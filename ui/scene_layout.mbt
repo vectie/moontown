@@ -39,54 +39,54 @@ pub struct TownSceneLayout {
 pub fn default_town_scene_layout() -> TownSceneLayout {
   let background = {
     key: "town-square",
-    path: "ui/assets/backgrounds/town-square.webp",
+    path: "ui/assets/backgrounds/town-square.svg",
     purpose: "Main overworld scene behind the mayor hall, book houses, and worker yard.",
   }
   let assets = [
     background,
     {
       key: "city-hall",
-      path: "ui/assets/buildings/city-hall.webp",
+      path: "ui/assets/buildings/city-hall.svg",
       purpose: "Mayor building and strategic control center.",
     },
     {
       key: "book-house-coding",
-      path: "ui/assets/buildings/book-house-coding.webp",
+      path: "ui/assets/buildings/book-house-coding.svg",
       purpose: "Coding moonbook building exterior and keeper station.",
     },
     {
       key: "book-house-finance",
-      path: "ui/assets/buildings/book-house-finance.webp",
+      path: "ui/assets/buildings/book-house-finance.svg",
       purpose: "Finance moonbook building exterior and private keeper station.",
     },
     {
       key: "worker-yard",
-      path: "ui/assets/props/worker-yard.webp",
+      path: "ui/assets/props/worker-yard.svg",
       purpose: "Shared staging ground where worker claws wait for assignments.",
     },
     {
       key: "mayor-claw",
-      path: "ui/assets/actors/mayor-claw.webp",
+      path: "ui/assets/actors/mayor-claw.svg",
       purpose: "Strategic mayor runtime avatar.",
     },
     {
       key: "keeper-claw",
-      path: "ui/assets/actors/keeper-claw.webp",
+      path: "ui/assets/actors/keeper-claw.svg",
       purpose: "Book-local keeper runtime avatar.",
     },
     {
       key: "worker-claw",
-      path: "ui/assets/actors/worker-claw.webp",
+      path: "ui/assets/actors/worker-claw.svg",
       purpose: "General execution claw avatar.",
     },
     {
       key: "anomaly-signal",
-      path: "ui/assets/effects/anomaly-signal.webp",
+      path: "ui/assets/effects/anomaly-signal.svg",
       purpose: "Alarm and recovery signal effect for failures or drift.",
     },
     {
       key: "gate-sign",
-      path: "ui/assets/props/gate-sign.webp",
+      path: "ui/assets/props/gate-sign.svg",
       purpose: "Town entrance and identity marker.",
     },
   ]
