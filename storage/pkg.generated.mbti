@@ -2,13 +2,22 @@
 package "username/moontown/storage"
 
 import {
+  "moonbitlang/core/json",
   "username/moontown/core",
 }
 
 // Values
+pub fn default_snapshot_path() -> String
+
 pub fn describe_snapshot(TownSnapshot) -> String
 
 pub fn empty_checkpoint(String) -> Checkpoint
+
+pub async fn load_or_create_snapshot(String, () -> @core.TownState) -> TownSnapshot
+
+pub async fn load_snapshot_file(String) -> TownSnapshot?
+
+pub async fn save_snapshot_file(String, TownSnapshot) -> Unit
 
 pub fn snapshot_of(@core.TownState) -> TownSnapshot
 
@@ -22,12 +31,16 @@ pub struct Checkpoint {
 }
 pub impl Eq for Checkpoint
 pub impl Show for Checkpoint
+pub impl ToJson for Checkpoint
+pub impl @json.FromJson for Checkpoint
 
 pub struct EventCursor {
   offset : Int
 }
 pub impl Eq for EventCursor
 pub impl Show for EventCursor
+pub impl ToJson for EventCursor
+pub impl @json.FromJson for EventCursor
 
 pub struct TownSnapshot {
   town : @core.TownState
@@ -35,6 +48,8 @@ pub struct TownSnapshot {
 }
 pub impl Eq for TownSnapshot
 pub impl Show for TownSnapshot
+pub impl ToJson for TownSnapshot
+pub impl @json.FromJson for TownSnapshot
 
 // Type aliases
 

@@ -19,3 +19,12 @@ test "dashboard renders town square and dispatch log" {
   assert_true(dashboard.contains("Snapshot"))
   assert_true(dashboard.contains("task-town-layer"))
 }
+
+///|
+async test "load or create demo state persists a snapshot" {
+  let path = ".moontown/test-town.json"
+  let state = @moontown.load_or_create_demo_state(path~)
+  assert_eq(state.books.length(), 2)
+  let snapshot = @storage.load_snapshot_file(path)
+  assert_true(snapshot is Some(saved) && saved.event_count == 4)
+}

@@ -5,7 +5,7 @@ pub struct RouteRequest {
 
 ///|
 pub fn RouteRequest::new(task~ : @core.TownTask) -> RouteRequest {
-  RouteRequest::{ task }
+  RouteRequest::{ task, }
 }
 
 ///|

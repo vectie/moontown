@@ -6,3 +6,7 @@ import {
   "username/moontown/storage",
   "username/moontown/ui",
 }
+
+import {
+  "moonbitlang/async",
+} for "test"

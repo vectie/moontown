@@ -1,6 +1,10 @@
 // Generated using `moon info`, DON'T EDIT IT
 package "username/moontown/core"
 
+import {
+  "moonbitlang/core/json",
+}
+
 // Values
 pub fn empty_state(TownConfig) -> TownState
 
@@ -17,6 +21,8 @@ pub struct AssignmentPlan {
 pub fn AssignmentPlan::new(task_id~ : String, worker_id~ : String, book_id~ : String, isolation~ : IsolationMode, reason~ : String) -> Self
 pub impl Eq for AssignmentPlan
 pub impl Show for AssignmentPlan
+pub impl ToJson for AssignmentPlan
+pub impl @json.FromJson for AssignmentPlan
 
 pub struct BookRef {
   id : String
@@ -29,6 +35,8 @@ pub struct BookRef {
 pub fn BookRef::new(id~ : String, name~ : String, purpose~ : String, workspace_root~ : String, memory_scope? : MemoryScope, tags? : Array[String]) -> Self
 pub impl Eq for BookRef
 pub impl Show for BookRef
+pub impl ToJson for BookRef
+pub impl @json.FromJson for BookRef
 
 pub(all) enum IsolationMode {
   SharedWorkspace
@@ -38,6 +46,8 @@ pub(all) enum IsolationMode {
 }
 pub impl Eq for IsolationMode
 pub impl Show for IsolationMode
+pub impl ToJson for IsolationMode
+pub impl @json.FromJson for IsolationMode
 
 pub(all) enum MemoryScope {
   SharedTown
@@ -46,6 +56,8 @@ pub(all) enum MemoryScope {
 }
 pub impl Eq for MemoryScope
 pub impl Show for MemoryScope
+pub impl ToJson for MemoryScope
+pub impl @json.FromJson for MemoryScope
 
 pub struct TownConfig {
   id : String
@@ -56,6 +68,8 @@ pub struct TownConfig {
 pub fn TownConfig::new(id~ : String, name~ : String, heartbeat_seconds? : Int, max_concurrent_tasks? : Int) -> Self
 pub impl Eq for TownConfig
 pub impl Show for TownConfig
+pub impl ToJson for TownConfig
+pub impl @json.FromJson for TownConfig
 
 pub struct TownEvent {
   id : String
@@ -67,6 +81,8 @@ pub struct TownEvent {
 pub fn TownEvent::new(id~ : String, kind~ : String, detail~ : String, related_task_id? : String?, related_book_id? : String?) -> Self
 pub impl Eq for TownEvent
 pub impl Show for TownEvent
+pub impl ToJson for TownEvent
+pub impl @json.FromJson for TownEvent
 
 pub struct TownState {
   config : TownConfig
@@ -81,6 +97,8 @@ pub fn TownState::register_book(Self, BookRef) -> Unit
 pub fn TownState::register_worker(Self, WorkerRef) -> Unit
 pub impl Eq for TownState
 pub impl Show for TownState
+pub impl ToJson for TownState
+pub impl @json.FromJson for TownState
 
 pub struct TownTask {
   id : String
@@ -95,6 +113,8 @@ pub struct TownTask {
 pub fn TownTask::new(id~ : String, book_id~ : String, title~ : String, prompt~ : String, domain~ : WorkDomain, required_role? : WorkerRole?, required_capabilities? : Array[String], status? : TownTaskStatus) -> Self
 pub impl Eq for TownTask
 pub impl Show for TownTask
+pub impl ToJson for TownTask
+pub impl @json.FromJson for TownTask
 
 pub(all) enum TownTaskStatus {
   Pending
@@ -107,6 +127,8 @@ pub(all) enum TownTaskStatus {
 }
 pub impl Eq for TownTaskStatus
 pub impl Show for TownTaskStatus
+pub impl ToJson for TownTaskStatus
+pub impl @json.FromJson for TownTaskStatus
 
 pub(all) enum WorkDomain {
   Coding
@@ -118,6 +140,8 @@ pub(all) enum WorkDomain {
 }
 pub impl Eq for WorkDomain
 pub impl Show for WorkDomain
+pub impl ToJson for WorkDomain
+pub impl @json.FromJson for WorkDomain
 
 pub struct WorkerRef {
   id : String
@@ -130,6 +154,8 @@ pub struct WorkerRef {
 pub fn WorkerRef::new(id~ : String, name~ : String, book_id~ : String, role~ : WorkerRole, capabilities? : Array[String], status? : WorkerStatus) -> Self
 pub impl Eq for WorkerRef
 pub impl Show for WorkerRef
+pub impl ToJson for WorkerRef
+pub impl @json.FromJson for WorkerRef
 
 pub(all) enum WorkerRole {
   Harness
@@ -142,6 +168,8 @@ pub(all) enum WorkerRole {
 }
 pub impl Eq for WorkerRole
 pub impl Show for WorkerRole
+pub impl ToJson for WorkerRole
+pub impl @json.FromJson for WorkerRole
 
 pub(all) enum WorkerStatus {
   Idle
@@ -152,6 +180,8 @@ pub(all) enum WorkerStatus {
 }
 pub impl Eq for WorkerStatus
 pub impl Show for WorkerStatus
+pub impl ToJson for WorkerStatus
+pub impl @json.FromJson for WorkerStatus
 
 // Type aliases
 

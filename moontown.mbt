@@ -19,11 +19,7 @@ fn planned_event(
         detail=reason,
       )
     Deferred(reason) =>
-      @core.TownEvent::new(
-        id="event-\{index}",
-        kind="deferred",
-        detail=reason,
-      )
+      @core.TownEvent::new(id="event-\{index}", kind="deferred", detail=reason)
   }
 }
 
@@ -33,7 +29,7 @@ fn seed_dispatch_events(state : @core.TownState) -> Unit {
     let task = state.tasks[i]
     let decision = @dispatch.route_task(
       state,
-      @dispatch.RouteRequest::new(task=task),
+      @dispatch.RouteRequest::new(task~),
     )
     state.record_event(planned_event(decision, i))
   }
@@ -153,10 +149,28 @@ pub fn demo_dashboard() -> String {
   let state = demo_state()
   let report = @health.inspect_town(state)
   let model = @ui.build_dashboard(state, report)
-  let tick = @scheduler.next_tick(
-    1,
-    @scheduler.plan_tick(state, report),
-  )
+  let tick = @scheduler.next_tick(1, @scheduler.plan_tick(state, report))
+  let snapshot = @storage.snapshot_of(state)
+  @ui.render_dashboard(model) +
+  "\nTown Tick\n- \{tick.summary}\n\nSnapshot\n- \{@storage.describe_snapshot(snapshot)}\n"
+}
+
+///|
+pub async fn load_or_create_demo_state(
+  path? : String = @storage.default_snapshot_path(),
+) -> @core.TownState {
+  let snapshot = @storage.load_or_create_snapshot(path, demo_state)
+  snapshot.town
+}
+
+///|
+pub async fn load_or_create_demo_dashboard(
+  path? : String = @storage.default_snapshot_path(),
+) -> String {
+  let state = load_or_create_demo_state(path~)
+  let report = @health.inspect_town(state)
+  let model = @ui.build_dashboard(state, report)
+  let tick = @scheduler.next_tick(1, @scheduler.plan_tick(state, report))
   let snapshot = @storage.snapshot_of(state)
   @ui.render_dashboard(model) +
   "\nTown Tick\n- \{tick.summary}\n\nSnapshot\n- \{@storage.describe_snapshot(snapshot)}\n"
