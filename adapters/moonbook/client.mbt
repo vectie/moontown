@@ -43,6 +43,32 @@ pub fn BookCatalogEntry::to_book_ref(self : BookCatalogEntry) -> @core.BookRef {
 }
 
 ///|
+pub struct MoonbookCatalogProvider {
+  catalog : Array[BookCatalogEntry]
+} derive(Show, Eq)
+
+///|
+pub fn MoonbookCatalogProvider::new(
+  catalog : Array[BookCatalogEntry],
+) -> MoonbookCatalogProvider {
+  MoonbookCatalogProvider::{ catalog, }
+}
+
+///|
+pub fn MoonbookCatalogProvider::book_refs(
+  self : MoonbookCatalogProvider,
+) -> Array[@core.BookRef] {
+  catalog_to_book_refs(self.catalog)
+}
+
+///|
+pub impl @core.BookProvider for MoonbookCatalogProvider with books(
+  self : MoonbookCatalogProvider,
+) -> Array[@core.BookRef] {
+  self.book_refs()
+}
+
+///|
 pub fn default_catalog() -> Array[BookCatalogEntry] {
   [
     BookCatalogEntry::new(
@@ -131,6 +157,13 @@ pub async fn load_or_create_catalog(
       catalog
     }
   }
+}
+
+///|
+pub async fn load_or_create_provider(
+  path? : String = default_catalog_path(),
+) -> MoonbookCatalogProvider {
+  MoonbookCatalogProvider::new(load_or_create_catalog(path~))
 }
 
 ///|

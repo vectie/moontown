@@ -12,9 +12,15 @@ pub fn demo_state() -> @core.TownState
 
 pub fn demo_state_snapshot() -> String
 
+pub fn[Provider : @core.BookProvider] demo_state_with_provider(Provider) -> @core.TownState
+
 pub async fn load_or_create_demo_dashboard(path? : String, book_catalog_path? : String) -> String
 
 pub async fn load_or_create_demo_state(path? : String, book_catalog_path? : String) -> @core.TownState
+
+pub async fn[Provider : @core.BookProvider] load_or_create_demo_state_with_provider(Provider, path? : String) -> @core.TownState
+
+pub fn render_state_dashboard(@core.TownState) -> String
 
 // Errors
 

@@ -224,3 +224,25 @@ pub fn TownState::enqueue_task(self : TownState, task : TownTask) -> Unit {
 pub fn TownState::record_event(self : TownState, event : TownEvent) -> Unit {
   self.events.push(event)
 }
+
+///|
+pub(open) trait BookProvider {
+  books(self : Self) -> Array[BookRef]
+}
+
+///|
+pub struct StaticBookProvider {
+  entries : Array[BookRef]
+} derive(Show, Eq)
+
+///|
+pub fn StaticBookProvider::new(entries : Array[BookRef]) -> StaticBookProvider {
+  StaticBookProvider::{ entries, }
+}
+
+///|
+pub impl BookProvider for StaticBookProvider with books(
+  self : StaticBookProvider,
+) -> Array[BookRef] {
+  self.entries
+}

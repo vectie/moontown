@@ -30,23 +30,21 @@ async test "load or create demo state persists a snapshot" {
 }
 
 ///|
-async test "load or create demo state uses persisted moonbook catalog" {
-  let snapshot_path = ".moontown/test-custom-town.json"
-  let catalog_path = ".moontown/test-moonbooks.json"
-  @moonbook.save_catalog_file(catalog_path, [
-    @moonbook.BookCatalogEntry::new(
+async test "load or create demo state accepts injected book provider" {
+  let snapshot_path = ".moontown/test-provider-town.json"
+  let provider = @core.StaticBookProvider::new([
+    @core.BookRef::new(
       id="lab",
-      name="Moonbook / Lab",
+      name="Town Lab",
       purpose="Isolated social experiment lab book.",
       workspace_root="/workspace/lab",
       memory_scope=@core.MemoryScope::BookPrivate,
       tags=["experiments", "observation"],
-      skills=["analysis", "memory"],
     ),
   ])
-  let state = @moontown.load_or_create_demo_state(
+  let state = @moontown.load_or_create_demo_state_with_provider(
+    provider,
     path=snapshot_path,
-    book_catalog_path=catalog_path,
   )
   assert_eq(state.books.length(), 1)
   assert_eq(state.books[0].id, "lab")

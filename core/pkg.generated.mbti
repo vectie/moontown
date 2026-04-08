@@ -59,6 +59,14 @@ pub impl Show for MemoryScope
 pub impl ToJson for MemoryScope
 pub impl @json.FromJson for MemoryScope
 
+pub struct StaticBookProvider {
+  entries : Array[BookRef]
+}
+pub fn StaticBookProvider::new(Array[BookRef]) -> Self
+pub impl Eq for StaticBookProvider
+pub impl Show for StaticBookProvider
+pub impl BookProvider for StaticBookProvider
+
 pub struct TownConfig {
   id : String
   name : String
@@ -186,4 +194,7 @@ pub impl @json.FromJson for WorkerStatus
 // Type aliases
 
 // Traits
+pub(open) trait BookProvider {
+  books(Self) -> Array[BookRef]
+}
 

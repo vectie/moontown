@@ -19,6 +19,8 @@ pub async fn load_catalog_file(String) -> Array[BookCatalogEntry]?
 
 pub async fn load_or_create_catalog(path? : String) -> Array[BookCatalogEntry]
 
+pub async fn load_or_create_provider(path? : String) -> MoonbookCatalogProvider
+
 pub async fn save_catalog_file(String, Array[BookCatalogEntry]) -> Unit
 
 pub fn stub_health(String) -> BookHealthResponse
@@ -106,6 +108,15 @@ pub struct BookTaskDraft {
 }
 pub impl Eq for BookTaskDraft
 pub impl Show for BookTaskDraft
+
+pub struct MoonbookCatalogProvider {
+  catalog : Array[BookCatalogEntry]
+}
+pub fn MoonbookCatalogProvider::book_refs(Self) -> Array[@core.BookRef]
+pub fn MoonbookCatalogProvider::new(Array[BookCatalogEntry]) -> Self
+pub impl Eq for MoonbookCatalogProvider
+pub impl Show for MoonbookCatalogProvider
+pub impl @core.BookProvider for MoonbookCatalogProvider
 
 // Type aliases
 
