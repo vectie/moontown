@@ -1,0 +1,7 @@
+import {
+  "username/moontown",
+}
+
+options(
+  "is-main": true,
+)
