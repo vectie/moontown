@@ -6,6 +6,12 @@ import {
 }
 
 // Values
+pub fn keeper_runtime(@core.BookRef) -> EmbeddedMoonclawRuntime
+
+pub fn mayor_runtime() -> EmbeddedMoonclawRuntime
+
+pub fn mayor_to_keeper_handoff(String, String, String, constraints? : Array[String]) -> EmbeddedRuntimeHandoff
+
 pub fn stub_assign(AssignTaskRequest) -> String
 
 pub fn stub_poll(String) -> PollWorkerResponse
@@ -13,6 +19,8 @@ pub fn stub_poll(String) -> PollWorkerResponse
 pub fn stub_result(String) -> TaskResultResponse
 
 pub fn stub_spawn(SpawnWorkerRequest) -> String
+
+pub fn worker_runtime(@core.WorkerRef) -> EmbeddedMoonclawRuntime
 
 // Errors
 
@@ -25,6 +33,79 @@ pub struct AssignTaskRequest {
 }
 pub impl Eq for AssignTaskRequest
 pub impl Show for AssignTaskRequest
+
+pub enum EmbeddedHandoffKind {
+  StrategicToDomain
+  DomainToExecution
+  ExecutionToDomain
+  DomainToStrategic
+}
+pub impl Eq for EmbeddedHandoffKind
+pub impl Show for EmbeddedHandoffKind
+
+pub enum EmbeddedMemoryScope {
+  Step
+  Workspace
+  Domain
+  Global
+}
+pub impl Eq for EmbeddedMemoryScope
+pub impl Show for EmbeddedMemoryScope
+
+pub struct EmbeddedMoonclawRuntime {
+  runtime_id : String
+  display_name : String
+  role_id : String
+  planning_layer : EmbeddedPlanningLayer
+  runtime_mode : EmbeddedRuntimeMode
+  tool_access : EmbeddedToolAccess
+  memory_scope : EmbeddedMemoryScope
+  allow_delegate : Bool
+  allow_workspace_write : Bool
+  allow_execution_tools : Bool
+  visible_tools : Array[String]
+  skills : Array[String]
+  output_contract : String?
+  authority_scope : String
+}
+pub fn EmbeddedMoonclawRuntime::new(runtime_id~ : String, display_name~ : String, role_id~ : String, planning_layer? : EmbeddedPlanningLayer, runtime_mode? : EmbeddedRuntimeMode, tool_access? : EmbeddedToolAccess, memory_scope? : EmbeddedMemoryScope, allow_delegate? : Bool, allow_workspace_write? : Bool, allow_execution_tools? : Bool, visible_tools? : Array[String], skills? : Array[String], output_contract? : String?, authority_scope~ : String) -> Self
+pub impl Eq for EmbeddedMoonclawRuntime
+pub impl Show for EmbeddedMoonclawRuntime
+
+pub enum EmbeddedPlanningLayer {
+  Strategic
+  Domain
+  Execution
+}
+pub impl Eq for EmbeddedPlanningLayer
+pub impl Show for EmbeddedPlanningLayer
+
+pub struct EmbeddedRuntimeHandoff {
+  kind : EmbeddedHandoffKind
+  objective : String
+  scope_summary : String
+  constraints : Array[String]
+  output_contract : String?
+  target_role_id : String
+}
+pub fn EmbeddedRuntimeHandoff::new(kind~ : EmbeddedHandoffKind, objective~ : String, scope_summary~ : String, constraints? : Array[String], output_contract? : String?, target_role_id~ : String) -> Self
+pub impl Eq for EmbeddedRuntimeHandoff
+pub impl Show for EmbeddedRuntimeHandoff
+
+pub enum EmbeddedRuntimeMode {
+  PlannerOnly
+  Executor
+}
+pub impl Eq for EmbeddedRuntimeMode
+pub impl Show for EmbeddedRuntimeMode
+
+pub enum EmbeddedToolAccess {
+  Disabled
+  Limited
+  Full
+}
+pub impl Eq for EmbeddedToolAccess
+pub impl Show for EmbeddedToolAccess
 
 pub struct PollWorkerResponse {
   worker_id : String

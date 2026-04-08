@@ -46,6 +46,7 @@ What is real today:
 
 - persisted town snapshot bootstrap
 - persisted moonbook catalog bootstrap
+- embedded `Mayor` role adapter over a constrained `moonclaw` runtime profile
 - routing and isolation decisions
 - dashboard rendering
 - scheduler/health/storage package boundaries
@@ -57,6 +58,35 @@ What is still stubbed:
 - moonclaw task execution
 - long-running daemon patrol
 - experiment runtime
+
+## Embedded Roles
+
+Moontown now treats MoonClaw as the shared agent substrate, but it does not
+expose a raw generic worker brain directly to town code.
+
+Current town-side role adapters:
+
+- `Mayor`
+  - town-level strategic planner
+  - planner-only runtime envelope
+  - limited tool visibility
+  - global town memory scope
+  - no direct workspace writes or execution tools by default
+- `keeper` handoff target
+  - modeled as the book-level domain runtime that receives strategic handoffs
+  - town delegates toward a keeper contract instead of invoking a generic agent
+    loop
+- worker runtime profiles
+  - still modeled separately as execution-layer profiles with full tool access
+
+The design intent is:
+
+- `moontown` calls `Mayor.decide_dispatch(...)`
+- `moontown` calls `Mayor.patrol(...)`
+- `moontown` produces keeper handoff packets for book-local planning
+
+This keeps town orchestration logic in `moontown`, keeps domain harness logic in
+`moonbook`, and leaves execution-heavy behavior in `moonclaw`.
 
 Planned package layout:
 

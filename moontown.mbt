@@ -56,7 +56,7 @@ pub fn[Provider : @core.BookProvider] demo_state_with_provider(
   state.register_worker(
     @core.WorkerRef::new(
       id="claw-harness",
-      name="Harness Mayor",
+      name="Harness Hound",
       book_id="coding",
       role=@core.WorkerRole::Harness,
       capabilities=["moonbit", "git", "testing"],
@@ -138,6 +138,11 @@ pub fn[Provider : @core.BookProvider] demo_state_with_provider(
 }
 
 ///|
+pub fn demo_mayor() -> @roles.Mayor {
+  @roles.Mayor::new()
+}
+
+///|
 pub fn demo_state() -> @core.TownState {
   demo_state_with_provider(
     @moonbook.MoonbookCatalogProvider::new(@moonbook.default_catalog()),
@@ -180,10 +185,15 @@ pub async fn load_or_create_demo_dashboard(
 
 ///|
 pub fn render_state_dashboard(state : @core.TownState) -> String {
+  let mayor = demo_mayor()
   let report = @health.inspect_town(state)
   let model = @ui.build_dashboard(state, report)
   let tick = @scheduler.next_tick(1, @scheduler.plan_tick(state, report))
   let snapshot = @storage.snapshot_of(state)
+  let runtime = mayor.runtime()
+  let mayor_block = "## Mayor\n- role: \{runtime.role_id}\n- mode: \{runtime.runtime_mode.to_string()}\n- tools: \{runtime.tool_access.to_string()}\n- scope: \{runtime.authority_scope}\n\n"
   @ui.render_dashboard(model) +
-  "\nTown Tick\n- \{tick.summary}\n\nSnapshot\n- \{@storage.describe_snapshot(snapshot)}\n"
+  "\n" +
+  mayor_block +
+  "Town Tick\n- \{tick.summary}\n\nSnapshot\n- \{@storage.describe_snapshot(snapshot)}\n"
 }

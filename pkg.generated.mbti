@@ -3,10 +3,13 @@ package "username/moontown"
 
 import {
   "username/moontown/core",
+  "username/moontown/roles",
 }
 
 // Values
 pub fn demo_dashboard() -> String
+
+pub fn demo_mayor() -> @roles.Mayor
 
 pub fn demo_state() -> @core.TownState
 
