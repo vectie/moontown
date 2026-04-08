@@ -36,30 +36,21 @@ fn seed_dispatch_events(state : @core.TownState) -> Unit {
 }
 
 ///|
-pub fn demo_state() -> @core.TownState {
+fn register_demo_books(
+  state : @core.TownState,
+  books : Array[@core.BookRef],
+) -> Unit {
+  for book in books {
+    state.register_book(book)
+  }
+}
+
+///|
+fn demo_state_with_books(books : Array[@core.BookRef]) -> @core.TownState {
   let state = @core.empty_state(
     @core.TownConfig::new(id="moonrise", name="Moontown / Moonrise"),
   )
-  state.register_book(
-    @core.BookRef::new(
-      id="coding",
-      name="Moonbook / Coding",
-      purpose="Harness engineering for source work, repo memory, and execution policy.",
-      workspace_root="/workspace/coding",
-      memory_scope=@core.MemoryScope::BookPrivate,
-      tags=["moonbit", "git", "review"],
-    ),
-  )
-  state.register_book(
-    @core.BookRef::new(
-      id="finance",
-      name="Moonbook / Finance",
-      purpose="Private daily finance operations with isolated memory and task artifacts.",
-      workspace_root="/workspace/finance",
-      memory_scope=@core.MemoryScope::TaskEphemeral,
-      tags=["ledger", "planning", "ops"],
-    ),
-  )
+  register_demo_books(state, books)
   state.register_worker(
     @core.WorkerRef::new(
       id="claw-harness",
@@ -145,6 +136,13 @@ pub fn demo_state() -> @core.TownState {
 }
 
 ///|
+pub fn demo_state() -> @core.TownState {
+  demo_state_with_books(
+    @moonbook.catalog_to_book_refs(@moonbook.default_catalog()),
+  )
+}
+
+///|
 pub fn demo_dashboard() -> String {
   let state = demo_state()
   let report = @health.inspect_town(state)
@@ -158,16 +156,21 @@ pub fn demo_dashboard() -> String {
 ///|
 pub async fn load_or_create_demo_state(
   path? : String = @storage.default_snapshot_path(),
+  book_catalog_path? : String = @moonbook.default_catalog_path(),
 ) -> @core.TownState {
-  let snapshot = @storage.load_or_create_snapshot(path, demo_state)
+  let catalog = @moonbook.load_or_create_catalog(path=book_catalog_path)
+  let snapshot = @storage.load_or_create_snapshot(path, () => {
+    demo_state_with_books(@moonbook.catalog_to_book_refs(catalog))
+  })
   snapshot.town
 }
 
 ///|
 pub async fn load_or_create_demo_dashboard(
   path? : String = @storage.default_snapshot_path(),
+  book_catalog_path? : String = @moonbook.default_catalog_path(),
 ) -> String {
-  let state = load_or_create_demo_state(path~)
+  let state = load_or_create_demo_state(path~, book_catalog_path~)
   let report = @health.inspect_town(state)
   let model = @ui.build_dashboard(state, report)
   let tick = @scheduler.next_tick(1, @scheduler.plan_tick(state, report))

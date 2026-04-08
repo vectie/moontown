@@ -12,9 +12,9 @@ pub fn demo_state() -> @core.TownState
 
 pub fn demo_state_snapshot() -> String
 
-pub async fn load_or_create_demo_dashboard(path? : String) -> String
+pub async fn load_or_create_demo_dashboard(path? : String, book_catalog_path? : String) -> String
 
-pub async fn load_or_create_demo_state(path? : String) -> @core.TownState
+pub async fn load_or_create_demo_state(path? : String, book_catalog_path? : String) -> @core.TownState
 
 // Errors
 

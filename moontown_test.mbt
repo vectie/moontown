@@ -28,3 +28,27 @@ async test "load or create demo state persists a snapshot" {
   let snapshot = @storage.load_snapshot_file(path)
   assert_true(snapshot is Some(saved) && saved.event_count == 4)
 }
+
+///|
+async test "load or create demo state uses persisted moonbook catalog" {
+  let snapshot_path = ".moontown/test-custom-town.json"
+  let catalog_path = ".moontown/test-moonbooks.json"
+  @moonbook.save_catalog_file(catalog_path, [
+    @moonbook.BookCatalogEntry::new(
+      id="lab",
+      name="Moonbook / Lab",
+      purpose="Isolated social experiment lab book.",
+      workspace_root="/workspace/lab",
+      memory_scope=@core.MemoryScope::BookPrivate,
+      tags=["experiments", "observation"],
+      skills=["analysis", "memory"],
+    ),
+  ])
+  let state = @moontown.load_or_create_demo_state(
+    path=snapshot_path,
+    book_catalog_path=catalog_path,
+  )
+  assert_eq(state.books.length(), 1)
+  assert_eq(state.books[0].id, "lab")
+  assert_eq(state.books[0].workspace_root, "/workspace/lab")
+}

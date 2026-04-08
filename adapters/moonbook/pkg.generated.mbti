@@ -2,10 +2,25 @@
 package "username/moontown/adapters/moonbook"
 
 import {
+  "moonbitlang/core/json",
   "username/moontown/core",
 }
 
 // Values
+pub fn catalog_to_book_refs(Array[BookCatalogEntry]) -> Array[@core.BookRef]
+
+pub fn default_catalog() -> Array[BookCatalogEntry]
+
+pub fn default_catalog_path() -> String
+
+pub fn find_catalog_entry(Array[BookCatalogEntry], String) -> BookCatalogEntry?
+
+pub async fn load_catalog_file(String) -> Array[BookCatalogEntry]?
+
+pub async fn load_or_create_catalog(path? : String) -> Array[BookCatalogEntry]
+
+pub async fn save_catalog_file(String, Array[BookCatalogEntry]) -> Unit
+
 pub fn stub_health(String) -> BookHealthResponse
 
 pub fn stub_hydrate(BookHydrationRequest) -> BookHydrationResponse
@@ -17,6 +32,22 @@ pub fn stub_plan(BookPlanRequest) -> BookPlanResponse
 // Errors
 
 // Types and methods
+pub struct BookCatalogEntry {
+  id : String
+  name : String
+  purpose : String
+  workspace_root : String
+  memory_scope : @core.MemoryScope
+  tags : Array[String]
+  skills : Array[String]
+}
+pub fn BookCatalogEntry::new(id~ : String, name~ : String, purpose~ : String, workspace_root~ : String, memory_scope? : @core.MemoryScope, tags? : Array[String], skills? : Array[String]) -> Self
+pub fn BookCatalogEntry::to_book_ref(Self) -> @core.BookRef
+pub impl Eq for BookCatalogEntry
+pub impl Show for BookCatalogEntry
+pub impl ToJson for BookCatalogEntry
+pub impl @json.FromJson for BookCatalogEntry
+
 pub struct BookHealthResponse {
   book_id : String
   status : String
