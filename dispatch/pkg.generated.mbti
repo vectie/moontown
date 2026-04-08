@@ -24,6 +24,7 @@ pub impl Show for RouteDecision
 pub struct RouteRequest {
   task : @core.TownTask
 }
+pub fn RouteRequest::new(task~ : @core.TownTask) -> Self
 pub impl Eq for RouteRequest
 pub impl Show for RouteRequest
 

@@ -1,53 +1,52 @@
 ///|
-test "worker score prefers book local matching specialist" {
-  let task = Task::new(
-    id="task-1",
-    title="Implement router",
-    summary="Build assignment logic.",
-    book_id="coding",
-    domain=Coding,
-    required_role=Some(Harness),
-    required_skills=["moonbit", "git"],
-  )
-  let local_worker = Worker::new(
-    id="local",
-    name="Local",
-    book_id="coding",
-    role=Harness,
-    skills=["moonbit", "git"],
-    preferred_isolation=Worktree,
-  )
-  let foreign_worker = Worker::new(
-    id="foreign",
-    name="Foreign",
-    book_id="finance",
-    role=Harness,
-    skills=["moonbit", "git"],
-    preferred_isolation=Worktree,
+test "dispatch routes coding work to same-book harness worker" {
+  let state = demo_state()
+  let decision = @dispatch.route_task(
+    state,
+    @dispatch.RouteRequest::new(
+      task=@core.TownTask::new(
+        id="task-1",
+        book_id="coding",
+        title="Implement router",
+        prompt="Build assignment logic.",
+        domain=@core.WorkDomain::Coding,
+        required_role=Some(@core.WorkerRole::Harness),
+        required_capabilities=["moonbit"],
+      ),
+    ),
   )
   assert_true(
-    worker_score(local_worker, task) > worker_score(foreign_worker, task),
+    decision is Assigned(plan) &&
+    plan.worker_id == "claw-harness" &&
+    plan.isolation == @core.IsolationMode::Worktree,
   )
 }
 
 ///|
 test "finance work prefers isolated execution" {
-  let task = Task::new(
-    id="task-2",
-    title="Close finance loop",
-    summary="Produce ledger summary.",
-    book_id="finance",
-    domain=Finance,
-    required_role=Some(Specialist),
-    required_skills=["ledgers"],
+  let book = @core.BookRef::new(
+    id="finance",
+    name="Finance",
+    purpose="finance",
+    workspace_root="/finance",
+    memory_scope=@core.MemoryScope::TaskEphemeral,
   )
-  let worker = Worker::new(
+  let worker = @core.WorkerRef::new(
     id="ledger",
     name="Ledger",
     book_id="finance",
-    role=Specialist,
-    skills=["ledgers"],
-    preferred_isolation=BookWorkspace,
+    role=@core.WorkerRole::Specialist,
   )
-  assert_eq(preferred_isolation(task, worker), Worktree)
+  let task = @core.TownTask::new(
+    id="task-2",
+    book_id="finance",
+    title="Close finance loop",
+    prompt="Produce ledger summary.",
+    domain=@core.WorkDomain::Finance,
+    required_role=Some(@core.WorkerRole::Specialist),
+  )
+  assert_eq(
+    @dispatch.choose_isolation(task, worker, book),
+    @core.IsolationMode::Sandboxed,
+  )
 }

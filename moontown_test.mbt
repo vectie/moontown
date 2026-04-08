@@ -1,24 +1,21 @@
 ///|
-test "demo town creates isolated moonbooks with routed assignments" {
-  let town = @moontown.demo_town()
-  assert_eq(town.book_count(), 2)
-  assert_eq(town.active_assignment_count(), 4)
-  let coding_tasks = town.tasks_for_book("coding")
-  let finance_tasks = town.tasks_for_book("finance")
-  assert_eq(coding_tasks.length(), 2)
-  assert_eq(finance_tasks.length(), 2)
-  assert_true(coding_tasks[0].assigned_worker_id is Some("claw-harness"))
-  assert_true(coding_tasks[1].assigned_worker_id is Some("claw-review"))
-  assert_true(finance_tasks[0].assigned_worker_id is Some("claw-ledger"))
-  assert_true(finance_tasks[1].assigned_worker_id is Some("claw-memory"))
+test "demo state seeds books workers tasks and dispatch events" {
+  let state = @moontown.demo_state()
+  assert_eq(state.books.length(), 2)
+  assert_eq(state.workers.length(), 4)
+  assert_eq(state.tasks.length(), 4)
+  assert_eq(state.events.length(), 4)
+  assert_true(state.events[0].detail.contains("task-town-layer"))
+  assert_true(state.events[1].detail.contains("task-review-contract"))
 }
 
 ///|
 test "dashboard renders town square and dispatch log" {
-  let dashboard = @moontown.demo_town().render_dashboard()
-  assert_true(dashboard.contains("MOONTOWN / moonrise"))
-  assert_true(dashboard.contains("Moonbook / Coding"))
-  assert_true(dashboard.contains("Moonbook / Finance"))
-  assert_true(dashboard.contains("Dispatch Log"))
+  let dashboard = @moontown.demo_dashboard()
+  assert_true(dashboard.contains("Dashboard / Moontown / Moonrise"))
+  assert_true(dashboard.contains("## Books"))
+  assert_true(dashboard.contains("## Workers"))
+  assert_true(dashboard.contains("Town Tick"))
+  assert_true(dashboard.contains("Snapshot"))
   assert_true(dashboard.contains("task-town-layer"))
 }

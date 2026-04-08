@@ -1,166 +1,20 @@
 // Generated using `moon info`, DON'T EDIT IT
 package "username/moontown"
 
+import {
+  "username/moontown/core",
+}
+
 // Values
-pub fn demo_town() -> Town
+pub fn demo_dashboard() -> String
 
-pub fn domain_label(WorkDomain) -> String
+pub fn demo_state() -> @core.TownState
 
-pub fn isolation_label(IsolationMode) -> String
-
-pub fn new(String) -> Town
-
-pub fn preferred_isolation(Task, Worker) -> IsolationMode
-
-pub fn role_label(WorkerRole) -> String
-
-pub fn worker_score(Worker, Task) -> Int
+pub fn demo_state_snapshot() -> String
 
 // Errors
 
 // Types and methods
-pub struct Assignment {
-  task_id : String
-  worker_id : String
-  book_id : String
-  isolation : IsolationMode
-  rationale : String
-}
-pub fn Assignment::new(task_id~ : String, worker_id~ : String, book_id~ : String, isolation~ : IsolationMode, rationale~ : String) -> Self
-pub impl Eq for Assignment
-pub impl Show for Assignment
-
-pub enum IsolationMode {
-  SharedWorkspace
-  BookWorkspace
-  Worktree
-}
-pub impl Eq for IsolationMode
-pub impl Show for IsolationMode
-
-pub enum MemoryScope {
-  SharedTown
-  BookPrivate
-  TaskEphemeral
-}
-pub impl Eq for MemoryScope
-pub impl Show for MemoryScope
-
-pub struct MoonbookHost {
-  id : String
-  name : String
-  purpose : String
-  workspace_root : String
-  memory_scope : MemoryScope
-  skills : Array[String]
-}
-pub fn MoonbookHost::new(id~ : String, name~ : String, purpose~ : String, workspace_root~ : String, memory_scope? : MemoryScope, skills? : Array[String]) -> Self
-pub impl Eq for MoonbookHost
-pub impl Show for MoonbookHost
-
-pub struct Task {
-  id : String
-  title : String
-  summary : String
-  book_id : String
-  domain : WorkDomain
-  status : TaskStatus
-  required_role : WorkerRole?
-  required_skills : Array[String]
-  assigned_worker_id : String?
-}
-pub fn Task::new(id~ : String, title~ : String, summary~ : String, book_id~ : String, domain~ : WorkDomain, status? : TaskStatus, required_role? : WorkerRole?, required_skills? : Array[String], assigned_worker_id? : String?) -> Self
-pub impl Eq for Task
-pub impl Show for Task
-
-pub enum TaskStatus {
-  Backlog
-  Assigned
-  InProgress
-  Blocked
-  Done
-}
-pub impl Eq for TaskStatus
-pub impl Show for TaskStatus
-
-pub struct Town {
-  name : String
-  books : Array[MoonbookHost]
-  workers : Array[Worker]
-  tasks : Array[Task]
-  assignments : Array[Assignment]
-  events : Array[TownEvent]
-}
-pub fn Town::active_assignment_count(Self) -> Int
-pub fn Town::add_book(Self, MoonbookHost) -> Unit
-pub fn Town::add_event(Self, TownEvent) -> Unit
-pub fn Town::add_task(Self, Task) -> Unit
-pub fn Town::add_worker(Self, Worker) -> Unit
-pub fn Town::assign_backlog(Self) -> Array[Assignment]
-pub fn Town::backlog_count(Self) -> Int
-pub fn Town::book(Self, String) -> MoonbookHost?
-pub fn Town::book_count(Self) -> Int
-pub fn Town::plan_assignment(Self, Task) -> Assignment?
-pub fn Town::render_dashboard(Self) -> String
-pub fn Town::task_count(Self) -> Int
-pub fn Town::tasks_for_book(Self, String) -> Array[Task]
-pub fn Town::worker_count(Self) -> Int
-pub fn Town::workers_for_book(Self, String) -> Array[Worker]
-pub impl Eq for Town
-pub impl Show for Town
-
-pub struct TownEvent {
-  title : String
-  detail : String
-}
-pub fn TownEvent::new(title~ : String, detail~ : String) -> Self
-pub impl Eq for TownEvent
-pub impl Show for TownEvent
-
-pub enum WorkDomain {
-  Coding
-  Finance
-  Research
-  Operations
-  Custom(String)
-}
-pub impl Eq for WorkDomain
-pub impl Show for WorkDomain
-
-pub struct Worker {
-  id : String
-  name : String
-  book_id : String
-  role : WorkerRole
-  status : WorkerStatus
-  skills : Array[String]
-  preferred_isolation : IsolationMode
-  active_task_id : String?
-}
-pub fn Worker::new(id~ : String, name~ : String, book_id~ : String, role~ : WorkerRole, status? : WorkerStatus, skills? : Array[String], preferred_isolation? : IsolationMode, active_task_id? : String?) -> Self
-pub impl Eq for Worker
-pub impl Show for Worker
-
-pub enum WorkerRole {
-  Harness
-  Planner
-  Specialist
-  Reviewer
-  MemoryKeeper
-  Watcher
-}
-pub impl Eq for WorkerRole
-pub impl Show for WorkerRole
-
-pub enum WorkerStatus {
-  Idle
-  Running
-  Waiting
-  Blocked
-  Offline
-}
-pub impl Eq for WorkerStatus
-pub impl Show for WorkerStatus
 
 // Type aliases
 

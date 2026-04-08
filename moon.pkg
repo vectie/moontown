@@ -1,1 +1,8 @@
-
+import {
+  "username/moontown/core",
+  "username/moontown/dispatch",
+  "username/moontown/health",
+  "username/moontown/scheduler",
+  "username/moontown/storage",
+  "username/moontown/ui",
+}

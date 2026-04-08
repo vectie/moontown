@@ -4,6 +4,11 @@ pub struct RouteRequest {
 } derive(Show, Eq)
 
 ///|
+pub fn RouteRequest::new(task~ : @core.TownTask) -> RouteRequest {
+  RouteRequest::{ task }
+}
+
+///|
 pub enum RouteDecision {
   Assigned(@core.AssignmentPlan)
   Escalated(String)
