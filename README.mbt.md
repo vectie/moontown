@@ -126,3 +126,18 @@ The default layout currently defines these scene places:
 - Anomaly Corner
 
 This gives `moontown` a stable visual contract before the actual art is drawn.
+
+The UI package also now exposes a renderer bridge:
+
+- `ui/scene_layout.mbt`
+  - static scene coordinates and asset slots
+- `ui/dashboard.mbt`
+  - live town state bound onto those scene places
+- `ui/scene_render.mbt`
+  - frontend-facing render model plus HTML payload generation
+
+That means the current pipeline is:
+
+```text
+town state -> dashboard model -> scene render model -> HTML scene payload
+```

@@ -9,9 +9,13 @@ import {
 // Values
 pub fn build_dashboard(@core.TownState, @health.HealthReport) -> DashboardModel
 
+pub fn build_scene_render(DashboardModel) -> SceneRenderModel
+
 pub fn default_town_scene_layout() -> TownSceneLayout
 
 pub fn render_dashboard(DashboardModel) -> String
+
+pub fn render_scene_html(SceneRenderModel) -> String
 
 // Errors
 
@@ -70,6 +74,31 @@ pub struct SceneAsset {
 }
 pub impl Eq for SceneAsset
 pub impl Show for SceneAsset
+
+pub struct SceneRenderModel {
+  title : String
+  width : Int
+  height : Int
+  background_path : String
+  alerts : Array[String]
+  nodes : Array[SceneRenderNode]
+}
+pub impl Eq for SceneRenderModel
+pub impl Show for SceneRenderModel
+
+pub struct SceneRenderNode {
+  key : String
+  title : String
+  class_name : String
+  x : Int
+  y : Int
+  width : Int
+  height : Int
+  asset_paths : Array[String]
+  lines : Array[String]
+}
+pub impl Eq for SceneRenderNode
+pub impl Show for SceneRenderNode
 
 pub struct TownMapPlace {
   key : String
