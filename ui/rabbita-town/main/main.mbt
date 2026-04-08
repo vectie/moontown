@@ -2,6 +2,7 @@
 using @html {
   article,
   aside,
+  button,
   div,
   h1,
   h2,
@@ -15,14 +16,70 @@ using @html {
 }
 
 ///|
-fn town_scene() -> @ui.SceneRenderModel {
-  let state = demo_state()
+using @rabbita {type Cmd, type Dispatch}
+
+///|
+priv struct Model {
+  tick : Int
+  paused : Bool
+}
+
+///|
+priv enum Msg {
+  Tick
+  TogglePause
+  Step
+}
+
+///|
+fn init_model() -> Model {
+  { tick: 0, paused: false }
+}
+
+///|
+fn schedule_tick(dispatch : Dispatch[Msg]) -> Cmd {
+  @rabbita.delay(dispatch(Tick), 1400)
+}
+
+///|
+fn update(dispatch : Dispatch[Msg], msg : Msg, model : Model) -> (Cmd, Model) {
+  match msg {
+    Tick => {
+      let next = { ..model, tick: model.tick + 1 }
+      let cmd = if next.paused {
+        @rabbita.none
+      } else {
+        schedule_tick(dispatch)
+      }
+      (cmd, next)
+    }
+    TogglePause => {
+      let next = { ..model, paused: !model.paused }
+      let cmd = if next.paused {
+        @rabbita.none
+      } else {
+        schedule_tick(dispatch)
+      }
+      (cmd, next)
+    }
+    Step =>
+      if model.paused {
+        (@rabbita.none, { ..model, tick: model.tick + 1 })
+      } else {
+        (@rabbita.none, model)
+      }
+  }
+}
+
+///|
+fn town_scene(model : Model) -> @ui.SceneRenderModel {
+  let state = demo_state(model.tick)
   let report = @health.inspect_town(state)
   @ui.build_scene_render(@ui.build_dashboard(state, report))
 }
 
 ///|
-fn demo_state() -> @core.TownState {
+fn demo_state(tick : Int) -> @core.TownState {
   let state = @core.empty_state(
     @core.TownConfig::new(id="moonrise", name="Moontown / Moonrise"),
   )
@@ -53,6 +110,7 @@ fn demo_state() -> @core.TownState {
       book_id="coding",
       role=@core.WorkerRole::Harness,
       capabilities=["moonbit", "git", "testing"],
+      status=worker_status_for(tick, 0),
     ),
   )
   state.register_worker(
@@ -62,6 +120,7 @@ fn demo_state() -> @core.TownState {
       book_id="coding",
       role=@core.WorkerRole::Reviewer,
       capabilities=["review", "moonbit"],
+      status=worker_status_for(tick, 1),
     ),
   )
   state.register_worker(
@@ -71,6 +130,7 @@ fn demo_state() -> @core.TownState {
       book_id="finance",
       role=@core.WorkerRole::Specialist,
       capabilities=["ledgers", "reporting"],
+      status=worker_status_for(tick, 2),
     ),
   )
   state.register_worker(
@@ -80,6 +140,7 @@ fn demo_state() -> @core.TownState {
       book_id="finance",
       role=@core.WorkerRole::MemoryKeeper,
       capabilities=["reporting", "planning"],
+      status=worker_status_for(tick, 3),
     ),
   )
   state.enqueue_task(
@@ -91,6 +152,19 @@ fn demo_state() -> @core.TownState {
       domain=@core.WorkDomain::Coding,
       required_role=Some(@core.WorkerRole::Harness),
       required_capabilities=["moonbit", "git"],
+      status=task_status_for(tick, 0),
+    ),
+  )
+  state.enqueue_task(
+    @core.TownTask::new(
+      id="task-review-contract",
+      book_id="coding",
+      title="Review delegation contract",
+      prompt="Check that the worker protocol is still safe for multi-book orchestration.",
+      domain=@core.WorkDomain::Coding,
+      required_role=Some(@core.WorkerRole::Reviewer),
+      required_capabilities=["review", "moonbit"],
+      status=task_status_for(tick, 1),
     ),
   )
   state.enqueue_task(
@@ -102,9 +176,49 @@ fn demo_state() -> @core.TownState {
       domain=@core.WorkDomain::Finance,
       required_role=Some(@core.WorkerRole::Specialist),
       required_capabilities=["ledgers", "reporting"],
+      status=task_status_for(tick, 2),
+    ),
+  )
+  state.enqueue_task(
+    @core.TownTask::new(
+      id="task-finance-memory",
+      book_id="finance",
+      title="Capture durable finance memories",
+      prompt="Store daily finance findings without leaking into the coding moonbook.",
+      domain=@core.WorkDomain::Finance,
+      required_role=Some(@core.WorkerRole::MemoryKeeper),
+      required_capabilities=["planning", "reporting"],
+      status=task_status_for(tick, 3),
     ),
   )
   state
+}
+
+///|
+fn worker_status_for(tick : Int, offset : Int) -> @core.WorkerStatus {
+  match (tick + offset) % 8 {
+    0 => @core.WorkerStatus::Running
+    1 => @core.WorkerStatus::Waiting
+    2 => @core.WorkerStatus::Idle
+    3 => @core.WorkerStatus::Running
+    4 => @core.WorkerStatus::Blocked
+    5 => @core.WorkerStatus::Waiting
+    6 => @core.WorkerStatus::Idle
+    _ => @core.WorkerStatus::Running
+  }
+}
+
+///|
+fn task_status_for(tick : Int, offset : Int) -> @core.TownTaskStatus {
+  match (tick + offset) % 7 {
+    0 => @core.TownTaskStatus::Pending
+    1 => @core.TownTaskStatus::Assigned
+    2 => @core.TownTaskStatus::Running
+    3 => @core.TownTaskStatus::Running
+    4 => @core.TownTaskStatus::Blocked
+    5 => @core.TownTaskStatus::Assigned
+    _ => @core.TownTaskStatus::Planned
+  }
 }
 
 ///|
@@ -127,6 +241,25 @@ fn render_alerts(alerts : Array[String]) -> @rabbita.Html {
 ///|
 fn no_children() -> Array[@rabbita.Html] {
   []
+}
+
+///|
+fn simulation_time_label(tick : Int) -> String {
+  let total_minutes = 8 * 60 + tick * 15
+  let day = total_minutes / (24 * 60) + 1
+  let minute_of_day = total_minutes % (24 * 60)
+  let hour = minute_of_day / 60
+  let minute = minute_of_day % 60
+  "Day \{day} / \{pad2(hour)}:\{pad2(minute)}"
+}
+
+///|
+fn pad2(value : Int) -> String {
+  if value < 10 {
+    "0\{value}"
+  } else {
+    value.to_string()
+  }
 }
 
 ///|
@@ -162,7 +295,21 @@ fn render_node(node : @ui.SceneRenderNode) -> @rabbita.Html {
 }
 
 ///|
-fn render_scene(scene : @ui.SceneRenderModel) -> @rabbita.Html {
+fn render_controls(dispatch : Dispatch[Msg], model : Model) -> @rabbita.Html {
+  let status = if model.paused { "Paused" } else { "Live" }
+  let action_label = if model.paused { "Resume" } else { "Pause" }
+  div(class="control-strip", [
+    status_chip(status, if model.paused { "chip-alert" } else { "chip-live" }),
+    status_chip(simulation_time_label(model.tick), "chip-clock"),
+    status_chip("Tick \{model.tick}", "chip-neutral"),
+    button(class="control-button", on_click=dispatch(TogglePause), action_label),
+    button(class="control-button", on_click=dispatch(Step), "Step"),
+  ])
+}
+
+///|
+fn render_scene(dispatch : Dispatch[Msg], model : Model) -> @rabbita.Html {
+  let scene = town_scene(model)
   let scene_style = ["width: \{scene.width}px", "height: \{scene.height}px"]
   section(class="town-shell", [
     header(class="town-header", [
@@ -173,6 +320,7 @@ fn render_scene(scene : @ui.SceneRenderModel) -> @rabbita.Html {
           class="summary",
           "Mayor hall, moonbook houses, worker yard, and anomaly corner rendered through Rabbita.",
         ),
+        render_controls(dispatch, model),
       ]),
       render_alerts(scene.alerts),
     ]),
@@ -200,6 +348,10 @@ fn render_scene(scene : @ui.SceneRenderModel) -> @rabbita.Html {
 
 ///|
 pub fn mount_app(target? : String = "app") -> Unit {
-  let app = @rabbita.static_cell(render_scene(town_scene()))
-  @rabbita.new(app).mount(target)
+  let (dispatch, app) = @rabbita.cell_with_dispatch(
+    model=init_model(),
+    update~,
+    view=(dispatch, model) => render_scene(dispatch, model),
+  )
+  @rabbita.new(app)..with_init(schedule_tick(dispatch)).mount(target)
 }

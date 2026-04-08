@@ -123,6 +123,46 @@ body {
   background: var(--calm);
 }
 
+.chip-live {
+  color: white;
+  background: var(--hall);
+}
+
+.chip-clock {
+  background: rgba(47, 107, 93, 0.12);
+}
+
+.chip-neutral {
+  background: rgba(83, 120, 149, 0.12);
+}
+
+.control-strip {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 10px;
+  align-items: center;
+  margin-top: 12px;
+}
+
+.control-button {
+  appearance: none;
+  border: 1px solid var(--line);
+  background: rgba(255, 249, 234, 0.94);
+  color: var(--ink);
+  border-radius: 999px;
+  padding: 10px 16px;
+  font: inherit;
+  cursor: pointer;
+  box-shadow: 0 6px 18px rgba(62, 40, 15, 0.08);
+  transition: transform 140ms ease, box-shadow 140ms ease, background 140ms ease;
+}
+
+.control-button:hover {
+  transform: translateY(-1px);
+  box-shadow: 0 10px 20px rgba(62, 40, 15, 0.12);
+  background: rgba(255, 249, 234, 1);
+}
+
 .town-main {
   display: grid;
   grid-template-columns: minmax(0, 1fr) 280px;
@@ -227,16 +267,44 @@ body {
   border-color: rgba(185, 92, 59, 0.32);
 }
 
+.node-city-hall .scene-card::before,
+.node-book-house .scene-card::before,
+.node-worker-yard .scene-card::before,
+.node-anomaly-corner .scene-card::before {
+  content: "";
+  position: absolute;
+  inset: -1px;
+  border-radius: 18px;
+  pointer-events: none;
+}
+
+.node-city-hall .scene-card::before {
+  box-shadow: inset 0 0 0 1px rgba(185, 92, 59, 0.16);
+}
+
 .node-book-house .scene-card {
   border-color: rgba(47, 107, 93, 0.32);
+}
+
+.node-book-house .scene-card::before {
+  box-shadow: inset 0 0 0 1px rgba(47, 107, 93, 0.16);
 }
 
 .node-worker-yard .scene-card {
   border-color: rgba(83, 120, 149, 0.32);
 }
 
+.node-worker-yard .scene-card::before {
+  box-shadow: inset 0 0 0 1px rgba(83, 120, 149, 0.16);
+}
+
 .node-anomaly-corner .scene-card {
   border-color: rgba(178, 58, 42, 0.34);
+  animation: alarm-pulse 2.2s ease-in-out infinite;
+}
+
+.node-anomaly-corner .scene-card::before {
+  box-shadow: inset 0 0 0 1px rgba(178, 58, 42, 0.18);
 }
 
 .node-gate .scene-card {
@@ -259,6 +327,16 @@ body {
   margin: 0 0 10px;
   line-height: 1.45;
   color: var(--muted);
+}
+
+@keyframes alarm-pulse {
+  0%,
+  100% {
+    box-shadow: 0 10px 28px rgba(62, 40, 15, 0.12);
+  }
+  50% {
+    box-shadow: 0 14px 34px rgba(178, 58, 42, 0.18);
+  }
 }
 
 @media (max-width: 1180px) {
@@ -301,4 +379,3 @@ body {
     font-size: 11px;
   }
 }
-
