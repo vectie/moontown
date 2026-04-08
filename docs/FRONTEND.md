@@ -1,0 +1,143 @@
+# Frontend Guide
+
+`moontown` has two UI layers:
+
+- renderer-agnostic scene modeling in the root module
+- Rabbita browser rendering in `ui/rabbita-town`
+
+## UI Stack
+
+The current UI flow is:
+
+```text
+TownState
+  -> DashboardModel
+  -> SceneRenderModel
+  -> Rabbita view
+  -> browser bundle
+```
+
+Files by layer:
+
+- scene contract
+  - [ui/scene_layout.mbt](/Users/kq/Workspace/moontown/ui/scene_layout.mbt)
+- town-to-scene projection
+  - [ui/dashboard.mbt](/Users/kq/Workspace/moontown/ui/dashboard.mbt)
+- renderer bridge
+  - [ui/scene_render.mbt](/Users/kq/Workspace/moontown/ui/scene_render.mbt)
+- Rabbita frontend
+  - [ui/rabbita-town/main/main.mbt](/Users/kq/Workspace/moontown/ui/rabbita-town/main/main.mbt)
+
+## Semantic Scene Model
+
+The frontend is intentionally not a graph viewer. It follows the `sou` lesson:
+
+- places first
+- state mapped into places
+- actors and props as meaning carriers
+- anomalies shown as a visible area
+
+Current default places:
+
+- Town Gate
+- City Hall
+- Moonbook / Coding
+- Moonbook / Finance
+- Worker Yard
+- Anomaly Corner
+
+This gives the UI a “town scene” instead of a “nodes and edges” look.
+
+## Current Rabbita Dashboard
+
+The Rabbita frontend already behaves like a live simulation dashboard.
+
+Implemented:
+
+- periodic ticks
+- pause/resume/step controls
+- strategy modes
+  - balanced
+  - throughput
+  - recovery
+- resource metrics
+  - budget
+  - energy
+  - queue pressure
+  - stability
+- moving worker avatars
+- selection and inspection
+- activity feed
+- command actions
+  - inject budget
+  - relieve queue
+  - stability drill
+
+This makes the frontend closer to a management simulation than a static admin
+panel.
+
+## Assets
+
+Original example assets live under:
+
+- [ui/assets/backgrounds](/Users/kq/Workspace/moontown/ui/assets/backgrounds)
+- [ui/assets/buildings](/Users/kq/Workspace/moontown/ui/assets/buildings)
+- [ui/assets/actors](/Users/kq/Workspace/moontown/ui/assets/actors)
+- [ui/assets/props](/Users/kq/Workspace/moontown/ui/assets/props)
+- [ui/assets/effects](/Users/kq/Workspace/moontown/ui/assets/effects)
+
+Current examples are SVG placeholders with original `moontown` styling, not
+borrowed `sou` assets.
+
+## Build and Dev
+
+From the frontend directory:
+
+```bash
+cd ui/rabbita-town
+npm install
+npm run dev
+npm run build
+```
+
+From the repo root:
+
+```bash
+./scripts/build-rabbita-ui.sh
+```
+
+Build output lands in:
+
+- `ui/rabbita-town/dist/`
+
+## UI Change Rule
+
+When UI files change, the expected verification path is:
+
+```bash
+moon check
+moon test
+moon info
+moon fmt
+./scripts/build-rabbita-ui.sh
+```
+
+For frontend-only iteration, at minimum run:
+
+```bash
+./scripts/build-rabbita-ui.sh
+```
+
+## What Is Still Missing
+
+The frontend is live, but not yet a full simulation game.
+
+Still missing:
+
+- real backend-fed live state
+- richer movement interpolation
+- deeper multi-agent coordination visuals
+- fuller command system
+- stronger audiovisual polish
+
+The current target is a rich operator dashboard, not a traditional game engine.

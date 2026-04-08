@@ -1,83 +1,125 @@
-# username/moontown
+# Moontown
 
-`moontown` is the town-level orchestration layer above multiple `moonbook`
-workspaces and multiple `moonclaw` workers.
+> MoonBit-native town control plane + embedded strategic roles + scene dashboard + Rabbita operator UI
 
-- A `Town` hosts many `MoonbookHost` instances.
-- Each book owns its own workspace root, memory scope, and worker pool.
-- Tasks route to the best matching worker with isolation rules that can differ
-  by domain, so coding and finance work do not have to share memory or runtime.
-- Town state is persisted so the demo can reboot from a saved snapshot instead
-  of rebuilding everything from scratch each run.
+`MoonBit` `Town Orchestration` `MoonBook Registry` `MoonClaw Roles` `Mayor` `Keeper` `Routing` `Health` `Storage` `Scene UI` `Rabbita`
 
-Run the demo:
+Moontown is the town-level orchestration layer above multiple `moonbook`
+domains and multiple `moonclaw` runtimes.
 
-```bash
-moon run cmd/main
-```
+It is designed for:
 
-The demo prints a room-style dashboard with books loaded from the moonbook
-catalog:
+- town-wide routing and scheduling
+- domain isolation across multiple books
+- embedded role-specialized planning runtimes
+- long-lived town state and snapshots
+- scene-based operator visibility
+- browser-facing simulation dashboards
 
-- a coding moonbook for harness engineering
-- a finance moonbook for private ledger work
-
-## Current bootstrap flow
-
-The current control path is:
+## What Moontown Feels Like
 
 ```text
-moonbook catalog -> town bootstrap -> worker/task demo state -> routing -> dashboard
+moonbook catalog / town state / mayor
+  -> seed a town
+  -> route work across books and workers
+  -> inspect health, anomalies, and patrol state
+  -> render the town as a live scene
+  -> evolve toward a 24/7 social-experiment control plane
 ```
 
-More concretely:
+Moontown is strongest when you want one system to hold together:
 
-- `adapters/moonbook/` persists the town's available books in
-  `.moontown/moonbooks.json`
-- `storage/` persists the seeded town snapshot in `.moontown/town.json`
-- `moontown` loads the book catalog first, then seeds the initial town state
-  from that catalog when the snapshot does not already exist
-- workers and tasks are still demo data, but books are now sourced from the
-  persisted moonbook registry boundary
+- global orchestration
+- per-book isolation
+- strategic role reasoning
+- operator-facing visibility
+- a town-shaped UI instead of a flat task list
 
-## Current status
+## Current Status
 
-What is real today:
+Implemented today:
 
-- persisted town snapshot bootstrap
-- persisted moonbook catalog bootstrap
-- embedded `Mayor` role adapter over a constrained `moonclaw` runtime profile
-- routing and isolation decisions
-- dashboard rendering
-- scheduler/health/storage package boundaries
+- persisted town bootstrap in `.moontown/town.json`
+- persisted moonbook catalog in `.moontown/moonbooks.json`
+- `BookProvider` abstraction for town bootstrap
+- strategic `Mayor` role adapter over embedded moonclaw runtime metadata
+- routing, isolation, scheduler, health, and storage packages
+- renderer-agnostic scene dashboard model
+- Rabbita live simulation frontend
+- original example SVG scene assets
 
-What is still stubbed:
+Still stubbed:
 
-- moonbook task planning
-- moonbook result persistence
-- moonclaw task execution
-- long-running daemon patrol
-- experiment runtime
+- real moonbook planning and result persistence
+- real moonclaw task execution transport
+- long-running daemon patrol and recovery loop
+- experiment lifecycle execution
+- real backend/frontend sync
 
-## Embedded Roles
+So the current repo is a control-plane-first prototype, not yet a fully live
+24/7 town runtime.
 
-Moontown now treats MoonClaw as the shared agent substrate, but it does not
-expose a raw generic worker brain directly to town code.
+## Current Capabilities
 
-Current town-side role adapters:
+- `core` town, book, worker, task, and event modeling
+- `dispatch` routing and isolation decisions
+- `storage` snapshot persistence
+- `health` anomaly and recovery reporting
+- `scheduler` tick planning
+- `roles` strategic `Mayor` role adapter
+- `adapters/moonbook` persisted book catalog and provider boundary
+- `adapters/moonclaw` embedded runtime profiles and handoff contracts
+- `ui` scene layout, dashboard projection, and HTML render bridge
+- `ui/rabbita-town` live browser dashboard with:
+  - tick loop
+  - pause/resume/step controls
+  - strategy switching
+  - moving worker avatars
+  - selection and inspector state
+  - budget/energy/pressure/stability metrics
+  - activity feed and anomaly surfacing
+
+## Main Subsystems
+
+- `core`
+  pure town model and provider abstractions
+- `dispatch`
+  routing and isolation policy
+- `experiment`
+  experiment model scaffold
+- `health`
+  anomaly detection and recovery suggestions
+- `scheduler`
+  tick planning and due-work collection
+- `storage`
+  snapshot and checkpoint persistence
+- `roles`
+  strategic mayor role adapter
+- `adapters/moonbook`
+  moonbook catalog and future book-service boundary
+- `adapters/moonclaw`
+  embedded runtime profiles and future execution boundary
+- `ui`
+  scene contract, dashboard model, and render model
+- `ui/rabbita-town`
+  browser simulation dashboard
+
+## Embedded Role Model
+
+Moontown does not expose a raw generic worker brain directly to town code.
+
+The intended role split is:
 
 - `Mayor`
-  - town-level strategic planner
-  - planner-only runtime envelope
-  - limited tool visibility
-  - global town memory scope
-  - no direct workspace writes or execution tools by default
-- `keeper` handoff target
-  - modeled as the book-level domain runtime that receives strategic handoffs
-  - town delegates toward a keeper contract instead of invoking a generic agent
-    loop
-- worker runtime profiles
-  - still modeled separately as execution-layer profiles with full tool access
+  - strategic town runtime
+  - planner-only envelope
+  - limited tools
+  - global memory scope
+- `keeper`
+  - book-local planning/runtime handoff target
+  - domain-scoped memory and tools
+- worker claws
+  - execution runtime profiles
 
 The design intent is:
 
@@ -85,38 +127,86 @@ The design intent is:
 - `moontown` calls `Mayor.patrol(...)`
 - `moontown` produces keeper handoff packets for book-local planning
 
-This keeps town orchestration logic in `moontown`, keeps domain harness logic in
-`moonbook`, and leaves execution-heavy behavior in `moonclaw`.
+That keeps:
 
-Planned package layout:
+- town orchestration in `moontown`
+- harness and memory control in `moonbook`
+- execution-heavy behavior in `moonclaw`
 
-```text
-core/                  pure town model and shared types
-dispatch/              routing and isolation decisions
-experiment/            social experiment definitions and runs
-health/                watchdog and anomaly reporting
-storage/               snapshots and checkpoints
-scheduler/             daemon tick planning
-adapters/moonbook/     boundary to moonbook
-adapters/moonclaw/     boundary to moonclaw
-ui/                    operator dashboard model/rendering
+## Quick Start
+
+From the repo root:
+
+```bash
+cd ~/Workspace/moontown
 ```
 
-## Scene Asset Scaffold
+Run the text dashboard:
 
-The UI package now includes a first-class scene layout spec in
-`ui/scene_layout.mbt` plus an asset scaffold in `ui/assets/`.
+```bash
+moon run cmd/main
+```
 
-That scaffold is meant to support a `sou`-style semantic scene, but with
-original `moontown` assets:
+Validate the module:
 
-- `backgrounds/` for the town square backdrop
-- `buildings/` for city hall and moonbook houses
-- `actors/` for mayor, keeper, and worker claw sprites
-- `props/` for gate signs and worker-yard objects
-- `effects/` for anomaly and patrol signals
+```bash
+moon check
+moon test
+moon info
+moon fmt
+```
 
-The default layout currently defines these scene places:
+Build the Rabbita frontend:
+
+```bash
+./scripts/build-rabbita-ui.sh
+```
+
+Or work directly in the frontend package:
+
+```bash
+cd ui/rabbita-town
+npm install
+npm run dev
+```
+
+## Runtime Flow
+
+Current bootstrap path:
+
+```text
+moonbook catalog
+  -> book provider
+  -> town snapshot bootstrap
+  -> dashboard / render model / frontend
+```
+
+Current strategic path:
+
+```text
+TownTask
+  -> Mayor.decide_dispatch(...)
+  -> route decision or keeper handoff
+```
+
+Current UI path:
+
+```text
+TownState
+  -> DashboardModel
+  -> SceneRenderModel
+  -> Rabbita simulation dashboard
+```
+
+## Town Scene
+
+The semantic town scene lives in:
+
+- `ui/scene_layout.mbt`
+- `ui/dashboard.mbt`
+- `ui/scene_render.mbt`
+
+Current scene places:
 
 - Town Gate
 - City Hall
@@ -125,36 +215,38 @@ The default layout currently defines these scene places:
 - Worker Yard
 - Anomaly Corner
 
-This gives `moontown` a stable visual contract before the actual art is drawn.
+Current asset folders:
 
-The UI package also now exposes a renderer bridge:
+- `ui/assets/backgrounds/`
+- `ui/assets/buildings/`
+- `ui/assets/actors/`
+- `ui/assets/props/`
+- `ui/assets/effects/`
 
-- `ui/scene_layout.mbt`
-  - static scene coordinates and asset slots
-- `ui/dashboard.mbt`
-  - live town state bound onto those scene places
-- `ui/scene_render.mbt`
-  - frontend-facing render model plus HTML payload generation
-
-That means the current pipeline is:
-
-```text
-town state -> dashboard model -> scene render model -> HTML scene payload
-```
+The current assets are original `moontown` starter SVGs, not copied `sou`
+assets.
 
 ## Rabbita Frontend
 
-`moontown` now also has a dedicated Rabbita browser frontend at
-`ui/rabbita-town/`.
+`ui/rabbita-town/` is the browser-facing simulation dashboard. It is not a game
+engine, but it is already game-adjacent in structure:
 
-That package:
+- live tick loop
+- moving worker avatars
+- strategy controls
+- resource feedback loops
+- selection and inspector state
+- activity and anomaly visibility
 
-- depends on `username/moontown/core`, `health`, and `ui`
-- renders the town scene through Rabbita
-- includes `index.html`, `bootstrap.js`, and `styles.css`
-- can be bundled with Vite via `./scripts/build-rabbita-ui.sh`
+The current frontend is best understood as a live simulation dashboard over the
+town model.
 
-The layering stays clean:
+## Docs
 
-- root module owns town state and renderer-agnostic scene contracts
-- `ui/rabbita-town` is one browser implementation on top
+Detailed docs:
+
+- [docs/USAGE.md](/Users/kq/Workspace/moontown/docs/USAGE.md)
+- [docs/ARCHITECTURE.md](/Users/kq/Workspace/moontown/docs/ARCHITECTURE.md)
+- [docs/PACKAGES.md](/Users/kq/Workspace/moontown/docs/PACKAGES.md)
+- [docs/FRONTEND.md](/Users/kq/Workspace/moontown/docs/FRONTEND.md)
+- [docs/DEVELOPMENT.md](/Users/kq/Workspace/moontown/docs/DEVELOPMENT.md)

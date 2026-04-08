@@ -22,26 +22,26 @@ The structure follows the semantic-scene lesson from `sou`:
 - `effects/`
   - anomaly, patrol, sync, and alert effects
 
-## Planned Baseline Assets
+## Current Baseline Assets
 
-- `backgrounds/town-square.webp`
-- `buildings/city-hall.webp`
-- `buildings/book-house-coding.webp`
-- `buildings/book-house-finance.webp`
-- `actors/mayor-claw.webp`
-- `actors/keeper-claw.webp`
-- `actors/worker-claw.webp`
-- `props/worker-yard.webp`
-- `props/gate-sign.webp`
-- `effects/anomaly-signal.webp`
+- `backgrounds/town-square.svg`
+- `buildings/city-hall.svg`
+- `buildings/book-house-coding.svg`
+- `buildings/book-house-finance.svg`
+- `actors/mayor-claw.svg`
+- `actors/keeper-claw.svg`
+- `actors/worker-claw.svg`
+- `props/worker-yard.svg`
+- `props/gate-sign.svg`
+- `effects/anomaly-signal.svg`
 
 ## Ownership Rules
 
 - Study `sou` for layout and scene semantics, not for direct asset reuse.
 - `sou` art assets are non-commercial only and should not be copied into this repo.
-- Replace every placeholder here with original `moontown` art.
+- Treat the current SVG set as starter examples and replace them with richer
+  original `moontown` art over time.
 
 ## Layout Source
 
 The matching scene spec lives in `ui/scene_layout.mbt`.
-
