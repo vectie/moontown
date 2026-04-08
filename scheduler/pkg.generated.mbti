@@ -1,0 +1,44 @@
+// Generated using `moon info`, DON'T EDIT IT
+package "username/moontown/scheduler"
+
+import {
+  "username/moontown/core",
+  "username/moontown/health",
+}
+
+// Values
+pub fn collect_due_tasks(@core.TownState) -> Array[@core.TownTask]
+
+pub fn next_tick(Int, Array[SchedulerAction]) -> SchedulerTick
+
+pub fn plan_tick(@core.TownState, @health.HealthReport) -> Array[SchedulerAction]
+
+// Errors
+
+// Types and methods
+pub struct ScheduledJob {
+  id : String
+  kind : String
+  interval_seconds : Int
+}
+pub impl Eq for ScheduledJob
+pub impl Show for ScheduledJob
+
+pub struct SchedulerAction {
+  kind : String
+  detail : String
+}
+pub impl Eq for SchedulerAction
+pub impl Show for SchedulerAction
+
+pub struct SchedulerTick {
+  sequence : Int
+  summary : String
+}
+pub impl Eq for SchedulerTick
+pub impl Show for SchedulerTick
+
+// Type aliases
+
+// Traits
+

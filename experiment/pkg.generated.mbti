@@ -1,0 +1,89 @@
+// Generated using `moon info`, DON'T EDIT IT
+package "username/moontown/experiment"
+
+// Values
+pub fn evaluate_run(ExperimentRun, ExperimentDefinition) -> ExperimentOutcome
+
+pub fn start_experiment(ExperimentDefinition, Array[Cohort]) -> ExperimentRun
+
+// Errors
+
+// Types and methods
+pub struct Cohort {
+  id : String
+  name : String
+  participants : Array[String]
+}
+pub impl Eq for Cohort
+pub impl Show for Cohort
+
+pub struct ExperimentDefinition {
+  id : String
+  title : String
+  hypothesis : String
+  target_book_ids : Array[String]
+  interventions : Array[Intervention]
+  stop_rules : Array[StopRule]
+}
+pub impl Eq for ExperimentDefinition
+pub impl Show for ExperimentDefinition
+
+pub struct ExperimentOutcome {
+  run_id : String
+  summary : String
+  should_stop : Bool
+}
+pub impl Eq for ExperimentOutcome
+pub impl Show for ExperimentOutcome
+
+pub enum ExperimentPhase {
+  Draft
+  Running
+  CoolingDown
+  Complete
+  Halted
+}
+pub impl Eq for ExperimentPhase
+pub impl Show for ExperimentPhase
+
+pub struct ExperimentRun {
+  id : String
+  definition_id : String
+  phase : ExperimentPhase
+  cohorts : Array[Cohort]
+  measurements : Array[Measurement]
+  spawned_task_ids : Array[String]
+}
+pub fn ExperimentRun::record_measurement(Self, Measurement) -> Self
+pub impl Eq for ExperimentRun
+pub impl Show for ExperimentRun
+
+pub struct Intervention {
+  id : String
+  title : String
+  detail : String
+  target_book_ids : Array[String]
+}
+pub impl Eq for Intervention
+pub impl Show for Intervention
+
+pub struct Measurement {
+  metric : String
+  value : Double
+  note : String
+}
+pub impl Eq for Measurement
+pub impl Show for Measurement
+
+pub struct StopRule {
+  metric : String
+  threshold : Double
+  direction : String
+}
+pub impl Eq for StopRule
+pub impl Show for StopRule
+
+// Type aliases
+
+// Traits
+

@@ -1,0 +1,33 @@
+// Generated using `moon info`, DON'T EDIT IT
+package "username/moontown/dispatch"
+
+import {
+  "username/moontown/core",
+}
+
+// Values
+pub fn choose_isolation(@core.TownTask, @core.WorkerRef, @core.BookRef) -> @core.IsolationMode
+
+pub fn route_task(@core.TownState, RouteRequest) -> RouteDecision
+
+// Errors
+
+// Types and methods
+pub enum RouteDecision {
+  Assigned(@core.AssignmentPlan)
+  Escalated(String)
+  Deferred(String)
+}
+pub impl Eq for RouteDecision
+pub impl Show for RouteDecision
+
+pub struct RouteRequest {
+  task : @core.TownTask
+}
+pub impl Eq for RouteRequest
+pub impl Show for RouteRequest
+
+// Type aliases
+
+// Traits
+

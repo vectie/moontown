@@ -1,0 +1,82 @@
+// Generated using `moon info`, DON'T EDIT IT
+package "username/moontown/adapters/moonbook"
+
+import {
+  "username/moontown/core",
+}
+
+// Values
+pub fn stub_health(String) -> BookHealthResponse
+
+pub fn stub_hydrate(BookHydrationRequest) -> BookHydrationResponse
+
+pub fn stub_persist(BookPersistRequest) -> String
+
+pub fn stub_plan(BookPlanRequest) -> BookPlanResponse
+
+// Errors
+
+// Types and methods
+pub struct BookHealthResponse {
+  book_id : String
+  status : String
+  detail : String
+}
+pub impl Eq for BookHealthResponse
+pub impl Show for BookHealthResponse
+
+pub struct BookHydrationRequest {
+  book_id : String
+  task_id : String
+}
+pub impl Eq for BookHydrationRequest
+pub impl Show for BookHydrationRequest
+
+pub struct BookHydrationResponse {
+  workspace_root : String
+  memory_scope : @core.MemoryScope
+  context_summary : String
+  skills : Array[String]
+}
+pub impl Eq for BookHydrationResponse
+pub impl Show for BookHydrationResponse
+
+pub struct BookPersistRequest {
+  book_id : String
+  task_id : String
+  result_summary : String
+  memory_candidates : Array[String]
+}
+pub impl Eq for BookPersistRequest
+pub impl Show for BookPersistRequest
+
+pub struct BookPlanRequest {
+  book_id : String
+  goal_id : String
+  title : String
+  prompt : String
+}
+pub impl Eq for BookPlanRequest
+pub impl Show for BookPlanRequest
+
+pub struct BookPlanResponse {
+  task_drafts : Array[BookTaskDraft]
+  summary : String
+  warnings : Array[String]
+}
+pub impl Eq for BookPlanResponse
+pub impl Show for BookPlanResponse
+
+pub struct BookTaskDraft {
+  id : String
+  title : String
+  prompt : String
+  required_role : @core.WorkerRole?
+}
+pub impl Eq for BookTaskDraft
+pub impl Show for BookTaskDraft
+
+// Type aliases
+
+// Traits
+

@@ -1,0 +1,55 @@
+// Generated using `moon info`, DON'T EDIT IT
+package "username/moontown/adapters/moonclaw"
+
+import {
+  "username/moontown/core",
+}
+
+// Values
+pub fn stub_assign(AssignTaskRequest) -> String
+
+pub fn stub_poll(String) -> PollWorkerResponse
+
+pub fn stub_result(String) -> TaskResultResponse
+
+pub fn stub_spawn(SpawnWorkerRequest) -> String
+
+// Errors
+
+// Types and methods
+pub struct AssignTaskRequest {
+  assignment : @core.AssignmentPlan
+  workspace_root : String
+  context_summary : String
+  skills : Array[String]
+}
+pub impl Eq for AssignTaskRequest
+pub impl Show for AssignTaskRequest
+
+pub struct PollWorkerResponse {
+  worker_id : String
+  status : @core.WorkerStatus
+  detail : String
+}
+pub impl Eq for PollWorkerResponse
+pub impl Show for PollWorkerResponse
+
+pub struct SpawnWorkerRequest {
+  worker : @core.WorkerRef
+}
+pub impl Eq for SpawnWorkerRequest
+pub impl Show for SpawnWorkerRequest
+
+pub struct TaskResultResponse {
+  task_id : String
+  status : @core.TownTaskStatus
+  summary : String
+  memory_candidates : Array[String]
+}
+pub impl Eq for TaskResultResponse
+pub impl Show for TaskResultResponse
+
+// Type aliases
+
+// Traits
+

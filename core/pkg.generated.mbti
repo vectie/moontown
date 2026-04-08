@@ -1,0 +1,159 @@
+// Generated using `moon info`, DON'T EDIT IT
+package "username/moontown/core"
+
+// Values
+pub fn empty_state(TownConfig) -> TownState
+
+// Errors
+
+// Types and methods
+pub struct AssignmentPlan {
+  task_id : String
+  worker_id : String
+  book_id : String
+  isolation : IsolationMode
+  reason : String
+}
+pub fn AssignmentPlan::new(task_id~ : String, worker_id~ : String, book_id~ : String, isolation~ : IsolationMode, reason~ : String) -> Self
+pub impl Eq for AssignmentPlan
+pub impl Show for AssignmentPlan
+
+pub struct BookRef {
+  id : String
+  name : String
+  purpose : String
+  workspace_root : String
+  memory_scope : MemoryScope
+  tags : Array[String]
+}
+pub fn BookRef::new(id~ : String, name~ : String, purpose~ : String, workspace_root~ : String, memory_scope? : MemoryScope, tags? : Array[String]) -> Self
+pub impl Eq for BookRef
+pub impl Show for BookRef
+
+pub(all) enum IsolationMode {
+  SharedWorkspace
+  BookWorkspace
+  Worktree
+  Sandboxed
+}
+pub impl Eq for IsolationMode
+pub impl Show for IsolationMode
+
+pub(all) enum MemoryScope {
+  SharedTown
+  BookPrivate
+  TaskEphemeral
+}
+pub impl Eq for MemoryScope
+pub impl Show for MemoryScope
+
+pub struct TownConfig {
+  id : String
+  name : String
+  heartbeat_seconds : Int
+  max_concurrent_tasks : Int
+}
+pub fn TownConfig::new(id~ : String, name~ : String, heartbeat_seconds? : Int, max_concurrent_tasks? : Int) -> Self
+pub impl Eq for TownConfig
+pub impl Show for TownConfig
+
+pub struct TownEvent {
+  id : String
+  kind : String
+  detail : String
+  related_task_id : String?
+  related_book_id : String?
+}
+pub fn TownEvent::new(id~ : String, kind~ : String, detail~ : String, related_task_id? : String?, related_book_id? : String?) -> Self
+pub impl Eq for TownEvent
+pub impl Show for TownEvent
+
+pub struct TownState {
+  config : TownConfig
+  books : Array[BookRef]
+  workers : Array[WorkerRef]
+  tasks : Array[TownTask]
+  events : Array[TownEvent]
+}
+pub fn TownState::enqueue_task(Self, TownTask) -> Unit
+pub fn TownState::record_event(Self, TownEvent) -> Unit
+pub fn TownState::register_book(Self, BookRef) -> Unit
+pub fn TownState::register_worker(Self, WorkerRef) -> Unit
+pub impl Eq for TownState
+pub impl Show for TownState
+
+pub struct TownTask {
+  id : String
+  book_id : String
+  title : String
+  prompt : String
+  domain : WorkDomain
+  required_role : WorkerRole?
+  required_capabilities : Array[String]
+  status : TownTaskStatus
+}
+pub fn TownTask::new(id~ : String, book_id~ : String, title~ : String, prompt~ : String, domain~ : WorkDomain, required_role? : WorkerRole?, required_capabilities? : Array[String], status? : TownTaskStatus) -> Self
+pub impl Eq for TownTask
+pub impl Show for TownTask
+
+pub(all) enum TownTaskStatus {
+  Pending
+  Planned
+  Assigned
+  Running
+  Blocked
+  Done
+  Failed
+}
+pub impl Eq for TownTaskStatus
+pub impl Show for TownTaskStatus
+
+pub(all) enum WorkDomain {
+  Coding
+  Finance
+  Research
+  Operations
+  SocialExperiment
+  Custom(String)
+}
+pub impl Eq for WorkDomain
+pub impl Show for WorkDomain
+
+pub struct WorkerRef {
+  id : String
+  name : String
+  book_id : String
+  role : WorkerRole
+  capabilities : Array[String]
+  status : WorkerStatus
+}
+pub fn WorkerRef::new(id~ : String, name~ : String, book_id~ : String, role~ : WorkerRole, capabilities? : Array[String], status? : WorkerStatus) -> Self
+pub impl Eq for WorkerRef
+pub impl Show for WorkerRef
+
+pub(all) enum WorkerRole {
+  Harness
+  Planner
+  Specialist
+  Reviewer
+  MemoryKeeper
+  Watcher
+  Operator
+}
+pub impl Eq for WorkerRole
+pub impl Show for WorkerRole
+
+pub(all) enum WorkerStatus {
+  Idle
+  Running
+  Waiting
+  Blocked
+  Offline
+}
+pub impl Eq for WorkerStatus
+pub impl Show for WorkerStatus
+
+// Type aliases
+
+// Traits
+

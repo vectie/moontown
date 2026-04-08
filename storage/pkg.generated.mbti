@@ -1,0 +1,42 @@
+// Generated using `moon info`, DON'T EDIT IT
+package "username/moontown/storage"
+
+import {
+  "username/moontown/core",
+}
+
+// Values
+pub fn describe_snapshot(TownSnapshot) -> String
+
+pub fn empty_checkpoint(String) -> Checkpoint
+
+pub fn snapshot_of(@core.TownState) -> TownSnapshot
+
+// Errors
+
+// Types and methods
+pub struct Checkpoint {
+  run_id : String
+  summary : String
+  event_count : Int
+}
+pub impl Eq for Checkpoint
+pub impl Show for Checkpoint
+
+pub struct EventCursor {
+  offset : Int
+}
+pub impl Eq for EventCursor
+pub impl Show for EventCursor
+
+pub struct TownSnapshot {
+  town : @core.TownState
+  event_count : Int
+}
+pub impl Eq for TownSnapshot
+pub impl Show for TownSnapshot
+
+// Type aliases
+
+// Traits
+

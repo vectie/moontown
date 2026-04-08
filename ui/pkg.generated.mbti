@@ -1,0 +1,42 @@
+// Generated using `moon info`, DON'T EDIT IT
+package "username/moontown/ui"
+
+import {
+  "username/moontown/core",
+  "username/moontown/health",
+}
+
+// Values
+pub fn build_dashboard(@core.TownState, @health.HealthReport) -> DashboardModel
+
+pub fn render_dashboard(DashboardModel) -> String
+
+// Errors
+
+// Types and methods
+pub struct AlertBanner {
+  level : String
+  text : String
+}
+pub impl Eq for AlertBanner
+pub impl Show for AlertBanner
+
+pub struct DashboardModel {
+  title : String
+  alerts : Array[AlertBanner]
+  sections : Array[DashboardSection]
+}
+pub impl Eq for DashboardModel
+pub impl Show for DashboardModel
+
+pub struct DashboardSection {
+  title : String
+  lines : Array[String]
+}
+pub impl Eq for DashboardSection
+pub impl Show for DashboardSection
+
+// Type aliases
+
+// Traits
+

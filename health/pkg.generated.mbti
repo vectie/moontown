@@ -1,0 +1,65 @@
+// Generated using `moon info`, DON'T EDIT IT
+package "username/moontown/health"
+
+import {
+  "username/moontown/core",
+}
+
+// Values
+pub fn inspect_town(@core.TownState) -> HealthReport
+
+pub fn recovery_actions(HealthReport) -> Array[RecoveryAction]
+
+// Errors
+
+// Types and methods
+pub struct Anomaly {
+  title : String
+  detail : String
+}
+pub impl Eq for Anomaly
+pub impl Show for Anomaly
+
+pub struct BookHealth {
+  book_id : String
+  level : HealthLevel
+  note : String
+}
+pub impl Eq for BookHealth
+pub impl Show for BookHealth
+
+pub enum HealthLevel {
+  Healthy
+  Degraded
+  Critical
+}
+pub impl Eq for HealthLevel
+pub impl Show for HealthLevel
+
+pub struct HealthReport {
+  worker_health : Array[WorkerHealth]
+  book_health : Array[BookHealth]
+  anomalies : Array[Anomaly]
+}
+pub impl Eq for HealthReport
+pub impl Show for HealthReport
+
+pub struct RecoveryAction {
+  kind : String
+  detail : String
+}
+pub impl Eq for RecoveryAction
+pub impl Show for RecoveryAction
+
+pub struct WorkerHealth {
+  worker_id : String
+  level : HealthLevel
+  note : String
+}
+pub impl Eq for WorkerHealth
+pub impl Show for WorkerHealth
+
+// Type aliases
+
+// Traits
+
