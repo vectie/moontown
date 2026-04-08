@@ -9,6 +9,8 @@ import {
 // Values
 pub fn build_dashboard(@core.TownState, @health.HealthReport) -> DashboardModel
 
+pub fn default_town_scene_layout() -> TownSceneLayout
+
 pub fn render_dashboard(DashboardModel) -> String
 
 // Errors
@@ -24,6 +26,7 @@ pub impl Show for AlertBanner
 pub struct DashboardModel {
   title : String
   alerts : Array[AlertBanner]
+  scene_layout : TownSceneLayout
   town_map : Array[TownMapPlace]
   sections : Array[DashboardSection]
 }
@@ -37,13 +40,61 @@ pub struct DashboardSection {
 pub impl Eq for DashboardSection
 pub impl Show for DashboardSection
 
-pub struct TownMapPlace {
+pub struct SceneArea {
+  key : String
   title : String
+  kind : SceneAreaKind
+  x : Int
+  y : Int
+  width : Int
+  height : Int
+  asset_keys : Array[String]
+}
+pub impl Eq for SceneArea
+pub impl Show for SceneArea
+
+pub enum SceneAreaKind {
+  CityHall
+  BookHouse
+  WorkerYard
+  AnomalyCorner
+  Gate
+}
+pub impl Eq for SceneAreaKind
+pub impl Show for SceneAreaKind
+
+pub struct SceneAsset {
+  key : String
+  path : String
+  purpose : String
+}
+pub impl Eq for SceneAsset
+pub impl Show for SceneAsset
+
+pub struct TownMapPlace {
+  key : String
+  title : String
+  kind : SceneAreaKind
   subtitle : String
+  x : Int
+  y : Int
+  width : Int
+  height : Int
+  asset_paths : Array[String]
   lines : Array[String]
 }
 pub impl Eq for TownMapPlace
 pub impl Show for TownMapPlace
+
+pub struct TownSceneLayout {
+  width : Int
+  height : Int
+  background : SceneAsset
+  areas : Array[SceneArea]
+  assets : Array[SceneAsset]
+}
+pub impl Eq for TownSceneLayout
+pub impl Show for TownSceneLayout
 
 // Type aliases
 

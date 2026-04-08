@@ -101,3 +101,28 @@ adapters/moonbook/     boundary to moonbook
 adapters/moonclaw/     boundary to moonclaw
 ui/                    operator dashboard model/rendering
 ```
+
+## Scene Asset Scaffold
+
+The UI package now includes a first-class scene layout spec in
+`ui/scene_layout.mbt` plus an asset scaffold in `ui/assets/`.
+
+That scaffold is meant to support a `sou`-style semantic scene, but with
+original `moontown` assets:
+
+- `backgrounds/` for the town square backdrop
+- `buildings/` for city hall and moonbook houses
+- `actors/` for mayor, keeper, and worker claw sprites
+- `props/` for gate signs and worker-yard objects
+- `effects/` for anomaly and patrol signals
+
+The default layout currently defines these scene places:
+
+- Town Gate
+- City Hall
+- Moonbook / Coding
+- Moonbook / Finance
+- Worker Yard
+- Anomaly Corner
+
+This gives `moontown` a stable visual contract before the actual art is drawn.

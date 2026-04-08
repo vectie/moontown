@@ -12,8 +12,15 @@ pub struct DashboardSection {
 
 ///|
 pub struct TownMapPlace {
+  key : String
   title : String
+  kind : SceneAreaKind
   subtitle : String
+  x : Int
+  y : Int
+  width : Int
+  height : Int
+  asset_paths : Array[String]
   lines : Array[String]
 } derive(Show, Eq)
 
@@ -21,6 +28,7 @@ pub struct TownMapPlace {
 pub struct DashboardModel {
   title : String
   alerts : Array[AlertBanner]
+  scene_layout : TownSceneLayout
   town_map : Array[TownMapPlace]
   sections : Array[DashboardSection]
 } derive(Show, Eq)
@@ -34,7 +42,8 @@ pub fn build_dashboard(
   for anomaly in report.anomalies {
     alerts.push({ level: "warning", text: anomaly.detail })
   }
-  let town_map = build_town_map(town, report)
+  let scene_layout = default_town_scene_layout()
+  let town_map = build_town_map(scene_layout, town, report)
   let sections = [
     {
       title: "Books",
@@ -51,7 +60,7 @@ pub fn build_dashboard(
       lines: town.tasks.map(task => "\{task.id}: \{task.status.to_string()}"),
     },
   ]
-  { title: town.config.name, alerts, town_map, sections }
+  { title: town.config.name, alerts, scene_layout, town_map, sections }
 }
 
 ///|
@@ -62,8 +71,18 @@ pub fn render_dashboard(model : DashboardModel) -> String {
     builder.write_string("! [\{alert.level}] \{alert.text}\n")
   }
   builder.write_string("\n## Town Map\n")
+  builder.write_string(
+    "- scene: \{model.scene_layout.width}x\{model.scene_layout.height} / \{model.scene_layout.background.path}\n",
+  )
   for place in model.town_map {
     builder.write_string("- \{place.title}: \{place.subtitle}\n")
+    builder.write_string(
+      "  frame: \{place.x},\{place.y} \{place.width}x\{place.height} / kind=\{place.kind.to_string()}\n",
+    )
+    if !place.asset_paths.is_empty() {
+      let assets_line = join_with_comma(place.asset_paths)
+      builder.write_string("  assets: \{assets_line}\n")
+    }
     for line in place.lines {
       builder.write_string("  \{line}\n")
     }
@@ -79,29 +98,59 @@ pub fn render_dashboard(model : DashboardModel) -> String {
 
 ///|
 fn build_town_map(
+  layout : TownSceneLayout,
   town : @core.TownState,
   report : @health.HealthReport,
 ) -> Array[TownMapPlace] {
   let places : Array[TownMapPlace] = []
-  places.push(build_city_hall(report))
+  places.push(build_gate(layout, town))
+  places.push(build_city_hall(layout, report))
   for book in town.books {
-    places.push(build_book_house(town, book))
+    places.push(build_book_house(layout, town, book))
   }
-  places.push(build_worker_yard(town))
-  places.push(build_anomaly_corner(report))
+  places.push(build_worker_yard(layout, town))
+  places.push(build_anomaly_corner(layout, report))
   places
 }
 
 ///|
-fn build_city_hall(report : @health.HealthReport) -> TownMapPlace {
+fn build_gate(layout : TownSceneLayout, town : @core.TownState) -> TownMapPlace {
+  let area = require_area(layout, "gate")
+  {
+    key: area.key,
+    title: area.title,
+    kind: area.kind,
+    subtitle: "Entry marker for the current town scene",
+    x: area.x,
+    y: area.y,
+    width: area.width,
+    height: area.height,
+    asset_paths: resolve_asset_paths(layout, area.asset_keys),
+    lines: ["town: \{town.config.name}", "books online: \{town.books.length()}"],
+  }
+}
+
+///|
+fn build_city_hall(
+  layout : TownSceneLayout,
+  report : @health.HealthReport,
+) -> TownMapPlace {
+  let area = require_area(layout, "city-hall")
   let health_line = if report.anomalies.is_empty() {
     "status: calm routes and clean patrol"
   } else {
     "status: \{report.anomalies.length()} anomaly signals on the board"
   }
   {
-    title: "City Hall",
+    key: area.key,
+    title: area.title,
+    kind: area.kind,
     subtitle: "Mayor claw runs strategic routing, patrol, and keeper handoffs",
+    x: area.x,
+    y: area.y,
+    width: area.width,
+    height: area.height,
+    asset_paths: resolve_asset_paths(layout, area.asset_keys),
     lines: [
       "role: mayor / planner-only / limited tools", "memory: town-global strategic scope",
       health_line,
@@ -111,14 +160,23 @@ fn build_city_hall(report : @health.HealthReport) -> TownMapPlace {
 
 ///|
 fn build_book_house(
+  layout : TownSceneLayout,
   town : @core.TownState,
   book : @core.BookRef,
 ) -> TownMapPlace {
+  let area = require_area(layout, book_area_key(book.id))
   let worker_count = count_book_workers(town, book.id)
   let task_count = count_book_tasks(town, book.id)
   {
-    title: "\{book.name}",
+    key: area.key,
+    title: book.name,
+    kind: area.kind,
     subtitle: "keeper-planned domain house at \{book.workspace_root}",
+    x: area.x,
+    y: area.y,
+    width: area.width,
+    height: area.height,
+    asset_paths: resolve_asset_paths(layout, area.asset_keys),
     lines: [
       "memory: \{book.memory_scope.to_string()}",
       "workers: \{worker_count}",
@@ -129,7 +187,11 @@ fn build_book_house(
 }
 
 ///|
-fn build_worker_yard(town : @core.TownState) -> TownMapPlace {
+fn build_worker_yard(
+  layout : TownSceneLayout,
+  town : @core.TownState,
+) -> TownMapPlace {
+  let area = require_area(layout, "worker-yard")
   let lines : Array[String] = []
   for worker in town.workers {
     lines.push(
@@ -137,14 +199,25 @@ fn build_worker_yard(town : @core.TownState) -> TownMapPlace {
     )
   }
   {
-    title: "Worker Yard",
+    key: area.key,
+    title: area.title,
+    kind: area.kind,
     subtitle: "execution claws wait here before keeper-directed work",
+    x: area.x,
+    y: area.y,
+    width: area.width,
+    height: area.height,
+    asset_paths: resolve_asset_paths(layout, area.asset_keys),
     lines,
   }
 }
 
 ///|
-fn build_anomaly_corner(report : @health.HealthReport) -> TownMapPlace {
+fn build_anomaly_corner(
+  layout : TownSceneLayout,
+  report : @health.HealthReport,
+) -> TownMapPlace {
+  let area = require_area(layout, "anomaly-corner")
   let lines : Array[String] = []
   if report.anomalies.is_empty() {
     lines.push("quiet: no worker alarms in the town")
@@ -154,10 +227,66 @@ fn build_anomaly_corner(report : @health.HealthReport) -> TownMapPlace {
     }
   }
   {
-    title: "Anomaly Corner",
+    key: area.key,
+    title: area.title,
+    kind: area.kind,
     subtitle: "visible trouble signals and recovery prompts",
+    x: area.x,
+    y: area.y,
+    width: area.width,
+    height: area.height,
+    asset_paths: resolve_asset_paths(layout, area.asset_keys),
     lines,
   }
+}
+
+///|
+fn book_area_key(book_id : String) -> String {
+  match book_id {
+    "coding" => "book-coding"
+    "finance" => "book-finance"
+    _ => "worker-yard"
+  }
+}
+
+///|
+fn require_area(layout : TownSceneLayout, key : String) -> SceneArea {
+  for area in layout.areas {
+    if area.key == key {
+      return area
+    }
+  }
+  panic()
+}
+
+///|
+fn resolve_asset_paths(
+  layout : TownSceneLayout,
+  asset_keys : Array[String],
+) -> Array[String] {
+  let paths : Array[String] = []
+  for asset_key in asset_keys {
+    for asset in layout.assets {
+      if asset.key == asset_key {
+        paths.push(asset.path)
+      }
+    }
+  }
+  paths
+}
+
+///|
+fn join_with_comma(parts : Array[String]) -> String {
+  let builder = StringBuilder::new()
+  let mut index = 0
+  for part in parts {
+    if index > 0 {
+      builder.write_string(", ")
+    }
+    builder.write_string(part)
+    index += 1
+  }
+  builder.to_string()
 }
 
 ///|
