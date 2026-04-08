@@ -141,3 +141,20 @@ That means the current pipeline is:
 ```text
 town state -> dashboard model -> scene render model -> HTML scene payload
 ```
+
+## Rabbita Frontend
+
+`moontown` now also has a dedicated Rabbita browser frontend at
+`ui/rabbita-town/`.
+
+That package:
+
+- depends on `username/moontown/core`, `health`, and `ui`
+- renders the town scene through Rabbita
+- includes `index.html`, `bootstrap.js`, and `styles.css`
+- can be bundled with Vite via `./scripts/build-rabbita-ui.sh`
+
+The layering stays clean:
+
+- root module owns town state and renderer-agnostic scene contracts
+- `ui/rabbita-town` is one browser implementation on top

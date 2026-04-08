@@ -1,0 +1,7 @@
+import {
+  "moonbit-community/rabbita",
+  "moonbit-community/rabbita/html",
+  "username/moontown/core",
+  "username/moontown/health",
+  "username/moontown/ui",
+}

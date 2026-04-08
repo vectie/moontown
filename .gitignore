@@ -3,3 +3,5 @@ _build/
 .mooncakes/
 .moonagent/
 .moontown/
+ui/rabbita-town/dist/
+ui/rabbita-town/node_modules/
