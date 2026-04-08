@@ -5,3 +5,7 @@ import {
   "username/moontown/health",
   "username/moontown/ui",
 }
+
+options(
+  "is-main": true,
+)

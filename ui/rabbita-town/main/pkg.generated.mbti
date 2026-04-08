@@ -2,7 +2,6 @@
 package "username/moontown-rabbita/main"
 
 // Values
-pub fn mount_app(target? : String) -> Unit
 
 // Errors
 
