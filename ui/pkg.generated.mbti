@@ -24,6 +24,7 @@ pub impl Show for AlertBanner
 pub struct DashboardModel {
   title : String
   alerts : Array[AlertBanner]
+  town_map : Array[TownMapPlace]
   sections : Array[DashboardSection]
 }
 pub impl Eq for DashboardModel
@@ -35,6 +36,14 @@ pub struct DashboardSection {
 }
 pub impl Eq for DashboardSection
 pub impl Show for DashboardSection
+
+pub struct TownMapPlace {
+  title : String
+  subtitle : String
+  lines : Array[String]
+}
+pub impl Eq for TownMapPlace
+pub impl Show for TownMapPlace
 
 // Type aliases
 
