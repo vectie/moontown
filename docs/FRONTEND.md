@@ -56,6 +56,7 @@ Implemented:
 
 - periodic ticks
 - pause/resume/step controls
+- packet/proposal/run lifecycle visibility
 - strategy modes
   - balanced
   - throughput

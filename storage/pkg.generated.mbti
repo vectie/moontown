@@ -1,9 +1,9 @@
 // Generated using `moon info`, DON'T EDIT IT
-package "username/moontown/storage"
+package "vectie/moontown/storage"
 
 import {
   "moonbitlang/core/json",
-  "username/moontown/core",
+  "vectie/moontown/core",
 }
 
 // Values

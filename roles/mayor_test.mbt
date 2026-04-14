@@ -18,7 +18,7 @@ test "mayor dispatch delegates to town routing logic" {
   let packet = mayor.decide_dispatch(state, state.tasks[0])
   assert_true(
     packet.decision is Assigned(plan) &&
-    plan.worker_id == "claw-harness" &&
+    plan.worker_id == "claw-review" &&
     packet.output_contract == "mayor.dispatch.packet.v1",
   )
 }

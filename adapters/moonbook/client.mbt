@@ -167,102 +167,361 @@ pub async fn load_or_create_provider(
 }
 
 ///|
-pub struct BookPlanRequest {
-  book_id : String
-  goal_id : String
-  title : String
-  prompt : String
-} derive(Show, Eq)
-
-///|
-pub struct BookTaskDraft {
+pub struct BookTask {
   id : String
   title : String
+  kind : String
   prompt : String
+  priority : Int
+  requires_review : Bool
+  target_pages : Array[String]
   required_role : @core.WorkerRole?
-} derive(Show, Eq)
+} derive(Show, Eq, ToJson, FromJson)
 
 ///|
-pub struct BookPlanResponse {
-  task_drafts : Array[BookTaskDraft]
+pub struct BookTaskBatch {
+  goal_id : String
+  goal : String
   summary : String
-  warnings : Array[String]
-} derive(Show, Eq)
+  tasks : Array[BookTask]
+} derive(Show, Eq, ToJson, FromJson)
 
 ///|
-pub struct BookHydrationRequest {
+pub struct BookGoalAcceptance {
+  goal_id : String
+  accepted : Bool
+  reason : String
+  task_count : Int
+  summary : String
+} derive(Show, Eq, ToJson, FromJson)
+
+///|
+pub struct WorkerContextBundle {
   book_id : String
-  task_id : String
-} derive(Show, Eq)
-
-///|
-pub struct BookHydrationResponse {
   workspace_root : String
-  memory_scope : @core.MemoryScope
-  context_summary : String
-  skills : Array[String]
-} derive(Show, Eq)
-
-///|
-pub struct BookPersistRequest {
-  book_id : String
   task_id : String
-  result_summary : String
-  memory_candidates : Array[String]
-} derive(Show, Eq)
+  prompt : String
+  policy : Array[String]
+  routines : Array[String]
+  skill_paths : Array[String]
+  context_pages : Array[String]
+  active_memory : Array[String]
+  user_memory : Array[String]
+  working_memory : Array[String]
+  memory_summary : String
+  output_contract : Array[String]
+} derive(Show, Eq, ToJson, FromJson)
 
 ///|
-pub struct BookHealthResponse {
-  book_id : String
-  status : String
+pub struct MemoryCandidate {
+  kind : String
+  title : String
   detail : String
-} derive(Show, Eq)
+  durable : Bool
+  target_page : String?
+} derive(Show, Eq, ToJson, FromJson)
 
 ///|
-pub fn stub_plan(req : BookPlanRequest) -> BookPlanResponse {
+pub struct BookResult {
+  task_id : String
+  summary : String
+  artifacts : Array[String]
+  memory_candidates : Array[MemoryCandidate]
+  requires_review : Bool
+  notify_town : Bool
+} derive(Show, Eq, ToJson, FromJson)
+
+///|
+pub struct PersistResultOutcome {
+  log_path : String
+  updated_pages : Array[String]
+  review_queued : Bool
+  notify_town : Bool
+  evidence_id : String
+} derive(Show, Eq, ToJson, FromJson)
+
+///|
+pub struct BookStateSummary {
+  book_id : String
+  root : String
+  page_count : Int
+  source_count : Int
+  entity_count : Int
+  concept_count : Int
+  pending_review_count : Int
+  keeper_memory_count : Int
+  keeper_working_count : Int
+  evidence_count : Int
+  summary : String
+} derive(Show, Eq, ToJson, FromJson)
+
+///|
+pub struct BookHealthReport {
+  level : String
+  summary : String
+  pending_review_count : Int
+  low_confidence_claim_count : Int
+  maintenance_entry_count : Int
+  keeper_working_count : Int
+  evidence_count : Int
+  issues : Array[String]
+} derive(Show, Eq, ToJson, FromJson)
+
+///|
+pub fn accept_goal(
+  entry : BookCatalogEntry,
+  goal : String,
+  goal_id? : String? = None,
+) -> BookGoalAcceptance {
+  let batch = produce_task_batch(entry, goal, goal_id~)
+  if batch.tasks.is_empty() {
+    {
+      goal_id: batch.goal_id,
+      accepted: false,
+      reason: "no book-local tasks produced",
+      task_count: 0,
+      summary: batch.summary,
+    }
+  } else {
+    {
+      goal_id: batch.goal_id,
+      accepted: true,
+      reason: "goal accepted into keeper packet planning",
+      task_count: batch.tasks.length(),
+      summary: batch.summary,
+    }
+  }
+}
+
+///|
+pub fn produce_task_batch(
+  entry : BookCatalogEntry,
+  goal : String,
+  goal_id? : String? = None,
+) -> BookTaskBatch {
+  let normalized_goal_id = goal_id.unwrap_or("goal-\{slugify_text(goal)}")
+  let goal_lower = goal.to_lower()
+  let tasks : Array[BookTask] = []
+  if goal_lower.contains("review") || goal_lower.contains("approve") {
+    tasks.push({
+      id: "\{normalized_goal_id}-review",
+      title: "Review pending book updates",
+      kind: "review",
+      prompt: "Review pending changes for the goal inside \{entry.name}: \{goal}",
+      priority: 100,
+      requires_review: false,
+      target_pages: ["wiki/reviews/pending.md", "wiki/reviews/approved.md"],
+      required_role: Some(@core.WorkerRole::Reviewer),
+    })
+  }
+  if goal_lower.contains("plan") ||
+    goal_lower.contains("next") ||
+    goal_lower.contains("roadmap") {
+    tasks.push({
+      id: "\{normalized_goal_id}-planning",
+      title: "Refresh local planning surfaces",
+      kind: "planning",
+      prompt: "Plan the next book-local revisions for the goal inside \{entry.name}: \{goal}",
+      priority: 95,
+      requires_review: true,
+      target_pages: [
+        "wiki/synthesis/maintenance-plan.md", "wiki/synthesis/map.md",
+      ],
+      required_role: Some(@core.WorkerRole::Planner),
+    })
+  }
+  tasks.push({
+    id: "\{normalized_goal_id}-analysis",
+    title: "Produce domain-local task result",
+    kind: "analysis",
+    prompt: "Use the durable wiki and keeper memory in \{entry.name} without leaking to other books: \{goal}",
+    priority: 85,
+    requires_review: true,
+    target_pages: ["wiki/index.md", "wiki/log.md", "keeper/INSIGHTS.md"],
+    required_role: Some(default_role_for_book(entry)),
+  })
+  if goal_lower.contains("source") ||
+    goal_lower.contains("ingest") ||
+    goal_lower.contains("memory") {
+    tasks.push({
+      id: "\{normalized_goal_id}-ingest",
+      title: "Prepare keeper ingest follow-up",
+      kind: "ingest",
+      prompt: "Inspect source and synthesis pages to prepare keeper ingest follow-up for: \{goal}",
+      priority: 72,
+      requires_review: true,
+      target_pages: ["raw/", "wiki/sources/", "wiki/synthesis/overview.md"],
+      required_role: Some(@core.WorkerRole::Harness),
+    })
+  }
   {
-    task_drafts: [
-      {
-        id: "\{req.goal_id}-draft",
-        title: req.title,
-        prompt: req.prompt,
-        required_role: Some(@core.WorkerRole::Harness),
-      },
+    goal_id: normalized_goal_id,
+    goal,
+    summary: "book=\{entry.id} workspace=\{entry.workspace_root} tasks=\{tasks.length()} memory=\{entry.memory_scope.to_string()}",
+    tasks,
+  }
+}
+
+///|
+pub fn hydrate_worker_context(
+  entry : BookCatalogEntry,
+  task : BookTask,
+) -> WorkerContextBundle {
+  let context_pages = task.target_pages.map(path => normalize_target_page(path))
+  let skill_paths = entry.skills.map(skill => "skills/\{skill}/SKILL.md")
+  {
+    book_id: entry.id,
+    workspace_root: entry.workspace_root,
+    task_id: task.id,
+    prompt: task.prompt,
+    policy: [
+      "Respect \{entry.name} memory boundaries.",
+      "Do not leak context across books.",
+      "Persist durable knowledge only through keeper review.",
     ],
-    summary: "moonbook plan stub for \{req.book_id}",
-    warnings: [],
+    routines: [
+      "hydrate wiki state", "produce keeper packet output", "stage review-safe results",
+    ],
+    skill_paths,
+    context_pages,
+    active_memory: ["\{entry.name} active memory", "recent keeper conclusions"],
+    user_memory: [
+      "user preference: keep domains isolated", "town preference: packet-first handoff",
+    ],
+    working_memory: [
+      "task kind: \{task.kind}",
+      "priority: \{task.priority.to_string()}",
+    ],
+    memory_summary: "\{entry.name} keeper memory for \{task.title}",
+    output_contract: ["keeper.plan.packet.v1", "book.result.v1"],
   }
 }
 
 ///|
-pub fn stub_hydrate(req : BookHydrationRequest) -> BookHydrationResponse {
-  let catalog = default_catalog()
-  match find_catalog_entry(catalog, req.book_id) {
-    Some(entry) =>
-      {
-        workspace_root: entry.workspace_root,
-        memory_scope: entry.memory_scope,
-        context_summary: "starter context for \{req.task_id}",
-        skills: entry.skills,
-      }
-    None =>
-      {
-        workspace_root: "/books/\{req.book_id}",
-        memory_scope: @core.MemoryScope::BookPrivate,
-        context_summary: "starter context for \{req.task_id}",
-        skills: ["analysis", "memory", "review"],
-      }
+pub fn persist_result(
+  entry : BookCatalogEntry,
+  result : BookResult,
+) -> PersistResultOutcome {
+  {
+    log_path: "\{entry.workspace_root}/keeper/logs/\{result.task_id}.md",
+    updated_pages: collect_updated_pages(result.memory_candidates),
+    review_queued: result.requires_review,
+    notify_town: result.notify_town,
+    evidence_id: "evidence-\{entry.id}-\{result.task_id}",
   }
 }
 
 ///|
-pub fn stub_persist(req : BookPersistRequest) -> String {
-  "persisted \{req.task_id} into \{req.book_id} with \{req.memory_candidates.length()} candidates"
+pub fn summarize_state(entry : BookCatalogEntry) -> BookStateSummary {
+  let base = if entry.id == "finance" { 12 } else { 18 }
+  {
+    book_id: entry.id,
+    root: entry.workspace_root,
+    page_count: base + entry.tags.length() * 3,
+    source_count: base / 2,
+    entity_count: base,
+    concept_count: base - 4,
+    pending_review_count: if entry.id == "finance" {
+      1
+    } else {
+      2
+    },
+    keeper_memory_count: entry.skills.length() + 2,
+    keeper_working_count: entry.tags.length() + 1,
+    evidence_count: base - 6,
+    summary: "\{entry.name} maintains wiki, keeper memory, and review queues under \{entry.workspace_root}",
+  }
 }
 
 ///|
-pub fn stub_health(book_id : String) -> BookHealthResponse {
-  { book_id, status: "healthy", detail: "moonbook adapter stub" }
+pub fn report_health(entry : BookCatalogEntry) -> BookHealthReport {
+  let pending = if entry.id == "finance" { 1 } else { 2 }
+  let low_confidence = if entry.memory_scope == @core.MemoryScope::TaskEphemeral {
+    0
+  } else {
+    2
+  }
+  let issues : Array[String] = []
+  if pending > 1 {
+    issues.push("review queue needs keeper attention")
+  }
+  if low_confidence > 0 {
+    issues.push("low-confidence claims are waiting for review")
+  }
+  {
+    level: if issues.is_empty() {
+      "healthy"
+    } else {
+      "degraded"
+    },
+    summary: "\{entry.name} keeper health snapshot",
+    pending_review_count: pending,
+    low_confidence_claim_count: low_confidence,
+    maintenance_entry_count: entry.tags.length() + 2,
+    keeper_working_count: entry.skills.length() + 1,
+    evidence_count: entry.skills.length() + 3,
+    issues,
+  }
+}
+
+///|
+fn default_role_for_book(entry : BookCatalogEntry) -> @core.WorkerRole {
+  if entry.id == "finance" {
+    @core.WorkerRole::MemoryKeeper
+  } else {
+    @core.WorkerRole::Harness
+  }
+}
+
+///|
+fn normalize_target_page(path : String) -> String {
+  if path.contains("/") {
+    path
+  } else {
+    "wiki/\{path}"
+  }
+}
+
+///|
+fn collect_updated_pages(candidates : Array[MemoryCandidate]) -> Array[String] {
+  let pages : Array[String] = []
+  for candidate in candidates {
+    match candidate.target_page {
+      Some(page) => if !pages.contains(page) { pages.push(page) }
+      None => ()
+    }
+  }
+  if pages.is_empty() {
+    ["wiki/log.md", "keeper/INSIGHTS.md"]
+  } else {
+    pages
+  }
+}
+
+///|
+fn slugify_text(text : String) -> String {
+  let builder = StringBuilder::new()
+  let mut pending_dash = false
+  for char in text.to_lower() {
+    let code = char.to_int()
+    let is_ascii_lower = code >= 'a'.to_int() && code <= 'z'.to_int()
+    let is_ascii_digit = code >= '0'.to_int() && code <= '9'.to_int()
+    if is_ascii_lower || is_ascii_digit {
+      if pending_dash && builder.to_string() != "" {
+        builder.write_char('-')
+      }
+      pending_dash = false
+      builder.write_char(char)
+    } else if builder.to_string() != "" {
+      pending_dash = true
+    }
+  }
+  let slug = builder.to_string()
+  if slug == "" {
+    "goal"
+  } else {
+    slug
+  }
 }
 
 ///|

@@ -8,6 +8,7 @@ It covers:
 - the text dashboard
 - the persisted town state
 - the moonbook catalog
+- the keeper packet and proposal/run lifecycle
 - the scene assets
 - the Rabbita frontend
 - the current limits of the repo
@@ -18,6 +19,7 @@ Right now, `moontown` is usable as:
 
 - a MoonBit town model
 - a persisted demo bootstrap
+- a packet-first keeper/proposal/run control-plane model
 - a scene-based dashboard
 - a Rabbita simulation frontend
 - a starter asset pipeline
@@ -44,6 +46,7 @@ What you get:
 - a text dashboard
 - current town map summary
 - books, workers, tasks
+- executions with packet / proposal / run ids
 - mayor role summary
 - scheduler tick summary
 - snapshot summary
@@ -150,6 +153,7 @@ Current Mayor capabilities:
 - decide dispatch
 - run patrol
 - produce keeper handoff packets
+- prepare keeper proposal packets
 
 Current embedded moonclaw runtime metadata:
 
@@ -160,6 +164,7 @@ Important current functions:
 - `Mayor.decide_dispatch(...)`
 - `Mayor.patrol(...)`
 - `Mayor.handoff_to_keeper(...)`
+- `Mayor.prepare_keeper_packet(...)`
 
 This is the right entry if you want to extend strategic orchestration.
 
@@ -219,7 +224,35 @@ Current starter assets:
 These are original starter examples. You can replace them with richer art while
 keeping the same scene keys.
 
-## 8. Run The Rabbita Frontend
+## 8. Use The Keeper Packet Lifecycle
+
+The current town model now tracks:
+
+- keeper packet id
+- packet path
+- proposal id
+- run id
+- execution status
+
+These lifecycle records live in:
+
+- `TownState.executions`
+- `TaskExecutionRecord`
+
+The relevant code is in:
+
+- [core/types.mbt](/Users/kq/Workspace/moontown/core/types.mbt)
+- [adapters/moonbook/client.mbt](/Users/kq/Workspace/moontown/adapters/moonbook/client.mbt)
+- [adapters/moonclaw/client.mbt](/Users/kq/Workspace/moontown/adapters/moonclaw/client.mbt)
+- [roles/mayor.mbt](/Users/kq/Workspace/moontown/roles/mayor.mbt)
+
+The current lifecycle is:
+
+```text
+book task -> keeper packet -> imported proposal -> confirmed run -> persistence -> review
+```
+
+## 9. Run The Rabbita Frontend
 
 The browser frontend lives in:
 
@@ -247,7 +280,7 @@ Important frontend files:
 - [ui/rabbita-town/bootstrap.js](/Users/kq/Workspace/moontown/ui/rabbita-town/bootstrap.js)
 - [ui/rabbita-town/vite.config.js](/Users/kq/Workspace/moontown/ui/rabbita-town/vite.config.js)
 
-## 9. Use The Live Simulation Controls
+## 10. Use The Live Simulation Controls
 
 The current Rabbita frontend is a live simulation dashboard.
 
@@ -283,7 +316,7 @@ Current visual behaviors:
 
 This is currently local simulation state, not backend-synced town state.
 
-## 10. Validate Changes
+## 11. Validate Changes
 
 For normal repo validation:
 
@@ -302,7 +335,7 @@ For UI changes, also run:
 
 That is the expected workflow for this repo now.
 
-## 11. Know The Current Boundaries
+## 12. Know The Current Boundaries
 
 There are three important “real vs stubbed” boundaries.
 
@@ -310,6 +343,8 @@ Real now:
 
 - persisted book catalog
 - persisted town snapshot
+- keeper packet generation
+- proposal/run lifecycle records
 - strategic mayor role model
 - dispatch and health model
 - scene dashboard model
@@ -317,9 +352,7 @@ Real now:
 
 Stubbed now:
 
-- moonbook planning
-- moonbook result persistence
-- moonclaw execution transport
+- real process execution against external moonbook/moonclaw CLIs
 - experiment runtime loop
 - 24/7 daemon supervision
 
@@ -328,7 +361,7 @@ So the correct expectation is:
 - use `moontown` today as a control-plane and frontend prototype
 - do not assume it already runs a real multi-agent backend
 
-## 12. Best Entry Points By Goal
+## 13. Best Entry Points By Goal
 
 If you want to:
 

@@ -55,6 +55,18 @@ pub(all) enum IsolationMode {
 } derive(Show, Eq, ToJson, FromJson)
 
 ///|
+pub(all) enum TaskExecutionStatus {
+  PacketReady
+  ProposalImported
+  RunConfirmed
+  Running
+  AwaitingPersistence
+  ReviewQueued
+  Completed
+  Failed
+} derive(Show, Eq, ToJson, FromJson)
+
+///|
 pub struct TownConfig {
   id : String
   name : String
@@ -172,12 +184,67 @@ pub fn AssignmentPlan::new(
 }
 
 ///|
+pub struct TaskExecutionRecord {
+  task_id : String
+  book_id : String
+  packet_id : String
+  packet_path : String
+  proposal_id : String?
+  run_id : String?
+  status : TaskExecutionStatus
+  summary : String
+  output_contract : String
+  context_pages : Array[String]
+  skill_paths : Array[String]
+  last_command : String?
+  requires_review : Bool
+  notify_town : Bool
+} derive(Show, Eq, ToJson, FromJson)
+
+///|
+pub fn TaskExecutionRecord::new(
+  task_id~ : String,
+  book_id~ : String,
+  packet_id~ : String,
+  packet_path~ : String,
+  proposal_id? : String? = None,
+  run_id? : String? = None,
+  status~ : TaskExecutionStatus,
+  summary~ : String,
+  output_contract~ : String,
+  context_pages? : Array[String] = [],
+  skill_paths? : Array[String] = [],
+  last_command? : String? = None,
+  requires_review? : Bool = false,
+  notify_town? : Bool = false,
+) -> TaskExecutionRecord {
+  TaskExecutionRecord::{
+    task_id,
+    book_id,
+    packet_id,
+    packet_path,
+    proposal_id,
+    run_id,
+    status,
+    summary,
+    output_contract,
+    context_pages,
+    skill_paths,
+    last_command,
+    requires_review,
+    notify_town,
+  }
+}
+
+///|
 pub struct TownEvent {
   id : String
   kind : String
   detail : String
   related_task_id : String?
   related_book_id : String?
+  related_proposal_id : String?
+  related_run_id : String?
 } derive(Show, Eq, ToJson, FromJson)
 
 ///|
@@ -187,8 +254,18 @@ pub fn TownEvent::new(
   detail~ : String,
   related_task_id? : String? = None,
   related_book_id? : String? = None,
+  related_proposal_id? : String? = None,
+  related_run_id? : String? = None,
 ) -> TownEvent {
-  TownEvent::{ id, kind, detail, related_task_id, related_book_id }
+  TownEvent::{
+    id,
+    kind,
+    detail,
+    related_task_id,
+    related_book_id,
+    related_proposal_id,
+    related_run_id,
+  }
 }
 
 ///|
@@ -197,12 +274,13 @@ pub struct TownState {
   books : Array[BookRef]
   workers : Array[WorkerRef]
   tasks : Array[TownTask]
+  executions : Array[TaskExecutionRecord]
   events : Array[TownEvent]
 } derive(Show, Eq, ToJson, FromJson)
 
 ///|
 pub fn empty_state(config : TownConfig) -> TownState {
-  { config, books: [], workers: [], tasks: [], events: [] }
+  { config, books: [], workers: [], tasks: [], executions: [], events: [] }
 }
 
 ///|
@@ -221,8 +299,29 @@ pub fn TownState::enqueue_task(self : TownState, task : TownTask) -> Unit {
 }
 
 ///|
+pub fn TownState::register_execution(
+  self : TownState,
+  execution : TaskExecutionRecord,
+) -> Unit {
+  self.executions.push(execution)
+}
+
+///|
 pub fn TownState::record_event(self : TownState, event : TownEvent) -> Unit {
   self.events.push(event)
+}
+
+///|
+pub fn find_execution(
+  town : TownState,
+  task_id : String,
+) -> TaskExecutionRecord? {
+  for execution in town.executions {
+    if execution.task_id == task_id {
+      return Some(execution)
+    }
+  }
+  None
 }
 
 ///|

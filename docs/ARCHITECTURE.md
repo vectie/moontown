@@ -90,6 +90,7 @@ Town code should call:
 
 - `Mayor.decide_dispatch(...)`
 - `Mayor.patrol(...)`
+- `Mayor.prepare_keeper_packet(...)`
 - `Mayor.handoff_to_keeper(...)`
 
 ### Keeper
@@ -103,8 +104,9 @@ Current shape:
 - memory scope: domain
 - tools limited to book-local control surfaces
 
-In the current repo, `moontown` only models the keeper handoff and runtime
-metadata. The actual keeper implementation belongs on the `moonbook` side.
+In the current repo, `moontown` now prepares real keeper proposal packets using
+book-harness-shaped context from the moonbook adapter. The actual keeper
+implementation still belongs on the `moonbook` side.
 
 ### Worker
 
@@ -128,7 +130,7 @@ The clean ownership rule is:
 
 Examples:
 
-- `TownState`, `AssignmentPlan`, `TownEvent`
+- `TownState`, `AssignmentPlan`, `TownEvent`, `TaskExecutionRecord`
   - `moontown`
 - workspace root, memory records, domain summaries
   - `moonbook`
@@ -143,6 +145,7 @@ Examples:
 moonbook catalog
   -> BookProvider
   -> seeded TownState
+  -> task execution records
   -> persisted TownSnapshot
   -> dashboard/render/frontend
 ```
@@ -152,8 +155,9 @@ moonbook catalog
 ```text
 TownTask
   -> Mayor.decide_dispatch(...)
-  -> dispatch.route_task(...)
-  -> AssignmentPlan | Escalation | Deferral
+  -> Mayor.prepare_keeper_packet(...)
+  -> external proposal packet
+  -> proposal/run lifecycle record
 ```
 
 ### Patrol
@@ -187,13 +191,15 @@ Real now:
 - snapshot persistence
 - town model
 - routing model
+- book-harness-shaped moonbook adapter
+- external proposal packet adapter
+- proposal/run lifecycle tracking
 - strategic mayor role adapter
 - dashboard and browser UI model
 
 Stubbed now:
 
-- moonbook plan/hydrate/persist service logic
-- moonclaw execution transport
+- real process-level execution against the external repos
 - experiment runtime progression
 - 24/7 supervisor loop
 

@@ -1,16 +1,36 @@
 // Generated using `moon info`, DON'T EDIT IT
-package "username/moontown/adapters/moonclaw"
+package "vectie/moontown/adapters/moonclaw"
 
 import {
-  "username/moontown/core",
+  "moonbitlang/core/json",
+  "vectie/moontown/adapters/moonbook",
+  "vectie/moontown/core",
 }
 
 // Values
+pub fn build_import_command(String, moonclaw_root? : String, home? : String, cwd? : String, confirm? : Bool) -> String
+
+pub fn confirm_imported_run(ProposalImportReceipt) -> ProposalImportReceipt
+
+pub fn default_packet_directory() -> String
+
+pub fn import_packet(ExternalProposalPacket, String, moonclaw_root? : String, home? : String, cwd? : String, confirm? : Bool) -> ProposalImportReceipt
+
 pub fn keeper_runtime(@core.BookRef) -> EmbeddedMoonclawRuntime
+
+pub async fn load_packet_file(String) -> ExternalProposalPacket?
 
 pub fn mayor_runtime() -> EmbeddedMoonclawRuntime
 
 pub fn mayor_to_keeper_handoff(String, String, String, constraints? : Array[String]) -> EmbeddedRuntimeHandoff
+
+pub fn packet_file_path(String, String) -> String
+
+pub fn poll_run(String, String, @core.TaskExecutionStatus) -> ProposalPollResponse
+
+pub fn proposal_packet_from_bundle(@moonbook.WorkerContextBundle, String, String, String, packet_id? : String?, notes? : Array[String], tags? : Array[String]) -> ExternalProposalPacket
+
+pub async fn save_packet_file(String, ExternalProposalPacket) -> Unit
 
 pub fn stub_assign(AssignTaskRequest) -> String
 
@@ -107,6 +127,24 @@ pub enum EmbeddedToolAccess {
 pub impl Eq for EmbeddedToolAccess
 pub impl Show for EmbeddedToolAccess
 
+pub struct ExternalProposalPacket {
+  packet_id : String
+  title : String
+  summary : String
+  request_text : String
+  profile : String
+  output_contract : String
+  context_pages : Array[String]
+  skill_paths : Array[String]
+  notes : Array[String]
+  tags : Array[String]
+  metadata : Array[String]
+}
+pub impl Eq for ExternalProposalPacket
+pub impl Show for ExternalProposalPacket
+pub impl ToJson for ExternalProposalPacket
+pub impl @json.FromJson for ExternalProposalPacket
+
 pub struct PollWorkerResponse {
   worker_id : String
   status : @core.WorkerStatus
@@ -114,6 +152,34 @@ pub struct PollWorkerResponse {
 }
 pub impl Eq for PollWorkerResponse
 pub impl Show for PollWorkerResponse
+
+pub struct ProposalImportReceipt {
+  packet_id : String
+  packet_path : String
+  proposal_id : String
+  run_id : String?
+  status : @core.TaskExecutionStatus
+  command : String
+  summary : String
+}
+pub impl Eq for ProposalImportReceipt
+pub impl Show for ProposalImportReceipt
+pub impl ToJson for ProposalImportReceipt
+pub impl @json.FromJson for ProposalImportReceipt
+
+pub struct ProposalPollResponse {
+  task_id : String
+  run_id : String
+  status : @core.TaskExecutionStatus
+  summary : String
+  memory_candidates : Array[String]
+  requires_review : Bool
+  notify_town : Bool
+}
+pub impl Eq for ProposalPollResponse
+pub impl Show for ProposalPollResponse
+pub impl ToJson for ProposalPollResponse
+pub impl @json.FromJson for ProposalPollResponse
 
 pub struct SpawnWorkerRequest {
   worker : @core.WorkerRef

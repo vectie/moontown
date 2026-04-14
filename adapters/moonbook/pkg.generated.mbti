@@ -1,12 +1,14 @@
 // Generated using `moon info`, DON'T EDIT IT
-package "username/moontown/adapters/moonbook"
+package "vectie/moontown/adapters/moonbook"
 
 import {
   "moonbitlang/core/json",
-  "username/moontown/core",
+  "vectie/moontown/core",
 }
 
 // Values
+pub fn accept_goal(BookCatalogEntry, String, goal_id? : String?) -> BookGoalAcceptance
+
 pub fn catalog_to_book_refs(Array[BookCatalogEntry]) -> Array[@core.BookRef]
 
 pub fn default_catalog() -> Array[BookCatalogEntry]
@@ -15,21 +17,23 @@ pub fn default_catalog_path() -> String
 
 pub fn find_catalog_entry(Array[BookCatalogEntry], String) -> BookCatalogEntry?
 
+pub fn hydrate_worker_context(BookCatalogEntry, BookTask) -> WorkerContextBundle
+
 pub async fn load_catalog_file(String) -> Array[BookCatalogEntry]?
 
 pub async fn load_or_create_catalog(path? : String) -> Array[BookCatalogEntry]
 
 pub async fn load_or_create_provider(path? : String) -> MoonbookCatalogProvider
 
+pub fn persist_result(BookCatalogEntry, BookResult) -> PersistResultOutcome
+
+pub fn produce_task_batch(BookCatalogEntry, String, goal_id? : String?) -> BookTaskBatch
+
+pub fn report_health(BookCatalogEntry) -> BookHealthReport
+
 pub async fn save_catalog_file(String, Array[BookCatalogEntry]) -> Unit
 
-pub fn stub_health(String) -> BookHealthResponse
-
-pub fn stub_hydrate(BookHydrationRequest) -> BookHydrationResponse
-
-pub fn stub_persist(BookPersistRequest) -> String
-
-pub fn stub_plan(BookPlanRequest) -> BookPlanResponse
+pub fn summarize_state(BookCatalogEntry) -> BookStateSummary
 
 // Errors
 
@@ -50,64 +54,101 @@ pub impl Show for BookCatalogEntry
 pub impl ToJson for BookCatalogEntry
 pub impl @json.FromJson for BookCatalogEntry
 
-pub struct BookHealthResponse {
-  book_id : String
-  status : String
-  detail : String
-}
-pub impl Eq for BookHealthResponse
-pub impl Show for BookHealthResponse
-
-pub struct BookHydrationRequest {
-  book_id : String
-  task_id : String
-}
-pub impl Eq for BookHydrationRequest
-pub impl Show for BookHydrationRequest
-
-pub struct BookHydrationResponse {
-  workspace_root : String
-  memory_scope : @core.MemoryScope
-  context_summary : String
-  skills : Array[String]
-}
-pub impl Eq for BookHydrationResponse
-pub impl Show for BookHydrationResponse
-
-pub struct BookPersistRequest {
-  book_id : String
-  task_id : String
-  result_summary : String
-  memory_candidates : Array[String]
-}
-pub impl Eq for BookPersistRequest
-pub impl Show for BookPersistRequest
-
-pub struct BookPlanRequest {
-  book_id : String
+pub struct BookGoalAcceptance {
   goal_id : String
-  title : String
-  prompt : String
-}
-pub impl Eq for BookPlanRequest
-pub impl Show for BookPlanRequest
-
-pub struct BookPlanResponse {
-  task_drafts : Array[BookTaskDraft]
+  accepted : Bool
+  reason : String
+  task_count : Int
   summary : String
-  warnings : Array[String]
 }
-pub impl Eq for BookPlanResponse
-pub impl Show for BookPlanResponse
+pub impl Eq for BookGoalAcceptance
+pub impl Show for BookGoalAcceptance
+pub impl ToJson for BookGoalAcceptance
+pub impl @json.FromJson for BookGoalAcceptance
 
-pub struct BookTaskDraft {
+pub struct BookHealthReport {
+  level : String
+  summary : String
+  pending_review_count : Int
+  low_confidence_claim_count : Int
+  maintenance_entry_count : Int
+  keeper_working_count : Int
+  evidence_count : Int
+  issues : Array[String]
+}
+pub impl Eq for BookHealthReport
+pub impl Show for BookHealthReport
+pub impl ToJson for BookHealthReport
+pub impl @json.FromJson for BookHealthReport
+
+pub struct BookResult {
+  task_id : String
+  summary : String
+  artifacts : Array[String]
+  memory_candidates : Array[MemoryCandidate]
+  requires_review : Bool
+  notify_town : Bool
+}
+pub impl Eq for BookResult
+pub impl Show for BookResult
+pub impl ToJson for BookResult
+pub impl @json.FromJson for BookResult
+
+pub struct BookStateSummary {
+  book_id : String
+  root : String
+  page_count : Int
+  source_count : Int
+  entity_count : Int
+  concept_count : Int
+  pending_review_count : Int
+  keeper_memory_count : Int
+  keeper_working_count : Int
+  evidence_count : Int
+  summary : String
+}
+pub impl Eq for BookStateSummary
+pub impl Show for BookStateSummary
+pub impl ToJson for BookStateSummary
+pub impl @json.FromJson for BookStateSummary
+
+pub struct BookTask {
   id : String
   title : String
+  kind : String
   prompt : String
+  priority : Int
+  requires_review : Bool
+  target_pages : Array[String]
   required_role : @core.WorkerRole?
 }
-pub impl Eq for BookTaskDraft
-pub impl Show for BookTaskDraft
+pub impl Eq for BookTask
+pub impl Show for BookTask
+pub impl ToJson for BookTask
+pub impl @json.FromJson for BookTask
+
+pub struct BookTaskBatch {
+  goal_id : String
+  goal : String
+  summary : String
+  tasks : Array[BookTask]
+}
+pub impl Eq for BookTaskBatch
+pub impl Show for BookTaskBatch
+pub impl ToJson for BookTaskBatch
+pub impl @json.FromJson for BookTaskBatch
+
+pub struct MemoryCandidate {
+  kind : String
+  title : String
+  detail : String
+  durable : Bool
+  target_page : String?
+}
+pub impl Eq for MemoryCandidate
+pub impl Show for MemoryCandidate
+pub impl ToJson for MemoryCandidate
+pub impl @json.FromJson for MemoryCandidate
 
 pub struct MoonbookCatalogProvider {
   catalog : Array[BookCatalogEntry]
@@ -117,6 +158,38 @@ pub fn MoonbookCatalogProvider::new(Array[BookCatalogEntry]) -> Self
 pub impl Eq for MoonbookCatalogProvider
 pub impl Show for MoonbookCatalogProvider
 pub impl @core.BookProvider for MoonbookCatalogProvider
+
+pub struct PersistResultOutcome {
+  log_path : String
+  updated_pages : Array[String]
+  review_queued : Bool
+  notify_town : Bool
+  evidence_id : String
+}
+pub impl Eq for PersistResultOutcome
+pub impl Show for PersistResultOutcome
+pub impl ToJson for PersistResultOutcome
+pub impl @json.FromJson for PersistResultOutcome
+
+pub struct WorkerContextBundle {
+  book_id : String
+  workspace_root : String
+  task_id : String
+  prompt : String
+  policy : Array[String]
+  routines : Array[String]
+  skill_paths : Array[String]
+  context_pages : Array[String]
+  active_memory : Array[String]
+  user_memory : Array[String]
+  working_memory : Array[String]
+  memory_summary : String
+  output_contract : Array[String]
+}
+pub impl Eq for WorkerContextBundle
+pub impl Show for WorkerContextBundle
+pub impl ToJson for WorkerContextBundle
+pub impl @json.FromJson for WorkerContextBundle
 
 // Type aliases
 

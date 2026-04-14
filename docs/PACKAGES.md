@@ -8,7 +8,7 @@ This repo is organized as multiple MoonBit packages under one module.
 
 Module name:
 
-- `username/moontown`
+- `vectie/moontown`
 
 ## Root Package
 
@@ -42,6 +42,7 @@ Important public types:
 - `WorkerRef`
 - `TownTask`
 - `AssignmentPlan`
+- `TaskExecutionRecord`
 - `TownEvent`
 - `TownState`
 - `BookProvider`
@@ -117,6 +118,7 @@ Purpose:
 - dispatch packets
 - patrol packets
 - keeper handoff packets
+- keeper proposal packet preparation
 
 This package is where town code stops talking to raw agent runtime metadata and
 starts talking to a role-specific API.
@@ -129,7 +131,7 @@ Purpose:
 
 - persisted moonbook catalog
 - book provider implementation
-- future moonbook service boundary
+- book-harness request/result types
 
 Current persisted file:
 
@@ -139,12 +141,12 @@ Current real pieces:
 
 - catalog read/write
 - catalog-backed `BookProvider`
-
-Current stub pieces:
-
-- `stub_plan(...)`
-- `stub_hydrate(...)`
-- `stub_persist(...)`
+- `accept_goal(...)`
+- `produce_task_batch(...)`
+- `hydrate_worker_context(...)`
+- `persist_result(...)`
+- `summarize_state(...)`
+- `report_health(...)`
 
 ## Moonclaw Adapter
 
@@ -154,7 +156,8 @@ Purpose:
 
 - embedded runtime metadata
 - strategic/domain/execution role profiles
-- future task-execution boundary
+- external proposal packet boundary
+- proposal/run lifecycle receipts
 
 Current real pieces:
 
@@ -162,10 +165,10 @@ Current real pieces:
 - `keeper_runtime(...)`
 - `worker_runtime(...)`
 - `mayor_to_keeper_handoff(...)`
-
-Current stub pieces:
-
-- worker spawn/assign/poll/result transport helpers
+- `proposal_packet_from_bundle(...)`
+- `save_packet_file(...)`
+- `import_packet(...)`
+- `poll_run(...)`
 
 ## UI
 

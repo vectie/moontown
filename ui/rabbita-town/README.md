@@ -4,9 +4,9 @@ This package is the browser-facing Rabbita frontend for `moontown`.
 
 It consumes the renderer-agnostic scene contracts from the root module:
 
-- `username/moontown/ui/scene_layout`
-- `username/moontown/ui/dashboard`
-- `username/moontown/ui/scene_render`
+- `vectie/moontown/ui/scene_layout`
+- `vectie/moontown/ui/dashboard`
+- `vectie/moontown/ui/scene_render`
 
 The intent is to keep town orchestration and scene modeling in the main module
 while this package provides a browser shell that can be built for JS.
@@ -22,6 +22,7 @@ It currently includes:
 - strategy switching
 - scene-based selection and inspector state
 - moving worker avatars
+- packet/proposal/run lifecycle visibility
 - budget/energy/pressure/stability metrics
 - activity feed and anomaly surfacing
 

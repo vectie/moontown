@@ -59,6 +59,14 @@ pub fn build_dashboard(
       title: "Tasks",
       lines: town.tasks.map(task => "\{task.id}: \{task.status.to_string()}"),
     },
+    {
+      title: "Executions",
+      lines: town.executions.map(execution => {
+        let proposal = execution.proposal_id.unwrap_or("draft")
+        let run = execution.run_id.unwrap_or("not-started")
+        "\{execution.task_id}: \{execution.status.to_string()} / proposal=\{proposal} / run=\{run}"
+      }),
+    },
   ]
   { title: town.config.name, alerts, scene_layout, town_map, sections }
 }
@@ -104,7 +112,7 @@ fn build_town_map(
 ) -> Array[TownMapPlace] {
   let places : Array[TownMapPlace] = []
   places.push(build_gate(layout, town))
-  places.push(build_city_hall(layout, report))
+  places.push(build_city_hall(layout, town, report))
   for book in town.books {
     places.push(build_book_house(layout, town, book))
   }
@@ -133,6 +141,7 @@ fn build_gate(layout : TownSceneLayout, town : @core.TownState) -> TownMapPlace 
 ///|
 fn build_city_hall(
   layout : TownSceneLayout,
+  town : @core.TownState,
   report : @health.HealthReport,
 ) -> TownMapPlace {
   let area = require_area(layout, "city-hall")
@@ -152,8 +161,12 @@ fn build_city_hall(
     height: area.height,
     asset_paths: resolve_asset_paths(layout, area.asset_keys),
     lines: [
-      "role: mayor / planner-only / limited tools", "memory: town-global strategic scope",
+      "role: mayor / planner-only / limited tools",
+      "memory: town-global strategic scope",
       health_line,
+      "packets: \{count_execution_status(town, @core.TaskExecutionStatus::PacketReady)} ready",
+      "imports: \{count_execution_status(town, @core.TaskExecutionStatus::ProposalImported)} imported",
+      "runs: \{running_like_count(town)} active lifecycle records",
     ],
   }
 }
@@ -181,6 +194,7 @@ fn build_book_house(
       "memory: \{book.memory_scope.to_string()}",
       "workers: \{worker_count}",
       "tasks: \{task_count}",
+      "executions: \{count_book_executions(town, book.id)}",
       "purpose: \{book.purpose}",
     ],
   }
@@ -196,6 +210,12 @@ fn build_worker_yard(
   for worker in town.workers {
     lines.push(
       "\{worker.id} -> \{worker.book_id} / \{worker.role.to_string()} / \{worker.status.to_string()}",
+    )
+  }
+  for execution in town.executions {
+    let proposal = execution.proposal_id.unwrap_or("draft")
+    lines.push(
+      "packet \{execution.packet_id} / \{execution.status.to_string()} / proposal=\{proposal}",
     )
   }
   {
@@ -306,6 +326,46 @@ fn count_book_tasks(town : @core.TownState, book_id : String) -> Int {
   for task in town.tasks {
     if task.book_id == book_id {
       count += 1
+    }
+  }
+  count
+}
+
+///|
+fn count_book_executions(town : @core.TownState, book_id : String) -> Int {
+  let mut count = 0
+  for execution in town.executions {
+    if execution.book_id == book_id {
+      count += 1
+    }
+  }
+  count
+}
+
+///|
+fn count_execution_status(
+  town : @core.TownState,
+  status : @core.TaskExecutionStatus,
+) -> Int {
+  let mut count = 0
+  for execution in town.executions {
+    if execution.status == status {
+      count += 1
+    }
+  }
+  count
+}
+
+///|
+fn running_like_count(town : @core.TownState) -> Int {
+  let mut count = 0
+  for execution in town.executions {
+    match execution.status {
+      @core.TaskExecutionStatus::RunConfirmed
+      | @core.TaskExecutionStatus::Running
+      | @core.TaskExecutionStatus::AwaitingPersistence
+      | @core.TaskExecutionStatus::ReviewQueued => count += 1
+      _ => ()
     }
   }
   count

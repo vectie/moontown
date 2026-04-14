@@ -1,5 +1,5 @@
 // Generated using `moon info`, DON'T EDIT IT
-package "username/moontown/core"
+package "vectie/moontown/core"
 
 import {
   "moonbitlang/core/json",
@@ -7,6 +7,8 @@ import {
 
 // Values
 pub fn empty_state(TownConfig) -> TownState
+
+pub fn find_execution(TownState, String) -> TaskExecutionRecord?
 
 // Errors
 
@@ -67,6 +69,43 @@ pub impl Eq for StaticBookProvider
 pub impl Show for StaticBookProvider
 pub impl BookProvider for StaticBookProvider
 
+pub struct TaskExecutionRecord {
+  task_id : String
+  book_id : String
+  packet_id : String
+  packet_path : String
+  proposal_id : String?
+  run_id : String?
+  status : TaskExecutionStatus
+  summary : String
+  output_contract : String
+  context_pages : Array[String]
+  skill_paths : Array[String]
+  last_command : String?
+  requires_review : Bool
+  notify_town : Bool
+}
+pub fn TaskExecutionRecord::new(task_id~ : String, book_id~ : String, packet_id~ : String, packet_path~ : String, proposal_id? : String?, run_id? : String?, status~ : TaskExecutionStatus, summary~ : String, output_contract~ : String, context_pages? : Array[String], skill_paths? : Array[String], last_command? : String?, requires_review? : Bool, notify_town? : Bool) -> Self
+pub impl Eq for TaskExecutionRecord
+pub impl Show for TaskExecutionRecord
+pub impl ToJson for TaskExecutionRecord
+pub impl @json.FromJson for TaskExecutionRecord
+
+pub(all) enum TaskExecutionStatus {
+  PacketReady
+  ProposalImported
+  RunConfirmed
+  Running
+  AwaitingPersistence
+  ReviewQueued
+  Completed
+  Failed
+}
+pub impl Eq for TaskExecutionStatus
+pub impl Show for TaskExecutionStatus
+pub impl ToJson for TaskExecutionStatus
+pub impl @json.FromJson for TaskExecutionStatus
+
 pub struct TownConfig {
   id : String
   name : String
@@ -85,8 +124,10 @@ pub struct TownEvent {
   detail : String
   related_task_id : String?
   related_book_id : String?
+  related_proposal_id : String?
+  related_run_id : String?
 }
-pub fn TownEvent::new(id~ : String, kind~ : String, detail~ : String, related_task_id? : String?, related_book_id? : String?) -> Self
+pub fn TownEvent::new(id~ : String, kind~ : String, detail~ : String, related_task_id? : String?, related_book_id? : String?, related_proposal_id? : String?, related_run_id? : String?) -> Self
 pub impl Eq for TownEvent
 pub impl Show for TownEvent
 pub impl ToJson for TownEvent
@@ -97,11 +138,13 @@ pub struct TownState {
   books : Array[BookRef]
   workers : Array[WorkerRef]
   tasks : Array[TownTask]
+  executions : Array[TaskExecutionRecord]
   events : Array[TownEvent]
 }
 pub fn TownState::enqueue_task(Self, TownTask) -> Unit
 pub fn TownState::record_event(Self, TownEvent) -> Unit
 pub fn TownState::register_book(Self, BookRef) -> Unit
+pub fn TownState::register_execution(Self, TaskExecutionRecord) -> Unit
 pub fn TownState::register_worker(Self, WorkerRef) -> Unit
 pub impl Eq for TownState
 pub impl Show for TownState

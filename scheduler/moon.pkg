@@ -1,4 +1,4 @@
 import {
-  "username/moontown/core",
-  "username/moontown/health",
+  "vectie/moontown/core",
+  "vectie/moontown/health",
 }

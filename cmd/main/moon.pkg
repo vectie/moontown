@@ -1,6 +1,6 @@
 import {
   "moonbitlang/async",
-  "username/moontown",
+  "vectie/moontown",
 }
 
 options(

@@ -1,9 +1,9 @@
 // Generated using `moon info`, DON'T EDIT IT
-package "username/moontown/ui"
+package "vectie/moontown/ui"
 
 import {
-  "username/moontown/core",
-  "username/moontown/health",
+  "vectie/moontown/core",
+  "vectie/moontown/health",
 }
 
 // Values

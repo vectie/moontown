@@ -279,6 +279,9 @@ fn demo_state(model : Model) -> @core.TownState {
   for task in task_specs(model) {
     state.enqueue_task(task)
   }
+  for execution in execution_specs(model) {
+    state.register_execution(execution)
+  }
   state
 }
 
@@ -518,6 +521,92 @@ fn task_status_for(model : Model, offset : Int) -> @core.TownTaskStatus {
       6 => @core.TownTaskStatus::Pending
       _ => @core.TownTaskStatus::Running
     }
+  }
+}
+
+///|
+fn execution_status_for(
+  model : Model,
+  offset : Int,
+) -> @core.TaskExecutionStatus {
+  if model.stability < 26 && offset == 3 {
+    @core.TaskExecutionStatus::Failed
+  } else {
+    match (model.tick + offset) % 7 {
+      0 => @core.TaskExecutionStatus::PacketReady
+      1 => @core.TaskExecutionStatus::ProposalImported
+      2 => @core.TaskExecutionStatus::RunConfirmed
+      3 => @core.TaskExecutionStatus::Running
+      4 => @core.TaskExecutionStatus::AwaitingPersistence
+      5 => @core.TaskExecutionStatus::ReviewQueued
+      _ => @core.TaskExecutionStatus::Completed
+    }
+  }
+}
+
+///|
+fn execution_specs(model : Model) -> Array[@core.TaskExecutionRecord] {
+  [
+    execution_spec(model, "task-town-layer", "coding", 0),
+    execution_spec(model, "task-review-contract", "coding", 1),
+    execution_spec(model, "task-ledger-close", "finance", 2),
+    execution_spec(model, "task-finance-memory", "finance", 3),
+  ]
+}
+
+///|
+fn execution_spec(
+  model : Model,
+  task_id : String,
+  book_id : String,
+  offset : Int,
+) -> @core.TaskExecutionRecord {
+  let status = execution_status_for(model, offset)
+  @core.TaskExecutionRecord::new(
+    task_id~,
+    book_id~,
+    packet_id="packet-\{task_id}",
+    packet_path=".moontown/packets/packet-\{task_id}.json",
+    proposal_id=Some("proposal-packet-\{task_id}"),
+    run_id=if status == @core.TaskExecutionStatus::PacketReady ||
+      status == @core.TaskExecutionStatus::ProposalImported {
+      None
+    } else {
+      Some("run-packet-\{task_id}")
+    },
+    status~,
+    summary=execution_summary(status, task_id),
+    output_contract="keeper.plan.packet.v1",
+    context_pages=["wiki/index.md", "wiki/log.md"],
+    skill_paths=["skills/wiki-maintainer/SKILL.md"],
+    requires_review=status == @core.TaskExecutionStatus::AwaitingPersistence ||
+      status == @core.TaskExecutionStatus::ReviewQueued,
+    notify_town=true,
+  )
+}
+
+///|
+fn execution_summary(
+  status : @core.TaskExecutionStatus,
+  task_id : String,
+) -> String {
+  match status {
+    @core.TaskExecutionStatus::PacketReady =>
+      "Keeper packet prepared for \{task_id}."
+    @core.TaskExecutionStatus::ProposalImported =>
+      "Proposal imported and waiting for mayor confirmation."
+    @core.TaskExecutionStatus::RunConfirmed =>
+      "Mayor confirmed a live MoonClaw run."
+    @core.TaskExecutionStatus::Running =>
+      "MoonClaw run is executing book-local work."
+    @core.TaskExecutionStatus::AwaitingPersistence =>
+      "MoonBook persistence is waiting to absorb the result."
+    @core.TaskExecutionStatus::ReviewQueued =>
+      "Keeper review queued after persistence."
+    @core.TaskExecutionStatus::Completed =>
+      "Packet, run, and review loop completed."
+    @core.TaskExecutionStatus::Failed =>
+      "Execution failed and the town should recover or retry."
   }
 }
 
@@ -769,7 +858,11 @@ fn render_worker_avatar(
 }
 
 ///|
-fn feed_items(model : Model, workers : Array[WorkerSim]) -> Array[FeedItem] {
+fn feed_items(
+  model : Model,
+  workers : Array[WorkerSim],
+  executions : Array[@core.TaskExecutionRecord],
+) -> Array[FeedItem] {
   let feed : Array[FeedItem] = []
   for worker in workers {
     if worker.status == @core.WorkerStatus::Blocked {
@@ -778,6 +871,29 @@ fn feed_items(model : Model, workers : Array[WorkerSim]) -> Array[FeedItem] {
         detail: "Shift attention into stability or relieve queue pressure.",
         tone: "alert",
       })
+    }
+  }
+  for execution in executions {
+    match execution.status {
+      @core.TaskExecutionStatus::AwaitingPersistence =>
+        feed.push({
+          title: "\{execution.task_id} awaits MoonBook persistence",
+          detail: "The run is done; the next town action is keeper persistence and evidence capture.",
+          tone: "hot",
+        })
+      @core.TaskExecutionStatus::ReviewQueued =>
+        feed.push({
+          title: "\{execution.task_id} queued for keeper review",
+          detail: "Town should keep the proposal chain visible until review sync settles.",
+          tone: "alert",
+        })
+      @core.TaskExecutionStatus::Failed =>
+        feed.push({
+          title: "\{execution.task_id} failed",
+          detail: "A proposal/run failure surfaced in the packet lifecycle.",
+          tone: "alert",
+        })
+      _ => ()
     }
   }
   if model.strategy == Strategy::Throughput {
@@ -852,6 +968,7 @@ fn selection_body(
   model : Model,
   scene : @ui.SceneRenderModel,
   workers : Array[WorkerSim],
+  executions : Array[@core.TaskExecutionRecord],
 ) -> Array[@rabbita.Html] {
   match model.selection {
     Overview =>
@@ -859,6 +976,13 @@ fn selection_body(
         p(
           "Select a zone or worker to inspect live state. Use town actions to redirect the simulation.",
         ),
+        p(
+          "Packet-ready: \{count_execution_status(executions, @core.TaskExecutionStatus::PacketReady)}",
+        ),
+        p(
+          "Imported proposals: \{count_execution_status(executions, @core.TaskExecutionStatus::ProposalImported)}",
+        ),
+        p("Active runs: \{running_execution_count(executions)}"),
         button(
           class="inspector-action",
           on_click=dispatch(InjectBudget),
@@ -880,11 +1004,15 @@ fn selection_body(
       let related_workers = workers.filter(fn(worker) {
         worker.zone_key == node_key
       })
+      let related_executions = executions.filter(fn(execution) {
+        node_matches_execution(node_key, execution.book_id, execution.status)
+      })
       [
         p("Zone: \{node.title}"),
         p("Footprint: \{node.width}x\{node.height}"),
         p("Assets: \{node.asset_paths.length()}"),
         p("Workers present: \{related_workers.length()}"),
+        p("Execution records: \{related_executions.length()}"),
         button(
           class="inspector-action",
           on_click=dispatch(SelectOverview),
@@ -894,7 +1022,13 @@ fn selection_body(
     }
     Worker(worker_id) =>
       match find_worker(workers, worker_id) {
-        Some(worker) =>
+        Some(worker) => {
+          let book_execution = find_book_execution(executions, worker.book_id)
+          let lifecycle = match book_execution {
+            Some(execution) =>
+              "Book lifecycle: \{execution.status.to_string()} / \{execution.summary}"
+            None => "Book lifecycle: no execution record visible."
+          }
           [
             p("Role: \{worker.role}"),
             p("Status: \{worker.status.to_string()}"),
@@ -902,6 +1036,7 @@ fn selection_body(
             p("Energy: \{worker.energy}%"),
             p("Load: \{worker.load}%"),
             p(worker.summary),
+            p(lifecycle),
             button(
               class="inspector-action",
               on_click=dispatch(RelieveQueue),
@@ -918,6 +1053,7 @@ fn selection_body(
               "Back To Overview",
             ),
           ]
+        }
         None => [p("The selected worker is no longer visible in the scene.")]
       }
   }
@@ -929,17 +1065,23 @@ fn render_inspector(
   model : Model,
   scene : @ui.SceneRenderModel,
   workers : Array[WorkerSim],
+  executions : Array[@core.TaskExecutionRecord],
 ) -> @rabbita.Html {
   section(class="inspector-panel", [
     h2(selection_title(model.selection)),
-    div(class="inspector-body", selection_body(dispatch, model, scene, workers)),
+    div(
+      class="inspector-body",
+      selection_body(dispatch, model, scene, workers, executions),
+    ),
   ])
 }
 
 ///|
 fn render_scene(dispatch : Dispatch[Msg], model : Model) -> @rabbita.Html {
+  let state = demo_state(model)
   let scene = town_scene(model)
   let workers = worker_sims(model)
+  let executions = state.executions
   let alerts = all_alerts(scene, model)
   let scene_style = ["width: \{scene.width}px", "height: \{scene.height}px"]
   let selected_node_key = match model.selection {
@@ -1004,8 +1146,8 @@ fn render_scene(dispatch : Dispatch[Msg], model : Model) -> @rabbita.Html {
         ]),
       ]),
       div(class="sidebar-column", [
-        render_inspector(dispatch, model, scene, workers),
-        render_feed(feed_items(model, workers)),
+        render_inspector(dispatch, model, scene, workers, executions),
+        render_feed(feed_items(model, workers, executions)),
         aside(class="scene-legend", [
           h2("Legend"),
           p("City Hall is the mayor runtime and policy anchor."),
@@ -1020,6 +1162,73 @@ fn render_scene(dispatch : Dispatch[Msg], model : Model) -> @rabbita.Html {
       ]),
     ]),
   ])
+}
+
+///|
+fn count_execution_status(
+  executions : Array[@core.TaskExecutionRecord],
+  status : @core.TaskExecutionStatus,
+) -> Int {
+  let mut count = 0
+  for execution in executions {
+    if execution.status == status {
+      count += 1
+    }
+  }
+  count
+}
+
+///|
+fn running_execution_count(
+  executions : Array[@core.TaskExecutionRecord],
+) -> Int {
+  let mut count = 0
+  for execution in executions {
+    match execution.status {
+      @core.TaskExecutionStatus::RunConfirmed
+      | @core.TaskExecutionStatus::Running
+      | @core.TaskExecutionStatus::AwaitingPersistence
+      | @core.TaskExecutionStatus::ReviewQueued => count += 1
+      _ => ()
+    }
+  }
+  count
+}
+
+///|
+fn node_matches_execution(
+  node_key : String,
+  book_id : String,
+  status : @core.TaskExecutionStatus,
+) -> Bool {
+  match node_key {
+    "city-hall" =>
+      status == @core.TaskExecutionStatus::PacketReady ||
+      status == @core.TaskExecutionStatus::ProposalImported ||
+      status == @core.TaskExecutionStatus::RunConfirmed
+    "anomaly-corner" =>
+      status == @core.TaskExecutionStatus::Failed ||
+      status == @core.TaskExecutionStatus::ReviewQueued
+    "book-coding" => book_id == "coding"
+    "book-finance" => book_id == "finance"
+    "worker-yard" =>
+      status == @core.TaskExecutionStatus::AwaitingPersistence ||
+      status == @core.TaskExecutionStatus::Completed
+    _ => false
+  }
+}
+
+///|
+fn find_book_execution(
+  executions : Array[@core.TaskExecutionRecord],
+  book_id : String,
+) -> @core.TaskExecutionRecord? {
+  for execution in executions {
+    if execution.book_id == book_id {
+      return Some(execution)
+    }
+  }
+  None
 }
 
 ///|

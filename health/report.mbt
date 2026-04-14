@@ -55,14 +55,25 @@ pub fn inspect_town(town : @core.TownState) -> HealthReport {
   }
   let book_health : Array[BookHealth] = []
   for book in town.books {
-    book_health.push({ book_id: book.id, level: Healthy, note: book.purpose })
+    let execution_note = match latest_book_execution_note(town, book.id) {
+      Some(note) => note
+      None => book.purpose
+    }
+    book_health.push({
+      book_id: book.id,
+      level: book_level(town, book.id),
+      note: execution_note,
+    })
   }
-  let anomalies = detect_anomalies(worker_health)
+  let anomalies = detect_anomalies(worker_health, town.executions)
   { worker_health, book_health, anomalies }
 }
 
 ///|
-fn detect_anomalies(worker_health : Array[WorkerHealth]) -> Array[Anomaly] {
+fn detect_anomalies(
+  worker_health : Array[WorkerHealth],
+  executions : Array[@core.TaskExecutionRecord],
+) -> Array[Anomaly] {
   let anomalies : Array[Anomaly] = []
   for item in worker_health {
     if item.level != Healthy {
@@ -70,6 +81,21 @@ fn detect_anomalies(worker_health : Array[WorkerHealth]) -> Array[Anomaly] {
         title: "worker-health",
         detail: "\{item.worker_id} is \{item.level.to_string()}",
       })
+    }
+  }
+  for execution in executions {
+    match execution.status {
+      @core.TaskExecutionStatus::Failed =>
+        anomalies.push({
+          title: "execution-failed",
+          detail: "\{execution.task_id} failed after packet \{execution.packet_id}",
+        })
+      @core.TaskExecutionStatus::ReviewQueued =>
+        anomalies.push({
+          title: "review-queued",
+          detail: "\{execution.task_id} is waiting for keeper review sync",
+        })
+      _ => ()
     }
   }
   anomalies
@@ -82,4 +108,32 @@ pub fn recovery_actions(report : HealthReport) -> Array[RecoveryAction] {
     actions.push({ kind: "investigate", detail: anomaly.detail })
   }
   actions
+}
+
+///|
+fn latest_book_execution_note(
+  town : @core.TownState,
+  book_id : String,
+) -> String? {
+  for execution in town.executions {
+    if execution.book_id == book_id {
+      return Some("\{execution.status.to_string()}: \{execution.summary}")
+    }
+  }
+  None
+}
+
+///|
+fn book_level(town : @core.TownState, book_id : String) -> HealthLevel {
+  for execution in town.executions {
+    if execution.book_id != book_id {
+      continue
+    }
+    match execution.status {
+      @core.TaskExecutionStatus::Failed => return Critical
+      @core.TaskExecutionStatus::ReviewQueued => return Degraded
+      _ => ()
+    }
+  }
+  Healthy
 }

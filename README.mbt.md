@@ -2,7 +2,7 @@
 
 > MoonBit-native town control plane + embedded strategic roles + scene dashboard + Rabbita operator UI
 
-`MoonBit` `Town Orchestration` `MoonBook Registry` `MoonClaw Roles` `Mayor` `Keeper` `Routing` `Health` `Storage` `Scene UI` `Rabbita`
+`MoonBit` `Town Orchestration` `MoonBook Harness` `MoonClaw Proposal Packets` `Mayor` `Keeper` `Routing` `Health` `Storage` `Scene UI` `Rabbita`
 
 Moontown is the town-level orchestration layer above multiple `moonbook`
 domains and multiple `moonclaw` runtimes.
@@ -19,9 +19,10 @@ It is designed for:
 ## What Moontown Feels Like
 
 ```text
-moonbook catalog / town state / mayor
+ moonbook catalog / keeper packets / mayor
   -> seed a town
-  -> route work across books and workers
+  -> turn book-local tasks into keeper proposal packets
+  -> import packets into MoonClaw proposal/run lifecycle
   -> inspect health, anomalies, and patrol state
   -> render the town as a live scene
   -> evolve toward a 24/7 social-experiment control plane
@@ -42,6 +43,8 @@ Implemented today:
 - persisted town bootstrap in `.moontown/town.json`
 - persisted moonbook catalog in `.moontown/moonbooks.json`
 - `BookProvider` abstraction for town bootstrap
+- book-harness-shaped moonbook adapter
+- external proposal packet and proposal/run receipt lifecycle
 - strategic `Mayor` role adapter over embedded moonclaw runtime metadata
 - routing, isolation, scheduler, health, and storage packages
 - renderer-agnostic scene dashboard model
@@ -50,8 +53,7 @@ Implemented today:
 
 Still stubbed:
 
-- real moonbook planning and result persistence
-- real moonclaw task execution transport
+- real process execution against external `moonbook` and `moonclaw` repos
 - long-running daemon patrol and recovery loop
 - experiment lifecycle execution
 - real backend/frontend sync
@@ -67,8 +69,8 @@ So the current repo is a control-plane-first prototype, not yet a fully live
 - `health` anomaly and recovery reporting
 - `scheduler` tick planning
 - `roles` strategic `Mayor` role adapter
-- `adapters/moonbook` persisted book catalog and provider boundary
-- `adapters/moonclaw` embedded runtime profiles and handoff contracts
+- `adapters/moonbook` persisted book catalog plus book-harness request/result shapes
+- `adapters/moonclaw` embedded runtime profiles plus external proposal packet lifecycle
 - `ui` scene layout, dashboard projection, and HTML render bridge
 - `ui/rabbita-town` live browser dashboard with:
   - tick loop
@@ -126,6 +128,7 @@ The design intent is:
 - `moontown` calls `Mayor.decide_dispatch(...)`
 - `moontown` calls `Mayor.patrol(...)`
 - `moontown` produces keeper handoff packets for book-local planning
+- `moontown` tracks packet, proposal, and run lifecycle records in town state
 
 That keeps:
 
@@ -176,7 +179,9 @@ Current bootstrap path:
 
 ```text
 moonbook catalog
-  -> book provider
+  -> book task batch
+  -> keeper packet
+  -> MoonClaw proposal/run receipt
   -> town snapshot bootstrap
   -> dashboard / render model / frontend
 ```
@@ -186,7 +191,8 @@ Current strategic path:
 ```text
 TownTask
   -> Mayor.decide_dispatch(...)
-  -> route decision or keeper handoff
+  -> keeper handoff
+  -> proposal packet lifecycle record
 ```
 
 Current UI path:
@@ -233,6 +239,7 @@ engine, but it is already game-adjacent in structure:
 
 - live tick loop
 - moving worker avatars
+- packet / proposal / run lifecycle visibility
 - strategy controls
 - resource feedback loops
 - selection and inspector state

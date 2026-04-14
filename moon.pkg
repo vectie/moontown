@@ -1,12 +1,13 @@
 import {
-  "username/moontown/core",
-  "username/moontown/adapters/moonbook",
-  "username/moontown/dispatch",
-  "username/moontown/health",
-  "username/moontown/roles",
-  "username/moontown/scheduler",
-  "username/moontown/storage",
-  "username/moontown/ui",
+  "vectie/moontown/core",
+  "vectie/moontown/adapters/moonbook",
+  "vectie/moontown/adapters/moonclaw",
+  "vectie/moontown/dispatch",
+  "vectie/moontown/health",
+  "vectie/moontown/roles",
+  "vectie/moontown/scheduler",
+  "vectie/moontown/storage",
+  "vectie/moontown/ui",
 }
 
 import {

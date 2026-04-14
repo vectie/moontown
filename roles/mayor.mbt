@@ -43,6 +43,14 @@ pub fn Mayor::decide_dispatch(
 }
 
 ///|
+pub struct MayorKeeperPacket {
+  handoff : @moonclaw.EmbeddedRuntimeHandoff
+  packet : @moonclaw.ExternalProposalPacket
+  packet_path : String
+  rationale : String
+} derive(Show, Eq)
+
+///|
 pub struct MayorPatrolPacket {
   output_contract : String
   report : @health.HealthReport
@@ -79,6 +87,37 @@ pub fn Mayor::handoff_to_keeper(
     scope_summary,
     constraints~,
   )
+}
+
+///|
+pub fn Mayor::prepare_keeper_packet(
+  self : Mayor,
+  entry : @moonbook.BookCatalogEntry,
+  task : @moonbook.BookTask,
+  packet_dir? : String = @moonclaw.default_packet_directory(),
+) -> MayorKeeperPacket {
+  let bundle = @moonbook.hydrate_worker_context(entry, task)
+  let packet_id = "keeper-\{entry.id}-\{task.id}"
+  let packet = @moonclaw.proposal_packet_from_bundle(
+    bundle,
+    task.title,
+    "Mayor issued a keeper packet for \{entry.name}.",
+    "wiki_ingest_controller",
+    packet_id=Some(packet_id),
+    notes=["produced by mayor runtime", "book task kind=\{task.kind}"],
+    tags=[entry.id, task.kind, "keeper"],
+  )
+  {
+    handoff: self.handoff_to_keeper(
+      entry.to_book_ref(),
+      task.title,
+      bundle.memory_summary,
+      constraints=["follow packet-first handoff", "keep book memory isolated"],
+    ),
+    packet,
+    packet_path: @moonclaw.packet_file_path(packet_dir, packet.packet_id),
+    rationale: "Mayor prepared keeper packet \{packet.packet_id} for \{entry.id} / \{task.id}.",
+  }
 }
 
 ///|

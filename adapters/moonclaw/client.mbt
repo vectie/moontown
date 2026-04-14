@@ -117,6 +117,43 @@ pub fn EmbeddedRuntimeHandoff::new(
 }
 
 ///|
+pub struct ExternalProposalPacket {
+  packet_id : String
+  title : String
+  summary : String
+  request_text : String
+  profile : String
+  output_contract : String
+  context_pages : Array[String]
+  skill_paths : Array[String]
+  notes : Array[String]
+  tags : Array[String]
+  metadata : Array[String]
+} derive(Show, Eq, ToJson, FromJson)
+
+///|
+pub struct ProposalImportReceipt {
+  packet_id : String
+  packet_path : String
+  proposal_id : String
+  run_id : String?
+  status : @core.TaskExecutionStatus
+  command : String
+  summary : String
+} derive(Show, Eq, ToJson, FromJson)
+
+///|
+pub struct ProposalPollResponse {
+  task_id : String
+  run_id : String
+  status : @core.TaskExecutionStatus
+  summary : String
+  memory_candidates : Array[String]
+  requires_review : Bool
+  notify_town : Bool
+} derive(Show, Eq, ToJson, FromJson)
+
+///|
 pub struct SpawnWorkerRequest {
   worker : @core.WorkerRef
 } derive(Show, Eq)
@@ -143,6 +180,183 @@ pub struct TaskResultResponse {
   summary : String
   memory_candidates : Array[String]
 } derive(Show, Eq)
+
+///|
+pub fn default_packet_directory() -> String {
+  ".moontown/packets"
+}
+
+///|
+pub fn packet_file_path(packet_dir : String, packet_id : String) -> String {
+  "\{packet_dir}/\{packet_id}.json"
+}
+
+///|
+pub fn proposal_packet_from_bundle(
+  bundle : @moonbook.WorkerContextBundle,
+  title : String,
+  summary : String,
+  profile : String,
+  packet_id? : String? = None,
+  notes? : Array[String] = [],
+  tags? : Array[String] = [],
+) -> ExternalProposalPacket {
+  let resolved_packet_id = packet_id.unwrap_or("packet-\{bundle.task_id}")
+  {
+    packet_id: resolved_packet_id,
+    title,
+    summary,
+    request_text: bundle.prompt,
+    profile,
+    output_contract: bundle.output_contract.join(", "),
+    context_pages: bundle.context_pages,
+    skill_paths: bundle.skill_paths,
+    notes,
+    tags,
+    metadata: [
+      "book_id=\{bundle.book_id}",
+      "workspace_root=\{bundle.workspace_root}",
+      "task_id=\{bundle.task_id}",
+      "memory_summary=\{bundle.memory_summary}",
+    ],
+  }
+}
+
+///|
+pub async fn save_packet_file(
+  path : String,
+  packet : ExternalProposalPacket,
+) -> Unit {
+  ensure_parent_directory(path)
+  @fs.write_file(
+    path,
+    @encoding/utf8.encode(packet.to_json().stringify()),
+    create=0o644,
+    truncate=true,
+  )
+}
+
+///|
+pub async fn load_packet_file(path : String) -> ExternalProposalPacket? {
+  if !@fs.exists(path) {
+    return None
+  }
+  let text = @fs.read_file(path).text()
+  let parsed = @json.parse(text) catch { _ => return None }
+  Some(@json.from_json(parsed) catch { _ => return None })
+}
+
+///|
+pub fn build_import_command(
+  packet_path : String,
+  moonclaw_root? : String = "../moonclaw",
+  home? : String = "~/.moonclaw",
+  cwd? : String = ".",
+  confirm? : Bool = false,
+) -> String {
+  let confirm_flag = if confirm { " --confirm" } else { "" }
+  "moon -C \{moonclaw_root} run cmd/main -- proposal import \{packet_path} --json --cwd \{cwd} --home \{home}\{confirm_flag}"
+}
+
+///|
+pub fn import_packet(
+  packet : ExternalProposalPacket,
+  packet_path : String,
+  moonclaw_root? : String = "../moonclaw",
+  home? : String = "~/.moonclaw",
+  cwd? : String = ".",
+  confirm? : Bool = false,
+) -> ProposalImportReceipt {
+  let proposal_id = "proposal-\{packet.packet_id}"
+  let run_id = if confirm { Some("run-\{packet.packet_id}") } else { None }
+  {
+    packet_id: packet.packet_id,
+    packet_path,
+    proposal_id,
+    run_id,
+    status: if confirm {
+      @core.TaskExecutionStatus::RunConfirmed
+    } else {
+      @core.TaskExecutionStatus::ProposalImported
+    },
+    command: build_import_command(
+      packet_path,
+      moonclaw_root~,
+      home~,
+      cwd~,
+      confirm~,
+    ),
+    summary: if confirm {
+      "Imported \{packet.packet_id} and confirmed a run in MoonClaw."
+    } else {
+      "Imported \{packet.packet_id} into MoonClaw proposal storage."
+    },
+  }
+}
+
+///|
+pub fn confirm_imported_run(
+  receipt : ProposalImportReceipt,
+) -> ProposalImportReceipt {
+  {
+    ..receipt,
+    run_id: Some(receipt.run_id.unwrap_or("run-\{receipt.packet_id}")),
+    status: @core.TaskExecutionStatus::RunConfirmed,
+    summary: "Confirmed proposal \{receipt.proposal_id} into a live run.",
+  }
+}
+
+///|
+pub fn poll_run(
+  task_id : String,
+  run_id : String,
+  status : @core.TaskExecutionStatus,
+) -> ProposalPollResponse {
+  match status {
+    @core.TaskExecutionStatus::Running =>
+      {
+        task_id,
+        run_id,
+        status: @core.TaskExecutionStatus::AwaitingPersistence,
+        summary: "Run \{run_id} finished its keeper execution and is waiting for book persistence.",
+        memory_candidates: [
+          "observation:keeper-finished", "insight:stage-review",
+        ],
+        requires_review: true,
+        notify_town: true,
+      }
+    @core.TaskExecutionStatus::AwaitingPersistence =>
+      {
+        task_id,
+        run_id,
+        status: @core.TaskExecutionStatus::ReviewQueued,
+        summary: "Book persistence queued durable review work for \{task_id}.",
+        memory_candidates: ["observation:review-queued"],
+        requires_review: true,
+        notify_town: true,
+      }
+    @core.TaskExecutionStatus::ReviewQueued =>
+      {
+        task_id,
+        run_id,
+        status: @core.TaskExecutionStatus::Completed,
+        summary: "Review queue settled and town can mark \{task_id} complete.",
+        memory_candidates: ["observation:completed"],
+        requires_review: false,
+        notify_town: true,
+      }
+    _ =>
+      {
+        task_id,
+        run_id,
+        status: @core.TaskExecutionStatus::Running,
+        summary: "Run \{run_id} is still executing through MoonClaw.",
+        memory_candidates: [],
+        requires_review: false,
+        notify_town: false,
+      }
+  }
+}
 
 ///|
 pub fn stub_spawn(req : SpawnWorkerRequest) -> String {
@@ -257,4 +471,16 @@ pub fn mayor_to_keeper_handoff(
     output_contract=Some("keeper.plan.packet.v1"),
     target_role_id="keeper:\{book_id}",
   )
+}
+
+///|
+async fn ensure_parent_directory(path : String) -> Unit {
+  let parent = @path.Path::dirname(path).to_string()
+  if parent == "." || parent == "" || @fs.exists(parent) {
+    return
+  }
+  ensure_parent_directory(parent)
+  @fs.mkdir(parent, permission=0o755) catch {
+    _ => ()
+  }
 }
