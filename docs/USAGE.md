@@ -27,8 +27,8 @@ Right now, `moontown` is usable as:
 It is not yet usable as:
 
 - a real 24/7 autonomous town daemon
-- a real moonbook planner/executor integration
-- a real moonclaw execution backend
+- a real external moonbook process runner
+- a real external moonclaw process runner
 
 So the right way to use the repo today is as a live architectural and frontend
 prototype.
@@ -65,6 +65,7 @@ The demo town persists runtime bootstrap files under:
 
 - `.moontown/moonbooks.json`
 - `.moontown/town.json`
+- `.moontown/packets/` when packet files are exported
 
 What they do:
 
@@ -121,6 +122,8 @@ Important concepts:
 - `BookRef`
 - `WorkerRef`
 - `TownTask`
+- `TaskExecutionStatus`
+- `TaskExecutionRecord`
 - `TownEvent`
 - `TownState`
 - `BookProvider`
@@ -251,6 +254,17 @@ The current lifecycle is:
 ```text
 book task -> keeper packet -> imported proposal -> confirmed run -> persistence -> review
 ```
+
+Current execution statuses include:
+
+- `PacketReady`
+- `ProposalImported`
+- `RunConfirmed`
+- `Running`
+- `AwaitingPersistence`
+- `ReviewQueued`
+- `Completed`
+- `Failed`
 
 ## 9. Run The Rabbita Frontend
 

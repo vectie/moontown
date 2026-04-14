@@ -57,6 +57,7 @@ Implemented:
 - periodic ticks
 - pause/resume/step controls
 - packet/proposal/run lifecycle visibility
+- execution status projection from `TownState.executions`
 - strategy modes
   - balanced
   - throughput
@@ -76,6 +77,31 @@ Implemented:
 
 This makes the frontend closer to a management simulation than a static admin
 panel.
+
+## Lifecycle Projection
+
+The current frontend does not invent its own execution state. It projects
+execution records from the root town model:
+
+- `TownState.executions`
+  - packet id and packet path
+  - proposal id
+  - run id
+  - execution status
+
+The current status vocabulary is:
+
+- `PacketReady`
+- `ProposalImported`
+- `RunConfirmed`
+- `Running`
+- `AwaitingPersistence`
+- `ReviewQueued`
+- `Completed`
+- `Failed`
+
+Those states are surfaced through the dashboard cards, scene summary, and live
+activity feed.
 
 ## Assets
 

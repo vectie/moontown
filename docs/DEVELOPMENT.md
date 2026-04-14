@@ -73,6 +73,7 @@ Runtime state is stored under:
 
 - `.moontown/moonbooks.json`
 - `.moontown/town.json`
+- `.moontown/packets/` when exported packet files are written
 
 These are runtime artifacts, not source-of-truth project files.
 
@@ -83,6 +84,7 @@ Package tests currently cover:
 - core state and package surfaces
 - scene layout/render contracts
 - mayor role behavior
+- proposal/import/run lifecycle tracking
 - root demo path
 
 If a change affects dashboard output or scene contracts, update the relevant
@@ -103,6 +105,14 @@ When architecture or frontend behavior changes, update:
 - [docs/PACKAGES.md](/Users/kq/Workspace/moontown/docs/PACKAGES.md)
 - [docs/FRONTEND.md](/Users/kq/Workspace/moontown/docs/FRONTEND.md)
 - [docs/DEVELOPMENT.md](/Users/kq/Workspace/moontown/docs/DEVELOPMENT.md)
+
+If the change touches keeper packets or execution lifecycle state, also verify
+the wording in:
+
+- [README.mbt.md](/Users/kq/Workspace/moontown/README.mbt.md)
+- [docs/ARCHITECTURE.md](/Users/kq/Workspace/moontown/docs/ARCHITECTURE.md)
+- [docs/PACKAGES.md](/Users/kq/Workspace/moontown/docs/PACKAGES.md)
+- [docs/USAGE.md](/Users/kq/Workspace/moontown/docs/USAGE.md)
 
 Also update UI-local docs when relevant:
 

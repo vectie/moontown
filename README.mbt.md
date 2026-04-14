@@ -98,7 +98,7 @@ So the current repo is a control-plane-first prototype, not yet a fully live
 - `roles`
   strategic mayor role adapter
 - `adapters/moonbook`
-  moonbook catalog and future book-service boundary
+  moonbook catalog and book-harness boundary
 - `adapters/moonclaw`
   embedded runtime profiles and future execution boundary
 - `ui`
@@ -193,6 +193,17 @@ TownTask
   -> Mayor.decide_dispatch(...)
   -> keeper handoff
   -> proposal packet lifecycle record
+```
+
+Current execution contract path:
+
+```text
+BookTask
+  -> WorkerContextBundle
+  -> ExternalProposalPacket
+  -> ProposalImportReceipt
+  -> TaskExecutionRecord
+  -> dashboard / frontend
 ```
 
 Current UI path:

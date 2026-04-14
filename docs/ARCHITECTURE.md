@@ -144,6 +144,10 @@ Examples:
 ```text
 moonbook catalog
   -> BookProvider
+  -> book task batch
+  -> worker context bundle
+  -> external proposal packet
+  -> proposal import receipt
   -> seeded TownState
   -> task execution records
   -> persisted TownSnapshot
@@ -159,6 +163,25 @@ TownTask
   -> external proposal packet
   -> proposal/run lifecycle record
 ```
+
+## Packet Lifecycle Ownership
+
+The packet lifecycle is intentionally split across package boundaries:
+
+- `adapters/moonbook`
+  - accepts goals
+  - produces book task batches
+  - hydrates worker context bundles
+  - persists or summarizes book-local outcomes
+- `roles/mayor`
+  - decides whether work should be routed, deferred, or escalated
+  - prepares keeper-facing packets from book tasks and worker context
+- `adapters/moonclaw`
+  - shapes `ExternalProposalPacket`
+  - models `ProposalImportReceipt`
+  - models run confirmation polling
+- `core`
+  - records packet path, proposal id, run id, and execution status in `TaskExecutionRecord`
 
 ### Patrol
 
@@ -177,6 +200,8 @@ Current persisted files:
   - persisted moonbook catalog entries
 - `.moontown/town.json`
   - persisted town snapshot
+- `.moontown/packets/`
+  - optional exported keeper packet files
 
 Current implementation:
 
@@ -199,7 +224,7 @@ Real now:
 
 Stubbed now:
 
-- real process-level execution against the external repos
+- real process-level execution against external `moonbook` and `moonclaw` repos
 - experiment runtime progression
 - 24/7 supervisor loop
 

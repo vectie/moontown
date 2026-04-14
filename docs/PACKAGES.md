@@ -41,6 +41,7 @@ Important public types:
 - `BookRef`
 - `WorkerRef`
 - `TownTask`
+- `TaskExecutionStatus`
 - `AssignmentPlan`
 - `TaskExecutionRecord`
 - `TownEvent`
@@ -107,6 +108,7 @@ Purpose:
 Current persisted files:
 
 - `.moontown/town.json`
+- `.moontown/packets/` when keeper packets are exported
 
 ## Roles
 
@@ -165,10 +167,17 @@ Current real pieces:
 - `keeper_runtime(...)`
 - `worker_runtime(...)`
 - `mayor_to_keeper_handoff(...)`
+- `build_import_command(...)`
+- `packet_file_path(...)`
 - `proposal_packet_from_bundle(...)`
 - `save_packet_file(...)`
 - `import_packet(...)`
 - `poll_run(...)`
+
+Important public types:
+
+- `ExternalProposalPacket`
+- `ProposalImportReceipt`
 
 ## UI
 
