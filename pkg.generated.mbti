@@ -26,7 +26,13 @@ pub async fn load_or_create_demo_state(path? : String, book_catalog_path? : Stri
 
 pub async fn[Provider : @core.BookProvider] load_or_create_demo_state_with_provider(Provider, path? : String) -> @core.TownState
 
+pub async fn load_or_create_modeled_demo_state(path? : String, book_catalog_path? : String) -> @core.TownState
+
+pub async fn render_goal_run(String, book_id? : String?, task_limit_per_book? : Int, snapshot_path? : String, book_catalog_path? : String) -> String
+
 pub fn render_state_dashboard(@core.TownState) -> String
+
+pub async fn run_goal(String, book_id? : String?, task_limit_per_book? : Int, snapshot_path? : String, book_catalog_path? : String) -> @core.TownState
 
 // Errors
 

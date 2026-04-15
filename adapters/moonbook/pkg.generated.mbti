@@ -7,7 +7,9 @@ import {
 }
 
 // Values
-pub fn accept_goal(BookCatalogEntry, String, goal_id? : String?) -> BookGoalAcceptance
+pub async fn accept_goal(BookCatalogEntry, String, goal_id? : String?) -> BookGoalAcceptance
+
+pub async fn build_workspace(BookCatalogEntry, moonbook_root? : String) -> String
 
 pub fn catalog_to_book_refs(Array[BookCatalogEntry]) -> Array[@core.BookRef]
 
@@ -15,9 +17,15 @@ pub fn default_catalog() -> Array[BookCatalogEntry]
 
 pub fn default_catalog_path() -> String
 
+pub fn default_moonbook_root() -> String
+
+pub fn default_workspace_root(String) -> String
+
 pub fn find_catalog_entry(Array[BookCatalogEntry], String) -> BookCatalogEntry?
 
-pub fn hydrate_worker_context(BookCatalogEntry, BookTask) -> WorkerContextBundle
+pub fn generated_site_index_path(BookCatalogEntry) -> String
+
+pub async fn hydrate_worker_context(BookCatalogEntry, BookTask) -> WorkerContextBundle
 
 pub async fn load_catalog_file(String) -> Array[BookCatalogEntry]?
 
@@ -25,15 +33,17 @@ pub async fn load_or_create_catalog(path? : String) -> Array[BookCatalogEntry]
 
 pub async fn load_or_create_provider(path? : String) -> MoonbookCatalogProvider
 
-pub fn persist_result(BookCatalogEntry, BookResult) -> PersistResultOutcome
+pub async fn persist_result(BookCatalogEntry, BookResult) -> PersistResultOutcome
 
-pub fn produce_task_batch(BookCatalogEntry, String, goal_id? : String?) -> BookTaskBatch
+pub async fn produce_task_batch(BookCatalogEntry, String, goal_id? : String?) -> BookTaskBatch
 
-pub fn report_health(BookCatalogEntry) -> BookHealthReport
+pub async fn report_health(BookCatalogEntry) -> BookHealthReport
 
 pub async fn save_catalog_file(String, Array[BookCatalogEntry]) -> Unit
 
-pub fn summarize_state(BookCatalogEntry) -> BookStateSummary
+pub async fn summarize_state(BookCatalogEntry) -> BookStateSummary
+
+pub fn workspace_root(BookCatalogEntry) -> String
 
 // Errors
 
@@ -89,6 +99,7 @@ pub struct BookResult {
   requires_review : Bool
   notify_town : Bool
 }
+pub fn BookResult::new(task_id~ : String, summary~ : String, artifacts? : Array[String], memory_candidates? : Array[MemoryCandidate], requires_review? : Bool, notify_town? : Bool) -> Self
 pub impl Eq for BookResult
 pub impl Show for BookResult
 pub impl ToJson for BookResult
@@ -107,6 +118,7 @@ pub struct BookStateSummary {
   evidence_count : Int
   summary : String
 }
+pub fn BookStateSummary::new(book_id~ : String, root~ : String, page_count~ : Int, source_count~ : Int, entity_count~ : Int, concept_count~ : Int, pending_review_count~ : Int, keeper_memory_count~ : Int, keeper_working_count~ : Int, evidence_count~ : Int, summary~ : String) -> Self
 pub impl Eq for BookStateSummary
 pub impl Show for BookStateSummary
 pub impl ToJson for BookStateSummary
@@ -114,6 +126,7 @@ pub impl @json.FromJson for BookStateSummary
 
 pub struct BookTask {
   id : String
+  goal : String?
   title : String
   kind : String
   prompt : String
@@ -122,6 +135,7 @@ pub struct BookTask {
   target_pages : Array[String]
   required_role : @core.WorkerRole?
 }
+pub fn BookTask::new(id~ : String, goal? : String?, title~ : String, kind~ : String, prompt~ : String, priority~ : Int, requires_review~ : Bool, target_pages? : Array[String], required_role? : @core.WorkerRole?) -> Self
 pub impl Eq for BookTask
 pub impl Show for BookTask
 pub impl ToJson for BookTask
@@ -137,6 +151,18 @@ pub impl Eq for BookTaskBatch
 pub impl Show for BookTaskBatch
 pub impl ToJson for BookTaskBatch
 pub impl @json.FromJson for BookTaskBatch
+
+type ExternalBookTask
+pub impl Eq for ExternalBookTask
+pub impl Show for ExternalBookTask
+pub impl ToJson for ExternalBookTask
+pub impl @json.FromJson for ExternalBookTask
+
+type ExternalBookTaskBatch
+pub impl Eq for ExternalBookTaskBatch
+pub impl Show for ExternalBookTaskBatch
+pub impl ToJson for ExternalBookTaskBatch
+pub impl @json.FromJson for ExternalBookTaskBatch
 
 pub struct MemoryCandidate {
   kind : String

@@ -4,10 +4,12 @@ import {
   "vectie/moontown/adapters/moonclaw",
   "vectie/moontown/dispatch",
   "vectie/moontown/health",
+  "vectie/moontown/integration",
   "vectie/moontown/roles",
   "vectie/moontown/scheduler",
   "vectie/moontown/storage",
   "vectie/moontown/ui",
+  "moonbitlang/async",
 }
 
 import {

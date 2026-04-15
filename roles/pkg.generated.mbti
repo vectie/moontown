@@ -23,7 +23,7 @@ pub fn Mayor::decide_dispatch(Self, @core.TownState, @core.TownTask) -> MayorDis
 pub fn Mayor::handoff_to_keeper(Self, @core.BookRef, String, String, constraints? : Array[String]) -> @moonclaw.EmbeddedRuntimeHandoff
 pub fn Mayor::new() -> Self
 pub fn Mayor::patrol(Self, @core.TownState) -> MayorPatrolPacket
-pub fn Mayor::prepare_keeper_packet(Self, @moonbook.BookCatalogEntry, @moonbook.BookTask, packet_dir? : String) -> MayorKeeperPacket
+pub async fn Mayor::prepare_keeper_packet(Self, @moonbook.BookCatalogEntry, @moonbook.BookTask, packet_dir? : String) -> MayorKeeperPacket
 pub fn Mayor::runtime(Self) -> @moonclaw.EmbeddedMoonclawRuntime
 pub impl Eq for Mayor
 pub impl Show for Mayor

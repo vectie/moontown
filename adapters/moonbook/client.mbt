@@ -75,7 +75,7 @@ pub fn default_catalog() -> Array[BookCatalogEntry] {
       id="coding",
       name="Moonbook / Coding",
       purpose="Harness engineering for source work, repo memory, and execution policy.",
-      workspace_root="/workspace/coding",
+      workspace_root=default_workspace_root("coding"),
       memory_scope=@core.MemoryScope::BookPrivate,
       tags=["moonbit", "git", "review"],
       skills=["analysis", "memory", "review"],
@@ -84,7 +84,7 @@ pub fn default_catalog() -> Array[BookCatalogEntry] {
       id="finance",
       name="Moonbook / Finance",
       purpose="Private daily finance operations with isolated memory and task artifacts.",
-      workspace_root="/workspace/finance",
+      workspace_root=default_workspace_root("finance"),
       memory_scope=@core.MemoryScope::TaskEphemeral,
       tags=["ledger", "planning", "ops"],
       skills=["planning", "memory", "reporting"],
@@ -93,8 +93,18 @@ pub fn default_catalog() -> Array[BookCatalogEntry] {
 }
 
 ///|
+pub fn default_workspace_root(book_id : String) -> String {
+  ".moontown/books/\{book_id}"
+}
+
+///|
 pub fn default_catalog_path() -> String {
   ".moontown/moonbooks.json"
+}
+
+///|
+pub fn default_moonbook_root() -> String {
+  "../moonbook"
 }
 
 ///|
@@ -150,7 +160,13 @@ pub async fn load_or_create_catalog(
   path? : String = default_catalog_path(),
 ) -> Array[BookCatalogEntry] {
   match load_catalog_file(path) {
-    Some(catalog) => catalog
+    Some(catalog) => {
+      let normalized = normalize_catalog(catalog)
+      if normalized != catalog {
+        save_catalog_file(path, normalized)
+      }
+      normalized
+    }
     None => {
       let catalog = default_catalog()
       save_catalog_file(path, catalog)
@@ -169,6 +185,7 @@ pub async fn load_or_create_provider(
 ///|
 pub struct BookTask {
   id : String
+  goal : String?
   title : String
   kind : String
   prompt : String
@@ -177,6 +194,31 @@ pub struct BookTask {
   target_pages : Array[String]
   required_role : @core.WorkerRole?
 } derive(Show, Eq, ToJson, FromJson)
+
+///|
+pub fn BookTask::new(
+  id~ : String,
+  goal? : String? = None,
+  title~ : String,
+  kind~ : String,
+  prompt~ : String,
+  priority~ : Int,
+  requires_review~ : Bool,
+  target_pages? : Array[String] = [],
+  required_role? : @core.WorkerRole? = None,
+) -> BookTask {
+  {
+    id,
+    goal,
+    title,
+    kind,
+    prompt,
+    priority,
+    requires_review,
+    target_pages,
+    required_role,
+  }
+}
 
 ///|
 pub struct BookTaskBatch {
@@ -193,6 +235,25 @@ pub struct BookGoalAcceptance {
   reason : String
   task_count : Int
   summary : String
+} derive(Show, Eq, ToJson, FromJson)
+
+///|
+struct ExternalBookTask {
+  id : String
+  title : String
+  kind : String
+  prompt : String
+  priority : Int
+  requires_review : Bool
+  target_pages : Array[String]
+} derive(Show, Eq, ToJson, FromJson)
+
+///|
+struct ExternalBookTaskBatch {
+  goal_id : String
+  goal : String
+  summary : String
+  tasks : Array[ExternalBookTask]
 } derive(Show, Eq, ToJson, FromJson)
 
 ///|
@@ -232,6 +293,25 @@ pub struct BookResult {
 } derive(Show, Eq, ToJson, FromJson)
 
 ///|
+pub fn BookResult::new(
+  task_id~ : String,
+  summary~ : String,
+  artifacts? : Array[String] = [],
+  memory_candidates? : Array[MemoryCandidate] = [],
+  requires_review? : Bool = false,
+  notify_town? : Bool = false,
+) -> BookResult {
+  {
+    task_id,
+    summary,
+    artifacts,
+    memory_candidates,
+    requires_review,
+    notify_town,
+  }
+}
+
+///|
 pub struct PersistResultOutcome {
   log_path : String
   updated_pages : Array[String]
@@ -256,6 +336,35 @@ pub struct BookStateSummary {
 } derive(Show, Eq, ToJson, FromJson)
 
 ///|
+pub fn BookStateSummary::new(
+  book_id~ : String,
+  root~ : String,
+  page_count~ : Int,
+  source_count~ : Int,
+  entity_count~ : Int,
+  concept_count~ : Int,
+  pending_review_count~ : Int,
+  keeper_memory_count~ : Int,
+  keeper_working_count~ : Int,
+  evidence_count~ : Int,
+  summary~ : String,
+) -> BookStateSummary {
+  {
+    book_id,
+    root,
+    page_count,
+    source_count,
+    entity_count,
+    concept_count,
+    pending_review_count,
+    keeper_memory_count,
+    keeper_working_count,
+    evidence_count,
+    summary,
+  }
+}
+
+///|
 pub struct BookHealthReport {
   level : String
   summary : String
@@ -268,200 +377,104 @@ pub struct BookHealthReport {
 } derive(Show, Eq, ToJson, FromJson)
 
 ///|
-pub fn accept_goal(
+pub async fn accept_goal(
   entry : BookCatalogEntry,
   goal : String,
   goal_id? : String? = None,
 ) -> BookGoalAcceptance {
-  let batch = produce_task_batch(entry, goal, goal_id~)
-  if batch.tasks.is_empty() {
-    {
-      goal_id: batch.goal_id,
-      accepted: false,
-      reason: "no book-local tasks produced",
-      task_count: 0,
-      summary: batch.summary,
-    }
-  } else {
-    {
-      goal_id: batch.goal_id,
-      accepted: true,
-      reason: "goal accepted into keeper packet planning",
-      task_count: batch.tasks.length(),
-      summary: batch.summary,
-    }
-  }
+  ignore(goal_id)
+  let json = run_book_json_command(entry, ["accept", entry.workspace_root, goal])
+  @json.from_json(json)
 }
 
 ///|
-pub fn produce_task_batch(
+pub async fn produce_task_batch(
   entry : BookCatalogEntry,
   goal : String,
   goal_id? : String? = None,
 ) -> BookTaskBatch {
-  let normalized_goal_id = goal_id.unwrap_or("goal-\{slugify_text(goal)}")
-  let goal_lower = goal.to_lower()
-  let tasks : Array[BookTask] = []
-  if goal_lower.contains("review") || goal_lower.contains("approve") {
-    tasks.push({
-      id: "\{normalized_goal_id}-review",
-      title: "Review pending book updates",
-      kind: "review",
-      prompt: "Review pending changes for the goal inside \{entry.name}: \{goal}",
-      priority: 100,
-      requires_review: false,
-      target_pages: ["wiki/reviews/pending.md", "wiki/reviews/approved.md"],
-      required_role: Some(@core.WorkerRole::Reviewer),
-    })
-  }
-  if goal_lower.contains("plan") ||
-    goal_lower.contains("next") ||
-    goal_lower.contains("roadmap") {
-    tasks.push({
-      id: "\{normalized_goal_id}-planning",
-      title: "Refresh local planning surfaces",
-      kind: "planning",
-      prompt: "Plan the next book-local revisions for the goal inside \{entry.name}: \{goal}",
-      priority: 95,
-      requires_review: true,
-      target_pages: [
-        "wiki/synthesis/maintenance-plan.md", "wiki/synthesis/map.md",
-      ],
-      required_role: Some(@core.WorkerRole::Planner),
-    })
-  }
-  tasks.push({
-    id: "\{normalized_goal_id}-analysis",
-    title: "Produce domain-local task result",
-    kind: "analysis",
-    prompt: "Use the durable wiki and keeper memory in \{entry.name} without leaking to other books: \{goal}",
-    priority: 85,
-    requires_review: true,
-    target_pages: ["wiki/index.md", "wiki/log.md", "keeper/INSIGHTS.md"],
-    required_role: Some(default_role_for_book(entry)),
-  })
-  if goal_lower.contains("source") ||
-    goal_lower.contains("ingest") ||
-    goal_lower.contains("memory") {
-    tasks.push({
-      id: "\{normalized_goal_id}-ingest",
-      title: "Prepare keeper ingest follow-up",
-      kind: "ingest",
-      prompt: "Inspect source and synthesis pages to prepare keeper ingest follow-up for: \{goal}",
-      priority: 72,
-      requires_review: true,
-      target_pages: ["raw/", "wiki/sources/", "wiki/synthesis/overview.md"],
-      required_role: Some(@core.WorkerRole::Harness),
-    })
-  }
+  ignore(goal_id)
+  let json = run_book_json_command(entry, ["tasks", entry.workspace_root, goal])
+  let external : ExternalBookTaskBatch = @json.from_json(json)
   {
-    goal_id: normalized_goal_id,
-    goal,
-    summary: "book=\{entry.id} workspace=\{entry.workspace_root} tasks=\{tasks.length()} memory=\{entry.memory_scope.to_string()}",
-    tasks,
+    goal_id: external.goal_id,
+    goal: external.goal,
+    summary: external.summary,
+    tasks: external.tasks.map(task => {
+      external_task_to_book_task(entry, task, external.goal)
+    }),
   }
 }
 
 ///|
-pub fn hydrate_worker_context(
+pub async fn hydrate_worker_context(
   entry : BookCatalogEntry,
   task : BookTask,
 ) -> WorkerContextBundle {
-  let context_pages = task.target_pages.map(path => normalize_target_page(path))
-  let skill_paths = entry.skills.map(skill => "skills/\{skill}/SKILL.md")
-  {
-    book_id: entry.id,
-    workspace_root: entry.workspace_root,
-    task_id: task.id,
-    prompt: task.prompt,
-    policy: [
-      "Respect \{entry.name} memory boundaries.",
-      "Do not leak context across books.",
-      "Persist durable knowledge only through keeper review.",
-    ],
-    routines: [
-      "hydrate wiki state", "produce keeper packet output", "stage review-safe results",
-    ],
-    skill_paths,
-    context_pages,
-    active_memory: ["\{entry.name} active memory", "recent keeper conclusions"],
-    user_memory: [
-      "user preference: keep domains isolated", "town preference: packet-first handoff",
-    ],
-    working_memory: [
-      "task kind: \{task.kind}",
-      "priority: \{task.priority.to_string()}",
-    ],
-    memory_summary: "\{entry.name} keeper memory for \{task.title}",
-    output_contract: ["keeper.plan.packet.v1", "book.result.v1"],
-  }
+  let json = run_book_json_command(entry, [
+    "context",
+    entry.workspace_root,
+    task.goal.unwrap_or(task.prompt),
+    "--task",
+    task.id,
+  ])
+  @json.from_json(json)
 }
 
 ///|
-pub fn persist_result(
+pub async fn persist_result(
   entry : BookCatalogEntry,
   result : BookResult,
 ) -> PersistResultOutcome {
-  {
-    log_path: "\{entry.workspace_root}/keeper/logs/\{result.task_id}.md",
-    updated_pages: collect_updated_pages(result.memory_candidates),
-    review_queued: result.requires_review,
-    notify_town: result.notify_town,
-    evidence_id: "evidence-\{entry.id}-\{result.task_id}",
-  }
+  let path = result_temp_path(result.task_id)
+  save_result_file(path, result)
+  let json = run_book_json_command(entry, [
+    "persist",
+    entry.workspace_root,
+    path,
+  ])
+  @json.from_json(json)
 }
 
 ///|
-pub fn summarize_state(entry : BookCatalogEntry) -> BookStateSummary {
-  let base = if entry.id == "finance" { 12 } else { 18 }
-  {
-    book_id: entry.id,
-    root: entry.workspace_root,
-    page_count: base + entry.tags.length() * 3,
-    source_count: base / 2,
-    entity_count: base,
-    concept_count: base - 4,
-    pending_review_count: if entry.id == "finance" {
-      1
-    } else {
-      2
-    },
-    keeper_memory_count: entry.skills.length() + 2,
-    keeper_working_count: entry.tags.length() + 1,
-    evidence_count: base - 6,
-    summary: "\{entry.name} maintains wiki, keeper memory, and review queues under \{entry.workspace_root}",
-  }
+pub async fn summarize_state(entry : BookCatalogEntry) -> BookStateSummary {
+  let json = run_book_json_command(entry, ["summary", entry.workspace_root])
+  @json.from_json(json)
 }
 
 ///|
-pub fn report_health(entry : BookCatalogEntry) -> BookHealthReport {
-  let pending = if entry.id == "finance" { 1 } else { 2 }
-  let low_confidence = if entry.memory_scope == @core.MemoryScope::TaskEphemeral {
-    0
-  } else {
-    2
-  }
-  let issues : Array[String] = []
-  if pending > 1 {
-    issues.push("review queue needs keeper attention")
-  }
-  if low_confidence > 0 {
-    issues.push("low-confidence claims are waiting for review")
-  }
-  {
-    level: if issues.is_empty() {
-      "healthy"
-    } else {
-      "degraded"
-    },
-    summary: "\{entry.name} keeper health snapshot",
-    pending_review_count: pending,
-    low_confidence_claim_count: low_confidence,
-    maintenance_entry_count: entry.tags.length() + 2,
-    keeper_working_count: entry.skills.length() + 1,
-    evidence_count: entry.skills.length() + 3,
-    issues,
-  }
+pub async fn report_health(entry : BookCatalogEntry) -> BookHealthReport {
+  let json = run_book_json_command(entry, ["health", entry.workspace_root])
+  @json.from_json(json)
+}
+
+///|
+pub async fn build_workspace(
+  entry : BookCatalogEntry,
+  moonbook_root? : String = default_moonbook_root(),
+) -> String {
+  ensure_workspace(entry, moonbook_root~)
+  let root = resolved_workspace_root(entry.workspace_root)
+  ignore(
+    @integration.run_checked("moon", [
+      "-C", moonbook_root, "run", "cmd/main", "--", "build", root,
+    ]),
+  )
+  @path.Path(root)
+  .join(@path.Path("book/site/generated/index.html"))
+  .to_string()
+}
+
+///|
+pub fn generated_site_index_path(entry : BookCatalogEntry) -> String {
+  @path.Path(resolved_workspace_root(entry.workspace_root))
+  .join(@path.Path("book/site/generated/index.html"))
+  .to_string()
+}
+
+///|
+pub fn workspace_root(entry : BookCatalogEntry) -> String {
+  resolved_workspace_root(entry.workspace_root)
 }
 
 ///|
@@ -483,44 +496,155 @@ fn normalize_target_page(path : String) -> String {
 }
 
 ///|
-fn collect_updated_pages(candidates : Array[MemoryCandidate]) -> Array[String] {
-  let pages : Array[String] = []
-  for candidate in candidates {
-    match candidate.target_page {
-      Some(page) => if !pages.contains(page) { pages.push(page) }
-      None => ()
-    }
-  }
-  if pages.is_empty() {
-    ["wiki/log.md", "keeper/INSIGHTS.md"]
+fn normalize_catalog(
+  catalog : Array[BookCatalogEntry],
+) -> Array[BookCatalogEntry] {
+  catalog.map(normalize_catalog_entry)
+}
+
+///|
+fn normalize_catalog_entry(entry : BookCatalogEntry) -> BookCatalogEntry {
+  if entry.workspace_root.contains("/workspace/") {
+    { ..entry, workspace_root: default_workspace_root(entry.id) }
+  } else if !entry.workspace_root.has_prefix("/") {
+    { ..entry, workspace_root: resolved_workspace_root(entry.workspace_root) }
   } else {
-    pages
+    entry
   }
 }
 
 ///|
-fn slugify_text(text : String) -> String {
-  let builder = StringBuilder::new()
-  let mut pending_dash = false
-  for char in text.to_lower() {
-    let code = char.to_int()
-    let is_ascii_lower = code >= 'a'.to_int() && code <= 'z'.to_int()
-    let is_ascii_digit = code >= '0'.to_int() && code <= '9'.to_int()
-    if is_ascii_lower || is_ascii_digit {
-      if pending_dash && builder.to_string() != "" {
-        builder.write_char('-')
-      }
-      pending_dash = false
-      builder.write_char(char)
-    } else if builder.to_string() != "" {
-      pending_dash = true
-    }
+fn external_task_to_book_task(
+  entry : BookCatalogEntry,
+  task : ExternalBookTask,
+  goal : String,
+) -> BookTask {
+  {
+    id: task.id,
+    goal: Some(goal),
+    title: task.title,
+    kind: task.kind,
+    prompt: task.prompt,
+    priority: task.priority,
+    requires_review: task.requires_review,
+    target_pages: task.target_pages.map(path => normalize_target_page(path)),
+    required_role: Some(infer_role_for_kind(entry, task.kind)),
   }
-  let slug = builder.to_string()
-  if slug == "" {
-    "goal"
+}
+
+///|
+fn infer_role_for_kind(
+  entry : BookCatalogEntry,
+  kind : String,
+) -> @core.WorkerRole {
+  match kind {
+    "review" => @core.WorkerRole::Reviewer
+    "planning" => @core.WorkerRole::Planner
+    "ingest" => @core.WorkerRole::Harness
+    "ingest-followup" => @core.WorkerRole::Harness
+    _ => default_role_for_book(entry)
+  }
+}
+
+///|
+fn result_temp_path(task_id : String) -> String {
+  resolved_root_path(".moontown/book-results/\{task_id}.json")
+}
+
+///|
+async fn save_result_file(path : String, result : BookResult) -> Unit {
+  ensure_parent_directory(path)
+  @fs.write_file(
+    path,
+    @encoding/utf8.encode(result.to_json().stringify()),
+    create=0o644,
+    truncate=true,
+  )
+}
+
+///|
+async fn ensure_workspace(
+  entry : BookCatalogEntry,
+  moonbook_root? : String = default_moonbook_root(),
+) -> Unit {
+  let root = resolved_workspace_root(entry.workspace_root)
+  let marker = "\{root}/wiki/index.md"
+  if @fs.exists(marker) {
+    let jobs_path = "\{root}/moonclaw.jobs.json"
+    if @fs.exists(jobs_path) {
+      return
+    }
   } else {
-    slug
+    ignore(
+      @integration.run_checked("moon", [
+        "-C", moonbook_root, "run", "cmd/main", "--", "wiki", "init", root,
+      ]),
+    )
+  }
+  ignore(
+    @integration.run_checked("moon", [
+      "-C", moonbook_root, "run", "cmd/main", "--", "wiki", "enable", "moonclaw",
+      root,
+    ]),
+  )
+}
+
+///|
+async fn run_book_json_command(
+  entry : BookCatalogEntry,
+  args : Array[String],
+  moonbook_root? : String = default_moonbook_root(),
+) -> Json {
+  ensure_workspace(entry, moonbook_root~)
+  let root = resolved_workspace_root(entry.workspace_root)
+  @integration.run_json(
+    "moon",
+    [
+      "-C",
+      moonbook_root,
+      "run",
+      "cmd/main",
+      "--",
+      "wiki",
+      "book",
+      ..rewrite_workspace_args(args, root),
+    ],
+  )
+}
+
+///|
+fn rewrite_workspace_args(args : Array[String], root : String) -> Array[String] {
+  if args.is_empty() {
+    return args
+  }
+  let next = args.copy()
+  match next[0] {
+    "accept"
+    | "tasks"
+    | "context"
+    | "persist"
+    | "catalog"
+    | "summary"
+    | "health" => if next.length() >= 2 { next[1] = root }
+    _ => ()
+  }
+  next
+}
+
+///|
+fn resolved_workspace_root(workspace_root : String) -> String {
+  resolved_root_path(workspace_root)
+}
+
+///|
+fn resolved_root_path(path : String) -> String {
+  if path.has_prefix("/") {
+    path
+  } else {
+    match @env.current_dir() {
+      Some(dir) => @path.Path(dir).join(@path.Path(path)).to_string()
+      None => path
+    }
   }
 }
 

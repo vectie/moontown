@@ -19,7 +19,8 @@ Right now, `moontown` is usable as:
 
 - a MoonBit town model
 - a persisted demo bootstrap
-- a packet-first keeper/proposal/run control-plane model
+- a real MoonBook CLI-backed planning and context-hydration boundary
+- a real MoonClaw CLI-backed proposal import boundary
 - a scene-based dashboard
 - a Rabbita simulation frontend
 - a starter asset pipeline
@@ -27,8 +28,8 @@ Right now, `moontown` is usable as:
 It is not yet usable as:
 
 - a real 24/7 autonomous town daemon
-- a real external moonbook process runner
-- a real external moonclaw process runner
+- a full run-status supervisor for long-lived MoonClaw jobs
+- an automatic MoonBook persistence loop after worker completion
 
 So the right way to use the repo today is as a live architectural and frontend
 prototype.
@@ -47,6 +48,7 @@ What you get:
 - current town map summary
 - books, workers, tasks
 - executions with packet / proposal / run ids
+- real failure details when MoonBook or MoonClaw rejects a handoff
 - mayor role summary
 - scheduler tick summary
 - snapshot summary
@@ -79,7 +81,9 @@ Current persistence code:
 - [adapters/moonbook/client.mbt](/Users/kq/Workspace/moontown/adapters/moonbook/client.mbt)
 - [storage/store.mbt](/Users/kq/Workspace/moontown/storage/store.mbt)
 
-If those files do not exist, `moontown` creates them during bootstrap.
+If those files do not exist, `moontown` creates them during bootstrap. It also
+initializes missing MoonBook workspaces and seeds the MoonBook MoonClaw
+extension pack before attempting proposal import.
 
 ## 3. Edit The Town Books
 

@@ -128,7 +128,7 @@ pub struct ExternalProposalPacket {
   skill_paths : Array[String]
   notes : Array[String]
   tags : Array[String]
-  metadata : Array[String]
+  metadata : Json
 } derive(Show, Eq, ToJson, FromJson)
 
 ///|
@@ -151,6 +151,20 @@ pub struct ProposalPollResponse {
   memory_candidates : Array[String]
   requires_review : Bool
   notify_town : Bool
+} derive(Show, Eq, ToJson, FromJson)
+
+///|
+struct RunsIndexFile {
+  runs : Array[StoredRun]
+} derive(Show, Eq, ToJson, FromJson)
+
+///|
+struct StoredRun {
+  id : String
+  workspace_dir : String?
+  status : String
+  summary : String?
+  error : String?
 } derive(Show, Eq, ToJson, FromJson)
 
 ///|
@@ -208,17 +222,37 @@ pub fn proposal_packet_from_bundle(
     summary,
     request_text: bundle.prompt,
     profile,
-    output_contract: bundle.output_contract.join(", "),
+    output_contract: packet_output_contract(bundle.output_contract),
     context_pages: bundle.context_pages,
     skill_paths: bundle.skill_paths,
     notes,
     tags,
-    metadata: [
-      "book_id=\{bundle.book_id}",
-      "workspace_root=\{bundle.workspace_root}",
-      "task_id=\{bundle.task_id}",
-      "memory_summary=\{bundle.memory_summary}",
-    ],
+    metadata: {
+      "producer": "moontown".to_json(),
+      "book_id": bundle.book_id.to_json(),
+      "workspace_root": bundle.workspace_root.to_json(),
+      "task_id": bundle.task_id.to_json(),
+      "memory_summary": bundle.memory_summary.to_json(),
+      "disable_waiting_for_input": true.to_json(),
+      "best_effort_on_missing_input": true.to_json(),
+      "profile_metadata": {
+        "disable_waiting_for_input": true.to_json(),
+        "best_effort_on_missing_input": true.to_json(),
+      },
+      "step_metadata": {
+        "disable_waiting_for_input": true.to_json(),
+        "best_effort_on_missing_input": true.to_json(),
+      },
+    },
+  }
+}
+
+///|
+fn packet_output_contract(lines : Array[String]) -> String {
+  if lines.is_empty() {
+    "Return exactly one JSON object."
+  } else {
+    lines.join("\n")
   }
 }
 
@@ -250,7 +284,7 @@ pub async fn load_packet_file(path : String) -> ExternalProposalPacket? {
 pub fn build_import_command(
   packet_path : String,
   moonclaw_root? : String = "../moonclaw",
-  home? : String = "~/.moonclaw",
+  home? : String = default_moonclaw_home(),
   cwd? : String = ".",
   confirm? : Bool = false,
 ) -> String {
@@ -259,37 +293,74 @@ pub fn build_import_command(
 }
 
 ///|
-pub fn import_packet(
+pub fn build_run_command(
+  run_id : String,
+  moonclaw_root? : String = "../moonclaw",
+  home? : String = default_moonclaw_home(),
+  cwd? : String = ".",
+) -> String {
+  "moon -C \{moonclaw_root} run cmd/main -- proposal run \{run_id} --cwd \{cwd} --home \{home}"
+}
+
+///|
+pub fn default_moonclaw_home() -> String {
+  ".moonclaw"
+}
+
+///|
+pub async fn import_packet(
   packet : ExternalProposalPacket,
   packet_path : String,
   moonclaw_root? : String = "../moonclaw",
-  home? : String = "~/.moonclaw",
+  home? : String = default_moonclaw_home(),
   cwd? : String = ".",
   confirm? : Bool = false,
 ) -> ProposalImportReceipt {
-  let proposal_id = "proposal-\{packet.packet_id}"
-  let run_id = if confirm { Some("run-\{packet.packet_id}") } else { None }
+  let resolved_cwd = resolve_root_path(cwd)
+  let resolved_home = resolve_home_path(home, resolved_cwd)
+  let resolved_packet_path = resolve_packet_path(packet_path)
+  save_packet_file(resolved_packet_path, packet)
+  let args = [
+    "-C",
+    moonclaw_root,
+    "run",
+    "cmd/main",
+    "--",
+    "proposal",
+    "import",
+    resolved_packet_path,
+    "--json",
+    "--cwd",
+    resolved_cwd,
+    "--home",
+    resolved_home,
+    ..if confirm {
+      ["--confirm"]
+    } else {
+      []
+    },
+  ]
+  let command = @integration.render_command("moon", args)
+  let output = @integration.run_json("moon", args)
+  let proposal_id = parse_json_string(output, "proposal_id").unwrap_or(
+    "proposal-\{packet.packet_id}",
+  )
+  let run_id = parse_json_string(output, "run_id")
   {
     packet_id: packet.packet_id,
-    packet_path,
+    packet_path: resolved_packet_path,
     proposal_id,
     run_id,
-    status: if confirm {
+    status: if run_id is Some(_) {
       @core.TaskExecutionStatus::RunConfirmed
     } else {
       @core.TaskExecutionStatus::ProposalImported
     },
-    command: build_import_command(
-      packet_path,
-      moonclaw_root~,
-      home~,
-      cwd~,
-      confirm~,
-    ),
-    summary: if confirm {
-      "Imported \{packet.packet_id} and confirmed a run in MoonClaw."
+    command,
+    summary: if run_id is Some(run_id) {
+      "Imported \{packet.packet_id} into MoonClaw proposal \{proposal_id} and started run \{run_id}."
     } else {
-      "Imported \{packet.packet_id} into MoonClaw proposal storage."
+      "Imported \{packet.packet_id} into MoonClaw proposal storage as \{proposal_id}."
     },
   }
 }
@@ -307,50 +378,57 @@ pub fn confirm_imported_run(
 }
 
 ///|
-pub fn poll_run(
+pub async fn run_confirmed_run(
+  run_id : String,
+  moonclaw_root? : String = "../moonclaw",
+  home? : String = default_moonclaw_home(),
+  cwd? : String = ".",
+) -> String {
+  let resolved_cwd = resolve_root_path(cwd)
+  let resolved_home = resolve_home_path(home, resolved_cwd)
+  let args = [
+    "-C", moonclaw_root, "run", "cmd/main", "--", "proposal", "run", run_id, "--cwd",
+    resolved_cwd, "--home", resolved_home,
+  ]
+  let command = @integration.render_command("moon", args)
+  ignore(@integration.run_checked("moon", args))
+  command
+}
+
+///|
+pub async fn poll_run(
   task_id : String,
   run_id : String,
-  status : @core.TaskExecutionStatus,
+  home? : String = default_moonclaw_home(),
+  cwd? : String = ".",
 ) -> ProposalPollResponse {
-  match status {
-    @core.TaskExecutionStatus::Running =>
+  let resolved_cwd = resolve_root_path(cwd)
+  let resolved_home = resolve_home_path(home, resolved_cwd)
+  match load_run(run_id, resolved_home) {
+    Some(run) => {
+      let workspace_dir = run.workspace_dir.unwrap_or(resolved_cwd)
+      let result_payload = load_run_result_payload(workspace_dir)
+      let status = town_status_for_run_status(run.status)
       {
         task_id,
         run_id,
-        status: @core.TaskExecutionStatus::AwaitingPersistence,
-        summary: "Run \{run_id} finished its keeper execution and is waiting for book persistence.",
-        memory_candidates: [
-          "observation:keeper-finished", "insight:stage-review",
-        ],
-        requires_review: true,
-        notify_town: true,
+        status,
+        summary: run_summary(run, result_payload),
+        memory_candidates: [],
+        requires_review: parse_json_bool(result_payload, "requires_review").unwrap_or(
+          false,
+        ),
+        notify_town: parse_json_bool(result_payload, "notify_town").unwrap_or(
+          status == @core.TaskExecutionStatus::Completed,
+        ),
       }
-    @core.TaskExecutionStatus::AwaitingPersistence =>
-      {
-        task_id,
-        run_id,
-        status: @core.TaskExecutionStatus::ReviewQueued,
-        summary: "Book persistence queued durable review work for \{task_id}.",
-        memory_candidates: ["observation:review-queued"],
-        requires_review: true,
-        notify_town: true,
-      }
-    @core.TaskExecutionStatus::ReviewQueued =>
-      {
-        task_id,
-        run_id,
-        status: @core.TaskExecutionStatus::Completed,
-        summary: "Review queue settled and town can mark \{task_id} complete.",
-        memory_candidates: ["observation:completed"],
-        requires_review: false,
-        notify_town: true,
-      }
-    _ =>
+    }
+    None =>
       {
         task_id,
         run_id,
         status: @core.TaskExecutionStatus::Running,
-        summary: "Run \{run_id} is still executing through MoonClaw.",
+        summary: "Run \{run_id} has not been indexed in MoonClaw yet.",
         memory_candidates: [],
         requires_review: false,
         notify_town: false,
@@ -359,31 +437,128 @@ pub fn poll_run(
 }
 
 ///|
-pub fn stub_spawn(req : SpawnWorkerRequest) -> String {
-  "spawned \{req.worker.id}"
-}
-
-///|
-pub fn stub_assign(req : AssignTaskRequest) -> String {
-  "assigned \{req.assignment.task_id} to \{req.assignment.worker_id} in \{req.workspace_root}"
-}
-
-///|
-pub fn stub_poll(worker_id : String) -> PollWorkerResponse {
-  {
-    worker_id,
-    status: @core.WorkerStatus::Idle,
-    detail: "moonclaw adapter stub",
+fn parse_json_string(json : Json, key : String) -> String? {
+  match json {
+    Object(object) =>
+      match object.get(key) {
+        Some(String(value)) => Some(value)
+        _ => None
+      }
+    _ => None
   }
 }
 
 ///|
-pub fn stub_result(task_id : String) -> TaskResultResponse {
-  {
-    task_id,
-    status: @core.TownTaskStatus::Done,
-    summary: "moonclaw completed the starter task",
-    memory_candidates: ["observation:success"],
+fn parse_json_bool(json : Json, key : String) -> Bool? {
+  match json {
+    Object(object) =>
+      match object.get(key) {
+        Some(True) => Some(true)
+        Some(False) => Some(false)
+        _ => None
+      }
+    _ => None
+  }
+}
+
+///|
+fn resolve_packet_path(packet_path : String) -> String {
+  resolve_root_path(packet_path)
+}
+
+///|
+fn resolve_root_path(path : String) -> String {
+  if path.has_prefix("/") {
+    path
+  } else {
+    match @env.current_dir() {
+      Some(dir) => @path.Path(dir).join(@path.Path(path)).to_string()
+      None => path
+    }
+  }
+}
+
+///|
+fn resolve_home_path(home : String, cwd : String) -> String {
+  if home.has_prefix("/") {
+    home
+  } else {
+    @path.Path(cwd).join(@path.Path(home)).to_string()
+  }
+}
+
+///|
+fn run_store_root(home : String) -> String {
+  @path.Path(home).join(@path.Path("jobs")).to_string()
+}
+
+///|
+async fn load_run(run_id : String, home : String) -> StoredRun? {
+  let path = @path.Path(run_store_root(home))
+    .join(@path.Path("index/runs.json"))
+    .to_string()
+  if !@fs.exists(path) {
+    return None
+  }
+  let text = @fs.read_file(path).text()
+  let parsed = @json.parse(text) catch { _ => return None }
+  let index : RunsIndexFile = @json.from_json(parsed) catch { _ => return None }
+  index.runs.iter().find_first(fn(run) { run.id == run_id })
+}
+
+///|
+async fn load_run_result_payload(workspace_dir : String) -> Json {
+  let path = @path.Path(workspace_dir)
+    .join(@path.Path("result.json"))
+    .to_string()
+  if !@fs.exists(path) {
+    return {}
+  }
+  let text = @fs.read_file(path).text() catch { _ => return {} }
+  @json.parse(text) catch {
+    _ => {}
+  }
+}
+
+///|
+fn town_status_for_run_status(status : String) -> @core.TaskExecutionStatus {
+  match status {
+    "Pending" => @core.TaskExecutionStatus::RunConfirmed
+    "Running" => @core.TaskExecutionStatus::Running
+    "WaitingForInput" => @core.TaskExecutionStatus::Running
+    "Succeeded" => @core.TaskExecutionStatus::Completed
+    "Failed" => @core.TaskExecutionStatus::Failed
+    "Cancelled" => @core.TaskExecutionStatus::Failed
+    _ => @core.TaskExecutionStatus::Running
+  }
+}
+
+///|
+fn run_summary(run : StoredRun, result_payload : Json) -> String {
+  let detail = parse_json_string(result_payload, "summary").unwrap_or(
+    run.summary.unwrap_or(""),
+  )
+  let workspace_suffix = match run.workspace_dir {
+    Some(workspace_dir) => " workspace=\{workspace_dir}"
+    None => ""
+  }
+  match run.status {
+    "Succeeded" =>
+      if detail.is_blank() {
+        "MoonClaw run \{run.id} completed successfully.\{workspace_suffix}"
+      } else {
+        "MoonClaw run \{run.id} completed: \{detail}\{workspace_suffix}"
+      }
+    "Failed" | "Cancelled" =>
+      "MoonClaw run \{run.id} failed: \{run.error.unwrap_or(detail).trim().to_string()}\{workspace_suffix}"
+    "WaitingForInput" =>
+      "MoonClaw run \{run.id} is waiting for input.\{workspace_suffix}"
+    _ =>
+      if detail.is_blank() {
+        "MoonClaw run \{run.id} is \{run.status}.\{workspace_suffix}"
+      } else {
+        "MoonClaw run \{run.id} is \{run.status}: \{detail}\{workspace_suffix}"
+      }
   }
 }
 

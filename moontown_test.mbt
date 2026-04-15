@@ -7,7 +7,7 @@ test "demo state seeds books workers tasks and dispatch events" {
   assert_eq(state.executions.length(), 4)
   assert_eq(state.events.length(), 8)
   assert_true(state.events[0].detail.contains("goal-plan-next-coding"))
-  assert_true(state.events[4].detail.contains("proposal-keeper-coding"))
+  assert_true(state.events[4].detail.contains("proposal=proposal-packet-"))
 }
 
 ///|
@@ -22,7 +22,10 @@ test "dashboard renders town square and dispatch log" {
   assert_true(dashboard.contains("Anomaly Corner"))
   assert_true(dashboard.contains("## Books"))
   assert_true(dashboard.contains("## Workers"))
+  assert_true(dashboard.contains("## Pipeline"))
   assert_true(dashboard.contains("## Executions"))
+  assert_true(dashboard.contains("stage=Review"))
+  assert_true(dashboard.contains("active stage: Review"))
   assert_true(dashboard.contains("## Mayor"))
   assert_true(dashboard.contains("Town Tick"))
   assert_true(dashboard.contains("Snapshot"))
@@ -31,8 +34,8 @@ test "dashboard renders town square and dispatch log" {
 
 ///|
 async test "load or create demo state persists a snapshot" {
-  let path = ".moontown/test-town.json"
-  let state = @moontown.load_or_create_demo_state(path~)
+  let path = ".moontown/test-town-modeled.json"
+  let state = @moontown.load_or_create_modeled_demo_state(path~)
   assert_eq(state.books.length(), 2)
   let snapshot = @storage.load_snapshot_file(path)
   assert_true(snapshot is Some(saved) && saved.event_count == 8)

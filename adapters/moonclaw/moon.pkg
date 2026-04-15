@@ -1,8 +1,10 @@
 import {
   "vectie/moontown/core",
   "vectie/moontown/adapters/moonbook",
+  "vectie/moontown/integration",
   "moonbitlang/async/fs",
   "moonbitlang/core/encoding/utf8" @encoding/utf8,
+  "moonbitlang/core/env" @env,
   "moonbitlang/core/json",
   "moonbitlang/x/path",
 }

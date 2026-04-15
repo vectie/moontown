@@ -216,15 +216,16 @@ Real now:
 - snapshot persistence
 - town model
 - routing model
-- book-harness-shaped moonbook adapter
-- external proposal packet adapter
+- MoonBook CLI-backed planning, context hydration, summary, and health
+- MoonClaw CLI-backed packet import
 - proposal/run lifecycle tracking
 - strategic mayor role adapter
 - dashboard and browser UI model
 
 Stubbed now:
 
-- real process-level execution against external `moonbook` and `moonclaw` repos
+- long-running run-status polling after the initial MoonClaw handoff
+- automatic result persistence back into MoonBook after run completion
 - experiment runtime progression
 - 24/7 supervisor loop
 
@@ -232,8 +233,8 @@ Stubbed now:
 
 The clean next order is:
 
-1. real moonbook planning/hydration/persist integration
-2. town task expansion from book plans
-3. real moonclaw execution integration
-4. daemon patrol and recovery loop
+1. run-status polling and terminal-state ingestion from MoonClaw
+2. result persistence and review queue updates back into MoonBook
+3. daemon patrol and recovery loop
+4. town task expansion from completed book plans
 5. real experiment runtime

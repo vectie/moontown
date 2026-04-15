@@ -143,6 +143,8 @@ Current real pieces:
 
 - catalog read/write
 - catalog-backed `BookProvider`
+- workspace initialization through real `moonbook wiki init`
+- MoonClaw extension seeding through real `moonbook wiki enable moonclaw`
 - `accept_goal(...)`
 - `produce_task_batch(...)`
 - `hydrate_worker_context(...)`
@@ -171,7 +173,7 @@ Current real pieces:
 - `packet_file_path(...)`
 - `proposal_packet_from_bundle(...)`
 - `save_packet_file(...)`
-- `import_packet(...)`
+- `import_packet(...)` via real `moonclaw proposal import --json`
 - `poll_run(...)`
 
 Important public types:

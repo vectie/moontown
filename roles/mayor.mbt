@@ -90,7 +90,7 @@ pub fn Mayor::handoff_to_keeper(
 }
 
 ///|
-pub fn Mayor::prepare_keeper_packet(
+pub async fn Mayor::prepare_keeper_packet(
   self : Mayor,
   entry : @moonbook.BookCatalogEntry,
   task : @moonbook.BookTask,
@@ -98,11 +98,12 @@ pub fn Mayor::prepare_keeper_packet(
 ) -> MayorKeeperPacket {
   let bundle = @moonbook.hydrate_worker_context(entry, task)
   let packet_id = "keeper-\{entry.id}-\{task.id}"
+  let profile = moonclaw_profile_for_task(task)
   let packet = @moonclaw.proposal_packet_from_bundle(
     bundle,
     task.title,
     "Mayor issued a keeper packet for \{entry.name}.",
-    "wiki_ingest_controller",
+    profile,
     packet_id=Some(packet_id),
     notes=["produced by mayor runtime", "book task kind=\{task.kind}"],
     tags=[entry.id, task.kind, "keeper"],
@@ -125,4 +126,14 @@ pub fn keeper_runtime(
   book : @core.BookRef,
 ) -> @moonclaw.EmbeddedMoonclawRuntime {
   @moonclaw.keeper_runtime(book)
+}
+
+///|
+fn moonclaw_profile_for_task(task : @moonbook.BookTask) -> String {
+  match task.kind {
+    "ingest" | "ingest-followup" => "wiki_ingest_controller"
+    "review" | "planning" => "wiki_lint_controller"
+    "analysis" | "synthesis" => "wiki_query_controller"
+    _ => "wiki_query_controller"
+  }
 }

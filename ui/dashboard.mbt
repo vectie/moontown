@@ -57,14 +57,19 @@ pub fn build_dashboard(
     },
     {
       title: "Tasks",
-      lines: town.tasks.map(task => "\{task.id}: \{task.status.to_string()}"),
+      lines: town.tasks.map(task => {
+        let stage = task_stage_label(task)
+        "\{task.id}: \{task.status.to_string()} / stage=\{stage}"
+      }),
     },
+    { title: "Pipeline", lines: build_pipeline_lines(town) },
     {
       title: "Executions",
       lines: town.executions.map(execution => {
         let proposal = execution.proposal_id.unwrap_or("draft")
         let run = execution.run_id.unwrap_or("not-started")
-        "\{execution.task_id}: \{execution.status.to_string()} / proposal=\{proposal} / run=\{run}"
+        let stage = execution_stage_label(town, execution)
+        "\{execution.task_id}: \{execution.status.to_string()} / stage=\{stage} / proposal=\{proposal} / run=\{run}"
       }),
     },
   ]
@@ -180,6 +185,7 @@ fn build_book_house(
   let area = require_area(layout, book_area_key(book.id))
   let worker_count = count_book_workers(town, book.id)
   let task_count = count_book_tasks(town, book.id)
+  let active_stage = active_book_stage(town, book.id)
   {
     key: area.key,
     title: book.name,
@@ -195,6 +201,7 @@ fn build_book_house(
       "workers: \{worker_count}",
       "tasks: \{task_count}",
       "executions: \{count_book_executions(town, book.id)}",
+      "active stage: \{active_stage}",
       "purpose: \{book.purpose}",
     ],
   }
@@ -214,8 +221,9 @@ fn build_worker_yard(
   }
   for execution in town.executions {
     let proposal = execution.proposal_id.unwrap_or("draft")
+    let stage = execution_stage_label(town, execution)
     lines.push(
-      "packet \{execution.packet_id} / \{execution.status.to_string()} / proposal=\{proposal}",
+      "packet \{execution.packet_id} / \{execution.status.to_string()} / stage=\{stage} / proposal=\{proposal}",
     )
   }
   {
@@ -307,6 +315,121 @@ fn join_with_comma(parts : Array[String]) -> String {
     index += 1
   }
   builder.to_string()
+}
+
+///|
+fn build_pipeline_lines(town : @core.TownState) -> Array[String] {
+  let lines : Array[String] = []
+  for task in town.tasks {
+    let execution = find_execution_for_task(town, task.id)
+    let status = execution
+      .map(fn(record) { record.status.to_string() })
+      .unwrap_or("not-started")
+    let stage = execution
+      .map(fn(record) { execution_stage_label(town, record) })
+      .unwrap_or(task_stage_label(task))
+    lines.push("\{task.book_id} / \{stage} / \{task.id} / \{status}")
+  }
+  lines
+}
+
+///|
+fn find_execution_for_task(
+  town : @core.TownState,
+  task_id : String,
+) -> @core.TaskExecutionRecord? {
+  for execution in town.executions {
+    if execution.task_id == task_id {
+      return Some(execution)
+    }
+  }
+  None
+}
+
+///|
+fn active_book_stage(town : @core.TownState, book_id : String) -> String {
+  let priorities = [
+    "Bootstrap", "Source Population", "Review", "Synthesis", "Planning",
+  ]
+  for priority in priorities {
+    for execution in town.executions {
+      if execution.book_id == book_id &&
+        execution_stage_label(town, execution) == priority {
+        return priority
+      }
+    }
+    for task in town.tasks {
+      if task.book_id == book_id && task_stage_label(task) == priority {
+        return priority
+      }
+    }
+  }
+  "Planning"
+}
+
+///|
+fn execution_stage_label(
+  town : @core.TownState,
+  execution : @core.TaskExecutionRecord,
+) -> String {
+  match find_task_by_id(town, execution.task_id) {
+    Some(task) => task_stage_label(task)
+    None => stage_label_for_text(execution.task_id, execution.summary)
+  }
+}
+
+///|
+fn find_task_by_id(town : @core.TownState, task_id : String) -> @core.TownTask? {
+  for task in town.tasks {
+    if task.id == task_id {
+      return Some(task)
+    }
+  }
+  None
+}
+
+///|
+fn task_stage_label(task : @core.TownTask) -> String {
+  stage_label_for_text(task.id, "\{task.title} \{task.prompt}")
+}
+
+///|
+fn stage_label_for_text(primary : String, secondary : String) -> String {
+  let primary_lower = primary.to_lower()
+  let secondary_lower = secondary.to_lower()
+  if contains_stage_token(primary_lower, secondary_lower, ["bootstrap"]) {
+    return "Bootstrap"
+  }
+  if contains_stage_token(primary_lower, secondary_lower, [
+      "ingest", "source", "discover", "populate",
+    ]) {
+    return "Source Population"
+  }
+  if contains_stage_token(primary_lower, secondary_lower, [
+      "review", "approve", "promote", "lint",
+    ]) {
+    return "Review"
+  }
+  if contains_stage_token(primary_lower, secondary_lower, [
+      "query", "synthesis", "answer", "research", "analysis",
+    ]) {
+    return "Synthesis"
+  }
+  "Planning"
+}
+
+///|
+fn contains_stage_token(
+  primary : String,
+  secondary : String,
+  tokens : Array[String],
+) -> Bool {
+  for token in tokens {
+    if primary.contains(token) || secondary.contains(token) {
+      return true
+    }
+  }
+  false
 }
 
 ///|

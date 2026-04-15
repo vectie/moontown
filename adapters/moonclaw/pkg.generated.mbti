@@ -10,11 +10,15 @@ import {
 // Values
 pub fn build_import_command(String, moonclaw_root? : String, home? : String, cwd? : String, confirm? : Bool) -> String
 
+pub fn build_run_command(String, moonclaw_root? : String, home? : String, cwd? : String) -> String
+
 pub fn confirm_imported_run(ProposalImportReceipt) -> ProposalImportReceipt
+
+pub fn default_moonclaw_home() -> String
 
 pub fn default_packet_directory() -> String
 
-pub fn import_packet(ExternalProposalPacket, String, moonclaw_root? : String, home? : String, cwd? : String, confirm? : Bool) -> ProposalImportReceipt
+pub async fn import_packet(ExternalProposalPacket, String, moonclaw_root? : String, home? : String, cwd? : String, confirm? : Bool) -> ProposalImportReceipt
 
 pub fn keeper_runtime(@core.BookRef) -> EmbeddedMoonclawRuntime
 
@@ -26,19 +30,13 @@ pub fn mayor_to_keeper_handoff(String, String, String, constraints? : Array[Stri
 
 pub fn packet_file_path(String, String) -> String
 
-pub fn poll_run(String, String, @core.TaskExecutionStatus) -> ProposalPollResponse
+pub async fn poll_run(String, String, home? : String, cwd? : String) -> ProposalPollResponse
 
 pub fn proposal_packet_from_bundle(@moonbook.WorkerContextBundle, String, String, String, packet_id? : String?, notes? : Array[String], tags? : Array[String]) -> ExternalProposalPacket
 
+pub async fn run_confirmed_run(String, moonclaw_root? : String, home? : String, cwd? : String) -> String
+
 pub async fn save_packet_file(String, ExternalProposalPacket) -> Unit
-
-pub fn stub_assign(AssignTaskRequest) -> String
-
-pub fn stub_poll(String) -> PollWorkerResponse
-
-pub fn stub_result(String) -> TaskResultResponse
-
-pub fn stub_spawn(SpawnWorkerRequest) -> String
 
 pub fn worker_runtime(@core.WorkerRef) -> EmbeddedMoonclawRuntime
 
@@ -138,7 +136,7 @@ pub struct ExternalProposalPacket {
   skill_paths : Array[String]
   notes : Array[String]
   tags : Array[String]
-  metadata : Array[String]
+  metadata : Json
 }
 pub impl Eq for ExternalProposalPacket
 pub impl Show for ExternalProposalPacket
@@ -181,11 +179,23 @@ pub impl Show for ProposalPollResponse
 pub impl ToJson for ProposalPollResponse
 pub impl @json.FromJson for ProposalPollResponse
 
+type RunsIndexFile
+pub impl Eq for RunsIndexFile
+pub impl Show for RunsIndexFile
+pub impl ToJson for RunsIndexFile
+pub impl @json.FromJson for RunsIndexFile
+
 pub struct SpawnWorkerRequest {
   worker : @core.WorkerRef
 }
 pub impl Eq for SpawnWorkerRequest
 pub impl Show for SpawnWorkerRequest
+
+type StoredRun
+pub impl Eq for StoredRun
+pub impl Show for StoredRun
+pub impl ToJson for StoredRun
+pub impl @json.FromJson for StoredRun
 
 pub struct TaskResultResponse {
   task_id : String

@@ -53,7 +53,8 @@ Implemented today:
 
 Still stubbed:
 
-- real process execution against external `moonbook` and `moonclaw` repos
+- long-running run-status polling and completion ingestion from external `moonclaw`
+- automatic result persistence back into external `moonbook` after a completed run
 - long-running daemon patrol and recovery loop
 - experiment lifecycle execution
 - real backend/frontend sync
@@ -69,8 +70,8 @@ So the current repo is a control-plane-first prototype, not yet a fully live
 - `health` anomaly and recovery reporting
 - `scheduler` tick planning
 - `roles` strategic `Mayor` role adapter
-- `adapters/moonbook` persisted book catalog plus book-harness request/result shapes
-- `adapters/moonclaw` embedded runtime profiles plus external proposal packet lifecycle
+- `adapters/moonbook` persisted book catalog plus real MoonBook CLI-backed harness requests
+- `adapters/moonclaw` embedded runtime profiles plus real MoonClaw proposal import boundary
 - `ui` scene layout, dashboard projection, and HTML render bridge
 - `ui/rabbita-town` live browser dashboard with:
   - tick loop

@@ -1,0 +1,35 @@
+// Generated using `moon info`, DON'T EDIT IT
+package "vectie/moontown/integration"
+
+// Values
+pub fn render_command(String, Array[String]) -> String
+
+pub async fn run(String, Array[String], cwd? : String?) -> CompletedCommand
+
+pub async fn run_checked(String, Array[String], cwd? : String?) -> CompletedCommand
+
+pub async fn run_json(String, Array[String], cwd? : String?) -> Json
+
+// Errors
+pub suberror CommandFailed {
+  CommandFailed(CompletedCommand)
+}
+pub impl Show for CommandFailed
+pub impl ToJson for CommandFailed
+
+// Types and methods
+pub struct CompletedCommand {
+  command : String
+  args : Array[String]
+  status : Int
+  stdout : String
+  stderr : String
+}
+pub impl Eq for CompletedCommand
+pub impl Show for CompletedCommand
+pub impl ToJson for CompletedCommand
+
+// Type aliases
+
+// Traits
+
