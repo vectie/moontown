@@ -455,10 +455,11 @@ pub async fn build_workspace(
 ) -> String {
   ensure_workspace(entry, moonbook_root~)
   let root = resolved_workspace_root(entry.workspace_root)
+  let resolved_moonbook_root = resolved_root_path(moonbook_root)
   ignore(
     @integration.run_checked("moon", [
-      "-C", moonbook_root, "run", "cmd/main", "--", "build", root,
-    ]),
+      "run", "cmd/main", "--", "build", root,
+    ], cwd=Some(resolved_moonbook_root)),
   )
   @path.Path(root)
   .join(@path.Path("book/site/generated/index.html"))
@@ -568,8 +569,10 @@ async fn ensure_workspace(
   moonbook_root? : String = default_moonbook_root(),
 ) -> Unit {
   let root = resolved_workspace_root(entry.workspace_root)
+  let resolved_moonbook_root = resolved_root_path(moonbook_root)
   let marker = "\{root}/wiki/index.md"
   if @fs.exists(marker) {
+    ensure_workspace_build_dirs(root)
     let jobs_path = "\{root}/moonclaw.jobs.json"
     if @fs.exists(jobs_path) {
       return
@@ -577,15 +580,16 @@ async fn ensure_workspace(
   } else {
     ignore(
       @integration.run_checked("moon", [
-        "-C", moonbook_root, "run", "cmd/main", "--", "wiki", "init", root,
-      ]),
+        "run", "cmd/main", "--", "wiki", "init", root,
+      ], cwd=Some(resolved_moonbook_root)),
     )
+    ensure_workspace_build_dirs(root)
   }
   ignore(
     @integration.run_checked("moon", [
-      "-C", moonbook_root, "run", "cmd/main", "--", "wiki", "enable", "moonclaw",
+      "run", "cmd/main", "--", "wiki", "enable", "moonclaw",
       root,
-    ]),
+    ], cwd=Some(resolved_moonbook_root)),
   )
 }
 
@@ -597,11 +601,10 @@ async fn run_book_json_command(
 ) -> Json {
   ensure_workspace(entry, moonbook_root~)
   let root = resolved_workspace_root(entry.workspace_root)
+  let resolved_moonbook_root = resolved_root_path(moonbook_root)
   @integration.run_json(
     "moon",
     [
-      "-C",
-      moonbook_root,
       "run",
       "cmd/main",
       "--",
@@ -609,7 +612,29 @@ async fn run_book_json_command(
       "book",
       ..rewrite_workspace_args(args, root),
     ],
+    cwd=Some(resolved_moonbook_root),
   )
+}
+
+///|
+async fn ensure_workspace_build_dirs(root : String) -> Unit {
+  let marker = "\{root}/book/site/generated/.gitkeep"
+  ensure_parent_directory(marker)
+  if !@fs.exists("\{root}/book") {
+    @fs.mkdir("\{root}/book", permission=0o755) catch {
+      _ => ()
+    }
+  }
+  if !@fs.exists("\{root}/book/site") {
+    @fs.mkdir("\{root}/book/site", permission=0o755) catch {
+      _ => ()
+    }
+  }
+  if !@fs.exists("\{root}/book/site/generated") {
+    @fs.mkdir("\{root}/book/site/generated", permission=0o755) catch {
+      _ => ()
+    }
+  }
 }
 
 ///|
