@@ -77,10 +77,13 @@ So the current repo is a control-plane-first prototype, not yet a fully live
   - tick loop
   - pause/resume/step controls
   - strategy switching
+  - runtime summary bar
+  - packet/import/run/persist/review stage rail
   - moving worker avatars
   - selection and inspector state
   - budget/energy/pressure/stability metrics
   - activity feed and anomaly surfacing
+  - scroll-safe scene viewport on smaller screens
 
 ## Main Subsystems
 
@@ -252,13 +255,20 @@ engine, but it is already game-adjacent in structure:
 - live tick loop
 - moving worker avatars
 - packet / proposal / run lifecycle visibility
+- stage-by-stage execution rail
 - strategy controls
 - resource feedback loops
 - selection and inspector state
 - activity and anomaly visibility
+- responsive scene viewport with scroll instead of clipping
 
 The current frontend is best understood as a live simulation dashboard over the
 town model.
+
+The generated MoonBook workspace site is a separate surface. If a live run
+still shows generic branding or dead projection links under
+`.moontown/books/*/site/`, that bug belongs to the MoonBook site generator, not
+to the Moontown Rabbita dashboard.
 
 ## Docs
 

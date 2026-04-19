@@ -20,14 +20,22 @@ It currently includes:
 - live tick loop
 - pause/resume/step controls
 - strategy switching
+- runtime summary bar
+- packet/import/run/persist/review stage rail
 - scene-based selection and inspector state
 - moving worker avatars
 - packet/proposal/run lifecycle visibility
 - budget/energy/pressure/stability metrics
 - activity feed and anomaly surfacing
+- responsive scroll-safe scene viewport
+- stronger keyboard focus visibility
 
 The current frontend model is still local/demo-driven. It is not yet attached to
 a real town backend.
+
+This package owns the Moontown operator dashboard only. It does not own the
+generated MoonBook site that appears under live workspace directories such as
+`.moontown/books/coding/site/`.
 
 Run locally from this directory:
 

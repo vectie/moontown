@@ -707,6 +707,145 @@ fn render_meter(label : String, value : Int, tone : String) -> @rabbita.Html {
 }
 
 ///|
+fn count_workers_by_status(
+  workers : Array[WorkerSim],
+  status : @core.WorkerStatus,
+) -> Int {
+  let mut count = 0
+  for worker in workers {
+    if worker.status == status {
+      count += 1
+    }
+  }
+  count
+}
+
+///|
+fn runtime_stat_chip(
+  label : String,
+  value : Int,
+  class_name : String,
+) -> @rabbita.Html {
+  article(class="runtime-stat \{class_name}", [
+    p(class="metric-label", label),
+    p(class="runtime-stat-value", value.to_string()),
+  ])
+}
+
+///|
+fn render_runtime_bar(
+  model : Model,
+  workers : Array[WorkerSim],
+  executions : Array[@core.TaskExecutionRecord],
+) -> @rabbita.Html {
+  let running_workers = count_workers_by_status(
+    workers,
+    @core.WorkerStatus::Running,
+  )
+  let blocked_workers = count_workers_by_status(
+    workers,
+    @core.WorkerStatus::Blocked,
+  )
+  let review_count = count_execution_status(
+    executions,
+    @core.TaskExecutionStatus::ReviewQueued,
+  )
+  let persistence_count = count_execution_status(
+    executions,
+    @core.TaskExecutionStatus::AwaitingPersistence,
+  )
+  let completed_count = count_execution_status(
+    executions,
+    @core.TaskExecutionStatus::Completed,
+  )
+  section(class="runtime-bar", [
+    div(class="runtime-head", [
+      div(class="runtime-copy", [
+        p(class="eyebrow", "Live Surface"),
+        h2("Town traffic, keeper queue, and review flow"),
+        p(
+          class="summary",
+          "The mayor loop stays visible while packets move through import, execution, persistence, and review.",
+        ),
+      ]),
+      div(class="runtime-status", [
+        status_chip(
+          if model.paused {
+            "Simulation paused"
+          } else {
+            "Simulation live"
+          },
+          if model.paused {
+            "chip-alert"
+          } else {
+            "chip-live"
+          },
+        ),
+        status_chip("Workers online: \{workers.length()}", "chip-neutral"),
+      ]),
+    ]),
+    div(class="runtime-grid", [
+      runtime_stat_chip("Running", running_workers, "runtime-running"),
+      runtime_stat_chip("Blocked", blocked_workers, "runtime-blocked"),
+      runtime_stat_chip("Persisting", persistence_count, "runtime-persisting"),
+      runtime_stat_chip("Review", review_count, "runtime-review"),
+      runtime_stat_chip("Completed", completed_count, "runtime-completed"),
+    ]),
+  ])
+}
+
+///|
+fn execution_stage_cards(
+  executions : Array[@core.TaskExecutionRecord],
+) -> Array[@rabbita.Html] {
+  [
+    runtime_stat_chip(
+      "Packets",
+      count_execution_status(executions, @core.TaskExecutionStatus::PacketReady),
+      "runtime-packets",
+    ),
+    runtime_stat_chip(
+      "Imported",
+      count_execution_status(
+        executions,
+        @core.TaskExecutionStatus::ProposalImported,
+      ),
+      "runtime-imported",
+    ),
+    runtime_stat_chip(
+      "Running",
+      count_execution_status(executions, @core.TaskExecutionStatus::Running) +
+      count_execution_status(
+        executions,
+        @core.TaskExecutionStatus::RunConfirmed,
+      ),
+      "runtime-running",
+    ),
+    runtime_stat_chip(
+      "Persisting",
+      count_execution_status(
+        executions,
+        @core.TaskExecutionStatus::AwaitingPersistence,
+      ),
+      "runtime-persisting",
+    ),
+    runtime_stat_chip(
+      "Review",
+      count_execution_status(
+        executions,
+        @core.TaskExecutionStatus::ReviewQueued,
+      ),
+      "runtime-review",
+    ),
+    runtime_stat_chip(
+      "Done",
+      count_execution_status(executions, @core.TaskExecutionStatus::Completed),
+      "runtime-completed",
+    ),
+  ]
+}
+
+///|
 fn render_strategy_button(
   dispatch : Dispatch[Msg],
   current : Strategy,
@@ -1084,6 +1223,7 @@ fn render_scene(dispatch : Dispatch[Msg], model : Model) -> @rabbita.Html {
   let executions = state.executions
   let alerts = all_alerts(scene, model)
   let scene_style = ["width: \{scene.width}px", "height: \{scene.height}px"]
+  let scene_frame_style = ["--scene-width: \{scene.width}px"]
   let selected_node_key = match model.selection {
     Node(node_key) => Some(node_key)
     _ => None
@@ -1124,24 +1264,38 @@ fn render_scene(dispatch : Dispatch[Msg], model : Model) -> @rabbita.Html {
       render_meter("Queue Pressure", model.pressure, "tone-pressure"),
       render_meter("Town Stability", model.stability, "tone-stability"),
     ]),
+    render_runtime_bar(model, workers, executions),
     main_(class="town-main", [
       div(class="scene-column", [
-        div(class="scene-frame", style=scene_style, [
-          img(
-            class="scene-background",
-            src=scene.background_path,
-            alt="\{scene.title} background",
-            loading="eager",
-            no_children(),
+        section(class="scene-frame-shell", [
+          div(class="scene-stage-rail", execution_stage_cards(executions)),
+          p(
+            class="scene-hint",
+            "Scroll the viewport on smaller screens, then select a zone or worker to inspect the live pipeline state.",
           ),
-          div(class="scene-overlay", [
-            div(
-              class="scene-nodes-layer",
-              scene.nodes.map(node => {
-                render_node(dispatch, node, selected_node_key == Some(node.key))
-              }),
-            ),
-            div(class="scene-workers-layer", worker_avatars),
+          div(class="scene-frame", style=scene_frame_style, [
+            div(class="scene-stage", style=scene_style, [
+              img(
+                class="scene-background",
+                src=scene.background_path,
+                alt="\{scene.title} background",
+                loading="eager",
+                no_children(),
+              ),
+              div(class="scene-overlay", [
+                div(
+                  class="scene-nodes-layer",
+                  scene.nodes.map(node => {
+                    render_node(
+                      dispatch,
+                      node,
+                      selected_node_key == Some(node.key),
+                    )
+                  }),
+                ),
+                div(class="scene-workers-layer", worker_avatars),
+              ]),
+            ]),
           ]),
         ]),
       ]),

@@ -56,6 +56,8 @@ Implemented:
 
 - periodic ticks
 - pause/resume/step controls
+- runtime summary bar
+- execution stage rail
 - packet/proposal/run lifecycle visibility
 - execution status projection from `TownState.executions`
 - strategy modes
@@ -70,6 +72,8 @@ Implemented:
 - moving worker avatars
 - selection and inspection
 - activity feed
+- keyboard focus-visible affordances
+- responsive scene viewport with internal scroll
 - command actions
   - inject budget
   - relieve queue
@@ -102,6 +106,9 @@ The current status vocabulary is:
 
 Those states are surfaced through the dashboard cards, scene summary, and live
 activity feed.
+
+They are also surfaced in the Rabbita runtime bar and stage rail so the browser
+view reads as an operator surface rather than a static postcard.
 
 ## Assets
 
@@ -154,6 +161,21 @@ For frontend-only iteration, at minimum run:
 ```bash
 ./scripts/build-rabbita-ui.sh
 ```
+
+## UI Ownership Boundary
+
+This repo owns:
+
+- town scene layout
+- dashboard projection
+- Rabbita interaction and styling
+
+This repo does not own the generated MoonBook workspace site under live runtime
+directories such as `.moontown/books/coding/site/`.
+
+If that generated site shows generic branding or broken projection links, the
+fix belongs in `moonbook`'s site generator/templates, not in the Moontown
+frontend package.
 
 ## What Is Still Missing
 

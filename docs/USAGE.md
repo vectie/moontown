@@ -325,12 +325,23 @@ Current live metrics:
 - pressure
 - stability
 
+Current dashboard surfaces:
+
+- runtime summary bar
+- packet/import/run/persist/review stage rail
+- scene viewport with worker movement
+- inspector sidebar
+- activity feed
+
 Current visual behaviors:
 
 - moving worker avatars
 - activity feed
 - anomaly surfacing
 - scene selection/inspector
+
+On narrower screens, the scene now scrolls internally instead of clipping the
+town layout.
 
 This is currently local simulation state, not backend-synced town state.
 
@@ -373,6 +384,12 @@ Stubbed now:
 - real process execution against external moonbook/moonclaw CLIs
 - experiment runtime loop
 - 24/7 daemon supervision
+
+Separate ownership note:
+
+- the Rabbita town dashboard belongs to `moontown`
+- the generated workspace website under `.moontown/books/*/site/` belongs to
+  `moonbook`
 
 So the correct expectation is:
 
