@@ -57,3 +57,41 @@ test "scene html includes positioned nodes and assets" {
   assert_true(html.contains("ui/assets/buildings/city-hall.svg"))
   assert_true(html.contains("node-book-house"))
 }
+
+///|
+test "scene render supports dynamic research books" {
+  let state = @core.empty_state(
+    @core.TownConfig::new(id="moonrise", name="Moontown / Moonrise"),
+  )
+  for
+    book in [
+      @core.BookRef::new(
+        id="research-moontown",
+        name="Moonbook / Research / Moontown",
+        purpose="Research lane for Moontown.",
+        workspace_root="/workspace/research-moontown",
+      ),
+      @core.BookRef::new(
+        id="research-moonbook",
+        name="Moonbook / Research / MoonBook",
+        purpose="Research lane for MoonBook.",
+        workspace_root="/workspace/research-moonbook",
+      ),
+      @core.BookRef::new(
+        id="research-moonclaw",
+        name="Moonbook / Research / MoonClaw",
+        purpose="Research lane for MoonClaw.",
+        workspace_root="/workspace/research-moonclaw",
+      ),
+    ] {
+    state.register_book(book)
+  }
+  let html = @ui.render_scene_html(
+    @ui.build_scene_render(
+      @ui.build_dashboard(state, @health.inspect_town(state)),
+    ),
+  )
+  assert_true(html.contains("data-node=\"book-research-moontown\""))
+  assert_true(html.contains("data-node=\"book-research-moonbook\""))
+  assert_true(html.contains("data-node=\"book-research-moonclaw\""))
+}

@@ -63,6 +63,7 @@ pub(all) enum TaskExecutionStatus {
   AwaitingPersistence
   ReviewQueued
   Completed
+  Stale
   Failed
 } derive(Show, Eq, ToJson, FromJson)
 
@@ -197,6 +198,11 @@ pub struct TaskExecutionRecord {
   context_pages : Array[String]
   skill_paths : Array[String]
   last_command : String?
+  assigned_worker_id : String?
+  attempt : Int
+  heartbeat_tick : Int
+  stale_after_tick : Int
+  next_retry_tick : Int?
   requires_review : Bool
   notify_town : Bool
 } derive(Show, Eq, ToJson, FromJson)
@@ -215,6 +221,11 @@ pub fn TaskExecutionRecord::new(
   context_pages? : Array[String] = [],
   skill_paths? : Array[String] = [],
   last_command? : String? = None,
+  assigned_worker_id? : String? = None,
+  attempt? : Int = 1,
+  heartbeat_tick? : Int = 0,
+  stale_after_tick? : Int = 3,
+  next_retry_tick? : Int? = None,
   requires_review? : Bool = false,
   notify_town? : Bool = false,
 ) -> TaskExecutionRecord {
@@ -231,6 +242,11 @@ pub fn TaskExecutionRecord::new(
     context_pages,
     skill_paths,
     last_command,
+    assigned_worker_id,
+    attempt,
+    heartbeat_tick,
+    stale_after_tick,
+    next_retry_tick,
     requires_review,
     notify_town,
   }
@@ -307,6 +323,45 @@ pub fn TownState::register_execution(
 }
 
 ///|
+pub fn TownState::replace_execution(
+  self : TownState,
+  execution : TaskExecutionRecord,
+) -> Unit {
+  for index in 0..<self.executions.length() {
+    if self.executions[index].task_id == execution.task_id {
+      self.executions[index] = execution
+      return
+    }
+  }
+  self.executions.push(execution)
+}
+
+///|
+pub fn TownState::replace_task(self : TownState, task : TownTask) -> Unit {
+  for index in 0..<self.tasks.length() {
+    if self.tasks[index].id == task.id {
+      self.tasks[index] = task
+      return
+    }
+  }
+  self.tasks.push(task)
+}
+
+///|
+pub fn TownState::set_worker_status(
+  self : TownState,
+  worker_id : String,
+  status : WorkerStatus,
+) -> Unit {
+  for index in 0..<self.workers.length() {
+    if self.workers[index].id == worker_id {
+      self.workers[index] = { ..self.workers[index], status, }
+      return
+    }
+  }
+}
+
+///|
 pub fn TownState::record_event(self : TownState, event : TownEvent) -> Unit {
   self.events.push(event)
 }
@@ -319,6 +374,16 @@ pub fn find_execution(
   for execution in town.executions {
     if execution.task_id == task_id {
       return Some(execution)
+    }
+  }
+  None
+}
+
+///|
+pub fn find_task(town : TownState, task_id : String) -> TownTask? {
+  for task in town.tasks {
+    if task.id == task_id {
+      return Some(task)
     }
   }
   None

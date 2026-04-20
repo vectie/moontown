@@ -10,6 +10,8 @@ pub fn empty_state(TownConfig) -> TownState
 
 pub fn find_execution(TownState, String) -> TaskExecutionRecord?
 
+pub fn find_task(TownState, String) -> TownTask?
+
 // Errors
 
 // Types and methods
@@ -82,10 +84,15 @@ pub struct TaskExecutionRecord {
   context_pages : Array[String]
   skill_paths : Array[String]
   last_command : String?
+  assigned_worker_id : String?
+  attempt : Int
+  heartbeat_tick : Int
+  stale_after_tick : Int
+  next_retry_tick : Int?
   requires_review : Bool
   notify_town : Bool
 }
-pub fn TaskExecutionRecord::new(task_id~ : String, book_id~ : String, packet_id~ : String, packet_path~ : String, proposal_id? : String?, run_id? : String?, status~ : TaskExecutionStatus, summary~ : String, output_contract~ : String, context_pages? : Array[String], skill_paths? : Array[String], last_command? : String?, requires_review? : Bool, notify_town? : Bool) -> Self
+pub fn TaskExecutionRecord::new(task_id~ : String, book_id~ : String, packet_id~ : String, packet_path~ : String, proposal_id? : String?, run_id? : String?, status~ : TaskExecutionStatus, summary~ : String, output_contract~ : String, context_pages? : Array[String], skill_paths? : Array[String], last_command? : String?, assigned_worker_id? : String?, attempt? : Int, heartbeat_tick? : Int, stale_after_tick? : Int, next_retry_tick? : Int?, requires_review? : Bool, notify_town? : Bool) -> Self
 pub impl Eq for TaskExecutionRecord
 pub impl Show for TaskExecutionRecord
 pub impl ToJson for TaskExecutionRecord
@@ -99,6 +106,7 @@ pub(all) enum TaskExecutionStatus {
   AwaitingPersistence
   ReviewQueued
   Completed
+  Stale
   Failed
 }
 pub impl Eq for TaskExecutionStatus
@@ -146,6 +154,9 @@ pub fn TownState::record_event(Self, TownEvent) -> Unit
 pub fn TownState::register_book(Self, BookRef) -> Unit
 pub fn TownState::register_execution(Self, TaskExecutionRecord) -> Unit
 pub fn TownState::register_worker(Self, WorkerRef) -> Unit
+pub fn TownState::replace_execution(Self, TaskExecutionRecord) -> Unit
+pub fn TownState::replace_task(Self, TownTask) -> Unit
+pub fn TownState::set_worker_status(Self, String, WorkerStatus) -> Unit
 pub impl Eq for TownState
 pub impl Show for TownState
 pub impl ToJson for TownState

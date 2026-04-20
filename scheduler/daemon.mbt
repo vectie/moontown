@@ -41,6 +41,7 @@ fn execution_action_kind(execution : @core.TaskExecutionRecord) -> String {
     @core.TaskExecutionStatus::AwaitingPersistence => "persist-result"
     @core.TaskExecutionStatus::ReviewQueued => "review-sync"
     @core.TaskExecutionStatus::Completed => "archive"
+    @core.TaskExecutionStatus::Stale => "recover-stale"
     @core.TaskExecutionStatus::Failed => "recovery"
   }
 }

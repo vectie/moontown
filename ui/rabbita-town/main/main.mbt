@@ -605,6 +605,8 @@ fn execution_summary(
       "Keeper review queued after persistence."
     @core.TaskExecutionStatus::Completed =>
       "Packet, run, and review loop completed."
+    @core.TaskExecutionStatus::Stale =>
+      "Mayor marked the execution stale and queued a recovery decision."
     @core.TaskExecutionStatus::Failed =>
       "Execution failed and the town should recover or retry."
   }
@@ -1026,6 +1028,12 @@ fn feed_items(
           detail: "Town should keep the proposal chain visible until review sync settles.",
           tone: "alert",
         })
+      @core.TaskExecutionStatus::Stale =>
+        feed.push({
+          title: "\{execution.task_id} went stale",
+          detail: "Mayor supervision should recover the missed heartbeat or retry the lane.",
+          tone: "alert",
+        })
       @core.TaskExecutionStatus::Failed =>
         feed.push({
           title: "\{execution.task_id} failed",
@@ -1343,6 +1351,7 @@ fn running_execution_count(
       | @core.TaskExecutionStatus::Running
       | @core.TaskExecutionStatus::AwaitingPersistence
       | @core.TaskExecutionStatus::ReviewQueued => count += 1
+      | @core.TaskExecutionStatus::Stale => count += 1
       _ => ()
     }
   }
@@ -1362,6 +1371,7 @@ fn node_matches_execution(
       status == @core.TaskExecutionStatus::RunConfirmed
     "anomaly-corner" =>
       status == @core.TaskExecutionStatus::Failed ||
+      status == @core.TaskExecutionStatus::Stale ||
       status == @core.TaskExecutionStatus::ReviewQueued
     "book-coding" => book_id == "coding"
     "book-finance" => book_id == "finance"

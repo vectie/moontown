@@ -579,6 +579,7 @@ pub fn mayor_runtime() -> EmbeddedMoonclawRuntime {
       "town-registry", "event-log", "scheduler-state", "health-state",
     ],
     skills=[
+      "skills/mayor-goal-decomposition/SKILL.md", "skills/mayor-supervision/SKILL.md",
       "routing", "scheduling", "experiment-design", "safety-policy", "health-triage",
     ],
     output_contract=Some("mayor.dispatch.packet.v1"),

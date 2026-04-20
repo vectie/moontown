@@ -23,8 +23,10 @@ pub fn Mayor::decide_dispatch(Self, @core.TownState, @core.TownTask) -> MayorDis
 pub fn Mayor::handoff_to_keeper(Self, @core.BookRef, String, String, constraints? : Array[String]) -> @moonclaw.EmbeddedRuntimeHandoff
 pub fn Mayor::new() -> Self
 pub fn Mayor::patrol(Self, @core.TownState) -> MayorPatrolPacket
+pub fn Mayor::plan_goal(Self, Array[@moonbook.BookCatalogEntry], String, explicit_book_id? : String?) -> MayorGoalPlan
 pub async fn Mayor::prepare_keeper_packet(Self, @moonbook.BookCatalogEntry, @moonbook.BookTask, packet_dir? : String) -> MayorKeeperPacket
 pub fn Mayor::runtime(Self) -> @moonclaw.EmbeddedMoonclawRuntime
+pub fn Mayor::supervise(Self, @core.TownState, Int) -> MayorSupervisionPacket
 pub impl Eq for Mayor
 pub impl Show for Mayor
 
@@ -35,6 +37,24 @@ pub struct MayorDispatchPacket {
 }
 pub impl Eq for MayorDispatchPacket
 pub impl Show for MayorDispatchPacket
+
+pub struct MayorGoalLane {
+  entry : @moonbook.BookCatalogEntry
+  objective : String
+  rationale : String
+}
+pub impl Eq for MayorGoalLane
+pub impl Show for MayorGoalLane
+
+pub struct MayorGoalPlan {
+  output_contract : String
+  prompt : String
+  parallelizable : Bool
+  summary : String
+  lanes : Array[MayorGoalLane]
+}
+pub impl Eq for MayorGoalPlan
+pub impl Show for MayorGoalPlan
 
 pub struct MayorKeeperPacket {
   handoff : @moonclaw.EmbeddedRuntimeHandoff
@@ -54,6 +74,25 @@ pub struct MayorPatrolPacket {
 }
 pub impl Eq for MayorPatrolPacket
 pub impl Show for MayorPatrolPacket
+
+pub struct MayorSupervisionDirective {
+  kind : String
+  task_id : String
+  execution_status : @core.TaskExecutionStatus
+  detail : String
+  next_retry_tick : Int?
+}
+pub impl Eq for MayorSupervisionDirective
+pub impl Show for MayorSupervisionDirective
+
+pub struct MayorSupervisionPacket {
+  output_contract : String
+  tick : Int
+  summary : String
+  directives : Array[MayorSupervisionDirective]
+}
+pub impl Eq for MayorSupervisionPacket
+pub impl Show for MayorSupervisionPacket
 
 // Type aliases
 

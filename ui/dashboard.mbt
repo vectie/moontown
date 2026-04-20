@@ -118,8 +118,16 @@ fn build_town_map(
   let places : Array[TownMapPlace] = []
   places.push(build_gate(layout, town))
   places.push(build_city_hall(layout, town, report))
-  for book in town.books {
-    places.push(build_book_house(layout, town, book))
+  for index in 0..<town.books.length() {
+    places.push(
+      build_book_house(
+        layout,
+        town,
+        town.books[index],
+        index,
+        town.books.length(),
+      ),
+    )
   }
   places.push(build_worker_yard(layout, town))
   places.push(build_anomaly_corner(layout, report))
@@ -181,8 +189,10 @@ fn build_book_house(
   layout : TownSceneLayout,
   town : @core.TownState,
   book : @core.BookRef,
+  index : Int,
+  total_books : Int,
 ) -> TownMapPlace {
-  let area = require_area(layout, book_area_key(book.id))
+  let area = area_for_book(layout, book, index, total_books)
   let worker_count = count_book_workers(town, book.id)
   let task_count = count_book_tasks(town, book.id)
   let active_stage = active_book_stage(town, book.id)
@@ -269,12 +279,66 @@ fn build_anomaly_corner(
 }
 
 ///|
-fn book_area_key(book_id : String) -> String {
-  match book_id {
-    "coding" => "book-coding"
-    "finance" => "book-finance"
-    _ => "worker-yard"
+fn area_for_book(
+  layout : TownSceneLayout,
+  book : @core.BookRef,
+  index : Int,
+  total_books : Int,
+) -> SceneArea {
+  match book.id {
+    "coding" =>
+      if total_books <= 2 {
+        require_area(layout, "book-coding")
+      } else {
+        dynamic_book_area(book, index, total_books)
+      }
+    "finance" =>
+      if total_books <= 2 {
+        require_area(layout, "book-finance")
+      } else {
+        dynamic_book_area(book, index, total_books)
+      }
+    _ => dynamic_book_area(book, index, total_books)
   }
+}
+
+///|
+fn dynamic_book_area(
+  book : @core.BookRef,
+  index : Int,
+  total_books : Int,
+) -> SceneArea {
+  let columns = if total_books <= 3 { total_books } else { 3 }
+  let safe_columns = if columns < 1 { 1 } else { columns }
+  let row = index / safe_columns
+  let column = index % safe_columns
+  let gap = 32
+  let width = 250
+  let height = 180
+  let content_width = safe_columns * width + (safe_columns - 1) * gap
+  let start_x = 640 - content_width / 2
+  let x = start_x + column * (width + gap)
+  let y = 250 + row * 190
+  {
+    key: "book-\{book.id}",
+    title: book.name,
+    kind: BookHouse,
+    x,
+    y,
+    width,
+    height,
+    asset_keys: dynamic_book_asset_keys(index),
+  }
+}
+
+///|
+fn dynamic_book_asset_keys(index : Int) -> Array[String] {
+  let building = if index % 2 == 0 {
+    "book-house-coding"
+  } else {
+    "book-house-finance"
+  }
+  [building, "keeper-claw"]
 }
 
 ///|
@@ -487,7 +551,8 @@ fn running_like_count(town : @core.TownState) -> Int {
       @core.TaskExecutionStatus::RunConfirmed
       | @core.TaskExecutionStatus::Running
       | @core.TaskExecutionStatus::AwaitingPersistence
-      | @core.TaskExecutionStatus::ReviewQueued => count += 1
+      | @core.TaskExecutionStatus::ReviewQueued
+      | @core.TaskExecutionStatus::Stale => count += 1
       _ => ()
     }
   }

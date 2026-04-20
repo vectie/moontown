@@ -90,6 +90,11 @@ fn detect_anomalies(
           title: "execution-failed",
           detail: "\{execution.task_id} failed after packet \{execution.packet_id}",
         })
+      @core.TaskExecutionStatus::Stale =>
+        anomalies.push({
+          title: "execution-stale",
+          detail: "\{execution.task_id} missed heartbeat and needs mayor recovery",
+        })
       @core.TaskExecutionStatus::ReviewQueued =>
         anomalies.push({
           title: "review-queued",
@@ -131,6 +136,7 @@ fn book_level(town : @core.TownState, book_id : String) -> HealthLevel {
     }
     match execution.status {
       @core.TaskExecutionStatus::Failed => return Critical
+      @core.TaskExecutionStatus::Stale => return Critical
       @core.TaskExecutionStatus::ReviewQueued => return Degraded
       _ => ()
     }

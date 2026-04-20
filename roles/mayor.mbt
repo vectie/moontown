@@ -21,6 +21,39 @@ pub struct MayorDispatchPacket {
 } derive(Show, Eq)
 
 ///|
+pub struct MayorGoalLane {
+  entry : @moonbook.BookCatalogEntry
+  objective : String
+  rationale : String
+} derive(Show, Eq)
+
+///|
+pub struct MayorGoalPlan {
+  output_contract : String
+  prompt : String
+  parallelizable : Bool
+  summary : String
+  lanes : Array[MayorGoalLane]
+} derive(Show, Eq)
+
+///|
+pub struct MayorSupervisionDirective {
+  kind : String
+  task_id : String
+  execution_status : @core.TaskExecutionStatus
+  detail : String
+  next_retry_tick : Int?
+} derive(Show, Eq)
+
+///|
+pub struct MayorSupervisionPacket {
+  output_contract : String
+  tick : Int
+  summary : String
+  directives : Array[MayorSupervisionDirective]
+} derive(Show, Eq)
+
+///|
 pub fn Mayor::decide_dispatch(
   self : Mayor,
   state : @core.TownState,
@@ -39,6 +72,74 @@ pub fn Mayor::decide_dispatch(
       "mayor.dispatch.packet.v1",
     ),
     rationale,
+  }
+}
+
+///|
+pub fn Mayor::plan_goal(
+  self : Mayor,
+  catalog : Array[@moonbook.BookCatalogEntry],
+  goal : String,
+  explicit_book_id? : String? = None,
+) -> MayorGoalPlan {
+  ignore(self)
+  let prompt = mayor_goal_decomposition_prompt(catalog, goal, explicit_book_id~)
+  match explicit_book_id {
+    Some(book_id) =>
+      match @moonbook.find_catalog_entry(catalog, book_id) {
+        Some(entry) =>
+          {
+            output_contract: "mayor.goal.decomposition.v1",
+            prompt,
+            parallelizable: false,
+            summary: "Mayor bound the goal to the explicit book \{entry.id}.",
+            lanes: [goal_lane(entry, goal, entry.id)],
+          }
+        None =>
+          {
+            output_contract: "mayor.goal.decomposition.v1",
+            prompt,
+            parallelizable: false,
+            summary: "Mayor could not find the explicit book \{book_id}.",
+            lanes: [],
+          }
+      }
+    None => {
+      let topics = @moonbook.research_lane_topics(goal)
+      if @moonbook.should_parallelize_goal(goal) {
+        let lanes = topics.map(fn(topic) {
+          let entry = @moonbook.parallel_research_entry(topic)
+          goal_lane(entry, goal, topic)
+        })
+        {
+          output_contract: "mayor.goal.decomposition.v1",
+          prompt,
+          parallelizable: true,
+          summary: "Mayor split the goal into \{lanes.length()} isolated research lanes because the request names multiple knowledge subjects.",
+          lanes,
+        }
+      } else {
+        let selected = select_default_entry(catalog, goal)
+        match selected {
+          Some(entry) =>
+            {
+              output_contract: "mayor.goal.decomposition.v1",
+              prompt,
+              parallelizable: false,
+              summary: "Mayor kept the goal inside one book because the request reads as one domain lane.",
+              lanes: [goal_lane(entry, goal, entry.id)],
+            }
+          None =>
+            {
+              output_contract: "mayor.goal.decomposition.v1",
+              prompt,
+              parallelizable: false,
+              summary: "Mayor found no available book for the goal.",
+              lanes: [],
+            }
+        }
+      }
+    }
   }
 }
 
@@ -73,6 +174,32 @@ pub fn Mayor::patrol(
 }
 
 ///|
+pub fn Mayor::supervise(
+  self : Mayor,
+  state : @core.TownState,
+  tick : Int,
+) -> MayorSupervisionPacket {
+  ignore(self)
+  let directives : Array[MayorSupervisionDirective] = []
+  for execution in state.executions {
+    match supervision_directive_for(state, execution, tick) {
+      Some(directive) => directives.push(directive)
+      None => ()
+    }
+  }
+  {
+    output_contract: "mayor.supervision.packet.v1",
+    tick,
+    summary: if directives.is_empty() {
+      "Mayor found no stale or retry-ready executions."
+    } else {
+      "Mayor produced \{directives.length()} supervision directives."
+    },
+    directives,
+  }
+}
+
+///|
 pub fn Mayor::handoff_to_keeper(
   self : Mayor,
   book : @core.BookRef,
@@ -97,7 +224,7 @@ pub async fn Mayor::prepare_keeper_packet(
   packet_dir? : String = @moonclaw.default_packet_directory(),
 ) -> MayorKeeperPacket {
   let bundle = @moonbook.hydrate_worker_context(entry, task)
-  let packet_id = "keeper-\{entry.id}-\{task.id}"
+  let packet_id = compact_keeper_packet_id(entry.id, task.id)
   let profile = moonclaw_profile_for_task(task)
   let packet = @moonclaw.proposal_packet_from_bundle(
     bundle,
@@ -129,6 +256,44 @@ pub fn keeper_runtime(
 }
 
 ///|
+fn compact_keeper_packet_id(book_id : String, task_id : String) -> String {
+  let hash = task_id.hash().to_string().trim(chars="-").to_string()
+  let prefix = compact_id_segment(book_id, 24)
+  let body = compact_id_segment(task_id, 40)
+  "keeper-\{prefix}-\{body}-\{hash}"
+}
+
+///|
+fn compact_id_segment(text : String, limit : Int) -> String {
+  let builder = StringBuilder::new()
+  let mut emitted = 0
+  let mut last_dash = false
+  for char in text.to_lower() {
+    if (char >= 'a' && char <= 'z') || (char >= '0' && char <= '9') {
+      if emitted >= limit {
+        break
+      }
+      builder.write_char(char)
+      emitted += 1
+      last_dash = false
+    } else if !last_dash && emitted > 0 {
+      if emitted >= limit {
+        break
+      }
+      builder.write_char('-')
+      emitted += 1
+      last_dash = true
+    }
+  }
+  let slug = builder.to_string().trim(chars="-").to_string()
+  if slug.is_blank() {
+    "task"
+  } else {
+    slug
+  }
+}
+
+///|
 fn moonclaw_profile_for_task(task : @moonbook.BookTask) -> String {
   match task.kind {
     "ingest" | "ingest-followup" => "wiki_ingest_controller"
@@ -136,4 +301,131 @@ fn moonclaw_profile_for_task(task : @moonbook.BookTask) -> String {
     "analysis" | "synthesis" => "wiki_query_controller"
     _ => "wiki_query_controller"
   }
+}
+
+///|
+fn goal_lane(
+  entry : @moonbook.BookCatalogEntry,
+  goal : String,
+  topic : String,
+) -> MayorGoalLane {
+  let objective = if @moonbook.should_parallelize_goal(goal) {
+    "Own only the \{topic} research lane. Build durable source, entity, concept, and synthesis coverage for this lane. Cross-reference other lanes only through durable outputs. Global town goal: \{goal}"
+  } else {
+    goal
+  }
+  {
+    entry,
+    objective,
+    rationale: if objective == goal {
+      "single-lane book objective"
+    } else {
+      "parallel research lane for \{topic}"
+    },
+  }
+}
+
+///|
+fn select_default_entry(
+  catalog : Array[@moonbook.BookCatalogEntry],
+  goal : String,
+) -> @moonbook.BookCatalogEntry? {
+  let notes = goal.to_lower()
+  let book_id = if notes.contains("finance") ||
+    notes.contains("ledger") ||
+    notes.contains("budget") ||
+    notes.contains("daily") {
+    "finance"
+  } else {
+    "coding"
+  }
+  match @moonbook.find_catalog_entry(catalog, book_id) {
+    Some(entry) => Some(entry)
+    None => if catalog.is_empty() { None } else { Some(catalog[0]) }
+  }
+}
+
+///|
+fn supervision_directive_for(
+  state : @core.TownState,
+  execution : @core.TaskExecutionRecord,
+  tick : Int,
+) -> MayorSupervisionDirective? {
+  ignore(state)
+  let stale = if execution.status == @core.TaskExecutionStatus::Running ||
+    execution.status == @core.TaskExecutionStatus::RunConfirmed {
+    execution.stale_after_tick <= tick
+  } else {
+    false
+  }
+  if stale {
+    return Some({
+      kind: if execution.attempt < 3 {
+        "mark-stale-retry"
+      } else {
+        "mark-stale-failed"
+      },
+      task_id: execution.task_id,
+      execution_status: @core.TaskExecutionStatus::Stale,
+      detail: "Execution \{execution.task_id} missed its heartbeat window and needs mayor recovery.",
+      next_retry_tick: if execution.attempt < 3 {
+        Some(tick + retry_backoff_ticks(execution.attempt))
+      } else {
+        None
+      },
+    })
+  }
+  match execution.status {
+    @core.TaskExecutionStatus::AwaitingPersistence =>
+      Some({
+        kind: "persist-result",
+        task_id: execution.task_id,
+        execution_status: execution.status,
+        detail: "Execution \{execution.task_id} should be persisted into MoonBook.",
+        next_retry_tick: None,
+      })
+    @core.TaskExecutionStatus::ReviewQueued =>
+      Some({
+        kind: "review-sync",
+        task_id: execution.task_id,
+        execution_status: execution.status,
+        detail: "Execution \{execution.task_id} is waiting for keeper review sync.",
+        next_retry_tick: None,
+      })
+    @core.TaskExecutionStatus::Stale | @core.TaskExecutionStatus::Failed =>
+      match execution.next_retry_tick {
+        Some(next_tick) if execution.attempt < 3 && next_tick <= tick =>
+          Some({
+            kind: "retry-execution",
+            task_id: execution.task_id,
+            execution_status: execution.status,
+            detail: "Execution \{execution.task_id} is eligible for a supervised retry.",
+            next_retry_tick: Some(
+              tick + retry_backoff_ticks(execution.attempt + 1),
+            ),
+          })
+        _ => None
+      }
+    _ => None
+  }
+}
+
+///|
+fn retry_backoff_ticks(attempt : Int) -> Int {
+  match attempt {
+    0 | 1 => 1
+    2 => 3
+    _ => 6
+  }
+}
+
+///|
+fn mayor_goal_decomposition_prompt(
+  catalog : Array[@moonbook.BookCatalogEntry],
+  goal : String,
+  explicit_book_id? : String? = None,
+) -> String {
+  let books = catalog.map(fn(entry) { entry.id }).join(", ")
+  let explicit = explicit_book_id.unwrap_or("none")
+  "You are the Mayor claw for Moontown.\nDecide whether the town goal should stay in one MoonBook or decompose into multiple isolated MoonBooks.\nAvailable books: \{books}\nExplicit book: \{explicit}\nGoal: \{goal}\nRules:\n- parallelize only when the goal names meaningfully distinct knowledge subjects or domains\n- each lane must own an isolated wiki/workspace\n- prefer one lane if shared context is essential and decomposition would create artificial fragmentation\n- if decomposing, emit one lane per durable knowledge subject\n- each lane objective must be self-contained and book-local\nRequired output contract: mayor.goal.decomposition.v1\nFields:\n- parallelizable: bool\n- summary: string\n- lanes: [{book_id, objective, rationale}]"
 }

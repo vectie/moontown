@@ -128,6 +128,7 @@ fn town_task_status_for_execution(
       @core.TownTaskStatus::Running
     @core.TaskExecutionStatus::ReviewQueued => @core.TownTaskStatus::Blocked
     @core.TaskExecutionStatus::Completed => @core.TownTaskStatus::Done
+    @core.TaskExecutionStatus::Stale => @core.TownTaskStatus::Blocked
     @core.TaskExecutionStatus::Failed => @core.TownTaskStatus::Failed
   }
 }

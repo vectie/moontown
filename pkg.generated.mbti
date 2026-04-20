@@ -34,6 +34,8 @@ pub fn render_state_dashboard(@core.TownState) -> String
 
 pub async fn run_goal(String, book_id? : String?, task_limit_per_book? : Int, snapshot_path? : String, book_catalog_path? : String) -> @core.TownState
 
+pub async fn supervise_saved_town(snapshot_path? : String, book_catalog_path? : String) -> String
+
 // Errors
 
 // Types and methods

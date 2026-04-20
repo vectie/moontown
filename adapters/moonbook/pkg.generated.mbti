@@ -21,6 +21,8 @@ pub fn default_moonbook_root() -> String
 
 pub fn default_workspace_root(String) -> String
 
+pub fn entry_for_book_id(Array[BookCatalogEntry], String) -> BookCatalogEntry?
+
 pub fn find_catalog_entry(Array[BookCatalogEntry], String) -> BookCatalogEntry?
 
 pub fn generated_site_index_path(BookCatalogEntry) -> String
@@ -33,13 +35,19 @@ pub async fn load_or_create_catalog(path? : String) -> Array[BookCatalogEntry]
 
 pub async fn load_or_create_provider(path? : String) -> MoonbookCatalogProvider
 
+pub fn parallel_research_entry(String) -> BookCatalogEntry
+
 pub async fn persist_result(BookCatalogEntry, BookResult) -> PersistResultOutcome
 
 pub async fn produce_task_batch(BookCatalogEntry, String, goal_id? : String?) -> BookTaskBatch
 
 pub async fn report_health(BookCatalogEntry) -> BookHealthReport
 
+pub fn research_lane_topics(String) -> Array[String]
+
 pub async fn save_catalog_file(String, Array[BookCatalogEntry]) -> Unit
+
+pub fn should_parallelize_goal(String) -> Bool
 
 pub async fn summarize_state(BookCatalogEntry) -> BookStateSummary
 
@@ -151,6 +159,18 @@ pub impl Eq for BookTaskBatch
 pub impl Show for BookTaskBatch
 pub impl ToJson for BookTaskBatch
 pub impl @json.FromJson for BookTaskBatch
+
+type BookTaskProviderManifestEntry
+pub impl Eq for BookTaskProviderManifestEntry
+pub impl Show for BookTaskProviderManifestEntry
+pub impl ToJson for BookTaskProviderManifestEntry
+pub impl @json.FromJson for BookTaskProviderManifestEntry
+
+type BookTaskProviderMetadata
+pub impl Eq for BookTaskProviderMetadata
+pub impl Show for BookTaskProviderMetadata
+pub impl ToJson for BookTaskProviderMetadata
+pub impl @json.FromJson for BookTaskProviderMetadata
 
 type ExternalBookTask
 pub impl Eq for ExternalBookTask

@@ -98,6 +98,73 @@ pub fn default_workspace_root(book_id : String) -> String {
 }
 
 ///|
+pub fn research_lane_topics(goal : String) -> Array[String] {
+  let notes = goal.to_lower()
+  let topics : Array[String] = []
+  for topic in ["moontown", "moonbook", "moonclaw", "finance", "coding"] {
+    if notes.contains(topic) {
+      topics.push(topic)
+    }
+  }
+  topics
+}
+
+///|
+pub fn should_parallelize_goal(goal : String) -> Bool {
+  let topics = research_lane_topics(goal)
+  is_research_goal(goal) && topics.length() > 1
+}
+
+///|
+pub fn parallel_research_entry(topic : String) -> BookCatalogEntry {
+  let normalized = normalize_topic_id(topic)
+  let display = display_topic_name(normalized)
+  BookCatalogEntry::new(
+    id="research-\{normalized}",
+    name="Moonbook / Research / \{display}",
+    purpose="Isolated research wiki for \{display}, managed by the mayor as one lane in a parallel town goal.",
+    workspace_root=default_workspace_root("research-\{normalized}"),
+    memory_scope=@core.MemoryScope::BookPrivate,
+    tags=["research", normalized, "parallel-lane"],
+    skills=["analysis", "synthesis", "memory", "review"],
+  )
+}
+
+///|
+fn is_research_goal(goal : String) -> Bool {
+  let notes = goal.to_lower()
+  notes.contains("research") ||
+  notes.contains("compare") ||
+  notes.contains("survey") ||
+  notes.contains("map")
+}
+
+///|
+fn normalize_topic_id(topic : String) -> String {
+  let normalized = topic.to_lower().trim().to_string()
+  match normalized {
+    "moontown" => "moontown"
+    "moonbook" => "moonbook"
+    "moonclaw" => "moonclaw"
+    "finance" => "finance"
+    "coding" => "coding"
+    _ => normalized.replace(old=" ", new="-")
+  }
+}
+
+///|
+fn display_topic_name(topic : String) -> String {
+  match topic {
+    "moontown" => "Moontown"
+    "moonbook" => "MoonBook"
+    "moonclaw" => "MoonClaw"
+    "finance" => "Finance"
+    "coding" => "Coding"
+    _ => topic
+  }
+}
+
+///|
 pub fn default_catalog_path() -> String {
   ".moontown/moonbooks.json"
 }
@@ -129,6 +196,27 @@ pub fn find_catalog_entry(
     }
   }
   None
+}
+
+///|
+pub fn entry_for_book_id(
+  catalog : Array[BookCatalogEntry],
+  book_id : String,
+) -> BookCatalogEntry? {
+  match find_catalog_entry(catalog, book_id) {
+    Some(entry) => Some(entry)
+    None =>
+      if book_id.has_prefix("research-") {
+        let parts = book_id.split("research-").to_array()
+        if parts.length() > 1 {
+          Some(parallel_research_entry(parts[1].to_string()))
+        } else {
+          None
+        }
+      } else {
+        None
+      }
+  }
 }
 
 ///|
@@ -321,6 +409,24 @@ pub struct PersistResultOutcome {
 } derive(Show, Eq, ToJson, FromJson)
 
 ///|
+struct BookTaskProviderMetadata {
+  command : String
+  args : Array[String]
+  cwd : String
+  workspace_root : String
+} derive(Show, Eq, ToJson, FromJson)
+
+///|
+struct BookTaskProviderManifestEntry {
+  name : String
+  title : String
+  description : String
+  kind : String
+  capabilities : Array[String]
+  metadata : BookTaskProviderMetadata
+} derive(Show, Eq, ToJson, FromJson)
+
+///|
 pub struct BookStateSummary {
   book_id : String
   root : String
@@ -457,9 +563,11 @@ pub async fn build_workspace(
   let root = resolved_workspace_root(entry.workspace_root)
   let resolved_moonbook_root = resolved_root_path(moonbook_root)
   ignore(
-    @integration.run_checked("moon", [
-      "run", "cmd/main", "--", "build", root,
-    ], cwd=Some(resolved_moonbook_root)),
+    @integration.run_checked(
+      "moon",
+      ["run", "cmd/main", "--", "build", root],
+      cwd=Some(resolved_moonbook_root),
+    ),
   )
   @path.Path(root)
   .join(@path.Path("book/site/generated/index.html"))
@@ -573,24 +681,29 @@ async fn ensure_workspace(
   let marker = "\{root}/wiki/index.md"
   if @fs.exists(marker) {
     ensure_workspace_build_dirs(root)
+    ensure_book_provider_manifest(root, resolved_moonbook_root)
     let jobs_path = "\{root}/moonclaw.jobs.json"
     if @fs.exists(jobs_path) {
       return
     }
   } else {
     ignore(
-      @integration.run_checked("moon", [
-        "run", "cmd/main", "--", "wiki", "init", root,
-      ], cwd=Some(resolved_moonbook_root)),
+      @integration.run_checked(
+        "moon",
+        ["run", "cmd/main", "--", "wiki", "init", root],
+        cwd=Some(resolved_moonbook_root),
+      ),
     )
     ensure_workspace_build_dirs(root)
   }
   ignore(
-    @integration.run_checked("moon", [
-      "run", "cmd/main", "--", "wiki", "enable", "moonclaw",
-      root,
-    ], cwd=Some(resolved_moonbook_root)),
+    @integration.run_checked(
+      "moon",
+      ["run", "cmd/main", "--", "wiki", "enable", "moonclaw", root],
+      cwd=Some(resolved_moonbook_root),
+    ),
   )
+  ensure_book_provider_manifest(root, resolved_moonbook_root)
 }
 
 ///|
@@ -634,6 +747,49 @@ async fn ensure_workspace_build_dirs(root : String) -> Unit {
     @fs.mkdir("\{root}/book/site/generated", permission=0o755) catch {
       _ => ()
     }
+  }
+}
+
+///|
+async fn ensure_book_provider_manifest(
+  root : String,
+  moonbook_root : String,
+) -> Unit {
+  let path = moonclaw_provider_manifest_path(root)
+  ensure_parent_directory(path)
+  let manifest = [moonbook_task_provider_manifest_entry(root, moonbook_root)]
+  @fs.write_file(
+    path,
+    @encoding/utf8.encode(manifest.to_json().stringify()),
+    create=0o644,
+    truncate=true,
+  )
+}
+
+///|
+fn moonclaw_provider_manifest_path(root : String) -> String {
+  "\{root}/.moonclaw/providers.json"
+}
+
+///|
+fn moonbook_task_provider_manifest_entry(
+  root : String,
+  moonbook_root : String,
+) -> BookTaskProviderManifestEntry {
+  {
+    name: "moonbook",
+    title: "MoonBook Book Harness",
+    description: "MoonBook provider-task bridge for domain-local workspace logic.",
+    kind: "task-provider",
+    capabilities: [
+      "provider", "extension", "provider.task", "extension.task", "bookapi", "moonbook.bookapi",
+    ],
+    metadata: {
+      command: "moon",
+      args: ["run", "cmd/main", "--"],
+      cwd: moonbook_root,
+      workspace_root: root,
+    },
   }
 }
 
