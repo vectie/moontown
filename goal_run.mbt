@@ -34,12 +34,18 @@ pub async fn run_goal(
   )
   persist_town_checkpoint(state, snapshot_path)
   let limit = if task_limit_per_book < 1 { 1 } else { task_limit_per_book }
+  let launches : Array[GoalBookLaunch] = []
   for lane in plan.lanes {
-    run_goal_for_book(state, mayor, lane.entry, lane.objective, limit)
-    run_supervision_cycle(state, mayor, catalog)
+    match prepare_goal_book_launch(state, lane.entry, lane.objective, limit) {
+      Some(launch) => launches.push(launch)
+      None => ()
+    }
+  }
+  for launch in launches {
+    launch_goal_book(state, mayor, launch)
     persist_town_checkpoint(state, snapshot_path)
   }
-  run_supervision_cycle(state, mayor, catalog)
+  wait_for_goal_settle(state, mayor, catalog, snapshot_path)
   persist_town_checkpoint(state, snapshot_path)
   @storage.save_snapshot_file(snapshot_path, @storage.snapshot_of(state))
   state
@@ -91,13 +97,18 @@ async fn persist_town_checkpoint(
 }
 
 ///|
-async fn run_goal_for_book(
+priv struct GoalBookLaunch {
+  entry : @moonbook.BookCatalogEntry
+  tasks : Array[@moonbook.BookTask]
+}
+
+///|
+async fn prepare_goal_book_launch(
   state : @core.TownState,
-  mayor : @roles.Mayor,
   entry : @moonbook.BookCatalogEntry,
   objective : String,
   task_limit : Int,
-) -> Unit {
+) -> GoalBookLaunch? {
   let acceptance = @moonbook.accept_goal(entry, objective) catch {
     error => {
       state.record_event(
@@ -108,7 +119,7 @@ async fn run_goal_for_book(
           related_book_id=Some(entry.id),
         ),
       )
-      return
+      return None
     }
   }
   state.record_event(
@@ -129,7 +140,7 @@ async fn run_goal_for_book(
           related_book_id=Some(entry.id),
         ),
       )
-      return
+      return None
     }
   }
   let batch = @moonbook.produce_task_batch(entry, objective) catch {
@@ -142,7 +153,7 @@ async fn run_goal_for_book(
           related_book_id=Some(entry.id),
         ),
       )
-      return
+      return None
     }
   }
   let bootstrap = research_bootstrap_plan(
@@ -162,14 +173,27 @@ async fn run_goal_for_book(
       ),
     )
   }
+  let selected_tasks : Array[@moonbook.BookTask] = []
   let mut emitted = 0
-  let emitted_task_ids : Array[String] = []
   for task in bootstrap.tasks {
     if emitted >= bootstrap.task_limit {
       break
     }
+    selected_tasks.push(task)
+    emitted += 1
+  }
+  Some({ entry, tasks: selected_tasks })
+}
+
+///|
+async fn launch_goal_book(
+  state : @core.TownState,
+  mayor : @roles.Mayor,
+  launch : GoalBookLaunch,
+) -> Unit {
+  for task in launch.tasks {
     let planned_task = to_town_task(
-      entry,
+      launch.entry,
       task,
       @core.TaskExecutionStatus::PacketReady,
     )
@@ -178,28 +202,35 @@ async fn run_goal_for_book(
     let worker_id = assigned_worker_id(decision.decision)
     let execution = execute_goal_book_task(
       mayor,
-      entry,
+      launch.entry,
       task,
       assigned_worker_id=worker_id,
       tick=supervision_tick(state),
     ) catch {
       error =>
         failed_execution_record(
-          entry,
+          launch.entry,
           task,
-          "Goal execution failed for \{entry.id} / \{task.id}: \{error}",
+          "Goal execution failed for \{launch.entry.id} / \{task.id}: \{error}",
         )
     }
-    state.replace_task(to_town_task(entry, task, execution.status))
+    state.replace_task(to_town_task(launch.entry, task, execution.status))
     state.replace_execution(execution)
     sync_worker_from_execution(state, execution)
     state.record_event(
       execution_event(execution, state.executions.length() - 1),
     )
-    persist_execution_into_book(state, entry, execution)
-    emitted_task_ids.push(task.id)
-    emitted += 1
+    persist_execution_into_book(state, launch.entry, execution)
   }
+}
+
+///|
+async fn finalize_goal_book_entry(
+  state : @core.TownState,
+  entry : @moonbook.BookCatalogEntry,
+  pending_review_baseline : Int,
+  task_ids : Array[String],
+) -> Unit {
   let generated_index = @moonbook.build_workspace(entry) catch {
     error => {
       state.record_event(
@@ -226,11 +257,11 @@ async fn run_goal_for_book(
       return
     }
   }
-  if summary.pending_review_count > initial_summary.pending_review_count {
+  if summary.pending_review_count > pending_review_baseline {
     queue_book_review_backlog(
       state,
       entry.id,
-      emitted_task_ids,
+      task_ids,
       summary.pending_review_count,
     )
   }
@@ -296,7 +327,9 @@ async fn persist_execution_into_book(
   execution : @core.TaskExecutionRecord,
 ) -> Unit {
   if execution.summary.trim().is_blank() ||
-    execution.status is @core.TaskExecutionStatus::RunConfirmed {
+    execution.status is @core.TaskExecutionStatus::ProposalImported ||
+    execution.status is @core.TaskExecutionStatus::RunConfirmed ||
+    execution.status is @core.TaskExecutionStatus::Running {
     return
   }
   let result = @moonbook.BookResult::new(
@@ -553,6 +586,62 @@ async fn run_supervision_cycle(
 }
 
 ///|
+async fn wait_for_goal_settle(
+  state : @core.TownState,
+  mayor : @roles.Mayor,
+  catalog : Array[@moonbook.BookCatalogEntry],
+  snapshot_path : String,
+  max_cycles? : Int = 120,
+  sleep_ms? : Int = 5_000,
+) -> Unit {
+  let cycles = if max_cycles < 1 { 1 } else { max_cycles }
+  for cycle = 0; cycle < cycles; cycle = cycle + 1 {
+    run_supervision_cycle(state, mayor, catalog)
+    persist_town_checkpoint(state, snapshot_path)
+    if !has_live_executions(state) &&
+      !has_retry_pending_executions(state, supervision_tick(state)) {
+      return
+    }
+    @async.sleep(sleep_ms)
+  }
+  if has_live_executions(state) {
+    state.record_event(
+      @core.TownEvent::new(
+        id="event-settle-timeout-\{supervision_tick(state)}",
+        kind="supervision",
+        detail="Mayor supervision timed out while waiting for live executions to settle.",
+      ),
+    )
+  }
+}
+
+///|
+fn has_live_executions(state : @core.TownState) -> Bool {
+  for execution in state.executions {
+    if live_execution_status(execution.status) {
+      return true
+    }
+  }
+  false
+}
+
+///|
+fn has_retry_pending_executions(state : @core.TownState, tick : Int) -> Bool {
+  ignore(tick)
+  for execution in state.executions {
+    match execution.status {
+      @core.TaskExecutionStatus::Stale | @core.TaskExecutionStatus::Failed =>
+        match execution.next_retry_tick {
+          Some(_) if execution.attempt < 3 => return true
+          _ => ()
+        }
+      _ => ()
+    }
+  }
+  false
+}
+
+///|
 async fn reconcile_live_executions(
   state : @core.TownState,
   catalog : Array[@moonbook.BookCatalogEntry],
@@ -586,7 +675,10 @@ async fn reconcile_live_executions(
             execution_event(updated, state.executions.length() - 1),
           )
           match @moonbook.entry_for_book_id(catalog, updated.book_id) {
-            Some(entry) => persist_execution_into_book(state, entry, updated)
+            Some(entry) => {
+              persist_execution_into_book(state, entry, updated)
+              finalize_goal_book_entry(state, entry, 0, [updated.task_id])
+            }
             None => ()
           }
         }

@@ -524,7 +524,7 @@ pub async fn hydrate_worker_context(
     "--task",
     task.id,
   ])
-  @json.from_json(json)
+  enrich_worker_context_bundle(entry, @json.from_json(json))
 }
 
 ///|
@@ -682,6 +682,7 @@ async fn ensure_workspace(
   if @fs.exists(marker) {
     ensure_workspace_build_dirs(root)
     ensure_book_provider_manifest(root, resolved_moonbook_root)
+    ensure_moontown_research_pack(root, entry)
     let jobs_path = "\{root}/moonclaw.jobs.json"
     if @fs.exists(jobs_path) {
       return
@@ -704,6 +705,7 @@ async fn ensure_workspace(
     ),
   )
   ensure_book_provider_manifest(root, resolved_moonbook_root)
+  ensure_moontown_research_pack(root, entry)
 }
 
 ///|
@@ -751,6 +753,57 @@ async fn ensure_workspace_build_dirs(root : String) -> Unit {
 }
 
 ///|
+fn enrich_worker_context_bundle(
+  entry : BookCatalogEntry,
+  bundle : WorkerContextBundle,
+) -> WorkerContextBundle {
+  if !entry.id.has_prefix("research-") {
+    return bundle
+  }
+  let skill_paths = unique_paths(
+    [
+      ..bundle.skill_paths,
+      "skills/web-first-research/SKILL.md",
+      "skills/repo-source-materialize/SKILL.md",
+    ],
+  )
+  let context_pages = unique_paths(
+    [
+      ..bundle.context_pages,
+      "raw/bootstrap/RESEARCH_REQUEST.md",
+      "raw/bootstrap/SOURCE_HINTS.md",
+      "wiki/history/journey.md",
+    ],
+  )
+  {
+    book_id: bundle.book_id,
+    workspace_root: bundle.workspace_root,
+    task_id: bundle.task_id,
+    prompt: bundle.prompt,
+    policy: bundle.policy,
+    routines: bundle.routines,
+    skill_paths,
+    context_pages,
+    active_memory: bundle.active_memory,
+    user_memory: bundle.user_memory,
+    working_memory: bundle.working_memory,
+    memory_summary: bundle.memory_summary,
+    output_contract: bundle.output_contract,
+  }
+}
+
+///|
+fn unique_paths(values : Array[String]) -> Array[String] {
+  let next : Array[String] = []
+  for value in values {
+    if !next.contains(value) {
+      next.push(value)
+    }
+  }
+  next
+}
+
+///|
 async fn ensure_book_provider_manifest(
   root : String,
   moonbook_root : String,
@@ -764,6 +817,301 @@ async fn ensure_book_provider_manifest(
     create=0o644,
     truncate=true,
   )
+}
+
+///|
+async fn ensure_moontown_research_pack(
+  root : String,
+  entry : BookCatalogEntry,
+) -> Unit {
+  guard entry.id.has_prefix("research-") else { return }
+  write_workspace_text(
+    "\{root}/skills/web-first-research/SKILL.md",
+    web_first_research_skill_text(entry),
+  )
+  write_workspace_text(
+    "\{root}/skills/repo-source-materialize/SKILL.md",
+    repo_source_materialize_skill_text(entry),
+  )
+  write_workspace_text(
+    "\{root}/raw/bootstrap/RESEARCH_REQUEST.md",
+    research_request_text(entry),
+  )
+  write_workspace_text(
+    "\{root}/raw/bootstrap/SOURCE_HINTS.md",
+    research_source_hints_text(entry),
+  )
+}
+
+///|
+async fn write_workspace_text(path : String, content : String) -> Unit {
+  ensure_parent_directory(path)
+  @fs.write_file(
+    path,
+    @encoding/utf8.encode(content),
+    create=0o644,
+    truncate=true,
+  )
+}
+
+///|
+fn research_request_text(entry : BookCatalogEntry) -> String {
+  let topic = research_topic_id(entry)
+  let display = display_topic_name(topic)
+  [
+    "# Research Request",
+    "",
+    "- Topic: \{display}",
+    "- Goal: produce durable wiki coverage that is specific to \{display}, not generic scaffold text.",
+    "- Mode: web search first, then local repository inspection as fallback and corroboration.",
+    "- Required durable outputs:",
+    "  - `raw/bootstrap/web-sources.md`",
+    "  - `raw/bootstrap/local-sources.md`",
+    "  - at least one substantive page under `wiki/sources/`",
+    "  - at least one substantive page under `wiki/entities/`, `wiki/concepts/`, or `wiki/synthesis/`",
+    "  - `wiki/index.md` and `wiki/log.md` updated consistently",
+    "",
+    "## Execution Order",
+    "",
+    "1. Run targeted `web_search` queries first.",
+    "2. Use `web_fetch` on the most authoritative pages you found.",
+    "3. Write durable notes to `raw/bootstrap/web-sources.md` with titles, URLs, snippets, and why each source matters.",
+    "4. Only after web discovery, inspect high-signal local files for corroboration and implementation detail.",
+    "5. Write durable notes to `raw/bootstrap/local-sources.md` with exact paths and evidence bullets.",
+    "6. Materialize durable wiki pages. Do not stop at notes or generic completion text.",
+    "",
+    "## Blocking Rule",
+    "",
+    "If a tool is unavailable, record the exact blocker, continue with the remaining permitted path, and still create the durable bootstrap notes that explain what happened.",
+  ].join("\n")
+}
+
+///|
+fn research_source_hints_text(entry : BookCatalogEntry) -> String {
+  let topic = research_topic_id(entry)
+  let display = display_topic_name(topic)
+  let web_queries = research_web_queries(topic)
+  let local_paths = research_local_paths(topic)
+  let reference_urls = research_reference_urls(topic)
+  let lines : Array[String] = [
+    "# Source Hints",
+    "",
+    "These are Moontown-generated hints for the \{display} research lane.",
+    "",
+    "## Web Search First",
+    "",
+  ]
+  for query in web_queries {
+    lines.push("- \{query}")
+  }
+  if !reference_urls.is_empty() {
+    lines.push("")
+    lines.push("## High-Signal URLs")
+    lines.push("")
+    for url in reference_urls {
+      lines.push("- \{url}")
+    }
+  }
+  lines.push("")
+  lines.push("## Local Repository Follow-Up")
+  lines.push("")
+  for path in local_paths {
+    lines.push("- \{path}")
+  }
+  lines.push("")
+  lines.push("## Materialization Target")
+  lines.push("")
+  lines.push(
+    "- Turn evidence into topic-specific source, entity, concept, and synthesis pages.",
+  )
+  lines.push(
+    "- Generic statements like `LLM Wiki is a maintained workspace` are not acceptable final coverage for this lane.",
+  )
+  lines.join("\n")
+}
+
+///|
+fn web_first_research_skill_text(entry : BookCatalogEntry) -> String {
+  let topic = research_topic_id(entry)
+  let display = display_topic_name(topic)
+  let sample_query = research_web_queries(topic).get(0).unwrap_or(display)
+  let sample_url = research_reference_urls(topic)
+    .get(0)
+    .unwrap_or("https://github.com/vectie/\{topic}")
+  [
+    "---",
+    "name: web-first-research",
+    "description: Discover authoritative web sources before local repository search, then convert them into durable bootstrap notes and wiki-ready claims.",
+    "---",
+    "",
+    "# Web-First Research",
+    "",
+    "Use this skill for research-lane ingest and follow-up work.",
+    "",
+    "## Rules",
+    "",
+    "- Start with `web_search` before local file discovery.",
+    "- Prefer authoritative pages: official docs, repo pages, maintainer docs, and project READMEs.",
+    "- After search, use `web_fetch` on the highest-signal pages before writing conclusions.",
+    "- Write durable notes into `raw/bootstrap/web-sources.md` before inspecting the local repo.",
+    "- Only then inspect the local repo to corroborate architecture, implementation, and file-level details.",
+    "- If web tools are unavailable, write a blocker note and continue with local discovery instead of silently skipping the phase.",
+    "",
+    "## Required Output",
+    "",
+    "- `raw/bootstrap/web-sources.md` with query list, fetched URLs, evidence bullets, and open questions.",
+    "- `raw/bootstrap/local-sources.md` with exact file paths and evidence bullets.",
+    "- Durable wiki pages that are specific to \{display}.",
+    "",
+    "## Example",
+    "",
+    "Search sequence:",
+    "- `web_search` query: `\{sample_query}`",
+    "- `web_fetch` url: `\{sample_url}`",
+    "",
+    "Then write a note like:",
+    "",
+    "```md",
+    "# Web Sources",
+    "",
+    "- Query: `\{sample_query}`",
+    "- URL: `\{sample_url}`",
+    "- Why it matters: canonical maintainer-facing source for \{display}",
+    "- Evidence:",
+    "  - concrete capability or architecture point with citation",
+    "  - concrete repo or docs location with citation",
+    "- Open questions:",
+    "  - what is still unclear after the fetch",
+    "```",
+    "",
+    "Do not stop after the note. Use it to drive durable wiki pages.",
+  ].join("\n")
+}
+
+///|
+fn repo_source_materialize_skill_text(entry : BookCatalogEntry) -> String {
+  let topic = research_topic_id(entry)
+  let display = display_topic_name(topic)
+  let source_page = "wiki/sources/\{topic}.md"
+  let concept_page = "wiki/concepts/\{topic}-architecture.md"
+  [
+    "---",
+    "name: repo-source-materialize",
+    "description: Turn gathered web and local evidence into durable source, entity, concept, and synthesis pages instead of generic completion text.",
+    "---",
+    "",
+    "# Repo Source Materialize",
+    "",
+    "Use this skill after source discovery for \{display}.",
+    "",
+    "## Rules",
+    "",
+    "- Convert evidence into durable markdown pages, not chat-style summaries.",
+    "- Preserve provenance from both web and local sources.",
+    "- Update `wiki/index.md` and `wiki/log.md` whenever new substantive pages are created or revised.",
+    "- If evidence is still weak, create an explicit blocker note that states what is missing.",
+    "",
+    "## Minimum Acceptable Materialization",
+    "",
+    "- one substantive source page, for example `\{source_page}`",
+    "- one substantive concept, entity, or synthesis page, for example `\{concept_page}`",
+    "- index and log updates that reference those pages",
+    "",
+    "## Example",
+    "",
+    "Good result:",
+    "",
+    "```md",
+    "# \{display}",
+    "",
+    "## What It Is",
+    "- precise description grounded in fetched docs and local repo evidence",
+    "",
+    "## Evidence",
+    "- web: fetched maintainer or repo page",
+    "- local: concrete file path and why it supports the claim",
+    "",
+    "## Open Questions",
+    "- unresolved boundary or missing capability",
+    "```",
+    "",
+    "Bad result:",
+    "- `Completed provider task.`",
+    "- generic workspace boilerplate with zero topic-specific claims",
+  ].join("\n")
+}
+
+///|
+fn research_topic_id(entry : BookCatalogEntry) -> String {
+  if entry.id.has_prefix("research-") {
+    entry.id[9:].to_string()
+  } else {
+    normalize_topic_id(entry.id)
+  }
+}
+
+///|
+fn research_web_queries(topic : String) -> Array[String] {
+  match topic {
+    "moontown" =>
+      [
+        "vectie moontown", "moontown moonbook moonclaw", "site:github.com vectie moontown",
+      ]
+    "moonbook" =>
+      [
+        "vectie moonbook", "moonbook wiki moonbit", "site:github.com vectie moonbook",
+      ]
+    "moonclaw" =>
+      [
+        "vectie moonclaw", "moonclaw moonbit agent", "site:github.com vectie moonclaw",
+      ]
+    _ =>
+      ["vectie \{topic}", "\{topic} moonbit", "site:github.com vectie \{topic}"]
+  }
+}
+
+///|
+fn research_reference_urls(topic : String) -> Array[String] {
+  match topic {
+    "moontown" => ["https://github.com/vectie/moontown"]
+    "moonbook" => ["https://github.com/vectie/moonbook"]
+    "moonclaw" => ["https://github.com/vectie/moonclaw"]
+    _ => ["https://github.com/vectie/\{topic}"]
+  }
+}
+
+///|
+fn research_local_paths(topic : String) -> Array[String] {
+  match topic {
+    "moontown" =>
+      [
+        "/Users/kq/Workspace/moontown/README.md", "/Users/kq/Workspace/moontown/README.mbt.md",
+        "/Users/kq/Workspace/moontown/AGENTS.md", "/Users/kq/Workspace/moontown/moon.mod.json",
+        "/Users/kq/Workspace/moontown/cmd/main/main.mbt", "/Users/kq/Workspace/moontown/goal_run.mbt",
+        "/Users/kq/Workspace/moontown/adapters/moonbook/client.mbt", "/Users/kq/Workspace/moontown/adapters/moonclaw/client.mbt",
+        "/Users/kq/Workspace/moontown/roles/mayor.mbt",
+      ]
+    "moonbook" =>
+      [
+        "/Users/kq/Workspace/moonbook/README.md", "/Users/kq/Workspace/moonbook/README.mbt.md",
+        "/Users/kq/Workspace/moonbook/AGENTS.md", "/Users/kq/Workspace/moonbook/moon.mod.json",
+        "/Users/kq/Workspace/moonbook/docs/SYSTEM_ARCHITECTURE.md", "/Users/kq/Workspace/moonbook/wiki/bookapi.mbt",
+        "/Users/kq/Workspace/moonbook/wiki/init.mbt", "/Users/kq/Workspace/moonbook/wiki/ui_state.mbt",
+      ]
+    "moonclaw" =>
+      [
+        "/Users/kq/Workspace/moonclaw/README.mbt.md", "/Users/kq/Workspace/moonclaw/Agents.md",
+        "/Users/kq/Workspace/moonclaw/moon.mod.json", "/Users/kq/Workspace/moonclaw/docs/research_controller_architecture.md",
+        "/Users/kq/Workspace/moonclaw/job/provider_task.mbt", "/Users/kq/Workspace/moonclaw/job/analysis_contracts.mbt",
+        "/Users/kq/Workspace/moonclaw/tools/web_search/tool.mbt", "/Users/kq/Workspace/moonclaw/tools/web_fetch/tool.mbt",
+        "/Users/kq/Workspace/moonclaw/tools/search_files/tool.mbt",
+      ]
+    _ =>
+      [
+        "/Users/kq/Workspace/\{topic}/README.md",
+        "/Users/kq/Workspace/\{topic}/moon.mod.json",
+      ]
+  }
 }
 
 ///|
