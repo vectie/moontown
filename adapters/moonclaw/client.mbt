@@ -391,8 +391,31 @@ pub async fn run_confirmed_run(
     resolved_cwd, "--home", resolved_home,
   ]
   let command = @integration.render_command("moon", args)
-  ignore(@integration.run_checked("moon", args))
+  let shell_command = build_detached_shell_command("moon", args)
+  ignore(@integration.run_checked("/bin/zsh", ["-lc", shell_command]))
   command
+}
+
+///|
+fn build_detached_shell_command(
+  command : String,
+  args : Array[String],
+) -> String {
+  let builder = StringBuilder::new()
+  builder.write_string("nohup ")
+  builder.write_string(shell_quote(command))
+  for arg in args {
+    builder.write_char(' ')
+    builder.write_string(shell_quote(arg))
+  }
+  builder.write_string(" >/dev/null 2>&1 &")
+  builder.to_string()
+}
+
+///|
+fn shell_quote(text : String) -> String {
+  let escaped = text.replace(old="'", new="'\"'\"'")
+  "'\{escaped}'"
 }
 
 ///|

@@ -561,6 +561,7 @@ async fn run_supervision_cycle(
   catalog : Array[@moonbook.BookCatalogEntry],
 ) -> Unit {
   reconcile_live_executions(state, catalog)
+  refresh_live_execution_deadlines(state)
   let packet = mayor.supervise(state, supervision_tick(state))
   if packet.directives.is_empty() {
     return
@@ -582,6 +583,23 @@ async fn run_supervision_cycle(
       ),
     )
     apply_supervision_directive(state, mayor, catalog, directive)
+  }
+}
+
+///|
+fn refresh_live_execution_deadlines(state : @core.TownState) -> Unit {
+  let tick = supervision_tick(state)
+  let snapshot = state.executions.copy()
+  for execution in snapshot {
+    if live_execution_status(execution.status) {
+      state.replace_execution(
+        copy_execution_with(
+          execution,
+          heartbeat_tick=tick,
+          stale_after_tick=tick + 3,
+        ),
+      )
+    }
   }
 }
 
@@ -649,7 +667,7 @@ async fn reconcile_live_executions(
   let tick = supervision_tick(state)
   let snapshot = state.executions.copy()
   for execution in snapshot {
-    if !live_execution_status(execution.status) {
+    if !pollable_execution_status(execution.status) {
       continue
     }
     match execution.run_id {
@@ -666,6 +684,10 @@ async fn reconcile_live_executions(
           heartbeat_tick=tick,
           stale_after_tick=tick + 3,
         )
+        if execution.status is @core.TaskExecutionStatus::Stale &&
+          !terminal_execution_status(polled.status) {
+          continue
+        }
         state.replace_execution(updated)
         state.replace_task(task_for_supervision(state, updated))
         sync_worker_from_execution(state, updated)
@@ -686,6 +708,11 @@ async fn reconcile_live_executions(
       None => ()
     }
   }
+}
+
+///|
+fn pollable_execution_status(status : @core.TaskExecutionStatus) -> Bool {
+  live_execution_status(status) || status is @core.TaskExecutionStatus::Stale
 }
 
 ///|
