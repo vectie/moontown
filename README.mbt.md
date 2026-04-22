@@ -23,6 +23,8 @@ It is designed for:
   -> seed a town
   -> turn book-local tasks into keeper proposal packets
   -> import packets into MoonClaw proposal/run lifecycle
+  -> poll terminal run state and persist results back into MoonBook
+  -> write a mayor-level synthesis across parallel research lanes
   -> inspect health, anomalies, and patrol state
   -> render the town as a live scene
   -> evolve toward a 24/7 social-experiment control plane
@@ -45,6 +47,9 @@ Implemented today:
 - `BookProvider` abstraction for town bootstrap
 - book-harness-shaped moonbook adapter
 - external proposal packet and proposal/run receipt lifecycle
+- run polling, result persistence, and review-queue surfacing for goal runs
+- mayor-level cross-book research synthesis under `.moontown/town-synthesis/`
+- town quality gates for provisional or non-lane-specific research output
 - strategic `Mayor` role adapter over embedded moonclaw runtime metadata
 - routing, isolation, scheduler, health, and storage packages
 - renderer-agnostic scene dashboard model
@@ -53,8 +58,6 @@ Implemented today:
 
 Still stubbed:
 
-- long-running run-status polling and completion ingestion from external `moonclaw`
-- automatic result persistence back into external `moonbook` after a completed run
 - long-running daemon patrol and recovery loop
 - experiment lifecycle execution
 - real backend/frontend sync
@@ -71,7 +74,7 @@ So the current repo is a control-plane-first prototype, not yet a fully live
 - `scheduler` tick planning
 - `roles` strategic `Mayor` role adapter
 - `adapters/moonbook` persisted book catalog plus real MoonBook CLI-backed harness requests
-- `adapters/moonclaw` embedded runtime profiles plus real MoonClaw proposal import boundary
+- `adapters/moonclaw` embedded runtime profiles plus real MoonClaw proposal import, run, and polling boundary
 - `ui` scene layout, dashboard projection, and HTML render bridge
 - `ui/rabbita-town` live browser dashboard with:
   - tick loop
@@ -104,7 +107,7 @@ So the current repo is a control-plane-first prototype, not yet a fully live
 - `adapters/moonbook`
   moonbook catalog and book-harness boundary
 - `adapters/moonclaw`
-  embedded runtime profiles and future execution boundary
+  embedded runtime profiles plus real MoonClaw proposal import, run, and polling boundary
 - `ui`
   scene contract, dashboard model, and render model
 - `ui/rabbita-town`

@@ -21,6 +21,8 @@ It should own:
 - experiment control
 - operator UI
 - town-wide persistence
+- cross-book research synthesis
+- town-level acceptance and quality gates
 
 It should not become:
 
@@ -154,6 +156,26 @@ moonbook catalog
   -> dashboard/render/frontend
 ```
 
+### Goal Run
+
+```text
+user goal
+  -> Mayor.plan_goal(...)
+  -> one or more isolated MoonBook lanes
+  -> MoonBook accept/plan/context APIs
+  -> Mayor.prepare_keeper_packet(...)
+  -> MoonClaw import/run/poll lifecycle
+  -> MoonBook persist/build/summary APIs
+  -> mayor research quality gate
+  -> town-level synthesis under .moontown/town-synthesis/
+  -> persisted TownSnapshot
+```
+
+The key design rule is that Moontown can decide whether a lane is acceptable,
+but it does not become the research engine. MoonBook owns the workspace and
+durable wiki state. MoonClaw owns execution and tool use. Moontown owns
+cross-book readiness, supervision, and operator-visible acceptance.
+
 ### Dispatch
 
 ```text
@@ -173,9 +195,11 @@ The packet lifecycle is intentionally split across package boundaries:
   - produces book task batches
   - hydrates worker context bundles
   - persists or summarizes book-local outcomes
+  - refreshes generated workspace sites
 - `roles/mayor`
   - decides whether work should be routed, deferred, or escalated
   - prepares keeper-facing packets from book tasks and worker context
+  - performs town-level quality gating for cross-book research goals
 - `adapters/moonclaw`
   - shapes `ExternalProposalPacket`
   - models `ProposalImportReceipt`
@@ -200,6 +224,8 @@ Current persisted files:
   - persisted moonbook catalog entries
 - `.moontown/town.json`
   - persisted town snapshot
+- `.moontown/town-synthesis/*.md`
+  - mayor-owned cross-book synthesis and readiness artifacts
 - `.moontown/packets/`
   - optional exported keeper packet files
 
@@ -217,24 +243,28 @@ Real now:
 - town model
 - routing model
 - MoonBook CLI-backed planning, context hydration, summary, and health
-- MoonClaw CLI-backed packet import
+- MoonClaw CLI-backed packet import, run confirmation, and polling for bounded goal runs
+- MoonBook persistence/build after terminal goal runs
+- parallel research-lane decomposition for multi-topic goals
+- mayor-level research quality gates
+- town synthesis artifacts under `.moontown/town-synthesis/`
 - proposal/run lifecycle tracking
 - strategic mayor role adapter
 - dashboard and browser UI model
 
 Stubbed now:
 
-- long-running run-status polling after the initial MoonClaw handoff
-- automatic result persistence back into MoonBook after run completion
 - experiment runtime progression
 - 24/7 supervisor loop
+- restart-safe multi-day daemon recovery
+- backend-synced Rabbita frontend state
 
 ## Next Integration Milestones
 
 The clean next order is:
 
-1. run-status polling and terminal-state ingestion from MoonClaw
-2. result persistence and review queue updates back into MoonBook
-3. daemon patrol and recovery loop
-4. town task expansion from completed book plans
+1. richer MoonBook readiness contracts so Moontown can replace content-marker heuristics
+2. restart-safe daemon patrol and recovery loop
+3. town task expansion from completed book plans
+4. backend-synced Rabbita frontend state
 5. real experiment runtime

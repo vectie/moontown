@@ -9,6 +9,8 @@ It covers:
 - the persisted town state
 - the moonbook catalog
 - the keeper packet and proposal/run lifecycle
+- parallel research goal runs
+- mayor-level town synthesis
 - the scene assets
 - the Rabbita frontend
 - the current limits of the repo
@@ -20,7 +22,9 @@ Right now, `moontown` is usable as:
 - a MoonBit town model
 - a persisted demo bootstrap
 - a real MoonBook CLI-backed planning and context-hydration boundary
-- a real MoonClaw CLI-backed proposal import boundary
+- a real MoonClaw CLI-backed proposal import/run/polling boundary
+- a real MoonBook result-persistence and generated-site refresh boundary for goal runs
+- a mayor-level synthesis and quality-gate surface for parallel research lanes
 - a scene-based dashboard
 - a Rabbita simulation frontend
 - a starter asset pipeline
@@ -28,11 +32,12 @@ Right now, `moontown` is usable as:
 It is not yet usable as:
 
 - a real 24/7 autonomous town daemon
-- a full run-status supervisor for long-lived MoonClaw jobs
-- an automatic MoonBook persistence loop after worker completion
+- a durable multi-day restart/recovery supervisor
+- a backend-synced browser UI
 
-So the right way to use the repo today is as a live architectural and frontend
-prototype.
+So the right way to use the repo today is as a real goal-run control plane plus
+a live architectural and frontend prototype. It can launch and observe bounded
+MoonBook/MoonClaw research runs, but it is not yet a days-long daemon.
 
 ## 1. Run The Text Dashboard
 
@@ -256,7 +261,15 @@ The relevant code is in:
 The current lifecycle is:
 
 ```text
-book task -> keeper packet -> imported proposal -> confirmed run -> persistence -> review
+book task
+  -> keeper packet
+  -> imported proposal
+  -> confirmed run
+  -> run polling
+  -> MoonBook persistence
+  -> generated site refresh
+  -> mayor quality gate
+  -> review or complete
 ```
 
 Current execution statuses include:
@@ -270,7 +283,71 @@ Current execution statuses include:
 - `Completed`
 - `Failed`
 
-## 9. Run The Rabbita Frontend
+## 9. Run A Parallel Research Goal
+
+The goal runner can split a multi-topic research request into isolated
+MoonBook lanes. For example:
+
+```bash
+moon run cmd/main -- run "research moontown, moonbook, and moonclaw"
+```
+
+For that goal, the mayor currently creates one book lane per named subject:
+
+- `research-moontown`
+- `research-moonbook`
+- `research-moonclaw`
+
+Each lane gets its own MoonBook workspace under:
+
+- `.moontown/books/research-moontown`
+- `.moontown/books/research-moonbook`
+- `.moontown/books/research-moonclaw`
+
+The mayor then imports keeper packets into MoonClaw, polls run status, persists
+terminal results back into the lane's MoonBook workspace, and asks MoonBook to
+refresh the generated site.
+
+## 10. Read The Town Synthesis
+
+After a parallel research goal settles or times out, Moontown writes a
+town-level synthesis artifact under:
+
+- `.moontown/town-synthesis/<goal-slug>.md`
+- `.moontown/town-synthesis/latest.md`
+
+The synthesis is a mayor-owned control-plane projection. It summarizes:
+
+- lane count
+- running/completed/review/failed lane status
+- verified source counts
+- evidence, entity, and concept counts
+- generated-site paths
+- lane readiness gaps
+- the mayor decision for whether the goal is complete or still blocked
+
+This is intentionally not a MoonBook page. MoonBook owns durable domain
+knowledge; Moontown owns cross-book supervision and acceptance.
+
+## 11. Understand The Research Quality Gate
+
+Moontown now blocks weak research instead of accepting file existence as
+success. For research lanes, the mayor checks for required bootstrap artifacts
+and rejects output that still contains provisional-only markers.
+
+Examples of blockers:
+
+- missing bootstrap files such as `search-log.md` or `evidence-matrix.md`
+- no verified source digest under `wiki/sources/`
+- synthesis brief is not lane-specific
+- web candidates were listed but not fetched and screened
+- search log says the web pass may be enriched later
+- wiki synthesis still says review is pending
+
+When those gaps exist, Moontown marks the lane as `ReviewQueued` and the town
+synthesis remains blocked or interim.
+
+## 12. Run The Rabbita Frontend
 
 The browser frontend lives in:
 
@@ -298,7 +375,7 @@ Important frontend files:
 - [ui/rabbita-town/bootstrap.js](/Users/kq/Workspace/moontown/ui/rabbita-town/bootstrap.js)
 - [ui/rabbita-town/vite.config.js](/Users/kq/Workspace/moontown/ui/rabbita-town/vite.config.js)
 
-## 10. Use The Live Simulation Controls
+## 13. Use The Live Simulation Controls
 
 The current Rabbita frontend is a live simulation dashboard.
 
@@ -345,7 +422,7 @@ town layout.
 
 This is currently local simulation state, not backend-synced town state.
 
-## 11. Validate Changes
+## 14. Validate Changes
 
 For normal repo validation:
 
@@ -364,7 +441,7 @@ For UI changes, also run:
 
 That is the expected workflow for this repo now.
 
-## 12. Know The Current Boundaries
+## 15. Know The Current Boundaries
 
 There are three important “real vs stubbed” boundaries.
 
@@ -374,6 +451,9 @@ Real now:
 - persisted town snapshot
 - keeper packet generation
 - proposal/run lifecycle records
+- MoonClaw run polling for bounded goal runs
+- MoonBook persistence and generated-site refresh after terminal goal runs
+- mayor-level research synthesis and quality gating
 - strategic mayor role model
 - dispatch and health model
 - scene dashboard model
@@ -381,9 +461,10 @@ Real now:
 
 Stubbed now:
 
-- real process execution against external moonbook/moonclaw CLIs
 - experiment runtime loop
 - 24/7 daemon supervision
+- restart-safe multi-day process supervision
+- backend-synced Rabbita state
 
 Separate ownership note:
 
@@ -393,10 +474,10 @@ Separate ownership note:
 
 So the correct expectation is:
 
-- use `moontown` today as a control-plane and frontend prototype
-- do not assume it already runs a real multi-agent backend
+- use `moontown` today as a bounded control-plane runner and frontend prototype
+- do not assume it already runs a durable 24/7 multi-agent backend
 
-## 13. Best Entry Points By Goal
+## 16. Best Entry Points By Goal
 
 If you want to:
 
