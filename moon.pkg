@@ -10,4 +10,7 @@ import {
   "vectie/moontown/storage",
   "vectie/moontown/ui",
   "moonbitlang/async",
+  "moonbitlang/async/fs",
+  "moonbitlang/core/encoding/utf8" @encoding/utf8,
+  "moonbitlang/x/path",
 }

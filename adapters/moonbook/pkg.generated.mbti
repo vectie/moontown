@@ -118,15 +118,22 @@ pub struct BookStateSummary {
   root : String
   page_count : Int
   source_count : Int
+  source_page_count : Int
+  candidate_source_count : Int
+  provisional_source_count : Int
+  verified_source_count : Int
   entity_count : Int
+  entity_page_count : Int
   concept_count : Int
+  concept_page_count : Int
+  query_note_count : Int
   pending_review_count : Int
   keeper_memory_count : Int
   keeper_working_count : Int
   evidence_count : Int
   summary : String
 }
-pub fn BookStateSummary::new(book_id~ : String, root~ : String, page_count~ : Int, source_count~ : Int, entity_count~ : Int, concept_count~ : Int, pending_review_count~ : Int, keeper_memory_count~ : Int, keeper_working_count~ : Int, evidence_count~ : Int, summary~ : String) -> Self
+pub fn BookStateSummary::new(book_id~ : String, root~ : String, page_count~ : Int, source_count~ : Int, source_page_count? : Int, candidate_source_count? : Int, provisional_source_count? : Int, verified_source_count? : Int, entity_count~ : Int, entity_page_count? : Int, concept_count~ : Int, concept_page_count? : Int, query_note_count? : Int, pending_review_count~ : Int, keeper_memory_count~ : Int, keeper_working_count~ : Int, evidence_count~ : Int, summary~ : String) -> Self
 pub impl Eq for BookStateSummary
 pub impl Show for BookStateSummary
 pub impl ToJson for BookStateSummary
