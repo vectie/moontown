@@ -73,6 +73,8 @@ The demo town persists runtime bootstrap files under:
 - `.moontown/moonbooks.json`
 - `.moontown/town.json`
 - `.moontown/packets/` when packet files are exported
+- `.moontown/books/<book>/` for MoonBook lane workspaces
+- `.moontown/town-synthesis/` for mayor-level cross-book reports
 
 What they do:
 
@@ -80,6 +82,11 @@ What they do:
   - stores the available books loaded into town bootstrap
 - `.moontown/town.json`
   - stores the seeded town snapshot
+- `.moontown/books/<book>/raw/bootstrap/`
+  - stores research questions, search logs, source screens, evidence matrices,
+    local source digests, and synthesis briefs
+- `.moontown/town-synthesis/*.md`
+  - stores cross-book mayor synthesis reports
 
 Current persistence code:
 
@@ -318,11 +325,16 @@ town-level synthesis artifact under:
 
 The synthesis is a mayor-owned control-plane projection. It summarizes:
 
+- executive summary
+- integrated research narrative
 - lane count
 - running/completed/review/failed lane status
 - verified source counts
 - evidence, entity, and concept counts
 - generated-site paths
+- W-source and L-source evidence references from each lane
+- comparative findings
+- maturity and gap summary
 - lane readiness gaps
 - the mayor decision for whether the goal is complete or still blocked
 
@@ -453,7 +465,7 @@ Real now:
 - proposal/run lifecycle records
 - MoonClaw run polling for bounded goal runs
 - MoonBook persistence and generated-site refresh after terminal goal runs
-- mayor-level research synthesis and quality gating
+- mayor-level research synthesis, integrated narrative, and quality gating
 - strategic mayor role model
 - dispatch and health model
 - scene dashboard model

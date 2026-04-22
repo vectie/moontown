@@ -188,9 +188,12 @@ Current bootstrap path:
 moonbook catalog
   -> book task batch
   -> keeper packet
-  -> MoonClaw proposal/run receipt
-  -> town snapshot bootstrap
-  -> dashboard / render model / frontend
+  -> MoonClaw proposal import
+  -> confirmed MoonClaw run
+  -> terminal run polling
+  -> MoonBook result persistence
+  -> book generated site
+  -> town snapshot / dashboard / frontend
 ```
 
 Current strategic path:
@@ -209,8 +212,22 @@ BookTask
   -> WorkerContextBundle
   -> ExternalProposalPacket
   -> ProposalImportReceipt
+  -> ProposalPollResponse
   -> TaskExecutionRecord
+  -> MoonBook persisted result
   -> dashboard / frontend
+```
+
+Current research goal path:
+
+```text
+user goal naming multiple subjects
+  -> Mayor splits isolated research lanes
+  -> each lane bootstraps verified research coverage
+  -> MoonClaw gathers web/local evidence into raw/bootstrap/*
+  -> MoonBook materializes durable wiki coverage and generated sites
+  -> Moontown applies quality gates
+  -> mayor writes .moontown/town-synthesis/*.md
 ```
 
 Current UI path:

@@ -149,9 +149,11 @@ moonbook catalog
   -> book task batch
   -> worker context bundle
   -> external proposal packet
-  -> proposal import receipt
-  -> seeded TownState
-  -> task execution records
+  -> MoonClaw proposal import
+  -> confirmed MoonClaw run
+  -> terminal run polling
+  -> MoonBook result persistence/build
+  -> task execution records and seeded TownState
   -> persisted TownSnapshot
   -> dashboard/render/frontend
 ```
@@ -175,6 +177,13 @@ The key design rule is that Moontown can decide whether a lane is acceptable,
 but it does not become the research engine. MoonBook owns the workspace and
 durable wiki state. MoonClaw owns execution and tool use. Moontown owns
 cross-book readiness, supervision, and operator-visible acceptance.
+
+The town synthesis is intentionally cross-book rather than book-local. It
+combines the lane outputs into an executive summary, integrated research
+narrative, lane matrix, relationship model, evidence trail, comparative
+findings, and maturity/gap section. The evidence trail points back to each
+book's `raw/bootstrap/` research artifacts, including W-source and L-source
+rows.
 
 ### Dispatch
 
@@ -203,7 +212,9 @@ The packet lifecycle is intentionally split across package boundaries:
 - `adapters/moonclaw`
   - shapes `ExternalProposalPacket`
   - models `ProposalImportReceipt`
-  - models run confirmation polling
+  - confirms and runs imported proposals
+  - polls terminal run state
+  - maps MoonClaw terminal state into town execution records
 - `core`
   - records packet path, proposal id, run id, and execution status in `TaskExecutionRecord`
 
@@ -228,6 +239,10 @@ Current persisted files:
   - mayor-owned cross-book synthesis and readiness artifacts
 - `.moontown/packets/`
   - optional exported keeper packet files
+- `.moontown/books/<book>/raw/bootstrap/`
+  - book-lane research question, search log, source screen, evidence matrix, local source digest, and synthesis brief
+- `.moontown/books/<book>/book/site/generated/index.html`
+  - MoonBook-generated site projection for the lane
 
 Current implementation:
 
@@ -248,6 +263,7 @@ Real now:
 - parallel research-lane decomposition for multi-topic goals
 - mayor-level research quality gates
 - town synthesis artifacts under `.moontown/town-synthesis/`
+- integrated research narrative with W-source and L-source evidence references
 - proposal/run lifecycle tracking
 - strategic mayor role adapter
 - dashboard and browser UI model
