@@ -299,6 +299,7 @@ async fn research_quality_gaps(
   let required = [
     "raw/bootstrap/research-question.md", "raw/bootstrap/search-log.md", "raw/bootstrap/source-screen.md",
     "raw/bootstrap/evidence-matrix.md", "raw/bootstrap/local-sources.md", "raw/bootstrap/synthesis-brief.md",
+    "raw/bootstrap/marketing-brief.md",
   ]
   let gaps : Array[String] = []
   for relative in required {
@@ -373,6 +374,14 @@ async fn research_content_quality_gaps(
     }
     None => ()
   }
+  let deep_report_path = "\{root}/raw/bootstrap/deep-report.md"
+  match read_optional_text(deep_report_path) {
+    Some(text) =>
+      for gap in deep_report_quality_gaps(entry, text) {
+        gaps.push(gap)
+      }
+    None => gaps.push("missing `raw/bootstrap/deep-report.md`")
+  }
   gaps
 }
 
@@ -384,6 +393,88 @@ async fn read_optional_text(path : String) -> String? {
   Some(@fs.read_file(path).text()) catch {
     _ => None
   }
+}
+
+///|
+fn deep_report_quality_gaps(
+  entry : @moonbook.BookCatalogEntry,
+  report : String,
+) -> Array[String] {
+  let gaps : Array[String] = []
+  let lower = report.to_lower()
+  let topic = entry.id.replace(old="research-", new="").to_lower()
+  if !lower.contains("deep research analysis") {
+    gaps.push("deep report title does not declare `Deep Research Analysis`")
+  }
+  if !lower.contains(topic) {
+    gaps.push("deep report is not lane-specific for `\{topic}`")
+  }
+  let section_count = count_markdown_sections(report)
+  if section_count < 8 {
+    gaps.push(
+      "deep report has only \{section_count} top-level sections; expected at least 8",
+    )
+  }
+  if !lower.contains("## executive summary") {
+    gaps.push("deep report is missing `## Executive Summary`")
+  }
+  if !markdown_has_table(report) {
+    gaps.push("deep report is missing at least one comparison/evidence table")
+  }
+  if !lower.contains("```mermaid") {
+    gaps.push("deep report is missing a Mermaid relationship diagram")
+  }
+  if contains_process_heavy_research_text(lower) {
+    gaps.push("deep report still reads like a run log instead of research")
+  }
+  gaps
+}
+
+///|
+fn count_markdown_sections(markdown : String) -> Int {
+  let mut count = 0
+  for line in markdown.split("\n") {
+    let trimmed = line.trim().to_string()
+    if trimmed.has_prefix("## ") {
+      count += 1
+    }
+  }
+  count
+}
+
+///|
+fn markdown_has_table(markdown : String) -> Bool {
+  for line in markdown.split("\n") {
+    let trimmed = line.trim().to_string()
+    if trimmed.has_prefix("|") && trimmed.contains("---") {
+      return true
+    }
+  }
+  false
+}
+
+///|
+fn contains_process_heavy_research_text(lower : String) -> Bool {
+  if lower.contains("pending enrichment") ||
+    lower.contains("provisional-only") ||
+    lower.contains("placeholder") ||
+    lower.contains("unable to access") ||
+    lower.contains("i could not") {
+    return true
+  }
+  let mut process_markers = 0
+  if lower.contains("this run") {
+    process_markers += 1
+  }
+  if lower.contains("the worker failed") ||
+    lower.contains("the worker could not") ||
+    lower.contains("worker log") {
+    process_markers += 1
+  }
+  if lower.contains("tool output") {
+    process_markers += 1
+  }
+  process_markers >= 2
 }
 
 ///|
@@ -521,62 +612,240 @@ async fn render_town_goal_synthesis(
   plan : @roles.MayorGoalPlan,
 ) -> String {
   let builder = StringBuilder::new()
-  builder.write_string("# Town-Level Research Synthesis\n\n")
+  builder.write_string(
+    "# Moontown, MoonBook, and MoonClaw: Deep Research Analysis\n\n",
+  )
   builder.write_string("Goal: \{goal}\n\n")
   builder.write_string("Mayor plan: \{plan.summary}\n\n")
   builder.write_string("Output contract: `mayor.town_synthesis.v1`\n\n")
   builder.write_string("## Executive Summary\n\n")
-  builder.write_string(
-    "Moontown, MoonBook, and MoonClaw form a layered research and execution stack. Moontown is the strategic town-control layer, MoonBook is the durable domain workspace and projection layer, and MoonClaw is the tactical execution/runtime layer that gathers evidence and runs provider-backed work. The current research pass is source-grounded: each lane records web queries, fetched web evidence, local source inspection, a source screen, and a claim-level evidence matrix before MoonBook materializes durable pages.\n\n",
-  )
-  builder.write_string("## Integrated Research Narrative\n\n")
-  builder.write_string(render_integrated_research_narrative(plan))
+  builder.write_string(render_town_report_executive_summary(plan))
   builder.write_string("\n\n")
-  builder.write_string("## Town Status\n\n")
+  builder.write_string("## Ecosystem Overview and Foundational Context\n\n")
+  builder.write_string(render_town_ecosystem_overview(plan))
+  builder.write_string("\n\n")
+  builder.write_string(
+    "## MoonBook: Documentation and Knowledge Infrastructure\n\n",
+  )
+  builder.write_string(render_lane_deep_report_for_topic(plan, "moonbook"))
+  builder.write_string(
+    "\n\n## MoonClaw: Agent Runtime and Job Orchestration\n\n",
+  )
+  builder.write_string(render_lane_deep_report_for_topic(plan, "moonclaw"))
+  builder.write_string(
+    "\n\n## Moontown: Orchestration Layer and Control Plane\n\n",
+  )
+  builder.write_string(render_lane_deep_report_for_topic(plan, "moontown"))
+  builder.write_string(
+    "\n\n## Inter-System Integration and Architectural Relationships\n\n",
+  )
+  builder.write_string(render_town_integration_section(plan))
+  builder.write_string(
+    "\n\n## Technical Documentation and Development Resources\n\n",
+  )
+  builder.write_string(render_town_technical_resources(plan))
+  builder.write_string("\n\n## Comparative and Contextual Analysis\n\n")
+  builder.write_string(render_town_comparative_analysis())
+  builder.write_string("\n\n## Current Status and Development Trajectory\n\n")
+  builder.write_string(render_town_status_and_trajectory(state, plan))
+  builder.write_string("\n\n## Evidence and Limits\n\n")
+  builder.write_string(render_town_evidence_and_limits(state, plan))
+  builder.to_string()
+}
+
+///|
+async fn render_town_report_executive_summary(
+  plan : @roles.MayorGoalPlan,
+) -> String {
+  let builder = StringBuilder::new()
+  builder.write_string(
+    "Moontown, MoonBook, and MoonClaw form a vertically layered MoonBit-native agent infrastructure stack: MoonBook maintains durable knowledge workspaces, MoonClaw executes bounded agent/job work, and Moontown coordinates multiple books and runtimes as a town-level control plane. ",
+  )
+  builder.write_string(
+    "The strongest current evidence comes from the three MoonBook lane reports, each of which now contains a thesis-first deep analysis, implementation-backed sections, tables, and Mermaid relationship models. ",
+  )
+  builder.write_string(
+    "The town-level conclusion is that the projects should be evaluated as a coupled ecosystem rather than as isolated repositories: knowledge, execution, and governance are deliberately separated so each layer can evolve without collapsing responsibilities.\n\n",
+  )
+  for topic in ["moonbook", "moonclaw", "moontown"] {
+    builder.write_string("- \{display_topic_title(topic)}: ")
+    builder.write_string(first_deep_report_summary(plan, topic))
+    builder.write_string("\n")
+  }
+  builder.to_string()
+}
+
+///|
+async fn first_deep_report_summary(
+  plan : @roles.MayorGoalPlan,
+  topic : String,
+) -> String {
+  match lane_entry_for_topic(plan, topic) {
+    Some(entry) => {
+      let report = read_lane_deep_report(entry)
+      if report.is_blank() {
+        return "No deep report was available for this lane."
+      }
+      let body = section_body(report, "## Executive Summary")
+      let compact = first_non_heading_paragraph(body)
+      if compact.is_blank() {
+        "Deep report exists, but no usable executive-summary paragraph was found."
+      } else {
+        markdown_excerpt(compact, 520)
+      }
+    }
+    None => "No matching lane was found."
+  }
+}
+
+///|
+fn render_town_ecosystem_overview(plan : @roles.MayorGoalPlan) -> String {
+  let builder = StringBuilder::new()
+  builder.write_string(
+    "The updated MoonBook research-report skill changes the quality target from status projection to article synthesis. Moontown should therefore treat each lane's `raw/bootstrap/deep-report.md` as the primary source for town synthesis, while still using evidence matrices and readiness summaries as guardrails.\n\n",
+  )
+  builder.write_string(
+    "The ecosystem is organized around a clean separation of concerns: MoonBook stores and projects durable knowledge, MoonClaw runs jobs and provider-backed tool work, and Moontown coordinates multi-book goals, quality gates, and cross-lane decisions. This relationship is visible across the three reports and is the central thesis of the town-level synthesis.\n\n",
+  )
+  builder.write_string("```mermaid\n")
+  builder.write_string("flowchart TB\n")
+  builder.write_string("  User[User research goal] --> Town[Moontown mayor]\n")
+  builder.write_string("  Town --> MB[MoonBook lane]\n")
+  builder.write_string("  Town --> MC[MoonClaw lane]\n")
+  builder.write_string("  Town --> MT[Moontown lane]\n")
+  builder.write_string("  MB --> MBK[Durable wiki and generated report]\n")
+  builder.write_string(
+    "  MC --> MCR[Execution evidence and provider results]\n",
+  )
+  builder.write_string("  MT --> MTO[Routing supervision and town synthesis]\n")
+  builder.write_string("  MBK --> S[Town-level ecosystem report]\n")
+  builder.write_string("  MCR --> S\n")
+  builder.write_string("  MTO --> S\n")
+  builder.write_string("```\n\n")
+  builder.write_string(
+    "The current run includes \{plan.lanes.length()} isolated research lanes, which is the right execution shape for this goal. The remaining quality question is no longer whether the lanes ran, but whether the final town report preserves the knowledge contained in the lane reports.",
+  )
+  builder.to_string()
+}
+
+///|
+async fn render_lane_deep_report_for_topic(
+  plan : @roles.MayorGoalPlan,
+  topic : String,
+) -> String {
+  match lane_entry_for_topic(plan, topic) {
+    Some(entry) => {
+      let report = read_lane_deep_report(entry)
+      if report.is_blank() {
+        return render_missing_deep_report_block(entry)
+      }
+      let body = remove_first_markdown_title(report)
+      let excerpt = markdown_excerpt(demote_markdown_headings(body), 9000)
+      "\{excerpt}\n\nSource lane report: `\{@moonbook.workspace_root(entry)}/raw/bootstrap/deep-report.md`"
+    }
+    None => "- No lane report found for `\{topic}`."
+  }
+}
+
+///|
+fn render_missing_deep_report_block(
+  entry : @moonbook.BookCatalogEntry,
+) -> String {
+  "- Missing `raw/bootstrap/deep-report.md` for `\{entry.id}`. The town report cannot meet the MoonBook research-report skill standard until this lane emits a long-form report."
+}
+
+///|
+fn render_town_integration_section(plan : @roles.MayorGoalPlan) -> String {
+  let builder = StringBuilder::new()
+  builder.write_string(
+    "The three reports converge on a stack interpretation: MoonBook is the knowledge substrate, MoonClaw is the execution substrate, and Moontown is the governance substrate. The important design choice is not that the projects can call each other; it is that they divide responsibility along durable boundaries.\n\n",
+  )
+  builder.write_string(
+    "| Layer | Project | Primary Responsibility | Town-Level Interpretation |\n",
+  )
+  builder.write_string("| --- | --- | --- | --- |\n")
+  for topic in ["moonbook", "moonclaw", "moontown"] {
+    match lane_entry_for_topic(plan, topic) {
+      Some(entry) =>
+        builder.write_string(
+          "| \{display_topic_title(topic)} | \{entry.id} | \{project_responsibility(topic)} | \{project_town_interpretation(topic)} |\n",
+        )
+      None => ()
+    }
+  }
+  builder.write_string("\n")
+  builder.write_string(
+    "This model prevents a common multi-agent-system failure mode: the executor does not own long-term truth, the wiki does not become the global scheduler, and the town does not become a raw tool runner.",
+  )
+  builder.to_string()
+}
+
+///|
+fn render_town_technical_resources(plan : @roles.MayorGoalPlan) -> String {
+  let builder = StringBuilder::new()
+  builder.write_string(
+    "The strongest technical evidence in the current run comes from repository-controlled READMEs, local source files, Moon module metadata, architecture docs, and the generated deep reports. The town synthesis treats these as lane-owned evidence rather than copying raw logs directly into the main article.\n\n",
+  )
+  builder.write_string(
+    "| Lane | Deep Report | Evidence Matrix | Generated Site |\n",
+  )
+  builder.write_string("| --- | --- | --- | --- |\n")
+  for lane in plan.lanes {
+    let root = @moonbook.workspace_root(lane.entry)
+    let site = @moonbook.generated_site_index_path(lane.entry)
+    builder.write_string(
+      "| \{lane.entry.id} | `\{root}/raw/bootstrap/deep-report.md` | `\{root}/raw/bootstrap/evidence-matrix.md` | `\{site}` |\n",
+    )
+  }
+  builder.write_string("\n")
+  builder.write_string(
+    "The town report should be judged against the `research-report` skill standard: at least ten sections for a multi-project report, thesis-first prose, tables, relationship diagrams, maturity assessment, and an evidence/limits section.",
+  )
+  builder.to_string()
+}
+
+///|
+fn render_town_comparative_analysis() -> String {
+  "Compared with a single generated marketing page, a town-level deep report must answer a different question: how do the projects work together, where do their boundaries sit, and what tradeoffs does the stack make? MoonBook contributes durable memory and report projection, MoonClaw contributes bounded execution and tool-backed evidence collection, and Moontown contributes planning, parallel decomposition, supervision, and acceptance. This makes the ecosystem closer to a coordinated agent-infrastructure stack than to a loose collection of utilities."
+}
+
+///|
+fn render_town_status_and_trajectory(
+  state : @core.TownState,
+  plan : @roles.MayorGoalPlan,
+) -> String {
+  let builder = StringBuilder::new()
   let running_count = count_lanes_by_status(state, plan, "running")
   let complete_count = count_lanes_by_status(state, plan, "complete")
   let review_count = count_lanes_by_status(state, plan, "review queued")
   let failed_count = count_lanes_by_status(state, plan, "failed")
-  builder.write_string("- lanes: \{plan.lanes.length()}\n")
-  builder.write_string("- running lanes: \{running_count}\n")
-  builder.write_string("- completed lanes: \{complete_count}\n")
-  builder.write_string("- review-queued lanes: \{review_count}\n")
-  builder.write_string("- failed lanes: \{failed_count}\n\n")
-  builder.write_string("## Lane Matrix\n\n")
   builder.write_string(
-    "| Lane | Objective | Status | Verified Sources | Evidence | Entities | Concepts | Site |\n",
+    "The latest town run has \{complete_count} completed lanes, \{running_count} running lanes, \{review_count} review-queued lanes, and \{failed_count} failed lanes. ",
   )
-  builder.write_string(
-    "| --- | --- | --- | ---: | ---: | ---: | ---: | --- |\n",
-  )
-  for lane in plan.lanes {
-    let summary = Some(@moonbook.summarize_state(lane.entry)) catch {
-      _ => None
-    }
-    let status = lane_research_status(state, lane.entry.id)
-    let site = @moonbook.generated_site_index_path(lane.entry)
-    match summary {
-      Some(summary) =>
-        builder.write_string(
-          "| \{lane.entry.id} | \{markdown_cell(lane.objective)} | \{status} | \{summary.verified_source_count} | \{summary.evidence_count} | \{summary.entity_page_count} | \{summary.concept_page_count} | \{site} |\n",
-        )
-      None =>
-        builder.write_string(
-          "| \{lane.entry.id} | \{markdown_cell(lane.objective)} | \{status} | 0 | 0 | 0 | 0 | \{site} |\n",
-        )
-    }
+  if review_count == 0 && failed_count == 0 && running_count == 0 {
+    builder.write_string(
+      "That status is strong enough for a town-level report, provided the lane `deep-report.md` files remain present and substantive.\n\n",
+    )
+  } else {
+    builder.write_string(
+      "That status means the town report should be treated as interim rather than final.\n\n",
+    )
   }
-  builder.write_string("\n")
-  builder.write_string("## System Relationship Model\n\n")
   builder.write_string(
-    "| Layer | Primary Owner | Responsibility | Evidence Basis |\n",
+    "The next improvement is to stop treating generated marketing pages as the final reading surface. The source of truth for research quality is now the deep report in each MoonBook lane plus this town-level synthesis.",
   )
-  builder.write_string("| --- | --- | --- | --- |\n")
-  for lane in plan.lanes {
-    builder.write_string(render_lane_relationship_row(lane.entry))
-  }
-  builder.write_string("\n")
-  builder.write_string("## Research Readiness\n\n")
+  builder.to_string()
+}
+
+///|
+async fn render_town_evidence_and_limits(
+  state : @core.TownState,
+  plan : @roles.MayorGoalPlan,
+) -> String {
+  let builder = StringBuilder::new()
+  builder.write_string("### Lane Matrix\n\n")
+  builder.write_string(render_town_lane_matrix(state, plan))
+  builder.write_string("\n### Readiness\n\n")
   for lane in plan.lanes {
     let gaps = research_quality_gaps(lane.entry)
     if gaps.is_empty() {
@@ -589,49 +858,176 @@ async fn render_town_goal_synthesis(
     }
   }
   builder.write_string("\n")
-  builder.write_string("## Evidence Trail\n\n")
+  builder.write_string(
+    "Limit: this town report relies on the three lane reports produced by MoonBook. If a lane report is shallow, missing, or process-heavy, Moontown should mark the town synthesis as review-queued instead of masking the weakness with generic ecosystem prose.\n\n",
+  )
+  builder.write_string("Mayor decision: ")
+  builder.write_string(town_synthesis_decision(state, plan))
+  builder.to_string()
+}
+
+///|
+async fn render_town_lane_matrix(
+  state : @core.TownState,
+  plan : @roles.MayorGoalPlan,
+) -> String {
+  let builder = StringBuilder::new()
+  builder.write_string(
+    "| Lane | Status | Verified Sources | Evidence | Entities | Concepts | Deep Report |\n",
+  )
+  builder.write_string("| --- | --- | ---: | ---: | ---: | ---: | --- |\n")
   for lane in plan.lanes {
-    builder.write_string("### \{lane.entry.name}\n\n")
-    builder.write_string(render_lane_evidence_trail(lane.entry))
-    builder.write_string("\n\n")
-  }
-  builder.write_string("## Comparative Findings\n\n")
-  builder.write_string(
-    "- Moontown should be read as the cross-book orchestration and supervision layer: it plans lanes, checks readiness, and produces town-level synthesis rather than doing domain-local wiki work itself.\n",
-  )
-  builder.write_string(
-    "- MoonBook should be read as the durable knowledge harness: it owns workspace semantics, raw-to-wiki materialization, source quality classification, generated sites, and review/projection surfaces.\n",
-  )
-  builder.write_string(
-    "- MoonClaw should be read as the execution substrate: it imports proposal packets, loads skills and source hints, runs tool-backed work, records web/local evidence, and returns bounded result envelopes without owning durable wiki semantics.\n",
-  )
-  builder.write_string(
-    "- The main architectural boundary is now clean: strategic planning stays in Moontown, durable knowledge state stays in MoonBook, and tactical evidence gathering stays in MoonClaw.\n\n",
-  )
-  builder.write_string("## Maturity And Gaps\n\n")
-  for lane in plan.lanes {
-    builder.write_string("- \{lane.entry.id}: ")
-    let gaps = research_quality_gaps(lane.entry)
-    if gaps.is_empty() {
-      builder.write_string(
-        "complete enough for synthesis; evidence includes fetched web rows and local source rows.\n",
-      )
-    } else {
-      let gap_text = gaps.join("; ")
-      builder.write_string("needs follow-up: \{gap_text}.\n")
+    let summary = Some(@moonbook.summarize_state(lane.entry)) catch {
+      _ => None
+    }
+    let status = lane_research_status(state, lane.entry.id)
+    let root = @moonbook.workspace_root(lane.entry)
+    match summary {
+      Some(summary) =>
+        builder.write_string(
+          "| \{lane.entry.id} | \{status} | \{summary.verified_source_count} | \{summary.evidence_count} | \{summary.entity_page_count} | \{summary.concept_page_count} | `\{root}/raw/bootstrap/deep-report.md` |\n",
+        )
+      None =>
+        builder.write_string(
+          "| \{lane.entry.id} | \{status} | 0 | 0 | 0 | 0 | `\{root}/raw/bootstrap/deep-report.md` |\n",
+        )
     }
   }
-  builder.write_string("\n")
-  builder.write_string("## Lane Briefs\n\n")
-  for lane in plan.lanes {
-    builder.write_string("### \{lane.entry.name}\n\n")
-    builder.write_string(read_lane_synthesis_brief(lane.entry))
-    builder.write_string("\n\n")
-  }
-  builder.write_string("## Mayor Decision\n\n")
-  builder.write_string(town_synthesis_decision(state, plan))
-  builder.write_string("\n")
   builder.to_string()
+}
+
+///|
+fn lane_entry_for_topic(
+  plan : @roles.MayorGoalPlan,
+  topic : String,
+) -> @moonbook.BookCatalogEntry? {
+  let needle = "research-\{topic}"
+  for lane in plan.lanes {
+    if lane.entry.id == needle || lane.entry.id.contains(topic) {
+      return Some(lane.entry)
+    }
+  }
+  None
+}
+
+///|
+fn display_topic_title(topic : String) -> String {
+  match topic {
+    "moonbook" => "MoonBook"
+    "moonclaw" => "MoonClaw"
+    "moontown" => "Moontown"
+    _ => topic
+  }
+}
+
+///|
+fn project_responsibility(topic : String) -> String {
+  match topic {
+    "moonbook" =>
+      "documentation, wiki state, report projection, and durable memory"
+    "moonclaw" =>
+      "agent runtime, jobs, provider tasks, tools, memory, and artifacts"
+    "moontown" =>
+      "goal decomposition, routing, supervision, quality gates, and town synthesis"
+    _ => "lane-specific responsibility"
+  }
+}
+
+///|
+fn project_town_interpretation(topic : String) -> String {
+  match topic {
+    "moonbook" =>
+      "the book layer that decides what evidence becomes durable knowledge"
+    "moonclaw" =>
+      "the claw layer that performs bounded work and returns structured evidence"
+    "moontown" =>
+      "the town layer that coordinates many books and workers into one operator-visible goal"
+    _ => "a supporting layer in the town goal"
+  }
+}
+
+///|
+async fn read_lane_deep_report(entry : @moonbook.BookCatalogEntry) -> String {
+  read_text_or_empty(
+    "\{@moonbook.workspace_root(entry)}/raw/bootstrap/deep-report.md",
+  )
+}
+
+///|
+fn remove_first_markdown_title(report : String) -> String {
+  let builder = StringBuilder::new()
+  let mut skipped = false
+  for line in report.split("\n") {
+    let trimmed = line.trim().to_string()
+    if !skipped && trimmed.has_prefix("# ") {
+      skipped = true
+      continue
+    }
+    builder.write_string(line.to_string())
+    builder.write_string("\n")
+  }
+  builder.to_string().trim().to_string()
+}
+
+///|
+fn demote_markdown_headings(markdown : String) -> String {
+  let builder = StringBuilder::new()
+  for line in markdown.split("\n") {
+    if line.has_prefix("####") {
+      builder.write_string("#\{line}\n")
+    } else if line.has_prefix("###") {
+      builder.write_string("#\{line}\n")
+    } else if line.has_prefix("##") {
+      builder.write_string("#\{line}\n")
+    } else {
+      builder.write_string(line.to_string())
+      builder.write_string("\n")
+    }
+  }
+  builder.to_string()
+}
+
+///|
+fn section_body(report : String, heading : String) -> String {
+  let builder = StringBuilder::new()
+  let mut in_section = false
+  for line in report.split("\n") {
+    let trimmed = line.trim().to_string()
+    if trimmed == heading {
+      in_section = true
+      continue
+    }
+    if in_section && trimmed.has_prefix("## ") {
+      break
+    }
+    if in_section {
+      builder.write_string(line.to_string())
+      builder.write_string("\n")
+    }
+  }
+  builder.to_string().trim().to_string()
+}
+
+///|
+fn first_non_heading_paragraph(markdown : String) -> String {
+  let builder = StringBuilder::new()
+  for line in markdown.split("\n") {
+    let trimmed = line.trim().to_string()
+    if trimmed.is_blank() {
+      if !builder.to_string().trim().is_blank() {
+        break
+      }
+      continue
+    }
+    if trimmed.has_prefix("#") ||
+      trimmed.has_prefix("|") ||
+      trimmed.has_prefix("```") {
+      continue
+    }
+    builder.write_string(trimmed)
+    builder.write_string(" ")
+  }
+  builder.to_string().trim().to_string()
 }
 
 ///|
@@ -812,371 +1208,12 @@ fn lane_research_status(state : @core.TownState, book_id : String) -> String {
 }
 
 ///|
-async fn read_lane_synthesis_brief(
-  entry : @moonbook.BookCatalogEntry,
-) -> String {
-  let root = @moonbook.workspace_root(entry)
-  let path = "\{root}/raw/bootstrap/synthesis-brief.md"
-  if @fs.exists(path) {
-    let content = @fs.read_file(path).text() catch {
-      _ => return "- No readable synthesis brief found at `\{path}`."
-    }
-    let excerpt = markdown_excerpt(content, 1800)
-    if excerpt.is_blank() {
-      "- Synthesis brief exists but is empty: `\{path}`."
-    } else {
-      "\{excerpt}\n\nSource: `\{path}`"
-    }
-  } else {
-    "- No synthesis brief exists yet at `\{path}`."
-  }
-}
-
-///|
-async fn render_integrated_research_narrative(
-  plan : @roles.MayorGoalPlan,
-) -> String {
-  let builder = StringBuilder::new()
-  builder.write_string(
-    "The evidence supports a three-layer interpretation rather than three independent products. ",
-  )
-  builder.write_string(
-    "Moontown owns cross-book intent and scheduling, MoonBook owns durable knowledge state and projections, and MoonClaw owns bounded execution with web/local tool evidence. ",
-  )
-  builder.write_string(
-    "This answer is intentionally stricter than a generic web summary: every lane below is backed by a fetched web row, a local source row, or a recorded blocker from the lane evidence matrix.\n\n",
-  )
-  for lane in plan.lanes {
-    builder.write_string(render_lane_narrative(lane.entry))
-    builder.write_string("\n")
-  }
-  builder.write_string(
-    "Taken together, the system is closest to a town/book/worker research stack. ",
-  )
-  builder.write_string(
-    "The important architectural boundary is that MoonClaw should not decide what counts as durable wiki knowledge; it should gather and report evidence. ",
-  )
-  builder.write_string(
-    "MoonBook should turn screened evidence into source/entity/concept/synthesis pages, while Moontown should only coordinate lanes and write the final cross-book synthesis. ",
-  )
-  builder.write_string(
-    "The current run meets the minimum deep-research shape because it includes search logs, source screening, evidence matrices, local source inspection, and lane-specific synthesis briefs before this town-level synthesis.\n",
-  )
-  builder.to_string()
-}
-
-///|
-async fn render_lane_narrative(entry : @moonbook.BookCatalogEntry) -> String {
-  let root = @moonbook.workspace_root(entry)
-  let topic = entry.id.replace(old="research-", new="").to_lower()
-  let question = lane_research_question(root, topic)
-  let role = narrative_role_for_topic(topic)
-  let evidence = lane_evidence_ids(root)
-  let finding = lane_primary_finding(root, topic)
-  let blocker = lane_primary_blocker(root)
-  let builder = StringBuilder::new()
-  builder.write_string("### \{entry.name}\n\n")
-  builder.write_string("Research question: \{question}\n\n")
-  builder.write_string("\{entry.name} is best understood as \{role}. ")
-  builder.write_string("\{finding} ")
-  if !evidence.is_blank() {
-    builder.write_string("Evidence used: \{evidence}. ")
-  }
-  if !blocker.is_blank() {
-    builder.write_string("Remaining caveat: \{blocker}. ")
-  }
-  builder.write_string(
-    "This lane should be compared through its responsibility boundary, not by treating it as a standalone application.\n",
-  )
-  builder.to_string()
-}
-
-///|
-async fn lane_research_question(root : String, fallback : String) -> String {
-  let content = read_text_or_empty("\{root}/raw/bootstrap/research-question.md")
-  for line in content.split("\n") {
-    let trimmed = line.trim().to_string()
-    if trimmed.is_blank() || trimmed.has_prefix("#") {
-      continue
-    }
-    let lower = trimmed.to_lower()
-    if lower.contains("research question:") {
-      let extracted = extract_inline_research_question(trimmed)
-      if !extracted.is_blank() {
-        return extracted
-      }
-      return default_lane_research_question(fallback)
-    }
-    if lower.has_prefix("task:") ||
-      lower.has_prefix("goal:") ||
-      lower == "question:" ||
-      lower == "success criteria:" {
-      continue
-    }
-    if trimmed.has_prefix("- ") {
-      let item = trimmed[2:].to_string().trim().to_string()
-      if item.contains("?") {
-        return item
-      }
-      continue
-    }
-    if !trimmed.contains("?") {
-      continue
-    }
-    return trimmed
-  }
-  default_lane_research_question(fallback)
-}
-
-///|
-fn extract_inline_research_question(line : String) -> String {
-  let parts = line.split("Research question:").collect()
-  if parts.length() < 2 {
-    return ""
-  }
-  let after = parts[1].trim().to_string()
-  let clipped = if after.contains(" - Quality bar:") {
-    after.split(" - Quality bar:").collect()[0].trim().to_string()
-  } else if after.contains(" - ") {
-    after.split(" - ").collect()[0].trim().to_string()
-  } else {
-    after
-  }
-  clipped.trim(chars="- ").to_string()
-}
-
-///|
-fn default_lane_research_question(fallback : String) -> String {
-  "What is \{fallback}, what problem does it solve, how is it implemented or operated, what evidence supports those claims, and what remains uncertain?"
-}
-
-///|
-fn narrative_role_for_topic(topic : String) -> String {
-  match topic {
-    "moontown" =>
-      "the strategic orchestration layer that decomposes a user goal into book-scoped research lanes, supervises execution, and records a cross-book outcome"
-    "moonbook" =>
-      "the domain memory and projection layer that turns gathered evidence into a maintained wiki, readiness model, review queue, and generated site"
-    "moonclaw" =>
-      "the tactical execution layer that imports bounded proposal packets, loads skills and source hints, runs provider-backed work, and returns structured results"
-    _ => "a researched subsystem with a lane-specific responsibility"
-  }
-}
-
-///|
-async fn lane_evidence_ids(root : String) -> String {
-  let matrix = read_text_or_empty("\{root}/raw/bootstrap/evidence-matrix.md")
-  let web_ids : Array[String] = []
-  let local_ids : Array[String] = []
-  for line in matrix.split("\n") {
-    let trimmed = line.trim().to_string()
-    if trimmed.has_prefix("| W") && !trimmed.contains("| --- ") {
-      let id = table_first_cell(trimmed)
-      if !id.is_blank() && web_ids.length() < 3 {
-        web_ids.push(id)
-      }
-    } else if trimmed.has_prefix("| L") && !trimmed.contains("| --- ") {
-      let id = table_first_cell(trimmed)
-      if !id.is_blank() && local_ids.length() < 3 {
-        local_ids.push(id)
-      }
-    }
-  }
-  let parts : Array[String] = []
-  if !web_ids.is_empty() {
-    let web_text = web_ids.join(", ")
-    parts.push("web \{web_text}")
-  }
-  if !local_ids.is_empty() {
-    let local_text = local_ids.join(", ")
-    parts.push("local \{local_text}")
-  }
-  parts.join("; ")
-}
-
-///|
-fn table_first_cell(row : String) -> String {
-  let cells = row.split("|").collect()
-  if cells.length() < 3 {
-    return ""
-  }
-  cells[1].trim().to_string()
-}
-
-///|
-async fn lane_primary_finding(root : String, topic : String) -> String {
-  let brief = read_text_or_empty("\{root}/raw/bootstrap/synthesis-brief.md")
-  let lines = brief.split("\n").collect()
-  let mut in_findings = false
-  for line in lines {
-    let trimmed = line.trim().to_string()
-    if trimmed == "Verified findings:" || trimmed == "Findings:" {
-      in_findings = true
-      continue
-    }
-    if in_findings && trimmed.has_suffix(":") && !trimmed.has_prefix("- ") {
-      break
-    }
-    if in_findings && trimmed.has_prefix("- ") {
-      let finding = trimmed[2:].to_string().trim().to_string()
-      let lower = finding.to_lower()
-      if lower.contains("local source hints were mounted") ||
-        lower.contains("workspace aliases") {
-        continue
-      }
-      return finding
-    }
-  }
-  match topic {
-    "moontown" =>
-      "The lane evidence points to goal decomposition, supervision, and town-level synthesis as the core responsibility."
-    "moonbook" =>
-      "The lane evidence points to workspace semantics, source classification, durable wiki materialization, and projection as the core responsibility."
-    "moonclaw" =>
-      "The lane evidence points to proposal import, provider tasks, tool-backed gathering, and structured execution results as the core responsibility."
-    _ =>
-      "The lane evidence supports a distinct subsystem role, but the synthesis brief should be refined with stronger findings."
-  }
-}
-
-///|
-async fn lane_primary_blocker(root : String) -> String {
-  let brief = read_text_or_empty("\{root}/raw/bootstrap/synthesis-brief.md")
-  let lines = brief.split("\n").collect()
-  let mut in_blockers = false
-  for line in lines {
-    let trimmed = line.trim().to_string()
-    if trimmed == "Blockers:" || trimmed == "Gaps:" {
-      in_blockers = true
-      continue
-    }
-    if in_blockers && trimmed.has_suffix(":") && !trimmed.has_prefix("- ") {
-      break
-    }
-    if in_blockers && trimmed.has_prefix("- ") {
-      let blocker = trimmed[2:].to_string().trim().to_string()
-      if blocker.to_lower() == "none detected in deterministic bootstrap." ||
-        blocker.to_lower() == "none detected." ||
-        blocker.to_lower() == "none" {
-        return ""
-      }
-      return blocker
-    }
-  }
-  ""
-}
-
-///|
-async fn render_lane_relationship_row(
-  entry : @moonbook.BookCatalogEntry,
-) -> String {
-  let root = @moonbook.workspace_root(entry)
-  let topic = entry.id.replace(old="research-", new="").to_lower()
-  let role = match topic {
-    "moontown" => "Strategic orchestration and cross-book supervision"
-    "moonbook" => "Domain workspace, wiki materialization, and projection"
-    "moonclaw" => "Tactical execution, provider tools, and evidence gathering"
-    _ => "Research lane"
-  }
-  let evidence = if @fs.exists("\{root}/raw/bootstrap/evidence-matrix.md") {
-    "`raw/bootstrap/evidence-matrix.md` plus fetched W-source rows"
-  } else {
-    "evidence matrix missing"
-  }
-  "| \{entry.id} | \{topic} | \{role} | \{evidence} |\n"
-}
-
-///|
-async fn render_lane_evidence_trail(
-  entry : @moonbook.BookCatalogEntry,
-) -> String {
-  let root = @moonbook.workspace_root(entry)
-  let builder = StringBuilder::new()
-  builder.write_string("Search and fetch trail:\n")
-  builder.write_string(
-    excerpt_named_section(
-      read_text_or_empty("\{root}/raw/bootstrap/search-log.md"),
-      "Web evidence gathered by provider tools:",
-      limit=900,
-    ),
-  )
-  builder.write_string("\n\nSource screening:\n")
-  builder.write_string(
-    excerpt_named_section(
-      read_text_or_empty("\{root}/raw/bootstrap/source-screen.md"),
-      "Fetched web evidence and explicit web blockers:",
-      limit=700,
-    ),
-  )
-  builder.write_string("\n\nEvidence matrix sample:\n")
-  builder.write_string(
-    evidence_matrix_sample(
-      read_text_or_empty("\{root}/raw/bootstrap/evidence-matrix.md"),
-      limit=6,
-    ),
-  )
-  builder.to_string()
-}
-
-///|
 async fn read_text_or_empty(path : String) -> String {
   if !@fs.exists(path) {
     return ""
   }
   @fs.read_file(path).text() catch {
     _ => ""
-  }
-}
-
-///|
-fn excerpt_named_section(
-  content : String,
-  heading : String,
-  limit? : Int = 800,
-) -> String {
-  if content.trim().is_blank() {
-    return "- no readable content"
-  }
-  let lines = content.split("\n").collect()
-  let captured : Array[String] = []
-  let mut in_section = false
-  for line in lines {
-    let trimmed = line.trim().to_string()
-    if trimmed == heading {
-      in_section = true
-      continue
-    }
-    if in_section && trimmed.has_suffix(":") && !trimmed.has_prefix("- ") {
-      break
-    }
-    if in_section && !trimmed.is_blank() {
-      captured.push(trimmed)
-    }
-  }
-  let text = if captured.is_empty() { content } else { captured.join("\n") }
-  markdown_excerpt(text, limit)
-}
-
-///|
-fn evidence_matrix_sample(content : String, limit? : Int = 6) -> String {
-  if content.trim().is_blank() {
-    return "- no evidence matrix"
-  }
-  let rows : Array[String] = []
-  for line in content.split("\n") {
-    let trimmed = line.trim().to_string()
-    if !trimmed.has_prefix("| ") || trimmed.contains("| --- ") {
-      continue
-    }
-    rows.push(trimmed)
-    if rows.length() >= limit + 2 {
-      break
-    }
-  }
-  if rows.is_empty() {
-    markdown_excerpt(content, 900)
-  } else {
-    rows.join("\n")
   }
 }
 
@@ -1238,11 +1275,6 @@ fn town_goal_slug(goal : String) -> String {
   } else {
     slug
   }
-}
-
-///|
-fn markdown_cell(text : String) -> String {
-  text.replace(old="|", new="/").replace(old="\n", new=" ").trim().to_string()
 }
 
 ///|
@@ -1374,14 +1406,24 @@ async fn ensure_run_execution(
   run_id : String,
   workspace_root : String,
 ) -> (@moonclaw.ProposalPollResponse, String?)? {
-  let initial = @moonclaw.poll_run(task_id, run_id, cwd=workspace_root)
+  let initial = @moonclaw.poll_run(
+    task_id,
+    run_id,
+    cwd=workspace_root,
+    detect_orphan=false,
+  )
   let launch_command = if initial.status
     is @core.TaskExecutionStatus::RunConfirmed {
     Some(@moonclaw.run_confirmed_run(run_id, cwd=workspace_root))
   } else {
     None
   }
-  let current = @moonclaw.poll_run(task_id, run_id, cwd=workspace_root)
+  let current = @moonclaw.poll_run(
+    task_id,
+    run_id,
+    cwd=workspace_root,
+    detect_orphan=false,
+  )
   Some((current, launch_command))
 }
 
@@ -1903,14 +1945,14 @@ fn bootstrap_ingest_task(
     goal=Some(normalized_goal),
     title="Bootstrap verified research coverage",
     kind="ingest",
-    prompt="Bootstrap this book before answering the research question. Work as a researcher: formulate the lane-specific question, run web search before local file search, fetch and screen authoritative sources, extract a claim-level evidence matrix, inspect local files only after web discovery, then materialize verified source, entity, concept, and synthesis pages. The result must be specific to this book lane, not generic MoonBook copy, and every major claim must cite a source ID or local path.",
+    prompt="Bootstrap this book before answering the research question. Work as a researcher: formulate the lane-specific question, run web search before local file search, fetch and screen authoritative sources, extract a claim-level evidence matrix, inspect local files only after web discovery, write a skill-authored marketing brief, then materialize verified source, entity, concept, and synthesis pages. The result must be specific to this book lane, not generic MoonBook copy, and every major claim must cite a source ID or local path.",
     priority=100,
     requires_review=true,
     target_pages=[
       "raw/bootstrap/research-question.md", "raw/bootstrap/search-log.md", "raw/bootstrap/source-screen.md",
       "raw/bootstrap/evidence-matrix.md", "raw/bootstrap/local-sources.md", "raw/bootstrap/synthesis-brief.md",
-      "wiki/sources", "wiki/entities", "wiki/concepts", "wiki/synthesis", "wiki/index.md",
-      "wiki/log.md",
+      "raw/bootstrap/marketing-brief.md", "wiki/sources", "wiki/entities", "wiki/concepts",
+      "wiki/synthesis", "wiki/index.md", "wiki/log.md",
     ],
     required_role=Some(@core.WorkerRole::Harness),
   )

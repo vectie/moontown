@@ -30,7 +30,7 @@ pub fn mayor_to_keeper_handoff(String, String, String, constraints? : Array[Stri
 
 pub fn packet_file_path(String, String) -> String
 
-pub async fn poll_run(String, String, home? : String, cwd? : String) -> ProposalPollResponse
+pub async fn poll_run(String, String, home? : String, cwd? : String, detect_orphan? : Bool) -> ProposalPollResponse
 
 pub fn proposal_packet_from_bundle(@moonbook.WorkerContextBundle, String, String, String, packet_id? : String?, notes? : Array[String], tags? : Array[String]) -> ExternalProposalPacket
 

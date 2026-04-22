@@ -40,3 +40,28 @@ test "lane status prefers review queued over complete" {
   )
   assert_eq(lane_research_status(state, "research-moonbook"), "review queued")
 }
+
+///|
+test "deep report quality gate accepts research-shaped report" {
+  let entry = @moonbook.BookCatalogEntry::new(
+    id="research-moonbook",
+    name="MoonBook Research",
+    purpose="test",
+    workspace_root="/tmp/moonbook",
+  )
+  let report = "# MoonBook: Deep Research Analysis\n\n## Executive Summary\n\nMoonBook is a lane-specific research subject.\n\n## Context\n\nText.\n\n## Architecture\n\n| Layer | Role |\n| --- | --- |\n| Book | Memory |\n\n## Evidence\n\nText.\n\n## Integration\n\n```mermaid\nflowchart TB\nA-->B\n```\n\n## Maturity\n\nText.\n\n## Risks\n\nText.\n\n## Trajectory\n\nText.\n"
+  assert_eq(deep_report_quality_gaps(entry, report).length(), 0)
+}
+
+///|
+test "deep report quality gate rejects shallow process output" {
+  let entry = @moonbook.BookCatalogEntry::new(
+    id="research-moonclaw",
+    name="MoonClaw Research",
+    purpose="test",
+    workspace_root="/tmp/moonclaw",
+  )
+  let report = "# Run Notes\n\n## Summary\n\nThis run is pending enrichment and has placeholder notes.\n"
+  let gaps = deep_report_quality_gaps(entry, report)
+  assert_true(gaps.length() >= 5)
+}
