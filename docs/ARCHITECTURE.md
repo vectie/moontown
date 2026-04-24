@@ -185,6 +185,33 @@ findings, and maturity/gap section. The evidence trail points back to each
 book's `raw/bootstrap/` research artifacts, including W-source and L-source
 rows.
 
+### Readiness and Quality Gates
+
+Moontown now keeps a typed readiness layer for research acceptance instead of
+only relying on Markdown string markers.
+
+Current town-side readiness model:
+
+- [research_readiness.mbt](/Users/kq/Workspace/moontown/research_readiness.mbt)
+
+It consumes MoonBook-owned summary fields such as verified source count, entity
+page count, concept page count, evidence count, query note count, and pending
+review count. MoonBook still owns the workspace semantics; Moontown only decides
+whether a lane is acceptable for town-level synthesis.
+
+### Runtime Status and Daemon Tick
+
+Moontown exposes an operator-readable runtime status seam:
+
+- [runtime_status.mbt](/Users/kq/Workspace/moontown/runtime_status.mbt)
+
+The current daemon implementation is still a one-shot durable tick rather than
+a days-long process manager. It loads a persisted snapshot, runs one mayor
+supervision cycle, persists the checkpoint, and reports planned scheduler
+actions. It also persists `.moontown/daemon.json` with daemon tick, lease, and
+job metadata. This is the intended stepping stone toward a restart-safe loop
+with stronger leases and heartbeats.
+
 ### Dispatch
 
 ```text
@@ -218,6 +245,30 @@ The packet lifecycle is intentionally split across package boundaries:
 - `core`
   - records packet path, proposal id, run id, and execution status in `TaskExecutionRecord`
 
+## Refactor Boundaries
+
+The root package is now split so bootstrap planning is not buried inside the
+goal runner:
+
+- [goal_run.mbt](/Users/kq/Workspace/moontown/goal_run.mbt)
+  - high-level goal orchestration, book launch, quality gates, and persistence handoff
+- [goal_bootstrap.mbt](/Users/kq/Workspace/moontown/goal_bootstrap.mbt)
+  - research bootstrap task selection and ingest-first planning
+- [goal_execution.mbt](/Users/kq/Workspace/moontown/goal_execution.mbt)
+  - MoonClaw proposal/run launch and MoonBook result persistence
+- [goal_supervision.mbt](/Users/kq/Workspace/moontown/goal_supervision.mbt)
+  - live execution polling, retry directives, worker status sync, and settle loop
+- [research_quality.mbt](/Users/kq/Workspace/moontown/research_quality.mbt)
+  - research quality gates, deep-report checks, and review-queue marking
+- [town_synthesis.mbt](/Users/kq/Workspace/moontown/town_synthesis.mbt)
+  - mayor-owned cross-book synthesis rendering and synthesis execution registration
+- [file_io.mbt](/Users/kq/Workspace/moontown/file_io.mbt)
+  - root-package local text/file helpers used by synthesis, status, and quality checks
+- [research_readiness.mbt](/Users/kq/Workspace/moontown/research_readiness.mbt)
+  - typed research readiness model
+- [runtime_status.mbt](/Users/kq/Workspace/moontown/runtime_status.mbt)
+  - persisted snapshot status and daemon tick entry points
+
 ### Patrol
 
 ```text
@@ -235,6 +286,8 @@ Current persisted files:
   - persisted moonbook catalog entries
 - `.moontown/town.json`
   - persisted town snapshot
+- `.moontown/daemon.json`
+  - persisted one-shot daemon tick state, lease owner, heartbeat event count, and scheduled job metadata
 - `.moontown/town-synthesis/*.md`
   - mayor-owned cross-book synthesis and readiness artifacts
 - `.moontown/packets/`

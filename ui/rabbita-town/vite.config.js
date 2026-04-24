@@ -2,6 +2,8 @@ import { defineConfig } from 'vite'
 import rabbita from '@rabbita/vite'
 
 export default defineConfig({
+  base: './',
+  publicDir: '../assets',
   plugins: [rabbita()],
   build: {
     rollupOptions: {
@@ -20,4 +22,3 @@ export default defineConfig({
     fs: { allow: ['..', '../..', '../../..'] },
   },
 })
-

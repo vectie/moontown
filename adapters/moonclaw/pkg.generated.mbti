@@ -18,6 +18,10 @@ pub fn default_moonclaw_home() -> String
 
 pub fn default_packet_directory() -> String
 
+pub fn embedded_handoff_examples() -> Array[EmbeddedRuntimeHandoff]
+
+pub fn embedded_runtime_policy_examples() -> Array[EmbeddedMoonclawRuntime]
+
 pub async fn import_packet(ExternalProposalPacket, String, moonclaw_root? : String, home? : String, cwd? : String, confirm? : Bool) -> ProposalImportReceipt
 
 pub fn keeper_runtime(@core.BookRef) -> EmbeddedMoonclawRuntime
@@ -49,6 +53,7 @@ pub struct AssignTaskRequest {
   context_summary : String
   skills : Array[String]
 }
+pub fn AssignTaskRequest::new(assignment~ : @core.AssignmentPlan, workspace_root~ : String, context_summary~ : String, skills? : Array[String]) -> Self
 pub impl Eq for AssignTaskRequest
 pub impl Show for AssignTaskRequest
 
@@ -148,6 +153,7 @@ pub struct PollWorkerResponse {
   status : @core.WorkerStatus
   detail : String
 }
+pub fn PollWorkerResponse::new(worker_id~ : String, status~ : @core.WorkerStatus, detail~ : String) -> Self
 pub impl Eq for PollWorkerResponse
 pub impl Show for PollWorkerResponse
 
@@ -188,6 +194,7 @@ pub impl @json.FromJson for RunsIndexFile
 pub struct SpawnWorkerRequest {
   worker : @core.WorkerRef
 }
+pub fn SpawnWorkerRequest::new(worker~ : @core.WorkerRef) -> Self
 pub impl Eq for SpawnWorkerRequest
 pub impl Show for SpawnWorkerRequest
 
@@ -203,6 +210,7 @@ pub struct TaskResultResponse {
   summary : String
   memory_candidates : Array[String]
 }
+pub fn TaskResultResponse::new(task_id~ : String, status~ : @core.TownTaskStatus, summary~ : String, memory_candidates? : Array[String]) -> Self
 pub impl Eq for TaskResultResponse
 pub impl Show for TaskResultResponse
 

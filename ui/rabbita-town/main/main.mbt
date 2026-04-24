@@ -23,14 +23,20 @@ priv enum Strategy {
   Balanced
   Throughput
   Recovery
-} derive(Show, Eq)
+} derive(Eq)
 
 ///|
 priv enum Selection {
   Overview
   Node(String)
   Worker(String)
-} derive(Show, Eq)
+}
+
+///|
+priv enum StateSourceKind {
+  DemoSimulation
+  SnapshotFile
+} derive(Eq)
 
 ///|
 priv struct Model {
@@ -38,11 +44,12 @@ priv struct Model {
   paused : Bool
   strategy : Strategy
   selection : Selection
+  state_source : StateSourceKind
   budget : Int
   energy : Int
   pressure : Int
   stability : Int
-} derive(Show, Eq)
+}
 
 ///|
 priv enum Msg {
@@ -53,10 +60,11 @@ priv enum Msg {
   SelectNode(String)
   SelectOverview
   SetStrategy(Strategy)
+  ToggleStateSource
   InjectBudget
   RelieveQueue
   StabilityDrill
-} derive(Show, Eq)
+}
 
 ///|
 priv struct WorkerSim {
@@ -69,14 +77,52 @@ priv struct WorkerSim {
   energy : Int
   load : Int
   summary : String
-} derive(Show, Eq)
+}
 
 ///|
 priv struct FeedItem {
   title : String
   detail : String
   tone : String
-} derive(Show, Eq)
+}
+
+///|
+priv struct ResidentSim {
+  name : String
+  venture : String
+  need : String
+  mood : String
+  agent_goal : String
+  memory : String
+  plan : String
+  zone : String
+}
+
+///|
+priv struct CivicQuestSim {
+  title : String
+  area : String
+  stage : String
+  reward : String
+  status : String
+}
+
+///|
+priv struct SocialMatchSim {
+  left : String
+  right : String
+  reason : String
+  next_step : String
+  confidence : Int
+}
+
+///|
+priv struct TalentSignalSim {
+  name : String
+  domain : String
+  skills : String
+  activity : Int
+}
 
 ///|
 fn init_model() -> Model {
@@ -85,6 +131,7 @@ fn init_model() -> Model {
     paused: false,
     strategy: Strategy::Balanced,
     selection: Selection::Overview,
+    state_source: StateSourceKind::DemoSimulation,
     budget: 76,
     energy: 68,
     pressure: 34,
@@ -130,6 +177,11 @@ fn update(dispatch : Dispatch[Msg], msg : Msg, model : Model) -> (Cmd, Model) {
       (@rabbita.none, { ..model, selection: Node(node_key) })
     SelectOverview => (@rabbita.none, { ..model, selection: Overview })
     SetStrategy(strategy) => (@rabbita.none, { ..model, strategy, })
+    ToggleStateSource =>
+      (
+        @rabbita.none,
+        { ..model, state_source: next_state_source(model.state_source) },
+      )
     InjectBudget =>
       (
         @rabbita.none,
@@ -165,6 +217,7 @@ fn update(dispatch : Dispatch[Msg], msg : Msg, model : Model) -> (Cmd, Model) {
 
 ///|
 fn advance_model(model : Model) -> Model {
+  let recovery_active = mayor_recovery_active(model)
   let budget_delta = match model.strategy {
     Balanced => -2
     Throughput => -4
@@ -193,23 +246,35 @@ fn advance_model(model : Model) -> Model {
   let energy_bonus = if model.tick % 5 == 0 { 1 } else { 0 }
   let pressure_relief = if model.tick % 4 == 0 { 1 } else { 0 }
   let stability_bonus = if model.tick % 5 == 0 { 1 } else { 0 }
-  let next_budget = clamp_metric(model.budget + budget_delta + budget_bonus)
+  let supervision_budget = if recovery_active { 8 } else { 0 }
+  let supervision_energy = if recovery_active { 10 } else { 0 }
+  let supervision_pressure = if recovery_active { 14 } else { 0 }
+  let supervision_stability = if recovery_active { 12 } else { 0 }
+  let next_budget = clamp_metric(
+    model.budget + budget_delta + budget_bonus + supervision_budget,
+  )
   let next_energy = clamp_metric(
-    model.energy + energy_delta - overload_penalty + energy_bonus,
+    model.energy +
+    energy_delta -
+    overload_penalty +
+    energy_bonus +
+    supervision_energy,
   )
   let next_pressure = clamp_metric(
     model.pressure +
     pressure_delta +
     brittle_penalty +
     energy_penalty -
-    pressure_relief,
+    pressure_relief -
+    supervision_pressure,
   )
   let next_stability = clamp_metric(
     model.stability +
     stability_delta -
     overload_penalty -
     budget_penalty +
-    stability_bonus,
+    stability_bonus +
+    supervision_stability,
   )
   {
     ..model,
@@ -219,6 +284,14 @@ fn advance_model(model : Model) -> Model {
     pressure: next_pressure,
     stability: next_stability,
   }
+}
+
+///|
+fn mayor_recovery_active(model : Model) -> Bool {
+  model.pressure > 76 ||
+  model.stability < 36 ||
+  model.energy < 28 ||
+  model.budget < 24
 }
 
 ///|
@@ -234,34 +307,108 @@ fn clamp_metric(value : Int) -> Int {
 
 ///|
 fn town_scene(model : Model) -> @ui.SceneRenderModel {
-  let state = demo_state(model)
+  let state = state_for_model(model)
   let report = @health.inspect_town(state)
   @ui.build_scene_render(@ui.build_dashboard(state, report))
 }
 
 ///|
+fn state_for_model(model : Model) -> @core.TownState {
+  match model.state_source {
+    StateSourceKind::DemoSimulation => demo_state(model)
+    StateSourceKind::SnapshotFile => snapshot_placeholder_state(model)
+  }
+}
+
+///|
+fn next_state_source(source : StateSourceKind) -> StateSourceKind {
+  match source {
+    StateSourceKind::DemoSimulation => StateSourceKind::SnapshotFile
+    StateSourceKind::SnapshotFile => StateSourceKind::DemoSimulation
+  }
+}
+
+///|
+fn state_source_label(source : StateSourceKind) -> String {
+  match source {
+    StateSourceKind::DemoSimulation => "Demo Simulation"
+    StateSourceKind::SnapshotFile => "Snapshot File"
+  }
+}
+
+///|
+fn state_source_detail(source : StateSourceKind) -> String {
+  match source {
+    StateSourceKind::DemoSimulation =>
+      "Live civic simulation: mayor supervision keeps services, agents, quests, and town health cycling 24/7."
+    StateSourceKind::SnapshotFile =>
+      "Snapshot mode shows the non-simulated bridge placeholder until the browser bundle can load `.moontown/town.json`."
+  }
+}
+
+///|
+fn state_source_options() -> Array[StateSourceKind] {
+  [DemoSimulation, SnapshotFile]
+}
+
+///|
 fn demo_state(model : Model) -> @core.TownState {
   let state = @core.empty_state(
-    @core.TownConfig::new(id="moonrise", name="Moontown / Moonrise"),
-  )
-  state.register_book(
-    @core.BookRef::new(
-      id="coding",
-      name="Moonbook / Coding",
-      purpose="Harness engineering for source work, repo memory, and execution policy.",
-      workspace_root="/workspace/coding",
-      memory_scope=@core.MemoryScope::BookPrivate,
-      tags=["moonbit", "repo", "harness"],
+    @core.TownConfig::new(
+      id="wenyu-valley",
+      name="Wenyu Valley / AI Innovation Town",
+      heartbeat_seconds=30,
+      max_concurrent_tasks=24,
     ),
   )
   state.register_book(
     @core.BookRef::new(
-      id="finance",
-      name="Moonbook / Finance",
-      purpose="Private daily finance operations with isolated memory and task artifacts.",
-      workspace_root="/workspace/finance",
-      memory_scope=@core.MemoryScope::TaskEphemeral,
-      tags=["ledger", "private", "daily"],
+      id="policy-hall",
+      name="Policy Release Hall",
+      purpose="Turns policy documents into quest lines, advisor answers, and application checklists.",
+      workspace_root="/town/policy-hall",
+      memory_scope=@core.MemoryScope::BookPrivate,
+      tags=["policy", "quest", "advisor"],
+    ),
+  )
+  state.register_book(
+    @core.BookRef::new(
+      id="social-square",
+      name="Social Square",
+      purpose="Maintains weak-tie matching, activity initiation, and collaboration loops.",
+      workspace_root="/town/social-square",
+      memory_scope=@core.MemoryScope::BookPrivate,
+      tags=["matching", "events", "community"],
+    ),
+  )
+  state.register_book(
+    @core.BookRef::new(
+      id="talent-avenue",
+      name="Talent Star Avenue",
+      purpose="Projects resident talent cards, skills heatmaps, and reception tours.",
+      workspace_root="/town/talent-avenue",
+      memory_scope=@core.MemoryScope::SharedTown,
+      tags=["talent", "graph", "showcase"],
+    ),
+  )
+  state.register_book(
+    @core.BookRef::new(
+      id="ai-garden",
+      name="AI Science Garden",
+      purpose="Runs AI learning tips, tool trials, creator workshops, and tutorial quests.",
+      workspace_root="/town/ai-garden",
+      memory_scope=@core.MemoryScope::BookPrivate,
+      tags=["learning", "tools", "workshop"],
+    ),
+  )
+  state.register_book(
+    @core.BookRef::new(
+      id="future-harbor",
+      name="Future Harbor",
+      purpose="Coordinates roadshows, contest preparation, offline robot links, and digital twin signals.",
+      workspace_root="/town/future-harbor",
+      memory_scope=@core.MemoryScope::SharedTown,
+      tags=["roadshow", "robot", "digital-twin"],
     ),
   )
   for worker in worker_sims(model) {
@@ -286,11 +433,60 @@ fn demo_state(model : Model) -> @core.TownState {
 }
 
 ///|
+fn snapshot_placeholder_state(model : Model) -> @core.TownState {
+  let state = @core.empty_state(
+    @core.TownConfig::new(id="moonrise", name="Moontown / Moonrise"),
+  )
+  state.register_book(
+    @core.BookRef::new(
+      id="snapshot",
+      name="Persisted Town Snapshot",
+      purpose="Browser snapshot bridge placeholder for `.moontown/town.json`.",
+      workspace_root=".moontown",
+      memory_scope=@core.MemoryScope::SharedTown,
+      tags=["snapshot", "pending-bridge"],
+    ),
+  )
+  state.register_worker(
+    @core.WorkerRef::new(
+      id="snapshot-bridge",
+      name="Snapshot Bridge",
+      book_id="snapshot",
+      role=@core.WorkerRole::Watcher,
+      capabilities=["state-source", "projection"],
+      status=@core.WorkerStatus::Waiting,
+    ),
+  )
+  state.enqueue_task(
+    @core.TownTask::new(
+      id="connect-snapshot-source",
+      book_id="snapshot",
+      title="Connect persisted town state",
+      prompt="Load `.moontown/town.json` through a local endpoint or generated static JSON artifact.",
+      domain=@core.WorkDomain::Operations,
+      required_role=Some(@core.WorkerRole::Watcher),
+      required_capabilities=["state-source"],
+      status=@core.TownTaskStatus::Planned,
+    ),
+  )
+  state.record_event(
+    @core.TownEvent::new(
+      id="snapshot-source-\{model.tick}",
+      kind="state-source",
+      detail="Snapshot source selected; Rabbita browser bundle needs a state bridge before this reflects live town data.",
+    ),
+  )
+  state
+}
+
+///|
 fn worker_role_from_id(worker_id : String) -> @core.WorkerRole {
   match worker_id {
-    "claw-harness" => @core.WorkerRole::Harness
-    "claw-review" => @core.WorkerRole::Reviewer
-    "claw-ledger" => @core.WorkerRole::Specialist
+    "agent-policy" => @core.WorkerRole::Specialist
+    "agent-social" => @core.WorkerRole::Operator
+    "agent-talent" => @core.WorkerRole::MemoryKeeper
+    "agent-garden" => @core.WorkerRole::Planner
+    "agent-robot" => @core.WorkerRole::Watcher
     _ => @core.WorkerRole::MemoryKeeper
   }
 }
@@ -298,9 +494,11 @@ fn worker_role_from_id(worker_id : String) -> @core.WorkerRole {
 ///|
 fn worker_capabilities(worker_id : String) -> Array[String] {
   match worker_id {
-    "claw-harness" => ["moonbit", "git", "testing"]
-    "claw-review" => ["review", "moonbit"]
-    "claw-ledger" => ["ledgers", "reporting"]
+    "agent-policy" => ["policy", "rag", "checklist"]
+    "agent-social" => ["matching", "event-planning", "community"]
+    "agent-talent" => ["talent-graph", "projection", "reception"]
+    "agent-garden" => ["tutorial", "tool-trial", "workshop"]
+    "agent-robot" => ["robot", "venue", "digital-twin"]
     _ => ["reporting", "planning"]
   }
 }
@@ -310,36 +508,69 @@ fn worker_sims(model : Model) -> Array[WorkerSim] {
   [
     build_worker_sim(
       model,
-      id="claw-harness",
-      title="Harness Hound",
-      role="Harness",
-      book_id="coding",
+      id="agent-policy",
+      title="Policy Sprite",
+      role="Policy Advisor",
+      book_id="policy-hall",
       offset=0,
     ),
     build_worker_sim(
       model,
-      id="claw-review",
-      title="Review Owl",
-      role="Reviewer",
-      book_id="coding",
+      id="agent-social",
+      title="Cafe Matchmaker",
+      role="Social Operator",
+      book_id="social-square",
       offset=1,
     ),
     build_worker_sim(
       model,
-      id="claw-ledger",
-      title="Ledger Fox",
-      role="Specialist",
-      book_id="finance",
+      id="agent-talent",
+      title="Talent Cartographer",
+      role="Memory Keeper",
+      book_id="talent-avenue",
       offset=2,
     ),
     build_worker_sim(
       model,
-      id="claw-memory",
-      title="Archive Cat",
-      role="Memory Keeper",
-      book_id="finance",
+      id="agent-garden",
+      title="AI Garden Tutor",
+      role="Planner",
+      book_id="ai-garden",
       offset=3,
     ),
+    build_worker_sim(
+      model,
+      id="agent-robot",
+      title="Harbor Robot Link",
+      role="Watcher",
+      book_id="future-harbor",
+      offset=4,
+    ),
+  ]
+}
+
+///|
+fn workers_for_model(model : Model) -> Array[WorkerSim] {
+  match model.state_source {
+    StateSourceKind::DemoSimulation => worker_sims(model)
+    StateSourceKind::SnapshotFile => snapshot_worker_sims()
+  }
+}
+
+///|
+fn snapshot_worker_sims() -> Array[WorkerSim] {
+  [
+    {
+      id: "snapshot-bridge",
+      title: "Snapshot Bridge",
+      role: "Watcher",
+      book_id: "snapshot",
+      status: @core.WorkerStatus::Waiting,
+      zone_key: "worker-yard",
+      energy: 100,
+      load: 12,
+      summary: "Waiting for a static or local endpoint bridge into `.moontown/town.json`.",
+    },
   ]
 }
 
@@ -373,10 +604,22 @@ fn build_worker_sim(
 ///|
 fn worker_status_for(model : Model, offset : Int) -> @core.WorkerStatus {
   let cycle = (model.tick + offset) % 9
-  if model.stability < 30 && (cycle == 2 || cycle == 6) {
-    @core.WorkerStatus::Blocked
+  if mayor_recovery_active(model) {
+    match cycle {
+      0 => @core.WorkerStatus::Running
+      1 => @core.WorkerStatus::Waiting
+      2 => @core.WorkerStatus::Idle
+      3 => @core.WorkerStatus::Running
+      4 => @core.WorkerStatus::Waiting
+      5 => @core.WorkerStatus::Idle
+      6 => @core.WorkerStatus::Running
+      7 => @core.WorkerStatus::Waiting
+      _ => @core.WorkerStatus::Idle
+    }
+  } else if model.stability < 30 && (cycle == 2 || cycle == 6) {
+    @core.WorkerStatus::Waiting
   } else if model.pressure > 76 && (cycle == 1 || cycle == 4 || cycle == 7) {
-    @core.WorkerStatus::Blocked
+    @core.WorkerStatus::Waiting
   } else {
     match model.strategy {
       Strategy::Balanced =>
@@ -424,14 +667,9 @@ fn worker_zone_key(book_id : String, status : @core.WorkerStatus) -> String {
   match status {
     @core.WorkerStatus::Blocked => "anomaly-corner"
     @core.WorkerStatus::Idle => "worker-yard"
-    @core.WorkerStatus::Waiting => "city-hall"
+    @core.WorkerStatus::Waiting => "worker-yard"
     @core.WorkerStatus::Offline => "gate"
-    @core.WorkerStatus::Running =>
-      if book_id == "finance" {
-        "book-finance"
-      } else {
-        "book-coding"
-      }
+    @core.WorkerStatus::Running => "book-\{book_id}"
   }
 }
 
@@ -451,10 +689,13 @@ fn worker_load(model : Model, offset : Int, status : @core.WorkerStatus) -> Int 
 fn worker_summary(status : @core.WorkerStatus, load : Int) -> String {
   match status {
     @core.WorkerStatus::Running =>
-      "Executing keeper-issued work at load \{load}%."
-    @core.WorkerStatus::Waiting => "Waiting for dispatch and context hydration."
-    @core.WorkerStatus::Idle => "Cooling in the yard and recovering attention."
-    @core.WorkerStatus::Blocked => "Blocked by queue pressure or town drift."
+      "Serving residents and town quests at load \{load}%."
+    @core.WorkerStatus::Waiting =>
+      "Waiting in the plaza for the mayor's next supervised handoff."
+    @core.WorkerStatus::Idle =>
+      "Resting in the yard while memory and social signals settle."
+    @core.WorkerStatus::Blocked =>
+      "Blocked by civic queue pressure or failed offline linkage."
     @core.WorkerStatus::Offline => "Offline and unavailable."
   }
 }
@@ -463,44 +704,54 @@ fn worker_summary(status : @core.WorkerStatus, load : Int) -> String {
 fn task_specs(model : Model) -> Array[@core.TownTask] {
   [
     @core.TownTask::new(
-      id="task-town-layer",
-      book_id="coding",
-      title="Implement town orchestration layer",
-      prompt="Host multiple moonbooks and route coding work to the right claw worker.",
-      domain=@core.WorkDomain::Coding,
-      required_role=Some(@core.WorkerRole::Harness),
-      required_capabilities=["moonbit", "git"],
+      id="task-policy-quest",
+      book_id="policy-hall",
+      title="Explain rental subsidy quest",
+      prompt="Convert a policy into a scenario quest, checklist, and resident-facing reward path.",
+      domain=@core.WorkDomain::Operations,
+      required_role=Some(@core.WorkerRole::Specialist),
+      required_capabilities=["policy", "checklist"],
       status=task_status_for(model, 0),
     ),
     @core.TownTask::new(
-      id="task-review-contract",
-      book_id="coding",
-      title="Review delegation contract",
-      prompt="Check that the worker protocol is still safe for multi-book orchestration.",
-      domain=@core.WorkDomain::Coding,
-      required_role=Some(@core.WorkerRole::Reviewer),
-      required_capabilities=["review", "moonbit"],
+      id="task-cafe-match",
+      book_id="social-square",
+      title="Match two complementary OPCs",
+      prompt="Detect business complementarity and stage a low-pressure cafe introduction.",
+      domain=@core.WorkDomain::SocialExperiment,
+      required_role=Some(@core.WorkerRole::Operator),
+      required_capabilities=["matching", "community"],
       status=task_status_for(model, 1),
     ),
     @core.TownTask::new(
-      id="task-ledger-close",
-      book_id="finance",
-      title="Close daily finance loop",
-      prompt="Summarize transactions, update balances, and prepare the next-day brief.",
-      domain=@core.WorkDomain::Finance,
-      required_role=Some(@core.WorkerRole::Specialist),
-      required_capabilities=["ledgers", "reporting"],
+      id="task-talent-graph",
+      book_id="talent-avenue",
+      title="Refresh talent heatmap",
+      prompt="Update resident skills, achievements, and tour-ready showcase cards.",
+      domain=@core.WorkDomain::Research,
+      required_role=Some(@core.WorkerRole::MemoryKeeper),
+      required_capabilities=["talent-graph", "projection"],
       status=task_status_for(model, 2),
     ),
     @core.TownTask::new(
-      id="task-finance-memory",
-      book_id="finance",
-      title="Capture durable finance memories",
-      prompt="Store daily finance findings without leaking into the coding moonbook.",
-      domain=@core.WorkDomain::Finance,
-      required_role=Some(@core.WorkerRole::MemoryKeeper),
-      required_capabilities=["planning", "reporting"],
+      id="task-ai-tip",
+      book_id="ai-garden",
+      title="Publish daily AI tool trial",
+      prompt="Turn one practical AI workflow into a five-minute resident tutorial.",
+      domain=@core.WorkDomain::Research,
+      required_role=Some(@core.WorkerRole::Planner),
+      required_capabilities=["tutorial", "tool-trial"],
       status=task_status_for(model, 3),
+    ),
+    @core.TownTask::new(
+      id="task-robot-booking",
+      book_id="future-harbor",
+      title="Sync robot venue booking",
+      prompt="Bridge a virtual request into roadshow room availability and robot confirmation.",
+      domain=@core.WorkDomain::Operations,
+      required_role=Some(@core.WorkerRole::Watcher),
+      required_capabilities=["robot", "venue"],
+      status=task_status_for(model, 4),
     ),
   ]
 }
@@ -508,8 +759,19 @@ fn task_specs(model : Model) -> Array[@core.TownTask] {
 ///|
 fn task_status_for(model : Model, offset : Int) -> @core.TownTaskStatus {
   let cycle = (model.tick + offset) % 8
-  if model.pressure > 80 && (cycle == 3 || cycle == 6) {
-    @core.TownTaskStatus::Blocked
+  if mayor_recovery_active(model) {
+    match cycle {
+      0 => @core.TownTaskStatus::Assigned
+      1 => @core.TownTaskStatus::Running
+      2 => @core.TownTaskStatus::Running
+      3 => @core.TownTaskStatus::Planned
+      4 => @core.TownTaskStatus::Assigned
+      5 => @core.TownTaskStatus::Running
+      6 => @core.TownTaskStatus::Pending
+      _ => @core.TownTaskStatus::Running
+    }
+  } else if model.pressure > 80 && (cycle == 3 || cycle == 6) {
+    @core.TownTaskStatus::Assigned
   } else {
     match cycle {
       0 => @core.TownTaskStatus::Pending
@@ -529,8 +791,10 @@ fn execution_status_for(
   model : Model,
   offset : Int,
 ) -> @core.TaskExecutionStatus {
-  if model.stability < 26 && offset == 3 {
-    @core.TaskExecutionStatus::Failed
+  if mayor_recovery_active(model) && offset == 4 {
+    @core.TaskExecutionStatus::RunConfirmed
+  } else if model.stability < 26 && offset == 3 {
+    @core.TaskExecutionStatus::ReviewQueued
   } else {
     match (model.tick + offset) % 7 {
       0 => @core.TaskExecutionStatus::PacketReady
@@ -547,10 +811,11 @@ fn execution_status_for(
 ///|
 fn execution_specs(model : Model) -> Array[@core.TaskExecutionRecord] {
   [
-    execution_spec(model, "task-town-layer", "coding", 0),
-    execution_spec(model, "task-review-contract", "coding", 1),
-    execution_spec(model, "task-ledger-close", "finance", 2),
-    execution_spec(model, "task-finance-memory", "finance", 3),
+    execution_spec(model, "task-policy-quest", "policy-hall", 0),
+    execution_spec(model, "task-cafe-match", "social-square", 1),
+    execution_spec(model, "task-talent-graph", "talent-avenue", 2),
+    execution_spec(model, "task-ai-tip", "ai-garden", 3),
+    execution_spec(model, "task-robot-booking", "future-harbor", 4),
   ]
 }
 
@@ -642,6 +907,59 @@ fn pad2(value : Int) -> String {
 }
 
 ///|
+fn day_phase_label(tick : Int) -> String {
+  let minute_of_day = (8 * 60 + tick * 15) % (24 * 60)
+  let hour = minute_of_day / 60
+  if hour < 6 {
+    "Night patrol"
+  } else if hour < 11 {
+    "Morning onboarding"
+  } else if hour < 15 {
+    "Midday service"
+  } else if hour < 19 {
+    "Cafe matching"
+  } else {
+    "Evening reflection"
+  }
+}
+
+///|
+fn season_label(tick : Int) -> String {
+  match tick / 96 % 4 {
+    0 => "Spring code festival"
+    1 => "Summer river lab"
+    2 => "Autumn roadshow"
+    _ => "Winter build camp"
+  }
+}
+
+///|
+fn weather_label(tick : Int) -> String {
+  match tick / 12 % 5 {
+    0 => "Clear valley"
+    1 => "River breeze"
+    2 => "Rainy hackathon"
+    3 => "Firefly night"
+    _ => "Soft fog"
+  }
+}
+
+///|
+fn resident_count(model : Model) -> Int {
+  52 + model.tick % 19
+}
+
+///|
+fn valley_points_redeemed(model : Model) -> Int {
+  12 + model.tick % 11
+}
+
+///|
+fn robot_service_count(model : Model) -> Int {
+  8 + model.tick % 7
+}
+
+///|
 fn strategy_label(strategy : Strategy) -> String {
   match strategy {
     Strategy::Balanced => "Balanced"
@@ -664,6 +982,12 @@ fn render_asset(asset_path : String, title : String) -> @rabbita.Html {
 ///|
 fn all_alerts(scene : @ui.SceneRenderModel, model : Model) -> Array[String] {
   let alerts : Array[String] = []
+  if mayor_recovery_active(model) {
+    alerts.push(
+      "Mayor supervision is actively recovering the town loop before service collapse.",
+    )
+    return alerts
+  }
   for alert in scene.alerts {
     alerts.push(alert)
   }
@@ -686,6 +1010,10 @@ fn all_alerts(scene : @ui.SceneRenderModel, model : Model) -> Array[String] {
 fn render_alerts(alerts : Array[String]) -> @rabbita.Html {
   if alerts.length() == 1 && alerts[0] == "No active alerts" {
     div(class="alert-strip", [status_chip(alerts[0], "chip-calm")])
+  } else if alerts.length() == 1 &&
+    alerts[0] ==
+    "Mayor supervision is actively recovering the town loop before service collapse." {
+    div(class="alert-strip", [status_chip(alerts[0], "chip-recovery")])
   } else {
     div(
       class="alert-strip",
@@ -705,6 +1033,21 @@ fn render_meter(label : String, value : Int, tone : String) -> @rabbita.Html {
     div(class="metric-track", [
       div(class="metric-fill \{tone}", style=fill_style, no_children()),
     ]),
+  ])
+}
+
+///|
+fn render_civic_context(model : Model) -> @rabbita.Html {
+  section(class="civic-context", [
+    status_chip("Phase: \{day_phase_label(model.tick)}", "chip-clock"),
+    status_chip("Season: \{season_label(model.tick)}", "chip-book"),
+    status_chip("Weather: \{weather_label(model.tick)}", "chip-neutral"),
+    status_chip("Residents: \{resident_count(model)}", "chip-neutral"),
+    status_chip(
+      "Valley points redeemed: \{valley_points_redeemed(model)}",
+      "chip-book",
+    ),
+    status_chip("Robot calls: \{robot_service_count(model)}", "chip-neutral"),
   ])
 }
 
@@ -763,25 +1106,30 @@ fn render_runtime_bar(
   section(class="runtime-bar", [
     div(class="runtime-head", [
       div(class="runtime-copy", [
-        p(class="eyebrow", "Live Surface"),
+        p(class="eyebrow", "Operator Surface"),
         h2("Town traffic, keeper queue, and review flow"),
-        p(
-          class="summary",
-          "The mayor loop stays visible while packets move through import, execution, persistence, and review.",
-        ),
+        p(class="summary", state_source_detail(model.state_source)),
       ]),
       div(class="runtime-status", [
         status_chip(
-          if model.paused {
+          if model.state_source == StateSourceKind::SnapshotFile {
+            "Snapshot bridge"
+          } else if model.paused {
             "Simulation paused"
           } else {
             "Simulation live"
           },
-          if model.paused {
+          if model.state_source == StateSourceKind::SnapshotFile {
+            "chip-neutral"
+          } else if model.paused {
             "chip-alert"
           } else {
             "chip-live"
           },
+        ),
+        status_chip(
+          "Source: \{state_source_label(model.state_source)}",
+          "chip-book",
         ),
         status_chip("Workers online: \{workers.length()}", "chip-neutral"),
       ]),
@@ -792,6 +1140,373 @@ fn render_runtime_bar(
       runtime_stat_chip("Persisting", persistence_count, "runtime-persisting"),
       runtime_stat_chip("Review", review_count, "runtime-review"),
       runtime_stat_chip("Completed", completed_count, "runtime-completed"),
+    ]),
+  ])
+}
+
+///|
+fn render_civic_module_card(
+  name : String,
+  zone : String,
+  detail : String,
+  signal : String,
+) -> @rabbita.Html {
+  article(class="civic-module-card", [
+    p(class="scene-node-key", zone),
+    h3(name),
+    p(detail),
+    span(class="module-signal", signal),
+  ])
+}
+
+///|
+fn render_civic_modules(model : Model) -> @rabbita.Html {
+  section(class="civic-modules", [
+    div(class="runtime-copy", [
+      p(class="eyebrow", "Wenyu Valley Modules"),
+      h2("Seven civic systems, one always-on mayor loop"),
+      p(
+        class="summary",
+        if mayor_recovery_active(model) {
+          "Recovery patrol is active: the mayor is throttling queues, restoring worker energy, and keeping services online."
+        } else {
+          "The town stays alive through policy quests, social matching, talent projection, AI learning, and virtual-physical service loops."
+        },
+      ),
+    ]),
+    div(class="civic-module-grid", [
+      render_civic_module_card(
+        "Policy Hall", "South / services", "Policy scrolls become quests, checklists, and advisor answers.",
+        "Quest-ready",
+      ),
+      render_civic_module_card(
+        "Contest Express", "Future Harbor", "Roadshow prep, mock judging, reminders, and champion parade hooks.",
+        "Season live",
+      ),
+      render_civic_module_card(
+        "Social Square", "Central / cafe", "Agents turn weak ties into introductions, events, and trial collaboration.",
+        "Matchmaking",
+      ),
+      render_civic_module_card(
+        "Talent Avenue", "Central / showcase", "Resident skills, achievements, tour cards, and talent graph projections.",
+        "Graph warm",
+      ),
+      render_civic_module_card(
+        "Vitality ECG", "Town-wide", "Settlement broadcasts, activity calendar, and verified achievement pulses.",
+        "24/7 pulse",
+      ),
+      render_civic_module_card(
+        "AI Garden", "North / eco", "Five-minute AI tips, tool trials, and creator workshop loops.",
+        "Learning",
+      ),
+      render_civic_module_card(
+        "Robot Link", "Offline bridge", "Venue booking, proxy attendance, and digital twin signals for physical space.",
+        "Bridge sync",
+      ),
+    ]),
+  ])
+}
+
+///|
+fn resident_sims(model : Model) -> Array[ResidentSim] {
+  [
+    {
+      name: "Li / Edge AI OPC",
+      venture: "Low-power vision module studio",
+      need: "Needs rental subsidy eligibility and contest prep.",
+      mood: if model.pressure > 70 {
+        "Focused"
+      } else {
+        "Curious"
+      },
+      agent_goal: "Ask Policy Sprite for subsidy checklist, then book a mock roadshow.",
+      memory: "Remembered a past concern about compute vouchers and prototype demo timing.",
+      plan: "09:00 policy quest, 14:00 cafe intro, 18:00 reflection note.",
+      zone: "Policy Hall",
+    },
+    {
+      name: "Chen / Design Automation OPC",
+      venture: "AI UI prototyping service",
+      need: "Looking for hardware founders who need interface design.",
+      mood: "Open to weak-tie match",
+      agent_goal: "Meet one robotics or edge-AI neighbor in Social Square.",
+      memory: "Prefers low-pressure cafe intros before business collaboration.",
+      plan: "Browse Talent Avenue, accept cafe match, save follow-up memory.",
+      zone: "Social Square",
+    },
+    {
+      name: "Ma / Policy Ops Visitor",
+      venture: "District operator evaluating settlement conversion.",
+      need: "Needs tour-ready talent graph and daily vitality summary.",
+      mood: "Observing",
+      agent_goal: "Generate VIP reception route and verify achievement broadcasts.",
+      memory: "Asked yesterday for warm-community evidence instead of raw traffic.",
+      plan: "Review talent heatmap, export visit notes, flag missing service gaps.",
+      zone: "Talent Avenue",
+    },
+  ]
+}
+
+///|
+fn render_resident_card(resident : ResidentSim) -> @rabbita.Html {
+  article(class="resident-card", [
+    div(class="resident-head", [
+      span(class="resident-avatar", resident_initials(resident.name)),
+      div(class="resident-title", [h3(resident.name), p(resident.zone)]),
+    ]),
+    p(resident.venture),
+    p("Need: \{resident.need}"),
+    p("Mood: \{resident.mood}"),
+    p("Agent goal: \{resident.agent_goal}"),
+    div(class="memory-strip", [span("Memory"), p(resident.memory)]),
+    div(class="memory-strip", [span("Plan"), p(resident.plan)]),
+  ])
+}
+
+///|
+fn resident_initials(name : String) -> String {
+  match name {
+    "Li / Edge AI OPC" => "LI"
+    "Chen / Design Automation OPC" => "CH"
+    "Ma / Policy Ops Visitor" => "MA"
+    _ => "AI"
+  }
+}
+
+///|
+fn render_resident_agents(model : Model) -> @rabbita.Html {
+  section(class="resident-panel", [
+    div(class="runtime-copy", [
+      p(class="eyebrow", "Resident Agents"),
+      h2("Digital twins with memory, reflection, and plans"),
+      p(
+        class="summary",
+        "Each resident now has visible need state, remembered context, and a next plan. This is the UI contract for real Memory Stream + Reflection + Planning integration.",
+      ),
+    ]),
+    div(
+      class="resident-grid",
+      resident_sims(model).map(resident => render_resident_card(resident)),
+    ),
+  ])
+}
+
+///|
+fn civic_quests(model : Model) -> Array[CivicQuestSim] {
+  [
+    {
+      title: "Rental subsidy walkthrough",
+      area: "Policy Hall",
+      stage: if model.tick % 4 < 2 {
+        "Advisor interpreting"
+      } else {
+        "Checklist ready"
+      },
+      reward: "80 Valley XP + application packet",
+      status: "Active",
+    },
+    {
+      title: "OPC roadshow preparation",
+      area: "Contest Express",
+      stage: if model.tick % 5 < 3 {
+        "Mock judge scoring"
+      } else {
+        "Deck gap review"
+      },
+      reward: "Priority roadshow slot",
+      status: "Nurturing",
+    },
+    {
+      title: "Cafe collaboration intro",
+      area: "Social Square",
+      stage: "Agent-mediated weak-tie match",
+      reward: "Trial collaboration room",
+      status: "Matching",
+    },
+    {
+      title: "Remote venue booking",
+      area: "Robot Link",
+      stage: if model.tick % 3 == 0 {
+        "Robot confirmation"
+      } else {
+        "Room availability sync"
+      },
+      reward: "Offline room hold",
+      status: "Bridge",
+    },
+  ]
+}
+
+///|
+fn render_quest_card(quest : CivicQuestSim) -> @rabbita.Html {
+  article(class="quest-card", [
+    p(class="scene-node-key", quest.area),
+    h3(quest.title),
+    p("Stage: \{quest.stage}"),
+    p("Reward: \{quest.reward}"),
+    span(class="module-signal", quest.status),
+  ])
+}
+
+///|
+fn render_civic_quests(model : Model) -> @rabbita.Html {
+  section(class="quest-panel", [
+    div(class="runtime-copy", [
+      p(class="eyebrow", "Civic Quests"),
+      h2("Policy, contest, social, and offline workflows as playable services"),
+      p(
+        class="summary",
+        "This replaces static service text with quest-shaped state that agents can advance and the mayor can supervise.",
+      ),
+    ]),
+    div(
+      class="quest-grid",
+      civic_quests(model).map(quest => render_quest_card(quest)),
+    ),
+  ])
+}
+
+///|
+fn social_matches() -> Array[SocialMatchSim] {
+  [
+    {
+      left: "Li / Edge AI OPC",
+      right: "Chen / Design Automation OPC",
+      reason: "Hardware prototype needs investor-facing UI and demo storytelling.",
+      next_step: "Cafe intro at 15:30, then shared roadshow checklist.",
+      confidence: 87,
+    },
+    {
+      left: "AI Garden Tutor",
+      right: "Policy Sprite",
+      reason: "Daily AI tip can explain subsidy form filling with a practical demo.",
+      next_step: "Publish tutorial quest after policy source review.",
+      confidence: 79,
+    },
+  ]
+}
+
+///|
+fn talent_signals(model : Model) -> Array[TalentSignalSim] {
+  [
+    {
+      name: "Edge AI Studio",
+      domain: "Robotics / edge vision",
+      skills: "TinyML, camera modules, deployment",
+      activity: clamp_metric(72 + model.tick % 16),
+    },
+    {
+      name: "Design Automation Lab",
+      domain: "AI design services",
+      skills: "UI generation, design systems, rapid prototypes",
+      activity: clamp_metric(66 + model.tick % 19),
+    },
+    {
+      name: "Policy Ops Desk",
+      domain: "District services",
+      skills: "policy synthesis, reception routes, event ops",
+      activity: clamp_metric(58 + model.tick % 23),
+    },
+  ]
+}
+
+///|
+fn render_match_card(match_item : SocialMatchSim) -> @rabbita.Html {
+  article(class="match-card", [
+    h3("\{match_item.left} x \{match_item.right}"),
+    p(match_item.reason),
+    p("Next: \{match_item.next_step}"),
+    span(class="module-signal", "Confidence \{match_item.confidence}%"),
+  ])
+}
+
+///|
+fn render_talent_card(signal : TalentSignalSim) -> @rabbita.Html {
+  let fill_style = ["width: \{signal.activity}%"]
+  article(class="talent-card", [
+    h3(signal.name),
+    p(signal.domain),
+    p(signal.skills),
+    div(class="metric-track", [
+      div(class="metric-fill tone-energy", style=fill_style, no_children()),
+    ]),
+    p("Activity brightness: \{signal.activity}%"),
+  ])
+}
+
+///|
+fn render_social_talent(model : Model) -> @rabbita.Html {
+  section(class="social-talent-panel", [
+    div(class="runtime-copy", [
+      p(class="eyebrow", "Social Capital"),
+      h2("Weak ties, talent graph, and reception-ready evidence"),
+      p(
+        class="summary",
+        "The town should prove community warmth through visible matches, skill density, and operator-friendly talent projections.",
+      ),
+    ]),
+    div(class="social-talent-grid", [
+      div(class="subpanel", [
+        h3("Agent Matches"),
+        div(
+          class="feed-list",
+          social_matches().map(item => render_match_card(item)),
+        ),
+      ]),
+      div(class="subpanel", [
+        h3("Talent Star Avenue"),
+        div(
+          class="feed-list",
+          talent_signals(model).map(signal => render_talent_card(signal)),
+        ),
+      ]),
+    ]),
+  ])
+}
+
+///|
+fn render_bridge_contract(model : Model) -> @rabbita.Html {
+  section(class="bridge-panel", [
+    div(class="runtime-copy", [
+      p(class="eyebrow", "24/7 Runtime Contract"),
+      h2("From playable prototype to durable daemon town"),
+      p(
+        class="summary",
+        "The UI now exposes the state objects the backend must keep alive: residents, memories, quests, matches, workers, health, and physical bridge events.",
+      ),
+    ]),
+    div(class="bridge-grid", [
+      runtime_stat_chip("Daemon ticks", model.tick, "runtime-running"),
+      runtime_stat_chip("Residents", resident_count(model), "runtime-packets"),
+      runtime_stat_chip(
+        "Memory streams",
+        resident_sims(model).length(),
+        "runtime-imported",
+      ),
+      runtime_stat_chip(
+        "Open quests",
+        civic_quests(model).length(),
+        "runtime-persisting",
+      ),
+      runtime_stat_chip(
+        "Robot calls",
+        robot_service_count(model),
+        "runtime-review",
+      ),
+    ]),
+    div(class="contract-list", [
+      p(
+        "Persisted town state: `.moontown/town.json` should publish the same objects shown here.",
+      ),
+      p(
+        "MoonBook state: each civic module owns durable wiki/memory pages for its domain.",
+      ),
+      p(
+        "MoonClaw state: worker runs emit result packets and memory candidates, never raw global memory writes.",
+      ),
+      p(
+        "Browser bridge: Rabbita should consume a generated `town-runtime.json` or local endpoint instead of synthetic state.",
+      ),
     ]),
   ])
 }
@@ -865,7 +1580,17 @@ fn render_strategy_button(
 
 ///|
 fn render_controls(dispatch : Dispatch[Msg], model : Model) -> @rabbita.Html {
-  let status = if model.paused { "Paused" } else { "Live" }
+  let status = if model.state_source == StateSourceKind::SnapshotFile {
+    if model.paused {
+      "Bridge paused"
+    } else {
+      "Bridge"
+    }
+  } else if model.paused {
+    "Paused"
+  } else {
+    "Live"
+  }
   let action_label = if model.paused { "Resume" } else { "Pause" }
   section(class="control-hub", [
     div(class="control-strip", [
@@ -873,6 +1598,15 @@ fn render_controls(dispatch : Dispatch[Msg], model : Model) -> @rabbita.Html {
       status_chip(simulation_time_label(model.tick), "chip-clock"),
       status_chip("Tick \{model.tick}", "chip-neutral"),
       status_chip("Mode: \{strategy_label(model.strategy)}", "chip-book"),
+      status_chip(
+        "State sources: \{state_source_options().length()}",
+        "chip-neutral",
+      ),
+      button(
+        class="control-button",
+        on_click=dispatch(ToggleStateSource),
+        "Switch Source",
+      ),
       button(
         class="control-button",
         on_click=dispatch(TogglePause),
@@ -960,6 +1694,12 @@ fn worker_avatar_initials(title : String) -> String {
     "Review Owl" => "RO"
     "Ledger Fox" => "LF"
     "Archive Cat" => "AC"
+    "Snapshot Bridge" => "SB"
+    "Policy Sprite" => "PS"
+    "Cafe Matchmaker" => "CM"
+    "Talent Cartographer" => "TC"
+    "AI Garden Tutor" => "AG"
+    "Harbor Robot Link" => "HR"
     _ => "??"
   }
 }
@@ -1110,6 +1850,36 @@ fn find_worker(workers : Array[WorkerSim], worker_id : String) -> WorkerSim? {
 }
 
 ///|
+fn render_worker_choice_button(
+  dispatch : Dispatch[Msg],
+  worker : WorkerSim,
+) -> @rabbita.Html {
+  button(
+    class="inspector-action worker-choice",
+    on_click=dispatch(SelectWorker(worker.id)),
+    "\{worker.title} - \{worker.status.to_string()}",
+  )
+}
+
+///|
+fn render_worker_roster(
+  dispatch : Dispatch[Msg],
+  workers : Array[WorkerSim],
+) -> @rabbita.Html {
+  if workers.is_empty() {
+    div(class="worker-roster", [p("No workers are visible in this scope.")])
+  } else {
+    let controls : Array[@rabbita.Html] = [
+      p(class="worker-roster-title", "Workers"),
+    ]
+    for worker in workers {
+      controls.push(render_worker_choice_button(dispatch, worker))
+    }
+    div(class="worker-roster", controls)
+  }
+}
+
+///|
 fn selection_body(
   dispatch : Dispatch[Msg],
   model : Model,
@@ -1130,6 +1900,7 @@ fn selection_body(
           "Imported proposals: \{count_execution_status(executions, @core.TaskExecutionStatus::ProposalImported)}",
         ),
         p("Active runs: \{running_execution_count(executions)}"),
+        render_worker_roster(dispatch, workers),
         button(
           class="inspector-action",
           on_click=dispatch(InjectBudget),
@@ -1160,6 +1931,7 @@ fn selection_body(
         p("Assets: \{node.asset_paths.length()}"),
         p("Workers present: \{related_workers.length()}"),
         p("Execution records: \{related_executions.length()}"),
+        render_worker_roster(dispatch, related_workers),
         button(
           class="inspector-action",
           on_click=dispatch(SelectOverview),
@@ -1225,9 +1997,9 @@ fn render_inspector(
 
 ///|
 fn render_scene(dispatch : Dispatch[Msg], model : Model) -> @rabbita.Html {
-  let state = demo_state(model)
+  let state = state_for_model(model)
   let scene = town_scene(model)
-  let workers = worker_sims(model)
+  let workers = workers_for_model(model)
   let executions = state.executions
   let alerts = all_alerts(scene, model)
   let scene_style = ["width: \{scene.width}px", "height: \{scene.height}px"]
@@ -1260,7 +2032,7 @@ fn render_scene(dispatch : Dispatch[Msg], model : Model) -> @rabbita.Html {
         h1(scene.title),
         p(
           class="summary",
-          "A live mayor-and-keeper simulation dashboard with command actions, worker traffic, and pressure-driven feedback loops.",
+          "A pixel-art always-on AI town: mayor supervision, resident agents, district services, and virtual-physical feedback loops.",
         ),
         render_controls(dispatch, model),
       ]),
@@ -1272,7 +2044,13 @@ fn render_scene(dispatch : Dispatch[Msg], model : Model) -> @rabbita.Html {
       render_meter("Queue Pressure", model.pressure, "tone-pressure"),
       render_meter("Town Stability", model.stability, "tone-stability"),
     ]),
+    render_civic_context(model),
     render_runtime_bar(model, workers, executions),
+    render_civic_modules(model),
+    render_resident_agents(model),
+    render_civic_quests(model),
+    render_social_talent(model),
+    render_bridge_contract(model),
     main_(class="town-main", [
       div(class="scene-column", [
         section(class="scene-frame-shell", [
@@ -1350,7 +2128,7 @@ fn running_execution_count(
       @core.TaskExecutionStatus::RunConfirmed
       | @core.TaskExecutionStatus::Running
       | @core.TaskExecutionStatus::AwaitingPersistence
-      | @core.TaskExecutionStatus::ReviewQueued => count += 1
+      | @core.TaskExecutionStatus::ReviewQueued
       | @core.TaskExecutionStatus::Stale => count += 1
       _ => ()
     }
@@ -1378,7 +2156,7 @@ fn node_matches_execution(
     "worker-yard" =>
       status == @core.TaskExecutionStatus::AwaitingPersistence ||
       status == @core.TaskExecutionStatus::Completed
-    _ => false
+    _ => node_key == "book-\{book_id}"
   }
 }
 

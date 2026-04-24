@@ -18,7 +18,7 @@ test "dashboard renders town square and dispatch log" {
   assert_true(dashboard.contains("scene: 1280x720"))
   assert_true(dashboard.contains("City Hall"))
   assert_true(dashboard.contains("frame: 500,80 280x180"))
-  assert_true(dashboard.contains("ui/assets/buildings/city-hall.svg"))
+  assert_true(dashboard.contains("buildings/city-hall.svg"))
   assert_true(dashboard.contains("Anomaly Corner"))
   assert_true(dashboard.contains("## Books"))
   assert_true(dashboard.contains("## Workers"))

@@ -8,6 +8,8 @@ import {
 // Values
 pub fn choose_isolation(@core.TownTask, @core.WorkerRef, @core.BookRef) -> @core.IsolationMode
 
+pub fn escalate(String) -> RouteDecision
+
 pub fn route_task(@core.TownState, RouteRequest) -> RouteDecision
 
 // Errors

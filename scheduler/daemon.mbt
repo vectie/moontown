@@ -2,20 +2,58 @@
 pub struct SchedulerTick {
   sequence : Int
   summary : String
-} derive(Show, Eq)
+} derive(Show, Eq, ToJson, FromJson)
 
 ///|
 pub struct ScheduledJob {
   id : String
   kind : String
   interval_seconds : Int
-} derive(Show, Eq)
+} derive(Show, Eq, ToJson, FromJson)
+
+///|
+pub struct DaemonState {
+  daemon_id : String
+  lease_owner : String
+  tick_sequence : Int
+  last_heartbeat_event_count : Int
+  active_goal_ids : Array[String]
+  jobs : Array[ScheduledJob]
+} derive(Show, Eq, ToJson, FromJson)
+
+///|
+pub fn DaemonState::new(
+  daemon_id? : String = "moontown-daemon",
+  lease_owner? : String = "local",
+  tick_sequence? : Int = 0,
+  last_heartbeat_event_count? : Int = 0,
+  active_goal_ids? : Array[String] = [],
+  jobs? : Array[ScheduledJob] = default_daemon_jobs(),
+) -> DaemonState {
+  {
+    daemon_id,
+    lease_owner,
+    tick_sequence,
+    last_heartbeat_event_count,
+    active_goal_ids,
+    jobs,
+  }
+}
+
+///|
+pub fn default_daemon_jobs() -> Array[ScheduledJob] {
+  [
+    { id: "supervise-live-runs", kind: "supervision", interval_seconds: 30 },
+    { id: "refresh-health", kind: "health", interval_seconds: 60 },
+    { id: "project-ui-state", kind: "projection", interval_seconds: 60 },
+  ]
+}
 
 ///|
 pub struct SchedulerAction {
   kind : String
   detail : String
-} derive(Show, Eq)
+} derive(Show, Eq, ToJson, FromJson)
 
 ///|
 pub fn collect_due_tasks(town : @core.TownState) -> Array[@core.TownTask] {
@@ -78,4 +116,20 @@ pub fn next_tick(
   actions : Array[SchedulerAction],
 ) -> SchedulerTick {
   { sequence, summary: "\{actions.length()} town actions planned" }
+}
+
+///|
+pub fn plan_daemon_tick(
+  daemon : DaemonState,
+  town : @core.TownState,
+  report : @health.HealthReport,
+) -> (DaemonState, SchedulerTick, Array[SchedulerAction]) {
+  let actions = plan_tick(town, report)
+  let next_sequence = daemon.tick_sequence + 1
+  let next_daemon = {
+    ..daemon,
+    tick_sequence: next_sequence,
+    last_heartbeat_event_count: town.events.length(),
+  }
+  (next_daemon, next_tick(next_sequence, actions), actions)
 }

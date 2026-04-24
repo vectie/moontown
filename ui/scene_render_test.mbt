@@ -38,7 +38,7 @@ test "scene render model keeps background and node geometry" {
   let scene = @ui.build_scene_render(sample_dashboard_model())
   assert_eq(scene.width, 1280)
   assert_eq(scene.height, 720)
-  assert_eq(scene.background_path, "ui/assets/backgrounds/town-square.svg")
+  assert_eq(scene.background_path, "backgrounds/town-square.svg")
   assert_true(scene.nodes.any(fn(node) { node.key == "city-hall" }))
   assert_true(
     scene.nodes.any(fn(node) { node.class_name == "node-book-house" }),
@@ -54,7 +54,7 @@ test "scene html includes positioned nodes and assets" {
   assert_true(html.contains("scene-background"))
   assert_true(html.contains("data-node=\"city-hall\""))
   assert_true(html.contains("left:500px;top:80px;width:280px;height:180px;"))
-  assert_true(html.contains("ui/assets/buildings/city-hall.svg"))
+  assert_true(html.contains("buildings/city-hall.svg"))
   assert_true(html.contains("node-book-house"))
 }
 

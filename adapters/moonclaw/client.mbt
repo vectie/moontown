@@ -98,6 +98,70 @@ pub struct EmbeddedRuntimeHandoff {
 } derive(Show, Eq)
 
 ///|
+pub fn embedded_runtime_policy_examples() -> Array[EmbeddedMoonclawRuntime] {
+  [
+    EmbeddedMoonclawRuntime::new(
+      runtime_id="mayor-planner-example",
+      display_name="Mayor Planner",
+      role_id="mayor",
+      planning_layer=Strategic,
+      runtime_mode=PlannerOnly,
+      tool_access=Limited,
+      memory_scope=Global,
+      allow_delegate=true,
+      allow_workspace_write=false,
+      allow_execution_tools=false,
+      visible_tools=["town-registry", "health-state"],
+      skills=["mayor-supervision", "mayor-goal-decomposition"],
+      output_contract=Some("mayor.plan.v1"),
+      authority_scope="town",
+    ),
+    EmbeddedMoonclawRuntime::new(
+      runtime_id="step-inspector-example",
+      display_name="Step Inspector",
+      role_id="observer",
+      planning_layer=Execution,
+      runtime_mode=PlannerOnly,
+      tool_access=Disabled,
+      memory_scope=Step,
+      allow_workspace_write=false,
+      allow_execution_tools=false,
+      authority_scope="single-step",
+    ),
+  ]
+}
+
+///|
+pub fn embedded_handoff_examples() -> Array[EmbeddedRuntimeHandoff] {
+  [
+    EmbeddedRuntimeHandoff::new(
+      kind=StrategicToDomain,
+      objective="Translate a town goal into book-local work.",
+      scope_summary="Town mayor to book lead.",
+      target_role_id="keeper",
+    ),
+    EmbeddedRuntimeHandoff::new(
+      kind=DomainToExecution,
+      objective="Assign a scoped task to a worker claw.",
+      scope_summary="Book lead to worker pool.",
+      target_role_id="worker",
+    ),
+    EmbeddedRuntimeHandoff::new(
+      kind=ExecutionToDomain,
+      objective="Return evidence and memory candidates.",
+      scope_summary="Worker result to book lead.",
+      target_role_id="keeper",
+    ),
+    EmbeddedRuntimeHandoff::new(
+      kind=DomainToStrategic,
+      objective="Escalate readiness or risk to the mayor.",
+      scope_summary="Book lead to town mayor.",
+      target_role_id="mayor",
+    ),
+  ]
+}
+
+///|
 pub fn EmbeddedRuntimeHandoff::new(
   kind~ : EmbeddedHandoffKind,
   objective~ : String,
@@ -173,12 +237,27 @@ pub struct SpawnWorkerRequest {
 } derive(Show, Eq)
 
 ///|
+pub fn SpawnWorkerRequest::new(worker~ : @core.WorkerRef) -> SpawnWorkerRequest {
+  { worker, }
+}
+
+///|
 pub struct AssignTaskRequest {
   assignment : @core.AssignmentPlan
   workspace_root : String
   context_summary : String
   skills : Array[String]
 } derive(Show, Eq)
+
+///|
+pub fn AssignTaskRequest::new(
+  assignment~ : @core.AssignmentPlan,
+  workspace_root~ : String,
+  context_summary~ : String,
+  skills? : Array[String] = [],
+) -> AssignTaskRequest {
+  { assignment, workspace_root, context_summary, skills }
+}
 
 ///|
 pub struct PollWorkerResponse {
@@ -188,12 +267,31 @@ pub struct PollWorkerResponse {
 } derive(Show, Eq)
 
 ///|
+pub fn PollWorkerResponse::new(
+  worker_id~ : String,
+  status~ : @core.WorkerStatus,
+  detail~ : String,
+) -> PollWorkerResponse {
+  { worker_id, status, detail }
+}
+
+///|
 pub struct TaskResultResponse {
   task_id : String
   status : @core.TownTaskStatus
   summary : String
   memory_candidates : Array[String]
 } derive(Show, Eq)
+
+///|
+pub fn TaskResultResponse::new(
+  task_id~ : String,
+  status~ : @core.TownTaskStatus,
+  summary~ : String,
+  memory_candidates? : Array[String] = [],
+) -> TaskResultResponse {
+  { task_id, status, summary, memory_candidates }
+}
 
 ///|
 pub fn default_packet_directory() -> String {

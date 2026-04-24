@@ -25,19 +25,20 @@ Right now, `moontown` is usable as:
 - a real MoonClaw CLI-backed proposal import/run/polling boundary
 - a real MoonBook result-persistence and generated-site refresh boundary for goal runs
 - a mayor-level synthesis and quality-gate surface for parallel research lanes
+- typed runtime status and one-shot daemon tick commands
 - a scene-based dashboard
 - a Rabbita simulation frontend
 - a starter asset pipeline
 
 It is not yet usable as:
 
-- a real 24/7 autonomous town daemon
 - a durable multi-day restart/recovery supervisor
 - a backend-synced browser UI
 
 So the right way to use the repo today is as a real goal-run control plane plus
 a live architectural and frontend prototype. It can launch and observe bounded
-MoonBook/MoonClaw research runs, but it is not yet a days-long daemon.
+MoonBook/MoonClaw research runs, and it has the first durable daemon tick seam,
+but it is not yet a days-long restart-safe service.
 
 ## 1. Run The Text Dashboard
 
@@ -66,12 +67,45 @@ The root demo/bootstrap surface is:
 
 - [moontown.mbt](/Users/kq/Workspace/moontown/moontown.mbt)
 
+## 1.1 Inspect Runtime Status
+
+After a run has created `.moontown/town.json`, inspect the persisted town:
+
+```bash
+moon run cmd/main -- status
+```
+
+This prints:
+
+- snapshot path
+- book, worker, task, execution, and event counts
+- running/review/failed/stale/completed execution counts
+- planned scheduler/daemon actions
+
+The status model lives in:
+
+- [runtime_status.mbt](/Users/kq/Workspace/moontown/runtime_status.mbt)
+
+## 1.2 Run One Durable Daemon Tick
+
+Run one mayor supervision tick against the saved town:
+
+```bash
+moon run cmd/main -- daemon tick
+```
+
+This is not a permanent background process yet. It is the restart-safe unit the
+future daemon should repeat: load snapshot, reconcile live executions, apply
+mayor directives, persist checkpoint, update `.moontown/daemon.json`, and
+report planned next actions.
+
 ## 2. Use The Persisted Town State
 
 The demo town persists runtime bootstrap files under:
 
 - `.moontown/moonbooks.json`
 - `.moontown/town.json`
+- `.moontown/daemon.json`
 - `.moontown/packets/` when packet files are exported
 - `.moontown/books/<book>/` for MoonBook lane workspaces
 - `.moontown/town-synthesis/` for mayor-level cross-book reports
@@ -82,6 +116,8 @@ What they do:
   - stores the available books loaded into town bootstrap
 - `.moontown/town.json`
   - stores the seeded town snapshot
+- `.moontown/daemon.json`
+  - stores one-shot daemon state, tick sequence, lease owner, heartbeat event count, and scheduled job metadata
 - `.moontown/books/<book>/raw/bootstrap/`
   - stores research questions, search logs, source screens, evidence matrices,
     local source digests, and synthesis briefs

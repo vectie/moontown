@@ -16,6 +16,15 @@ Primary root package files:
 
 - [moon.pkg](/Users/kq/Workspace/moontown/moon.pkg)
 - [moontown.mbt](/Users/kq/Workspace/moontown/moontown.mbt)
+- [goal_run.mbt](/Users/kq/Workspace/moontown/goal_run.mbt)
+- [goal_bootstrap.mbt](/Users/kq/Workspace/moontown/goal_bootstrap.mbt)
+- [goal_execution.mbt](/Users/kq/Workspace/moontown/goal_execution.mbt)
+- [goal_supervision.mbt](/Users/kq/Workspace/moontown/goal_supervision.mbt)
+- [research_quality.mbt](/Users/kq/Workspace/moontown/research_quality.mbt)
+- [town_synthesis.mbt](/Users/kq/Workspace/moontown/town_synthesis.mbt)
+- [file_io.mbt](/Users/kq/Workspace/moontown/file_io.mbt)
+- [research_readiness.mbt](/Users/kq/Workspace/moontown/research_readiness.mbt)
+- [runtime_status.mbt](/Users/kq/Workspace/moontown/runtime_status.mbt)
 - [moontown_test.mbt](/Users/kq/Workspace/moontown/moontown_test.mbt)
 - [moontown_wbtest.mbt](/Users/kq/Workspace/moontown/moontown_wbtest.mbt)
 
@@ -23,6 +32,11 @@ Purpose:
 
 - convenience facade for demo bootstrap
 - current text dashboard entry surface
+- goal-run orchestration, research bootstrap planning, and execution launch
+- one-shot supervision and persisted runtime status
+- research quality gates and typed readiness
+- mayor-level town synthesis rendering
+- package-local file IO helpers shared by root features
 - package-level tests
 
 ## Core

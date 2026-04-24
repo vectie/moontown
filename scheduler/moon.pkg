@@ -1,4 +1,5 @@
 import {
   "vectie/moontown/core",
   "vectie/moontown/health",
+  "moonbitlang/core/json",
 }

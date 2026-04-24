@@ -16,6 +16,11 @@ pub enum RouteDecision {
 } derive(Show, Eq)
 
 ///|
+pub fn escalate(reason : String) -> RouteDecision {
+  Escalated(reason)
+}
+
+///|
 fn worker_matches(task : @core.TownTask, worker : @core.WorkerRef) -> Bool {
   if worker.status != @core.WorkerStatus::Idle {
     return false

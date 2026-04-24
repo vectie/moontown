@@ -4,6 +4,8 @@ package "vectie/moontown/experiment"
 // Values
 pub fn evaluate_run(ExperimentRun, ExperimentDefinition) -> ExperimentOutcome
 
+pub fn experiment_phases() -> Array[ExperimentPhase]
+
 pub fn start_experiment(ExperimentDefinition, Array[Cohort]) -> ExperimentRun
 
 // Errors
@@ -14,6 +16,7 @@ pub struct Cohort {
   name : String
   participants : Array[String]
 }
+pub fn Cohort::new(id~ : String, name~ : String, participants? : Array[String]) -> Self
 pub impl Eq for Cohort
 pub impl Show for Cohort
 
@@ -25,6 +28,7 @@ pub struct ExperimentDefinition {
   interventions : Array[Intervention]
   stop_rules : Array[StopRule]
 }
+pub fn ExperimentDefinition::new(id~ : String, title~ : String, hypothesis~ : String, target_book_ids? : Array[String], interventions? : Array[Intervention], stop_rules? : Array[StopRule]) -> Self
 pub impl Eq for ExperimentDefinition
 pub impl Show for ExperimentDefinition
 
@@ -64,6 +68,7 @@ pub struct Intervention {
   detail : String
   target_book_ids : Array[String]
 }
+pub fn Intervention::new(id~ : String, title~ : String, detail~ : String, target_book_ids? : Array[String]) -> Self
 pub impl Eq for Intervention
 pub impl Show for Intervention
 
@@ -72,6 +77,7 @@ pub struct Measurement {
   value : Double
   note : String
 }
+pub fn Measurement::new(metric~ : String, value~ : Double, note? : String) -> Self
 pub impl Eq for Measurement
 pub impl Show for Measurement
 
@@ -80,6 +86,7 @@ pub struct StopRule {
   threshold : Double
   direction : String
 }
+pub fn StopRule::new(metric~ : String, threshold~ : Double, direction? : String) -> Self
 pub impl Eq for StopRule
 pub impl Show for StopRule
 

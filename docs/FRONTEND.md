@@ -82,6 +82,17 @@ Implemented:
 This makes the frontend closer to a management simulation than a static admin
 panel.
 
+The browser surface now labels its state source explicitly and can switch
+between two modes:
+
+- `Demo Simulation`
+  - synthetic traffic for frontend/gameplay tuning
+- `Snapshot File`
+  - a non-simulated placeholder that shows the pending `.moontown/town.json` browser bridge task instead of fake worker traffic
+
+The next frontend integration is to replace that placeholder with a local state
+endpoint or generated static JSON artifact.
+
 ## Lifecycle Projection
 
 The current frontend does not invent its own execution state. It projects
@@ -143,6 +154,9 @@ From the repo root:
 Build output lands in:
 
 - `ui/rabbita-town/dist/`
+
+The Vite build uses a relative base path, so the generated `dist/index.html`
+can be opened from `file://` as well as served through Vite preview.
 
 ## UI Change Rule
 

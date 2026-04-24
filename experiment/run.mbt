@@ -8,11 +8,25 @@ pub enum ExperimentPhase {
 } derive(Show, Eq)
 
 ///|
+pub fn experiment_phases() -> Array[ExperimentPhase] {
+  [Draft, Running, CoolingDown, Complete, Halted]
+}
+
+///|
 pub struct Cohort {
   id : String
   name : String
   participants : Array[String]
 } derive(Show, Eq)
+
+///|
+pub fn Cohort::new(
+  id~ : String,
+  name~ : String,
+  participants? : Array[String] = [],
+) -> Cohort {
+  { id, name, participants }
+}
 
 ///|
 pub struct Intervention {
@@ -23,6 +37,16 @@ pub struct Intervention {
 } derive(Show, Eq)
 
 ///|
+pub fn Intervention::new(
+  id~ : String,
+  title~ : String,
+  detail~ : String,
+  target_book_ids? : Array[String] = [],
+) -> Intervention {
+  { id, title, detail, target_book_ids }
+}
+
+///|
 pub struct Measurement {
   metric : String
   value : Double
@@ -30,11 +54,29 @@ pub struct Measurement {
 } derive(Show, Eq)
 
 ///|
+pub fn Measurement::new(
+  metric~ : String,
+  value~ : Double,
+  note? : String = "",
+) -> Measurement {
+  { metric, value, note }
+}
+
+///|
 pub struct StopRule {
   metric : String
   threshold : Double
   direction : String
 } derive(Show, Eq)
+
+///|
+pub fn StopRule::new(
+  metric~ : String,
+  threshold~ : Double,
+  direction? : String = "gte",
+) -> StopRule {
+  { metric, threshold, direction }
+}
 
 ///|
 pub struct ExperimentDefinition {
@@ -45,6 +87,18 @@ pub struct ExperimentDefinition {
   interventions : Array[Intervention]
   stop_rules : Array[StopRule]
 } derive(Show, Eq)
+
+///|
+pub fn ExperimentDefinition::new(
+  id~ : String,
+  title~ : String,
+  hypothesis~ : String,
+  target_book_ids? : Array[String] = [],
+  interventions? : Array[Intervention] = [],
+  stop_rules? : Array[StopRule] = [],
+) -> ExperimentDefinition {
+  { id, title, hypothesis, target_book_ids, interventions, stop_rules }
+}
 
 ///|
 pub struct ExperimentRun {

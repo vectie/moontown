@@ -105,8 +105,8 @@ pub fn Mayor::plan_goal(
           }
       }
     None => {
-      let topics = @moonbook.research_lane_topics(goal)
-      if @moonbook.should_parallelize_goal(goal) {
+      let topics = mayor_research_lane_topics(goal)
+      if mayor_should_parallelize_goal(goal, topics) {
         let lanes = topics.map(fn(topic) {
           let entry = @moonbook.parallel_research_entry(topic)
           goal_lane(entry, goal, topic)
@@ -141,6 +141,28 @@ pub fn Mayor::plan_goal(
       }
     }
   }
+}
+
+///|
+fn mayor_research_lane_topics(goal : String) -> Array[String] {
+  let notes = goal.to_lower()
+  let topics : Array[String] = []
+  for topic in ["moontown", "moonbook", "moonclaw", "finance", "coding"] {
+    if notes.contains(topic) {
+      topics.push(topic)
+    }
+  }
+  topics
+}
+
+///|
+fn mayor_should_parallelize_goal(goal : String, topics : Array[String]) -> Bool {
+  let notes = goal.to_lower()
+  let research_like = notes.contains("research") ||
+    notes.contains("compare") ||
+    notes.contains("survey") ||
+    notes.contains("map")
+  research_like && topics.length() > 1
 }
 
 ///|

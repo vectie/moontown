@@ -2,6 +2,7 @@
 package "vectie/moontown/scheduler"
 
 import {
+  "moonbitlang/core/json",
   "vectie/moontown/core",
   "vectie/moontown/health",
 }
@@ -9,13 +10,31 @@ import {
 // Values
 pub fn collect_due_tasks(@core.TownState) -> Array[@core.TownTask]
 
+pub fn default_daemon_jobs() -> Array[ScheduledJob]
+
 pub fn next_tick(Int, Array[SchedulerAction]) -> SchedulerTick
+
+pub fn plan_daemon_tick(DaemonState, @core.TownState, @health.HealthReport) -> (DaemonState, SchedulerTick, Array[SchedulerAction])
 
 pub fn plan_tick(@core.TownState, @health.HealthReport) -> Array[SchedulerAction]
 
 // Errors
 
 // Types and methods
+pub struct DaemonState {
+  daemon_id : String
+  lease_owner : String
+  tick_sequence : Int
+  last_heartbeat_event_count : Int
+  active_goal_ids : Array[String]
+  jobs : Array[ScheduledJob]
+}
+pub fn DaemonState::new(daemon_id? : String, lease_owner? : String, tick_sequence? : Int, last_heartbeat_event_count? : Int, active_goal_ids? : Array[String], jobs? : Array[ScheduledJob]) -> Self
+pub impl Eq for DaemonState
+pub impl Show for DaemonState
+pub impl ToJson for DaemonState
+pub impl @json.FromJson for DaemonState
+
 pub struct ScheduledJob {
   id : String
   kind : String
@@ -23,6 +42,8 @@ pub struct ScheduledJob {
 }
 pub impl Eq for ScheduledJob
 pub impl Show for ScheduledJob
+pub impl ToJson for ScheduledJob
+pub impl @json.FromJson for ScheduledJob
 
 pub struct SchedulerAction {
   kind : String
@@ -30,6 +51,8 @@ pub struct SchedulerAction {
 }
 pub impl Eq for SchedulerAction
 pub impl Show for SchedulerAction
+pub impl ToJson for SchedulerAction
+pub impl @json.FromJson for SchedulerAction
 
 pub struct SchedulerTick {
   sequence : Int
@@ -37,6 +60,8 @@ pub struct SchedulerTick {
 }
 pub impl Eq for SchedulerTick
 pub impl Show for SchedulerTick
+pub impl ToJson for SchedulerTick
+pub impl @json.FromJson for SchedulerTick
 
 // Type aliases
 
