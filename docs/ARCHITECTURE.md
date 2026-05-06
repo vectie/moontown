@@ -6,6 +6,11 @@
 moontown -> moonbook -> moonclaw
 ```
 
+The Wenyu Valley product plan is tracked separately in
+[WENYU_VALLEY_PRD.md](/Users/kq/Workspace/moontown/docs/WENYU_VALLEY_PRD.md).
+That document defines the programmable roadmap for turning the current town
+prototype into a MoonBook/MoonClaw-backed civic AI town.
+
 ## Layer Responsibilities
 
 ### `moontown`

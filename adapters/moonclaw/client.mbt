@@ -218,6 +218,23 @@ pub struct ProposalPollResponse {
 } derive(Show, Eq, ToJson, FromJson)
 
 ///|
+pub fn timed_out_poll_response(
+  task_id : String,
+  run_id : String,
+  summary : String,
+) -> ProposalPollResponse {
+  {
+    task_id,
+    run_id,
+    status: @core.TaskExecutionStatus::Failed,
+    summary,
+    memory_candidates: [],
+    requires_review: true,
+    notify_town: true,
+  }
+}
+
+///|
 struct RunsIndexFile {
   runs : Array[StoredRun]
 } derive(Show, Eq, ToJson, FromJson)

@@ -12,6 +12,7 @@ import {
   "moonbitlang/async",
   "moonbitlang/async/fs",
   "moonbitlang/core/encoding/utf8" @encoding/utf8,
+  "moonbitlang/core/env" @env,
   "moonbitlang/core/json",
   "moonbitlang/x/path",
 }

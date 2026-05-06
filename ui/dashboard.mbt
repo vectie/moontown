@@ -118,20 +118,51 @@ fn build_town_map(
   let places : Array[TownMapPlace] = []
   places.push(build_gate(layout, town))
   places.push(build_city_hall(layout, town, report))
+  let book_count = visible_book_count(town.books)
   for index in 0..<town.books.length() {
-    places.push(
-      build_book_house(
-        layout,
-        town,
-        town.books[index],
-        index,
-        town.books.length(),
-      ),
-    )
+    let book = town.books[index]
+    if !is_mayor_book(book) {
+      places.push(
+        build_book_house(
+          layout,
+          town,
+          book,
+          visible_book_index(town.books, index),
+          book_count,
+        ),
+      )
+    }
   }
   places.push(build_worker_yard(layout, town))
   places.push(build_anomaly_corner(layout, report))
   places
+}
+
+///|
+fn is_mayor_book(book : @core.BookRef) -> Bool {
+  book.id == "town" || book.id == "moontown" || book.id == "mayor"
+}
+
+///|
+fn visible_book_count(books : Array[@core.BookRef]) -> Int {
+  let mut count = 0
+  for book in books {
+    if !is_mayor_book(book) {
+      count = count + 1
+    }
+  }
+  count
+}
+
+///|
+fn visible_book_index(books : Array[@core.BookRef], source_index : Int) -> Int {
+  let mut index = 0
+  for i in 0..<source_index {
+    if !is_mayor_book(books[i]) {
+      index = index + 1
+    }
+  }
+  index
 }
 
 ///|
@@ -290,35 +321,33 @@ fn area_for_book(
       if total_books <= 2 {
         require_area(layout, "book-coding")
       } else {
-        dynamic_book_area(book, index, total_books)
+        dynamic_book_area(book, index)
       }
     "finance" =>
       if total_books <= 2 {
         require_area(layout, "book-finance")
       } else {
-        dynamic_book_area(book, index, total_books)
+        dynamic_book_area(book, index)
       }
-    _ => dynamic_book_area(book, index, total_books)
+    _ => dynamic_book_area(book, index)
   }
 }
 
 ///|
-fn dynamic_book_area(
-  book : @core.BookRef,
-  index : Int,
-  total_books : Int,
-) -> SceneArea {
-  let columns = if total_books <= 3 { total_books } else { 3 }
-  let safe_columns = if columns < 1 { 1 } else { columns }
-  let row = index / safe_columns
-  let column = index % safe_columns
-  let gap = 32
-  let width = 250
-  let height = 180
-  let content_width = safe_columns * width + (safe_columns - 1) * gap
-  let start_x = 640 - content_width / 2
-  let x = start_x + column * (width + gap)
-  let y = 250 + row * 190
+fn dynamic_book_area(book : @core.BookRef, index : Int) -> SceneArea {
+  let width = 210
+  let height = 136
+  let slot = index % 8
+  let (x, y) = match slot {
+    0 => (80, 220)
+    1 => (990, 220)
+    2 => (80, 390)
+    3 => (990, 390)
+    4 => (80, 560)
+    5 => (990, 560)
+    6 => (330, 560)
+    _ => (740, 560)
+  }
   {
     key: "book-\{book.id}",
     title: book.name,

@@ -52,6 +52,12 @@ This gives the UI a “town scene” instead of a “nodes and edges” look.
 
 The Rabbita frontend already behaves like a live simulation dashboard.
 
+The Wenyu Valley target and implementation roadmap are specified in
+[WENYU_VALLEY_PRD.md](/Users/kq/Workspace/moontown/docs/WENYU_VALLEY_PRD.md).
+The frontend should be treated as a projection of the town runtime, not the
+source of truth for resident memory, civic quests, social matches, or talent
+graphs.
+
 Implemented:
 
 - periodic ticks

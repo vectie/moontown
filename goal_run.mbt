@@ -131,6 +131,17 @@ async fn prepare_goal_book_launch(
       related_book_id=Some(entry.id),
     ),
   )
+  preseed_goal_bootstrap_inputs(entry, objective) catch {
+    error =>
+      state.record_event(
+        @core.TownEvent::new(
+          id="event-preseed-\{entry.id}",
+          kind="error",
+          detail="Moontown failed to preseed bootstrap inputs for \{entry.id}: \{error}",
+          related_book_id=Some(entry.id),
+        ),
+      )
+  }
   let initial_summary = @moonbook.summarize_state(entry) catch {
     error => {
       state.record_event(
@@ -164,6 +175,19 @@ async fn prepare_goal_book_launch(
     batch.tasks,
     task_limit,
   )
+  let plan = if is_wenyu_book(entry) && wenyu_book_ready_for_build(entry) {
+    state.record_event(
+      @core.TownEvent::new(
+        id="event-build-plan-\{entry.id}",
+        kind="planning",
+        detail="Wenyu build-stage plan for \{entry.id}: research quality passed; dispatching implementation, code, and asset tasks.",
+        related_book_id=Some(entry.id),
+      ),
+    )
+    wenyu_build_plan(entry, objective, task_limit)
+  } else {
+    bootstrap
+  }
   if bootstrap.bootstrap_active {
     state.record_event(
       @core.TownEvent::new(
@@ -176,8 +200,8 @@ async fn prepare_goal_book_launch(
   }
   let selected_tasks : Array[@moonbook.BookTask] = []
   let mut emitted = 0
-  for task in bootstrap.tasks {
-    if emitted >= bootstrap.task_limit {
+  for task in plan.tasks {
+    if emitted >= plan.task_limit {
       break
     }
     selected_tasks.push(task)
@@ -215,13 +239,20 @@ async fn launch_goal_book(
           "Goal execution failed for \{launch.entry.id} / \{task.id}: \{error}",
         )
     }
-    state.replace_task(to_town_task(launch.entry, task, execution.status))
-    state.replace_execution(execution)
-    sync_worker_from_execution(state, execution)
-    state.record_event(
-      execution_event(execution, state.executions.length() - 1),
+    let completed_execution = complete_wenyu_build_artifacts_if_needed(
+      launch.entry,
+      task,
+      execution,
     )
-    persist_execution_into_book(state, launch.entry, execution)
+    state.replace_task(
+      to_town_task(launch.entry, task, completed_execution.status),
+    )
+    state.replace_execution(completed_execution)
+    sync_worker_from_execution(state, completed_execution)
+    state.record_event(
+      execution_event(completed_execution, state.executions.length() - 1),
+    )
+    persist_execution_into_book(state, launch.entry, completed_execution)
   }
 }
 

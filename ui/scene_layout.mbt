@@ -39,7 +39,7 @@ pub struct TownSceneLayout {
 pub fn default_town_scene_layout() -> TownSceneLayout {
   let background = {
     key: "town-square",
-    path: "backgrounds/town-square.svg",
+    path: "backgrounds/town-square.svg?v=solid-tiles",
     purpose: "Main overworld scene behind the mayor hall, book houses, and worker yard.",
   }
   let assets = [
@@ -135,10 +135,10 @@ pub fn default_town_scene_layout() -> TownSceneLayout {
       key: "worker-yard",
       title: "Worker Yard",
       kind: WorkerYard,
-      x: 390,
-      y: 360,
-      width: 500,
-      height: 220,
+      x: 440,
+      y: 282,
+      width: 400,
+      height: 118,
       asset_keys: ["worker-yard", "worker-claw"],
     },
     {

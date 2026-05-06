@@ -92,6 +92,48 @@ fn register_demo_workers(state : @core.TownState) -> Unit {
       capabilities=["reporting", "planning"],
     ),
   )
+  for book in state.books {
+    if book.id != "coding" && book.id != "finance" {
+      register_book_lane_workers(state, book)
+    }
+  }
+}
+
+///|
+fn register_book_lane_workers(
+  state : @core.TownState,
+  book : @core.BookRef,
+) -> Unit {
+  state.register_worker(
+    @core.WorkerRef::new(
+      id="claw-\{book.id}-harness",
+      name="\{book.name} Harness",
+      book_id=book.id,
+      role=@core.WorkerRole::Harness,
+      capabilities=[
+        "research", "analysis", "implementation-planning", "coding", "code-patch",
+        "asset-generation", "projection", "testing", "memory", "review",
+      ],
+    ),
+  )
+  state.register_worker(
+    @core.WorkerRef::new(
+      id="claw-\{book.id}-specialist",
+      name="\{book.name} Specialist",
+      book_id=book.id,
+      role=@core.WorkerRole::Specialist,
+      capabilities=["asset-generation", "projection", "design", "research"],
+    ),
+  )
+  state.register_worker(
+    @core.WorkerRef::new(
+      id="claw-\{book.id}-review",
+      name="\{book.name} Reviewer",
+      book_id=book.id,
+      role=@core.WorkerRole::Reviewer,
+      capabilities=["review", "quality", "evidence"],
+    ),
+  )
 }
 
 ///|
@@ -100,6 +142,19 @@ fn domain_for_book(entry : @moonbook.BookCatalogEntry) -> @core.WorkDomain {
     "finance" => @core.WorkDomain::Finance
     "coding" => @core.WorkDomain::Coding
     _ => @core.WorkDomain::Operations
+  }
+}
+
+///|
+fn domain_for_book_task(
+  entry : @moonbook.BookCatalogEntry,
+  task : @moonbook.BookTask,
+) -> @core.WorkDomain {
+  match task.kind {
+    "code-patch" | "test-fix" | "projection-schema" => @core.WorkDomain::Coding
+    "image-asset" => @core.WorkDomain::Coding
+    "implementation-backlog" => @core.WorkDomain::Operations
+    _ => domain_for_book(entry)
   }
 }
 
@@ -281,7 +336,7 @@ fn to_town_task(
     book_id=entry.id,
     title=task.title,
     prompt=task.prompt,
-    domain=domain_for_book(entry),
+    domain=domain_for_book_task(entry, task),
     required_role=task.required_role,
     required_capabilities=entry.skills,
     status=town_task_status_for_execution(status),

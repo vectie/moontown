@@ -32,6 +32,9 @@ async fn render_town_goal_synthesis(
   goal : String,
   plan : @roles.MayorGoalPlan,
 ) -> String {
+  if is_wenyu_town_synthesis_plan(goal, plan) {
+    return render_wenyu_town_goal_synthesis(state, goal, plan)
+  }
   let builder = StringBuilder::new()
   builder.write_string(
     "# Moontown, MoonBook, and MoonClaw: Deep Research Analysis\n\n",
@@ -71,6 +74,202 @@ async fn render_town_goal_synthesis(
   builder.write_string(render_town_status_and_trajectory(state, plan))
   builder.write_string("\n\n## Evidence and Limits\n\n")
   builder.write_string(render_town_evidence_and_limits(state, plan))
+  builder.to_string()
+}
+
+///|
+fn is_wenyu_town_synthesis_plan(
+  goal : String,
+  plan : @roles.MayorGoalPlan,
+) -> Bool {
+  let notes = goal.to_lower()
+  if notes.contains("wenyu") || notes.contains("wenyu valley") {
+    return true
+  }
+  for lane in plan.lanes {
+    if lane.entry.id.has_prefix("wenyu-") {
+      return true
+    }
+  }
+  false
+}
+
+///|
+async fn render_wenyu_town_goal_synthesis(
+  state : @core.TownState,
+  goal : String,
+  plan : @roles.MayorGoalPlan,
+) -> String {
+  let builder = StringBuilder::new()
+  builder.write_string("# Wenyu Valley AI Innovation Town: Build Synthesis\n\n")
+  builder.write_string("Goal: \{goal}\n\n")
+  builder.write_string("Mayor plan: \{plan.summary}\n\n")
+  builder.write_string("Output contract: `mayor.town_synthesis.v1`\n\n")
+  builder.write_string("## Executive Summary\n\n")
+  builder.write_string(render_wenyu_executive_summary(state, plan))
+  builder.write_string("\n\n## Product Architecture\n\n")
+  builder.write_string(render_wenyu_product_architecture(plan))
+  builder.write_string("\n\n## Module Lanes\n\n")
+  builder.write_string(render_wenyu_lane_briefs(plan))
+  builder.write_string("\n\n## Evidence and Artifacts\n\n")
+  builder.write_string(render_wenyu_artifact_matrix(state, plan))
+  builder.write_string("\n\n## Implementation Readiness\n\n")
+  builder.write_string(render_wenyu_readiness(state, plan))
+  builder.write_string("\n\n## Next Build Plan\n\n")
+  builder.write_string(render_wenyu_next_build_plan(plan))
+  builder.write_string("\n\n## Limits\n\n")
+  builder.write_string(
+    "This synthesis is a mayor-level build handoff. It does not replace each MoonBook lane's `raw/bootstrap/deep-report.md`, `raw/bootstrap/evidence-matrix.md`, or `raw/bootstrap/marketing-brief.md`. Those lane artifacts remain the evidence source of truth.",
+  )
+  builder.to_string()
+}
+
+///|
+fn render_wenyu_executive_summary(
+  state : @core.TownState,
+  plan : @roles.MayorGoalPlan,
+) -> String {
+  let complete_count = count_lanes_by_status(state, plan, "complete")
+  let running_count = count_lanes_by_status(state, plan, "running")
+  let failed_count = count_lanes_by_status(state, plan, "failed")
+  let builder = StringBuilder::new()
+  builder.write_string(
+    "The mayor decomposed Wenyu Valley into \{plan.lanes.length()} isolated civic product books so the town can grow by parallel knowledge lanes instead of one overloaded wiki. ",
+  )
+  builder.write_string(
+    "Each lane received the Wenyu PRD, the Wenyu vision, and a mounted source snapshot of Moontown, MoonBook, MoonClaw, and Rabbita implementation files. ",
+  )
+  builder.write_string(
+    "The fresh run completed \{complete_count} lanes, left \{running_count} running, and recorded \{failed_count} failed lanes.\n\n",
+  )
+  builder.write_string(
+    "The result is a product/build map for Wenyu Valley: Town Shell owns the live operator surface, Resident Twins owns resident memory projections, Policy Hall and Contest Express own service workflows, Social Square and Talent Avenue own community growth loops, Vitality Dashboard owns health telemetry, AI Garden owns safe agent experimentation, and Physical Bridge owns virtual-to-real operations.",
+  )
+  builder.to_string()
+}
+
+///|
+fn render_wenyu_product_architecture(plan : @roles.MayorGoalPlan) -> String {
+  let builder = StringBuilder::new()
+  builder.write_string(
+    "Wenyu Valley should be built as a projection-driven civic simulation, not as a static website. Moontown stays awake as the mayor/control plane, MoonBook owns durable module knowledge and generated projections, and MoonClaw executes bounded research/build tasks inside each module book.\n\n",
+  )
+  builder.write_string("```mermaid\n")
+  builder.write_string("flowchart TB\n")
+  builder.write_string(
+    "  Goal[\"Wenyu Valley PRD goal\"] --> Mayor[\"Mayor claw in Moontown\"]\n",
+  )
+  let mut index = 1
+  for lane in plan.lanes {
+    builder.write_string("  Mayor --> Lane\{index}[\"\{lane.entry.name}\"]\n")
+    index += 1
+  }
+  builder.write_string(
+    "  Mayor --> Synthesis[\"Town-level build synthesis\"]\n",
+  )
+  builder.write_string(
+    "  Synthesis --> Operator[\"Operator-visible Wenyu roadmap\"]\n",
+  )
+  builder.write_string("```\n\n")
+  builder.write_string(
+    "The important boundary is responsibility: Moontown decomposes, supervises, and visualizes; MoonBook turns each lane into durable wiki/projection state; MoonClaw performs the worker execution and emits artifacts back to the book.",
+  )
+  builder.to_string()
+}
+
+///|
+async fn render_wenyu_lane_briefs(plan : @roles.MayorGoalPlan) -> String {
+  let builder = StringBuilder::new()
+  for lane in plan.lanes {
+    builder.write_string("### \{lane.entry.name}\n\n")
+    builder.write_string("Objective: \{lane.objective}\n\n")
+    let report = read_lane_deep_report(lane.entry)
+    let summary = section_body(report, "## Executive Summary")
+    let compact = first_non_heading_paragraph(summary)
+    if compact.is_blank() {
+      builder.write_string(
+        "No executive-summary paragraph was found in this lane's deep report.\n\n",
+      )
+    } else {
+      builder.write_string(markdown_excerpt(compact, 900))
+      builder.write_string("\n\n")
+    }
+  }
+  builder.to_string().trim().to_string()
+}
+
+///|
+fn render_wenyu_artifact_matrix(
+  state : @core.TownState,
+  plan : @roles.MayorGoalPlan,
+) -> String {
+  ignore(state)
+  let builder = StringBuilder::new()
+  builder.write_string(
+    "| Lane | Deep Report | Marketing Brief | Evidence Matrix | Wiki Home |\n",
+  )
+  builder.write_string("| --- | --- | --- | --- | --- |\n")
+  for lane in plan.lanes {
+    let root = @moonbook.workspace_root(lane.entry)
+    builder.write_string(
+      "| \{lane.entry.id} | `\{root}/raw/bootstrap/deep-report.md` | `\{root}/raw/bootstrap/marketing-brief.md` | `\{root}/raw/bootstrap/evidence-matrix.md` | `\{root}/wiki/Home.md` |\n",
+    )
+  }
+  builder.to_string()
+}
+
+///|
+async fn render_wenyu_readiness(
+  state : @core.TownState,
+  plan : @roles.MayorGoalPlan,
+) -> String {
+  let builder = StringBuilder::new()
+  builder.write_string(
+    "| Lane | Status | Verified Sources | Evidence | Entities | Concepts | Quality Gate |\n",
+  )
+  builder.write_string("| --- | --- | ---: | ---: | ---: | ---: | --- |\n")
+  for lane in plan.lanes {
+    let summary = Some(@moonbook.summarize_state(lane.entry)) catch {
+      _ => None
+    }
+    let status = lane_research_status(state, lane.entry.id)
+    let gaps = research_quality_gaps(lane.entry)
+    let gate = if gaps.is_empty() { "ready" } else { gaps.join("; ") }
+    match summary {
+      Some(summary) =>
+        builder.write_string(
+          "| \{lane.entry.id} | \{status} | \{summary.verified_source_count} | \{summary.evidence_count} | \{summary.entity_page_count} | \{summary.concept_page_count} | \{gate} |\n",
+        )
+      None =>
+        builder.write_string(
+          "| \{lane.entry.id} | \{status} | 0 | 0 | 0 | 0 | summary unavailable |\n",
+        )
+    }
+  }
+  builder.to_string()
+}
+
+///|
+fn render_wenyu_next_build_plan(plan : @roles.MayorGoalPlan) -> String {
+  let builder = StringBuilder::new()
+  builder.write_string(
+    "1. Promote each lane's bootstrap findings into module-specific MoonBook pages instead of generic Moontown/MoonBook/MoonClaw pages.\n",
+  )
+  builder.write_string(
+    "2. Define a shared `TownRuntimeProjection` contract that exposes only safe, UI-ready fragments from each module book.\n",
+  )
+  builder.write_string(
+    "3. Switch Rabbita Town from demo simulation state to projection-loaded Wenyu state while keeping simulation fallback for demos.\n",
+  )
+  builder.write_string(
+    "4. Add module-by-module build tasks from the lane reports, starting with Town Shell and Resident Twins because other modules depend on live place and resident primitives.\n",
+  )
+  builder.write_string(
+    "5. Keep the mayor loop responsible for supervision, recovery, and cross-lane synthesis; do not move global scheduling authority into MoonBook or MoonClaw.\n\n",
+  )
+  builder.write_string(
+    "Lane count for next planning pass: \{plan.lanes.length()}.",
+  )
   builder.to_string()
 }
 

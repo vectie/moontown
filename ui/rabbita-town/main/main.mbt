@@ -45,10 +45,20 @@ priv struct Model {
   strategy : Strategy
   selection : Selection
   state_source : StateSourceKind
+  projection_snapshot : ProjectionSnapshot?
   budget : Int
   energy : Int
   pressure : Int
   stability : Int
+}
+
+///|
+priv struct VitalityMetric {
+  label : String
+  value : String
+  fill : Int
+  tone : String
+  detail : String
 }
 
 ///|
@@ -94,7 +104,10 @@ priv struct ResidentSim {
   mood : String
   agent_goal : String
   memory : String
+  reflection : String
   plan : String
+  recent_action : String
+  privacy_scope : String
   zone : String
 }
 
@@ -105,6 +118,9 @@ priv struct CivicQuestSim {
   stage : String
   reward : String
   status : String
+  status_class : String
+  detail : String
+  next_action : String
 }
 
 ///|
@@ -120,22 +136,99 @@ priv struct SocialMatchSim {
 priv struct TalentSignalSim {
   name : String
   domain : String
+  project : String
   skills : String
+  recent_achievement : String
+  evidence_status : String
+  reception_note : String
   activity : Int
 }
 
 ///|
+priv struct TalentRouteStopSim {
+  order : Int
+  stop_title : String
+  signal_name : String
+  talking_point : String
+  operator_note : String
+  evidence_status : String
+  readiness : Int
+}
+
+///|
+priv struct ProjectionSnapshot {
+  town : @core.TownState
+  event_count : Int
+} derive(FromJson, ToJson)
+
+///|
+extern "js" fn load_bootstrap_town_snapshot_json() -> String =
+  #| () => globalThis.__moontownTownSnapshotJson || ""
+
+///|
+extern "js" fn current_browser_path() -> String =
+  #| () => `${globalThis.location?.pathname || ""}${globalThis.location?.hash || ""}`
+
+///|
+fn standalone_viewport_requested() -> Bool {
+  let path = current_browser_path()
+  path.contains("viewport")
+}
+
+///|
 fn init_model() -> Model {
+  let projection_snapshot = parse_bootstrap_town_snapshot()
   {
     tick: 0,
     paused: false,
     strategy: Strategy::Balanced,
     selection: Selection::Overview,
-    state_source: StateSourceKind::DemoSimulation,
+    state_source: initial_state_source(projection_snapshot),
+    projection_snapshot,
     budget: 76,
     energy: 68,
     pressure: 34,
     stability: 78,
+  }
+}
+
+///|
+fn parse_bootstrap_town_snapshot() -> ProjectionSnapshot? {
+  let text = load_bootstrap_town_snapshot_json()
+  if text == "" {
+    return None
+  }
+  let parsed = @json.parse(text) catch { _ => return None }
+  Some(@json.from_json(parsed) catch { _ => return None })
+}
+
+///|
+fn initial_state_source(snapshot : ProjectionSnapshot?) -> StateSourceKind {
+  match snapshot {
+    Some(snapshot) =>
+      if projection_snapshot_ready(snapshot) {
+        StateSourceKind::SnapshotFile
+      } else {
+        StateSourceKind::DemoSimulation
+      }
+    None => StateSourceKind::DemoSimulation
+  }
+}
+
+///|
+fn projection_snapshot_ready(snapshot : ProjectionSnapshot) -> Bool {
+  !snapshot.town.books.is_empty() ||
+  !snapshot.town.workers.is_empty() ||
+  !snapshot.town.tasks.is_empty() ||
+  !snapshot.town.executions.is_empty() ||
+  !snapshot.town.events.is_empty()
+}
+
+///|
+fn projection_snapshot_is_ready(snapshot : ProjectionSnapshot?) -> Bool {
+  match snapshot {
+    Some(snapshot) => projection_snapshot_ready(snapshot)
+    None => false
   }
 }
 
@@ -316,7 +409,20 @@ fn town_scene(model : Model) -> @ui.SceneRenderModel {
 fn state_for_model(model : Model) -> @core.TownState {
   match model.state_source {
     StateSourceKind::DemoSimulation => demo_state(model)
-    StateSourceKind::SnapshotFile => snapshot_placeholder_state(model)
+    StateSourceKind::SnapshotFile => projection_state(model)
+  }
+}
+
+///|
+fn projection_state(model : Model) -> @core.TownState {
+  match model.projection_snapshot {
+    Some(snapshot) =>
+      if projection_snapshot_ready(snapshot) {
+        snapshot.town
+      } else {
+        snapshot_placeholder_state(model)
+      }
+    None => snapshot_placeholder_state(model)
   }
 }
 
@@ -332,23 +438,66 @@ fn next_state_source(source : StateSourceKind) -> StateSourceKind {
 fn state_source_label(source : StateSourceKind) -> String {
   match source {
     StateSourceKind::DemoSimulation => "Demo Simulation"
-    StateSourceKind::SnapshotFile => "Snapshot File"
+    StateSourceKind::SnapshotFile => "Projection Snapshot"
   }
 }
 
 ///|
-fn state_source_detail(source : StateSourceKind) -> String {
-  match source {
+fn state_source_detail(model : Model) -> String {
+  match model.state_source {
     StateSourceKind::DemoSimulation =>
-      "Live civic simulation: mayor supervision keeps services, agents, quests, and town health cycling 24/7."
+      "Live civic simulation: mayor supervision keeps services, agents, quests, and town health cycling 24/7 while Resident Twins stay limited to projection-safe summaries."
     StateSourceKind::SnapshotFile =>
-      "Snapshot mode shows the non-simulated bridge placeholder until the browser bundle can load `.moontown/town.json`."
+      match model.projection_snapshot {
+        Some(snapshot) if projection_snapshot_ready(snapshot) =>
+          "Projection snapshot mode is loaded from `.moontown/town.json` with \{snapshot.town.books.length()} books, \{snapshot.town.workers.length()} workers, and \{snapshot.town.tasks.length()} queued tasks."
+        Some(_) =>
+          "Projection snapshot file was found but does not yet contain a usable town runtime projection, so the shell stays on demo supervision until the bridge publishes real books, workers, or tasks."
+        None =>
+          "Projection snapshot mode shows the MoonBook-to-browser bridge placeholder until the bundle can load `.moontown/town.json` or a generated runtime projection."
+      }
   }
 }
 
 ///|
 fn state_source_options() -> Array[StateSourceKind] {
   [DemoSimulation, SnapshotFile]
+}
+
+///|
+fn tasks_for_model(model : Model) -> Array[@core.TownTask] {
+  match model.state_source {
+    StateSourceKind::SnapshotFile =>
+      match model.projection_snapshot {
+        Some(snapshot) =>
+          if projection_snapshot_ready(snapshot) &&
+            !snapshot.town.tasks.is_empty() {
+            snapshot.town.tasks
+          } else {
+            task_specs(model)
+          }
+        _ => task_specs(model)
+      }
+    StateSourceKind::DemoSimulation => task_specs(model)
+  }
+}
+
+///|
+fn executions_for_model(model : Model) -> Array[@core.TaskExecutionRecord] {
+  match model.state_source {
+    StateSourceKind::SnapshotFile =>
+      match model.projection_snapshot {
+        Some(snapshot) =>
+          if projection_snapshot_ready(snapshot) &&
+            !snapshot.town.executions.is_empty() {
+            snapshot.town.executions
+          } else {
+            execution_specs(model)
+          }
+        _ => execution_specs(model)
+      }
+    StateSourceKind::DemoSimulation => execution_specs(model)
+  }
 }
 
 ///|
@@ -363,12 +512,42 @@ fn demo_state(model : Model) -> @core.TownState {
   )
   state.register_book(
     @core.BookRef::new(
+      id="wenyu-town-shell",
+      name="Town Shell",
+      purpose="Owns the live district shell, runtime projection contract, and operator-facing Wenyu map.",
+      workspace_root="/town/wenyu-town-shell",
+      memory_scope=@core.MemoryScope::SharedTown,
+      tags=["projection", "ui", "shell"],
+    ),
+  )
+  state.register_book(
+    @core.BookRef::new(
+      id="wenyu-resident-twins",
+      name="Resident Twins",
+      purpose="Projects resident identity, memory summaries, reflection loops, privacy scope, and next actions into the town view.",
+      workspace_root="/town/wenyu-resident-twins",
+      memory_scope=@core.MemoryScope::BookPrivate,
+      tags=["resident-twins", "memory", "projection"],
+    ),
+  )
+  state.register_book(
+    @core.BookRef::new(
       id="policy-hall",
       name="Policy Release Hall",
       purpose="Turns policy documents into quest lines, advisor answers, and application checklists.",
       workspace_root="/town/policy-hall",
       memory_scope=@core.MemoryScope::BookPrivate,
       tags=["policy", "quest", "advisor"],
+    ),
+  )
+  state.register_book(
+    @core.BookRef::new(
+      id="wenyu-contest-express",
+      name="Contest Express",
+      purpose="Turns contest participation into a nurturing lane with countdowns, readiness reviews, mock judging, and champion replay hooks.",
+      workspace_root="/town/wenyu-contest-express",
+      memory_scope=@core.MemoryScope::SharedTown,
+      tags=["contest", "roadshow", "readiness"],
     ),
   )
   state.register_book(
@@ -403,12 +582,12 @@ fn demo_state(model : Model) -> @core.TownState {
   )
   state.register_book(
     @core.BookRef::new(
-      id="future-harbor",
-      name="Future Harbor",
-      purpose="Coordinates roadshows, contest preparation, offline robot links, and digital twin signals.",
-      workspace_root="/town/future-harbor",
+      id="wenyu-physical-bridge",
+      name="Physical Bridge",
+      purpose="Bridges virtual requests into venue booking, proxy attendance, robot dispatch, and live district telemetry.",
+      workspace_root="/town/wenyu-physical-bridge",
       memory_scope=@core.MemoryScope::SharedTown,
-      tags=["roadshow", "robot", "digital-twin"],
+      tags=["physical-bridge", "robot", "telemetry"],
     ),
   )
   for worker in worker_sims(model) {
@@ -436,6 +615,16 @@ fn demo_state(model : Model) -> @core.TownState {
 fn snapshot_placeholder_state(model : Model) -> @core.TownState {
   let state = @core.empty_state(
     @core.TownConfig::new(id="moonrise", name="Moontown / Moonrise"),
+  )
+  state.register_book(
+    @core.BookRef::new(
+      id="wenyu-town-shell",
+      name="Town Shell",
+      purpose="Town Shell stays visible here while the browser bridge waits for a persisted projection feed.",
+      workspace_root="/town/wenyu-town-shell",
+      memory_scope=@core.MemoryScope::SharedTown,
+      tags=["projection", "ui", "shell"],
+    ),
   )
   state.register_book(
     @core.BookRef::new(
@@ -482,7 +671,10 @@ fn snapshot_placeholder_state(model : Model) -> @core.TownState {
 ///|
 fn worker_role_from_id(worker_id : String) -> @core.WorkerRole {
   match worker_id {
+    "agent-town-shell" => @core.WorkerRole::Harness
+    "agent-resident" => @core.WorkerRole::MemoryKeeper
     "agent-policy" => @core.WorkerRole::Specialist
+    "agent-contest" => @core.WorkerRole::Planner
     "agent-social" => @core.WorkerRole::Operator
     "agent-talent" => @core.WorkerRole::MemoryKeeper
     "agent-garden" => @core.WorkerRole::Planner
@@ -494,7 +686,10 @@ fn worker_role_from_id(worker_id : String) -> @core.WorkerRole {
 ///|
 fn worker_capabilities(worker_id : String) -> Array[String] {
   match worker_id {
+    "agent-town-shell" => ["projection", "ui-state", "build-records"]
+    "agent-resident" => ["resident-memory", "reflection", "projection"]
     "agent-policy" => ["policy", "rag", "checklist"]
+    "agent-contest" => ["contest", "mock-judge", "readiness"]
     "agent-social" => ["matching", "event-planning", "community"]
     "agent-talent" => ["talent-graph", "projection", "reception"]
     "agent-garden" => ["tutorial", "tool-trial", "workshop"]
@@ -508,11 +703,35 @@ fn worker_sims(model : Model) -> Array[WorkerSim] {
   [
     build_worker_sim(
       model,
+      id="agent-town-shell",
+      title="Town Shell Foreman",
+      role="Projection Harness",
+      book_id="wenyu-town-shell",
+      offset=0,
+    ),
+    build_worker_sim(
+      model,
+      id="agent-resident",
+      title="Twin Keeper",
+      role="Resident Memory Keeper",
+      book_id="wenyu-resident-twins",
+      offset=1,
+    ),
+    build_worker_sim(
+      model,
       id="agent-policy",
       title="Policy Sprite",
       role="Policy Advisor",
       book_id="policy-hall",
-      offset=0,
+      offset=2,
+    ),
+    build_worker_sim(
+      model,
+      id="agent-contest",
+      title="Contest Conductor",
+      role="Roadshow Planner",
+      book_id="wenyu-contest-express",
+      offset=3,
     ),
     build_worker_sim(
       model,
@@ -520,7 +739,7 @@ fn worker_sims(model : Model) -> Array[WorkerSim] {
       title="Cafe Matchmaker",
       role="Social Operator",
       book_id="social-square",
-      offset=1,
+      offset=4,
     ),
     build_worker_sim(
       model,
@@ -528,7 +747,7 @@ fn worker_sims(model : Model) -> Array[WorkerSim] {
       title="Talent Cartographer",
       role="Memory Keeper",
       book_id="talent-avenue",
-      offset=2,
+      offset=5,
     ),
     build_worker_sim(
       model,
@@ -536,15 +755,15 @@ fn worker_sims(model : Model) -> Array[WorkerSim] {
       title="AI Garden Tutor",
       role="Planner",
       book_id="ai-garden",
-      offset=3,
+      offset=6,
     ),
     build_worker_sim(
       model,
       id="agent-robot",
-      title="Harbor Robot Link",
+      title="Physical Bridge Link",
       role="Watcher",
-      book_id="future-harbor",
-      offset=4,
+      book_id="wenyu-physical-bridge",
+      offset=7,
     ),
   ]
 }
@@ -553,12 +772,38 @@ fn worker_sims(model : Model) -> Array[WorkerSim] {
 fn workers_for_model(model : Model) -> Array[WorkerSim] {
   match model.state_source {
     StateSourceKind::DemoSimulation => worker_sims(model)
-    StateSourceKind::SnapshotFile => snapshot_worker_sims()
+    StateSourceKind::SnapshotFile => snapshot_worker_sims(model)
   }
 }
 
 ///|
-fn snapshot_worker_sims() -> Array[WorkerSim] {
+fn snapshot_worker_sims(model : Model) -> Array[WorkerSim] {
+  match model.projection_snapshot {
+    Some(snapshot) =>
+      if snapshot.town.workers.is_empty() {
+        fallback_snapshot_worker_sims()
+      } else {
+        snapshot.town.workers.map(worker => {
+          let load = snapshot_worker_load(worker.status)
+          {
+            id: worker.id,
+            title: worker.name,
+            role: "\{worker.role}",
+            book_id: worker.book_id,
+            status: worker.status,
+            zone_key: worker_zone_key(worker.book_id, worker.status),
+            energy: snapshot_worker_energy(worker.status),
+            load,
+            summary: snapshot_worker_summary(worker),
+          }
+        })
+      }
+    None => fallback_snapshot_worker_sims()
+  }
+}
+
+///|
+fn fallback_snapshot_worker_sims() -> Array[WorkerSim] {
   [
     {
       id: "snapshot-bridge",
@@ -572,6 +817,41 @@ fn snapshot_worker_sims() -> Array[WorkerSim] {
       summary: "Waiting for a static or local endpoint bridge into `.moontown/town.json`.",
     },
   ]
+}
+
+///|
+fn snapshot_worker_load(status : @core.WorkerStatus) -> Int {
+  match status {
+    @core.WorkerStatus::Running => 74
+    @core.WorkerStatus::Waiting => 28
+    @core.WorkerStatus::Idle => 16
+    @core.WorkerStatus::Blocked => 91
+    @core.WorkerStatus::Offline => 0
+  }
+}
+
+///|
+fn snapshot_worker_energy(status : @core.WorkerStatus) -> Int {
+  match status {
+    @core.WorkerStatus::Running => 64
+    @core.WorkerStatus::Waiting => 79
+    @core.WorkerStatus::Idle => 88
+    @core.WorkerStatus::Blocked => 38
+    @core.WorkerStatus::Offline => 0
+  }
+}
+
+///|
+fn snapshot_worker_summary(worker : @core.WorkerRef) -> String {
+  let capability_count = worker.capabilities.length()
+  let capability_text = if capability_count == 0 {
+    "no declared capabilities yet"
+  } else if capability_count == 1 {
+    "1 declared capability"
+  } else {
+    "\{capability_count} declared capabilities"
+  }
+  "\{worker.name} is projected from persisted town state with status \{worker.status}, role \{worker.role}, and \{capability_text}."
 }
 
 ///|
@@ -704,6 +984,46 @@ fn worker_summary(status : @core.WorkerStatus, load : Int) -> String {
 fn task_specs(model : Model) -> Array[@core.TownTask] {
   [
     @core.TownTask::new(
+      id="task-town-shell-implementation-backlog",
+      book_id="wenyu-town-shell",
+      title="Materialize Town Shell implementation backlog",
+      prompt="Turn the Wenyu Valley PRD and evidence lane into codex-ready files, acceptance checks, and projection tasks.",
+      domain=@core.WorkDomain::Coding,
+      required_role=Some(@core.WorkerRole::Planner),
+      required_capabilities=["planning", "projection"],
+      status=task_status_for(model, 0),
+    ),
+    @core.TownTask::new(
+      id="task-town-shell-code-patch",
+      book_id="wenyu-town-shell",
+      title="Patch Town Shell live district slice",
+      prompt="Replace hardcoded module framing with live Town Shell projection signals and reviewable district status.",
+      domain=@core.WorkDomain::Coding,
+      required_role=Some(@core.WorkerRole::Harness),
+      required_capabilities=["projection", "ui-state", "testing"],
+      status=task_status_for(model, 1),
+    ),
+    @core.TownTask::new(
+      id="task-town-shell-image-asset-pack",
+      book_id="wenyu-town-shell",
+      title="Generate Town Shell asset pack",
+      prompt="Produce tile, icon, worker sprite, and vignette prompts that fit the warm civic Wenyu district style.",
+      domain=@core.WorkDomain::Coding,
+      required_role=Some(@core.WorkerRole::Reviewer),
+      required_capabilities=["asset-generation", "design", "projection"],
+      status=task_status_for(model, 2),
+    ),
+    @core.TownTask::new(
+      id="task-resident-twins-code-patch",
+      book_id="wenyu-resident-twins",
+      title="Project Resident Twins live district state",
+      prompt="Replace generic Resident Twins framing with live worker, queue, health, and next-action status while keeping memory projection-safe.",
+      domain=@core.WorkDomain::Coding,
+      required_role=Some(@core.WorkerRole::MemoryKeeper),
+      required_capabilities=["resident-memory", "reflection", "projection"],
+      status=task_status_for(model, 3),
+    ),
+    @core.TownTask::new(
       id="task-policy-quest",
       book_id="policy-hall",
       title="Explain rental subsidy quest",
@@ -711,7 +1031,17 @@ fn task_specs(model : Model) -> Array[@core.TownTask] {
       domain=@core.WorkDomain::Operations,
       required_role=Some(@core.WorkerRole::Specialist),
       required_capabilities=["policy", "checklist"],
-      status=task_status_for(model, 0),
+      status=task_status_for(model, 4),
+    ),
+    @core.TownTask::new(
+      id="task-contest-readiness",
+      book_id="wenyu-contest-express",
+      title="Coach resident contest readiness",
+      prompt="Analyze contest rules, review the deck intro, score readiness gaps, and stage the next mock roadshow action.",
+      domain=@core.WorkDomain::Operations,
+      required_role=Some(@core.WorkerRole::Planner),
+      required_capabilities=["contest", "mock-judge", "readiness"],
+      status=task_status_for(model, 5),
     ),
     @core.TownTask::new(
       id="task-cafe-match",
@@ -721,7 +1051,7 @@ fn task_specs(model : Model) -> Array[@core.TownTask] {
       domain=@core.WorkDomain::SocialExperiment,
       required_role=Some(@core.WorkerRole::Operator),
       required_capabilities=["matching", "community"],
-      status=task_status_for(model, 1),
+      status=task_status_for(model, 6),
     ),
     @core.TownTask::new(
       id="task-talent-graph",
@@ -731,7 +1061,7 @@ fn task_specs(model : Model) -> Array[@core.TownTask] {
       domain=@core.WorkDomain::Research,
       required_role=Some(@core.WorkerRole::MemoryKeeper),
       required_capabilities=["talent-graph", "projection"],
-      status=task_status_for(model, 2),
+      status=task_status_for(model, 7),
     ),
     @core.TownTask::new(
       id="task-ai-tip",
@@ -741,17 +1071,17 @@ fn task_specs(model : Model) -> Array[@core.TownTask] {
       domain=@core.WorkDomain::Research,
       required_role=Some(@core.WorkerRole::Planner),
       required_capabilities=["tutorial", "tool-trial"],
-      status=task_status_for(model, 3),
+      status=task_status_for(model, 8),
     ),
     @core.TownTask::new(
-      id="task-robot-booking",
-      book_id="future-harbor",
-      title="Sync robot venue booking",
-      prompt="Bridge a virtual request into roadshow room availability and robot confirmation.",
+      id="task-physical-bridge-sync",
+      book_id="wenyu-physical-bridge",
+      title="Project Physical Bridge live district state",
+      prompt="Bridge virtual requests into room availability, robot confirmation, proxy attendance, and live district telemetry.",
       domain=@core.WorkDomain::Operations,
       required_role=Some(@core.WorkerRole::Watcher),
-      required_capabilities=["robot", "venue"],
-      status=task_status_for(model, 4),
+      required_capabilities=["robot", "venue", "digital-twin"],
+      status=task_status_for(model, 9),
     ),
   ]
 }
@@ -811,11 +1141,24 @@ fn execution_status_for(
 ///|
 fn execution_specs(model : Model) -> Array[@core.TaskExecutionRecord] {
   [
-    execution_spec(model, "task-policy-quest", "policy-hall", 0),
-    execution_spec(model, "task-cafe-match", "social-square", 1),
-    execution_spec(model, "task-talent-graph", "talent-avenue", 2),
-    execution_spec(model, "task-ai-tip", "ai-garden", 3),
-    execution_spec(model, "task-robot-booking", "future-harbor", 4),
+    execution_spec(
+      model, "task-town-shell-implementation-backlog", "wenyu-town-shell", 0,
+    ),
+    execution_spec(model, "task-town-shell-code-patch", "wenyu-town-shell", 1),
+    execution_spec(
+      model, "task-town-shell-image-asset-pack", "wenyu-town-shell", 2,
+    ),
+    execution_spec(
+      model, "task-resident-twins-code-patch", "wenyu-resident-twins", 3,
+    ),
+    execution_spec(model, "task-policy-quest", "policy-hall", 4),
+    execution_spec(model, "task-contest-readiness", "wenyu-contest-express", 5),
+    execution_spec(model, "task-cafe-match", "social-square", 6),
+    execution_spec(model, "task-talent-graph", "talent-avenue", 7),
+    execution_spec(model, "task-ai-tip", "ai-garden", 8),
+    execution_spec(
+      model, "task-physical-bridge-sync", "wenyu-physical-bridge", 9,
+    ),
   ]
 }
 
@@ -950,8 +1293,79 @@ fn resident_count(model : Model) -> Int {
 }
 
 ///|
+fn resident_joins_today(model : Model) -> Int {
+  let strategy_lift = match model.strategy {
+    Strategy::Balanced => 1
+    Strategy::Throughput => 3
+    Strategy::Recovery => 0
+  }
+  let recovery_drag = if mayor_recovery_active(model) { 2 } else { 0 }
+  let joins = 4 + model.tick % 6 + strategy_lift - recovery_drag
+  if joins < 1 {
+    1
+  } else {
+    joins
+  }
+}
+
+///|
+fn active_quest_count(model : Model) -> Int {
+  let mut count = 0
+  for task in tasks_for_model(model) {
+    if task.status == @core.TownTaskStatus::Assigned ||
+      task.status == @core.TownTaskStatus::Running {
+      count += 1
+    }
+  }
+  count
+}
+
+///|
+fn events_today(model : Model) -> Int {
+  social_matches().length() + 1 + model.tick % 3
+}
+
+///|
+fn valley_points_issued(model : Model) -> Int {
+  valley_points_redeemed(model) +
+  resident_joins_today(model) +
+  events_today(model)
+}
+
+///|
 fn valley_points_redeemed(model : Model) -> Int {
   12 + model.tick % 11
+}
+
+///|
+fn achievement_broadcast_count(model : Model) -> Int {
+  count_execution_status(
+    executions_for_model(model),
+    @core.TaskExecutionStatus::Completed,
+  ) +
+  model.tick % 3
+}
+
+///|
+fn service_response_minutes(model : Model) -> Int {
+  let recovery_delay = if mayor_recovery_active(model) { 2 } else { 0 }
+  4 + model.pressure / 12 + recovery_delay
+}
+
+///|
+fn agent_action_count(model : Model) -> Int {
+  let running_workers = count_workers_by_status(
+    workers_for_model(model),
+    @core.WorkerStatus::Running,
+  )
+  18 + running_workers * 4 + model.tick % 9
+}
+
+///|
+fn retention_signal(model : Model) -> Int {
+  clamp_metric(
+    (model.stability * 2 + model.energy + model.budget - model.pressure) / 3,
+  )
 }
 
 ///|
@@ -970,13 +1384,27 @@ fn strategy_label(strategy : Strategy) -> String {
 
 ///|
 fn render_asset(asset_path : String, title : String) -> @rabbita.Html {
+  let asset_class = "scene-asset " + scene_asset_class(asset_path)
   img(
-    class="scene-asset",
+    class=asset_class,
     src=asset_path,
     alt="\{title} asset",
     loading="lazy",
     no_children(),
   )
+}
+
+///|
+fn scene_asset_class(asset_path : String) -> String {
+  if asset_path.contains("actors/") {
+    "scene-actor-asset"
+  } else if asset_path.contains("effects/") {
+    "scene-effect-asset"
+  } else if asset_path.contains("props/") {
+    "scene-prop-asset"
+  } else {
+    "scene-building-asset"
+  }
 }
 
 ///|
@@ -1023,17 +1451,65 @@ fn render_alerts(alerts : Array[String]) -> @rabbita.Html {
 }
 
 ///|
-fn render_meter(label : String, value : Int, tone : String) -> @rabbita.Html {
-  let fill_style = ["width: \{value}%"]
+fn render_metric_card(metric : VitalityMetric) -> @rabbita.Html {
+  let fill_style = ["width: \{metric.fill}%"]
   article(class="metric-card", [
     div(class="metric-head", [
-      p(class="metric-label", label),
-      p(class="metric-value", "\{value}%"),
+      p(class="metric-label", metric.label),
+      p(class="metric-value", metric.value),
     ]),
     div(class="metric-track", [
-      div(class="metric-fill \{tone}", style=fill_style, no_children()),
+      div(class="metric-fill \{metric.tone}", style=fill_style, no_children()),
     ]),
+    p(class="metric-detail", metric.detail),
   ])
+}
+
+///|
+fn vitality_metrics(model : Model) -> Array[VitalityMetric] {
+  let joins = resident_joins_today(model)
+  let quests = active_quest_count(model)
+  let events = events_today(model)
+  let retention = retention_signal(model)
+  [
+    {
+      label: "Resident joins",
+      value: joins.to_string(),
+      fill: clamp_metric(joins * 12),
+      tone: "tone-budget",
+      detail: "New founder or resident arrivals recorded in the current tick window.",
+    },
+    {
+      label: "Active quests",
+      value: quests.to_string(),
+      fill: clamp_metric(quests * 11),
+      tone: "tone-energy",
+      detail: "Civic service and build lanes currently assigned or running.",
+    },
+    {
+      label: "Events today",
+      value: events.to_string(),
+      fill: clamp_metric(events * 18),
+      tone: "tone-pressure",
+      detail: "Meetups, reviews, and district moments visible in the square.",
+    },
+    {
+      label: "Return signal",
+      value: "\{retention}%",
+      fill: retention,
+      tone: "tone-stability",
+      detail: "Retention and repeat participation trend from the current town pulse.",
+    },
+  ]
+}
+
+///|
+fn render_vitality_metric_grid(model : Model) -> Array[@rabbita.Html] {
+  let cards : Array[@rabbita.Html] = []
+  for metric in vitality_metrics(model) {
+    cards.push(render_metric_card(metric))
+  }
+  cards
 }
 
 ///|
@@ -1044,9 +1520,19 @@ fn render_civic_context(model : Model) -> @rabbita.Html {
     status_chip("Weather: \{weather_label(model.tick)}", "chip-neutral"),
     status_chip("Residents: \{resident_count(model)}", "chip-neutral"),
     status_chip(
-      "Valley points redeemed: \{valley_points_redeemed(model)}",
+      "Points flow: \{valley_points_issued(model)} issued / \{valley_points_redeemed(model)} redeemed",
       "chip-book",
     ),
+    status_chip(
+      "Broadcasts: \{achievement_broadcast_count(model)}",
+      "chip-live",
+    ),
+    status_chip(
+      "Response: \{service_response_minutes(model)} min",
+      "chip-neutral",
+    ),
+    status_chip("Agent actions: \{agent_action_count(model)}", "chip-book"),
+    status_chip("Return: \{retention_signal(model)}%", "chip-neutral"),
     status_chip("Robot calls: \{robot_service_count(model)}", "chip-neutral"),
   ])
 }
@@ -1108,7 +1594,7 @@ fn render_runtime_bar(
       div(class="runtime-copy", [
         p(class="eyebrow", "Operator Surface"),
         h2("Town traffic, keeper queue, and review flow"),
-        p(class="summary", state_source_detail(model.state_source)),
+        p(class="summary", state_source_detail(model)),
       ]),
       div(class="runtime-status", [
         status_chip(
@@ -1145,17 +1631,328 @@ fn render_runtime_bar(
 }
 
 ///|
-fn render_civic_module_card(
-  name : String,
-  zone : String,
-  detail : String,
-  signal : String,
-) -> @rabbita.Html {
-  article(class="civic-module-card", [
-    p(class="scene-node-key", zone),
-    h3(name),
-    p(detail),
-    span(class="module-signal", signal),
+fn render_module_metric(label : String, value : String) -> @rabbita.Html {
+  div(class="module-metric", [
+    span(class="module-metric-label", label),
+    p(value),
+  ])
+}
+
+///|
+fn render_policy_hall_module_card(model : Model) -> @rabbita.Html {
+  let worker = policy_hall_worker(model)
+  let task = policy_hall_task(model)
+  let execution = policy_hall_execution(model)
+  let queue_pressure = policy_hall_queue_pressure(model, worker)
+  let health = policy_hall_health(worker, execution)
+  let confidence = policy_hall_confidence(model, execution)
+  article(class="civic-module-card civic-module-card-featured", [
+    p(class="scene-node-key", "South / services"),
+    h3("Policy Hall"),
+    p(policy_hall_module_copy(model, worker, execution)),
+    div(class="module-metric-grid", [
+      render_module_metric("Worker", policy_hall_worker_label(worker)),
+      render_module_metric("Queue", "\{queue_pressure}%"),
+      render_module_metric("Health", "\{health}%"),
+    ]),
+    div(class="module-detail-grid", [
+      render_module_detail("Confidence", "\{confidence}%"),
+      render_module_detail(
+        "Checklist",
+        policy_hall_checklist_label(model, execution),
+      ),
+      render_module_detail(
+        "Evidence",
+        policy_hall_evidence_label(model, execution),
+      ),
+    ]),
+    p(
+      class="module-next-action",
+      "Next: \{policy_hall_next_action(model, task, execution)}",
+    ),
+    span(
+      class="module-signal \{policy_hall_signal_class(model, execution)}",
+      policy_hall_signal(model, execution),
+    ),
+  ])
+}
+
+///|
+fn render_resident_twins_module_card(model : Model) -> @rabbita.Html {
+  let worker = find_book_worker(
+    workers_for_model(model),
+    "wenyu-resident-twins",
+  )
+  let task = find_book_task(task_specs(model), "wenyu-resident-twins")
+  let execution = find_book_execution(
+    execution_specs(model),
+    "wenyu-resident-twins",
+  )
+  let queue_pressure = resident_twins_queue_pressure(model, worker)
+  let health = resident_twins_health(worker, execution)
+  article(class="civic-module-card civic-module-card-featured", [
+    p(class="scene-node-key", "Central / lived layer"),
+    h3("Resident Twins"),
+    p(resident_twins_module_copy(model, worker, execution)),
+    div(class="module-metric-grid", [
+      render_module_metric("Worker", resident_twins_worker_label(worker)),
+      render_module_metric("Queue", "\{queue_pressure}%"),
+      render_module_metric("Health", "\{health}%"),
+    ]),
+    div(class="module-detail-grid", [
+      render_module_detail(
+        "Stage",
+        resident_twins_build_stage(model, execution),
+      ),
+      render_module_detail(
+        "Active twin",
+        resident_twins_active_twin_label(model),
+      ),
+      render_module_detail("Privacy", resident_twins_privacy_label(model)),
+    ]),
+    p(
+      class="module-next-action",
+      "Next: \{resident_twins_next_action(model, task, execution)}",
+    ),
+    span(
+      class="module-signal \{resident_twins_signal_class(model, execution)}",
+      resident_twins_signal(model, execution),
+    ),
+  ])
+}
+
+///|
+fn render_social_square_module_card(model : Model) -> @rabbita.Html {
+  let worker = social_square_worker(model)
+  let task = social_square_task(model)
+  let execution = social_square_execution(model)
+  let lead_match = social_square_lead_match(model)
+  let queue_pressure = social_square_queue_pressure(model, worker)
+  let health = social_square_health(worker, execution)
+  article(
+    class="civic-module-card civic-module-card-featured civic-module-card-social-square",
+    [
+      p(class="scene-node-key", "Central / cafe"),
+      h3("Social Square"),
+      p(social_square_module_copy(model, worker, execution)),
+      div(class="module-metric-grid", [
+        render_module_metric("Worker", social_square_worker_label(worker)),
+        render_module_metric("Queue", "\{queue_pressure}%"),
+        render_module_metric("Health", "\{health}%"),
+      ]),
+      div(class="module-detail-grid", [
+        render_module_detail("Stage", social_square_stage(model, execution)),
+        render_module_detail("Lead pair", social_square_pair_label(lead_match)),
+        render_module_detail(
+          "Strongest match",
+          "\{lead_match.confidence}% confidence",
+        ),
+      ]),
+      p(
+        class="module-next-action",
+        "Next: \{social_square_next_action(model, task, execution)}",
+      ),
+      span(
+        class="module-signal \{social_square_signal_class(model, execution)}",
+        social_square_signal(model, execution),
+      ),
+    ],
+  )
+}
+
+///|
+fn render_talent_avenue_module_card(model : Model) -> @rabbita.Html {
+  let worker = find_book_worker(workers_for_model(model), "talent-avenue")
+  let task = find_book_task(task_specs(model), "talent-avenue")
+  let execution = find_book_execution(execution_specs(model), "talent-avenue")
+  let queue_pressure = talent_avenue_queue_pressure(model, worker)
+  let health = talent_avenue_health(model, worker, execution)
+  article(class="civic-module-card civic-module-card-featured", [
+    p(class="scene-node-key", "Central / showcase"),
+    h3("Talent Avenue"),
+    p(talent_avenue_module_copy(model, worker, execution)),
+    div(class="module-metric-grid", [
+      render_module_metric("Worker", talent_avenue_worker_label(worker)),
+      render_module_metric("Queue", "\{queue_pressure}%"),
+      render_module_metric("Health", "\{health}%"),
+    ]),
+    p(
+      class="module-next-action",
+      "Next: \{talent_avenue_next_action(model, task, execution)}",
+    ),
+    span(
+      class="module-signal \{talent_avenue_signal_class(model, execution)}",
+      talent_avenue_signal(model, execution),
+    ),
+  ])
+}
+
+///|
+fn render_ai_garden_module_card(model : Model) -> @rabbita.Html {
+  let worker = ai_garden_worker(model)
+  let task = ai_garden_task(model)
+  let execution = ai_garden_execution(model)
+  let queue_pressure = ai_garden_queue_pressure(model, worker)
+  let health = ai_garden_health(model, worker, execution)
+  article(class="civic-module-card civic-module-card-featured", [
+    p(class="scene-node-key", "North / eco"),
+    h3("AI Garden"),
+    p(ai_garden_module_copy(model, worker, execution)),
+    div(class="module-metric-grid", [
+      render_module_metric("Worker", ai_garden_worker_label(worker)),
+      render_module_metric("Queue", "\{queue_pressure}%"),
+      render_module_metric("Health", "\{health}%"),
+    ]),
+    div(class="module-detail-grid", [
+      render_module_detail("Stage", ai_garden_stage(model, execution)),
+      render_module_detail(
+        "Tool trial",
+        ai_garden_tool_trial_label(model, execution),
+      ),
+      render_module_detail("Workshop", ai_garden_workshop_label(model)),
+    ]),
+    p(
+      class="module-next-action",
+      "Next: \{ai_garden_next_action(model, task, execution)}",
+    ),
+    span(
+      class="module-signal \{ai_garden_signal_class(model, execution)}",
+      ai_garden_signal(model, execution),
+    ),
+  ])
+}
+
+///|
+fn render_town_shell_module_card(model : Model) -> @rabbita.Html {
+  let tasks = tasks_for_model(model)
+  let executions = executions_for_model(model)
+  let worker = find_priority_book_worker(
+    workers_for_model(model),
+    "wenyu-town-shell",
+  )
+  let task = find_priority_book_task(tasks, "wenyu-town-shell")
+  let execution = find_priority_book_execution(executions, "wenyu-town-shell")
+  let queue_pressure = town_shell_queue_pressure(model, worker)
+  let health = town_shell_health(worker, execution)
+  article(class="civic-module-card civic-module-card-featured", [
+    p(class="scene-node-key", "Town-wide / operator shell"),
+    h3("Town Shell"),
+    p(town_shell_module_copy(model, worker, execution)),
+    div(class="module-metric-grid", [
+      render_module_metric("Worker", town_shell_worker_label(worker)),
+      render_module_metric("Queue", "\{queue_pressure}%"),
+      render_module_metric("Health", "\{health}%"),
+    ]),
+    div(class="module-detail-grid", [
+      render_module_detail("Runtime feed", town_shell_runtime_feed_label(model)),
+      render_module_detail(
+        "Activity",
+        town_shell_activity_label(model, tasks, executions),
+      ),
+      render_module_detail("Stage", town_shell_build_stage(model, execution)),
+    ]),
+    p(
+      class="module-next-action",
+      "Next: \{town_shell_next_action(model, task, execution)}",
+    ),
+    span(
+      class="module-signal \{town_shell_signal_class(model, execution)}",
+      town_shell_signal(model, execution),
+    ),
+  ])
+}
+
+///|
+fn render_vitality_dashboard_module_card(model : Model) -> @rabbita.Html {
+  let tasks = tasks_for_model(model)
+  let executions = executions_for_model(model)
+  let worker = find_priority_book_worker(
+    workers_for_model(model),
+    "wenyu-town-shell",
+  )
+  let task = find_priority_book_task(tasks, "wenyu-town-shell")
+  let execution = find_priority_book_execution(executions, "wenyu-town-shell")
+  let queue_pressure = vitality_dashboard_queue_pressure(model, worker)
+  let health = vitality_dashboard_health(model, worker, execution)
+  article(
+    class="civic-module-card civic-module-card-featured civic-module-card-vitality-dashboard",
+    [
+      p(class="scene-node-key", "Central square / district pulse"),
+      h3("Vitality Dashboard"),
+      p(vitality_dashboard_module_copy(model, worker, execution)),
+      div(class="module-metric-grid", [
+        render_module_metric("Worker", vitality_dashboard_worker_label(worker)),
+        render_module_metric("Queue", "\{queue_pressure}%"),
+        render_module_metric("Health", "\{health}%"),
+      ]),
+      div(class="module-detail-grid", [
+        render_module_detail(
+          "Points",
+          vitality_dashboard_points_flow_label(model),
+        ),
+        render_module_detail(
+          "Broadcasts",
+          vitality_dashboard_broadcast_label(model),
+        ),
+        render_module_detail(
+          "Response",
+          "\{service_response_minutes(model)} min",
+        ),
+      ]),
+      p(
+        class="module-next-action",
+        "Next: \{vitality_dashboard_next_action(model, task, execution)}",
+      ),
+      span(
+        class="module-signal \{vitality_dashboard_signal_class(model, execution)}",
+        vitality_dashboard_signal(model, execution),
+      ),
+    ],
+  )
+}
+
+///|
+fn render_contest_express_module_card(model : Model) -> @rabbita.Html {
+  let tasks = tasks_for_model(model)
+  let executions = executions_for_model(model)
+  let worker = find_priority_book_worker(
+    workers_for_model(model),
+    "wenyu-contest-express",
+  )
+  let task = find_priority_book_task(tasks, "wenyu-contest-express")
+  let execution = find_priority_book_execution(
+    executions, "wenyu-contest-express",
+  )
+  let queue_pressure = contest_express_queue_pressure(model, worker)
+  let health = contest_express_health(worker, execution)
+  article(class="civic-module-card civic-module-card-featured", [
+    p(class="scene-node-key", "Future Harbor / roadshow lane"),
+    h3("Contest Express"),
+    p(contest_express_module_copy(model, worker, execution)),
+    div(class="module-metric-grid", [
+      render_module_metric("Worker", contest_express_worker_label(worker)),
+      render_module_metric("Queue", "\{queue_pressure}%"),
+      render_module_metric("Health", "\{health}%"),
+    ]),
+    div(class="module-detail-grid", [
+      render_module_detail("Countdown", contest_express_countdown_label(model)),
+      render_module_detail(
+        "Readiness",
+        contest_express_readiness_label(model, execution),
+      ),
+      render_module_detail(
+        "Champion wall",
+        contest_express_champion_label(model, execution),
+      ),
+    ]),
+    p(
+      class="module-next-action",
+      "Next: \{contest_express_next_action(model, task, execution)}",
+    ),
+    span(
+      class="module-signal \{contest_express_signal_class(model, execution)}",
+      contest_express_signal(model, execution),
+    ),
   ])
 }
 
@@ -1164,7 +1961,7 @@ fn render_civic_modules(model : Model) -> @rabbita.Html {
   section(class="civic-modules", [
     div(class="runtime-copy", [
       p(class="eyebrow", "Wenyu Valley Modules"),
-      h2("Seven civic systems, one always-on mayor loop"),
+      h2("Town shell plus live civic systems"),
       p(
         class="summary",
         if mayor_recovery_active(model) {
@@ -1175,36 +1972,2063 @@ fn render_civic_modules(model : Model) -> @rabbita.Html {
       ),
     ]),
     div(class="civic-module-grid", [
-      render_civic_module_card(
-        "Policy Hall", "South / services", "Policy scrolls become quests, checklists, and advisor answers.",
-        "Quest-ready",
-      ),
-      render_civic_module_card(
-        "Contest Express", "Future Harbor", "Roadshow prep, mock judging, reminders, and champion parade hooks.",
-        "Season live",
-      ),
-      render_civic_module_card(
-        "Social Square", "Central / cafe", "Agents turn weak ties into introductions, events, and trial collaboration.",
-        "Matchmaking",
-      ),
-      render_civic_module_card(
-        "Talent Avenue", "Central / showcase", "Resident skills, achievements, tour cards, and talent graph projections.",
-        "Graph warm",
-      ),
-      render_civic_module_card(
-        "Vitality ECG", "Town-wide", "Settlement broadcasts, activity calendar, and verified achievement pulses.",
-        "24/7 pulse",
-      ),
-      render_civic_module_card(
-        "AI Garden", "North / eco", "Five-minute AI tips, tool trials, and creator workshop loops.",
-        "Learning",
-      ),
-      render_civic_module_card(
-        "Robot Link", "Offline bridge", "Venue booking, proxy attendance, and digital twin signals for physical space.",
-        "Bridge sync",
-      ),
+      render_town_shell_module_card(model),
+      render_vitality_dashboard_module_card(model),
+      render_resident_twins_module_card(model),
+      render_policy_hall_module_card(model),
+      render_contest_express_module_card(model),
+      render_social_square_module_card(model),
+      render_talent_avenue_module_card(model),
+      render_ai_garden_module_card(model),
+      render_physical_bridge_module_card(model),
     ]),
   ])
+}
+
+///|
+fn resident_twins_signal(
+  model : Model,
+  execution : @core.TaskExecutionRecord?,
+) -> String {
+  if model.state_source == StateSourceKind::SnapshotFile {
+    "Projection bridge"
+  } else {
+    match execution {
+      Some(execution) =>
+        match execution.status {
+          @core.TaskExecutionStatus::AwaitingPersistence =>
+            "Memory awaiting persistence"
+          @core.TaskExecutionStatus::ReviewQueued => "Needs review"
+          @core.TaskExecutionStatus::Completed => "Twin live"
+          @core.TaskExecutionStatus::Running
+          | @core.TaskExecutionStatus::RunConfirmed => "Reflection running"
+          @core.TaskExecutionStatus::PacketReady
+          | @core.TaskExecutionStatus::ProposalImported => "Twin dispatch"
+          @core.TaskExecutionStatus::Failed
+          | @core.TaskExecutionStatus::Stale => "Recovery required"
+        }
+      None => "Twin queued"
+    }
+  }
+}
+
+///|
+fn resident_twins_signal_class(
+  model : Model,
+  execution : @core.TaskExecutionRecord?,
+) -> String {
+  if model.state_source == StateSourceKind::SnapshotFile {
+    "module-signal-neutral"
+  } else {
+    match execution {
+      Some(execution) =>
+        match execution.status {
+          @core.TaskExecutionStatus::ReviewQueued
+          | @core.TaskExecutionStatus::Failed
+          | @core.TaskExecutionStatus::Stale => "module-signal-alert"
+          @core.TaskExecutionStatus::AwaitingPersistence =>
+            "module-signal-review"
+          @core.TaskExecutionStatus::Completed
+          | @core.TaskExecutionStatus::Running
+          | @core.TaskExecutionStatus::RunConfirmed => "module-signal-live"
+          _ => "module-signal-book"
+        }
+      None => "module-signal-book"
+    }
+  }
+}
+
+///|
+fn resident_twins_module_copy(
+  model : Model,
+  worker : WorkerSim?,
+  execution : @core.TaskExecutionRecord?,
+) -> String {
+  let active_twin = resident_twins_active_twin_label(model)
+  let private_count = resident_private_scope_count(model)
+  let review_count = resident_review_queue_count(model)
+  let worker_text = resident_twins_worker_label(worker)
+  let build_stage = resident_twins_build_stage(model, execution)
+  "Resident Twins now runs as a supervised district lane. \{worker_text} is carrying the memory-reflection-plan loop, \{active_twin} is the active twin in view, \{private_count} private scopes stay hidden from town view, \{review_count} records need keeper attention, and the current stage is \{build_stage}."
+}
+
+///|
+fn resident_twins_worker_label(worker : WorkerSim?) -> String {
+  match worker {
+    Some(worker) => "\{worker.title} / \{worker.status.to_string()}"
+    None => "Twin Keeper / pending"
+  }
+}
+
+///|
+fn resident_twins_queue_pressure(model : Model, worker : WorkerSim?) -> Int {
+  let review_weight = resident_review_queue_count(model) * 16
+  match worker {
+    Some(worker) =>
+      clamp_metric((worker.load + model.pressure + review_weight) / 3)
+    None => clamp_metric(model.pressure + review_weight)
+  }
+}
+
+///|
+fn resident_twins_health(
+  worker : WorkerSim?,
+  execution : @core.TaskExecutionRecord?,
+) -> Int {
+  let base = match worker {
+    Some(worker) => clamp_metric(worker.energy - worker.load / 4 + 22)
+    None => 54
+  }
+  match execution {
+    Some(execution) =>
+      match execution.status {
+        @core.TaskExecutionStatus::AwaitingPersistence => clamp_metric(base - 8)
+        @core.TaskExecutionStatus::ReviewQueued => clamp_metric(base - 18)
+        @core.TaskExecutionStatus::Failed | @core.TaskExecutionStatus::Stale =>
+          clamp_metric(base - 28)
+        @core.TaskExecutionStatus::Completed => clamp_metric(base + 10)
+        _ => base
+      }
+    None => base
+  }
+}
+
+///|
+fn resident_twins_next_action(
+  model : Model,
+  task : @core.TownTask?,
+  execution : @core.TaskExecutionRecord?,
+) -> String {
+  match execution {
+    Some(execution) =>
+      match execution.status {
+        @core.TaskExecutionStatus::AwaitingPersistence =>
+          "Persist the reviewed resident summary and refresh the projection-safe handoff."
+        @core.TaskExecutionStatus::ReviewQueued =>
+          "Clear keeper review before exposing the next reflection summary in town view."
+        @core.TaskExecutionStatus::Completed =>
+          "Publish the updated resident lane into the next runtime projection snapshot."
+        @core.TaskExecutionStatus::Running
+        | @core.TaskExecutionStatus::RunConfirmed =>
+          "Finish the current reflection cycle and keep the next resident plan visible."
+        @core.TaskExecutionStatus::PacketReady
+        | @core.TaskExecutionStatus::ProposalImported =>
+          "Confirm the district patch dispatch and keep resident memory projection-safe."
+        @core.TaskExecutionStatus::Failed | @core.TaskExecutionStatus::Stale =>
+          "Recover the stalled resident lane before memory and plan cards drift."
+      }
+    None =>
+      match task {
+        Some(task) => task.prompt
+        None => resident_twins_resident_plan(model)
+      }
+  }
+}
+
+///|
+fn resident_twins_build_stage(
+  model : Model,
+  execution : @core.TaskExecutionRecord?,
+) -> String {
+  match execution {
+    Some(execution) =>
+      match execution.status {
+        @core.TaskExecutionStatus::PacketReady
+        | @core.TaskExecutionStatus::ProposalImported => "Patch packet prepared"
+        @core.TaskExecutionStatus::RunConfirmed
+        | @core.TaskExecutionStatus::Running => "Reflection loop running"
+        @core.TaskExecutionStatus::AwaitingPersistence =>
+          "Memory awaiting persistence"
+        @core.TaskExecutionStatus::ReviewQueued => "Keeper review queued"
+        @core.TaskExecutionStatus::Completed => "Projection updated"
+        @core.TaskExecutionStatus::Failed | @core.TaskExecutionStatus::Stale =>
+          "Recovery required"
+      }
+    None =>
+      if model.tick % 4 < 2 {
+        "Projection wiring queued"
+      } else {
+        "Review loop visible"
+      }
+  }
+}
+
+///|
+fn resident_twins_active_twin(model : Model) -> ResidentSim? {
+  let residents = resident_sims(model)
+  if residents.is_empty() {
+    None
+  } else {
+    residents.get(model.tick % residents.length())
+  }
+}
+
+///|
+fn resident_twins_active_twin_label(model : Model) -> String {
+  match resident_twins_active_twin(model) {
+    Some(resident) => "\{resident.name} / \{resident.zone}"
+    None => "Await first resident projection"
+  }
+}
+
+///|
+fn resident_twins_privacy_label(model : Model) -> String {
+  let residents = resident_sims(model)
+  let private_count = resident_private_scope_count(model)
+  let visible_count = residents.length() - private_count
+  if residents.is_empty() {
+    "Projection pending"
+  } else {
+    "\{private_count} private / \{visible_count} shared"
+  }
+}
+
+///|
+fn town_shell_signal(
+  model : Model,
+  execution : @core.TaskExecutionRecord?,
+) -> String {
+  if model.state_source == StateSourceKind::SnapshotFile {
+    "Projection bridge"
+  } else {
+    match execution {
+      Some(execution) =>
+        match execution.status {
+          @core.TaskExecutionStatus::AwaitingPersistence =>
+            "Patch awaiting persistence"
+          @core.TaskExecutionStatus::ReviewQueued => "Patch review queued"
+          @core.TaskExecutionStatus::Completed => "Patch landed"
+          @core.TaskExecutionStatus::Running
+          | @core.TaskExecutionStatus::RunConfirmed => "Build live"
+          @core.TaskExecutionStatus::PacketReady
+          | @core.TaskExecutionStatus::ProposalImported => "Build dispatch"
+          @core.TaskExecutionStatus::Failed
+          | @core.TaskExecutionStatus::Stale => "Needs recovery"
+        }
+      None => "Build queued"
+    }
+  }
+}
+
+///|
+fn town_shell_signal_class(
+  model : Model,
+  execution : @core.TaskExecutionRecord?,
+) -> String {
+  if model.state_source == StateSourceKind::SnapshotFile {
+    "module-signal-neutral"
+  } else {
+    match execution {
+      Some(execution) =>
+        match execution.status {
+          @core.TaskExecutionStatus::ReviewQueued
+          | @core.TaskExecutionStatus::Failed
+          | @core.TaskExecutionStatus::Stale => "module-signal-alert"
+          @core.TaskExecutionStatus::AwaitingPersistence =>
+            "module-signal-review"
+          @core.TaskExecutionStatus::Completed
+          | @core.TaskExecutionStatus::Running
+          | @core.TaskExecutionStatus::RunConfirmed => "module-signal-live"
+          _ => "module-signal-book"
+        }
+      None => "module-signal-book"
+    }
+  }
+}
+
+///|
+fn town_shell_module_copy(
+  model : Model,
+  worker : WorkerSim?,
+  execution : @core.TaskExecutionRecord?,
+) -> String {
+  let queue_pressure = town_shell_queue_pressure(model, worker)
+  let build_stage = town_shell_build_stage(model, execution)
+  let worker_text = town_shell_worker_label(worker)
+  let runtime_feed = town_shell_runtime_feed_label(model)
+  "Town Shell now carries the Wenyu build lane as a visible district. \{worker_text} is driving the operator surface, queue pressure sits at \{queue_pressure}%, the runtime feed is \{runtime_feed}, and the current build stage is \{build_stage}."
+}
+
+///|
+fn town_shell_worker_label(worker : WorkerSim?) -> String {
+  match worker {
+    Some(worker) => "\{worker.title} / \{worker.status.to_string()}"
+    None => "Town Shell Foreman / pending"
+  }
+}
+
+///|
+fn town_shell_queue_pressure(model : Model, worker : WorkerSim?) -> Int {
+  match worker {
+    Some(worker) => clamp_metric((worker.load + model.pressure) / 2)
+    None => model.pressure
+  }
+}
+
+///|
+fn town_shell_runtime_feed_label(model : Model) -> String {
+  if model.state_source == StateSourceKind::SnapshotFile {
+    if projection_snapshot_is_ready(model.projection_snapshot) {
+      "Projection live"
+    } else {
+      "Bridge waiting"
+    }
+  } else {
+    "Demo supervision"
+  }
+}
+
+///|
+fn town_shell_activity_label(
+  model : Model,
+  tasks : Array[@core.TownTask],
+  executions : Array[@core.TaskExecutionRecord],
+) -> String {
+  let running_workers = count_workers_by_status(
+    workers_for_model(model),
+    @core.WorkerStatus::Running,
+  )
+  let review_count = count_execution_status(
+    executions,
+    @core.TaskExecutionStatus::ReviewQueued,
+  )
+  "\{running_workers} workers / \{tasks.length()} tasks / \{review_count} review"
+}
+
+///|
+fn town_shell_health(
+  worker : WorkerSim?,
+  execution : @core.TaskExecutionRecord?,
+) -> Int {
+  let base = match worker {
+    Some(worker) => clamp_metric(worker.energy - worker.load / 4 + 18)
+    None => 48
+  }
+  match execution {
+    Some(execution) =>
+      match execution.status {
+        @core.TaskExecutionStatus::AwaitingPersistence => clamp_metric(base - 6)
+        @core.TaskExecutionStatus::ReviewQueued => clamp_metric(base - 16)
+        @core.TaskExecutionStatus::Failed | @core.TaskExecutionStatus::Stale =>
+          clamp_metric(base - 28)
+        @core.TaskExecutionStatus::Completed => clamp_metric(base + 10)
+        _ => base
+      }
+    None => base
+  }
+}
+
+///|
+fn town_shell_next_action(
+  model : Model,
+  task : @core.TownTask?,
+  execution : @core.TaskExecutionRecord?,
+) -> String {
+  match execution {
+    Some(execution) =>
+      match execution.status {
+        @core.TaskExecutionStatus::AwaitingPersistence =>
+          "Persist the validated patch and refresh the book's code-patch record."
+        @core.TaskExecutionStatus::ReviewQueued =>
+          "Clear the queued review so the Town Shell lane can return to live build status."
+        @core.TaskExecutionStatus::Completed =>
+          "Roll the updated district card into the next runtime projection snapshot."
+        @core.TaskExecutionStatus::Running
+        | @core.TaskExecutionStatus::RunConfirmed =>
+          "Finish the focused UI slice and keep the shell readable while the build runs."
+        @core.TaskExecutionStatus::PacketReady
+        | @core.TaskExecutionStatus::ProposalImported =>
+          "Confirm the patch dispatch and keep the lane visible in the town dashboard."
+        @core.TaskExecutionStatus::Failed | @core.TaskExecutionStatus::Stale =>
+          "Recover the stalled build run before the shell drifts back to placeholder state."
+      }
+    None =>
+      match task {
+        Some(task) => task.prompt
+        None =>
+          if model.state_source == StateSourceKind::SnapshotFile {
+            "Connect the persisted browser bridge so Town Shell reads live projection state."
+          } else {
+            "Keep the live district card aligned with runtime projection data."
+          }
+      }
+  }
+}
+
+///|
+fn town_shell_build_stage(
+  model : Model,
+  execution : @core.TaskExecutionRecord?,
+) -> String {
+  match execution {
+    Some(execution) =>
+      match execution.status {
+        @core.TaskExecutionStatus::PacketReady
+        | @core.TaskExecutionStatus::ProposalImported => "Patch packet prepared"
+        @core.TaskExecutionStatus::RunConfirmed
+        | @core.TaskExecutionStatus::Running => "Code patch running"
+        @core.TaskExecutionStatus::AwaitingPersistence =>
+          "Patch awaiting persistence"
+        @core.TaskExecutionStatus::ReviewQueued => "Keeper review queued"
+        @core.TaskExecutionStatus::Completed => "District card updated"
+        @core.TaskExecutionStatus::Failed | @core.TaskExecutionStatus::Stale =>
+          "Recovery required"
+      }
+    None =>
+      if model.tick % 4 < 2 {
+        "Backlog materialized"
+      } else {
+        "Asset prompts queued"
+      }
+  }
+}
+
+///|
+fn vitality_dashboard_signal(
+  model : Model,
+  execution : @core.TaskExecutionRecord?,
+) -> String {
+  if model.state_source == StateSourceKind::SnapshotFile {
+    "Projection bridge"
+  } else if mayor_recovery_active(model) {
+    "Recovery loop"
+  } else {
+    match execution {
+      Some(execution) =>
+        match execution.status {
+          @core.TaskExecutionStatus::AwaitingPersistence => "Pulse persisting"
+          @core.TaskExecutionStatus::ReviewQueued => "Pulse review"
+          @core.TaskExecutionStatus::Completed => "Pulse live"
+          @core.TaskExecutionStatus::Running
+          | @core.TaskExecutionStatus::RunConfirmed => "Pulse syncing"
+          @core.TaskExecutionStatus::PacketReady
+          | @core.TaskExecutionStatus::ProposalImported => "Sync queued"
+          @core.TaskExecutionStatus::Failed
+          | @core.TaskExecutionStatus::Stale => "Needs recovery"
+        }
+      None => "Pulse active"
+    }
+  }
+}
+
+///|
+fn vitality_dashboard_signal_class(
+  model : Model,
+  execution : @core.TaskExecutionRecord?,
+) -> String {
+  if model.state_source == StateSourceKind::SnapshotFile {
+    "module-signal-neutral"
+  } else if mayor_recovery_active(model) {
+    "module-signal-alert"
+  } else {
+    match execution {
+      Some(execution) =>
+        match execution.status {
+          @core.TaskExecutionStatus::ReviewQueued
+          | @core.TaskExecutionStatus::Failed
+          | @core.TaskExecutionStatus::Stale => "module-signal-alert"
+          @core.TaskExecutionStatus::AwaitingPersistence =>
+            "module-signal-review"
+          @core.TaskExecutionStatus::Completed
+          | @core.TaskExecutionStatus::Running
+          | @core.TaskExecutionStatus::RunConfirmed => "module-signal-live"
+          _ => "module-signal-book"
+        }
+      None => "module-signal-book"
+    }
+  }
+}
+
+///|
+fn vitality_dashboard_module_copy(
+  model : Model,
+  worker : WorkerSim?,
+  execution : @core.TaskExecutionRecord?,
+) -> String {
+  let joins = resident_joins_today(model)
+  let quests = active_quest_count(model)
+  let events = events_today(model)
+  let return_signal = retention_signal(model)
+  let response = service_response_minutes(model)
+  let broadcasts = achievement_broadcast_count(model)
+  let actions = agent_action_count(model)
+  let build_stage = town_shell_build_stage(model, execution)
+  let worker_text = vitality_dashboard_worker_label(worker)
+  "Moontown now projects a real Vitality Dashboard lane: \{worker_text} is keeping the district pulse visible, \{joins} joins, \{quests} active quests, and \{events} events are on the board, \{broadcasts} achievement broadcasts are live, service response is \{response} minutes, agent actions total \{actions}, return signal is \{return_signal}%, and the current patch stage is \{build_stage}."
+}
+
+///|
+fn vitality_dashboard_worker_label(worker : WorkerSim?) -> String {
+  match worker {
+    Some(worker) => "\{worker.title} / \{worker.status.to_string()}"
+    None => "Town Shell Foreman / pending"
+  }
+}
+
+///|
+fn vitality_dashboard_points_flow_label(model : Model) -> String {
+  "\{valley_points_issued(model)} issued / \{valley_points_redeemed(model)} redeemed"
+}
+
+///|
+fn vitality_dashboard_broadcast_label(model : Model) -> String {
+  if model.state_source == StateSourceKind::SnapshotFile &&
+    !projection_snapshot_is_ready(model.projection_snapshot) {
+    "Bridge waiting"
+  } else {
+    "\{achievement_broadcast_count(model)} live"
+  }
+}
+
+///|
+fn vitality_dashboard_queue_pressure(model : Model, worker : WorkerSim?) -> Int {
+  let quest_load = active_quest_count(model) * 5
+  match worker {
+    Some(worker) =>
+      clamp_metric((worker.load + model.pressure + quest_load) / 3)
+    None => clamp_metric(model.pressure + quest_load / 2)
+  }
+}
+
+///|
+fn vitality_dashboard_health(
+  model : Model,
+  worker : WorkerSim?,
+  execution : @core.TaskExecutionRecord?,
+) -> Int {
+  let base = match worker {
+    Some(worker) =>
+      clamp_metric(
+        (worker.energy + model.stability + retention_signal(model)) / 3,
+      )
+    None => clamp_metric((model.energy + model.stability) / 2)
+  }
+  match execution {
+    Some(execution) =>
+      match execution.status {
+        @core.TaskExecutionStatus::AwaitingPersistence => clamp_metric(base - 8)
+        @core.TaskExecutionStatus::ReviewQueued => clamp_metric(base - 18)
+        @core.TaskExecutionStatus::Failed | @core.TaskExecutionStatus::Stale =>
+          clamp_metric(base - 30)
+        @core.TaskExecutionStatus::Completed => clamp_metric(base + 8)
+        _ => base
+      }
+    None => base
+  }
+}
+
+///|
+fn vitality_dashboard_next_action(
+  model : Model,
+  task : @core.TownTask?,
+  execution : @core.TaskExecutionRecord?,
+) -> String {
+  match execution {
+    Some(execution) =>
+      match execution.status {
+        @core.TaskExecutionStatus::AwaitingPersistence =>
+          "Persist the validated vitality slice so Moontown can project it beyond demo simulation."
+        @core.TaskExecutionStatus::ReviewQueued =>
+          "Clear keeper review and keep the district pulse visible while MoonBook absorbs the record."
+        @core.TaskExecutionStatus::Completed =>
+          "Wire the next projection snapshot so joins, quests, and retention stop depending on local simulation."
+        @core.TaskExecutionStatus::Running
+        | @core.TaskExecutionStatus::RunConfirmed =>
+          "Finish the UI slice while keeping queue pressure, health, and next action legible."
+        @core.TaskExecutionStatus::PacketReady
+        | @core.TaskExecutionStatus::ProposalImported =>
+          "Confirm the code-patch dispatch and keep the vitality lane visible in the town square."
+        @core.TaskExecutionStatus::Failed | @core.TaskExecutionStatus::Stale =>
+          "Recover the stalled vitality run before the district pulse drifts out of sync."
+      }
+    None =>
+      match task {
+        Some(task) => task.prompt
+        None =>
+          if model.state_source == StateSourceKind::SnapshotFile {
+            "Connect the projection bridge so the vitality lane reads persisted town state."
+          } else {
+            "Keep the district pulse aligned with Moontown projection, MoonBook counters, and MoonClaw events."
+          }
+      }
+  }
+}
+
+///|
+fn contest_express_signal(
+  model : Model,
+  execution : @core.TaskExecutionRecord?,
+) -> String {
+  if model.state_source == StateSourceKind::SnapshotFile {
+    "Projection bridge"
+  } else {
+    match execution {
+      Some(execution) =>
+        match execution.status {
+          @core.TaskExecutionStatus::AwaitingPersistence =>
+            "Replay under review"
+          @core.TaskExecutionStatus::ReviewQueued => "Judge review queued"
+          @core.TaskExecutionStatus::Completed => "Roadshow ready"
+          @core.TaskExecutionStatus::Running
+          | @core.TaskExecutionStatus::RunConfirmed => "Mock judge live"
+          @core.TaskExecutionStatus::PacketReady
+          | @core.TaskExecutionStatus::ProposalImported => "Dispatching"
+          @core.TaskExecutionStatus::Failed
+          | @core.TaskExecutionStatus::Stale => "Needs recovery"
+        }
+      None => "Readiness live"
+    }
+  }
+}
+
+///|
+fn contest_express_signal_class(
+  model : Model,
+  execution : @core.TaskExecutionRecord?,
+) -> String {
+  if model.state_source == StateSourceKind::SnapshotFile {
+    "module-signal-neutral"
+  } else {
+    match execution {
+      Some(execution) =>
+        match execution.status {
+          @core.TaskExecutionStatus::ReviewQueued
+          | @core.TaskExecutionStatus::Failed
+          | @core.TaskExecutionStatus::Stale => "module-signal-alert"
+          @core.TaskExecutionStatus::AwaitingPersistence =>
+            "module-signal-review"
+          @core.TaskExecutionStatus::Completed => "module-signal-live"
+          _ => "module-signal-book"
+        }
+      None => "module-signal-book"
+    }
+  }
+}
+
+///|
+fn contest_express_module_copy(
+  model : Model,
+  worker : WorkerSim?,
+  execution : @core.TaskExecutionRecord?,
+) -> String {
+  let queue_pressure = contest_express_queue_pressure(model, worker)
+  let stage = contest_express_stage(model, execution)
+  let worker_text = contest_express_worker_label(worker)
+  "Contest coaching stays visible in the mayor loop: \{worker_text} is advancing \{stage}, queue pressure sits at \{queue_pressure}%, and the next resident-facing handoff stays reviewable."
+}
+
+///|
+fn contest_express_worker_label(worker : WorkerSim?) -> String {
+  match worker {
+    Some(worker) => "\{worker.title} / \{worker.status.to_string()}"
+    None => "Contest Conductor / pending"
+  }
+}
+
+///|
+fn contest_express_queue_pressure(model : Model, worker : WorkerSim?) -> Int {
+  match worker {
+    Some(worker) => worker.load
+    None => clamp_metric(model.pressure + 8)
+  }
+}
+
+///|
+fn contest_express_health(
+  worker : WorkerSim?,
+  execution : @core.TaskExecutionRecord?,
+) -> Int {
+  let base = match worker {
+    Some(worker) => clamp_metric(worker.energy - worker.load / 4 + 4)
+    None => 46
+  }
+  match execution {
+    Some(execution) =>
+      match execution.status {
+        @core.TaskExecutionStatus::AwaitingPersistence =>
+          clamp_metric(base - 10)
+        @core.TaskExecutionStatus::ReviewQueued => clamp_metric(base - 20)
+        @core.TaskExecutionStatus::Failed | @core.TaskExecutionStatus::Stale =>
+          clamp_metric(base - 30)
+        @core.TaskExecutionStatus::Completed => clamp_metric(base + 10)
+        _ => base
+      }
+    None => base
+  }
+}
+
+///|
+fn contest_express_next_action(
+  model : Model,
+  task : @core.TownTask?,
+  execution : @core.TaskExecutionRecord?,
+) -> String {
+  ignore(model)
+  match execution {
+    Some(execution) =>
+      match execution.status {
+        @core.TaskExecutionStatus::AwaitingPersistence =>
+          "Keep the readiness score and replay link visible while MoonBook persists the reviewed packet."
+        @core.TaskExecutionStatus::ReviewQueued =>
+          "Route the mock-judge notes through keeper review before broadcasting the next reminder."
+        @core.TaskExecutionStatus::Completed =>
+          "Publish the champion-wall summary, then schedule the next countdown checkpoint."
+        @core.TaskExecutionStatus::Running
+        | @core.TaskExecutionStatus::RunConfirmed =>
+          "Finish mock judging and turn weak sections into a revision packet."
+        @core.TaskExecutionStatus::PacketReady
+        | @core.TaskExecutionStatus::ProposalImported =>
+          "Confirm dispatch and open the next contest-readiness step."
+        @core.TaskExecutionStatus::Failed | @core.TaskExecutionStatus::Stale =>
+          "Recover the stalled contest lane before the next roadshow countdown slips."
+      }
+    None =>
+      match task {
+        Some(task) => task.prompt
+        None => "Open the contest calendar and score the next readiness gap."
+      }
+  }
+}
+
+///|
+fn contest_express_stage(
+  model : Model,
+  execution : @core.TaskExecutionRecord?,
+) -> String {
+  match execution {
+    Some(execution) =>
+      match execution.status {
+        @core.TaskExecutionStatus::PacketReady
+        | @core.TaskExecutionStatus::ProposalImported =>
+          "Readiness packet prepared"
+        @core.TaskExecutionStatus::RunConfirmed
+        | @core.TaskExecutionStatus::Running => "Mock judge scoring"
+        @core.TaskExecutionStatus::AwaitingPersistence =>
+          "Replay awaiting persistence"
+        @core.TaskExecutionStatus::ReviewQueued => "Keeper review queued"
+        @core.TaskExecutionStatus::Completed => "Champion-wall ready"
+        @core.TaskExecutionStatus::Failed | @core.TaskExecutionStatus::Stale =>
+          "Recovery required"
+      }
+    None =>
+      if model.tick % 4 < 2 {
+        "Deck gap review"
+      } else {
+        "Reminder schedule"
+      }
+  }
+}
+
+///|
+fn contest_express_countdown_label(model : Model) -> String {
+  if model.state_source == StateSourceKind::SnapshotFile {
+    if projection_snapshot_is_ready(model.projection_snapshot) {
+      "Projection-controlled"
+    } else {
+      "Bridge waiting"
+    }
+  } else {
+    let days_left = 9 - model.tick % 5
+    "T-\{days_left} days"
+  }
+}
+
+///|
+fn contest_express_readiness_label(
+  model : Model,
+  execution : @core.TaskExecutionRecord?,
+) -> String {
+  let score = match execution {
+    Some(execution) =>
+      match execution.status {
+        @core.TaskExecutionStatus::Completed => 96
+        @core.TaskExecutionStatus::AwaitingPersistence => 88
+        @core.TaskExecutionStatus::Running
+        | @core.TaskExecutionStatus::RunConfirmed => 74
+        @core.TaskExecutionStatus::PacketReady
+        | @core.TaskExecutionStatus::ProposalImported => 67
+        @core.TaskExecutionStatus::ReviewQueued => 58
+        @core.TaskExecutionStatus::Failed | @core.TaskExecutionStatus::Stale =>
+          34
+      }
+    None =>
+      if model.state_source == StateSourceKind::SnapshotFile {
+        46
+      } else {
+        79
+      }
+  }
+  "\{score}% ready"
+}
+
+///|
+fn contest_express_champion_label(
+  model : Model,
+  execution : @core.TaskExecutionRecord?,
+) -> String {
+  match execution {
+    Some(execution) =>
+      match execution.status {
+        @core.TaskExecutionStatus::Completed => "Replay queued"
+        @core.TaskExecutionStatus::AwaitingPersistence => "Summary persisting"
+        @core.TaskExecutionStatus::ReviewQueued => "Review before broadcast"
+        @core.TaskExecutionStatus::Running
+        | @core.TaskExecutionStatus::RunConfirmed => "Waiting on judge notes"
+        @core.TaskExecutionStatus::PacketReady
+        | @core.TaskExecutionStatus::ProposalImported => "Champion wall draft"
+        @core.TaskExecutionStatus::Failed | @core.TaskExecutionStatus::Stale =>
+          "Broadcast blocked"
+      }
+    None =>
+      if model.state_source == StateSourceKind::SnapshotFile {
+        "Projection pending"
+      } else {
+        "Ready after next win"
+      }
+  }
+}
+
+///|
+fn ai_garden_signal(
+  model : Model,
+  execution : @core.TaskExecutionRecord?,
+) -> String {
+  if model.state_source == StateSourceKind::SnapshotFile {
+    "Projection bridge"
+  } else {
+    match execution {
+      Some(execution) =>
+        match execution.status {
+          @core.TaskExecutionStatus::AwaitingPersistence =>
+            "Tutorial under review"
+          @core.TaskExecutionStatus::ReviewQueued => "Keeper review queued"
+          @core.TaskExecutionStatus::Completed => "Lesson published"
+          @core.TaskExecutionStatus::Running
+          | @core.TaskExecutionStatus::RunConfirmed => "Tool trial live"
+          @core.TaskExecutionStatus::PacketReady
+          | @core.TaskExecutionStatus::ProposalImported => "Dispatching"
+          @core.TaskExecutionStatus::Failed
+          | @core.TaskExecutionStatus::Stale => "Needs recovery"
+        }
+      None => "Learning live"
+    }
+  }
+}
+
+///|
+fn ai_garden_signal_class(
+  model : Model,
+  execution : @core.TaskExecutionRecord?,
+) -> String {
+  if model.state_source == StateSourceKind::SnapshotFile {
+    "module-signal-neutral"
+  } else {
+    match execution {
+      Some(execution) =>
+        match execution.status {
+          @core.TaskExecutionStatus::ReviewQueued
+          | @core.TaskExecutionStatus::Failed
+          | @core.TaskExecutionStatus::Stale => "module-signal-alert"
+          @core.TaskExecutionStatus::AwaitingPersistence =>
+            "module-signal-review"
+          @core.TaskExecutionStatus::Completed => "module-signal-live"
+          _ => "module-signal-book"
+        }
+      None => "module-signal-book"
+    }
+  }
+}
+
+///|
+fn ai_garden_module_copy(
+  model : Model,
+  worker : WorkerSim?,
+  execution : @core.TaskExecutionRecord?,
+) -> String {
+  let worker_text = ai_garden_worker_label(worker)
+  let stage = ai_garden_stage(model, execution)
+  let scenario_count = ai_garden_scenario_count(model)
+  let queue_pressure = ai_garden_queue_pressure(model, worker)
+  let tool_trial = ai_garden_tool_trial_label(model, execution)
+  let workshop = ai_garden_workshop_label(model)
+  "AI Garden now reads as a live learning district: \{worker_text} is carrying \{stage}, \{scenario_count} scenario lanes are visible in town view, \{tool_trial} is on deck, \{workshop} is active, and queue pressure sits at \{queue_pressure}%."
+}
+
+///|
+fn ai_garden_worker_label(worker : WorkerSim?) -> String {
+  match worker {
+    Some(worker) => "\{worker.title} / \{worker.status.to_string()}"
+    None => "AI Garden Tutor / pending"
+  }
+}
+
+///|
+fn ai_garden_queue_pressure(model : Model, worker : WorkerSim?) -> Int {
+  let scenarios = ai_garden_scenario_count(model)
+  match worker {
+    Some(worker) =>
+      clamp_metric((worker.load + model.pressure + scenarios * 6) / 3)
+    None => clamp_metric(model.pressure + scenarios * 5)
+  }
+}
+
+///|
+fn ai_garden_health(
+  model : Model,
+  worker : WorkerSim?,
+  execution : @core.TaskExecutionRecord?,
+) -> Int {
+  let scenario_bonus = ai_garden_scenario_count(model) * 5
+  let base = match worker {
+    Some(worker) =>
+      clamp_metric(
+        worker.energy +
+        scenario_bonus -
+        ai_garden_queue_pressure(model, Some(worker)) / 4,
+      )
+    None => clamp_metric(50 + scenario_bonus)
+  }
+  match execution {
+    Some(execution) =>
+      match execution.status {
+        @core.TaskExecutionStatus::AwaitingPersistence => clamp_metric(base - 8)
+        @core.TaskExecutionStatus::ReviewQueued => clamp_metric(base - 18)
+        @core.TaskExecutionStatus::Failed | @core.TaskExecutionStatus::Stale =>
+          clamp_metric(base - 30)
+        @core.TaskExecutionStatus::Completed => clamp_metric(base + 10)
+        _ => base
+      }
+    None => base
+  }
+}
+
+///|
+fn ai_garden_next_action(
+  model : Model,
+  task : @core.TownTask?,
+  execution : @core.TaskExecutionRecord?,
+) -> String {
+  match execution {
+    Some(execution) =>
+      match execution.status {
+        @core.TaskExecutionStatus::AwaitingPersistence =>
+          "Persist the reviewed tutorial page and refresh the district-facing learning snapshot."
+        @core.TaskExecutionStatus::ReviewQueued =>
+          "Resolve keeper review before promoting the next public-safe tool trial."
+        @core.TaskExecutionStatus::Completed =>
+          "Queue the next resident scenario and compare before-and-after output in town view."
+        @core.TaskExecutionStatus::Running
+        | @core.TaskExecutionStatus::RunConfirmed =>
+          "Finish the guided tool trial and keep the five-minute lesson visible to residents."
+        @core.TaskExecutionStatus::PacketReady
+        | @core.TaskExecutionStatus::ProposalImported =>
+          "Confirm dispatch and open the next AI adoption quest."
+        @core.TaskExecutionStatus::Failed | @core.TaskExecutionStatus::Stale =>
+          "Recover the stalled tutorial run before the daily learning loop drifts."
+      }
+    None =>
+      match task {
+        Some(task) => task.prompt
+        None =>
+          if model.state_source == StateSourceKind::SnapshotFile {
+            "Connect MoonBook learning projections so the district stops relying on synthetic examples."
+          } else {
+            "Keep AI Garden visible as a practical on-ramp to resident AI adoption."
+          }
+      }
+  }
+}
+
+///|
+fn ai_garden_stage(
+  model : Model,
+  execution : @core.TaskExecutionRecord?,
+) -> String {
+  match execution {
+    Some(execution) =>
+      match execution.status {
+        @core.TaskExecutionStatus::PacketReady
+        | @core.TaskExecutionStatus::ProposalImported =>
+          "Tool trial packet prepared"
+        @core.TaskExecutionStatus::RunConfirmed
+        | @core.TaskExecutionStatus::Running => "Tutorial quest running"
+        @core.TaskExecutionStatus::AwaitingPersistence =>
+          "Tutorial awaiting persistence"
+        @core.TaskExecutionStatus::ReviewQueued => "Keeper review queued"
+        @core.TaskExecutionStatus::Completed => "Daily lesson published"
+        @core.TaskExecutionStatus::Failed | @core.TaskExecutionStatus::Stale =>
+          "Recovery required"
+      }
+    None =>
+      if model.tick % 4 < 2 {
+        "Scenario drafting"
+      } else {
+        "Workshop rotation"
+      }
+  }
+}
+
+///|
+fn ai_garden_tool_trial_label(
+  model : Model,
+  execution : @core.TaskExecutionRecord?,
+) -> String {
+  match execution {
+    Some(execution) =>
+      match execution.status {
+        @core.TaskExecutionStatus::Completed => "Before/after lesson published"
+        @core.TaskExecutionStatus::AwaitingPersistence =>
+          "Reviewed lesson waiting for persist"
+        @core.TaskExecutionStatus::ReviewQueued =>
+          "Comparison draft in keeper review"
+        @core.TaskExecutionStatus::Running
+        | @core.TaskExecutionStatus::RunConfirmed =>
+          "Email draft comparison live"
+        @core.TaskExecutionStatus::PacketReady
+        | @core.TaskExecutionStatus::ProposalImported =>
+          "Scenario packet staged"
+        @core.TaskExecutionStatus::Failed | @core.TaskExecutionStatus::Stale =>
+          "Tool trial recovery required"
+      }
+    None =>
+      if model.state_source == StateSourceKind::SnapshotFile {
+        "Projection lesson pending"
+      } else {
+        "Client email tool trial"
+      }
+  }
+}
+
+///|
+fn ai_garden_workshop_label(model : Model) -> String {
+  if model.state_source == StateSourceKind::SnapshotFile &&
+    !projection_snapshot_is_ready(model.projection_snapshot) {
+    "Projection workshop waiting"
+  } else {
+    match model.tick % 3 {
+      0 => "Creator workshop live"
+      1 => "Template remix circle"
+      _ => "Five-minute tutorial clinic"
+    }
+  }
+}
+
+///|
+fn ai_garden_comparison_label(
+  model : Model,
+  execution : @core.TaskExecutionRecord?,
+) -> String {
+  match execution {
+    Some(execution) =>
+      match execution.status {
+        @core.TaskExecutionStatus::Completed => "Comparison proof published"
+        @core.TaskExecutionStatus::AwaitingPersistence =>
+          "Comparison proof persisting"
+        @core.TaskExecutionStatus::ReviewQueued =>
+          "Comparison proof under review"
+        @core.TaskExecutionStatus::Running
+        | @core.TaskExecutionStatus::RunConfirmed => "Live before/after capture"
+        @core.TaskExecutionStatus::PacketReady
+        | @core.TaskExecutionStatus::ProposalImported =>
+          "Comparison prompt staged"
+        @core.TaskExecutionStatus::Failed | @core.TaskExecutionStatus::Stale =>
+          "Comparison proof blocked"
+      }
+    None =>
+      if model.state_source == StateSourceKind::SnapshotFile {
+        "Projection proof pending"
+      } else {
+        "Before/after proof loop"
+      }
+  }
+}
+
+///|
+fn ai_garden_scenario_count(model : Model) -> Int {
+  let base = 3
+  if mayor_recovery_active(model) {
+    base - 1
+  } else if model.tick % 4 == 0 {
+    base + 1
+  } else {
+    base
+  }
+}
+
+///|
+fn render_physical_bridge_module_card(model : Model) -> @rabbita.Html {
+  let worker = find_book_worker(
+    workers_for_model(model),
+    "wenyu-physical-bridge",
+  )
+  let task = find_book_task(task_specs(model), "wenyu-physical-bridge")
+  let execution = find_book_execution(
+    execution_specs(model),
+    "wenyu-physical-bridge",
+  )
+  let queue_pressure = physical_bridge_queue_pressure(model, worker)
+  let health = physical_bridge_health(model, worker, execution)
+  article(
+    class="civic-module-card civic-module-card-featured civic-module-card-physical-bridge",
+    [
+      p(class="scene-node-key", "South / virtual-physical connector"),
+      h3("Physical Bridge"),
+      p(physical_bridge_module_copy(model, worker, execution)),
+      div(class="module-metric-grid", [
+        render_module_metric("Worker", physical_bridge_worker_label(worker)),
+        render_module_metric("Queue", "\{queue_pressure}%"),
+        render_module_metric("Health", "\{health}%"),
+      ]),
+      div(class="module-detail-grid", [
+        render_module_detail("Stage", physical_bridge_stage(model, execution)),
+        render_module_detail(
+          "Handoff",
+          physical_bridge_handoff_label(model, execution),
+        ),
+        render_module_detail("Coverage", physical_bridge_coverage_label(model)),
+      ]),
+      p(
+        class="module-next-action",
+        "Next: \{physical_bridge_next_action(model, task, execution)}",
+      ),
+      span(
+        class="module-signal \{physical_bridge_signal_class(model, execution)}",
+        physical_bridge_signal(model, execution),
+      ),
+    ],
+  )
+}
+
+///|
+fn physical_bridge_signal(
+  model : Model,
+  execution : @core.TaskExecutionRecord?,
+) -> String {
+  if model.state_source == StateSourceKind::SnapshotFile {
+    "Projection bridge"
+  } else {
+    match execution {
+      Some(execution) =>
+        match execution.status {
+          @core.TaskExecutionStatus::AwaitingPersistence =>
+            "Telemetry awaiting persistence"
+          @core.TaskExecutionStatus::ReviewQueued => "Bridge review queued"
+          @core.TaskExecutionStatus::Completed => "District link live"
+          @core.TaskExecutionStatus::Running
+          | @core.TaskExecutionStatus::RunConfirmed => "Bridge sync live"
+          @core.TaskExecutionStatus::PacketReady
+          | @core.TaskExecutionStatus::ProposalImported => "Sync dispatch"
+          @core.TaskExecutionStatus::Failed
+          | @core.TaskExecutionStatus::Stale => "Needs recovery"
+        }
+      None => "Bridge staged"
+    }
+  }
+}
+
+///|
+fn physical_bridge_signal_class(
+  model : Model,
+  execution : @core.TaskExecutionRecord?,
+) -> String {
+  if model.state_source == StateSourceKind::SnapshotFile {
+    "module-signal-neutral"
+  } else {
+    match execution {
+      Some(execution) =>
+        match execution.status {
+          @core.TaskExecutionStatus::ReviewQueued
+          | @core.TaskExecutionStatus::Failed
+          | @core.TaskExecutionStatus::Stale => "module-signal-alert"
+          @core.TaskExecutionStatus::AwaitingPersistence =>
+            "module-signal-review"
+          @core.TaskExecutionStatus::Completed
+          | @core.TaskExecutionStatus::Running
+          | @core.TaskExecutionStatus::RunConfirmed => "module-signal-live"
+          _ => "module-signal-book"
+        }
+      None => "module-signal-book"
+    }
+  }
+}
+
+///|
+fn physical_bridge_module_copy(
+  model : Model,
+  worker : WorkerSim?,
+  execution : @core.TaskExecutionRecord?,
+) -> String {
+  let worker_text = physical_bridge_worker_label(worker)
+  let stage = physical_bridge_stage(model, execution)
+  let robot_calls = robot_service_count(model)
+  let telemetry_signals = physical_bridge_telemetry_signal_count(model)
+  "Physical Bridge turns Wenyu's offline promise into a reviewable district lane. \{worker_text} is carrying \{stage}, \{robot_calls} robot or venue calls are visible in this window, and \{telemetry_signals} live telemetry signals are ready for projection-safe town view."
+}
+
+///|
+fn physical_bridge_worker_label(worker : WorkerSim?) -> String {
+  match worker {
+    Some(worker) => "\{worker.title} / \{worker.status.to_string()}"
+    None => "Physical Bridge Link / pending"
+  }
+}
+
+///|
+fn physical_bridge_queue_pressure(model : Model, worker : WorkerSim?) -> Int {
+  let load_bonus = robot_service_count(model) +
+    physical_bridge_telemetry_signal_count(model) * 4
+  match worker {
+    Some(worker) =>
+      clamp_metric((worker.load + model.pressure + load_bonus) / 2)
+    None => clamp_metric(model.pressure + load_bonus)
+  }
+}
+
+///|
+fn physical_bridge_health(
+  model : Model,
+  worker : WorkerSim?,
+  execution : @core.TaskExecutionRecord?,
+) -> Int {
+  let telemetry_bonus = physical_bridge_telemetry_signal_count(model) * 5
+  let base = match worker {
+    Some(worker) =>
+      clamp_metric(
+        worker.energy +
+        telemetry_bonus -
+        physical_bridge_queue_pressure(model, Some(worker)) / 4,
+      )
+    None => clamp_metric(48 + telemetry_bonus)
+  }
+  match execution {
+    Some(execution) =>
+      match execution.status {
+        @core.TaskExecutionStatus::AwaitingPersistence => clamp_metric(base - 8)
+        @core.TaskExecutionStatus::ReviewQueued => clamp_metric(base - 18)
+        @core.TaskExecutionStatus::Failed | @core.TaskExecutionStatus::Stale =>
+          clamp_metric(base - 28)
+        @core.TaskExecutionStatus::Completed => clamp_metric(base + 12)
+        _ => base
+      }
+    None => base
+  }
+}
+
+///|
+fn physical_bridge_next_action(
+  model : Model,
+  task : @core.TownTask?,
+  execution : @core.TaskExecutionRecord?,
+) -> String {
+  match execution {
+    Some(execution) =>
+      match execution.status {
+        @core.TaskExecutionStatus::AwaitingPersistence =>
+          "Persist the reviewed telemetry and booking slice so Moontown can project a trustworthy district state."
+        @core.TaskExecutionStatus::ReviewQueued =>
+          "Clear keeper review before exposing proxy attendance or room status beyond projection-safe summaries."
+        @core.TaskExecutionStatus::Completed =>
+          "Refresh the town tile with the latest room, robot, and telemetry counters instead of the generic bridge placeholder."
+        @core.TaskExecutionStatus::Running
+        | @core.TaskExecutionStatus::RunConfirmed =>
+          "Finish the room-and-robot sync and keep next action legible for the mayor loop."
+        @core.TaskExecutionStatus::PacketReady
+        | @core.TaskExecutionStatus::ProposalImported =>
+          "Confirm dispatch and open the next virtual-to-physical handoff."
+        @core.TaskExecutionStatus::Failed | @core.TaskExecutionStatus::Stale =>
+          "Recover the stalled bridge run before offline status drifts away from the visible town."
+      }
+    None =>
+      match task {
+        Some(task) => task.prompt
+        None =>
+          if model.state_source == StateSourceKind::SnapshotFile {
+            "Connect the projection bridge so Physical Bridge stops relying on demo-only telemetry."
+          } else {
+            "Keep robot calls, room holds, and district telemetry visible without leaking private execution state."
+          }
+      }
+  }
+}
+
+///|
+fn physical_bridge_stage(
+  model : Model,
+  execution : @core.TaskExecutionRecord?,
+) -> String {
+  if model.state_source == StateSourceKind::SnapshotFile {
+    "Projection bridge pending"
+  } else {
+    match execution {
+      Some(execution) =>
+        match execution.status {
+          @core.TaskExecutionStatus::PacketReady
+          | @core.TaskExecutionStatus::ProposalImported =>
+            "Bridge packet prepared"
+          @core.TaskExecutionStatus::RunConfirmed
+          | @core.TaskExecutionStatus::Running => "Room and robot sync running"
+          @core.TaskExecutionStatus::AwaitingPersistence =>
+            "Telemetry awaiting persistence"
+          @core.TaskExecutionStatus::ReviewQueued => "Projection review queued"
+          @core.TaskExecutionStatus::Completed => "District tile ready"
+          @core.TaskExecutionStatus::Failed
+          | @core.TaskExecutionStatus::Stale => "Recovery required"
+        }
+      None =>
+        if mayor_recovery_active(model) {
+          "Recovery patrol handoff"
+        } else {
+          "Live district sync"
+        }
+    }
+  }
+}
+
+///|
+fn physical_bridge_handoff_label(
+  model : Model,
+  execution : @core.TaskExecutionRecord?,
+) -> String {
+  if model.state_source == StateSourceKind::SnapshotFile {
+    "Projection-safe room and robot feed"
+  } else {
+    match execution {
+      Some(execution) =>
+        match execution.status {
+          @core.TaskExecutionStatus::AwaitingPersistence =>
+            "Telemetry and booking slice persisting"
+          @core.TaskExecutionStatus::ReviewQueued =>
+            "Proxy attendance waiting for keeper review"
+          @core.TaskExecutionStatus::Completed =>
+            "Room, robot, and proxy counters ready"
+          @core.TaskExecutionStatus::Running
+          | @core.TaskExecutionStatus::RunConfirmed =>
+            "Room hold and robot sync in motion"
+          @core.TaskExecutionStatus::PacketReady
+          | @core.TaskExecutionStatus::ProposalImported =>
+            "Mayor dispatch opened for bridge run"
+          @core.TaskExecutionStatus::Failed
+          | @core.TaskExecutionStatus::Stale => "Offline bridge handoff stalled"
+        }
+      None => "Warm handoff between venue, robot, and telemetry lanes"
+    }
+  }
+}
+
+///|
+fn physical_bridge_coverage_label(model : Model) -> String {
+  "\{robot_service_count(model)} calls / \{physical_bridge_telemetry_signal_count(model)} signals"
+}
+
+///|
+fn physical_bridge_telemetry_signal_count(model : Model) -> Int {
+  3 + model.tick % 4
+}
+
+///|
+fn talent_avenue_signal(
+  model : Model,
+  execution : @core.TaskExecutionRecord?,
+) -> String {
+  if model.state_source == StateSourceKind::SnapshotFile {
+    "Projection bridge"
+  } else {
+    match execution {
+      Some(execution) =>
+        match execution.status {
+          @core.TaskExecutionStatus::AwaitingPersistence =>
+            "Tour note under review"
+          @core.TaskExecutionStatus::ReviewQueued => "Reception review queued"
+          @core.TaskExecutionStatus::Completed => "Talent wall live"
+          @core.TaskExecutionStatus::Running
+          | @core.TaskExecutionStatus::RunConfirmed => "Heatmap refreshing"
+          @core.TaskExecutionStatus::PacketReady
+          | @core.TaskExecutionStatus::ProposalImported => "Dispatching"
+          @core.TaskExecutionStatus::Failed
+          | @core.TaskExecutionStatus::Stale => "Needs recovery"
+        }
+      None => "Graph warm"
+    }
+  }
+}
+
+///|
+fn talent_avenue_signal_class(
+  model : Model,
+  execution : @core.TaskExecutionRecord?,
+) -> String {
+  if model.state_source == StateSourceKind::SnapshotFile {
+    "module-signal-neutral"
+  } else {
+    match execution {
+      Some(execution) =>
+        match execution.status {
+          @core.TaskExecutionStatus::ReviewQueued
+          | @core.TaskExecutionStatus::Failed
+          | @core.TaskExecutionStatus::Stale => "module-signal-alert"
+          @core.TaskExecutionStatus::AwaitingPersistence =>
+            "module-signal-review"
+          @core.TaskExecutionStatus::Completed => "module-signal-live"
+          _ => "module-signal-book"
+        }
+      None => "module-signal-book"
+    }
+  }
+}
+
+///|
+fn talent_avenue_module_copy(
+  model : Model,
+  worker : WorkerSim?,
+  execution : @core.TaskExecutionRecord?,
+) -> String {
+  let worker_text = talent_avenue_worker_label(worker)
+  let graph_entities = talent_signals(model).length()
+  let verified_cards = talent_avenue_verified_card_count(model)
+  let stage = talent_avenue_stage(model, execution)
+  "Talent Avenue keeps the district legible for visitors and operators: \{worker_text} is carrying \{stage}, \{graph_entities} public-safe cards are live, and \{verified_cards} cards already carry reviewable evidence status."
+}
+
+///|
+fn talent_avenue_worker_label(worker : WorkerSim?) -> String {
+  match worker {
+    Some(worker) => "\{worker.title} / \{worker.status.to_string()}"
+    None => "Talent Cartographer / pending"
+  }
+}
+
+///|
+fn talent_avenue_queue_pressure(model : Model, worker : WorkerSim?) -> Int {
+  let activity = talent_avenue_activity_score(model)
+  match worker {
+    Some(worker) => clamp_metric((worker.load + activity) / 2)
+    None => clamp_metric((model.pressure + activity) / 2)
+  }
+}
+
+///|
+fn talent_avenue_health(
+  model : Model,
+  worker : WorkerSim?,
+  execution : @core.TaskExecutionRecord?,
+) -> Int {
+  let base = match worker {
+    Some(worker) =>
+      clamp_metric(
+        worker.energy +
+        talent_avenue_verified_card_count(model) * 8 -
+        talent_avenue_queue_pressure(model, Some(worker)) / 4,
+      )
+    None => 44
+  }
+  match execution {
+    Some(execution) =>
+      match execution.status {
+        @core.TaskExecutionStatus::AwaitingPersistence => clamp_metric(base - 8)
+        @core.TaskExecutionStatus::ReviewQueued => clamp_metric(base - 18)
+        @core.TaskExecutionStatus::Failed | @core.TaskExecutionStatus::Stale =>
+          clamp_metric(base - 28)
+        @core.TaskExecutionStatus::Completed => clamp_metric(base + 10)
+        _ => base
+      }
+    None => base
+  }
+}
+
+///|
+fn talent_avenue_next_action(
+  model : Model,
+  task : @core.TownTask?,
+  execution : @core.TaskExecutionRecord?,
+) -> String {
+  match execution {
+    Some(execution) =>
+      match execution.status {
+        @core.TaskExecutionStatus::AwaitingPersistence =>
+          "Keep the VIP route note visible while MoonBook persists the reviewed reception summary."
+        @core.TaskExecutionStatus::ReviewQueued =>
+          "Clear the queued reception review before promoting the next public-safe card."
+        @core.TaskExecutionStatus::Completed =>
+          "Publish the refreshed tour cards and export the next talent graph snapshot."
+        @core.TaskExecutionStatus::Running
+        | @core.TaskExecutionStatus::RunConfirmed =>
+          "Refresh achievements, evidence tags, and reception notes without leaking resident-private detail."
+        @core.TaskExecutionStatus::PacketReady
+        | @core.TaskExecutionStatus::ProposalImported =>
+          "Confirm dispatch and open the next showcase refresh for operators."
+        @core.TaskExecutionStatus::Failed | @core.TaskExecutionStatus::Stale =>
+          "Recover the stalled talent graph before the reception route goes stale."
+      }
+    None =>
+      match task {
+        Some(task) => task.prompt
+        None =>
+          if model.state_source == StateSourceKind::SnapshotFile {
+            "Bridge Talent Avenue to a persisted MoonBook projection before switching out of snapshot mode."
+          } else {
+            "Keep the talent wall aligned with the next reception-ready projection."
+          }
+      }
+  }
+}
+
+///|
+fn talent_avenue_stage(
+  model : Model,
+  execution : @core.TaskExecutionRecord?,
+) -> String {
+  match execution {
+    Some(execution) =>
+      match execution.status {
+        @core.TaskExecutionStatus::PacketReady
+        | @core.TaskExecutionStatus::ProposalImported =>
+          "Showcase packet prepared"
+        @core.TaskExecutionStatus::RunConfirmed
+        | @core.TaskExecutionStatus::Running => "Talent heatmap refresh"
+        @core.TaskExecutionStatus::AwaitingPersistence =>
+          "Reception summary awaiting persistence"
+        @core.TaskExecutionStatus::ReviewQueued => "Keeper review queued"
+        @core.TaskExecutionStatus::Completed => "Tour cards ready"
+        @core.TaskExecutionStatus::Failed | @core.TaskExecutionStatus::Stale =>
+          "Recovery required"
+      }
+    None =>
+      if model.tick % 4 < 2 {
+        "Achievement broadcast refresh"
+      } else {
+        "VIP route planning"
+      }
+  }
+}
+
+///|
+fn talent_avenue_activity_score(model : Model) -> Int {
+  let signals = talent_signals(model)
+  let mut total = 0
+  for signal in signals {
+    total += signal.activity
+  }
+  total / signals.length()
+}
+
+///|
+fn talent_avenue_verified_card_count(model : Model) -> Int {
+  let mut count = 0
+  for signal in talent_signals(model) {
+    if signal.evidence_status == "Verified evidence" {
+      count += 1
+    }
+  }
+  count
+}
+
+///|
+fn social_square_signal(
+  model : Model,
+  execution : @core.TaskExecutionRecord?,
+) -> String {
+  if model.state_source == StateSourceKind::SnapshotFile {
+    "Projection bridge"
+  } else {
+    match execution {
+      Some(execution) =>
+        match execution.status {
+          @core.TaskExecutionStatus::AwaitingPersistence =>
+            "Follow-up persisting"
+          @core.TaskExecutionStatus::ReviewQueued => "Review queued"
+          @core.TaskExecutionStatus::Completed => "Follow-up landed"
+          @core.TaskExecutionStatus::Running
+          | @core.TaskExecutionStatus::RunConfirmed => "Match live"
+          @core.TaskExecutionStatus::PacketReady
+          | @core.TaskExecutionStatus::ProposalImported => "Match queued"
+          @core.TaskExecutionStatus::Failed
+          | @core.TaskExecutionStatus::Stale => "Needs recovery"
+        }
+      None => "Matchmaking"
+    }
+  }
+}
+
+///|
+fn social_square_worker(model : Model) -> WorkerSim? {
+  find_book_worker_by_ids(workers_for_model(model), social_square_book_ids())
+}
+
+///|
+fn social_square_task(model : Model) -> @core.TownTask? {
+  find_book_task_by_ids(tasks_for_model(model), social_square_book_ids())
+}
+
+///|
+fn social_square_execution(model : Model) -> @core.TaskExecutionRecord? {
+  find_priority_book_execution_by_ids(
+    executions_for_model(model),
+    social_square_book_ids(),
+  )
+}
+
+///|
+fn social_square_book_ids() -> Array[String] {
+  ["social-square", "wenyu-social-square"]
+}
+
+///|
+fn social_square_signal_class(
+  model : Model,
+  execution : @core.TaskExecutionRecord?,
+) -> String {
+  if model.state_source == StateSourceKind::SnapshotFile {
+    "module-signal-neutral"
+  } else {
+    match execution {
+      Some(execution) =>
+        match execution.status {
+          @core.TaskExecutionStatus::ReviewQueued
+          | @core.TaskExecutionStatus::Failed
+          | @core.TaskExecutionStatus::Stale => "module-signal-alert"
+          @core.TaskExecutionStatus::AwaitingPersistence =>
+            "module-signal-review"
+          @core.TaskExecutionStatus::Completed
+          | @core.TaskExecutionStatus::Running
+          | @core.TaskExecutionStatus::RunConfirmed => "module-signal-live"
+          _ => "module-signal-book"
+        }
+      None => "module-signal-book"
+    }
+  }
+}
+
+///|
+fn social_square_module_copy(
+  model : Model,
+  worker : WorkerSim?,
+  execution : @core.TaskExecutionRecord?,
+) -> String {
+  let queue_pressure = social_square_queue_pressure(model, worker)
+  let lead_match = social_square_lead_match(model)
+  let confidence = lead_match.confidence
+  let social_step = social_square_stage(model, execution)
+  "Social Square now reads like a live district instead of a static networking tile. \{social_square_worker_label(worker)} is holding \{social_matches().length()} reasoned introductions, queue pressure sits at \{queue_pressure}%, strongest current confidence is \{confidence}%, and the active social step is \{social_step}."
+}
+
+///|
+fn social_square_worker_label(worker : WorkerSim?) -> String {
+  match worker {
+    Some(worker) => "\{worker.title} / \{worker.status.to_string()}"
+    None => "Cafe Matchmaker / pending"
+  }
+}
+
+///|
+fn social_square_queue_pressure(model : Model, worker : WorkerSim?) -> Int {
+  match worker {
+    Some(worker) =>
+      clamp_metric(
+        (worker.load + model.pressure + social_matches().length() * 8) / 2,
+      )
+    None => clamp_metric(model.pressure + social_matches().length() * 4)
+  }
+}
+
+///|
+fn social_square_health(
+  worker : WorkerSim?,
+  execution : @core.TaskExecutionRecord?,
+) -> Int {
+  let base = match worker {
+    Some(worker) => clamp_metric(worker.energy - worker.load / 5 + 22)
+    None => 54
+  }
+  match execution {
+    Some(execution) =>
+      match execution.status {
+        @core.TaskExecutionStatus::AwaitingPersistence => clamp_metric(base - 4)
+        @core.TaskExecutionStatus::ReviewQueued => clamp_metric(base - 14)
+        @core.TaskExecutionStatus::Failed | @core.TaskExecutionStatus::Stale =>
+          clamp_metric(base - 24)
+        @core.TaskExecutionStatus::Completed => clamp_metric(base + 8)
+        _ => base
+      }
+    None => base
+  }
+}
+
+///|
+fn social_square_next_action(
+  model : Model,
+  task : @core.TownTask?,
+  execution : @core.TaskExecutionRecord?,
+) -> String {
+  match execution {
+    Some(execution) =>
+      match execution.status {
+        @core.TaskExecutionStatus::AwaitingPersistence =>
+          "Persist the reviewed intro outcome and follow-up note into MoonBook social records."
+        @core.TaskExecutionStatus::ReviewQueued =>
+          "Clear the sensitive match review before the invite and reminder plan is sent."
+        @core.TaskExecutionStatus::Completed =>
+          "Project the latest follow-up back into the district card and resident-safe memory handoff."
+        @core.TaskExecutionStatus::Running
+        | @core.TaskExecutionStatus::RunConfirmed =>
+          "Finish the cafe intro proposal with RSVP timing and a low-pressure follow-up."
+        @core.TaskExecutionStatus::PacketReady
+        | @core.TaskExecutionStatus::ProposalImported =>
+          "Confirm the dispatch so the reason and confidence stay visible in the town loop."
+        @core.TaskExecutionStatus::Failed | @core.TaskExecutionStatus::Stale =>
+          "Recover the stalled introduction run before the context for this weak tie goes cold."
+      }
+    None =>
+      match task {
+        Some(task) => task.prompt
+        None =>
+          if model.state_source == StateSourceKind::SnapshotFile {
+            "Load projected social records so the district stops relying on demo-only matches."
+          } else {
+            "Keep the district card aligned with reviewed matches, event plans, and follow-up memory."
+          }
+      }
+  }
+}
+
+///|
+fn social_square_stage(
+  model : Model,
+  execution : @core.TaskExecutionRecord?,
+) -> String {
+  if model.state_source == StateSourceKind::SnapshotFile {
+    "Projection bridge pending"
+  } else {
+    match execution {
+      Some(execution) =>
+        match execution.status {
+          @core.TaskExecutionStatus::AwaitingPersistence =>
+            "MoonBook follow-up persistence"
+          @core.TaskExecutionStatus::ReviewQueued => "Sensitive match review"
+          @core.TaskExecutionStatus::Completed => "Follow-up recorded"
+          @core.TaskExecutionStatus::Running
+          | @core.TaskExecutionStatus::RunConfirmed => "RSVP plan in flight"
+          @core.TaskExecutionStatus::PacketReady
+          | @core.TaskExecutionStatus::ProposalImported => "Match dispatch"
+          @core.TaskExecutionStatus::Failed
+          | @core.TaskExecutionStatus::Stale => "Recovery required"
+        }
+      None => "Reasoned introductions"
+    }
+  }
+}
+
+///|
+fn social_square_lead_match(model : Model) -> SocialMatchSim {
+  let matches = social_matches()
+  matches[model.tick % matches.length()]
+}
+
+///|
+fn social_square_pair_label(match_item : SocialMatchSim) -> String {
+  "\{match_item.left} x \{match_item.right}"
+}
+
+///|
+fn ai_garden_worker(model : Model) -> WorkerSim? {
+  find_book_worker_by_ids(workers_for_model(model), ai_garden_book_ids())
+}
+
+///|
+fn ai_garden_task(model : Model) -> @core.TownTask? {
+  find_book_task_by_ids(tasks_for_model(model), ai_garden_book_ids())
+}
+
+///|
+fn ai_garden_execution(model : Model) -> @core.TaskExecutionRecord? {
+  find_priority_book_execution_by_ids(
+    executions_for_model(model),
+    ai_garden_book_ids(),
+  )
+}
+
+///|
+fn ai_garden_book_ids() -> Array[String] {
+  ["wenyu-ai-garden", "ai-garden"]
+}
+
+///|
+fn policy_hall_worker(model : Model) -> WorkerSim? {
+  find_book_worker_by_ids(workers_for_model(model), policy_hall_book_ids())
+}
+
+///|
+fn policy_hall_task(model : Model) -> @core.TownTask? {
+  find_book_task_by_ids(tasks_for_model(model), policy_hall_book_ids())
+}
+
+///|
+fn policy_hall_execution(model : Model) -> @core.TaskExecutionRecord? {
+  find_priority_book_execution_by_ids(
+    executions_for_model(model),
+    policy_hall_book_ids(),
+  )
+}
+
+///|
+fn policy_hall_book_ids() -> Array[String] {
+  ["wenyu-policy-hall", "policy-hall"]
+}
+
+///|
+fn policy_hall_signal(
+  model : Model,
+  execution : @core.TaskExecutionRecord?,
+) -> String {
+  match execution {
+    Some(execution) =>
+      match execution.status {
+        @core.TaskExecutionStatus::AwaitingPersistence =>
+          "Checklist under review"
+        @core.TaskExecutionStatus::ReviewQueued => "Escalated"
+        @core.TaskExecutionStatus::Completed => "Checklist ready"
+        @core.TaskExecutionStatus::Running
+        | @core.TaskExecutionStatus::RunConfirmed => "Quest live"
+        @core.TaskExecutionStatus::PacketReady
+        | @core.TaskExecutionStatus::ProposalImported => "Dispatching"
+        @core.TaskExecutionStatus::Failed | @core.TaskExecutionStatus::Stale =>
+          "Needs recovery"
+      }
+    None =>
+      if model.state_source == StateSourceKind::SnapshotFile {
+        "Projection bridge pending"
+      } else {
+        "Quest-ready"
+      }
+  }
+}
+
+///|
+fn policy_hall_signal_class(
+  model : Model,
+  execution : @core.TaskExecutionRecord?,
+) -> String {
+  match execution {
+    Some(execution) =>
+      match execution.status {
+        @core.TaskExecutionStatus::ReviewQueued
+        | @core.TaskExecutionStatus::Failed
+        | @core.TaskExecutionStatus::Stale => "module-signal-alert"
+        @core.TaskExecutionStatus::AwaitingPersistence => "module-signal-review"
+        @core.TaskExecutionStatus::Completed
+        | @core.TaskExecutionStatus::Running
+        | @core.TaskExecutionStatus::RunConfirmed => "module-signal-live"
+        _ => "module-signal-book"
+      }
+    None =>
+      if model.state_source == StateSourceKind::SnapshotFile {
+        "module-signal-neutral"
+      } else {
+        "module-signal-book"
+      }
+  }
+}
+
+///|
+fn policy_hall_module_copy(
+  model : Model,
+  worker : WorkerSim?,
+  execution : @core.TaskExecutionRecord?,
+) -> String {
+  let queue_pressure = policy_hall_queue_pressure(model, worker)
+  let quest_stage = policy_hall_quest_stage(model, execution)
+  let worker_text = policy_hall_worker_label(worker)
+  let confidence = policy_hall_confidence(model, execution)
+  "Policy guidance stays inside the town loop: \{worker_text} is advancing the quest, queue pressure sits at \{queue_pressure}%, confidence is \{confidence}%, and the current resident-facing stage is \{quest_stage}."
+}
+
+///|
+fn policy_hall_worker_label(worker : WorkerSim?) -> String {
+  match worker {
+    Some(worker) => "\{worker.title} / \{worker.status.to_string()}"
+    None => "Policy Sprite / pending"
+  }
+}
+
+///|
+fn policy_hall_queue_pressure(model : Model, worker : WorkerSim?) -> Int {
+  match worker {
+    Some(worker) => worker.load
+    None => model.pressure
+  }
+}
+
+///|
+fn policy_hall_health(
+  worker : WorkerSim?,
+  execution : @core.TaskExecutionRecord?,
+) -> Int {
+  let base = match worker {
+    Some(worker) => clamp_metric(worker.energy - worker.load / 3)
+    None => 42
+  }
+  match execution {
+    Some(execution) =>
+      match execution.status {
+        @core.TaskExecutionStatus::AwaitingPersistence => clamp_metric(base - 8)
+        @core.TaskExecutionStatus::ReviewQueued => clamp_metric(base - 18)
+        @core.TaskExecutionStatus::Failed | @core.TaskExecutionStatus::Stale =>
+          clamp_metric(base - 28)
+        @core.TaskExecutionStatus::Completed => clamp_metric(base + 12)
+        _ => base
+      }
+    None => base
+  }
+}
+
+///|
+fn policy_hall_next_action(
+  model : Model,
+  task : @core.TownTask?,
+  execution : @core.TaskExecutionRecord?,
+) -> String {
+  match execution {
+    Some(execution) =>
+      match execution.status {
+        @core.TaskExecutionStatus::AwaitingPersistence =>
+          "Keep the checklist visible while MoonBook persists reviewed output."
+        @core.TaskExecutionStatus::ReviewQueued =>
+          "Escalate the low-confidence answer for keeper review before publishing."
+        @core.TaskExecutionStatus::Completed =>
+          "Hand the resident a reviewed checklist and packet summary."
+        @core.TaskExecutionStatus::Running
+        | @core.TaskExecutionStatus::RunConfirmed =>
+          "Finish the current clause walkthrough and prepare the checklist."
+        @core.TaskExecutionStatus::PacketReady
+        | @core.TaskExecutionStatus::ProposalImported =>
+          "Confirm dispatch and open the first policy quest step."
+        @core.TaskExecutionStatus::Failed | @core.TaskExecutionStatus::Stale =>
+          "Recover the stalled run and replay the eligibility step."
+      }
+    None =>
+      match task {
+        Some(task) => task.prompt
+        None =>
+          if model.state_source == StateSourceKind::SnapshotFile {
+            "Bridge the Policy Hall book projection so confidence, checklist readiness, and reviewed citations stop falling back to demo state."
+          } else {
+            resident_twins_resident_plan(model)
+          }
+      }
+  }
+}
+
+///|
+fn policy_hall_quest_stage(
+  model : Model,
+  execution : @core.TaskExecutionRecord?,
+) -> String {
+  match execution {
+    Some(execution) =>
+      match execution.status {
+        @core.TaskExecutionStatus::PacketReady
+        | @core.TaskExecutionStatus::ProposalImported => "Packet prepared"
+        @core.TaskExecutionStatus::RunConfirmed
+        | @core.TaskExecutionStatus::Running => "Advisor interpreting"
+        @core.TaskExecutionStatus::AwaitingPersistence =>
+          "Checklist awaiting persistence"
+        @core.TaskExecutionStatus::ReviewQueued => "Keeper review queued"
+        @core.TaskExecutionStatus::Completed => "Checklist ready"
+        @core.TaskExecutionStatus::Failed | @core.TaskExecutionStatus::Stale =>
+          "Recovery required"
+      }
+    None =>
+      if model.state_source == StateSourceKind::SnapshotFile {
+        "Projection bridge pending"
+      } else if model.tick % 4 < 2 {
+        "Advisor interpreting"
+      } else {
+        "Checklist ready"
+      }
+  }
+}
+
+///|
+fn policy_hall_confidence(
+  model : Model,
+  execution : @core.TaskExecutionRecord?,
+) -> Int {
+  match execution {
+    Some(execution) =>
+      match execution.status {
+        @core.TaskExecutionStatus::Completed => 94
+        @core.TaskExecutionStatus::AwaitingPersistence => 82
+        @core.TaskExecutionStatus::Running
+        | @core.TaskExecutionStatus::RunConfirmed => 74
+        @core.TaskExecutionStatus::PacketReady
+        | @core.TaskExecutionStatus::ProposalImported => 69
+        @core.TaskExecutionStatus::ReviewQueued => 56
+        @core.TaskExecutionStatus::Failed | @core.TaskExecutionStatus::Stale =>
+          28
+      }
+    None =>
+      if model.state_source == StateSourceKind::SnapshotFile {
+        41
+      } else {
+        78
+      }
+  }
+}
+
+///|
+fn policy_hall_checklist_label(
+  model : Model,
+  execution : @core.TaskExecutionRecord?,
+) -> String {
+  match execution {
+    Some(execution) =>
+      match execution.status {
+        @core.TaskExecutionStatus::Completed => "Ready for resident handoff"
+        @core.TaskExecutionStatus::AwaitingPersistence =>
+          "Keeper persistence pending"
+        @core.TaskExecutionStatus::ReviewQueued => "Escalated for review"
+        @core.TaskExecutionStatus::Running
+        | @core.TaskExecutionStatus::RunConfirmed => "Drafting checklist"
+        @core.TaskExecutionStatus::PacketReady
+        | @core.TaskExecutionStatus::ProposalImported => "Packet staged"
+        @core.TaskExecutionStatus::Failed | @core.TaskExecutionStatus::Stale =>
+          "Recovery required"
+      }
+    None =>
+      if model.state_source == StateSourceKind::SnapshotFile {
+        "Waiting for projection"
+      } else {
+        "Demo quest ready"
+      }
+  }
+}
+
+///|
+fn policy_hall_evidence_label(
+  model : Model,
+  execution : @core.TaskExecutionRecord?,
+) -> String {
+  match execution {
+    Some(execution) =>
+      match execution.status {
+        @core.TaskExecutionStatus::Completed => "Reviewed citations linked"
+        @core.TaskExecutionStatus::AwaitingPersistence =>
+          "Citations queued for persist"
+        @core.TaskExecutionStatus::ReviewQueued => "Low-confidence review"
+        @core.TaskExecutionStatus::Running
+        | @core.TaskExecutionStatus::RunConfirmed => "Clause scan in flight"
+        @core.TaskExecutionStatus::PacketReady
+        | @core.TaskExecutionStatus::ProposalImported =>
+          "Evidence packet staged"
+        @core.TaskExecutionStatus::Failed | @core.TaskExecutionStatus::Stale =>
+          "Evidence needs recovery"
+      }
+    None =>
+      if model.state_source == StateSourceKind::SnapshotFile {
+        "Snapshot not wired yet"
+      } else {
+        "Demo citations assumed"
+      }
+  }
 }
 
 ///|
@@ -1221,7 +4045,10 @@ fn resident_sims(model : Model) -> Array[ResidentSim] {
       },
       agent_goal: "Ask Policy Sprite for subsidy checklist, then book a mock roadshow.",
       memory: "Remembered a past concern about compute vouchers and prototype demo timing.",
+      reflection: "Confidence rises when policy advice turns into a concrete checklist and rehearsal slot.",
       plan: "09:00 policy quest, 14:00 cafe intro, 18:00 reflection note.",
+      recent_action: "Policy Sprite drafted a subsidy checklist and queued a mock roadshow packet.",
+      privacy_scope: "Operator summary",
       zone: "Policy Hall",
     },
     {
@@ -1231,7 +4058,10 @@ fn resident_sims(model : Model) -> Array[ResidentSim] {
       mood: "Open to weak-tie match",
       agent_goal: "Meet one robotics or edge-AI neighbor in Social Square.",
       memory: "Prefers low-pressure cafe intros before business collaboration.",
+      reflection: "Warm introductions outperform cold outreach when social pressure stays low and goals are specific.",
       plan: "Browse Talent Avenue, accept cafe match, save follow-up memory.",
+      recent_action: "Cafe Matchmaker proposed a founder intro with a shared demo-day preparation angle.",
+      privacy_scope: "Shared town",
       zone: "Social Square",
     },
     {
@@ -1241,7 +4071,10 @@ fn resident_sims(model : Model) -> Array[ResidentSim] {
       mood: "Observing",
       agent_goal: "Generate VIP reception route and verify achievement broadcasts.",
       memory: "Asked yesterday for warm-community evidence instead of raw traffic.",
+      reflection: "Operator trust improves when the town shows story-rich resident progress instead of abstract metrics alone.",
       plan: "Review talent heatmap, export visit notes, flag missing service gaps.",
+      recent_action: "Talent Avenue projected a tour summary while keeping resident-private notes out of the route brief.",
+      privacy_scope: "Public-safe",
       zone: "Talent Avenue",
     },
   ]
@@ -1255,11 +4088,20 @@ fn render_resident_card(resident : ResidentSim) -> @rabbita.Html {
       div(class="resident-title", [h3(resident.name), p(resident.zone)]),
     ]),
     p(resident.venture),
+    div(class="resident-chip-row", [
+      span(class="resident-chip resident-chip-privacy", resident.privacy_scope),
+      span(class="resident-chip resident-chip-action", "Recent action"),
+    ]),
     p("Need: \{resident.need}"),
     p("Mood: \{resident.mood}"),
     p("Agent goal: \{resident.agent_goal}"),
     div(class="memory-strip", [span("Memory"), p(resident.memory)]),
+    div(class="memory-strip", [span("Reflection"), p(resident.reflection)]),
     div(class="memory-strip", [span("Plan"), p(resident.plan)]),
+    div(class="memory-strip", [
+      span("Latest handoff"),
+      p(resident.recent_action),
+    ]),
   ])
 }
 
@@ -1281,7 +4123,44 @@ fn render_resident_agents(model : Model) -> @rabbita.Html {
       h2("Digital twins with memory, reflection, and plans"),
       p(
         class="summary",
-        "Each resident now has visible need state, remembered context, and a next plan. This is the UI contract for real Memory Stream + Reflection + Planning integration.",
+        "Each resident now has visible need state, remembered context, reflection, privacy scope, and a next plan. This is the UI contract for real Memory Stream + Reflection + Planning integration.",
+      ),
+    ]),
+    div(class="resident-summary-grid", [
+      runtime_stat_chip(
+        "Visible twins",
+        resident_count(model),
+        "runtime-running",
+      ),
+      runtime_stat_chip(
+        "Private scopes",
+        resident_private_scope_count(model),
+        "runtime-review",
+      ),
+      runtime_stat_chip(
+        "Review queued",
+        resident_review_queue_count(model),
+        "runtime-persisting",
+      ),
+      runtime_stat_chip(
+        "Projection mode",
+        if model.state_source == StateSourceKind::SnapshotFile {
+          1
+        } else {
+          0
+        },
+        "runtime-imported",
+      ),
+    ]),
+    div(class="contract-list resident-contract-list", [
+      p(
+        "Resident memory stays durable in MoonBook; Moontown renders only projection-safe summaries and counters.",
+      ),
+      p(
+        "Projection scope in this slice: public-safe, shared town, and operator summary.",
+      ),
+      p(
+        "Recent actions show MoonClaw handoff results, not direct durable memory writes.",
       ),
     ]),
     div(
@@ -1292,18 +4171,52 @@ fn render_resident_agents(model : Model) -> @rabbita.Html {
 }
 
 ///|
+fn resident_private_scope_count(model : Model) -> Int {
+  let mut count = 0
+  for resident in resident_sims(model) {
+    if resident.privacy_scope == "Operator summary" {
+      count += 1
+    }
+  }
+  count
+}
+
+///|
+fn resident_review_queue_count(model : Model) -> Int {
+  let mut count = 0
+  for execution in executions_for_model(model) {
+    if execution.status == @core.TaskExecutionStatus::AwaitingPersistence ||
+      execution.status == @core.TaskExecutionStatus::ReviewQueued {
+      count += 1
+    }
+  }
+  count
+}
+
+///|
+fn resident_twins_resident_plan(model : Model) -> String {
+  match resident_sims(model).get(model.tick % resident_sims(model).length()) {
+    Some(resident) => resident.plan
+    None => "Await first resident projection."
+  }
+}
+
+///|
 fn civic_quests(model : Model) -> Array[CivicQuestSim] {
+  let policy_execution = policy_hall_execution(model)
+  let policy_task = policy_hall_task(model)
+  let ai_garden_task = ai_garden_task(model)
+  let ai_garden_execution = ai_garden_execution(model)
   [
     {
       title: "Rental subsidy walkthrough",
       area: "Policy Hall",
-      stage: if model.tick % 4 < 2 {
-        "Advisor interpreting"
-      } else {
-        "Checklist ready"
-      },
+      stage: policy_hall_quest_stage(model, policy_execution),
       reward: "80 Valley XP + application packet",
-      status: "Active",
+      status: policy_hall_signal(model, policy_execution),
+      status_class: policy_hall_signal_class(model, policy_execution),
+      detail: "Confidence \{policy_hall_confidence(model, policy_execution)}% · \{policy_hall_checklist_label(model, policy_execution)} · \{policy_hall_evidence_label(model, policy_execution)}",
+      next_action: policy_hall_next_action(model, policy_task, policy_execution),
     },
     {
       title: "OPC roadshow preparation",
@@ -1314,25 +4227,46 @@ fn civic_quests(model : Model) -> Array[CivicQuestSim] {
         "Deck gap review"
       },
       reward: "Priority roadshow slot",
+      status_class: "module-signal-book",
       status: "Nurturing",
+      detail: "Checklist shaping in contest workspace with reviewable deck gaps.",
+      next_action: "Keep the next mock judge round and reminder schedule visible.",
     },
     {
       title: "Cafe collaboration intro",
       area: "Social Square",
       stage: "Agent-mediated weak-tie match",
       reward: "Trial collaboration room",
+      status_class: "module-signal-live",
       status: "Matching",
+      detail: "Reasoned introduction stays lightweight until both sides accept.",
+      next_action: "Project the latest follow-up into the resident-safe summary.",
     },
     {
-      title: "Remote venue booking",
-      area: "Robot Link",
+      title: "Resident AI adoption sprint",
+      area: "AI Garden",
+      stage: ai_garden_stage(model, ai_garden_execution),
+      reward: "Scenario template + before/after proof",
+      status: ai_garden_signal(model, ai_garden_execution),
+      status_class: ai_garden_signal_class(model, ai_garden_execution),
+      detail: "Scenario lanes \{ai_garden_scenario_count(model)} · \{ai_garden_tool_trial_label(model, ai_garden_execution)} · \{ai_garden_comparison_label(model, ai_garden_execution)}",
+      next_action: ai_garden_next_action(
+        model, ai_garden_task, ai_garden_execution,
+      ),
+    },
+    {
+      title: "Physical bridge sync",
+      area: "Physical Bridge",
       stage: if model.tick % 3 == 0 {
         "Robot confirmation"
       } else {
-        "Room availability sync"
+        "Room and telemetry sync"
       },
-      reward: "Offline room hold",
-      status: "Bridge",
+      reward: "Room hold + district signal",
+      status_class: "module-signal-live",
+      status: "Bridge live",
+      detail: "Venue, robot, and telemetry handoffs stay visible in town view.",
+      next_action: "Confirm the next offline sync before the district route changes.",
     },
   ]
 }
@@ -1344,7 +4278,9 @@ fn render_quest_card(quest : CivicQuestSim) -> @rabbita.Html {
     h3(quest.title),
     p("Stage: \{quest.stage}"),
     p("Reward: \{quest.reward}"),
-    span(class="module-signal", quest.status),
+    p(class="quest-detail", quest.detail),
+    p(class="quest-next", "Next: \{quest.next_action}"),
+    span(class="module-signal \{quest.status_class}", quest.status),
   ])
 }
 
@@ -1392,19 +4328,31 @@ fn talent_signals(model : Model) -> Array[TalentSignalSim] {
     {
       name: "Edge AI Studio",
       domain: "Robotics / edge vision",
+      project: "Low-power orchard camera pilot",
       skills: "TinyML, camera modules, deployment",
+      recent_achievement: "Verified a low-power orchard sensor demo for the district tour route.",
+      evidence_status: "Verified evidence",
+      reception_note: "Start the VIP route here to show shipping hardware and calm operator notes.",
       activity: clamp_metric(72 + model.tick % 16),
     },
     {
       name: "Design Automation Lab",
       domain: "AI design services",
+      project: "Prompt-to-prototype studio sprint",
       skills: "UI generation, design systems, rapid prototypes",
+      recent_achievement: "Published a reusable service blueprint for founder-facing UI demos.",
+      evidence_status: "Review queued",
+      reception_note: "Use as the second stop when the tour needs a fast software contrast.",
       activity: clamp_metric(66 + model.tick % 19),
     },
     {
       name: "Policy Ops Desk",
       domain: "District services",
+      project: "Founder reception routing pilot",
       skills: "policy synthesis, reception routes, event ops",
+      recent_achievement: "Turned yesterday's visitor questions into a public-safe route brief.",
+      evidence_status: "Projection-safe summary",
+      reception_note: "Close the route with this card to connect public talent signals to operator workflow.",
       activity: clamp_metric(58 + model.tick % 23),
     },
   ]
@@ -1424,9 +4372,21 @@ fn render_match_card(match_item : SocialMatchSim) -> @rabbita.Html {
 fn render_talent_card(signal : TalentSignalSim) -> @rabbita.Html {
   let fill_style = ["width: \{signal.activity}%"]
   article(class="talent-card", [
-    h3(signal.name),
+    div(class="talent-card-head", [
+      h3(signal.name),
+      span(class="module-signal talent-card-signal", signal.evidence_status),
+    ]),
     p(signal.domain),
-    p(signal.skills),
+    p("Project: \{signal.project}"),
+    p("Skills: \{signal.skills}"),
+    div(class="memory-strip talent-card-strip", [
+      span("Recent win"),
+      p(signal.recent_achievement),
+    ]),
+    div(class="memory-strip talent-card-strip", [
+      span("Reception note"),
+      p(signal.reception_note),
+    ]),
     div(class="metric-track", [
       div(class="metric-fill tone-energy", style=fill_style, no_children()),
     ]),
@@ -1435,7 +4395,66 @@ fn render_talent_card(signal : TalentSignalSim) -> @rabbita.Html {
 }
 
 ///|
+fn talent_route_stops(model : Model) -> Array[TalentRouteStopSim] {
+  match talent_signals(model) {
+    [hardware, software, operator, ..] =>
+      [
+        {
+          order: 1,
+          stop_title: "Arrival proof stop",
+          signal_name: hardware.name,
+          talking_point: "Open with a shipping artifact so visitors see real district output before hearing abstractions.",
+          operator_note: hardware.reception_note,
+          evidence_status: hardware.evidence_status,
+          readiness: clamp_metric(hardware.activity + 10),
+        },
+        {
+          order: 2,
+          stop_title: "Software contrast stop",
+          signal_name: software.name,
+          talking_point: "Shift into rapid-service delivery to show that Wenyu talent spans more than one founder archetype.",
+          operator_note: software.reception_note,
+          evidence_status: software.evidence_status,
+          readiness: clamp_metric(software.activity + 6),
+        },
+        {
+          order: 3,
+          stop_title: "Operator close-out",
+          signal_name: operator.name,
+          talking_point: "End on the district workflow layer so the route lands on matching, planning, and next-action evidence.",
+          operator_note: operator.reception_note,
+          evidence_status: operator.evidence_status,
+          readiness: clamp_metric(operator.activity + 4),
+        },
+      ]
+    _ => []
+  }
+}
+
+///|
+fn render_route_stop_card(stop : TalentRouteStopSim) -> @rabbita.Html {
+  let fill_style = ["width: \{stop.readiness}%"]
+  article(class="route-stop-card", [
+    div(class="route-stop-head", [
+      span(class="route-stop-order", stop.order.to_string()),
+      div(class="route-stop-title", [h3(stop.stop_title), p(stop.signal_name)]),
+      span(class="module-signal talent-card-signal", stop.evidence_status),
+    ]),
+    p(stop.talking_point),
+    div(class="memory-strip route-stop-strip", [
+      span("Operator note"),
+      p(stop.operator_note),
+    ]),
+    div(class="metric-track", [
+      div(class="metric-fill tone-energy", style=fill_style, no_children()),
+    ]),
+    p("Route readiness: \{stop.readiness}%"),
+  ])
+}
+
+///|
 fn render_social_talent(model : Model) -> @rabbita.Html {
+  let route_stops = talent_route_stops(model)
   section(class="social-talent-panel", [
     div(class="runtime-copy", [
       p(class="eyebrow", "Social Capital"),
@@ -1458,6 +4477,16 @@ fn render_social_talent(model : Model) -> @rabbita.Html {
         div(
           class="feed-list",
           talent_signals(model).map(signal => render_talent_card(signal)),
+        ),
+      ]),
+      div(class="subpanel", [
+        h3("Reception Route"),
+        p(
+          "Guide visitors through a proof-first route, keep operator notes projection-safe, and close with a clear next action.",
+        ),
+        div(
+          class="route-stop-list",
+          route_stops.map(stop => render_route_stop_card(stop)),
         ),
       ]),
     ]),
@@ -1581,10 +4610,14 @@ fn render_strategy_button(
 ///|
 fn render_controls(dispatch : Dispatch[Msg], model : Model) -> @rabbita.Html {
   let status = if model.state_source == StateSourceKind::SnapshotFile {
-    if model.paused {
-      "Bridge paused"
+    if projection_snapshot_is_ready(model.projection_snapshot) {
+      if model.paused {
+        "Bridge paused"
+      } else {
+        "Bridge ready"
+      }
     } else {
-      "Bridge"
+      "Bridge waiting"
     }
   } else if model.paused {
     "Paused"
@@ -1679,12 +4712,20 @@ fn scene_node_by_key(
 
 ///|
 fn worker_avatar_left(zone : @ui.SceneRenderNode, index : Int) -> Int {
-  zone.x + 18 + index % 2 * 62 + index / 2 * 18
+  match zone.key {
+    "worker-yard" => zone.x + 190 + index % 4 * 38
+    "city-hall" => zone.x + zone.width - 58
+    _ => zone.x + zone.width - 52 + index % 2 * 18
+  }
 }
 
 ///|
 fn worker_avatar_top(zone : @ui.SceneRenderNode, index : Int) -> Int {
-  zone.y + zone.height / 2 - 26 + index % 3 * 18
+  match zone.key {
+    "worker-yard" => zone.y + 34 + index / 4 * 36
+    "city-hall" => zone.y + zone.height - 74
+    _ => zone.y + zone.height - 70 + index / 2 * 34
+  }
 }
 
 ///|
@@ -1695,11 +4736,12 @@ fn worker_avatar_initials(title : String) -> String {
     "Ledger Fox" => "LF"
     "Archive Cat" => "AC"
     "Snapshot Bridge" => "SB"
+    "Town Shell Foreman" => "TS"
     "Policy Sprite" => "PS"
     "Cafe Matchmaker" => "CM"
     "Talent Cartographer" => "TC"
     "AI Garden Tutor" => "AG"
-    "Harbor Robot Link" => "HR"
+    "Physical Bridge Link" => "PB"
     _ => "??"
   }
 }
@@ -1735,6 +4777,119 @@ fn render_worker_avatar(
     span(class="worker-badge", worker_avatar_initials(worker.title)),
     span(class="worker-label", worker.title),
     span(class="worker-meta", "\{worker.role} / \{worker.status.to_string()}"),
+  ])
+}
+
+///|
+fn is_working_worker(worker : WorkerSim) -> Bool {
+  match worker.status {
+    @core.WorkerStatus::Running | @core.WorkerStatus::Blocked => true
+    _ => false
+  }
+}
+
+///|
+fn visible_overworld_workers(workers : Array[WorkerSim]) -> Array[WorkerSim] {
+  workers.filter(worker => is_working_worker(worker))
+}
+
+///|
+fn node_owns_worker(node : @ui.SceneRenderNode, worker : WorkerSim) -> Bool {
+  worker.zone_key == node.key ||
+  node.key == "book-\{worker.book_id}" ||
+  node.key.contains(worker.book_id) ||
+  (node.key == "worker-yard" && !is_working_worker(worker))
+}
+
+///|
+fn workers_inside_node(
+  node : @ui.SceneRenderNode,
+  workers : Array[WorkerSim],
+) -> Array[WorkerSim] {
+  workers.filter(worker => node_owns_worker(node, worker))
+}
+
+///|
+fn furniture_for_node(node : @ui.SceneRenderNode) -> Array[@rabbita.Html] {
+  if node.key == "city-hall" {
+    [
+      div(class="furniture furniture-map-table", [span("Dispatch Map")]),
+      div(class="furniture furniture-radio", [span("Mayor Radio")]),
+      div(class="furniture furniture-policy-board", [span("Policy Board")]),
+      div(class="furniture furniture-archive", [span("Town Ledger")]),
+    ]
+  } else if node.key == "worker-yard" {
+    [
+      div(class="furniture furniture-bench", [span("Ready Bench")]),
+      div(class="furniture furniture-tool-rack", [span("Tool Rack")]),
+      div(class="furniture furniture-queue-board", [span("Queue Board")]),
+      div(class="furniture furniture-rest-mat", [span("Rest Mat")]),
+    ]
+  } else if node.key.contains("book") {
+    [
+      div(class="furniture furniture-desk", [span("Keeper Desk")]),
+      div(class="furniture furniture-bookshelf", [span("Wiki Shelf")]),
+      div(class="furniture furniture-memory-crystal", [span("Memory Core")]),
+      div(class="furniture furniture-review-table", [span("Review Table")]),
+    ]
+  } else {
+    [
+      div(class="furniture furniture-signal-post", [span("Signal Post")]),
+      div(class="furniture furniture-repair-box", [span("Repair Box")]),
+      div(class="furniture furniture-log-wall", [span("Event Wall")]),
+    ]
+  }
+}
+
+///|
+fn render_interior_agent(
+  dispatch : Dispatch[Msg],
+  worker : WorkerSim,
+) -> @rabbita.Html {
+  button(
+    class="interior-agent \{worker_status_class(worker.status)}",
+    on_click=dispatch(SelectWorker(worker.id)),
+    [
+      span(class="worker-badge", worker_avatar_initials(worker.title)),
+      span(class="worker-label", worker.title),
+      span(class="worker-meta", "\{worker.role} / \{worker.status.to_string()}"),
+    ],
+  )
+}
+
+///|
+fn render_building_interior(
+  dispatch : Dispatch[Msg],
+  scene : @ui.SceneRenderModel,
+  workers : Array[WorkerSim],
+  node_key : String,
+) -> @rabbita.Html {
+  let node = scene_node_by_key(scene, node_key)
+  let residents = workers_inside_node(node, workers)
+  section(class="interior-shell", [
+    header(class="interior-header", [
+      div([
+        p(class="eyebrow", "Interior View"),
+        h2(node.title),
+        p(class="scene-node-key", node.key),
+      ]),
+      button(
+        class="control-button",
+        on_click=dispatch(SelectOverview),
+        "Back To Town",
+      ),
+    ]),
+    div(class="interior-room", [
+      div(class="interior-floor", furniture_for_node(node)),
+      div(
+        class="interior-agent-grid",
+        if residents.is_empty() {
+          [p(class="interior-empty", "No visible agents inside this room.")]
+        } else {
+          residents.map(worker => render_interior_agent(dispatch, worker))
+        },
+      ),
+    ]),
   ])
 }
 
@@ -1996,22 +5151,18 @@ fn render_inspector(
 }
 
 ///|
-fn render_scene(dispatch : Dispatch[Msg], model : Model) -> @rabbita.Html {
-  let state = state_for_model(model)
-  let scene = town_scene(model)
-  let workers = workers_for_model(model)
-  let executions = state.executions
-  let alerts = all_alerts(scene, model)
+fn render_town_viewport(
+  dispatch : Dispatch[Msg],
+  scene : @ui.SceneRenderModel,
+  workers : Array[WorkerSim],
+  executions : Array[@core.TaskExecutionRecord],
+  selected_node_key : String?,
+  selected_worker_id : String?,
+  shell_class : String,
+  frame_class : String,
+) -> @rabbita.Html {
   let scene_style = ["width: \{scene.width}px", "height: \{scene.height}px"]
   let scene_frame_style = ["--scene-width: \{scene.width}px"]
-  let selected_node_key = match model.selection {
-    Node(node_key) => Some(node_key)
-    _ => None
-  }
-  let selected_worker_id = match model.selection {
-    Worker(worker_id) => Some(worker_id)
-    _ => None
-  }
   let worker_avatars : Array[@rabbita.Html] = []
   for i in 0..<workers.length() {
     let worker = workers[i]
@@ -2024,6 +5175,98 @@ fn render_scene(dispatch : Dispatch[Msg], model : Model) -> @rabbita.Html {
         selected_worker_id == Some(worker.id),
       ),
     )
+  }
+  section(class=shell_class, [
+    div(class="scene-stage-rail", execution_stage_cards(executions)),
+    p(
+      class="scene-hint",
+      "Scroll the viewport on smaller screens, then select a zone or worker to inspect the live pipeline state.",
+    ),
+    div(class=frame_class, style=scene_frame_style, [
+      div(class="scene-stage", style=scene_style, [
+        img(
+          class="scene-background",
+          src=scene.background_path,
+          alt="\{scene.title} background",
+          loading="eager",
+          no_children(),
+        ),
+        div(class="scene-overlay", [
+          div(
+            class="scene-nodes-layer",
+            scene.nodes.filter(node => !is_mayor_scene_node(node)).map(node => {
+              render_node(dispatch, node, selected_node_key == Some(node.key))
+            }),
+          ),
+          div(class="scene-workers-layer", worker_avatars),
+        ]),
+      ]),
+    ]),
+  ])
+}
+
+///|
+fn is_mayor_scene_node(node : @ui.SceneRenderNode) -> Bool {
+  node.key == "book-town" ||
+  node.key == "book-moontown" ||
+  node.key == "book-mayor"
+}
+
+///|
+fn render_scene(dispatch : Dispatch[Msg], model : Model) -> @rabbita.Html {
+  let state = state_for_model(model)
+  let scene = town_scene(model)
+  let workers = workers_for_model(model)
+  let executions = state.executions
+  let alerts = all_alerts(scene, model)
+  let selected_node_key = match model.selection {
+    Node(node_key) => Some(node_key)
+    _ => None
+  }
+  let selected_worker_id = match model.selection {
+    Worker(worker_id) => Some(worker_id)
+    _ => None
+  }
+  if standalone_viewport_requested() {
+    let viewport_body = match model.selection {
+      Node(node_key) =>
+        render_building_interior(dispatch, scene, workers, node_key)
+      _ =>
+        render_town_viewport(
+          dispatch,
+          scene,
+          visible_overworld_workers(workers),
+          executions,
+          selected_node_key,
+          selected_worker_id,
+          "scene-frame-shell viewport-frame-shell",
+          "scene-frame viewport-frame",
+        )
+    }
+    return section(class="viewport-page", [
+      header(class="viewport-hud", [
+        div(class="viewport-title", [
+          p(class="eyebrow", "Moontown Viewport"),
+          h1(scene.title),
+        ]),
+        div(class="viewport-actions", [
+          status_chip(if model.paused { "Paused" } else { "Live" }, "chip-live"),
+          status_chip(simulation_time_label(model.tick), "chip-clock"),
+          status_chip("Tick \{model.tick}", "chip-neutral"),
+          button(
+            class="control-button",
+            on_click=dispatch(TogglePause),
+            if model.paused {
+              "Resume"
+            } else {
+              "Pause"
+            },
+          ),
+          button(class="control-button", on_click=dispatch(Step), "Step"),
+        ]),
+      ]),
+      viewport_body,
+    ])
   }
   section(class="town-shell", [
     header(class="town-header", [
@@ -2038,52 +5281,12 @@ fn render_scene(dispatch : Dispatch[Msg], model : Model) -> @rabbita.Html {
       ]),
       render_alerts(alerts),
     ]),
-    section(class="metric-grid", [
-      render_meter("Budget Reserve", model.budget, "tone-budget"),
-      render_meter("Worker Energy", model.energy, "tone-energy"),
-      render_meter("Queue Pressure", model.pressure, "tone-pressure"),
-      render_meter("Town Stability", model.stability, "tone-stability"),
-    ]),
-    render_civic_context(model),
-    render_runtime_bar(model, workers, executions),
-    render_civic_modules(model),
-    render_resident_agents(model),
-    render_civic_quests(model),
-    render_social_talent(model),
-    render_bridge_contract(model),
     main_(class="town-main", [
       div(class="scene-column", [
-        section(class="scene-frame-shell", [
-          div(class="scene-stage-rail", execution_stage_cards(executions)),
-          p(
-            class="scene-hint",
-            "Scroll the viewport on smaller screens, then select a zone or worker to inspect the live pipeline state.",
-          ),
-          div(class="scene-frame", style=scene_frame_style, [
-            div(class="scene-stage", style=scene_style, [
-              img(
-                class="scene-background",
-                src=scene.background_path,
-                alt="\{scene.title} background",
-                loading="eager",
-                no_children(),
-              ),
-              div(class="scene-overlay", [
-                div(
-                  class="scene-nodes-layer",
-                  scene.nodes.map(node => {
-                    render_node(
-                      dispatch,
-                      node,
-                      selected_node_key == Some(node.key),
-                    )
-                  }),
-                ),
-                div(class="scene-workers-layer", worker_avatars),
-              ]),
-            ]),
-          ]),
-        ]),
+        render_town_viewport(
+          dispatch, scene, workers, executions, selected_node_key, selected_worker_id,
+          "scene-frame-shell", "scene-frame",
+        ),
       ]),
       div(class="sidebar-column", [
         render_inspector(dispatch, model, scene, workers, executions),
@@ -2101,6 +5304,14 @@ fn render_scene(dispatch : Dispatch[Msg], model : Model) -> @rabbita.Html {
         ]),
       ]),
     ]),
+    section(class="metric-grid", render_vitality_metric_grid(model)),
+    render_civic_context(model),
+    render_runtime_bar(model, workers, executions),
+    render_civic_modules(model),
+    render_resident_agents(model),
+    render_civic_quests(model),
+    render_social_talent(model),
+    render_bridge_contract(model),
   ])
 }
 
@@ -2171,6 +5382,156 @@ fn find_book_execution(
     }
   }
   None
+}
+
+///|
+fn render_module_detail(label : String, value : String) -> @rabbita.Html {
+  div(class="module-detail-card", [
+    span(class="module-detail-label", label),
+    p(value),
+  ])
+}
+
+///|
+fn find_book_worker(workers : Array[WorkerSim], book_id : String) -> WorkerSim? {
+  for worker in workers {
+    if worker.book_id == book_id {
+      return Some(worker)
+    }
+  }
+  None
+}
+
+///|
+fn find_book_task(
+  tasks : Array[@core.TownTask],
+  book_id : String,
+) -> @core.TownTask? {
+  for task in tasks {
+    if task.book_id == book_id {
+      return Some(task)
+    }
+  }
+  None
+}
+
+///|
+fn priority_for_task_id(task_id : String) -> Int {
+  if task_id.contains("code-patch") {
+    0
+  } else if task_id.contains("implementation-backlog") {
+    1
+  } else if task_id.contains("image-asset") || task_id.contains("asset-pack") {
+    2
+  } else {
+    3
+  }
+}
+
+///|
+fn find_priority_book_worker(
+  workers : Array[WorkerSim],
+  book_id : String,
+) -> WorkerSim? {
+  find_book_worker(workers, book_id)
+}
+
+///|
+fn find_priority_book_task(
+  tasks : Array[@core.TownTask],
+  book_id : String,
+) -> @core.TownTask? {
+  let mut best : @core.TownTask? = None
+  let mut best_priority = 999
+  for task in tasks {
+    if task.book_id != book_id {
+      continue
+    }
+    let priority = priority_for_task_id(task.id)
+    if priority < best_priority {
+      best_priority = priority
+      best = Some(task)
+    }
+  }
+  best
+}
+
+///|
+fn find_priority_book_execution(
+  executions : Array[@core.TaskExecutionRecord],
+  book_id : String,
+) -> @core.TaskExecutionRecord? {
+  let mut best : @core.TaskExecutionRecord? = None
+  let mut best_priority = 999
+  for execution in executions {
+    if execution.book_id != book_id {
+      continue
+    }
+    let priority = priority_for_task_id(execution.task_id)
+    if priority < best_priority {
+      best_priority = priority
+      best = Some(execution)
+    }
+  }
+  best
+}
+
+///|
+fn matches_any_book_id(book_id : String, candidates : Array[String]) -> Bool {
+  for candidate in candidates {
+    if book_id == candidate {
+      return true
+    }
+  }
+  false
+}
+
+///|
+fn find_book_worker_by_ids(
+  workers : Array[WorkerSim],
+  book_ids : Array[String],
+) -> WorkerSim? {
+  for book_id in book_ids {
+    match find_book_worker(workers, book_id) {
+      Some(worker) => return Some(worker)
+      None => ()
+    }
+  }
+  None
+}
+
+///|
+fn find_book_task_by_ids(
+  tasks : Array[@core.TownTask],
+  book_ids : Array[String],
+) -> @core.TownTask? {
+  for book_id in book_ids {
+    match find_book_task(tasks, book_id) {
+      Some(task) => return Some(task)
+      None => ()
+    }
+  }
+  None
+}
+
+///|
+fn find_priority_book_execution_by_ids(
+  executions : Array[@core.TaskExecutionRecord],
+  book_ids : Array[String],
+) -> @core.TaskExecutionRecord? {
+  let mut best : @core.TaskExecutionRecord? = None
+  let mut best_priority = 999
+  for execution in executions {
+    if !matches_any_book_id(execution.book_id, book_ids) {
+      continue
+    }
+    let priority = priority_for_task_id(execution.task_id)
+    if priority < best_priority {
+      best_priority = priority
+      best = Some(execution)
+    }
+  }
+  best
 }
 
 ///|

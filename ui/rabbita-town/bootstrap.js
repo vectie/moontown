@@ -14,5 +14,19 @@ if (app) {
   `
 }
 
-import('/main.js')
+async function boot() {
+  try {
+    const response = await fetch('./town.json', { cache: 'no-store' })
+    if (response.ok) {
+      globalThis.__moontownTownSnapshotJson = await response.text()
+    } else {
+      globalThis.__moontownTownSnapshotJson = ''
+    }
+  } catch {
+    globalThis.__moontownTownSnapshotJson = ''
+  }
 
+  import('/main.js')
+}
+
+boot()

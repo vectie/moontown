@@ -544,8 +544,49 @@ pub async fn hydrate_worker_context(
     task.goal.unwrap_or(task.prompt),
     "--task",
     task.id,
-  ])
-  enrich_worker_context_bundle(entry, @json.from_json(json))
+  ]) catch {
+    _ =>
+      return enrich_worker_context_bundle(
+        entry,
+        fallback_worker_context_bundle(entry, task),
+      )
+  }
+  let parsed : WorkerContextBundle = @json.from_json(json) catch {
+    _ => fallback_worker_context_bundle(entry, task)
+  }
+  enrich_worker_context_bundle(entry, parsed)
+}
+
+///|
+fn fallback_worker_context_bundle(
+  entry : BookCatalogEntry,
+  task : BookTask,
+) -> WorkerContextBundle {
+  {
+    book_id: entry.id,
+    workspace_root: resolved_workspace_root(entry.workspace_root),
+    task_id: task.id,
+    prompt: task.prompt,
+    policy: [
+      "Keep all memory and durable artifacts inside this book unless the task explicitly names a repository patch.",
+      "Return explicit blockers instead of fake completion when required tools or sources are missing.",
+      "Preserve Moontown, MoonBook, and MoonClaw responsibility boundaries.",
+    ],
+    routines: [
+      "Read task context pages first.", "Create or update target pages listed in the task when applicable.",
+      "Report changed files, artifacts, blockers, and validation results.",
+    ],
+    skill_paths: ["skills/wiki-maintainer/SKILL.md"],
+    context_pages: task.target_pages,
+    active_memory: [],
+    user_memory: [],
+    working_memory: [],
+    memory_summary: "Fallback MoonBook context for externally planned task `\{task.id}` in book `\{entry.id}`.",
+    output_contract: [
+      "task_id", "summary", "artifacts", "memory_candidates", "requires_review",
+      "notify_town",
+    ],
+  }
 }
 
 ///|
@@ -672,6 +713,11 @@ fn infer_role_for_kind(
     "planning" => @core.WorkerRole::Planner
     "ingest" => @core.WorkerRole::Harness
     "ingest-followup" => @core.WorkerRole::Harness
+    "implementation-backlog" => @core.WorkerRole::Planner
+    "code-patch" => @core.WorkerRole::Harness
+    "test-fix" => @core.WorkerRole::Harness
+    "projection-schema" => @core.WorkerRole::Harness
+    "image-asset" => @core.WorkerRole::Specialist
     _ => default_role_for_book(entry)
   }
 }
@@ -778,6 +824,9 @@ fn enrich_worker_context_bundle(
   entry : BookCatalogEntry,
   bundle : WorkerContextBundle,
 ) -> WorkerContextBundle {
+  if entry.id.has_prefix("wenyu-") {
+    return enrich_wenyu_worker_context_bundle(entry, bundle)
+  }
   if !entry.id.has_prefix("research-") {
     return bundle
   }
@@ -796,6 +845,57 @@ fn enrich_worker_context_bundle(
       "raw/bootstrap/RESEARCH_REQUEST.md",
       "raw/bootstrap/SOURCE_HINTS.md",
       "wiki/history/journey.md",
+    ],
+  )
+  {
+    book_id: bundle.book_id,
+    workspace_root: bundle.workspace_root,
+    task_id: bundle.task_id,
+    prompt: bundle.prompt,
+    policy: bundle.policy,
+    routines: bundle.routines,
+    skill_paths,
+    context_pages,
+    active_memory: bundle.active_memory,
+    user_memory: bundle.user_memory,
+    working_memory: bundle.working_memory,
+    memory_summary: bundle.memory_summary,
+    output_contract: bundle.output_contract,
+  }
+}
+
+///|
+fn enrich_wenyu_worker_context_bundle(
+  entry : BookCatalogEntry,
+  bundle : WorkerContextBundle,
+) -> WorkerContextBundle {
+  ignore(entry)
+  let skill_paths = unique_paths(
+    [
+      ..bundle.skill_paths,
+      "skills/wenyu-build/SKILL.md",
+      "skills/wenyu-code-patch/SKILL.md",
+      "skills/wenyu-asset-pack/SKILL.md",
+      "skills/web-first-research/SKILL.md",
+      "skills/research-evidence-synthesis/SKILL.md",
+      "skills/repo-source-materialize/SKILL.md",
+      "skills/wiki-marketing/SKILL.md",
+    ],
+  )
+  let context_pages = unique_paths(
+    [
+      ..bundle.context_pages,
+      "raw/bootstrap/RESEARCH_REQUEST.md",
+      "raw/bootstrap/SOURCE_HINTS.md",
+      "raw/bootstrap/WENYU_VALLEY_PRD.md",
+      "raw/bootstrap/WENYU_VISION.md",
+      "raw/bootstrap/deep-report.md",
+      "raw/bootstrap/evidence-matrix.md",
+      "raw/bootstrap/marketing-brief.md",
+      "raw/bootstrap/local-sources.md",
+      "mounted-sources/MANIFEST.md",
+      "build/IMPLEMENTATION_BACKLOG.md",
+      "build/ACCEPTANCE_TESTS.md",
     ],
   )
   {

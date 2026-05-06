@@ -50,6 +50,24 @@ test "mayor plans parallel research lanes for multi-subject goal" {
 }
 
 ///|
+test "mayor decomposes Wenyu Valley PRD build into civic lanes" {
+  let mayor = Mayor::new()
+  let plan = mayor.plan_goal(
+    @moonbook.default_catalog(),
+    "Build Wenyu Valley AI Innovation Town according to docs/WENYU_VALLEY_PRD.md",
+  )
+  assert_true(plan.parallelizable)
+  assert_eq(plan.lanes.length(), 9)
+  assert_eq(plan.lanes[0].entry.id, "wenyu-town-shell")
+  assert_eq(plan.lanes[1].entry.id, "wenyu-resident-twins")
+  assert_true(plan.summary.contains("Wenyu Valley"))
+  assert_true(
+    plan.lanes[0].objective.contains("../../../docs/WENYU_VALLEY_PRD.md"),
+  )
+  assert_true(plan.lanes[0].objective.contains("Town Shell"))
+}
+
+///|
 test "mayor supervision marks stale executions for recovery" {
   let mayor = Mayor::new()
   let state = @moontown.demo_state()

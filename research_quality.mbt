@@ -2,15 +2,24 @@
 async fn research_quality_gaps(
   entry : @moonbook.BookCatalogEntry,
 ) -> Array[String] {
-  if !entry.id.has_prefix("research-") {
+  if !entry.id.has_prefix("research-") && !is_wenyu_book(entry) {
     return []
   }
   let root = @moonbook.workspace_root(entry)
-  let required = [
-    "raw/bootstrap/research-question.md", "raw/bootstrap/search-log.md", "raw/bootstrap/source-screen.md",
-    "raw/bootstrap/evidence-matrix.md", "raw/bootstrap/local-sources.md", "raw/bootstrap/synthesis-brief.md",
-    "raw/bootstrap/marketing-brief.md",
-  ]
+  let required = if is_wenyu_book(entry) {
+    [
+      "raw/bootstrap/research-question.md", "raw/bootstrap/search-log.md", "raw/bootstrap/source-screen.md",
+      "raw/bootstrap/evidence-matrix.md", "raw/bootstrap/local-sources.md", "raw/bootstrap/synthesis-brief.md",
+      "raw/bootstrap/marketing-brief.md", "raw/bootstrap/deep-report.md", "raw/bootstrap/WENYU_VALLEY_PRD.md",
+      "mounted-sources/MANIFEST.md",
+    ]
+  } else {
+    [
+      "raw/bootstrap/research-question.md", "raw/bootstrap/search-log.md", "raw/bootstrap/source-screen.md",
+      "raw/bootstrap/evidence-matrix.md", "raw/bootstrap/local-sources.md", "raw/bootstrap/synthesis-brief.md",
+      "raw/bootstrap/marketing-brief.md",
+    ]
+  }
   let gaps : Array[String] = []
   for relative in required {
     if !@fs.exists("\{root}/\{relative}") {
@@ -42,7 +51,7 @@ async fn research_content_quality_gaps(
   root : String,
 ) -> Array[String] {
   let gaps : Array[String] = []
-  let topic = entry.id.replace(old="research-", new="").to_lower()
+  let topic = quality_topic_for_entry(entry)
   let brief_path = "\{root}/raw/bootstrap/synthesis-brief.md"
   let overview_path = "\{root}/wiki/synthesis/overview.md"
   let search_log_path = "\{root}/raw/bootstrap/search-log.md"
@@ -112,7 +121,7 @@ fn deep_report_quality_gaps(
 ) -> Array[String] {
   let gaps : Array[String] = []
   let lower = report.to_lower()
-  let topic = entry.id.replace(old="research-", new="").to_lower()
+  let topic = quality_topic_for_entry(entry)
   if !lower.contains("deep research analysis") {
     gaps.push("deep report title does not declare `Deep Research Analysis`")
   }
@@ -138,6 +147,17 @@ fn deep_report_quality_gaps(
     gaps.push("deep report still reads like a run log instead of research")
   }
   gaps
+}
+
+///|
+fn quality_topic_for_entry(entry : @moonbook.BookCatalogEntry) -> String {
+  if entry.id.has_prefix("research-") {
+    entry.id.replace(old="research-", new="").to_lower()
+  } else if entry.id.has_prefix("wenyu-") {
+    entry.id.replace(old="wenyu-", new="").replace(old="-", new=" ").to_lower()
+  } else {
+    entry.id.to_lower()
+  }
 }
 
 ///|

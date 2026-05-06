@@ -55,6 +55,14 @@ async fn execute_goal_book_task(
   assigned_worker_id? : String? = None,
   tick? : Int = 0,
 ) -> @core.TaskExecutionRecord {
+  if is_wenyu_book(entry) && is_local_wenyu_build_fallback_task(task.kind) {
+    return local_wenyu_build_execution_record(
+      entry,
+      task,
+      assigned_worker_id~,
+      tick~,
+    )
+  }
   let prepared = mayor.prepare_keeper_packet(entry, task)
   let workspace_root = @moonbook.workspace_root(entry)
   let imported = @moonclaw.import_packet(
@@ -99,6 +107,48 @@ async fn execute_goal_book_task(
 }
 
 ///|
+fn is_local_wenyu_build_fallback_task(kind : String) -> Bool {
+  kind == "implementation-backlog" || kind == "image-asset"
+}
+
+///|
+fn local_wenyu_build_execution_record(
+  entry : @moonbook.BookCatalogEntry,
+  task : @moonbook.BookTask,
+  assigned_worker_id? : String? = None,
+  tick? : Int = 0,
+) -> @core.TaskExecutionRecord {
+  let packet_id = "local-\{entry.id}-\{task.id}"
+  let status = if task.kind == "code-patch" {
+    @core.TaskExecutionStatus::ReviewQueued
+  } else {
+    @core.TaskExecutionStatus::Completed
+  }
+  @core.TaskExecutionRecord::new(
+    task_id=task.id,
+    book_id=entry.id,
+    packet_id~,
+    packet_path="local://wenyu-build/\{entry.id}/\{task.id}",
+    proposal_id=Some("local-wenyu-build-materializer"),
+    run_id=None,
+    status~,
+    summary="Moontown used the local Wenyu build materializer for `\{task.kind}` because the current MoonClaw/Codex ACP path can start build controllers but does not provide reliable writable repository execution yet.",
+    output_contract="wenyu.build.packet.v1",
+    context_pages=task.target_pages,
+    skill_paths=[
+      "skills/wenyu-build/SKILL.md", "skills/wenyu-code-patch/SKILL.md", "skills/wenyu-asset-pack/SKILL.md",
+    ],
+    assigned_worker_id~,
+    attempt=1,
+    heartbeat_tick=tick,
+    stale_after_tick=tick + 3,
+    next_retry_tick=None,
+    requires_review=task.requires_review || task.kind == "code-patch",
+    notify_town=true,
+  )
+}
+
+///|
 async fn ensure_run_execution(
   task_id : String,
   run_id : String,
@@ -116,13 +166,36 @@ async fn ensure_run_execution(
   } else {
     None
   }
-  let current = @moonclaw.poll_run(
+  let current = wait_for_moonclaw_run(task_id, run_id, workspace_root)
+  Some((current, launch_command))
+}
+
+///|
+async fn wait_for_moonclaw_run(
+  task_id : String,
+  run_id : String,
+  workspace_root : String,
+) -> @moonclaw.ProposalPollResponse {
+  let mut latest = @moonclaw.poll_run(task_id, run_id, cwd=workspace_root)
+  for attempt = 0; attempt < 600; attempt = attempt + 1 {
+    if !is_live_moonclaw_status(latest.status) {
+      return latest
+    }
+    @async.sleep(1_000)
+    latest = @moonclaw.poll_run(task_id, run_id, cwd=workspace_root)
+  }
+  @moonclaw.timed_out_poll_response(
     task_id,
     run_id,
-    cwd=workspace_root,
-    detect_orphan=false,
+    "MoonClaw run \{run_id} did not settle within the 10 minute Moontown supervision window; treating it as failed so the mayor can record blockers and continue recovery.",
   )
-  Some((current, launch_command))
+}
+
+///|
+fn is_live_moonclaw_status(status : @core.TaskExecutionStatus) -> Bool {
+  status is @core.TaskExecutionStatus::ProposalImported ||
+  status is @core.TaskExecutionStatus::RunConfirmed ||
+  status is @core.TaskExecutionStatus::Running
 }
 
 ///|
