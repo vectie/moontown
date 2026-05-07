@@ -1,0 +1,163 @@
+{
+  "id": "wenyu-valley-isometric",
+  "orientation": "isometric",
+  "sourceTileWidth": 128,
+  "sourceTileHeight": 96,
+  "renderTileWidth": 96,
+  "renderTileHeight": 72,
+  "gridStepX": 42,
+  "gridStepY": 21,
+  "viewportGridWidth": 31,
+  "viewportGridHeight": 23,
+  "viewportPolicy": "Render an overscanned procedural isometric field so buildings can stand on generated land beyond the visible frame.",
+  "assetPolicy": "Generate final PNG assets with gpt-image-2. Do not replace these with hand-authored SVG/vector placeholders.",
+  "tiles": {
+    "grass_plain": {
+      "path": "tiles/grass_plain.png",
+      "solid": false,
+      "terrain": "grass"
+    },
+    "grass_light": {
+      "path": "tiles/grass_light.png",
+      "solid": false,
+      "terrain": "grass"
+    },
+    "grass_dark": {
+      "path": "tiles/grass_dark.png",
+      "solid": false,
+      "terrain": "grass"
+    },
+    "grass_flower_pink": {
+      "path": "tiles/grass_flower_pink.png",
+      "solid": false,
+      "terrain": "grass"
+    },
+    "grass_flower_yellow": {
+      "path": "tiles/grass_flower_yellow.png",
+      "solid": false,
+      "terrain": "grass"
+    },
+    "river_straight": {
+      "path": "tiles/river_straight.png",
+      "solid": true,
+      "terrain": "water"
+    },
+    "river_bank": {
+      "path": "tiles/river_bank.png",
+      "solid": false,
+      "terrain": "bank"
+    },
+    "dirt_path": {
+      "path": "tiles/dirt_path.png",
+      "solid": false,
+      "terrain": "path"
+    },
+    "plaza_stone": {
+      "path": "tiles/plaza_stone.png",
+      "solid": false,
+      "terrain": "plaza"
+    },
+    "wood_bridge": {
+      "path": "tiles/wood_bridge.png",
+      "solid": false,
+      "terrain": "bridge",
+      "elevation": 1
+    }
+  },
+  "objects": {
+    "tree_large": {
+      "path": "objects/tree_large.png",
+      "anchor": "bottom-center",
+      "solid": true,
+      "sort": "y"
+    },
+    "tree_small": {
+      "path": "objects/tree_small.png",
+      "anchor": "bottom-center",
+      "solid": true,
+      "sort": "y"
+    },
+    "bush": {
+      "path": "objects/bush.png",
+      "anchor": "bottom-center",
+      "solid": true,
+      "sort": "y"
+    },
+    "flower_patch": {
+      "path": "objects/flower_patch.png",
+      "anchor": "bottom-center",
+      "solid": false,
+      "sort": "y"
+    },
+    "lamp": {
+      "path": "objects/lamp.png",
+      "anchor": "bottom-center",
+      "solid": true,
+      "sort": "y"
+    }
+  },
+  "actors": {
+    "mayor": {
+      "strip": "actors/mayor_walk_strip.png",
+      "frames": 4,
+      "role": "town supervision"
+    },
+    "keeper": {
+      "strip": "actors/keeper_walk_strip.png",
+      "frames": 4,
+      "role": "book memory"
+    },
+    "worker": {
+      "strip": "actors/worker_walk_strip.png",
+      "frames": 4,
+      "role": "execution"
+    },
+    "researcher": {
+      "strip": "actors/researcher_walk_strip.png",
+      "frames": 4,
+      "role": "research and planning"
+    },
+    "resident_roster": {
+      "pathPattern": "actors/roster/resident_{index}.png",
+      "count": 64,
+      "role": "unique resident and worker identities",
+      "animation": "route wander plus idle bob"
+    }
+  },
+  "buildings": {
+    "city_hall": {
+      "sprite": "buildings/city_hall_base.png",
+      "sourceBase": "buildings/city_hall_base.png",
+      "sourceRoof": "buildings/city_hall_roof.png",
+      "anchor": "bottom-center",
+      "zone": "city-hall"
+    },
+    "book_house": {
+      "sprite": "buildings/book_house_base.png",
+      "sourceBase": "buildings/book_house_base.png",
+      "sourceRoof": "buildings/book_house_roof.png",
+      "anchor": "bottom-center",
+      "zonePrefix": "book-"
+    },
+    "worker_yard": {
+      "sprite": "buildings/worker_yard_base.png",
+      "sourceBase": "buildings/worker_yard_base.png",
+      "sourceRoof": "buildings/worker_yard_roof.png",
+      "anchor": "bottom-center",
+      "zone": "worker-yard"
+    },
+    "wenyu_districts": {
+      "town_shell": "districts/town_shell.png",
+      "resident_twins": "districts/resident_twins.png",
+      "policy_hall": "districts/policy_hall.png",
+      "contest_express": "districts/contest_express.png",
+      "social_square": "districts/social_square.png",
+      "talent_avenue": "districts/talent_avenue.png",
+      "vitality_dashboard": "districts/vitality_dashboard.png",
+      "ai_garden": "districts/ai_garden.png",
+      "physical_bridge": "districts/physical_bridge.png",
+      "anchor": "bottom-center",
+      "zonePrefix": "wenyu-"
+    }
+  }
+}

@@ -906,6 +906,7 @@ body,
 
 .viewport-frame .scene-stage {
   overflow: hidden;
+  transform: translateX(-96px);
   background:
     linear-gradient(#fff8cf, #fff8cf) 154px 114px / 28px 28px no-repeat,
     linear-gradient(#fff2be, #fff2be) 112px 72px / 112px 112px no-repeat,
@@ -1072,12 +1073,158 @@ body,
   display: none;
 }
 
-.viewport-frame-shell .scene-stage-rail {
+.viewport-frame .scene-stage {
+  background:
+    linear-gradient(180deg, rgba(189, 212, 104, 0.94), rgba(148, 176, 82, 0.92));
+}
+
+.viewport-frame .scene-stage::before,
+.viewport-frame .scene-stage::after {
+  display: none;
+}
+
+.tilemap-layer {
   position: absolute;
-  left: 18px;
-  right: 18px;
-  bottom: 18px;
-  z-index: 8;
+  inset: 0;
+  z-index: 1;
+  pointer-events: none;
+}
+
+.iso-tile {
+  position: absolute;
+  width: 96px;
+  height: 72px;
+  background-color: transparent;
+  background-image: var(--tile-image);
+  background-size: contain;
+  background-position: center bottom;
+  background-repeat: no-repeat;
+  image-rendering: pixelated;
+  filter: drop-shadow(0 2px 0 rgba(64, 84, 32, 0.18));
+}
+
+.iso-tile-grass-light {
+  background-color: transparent;
+}
+
+.iso-tile-grass-dark {
+  background-color: transparent;
+}
+
+.iso-tile-grass-flower-pink {
+  background-color: transparent;
+}
+
+.iso-tile-grass-flower-yellow {
+  background-color: transparent;
+}
+
+.iso-tile-river {
+  background-color: transparent;
+  filter: drop-shadow(0 3px 0 rgba(55, 105, 120, 0.28));
+}
+
+.iso-tile-river-bank {
+  background-color: transparent;
+}
+
+.iso-tile-dirt-path {
+  background-color: transparent;
+}
+
+.iso-tile-plaza-stone {
+  background-color: transparent;
+}
+
+.iso-tile-bridge {
+  background-color: transparent;
+  filter: drop-shadow(0 4px 0 rgba(58, 39, 21, 0.3));
+}
+
+.viewport-frame .iso-tile {
+  background-size: contain;
+  background-position: center bottom;
+  background-repeat: no-repeat;
+}
+
+.tile-object {
+  position: absolute;
+  width: 58px;
+  height: 70px;
+  transform: translate(-4px, -10px);
+  background-image: var(--object-image);
+  background-repeat: no-repeat;
+  background-size: contain;
+  background-position: center bottom;
+  image-rendering: pixelated;
+  filter: drop-shadow(5px 5px 0 rgba(47, 30, 8, 0.18));
+}
+
+.tile-object-tree-large {
+  width: 76px;
+  height: 94px;
+  transform: translate(-16px, -28px);
+}
+
+.tile-object-tree-small {
+  width: 58px;
+  height: 78px;
+  transform: translate(-8px, -20px);
+}
+
+.tile-object-bush,
+.tile-object-flower-patch {
+  width: 48px;
+  height: 42px;
+  transform: translate(4px, 8px);
+}
+
+.tile-object-lamp {
+  width: 34px;
+  height: 70px;
+  transform: translate(14px, -18px);
+}
+
+.tile-object-tree-large,
+.tile-object-tree-small {
+  background-image: var(--object-image);
+}
+
+.tile-object-tree-small {
+  width: 58px;
+  height: 68px;
+  transform: translate(2px, 0);
+}
+
+.tile-object-bush {
+  width: 58px;
+  height: 42px;
+  transform: translate(2px, 18px);
+  background-image: var(--object-image);
+}
+
+.tile-object-flower-patch {
+  width: 56px;
+  height: 38px;
+  transform: translate(4px, 20px);
+  background-image: var(--object-image);
+}
+
+.tile-object-lamp {
+  width: 46px;
+  height: 62px;
+  transform: translate(10px, 0);
+  background-image: var(--object-image);
+}
+
+.viewport-frame .tile-object {
+  background-size: contain;
+  background-position: center bottom;
+  background-repeat: no-repeat;
+}
+
+.viewport-frame-shell .scene-stage-rail {
+  display: none;
 }
 
 .viewport-frame-shell .runtime-stat {
@@ -1272,22 +1419,28 @@ body,
 }
 
 .viewport-frame .worker-avatar {
-  width: 34px;
-  min-width: 34px;
-  height: 40px;
-  padding: 4px;
+  width: 48px;
+  min-width: 48px;
+  height: 62px;
+  padding: 0;
   place-items: center;
-  background: #e9f3de;
+  border: 0;
+  background: transparent;
+  box-shadow: none;
+  overflow: visible;
+  animation: worker-wander var(--wander-duration, 5600ms) linear infinite;
 }
 
 .viewport-frame .worker-badge {
-  width: 24px;
-  height: 24px;
-  font-size: 8px;
+  display: none;
 }
 
 .viewport-frame .worker-label,
 .viewport-frame .worker-meta {
+  display: none;
+}
+
+.worker-sprite {
   display: none;
 }
 
@@ -1331,6 +1484,11 @@ body,
   position: absolute;
 }
 
+.viewport-frame .scene-node {
+  transform: scale(0.64);
+  transform-origin: bottom left;
+}
+
 .asset-stack {
   position: absolute;
   inset: 0;
@@ -1345,7 +1503,8 @@ body,
 }
 
 .scene-building-asset,
-.scene-prop-asset {
+.scene-prop-asset,
+.scene-roof-asset {
   left: 0;
   right: 0;
   bottom: 0;
@@ -1354,6 +1513,72 @@ body,
   max-height: 100%;
   margin: auto;
   object-fit: contain;
+}
+
+.scene-roof-asset {
+  height: auto;
+  z-index: 2;
+  filter: drop-shadow(5px 5px 0 rgba(47, 30, 8, 0.2));
+}
+
+.scene-roof-asset.scene-asset-civic {
+  left: 4%;
+  width: 92%;
+  bottom: 32%;
+}
+
+.scene-roof-asset.scene-asset-coding,
+.scene-roof-asset.scene-asset-finance {
+  left: 2%;
+  width: 96%;
+  bottom: 30%;
+}
+
+.scene-roof-asset.scene-asset-worker {
+  left: 6%;
+  width: 88%;
+  bottom: 24%;
+}
+
+.scene-asset-coding {
+  filter:
+    hue-rotate(8deg)
+    saturate(1.18)
+    drop-shadow(6px 6px 0 rgba(47, 30, 8, 0.22));
+}
+
+.scene-asset-finance {
+  filter:
+    hue-rotate(52deg)
+    saturate(1.08)
+    brightness(1.06)
+    drop-shadow(6px 6px 0 rgba(47, 30, 8, 0.22));
+}
+
+.scene-asset-civic {
+  filter:
+    saturate(1.16)
+    contrast(1.04)
+    drop-shadow(6px 6px 0 rgba(47, 30, 8, 0.22));
+}
+
+.scene-asset-worker {
+  filter:
+    hue-rotate(-18deg)
+    saturate(0.92)
+    brightness(0.98)
+    drop-shadow(6px 6px 0 rgba(47, 30, 8, 0.22));
+}
+
+.scene-asset-district {
+  height: auto;
+  width: 92%;
+  left: 4%;
+  bottom: 2%;
+  filter:
+    saturate(1.08)
+    contrast(1.03)
+    drop-shadow(6px 6px 0 rgba(47, 30, 8, 0.22));
 }
 
 .scene-actor-asset {
@@ -1404,6 +1629,24 @@ body,
   overflow: hidden;
   box-shadow: 4px 4px 0 rgba(56, 35, 16, 0.25);
   transition: transform 80ms steps(1), box-shadow 80ms steps(1), border-color 80ms steps(1);
+}
+
+.viewport-frame .scene-card-button {
+  opacity: 0;
+  pointer-events: none;
+  transform: translateY(8px);
+  transition:
+    opacity 120ms steps(2),
+    transform 120ms steps(2),
+    box-shadow 80ms steps(1),
+    border-color 80ms steps(1);
+}
+
+.viewport-frame .scene-node:hover .scene-card-button,
+.viewport-frame .scene-node:focus-within .scene-card-button {
+  opacity: 1;
+  pointer-events: auto;
+  transform: translateY(0);
 }
 
 .scene-card-button.selected {
@@ -1473,6 +1716,103 @@ body,
     box-shadow 80ms steps(1),
     background 80ms steps(1);
   box-shadow: 4px 4px 0 rgba(56, 35, 16, 0.28);
+}
+
+.worker-sprite {
+  width: 38px;
+  height: 54px;
+  background-repeat: no-repeat;
+  background-position: center bottom;
+  background-size: contain;
+  image-rendering: pixelated;
+  filter: drop-shadow(4px 5px 0 rgba(47, 30, 8, 0.26));
+  animation: worker-idle-bob 1100ms steps(2) infinite;
+}
+
+.viewport-frame .worker-sprite {
+  display: block;
+}
+
+.worker-sprite-mayor .worker-sprite {
+  background-image: url("tilemap/actors/mayor_walk_strip.png");
+  background-size: 400% 100%;
+  animation: worker-walk-cycle 760ms steps(3) infinite;
+}
+
+.worker-sprite-keeper .worker-sprite {
+  background-image: url("tilemap/actors/keeper_walk_strip.png");
+  background-size: 400% 100%;
+  animation: worker-walk-cycle 760ms steps(3) infinite;
+}
+
+.worker-sprite-worker .worker-sprite {
+  background-image: url("tilemap/actors/worker_walk_strip.png");
+  background-size: 400% 100%;
+  animation: worker-walk-cycle 760ms steps(3) infinite;
+}
+
+.worker-sprite-researcher .worker-sprite {
+  background-image: url("tilemap/actors/researcher_walk_strip.png");
+  background-size: 400% 100%;
+  animation: worker-walk-cycle 760ms steps(3) infinite;
+}
+
+.worker-sprite-roster .worker-sprite {
+  background-image: var(--worker-image);
+  animation: worker-idle-bob 1200ms steps(2) infinite;
+}
+
+.worker-running .worker-sprite {
+  animation-duration: 620ms;
+}
+
+.worker-waiting .worker-sprite,
+.worker-idle .worker-sprite {
+  animation-duration: 980ms;
+}
+
+.worker-blocked .worker-sprite {
+  filter:
+    hue-rotate(-24deg)
+    saturate(1.25)
+    drop-shadow(4px 5px 0 rgba(120, 30, 20, 0.28));
+}
+
+@keyframes worker-walk-cycle {
+  from {
+    background-position-x: 0%;
+  }
+  to {
+    background-position-x: 100%;
+  }
+}
+
+@keyframes worker-wander {
+  0% {
+    transform: translate(0, 0);
+  }
+  25% {
+    transform: translate(var(--wander-x1, 28px), var(--wander-y1, -12px));
+  }
+  50% {
+    transform: translate(var(--wander-x2, 44px), var(--wander-y2, 18px));
+  }
+  75% {
+    transform: translate(var(--wander-x3, -16px), var(--wander-y3, 24px));
+  }
+  100% {
+    transform: translate(0, 0);
+  }
+}
+
+@keyframes worker-idle-bob {
+  0%,
+  100% {
+    transform: translateY(0);
+  }
+  50% {
+    transform: translateY(-2px);
+  }
 }
 
 .worker-avatar.selected {

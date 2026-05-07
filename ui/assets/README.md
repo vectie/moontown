@@ -21,6 +21,8 @@ The structure follows the semantic-scene lesson from `sou`:
   - signs, yards, furniture, utility objects
 - `effects/`
   - anomaly, patrol, sync, and alert effects
+- `tilemap/`
+  - generated 2.5D isometric tilesets, sliced PNG sprites, map JSON, prompts, and tile manifests
 
 ## Current Baseline Assets
 
@@ -34,6 +36,12 @@ The structure follows the semantic-scene lesson from `sou`:
 - `props/worker-yard.svg`
 - `props/gate-sign.svg`
 - `effects/anomaly-signal.svg`
+- `tilemap/tiles/*.png`
+- `tilemap/objects/*.png`
+- `tilemap/actors/*.png`
+  - role animation strips plus `actors/roster/resident_0.png` through `resident_63.png`
+- `tilemap/buildings/*.png`
+- `tilemap/maps/wenyu-valley.json`
 
 ## Ownership Rules
 
@@ -41,6 +49,13 @@ The structure follows the semantic-scene lesson from `sou`:
 - `sou` art assets are non-commercial only and should not be copied into this repo.
 - Treat the current SVG set as starter examples and replace them with richer
   original `moontown` art over time.
+- Follow the tiled-map procedure in
+  [docs/TILED_MAP_PIPELINE.md](/Users/kq/Workspace/moontown/docs/TILED_MAP_PIPELINE.md)
+  when generating and assembling isometric tiles.
+- Prefer complete building sprites for the current DOM renderer. Add clean
+  base/roof splits only when the renderer supports actor depth sorting behind
+  canopy pixels.
+- Do not bake labels or UI text into art assets. Labels belong to Rabbita UI.
 
 ## Layout Source
 

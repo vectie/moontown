@@ -337,16 +337,20 @@ fn area_for_book(
 fn dynamic_book_area(book : @core.BookRef, index : Int) -> SceneArea {
   let width = 210
   let height = 136
-  let slot = index % 8
+  let slot = index % 12
   let (x, y) = match slot {
-    0 => (80, 220)
-    1 => (990, 220)
-    2 => (80, 390)
-    3 => (990, 390)
-    4 => (80, 560)
-    5 => (990, 560)
-    6 => (330, 560)
-    _ => (740, 560)
+    0 => (82, 356)
+    1 => (214, 260)
+    2 => (96, 490)
+    3 => (326, 460)
+    4 => (432, 342)
+    5 => (408, 540)
+    6 => (660, 156)
+    7 => (842, 404)
+    8 => (818, 282)
+    9 => (500, 214)
+    10 => (706, 248)
+    _ => (802, 558)
   }
   {
     key: "book-\{book.id}",
@@ -356,18 +360,39 @@ fn dynamic_book_area(book : @core.BookRef, index : Int) -> SceneArea {
     y,
     width,
     height,
-    asset_keys: dynamic_book_asset_keys(index),
+    asset_keys: dynamic_book_asset_keys(book.id, index),
   }
 }
 
 ///|
-fn dynamic_book_asset_keys(index : Int) -> Array[String] {
-  let building = if index % 2 == 0 {
-    "book-house-coding"
+fn dynamic_book_asset_keys(book_id : String, index : Int) -> Array[String] {
+  let district = dynamic_district_asset_key(book_id)
+  if district != "" {
+    [district]
   } else {
-    "book-house-finance"
+    let (building, roof) = if index % 2 == 0 {
+      ("book-house-coding", "book-house-coding-roof")
+    } else {
+      ("book-house-finance", "book-house-finance-roof")
+    }
+    [building, roof, "keeper-claw"]
   }
-  [building, "keeper-claw"]
+}
+
+///|
+fn dynamic_district_asset_key(book_id : String) -> String {
+  match book_id {
+    "wenyu-town-shell" => "district-town-shell"
+    "wenyu-resident-twins" => "district-resident-twins"
+    "wenyu-policy-hall" => "district-policy-hall"
+    "wenyu-contest-express" => "district-contest-express"
+    "wenyu-social-square" => "district-social-square"
+    "wenyu-talent-avenue" => "district-talent-avenue"
+    "wenyu-vitality-dashboard" => "district-vitality-dashboard"
+    "wenyu-ai-garden" => "district-ai-garden"
+    "wenyu-physical-bridge" => "district-physical-bridge"
+    _ => ""
+  }
 }
 
 ///|

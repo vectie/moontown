@@ -58,6 +58,11 @@ The frontend should be treated as a projection of the town runtime, not the
 source of truth for resident memory, civic quests, social matches, or talent
 graphs.
 
+The tiled-map production workflow is specified in
+[TILED_MAP_PIPELINE.md](/Users/kq/Workspace/moontown/docs/TILED_MAP_PIPELINE.md).
+Use that procedure when extending the current generated isometric tilemap into
+a Tiled-compatible map loader and depth-sorted actor layer.
+
 Implemented:
 
 - periodic ticks
@@ -76,6 +81,8 @@ Implemented:
   - queue pressure
   - stability
 - moving worker avatars
+- generated isometric tilemap viewport
+- generated PNG tiles, objects, flowers, trees, river, bridge, and building sprites
 - selection and inspection
 - activity feed
 - keyboard focus-visible affordances
@@ -139,6 +146,14 @@ Original example assets live under:
 
 Current examples are SVG placeholders with original `moontown` styling, not
 borrowed `sou` assets.
+
+For the next-generation tiled map, generated assets should be registered under:
+
+- [ui/assets/tilemap](/Users/kq/Workspace/moontown/ui/assets/tilemap)
+
+That folder holds the generated tilesets, sliced tile PNGs, object sprites,
+building sprites, reference map JSON, prompts, and manifest described by the
+tiled-map pipeline.
 
 ## Build and Dev
 

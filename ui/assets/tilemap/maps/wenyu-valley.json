@@ -1,0 +1,48 @@
+{
+  "id": "wenyu-valley-demo",
+  "orientation": "isometric",
+  "width": 15,
+  "height": 11,
+  "sourceTileWidth": 128,
+  "sourceTileHeight": 96,
+  "renderTileWidth": 96,
+  "renderTileHeight": 72,
+  "gridStepX": 42,
+  "gridStepY": 21,
+  "layers": [
+    {
+      "id": "ground",
+      "type": "tilelayer",
+      "encoding": "row-major",
+      "tiles": [
+        "grass", "grass-light", "grass-dark", "grass", "grass-flower-pink", "river-bank", "grass", "plaza-stone", "plaza-stone", "plaza-stone", "plaza-stone", "grass-flower-yellow", "grass", "grass-light", "grass-dark",
+        "grass-light", "grass-dark", "grass", "grass-flower-yellow", "river-bank", "river", "river-bank", "plaza-stone", "plaza-stone", "plaza-stone", "plaza-stone", "plaza-stone", "grass-light", "grass-dark", "grass",
+        "grass-dark", "grass", "grass-flower-pink", "river-bank", "river", "river-bank", "grass", "plaza-stone", "plaza-stone", "plaza-stone", "plaza-stone", "grass", "grass-dark", "grass", "grass-flower-pink",
+        "grass", "grass-flower-yellow", "river-bank", "river", "river-bank", "grass", "grass-light", "plaza-stone", "plaza-stone", "plaza-stone", "plaza-stone", "grass-dark", "grass", "grass-flower-yellow", "grass",
+        "grass-flower-pink", "river-bank", "river", "river-bank", "grass", "grass-light", "grass-dark", "plaza-stone", "plaza-stone", "plaza-stone", "plaza-stone", "grass", "grass-flower-pink", "grass-light", "grass-dark",
+        "river", "river", "river", "river", "river", "river", "river", "plaza-stone", "bridge", "bridge", "plaza-stone", "river", "river", "river", "river",
+        "river-bank", "river-bank", "river-bank", "river-bank", "river-bank", "river-bank", "river-bank", "plaza-stone", "plaza-stone", "plaza-stone", "plaza-stone", "river-bank", "river-bank", "river-bank", "river-bank",
+        "grass", "grass-dark", "grass", "grass-flower-yellow", "grass-light", "grass-dark", "grass", "plaza-stone", "plaza-stone", "plaza-stone", "plaza-stone", "grass-light", "grass-dark", "grass", "grass-flower-pink",
+        "grass-dark", "grass", "grass-flower-pink", "grass-light", "grass-dark", "grass", "grass-flower-yellow", "grass", "dirt-path", "dirt-path", "grass-light", "grass-dark", "grass-flower-pink", "grass", "grass-light",
+        "grass", "grass-flower-yellow", "grass-light", "grass-dark", "grass", "grass-flower-pink", "grass-light", "grass-dark", "dirt-path", "dirt-path", "grass", "grass-flower-yellow", "grass-light", "grass-dark", "grass",
+        "dirt-path", "dirt-path", "dirt-path", "dirt-path", "dirt-path", "dirt-path", "dirt-path", "dirt-path", "dirt-path", "dirt-path", "dirt-path", "dirt-path", "dirt-path", "dirt-path", "dirt-path"
+      ]
+    },
+    {
+      "id": "objects",
+      "type": "objectgroup",
+      "objects": [
+        { "id": "tree-large-1", "kind": "tree-large", "x": 1, "y": 2 },
+        { "id": "tree-small-1", "kind": "tree-small", "x": 3, "y": 4 },
+        { "id": "tree-small-2", "kind": "tree-small", "x": 11, "y": 1 },
+        { "id": "tree-large-2", "kind": "tree-large", "x": 13, "y": 3 },
+        { "id": "bush-1", "kind": "bush", "x": 2, "y": 8 },
+        { "id": "bush-2", "kind": "bush", "x": 5, "y": 1 },
+        { "id": "flowers-1", "kind": "flower-patch", "x": 10, "y": 2 },
+        { "id": "flowers-2", "kind": "flower-patch", "x": 4, "y": 8 },
+        { "id": "flowers-3", "kind": "flower-patch", "x": 11, "y": 8 },
+        { "id": "lamp-1", "kind": "lamp", "x": 8, "y": 7 }
+      ]
+    }
+  ]
+}

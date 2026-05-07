@@ -946,8 +946,8 @@ fn worker_status_for(model : Model, offset : Int) -> @core.WorkerStatus {
 fn worker_zone_key(book_id : String, status : @core.WorkerStatus) -> String {
   match status {
     @core.WorkerStatus::Blocked => "anomaly-corner"
-    @core.WorkerStatus::Idle => "worker-yard"
-    @core.WorkerStatus::Waiting => "worker-yard"
+    @core.WorkerStatus::Idle => "book-\{book_id}"
+    @core.WorkerStatus::Waiting => "book-\{book_id}"
     @core.WorkerStatus::Offline => "gate"
     @core.WorkerStatus::Running => "book-\{book_id}"
   }
@@ -1396,14 +1396,33 @@ fn render_asset(asset_path : String, title : String) -> @rabbita.Html {
 
 ///|
 fn scene_asset_class(asset_path : String) -> String {
-  if asset_path.contains("actors/") {
+  if asset_path.contains("actors/") || asset_path.contains("tilemap/actors/") {
     "scene-actor-asset"
   } else if asset_path.contains("effects/") {
     "scene-effect-asset"
   } else if asset_path.contains("props/") {
     "scene-prop-asset"
+  } else if asset_path.contains("_roof") {
+    "scene-roof-asset " + scene_asset_variant_class(asset_path)
   } else {
-    "scene-building-asset"
+    "scene-building-asset " + scene_asset_variant_class(asset_path)
+  }
+}
+
+///|
+fn scene_asset_variant_class(asset_path : String) -> String {
+  if asset_path.contains("variant=coding") {
+    "scene-asset-coding"
+  } else if asset_path.contains("variant=finance") {
+    "scene-asset-finance"
+  } else if asset_path.contains("city_hall") {
+    "scene-asset-civic"
+  } else if asset_path.contains("worker_yard") {
+    "scene-asset-worker"
+  } else if asset_path.contains("districts/") {
+    "scene-asset-district"
+  } else {
+    ""
   }
 }
 
@@ -4698,6 +4717,140 @@ fn render_node(
 }
 
 ///|
+fn tile_asset_for_kind(kind : String) -> String {
+  match kind {
+    "grass-light" => "tilemap/tiles/grass_light.png"
+    "grass-dark" => "tilemap/tiles/grass_dark.png"
+    "grass-flower-pink" => "tilemap/tiles/grass_flower_pink.png"
+    "grass-flower-yellow" => "tilemap/tiles/grass_flower_yellow.png"
+    "river" => "tilemap/tiles/river_straight.png"
+    "river-bank" => "tilemap/tiles/river_bank.png"
+    "dirt-path" => "tilemap/tiles/dirt_path.png"
+    "plaza-stone" => "tilemap/tiles/plaza_stone.png"
+    "bridge" => "tilemap/tiles/wood_bridge.png"
+    _ => "tilemap/tiles/grass_plain.png"
+  }
+}
+
+///|
+fn tile_kind_at(grid_x : Int, grid_y : Int) -> String {
+  let river_y = if grid_x < 4 {
+    7
+  } else if grid_x < 9 {
+    8
+  } else if grid_x < 14 {
+    7
+  } else if grid_x < 22 {
+    6
+  } else {
+    5
+  }
+  if grid_y == river_y {
+    if grid_x == 8 || grid_x == 9 {
+      "bridge"
+    } else {
+      "river"
+    }
+  } else if grid_y == river_y - 1 || grid_y == river_y + 1 {
+    "river-bank"
+  } else if grid_x >= 7 && grid_x <= 15 && grid_y >= 4 && grid_y <= 11 {
+    "plaza-stone"
+  } else if grid_x == 8 || grid_x == 9 || grid_y == 13 {
+    "dirt-path"
+  } else if (grid_x + grid_y) % 11 == 0 {
+    "grass-flower-pink"
+  } else if (grid_x * 3 + grid_y) % 13 == 0 {
+    "grass-flower-yellow"
+  } else if (grid_x + grid_y) % 4 == 0 {
+    "grass-light"
+  } else if (grid_x * 2 + grid_y) % 5 == 0 {
+    "grass-dark"
+  } else {
+    "grass"
+  }
+}
+
+///|
+fn iso_tile_left(grid_x : Int, grid_y : Int) -> Int {
+  560 + (grid_x - grid_y) * 42 - 48
+}
+
+///|
+fn iso_tile_top(grid_x : Int, grid_y : Int) -> Int {
+  18 + (grid_x + grid_y) * 21
+}
+
+///|
+fn render_iso_tile(grid_x : Int, grid_y : Int) -> @rabbita.Html {
+  let kind = tile_kind_at(grid_x, grid_y)
+  let style = [
+    "left: \{iso_tile_left(grid_x, grid_y)}px",
+    "top: \{iso_tile_top(grid_x, grid_y)}px",
+    "--tile-image: url('\{tile_asset_for_kind(kind)}')",
+  ]
+  div(
+    class="iso-tile iso-tile-\{kind}",
+    style~,
+    no_children(),
+  )
+}
+
+///|
+fn tile_object_asset(kind : String) -> String {
+  match kind {
+    "tree-large" => "tilemap/objects/tree_large.png"
+    "tree-small" => "tilemap/objects/tree_small.png"
+    "bush" => "tilemap/objects/bush.png"
+    "flower-patch" => "tilemap/objects/flower_patch.png"
+    "lamp" => "tilemap/objects/lamp.png"
+    _ => "tilemap/objects/bush.png"
+  }
+}
+
+///|
+fn render_tile_object(
+  grid_x : Int,
+  grid_y : Int,
+  kind : String,
+) -> @rabbita.Html {
+  let style = [
+    "left: \{iso_tile_left(grid_x, grid_y)}px",
+    "top: \{iso_tile_top(grid_x, grid_y) - 52}px",
+    "--object-image: url('\{tile_object_asset(kind)}')",
+  ]
+  div(class="tile-object tile-object-\{kind}", style~, no_children())
+}
+
+///|
+fn render_tilemap_layer() -> @rabbita.Html {
+  let children : Array[@rabbita.Html] = []
+  for y in 0..<23 {
+    for x in 0..<31 {
+      children.push(render_iso_tile(x, y))
+    }
+  }
+  children.push(render_tile_object(1, 2, "tree-large"))
+  children.push(render_tile_object(3, 4, "tree-small"))
+  children.push(render_tile_object(11, 1, "tree-small"))
+  children.push(render_tile_object(16, 2, "tree-small"))
+  children.push(render_tile_object(19, 4, "tree-large"))
+  children.push(render_tile_object(2, 8, "bush"))
+  children.push(render_tile_object(5, 1, "bush"))
+  children.push(render_tile_object(15, 6, "bush"))
+  children.push(render_tile_object(10, 2, "flower-patch"))
+  children.push(render_tile_object(4, 8, "flower-patch"))
+  children.push(render_tile_object(11, 8, "flower-patch"))
+  children.push(render_tile_object(16, 11, "flower-patch"))
+  children.push(render_tile_object(20, 12, "flower-patch"))
+  children.push(render_tile_object(24, 15, "bush"))
+  children.push(render_tile_object(27, 18, "tree-small"))
+  children.push(render_tile_object(8, 7, "lamp"))
+  children.push(render_tile_object(12, 10, "lamp"))
+  children.push(render_tile_object(18, 13, "lamp"))
+  div(class="tilemap-layer", children)
+}
+
+///|
 fn scene_node_by_key(
   scene : @ui.SceneRenderModel,
   key : String,
@@ -4713,18 +4866,38 @@ fn scene_node_by_key(
 ///|
 fn worker_avatar_left(zone : @ui.SceneRenderNode, index : Int) -> Int {
   match zone.key {
-    "worker-yard" => zone.x + 190 + index % 4 * 38
+    "worker-yard" => zone.x + 132 + index % 5 * 54
     "city-hall" => zone.x + zone.width - 58
-    _ => zone.x + zone.width - 52 + index % 2 * 18
+    _ => {
+      let slot = index % 6
+      match slot {
+        0 => zone.x + 8
+        1 => zone.x + zone.width - 42
+        2 => zone.x + zone.width / 2 - 24
+        3 => zone.x + 34
+        4 => zone.x + zone.width - 76
+        _ => zone.x + zone.width / 2 + 30
+      }
+    }
   }
 }
 
 ///|
 fn worker_avatar_top(zone : @ui.SceneRenderNode, index : Int) -> Int {
   match zone.key {
-    "worker-yard" => zone.y + 34 + index / 4 * 36
+    "worker-yard" => zone.y + 24 + index / 5 * 44
     "city-hall" => zone.y + zone.height - 74
-    _ => zone.y + zone.height - 70 + index / 2 * 34
+    _ => {
+      let slot = index % 6
+      match slot {
+        0 => zone.y + zone.height - 46
+        1 => zone.y + zone.height - 42
+        2 => zone.y + zone.height - 74
+        3 => zone.y + zone.height - 4
+        4 => zone.y + zone.height - 2
+        _ => zone.y + zone.height - 28
+      }
+    }
   }
 }
 
@@ -4769,15 +4942,106 @@ fn render_worker_avatar(
   let style = [
     "left: \{worker_avatar_left(zone, index)}px",
     "top: \{worker_avatar_top(zone, index)}px",
+    "--wander-x1: \{worker_wander_x1(index)}px",
+    "--wander-y1: \{worker_wander_y1(index)}px",
+    "--wander-x2: \{worker_wander_x2(index)}px",
+    "--wander-y2: \{worker_wander_y2(index)}px",
+    "--wander-x3: \{worker_wander_x3(index)}px",
+    "--wander-y3: \{worker_wander_y3(index)}px",
+    "--wander-duration: \{worker_wander_duration(index)}ms",
+    "--worker-image: url('\{worker_roster_asset(index)}')",
   ]
   let selected_suffix = if selected { " selected" } else { "" }
   let class_name = "worker-avatar \{worker_status_class(worker.status)}" +
-    selected_suffix
+    " worker-sprite-roster" + selected_suffix
   button(class=class_name, style~, on_click=dispatch(SelectWorker(worker.id)), [
+    span(class="worker-sprite", no_children()),
     span(class="worker-badge", worker_avatar_initials(worker.title)),
     span(class="worker-label", worker.title),
     span(class="worker-meta", "\{worker.role} / \{worker.status.to_string()}"),
   ])
+}
+
+///|
+fn worker_wander_x1(index : Int) -> Int {
+  match index % 6 {
+    0 => 28
+    1 => -24
+    2 => 18
+    3 => -30
+    4 => 34
+    _ => -18
+  }
+}
+
+///|
+fn worker_wander_y1(index : Int) -> Int {
+  match index % 6 {
+    0 => -12
+    1 => -10
+    2 => 14
+    3 => 8
+    4 => -4
+    _ => 16
+  }
+}
+
+///|
+fn worker_wander_x2(index : Int) -> Int {
+  match index % 6 {
+    0 => 44
+    1 => -42
+    2 => 30
+    3 => -48
+    4 => 52
+    _ => -28
+  }
+}
+
+///|
+fn worker_wander_y2(index : Int) -> Int {
+  match index % 6 {
+    0 => 18
+    1 => 16
+    2 => -18
+    3 => -14
+    4 => 20
+    _ => -22
+  }
+}
+
+///|
+fn worker_wander_x3(index : Int) -> Int {
+  match index % 6 {
+    0 => -16
+    1 => 22
+    2 => -24
+    3 => 26
+    4 => -20
+    _ => 18
+  }
+}
+
+///|
+fn worker_wander_y3(index : Int) -> Int {
+  match index % 6 {
+    0 => 24
+    1 => -24
+    2 => 22
+    3 => -18
+    4 => -26
+    _ => 18
+  }
+}
+
+///|
+fn worker_wander_duration(index : Int) -> Int {
+  5200 + index % 5 * 640
+}
+
+///|
+fn worker_roster_asset(index : Int) -> String {
+  "tilemap/actors/roster/resident_\{index % 64}.png"
 }
 
 ///|
@@ -4790,7 +5054,7 @@ fn is_working_worker(worker : WorkerSim) -> Bool {
 
 ///|
 fn visible_overworld_workers(workers : Array[WorkerSim]) -> Array[WorkerSim] {
-  workers.filter(worker => is_working_worker(worker))
+  workers
 }
 
 ///|
@@ -5191,6 +5455,7 @@ fn render_town_viewport(
           loading="eager",
           no_children(),
         ),
+        render_tilemap_layer(),
         div(class="scene-overlay", [
           div(
             class="scene-nodes-layer",

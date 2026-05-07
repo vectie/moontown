@@ -42,6 +42,8 @@ pub async fn run_confirmed_run(String, moonclaw_root? : String, home? : String, 
 
 pub async fn save_packet_file(String, ExternalProposalPacket) -> Unit
 
+pub fn timed_out_poll_response(String, String, String) -> ProposalPollResponse
+
 pub fn worker_runtime(@core.WorkerRef) -> EmbeddedMoonclawRuntime
 
 // Errors
