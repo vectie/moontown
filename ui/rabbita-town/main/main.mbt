@@ -64,6 +64,7 @@ priv struct VitalityMetric {
 ///|
 priv enum Msg {
   Tick
+  ViewportControlNoop
   TogglePause
   Step
   SelectWorker(String)
@@ -170,6 +171,10 @@ extern "js" fn current_browser_path() -> String =
   #| () => `${globalThis.location?.pathname || ""}${globalThis.location?.hash || ""}`
 
 ///|
+extern "js" fn reference_tile_code_at(grid_x : Int, grid_y : Int) -> String =
+  #| (gridX, gridY) => globalThis.__wenyuReferenceLabels?.rows?.[gridY]?.[gridX] || ""
+
+///|
 fn standalone_viewport_requested() -> Bool {
   let path = current_browser_path()
   path.contains("viewport")
@@ -240,6 +245,7 @@ fn schedule_tick(dispatch : Dispatch[Msg]) -> Cmd {
 ///|
 fn update(dispatch : Dispatch[Msg], msg : Msg, model : Model) -> (Cmd, Model) {
   match msg {
+    ViewportControlNoop => (@rabbita.none, model)
     Tick => {
       let next = advance_model(model)
       let cmd = if next.paused {
@@ -4696,10 +4702,10 @@ fn render_node(
   selected : Bool,
 ) -> @rabbita.Html {
   let style = [
-    "left: \{node.x}px",
-    "top: \{node.y}px",
-    "width: \{node.width}px",
-    "height: \{node.height}px",
+    "left: \{scene_node_left(node)}px",
+    "top: \{scene_node_top(node)}px",
+    "width: \{scene_node_width(node)}px",
+    "height: \{scene_node_height(node)}px",
   ]
   let selected_suffix = if selected { " selected" } else { "" }
   let class_name = "scene-card-button" + selected_suffix
@@ -4717,6 +4723,126 @@ fn render_node(
 }
 
 ///|
+fn abs_int(value : Int) -> Int {
+  if value < 0 {
+    -value
+  } else {
+    value
+  }
+}
+
+///|
+fn in_rect(
+  grid_x : Int,
+  grid_y : Int,
+  min_x : Int,
+  min_y : Int,
+  max_x : Int,
+  max_y : Int,
+) -> Bool {
+  grid_x >= min_x && grid_x <= max_x && grid_y >= min_y && grid_y <= max_y
+}
+
+///|
+fn in_ellipse(
+  grid_x : Int,
+  grid_y : Int,
+  center_x : Int,
+  center_y : Int,
+  radius_x : Int,
+  radius_y : Int,
+) -> Bool {
+  let dx = grid_x - center_x
+  let dy = grid_y - center_y
+  dx * dx * radius_y * radius_y + dy * dy * radius_x * radius_x <=
+  radius_x * radius_x * radius_y * radius_y
+}
+
+///|
+fn reference_node_grid_x(key : String) -> Int {
+  match key {
+    "city-hall" => 61
+    "worker-yard" => 72
+    "book-wenyu-town-shell" => 49
+    "book-wenyu-resident-twins" => 25
+    "book-wenyu-policy-hall" => 56
+    "book-wenyu-contest-express" => 66
+    "book-wenyu-social-square" => 51
+    "book-wenyu-talent-avenue" => 78
+    "book-wenyu-vitality-dashboard" => 103
+    "book-wenyu-ai-garden" => 23
+    "book-wenyu-physical-bridge" => 91
+    "anomaly-corner" => 116
+    "gate" => 18
+    _ => 58
+  }
+}
+
+///|
+fn reference_node_grid_y(key : String) -> Int {
+  match key {
+    "city-hall" => 32
+    "worker-yard" => 50
+    "book-wenyu-town-shell" => 24
+    "book-wenyu-resident-twins" => 47
+    "book-wenyu-policy-hall" => 17
+    "book-wenyu-contest-express" => 57
+    "book-wenyu-social-square" => 43
+    "book-wenyu-talent-avenue" => 54
+    "book-wenyu-vitality-dashboard" => 42
+    "book-wenyu-ai-garden" => 13
+    "book-wenyu-physical-bridge" => 37
+    "anomaly-corner" => 25
+    "gate" => 60
+    _ => 36
+  }
+}
+
+///|
+fn scene_node_width(node : @ui.SceneRenderNode) -> Int {
+  if !standalone_viewport_requested() {
+    return node.width
+  }
+  match node.key {
+    "city-hall" => 220
+    "worker-yard" => 240
+    "gate" => 140
+    "anomaly-corner" => 150
+    _ => 170
+  }
+}
+
+///|
+fn scene_node_height(node : @ui.SceneRenderNode) -> Int {
+  if !standalone_viewport_requested() {
+    return node.height
+  }
+  match node.key {
+    "worker-yard" => 100
+    "gate" => 58
+    _ => 128
+  }
+}
+
+///|
+fn scene_node_left(node : @ui.SceneRenderNode) -> Int {
+  if !standalone_viewport_requested() {
+    return node.x
+  }
+  iso_tile_left(reference_node_grid_x(node.key), reference_node_grid_y(node.key)) -
+  scene_node_width(node) / 2 + 22
+}
+
+///|
+fn scene_node_top(node : @ui.SceneRenderNode) -> Int {
+  if !standalone_viewport_requested() {
+    return node.y
+  }
+  iso_tile_top(reference_node_grid_x(node.key), reference_node_grid_y(node.key)) -
+  scene_node_height(node) + 42
+}
+
+///|
 fn tile_asset_for_kind(kind : String) -> String {
   match kind {
     "grass-light" => "tilemap/tiles/grass_light.png"
@@ -4724,8 +4850,19 @@ fn tile_asset_for_kind(kind : String) -> String {
     "grass-flower-pink" => "tilemap/tiles/grass_flower_pink.png"
     "grass-flower-yellow" => "tilemap/tiles/grass_flower_yellow.png"
     "river" => "tilemap/tiles/river_straight.png"
+    "lake" => "tilemap/tiles/river_straight.png"
+    "pond" => "tilemap/tiles/river_straight.png"
     "river-bank" => "tilemap/tiles/river_bank.png"
+    "wetland" => "tilemap/tiles/river_bank.png"
     "dirt-path" => "tilemap/tiles/dirt_path.png"
+    "road" => "tilemap/tiles/dirt_path.png"
+    "road-major" => "tilemap/tiles/dirt_path.png"
+    "farm" => "tilemap/tiles/grass_flower_yellow.png"
+    "field" => "tilemap/tiles/grass_light.png"
+    "forest" => "tilemap/tiles/grass_dark.png"
+    "urban" => "tilemap/tiles/plaza_stone.png"
+    "urban-dense" => "tilemap/tiles/plaza_stone.png"
+    "campus" => "tilemap/tiles/plaza_stone.png"
     "plaza-stone" => "tilemap/tiles/plaza_stone.png"
     "bridge" => "tilemap/tiles/wood_bridge.png"
     _ => "tilemap/tiles/grass_plain.png"
@@ -4733,51 +4870,261 @@ fn tile_asset_for_kind(kind : String) -> String {
 }
 
 ///|
-fn tile_kind_at(grid_x : Int, grid_y : Int) -> String {
-  let river_y = if grid_x < 4 {
-    7
-  } else if grid_x < 9 {
-    8
-  } else if grid_x < 14 {
-    7
-  } else if grid_x < 22 {
-    6
-  } else {
-    5
+fn tilemap_grid_width() -> Int {
+  256
+}
+
+///|
+fn tilemap_grid_height() -> Int {
+  144
+}
+
+///|
+fn tilemap_step_x() -> Int {
+  18
+}
+
+///|
+fn tilemap_step_y() -> Int {
+  9
+}
+
+///|
+fn tilemap_origin_x() -> Int {
+  1180
+}
+
+///|
+fn tilemap_origin_y() -> Int {
+  18
+}
+
+///|
+fn tilemap_scene_width() -> Int {
+  tilemap_origin_x() + (tilemap_grid_width() - 1) * tilemap_step_x() + 144
+}
+
+///|
+fn tilemap_scene_height() -> Int {
+  tilemap_origin_y() +
+  (tilemap_grid_width() + tilemap_grid_height() - 2) * tilemap_step_y() + 120
+}
+
+///|
+fn river_center_x_at(grid_y : Int) -> Int {
+  74 + grid_y / 3 + (if grid_y % 18 < 9 { -2 } else { 2 })
+}
+
+///|
+fn reference_river_at(grid_x : Int, grid_y : Int) -> Bool {
+  let center = river_center_x_at(grid_y)
+  (grid_y >= 7 && abs_int(grid_x - center) <= (if grid_y > 50 { 4 } else { 2 })) ||
+  (grid_y >= 2 && grid_y <= 13 &&
+    abs_int(grid_x - (8 + grid_y * 2 + grid_y / 3)) <= 1) ||
+  (grid_y >= 38 && grid_y <= 50 &&
+    abs_int(grid_x - (43 + (grid_y - 38) * 3)) <= 2) ||
+  (grid_y >= 49 && grid_x >= 108 && in_ellipse(grid_x, grid_y, 118, 56, 9, 12))
+}
+
+///|
+fn reference_lake_at(grid_x : Int, grid_y : Int) -> Bool {
+  in_ellipse(grid_x, grid_y, 44, 42, 8, 5) ||
+  in_ellipse(grid_x, grid_y, 52, 44, 6, 4) ||
+  in_ellipse(grid_x, grid_y, 80, 38, 6, 4) ||
+  in_ellipse(grid_x, grid_y, 13, 8, 5, 3) ||
+  in_ellipse(grid_x, grid_y, 27, 8, 4, 2) ||
+  in_ellipse(grid_x, grid_y, 75, 8, 7, 3)
+}
+
+///|
+fn reference_water_at(grid_x : Int, grid_y : Int) -> Bool {
+  reference_river_at(grid_x, grid_y) || reference_lake_at(grid_x, grid_y)
+}
+
+///|
+fn reference_bridge_at(grid_x : Int, grid_y : Int) -> Bool {
+  (grid_y >= 33 && grid_y <= 36 &&
+    abs_int(grid_x - river_center_x_at(grid_y)) <= 3) ||
+  (grid_y >= 54 && grid_y <= 56 &&
+    abs_int(grid_x - river_center_x_at(grid_y)) <= 4) ||
+  (grid_x >= 57 && grid_x <= 62 && grid_y >= 42 && grid_y <= 44) ||
+  (grid_x >= 88 && grid_x <= 94 && grid_y >= 39 && grid_y <= 41) ||
+  (grid_x >= 18 && grid_x <= 23 && grid_y >= 8 && grid_y <= 10)
+}
+
+///|
+fn reference_wetland_at(grid_x : Int, grid_y : Int) -> Bool {
+  let river_center = river_center_x_at(grid_y)
+  (grid_y >= 7 && abs_int(grid_x - river_center) <= 5) ||
+  in_ellipse(grid_x, grid_y, 47, 43, 13, 8) ||
+  in_ellipse(grid_x, grid_y, 80, 39, 11, 7) ||
+  in_ellipse(grid_x, grid_y, 20, 8, 12, 5) ||
+  (grid_y >= 36 && grid_y <= 52 &&
+    abs_int(grid_x - (43 + (grid_y - 38) * 3)) <= 4)
+}
+
+///|
+fn reference_major_road_at(grid_x : Int, grid_y : Int) -> Bool {
+  abs_int(grid_y * 3 + grid_x * 2 - 142) <= 2 ||
+  abs_int(grid_y * 2 - grid_x + 24) <= 1 ||
+  (abs_int(grid_y - 35) <= 1 && grid_x < 100) ||
+  (abs_int(grid_y - 55) <= 1 && grid_x > 20 && grid_x < 112) ||
+  (abs_int(grid_x - 62) <= 1 && grid_y > 10 && grid_y < 58) ||
+  (abs_int(grid_x - 94) <= 1 && grid_y > 20)
+}
+
+///|
+fn reference_local_road_at(grid_x : Int, grid_y : Int) -> Bool {
+  (in_rect(grid_x, grid_y, 7, 18, 38, 34) &&
+    (grid_x % 7 == 0 || grid_y % 5 == 0)) ||
+  (in_rect(grid_x, grid_y, 31, 15, 69, 36) &&
+    (grid_x % 6 == 0 || grid_y % 5 == 0)) ||
+  (in_rect(grid_x, grid_y, 14, 39, 43, 57) &&
+    (grid_x % 5 == 0 || grid_y % 4 == 0)) ||
+  (in_rect(grid_x, grid_y, 48, 49, 86, 63) &&
+    (grid_x % 6 == 0 || grid_y % 4 == 0)) ||
+  (in_rect(grid_x, grid_y, 92, 33, 118, 51) &&
+    (grid_x % 5 == 0 || grid_y % 5 == 0)) ||
+  (in_rect(grid_x, grid_y, 88, 54, 123, 63) &&
+    (grid_x % 6 == 0 || grid_y % 4 == 0))
+}
+
+///|
+fn reference_road_at(grid_x : Int, grid_y : Int) -> Bool {
+  reference_major_road_at(grid_x, grid_y) || reference_local_road_at(grid_x, grid_y)
+}
+
+///|
+fn reference_dense_urban_at(grid_x : Int, grid_y : Int) -> Bool {
+  in_rect(grid_x, grid_y, 35, 16, 69, 34) ||
+  in_rect(grid_x, grid_y, 88, 54, 123, 63) ||
+  in_rect(grid_x, grid_y, 95, 35, 116, 48)
+}
+
+///|
+fn reference_urban_at(grid_x : Int, grid_y : Int) -> Bool {
+  reference_dense_urban_at(grid_x, grid_y) ||
+  in_rect(grid_x, grid_y, 13, 39, 43, 57) ||
+  in_rect(grid_x, grid_y, 48, 49, 86, 63) ||
+  in_rect(grid_x, grid_y, 7, 8, 30, 18) ||
+  in_rect(grid_x, grid_y, 70, 34, 84, 50)
+}
+
+///|
+fn reference_campus_at(grid_x : Int, grid_y : Int) -> Bool {
+  in_rect(grid_x, grid_y, 52, 37, 65, 47) ||
+  in_rect(grid_x, grid_y, 79, 51, 91, 61) ||
+  in_rect(grid_x, grid_y, 102, 27, 121, 33)
+}
+
+///|
+fn reference_farm_at(grid_x : Int, grid_y : Int) -> Bool {
+  in_rect(grid_x, grid_y, 70, 18, 88, 33) ||
+  in_rect(grid_x, grid_y, 6, 20, 36, 34) ||
+  in_rect(grid_x, grid_y, 2, 49, 18, 63) ||
+  in_rect(grid_x, grid_y, 105, 8, 127, 25)
+}
+
+///|
+fn reference_forest_at(grid_x : Int, grid_y : Int) -> Bool {
+  grid_y < 7 ||
+  (grid_x < 7 && grid_y > 36) ||
+  (grid_y > 58 && grid_x < 48) ||
+  (grid_x > 96 && grid_y < 30) ||
+  in_ellipse(grid_x, grid_y, 9, 50, 11, 10) ||
+  in_ellipse(grid_x, grid_y, 92, 13, 13, 9)
+}
+
+///|
+fn tile_kind_for_reference_code(code : String) -> String {
+  match code {
+    "." => "grass"
+    "g" => "grass-light"
+    "G" => "forest"
+    "p" => "grass-flower-pink"
+    "y" => "grass-flower-yellow"
+    "f" => "farm"
+    "F" => "field"
+    "r" => "river"
+    "l" => "lake"
+    "w" => "wetland"
+    "b" => "bridge"
+    "M" => "road-major"
+    "R" => "road"
+    "u" => "urban"
+    "U" => "urban-dense"
+    "c" => "campus"
+    _ => ""
   }
-  if grid_y == river_y {
-    if grid_x == 8 || grid_x == 9 {
-      "bridge"
-    } else {
-      "river"
-    }
-  } else if grid_y == river_y - 1 || grid_y == river_y + 1 {
-    "river-bank"
-  } else if grid_x >= 7 && grid_x <= 15 && grid_y >= 4 && grid_y <= 11 {
-    "plaza-stone"
-  } else if grid_x == 8 || grid_x == 9 || grid_y == 13 {
-    "dirt-path"
-  } else if (grid_x + grid_y) % 11 == 0 {
-    "grass-flower-pink"
-  } else if (grid_x * 3 + grid_y) % 13 == 0 {
-    "grass-flower-yellow"
-  } else if (grid_x + grid_y) % 4 == 0 {
-    "grass-light"
-  } else if (grid_x * 2 + grid_y) % 5 == 0 {
-    "grass-dark"
+}
+
+///|
+fn reference_tile_kind_at(grid_x : Int, grid_y : Int) -> String? {
+  let kind = tile_kind_for_reference_code(reference_tile_code_at(grid_x, grid_y))
+  if kind == "" {
+    None
   } else {
-    "grass"
+    Some(kind)
+  }
+}
+
+///|
+fn tile_kind_at(grid_x : Int, grid_y : Int) -> String {
+  match reference_tile_kind_at(grid_x, grid_y) {
+    Some(kind) => kind
+    None =>
+      if reference_water_at(grid_x, grid_y) {
+        if reference_bridge_at(grid_x, grid_y) {
+          "bridge"
+        } else if reference_lake_at(grid_x, grid_y) {
+          "lake"
+        } else {
+          "river"
+        }
+      } else if reference_road_at(grid_x, grid_y) {
+        if reference_major_road_at(grid_x, grid_y) {
+          "road-major"
+        } else {
+          "road"
+        }
+      } else if reference_wetland_at(grid_x, grid_y) {
+        "wetland"
+      } else if reference_campus_at(grid_x, grid_y) {
+        "campus"
+      } else if reference_dense_urban_at(grid_x, grid_y) {
+        "urban-dense"
+      } else if reference_urban_at(grid_x, grid_y) {
+        "urban"
+      } else if reference_farm_at(grid_x, grid_y) {
+        if (grid_x + grid_y) % 4 == 0 {
+          "field"
+        } else {
+          "farm"
+        }
+      } else if reference_forest_at(grid_x, grid_y) {
+        "forest"
+      } else if (grid_x + grid_y) % 11 == 0 {
+        "grass-flower-pink"
+      } else if (grid_x * 3 + grid_y) % 13 == 0 {
+        "grass-flower-yellow"
+      } else if (grid_x + grid_y) % 4 == 0 {
+        "grass-light"
+      } else if (grid_x * 2 + grid_y) % 5 == 0 {
+        "grass-dark"
+      } else {
+        "grass"
+      }
   }
 }
 
 ///|
 fn iso_tile_left(grid_x : Int, grid_y : Int) -> Int {
-  560 + (grid_x - grid_y) * 42 - 48
+  tilemap_origin_x() + (grid_x - grid_y) * tilemap_step_x() - 22
 }
 
 ///|
 fn iso_tile_top(grid_x : Int, grid_y : Int) -> Int {
-  18 + (grid_x + grid_y) * 21
+  tilemap_origin_y() + (grid_x + grid_y) * tilemap_step_y()
 }
 
 ///|
@@ -4815,38 +5162,152 @@ fn render_tile_object(
 ) -> @rabbita.Html {
   let style = [
     "left: \{iso_tile_left(grid_x, grid_y)}px",
-    "top: \{iso_tile_top(grid_x, grid_y) - 52}px",
+    "top: \{iso_tile_top(grid_x, grid_y) - 22}px",
     "--object-image: url('\{tile_object_asset(kind)}')",
   ]
   div(class="tile-object tile-object-\{kind}", style~, no_children())
 }
 
 ///|
+fn should_place_tile_object(grid_x : Int, grid_y : Int) -> Bool {
+  let kind = tile_kind_at(grid_x, grid_y)
+  if kind == "river" || kind == "river-bank" || kind == "bridge" ||
+    kind == "lake" || kind == "road" || kind == "road-major" ||
+    kind == "urban" || kind == "urban-dense" || kind == "campus" ||
+    kind == "farm" || kind == "field" || kind == "plaza-stone" {
+    return false
+  }
+  (kind == "forest" && (grid_x * 17 + grid_y * 31) % 19 == 0) ||
+  (kind == "wetland" && (grid_x * 7 + grid_y * 19) % 31 == 0) ||
+  ((grid_x * 17 + grid_y * 31) % 71 == 0) ||
+  ((grid_x + grid_y * 5) % 97 == 0)
+}
+
+///|
+fn tile_object_kind_at(grid_x : Int, grid_y : Int) -> String {
+  if (grid_x * 17 + grid_y * 31) % 47 == 0 {
+    if (grid_x + grid_y) % 3 == 0 {
+      "tree-large"
+    } else {
+      "tree-small"
+    }
+  } else if (grid_x * 7 + grid_y * 19) % 61 == 0 {
+    "bush"
+  } else {
+    "flower-patch"
+  }
+}
+
+///|
+fn should_place_reference_building(grid_x : Int, grid_y : Int) -> Bool {
+  let kind = tile_kind_at(grid_x, grid_y)
+  if kind != "urban" && kind != "urban-dense" && kind != "campus" {
+    return false
+  }
+  if reference_road_at(grid_x, grid_y) || reference_water_at(grid_x, grid_y) {
+    return false
+  }
+  if kind == "urban-dense" {
+    (grid_x * 5 + grid_y * 7) % 3 != 0
+  } else if kind == "campus" {
+    (grid_x + grid_y) % 3 == 0
+  } else {
+    (grid_x * 11 + grid_y * 13) % 5 != 0
+  }
+}
+
+///|
+fn reference_building_kind_at(grid_x : Int, grid_y : Int) -> String {
+  let tile = tile_kind_at(grid_x, grid_y)
+  if tile == "campus" {
+    if (grid_x + grid_y) % 2 == 0 {
+      "campus"
+    } else {
+      "civic"
+    }
+  } else if reference_dense_urban_at(grid_x, grid_y) {
+    if (grid_x * 3 + grid_y) % 11 == 0 {
+      "tower"
+    } else if (grid_x + grid_y) % 2 == 0 {
+      "row"
+    } else {
+      "block"
+    }
+  } else if (grid_x + grid_y) % 4 == 0 {
+    "courtyard"
+  } else {
+    "lowrise"
+  }
+}
+
+///|
+fn render_reference_building(
+  grid_x : Int,
+  grid_y : Int,
+  kind : String,
+) -> @rabbita.Html {
+  let style = [
+    "left: \{iso_tile_left(grid_x, grid_y) + 11}px",
+    "top: \{iso_tile_top(grid_x, grid_y) + 10}px",
+  ]
+  div(class="reference-building reference-building-\{kind}", style~, [
+    span(class="reference-building-roof", no_children()),
+  ])
+}
+
+///|
+fn render_reference_haze(
+  class_suffix : String,
+  left : Int,
+  top : Int,
+  width : Int,
+  height : Int,
+) -> @rabbita.Html {
+  let style = [
+    "left: \{left}px",
+    "top: \{top}px",
+    "width: \{width}px",
+    "height: \{height}px",
+  ]
+  div(class="reference-haze reference-haze-\{class_suffix}", style~, no_children())
+}
+
+///|
+fn render_tilemap_raster_layer() -> @rabbita.Html {
+  img(
+    class="tilemap-raster-layer",
+    src="tilemap/wenyu_reference_tilemap_iso.png",
+    alt="Wenyu Valley rendered tilemap",
+    loading="eager",
+    no_children(),
+  )
+}
+
+///|
 fn render_tilemap_layer() -> @rabbita.Html {
+  if standalone_viewport_requested() {
+    return render_tilemap_raster_layer()
+  }
   let children : Array[@rabbita.Html] = []
-  for y in 0..<23 {
-    for x in 0..<31 {
+  for y in 0..<tilemap_grid_height() {
+    for x in 0..<tilemap_grid_width() {
       children.push(render_iso_tile(x, y))
     }
   }
-  children.push(render_tile_object(1, 2, "tree-large"))
-  children.push(render_tile_object(3, 4, "tree-small"))
-  children.push(render_tile_object(11, 1, "tree-small"))
-  children.push(render_tile_object(16, 2, "tree-small"))
-  children.push(render_tile_object(19, 4, "tree-large"))
-  children.push(render_tile_object(2, 8, "bush"))
-  children.push(render_tile_object(5, 1, "bush"))
-  children.push(render_tile_object(15, 6, "bush"))
-  children.push(render_tile_object(10, 2, "flower-patch"))
-  children.push(render_tile_object(4, 8, "flower-patch"))
-  children.push(render_tile_object(11, 8, "flower-patch"))
-  children.push(render_tile_object(16, 11, "flower-patch"))
-  children.push(render_tile_object(20, 12, "flower-patch"))
-  children.push(render_tile_object(24, 15, "bush"))
-  children.push(render_tile_object(27, 18, "tree-small"))
-  children.push(render_tile_object(8, 7, "lamp"))
-  children.push(render_tile_object(12, 10, "lamp"))
-  children.push(render_tile_object(18, 13, "lamp"))
+  for y in 0..<tilemap_grid_height() {
+    for x in 0..<tilemap_grid_width() {
+      if should_place_tile_object(x, y) {
+        children.push(render_tile_object(x, y, tile_object_kind_at(x, y)))
+      }
+    }
+  }
+  children.push(render_tile_object(122, 78, "lamp"))
+  children.push(render_tile_object(149, 94, "lamp"))
+  children.push(render_tile_object(182, 84, "lamp"))
+  children.push(render_reference_haze("north-west", 120, 40, 3600, 760))
+  children.push(render_reference_haze("north-east", 8800, 20, 3200, 940))
+  children.push(render_reference_haze("south-west", 0, 6500, 3600, 980))
+  children.push(render_reference_haze("east", 10300, 3100, 2500, 1200))
   div(class="tilemap-layer", children)
 }
 
@@ -4865,18 +5326,20 @@ fn scene_node_by_key(
 
 ///|
 fn worker_avatar_left(zone : @ui.SceneRenderNode, index : Int) -> Int {
+  let zone_x = scene_node_left(zone)
+  let zone_width = scene_node_width(zone)
   match zone.key {
-    "worker-yard" => zone.x + 132 + index % 5 * 54
-    "city-hall" => zone.x + zone.width - 58
+    "worker-yard" => zone_x + 72 + index % 5 * 38
+    "city-hall" => zone_x + zone_width - 44
     _ => {
       let slot = index % 6
       match slot {
-        0 => zone.x + 8
-        1 => zone.x + zone.width - 42
-        2 => zone.x + zone.width / 2 - 24
-        3 => zone.x + 34
-        4 => zone.x + zone.width - 76
-        _ => zone.x + zone.width / 2 + 30
+        0 => zone_x + 8
+        1 => zone_x + zone_width - 42
+        2 => zone_x + zone_width / 2 - 24
+        3 => zone_x + 34
+        4 => zone_x + zone_width - 76
+        _ => zone_x + zone_width / 2 + 30
       }
     }
   }
@@ -4884,18 +5347,20 @@ fn worker_avatar_left(zone : @ui.SceneRenderNode, index : Int) -> Int {
 
 ///|
 fn worker_avatar_top(zone : @ui.SceneRenderNode, index : Int) -> Int {
+  let zone_y = scene_node_top(zone)
+  let zone_height = scene_node_height(zone)
   match zone.key {
-    "worker-yard" => zone.y + 24 + index / 5 * 44
-    "city-hall" => zone.y + zone.height - 74
+    "worker-yard" => zone_y + 20 + index / 5 * 34
+    "city-hall" => zone_y + zone_height - 62
     _ => {
       let slot = index % 6
       match slot {
-        0 => zone.y + zone.height - 46
-        1 => zone.y + zone.height - 42
-        2 => zone.y + zone.height - 74
-        3 => zone.y + zone.height - 4
-        4 => zone.y + zone.height - 2
-        _ => zone.y + zone.height - 28
+        0 => zone_y + zone_height - 46
+        1 => zone_y + zone_height - 42
+        2 => zone_y + zone_height - 74
+        3 => zone_y + zone_height - 4
+        4 => zone_y + zone_height - 2
+        _ => zone_y + zone_height - 28
       }
     }
   }
@@ -5041,7 +5506,7 @@ fn worker_wander_duration(index : Int) -> Int {
 
 ///|
 fn worker_roster_asset(index : Int) -> String {
-  "tilemap/actors/roster/resident_\{index % 64}.png"
+  "tilemap/actors/roster/resident_\{index % 64}_walk_strip.png"
 }
 
 ///|
@@ -5425,20 +5890,39 @@ fn render_town_viewport(
   shell_class : String,
   frame_class : String,
 ) -> @rabbita.Html {
-  let scene_style = ["width: \{scene.width}px", "height: \{scene.height}px"]
-  let scene_frame_style = ["--scene-width: \{scene.width}px"]
+  let stage_width = if standalone_viewport_requested() {
+    tilemap_scene_width()
+  } else {
+    scene.width
+  }
+  let stage_height = if standalone_viewport_requested() {
+    tilemap_scene_height()
+  } else {
+    scene.height
+  }
+  let scene_style = ["width: \{stage_width}px", "height: \{stage_height}px"]
+  let scene_frame_style = ["--scene-width: \{stage_width}px"]
   let worker_avatars : Array[@rabbita.Html] = []
-  for i in 0..<workers.length() {
-    let worker = workers[i]
-    worker_avatars.push(
-      render_worker_avatar(
-        dispatch,
-        scene,
-        worker,
-        i,
-        selected_worker_id == Some(worker.id),
-      ),
-    )
+  if !standalone_viewport_requested() {
+    for i in 0..<workers.length() {
+      let worker = workers[i]
+      worker_avatars.push(
+        render_worker_avatar(
+          dispatch,
+          scene,
+          worker,
+          i,
+          selected_worker_id == Some(worker.id),
+        ),
+      )
+    }
+  }
+  let scene_nodes = if standalone_viewport_requested() {
+    []
+  } else {
+    scene.nodes.filter(node => !is_mayor_scene_node(node)).map(node => {
+      render_node(dispatch, node, selected_node_key == Some(node.key))
+    })
   }
   section(class=shell_class, [
     div(class="scene-stage-rail", execution_stage_cards(executions)),
@@ -5457,12 +5941,7 @@ fn render_town_viewport(
         ),
         render_tilemap_layer(),
         div(class="scene-overlay", [
-          div(
-            class="scene-nodes-layer",
-            scene.nodes.filter(node => !is_mayor_scene_node(node)).map(node => {
-              render_node(dispatch, node, selected_node_key == Some(node.key))
-            }),
-          ),
+          div(class="scene-nodes-layer", scene_nodes),
           div(class="scene-workers-layer", worker_avatars),
         ]),
       ]),
@@ -5518,6 +5997,16 @@ fn render_scene(dispatch : Dispatch[Msg], model : Model) -> @rabbita.Html {
           status_chip(if model.paused { "Paused" } else { "Live" }, "chip-live"),
           status_chip(simulation_time_label(model.tick), "chip-clock"),
           status_chip("Tick \{model.tick}", "chip-neutral"),
+          button(
+            class="control-button viewport-zoom-button viewport-zoom-out",
+            on_click=dispatch(ViewportControlNoop),
+            "Zoom Out",
+          ),
+          button(
+            class="control-button viewport-zoom-button viewport-zoom-in",
+            on_click=dispatch(ViewportControlNoop),
+            "Zoom In",
+          ),
           button(
             class="control-button",
             on_click=dispatch(TogglePause),

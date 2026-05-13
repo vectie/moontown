@@ -899,14 +899,34 @@ body,
 
 .viewport-frame {
   height: 100%;
+  --viewport-zoom: 1;
   border-radius: 0;
   border: var(--pixel-border);
   background: #c4d26d;
+  cursor: grab;
+  touch-action: none;
+  user-select: none;
+  -webkit-user-select: none;
+  -webkit-overflow-scrolling: touch;
+  overscroll-behavior: contain;
+  will-change: scroll-position;
+}
+
+.viewport-frame.is-drag-panning {
+  cursor: grabbing;
+}
+
+.viewport-zoom-button {
+  min-width: 88px;
 }
 
 .viewport-frame .scene-stage {
   overflow: hidden;
+  zoom: var(--viewport-zoom);
   transform: translateX(-96px);
+  transform: translate3d(-96px, 0, 0);
+  contain: layout paint style;
+  will-change: contents;
   background:
     linear-gradient(#fff8cf, #fff8cf) 154px 114px / 28px 28px no-repeat,
     linear-gradient(#fff2be, #fff2be) 112px 72px / 112px 112px no-repeat,
@@ -1088,19 +1108,35 @@ body,
   inset: 0;
   z-index: 1;
   pointer-events: none;
+  contain: layout paint style;
+  transform: translateZ(0);
+}
+
+.tilemap-raster-layer {
+  position: absolute;
+  inset: 0;
+  z-index: 1;
+  width: 100%;
+  height: 100%;
+  pointer-events: none;
+  image-rendering: pixelated;
+  transform: translateZ(0);
+  contain: layout paint style;
+  user-select: none;
+  -webkit-user-drag: none;
 }
 
 .iso-tile {
   position: absolute;
-  width: 96px;
-  height: 72px;
+  width: 44px;
+  height: 33px;
   background-color: transparent;
   background-image: var(--tile-image);
   background-size: contain;
   background-position: center bottom;
   background-repeat: no-repeat;
   image-rendering: pixelated;
-  filter: drop-shadow(0 2px 0 rgba(64, 84, 32, 0.18));
+  backface-visibility: hidden;
 }
 
 .iso-tile-grass-light {
@@ -1121,37 +1157,123 @@ body,
 
 .iso-tile-river {
   background-color: transparent;
-  filter: drop-shadow(0 3px 0 rgba(55, 105, 120, 0.28));
+  filter:
+    saturate(1.3)
+    brightness(1.08)
+    drop-shadow(0 3px 0 rgba(55, 105, 120, 0.28));
 }
 
-.iso-tile-river-bank {
+.iso-tile-lake,
+.iso-tile-pond {
+  background-color: transparent;
+  filter:
+    hue-rotate(-8deg)
+    saturate(1.24)
+    brightness(1.1)
+    drop-shadow(0 3px 0 rgba(55, 105, 120, 0.22));
+}
+
+.iso-tile-river-bank,
+.iso-tile-wetland {
+  background-color: transparent;
+  filter:
+    hue-rotate(-18deg)
+    saturate(1.24)
+    brightness(1.05);
+}
+
+.iso-tile-dirt-path,
+.iso-tile-road,
+.iso-tile-road-major {
   background-color: transparent;
 }
 
-.iso-tile-dirt-path {
+.iso-tile-road {
+  filter:
+    grayscale(0.18)
+    saturate(0.76)
+    brightness(1.08)
+    drop-shadow(0 2px 0 rgba(80, 78, 62, 0.18));
+}
+
+.iso-tile-road-major {
+  filter:
+    grayscale(0.34)
+    saturate(0.64)
+    brightness(1.18)
+    drop-shadow(0 3px 0 rgba(68, 70, 60, 0.24));
+}
+
+.iso-tile-plaza-stone,
+.iso-tile-urban,
+.iso-tile-urban-dense,
+.iso-tile-campus {
   background-color: transparent;
 }
 
-.iso-tile-plaza-stone {
+.iso-tile-urban {
+  filter:
+    grayscale(0.22)
+    brightness(1.08)
+    saturate(0.8);
+}
+
+.iso-tile-urban-dense {
+  filter:
+    grayscale(0.38)
+    brightness(1.16)
+    saturate(0.62)
+    drop-shadow(0 2px 0 rgba(80, 78, 70, 0.18));
+}
+
+.iso-tile-campus {
+  filter:
+    hue-rotate(22deg)
+    saturate(0.82)
+    brightness(1.13);
+}
+
+.iso-tile-farm,
+.iso-tile-field {
   background-color: transparent;
+  filter:
+    hue-rotate(18deg)
+    saturate(1.24)
+    brightness(1.08);
+}
+
+.iso-tile-forest {
+  background-color: transparent;
+  filter:
+    hue-rotate(-18deg)
+    saturate(1.28)
+    brightness(0.78);
 }
 
 .iso-tile-bridge {
   background-color: transparent;
-  filter: drop-shadow(0 4px 0 rgba(58, 39, 21, 0.3));
 }
 
 .viewport-frame .iso-tile {
   background-size: contain;
   background-position: center bottom;
   background-repeat: no-repeat;
+  filter: none;
+}
+
+.viewport-frame.is-drag-panning .iso-tile,
+.viewport-frame.is-zooming .iso-tile,
+.viewport-frame.is-drag-panning .tile-object,
+.viewport-frame.is-zooming .tile-object {
+  filter: none !important;
 }
 
 .tile-object {
   position: absolute;
-  width: 58px;
-  height: 70px;
-  transform: translate(-4px, -10px);
+  z-index: 4;
+  width: 28px;
+  height: 34px;
+  transform: translate(2px, -2px);
   background-image: var(--object-image);
   background-repeat: no-repeat;
   background-size: contain;
@@ -1161,28 +1283,28 @@ body,
 }
 
 .tile-object-tree-large {
-  width: 76px;
-  height: 94px;
-  transform: translate(-16px, -28px);
+  width: 36px;
+  height: 46px;
+  transform: translate(-6px, -12px);
 }
 
 .tile-object-tree-small {
-  width: 58px;
-  height: 78px;
-  transform: translate(-8px, -20px);
+  width: 28px;
+  height: 38px;
+  transform: translate(0, -8px);
 }
 
 .tile-object-bush,
 .tile-object-flower-patch {
-  width: 48px;
-  height: 42px;
-  transform: translate(4px, 8px);
+  width: 24px;
+  height: 20px;
+  transform: translate(6px, 6px);
 }
 
 .tile-object-lamp {
-  width: 34px;
-  height: 70px;
-  transform: translate(14px, -18px);
+  width: 18px;
+  height: 34px;
+  transform: translate(10px, -4px);
 }
 
 .tile-object-tree-large,
@@ -1191,29 +1313,29 @@ body,
 }
 
 .tile-object-tree-small {
-  width: 58px;
-  height: 68px;
-  transform: translate(2px, 0);
+  width: 28px;
+  height: 34px;
+  transform: translate(3px, 0);
 }
 
 .tile-object-bush {
-  width: 58px;
-  height: 42px;
-  transform: translate(2px, 18px);
+  width: 28px;
+  height: 20px;
+  transform: translate(4px, 9px);
   background-image: var(--object-image);
 }
 
 .tile-object-flower-patch {
-  width: 56px;
-  height: 38px;
-  transform: translate(4px, 20px);
+  width: 26px;
+  height: 18px;
+  transform: translate(6px, 9px);
   background-image: var(--object-image);
 }
 
 .tile-object-lamp {
-  width: 46px;
-  height: 62px;
-  transform: translate(10px, 0);
+  width: 20px;
+  height: 30px;
+  transform: translate(8px, 0);
   background-image: var(--object-image);
 }
 
@@ -1221,6 +1343,108 @@ body,
   background-size: contain;
   background-position: center bottom;
   background-repeat: no-repeat;
+}
+
+.reference-building {
+  position: absolute;
+  z-index: 3;
+  width: 13px;
+  height: 11px;
+  transform: translate(-7px, -8px) skewY(-8deg);
+  background:
+    linear-gradient(90deg, #f6f2df 0 58%, #c9c2ad 58% 100%);
+  border-left: 2px solid rgba(83, 78, 65, 0.42);
+  border-bottom: 2px solid rgba(83, 78, 65, 0.5);
+  image-rendering: pixelated;
+  box-shadow: 5px 5px 0 rgba(45, 54, 36, 0.14);
+}
+
+.reference-building::before {
+  content: "";
+  position: absolute;
+  left: 1px;
+  right: -2px;
+  top: -4px;
+  height: 4px;
+  background:
+    linear-gradient(135deg, #ffffff 0 56%, #d6d0bd 56% 100%);
+  border-top: 2px solid rgba(255, 255, 255, 0.76);
+  border-right: 2px solid rgba(111, 105, 89, 0.34);
+  transform: skewX(-18deg);
+}
+
+.reference-building-roof {
+  position: absolute;
+  inset: 3px 2px auto 2px;
+  height: 2px;
+  background: rgba(91, 103, 96, 0.34);
+}
+
+.reference-building-row {
+  width: 18px;
+  height: 9px;
+  transform: translate(-9px, -6px) skewY(-8deg);
+}
+
+.reference-building-block {
+  width: 16px;
+  height: 12px;
+  transform: translate(-8px, -9px) skewY(-8deg);
+}
+
+.reference-building-tower {
+  width: 13px;
+  height: 22px;
+  transform: translate(-7px, -19px) skewY(-8deg);
+  background:
+    linear-gradient(90deg, #fffdf1 0 52%, #b7b0a2 52% 100%);
+}
+
+.reference-building-lowrise,
+.reference-building-courtyard {
+  filter: saturate(0.88) brightness(0.96);
+}
+
+.reference-building-courtyard {
+  width: 20px;
+  height: 11px;
+  background:
+    linear-gradient(90deg, #f7f0d4 0 22%, transparent 22% 44%, #f7f0d4 44% 100%),
+    linear-gradient(#cfc3a1, #cfc3a1);
+}
+
+.reference-building-campus,
+.reference-building-civic {
+  width: 22px;
+  height: 14px;
+  transform: translate(-11px, -11px) skewY(-8deg);
+  background:
+    linear-gradient(90deg, #fffdf0 0 64%, #c1cabf 64% 100%);
+  box-shadow: 6px 6px 0 rgba(45, 77, 58, 0.16);
+}
+
+.reference-building-civic::after {
+  content: "";
+  position: absolute;
+  left: 4px;
+  bottom: 2px;
+  width: 9px;
+  height: 2px;
+  background: rgba(106, 136, 139, 0.34);
+}
+
+.reference-haze {
+  position: absolute;
+  z-index: 7;
+  pointer-events: none;
+  border-radius: 999px;
+  opacity: 0.46;
+  background:
+    radial-gradient(circle at 18% 50%, rgba(255, 255, 255, 0.86), transparent 28%),
+    radial-gradient(circle at 44% 42%, rgba(255, 255, 255, 0.72), transparent 34%),
+    radial-gradient(circle at 72% 55%, rgba(255, 255, 255, 0.78), transparent 30%),
+    linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.34), transparent);
+  filter: blur(3px);
 }
 
 .viewport-frame-shell .scene-stage-rail {
@@ -1419,9 +1643,9 @@ body,
 }
 
 .viewport-frame .worker-avatar {
-  width: 48px;
-  min-width: 48px;
-  height: 62px;
+  width: 30px;
+  min-width: 30px;
+  height: 42px;
   padding: 0;
   place-items: center;
   border: 0;
@@ -1485,7 +1709,7 @@ body,
 }
 
 .viewport-frame .scene-node {
-  transform: scale(0.64);
+  transform: scale(0.34);
   transform-origin: bottom left;
 }
 
@@ -1719,8 +1943,8 @@ body,
 }
 
 .worker-sprite {
-  width: 38px;
-  height: 54px;
+  width: 30px;
+  height: 42px;
   background-repeat: no-repeat;
   background-position: center bottom;
   background-size: contain;
@@ -1759,7 +1983,8 @@ body,
 
 .worker-sprite-roster .worker-sprite {
   background-image: var(--worker-image);
-  animation: worker-idle-bob 1200ms steps(2) infinite;
+  background-size: 400% 100%;
+  animation: resident-walk-cycle 720ms step-end infinite;
 }
 
 .worker-running .worker-sprite {
@@ -1783,6 +2008,25 @@ body,
     background-position-x: 0%;
   }
   to {
+    background-position-x: 100%;
+  }
+}
+
+@keyframes resident-walk-cycle {
+  0%,
+  24.99% {
+    background-position-x: 0%;
+  }
+  25%,
+  49.99% {
+    background-position-x: 33.333%;
+  }
+  50%,
+  74.99% {
+    background-position-x: 66.666%;
+  }
+  75%,
+  100% {
     background-position-x: 100%;
   }
 }

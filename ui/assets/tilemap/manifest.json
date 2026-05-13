@@ -3,14 +3,32 @@
   "orientation": "isometric",
   "sourceTileWidth": 128,
   "sourceTileHeight": 96,
-  "renderTileWidth": 96,
-  "renderTileHeight": 72,
-  "gridStepX": 42,
-  "gridStepY": 21,
-  "viewportGridWidth": 31,
-  "viewportGridHeight": 23,
-  "viewportPolicy": "Render an overscanned procedural isometric field so buildings can stand on generated land beyond the visible frame.",
-  "assetPolicy": "Generate final PNG assets with gpt-image-2. Do not replace these with hand-authored SVG/vector placeholders.",
+  "renderTileWidth": 44,
+  "renderTileHeight": 33,
+  "gridStepX": 18,
+  "gridStepY": 9,
+  "viewportGridWidth": 256,
+  "viewportGridHeight": 144,
+  "viewportPolicy": "Render a draggable Wenyu Valley masterplan tilemap: right-side river corridor, central wetlands, diagonal road grids, dense urban clusters, satellite campuses, farmland blocks, forest buffers, ponds, bridges, and edge haze matching the reference aerial composition.",
+  "assetPolicy": "Keep semantic labels in JSON, generate transparent PNG tiles/sprites from the approved visual references, then bake the standalone viewport into a raster layer for smooth drag and zoom.",
+  "semanticLayers": {
+    "terrain": {
+      "path": "wenyu_reference_labels.json",
+      "gridWidth": 256,
+      "gridHeight": 144
+    },
+    "buildings": {
+      "path": "wenyu_reference_buildings.json",
+      "source": "wenyu_reference_buildings_source.png",
+      "preview": "wenyu_reference_buildings_preview.png",
+      "method": "Shape-first extraction from reference.png: label exact footprint cells, preserve road/grid seams, classify connected components, and bake those outlines into the viewport raster."
+    },
+    "standaloneRaster": {
+      "path": "wenyu_reference_tilemap_iso.png",
+      "source": "terrain + buildings",
+      "reason": "A single raster layer avoids moving tens of thousands of DOM nodes while dragging or zooming."
+    }
+  },
   "tiles": {
     "grass_plain": {
       "path": "tiles/grass_plain.png",
@@ -119,9 +137,12 @@
     },
     "resident_roster": {
       "pathPattern": "actors/roster/resident_{index}.png",
+      "walkFramePattern": "actors/roster/resident_{index}_walk_{frame}.png",
+      "walkStripPattern": "actors/roster/resident_{index}_walk_strip.png",
       "count": 64,
       "role": "unique resident and worker identities",
-      "animation": "route wander plus idle bob"
+      "walkFrames": 4,
+      "animation": "deterministic four-frame walk strip plus route wander"
     }
   },
   "buildings": {
@@ -158,6 +179,18 @@
       "physical_bridge": "districts/physical_bridge.png",
       "anchor": "bottom-center",
       "zonePrefix": "wenyu-"
+    },
+    "wenyu_reference_buildings": {
+      "lowrise": "buildings/wenyu_shape/cell_lowrise.png",
+      "row": "buildings/wenyu_shape/cell_row.png",
+      "block": "buildings/wenyu_shape/cell_block.png",
+      "tower": "buildings/wenyu_shape/cell_tower.png",
+      "courtyard": "buildings/wenyu_shape/cell_courtyard.png",
+      "campus": "buildings/wenyu_shape/cell_campus.png",
+      "civic": "buildings/wenyu_shape/cell_civic.png",
+      "industrial": "buildings/wenyu_shape/cell_industrial.png",
+      "placementLayer": "wenyu_reference_buildings.json",
+      "rendering": "Each sprite is a per-cell material. Building shape and orientation come from wenyu_reference_buildings.json labelRows/components, not from random icon placement."
     }
   }
 }
