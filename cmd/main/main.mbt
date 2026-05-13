@@ -8,6 +8,9 @@ async fn main {
     ["supervise"] => println(@moontown.supervise_saved_town())
     ["status"] => println(@moontown.render_saved_town_status())
     ["daemon", "tick"] => println(@moontown.daemon_tick_saved_town())
+    ["daemon", "run", "--once"] =>
+      println(@moontown.daemon_run_saved_town(max_ticks=1, sleep_ms=0))
+    ["daemon", "run"] => println(@moontown.daemon_run_saved_town())
     ["run", .. rest] =>
       println(@moontown.render_goal_run(rest.to_array().join(" ")))
     _ => println(@moontown.load_or_create_demo_dashboard())

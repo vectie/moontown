@@ -165,6 +165,61 @@ pub fn TownTask::new(
 }
 
 ///|
+pub struct StandingGoal {
+  id : String
+  title : String
+  prompt : String
+  target_book_id : String?
+  cadence_ticks : Int
+  next_due_tick : Int
+  last_run_tick : Int?
+  enabled : Bool
+  source_policy : String
+  quality_threshold : Int
+} derive(Show, Eq, ToJson, FromJson)
+
+///|
+pub fn StandingGoal::new(
+  id~ : String,
+  title~ : String,
+  prompt~ : String,
+  target_book_id? : String? = None,
+  cadence_ticks? : Int = 720,
+  next_due_tick? : Int = 0,
+  last_run_tick? : Int? = None,
+  enabled? : Bool = true,
+  source_policy? : String = "web-first",
+  quality_threshold? : Int = 80,
+) -> StandingGoal {
+  StandingGoal::{
+    id,
+    title,
+    prompt,
+    target_book_id,
+    cadence_ticks,
+    next_due_tick,
+    last_run_tick,
+    enabled,
+    source_policy,
+    quality_threshold,
+  }
+}
+
+///|
+pub fn StandingGoal::is_due(self : StandingGoal, tick : Int) -> Bool {
+  self.enabled && tick >= self.next_due_tick
+}
+
+///|
+pub fn StandingGoal::mark_dispatched(
+  self : StandingGoal,
+  tick : Int,
+) -> StandingGoal {
+  let cadence = if self.cadence_ticks < 1 { 1 } else { self.cadence_ticks }
+  { ..self, last_run_tick: Some(tick), next_due_tick: tick + cadence }
+}
+
+///|
 pub struct AssignmentPlan {
   task_id : String
   worker_id : String

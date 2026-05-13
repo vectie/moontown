@@ -21,6 +21,7 @@ It should own:
 
 - global orchestration
 - routing and isolation policy
+- standing goals and daemon cadence
 - health monitoring and recovery
 - scheduling and patrol
 - experiment control
@@ -190,6 +191,35 @@ findings, and maturity/gap section. The evidence trail points back to each
 book's `raw/bootstrap/` research artifacts, including W-source and L-source
 rows.
 
+### Standing Goal Run
+
+Standing goals are durable town-level obligations. They are not book memory and
+not worker sessions.
+
+```text
+.moontown/standing-goals.json
+  -> daemon tick
+  -> Mayor checks due standing goals
+  -> Mayor dispatches target book keeper
+  -> MoonBook hydrates book-local context
+  -> MoonClaw executes bounded work
+  -> MoonBook persists wiki/source/timeline/synthesis updates
+  -> Moontown advances next_due_tick
+```
+
+The first default standing goal is `watch-opc-news`, which targets the dynamic
+`research-opc` book and uses a web-first source policy. The Mayor owns when it
+runs. The `research-opc` keeper owns what gets remembered. MoonClaw workers own
+how the bounded research job is executed.
+
+This is the core long-standing split:
+
+```text
+Mayor decides when / where / why.
+Book Keeper decides what belongs in durable memory.
+Worker Claws decide how to execute bounded tasks.
+```
+
 ### Readiness and Quality Gates
 
 Moontown now keeps a typed readiness layer for research acceptance instead of
@@ -210,12 +240,25 @@ Moontown exposes an operator-readable runtime status seam:
 
 - [runtime_status.mbt](/Users/kq/Workspace/moontown/runtime_status.mbt)
 
-The current daemon implementation is still a one-shot durable tick rather than
-a days-long process manager. It loads a persisted snapshot, runs one mayor
-supervision cycle, persists the checkpoint, and reports planned scheduler
-actions. It also persists `.moontown/daemon.json` with daemon tick, lease, and
-job metadata. This is the intended stepping stone toward a restart-safe loop
-with stronger leases and heartbeats.
+The daemon implementation now has two levels:
+
+- `daemon tick`
+  runs one restart-safe mayor supervision cycle and bootstraps a saved town if
+  no snapshot exists.
+- `daemon run`
+  repeats durable ticks and sleeps between iterations.
+
+The daemon persists:
+
+- `.moontown/daemon.json`
+  daemon tick, lease owner, heartbeat event count, active standing goal ids, and
+  scheduled job metadata
+- `.moontown/standing-goals.json`
+  standing goal registry, cadence, target book, source policy, and next due tick
+
+This is not yet production-grade multi-day process management. Missing hardening
+still includes lease expiry, process identity, crash fencing, backoff policy,
+external service supervision, and browser/backend live sync.
 
 ### Dispatch
 
@@ -292,7 +335,9 @@ Current persisted files:
 - `.moontown/town.json`
   - persisted town snapshot
 - `.moontown/daemon.json`
-  - persisted one-shot daemon tick state, lease owner, heartbeat event count, and scheduled job metadata
+  - persisted daemon tick state, lease owner, heartbeat event count, active standing goals, and scheduled job metadata
+- `.moontown/standing-goals.json`
+  - persisted Mayor-owned standing goal registry
 - `.moontown/town-synthesis/*.md`
   - mayor-owned cross-book synthesis and readiness artifacts
 - `.moontown/packets/`

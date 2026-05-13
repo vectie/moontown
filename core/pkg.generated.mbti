@@ -63,6 +63,26 @@ pub impl Show for MemoryScope
 pub impl ToJson for MemoryScope
 pub impl @json.FromJson for MemoryScope
 
+pub struct StandingGoal {
+  id : String
+  title : String
+  prompt : String
+  target_book_id : String?
+  cadence_ticks : Int
+  next_due_tick : Int
+  last_run_tick : Int?
+  enabled : Bool
+  source_policy : String
+  quality_threshold : Int
+}
+pub fn StandingGoal::is_due(Self, Int) -> Bool
+pub fn StandingGoal::mark_dispatched(Self, Int) -> Self
+pub fn StandingGoal::new(id~ : String, title~ : String, prompt~ : String, target_book_id? : String?, cadence_ticks? : Int, next_due_tick? : Int, last_run_tick? : Int?, enabled? : Bool, source_policy? : String, quality_threshold? : Int) -> Self
+pub impl Eq for StandingGoal
+pub impl Show for StandingGoal
+pub impl ToJson for StandingGoal
+pub impl @json.FromJson for StandingGoal
+
 pub struct StaticBookProvider {
   entries : Array[BookRef]
 }

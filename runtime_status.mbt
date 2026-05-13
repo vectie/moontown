@@ -12,6 +12,8 @@ pub struct TownRuntimeStatus {
   failed_count : Int
   stale_count : Int
   completed_count : Int
+  standing_goal_count : Int
+  due_standing_goal_count : Int
   daemon_actions : Array[@scheduler.SchedulerAction]
   summary : String
 } derive(Show, Eq, ToJson, FromJson)
@@ -21,7 +23,18 @@ pub async fn inspect_saved_town(
   snapshot_path? : String = @storage.default_snapshot_path(),
 ) -> TownRuntimeStatus {
   match @storage.load_snapshot_file(snapshot_path) {
-    Some(snapshot) => runtime_status_from_state(snapshot.town, snapshot_path)
+    Some(snapshot) => {
+      let daemon = load_daemon_state(default_daemon_state_path(snapshot_path))
+      let goals = @storage.load_or_create_standing_goals(
+        path=default_standing_goal_state_path(snapshot_path),
+      )
+      runtime_status_from_state(
+        snapshot.town,
+        snapshot_path,
+        standing_goals=goals,
+        daemon_tick=daemon.tick_sequence,
+      )
+    }
     None =>
       {
         snapshot_path,
@@ -36,6 +49,8 @@ pub async fn inspect_saved_town(
         failed_count: 0,
         stale_count: 0,
         completed_count: 0,
+        standing_goal_count: 0,
+        due_standing_goal_count: 0,
         daemon_actions: [],
         summary: "No saved town snapshot exists at \{snapshot_path}.",
       }
@@ -46,9 +61,16 @@ pub async fn inspect_saved_town(
 pub fn runtime_status_from_state(
   state : @core.TownState,
   snapshot_path : String,
+  standing_goals? : Array[@core.StandingGoal] = [],
+  daemon_tick? : Int = 0,
 ) -> TownRuntimeStatus {
   let report = @health.inspect_town(state)
   let actions = @scheduler.plan_tick(state, report)
+  let next_tick = daemon_tick + 1
+  let due_goals = @scheduler.due_standing_goals(standing_goals, next_tick)
+  for action in @scheduler.plan_standing_goal_actions(standing_goals, next_tick) {
+    actions.push(action)
+  }
   let running = count_runtime_executions(state, [
     @core.TaskExecutionStatus::ProposalImported,
     @core.TaskExecutionStatus::RunConfirmed,
@@ -78,8 +100,10 @@ pub fn runtime_status_from_state(
     failed_count: failed,
     stale_count: stale,
     completed_count: completed,
+    standing_goal_count: standing_goals.length(),
+    due_standing_goal_count: due_goals.length(),
     daemon_actions: actions,
-    summary: "books=\{state.books.length()} workers=\{state.workers.length()} tasks=\{state.tasks.length()} executions=\{state.executions.length()} running=\{running} review=\{review} failed=\{failed} stale=\{stale} planned_actions=\{actions.length()}",
+    summary: "books=\{state.books.length()} workers=\{state.workers.length()} tasks=\{state.tasks.length()} executions=\{state.executions.length()} running=\{running} review=\{review} failed=\{failed} stale=\{stale} standing_goals=\{standing_goals.length()} due_goals=\{due_goals.length()} planned_actions=\{actions.length()}",
   }
 }
 
@@ -117,6 +141,9 @@ pub async fn render_saved_town_status(
     "daemon=\{daemon.daemon_id} tick=\{daemon.tick_sequence} lease=\{daemon.lease_owner} jobs=\{daemon.jobs.length()}\n",
   )
   builder.write_string(
+    "standing_goals=\{status.standing_goal_count} due_next_tick=\{status.due_standing_goal_count}\n",
+  )
+  builder.write_string(
     "planned daemon actions=\{status.daemon_actions.length()}\n",
   )
   for action in status.daemon_actions {
@@ -134,29 +161,102 @@ pub async fn daemon_tick_saved_town(
   let catalog = @moonbook.load_or_create_catalog(path=book_catalog_path)
   let daemon_path = default_daemon_state_path(snapshot_path)
   let daemon = load_daemon_state(daemon_path)
+  let goal_path = default_standing_goal_state_path(snapshot_path)
+  let standing_goals = @storage.load_or_create_standing_goals(path=goal_path)
   let mayor = demo_mayor()
-  match snapshot {
-    Some(saved) => {
-      let state = saved.town
-      run_supervision_cycle(state, mayor, catalog)
-      persist_town_checkpoint(state, snapshot_path)
-      let report = @health.inspect_town(state)
-      let (next_daemon, tick, _) = @scheduler.plan_daemon_tick(
-        daemon, state, report,
+  let saved = match snapshot {
+    Some(saved) => saved
+    None => {
+      let state = load_or_create_demo_state(
+        path=snapshot_path,
+        book_catalog_path~,
       )
-      save_daemon_state(daemon_path, next_daemon)
+      @storage.snapshot_of(state)
+    }
+  }
+  let state = saved.town
+  let next_tick_sequence = daemon.tick_sequence + 1
+  let updated_goals = dispatch_due_standing_goals(
+    state, standing_goals, next_tick_sequence, snapshot_path, book_catalog_path,
+  )
+  @storage.save_standing_goals_file(goal_path, updated_goals)
+  run_supervision_cycle(state, mayor, catalog)
+  persist_town_checkpoint(state, snapshot_path)
+  let report = @health.inspect_town(state)
+  let (next_daemon, tick, _) = @scheduler.plan_daemon_tick(
+    daemon,
+    state,
+    report,
+    standing_goals~,
+  )
+  save_daemon_state(daemon_path, next_daemon)
+  state.record_event(
+    @core.TownEvent::new(
+      id="event-daemon-\{tick.sequence}",
+      kind="daemon",
+      detail=tick.summary,
+    ),
+  )
+  persist_town_checkpoint(state, snapshot_path)
+  render_saved_town_status(snapshot_path~)
+}
+
+///|
+async fn dispatch_due_standing_goals(
+  state : @core.TownState,
+  goals : Array[@core.StandingGoal],
+  tick : Int,
+  snapshot_path : String,
+  book_catalog_path : String,
+) -> Array[@core.StandingGoal] {
+  let updated : Array[@core.StandingGoal] = []
+  for goal in goals {
+    if goal.is_due(tick) {
+      let target = goal.target_book_id.unwrap_or("mayor-selected-book")
       state.record_event(
         @core.TownEvent::new(
-          id="event-daemon-\{tick.sequence}",
-          kind="daemon",
-          detail=tick.summary,
+          id="event-standing-goal-\{tick}-\{goal.id}",
+          kind="standing-goal",
+          detail="Mayor dispatched standing goal \{goal.id} to \{target}: \{goal.title}",
+          related_book_id=goal.target_book_id,
         ),
       )
-      persist_town_checkpoint(state, snapshot_path)
-      render_saved_town_status(snapshot_path~)
+      ignore(
+        run_goal_into_state(
+          state,
+          goal.prompt,
+          book_id=goal.target_book_id,
+          task_limit_per_book=1,
+          snapshot_path~,
+          book_catalog_path~,
+        ),
+      )
+      updated.push(goal.mark_dispatched(tick))
+    } else {
+      updated.push(goal)
     }
-    None => "No saved town snapshot exists at \{snapshot_path}."
   }
+  updated
+}
+
+///|
+pub async fn daemon_run_saved_town(
+  snapshot_path? : String = @storage.default_snapshot_path(),
+  book_catalog_path? : String = @moonbook.default_catalog_path(),
+  max_ticks? : Int = 0,
+  sleep_ms? : Int = 30_000,
+) -> String {
+  let mut ticks = 0
+  let mut latest = ""
+  while max_ticks <= 0 || ticks < max_ticks {
+    latest = daemon_tick_saved_town(snapshot_path~, book_catalog_path~)
+    ticks += 1
+    if max_ticks > 0 && ticks >= max_ticks {
+      break
+    }
+    @async.sleep(sleep_ms)
+  }
+  "Moontown daemon run completed ticks=\{ticks}\n\{latest}"
 }
 
 ///|
@@ -166,6 +266,16 @@ fn default_daemon_state_path(snapshot_path : String) -> String {
     ".moontown/daemon.json"
   } else {
     "\{base}/daemon.json"
+  }
+}
+
+///|
+fn default_standing_goal_state_path(snapshot_path : String) -> String {
+  let base = @path.Path::dirname(snapshot_path).to_string()
+  if base == "." || base == "" {
+    @storage.default_standing_goal_path()
+  } else {
+    "\{base}/standing-goals.json"
   }
 }
 

@@ -10,6 +10,7 @@ domains and multiple `moonclaw` runtimes.
 It is designed for:
 
 - town-wide routing and scheduling
+- standing goals and durable mayor supervision
 - domain isolation across multiple books
 - embedded role-specialized planning runtimes
 - long-lived town state and snapshots
@@ -21,6 +22,8 @@ It is designed for:
 ```text
  moonbook catalog / keeper packets / mayor
   -> seed a town
+  -> load standing goals such as "track OPC news"
+  -> Mayor decides when a standing goal is due
   -> turn book-local tasks into keeper proposal packets
   -> import packets into MoonClaw proposal/run lifecycle
   -> poll terminal run state and persist results back into MoonBook
@@ -43,6 +46,7 @@ Moontown is strongest when you want one system to hold together:
 Implemented today:
 
 - persisted town bootstrap in `.moontown/town.json`
+- persisted standing goal registry in `.moontown/standing-goals.json`
 - persisted moonbook catalog in `.moontown/moonbooks.json`
 - `BookProvider` abstraction for town bootstrap
 - book-harness-shaped moonbook adapter
@@ -50,20 +54,22 @@ Implemented today:
 - run polling, result persistence, and review-queue surfacing for goal runs
 - mayor-level cross-book research synthesis under `.moontown/town-synthesis/`
 - town quality gates for provisional or non-lane-specific research output
+- one-shot and continuous daemon commands for mayor supervision
+- standing-goal due planning and dispatch into explicit MoonBook keeper lanes
 - strategic `Mayor` role adapter over embedded moonclaw runtime metadata
 - routing, isolation, scheduler, health, and storage packages
 - renderer-agnostic scene dashboard model
 - Rabbita live simulation frontend
 - original example SVG scene assets
 
-Still stubbed:
+Still incomplete:
 
-- long-running daemon patrol and recovery loop
+- production-grade multi-day process management, lease expiry, and crash recovery
 - experiment lifecycle execution
 - real backend/frontend sync
 
-So the current repo is a control-plane-first prototype, not yet a fully live
-24/7 town runtime.
+So the current repo now has the first real standing-goal daemon seam, but it is
+not yet a production-grade 24/7 service manager.
 
 ## Current Capabilities
 
@@ -72,6 +78,7 @@ So the current repo is a control-plane-first prototype, not yet a fully live
 - `storage` snapshot persistence
 - `health` anomaly and recovery reporting
 - `scheduler` tick planning
+- `scheduler` standing-goal due planning
 - `roles` strategic `Mayor` role adapter
 - `adapters/moonbook` persisted book catalog plus real MoonBook CLI-backed harness requests
 - `adapters/moonclaw` embedded runtime profiles plus real MoonClaw proposal import, run, and polling boundary
@@ -87,6 +94,42 @@ So the current repo is a control-plane-first prototype, not yet a fully live
   - budget/energy/pressure/stability metrics
   - activity feed and anomaly surfacing
   - scroll-safe scene viewport on smaller screens
+
+## Standing Goal Model
+
+The long-standing runtime split is:
+
+```text
+Mayor -> Book Keeper -> Worker Claws
+```
+
+- `Mayor`
+  owns standing goals, daemon ticks, routing, health, and recovery.
+- `Book Keeper`
+  owns durable book memory, wiki updates, review policy, and generated
+  projection quality.
+- `Worker Claws`
+  execute bounded jobs such as search, fetch, synthesis, coding, image
+  generation, review, and result packaging.
+
+The first default standing goal is:
+
+```text
+watch-opc-news
+  -> target book: research-opc
+  -> cadence: 720 daemon ticks
+  -> policy: web-first
+  -> task: track latest One Person Company (OPC) news and update the book
+```
+
+The registry is persisted at:
+
+- `.moontown/standing-goals.json`
+
+The daemon does not put OPC memory in Moontown. Moontown only decides that the
+OPC standing goal is due and dispatches it to the `research-opc` MoonBook lane.
+MoonBook owns the durable OPC wiki, and MoonClaw owns the bounded research
+execution.
 
 ## Main Subsystems
 
@@ -157,6 +200,24 @@ Run the text dashboard:
 moon run cmd/main
 ```
 
+Run one restart-safe daemon tick:
+
+```bash
+moon run cmd/main -- daemon tick
+```
+
+Run the durable daemon loop:
+
+```bash
+moon run cmd/main -- daemon run
+```
+
+Run a single daemon-loop iteration for verification:
+
+```bash
+moon run cmd/main -- daemon run --once
+```
+
 Validate the module:
 
 ```bash
@@ -186,6 +247,8 @@ Current bootstrap path:
 
 ```text
 moonbook catalog
+  -> standing goal registry
+  -> Mayor due-goal decision
   -> book task batch
   -> keeper packet
   -> MoonClaw proposal import
@@ -228,6 +291,18 @@ user goal naming multiple subjects
   -> MoonBook materializes durable wiki coverage and generated sites
   -> Moontown applies quality gates
   -> mayor writes .moontown/town-synthesis/*.md
+```
+
+Current standing-goal path:
+
+```text
+.moontown/standing-goals.json
+  -> daemon tick
+  -> Mayor dispatches due standing goal
+  -> explicit MoonBook keeper lane, e.g. research-opc
+  -> MoonClaw bounded worker execution
+  -> MoonBook durable wiki/site persistence
+  -> standing goal next_due_tick advanced
 ```
 
 Current UI path:

@@ -29,6 +29,32 @@ test "runtime status summarizes execution lifecycle counts" {
   assert_eq(status.running_count, 1)
   assert_eq(status.review_count, 1)
   assert_eq(status.execution_count, 2)
+  assert_eq(status.standing_goal_count, 0)
+}
+
+///|
+test "runtime status includes due standing goal actions" {
+  let state = @core.empty_state(
+    @core.TownConfig::new(id="test-town", name="Test Town"),
+  )
+  let goal = @core.StandingGoal::new(
+    id="watch-opc-news",
+    title="Track OPC news",
+    prompt="Research OPC.",
+    target_book_id=Some("research-opc"),
+    next_due_tick=1,
+  )
+  let status = runtime_status_from_state(
+    state,
+    "/tmp/town.json",
+    standing_goals=[goal],
+    daemon_tick=0,
+  )
+  assert_eq(status.standing_goal_count, 1)
+  assert_eq(status.due_standing_goal_count, 1)
+  assert_true(
+    status.daemon_actions.any(fn(action) { action.kind == "standing-goal-due" }),
+  )
 }
 
 ///|

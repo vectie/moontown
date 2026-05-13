@@ -6,28 +6,48 @@ pub async fn run_goal(
   snapshot_path? : String = @storage.default_snapshot_path(),
   book_catalog_path? : String = @moonbook.default_catalog_path(),
 ) -> @core.TownState {
-  let catalog = @moonbook.load_or_create_catalog(path=book_catalog_path)
-  let mayor = demo_mayor()
-  let plan = mayor.plan_goal(catalog, goal, explicit_book_id=book_id)
   let state = @core.empty_state(
     @core.TownConfig::new(id="moonrise", name="Moontown / Moonrise"),
   )
+  run_goal_into_state(
+    state,
+    goal,
+    book_id~,
+    task_limit_per_book~,
+    snapshot_path~,
+    book_catalog_path~,
+  )
+}
+
+///|
+async fn run_goal_into_state(
+  state : @core.TownState,
+  goal : String,
+  book_id? : String? = None,
+  task_limit_per_book? : Int = 1,
+  snapshot_path? : String = @storage.default_snapshot_path(),
+  book_catalog_path? : String = @moonbook.default_catalog_path(),
+) -> @core.TownState {
+  let catalog = @moonbook.load_or_create_catalog(path=book_catalog_path)
+  let mayor = demo_mayor()
+  let plan = mayor.plan_goal(catalog, goal, explicit_book_id=book_id)
   let books : Array[@core.BookRef] = []
   for lane in plan.lanes {
     books.push(lane.entry.to_book_ref())
   }
   register_demo_books(state, books)
   register_demo_workers(state)
+  let event_index = state.events.length()
   state.record_event(
     @core.TownEvent::new(
-      id="event-goal",
+      id="event-goal-\{event_index}",
       kind="goal",
       detail="Accepted town goal: \{goal}",
     ),
   )
   state.record_event(
     @core.TownEvent::new(
-      id="event-goal-plan",
+      id="event-goal-plan-\{event_index}",
       kind="planning",
       detail=plan.summary,
     ),

@@ -26,19 +26,21 @@ Right now, `moontown` is usable as:
 - a real MoonBook result-persistence and generated-site refresh boundary for goal runs
 - a mayor-level synthesis and quality-gate surface for parallel research lanes
 - typed runtime status and one-shot daemon tick commands
+- persisted standing goals and a continuous daemon-loop command
 - a scene-based dashboard
 - a Rabbita simulation frontend
 - a starter asset pipeline
 
 It is not yet usable as:
 
-- a durable multi-day restart/recovery supervisor
+- a production-hardened multi-day restart/recovery supervisor
 - a backend-synced browser UI
 
 So the right way to use the repo today is as a real goal-run control plane plus
 a live architectural and frontend prototype. It can launch and observe bounded
 MoonBook/MoonClaw research runs, and it has the first durable daemon tick seam,
-but it is not yet a days-long restart-safe service.
+plus the first standing-goal daemon loop. It is not yet a production service
+manager.
 
 ## 1. Run The Text Dashboard
 
@@ -99,6 +101,44 @@ future daemon should repeat: load snapshot, reconcile live executions, apply
 mayor directives, persist checkpoint, update `.moontown/daemon.json`, and
 report planned next actions.
 
+## 1.3 Run The Standing-Goal Daemon Loop
+
+Run the continuous daemon loop:
+
+```bash
+moon run cmd/main -- daemon run
+```
+
+Run exactly one loop iteration for verification:
+
+```bash
+moon run cmd/main -- daemon run --once
+```
+
+The daemon loop repeats the restart-safe tick. Each tick:
+
+- loads `.moontown/town.json`
+- bootstraps a saved town if the snapshot is missing
+- loads `.moontown/daemon.json`
+- loads `.moontown/standing-goals.json`
+- lets the Mayor dispatch due standing goals
+- routes the target book to its keeper lane
+- persists checkpoint and standing-goal next due state
+- sleeps before the next tick
+
+The default standing goal is:
+
+```text
+watch-opc-news
+  target_book_id: research-opc
+  source_policy: web-first
+  cadence_ticks: 720
+```
+
+This creates or reuses the dynamic `research-opc` MoonBook lane. Moontown owns
+the schedule and dispatch event; MoonBook owns the OPC wiki and generated site;
+MoonClaw owns bounded research execution.
+
 ## 2. Use The Persisted Town State
 
 The demo town persists runtime bootstrap files under:
@@ -107,6 +147,7 @@ The demo town persists runtime bootstrap files under:
 - `.moontown/town.json`
 - `.moontown/daemon.json`
 - `.moontown/packets/` when packet files are exported
+- `.moontown/standing-goals.json`
 - `.moontown/books/<book>/` for MoonBook lane workspaces
 - `.moontown/town-synthesis/` for mayor-level cross-book reports
 
@@ -117,7 +158,9 @@ What they do:
 - `.moontown/town.json`
   - stores the seeded town snapshot
 - `.moontown/daemon.json`
-  - stores one-shot daemon state, tick sequence, lease owner, heartbeat event count, and scheduled job metadata
+  - stores daemon state, tick sequence, lease owner, heartbeat event count, active goal ids, and scheduled job metadata
+- `.moontown/standing-goals.json`
+  - stores Mayor-owned standing goals, target book, cadence, source policy, last run tick, and next due tick
 - `.moontown/books/<book>/raw/bootstrap/`
   - stores research questions, search logs, source screens, evidence matrices,
     local source digests, and synthesis briefs

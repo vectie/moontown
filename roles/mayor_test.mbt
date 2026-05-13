@@ -68,6 +68,20 @@ test "mayor decomposes Wenyu Valley PRD build into civic lanes" {
 }
 
 ///|
+test "mayor creates dynamic OPC research book for standing goal target" {
+  let mayor = Mayor::new()
+  let plan = mayor.plan_goal(
+    @moonbook.default_catalog(),
+    "Research the latest One Person Company OPC news.",
+    explicit_book_id=Some("research-opc"),
+  )
+  assert_true(!plan.parallelizable)
+  assert_eq(plan.lanes.length(), 1)
+  assert_eq(plan.lanes[0].entry.id, "research-opc")
+  assert_true(plan.summary.contains("dynamic research book"))
+}
+
+///|
 test "mayor supervision marks stale executions for recovery" {
   let mayor = Mayor::new()
   let state = @moontown.demo_state()

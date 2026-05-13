@@ -106,6 +106,17 @@ between two modes:
 The next frontend integration is to replace that placeholder with a local state
 endpoint or generated static JSON artifact.
 
+The runtime state that should drive the next browser bridge now includes:
+
+- standing goals from `.moontown/standing-goals.json`
+- daemon tick and active goal ids from `.moontown/daemon.json`
+- book/task/execution state from `.moontown/town.json`
+
+For example, the `watch-opc-news` standing goal should make the OPC researcher
+avatar visibly busy only when the daemon has dispatched the `research-opc` book
+lane. The current resident animation is visual scaffolding; the next UI step is
+to bind it to real daemon state instead of synthetic ticks.
+
 ## Lifecycle Projection
 
 The current frontend does not invent its own execution state. It projects
@@ -219,6 +230,7 @@ The frontend is live, but not yet a full simulation game.
 Still missing:
 
 - real backend-fed live state
+- standing-goal and daemon-state projection into the browser
 - richer movement interpolation
 - deeper multi-agent coordination visuals
 - fuller command system

@@ -28,10 +28,14 @@ It currently includes:
 - budget/energy/pressure/stability metrics
 - activity feed and anomaly surfacing
 - responsive scroll-safe scene viewport
+- generated Wenyu Valley tilemap viewport with animated resident overlay
 - stronger keyboard focus visibility
 
 The current frontend model is still local/demo-driven. It is not yet attached to
-a real town backend.
+a real town backend. The next bridge should consume `.moontown/town.json`,
+`.moontown/daemon.json`, and `.moontown/standing-goals.json` so Mayor standing
+goals such as `watch-opc-news` make the matching book/worker avatars visibly
+busy only when real daemon work is active.
 
 This package owns the Moontown operator dashboard only. It does not own the
 generated MoonBook site that appears under live workspace directories such as

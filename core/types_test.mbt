@@ -30,3 +30,20 @@ test "core state registers books workers and tasks" {
   assert_eq(state.workers.length(), 1)
   assert_eq(state.tasks.length(), 1)
 }
+
+///|
+test "standing goal marks next dispatch window" {
+  let goal = StandingGoal::new(
+    id="watch-opc-news",
+    title="Watch OPC news",
+    prompt="Research latest one person company news.",
+    target_book_id=Some("research-opc"),
+    cadence_ticks=6,
+    next_due_tick=2,
+  )
+  assert_true(!goal.is_due(1))
+  assert_true(goal.is_due(2))
+  let dispatched = goal.mark_dispatched(2)
+  assert_eq(dispatched.last_run_tick, Some(2))
+  assert_eq(dispatched.next_due_tick, 8)
+}

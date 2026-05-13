@@ -44,6 +44,11 @@ pub fn DaemonState::new(
 pub fn default_daemon_jobs() -> Array[ScheduledJob] {
   [
     { id: "supervise-live-runs", kind: "supervision", interval_seconds: 30 },
+    {
+      id: "dispatch-standing-goals",
+      kind: "standing-goal",
+      interval_seconds: 30,
+    },
     { id: "refresh-health", kind: "health", interval_seconds: 60 },
     { id: "project-ui-state", kind: "projection", interval_seconds: 60 },
   ]
@@ -111,6 +116,36 @@ pub fn plan_tick(
 }
 
 ///|
+pub fn due_standing_goals(
+  goals : Array[@core.StandingGoal],
+  tick : Int,
+) -> Array[@core.StandingGoal] {
+  let due : Array[@core.StandingGoal] = []
+  for goal in goals {
+    if goal.is_due(tick) {
+      due.push(goal)
+    }
+  }
+  due
+}
+
+///|
+pub fn plan_standing_goal_actions(
+  goals : Array[@core.StandingGoal],
+  tick : Int,
+) -> Array[SchedulerAction] {
+  let actions : Array[SchedulerAction] = []
+  for goal in due_standing_goals(goals, tick) {
+    let target = goal.target_book_id.unwrap_or("mayor-selected-book")
+    actions.push({
+      kind: "standing-goal-due",
+      detail: "\{goal.id} -> \{target}: \{goal.title}",
+    })
+  }
+  actions
+}
+
+///|
 pub fn next_tick(
   sequence : Int,
   actions : Array[SchedulerAction],
@@ -123,13 +158,26 @@ pub fn plan_daemon_tick(
   daemon : DaemonState,
   town : @core.TownState,
   report : @health.HealthReport,
+  standing_goals? : Array[@core.StandingGoal] = [],
 ) -> (DaemonState, SchedulerTick, Array[SchedulerAction]) {
-  let actions = plan_tick(town, report)
   let next_sequence = daemon.tick_sequence + 1
+  let actions = plan_tick(town, report)
+  let standing_actions = plan_standing_goal_actions(
+    standing_goals, next_sequence,
+  )
+  for action in standing_actions {
+    actions.push(action)
+  }
+  let active_goal_ids = due_standing_goals(standing_goals, next_sequence).map(fn(
+    goal,
+  ) {
+    goal.id
+  })
   let next_daemon = {
     ..daemon,
     tick_sequence: next_sequence,
     last_heartbeat_event_count: town.events.length(),
+    active_goal_ids,
   }
   (next_daemon, next_tick(next_sequence, actions), actions)
 }

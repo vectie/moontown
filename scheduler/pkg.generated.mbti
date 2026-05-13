@@ -12,9 +12,13 @@ pub fn collect_due_tasks(@core.TownState) -> Array[@core.TownTask]
 
 pub fn default_daemon_jobs() -> Array[ScheduledJob]
 
+pub fn due_standing_goals(Array[@core.StandingGoal], Int) -> Array[@core.StandingGoal]
+
 pub fn next_tick(Int, Array[SchedulerAction]) -> SchedulerTick
 
-pub fn plan_daemon_tick(DaemonState, @core.TownState, @health.HealthReport) -> (DaemonState, SchedulerTick, Array[SchedulerAction])
+pub fn plan_daemon_tick(DaemonState, @core.TownState, @health.HealthReport, standing_goals? : Array[@core.StandingGoal]) -> (DaemonState, SchedulerTick, Array[SchedulerAction])
+
+pub fn plan_standing_goal_actions(Array[@core.StandingGoal], Int) -> Array[SchedulerAction]
 
 pub fn plan_tick(@core.TownState, @health.HealthReport) -> Array[SchedulerAction]
 

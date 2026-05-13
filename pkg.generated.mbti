@@ -10,6 +10,8 @@ import {
 }
 
 // Values
+pub async fn daemon_run_saved_town(snapshot_path? : String, book_catalog_path? : String, max_ticks? : Int, sleep_ms? : Int) -> String
+
 pub async fn daemon_tick_saved_town(snapshot_path? : String, book_catalog_path? : String) -> String
 
 pub fn demo_dashboard() -> String
@@ -42,7 +44,7 @@ pub fn render_state_dashboard(@core.TownState) -> String
 
 pub async fn run_goal(String, book_id? : String?, task_limit_per_book? : Int, snapshot_path? : String, book_catalog_path? : String) -> @core.TownState
 
-pub fn runtime_status_from_state(@core.TownState, String) -> TownRuntimeStatus
+pub fn runtime_status_from_state(@core.TownState, String, standing_goals? : Array[@core.StandingGoal], daemon_tick? : Int) -> TownRuntimeStatus
 
 pub async fn supervise_saved_town(snapshot_path? : String, book_catalog_path? : String) -> String
 
@@ -82,6 +84,8 @@ pub struct TownRuntimeStatus {
   failed_count : Int
   stale_count : Int
   completed_count : Int
+  standing_goal_count : Int
+  due_standing_goal_count : Int
   daemon_actions : Array[@scheduler.SchedulerAction]
   summary : String
 }

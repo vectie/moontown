@@ -33,7 +33,7 @@ Purpose:
 - convenience facade for demo bootstrap
 - current text dashboard entry surface
 - goal-run orchestration, research bootstrap planning, and execution launch
-- one-shot supervision and persisted runtime status
+- standing-goal dispatch, daemon-loop entry points, and persisted runtime status
 - research quality gates and typed readiness
 - mayor-level town synthesis rendering
 - package-local file IO helpers shared by root features
@@ -55,6 +55,7 @@ Important public types:
 - `BookRef`
 - `WorkerRef`
 - `TownTask`
+- `StandingGoal`
 - `TaskExecutionStatus`
 - `AssignmentPlan`
 - `TaskExecutionRecord`
@@ -102,13 +103,15 @@ Purpose:
 Purpose:
 
 - collect due work
+- collect due standing goals
 - plan one town tick
 - summarize tick actions
 
 Current status:
 
-- planning model only
-- not yet a real long-lived daemon
+- plans normal execution lifecycle actions
+- plans standing-goal due actions for the daemon
+- records active standing goal ids in daemon state
 
 ## Storage
 
@@ -118,10 +121,12 @@ Purpose:
 
 - snapshot persistence
 - checkpoint model
+- standing-goal registry persistence
 
 Current persisted files:
 
 - `.moontown/town.json`
+- `.moontown/standing-goals.json`
 - `.moontown/packets/` when keeper packets are exported
 
 ## Roles
@@ -133,6 +138,7 @@ Purpose:
 - strategic `Mayor` role adapter
 - dispatch packets
 - patrol packets
+- standing-goal target book routing
 - keeper handoff packets
 - keeper proposal packet preparation
 

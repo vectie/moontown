@@ -106,6 +106,9 @@ pub fn research_lane_topics(goal : String) -> Array[String] {
       topics.push(topic)
     }
   }
+  if notes.contains("opc") || notes.contains("one person company") {
+    topics.push("opc")
+  }
   topics
 }
 
@@ -160,6 +163,7 @@ fn display_topic_name(topic : String) -> String {
     "moonclaw" => "MoonClaw"
     "finance" => "Finance"
     "coding" => "Coding"
+    "opc" => "One Person Company (OPC)"
     _ => topic
   }
 }

@@ -82,17 +82,41 @@ Runtime state is stored under:
 
 - `.moontown/moonbooks.json`
 - `.moontown/town.json`
+- `.moontown/standing-goals.json`
+- `.moontown/daemon.json`
 - `.moontown/packets/` when exported packet files are written
 
 These are runtime artifacts, not source-of-truth project files.
+
+## Standing-Goal Loop
+
+The durable 24/7 path is developed around:
+
+```text
+Mayor -> Book Keeper -> Worker Claws
+```
+
+Use these commands while developing the loop:
+
+```bash
+moon run cmd/main -- status
+moon run cmd/main -- daemon tick
+moon run cmd/main -- daemon run --once
+```
+
+Do not put durable research memory in Moontown. Standing goals belong to the
+Mayor, book-local memory belongs to MoonBook, and bounded execution belongs to
+MoonClaw.
 
 ## Testing Notes
 
 Package tests currently cover:
 
 - core state and package surfaces
+- standing goal due windows
 - scene layout/render contracts
 - mayor role behavior
+- scheduler standing-goal planning
 - proposal/import/run lifecycle tracking
 - root demo path
 
@@ -103,6 +127,8 @@ tests in:
 - `ui/scene_layout_test.mbt`
 - `ui/scene_render_test.mbt`
 - `roles/mayor_test.mbt`
+- `runtime_status_wbtest.mbt`
+- `scheduler/daemon_wbtest.mbt`
 
 ## Docs Maintenance
 

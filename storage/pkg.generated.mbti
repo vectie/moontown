@@ -9,15 +9,25 @@ import {
 // Values
 pub fn default_snapshot_path() -> String
 
+pub fn default_standing_goal_path() -> String
+
+pub fn default_standing_goals() -> Array[@core.StandingGoal]
+
 pub fn describe_snapshot(TownSnapshot) -> String
 
 pub fn empty_checkpoint(String) -> Checkpoint
 
 pub async fn load_or_create_snapshot(String, () -> @core.TownState) -> TownSnapshot
 
+pub async fn load_or_create_standing_goals(path? : String) -> Array[@core.StandingGoal]
+
 pub async fn load_snapshot_file(String) -> TownSnapshot?
 
+pub async fn load_standing_goals_file(String) -> Array[@core.StandingGoal]?
+
 pub async fn save_snapshot_file(String, TownSnapshot) -> Unit
+
+pub async fn save_standing_goals_file(String, Array[@core.StandingGoal]) -> Unit
 
 pub fn snapshot_of(@core.TownState) -> TownSnapshot
 

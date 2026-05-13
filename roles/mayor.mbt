@@ -96,12 +96,23 @@ pub fn Mayor::plan_goal(
             lanes: [goal_lane(entry, goal, entry.id)],
           }
         None =>
-          {
-            output_contract: "mayor.goal.decomposition.v1",
-            prompt,
-            parallelizable: false,
-            summary: "Mayor could not find the explicit book \{book_id}.",
-            lanes: [],
+          match @moonbook.entry_for_book_id(catalog, book_id) {
+            Some(entry) =>
+              {
+                output_contract: "mayor.goal.decomposition.v1",
+                prompt,
+                parallelizable: false,
+                summary: "Mayor created dynamic research book \{entry.id} for the explicit standing goal target.",
+                lanes: [goal_lane(entry, goal, entry.id)],
+              }
+            None =>
+              {
+                output_contract: "mayor.goal.decomposition.v1",
+                prompt,
+                parallelizable: false,
+                summary: "Mayor could not find the explicit book \{book_id}.",
+                lanes: [],
+              }
           }
       }
     None => {
@@ -270,6 +281,9 @@ fn mayor_research_lane_topics(goal : String) -> Array[String] {
     if notes.contains(topic) {
       topics.push(topic)
     }
+  }
+  if notes.contains("opc") || notes.contains("one person company") {
+    topics.push("opc")
   }
   topics
 }

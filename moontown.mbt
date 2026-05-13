@@ -50,13 +50,14 @@ fn register_demo_books(
   books : Array[@core.BookRef],
 ) -> Unit {
   for book in books {
-    state.register_book(book)
+    register_book_if_missing(state, book)
   }
 }
 
 ///|
 fn register_demo_workers(state : @core.TownState) -> Unit {
-  state.register_worker(
+  register_worker_if_missing(
+    state,
     @core.WorkerRef::new(
       id="claw-harness",
       name="Harness Hound",
@@ -65,7 +66,8 @@ fn register_demo_workers(state : @core.TownState) -> Unit {
       capabilities=["moonbit", "git", "testing"],
     ),
   )
-  state.register_worker(
+  register_worker_if_missing(
+    state,
     @core.WorkerRef::new(
       id="claw-review",
       name="Review Owl",
@@ -74,7 +76,8 @@ fn register_demo_workers(state : @core.TownState) -> Unit {
       capabilities=["review", "moonbit"],
     ),
   )
-  state.register_worker(
+  register_worker_if_missing(
+    state,
     @core.WorkerRef::new(
       id="claw-ledger",
       name="Ledger Fox",
@@ -83,7 +86,8 @@ fn register_demo_workers(state : @core.TownState) -> Unit {
       capabilities=["ledgers", "reporting"],
     ),
   )
-  state.register_worker(
+  register_worker_if_missing(
+    state,
     @core.WorkerRef::new(
       id="claw-memory",
       name="Archive Cat",
@@ -104,7 +108,8 @@ fn register_book_lane_workers(
   state : @core.TownState,
   book : @core.BookRef,
 ) -> Unit {
-  state.register_worker(
+  register_worker_if_missing(
+    state,
     @core.WorkerRef::new(
       id="claw-\{book.id}-harness",
       name="\{book.name} Harness",
@@ -116,7 +121,8 @@ fn register_book_lane_workers(
       ],
     ),
   )
-  state.register_worker(
+  register_worker_if_missing(
+    state,
     @core.WorkerRef::new(
       id="claw-\{book.id}-specialist",
       name="\{book.name} Specialist",
@@ -125,7 +131,8 @@ fn register_book_lane_workers(
       capabilities=["asset-generation", "projection", "design", "research"],
     ),
   )
-  state.register_worker(
+  register_worker_if_missing(
+    state,
     @core.WorkerRef::new(
       id="claw-\{book.id}-review",
       name="\{book.name} Reviewer",
@@ -134,6 +141,32 @@ fn register_book_lane_workers(
       capabilities=["review", "quality", "evidence"],
     ),
   )
+}
+
+///|
+fn register_book_if_missing(
+  state : @core.TownState,
+  book : @core.BookRef,
+) -> Unit {
+  for existing in state.books {
+    if existing.id == book.id {
+      return
+    }
+  }
+  state.register_book(book)
+}
+
+///|
+fn register_worker_if_missing(
+  state : @core.TownState,
+  worker : @core.WorkerRef,
+) -> Unit {
+  for existing in state.workers {
+    if existing.id == worker.id {
+      return
+    }
+  }
+  state.register_worker(worker)
 }
 
 ///|
