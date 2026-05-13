@@ -5510,6 +5510,186 @@ fn worker_roster_asset(index : Int) -> String {
 }
 
 ///|
+fn viewport_resident_grid_x(index : Int) -> Int {
+  match index % 64 {
+    0 => 34
+    1 => 38
+    2 => 44
+    3 => 50
+    4 => 56
+    5 => 62
+    6 => 28
+    7 => 36
+    8 => 72
+    9 => 80
+    10 => 88
+    11 => 96
+    12 => 104
+    13 => 112
+    14 => 120
+    15 => 128
+    16 => 82
+    17 => 90
+    18 => 100
+    19 => 110
+    20 => 120
+    21 => 132
+    22 => 142
+    23 => 152
+    24 => 162
+    25 => 172
+    26 => 182
+    27 => 192
+    28 => 202
+    29 => 212
+    30 => 222
+    31 => 232
+    32 => 126
+    33 => 136
+    34 => 146
+    35 => 156
+    36 => 166
+    37 => 176
+    38 => 186
+    39 => 196
+    40 => 54
+    41 => 62
+    42 => 70
+    43 => 78
+    44 => 86
+    45 => 94
+    46 => 102
+    47 => 110
+    48 => 22
+    49 => 18
+    50 => 26
+    51 => 42
+    52 => 58
+    53 => 74
+    54 => 150
+    55 => 160
+    56 => 176
+    57 => 194
+    58 => 210
+    59 => 226
+    60 => 116
+    61 => 134
+    62 => 150
+    _ => 168
+  }
+}
+
+///|
+fn viewport_resident_grid_y(index : Int) -> Int {
+  match index % 64 {
+    0 => 32
+    1 => 36
+    2 => 40
+    3 => 44
+    4 => 48
+    5 => 52
+    6 => 54
+    7 => 60
+    8 => 24
+    9 => 28
+    10 => 32
+    11 => 36
+    12 => 40
+    13 => 44
+    14 => 48
+    15 => 52
+    16 => 60
+    17 => 66
+    18 => 70
+    19 => 74
+    20 => 78
+    21 => 82
+    22 => 86
+    23 => 90
+    24 => 62
+    25 => 66
+    26 => 70
+    27 => 74
+    28 => 78
+    29 => 82
+    30 => 86
+    31 => 90
+    32 => 102
+    33 => 106
+    34 => 110
+    35 => 114
+    36 => 118
+    37 => 122
+    38 => 126
+    39 => 130
+    40 => 82
+    41 => 88
+    42 => 94
+    43 => 100
+    44 => 106
+    45 => 112
+    46 => 118
+    47 => 124
+    48 => 30
+    49 => 46
+    50 => 62
+    51 => 72
+    52 => 72
+    53 => 78
+    54 => 36
+    55 => 44
+    56 => 50
+    57 => 56
+    58 => 58
+    59 => 64
+    60 => 58
+    61 => 64
+    62 => 72
+    _ => 80
+  }
+}
+
+///|
+fn viewport_resident_avatar(index : Int) -> @rabbita.Html {
+  let grid_x = viewport_resident_grid_x(index)
+  let grid_y = viewport_resident_grid_y(index)
+  let delay = (index * 173) % 2400
+  let style = [
+    "left: \{iso_tile_left(grid_x, grid_y) + 9}px",
+    "top: \{iso_tile_top(grid_x, grid_y) - 31}px",
+    "z-index: \{100 + grid_x + grid_y}",
+    "--wander-x1: \{worker_wander_x1(index + 2)}px",
+    "--wander-y1: \{worker_wander_y1(index + 2)}px",
+    "--wander-x2: \{worker_wander_x2(index + 4)}px",
+    "--wander-y2: \{worker_wander_y2(index + 4)}px",
+    "--wander-x3: \{worker_wander_x3(index + 6)}px",
+    "--wander-y3: \{worker_wander_y3(index + 6)}px",
+    "--wander-duration: \{6200 + index % 8 * 360}ms",
+    "--wander-delay: -\{delay}ms",
+    "--worker-image: url('\{worker_roster_asset(index)}')",
+  ]
+  div(
+    class="worker-avatar viewport-resident worker-running worker-sprite-roster",
+    style~,
+    [
+      span(class="worker-sprite", no_children()),
+      span(class="worker-badge", ""),
+      span(class="worker-label", "Resident \{index + 1}"),
+      span(class="worker-meta", "walking building district"),
+    ],
+  )
+}
+
+///|
+fn render_viewport_residents() -> Array[@rabbita.Html] {
+  let residents : Array[@rabbita.Html] = []
+  for i in 0..<64 {
+    residents.push(viewport_resident_avatar(i))
+  }
+  residents
+}
+
+///|
 fn is_working_worker(worker : WorkerSim) -> Bool {
   match worker.status {
     @core.WorkerStatus::Running | @core.WorkerStatus::Blocked => true
@@ -5903,7 +6083,11 @@ fn render_town_viewport(
   let scene_style = ["width: \{stage_width}px", "height: \{stage_height}px"]
   let scene_frame_style = ["--scene-width: \{stage_width}px"]
   let worker_avatars : Array[@rabbita.Html] = []
-  if !standalone_viewport_requested() {
+  if standalone_viewport_requested() {
+    for resident in render_viewport_residents() {
+      worker_avatars.push(resident)
+    }
+  } else {
     for i in 0..<workers.length() {
       let worker = workers[i]
       worker_avatars.push(

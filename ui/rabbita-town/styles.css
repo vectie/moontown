@@ -1653,6 +1653,22 @@ body,
   box-shadow: none;
   overflow: visible;
   animation: worker-wander var(--wander-duration, 5600ms) linear infinite;
+  animation-delay: var(--wander-delay, 0ms);
+}
+
+.viewport-frame .viewport-resident {
+  z-index: 5;
+  pointer-events: none;
+}
+
+.viewport-frame.is-drag-panning .viewport-resident,
+.viewport-frame.is-zooming .viewport-resident {
+  animation-play-state: paused;
+}
+
+.viewport-frame.is-drag-panning .viewport-resident .worker-sprite,
+.viewport-frame.is-zooming .viewport-resident .worker-sprite {
+  animation-play-state: paused;
 }
 
 .viewport-frame .worker-badge {
