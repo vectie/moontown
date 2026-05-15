@@ -599,9 +599,18 @@ async fn research_bootstrap_plan(
   task_limit : Int,
 ) -> ResearchBootstrapPlan {
   let ordered = prioritized_tasks(tasks, goal)
-  let bootstrap_active = research_goal_needs_bootstrap(entry, goal, summary)
+  let quality_gaps = research_quality_gaps(entry)
+  let bootstrap_active = research_goal_needs_bootstrap(
+    entry,
+    goal,
+    summary,
+    quality_gaps~,
+  )
   if !bootstrap_active {
     return { tasks: ordered, task_limit, bootstrap_active: false }
+  }
+  if !quality_gaps.is_empty() {
+    archive_research_bootstrap_for_repair(entry, quality_gaps)
   }
   let bootstrap_task = bootstrap_ingest_task(entry, goal)
   let planned = [
@@ -622,6 +631,7 @@ async fn research_goal_needs_bootstrap(
   entry : @moonbook.BookCatalogEntry,
   goal : String,
   summary : @moonbook.BookStateSummary,
+  quality_gaps? : Array[String] = [],
 ) -> Bool {
   if !is_research_goal(goal) {
     return false
@@ -631,10 +641,75 @@ async fn research_goal_needs_bootstrap(
     summary.concept_count == 0
   let no_durable_sources = summary.verified_source_count == 0
   let no_durable_evidence = summary.evidence_count == 0
+  let quality_repair_needed = !quality_gaps.is_empty()
   no_substantive_tree ||
   missing_domain_coverage ||
   no_durable_sources ||
-  no_durable_evidence
+  no_durable_evidence ||
+  quality_repair_needed
+}
+
+///|
+async fn archive_research_bootstrap_for_repair(
+  entry : @moonbook.BookCatalogEntry,
+  quality_gaps : Array[String],
+) -> Unit {
+  guard entry.id.has_prefix("research-") else { return }
+  let root = @moonbook.workspace_root(entry)
+  let raw_root = "\{root}/raw/bootstrap"
+  let archive_id = quality_gaps
+    .join("|")
+    .hash()
+    .to_string()
+    .trim(chars="-")
+    .to_string()
+  let archive_dir = "\{raw_root}/archive/quality-repair-\{archive_id}"
+  ignore_checked_command("mkdir", ["-p", archive_dir])
+  for relative in research_bootstrap_repair_artifacts() {
+    let path = "\{root}/\{relative}"
+    if !@fs.exists(path) {
+      continue
+    }
+    let archived = "\{archive_dir}/\{path_basename(relative)}"
+    ignore_checked_command("cp", [path, archived])
+    ignore_checked_command("rm", ["-f", path])
+  }
+  write_text_file(
+    "\{raw_root}/QUALITY_REPAIR.md",
+    [
+      "# Quality Repair Trigger",
+      "",
+      "Moontown archived stale generated bootstrap artifacts before relaunching research because the quality gate found these gaps:",
+      "",
+      ..quality_gaps.map(fn(gap) { "- \{gap}" }),
+      "",
+      "The next bootstrap run must regenerate the raw research envelope from the current `RESEARCH_REQUEST.md`, `SOURCE_HINTS.md`, and loaded skills instead of completing from stale artifacts.",
+    ].join("\n"),
+  )
+}
+
+///|
+async fn ignore_checked_command(command : String, args : Array[String]) -> Unit {
+  let completed = @integration.run_checked(command, args) catch { _ => return }
+  ignore(completed)
+}
+
+///|
+fn research_bootstrap_repair_artifacts() -> Array[String] {
+  [
+    "raw/bootstrap/research-question.md", "raw/bootstrap/search-log.md", "raw/bootstrap/source-screen.md",
+    "raw/bootstrap/local-sources.md", "raw/bootstrap/evidence-matrix.md", "raw/bootstrap/synthesis-brief.md",
+    "raw/bootstrap/deep-report.md", "raw/bootstrap/marketing-brief.md",
+  ]
+}
+
+///|
+fn path_basename(path : String) -> String {
+  let parts = path.split("/").to_array()
+  match parts.get(parts.length() - 1) {
+    Some(part) => part.to_string()
+    None => path
+  }
 }
 
 ///|

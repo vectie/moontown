@@ -6,3 +6,21 @@ test "mayor keeper packet ids stay compact for long task ids" {
   assert_true(packet_id.length() < 96)
   assert_true(!packet_id.contains(task_id))
 }
+
+///|
+test "research bootstrap task uses direct research bootstrap profile" {
+  let task = @moonbook.BookTask::new(
+    id="goal-research-opc-research-bootstrap-ingest",
+    goal=Some("Research latest OPC news"),
+    title="Bootstrap verified research coverage",
+    kind="ingest",
+    prompt="Bootstrap this book before answering the research question.",
+    priority=100,
+    requires_review=true,
+    target_pages=["raw/bootstrap/research-question.md"],
+  )
+  assert_eq(
+    moonclaw_profile_for_task(task),
+    "moontown_research_bootstrap_worker",
+  )
+}

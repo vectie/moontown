@@ -327,6 +327,7 @@ pub fn proposal_packet_from_bundle(
   summary : String,
   profile : String,
   packet_id? : String? = None,
+  task? : @moonbook.BookTask? = None,
   notes? : Array[String] = [],
   tags? : Array[String] = [],
 ) -> ExternalProposalPacket {
@@ -354,11 +355,90 @@ pub fn proposal_packet_from_bundle(
         "disable_waiting_for_input": true.to_json(),
         "best_effort_on_missing_input": true.to_json(),
       },
-      "step_metadata": {
-        "disable_waiting_for_input": true.to_json(),
-        "best_effort_on_missing_input": true.to_json(),
-      },
+      "step_metadata": packet_step_metadata(task),
     },
+  }
+}
+
+///|
+fn packet_step_metadata(task : @moonbook.BookTask?) -> Json {
+  let fields : Map[String, Json] = {
+    "disable_waiting_for_input": true.to_json(),
+    "best_effort_on_missing_input": true.to_json(),
+  }
+  match task {
+    Some(task) => {
+      let provider_kind = provider_task_kind_for_book_task(task)
+      let research_bootstrap = is_moontown_research_bootstrap_task(task)
+      let task_prompt = if research_bootstrap {
+        research_bootstrap_task_prompt()
+      } else {
+        task.prompt
+      }
+      let target_pages = if research_bootstrap {
+        research_bootstrap_target_pages()
+      } else {
+        task.target_pages
+      }
+      let task_spec : Map[String, Json] = {
+        "id": task.id.to_json(),
+        "title": task.title.to_json(),
+        "kind": provider_kind.to_json(),
+        "prompt": task_prompt.to_json(),
+        "priority": task.priority.to_json(),
+        "requires_review": task.requires_review.to_json(),
+        "target_pages": target_pages.to_json(),
+      }
+      fields.set("extension_task_id", task.id.to_json())
+      fields.set("bookapi_task_id", task.id.to_json())
+      fields.set("extension_task_spec", Json::object(task_spec))
+      fields.set("bookapi_task_spec", Json::object(task_spec))
+      fields.set("extension_task_kind", provider_kind.to_json())
+      fields.set("bookapi_task_kind", provider_kind.to_json())
+      fields.set("extension_priority", task.priority.to_json())
+      fields.set("bookapi_priority", task.priority.to_json())
+      fields.set("extension_requires_review", task.requires_review.to_json())
+      fields.set("bookapi_requires_review", task.requires_review.to_json())
+      fields.set("extension_target_pages", target_pages.to_json())
+      fields.set("bookapi_target_pages", target_pages.to_json())
+    }
+    None => ()
+  }
+  Json::object(fields)
+}
+
+///|
+fn research_bootstrap_task_prompt() -> String {
+  [
+    "Produce MoonClaw raw research bootstrap artifacts only.", "Use web discovery before local file inspection.",
+    "Let the LLM choose sources and claims from screened evidence.", "Do not materialize durable wiki pages in this worker task; MoonBook owns wiki materialization from the raw envelope.",
+    "If a tool or source is blocked, write explicit blockers and continue with evidence limits.",
+  ].join(" ")
+}
+
+///|
+fn research_bootstrap_target_pages() -> Array[String] {
+  [
+    "raw/bootstrap/research-question.md", "raw/bootstrap/search-log.md", "raw/bootstrap/source-screen.md",
+    "raw/bootstrap/evidence-matrix.md", "raw/bootstrap/local-sources.md", "raw/bootstrap/synthesis-brief.md",
+    "raw/bootstrap/deep-report.md", "raw/bootstrap/marketing-brief.md",
+  ]
+}
+
+///|
+fn is_moontown_research_bootstrap_task(task : @moonbook.BookTask) -> Bool {
+  task.kind == "ingest" &&
+  task.id.contains("research-bootstrap-ingest") &&
+  task.prompt.to_lower().contains("research")
+}
+
+///|
+fn provider_task_kind_for_book_task(task : @moonbook.BookTask) -> String {
+  let combined = "\{task.kind} \{task.title} \{task.prompt}".to_lower()
+  if task.kind == "ingest" && combined.contains("bootstrap") {
+    "bootstrap_gather"
+  } else {
+    task.kind
   }
 }
 

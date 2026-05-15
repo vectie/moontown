@@ -375,6 +375,17 @@ pub struct MemoryCandidate {
 } derive(Show, Eq, ToJson, FromJson)
 
 ///|
+pub fn MemoryCandidate::new(
+  kind~ : String,
+  title~ : String,
+  detail~ : String,
+  durable? : Bool = false,
+  target_page? : String? = None,
+) -> MemoryCandidate {
+  { kind, title, detail, durable, target_page }
+}
+
+///|
 pub struct BookResult {
   task_id : String
   summary : String
@@ -635,14 +646,29 @@ pub async fn build_workspace(
       cwd=Some(resolved_moonbook_root),
     ),
   )
-  @path.Path(root)
-  .join(@path.Path("book/site/generated/index.html"))
-  .to_string()
+  resolved_generated_site_index_after_build(root)
 }
 
 ///|
 pub fn generated_site_index_path(entry : BookCatalogEntry) -> String {
   @path.Path(resolved_workspace_root(entry.workspace_root))
+  .join(@path.Path("book/site/generated/index.html"))
+  .to_string()
+}
+
+///|
+async fn resolved_generated_site_index_after_build(root : String) -> String {
+  let candidates = [
+    "book/site/generated/index.html", "site/generated/index.html", "site/index.html",
+  ]
+  for relative in candidates {
+    let path = @path.Path(root).join(@path.Path(relative)).to_string()
+    let exists = @fs.exists(path) catch { _ => false }
+    if exists {
+      return path
+    }
+  }
+  @path.Path(root)
   .join(@path.Path("book/site/generated/index.html"))
   .to_string()
 }
@@ -834,6 +860,9 @@ fn enrich_worker_context_bundle(
   if !entry.id.has_prefix("research-") {
     return bundle
   }
+  if is_research_bootstrap_context_bundle(bundle) {
+    return research_bootstrap_worker_context_bundle(entry, bundle)
+  }
   let skill_paths = unique_paths(
     [
       ..bundle.skill_paths,
@@ -866,6 +895,76 @@ fn enrich_worker_context_bundle(
     memory_summary: bundle.memory_summary,
     output_contract: bundle.output_contract,
   }
+}
+
+///|
+fn is_research_bootstrap_context_bundle(bundle : WorkerContextBundle) -> Bool {
+  let combined = "\{bundle.task_id} \{bundle.prompt}".to_lower()
+  combined.contains("bootstrap") && combined.contains("research")
+}
+
+///|
+fn research_bootstrap_worker_context_bundle(
+  entry : BookCatalogEntry,
+  bundle : WorkerContextBundle,
+) -> WorkerContextBundle {
+  let skill_paths = [
+    "skills/web-first-research/SKILL.md", "skills/source-diarize/SKILL.md", "skills/research-evidence-synthesis/SKILL.md",
+    "skills/research-report/SKILL.md", "skills/wiki-marketing/SKILL.md",
+  ]
+  let context_pages = [
+    "raw/bootstrap/RESEARCH_REQUEST.md", "raw/bootstrap/SOURCE_HINTS.md",
+  ]
+  {
+    book_id: bundle.book_id,
+    workspace_root: bundle.workspace_root,
+    task_id: bundle.task_id,
+    prompt: research_bootstrap_worker_prompt(entry),
+    policy: [
+      "MoonClaw owns raw evidence/report execution for this bootstrap worker.", "MoonBook owns durable wiki materialization after raw artifacts are ready.",
+      "Use web discovery before local file inspection; do not infer a local repository for external-domain topics.",
+      "If a tool or source is blocked, record the exact blocker and continue with clearly labeled evidence limits.",
+    ],
+    routines: [
+      "Read `raw/bootstrap/RESEARCH_REQUEST.md` and `raw/bootstrap/SOURCE_HINTS.md` first.",
+      "Produce raw bootstrap artifacts with provenance, source IDs, claim IDs, and blockers.",
+      "Return a concise Markdown handoff summary from each worker step.",
+    ],
+    skill_paths,
+    context_pages,
+    active_memory: [],
+    user_memory: [],
+    working_memory: [],
+    memory_summary: "Sanitized Moontown research bootstrap context for `\{entry.id}`.",
+    output_contract: research_bootstrap_output_contract_lines(),
+  }
+}
+
+///|
+fn research_bootstrap_worker_prompt(entry : BookCatalogEntry) -> String {
+  let display = display_topic_name(research_topic_id(entry))
+  [
+    "Own the MoonClaw raw research bootstrap handoff for \{display}.",
+    "",
+    "Use the generated job profile steps as the execution authority:",
+    "- stage 1 writes research question and starter search log",
+    "- stage 2 performs bounded web/source screening",
+    "- stage 3 writes evidence matrix, synthesis brief, deep report, and marketing brief",
+    "",
+    "Do not materialize durable `wiki/*` pages in the worker stage. MoonBook will materialize wiki pages from the raw evidence envelope.",
+    "Do not treat \{display} as a local repository unless screened sources prove that interpretation.",
+    "Do not hard-code final research claims. Let the LLM choose sources and claims from screened evidence.",
+  ].join("\n")
+}
+
+///|
+fn research_bootstrap_output_contract_lines() -> Array[String] {
+  [
+    "For direct Moontown research bootstrap worker steps, return plain Markdown summaries unless a step prompt explicitly asks for JSON.",
+    "Do not return adaptive-planning JSON such as `needs_subplan` or `suggested_substeps`.",
+    "Raw artifacts must be workspace-relative paths under `raw/bootstrap/`.", "Required raw artifacts before the handoff is complete: `raw/bootstrap/research-question.md`, `raw/bootstrap/search-log.md`, `raw/bootstrap/source-screen.md`, `raw/bootstrap/evidence-matrix.md`, `raw/bootstrap/local-sources.md`, `raw/bootstrap/synthesis-brief.md`, `raw/bootstrap/deep-report.md`, and `raw/bootstrap/marketing-brief.md`.",
+    "If any artifact cannot be produced, write a blocker artifact and explain the missing tool or source.",
+  ]
 }
 
 ///|
@@ -980,6 +1079,15 @@ async fn ensure_moontown_research_pack(
     "\{root}/raw/bootstrap/SOURCE_HINTS.md",
     research_source_hints_text(entry),
   )
+  write_workspace_text_if_missing(
+    "\{root}/raw/bootstrap/research-question.md",
+    research_question_seed_text(entry),
+  )
+  write_workspace_text_if_missing(
+    "\{root}/raw/bootstrap/search-log.md",
+    research_search_log_seed_text(entry),
+  )
+  ensure_moontown_research_moonclaw_profile(root)
 }
 
 ///|
@@ -994,25 +1102,143 @@ async fn write_workspace_text(path : String, content : String) -> Unit {
 }
 
 ///|
+async fn write_workspace_text_if_missing(
+  path : String,
+  content : String,
+) -> Unit {
+  let existing = if @fs.exists(path) {
+    @fs.read_file(path).text() catch {
+      _ => ""
+    }
+  } else {
+    ""
+  }
+  if existing.trim().is_empty() {
+    write_workspace_text(path, content)
+  }
+}
+
+///|
+async fn ensure_moontown_research_moonclaw_profile(root : String) -> Unit {
+  let path = "\{root}/moonclaw.jobs.json"
+  let existing = if @fs.exists(path) {
+    @json.parse(@fs.read_file(path).text()) catch {
+      _ => Json::object({})
+    }
+  } else {
+    Json::object({})
+  }
+  let profile = @json.parse(moontown_research_bootstrap_profile_json()) catch {
+    _ => Json::object({})
+  }
+  write_workspace_text(
+    path,
+    upsert_moonclaw_job_profile_json(
+      existing, "moontown_research_bootstrap_worker", profile,
+    ).stringify(indent=2),
+  )
+}
+
+///|
+fn moonbook_json_object_copy(value : Json?) -> Map[String, Json] {
+  let copied : Map[String, Json] = {}
+  match value {
+    Some(Object(obj)) =>
+      for key, entry in obj {
+        copied[key] = entry
+      }
+    _ => ()
+  }
+  copied
+}
+
+///|
+fn upsert_moonclaw_job_profile_json(
+  config : Json,
+  profile_id : String,
+  profile : Json,
+) -> Json {
+  let root = moonbook_json_object_copy(Some(config))
+  let jobs = moonbook_json_object_copy(root.get("jobs"))
+  let profiles = moonbook_json_object_copy(jobs.get("profiles"))
+  profiles[profile_id] = profile
+  jobs["profiles"] = Json::object(profiles)
+  root["jobs"] = Json::object(jobs)
+  Json::object(root)
+}
+
+///|
+fn moontown_research_bootstrap_profile_json() -> String {
+  [
+    "{", "  \"family\": \"moontown_research_bootstrap_worker\",", "  \"role\": \"worker\",",
+    "  \"priority\": 150,", "  \"tags\": [\"moontown\", \"research\", \"bootstrap\", \"web\", \"wiki\"],",
+    "  \"match\": {", "    \"all\": [\"research\"],", "    \"any\": [\"bootstrap\", \"source\", \"web\", \"evidence\", \"report\"]",
+    "  },", "  \"steps\": [", "    {", "      \"id\": \"research_bootstrap_sources\",",
+    "      \"title\": \"Run bounded web discovery and source screening\",", "      \"kind\": \"job.analysis\",",
+    "      \"prompt_template\": \"Execute the source-screening stage of the imported Moontown research bootstrap packet for ${proposal.title}. Read raw/bootstrap/RESEARCH_REQUEST.md, raw/bootstrap/SOURCE_HINTS.md, raw/bootstrap/research-question.md, raw/bootstrap/search-log.md, and only the relevant source-screening SKILL.md files. Use native web_search first when it is available, then use web_fetch on high-signal candidate pages. If a native web tool returns {bad request}, retry once with a simpler query or URL. If native web tools are unavailable, blocked, or return only weak search pages, fall back to bounded execute_command discovery such as curl -L --max-time 12 against LLM-chosen search-result pages and selected source URLs. First update raw/bootstrap/search-log.md with a source-screening plan, then immediately run the web-discovery tool path; do not spend a long model turn planning. Keep this pass bounded: stop searching after enough inspected evidence for a cautious synthesis, after three explicit blockers, or after six web/discovery attempts. Use high-signal URLs from SOURCE_HINTS.md as leads, but let the LLM choose which sources to include, exclude, or mark blocked. Use search pages only for discovery, never as claim evidence. Do not inspect local implementation files unless SOURCE_HINTS.md explicitly permits it. Write or revise raw/bootstrap/search-log.md, raw/bootstrap/source-screen.md, and raw/bootstrap/tool-blockers.md. Do not ask for more input; weak coverage is a blocker to record, not a reason to stall. Return plain Markdown, not JSON; do not use fields named verdict, substeps, suggested_substeps, or needs_subplan. After these files are written, immediately return a concise completion summary with source counts, rejected sources, blockers, and whether synthesis has enough evidence.\",",
+    "      \"metadata\": {", "        \"preferred_skills\": [", "          \"web-first-research\",",
+    "          \"source-diarize\"", "        ],", "        \"enable_tools\": true,",
+    "        \"web_search\": true,", "        \"disable_waiting_for_input\": true,",
+    "        \"best_effort_on_missing_input\": true,", "        \"best_effort_on_timeout\": true,",
+    "        \"retry_max_attempts\": 1,", "        \"timeout_ms\": 300000,", "        \"board_lane\": \"Bootstrap\",",
+    "        \"board_order\": 0,", "        \"role_runtime\": {", "          \"planning_layer\": \"execution\",",
+    "          \"runtime_mode\": \"executor\",", "          \"tool_access\": \"full\",",
+    "          \"memory_scope\": \"workspace\",", "          \"allow_delegate\": false,",
+    "          \"allow_workspace_write\": true,", "          \"allow_execution_tools\": true,",
+    "          \"output_contract\": \"moontown.research.sources.v1\"", "        }",
+    "      }", "    },", "    {", "      \"id\": \"research_bootstrap_report\",",
+    "      \"title\": \"Synthesize evidence and write research reports\",", "      \"kind\": \"job.analysis\",",
+    "      \"prompt_template\": \"Execute the synthesis stage of the imported Moontown research bootstrap packet for ${proposal.title}. Start by reading raw/bootstrap/source-screen.md, raw/bootstrap/search-log.md, raw/bootstrap/tool-blockers.md, raw/bootstrap/research-question.md, raw/bootstrap/RESEARCH_REQUEST.md, and raw/bootstrap/SOURCE_HINTS.md. Read only the directly relevant synthesis/report/marketing SKILL.md files. Do not run new web discovery in this stage and do not ask for more input. Use the screened sources and blockers as the evidence boundary, even if the source set is thin. Write or revise raw/bootstrap/local-sources.md, raw/bootstrap/evidence-matrix.md, raw/bootstrap/synthesis-brief.md, raw/bootstrap/deep-report.md, and raw/bootstrap/marketing-brief.md. If evidence is weak, write a cautious report with explicit Evidence and Limits, missing-source blockers, and next research; do not stall waiting for stronger evidence. The report must be topic-correct, source-backed, thesis-first, evidence-limited, and governed by the loaded research skills. Do not reinterpret external domain topics as local repositories unless screened sources prove that meaning. Do not update wiki pages in this worker stage; raw artifacts are the handoff for MoonBook materialization. Return plain Markdown, not JSON; do not use fields named verdict, substeps, suggested_substeps, or needs_subplan. After the files are written, immediately return the artifact paths, source counts, blockers, report quality gaps if any, and whether the evidence is strong enough for MoonBook wiki materialization.\",",
+    "      \"metadata\": {", "        \"preferred_skills\": [", "          \"research-evidence-synthesis\",",
+    "          \"research-report\",", "          \"wiki-marketing\"", "        ],",
+    "        \"enable_tools\": true,", "        \"web_search\": false,", "        \"disable_waiting_for_input\": true,",
+    "        \"best_effort_on_missing_input\": true,", "        \"best_effort_on_timeout\": true,",
+    "        \"retry_max_attempts\": 1,", "        \"timeout_ms\": 240000,", "        \"board_lane\": \"Bootstrap\",",
+    "        \"board_order\": 1,", "        \"role_runtime\": {", "          \"planning_layer\": \"execution\",",
+    "          \"runtime_mode\": \"executor\",", "          \"tool_access\": \"full\",",
+    "          \"memory_scope\": \"workspace\",", "          \"allow_delegate\": false,",
+    "          \"allow_workspace_write\": true,", "          \"allow_execution_tools\": true,",
+    "          \"output_contract\": \"moontown.research.report.v1\"", "        }",
+    "      }", "    }", "  ],", "  \"metadata\": {", "    \"profile_metadata\": {",
+    "      \"disable_waiting_for_input\": true,", "      \"best_effort_on_missing_input\": true",
+    "    },", "    \"worker_role\": \"research_bootstrap\"", "  }", "}",
+  ].join("\n")
+}
+
+///|
 fn research_request_text(entry : BookCatalogEntry) -> String {
   let topic = research_topic_id(entry)
   let display = display_topic_name(topic)
+  let mode = research_mode_text(topic)
+  let question = research_question_text(topic, display)
+  let web_priority = if is_external_domain_research_topic(topic) {
+    "3. Fetch or otherwise inspect the highest-signal pages you found with the available web access path, prioritizing current reputable coverage, primary sources, official pages, regulatory or standards material, and well-sourced expert analysis."
+  } else {
+    "3. Fetch or otherwise inspect the highest-signal pages you found with the available web access path, prioritizing official repositories, maintainer docs, release docs, and project pages."
+  }
+  let local_step = if is_external_domain_research_topic(topic) {
+    "7. Do not infer a local repository from the topic name. Inspect local files only when `SOURCE_HINTS.md` lists explicit paths or fetched sources prove local implementation material is relevant."
+  } else {
+    "7. Only after web discovery, inspect high-signal local files for corroboration and implementation detail."
+  }
   [
     "# Research Request",
     "",
     "- Topic: \{display}",
     "- Goal: produce a researcher-grade dossier and durable wiki coverage that is specific to \{display}, not generic scaffold text.",
-    "- Mode: web search first, source screening second, evidence extraction third, local repository inspection fourth, synthesis and wiki materialization last.",
-    "- Research question: What is \{display}, what problem does it solve, how is it implemented or operated, what evidence supports those claims, and what remains uncertain?",
+    "- Mode: \{mode}",
+    "- Research question: \{question}",
     "- Quality bar: every major claim must trace to either a fetched web source, a local file path, or an explicit blocker explaining why the source could not be inspected.",
-    "- Required durable outputs:",
+    "- Required MoonClaw worker outputs:",
     "  - `raw/bootstrap/research-question.md`",
     "  - `raw/bootstrap/search-log.md`",
     "  - `raw/bootstrap/source-screen.md`",
     "  - `raw/bootstrap/evidence-matrix.md`",
     "  - `raw/bootstrap/local-sources.md`",
     "  - `raw/bootstrap/synthesis-brief.md`",
+    "  - `raw/bootstrap/deep-report.md`",
     "  - `raw/bootstrap/marketing-brief.md`",
+    "- Required MoonBook materialization outputs after raw evidence is ready:",
     "  - at least one substantive page under `wiki/sources/`",
     "  - at least one substantive page under `wiki/entities/`",
     "  - at least one substantive page under `wiki/concepts/`",
@@ -1022,22 +1248,106 @@ fn research_request_text(entry : BookCatalogEntry) -> String {
     "## Execution Order",
     "",
     "1. Write `raw/bootstrap/research-question.md` with scope, inclusion criteria, exclusion criteria, keywords, and known source classes.",
-    "2. Run at least three targeted `web_search` queries before local file discovery.",
-    "3. Use `web_fetch` on the highest-signal pages you found, prioritizing official repositories, maintainer docs, release docs, and project pages.",
+    "2. Run at least three targeted web-discovery attempts before local file discovery. Use native `web_search` when available; otherwise use bounded command-line discovery such as `curl -L --max-time 12` against LLM-chosen search pages and candidate URLs.",
+    web_priority,
     "4. Write `raw/bootstrap/search-log.md` with query strings, result counts if available, selected URLs, rejected URLs, and the reason for each decision.",
     "5. Write `raw/bootstrap/source-screen.md` with one row per inspected source: include/exclude, authority, recency, relevance, and risk.",
     "6. Extract claims into `raw/bootstrap/evidence-matrix.md` before synthesis. Use claim IDs like `C1`, `C2`, and cite source IDs like `W1` or `L1`.",
-    "7. Only after web discovery, inspect high-signal local files for corroboration and implementation detail.",
+    local_step,
     "8. Write `raw/bootstrap/local-sources.md` with exact paths, symbols or sections inspected, and evidence bullets.",
     "9. Write `raw/bootstrap/synthesis-brief.md` that separates findings, contradictions, gaps, and next research.",
     "10. Write `raw/bootstrap/marketing-brief.md` using `skills/wiki-marketing/SKILL.md`: buyer pain, promise, differentiation, proof, objections, and next action.",
-    "11. Materialize durable wiki pages. Do not stop at notes, candidate inventories, or generic completion text.",
+    "11. If running inside MoonBook, materialize durable wiki pages. If running inside a direct MoonClaw worker, stop at wiki-ready raw artifacts and clearly mark whether MoonBook has enough evidence to materialize pages.",
     "",
     "## Blocking Rule",
     "",
     "If a tool is unavailable, record the exact blocker in `raw/bootstrap/tool-blockers.md`, continue with the remaining permitted path, and still create the durable bootstrap notes that explain what happened.",
+    "If native `web_search` returns only a search-engine result page or query URL, fetch that page, extract candidate URLs if possible, and retry with broader or narrower query variants before declaring the web pass blocked.",
+    "If native `web_search` is disabled or stalls, use bounded command-line web discovery such as `curl -L --max-time 12` against LLM-chosen search-result pages and candidate URLs. Retry `{bad request}` once with a simpler query or URL before recording a blocker.",
     "If web search or fetch fails, do not pretend web evidence exists. Mark the source status as `blocked`, use local sources only as provisional evidence, and make the wiki page say what is missing.",
   ].join("\n")
+}
+
+///|
+fn research_question_seed_text(entry : BookCatalogEntry) -> String {
+  let topic = research_topic_id(entry)
+  let display = display_topic_name(topic)
+  [
+    "# Research Question",
+    "",
+    "## Core Question",
+    "",
+    research_question_text(topic, display),
+    "",
+    "## Scope",
+    "",
+    "This seed file frames a web-first research pass for \{display}. It is intentionally provisional; the worker should revise it when source screening finds better boundaries.",
+    "",
+    "## Inclusion Criteria",
+    "",
+    "- directly relevant to \{display}",
+    "- attributable to a reputable publisher, official body, company, operator, or named expert",
+    "- specific enough to support falsifiable claims",
+    "- current enough for the research question, or clearly foundational if older",
+    "",
+    "## Exclusion Criteria",
+    "",
+    "- search snippets treated as verified evidence",
+    "- generic or motivational content without inspectable claims",
+    "- local repository interpretation unless screened sources prove that meaning",
+    "- final claims written before source inspection",
+    "",
+    "## Query Seeds",
+    "",
+    ..research_web_queries(topic).map(fn(query) { "- `\{query}`" }),
+    "",
+    "## Local Source Position",
+    "",
+    if is_external_domain_research_topic(topic) {
+      "`SOURCE_HINTS.md` says no local repository is implied for this lane. Keep local evidence empty unless screened web evidence points to a concrete local artifact."
+    } else {
+      "Inspect local files only after web discovery has been recorded."
+    },
+  ].join("\n")
+}
+
+///|
+fn research_search_log_seed_text(entry : BookCatalogEntry) -> String {
+  let topic = research_topic_id(entry)
+  let display = display_topic_name(topic)
+  [
+    "# Search Log",
+    "",
+    "## Seed Status",
+    "",
+    "Moontown created this starter log before MoonClaw source screening so the research trail is durable. It contains planned queries only; source screening must revise it with actual attempts, selected URLs, rejected URLs, blockers, and decisions.",
+    "",
+    "## Planned Queries",
+    "",
+    "| Query ID | Query | Purpose | Status |",
+    "| --- | --- | --- | --- |",
+    ..research_query_seed_rows(topic, display),
+    "",
+    "## Source Screening Rules",
+    "",
+    "- Use native web tools when available; otherwise use bounded command-line discovery such as `curl -L --max-time 12`.",
+    "- Retry `{bad request}` once with a simpler query or URL before recording a blocker.",
+    "- Use search pages only for discovery; do not cite them as evidence.",
+    "- Prefer inspected source content, clear provenance, and claim-level extraction.",
+    "- Keep blocked or weak sources visible in `raw/bootstrap/source-screen.md` or `raw/bootstrap/tool-blockers.md`.",
+  ].join("\n")
+}
+
+///|
+fn research_query_seed_rows(topic : String, display : String) -> Array[String] {
+  let rows : Array[String] = []
+  let queries = research_web_queries(topic)
+  for index, query in queries {
+    rows.push(
+      "| Q\{index + 1} | `\{query}` | source discovery for \{display} | planned |",
+    )
+  }
+  rows
 }
 
 ///|
@@ -1052,9 +1362,23 @@ fn research_source_hints_text(entry : BookCatalogEntry) -> String {
     "",
     "These are Moontown-generated hints for the \{display} research lane.",
     "",
-    "## Web Search First",
-    "",
   ]
+  if is_external_domain_research_topic(topic) {
+    lines.push("## Interpretation Guard")
+    lines.push("")
+    lines.push(
+      "- Treat \{display} as an external domain research topic, not as a Vectie repository, MoonBit package, or local codebase unless source evidence proves otherwise.",
+    )
+    lines.push(
+      "- Let the LLM choose the best current sources, but require screened web evidence before synthesis.",
+    )
+    lines.push(
+      "- Prefer recent, reputable, source-backed material over search snippets, generic explainers, or run-log prose.",
+    )
+    lines.push("")
+  }
+  lines.push("## Web Search First")
+  lines.push("")
   for query in web_queries {
     lines.push("- \{query}")
   }
@@ -1066,11 +1390,20 @@ fn research_source_hints_text(entry : BookCatalogEntry) -> String {
       lines.push("- \{url}")
     }
   }
-  lines.push("")
-  lines.push("## Local Repository Follow-Up")
-  lines.push("")
-  for path in local_paths {
-    lines.push("- \{path}")
+  if !local_paths.is_empty() {
+    lines.push("")
+    lines.push("## Local Repository Follow-Up")
+    lines.push("")
+    for path in local_paths {
+      lines.push("- \{path}")
+    }
+  } else if is_external_domain_research_topic(topic) {
+    lines.push("")
+    lines.push("## Local Follow-Up")
+    lines.push("")
+    lines.push(
+      "- No local repository is implied for this lane. Record `raw/bootstrap/local-sources.md` as intentionally empty unless web evidence points to a concrete local artifact.",
+    )
   }
   lines.push("")
   lines.push("## Materialization Target")
@@ -1091,7 +1424,7 @@ fn research_source_hints_text(entry : BookCatalogEntry) -> String {
 fn research_wiki_ingest_skill_text(entry : BookCatalogEntry) -> String {
   let topic = research_topic_id(entry)
   let display = display_topic_name(topic)
-  [
+  let lines : Array[String] = [
     "---",
     "name: wiki-ingest",
     "description: Research-grade wiki ingest for a Moontown research book: search, screen, extract, materialize, and report blockers with provenance.",
@@ -1101,64 +1434,84 @@ fn research_wiki_ingest_skill_text(entry : BookCatalogEntry) -> String {
     "",
     "This research book overrides the default generic wiki ingest behavior. Do not produce generic MoonBook product copy. Build a lane-specific research record for \{display}.",
     "",
-    "## Mandatory Method",
-    "",
-    "1. Read `raw/bootstrap/RESEARCH_REQUEST.md` and `raw/bootstrap/SOURCE_HINTS.md` first.",
-    "2. Attempt web-first discovery before local-only conclusions. If `web_search` or `web_fetch` is not available in the tool list, write `raw/bootstrap/tool-blockers.md` and mark web evidence as blocked.",
-    "3. Create `raw/bootstrap/research-question.md` with question, scope, inclusion criteria, exclusion criteria, keywords, and source classes.",
-    "4. Create `raw/bootstrap/search-log.md` even when web tools are blocked. Include attempted queries, selected or blocked URLs, rejected sources, and decisions.",
-    "5. Create `raw/bootstrap/source-screen.md` with source ID, include/exclude decision, authority, relevance, recency, and risk.",
-    "6. Create `raw/bootstrap/evidence-matrix.md` before writing wiki prose. Claims must be falsifiable and cite source IDs.",
-    "7. Inspect local files only after recording the web-search state. Use exact paths from `SOURCE_HINTS.md` and record them as `L1`, `L2`, etc.",
-    "8. Write `raw/bootstrap/marketing-brief.md` from screened evidence using `skills/wiki-marketing/SKILL.md`; make it buyer-facing, specific, and proof-backed.",
-    "9. Materialize durable wiki pages only from screened evidence: `wiki/sources/`, `wiki/entities/`, `wiki/concepts/`, and `wiki/synthesis/`.",
-    "10. Update `wiki/index.md` and `wiki/log.md` with the durable pages created.",
-    "",
-    "## Required Raw Files",
-    "",
-    "- `raw/bootstrap/research-question.md`",
-    "- `raw/bootstrap/search-log.md`",
-    "- `raw/bootstrap/source-screen.md`",
-    "- `raw/bootstrap/evidence-matrix.md`",
-    "- `raw/bootstrap/local-sources.md`",
-    "- `raw/bootstrap/synthesis-brief.md`",
-    "- `raw/bootstrap/marketing-brief.md`",
-    "",
-    "## Required Wiki Files",
-    "",
-    "- `wiki/sources/\{topic}-web-and-local.md` or another topic-specific verified source digest.",
-    "- `wiki/entities/\{topic}.md` or another concrete entity page for \{display}.",
-    "- `wiki/concepts/\{topic}-architecture.md` or another concept page grounded in claims.",
-    "- `wiki/synthesis/\{topic}-research-brief.md` or another synthesis page connecting claims across sources.",
-    "",
-    "## Verified Source Page Criteria",
-    "",
-    "A page under `wiki/sources/` is verified only when it includes:",
-    "",
-    "- `Source type: verified source digest`",
-    "- source IDs such as `W1`, `W2`, `L1`",
-    "- inspected content summary",
-    "- extracted claim IDs",
-    "- confidence and risk notes",
-    "- explicit blockers for missing web or local evidence",
-    "",
-    "## Example Result Shape",
-    "",
-    "```md",
-    "# \{display} Research Brief",
-    "",
-    "## Findings",
-    "- C1: \{display} has a specific system responsibility. Evidence: W1 if web was available, L1 from local files.",
-    "",
-    "## Contradictions",
-    "- C2 has local support but no public source; confidence remains medium.",
-    "",
-    "## Gaps",
-    "- Web tools were unavailable, so public-source verification is blocked.",
-    "```",
-    "",
-    "If you cannot create the required files, return a blocker result. Do not mark the task complete with only generic source pages.",
-  ].join("\n")
+  ]
+  if is_external_domain_research_topic(topic) {
+    lines.push("## Domain Guard")
+    lines.push("")
+    lines.push(
+      "- This lane is external domain research. Do not reinterpret \{display} as a local repo, Vectie project, or MoonBit package unless screened sources prove that meaning.",
+    )
+    lines.push(
+      "- Build source-backed coverage from web discovery, inspected pages, evidence extraction, raw worker artifacts, and durable MoonBook wiki pages.",
+    )
+    lines.push(
+      "- If a search tool returns only a search results page, fetch and screen that page or retry query variants before declaring a blocker.",
+    )
+    lines.push("")
+  }
+  for
+    line in [
+      "## Mandatory Method",
+      "",
+      "1. Read `raw/bootstrap/RESEARCH_REQUEST.md` and `raw/bootstrap/SOURCE_HINTS.md` first.",
+      "2. Attempt web-first discovery before local-only conclusions. Use native `web_search` and `web_fetch` when available. If they are unavailable, use bounded command-line discovery such as `curl -L --max-time 12`; if all web access is blocked, write `raw/bootstrap/tool-blockers.md` and mark web evidence as blocked.",
+      "3. Create `raw/bootstrap/research-question.md` with question, scope, inclusion criteria, exclusion criteria, keywords, and source classes.",
+      "4. Create `raw/bootstrap/search-log.md` even when web tools are blocked. Include attempted queries, selected or blocked URLs, rejected sources, and decisions.",
+      "5. Create `raw/bootstrap/source-screen.md` with source ID, include/exclude decision, authority, relevance, recency, and risk.",
+      "6. Create `raw/bootstrap/evidence-matrix.md` before writing wiki prose. Claims must be falsifiable and cite source IDs.",
+      "7. Inspect local files only after recording the web-search state, and only when `SOURCE_HINTS.md` or screened web evidence makes local files relevant. Use exact paths and record them as `L1`, `L2`, etc.",
+      "8. Write `raw/bootstrap/marketing-brief.md` from screened evidence using `skills/wiki-marketing/SKILL.md`; make it buyer-facing, specific, and proof-backed.",
+      "9. Materialize durable wiki pages only from screened evidence: `wiki/sources/`, `wiki/entities/`, `wiki/concepts/`, and `wiki/synthesis/`.",
+      "10. Update `wiki/index.md` and `wiki/log.md` with the durable pages created.",
+      "",
+      "## Required Raw Files",
+      "",
+      "- `raw/bootstrap/research-question.md`",
+      "- `raw/bootstrap/search-log.md`",
+      "- `raw/bootstrap/source-screen.md`",
+      "- `raw/bootstrap/evidence-matrix.md`",
+      "- `raw/bootstrap/local-sources.md`",
+      "- `raw/bootstrap/synthesis-brief.md`",
+      "- `raw/bootstrap/marketing-brief.md`",
+      "",
+      "## Required Wiki Files",
+      "",
+      "- `wiki/sources/\{topic}-web-and-local.md` or another topic-specific verified source digest.",
+      "- `wiki/entities/\{topic}.md` or another concrete entity page for \{display}.",
+      "- `wiki/concepts/\{topic}-architecture.md` or another concept page grounded in claims.",
+      "- `wiki/synthesis/\{topic}-research-brief.md` or another synthesis page connecting claims across sources.",
+      "",
+      "## Verified Source Page Criteria",
+      "",
+      "A page under `wiki/sources/` is verified only when it includes:",
+      "",
+      "- `Source type: verified source digest`",
+      "- source IDs such as `W1`, `W2`, `L1`",
+      "- inspected content summary",
+      "- extracted claim IDs",
+      "- confidence and risk notes",
+      "- explicit blockers for missing web or local evidence",
+      "",
+      "## Example Result Shape",
+      "",
+      "```md",
+      "# \{display} Research Brief",
+      "",
+      "## Findings",
+      "- C1: \{display} has a specific verified property. Evidence: W1 and W2 if web was available, optional L1 only when local files are relevant.",
+      "",
+      "## Contradictions",
+      "- C2 has local support but no public source; confidence remains medium.",
+      "",
+      "## Gaps",
+      "- Web tools were unavailable, so public-source verification is blocked.",
+      "```",
+      "",
+      "If you cannot create the required files, return a blocker result. Do not mark the task complete with only generic source pages.",
+    ] {
+    lines.push(line)
+  }
+  lines.join("\n")
 }
 
 ///|
@@ -1178,7 +1531,7 @@ fn research_source_diarize_skill_text(entry : BookCatalogEntry) -> String {
     "## Source IDs",
     "",
     "- `W1`, `W2`, `W3`: web sources from search/fetch.",
-    "- `L1`, `L2`, `L3`: local repository files.",
+    "- `L1`, `L2`, `L3`: local files only when local evidence is explicitly relevant.",
     "- `B1`: blocker records such as missing web search, unreadable file, or unavailable source.",
     "",
     "## Packet Requirements",
@@ -1198,7 +1551,7 @@ fn research_source_diarize_skill_text(entry : BookCatalogEntry) -> String {
     "```md",
     "| Claim ID | Claim | Source IDs | Evidence detail | Confidence | Gap or contradiction |",
     "| --- | --- | --- | --- | --- | --- |",
-    "| C1 | \{display} is responsible for a concrete architecture role. | L1, B1 | Local file supports the role; web search unavailable. | medium | Needs public docs verification. |",
+    "| C1 | \{display} has a specific verified property stated as a falsifiable sentence. | W1, W2 | Inspected sources support the claim; blocker rows explain missing evidence. | medium | Needs another independent source or narrower jurisdiction note. |",
     "```",
     "",
     "## Do Not",
@@ -1217,7 +1570,17 @@ fn web_first_research_skill_text(entry : BookCatalogEntry) -> String {
   let sample_query = research_web_queries(topic).get(0).unwrap_or(display)
   let sample_url = research_reference_urls(topic)
     .get(0)
-    .unwrap_or("https://github.com/vectie/\{topic}")
+    .unwrap_or("source chosen from screened web discovery")
+  let authority_rule = if is_external_domain_research_topic(topic) {
+    "- Prefer reputable current coverage, primary-source pages, official/regulatory material, research reports, expert essays, and clearly dated news. Do not prefer code repositories unless the topic is actually a software project."
+  } else {
+    "- Prefer authoritative pages: official docs, repo pages, maintainer docs, and project READMEs."
+  }
+  let local_rule = if is_external_domain_research_topic(topic) {
+    "- Do not inspect a local repository by guessing from the topic name. Use local files only when explicitly listed in `SOURCE_HINTS.md` or when web evidence points to a concrete local artifact."
+  } else {
+    "- Only then inspect the local repo to corroborate architecture, implementation, and file-level details."
+  }
   [
     "---",
     "name: web-first-research",
@@ -1243,13 +1606,17 @@ fn web_first_research_skill_text(entry : BookCatalogEntry) -> String {
     "",
     "## Rules",
     "",
-    "- Start with `web_search` before local file discovery unless the runtime explicitly reports the tool is unavailable.",
+    "- Start with web discovery before local file discovery. Use native `web_search` when it is available.",
+    "- If native `web_search` or `web_fetch` is disabled, unavailable, or stalls, use bounded command-line web discovery such as `curl -L --max-time 12` against LLM-chosen search-result pages and candidate URLs before local file discovery.",
+    "- In command-line discovery mode, first write the planned query/source-screening strategy to `raw/bootstrap/search-log.md`, then run a small bounded command batch. Do not spend a long model turn planning before the first durable write or command.",
     "- Run at least three web queries for this topic.",
-    "- Prefer authoritative pages: official docs, repo pages, maintainer docs, and project READMEs.",
-    "- After search, use `web_fetch` on at least two highest-signal pages before writing conclusions.",
+    "- Keep discovery bounded. Stop searching once the pass has enough inspected evidence for a cautious synthesis, three explicit blockers, or six web/discovery attempts. Weak evidence should become an explicit blocker and synthesis gap, not an endless search.",
+    authority_rule,
+    "- After search, inspect at least two highest-signal pages before writing conclusions. Use native `web_fetch` if available; otherwise use bounded command-line fetches.",
+    "- If native `web_search` returns only a search-engine URL or weak result page, fetch the result page, extract candidates when possible, and retry query variants before writing a blocker.",
     "- Write durable notes into `raw/bootstrap/search-log.md` and `raw/bootstrap/source-screen.md` before inspecting the local repo.",
-    "- Only then inspect the local repo to corroborate architecture, implementation, and file-level details.",
-    "- If web tools are unavailable, write `raw/bootstrap/tool-blockers.md` and continue with local discovery instead of silently skipping the phase.",
+    local_rule,
+    "- If all web access paths are unavailable, write `raw/bootstrap/tool-blockers.md` and continue only with clearly provisional evidence instead of silently skipping the phase.",
     "- Do not cite search snippets as verified evidence unless fetch is blocked and the source is clearly labeled provisional.",
     "- Do not mark a source page verified unless it contains inspected source content, extracted claims, and provenance.",
     "",
@@ -1261,16 +1628,18 @@ fn web_first_research_skill_text(entry : BookCatalogEntry) -> String {
     "- `raw/bootstrap/evidence-matrix.md` with claim IDs, source IDs, evidence, confidence, and gaps.",
     "- `raw/bootstrap/local-sources.md` with exact file paths, symbols or sections, and evidence bullets.",
     "- `raw/bootstrap/synthesis-brief.md` with findings, contradictions, gaps, and next research.",
+    "- `raw/bootstrap/deep-report.md` with thesis-first research analysis, tables, Mermaid relationship diagram, maturity assessment, and evidence limits.",
     "- `raw/bootstrap/marketing-brief.md` with buyer-facing positioning, product strengths, proof points, objections, and next action.",
-    "- Durable wiki pages that are specific to \{display}.",
+    "- Wiki-ready materialization notes that are specific to \{display}; create durable wiki pages only when the current runtime owns MoonBook wiki materialization.",
     "",
     "## Example Workflow",
     "",
     "Search sequence:",
-    "- `web_search` query: `\{sample_query}`",
-    "- `web_search` query: `\{display} architecture implementation`",
-    "- `web_search` query: `site:github.com vectie \{topic}`",
-    "- `web_fetch` url: `\{sample_url}`",
+    "- native mode: `web_search` query: `\{sample_query}`",
+    "- native mode: `web_search` query: `\{research_followup_query(topic, display)}`",
+    "- native mode: `web_search` query: `\{research_risk_query(topic, display)}`",
+    "- command-line mode: `curl -L --max-time 12 'search page chosen by the worker for \{sample_query}'`",
+    "- command-line mode: `curl -L --max-time 12 '\{sample_url}'`",
     "",
     "Then write protocol notes like:",
     "",
@@ -1279,16 +1648,16 @@ fn web_first_research_skill_text(entry : BookCatalogEntry) -> String {
     "",
     "| ID | Query | Selected source | Decision | Rationale |",
     "| --- | --- | --- | --- | --- |",
-    "| W1 | `\{sample_query}` | `\{sample_url}` | include | official or maintainer-facing source for \{display} |",
+    "| W1 | `\{sample_query}` | `\{sample_url}` | include | inspected source with direct relevance to \{display} |",
     "",
     "# Evidence Matrix",
     "",
     "| Claim ID | Claim | Sources | Confidence | Notes |",
     "| --- | --- | --- | --- | --- |",
-    "| C1 | \{display} has a concrete role in the system architecture. | W1, L1 | medium | Confirm with local files before final synthesis. |",
+    "| C1 | \{display} has a specific verified property discovered from screened evidence. | W1 | medium | Confirm with another current source before final synthesis. |",
     "```",
     "",
-    "Do not stop after the notes. Use them to drive durable wiki pages.",
+    "Do not stop after the notes. Use them to drive either durable wiki pages or a clear handoff that MoonBook can materialize.",
     "",
     "## Output Contract Example",
     "",
@@ -1336,7 +1705,7 @@ fn research_evidence_synthesis_skill_text(entry : BookCatalogEntry) -> String {
     "2. Search: record every query attempted and why it was chosen.",
     "3. Screen: include or exclude sources using authority, relevance, recency, and source risk.",
     "4. Extract: convert source observations into claim rows before writing prose.",
-    "5. Triangulate: compare at least one web source with at least one local repository source when both are available.",
+    "5. Triangulate: compare multiple independent web sources, and compare with local repository evidence only when local evidence is explicitly relevant.",
     "6. Synthesize: combine claims into a short argument about what \{display} is, how it works, and why it matters.",
     "7. Position: use the marketing skill to convert supported claims into `raw/bootstrap/marketing-brief.md` without inventing unsupported product claims.",
     "8. Gap map: list missing evidence, contradictions, and next searches.",
@@ -1354,8 +1723,8 @@ fn research_evidence_synthesis_skill_text(entry : BookCatalogEntry) -> String {
     "## Wiki Materialization Rules",
     "",
     "- A source page under `wiki/sources/` must identify source IDs, source type, inspected content, extracted claims, and risk.",
-    "- An entity page under `wiki/entities/` must describe the concrete project or actor, not the generic MoonBook workspace.",
-    "- A concept page under `wiki/concepts/` must explain one architecture or workflow concept grounded in claims.",
+    "- An entity page under `wiki/entities/` must describe the concrete project, actor, institution, domain model, or market participant that the evidence actually supports.",
+    "- A concept page under `wiki/concepts/` must explain one architecture, workflow, business, legal, or market concept grounded in claims.",
     "- A synthesis page under `wiki/synthesis/` must connect claims across sources and name unresolved gaps.",
     "- `raw/bootstrap/marketing-brief.md` must translate the evidence into product and seller perspective: buyer, pain, promise, strengths, proof, objections, and next action.",
     "- Every durable page must include provenance. Use claim IDs and source IDs from the evidence matrix.",
@@ -1367,20 +1736,20 @@ fn research_evidence_synthesis_skill_text(entry : BookCatalogEntry) -> String {
     "",
     "- Source type: verified source digest",
     "- Topic: \{display}",
-    "- Source IDs: W1, W2, L1",
+    "- Source IDs: W1, W2, optional L1 only when local evidence is relevant",
     "",
     "## Screened Sources",
     "",
-    "- W1: fetched official repository or docs page. Included because it directly describes \{display}.",
-    "- L1: local file path inspected for implementation detail.",
+    "- W1: fetched reputable web source. Included because it directly describes \{display}.",
+    "- L1: optional local file path inspected only when source hints or screened evidence make it relevant.",
     "",
     "## Extracted Claims",
     "",
-    "- C1: \{display} has a specific system responsibility. Sources: W1, L1. Confidence: medium.",
+    "- C1: \{display} has a specific verified property. Sources: W1, W2. Confidence: medium.",
     "",
     "## Risks",
     "",
-    "- Missing release history, unclear public documentation, or local-only evidence.",
+    "- Missing current evidence, blocked sources, jurisdiction limits, or single-source claims.",
     "```",
     "",
     "## Failure Discipline",
@@ -1463,6 +1832,49 @@ fn research_topic_id(entry : BookCatalogEntry) -> String {
 }
 
 ///|
+fn is_external_domain_research_topic(topic : String) -> Bool {
+  match topic {
+    "opc" => true
+    _ => false
+  }
+}
+
+///|
+fn research_mode_text(topic : String) -> String {
+  if is_external_domain_research_topic(topic) {
+    "web discovery first, source screening second, evidence extraction third, source triangulation fourth, MoonClaw raw handoff fifth, and MoonBook wiki materialization last. Local repository inspection is not part of the default path."
+  } else {
+    "web discovery first, source screening second, evidence extraction third, local repository inspection fourth, MoonClaw raw handoff fifth, and MoonBook wiki materialization last."
+  }
+}
+
+///|
+fn research_question_text(topic : String, display : String) -> String {
+  match topic {
+    "opc" =>
+      "What is the One Person Company model, what current news and evidence show about its business reality, how AI tools and agentic workflows change its feasibility, what examples and risks matter, and what remains uncertain?"
+    _ =>
+      "What is \{display}, what problem does it solve, how is it implemented or operated, what evidence supports those claims, and what remains uncertain?"
+  }
+}
+
+///|
+fn research_followup_query(topic : String, display : String) -> String {
+  match topic {
+    "opc" => "AI solo founder one person company trend"
+    _ => "\{display} architecture implementation"
+  }
+}
+
+///|
+fn research_risk_query(topic : String, _display : String) -> String {
+  match topic {
+    "opc" => "one person company risks operations legal finance"
+    _ => "site:github.com vectie \{topic}"
+  }
+}
+
+///|
 fn research_web_queries(topic : String) -> Array[String] {
   match topic {
     "moontown" =>
@@ -1477,6 +1889,13 @@ fn research_web_queries(topic : String) -> Array[String] {
       [
         "vectie moonclaw", "moonclaw moonbit agent", "site:github.com vectie moonclaw",
       ]
+    "opc" =>
+      [
+        "one person company latest news AI", "one-person company solo founder AI startup",
+        "one person company business model trend", "one-person unicorn AI startup trend",
+        "Anthropic CEO one-person billion-dollar company AI", "OPC entrepreneur one person company current evidence",
+        "one person company risks legal finance operations",
+      ]
     _ =>
       ["vectie \{topic}", "\{topic} moonbit", "site:github.com vectie \{topic}"]
   }
@@ -1488,6 +1907,12 @@ fn research_reference_urls(topic : String) -> Array[String] {
     "moontown" => ["https://github.com/vectie/moontown"]
     "moonbook" => ["https://github.com/vectie/moonbook"]
     "moonclaw" => ["https://github.com/vectie/moonclaw"]
+    "opc" =>
+      [
+        "https://www.opc.community/", "https://www.forbes.com/sites/elainepofeldt/2026/01/28/as-more-founders-aim-to-build-billion-dollar-one-person-businesses-new-research-points-to-high-potential-niches/",
+        "https://www.europeanbusinessreview.com/one-person-startups-are-on-the-rise-thanks-to-ai/",
+        "https://www.worldbank.org/en/programs/entrepreneurship", "https://www.gov.uk/running-a-limited-company",
+      ]
     _ => ["https://github.com/vectie/\{topic}"]
   }
 }
@@ -1518,6 +1943,7 @@ fn research_local_paths(topic : String) -> Array[String] {
         "/Users/kq/Workspace/moonclaw/tools/web_search/tool.mbt", "/Users/kq/Workspace/moonclaw/tools/web_fetch/tool.mbt",
         "/Users/kq/Workspace/moonclaw/tools/search_files/tool.mbt",
       ]
+    "opc" => []
     _ =>
       [
         "/Users/kq/Workspace/\{topic}/README.md",

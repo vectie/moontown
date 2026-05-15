@@ -198,6 +198,7 @@ pub struct MemoryCandidate {
   durable : Bool
   target_page : String?
 }
+pub fn MemoryCandidate::new(kind~ : String, title~ : String, detail~ : String, durable? : Bool, target_page? : String?) -> Self
 pub impl Eq for MemoryCandidate
 pub impl Show for MemoryCandidate
 pub impl ToJson for MemoryCandidate

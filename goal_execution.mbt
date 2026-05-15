@@ -10,10 +10,14 @@ async fn persist_execution_into_book(
     execution.status is @core.TaskExecutionStatus::Running {
     return
   }
+  let result_summary = research_persist_summary(entry, execution)
+  let result_artifacts = research_persist_artifacts(entry, execution)
+  let memory_candidates = research_persist_memory_candidates(entry, execution)
   let result = @moonbook.BookResult::new(
     task_id=execution.task_id,
-    summary=execution.summary,
-    artifacts=execution.run_id.map(fn(run_id) { [run_id] }).unwrap_or([]),
+    summary=result_summary,
+    artifacts=result_artifacts,
+    memory_candidates~,
     requires_review=execution.requires_review ||
       execution.status is @core.TaskExecutionStatus::Running,
     notify_town=execution.notify_town,
@@ -45,6 +49,178 @@ async fn persist_execution_into_book(
       related_run_id=execution.run_id,
     ),
   )
+}
+
+///|
+async fn research_persist_summary(
+  entry : @moonbook.BookCatalogEntry,
+  execution : @core.TaskExecutionRecord,
+) -> String {
+  if !is_research_bootstrap_execution(entry, execution) {
+    return execution.summary
+  }
+  let root = @moonbook.workspace_root(entry)
+  let display = research_persist_display(entry)
+  let brief = read_text_or_empty("\{root}/raw/bootstrap/synthesis-brief.md")
+  let report = read_text_or_empty("\{root}/raw/bootstrap/deep-report.md")
+  let source_screen = read_text_or_empty(
+    "\{root}/raw/bootstrap/source-screen.md",
+  )
+  let evidence = read_text_or_empty("\{root}/raw/bootstrap/evidence-matrix.md")
+  let evidence_summary = first_non_empty_compact_excerpt(
+    [brief, report, source_screen, evidence],
+    900,
+  )
+  let run_line = match execution.run_id {
+    Some(run_id) => " Worker run: `\{run_id}`."
+    None => ""
+  }
+  "Research bootstrap completed for \{display}. Raw artifacts are ready under `raw/bootstrap/`: research-question, search-log, source-screen, evidence-matrix, local-sources, synthesis-brief, deep-report, and marketing-brief.\{run_line} Evidence summary: \{evidence_summary}"
+}
+
+///|
+fn research_persist_artifacts(
+  entry : @moonbook.BookCatalogEntry,
+  execution : @core.TaskExecutionRecord,
+) -> Array[String] {
+  let artifacts : Array[String] = []
+  match execution.run_id {
+    Some(run_id) => artifacts.push(run_id)
+    None => ()
+  }
+  if is_research_bootstrap_execution(entry, execution) {
+    for artifact in research_bootstrap_result_artifacts() {
+      artifacts.push(artifact)
+    }
+  }
+  artifacts
+}
+
+///|
+async fn research_persist_memory_candidates(
+  entry : @moonbook.BookCatalogEntry,
+  execution : @core.TaskExecutionRecord,
+) -> Array[@moonbook.MemoryCandidate] {
+  if !is_research_bootstrap_execution(entry, execution) {
+    return []
+  }
+  let topic = quality_topic_for_entry(entry)
+  let display = research_persist_display(entry)
+  let root = @moonbook.workspace_root(entry)
+  let brief = read_text_or_empty("\{root}/raw/bootstrap/synthesis-brief.md")
+  let source_screen = read_text_or_empty(
+    "\{root}/raw/bootstrap/source-screen.md",
+  )
+  let evidence = read_text_or_empty("\{root}/raw/bootstrap/evidence-matrix.md")
+  let report = read_text_or_empty("\{root}/raw/bootstrap/deep-report.md")
+  let source_detail = first_non_empty_compact_excerpt(
+    [source_screen, evidence, brief],
+    700,
+  )
+  let entity_detail = first_non_empty_compact_excerpt([brief, report], 700)
+  let concept_detail = first_non_empty_compact_excerpt(
+    [evidence, brief, report],
+    700,
+  )
+  let synthesis_detail = first_non_empty_compact_excerpt(
+    [brief, evidence, report],
+    700,
+  )
+  [
+    @moonbook.MemoryCandidate::new(
+      kind="source",
+      title="\{display} screened source set",
+      detail="Screened research evidence for this book: \{source_detail}",
+      durable=true,
+      target_page=Some("sources/\{topic}-screened-sources.md"),
+    ),
+    @moonbook.MemoryCandidate::new(
+      kind="entity",
+      title=display,
+      detail="Primary research entity for this book: \{entity_detail}",
+      durable=true,
+      target_page=Some("entities/\{topic}.md"),
+    ),
+    @moonbook.MemoryCandidate::new(
+      kind="concept",
+      title="\{display} research thesis",
+      detail="Maintained concept synthesized from the evidence matrix: \{concept_detail}",
+      durable=true,
+      target_page=Some("concepts/\{topic}-research-thesis.md"),
+    ),
+    @moonbook.MemoryCandidate::new(
+      kind="synthesis",
+      title="\{display} evidence-limited synthesis",
+      detail="Current synthesis and open gaps: \{synthesis_detail}",
+      durable=true,
+      target_page=Some("synthesis/\{topic}-research-thesis.md"),
+    ),
+  ]
+}
+
+///|
+fn is_research_bootstrap_execution(
+  entry : @moonbook.BookCatalogEntry,
+  execution : @core.TaskExecutionRecord,
+) -> Bool {
+  entry.id.has_prefix("research-") &&
+  execution.task_id.contains("research-bootstrap-ingest")
+}
+
+///|
+fn research_bootstrap_result_artifacts() -> Array[String] {
+  [
+    "raw/bootstrap/research-question.md", "raw/bootstrap/search-log.md", "raw/bootstrap/source-screen.md",
+    "raw/bootstrap/evidence-matrix.md", "raw/bootstrap/local-sources.md", "raw/bootstrap/synthesis-brief.md",
+    "raw/bootstrap/deep-report.md", "raw/bootstrap/marketing-brief.md",
+  ]
+}
+
+///|
+fn research_persist_display(entry : @moonbook.BookCatalogEntry) -> String {
+  let topic = quality_topic_for_entry(entry)
+  if topic == "opc" {
+    "One Person Company (OPC)"
+  } else if !entry.name.trim().is_blank() {
+    entry.name
+  } else {
+    topic.replace(old="-", new=" ").to_string()
+  }
+}
+
+///|
+fn first_non_empty_compact_excerpt(
+  texts : Array[String],
+  limit : Int,
+) -> String {
+  for text in texts {
+    let compact = compact_markdown_for_candidate(text)
+    if !compact.is_blank() {
+      return markdown_excerpt(compact, limit)
+    }
+  }
+  "No non-empty research artifact text was available at persistence time."
+}
+
+///|
+fn compact_markdown_for_candidate(text : String) -> String {
+  let builder = StringBuilder::new()
+  let mut wrote = false
+  for raw in text.split("\n") {
+    let line = raw.trim().to_string()
+    if line.is_empty() ||
+      line.has_prefix("#") ||
+      line.has_prefix("| ---") ||
+      line.has_prefix("```") {
+      continue
+    }
+    if wrote {
+      builder.write_string(" ")
+    }
+    builder.write_string(line)
+    wrote = true
+  }
+  builder.to_string()
 }
 
 ///|
@@ -176,13 +352,23 @@ async fn wait_for_moonclaw_run(
   run_id : String,
   workspace_root : String,
 ) -> @moonclaw.ProposalPollResponse {
-  let mut latest = @moonclaw.poll_run(task_id, run_id, cwd=workspace_root)
+  let mut latest = @moonclaw.poll_run(
+    task_id,
+    run_id,
+    cwd=workspace_root,
+    detect_orphan=false,
+  )
   for attempt = 0; attempt < 600; attempt = attempt + 1 {
     if !is_live_moonclaw_status(latest.status) {
       return latest
     }
     @async.sleep(1_000)
-    latest = @moonclaw.poll_run(task_id, run_id, cwd=workspace_root)
+    latest = @moonclaw.poll_run(
+      task_id,
+      run_id,
+      cwd=workspace_root,
+      detect_orphan=false,
+    )
   }
   @moonclaw.timed_out_poll_response(
     task_id,

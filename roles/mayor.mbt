@@ -387,6 +387,7 @@ pub async fn Mayor::prepare_keeper_packet(
     "Mayor issued a keeper packet for \{entry.name}.",
     profile,
     packet_id=Some(packet_id),
+    task=Some(task),
     notes=["produced by mayor runtime", "book task kind=\{task.kind}"],
     tags=[entry.id, task.kind, "keeper"],
   )
@@ -450,6 +451,9 @@ fn compact_id_segment(text : String, limit : Int) -> String {
 
 ///|
 fn moonclaw_profile_for_task(task : @moonbook.BookTask) -> String {
+  if is_research_bootstrap_task(task) {
+    return "moontown_research_bootstrap_worker"
+  }
   match task.kind {
     "implementation-backlog"
     | "code-patch"
@@ -461,6 +465,13 @@ fn moonclaw_profile_for_task(task : @moonbook.BookTask) -> String {
     "analysis" | "synthesis" => "wiki_query_controller"
     _ => "wiki_query_controller"
   }
+}
+
+///|
+fn is_research_bootstrap_task(task : @moonbook.BookTask) -> Bool {
+  task.kind == "ingest" &&
+  task.id.contains("research-bootstrap-ingest") &&
+  task.prompt.to_lower().contains("research")
 }
 
 ///|

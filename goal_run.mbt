@@ -121,6 +121,7 @@ async fn persist_town_checkpoint(
 priv struct GoalBookLaunch {
   entry : @moonbook.BookCatalogEntry
   tasks : Array[@moonbook.BookTask]
+  pending_review_baseline : Int
 }
 
 ///|
@@ -227,7 +228,11 @@ async fn prepare_goal_book_launch(
     selected_tasks.push(task)
     emitted += 1
   }
-  Some({ entry, tasks: selected_tasks })
+  Some({
+    entry,
+    tasks: selected_tasks,
+    pending_review_baseline: initial_summary.pending_review_count,
+  })
 }
 
 ///|
@@ -273,6 +278,14 @@ async fn launch_goal_book(
       execution_event(completed_execution, state.executions.length() - 1),
     )
     persist_execution_into_book(state, launch.entry, completed_execution)
+    if terminal_execution_status(completed_execution.status) {
+      finalize_goal_book_entry(
+        state,
+        launch.entry,
+        launch.pending_review_baseline,
+        [completed_execution.task_id],
+      )
+    }
   }
 }
 
@@ -324,6 +337,8 @@ async fn finalize_goal_book_entry(
   )
   if !quality_gaps.is_empty() {
     queue_research_quality_gate(state, entry.id, task_ids, quality_gaps)
+  } else {
+    complete_recovered_research_bootstrap_if_clean(state, entry.id, task_ids)
   }
   state.record_event(
     @core.TownEvent::new(
