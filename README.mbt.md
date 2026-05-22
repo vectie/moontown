@@ -117,7 +117,7 @@ The first default standing goal is:
 ```text
 watch-opc-news
   -> target book: research-opc
-  -> cadence: 720 daemon ticks
+  -> cadence: 60 daemon ticks
   -> policy: web-first
   -> task: track latest One Person Company (OPC) news and update the book
 ```
@@ -165,6 +165,22 @@ decide whether OPC research is novel; that remains a MoonBook keeper decision.
 No-change and failed checks are operational activity, not evidence progress:
 accepted facts, changed pages, and `book_changed` must stay zero/no unless
 durable book knowledge changed or a review item was queued.
+
+Validated accounting example:
+
+```text
+decision: no_change
+checked_sources_count: 4
+new_sources_found: 1
+accepted_facts_count: 0
+rejected_facts_count: 1
+wiki_pages_changed_count: 0
+book_changed: no
+```
+
+This means the watcher really ran and screened sources, but MoonBook rejected
+the candidate as insufficient for durable knowledge. The town UI should show
+activity and judgement, not pretend that the book improved.
 
 ## Main Subsystems
 

@@ -229,9 +229,30 @@ Moontown persists the control-plane side of each watcher cycle under:
 ```
 
 Each line is a `WatcherRunRecord` containing the daemon tick, target book,
-MoonBook decision, task/run ids, detail, and next due tick. This ledger is the
-restart-readable audit trail for 24/7 operation. The durable research truth
-still lives inside the target MoonBook.
+MoonBook decision, task/run ids, strict accounting fields, detail, and next due
+tick. This ledger is the restart-readable audit trail for 24/7 operation. The
+durable research truth still lives inside the target MoonBook.
+
+Important boundary: the watcher ledger is not a wiki. It records whether a
+check happened and what MoonBook decided about the check. The accounting fields
+make this distinction explicit:
+
+- `checked_sources_count`
+  counts sources actually opened, fetched, or read enough to judge.
+- `new_sources_found`
+  counts candidate signals discovered during the check.
+- `accepted_facts_count`
+  counts facts MoonBook accepted into durable knowledge.
+- `rejected_facts_count`
+  counts candidate facts or sources rejected as duplicate, weak, stale, blocked,
+  or irrelevant.
+- `wiki_pages_changed_count`
+  counts durable MoonBook pages changed by the cycle.
+- `book_changed`
+  is `yes` only when durable knowledge changed or review was queued.
+
+This prevents a long-running town from mistaking retries, site rebuilds,
+generated logs, or no-change patrols for research progress.
 
 ### Readiness and Quality Gates
 

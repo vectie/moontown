@@ -165,9 +165,18 @@ The progress surface shows:
 - current running worker count
 - latest watcher decision
 - latest new source count
+- latest checked source count
+- accepted/rejected fact counts
+- whether the target book actually changed
 - update/review/no-change/failed decision mix
 - standing-goal progress toward the next due tick
 - the last five watcher records with source, delta, task, and run metadata
+
+The UI should treat `book_changed: no` plus nonzero `checked_sources_count` as
+useful operational transparency, not as failure. It means the town worker
+screened material and MoonBook judged that the book should not be inflated. The
+UI should reserve "progress" language for accepted facts, queued review, changed
+wiki pages, or `book_changed: yes`.
 
 The request composer writes through the Vite dev endpoint
 `POST /api/operator-requests`. A successful submit appends an operator request

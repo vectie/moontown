@@ -168,6 +168,27 @@ Accounting rule: retries, generated site rebuilds, journal maintenance, and
 failed/no-change checks are not research evidence. Only MoonBook-accepted facts,
 review items, and changed durable book pages count as book progress.
 
+The latest verified no-change shape looks like this:
+
+```text
+standing_goal_decision: no_change
+delta_score: 10
+new_source_count: 0
+next_check_hint: slower
+checked_sources_count: 4
+new_sources_found: 1
+accepted_facts_count: 0
+rejected_facts_count: 1
+wiki_pages_changed_count: 0
+book_changed: no
+```
+
+Interpretation: the watcher executed a real check, opened enough sources to
+judge them, found one candidate signal, rejected it, and correctly left the
+book unchanged. This is healthy 24/7 behavior. A no-change cycle is only a
+problem if `checked_sources_count` stays zero during cycles that claim to have
+searched.
+
 ## 2. Use The Persisted Town State
 
 The demo town persists runtime bootstrap files under:
@@ -192,7 +213,7 @@ What they do:
 - `.moontown/standing-goals.json`
   - stores Mayor-owned standing goals, target book, cadence, source policy, last run tick, and next due tick
 - `.moontown/watchers/*.jsonl`
-  - stores standing-watch decisions, target book, task/run ids, detail, and next due tick
+  - stores standing-watch decisions, target book, task/run ids, strict research accounting, detail, and next due tick
 - `.moontown/books/<book>/raw/bootstrap/`
   - stores research questions, search logs, source screens, evidence matrices,
     local source digests, and synthesis briefs
