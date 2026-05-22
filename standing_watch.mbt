@@ -251,6 +251,12 @@ fn standing_watch_prompt(
     $|- MoonClaw only performs bounded search/fetch/read/summarize work and returns candidate evidence.
     $|- Moontown only scheduled this check and will consume your final decision marker.
     $|
+    $|Research temperament:
+    $|- Use imagination to form better hypotheses and search angles, not to invent facts.
+    $|- Use curiosity to ask what would surprise the current book, why this topic matters now, and which weak signals deserve a future pass.
+    $|- Use judgement to reject noise, mirrors, stale material, inaccessible pages, and operational churn.
+    $|- A truthful no-change digest is better than a fake update.
+    $|
     $|Required workflow:
     $|1. Load the current book baseline before searching: wiki/sources, wiki/entities, wiki/concepts, wiki/synthesis, wiki/history, raw/bootstrap, and any latest digest.
     $|2. Search/fetch web sources first when the source policy is web-first. If web search is unavailable, record the tool blocker and use approved local/source hints only as fallback.
@@ -264,12 +270,25 @@ fn standing_watch_prompt(
     $|delta_score: 0-100
     $|new_source_count: <integer>
     $|next_check_hint: normal | slower | faster | review
+    $|checked_sources_count: <integer>
+    $|new_sources_found: <integer>
+    $|accepted_facts_count: <integer>
+    $|rejected_facts_count: <integer>
+    $|wiki_pages_changed_count: <integer>
+    $|book_changed: yes | no
     $|
     $|Decision meaning:
     $|- update: useful new evidence was persisted or queued for durable memory.
     $|- no_change: checked sources did not beat the current baseline.
     $|- needs_review: likely useful, but requires keeper/human review.
     $|- failed: the check could not complete honestly.
+    $|
+    $|Strict accounting:
+    $|- new_source_count counts newly useful accepted sources, not search results.
+    $|- checked_sources_count counts sources actually opened/fetched/read enough to judge.
+    $|- accepted_facts_count and wiki_pages_changed_count must be 0 for failed and ordinary no_change cycles.
+    $|- book_changed is yes only when durable book knowledge changed or review was queued.
+    $|- Generated site rebuilds, retries, history entries, and operational logs do not count as research progress.
   prompt
 }
 
@@ -433,6 +452,7 @@ fn standing_watch_summary_from_history_block(
   block_id : String,
   lines : Array[String],
 ) -> String? {
+  let summary_text = standing_watch_history_summary_text(lines)
   let decision = standing_watch_history_field(lines, "- Decision: `").unwrap_or(
     "unknown",
   )
@@ -448,11 +468,63 @@ fn standing_watch_summary_from_history_block(
   let next_check_hint = standing_watch_history_field(
     lines, "- Next check hint: `",
   ).unwrap_or("normal")
-  let summary = standing_watch_history_summary_line(lines).unwrap_or(
-    "MoonBook recorded a standing-watch decision.",
+  let checked_sources_count = standing_watch_history_field(
+    lines, "- Checked sources count: `",
+  ).unwrap_or(
+    standing_watch_marker_int(summary_text, "checked_sources_count", fallback=0).to_string(),
   )
+  let new_sources_found = standing_watch_history_field(
+    lines, "- New sources found: `",
+  ).unwrap_or(
+    standing_watch_marker_int(
+      summary_text,
+      "new_sources_found",
+      fallback=first_non_negative_int(new_source_count).unwrap_or(0),
+    ).to_string(),
+  )
+  let accepted_facts_count = standing_watch_history_field(
+    lines, "- Accepted facts count: `",
+  ).unwrap_or(
+    standing_watch_marker_int(
+      summary_text,
+      "accepted_facts_count",
+      fallback=if decision == "update" { 1 } else { 0 },
+    ).to_string(),
+  )
+  let rejected_facts_count = standing_watch_history_field(
+    lines, "- Rejected facts count: `",
+  ).unwrap_or(
+    standing_watch_marker_int(summary_text, "rejected_facts_count", fallback=0).to_string(),
+  )
+  let wiki_pages_changed_count = standing_watch_history_field(
+    lines, "- Wiki pages changed count: `",
+  ).unwrap_or(
+    standing_watch_marker_int(
+      summary_text,
+      "wiki_pages_changed_count",
+      fallback=if decision == "update" || decision == "needs_review" {
+        1
+      } else {
+        0
+      },
+    ).to_string(),
+  )
+  let book_changed = standing_watch_history_field(lines, "- Book changed: `").unwrap_or(
+    standing_watch_marker_value(summary_text, "book_changed").unwrap_or(
+      if decision == "update" || decision == "needs_review" {
+        "yes"
+      } else {
+        "no"
+      },
+    ),
+  )
+  let summary = if summary_text.is_blank() {
+    "MoonBook recorded a standing-watch decision."
+  } else {
+    summary_text
+  }
   Some(
-    "standing_goal_decision: \{decision}\ndelta_score: \{delta_score}\nnew_source_count: \{new_source_count}\nnext_check_hint: \{next_check_hint}\nbook_watch_record_id: \{block_id}\n\{summary}",
+    "standing_goal_decision: \{decision}\ndelta_score: \{delta_score}\nnew_source_count: \{new_source_count}\nnext_check_hint: \{next_check_hint}\nchecked_sources_count: \{checked_sources_count}\nnew_sources_found: \{new_sources_found}\naccepted_facts_count: \{accepted_facts_count}\nrejected_facts_count: \{rejected_facts_count}\nwiki_pages_changed_count: \{wiki_pages_changed_count}\nbook_changed: \{book_changed}\nbook_watch_record_id: \{block_id}\n\{summary}",
   )
 }
 
@@ -474,14 +546,45 @@ fn standing_watch_history_field(
 }
 
 ///|
-fn standing_watch_history_summary_line(lines : Array[String]) -> String? {
+fn standing_watch_history_summary_text(lines : Array[String]) -> String {
   let prefix = "- Summary: "
+  let builder = StringBuilder::new()
+  let mut collecting = false
+  let mut wrote = false
   for line in lines {
     if line.has_prefix(prefix) {
+      collecting = true
       let value = line[prefix.length():].trim().to_string()
       if !value.is_blank() {
-        return Some(value)
+        builder.write_string(value)
+        wrote = true
       }
+    } else if collecting {
+      let value = line.trim().to_string()
+      if value.is_blank() || line.has_prefix("- ") {
+        break
+      }
+      if wrote {
+        builder.write_char('\n')
+      }
+      builder.write_string(value)
+      wrote = true
+    }
+  }
+  builder.to_string()
+}
+
+///|
+fn standing_watch_marker_value(summary : String, key : String) -> String? {
+  let key_colon = "\{key}:"
+  let key_equals = "\{key}="
+  for raw in summary.split("\n") {
+    let line = raw.trim().to_string()
+    let lower = line.to_lower()
+    if lower.has_prefix(key_colon) {
+      return Some(line[key_colon.length():].trim(chars=" `").to_string())
+    } else if lower.has_prefix(key_equals) {
+      return Some(line[key_equals.length():].trim(chars=" `").to_string())
     }
   }
   None

@@ -855,6 +855,290 @@ body,
   border-color: rgba(77, 128, 80, 0.24);
 }
 
+.operator-console {
+  display: grid;
+  gap: 16px;
+  padding: 18px;
+  border: var(--pixel-border);
+  border-radius: 0;
+  background:
+    linear-gradient(135deg, rgba(255, 246, 221, 0.96), rgba(222, 242, 231, 0.9)),
+    radial-gradient(circle at 0% 0%, rgba(185, 138, 41, 0.2), transparent 36%),
+    radial-gradient(circle at 100% 0%, rgba(46, 111, 96, 0.16), transparent 40%);
+  box-shadow: var(--shadow);
+}
+
+.operator-console-head {
+  display: flex;
+  justify-content: space-between;
+  gap: 16px;
+  align-items: start;
+}
+
+.operator-console-head h2,
+.request-composer h3,
+.standing-progress-card h3,
+.watch-timeline-item h3 {
+  margin: 0;
+}
+
+.operator-console-status {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: flex-end;
+  gap: 8px;
+}
+
+.operator-console-grid {
+  display: grid;
+  grid-template-columns: minmax(0, 1.25fr) minmax(320px, 0.75fr);
+  gap: 16px;
+  align-items: start;
+}
+
+.operator-watch-column {
+  display: grid;
+  gap: 14px;
+  min-width: 0;
+}
+
+.operator-stat-grid {
+  display: grid;
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+  gap: 12px;
+}
+
+.operator-stat,
+.standing-progress-card,
+.request-composer,
+.watch-timeline {
+  border: 3px solid var(--line);
+  background: rgba(255, 252, 244, 0.82);
+  box-shadow: 3px 3px 0 rgba(56, 35, 16, 0.16);
+}
+
+.operator-stat {
+  min-height: 132px;
+  display: grid;
+  align-content: start;
+  gap: 8px;
+  padding: 14px;
+}
+
+.operator-stat-live {
+  border-color: rgba(77, 128, 80, 0.34);
+}
+
+.operator-stat-alert {
+  border-color: rgba(180, 49, 39, 0.34);
+}
+
+.operator-stat-calm {
+  border-color: rgba(15, 118, 110, 0.32);
+}
+
+.operator-stat-value {
+  margin: 0;
+  font-family: "Courier New", "Menlo", monospace;
+  font-size: clamp(18px, 2vw, 28px);
+  font-weight: 900;
+  word-break: break-word;
+}
+
+.operator-stat-detail {
+  margin: 0;
+  color: var(--muted);
+  font-size: 12px;
+  line-height: 1.38;
+}
+
+.standing-progress-card,
+.request-composer {
+  display: grid;
+  gap: 14px;
+  padding: 16px;
+}
+
+.standing-progress-head,
+.request-composer-head {
+  display: flex;
+  justify-content: space-between;
+  gap: 12px;
+  align-items: start;
+}
+
+.request-composer-actions-top {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: flex-end;
+  gap: 8px;
+}
+
+.standing-progress-copy,
+.request-last,
+.request-status {
+  margin: 0;
+  color: var(--muted);
+  line-height: 1.45;
+}
+
+.standing-progress-track {
+  height: 16px;
+  border: 3px solid rgba(90, 59, 32, 0.72);
+  background: rgba(32, 21, 10, 0.1);
+  overflow: hidden;
+}
+
+.standing-progress-fill {
+  height: 100%;
+  background:
+    repeating-linear-gradient(90deg, rgba(255, 255, 255, 0.18) 0 8px, transparent 8px 16px),
+    linear-gradient(90deg, var(--book), var(--calm));
+  transition: width 450ms ease;
+}
+
+.standing-progress-meta,
+.watch-timeline-meta,
+.request-actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  align-items: center;
+}
+
+.standing-progress-meta span,
+.watch-timeline-meta span {
+  padding: 5px 8px;
+  border: 1px solid rgba(32, 21, 10, 0.14);
+  background: rgba(255, 240, 189, 0.72);
+  color: var(--muted);
+  font-size: 11px;
+  font-weight: 800;
+}
+
+.watch-timeline {
+  display: grid;
+  gap: 0;
+  padding: 8px 12px;
+}
+
+.watch-timeline-item,
+.watch-timeline-empty {
+  display: grid;
+  grid-template-columns: 18px minmax(0, 1fr);
+  gap: 10px;
+  padding: 12px 0;
+  border-bottom: 1px dashed rgba(90, 59, 32, 0.28);
+}
+
+.watch-timeline-item:last-child,
+.watch-timeline-empty:last-child {
+  border-bottom: none;
+}
+
+.watch-timeline-dot {
+  width: 12px;
+  height: 12px;
+  margin-top: 5px;
+  border: 2px solid var(--line);
+  background: var(--clock);
+  box-shadow: 2px 2px 0 rgba(56, 35, 16, 0.18);
+}
+
+.watch-decision-Update .watch-timeline-dot {
+  background: var(--calm);
+}
+
+.watch-decision-NoChange .watch-timeline-dot {
+  background: var(--book);
+}
+
+.watch-decision-NeedsReview .watch-timeline-dot {
+  background: var(--gold);
+}
+
+.watch-decision-Failed .watch-timeline-dot {
+  background: var(--alert);
+}
+
+.watch-timeline-copy {
+  display: grid;
+  gap: 6px;
+  min-width: 0;
+}
+
+.watch-timeline-copy p,
+.watch-timeline-empty p {
+  margin: 0;
+  color: var(--muted);
+  line-height: 1.42;
+}
+
+.request-field-grid {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 10px;
+}
+
+.request-field {
+  display: grid;
+  gap: 6px;
+}
+
+.request-field-wide {
+  grid-column: 1 / -1;
+}
+
+.request-label {
+  margin: 0;
+  text-transform: uppercase;
+  letter-spacing: 0.12em;
+  font-size: 10px;
+  color: var(--muted);
+  font-weight: 900;
+}
+
+.request-input,
+.request-textarea {
+  width: 100%;
+  border: 3px solid rgba(90, 59, 32, 0.8);
+  border-radius: 0;
+  background: rgba(255, 250, 239, 0.96);
+  color: var(--ink);
+  font: 13px/1.45 "Courier New", "Menlo", monospace;
+  box-shadow: inset 3px 3px 0 rgba(56, 35, 16, 0.08);
+}
+
+.request-input {
+  min-height: 42px;
+  padding: 10px 12px;
+}
+
+.request-textarea {
+  min-height: 132px;
+  resize: vertical;
+  padding: 12px;
+}
+
+.request-input:focus,
+.request-textarea:focus {
+  outline: 3px solid rgba(15, 118, 110, 0.26);
+  outline-offset: 2px;
+}
+
+.request-submit {
+  background: var(--book);
+  color: #fffaf0;
+}
+
+.request-status {
+  flex: 1 1 220px;
+  padding: 8px 10px;
+  border: 1px solid rgba(32, 21, 10, 0.12);
+  background: rgba(255, 250, 239, 0.68);
+  font-size: 12px;
+}
+
 .scene-hint {
   margin: 0;
   color: var(--muted);
@@ -885,6 +1169,68 @@ body,
 .scene-frame-shell {
   min-width: 0;
   overflow: hidden;
+}
+
+.viewport-portal-card {
+  min-height: 300px;
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) auto;
+  gap: 18px;
+  align-items: center;
+  padding: 24px;
+  border: var(--pixel-border);
+  background:
+    linear-gradient(135deg, rgba(255, 247, 218, 0.96), rgba(229, 244, 225, 0.9)),
+    radial-gradient(circle at 12% 18%, rgba(20, 184, 166, 0.16), transparent 28%),
+    radial-gradient(circle at 86% 76%, rgba(185, 138, 41, 0.18), transparent 32%),
+    repeating-linear-gradient(45deg, rgba(90, 59, 32, 0.06) 0 6px, transparent 6px 18px);
+  box-shadow: var(--shadow);
+}
+
+.viewport-portal-copy {
+  display: grid;
+  gap: 14px;
+}
+
+.viewport-portal-copy h2 {
+  margin: 0;
+  max-width: 16ch;
+  font-size: clamp(28px, 3.3vw, 52px);
+  line-height: 0.96;
+}
+
+.viewport-portal-stats {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+}
+
+.viewport-portal-button {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-width: 220px;
+  min-height: 74px;
+  padding: 16px 20px;
+  border: 4px solid var(--line);
+  color: #fffaf0;
+  background: linear-gradient(135deg, var(--book), var(--clock));
+  box-shadow: 6px 6px 0 rgba(56, 35, 16, 0.26);
+  font-family: "Courier New", "Menlo", monospace;
+  font-weight: 900;
+  text-decoration: none;
+  text-align: center;
+  transition: transform 80ms steps(1), box-shadow 80ms steps(1);
+}
+
+.viewport-portal-button:hover {
+  transform: translate(-2px, -2px);
+  box-shadow: 8px 8px 0 rgba(56, 35, 16, 0.3);
+}
+
+.viewport-portal-button:focus-visible {
+  outline: 3px solid rgba(53, 89, 109, 0.34);
+  outline-offset: 2px;
 }
 
 .viewport-frame-shell {
@@ -2360,12 +2706,26 @@ body,
     grid-column: span 1;
   }
 
+  .operator-stat-grid {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+
   .runtime-head {
+    display: grid;
+  }
+
+  .operator-console-head,
+  .standing-progress-head,
+  .request-composer-head {
     display: grid;
   }
 
   .runtime-status {
     justify-items: start;
+  }
+
+  .operator-console-status {
+    justify-content: flex-start;
   }
 
   .town-main {
@@ -2374,6 +2734,14 @@ body,
 
   .scene-frame {
     height: min(72vh, 680px);
+  }
+
+  .viewport-portal-card {
+    grid-template-columns: 1fr;
+  }
+
+  .viewport-portal-button {
+    width: 100%;
   }
 }
 
@@ -2400,6 +2768,7 @@ body,
   }
 
   .runtime-bar,
+  .operator-console,
   .scene-frame-shell,
   .metric-card,
   .inspector-panel,
@@ -2425,6 +2794,15 @@ body,
   }
 
   .sidebar-column {
+    grid-template-columns: 1fr;
+  }
+
+  .request-field-grid {
+    grid-template-columns: 1fr;
+  }
+
+  .operator-console-grid,
+  .operator-stat-grid {
     grid-template-columns: 1fr;
   }
 

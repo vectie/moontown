@@ -19,16 +19,12 @@ pub enum RouteDecision {
   Assigned(@core.AssignmentPlan)
   Escalated(String)
   Deferred(String)
-}
-pub impl Eq for RouteDecision
-pub impl Show for RouteDecision
+} derive(Eq, Show)
 
 pub struct RouteRequest {
   task : @core.TownTask
-}
+} derive(Eq, Show)
 pub fn RouteRequest::new(task~ : @core.TownTask) -> Self
-pub impl Eq for RouteRequest
-pub impl Show for RouteRequest
 
 // Type aliases
 

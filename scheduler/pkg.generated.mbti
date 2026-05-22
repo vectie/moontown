@@ -32,40 +32,24 @@ pub struct DaemonState {
   last_heartbeat_event_count : Int
   active_goal_ids : Array[String]
   jobs : Array[ScheduledJob]
-}
+} derive(Eq, Show, ToJson, @json.FromJson)
 pub fn DaemonState::new(daemon_id? : String, lease_owner? : String, tick_sequence? : Int, last_heartbeat_event_count? : Int, active_goal_ids? : Array[String], jobs? : Array[ScheduledJob]) -> Self
-pub impl Eq for DaemonState
-pub impl Show for DaemonState
-pub impl ToJson for DaemonState
-pub impl @json.FromJson for DaemonState
 
 pub struct ScheduledJob {
   id : String
   kind : String
   interval_seconds : Int
-}
-pub impl Eq for ScheduledJob
-pub impl Show for ScheduledJob
-pub impl ToJson for ScheduledJob
-pub impl @json.FromJson for ScheduledJob
+} derive(Eq, Show, ToJson, @json.FromJson)
 
 pub struct SchedulerAction {
   kind : String
   detail : String
-}
-pub impl Eq for SchedulerAction
-pub impl Show for SchedulerAction
-pub impl ToJson for SchedulerAction
-pub impl @json.FromJson for SchedulerAction
+} derive(Eq, Show, ToJson, @json.FromJson)
 
 pub struct SchedulerTick {
   sequence : Int
   summary : String
-}
-pub impl Eq for SchedulerTick
-pub impl Show for SchedulerTick
-pub impl ToJson for SchedulerTick
-pub impl @json.FromJson for SchedulerTick
+} derive(Eq, Show, ToJson, @json.FromJson)
 
 // Type aliases
 

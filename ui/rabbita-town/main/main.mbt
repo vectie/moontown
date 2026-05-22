@@ -1,5 +1,6 @@
 ///|
 using @html {
+  a,
   article,
   aside,
   button,
@@ -9,10 +10,12 @@ using @html {
   h3,
   header,
   img,
+  input,
   main_,
   p,
   section,
   span,
+  textarea,
 }
 
 ///|
@@ -49,6 +52,19 @@ priv struct Model {
   snapshot_version : Int
   daemon_snapshot : DaemonSnapshot?
   daemon_snapshot_version : Int
+  standing_goals : Array[StandingGoalSnapshot]
+  standing_goals_version : Int
+  watcher_records : Array[WatcherRunRecordSnapshot]
+  watcher_records_version : Int
+  operator_requests : Array[OperatorRequestSnapshot]
+  operator_requests_version : Int
+  request_title : String
+  request_prompt : String
+  request_book_id : String
+  request_cadence : String
+  request_quality_threshold : String
+  request_submitting : Bool
+  request_status : String
   budget : Int
   energy : Int
   pressure : Int
@@ -78,6 +94,13 @@ priv enum Msg {
   InjectBudget
   RelieveQueue
   StabilityDrill
+  SetRequestTitle(String)
+  SetRequestPrompt(String)
+  SetRequestBookId(String)
+  SetRequestCadence(String)
+  SetRequestQualityThreshold(String)
+  SubmitOperatorRequest
+  OperatorRequestSubmitted(String)
 }
 
 ///|
@@ -163,14 +186,14 @@ priv struct TalentRouteStopSim {
 priv struct ProjectionSnapshot {
   town : @core.TownState
   event_count : Int
-} derive(FromJson, ToJson)
+} derive(FromJson)
 
 ///|
 priv struct DaemonJobSnapshot {
   id : String
   kind : String
   interval_seconds : Int
-} derive(FromJson, ToJson)
+} derive(FromJson)
 
 ///|
 priv struct DaemonSnapshot {
@@ -180,7 +203,58 @@ priv struct DaemonSnapshot {
   last_heartbeat_event_count : Int
   active_goal_ids : Array[String]
   jobs : Array[DaemonJobSnapshot]
-} derive(FromJson, ToJson)
+} derive(FromJson)
+
+///|
+priv struct StandingGoalSnapshot {
+  id : String
+  title : String
+  prompt : String
+  target_book_id : String?
+  cadence_ticks : Int
+  next_due_tick : Int
+  last_run_tick : Int?
+  enabled : Bool
+  source_policy : String
+  quality_threshold : Int
+} derive(FromJson)
+
+///|
+priv struct WatcherRunRecordSnapshot {
+  goal_id : String
+  tick : Int
+  target_book_id : String
+  decision : String
+  delta_score : Int
+  new_source_count : Int
+  detail : String
+  task_id : String?
+  run_id : String?
+  next_due_tick : Int
+} derive(FromJson)
+
+///|
+priv struct OperatorRequestSnapshot {
+  id : String
+  status : String
+  created_at : String
+  title : String
+  prompt : String
+  target_book_id : String
+  cadence_ticks : Int
+  source_policy : String
+  quality_threshold : Int
+  standing_goal_id : String
+} derive(FromJson)
+
+///|
+priv struct OperatorRequestSubmitResult {
+  ok : Bool
+  request_id : String?
+  standing_goal_id : String?
+  status : String?
+  error : String?
+} derive(FromJson)
 
 ///|
 extern "js" fn load_bootstrap_town_snapshot_json() -> String =
@@ -197,6 +271,69 @@ extern "js" fn load_bootstrap_daemon_snapshot_json() -> String =
 ///|
 extern "js" fn daemon_snapshot_version() -> Int =
   #| () => globalThis.__moontownDaemonSnapshotVersion || 0
+
+///|
+extern "js" fn load_bootstrap_standing_goals_json() -> String =
+  #| () => globalThis.__moontownStandingGoalsJson || "[]"
+
+///|
+extern "js" fn standing_goals_version() -> Int =
+  #| () => globalThis.__moontownStandingGoalsVersion || 0
+
+///|
+extern "js" fn load_bootstrap_watcher_records_json() -> String =
+  #| () => globalThis.__moontownWatcherRecordsJson || "[]"
+
+///|
+extern "js" fn watcher_records_version() -> Int =
+  #| () => globalThis.__moontownWatcherRecordsVersion || 0
+
+///|
+extern "js" fn load_bootstrap_operator_requests_json() -> String =
+  #| () => globalThis.__moontownOperatorRequestsJson || "[]"
+
+///|
+extern "js" fn operator_requests_version() -> Int =
+  #| () => globalThis.__moontownOperatorRequestsVersion || 0
+
+///|
+extern "js" fn submit_operator_request_json(
+  title : String,
+  prompt : String,
+  target_book_id : String,
+  cadence_ticks : String,
+  quality_threshold : String,
+) -> String =
+  #| async (title, prompt, targetBookId, cadenceTicks, qualityThreshold) => {
+  #|   try {
+  #|     const response = await fetch("./api/operator-requests", {
+  #|       method: "POST",
+  #|       headers: { "Content-Type": "application/json" },
+  #|       body: JSON.stringify({
+  #|         title,
+  #|         prompt,
+  #|         target_book_id: targetBookId,
+  #|         cadence_ticks: cadenceTicks,
+  #|         quality_threshold: qualityThreshold,
+  #|       }),
+  #|     });
+  #|     const text = await response.text();
+  #|     if (globalThis.__moontownRefreshRuntimeSnapshots) {
+  #|       await globalThis.__moontownRefreshRuntimeSnapshots();
+  #|     }
+  #|     if (!response.ok) {
+  #|       try {
+  #|         const parsed = JSON.parse(text);
+  #|         return JSON.stringify({ ok: false, error: parsed.error || text });
+  #|       } catch (_) {
+  #|         return JSON.stringify({ ok: false, error: text || response.statusText });
+  #|       }
+  #|     }
+  #|     return text;
+  #|   } catch (error) {
+  #|     return JSON.stringify({ ok: false, error: String(error) });
+  #|   }
+  #| }
 
 ///|
 extern "js" fn real_time_label() -> String =
@@ -228,6 +365,9 @@ fn standalone_viewport_requested() -> Bool {
 fn init_model() -> Model {
   let projection_snapshot = parse_bootstrap_town_snapshot()
   let daemon_snapshot = parse_bootstrap_daemon_snapshot()
+  let standing_goals = parse_bootstrap_standing_goals()
+  let watcher_records = parse_bootstrap_watcher_records()
+  let operator_requests = parse_bootstrap_operator_requests()
   {
     tick: 0,
     paused: false,
@@ -238,6 +378,19 @@ fn init_model() -> Model {
     snapshot_version: town_snapshot_version(),
     daemon_snapshot,
     daemon_snapshot_version: daemon_snapshot_version(),
+    standing_goals,
+    standing_goals_version: standing_goals_version(),
+    watcher_records,
+    watcher_records_version: watcher_records_version(),
+    operator_requests,
+    operator_requests_version: operator_requests_version(),
+    request_title: "Track a new research topic",
+    request_prompt: "Research the latest useful updates, screen sources carefully, and update the target MoonBook only when the evidence changes the baseline.",
+    request_book_id: "research-opc",
+    request_cadence: "60",
+    request_quality_threshold: "85",
+    request_submitting: false,
+    request_status: "Ready to submit a standing watch request.",
     budget: 76,
     energy: 68,
     pressure: 34,
@@ -263,6 +416,75 @@ fn parse_bootstrap_daemon_snapshot() -> DaemonSnapshot? {
   }
   let parsed = @json.parse(text) catch { _ => return None }
   Some(@json.from_json(parsed) catch { _ => return None })
+}
+
+///|
+fn parse_bootstrap_standing_goals() -> Array[StandingGoalSnapshot] {
+  parse_standing_goals_json(load_bootstrap_standing_goals_json())
+}
+
+///|
+fn parse_bootstrap_watcher_records() -> Array[WatcherRunRecordSnapshot] {
+  parse_watcher_records_json(load_bootstrap_watcher_records_json())
+}
+
+///|
+fn parse_bootstrap_operator_requests() -> Array[OperatorRequestSnapshot] {
+  parse_operator_requests_json(load_bootstrap_operator_requests_json())
+}
+
+///|
+fn parse_standing_goals_json(text : String) -> Array[StandingGoalSnapshot] {
+  let parsed = @json.parse(text) catch { _ => return [] }
+  @json.from_json(parsed) catch {
+    _ => []
+  }
+}
+
+///|
+fn parse_watcher_records_json(text : String) -> Array[WatcherRunRecordSnapshot] {
+  let parsed = @json.parse(text) catch { _ => return [] }
+  @json.from_json(parsed) catch {
+    _ => []
+  }
+}
+
+///|
+fn parse_operator_requests_json(
+  text : String,
+) -> Array[OperatorRequestSnapshot] {
+  let parsed = @json.parse(text) catch { _ => return [] }
+  @json.from_json(parsed) catch {
+    _ => []
+  }
+}
+
+///|
+fn parse_operator_request_submit_result(
+  text : String,
+) -> OperatorRequestSubmitResult {
+  let parsed = @json.parse(text) catch {
+    _ =>
+      return {
+        ok: false,
+        request_id: None,
+        standing_goal_id: None,
+        status: None,
+        error: Some("Request endpoint returned invalid JSON."),
+      }
+  }
+  @json.from_json(parsed) catch {
+    _ =>
+      {
+        ok: false,
+        request_id: None,
+        standing_goal_id: None,
+        status: None,
+        error: Some(
+          "Request endpoint response did not match the expected contract.",
+        ),
+      }
+  }
 }
 
 ///|
@@ -369,7 +591,79 @@ fn update(dispatch : Dispatch[Msg], msg : Msg, model : Model) -> (Cmd, Model) {
           budget: clamp_metric(model.budget - 7),
         },
       )
+    SetRequestTitle(value) => (@rabbita.none, { ..model, request_title: value })
+    SetRequestPrompt(value) =>
+      (@rabbita.none, { ..model, request_prompt: value })
+    SetRequestBookId(value) =>
+      (@rabbita.none, { ..model, request_book_id: value })
+    SetRequestCadence(value) =>
+      (@rabbita.none, { ..model, request_cadence: value })
+    SetRequestQualityThreshold(value) =>
+      (@rabbita.none, { ..model, request_quality_threshold: value })
+    SubmitOperatorRequest =>
+      if model.request_title.trim().to_string().is_empty() ||
+        model.request_prompt.trim().to_string().is_empty() {
+        (
+          @rabbita.none,
+          {
+            ..model,
+            request_status: "Add both a title and a request before submitting.",
+          },
+        )
+      } else {
+        (
+          submit_operator_request_cmd(dispatch, model),
+          {
+            ..model,
+            request_submitting: true,
+            request_status: "Submitting request to the local Moontown standing-goal inbox...",
+          },
+        )
+      }
+    OperatorRequestSubmitted(raw) => {
+      let result = parse_operator_request_submit_result(raw)
+      if result.ok {
+        let goal_id = result.standing_goal_id.unwrap_or("standing-goal")
+        let request_id = result.request_id.unwrap_or("operator-request")
+        let status = result.status.unwrap_or("accepted")
+        (
+          @rabbita.none,
+          {
+            ..model,
+            request_submitting: false,
+            request_status: "Accepted as `\{goal_id}` via `\{request_id}` (`\{status}`). The daemon will pick it up on the next standing-goal dispatch tick.",
+            standing_goals: parse_bootstrap_standing_goals(),
+            standing_goals_version: standing_goals_version(),
+            operator_requests: parse_bootstrap_operator_requests(),
+            operator_requests_version: operator_requests_version(),
+          },
+        )
+      } else {
+        let error = result.error.unwrap_or("unknown error")
+        (
+          @rabbita.none,
+          {
+            ..model,
+            request_submitting: false,
+            request_status: "Request failed: \{error}",
+          },
+        )
+      }
+    }
   }
+}
+
+///|
+fn submit_operator_request_cmd(dispatch : Dispatch[Msg], model : Model) -> Cmd {
+  @rabbita.perform(fn(raw) { dispatch(OperatorRequestSubmitted(raw)) }, fn() noraise {
+    submit_operator_request_json(
+      model.request_title,
+      model.request_prompt,
+      model.request_book_id,
+      model.request_cadence,
+      model.request_quality_threshold,
+    )
+  })
 }
 
 ///|
@@ -392,6 +686,27 @@ fn advance_model(model : Model) -> Model {
     }
   } else {
     model.daemon_snapshot
+  }
+  let refreshed_standing_goals_version = standing_goals_version()
+  let refreshed_standing_goals = if refreshed_standing_goals_version !=
+    model.standing_goals_version {
+    parse_bootstrap_standing_goals()
+  } else {
+    model.standing_goals
+  }
+  let refreshed_watcher_records_version = watcher_records_version()
+  let refreshed_watcher_records = if refreshed_watcher_records_version !=
+    model.watcher_records_version {
+    parse_bootstrap_watcher_records()
+  } else {
+    model.watcher_records
+  }
+  let refreshed_operator_requests_version = operator_requests_version()
+  let refreshed_operator_requests = if refreshed_operator_requests_version !=
+    model.operator_requests_version {
+    parse_bootstrap_operator_requests()
+  } else {
+    model.operator_requests
   }
   let refreshed_source = if model.state_source == StateSourceKind::SnapshotFile {
     if projection_snapshot_is_ready(refreshed_snapshot) {
@@ -472,6 +787,12 @@ fn advance_model(model : Model) -> Model {
     snapshot_version: refreshed_version,
     daemon_snapshot: refreshed_daemon_snapshot,
     daemon_snapshot_version: refreshed_daemon_version,
+    standing_goals: refreshed_standing_goals,
+    standing_goals_version: refreshed_standing_goals_version,
+    watcher_records: refreshed_watcher_records,
+    watcher_records_version: refreshed_watcher_records_version,
+    operator_requests: refreshed_operator_requests,
+    operator_requests_version: refreshed_operator_requests_version,
     budget: next_budget,
     energy: next_energy,
     pressure: next_pressure,
@@ -550,7 +871,7 @@ fn state_source_detail(model : Model) -> String {
     StateSourceKind::SnapshotFile =>
       match model.projection_snapshot {
         Some(snapshot) if projection_snapshot_ready(snapshot) =>
-          "Projection snapshot mode is loaded from `.moontown/town.json` with \{snapshot.town.books.length()} books, \{snapshot.town.workers.length()} workers, and \{snapshot.town.tasks.length()} queued tasks."
+          "Projection snapshot mode is loaded from `.moontown/town.json` with \{snapshot.town.books.length()} books, \{snapshot.town.workers.length()} workers, \{snapshot.town.tasks.length()} queued tasks, and \{snapshot.event_count} events."
         Some(_) =>
           "Projection snapshot file was found but does not yet contain a usable town runtime projection, so the shell stays on demo supervision until the bridge publishes real books, workers, or tasks."
         None =>
@@ -951,7 +1272,8 @@ fn snapshot_worker_summary(worker : @core.WorkerRef) -> String {
   } else {
     "\{capability_count} declared capabilities"
   }
-  if worker.role.to_string() == "Watcher" && worker.status == @core.WorkerStatus::Idle {
+  if worker.role.to_string() == "Watcher" &&
+    worker.status == @core.WorkerStatus::Idle {
     return "\{worker.name} is on duty for the 30-minute standing-watch loop. Idle means waiting between checks, not offline; the mayor message feed shows the latest check result."
   }
   "\{worker.name} is projected from persisted town state with status \{worker.status}, role \{worker.role}, and \{capability_text}."
@@ -1378,14 +1700,102 @@ fn daemon_cadence_label(model : Model) -> String {
   match model.daemon_snapshot {
     Some(snapshot) => {
       let mut cadence = 30
+      let mut kind = "standing-goal"
       for job in snapshot.jobs {
         if job.id == "dispatch-standing-goals" {
           cadence = job.interval_seconds
+          kind = job.kind
         }
       }
-      "Daemon cadence \{cadence}s"
+      "Daemon \{kind} cadence \{cadence}s"
     }
     None => "Daemon cadence waiting"
+  }
+}
+
+///|
+fn active_standing_goal(model : Model) -> StandingGoalSnapshot? {
+  for goal in model.standing_goals {
+    if goal.enabled {
+      return Some(goal)
+    }
+  }
+  None
+}
+
+///|
+fn latest_watcher_record(model : Model) -> WatcherRunRecordSnapshot? {
+  if model.watcher_records.is_empty() {
+    None
+  } else {
+    Some(model.watcher_records[model.watcher_records.length() - 1])
+  }
+}
+
+///|
+fn latest_operator_request(model : Model) -> OperatorRequestSnapshot? {
+  if model.operator_requests.is_empty() {
+    None
+  } else {
+    Some(model.operator_requests[model.operator_requests.length() - 1])
+  }
+}
+
+///|
+fn watcher_decision_count(model : Model, decision : String) -> Int {
+  let mut count = 0
+  for record in model.watcher_records {
+    if record.decision == decision {
+      count += 1
+    }
+  }
+  count
+}
+
+///|
+fn ticks_until_next_goal_check(
+  model : Model,
+  goal : StandingGoalSnapshot,
+) -> Int {
+  let remaining = goal.next_due_tick - daemon_tick_count(model)
+  if remaining < 0 {
+    0
+  } else {
+    remaining
+  }
+}
+
+///|
+fn standing_goal_progress(model : Model, goal : StandingGoalSnapshot) -> Int {
+  match goal.last_run_tick {
+    Some(last_tick) => {
+      let span = goal.next_due_tick - last_tick
+      if span <= 0 {
+        100
+      } else {
+        clamp_metric((daemon_tick_count(model) - last_tick) * 100 / span)
+      }
+    }
+    None => if goal.next_due_tick <= daemon_tick_count(model) { 100 } else { 0 }
+  }
+}
+
+///|
+fn one_line(text : String) -> String {
+  for line in text.split("\n") {
+    return line.trim().to_string()
+  }
+  text
+}
+
+///|
+fn request_status_tone(status : String) -> String {
+  if status.contains("failed") || status.contains("Failed") {
+    "alert"
+  } else if status.contains("Accepted") || status.contains("Ready") {
+    "calm"
+  } else {
+    "neutral"
   }
 }
 
@@ -1748,6 +2158,334 @@ fn render_runtime_bar(
       runtime_stat_chip("Persisting", persistence_count, "runtime-persisting"),
       runtime_stat_chip("Review", review_count, "runtime-review"),
       runtime_stat_chip("Completed", completed_count, "runtime-completed"),
+    ]),
+  ])
+}
+
+///|
+fn render_operator_stat(
+  label : String,
+  value : String,
+  detail : String,
+  tone : String,
+) -> @rabbita.Html {
+  article(class="operator-stat operator-stat-\{tone}", [
+    p(class="metric-label", label),
+    p(class="operator-stat-value", value),
+    p(class="operator-stat-detail", detail),
+  ])
+}
+
+///|
+fn render_watcher_record(record : WatcherRunRecordSnapshot) -> @rabbita.Html {
+  article(class="watch-timeline-item watch-decision-\{record.decision}", [
+    div(class="watch-timeline-dot", no_children()),
+    div(class="watch-timeline-copy", [
+      h3("\{record.decision} at tick \{record.tick}"),
+      p(one_line(record.detail)),
+      div(class="watch-timeline-meta", [
+        span("goal \{record.goal_id}"),
+        span("book \{record.target_book_id}"),
+        span("sources +\{record.new_source_count}"),
+        span("delta \{record.delta_score}"),
+        span("next \{record.next_due_tick}"),
+        match record.task_id {
+          Some(task_id) => span("task \{task_id}")
+          None => span("task pending")
+        },
+        match record.run_id {
+          Some(run_id) => span("run \{run_id}")
+          None => span("run pending")
+        },
+      ]),
+    ]),
+  ])
+}
+
+///|
+fn render_watcher_timeline(model : Model) -> @rabbita.Html {
+  let items : Array[@rabbita.Html] = []
+  let count = if model.watcher_records.length() < 5 {
+    model.watcher_records.length()
+  } else {
+    5
+  }
+  for offset in 0..<count {
+    let record = model.watcher_records[model.watcher_records.length() -
+      1 -
+      offset]
+    items.push(render_watcher_record(record))
+  }
+  if items.is_empty() {
+    items.push(
+      article(class="watch-timeline-empty", [
+        h3("No watcher records yet"),
+        p(
+          "Start the daemon or submit a standing watch request to create a durable progress ledger.",
+        ),
+      ]),
+    )
+  }
+  div(class="watch-timeline", items)
+}
+
+///|
+fn render_standing_goal_progress(model : Model) -> @rabbita.Html {
+  match active_standing_goal(model) {
+    Some(goal) => {
+      let remaining = ticks_until_next_goal_check(model, goal)
+      let progress = standing_goal_progress(model, goal)
+      let target = goal.target_book_id.unwrap_or("mayor-selected-book")
+      article(class="standing-progress-card", [
+        div(class="standing-progress-head", [
+          div([p(class="eyebrow", "Standing Watch"), h3(goal.title)]),
+          status_chip(
+            if remaining == 0 {
+              "Due now"
+            } else {
+              "Next in \{remaining} ticks"
+            },
+            if remaining == 0 {
+              "chip-alert"
+            } else {
+              "chip-live"
+            },
+          ),
+        ]),
+        p(class="standing-progress-copy", goal.prompt),
+        div(class="standing-progress-track", [
+          div(
+            class="standing-progress-fill",
+            style=["width: \{progress}%"],
+            no_children(),
+          ),
+        ]),
+        div(class="standing-progress-meta", [
+          span("goal `\{goal.id}`"),
+          span("book `\{target}`"),
+          span("cadence \{goal.cadence_ticks} ticks"),
+          span("quality \{goal.quality_threshold}%"),
+          span(goal.source_policy),
+        ]),
+      ])
+    }
+    None =>
+      article(class="standing-progress-card", [
+        div(class="standing-progress-head", [
+          div([
+            p(class="eyebrow", "Standing Watch"),
+            h3("No active standing goal"),
+          ]),
+          status_chip("Waiting", "chip-neutral"),
+        ]),
+        p(
+          class="standing-progress-copy",
+          "Submit a request on the right to create a durable standing goal for the mayor daemon.",
+        ),
+      ])
+  }
+}
+
+///|
+fn render_request_composer(
+  dispatch : Dispatch[Msg],
+  model : Model,
+) -> @rabbita.Html {
+  let submit_label = if model.request_submitting {
+    "Submitting..."
+  } else {
+    "Submit Standing Watch"
+  }
+  article(class="request-composer", [
+    div(class="request-composer-head", [
+      div([
+        p(class="eyebrow", "New Request"),
+        h3("Ask the town to keep watching"),
+      ]),
+      div(class="request-composer-actions-top", [
+        status_chip("Writes standing-goals.json", "chip-book"),
+        button(
+          class="control-button request-submit",
+          on_click=dispatch(SubmitOperatorRequest),
+          submit_label,
+        ),
+      ]),
+    ]),
+    div(class="request-field-grid", [
+      div(class="request-field request-field-wide", [
+        p(class="request-label", "Title"),
+        input(
+          class="request-input",
+          placeholder="Track AI tooling news",
+          value=model.request_title,
+          on_input=value => dispatch(SetRequestTitle(value)),
+          "",
+        ),
+      ]),
+      div(class="request-field", [
+        p(class="request-label", "Target MoonBook"),
+        input(
+          class="request-input",
+          placeholder="research-opc",
+          value=model.request_book_id,
+          on_input=value => dispatch(SetRequestBookId(value)),
+          "",
+        ),
+      ]),
+      div(class="request-field", [
+        p(class="request-label", "Cadence ticks"),
+        input(
+          class="request-input",
+          placeholder="60",
+          value=model.request_cadence,
+          on_input=value => dispatch(SetRequestCadence(value)),
+          "",
+        ),
+      ]),
+      div(class="request-field", [
+        p(class="request-label", "Quality threshold"),
+        input(
+          class="request-input",
+          placeholder="85",
+          value=model.request_quality_threshold,
+          on_input=value => dispatch(SetRequestQualityThreshold(value)),
+          "",
+        ),
+      ]),
+    ]),
+    div(class="request-field", [
+      p(class="request-label", "Request"),
+      textarea(
+        class="request-textarea",
+        placeholder="Describe what the mayor should watch, what counts as a useful change, and what MoonBook should update.",
+        value=model.request_prompt,
+        on_input=value => dispatch(SetRequestPrompt(value)),
+        no_children(),
+      ),
+    ]),
+    div(class="request-actions", [
+      p(
+        class="request-status tone-\{request_status_tone(model.request_status)}",
+        model.request_status,
+      ),
+    ]),
+    match latest_operator_request(model) {
+      Some(request) =>
+        p(
+          class="request-last",
+          "Last accepted: `\{request.standing_goal_id}` (`\{request.id}`) for `\{request.target_book_id}` at \{request.created_at}. Status \{request.status}; title: \{request.title}; cadence \{request.cadence_ticks}; policy \{request.source_policy}; quality \{request.quality_threshold}%. Request: \{one_line(request.prompt)}",
+        )
+      None =>
+        p(
+          class="request-last",
+          "No operator-submitted standing goals have been accepted in this browser session yet.",
+        )
+    },
+  ])
+}
+
+///|
+fn render_operator_command_center(
+  dispatch : Dispatch[Msg],
+  model : Model,
+  workers : Array[WorkerSim],
+  executions : Array[@core.TaskExecutionRecord],
+) -> @rabbita.Html {
+  let running_workers = count_workers_by_status(
+    workers,
+    @core.WorkerStatus::Running,
+  )
+  let latest = latest_watcher_record(model)
+  let latest_decision = match latest {
+    Some(record) => record.decision
+    None => "Waiting"
+  }
+  let latest_sources = match latest {
+    Some(record) => record.new_source_count.to_string()
+    None => "0"
+  }
+  let latest_detail = match latest {
+    Some(record) => one_line(record.detail)
+    None => "No durable watcher ledger has been published yet."
+  }
+  let progress_detail = match active_standing_goal(model) {
+    Some(goal) =>
+      "Next check in \{ticks_until_next_goal_check(model, goal)} ticks. Daemon tick \{daemon_tick_count(model)}."
+    None => "No enabled standing goal found."
+  }
+  let update_count = watcher_decision_count(model, "Update")
+  let review_count = watcher_decision_count(model, "NeedsReview")
+  let no_change_count = watcher_decision_count(model, "NoChange")
+  let failed_count = watcher_decision_count(model, "Failed")
+  let daemon_identity = match model.daemon_snapshot {
+    Some(snapshot) => "\{snapshot.daemon_id} / \{snapshot.lease_owner}"
+    None => "daemon waiting"
+  }
+  let active_goal_count = match model.daemon_snapshot {
+    Some(snapshot) => snapshot.active_goal_ids.length()
+    None => 0
+  }
+  section(class="operator-console", [
+    div(class="operator-console-head", [
+      div([
+        p(class="eyebrow", "Progress And Requests"),
+        h2("Mayor command center"),
+        p(
+          class="summary",
+          "This panel reads real runtime files: `town.json`, `daemon.json`, `standing-goals.json`, and the watcher ledger. It also lets you submit new standing-watch requests into the local daemon queue.",
+        ),
+      ]),
+      div(class="operator-console-status", [
+        status_chip(daemon_cadence_label(model), "chip-clock"),
+        status_chip("Daemon \{daemon_identity}", "chip-neutral"),
+        status_chip("Active due goals \{active_goal_count}", "chip-neutral"),
+        status_chip(
+          "Requests \{model.operator_requests.length()}",
+          "chip-neutral",
+        ),
+        status_chip("Executions \{executions.length()}", "chip-neutral"),
+      ]),
+    ]),
+    div(class="operator-console-grid", [
+      div(class="operator-watch-column", [
+        div(class="operator-stat-grid", [
+          render_operator_stat(
+            "Current workers",
+            running_workers.to_string(),
+            "Visible active workers in the current town projection.",
+            "live",
+          ),
+          render_operator_stat(
+            "Latest decision",
+            latest_decision,
+            latest_detail,
+            if latest_decision == "Failed" {
+              "alert"
+            } else {
+              "calm"
+            },
+          ),
+          render_operator_stat(
+            "New sources",
+            latest_sources,
+            "Count reported by the latest MoonBook standing-watch result.",
+            if latest_sources == "0" {
+              "neutral"
+            } else {
+              "live"
+            },
+          ),
+          render_operator_stat(
+            "Decision mix",
+            "U\{update_count} / R\{review_count} / N\{no_change_count} / F\{failed_count}",
+            progress_detail,
+            "neutral",
+          ),
+        ]),
+        render_standing_goal_progress(model),
+        render_watcher_timeline(model),
+      ]),
+      render_request_composer(dispatch, model),
     ]),
   ])
 }
@@ -4627,7 +5365,11 @@ fn render_bridge_contract(model : Model) -> @rabbita.Html {
       ),
     ]),
     div(class="bridge-grid", [
-      runtime_stat_chip("Daemon tick", daemon_tick_count(model), "runtime-running"),
+      runtime_stat_chip(
+        "Daemon tick",
+        daemon_tick_count(model),
+        "runtime-running",
+      ),
       runtime_stat_chip("Residents", resident_count(model), "runtime-packets"),
       runtime_stat_chip(
         "Memory streams",
@@ -4927,8 +5669,12 @@ fn scene_node_left(node : @ui.SceneRenderNode) -> Int {
   if !standalone_viewport_requested() {
     return node.x
   }
-  iso_tile_left(reference_node_grid_x(node.key), reference_node_grid_y(node.key)) -
-  scene_node_width(node) / 2 + 22
+  iso_tile_left(
+    reference_node_grid_x(node.key),
+    reference_node_grid_y(node.key),
+  ) -
+  scene_node_width(node) / 2 +
+  22
 }
 
 ///|
@@ -4937,7 +5683,8 @@ fn scene_node_top(node : @ui.SceneRenderNode) -> Int {
     return node.y
   }
   iso_tile_top(reference_node_grid_x(node.key), reference_node_grid_y(node.key)) -
-  scene_node_height(node) + 42
+  scene_node_height(node) +
+  42
 }
 
 ///|
@@ -5005,7 +5752,8 @@ fn tilemap_scene_width() -> Int {
 ///|
 fn tilemap_scene_height() -> Int {
   tilemap_origin_y() +
-  (tilemap_grid_width() + tilemap_grid_height() - 2) * tilemap_step_y() + 120
+  (tilemap_grid_width() + tilemap_grid_height() - 2) * tilemap_step_y() +
+  120
 }
 
 ///|
@@ -5017,10 +5765,16 @@ fn river_center_x_at(grid_y : Int) -> Int {
 fn reference_river_at(grid_x : Int, grid_y : Int) -> Bool {
   let center = river_center_x_at(grid_y)
   (grid_y >= 7 && abs_int(grid_x - center) <= (if grid_y > 50 { 4 } else { 2 })) ||
-  (grid_y >= 2 && grid_y <= 13 &&
-    abs_int(grid_x - (8 + grid_y * 2 + grid_y / 3)) <= 1) ||
-  (grid_y >= 38 && grid_y <= 50 &&
-    abs_int(grid_x - (43 + (grid_y - 38) * 3)) <= 2) ||
+  (
+    grid_y >= 2 &&
+    grid_y <= 13 &&
+    abs_int(grid_x - (8 + grid_y * 2 + grid_y / 3)) <= 1
+  ) ||
+  (
+    grid_y >= 38 &&
+    grid_y <= 50 &&
+    abs_int(grid_x - (43 + (grid_y - 38) * 3)) <= 2
+  ) ||
   (grid_y >= 49 && grid_x >= 108 && in_ellipse(grid_x, grid_y, 118, 56, 9, 12))
 }
 
@@ -5041,10 +5795,16 @@ fn reference_water_at(grid_x : Int, grid_y : Int) -> Bool {
 
 ///|
 fn reference_bridge_at(grid_x : Int, grid_y : Int) -> Bool {
-  (grid_y >= 33 && grid_y <= 36 &&
-    abs_int(grid_x - river_center_x_at(grid_y)) <= 3) ||
-  (grid_y >= 54 && grid_y <= 56 &&
-    abs_int(grid_x - river_center_x_at(grid_y)) <= 4) ||
+  (
+    grid_y >= 33 &&
+    grid_y <= 36 &&
+    abs_int(grid_x - river_center_x_at(grid_y)) <= 3
+  ) ||
+  (
+    grid_y >= 54 &&
+    grid_y <= 56 &&
+    abs_int(grid_x - river_center_x_at(grid_y)) <= 4
+  ) ||
   (grid_x >= 57 && grid_x <= 62 && grid_y >= 42 && grid_y <= 44) ||
   (grid_x >= 88 && grid_x <= 94 && grid_y >= 39 && grid_y <= 41) ||
   (grid_x >= 18 && grid_x <= 23 && grid_y >= 8 && grid_y <= 10)
@@ -5057,8 +5817,11 @@ fn reference_wetland_at(grid_x : Int, grid_y : Int) -> Bool {
   in_ellipse(grid_x, grid_y, 47, 43, 13, 8) ||
   in_ellipse(grid_x, grid_y, 80, 39, 11, 7) ||
   in_ellipse(grid_x, grid_y, 20, 8, 12, 5) ||
-  (grid_y >= 36 && grid_y <= 52 &&
-    abs_int(grid_x - (43 + (grid_y - 38) * 3)) <= 4)
+  (
+    grid_y >= 36 &&
+    grid_y <= 52 &&
+    abs_int(grid_x - (43 + (grid_y - 38) * 3)) <= 4
+  )
 }
 
 ///|
@@ -5073,23 +5836,36 @@ fn reference_major_road_at(grid_x : Int, grid_y : Int) -> Bool {
 
 ///|
 fn reference_local_road_at(grid_x : Int, grid_y : Int) -> Bool {
-  (in_rect(grid_x, grid_y, 7, 18, 38, 34) &&
-    (grid_x % 7 == 0 || grid_y % 5 == 0)) ||
-  (in_rect(grid_x, grid_y, 31, 15, 69, 36) &&
-    (grid_x % 6 == 0 || grid_y % 5 == 0)) ||
-  (in_rect(grid_x, grid_y, 14, 39, 43, 57) &&
-    (grid_x % 5 == 0 || grid_y % 4 == 0)) ||
-  (in_rect(grid_x, grid_y, 48, 49, 86, 63) &&
-    (grid_x % 6 == 0 || grid_y % 4 == 0)) ||
-  (in_rect(grid_x, grid_y, 92, 33, 118, 51) &&
-    (grid_x % 5 == 0 || grid_y % 5 == 0)) ||
-  (in_rect(grid_x, grid_y, 88, 54, 123, 63) &&
-    (grid_x % 6 == 0 || grid_y % 4 == 0))
+  (
+    in_rect(grid_x, grid_y, 7, 18, 38, 34) &&
+    (grid_x % 7 == 0 || grid_y % 5 == 0)
+  ) ||
+  (
+    in_rect(grid_x, grid_y, 31, 15, 69, 36) &&
+    (grid_x % 6 == 0 || grid_y % 5 == 0)
+  ) ||
+  (
+    in_rect(grid_x, grid_y, 14, 39, 43, 57) &&
+    (grid_x % 5 == 0 || grid_y % 4 == 0)
+  ) ||
+  (
+    in_rect(grid_x, grid_y, 48, 49, 86, 63) &&
+    (grid_x % 6 == 0 || grid_y % 4 == 0)
+  ) ||
+  (
+    in_rect(grid_x, grid_y, 92, 33, 118, 51) &&
+    (grid_x % 5 == 0 || grid_y % 5 == 0)
+  ) ||
+  (
+    in_rect(grid_x, grid_y, 88, 54, 123, 63) &&
+    (grid_x % 6 == 0 || grid_y % 4 == 0)
+  )
 }
 
 ///|
 fn reference_road_at(grid_x : Int, grid_y : Int) -> Bool {
-  reference_major_road_at(grid_x, grid_y) || reference_local_road_at(grid_x, grid_y)
+  reference_major_road_at(grid_x, grid_y) ||
+  reference_local_road_at(grid_x, grid_y)
 }
 
 ///|
@@ -5158,7 +5934,9 @@ fn tile_kind_for_reference_code(code : String) -> String {
 
 ///|
 fn reference_tile_kind_at(grid_x : Int, grid_y : Int) -> String? {
-  let kind = tile_kind_for_reference_code(reference_tile_code_at(grid_x, grid_y))
+  let kind = tile_kind_for_reference_code(
+    reference_tile_code_at(grid_x, grid_y),
+  )
   if kind == "" {
     None
   } else {
@@ -5233,11 +6011,7 @@ fn render_iso_tile(grid_x : Int, grid_y : Int) -> @rabbita.Html {
     "top: \{iso_tile_top(grid_x, grid_y)}px",
     "--tile-image: url('\{tile_asset_for_kind(kind)}')",
   ]
-  div(
-    class="iso-tile iso-tile-\{kind}",
-    style~,
-    no_children(),
-  )
+  div(class="iso-tile iso-tile-\{kind}", style~, no_children())
 }
 
 ///|
@@ -5269,16 +6043,24 @@ fn render_tile_object(
 ///|
 fn should_place_tile_object(grid_x : Int, grid_y : Int) -> Bool {
   let kind = tile_kind_at(grid_x, grid_y)
-  if kind == "river" || kind == "river-bank" || kind == "bridge" ||
-    kind == "lake" || kind == "road" || kind == "road-major" ||
-    kind == "urban" || kind == "urban-dense" || kind == "campus" ||
-    kind == "farm" || kind == "field" || kind == "plaza-stone" {
+  if kind == "river" ||
+    kind == "river-bank" ||
+    kind == "bridge" ||
+    kind == "lake" ||
+    kind == "road" ||
+    kind == "road-major" ||
+    kind == "urban" ||
+    kind == "urban-dense" ||
+    kind == "campus" ||
+    kind == "farm" ||
+    kind == "field" ||
+    kind == "plaza-stone" {
     return false
   }
   (kind == "forest" && (grid_x * 17 + grid_y * 31) % 19 == 0) ||
   (kind == "wetland" && (grid_x * 7 + grid_y * 19) % 31 == 0) ||
-  ((grid_x * 17 + grid_y * 31) % 71 == 0) ||
-  ((grid_x + grid_y * 5) % 97 == 0)
+  (grid_x * 17 + grid_y * 31) % 71 == 0 ||
+  (grid_x + grid_y * 5) % 97 == 0
 }
 
 ///|
@@ -5367,7 +6149,11 @@ fn render_reference_haze(
     "width: \{width}px",
     "height: \{height}px",
   ]
-  div(class="reference-haze reference-haze-\{class_suffix}", style~, no_children())
+  div(
+    class="reference-haze reference-haze-\{class_suffix}",
+    style~,
+    no_children(),
+  )
 }
 
 ///|
@@ -5516,7 +6302,8 @@ fn render_worker_avatar(
   ]
   let selected_suffix = if selected { " selected" } else { "" }
   let class_name = "worker-avatar \{worker_status_class(worker.status)}" +
-    " worker-sprite-roster" + selected_suffix
+    " worker-sprite-roster" +
+    selected_suffix
   button(class=class_name, style~, on_click=dispatch(SelectWorker(worker.id)), [
     span(class="worker-sprite", no_children()),
     span(class="worker-badge", worker_avatar_initials(worker.title)),
@@ -5751,7 +6538,7 @@ fn viewport_resident_grid_y(index : Int) -> Int {
 fn viewport_resident_avatar(index : Int) -> @rabbita.Html {
   let grid_x = viewport_resident_grid_x(index)
   let grid_y = viewport_resident_grid_y(index)
-  let delay = (index * 173) % 2400
+  let delay = index * 173 % 2400
   let style = [
     "left: \{iso_tile_left(grid_x, grid_y) + 9}px",
     "top: \{iso_tile_top(grid_x, grid_y) - 31}px",
@@ -5802,7 +6589,9 @@ fn is_on_duty_watcher(worker : WorkerSim) -> Bool {
 
 ///|
 fn visible_overworld_workers(workers : Array[WorkerSim]) -> Array[WorkerSim] {
-  workers.filter(worker => is_working_worker(worker) || is_on_duty_watcher(worker))
+  workers.filter(worker => {
+    is_working_worker(worker) || is_on_duty_watcher(worker)
+  })
 }
 
 ///|
@@ -5985,7 +6774,10 @@ fn push_recent_event_messages(
 }
 
 ///|
-fn push_worker_alert_messages(feed : Array[FeedItem], workers : Array[WorkerSim]) -> Unit {
+fn push_worker_alert_messages(
+  feed : Array[FeedItem],
+  workers : Array[WorkerSim],
+) -> Unit {
   for worker in workers {
     if worker.status == @core.WorkerStatus::Blocked {
       feed.push({
@@ -5993,7 +6785,8 @@ fn push_worker_alert_messages(feed : Array[FeedItem], workers : Array[WorkerSim]
         detail: "Mayor should recover this lane before the next 30-minute watcher cycle.",
         tone: "alert",
       })
-    } else if is_on_duty_watcher(worker) && worker.status == @core.WorkerStatus::Idle {
+    } else if is_on_duty_watcher(worker) &&
+      worker.status == @core.WorkerStatus::Idle {
       feed.push({
         title: "\{worker.title} is on duty",
         detail: "Waiting between half-hour OPC checks. The next due check will move this watcher into an active run.",
@@ -6297,7 +7090,9 @@ fn render_town_viewport(
   let scene_nodes = if standalone_viewport_requested() {
     []
   } else {
-    scene.nodes.filter(node => !is_mayor_scene_node(node)).map(node => {
+    scene.nodes
+    .filter(node => !is_mayor_scene_node(node))
+    .map(node => {
       render_node(dispatch, node, selected_node_key == Some(node.key))
     })
   }
@@ -6323,6 +7118,49 @@ fn render_town_viewport(
         ]),
       ]),
     ]),
+  ])
+}
+
+///|
+fn render_wenyu_viewport_portal(
+  model : Model,
+  scene : @ui.SceneRenderModel,
+  executions : Array[@core.TaskExecutionRecord],
+) -> @rabbita.Html {
+  let latest = latest_watcher_record(model)
+  let latest_decision = match latest {
+    Some(record) => record.decision
+    None => "Waiting"
+  }
+  let latest_sources = match latest {
+    Some(record) => record.new_source_count.to_string()
+    None => "0"
+  }
+  let next_check = match active_standing_goal(model) {
+    Some(goal) => "\{ticks_until_next_goal_check(model, goal)} ticks"
+    None => "not scheduled"
+  }
+  section(class="viewport-portal-card", [
+    div(class="viewport-portal-copy", [
+      p(class="eyebrow", "Canonical Wenyu Viewport"),
+      h2("Open the real Wenyu Valley tile map"),
+      p(
+        class="summary",
+        "The dashboard no longer renders a second scaled-down town map. Click through to the standalone viewport so the operator view and the Wenyu Valley map stay consistent.",
+      ),
+      div(class="viewport-portal-stats", [
+        status_chip("Scene: \{scene.title}", "chip-book"),
+        status_chip("Latest: \{latest_decision}", "chip-neutral"),
+        status_chip("New sources: \{latest_sources}", "chip-neutral"),
+        status_chip("Next check: \{next_check}", "chip-clock"),
+        status_chip("Executions: \{executions.length()}", "chip-neutral"),
+      ]),
+    ]),
+    a(
+      href="./viewport.html?assets=generated&v=wenyu",
+      class="viewport-portal-button",
+      "Open Wenyu Viewport",
+    ),
   ])
 }
 
@@ -6412,12 +7250,10 @@ fn render_scene(dispatch : Dispatch[Msg], model : Model) -> @rabbita.Html {
       ]),
       render_alerts(alerts),
     ]),
+    render_operator_command_center(dispatch, model, workers, executions),
     main_(class="town-main", [
       div(class="scene-column", [
-        render_town_viewport(
-          dispatch, scene, workers, executions, selected_node_key, selected_worker_id,
-          "scene-frame-shell", "scene-frame",
-        ),
+        render_wenyu_viewport_portal(model, scene, executions),
       ]),
       div(class="sidebar-column", [
         render_inspector(dispatch, model, scene, workers, executions),

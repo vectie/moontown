@@ -63,13 +63,9 @@ pub struct ResearchReadiness {
   pending_review_count : Int
   substantive_coverage_ready : Bool
   gaps : Array[String]
-}
+} derive(Eq, Show, ToJson, @json.FromJson)
 pub fn ResearchReadiness::from_summary(@moonbook.BookStateSummary, extra_gaps? : Array[String]) -> Self
 pub fn ResearchReadiness::summary_line(Self) -> String
-pub impl Eq for ResearchReadiness
-pub impl Show for ResearchReadiness
-pub impl ToJson for ResearchReadiness
-pub impl @json.FromJson for ResearchReadiness
 
 pub struct TownRuntimeStatus {
   snapshot_path : String
@@ -90,11 +86,7 @@ pub struct TownRuntimeStatus {
   watcher_summary : String
   daemon_actions : Array[@scheduler.SchedulerAction]
   summary : String
-}
-pub impl Eq for TownRuntimeStatus
-pub impl Show for TownRuntimeStatus
-pub impl ToJson for TownRuntimeStatus
-pub impl @json.FromJson for TownRuntimeStatus
+} derive(Eq, Show, ToJson, @json.FromJson)
 
 // Type aliases
 

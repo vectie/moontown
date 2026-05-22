@@ -16,48 +16,36 @@ pub fn recovery_actions(HealthReport) -> Array[RecoveryAction]
 pub struct Anomaly {
   title : String
   detail : String
-}
-pub impl Eq for Anomaly
-pub impl Show for Anomaly
+} derive(Eq, Show)
 
 pub struct BookHealth {
   book_id : String
   level : HealthLevel
   note : String
-}
-pub impl Eq for BookHealth
-pub impl Show for BookHealth
+} derive(Eq, Show)
 
 pub enum HealthLevel {
   Healthy
   Degraded
   Critical
-}
-pub impl Eq for HealthLevel
-pub impl Show for HealthLevel
+} derive(Eq, Show)
 
 pub struct HealthReport {
   worker_health : Array[WorkerHealth]
   book_health : Array[BookHealth]
   anomalies : Array[Anomaly]
-}
-pub impl Eq for HealthReport
-pub impl Show for HealthReport
+} derive(Eq, Show)
 
 pub struct RecoveryAction {
   kind : String
   detail : String
-}
-pub impl Eq for RecoveryAction
-pub impl Show for RecoveryAction
+} derive(Eq, Show)
 
 pub struct WorkerHealth {
   worker_id : String
   level : HealthLevel
   note : String
-}
-pub impl Eq for WorkerHealth
-pub impl Show for WorkerHealth
+} derive(Eq, Show)
 
 // Type aliases
 

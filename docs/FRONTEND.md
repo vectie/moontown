@@ -145,6 +145,41 @@ activity feed.
 They are also surfaced in the Rabbita runtime bar and stage rail so the browser
 view reads as an operator surface rather than a static postcard.
 
+## Operator Command Center
+
+The Rabbita frontend now has a command-center section for 24/7 operation. It is
+the first place to check whether progress is actually being made.
+
+It reads:
+
+- `.moontown/town.json` for books, workers, tasks, executions, and events.
+- `.moontown/daemon.json` for real daemon tick, lease owner, cadence, and due
+  standing goals.
+- `.moontown/standing-goals.json` for enabled standing-watch requests and next
+  due tick.
+- `.moontown/watchers/watch-opc-news.jsonl` for the durable watcher ledger.
+- `.moontown/operator-requests/requests.jsonl` for browser-submitted requests.
+
+The progress surface shows:
+
+- current running worker count
+- latest watcher decision
+- latest new source count
+- update/review/no-change/failed decision mix
+- standing-goal progress toward the next due tick
+- the last five watcher records with source, delta, task, and run metadata
+
+The request composer writes through the Vite dev endpoint
+`POST /api/operator-requests`. A successful submit appends an operator request
+record and creates or replaces the matching standing goal in
+`.moontown/standing-goals.json`. The daemon is still the executor; the UI only
+adds durable work to the Mayor queue.
+
+The operator dashboard does not render the Wenyu map inline. It shows a portal
+card that links to `viewport.html?assets=generated&v=wenyu`, the canonical
+standalone tilemap viewport. This avoids divergence between a small dashboard
+map and the actual Wenyu Valley viewport.
+
 ## Assets
 
 Original example assets live under:

@@ -50,28 +50,16 @@ pub struct Checkpoint {
   run_id : String
   summary : String
   event_count : Int
-}
-pub impl Eq for Checkpoint
-pub impl Show for Checkpoint
-pub impl ToJson for Checkpoint
-pub impl @json.FromJson for Checkpoint
+} derive(Eq, Show, ToJson, @json.FromJson)
 
 pub struct EventCursor {
   offset : Int
-}
-pub impl Eq for EventCursor
-pub impl Show for EventCursor
-pub impl ToJson for EventCursor
-pub impl @json.FromJson for EventCursor
+} derive(Eq, Show, ToJson, @json.FromJson)
 
 pub struct TownSnapshot {
   town : @core.TownState
   event_count : Int
-}
-pub impl Eq for TownSnapshot
-pub impl Show for TownSnapshot
-pub impl ToJson for TownSnapshot
-pub impl @json.FromJson for TownSnapshot
+} derive(Eq, Show, ToJson, @json.FromJson)
 
 // Type aliases
 

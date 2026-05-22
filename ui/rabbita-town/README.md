@@ -27,15 +27,32 @@ It currently includes:
 - packet/proposal/run lifecycle visibility
 - budget/energy/pressure/stability metrics
 - activity feed and anomaly surfacing
-- responsive scroll-safe scene viewport
+- Mayor command center with real standing-goal progress
+- watcher decision timeline from `.moontown/watchers/*.jsonl`
+- local standing-watch request composer
+- dashboard portal to the canonical standalone Wenyu viewport
 - generated Wenyu Valley tilemap viewport with animated resident overlay
 - stronger keyboard focus visibility
 
-The current frontend model is still local/demo-driven. It is not yet attached to
-a real town backend. The next bridge should consume `.moontown/town.json`,
-`.moontown/daemon.json`, and `.moontown/standing-goals.json` so Mayor standing
-goals such as `watch-opc-news` make the matching book/worker avatars visibly
-busy only when real daemon work is active.
+The current frontend can run in demo mode, but the dev server also bridges real
+runtime files:
+
+- `.moontown/town.json`
+- `.moontown/daemon.json`
+- `.moontown/standing-goals.json`
+- `.moontown/watchers/watch-opc-news.jsonl`
+- `.moontown/operator-requests/requests.jsonl`
+
+The Mayor command center uses those files to show progress, next due tick,
+latest watcher decision, source delta count, and decision mix. The request
+composer posts to `/api/operator-requests`, writes an operator request record,
+and creates or replaces a standing goal in `.moontown/standing-goals.json`.
+The daemon then picks that goal up during its normal standing-goal dispatch
+cycle.
+
+The dashboard intentionally does not embed a second scaled copy of the Wenyu
+map. It links to `viewport.html?assets=generated&v=wenyu`, which is the
+canonical generated-tilemap viewport used for visual inspection.
 
 This package owns the Moontown operator dashboard only. It does not own the
 generated MoonBook site that appears under live workspace directories such as

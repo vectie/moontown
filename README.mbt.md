@@ -152,10 +152,19 @@ standing_goal_decision: update | no_change | needs_review | failed
 delta_score: 0-100
 new_source_count: <integer>
 next_check_hint: normal | slower | faster | review
+checked_sources_count: <integer>
+new_sources_found: <integer>
+accepted_facts_count: <integer>
+rejected_facts_count: <integer>
+wiki_pages_changed_count: <integer>
+book_changed: yes | no
 ```
 
 Moontown only consumes this marker for scheduling and UI status. It does not
 decide whether OPC research is novel; that remains a MoonBook keeper decision.
+No-change and failed checks are operational activity, not evidence progress:
+accepted facts, changed pages, and `book_changed` must stay zero/no unless
+durable book knowledge changed or a review item was queued.
 
 ## Main Subsystems
 

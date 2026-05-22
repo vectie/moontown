@@ -23,9 +23,7 @@ pub fn render_scene_html(SceneRenderModel) -> String
 pub struct AlertBanner {
   level : String
   text : String
-}
-pub impl Eq for AlertBanner
-pub impl Show for AlertBanner
+} derive(Eq, Show)
 
 pub struct DashboardModel {
   title : String
@@ -33,16 +31,12 @@ pub struct DashboardModel {
   scene_layout : TownSceneLayout
   town_map : Array[TownMapPlace]
   sections : Array[DashboardSection]
-}
-pub impl Eq for DashboardModel
-pub impl Show for DashboardModel
+} derive(Eq, Show)
 
 pub struct DashboardSection {
   title : String
   lines : Array[String]
-}
-pub impl Eq for DashboardSection
-pub impl Show for DashboardSection
+} derive(Eq, Show)
 
 pub struct SceneArea {
   key : String
@@ -53,9 +47,7 @@ pub struct SceneArea {
   width : Int
   height : Int
   asset_keys : Array[String]
-}
-pub impl Eq for SceneArea
-pub impl Show for SceneArea
+} derive(Eq, Show)
 
 pub enum SceneAreaKind {
   CityHall
@@ -63,17 +55,13 @@ pub enum SceneAreaKind {
   WorkerYard
   AnomalyCorner
   Gate
-}
-pub impl Eq for SceneAreaKind
-pub impl Show for SceneAreaKind
+} derive(Eq, Show)
 
 pub struct SceneAsset {
   key : String
   path : String
   purpose : String
-}
-pub impl Eq for SceneAsset
-pub impl Show for SceneAsset
+} derive(Eq, Show)
 
 pub struct SceneRenderModel {
   title : String
@@ -82,9 +70,7 @@ pub struct SceneRenderModel {
   background_path : String
   alerts : Array[String]
   nodes : Array[SceneRenderNode]
-}
-pub impl Eq for SceneRenderModel
-pub impl Show for SceneRenderModel
+} derive(Eq, Show)
 
 pub struct SceneRenderNode {
   key : String
@@ -96,9 +82,7 @@ pub struct SceneRenderNode {
   height : Int
   asset_paths : Array[String]
   lines : Array[String]
-}
-pub impl Eq for SceneRenderNode
-pub impl Show for SceneRenderNode
+} derive(Eq, Show)
 
 pub struct TownMapPlace {
   key : String
@@ -111,9 +95,7 @@ pub struct TownMapPlace {
   height : Int
   asset_paths : Array[String]
   lines : Array[String]
-}
-pub impl Eq for TownMapPlace
-pub impl Show for TownMapPlace
+} derive(Eq, Show)
 
 pub struct TownSceneLayout {
   width : Int
@@ -121,9 +103,7 @@ pub struct TownSceneLayout {
   background : SceneAsset
   areas : Array[SceneArea]
   assets : Array[SceneAsset]
-}
-pub impl Eq for TownSceneLayout
-pub impl Show for TownSceneLayout
+} derive(Eq, Show)
 
 // Type aliases
 

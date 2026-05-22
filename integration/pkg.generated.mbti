@@ -13,9 +13,8 @@ pub async fn run_json(String, Array[String], cwd? : String?) -> Json
 // Errors
 pub suberror CommandFailed {
   CommandFailed(CompletedCommand)
-}
+} derive(ToJson)
 pub impl Show for CommandFailed
-pub impl ToJson for CommandFailed
 
 // Types and methods
 pub struct CompletedCommand {
@@ -24,10 +23,7 @@ pub struct CompletedCommand {
   status : Int
   stdout : String
   stderr : String
-}
-pub impl Eq for CompletedCommand
-pub impl Show for CompletedCommand
-pub impl ToJson for CompletedCommand
+} derive(Eq, Show, ToJson)
 
 // Type aliases
 

@@ -134,7 +134,7 @@ The default standing goal is:
 watch-opc-news
   target_book_id: research-opc
   source_policy: web-first
-  cadence_ticks: 720
+  cadence_ticks: 60
 ```
 
 This creates or reuses the dynamic `research-opc` MoonBook lane. Moontown owns
@@ -148,6 +148,12 @@ standing_goal_decision: update | no_change | needs_review | failed
 delta_score: 0-100
 new_source_count: <integer>
 next_check_hint: normal | slower | faster | review
+checked_sources_count: <integer>
+new_sources_found: <integer>
+accepted_facts_count: <integer>
+rejected_facts_count: <integer>
+wiki_pages_changed_count: <integer>
+book_changed: yes | no
 ```
 
 Moontown uses that marker only for control-plane scheduling:
@@ -157,6 +163,10 @@ Moontown uses that marker only for control-plane scheduling:
 - `needs_review`: shorter review retry window
 - `failed`: shorter failure retry window
 - active duplicate watcher: defer one tick
+
+Accounting rule: retries, generated site rebuilds, journal maintenance, and
+failed/no-change checks are not research evidence. Only MoonBook-accepted facts,
+review items, and changed durable book pages count as book progress.
 
 ## 2. Use The Persisted Town State
 
@@ -518,14 +528,16 @@ Current live metrics:
 Current dashboard surfaces:
 
 - runtime summary bar
-- packet/import/run/persist/review stage rail
-- scene viewport with worker movement
+- Mayor command center
+- standing-goal progress and latest watcher decision
+- request composer that submits new standing goals through the local Vite endpoint
+- Wenyu viewport portal linking to the standalone tilemap page
 - inspector sidebar
 - activity feed
 
 Current visual behaviors:
 
-- moving worker avatars
+- moving worker avatars in the standalone Wenyu viewport
 - activity feed
 - anomaly surfacing
 - scene selection/inspector
@@ -533,7 +545,10 @@ Current visual behaviors:
 On narrower screens, the scene now scrolls internally instead of clipping the
 town layout.
 
-This is currently local simulation state, not backend-synced town state.
+The UI can still run demo simulation state, but the dev server now also bridges
+real runtime files: `.moontown/town.json`, `.moontown/daemon.json`,
+`.moontown/standing-goals.json`, `.moontown/watchers/*.jsonl`, and
+`.moontown/operator-requests/requests.jsonl`.
 
 ## 14. Validate Changes
 

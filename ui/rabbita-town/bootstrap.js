@@ -44,12 +44,77 @@ async function refreshDaemonSnapshot() {
   }
 }
 
+async function refreshStandingGoals() {
+  try {
+    const response = await fetch(`./standing-goals.json?ts=${Date.now()}`, { cache: 'no-store' })
+    if (response.ok) {
+      globalThis.__moontownStandingGoalsJson = await response.text()
+      globalThis.__moontownStandingGoalsVersion =
+        (globalThis.__moontownStandingGoalsVersion || 0) + 1
+    } else {
+      globalThis.__moontownStandingGoalsJson = '[]'
+    }
+  } catch {
+    globalThis.__moontownStandingGoalsJson = '[]'
+  }
+}
+
+async function refreshWatcherRecords() {
+  try {
+    const response = await fetch(`./watchers/watch-opc-news.jsonl?ts=${Date.now()}`, { cache: 'no-store' })
+    if (response.ok) {
+      const text = await response.text()
+      const records = text.trim().startsWith('[')
+        ? JSON.parse(text)
+        : text
+          .split('\n')
+          .map(line => line.trim())
+          .filter(Boolean)
+          .map(line => {
+            try {
+              return JSON.parse(line)
+            } catch {
+              return null
+            }
+          })
+          .filter(Boolean)
+      globalThis.__moontownWatcherRecordsJson = JSON.stringify(records)
+      globalThis.__moontownWatcherRecordsVersion =
+        (globalThis.__moontownWatcherRecordsVersion || 0) + 1
+    } else {
+      globalThis.__moontownWatcherRecordsJson = '[]'
+    }
+  } catch {
+    globalThis.__moontownWatcherRecordsJson = '[]'
+  }
+}
+
+async function refreshOperatorRequests() {
+  try {
+    const response = await fetch(`./operator-requests.json?ts=${Date.now()}`, { cache: 'no-store' })
+    if (response.ok) {
+      globalThis.__moontownOperatorRequestsJson = await response.text()
+      globalThis.__moontownOperatorRequestsVersion =
+        (globalThis.__moontownOperatorRequestsVersion || 0) + 1
+    } else {
+      globalThis.__moontownOperatorRequestsJson = '[]'
+    }
+  } catch {
+    globalThis.__moontownOperatorRequestsJson = '[]'
+  }
+}
+
 async function refreshRuntimeSnapshots() {
   await Promise.all([
     refreshTownSnapshot(),
     refreshDaemonSnapshot(),
+    refreshStandingGoals(),
+    refreshWatcherRecords(),
+    refreshOperatorRequests(),
   ])
 }
+
+globalThis.__moontownRefreshRuntimeSnapshots = refreshRuntimeSnapshots
 
 async function boot() {
   await refreshRuntimeSnapshots()

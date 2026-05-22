@@ -62,7 +62,7 @@ pub fn MoonbookCatalogProvider::book_refs(
 }
 
 ///|
-pub impl @core.BookProvider for MoonbookCatalogProvider with books(
+pub impl @core.BookProvider for MoonbookCatalogProvider with fn books(
   self : MoonbookCatalogProvider,
 ) -> Array[@core.BookRef] {
   self.book_refs()
@@ -954,6 +954,12 @@ fn standing_watch_worker_context_bundle(
       "delta_score: 0-100",
       "new_source_count: <integer>",
       "next_check_hint: normal | slower | faster | review",
+      "checked_sources_count: <integer>",
+      "new_sources_found: <integer>",
+      "accepted_facts_count: <integer>",
+      "rejected_facts_count: <integer>",
+      "wiki_pages_changed_count: <integer>",
+      "book_changed: yes | no",
     ],
   )
   {
@@ -1661,6 +1667,15 @@ fn web_first_research_skill_text(entry : BookCatalogEntry) -> String {
     "",
     "Use this skill for research-lane ingest and follow-up work. The output must look like a researcher worked through a transparent protocol, not like a product blurb.",
     "",
+    "## Research Temperament",
+    "",
+    "Good research needs more than correctness.",
+    "",
+    "- Use imagination to form hypotheses, adjacent-domain search angles, and second-order implications. Do not invent facts.",
+    "- Use curiosity to ask why the topic matters now, what would surprise the current book, who benefits, who is harmed, and what evidence would change the synthesis.",
+    "- Use judgement to prefer high-signal sources and reject noise, stale mirrors, shallow commentary, and operational busywork.",
+    "- End with a point of view: what changed, what did not change, why it matters, and what should be watched next.",
+    "",
     "## Research Method",
     "",
     "Follow this sequence:",
@@ -1768,6 +1783,15 @@ fn research_evidence_synthesis_skill_text(entry : BookCatalogEntry) -> String {
     "# Research Evidence Synthesis",
     "",
     "Use this skill when a research lane needs real knowledge work instead of a scaffold or candidate inventory.",
+    "",
+    "## Research Temperament",
+    "",
+    "The goal is not to dump facts. The goal is to build understanding.",
+    "",
+    "- Imagination: propose plausible mechanisms and futures, then test them against evidence.",
+    "- Curiosity: look for surprises, absences, contradictions, incentives, and second-order effects.",
+    "- Judgement: decide what matters enough to become durable knowledge and what should be rejected or deferred.",
+    "- Taste: make the synthesis useful to a human decision-maker, not just correct in isolation.",
     "",
     "## Protocol",
     "",

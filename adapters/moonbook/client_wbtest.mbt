@@ -183,6 +183,7 @@ test "standing watch context is not mistaken for research bootstrap" {
   assert_true(clean.prompt.contains("24/7 standing-watch"))
   assert_true(clean.skill_paths.contains("skills/standing-watch/SKILL.md"))
   assert_true(clean.output_contract.join("\n").contains("new_source_count"))
+  assert_true(clean.output_contract.join("\n").contains("book_changed"))
   assert_true(!clean.prompt.contains("raw research bootstrap handoff"))
   assert_true(!clean.skill_paths.contains("skills/wiki-marketing/SKILL.md"))
 }
