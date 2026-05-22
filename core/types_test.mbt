@@ -47,3 +47,27 @@ test "standing goal marks next dispatch window" {
   assert_eq(dispatched.last_run_tick, Some(2))
   assert_eq(dispatched.next_due_tick, 8)
 }
+
+///|
+test "standing goal watcher decisions keep normal half-hour cadence on no-change" {
+  let goal = StandingGoal::new(
+    id="watch-opc-news",
+    title="Watch OPC news",
+    prompt="Research latest one person company news.",
+    target_book_id=Some("research-opc"),
+    cadence_ticks=8,
+    next_due_tick=2,
+  )
+  let updated = goal.mark_watcher_decision(10, WatcherDecisionKind::Update)
+  assert_eq(updated.next_due_tick, 18)
+  let no_change = goal.mark_watcher_decision(
+    10,
+    WatcherDecisionKind::NoChange,
+    no_change_streak=2,
+  )
+  assert_eq(no_change.next_due_tick, 18)
+  let failed = goal.mark_watcher_decision(10, WatcherDecisionKind::Failed)
+  assert_eq(failed.next_due_tick, 12)
+  let deferred = goal.mark_watcher_decision(10, WatcherDecisionKind::Deferred)
+  assert_eq(deferred.next_due_tick, 11)
+}

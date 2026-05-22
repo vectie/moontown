@@ -46,6 +46,9 @@ priv struct Model {
   selection : Selection
   state_source : StateSourceKind
   projection_snapshot : ProjectionSnapshot?
+  snapshot_version : Int
+  daemon_snapshot : DaemonSnapshot?
+  daemon_snapshot_version : Int
   budget : Int
   energy : Int
   pressure : Int
@@ -163,8 +166,49 @@ priv struct ProjectionSnapshot {
 } derive(FromJson, ToJson)
 
 ///|
+priv struct DaemonJobSnapshot {
+  id : String
+  kind : String
+  interval_seconds : Int
+} derive(FromJson, ToJson)
+
+///|
+priv struct DaemonSnapshot {
+  daemon_id : String
+  lease_owner : String
+  tick_sequence : Int
+  last_heartbeat_event_count : Int
+  active_goal_ids : Array[String]
+  jobs : Array[DaemonJobSnapshot]
+} derive(FromJson, ToJson)
+
+///|
 extern "js" fn load_bootstrap_town_snapshot_json() -> String =
   #| () => globalThis.__moontownTownSnapshotJson || ""
+
+///|
+extern "js" fn town_snapshot_version() -> Int =
+  #| () => globalThis.__moontownTownSnapshotVersion || 0
+
+///|
+extern "js" fn load_bootstrap_daemon_snapshot_json() -> String =
+  #| () => globalThis.__moontownDaemonSnapshotJson || ""
+
+///|
+extern "js" fn daemon_snapshot_version() -> Int =
+  #| () => globalThis.__moontownDaemonSnapshotVersion || 0
+
+///|
+extern "js" fn real_time_label() -> String =
+  #| () => new Date().toLocaleTimeString(undefined, { hour: "2-digit", minute: "2-digit", second: "2-digit" })
+
+///|
+extern "js" fn real_calendar_label() -> String =
+  #| () => new Date().toLocaleDateString(undefined, { weekday: "short", month: "short", day: "numeric", year: "numeric" })
+
+///|
+extern "js" fn real_local_hour() -> Int =
+  #| () => new Date().getHours()
 
 ///|
 extern "js" fn current_browser_path() -> String =
@@ -183,6 +227,7 @@ fn standalone_viewport_requested() -> Bool {
 ///|
 fn init_model() -> Model {
   let projection_snapshot = parse_bootstrap_town_snapshot()
+  let daemon_snapshot = parse_bootstrap_daemon_snapshot()
   {
     tick: 0,
     paused: false,
@@ -190,6 +235,9 @@ fn init_model() -> Model {
     selection: Selection::Overview,
     state_source: initial_state_source(projection_snapshot),
     projection_snapshot,
+    snapshot_version: town_snapshot_version(),
+    daemon_snapshot,
+    daemon_snapshot_version: daemon_snapshot_version(),
     budget: 76,
     energy: 68,
     pressure: 34,
@@ -200,6 +248,16 @@ fn init_model() -> Model {
 ///|
 fn parse_bootstrap_town_snapshot() -> ProjectionSnapshot? {
   let text = load_bootstrap_town_snapshot_json()
+  if text == "" {
+    return None
+  }
+  let parsed = @json.parse(text) catch { _ => return None }
+  Some(@json.from_json(parsed) catch { _ => return None })
+}
+
+///|
+fn parse_bootstrap_daemon_snapshot() -> DaemonSnapshot? {
+  let text = load_bootstrap_daemon_snapshot_json()
   if text == "" {
     return None
   }
@@ -316,6 +374,37 @@ fn update(dispatch : Dispatch[Msg], msg : Msg, model : Model) -> (Cmd, Model) {
 
 ///|
 fn advance_model(model : Model) -> Model {
+  let refreshed_version = town_snapshot_version()
+  let refreshed_snapshot = if refreshed_version != model.snapshot_version {
+    match parse_bootstrap_town_snapshot() {
+      Some(snapshot) => Some(snapshot)
+      None => model.projection_snapshot
+    }
+  } else {
+    model.projection_snapshot
+  }
+  let refreshed_daemon_version = daemon_snapshot_version()
+  let refreshed_daemon_snapshot = if refreshed_daemon_version !=
+    model.daemon_snapshot_version {
+    match parse_bootstrap_daemon_snapshot() {
+      Some(snapshot) => Some(snapshot)
+      None => model.daemon_snapshot
+    }
+  } else {
+    model.daemon_snapshot
+  }
+  let refreshed_source = if model.state_source == StateSourceKind::SnapshotFile {
+    if projection_snapshot_is_ready(refreshed_snapshot) {
+      StateSourceKind::SnapshotFile
+    } else {
+      model.state_source
+    }
+  } else if !projection_snapshot_is_ready(model.projection_snapshot) &&
+    projection_snapshot_is_ready(refreshed_snapshot) {
+    StateSourceKind::SnapshotFile
+  } else {
+    model.state_source
+  }
   let recovery_active = mayor_recovery_active(model)
   let budget_delta = match model.strategy {
     Balanced => -2
@@ -378,6 +467,11 @@ fn advance_model(model : Model) -> Model {
   {
     ..model,
     tick: model.tick + 1,
+    state_source: refreshed_source,
+    projection_snapshot: refreshed_snapshot,
+    snapshot_version: refreshed_version,
+    daemon_snapshot: refreshed_daemon_snapshot,
+    daemon_snapshot_version: refreshed_daemon_version,
     budget: next_budget,
     energy: next_energy,
     pressure: next_pressure,
@@ -857,6 +951,9 @@ fn snapshot_worker_summary(worker : @core.WorkerRef) -> String {
   } else {
     "\{capability_count} declared capabilities"
   }
+  if worker.role.to_string() == "Watcher" && worker.status == @core.WorkerStatus::Idle {
+    return "\{worker.name} is on duty for the 30-minute standing-watch loop. Idle means waiting between checks, not offline; the mayor message feed shows the latest check result."
+  }
   "\{worker.name} is projected from persisted town state with status \{worker.status}, role \{worker.role}, and \{capability_text}."
 }
 
@@ -1237,28 +1334,8 @@ fn no_children() -> Array[@rabbita.Html] {
 }
 
 ///|
-fn simulation_time_label(tick : Int) -> String {
-  let total_minutes = 8 * 60 + tick * 15
-  let day = total_minutes / (24 * 60) + 1
-  let minute_of_day = total_minutes % (24 * 60)
-  let hour = minute_of_day / 60
-  let minute = minute_of_day % 60
-  "Day \{day} / \{pad2(hour)}:\{pad2(minute)}"
-}
-
-///|
-fn pad2(value : Int) -> String {
-  if value < 10 {
-    "0\{value}"
-  } else {
-    value.to_string()
-  }
-}
-
-///|
-fn day_phase_label(tick : Int) -> String {
-  let minute_of_day = (8 * 60 + tick * 15) % (24 * 60)
-  let hour = minute_of_day / 60
+fn real_phase_label() -> String {
+  let hour = real_local_hour()
   if hour < 6 {
     "Night patrol"
   } else if hour < 11 {
@@ -1273,23 +1350,42 @@ fn day_phase_label(tick : Int) -> String {
 }
 
 ///|
-fn season_label(tick : Int) -> String {
-  match tick / 96 % 4 {
-    0 => "Spring code festival"
-    1 => "Summer river lab"
-    2 => "Autumn roadshow"
-    _ => "Winter build camp"
+fn daemon_tick_count(model : Model) -> Int {
+  match model.daemon_snapshot {
+    Some(snapshot) => snapshot.tick_sequence
+    None => 0
   }
 }
 
 ///|
-fn weather_label(tick : Int) -> String {
-  match tick / 12 % 5 {
-    0 => "Clear valley"
-    1 => "River breeze"
-    2 => "Rainy hackathon"
-    3 => "Firefly night"
-    _ => "Soft fog"
+fn daemon_tick_label(model : Model) -> String {
+  match model.daemon_snapshot {
+    Some(snapshot) => "Daemon tick \{snapshot.tick_sequence}"
+    None => "Daemon tick waiting"
+  }
+}
+
+///|
+fn daemon_heartbeat_label(model : Model) -> String {
+  match model.daemon_snapshot {
+    Some(snapshot) => "Heartbeat events \{snapshot.last_heartbeat_event_count}"
+    None => "Heartbeat waiting"
+  }
+}
+
+///|
+fn daemon_cadence_label(model : Model) -> String {
+  match model.daemon_snapshot {
+    Some(snapshot) => {
+      let mut cadence = 30
+      for job in snapshot.jobs {
+        if job.id == "dispatch-standing-goals" {
+          cadence = job.interval_seconds
+        }
+      }
+      "Daemon cadence \{cadence}s"
+    }
+    None => "Daemon cadence waiting"
   }
 }
 
@@ -1540,9 +1636,10 @@ fn render_vitality_metric_grid(model : Model) -> Array[@rabbita.Html] {
 ///|
 fn render_civic_context(model : Model) -> @rabbita.Html {
   section(class="civic-context", [
-    status_chip("Phase: \{day_phase_label(model.tick)}", "chip-clock"),
-    status_chip("Season: \{season_label(model.tick)}", "chip-book"),
-    status_chip("Weather: \{weather_label(model.tick)}", "chip-neutral"),
+    status_chip("Local time: \{real_time_label()}", "chip-clock"),
+    status_chip("Date: \{real_calendar_label()}", "chip-book"),
+    status_chip("Phase: \{real_phase_label()}", "chip-clock"),
+    status_chip(daemon_cadence_label(model), "chip-neutral"),
     status_chip("Residents: \{resident_count(model)}", "chip-neutral"),
     status_chip(
       "Points flow: \{valley_points_issued(model)} issued / \{valley_points_redeemed(model)} redeemed",
@@ -4530,7 +4627,7 @@ fn render_bridge_contract(model : Model) -> @rabbita.Html {
       ),
     ]),
     div(class="bridge-grid", [
-      runtime_stat_chip("Daemon ticks", model.tick, "runtime-running"),
+      runtime_stat_chip("Daemon tick", daemon_tick_count(model), "runtime-running"),
       runtime_stat_chip("Residents", resident_count(model), "runtime-packets"),
       runtime_stat_chip(
         "Memory streams",
@@ -4653,8 +4750,9 @@ fn render_controls(dispatch : Dispatch[Msg], model : Model) -> @rabbita.Html {
   section(class="control-hub", [
     div(class="control-strip", [
       status_chip(status, if model.paused { "chip-alert" } else { "chip-live" }),
-      status_chip(simulation_time_label(model.tick), "chip-clock"),
-      status_chip("Tick \{model.tick}", "chip-neutral"),
+      status_chip("Local time \{real_time_label()}", "chip-clock"),
+      status_chip(daemon_tick_label(model), "chip-neutral"),
+      status_chip(daemon_heartbeat_label(model), "chip-neutral"),
       status_chip("Mode: \{strategy_label(model.strategy)}", "chip-book"),
       status_chip(
         "State sources: \{state_source_options().length()}",
@@ -5698,8 +5796,13 @@ fn is_working_worker(worker : WorkerSim) -> Bool {
 }
 
 ///|
+fn is_on_duty_watcher(worker : WorkerSim) -> Bool {
+  worker.role.contains("Watcher")
+}
+
+///|
 fn visible_overworld_workers(workers : Array[WorkerSim]) -> Array[WorkerSim] {
-  workers
+  workers.filter(worker => is_working_worker(worker) || is_on_duty_watcher(worker))
 }
 
 ///|
@@ -5803,34 +5906,122 @@ fn render_building_interior(
 }
 
 ///|
-fn feed_items(
-  model : Model,
-  workers : Array[WorkerSim],
-  executions : Array[@core.TaskExecutionRecord],
-) -> Array[FeedItem] {
-  let feed : Array[FeedItem] = []
+fn feed_event_title(event : @core.TownEvent) -> String {
+  let suffix = match event.related_book_id {
+    Some(book_id) => " / \{book_id}"
+    None => ""
+  }
+  match event.kind {
+    "standing-watch" => "Mayor watch update\{suffix}"
+    "standing-goal" => "Watcher dispatched\{suffix}"
+    "execution" => "Worker run changed\{suffix}"
+    "persist" => "Bookkeeper saved memory\{suffix}"
+    "projection" => "Website projection refreshed\{suffix}"
+    "summary" => "Book health summary\{suffix}"
+    "review" => "Keeper review needed\{suffix}"
+    "daemon" => "Daemon heartbeat"
+    "supervision" => "Mayor supervision"
+    _ => "Town message\{suffix}"
+  }
+}
+
+///|
+fn feed_event_tone(event : @core.TownEvent) -> String {
+  if event.detail.contains("Failed") ||
+    event.detail.contains("failed") ||
+    event.detail.contains("not-ready") {
+    "alert"
+  } else if event.kind == "standing-watch" && event.detail.contains("NoChange") {
+    "calm"
+  } else if event.kind == "persist" || event.kind == "projection" {
+    "calm"
+  } else if event.kind == "review" || event.kind == "supervision" {
+    "hot"
+  } else {
+    "neutral"
+  }
+}
+
+///|
+fn feed_event_visible(event : @core.TownEvent) -> Bool {
+  event.kind == "standing-watch" ||
+  event.kind == "standing-goal" ||
+  event.kind == "execution" ||
+  event.kind == "persist" ||
+  event.kind == "projection" ||
+  event.kind == "summary" ||
+  event.kind == "review" ||
+  event.kind == "daemon" ||
+  event.kind == "supervision"
+}
+
+///|
+fn push_recent_event_messages(
+  feed : Array[FeedItem],
+  events : Array[@core.TownEvent],
+) -> Unit {
+  let mut pushed = 0
+  let mut daemon_pushed = false
+  for offset in 0..<events.length() {
+    let event = events[events.length() - 1 - offset]
+    if pushed >= 6 {
+      break
+    }
+    if event.kind == "daemon" && daemon_pushed {
+      continue
+    }
+    if feed_event_visible(event) {
+      feed.push({
+        title: feed_event_title(event),
+        detail: event.detail,
+        tone: feed_event_tone(event),
+      })
+      pushed += 1
+      if event.kind == "daemon" {
+        daemon_pushed = true
+      }
+    }
+  }
+}
+
+///|
+fn push_worker_alert_messages(feed : Array[FeedItem], workers : Array[WorkerSim]) -> Unit {
   for worker in workers {
     if worker.status == @core.WorkerStatus::Blocked {
       feed.push({
         title: "\{worker.title} stalled",
-        detail: "Shift attention into stability or relieve queue pressure.",
+        detail: "Mayor should recover this lane before the next 30-minute watcher cycle.",
         tone: "alert",
+      })
+    } else if is_on_duty_watcher(worker) && worker.status == @core.WorkerStatus::Idle {
+      feed.push({
+        title: "\{worker.title} is on duty",
+        detail: "Waiting between half-hour OPC checks. The next due check will move this watcher into an active run.",
+        tone: "calm",
       })
     }
   }
+}
+
+///|
+fn push_execution_messages(
+  feed : Array[FeedItem],
+  executions : Array[@core.TaskExecutionRecord],
+) -> Unit {
   for execution in executions {
     match execution.status {
+      @core.TaskExecutionStatus::Running
+      | @core.TaskExecutionStatus::RunConfirmed =>
+        feed.push({
+          title: "\{execution.task_id} is running",
+          detail: execution.summary,
+          tone: "neutral",
+        })
       @core.TaskExecutionStatus::AwaitingPersistence =>
         feed.push({
           title: "\{execution.task_id} awaits MoonBook persistence",
           detail: "The run is done; the next town action is keeper persistence and evidence capture.",
           tone: "hot",
-        })
-      @core.TaskExecutionStatus::ReviewQueued =>
-        feed.push({
-          title: "\{execution.task_id} queued for keeper review",
-          detail: "Town should keep the proposal chain visible until review sync settles.",
-          tone: "alert",
         })
       @core.TaskExecutionStatus::Stale =>
         feed.push({
@@ -5847,45 +6038,47 @@ fn feed_items(
       _ => ()
     }
   }
-  if model.strategy == Strategy::Throughput {
+}
+
+///|
+fn feed_items(
+  workers : Array[WorkerSim],
+  executions : Array[@core.TaskExecutionRecord],
+  events : Array[@core.TownEvent],
+) -> Array[FeedItem] {
+  let feed : Array[FeedItem] = []
+  feed.push({
+    title: "OPC watcher is connected",
+    detail: "Mayor keeps the standing watch alive through the daemon. It checks for useful OPC updates every 60 ticks, about every 30 minutes at the current heartbeat.",
+    tone: "calm",
+  })
+  push_recent_event_messages(feed, events)
+  push_worker_alert_messages(feed, workers)
+  push_execution_messages(feed, executions)
+  if feed.length() == 1 {
     feed.push({
-      title: "Mayor favors throughput",
-      detail: "Output is up, but queue pressure is climbing faster than recovery.",
-      tone: "hot",
-    })
-  } else if model.strategy == Strategy::Recovery {
-    feed.push({
-      title: "Recovery window active",
-      detail: "Books are absorbing less work while stability and energy recover.",
-      tone: "calm",
-    })
-  } else {
-    feed.push({
-      title: "Balanced dispatch",
-      detail: "Town is trading moderate output for smoother keeper handoffs.",
+      title: "No new town messages",
+      detail: "The daemon is between checks. Leave this page open and the thread refreshes from `.moontown/town.json` every few seconds.",
       tone: "neutral",
     })
   }
-  feed.push({
-    title: "Budget reserve",
-    detail: "Current reserve sits at \{model.budget}%. Low reserve amplifies town fragility.",
-    tone: if model.budget < 30 {
-      "alert"
-    } else {
-      "neutral"
-    },
-  })
   feed
 }
 
 ///|
 fn render_feed(feed : Array[FeedItem]) -> @rabbita.Html {
-  section(class="feed-panel", [
-    h2("Activity Feed"),
+  section(class="feed-panel phone-message-panel", [
+    div(class="phone-topbar", [
+      span(class="phone-status-dot", ""),
+      div([
+        h2("Mayor Messages"),
+        p("Live town thread for standing-watch updates"),
+      ]),
+    ]),
     div(
-      class="feed-list",
+      class="feed-list phone-thread",
       feed.map(item => {
-        article(class="feed-item tone-\{item.tone}", [
+        article(class="feed-item message-bubble tone-\{item.tone}", [
           h3(item.title),
           p(item.detail),
         ])
@@ -6179,8 +6372,8 @@ fn render_scene(dispatch : Dispatch[Msg], model : Model) -> @rabbita.Html {
         ]),
         div(class="viewport-actions", [
           status_chip(if model.paused { "Paused" } else { "Live" }, "chip-live"),
-          status_chip(simulation_time_label(model.tick), "chip-clock"),
-          status_chip("Tick \{model.tick}", "chip-neutral"),
+          status_chip("Local time \{real_time_label()}", "chip-clock"),
+          status_chip(daemon_tick_label(model), "chip-neutral"),
           button(
             class="control-button viewport-zoom-button viewport-zoom-out",
             on_click=dispatch(ViewportControlNoop),
@@ -6228,7 +6421,7 @@ fn render_scene(dispatch : Dispatch[Msg], model : Model) -> @rabbita.Html {
       ]),
       div(class="sidebar-column", [
         render_inspector(dispatch, model, scene, workers, executions),
-        render_feed(feed_items(model, workers, executions)),
+        render_feed(feed_items(workers, executions, state.events)),
         aside(class="scene-legend", [
           h2("Legend"),
           p("City Hall is the mayor runtime and policy anchor."),

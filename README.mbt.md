@@ -131,6 +131,32 @@ OPC standing goal is due and dispatches it to the `research-opc` MoonBook lane.
 MoonBook owns the durable OPC wiki, and MoonClaw owns the bounded research
 execution.
 
+The 24/7 watcher path now uses an explicit standing-watch contract instead of
+unconditionally running a full research pass whenever a goal is due:
+
+```text
+daemon tick
+  -> due standing goal
+  -> book-local standing-watch task
+  -> MoonBook compares the topic against its own baseline
+  -> MoonClaw performs bounded web/source discovery
+  -> MoonBook emits standing_goal_decision
+  -> Moontown records .moontown/watchers/<goal-id>.jsonl
+  -> next_due_tick advances with update/no-change/review/failure backoff
+```
+
+Required MoonBook result marker:
+
+```text
+standing_goal_decision: update | no_change | needs_review | failed
+delta_score: 0-100
+new_source_count: <integer>
+next_check_hint: normal | slower | faster | review
+```
+
+Moontown only consumes this marker for scheduling and UI status. It does not
+decide whether OPC research is novel; that remains a MoonBook keeper decision.
+
 ## Main Subsystems
 
 - `core`
@@ -144,7 +170,7 @@ execution.
 - `scheduler`
   tick planning and due-work collection
 - `storage`
-  snapshot and checkpoint persistence
+  snapshot, checkpoint, standing-goal, and watcher-ledger persistence
 - `roles`
   strategic mayor role adapter
 - `adapters/moonbook`

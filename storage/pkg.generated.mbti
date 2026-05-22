@@ -7,11 +7,17 @@ import {
 }
 
 // Values
+pub async fn append_watcher_run_record_file(String, @core.WatcherRunRecord) -> Unit
+
+pub fn consecutive_no_change_count(Array[@core.WatcherRunRecord]) -> Int
+
 pub fn default_snapshot_path() -> String
 
 pub fn default_standing_goal_path() -> String
 
 pub fn default_standing_goals() -> Array[@core.StandingGoal]
+
+pub fn default_watcher_ledger_dir() -> String
 
 pub fn describe_snapshot(TownSnapshot) -> String
 
@@ -25,11 +31,17 @@ pub async fn load_snapshot_file(String) -> TownSnapshot?
 
 pub async fn load_standing_goals_file(String) -> Array[@core.StandingGoal]?
 
+pub async fn load_watcher_run_records(String, dir? : String) -> Array[@core.WatcherRunRecord]
+
+pub async fn load_watcher_run_records_file(String) -> Array[@core.WatcherRunRecord]
+
 pub async fn save_snapshot_file(String, TownSnapshot) -> Unit
 
 pub async fn save_standing_goals_file(String, Array[@core.StandingGoal]) -> Unit
 
 pub fn snapshot_of(@core.TownState) -> TownSnapshot
+
+pub fn watcher_ledger_path(String, dir? : String) -> String
 
 // Errors
 

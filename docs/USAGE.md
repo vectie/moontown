@@ -122,8 +122,10 @@ The daemon loop repeats the restart-safe tick. Each tick:
 - loads `.moontown/daemon.json`
 - loads `.moontown/standing-goals.json`
 - lets the Mayor dispatch due standing goals
-- routes the target book to its keeper lane
+- routes the target book to a book-local `standing-watch` task
+- lets MoonBook decide whether the check produced useful new information
 - persists checkpoint and standing-goal next due state
+- appends `.moontown/watchers/<goal-id>.jsonl`
 - sleeps before the next tick
 
 The default standing goal is:
@@ -139,6 +141,23 @@ This creates or reuses the dynamic `research-opc` MoonBook lane. Moontown owns
 the schedule and dispatch event; MoonBook owns the OPC wiki and generated site;
 MoonClaw owns bounded research execution.
 
+The expected MoonBook result marker for a standing watcher is:
+
+```text
+standing_goal_decision: update | no_change | needs_review | failed
+delta_score: 0-100
+new_source_count: <integer>
+next_check_hint: normal | slower | faster | review
+```
+
+Moontown uses that marker only for control-plane scheduling:
+
+- `update`: normal cadence
+- `no_change`: increasing no-change backoff, capped at 4x cadence
+- `needs_review`: shorter review retry window
+- `failed`: shorter failure retry window
+- active duplicate watcher: defer one tick
+
 ## 2. Use The Persisted Town State
 
 The demo town persists runtime bootstrap files under:
@@ -148,6 +167,7 @@ The demo town persists runtime bootstrap files under:
 - `.moontown/daemon.json`
 - `.moontown/packets/` when packet files are exported
 - `.moontown/standing-goals.json`
+- `.moontown/watchers/*.jsonl`
 - `.moontown/books/<book>/` for MoonBook lane workspaces
 - `.moontown/town-synthesis/` for mayor-level cross-book reports
 
@@ -161,6 +181,8 @@ What they do:
   - stores daemon state, tick sequence, lease owner, heartbeat event count, active goal ids, and scheduled job metadata
 - `.moontown/standing-goals.json`
   - stores Mayor-owned standing goals, target book, cadence, source policy, last run tick, and next due tick
+- `.moontown/watchers/*.jsonl`
+  - stores standing-watch decisions, target book, task/run ids, detail, and next due tick
 - `.moontown/books/<book>/raw/bootstrap/`
   - stores research questions, search logs, source screens, evidence matrices,
     local source digests, and synthesis briefs

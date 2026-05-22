@@ -5,3 +5,7 @@ import {
   "moonbitlang/core/json",
   "moonbitlang/x/path",
 }
+
+import {
+  "moonbitlang/async",
+} for "wbtest"

@@ -262,6 +262,7 @@ async fn launch_goal_book(
           launch.entry,
           task,
           "Goal execution failed for \{launch.entry.id} / \{task.id}: \{error}",
+          assigned_worker_id=worker_id,
         )
     }
     let completed_execution = complete_wenyu_build_artifacts_if_needed(

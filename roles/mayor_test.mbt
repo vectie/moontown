@@ -113,3 +113,25 @@ test "mayor supervision marks stale executions for recovery" {
   assert_true(packet.directives.length() >= 1)
   assert_true(packet.directives[0].kind.contains("stale"))
 }
+
+///|
+test "mayor supervision does not repeat synced review queue directives" {
+  let mayor = Mayor::new()
+  let state = @core.empty_state(
+    @core.TownConfig::new(id="test-town", name="Test Town"),
+  )
+  state.register_execution(
+    @core.TaskExecutionRecord::new(
+      task_id="standing-watch-opc-news-tick-5",
+      book_id="research-opc",
+      packet_id="packet",
+      packet_path="packet.json",
+      status=@core.TaskExecutionStatus::ReviewQueued,
+      summary="standing_goal_decision: no_change",
+      output_contract="test",
+      heartbeat_tick=42,
+    ),
+  )
+  let packet = mayor.supervise(state, 43)
+  assert_eq(packet.directives.length(), 0)
+}

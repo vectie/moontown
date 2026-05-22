@@ -44,7 +44,7 @@ pub fn render_state_dashboard(@core.TownState) -> String
 
 pub async fn run_goal(String, book_id? : String?, task_limit_per_book? : Int, snapshot_path? : String, book_catalog_path? : String) -> @core.TownState
 
-pub fn runtime_status_from_state(@core.TownState, String, standing_goals? : Array[@core.StandingGoal], daemon_tick? : Int) -> TownRuntimeStatus
+pub fn runtime_status_from_state(@core.TownState, String, standing_goals? : Array[@core.StandingGoal], daemon_tick? : Int, watcher_records? : Array[@core.WatcherRunRecord]) -> TownRuntimeStatus
 
 pub async fn supervise_saved_town(snapshot_path? : String, book_catalog_path? : String) -> String
 
@@ -86,6 +86,8 @@ pub struct TownRuntimeStatus {
   completed_count : Int
   standing_goal_count : Int
   due_standing_goal_count : Int
+  watcher_record_count : Int
+  watcher_summary : String
   daemon_actions : Array[@scheduler.SchedulerAction]
   summary : String
 }

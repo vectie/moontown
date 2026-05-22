@@ -455,6 +455,7 @@ fn moonclaw_profile_for_task(task : @moonbook.BookTask) -> String {
     return "moontown_research_bootstrap_worker"
   }
   match task.kind {
+    "standing-watch" => "wiki_ingest_controller"
     "implementation-backlog"
     | "code-patch"
     | "image-asset"
@@ -556,13 +557,17 @@ fn supervision_directive_for(
         next_retry_tick: None,
       })
     @core.TaskExecutionStatus::ReviewQueued =>
-      Some({
-        kind: "review-sync",
-        task_id: execution.task_id,
-        execution_status: execution.status,
-        detail: "Execution \{execution.task_id} is waiting for keeper review sync.",
-        next_retry_tick: None,
-      })
+      if execution.heartbeat_tick == 0 {
+        Some({
+          kind: "review-sync",
+          task_id: execution.task_id,
+          execution_status: execution.status,
+          detail: "Execution \{execution.task_id} is waiting for keeper review sync.",
+          next_retry_tick: None,
+        })
+      } else {
+        None
+      }
     @core.TaskExecutionStatus::Stale | @core.TaskExecutionStatus::Failed =>
       match execution.next_retry_tick {
         Some(next_tick) if execution.attempt < 3 && next_tick <= tick =>

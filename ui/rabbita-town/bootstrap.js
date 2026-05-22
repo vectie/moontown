@@ -14,17 +14,50 @@ if (app) {
   `
 }
 
-async function boot() {
+async function refreshTownSnapshot() {
   try {
-    const response = await fetch('./town.json', { cache: 'no-store' })
+    const response = await fetch(`./town.json?ts=${Date.now()}`, { cache: 'no-store' })
     if (response.ok) {
       globalThis.__moontownTownSnapshotJson = await response.text()
+      globalThis.__moontownTownSnapshotVersion =
+        (globalThis.__moontownTownSnapshotVersion || 0) + 1
     } else {
       globalThis.__moontownTownSnapshotJson = ''
     }
   } catch {
     globalThis.__moontownTownSnapshotJson = ''
   }
+}
+
+async function refreshDaemonSnapshot() {
+  try {
+    const response = await fetch(`./daemon.json?ts=${Date.now()}`, { cache: 'no-store' })
+    if (response.ok) {
+      globalThis.__moontownDaemonSnapshotJson = await response.text()
+      globalThis.__moontownDaemonSnapshotVersion =
+        (globalThis.__moontownDaemonSnapshotVersion || 0) + 1
+    } else {
+      globalThis.__moontownDaemonSnapshotJson = ''
+    }
+  } catch {
+    globalThis.__moontownDaemonSnapshotJson = ''
+  }
+}
+
+async function refreshRuntimeSnapshots() {
+  await Promise.all([
+    refreshTownSnapshot(),
+    refreshDaemonSnapshot(),
+  ])
+}
+
+async function boot() {
+  await refreshRuntimeSnapshots()
+
+  if (globalThis.__moontownTownSnapshotRefreshTimer) {
+    clearInterval(globalThis.__moontownTownSnapshotRefreshTimer)
+  }
+  globalThis.__moontownTownSnapshotRefreshTimer = setInterval(refreshRuntimeSnapshots, 5000)
 
   try {
     const response = await fetch('./tilemap/wenyu_reference_labels.json', { cache: 'no-store' })

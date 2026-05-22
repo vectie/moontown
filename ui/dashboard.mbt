@@ -467,7 +467,7 @@ fn find_execution_for_task(
 ///|
 fn active_book_stage(town : @core.TownState, book_id : String) -> String {
   let priorities = [
-    "Bootstrap", "Source Population", "Review", "Synthesis", "Planning",
+    "Bootstrap", "Source Population", "Watch", "Review", "Synthesis", "Planning",
   ]
   for priority in priorities {
     for execution in town.executions {
@@ -515,6 +515,11 @@ fn task_stage_label(task : @core.TownTask) -> String {
 fn stage_label_for_text(primary : String, secondary : String) -> String {
   let primary_lower = primary.to_lower()
   let secondary_lower = secondary.to_lower()
+  if contains_stage_token(primary_lower, secondary_lower, [
+      "standing-watch", "standing watch", "standing_goal_decision", "watcher",
+    ]) {
+    return "Watch"
+  }
   if contains_stage_token(primary_lower, secondary_lower, ["bootstrap"]) {
     return "Bootstrap"
   }

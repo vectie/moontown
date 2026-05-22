@@ -556,7 +556,7 @@ pub async fn hydrate_worker_context(
   let json = run_book_json_command(entry, [
     "context",
     entry.workspace_root,
-    task.goal.unwrap_or(task.prompt),
+    context_goal_for_task(task),
     "--task",
     task.id,
   ]) catch {
@@ -570,6 +570,15 @@ pub async fn hydrate_worker_context(
     _ => fallback_worker_context_bundle(entry, task)
   }
   enrich_worker_context_bundle(entry, parsed)
+}
+
+///|
+fn context_goal_for_task(task : BookTask) -> String {
+  if task.kind == "standing-watch" {
+    task.prompt
+  } else {
+    task.goal.unwrap_or(task.prompt)
+  }
 }
 
 ///|
@@ -860,6 +869,9 @@ fn enrich_worker_context_bundle(
   if !entry.id.has_prefix("research-") {
     return bundle
   }
+  if is_standing_watch_context_bundle(bundle) {
+    return standing_watch_worker_context_bundle(bundle)
+  }
   if is_research_bootstrap_context_bundle(bundle) {
     return research_bootstrap_worker_context_bundle(entry, bundle)
   }
@@ -898,9 +910,67 @@ fn enrich_worker_context_bundle(
 }
 
 ///|
+fn is_standing_watch_context_bundle(bundle : WorkerContextBundle) -> Bool {
+  let combined = "\{bundle.task_id} \{bundle.prompt}".to_lower()
+  combined.contains("standing-watch") ||
+  combined.contains("standing watch") ||
+  combined.contains("standing_goal_decision")
+}
+
+///|
 fn is_research_bootstrap_context_bundle(bundle : WorkerContextBundle) -> Bool {
+  guard !is_standing_watch_context_bundle(bundle) else { return false }
   let combined = "\{bundle.task_id} \{bundle.prompt}".to_lower()
   combined.contains("bootstrap") && combined.contains("research")
+}
+
+///|
+fn standing_watch_worker_context_bundle(
+  bundle : WorkerContextBundle,
+) -> WorkerContextBundle {
+  let skill_paths = unique_paths(
+    [
+      ..bundle.skill_paths,
+      "skills/standing-watch/SKILL.md",
+      "skills/web-first-research/SKILL.md",
+      "skills/source-diarize/SKILL.md",
+      "skills/research-evidence-synthesis/SKILL.md",
+    ],
+  )
+  let context_pages = unique_paths(
+    [
+      ..bundle.context_pages,
+      "wiki/history/standing-watch.md",
+      "wiki/history/journey.md",
+      "wiki/sources/",
+      "wiki/synthesis/overview.md",
+      "wiki/synthesis/claims.md",
+    ],
+  )
+  let output_contract = unique_paths(
+    [
+      ..bundle.output_contract,
+      "standing_goal_decision: update | no_change | needs_review | failed",
+      "delta_score: 0-100",
+      "new_source_count: <integer>",
+      "next_check_hint: normal | slower | faster | review",
+    ],
+  )
+  {
+    book_id: bundle.book_id,
+    workspace_root: bundle.workspace_root,
+    task_id: bundle.task_id,
+    prompt: bundle.prompt,
+    policy: bundle.policy,
+    routines: bundle.routines,
+    skill_paths,
+    context_pages,
+    active_memory: bundle.active_memory,
+    user_memory: bundle.user_memory,
+    working_memory: bundle.working_memory,
+    memory_summary: bundle.memory_summary,
+    output_contract,
+  }
 }
 
 ///|

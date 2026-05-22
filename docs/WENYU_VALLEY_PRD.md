@@ -553,6 +553,8 @@ hydrate town projection
 poll active MoonClaw runs
 ask Mayor for patrol decision
 dispatch due tasks
+run due standing-watch tasks through target MoonBooks
+record watcher decisions and next due ticks
 persist town checkpoint
 publish town-runtime projection
 sleep until next tick
@@ -576,6 +578,8 @@ Acceptance criteria:
 - Failed jobs produce visible recovery actions.
 - Normal review queues do not become degraded health.
 - `.moontown/daemon.json` records lease, tick, heartbeat, and last action.
+- `.moontown/watchers/*.jsonl` records topic watcher decisions, including
+  update/no-change/review/failure outcomes and next due tick.
 
 ## 6. Implementation Milestones
 

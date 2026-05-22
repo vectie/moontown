@@ -34,6 +34,7 @@ Purpose:
 - current text dashboard entry surface
 - goal-run orchestration, research bootstrap planning, and execution launch
 - standing-goal dispatch, daemon-loop entry points, and persisted runtime status
+- standing-watch task dispatch and watcher-ledger projection for 24/7 topics
 - research quality gates and typed readiness
 - mayor-level town synthesis rendering
 - package-local file IO helpers shared by root features
@@ -122,11 +123,13 @@ Purpose:
 - snapshot persistence
 - checkpoint model
 - standing-goal registry persistence
+- watcher ledger persistence
 
 Current persisted files:
 
 - `.moontown/town.json`
 - `.moontown/standing-goals.json`
+- `.moontown/watchers/*.jsonl`
 - `.moontown/packets/` when keeper packets are exported
 
 ## Roles

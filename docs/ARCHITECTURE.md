@@ -200,11 +200,13 @@ not worker sessions.
 .moontown/standing-goals.json
   -> daemon tick
   -> Mayor checks due standing goals
-  -> Mayor dispatches target book keeper
-  -> MoonBook hydrates book-local context
-  -> MoonClaw executes bounded work
-  -> MoonBook persists wiki/source/timeline/synthesis updates
-  -> Moontown advances next_due_tick
+  -> Mayor dispatches a target-book standing-watch task
+  -> MoonBook hydrates book-local baseline and context
+  -> MoonClaw executes bounded web/source discovery
+  -> MoonBook decides update/no_change/needs_review/failed
+  -> MoonBook persists wiki/source/timeline/synthesis updates when useful
+  -> Moontown records a watcher ledger entry
+  -> Moontown advances next_due_tick with backoff
 ```
 
 The first default standing goal is `watch-opc-news`, which targets the dynamic
@@ -219,6 +221,17 @@ Mayor decides when / where / why.
 Book Keeper decides what belongs in durable memory.
 Worker Claws decide how to execute bounded tasks.
 ```
+
+Moontown persists the control-plane side of each watcher cycle under:
+
+```text
+.moontown/watchers/<standing-goal-id>.jsonl
+```
+
+Each line is a `WatcherRunRecord` containing the daemon tick, target book,
+MoonBook decision, task/run ids, detail, and next due tick. This ledger is the
+restart-readable audit trail for 24/7 operation. The durable research truth
+still lives inside the target MoonBook.
 
 ### Readiness and Quality Gates
 
@@ -255,6 +268,9 @@ The daemon persists:
   scheduled job metadata
 - `.moontown/standing-goals.json`
   standing goal registry, cadence, target book, source policy, and next due tick
+- `.moontown/watchers/*.jsonl`
+  standing-watch decisions, no-change/update/review/failure records, and next
+  due ticks
 
 This is not yet production-grade multi-day process management. Missing hardening
 still includes lease expiry, process identity, crash fencing, backoff policy,

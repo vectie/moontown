@@ -111,6 +111,19 @@ fn register_book_lane_workers(
   register_worker_if_missing(
     state,
     @core.WorkerRef::new(
+      id="claw-\{book.id}-watcher",
+      name="\{book.name} Watcher",
+      book_id=book.id,
+      role=@core.WorkerRole::Watcher,
+      capabilities=[
+        "standing-watch", "web-search", "source-screening", "delta-detection", "digest",
+        "memory", "review",
+      ],
+    ),
+  )
+  register_worker_if_missing(
+    state,
+    @core.WorkerRef::new(
       id="claw-\{book.id}-harness",
       name="\{book.name} Harness",
       book_id=book.id,
@@ -184,6 +197,7 @@ fn domain_for_book_task(
   task : @moonbook.BookTask,
 ) -> @core.WorkDomain {
   match task.kind {
+    "standing-watch" => @core.WorkDomain::Research
     "code-patch" | "test-fix" | "projection-schema" => @core.WorkDomain::Coding
     "image-asset" => @core.WorkDomain::Coding
     "implementation-backlog" => @core.WorkDomain::Operations
@@ -455,6 +469,7 @@ fn failed_execution_record(
   entry : @moonbook.BookCatalogEntry,
   task : @moonbook.BookTask,
   detail : String,
+  assigned_worker_id? : String? = None,
 ) -> @core.TaskExecutionRecord {
   let packet_id = "keeper-\{entry.id}-\{task.id}"
   let packet_path = @moonclaw.packet_file_path(
@@ -469,6 +484,7 @@ fn failed_execution_record(
     status=@core.TaskExecutionStatus::Failed,
     summary=detail,
     output_contract="keeper.plan.packet.v1",
+    assigned_worker_id~,
     requires_review=task.requires_review,
     notify_town=true,
   )

@@ -86,10 +86,12 @@ fn detect_anomalies(
   for execution in executions {
     match execution.status {
       @core.TaskExecutionStatus::Failed =>
-        anomalies.push({
-          title: "execution-failed",
-          detail: "\{execution.task_id} failed after packet \{execution.packet_id}",
-        })
+        if !standing_watch_failure_superseded(executions, execution) {
+          anomalies.push({
+            title: "execution-failed",
+            detail: "\{execution.task_id} failed after packet \{execution.packet_id}",
+          })
+        }
       @core.TaskExecutionStatus::Stale =>
         anomalies.push({
           title: "execution-stale",
@@ -130,10 +132,58 @@ fn book_level(town : @core.TownState, book_id : String) -> HealthLevel {
       continue
     }
     match execution.status {
-      @core.TaskExecutionStatus::Failed => return Critical
+      @core.TaskExecutionStatus::Failed =>
+        if !standing_watch_failure_superseded(town.executions, execution) {
+          return Critical
+        }
       @core.TaskExecutionStatus::Stale => return Critical
       _ => ()
     }
   }
   Healthy
+}
+
+///|
+fn standing_watch_failure_superseded(
+  executions : Array[@core.TaskExecutionRecord],
+  failed : @core.TaskExecutionRecord,
+) -> Bool {
+  let prefix = match standing_watch_task_prefix(failed.task_id) {
+    Some(prefix) => prefix
+    None => return false
+  }
+  let mut after_failed = false
+  for execution in executions {
+    if execution.task_id == failed.task_id {
+      after_failed = true
+      continue
+    }
+    if !after_failed || execution.book_id != failed.book_id {
+      continue
+    }
+    match standing_watch_task_prefix(execution.task_id) {
+      Some(other_prefix) =>
+        if other_prefix == prefix &&
+          execution.status != @core.TaskExecutionStatus::Failed &&
+          execution.status != @core.TaskExecutionStatus::Stale {
+          return true
+        }
+      None => ()
+    }
+  }
+  false
+}
+
+///|
+fn standing_watch_task_prefix(task_id : String) -> String? {
+  let normalized = task_id.to_lower()
+  if !normalized.has_prefix("standing-") || !normalized.contains("-tick-") {
+    return None
+  }
+  let parts = task_id.split("-tick-").to_array()
+  if parts.length() == 0 || parts[0].is_empty() {
+    None
+  } else {
+    Some(parts[0].to_string())
+  }
 }

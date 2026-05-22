@@ -77,7 +77,9 @@ pub struct StandingGoal {
 }
 pub fn StandingGoal::is_due(Self, Int) -> Bool
 pub fn StandingGoal::mark_dispatched(Self, Int) -> Self
+pub fn StandingGoal::mark_watcher_decision(Self, Int, WatcherDecisionKind, no_change_streak? : Int) -> Self
 pub fn StandingGoal::new(id~ : String, title~ : String, prompt~ : String, target_book_id? : String?, cadence_ticks? : Int, next_due_tick? : Int, last_run_tick? : Int?, enabled? : Bool, source_policy? : String, quality_threshold? : Int) -> Self
+pub fn StandingGoal::next_due_after_watcher_decision(Self, Int, WatcherDecisionKind, no_change_streak? : Int) -> Int
 pub impl Eq for StandingGoal
 pub impl Show for StandingGoal
 pub impl ToJson for StandingGoal
@@ -211,6 +213,36 @@ pub impl Eq for TownTaskStatus
 pub impl Show for TownTaskStatus
 pub impl ToJson for TownTaskStatus
 pub impl @json.FromJson for TownTaskStatus
+
+pub(all) enum WatcherDecisionKind {
+  Update
+  NoChange
+  NeedsReview
+  Failed
+  Deferred
+}
+pub impl Eq for WatcherDecisionKind
+pub impl Show for WatcherDecisionKind
+pub impl ToJson for WatcherDecisionKind
+pub impl @json.FromJson for WatcherDecisionKind
+
+pub struct WatcherRunRecord {
+  goal_id : String
+  tick : Int
+  target_book_id : String
+  decision : WatcherDecisionKind
+  delta_score : Int
+  new_source_count : Int
+  detail : String
+  task_id : String?
+  run_id : String?
+  next_due_tick : Int
+}
+pub fn WatcherRunRecord::new(goal_id~ : String, tick~ : Int, target_book_id~ : String, decision~ : WatcherDecisionKind, delta_score? : Int, new_source_count? : Int, detail? : String, task_id? : String?, run_id? : String?, next_due_tick? : Int) -> Self
+pub impl Eq for WatcherRunRecord
+pub impl Show for WatcherRunRecord
+pub impl ToJson for WatcherRunRecord
+pub impl @json.FromJson for WatcherRunRecord
 
 pub(all) enum WorkDomain {
   Coding
