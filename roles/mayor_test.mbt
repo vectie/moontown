@@ -139,3 +139,29 @@ test "mayor supervision does not repeat synced review queue directives" {
   let packet = mayor.supervise(state, 43)
   assert_eq(packet.directives.length(), 0)
 }
+
+///|
+test "mayor supervision retries review queued research quality gaps in place" {
+  let mayor = Mayor::new()
+  let state = @core.empty_state(
+    @core.TownConfig::new(id="test-town", name="Test Town"),
+  )
+  state.register_execution(
+    @core.TaskExecutionRecord::new(
+      task_id="goal-research-llm-training-research-bootstrap-ingest",
+      book_id="research-how-llm-are-trained-in-very-detail",
+      packet_id="packet",
+      packet_path="packet.json",
+      status=@core.TaskExecutionStatus::ReviewQueued,
+      summary="quality_gate_failed=1",
+      output_contract="test",
+      attempt=1,
+      heartbeat_tick=42,
+      next_retry_tick=Some(43),
+    ),
+  )
+  let packet = mayor.supervise(state, 43)
+  assert_eq(packet.directives.length(), 1)
+  assert_eq(packet.directives[0].kind, "retry-execution")
+  assert_true(packet.directives[0].detail.contains("in-place repair retry"))
+}

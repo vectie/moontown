@@ -8,6 +8,16 @@ test "external research topic detector accepts acronym-led reports" {
 }
 
 ///|
+test "external research topic detector accepts llm training aliases" {
+  assert_true(
+    research_text_contains_topic(
+      "the strongest supported picture is a staged industrial pipeline for large language model training.",
+      "how-llm-are-trained-in-very-detail",
+    ),
+  )
+}
+
+///|
 test "external deep report word gate applies when source base is broad" {
   let source_screen =
     #|# Source Screen
@@ -112,6 +122,55 @@ test "included source count accepts included sources section without decision co
     #|| Source ID | URL | Decision |
     #|| --- | --- | --- |
     #|| D1 | `https://example.org/index` | discovery_only |
+    #|
+  assert_eq(count_included_screened_sources(source_screen), 2)
+}
+
+///|
+test "included source count accepts heading list entries with decision bullets" {
+  let source_screen =
+    #|# Source Screen
+    #|
+    #|ready_for_12k_dossier: true
+    #|
+    #|## Included Sources
+    #|
+    #|### W1
+    #|- Type: web
+    #|- URL: `https://example.com/report`
+    #|- Decision: include
+    #|- Key claims:
+    #|  - Claim one.
+    #|
+    #|### W2
+    #|- Type: web
+    #|- URL: `https://example.org/paper`
+    #|- Decision: include_with_caution
+    #|
+    #|## Excluded Or Rejected Sources
+    #|
+    #|### W3
+    #|- Decision: include
+    #|
+  assert_eq(count_included_screened_sources(source_screen), 2)
+}
+
+///|
+test "included source count accepts decision bullet entries outside included section" {
+  let source_screen =
+    #|# Source Screen
+    #|
+    #|### W1
+    #|- URL: `https://example.com/report`
+    #|- Decision: include
+    #|
+    #|### W2
+    #|- URL: `https://example.com/search?q=llm`
+    #|- Decision: discovery_only
+    #|
+    #|### W3
+    #|- URL: `https://example.org/paper`
+    #|- Decision: include_with_caution
     #|
   assert_eq(count_included_screened_sources(source_screen), 2)
 }
@@ -381,4 +440,58 @@ test "clean research projection recovers late failed bootstrap execution" {
   )
   assert_eq(state.workers[0].status, @core.WorkerStatus::Idle)
   assert_true(state.events.any(fn(event) { event.kind == "recovery" }))
+}
+
+///|
+async test "research quality gate schedules in-place repair retry" {
+  let root = "/tmp/moontown-quality-retry"
+  ignore_checked_command("rm", ["-rf", root])
+  let state = @core.empty_state(
+    @core.TownConfig::new(id="test", name="Test Town"),
+  )
+  state.register_book(
+    @core.BookRef::new(
+      id="research-how-llm-are-trained-in-very-detail",
+      name="LLM Training Research",
+      purpose="research",
+      workspace_root=root,
+    ),
+  )
+  let task_id = "goal-research-how-llm-are-trained-in-very-detail-research-bootstrap-ingest"
+  state.enqueue_task(
+    @core.TownTask::new(
+      id=task_id,
+      book_id="research-how-llm-are-trained-in-very-detail",
+      title="Bootstrap verified research coverage",
+      prompt="research",
+      domain=@core.WorkDomain::Research,
+      status=@core.TownTaskStatus::Done,
+    ),
+  )
+  state.register_execution(
+    @core.TaskExecutionRecord::new(
+      task_id~,
+      book_id="research-how-llm-are-trained-in-very-detail",
+      packet_id="packet",
+      packet_path="packet.json",
+      status=@core.TaskExecutionStatus::Completed,
+      summary="completed",
+      output_contract="research",
+      attempt=1,
+    ),
+  )
+  queue_research_quality_gate(state, state.books[0].id, [task_id], [
+    "deep-report.md has fewer than 12k English words",
+  ])
+  let execution = @core.find_execution(state, task_id).unwrap()
+  assert_eq(execution.status, @core.TaskExecutionStatus::ReviewQueued)
+  assert_true(execution.next_retry_tick != None)
+  assert_true(execution.summary.contains("auto_retry=true"))
+  assert_eq(
+    @core.find_task(state, task_id).unwrap().status,
+    @core.TownTaskStatus::Blocked,
+  )
+  let trigger = @fs.read_file(root + "/raw/bootstrap/QUALITY_REPAIR.md").text()
+  assert_true(trigger.contains("in-place review/repair"))
+  assert_true(trigger.contains("do not create a new v1/v2/v3/v4 book"))
 }

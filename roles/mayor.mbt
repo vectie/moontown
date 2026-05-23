@@ -558,16 +558,29 @@ fn supervision_directive_for(
         next_retry_tick: None,
       })
     @core.TaskExecutionStatus::ReviewQueued =>
-      if execution.heartbeat_tick == 0 {
-        Some({
-          kind: "review-sync",
-          task_id: execution.task_id,
-          execution_status: execution.status,
-          detail: "Execution \{execution.task_id} is waiting for keeper review sync.",
-          next_retry_tick: None,
-        })
-      } else {
-        None
+      match execution.next_retry_tick {
+        Some(next_tick) if execution.attempt < 3 && next_tick <= tick =>
+          Some({
+            kind: "retry-execution",
+            task_id: execution.task_id,
+            execution_status: execution.status,
+            detail: "Execution \{execution.task_id} is review-queued with fixable quality gaps and is eligible for an in-place repair retry.",
+            next_retry_tick: Some(
+              tick + retry_backoff_ticks(execution.attempt + 1),
+            ),
+          })
+        _ =>
+          if execution.heartbeat_tick == 0 {
+            Some({
+              kind: "review-sync",
+              task_id: execution.task_id,
+              execution_status: execution.status,
+              detail: "Execution \{execution.task_id} is waiting for keeper review sync.",
+              next_retry_tick: None,
+            })
+          } else {
+            None
+          }
       }
     @core.TaskExecutionStatus::Stale | @core.TaskExecutionStatus::Failed =>
       match execution.next_retry_tick {

@@ -193,7 +193,11 @@ fn latest_execution_for_worker(
 fn worker_should_be_released(execution : @core.TaskExecutionRecord) -> Bool {
   match execution.status {
     @core.TaskExecutionStatus::Completed => true
-    @core.TaskExecutionStatus::ReviewQueued => true
+    @core.TaskExecutionStatus::ReviewQueued =>
+      match execution.next_retry_tick {
+        Some(_) => false
+        None => true
+      }
     @core.TaskExecutionStatus::Failed => true
     @core.TaskExecutionStatus::Stale =>
       match execution.next_retry_tick {
@@ -266,7 +270,9 @@ fn has_retry_pending_executions(state : @core.TownState, tick : Int) -> Bool {
   ignore(tick)
   for execution in state.executions {
     match execution.status {
-      @core.TaskExecutionStatus::Stale | @core.TaskExecutionStatus::Failed =>
+      @core.TaskExecutionStatus::Stale
+      | @core.TaskExecutionStatus::Failed
+      | @core.TaskExecutionStatus::ReviewQueued =>
         match execution.next_retry_tick {
           Some(_) if execution.attempt < 3 => return true
           _ => ()
@@ -479,6 +485,9 @@ async fn retry_execution(
   state.replace_task(task_for_supervision(state, updated))
   sync_worker_from_execution(state, updated)
   persist_execution_into_book(state, entry, updated)
+  if terminal_execution_status(updated.status) {
+    finalize_goal_book_entry(state, entry, 0, [updated.task_id])
+  }
 }
 
 ///|

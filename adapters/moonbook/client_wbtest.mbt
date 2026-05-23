@@ -100,17 +100,21 @@ test "generic external research topics are web-first and reference-aware" {
 }
 
 ///|
-test "explicit research book id does not replace research topic" {
+test "versioned explicit research book id canonicalizes to stable topic book" {
   let entry = entry_for_explicit_research_book(
     default_catalog(),
     "research-euv-native-quality-v2",
     "research euv lithography machine new advantages and supplements",
   ).unwrap()
-  assert_eq(entry.id, "research-euv-native-quality-v2")
+  assert_eq(
+    entry.id,
+    "research-euv-lithography-machine-new-advantages-and-supplements",
+  )
   assert_eq(entry.tags, [
     "research", "euv-lithography-machine-new-advantages-and-supplements", "topic:euv-lithography-machine-new-advantages-and-supplements",
-    "explicit-book",
+    "explicit-book", "requested-book:research-euv-native-quality-v2",
   ])
+  assert_true(entry.purpose.contains("do not create v1/v2/v3 forks"))
   let request = research_request_text(entry).to_lower()
   assert_true(
     request.contains(
@@ -162,18 +166,22 @@ test "research bootstrap profile is direct MoonClaw execution" {
   assert_true(profile_text.contains("research_bootstrap_quality_repair"))
   assert_true(profile_text.contains("Use native web_search first"))
   assert_true(profile_text.contains("focused source-expansion stage"))
+  assert_true(profile_text.contains("optional raw/bootstrap/QUALITY_REPAIR.md"))
+  assert_true(profile_text.contains("tool-backed self-review"))
+  assert_true(profile_text.contains("review gate"))
+  assert_true(profile_text.contains("repair in-place"))
   assert_true(profile_text.contains("REFERENCE_SOURCE_HINTS.md"))
   assert_true(
     profile_text.contains(
       "Do not load the full reference report in this source-screening stage",
     ),
   )
-  assert_true(profile_text.contains("final deep-research quality repair pass"))
+  assert_true(profile_text.contains("final deep-research review gate"))
   assert_true(profile_text.contains("Six included sources is the minimum"))
   assert_true(profile_text.contains("ten to fourteen"))
   assert_true(profile_text.contains("extract candidate result URLs"))
-  assert_true(profile_text.contains("12k-15k English-word"))
-  assert_true(profile_text.contains("hard floor of 12k words"))
+  assert_true(profile_text.contains("13k-15k English-word"))
+  assert_true(profile_text.contains("hard acceptance floor of 12k words"))
   assert_true(profile_text.contains("reference line-count target"))
   assert_true(profile_text.contains("\"disable_adaptive\": true"))
   assert_true(profile_text.contains("\"web_search\": true"))

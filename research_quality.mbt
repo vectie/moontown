@@ -501,6 +501,20 @@ fn research_text_contains_topic(lower : String, topic : String) -> Bool {
 fn topic_page_aliases(topic : String) -> Array[String] {
   if topic == "opc" {
     ["opc", "one-person-company", "one person company", "one-person company"]
+  } else if topic.contains("llm") ||
+    topic.contains("large-language-model") ||
+    topic.contains("large language model") {
+    [
+      topic,
+      topic.replace(old="-", new=" ").to_string(),
+      "llm training",
+      "llm trained",
+      "llms are trained",
+      "large language model training",
+      "large language models are trained",
+      "large language model pre-training",
+      "large language model post-training",
+    ]
   } else {
     [topic, topic.replace(old="-", new=" ").to_string()]
   }
@@ -522,14 +536,35 @@ fn count_text_lines(text : String) -> Int {
 fn count_included_screened_sources(text : String) -> Int {
   let mut count = 0
   let mut in_included_section = false
+  let mut in_non_included_source_section = false
+  let mut pending_source_heading = false
   for raw in text.split("\n") {
     let line = raw.trim().to_string().to_lower()
     if line.has_prefix("## included") || line.has_prefix("### included") {
       in_included_section = true
+      in_non_included_source_section = false
+      pending_source_heading = false
       continue
     }
-    if line.has_prefix("## ") || line.has_prefix("### ") {
+    if line.has_prefix("## ") {
       in_included_section = false
+      in_non_included_source_section = line.contains("excluded") ||
+        line.contains("rejected") ||
+        line.contains("blocked") ||
+        line.contains("discovery") ||
+        line.contains("candidate")
+      pending_source_heading = false
+    }
+    if in_included_section && is_source_entry_heading(line) {
+      count += 1
+      pending_source_heading = false
+      continue
+    }
+    if !in_included_section &&
+      !in_non_included_source_section &&
+      is_source_entry_heading(line) {
+      pending_source_heading = true
+      continue
     }
     if is_substantive_included_source_line(line) ||
       (
@@ -537,9 +572,27 @@ fn count_included_screened_sources(text : String) -> Int {
         is_substantive_source_table_row_without_decision(line)
       ) {
       count += 1
+      pending_source_heading = false
+      continue
+    }
+    if pending_source_heading &&
+      line.has_prefix("- decision:") &&
+      line.contains("include") &&
+      !line.contains("exclude") &&
+      !line.contains("discovery_only") {
+      count += 1
+      pending_source_heading = false
     }
   }
   count
+}
+
+///|
+fn is_source_entry_heading(line : String) -> Bool {
+  if !(line.has_prefix("### w") || line.has_prefix("### l")) {
+    return false
+  }
+  !is_discovery_or_index_source_line(line)
 }
 
 ///|
@@ -773,7 +826,7 @@ async fn has_research_source_marker(root : String) -> Bool {
 }
 
 ///|
-fn queue_research_quality_gate(
+async fn queue_research_quality_gate(
   state : @core.TownState,
   book_id : String,
   task_ids : Array[String],
@@ -782,14 +835,23 @@ fn queue_research_quality_gate(
   let gap_summary = gaps.join("; ")
   let detail = "Research quality gate failed for \{book_id}: \{gap_summary}"
   let mut marked = 0
+  write_research_quality_review_trigger_for_state(
+    state, book_id, gaps, "post-run quality gate",
+  )
   for task_id in task_ids {
     match @core.find_execution(state, task_id) {
       Some(execution) =>
         if execution.status is @core.TaskExecutionStatus::Completed {
+          let retry_tick = if execution.attempt < 3 {
+            Some(supervision_tick(state))
+          } else {
+            None
+          }
           let updated = copy_execution_with(
             execution,
             status=@core.TaskExecutionStatus::ReviewQueued,
-            summary="\{execution.summary} / quality_gate_failed=\{gaps.length()}",
+            summary="\{execution.summary} / quality_gate_failed=\{gaps.length()} / auto_retry=\{retry_tick != None}",
+            next_retry_tick=retry_tick,
           )
           state.replace_execution(updated)
           state.replace_task(task_for_supervision(state, updated))
@@ -803,10 +865,34 @@ fn queue_research_quality_gate(
     @core.TownEvent::new(
       id="event-quality-\{book_id}",
       kind="review",
-      detail="\{detail}; mayor marked \{marked} task(s) as review-queued.",
+      detail="\{detail}; mayor marked \{marked} task(s) as review-queued and scheduled in-place repair retries when attempts remain.",
       related_book_id=Some(book_id),
     ),
   )
+}
+
+///|
+async fn write_research_quality_review_trigger_for_state(
+  state : @core.TownState,
+  book_id : String,
+  quality_gaps : Array[String],
+  reason : String,
+) -> Unit {
+  for book in state.books {
+    if book.id != book_id {
+      continue
+    }
+    let entry = @moonbook.BookCatalogEntry::new(
+      id=book.id,
+      name=book.name,
+      purpose=book.purpose,
+      workspace_root=book.workspace_root,
+      memory_scope=book.memory_scope,
+      tags=book.tags,
+    )
+    write_research_quality_review_trigger(entry, quality_gaps, reason)
+    return
+  }
 }
 
 ///|

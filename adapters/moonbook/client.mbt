@@ -156,6 +156,42 @@ fn normalize_topic_id(topic : String) -> String {
 }
 
 ///|
+fn strip_research_attempt_suffix(topic : String) -> String {
+  let cleaned = topic.to_lower().trim().to_string()
+  let parts = cleaned.split("-").to_array()
+  if parts.length() < 2 {
+    return cleaned
+  }
+  let last = parts[parts.length() - 1].to_string()
+  if !(last.length() > 1 &&
+    last[0] == 'v' &&
+    string_is_digits(last[1:].to_string())) {
+    return cleaned
+  }
+  let builder = StringBuilder::new()
+  for index in 0..<(parts.length() - 1) {
+    if index > 0 {
+      builder.write_char('-')
+    }
+    builder.write_string(parts[index].to_string())
+  }
+  builder.to_string()
+}
+
+///|
+fn string_is_digits(text : String) -> Bool {
+  if text.is_empty() {
+    return false
+  }
+  for char in text {
+    if char < '0' || char > '9' {
+      return false
+    }
+  }
+  true
+}
+
+///|
 fn compact_topic_segment(text : String) -> String {
   let builder = StringBuilder::new()
   let mut last_dash = false
@@ -289,22 +325,54 @@ pub fn entry_for_explicit_research_book(
     None =>
       if book_id.has_prefix("research-") {
         let storage_topic = book_id[9:].to_string()
-        let goal_topic = research_topic_from_goal(goal).unwrap_or(storage_topic)
-        let normalized = normalize_topic_id(goal_topic)
-        let display = display_topic_name(normalized)
+        let stable_storage_topic = strip_research_attempt_suffix(storage_topic)
+        let goal_topic = research_topic_from_goal(goal)
+        let goal_topic_id = match goal_topic {
+          Some(topic) => normalize_topic_id(topic)
+          None => ""
+        }
+        let storage_topic_id = normalize_topic_id(stable_storage_topic)
+        let has_attempt_suffix = stable_storage_topic !=
+          storage_topic.to_lower().trim().to_string()
+        let book_topic_id = if has_attempt_suffix && !goal_topic_id.is_empty() {
+          goal_topic_id
+        } else {
+          storage_topic_id
+        }
+        if book_topic_id.is_empty() {
+          return None
+        }
+        let topic_id = if !goal_topic_id.is_empty() {
+          goal_topic_id
+        } else {
+          book_topic_id
+        }
+        let canonical_book_id = "research-\{book_topic_id}"
+        let display = display_topic_name(topic_id)
+        let purpose = if canonical_book_id == book_id {
+          "Isolated research wiki for \{display}, stored in \{canonical_book_id} for this topic."
+        } else {
+          "Isolated research wiki for \{display}; requested as \{book_id}, but stored in stable topic book \{canonical_book_id} so quality retries do not create v1/v2/v3 forks."
+        }
+        let tags = if canonical_book_id == book_id {
+          ["research", topic_id, "topic:\{topic_id}", "explicit-book"]
+        } else {
+          [
+            "research",
+            topic_id,
+            "topic:\{topic_id}",
+            "explicit-book",
+            "requested-book:\{book_id}",
+          ]
+        }
         Some(
           BookCatalogEntry::new(
-            id=book_id,
+            id=canonical_book_id,
             name="Moonbook / Research / \{display}",
-            purpose="Isolated research wiki for \{display}, stored in \{book_id} for this run.",
-            workspace_root=default_workspace_root(book_id),
+            purpose~,
+            workspace_root=default_workspace_root(canonical_book_id),
             memory_scope=@core.MemoryScope::BookPrivate,
-            tags=[
-              "research",
-              normalized,
-              "topic:\{normalized}",
-              "explicit-book",
-            ],
+            tags~,
             skills=["analysis", "synthesis", "memory", "review"],
           ),
         )
@@ -1377,7 +1445,7 @@ fn moontown_research_bootstrap_profile_json() -> String {
     "          \"output_contract\": \"moontown.research.source_expansion.v1\"", "        }",
     "      }", "    },", "    {", "      \"id\": \"research_bootstrap_report\",",
     "      \"title\": \"Synthesize evidence and write research reports\",", "      \"kind\": \"job.analysis\",",
-    "      \"prompt_template\": \"Execute the synthesis stage of the imported Moontown research bootstrap packet for ${proposal.title}. Start by reading raw/bootstrap/source-screen.md, raw/bootstrap/search-log.md, raw/bootstrap/tool-blockers.md, raw/bootstrap/research-question.md, raw/bootstrap/RESEARCH_REQUEST.md, raw/bootstrap/SOURCE_HINTS.md, optional raw/bootstrap/REFERENCE_SOURCE_HINTS.md, and optional raw/bootstrap/REFERENCE_STYLE.md. Do not load the full raw/bootstrap/REFERENCE_OUTPUT.md in this draft stage; use REFERENCE_STYLE.md for language, length class, and visual/table expectations when it exists. Read only the directly relevant synthesis/report/marketing SKILL.md files. Do not run new web discovery in this stage and do not ask for more input. Use the screened sources and blockers as the evidence boundary, even if the source set is thin. Treat reference output as a style, language, structure, length, candidate-route taxonomy, and visualization target only; do not copy its domain claims unless independently supported by screened sources for this topic. Treat reference source hints only as already-screened lead metadata; if a hinted source was not screened, it belongs in Evidence and Limits, not in claims. If no reference report exists, use `skills/research-report/SKILL.md` as the quality authority: for complex external, comparative, route-map, or technology research with six or more included sources, the draft should aim for a 12k-15k English-word deep dossier, not a short executive article. If the source base is too thin for that length, write the best honest draft and explicitly name which source classes prevent full depth. Write analysis, route mechanics, evidence interpretation, adoption logic, and limits. Write or revise raw/bootstrap/local-sources.md, raw/bootstrap/evidence-matrix.md, raw/bootstrap/synthesis-brief.md, raw/bootstrap/deep-report.md, and raw/bootstrap/marketing-brief.md. If evidence is weak, write a cautious report with explicit Evidence and Limits, missing-source blockers, and next research; do not stall waiting for stronger evidence. The report must be topic-correct, source-backed, thesis-first, evidence-limited, and governed by the loaded research skills. Do not reinterpret external domain topics as local repositories unless screened sources prove that meaning. Do not update wiki pages in this worker stage; raw artifacts are the handoff for MoonBook materialization. Return plain Markdown, not JSON; do not use fields named verdict, substeps, suggested_substeps, or needs_subplan. After the files are written, immediately return the artifact paths, source counts, blockers, report word count, report quality gaps if any, and whether the evidence is strong enough for MoonBook wiki materialization.\",",
+    "      \"prompt_template\": \"Execute the synthesis stage of the imported Moontown research bootstrap packet for ${proposal.title}. Start by reading raw/bootstrap/source-screen.md, raw/bootstrap/search-log.md, raw/bootstrap/tool-blockers.md, raw/bootstrap/research-question.md, raw/bootstrap/RESEARCH_REQUEST.md, raw/bootstrap/SOURCE_HINTS.md, optional raw/bootstrap/REFERENCE_SOURCE_HINTS.md, optional raw/bootstrap/REFERENCE_STYLE.md, and optional raw/bootstrap/QUALITY_REPAIR.md. Do not load the full raw/bootstrap/REFERENCE_OUTPUT.md in this draft stage; use REFERENCE_STYLE.md for language, length class, and visual/table expectations when it exists. Read only the directly relevant synthesis/report/marketing SKILL.md files. Do not run new web discovery in this stage and do not ask for more input. Use the screened sources and blockers as the evidence boundary, even if the source set is thin. Treat reference output as a style, language, structure, length, candidate-route taxonomy, and visualization target only; do not copy its domain claims unless independently supported by screened sources for this topic. Treat reference source hints only as already-screened lead metadata; if a hinted source was not screened, it belongs in Evidence and Limits, not in claims. If no reference report exists, use `skills/research-report/SKILL.md` as the quality authority: for complex external, comparative, route-map, or technology research with six or more included sources, the draft should aim for a 13k-15k English-word deep dossier, not a short executive article; 12k English words is only the acceptance floor, so aim above it to avoid near-miss drafts. If the source base is too thin for that length, write the best honest draft and explicitly name which source classes prevent full depth. Write analysis, route mechanics, evidence interpretation, adoption logic, and limits. Write or revise raw/bootstrap/local-sources.md, raw/bootstrap/evidence-matrix.md, raw/bootstrap/synthesis-brief.md, raw/bootstrap/deep-report.md, and raw/bootstrap/marketing-brief.md. If evidence is weak, write a cautious report with explicit Evidence and Limits, missing-source blockers, and next research; do not stall waiting for stronger evidence. The report must be topic-correct, source-backed, thesis-first, evidence-limited, and governed by the loaded research skills. Before returning, perform a tool-backed self-review of deep-report.md: count English words, section headings, included screened sources, tables, Mermaid blocks, topic correctness, and process-log leakage; if any fixable quality gap remains, revise the report in-place immediately instead of leaving the issue for the review stage. Do not reinterpret external domain topics as local repositories unless screened sources prove that meaning. Do not update wiki pages in this worker stage; raw artifacts are the handoff for MoonBook materialization. Return plain Markdown, not JSON; do not use fields named verdict, substeps, suggested_substeps, or needs_subplan. After the files are written and self-reviewed, immediately return the artifact paths, source counts, blockers, report word count, report quality gaps if any, and whether the evidence is strong enough for MoonBook wiki materialization.\",",
     "      \"metadata\": {", "        \"preferred_skills\": [", "          \"research-evidence-synthesis\",",
     "          \"research-report\",", "          \"wiki-marketing\"", "        ],",
     "        \"enable_tools\": true,", "        \"web_search\": false,", "        \"disable_adaptive\": true,",
@@ -1390,8 +1458,8 @@ fn moontown_research_bootstrap_profile_json() -> String {
     "          \"allow_workspace_write\": true,", "          \"allow_execution_tools\": true,",
     "          \"output_contract\": \"moontown.research.report.v1\"", "        }",
     "      }", "    },", "    {", "      \"id\": \"research_bootstrap_quality_repair\",",
-    "      \"title\": \"Self-review and expand research report to reference quality\",",
-    "      \"kind\": \"job.analysis\",", "      \"prompt_template\": \"Execute the final deep-research quality repair pass for ${proposal.title}. Read raw/bootstrap/source-screen.md, raw/bootstrap/evidence-matrix.md, raw/bootstrap/synthesis-brief.md, raw/bootstrap/deep-report.md, raw/bootstrap/marketing-brief.md, skills/research-report/SKILL.md, and optional raw/bootstrap/REFERENCE_STYLE.md. Use tools to count English word tokens, lines, sections, tables, Mermaid blocks, and included source rows. If raw/bootstrap/REFERENCE_OUTPUT.md exists, count its lines but do not load the full reference report unless REFERENCE_STYLE.md is insufficient. If no reference exists, do not ask for one; the skill is the quality contract. For complex external, comparative, route-map, or technology research with six or more included sources, revise raw/bootstrap/deep-report.md toward a 12k-15k English-word dossier with a hard floor of 12k words unless the source-screen explicitly records a source-depth blocker. If a long reference exists, also satisfy the reference line-count target. Expand only from screened evidence by adding mechanism analysis, route-by-route sections, source-reliability analysis, maturity/adoption filters, bottlenecks, scenarios, second-order implications, what would change the thesis, and explicit evidence limits. Do not add unsupported claims, do not copy reference facts, and do not hard-code topic facts outside screened evidence. Also revise raw/bootstrap/marketing-brief.md only if the report title or thesis changed. Return plain Markdown with before/after word counts, line counts, section count, source count, and remaining quality gaps.\",",
+    "      \"title\": \"Review gate and repair research report if needed\",", "      \"kind\": \"job.analysis\",",
+    "      \"prompt_template\": \"Execute the final deep-research review gate for ${proposal.title}. Read raw/bootstrap/source-screen.md, raw/bootstrap/evidence-matrix.md, raw/bootstrap/synthesis-brief.md, raw/bootstrap/deep-report.md, raw/bootstrap/marketing-brief.md, optional raw/bootstrap/QUALITY_REPAIR.md, skills/research-report/SKILL.md, and optional raw/bootstrap/REFERENCE_STYLE.md. Use tools to count English word tokens, lines, sections, tables, Mermaid blocks, and included source rows. If raw/bootstrap/REFERENCE_OUTPUT.md exists, count its lines but do not load the full reference report unless REFERENCE_STYLE.md is insufficient. If no reference exists, do not ask for one; the skill is the quality contract. First judge whether the report already passes; if it passes, record a no-op review with measured counts and do not rewrite for churn. If fixable gaps remain, repair in-place in raw/bootstrap/deep-report.md rather than creating v2/v3/v4 files or a new book. For complex external, comparative, route-map, or technology research with six or more included sources, revise raw/bootstrap/deep-report.md toward a 13k-15k English-word dossier with a hard acceptance floor of 12k words unless the source-screen explicitly records a source-depth blocker. Use the tool-counted word count, not visual length; if the count is below 13k and evidence exists, keep expanding from screened evidence until it is safely above 12k. If a long reference exists, also satisfy the reference line-count target. Expand only from screened evidence by adding mechanism analysis, route-by-route sections, source-reliability analysis, maturity/adoption filters, bottlenecks, scenarios, second-order implications, what would change the thesis, and explicit evidence limits. Do not add unsupported claims, do not copy reference facts, and do not hard-code topic facts outside screened evidence. Also revise raw/bootstrap/marketing-brief.md only if the report title or thesis changed. Return plain Markdown with before/after word counts, line counts, section count, source count, whether repair was needed, and remaining quality gaps.\",",
     "      \"metadata\": {", "        \"preferred_skills\": [", "          \"research-report\",",
     "          \"research-evidence-synthesis\"", "        ],", "        \"enable_tools\": true,",
     "        \"web_search\": false,", "        \"disable_adaptive\": true,", "        \"disable_waiting_for_input\": true,",

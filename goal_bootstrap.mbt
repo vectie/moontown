@@ -765,7 +765,9 @@ async fn research_bootstrap_plan(
     return { tasks: ordered, task_limit, bootstrap_active: false }
   }
   if !quality_gaps.is_empty() {
-    archive_research_bootstrap_for_repair(entry, quality_gaps)
+    write_research_quality_review_trigger(
+      entry, quality_gaps, "preflight quality gate",
+    )
   }
   let bootstrap_task = bootstrap_ingest_task(entry, goal)
   let planned = [
@@ -805,40 +807,33 @@ async fn research_goal_needs_bootstrap(
 }
 
 ///|
-async fn archive_research_bootstrap_for_repair(
+async fn write_research_quality_review_trigger(
   entry : @moonbook.BookCatalogEntry,
   quality_gaps : Array[String],
+  reason : String,
 ) -> Unit {
   guard entry.id.has_prefix("research-") else { return }
   let root = @moonbook.workspace_root(entry)
   let raw_root = "\{root}/raw/bootstrap"
-  let archive_id = quality_gaps
-    .join("|")
-    .hash()
-    .to_string()
-    .trim(chars="-")
-    .to_string()
-  let archive_dir = "\{raw_root}/archive/quality-repair-\{archive_id}"
-  ignore_checked_command("mkdir", ["-p", archive_dir])
-  for relative in research_bootstrap_repair_artifacts() {
-    let path = "\{root}/\{relative}"
-    if !@fs.exists(path) {
-      continue
-    }
-    let archived = "\{archive_dir}/\{path_basename(relative)}"
-    ignore_checked_command("cp", [path, archived])
-    ignore_checked_command("rm", ["-f", path])
-  }
+  ignore_checked_command("mkdir", ["-p", raw_root])
   write_text_file(
     "\{raw_root}/QUALITY_REPAIR.md",
     [
-      "# Quality Repair Trigger",
+      "# Research Review Trigger",
       "",
-      "Moontown archived stale generated bootstrap artifacts before relaunching research because the quality gate found these gaps:",
+      "Moontown queued an in-place review/repair pass for this stable research book.",
+      "",
+      "Reason: \{reason}",
+      "",
+      "Quality gaps:",
       "",
       ..quality_gaps.map(fn(gap) { "- \{gap}" }),
       "",
-      "The next bootstrap run must regenerate the raw research envelope from the current `RESEARCH_REQUEST.md`, `SOURCE_HINTS.md`, and loaded skills instead of completing from stale artifacts.",
+      "Rules:",
+      "- do not create a new v1/v2/v3/v4 book or alternate report file",
+      "- keep the current raw/bootstrap envelope as context",
+      "- revise `raw/bootstrap/deep-report.md` and companion artifacts in-place",
+      "- if a gap is not fixable from screened evidence, explain the blocker explicitly",
     ].join("\n"),
   )
 }
@@ -847,15 +842,6 @@ async fn archive_research_bootstrap_for_repair(
 async fn ignore_checked_command(command : String, args : Array[String]) -> Unit {
   let completed = @integration.run_checked(command, args) catch { _ => return }
   ignore(completed)
-}
-
-///|
-fn research_bootstrap_repair_artifacts() -> Array[String] {
-  [
-    "raw/bootstrap/research-question.md", "raw/bootstrap/search-log.md", "raw/bootstrap/source-screen.md",
-    "raw/bootstrap/local-sources.md", "raw/bootstrap/evidence-matrix.md", "raw/bootstrap/synthesis-brief.md",
-    "raw/bootstrap/deep-report.md", "raw/bootstrap/marketing-brief.md",
-  ]
 }
 
 ///|
