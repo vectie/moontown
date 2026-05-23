@@ -67,6 +67,60 @@ test "OPC research request rejects guessed local repo path" {
 }
 
 ///|
+test "generic external research topics are web-first and reference-aware" {
+  let entry = BookCatalogEntry::new(
+    id="research-euv-lithography-machine-new-advantages-and-supplements",
+    name="EUV lithography machine new advantages and supplements",
+    purpose="Research EUV lithography technology routes",
+    workspace_root="/tmp/research-euv",
+  )
+  let topic = research_topic_id(entry)
+  let request = research_request_text(entry).to_lower()
+  let hints = research_source_hints_text(entry).to_lower()
+  assert_true(is_external_domain_research_topic(topic))
+  assert_true(request.contains("new advantages or supplements are emerging"))
+  assert_true(request.contains("reference_style.md"))
+  assert_true(request.contains("reference_output.md"))
+  assert_true(hints.contains("reference_source_hints.md"))
+  assert_true(hints.contains("external domain research topic"))
+  assert_true(hints.contains("technology roadmap 2026"))
+  assert_true(hints.contains("optional reference style inputs"))
+  assert_true(request.contains("12k-15k english-word"))
+  assert_true(request.contains("source-class blocker"))
+  assert_true(request.contains("source-domain front-door discovery"))
+  assert_true(request.contains("command fallback attempts"))
+  assert_true(request.contains("execute_command"))
+  assert_true(
+    request.contains("fetch at least eight high-signal candidate pages"),
+  )
+  assert_true(research_reference_urls(topic).is_empty())
+  assert_true(research_local_paths(topic).is_empty())
+  assert_true(!hints.contains("github.com/vectie"))
+  assert_true(!hints.contains("/users/kq/workspace/euv"))
+}
+
+///|
+test "explicit research book id does not replace research topic" {
+  let entry = entry_for_explicit_research_book(
+    default_catalog(),
+    "research-euv-native-quality-v2",
+    "research euv lithography machine new advantages and supplements",
+  ).unwrap()
+  assert_eq(entry.id, "research-euv-native-quality-v2")
+  assert_eq(entry.tags, [
+    "research", "euv-lithography-machine-new-advantages-and-supplements", "topic:euv-lithography-machine-new-advantages-and-supplements",
+    "explicit-book",
+  ])
+  let request = research_request_text(entry).to_lower()
+  assert_true(
+    request.contains(
+      "topic: euv lithography machine new advantages and supplements",
+    ),
+  )
+  assert_true(!request.contains("topic: euv native-quality-v2"))
+}
+
+///|
 test "standing watch context hydration uses task prompt over bare goal" {
   let task = BookTask::new(
     id="standing-watch-opc-news-tick-1",
@@ -103,10 +157,29 @@ test "research bootstrap profile is direct MoonClaw execution" {
   assert_true(profile_text.contains("moontown_research_bootstrap_worker"))
   assert_true(profile_text.contains("\"role\": \"worker\""))
   assert_true(profile_text.contains("research_bootstrap_sources"))
+  assert_true(profile_text.contains("research_bootstrap_source_expansion"))
   assert_true(profile_text.contains("research_bootstrap_report"))
+  assert_true(profile_text.contains("research_bootstrap_quality_repair"))
   assert_true(profile_text.contains("Use native web_search first"))
+  assert_true(profile_text.contains("focused source-expansion stage"))
+  assert_true(profile_text.contains("REFERENCE_SOURCE_HINTS.md"))
+  assert_true(
+    profile_text.contains(
+      "Do not load the full reference report in this source-screening stage",
+    ),
+  )
+  assert_true(profile_text.contains("final deep-research quality repair pass"))
+  assert_true(profile_text.contains("Six included sources is the minimum"))
+  assert_true(profile_text.contains("ten to fourteen"))
+  assert_true(profile_text.contains("extract candidate result URLs"))
+  assert_true(profile_text.contains("12k-15k English-word"))
+  assert_true(profile_text.contains("hard floor of 12k words"))
+  assert_true(profile_text.contains("reference line-count target"))
+  assert_true(profile_text.contains("\"disable_adaptive\": true"))
   assert_true(profile_text.contains("\"web_search\": true"))
-  assert_true(profile_text.contains("\"retry_max_attempts\": 1"))
+  assert_true(profile_text.contains("\"retry_max_attempts\": 3"))
+  assert_true(profile_text.contains("\"retry_backoff_ms\": 4000"))
+  assert_true(profile_text.contains("\"timeout_ms\": 900000"))
   assert_true(profile_text.contains("\"best_effort_on_timeout\": true"))
   assert_true(profile_text.contains("curl -L --max-time 12"))
   assert_true(profile_text.contains("Return plain Markdown, not JSON"))

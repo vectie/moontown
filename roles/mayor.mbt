@@ -96,7 +96,8 @@ pub fn Mayor::plan_goal(
             lanes: [goal_lane(entry, goal, entry.id)],
           }
         None =>
-          match @moonbook.entry_for_book_id(catalog, book_id) {
+          match
+            @moonbook.entry_for_explicit_research_book(catalog, book_id, goal) {
             Some(entry) =>
               {
                 output_contract: "mayor.goal.decomposition.v1",

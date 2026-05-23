@@ -246,6 +246,7 @@ async fn execute_goal_book_task(
     prepared.packet_path,
     cwd=workspace_root,
     confirm=true,
+    run_inline=moontown_moonclaw_inline_enabled(),
   )
   let execution = match imported.run_id {
     Some(run_id) => ensure_run_execution(task.id, run_id, workspace_root)
@@ -322,6 +323,17 @@ fn local_wenyu_build_execution_record(
     requires_review=task.requires_review || task.kind == "code-patch",
     notify_town=true,
   )
+}
+
+///|
+fn moontown_moonclaw_inline_enabled() -> Bool {
+  match optional_env_text("MOONTOWN_MOONCLAW_INLINE") {
+    Some(value) => {
+      let lower = value.to_lower()
+      lower == "1" || lower == "true" || lower == "yes" || lower == "on"
+    }
+    None => false
+  }
 }
 
 ///|

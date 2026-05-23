@@ -23,6 +23,8 @@ pub fn default_workspace_root(String) -> String
 
 pub fn entry_for_book_id(Array[BookCatalogEntry], String) -> BookCatalogEntry?
 
+pub fn entry_for_explicit_research_book(Array[BookCatalogEntry], String, String) -> BookCatalogEntry?
+
 pub fn find_catalog_entry(Array[BookCatalogEntry], String) -> BookCatalogEntry?
 
 pub fn generated_site_index_path(BookCatalogEntry) -> String

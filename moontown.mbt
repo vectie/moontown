@@ -425,6 +425,7 @@ async fn live_execution_record_for_book_task(
     prepared.packet_path,
     cwd=entry.workspace_root,
     confirm=true,
+    run_inline=moontown_moonclaw_inline_enabled(),
   )
   let execution_command = match imported.run_id {
     Some(run_id) => {
@@ -432,6 +433,7 @@ async fn live_execution_record_for_book_task(
         task.id,
         run_id,
         cwd=entry.workspace_root,
+        detect_orphan=false,
       )
       if initial.status is @core.TaskExecutionStatus::RunConfirmed {
         Some(@moonclaw.run_confirmed_run(run_id, cwd=entry.workspace_root))

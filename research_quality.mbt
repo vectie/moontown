@@ -56,14 +56,16 @@ async fn research_content_quality_gaps(
   let overview_path = "\{root}/wiki/synthesis/overview.md"
   let search_log_path = "\{root}/raw/bootstrap/search-log.md"
   let source_screen_path = "\{root}/raw/bootstrap/source-screen.md"
+  let tool_blockers_path = "\{root}/raw/bootstrap/tool-blockers.md"
   let brief = read_optional_text(brief_path)
   let overview = read_optional_text(overview_path)
   let search_log = read_optional_text(search_log_path)
   let source_screen = read_optional_text(source_screen_path)
+  let tool_blockers = read_optional_text(tool_blockers_path)
   match brief {
     Some(text) => {
       let lower = text.to_lower()
-      if !lower.contains(topic) {
+      if !research_text_contains_topic(lower, topic) {
         gaps.push("synthesis brief is not lane-specific for `\{topic}`")
       }
       if lower.contains("require model/web enrichment") ||
@@ -100,15 +102,39 @@ async fn research_content_quality_gaps(
         !lower.contains("verified web evidence") {
         gaps.push("web candidates were listed but not fetched and screened")
       }
+      for gap in source_depth_quality_gaps(topic, text) {
+        gaps.push(gap)
+      }
+      for
+        gap in source_discovery_fallback_gaps(
+          topic,
+          search_log.unwrap_or(""),
+          text,
+          tool_blockers.unwrap_or(""),
+        ) {
+        gaps.push(gap)
+      }
     }
     None => ()
   }
   let deep_report_path = "\{root}/raw/bootstrap/deep-report.md"
   match read_optional_text(deep_report_path) {
-    Some(text) =>
+    Some(text) => {
       for gap in deep_report_quality_gaps(entry, text) {
         gaps.push(gap)
       }
+      for
+        gap in deep_report_word_count_gaps(
+          topic,
+          text,
+          source_screen.unwrap_or(""),
+        ) {
+        gaps.push(gap)
+      }
+      for gap in reference_report_length_gaps(root, text) {
+        gaps.push(gap)
+      }
+    }
     None => gaps.push("missing `raw/bootstrap/deep-report.md`")
   }
   for gap in research_wiki_materialization_gaps(entry, root, topic) {
@@ -128,10 +154,11 @@ fn deep_report_quality_gaps(
   let gaps : Array[String] = []
   let lower = report.to_lower()
   let topic = quality_topic_for_entry(entry)
-  if !lower.contains("deep research analysis") {
+  if !lower.contains("deep research analysis") &&
+    !report.contains("深度研究分析") {
     gaps.push("deep report title does not declare `Deep Research Analysis`")
   }
-  if !lower.contains(topic) {
+  if !research_text_contains_topic(lower, topic) {
     gaps.push("deep report is not lane-specific for `\{topic}`")
   }
   if is_external_quality_topic(topic) {
@@ -161,16 +188,121 @@ fn deep_report_quality_gaps(
 }
 
 ///|
+fn deep_report_word_count_gaps(
+  topic : String,
+  report : String,
+  source_screen : String,
+) -> Array[String] {
+  let gaps : Array[String] = []
+  guard is_external_quality_topic(topic) else { return gaps }
+  let included_sources = count_included_screened_sources(source_screen)
+  if included_sources < 6 {
+    return gaps
+  }
+  let word_count = count_english_word_tokens(report)
+  if word_count < 12000 {
+    gaps.push(
+      "deep report has \{word_count} English word tokens with \{included_sources} included screened sources; complex external research should target 12k-15k English words or record a source-depth blocker",
+    )
+  }
+  gaps
+}
+
+///|
+fn source_depth_quality_gaps(
+  topic : String,
+  source_screen : String,
+) -> Array[String] {
+  let gaps : Array[String] = []
+  guard is_external_quality_topic(topic) else { return gaps }
+  let included_sources = count_included_screened_sources(source_screen)
+  if included_sources < 6 {
+    gaps.push(
+      "source screen has only \{included_sources} included inspected sources; reference-grade external research needs at least six before a 12k-15k dossier can be considered clean",
+    )
+  }
+  gaps
+}
+
+///|
+fn source_discovery_fallback_gaps(
+  topic : String,
+  search_log : String,
+  source_screen : String,
+  tool_blockers : String,
+) -> Array[String] {
+  let gaps : Array[String] = []
+  guard is_external_quality_topic(topic) else { return gaps }
+  let included_sources = count_included_screened_sources(source_screen)
+  if included_sources >= 6 {
+    return gaps
+  }
+  let lower = "\{search_log}\n\{tool_blockers}".to_lower()
+  let weak_native_search = lower.contains("weak_search_page") ||
+    lower.contains("duckduckgo") ||
+    lower.contains("search-engine result") ||
+    lower.contains("search-engine page") ||
+    lower.contains("native `web_search`")
+  if !weak_native_search {
+    return gaps
+  }
+  let command_fallback_recorded = lower.contains("execute_command") ||
+    lower.contains("curl -l") ||
+    lower.contains("curl --") ||
+    lower.contains("fetched with curl") ||
+    lower.contains("command fallback attempts") ||
+    lower.contains("command-line attempts")
+  if !command_fallback_recorded {
+    gaps.push(
+      "source screen is below six included sources after weak native search, but search-log/tool-blockers do not record actual execute_command/curl fallback attempts",
+    )
+  }
+  gaps
+}
+
+///|
+async fn reference_report_length_gaps(
+  root : String,
+  report : String,
+) -> Array[String] {
+  let gaps : Array[String] = []
+  match read_optional_text("\{root}/raw/bootstrap/REFERENCE_OUTPUT.md") {
+    Some(reference) => {
+      let reference_lines = count_text_lines(reference)
+      let report_lines = count_text_lines(report)
+      if reference_lines >= 200 && report_lines * 10 < reference_lines * 6 {
+        gaps.push(
+          "deep report has \{report_lines} lines, far shorter than the \{reference_lines}-line reference output; expected at least 60% of reference length for reference-matched research",
+        )
+      }
+    }
+    None => ()
+  }
+  gaps
+}
+
+///|
 fn is_external_quality_topic(topic : String) -> Bool {
   match topic {
-    "opc" => true
-    _ => false
+    "moontown" | "moonbook" | "moonclaw" => false
+    _ => true
   }
 }
 
 ///|
 fn external_domain_report_gaps(topic : String, lower : String) -> Array[String] {
   let gaps : Array[String] = []
+  if lower.contains("github.com/vectie/\{topic}") ||
+    lower.contains("/workspace/\{topic}") {
+    gaps.push(
+      "external-domain report incorrectly treats the lane as a Vectie/local repository",
+    )
+  }
+  if lower.contains("moonbit package") || lower.contains("moon.mod.json") {
+    gaps.push(
+      "external-domain report incorrectly treats the lane as a MoonBit software package",
+    )
+  }
   if topic == "opc" {
     if lower.contains("vectie/opc") ||
       lower.contains("github.com/vectie/opc") ||
@@ -273,7 +405,10 @@ async fn research_generated_site_gaps(
     )
   }
   if !lower.contains("deep research") ||
-    !lower.contains("deep research analysis") ||
+    (
+      !lower.contains("deep research analysis") &&
+      !html.contains("深度研究分析")
+    ) ||
     !lower.contains("executive summary") ||
     !lower.contains("report-table") {
     gaps.push(
@@ -322,6 +457,9 @@ async fn research_site_entry_gaps(
 
 ///|
 fn projection_contains_topic(lower : String, topic : String) -> Bool {
+  if research_text_contains_topic(lower, topic) {
+    return true
+  }
   for topic_alias in topic_page_aliases(topic) {
     if lower.contains(topic_alias.to_lower()) {
       return true
@@ -331,12 +469,143 @@ fn projection_contains_topic(lower : String, topic : String) -> Bool {
 }
 
 ///|
+fn research_text_contains_topic(lower : String, topic : String) -> Bool {
+  for topic_alias in topic_page_aliases(topic) {
+    if lower.contains(topic_alias.to_lower()) {
+      return true
+    }
+  }
+  let normalized = topic.replace(old="-", new=" ").to_string()
+  let mut first_topic_word : String? = None
+  let mut hits = 0
+  for piece in normalized.split(" ") {
+    let word = piece.trim().to_string()
+    if first_topic_word is None && !word.is_empty() && word != "research" {
+      first_topic_word = Some(word)
+    }
+    if word.length() >= 4 && lower.contains(word.to_lower()) {
+      hits += 1
+    }
+  }
+  match first_topic_word {
+    Some(word) =>
+      if word.length() >= 3 && lower.contains(word.to_lower()) {
+        return true
+      }
+    None => ()
+  }
+  hits >= 2
+}
+
+///|
 fn topic_page_aliases(topic : String) -> Array[String] {
   if topic == "opc" {
     ["opc", "one-person-company", "one person company", "one-person company"]
   } else {
     [topic, topic.replace(old="-", new=" ").to_string()]
   }
+}
+
+///|
+fn count_text_lines(text : String) -> Int {
+  if text.is_empty() {
+    return 0
+  }
+  let mut count = 0
+  for _ in text.split("\n") {
+    count += 1
+  }
+  count
+}
+
+///|
+fn count_included_screened_sources(text : String) -> Int {
+  let mut count = 0
+  let mut in_included_section = false
+  for raw in text.split("\n") {
+    let line = raw.trim().to_string().to_lower()
+    if line.has_prefix("## included") || line.has_prefix("### included") {
+      in_included_section = true
+      continue
+    }
+    if line.has_prefix("## ") || line.has_prefix("### ") {
+      in_included_section = false
+    }
+    if is_substantive_included_source_line(line) ||
+      (
+        in_included_section &&
+        is_substantive_source_table_row_without_decision(line)
+      ) {
+      count += 1
+    }
+  }
+  count
+}
+
+///|
+fn is_substantive_included_source_line(line : String) -> Bool {
+  if !((line.has_prefix("| w") || line.has_prefix("| l")) &&
+    line.contains("| include")) {
+    return false
+  }
+  if is_discovery_or_index_source_line(line) {
+    return false
+  }
+  true
+}
+
+///|
+fn is_substantive_source_table_row_without_decision(line : String) -> Bool {
+  if !((line.has_prefix("| w") || line.has_prefix("| l")) && line.contains("|")) {
+    return false
+  }
+  if line.contains("---") || line.contains("source id") {
+    return false
+  }
+  !is_discovery_or_index_source_line(line)
+}
+
+///|
+fn is_discovery_or_index_source_line(line : String) -> Bool {
+  line.contains("/search?") ||
+  line.contains("search?") ||
+  line.contains("web primary/index") ||
+  line.contains("web research/index") ||
+  line.contains("web market/index") ||
+  line.contains("web independent/index") ||
+  line.contains("index page") ||
+  line.contains("search page") ||
+  line.contains("hub/index") ||
+  line.contains("discovery-oriented") ||
+  line.contains("discovery-heavy") ||
+  line.contains("discovery_only") ||
+  line.contains("discovery only") ||
+  line.contains("not claim evidence") ||
+  line.contains("not evidence")
+}
+
+///|
+fn count_english_word_tokens(text : String) -> Int {
+  let mut count = 0
+  let mut in_word = false
+  for char in text {
+    if is_english_alnum(char) {
+      if !in_word {
+        count += 1
+      }
+      in_word = true
+    } else {
+      in_word = false
+    }
+  }
+  count
+}
+
+///|
+fn is_english_alnum(char : Char) -> Bool {
+  (char >= 'a' && char <= 'z') ||
+  (char >= 'A' && char <= 'Z') ||
+  (char >= '0' && char <= '9')
 }
 
 ///|
@@ -411,6 +680,14 @@ async fn directory_has_topic_source_page(
 
 ///|
 fn quality_topic_for_entry(entry : @moonbook.BookCatalogEntry) -> String {
+  for tag in entry.tags {
+    if tag.has_prefix("topic:") {
+      let topic = tag[6:].to_string()
+      if !topic.is_empty() {
+        return topic
+      }
+    }
+  }
   if entry.id.has_prefix("research-") {
     entry.id.replace(old="research-", new="").to_lower()
   } else if entry.id.has_prefix("wenyu-") {

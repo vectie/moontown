@@ -128,7 +128,7 @@ pub fn parallel_research_entry(topic : String) -> BookCatalogEntry {
     purpose="Isolated research wiki for \{display}, managed by the mayor as one lane in a parallel town goal.",
     workspace_root=default_workspace_root("research-\{normalized}"),
     memory_scope=@core.MemoryScope::BookPrivate,
-    tags=["research", normalized, "parallel-lane"],
+    tags=["research", normalized, "topic:\{normalized}", "parallel-lane"],
     skills=["analysis", "synthesis", "memory", "review"],
   )
 }
@@ -151,8 +151,50 @@ fn normalize_topic_id(topic : String) -> String {
     "moonclaw" => "moonclaw"
     "finance" => "finance"
     "coding" => "coding"
-    _ => normalized.replace(old=" ", new="-")
+    _ => compact_topic_segment(normalized)
   }
+}
+
+///|
+fn compact_topic_segment(text : String) -> String {
+  let builder = StringBuilder::new()
+  let mut last_dash = false
+  for char in text.to_lower() {
+    if (char >= 'a' && char <= 'z') || (char >= '0' && char <= '9') {
+      builder.write_char(char)
+      last_dash = false
+    } else if !last_dash {
+      builder.write_char('-')
+      last_dash = true
+    }
+  }
+  builder.to_string().trim(chars="-").to_string()
+}
+
+///|
+fn research_topic_from_goal(goal : String) -> String? {
+  let trimmed = goal.trim().trim(chars=" .:;!?\"'`").to_string()
+  if trimmed.is_empty() {
+    return None
+  }
+  let lower = trimmed.to_lower()
+  let prefixes = [
+    "research about ", "research on ", "research the ", "research ", "study about ",
+    "study on ", "study the ", "study ", "survey about ", "survey on ", "survey the ",
+    "survey ", "compare about ", "compare on ", "compare the ", "compare ",
+  ]
+  for prefix in prefixes {
+    if lower.has_prefix(prefix) {
+      let topic = trimmed[prefix.length():]
+        .trim()
+        .trim(chars=" .:;!?\"'`")
+        .to_string()
+      if !topic.is_empty() {
+        return Some(topic)
+      }
+    }
+  }
+  Some(trimmed)
 }
 
 ///|
@@ -164,8 +206,21 @@ fn display_topic_name(topic : String) -> String {
     "finance" => "Finance"
     "coding" => "Coding"
     "opc" => "One Person Company (OPC)"
-    _ => topic
+    _ => topic_id_to_words(topic)
   }
+}
+
+///|
+fn topic_id_to_words(topic : String) -> String {
+  let builder = StringBuilder::new()
+  for char in topic {
+    if char == '-' {
+      builder.write_char(' ')
+    } else {
+      builder.write_char(char)
+    }
+  }
+  builder.to_string()
 }
 
 ///|
@@ -217,6 +272,42 @@ pub fn entry_for_book_id(
         } else {
           None
         }
+      } else {
+        None
+      }
+  }
+}
+
+///|
+pub fn entry_for_explicit_research_book(
+  catalog : Array[BookCatalogEntry],
+  book_id : String,
+  goal : String,
+) -> BookCatalogEntry? {
+  match find_catalog_entry(catalog, book_id) {
+    Some(entry) => Some(entry)
+    None =>
+      if book_id.has_prefix("research-") {
+        let storage_topic = book_id[9:].to_string()
+        let goal_topic = research_topic_from_goal(goal).unwrap_or(storage_topic)
+        let normalized = normalize_topic_id(goal_topic)
+        let display = display_topic_name(normalized)
+        Some(
+          BookCatalogEntry::new(
+            id=book_id,
+            name="Moonbook / Research / \{display}",
+            purpose="Isolated research wiki for \{display}, stored in \{book_id} for this run.",
+            workspace_root=default_workspace_root(book_id),
+            memory_scope=@core.MemoryScope::BookPrivate,
+            tags=[
+              "research",
+              normalized,
+              "topic:\{normalized}",
+              "explicit-book",
+            ],
+            skills=["analysis", "synthesis", "memory", "review"],
+          ),
+        )
       } else {
         None
       }
@@ -989,7 +1080,8 @@ fn research_bootstrap_worker_context_bundle(
     "skills/research-report/SKILL.md", "skills/wiki-marketing/SKILL.md",
   ]
   let context_pages = [
-    "raw/bootstrap/RESEARCH_REQUEST.md", "raw/bootstrap/SOURCE_HINTS.md",
+    "raw/bootstrap/RESEARCH_REQUEST.md", "raw/bootstrap/SOURCE_HINTS.md", "raw/bootstrap/REFERENCE_STYLE.md",
+    "raw/bootstrap/REFERENCE_OUTPUT.md", "raw/bootstrap/REFERENCE_SOURCE_HINTS.md",
   ]
   {
     book_id: bundle.book_id,
@@ -1030,6 +1122,8 @@ fn research_bootstrap_worker_prompt(entry : BookCatalogEntry) -> String {
     "Do not materialize durable `wiki/*` pages in the worker stage. MoonBook will materialize wiki pages from the raw evidence envelope.",
     "Do not treat \{display} as a local repository unless screened sources prove that interpretation.",
     "Do not hard-code final research claims. Let the LLM choose sources and claims from screened evidence.",
+    "If `raw/bootstrap/REFERENCE_STYLE.md` or `raw/bootstrap/REFERENCE_OUTPUT.md` exists, use it only as a style, length, language, and quality target. Do not import its claims as evidence for this topic.",
+    "If `raw/bootstrap/REFERENCE_SOURCE_HINTS.md` exists, treat it as a candidate lead sheet only. Fetch, screen, accept, reject, or mark blocked; never cite it as evidence by itself.",
   ].join("\n")
 }
 
@@ -1144,6 +1238,10 @@ async fn ensure_moontown_research_pack(
     research_evidence_synthesis_skill_text(entry),
   )
   write_workspace_text(
+    "\{root}/skills/research-report/SKILL.md",
+    research_report_skill_text(entry),
+  )
+  write_workspace_text(
     "\{root}/skills/repo-source-materialize/SKILL.md",
     repo_source_materialize_skill_text(entry),
   )
@@ -1251,33 +1349,64 @@ fn moontown_research_bootstrap_profile_json() -> String {
     "  \"match\": {", "    \"all\": [\"research\"],", "    \"any\": [\"bootstrap\", \"source\", \"web\", \"evidence\", \"report\"]",
     "  },", "  \"steps\": [", "    {", "      \"id\": \"research_bootstrap_sources\",",
     "      \"title\": \"Run bounded web discovery and source screening\",", "      \"kind\": \"job.analysis\",",
-    "      \"prompt_template\": \"Execute the source-screening stage of the imported Moontown research bootstrap packet for ${proposal.title}. Read raw/bootstrap/RESEARCH_REQUEST.md, raw/bootstrap/SOURCE_HINTS.md, raw/bootstrap/research-question.md, raw/bootstrap/search-log.md, and only the relevant source-screening SKILL.md files. Use native web_search first when it is available, then use web_fetch on high-signal candidate pages. If a native web tool returns {bad request}, retry once with a simpler query or URL. If native web tools are unavailable, blocked, or return only weak search pages, fall back to bounded execute_command discovery such as curl -L --max-time 12 against LLM-chosen search-result pages and selected source URLs. First update raw/bootstrap/search-log.md with a source-screening plan, then immediately run the web-discovery tool path; do not spend a long model turn planning. Keep this pass bounded: stop searching after enough inspected evidence for a cautious synthesis, after three explicit blockers, or after six web/discovery attempts. Use high-signal URLs from SOURCE_HINTS.md as leads, but let the LLM choose which sources to include, exclude, or mark blocked. Use search pages only for discovery, never as claim evidence. Do not inspect local implementation files unless SOURCE_HINTS.md explicitly permits it. Write or revise raw/bootstrap/search-log.md, raw/bootstrap/source-screen.md, and raw/bootstrap/tool-blockers.md. Do not ask for more input; weak coverage is a blocker to record, not a reason to stall. Return plain Markdown, not JSON; do not use fields named verdict, substeps, suggested_substeps, or needs_subplan. After these files are written, immediately return a concise completion summary with source counts, rejected sources, blockers, and whether synthesis has enough evidence.\",",
+    "      \"prompt_template\": \"Execute the source-screening stage of the imported Moontown research bootstrap packet for ${proposal.title}. Read raw/bootstrap/RESEARCH_REQUEST.md, raw/bootstrap/SOURCE_HINTS.md, raw/bootstrap/research-question.md, raw/bootstrap/search-log.md, optional raw/bootstrap/REFERENCE_STYLE.md, optional raw/bootstrap/REFERENCE_SOURCE_HINTS.md, and only the relevant source-screening SKILL.md files. Do not load the full reference report in this source-screening stage; REFERENCE_STYLE.md already contains the style target and line count. Reference output is not evidence, but its route names, comparison axes, diagrams, and section taxonomy may be used as hypothesis/search leads only when they are summarized by REFERENCE_STYLE.md or SOURCE_HINTS.md and relevant to the user objective. Reference source hints are not evidence; they are candidate leads that must be fetched, screened, accepted, rejected, or marked blocked. Verify every adopted route independently. Use native web_search first when it is available, then use web_fetch on high-signal candidate pages. If a native web tool returns {bad request}, retry once with a simpler query or URL. If native web tools are unavailable, blocked, or return only weak search pages, fall back to bounded execute_command discovery. Weak native search means search-engine result URLs, redirect shells, snippets without source URLs, generic index pages, or fewer than six included inspected sources after native discovery. In fallback mode, you must call execute_command with bounded curl/front-door commands before closing source screening below six included sources. Fetch the search-result page itself, extract candidate result URLs and titles, then fetch selected result URLs; do not skip directly to guessed URLs unless search-result extraction is blocked. If search-result extraction is blocked, pivot to source-class front-door discovery: choose authoritative organizations for the topic, fetch their home pages, robots.txt, sitemap files, visible search/index pages, and navigation pages, harvest candidate links with topic keywords, then fetch selected candidates. When any front-door or sitemap step harvests candidate content URLs, convert the harvest into inspection: fetch at least eight high-signal candidate pages, or all harvested candidate pages if fewer than eight, unless each unfetched class is explicitly blocked. Do not stop at a sitemap/index harvest; harvested URLs are only leads until fetched and screened. In fallback/front-door mode, write a Command Fallback Attempts table with each command target, source class, harvested candidate count, fetched candidate count, and result. Do not treat the first guessed 404 URL as exhausting a source class. Use commands such as curl -L --max-time 12 against LLM-chosen search-result pages, source-domain front doors, robots.txt, sitemaps, index pages, and selected source URLs. First update raw/bootstrap/search-log.md with a source-screening plan, then immediately run the web-discovery tool path; do not spend a long model turn planning. Keep this pass bounded but serious: for comparative, route-map, or technology research, try to screen ten to fourteen accessible high-signal sources across primary, independent, research-institution, market/adoption, critique/risk, and primary-paper/source-data classes before synthesis. Six included sources is the minimum for a cautious report; ten or more is the preferred source base for a 12k-15k word dossier. Search pages, site search pages, hub pages, and index pages are discovery artifacts, not included evidence sources, unless the page itself contains substantive inspected claims; normally mark them discovery_only/candidate rather than include. Do not stop below six included inspected evidence sources merely because generic search pages are blocked; exhaust source-class front-door discovery and direct source-domain link harvesting first. Only proceed below six after twenty-four web/discovery attempts, recorded command fallback attempts, candidate-harvest conversion attempts, and an explicit source-depth blocker with ready_for_12k_dossier=false. Use high-signal URLs from SOURCE_HINTS.md and REFERENCE_SOURCE_HINTS.md as leads, but let the LLM choose which sources to include, exclude, or mark blocked. Use search pages only for discovery, never as claim evidence. Do not inspect local implementation files unless SOURCE_HINTS.md explicitly permits it. Write or revise raw/bootstrap/search-log.md, raw/bootstrap/source-screen.md, and raw/bootstrap/tool-blockers.md. Do not ask for more input; weak coverage is a blocker to record, not a reason to stall. If something feels missing, write the missing source class into tool-blockers.md and complete the best research pass from available screened leads; never return a missing-input/adaptive-planning response. Return plain Markdown, not JSON; do not use fields named verdict, substeps, suggested_substeps, or needs_subplan. After these files are written, immediately return a concise completion summary with source counts, rejected sources, blockers, ready_for_12k_dossier, and whether synthesis has enough evidence.\",",
     "      \"metadata\": {", "        \"preferred_skills\": [", "          \"web-first-research\",",
     "          \"source-diarize\"", "        ],", "        \"enable_tools\": true,",
-    "        \"web_search\": true,", "        \"disable_waiting_for_input\": true,",
+    "        \"web_search\": true,", "        \"disable_adaptive\": true,", "        \"disable_waiting_for_input\": true,",
     "        \"best_effort_on_missing_input\": true,", "        \"best_effort_on_timeout\": true,",
-    "        \"retry_max_attempts\": 1,", "        \"timeout_ms\": 300000,", "        \"board_lane\": \"Bootstrap\",",
+    "        \"retry_max_attempts\": 3,", "        \"retry_backoff_ms\": 4000,",
+    "        \"timeout_ms\": 900000,", "        \"board_lane\": \"Bootstrap\",",
     "        \"board_order\": 0,", "        \"role_runtime\": {", "          \"planning_layer\": \"execution\",",
     "          \"runtime_mode\": \"executor\",", "          \"tool_access\": \"full\",",
     "          \"memory_scope\": \"workspace\",", "          \"allow_delegate\": false,",
     "          \"allow_workspace_write\": true,", "          \"allow_execution_tools\": true,",
     "          \"output_contract\": \"moontown.research.sources.v1\"", "        }",
-    "      }", "    },", "    {", "      \"id\": \"research_bootstrap_report\",",
-    "      \"title\": \"Synthesize evidence and write research reports\",", "      \"kind\": \"job.analysis\",",
-    "      \"prompt_template\": \"Execute the synthesis stage of the imported Moontown research bootstrap packet for ${proposal.title}. Start by reading raw/bootstrap/source-screen.md, raw/bootstrap/search-log.md, raw/bootstrap/tool-blockers.md, raw/bootstrap/research-question.md, raw/bootstrap/RESEARCH_REQUEST.md, and raw/bootstrap/SOURCE_HINTS.md. Read only the directly relevant synthesis/report/marketing SKILL.md files. Do not run new web discovery in this stage and do not ask for more input. Use the screened sources and blockers as the evidence boundary, even if the source set is thin. Write or revise raw/bootstrap/local-sources.md, raw/bootstrap/evidence-matrix.md, raw/bootstrap/synthesis-brief.md, raw/bootstrap/deep-report.md, and raw/bootstrap/marketing-brief.md. If evidence is weak, write a cautious report with explicit Evidence and Limits, missing-source blockers, and next research; do not stall waiting for stronger evidence. The report must be topic-correct, source-backed, thesis-first, evidence-limited, and governed by the loaded research skills. Do not reinterpret external domain topics as local repositories unless screened sources prove that meaning. Do not update wiki pages in this worker stage; raw artifacts are the handoff for MoonBook materialization. Return plain Markdown, not JSON; do not use fields named verdict, substeps, suggested_substeps, or needs_subplan. After the files are written, immediately return the artifact paths, source counts, blockers, report quality gaps if any, and whether the evidence is strong enough for MoonBook wiki materialization.\",",
-    "      \"metadata\": {", "        \"preferred_skills\": [", "          \"research-evidence-synthesis\",",
-    "          \"research-report\",", "          \"wiki-marketing\"", "        ],",
-    "        \"enable_tools\": true,", "        \"web_search\": false,", "        \"disable_waiting_for_input\": true,",
+    "      }", "    },", "    {", "      \"id\": \"research_bootstrap_source_expansion\",",
+    "      \"title\": \"Expand weak source screens with command fallback\",", "      \"kind\": \"job.analysis\",",
+    "      \"prompt_template\": \"Execute the focused source-expansion stage of the imported Moontown research bootstrap packet for ${proposal.title}. Start by reading raw/bootstrap/RESEARCH_REQUEST.md, raw/bootstrap/search-log.md, raw/bootstrap/source-screen.md, raw/bootstrap/tool-blockers.md, raw/bootstrap/SOURCE_HINTS.md, and skills/web-first-research/SKILL.md. This step exists only to fix thin or weak source screens; do not write the final report. If source-screen.md already has six or more included inspected evidence sources, verify the count, add a short no-op note to search-log.md, and finish. Otherwise, perform command-line fallback and source-domain front-door discovery now. You must call execute_command with bounded curl commands before returning when native search was weak. Fetch search-result pages when useful; if search pages block extraction, fetch source-domain front doors, robots.txt, sitemaps, and selected candidate content URLs. When sitemaps or front doors harvest candidate content URLs, fetch at least eight high-signal candidate pages, or all harvested candidates when fewer than eight, unless the domain blocks access. Convert fetched content pages into source-screen rows with include, exclude, discovery_only, or blocked decisions. Search/index/hub pages and sitemaps are not evidence unless they contain substantive inspected claims. Revise raw/bootstrap/search-log.md with Command Fallback Attempts and harvested/fetched counts. Revise raw/bootstrap/source-screen.md with accurate included_source_count and ready_for_12k_dossier. Revise raw/bootstrap/tool-blockers.md with exact blocked source classes. If you still cannot reach six included sources after command fallback and candidate conversion, record why; do not invent claims and do not ask for input. Return plain Markdown with included source count, command fallback count, fetched candidate count, blockers, and whether the next report step may target 12k-15k words.\",",
+    "      \"metadata\": {", "        \"preferred_skills\": [", "          \"web-first-research\",",
+    "          \"source-diarize\"", "        ],", "        \"enable_tools\": true,",
+    "        \"web_search\": true,", "        \"disable_adaptive\": true,", "        \"disable_waiting_for_input\": true,",
     "        \"best_effort_on_missing_input\": true,", "        \"best_effort_on_timeout\": true,",
-    "        \"retry_max_attempts\": 1,", "        \"timeout_ms\": 240000,", "        \"board_lane\": \"Bootstrap\",",
+    "        \"retry_max_attempts\": 2,", "        \"retry_backoff_ms\": 4000,",
+    "        \"timeout_ms\": 900000,", "        \"board_lane\": \"Bootstrap\",",
     "        \"board_order\": 1,", "        \"role_runtime\": {", "          \"planning_layer\": \"execution\",",
     "          \"runtime_mode\": \"executor\",", "          \"tool_access\": \"full\",",
     "          \"memory_scope\": \"workspace\",", "          \"allow_delegate\": false,",
     "          \"allow_workspace_write\": true,", "          \"allow_execution_tools\": true,",
+    "          \"output_contract\": \"moontown.research.source_expansion.v1\"", "        }",
+    "      }", "    },", "    {", "      \"id\": \"research_bootstrap_report\",",
+    "      \"title\": \"Synthesize evidence and write research reports\",", "      \"kind\": \"job.analysis\",",
+    "      \"prompt_template\": \"Execute the synthesis stage of the imported Moontown research bootstrap packet for ${proposal.title}. Start by reading raw/bootstrap/source-screen.md, raw/bootstrap/search-log.md, raw/bootstrap/tool-blockers.md, raw/bootstrap/research-question.md, raw/bootstrap/RESEARCH_REQUEST.md, raw/bootstrap/SOURCE_HINTS.md, optional raw/bootstrap/REFERENCE_SOURCE_HINTS.md, and optional raw/bootstrap/REFERENCE_STYLE.md. Do not load the full raw/bootstrap/REFERENCE_OUTPUT.md in this draft stage; use REFERENCE_STYLE.md for language, length class, and visual/table expectations when it exists. Read only the directly relevant synthesis/report/marketing SKILL.md files. Do not run new web discovery in this stage and do not ask for more input. Use the screened sources and blockers as the evidence boundary, even if the source set is thin. Treat reference output as a style, language, structure, length, candidate-route taxonomy, and visualization target only; do not copy its domain claims unless independently supported by screened sources for this topic. Treat reference source hints only as already-screened lead metadata; if a hinted source was not screened, it belongs in Evidence and Limits, not in claims. If no reference report exists, use `skills/research-report/SKILL.md` as the quality authority: for complex external, comparative, route-map, or technology research with six or more included sources, the draft should aim for a 12k-15k English-word deep dossier, not a short executive article. If the source base is too thin for that length, write the best honest draft and explicitly name which source classes prevent full depth. Write analysis, route mechanics, evidence interpretation, adoption logic, and limits. Write or revise raw/bootstrap/local-sources.md, raw/bootstrap/evidence-matrix.md, raw/bootstrap/synthesis-brief.md, raw/bootstrap/deep-report.md, and raw/bootstrap/marketing-brief.md. If evidence is weak, write a cautious report with explicit Evidence and Limits, missing-source blockers, and next research; do not stall waiting for stronger evidence. The report must be topic-correct, source-backed, thesis-first, evidence-limited, and governed by the loaded research skills. Do not reinterpret external domain topics as local repositories unless screened sources prove that meaning. Do not update wiki pages in this worker stage; raw artifacts are the handoff for MoonBook materialization. Return plain Markdown, not JSON; do not use fields named verdict, substeps, suggested_substeps, or needs_subplan. After the files are written, immediately return the artifact paths, source counts, blockers, report word count, report quality gaps if any, and whether the evidence is strong enough for MoonBook wiki materialization.\",",
+    "      \"metadata\": {", "        \"preferred_skills\": [", "          \"research-evidence-synthesis\",",
+    "          \"research-report\",", "          \"wiki-marketing\"", "        ],",
+    "        \"enable_tools\": true,", "        \"web_search\": false,", "        \"disable_adaptive\": true,",
+    "        \"disable_waiting_for_input\": true,", "        \"best_effort_on_missing_input\": true,",
+    "        \"best_effort_on_timeout\": true,", "        \"retry_max_attempts\": 2,",
+    "        \"retry_backoff_ms\": 4000,", "        \"timeout_ms\": 900000,", "        \"board_lane\": \"Bootstrap\",",
+    "        \"board_order\": 2,", "        \"role_runtime\": {", "          \"planning_layer\": \"execution\",",
+    "          \"runtime_mode\": \"executor\",", "          \"tool_access\": \"full\",",
+    "          \"memory_scope\": \"workspace\",", "          \"allow_delegate\": false,",
+    "          \"allow_workspace_write\": true,", "          \"allow_execution_tools\": true,",
     "          \"output_contract\": \"moontown.research.report.v1\"", "        }",
+    "      }", "    },", "    {", "      \"id\": \"research_bootstrap_quality_repair\",",
+    "      \"title\": \"Self-review and expand research report to reference quality\",",
+    "      \"kind\": \"job.analysis\",", "      \"prompt_template\": \"Execute the final deep-research quality repair pass for ${proposal.title}. Read raw/bootstrap/source-screen.md, raw/bootstrap/evidence-matrix.md, raw/bootstrap/synthesis-brief.md, raw/bootstrap/deep-report.md, raw/bootstrap/marketing-brief.md, skills/research-report/SKILL.md, and optional raw/bootstrap/REFERENCE_STYLE.md. Use tools to count English word tokens, lines, sections, tables, Mermaid blocks, and included source rows. If raw/bootstrap/REFERENCE_OUTPUT.md exists, count its lines but do not load the full reference report unless REFERENCE_STYLE.md is insufficient. If no reference exists, do not ask for one; the skill is the quality contract. For complex external, comparative, route-map, or technology research with six or more included sources, revise raw/bootstrap/deep-report.md toward a 12k-15k English-word dossier with a hard floor of 12k words unless the source-screen explicitly records a source-depth blocker. If a long reference exists, also satisfy the reference line-count target. Expand only from screened evidence by adding mechanism analysis, route-by-route sections, source-reliability analysis, maturity/adoption filters, bottlenecks, scenarios, second-order implications, what would change the thesis, and explicit evidence limits. Do not add unsupported claims, do not copy reference facts, and do not hard-code topic facts outside screened evidence. Also revise raw/bootstrap/marketing-brief.md only if the report title or thesis changed. Return plain Markdown with before/after word counts, line counts, section count, source count, and remaining quality gaps.\",",
+    "      \"metadata\": {", "        \"preferred_skills\": [", "          \"research-report\",",
+    "          \"research-evidence-synthesis\"", "        ],", "        \"enable_tools\": true,",
+    "        \"web_search\": false,", "        \"disable_adaptive\": true,", "        \"disable_waiting_for_input\": true,",
+    "        \"best_effort_on_missing_input\": true,", "        \"best_effort_on_timeout\": true,",
+    "        \"retry_max_attempts\": 2,", "        \"retry_backoff_ms\": 4000,",
+    "        \"timeout_ms\": 900000,", "        \"board_lane\": \"Bootstrap\",",
+    "        \"board_order\": 3,", "        \"role_runtime\": {", "          \"planning_layer\": \"execution\",",
+    "          \"runtime_mode\": \"executor\",", "          \"tool_access\": \"full\",",
+    "          \"memory_scope\": \"workspace\",", "          \"allow_delegate\": false,",
+    "          \"allow_workspace_write\": true,", "          \"allow_execution_tools\": true,",
+    "          \"output_contract\": \"moontown.research.quality_repair.v1\"", "        }",
     "      }", "    }", "  ],", "  \"metadata\": {", "    \"profile_metadata\": {",
-    "      \"disable_waiting_for_input\": true,", "      \"best_effort_on_missing_input\": true",
-    "    },", "    \"worker_role\": \"research_bootstrap\"", "  }", "}",
+    "      \"disable_adaptive\": true,", "      \"disable_waiting_for_input\": true,",
+    "      \"best_effort_on_missing_input\": true", "    },", "    \"worker_role\": \"research_bootstrap\"",
+    "  }", "}",
   ].join("\n")
 }
 
@@ -1305,6 +1434,8 @@ fn research_request_text(entry : BookCatalogEntry) -> String {
     "- Mode: \{mode}",
     "- Research question: \{question}",
     "- Quality bar: every major claim must trace to either a fetched web source, a local file path, or an explicit blocker explaining why the source could not be inspected.",
+    "- Depth target: for complex external, comparative, route-map, or technology research, `raw/bootstrap/deep-report.md` should target 12k-15k English words when the screened source base has enough evidence. If the source base cannot support that depth, write the exact source-class blocker rather than padding.",
+    "- Reference style: if `raw/bootstrap/REFERENCE_STYLE.md` or `raw/bootstrap/REFERENCE_OUTPUT.md` exists, match its depth, length, section discipline, language, tables, and visualization standard. Treat it as a style target and candidate search-taxonomy source only, not evidence for \{display}.",
     "- Required MoonClaw worker outputs:",
     "  - `raw/bootstrap/research-question.md`",
     "  - `raw/bootstrap/search-log.md`",
@@ -1324,22 +1455,28 @@ fn research_request_text(entry : BookCatalogEntry) -> String {
     "## Execution Order",
     "",
     "1. Write `raw/bootstrap/research-question.md` with scope, inclusion criteria, exclusion criteria, keywords, and known source classes.",
-    "2. Run at least three targeted web-discovery attempts before local file discovery. Use native `web_search` when available; otherwise use bounded command-line discovery such as `curl -L --max-time 12` against LLM-chosen search pages and candidate URLs.",
+    "2. Run at least three targeted web-discovery attempts before local file discovery. Use native `web_search` when available; if it returns only weak search pages, redirect shells, or fewer than six included inspected sources, use bounded command-line discovery such as `curl -L --max-time 12` against LLM-chosen search pages and candidate URLs before closing the source-screening stage.",
+    "   - If native search only returns search-engine pages, fetch those result pages with `execute_command`/`curl` when native fetch cannot extract results, extract result URLs and titles, and then inspect selected result URLs before guessing direct source URLs.",
+    "   - If search-result extraction is blocked, switch to source-domain front-door discovery: choose authoritative organizations for each source class, fetch home pages, robots/sitemaps, on-site search/index pages, and navigation pages, harvest candidate links, then fetch selected pages.",
+    "   - Record a `Command Fallback Attempts` table in `raw/bootstrap/search-log.md` whenever native search is weak and the source screen remains below six included inspected sources.",
+    "   - If sitemaps or front-door pages harvest candidate content URLs, fetch at least eight high-signal candidate pages, or all harvested candidate pages when fewer than eight, before declaring source depth blocked.",
+    "   - Do not treat one guessed 404 as a failed source class. A source class is only exhausted after front-door discovery and bounded link harvesting fail.",
     web_priority,
     "4. Write `raw/bootstrap/search-log.md` with query strings, result counts if available, selected URLs, rejected URLs, and the reason for each decision.",
-    "5. Write `raw/bootstrap/source-screen.md` with one row per inspected source: include/exclude, authority, recency, relevance, and risk.",
+    "5. Write `raw/bootstrap/source-screen.md` with one row per inspected source: include/exclude, authority, recency, relevance, and risk. For complex external research, aim for at least six included inspected evidence sources before synthesis; search/index/hub pages are discovery artifacts and should not count unless they contain substantive inspected claims. If impossible after bounded source-domain discovery, write `ready_for_12k_dossier: false` and the exact source-depth blocker.",
     "6. Extract claims into `raw/bootstrap/evidence-matrix.md` before synthesis. Use claim IDs like `C1`, `C2`, and cite source IDs like `W1` or `L1`.",
     local_step,
     "8. Write `raw/bootstrap/local-sources.md` with exact paths, symbols or sections inspected, and evidence bullets.",
     "9. Write `raw/bootstrap/synthesis-brief.md` that separates findings, contradictions, gaps, and next research.",
-    "10. Write `raw/bootstrap/marketing-brief.md` using `skills/wiki-marketing/SKILL.md`: buyer pain, promise, differentiation, proof, objections, and next action.",
-    "11. If running inside MoonBook, materialize durable wiki pages. If running inside a direct MoonClaw worker, stop at wiki-ready raw artifacts and clearly mark whether MoonBook has enough evidence to materialize pages.",
+    "10. Write `raw/bootstrap/deep-report.md` using `skills/research-report/SKILL.md`. Prefer a 12k-15k English-word deep dossier for complex external/technology-route research with enough screened sources. If a reference report exists, also match its reader-facing ambition and approximate length class without copying unsupported claims.",
+    "11. Write `raw/bootstrap/marketing-brief.md` using `skills/wiki-marketing/SKILL.md`: buyer pain, promise, differentiation, proof, objections, and next action.",
+    "12. If running inside MoonBook, materialize durable wiki pages. If running inside a direct MoonClaw worker, stop at wiki-ready raw artifacts and clearly mark whether MoonBook has enough evidence to materialize pages.",
     "",
     "## Blocking Rule",
     "",
     "If a tool is unavailable, record the exact blocker in `raw/bootstrap/tool-blockers.md`, continue with the remaining permitted path, and still create the durable bootstrap notes that explain what happened.",
     "If native `web_search` returns only a search-engine result page or query URL, fetch that page, extract candidate URLs if possible, and retry with broader or narrower query variants before declaring the web pass blocked.",
-    "If native `web_search` is disabled or stalls, use bounded command-line web discovery such as `curl -L --max-time 12` against LLM-chosen search-result pages and candidate URLs. Retry `{bad request}` once with a simpler query or URL before recording a blocker.",
+    "If native `web_search` is disabled, stalls, or only returns weak search pages, use bounded command-line web discovery such as `curl -L --max-time 12` against LLM-chosen search-result pages and candidate URLs. Retry `{bad request}` once with a simpler query or URL before recording a blocker.",
     "If web search or fetch fails, do not pretend web evidence exists. Mark the source status as `blocked`, use local sources only as provisional evidence, and make the wiki page say what is missing.",
   ].join("\n")
 }
@@ -1458,6 +1595,24 @@ fn research_source_hints_text(entry : BookCatalogEntry) -> String {
   for query in web_queries {
     lines.push("- \{query}")
   }
+  lines.push("")
+  lines.push("## Optional Reference Style Inputs")
+  lines.push("")
+  lines.push(
+    "- `raw/bootstrap/REFERENCE_STYLE.md`: if present, explains how to use user-supplied reference material as a style and quality target.",
+  )
+  lines.push(
+    "- `raw/bootstrap/REFERENCE_OUTPUT.md`: if present, match its length class, section discipline, evidence density, tables, visualization style, and language when appropriate.",
+  )
+  lines.push(
+    "- `raw/bootstrap/REFERENCE_SOURCE_HINTS.md`: if present, use it as a candidate lead sheet only. Every lead still needs source screening before it can support claims.",
+  )
+  lines.push(
+    "- Reference files are not evidence for \{display}; use them to improve report craft, not to import facts.",
+  )
+  lines.push(
+    "- If the reference report names candidate routes, comparison axes, or visual dimensions that fit the user's objective, use them as search hypotheses and independently screen sources for each adopted route.",
+  )
   if !reference_urls.is_empty() {
     lines.push("")
     lines.push("## High-Signal URLs")
@@ -1676,6 +1831,13 @@ fn web_first_research_skill_text(entry : BookCatalogEntry) -> String {
     "- Use judgement to prefer high-signal sources and reject noise, stale mirrors, shallow commentary, and operational busywork.",
     "- End with a point of view: what changed, what did not change, why it matters, and what should be watched next.",
     "",
+    "## Reference Style Discipline",
+    "",
+    "- If `raw/bootstrap/REFERENCE_STYLE.md` or `raw/bootstrap/REFERENCE_OUTPUT.md` exists, read it before synthesis and use it to match the expected quality bar.",
+    "- Treat reference files as craft guidance only: length class, language, section architecture, table density, visualization type, and level of analytical courage.",
+    "- Treat reference route names, comparison axes, and diagram dimensions as hypotheses/search leads when they fit the user's objective; verify them with current screened sources before including them.",
+    "- Never use reference-file claims as evidence for \{display} unless independent screened sources support them.",
+    "",
     "## Research Method",
     "",
     "Follow this sequence:",
@@ -1692,13 +1854,17 @@ fn web_first_research_skill_text(entry : BookCatalogEntry) -> String {
     "## Rules",
     "",
     "- Start with web discovery before local file discovery. Use native `web_search` when it is available.",
-    "- If native `web_search` or `web_fetch` is disabled, unavailable, or stalls, use bounded command-line web discovery such as `curl -L --max-time 12` against LLM-chosen search-result pages and candidate URLs before local file discovery.",
+    "- If native `web_search` or `web_fetch` is disabled, unavailable, stalls, returns only search-engine/redirect pages, or leaves the source base below six included inspected sources, use bounded `execute_command` discovery such as `curl -L --max-time 12` against LLM-chosen search-result pages and candidate URLs before local file discovery.",
     "- In command-line discovery mode, first write the planned query/source-screening strategy to `raw/bootstrap/search-log.md`, then run a small bounded command batch. Do not spend a long model turn planning before the first durable write or command.",
     "- Run at least three web queries for this topic.",
-    "- Keep discovery bounded. Stop searching once the pass has enough inspected evidence for a cautious synthesis, three explicit blockers, or six web/discovery attempts. Weak evidence should become an explicit blocker and synthesis gap, not an endless search.",
+    "- For comparative or technology-route research, try to cover at least six high-signal sources across primary, independent, research-institution, market/adoption, and critique/risk classes before synthesis. Ten or more included sources is preferred for a 12k-15k dossier.",
+    "- Do not count search pages, site search pages, hub pages, or index pages as included evidence just because they were fetched. Use `discovery_only`, `candidate`, or `exclude` unless the page itself contains substantive inspected claims.",
+    "- Keep discovery bounded but serious. Do not stop below six included inspected sources merely because generic search-result pages are blocked. First try source-class front-door discovery, domain sitemaps, on-site search/index pages, and link harvesting.",
+    "- When sitemap/front-door harvesting yields candidate content URLs, convert the harvest into inspected sources: fetch at least eight high-signal candidates, or every harvested candidate when fewer than eight, before declaring the source base thin.",
+    "- Stop below six included sources only after twenty-four web/discovery attempts and an explicit source-depth blocker. In that case write `ready_for_12k_dossier: false` into `raw/bootstrap/source-screen.md`.",
     authority_rule,
     "- After search, inspect at least two highest-signal pages before writing conclusions. Use native `web_fetch` if available; otherwise use bounded command-line fetches.",
-    "- If native `web_search` returns only a search-engine URL or weak result page, fetch the result page, extract candidates when possible, and retry query variants before writing a blocker.",
+    "- If native `web_search` returns only a search-engine URL or weak result page, fetch the result page with native fetch; if that cannot extract candidates, use `execute_command`/`curl`, extract candidates when possible, and retry query variants before writing a blocker.",
     "- Write durable notes into `raw/bootstrap/search-log.md` and `raw/bootstrap/source-screen.md` before inspecting the local repo.",
     local_rule,
     "- If all web access paths are unavailable, write `raw/bootstrap/tool-blockers.md` and continue only with clearly provisional evidence instead of silently skipping the phase.",
@@ -1716,6 +1882,46 @@ fn web_first_research_skill_text(entry : BookCatalogEntry) -> String {
     "- `raw/bootstrap/deep-report.md` with thesis-first research analysis, tables, Mermaid relationship diagram, maturity assessment, and evidence limits.",
     "- `raw/bootstrap/marketing-brief.md` with buyer-facing positioning, product strengths, proof points, objections, and next action.",
     "- Wiki-ready materialization notes that are specific to \{display}; create durable wiki pages only when the current runtime owns MoonBook wiki materialization.",
+    "",
+    "## Deep Dossier Target",
+    "",
+    "For complex external, comparative, route-map, or technology research, source collection should be strong enough to support a long-form dossier, not just a short article.",
+    "",
+    "- preferred source base: ten to fourteen included, inspected sources across primary, independent, research-institution, market/adoption, critique/risk, and primary-paper/source-data classes",
+    "- minimum source base for a cautious dossier: six included, inspected sources plus explicit blockers for missing classes",
+    "- target report size with enough evidence: 12k-15k English words",
+    "- if this target cannot be reached honestly, write the source-depth blocker, set `ready_for_12k_dossier: false`, and write the next search plan; do not pad with generic definitions",
+    "",
+    "## Search-Result Fallback",
+    "",
+    "When native `web_search` returns only a search-engine page, weak landing page, or `{bad request}`, do not guess a final source list from memory.",
+    "",
+    "1. Fetch the search-result page itself with a bounded command such as `curl -L --max-time 12`; this command fallback is mandatory before closing below six included inspected sources when native search was weak.",
+    "2. Extract candidate result URLs, titles, snippets, and domains into `raw/bootstrap/search-log.md`.",
+    "3. Choose candidates across source classes: primary, independent, research institution, market/adoption, critique/risk, and source-data or paper.",
+    "4. Fetch selected result URLs and only then include, reject, or block them in `raw/bootstrap/source-screen.md`.",
+    "5. If search-result extraction is blocked, record the exact blocked page, command target, and source class in `raw/bootstrap/tool-blockers.md`.",
+    "",
+    "## Source-Class Front-Door Fallback",
+    "",
+    "If generic search pages block extraction, shift from search-engine discovery to source-domain discovery instead of guessing article URLs from memory.",
+    "",
+    "1. Derive source classes for the topic: primary/official, customer or adopter, research institution, standards or conference, market/adoption, independent critique, and source-data or paper.",
+    "2. For each source class, choose candidate organizations or publications that a serious researcher would inspect for this topic.",
+    "3. For each chosen domain, fetch the home page, `robots.txt`, one or more sitemap URLs if exposed, visible search or index pages, and high-signal navigation pages.",
+    "4. Harvest candidate links whose titles, paths, or snippets match the topic keywords; write them into `raw/bootstrap/search-log.md` before fetching.",
+    "5. Fetch at least eight high-signal harvested candidate pages, or all harvested candidates when fewer than eight, and screen them. A 404 on one guessed URL is a rejected candidate, not a rejected source class.",
+    "6. Continue until the source screen has at least six included inspected sources, ten preferred, or until twenty-four bounded attempts plus a source-depth blocker make more discovery dishonest.",
+    "",
+    "Concrete front-door command pattern:",
+    "",
+    "- fetch `https://<domain>/robots.txt` and look for `Sitemap:` entries",
+    "- fetch likely sitemap URLs such as `https://<domain>/sitemap.xml` only when chosen by the worker for that domain",
+    "- fetch the domain home page and one visible topic/search/index page",
+    "- extract candidate links containing topic terms, route names, or source-class terms",
+    "- fetch candidate article/report/product/paper pages; only these fetched content pages normally count as included evidence",
+    "- write a `Front-Door Attempts` table in `raw/bootstrap/search-log.md` with domain, command target, harvested candidates, fetched candidates, and result",
+    "- write a `Command Fallback Attempts` table whenever native search was weak and command-line fetching was used",
     "",
     "## Example Workflow",
     "",
@@ -1793,6 +1999,25 @@ fn research_evidence_synthesis_skill_text(entry : BookCatalogEntry) -> String {
     "- Judgement: decide what matters enough to become durable knowledge and what should be rejected or deferred.",
     "- Taste: make the synthesis useful to a human decision-maker, not just correct in isolation.",
     "",
+    "## Reference-Aware Synthesis",
+    "",
+    "When a reference report is supplied, use it as a benchmark for research craft:",
+    "",
+    "- match its seriousness, section depth, table/diagram expectations, and approximate length class when the evidence supports that depth",
+    "- preserve its language choice when the user has not asked otherwise",
+    "- use its route taxonomy, comparison axes, and visual structure as candidate hypotheses only when the current topic calls for those comparisons",
+    "- use optional `raw/bootstrap/REFERENCE_SOURCE_HINTS.md` only as a list of sources or searches to screen, not as evidence",
+    "- do not copy its claims, source choices, or conclusions unless current screened evidence for \{display} independently supports them",
+    "- if evidence is thinner than the reference, explain the gap and write the strongest honest version rather than padding with generic prose",
+    "",
+    "When no reference report is supplied, use the skill's own depth standard:",
+    "",
+    "- for complex external, comparative, route-map, or technology research, target a 12k-15k English-word dossier when the screened source base has enough evidence",
+    "- six included inspected sources is the minimum for a cautious dossier; ten or more included sources is the preferred source base for a reference-grade report",
+    "- build length from explanation depth: mechanisms, route tradeoffs, adoption constraints, evidence reliability, scenarios, second-order implications, and what would change the thesis",
+    "- do not pad with repeated definitions, unverified background, or generic process notes",
+    "- if the source base is too thin, say exactly which missing source classes block full depth",
+    "",
     "## Protocol",
     "",
     "1. Question: define the research question for \{display}, the subquestions, and what counts as in scope.",
@@ -1849,6 +2074,154 @@ fn research_evidence_synthesis_skill_text(entry : BookCatalogEntry) -> String {
     "## Failure Discipline",
     "",
     "If the research cannot reach verified coverage, make that explicit. Create provisional pages only when they are labeled provisional and explain the exact missing source or tool.",
+  ].join("\n")
+}
+
+///|
+fn research_report_skill_text(entry : BookCatalogEntry) -> String {
+  let topic = research_topic_id(entry)
+  let display = display_topic_name(topic)
+  [
+    "---",
+    "name: research-report",
+    "description: Turn screened research artifacts into a long-form, reader-facing deep research report with evidence-backed claims, comparison tables, diagrams, and explicit limits.",
+    "---",
+    "",
+    "# Research Report Skill For \{display}",
+    "",
+    "Use this skill after source collection and evidence extraction. It is not a source-fetching skill; if evidence is missing, write blockers and limits instead of inventing claims.",
+    "",
+    "## Non-Negotiable Output",
+    "",
+    "Always produce or revise `raw/bootstrap/deep-report.md` when `raw/bootstrap/evidence-matrix.md` exists.",
+    "",
+    "Hard requirements:",
+    "",
+    "- title: the first heading must contain `Deep Research Analysis`; use `# \{display}: Deep Research Analysis` unless there is a strong reason to add a subtitle",
+    "- at least 8 `##` sections for a single-topic report",
+    "- first `##` section: `## Executive Summary`",
+    "- at least one comparison, evidence, roadmap, or maturity table",
+    "- at least one Mermaid relationship, route, or decision diagram when relationships or routes matter",
+    "- source IDs on strong claims",
+    "- a final `## Evidence and Limits` section",
+    "- process/tool caveats only in the limits section unless they invalidate the thesis",
+    "- for complex external, comparative, route-map, or technology research with enough screened sources: target 12k-15k English words; 12k English words is the quality floor unless explicit source-depth blockers make that dishonest",
+    "",
+    "This word target is not a license to pad. Reach it through evidence-backed mechanism analysis, route-by-route judgement, adoption constraints, second-order implications, and source reliability work.",
+    "",
+    "## Reference Output Rule",
+    "",
+    "If these files exist, read them before writing:",
+    "",
+    "- `raw/bootstrap/REFERENCE_STYLE.md`",
+    "- `raw/bootstrap/REFERENCE_OUTPUT.md`",
+    "- `raw/bootstrap/REFERENCE_SOURCE_HINTS.md`",
+    "- `raw/bootstrap/REFERENCE_VISUAL_PATH.txt`",
+    "",
+    "Use reference material only as a style and quality benchmark:",
+    "",
+    "- match its approximate length class when evidence supports that length",
+    "- match its section discipline, evidence density, table density, strategic conclusions, and visual-analysis ambition",
+    "- if the reference report is hundreds of lines long, write a hundreds-of-lines report rather than a short executive brief; when `REFERENCE_STYLE.md` reports the line count and `source-screen.md` has at least six included sources, target at least 60% of the reference line count plus a 30-line safety buffer",
+    "- if evidence is narrower than the reference, expand by explaining mechanisms, route tradeoffs, adoption logic, bottlenecks, source reliability, and what evidence would change the thesis; do not pad with repeated definitions or unsupported facts",
+    "- use route names, comparison axes, and visual dimensions found in the reference as candidate search and synthesis hypotheses when relevant, but verify each adopted route independently",
+    "- use reference source hints only when `source-screen.md` or `evidence-matrix.md` shows they were inspected; unscreened hints belong in gaps, not claims",
+    "- preserve its language choice when the user has not asked otherwise",
+    "- never import its factual claims into \{display} unless independently supported by screened evidence",
+    "- if the reference is stronger than the available evidence, state the evidence gap and write the strongest honest report instead of padding",
+    "",
+    "## No-Reference Deep Research Rule",
+    "",
+    "When no reference report is supplied, do not fall back to a short default report.",
+    "",
+    "- Use this skill as the quality authority.",
+    "- With six or more included inspected sources, write toward the 12k-15k English-word dossier target.",
+    "- With fewer than six included inspected sources, write the strongest honest report and make the source-depth blocker explicit.",
+    "- Prefer ten or more included inspected sources before claiming reference-grade depth.",
+    "- Expand by asking researcher questions: what mechanism actually creates the advantage, what adoption filter blocks it, which route is only a supplement, what would change the thesis, and what second-order consequence matters.",
+    "",
+    "## Research Temperament",
+    "",
+    "Correctness is necessary but not sufficient.",
+    "",
+    "- Imagination: propose mechanisms, futures, substitutions, hidden constraints, and second-order consequences; then test them against evidence.",
+    "- Curiosity: ask why the topic matters now, what changed recently, what would surprise a serious reader, and which missing fact would change the conclusion.",
+    "- Judgement: rank evidence quality, reject weak sources, distinguish signal from hype, and decide what deserves durable memory.",
+    "- Taste: write with a point of view. The report should help a human make sense of the topic, not merely prove that a pipeline ran.",
+    "",
+    "## Required Inputs",
+    "",
+    "- `raw/bootstrap/research-question.md`",
+    "- `raw/bootstrap/search-log.md`",
+    "- `raw/bootstrap/source-screen.md`",
+    "- `raw/bootstrap/evidence-matrix.md`",
+    "- `raw/bootstrap/local-sources.md`",
+    "- `raw/bootstrap/synthesis-brief.md`",
+    "- `wiki/sources/*.md`",
+    "- `wiki/entities/*.md`",
+    "- `wiki/concepts/*.md`",
+    "- `wiki/synthesis/*.md`",
+    "",
+    "## Article Shape",
+    "",
+    "Use this shape unless the evidence clearly calls for a better structure:",
+    "",
+    "1. Executive Summary",
+    "2. Research Question and Scope",
+    "3. Ecosystem Context",
+    "4. Core Thesis",
+    "5. Technical Routes or Architecture",
+    "6. Evidence and Key Claims",
+    "7. Comparison and Tradeoffs",
+    "8. Maturity, Bottlenecks, and Adoption Signals",
+    "9. Roadmap and Watch Points",
+    "10. Evidence and Limits",
+    "",
+    "For technology-route research, compare alternatives by performance, manufacturability, cost, maturity, supply chain, scalability, and unresolved physics or engineering bottlenecks when the evidence supports those dimensions.",
+    "For long-form reference-matched technology research, create section depth from reasoning over screened claims: explain mechanisms, dependencies, adoption constraints, what would change the conclusion, and why each route is or is not a supplement. Do not fill length with repeated definitions.",
+    "",
+    "## Quality Rubric",
+    "",
+    "| Dimension | Strong output | Weak output |",
+    "| --- | --- | --- |",
+    "| Thesis | Opens with a clear interpretation and why it matters now | Opens with workspace/process notes |",
+    "| Evidence | Converts source rows into claim-backed paragraphs | Lists sources without synthesis |",
+    "| Comparison | Explains tradeoffs across alternatives | Ranks things without criteria |",
+    "| Specificity | Names concrete actors, technologies, dates, metrics, and bottlenecks when sourced | Uses generic claims that could fit any topic |",
+    "| Judgement | Separates near-term reality, plausible supplement, and speculative route | Treats every idea as equally viable |",
+    "",
+    "## Concrete Example",
+    "",
+    "```md",
+    "# \{display}: Deep Research Analysis",
+    "",
+    "## Executive Summary",
+    "",
+    "<Answer the research question directly in one or two dense paragraphs. Cite strongest source IDs.>",
+    "",
+    "## Technical Route Comparison",
+    "",
+    "| Route | Advantage | Bottleneck | Maturity | Evidence |",
+    "| --- | --- | --- | --- | --- |",
+    "| Route A | Supported advantage | Specific unresolved issue | pilot / mature / speculative | W1, W3 |",
+    "",
+    "## Relationship Model",
+    "",
+    "```mermaid",
+    "flowchart LR",
+    "  Need[Manufacturing need] --> RouteA[Route A]",
+    "  Need --> RouteB[Route B]",
+    "  RouteA --> Constraint[Shared bottleneck]",
+    "  RouteB --> Supplement[Supplementary use case]",
+    "```",
+    "",
+    "## Evidence and Limits",
+    "",
+    "- Strongest sources: W1, W2, W3.",
+    "- Weakest point: <missing source, uncertainty, or contradiction>.",
+    "```",
+    "",
+    "Before returning success, revise if the draft is short, generic, missing tables, missing diagram, not lane-specific to \{topic}, or reads like a run log.",
   ].join("\n")
 }
 
@@ -1918,6 +2291,14 @@ fn repo_source_materialize_skill_text(entry : BookCatalogEntry) -> String {
 
 ///|
 fn research_topic_id(entry : BookCatalogEntry) -> String {
+  for tag in entry.tags {
+    if tag.has_prefix("topic:") {
+      let topic = tag[6:].to_string()
+      if !topic.is_empty() {
+        return topic
+      }
+    }
+  }
   if entry.id.has_prefix("research-") {
     entry.id[9:].to_string()
   } else {
@@ -1927,8 +2308,13 @@ fn research_topic_id(entry : BookCatalogEntry) -> String {
 
 ///|
 fn is_external_domain_research_topic(topic : String) -> Bool {
+  !is_local_project_research_topic(topic)
+}
+
+///|
+fn is_local_project_research_topic(topic : String) -> Bool {
   match topic {
-    "opc" => true
+    "moontown" | "moonbook" | "moonclaw" => true
     _ => false
   }
 }
@@ -1947,6 +2333,8 @@ fn research_question_text(topic : String, display : String) -> String {
   match topic {
     "opc" =>
       "What is the One Person Company model, what current news and evidence show about its business reality, how AI tools and agentic workflows change its feasibility, what examples and risks matter, and what remains uncertain?"
+    _ if is_external_domain_research_topic(topic) =>
+      "What is \{display}, what new advantages or supplements are emerging, what evidence shows their technical and market significance, what routes or alternatives should be compared, what bottlenecks remain, and what should be watched next?"
     _ =>
       "What is \{display}, what problem does it solve, how is it implemented or operated, what evidence supports those claims, and what remains uncertain?"
   }
@@ -1956,14 +2344,18 @@ fn research_question_text(topic : String, display : String) -> String {
 fn research_followup_query(topic : String, display : String) -> String {
   match topic {
     "opc" => "AI solo founder one person company trend"
+    _ if is_external_domain_research_topic(topic) =>
+      "\{display} latest research advantages limitations roadmap"
     _ => "\{display} architecture implementation"
   }
 }
 
 ///|
-fn research_risk_query(topic : String, _display : String) -> String {
+fn research_risk_query(topic : String, display : String) -> String {
   match topic {
     "opc" => "one person company risks operations legal finance"
+    _ if is_external_domain_research_topic(topic) =>
+      "\{display} bottlenecks risks supply chain adoption"
     _ => "site:github.com vectie \{topic}"
   }
 }
@@ -1990,6 +2382,18 @@ fn research_web_queries(topic : String) -> Array[String] {
         "Anthropic CEO one-person billion-dollar company AI", "OPC entrepreneur one person company current evidence",
         "one person company risks legal finance operations",
       ]
+    _ if is_external_domain_research_topic(topic) => {
+      let display = display_topic_name(topic)
+      [
+        "\{display} latest research advantages limitations",
+        "\{display} technology roadmap 2026",
+        "\{display} market analysis suppliers adoption",
+        "\{display} new advances bottlenecks comparison",
+        "\{display} research report risks supplements",
+        "\{display} alternatives complementary technologies comparison",
+        "\{display} route comparison maturity cost scalability",
+      ]
+    }
     _ =>
       ["vectie \{topic}", "\{topic} moonbit", "site:github.com vectie \{topic}"]
   }
@@ -2007,6 +2411,7 @@ fn research_reference_urls(topic : String) -> Array[String] {
         "https://www.europeanbusinessreview.com/one-person-startups-are-on-the-rise-thanks-to-ai/",
         "https://www.worldbank.org/en/programs/entrepreneurship", "https://www.gov.uk/running-a-limited-company",
       ]
+    _ if is_external_domain_research_topic(topic) => []
     _ => ["https://github.com/vectie/\{topic}"]
   }
 }
@@ -2038,6 +2443,7 @@ fn research_local_paths(topic : String) -> Array[String] {
         "/Users/kq/Workspace/moonclaw/tools/search_files/tool.mbt",
       ]
     "opc" => []
+    _ if is_external_domain_research_topic(topic) => []
     _ =>
       [
         "/Users/kq/Workspace/\{topic}/README.md",

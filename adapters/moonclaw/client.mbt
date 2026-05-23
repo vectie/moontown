@@ -482,9 +482,11 @@ pub fn build_import_command(
   home? : String = default_moonclaw_home(),
   cwd? : String = ".",
   confirm? : Bool = false,
+  run_inline? : Bool = false,
 ) -> String {
   let confirm_flag = if confirm { " --confirm" } else { "" }
-  "moon -C \{moonclaw_root} run cmd/main -- proposal import \{packet_path} --json --cwd \{cwd} --home \{home}\{confirm_flag}"
+  let inline_flag = if confirm && run_inline { " --inline" } else { "" }
+  "moon -C \{moonclaw_root} run cmd/main -- proposal import \{packet_path} --json --cwd \{cwd} --home \{home}\{confirm_flag}\{inline_flag}"
 }
 
 ///|
@@ -510,6 +512,7 @@ pub async fn import_packet(
   home? : String = default_moonclaw_home(),
   cwd? : String = ".",
   confirm? : Bool = false,
+  run_inline? : Bool = false,
 ) -> ProposalImportReceipt {
   let resolved_cwd = resolve_root_path(cwd)
   let resolved_home = resolve_home_path(home, resolved_cwd)
@@ -531,6 +534,11 @@ pub async fn import_packet(
     resolved_home,
     ..if confirm {
       ["--confirm"]
+    } else {
+      []
+    },
+    ..if confirm && run_inline {
+      ["--inline"]
     } else {
       []
     },

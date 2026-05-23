@@ -1,4 +1,192 @@
 ///|
+test "external research topic detector accepts acronym-led reports" {
+  assert_true(
+    research_text_contains_topic(
+      "本报告分析 euv 光刻的 high-na、nil 和 dsa 路线。", "euv-lithography-machine-new-advantages-and-supplements",
+    ),
+  )
+}
+
+///|
+test "external deep report word gate applies when source base is broad" {
+  let source_screen =
+    #|# Source Screen
+    #|
+    #|| Source ID | Decision |
+    #|| --- | --- |
+    #|| W1 | include |
+    #|| W2 | include |
+    #|| W3 | include |
+    #|| W4 | include with caution |
+    #|| W5 | include |
+    #|| W6 | include |
+    #|
+  let report =
+    #|# EUV Lithography Machine New Advantages And Supplements: Deep Research Analysis
+    #|
+    #|## Executive Summary
+    #|EUV research report with enough sources but not enough words.
+    #|
+  let gaps = deep_report_word_count_gaps(
+    "euv-lithography-machine-new-advantages-and-supplements", report, source_screen,
+  )
+  assert_eq(gaps.length(), 1)
+  let gap = gaps[0]
+  assert_true(gap.contains("English word tokens"))
+  assert_true(gap.contains("6 included screened sources"))
+  assert_true(gap.contains("12k-15k English words"))
+}
+
+///|
+test "external deep report word gate is skipped when source base is thin" {
+  let source_screen =
+    #|# Source Screen
+    #|
+    #|| Source ID | Decision |
+    #|| --- | --- |
+    #|| W1 | include |
+    #|| W2 | include |
+    #|
+  let report =
+    #|# EUV Lithography Machine New Advantages And Supplements: Deep Research Analysis
+    #|
+    #|## Executive Summary
+    #|EUV research report with a thin source base.
+    #|
+  assert_eq(
+    deep_report_word_count_gaps(
+      "euv-lithography-machine-new-advantages-and-supplements", report, source_screen,
+    ).length(),
+    0,
+  )
+}
+
+///|
+test "external source depth gate rejects thin source screens" {
+  let source_screen =
+    #|# Source Screen
+    #|
+    #|| Source ID | Decision |
+    #|| --- | --- |
+    #|| W1 | include |
+    #|| W2 | include |
+    #|
+  let gaps = source_depth_quality_gaps(
+    "euv-lithography-machine-new-advantages-and-supplements", source_screen,
+  )
+  assert_eq(gaps.length(), 1)
+  assert_true(gaps[0].contains("only 2 included inspected sources"))
+  assert_true(gaps[0].contains("at least six"))
+}
+
+///|
+test "included source count ignores search and index discovery pages" {
+  let source_screen =
+    #|# Source Screen
+    #|
+    #|| Source ID | Source type | URL | Decision | Risk |
+    #|| --- | --- | --- | --- | --- |
+    #|| W1 | web primary | `https://example.com/report` | include | inspected evidence |
+    #|| W2 | web research/index | `https://example.com/search?query=euv` | include | search page is discovery-heavy |
+    #|| W3 | web market/index | `https://example.org/news-resources` | include | index page, not claim evidence |
+    #|| W4 | web independent | `https://example.net/analysis` | include | inspected evidence |
+    #|
+  assert_eq(count_included_screened_sources(source_screen), 2)
+}
+
+///|
+test "included source count accepts included sources section without decision column" {
+  let source_screen =
+    #|# Source Screen
+    #|
+    #|## Included Sources
+    #|
+    #|| Source ID | Source type | URL | Include rationale |
+    #|| --- | --- | --- | --- |
+    #|| W1 | web | `https://example.com/report` | inspected evidence |
+    #|| W2 | web | `https://example.com/search?q=euv` | discovery-only search page |
+    #|| W3 | web | `https://example.org/analysis` | inspected evidence |
+    #|
+    #|## Discovery-Only or Candidate Sources
+    #|
+    #|| Source ID | URL | Decision |
+    #|| --- | --- | --- |
+    #|| D1 | `https://example.org/index` | discovery_only |
+    #|
+  assert_eq(count_included_screened_sources(source_screen), 2)
+}
+
+///|
+test "thin weak native search requires command-line fallback record" {
+  let source_screen =
+    #|# Source Screen
+    #|
+    #|| Source ID | Decision |
+    #|| --- | --- |
+    #|| W1 | include |
+    #|
+  let search_log =
+    #|# Search Log
+    #|
+    #|| Query | Tool result |
+    #|| --- | --- |
+    #|| EUV route map | native `web_search` returned DuckDuckGo URL only; weak_search_page |
+    #|
+  let gaps = source_discovery_fallback_gaps(
+    "euv-lithography-machine-new-advantages-and-supplements", search_log, source_screen,
+    "",
+  )
+  assert_eq(gaps.length(), 1)
+  assert_true(gaps[0].contains("execute_command/curl fallback"))
+}
+
+///|
+test "thin weak native search accepts recorded command fallback" {
+  let source_screen =
+    #|# Source Screen
+    #|
+    #|| Source ID | Decision |
+    #|| --- | --- |
+    #|| W1 | include |
+    #|
+  let search_log =
+    #|# Search Log
+    #|
+    #|| Query | Tool result |
+    #|| --- | --- |
+    #|| EUV route map | native `web_search` returned DuckDuckGo URL only; weak_search_page |
+    #|
+    #|## Command Fallback Attempts
+    #|
+    #|- execute_command: `curl -L --max-time 12 https://example.com/search?q=euv`
+    #|
+  assert_eq(
+    source_discovery_fallback_gaps(
+      "euv-lithography-machine-new-advantages-and-supplements", search_log, source_screen,
+      "",
+    ).length(),
+    0,
+  )
+}
+
+///|
+test "quality topic prefers explicit research topic tag over storage id" {
+  let entry = @moonbook.BookCatalogEntry::new(
+    id="research-euv-native-quality-v4",
+    name="Storage-only book",
+    purpose="Research EUV",
+    workspace_root="/tmp/research-euv-native-quality-v4",
+    tags=[
+      "research", "euv-lithography-machine-new-advantages-and-supplements", "topic:euv-lithography-machine-new-advantages-and-supplements",
+    ],
+  )
+  assert_eq(
+    quality_topic_for_entry(entry),
+    "euv-lithography-machine-new-advantages-and-supplements",
+  )
+}
+
+///|
 test "OPC deep report rejects repository interpretation" {
   let entry = @moonbook.BookCatalogEntry::new(
     id="research-opc",

@@ -78,6 +78,10 @@ test "mayor creates dynamic OPC research book for standing goal target" {
   assert_true(!plan.parallelizable)
   assert_eq(plan.lanes.length(), 1)
   assert_eq(plan.lanes[0].entry.id, "research-opc")
+  assert_eq(plan.lanes[0].entry.tags, [
+    "research", "latest-one-person-company-opc-news", "topic:latest-one-person-company-opc-news",
+    "explicit-book",
+  ])
   assert_true(plan.summary.contains("dynamic research book"))
 }
 
