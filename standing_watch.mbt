@@ -101,15 +101,16 @@ async fn run_standing_goal_watch_cycle(
   state.record_event(
     execution_event(final_execution, state.executions.length() - 1),
   )
-  persist_execution_into_book(state, entry, final_execution)
   let observed_execution = standing_watch_execution_with_book_decision(
     entry, final_execution,
   )
   if observed_execution != final_execution {
     state.replace_execution(observed_execution)
   }
-  if terminal_execution_status(final_execution.status) {
-    finalize_goal_book_entry(state, entry, 0, [final_execution.task_id])
+  persist_execution_into_book(state, entry, observed_execution)
+  collapse_standing_watch_book_history(entry, observed_execution)
+  if terminal_execution_status(observed_execution.status) {
+    finalize_goal_book_entry(state, entry, 0, [observed_execution.task_id])
   }
   let decision = standing_watch_decision_from_execution(observed_execution)
   let next_no_change_streak = if decision == @core.WatcherDecisionKind::NoChange {
@@ -154,7 +155,7 @@ fn running_standing_watch_execution(
     proposal_id=None,
     run_id=None,
     status=@core.TaskExecutionStatus::Running,
-    summary="Mayor assigned \{task.id}; MoonClaw watcher is searching and MoonBook will persist only useful OPC deltas.",
+    summary="Mayor assigned \{task.id} for `\{task.title}`; MoonClaw watcher is searching and MoonBook will persist only useful deltas for `\{entry.id}`.",
     output_contract="standing-watch-live-snapshot",
     context_pages=task.target_pages,
     skill_paths=entry.skills,
@@ -191,7 +192,7 @@ async fn publish_running_standing_watch_snapshot(
         @core.TownEvent::new(
           id="event-watch-running-\{tick}-\{task.id}",
           kind="execution",
-          detail="\{task.id} is running now; \{worker_id} is checking OPC sources and will report whether the book needs an update.",
+          detail="\{task.id} is running now; \{worker_id} is checking sources for `\{entry.id}` and will report whether the book needs an update.",
           related_task_id=Some(task.id),
           related_book_id=Some(entry.id),
         ),
@@ -262,7 +263,7 @@ fn standing_watch_prompt(
     $|2. Search/fetch web sources first when the source policy is web-first. If web search is unavailable, record the tool blocker and use approved local/source hints only as fallback.
     $|3. Compare candidates against the existing baseline. Do not rewrite the wiki just because the standing goal is due.
     $|4. If the new evidence is meaningfully useful, add or revise durable MoonBook artifacts: source cards, claim/evidence notes, timeline/journey note, synthesis/digest, and generated-site projection inputs.
-    $|5. If there is no meaningful new advantage, write only a compact no-change observation in the book journey/review surface and do not inflate the wiki.
+    $|5. If there is no meaningful new evidence, contradiction, advantage, risk, or synthesis value for this topic, write only a compact no-change observation in the book journey/review surface and do not inflate the wiki.
     $|6. If evidence is ambiguous or risky, queue review instead of silently accepting it.
     $|
     $|Required final marker in the result summary:
@@ -405,7 +406,91 @@ async fn standing_watch_book_decision_summary(
   if history.trim().is_blank() {
     None
   } else {
-    standing_watch_history_decision_summary_for_task(history, task_id)
+    match standing_watch_history_decision_summary_for_task(history, task_id) {
+      Some(summary) => Some(summary)
+      None => standing_watch_latest_provider_decision_summary(history)
+    }
+  }
+}
+
+///|
+async fn collapse_standing_watch_book_history(
+  entry : @moonbook.BookCatalogEntry,
+  execution : @core.TaskExecutionRecord,
+) -> Unit {
+  let provider_id = standing_watch_marker_value(
+    execution.summary,
+    "book_watch_record_id",
+  ).unwrap_or("")
+  if provider_id.is_empty() {
+    return
+  }
+  let root = @moonbook.workspace_root(entry)
+  let path = "\{root}/wiki/history/standing-watch.md"
+  let history = read_text_or_empty(path)
+  if history.trim().is_blank() {
+    return
+  }
+  let collapsed = remove_standing_watch_history_block(history, provider_id)
+  if collapsed != history {
+    write_text_file(path, collapsed)
+  }
+}
+
+///|
+fn remove_standing_watch_history_block(
+  history : String,
+  block_id : String,
+) -> String {
+  let heading = "### \{block_id}"
+  let builder = StringBuilder::new()
+  let mut skipping = false
+  let mut removed = false
+  for raw in history.split("\n") {
+    let line = raw.to_string()
+    if line.has_prefix("### ") {
+      if line.trim().to_string() == heading {
+        skipping = true
+        removed = true
+        continue
+      }
+      skipping = false
+    }
+    if !skipping {
+      builder.write_string(line)
+      builder.write_char('\n')
+    }
+  }
+  if removed {
+    builder.to_string()
+  } else {
+    history
+  }
+}
+
+///|
+fn standing_watch_latest_provider_decision_summary(history : String) -> String? {
+  let mut current_id = ""
+  let current_lines : Array[String] = []
+  for raw in history.split("\n") {
+    let line = raw.to_string()
+    if line.has_prefix("### ") {
+      if current_id.has_prefix("provider-standing-watch-") {
+        return standing_watch_summary_from_history_block(
+          current_id, current_lines,
+        )
+      }
+      let heading = line[4:].trim().to_string()
+      current_id = heading
+      current_lines.clear()
+    } else if current_id != "" {
+      current_lines.push(line)
+    }
+  }
+  if current_id.has_prefix("provider-standing-watch-") {
+    standing_watch_summary_from_history_block(current_id, current_lines)
+  } else {
+    None
   }
 }
 

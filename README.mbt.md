@@ -112,23 +112,33 @@ Mayor -> Book Keeper -> Worker Claws
   execute bounded jobs such as search, fetch, synthesis, coding, image
   generation, review, and result packaging.
 
-The first default standing goal is:
+Standing goals are data-driven. Add long-horizon watchers by editing
+`.moontown/standing-goals.json`; the daemon reads the registry on each tick, so
+new topics do not require MoonBit code changes.
 
-```text
-watch-opc-news
-  -> target book: research-opc
-  -> cadence: 60 daemon ticks
-  -> policy: web-first
-  -> task: track latest One Person Company (OPC) news and update the book
+Example:
+
+```json
+{
+  "id": "watch-llm-training",
+  "title": "Track LLM training research",
+  "prompt": "Maintain a long-horizon research watch on how LLMs are trained in detail. Use web search first, screen sources, compare against the book baseline, and update only when useful evidence changes the baseline.",
+  "target_book_id": "research-how-llms-are-trained-in-very-detail",
+  "cadence_ticks": 60,
+  "next_due_tick": 0,
+  "enabled": true,
+  "source_policy": "web-first",
+  "quality_threshold": 90
+}
 ```
 
 The registry is persisted at:
 
 - `.moontown/standing-goals.json`
 
-The daemon does not put OPC memory in Moontown. Moontown only decides that the
-OPC standing goal is due and dispatches it to the `research-opc` MoonBook lane.
-MoonBook owns the durable OPC wiki, and MoonClaw owns the bounded research
+The daemon does not put topic memory in Moontown. Moontown only decides that a
+standing goal is due and dispatches it to its `target_book_id` MoonBook lane.
+MoonBook owns the durable topic wiki, and MoonClaw owns bounded research
 execution.
 
 The 24/7 watcher path now uses an explicit standing-watch contract instead of
@@ -161,7 +171,7 @@ book_changed: yes | no
 ```
 
 Moontown only consumes this marker for scheduling and UI status. It does not
-decide whether OPC research is novel; that remains a MoonBook keeper decision.
+decide whether topic research is novel; that remains a MoonBook keeper decision.
 No-change and failed checks are operational activity, not evidence progress:
 accepted facts, changed pages, and `book_changed` must stay zero/no unless
 durable book knowledge changed or a review item was queued.

@@ -494,4 +494,68 @@ async test "research quality gate schedules in-place repair retry" {
   let trigger = @fs.read_file(root + "/raw/bootstrap/QUALITY_REPAIR.md").text()
   assert_true(trigger.contains("in-place review/repair"))
   assert_true(trigger.contains("do not create a new v1/v2/v3/v4 book"))
+  write_research_quality_review_resolved(
+    @moonbook.BookCatalogEntry::new(
+      id="research-how-llm-are-trained-in-very-detail",
+      name="LLM Training Research",
+      purpose="research",
+      workspace_root=root,
+    ),
+    "post-run quality gate",
+  )
+  let resolved = @fs.read_file(root + "/raw/bootstrap/QUALITY_REPAIR.md").text()
+  assert_true(resolved.contains("No active quality repair"))
+  assert_true(!resolved.contains("deep-report.md has fewer than 12k"))
+}
+
+///|
+async test "research quality gate retries failed bootstrap before version forking" {
+  let root = "/tmp/moontown-quality-failed-retry"
+  ignore_checked_command("rm", ["-rf", root])
+  let state = @core.empty_state(
+    @core.TownConfig::new(id="test", name="Test Town"),
+  )
+  state.register_book(
+    @core.BookRef::new(
+      id="research-how-llms-are-trained-in-very-detail",
+      name="LLM Training Research",
+      purpose="research",
+      workspace_root=root,
+    ),
+  )
+  let task_id = "goal-research-how-llms-are-trained-in-very-detail-research-bootstrap-ingest"
+  state.enqueue_task(
+    @core.TownTask::new(
+      id=task_id,
+      book_id="research-how-llms-are-trained-in-very-detail",
+      title="Bootstrap verified research coverage",
+      prompt="research",
+      domain=@core.WorkDomain::Research,
+      status=@core.TownTaskStatus::Failed,
+    ),
+  )
+  state.register_execution(
+    @core.TaskExecutionRecord::new(
+      task_id~,
+      book_id="research-how-llms-are-trained-in-very-detail",
+      packet_id="packet",
+      packet_path="packet.json",
+      status=@core.TaskExecutionStatus::Failed,
+      summary="MoonClaw run did not settle before deep-report.md existed.",
+      output_contract="research",
+      attempt=1,
+    ),
+  )
+  queue_research_quality_gate(state, state.books[0].id, [task_id], [
+    "missing `raw/bootstrap/deep-report.md`",
+  ])
+  let execution = @core.find_execution(state, task_id).unwrap()
+  assert_eq(execution.status, @core.TaskExecutionStatus::ReviewQueued)
+  assert_true(execution.next_retry_tick != None)
+  assert_eq(
+    @core.find_task(state, task_id).unwrap().status,
+    @core.TownTaskStatus::Blocked,
+  )
+  let trigger = @fs.read_file(root + "/raw/bootstrap/QUALITY_REPAIR.md").text()
+  assert_true(trigger.contains("missing `raw/bootstrap/deep-report.md`"))
 }

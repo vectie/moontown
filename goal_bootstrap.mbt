@@ -839,6 +839,35 @@ async fn write_research_quality_review_trigger(
 }
 
 ///|
+async fn write_research_quality_review_resolved(
+  entry : @moonbook.BookCatalogEntry,
+  reason : String,
+) -> Unit {
+  guard entry.id.has_prefix("research-") else { return }
+  let root = @moonbook.workspace_root(entry)
+  let raw_root = "\{root}/raw/bootstrap"
+  let path = "\{raw_root}/QUALITY_REPAIR.md"
+  guard @fs.exists(path) else { return }
+  write_text_file(
+    path,
+    [
+      "# Research Review Trigger",
+      "",
+      "No active quality repair.",
+      "",
+      "Moontown rechecked this stable research book and found no remaining framework-level quality gaps.",
+      "",
+      "Reason: \{reason}",
+      "",
+      "Rules:",
+      "- keep this file as historical repair audit context only",
+      "- do not treat this file as a request to create a new v1/v2/v3/v4 book",
+      "- do not enter repair mode from this file unless new active quality gaps are written below",
+    ].join("\n"),
+  )
+}
+
+///|
 async fn ignore_checked_command(command : String, args : Array[String]) -> Unit {
   let completed = @integration.run_checked(command, args) catch { _ => return }
   ignore(completed)

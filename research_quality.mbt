@@ -841,7 +841,9 @@ async fn queue_research_quality_gate(
   for task_id in task_ids {
     match @core.find_execution(state, task_id) {
       Some(execution) =>
-        if execution.status is @core.TaskExecutionStatus::Completed {
+        if execution.status is @core.TaskExecutionStatus::Completed ||
+          execution.status is @core.TaskExecutionStatus::Failed ||
+          execution.status is @core.TaskExecutionStatus::Stale {
           let retry_tick = if execution.attempt < 3 {
             Some(supervision_tick(state))
           } else {

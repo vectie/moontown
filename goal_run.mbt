@@ -339,6 +339,7 @@ async fn finalize_goal_book_entry(
   if !quality_gaps.is_empty() {
     queue_research_quality_gate(state, entry.id, task_ids, quality_gaps)
   } else {
+    write_research_quality_review_resolved(entry, "post-run quality gate")
     complete_recovered_research_bootstrap_if_clean(state, entry.id, task_ids)
   }
   state.record_event(

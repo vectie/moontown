@@ -386,7 +386,7 @@ fn init_model() -> Model {
     operator_requests_version: operator_requests_version(),
     request_title: "Track a new research topic",
     request_prompt: "Research the latest useful updates, screen sources carefully, and update the target MoonBook only when the evidence changes the baseline.",
-    request_book_id: "research-opc",
+    request_book_id: "research-topic",
     request_cadence: "60",
     request_quality_threshold: "85",
     request_submitting: false,
@@ -2326,7 +2326,7 @@ fn render_request_composer(
         p(class="request-label", "Target MoonBook"),
         input(
           class="request-input",
-          placeholder="research-opc",
+          placeholder="research-topic",
           value=model.request_book_id,
           on_input=value => dispatch(SetRequestBookId(value)),
           "",
@@ -6777,6 +6777,7 @@ fn push_recent_event_messages(
 fn push_worker_alert_messages(
   feed : Array[FeedItem],
   workers : Array[WorkerSim],
+  watcher_idle_detail : String,
 ) -> Unit {
   for worker in workers {
     if worker.status == @core.WorkerStatus::Blocked {
@@ -6789,7 +6790,7 @@ fn push_worker_alert_messages(
       worker.status == @core.WorkerStatus::Idle {
       feed.push({
         title: "\{worker.title} is on duty",
-        detail: "Waiting between half-hour OPC checks. The next due check will move this watcher into an active run.",
+        detail: watcher_idle_detail,
         tone: "calm",
       })
     }
@@ -6835,18 +6836,19 @@ fn push_execution_messages(
 
 ///|
 fn feed_items(
+  model : Model,
   workers : Array[WorkerSim],
   executions : Array[@core.TaskExecutionRecord],
   events : Array[@core.TownEvent],
 ) -> Array[FeedItem] {
   let feed : Array[FeedItem] = []
   feed.push({
-    title: "OPC watcher is connected",
-    detail: "Mayor keeps the standing watch alive through the daemon. It checks for useful OPC updates every 60 ticks, about every 30 minutes at the current heartbeat.",
+    title: standing_watch_connected_title(model),
+    detail: standing_watch_connected_detail(model),
     tone: "calm",
   })
   push_recent_event_messages(feed, events)
-  push_worker_alert_messages(feed, workers)
+  push_worker_alert_messages(feed, workers, standing_watch_idle_detail(model))
   push_execution_messages(feed, executions)
   if feed.length() == 1 {
     feed.push({
@@ -6856,6 +6858,67 @@ fn feed_items(
     })
   }
   feed
+}
+
+///|
+fn enabled_standing_goal_count(model : Model) -> Int {
+  let mut count = 0
+  for goal in model.standing_goals {
+    if goal.enabled {
+      count += 1
+    }
+  }
+  count
+}
+
+///|
+fn standing_watch_connected_title(model : Model) -> String {
+  let count = enabled_standing_goal_count(model)
+  if count == 0 {
+    "No standing watcher connected"
+  } else if count == 1 {
+    match active_standing_goal(model) {
+      Some(goal) => "\{goal.title} watcher is connected"
+      None => "Standing watcher is connected"
+    }
+  } else {
+    "\{count} standing watchers connected"
+  }
+}
+
+///|
+fn standing_watch_connected_detail(model : Model) -> String {
+  let count = enabled_standing_goal_count(model)
+  match active_standing_goal(model) {
+    Some(goal) => {
+      let target = goal.target_book_id.unwrap_or("mayor-selected-book")
+      let prefix = if count > 1 {
+        "Mayor keeps \{count} standing watches alive through the daemon."
+      } else {
+        "Mayor keeps this standing watch alive through the daemon."
+      }
+      "\{prefix} Next configured watch: `\{goal.id}` -> `\{target}` every \{goal.cadence_ticks} ticks."
+    }
+    None =>
+      "Add a standing goal in `.moontown/standing-goals.json` or submit one from the operator panel to start durable topic monitoring."
+  }
+}
+
+///|
+fn standing_watch_idle_detail(model : Model) -> String {
+  match active_standing_goal(model) {
+    Some(goal) => {
+      let remaining = goal.next_due_tick - daemon_tick_count(model)
+      let wait = if remaining > 0 {
+        "\{remaining} daemon ticks"
+      } else {
+        "the next daemon tick"
+      }
+      "Waiting until \{wait} for `\{goal.id}`. The next due check will move a watcher into an active run."
+    }
+    None =>
+      "Waiting for a configured standing watch. Add one to `.moontown/standing-goals.json` to activate this worker."
+  }
 }
 
 ///|
@@ -7257,7 +7320,7 @@ fn render_scene(dispatch : Dispatch[Msg], model : Model) -> @rabbita.Html {
       ]),
       div(class="sidebar-column", [
         render_inspector(dispatch, model, scene, workers, executions),
-        render_feed(feed_items(workers, executions, state.events)),
+        render_feed(feed_items(model, workers, executions, state.events)),
         aside(class="scene-legend", [
           h2("Legend"),
           p("City Hall is the mayor runtime and policy anchor."),

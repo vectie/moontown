@@ -175,6 +175,28 @@ test "standing watch decision honors marker even when execution is review queued
 }
 
 ///|
+test "standing watch live snapshot is topic agnostic" {
+  let entry = @moonbook.BookCatalogEntry::new(
+    id="research-euv-lithography",
+    name="Research EUV Lithography",
+    purpose="Watch EUV lithography research",
+    workspace_root="/tmp/research-euv-lithography",
+  )
+  let task = @moonbook.BookTask::new(
+    id="standing-watch-euv-lithography-tick-1",
+    title="Standing watch: Track EUV lithography",
+    kind="standing-watch",
+    prompt="Track EUV lithography updates.",
+    priority=95,
+    requires_review=false,
+  )
+  let execution = running_standing_watch_execution(entry, task, "watcher", 7)
+  assert_true(execution.summary.contains("Track EUV lithography"))
+  assert_true(execution.summary.contains("research-euv-lithography"))
+  assert_true(!execution.summary.contains("OPC"))
+}
+
+///|
 test "standing watch history parser reads provider decision for current task" {
   let history =
     $|# Standing Watch
@@ -218,6 +240,68 @@ test "standing watch history parser reads provider decision for current task" {
   assert_true(
     summary.contains("book_watch_record_id: provider-standing-watch-123"),
   )
+}
+
+///|
+test "standing watch history parser reads newest provider decision before task block exists" {
+  let history =
+    $|# Standing Watch
+    $|
+    $|## Decisions
+    $|
+    $|### provider-standing-watch-456
+    $|
+    $|- Decision: `no_change`
+    $|- Delta score: `5`
+    $|- New source count: `0`
+    $|- Next check hint: `slower`
+    $|- Checked sources count: `7`
+    $|- Rejected facts count: `3`
+    $|- Summary: standing_goal_decision: no_change
+    $|checked_sources_count: 7
+    $|rejected_facts_count: 3
+    $|book_changed: no
+    $|
+    $|### standing-watch-opc-news-tick-4
+    $|
+    $|- Decision: `unknown`
+  let summary = standing_watch_latest_provider_decision_summary(history).unwrap()
+  assert_true(summary.contains("standing_goal_decision: no_change"))
+  assert_true(summary.contains("delta_score: 5"))
+  assert_true(summary.contains("checked_sources_count: 7"))
+  assert_true(summary.contains("rejected_facts_count: 3"))
+  assert_true(
+    summary.contains("book_watch_record_id: provider-standing-watch-456"),
+  )
+}
+
+///|
+test "standing watch collapse removes folded provider decision block" {
+  let history =
+    $|# Standing Watch
+    $|
+    $|## Decisions
+    $|
+    $|### standing-watch-opc-news-tick-5
+    $|
+    $|- Decision: `no_change`
+    $|- Summary: standing_goal_decision: no_change
+    $|book_watch_record_id: provider-standing-watch-456
+    $|
+    $|### provider-standing-watch-456
+    $|
+    $|- Decision: `no_change`
+    $|- Summary: standing_goal_decision: no_change
+    $|
+    $|### standing-watch-opc-news-tick-4
+    $|
+    $|- Decision: `unknown`
+  let collapsed = remove_standing_watch_history_block(
+    history, "provider-standing-watch-456",
+  )
+  assert_true(collapsed.contains("### standing-watch-opc-news-tick-5"))
+  assert_true(!collapsed.contains("### provider-standing-watch-456"))
+  assert_true(collapsed.contains("### standing-watch-opc-news-tick-4"))
 }
 
 ///|
@@ -302,4 +386,29 @@ test "research readiness exposes typed coverage gaps" {
   let readiness = ResearchReadiness::from_summary(summary)
   assert_true(!readiness.substantive_coverage_ready)
   assert_true(readiness.gaps.length() >= 4)
+}
+
+///|
+test "research readiness reports pending review without treating it as coverage gap" {
+  let summary = @moonbook.BookStateSummary::new(
+    book_id="research-llm-training",
+    root="/tmp/research-llm-training",
+    page_count=8,
+    source_count=2,
+    source_page_count=2,
+    verified_source_count=2,
+    entity_count=1,
+    entity_page_count=1,
+    concept_count=1,
+    concept_page_count=1,
+    pending_review_count=1,
+    keeper_memory_count=0,
+    keeper_working_count=0,
+    evidence_count=3,
+    summary="ready with human review backlog",
+  )
+  let readiness = ResearchReadiness::from_summary(summary)
+  assert_true(readiness.substantive_coverage_ready)
+  assert_eq(readiness.pending_review_count, 1)
+  assert_true(readiness.gaps.is_empty())
 }

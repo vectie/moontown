@@ -46,3 +46,12 @@ async test "research persistence handoff uses topic artifacts instead of runtime
   assert_eq(candidates[2].target_page, Some("concepts/opc-research-thesis.md"))
   assert_eq(candidates[3].target_page, Some("synthesis/opc-research-thesis.md"))
 }
+
+///|
+test "moonclaw supervision seconds parser accepts only positive integers" {
+  assert_eq(parse_positive_seconds("900", fallback=3600), 900)
+  assert_eq(parse_positive_seconds(" 1800 ", fallback=3600), 1800)
+  assert_eq(parse_positive_seconds("", fallback=3600), 3600)
+  assert_eq(parse_positive_seconds("0", fallback=3600), 3600)
+  assert_eq(parse_positive_seconds("10m", fallback=3600), 3600)
+}

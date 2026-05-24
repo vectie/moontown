@@ -128,17 +128,26 @@ The daemon loop repeats the restart-safe tick. Each tick:
 - appends `.moontown/watchers/<goal-id>.jsonl`
 - sleeps before the next tick
 
-The default standing goal is:
+Standing goals are data-driven. To add another long-horizon watcher, edit
+`.moontown/standing-goals.json`; no MoonBit code change is required as long as
+the entry follows the same shape:
 
-```text
-watch-opc-news
-  target_book_id: research-opc
-  source_policy: web-first
-  cadence_ticks: 60
+```json
+{
+  "id": "watch-llm-training",
+  "title": "Track LLM training research",
+  "prompt": "Maintain a long-horizon research watch on how LLMs are trained in detail. Use web search first, screen sources, compare against the book baseline, and update only when useful evidence changes the baseline.",
+  "target_book_id": "research-how-llms-are-trained-in-very-detail",
+  "cadence_ticks": 60,
+  "next_due_tick": 0,
+  "enabled": true,
+  "source_policy": "web-first",
+  "quality_threshold": 90
+}
 ```
 
-This creates or reuses the dynamic `research-opc` MoonBook lane. Moontown owns
-the schedule and dispatch event; MoonBook owns the OPC wiki and generated site;
+This creates or reuses the dynamic target MoonBook lane. Moontown owns the
+schedule and dispatch event; MoonBook owns the topic wiki and generated site;
 MoonClaw owns bounded research execution.
 
 The expected MoonBook result marker for a standing watcher is:

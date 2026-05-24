@@ -31,9 +31,9 @@ pub fn ResearchReadiness::from_summary(
   if summary.concept_page_count == 0 {
     gaps.push("no concept pages")
   }
-  if summary.pending_review_count > 0 {
-    gaps.push("\{summary.pending_review_count} pending review item(s)")
-  }
+  // Pending human review is backlog state, not missing research coverage.
+  // `queue_book_review_backlog` handles it separately so stale review notes do
+  // not keep spawning repair runs after artifacts have already recovered.
   let substantive_coverage_ready = gaps.is_empty() &&
     summary.verified_source_count > 0 &&
     summary.evidence_count > 0 &&

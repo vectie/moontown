@@ -364,13 +364,14 @@ async fn wait_for_moonclaw_run(
   run_id : String,
   workspace_root : String,
 ) -> @moonclaw.ProposalPollResponse {
+  let supervision_seconds = moontown_moonclaw_supervision_seconds()
   let mut latest = @moonclaw.poll_run(
     task_id,
     run_id,
     cwd=workspace_root,
     detect_orphan=false,
   )
-  for attempt = 0; attempt < 600; attempt = attempt + 1 {
+  for attempt = 0; attempt < supervision_seconds; attempt = attempt + 1 {
     if !is_live_moonclaw_status(latest.status) {
       return latest
     }
@@ -385,8 +386,35 @@ async fn wait_for_moonclaw_run(
   @moonclaw.timed_out_poll_response(
     task_id,
     run_id,
-    "MoonClaw run \{run_id} did not settle within the 10 minute Moontown supervision window; treating it as failed so the mayor can record blockers and continue recovery.",
+    "MoonClaw run \{run_id} did not settle within the \{supervision_seconds} second Moontown supervision window; treating it as failed so the mayor can record blockers and continue recovery.",
   )
+}
+
+///|
+fn moontown_moonclaw_supervision_seconds() -> Int {
+  match optional_env_text("MOONTOWN_MOONCLAW_SUPERVISION_SECONDS") {
+    Some(value) => parse_positive_seconds(value, fallback=3600)
+    None => 3600
+  }
+}
+
+///|
+fn parse_positive_seconds(text : String, fallback~ : Int) -> Int {
+  let mut seen = false
+  let mut value = 0
+  for char in text.trim() {
+    if char >= '0' && char <= '9' {
+      value = value * 10 + (char.to_int() - '0'.to_int())
+      seen = true
+    } else {
+      return fallback
+    }
+  }
+  if seen && value > 0 {
+    value
+  } else {
+    fallback
+  }
 }
 
 ///|
