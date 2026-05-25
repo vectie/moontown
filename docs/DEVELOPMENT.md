@@ -105,6 +105,8 @@ moon run cmd/main -- daemon run --once
 moon run cmd/main -- daemon start
 moon run cmd/main -- daemon doctor
 moon run cmd/main -- daemon stop
+./scripts/install-launchd-daemon.sh
+./scripts/uninstall-launchd-daemon.sh
 ```
 
 Do not put durable research memory in Moontown. Standing goals belong to the

@@ -109,10 +109,11 @@ async fn run_supervision_cycle(
   state : @core.TownState,
   mayor : @roles.Mayor,
   catalog : Array[@moonbook.BookCatalogEntry],
+  snapshot_path? : String = @storage.default_snapshot_path(),
+  standing_goals? : Array[@core.StandingGoal] = [],
 ) -> Unit {
-  reconcile_live_executions(state, catalog)
+  reconcile_live_executions(state, catalog, snapshot_path, standing_goals)
   release_orphaned_blocked_workers(state)
-  refresh_live_execution_deadlines(state)
   let packet = mayor.supervise(state, supervision_tick(state))
   if packet.directives.is_empty() {
     return
@@ -133,7 +134,9 @@ async fn run_supervision_cycle(
         related_task_id=Some(directive.task_id),
       ),
     )
-    apply_supervision_directive(state, mayor, catalog, directive)
+    apply_supervision_directive(
+      state, mayor, catalog, directive, snapshot_path, standing_goals,
+    )
   }
 }
 
@@ -193,35 +196,10 @@ fn latest_execution_for_worker(
 fn worker_should_be_released(execution : @core.TaskExecutionRecord) -> Bool {
   match execution.status {
     @core.TaskExecutionStatus::Completed => true
-    @core.TaskExecutionStatus::ReviewQueued =>
-      match execution.next_retry_tick {
-        Some(_) => false
-        None => true
-      }
+    @core.TaskExecutionStatus::ReviewQueued => true
     @core.TaskExecutionStatus::Failed => true
-    @core.TaskExecutionStatus::Stale =>
-      match execution.next_retry_tick {
-        Some(_) => false
-        None => true
-      }
+    @core.TaskExecutionStatus::Stale => true
     _ => false
-  }
-}
-
-///|
-fn refresh_live_execution_deadlines(state : @core.TownState) -> Unit {
-  let tick = supervision_tick(state)
-  let snapshot = state.executions.copy()
-  for execution in snapshot {
-    if live_execution_status(execution.status) {
-      state.replace_execution(
-        copy_execution_with(
-          execution,
-          heartbeat_tick=tick,
-          stale_after_tick=tick + 3,
-        ),
-      )
-    }
   }
 }
 
@@ -236,7 +214,7 @@ async fn wait_for_goal_settle(
 ) -> Unit {
   let cycles = if max_cycles < 1 { 1 } else { max_cycles }
   for cycle = 0; cycle < cycles; cycle = cycle + 1 {
-    run_supervision_cycle(state, mayor, catalog)
+    run_supervision_cycle(state, mayor, catalog, snapshot_path~)
     persist_town_checkpoint(state, snapshot_path)
     if !has_live_executions(state) &&
       !has_retry_pending_executions(state, supervision_tick(state)) {
@@ -287,6 +265,8 @@ fn has_retry_pending_executions(state : @core.TownState, tick : Int) -> Bool {
 async fn reconcile_live_executions(
   state : @core.TownState,
   catalog : Array[@moonbook.BookCatalogEntry],
+  snapshot_path : String,
+  standing_goals : Array[@core.StandingGoal],
 ) -> Unit {
   let tick = supervision_tick(state)
   let snapshot = state.executions.copy()
@@ -324,6 +304,14 @@ async fn reconcile_live_executions(
             Some(entry) => {
               persist_execution_into_book(state, entry, updated)
               finalize_goal_book_entry(state, entry, 0, [updated.task_id])
+              let observed = finalize_standing_watch_supervision_record(
+                state, entry, updated, standing_goals, snapshot_path,
+              )
+              if observed != updated {
+                state.replace_execution(observed)
+                state.replace_task(task_for_supervision(state, observed))
+                sync_worker_from_execution(state, observed)
+              }
             }
             None => ()
           }
@@ -365,6 +353,8 @@ async fn apply_supervision_directive(
   mayor : @roles.Mayor,
   catalog : Array[@moonbook.BookCatalogEntry],
   directive : @roles.MayorSupervisionDirective,
+  snapshot_path : String,
+  standing_goals : Array[@core.StandingGoal],
 ) -> Unit {
   let execution = match @core.find_execution(state, directive.task_id) {
     Some(execution) => execution
@@ -388,7 +378,9 @@ async fn apply_supervision_directive(
       sync_worker_from_execution(state, updated)
     }
     "retry-execution" =>
-      retry_execution(state, mayor, catalog, execution, directive)
+      retry_execution(
+        state, mayor, catalog, execution, directive, snapshot_path, standing_goals,
+      )
     "review-sync" => {
       let updated = copy_execution_with(
         execution,
@@ -442,6 +434,8 @@ async fn retry_execution(
   catalog : Array[@moonbook.BookCatalogEntry],
   execution : @core.TaskExecutionRecord,
   directive : @roles.MayorSupervisionDirective,
+  snapshot_path : String,
+  standing_goals : Array[@core.StandingGoal],
 ) -> Unit {
   let entry = match @moonbook.entry_for_book_id(catalog, execution.book_id) {
     Some(entry) => entry
@@ -487,6 +481,14 @@ async fn retry_execution(
   persist_execution_into_book(state, entry, updated)
   if terminal_execution_status(updated.status) {
     finalize_goal_book_entry(state, entry, 0, [updated.task_id])
+    let observed = finalize_standing_watch_supervision_record(
+      state, entry, updated, standing_goals, snapshot_path,
+    )
+    if observed != updated {
+      state.replace_execution(observed)
+      state.replace_task(task_for_supervision(state, observed))
+      sync_worker_from_execution(state, observed)
+    }
   }
 }
 

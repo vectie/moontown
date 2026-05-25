@@ -208,6 +208,44 @@ async fn append_daemon_log(path : String, message : String) -> Unit {
 }
 
 ///|
+fn daemon_parse_positive_int(text : String) -> Int {
+  let mut seen = false
+  let mut value = 0
+  for char in text.trim() {
+    if char >= '0' && char <= '9' {
+      value = value * 10 + (char.to_int() - '0'.to_int())
+      seen = true
+    } else {
+      return 0
+    }
+  }
+  if seen && value > 0 {
+    value
+  } else {
+    0
+  }
+}
+
+///|
+async fn daemon_current_process_pid(snapshot_path : String) -> Int {
+  let tmp_path = "\{daemon_base_dir(snapshot_path)}/daemon-current.pid.tmp"
+  ensure_parent_directory(tmp_path) catch {
+    _ => return 0
+  }
+  let status = @process.run("sh", [
+    "-c", "printf '%s\\n' \"$PPID\" > \"$1\"", "moontown-pid", tmp_path,
+  ]) catch {
+    _ => return 0
+  }
+  if status != 0 {
+    return 0
+  }
+  let text = @fs.read_file(tmp_path).text() catch { _ => return 0 }
+  remove_file_if_exists(tmp_path)
+  daemon_parse_positive_int(text)
+}
+
+///|
 async fn write_daemon_pid_file(path : String, pid : Int) -> Unit {
   write_text_file(path, "\{pid}\n") catch {
     _ => ()
@@ -350,6 +388,7 @@ async fn mark_daemon_worker_started(
   snapshot_path : String,
   worker_pid : Int,
   worker_run_id : String,
+  clear_supervisor? : Bool = false,
 ) -> Unit {
   let runtime_path = default_daemon_runtime_path(snapshot_path~)
   let log_path = default_daemon_log_path(snapshot_path~)
@@ -360,6 +399,16 @@ async fn mark_daemon_worker_started(
   save_daemon_runtime_state(runtime_path, {
     ..previous,
     status: "running",
+    supervisor_pid: if clear_supervisor {
+      0
+    } else {
+      previous.supervisor_pid
+    },
+    supervisor_run_id: if clear_supervisor {
+      ""
+    } else {
+      previous.supervisor_run_id
+    },
     worker_pid,
     worker_run_id,
     started_at_ms: if previous.started_at_ms == 0UL {
@@ -373,6 +422,9 @@ async fn mark_daemon_worker_started(
     log_path,
   })
   write_daemon_pid_file(default_daemon_pid_path(snapshot_path~), worker_pid)
+  if clear_supervisor {
+    remove_file_if_exists(default_daemon_supervisor_pid_path(snapshot_path~))
+  }
 }
 
 ///|
@@ -580,9 +632,13 @@ pub async fn daemon_supervise_saved_town(
 ) -> String {
   let command = daemon_command_or_current(command)
   let run_id = daemon_run_id("supervisor")
+  let supervisor_pid = daemon_current_process_pid(snapshot_path)
+  if supervisor_pid > 0 {
+    mark_daemon_supervisor_started(snapshot_path, supervisor_pid, run_id)
+  }
   append_daemon_log(
     default_daemon_log_path(snapshot_path~),
-    "supervisor loop entered run=\{run_id}",
+    "supervisor loop entered run=\{run_id} pid=\{supervisor_pid}",
   )
   let mut checks = 0
   let mut latest = ""

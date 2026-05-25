@@ -202,9 +202,13 @@ pub async fn daemon_tick_saved_town(
   }
   let state = saved.town
   let next_tick_sequence = daemon.tick_sequence + 1
-  run_supervision_cycle(state, mayor, catalog)
+  run_supervision_cycle(state, mayor, catalog, snapshot_path~, standing_goals~)
+  let standing_goals_after_supervision = @storage.load_or_create_standing_goals(
+    path=goal_path,
+  )
   let updated_goals = dispatch_due_standing_goals(
-    state, mayor, catalog, standing_goals, next_tick_sequence, snapshot_path,
+    state, mayor, catalog, standing_goals_after_supervision, next_tick_sequence,
+    snapshot_path,
   )
   @storage.save_standing_goals_file(goal_path, updated_goals)
   persist_town_checkpoint(state, snapshot_path)
@@ -213,7 +217,7 @@ pub async fn daemon_tick_saved_town(
     daemon,
     state,
     report,
-    standing_goals~,
+    standing_goals=updated_goals,
   )
   save_daemon_state(daemon_path, next_daemon)
   state.record_event(
@@ -290,12 +294,22 @@ pub async fn daemon_run_saved_town(
   book_catalog_path? : String = @moonbook.default_catalog_path(),
   max_ticks? : Int = 0,
   sleep_ms? : Int = 30_000,
+  preserve_supervisor? : Bool = false,
 ) -> String {
   let worker_run_id = daemon_run_id("worker")
   let log_path = default_daemon_log_path(snapshot_path~)
+  let worker_pid = daemon_current_process_pid(snapshot_path)
+  if worker_pid > 0 {
+    mark_daemon_worker_started(
+      snapshot_path,
+      worker_pid,
+      worker_run_id,
+      clear_supervisor=!preserve_supervisor,
+    )
+  }
   append_daemon_log(
     log_path,
-    "worker loop entered run=\{worker_run_id} max_ticks=\{max_ticks} sleep_ms=\{sleep_ms}",
+    "worker loop entered run=\{worker_run_id} pid=\{worker_pid} max_ticks=\{max_ticks} sleep_ms=\{sleep_ms}",
   )
   let mut ticks = 0
   let mut latest = ""

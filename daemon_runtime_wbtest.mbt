@@ -90,3 +90,11 @@ test "daemon process args keep direct executable clean" {
   ]).join(" ")
   assert_true(args == "daemon run --worker")
 }
+
+///|
+test "daemon pid parser rejects noisy input" {
+  assert_eq(daemon_parse_positive_int("12345"), 12345)
+  assert_eq(daemon_parse_positive_int(" 42\n"), 42)
+  assert_eq(daemon_parse_positive_int(""), 0)
+  assert_eq(daemon_parse_positive_int("42x"), 0)
+}

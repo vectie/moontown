@@ -209,6 +209,12 @@ not worker sessions.
   -> Moontown advances next_due_tick with backoff
 ```
 
+Retries use the same ownership boundary. Moontown may retry or poll the
+execution, but it does not reinterpret the domain result. After a retry settles,
+Moontown asks the target MoonBook history for the final standing-watch decision,
+records a corrected watcher ledger row, and advances the standing goal from
+that MoonBook decision.
+
 The first default standing goal is `watch-opc-news`, which targets the dynamic
 `research-opc` book and uses a web-first source policy. The Mayor owns when it
 runs. The `research-opc` keeper owns what gets remembered. MoonClaw workers own
@@ -306,9 +312,10 @@ The daemon persists:
   standing-watch decisions, no-change/update/review/failure records, and next
   due ticks
 
-This is now local multi-day process management, not an OS-installed service.
-Remaining hardening is launchd/systemd/container packaging, external watchdog
-integration, and browser/backend live sync.
+This is now local multi-day process management. On macOS, the included launchd
+installer runs `daemon run` as a foreground worker supervised by the OS. Remaining
+hardening is systemd/container packaging, external watchdog integration, and
+browser/backend live sync.
 
 The daemon launcher resolves the command from `MOONTOWN_DAEMON_COMMAND`,
 `MOON_BIN`, then `$HOME/.moon/bin/moon`. The default dev path launches

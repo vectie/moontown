@@ -17,7 +17,8 @@ async fn main {
       println(@moontown.daemon_supervise_saved_town(max_checks=1, sleep_ms=0))
     ["daemon", "run", "--once"] =>
       println(@moontown.daemon_run_saved_town(max_ticks=1, sleep_ms=0))
-    ["daemon", "run", "--worker"] => println(@moontown.daemon_run_saved_town())
+    ["daemon", "run", "--worker"] =>
+      println(@moontown.daemon_run_saved_town(preserve_supervisor=true))
     ["daemon", "run"] => println(@moontown.daemon_run_saved_town())
     ["run", .. rest] =>
       println(@moontown.render_goal_run(rest.to_array().join(" ")))

@@ -157,6 +157,12 @@ daemon tick
   -> next_due_tick advances with update/no-change/review/failure backoff
 ```
 
+If a MoonClaw run is retried, the Mayor records the retry as operational
+history and then re-reads the MoonBook standing-watch decision after the retry
+settles. The final watcher row must contain the real task/run id and strict
+accounting markers, so tomorrow's status view can distinguish "still alive and
+checked sources" from "process churn happened".
+
 Required MoonBook result marker:
 
 ```text
@@ -293,6 +299,20 @@ the foreground instead:
 
 ```bash
 moon run cmd/main -- daemon run
+```
+
+On macOS, install the foreground worker under launchd so it survives shell,
+Codex, and terminal cleanup:
+
+```bash
+./scripts/install-launchd-daemon.sh
+moon run cmd/main -- daemon doctor
+```
+
+Stop the launchd-managed daemon:
+
+```bash
+./scripts/uninstall-launchd-daemon.sh
 ```
 
 Run a single daemon-loop iteration for verification:

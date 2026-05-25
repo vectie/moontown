@@ -13,7 +13,7 @@ import {
 // Values
 pub async fn daemon_doctor_saved_town(snapshot_path? : String, stale_after_ms? : UInt64) -> String
 
-pub async fn daemon_run_saved_town(snapshot_path? : String, book_catalog_path? : String, max_ticks? : Int, sleep_ms? : Int) -> String
+pub async fn daemon_run_saved_town(snapshot_path? : String, book_catalog_path? : String, max_ticks? : Int, sleep_ms? : Int, preserve_supervisor? : Bool) -> String
 
 pub fn daemon_runtime_health_summary(DaemonRuntimeHealth) -> String
 

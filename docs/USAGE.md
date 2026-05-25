@@ -33,15 +33,15 @@ Right now, `moontown` is usable as:
 
 It is not yet usable as:
 
-- an OS-installed launchd/systemd/container service
+- a packaged cross-platform systemd/container service
 - a backend-synced browser UI
 
 So the right way to use the repo today is as a real goal-run control plane plus
 a live architectural and frontend prototype. It can launch and observe bounded
 MoonBook/MoonClaw research runs, and it has the first durable daemon tick seam,
 plus a supervised standing-goal daemon loop. It is now suitable for local
-multi-day supervised testing, while production service packaging is still a
-separate layer.
+multi-day supervised testing on macOS through the included launchd installer,
+while cross-platform production service packaging is still a separate layer.
 
 ## 1. Run The Text Dashboard
 
@@ -147,6 +147,13 @@ The daemon loop repeats the restart-safe tick. Each tick:
 - appends `.moontown/watchers/<goal-id>.jsonl`
 - sleeps before the next tick
 
+If a standing-watch handoff has to retry, the Mayor keeps polling the MoonClaw
+run and then re-reads the MoonBook standing-watch history before final
+accounting. A successful retry appends a corrected watcher ledger row with the
+real task/run id and updates `next_due_tick`; the earlier failed or deferred row
+stays in the append-only log as an operational trail, not as final research
+truth.
+
 `daemon start` runs a background supervisor process, and that supervisor runs a
 worker loop. The supervisor watches PID liveness and heartbeat age. If the
 worker exits or its heartbeat becomes stale, the supervisor records the event in
@@ -168,6 +175,42 @@ If a host process manager aggressively cleans up child processes, run
 `daemon start`. The Codex execution harness does this cleanup, so local smoke
 tests should use `daemon run --once`, `daemon supervise --once`, and
 `daemon doctor`; a normal terminal or OS service wrapper can use `daemon start`.
+
+For overnight macOS runs, prefer launchd. This runs the foreground worker under
+the OS instead of relying on a detached child process:
+
+```bash
+./scripts/install-launchd-daemon.sh
+moon run cmd/main -- daemon doctor
+tail -f .moontown/daemon.log
+```
+
+The installer writes `.moontown/launchd/com.vectie.moontown.daemon.plist`,
+loads it into the current user launchd domain, and points stdout/stderr at:
+
+- `.moontown/launchd.out.log`
+- `.moontown/launchd.err.log`
+
+Stop it with:
+
+```bash
+./scripts/uninstall-launchd-daemon.sh
+```
+
+Overnight validation checklist:
+
+- `moon run cmd/main -- daemon doctor` should report a fresh heartbeat and a
+  non-stale runtime.
+- `.moontown/daemon.json` should show `tick_sequence` increasing.
+- `.moontown/watchers/watch-opc-news.jsonl` should contain a new record after
+  the OPC standing goal reaches `next_due_tick`.
+- `.moontown/watchers/watch-llm-training.jsonl` should contain a new record
+  after the LLM watcher reaches `next_due_tick`.
+- A real no-change cycle is still progress only if it reports nonzero checked
+  sources and clear accepted/rejected accounting.
+- A retry is healthy only when the latest row for that task/run is
+  `Update`, `NoChange`, or `NeedsReview`; an older `Failed` row may remain as
+  historical evidence of the retry path.
 
 Standing goals are data-driven. To add another long-horizon watcher, edit
 `.moontown/standing-goals.json`; no MoonBit code change is required as long as
