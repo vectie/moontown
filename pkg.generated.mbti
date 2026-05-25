@@ -2,6 +2,7 @@
 package "vectie/moontown"
 
 import {
+  "moonbitlang/core/debug",
   "moonbitlang/core/json",
   "vectie/moontown/adapters/moonbook",
   "vectie/moontown/core",
@@ -10,9 +11,29 @@ import {
 }
 
 // Values
+pub async fn daemon_doctor_saved_town(snapshot_path? : String, stale_after_ms? : UInt64) -> String
+
 pub async fn daemon_run_saved_town(snapshot_path? : String, book_catalog_path? : String, max_ticks? : Int, sleep_ms? : Int) -> String
 
+pub fn daemon_runtime_health_summary(DaemonRuntimeHealth) -> String
+
+pub async fn daemon_start_saved_town(snapshot_path? : String, command? : String, stale_after_ms? : UInt64) -> String
+
+pub async fn daemon_stop_saved_town(snapshot_path? : String) -> String
+
+pub async fn daemon_supervise_saved_town(snapshot_path? : String, command? : String, max_checks? : Int, sleep_ms? : Int, stale_after_ms? : UInt64) -> String
+
 pub async fn daemon_tick_saved_town(snapshot_path? : String, book_catalog_path? : String) -> String
+
+pub fn default_daemon_log_path(snapshot_path? : String) -> String
+
+pub fn default_daemon_pid_path(snapshot_path? : String) -> String
+
+pub fn default_daemon_runtime_path(snapshot_path? : String) -> String
+
+pub fn default_daemon_stop_path(snapshot_path? : String) -> String
+
+pub fn default_daemon_supervisor_pid_path(snapshot_path? : String) -> String
 
 pub fn demo_dashboard() -> String
 
@@ -25,6 +46,8 @@ pub fn demo_state_from_catalog(Array[@moonbook.BookCatalogEntry]) -> @core.TownS
 pub fn demo_state_snapshot() -> String
 
 pub fn[Provider : @core.BookProvider] demo_state_with_provider(Provider) -> @core.TownState
+
+pub async fn inspect_daemon_runtime(snapshot_path? : String, stale_after_ms? : UInt64) -> DaemonRuntimeHealth
 
 pub async fn inspect_saved_town(snapshot_path? : String) -> TownRuntimeStatus
 
@@ -51,6 +74,45 @@ pub async fn supervise_saved_town(snapshot_path? : String, book_catalog_path? : 
 // Errors
 
 // Types and methods
+pub struct DaemonRuntimeHealth {
+  status : String
+  supervisor_pid : Int
+  worker_pid : Int
+  supervisor_alive : Bool
+  worker_alive : Bool
+  heartbeat_age_ms : UInt64
+  stale : Bool
+  stop_requested : Bool
+  tick_success_count : Int
+  tick_failure_count : Int
+  last_error : String
+  log_path : String
+} derive(Eq, ToJson, @debug.Debug, @json.FromJson)
+pub fn DaemonRuntimeHealth::healthy(Self) -> Bool
+
+pub struct DaemonRuntimeState {
+  daemon_id : String
+  status : String
+  supervisor_pid : Int
+  worker_pid : Int
+  supervisor_run_id : String
+  worker_run_id : String
+  started_at_ms : UInt64
+  last_heartbeat_ms : UInt64
+  last_tick_started_ms : UInt64
+  last_tick_finished_ms : UInt64
+  last_success_ms : UInt64
+  last_failure_ms : UInt64
+  tick_success_count : Int
+  tick_failure_count : Int
+  stop_requested : Bool
+  last_error : String
+  log_path : String
+} derive(Eq, ToJson, @debug.Debug, @json.FromJson)
+pub fn DaemonRuntimeState::heartbeat_age_ms(Self, UInt64) -> UInt64
+pub fn DaemonRuntimeState::is_stale(Self, UInt64, UInt64) -> Bool
+pub fn DaemonRuntimeState::new(daemon_id? : String, status? : String, supervisor_pid? : Int, worker_pid? : Int, supervisor_run_id? : String, worker_run_id? : String, started_at_ms? : UInt64, last_heartbeat_ms? : UInt64, last_tick_started_ms? : UInt64, last_tick_finished_ms? : UInt64, last_success_ms? : UInt64, last_failure_ms? : UInt64, tick_success_count? : Int, tick_failure_count? : Int, stop_requested? : Bool, last_error? : String, log_path? : String) -> Self
+
 pub struct ResearchReadiness {
   book_id : String
   root : String

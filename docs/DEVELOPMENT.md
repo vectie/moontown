@@ -102,6 +102,9 @@ Use these commands while developing the loop:
 moon run cmd/main -- status
 moon run cmd/main -- daemon tick
 moon run cmd/main -- daemon run --once
+moon run cmd/main -- daemon start
+moon run cmd/main -- daemon doctor
+moon run cmd/main -- daemon stop
 ```
 
 Do not put durable research memory in Moontown. Standing goals belong to the

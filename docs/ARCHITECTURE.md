@@ -274,28 +274,47 @@ Moontown exposes an operator-readable runtime status seam:
 
 - [runtime_status.mbt](/Users/kq/Workspace/moontown/runtime_status.mbt)
 
-The daemon implementation now has two levels:
+The daemon implementation now has three levels:
 
 - `daemon tick`
   runs one restart-safe mayor supervision cycle and bootstraps a saved town if
   no snapshot exists.
 - `daemon run`
   repeats durable ticks and sleeps between iterations.
+- `daemon start`
+  starts a supervised background runtime with a supervisor process and a worker
+  process. The supervisor watches process liveness and heartbeat age, then
+  restarts a missing or stale worker.
 
 The daemon persists:
 
 - `.moontown/daemon.json`
   daemon tick, lease owner, heartbeat event count, active standing goal ids, and
   scheduled job metadata
+- `.moontown/daemon-runtime.json`
+  supervisor/worker process ids, run ids, heartbeat and tick timestamps,
+  success/failure counters, stop-request state, and last error
+- `.moontown/daemon.log`
+  append-only supervisor/worker lifecycle and guarded tick records
+- `.moontown/daemon.pid`
+  current daemon worker process id
+- `.moontown/daemon-supervisor.pid`
+  current daemon supervisor process id
 - `.moontown/standing-goals.json`
   standing goal registry, cadence, target book, source policy, and next due tick
 - `.moontown/watchers/*.jsonl`
   standing-watch decisions, no-change/update/review/failure records, and next
   due ticks
 
-This is not yet production-grade multi-day process management. Missing hardening
-still includes lease expiry, process identity, crash fencing, backoff policy,
-external service supervision, and browser/backend live sync.
+This is now local multi-day process management, not an OS-installed service.
+Remaining hardening is launchd/systemd/container packaging, external watchdog
+integration, and browser/backend live sync.
+
+The daemon launcher resolves the command from `MOONTOWN_DAEMON_COMMAND`,
+`MOON_BIN`, then `$HOME/.moon/bin/moon`. The default dev path launches
+`moon run cmd/main -- daemon ...`. Hosts that reap detached descendants should
+run `daemon run` under their own process manager instead of relying on
+`daemon start`.
 
 ### Dispatch
 

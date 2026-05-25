@@ -54,7 +54,8 @@ Implemented today:
 - run polling, result persistence, and review-queue surfacing for goal runs
 - mayor-level cross-book research synthesis under `.moontown/town-synthesis/`
 - town quality gates for provisional or non-lane-specific research output
-- one-shot and continuous daemon commands for mayor supervision
+- one-shot, foreground, and supervised background daemon commands for mayor supervision
+- daemon runtime health, heartbeat, PID, log, stale-worker detection, and restart policy
 - standing-goal due planning and dispatch into explicit MoonBook keeper lanes
 - strategic `Mayor` role adapter over embedded moonclaw runtime metadata
 - routing, isolation, scheduler, health, and storage packages
@@ -64,12 +65,13 @@ Implemented today:
 
 Still incomplete:
 
-- production-grade multi-day process management, lease expiry, and crash recovery
+- OS-level service installation through launchd/systemd/container supervision
 - experiment lifecycle execution
 - real backend/frontend sync
 
-So the current repo now has the first real standing-goal daemon seam, but it is
-not yet a production-grade 24/7 service manager.
+So the current repo now has a local supervised 24/7 daemon seam. It can run a
+background supervisor/worker pair, detect stale workers, restart them, and
+record runtime health, but it is not yet packaged as an operating-system service.
 
 ## Current Capabilities
 
@@ -268,6 +270,26 @@ moon run cmd/main -- daemon tick
 ```
 
 Run the durable daemon loop:
+
+```bash
+moon run cmd/main -- daemon run
+```
+
+Start the supervised background daemon:
+
+```bash
+moon run cmd/main -- daemon start
+moon run cmd/main -- daemon doctor
+```
+
+Stop the supervised background daemon:
+
+```bash
+moon run cmd/main -- daemon stop
+```
+
+If the host process manager cleans up detached children, run the worker loop in
+the foreground instead:
 
 ```bash
 moon run cmd/main -- daemon run

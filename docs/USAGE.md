@@ -26,21 +26,22 @@ Right now, `moontown` is usable as:
 - a real MoonBook result-persistence and generated-site refresh boundary for goal runs
 - a mayor-level synthesis and quality-gate surface for parallel research lanes
 - typed runtime status and one-shot daemon tick commands
-- persisted standing goals and a continuous daemon-loop command
+- persisted standing goals, a continuous daemon-loop command, and a supervised background daemon
 - a scene-based dashboard
 - a Rabbita simulation frontend
 - a starter asset pipeline
 
 It is not yet usable as:
 
-- a production-hardened multi-day restart/recovery supervisor
+- an OS-installed launchd/systemd/container service
 - a backend-synced browser UI
 
 So the right way to use the repo today is as a real goal-run control plane plus
 a live architectural and frontend prototype. It can launch and observe bounded
 MoonBook/MoonClaw research runs, and it has the first durable daemon tick seam,
-plus the first standing-goal daemon loop. It is not yet a production service
-manager.
+plus a supervised standing-goal daemon loop. It is now suitable for local
+multi-day supervised testing, while production service packaging is still a
+separate layer.
 
 ## 1. Run The Text Dashboard
 
@@ -103,6 +104,24 @@ report planned next actions.
 
 ## 1.3 Run The Standing-Goal Daemon Loop
 
+Start the supervised background daemon:
+
+```bash
+moon run cmd/main -- daemon start
+```
+
+Inspect the supervisor/worker health:
+
+```bash
+moon run cmd/main -- daemon doctor
+```
+
+Stop the supervised background daemon:
+
+```bash
+moon run cmd/main -- daemon stop
+```
+
 Run the continuous daemon loop:
 
 ```bash
@@ -127,6 +146,28 @@ The daemon loop repeats the restart-safe tick. Each tick:
 - persists checkpoint and standing-goal next due state
 - appends `.moontown/watchers/<goal-id>.jsonl`
 - sleeps before the next tick
+
+`daemon start` runs a background supervisor process, and that supervisor runs a
+worker loop. The supervisor watches PID liveness and heartbeat age. If the
+worker exits or its heartbeat becomes stale, the supervisor records the event in
+`.moontown/daemon.log` and starts a fresh worker. The worker records every tick
+start, tick success, and tick failure so a bad watcher cycle does not silently
+kill the long-lived daemon.
+
+Launcher selection is environment-driven:
+
+- `MOONTOWN_DAEMON_COMMAND`
+  overrides the command used by `daemon start`.
+- `MOON_BIN`
+  overrides the MoonBit runner path.
+- default
+  uses `$HOME/.moon/bin/moon` and launches `moon run cmd/main -- daemon ...`.
+
+If a host process manager aggressively cleans up child processes, run
+`daemon run` in the foreground under that manager instead of using
+`daemon start`. The Codex execution harness does this cleanup, so local smoke
+tests should use `daemon run --once`, `daemon supervise --once`, and
+`daemon doctor`; a normal terminal or OS service wrapper can use `daemon start`.
 
 Standing goals are data-driven. To add another long-horizon watcher, edit
 `.moontown/standing-goals.json`; no MoonBit code change is required as long as
@@ -206,6 +247,10 @@ The demo town persists runtime bootstrap files under:
 - `.moontown/town.json`
 - `.moontown/daemon.json`
 - `.moontown/packets/` when packet files are exported
+- `.moontown/daemon-runtime.json`
+- `.moontown/daemon.log`
+- `.moontown/daemon.pid`
+- `.moontown/daemon-supervisor.pid`
 - `.moontown/standing-goals.json`
 - `.moontown/watchers/*.jsonl`
 - `.moontown/books/<book>/` for MoonBook lane workspaces
@@ -219,6 +264,14 @@ What they do:
   - stores the seeded town snapshot
 - `.moontown/daemon.json`
   - stores daemon state, tick sequence, lease owner, heartbeat event count, active goal ids, and scheduled job metadata
+- `.moontown/daemon-runtime.json`
+  - stores supervised daemon process state, heartbeat times, tick counters, last error, and stop-request status
+- `.moontown/daemon.log`
+  - stores supervisor and worker lifecycle records for restart/debug accounting
+- `.moontown/daemon.pid`
+  - stores the current daemon worker process id
+- `.moontown/daemon-supervisor.pid`
+  - stores the current daemon supervisor process id
 - `.moontown/standing-goals.json`
   - stores Mayor-owned standing goals, target book, cadence, source policy, last run tick, and next due tick
 - `.moontown/watchers/*.jsonl`

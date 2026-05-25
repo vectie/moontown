@@ -151,6 +151,7 @@ pub async fn render_saved_town_status(
 ) -> String {
   let status = inspect_saved_town(snapshot_path~)
   let daemon = load_daemon_state(default_daemon_state_path(snapshot_path))
+  let runtime = inspect_daemon_runtime(snapshot_path~)
   let builder = StringBuilder::new()
   builder.write_string("Moontown status\n")
   builder.write_string("\{status.summary}\n")
@@ -161,6 +162,7 @@ pub async fn render_saved_town_status(
   builder.write_string(
     "daemon=\{daemon.daemon_id} tick=\{daemon.tick_sequence} lease=\{daemon.lease_owner} jobs=\{daemon.jobs.length()}\n",
   )
+  builder.write_string("\{daemon_runtime_health_summary(runtime)}\n")
   builder.write_string(
     "standing_goals=\{status.standing_goal_count} due_next_tick=\{status.due_standing_goal_count}\n",
   )
@@ -289,15 +291,48 @@ pub async fn daemon_run_saved_town(
   max_ticks? : Int = 0,
   sleep_ms? : Int = 30_000,
 ) -> String {
+  let worker_run_id = daemon_run_id("worker")
+  let log_path = default_daemon_log_path(snapshot_path~)
+  append_daemon_log(
+    log_path,
+    "worker loop entered run=\{worker_run_id} max_ticks=\{max_ticks} sleep_ms=\{sleep_ms}",
+  )
   let mut ticks = 0
   let mut latest = ""
   while max_ticks <= 0 || ticks < max_ticks {
-    latest = daemon_tick_saved_town(snapshot_path~, book_catalog_path~)
+    if daemon_stop_requested(snapshot_path) {
+      latest = "daemon stop requested"
+      break
+    }
+    mark_daemon_tick_started(snapshot_path, worker_run_id)
+    let mut ok = true
+    latest = daemon_tick_saved_town(snapshot_path~, book_catalog_path~) catch {
+      error => {
+        ok = false
+        "daemon tick failed: \{error}"
+      }
+    }
+    mark_daemon_tick_finished(snapshot_path, ok, latest)
+    append_daemon_log(
+      log_path,
+      if ok {
+        "tick ok index=\{ticks + 1}"
+      } else {
+        "tick failed index=\{ticks + 1}: \{latest}"
+      },
+    )
     ticks += 1
     if max_ticks > 0 && ticks >= max_ticks {
       break
     }
     @async.sleep(sleep_ms)
+  }
+  if latest == "daemon stop requested" {
+    mark_daemon_stopped(snapshot_path, "worker stopped by request")
+    append_daemon_log(log_path, "worker stopped run=\{worker_run_id}")
+  } else if max_ticks > 0 {
+    mark_daemon_stopped(snapshot_path, "worker completed bounded run")
+    append_daemon_log(log_path, "worker completed bounded run=\{worker_run_id}")
   }
   "Moontown daemon run completed ticks=\{ticks}\n\{latest}"
 }
