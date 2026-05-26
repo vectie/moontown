@@ -39,6 +39,17 @@ asset prompt/spec
   -> Rabbita/Pixi/Canvas renderer
 ```
 
+The interactive Wenyu feature layer is specified separately in
+`docs/WENYU_UI_MODULE_SYSTEM.md`. The important split is:
+
+- this document owns terrain, generated tiles, map assembly, and depth sorting
+- `WENYU_UI_MODULE_SYSTEM.md` owns civic module buildings, interiors, and
+  runtime bindings
+
+Do not bake civic service UI into the base terrain raster. The base map should
+remain a calm Wenyu Valley landscape; optional service buildings should be
+loaded from module configuration and rendered above it.
+
 ## Asset Procedure
 
 ### 1. Define The Tile Vocabulary
@@ -148,6 +159,8 @@ ui/assets/tilemap/
   maps/
     wenyu-valley.tmj
     wenyu-valley.json
+  modules/
+    wenyu-town-modules.json
   manifest.json
 ```
 

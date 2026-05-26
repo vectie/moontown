@@ -261,6 +261,13 @@ Accounting rule: retries, generated site rebuilds, journal maintenance, and
 failed/no-change checks are not research evidence. Only MoonBook-accepted facts,
 review items, and changed durable book pages count as book progress.
 
+Moontown also normalizes MoonBook summary accounting at the adapter boundary:
+
+- `evidence_count` means domain evidence used for readiness.
+- `operational_evidence_count` means watcher audits, no-change patrol records,
+  run wrappers, and other control-plane evidence.
+- `total_evidence_count` preserves the raw support-record count for audit trails.
+
 The latest verified no-change shape looks like this:
 
 ```text

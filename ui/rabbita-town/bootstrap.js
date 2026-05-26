@@ -151,6 +151,19 @@ async function boot() {
     globalThis.__wenyuReferenceLabels = null
   }
 
+  try {
+    const response = await fetch('./tilemap/modules/wenyu-town-modules.json', { cache: 'no-store' })
+    if (response.ok) {
+      globalThis.__wenyuTownModulesJson = await response.text()
+      globalThis.__wenyuTownModulesVersion =
+        (globalThis.__wenyuTownModulesVersion || 0) + 1
+    } else {
+      globalThis.__wenyuTownModulesJson = '{"modules":[]}'
+    }
+  } catch {
+    globalThis.__wenyuTownModulesJson = '{"modules":[]}'
+  }
+
   await import('/main.js')
   installViewportDragPan()
 }

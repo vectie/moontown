@@ -61,5 +61,5 @@ pub fn ResearchReadiness::summary_line(self : ResearchReadiness) -> String {
   } else {
     "not-ready"
   }
-  "\{self.book_id}: \{status}; sources=\{self.verified_source_count}; evidence=\{self.evidence_count}; entities=\{self.entity_page_count}; concepts=\{self.concept_page_count}; review=\{self.pending_review_count}"
+  "\{self.book_id}: \{status}; sources=\{self.verified_source_count}; domain_evidence=\{self.evidence_count}; entities=\{self.entity_page_count}; concepts=\{self.concept_page_count}; review=\{self.pending_review_count}"
 }

@@ -306,6 +306,33 @@ priv struct OperatorRequestSubmitResult {
 } derive(FromJson)
 
 ///|
+priv struct WenyuTownModuleConfig {
+  version : Int
+  description : String
+  modules : Array[WenyuTownModule]
+} derive(FromJson)
+
+///|
+priv struct WenyuTownModule {
+  id : String
+  enabled : Bool
+  title : String
+  book_id : String
+  district : String
+  building_kind : String
+  grid_x : Int
+  grid_y : Int
+  footprint_w : Int
+  footprint_h : Int
+  entrance_x : Int
+  entrance_y : Int
+  interior_kind : String
+  asset_base : String
+  asset_roof : String
+  summary : String
+} derive(FromJson)
+
+///|
 extern "js" fn load_bootstrap_town_snapshot_json() -> String =
   #| () => globalThis.__moontownTownSnapshotJson || ""
 
@@ -352,6 +379,14 @@ extern "js" fn load_bootstrap_operator_requests_json() -> String =
 ///|
 extern "js" fn operator_requests_version() -> Int =
   #| () => globalThis.__moontownOperatorRequestsVersion || 0
+
+///|
+extern "js" fn load_bootstrap_wenyu_modules_json() -> String =
+  #| () => globalThis.__wenyuTownModulesJson || "{\"modules\":[]}"
+
+///|
+extern "js" fn wenyu_modules_version() -> Int =
+  #| () => globalThis.__wenyuTownModulesVersion || 0
 
 ///|
 extern "js" fn submit_operator_request_json(
@@ -527,6 +562,41 @@ fn parse_operator_requests_json(
   @json.from_json(parsed) catch {
     _ => []
   }
+}
+
+///|
+fn parse_bootstrap_wenyu_modules() -> Array[WenyuTownModule] {
+  let text = load_bootstrap_wenyu_modules_json()
+  if text == "" {
+    return []
+  }
+  let parsed = @json.parse(text) catch { _ => return [] }
+  let config : WenyuTownModuleConfig = @json.from_json(parsed) catch {
+    _ => return []
+  }
+  ignore(config.version)
+  ignore(config.description)
+  config.modules.filter(civic => civic.enabled)
+}
+
+///|
+fn wenyu_modules() -> Array[WenyuTownModule] {
+  parse_bootstrap_wenyu_modules()
+}
+
+///|
+fn wenyu_module_count() -> Int {
+  wenyu_modules().length()
+}
+
+///|
+fn find_wenyu_module(module_id : String) -> WenyuTownModule? {
+  for civic in wenyu_modules() {
+    if civic.id == module_id {
+      return Some(civic)
+    }
+  }
+  None
 }
 
 ///|
@@ -6278,6 +6348,269 @@ fn render_tilemap_layer() -> @rabbita.Html {
 }
 
 ///|
+fn render_water_effect_layer() -> @rabbita.Html {
+  if !standalone_viewport_requested() {
+    return div(
+      class="water-effect-layer water-effect-layer-empty",
+      no_children(),
+    )
+  }
+  div(class="water-effect-layer", [
+    div(class="water-depth water-depth-main-river", no_children()),
+    div(class="water-depth water-depth-central-lake", no_children()),
+    div(class="water-depth water-depth-south-lake", no_children()),
+    div(class="water-reflection water-reflection-north", no_children()),
+    div(class="water-reflection water-reflection-center", no_children()),
+    div(class="water-reflection water-reflection-south", no_children()),
+    div(class="bridge-shadow bridge-shadow-north", no_children()),
+    div(class="bridge-shadow bridge-shadow-center", no_children()),
+    div(class="bridge-shadow bridge-shadow-south", no_children()),
+  ])
+}
+
+///|
+fn wenyu_module_status_class(
+  civic : WenyuTownModule,
+  executions : Array[@core.TaskExecutionRecord],
+) -> String {
+  match find_book_execution(executions, civic.book_id) {
+    Some(execution) =>
+      match execution.status {
+        @core.TaskExecutionStatus::Running
+        | @core.TaskExecutionStatus::RunConfirmed => "module-status-running"
+        @core.TaskExecutionStatus::AwaitingPersistence
+        | @core.TaskExecutionStatus::ReviewQueued => "module-status-review"
+        @core.TaskExecutionStatus::Failed | @core.TaskExecutionStatus::Stale =>
+          "module-status-alert"
+        @core.TaskExecutionStatus::Completed => "module-status-complete"
+        _ => "module-status-waiting"
+      }
+    None => "module-status-calm"
+  }
+}
+
+///|
+fn wenyu_module_status_label(
+  civic : WenyuTownModule,
+  executions : Array[@core.TaskExecutionRecord],
+) -> String {
+  match find_book_execution(executions, civic.book_id) {
+    Some(execution) => execution.status.to_string()
+    None => "Configured"
+  }
+}
+
+///|
+fn render_wenyu_module_building(
+  dispatch : Dispatch[Msg],
+  civic : WenyuTownModule,
+  executions : Array[@core.TaskExecutionRecord],
+  selected_node_key : String?,
+) -> @rabbita.Html {
+  let width = 92 + civic.footprint_w * 7
+  let height = 76 + civic.footprint_h * 8
+  let selected_suffix = if selected_node_key == Some(civic.id) {
+    " selected"
+  } else {
+    ""
+  }
+  let style = [
+    "left: \{iso_tile_left(civic.grid_x, civic.grid_y)}px",
+    "top: \{iso_tile_top(civic.grid_x, civic.grid_y)}px",
+    "z-index: \{260 + civic.grid_x + civic.grid_y}",
+    "--module-width: \{width}px",
+    "--module-height: \{height}px",
+    "--module-image: url('\{civic.asset_base}')",
+    "--module-roof-image: url('\{civic.asset_roof}')",
+  ]
+  button(
+    class="wenyu-module-building wenyu-module-\{civic.building_kind} \{wenyu_module_status_class(civic, executions)}\{selected_suffix}",
+    style~,
+    title="\{civic.title}: \{civic.summary}",
+    on_click=dispatch(SelectNode(civic.id)),
+    [
+      span(class="wenyu-module-shadow", no_children()),
+      span(class="wenyu-module-sprite", no_children()),
+      span(class="wenyu-module-light", no_children()),
+      span(class="wenyu-module-label", [
+        span(class="wenyu-module-title", civic.title),
+        span(class="wenyu-module-district", civic.district),
+        span(
+          class="wenyu-module-state",
+          wenyu_module_status_label(civic, executions),
+        ),
+      ]),
+    ],
+  )
+}
+
+///|
+fn render_wenyu_module_building_layer(
+  dispatch : Dispatch[Msg],
+  executions : Array[@core.TaskExecutionRecord],
+  selected_node_key : String?,
+) -> @rabbita.Html {
+  if !standalone_viewport_requested() {
+    return div(
+      class="wenyu-module-layer wenyu-module-layer-empty",
+      no_children(),
+    )
+  }
+  let children : Array[@rabbita.Html] = []
+  for civic in wenyu_modules() {
+    children.push(
+      render_wenyu_module_building(
+        dispatch, civic, executions, selected_node_key,
+      ),
+    )
+  }
+  div(class="wenyu-module-layer", children)
+}
+
+///|
+fn module_workers(
+  civic : WenyuTownModule,
+  workers : Array[WorkerSim],
+) -> Array[WorkerSim] {
+  workers.filter(worker => worker.book_id == civic.book_id)
+}
+
+///|
+fn module_interior_furniture(civic : WenyuTownModule) -> Array[@rabbita.Html] {
+  match civic.interior_kind {
+    "mayor" =>
+      [
+        div(class="furniture furniture-map-table", [span("Runtime Map")]),
+        div(class="furniture furniture-radio", [span("Mayor Radio")]),
+        div(class="furniture furniture-policy-board", [span("Patrol Board")]),
+        div(class="furniture furniture-archive", [span("Town Ledger")]),
+      ]
+    "policy" =>
+      [
+        div(class="furniture furniture-policy-board", [span("Policy Wall")]),
+        div(class="furniture furniture-desk", [span("Eligibility Desk")]),
+        div(class="furniture furniture-archive", [span("Source Shelf")]),
+        div(class="furniture furniture-review-table", [span("Checklist Table")]),
+      ]
+    "contest" =>
+      [
+        div(class="furniture furniture-stage", [span("Mock Stage")]),
+        div(class="furniture furniture-scoreboard", [span("Judge Board")]),
+        div(class="furniture furniture-desk", [span("Deck Clinic")]),
+        div(class="furniture furniture-log-wall", [span("Countdown Wall")]),
+      ]
+    "social" =>
+      [
+        div(class="furniture furniture-cafe-table", [span("Cafe Table")]),
+        div(class="furniture furniture-signal-post", [span("Match Board")]),
+        div(class="furniture furniture-bench", [span("Intro Bench")]),
+        div(class="furniture furniture-log-wall", [span("Follow Up")]),
+      ]
+    "talent" =>
+      [
+        div(class="furniture furniture-gallery", [span("Talent Wall")]),
+        div(class="furniture furniture-scoreboard", [span("Skill Heatmap")]),
+        div(class="furniture furniture-desk", [span("Tour Desk")]),
+        div(class="furniture furniture-archive", [span("Evidence Shelf")]),
+      ]
+    "vitality" =>
+      [
+        div(class="furniture furniture-scoreboard", [span("Pulse Board")]),
+        div(class="furniture furniture-map-table", [span("Heat Map")]),
+        div(class="furniture furniture-radio", [span("Service Radio")]),
+        div(class="furniture furniture-log-wall", [span("Metric Ledger")]),
+      ]
+    "garden" =>
+      [
+        div(class="furniture furniture-garden-bed", [span("Tool Trial")]),
+        div(class="furniture furniture-bench", [span("Tutorial Bench")]),
+        div(class="furniture furniture-signal-post", [span("Daily Tip")]),
+        div(class="furniture furniture-review-table", [span("Before / After")]),
+      ]
+    "bridge" =>
+      [
+        div(class="furniture furniture-robot-bay", [span("Robot Bay")]),
+        div(class="furniture furniture-radio", [span("Venue Link")]),
+        div(class="furniture furniture-map-table", [span("Offline Map")]),
+        div(class="furniture furniture-review-table", [span("Confirm Gate")]),
+      ]
+    "market" =>
+      [
+        div(class="furniture furniture-market-stall", [span("Point Stall")]),
+        div(class="furniture furniture-scoreboard", [span("Rewards")]),
+        div(class="furniture furniture-desk", [span("Redeem Desk")]),
+        div(class="furniture furniture-log-wall", [span("Benefit Ledger")]),
+      ]
+    "broadcast" =>
+      [
+        div(class="furniture furniture-radio", [span("Story Radar")]),
+        div(class="furniture furniture-scoreboard", [span("Signal Board")]),
+        div(class="furniture furniture-review-table", [span("Review Desk")]),
+        div(class="furniture furniture-log-wall", [span("Broadcast Wall")]),
+      ]
+    _ =>
+      [
+        div(class="furniture furniture-desk", [span("Module Desk")]),
+        div(class="furniture furniture-signal-post", [span("Signal Post")]),
+        div(class="furniture furniture-review-table", [span("Review Table")]),
+      ]
+  }
+}
+
+///|
+fn render_wenyu_module_interior(
+  dispatch : Dispatch[Msg],
+  civic : WenyuTownModule,
+  workers : Array[WorkerSim],
+  executions : Array[@core.TaskExecutionRecord],
+) -> @rabbita.Html {
+  let residents = module_workers(civic, workers)
+  let execution = find_book_execution(executions, civic.book_id)
+  let lifecycle = match execution {
+    Some(execution) => execution.status.to_string()
+    None => "Configured"
+  }
+  section(class="interior-shell module-interior-shell", [
+    header(class="interior-header", [
+      div([
+        p(class="eyebrow", "Module Interior"),
+        h2(civic.title),
+        p(class="scene-node-key", "\{civic.id} / \{civic.book_id}"),
+      ]),
+      button(
+        class="control-button",
+        on_click=dispatch(SelectOverview),
+        "Back To Town",
+      ),
+    ]),
+    div(class="interior-room module-interior-room", [
+      div(class="module-interior-summary", [
+        render_module_detail("District", civic.district),
+        render_module_detail("Runtime", lifecycle),
+        render_module_detail(
+          "Entrance",
+          "\{civic.entrance_x},\{civic.entrance_y}",
+        ),
+      ]),
+      div(class="interior-floor", module_interior_furniture(civic)),
+      div(
+        class="interior-agent-grid",
+        if residents.is_empty() {
+          [
+            p(
+              class="interior-empty",
+              "No active workers are inside this module. Idle residents stay hidden until the module is opened by runtime projection.",
+            ),
+          ]
+        } else {
+          residents.map(worker => render_interior_agent(dispatch, worker))
+        },
+      ),
+    ]),
+  ])
+}
+
+///|
 fn scene_node_by_key(
   scene : @ui.SceneRenderModel,
   key : String,
@@ -6709,7 +7042,10 @@ fn visual_agent_grid_y(agent : VisualAgentSnapshot) -> Int {
 }
 
 ///|
-fn visual_agent_sprite_asset(agent : VisualAgentSnapshot, index : Int) -> String {
+fn visual_agent_sprite_asset(
+  agent : VisualAgentSnapshot,
+  index : Int,
+) -> String {
   if agent.sprite_key == "" {
     worker_roster_asset(index)
   } else {
@@ -6757,10 +7093,7 @@ fn render_visual_agent_avatar(
       span(class="worker-sprite", no_children()),
       span(class="worker-badge", worker_avatar_initials(agent.worker_name)),
       span(class="worker-label", agent.worker_name),
-      span(
-        class="worker-meta",
-        "\{agent.phase} / \{agent.book_title}",
-      ),
+      span(class="worker-meta", "\{agent.phase} / \{agent.book_title}"),
     ],
   )
 }
@@ -7384,6 +7717,10 @@ fn render_town_viewport(
           no_children(),
         ),
         render_tilemap_layer(),
+        render_water_effect_layer(),
+        render_wenyu_module_building_layer(
+          dispatch, executions, selected_node_key,
+        ),
         div(class="scene-overlay", [
           div(class="scene-nodes-layer", scene_nodes),
           div(class="scene-workers-layer", worker_avatars),
@@ -7461,7 +7798,11 @@ fn render_scene(dispatch : Dispatch[Msg], model : Model) -> @rabbita.Html {
   if standalone_viewport_requested() {
     let viewport_body = match model.selection {
       Node(node_key) =>
-        render_building_interior(dispatch, scene, workers, node_key)
+        match find_wenyu_module(node_key) {
+          Some(civic) =>
+            render_wenyu_module_interior(dispatch, civic, workers, executions)
+          None => render_building_interior(dispatch, scene, workers, node_key)
+        }
       _ =>
         render_town_viewport(
           dispatch,
@@ -7485,6 +7826,10 @@ fn render_scene(dispatch : Dispatch[Msg], model : Model) -> @rabbita.Html {
           status_chip(if model.paused { "Paused" } else { "Live" }, "chip-live"),
           status_chip("Local time \{real_time_label()}", "chip-clock"),
           status_chip(daemon_tick_label(model), "chip-neutral"),
+          status_chip(
+            "Modules \{wenyu_module_count()} / cfg \{wenyu_modules_version()}",
+            "chip-book",
+          ),
           button(
             class="control-button viewport-zoom-button viewport-zoom-out",
             on_click=dispatch(ViewportControlNoop),

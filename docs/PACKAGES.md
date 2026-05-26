@@ -175,6 +175,11 @@ Current real pieces:
 - `summarize_state(...)`
 - `report_health(...)`
 
+`summarize_state(...)` preserves MoonBook's raw evidence total but normalizes
+the town-facing readiness count: domain evidence stays in `evidence_count`,
+watcher/run bookkeeping moves to `operational_evidence_count`, and the raw audit
+total is exposed as `total_evidence_count`.
+
 ## Moonclaw Adapter
 
 - [adapters/moonclaw/client.mbt](/Users/kq/Workspace/moontown/adapters/moonclaw/client.mbt)

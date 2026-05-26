@@ -225,9 +225,11 @@ async fn render_wenyu_readiness(
 ) -> String {
   let builder = StringBuilder::new()
   builder.write_string(
-    "| Lane | Status | Verified Sources | Evidence | Entities | Concepts | Quality Gate |\n",
+    "| Lane | Status | Verified Sources | Domain Evidence | Operational Evidence | Entities | Concepts | Quality Gate |\n",
   )
-  builder.write_string("| --- | --- | ---: | ---: | ---: | ---: | --- |\n")
+  builder.write_string(
+    "| --- | --- | ---: | ---: | ---: | ---: | ---: | --- |\n",
+  )
   for lane in plan.lanes {
     let summary = Some(@moonbook.summarize_state(lane.entry)) catch {
       _ => None
@@ -238,11 +240,11 @@ async fn render_wenyu_readiness(
     match summary {
       Some(summary) =>
         builder.write_string(
-          "| \{lane.entry.id} | \{status} | \{summary.verified_source_count} | \{summary.evidence_count} | \{summary.entity_page_count} | \{summary.concept_page_count} | \{gate} |\n",
+          "| \{lane.entry.id} | \{status} | \{summary.verified_source_count} | \{summary.evidence_count} | \{summary.operational_evidence_count} | \{summary.entity_page_count} | \{summary.concept_page_count} | \{gate} |\n",
         )
       None =>
         builder.write_string(
-          "| \{lane.entry.id} | \{status} | 0 | 0 | 0 | 0 | summary unavailable |\n",
+          "| \{lane.entry.id} | \{status} | 0 | 0 | 0 | 0 | 0 | summary unavailable |\n",
         )
     }
   }
@@ -493,9 +495,11 @@ async fn render_town_lane_matrix(
 ) -> String {
   let builder = StringBuilder::new()
   builder.write_string(
-    "| Lane | Status | Verified Sources | Evidence | Entities | Concepts | Deep Report |\n",
+    "| Lane | Status | Verified Sources | Domain Evidence | Operational Evidence | Entities | Concepts | Deep Report |\n",
   )
-  builder.write_string("| --- | --- | ---: | ---: | ---: | ---: | --- |\n")
+  builder.write_string(
+    "| --- | --- | ---: | ---: | ---: | ---: | ---: | --- |\n",
+  )
   for lane in plan.lanes {
     let summary = Some(@moonbook.summarize_state(lane.entry)) catch {
       _ => None
@@ -505,11 +509,11 @@ async fn render_town_lane_matrix(
     match summary {
       Some(summary) =>
         builder.write_string(
-          "| \{lane.entry.id} | \{status} | \{summary.verified_source_count} | \{summary.evidence_count} | \{summary.entity_page_count} | \{summary.concept_page_count} | `\{root}/raw/bootstrap/deep-report.md` |\n",
+          "| \{lane.entry.id} | \{status} | \{summary.verified_source_count} | \{summary.evidence_count} | \{summary.operational_evidence_count} | \{summary.entity_page_count} | \{summary.concept_page_count} | `\{root}/raw/bootstrap/deep-report.md` |\n",
         )
       None =>
         builder.write_string(
-          "| \{lane.entry.id} | \{status} | 0 | 0 | 0 | 0 | `\{root}/raw/bootstrap/deep-report.md` |\n",
+          "| \{lane.entry.id} | \{status} | 0 | 0 | 0 | 0 | 0 | `\{root}/raw/bootstrap/deep-report.md` |\n",
         )
     }
   }

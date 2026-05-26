@@ -12,6 +12,10 @@
   "viewportPolicy": "Render a draggable Wenyu Valley masterplan tilemap: right-side river corridor, central wetlands, diagonal road grids, dense urban clusters, satellite campuses, farmland blocks, forest buffers, ponds, bridges, and edge haze matching the reference aerial composition.",
   "assetPolicy": "Keep semantic labels in JSON, generate transparent PNG tiles/sprites from the approved visual references, then bake the standalone viewport into a raster layer for smooth drag and zoom.",
   "semanticLayers": {
+    "modules": {
+      "path": "modules/wenyu-town-modules.json",
+      "method": "Designer-editable add-on registry. Each enabled module becomes a map building, interior, runtime binding, and actor destination without code edits."
+    },
     "terrain": {
       "path": "wenyu_reference_labels.json",
       "gridWidth": 256,

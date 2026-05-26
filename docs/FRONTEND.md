@@ -189,6 +189,38 @@ card that links to `viewport.html?assets=generated&v=wenyu`, the canonical
 standalone tilemap viewport. This avoids divergence between a small dashboard
 map and the actual Wenyu Valley viewport.
 
+## Wenyu Module UI
+
+The Wenyu viewport is moving toward a modular add-on system documented in
+[WENYU_UI_MODULE_SYSTEM.md](/Users/kq/Workspace/moontown/docs/WENYU_UI_MODULE_SYSTEM.md).
+Current readiness is tracked in
+[WENYU_TOWN_STATUS.md](/Users/kq/Workspace/moontown/docs/WENYU_TOWN_STATUS.md).
+
+The short version:
+
+- the base terrain stays clean and mostly rasterized for drag/zoom performance
+- each civic feature is a configurable building on the map
+- buildings are loaded from `ui/assets/tilemap/modules/wenyu-town-modules.json`
+- each building binds to a MoonBook through `book_id`
+- clicking a building opens a module-specific interior
+- hover/focus reveals module details without cluttering the first screen
+- water depth and reflection are rendered as cheap overlay layers, not baked
+  into the base map
+
+This keeps Moontown in charge of the visual control plane while allowing
+MoonBook and MoonClaw to provide the state and work behind each building.
+
+Current frontend maturity:
+
+- the standalone viewport and modular building shell are real
+- hover labels, clickable interiors, water overlays, and module config loading
+  are real
+- the module status lights are only partially bound to real execution records
+- the interiors are still mostly projection shells until MoonBook emits
+  module-specific fragments
+- the next hard requirement is truthful binding: no visible "busy" state unless
+  it comes from a real daemon, watcher, task, or run record
+
 ## Assets
 
 Original example assets live under:

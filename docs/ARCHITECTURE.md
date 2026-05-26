@@ -270,9 +270,12 @@ Current town-side readiness model:
 - [research_readiness.mbt](/Users/kq/Workspace/moontown/research_readiness.mbt)
 
 It consumes MoonBook-owned summary fields such as verified source count, entity
-page count, concept page count, evidence count, query note count, and pending
-review count. MoonBook still owns the workspace semantics; Moontown only decides
-whether a lane is acceptable for town-level synthesis.
+page count, concept page count, query note count, and pending review count.
+Moontown normalizes evidence accounting before using the summary: domain
+evidence remains in `evidence_count`, operational watcher/run records are
+reported as `operational_evidence_count`, and the raw audit total is preserved
+as `total_evidence_count`. MoonBook still owns the workspace semantics;
+Moontown only decides whether a lane is acceptable for town-level synthesis.
 
 ### Runtime Status and Daemon Tick
 

@@ -35,6 +35,21 @@ The town should make an innovation district playable, livable, and growable:
 - Growable: the system can run 24/7, recover from failures, and improve its
   knowledge through MoonBook and MoonClaw.
 
+### Current Delivery Distance
+
+The current implementation is a real prototype, not yet a complete civic
+operating system. The latest scorecard is maintained in
+[WENYU_TOWN_STATUS.md](/Users/kq/Workspace/moontown/docs/WENYU_TOWN_STATUS.md).
+
+In product terms:
+
+- the visual town shell is usable
+- the module add-on architecture has started
+- the daemon/watch seam exists locally
+- research workflows can persist through MoonBook/MoonClaw
+- civic services still need end-to-end module workflows before the town can be
+  called fully functioning
+
 ## 2. Responsibility Split
 
 ### Moontown
@@ -138,6 +153,16 @@ Acceptance criteria:
 - No broken assets.
 - No false degradation warnings during normal lifecycle states.
 - Operator can inspect a resident, worker, place, quest, and module.
+
+Implementation note:
+
+- Civic functions should be implemented as configurable map modules, not
+  hardcoded viewport decorations. See
+  [WENYU_UI_MODULE_SYSTEM.md](/Users/kq/Workspace/moontown/docs/WENYU_UI_MODULE_SYSTEM.md).
+- A town designer should be able to add, remove, or move feature buildings by
+  editing `ui/assets/tilemap/modules/wenyu-town-modules.json`.
+- The clean terrain layer should remain separate from service buildings,
+  interiors, agents, and runtime effects.
 
 ### 3.2 Resident Digital Twins
 

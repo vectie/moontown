@@ -117,9 +117,12 @@ pub struct BookStateSummary {
   keeper_memory_count : Int
   keeper_working_count : Int
   evidence_count : Int
+  total_evidence_count : Int
+  operational_evidence_count : Int
+  substantive_coverage_ready : Bool
   summary : String
 } derive(Eq, Show, ToJson, @json.FromJson)
-pub fn BookStateSummary::new(book_id~ : String, root~ : String, page_count~ : Int, source_count~ : Int, source_page_count? : Int, candidate_source_count? : Int, provisional_source_count? : Int, verified_source_count? : Int, entity_count~ : Int, entity_page_count? : Int, concept_count~ : Int, concept_page_count? : Int, query_note_count? : Int, pending_review_count~ : Int, keeper_memory_count~ : Int, keeper_working_count~ : Int, evidence_count~ : Int, summary~ : String) -> Self
+pub fn BookStateSummary::new(book_id~ : String, root~ : String, page_count~ : Int, source_count~ : Int, source_page_count? : Int, candidate_source_count? : Int, provisional_source_count? : Int, verified_source_count? : Int, entity_count~ : Int, entity_page_count? : Int, concept_count~ : Int, concept_page_count? : Int, query_note_count? : Int, pending_review_count~ : Int, keeper_memory_count~ : Int, keeper_working_count~ : Int, evidence_count~ : Int, total_evidence_count? : Int, operational_evidence_count? : Int, substantive_coverage_ready? : Bool, summary~ : String) -> Self
 
 pub struct BookTask {
   id : String
@@ -144,6 +147,10 @@ pub struct BookTaskBatch {
 type BookTaskProviderManifestEntry derive(Eq, Show, ToJson, @json.FromJson)
 
 type BookTaskProviderMetadata derive(Eq, Show, ToJson, @json.FromJson)
+
+type EvidenceAccounting derive(Eq, Show)
+
+type ExternalBookStateSummary derive(Eq, Show, ToJson, @json.FromJson)
 
 type ExternalBookTask derive(Eq, Show, ToJson, @json.FromJson)
 

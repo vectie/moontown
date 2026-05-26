@@ -355,7 +355,7 @@ async fn finalize_goal_book_entry(
     @core.TownEvent::new(
       id="event-summary-\{entry.id}",
       kind="summary",
-      detail="Book summary \{entry.id}: pages=\{summary.page_count} evidence=\{summary.evidence_count} pending_review=\{summary.pending_review_count} quality_gaps=\{quality_gaps.length()} readiness=\{readiness.summary_line()}",
+      detail="Book summary \{entry.id}: pages=\{summary.page_count} domain_evidence=\{summary.evidence_count} operational_evidence=\{summary.operational_evidence_count} total_evidence=\{summary.total_evidence_count} pending_review=\{summary.pending_review_count} quality_gaps=\{quality_gaps.length()} readiness=\{readiness.summary_line()}",
       related_book_id=Some(entry.id),
     ),
   )

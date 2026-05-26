@@ -619,6 +619,9 @@ pub struct BookStateSummary {
   keeper_memory_count : Int
   keeper_working_count : Int
   evidence_count : Int
+  total_evidence_count : Int
+  operational_evidence_count : Int
+  substantive_coverage_ready : Bool
   summary : String
 } derive(Show, Eq, ToJson, FromJson)
 
@@ -641,6 +644,9 @@ pub fn BookStateSummary::new(
   keeper_memory_count~ : Int,
   keeper_working_count~ : Int,
   evidence_count~ : Int,
+  total_evidence_count? : Int = evidence_count,
+  operational_evidence_count? : Int = total_evidence_count - evidence_count,
+  substantive_coverage_ready? : Bool = false,
   summary~ : String,
 ) -> BookStateSummary {
   {
@@ -661,9 +667,35 @@ pub fn BookStateSummary::new(
     keeper_memory_count,
     keeper_working_count,
     evidence_count,
+    total_evidence_count,
+    operational_evidence_count,
+    substantive_coverage_ready,
     summary,
   }
 }
+
+///|
+struct ExternalBookStateSummary {
+  book_id : String
+  root : String
+  page_count : Int
+  source_count : Int
+  source_page_count : Int
+  candidate_source_count : Int
+  provisional_source_count : Int
+  verified_source_count : Int
+  entity_count : Int
+  entity_page_count : Int
+  concept_count : Int
+  concept_page_count : Int
+  query_note_count : Int
+  pending_review_count : Int
+  keeper_memory_count : Int
+  keeper_working_count : Int
+  evidence_count : Int
+  substantive_coverage_ready : Bool
+  summary : String
+} derive(Show, Eq, ToJson, FromJson)
 
 ///|
 pub struct BookHealthReport {
@@ -790,13 +822,209 @@ pub async fn persist_result(
 ///|
 pub async fn summarize_state(entry : BookCatalogEntry) -> BookStateSummary {
   let json = run_book_json_command(entry, ["summary", entry.workspace_root])
-  @json.from_json(json)
+  let external : ExternalBookStateSummary = @json.from_json(json)
+  normalize_book_state_summary(entry, external)
 }
 
 ///|
 pub async fn report_health(entry : BookCatalogEntry) -> BookHealthReport {
   let json = run_book_json_command(entry, ["health", entry.workspace_root])
   @json.from_json(json)
+}
+
+///|
+async fn normalize_book_state_summary(
+  entry : BookCatalogEntry,
+  external : ExternalBookStateSummary,
+) -> BookStateSummary {
+  let root = resolved_workspace_root(entry.workspace_root)
+  let accounting = evidence_accounting_for_workspace(
+    root,
+    fallback_total=external.evidence_count,
+  )
+  let substantive_coverage_ready = external.substantive_coverage_ready &&
+    accounting.domain_count > 0
+  BookStateSummary::new(
+    book_id=external.book_id,
+    root=external.root,
+    page_count=external.page_count,
+    source_count=external.source_count,
+    source_page_count=external.source_page_count,
+    candidate_source_count=external.candidate_source_count,
+    provisional_source_count=external.provisional_source_count,
+    verified_source_count=external.verified_source_count,
+    entity_count=external.entity_count,
+    entity_page_count=external.entity_page_count,
+    concept_count=external.concept_count,
+    concept_page_count=external.concept_page_count,
+    query_note_count=external.query_note_count,
+    pending_review_count=external.pending_review_count,
+    keeper_memory_count=external.keeper_memory_count,
+    keeper_working_count=external.keeper_working_count,
+    evidence_count=accounting.domain_count,
+    total_evidence_count=accounting.total_count,
+    operational_evidence_count=accounting.operational_count,
+    substantive_coverage_ready~,
+    summary=append_evidence_accounting_summary(external.summary, accounting),
+  )
+}
+
+///|
+struct EvidenceAccounting {
+  total_count : Int
+  domain_count : Int
+  operational_count : Int
+} derive(Show, Eq)
+
+///|
+async fn evidence_accounting_for_workspace(
+  root : String,
+  fallback_total~ : Int,
+) -> EvidenceAccounting {
+  let evidence_path = @path.Path(root)
+    .join(@path.Path("wiki/synthesis/evidence.md"))
+    .to_string()
+  if !(@fs.exists(evidence_path) catch { _ => false }) {
+    return {
+      total_count: fallback_total,
+      domain_count: fallback_total,
+      operational_count: 0,
+    }
+  }
+  evidence_accounting_from_text(
+    @fs.read_file(evidence_path).text() catch {
+      _ => ""
+    },
+  )
+}
+
+///|
+fn evidence_accounting_from_text(content : String) -> EvidenceAccounting {
+  let blocks = evidence_record_blocks(content)
+  let mut operational_count = 0
+  for block in blocks {
+    if evidence_block_is_operational(block) {
+      operational_count += 1
+    }
+  }
+  {
+    total_count: blocks.length(),
+    domain_count: blocks.length() - operational_count,
+    operational_count,
+  }
+}
+
+///|
+fn evidence_record_blocks(content : String) -> Array[String] {
+  let blocks : Array[String] = []
+  let mut current = ""
+  let mut active = false
+  for raw in content.split("\n") {
+    let line = raw.to_string()
+    if line.has_prefix("### ") {
+      if active {
+        blocks.push(current)
+      }
+      current = line + "\n"
+      active = true
+    } else if active {
+      current = current + line + "\n"
+    }
+  }
+  if active {
+    blocks.push(current)
+  }
+  blocks
+}
+
+///|
+fn evidence_block_is_operational(block : String) -> Bool {
+  let lower = block.to_lower()
+  if evidence_block_is_standing_watch(lower) {
+    return !standing_watch_block_has_domain_delta(block)
+  }
+  lower.contains("workflow completed workspace=") &&
+  lower.contains("/moonclaw-jobs/run-") &&
+  !lower.contains("accepted_facts_count:") &&
+  !lower.contains("wiki_pages_changed_count:")
+}
+
+///|
+fn evidence_block_is_standing_watch(lower_block : String) -> Bool {
+  lower_block.contains("standing-watch") ||
+  lower_block.contains("standing watch") ||
+  lower_block.contains("standing_goal_decision") ||
+  lower_block.contains("next_check_hint")
+}
+
+///|
+fn standing_watch_block_has_domain_delta(block : String) -> Bool {
+  let decision = summary_field(block, "standing_goal_decision").to_lower()
+  let accepted_facts = summary_field_int(block, "accepted_facts_count")
+  let changed_pages = summary_field_int(block, "wiki_pages_changed_count")
+  let book_changed = summary_field(block, "book_changed").to_lower()
+  (decision == "update" || decision == "needs_review") &&
+  (accepted_facts > 0 || changed_pages > 0 || book_changed == "yes")
+}
+
+///|
+fn summary_field(content : String, key : String) -> String {
+  let prefix = key.to_lower() + ":"
+  for raw in content.split("\n") {
+    let mut line = raw.trim().to_string()
+    if line.has_prefix("- ") {
+      line = line[2:].trim().to_string()
+    }
+    if line.to_lower().has_prefix("summary:") {
+      line = line[8:].trim().to_string()
+    }
+    if line.to_lower().has_prefix(prefix) {
+      return line[prefix.length():].trim().trim(chars="`").to_string()
+    }
+  }
+  ""
+}
+
+///|
+fn summary_field_int(content : String, key : String) -> Int {
+  match first_non_negative_int(summary_field(content, key)) {
+    Some(value) => value
+    None => 0
+  }
+}
+
+///|
+fn first_non_negative_int(text : String) -> Int? {
+  let mut seen = false
+  let mut value = 0
+  for char in text {
+    if char >= '0' && char <= '9' {
+      value = value * 10 + (char.to_int() - '0'.to_int())
+      seen = true
+    } else if seen {
+      return Some(value)
+    }
+  }
+  if seen {
+    Some(value)
+  } else {
+    None
+  }
+}
+
+///|
+fn append_evidence_accounting_summary(
+  summary : String,
+  accounting : EvidenceAccounting,
+) -> String {
+  let extra = "domain_evidence=\{accounting.domain_count} operational_evidence=\{accounting.operational_count} total_evidence=\{accounting.total_count}"
+  if summary.contains("domain_evidence=") {
+    summary
+  } else if summary.is_empty() {
+    extra
+  } else {
+    summary + " " + extra
+  }
 }
 
 ///|

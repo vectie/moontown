@@ -62,6 +62,14 @@ Implemented today:
 - renderer-agnostic scene dashboard model
 - Rabbita live simulation frontend
 - original example SVG scene assets
+- Wenyu Valley standalone tile viewport with configurable civic module
+  buildings and clickable interiors
+
+Wenyu Valley product readiness is tracked in:
+
+- [docs/WENYU_VALLEY_PRD.md](/Users/kq/Workspace/moontown/docs/WENYU_VALLEY_PRD.md)
+- [docs/WENYU_UI_MODULE_SYSTEM.md](/Users/kq/Workspace/moontown/docs/WENYU_UI_MODULE_SYSTEM.md)
+- [docs/WENYU_TOWN_STATUS.md](/Users/kq/Workspace/moontown/docs/WENYU_TOWN_STATUS.md)
 
 Still incomplete:
 
