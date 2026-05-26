@@ -1,6 +1,6 @@
 # Wenyu Valley Town Status
 
-Last updated: 2026-05-26 16:47 CST
+Last updated: 2026-05-26 16:59 CST
 
 This document answers one question: how far is the current Wenyu Valley
 implementation from a fully functioning town?
@@ -31,7 +31,7 @@ runtime projection are real. The civic service layer is still mostly missing.
 | Visual town shell | Near | The 256 x 144 Wenyu map, drag/zoom, module buildings, interiors, water overlays, and validation are in place |
 | Truthful runtime UI | Medium-near | `visual-projection.json` now has module status, module interiors can read MoonBook UI fragments, and the viewport avoids fake busy state; civic books still need full coverage |
 | Long-running mayor loop | Medium | The daemon worker is healthy locally with zero recorded failures in the current runtime file; the service supervisor wrapper is not currently active, so install/service hardening and multi-day recovery evidence are still required |
-| Research watchers | Medium | OPC and LLM standing watches run through real books and ledgers; the latest LLM watcher is `NeedsReview` and the OPC watcher is currently running, but domain/operational quality accounting still needs stronger UI |
+| Research watchers | Medium | OPC and LLM standing watches run through real books and ledgers; both are visible in the watch portfolio, but the current latest LLM watcher is still `NeedsReview` and the OPC watcher is still running |
 | Civic modules | Far | Policy, contest, social, talent, market, bridge, and story modules are mostly product specs, not end-to-end workflows |
 | Designer/operator tooling | Far | JSON config works, but there is no module editor, asset checker, or Moondesk-style output browser yet |
 | Production deployment | Far | Auth, backups, permissions, packaged supervisor, and recovery playbooks are not complete |
@@ -116,7 +116,7 @@ Implemented and validated:
 
 ## Current Runtime Snapshot
 
-Checked on 2026-05-26 16:47 CST with:
+Checked on 2026-05-26 16:59 CST with:
 
 ```bash
 moon run cmd/main -- status
@@ -128,6 +128,8 @@ Observed state:
 - daemon doctor reports `runtime=healthy`
 - daemon status is `ticking`
 - worker process is alive and heartbeat age is still below the stale threshold
+- no new completed daemon tick was observed since the 16:47 status update;
+  the runtime is still healthy, but the current OPC watch remains in progress
 - service supervisor wrapper is not currently alive (`supervisor_pid=0`), so
   this is a live local worker loop, not yet a packaged durable service
 - daemon runtime is at tick 5875 with 1836 successful cycles and 0 recorded
@@ -148,9 +150,10 @@ Observed state:
 Interpretation:
 
 - the local daemon/watch loop is alive
-- the town can run background research maintenance and is not idle
-- the LLM watcher has produced a reviewable event, and the OPC watcher is
-  currently in progress
+- the town can run background research maintenance, but the current snapshot
+  has not advanced past tick 5875 since the prior check
+- the LLM watcher has produced a reviewable event, and the OPC watcher is still
+  in progress
 - the current background work is still research-book maintenance, not yet the
   full Wenyu civic service layer
 - the inactive supervisor wrapper means this is not yet production-grade 24/7
