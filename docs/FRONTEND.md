@@ -157,7 +157,8 @@ It reads:
   standing goals.
 - `.moontown/standing-goals.json` for enabled standing-watch requests and next
   due tick.
-- `.moontown/watchers/watch-opc-news.jsonl` for the durable watcher ledger.
+- `.moontown/watchers/*.jsonl` through `watchers/index.json` for the durable
+  multi-topic watcher ledger.
 - `.moontown/operator-requests/requests.jsonl` for browser-submitted requests.
 
 The progress surface shows:
@@ -169,7 +170,8 @@ The progress surface shows:
 - accepted/rejected fact counts
 - whether the target book actually changed
 - update/review/no-change/failed decision mix
-- standing-goal progress toward the next due tick
+- a standing-watch portfolio for every enabled long-horizon topic
+- per-goal progress toward the next due tick
 - the last five watcher records with source, delta, task, and run metadata
 
 The UI should treat `book_changed: no` plus nonzero `checked_sources_count` as

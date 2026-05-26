@@ -265,6 +265,56 @@ async function serveJsonlAsArray(res, filePath) {
   res.end(JSON.stringify(rows))
 }
 
+async function readJsonlRows(filePath) {
+  if (!existsSync(filePath)) {
+    return []
+  }
+
+  return (await readFile(filePath, 'utf8'))
+    .split('\n')
+    .map(line => line.trim())
+    .filter(Boolean)
+    .map(line => {
+      try {
+        return JSON.parse(line)
+      } catch {
+        return null
+      }
+    })
+    .filter(Boolean)
+}
+
+async function loadWatcherLedgerIndex() {
+  if (!existsSync(watcherDir)) {
+    return []
+  }
+
+  const entries = await readdir(watcherDir, { withFileTypes: true })
+  const rows = []
+  for (const entry of entries) {
+    if (!entry.isFile() || !entry.name.endsWith('.jsonl')) {
+      continue
+    }
+    const goalId = entry.name.replace(/\.jsonl$/, '')
+    const fileRows = await readJsonlRows(path.join(watcherDir, entry.name))
+    for (const row of fileRows) {
+      rows.push({
+        ...row,
+        goal_id: String(row.goal_id || goalId),
+      })
+    }
+  }
+
+  rows.sort((left, right) => {
+    const tickDelta = Number(left.tick || 0) - Number(right.tick || 0)
+    if (tickDelta !== 0) {
+      return tickDelta
+    }
+    return String(left.goal_id || '').localeCompare(String(right.goal_id || ''))
+  })
+  return rows
+}
+
 async function handleOperatorRequest(req, res) {
   try {
     const payload = JSON.parse(await readBody(req))
@@ -390,6 +440,14 @@ function moontownSnapshotPlugin() {
       })
       server.middlewares.use('/watchers', async (req, res) => {
         const pathname = new URL(req.url || '/', 'http://moontown.local').pathname
+        if (pathname === '/index.json' || pathname === '/index') {
+          const rows = await loadWatcherLedgerIndex()
+          res.statusCode = 200
+          res.setHeader('Content-Type', 'application/json')
+          res.end(JSON.stringify(rows))
+          return
+        }
+
         const requested = safeSegment(pathname.replace(/^\//, '').replace(/\.jsonl$/, ''))
         const filePath = path.join(watcherDir, `${requested}.jsonl`)
         await serveJsonlAsArray(res, filePath)
@@ -468,25 +526,20 @@ function moontownSnapshotPlugin() {
         )
       }
 
-      if (existsSync(path.join(watcherDir, 'watch-opc-news.jsonl'))) {
-        const watcherText = await readFile(path.join(watcherDir, 'watch-opc-news.jsonl'), 'utf8')
-        const watcherRows = watcherText
-          .split('\n')
-          .map(line => line.trim())
-          .filter(Boolean)
-          .map(line => {
-            try {
-              return JSON.parse(line)
-            } catch {
-              return null
-            }
-          })
-          .filter(Boolean)
+      if (existsSync(watcherDir)) {
         const watcherDistDir = path.join(distDir, 'watchers')
         await mkdir(watcherDistDir, { recursive: true })
+        const entries = await readdir(watcherDir, { withFileTypes: true })
+        for (const entry of entries) {
+          if (!entry.isFile() || !entry.name.endsWith('.jsonl')) {
+            continue
+          }
+          const rows = await readJsonlRows(path.join(watcherDir, entry.name))
+          await writeFile(path.join(watcherDistDir, entry.name), JSON.stringify(rows), 'utf8')
+        }
         await writeFile(
-          path.join(watcherDistDir, 'watch-opc-news.jsonl'),
-          JSON.stringify(watcherRows),
+          path.join(watcherDistDir, 'index.json'),
+          JSON.stringify(await loadWatcherLedgerIndex()),
           'utf8',
         )
       }

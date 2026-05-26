@@ -959,6 +959,58 @@ body,
   padding: 16px;
 }
 
+.watch-portfolio {
+  display: grid;
+  gap: 12px;
+}
+
+.watch-portfolio-head {
+  display: flex;
+  justify-content: space-between;
+  gap: 12px;
+  align-items: start;
+}
+
+.watch-portfolio-head h3 {
+  margin: 0;
+}
+
+.watch-portfolio-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(260px, 1fr));
+  gap: 12px;
+}
+
+.watch-goal-card {
+  display: grid;
+  gap: 12px;
+  padding: 14px;
+  border: 3px solid var(--line);
+  background:
+    linear-gradient(135deg, rgba(255, 252, 244, 0.9), rgba(233, 247, 224, 0.78)),
+    radial-gradient(circle at 92% 8%, rgba(185, 138, 41, 0.16), transparent 42%);
+  box-shadow: 3px 3px 0 rgba(56, 35, 16, 0.14);
+}
+
+.watch-goal-card.watch-decision-NeedsReview {
+  border-color: rgba(185, 138, 41, 0.58);
+}
+
+.watch-goal-card.watch-decision-Update {
+  border-color: rgba(77, 128, 80, 0.58);
+}
+
+.watch-goal-card.watch-decision-Failed {
+  border-color: rgba(180, 49, 39, 0.58);
+}
+
+.watch-goal-prompt {
+  margin: -4px 0 0;
+  color: rgba(86, 61, 37, 0.74);
+  font-size: 12px;
+  line-height: 1.35;
+}
+
 .standing-progress-head,
 .request-composer-head {
   display: flex;

@@ -91,23 +91,10 @@ async function refreshStandingGoals() {
 
 async function refreshWatcherRecords() {
   try {
-    const response = await fetch(`./watchers/watch-opc-news.jsonl?ts=${Date.now()}`, { cache: 'no-store' })
+    const response = await fetch(`./watchers/index.json?ts=${Date.now()}`, { cache: 'no-store' })
     if (response.ok) {
       const text = await response.text()
-      const records = text.trim().startsWith('[')
-        ? JSON.parse(text)
-        : text
-          .split('\n')
-          .map(line => line.trim())
-          .filter(Boolean)
-          .map(line => {
-            try {
-              return JSON.parse(line)
-            } catch {
-              return null
-            }
-          })
-          .filter(Boolean)
+      const records = parseWatcherRecords(text)
       globalThis.__moontownWatcherRecordsJson = JSON.stringify(records)
       globalThis.__moontownWatcherRecordsVersion =
         (globalThis.__moontownWatcherRecordsVersion || 0) + 1
@@ -117,6 +104,33 @@ async function refreshWatcherRecords() {
   } catch {
     globalThis.__moontownWatcherRecordsJson = '[]'
   }
+}
+
+function parseWatcherRecords(text) {
+  try {
+    const parsed = JSON.parse(text)
+    if (Array.isArray(parsed)) {
+      return parsed
+    }
+    if (Array.isArray(parsed?.records)) {
+      return parsed.records
+    }
+  } catch {
+    // Fall through to JSONL parsing for old static builds.
+  }
+
+  return text
+    .split('\n')
+    .map(line => line.trim())
+    .filter(Boolean)
+    .map(line => {
+      try {
+        return JSON.parse(line)
+      } catch {
+        return null
+      }
+    })
+    .filter(Boolean)
 }
 
 async function refreshOperatorRequests() {

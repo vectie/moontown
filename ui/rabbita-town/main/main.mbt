@@ -734,9 +734,9 @@ fn module_book_matches(civic : WenyuTownModule, book_id : String) -> Bool {
   book_id == civic.book_id ||
   book_id == civic.id ||
   normalize_module_binding_key(book_id) ==
-    normalize_module_binding_key(civic.book_id) ||
+  normalize_module_binding_key(civic.book_id) ||
   normalize_module_binding_key(book_id) ==
-    normalize_module_binding_key(civic.id)
+  normalize_module_binding_key(civic.id)
 }
 
 ///|
@@ -2057,6 +2057,20 @@ fn latest_watcher_record(model : Model) -> WatcherRunRecordSnapshot? {
 }
 
 ///|
+fn latest_watcher_record_for_goal(
+  model : Model,
+  goal_id : String,
+) -> WatcherRunRecordSnapshot? {
+  let mut found : WatcherRunRecordSnapshot? = None
+  for record in model.watcher_records {
+    if record.goal_id == goal_id {
+      found = Some(record)
+    }
+  }
+  found
+}
+
+///|
 fn latest_operator_request(model : Model) -> OperatorRequestSnapshot? {
   if model.operator_requests.is_empty() {
     None
@@ -2070,6 +2084,32 @@ fn watcher_decision_count(model : Model, decision : String) -> Int {
   let mut count = 0
   for record in model.watcher_records {
     if record.decision == decision {
+      count += 1
+    }
+  }
+  count
+}
+
+///|
+fn watcher_decision_count_for_goal(
+  model : Model,
+  goal_id : String,
+  decision : String,
+) -> Int {
+  let mut count = 0
+  for record in model.watcher_records {
+    if record.goal_id == goal_id && record.decision == decision {
+      count += 1
+    }
+  }
+  count
+}
+
+///|
+fn watcher_record_count_for_goal(model : Model, goal_id : String) -> Int {
+  let mut count = 0
+  for record in model.watcher_records {
+    if record.goal_id == goal_id {
       count += 1
     }
   }
@@ -2554,60 +2594,118 @@ fn render_watcher_timeline(model : Model) -> @rabbita.Html {
 }
 
 ///|
-fn render_standing_goal_progress(model : Model) -> @rabbita.Html {
-  match active_standing_goal(model) {
-    Some(goal) => {
-      let remaining = ticks_until_next_goal_check(model, goal)
-      let progress = standing_goal_progress(model, goal)
-      let target = goal.target_book_id.unwrap_or("mayor-selected-book")
-      article(class="standing-progress-card", [
-        div(class="standing-progress-head", [
-          div([p(class="eyebrow", "Standing Watch"), h3(goal.title)]),
-          status_chip(
-            if remaining == 0 {
-              "Due now"
-            } else {
-              "Next in \{remaining} ticks"
-            },
-            if remaining == 0 {
-              "chip-alert"
-            } else {
-              "chip-live"
-            },
-          ),
-        ]),
-        p(class="standing-progress-copy", goal.prompt),
-        div(class="standing-progress-track", [
-          div(
-            class="standing-progress-fill",
-            style=["width: \{progress}%"],
-            no_children(),
-          ),
-        ]),
-        div(class="standing-progress-meta", [
-          span("goal `\{goal.id}`"),
-          span("book `\{target}`"),
-          span("cadence \{goal.cadence_ticks} ticks"),
-          span("quality \{goal.quality_threshold}%"),
-          span(goal.source_policy),
-        ]),
-      ])
+fn watcher_decision_chip_class(decision : String) -> String {
+  match decision {
+    "Update" => "chip-live"
+    "NeedsReview" => "chip-book"
+    "Failed" => "chip-alert"
+    "Deferred" => "chip-neutral"
+    "NoChange" => "chip-calm"
+    _ => "chip-neutral"
+  }
+}
+
+///|
+fn render_standing_goal_card(
+  model : Model,
+  goal : StandingGoalSnapshot,
+) -> @rabbita.Html {
+  let remaining = ticks_until_next_goal_check(model, goal)
+  let progress = standing_goal_progress(model, goal)
+  let target = goal.target_book_id.unwrap_or("mayor-selected-book")
+  let latest = latest_watcher_record_for_goal(model, goal.id)
+  let decision = match latest {
+    Some(record) => record.decision
+    None => "Waiting"
+  }
+  let detail = match latest {
+    Some(record) => one_line(record.detail)
+    None => "No ledger row has been recorded for this standing watch yet."
+  }
+  let latest_tick = match latest {
+    Some(record) => "latest tick \{record.tick}"
+    None => "no completed tick"
+  }
+  let update_count = watcher_decision_count_for_goal(model, goal.id, "Update")
+  let review_count = watcher_decision_count_for_goal(
+    model,
+    goal.id,
+    "NeedsReview",
+  )
+  let no_change_count = watcher_decision_count_for_goal(
+    model,
+    goal.id,
+    "NoChange",
+  )
+  let failed_count = watcher_decision_count_for_goal(model, goal.id, "Failed")
+  article(class="watch-goal-card watch-decision-\{decision}", [
+    div(class="standing-progress-head", [
+      div([p(class="eyebrow", "Standing Watch"), h3(goal.title)]),
+      status_chip(decision, watcher_decision_chip_class(decision)),
+    ]),
+    p(class="standing-progress-copy", detail),
+    p(class="watch-goal-prompt", one_line(goal.prompt)),
+    div(class="standing-progress-track", [
+      div(
+        class="standing-progress-fill",
+        style=["width: \{progress}%"],
+        no_children(),
+      ),
+    ]),
+    div(class="standing-progress-meta", [
+      span("goal `\{goal.id}`"),
+      span("book `\{target}`"),
+      span(
+        if remaining == 0 {
+          "due now"
+        } else {
+          "next in \{remaining} ticks"
+        },
+      ),
+      span(latest_tick),
+      span("cadence \{goal.cadence_ticks} ticks"),
+      span("quality \{goal.quality_threshold}%"),
+      span(goal.source_policy),
+      span("records \{watcher_record_count_for_goal(model, goal.id)}"),
+      span(
+        "U\{update_count} / R\{review_count} / N\{no_change_count} / F\{failed_count}",
+      ),
+    ]),
+  ])
+}
+
+///|
+fn render_standing_goal_portfolio(model : Model) -> @rabbita.Html {
+  let cards : Array[@rabbita.Html] = []
+  for goal in model.standing_goals {
+    if goal.enabled {
+      cards.push(render_standing_goal_card(model, goal))
     }
-    None =>
-      article(class="standing-progress-card", [
+  }
+  if cards.is_empty() {
+    cards.push(
+      article(class="watch-goal-card", [
         div(class="standing-progress-head", [
           div([
-            p(class="eyebrow", "Standing Watch"),
-            h3("No active standing goal"),
+            p(class="eyebrow", "Standing Watch Portfolio"),
+            h3("No active standing goals"),
           ]),
           status_chip("Waiting", "chip-neutral"),
         ]),
         p(
           class="standing-progress-copy",
-          "Submit a request on the right to create a durable standing goal for the mayor daemon.",
+          "Add a standing goal in `.moontown/standing-goals.json` or submit one from the operator panel to start durable topic monitoring.",
         ),
-      ])
+      ]),
+    )
   }
+  section(class="watch-portfolio", [
+    div(class="watch-portfolio-head", [
+      div([p(class="eyebrow", "Watch Portfolio"), h3("Long-horizon topics")]),
+      status_chip("\{cards.length()} configured", "chip-neutral"),
+    ]),
+    div(class="watch-portfolio-grid", cards),
+  ])
 }
 
 ///|
@@ -2806,7 +2904,7 @@ fn render_operator_command_center(
             "neutral",
           ),
         ]),
-        render_standing_goal_progress(model),
+        render_standing_goal_portfolio(model),
         render_watcher_timeline(model),
       ]),
       render_request_composer(dispatch, model),
@@ -6602,7 +6700,9 @@ fn module_visual_agents(
 ) -> Array[VisualAgentSnapshot] {
   match model.visual_projection {
     Some(projection) =>
-      projection.agents.filter(agent => module_book_matches(civic, agent.book_id))
+      projection.agents.filter(agent => {
+        module_book_matches(civic, agent.book_id)
+      })
     None => []
   }
 }
@@ -6698,7 +6798,9 @@ fn wenyu_clean_module_count() -> Int {
 }
 
 ///|
-fn module_projection_status_class(module_status : VisualModuleSnapshot) -> String {
+fn module_projection_status_class(
+  module_status : VisualModuleSnapshot,
+) -> String {
   match module_status.status {
     "alert" => "module-status-alert"
     "review" => "module-status-review"
@@ -6724,7 +6826,9 @@ fn module_projection_status_class(module_status : VisualModuleSnapshot) -> Strin
 }
 
 ///|
-fn module_projection_status_label(module_status : VisualModuleSnapshot) -> String {
+fn module_projection_status_label(
+  module_status : VisualModuleSnapshot,
+) -> String {
   match module_status.status {
     "alert" => "Recovery"
     "review" => "Review"
@@ -6825,8 +6929,7 @@ fn wenyu_module_runtime_state(
                   "module-status-review"
                 @core.TaskExecutionStatus::Failed
                 | @core.TaskExecutionStatus::Stale => "module-status-alert"
-                @core.TaskExecutionStatus::Completed =>
-                  "module-status-complete"
+                @core.TaskExecutionStatus::Completed => "module-status-complete"
                 _ => "module-status-waiting"
               }
               {
@@ -6927,7 +7030,9 @@ fn render_wenyu_module_building(
     )
   }
   if runtime.issue_count > 0 {
-    children.push(span(class="wenyu-module-issue-count", "\{runtime.issue_count}"))
+    children.push(
+      span(class="wenyu-module-issue-count", "\{runtime.issue_count}"),
+    )
   }
   children.push(
     span(class="wenyu-module-label", [
@@ -7217,7 +7322,10 @@ fn render_projection_journey(
       }
       rows.push(
         article(class="module-book-journey-item", [
-          span(class="module-book-journey-status", "\{step.stage} / \{step.status}"),
+          span(
+            class="module-book-journey-status",
+            "\{step.stage} / \{step.status}",
+          ),
           h3(step.title),
           p("\{step.summary}\{highlights}"),
         ]),
@@ -7262,10 +7370,7 @@ fn render_module_book_projection(
     Some(projection) =>
       section(class="module-book-projection", [
         div(class="module-book-heading", [
-          div([
-            p(class="eyebrow", "MoonBook Projection"),
-            h2(projection.title),
-          ]),
+          div([p(class="eyebrow", "MoonBook Projection"), h2(projection.title)]),
           span(class="module-book-id", projection.book_id),
         ]),
         p(class="module-book-summary", projection.summary),
