@@ -294,6 +294,12 @@ priv struct WatcherRunRecordSnapshot {
   decision : String
   delta_score : Int
   new_source_count : Int
+  checked_sources_count : Int?
+  new_sources_found : Int?
+  accepted_facts_count : Int?
+  rejected_facts_count : Int?
+  wiki_pages_changed_count : Int?
+  book_changed : String?
   detail : String
   task_id : String?
   run_id : String?
@@ -2117,6 +2123,22 @@ fn watcher_record_count_for_goal(model : Model, goal_id : String) -> Int {
 }
 
 ///|
+fn watcher_metric_value(value : Int?) -> String {
+  match value {
+    Some(count) => count.to_string()
+    None => "n/a"
+  }
+}
+
+///|
+fn watcher_book_changed_value(value : String?) -> String {
+  match value {
+    Some(flag) => flag
+    None => "unknown"
+  }
+}
+
+///|
 fn ticks_until_next_goal_check(
   model : Model,
   goal : StandingGoalSnapshot,
@@ -2551,6 +2573,12 @@ fn render_watcher_record(record : WatcherRunRecordSnapshot) -> @rabbita.Html {
         span("goal \{record.goal_id}"),
         span("book \{record.target_book_id}"),
         span("sources +\{record.new_source_count}"),
+        span("checked \{watcher_metric_value(record.checked_sources_count)}"),
+        span("found \{watcher_metric_value(record.new_sources_found)}"),
+        span("accepted \{watcher_metric_value(record.accepted_facts_count)}"),
+        span("rejected \{watcher_metric_value(record.rejected_facts_count)}"),
+        span("wiki \{watcher_metric_value(record.wiki_pages_changed_count)}"),
+        span("book changed \{watcher_book_changed_value(record.book_changed)}"),
         span("delta \{record.delta_score}"),
         span("next \{record.next_due_tick}"),
         match record.task_id {
@@ -2626,6 +2654,30 @@ fn render_standing_goal_card(
     Some(record) => "latest tick \{record.tick}"
     None => "no completed tick"
   }
+  let checked_sources = match latest {
+    Some(record) => watcher_metric_value(record.checked_sources_count)
+    None => "n/a"
+  }
+  let accepted_facts = match latest {
+    Some(record) => watcher_metric_value(record.accepted_facts_count)
+    None => "n/a"
+  }
+  let new_sources_found = match latest {
+    Some(record) => watcher_metric_value(record.new_sources_found)
+    None => "n/a"
+  }
+  let rejected_facts = match latest {
+    Some(record) => watcher_metric_value(record.rejected_facts_count)
+    None => "n/a"
+  }
+  let changed_pages = match latest {
+    Some(record) => watcher_metric_value(record.wiki_pages_changed_count)
+    None => "n/a"
+  }
+  let book_changed = match latest {
+    Some(record) => watcher_book_changed_value(record.book_changed)
+    None => "unknown"
+  }
   let update_count = watcher_decision_count_for_goal(model, goal.id, "Update")
   let review_count = watcher_decision_count_for_goal(
     model,
@@ -2666,6 +2718,12 @@ fn render_standing_goal_card(
       span("cadence \{goal.cadence_ticks} ticks"),
       span("quality \{goal.quality_threshold}%"),
       span(goal.source_policy),
+      span("checked \{checked_sources}"),
+      span("found \{new_sources_found}"),
+      span("accepted \{accepted_facts}"),
+      span("rejected \{rejected_facts}"),
+      span("wiki \{changed_pages}"),
+      span("book changed \{book_changed}"),
       span("records \{watcher_record_count_for_goal(model, goal.id)}"),
       span(
         "U\{update_count} / R\{review_count} / N\{no_change_count} / F\{failed_count}",
@@ -2826,6 +2884,22 @@ fn render_operator_command_center(
     Some(record) => record.new_source_count.to_string()
     None => "0"
   }
+  let latest_checked = match latest {
+    Some(record) => watcher_metric_value(record.checked_sources_count)
+    None => "n/a"
+  }
+  let latest_accepted = match latest {
+    Some(record) => watcher_metric_value(record.accepted_facts_count)
+    None => "n/a"
+  }
+  let latest_wiki = match latest {
+    Some(record) => watcher_metric_value(record.wiki_pages_changed_count)
+    None => "n/a"
+  }
+  let latest_book_changed = match latest {
+    Some(record) => watcher_book_changed_value(record.book_changed)
+    None => "unknown"
+  }
   let latest_detail = match latest {
     Some(record) => one_line(record.detail)
     None => "No durable watcher ledger has been published yet."
@@ -2890,7 +2964,7 @@ fn render_operator_command_center(
           render_operator_stat(
             "New sources",
             latest_sources,
-            "Count reported by the latest MoonBook standing-watch result.",
+            "Latest digest: checked \{latest_checked}, accepted \{latest_accepted}, wiki pages \{latest_wiki}, book changed \{latest_book_changed}.",
             if latest_sources == "0" {
               "neutral"
             } else {
