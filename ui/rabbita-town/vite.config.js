@@ -5,6 +5,7 @@ import { mkdir, readFile, writeFile } from 'node:fs/promises'
 import path from 'node:path'
 
 const townSnapshotPath = path.resolve(process.cwd(), '../../.moontown/town.json')
+const visualProjectionPath = path.resolve(process.cwd(), '../../.moontown/visual-projection.json')
 const daemonSnapshotPath = path.resolve(process.cwd(), '../../.moontown/daemon.json')
 const standingGoalsPath = path.resolve(process.cwd(), '../../.moontown/standing-goals.json')
 const watcherDir = path.resolve(process.cwd(), '../../.moontown/watchers')
@@ -176,6 +177,16 @@ function moontownSnapshotPlugin() {
         res.setHeader('Content-Type', 'application/json')
         res.end(contents)
       })
+      server.middlewares.use('/visual-projection.json', async (_req, res) => {
+        if (!serveJsonSnapshot(res, visualProjectionPath, 'missing visual projection')) {
+          return
+        }
+
+        const contents = await readFile(visualProjectionPath, 'utf8')
+        res.statusCode = 200
+        res.setHeader('Content-Type', 'application/json')
+        res.end(contents)
+      })
       server.middlewares.use('/daemon.json', async (_req, res) => {
         if (!serveJsonSnapshot(res, daemonSnapshotPath, 'missing daemon snapshot')) {
           return
@@ -224,6 +235,14 @@ function moontownSnapshotPlugin() {
         await writeFile(
           path.join(distDir, 'town.json'),
           await readFile(townSnapshotPath, 'utf8'),
+          'utf8',
+        )
+      }
+
+      if (existsSync(visualProjectionPath)) {
+        await writeFile(
+          path.join(distDir, 'visual-projection.json'),
+          await readFile(visualProjectionPath, 'utf8'),
           'utf8',
         )
       }

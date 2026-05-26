@@ -11,6 +11,8 @@ import {
 }
 
 // Values
+pub fn build_visual_projection(@core.TownState, tick? : Int) -> VisualProjection
+
 pub async fn daemon_doctor_saved_town(snapshot_path? : String, stale_after_ms? : UInt64) -> String
 
 pub async fn daemon_run_saved_town(snapshot_path? : String, book_catalog_path? : String, max_ticks? : Int, sleep_ms? : Int, preserve_supervisor? : Bool) -> String
@@ -35,6 +37,8 @@ pub fn default_daemon_stop_path(snapshot_path? : String) -> String
 
 pub fn default_daemon_supervisor_pid_path(snapshot_path? : String) -> String
 
+pub fn default_visual_projection_path(String) -> String
+
 pub fn demo_dashboard() -> String
 
 pub fn demo_mayor() -> @roles.Mayor
@@ -58,6 +62,8 @@ pub async fn load_or_create_demo_state(path? : String, book_catalog_path? : Stri
 pub async fn[Provider : @core.BookProvider] load_or_create_demo_state_with_provider(Provider, path? : String) -> @core.TownState
 
 pub async fn load_or_create_modeled_demo_state(path? : String, book_catalog_path? : String) -> @core.TownState
+
+pub async fn persist_visual_projection(@core.TownState, String, tick? : Int) -> Unit
 
 pub async fn render_goal_run(String, book_id? : String?, task_limit_per_book? : Int, snapshot_path? : String, book_catalog_path? : String) -> String
 
@@ -149,6 +155,50 @@ pub struct TownRuntimeStatus {
   daemon_actions : Array[@scheduler.SchedulerAction]
   summary : String
 } derive(Eq, Show, ToJson, @json.FromJson)
+
+pub struct VisualAgentProjection {
+  worker_id : String
+  worker_name : String
+  book_id : String
+  book_title : String
+  role : String
+  status : String
+  phase : String
+  task_id : String?
+  task_title : String?
+  run_id : String?
+  sprite_key : String
+  zone_key : String
+  location : String
+  destination : String
+  behavior : String
+  effect : String
+  visible_on_overworld : Bool
+  message : String
+  grid_x : Int
+  grid_y : Int
+  z : Int
+} derive(Eq, ToJson, @debug.Debug, @json.FromJson)
+
+pub struct VisualBuildingProjection {
+  book_id : String
+  title : String
+  zone_key : String
+  running_count : Int
+  waiting_count : Int
+  review_count : Int
+  blocked_count : Int
+  completed_count : Int
+  effect : String
+  message : String
+} derive(Eq, ToJson, @debug.Debug, @json.FromJson)
+
+pub struct VisualProjection {
+  tick : Int
+  agents : Array[VisualAgentProjection]
+  buildings : Array[VisualBuildingProjection]
+  messages : Array[String]
+} derive(Eq, ToJson, @debug.Debug, @json.FromJson)
 
 // Type aliases
 

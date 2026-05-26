@@ -29,6 +29,21 @@ async function refreshTownSnapshot() {
   }
 }
 
+async function refreshVisualProjection() {
+  try {
+    const response = await fetch(`./visual-projection.json?ts=${Date.now()}`, { cache: 'no-store' })
+    if (response.ok) {
+      globalThis.__moontownVisualProjectionJson = await response.text()
+      globalThis.__moontownVisualProjectionVersion =
+        (globalThis.__moontownVisualProjectionVersion || 0) + 1
+    } else {
+      globalThis.__moontownVisualProjectionJson = ''
+    }
+  } catch {
+    globalThis.__moontownVisualProjectionJson = ''
+  }
+}
+
 async function refreshDaemonSnapshot() {
   try {
     const response = await fetch(`./daemon.json?ts=${Date.now()}`, { cache: 'no-store' })
@@ -107,6 +122,7 @@ async function refreshOperatorRequests() {
 async function refreshRuntimeSnapshots() {
   await Promise.all([
     refreshTownSnapshot(),
+    refreshVisualProjection(),
     refreshDaemonSnapshot(),
     refreshStandingGoals(),
     refreshWatcherRecords(),

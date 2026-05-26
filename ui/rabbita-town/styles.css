@@ -2007,13 +2007,22 @@ body,
   pointer-events: none;
 }
 
+.viewport-frame .visual-agent {
+  z-index: 8;
+  pointer-events: auto;
+}
+
 .viewport-frame.is-drag-panning .viewport-resident,
-.viewport-frame.is-zooming .viewport-resident {
+.viewport-frame.is-drag-panning .visual-agent,
+.viewport-frame.is-zooming .viewport-resident,
+.viewport-frame.is-zooming .visual-agent {
   animation-play-state: paused;
 }
 
 .viewport-frame.is-drag-panning .viewport-resident .worker-sprite,
-.viewport-frame.is-zooming .viewport-resident .worker-sprite {
+.viewport-frame.is-drag-panning .visual-agent .worker-sprite,
+.viewport-frame.is-zooming .viewport-resident .worker-sprite,
+.viewport-frame.is-zooming .visual-agent .worker-sprite {
   animation-play-state: paused;
 }
 
@@ -2351,6 +2360,70 @@ body,
   animation: resident-walk-cycle 720ms step-end infinite;
 }
 
+.visual-agent::before,
+.visual-agent::after {
+  content: "";
+  position: absolute;
+  pointer-events: none;
+  image-rendering: pixelated;
+}
+
+.visual-agent::before {
+  left: 50%;
+  top: -9px;
+  width: 8px;
+  height: 8px;
+  transform: translateX(-50%);
+  background: #ffe06d;
+  border: 2px solid #5d401c;
+  box-shadow: 0 0 0 2px rgba(255, 246, 170, 0.45);
+}
+
+.visual-agent.agent-effect-none::before {
+  display: none;
+}
+
+.visual-agent.agent-effect-work-particles::after {
+  left: 9px;
+  top: 6px;
+  width: 4px;
+  height: 4px;
+  background: #fff3a6;
+  box-shadow:
+    16px -6px 0 #c6f289,
+    25px 8px 0 #72d6ff,
+    5px 20px 0 #ffd36a;
+  animation: agent-work-spark 900ms steps(4) infinite;
+}
+
+.visual-agent.agent-effect-memory-glow::after {
+  left: 2px;
+  right: 2px;
+  bottom: 2px;
+  height: 9px;
+  background: rgba(92, 231, 178, 0.34);
+  box-shadow: 0 0 12px rgba(92, 231, 178, 0.7);
+  animation: agent-memory-glow 1100ms steps(3) infinite;
+}
+
+.visual-agent.agent-effect-review-glow::before {
+  background: #f6f0ff;
+  box-shadow:
+    0 0 0 2px rgba(255, 255, 255, 0.6),
+    0 0 10px rgba(126, 108, 255, 0.65);
+}
+
+.visual-agent.agent-effect-packet-pulse::before {
+  background: #f9c46b;
+  animation: agent-packet-pulse 850ms steps(2) infinite;
+}
+
+.visual-agent.agent-effect-alert-pulse::before {
+  background: #ff625d;
+  box-shadow: 0 0 0 2px rgba(255, 110, 80, 0.45);
+  animation: agent-alert-pulse 620ms steps(2) infinite;
+}
+
 .worker-running .worker-sprite {
   animation-duration: 620ms;
 }
@@ -2365,6 +2438,51 @@ body,
     hue-rotate(-24deg)
     saturate(1.25)
     drop-shadow(4px 5px 0 rgba(120, 30, 20, 0.28));
+}
+
+@keyframes agent-work-spark {
+  0% {
+    opacity: 0.35;
+    transform: translateY(0);
+  }
+  50% {
+    opacity: 1;
+    transform: translateY(-5px);
+  }
+  100% {
+    opacity: 0.35;
+    transform: translateY(0);
+  }
+}
+
+@keyframes agent-memory-glow {
+  0%,
+  100% {
+    opacity: 0.45;
+  }
+  50% {
+    opacity: 0.95;
+  }
+}
+
+@keyframes agent-packet-pulse {
+  0%,
+  100% {
+    transform: translateX(-50%) scale(1);
+  }
+  50% {
+    transform: translateX(-50%) scale(1.4);
+  }
+}
+
+@keyframes agent-alert-pulse {
+  0%,
+  100% {
+    transform: translateX(-50%) translateY(0);
+  }
+  50% {
+    transform: translateX(-50%) translateY(-4px);
+  }
 }
 
 @keyframes worker-walk-cycle {

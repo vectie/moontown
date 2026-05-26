@@ -50,6 +50,8 @@ priv struct Model {
   state_source : StateSourceKind
   projection_snapshot : ProjectionSnapshot?
   snapshot_version : Int
+  visual_projection : VisualProjectionSnapshot?
+  visual_projection_version : Int
   daemon_snapshot : DaemonSnapshot?
   daemon_snapshot_version : Int
   standing_goals : Array[StandingGoalSnapshot]
@@ -189,6 +191,53 @@ priv struct ProjectionSnapshot {
 } derive(FromJson)
 
 ///|
+priv struct VisualAgentSnapshot {
+  worker_id : String
+  worker_name : String
+  book_id : String
+  book_title : String
+  role : String
+  status : String
+  phase : String
+  task_id : String?
+  task_title : String?
+  run_id : String?
+  sprite_key : String
+  zone_key : String
+  location : String
+  destination : String
+  behavior : String
+  effect : String
+  visible_on_overworld : Bool
+  message : String
+  grid_x : Int
+  grid_y : Int
+  z : Int
+} derive(FromJson)
+
+///|
+priv struct VisualBuildingSnapshot {
+  book_id : String
+  title : String
+  zone_key : String
+  running_count : Int
+  waiting_count : Int
+  review_count : Int
+  blocked_count : Int
+  completed_count : Int
+  effect : String
+  message : String
+} derive(FromJson)
+
+///|
+priv struct VisualProjectionSnapshot {
+  tick : Int
+  agents : Array[VisualAgentSnapshot]
+  buildings : Array[VisualBuildingSnapshot]
+  messages : Array[String]
+} derive(FromJson)
+
+///|
 priv struct DaemonJobSnapshot {
   id : String
   kind : String
@@ -263,6 +312,14 @@ extern "js" fn load_bootstrap_town_snapshot_json() -> String =
 ///|
 extern "js" fn town_snapshot_version() -> Int =
   #| () => globalThis.__moontownTownSnapshotVersion || 0
+
+///|
+extern "js" fn load_bootstrap_visual_projection_json() -> String =
+  #| () => globalThis.__moontownVisualProjectionJson || ""
+
+///|
+extern "js" fn visual_projection_version() -> Int =
+  #| () => globalThis.__moontownVisualProjectionVersion || 0
 
 ///|
 extern "js" fn load_bootstrap_daemon_snapshot_json() -> String =
@@ -364,6 +421,7 @@ fn standalone_viewport_requested() -> Bool {
 ///|
 fn init_model() -> Model {
   let projection_snapshot = parse_bootstrap_town_snapshot()
+  let visual_projection = parse_bootstrap_visual_projection()
   let daemon_snapshot = parse_bootstrap_daemon_snapshot()
   let standing_goals = parse_bootstrap_standing_goals()
   let watcher_records = parse_bootstrap_watcher_records()
@@ -376,6 +434,8 @@ fn init_model() -> Model {
     state_source: initial_state_source(projection_snapshot),
     projection_snapshot,
     snapshot_version: town_snapshot_version(),
+    visual_projection,
+    visual_projection_version: visual_projection_version(),
     daemon_snapshot,
     daemon_snapshot_version: daemon_snapshot_version(),
     standing_goals,
@@ -401,6 +461,16 @@ fn init_model() -> Model {
 ///|
 fn parse_bootstrap_town_snapshot() -> ProjectionSnapshot? {
   let text = load_bootstrap_town_snapshot_json()
+  if text == "" {
+    return None
+  }
+  let parsed = @json.parse(text) catch { _ => return None }
+  Some(@json.from_json(parsed) catch { _ => return None })
+}
+
+///|
+fn parse_bootstrap_visual_projection() -> VisualProjectionSnapshot? {
+  let text = load_bootstrap_visual_projection_json()
   if text == "" {
     return None
   }
@@ -677,6 +747,16 @@ fn advance_model(model : Model) -> Model {
   } else {
     model.projection_snapshot
   }
+  let refreshed_visual_projection_version = visual_projection_version()
+  let refreshed_visual_projection = if refreshed_visual_projection_version !=
+    model.visual_projection_version {
+    match parse_bootstrap_visual_projection() {
+      Some(snapshot) => Some(snapshot)
+      None => model.visual_projection
+    }
+  } else {
+    model.visual_projection
+  }
   let refreshed_daemon_version = daemon_snapshot_version()
   let refreshed_daemon_snapshot = if refreshed_daemon_version !=
     model.daemon_snapshot_version {
@@ -785,6 +865,8 @@ fn advance_model(model : Model) -> Model {
     state_source: refreshed_source,
     projection_snapshot: refreshed_snapshot,
     snapshot_version: refreshed_version,
+    visual_projection: refreshed_visual_projection,
+    visual_projection_version: refreshed_visual_projection_version,
     daemon_snapshot: refreshed_daemon_snapshot,
     daemon_snapshot_version: refreshed_daemon_version,
     standing_goals: refreshed_standing_goals,
@@ -6575,6 +6657,115 @@ fn render_viewport_residents() -> Array[@rabbita.Html] {
 }
 
 ///|
+fn visual_overworld_agents(model : Model) -> Array[VisualAgentSnapshot] {
+  match model.visual_projection {
+    Some(projection) =>
+      projection.agents.filter(fn(agent) { agent.visible_on_overworld })
+    None => []
+  }
+}
+
+///|
+fn visual_agent_status_class(agent : VisualAgentSnapshot) -> String {
+  match agent.status {
+    "running" => "worker-running"
+    "waiting" => "worker-waiting"
+    "idle" => "worker-idle"
+    "blocked" => "worker-blocked"
+    "offline" => "worker-offline"
+    _ =>
+      if agent.phase == "failed" || agent.phase == "stale" {
+        "worker-blocked"
+      } else if agent.phase == "running" || agent.phase == "persisting" {
+        "worker-running"
+      } else if agent.phase == "packet" || agent.phase == "importing" {
+        "worker-waiting"
+      } else {
+        "worker-idle"
+      }
+  }
+}
+
+///|
+fn visual_agent_grid_x(agent : VisualAgentSnapshot) -> Int {
+  if agent.grid_x < 0 {
+    0
+  } else if agent.grid_x > 255 {
+    255
+  } else {
+    agent.grid_x
+  }
+}
+
+///|
+fn visual_agent_grid_y(agent : VisualAgentSnapshot) -> Int {
+  if agent.grid_y < 0 {
+    0
+  } else if agent.grid_y > 143 {
+    143
+  } else {
+    agent.grid_y
+  }
+}
+
+///|
+fn visual_agent_sprite_asset(agent : VisualAgentSnapshot, index : Int) -> String {
+  if agent.sprite_key == "" {
+    worker_roster_asset(index)
+  } else {
+    "tilemap/actors/roster/\{agent.sprite_key}_walk_strip.png"
+  }
+}
+
+///|
+fn render_visual_agent_avatar(
+  dispatch : Dispatch[Msg],
+  agent : VisualAgentSnapshot,
+  index : Int,
+  selected : Bool,
+) -> @rabbita.Html {
+  let grid_x = visual_agent_grid_x(agent)
+  let grid_y = visual_agent_grid_y(agent)
+  let delay = (index * 211 + agent.z * 17) % 2600
+  let style = [
+    "left: \{iso_tile_left(grid_x, grid_y) + 9}px",
+    "top: \{iso_tile_top(grid_x, grid_y) - 31}px",
+    "z-index: \{120 + agent.z}",
+    "--wander-x1: \{worker_wander_x1(index + 3)}px",
+    "--wander-y1: \{worker_wander_y1(index + 3)}px",
+    "--wander-x2: \{worker_wander_x2(index + 5)}px",
+    "--wander-y2: \{worker_wander_y2(index + 5)}px",
+    "--wander-x3: \{worker_wander_x3(index + 7)}px",
+    "--wander-y3: \{worker_wander_y3(index + 7)}px",
+    "--wander-duration: \{5600 + index % 7 * 420}ms",
+    "--wander-delay: -\{delay}ms",
+    "--worker-image: url('\{visual_agent_sprite_asset(agent, index)}')",
+  ]
+  let selected_suffix = if selected { " selected" } else { "" }
+  let class_name = "worker-avatar visual-agent \{visual_agent_status_class(agent)}" +
+    " worker-sprite-roster" +
+    " agent-phase-\{agent.phase}" +
+    " agent-behavior-\{agent.behavior}" +
+    " agent-effect-\{agent.effect}" +
+    selected_suffix
+  button(
+    class=class_name,
+    style~,
+    title=agent.message,
+    on_click=dispatch(SelectWorker(agent.worker_id)),
+    [
+      span(class="worker-sprite", no_children()),
+      span(class="worker-badge", worker_avatar_initials(agent.worker_name)),
+      span(class="worker-label", agent.worker_name),
+      span(
+        class="worker-meta",
+        "\{agent.phase} / \{agent.book_title}",
+      ),
+    ],
+  )
+}
+
+///|
 fn is_working_worker(worker : WorkerSim) -> Bool {
   match worker.status {
     @core.WorkerStatus::Running | @core.WorkerStatus::Blocked => true
@@ -7111,6 +7302,7 @@ fn render_inspector(
 ///|
 fn render_town_viewport(
   dispatch : Dispatch[Msg],
+  model : Model,
   scene : @ui.SceneRenderModel,
   workers : Array[WorkerSim],
   executions : Array[@core.TaskExecutionRecord],
@@ -7133,8 +7325,25 @@ fn render_town_viewport(
   let scene_frame_style = ["--scene-width: \{stage_width}px"]
   let worker_avatars : Array[@rabbita.Html] = []
   if standalone_viewport_requested() {
-    for resident in render_viewport_residents() {
-      worker_avatars.push(resident)
+    match model.visual_projection {
+      Some(_) => {
+        let visual_agents = visual_overworld_agents(model)
+        for i in 0..<visual_agents.length() {
+          let agent = visual_agents[i]
+          worker_avatars.push(
+            render_visual_agent_avatar(
+              dispatch,
+              agent,
+              i,
+              selected_worker_id == Some(agent.worker_id),
+            ),
+          )
+        }
+      }
+      None =>
+        for resident in render_viewport_residents() {
+          worker_avatars.push(resident)
+        }
     }
   } else {
     for i in 0..<workers.length() {
@@ -7256,6 +7465,7 @@ fn render_scene(dispatch : Dispatch[Msg], model : Model) -> @rabbita.Html {
       _ =>
         render_town_viewport(
           dispatch,
+          model,
           scene,
           visible_overworld_workers(workers),
           executions,
