@@ -1,6 +1,6 @@
 # Wenyu Valley Town Status
 
-Last updated: 2026-05-26 16:15 CST
+Last updated: 2026-05-26 16:29 CST
 
 This document answers one question: how far is the current Wenyu Valley
 implementation from a fully functioning town?
@@ -8,9 +8,9 @@ implementation from a fully functioning town?
 The short answer is:
 
 - as a visual, inspectable town shell: about 70% complete
-- as a local 24/7 AI control-plane prototype: about 60% complete
+- as a local 24/7 AI control-plane prototype: about 60-62% complete
 - as a fully functioning civic AI town with real services, persistent memory,
-  execution, generated projections, and operator workflow: about 38-42% complete
+  execution, generated projections, and operator workflow: about 39-42% complete
 
 The project is no longer just markdown or a static map. It now has a real
 terrain viewport, modular civic buildings, daemon/watch state, MoonBook/MoonClaw
@@ -30,8 +30,8 @@ runtime projection are real. The civic service layer is still mostly missing.
 |---|---:|---|
 | Visual town shell | Near | The 256 x 144 Wenyu map, drag/zoom, module buildings, interiors, water overlays, and validation are in place |
 | Truthful runtime UI | Medium-near | `visual-projection.json` now has module status, module interiors can read MoonBook UI fragments, and the viewport avoids fake busy state; civic books still need full coverage |
-| Long-running mayor loop | Medium | The daemon is healthy locally with zero recorded failures in the current runtime file, but it still needs install/service hardening and multi-day recovery evidence |
-| Research watchers | Medium | OPC and LLM standing watches run through real books and ledgers, but domain/operational quality accounting still needs stronger UI |
+| Long-running mayor loop | Medium | The daemon worker is healthy locally with zero recorded failures in the current runtime file; the service supervisor wrapper is not currently active, so install/service hardening and multi-day recovery evidence are still required |
+| Research watchers | Medium | OPC and LLM standing watches run through real books and ledgers; the latest LLM watcher is `NeedsReview` and the OPC watcher is currently running, but domain/operational quality accounting still needs stronger UI |
 | Civic modules | Far | Policy, contest, social, talent, market, bridge, and story modules are mostly product specs, not end-to-end workflows |
 | Designer/operator tooling | Far | JSON config works, but there is no module editor, asset checker, or Moondesk-style output browser yet |
 | Production deployment | Far | Auth, backups, permissions, packaged supervisor, and recovery playbooks are not complete |
@@ -66,8 +66,8 @@ A fully functioning Wenyu town means:
 | Water effects | Runtime overlay adds depth, reflection, and bridge shadow | 35% | Needs richer segmented river logic and seasonal/weather response |
 | Agents on map | Visual agent projection exists; active module workers route to module entrances and idle/completed workers stay hidden | 60% | Needs Wenyu-specific task projection coverage for every civic module |
 | Operator dashboard | Shows daemon/watch progress, request composer, and portal to canonical viewport | 60% | Needs stronger multi-book progress panels and output retrieval |
-| Mayor daemon | Local run/start/doctor/stop, heartbeat, stale detection, standing-goal dispatch | 60% | Needs long-run soak testing, service install hardening, and recovery playbooks |
-| Standing watchers | Data-driven standing goals and watcher ledgers exist | 60% | Need stronger MoonBook quality accounting and per-topic progress views |
+| Mayor daemon | Local run/start/doctor/stop, heartbeat, stale detection, standing-goal dispatch | 62% | Needs long-run soak testing, service install hardening, and recovery playbooks |
+| Standing watchers | Data-driven standing goals and watcher ledgers exist | 62% | Need stronger MoonBook quality accounting and per-topic progress views |
 | MoonBook memory binding | Research books and generated projections work for research lanes; the Wenyu UI can consume `moonbook-ui-state.json` fragments generically | 50% | Civic modules need canonical book schemas, real workspaces, and service-specific content |
 | MoonClaw execution binding | Proposal/run boundary and worker execution path exist | 45% | Civic service tasks need role-specific skills and output contracts |
 | Real civic services | PRD describes policy, contest, social, talent, bridge, market, and story modules | 15% | Most services are still product specs, not reliable end-to-end workflows |
@@ -113,7 +113,7 @@ Implemented and validated:
 
 ## Current Runtime Snapshot
 
-Checked on 2026-05-26 15:53 CST with:
+Checked on 2026-05-26 16:29 CST with:
 
 ```bash
 moon run cmd/main -- status
@@ -123,30 +123,38 @@ moon run cmd/main -- daemon doctor
 Observed state:
 
 - daemon doctor reports `runtime=healthy`
-- daemon status is `running`
-- worker process is alive and heartbeat is fresh
-- daemon runtime is at tick 5788 with 1749 successful cycles and 0 recorded
+- daemon status is `ticking`
+- worker process is alive and heartbeat age is still below the stale threshold
+- service supervisor wrapper is not currently alive (`supervisor_pid=0`), so
+  this is a live local worker loop, not yet a packaged durable service
+- daemon runtime is at tick 5845 with 1806 successful cycles and 0 recorded
   failures
-- town snapshot contains 2 active research books, 12 workers, 73 tasks, 73
-  executions, and 187 watcher records
-- current execution mix is 0 running, 72 review, 0 failed, and 0 stale
+- town snapshot contains 2 active research books, 12 workers, 75 tasks, 75
+  executions, and 188 watcher records
+- current execution mix is 1 running, 73 review, 0 failed, and 0 stale
 - active long-horizon books are:
   - `research-opc`
   - `research-how-llms-are-trained-in-very-detail`
-- both books are being checked through standing-watch tasks
-- recent watcher decisions are mostly `no_change`
-- the latest watcher record is `watch-llm-training/NoChange`
-- the next due watcher tick is scheduled for tick 5832
-- there are currently 0 due standing goals and 0 planned daemon actions
+- the current planned daemon actions are:
+  - `poll-run`: `standing-watch-opc-news-tick-5846` / `Running`
+  - `standing-goal-due`: `watch-opc-news` -> `research-opc`
+- the latest watcher record is `watch-llm-training/NeedsReview`
+- the next due watcher tick is scheduled for tick 5862
+- there is currently 1 due standing goal and 2 planned daemon actions
 
 Interpretation:
 
 - the local daemon/watch loop is alive
-- the town can run background research maintenance
+- the town can run background research maintenance and is not idle
+- the LLM watcher has produced a reviewable event, and the OPC watcher is
+  currently in progress
 - the current background work is still research-book maintenance, not yet the
   full Wenyu civic service layer
-- the UI should present no-change watcher cycles as operational diligence, not
-  new knowledge progress
+- the inactive supervisor wrapper means this is not yet production-grade 24/7
+  supervision, even though the worker loop itself is healthy
+- the UI should present no-change watcher cycles as operational diligence,
+  review-needed cycles as pending judgment, and accepted changes as real
+  knowledge progress
 
 ## What Is Still A Prototype
 

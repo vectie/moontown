@@ -71,15 +71,21 @@ Wenyu Valley product readiness is tracked in:
 - [docs/WENYU_UI_MODULE_SYSTEM.md](/Users/kq/Workspace/moontown/docs/WENYU_UI_MODULE_SYSTEM.md)
 - [docs/WENYU_TOWN_STATUS.md](/Users/kq/Workspace/moontown/docs/WENYU_TOWN_STATUS.md)
 
+The status document is the source of truth for the latest observed distance to
+a fully functioning town. It separates the visual town shell, the local 24/7
+control-plane prototype, and the unfinished production civic-service system.
+
 Still incomplete:
 
-- OS-level service installation through launchd/systemd/container supervision
+- production-grade OS-level service installation through
+  launchd/systemd/container supervision and multi-day soak evidence
 - experiment lifecycle execution
-- real backend/frontend sync
+- full Wenyu civic module book coverage and real backend/frontend sync
 
 So the current repo now has a local supervised 24/7 daemon seam. It can run a
 background supervisor/worker pair, detect stale workers, restart them, and
-record runtime health, but it is not yet packaged as an operating-system service.
+record runtime health, but it is not yet packaged and proven as an
+operating-system service.
 
 ## Current Capabilities
 
