@@ -38,10 +38,28 @@ pub struct VisualBuildingProjection {
 } derive(Debug, Eq, ToJson, FromJson)
 
 ///|
+pub struct VisualModuleProjection {
+  module_id : String
+  book_id : String
+  title : String
+  status : String
+  source : String
+  running_count : Int
+  waiting_count : Int
+  review_count : Int
+  blocked_count : Int
+  completed_count : Int
+  active_agent_count : Int
+  effect : String
+  message : String
+} derive(Debug, Eq, ToJson, FromJson)
+
+///|
 pub struct VisualProjection {
   tick : Int
   agents : Array[VisualAgentProjection]
   buildings : Array[VisualBuildingProjection]
+  modules : Array[VisualModuleProjection]
   messages : Array[String]
 } derive(Debug, Eq, ToJson, FromJson)
 
@@ -58,10 +76,15 @@ pub fn build_visual_projection(
   for book in state.books {
     buildings.push(visual_building_projection(state, book))
   }
+  let modules : Array[VisualModuleProjection] = []
+  for building in buildings {
+    modules.push(visual_module_projection(building, agents))
+  }
   {
     tick,
     agents,
     buildings,
+    modules,
     messages: visual_projection_messages(state, agents, buildings),
   }
 }
@@ -168,6 +191,56 @@ fn visual_building_projection(
     completed_count: completed,
     effect,
     message: visual_building_message(book, running, waiting, review, blocked),
+  }
+}
+
+///|
+fn visual_module_projection(
+  building : VisualBuildingProjection,
+  agents : Array[VisualAgentProjection],
+) -> VisualModuleProjection {
+  let status = if building.blocked_count > 0 {
+    "alert"
+  } else if building.review_count > 0 {
+    "review"
+  } else if building.running_count > 0 {
+    "running"
+  } else if building.waiting_count > 0 {
+    "waiting"
+  } else if building.completed_count > 0 {
+    "complete"
+  } else {
+    "calm"
+  }
+  {
+    module_id: visual_module_id_from_book_id(building.book_id),
+    book_id: building.book_id,
+    title: building.title,
+    status,
+    source: "runtime",
+    running_count: building.running_count,
+    waiting_count: building.waiting_count,
+    review_count: building.review_count,
+    blocked_count: building.blocked_count,
+    completed_count: building.completed_count,
+    active_agent_count: agents
+    .filter(fn(agent) {
+      agent.book_id == building.book_id && agent.visible_on_overworld
+    })
+    .length(),
+    effect: building.effect,
+    message: building.message,
+  }
+}
+
+///|
+fn visual_module_id_from_book_id(book_id : String) -> String {
+  let prefix = "wenyu-"
+  if book_id.length() > prefix.length() &&
+    book_id[:prefix.length()].to_owned() == prefix {
+    book_id[prefix.length():].to_owned()
+  } else {
+    book_id
   }
 }
 

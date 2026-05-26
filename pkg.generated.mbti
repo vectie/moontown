@@ -193,10 +193,27 @@ pub struct VisualBuildingProjection {
   message : String
 } derive(Eq, ToJson, @debug.Debug, @json.FromJson)
 
+pub struct VisualModuleProjection {
+  module_id : String
+  book_id : String
+  title : String
+  status : String
+  source : String
+  running_count : Int
+  waiting_count : Int
+  review_count : Int
+  blocked_count : Int
+  completed_count : Int
+  active_agent_count : Int
+  effect : String
+  message : String
+} derive(Eq, ToJson, @debug.Debug, @json.FromJson)
+
 pub struct VisualProjection {
   tick : Int
   agents : Array[VisualAgentProjection]
   buildings : Array[VisualBuildingProjection]
+  modules : Array[VisualModuleProjection]
   messages : Array[String]
 } derive(Eq, ToJson, @debug.Debug, @json.FromJson)
 

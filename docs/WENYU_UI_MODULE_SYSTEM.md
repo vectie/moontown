@@ -182,11 +182,31 @@ functioning.
 - Keep idle, waiting, and completed agents inside buildings unless a user opens
   that building.
 
+Current status:
+
+- active visual agents now route to a matched module entrance when their
+  book/task maps to a configured module
+- idle, completed, and absent module agents do not create fake overworld badges
+- the remaining gap is projection coverage: each Wenyu civic workflow still
+  needs to emit module-specific book/task/run fragments
+
 ### Stage 4: Runtime Projection
 
 - Extend Moontown projection JSON with module status.
 - Merge MoonBook projection fragments by `book_id`.
 - Bind building lights, counters, badges, and messages to real data.
+
+Current status:
+
+- the viewport uses visual projection data first, direct execution records
+  second, and config fallback last
+- module lights distinguish running, waiting, review, alert, complete,
+  projected, unbound, and calm states
+- module interiors show runtime source, status counters, validation state, and
+  active worker roster slots
+- `visual-projection.json` now includes first-class `modules[]` status objects
+  keyed by normalized module id
+- the MoonBook fragment merge is still pending
 
 ### Stage 5: Asset Pipeline
 
@@ -204,6 +224,13 @@ functioning.
 - Report missing assets, oversized sprites, non-transparent backgrounds, and
   broken `book_id` bindings.
 - Export a placement diff that can be reviewed before committing map changes.
+
+Current status:
+
+- viewport runtime validation catches missing `book_id`, missing assets, invalid
+  footprints, building anchors on blocked terrain, and entrances on water
+- bridge/river/harbor modules can opt into water or bridge placement
+- standalone schema validation and designer preview tooling are still pending
 
 ### Stage 7: Civic Runtime Integration
 

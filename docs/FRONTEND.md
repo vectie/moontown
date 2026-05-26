@@ -215,11 +215,17 @@ Current frontend maturity:
 - the standalone viewport and modular building shell are real
 - hover labels, clickable interiors, water overlays, and module config loading
   are real
-- the module status lights are only partially bound to real execution records
-- the interiors are still mostly projection shells until MoonBook emits
-  module-specific fragments
-- the next hard requirement is truthful binding: no visible "busy" state unless
-  it comes from a real daemon, watcher, task, or run record
+- module lights now use visual projection data first, direct execution records
+  second, and config fallback last
+- `visual-projection.json` now carries first-class `modules[]` runtime status
+  keyed by normalized module id
+- active workers route to matched module entrances; idle, completed, and absent
+  workers do not create fake busy badges
+- interiors show runtime source, counters, validation state, and active worker
+  roster slots
+- the next hard requirement is module projection coverage: MoonBook needs to
+  emit module-specific fragments so each civic building can show pages, review
+  gaps, outputs, and accepted changes
 
 ## Assets
 

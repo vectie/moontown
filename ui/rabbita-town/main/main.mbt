@@ -230,10 +230,26 @@ priv struct VisualBuildingSnapshot {
 } derive(FromJson)
 
 ///|
+priv struct VisualModuleSnapshot {
+  module_id : String
+  book_id : String
+  status : String
+  source : String
+  running_count : Int
+  waiting_count : Int
+  review_count : Int
+  blocked_count : Int
+  completed_count : Int
+  active_agent_count : Int
+  message : String
+} derive(FromJson)
+
+///|
 priv struct VisualProjectionSnapshot {
   tick : Int
   agents : Array[VisualAgentSnapshot]
   buildings : Array[VisualBuildingSnapshot]
+  modules : Array[VisualModuleSnapshot]?
   messages : Array[String]
 } derive(FromJson)
 
@@ -331,6 +347,21 @@ priv struct WenyuTownModule {
   asset_roof : String
   summary : String
 } derive(FromJson)
+
+///|
+priv struct WenyuModuleRuntimeState {
+  status_class : String
+  status_label : String
+  source_label : String
+  detail : String
+  running_count : Int
+  waiting_count : Int
+  review_count : Int
+  blocked_count : Int
+  completed_count : Int
+  visible_agent_count : Int
+  issue_count : Int
+}
 
 ///|
 extern "js" fn load_bootstrap_town_snapshot_json() -> String =
@@ -593,6 +624,41 @@ fn wenyu_module_count() -> Int {
 fn find_wenyu_module(module_id : String) -> WenyuTownModule? {
   for civic in wenyu_modules() {
     if civic.id == module_id {
+      return Some(civic)
+    }
+  }
+  None
+}
+
+///|
+fn strip_prefix_once(text : String, prefix : String) -> String {
+  if text.length() >= prefix.length() &&
+    text[:prefix.length()].to_string() == prefix {
+    text[prefix.length():].to_string()
+  } else {
+    text
+  }
+}
+
+///|
+fn normalize_module_binding_key(text : String) -> String {
+  strip_prefix_once(strip_prefix_once(text, "book-"), "wenyu-")
+}
+
+///|
+fn module_book_matches(civic : WenyuTownModule, book_id : String) -> Bool {
+  book_id == civic.book_id ||
+  book_id == civic.id ||
+  normalize_module_binding_key(book_id) ==
+    normalize_module_binding_key(civic.book_id) ||
+  normalize_module_binding_key(book_id) ==
+    normalize_module_binding_key(civic.id)
+}
+
+///|
+fn find_module_for_book(book_id : String) -> WenyuTownModule? {
+  for civic in wenyu_modules() {
+    if module_book_matches(civic, book_id) {
       return Some(civic)
     }
   }
@@ -6369,44 +6435,364 @@ fn render_water_effect_layer() -> @rabbita.Html {
 }
 
 ///|
-fn wenyu_module_status_class(
+fn find_module_execution(
   civic : WenyuTownModule,
   executions : Array[@core.TaskExecutionRecord],
-) -> String {
-  match find_book_execution(executions, civic.book_id) {
-    Some(execution) =>
-      match execution.status {
-        @core.TaskExecutionStatus::Running
-        | @core.TaskExecutionStatus::RunConfirmed => "module-status-running"
-        @core.TaskExecutionStatus::AwaitingPersistence
-        | @core.TaskExecutionStatus::ReviewQueued => "module-status-review"
-        @core.TaskExecutionStatus::Failed | @core.TaskExecutionStatus::Stale =>
-          "module-status-alert"
-        @core.TaskExecutionStatus::Completed => "module-status-complete"
-        _ => "module-status-waiting"
+) -> @core.TaskExecutionRecord? {
+  let mut matched : @core.TaskExecutionRecord? = None
+  for execution in executions {
+    if module_book_matches(civic, execution.book_id) {
+      matched = Some(execution)
+    }
+  }
+  matched
+}
+
+///|
+fn find_module_visual_building(
+  model : Model,
+  civic : WenyuTownModule,
+) -> VisualBuildingSnapshot? {
+  match model.visual_projection {
+    Some(projection) => {
+      for building in projection.buildings {
+        if module_book_matches(civic, building.book_id) {
+          return Some(building)
+        }
       }
-    None => "module-status-calm"
+      None
+    }
+    None => None
   }
 }
 
 ///|
-fn wenyu_module_status_label(
+fn find_module_visual_module(
+  model : Model,
+  civic : WenyuTownModule,
+) -> VisualModuleSnapshot? {
+  match model.visual_projection {
+    Some(projection) =>
+      match projection.modules {
+        Some(modules) => {
+          for module_status in modules {
+            if module_status.module_id == civic.id ||
+              module_book_matches(civic, module_status.book_id) {
+              return Some(module_status)
+            }
+          }
+          None
+        }
+        None => None
+      }
+    None => None
+  }
+}
+
+///|
+fn module_visual_agents(
+  model : Model,
+  civic : WenyuTownModule,
+) -> Array[VisualAgentSnapshot] {
+  match model.visual_projection {
+    Some(projection) =>
+      projection.agents.filter(agent => module_book_matches(civic, agent.book_id))
+    None => []
+  }
+}
+
+///|
+fn module_active_visual_agents(
+  model : Model,
+  civic : WenyuTownModule,
+) -> Array[VisualAgentSnapshot] {
+  module_visual_agents(model, civic).filter(agent => {
+    agent.visible_on_overworld ||
+    agent.phase == "running" ||
+    agent.phase == "persisting" ||
+    agent.phase == "review" ||
+    agent.phase == "failed" ||
+    agent.phase == "stale" ||
+    agent.phase == "blocked"
+  })
+}
+
+///|
+fn module_allows_water_or_bridge(civic : WenyuTownModule) -> Bool {
+  civic.building_kind == "physical-bridge" ||
+  civic.district.contains("river") ||
+  civic.district.contains("harbor")
+}
+
+///|
+fn module_anchor_tile_kind(civic : WenyuTownModule) -> String {
+  tile_kind_at(civic.grid_x, civic.grid_y)
+}
+
+///|
+fn module_entrance_tile_kind(civic : WenyuTownModule) -> String {
+  tile_kind_at(civic.entrance_x, civic.entrance_y)
+}
+
+///|
+fn module_tile_blocks_building(kind : String, civic : WenyuTownModule) -> Bool {
+  if module_allows_water_or_bridge(civic) {
+    false
+  } else {
+    kind == "river" ||
+    kind == "lake" ||
+    kind == "wetland" ||
+    kind == "bridge" ||
+    kind == "road" ||
+    kind == "road-major"
+  }
+}
+
+///|
+fn module_tile_blocks_entrance(kind : String, civic : WenyuTownModule) -> Bool {
+  if module_allows_water_or_bridge(civic) {
+    false
+  } else {
+    kind == "river" || kind == "lake" || kind == "wetland"
+  }
+}
+
+///|
+fn module_validation_issues(civic : WenyuTownModule) -> Array[String] {
+  let issues : Array[String] = []
+  if civic.book_id == "" {
+    issues.push("missing book_id")
+  }
+  if civic.asset_base == "" {
+    issues.push("missing asset_base")
+  }
+  if civic.footprint_w <= 0 || civic.footprint_h <= 0 {
+    issues.push("invalid footprint")
+  }
+  let anchor_kind = module_anchor_tile_kind(civic)
+  if module_tile_blocks_building(anchor_kind, civic) {
+    issues.push("anchor on \{anchor_kind}")
+  }
+  let entrance_kind = module_entrance_tile_kind(civic)
+  if module_tile_blocks_entrance(entrance_kind, civic) {
+    issues.push("entrance on \{entrance_kind}")
+  }
+  issues
+}
+
+///|
+fn wenyu_clean_module_count() -> Int {
+  let mut count = 0
+  for civic in wenyu_modules() {
+    if module_validation_issues(civic).is_empty() {
+      count += 1
+    }
+  }
+  count
+}
+
+///|
+fn module_projection_status_class(module_status : VisualModuleSnapshot) -> String {
+  match module_status.status {
+    "alert" => "module-status-alert"
+    "review" => "module-status-review"
+    "running" => "module-status-running"
+    "waiting" => "module-status-waiting"
+    "complete" => "module-status-complete"
+    "projected" => "module-status-projected"
+    _ =>
+      if module_status.blocked_count > 0 {
+        "module-status-alert"
+      } else if module_status.review_count > 0 {
+        "module-status-review"
+      } else if module_status.running_count > 0 {
+        "module-status-running"
+      } else if module_status.waiting_count > 0 {
+        "module-status-waiting"
+      } else if module_status.completed_count > 0 {
+        "module-status-complete"
+      } else {
+        "module-status-projected"
+      }
+  }
+}
+
+///|
+fn module_projection_status_label(module_status : VisualModuleSnapshot) -> String {
+  match module_status.status {
+    "alert" => "Recovery"
+    "review" => "Review"
+    "running" => "Running"
+    "waiting" => "Waiting"
+    "complete" => "Quiet"
+    "projected" => "Projected"
+    _ => "Projected"
+  }
+}
+
+///|
+fn module_projection_source_label(source : String) -> String {
+  match source {
+    "runtime" => "Module"
+    "projection" => "Module"
+    "execution" => "Execution"
+    "" => "Module"
+    _ => source
+  }
+}
+
+///|
+fn wenyu_module_runtime_state(
+  model : Model,
   civic : WenyuTownModule,
   executions : Array[@core.TaskExecutionRecord],
-) -> String {
-  match find_book_execution(executions, civic.book_id) {
-    Some(execution) => execution.status.to_string()
-    None => "Configured"
+) -> WenyuModuleRuntimeState {
+  let issue_count = module_validation_issues(civic).length()
+  let active_agents = module_active_visual_agents(model, civic)
+  match find_module_visual_module(model, civic) {
+    Some(module_status) =>
+      {
+        status_class: module_projection_status_class(module_status),
+        status_label: module_projection_status_label(module_status),
+        source_label: module_projection_source_label(module_status.source),
+        detail: module_status.message,
+        running_count: module_status.running_count,
+        waiting_count: module_status.waiting_count,
+        review_count: module_status.review_count,
+        blocked_count: module_status.blocked_count,
+        completed_count: module_status.completed_count,
+        visible_agent_count: module_status.active_agent_count,
+        issue_count,
+      }
+    None =>
+      match find_module_visual_building(model, civic) {
+        Some(building) => {
+          let status_class = if building.blocked_count > 0 {
+            "module-status-alert"
+          } else if building.review_count > 0 {
+            "module-status-review"
+          } else if building.running_count > 0 {
+            "module-status-running"
+          } else if building.waiting_count > 0 {
+            "module-status-waiting"
+          } else if building.completed_count > 0 {
+            "module-status-complete"
+          } else {
+            "module-status-projected"
+          }
+          let label = if building.blocked_count > 0 {
+            "Recovery"
+          } else if building.review_count > 0 {
+            "Review"
+          } else if building.running_count > 0 {
+            "Running"
+          } else if building.waiting_count > 0 {
+            "Waiting"
+          } else if building.completed_count > 0 {
+            "Quiet"
+          } else {
+            "Projected"
+          }
+          {
+            status_class,
+            status_label: label,
+            source_label: "Projection",
+            detail: building.message,
+            running_count: building.running_count,
+            waiting_count: building.waiting_count,
+            review_count: building.review_count,
+            blocked_count: building.blocked_count,
+            completed_count: building.completed_count,
+            visible_agent_count: active_agents.length(),
+            issue_count,
+          }
+        }
+        None =>
+          match find_module_execution(civic, executions) {
+            Some(execution) => {
+              let status_class = match execution.status {
+                @core.TaskExecutionStatus::Running
+                | @core.TaskExecutionStatus::RunConfirmed =>
+                  "module-status-running"
+                @core.TaskExecutionStatus::AwaitingPersistence
+                | @core.TaskExecutionStatus::ReviewQueued =>
+                  "module-status-review"
+                @core.TaskExecutionStatus::Failed
+                | @core.TaskExecutionStatus::Stale => "module-status-alert"
+                @core.TaskExecutionStatus::Completed =>
+                  "module-status-complete"
+                _ => "module-status-waiting"
+              }
+              {
+                status_class,
+                status_label: execution.status.to_string(),
+                source_label: "Execution",
+                detail: execution.summary,
+                running_count: if status_class == "module-status-running" {
+                  1
+                } else {
+                  0
+                },
+                waiting_count: if status_class == "module-status-waiting" {
+                  1
+                } else {
+                  0
+                },
+                review_count: if status_class == "module-status-review" {
+                  1
+                } else {
+                  0
+                },
+                blocked_count: if status_class == "module-status-alert" {
+                  1
+                } else {
+                  0
+                },
+                completed_count: if status_class == "module-status-complete" {
+                  1
+                } else {
+                  0
+                },
+                visible_agent_count: active_agents.length(),
+                issue_count,
+              }
+            }
+            None =>
+              {
+                status_class: if issue_count > 0 {
+                  "module-status-unbound"
+                } else {
+                  "module-status-calm"
+                },
+                status_label: if issue_count > 0 {
+                  "Needs config"
+                } else {
+                  "Configured"
+                },
+                source_label: "Config",
+                detail: civic.summary,
+                running_count: 0,
+                waiting_count: 0,
+                review_count: 0,
+                blocked_count: 0,
+                completed_count: 0,
+                visible_agent_count: active_agents.length(),
+                issue_count,
+              }
+          }
+      }
   }
 }
 
 ///|
 fn render_wenyu_module_building(
   dispatch : Dispatch[Msg],
+  model : Model,
   civic : WenyuTownModule,
   executions : Array[@core.TaskExecutionRecord],
   selected_node_key : String?,
 ) -> @rabbita.Html {
+  let runtime = wenyu_module_runtime_state(model, civic, executions)
   let width = 92 + civic.footprint_w * 7
   let height = 76 + civic.footprint_h * 8
   let selected_suffix = if selected_node_key == Some(civic.id) {
@@ -6414,6 +6800,7 @@ fn render_wenyu_module_building(
   } else {
     ""
   }
+  let issue_suffix = if runtime.issue_count > 0 { " has-issues" } else { "" }
   let style = [
     "left: \{iso_tile_left(civic.grid_x, civic.grid_y)}px",
     "top: \{iso_tile_top(civic.grid_x, civic.grid_y)}px",
@@ -6423,30 +6810,40 @@ fn render_wenyu_module_building(
     "--module-image: url('\{civic.asset_base}')",
     "--module-roof-image: url('\{civic.asset_roof}')",
   ]
+  let children : Array[@rabbita.Html] = [
+    span(class="wenyu-module-shadow", no_children()),
+    span(class="wenyu-module-sprite", no_children()),
+    span(class="wenyu-module-light", no_children()),
+  ]
+  if runtime.visible_agent_count > 0 {
+    children.push(
+      span(class="wenyu-module-agent-count", "\{runtime.visible_agent_count}"),
+    )
+  }
+  if runtime.issue_count > 0 {
+    children.push(span(class="wenyu-module-issue-count", "\{runtime.issue_count}"))
+  }
+  children.push(
+    span(class="wenyu-module-label", [
+      span(class="wenyu-module-title", civic.title),
+      span(class="wenyu-module-district", civic.district),
+      span(class="wenyu-module-state", runtime.status_label),
+      span(class="wenyu-module-state-source", runtime.source_label),
+    ]),
+  )
   button(
-    class="wenyu-module-building wenyu-module-\{civic.building_kind} \{wenyu_module_status_class(civic, executions)}\{selected_suffix}",
+    class="wenyu-module-building wenyu-module-\{civic.building_kind} \{runtime.status_class}\{selected_suffix}\{issue_suffix}",
     style~,
-    title="\{civic.title}: \{civic.summary}",
+    title="\{civic.title}: \{runtime.status_label}. \{runtime.detail}",
     on_click=dispatch(SelectNode(civic.id)),
-    [
-      span(class="wenyu-module-shadow", no_children()),
-      span(class="wenyu-module-sprite", no_children()),
-      span(class="wenyu-module-light", no_children()),
-      span(class="wenyu-module-label", [
-        span(class="wenyu-module-title", civic.title),
-        span(class="wenyu-module-district", civic.district),
-        span(
-          class="wenyu-module-state",
-          wenyu_module_status_label(civic, executions),
-        ),
-      ]),
-    ],
+    children,
   )
 }
 
 ///|
 fn render_wenyu_module_building_layer(
   dispatch : Dispatch[Msg],
+  model : Model,
   executions : Array[@core.TaskExecutionRecord],
   selected_node_key : String?,
 ) -> @rabbita.Html {
@@ -6460,7 +6857,7 @@ fn render_wenyu_module_building_layer(
   for civic in wenyu_modules() {
     children.push(
       render_wenyu_module_building(
-        dispatch, civic, executions, selected_node_key,
+        dispatch, model, civic, executions, selected_node_key,
       ),
     )
   }
@@ -6472,7 +6869,7 @@ fn module_workers(
   civic : WenyuTownModule,
   workers : Array[WorkerSim],
 ) -> Array[WorkerSim] {
-  workers.filter(worker => worker.book_id == civic.book_id)
+  workers.filter(worker => module_book_matches(civic, worker.book_id))
 }
 
 ///|
@@ -6558,18 +6955,61 @@ fn module_interior_furniture(civic : WenyuTownModule) -> Array[@rabbita.Html] {
 }
 
 ///|
+fn render_module_visual_agent(
+  dispatch : Dispatch[Msg],
+  agent : VisualAgentSnapshot,
+) -> @rabbita.Html {
+  button(
+    class="interior-agent visual-interior-agent \{visual_agent_status_class(agent)}",
+    title=agent.message,
+    on_click=dispatch(SelectWorker(agent.worker_id)),
+    [
+      span(class="interior-agent-name", agent.worker_name),
+      span(class="interior-agent-role", "\{agent.role} / \{agent.phase}"),
+      span(class="interior-agent-summary", agent.message),
+    ],
+  )
+}
+
+///|
+fn render_module_issue_list(civic : WenyuTownModule) -> @rabbita.Html {
+  let issues = module_validation_issues(civic)
+  if issues.is_empty() {
+    div(class="module-issue-list module-issue-list-clean", [
+      span("Config validated for current viewport placement."),
+    ])
+  } else {
+    div(
+      class="module-issue-list",
+      issues.map(issue => span(class="module-issue-chip", issue)),
+    )
+  }
+}
+
+///|
+fn render_module_runtime_counters(
+  runtime : WenyuModuleRuntimeState,
+) -> @rabbita.Html {
+  div(class="module-runtime-counters", [
+    span("Run \{runtime.running_count}"),
+    span("Wait \{runtime.waiting_count}"),
+    span("Review \{runtime.review_count}"),
+    span("Blocked \{runtime.blocked_count}"),
+    span("Done \{runtime.completed_count}"),
+  ])
+}
+
+///|
 fn render_wenyu_module_interior(
   dispatch : Dispatch[Msg],
+  model : Model,
   civic : WenyuTownModule,
   workers : Array[WorkerSim],
   executions : Array[@core.TaskExecutionRecord],
 ) -> @rabbita.Html {
   let residents = module_workers(civic, workers)
-  let execution = find_book_execution(executions, civic.book_id)
-  let lifecycle = match execution {
-    Some(execution) => execution.status.to_string()
-    None => "Configured"
-  }
+  let visual_agents = module_active_visual_agents(model, civic)
+  let runtime = wenyu_module_runtime_state(model, civic, executions)
   section(class="interior-shell module-interior-shell", [
     header(class="interior-header", [
       div([
@@ -6586,16 +7026,26 @@ fn render_wenyu_module_interior(
     div(class="interior-room module-interior-room", [
       div(class="module-interior-summary", [
         render_module_detail("District", civic.district),
-        render_module_detail("Runtime", lifecycle),
+        render_module_detail("Runtime", runtime.status_label),
+        render_module_detail("Source", runtime.source_label),
+        render_module_detail(
+          "Workers",
+          "\{runtime.visible_agent_count} active / \{residents.length()} bound",
+        ),
         render_module_detail(
           "Entrance",
           "\{civic.entrance_x},\{civic.entrance_y}",
         ),
       ]),
+      p(class="module-runtime-detail", runtime.detail),
+      render_module_runtime_counters(runtime),
+      render_module_issue_list(civic),
       div(class="interior-floor", module_interior_furniture(civic)),
       div(
         class="interior-agent-grid",
-        if residents.is_empty() {
+        if !visual_agents.is_empty() {
+          visual_agents.map(agent => render_module_visual_agent(dispatch, agent))
+        } else if residents.is_empty() {
           [
             p(
               class="interior-empty",
@@ -7021,23 +7471,61 @@ fn visual_agent_status_class(agent : VisualAgentSnapshot) -> String {
 
 ///|
 fn visual_agent_grid_x(agent : VisualAgentSnapshot) -> Int {
-  if agent.grid_x < 0 {
-    0
-  } else if agent.grid_x > 255 {
-    255
-  } else {
-    agent.grid_x
+  match visual_agent_target_module(agent) {
+    Some(civic) =>
+      if visual_agent_should_route_to_module(agent) {
+        clamp_visual_grid_x(civic.entrance_x + agent.z % 5 - 2)
+      } else {
+        clamp_visual_grid_x(agent.grid_x)
+      }
+    None => clamp_visual_grid_x(agent.grid_x)
   }
 }
 
 ///|
 fn visual_agent_grid_y(agent : VisualAgentSnapshot) -> Int {
-  if agent.grid_y < 0 {
+  match visual_agent_target_module(agent) {
+    Some(civic) =>
+      if visual_agent_should_route_to_module(agent) {
+        clamp_visual_grid_y(civic.entrance_y + agent.z / 5 % 5 - 2)
+      } else {
+        clamp_visual_grid_y(agent.grid_y)
+      }
+    None => clamp_visual_grid_y(agent.grid_y)
+  }
+}
+
+///|
+fn visual_agent_target_module(agent : VisualAgentSnapshot) -> WenyuTownModule? {
+  find_module_for_book(agent.book_id)
+}
+
+///|
+fn visual_agent_should_route_to_module(agent : VisualAgentSnapshot) -> Bool {
+  agent.phase == "running" ||
+  agent.phase == "persisting" ||
+  agent.phase == "review"
+}
+
+///|
+fn clamp_visual_grid_x(value : Int) -> Int {
+  if value < 0 {
     0
-  } else if agent.grid_y > 143 {
+  } else if value > 255 {
+    255
+  } else {
+    value
+  }
+}
+
+///|
+fn clamp_visual_grid_y(value : Int) -> Int {
+  if value < 0 {
+    0
+  } else if value > 143 {
     143
   } else {
-    agent.grid_y
+    value
   }
 }
 
@@ -7719,7 +8207,7 @@ fn render_town_viewport(
         render_tilemap_layer(),
         render_water_effect_layer(),
         render_wenyu_module_building_layer(
-          dispatch, executions, selected_node_key,
+          dispatch, model, executions, selected_node_key,
         ),
         div(class="scene-overlay", [
           div(class="scene-nodes-layer", scene_nodes),
@@ -7800,7 +8288,9 @@ fn render_scene(dispatch : Dispatch[Msg], model : Model) -> @rabbita.Html {
       Node(node_key) =>
         match find_wenyu_module(node_key) {
           Some(civic) =>
-            render_wenyu_module_interior(dispatch, civic, workers, executions)
+            render_wenyu_module_interior(
+              dispatch, model, civic, workers, executions,
+            )
           None => render_building_interior(dispatch, scene, workers, node_key)
         }
       _ =>
@@ -7827,7 +8317,7 @@ fn render_scene(dispatch : Dispatch[Msg], model : Model) -> @rabbita.Html {
           status_chip("Local time \{real_time_label()}", "chip-clock"),
           status_chip(daemon_tick_label(model), "chip-neutral"),
           status_chip(
-            "Modules \{wenyu_module_count()} / cfg \{wenyu_modules_version()}",
+            "Modules \{wenyu_module_count()} / clean \{wenyu_clean_module_count()} / v\{wenyu_modules_version()}",
             "chip-book",
           ),
           button(

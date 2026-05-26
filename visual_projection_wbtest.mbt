@@ -123,6 +123,26 @@ test "visual projection summarizes book building activity" {
 }
 
 ///|
+test "visual projection emits module status from book runtime" {
+  let projection = build_visual_projection(visual_projection_test_state())
+  assert_eq(projection.modules.length(), 1)
+  let module_status = projection.modules[0]
+  assert_eq(module_status.module_id, "research-opc")
+  assert_eq(module_status.book_id, "research-opc")
+  assert_eq(module_status.status, "running")
+  assert_eq(module_status.source, "runtime")
+  assert_eq(module_status.running_count, 1)
+  assert_eq(module_status.active_agent_count, 1)
+  assert_eq(module_status.effect, "work-particles")
+}
+
+///|
+test "visual projection strips wenyu prefix for module ids" {
+  assert_eq(visual_module_id_from_book_id("wenyu-policy-hall"), "policy-hall")
+  assert_eq(visual_module_id_from_book_id("research-opc"), "research-opc")
+}
+
+///|
 async test "town checkpoint persists visual projection beside snapshot" {
   let root = "/tmp/moontown-visual-projection-check"
   ignore_checked_command("rm", ["-rf", root])
@@ -132,4 +152,6 @@ async test "town checkpoint persists visual projection beside snapshot" {
   assert_true(text.contains("\"worker_id\":\"worker-opc-researcher\""))
   assert_true(text.contains("\"phase\":\"running\""))
   assert_true(text.contains("\"effect\":\"work-particles\""))
+  assert_true(text.contains("\"modules\""))
+  assert_true(text.contains("\"module_id\":\"research-opc\""))
 }
