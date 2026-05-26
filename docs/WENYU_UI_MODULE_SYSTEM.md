@@ -140,10 +140,12 @@ Each module binds to a MoonBook through `book_id`.
 ```text
 module.book_id
   -> MoonBook projection fragment
+  -> module-projections.json bridge
   -> Moontown runtime projection
   -> viewport building status
   -> actor destination
   -> interior worker roster
+  -> generated output links
 ```
 
 The visual state should come from real runtime data when available:
@@ -152,7 +154,7 @@ The visual state should come from real runtime data when available:
 - review queues -> amber review light
 - failed/stale runs -> recovery marker
 - no work due -> calm/idle building
-- projection missing -> neutral bridge state
+- projection missing -> explicit integration-gap panel inside the module
 
 ## Implementation Stages
 
@@ -206,7 +208,13 @@ Current status:
   active worker roster slots
 - `visual-projection.json` now includes first-class `modules[]` status objects
   keyed by normalized module id
-- the MoonBook fragment merge is still pending
+- the Vite bridge now scans `.moontown/books/*/book/moonbook-ui-state.json`
+  and publishes `module-projections.json`
+- module interiors now show MoonBook summary, chips, metrics, readiness,
+  review queue, page families, output links, and latest journey when a bound
+  book fragment exists
+- the remaining gap is civic content coverage: most Wenyu feature buildings
+  still need real MoonBook workspaces and service-specific schemas
 
 ### Stage 5: Asset Pipeline
 
@@ -234,7 +242,8 @@ Current status:
 
 ### Stage 7: Civic Runtime Integration
 
-- Require every enabled module to bind to a MoonBook projection fragment.
+- Require every enabled module to bind to a populated MoonBook projection
+  fragment.
 - Require every active worker avatar to derive from a MoonClaw run or standing
   watcher record.
 - Show output links, review gaps, and last accepted knowledge changes in the

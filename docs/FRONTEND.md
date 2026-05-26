@@ -203,6 +203,10 @@ The short version:
 - buildings are loaded from `ui/assets/tilemap/modules/wenyu-town-modules.json`
 - each building binds to a MoonBook through `book_id`
 - clicking a building opens a module-specific interior
+- the Vite bridge scans `.moontown/books/*/book/moonbook-ui-state.json` and
+  publishes `module-projections.json`
+- generated MoonBook HTML outputs are served and copied under
+  `book-output/<book-id>/...` for module interior links
 - hover/focus reveals module details without cluttering the first screen
 - water depth and reflection are rendered as cheap overlay layers, not baked
   into the base map
@@ -223,9 +227,12 @@ Current frontend maturity:
   workers do not create fake busy badges
 - interiors show runtime source, counters, validation state, and active worker
   roster slots
-- the next hard requirement is module projection coverage: MoonBook needs to
-  emit module-specific fragments so each civic building can show pages, review
-  gaps, outputs, and accepted changes
+- interiors show MoonBook summary, status chips, metrics, readiness, review
+  queue, page families, output links, and latest journey when the bound book
+  publishes `moonbook-ui-state.json`
+- the next hard requirement is civic coverage: each Wenyu feature building
+  needs a populated MoonBook workspace and service-specific schema, not just a
+  configured building shell
 
 ## Assets
 
@@ -311,8 +318,7 @@ The frontend is live, but not yet a full simulation game.
 
 Still missing:
 
-- real backend-fed live state
-- standing-goal and daemon-state projection into the browser
+- full Wenyu civic-service book coverage
 - richer movement interpolation
 - deeper multi-agent coordination visuals
 - fuller command system

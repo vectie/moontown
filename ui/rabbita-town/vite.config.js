@@ -1,7 +1,7 @@
 import { defineConfig } from 'vite'
 import rabbita from '@rabbita/vite'
 import { existsSync } from 'node:fs'
-import { mkdir, readFile, writeFile } from 'node:fs/promises'
+import { mkdir, readdir, readFile, stat, writeFile } from 'node:fs/promises'
 import path from 'node:path'
 
 const townSnapshotPath = path.resolve(process.cwd(), '../../.moontown/town.json')
@@ -11,6 +11,17 @@ const standingGoalsPath = path.resolve(process.cwd(), '../../.moontown/standing-
 const watcherDir = path.resolve(process.cwd(), '../../.moontown/watchers')
 const operatorRequestDir = path.resolve(process.cwd(), '../../.moontown/operator-requests')
 const operatorRequestLedgerPath = path.join(operatorRequestDir, 'requests.jsonl')
+const booksRootPath = path.resolve(process.cwd(), '../../.moontown/books')
+
+const keyBookOutputFiles = [
+  'book/Home.html',
+  'book/index.html',
+  'book/site/generated/index.html',
+  'book/synthesis/report.html',
+  'book/synthesis/overview.html',
+  'book/synthesis/evidence.html',
+  'book/reviews/pending.html',
+]
 
 function serveJsonSnapshot(res, snapshotPath, missingMessage) {
   if (!existsSync(snapshotPath)) {
@@ -65,6 +76,167 @@ async function appendJsonLine(filePath, value) {
   }
   const prefix = previous && !previous.endsWith('\n') ? `${previous}\n` : previous
   await writeFile(filePath, `${prefix}${JSON.stringify(value)}\n`, 'utf8')
+}
+
+async function readJsonFile(filePath, fallback) {
+  if (!existsSync(filePath)) {
+    return fallback
+  }
+  try {
+    return JSON.parse(await readFile(filePath, 'utf8'))
+  } catch {
+    return fallback
+  }
+}
+
+function projectionLinksForBook(bookId, bookRoot) {
+  const candidates = [
+    ['Home', 'book/Home.html', 'home'],
+    ['Generated site', 'book/site/generated/index.html', 'site'],
+    ['Research report', 'book/synthesis/report.html', 'report'],
+    ['Overview', 'book/synthesis/overview.html', 'overview'],
+    ['Evidence', 'book/synthesis/evidence.html', 'evidence'],
+    ['Pending review', 'book/reviews/pending.html', 'review'],
+  ]
+
+  return candidates
+    .filter(([, relativePath]) => existsSync(path.join(bookRoot, relativePath)))
+    .map(([label, relativePath, kind]) => ({
+      label,
+      kind,
+      url: `./book-output/${encodeURIComponent(bookId)}/${relativePath}`,
+    }))
+}
+
+function normalizeChipArray(value, maxItems = 6) {
+  return Array.isArray(value)
+    ? value.slice(0, maxItems).map(item => ({
+      label: String(item?.label || 'status'),
+      tone: String(item?.tone || 'info'),
+    }))
+    : []
+}
+
+function normalizeMetricArray(value, maxItems = 8) {
+  return Array.isArray(value)
+    ? value.slice(0, maxItems).map(item => ({
+      label: String(item?.label || 'Metric'),
+      value: String(item?.value || 'n/a'),
+      note: String(item?.note || ''),
+      tone: String(item?.tone || 'info'),
+    }))
+    : []
+}
+
+function normalizeItemArray(value, maxItems = 6) {
+  return Array.isArray(value)
+    ? value.slice(0, maxItems).map(item => ({
+      title: String(item?.title || 'Untitled'),
+      detail: String(item?.detail || ''),
+      meta: String(item?.meta || ''),
+    }))
+    : []
+}
+
+function normalizeJourneyArray(value, maxItems = 5) {
+  return Array.isArray(value)
+    ? value.slice(0, maxItems).map(item => ({
+      title: String(item?.title || 'Recent activity'),
+      stage: String(item?.stage || 'activity'),
+      status: String(item?.status || 'unknown'),
+      summary: String(item?.summary || ''),
+      highlights: Array.isArray(item?.highlights)
+        ? item.highlights.slice(0, 4).map(highlight => String(highlight))
+        : [],
+    }))
+    : []
+}
+
+async function loadModuleProjectionIndex() {
+  if (!existsSync(booksRootPath)) {
+    return { generated_at: new Date().toISOString(), projections: [] }
+  }
+
+  const entries = await readdir(booksRootPath, { withFileTypes: true })
+  const projections = []
+  for (const entry of entries) {
+    if (!entry.isDirectory()) {
+      continue
+    }
+    const bookId = entry.name
+    const bookRoot = path.join(booksRootPath, bookId)
+    const uiStatePath = path.join(bookRoot, 'book/moonbook-ui-state.json')
+    const state = await readJsonFile(uiStatePath, null)
+    if (!state) {
+      continue
+    }
+    projections.push({
+      book_id: bookId,
+      title: String(state.title || bookId),
+      summary: String(state.summary || ''),
+      status_chips: normalizeChipArray(state.status_chips, 6),
+      metrics: normalizeMetricArray(state.metrics, 8),
+      readiness: normalizeItemArray(state.readiness, 6),
+      review_queue: normalizeItemArray(state.review_queue, 8),
+      page_families: normalizeItemArray(state.page_families, 8),
+      journey: normalizeJourneyArray(state.journey, 5),
+      links: projectionLinksForBook(bookId, bookRoot),
+    })
+  }
+
+  projections.sort((left, right) => left.book_id.localeCompare(right.book_id))
+  return { generated_at: new Date().toISOString(), projections }
+}
+
+async function serveBookOutput(req, res) {
+  const pathname = new URL(req.url || '/', 'http://moontown.local').pathname
+  const parts = pathname.split('/').filter(Boolean)
+  const rawBookId = parts.shift() || ''
+  const bookId = safeSegment(decodeURIComponent(rawBookId), '')
+  if (!bookId || parts.length === 0) {
+    res.statusCode = 404
+    res.setHeader('Content-Type', 'text/plain')
+    res.end('missing book output')
+    return
+  }
+
+  const requestedPath = path.normalize(parts.join('/'))
+  if (requestedPath.startsWith('..') || path.isAbsolute(requestedPath)) {
+    res.statusCode = 400
+    res.setHeader('Content-Type', 'text/plain')
+    res.end('invalid book output path')
+    return
+  }
+
+  const filePath = path.join(booksRootPath, bookId, requestedPath)
+  const resolved = path.resolve(filePath)
+  const allowedRoot = path.resolve(booksRootPath, bookId)
+  if (!resolved.startsWith(`${allowedRoot}${path.sep}`) || !existsSync(resolved)) {
+    res.statusCode = 404
+    res.setHeader('Content-Type', 'text/plain')
+    res.end('book output not found')
+    return
+  }
+
+  const fileStat = await stat(resolved)
+  if (!fileStat.isFile()) {
+    res.statusCode = 404
+    res.setHeader('Content-Type', 'text/plain')
+    res.end('book output not found')
+    return
+  }
+
+  const ext = path.extname(resolved).toLowerCase()
+  const contentType = ext === '.html'
+    ? 'text/html; charset=utf-8'
+    : ext === '.css'
+      ? 'text/css; charset=utf-8'
+      : ext === '.js'
+        ? 'application/javascript; charset=utf-8'
+        : 'text/plain; charset=utf-8'
+  res.statusCode = 200
+  res.setHeader('Content-Type', contentType)
+  res.end(await readFile(resolved))
 }
 
 async function serveJsonlAsArray(res, filePath) {
@@ -187,6 +359,15 @@ function moontownSnapshotPlugin() {
         res.setHeader('Content-Type', 'application/json')
         res.end(contents)
       })
+      server.middlewares.use('/module-projections.json', async (_req, res) => {
+        const index = await loadModuleProjectionIndex()
+        res.statusCode = 200
+        res.setHeader('Content-Type', 'application/json')
+        res.end(JSON.stringify(index))
+      })
+      server.middlewares.use('/book-output', async (req, res) => {
+        await serveBookOutput(req, res)
+      })
       server.middlewares.use('/daemon.json', async (_req, res) => {
         if (!serveJsonSnapshot(res, daemonSnapshotPath, 'missing daemon snapshot')) {
           return
@@ -245,6 +426,30 @@ function moontownSnapshotPlugin() {
           await readFile(visualProjectionPath, 'utf8'),
           'utf8',
         )
+      }
+
+      const moduleProjectionIndex = await loadModuleProjectionIndex()
+      await writeFile(
+        path.join(distDir, 'module-projections.json'),
+        JSON.stringify(moduleProjectionIndex),
+        'utf8',
+      )
+
+      for (const projection of moduleProjectionIndex.projections) {
+        for (const relativePath of keyBookOutputFiles) {
+          const sourcePath = path.join(booksRootPath, projection.book_id, relativePath)
+          if (!existsSync(sourcePath)) {
+            continue
+          }
+          const targetPath = path.join(
+            distDir,
+            'book-output',
+            projection.book_id,
+            relativePath,
+          )
+          await mkdir(path.dirname(targetPath), { recursive: true })
+          await writeFile(targetPath, await readFile(sourcePath))
+        }
       }
 
       if (existsSync(daemonSnapshotPath)) {

@@ -1,23 +1,24 @@
 # Wenyu Valley Town Status
 
-Last updated: 2026-05-26 15:53 CST
+Last updated: 2026-05-26 16:15 CST
 
 This document answers one question: how far is the current Wenyu Valley
 implementation from a fully functioning town?
 
 The short answer is:
 
-- as a visual, inspectable town shell: about 65-70% complete
-- as a local 24/7 AI control-plane prototype: about 55-60% complete
+- as a visual, inspectable town shell: about 70% complete
+- as a local 24/7 AI control-plane prototype: about 60% complete
 - as a fully functioning civic AI town with real services, persistent memory,
-  execution, generated projections, and operator workflow: about 35-40% complete
+  execution, generated projections, and operator workflow: about 38-42% complete
 
 The project is no longer just markdown or a static map. It now has a real
 terrain viewport, modular civic buildings, daemon/watch state, MoonBook/MoonClaw
 boundaries, operator visibility, and first-class module runtime projection. The
-remaining work is mostly integration depth: every visible building needs a real
-MoonBook projection fragment, real worker activity, real output links, and real
-service workflows.
+browser can now build a MoonBook projection index and serve/copy generated book
+outputs into the Wenyu module UI. The remaining work is mostly integration
+depth: every civic building needs a real bound MoonBook workspace, real worker
+activity, meaningful module-specific output, and real service workflows.
 
 ## Distance To Fully Functioning Town
 
@@ -28,7 +29,7 @@ runtime projection are real. The civic service layer is still mostly missing.
 | Layer | Current Distance | Why |
 |---|---:|---|
 | Visual town shell | Near | The 256 x 144 Wenyu map, drag/zoom, module buildings, interiors, water overlays, and validation are in place |
-| Truthful runtime UI | Medium | `visual-projection.json` now has module status, and the viewport avoids fake busy state; it still needs MoonBook projection fragments |
+| Truthful runtime UI | Medium-near | `visual-projection.json` now has module status, module interiors can read MoonBook UI fragments, and the viewport avoids fake busy state; civic books still need full coverage |
 | Long-running mayor loop | Medium | The daemon is healthy locally with zero recorded failures in the current runtime file, but it still needs install/service hardening and multi-day recovery evidence |
 | Research watchers | Medium | OPC and LLM standing watches run through real books and ledgers, but domain/operational quality accounting still needs stronger UI |
 | Civic modules | Far | Policy, contest, social, talent, market, bridge, and story modules are mostly product specs, not end-to-end workflows |
@@ -61,13 +62,13 @@ A fully functioning Wenyu town means:
 | Wenyu terrain map | 256 x 144 tiled visual surface with river, lakes, farms, roads, bridges, drag, and zoom | 70% | Needs richer depth, seasonal overlays, fog/cloud layers, and perf budgets for lower-end browsers |
 | Civic module registry | `wenyu-town-modules.json` can add, remove, move, and configure feature buildings; runtime validation now catches missing bindings and bad placement | 65% | Needs standalone schema checks, asset checks, and designer preview |
 | Module buildings | 11 configurable module buildings render above terrain and open interiors | 50% | Assets are still reused/early-stage; each module needs custom generated sprites and roof/depth variants |
-| Module interiors | Click opens module-specific interior furniture with runtime source, counters, validation state, and worker roster slots | 50% | Interiors still need MoonBook module projection fragments and output links |
+| Module interiors | Click opens module-specific interior furniture with runtime source, counters, validation state, worker roster slots, MoonBook fragments, and output links when available | 60% | Most Wenyu civic modules still need real bound books and service-specific page schemas |
 | Water effects | Runtime overlay adds depth, reflection, and bridge shadow | 35% | Needs richer segmented river logic and seasonal/weather response |
 | Agents on map | Visual agent projection exists; active module workers route to module entrances and idle/completed workers stay hidden | 60% | Needs Wenyu-specific task projection coverage for every civic module |
 | Operator dashboard | Shows daemon/watch progress, request composer, and portal to canonical viewport | 60% | Needs stronger multi-book progress panels and output retrieval |
 | Mayor daemon | Local run/start/doctor/stop, heartbeat, stale detection, standing-goal dispatch | 60% | Needs long-run soak testing, service install hardening, and recovery playbooks |
 | Standing watchers | Data-driven standing goals and watcher ledgers exist | 60% | Need stronger MoonBook quality accounting and per-topic progress views |
-| MoonBook memory binding | Research books and generated projections work for research lanes | 45% | Civic modules need canonical book schemas and module projection fragments |
+| MoonBook memory binding | Research books and generated projections work for research lanes; the Wenyu UI can consume `moonbook-ui-state.json` fragments generically | 50% | Civic modules need canonical book schemas, real workspaces, and service-specific content |
 | MoonClaw execution binding | Proposal/run boundary and worker execution path exist | 45% | Civic service tasks need role-specific skills and output contracts |
 | Real civic services | PRD describes policy, contest, social, talent, bridge, market, and story modules | 15% | Most services are still product specs, not reliable end-to-end workflows |
 | Designer workflow | Manual JSON config works | 30% | Needs editor, validation, asset manifest checks, and map collision checks |
@@ -86,12 +87,21 @@ Implemented and validated:
   terrain.
 - Building labels stay hidden until hover/focus.
 - Clicking a module opens an interior scene.
-- The HUD reports total modules, cleanly validated modules, and module-config
-  load version.
+- The HUD reports total modules, cleanly validated modules, loaded MoonBook
+  fragments, and module-config load version.
 - Module placement validation reports missing bindings, missing assets, invalid
   footprints, and bad water/road placement.
 - Module interiors show runtime source, status counters, current detail,
   validation state, and active worker roster slots.
+- The Vite bridge exposes `module-projections.json` by scanning
+  `.moontown/books/*/book/moonbook-ui-state.json`.
+- The build copies important MoonBook generated HTML outputs under
+  `dist/book-output/<book-id>/...`.
+- Module interiors show MoonBook summary, status chips, metrics, readiness,
+  review queue, page families, output links, and latest journey when the bound
+  book publishes a fragment.
+- Missing MoonBook fragments are called out as real integration gaps instead
+  of being hidden behind decorative fallback copy.
 - Active module workers route to the configured `entrance_x`/`entrance_y`;
   idle, completed, and absent workers are not shown as fake busy avatars.
 - Water depth, reflection, and bridge-shadow effects render as pointer-safe
@@ -143,8 +153,8 @@ Interpretation:
 The following items are visible but not fully real yet:
 
 - Module buildings do not all have final custom art.
-- Module interiors are not yet populated from each module's MoonBook projection
-  fragments or output links.
+- Module interiors can consume MoonBook projection fragments, but most Wenyu
+  civic modules do not yet have populated civic workspaces behind them.
 - Agent movement is only as complete as the current visual projection; Wenyu
   civic books still need module-specific task/run fragments.
 - The module registry is manually edited JSON; there is no designer tool.
@@ -175,13 +185,17 @@ Implemented:
   active worker rosters
 - `visual-projection.json` now includes a first-class `modules[]` status array
   keyed by normalized module id
+- the browser bridge now merges MoonBook UI fragments by `book_id`
+- interiors now expose module-specific output links, review gaps, metrics, and
+  recent MoonBook journey entries when the bound book has generated state
 - the viewport was validated with 11 modules, 11 clean placements, 0 issue
   badges, and 0 fake active-agent badges
 
 Remaining:
 
-- Merge MoonBook projection fragments by `book_id`.
-- Add module-specific output links, review gaps, and accepted-change summaries.
+- Create or populate the civic MoonBook workspaces for every enabled Wenyu
+  module.
+- Add accepted-change summaries to the MoonBook UI-state contract.
 - Add Wenyu-specific civic task fixtures so every module can be validated
   against real MoonBook/MoonClaw activity.
 
@@ -225,6 +239,8 @@ Required work:
 - Define review queues and public/private projection scopes.
 - Add MoonBook skills for policy, contest, social matching, talent graph,
   education garden, physical bridge, market ledger, and story radar.
+- Publish `book/moonbook-ui-state.json` for each civic module so Moontown can
+  render it without hardcoded module copy.
 
 Acceptance:
 
@@ -291,12 +307,13 @@ Acceptance:
 
 ## Recommended Next Order
 
-1. Add MoonBook module projection fragments for each Wenyu civic building.
+1. Create or populate MoonBook workspaces for each Wenyu civic building and
+   ensure each publishes `book/moonbook-ui-state.json`.
 2. Add MoonClaw skill/output contracts per civic module.
 3. Generate final module assets and register them in the manifest.
 4. Add a standalone module config, placement, and asset validator.
-5. Add module-specific output links, review gaps, and accepted-change summaries
-   to interiors.
+5. Add accepted-change summaries to the MoonBook UI-state contract and surface
+   them in interiors.
 6. Run a 24-hour daemon soak test with at least two standing goals and one
    Wenyu civic module workflow.
 7. Add Moondesk-style output browsing for produced wiki pages, reports, assets,

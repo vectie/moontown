@@ -52,6 +52,8 @@ priv struct Model {
   snapshot_version : Int
   visual_projection : VisualProjectionSnapshot?
   visual_projection_version : Int
+  module_projections : Array[BookProjectionFragment]
+  module_projections_version : Int
   daemon_snapshot : DaemonSnapshot?
   daemon_snapshot_version : Int
   standing_goals : Array[StandingGoalSnapshot]
@@ -322,6 +324,63 @@ priv struct OperatorRequestSubmitResult {
 } derive(FromJson)
 
 ///|
+priv struct ProjectionChipSnapshot {
+  label : String
+  tone : String
+} derive(FromJson)
+
+///|
+priv struct ProjectionMetricSnapshot {
+  label : String
+  value : String
+  note : String
+  tone : String
+} derive(FromJson)
+
+///|
+priv struct ProjectionItemSnapshot {
+  title : String
+  detail : String
+  meta : String
+} derive(FromJson)
+
+///|
+priv struct ProjectionJourneySnapshot {
+  title : String
+  stage : String
+  status : String
+  summary : String
+  highlights : Array[String]
+} derive(FromJson)
+
+///|
+priv struct ProjectionLinkSnapshot {
+  label : String
+  kind : String
+  url : String
+} derive(FromJson)
+
+///|
+priv struct BookProjectionFragment {
+  book_id : String
+  title : String
+  summary : String
+  status_chips : Array[ProjectionChipSnapshot]
+  metrics : Array[ProjectionMetricSnapshot]
+  readiness : Array[ProjectionItemSnapshot]
+  review_queue : Array[ProjectionItemSnapshot]
+  page_families : Array[ProjectionItemSnapshot]
+  journey : Array[ProjectionJourneySnapshot]
+  links : Array[ProjectionLinkSnapshot]
+} derive(FromJson)
+
+///|
+priv struct ModuleProjectionIndex {
+  generated_at : String
+  projections : Array[BookProjectionFragment]
+} derive(FromJson)
+
+///|
 priv struct WenyuTownModuleConfig {
   version : Int
   description : String
@@ -378,6 +437,14 @@ extern "js" fn load_bootstrap_visual_projection_json() -> String =
 ///|
 extern "js" fn visual_projection_version() -> Int =
   #| () => globalThis.__moontownVisualProjectionVersion || 0
+
+///|
+extern "js" fn load_bootstrap_module_projections_json() -> String =
+  #| () => globalThis.__moontownModuleProjectionsJson || "{\"projections\":[]}"
+
+///|
+extern "js" fn module_projections_version() -> Int =
+  #| () => globalThis.__moontownModuleProjectionsVersion || 0
 
 ///|
 extern "js" fn load_bootstrap_daemon_snapshot_json() -> String =
@@ -488,6 +555,7 @@ fn standalone_viewport_requested() -> Bool {
 fn init_model() -> Model {
   let projection_snapshot = parse_bootstrap_town_snapshot()
   let visual_projection = parse_bootstrap_visual_projection()
+  let module_projections = parse_bootstrap_module_projections()
   let daemon_snapshot = parse_bootstrap_daemon_snapshot()
   let standing_goals = parse_bootstrap_standing_goals()
   let watcher_records = parse_bootstrap_watcher_records()
@@ -502,6 +570,8 @@ fn init_model() -> Model {
     snapshot_version: town_snapshot_version(),
     visual_projection,
     visual_projection_version: visual_projection_version(),
+    module_projections,
+    module_projections_version: module_projections_version(),
     daemon_snapshot,
     daemon_snapshot_version: daemon_snapshot_version(),
     standing_goals,
@@ -542,6 +612,20 @@ fn parse_bootstrap_visual_projection() -> VisualProjectionSnapshot? {
   }
   let parsed = @json.parse(text) catch { _ => return None }
   Some(@json.from_json(parsed) catch { _ => return None })
+}
+
+///|
+fn parse_bootstrap_module_projections() -> Array[BookProjectionFragment] {
+  let text = load_bootstrap_module_projections_json()
+  if text == "" {
+    return []
+  }
+  let parsed = @json.parse(text) catch { _ => return [] }
+  let index : ModuleProjectionIndex = @json.from_json(parsed) catch {
+    _ => return []
+  }
+  ignore(index.generated_at)
+  index.projections
 }
 
 ///|
@@ -660,6 +744,19 @@ fn find_module_for_book(book_id : String) -> WenyuTownModule? {
   for civic in wenyu_modules() {
     if module_book_matches(civic, book_id) {
       return Some(civic)
+    }
+  }
+  None
+}
+
+///|
+fn find_module_book_projection(
+  model : Model,
+  civic : WenyuTownModule,
+) -> BookProjectionFragment? {
+  for projection in model.module_projections {
+    if module_book_matches(civic, projection.book_id) {
+      return Some(projection)
     }
   }
   None
@@ -893,6 +990,13 @@ fn advance_model(model : Model) -> Model {
   } else {
     model.visual_projection
   }
+  let refreshed_module_projections_version = module_projections_version()
+  let refreshed_module_projections = if refreshed_module_projections_version !=
+    model.module_projections_version {
+    parse_bootstrap_module_projections()
+  } else {
+    model.module_projections
+  }
   let refreshed_daemon_version = daemon_snapshot_version()
   let refreshed_daemon_snapshot = if refreshed_daemon_version !=
     model.daemon_snapshot_version {
@@ -1003,6 +1107,8 @@ fn advance_model(model : Model) -> Model {
     snapshot_version: refreshed_version,
     visual_projection: refreshed_visual_projection,
     visual_projection_version: refreshed_visual_projection_version,
+    module_projections: refreshed_module_projections,
+    module_projections_version: refreshed_module_projections_version,
     daemon_snapshot: refreshed_daemon_snapshot,
     daemon_snapshot_version: refreshed_daemon_version,
     standing_goals: refreshed_standing_goals,
@@ -7000,6 +7106,216 @@ fn render_module_runtime_counters(
 }
 
 ///|
+fn projection_tone_class(tone : String) -> String {
+  match tone {
+    "alert" => "projection-tone-alert"
+    "review" => "projection-tone-review"
+    "healthy" => "projection-tone-healthy"
+    "success" => "projection-tone-healthy"
+    "warning" => "projection-tone-review"
+    "info" => "projection-tone-info"
+    _ => "projection-tone-info"
+  }
+}
+
+///|
+fn render_projection_chips(
+  projection : BookProjectionFragment,
+) -> @rabbita.Html {
+  let chips : Array[@rabbita.Html] = []
+  for chip in projection.status_chips {
+    chips.push(
+      span(
+        class="module-book-chip \{projection_tone_class(chip.tone)}",
+        chip.label,
+      ),
+    )
+  }
+  if chips.is_empty() {
+    chips.push(span(class="module-book-chip projection-tone-info", "No chips"))
+  }
+  div(class="module-book-chip-row", chips)
+}
+
+///|
+fn render_projection_metrics(
+  projection : BookProjectionFragment,
+) -> @rabbita.Html {
+  let cards : Array[@rabbita.Html] = []
+  for metric in projection.metrics {
+    cards.push(
+      article(
+        class="module-book-metric \{projection_tone_class(metric.tone)}",
+        [
+          span(class="module-book-metric-label", metric.label),
+          span(class="module-book-metric-value", metric.value),
+          p(metric.note),
+        ],
+      ),
+    )
+  }
+  if cards.is_empty() {
+    cards.push(
+      article(class="module-book-metric projection-tone-info", [
+        span(class="module-book-metric-label", "MoonBook"),
+        span(class="module-book-metric-value", "waiting"),
+        p("No generated UI metrics were published for this book yet."),
+      ]),
+    )
+  }
+  div(class="module-book-metric-grid", cards)
+}
+
+///|
+fn render_projection_item(
+  item : ProjectionItemSnapshot,
+  kind : String,
+) -> @rabbita.Html {
+  article(class="module-book-item module-book-item-\{kind}", [
+    h3(item.title),
+    p(item.detail),
+    span(item.meta),
+  ])
+}
+
+///|
+fn render_projection_item_group(
+  title : String,
+  empty : String,
+  kind : String,
+  items : Array[ProjectionItemSnapshot],
+) -> @rabbita.Html {
+  let children : Array[@rabbita.Html] = [h3(title)]
+  if items.is_empty() {
+    children.push(p(class="module-book-empty", empty))
+  } else {
+    for item in items {
+      children.push(render_projection_item(item, kind))
+    }
+  }
+  div(class="module-book-group", children)
+}
+
+///|
+fn render_projection_journey(
+  projection : BookProjectionFragment,
+) -> @rabbita.Html {
+  let rows : Array[@rabbita.Html] = [h3("Latest Journey")]
+  if projection.journey.is_empty() {
+    rows.push(
+      p(
+        class="module-book-empty",
+        "No MoonBook journey entries were published yet.",
+      ),
+    )
+  } else {
+    for step in projection.journey {
+      let highlights = if step.highlights.is_empty() {
+        ""
+      } else {
+        " / \{step.highlights.join(" / ")}"
+      }
+      rows.push(
+        article(class="module-book-journey-item", [
+          span(class="module-book-journey-status", "\{step.stage} / \{step.status}"),
+          h3(step.title),
+          p("\{step.summary}\{highlights}"),
+        ]),
+      )
+    }
+  }
+  div(class="module-book-group module-book-journey", rows)
+}
+
+///|
+fn render_projection_links(
+  projection : BookProjectionFragment,
+) -> @rabbita.Html {
+  let links : Array[@rabbita.Html] = [h3("Outputs")]
+  if projection.links.is_empty() {
+    links.push(
+      p(
+        class="module-book-empty",
+        "No generated HTML outputs were found for this book.",
+      ),
+    )
+  } else {
+    for link in projection.links {
+      links.push(
+        a(
+          href=link.url,
+          class="module-book-link module-book-link-\{link.kind}",
+          "\{link.label}",
+        ),
+      )
+    }
+  }
+  div(class="module-book-group module-book-links", links)
+}
+
+///|
+fn render_module_book_projection(
+  model : Model,
+  civic : WenyuTownModule,
+) -> @rabbita.Html {
+  match find_module_book_projection(model, civic) {
+    Some(projection) =>
+      section(class="module-book-projection", [
+        div(class="module-book-heading", [
+          div([
+            p(class="eyebrow", "MoonBook Projection"),
+            h2(projection.title),
+          ]),
+          span(class="module-book-id", projection.book_id),
+        ]),
+        p(class="module-book-summary", projection.summary),
+        render_projection_chips(projection),
+        render_projection_metrics(projection),
+        div(class="module-book-grid", [
+          render_projection_item_group(
+            "Readiness",
+            "MoonBook has not published readiness items for this module.",
+            "readiness",
+            projection.readiness,
+          ),
+          render_projection_item_group(
+            "Review Queue",
+            "No pending review items were published for this module.",
+            "review",
+            projection.review_queue,
+          ),
+          render_projection_item_group(
+            "Page Families",
+            "No generated page-family summary was published for this module.",
+            "pages",
+            projection.page_families,
+          ),
+          render_projection_links(projection),
+        ]),
+        render_projection_journey(projection),
+      ])
+    None =>
+      section(class="module-book-projection module-book-projection-missing", [
+        div(class="module-book-heading", [
+          div([
+            p(class="eyebrow", "MoonBook Projection"),
+            h2("Projection Not Connected"),
+          ]),
+          span(class="module-book-id", civic.book_id),
+        ]),
+        p(
+          class="module-book-summary",
+          "This building is configured, but the UI did not find a generated MoonBook fragment for `.moontown/books/\{civic.book_id}/book/moonbook-ui-state.json`.",
+        ),
+        p(
+          class="module-book-empty",
+          "This is now a real integration gap, not a decorative fallback: create the bound civic book or publish its MoonBook UI state to make this interior useful.",
+        ),
+      ])
+  }
+}
+
+///|
 fn render_wenyu_module_interior(
   dispatch : Dispatch[Msg],
   model : Model,
@@ -7040,6 +7356,7 @@ fn render_wenyu_module_interior(
       p(class="module-runtime-detail", runtime.detail),
       render_module_runtime_counters(runtime),
       render_module_issue_list(civic),
+      render_module_book_projection(model, civic),
       div(class="interior-floor", module_interior_furniture(civic)),
       div(
         class="interior-agent-grid",
@@ -8317,7 +8634,7 @@ fn render_scene(dispatch : Dispatch[Msg], model : Model) -> @rabbita.Html {
           status_chip("Local time \{real_time_label()}", "chip-clock"),
           status_chip(daemon_tick_label(model), "chip-neutral"),
           status_chip(
-            "Modules \{wenyu_module_count()} / clean \{wenyu_clean_module_count()} / v\{wenyu_modules_version()}",
+            "Modules \{wenyu_module_count()} / clean \{wenyu_clean_module_count()} / book fragments \{model.module_projections.length()} / v\{wenyu_modules_version()}",
             "chip-book",
           ),
           button(
