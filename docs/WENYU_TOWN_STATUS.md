@@ -1,6 +1,6 @@
 # Wenyu Valley Town Status
 
-Last updated: 2026-05-26 16:59 CST
+Last updated: 2026-05-26 17:35 CST
 
 This document answers one question: how far is the current Wenyu Valley
 implementation from a fully functioning town?
@@ -33,7 +33,7 @@ runtime projection are real. The civic service layer is still mostly missing.
 | Long-running mayor loop | Medium | The daemon worker is healthy locally with zero recorded failures in the current runtime file; the service supervisor wrapper is not currently active, so install/service hardening and multi-day recovery evidence are still required |
 | Research watchers | Medium | OPC and LLM standing watches run through real books and ledgers; both are visible in the watch portfolio, but the current latest LLM watcher is still `NeedsReview` and the OPC watcher is still running |
 | Civic modules | Far | Policy, contest, social, talent, market, bridge, and story modules are mostly product specs, not end-to-end workflows |
-| Designer/operator tooling | Far | JSON config works, but there is no module editor, asset checker, or Moondesk-style output browser yet |
+| Designer/operator tooling | Medium | JSON config works, the standalone viewport has view/editor/output modes, editor mode shows town-level Moondesk handoff lanes, and detailed single-agent/workspace editing remains in Moondesk |
 | Production deployment | Far | Auth, backups, permissions, packaged supervisor, and recovery playbooks are not complete |
 
 ## Definition Of Fully Functioning
@@ -65,13 +65,13 @@ A fully functioning Wenyu town means:
 | Module interiors | Click opens module-specific interior furniture with runtime source, counters, validation state, worker roster slots, MoonBook fragments, and output links when available | 60% | Most Wenyu civic modules still need real bound books and service-specific page schemas |
 | Water effects | Runtime overlay adds depth, reflection, and bridge shadow | 35% | Needs richer segmented river logic and seasonal/weather response |
 | Agents on map | Visual agent projection exists; active module workers route to module entrances and idle/completed workers stay hidden | 60% | Needs Wenyu-specific task projection coverage for every civic module |
-| Operator dashboard | Shows daemon/watch progress, a multi-topic watch portfolio, request composer, and portal to canonical viewport | 62% | Needs output retrieval, approval queues, and richer per-book progress panels |
+| Operator dashboard | Shows daemon/watch progress, a multi-topic watch portfolio, request composer, portal to canonical viewport, output mode, and Moondesk bridge visibility | 68% | Needs approval queues and richer per-book progress panels |
 | Mayor daemon | Local run/start/doctor/stop, heartbeat, stale detection, standing-goal dispatch | 62% | Needs long-run soak testing, service install hardening, and recovery playbooks |
 | Standing watchers | Data-driven standing goals and watcher ledgers exist; the UI now aggregates all watcher ledgers instead of only the OPC lane | 64% | Need stronger MoonBook quality accounting and accepted-change views |
 | MoonBook memory binding | Research books and generated projections work for research lanes; the Wenyu UI can consume `moonbook-ui-state.json` fragments generically | 50% | Civic modules need canonical book schemas, real workspaces, and service-specific content |
 | MoonClaw execution binding | Proposal/run boundary and worker execution path exist | 45% | Civic service tasks need role-specific skills and output contracts |
 | Real civic services | PRD describes policy, contest, social, talent, bridge, market, and story modules | 15% | Most services are still product specs, not reliable end-to-end workflows |
-| Designer workflow | Manual JSON config works | 30% | Needs editor, validation, asset manifest checks, and map collision checks |
+| Designer workflow | Manual JSON config plus standalone editor mode and handoff/bridge visibility | 48% | Needs write-back import/export, asset manifest checks, richer collision preview, and automatic Moondesk artifact ingestion |
 | Production readiness | Local development works; build/check pass | 25% | Needs packaged daemon, auth, permissions, backups, observability, and deployment model |
 
 ## What Is Real Today
@@ -113,6 +113,23 @@ Implemented and validated:
   single focused watcher card.
 - The operator dashboard links to the standalone Wenyu viewport instead of
   duplicating a second map.
+- The standalone viewport supports explicit `view`, `editor`, and `output`
+  modes.
+- Editor mode shows configured modules, grid/entrance placement, runtime state,
+  validation issues, and whether a MoonBook output fragment is connected.
+- Final output mode lists generated MoonBook projection fragments and links to
+  the book HTML/report outputs copied by the browser bridge.
+- The editor boundary is documented: Moontown edits town/module/multi-agent
+  composition, while `../moondesk` should own detailed file/workspace,
+  single-book, and single-agent authoring.
+- `tilemap/modules/moondesk-handoff.json` declares portable artifact lanes for
+  book workspaces, module packs, asset packs, simple agent profiles, skill-pack
+  references, operator request packs, and generated output bundles.
+- The Vite bridge exposes `moondesk-bridge.json` by scanning real
+  `.moontown/moondesk-dispatches`, `.moontown/moondesk-requests`, and
+  `.moontown/book-results` files.
+- Editor mode and final output mode both show Moondesk handoff lanes and recent
+  bridge records.
 
 ## Current Runtime Snapshot
 
@@ -171,10 +188,14 @@ The following items are visible but not fully real yet:
   civic modules do not yet have populated civic workspaces behind them.
 - Agent movement is only as complete as the current visual projection; Wenyu
   civic books still need module-specific task/run fragments.
-- The module registry is manually edited JSON; there is no designer tool.
+- The module registry is manually edited JSON; editor mode validates, inspects,
+  and displays import contracts but does not yet write config changes back or
+  automatically merge Moondesk module packs.
 - The 24/7 loop is a local supervised seam, not a fully packaged service.
 - Civic service flows are mostly planned modules, not all implemented workflows.
-- Output retrieval is not yet a full desktop/file-manager experience.
+- Output retrieval exists in viewport output mode, but the full
+  desktop/file-manager experience belongs in Moondesk and still needs a clean
+  write-back/import handoff back into Moontown.
 - Production safety boundaries, auth, operator approvals, and backups are not
   complete.
 

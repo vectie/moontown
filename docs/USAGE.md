@@ -176,6 +176,45 @@ If a host process manager aggressively cleans up child processes, run
 tests should use `daemon run --once`, `daemon supervise --once`, and
 `daemon doctor`; a normal terminal or OS service wrapper can use `daemon start`.
 
+## 1.4 Open The Wenyu Viewport
+
+Run the Rabbita frontend, then open the canonical standalone Wenyu viewport:
+
+```bash
+cd ui/rabbita-town
+npm run dev
+```
+
+Direct viewport modes:
+
+- `http://127.0.0.1:5173/viewport.html?assets=generated&mode=view&v=wenyu`
+  opens the clean town view.
+- `http://127.0.0.1:5173/viewport.html?assets=generated&mode=editor&v=wenyu`
+  opens the module editor/validation view.
+- `http://127.0.0.1:5173/viewport.html?assets=generated&mode=output&v=wenyu`
+  opens the final generated-output browser.
+
+Use view mode to present the town, editor mode to check module placement and
+bindings, and output mode to retrieve MoonBook-generated sites, reports,
+review queues, and page-family summaries.
+
+The viewport editor is intentionally town-level. Use it to compose modules,
+bind books, validate placement, inspect worker lanes, and check output
+availability. Do not use it as a detailed single-agent or single-book editor.
+That deeper workspace belongs in `../moondesk`; Moondesk-produced books, skill
+packs, agent profiles, assets, and module packs should be imported back into
+Moontown as data/config artifacts.
+
+Useful bridge artifacts:
+
+- `http://127.0.0.1:5173/tilemap/modules/wenyu-town-modules.json`
+  opens the current module registry.
+- `http://127.0.0.1:5173/tilemap/modules/moondesk-handoff.json`
+  opens the portable Moondesk-to-Moontown artifact contract.
+- `http://127.0.0.1:5173/moondesk-bridge.json`
+  opens the live bridge ledger built from `.moontown/moondesk-*` and
+  `.moontown/book-results`.
+
 For overnight macOS runs, prefer launchd. This runs the foreground worker under
 the OS instead of relying on a detached child process:
 

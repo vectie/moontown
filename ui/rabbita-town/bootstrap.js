@@ -59,6 +59,36 @@ async function refreshModuleProjections() {
   }
 }
 
+async function refreshMoondeskBridge() {
+  try {
+    const response = await fetch(`./moondesk-bridge.json?ts=${Date.now()}`, { cache: 'no-store' })
+    if (response.ok) {
+      globalThis.__moontownMoondeskBridgeJson = await response.text()
+      globalThis.__moontownMoondeskBridgeVersion =
+        (globalThis.__moontownMoondeskBridgeVersion || 0) + 1
+    } else {
+      globalThis.__moontownMoondeskBridgeJson = '{"records":[]}'
+    }
+  } catch {
+    globalThis.__moontownMoondeskBridgeJson = '{"records":[]}'
+  }
+}
+
+async function refreshMoondeskHandoff() {
+  try {
+    const response = await fetch(`./tilemap/modules/moondesk-handoff.json?ts=${Date.now()}`, { cache: 'no-store' })
+    if (response.ok) {
+      globalThis.__moontownMoondeskHandoffJson = await response.text()
+      globalThis.__moontownMoondeskHandoffVersion =
+        (globalThis.__moontownMoondeskHandoffVersion || 0) + 1
+    } else {
+      globalThis.__moontownMoondeskHandoffJson = '{"artifacts":[]}'
+    }
+  } catch {
+    globalThis.__moontownMoondeskHandoffJson = '{"artifacts":[]}'
+  }
+}
+
 async function refreshDaemonSnapshot() {
   try {
     const response = await fetch(`./daemon.json?ts=${Date.now()}`, { cache: 'no-store' })
@@ -153,6 +183,8 @@ async function refreshRuntimeSnapshots() {
     refreshTownSnapshot(),
     refreshVisualProjection(),
     refreshModuleProjections(),
+    refreshMoondeskBridge(),
+    refreshMoondeskHandoff(),
     refreshDaemonSnapshot(),
     refreshStandingGoals(),
     refreshWatcherRecords(),

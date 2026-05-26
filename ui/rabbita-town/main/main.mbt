@@ -42,18 +42,30 @@ priv enum StateSourceKind {
 } derive(Eq)
 
 ///|
+priv enum ViewportMode {
+  ViewMode
+  EditorMode
+  OutputMode
+} derive(Eq)
+
+///|
 priv struct Model {
   tick : Int
   paused : Bool
   strategy : Strategy
   selection : Selection
   state_source : StateSourceKind
+  viewport_mode : ViewportMode
   projection_snapshot : ProjectionSnapshot?
   snapshot_version : Int
   visual_projection : VisualProjectionSnapshot?
   visual_projection_version : Int
   module_projections : Array[BookProjectionFragment]
   module_projections_version : Int
+  moondesk_handoff_artifacts : Array[MoondeskHandoffArtifact]
+  moondesk_handoff_version : Int
+  moondesk_bridge : MoondeskBridgeIndex?
+  moondesk_bridge_version : Int
   daemon_snapshot : DaemonSnapshot?
   daemon_snapshot_version : Int
   standing_goals : Array[StandingGoalSnapshot]
@@ -94,6 +106,7 @@ priv enum Msg {
   SelectNode(String)
   SelectOverview
   SetStrategy(Strategy)
+  SetViewportMode(ViewportMode)
   ToggleStateSource
   InjectBudget
   RelieveQueue
@@ -387,6 +400,45 @@ priv struct ModuleProjectionIndex {
 } derive(FromJson)
 
 ///|
+priv struct MoondeskHandoffArtifact {
+  id : String
+  title : String
+  kind : String
+  status : String
+  scope : String
+  source_path : String
+  target_path : String
+  summary : String
+  import_contract : Array[String]
+} derive(FromJson)
+
+///|
+priv struct MoondeskHandoffIndex {
+  version : Int
+  description : String
+  artifacts : Array[MoondeskHandoffArtifact]
+} derive(FromJson)
+
+///|
+priv struct MoondeskBridgeRecord {
+  id : String
+  kind : String
+  status : String
+  path : String
+  title : String
+  summary : String
+  target : String
+  created_at : String
+} derive(FromJson)
+
+///|
+priv struct MoondeskBridgeIndex {
+  generated_at : String
+  moondesk_root_available : Bool
+  records : Array[MoondeskBridgeRecord]
+} derive(FromJson)
+
+///|
 priv struct WenyuTownModuleConfig {
   version : Int
   description : String
@@ -451,6 +503,22 @@ extern "js" fn load_bootstrap_module_projections_json() -> String =
 ///|
 extern "js" fn module_projections_version() -> Int =
   #| () => globalThis.__moontownModuleProjectionsVersion || 0
+
+///|
+extern "js" fn load_bootstrap_moondesk_handoff_json() -> String =
+  #| () => globalThis.__moontownMoondeskHandoffJson || "{\"artifacts\":[]}"
+
+///|
+extern "js" fn moondesk_handoff_version() -> Int =
+  #| () => globalThis.__moontownMoondeskHandoffVersion || 0
+
+///|
+extern "js" fn load_bootstrap_moondesk_bridge_json() -> String =
+  #| () => globalThis.__moontownMoondeskBridgeJson || "{\"records\":[]}"
+
+///|
+extern "js" fn moondesk_bridge_version() -> Int =
+  #| () => globalThis.__moontownMoondeskBridgeVersion || 0
 
 ///|
 extern "js" fn load_bootstrap_daemon_snapshot_json() -> String =
@@ -548,6 +616,16 @@ extern "js" fn current_browser_path() -> String =
   #| () => `${globalThis.location?.pathname || ""}${globalThis.location?.hash || ""}`
 
 ///|
+extern "js" fn current_viewport_mode_param() -> String =
+  #| () => {
+  #|   try {
+  #|     return new URL(globalThis.location?.href || "http://local/").searchParams.get("mode") || "";
+  #|   } catch (_) {
+  #|     return "";
+  #|   }
+  #| }
+
+///|
 extern "js" fn reference_tile_code_at(grid_x : Int, grid_y : Int) -> String =
   #| (gridX, gridY) => globalThis.__wenyuReferenceLabels?.rows?.[gridY]?.[gridX] || ""
 
@@ -558,10 +636,23 @@ fn standalone_viewport_requested() -> Bool {
 }
 
 ///|
+fn initial_viewport_mode() -> ViewportMode {
+  match current_viewport_mode_param() {
+    "editor" => ViewportMode::EditorMode
+    "edit" => ViewportMode::EditorMode
+    "output" => ViewportMode::OutputMode
+    "final" => ViewportMode::OutputMode
+    _ => ViewportMode::ViewMode
+  }
+}
+
+///|
 fn init_model() -> Model {
   let projection_snapshot = parse_bootstrap_town_snapshot()
   let visual_projection = parse_bootstrap_visual_projection()
   let module_projections = parse_bootstrap_module_projections()
+  let moondesk_handoff_artifacts = parse_bootstrap_moondesk_handoff_artifacts()
+  let moondesk_bridge = parse_bootstrap_moondesk_bridge()
   let daemon_snapshot = parse_bootstrap_daemon_snapshot()
   let standing_goals = parse_bootstrap_standing_goals()
   let watcher_records = parse_bootstrap_watcher_records()
@@ -572,12 +663,17 @@ fn init_model() -> Model {
     strategy: Strategy::Balanced,
     selection: Selection::Overview,
     state_source: initial_state_source(projection_snapshot),
+    viewport_mode: initial_viewport_mode(),
     projection_snapshot,
     snapshot_version: town_snapshot_version(),
     visual_projection,
     visual_projection_version: visual_projection_version(),
     module_projections,
     module_projections_version: module_projections_version(),
+    moondesk_handoff_artifacts,
+    moondesk_handoff_version: moondesk_handoff_version(),
+    moondesk_bridge,
+    moondesk_bridge_version: moondesk_bridge_version(),
     daemon_snapshot,
     daemon_snapshot_version: daemon_snapshot_version(),
     standing_goals,
@@ -632,6 +728,32 @@ fn parse_bootstrap_module_projections() -> Array[BookProjectionFragment] {
   }
   ignore(index.generated_at)
   index.projections
+}
+
+///|
+fn parse_bootstrap_moondesk_handoff_artifacts(
+) -> Array[MoondeskHandoffArtifact] {
+  let text = load_bootstrap_moondesk_handoff_json()
+  if text == "" {
+    return []
+  }
+  let parsed = @json.parse(text) catch { _ => return [] }
+  let index : MoondeskHandoffIndex = @json.from_json(parsed) catch {
+    _ => return []
+  }
+  ignore(index.version)
+  ignore(index.description)
+  index.artifacts
+}
+
+///|
+fn parse_bootstrap_moondesk_bridge() -> MoondeskBridgeIndex? {
+  let text = load_bootstrap_moondesk_bridge_json()
+  if text == "" {
+    return None
+  }
+  let parsed = @json.parse(text) catch { _ => return None }
+  Some(@json.from_json(parsed) catch { _ => return None })
 }
 
 ///|
@@ -865,6 +987,11 @@ fn update(dispatch : Dispatch[Msg], msg : Msg, model : Model) -> (Cmd, Model) {
       (@rabbita.none, { ..model, selection: Node(node_key) })
     SelectOverview => (@rabbita.none, { ..model, selection: Overview })
     SetStrategy(strategy) => (@rabbita.none, { ..model, strategy, })
+    SetViewportMode(viewport_mode) =>
+      (
+        @rabbita.none,
+        { ..model, viewport_mode, selection: Selection::Overview },
+      )
     ToggleStateSource =>
       (
         @rabbita.none,
@@ -1003,6 +1130,23 @@ fn advance_model(model : Model) -> Model {
   } else {
     model.module_projections
   }
+  let refreshed_moondesk_handoff_version = moondesk_handoff_version()
+  let refreshed_moondesk_handoff_artifacts = if
+    refreshed_moondesk_handoff_version != model.moondesk_handoff_version {
+    parse_bootstrap_moondesk_handoff_artifacts()
+  } else {
+    model.moondesk_handoff_artifacts
+  }
+  let refreshed_moondesk_bridge_version = moondesk_bridge_version()
+  let refreshed_moondesk_bridge = if refreshed_moondesk_bridge_version !=
+    model.moondesk_bridge_version {
+    match parse_bootstrap_moondesk_bridge() {
+      Some(snapshot) => Some(snapshot)
+      None => model.moondesk_bridge
+    }
+  } else {
+    model.moondesk_bridge
+  }
   let refreshed_daemon_version = daemon_snapshot_version()
   let refreshed_daemon_snapshot = if refreshed_daemon_version !=
     model.daemon_snapshot_version {
@@ -1115,6 +1259,10 @@ fn advance_model(model : Model) -> Model {
     visual_projection_version: refreshed_visual_projection_version,
     module_projections: refreshed_module_projections,
     module_projections_version: refreshed_module_projections_version,
+    moondesk_handoff_artifacts: refreshed_moondesk_handoff_artifacts,
+    moondesk_handoff_version: refreshed_moondesk_handoff_version,
+    moondesk_bridge: refreshed_moondesk_bridge,
+    moondesk_bridge_version: refreshed_moondesk_bridge_version,
     daemon_snapshot: refreshed_daemon_snapshot,
     daemon_snapshot_version: refreshed_daemon_version,
     standing_goals: refreshed_standing_goals,
@@ -8765,6 +8913,522 @@ fn is_mayor_scene_node(node : @ui.SceneRenderNode) -> Bool {
 }
 
 ///|
+fn viewport_mode_label(mode : ViewportMode) -> String {
+  match mode {
+    ViewMode => "View Mode"
+    EditorMode => "Editor Mode"
+    OutputMode => "Final Output"
+  }
+}
+
+///|
+fn viewport_mode_slug(mode : ViewportMode) -> String {
+  match mode {
+    ViewMode => "view"
+    EditorMode => "editor"
+    OutputMode => "output"
+  }
+}
+
+///|
+fn viewport_mode_summary(mode : ViewportMode) -> String {
+  match mode {
+    ViewMode =>
+      "Clean town presentation. Click buildings to inspect live module interiors."
+    EditorMode =>
+      "Designer workspace. Validate module placement, runtime bindings, and output coverage without changing MoonBook state."
+    OutputMode =>
+      "Final retrieval surface. Browse generated MoonBook websites, reports, reviews, and page families from one place."
+  }
+}
+
+///|
+fn render_viewport_mode_button(
+  dispatch : Dispatch[Msg],
+  model : Model,
+  mode : ViewportMode,
+) -> @rabbita.Html {
+  let active = if model.viewport_mode == mode { " is-active" } else { "" }
+  button(
+    class="control-button viewport-mode-button\{active}",
+    on_click=dispatch(SetViewportMode(mode)),
+    viewport_mode_label(mode),
+  )
+}
+
+///|
+fn render_viewport_mode_switch(
+  dispatch : Dispatch[Msg],
+  model : Model,
+) -> @rabbita.Html {
+  div(class="viewport-mode-switch", [
+    span(class="viewport-mode-current", viewport_mode_label(model.viewport_mode)),
+    render_viewport_mode_button(dispatch, model, ViewportMode::ViewMode),
+    render_viewport_mode_button(dispatch, model, ViewportMode::EditorMode),
+    render_viewport_mode_button(dispatch, model, ViewportMode::OutputMode),
+    a(
+      href="./viewport.html?assets=generated&mode=\{viewport_mode_slug(model.viewport_mode)}&v=wenyu",
+      class="viewport-mode-link",
+      "Copyable Mode URL",
+    ),
+  ])
+}
+
+///|
+fn module_projection_count_for_configured_modules(model : Model) -> Int {
+  let mut count = 0
+  for civic in wenyu_modules() {
+    match find_module_book_projection(model, civic) {
+      Some(_) => count += 1
+      None => ()
+    }
+  }
+  count
+}
+
+///|
+fn moondesk_bridge_records(model : Model) -> Array[MoondeskBridgeRecord] {
+  match model.moondesk_bridge {
+    Some(bridge) => bridge.records
+    None => []
+  }
+}
+
+///|
+fn moondesk_root_status_label(model : Model) -> String {
+  match model.moondesk_bridge {
+    Some(bridge) =>
+      if bridge.moondesk_root_available {
+        "Moondesk checkout found"
+      } else {
+        "Moondesk checkout missing"
+      }
+    None => "Bridge not loaded"
+  }
+}
+
+///|
+fn moondesk_record_count(model : Model) -> Int {
+  moondesk_bridge_records(model).length()
+}
+
+///|
+fn artifact_status_class(status : String) -> String {
+  match status {
+    "ready" => "artifact-status-ready"
+    "simple-only" => "artifact-status-simple"
+    "reference-only" => "artifact-status-reference"
+    "review" => "artifact-status-review"
+    _ => "artifact-status-neutral"
+  }
+}
+
+///|
+fn bridge_record_status_class(status : String) -> String {
+  match status {
+    "ready" => "artifact-status-ready"
+    "accepted" => "artifact-status-ready"
+    "completed" => "artifact-status-ready"
+    "review" => "artifact-status-review"
+    "needs-review" => "artifact-status-review"
+    "failed" => "artifact-status-alert"
+    _ => "artifact-status-neutral"
+  }
+}
+
+///|
+fn render_handoff_contract_items(
+  artifact : MoondeskHandoffArtifact,
+) -> @rabbita.Html {
+  let items : Array[@rabbita.Html] = []
+  for contract in artifact.import_contract {
+    items.push(span(class="handoff-contract-item", contract))
+  }
+  if items.is_empty() {
+    items.push(
+      span(class="handoff-contract-item", "No import contract declared."),
+    )
+  }
+  div(class="handoff-contract-list", items)
+}
+
+///|
+fn render_handoff_artifact_card(
+  artifact : MoondeskHandoffArtifact,
+) -> @rabbita.Html {
+  article(
+    class="handoff-artifact-card \{artifact_status_class(artifact.status)}",
+    [
+      div(class="handoff-artifact-heading", [
+        span(class="handoff-kind", artifact.kind),
+        span(class="handoff-status", artifact.status),
+      ]),
+      h3(artifact.title),
+      p(artifact.summary),
+      div(class="handoff-path-grid", [
+        render_module_detail("Source", artifact.source_path),
+        render_module_detail("Target", artifact.target_path),
+      ]),
+      p(class="handoff-scope", artifact.scope),
+      render_handoff_contract_items(artifact),
+    ],
+  )
+}
+
+///|
+fn render_moondesk_bridge_record(
+  record : MoondeskBridgeRecord,
+) -> @rabbita.Html {
+  article(
+    class="moondesk-bridge-record \{bridge_record_status_class(record.status)}",
+    [
+      div(class="handoff-artifact-heading", [
+        span(class="handoff-kind", record.kind),
+        span(class="handoff-status", record.status),
+      ]),
+      h3(record.title),
+      p(record.summary),
+      div(class="handoff-path-grid", [
+        render_module_detail("Target", record.target),
+        render_module_detail("Path", record.path),
+      ]),
+      span(class="bridge-record-time", record.created_at),
+    ],
+  )
+}
+
+///|
+fn render_town_editor_boundary_panel(model : Model) -> @rabbita.Html {
+  section(class="viewport-editor-boundary", [
+    div(class="viewport-panel-heading", [
+      p(class="eyebrow", "Town-Level Editor"),
+      h2("Moontown / Moondesk Boundary"),
+      p(
+        "Moontown composes modules, books, worker lanes, resource envelopes, and output surfaces. Detailed file, prompt, skill, memory, and single-agent work stays in Moondesk and returns as portable artifacts.",
+      ),
+    ]),
+    div(class="viewport-editor-stats", [
+      render_module_detail("Edit Scope", "multi-agent town"),
+      render_module_detail("Simple Agent Edit", "role, cadence, capacity"),
+      render_module_detail("Deep Agent Edit", "Moondesk"),
+      render_module_detail("Bridge", moondesk_root_status_label(model)),
+    ]),
+    div(class="handoff-link-row", [
+      a(
+        href="./tilemap/modules/wenyu-town-modules.json",
+        class="module-book-link module-book-link-config",
+        "Open Module Registry",
+      ),
+      a(
+        href="./tilemap/modules/moondesk-handoff.json",
+        class="module-book-link module-book-link-config",
+        "Open Handoff Manifest",
+      ),
+      a(
+        href="./moondesk-bridge.json",
+        class="module-book-link module-book-link-config",
+        "Open Bridge Ledger",
+      ),
+    ]),
+  ])
+}
+
+///|
+fn render_moondesk_handoff_panel(model : Model) -> @rabbita.Html {
+  let artifacts : Array[@rabbita.Html] = []
+  for artifact in model.moondesk_handoff_artifacts {
+    artifacts.push(render_handoff_artifact_card(artifact))
+  }
+  section(class="moondesk-handoff-panel", [
+    div(class="viewport-panel-heading", [
+      p(class="eyebrow", "Moondesk Import Contract"),
+      h2("Portable Artifact Lanes"),
+      p(
+        "These are the data/config lanes Moondesk can export into Moontown. Adding new capability should add or update this manifest before changing viewport code.",
+      ),
+    ]),
+    div(
+      class="handoff-artifact-grid",
+      if artifacts.is_empty() {
+        [
+          article(class="viewport-output-empty", [
+            h2("No Handoff Artifacts"),
+            p("`tilemap/modules/moondesk-handoff.json` did not load."),
+          ]),
+        ]
+      } else {
+        artifacts
+      },
+    ),
+  ])
+}
+
+///|
+fn render_moondesk_bridge_panel(model : Model) -> @rabbita.Html {
+  let records : Array[@rabbita.Html] = []
+  for record in moondesk_bridge_records(model) {
+    records.push(render_moondesk_bridge_record(record))
+  }
+  section(class="moondesk-bridge-panel", [
+    div(class="viewport-panel-heading", [
+      p(class="eyebrow", "Moondesk Bridge"),
+      h2("Recent Portable Records"),
+      p(
+        "Real bridge records from `.moontown/moondesk-*` and `.moontown/book-results`. This is the evidence trail for work moving between Moondesk, MoonBook, MoonClaw, and Moontown.",
+      ),
+    ]),
+    div(class="viewport-editor-stats", [
+      render_module_detail("Bridge Records", "\{moondesk_record_count(model)}"),
+      render_module_detail("Checkout", moondesk_root_status_label(model)),
+    ]),
+    div(
+      class="moondesk-bridge-list",
+      if records.is_empty() {
+        [
+          article(class="viewport-output-empty", [
+            h2("No Bridge Records"),
+            p("No Moondesk dispatch, request, or book-result records were found yet."),
+          ]),
+        ]
+      } else {
+        records
+      },
+    ),
+  ])
+}
+
+///|
+fn render_standalone_viewport_map(
+  dispatch : Dispatch[Msg],
+  model : Model,
+  scene : @ui.SceneRenderModel,
+  workers : Array[WorkerSim],
+  executions : Array[@core.TaskExecutionRecord],
+  selected_node_key : String?,
+  selected_worker_id : String?,
+) -> @rabbita.Html {
+  render_town_viewport(
+    dispatch,
+    model,
+    scene,
+    visible_overworld_workers(workers),
+    executions,
+    selected_node_key,
+    selected_worker_id,
+    "scene-frame-shell viewport-frame-shell",
+    "scene-frame viewport-frame",
+  )
+}
+
+///|
+fn render_viewport_view_body(
+  dispatch : Dispatch[Msg],
+  model : Model,
+  scene : @ui.SceneRenderModel,
+  workers : Array[WorkerSim],
+  executions : Array[@core.TaskExecutionRecord],
+  selected_node_key : String?,
+  selected_worker_id : String?,
+) -> @rabbita.Html {
+  match model.selection {
+    Node(node_key) =>
+      match find_wenyu_module(node_key) {
+        Some(civic) =>
+          render_wenyu_module_interior(dispatch, model, civic, workers, executions)
+        None => render_building_interior(dispatch, scene, workers, node_key)
+      }
+    _ =>
+      section(class="viewport-view-mode", [
+        p(class="viewport-mode-note", viewport_mode_summary(ViewportMode::ViewMode)),
+        render_standalone_viewport_map(
+          dispatch,
+          model,
+          scene,
+          workers,
+          executions,
+          selected_node_key,
+          selected_worker_id,
+        ),
+      ])
+  }
+}
+
+///|
+fn render_editor_module_row(
+  dispatch : Dispatch[Msg],
+  model : Model,
+  civic : WenyuTownModule,
+  executions : Array[@core.TaskExecutionRecord],
+) -> @rabbita.Html {
+  let runtime = wenyu_module_runtime_state(model, civic, executions)
+  let issues = module_validation_issues(civic)
+  let projection_status = match find_module_book_projection(model, civic) {
+    Some(_) => "MoonBook output connected"
+    None => "Missing MoonBook output"
+  }
+  let issue_text = if issues.is_empty() {
+    "placement clean"
+  } else {
+    issues.join(", ")
+  }
+  button(
+    class="editor-module-row \{runtime.status_class}",
+    on_click=dispatch(SelectNode(civic.id)),
+    [
+      span(class="editor-module-title", civic.title),
+      span(class="editor-module-meta", "\{civic.id} / \{civic.book_id}"),
+      span(
+        class="editor-module-meta",
+        "\{civic.grid_x},\{civic.grid_y} -> \{civic.entrance_x},\{civic.entrance_y}",
+      ),
+      span(class="editor-module-runtime", runtime.status_label),
+      span(class="editor-module-meta", projection_status),
+      span(class="editor-module-issues", issue_text),
+    ],
+  )
+}
+
+///|
+fn render_viewport_editor_panel(
+  dispatch : Dispatch[Msg],
+  model : Model,
+  executions : Array[@core.TaskExecutionRecord],
+) -> @rabbita.Html {
+  let module_rows : Array[@rabbita.Html] = []
+  for civic in wenyu_modules() {
+    module_rows.push(render_editor_module_row(dispatch, model, civic, executions))
+  }
+  aside(class="viewport-editor-panel", [
+    div(class="viewport-panel-heading", [
+      p(class="eyebrow", "Editor Mode"),
+      h2("Module Registry"),
+      p(viewport_mode_summary(ViewportMode::EditorMode)),
+    ]),
+    div(class="viewport-editor-stats", [
+      render_module_detail("Modules", "\{wenyu_module_count()} enabled"),
+      render_module_detail("Placement", "\{wenyu_clean_module_count()} clean"),
+      render_module_detail(
+        "Book Outputs",
+        "\{module_projection_count_for_configured_modules(model)} bound",
+      ),
+      render_module_detail("Config Version", "v\{wenyu_modules_version()}"),
+    ]),
+    render_town_editor_boundary_panel(model),
+    render_moondesk_handoff_panel(model),
+    render_moondesk_bridge_panel(model),
+    div(class="editor-module-list", module_rows),
+  ])
+}
+
+///|
+fn render_viewport_editor_body(
+  dispatch : Dispatch[Msg],
+  model : Model,
+  scene : @ui.SceneRenderModel,
+  workers : Array[WorkerSim],
+  executions : Array[@core.TaskExecutionRecord],
+  selected_node_key : String?,
+  selected_worker_id : String?,
+) -> @rabbita.Html {
+  section(class="viewport-editor-layout", [
+    render_standalone_viewport_map(
+      dispatch,
+      model,
+      scene,
+      workers,
+      executions,
+      selected_node_key,
+      selected_worker_id,
+    ),
+    render_viewport_editor_panel(dispatch, model, executions),
+  ])
+}
+
+///|
+fn render_final_output_book_card(
+  projection : BookProjectionFragment,
+) -> @rabbita.Html {
+  article(class="viewport-output-book-card", [
+    div(class="module-book-heading", [
+      div([p(class="eyebrow", "MoonBook Output"), h2(projection.title)]),
+      span(class="module-book-id", projection.book_id),
+    ]),
+    p(class="module-book-summary", projection.summary),
+    render_projection_chips(projection),
+    render_projection_metrics(projection),
+    div(class="viewport-output-book-grid", [
+      render_projection_item_group(
+        "Readiness",
+        "No readiness summary was published yet.",
+        "readiness",
+        projection.readiness,
+      ),
+      render_projection_item_group(
+        "Review Queue",
+        "No review queue was published yet.",
+        "review",
+        projection.review_queue,
+      ),
+      render_projection_item_group(
+        "Page Families",
+        "No page-family summary was published yet.",
+        "pages",
+        projection.page_families,
+      ),
+      render_projection_links(projection),
+    ]),
+    render_projection_journey(projection),
+  ])
+}
+
+///|
+fn render_final_output_empty_state() -> @rabbita.Html {
+  article(class="viewport-output-empty", [
+    h2("No MoonBook Outputs Connected"),
+    p(
+      "The final-output mode is working, but the browser bridge did not load any `moonbook-ui-state.json` fragments yet.",
+    ),
+    p(
+      "Run a book projection or publish generated MoonBook UI state under `.moontown/books/<book>/book/` to populate this page.",
+    ),
+  ])
+}
+
+///|
+fn render_viewport_output_body(model : Model) -> @rabbita.Html {
+  let cards : Array[@rabbita.Html] = []
+  for projection in model.module_projections {
+    cards.push(render_final_output_book_card(projection))
+  }
+  section(class="viewport-output-panel", [
+    div(class="viewport-panel-heading", [
+      p(class="eyebrow", "Final Output Mode"),
+      h2("Generated Book Outputs"),
+      p(viewport_mode_summary(ViewportMode::OutputMode)),
+    ]),
+    div(class="viewport-output-stats", [
+      render_module_detail("Book Fragments", "\{model.module_projections.length()}"),
+      render_module_detail(
+        "Bound Modules",
+        "\{module_projection_count_for_configured_modules(model)}",
+      ),
+      render_module_detail("Daemon Tick", daemon_tick_label(model)),
+      render_module_detail("Local Time", real_time_label()),
+    ]),
+    div(
+      class="viewport-output-grid",
+      if cards.is_empty() {
+        [render_final_output_empty_state()]
+      } else {
+        cards
+      },
+    ),
+    render_moondesk_handoff_panel(model),
+    render_moondesk_bridge_panel(model),
+  ])
+}
+
+///|
 fn render_scene(dispatch : Dispatch[Msg], model : Model) -> @rabbita.Html {
   let state = state_for_model(model)
   let scene = town_scene(model)
@@ -8780,35 +9444,40 @@ fn render_scene(dispatch : Dispatch[Msg], model : Model) -> @rabbita.Html {
     _ => None
   }
   if standalone_viewport_requested() {
-    let viewport_body = match model.selection {
-      Node(node_key) =>
-        match find_wenyu_module(node_key) {
-          Some(civic) =>
-            render_wenyu_module_interior(
-              dispatch, model, civic, workers, executions,
-            )
-          None => render_building_interior(dispatch, scene, workers, node_key)
-        }
-      _ =>
-        render_town_viewport(
+    let viewport_body = match model.viewport_mode {
+      ViewMode =>
+        render_viewport_view_body(
           dispatch,
           model,
           scene,
-          visible_overworld_workers(workers),
+          workers,
           executions,
           selected_node_key,
           selected_worker_id,
-          "scene-frame-shell viewport-frame-shell",
-          "scene-frame viewport-frame",
         )
+      EditorMode =>
+        render_viewport_editor_body(
+          dispatch,
+          model,
+          scene,
+          workers,
+          executions,
+          selected_node_key,
+          selected_worker_id,
+        )
+      OutputMode => render_viewport_output_body(model)
     }
-    return section(class="viewport-page", [
+    return section(
+      class="viewport-page viewport-mode-\{viewport_mode_slug(model.viewport_mode)}",
+      [
       header(class="viewport-hud", [
         div(class="viewport-title", [
           p(class="eyebrow", "Moontown Viewport"),
           h1(scene.title),
+          p(class="viewport-mode-subtitle", viewport_mode_summary(model.viewport_mode)),
         ]),
         div(class="viewport-actions", [
+          render_viewport_mode_switch(dispatch, model),
           status_chip(if model.paused { "Paused" } else { "Live" }, "chip-live"),
           status_chip("Local time \{real_time_label()}", "chip-clock"),
           status_chip(daemon_tick_label(model), "chip-neutral"),

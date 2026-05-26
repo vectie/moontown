@@ -191,6 +191,68 @@ card that links to `viewport.html?assets=generated&v=wenyu`, the canonical
 standalone tilemap viewport. This avoids divergence between a small dashboard
 map and the actual Wenyu Valley viewport.
 
+## Standalone Viewport Modes
+
+The canonical Wenyu viewport now has three explicit modes. These modes are
+selected from the viewport HUD and can also be opened directly by URL:
+
+- `viewport.html?assets=generated&mode=view&v=wenyu`
+  - clean public town presentation
+  - click buildings to inspect live module interiors
+  - no editor panel or output-browser chrome
+- `viewport.html?assets=generated&mode=editor&v=wenyu`
+  - town-designer workspace
+  - shows module placement, entrance tile, runtime state, validation issues,
+    and whether each building has a connected MoonBook output fragment
+  - changing a module still happens in
+    `ui/assets/tilemap/modules/wenyu-town-modules.json`
+  - scope is multi-agent/town composition, not deep single-agent editing
+- `viewport.html?assets=generated&mode=output&v=wenyu`
+  - final retrieval surface
+  - lists generated MoonBook projection fragments, metrics, review queues,
+    page families, journey entries, and links to generated HTML/report outputs
+  - also shows the Moondesk handoff contract and recent portable bridge
+    records from `.moontown/moondesk-*` and `.moontown/book-results`
+
+This separation is intentional:
+
+- view mode is for presentation
+- editor mode is for map/module design validation
+- output mode is for retrieving produced work
+
+The mode switch uses the same runtime data in all cases. It does not invent
+book content or duplicate the Wenyu map.
+
+Editor-mode boundary:
+
+- Moontown editor manages modules, books, worker lanes, runtime bindings,
+  placement, and output availability.
+- Moontown can expose only simple per-agent controls such as role, capacity,
+  cadence, home building, and permission envelope.
+- Complex single-agent or single-book editing belongs in `../moondesk`, where a
+  human can browse files, edit wiki pages, author skills/prompts, inspect
+  generated outputs, and package reusable artifacts.
+- Moondesk outputs should be portable back into Moontown as MoonBook folders,
+  `moonbook-ui-state.json` projections, skill/profile manifests, asset packs,
+  or module-pack JSON. Moontown consumes those artifacts; it should not
+  duplicate Moondesk as an IDE.
+
+Implemented handoff surfaces:
+
+- `tilemap/modules/moondesk-handoff.json`
+  - declares portable artifact lanes such as book workspace packs, module
+    packs, asset packs, simple agent profiles, skill-pack references, operator
+    request packs, and generated output bundles
+- `moondesk-bridge.json`
+  - Vite bridge output that scans real `.moontown/moondesk-dispatches`,
+    `.moontown/moondesk-requests`, and `.moontown/book-results` records
+- editor mode
+  - shows the boundary panel, handoff manifest, and bridge ledger beside module
+    validation
+- final output mode
+  - shows MoonBook outputs plus the same Moondesk artifact lanes and recent
+    bridge records as retrieval context
+
 ## Wenyu Module UI
 
 The Wenyu viewport is moving toward a modular add-on system documented in

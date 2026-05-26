@@ -50,6 +50,55 @@ Keep three layers separate:
 The UI should never require code edits just to add, remove, or move one civic
 feature building.
 
+## Editor Boundary: Moontown vs Moondesk
+
+The Wenyu town editor is a multi-agent composition tool, not a detailed
+single-agent authoring tool.
+
+Moontown owns town-level editing:
+
+- add, remove, enable, disable, and move civic modules
+- bind each module to a MoonBook through `book_id`
+- validate placement, collision, terrain fit, missing assets, and broken
+  MoonBook projection bindings
+- assign high-level worker roles and visible routing destinations
+- show runtime state, active work, review pressure, and output availability
+- export/import module packs that can be shared across towns
+
+Moontown should only support simple agent edits:
+
+- choose a worker role or lane
+- choose visible home/destination building
+- set basic capacity, cadence, and permission envelope
+- attach or detach the worker from a module/book
+
+Moondesk owns detailed human/workspace editing:
+
+- browse and edit MoonBook files, wiki pages, reports, assets, and generated
+  outputs through a desktop/file-manager-like workspace
+- author detailed single-agent prompts, skill packs, memory rules, and review
+  contracts
+- inspect one book or one worker deeply without turning the town viewport into
+  an IDE
+- package the finished workspace, skill pack, asset pack, or agent profile for
+  reuse
+
+Portable output from Moondesk should enter Moontown as data, not as hardcoded
+UI:
+
+```text
+Moondesk edited workspace
+  -> MoonBook book folder / projection fragment
+  -> skill pack or agent profile manifest
+  -> asset pack / module pack
+  -> Moontown module registry import
+  -> mayor-visible multi-agent runtime
+```
+
+This boundary keeps the town viewport legible. Moontown designs the civic
+system and supervises groups of agents; Moondesk handles the deep single-book
+and single-agent work that would otherwise overload the town map.
+
 ## Module Registry
 
 The first config file lives at:
@@ -238,7 +287,14 @@ Current status:
 - viewport runtime validation catches missing `book_id`, missing assets, invalid
   footprints, building anchors on blocked terrain, and entrances on water
 - bridge/river/harbor modules can opt into water or bridge placement
-- standalone schema validation and designer preview tooling are still pending
+- editor mode now shows the town/Moondesk boundary, the handoff manifest, and
+  recent bridge records next to module validation
+- `tilemap/modules/moondesk-handoff.json` defines the portable artifact lanes
+  that can be imported without changing viewport code
+- `moondesk-bridge.json` scans real `.moontown/moondesk-*` and
+  `.moontown/book-results` files for recent portable records
+- standalone write-back editing, schema validation, and richer designer preview
+  tooling are still pending
 
 ### Stage 7: Civic Runtime Integration
 

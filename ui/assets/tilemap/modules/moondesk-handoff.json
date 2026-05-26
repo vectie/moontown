@@ -1,0 +1,111 @@
+{
+  "version": 1,
+  "description": "Portable artifact lanes that Moondesk can export and Moontown can consume without turning the town viewport into a single-agent IDE.",
+  "artifacts": [
+    {
+      "id": "book-workspace-pack",
+      "title": "MoonBook Workspace Pack",
+      "kind": "book-workspace",
+      "status": "ready",
+      "scope": "single book authored in Moondesk, supervised in Moontown",
+      "source_path": "../moondesk workspace export or .moontown/books/<book-id>/book",
+      "target_path": ".moontown/books/<book-id>/book",
+      "summary": "Durable wiki, generated pages, evidence folders, and review queues prepared in Moondesk and bound to a Moontown civic module through book_id.",
+      "import_contract": [
+        "book folder contains moonbook-ui-state.json or can regenerate it",
+        "book_id is stable and matches one configured town module",
+        "generated output paths stay under the book folder"
+      ]
+    },
+    {
+      "id": "module-pack",
+      "title": "Town Module Pack",
+      "kind": "module-pack",
+      "status": "ready",
+      "scope": "multi-agent/town composition",
+      "source_path": "../moondesk exports/module-packs/*.json",
+      "target_path": "ui/assets/tilemap/modules/wenyu-town-modules.json",
+      "summary": "A portable set of civic buildings, coordinates, entrances, MoonBook bindings, and summaries that Moontown can merge into the module registry.",
+      "import_contract": [
+        "modules have stable ids and book_id bindings",
+        "coordinates pass terrain and collision validation",
+        "disabled modules remain in config but do not render"
+      ]
+    },
+    {
+      "id": "asset-pack",
+      "title": "Tilemap Asset Pack",
+      "kind": "asset-pack",
+      "status": "ready",
+      "scope": "visual add-on assets",
+      "source_path": "../moondesk exports/assets/<pack-id>",
+      "target_path": "ui/assets/tilemap/districts or ui/assets/tilemap/actors",
+      "summary": "Transparent building, roof, actor, and prop sprites produced or curated in Moondesk and referenced by module config.",
+      "import_contract": [
+        "sprites use transparent backgrounds",
+        "asset paths are relative to the Rabbita public asset root",
+        "large sprites include footprint metadata"
+      ]
+    },
+    {
+      "id": "agent-profile-pack",
+      "title": "Agent Profile Pack",
+      "kind": "agent-profile",
+      "status": "simple-only",
+      "scope": "simple worker lane controls in Moontown, detailed authoring in Moondesk",
+      "source_path": "../moondesk exports/agent-profiles/*.json",
+      "target_path": ".moontown/agent-profiles/<profile-id>.json",
+      "summary": "Role, capacity, cadence, permission envelope, visible home building, and book/module assignment. Detailed prompts and memory rules remain in Moondesk/MoonBook skill files.",
+      "import_contract": [
+        "profile declares role, capacity, and permission envelope",
+        "profile binds to a module id or book_id",
+        "profile does not include unrestricted raw tool access"
+      ]
+    },
+    {
+      "id": "skill-pack",
+      "title": "Skill Pack Reference",
+      "kind": "skill-pack",
+      "status": "reference-only",
+      "scope": "MoonBook/MoonClaw execution quality",
+      "source_path": "../moondesk exports/skills/<skill-id>",
+      "target_path": "MoonBook or MoonClaw skill registry",
+      "summary": "Reusable prompts, output contracts, review rubrics, and examples. Moontown only references the pack when assigning work; it does not edit the skill body.",
+      "import_contract": [
+        "skill has SKILL.md with examples and output contracts",
+        "skill owner is MoonBook or MoonClaw, not Moontown",
+        "town module references the skill by id"
+      ]
+    },
+    {
+      "id": "operator-request-pack",
+      "title": "Operator Request Pack",
+      "kind": "operator-request",
+      "status": "ready",
+      "scope": "human request staged in Moondesk, dispatched by Moontown mayor",
+      "source_path": ".moontown/moondesk-requests/*.json",
+      "target_path": ".moontown/standing-goals.json or .moontown/operator-requests",
+      "summary": "Context-rich request drafted in Moondesk and submitted to Moontown as a standing watch or one-shot mayor goal.",
+      "import_contract": [
+        "request declares target_book_id",
+        "request declares cadence and quality threshold",
+        "Moontown mayor performs scheduling and dispatch"
+      ]
+    },
+    {
+      "id": "output-bundle",
+      "title": "Generated Output Bundle",
+      "kind": "output-bundle",
+      "status": "ready",
+      "scope": "finished work retrieval",
+      "source_path": ".moontown/books/<book-id>/book/site/generated or book/synthesis",
+      "target_path": "Moontown final output mode and Moondesk file browser",
+      "summary": "Published sites, reports, evidence pages, and pending reviews. Moontown shows the high-level output surface; Moondesk remains the detailed file browser.",
+      "import_contract": [
+        "bundle is under a MoonBook book folder",
+        "moonbook-ui-state.json points to important outputs",
+        "review-required outputs are labeled before public presentation"
+      ]
+    }
+  ]
+}

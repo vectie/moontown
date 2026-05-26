@@ -163,6 +163,15 @@ Implementation note:
   editing `ui/assets/tilemap/modules/wenyu-town-modules.json`.
 - The clean terrain layer should remain separate from service buildings,
   interiors, agents, and runtime effects.
+- The Moontown editor should stay at the multi-agent system level: module
+  composition, MoonBook binding, worker-lane assignment, placement validation,
+  and output availability. It may expose simple per-agent controls, but deep
+  single-agent prompts, skill authoring, file browsing, and book/workspace
+  editing belong in `../moondesk`.
+- Moondesk should export portable artifacts back to Moontown: MoonBook folders,
+  projection fragments, skill packs, agent profiles, asset packs, and module
+  packs. Moontown should import those artifacts as data/config rather than
+  duplicating Moondesk's desktop/editor responsibilities.
 
 ### 3.2 Resident Digital Twins
 
@@ -765,6 +774,10 @@ Rules:
 - Add daemon loop beyond one-shot tick.
 - Add restart-safe lease handling.
 - Add mayor patrol decisions for Wenyu modules.
+- Add town-level editor import/export for module packs, asset packs, worker
+  lane profiles, and MoonBook projection bindings.
+- Keep Moontown editor changes scoped to multi-agent/town composition, not
+  detailed single-agent or file/workspace editing.
 
 ### MoonBook Backlog
 
