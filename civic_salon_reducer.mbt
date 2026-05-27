@@ -1,0 +1,560 @@
+///|
+async fn reduce_civic_salon_ideas(
+  scenario : CivicSalonScenario,
+  round_id? : String = "civic-salon-round-001",
+  round_number? : Int = 1,
+  workspace_base? : String = "",
+  mode? : CivicSalonReductionMode = MoonClawReducer,
+) -> CivicSalonReductionResult {
+  match mode {
+    FixtureReducer =>
+      fixture_civic_salon_reduction(scenario, round_id, workspace_base)
+    PersistedReducer =>
+      persisted_civic_salon_reduction(scenario, round_id, workspace_base)
+    MoonClawReducer =>
+      moonclaw_civic_salon_reduction(
+        scenario, round_id, round_number, workspace_base,
+      )
+  }
+}
+
+///|
+fn civic_salon_reducer_output_path(
+  scenario : CivicSalonScenario,
+  workspace_base : String,
+) -> String {
+  "\{civic_salon_workspace_root(scenario.building_book_id, workspace_base)}/raw/bootstrap/civic-salon-ideas.json"
+}
+
+///|
+fn civic_salon_reducer_packet_path(
+  scenario : CivicSalonScenario,
+  round_id : String,
+  workspace_base : String,
+) -> String {
+  "\{civic_salon_workspace_root(scenario.building_book_id, workspace_base)}/raw/bootstrap/civic-salon-reducer-\{scenario.id}-\{round_id}.packet.json"
+}
+
+///|
+async fn fixture_civic_salon_reduction(
+  scenario : CivicSalonScenario,
+  round_id : String,
+  workspace_base : String,
+) -> CivicSalonReductionResult {
+  let ideas = validated_civic_salon_ideas(scenario, scenario.ideas)
+  persist_civic_salon_reducer_output(scenario, ideas, workspace_base)
+  {
+    ideas,
+    status: if ideas.length() > 0 {
+      @core.TaskExecutionStatus::Completed
+    } else {
+      @core.TaskExecutionStatus::Failed
+    },
+    summary: "Fixture reducer loaded \{ideas.length()} template idea(s) for explicit deterministic smoke execution of `\{round_id}`.",
+    packet_id: None,
+    packet_path: None,
+    proposal_id: None,
+    run_id: None,
+    workspace_root: civic_salon_workspace_root(
+      scenario.building_book_id,
+      workspace_base,
+    ),
+    reducer_kind: "fixture",
+  }
+}
+
+///|
+async fn persisted_civic_salon_reduction(
+  scenario : CivicSalonScenario,
+  round_id : String,
+  workspace_base : String,
+) -> CivicSalonReductionResult {
+  let root = civic_salon_workspace_root(
+    scenario.building_book_id,
+    workspace_base,
+  )
+  match
+    load_civic_salon_ideas_file(
+      civic_salon_reducer_output_path(scenario, workspace_base),
+    ) {
+    Some(loaded) => {
+      let ideas = validated_civic_salon_ideas(scenario, loaded)
+      CivicSalonReductionResult::{
+        ideas,
+        status: if ideas.length() > 0 {
+          @core.TaskExecutionStatus::Completed
+        } else {
+          @core.TaskExecutionStatus::Failed
+        },
+        summary: if ideas.length() > 0 {
+          "Persisted reducer replayed \{ideas.length()} prior MoonClaw idea(s) for projection refresh of `\{round_id}`."
+        } else {
+          "Persisted reducer output exists but contains no valid CivicSalonIdea records for `\{round_id}`."
+        },
+        packet_id: None,
+        packet_path: None,
+        proposal_id: None,
+        run_id: None,
+        workspace_root: root,
+        reducer_kind: "persisted",
+      }
+    }
+    None =>
+      {
+        ideas: [],
+        status: @core.TaskExecutionStatus::Failed,
+        summary: "No persisted civic salon reducer output found at `raw/bootstrap/civic-salon-ideas.json`; refresh skipped instead of falling back to template seed ideas.",
+        packet_id: None,
+        packet_path: None,
+        proposal_id: None,
+        run_id: None,
+        workspace_root: root,
+        reducer_kind: "persisted",
+      }
+  }
+}
+
+///|
+async fn moonclaw_civic_salon_reduction(
+  scenario : CivicSalonScenario,
+  round_id : String,
+  round_number : Int,
+  workspace_base : String,
+) -> CivicSalonReductionResult {
+  let root = civic_salon_workspace_root(
+    scenario.building_book_id,
+    workspace_base,
+  )
+  write_civic_salon_reducer_workspace(scenario, root, round_id, round_number)
+  let packet_id = "civic-salon-reducer-\{scenario.id}-\{round_id}"
+  let packet_path = civic_salon_reducer_packet_path(
+    scenario, round_id, workspace_base,
+  )
+  let packet = civic_salon_reducer_packet(
+    scenario, packet_id, round_id, round_number,
+  )
+  let imported = @moonclaw.import_packet(
+    packet,
+    packet_path,
+    cwd=root,
+    confirm=true,
+    run_inline=moontown_moonclaw_inline_enabled(),
+  ) catch {
+    error =>
+      return failed_civic_salon_reduction(
+        root,
+        Some(packet_id),
+        Some(packet_path),
+        "MoonClaw reducer import failed for `\{scenario.id}`: \{error}",
+      )
+  }
+  let execution = match imported.run_id {
+    Some(run_id) => ensure_run_execution(packet_id, run_id, root)
+    None => None
+  }
+  let status = execution
+    .map(fn(result) { result.0.status })
+    .unwrap_or(imported.status)
+  let worker_summary = execution
+    .map(fn(result) { result.0.summary })
+    .unwrap_or(imported.summary)
+  let ideas = load_civic_salon_reducer_output_after_run(
+    scenario,
+    workspace_base,
+    root,
+    imported.run_id,
+  )
+  if status is @core.TaskExecutionStatus::Completed && ideas.length() > 0 {
+    persist_civic_salon_reducer_output(scenario, ideas, workspace_base)
+    {
+      ideas,
+      status,
+      summary: "MoonClaw reducer completed with \{ideas.length()} idea(s). \{worker_summary}",
+      packet_id: Some(packet_id),
+      packet_path: Some(packet_path),
+      proposal_id: Some(imported.proposal_id),
+      run_id: imported.run_id,
+      workspace_root: root,
+      reducer_kind: "moonclaw",
+    }
+  } else {
+    failed_civic_salon_reduction(
+      root,
+      Some(packet_id),
+      Some(packet_path),
+      "MoonClaw reducer did not produce a valid non-empty CivicSalonIdea contract. status=\{status}; \{worker_summary}",
+      proposal_id=Some(imported.proposal_id),
+      run_id=imported.run_id,
+    )
+  }
+}
+
+///|
+fn failed_civic_salon_reduction(
+  root : String,
+  packet_id : String?,
+  packet_path : String?,
+  summary : String,
+  proposal_id? : String? = None,
+  run_id? : String? = None,
+) -> CivicSalonReductionResult {
+  {
+    ideas: [],
+    status: @core.TaskExecutionStatus::Failed,
+    summary,
+    packet_id,
+    packet_path,
+    proposal_id,
+    run_id,
+    workspace_root: root,
+    reducer_kind: "moonclaw",
+  }
+}
+
+///|
+async fn write_civic_salon_reducer_workspace(
+  scenario : CivicSalonScenario,
+  root : String,
+  round_id : String,
+  round_number : Int,
+) -> Unit {
+  write_text_file(
+    "\{root}/skills/\{scenario.skill_name}/SKILL.md",
+    civic_salon_reducer_skill_text(scenario),
+  )
+  write_text_file(
+    "\{root}/raw/bootstrap/civic-salon-participants.json",
+    scenario.participants.to_json().stringify(indent=2),
+  )
+  write_text_file(
+    "\{root}/raw/bootstrap/civic-salon-reducer-input.md",
+    civic_salon_reducer_input_markdown(scenario, round_id, round_number),
+  )
+  write_text_file(
+    "\{root}/raw/bootstrap/civic-salon-reducer-contract.md",
+    civic_salon_reducer_contract_markdown(scenario),
+  )
+  write_text_file(
+    "\{root}/moonclaw.jobs.json",
+    civic_salon_reducer_profile_json(scenario),
+  )
+}
+
+///|
+fn civic_salon_reducer_packet(
+  scenario : CivicSalonScenario,
+  packet_id : String,
+  round_id : String,
+  round_number : Int,
+) -> @moonclaw.ExternalProposalPacket {
+  @moonclaw.ExternalProposalPacket::new(
+    packet_id~,
+    title="Reduce \{scenario.title} round \{round_number}",
+    summary="Run the \{scenario.domain_label} building reducer and emit CivicSalonIdea JSON for \{scenario.title}.",
+    request_text=civic_salon_reducer_request(scenario, round_id, round_number),
+    profile="civic_salon_reducer_worker",
+    output_contract="civic.salon.idea_reduction.v1",
+    context_pages=[
+      "raw/bootstrap/civic-salon-reducer-contract.md", "raw/bootstrap/civic-salon-participants.json",
+      "raw/bootstrap/civic-salon-reducer-input.md",
+    ],
+    skill_paths=["skills/\{scenario.skill_name}/SKILL.md"],
+    notes=[
+      "Read the generated SKILL.md before reducing ideas.", "Do not use template-provided seed ideas; only participant context and contract files are input.",
+      "Write raw/bootstrap/civic-salon-ideas.json with the exact CivicSalonIdea contract.",
+    ],
+    tags=["civic-salon", "reducer", scenario.id, scenario.building_id],
+    metadata={
+      "producer": "moontown".to_json(),
+      "building_id": scenario.building_id.to_json(),
+      "book_id": scenario.building_book_id.to_json(),
+      "round_id": round_id.to_json(),
+      "round_number": round_number.to_json(),
+      "disable_waiting_for_input": true.to_json(),
+      "best_effort_on_missing_input": true.to_json(),
+      "profile_metadata": {
+        "disable_waiting_for_input": true.to_json(),
+        "best_effort_on_missing_input": true.to_json(),
+      },
+      "step_metadata": {
+        "kind": "civic_salon_reducer".to_json(),
+        "output_contract": "civic.salon.idea_reduction.v1".to_json(),
+        "preferred_skills": [scenario.skill_name].to_json(),
+        "target_pages": ["raw/bootstrap/civic-salon-ideas.json"].to_json(),
+        "disable_waiting_for_input": true.to_json(),
+        "best_effort_on_missing_input": true.to_json(),
+      },
+    },
+  )
+}
+
+///|
+fn civic_salon_reducer_request(
+  scenario : CivicSalonScenario,
+  round_id : String,
+  round_number : Int,
+) -> String {
+  [
+    "You are the MoonClaw reducer for `\{scenario.title}`.",
+    "Round: `\{round_id}` (#\{round_number}).",
+    "Read `skills/\{scenario.skill_name}/SKILL.md` first, then read the reducer contract and participant JSON.",
+    "Reduce participant perspectives into novel, testable, cross-area research ideas.",
+    "Write the result to `raw/bootstrap/civic-salon-ideas.json`.",
+    "Do not wait for user input. If evidence is incomplete, produce best-effort ideas with explicit research questions and next experiments.",
+  ].join("\n")
+}
+
+///|
+fn civic_salon_reducer_skill_text(scenario : CivicSalonScenario) -> String {
+  [
+    "---",
+    "name: \{scenario.skill_name}",
+    "description: \{scenario.skill_description}",
+    "---",
+    "",
+    "# \{scenario.title} Reducer Skill",
+    "",
+    "This skill controls the building-level reducer for a civic salon. The reducer is an agentic map-reduce place: participant MoonBooks map domain perspectives into packets, then this worker reduces them into useful questions and experiments for return-home work.",
+    "",
+    "## Required Behavior",
+    "",
+    civic_salon_markdown_bullets(scenario.skill_rules),
+    "",
+    "## Quality Rules",
+    "",
+    civic_salon_markdown_bullets(scenario.quality_rules),
+    "",
+    "## Reduction Rules",
+    "",
+    "- Read every participant in `raw/bootstrap/civic-salon-participants.json`.",
+    "- Use at least two participant books for each idea unless the participant set itself has only one book.",
+    "- Generate ideas from tensions, dependencies, missing interfaces, evaluation gaps, or shared bottlenecks.",
+    "- Prefer questions that can become benchmarks, protocols, schemas, experiments, or review gates.",
+    "- Do not claim the idea is accepted knowledge. It is a returned research direction.",
+    "- Do not copy or consume template seed ideas. If seed examples exist elsewhere, ignore them.",
+    "",
+    "## Output Contract",
+    "",
+    "Emit the same `CivicSalonIdea` contract that Moontown materializes into building ledgers, participant MoonBooks, review queues, and projections.",
+    "",
+    "Write `raw/bootstrap/civic-salon-ideas.json` exactly as JSON:",
+    "",
+    "```json",
+    "{",
+    "  \"ideas\": [",
+    "    {",
+    "      \"id\": \"lowercase-stable-id\",",
+    "      \"title\": \"Short cross-area idea title\",",
+    "      \"summary\": \"One or two precise sentences explaining the cross-area dependency.\",",
+    "      \"participating_books\": [\"book-a\", \"book-b\"],",
+    "      \"research_questions\": [",
+    "        \"A testable question that belongs in follow-up work\",",
+    "        \"A second question that forces a concrete experiment or review gate\"",
+    "      ],",
+    "      \"why_it_matters\": \"Why this could change the domain program.\",",
+    "      \"next_experiment\": \"The smallest useful next experiment, prototype, benchmark, schema, or review exercise.\"",
+    "    }",
+    "  ],",
+    "  \"summary\": \"Reducer-level summary.\"",
+    "}",
+    "```",
+    "",
+    "## Concrete Example",
+    "",
+    "For a robotics salon with VLA, world-model, manipulation, and safety books, a good idea links perception-action policy limits to world-model uncertainty and proposes a concrete benchmark. A poor idea merely says \"combine VLA and world models\" without a test, owner books, or review gate.",
+  ].join("\n")
+}
+
+///|
+fn civic_salon_reducer_input_markdown(
+  scenario : CivicSalonScenario,
+  round_id : String,
+  round_number : Int,
+) -> String {
+  [
+    "# Civic Salon Reducer Input",
+    "",
+    "- Salon: \{scenario.title}",
+    "- Domain: \{scenario.domain_label}",
+    "- Topic: \{scenario.topic}",
+    "- Building: `\{scenario.building_id}`",
+    "- Round: `\{round_id}` (#\{round_number})",
+    "- Protocol channel: `\{scenario.protocol_channel}`",
+    "- Output channel: `\{scenario.output_channel}`",
+    "- Review gate: `\{scenario.review_gate}`",
+    "",
+    "The only authoritative inputs for reduction are the participant records and the generated skill/contract files. Template fixture ideas are intentionally not present in this reducer workspace.",
+  ].join("\n")
+}
+
+///|
+fn civic_salon_reducer_contract_markdown(
+  scenario : CivicSalonScenario,
+) -> String {
+  [
+    "# Civic Salon Idea Contract",
+    "",
+    "Emit a non-empty set of `CivicSalonIdea` records to `raw/bootstrap/civic-salon-ideas.json`.",
+    "",
+    "Each idea must include:",
+    "",
+    "- `id`: stable lowercase id",
+    "- `title`: human-readable idea title",
+    "- `summary`: cross-area dependency or tension",
+    "- `participating_books`: participant book ids from the input JSON",
+    "- `research_questions`: at least one testable follow-up question",
+    "- `why_it_matters`: judgement about why the idea is worth tracking",
+    "- `next_experiment`: smallest useful next experiment or artifact",
+    "",
+    "The reducer must not create accepted facts. It creates reviewable directions that are distributed back to participant MoonBooks through `\{scenario.output_channel}` and reviewed by `\{scenario.review_gate}`.",
+  ].join("\n")
+}
+
+///|
+fn civic_salon_reducer_profile_json(scenario : CivicSalonScenario) -> String {
+  let parsed = @json.parse(
+    "{ \"jobs\": { \"profiles\": { \"civic_salon_reducer_worker\": { \"family\": \"civic_salon_reducer_worker\", \"role\": \"worker\", \"priority\": 155, \"tags\": [\"civic\", \"salon\", \"reducer\", \{json_string(scenario.building_id)}], \"match\": { \"all\": [\"civic-salon\", \"reducer\"], \"any\": [\{json_string(scenario.id)}, \{json_string(scenario.building_id)}] }, \"steps\": [{ \"id\": \"reduce_civic_salon_ideas\", \"title\": \"Reduce civic salon participant packets into ideas\", \"kind\": \"job.analysis\", \"prompt_template\": \"Read ${proposal.request_text}. Then read the listed context pages and skill_paths. Write raw/bootstrap/civic-salon-ideas.json only after validating the CivicSalonIdea contract. Do not wait for input and do not use template seed ideas.\", \"metadata\": { \"preferred_skills\": [\{json_string(scenario.skill_name)}], \"enable_tools\": true, \"web_search\": false, \"disable_waiting_for_input\": true, \"best_effort_on_missing_input\": true, \"timeout_ms\": 600000, \"board_lane\": \"Salon Reducer\", \"board_order\": 0, \"role_runtime\": { \"planning_layer\": \"domain\", \"runtime_mode\": \"reducer\", \"tool_access\": \"workspace\", \"memory_scope\": \"domain\", \"allow_delegate\": false, \"allow_workspace_write\": true, \"allow_execution_tools\": true, \"output_contract\": \"civic.salon.idea_reduction.v1\" } } }] } } } }",
+  ) catch {
+    _ => Json::object({})
+  }
+  parsed.stringify(indent=2)
+}
+
+///|
+async fn load_civic_salon_reducer_output_after_run(
+  scenario : CivicSalonScenario,
+  workspace_base : String,
+  root : String,
+  run_id : String?,
+) -> Array[CivicSalonIdea] {
+  match
+    load_civic_salon_ideas_file(
+      civic_salon_reducer_output_path(scenario, workspace_base),
+    ) {
+    Some(ideas) => return validated_civic_salon_ideas(scenario, ideas)
+    None => ()
+  }
+  match run_id {
+    Some(run_id) =>
+      match @moonclaw.run_workspace_dir(run_id, cwd=root) {
+        Some(workspace_dir) =>
+          match
+            load_civic_salon_ideas_file(
+              "\{workspace_dir}/raw/bootstrap/civic-salon-ideas.json",
+            ) {
+            Some(loaded) => {
+              let ideas = validated_civic_salon_ideas(scenario, loaded)
+              if ideas.length() > 0 {
+                persist_civic_salon_reducer_output(
+                  scenario, ideas, workspace_base,
+                )
+              }
+              ideas
+            }
+            None => []
+          }
+        None => []
+      }
+    None => []
+  }
+}
+
+///|
+async fn load_civic_salon_ideas_file(path : String) -> Array[CivicSalonIdea]? {
+  if !@fs.exists(path) {
+    return None
+  }
+  let text = @fs.read_file(path).text() catch { _ => return None }
+  let parsed = @json.parse(text) catch { _ => return None }
+  let ideas = match parsed {
+    Array(_) => {
+      let values : Array[CivicSalonIdea] = @json.from_json(parsed) catch {
+        _ => return None
+      }
+      values
+    }
+    Object(object) =>
+      match object.get("ideas") {
+        Some(value) => {
+          let values : Array[CivicSalonIdea] = @json.from_json(value) catch {
+            _ => return None
+          }
+          values
+        }
+        _ => return None
+      }
+    _ => return None
+  }
+  Some(ideas)
+}
+
+///|
+fn validated_civic_salon_ideas(
+  scenario : CivicSalonScenario,
+  ideas : Array[CivicSalonIdea],
+) -> Array[CivicSalonIdea] {
+  let participant_ids = scenario.participants.map(fn(item) { item.book_id })
+  ideas.filter(fn(idea) {
+    civic_salon_idea_contract_valid(idea, participant_ids)
+  })
+}
+
+///|
+fn civic_salon_idea_contract_valid(
+  idea : CivicSalonIdea,
+  participant_ids : Array[String],
+) -> Bool {
+  if idea.id.trim().is_empty() ||
+    idea.title.trim().is_empty() ||
+    idea.summary.trim().is_empty() ||
+    idea.participating_books.length() == 0 ||
+    idea.research_questions.length() == 0 ||
+    idea.next_experiment.trim().is_empty() {
+    return false
+  }
+  for book_id in idea.participating_books {
+    if !participant_ids.contains(book_id) {
+      return false
+    }
+  }
+  true
+}
+
+///|
+async fn persist_civic_salon_reducer_output(
+  scenario : CivicSalonScenario,
+  ideas : Array[CivicSalonIdea],
+  workspace_base : String,
+) -> Unit {
+  write_text_file(
+    civic_salon_reducer_output_path(scenario, workspace_base),
+    Json::object({ "ideas": ideas.to_json() }).stringify(indent=2),
+  )
+  write_text_file(
+    "\{civic_salon_workspace_root(scenario.building_book_id, workspace_base)}/raw/bootstrap/\{scenario.id}-ideas.json",
+    Json::object({ "ideas": ideas.to_json() }).stringify(indent=2),
+  )
+}
+
+///|
+async fn write_civic_salon_reducer_blocker(
+  scenario : CivicSalonScenario,
+  reduction : CivicSalonReductionResult,
+  round_id : String,
+) -> Unit {
+  write_text_file(
+    "\{reduction.workspace_root}/raw/bootstrap/civic-salon-reducer-blocker.md",
+    [
+      "# Civic Salon Reducer Blocker",
+      "",
+      "- Salon: `\{scenario.id}`",
+      "- Round: `\{round_id}`",
+      "- Reducer: `\{reduction.reducer_kind}`",
+      "- Status: `\{reduction.status}`",
+      "",
+      reduction.summary,
+      "",
+      "Moontown did not fall back to template seed ideas. The next retry must run the MoonClaw reducer or use an explicit fixture mode in tests.",
+    ].join("\n"),
+  )
+}

@@ -196,6 +196,35 @@ pub struct ExternalProposalPacket {
 } derive(Show, Eq, ToJson, FromJson)
 
 ///|
+pub fn ExternalProposalPacket::new(
+  packet_id~ : String,
+  title~ : String,
+  summary~ : String,
+  request_text~ : String,
+  profile~ : String,
+  output_contract~ : String,
+  context_pages? : Array[String] = [],
+  skill_paths? : Array[String] = [],
+  notes? : Array[String] = [],
+  tags? : Array[String] = [],
+  metadata? : Json = Json::object({}),
+) -> ExternalProposalPacket {
+  {
+    packet_id,
+    title,
+    summary,
+    request_text,
+    profile,
+    output_contract,
+    context_pages,
+    skill_paths,
+    notes,
+    tags,
+    metadata,
+  }
+}
+
+///|
 pub struct ProposalImportReceipt {
   packet_id : String
   packet_path : String
@@ -673,6 +702,17 @@ pub async fn poll_run(
         notify_town: false,
       }
   }
+}
+
+///|
+pub async fn run_workspace_dir(
+  run_id : String,
+  home? : String = default_moonclaw_home(),
+  cwd? : String = ".",
+) -> String? {
+  let resolved_cwd = resolve_root_path(cwd)
+  let resolved_home = resolve_home_path(home, resolved_cwd)
+  load_run(run_id, resolved_home).bind(fn(run) { run.workspace_dir })
 }
 
 ///|

@@ -257,20 +257,25 @@ Bootstrap and inspect the building protocol runtime with:
 ```bash
 moon run cmd/main -- civic protocols bootstrap
 moon run cmd/main -- civic protocols status
-moon run cmd/main -- civic protocols robotics-salon
+moon run cmd/main -- civic protocols salon-template templates/civic-salons/robotics-mini-salon.json
 moon run cmd/main -- civic doctor
 ```
 
 The protocol bootstrap writes the town-level protocol registry under
 `.moontown/civic/protocols.json` and per-building protocol ledgers under
-`.moontown/civic/protocols/<building-id>/`. Social Square now has two proof
-slices: the original consent-gated introduction demo and the richer embodied
-robotics salon. The salon creates 10 sub-area MoonBooks, receives 10
-perspective packets, reduces them into five cross-area research ideas, and
+`.moontown/civic/protocols/<building-id>/`. Social Square has a protocol proof
+slice and can run additional salon scenarios from `CivicSalonScenario` JSON
+templates. A salon creates the participant MoonBooks declared by the template,
+receives perspective packets, reduces them into cross-area research ideas, and
 projects the result through the same module interior counters. It also writes
-`wiki/metrics/embodied-robotics-salon.md` in the Social Square book and
-returns relevant ideas to each sub-area home book at
+template-defined metrics in the Social Square book and returns relevant ideas
+to each participant home book at
 `wiki/queries/salon-returned-ideas.md`.
+
+The salon projection is now fed by generic `CivicSalonScenario` templates.
+There is no domain-specific default proof scenario in MoonBit; new domains
+arrive as template JSON and generated skill rules instead of frontend or
+MoonBit branches.
 
 This is a Moontown-side bootstrap bridge. Long term, MoonBook should own the
 native civic workspace templates, and Moontown should request them through a
@@ -480,13 +485,15 @@ Current status:
   places rather than generic research books
 - Social Square has a first durable protocol proof slice and appears in the
   viewport as a consent-gated protocol review
-- the embodied-robotics Social Square salon now measures idea yield, research
+- generic Social Square salon templates now measure idea yield, research
   question yield, cross-book links, home-book coverage, and return-home
   records instead of only counting packets
+- generic salon templates can feed the same projection path for future
+  domains without changing the viewport
 
 Remaining:
 
-- add one real scenario packet and reducer path for each other civic building
+- add one real scenario template and reducer path for each other civic building
 - route mayor/operator/resident/watch signals into protocol inboxes
 - persist accepted/rejected reductions into the correct MoonBook pages
 - show recent protocol history, not just current counters, inside interiors

@@ -12,7 +12,9 @@ import {
 }
 
 // Values
-pub async fn bootstrap_embodied_robotics_salon(book_catalog_path? : String, round_id? : String, round_number? : Int, workspace_base? : String) -> String
+pub async fn bootstrap_civic_salon_scenario(CivicSalonScenario, book_catalog_path? : String, round_id? : String, round_number? : Int, workspace_base? : String, reducer_mode? : CivicSalonReductionMode) -> String
+
+pub async fn bootstrap_civic_salon_scenario_file(String, book_catalog_path? : String, round_id? : String, round_number? : Int, workspace_base? : String, reducer_mode? : CivicSalonReductionMode) -> String
 
 pub async fn bootstrap_wenyu_building_protocols(registry_path? : String, status_path? : String) -> String
 
@@ -21,6 +23,8 @@ pub async fn bootstrap_wenyu_civic_workspaces(book_catalog_path? : String) -> St
 pub fn build_visual_projection(@core.TownState, tick? : Int) -> VisualProjection
 
 pub fn civic_salon_is_due(CivicSalonSchedule, UInt64) -> Bool
+
+pub fn civic_salon_scenario_path(String, snapshot_path? : String) -> String
 
 pub async fn daemon_doctor_saved_town(snapshot_path? : String, stale_after_ms? : UInt64) -> String
 
@@ -104,7 +108,7 @@ pub async fn render_wenyu_building_protocol_status(status_path? : String, regist
 
 pub async fn render_wenyu_civic_status(book_catalog_path? : String) -> String
 
-pub async fn run_due_civic_salons(snapshot_path? : String, book_catalog_path? : String, tick? : Int, now_ms? : UInt64) -> String
+pub async fn run_due_civic_salons(snapshot_path? : String, book_catalog_path? : String, tick? : Int, now_ms? : UInt64, reducer_mode? : CivicSalonReductionMode) -> String
 
 pub async fn run_goal(String, book_id? : String?, task_limit_per_book? : Int, snapshot_path? : String, book_catalog_path? : String) -> @core.TownState
 
@@ -121,6 +125,57 @@ pub async fn write_wenyu_civic_status(book_catalog_path? : String, status_path? 
 // Errors
 
 // Types and methods
+pub struct CivicSalonHomeReturn {
+  id : String
+  building_id : String
+  idea_id : String
+  target_book_id : String
+  target_path : String
+  summary : String
+  review_status : String
+} derive(Eq, ToJson, @debug.Debug, @json.FromJson)
+
+pub struct CivicSalonIdea {
+  id : String
+  title : String
+  summary : String
+  participating_books : Array[String]
+  research_questions : Array[String]
+  why_it_matters : String
+  next_experiment : String
+} derive(Eq, ToJson, @debug.Debug, @json.FromJson)
+
+pub struct CivicSalonMetric {
+  participant_count : Int
+  idea_count : Int
+  research_question_count : Int
+  participant_idea_links : Int
+  participating_book_coverage_count : Int
+  idea_return_home_count : Int
+  average_books_per_idea : String
+  structural_effectiveness_score : Int
+  summary : String
+} derive(Eq, ToJson, @debug.Debug, @json.FromJson)
+
+pub struct CivicSalonParticipantBook {
+  book_id : String
+  title : String
+  focus_area : String
+  perspective : String
+  cadence : String
+  current_question : String
+  contribution : String
+  next_artifact : String
+} derive(Eq, ToJson, @debug.Debug, @json.FromJson)
+
+pub enum CivicSalonReductionMode {
+  MoonClawReducer
+  PersistedReducer
+  FixtureReducer
+} derive(Eq, @debug.Debug)
+
+type CivicSalonReductionResult derive(Eq)
+
 pub struct CivicSalonRoundRecord {
   id : String
   salon_id : String
@@ -137,6 +192,34 @@ pub struct CivicSalonRoundRecord {
   structural_effectiveness_score : Int
   decision : String
   summary : String
+} derive(Eq, ToJson, @debug.Debug, @json.FromJson)
+
+pub struct CivicSalonScenario {
+  id : String
+  title : String
+  building_id : String
+  building_book_id : String
+  domain_label : String
+  topic : String
+  cadence : String
+  skill_name : String
+  skill_description : String
+  protocol_channel : String
+  reduction_kind : String
+  output_channel : String
+  review_gate : String
+  review_owner : String
+  review_reason : String
+  backlog_path : String
+  synthesis_path : String
+  metrics_path : String
+  review_path : String
+  returned_ideas_path : String
+  participant_contract_path : String
+  quality_rules : Array[String]
+  skill_rules : Array[String]
+  participants : Array[CivicSalonParticipantBook]
+  ideas : Array[CivicSalonIdea]
 } derive(Eq, ToJson, @debug.Debug, @json.FromJson)
 
 pub struct CivicSalonSchedule {

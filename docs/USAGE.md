@@ -199,32 +199,40 @@ Use view mode to present the town, editor mode to check module placement and
 bindings, and output mode to retrieve MoonBook-generated sites, reports,
 review queues, and page-family summaries.
 
-## 1.5 Run The Building Protocol Salon Test
+## 1.5 Run A Building Protocol Salon Template
 
-Social Square has a multi-book embodied robotics salon scenario that exercises
-the building protocol model:
+Social Square can run any `CivicSalonScenario` JSON template through the
+building protocol model:
 
 ```bash
-moon run cmd/main -- civic protocols robotics-salon
+moon run cmd/main -- civic protocols salon-template templates/civic-salons/robotics-mini-salon.json
 moon run cmd/main -- civic protocols status
 ```
 
-That command creates 10 embodied-robotics sub-area MoonBooks, sends their
-domain perspectives through Social Square, reduces them into five cross-area
-research ideas, and writes the ideas back to the relevant home books.
+That command creates the participant MoonBooks declared by the template, sends
+their domain perspectives through Social Square, runs a MoonClaw reducer
+guided by the generated `SKILL.md`, and writes relevant ideas back to each
+home book after the reducer emits `raw/bootstrap/civic-salon-ideas.json`.
 
 Important outputs:
 
 - `.moontown/civic/protocols/social-square/metrics.json`
 - `.moontown/civic/protocols/social-square/home_returns.jsonl`
-- `.moontown/books/wenyu-social-square/wiki/metrics/embodied-robotics-salon.md`
+- `.moontown/books/wenyu-social-square/wiki/metrics/<salon>.md`
 - `.moontown/books/wenyu-social-square/book/site/generated/index.html`
-- `.moontown/books/embodied-robotics-*/wiki/queries/salon-returned-ideas.md`
+- `.moontown/books/<participant-book>/wiki/queries/salon-returned-ideas.md`
 
 The metric is structural: it counts idea yield, research-question yield,
 cross-book links, home-book coverage, and return-home records. It proves the
 building performed exchange-reduce-distribute; it does not bypass the review
 queue or claim the ideas are already correct.
+
+The salon path is not robotics-hardcoded. `civic protocols salon-template
+<path>` loads a `CivicSalonScenario` JSON file and runs the same protocol
+envelope for that domain. Use
+[CIVIC_SALON_TEMPLATES.md](/Users/kq/Workspace/moontown/docs/CIVIC_SALON_TEMPLATES.md)
+and [robotics-mini-salon.json](/Users/kq/Workspace/moontown/templates/civic-salons/robotics-mini-salon.json)
+as the copyable contract.
 
 The viewport editor is intentionally town-level. Use it to compose modules,
 bind books, validate placement, inspect worker lanes, and check output
@@ -342,7 +350,7 @@ Inspect the civic-building protocol layer:
 moon run cmd/main -- civic protocols bootstrap
 moon run cmd/main -- civic protocols status
 moon run cmd/main -- civic protocols doctor
-moon run cmd/main -- civic protocols robotics-salon
+moon run cmd/main -- civic protocols salon-template templates/civic-salons/robotics-mini-salon.json
 moon run cmd/main -- civic protocols salons status
 moon run cmd/main -- civic protocols salons tick
 ```
@@ -352,16 +360,21 @@ moon run cmd/main -- civic protocols salons tick
 `.moontown/civic/protocols/social-square/`. `civic protocols status` prints the
 building protocol table. `civic protocols doctor` refreshes
 `.moontown/civic/protocol-status.json` and `.moontown/civic/protocol-status.md`.
-`civic protocols robotics-salon` seeds the first richer multi-book exchange:
-10 embodied-robotics sub-area MoonBooks communicate through Social Square and
-produce cross-area research ideas plus a reviewable question backlog.
+
+`civic protocols salon-template <path>` runs a domain scenario from JSON. The
+template defines participants, skill rules, quality rules, output paths, and
+review gate. Template `ideas` are fixture examples only; production runs use
+the MoonClaw reducer output contract. For recurring daemon use, place the file at
+`.moontown/civic/salon-scenarios/<salon-id>.json` and make sure
+`.moontown/civic/salons.json` has a schedule with the same `id`.
 
 `civic protocols salons status` reports the persisted recurring salon schedule
 from `.moontown/civic/salons.json`. `civic protocols salons tick` performs the
 same due-check used by the daemon: it compares real wall-clock time against
 `next_due_ms`, runs only due salons, advances the schedule, and appends a
-round record to `.moontown/civic/salon-runs/<salon-id>.jsonl`. The default
-embodied-robotics Social Square salon repeats every 30 real minutes.
+round record to `.moontown/civic/salon-runs/<salon-id>.jsonl`. There is no
+built-in recurring salon; operators add schedules and matching templates
+explicitly while the system is experimental.
 
 Run `civic doctor` after protocol updates so `civic-status.json` includes
 protocol status for the viewport interiors.
@@ -373,7 +386,7 @@ Overnight validation checklist:
 - `.moontown/daemon.json` should show `tick_sequence` increasing.
 - `.moontown/civic/salons.json` should show `round_count` increasing roughly
   every 30 minutes for enabled due salons.
-- `.moontown/civic/salon-runs/embodied-robotics-social-square.jsonl` should
+- `.moontown/civic/salon-runs/<salon-id>.jsonl` should
   contain one JSON line per completed salon round.
 - `.moontown/watchers/watch-opc-news.jsonl` should contain a new record after
   the OPC standing goal reaches `next_due_tick`.

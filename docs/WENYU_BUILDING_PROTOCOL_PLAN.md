@@ -51,30 +51,33 @@ Implemented:
 
 - `civic/protocols.mbt` defines one `BuildingProtocolDefinition` per enabled
   Wenyu civic building.
-- `civic_protocol_runtime.mbt` can bootstrap `.moontown/civic/protocols.json`
-  and `.moontown/civic/protocol-status.json`.
+- `civic_protocol_registry_runtime.mbt` bootstraps
+  `.moontown/civic/protocols.json`; `civic_protocol_status_runtime.mbt`
+  projects `.moontown/civic/protocol-status.json`.
+- `civic_protocol_store.mbt` owns protocol ledger paths, writes, counts, and
+  latest-record reads.
 - each civic MoonBook seed now receives
   `raw/bootstrap/BUILDING_PROTOCOL_CONTRACT.md`.
 - the generic Wenyu civic skill and each module-specific worker prompt now
   tell MoonClaw to read the building protocol contract before acting.
 - Social Square has a deterministic proof slice with durable inbox,
   contribution, reduction, outbox, and review ledgers.
-- Social Square now also has an embodied-robotics salon proof slice: 10
-  sub-area MoonBooks contribute domain perspectives, the building reduces them
-  into five cross-area research ideas, and the output is distributed to a
-  question backlog and review queue.
-- The embodied-robotics salon now publishes structural effectiveness metrics:
-  10 participant books, five idea reductions, 15 testable research questions,
-  21 participant-idea links, 10 covered home books, and 21 returned
-  idea-home records.
-- Each participating embodied-robotics sub-area MoonBook now receives
+- Social Square can run any `CivicSalonScenario` template as a salon proof
+  slice: participant MoonBooks contribute domain perspectives, the building
+  asks MoonClaw to reduce them into cross-area research ideas, and the output
+  is distributed to a question backlog and review queue.
+- Salon templates publish structural effectiveness metrics: participant count,
+  idea reductions, testable research questions, participant-idea links,
+  covered home books, and returned idea-home records.
+- Each participating salon MoonBook receives
   `wiki/queries/salon-returned-ideas.md`, so reduced ideas do not stay inside
   the Social Square building. They return home for review, refinement, or
   rejection.
 - `moon run cmd/main -- civic protocols status` shows protocol state across
   all buildings.
-- `moon run cmd/main -- civic protocols robotics-salon` reruns the embodied
-  robotics salon seed and refreshes the Social Square ledgers.
+- `moon run cmd/main -- civic protocols salon-template <path>` runs any valid
+  `CivicSalonScenario` template through the same Social Square/building
+  protocol envelope. This is the extensibility seam for new domains.
 - `moon run cmd/main -- civic protocols salons status` shows recurring salon
   schedules from `.moontown/civic/salons.json`.
 - `moon run cmd/main -- civic protocols salons tick` runs only wall-clock-due
@@ -89,83 +92,118 @@ ledger proof slices; the other buildings have protocol definitions and
 MoonBook/MoonClaw contracts, but they still need real scenario packets,
 reducers, accepted/rejected MoonBook persistence, and UI history.
 
-## Embodied Robotics Salon Test
+The first implementation was intentionally direct so the protocol loop could be
+validated end to end. The follow-up refactor is documented in
+[REFACTOR_PLAN.md](/Users/kq/Workspace/moontown/docs/REFACTOR_PLAN.md). The
+current refactor pass moved the salon runtime to a scenario-template boundary:
+domain behavior is described by `CivicSalonScenario` JSON, while Moontown keeps
+the reusable schedule, ledger, MoonBook write, metrics, and projection
+envelope. See
+[CIVIC_SALON_TEMPLATES.md](/Users/kq/Workspace/moontown/docs/CIVIC_SALON_TEMPLATES.md).
 
-The current high-quality building test uses Social Square as a domain exchange
-place for embodied robotics. The scenario is intentionally multi-book rather
-than single-agent:
+## Salon Template Test
 
-- `embodied-robotics-large-models`
-- `embodied-robotics-agent-systems`
-- `embodied-robotics-vla`
-- `embodied-robotics-world-models`
-- `embodied-robotics-locomotion`
-- `embodied-robotics-manipulation`
-- `embodied-robotics-brain`
-- `embodied-robotics-data-engine`
-- `embodied-robotics-sim2real`
-- `embodied-robotics-evaluation-safety`
+The current high-quality building test uses Social Square as a generic domain
+exchange place. The scenario is intentionally multi-book rather than
+single-agent, but the domain comes from JSON:
 
-Each sub-area MoonBook receives a small workspace, a salon skill, a current
-perspective page, and an open-question page. The building receives their
-perspective packets through the protocol inbox, maps them into contributions,
-reduces cross-area tensions into research ideas, and distributes the results to
-`wiki/queries/embodied-robotics-salon.md`.
+```bash
+moon run cmd/main -- civic protocols salon-template templates/civic-salons/robotics-mini-salon.json
+```
 
-The seed currently generates these idea reductions:
+Each participant MoonBook receives a small workspace, a salon skill, a current
+perspective page, and an open-question page. The building receives perspective
+packets through the protocol inbox, maps them into contributions, asks the
+MoonClaw reducer to turn cross-area tensions into research ideas, and
+distributes the results to the template-defined backlog path.
 
-- grounding as falsification, not confidence
-- contact-rich memory for robot agents
-- provenance-aware robot data flywheel
-- robot brain arbitration contract
-- long-horizon recovery benchmark
-
-The seed evaluates protocol effectiveness with a structural metric, not a
+The template evaluates protocol effectiveness with a structural metric, not a
 truth metric:
 
-- participants in: `10`
-- reduced ideas out: `5`
-- testable research questions: `15`
-- cross-pollination edges: `21`
-- home books covered: `10/10`
-- returned idea-home records: `21`
-- score: `100/100` for exchange-reduce-distribute completion
+- participants in
+- reduced ideas out
+- testable research questions
+- cross-pollination edges
+- home books covered
+- returned idea-home records
+- exchange-reduce-distribute completion score
 
 The score only proves that Social Square performed the protocol loop and wrote
 the outputs back to the participating books. It does not mean the research
 ideas are correct or ready for publication. The review queue still decides what
 becomes accepted long-horizon research work.
 
-This is the pattern to propagate to other buildings: first create one
-domain-specific scenario with multiple participant books, then make the
-building reduce their plural perspectives into useful, reviewable outputs.
+This is now a reusable template pattern, not a robotics-only MoonBit path.
+To propagate it to another domain, create a scenario JSON that names the
+building, participant books, skill rules, output paths, review gate, and
+optional fixture examples. The same runtime will run a MoonClaw reducer, write
+participant MoonBooks, run the protocol ledgers, compute structural metrics,
+and return ideas home.
+
+## Template-Driven Salon Runtime
+
+Recurring salon schedules load scenario files from:
+
+```text
+.moontown/civic/salon-scenarios/<salon-id>.json
+```
+
+One-off salon runs can load any template file:
+
+```bash
+moon run cmd/main -- civic protocols salon-template templates/civic-salons/robotics-mini-salon.json
+```
+
+The template controls:
+
+- participant MoonBook roster and perspectives
+- generated salon `SKILL.md` behavior
+- quality rules for the round
+- protocol channel and reduction kind
+- output paths for backlog, synthesis, metrics, reviews, and home returns
+- review gate, review owner, and review reason
+
+Moontown should not grow one MoonBit branch per domain. If a robotics,
+education, policy, finance, or healthcare salon needs different behavior, the
+first move is a new scenario template and stronger skill rules. MoonBit changes
+are reserved for new protocol capabilities, not new topic names.
 
 ## 24/7 Salon Loop
 
-The embodied-robotics salon is now part of the daemon path rather than only a
-manual proof command. The default recurring schedule is:
+The salon loop is part of the daemon path, but there is no built-in default
+domain. Operators create schedules explicitly:
 
 ```json
 {
-  "id": "embodied-robotics-social-square",
+  "id": "my-domain-social-square",
   "building_id": "social-square",
   "interval_ms": 1800000,
   "enabled": true
 }
 ```
 
-The schedule is stored in `.moontown/civic/salons.json`. Each daemon tick calls
-the civic salon due-check, compares real wall-clock time with `next_due_ms`,
-runs due salons, advances `round_count`, sets the next due time, and appends a
-round record under `.moontown/civic/salon-runs/`. This makes the Social Square
-pattern long-running: participant books periodically meet, ideas are reduced,
-and relevant outputs return to the home MoonBooks.
+The schedule is stored in `.moontown/civic/salons.json`, and a matching
+template must exist at `.moontown/civic/salon-scenarios/<salon-id>.json`. Each
+daemon tick calls the civic salon due-check, compares real wall-clock time with
+`next_due_ms`, runs due salons, advances `round_count`, sets the next due time,
+and appends a round record under `.moontown/civic/salon-runs/`. This makes the
+Social Square pattern long-running: participant books periodically meet, ideas
+are reduced, and relevant outputs return to the home MoonBooks.
 
-Current limitation: the recurring runner uses the existing deterministic
-embodied-robotics reducer. The lifecycle, schedule, ledgers, home returns, and
-daemon integration are real; the next quality step is to replace the reducer
-body with MoonClaw skill-driven salon agents while keeping the same protocol
-contract.
+The recurring runner now defaults to `MoonClawReducer`. A due round writes the
+building reducer workspace, generated `SKILL.md`, participant JSON, reducer
+contract, and `moonclaw.jobs.json`; imports a MoonClaw proposal; waits for a
+valid `raw/bootstrap/civic-salon-ideas.json`; then materializes those ideas
+into ledgers, participant books, review queues, and projections. If MoonClaw
+does not produce a valid non-empty `CivicSalonIdea` contract, the round is
+recorded as blocked and retried later instead of silently falling back to
+template examples.
+
+Refactor rule: deterministic idea data is a fixture, not the civic
+intelligence layer. `FixtureReducer` may consume template ideas only in tests
+or explicit smoke demos. Stale projection refreshes use `PersistedReducer` and
+replay the last persisted MoonClaw reducer output; they do not start another
+worker and do not consume template examples.
 
 ## Correct Model
 

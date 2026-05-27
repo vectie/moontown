@@ -1,6 +1,6 @@
 # Wenyu Valley Town Status
 
-Last updated: 2026-05-27 14:32 CST
+Last updated: 2026-05-27 17:20 CST
 
 This document answers one question: how far is the current Wenyu Valley
 implementation from a fully functioning town?
@@ -23,14 +23,16 @@ The Wenyu buildings now have generated civic MoonBook workspace seeds, schemas,
 review queues, projections, role-specific MoonClaw skill contracts, and building
 protocol contracts. Social Square has a durable protocol proof slice with
 inbox, contribution, reduction, outbox, review, home-return, and effectiveness
-metric ledgers. The embodied-robotics salon now proves that a building can hold
-a multi-book exchange, reduce ideas, measure output yield, and return reduced
-ideas back to each participant MoonBook. The remaining work is mostly
+metric ledgers. The template-driven salon path now proves that a building can
+hold a multi-book exchange, reduce ideas, measure output yield, and return
+reduced ideas back to each participant MoonBook. The remaining work is mostly
 integration depth: the other civic buildings still need repeated scenario
 packets, real MoonClaw reductions, MoonBook accept/reject persistence, and
 reviewable service histories before they can be called reliable civic services.
 The plan is tracked in
 [WENYU_BUILDING_PROTOCOL_PLAN.md](/Users/kq/Workspace/moontown/docs/WENYU_BUILDING_PROTOCOL_PLAN.md).
+The structural refactor plan is tracked in
+[REFACTOR_PLAN.md](/Users/kq/Workspace/moontown/docs/REFACTOR_PLAN.md).
 
 ## Distance To Fully Functioning Town
 
@@ -47,6 +49,7 @@ service-specific execution for each civic module.
 | Research watchers | Medium | OPC and LLM standing watches run through real books and ledgers; both are visible in the watch portfolio, but the current latest LLM watcher is still `NeedsReview` and the OPC watcher is still running |
 | Civic modules | Medium | Policy, contest, social, talent, market, bridge, story, education, resident, vitality, and town-shell modules now have generated MoonBook workspaces, schemas, review queues, projections, and skill contracts; end-to-end service runs still need soak testing |
 | Building protocol layer | Far-medium | Buildings have modes and skills, but do not yet have durable inbox/contribution/reduction/outbox ledgers or AI-guided map/reduce-style protocol execution |
+| Runtime architecture | Medium | Civic protocol behavior now has a documented refactor path, the salon scheduler is split away from generic daemon code, daemon scheduled jobs use a dispatcher, and protocol registry/store/status/fixtures are separated; package-level civic runtime splits and MoonClaw-driven reducers are still pending |
 | Designer/operator tooling | Medium | JSON config works, the standalone viewport has view/editor/output modes, editor mode shows town-level Moondesk handoff lanes, and detailed single-agent/workspace editing remains in Moondesk |
 | Production deployment | Far | Auth, backups, permissions, packaged supervisor, and recovery playbooks are not complete |
 
@@ -160,29 +163,29 @@ Implemented and validated:
   initial Social Square protocol ledgers.
 - `moon run cmd/main -- civic protocols status` reports protocol state across
   all Wenyu civic buildings.
-- `moon run cmd/main -- civic protocols robotics-salon` now seeds the first
-  richer multi-book exchange test: 10 embodied-robotics sub-area MoonBooks
-  communicate through Social Square and produce five cross-area idea
-  reductions.
+- `moon run cmd/main -- civic protocols salon-template <path>` now runs the
+  same civic salon envelope from a `CivicSalonScenario` JSON file, so future
+  domains can be added by template and schedule instead of editing MoonBit
+  runner code.
 - `moon run cmd/main -- civic protocols salons status` and
   `moon run cmd/main -- civic protocols salons tick` expose the recurring
   salon scheduler. The daemon now checks the same schedule on every tick and
   runs enabled salons when real wall-clock `next_due_ms` has arrived.
-- The robotics salon now writes `wiki/metrics/embodied-robotics-salon.md`,
+- Salon templates write template-defined metrics pages,
   `.moontown/civic/protocols/social-square/metrics.json`, and a
-  `home_returns.jsonl` ledger. The current structural effectiveness metric is
-  10 participant books, five reduced ideas, 15 research questions, 21
-  participant-idea links, 10 covered books, and 21 returned idea-home records.
+  `home_returns.jsonl` ledger. The structural effectiveness metric tracks
+  participant books, reduced ideas, research questions, participant-idea links,
+  covered books, and returned idea-home records.
 - Recurring salon rounds write an additional
-  `.moontown/civic/salon-runs/embodied-robotics-social-square.jsonl` ledger
-  for long-horizon audit and restart inspection.
-- Each robotics participant book receives
+  `.moontown/civic/salon-runs/<salon-id>.jsonl` ledger for long-horizon audit
+  and restart inspection.
+- Each salon participant book receives
   `wiki/queries/salon-returned-ideas.md`, so the Social Square building output
   returns to the relevant home MoonBooks instead of staying as a central
   summary only.
-- Social Square currently has protocol status `review`, with 10 inbox packets,
-  10 contributions, five reductions, five outbox records, 21 home-return
-  records, and one review gate for the embodied-robotics salon.
+- Social Square currently has protocol status `review`; salon templates can add
+  inbox packets, contributions, reductions, outbox records, home-return records,
+  and review gates without adding new MoonBit domain branches.
 - The civic registry defines `town-shell`, `resident-twins`, `policy-hall`,
   `contest-express`, `social-square`, `talent-avenue`, `vitality-dashboard`,
   `ai-garden`, `physical-bridge`, `valley-market`, and `broadcast-tower`.

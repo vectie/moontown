@@ -40,6 +40,8 @@ pub fn proposal_packet_from_bundle(@moonbook.WorkerContextBundle, String, String
 
 pub async fn run_confirmed_run(String, moonclaw_root? : String, home? : String, cwd? : String) -> String
 
+pub async fn run_workspace_dir(String, home? : String, cwd? : String) -> String?
+
 pub async fn save_packet_file(String, ExternalProposalPacket) -> Unit
 
 pub fn timed_out_poll_response(String, String, String) -> ProposalPollResponse
@@ -129,6 +131,7 @@ pub struct ExternalProposalPacket {
   tags : Array[String]
   metadata : Json
 } derive(Eq, Show, ToJson, @json.FromJson)
+pub fn ExternalProposalPacket::new(packet_id~ : String, title~ : String, summary~ : String, request_text~ : String, profile~ : String, output_contract~ : String, context_pages? : Array[String], skill_paths? : Array[String], notes? : Array[String], tags? : Array[String], metadata? : Json) -> Self
 
 pub struct PollWorkerResponse {
   worker_id : String

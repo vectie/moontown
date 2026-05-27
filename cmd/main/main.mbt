@@ -30,14 +30,14 @@ async fn main {
       println(@moontown.render_wenyu_building_protocol_status())
     ["civic", "protocols", "doctor"] =>
       println(@moontown.write_wenyu_building_protocol_status())
-    ["civic", "protocols", "robotics-salon"] =>
-      println(@moontown.bootstrap_embodied_robotics_salon())
+    ["civic", "protocols", "salon-template", template_path] =>
+      println(@moontown.bootstrap_civic_salon_scenario_file(template_path))
     ["civic", "protocols", "salons", "tick"] =>
       println(@moontown.run_due_civic_salons())
     ["civic", "protocols", "salons", "status"] =>
       println(@moontown.render_civic_salon_schedule_status())
     ["run", .. rest] =>
-      println(@moontown.render_goal_run(rest.to_array().join(" ")))
+      println(@moontown.render_goal_run(rest.to_owned().join(" ")))
     _ => println(@moontown.load_or_create_demo_dashboard())
   }
 }

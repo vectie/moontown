@@ -1,0 +1,86 @@
+{
+  "id": "robotics-mini-social-square",
+  "title": "Robotics Mini Social Square Salon",
+  "building_id": "social-square",
+  "building_book_id": "wenyu-social-square",
+  "domain_label": "robotics",
+  "topic": "robotics cross-area idea exchange",
+  "cadence": "operator-triggered salon",
+  "skill_name": "robotics-mini-salon",
+  "skill_description": "Join a multi-book robotics exchange and reduce plural perspectives into testable research questions.",
+  "protocol_channel": "domain_perspective",
+  "reduction_kind": "cross_area_research_idea",
+  "output_channel": "research_question_backlog",
+  "review_gate": "research_program_quality",
+  "review_owner": "keeper",
+  "review_reason": "keeper should review novelty, feasibility, source gaps, and best owner MoonBooks before promotion",
+  "backlog_path": "wiki/queries/robotics-mini-salon.md",
+  "synthesis_path": "wiki/civic/robotics-mini-salon.md",
+  "metrics_path": "wiki/metrics/robotics-mini-salon.md",
+  "review_path": "wiki/reviews/robotics-mini-salon.md",
+  "returned_ideas_path": "wiki/queries/salon-returned-ideas.md",
+  "participant_contract_path": "raw/bootstrap/ROBOTICS_MINI_SALON_CONTRACT.md",
+  "quality_rules": [
+    "Do not generate a generic report; produce exchange output that depends on multiple participants.",
+    "Every idea must connect at least two participant books.",
+    "Every idea must produce testable research questions and a next experiment.",
+    "Separate domain insight from operational chatter."
+  ],
+  "skill_rules": [
+    "Bring one focused perspective from your home book.",
+    "Name one bottleneck, one uncertainty, and one useful question.",
+    "Prefer outputs that can become experiments, benchmarks, schemas, or product probes.",
+    "Route unfinished ideas back to home books for review instead of treating them as accepted facts."
+  ],
+  "participants": [
+    {
+      "book_id": "robotics-mini-foundation-models",
+      "title": "Foundation Models Desk",
+      "focus_area": "robot foundation models and multimodal priors",
+      "perspective": "Foundation models are useful only when embodiment assumptions are explicit and falsifiable.",
+      "cadence": "operator-triggered salon",
+      "current_question": "Which robotic behaviors can be learned as reusable priors, and which require robot-specific adaptation?",
+      "contribution": "Foundation models can provide semantic priors and failure explanations, but they need grounding tests that expose hallucinated affordances.",
+      "next_artifact": "wiki/queries/foundation-model-grounding.md"
+    },
+    {
+      "book_id": "robotics-mini-manipulation",
+      "title": "Manipulation Desk",
+      "focus_area": "contact-rich manipulation and dexterous tool use",
+      "perspective": "Useful robot intelligence depends on contact dynamics, not only language-level plans.",
+      "cadence": "operator-triggered salon",
+      "current_question": "How can manipulation systems preserve useful contact memory without overfitting to one object or fixture?",
+      "contribution": "Manipulation work contributes tactile failures, tool affordance gaps, and recovery cases that language-centric systems usually miss.",
+      "next_artifact": "wiki/queries/contact-memory.md"
+    },
+    {
+      "book_id": "robotics-mini-evaluation",
+      "title": "Evaluation Desk",
+      "focus_area": "robot benchmarks, safety gates, and long-horizon evaluation",
+      "perspective": "A robot system is not mature until its recovery behavior is measurable under realistic disturbance.",
+      "cadence": "operator-triggered salon",
+      "current_question": "What benchmark would reveal whether a robot can recover from wrong affordance assumptions?",
+      "contribution": "Evaluation work converts promising ideas into falsifiable test plans and review gates.",
+      "next_artifact": "wiki/queries/recovery-benchmark.md"
+    }
+  ],
+  "ideas": [
+    {
+      "id": "grounding-contact-recovery-benchmark",
+      "title": "Grounding Contact Recovery Benchmark",
+      "summary": "Combine foundation-model affordance claims, contact-rich manipulation traces, and evaluation gates into a benchmark for recovering from wrong object assumptions.",
+      "participating_books": [
+        "robotics-mini-foundation-models",
+        "robotics-mini-manipulation",
+        "robotics-mini-evaluation"
+      ],
+      "research_questions": [
+        "Which affordance hallucinations are most common when language priors meet contact-rich manipulation?",
+        "What contact-memory signals predict that the robot should abandon a plan?",
+        "How should a benchmark score recovery quality instead of only task completion?"
+      ],
+      "why_it_matters": "It turns a vague robotics debate into a reviewable, measurable experiment across modeling, manipulation, and evaluation.",
+      "next_experiment": "Create a small object set with intentionally misleading affordance labels, collect contact traces, and score recovery decisions."
+    }
+  ]
+}

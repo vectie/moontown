@@ -17,6 +17,11 @@ That document defines the next architecture step: each Wenyu building should
 act as an AI-mediated protocol place for aggregation, exchange, reduction, and
 distribution, not merely as a research book or static UI card.
 
+The implementation refactor plan is tracked in
+[REFACTOR_PLAN.md](/Users/kq/Workspace/moontown/docs/REFACTOR_PLAN.md). That
+document is the source of truth for splitting the current working prototype
+into stable package boundaries without changing behavior first.
+
 ## Layer Responsibilities
 
 ### `moontown`
@@ -35,12 +40,14 @@ It should own:
 - town-wide persistence
 - cross-book research synthesis
 - town-level acceptance and quality gates
+- high-level civic runtime facade calls
 
 It should not become:
 
 - the place where book-local memory lives
 - the place where execution tooling lives
 - a generic raw worker runtime
+- the place where building-specific civic scenarios or reducers are hardcoded
 
 ### `moonbook`
 
@@ -222,6 +229,11 @@ channels, permissions, and review gates should be hardcoded. The building
 skill pack should guide MoonClaw to choose the right reduction strategy for the
 building's social responsibility.
 
+Refactor rule: the daemon may run a scheduled civic salon job, but it must not
+know the details of any building-specific scenario. Those details belong in a
+`CivicSalonScenario` template and the building's skill rules, behind a civic
+salon/protocol runtime boundary.
+
 ```text
 civic service registry
   -> module mode + dedicated skill mode
@@ -239,7 +251,14 @@ Current implementation lives in:
 - [civic/protocols.mbt](/Users/kq/Workspace/moontown/civic/protocols.mbt)
 - [civic_workspace.mbt](/Users/kq/Workspace/moontown/civic_workspace.mbt)
 - [civic_status.mbt](/Users/kq/Workspace/moontown/civic_status.mbt)
-- [civic_protocol_runtime.mbt](/Users/kq/Workspace/moontown/civic_protocol_runtime.mbt)
+- [civic_protocol_registry_runtime.mbt](/Users/kq/Workspace/moontown/civic_protocol_registry_runtime.mbt)
+- [civic_protocol_store.mbt](/Users/kq/Workspace/moontown/civic_protocol_store.mbt)
+- [civic_protocol_status_runtime.mbt](/Users/kq/Workspace/moontown/civic_protocol_status_runtime.mbt)
+- [civic_protocol_social_square_fixture.mbt](/Users/kq/Workspace/moontown/civic_protocol_social_square_fixture.mbt)
+- [civic_salon_scenario_types.mbt](/Users/kq/Workspace/moontown/civic_salon_scenario_types.mbt)
+- [civic_salon_scenario_runtime.mbt](/Users/kq/Workspace/moontown/civic_salon_scenario_runtime.mbt)
+- [civic_salon_runner.mbt](/Users/kq/Workspace/moontown/civic_salon_runner.mbt)
+- [docs/CIVIC_SALON_TEMPLATES.md](/Users/kq/Workspace/moontown/docs/CIVIC_SALON_TEMPLATES.md)
 
 Implemented protocol pieces:
 
@@ -248,9 +267,11 @@ Implemented protocol pieces:
 - append-only protocol ledgers under `.moontown/civic/protocols/<building-id>/`
 - civic workspace `BUILDING_PROTOCOL_CONTRACT.md` seed files
 - Social Square proof ledgers with one consent-gated review slice
-- Social Square embodied-robotics salon slice with 10 sub-area MoonBooks, 10
-  perspective packets, five cross-area idea reductions, and a reviewable
-  question backlog
+- Social Square salon slices loaded from `CivicSalonScenario` templates, with
+  participant MoonBooks, perspective packets, cross-area idea reductions, and a
+  reviewable question backlog
+- generic `CivicSalonScenario` loading so a new domain can be added by JSON
+  template and schedule entry rather than a new MoonBit branch
 - salon effectiveness metrics for idea yield, research-question yield,
   cross-book links, home-book coverage, and returned idea-home records
 - return-home pages in each participating sub-area MoonBook so reduced ideas
@@ -275,15 +296,18 @@ The CLI entry is:
 moon run cmd/main -- civic bootstrap
 moon run cmd/main -- civic protocols bootstrap
 moon run cmd/main -- civic protocols status
-moon run cmd/main -- civic protocols robotics-salon
+moon run cmd/main -- civic protocols salon-template templates/civic-salons/robotics-mini-salon.json
 moon run cmd/main -- civic protocols salons status
 moon run cmd/main -- civic protocols salons tick
 moon run cmd/main -- civic doctor
 ```
 
-The recurring-salon path is intentionally schedule-driven. Operators can edit
-`.moontown/civic/salons.json` to enable/disable salons or adjust
-`interval_ms`; the daemon tick calls the same due-check as
+The recurring-salon path is intentionally schedule-driven and
+template-driven. Operators can edit `.moontown/civic/salons.json` to
+enable/disable salons or adjust `interval_ms`, and can edit
+`.moontown/civic/salon-scenarios/<salon-id>.json` to change the domain,
+participants, skill rules, output paths, and review gate without changing
+MoonBit. The daemon tick calls the same due-check as
 `civic protocols salons tick`, then records completion in JSONL for restart
 inspection.
 

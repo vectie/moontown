@@ -149,25 +149,27 @@ Inspect protocol state with:
 ```bash
 moon run cmd/main -- civic protocols bootstrap
 moon run cmd/main -- civic protocols status
-moon run cmd/main -- civic protocols robotics-salon
+moon run cmd/main -- civic protocols salon-template templates/civic-salons/robotics-mini-salon.json
 moon run cmd/main -- civic protocols salons status
 moon run cmd/main -- civic protocols salons tick
 moon run cmd/main -- civic doctor
 ```
 
-The robotics salon command is the first richer building test: it creates 10
-embodied-robotics sub-area MoonBooks, sends their perspectives through Social
-Square, reduces them into reviewable cross-area research questions, measures
-idea yield, and writes relevant ideas back to each home book at
-`wiki/queries/salon-returned-ideas.md`.
+The salon runtime is now template-driven. New domains should provide a
+`CivicSalonScenario` JSON file with participant books, skill rules, quality
+rules, output paths, and review gates. `civic protocols salon-template <path>`
+runs a scenario directly; recurring salon jobs load a matching template from
+`.moontown/civic/salon-scenarios/<salon-id>.json`. Moontown should not grow one
+MoonBit branch per domain. See
+[docs/CIVIC_SALON_TEMPLATES.md](/Users/kq/Workspace/moontown/docs/CIVIC_SALON_TEMPLATES.md).
 
 The salon is also wired into the 24/7 daemon path. `civic protocols salons
 status` shows `.moontown/civic/salons.json`; `civic protocols salons tick`
 runs only wall-clock-due salons and appends round records under
-`.moontown/civic/salon-runs/`. By default, the embodied robotics Social Square
-salon is due every `1_800_000 ms` (30 real minutes), so `daemon run` or
-`daemon start` will periodically bring the participant books into the building,
-reduce ideas, and return them home.
+`.moontown/civic/salon-runs/`. There is no built-in recurring domain; add a
+schedule plus a matching scenario template to make `daemon run` or
+`daemon start` periodically bring participant books into the building, reduce
+ideas, and return them home.
 
 ## Standing Goal Model
 
