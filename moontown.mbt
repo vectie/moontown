@@ -108,6 +108,26 @@ fn register_book_lane_workers(
   state : @core.TownState,
   book : @core.BookRef,
 ) -> Unit {
+  match @civic.wenyu_civic_service_for_book_id(book.id) {
+    Some(service) =>
+      register_worker_if_missing(
+        state,
+        @core.WorkerRef::new(
+          id="claw-\{book.id}-civic",
+          name="\{service.title} Civic Worker",
+          book_id=book.id,
+          role=service.worker_role,
+          capabilities=[
+            "civic-service",
+            service.service_kind,
+            service.skill_pack,
+            "review-gate",
+            "projection",
+          ],
+        ),
+      )
+    None => ()
+  }
   register_worker_if_missing(
     state,
     @core.WorkerRef::new(
@@ -198,6 +218,7 @@ fn domain_for_book_task(
 ) -> @core.WorkDomain {
   match task.kind {
     "standing-watch" => @core.WorkDomain::Research
+    "civic-service-workflow" => @core.WorkDomain::SocialExperiment
     "code-patch" | "test-fix" | "projection-schema" => @core.WorkDomain::Coding
     "image-asset" => @core.WorkDomain::Coding
     "implementation-backlog" => @core.WorkDomain::Operations

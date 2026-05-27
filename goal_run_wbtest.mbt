@@ -84,14 +84,15 @@ test "Wenyu build stage emits implementation code and asset tasks" {
     workspace_root="/tmp/wenyu-town-shell",
   )
   let tasks = wenyu_build_tasks(entry, "Build Wenyu Valley")
-  assert_eq(tasks.length(), 3)
+  assert_eq(tasks.length(), 4)
+  assert_true(tasks.any(fn(task) { task.kind == "civic-service-workflow" }))
   assert_true(tasks.any(fn(task) { task.kind == "implementation-backlog" }))
   assert_true(tasks.any(fn(task) { task.kind == "code-patch" }))
   assert_true(tasks.any(fn(task) { task.kind == "image-asset" }))
 }
 
 ///|
-test "Wenyu code and asset tasks route as coding work" {
+test "Wenyu service code and asset tasks route to the expected domains" {
   let entry = @moonbook.BookCatalogEntry::new(
     id="wenyu-town-shell",
     name="Wenyu Valley / Town Shell",
@@ -99,10 +100,100 @@ test "Wenyu code and asset tasks route as coding work" {
     workspace_root="/tmp/wenyu-town-shell",
   )
   let tasks = wenyu_build_tasks(entry, "Build Wenyu Valley")
-  let code = tasks[1]
-  let asset = tasks[2]
+  let service = tasks[0]
+  let code = tasks[2]
+  let asset = tasks[3]
+  assert_eq(
+    domain_for_book_task(entry, service),
+    @core.WorkDomain::SocialExperiment,
+  )
   assert_eq(domain_for_book_task(entry, code), @core.WorkDomain::Coding)
   assert_eq(domain_for_book_task(entry, asset), @core.WorkDomain::Coding)
+}
+
+///|
+test "Wenyu civic task includes service skill and projection target" {
+  let entry = @moonbook.BookCatalogEntry::new(
+    id="wenyu-policy-hall",
+    name="Wenyu Valley / Policy Hall",
+    purpose="test",
+    workspace_root="/tmp/wenyu-policy-hall",
+  )
+  let tasks = wenyu_build_tasks(entry, "Build Wenyu Valley")
+  let service = tasks[0]
+  assert_eq(service.kind, "civic-service-workflow")
+  assert_true(
+    service.target_pages.contains("skills/civic-policy-researcher/SKILL.md"),
+  )
+  assert_true(service.target_pages.contains("book/moonbook-ui-state.json"))
+  assert_true(service.prompt.contains("wenyu.civic.policy_service.v1"))
+}
+
+///|
+test "Wenyu civic service plan skips research bootstrap" {
+  let entry = @moonbook.BookCatalogEntry::new(
+    id="wenyu-policy-hall",
+    name="Wenyu Valley / Policy Hall",
+    purpose="test",
+    workspace_root="/tmp/wenyu-policy-hall",
+  )
+  let bootstrap_like_task = @moonbook.BookTask::new(
+    id="goal-wenyu-policy-hall-research-bootstrap-ingest",
+    title="Bootstrap research",
+    kind="research-bootstrap-ingest",
+    prompt="Research Wenyu Valley Policy Hall.",
+    priority=999,
+    requires_review=false,
+  )
+  let plan = wenyu_civic_service_plan(
+    entry,
+    "Build Wenyu Valley AI Innovation Town",
+    [bootstrap_like_task],
+    1,
+  )
+  assert_true(!plan.bootstrap_active)
+  assert_eq(plan.task_limit, 1)
+  assert_eq(plan.tasks.length(), 1)
+  assert_eq(plan.tasks[0].kind, "civic-service-workflow")
+  assert_true(plan.tasks[0].prompt.contains("wenyu.civic.policy_service.v1"))
+}
+
+///|
+async test "Wenyu civic books are excluded from research quality gates" {
+  let entry = @moonbook.BookCatalogEntry::new(
+    id="wenyu-policy-hall",
+    name="Wenyu Valley / Policy Hall",
+    purpose="test",
+    workspace_root="/tmp/wenyu-policy-hall",
+  )
+  assert_eq(research_quality_gaps(entry), [])
+}
+
+///|
+test "Wenyu civic persistence creates service and review candidates" {
+  let service = @civic.wenyu_civic_service_for_book_id("wenyu-policy-hall").unwrap()
+  let execution = @core.TaskExecutionRecord::new(
+    task_id="goal-wenyu-policy-hall-civic-service",
+    book_id="wenyu-policy-hall",
+    packet_id="packet-civic",
+    packet_path="packet-civic.json",
+    run_id=Some("run-civic"),
+    status=@core.TaskExecutionStatus::Completed,
+    summary="civic_service_decision: update\nbook_changed: yes\nwiki_pages_changed_count: 2\naccepted_facts_count: 4\nreview_items_created_count: 1\nprojection_updated: yes\nnext_check_hint: normal\n\nUpdated cited policy checklist.",
+    output_contract="wenyu.civic.policy_service.v1",
+    context_pages=["raw/bootstrap/CIVIC_SERVICE_CONTRACT.md"],
+    requires_review=true,
+  )
+  let summary = civic_persist_summary(service, execution)
+  assert_true(summary.contains("Decision: `update`"))
+  assert_true(summary.contains("Changed pages: 2"))
+  let artifacts = civic_persist_artifacts(service, execution)
+  assert_true(artifacts.contains("run-civic"))
+  assert_true(artifacts.contains("book/moonbook-ui-state.json"))
+  let candidates = civic_persist_memory_candidates(service, execution)
+  assert_eq(candidates.length(), 2)
+  assert_eq(candidates[0].target_page, Some("civic/policy-hall.md"))
+  assert_eq(candidates[1].target_page, Some("reviews/policy-citations.md"))
 }
 
 ///|

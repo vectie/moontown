@@ -2,6 +2,9 @@
 async fn research_quality_gaps(
   entry : @moonbook.BookCatalogEntry,
 ) -> Array[String] {
+  if @civic.is_wenyu_civic_book_id(entry.id) {
+    return []
+  }
   if !entry.id.has_prefix("research-") && !is_wenyu_book(entry) {
     return []
   }

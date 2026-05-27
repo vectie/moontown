@@ -20,6 +20,10 @@ async fn main {
     ["daemon", "run", "--worker"] =>
       println(@moontown.daemon_run_saved_town(preserve_supervisor=true))
     ["daemon", "run"] => println(@moontown.daemon_run_saved_town())
+    ["civic", "bootstrap"] =>
+      println(@moontown.bootstrap_wenyu_civic_workspaces())
+    ["civic", "status"] => println(@moontown.render_wenyu_civic_status())
+    ["civic", "doctor"] => println(@moontown.write_wenyu_civic_status())
     ["run", .. rest] =>
       println(@moontown.render_goal_run(rest.to_array().join(" ")))
     _ => println(@moontown.load_or_create_demo_dashboard())

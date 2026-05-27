@@ -47,8 +47,11 @@ In product terms:
 - the module add-on architecture has started
 - the daemon/watch seam exists locally
 - research workflows can persist through MoonBook/MoonClaw
-- civic services still need end-to-end module workflows before the town can be
-  called fully functioning
+- Wenyu civic modules now have a Moontown-side service registry and bootstrap
+  command that creates seeded MoonBook workspaces, schemas, review queues,
+  projections, and MoonClaw skill contracts
+- civic services still need repeated end-to-end module workflows before the
+  town can be called fully functioning
 
 ## 2. Responsibility Split
 
@@ -65,6 +68,8 @@ Moontown owns:
 - Cross-book synthesis.
 - Operator and pixel-town UI.
 - Runtime projection contract consumed by the browser.
+- The Wenyu civic service registry and temporary local bootstrap bridge for
+  creating civic MoonBook workspaces until MoonBook owns native templates.
 
 Moontown must not own:
 
@@ -85,6 +90,7 @@ MoonBook owns:
 - Talent graph and social matching records.
 - Generated website projections for public or operator surfaces.
 - Persistence decisions for MoonClaw result packets.
+- Native civic workspace templates once the bootstrap contract stabilizes.
 
 MoonBook must expose:
 
@@ -108,6 +114,7 @@ MoonClaw owns:
 - Result packets.
 - Memory candidates.
 - Tool journals and execution logs.
+- Role-specific civic module execution through bounded skill/output contracts.
 
 MoonClaw must not directly own durable town memory. It emits candidates and
 artifacts; MoonBook decides what is persisted.
@@ -153,6 +160,8 @@ Acceptance criteria:
 - No broken assets.
 - No false degradation warnings during normal lifecycle states.
 - Operator can inspect a resident, worker, place, quest, and module.
+- `moon run cmd/main -- civic bootstrap` can create the civic module books
+  required by the viewport bindings.
 
 Implementation note:
 
@@ -557,7 +566,7 @@ Owner:
 ```json
 {
   "id": "quest-policy-rent-subsidy",
-  "book_id": "policy-hall",
+  "book_id": "wenyu-policy-hall",
   "title": "Rental subsidy walkthrough",
   "stage": "checklist_ready",
   "resident_id": "resident-li",
@@ -649,26 +658,43 @@ Acceptance criteria:
 
 ### Milestone 2: Civic MoonBooks
 
-Build MoonBook workspaces:
+Status:
 
-- `policy-hall`
-- `contest-express`
-- `social-square`
-- `talent-avenue`
-- `vitality-dashboard`
-- `ai-garden`
-- `future-harbor`
+- Implemented on the Moontown side as a civic service registry and bootstrap
+  bridge.
+
+Implemented civic workspaces:
+
+- `wenyu-town-shell`
+- `wenyu-resident-twins`
+- `wenyu-policy-hall`
+- `wenyu-contest-express`
+- `wenyu-social-square`
+- `wenyu-talent-avenue`
+- `wenyu-vitality-dashboard`
+- `wenyu-ai-garden`
+- `wenyu-physical-bridge`
+- `wenyu-valley-market`
+- `wenyu-broadcast-tower`
 
 Acceptance criteria:
 
 - Each book has wiki root, skill pack, projection fragment, and readiness
-  summary.
-- Moontown can bootstrap all civic books.
-- MoonBook generated site exposes module pages.
+  summary. Implemented for seeded workspaces.
+- Moontown can bootstrap all civic books. Implemented with
+  `moon run cmd/main -- civic bootstrap`.
+- MoonBook generated site exposes module pages. Implemented as seeded
+  `book/site/generated/index.html`; MoonBook-native templates are still the
+  long-term target.
 
 ### Milestone 3: MoonClaw Execution Packs
 
-Build role-specialized MoonClaw packs:
+Status:
+
+- Implemented as generated MoonBook-local skill packs and Moontown worker
+  context contracts.
+
+Role-specialized packs:
 
 - policy researcher
 - contest coach
@@ -677,13 +703,18 @@ Build role-specialized MoonClaw packs:
 - AI garden tutor
 - robot bridge operator
 - mayor patrol
+- resident keeper
+- vitality analyst
+- market keeper
+- story editor
 
 Acceptance criteria:
 
-- Each pack has `SKILL.md`.
-- Each pack emits a strict result packet.
+- Each pack has `SKILL.md`. Implemented by civic bootstrap.
+- Each pack emits a strict result packet. Contract text exists; real MoonClaw
+  contract parsing is still pending.
 - Each packet has evidence, summary, memory candidates, next actions, and
-  review flags.
+  review flags. Required by skills; needs repeated live execution validation.
 
 ### Milestone 4: Resident Memory
 
@@ -766,13 +797,14 @@ Rules:
 
 ### Moontown Backlog
 
-- Add `TownRuntimeProjection`.
-- Add projection JSON writer.
-- Add projection source mode to Rabbita UI.
-- Add civic module book bootstrap.
+- Keep `TownRuntimeProjection` and visual module projections aligned with the
+  civic service registry.
+- Keep projection JSON writer and Rabbita source mode stable.
+- Keep civic module book bootstrap aligned with MoonBook as templates migrate
+  upstream.
 - Add resident/quest/match/talent/bridge models.
-- Add daemon loop beyond one-shot tick.
-- Add restart-safe lease handling.
+- Continue hardening daemon loop, restart-safe lease handling, and multi-day
+  soak evidence.
 - Add mayor patrol decisions for Wenyu modules.
 - Add town-level editor import/export for module packs, asset packs, worker
   lane profiles, and MoonBook projection bindings.
@@ -781,7 +813,8 @@ Rules:
 
 ### MoonBook Backlog
 
-- Add civic workspace templates.
+- Promote the current civic workspace seed contract into native MoonBook civic
+  workspace templates.
 - Add resident memory stream schema.
 - Add quest schema and review queue.
 - Add talent graph schema.
@@ -791,8 +824,9 @@ Rules:
 
 ### MoonClaw Backlog
 
-- Add Wenyu civic role packs.
-- Add strict packet schemas.
+- Promote generated Wenyu civic role skill packs into native MoonClaw skill
+  packs where appropriate.
+- Add strict packet schemas for each `wenyu.civic.*.v1` contract.
 - Add policy source workflow.
 - Add contest coach workflow.
 - Add social match workflow.

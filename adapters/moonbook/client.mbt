@@ -1439,9 +1439,18 @@ fn enrich_wenyu_worker_context_bundle(
   bundle : WorkerContextBundle,
 ) -> WorkerContextBundle {
   ignore(entry)
+  let civic_context = is_wenyu_civic_context_bundle(bundle)
   let skill_paths = unique_paths(
     [
       ..bundle.skill_paths,
+      ..if civic_context {
+        [
+          "skills/wenyu-civic-service/SKILL.md",
+          ..skill_paths_from_context_pages(bundle.context_pages),
+        ]
+      } else {
+        []
+      },
       "skills/wenyu-build/SKILL.md",
       "skills/wenyu-code-patch/SKILL.md",
       "skills/wenyu-asset-pack/SKILL.md",
@@ -1465,8 +1474,31 @@ fn enrich_wenyu_worker_context_bundle(
       "mounted-sources/MANIFEST.md",
       "build/IMPLEMENTATION_BACKLOG.md",
       "build/ACCEPTANCE_TESTS.md",
+      ..if civic_context {
+        [
+          "raw/bootstrap/CIVIC_SERVICE_CONTRACT.md", "book/moonbook-ui-state.json",
+        ]
+      } else {
+        []
+      },
     ],
   )
+  let output_contract = if civic_context {
+    unique_paths(
+      [
+        ..bundle.output_contract,
+        "civic_service_decision: update | no_change | needs_review | blocked",
+        "book_changed: yes | no",
+        "wiki_pages_changed_count: <integer>",
+        "accepted_facts_count: <integer>",
+        "review_items_created_count: <integer>",
+        "projection_updated: yes | no",
+        "next_check_hint: normal | faster | slower | review",
+      ],
+    )
+  } else {
+    bundle.output_contract
+  }
   {
     book_id: bundle.book_id,
     workspace_root: bundle.workspace_root,
@@ -1480,8 +1512,30 @@ fn enrich_wenyu_worker_context_bundle(
     user_memory: bundle.user_memory,
     working_memory: bundle.working_memory,
     memory_summary: bundle.memory_summary,
-    output_contract: bundle.output_contract,
+    output_contract,
   }
+}
+
+///|
+fn is_wenyu_civic_context_bundle(bundle : WorkerContextBundle) -> Bool {
+  let combined = "\{bundle.task_id} \{bundle.prompt}".to_lower()
+  combined.contains("civic-service") ||
+  combined.contains("civic service") ||
+  bundle.context_pages.any(fn(path) {
+    path.contains("CIVIC_SERVICE_CONTRACT.md") ||
+    path.contains("wenyu-civic-service/SKILL.md")
+  })
+}
+
+///|
+fn skill_paths_from_context_pages(pages : Array[String]) -> Array[String] {
+  let skill_paths : Array[String] = []
+  for page in pages {
+    if page.has_prefix("skills/") && page.has_suffix("/SKILL.md") {
+      skill_paths.push(page)
+    }
+  }
+  skill_paths
 }
 
 ///|

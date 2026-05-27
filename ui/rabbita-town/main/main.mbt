@@ -62,6 +62,8 @@ priv struct Model {
   visual_projection_version : Int
   module_projections : Array[BookProjectionFragment]
   module_projections_version : Int
+  civic_status : CivicServicePortfolioSnapshot?
+  civic_status_version : Int
   moondesk_handoff_artifacts : Array[MoondeskHandoffArtifact]
   moondesk_handoff_version : Int
   moondesk_bridge : MoondeskBridgeIndex?
@@ -400,6 +402,37 @@ priv struct ModuleProjectionIndex {
 } derive(FromJson)
 
 ///|
+priv struct CivicServiceHealthSnapshot {
+  service_id : String
+  title : String
+  book_id : String
+  service_kind : String
+  status : String
+  operable : Bool
+  proven_by_result : Bool
+  latest_decision : String
+  latest_pages_changed : Int
+  latest_accepted_facts : Int
+  latest_review_items : Int
+  missing_required_paths : Array[String]
+  notes : Array[String]
+} derive(FromJson)
+
+///|
+priv struct CivicServicePortfolioSnapshot {
+  total : Int
+  operable_count : Int
+  proven_count : Int
+  seeded_count : Int
+  missing_count : Int
+  review_count : Int
+  blocked_count : Int
+  changed_count : Int
+  no_change_count : Int
+  services : Array[CivicServiceHealthSnapshot]
+} derive(FromJson)
+
+///|
 priv struct MoondeskHandoffArtifact {
   id : String
   title : String
@@ -503,6 +536,14 @@ extern "js" fn load_bootstrap_module_projections_json() -> String =
 ///|
 extern "js" fn module_projections_version() -> Int =
   #| () => globalThis.__moontownModuleProjectionsVersion || 0
+
+///|
+extern "js" fn load_bootstrap_civic_status_json() -> String =
+  #| () => globalThis.__moontownCivicStatusJson || "{\"services\":[]}"
+
+///|
+extern "js" fn civic_status_version() -> Int =
+  #| () => globalThis.__moontownCivicStatusVersion || 0
 
 ///|
 extern "js" fn load_bootstrap_moondesk_handoff_json() -> String =
@@ -651,6 +692,7 @@ fn init_model() -> Model {
   let projection_snapshot = parse_bootstrap_town_snapshot()
   let visual_projection = parse_bootstrap_visual_projection()
   let module_projections = parse_bootstrap_module_projections()
+  let civic_status = parse_bootstrap_civic_status()
   let moondesk_handoff_artifacts = parse_bootstrap_moondesk_handoff_artifacts()
   let moondesk_bridge = parse_bootstrap_moondesk_bridge()
   let daemon_snapshot = parse_bootstrap_daemon_snapshot()
@@ -670,6 +712,8 @@ fn init_model() -> Model {
     visual_projection_version: visual_projection_version(),
     module_projections,
     module_projections_version: module_projections_version(),
+    civic_status,
+    civic_status_version: civic_status_version(),
     moondesk_handoff_artifacts,
     moondesk_handoff_version: moondesk_handoff_version(),
     moondesk_bridge,
@@ -728,6 +772,16 @@ fn parse_bootstrap_module_projections() -> Array[BookProjectionFragment] {
   }
   ignore(index.generated_at)
   index.projections
+}
+
+///|
+fn parse_bootstrap_civic_status() -> CivicServicePortfolioSnapshot? {
+  let text = load_bootstrap_civic_status_json()
+  if text == "" {
+    return None
+  }
+  let parsed = @json.parse(text) catch { _ => return None }
+  Some(@json.from_json(parsed) catch { _ => return None })
 }
 
 ///|
@@ -888,6 +942,26 @@ fn find_module_book_projection(
     }
   }
   None
+}
+
+///|
+fn find_module_civic_health(
+  model : Model,
+  civic : WenyuTownModule,
+) -> CivicServiceHealthSnapshot? {
+  match model.civic_status {
+    Some(status) => {
+      for health in status.services {
+        if module_book_matches(civic, health.book_id) ||
+          normalize_module_binding_key(health.service_id) ==
+          normalize_module_binding_key(civic.id) {
+          return Some(health)
+        }
+      }
+      None
+    }
+    None => None
+  }
 }
 
 ///|
@@ -7189,29 +7263,98 @@ fn wenyu_module_runtime_state(
               }
             }
             None =>
-              {
-                status_class: if issue_count > 0 {
-                  "module-status-unbound"
-                } else {
-                  "module-status-calm"
-                },
-                status_label: if issue_count > 0 {
-                  "Needs config"
-                } else {
-                  "Configured"
-                },
-                source_label: "Config",
-                detail: civic.summary,
-                running_count: 0,
-                waiting_count: 0,
-                review_count: 0,
-                blocked_count: 0,
-                completed_count: 0,
-                visible_agent_count: active_agents.length(),
-                issue_count,
+              match find_module_civic_health(model, civic) {
+                Some(health) => {
+                  let status_class = civic_health_status_class(health.status)
+                  {
+                    status_class,
+                    status_label: civic_health_status_label(health.status),
+                    source_label: "Civic Doctor",
+                    detail: civic_health_detail(health),
+                    running_count: 0,
+                    waiting_count: if health.status == "seeded" { 1 } else { 0 },
+                    review_count: health.latest_review_items,
+                    blocked_count: if health.status == "blocked" ||
+                      health.status == "missing-workspace" ||
+                      health.status == "incomplete" ||
+                      health.status == "misconfigured" {
+                      1
+                    } else {
+                      0
+                    },
+                    completed_count: if health.proven_by_result { 1 } else { 0 },
+                    visible_agent_count: active_agents.length(),
+                    issue_count: issue_count + health.missing_required_paths.length(),
+                  }
+                }
+                None =>
+                  {
+                    status_class: if issue_count > 0 {
+                      "module-status-unbound"
+                    } else {
+                      "module-status-calm"
+                    },
+                    status_label: if issue_count > 0 {
+                      "Needs config"
+                    } else {
+                      "Configured"
+                    },
+                    source_label: "Config",
+                    detail: civic.summary,
+                    running_count: 0,
+                    waiting_count: 0,
+                    review_count: 0,
+                    blocked_count: 0,
+                    completed_count: 0,
+                    visible_agent_count: active_agents.length(),
+                    issue_count,
+                  }
               }
           }
       }
+  }
+}
+
+///|
+fn civic_health_status_class(status : String) -> String {
+  match status {
+    "changed" | "no-change" => "module-status-complete"
+    "needs-review" => "module-status-review"
+    "seeded" => "module-status-waiting"
+    "blocked" | "missing-workspace" | "incomplete" | "misconfigured" =>
+      "module-status-alert"
+    _ => "module-status-projected"
+  }
+}
+
+///|
+fn civic_health_status_label(status : String) -> String {
+  match status {
+    "missing-workspace" => "Missing workspace"
+    "needs-review" => "Needs review"
+    "no-change" => "No change"
+    "result-unknown" => "Result unknown"
+    "misconfigured" => "Misconfigured"
+    _ => status
+  }
+}
+
+///|
+fn civic_health_detail(health : CivicServiceHealthSnapshot) -> String {
+  let notes = if health.notes.is_empty() {
+    "no detailed notes"
+  } else {
+    health.notes.join("; ")
+  }
+  "Civic status: \{health.status}. Decision: \{health.latest_decision}; pages changed: \{health.latest_pages_changed}; accepted facts: \{health.latest_accepted_facts}; review items: \{health.latest_review_items}. \{notes}"
+}
+
+///|
+fn civic_status_summary(model : Model) -> String {
+  match model.civic_status {
+    Some(status) =>
+      "\{status.operable_count}/\{status.total} operable, \{status.proven_count} proven, \{status.review_count} review"
+    None => "not loaded"
   }
 }
 
@@ -7470,16 +7613,7 @@ fn render_projection_metrics(
 ) -> @rabbita.Html {
   let cards : Array[@rabbita.Html] = []
   for metric in projection.metrics {
-    cards.push(
-      article(
-        class="module-book-metric \{projection_tone_class(metric.tone)}",
-        [
-          span(class="module-book-metric-label", metric.label),
-          span(class="module-book-metric-value", metric.value),
-          p(metric.note),
-        ],
-      ),
-    )
+    cards.push(render_projection_metric(metric))
   }
   if cards.is_empty() {
     cards.push(
@@ -7491,6 +7625,15 @@ fn render_projection_metrics(
     )
   }
   div(class="module-book-metric-grid", cards)
+}
+
+///|
+fn render_projection_metric(metric : ProjectionMetricSnapshot) -> @rabbita.Html {
+  article(class="module-book-metric \{projection_tone_class(metric.tone)}", [
+    span(class="module-book-metric-label", metric.label),
+    span(class="module-book-metric-value", metric.value),
+    p(metric.note),
+  ])
 }
 
 ///|
@@ -7596,6 +7739,7 @@ fn render_module_book_projection(
           span(class="module-book-id", projection.book_id),
         ]),
         p(class="module-book-summary", projection.summary),
+        render_module_civic_health(model, civic),
         render_projection_chips(projection),
         render_projection_metrics(projection),
         div(class="module-book-grid", [
@@ -7637,6 +7781,61 @@ fn render_module_book_projection(
         p(
           class="module-book-empty",
           "This is now a real integration gap, not a decorative fallback: create the bound civic book or publish its MoonBook UI state to make this interior useful.",
+        ),
+        render_module_civic_health(model, civic),
+      ])
+  }
+}
+
+///|
+fn render_module_civic_health(
+  model : Model,
+  civic : WenyuTownModule,
+) -> @rabbita.Html {
+  match find_module_civic_health(model, civic) {
+    Some(health) =>
+      article(class="module-civic-health \{civic_health_status_class(health.status)}", [
+        div(class="module-civic-health-head", [
+          span(class="module-book-chip projection-tone-info", "Civic Doctor"),
+          span(class="module-civic-status", civic_health_status_label(health.status)),
+        ]),
+        p(class="module-book-summary", civic_health_detail(health)),
+        div(class="module-book-metric-grid", [
+          render_projection_metric(
+            ProjectionMetricSnapshot::{
+              label: "Operable",
+              value: if health.operable { "yes" } else { "no" },
+              note: "\{health.missing_required_paths.length()} missing paths",
+              tone: if health.operable { "healthy" } else { "alert" },
+            },
+          ),
+          render_projection_metric(
+            ProjectionMetricSnapshot::{
+              label: "Result Proof",
+              value: if health.proven_by_result { "present" } else { "missing" },
+              note: health.latest_decision,
+              tone: if health.proven_by_result { "healthy" } else { "review" },
+            },
+          ),
+          render_projection_metric(
+            ProjectionMetricSnapshot::{
+              label: "Review",
+              value: "\{health.latest_review_items}",
+              note: "items",
+              tone: if health.latest_review_items > 0 { "review" } else { "info" },
+            },
+          ),
+        ]),
+      ])
+    None =>
+      article(class="module-civic-health module-status-unbound", [
+        div(class="module-civic-health-head", [
+          span(class="module-book-chip projection-tone-alert", "Civic Doctor"),
+          span(class="module-civic-status", "No status"),
+        ]),
+        p(
+          class="module-book-summary",
+          "No civic status file was loaded. Run `moon run cmd/main -- civic doctor` to publish `.moontown/civic/status.json`.",
         ),
       ])
   }
@@ -9413,6 +9612,7 @@ fn render_viewport_output_body(model : Model) -> @rabbita.Html {
         "\{module_projection_count_for_configured_modules(model)}",
       ),
       render_module_detail("Daemon Tick", daemon_tick_label(model)),
+      render_module_detail("Civic", civic_status_summary(model)),
       render_module_detail("Local Time", real_time_label()),
     ]),
     div(
@@ -9482,7 +9682,7 @@ fn render_scene(dispatch : Dispatch[Msg], model : Model) -> @rabbita.Html {
           status_chip("Local time \{real_time_label()}", "chip-clock"),
           status_chip(daemon_tick_label(model), "chip-neutral"),
           status_chip(
-            "Modules \{wenyu_module_count()} / clean \{wenyu_clean_module_count()} / book fragments \{model.module_projections.length()} / v\{wenyu_modules_version()}",
+            "Modules \{wenyu_module_count()} / clean \{wenyu_clean_module_count()} / civic \{civic_status_summary(model)} / v\{wenyu_modules_version()}",
             "chip-book",
           ),
           button(

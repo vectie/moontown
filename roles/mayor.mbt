@@ -166,14 +166,6 @@ pub fn Mayor::plan_goal(
 }
 
 ///|
-priv struct WenyuLaneSpec {
-  id : String
-  name : String
-  purpose : String
-  module_name : String
-}
-
-///|
 fn is_wenyu_valley_goal(goal : String) -> Bool {
   let notes = goal.to_lower()
   notes.contains("wenyu") ||
@@ -182,96 +174,23 @@ fn is_wenyu_valley_goal(goal : String) -> Bool {
 }
 
 ///|
-fn wenyu_valley_specs() -> Array[WenyuLaneSpec] {
-  [
-    {
-      id: "town-shell",
-      name: "Wenyu Valley / Town Shell",
-      purpose: "Live valley map, always-on operator shell, town state projection, and 7x24 supervision visibility.",
-      module_name: "Town Shell",
-    },
-    {
-      id: "resident-twins",
-      name: "Wenyu Valley / Resident Twins",
-      purpose: "Persistent AI resident profiles, memory boundaries, roles, needs, and daily autonomous routines.",
-      module_name: "Resident Digital Twins",
-    },
-    {
-      id: "policy-hall",
-      name: "Wenyu Valley / Policy Hall",
-      purpose: "Policy discovery, eligibility interpretation, application guidance, and evidence-backed civic knowledge.",
-      module_name: "Policy Hall",
-    },
-    {
-      id: "contest-express",
-      name: "Wenyu Valley / Contest Express",
-      purpose: "Competition discovery, timeline tracking, team formation, preparation plans, and submission workflows.",
-      module_name: "Contest Express",
-    },
-    {
-      id: "social-square",
-      name: "Wenyu Valley / Social Square",
-      purpose: "Community feed, event loops, relationship graph, resident interactions, and visible social experiments.",
-      module_name: "Social Square",
-    },
-    {
-      id: "talent-avenue",
-      name: "Wenyu Valley / Talent Avenue",
-      purpose: "Talent matching, project opportunities, mentor links, skill paths, and portfolio/credential surfaces.",
-      module_name: "Talent Avenue",
-    },
-    {
-      id: "vitality-dashboard",
-      name: "Wenyu Valley / Vitality Dashboard",
-      purpose: "Town health metrics, resource budgets, experiment telemetry, alerts, and recovery loops.",
-      module_name: "Vitality Dashboard",
-    },
-    {
-      id: "ai-garden",
-      name: "Wenyu Valley / AI Garden",
-      purpose: "Experimental agents, autonomous simulations, reflection loops, and safe AI interaction spaces.",
-      module_name: "AI Garden",
-    },
-    {
-      id: "physical-bridge",
-      name: "Wenyu Valley / Physical Bridge",
-      purpose: "Virtual-to-real integration for local venues, events, QR entry points, displays, and operational handoff.",
-      module_name: "Virtual-Physical Connector",
-    },
-  ]
-}
-
-///|
 fn wenyu_valley_goal_lanes(goal : String) -> Array[MayorGoalLane] {
-  wenyu_valley_specs().map(fn(spec) {
-    let entry = wenyu_valley_entry(spec)
+  @civic.wenyu_civic_services().map(fn(service) {
+    let entry = @civic.wenyu_civic_book_entry(service)
     {
       entry,
-      objective: wenyu_valley_lane_objective(goal, spec),
-      rationale: "Wenyu Valley PRD lane for \{spec.module_name}; isolated MoonBook owns this module's research, design, implementation plan, and projection.",
+      objective: wenyu_valley_lane_objective_for_service(goal, service),
+      rationale: "Wenyu Valley civic service lane for \{service.title}; isolated MoonBook owns this module's schemas, wiki pages, review queues, service projections, and role-specific MoonClaw skill contracts.",
     }
   })
 }
 
 ///|
-fn wenyu_valley_entry(spec : WenyuLaneSpec) -> @moonbook.BookCatalogEntry {
-  @moonbook.BookCatalogEntry::new(
-    id="wenyu-\{spec.id}",
-    name=spec.name,
-    purpose=spec.purpose,
-    workspace_root=@moonbook.default_workspace_root("wenyu-\{spec.id}"),
-    memory_scope=@core.MemoryScope::BookPrivate,
-    tags=["wenyu-valley", "prd-build", spec.id, "parallel-lane"],
-    skills=[
-      "research", "product-design", "implementation-planning", "coding", "code-patch",
-      "asset-generation", "projection", "testing", "memory", "review",
-    ],
-  )
-}
-
-///|
-fn wenyu_valley_lane_objective(goal : String, spec : WenyuLaneSpec) -> String {
-  "Own only the Wenyu Valley `\{spec.module_name}` lane. Use `../../../docs/WENYU_VALLEY_PRD.md` as the primary product contract from this book workspace, then gather supporting research before local implementation planning. Produce durable wiki/source/entity/concept/synthesis coverage, implementation tasks, risks, acceptance criteria, and a generated product projection for this module. Do not solve other Wenyu modules except by referencing their durable outputs. Global town goal: \{goal}"
+fn wenyu_valley_lane_objective_for_service(
+  goal : String,
+  service : @civic.CivicServiceDefinition,
+) -> String {
+  "Own only the Wenyu Valley `\{service.title}` civic service lane. Use `../../../docs/WENYU_VALLEY_PRD.md` as the primary product contract from this book workspace, then gather supporting evidence before service planning. Produce durable wiki/source/entity/concept/synthesis coverage, module schemas, review queues, a generated projection, and MoonClaw-ready service skill/output contracts. Service kind: `\{service.service_kind}`. Output contract: `\{service.output_contract}`. Do not solve other Wenyu modules except by referencing their durable outputs. Global town goal: \{goal}"
 }
 
 ///|

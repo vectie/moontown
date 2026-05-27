@@ -269,6 +269,13 @@ The short version:
 - clicking a building opens a module-specific interior
 - the Vite bridge scans `.moontown/books/*/book/moonbook-ui-state.json` and
   publishes `module-projections.json`
+- `moon run cmd/main -- civic bootstrap` can create the canonical Wenyu civic
+  MoonBook projection fragments consumed by the module interiors
+- `moon run cmd/main -- civic status` prints the civic-service portfolio without
+  changing files
+- `moon run cmd/main -- civic doctor` writes `.moontown/civic/status.json` and
+  `.moontown/civic/status.md` so the viewport can show seeded, changed,
+  blocked, review, and misconfigured civic modules from real workspace state
 - generated MoonBook HTML outputs are served and copied under
   `book-output/<book-id>/...` for module interior links
 - hover/focus reveals module details without cluttering the first screen
@@ -294,9 +301,12 @@ Current frontend maturity:
 - interiors show MoonBook summary, status chips, metrics, readiness, review
   queue, page families, output links, and latest journey when the bound book
   publishes `moonbook-ui-state.json`
-- the next hard requirement is civic coverage: each Wenyu feature building
-  needs a populated MoonBook workspace and service-specific schema, not just a
-  configured building shell
+- interiors now show Civic Doctor readiness even before a rich MoonBook
+  projection exists, including schema/wiki/review/projection/skill/profile
+  checks and the last civic service result
+- the next hard requirement is civic execution maturity: each Wenyu feature
+  building needs repeated live service runs, accepted MoonBook updates, and
+  structured review/change history, not only a seeded workspace
 
 ## Assets
 
@@ -382,7 +392,7 @@ The frontend is live, but not yet a full simulation game.
 
 Still missing:
 
-- full Wenyu civic-service book coverage
+- full Wenyu civic-service execution coverage
 - richer movement interpolation
 - deeper multi-agent coordination visuals
 - fuller command system

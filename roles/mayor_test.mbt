@@ -57,9 +57,15 @@ test "mayor decomposes Wenyu Valley PRD build into civic lanes" {
     "Build Wenyu Valley AI Innovation Town according to docs/WENYU_VALLEY_PRD.md",
   )
   assert_true(plan.parallelizable)
-  assert_eq(plan.lanes.length(), 9)
+  assert_eq(plan.lanes.length(), 11)
   assert_eq(plan.lanes[0].entry.id, "wenyu-town-shell")
   assert_eq(plan.lanes[1].entry.id, "wenyu-resident-twins")
+  assert_true(
+    plan.lanes.any(fn(lane) { lane.entry.id == "wenyu-valley-market" }),
+  )
+  assert_true(
+    plan.lanes.any(fn(lane) { lane.entry.id == "wenyu-broadcast-tower" }),
+  )
   assert_true(plan.summary.contains("Wenyu Valley"))
   assert_true(
     plan.lanes[0].objective.contains("../../../docs/WENYU_VALLEY_PRD.md"),

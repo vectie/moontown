@@ -8,6 +8,7 @@ const townSnapshotPath = path.resolve(process.cwd(), '../../.moontown/town.json'
 const visualProjectionPath = path.resolve(process.cwd(), '../../.moontown/visual-projection.json')
 const daemonSnapshotPath = path.resolve(process.cwd(), '../../.moontown/daemon.json')
 const standingGoalsPath = path.resolve(process.cwd(), '../../.moontown/standing-goals.json')
+const civicStatusPath = path.resolve(process.cwd(), '../../.moontown/civic/status.json')
 const watcherDir = path.resolve(process.cwd(), '../../.moontown/watchers')
 const operatorRequestDir = path.resolve(process.cwd(), '../../.moontown/operator-requests')
 const operatorRequestLedgerPath = path.join(operatorRequestDir, 'requests.jsonl')
@@ -558,6 +559,16 @@ function moontownSnapshotPlugin() {
         res.setHeader('Content-Type', 'application/json')
         res.end(JSON.stringify(index))
       })
+      server.middlewares.use('/civic-status.json', async (_req, res) => {
+        if (!serveJsonSnapshot(res, civicStatusPath, 'missing civic status')) {
+          return
+        }
+
+        const contents = await readFile(civicStatusPath, 'utf8')
+        res.statusCode = 200
+        res.setHeader('Content-Type', 'application/json')
+        res.end(contents)
+      })
       server.middlewares.use('/book-output', async (req, res) => {
         await serveBookOutput(req, res)
       })
@@ -640,6 +651,13 @@ function moontownSnapshotPlugin() {
         JSON.stringify(await loadMoondeskBridgeIndex()),
         'utf8',
       )
+      if (existsSync(civicStatusPath)) {
+        await writeFile(
+          path.join(distDir, 'civic-status.json'),
+          await readFile(civicStatusPath, 'utf8'),
+          'utf8',
+        )
+      }
 
       for (const projection of moduleProjectionIndex.projections) {
         for (const relativePath of keyBookOutputFiles) {

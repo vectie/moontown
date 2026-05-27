@@ -191,6 +191,50 @@ findings, and maturity/gap section. The evidence trail points back to each
 book's `raw/bootstrap/` research artifacts, including W-source and L-source
 rows.
 
+### Wenyu Civic Service Bootstrap
+
+Wenyu civic modules use the same ownership rule as research lanes, but they are
+configured as long-lived civic services rather than one-off research topics.
+
+```text
+civic service registry
+  -> canonical wenyu-* MoonBook catalog entries
+  -> civic workspace seeds
+  -> module schemas, wiki pages, review queues
+  -> generic and module-specific MoonClaw skills
+  -> book/moonbook-ui-state.json
+  -> viewport module projection
+```
+
+Current implementation lives in:
+
+- [civic/services.mbt](/Users/kq/Workspace/moontown/civic/services.mbt)
+- [civic_workspace.mbt](/Users/kq/Workspace/moontown/civic_workspace.mbt)
+- [civic_status.mbt](/Users/kq/Workspace/moontown/civic_status.mbt)
+
+The CLI entry is:
+
+```bash
+moon run cmd/main -- civic bootstrap
+```
+
+The registry covers Town Shell, Resident Twin Homes, Policy Hall, Contest
+Express, Social Square, Talent Avenue, Vitality Tower, AI Science Garden,
+Physical Bridge, Valley Market, and Story Radar. Each service has a book id,
+schema pages, wiki pages, review queues, worker role, skill pack, output
+contract, and projection summary.
+
+Civic books intentionally bypass the Wenyu product research/bootstrap quality
+gate. Their first task is the registry-defined `civic-service-workflow`, while
+non-civic Wenyu books can still use product-build research, implementation,
+code-patch, and asset-pack stages.
+
+This is intentionally a bootstrap bridge. Durable civic-domain memory still
+belongs in MoonBook, and tool execution still belongs in MoonClaw. As the
+contract stabilizes, reusable civic workspace templates should move into
+MoonBook so Moontown requests workspace creation instead of writing every seed
+file itself.
+
 ### Standing Goal Run
 
 Standing goals are durable town-level obligations. They are not book memory and
@@ -423,6 +467,7 @@ Current implementation:
 Real now:
 
 - book catalog persistence
+- Wenyu civic service registry and `civic bootstrap` workspace creation
 - snapshot persistence
 - town model
 - routing model
@@ -436,20 +481,22 @@ Real now:
 - proposal/run lifecycle tracking
 - strategic mayor role adapter
 - dashboard and browser UI model
+- local supervised daemon loop, heartbeat, stale detection, watcher ledgers,
+  and launchd installer seam
 
 Stubbed now:
 
 - experiment runtime progression
-- 24/7 supervisor loop
-- restart-safe multi-day daemon recovery
 - backend-synced Rabbita frontend state
+- production-grade cross-platform service packaging
+- repeated accepted-output histories for every Wenyu civic service
 
 ## Next Integration Milestones
 
 The clean next order is:
 
-1. richer MoonBook readiness contracts so Moontown can replace content-marker heuristics
-2. restart-safe daemon patrol and recovery loop
-3. town task expansion from completed book plans
-4. backend-synced Rabbita frontend state
-5. real experiment runtime
+1. run and validate each Wenyu civic service lane through MoonClaw and MoonBook
+2. parse `wenyu.civic.*.v1` result contracts into structured service ledgers
+3. move reusable civic workspace templates into MoonBook
+4. add backend-synced Rabbita frontend state
+5. add real experiment runtime

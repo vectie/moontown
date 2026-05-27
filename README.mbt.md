@@ -64,6 +64,9 @@ Implemented today:
 - original example SVG scene assets
 - Wenyu Valley standalone tile viewport with configurable civic module
   buildings and clickable interiors
+- Wenyu civic service registry and `civic bootstrap` command that creates
+  MoonBook workspaces, schemas, review queues, generated projections, and
+  MoonClaw role skill contracts for enabled civic modules
 
 Wenyu Valley product readiness is tracked in:
 
@@ -80,7 +83,8 @@ Still incomplete:
 - production-grade OS-level service installation through
   launchd/systemd/container supervision and multi-day soak evidence
 - experiment lifecycle execution
-- full Wenyu civic module book coverage and real backend/frontend sync
+- repeated successful Wenyu civic workflow executions with accepted MoonBook
+  updates, structured service ledgers, and real backend/frontend sync
 
 So the current repo now has a local supervised 24/7 daemon seam. It can run a
 background supervisor/worker pair, detect stale workers, restart them, and
@@ -110,6 +114,22 @@ operating-system service.
   - budget/energy/pressure/stability metrics
   - activity feed and anomaly surfacing
   - scroll-safe scene viewport on smaller screens
+
+## Wenyu Civic Bootstrap
+
+Create the current Wenyu civic MoonBook workspaces with:
+
+```bash
+moon run cmd/main -- civic bootstrap
+```
+
+The bootstrap creates canonical `wenyu-*` books for Town Shell, Resident Twin
+Homes, Policy Hall, Contest Express, Social Square, Talent Avenue, Vitality
+Tower, AI Science Garden, Physical Bridge, Valley Market, and Story Radar. Each
+book is seeded with workspace contracts, schemas, review queues, generated
+projection files, and MoonClaw skill contracts. This gives the town real civic
+module bindings; it does not replace the need for live MoonClaw execution and
+MoonBook review histories.
 
 ## Standing Goal Model
 

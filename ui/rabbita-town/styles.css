@@ -2761,6 +2761,32 @@ body,
   background: #cfe8df;
 }
 
+.module-civic-health {
+  margin: 12px 0;
+  padding: 10px;
+  border: 3px solid rgba(84, 56, 31, 0.56);
+  background:
+    linear-gradient(135deg, rgba(218, 238, 177, 0.94), rgba(194, 226, 216, 0.86));
+  box-shadow: 4px 4px 0 rgba(56, 35, 16, 0.14);
+}
+
+.module-civic-health-head {
+  display: flex;
+  justify-content: space-between;
+  gap: 10px;
+  align-items: center;
+}
+
+.module-civic-status {
+  padding: 5px 8px;
+  border: 3px solid rgba(84, 56, 31, 0.46);
+  background: #fff7d2;
+  font-family: "Courier New", "Menlo", monospace;
+  font-size: 11px;
+  font-weight: 900;
+  text-transform: uppercase;
+}
+
 .module-book-metric-grid {
   display: grid;
   grid-template-columns: repeat(4, minmax(0, 1fr));

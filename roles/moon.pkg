@@ -5,6 +5,7 @@ import {
   "vectie/moontown/scheduler",
   "vectie/moontown/adapters/moonbook",
   "vectie/moontown/adapters/moonclaw",
+  "vectie/moontown/civic",
 }
 
 import {

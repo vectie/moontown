@@ -74,6 +74,21 @@ async function refreshMoondeskBridge() {
   }
 }
 
+async function refreshCivicStatus() {
+  try {
+    const response = await fetch(`./civic-status.json?ts=${Date.now()}`, { cache: 'no-store' })
+    if (response.ok) {
+      globalThis.__moontownCivicStatusJson = await response.text()
+      globalThis.__moontownCivicStatusVersion =
+        (globalThis.__moontownCivicStatusVersion || 0) + 1
+    } else {
+      globalThis.__moontownCivicStatusJson = '{"services":[]}'
+    }
+  } catch {
+    globalThis.__moontownCivicStatusJson = '{"services":[]}'
+  }
+}
+
 async function refreshMoondeskHandoff() {
   try {
     const response = await fetch(`./tilemap/modules/moondesk-handoff.json?ts=${Date.now()}`, { cache: 'no-store' })
@@ -184,6 +199,7 @@ async function refreshRuntimeSnapshots() {
     refreshVisualProjection(),
     refreshModuleProjections(),
     refreshMoondeskBridge(),
+    refreshCivicStatus(),
     refreshMoondeskHandoff(),
     refreshDaemonSnapshot(),
     refreshStandingGoals(),

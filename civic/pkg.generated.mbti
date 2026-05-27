@@ -1,0 +1,49 @@
+// Generated using `moon info`, DON'T EDIT IT
+package "vectie/moontown/civic"
+
+import {
+  "vectie/moontown/adapters/moonbook",
+  "vectie/moontown/core",
+}
+
+// Values
+pub fn civic_service_task_prompt(CivicServiceDefinition, String) -> String
+
+pub fn is_wenyu_civic_book_id(String) -> Bool
+
+pub fn wenyu_civic_book_entry(CivicServiceDefinition) -> @moonbook.BookCatalogEntry
+
+pub fn wenyu_civic_service_for_book_id(String) -> CivicServiceDefinition?
+
+pub fn wenyu_civic_service_for_module_id(String) -> CivicServiceDefinition?
+
+pub fn wenyu_civic_service_task(CivicServiceDefinition, String) -> @moonbook.BookTask
+
+pub fn wenyu_civic_services() -> Array[CivicServiceDefinition]
+
+// Errors
+
+// Types and methods
+pub struct CivicServiceDefinition {
+  id : String
+  title : String
+  book_id : String
+  service_kind : String
+  purpose : String
+  workflow : Array[String]
+  schema_pages : Array[String]
+  wiki_pages : Array[String]
+  review_queues : Array[String]
+  skill_pack : String
+  skill_path : String
+  output_contract : String
+  worker_role : @core.WorkerRole
+  target_pages : Array[String]
+  acceptance : Array[String]
+  projection_summary : String
+  legacy_book_ids : Array[String]
+} derive(Eq, Show)
+
+// Type aliases
+
+// Traits

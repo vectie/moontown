@@ -23,8 +23,8 @@ async fn wenyu_book_ready_for_build(entry : @moonbook.BookCatalogEntry) -> Bool 
 
 ///|
 fn wenyu_build_task_limit(task_limit : Int) -> Int {
-  if task_limit < 3 {
-    3
+  if task_limit < 4 {
+    4
   } else {
     task_limit
   }
@@ -50,7 +50,7 @@ fn wenyu_build_tasks(
 ) -> Array[@moonbook.BookTask] {
   let module_name = wenyu_module_name(entry)
   let repo_root = moontown_repo_root()
-  [
+  let build_tasks = [
     @moonbook.BookTask::new(
       id="goal-\{entry.id}-implementation-backlog",
       goal=Some(objective),
@@ -93,6 +93,52 @@ fn wenyu_build_tasks(
       required_role=Some(@core.WorkerRole::Specialist),
     ),
   ]
+  match @civic.wenyu_civic_service_for_book_id(entry.id) {
+    Some(service) =>
+      [@civic.wenyu_civic_service_task(service, objective), ..build_tasks]
+    None => build_tasks
+  }
+}
+
+///|
+fn wenyu_civic_service_plan(
+  entry : @moonbook.BookCatalogEntry,
+  objective : String,
+  tasks : Array[@moonbook.BookTask],
+  task_limit : Int,
+) -> ResearchBootstrapPlan {
+  match @civic.wenyu_civic_service_for_book_id(entry.id) {
+    Some(service) => {
+      let service_task = @civic.wenyu_civic_service_task(service, objective)
+      let ordered = prioritized_tasks(tasks, objective)
+      let merged = [service_task]
+      for task in ordered {
+        if task.id != service_task.id &&
+          task.kind != "research-bootstrap-ingest" {
+          merged.push(task)
+        }
+      }
+      {
+        tasks: merged,
+        task_limit: if task_limit < 1 {
+          1
+        } else {
+          task_limit
+        },
+        bootstrap_active: false,
+      }
+    }
+    None =>
+      {
+        tasks: prioritized_tasks(tasks, objective),
+        task_limit: if task_limit < 1 {
+          1
+        } else {
+          task_limit
+        },
+        bootstrap_active: false,
+      }
+  }
 }
 
 ///|

@@ -30,6 +30,20 @@ async fn write_text_file(path : String, content : String) -> Unit {
 }
 
 ///|
+async fn write_text_file_if_missing(path : String, content : String) -> Unit {
+  let current = if @fs.exists(path) {
+    @fs.read_file(path).text() catch {
+      _ => ""
+    }
+  } else {
+    ""
+  }
+  if current.trim().is_empty() {
+    write_text_file(path, content)
+  }
+}
+
+///|
 async fn ensure_parent_directory(path : String) -> Unit {
   let parent = @path.Path::dirname(path).to_string()
   if parent == "." || parent == "" || @fs.exists(parent) {

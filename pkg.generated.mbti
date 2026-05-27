@@ -11,6 +11,8 @@ import {
 }
 
 // Values
+pub async fn bootstrap_wenyu_civic_workspaces(book_catalog_path? : String) -> String
+
 pub fn build_visual_projection(@core.TownState, tick? : Int) -> VisualProjection
 
 pub async fn daemon_doctor_saved_town(snapshot_path? : String, stale_after_ms? : UInt64) -> String
@@ -39,6 +41,8 @@ pub fn default_daemon_supervisor_pid_path(snapshot_path? : String) -> String
 
 pub fn default_visual_projection_path(String) -> String
 
+pub fn default_wenyu_civic_status_path() -> String
+
 pub fn demo_dashboard() -> String
 
 pub fn demo_mayor() -> @roles.Mayor
@@ -54,6 +58,8 @@ pub fn[Provider : @core.BookProvider] demo_state_with_provider(Provider) -> @cor
 pub async fn inspect_daemon_runtime(snapshot_path? : String, stale_after_ms? : UInt64) -> DaemonRuntimeHealth
 
 pub async fn inspect_saved_town(snapshot_path? : String) -> TownRuntimeStatus
+
+pub async fn inspect_wenyu_civic_services(book_catalog_path? : String, status_path? : String) -> CivicServicePortfolio
 
 pub async fn load_or_create_demo_dashboard(path? : String, book_catalog_path? : String) -> String
 
@@ -71,15 +77,62 @@ pub async fn render_saved_town_status(snapshot_path? : String) -> String
 
 pub fn render_state_dashboard(@core.TownState) -> String
 
+pub async fn render_wenyu_civic_status(book_catalog_path? : String) -> String
+
 pub async fn run_goal(String, book_id? : String?, task_limit_per_book? : Int, snapshot_path? : String, book_catalog_path? : String) -> @core.TownState
 
 pub fn runtime_status_from_state(@core.TownState, String, standing_goals? : Array[@core.StandingGoal], daemon_tick? : Int, watcher_records? : Array[@core.WatcherRunRecord]) -> TownRuntimeStatus
 
 pub async fn supervise_saved_town(snapshot_path? : String, book_catalog_path? : String) -> String
 
+pub async fn write_wenyu_civic_status(book_catalog_path? : String, status_path? : String) -> String
+
 // Errors
 
 // Types and methods
+pub struct CivicServiceHealth {
+  service_id : String
+  title : String
+  book_id : String
+  service_kind : String
+  workspace_root : String
+  status : String
+  operable : Bool
+  proven_by_result : Bool
+  workspace_exists : Bool
+  schema_ready : Bool
+  wiki_ready : Bool
+  review_ready : Bool
+  projection_ready : Bool
+  skill_ready : Bool
+  moonclaw_profile_ready : Bool
+  latest_result_path : String
+  latest_result_found : Bool
+  latest_decision : String
+  latest_book_changed : String
+  latest_pages_changed : Int
+  latest_accepted_facts : Int
+  latest_review_items : Int
+  next_check_hint : String
+  missing_required_paths : Array[String]
+  notes : Array[String]
+} derive(Eq, ToJson, @json.FromJson)
+
+pub struct CivicServicePortfolio {
+  total : Int
+  operable_count : Int
+  proven_count : Int
+  seeded_count : Int
+  missing_count : Int
+  review_count : Int
+  blocked_count : Int
+  changed_count : Int
+  no_change_count : Int
+  status_path : String
+  markdown_path : String
+  services : Array[CivicServiceHealth]
+} derive(Eq, ToJson, @json.FromJson)
+
 pub struct DaemonRuntimeHealth {
   status : String
   supervisor_pid : Int

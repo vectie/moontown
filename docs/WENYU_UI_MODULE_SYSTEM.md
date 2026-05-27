@@ -114,7 +114,7 @@ Each module entry is a town add-on:
   "id": "policy-hall",
   "enabled": true,
   "title": "Policy Hall",
-  "book_id": "policy-hall",
+  "book_id": "wenyu-policy-hall",
   "district": "central-innovation",
   "building_kind": "policy-hall",
   "grid_x": 108,
@@ -160,6 +160,51 @@ Required fields:
 | 数字分身 | Resident Twin Homes | Moontown displays projections, MoonBook owns memory, MoonClaw emits candidates |
 | 河谷积分 | Valley Market | Moontown projects point flow, MoonBook stores ledger records, MoonClaw drafts reward paths |
 | Agent 故事雷达 | Broadcast Tower | Moontown highlights stories, MoonBook stores reviewed stories, MoonClaw summarizes events |
+
+## Civic MoonBook Binding
+
+Every Wenyu module should bind to a canonical civic MoonBook id. The current
+canonical ids are:
+
+| Module | Book |
+|---|---|
+| Town Shell | `wenyu-town-shell` |
+| Resident Twin Homes | `wenyu-resident-twins` |
+| Policy Hall | `wenyu-policy-hall` |
+| Contest Express | `wenyu-contest-express` |
+| Social Square | `wenyu-social-square` |
+| Talent Avenue | `wenyu-talent-avenue` |
+| Vitality Tower | `wenyu-vitality-dashboard` |
+| AI Science Garden | `wenyu-ai-garden` |
+| Physical Bridge | `wenyu-physical-bridge` |
+| Valley Market | `wenyu-valley-market` |
+| Story Radar | `wenyu-broadcast-tower` |
+
+Bootstrap the civic workspaces with:
+
+```bash
+moon run cmd/main -- civic bootstrap
+```
+
+That command updates `.moontown/moonbooks.json` and creates a seeded MoonBook
+workspace for each civic service. Each workspace receives:
+
+- `raw/bootstrap/CIVIC_SERVICE_CONTRACT.md`
+- `wiki/index.md`
+- canonical `wiki/schemas/*` pages
+- module-specific `wiki/civic/*`, `wiki/sources/*`, `wiki/entities/*`,
+  `wiki/concepts/*`, `wiki/queries/*`, or `wiki/synthesis/*` pages
+- module-specific `wiki/reviews/*` queues
+- `skills/wenyu-civic-service/SKILL.md`
+- one role-specific skill pack such as `skills/civic-policy-researcher/SKILL.md`
+- `book/moonbook-ui-state.json`
+- `book/Home.html`
+- `book/site/generated/index.html`
+- `moonclaw.jobs.json` with the `wenyu_civic_service_worker` profile
+
+This is a Moontown-side bootstrap bridge. Long term, MoonBook should own the
+native civic workspace templates, and Moontown should request them through a
+book creation API instead of writing every seed file directly.
 
 ## Visual Richness Without Clutter
 
@@ -262,8 +307,12 @@ Current status:
 - module interiors now show MoonBook summary, chips, metrics, readiness,
   review queue, page families, output links, and latest journey when a bound
   book fragment exists
-- the remaining gap is civic content coverage: most Wenyu feature buildings
-  still need real MoonBook workspaces and service-specific schemas
+- `moon run cmd/main -- civic bootstrap` can populate each Wenyu feature
+  building with a seeded MoonBook projection, schemas, review queues, and
+  service skills
+- the remaining gap is execution maturity: every civic service needs repeated
+  MoonClaw runs, accepted MoonBook updates, review history, and projection
+  freshness before it can be considered reliable
 
 ### Stage 5: Asset Pipeline
 
@@ -305,6 +354,25 @@ Current status:
 - Show output links, review gaps, and last accepted knowledge changes in the
   interior view.
 - Keep decorative animation separate from truth-bearing runtime status.
+
+Current status:
+
+- the civic registry defines one service contract per enabled civic building
+- Mayor decomposition uses that registry to create isolated service lanes
+- civic books route directly to the service workflow first, rather than through
+  the Wenyu research/bootstrap gate used by product-build books
+- worker context enrichment adds generic and module-specific civic skill files
+- each civic output contract uses explicit markers such as
+  `civic_service_decision`, `book_changed`, `wiki_pages_changed_count`,
+  `accepted_facts_count`, `review_items_created_count`,
+  `projection_updated`, and `next_check_hint`
+
+Remaining:
+
+- run and inspect each service lane end to end
+- parse the civic result markers into structured service ledgers
+- show accepted changes and pending review items in each module interior
+- move reusable civic templates into MoonBook as the canonical owner
 
 ## Acceptance Criteria
 

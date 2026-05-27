@@ -14,6 +14,7 @@ It covers:
 - the scene assets
 - the Rabbita frontend
 - the current limits of the repo
+- the Wenyu civic MoonBook bootstrap
 
 ## What You Can Use Right Now
 
@@ -236,6 +237,68 @@ Stop it with:
 ./scripts/uninstall-launchd-daemon.sh
 ```
 
+## 1.5 Bootstrap Wenyu Civic MoonBooks
+
+Create or refresh the Wenyu civic service workspaces:
+
+```bash
+moon run cmd/main -- civic bootstrap
+```
+
+This command updates `.moontown/moonbooks.json` and creates 11 canonical civic
+MoonBook workspaces:
+
+- `wenyu-town-shell`
+- `wenyu-resident-twins`
+- `wenyu-policy-hall`
+- `wenyu-contest-express`
+- `wenyu-social-square`
+- `wenyu-talent-avenue`
+- `wenyu-vitality-dashboard`
+- `wenyu-ai-garden`
+- `wenyu-physical-bridge`
+- `wenyu-valley-market`
+- `wenyu-broadcast-tower`
+
+Each workspace is seeded with:
+
+- service contract: `raw/bootstrap/CIVIC_SERVICE_CONTRACT.md`
+- generic civic skill: `skills/wenyu-civic-service/SKILL.md`
+- role-specific skill pack such as `skills/civic-policy-researcher/SKILL.md`
+- schema pages under `wiki/schemas/`
+- civic wiki pages under `wiki/civic/`, `wiki/sources/`, `wiki/entities/`,
+  `wiki/concepts/`, `wiki/queries/`, or `wiki/synthesis/`
+- review queues under `wiki/reviews/`
+- UI projection: `book/moonbook-ui-state.json`
+- generated HTML: `book/Home.html` and `book/site/generated/index.html`
+- MoonClaw profile: `moonclaw.jobs.json`
+
+Moontown uses these seeded books as civic module bindings. MoonBook remains the
+long-term owner of durable wiki/memory semantics, and MoonClaw remains the
+executor that turns service tasks into result packets. The bootstrap command is
+therefore a local workspace creation bridge, not a replacement for real civic
+service execution.
+
+When a Wenyu civic book is selected by the Mayor, Moontown now routes it
+directly to the registry-defined `civic-service-workflow`. It does not send
+that book through the Wenyu product research/bootstrap quality gate first. That
+keeps service modules such as Policy Hall, Social Square, Talent Avenue, Valley
+Market, and Story Radar operating as civic services instead of generic Wenyu
+research lanes.
+
+Inspect and publish civic operability status:
+
+```bash
+moon run cmd/main -- civic status
+moon run cmd/main -- civic doctor
+```
+
+`civic status` prints a Markdown table covering all civic modules. `civic
+doctor` writes `.moontown/civic/status.json` and `.moontown/civic/status.md`.
+The Rabbita viewport serves that JSON as `civic-status.json`, so each module
+interior can show whether its MoonBook workspace is only seeded, fully
+operable, blocked, review-needed, changed, or still missing files.
+
 Overnight validation checklist:
 
 - `moon run cmd/main -- daemon doctor` should report a fresh heartbeat and a
@@ -343,6 +406,8 @@ The demo town persists runtime bootstrap files under:
 - `.moontown/standing-goals.json`
 - `.moontown/watchers/*.jsonl`
 - `.moontown/books/<book>/` for MoonBook lane workspaces
+- `.moontown/books/wenyu-*/` for civic MoonBook workspaces created by
+  `moon run cmd/main -- civic bootstrap`
 - `.moontown/town-synthesis/` for mayor-level cross-book reports
 
 What they do:

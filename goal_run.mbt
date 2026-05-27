@@ -190,32 +190,47 @@ async fn prepare_goal_book_launch(
       return None
     }
   }
-  let bootstrap = research_bootstrap_plan(
-    entry,
-    objective,
-    initial_summary,
-    batch.tasks,
-    task_limit,
-  )
-  let plan = if is_wenyu_book(entry) && wenyu_book_ready_for_build(entry) {
-    state.record_event(
-      @core.TownEvent::new(
-        id="event-build-plan-\{entry.id}",
-        kind="planning",
-        detail="Wenyu build-stage plan for \{entry.id}: research quality passed; dispatching implementation, code, and asset tasks.",
-        related_book_id=Some(entry.id),
-      ),
-    )
-    wenyu_build_plan(entry, objective, task_limit)
-  } else {
-    bootstrap
+  let plan = match @civic.wenyu_civic_service_for_book_id(entry.id) {
+    Some(service) => {
+      state.record_event(
+        @core.TownEvent::new(
+          id="event-civic-plan-\{entry.id}",
+          kind="planning",
+          detail="Wenyu civic service plan for \{entry.id}: dispatching \{service.title} service workflow before any product-build or research-bootstrap tasks.",
+          related_book_id=Some(entry.id),
+        ),
+      )
+      wenyu_civic_service_plan(entry, objective, batch.tasks, task_limit)
+    }
+    None => {
+      let bootstrap = research_bootstrap_plan(
+        entry,
+        objective,
+        initial_summary,
+        batch.tasks,
+        task_limit,
+      )
+      if is_wenyu_book(entry) && wenyu_book_ready_for_build(entry) {
+        state.record_event(
+          @core.TownEvent::new(
+            id="event-build-plan-\{entry.id}",
+            kind="planning",
+            detail="Wenyu build-stage plan for \{entry.id}: research quality passed; dispatching implementation, code, and asset tasks.",
+            related_book_id=Some(entry.id),
+          ),
+        )
+        wenyu_build_plan(entry, objective, task_limit)
+      } else {
+        bootstrap
+      }
+    }
   }
-  if bootstrap.bootstrap_active {
+  if plan.bootstrap_active {
     state.record_event(
       @core.TownEvent::new(
         id="event-bootstrap-\{entry.id}",
         kind="planning",
-        detail="Bootstrap ingest-first plan for \{entry.id}: evidence=\{initial_summary.evidence_count} verified_sources=\{initial_summary.verified_source_count} candidate_sources=\{initial_summary.candidate_source_count} tasks=\{bootstrap.tasks.length()} limit=\{bootstrap.task_limit}",
+        detail="Bootstrap ingest-first plan for \{entry.id}: evidence=\{initial_summary.evidence_count} verified_sources=\{initial_summary.verified_source_count} candidate_sources=\{initial_summary.candidate_source_count} tasks=\{plan.tasks.length()} limit=\{plan.task_limit}",
         related_book_id=Some(entry.id),
       ),
     )
