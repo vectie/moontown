@@ -5,15 +5,22 @@ import {
   "moonbitlang/core/debug",
   "moonbitlang/core/json",
   "vectie/moontown/adapters/moonbook",
+  "vectie/moontown/civic",
   "vectie/moontown/core",
   "vectie/moontown/roles",
   "vectie/moontown/scheduler",
 }
 
 // Values
+pub async fn bootstrap_embodied_robotics_salon(book_catalog_path? : String, round_id? : String, round_number? : Int, workspace_base? : String) -> String
+
+pub async fn bootstrap_wenyu_building_protocols(registry_path? : String, status_path? : String) -> String
+
 pub async fn bootstrap_wenyu_civic_workspaces(book_catalog_path? : String) -> String
 
 pub fn build_visual_projection(@core.TownState, tick? : Int) -> VisualProjection
+
+pub fn civic_salon_is_due(CivicSalonSchedule, UInt64) -> Bool
 
 pub async fn daemon_doctor_saved_town(snapshot_path? : String, stale_after_ms? : UInt64) -> String
 
@@ -29,6 +36,12 @@ pub async fn daemon_supervise_saved_town(snapshot_path? : String, command? : Str
 
 pub async fn daemon_tick_saved_town(snapshot_path? : String, book_catalog_path? : String) -> String
 
+pub fn default_civic_salon_run_ledger_path(String, snapshot_path? : String) -> String
+
+pub fn default_civic_salon_schedule_path(snapshot_path? : String) -> String
+
+pub fn default_civic_salon_schedules() -> Array[CivicSalonSchedule]
+
 pub fn default_daemon_log_path(snapshot_path? : String) -> String
 
 pub fn default_daemon_pid_path(snapshot_path? : String) -> String
@@ -42,6 +55,10 @@ pub fn default_daemon_supervisor_pid_path(snapshot_path? : String) -> String
 pub fn default_visual_projection_path(String) -> String
 
 pub fn default_wenyu_civic_status_path() -> String
+
+pub fn default_wenyu_protocol_registry_path() -> String
+
+pub fn default_wenyu_protocol_status_path() -> String
 
 pub fn demo_dashboard() -> String
 
@@ -59,7 +76,11 @@ pub async fn inspect_daemon_runtime(snapshot_path? : String, stale_after_ms? : U
 
 pub async fn inspect_saved_town(snapshot_path? : String) -> TownRuntimeStatus
 
+pub async fn inspect_wenyu_building_protocols(status_path? : String, registry_path? : String) -> @civic.BuildingProtocolPortfolio
+
 pub async fn inspect_wenyu_civic_services(book_catalog_path? : String, status_path? : String) -> CivicServicePortfolio
+
+pub async fn load_or_create_civic_salon_schedules(path? : String) -> Array[CivicSalonSchedule]
 
 pub async fn load_or_create_demo_dashboard(path? : String, book_catalog_path? : String) -> String
 
@@ -71,30 +92,85 @@ pub async fn load_or_create_modeled_demo_state(path? : String, book_catalog_path
 
 pub async fn persist_visual_projection(@core.TownState, String, tick? : Int) -> Unit
 
+pub async fn render_civic_salon_schedule_status(snapshot_path? : String) -> String
+
 pub async fn render_goal_run(String, book_id? : String?, task_limit_per_book? : Int, snapshot_path? : String, book_catalog_path? : String) -> String
 
 pub async fn render_saved_town_status(snapshot_path? : String) -> String
 
 pub fn render_state_dashboard(@core.TownState) -> String
 
+pub async fn render_wenyu_building_protocol_status(status_path? : String, registry_path? : String) -> String
+
 pub async fn render_wenyu_civic_status(book_catalog_path? : String) -> String
+
+pub async fn run_due_civic_salons(snapshot_path? : String, book_catalog_path? : String, tick? : Int, now_ms? : UInt64) -> String
 
 pub async fn run_goal(String, book_id? : String?, task_limit_per_book? : Int, snapshot_path? : String, book_catalog_path? : String) -> @core.TownState
 
 pub fn runtime_status_from_state(@core.TownState, String, standing_goals? : Array[@core.StandingGoal], daemon_tick? : Int, watcher_records? : Array[@core.WatcherRunRecord]) -> TownRuntimeStatus
 
+pub async fn save_civic_salon_schedules(String, Array[CivicSalonSchedule]) -> Unit
+
 pub async fn supervise_saved_town(snapshot_path? : String, book_catalog_path? : String) -> String
+
+pub async fn write_wenyu_building_protocol_status(status_path? : String, registry_path? : String) -> String
 
 pub async fn write_wenyu_civic_status(book_catalog_path? : String, status_path? : String) -> String
 
 // Errors
 
 // Types and methods
+pub struct CivicSalonRoundRecord {
+  id : String
+  salon_id : String
+  building_id : String
+  tick : Int
+  round_number : Int
+  started_ms : UInt64
+  finished_ms : UInt64
+  participant_count : Int
+  idea_count : Int
+  research_question_count : Int
+  participant_idea_links : Int
+  idea_return_home_count : Int
+  structural_effectiveness_score : Int
+  decision : String
+  summary : String
+} derive(Eq, ToJson, @debug.Debug, @json.FromJson)
+
+pub struct CivicSalonSchedule {
+  id : String
+  title : String
+  building_id : String
+  topic : String
+  interval_ms : UInt64
+  participant_book_ids : Array[String]
+  enabled : Bool
+  last_run_ms : UInt64
+  next_due_ms : UInt64
+  round_count : Int
+  latest_round_id : String
+  latest_summary : String
+} derive(Eq, ToJson, @debug.Debug, @json.FromJson)
+pub fn CivicSalonSchedule::new(id~ : String, title~ : String, building_id~ : String, topic~ : String, interval_ms? : UInt64, participant_book_ids? : Array[String], enabled? : Bool, last_run_ms? : UInt64, next_due_ms? : UInt64, round_count? : Int, latest_round_id? : String, latest_summary? : String) -> Self
+
 pub struct CivicServiceHealth {
   service_id : String
   title : String
   book_id : String
   service_kind : String
+  module_mode : String
+  book_role : String
+  skill_mode : String
+  protocol_status : String
+  protocol_ready : Bool
+  protocol_inbox_count : Int
+  protocol_contribution_count : Int
+  protocol_reduction_count : Int
+  protocol_outbox_count : Int
+  protocol_review_count : Int
+  latest_protocol_summary : String
   workspace_root : String
   status : String
   operable : Bool

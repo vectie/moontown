@@ -19,8 +19,29 @@ test "Wenyu civic services expose book workspace and skill contracts" {
     assert_true(service.output_contract.has_prefix("wenyu.civic."))
     assert_true(service.target_pages.contains(service.skill_path))
     assert_true(service.target_pages.contains("book/moonbook-ui-state.json"))
+    assert_true(!service.module_mode.is_empty())
+    assert_true(!service.book_role.is_empty())
+    assert_true(!service.skill_mode.is_empty())
+    assert_true(!service.agent_work.is_empty())
+    assert_true(!service.place_work.is_empty())
     assert_true(!service.acceptance.is_empty())
   }
+}
+
+///|
+test "Wenyu civic registry distinguishes workspaces from places" {
+  let policy = wenyu_civic_service_for_book_id("wenyu-policy-hall").unwrap()
+  let social = wenyu_civic_service_for_book_id("wenyu-social-square").unwrap()
+  let market = wenyu_civic_service_for_book_id("wenyu-valley-market").unwrap()
+  let bridge = wenyu_civic_service_for_book_id("wenyu-physical-bridge").unwrap()
+  let tower = wenyu_civic_service_for_book_id("wenyu-vitality-dashboard").unwrap()
+  assert_eq(policy.module_mode, "agent-workspace")
+  assert_eq(social.module_mode, "exchange-place")
+  assert_eq(market.module_mode, "exchange-place")
+  assert_eq(bridge.module_mode, "gateway")
+  assert_eq(tower.module_mode, "projection-surface")
+  assert_true(social.place_work.any(fn(item) { item.contains("exchange") }))
+  assert_true(!social.skill_mode.contains("research"))
 }
 
 ///|
@@ -41,6 +62,8 @@ test "civic task carries role skill and output contract prompt" {
   let task = wenyu_civic_service_task(service, "Build Wenyu civic town")
   assert_eq(task.kind, "civic-service-workflow")
   assert_true(task.prompt.contains(service.output_contract))
+  assert_true(task.prompt.contains("Module mode"))
+  assert_true(task.prompt.contains("not a generic research task"))
   assert_true(task.target_pages.contains(service.skill_path))
   assert_eq(task.required_role, Some(service.worker_role))
 }

@@ -199,6 +199,33 @@ Use view mode to present the town, editor mode to check module placement and
 bindings, and output mode to retrieve MoonBook-generated sites, reports,
 review queues, and page-family summaries.
 
+## 1.5 Run The Building Protocol Salon Test
+
+Social Square has a multi-book embodied robotics salon scenario that exercises
+the building protocol model:
+
+```bash
+moon run cmd/main -- civic protocols robotics-salon
+moon run cmd/main -- civic protocols status
+```
+
+That command creates 10 embodied-robotics sub-area MoonBooks, sends their
+domain perspectives through Social Square, reduces them into five cross-area
+research ideas, and writes the ideas back to the relevant home books.
+
+Important outputs:
+
+- `.moontown/civic/protocols/social-square/metrics.json`
+- `.moontown/civic/protocols/social-square/home_returns.jsonl`
+- `.moontown/books/wenyu-social-square/wiki/metrics/embodied-robotics-salon.md`
+- `.moontown/books/wenyu-social-square/book/site/generated/index.html`
+- `.moontown/books/embodied-robotics-*/wiki/queries/salon-returned-ideas.md`
+
+The metric is structural: it counts idea yield, research-question yield,
+cross-book links, home-book coverage, and return-home records. It proves the
+building performed exchange-reduce-distribute; it does not bypass the review
+queue or claim the ideas are already correct.
+
 The viewport editor is intentionally town-level. Use it to compose modules,
 bind books, validate placement, inspect worker lanes, and check output
 availability. Do not use it as a detailed single-agent or single-book editor.
@@ -246,7 +273,7 @@ moon run cmd/main -- civic bootstrap
 ```
 
 This command updates `.moontown/moonbooks.json` and creates 11 canonical civic
-MoonBook workspaces:
+support workspaces:
 
 - `wenyu-town-shell`
 - `wenyu-resident-twins`
@@ -263,6 +290,7 @@ MoonBook workspaces:
 Each workspace is seeded with:
 
 - service contract: `raw/bootstrap/CIVIC_SERVICE_CONTRACT.md`
+- building protocol contract: `raw/bootstrap/BUILDING_PROTOCOL_CONTRACT.md`
 - generic civic skill: `skills/wenyu-civic-service/SKILL.md`
 - role-specific skill pack such as `skills/civic-policy-researcher/SKILL.md`
 - schema pages under `wiki/schemas/`
@@ -273,11 +301,13 @@ Each workspace is seeded with:
 - generated HTML: `book/Home.html` and `book/site/generated/index.html`
 - MoonClaw profile: `moonclaw.jobs.json`
 
-Moontown uses these seeded books as civic module bindings. MoonBook remains the
-long-term owner of durable wiki/memory semantics, and MoonClaw remains the
-executor that turns service tasks into result packets. The bootstrap command is
-therefore a local workspace creation bridge, not a replacement for real civic
-service execution.
+Moontown uses these seeded books as civic module support bindings. A Wenyu
+building is not automatically a MoonBook: some are agent workspaces, some are
+exchange places, some are projection surfaces, and some are gateways. MoonBook
+remains the long-term owner of durable wiki/memory/review semantics where the
+module needs them, and MoonClaw remains the executor that turns service tasks
+into result packets. The bootstrap command is therefore a local workspace
+creation bridge, not a replacement for real civic service execution.
 
 When a Wenyu civic book is selected by the Mayor, Moontown now routes it
 directly to the registry-defined `civic-service-workflow`. It does not send
@@ -285,6 +315,13 @@ that book through the Wenyu product research/bootstrap quality gate first. That
 keeps service modules such as Policy Hall, Social Square, Talent Avenue, Valley
 Market, and Story Radar operating as civic services instead of generic Wenyu
 research lanes.
+
+Each module also has a dedicated skill mode. Policy Hall performs policy
+intelligence, Contest Express performs contest coaching, Social Square performs
+consent-aware matchmaking, Vitality Tower performs observability/accounting,
+Physical Bridge performs confirmation-gated handoff, Valley Market performs
+market ledger keeping, and Story Radar performs public story editing. Do not
+judge these modules by whether they produced a research report.
 
 Inspect and publish civic operability status:
 
@@ -299,11 +336,45 @@ The Rabbita viewport serves that JSON as `civic-status.json`, so each module
 interior can show whether its MoonBook workspace is only seeded, fully
 operable, blocked, review-needed, changed, or still missing files.
 
+Inspect the civic-building protocol layer:
+
+```bash
+moon run cmd/main -- civic protocols bootstrap
+moon run cmd/main -- civic protocols status
+moon run cmd/main -- civic protocols doctor
+moon run cmd/main -- civic protocols robotics-salon
+moon run cmd/main -- civic protocols salons status
+moon run cmd/main -- civic protocols salons tick
+```
+
+`civic protocols bootstrap` writes `.moontown/civic/protocols.json`, per-building
+`PROTOCOL.md` files, and the current Social Square proof ledgers under
+`.moontown/civic/protocols/social-square/`. `civic protocols status` prints the
+building protocol table. `civic protocols doctor` refreshes
+`.moontown/civic/protocol-status.json` and `.moontown/civic/protocol-status.md`.
+`civic protocols robotics-salon` seeds the first richer multi-book exchange:
+10 embodied-robotics sub-area MoonBooks communicate through Social Square and
+produce cross-area research ideas plus a reviewable question backlog.
+
+`civic protocols salons status` reports the persisted recurring salon schedule
+from `.moontown/civic/salons.json`. `civic protocols salons tick` performs the
+same due-check used by the daemon: it compares real wall-clock time against
+`next_due_ms`, runs only due salons, advances the schedule, and appends a
+round record to `.moontown/civic/salon-runs/<salon-id>.jsonl`. The default
+embodied-robotics Social Square salon repeats every 30 real minutes.
+
+Run `civic doctor` after protocol updates so `civic-status.json` includes
+protocol status for the viewport interiors.
+
 Overnight validation checklist:
 
 - `moon run cmd/main -- daemon doctor` should report a fresh heartbeat and a
   non-stale runtime.
 - `.moontown/daemon.json` should show `tick_sequence` increasing.
+- `.moontown/civic/salons.json` should show `round_count` increasing roughly
+  every 30 minutes for enabled due salons.
+- `.moontown/civic/salon-runs/embodied-robotics-social-square.jsonl` should
+  contain one JSON line per completed salon round.
 - `.moontown/watchers/watch-opc-news.jsonl` should contain a new record after
   the OPC standing goal reaches `next_due_tick`.
 - `.moontown/watchers/watch-llm-training.jsonl` should contain a new record

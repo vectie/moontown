@@ -17,6 +17,10 @@ async test "civic status marks bootstrapped service operable but unproven" {
   )
   let health = inspect_wenyu_civic_service(service, entry)
   assert_eq(health.status, "seeded")
+  assert_eq(health.module_mode, "agent-workspace")
+  assert_eq(health.skill_mode, "policy-intelligence")
+  assert_eq(health.protocol_status, "defined")
+  assert_true(!health.protocol_ready)
   assert_true(health.operable)
   assert_true(!health.proven_by_result)
   assert_eq(health.missing_required_paths.length(), 0)
@@ -84,6 +88,17 @@ test "civic portfolio counts operable and review services" {
       title: "Policy Hall",
       book_id: "wenyu-policy-hall",
       service_kind: "policy-service",
+      module_mode: "agent-workspace",
+      book_role: "source-backed-service-workspace",
+      skill_mode: "policy-intelligence",
+      protocol_status: "review",
+      protocol_ready: true,
+      protocol_inbox_count: 1,
+      protocol_contribution_count: 1,
+      protocol_reduction_count: 1,
+      protocol_outbox_count: 1,
+      protocol_review_count: 1,
+      latest_protocol_summary: "Policy Hall reduced one source into a review item.",
       workspace_root: "/tmp/policy",
       status: "needs-review",
       operable: true,
@@ -111,6 +126,17 @@ test "civic portfolio counts operable and review services" {
       title: "Contest Express",
       book_id: "wenyu-contest-express",
       service_kind: "contest-service",
+      module_mode: "agent-workspace",
+      book_role: "coaching-workspace",
+      skill_mode: "contest-coaching",
+      protocol_status: "defined",
+      protocol_ready: false,
+      protocol_inbox_count: 0,
+      protocol_contribution_count: 0,
+      protocol_reduction_count: 0,
+      protocol_outbox_count: 0,
+      protocol_review_count: 0,
+      latest_protocol_summary: "",
       workspace_root: "/tmp/contest",
       status: "missing-workspace",
       operable: false,

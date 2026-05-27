@@ -49,9 +49,28 @@ pub fn default_daemon_jobs() -> Array[ScheduledJob] {
       kind: "standing-goal",
       interval_seconds: 30,
     },
+    { id: "run-civic-salons", kind: "civic-salon", interval_seconds: 30 },
     { id: "refresh-health", kind: "health", interval_seconds: 60 },
     { id: "project-ui-state", kind: "projection", interval_seconds: 60 },
   ]
+}
+
+///|
+pub fn merge_default_daemon_jobs(
+  jobs : Array[ScheduledJob],
+) -> Array[ScheduledJob] {
+  let merged : Array[ScheduledJob] = []
+  for job in jobs {
+    if !merged.any(fn(existing) { existing.id == job.id }) {
+      merged.push(job)
+    }
+  }
+  for job in default_daemon_jobs() {
+    if !merged.any(fn(existing) { existing.id == job.id }) {
+      merged.push(job)
+    }
+  }
+  merged
 }
 
 ///|
@@ -173,11 +192,13 @@ pub fn plan_daemon_tick(
   ) {
     goal.id
   })
+  let jobs = merge_default_daemon_jobs(daemon.jobs)
   let next_daemon = {
     ..daemon,
     tick_sequence: next_sequence,
     last_heartbeat_event_count: town.events.length(),
     active_goal_ids,
+    jobs,
   }
   (next_daemon, next_tick(next_sequence, actions), actions)
 }

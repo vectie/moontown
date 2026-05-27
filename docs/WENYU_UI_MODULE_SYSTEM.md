@@ -161,10 +161,56 @@ Required fields:
 | 河谷积分 | Valley Market | Moontown projects point flow, MoonBook stores ledger records, MoonClaw drafts reward paths |
 | Agent 故事雷达 | Broadcast Tower | Moontown highlights stories, MoonBook stores reviewed stories, MoonClaw summarizes events |
 
-## Civic MoonBook Binding
+## Civic Module Binding
 
-Every Wenyu module should bind to a canonical civic MoonBook id. The current
-canonical ids are:
+Every Wenyu module can bind to a canonical civic MoonBook support workspace,
+but the building itself is not always a MoonBook. The registry distinguishes:
+
+- `agent-workspace`: agents perform domain work and MoonBook is the primary
+  workspace.
+- `exchange-place`: the building is mainly a town place for requests, matching,
+  consent, ledgers, or exchange; MoonBook stores supporting history/review.
+- `projection-surface`: the building mainly displays runtime/accounting state.
+- `gateway`: the building gates external/offline action and confirmation.
+- `hybrid`: the building combines agent work with a visible civic place.
+
+## Building As Protocol Place
+
+The next abstraction is stronger than module binding. A building should be a
+place where agents and information gather, exchange, reduce, and leave through
+defined channels.
+
+```text
+building inbox
+  -> aggregation of packets and local memory
+  -> exchange between agents/books/residents under protocol rules
+  -> AI-guided reduction into a building-native result
+  -> review gate
+  -> distribution to MoonBook, UI, mayor, agents, or external handoff
+```
+
+This is map/reduce-like, but the reducer is not hardcoded. Moontown should
+hardcode the protocol envelope, channels, ledgers, permissions, idempotency, and
+review gates. The building-specific `SKILL.md` should guide MoonClaw to decide
+what the right reduction is.
+
+Examples:
+
+- Policy Hall reduces policy sources and resident questions into cited
+  checklists or uncertainty review items.
+- Social Square reduces consent-safe interests and event signals into match
+  candidates, consent requests, or no-change follow-ups.
+- Vitality Tower reduces daemon, watcher, worker, and projection records into
+  a health digest and recovery queue.
+- Physical Bridge reduces virtual requests and offline constraints into
+  confirmation-gated handoff packets or blockers.
+- Valley Market reduces offers, needs, points, and abuse signals into ledger
+  updates or redemption review items.
+
+The detailed protocol plan is in
+[WENYU_BUILDING_PROTOCOL_PLAN.md](/Users/kq/Workspace/moontown/docs/WENYU_BUILDING_PROTOCOL_PLAN.md).
+
+The current canonical support book ids are:
 
 | Module | Book |
 |---|---|
@@ -186,25 +232,55 @@ Bootstrap the civic workspaces with:
 moon run cmd/main -- civic bootstrap
 ```
 
-That command updates `.moontown/moonbooks.json` and creates a seeded MoonBook
-workspace for each civic service. Each workspace receives:
+That command updates `.moontown/moonbooks.json` and creates a seeded support
+workspace for each civic module that needs durable state. Each workspace
+receives:
 
 - `raw/bootstrap/CIVIC_SERVICE_CONTRACT.md`
+- `raw/bootstrap/BUILDING_PROTOCOL_CONTRACT.md`
 - `wiki/index.md`
 - canonical `wiki/schemas/*` pages
 - module-specific `wiki/civic/*`, `wiki/sources/*`, `wiki/entities/*`,
   `wiki/concepts/*`, `wiki/queries/*`, or `wiki/synthesis/*` pages
 - module-specific `wiki/reviews/*` queues
 - `skills/wenyu-civic-service/SKILL.md`
-- one role-specific skill pack such as `skills/civic-policy-researcher/SKILL.md`
+- one dedicated skill pack such as `skills/civic-policy-researcher/SKILL.md`,
+  `skills/civic-social-matchmaker/SKILL.md`, or
+  `skills/civic-bridge-operator/SKILL.md`
 - `book/moonbook-ui-state.json`
 - `book/Home.html`
 - `book/site/generated/index.html`
 - `moonclaw.jobs.json` with the `wenyu_civic_service_worker` profile
 
+Bootstrap and inspect the building protocol runtime with:
+
+```bash
+moon run cmd/main -- civic protocols bootstrap
+moon run cmd/main -- civic protocols status
+moon run cmd/main -- civic protocols robotics-salon
+moon run cmd/main -- civic doctor
+```
+
+The protocol bootstrap writes the town-level protocol registry under
+`.moontown/civic/protocols.json` and per-building protocol ledgers under
+`.moontown/civic/protocols/<building-id>/`. Social Square now has two proof
+slices: the original consent-gated introduction demo and the richer embodied
+robotics salon. The salon creates 10 sub-area MoonBooks, receives 10
+perspective packets, reduces them into five cross-area research ideas, and
+projects the result through the same module interior counters. It also writes
+`wiki/metrics/embodied-robotics-salon.md` in the Social Square book and
+returns relevant ideas to each sub-area home book at
+`wiki/queries/salon-returned-ideas.md`.
+
 This is a Moontown-side bootstrap bridge. Long term, MoonBook should own the
 native civic workspace templates, and Moontown should request them through a
 book creation API instead of writing every seed file directly.
+
+Do not route all modules through a generic research skill. Policy Hall needs
+policy intelligence, Contest Express needs coaching, Social Square needs
+consent-aware matchmaking, Vitality Tower needs observability/accounting,
+Physical Bridge needs confirmation-gated handoff, Valley Market needs ledger
+keeping, and Story Radar needs public story editing.
 
 ## Visual Richness Without Clutter
 
@@ -374,6 +450,47 @@ Remaining:
 - show accepted changes and pending review items in each module interior
 - move reusable civic templates into MoonBook as the canonical owner
 
+### Stage 8: Building Protocol Runtime
+
+- Add protocol definitions for every enabled building.
+- Persist building inbox, contribution, reduction, outbox, and review ledgers.
+- Route resident/operator/mayor/book/worker signals into building inboxes.
+- Let MoonClaw reducers choose the module-native aggregation/reduction strategy
+  from the building `SKILL.md`, rather than forcing a generic research or fixed
+  procedural workflow.
+- Persist accepted reductions into the building's MoonBook role.
+- Project protocol state into the viewport: inbox pressure, active reduction,
+  pending review, outgoing distributions, blocked handoffs, and recent accepted
+  results.
+
+Acceptance for this stage:
+
+- a building can receive at least one real input packet
+- the packet is grouped into a building-native contribution
+- a MoonClaw skill reduces the contributions into a module-native output
+- MoonBook accepts or rejects that output with civic accounting
+- the UI shows the protocol state without inventing fake activity
+- restart/retry does not duplicate reductions or distributions
+
+Current status:
+
+- protocol definitions exist for all 11 enabled Wenyu civic buildings
+- civic workspaces include `BUILDING_PROTOCOL_CONTRACT.md`
+- worker prompts and civic skills explicitly treat buildings as protocol
+  places rather than generic research books
+- Social Square has a first durable protocol proof slice and appears in the
+  viewport as a consent-gated protocol review
+- the embodied-robotics Social Square salon now measures idea yield, research
+  question yield, cross-book links, home-book coverage, and return-home
+  records instead of only counting packets
+
+Remaining:
+
+- add one real scenario packet and reducer path for each other civic building
+- route mayor/operator/resident/watch signals into protocol inboxes
+- persist accepted/rejected reductions into the correct MoonBook pages
+- show recent protocol history, not just current counters, inside interiors
+
 ## Acceptance Criteria
 
 - A designer can remove a building by setting `enabled` to `false`.
@@ -388,3 +505,6 @@ Remaining:
 - Runtime labels distinguish configured modules from real active work.
 - Worker avatars are not shown as busy unless a real task/run/watch record says
   they are busy.
+- Civic buildings show protocol state, not only workspace health.
+- A building is not considered fully functioning until it has durable inbox,
+  reduction, outbox, and review/accounting records.

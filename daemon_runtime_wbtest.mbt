@@ -34,6 +34,29 @@ test "daemon runtime health summary marks healthy worker" {
 }
 
 ///|
+test "daemon runtime health summary marks active supervisor" {
+  let health = {
+    status: "supervising",
+    supervisor_pid: 10,
+    worker_pid: 0,
+    supervisor_alive: true,
+    worker_alive: false,
+    heartbeat_age_ms: 50UL,
+    stale: false,
+    stop_requested: false,
+    tick_success_count: 0,
+    tick_failure_count: 0,
+    last_error: "",
+    log_path: ".moontown/daemon.log",
+  }
+  assert_true(!health.healthy())
+  assert_true(health.supervisor_active())
+  let summary = daemon_runtime_health_summary(health)
+  assert_true(summary.contains("runtime=supervising"))
+  assert_true(summary.contains("supervisor_pid=10"))
+}
+
+///|
 test "daemon runtime health summary marks stale worker" {
   let health = {
     status: "ticking",
@@ -53,6 +76,42 @@ test "daemon runtime health summary marks stale worker" {
   let summary = daemon_runtime_health_summary(health)
   assert_true(summary.contains("runtime=stale"))
   assert_true(summary.contains("failures=1"))
+}
+
+///|
+test "daemon shell quote escapes single quotes" {
+  assert_eq(daemon_shell_quote("plain"), "'plain'")
+  assert_eq(daemon_shell_quote("two words"), "'two words'")
+  assert_eq(daemon_shell_quote("it's"), "'it'\\''s'")
+}
+
+///|
+test "daemon detached shell line launches through nohup and captures pid" {
+  let line = daemon_detached_shell_line(
+    "/Users/kq/.moon/bin/moon",
+    ["daemon", "supervise", "--worker"],
+    "/tmp/moontown cwd",
+    "/tmp/moontown.log",
+    "/tmp/moontown.pid",
+  )
+  assert_true(line.contains("cd '/tmp/moontown cwd'"))
+  assert_true(line.contains("&& { nohup '/Users/kq/.moon/bin/moon'"))
+  assert_true(line.contains("'run' 'cmd/main' '--'"))
+  assert_true(line.contains("'daemon' 'supervise' '--worker'"))
+  assert_true(line.contains("echo $! > '/tmp/moontown.pid'"))
+}
+
+///|
+test "daemon launchd install line passes moon command explicitly" {
+  let line = daemon_launchd_install_shell_line("/Users/kq/.moon/bin/moon")
+  assert_true(line.contains("MOON_BIN='/Users/kq/.moon/bin/moon'"))
+  assert_true(line.contains("sh ./scripts/install-launchd-daemon.sh"))
+}
+
+///|
+test "daemon launchd stop line uses uninstall script" {
+  let line = daemon_launchd_stop_shell_line()
+  assert_true(line == "sh ./scripts/uninstall-launchd-daemon.sh")
 }
 
 ///|

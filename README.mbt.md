@@ -65,13 +65,14 @@ Implemented today:
 - Wenyu Valley standalone tile viewport with configurable civic module
   buildings and clickable interiors
 - Wenyu civic service registry and `civic bootstrap` command that creates
-  MoonBook workspaces, schemas, review queues, generated projections, and
-  MoonClaw role skill contracts for enabled civic modules
+  module-mode-aware support workspaces, schemas, review queues, generated
+  projections, and dedicated MoonClaw skill contracts for enabled civic modules
 
 Wenyu Valley product readiness is tracked in:
 
 - [docs/WENYU_VALLEY_PRD.md](/Users/kq/Workspace/moontown/docs/WENYU_VALLEY_PRD.md)
 - [docs/WENYU_UI_MODULE_SYSTEM.md](/Users/kq/Workspace/moontown/docs/WENYU_UI_MODULE_SYSTEM.md)
+- [docs/WENYU_BUILDING_PROTOCOL_PLAN.md](/Users/kq/Workspace/moontown/docs/WENYU_BUILDING_PROTOCOL_PLAN.md)
 - [docs/WENYU_TOWN_STATUS.md](/Users/kq/Workspace/moontown/docs/WENYU_TOWN_STATUS.md)
 
 The status document is the source of truth for the latest observed distance to
@@ -117,19 +118,56 @@ operating-system service.
 
 ## Wenyu Civic Bootstrap
 
-Create the current Wenyu civic MoonBook workspaces with:
+Create the current Wenyu civic support workspaces with:
 
 ```bash
 moon run cmd/main -- civic bootstrap
 ```
 
-The bootstrap creates canonical `wenyu-*` books for Town Shell, Resident Twin
+The bootstrap creates canonical `wenyu-*` support books for Town Shell, Resident Twin
 Homes, Policy Hall, Contest Express, Social Square, Talent Avenue, Vitality
 Tower, AI Science Garden, Physical Bridge, Valley Market, and Story Radar. Each
 book is seeded with workspace contracts, schemas, review queues, generated
-projection files, and MoonClaw skill contracts. This gives the town real civic
-module bindings; it does not replace the need for live MoonClaw execution and
-MoonBook review histories.
+projection files, and dedicated MoonClaw skill contracts. The registry also
+marks whether the building is an agent workspace, exchange place, projection
+surface, gateway, or hybrid. This gives the town real civic module bindings; it
+does not mean every civic feature should behave like a research book.
+
+The building-as-protocol layer has started. Each civic building now has a
+protocol definition and seeded `BUILDING_PROTOCOL_CONTRACT.md`; Social Square
+has the first durable protocol proof slice with inbox, contribution, reduction,
+outbox, review, home-return, and effectiveness metric ledgers. The goal is for
+every civic building to accept input packets, aggregate agent/book/resident
+signals, let agents exchange information under a specific social protocol, use
+MoonClaw skills to reduce the gathered context into a building-native output,
+and distribute the result to MoonBook, the UI, review queues, mayor alerts, or
+confirmation-gated external handoff. See
+[docs/WENYU_BUILDING_PROTOCOL_PLAN.md](/Users/kq/Workspace/moontown/docs/WENYU_BUILDING_PROTOCOL_PLAN.md).
+
+Inspect protocol state with:
+
+```bash
+moon run cmd/main -- civic protocols bootstrap
+moon run cmd/main -- civic protocols status
+moon run cmd/main -- civic protocols robotics-salon
+moon run cmd/main -- civic protocols salons status
+moon run cmd/main -- civic protocols salons tick
+moon run cmd/main -- civic doctor
+```
+
+The robotics salon command is the first richer building test: it creates 10
+embodied-robotics sub-area MoonBooks, sends their perspectives through Social
+Square, reduces them into reviewable cross-area research questions, measures
+idea yield, and writes relevant ideas back to each home book at
+`wiki/queries/salon-returned-ideas.md`.
+
+The salon is also wired into the 24/7 daemon path. `civic protocols salons
+status` shows `.moontown/civic/salons.json`; `civic protocols salons tick`
+runs only wall-clock-due salons and appends round records under
+`.moontown/civic/salon-runs/`. By default, the embodied robotics Social Square
+salon is due every `1_800_000 ms` (30 real minutes), so `daemon run` or
+`daemon start` will periodically bring the participant books into the building,
+reduce ideas, and return them home.
 
 ## Standing Goal Model
 

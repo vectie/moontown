@@ -6,7 +6,8 @@ label="${MOONTOWN_LAUNCHD_LABEL:-com.vectie.moontown.daemon}"
 plist="$root/.moontown/launchd/$label.plist"
 domain="gui/$(id -u)"
 
-launchctl bootout "$domain" "$plist" >/dev/null 2>&1 || true
-"${MOON_BIN:-$HOME/.moon/bin/moon}" run cmd/main -- daemon stop || true
+launchctl bootout "$domain" "$plist" >/dev/null 2>&1 ||
+  launchctl bootout "$domain/$label" >/dev/null 2>&1 ||
+  true
 
-echo "launchd daemon stopped: $label"
+echo "launchd stopped: $domain/$label"

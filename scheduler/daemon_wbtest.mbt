@@ -37,3 +37,25 @@ test "daemon tick records active due goal ids" {
   assert_eq(daemon.active_goal_ids, ["watch-opc-news"])
   assert_true(actions.any(fn(action) { action.kind == "standing-goal-due" }))
 }
+
+///|
+test "daemon tick migrates persisted job list to current defaults" {
+  let town = @core.empty_state(
+    @core.TownConfig::new(id="town", name="Moontown"),
+  )
+  let report = @health.inspect_town(town)
+  let old_jobs = [
+    { id: "supervise-live-runs", kind: "supervision", interval_seconds: 30 },
+    {
+      id: "dispatch-standing-goals",
+      kind: "standing-goal",
+      interval_seconds: 30,
+    },
+    { id: "refresh-health", kind: "health", interval_seconds: 60 },
+    { id: "project-ui-state", kind: "projection", interval_seconds: 60 },
+  ]
+  let old_daemon = DaemonState::new(jobs=old_jobs)
+  let (daemon, _, _) = plan_daemon_tick(old_daemon, town, report)
+  assert_true(daemon.jobs.any(fn(job) { job.id == "run-civic-salons" }))
+  assert_eq(daemon.jobs.length(), default_daemon_jobs().length())
+}

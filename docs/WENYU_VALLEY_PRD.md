@@ -656,12 +656,15 @@ Acceptance criteria:
 - Demo simulation and projection mode are visually distinguishable.
 - JSON projection has stable tests.
 
-### Milestone 2: Civic MoonBooks
+### Milestone 2: Civic Module Support Workspaces
 
 Status:
 
 - Implemented on the Moontown side as a civic service registry and bootstrap
   bridge.
+- The registry now distinguishes module mode from MoonBook support role:
+  `agent-workspace`, `exchange-place`, `projection-surface`, `gateway`, and
+  `hybrid`.
 
 Implemented civic workspaces:
 
@@ -679,9 +682,9 @@ Implemented civic workspaces:
 
 Acceptance criteria:
 
-- Each book has wiki root, skill pack, projection fragment, and readiness
-  summary. Implemented for seeded workspaces.
-- Moontown can bootstrap all civic books. Implemented with
+- Each support workspace has wiki root, dedicated skill pack, projection
+  fragment, and readiness summary. Implemented for seeded workspaces.
+- Moontown can bootstrap all civic support workspaces. Implemented with
   `moon run cmd/main -- civic bootstrap`.
 - MoonBook generated site exposes module pages. Implemented as seeded
   `book/site/generated/index.html`; MoonBook-native templates are still the
@@ -799,6 +802,16 @@ Rules:
 
 - Keep `TownRuntimeProjection` and visual module projections aligned with the
   civic service registry.
+- Add a building protocol registry so each civic building is a protocol place
+  with inbox, aggregation, exchange, reduction, distribution, review gates, and
+  projection status.
+- Add append-only building protocol ledgers under `.moontown/civic/protocols/`
+  for inbox, contributions, reductions, outbox, and reviews.
+- Route resident/operator/mayor/book/worker signals into building inboxes
+  before dispatching MoonClaw reducers.
+- Keep only the protocol envelope, channels, safety gates, idempotency, and
+  distribution destinations hardcoded; let building `SKILL.md` files guide the
+  AI reducer behavior.
 - Keep projection JSON writer and Rabbita source mode stable.
 - Keep civic module book bootstrap aligned with MoonBook as templates migrate
   upstream.
@@ -815,6 +828,10 @@ Rules:
 
 - Promote the current civic workspace seed contract into native MoonBook civic
   workspace templates.
+- Add native schemas for building protocol records: input packet,
+  contribution, reduction result, distribution packet, and review gate.
+- Persist accepted building reductions as module-native civic records rather
+  than generic research evidence.
 - Add resident memory stream schema.
 - Add quest schema and review queue.
 - Add talent graph schema.
@@ -826,6 +843,9 @@ Rules:
 
 - Promote generated Wenyu civic role skill packs into native MoonClaw skill
   packs where appropriate.
+- Add building protocol reducer skills that can map incoming packets into
+  contributions, reduce them into module-native outputs, and distribute them
+  through allowed channels.
 - Add strict packet schemas for each `wenyu.civic.*.v1` contract.
 - Add policy source workflow.
 - Add contest coach workflow.

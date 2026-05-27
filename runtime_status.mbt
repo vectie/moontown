@@ -211,6 +211,20 @@ pub async fn daemon_tick_saved_town(
     snapshot_path,
   )
   @storage.save_standing_goals_file(goal_path, updated_goals)
+  let salon_summary = run_due_civic_salons(
+    snapshot_path~,
+    book_catalog_path~,
+    tick=next_tick_sequence,
+  )
+  if salon_summary.has_prefix("Ran ") {
+    state.record_event(
+      @core.TownEvent::new(
+        id="event-civic-salon-\{next_tick_sequence}",
+        kind="civic-salon",
+        detail=salon_summary,
+      ),
+    )
+  }
   persist_town_checkpoint(state, snapshot_path)
   let report = @health.inspect_town(state)
   let (next_daemon, tick, _) = @scheduler.plan_daemon_tick(

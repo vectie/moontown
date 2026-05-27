@@ -407,6 +407,17 @@ priv struct CivicServiceHealthSnapshot {
   title : String
   book_id : String
   service_kind : String
+  module_mode : String
+  book_role : String
+  skill_mode : String
+  protocol_status : String
+  protocol_ready : Bool
+  protocol_inbox_count : Int
+  protocol_contribution_count : Int
+  protocol_reduction_count : Int
+  protocol_outbox_count : Int
+  protocol_review_count : Int
+  latest_protocol_summary : String
   status : String
   operable : Bool
   proven_by_result : Bool
@@ -7346,14 +7357,19 @@ fn civic_health_detail(health : CivicServiceHealthSnapshot) -> String {
   } else {
     health.notes.join("; ")
   }
-  "Civic status: \{health.status}. Decision: \{health.latest_decision}; pages changed: \{health.latest_pages_changed}; accepted facts: \{health.latest_accepted_facts}; review items: \{health.latest_review_items}. \{notes}"
+  "Civic status: \{health.status}. Protocol: \{health.protocol_status}; mode: \{health.module_mode}; skill: \{health.skill_mode}; MoonBook role: \{health.book_role}. Decision: \{health.latest_decision}; pages changed: \{health.latest_pages_changed}; accepted facts: \{health.latest_accepted_facts}; review items: \{health.latest_review_items}. \{notes}"
 }
 
 ///|
 fn civic_status_summary(model : Model) -> String {
   match model.civic_status {
-    Some(status) =>
-      "\{status.operable_count}/\{status.total} operable, \{status.proven_count} proven, \{status.review_count} review"
+    Some(status) => {
+      let mut protocol_review_count = 0
+      for service in status.services {
+        protocol_review_count += service.protocol_review_count
+      }
+      "\{status.operable_count}/\{status.total} operable, \{status.proven_count} proven, \{protocol_review_count} protocol review"
+    }
     None => "not loaded"
   }
 }
@@ -7800,6 +7816,11 @@ fn render_module_civic_health(
           span(class="module-civic-status", civic_health_status_label(health.status)),
         ]),
         p(class="module-book-summary", civic_health_detail(health)),
+        if health.latest_protocol_summary.is_empty() {
+          span(class="module-book-empty", "No building protocol reduction has been recorded yet.")
+        } else {
+          p(class="module-book-summary", health.latest_protocol_summary)
+        },
         div(class="module-book-metric-grid", [
           render_projection_metric(
             ProjectionMetricSnapshot::{
@@ -7815,6 +7836,22 @@ fn render_module_civic_health(
               value: if health.proven_by_result { "present" } else { "missing" },
               note: health.latest_decision,
               tone: if health.proven_by_result { "healthy" } else { "review" },
+            },
+          ),
+          render_projection_metric(
+            ProjectionMetricSnapshot::{
+              label: "Mode",
+              value: health.module_mode,
+              note: health.skill_mode,
+              tone: "info",
+            },
+          ),
+          render_projection_metric(
+            ProjectionMetricSnapshot::{
+              label: "Protocol",
+              value: health.protocol_status,
+              note: "in \{health.protocol_inbox_count} / red \{health.protocol_reduction_count} / out \{health.protocol_outbox_count}",
+              tone: if health.protocol_ready { "healthy" } else { "review" },
             },
           ),
           render_projection_metric(

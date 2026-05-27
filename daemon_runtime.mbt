@@ -111,9 +111,19 @@ pub fn DaemonRuntimeHealth::healthy(self : DaemonRuntimeHealth) -> Bool {
 }
 
 ///|
+fn DaemonRuntimeHealth::supervisor_active(self : DaemonRuntimeHealth) -> Bool {
+  !self.stop_requested &&
+  !self.stale &&
+  self.supervisor_alive &&
+  self.status == "supervising"
+}
+
+///|
 pub fn daemon_runtime_health_summary(health : DaemonRuntimeHealth) -> String {
   let health_label = if health.healthy() {
     "healthy"
+  } else if health.supervisor_active() {
+    "supervising"
   } else if health.stop_requested {
     "stopping"
   } else if health.stale {
@@ -335,6 +345,11 @@ pub async fn inspect_daemon_runtime(
           (state.status == "running" || state.status == "ticking") &&
           state.worker_pid > 0 &&
           !worker_alive
+        ) ||
+        (
+          state.status == "supervising" &&
+          state.supervisor_pid > 0 &&
+          !supervisor_alive
         )
       {
         status: state.status,
@@ -543,15 +558,131 @@ fn daemon_process_args(command : String, tail : Array[String]) -> Array[String] 
 }
 
 ///|
-async fn spawn_daemon_worker(command : String, snapshot_path : String) -> Int {
+fn daemon_shell_quote(text : String) -> String {
+  let builder = StringBuilder::new()
+  builder.write_char('\'')
+  for char in text {
+    if char == '\'' {
+      builder.write_string("'\\''")
+    } else {
+      builder.write_char(char)
+    }
+  }
+  builder.write_char('\'')
+  builder.to_string()
+}
+
+///|
+fn daemon_process_command_line(
+  command : String,
+  tail : Array[String],
+) -> String {
+  let parts : Array[String] = [daemon_shell_quote(command)]
+  for arg in daemon_process_args(command, tail) {
+    parts.push(daemon_shell_quote(arg))
+  }
+  parts.join(" ")
+}
+
+///|
+fn daemon_detached_shell_line(
+  command : String,
+  tail : Array[String],
+  cwd : String,
+  log_path : String,
+  pid_path : String,
+) -> String {
+  let invocation = daemon_process_command_line(command, tail)
+  "cd \{daemon_shell_quote(cwd)} && { nohup \{invocation} >> \{daemon_shell_quote(log_path)} 2>&1 < /dev/null & echo $! > \{daemon_shell_quote(pid_path)}; }"
+}
+
+///|
+fn daemon_launchd_install_shell_line(command : String) -> String {
+  "MOON_BIN=\{daemon_shell_quote(command)} sh ./scripts/install-launchd-daemon.sh"
+}
+
+///|
+fn daemon_launchd_stop_shell_line() -> String {
+  "sh ./scripts/uninstall-launchd-daemon.sh"
+}
+
+///|
+fn daemon_launchd_preferred() -> Bool {
+  match @sys.get_env_var("MOONTOWN_DAEMON_BACKEND") {
+    Some("detached") | Some("shell") | Some("none") => false
+    _ => true
+  }
+}
+
+///|
+async fn daemon_launchd_available() -> Bool {
+  let status = @process.run("sh", [
+    "-c", "[ \"$(uname -s)\" = Darwin ] && command -v launchctl >/dev/null 2>&1",
+  ]) catch {
+    _ => return false
+  }
+  status == 0
+}
+
+///|
+async fn spawn_daemon_detached(
+  command : String,
+  tail : Array[String],
+  snapshot_path : String,
+  kind : String,
+) -> Int {
+  let base_dir = daemon_base_dir(snapshot_path)
   let log_path = default_daemon_log_path(snapshot_path~)
-  let output = @process.redirect_to_file(log_path, append=true, create=0o644)
-  @process.spawn_orphan(
+  let pid_path = "\{base_dir}/daemon-\{kind}-spawn.pid.tmp"
+  ensure_parent_directory(log_path) catch {
+    _ => return 0
+  }
+  remove_file_if_exists(pid_path)
+  let cwd = @env.current_dir().unwrap_or(".")
+  let shell_line = daemon_detached_shell_line(
+    command, tail, cwd, log_path, pid_path,
+  )
+  let status = @process.run("sh", ["-c", shell_line]) catch { _ => return 0 }
+  if status != 0 {
+    return 0
+  }
+  let text = @fs.read_file(pid_path).text() catch { _ => return 0 }
+  remove_file_if_exists(pid_path)
+  daemon_parse_positive_int(text)
+}
+
+///|
+async fn start_daemon_with_launchd(command : String) -> Bool {
+  if !@fs.exists("./scripts/install-launchd-daemon.sh") {
+    return false
+  }
+  let status = @process.run("sh", [
+    "-c",
+    daemon_launchd_install_shell_line(command),
+  ]) catch {
+    _ => return false
+  }
+  status == 0
+}
+
+///|
+async fn stop_daemon_with_launchd() -> Bool {
+  if !@fs.exists("./scripts/uninstall-launchd-daemon.sh") {
+    return false
+  }
+  let status = @process.run("sh", ["-c", daemon_launchd_stop_shell_line()]) catch {
+    _ => return false
+  }
+  status == 0
+}
+
+///|
+async fn spawn_daemon_worker(command : String, snapshot_path : String) -> Int {
+  spawn_daemon_detached(
     command,
-    daemon_process_args(command, ["daemon", "run", "--worker"]),
-    stdout=output,
-    stderr=output,
-    cwd=@env.current_dir().unwrap_or("."),
+    ["daemon", "run", "--worker"],
+    snapshot_path,
+    "worker",
   )
 }
 
@@ -560,14 +691,11 @@ async fn spawn_daemon_supervisor(
   command : String,
   snapshot_path : String,
 ) -> Int {
-  let log_path = default_daemon_log_path(snapshot_path~)
-  let output = @process.redirect_to_file(log_path, append=true, create=0o644)
-  @process.spawn_orphan(
+  spawn_daemon_detached(
     command,
-    daemon_process_args(command, ["daemon", "supervise", "--worker"]),
-    stdout=output,
-    stderr=output,
-    cwd=@env.current_dir().unwrap_or("."),
+    ["daemon", "supervise", "--worker"],
+    snapshot_path,
+    "supervisor",
   )
 }
 
@@ -603,6 +731,29 @@ pub async fn daemon_start_saved_town(
     return "Moontown daemon already active\n\{daemon_runtime_health_summary(health)}"
   }
   clear_daemon_stop_request(snapshot_path)
+  if daemon_launchd_preferred() && daemon_launchd_available() {
+    append_daemon_log(
+      default_daemon_log_path(snapshot_path~),
+      "trying launchd daemon start",
+    )
+    if start_daemon_with_launchd(command) {
+      let launchd = inspect_daemon_runtime_after_start(
+        snapshot_path, stale_after_ms,
+      )
+      if launchd.healthy() || launchd.supervisor_active() {
+        return "Moontown daemon launchd started\n\{daemon_runtime_health_summary(launchd)}"
+      }
+      append_daemon_log(
+        default_daemon_log_path(snapshot_path~),
+        "launchd daemon start degraded; trying detached fallback",
+      )
+    } else {
+      append_daemon_log(
+        default_daemon_log_path(snapshot_path~),
+        "launchd daemon start failed; trying detached fallback",
+      )
+    }
+  }
   let supervisor_run_id = daemon_run_id("supervisor")
   let pid = spawn_daemon_supervisor(command, snapshot_path) catch {
     error => {
@@ -613,13 +764,51 @@ pub async fn daemon_start_saved_town(
       return "Moontown daemon start failed: \{error}"
     }
   }
+  if pid <= 0 {
+    append_daemon_log(
+      default_daemon_log_path(snapshot_path~),
+      "supervisor spawn failed: pid unavailable",
+    )
+    return "Moontown daemon start failed: supervisor pid unavailable"
+  }
   mark_daemon_supervisor_started(snapshot_path, pid, supervisor_run_id)
   append_daemon_log(
     default_daemon_log_path(snapshot_path~),
     "supervisor started pid=\{pid} run=\{supervisor_run_id}",
   )
-  let next = inspect_daemon_runtime(snapshot_path~, stale_after_ms~)
-  "Moontown daemon supervisor started pid=\{pid}\n\{daemon_runtime_health_summary(next)}"
+  let next = inspect_daemon_runtime_after_start(snapshot_path, stale_after_ms)
+  if next.healthy() || next.supervisor_active() {
+    return "Moontown daemon supervisor started pid=\{pid}\n\{daemon_runtime_health_summary(next)}"
+  }
+  append_daemon_log(
+    default_daemon_log_path(snapshot_path~),
+    "detached supervisor degraded; trying launchd fallback",
+  )
+  if start_daemon_with_launchd(command) {
+    let launchd = inspect_daemon_runtime_after_start(
+      snapshot_path, stale_after_ms,
+    )
+    return "Moontown daemon launchd fallback started after detached pid=\{pid}\n\{daemon_runtime_health_summary(launchd)}"
+  }
+  "Moontown daemon supervisor started pid=\{pid} but degraded\n\{daemon_runtime_health_summary(next)}\nlaunchd_fallback=failed-or-unavailable"
+}
+
+///|
+async fn inspect_daemon_runtime_after_start(
+  snapshot_path : String,
+  stale_after_ms : UInt64,
+) -> DaemonRuntimeHealth {
+  let mut latest = inspect_daemon_runtime(snapshot_path~, stale_after_ms~)
+  let mut attempts = 0
+  while attempts < 10 {
+    if latest.healthy() || latest.stale {
+      return latest
+    }
+    @async.sleep(500)
+    latest = inspect_daemon_runtime(snapshot_path~, stale_after_ms~)
+    attempts += 1
+  }
+  latest
 }
 
 ///|
@@ -665,6 +854,16 @@ pub async fn daemon_supervise_saved_town(
           continue
         }
       }
+      if pid <= 0 {
+        append_daemon_log(
+          default_daemon_log_path(snapshot_path~),
+          "worker spawn failed: pid unavailable",
+        )
+        latest = "worker spawn failed: pid unavailable"
+        checks += 1
+        @async.sleep(sleep_ms)
+        continue
+      }
       mark_daemon_worker_started(snapshot_path, pid, worker_run_id)
       append_daemon_log(
         default_daemon_log_path(snapshot_path~),
@@ -694,6 +893,7 @@ pub async fn daemon_supervise_saved_town(
 pub async fn daemon_stop_saved_town(
   snapshot_path? : String = @storage.default_snapshot_path(),
 ) -> String {
+  let launchd_stopped = stop_daemon_with_launchd()
   write_daemon_stop_request(snapshot_path)
   let health = inspect_daemon_runtime(snapshot_path~)
   let worker_killed = kill_daemon_pid(health.worker_pid)
@@ -701,9 +901,9 @@ pub async fn daemon_stop_saved_town(
   mark_daemon_stopped(snapshot_path, "stop requested")
   append_daemon_log(
     default_daemon_log_path(snapshot_path~),
-    "stop requested worker_pid=\{health.worker_pid} worker_killed=\{worker_killed} supervisor_pid=\{health.supervisor_pid} supervisor_killed=\{supervisor_killed}",
+    "stop requested launchd_stopped=\{launchd_stopped} worker_pid=\{health.worker_pid} worker_killed=\{worker_killed} supervisor_pid=\{health.supervisor_pid} supervisor_killed=\{supervisor_killed}",
   )
-  "Moontown daemon stop requested\nworker_pid=\{health.worker_pid} worker_killed=\{worker_killed}\nsupervisor_pid=\{health.supervisor_pid} supervisor_killed=\{supervisor_killed}"
+  "Moontown daemon stop requested\nlaunchd_stopped=\{launchd_stopped}\nworker_pid=\{health.worker_pid} worker_killed=\{worker_killed}\nsupervisor_pid=\{health.supervisor_pid} supervisor_killed=\{supervisor_killed}"
 }
 
 ///|
@@ -715,7 +915,7 @@ pub async fn daemon_doctor_saved_town(
   let builder = StringBuilder::new()
   builder.write_string("Moontown daemon doctor\n")
   builder.write_string("\{daemon_runtime_health_summary(health)}\n")
-  if health.healthy() {
+  if health.healthy() || health.supervisor_active() {
     builder.write_string("action=none\n")
   } else if health.stop_requested {
     builder.write_string("action=wait-or-stop\n")

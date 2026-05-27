@@ -4,8 +4,13 @@ pub struct CivicServiceDefinition {
   title : String
   book_id : String
   service_kind : String
+  module_mode : String
+  book_role : String
+  skill_mode : String
   purpose : String
   workflow : Array[String]
+  agent_work : Array[String]
+  place_work : Array[String]
   schema_pages : Array[String]
   wiki_pages : Array[String]
   review_queues : Array[String]
@@ -26,10 +31,20 @@ pub fn wenyu_civic_services() -> Array[CivicServiceDefinition] {
       id="town-shell",
       title="Town Shell",
       service_kind="town-supervision",
+      module_mode="projection-surface",
+      book_role="town-journal",
+      skill_mode="mayor-supervision",
       purpose="Live valley map, mayor supervision, town projection, operator console, and 24x7 service visibility.",
       workflow=[
         "read the latest town snapshot and daemon status", "detect stalled modules, missing projections, and stale workers",
         "publish a projection-safe mayor digest with recovery actions",
+      ],
+      agent_work=[
+        "diagnose stalled modules and stale workers", "write mayor recovery directives",
+        "publish an operator-safe town digest",
+      ],
+      place_work=[
+        "show whole-town state", "route operator commands", "link into module interiors",
       ],
       schema_pages=[
         "wiki/schemas/town-runtime.md", "wiki/schemas/module-registry.md",
@@ -50,10 +65,21 @@ pub fn wenyu_civic_services() -> Array[CivicServiceDefinition] {
       id="resident-twins",
       title="Resident Twin Homes",
       service_kind="resident-memory",
+      module_mode="hybrid",
+      book_role="private-memory-with-projection",
+      skill_mode="resident-memory-keeping",
       purpose="Projection-safe resident profiles, preferences, needs, reflection summaries, and daily autonomous routines.",
       workflow=[
         "ingest resident-safe updates and explicit preferences", "separate private memory from public projection",
         "propose next helpful actions without leaking sensitive data",
+      ],
+      agent_work=[
+        "promote explicit resident preferences into private memory", "draft projection-safe resident summaries",
+        "queue sensitive changes for review",
+      ],
+      place_work=[
+        "host resident-facing presence", "hide private memory from public town views",
+        "surface only consented projection cards",
       ],
       schema_pages=[
         "wiki/schemas/resident-profile.md", "wiki/schemas/privacy-projection.md",
@@ -75,10 +101,20 @@ pub fn wenyu_civic_services() -> Array[CivicServiceDefinition] {
       id="policy-hall",
       title="Policy Hall",
       service_kind="policy-service",
+      module_mode="agent-workspace",
+      book_role="source-backed-service-workspace",
+      skill_mode="policy-intelligence",
       purpose="Policy discovery, eligibility interpretation, cited civic answers, application checklists, and review-gated guidance.",
       workflow=[
         "search official policy sources before summaries", "extract eligibility, deadlines, documents, and responsible offices",
         "draft a cited checklist and queue uncertainty for review",
+      ],
+      agent_work=[
+        "discover official policy updates", "extract eligibility and deadline facts",
+        "draft cited checklists with uncertainty notes",
+      ],
+      place_work=[
+        "receive resident policy questions", "display reviewed checklists", "route application-advice requests to review",
       ],
       schema_pages=[
         "wiki/schemas/policy-source.md", "wiki/schemas/eligibility-check.md",
@@ -101,10 +137,19 @@ pub fn wenyu_civic_services() -> Array[CivicServiceDefinition] {
       id="contest-express",
       title="Contest Express",
       service_kind="contest-service",
+      module_mode="agent-workspace",
+      book_role="coaching-workspace",
+      skill_mode="contest-coaching",
       purpose="Contest calendars, readiness scoring, submission checklists, team preparation, mock judge feedback, and champion-wall stories.",
       workflow=[
         "discover relevant contests and deadlines", "score readiness against explicit criteria",
         "produce a revision plan and mock-judge review packet",
+      ],
+      agent_work=[
+        "track contest deadlines and requirements", "score team readiness", "produce mock-judge feedback and revision plans",
+      ],
+      place_work=[
+        "show contest calendar", "collect team submissions", "display reviewed champion-wall stories",
       ],
       schema_pages=[
         "wiki/schemas/contest.md", "wiki/schemas/readiness-score.md",
@@ -127,10 +172,20 @@ pub fn wenyu_civic_services() -> Array[CivicServiceDefinition] {
       id="social-square",
       title="Social Square",
       service_kind="social-matching",
+      module_mode="exchange-place",
+      book_role="consent-ledger-and-social-graph",
+      skill_mode="consent-aware-matchmaking",
       purpose="Community feed, consent-aware weak-tie introductions, event plans, RSVP reminders, and follow-up memory.",
       workflow=[
         "identify match hypotheses from explicit interests and needs", "explain why the introduction is useful and low-risk",
         "draft a consent-gated introduction and follow-up plan",
+      ],
+      agent_work=[
+        "infer low-risk match hypotheses from explicit interests", "draft consent-gated introductions",
+        "record follow-up outcomes after interaction",
+      ],
+      place_work=[
+        "host agent/resident exchange", "collect consent state", "surface public event and RSVP activity",
       ],
       schema_pages=[
         "wiki/schemas/social-match.md", "wiki/schemas/event-plan.md",
@@ -153,10 +208,20 @@ pub fn wenyu_civic_services() -> Array[CivicServiceDefinition] {
       id="talent-avenue",
       title="Talent Avenue",
       service_kind="talent-graph",
+      module_mode="hybrid",
+      book_role="talent-graph-workspace",
+      skill_mode="talent-curation",
       purpose="Talent cards, skill graph curation, project matching, mentor routes, VIP reception paths, and portfolio surfaces.",
       workflow=[
         "normalize talent evidence into skills, projects, needs, and availability",
         "build match candidates with explicit evidence", "prepare a reception or project-match route for operator review",
+      ],
+      agent_work=[
+        "verify talent claims and project evidence", "maintain skill graph edges",
+        "draft mentor or project-match routes",
+      ],
+      place_work=[
+        "display public talent cards", "host project matching requests", "support VIP/reception journeys",
       ],
       schema_pages=["wiki/schemas/talent-card.md", "wiki/schemas/skill-edge.md"],
       wiki_pages=[
@@ -177,10 +242,20 @@ pub fn wenyu_civic_services() -> Array[CivicServiceDefinition] {
       id="vitality-dashboard",
       title="Vitality Tower",
       service_kind="vitality-analytics",
+      module_mode="projection-surface",
+      book_role="operational-health-journal",
+      skill_mode="observability-and-accounting",
       purpose="Town health metrics, resource budgets, service response, points flow, retention signals, alerts, and recovery loops.",
       workflow=[
         "read daemon, watcher, worker, and projection ledgers", "separate operational activity from real domain updates",
         "publish a service-health digest and recovery queue",
+      ],
+      agent_work=[
+        "audit daemon/watch/service records", "separate operational events from domain progress",
+        "draft recovery queue items for stale modules",
+      ],
+      place_work=[
+        "display town vitality metrics", "surface warnings and freshness", "explain what changed versus what merely ran",
       ],
       schema_pages=[
         "wiki/schemas/vitality-metric.md", "wiki/schemas/service-alert.md",
@@ -202,10 +277,19 @@ pub fn wenyu_civic_services() -> Array[CivicServiceDefinition] {
       id="ai-garden",
       title="AI Science Garden",
       service_kind="education-service",
+      module_mode="agent-workspace",
+      book_role="learning-content-workspace",
+      skill_mode="ai-tutoring",
       purpose="AI literacy tutorials, tool trials, scenario templates, learning quests, before/after examples, and safe experiments.",
       workflow=[
         "choose an educational scenario based on current resident needs", "create a small tutorial with examples and safety notes",
         "record before/after learning evidence and next practice",
+      ],
+      agent_work=[
+        "design learning quests", "write novice-safe examples", "record before/after practice evidence",
+      ],
+      place_work=[
+        "show learning quests", "host tool-trial demos", "collect learner feedback for review",
       ],
       schema_pages=[
         "wiki/schemas/learning-quest.md", "wiki/schemas/tool-trial.md",
@@ -226,10 +310,19 @@ pub fn wenyu_civic_services() -> Array[CivicServiceDefinition] {
       id="physical-bridge",
       title="Physical Bridge",
       service_kind="physical-bridge",
+      module_mode="gateway",
+      book_role="offline-handoff-ledger",
+      skill_mode="confirmation-gated-handoff",
       purpose="Virtual-to-real venue, robot, QR, display, room booking, and offline handoff workflows with confirmation gates.",
       workflow=[
         "draft the offline request and required confirmation", "verify venue, robot, or display constraints",
         "write a handoff packet without finalizing external action automatically",
+      ],
+      agent_work=[
+        "draft offline handoff packets", "check venue or robot constraints", "queue confirmation-gated actions",
+      ],
+      place_work=[
+        "act as virtual-to-real gateway", "show confirmation state", "prevent unapproved external actions",
       ],
       schema_pages=[
         "wiki/schemas/physical-request.md", "wiki/schemas/handoff-confirmation.md",
@@ -252,10 +345,19 @@ pub fn wenyu_civic_services() -> Array[CivicServiceDefinition] {
       id="valley-market",
       title="Valley Market",
       service_kind="market-service",
+      module_mode="exchange-place",
+      book_role="points-ledger-and-review-log",
+      skill_mode="market-ledger-keeping",
       purpose="Valley points, benefit redemption, local opportunity exchange, lightweight reward loops, and anti-abuse review.",
       workflow=[
         "record reward or redemption candidates", "check policy, evidence, abuse risk, and budget limits",
         "write a ledger update proposal for operator review",
+      ],
+      agent_work=[
+        "draft reward or redemption proposals", "check budget and abuse risk", "maintain reviewed points-ledger entries",
+      ],
+      place_work=[
+        "host exchange requests", "show point/reward flow", "route redemption actions to review",
       ],
       schema_pages=[
         "wiki/schemas/points-ledger.md", "wiki/schemas/reward-offer.md",
@@ -278,10 +380,20 @@ pub fn wenyu_civic_services() -> Array[CivicServiceDefinition] {
       id="broadcast-tower",
       title="Story Radar",
       service_kind="story-service",
+      module_mode="hybrid",
+      book_role="story-draft-and-redaction-workspace",
+      skill_mode="public-story-editing",
       purpose="Public-safe town moments, achievement stories, resident/company highlights, privacy redaction, and operator-reviewed broadcasts.",
       workflow=[
         "detect story-worthy changes from reviewed book updates", "redact private or uncertain details",
         "draft a story with evidence links and publication approval state",
+      ],
+      agent_work=[
+        "detect story-worthy reviewed changes", "redact private or uncertain details",
+        "draft publication-ready stories for approval",
+      ],
+      place_work=[
+        "display approved public stories", "show broadcast review state", "avoid leaking private book memory",
       ],
       schema_pages=[
         "wiki/schemas/story-draft.md", "wiki/schemas/redaction-check.md",
@@ -307,8 +419,13 @@ fn civic_service(
   id~ : String,
   title~ : String,
   service_kind~ : String,
+  module_mode~ : String,
+  book_role~ : String,
+  skill_mode~ : String,
   purpose~ : String,
   workflow~ : Array[String],
+  agent_work~ : Array[String],
+  place_work~ : Array[String],
   schema_pages~ : Array[String],
   wiki_pages~ : Array[String],
   review_queues~ : Array[String],
@@ -324,8 +441,13 @@ fn civic_service(
     title,
     book_id,
     service_kind,
+    module_mode,
+    book_role,
+    skill_mode,
     purpose,
     workflow,
+    agent_work,
+    place_work,
     schema_pages,
     wiki_pages,
     review_queues,
@@ -336,6 +458,7 @@ fn civic_service(
     target_pages: unique_strings(
       [
         "raw/bootstrap/CIVIC_SERVICE_CONTRACT.md",
+        "raw/bootstrap/BUILDING_PROTOCOL_CONTRACT.md",
         "skills/wenyu-civic-service/SKILL.md",
         "skills/\{skill_pack}/SKILL.md",
         ..schema_pages,
@@ -410,12 +533,16 @@ pub fn wenyu_civic_book_entry(
       "civic-service",
       service.id,
       service.service_kind,
+      "module-mode:\{service.module_mode}",
+      "book-role:\{service.book_role}",
       "parallel-lane",
     ],
     skills=[
       "civic-service",
       service.skill_pack,
       service.service_kind,
+      service.skill_mode,
+      service.module_mode,
       "memory",
       "review",
       "projection",
@@ -447,13 +574,28 @@ pub fn civic_service_task_prompt(
   objective : String,
 ) -> String {
   [
-    "Operate the Wenyu Valley civic module `\{service.title}` as a real MoonBook-backed service lane.",
+    "Operate the Wenyu Valley civic module `\{service.title}` as a module-native civic service lane.",
     "",
-    "This is not a marketing-card task. Use the module skill pack and decide the best next service action from evidence, current wiki state, user goal, and review gates.",
+    "This is not a marketing-card task and not a generic research task. Use the module skill pack and decide the best next action from the module mode, current place state, current MoonBook memory, user goal, and review gates.",
     "",
     "## Service Purpose",
     "",
     service.purpose,
+    "",
+    "## Module Mode",
+    "",
+    "- Module mode: `\{service.module_mode}`.",
+    "- MoonBook role: `\{service.book_role}`.",
+    "- Skill mode: `\{service.skill_mode}`.",
+    "- Do not force this module into a generic research-report workflow; perform the module-native work described by the skill pack.",
+    "",
+    "## Agent Work",
+    "",
+    bullet_lines(service.agent_work),
+    "",
+    "## Place / Exchange Work",
+    "",
+    bullet_lines(service.place_work),
     "",
     "## Workflow Hints",
     "",
@@ -463,7 +605,8 @@ pub fn civic_service_task_prompt(
     "",
     "- Output contract: `\{service.output_contract}`.",
     "- Skill pack: `\{service.skill_path}`.",
-    "- Keep all durable service state inside this MoonBook workspace.",
+    "- Building protocol contract: `raw/bootstrap/BUILDING_PROTOCOL_CONTRACT.md`.",
+    "- Use MoonBook according to its role for this module: `\{service.book_role}`.",
     "- Queue review when the action touches external publication, application advice, bookings, redemptions, personal data, or uncertain evidence.",
     "- Do not hard-code the exact workflow; choose the next useful service action from the current book state and the skill rules.",
     "",

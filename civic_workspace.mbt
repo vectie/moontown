@@ -53,7 +53,8 @@ pub async fn bootstrap_wenyu_civic_workspaces(
     let entry = @civic.wenyu_civic_book_entry(service)
     write_wenyu_civic_workspace_seed_for_service(entry, service, objective)
   }
-  "Bootstrapped \{services.length()} Wenyu civic MoonBook workspaces and updated \{book_catalog_path}."
+  ignore(bootstrap_wenyu_building_protocols())
+  "Bootstrapped \{services.length()} Wenyu civic MoonBook workspaces, building protocol definitions, and updated \{book_catalog_path}."
 }
 
 ///|
@@ -99,6 +100,10 @@ async fn write_wenyu_civic_workspace_seed_for_service(
   write_text_file(
     "\{root}/raw/bootstrap/CIVIC_SERVICE_CONTRACT.md",
     civic_service_contract_text(entry, service, objective),
+  )
+  write_text_file(
+    "\{root}/raw/bootstrap/BUILDING_PROTOCOL_CONTRACT.md",
+    civic_workspace_building_protocol_contract_text(service),
   )
   write_text_file(
     "\{root}/skills/wenyu-civic-service/SKILL.md",
@@ -228,7 +233,7 @@ fn civic_workspace_index_text(
   [
     "# \{service.title}",
     "",
-    "This MoonBook workspace is the durable memory and projection home for the Wenyu Valley `\{service.title}` civic service.",
+    "This workspace supports the Wenyu Valley `\{service.title}` civic module. It is not automatically a research lane; its role is `\{service.book_role}` for a `\{service.module_mode}` building.",
     "",
     "## Ownership",
     "",
@@ -240,11 +245,15 @@ fn civic_workspace_index_text(
     "",
     "- Book: `\{entry.id}`",
     "- Kind: `\{service.service_kind}`",
+    "- Module mode: `\{service.module_mode}`",
+    "- MoonBook role: `\{service.book_role}`",
+    "- Skill mode: `\{service.skill_mode}`",
     "- Output contract: `\{service.output_contract}`",
     "",
     "## Start Here",
     "",
     "- `raw/bootstrap/CIVIC_SERVICE_CONTRACT.md`",
+    "- `raw/bootstrap/BUILDING_PROTOCOL_CONTRACT.md`",
     "- `\{service.skill_path}`",
     "- `book/moonbook-ui-state.json`",
   ].join("\n")
@@ -268,8 +277,12 @@ fn civic_service_contract_text(
     "- Book id: `\{entry.id}`",
     "- Module id: `\{service.id}`",
     "- Service kind: `\{service.service_kind}`",
+    "- Module mode: `\{service.module_mode}`",
+    "- MoonBook role: `\{service.book_role}`",
+    "- Skill mode: `\{service.skill_mode}`",
     "- Output contract: `\{service.output_contract}`",
     "- Skill pack: `\{service.skill_path}`",
+    "- Building protocol: `raw/bootstrap/BUILDING_PROTOCOL_CONTRACT.md`",
     "",
     "## Purpose",
     "",
@@ -278,6 +291,14 @@ fn civic_service_contract_text(
     "## Workflow Hints",
     "",
     markdown_bullets(service.workflow),
+    "",
+    "## Agent Work",
+    "",
+    markdown_bullets(service.agent_work),
+    "",
+    "## Place / Exchange Work",
+    "",
+    markdown_bullets(service.place_work),
     "",
     "## Required Schemas",
     "",
@@ -300,6 +321,67 @@ fn civic_service_contract_text(
     "- External publication, applications, bookings, redemptions, robot actions, and sensitive personal data changes require review.",
     "- If evidence is thin, write the blocker and next source class instead of inventing confidence.",
     "- Operational records must not inflate domain evidence counts.",
+    "- Do not turn this module into generic research unless its skill mode explicitly requires source research.",
+  ].join("\n")
+}
+
+///|
+fn civic_workspace_building_protocol_contract_text(
+  service : @civic.CivicServiceDefinition,
+) -> String {
+  let protocol = @civic.wenyu_building_protocol_for_service(service)
+  [
+    "# \{service.title} Building Protocol Contract",
+    "",
+    "This building is a protocol place, not just a MoonBook and not just a static UI card.",
+    "",
+    "## Social Responsibility",
+    "",
+    protocol.social_responsibility,
+    "",
+    "## Protocol Mode",
+    "",
+    "- Building id: `\{protocol.building_id}`",
+    "- Protocol mode: `\{protocol.protocol_mode}`",
+    "- Privacy scope: `\{protocol.privacy_scope}`",
+    "- Projection contract: `\{protocol.projection_contract}`",
+    "",
+    "## Participants",
+    "",
+    markdown_bullets(protocol.participant_roles),
+    "",
+    "## Input Channels",
+    "",
+    markdown_bullets(protocol.input_channels),
+    "",
+    "## Output Channels",
+    "",
+    markdown_bullets(protocol.output_channels),
+    "",
+    "## Policies",
+    "",
+    "- Aggregation: \{protocol.aggregation_policy}",
+    "- Exchange: \{protocol.exchange_policy}",
+    "- Reduction: \{protocol.reduction_policy}",
+    "- Distribution: \{protocol.distribution_policy}",
+    "",
+    "## Review Gates",
+    "",
+    markdown_bullets(protocol.review_gates),
+    "",
+    "## Runtime Ledgers",
+    "",
+    "- `.moontown/civic/protocols/\{protocol.building_id}/inbox.jsonl`",
+    "- `.moontown/civic/protocols/\{protocol.building_id}/contributions.jsonl`",
+    "- `.moontown/civic/protocols/\{protocol.building_id}/reductions.jsonl`",
+    "- `.moontown/civic/protocols/\{protocol.building_id}/outbox.jsonl`",
+    "- `.moontown/civic/protocols/\{protocol.building_id}/reviews.jsonl`",
+    "",
+    "## AI Reducer Boundary",
+    "",
+    "- Moontown hardcodes the envelope, routing, ledgers, idempotency, allowed channels, and review gates.",
+    "- MoonClaw uses the skill pack to choose the building-native aggregation and reduction strategy.",
+    "- MoonBook persists accepted civic records and review queues.",
   ].join("\n")
 }
 
@@ -308,19 +390,27 @@ fn wenyu_civic_service_skill_text() -> String {
   [
     "---", "name: wenyu-civic-service", "description: Operate one Wenyu Valley civic module as a MoonBook-backed service with review gates and projection-safe output.",
     "---", "", "# Wenyu Civic Service Skill", "", "Use this generic skill with the module-specific skill pack in the same workspace.",
-    "", "## Rules", "", "- Read `raw/bootstrap/CIVIC_SERVICE_CONTRACT.md` before acting.",
-    "- Choose the next useful service action from current book state, not from a fixed script.",
-    "- Use source evidence for knowledge claims and record source gaps clearly.",
-    "- Persist durable results to `wiki/*` and projection summaries to `book/moonbook-ui-state.json` only through review-safe records.",
+    "", "## Rules", "", "- Read `raw/bootstrap/CIVIC_SERVICE_CONTRACT.md` and `raw/bootstrap/BUILDING_PROTOCOL_CONTRACT.md` before acting.",
+    "- First identify the module mode: agent-workspace, exchange-place, projection-surface, gateway, or hybrid.",
+    "- Do not force every civic module into research. Use research only when the module-specific skill asks for source discovery or evidence verification.",
+    "- Choose the next useful service action from current book state, place state, and review gates; do not follow a fixed script.",
+    "- For exchange-place modules, produce consent, ledger, match, request, or follow-up records rather than long reports.",
+    "- For projection-surface modules, produce status, freshness, anomaly, and recovery records rather than domain research.",
+    "- For gateway modules, produce confirmation-gated handoff packets and blockers; never imply external execution happened without approval.",
+    "- For agent-workspace modules, produce the domain-specific artifact named by the dedicated skill pack.",
+    "- Treat the building as a protocol place: map inputs into contributions, group compatible contributions, reduce them into a module-native output, and distribute only through allowed channels.",
+    "- Use source evidence for knowledge claims and record source gaps clearly when knowledge claims are part of the module work.",
+    "- Persist durable results to the MoonBook role defined in the contract and projection summaries to `book/moonbook-ui-state.json` only through review-safe records.",
     "- Queue review for public, legal, financial, personal, booking, robot, or offline-impact actions.",
     "- Separate operational activity from domain progress.", "", "## Required Output Shape",
     "", "Return Markdown with these fields:", "", "- `civic_service_decision: update | no_change | needs_review | blocked`",
     "- `book_changed: yes | no`", "- `wiki_pages_changed_count: <integer>`", "- `accepted_facts_count: <integer>`",
     "- `review_items_created_count: <integer>`", "- `projection_updated: yes | no`",
-    "- `next_check_hint: normal | faster | slower | review`", "", "## Concrete Example",
-    "", "```md", "civic_service_decision: needs_review", "book_changed: yes", "wiki_pages_changed_count: 2",
-    "accepted_facts_count: 3", "review_items_created_count: 1", "projection_updated: yes",
-    "next_check_hint: review", "", "Summary: Policy Hall found a new official eligibility notice, updated the checklist, and queued an uncertain deadline interpretation for keeper review.",
+    "- `next_check_hint: normal | faster | slower | review`", "", "`accepted_facts_count` means accepted domain/service records for the module. For exchange-place, gateway, projection-surface, and hybrid modules, do not treat generic operational retries or daemon logs as accepted facts.",
+    "", "## Concrete Example", "", "```md", "civic_service_decision: needs_review",
+    "book_changed: yes", "wiki_pages_changed_count: 2", "accepted_facts_count: 3",
+    "review_items_created_count: 1", "projection_updated: yes", "next_check_hint: review",
+    "", "Summary: Policy Hall found a new official eligibility notice, updated the checklist, and queued an uncertain deadline interpretation for keeper review.",
     "Artifacts: `wiki/sources/policies.md`, `wiki/queries/policy-questions.md`, `wiki/reviews/policy-citations.md`",
     "```",
   ].join("\n")
@@ -338,6 +428,12 @@ fn civic_module_skill_text(service : @civic.CivicServiceDefinition) -> String {
     "",
     "You are operating the `\{service.title}` module for Wenyu Valley.",
     "",
+    "## Mode",
+    "",
+    "- Module mode: `\{service.module_mode}`",
+    "- MoonBook role: `\{service.book_role}`",
+    "- Skill mode: `\{service.skill_mode}`",
+    "",
     "## Purpose",
     "",
     service.purpose,
@@ -346,7 +442,16 @@ fn civic_module_skill_text(service : @civic.CivicServiceDefinition) -> String {
     "",
     "- Inspect the current MoonBook workspace and decide whether the next service action is an update, no-change digest, review queue, or blocker.",
     "- Prefer the highest-value action for a real civic operator and resident, not a generic wiki maintenance step.",
+    "- Do not produce a generic research report unless this module's skill mode explicitly requires source research.",
     "- Use imagination, curiosity, and judgment: ask what would genuinely help the resident, operator, or town ecosystem, then constrain the answer by evidence and safety.",
+    "",
+    "## Agent Work",
+    "",
+    markdown_bullets(service.agent_work),
+    "",
+    "## Place / Exchange Work",
+    "",
+    markdown_bullets(service.place_work),
     "",
     "## Workflow Hints",
     "",
@@ -355,8 +460,14 @@ fn civic_module_skill_text(service : @civic.CivicServiceDefinition) -> String {
     "## Output Contract",
     "",
     "- Contract id: `\{service.output_contract}`",
-    "- Must include changed pages, source basis, review items, projection delta, and next check hint.",
+    "- Must include changed pages, basis for the decision, review items, projection delta, and next check hint.",
+    "- Count accepted facts only when they are accepted domain/service records for this module; do not count daemon retries, process logs, or generic activity.",
     "- Must not claim external action completion unless a reviewed external action actually happened.",
+    "- Must respect `raw/bootstrap/BUILDING_PROTOCOL_CONTRACT.md`: allowed inputs, outputs, review gates, privacy scope, and distribution policy.",
+    "",
+    "## Mode-Specific Output",
+    "",
+    civic_mode_output_guidance(service),
     "",
     "## Durable Pages",
     "",
@@ -370,6 +481,26 @@ fn civic_module_skill_text(service : @civic.CivicServiceDefinition) -> String {
     "",
     civic_skill_example(service),
   ].join("\n")
+}
+
+///|
+fn civic_mode_output_guidance(
+  service : @civic.CivicServiceDefinition,
+) -> String {
+  match service.module_mode {
+    "agent-workspace" =>
+      "- Produce the domain artifact named by `\{service.skill_mode}`. Use research only if the artifact requires source discovery or evidence verification."
+    "exchange-place" =>
+      "- Produce consent, match, request, event, ledger, or follow-up records. Keep the output short, action-oriented, and review-gated instead of report-shaped."
+    "projection-surface" =>
+      "- Produce status, freshness, anomaly, recovery, and accounting records. Separate what changed from what merely ran."
+    "gateway" =>
+      "- Produce handoff packets, required confirmations, blockers, and next offline owner. Never state that offline action happened unless confirmed."
+    "hybrid" =>
+      "- Produce the smallest useful mix of workspace artifact and place-facing projection. Explicitly separate private memory, public projection, and review items."
+    _ =>
+      "- Produce the module-native artifact described by the skill mode; do not default to generic research."
+  }
 }
 
 ///|
@@ -388,10 +519,10 @@ fn civic_skill_example(service : @civic.CivicServiceDefinition) -> String {
     "projection_updated: yes",
     "next_check_hint: normal",
     "",
-    "Summary: \{service.title} selected the most useful next action from the current book state, updated `\{first_page}`, and queued one review item in `\{review_page}` because the action affects public/user-facing service behavior.",
+    "Summary: \{service.title} followed `\{service.module_mode}` / `\{service.skill_mode}` mode, selected the most useful module-native action from current book and place state, updated `\{first_page}`, and queued one review item in `\{review_page}` because the action affects public/user-facing service behavior.",
     "",
     "Evidence and judgment:",
-    "- What changed: one concrete service fact or operating condition.",
+    "- What changed: one concrete service fact, exchange record, gateway request, projection state, or operating condition.",
     "- Why it matters: resident/operator impact.",
     "- What remains uncertain: source, policy, consent, budget, privacy, or offline-action risk.",
     "",
@@ -412,6 +543,8 @@ fn civic_schema_page_text(
     "# \{schema_title(path)}",
     "",
     "Schema for `\{service.title}` (`\{service.service_kind}`).",
+    "",
+    "Module mode: `\{service.module_mode}`. MoonBook role: `\{service.book_role}`. Skill mode: `\{service.skill_mode}`.",
     "",
     "## Required Fields",
     "",
@@ -447,6 +580,7 @@ fn civic_wiki_page_text(
     "## Working Memory",
     "",
     "- The service should choose useful next actions from book evidence, resident/operator intent, and review gates.",
+    "- The action should match module mode `\{service.module_mode}` and skill mode `\{service.skill_mode}`.",
     "- New claims must be grounded in sources or explicit operator input.",
     "- Projection state must remain safe for town UI.",
     "",
@@ -490,6 +624,7 @@ fn civic_projection_state(
     status_chips: [
       { label: "Civic workspace", tone: "healthy" },
       { label: service.service_kind, tone: "info" },
+      { label: service.module_mode, tone: "info" },
       { label: "Review gated", tone: "review" },
     ],
     metrics: [
@@ -517,6 +652,12 @@ fn civic_projection_state(
         note: service.output_contract,
         tone: "info",
       },
+      {
+        label: "Mode",
+        value: service.module_mode,
+        note: service.skill_mode,
+        tone: "info",
+      },
     ],
     readiness: projection_items(
       [
@@ -524,6 +665,7 @@ fn civic_projection_state(
         ..service.wiki_pages,
         service.skill_path,
         "raw/bootstrap/CIVIC_SERVICE_CONTRACT.md",
+        "raw/bootstrap/BUILDING_PROTOCOL_CONTRACT.md",
       ],
       "Ready",
     ),
@@ -537,6 +679,8 @@ fn civic_projection_state(
         summary: "Moontown created the MoonBook-facing workspace scaffold, module skill pack, review queue, and projection fragment for \{service.title}.",
         highlights: [
           "Book id: \{service.book_id}",
+          "Mode: \{service.module_mode}",
+          "Book role: \{service.book_role}",
           "Skill: \{service.skill_path}",
           "Contract: \{service.output_contract}",
         ],
@@ -585,8 +729,14 @@ fn civic_generated_site_html(service : @civic.CivicServiceDefinition) -> String 
     "    <p class=\"eyebrow\">Wenyu Valley Civic MoonBook</p>",
     "    <h1>\{service.title}</h1>",
     "    <p>\{service.projection_summary}</p>",
-    "    <p><code>\{service.output_contract}</code></p>",
+    "    <p><code>\{service.module_mode}</code> <code>\{service.skill_mode}</code> <code>\{service.output_contract}</code></p>",
     "  </section>",
+    "  <h2>Module Role</h2>",
+    "  <p>MoonBook role: <code>\{service.book_role}</code>. This building should follow its dedicated skill and building protocol, not a generic research workflow.</p>",
+    "  <div class=\"grid\">",
+    "    <section class=\"card\"><h2>Agent Work</h2><ul>\{html_list_items(service.agent_work)}</ul></section>",
+    "    <section class=\"card\"><h2>Place Work</h2><ul>\{html_list_items(service.place_work)}</ul></section>",
+    "  </div>",
     "  <h2>Service Workflow</h2>",
     "  <ul>\{html_list_items(service.workflow)}</ul>",
     "  <div class=\"grid\">",
@@ -609,7 +759,7 @@ fn wenyu_civic_moonclaw_profile_json() -> String {
     "  \"match\": {", "    \"all\": [\"civic\"],", "    \"any\": [\"service\", \"policy\", \"contest\", \"social\", \"talent\", \"market\", \"bridge\", \"story\", \"education\"]",
     "  },", "  \"steps\": [", "    {", "      \"id\": \"execute_civic_service\",",
     "      \"title\": \"Execute Wenyu civic service packet\",", "      \"kind\": \"job.analysis\",",
-    "      \"prompt_template\": \"Execute the imported Wenyu civic service packet for ${proposal.title}. Read raw/bootstrap/CIVIC_SERVICE_CONTRACT.md, skills/wenyu-civic-service/SKILL.md, the module-specific SKILL.md listed in skill_paths, and the existing wiki/review pages. This is a service operation, not a generic report. Let the model choose the best next action from current book state, but obey review gates. Write or update only book-local artifacts unless the packet explicitly permits external output. Return Markdown with civic_service_decision, book_changed, wiki_pages_changed_count, accepted_facts_count, review_items_created_count, projection_updated, next_check_hint, artifacts, blockers, and review items. Do not wait for input; if a required source or authority is missing, write a blocker and a review item.\",",
+    "      \"prompt_template\": \"Execute the imported Wenyu civic service packet for ${proposal.title}. Read raw/bootstrap/CIVIC_SERVICE_CONTRACT.md, raw/bootstrap/BUILDING_PROTOCOL_CONTRACT.md, skills/wenyu-civic-service/SKILL.md, the module-specific SKILL.md listed in skill_paths, and the existing wiki/review pages. This is a module-native building protocol operation, not a generic report or generic research lane. Follow the module mode, MoonBook role, skill mode, input channels, output channels, review gates, and distribution policy from the contracts. Map inputs into contributions, group useful compatible contributions, reduce them into a building-native output, and distribute only through allowed channels. Use web/source research only when the dedicated skill requires it; otherwise produce the appropriate exchange, projection, ledger, gateway, coaching, tutorial, story, or review artifact. Let the model choose the best next action from current book and place state, but obey review gates. Write or update only permitted artifacts unless the packet explicitly permits external output. Return Markdown with civic_service_decision, book_changed, wiki_pages_changed_count, accepted_facts_count, review_items_created_count, projection_updated, next_check_hint, artifacts, blockers, and review items. Do not wait for input; if a required source or authority is missing, write a blocker and a review item.\",",
     "      \"metadata\": {", "        \"preferred_skills\": [\"wenyu-civic-service\"],",
     "        \"enable_tools\": true,", "        \"web_search\": true,", "        \"disable_waiting_for_input\": true,",
     "        \"best_effort_on_missing_input\": true,", "        \"timeout_ms\": 600000,",
@@ -620,7 +770,7 @@ fn wenyu_civic_moonclaw_profile_json() -> String {
     "          \"allow_execution_tools\": true,", "          \"output_contract\": \"wenyu.civic.service_packet.v1\"",
     "        }", "      }", "    },", "    {", "      \"id\": \"review_civic_service\",",
     "      \"title\": \"Review Wenyu civic service output\",", "      \"kind\": \"job.analysis\",",
-    "      \"prompt_template\": \"Review the civic service output for ${proposal.title}. Confirm that changed pages, source basis, review items, projection delta, and next_check_hint are present. Reject outputs that count operational retries as domain progress, claim external completion without approval, or expose private memory. Return concise Markdown with pass/fail, blockers, and required in-place repairs.\",",
+    "      \"prompt_template\": \"Review the civic service output for ${proposal.title}. Confirm that changed pages, basis for the protocol decision, review items, projection delta, and next_check_hint are present. Reject outputs that use disallowed channels, count operational retries as domain progress, claim external completion without approval, or expose private memory. Return concise Markdown with pass/fail, blockers, and required in-place repairs.\",",
     "      \"metadata\": {", "        \"preferred_skills\": [\"wenyu-civic-service\"],",
     "        \"enable_tools\": true,", "        \"web_search\": false,", "        \"disable_waiting_for_input\": true,",
     "        \"best_effort_on_missing_input\": true,", "        \"timeout_ms\": 300000,",

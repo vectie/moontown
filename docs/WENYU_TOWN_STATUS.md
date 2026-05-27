@@ -1,6 +1,6 @@
 # Wenyu Valley Town Status
 
-Last updated: 2026-05-26 17:52 CST
+Last updated: 2026-05-27 14:32 CST
 
 This document answers one question: how far is the current Wenyu Valley
 implementation from a fully functioning town?
@@ -10,17 +10,27 @@ The short answer is:
 - as a visual, inspectable town shell: about 70% complete
 - as a local 24/7 AI control-plane prototype: about 64% complete
 - as a fully functioning civic AI town with real services, persistent memory,
-  execution, generated projections, and operator workflow: about 46-50% complete
+  execution, generated projections, and operator workflow: about 50-54% complete
+- as a true civic-building protocol town where buildings aggregate, exchange,
+  reduce, and distribute agent/info packets: about 40-45% complete
 
 The project is no longer just markdown or a static map. It now has a real
 terrain viewport, modular civic buildings, daemon/watch state, MoonBook/MoonClaw
-boundaries, operator visibility, and first-class module runtime projection. The
-browser can now build a MoonBook projection index and serve/copy generated book
-outputs into the Wenyu module UI. The remaining work is mostly integration
-depth: the Wenyu buildings now have generated civic MoonBook workspace seeds,
-schemas, review queues, projections, and role-specific MoonClaw skill contracts,
-but those service lanes still need repeated real execution before they can be
-called reliable civic services.
+boundaries, operator visibility, first-class module runtime projection, and the
+first civic-building protocol runtime slice. The browser can build a MoonBook
+projection index and serve/copy generated book outputs into the Wenyu module UI.
+The Wenyu buildings now have generated civic MoonBook workspace seeds, schemas,
+review queues, projections, role-specific MoonClaw skill contracts, and building
+protocol contracts. Social Square has a durable protocol proof slice with
+inbox, contribution, reduction, outbox, review, home-return, and effectiveness
+metric ledgers. The embodied-robotics salon now proves that a building can hold
+a multi-book exchange, reduce ideas, measure output yield, and return reduced
+ideas back to each participant MoonBook. The remaining work is mostly
+integration depth: the other civic buildings still need repeated scenario
+packets, real MoonClaw reductions, MoonBook accept/reject persistence, and
+reviewable service histories before they can be called reliable civic services.
+The plan is tracked in
+[WENYU_BUILDING_PROTOCOL_PLAN.md](/Users/kq/Workspace/moontown/docs/WENYU_BUILDING_PROTOCOL_PLAN.md).
 
 ## Distance To Fully Functioning Town
 
@@ -36,6 +46,7 @@ service-specific execution for each civic module.
 | Long-running mayor loop | Medium | The daemon worker is healthy locally with zero recorded failures in the current runtime file; the service supervisor wrapper is not currently active, so install/service hardening and multi-day recovery evidence are still required |
 | Research watchers | Medium | OPC and LLM standing watches run through real books and ledgers; both are visible in the watch portfolio, but the current latest LLM watcher is still `NeedsReview` and the OPC watcher is still running |
 | Civic modules | Medium | Policy, contest, social, talent, market, bridge, story, education, resident, vitality, and town-shell modules now have generated MoonBook workspaces, schemas, review queues, projections, and skill contracts; end-to-end service runs still need soak testing |
+| Building protocol layer | Far-medium | Buildings have modes and skills, but do not yet have durable inbox/contribution/reduction/outbox ledgers or AI-guided map/reduce-style protocol execution |
 | Designer/operator tooling | Medium | JSON config works, the standalone viewport has view/editor/output modes, editor mode shows town-level Moondesk handoff lanes, and detailed single-agent/workspace editing remains in Moondesk |
 | Production deployment | Far | Auth, backups, permissions, packaged supervisor, and recovery playbooks are not complete |
 
@@ -46,16 +57,19 @@ A fully functioning Wenyu town means:
 1. The map is a stable, beautiful, navigable Wenyu Valley surface.
 2. Each civic feature is a configurable building, not hardcoded UI.
 3. Each building has a MoonBook workspace with durable wiki/memory state.
-4. MoonClaw workers execute bounded tasks for those workspaces.
-5. The Mayor daemon runs continuously, recovers failures, and dispatches due
+4. Each building also has a protocol envelope for inbox, aggregation,
+   exchange, AI-guided reduction, review, and distribution.
+5. MoonClaw workers execute bounded tasks for those workspaces and building
+   protocols.
+6. The Mayor daemon runs continuously, recovers failures, and dispatches due
    work.
-6. The UI shows real worker state, not decorative animation.
-7. Operators can submit requests, inspect progress, and retrieve outputs.
-8. No-change cycles, failed cycles, and real knowledge updates are accounted for
+7. The UI shows real worker state, not decorative animation.
+8. Operators can submit requests, inspect progress, and retrieve outputs.
+9. No-change cycles, failed cycles, and real knowledge updates are accounted for
    separately.
-9. A town designer can add, remove, or move modules by changing config and
+10. A town designer can add, remove, or move modules by changing config and
    assets, without editing MoonBit code.
-10. The system can run overnight and still show truthful progress the next
+11. The system can run overnight and still show truthful progress the next
     morning.
 
 ## Current Capability Scorecard
@@ -64,6 +78,7 @@ A fully functioning Wenyu town means:
 |---|---|---:|---|
 | Wenyu terrain map | 256 x 144 tiled visual surface with river, lakes, farms, roads, bridges, drag, and zoom | 70% | Needs richer depth, seasonal overlays, fog/cloud layers, and perf budgets for lower-end browsers |
 | Civic module registry | `wenyu-town-modules.json` can add, remove, move, and configure feature buildings; runtime validation now catches missing bindings and bad placement | 65% | Needs standalone schema checks, asset checks, and designer preview |
+| Building protocol registry | Protocol definitions exist for every Wenyu civic building; Social Square has durable inbox/contribution/reduction/outbox/review/home-return proof slices plus effectiveness metrics; the UI can show protocol review pressure | 48% | Need real scenario packets, AI reducers, MoonBook accept/reject persistence, and UI protocol history for every building |
 | Module buildings | 11 configurable module buildings render above terrain and open interiors | 50% | Assets are still reused/early-stage; each module needs custom generated sprites and roof/depth variants |
 | Module interiors | Click opens module-specific interior furniture with runtime source, counters, validation state, worker roster slots, MoonBook fragments, and output links when available | 64% | Seeded civic books exist; interiors still need accepted-change history and live service run evidence |
 | Water effects | Runtime overlay adds depth, reflection, and bridge shadow | 35% | Needs richer segmented river logic and seasonal/weather response |
@@ -133,23 +148,55 @@ Implemented and validated:
   `.moontown/book-results` files.
 - Editor mode and final output mode both show Moondesk handoff lanes and recent
   bridge records.
-- `moon run cmd/main -- civic bootstrap` bootstraps 11 Wenyu civic MoonBook
+- `moon run cmd/main -- civic bootstrap` bootstraps 11 Wenyu civic support
   workspaces and updates `.moontown/moonbooks.json`.
 - `moon run cmd/main -- civic status` reports module operability, latest civic
   service decision, review load, missing files, and accepted-change proof.
 - `moon run cmd/main -- civic doctor` writes `.moontown/civic/status.json` and
   `.moontown/civic/status.md`; the viewport bridge exposes that file as
   `civic-status.json`.
+- `moon run cmd/main -- civic protocols bootstrap` writes
+  `.moontown/civic/protocols.json`, per-building `PROTOCOL.md` files, and the
+  initial Social Square protocol ledgers.
+- `moon run cmd/main -- civic protocols status` reports protocol state across
+  all Wenyu civic buildings.
+- `moon run cmd/main -- civic protocols robotics-salon` now seeds the first
+  richer multi-book exchange test: 10 embodied-robotics sub-area MoonBooks
+  communicate through Social Square and produce five cross-area idea
+  reductions.
+- `moon run cmd/main -- civic protocols salons status` and
+  `moon run cmd/main -- civic protocols salons tick` expose the recurring
+  salon scheduler. The daemon now checks the same schedule on every tick and
+  runs enabled salons when real wall-clock `next_due_ms` has arrived.
+- The robotics salon now writes `wiki/metrics/embodied-robotics-salon.md`,
+  `.moontown/civic/protocols/social-square/metrics.json`, and a
+  `home_returns.jsonl` ledger. The current structural effectiveness metric is
+  10 participant books, five reduced ideas, 15 research questions, 21
+  participant-idea links, 10 covered books, and 21 returned idea-home records.
+- Recurring salon rounds write an additional
+  `.moontown/civic/salon-runs/embodied-robotics-social-square.jsonl` ledger
+  for long-horizon audit and restart inspection.
+- Each robotics participant book receives
+  `wiki/queries/salon-returned-ideas.md`, so the Social Square building output
+  returns to the relevant home MoonBooks instead of staying as a central
+  summary only.
+- Social Square currently has protocol status `review`, with 10 inbox packets,
+  10 contributions, five reductions, five outbox records, 21 home-return
+  records, and one review gate for the embodied-robotics salon.
 - The civic registry defines `town-shell`, `resident-twins`, `policy-hall`,
   `contest-express`, `social-square`, `talent-avenue`, `vitality-dashboard`,
   `ai-garden`, `physical-bridge`, `valley-market`, and `broadcast-tower`.
-- Each generated civic MoonBook workspace receives canonical schema pages,
+- Each civic module declares a mode: `agent-workspace`, `exchange-place`,
+  `projection-surface`, `gateway`, or `hybrid`. Not every civic feature is
+  meant to behave like a research book.
+- Each generated civic support workspace receives canonical schema pages,
   civic wiki pages, review queues, a generated `book/moonbook-ui-state.json`,
   a `book/site/generated/index.html`, and a `moonclaw.jobs.json` profile for
   `wenyu_civic_service_worker`.
 - Each civic module receives a generic `skills/wenyu-civic-service/SKILL.md`
-  plus a module-specific role skill such as
-  `skills/civic-policy-researcher/SKILL.md`.
+  plus a dedicated module skill such as `skills/civic-policy-researcher/SKILL.md`,
+  `skills/civic-social-matchmaker/SKILL.md`, or
+  `skills/civic-bridge-operator/SKILL.md`.
 - Mayor Wenyu decomposition now uses the civic registry, so Wenyu goals spawn
   isolated civic service lanes instead of relying on stale hardcoded module
   lists.
@@ -159,6 +206,8 @@ Implemented and validated:
 - Module interiors now include a Civic Doctor panel that distinguishes seeded
   workspaces from real service-result proof, review-needed status, blocked
   modules, and missing workspace/config paths.
+- Module interiors now include protocol status when available; Social Square
+  shows the consent-gated reduction summary and protocol counters.
 
 ## Current Runtime Snapshot
 
@@ -336,7 +385,8 @@ Implemented:
 - Moontown now injects the generic Wenyu civic service skill, the
   module-specific skill, the service contract, projection state, and explicit
   civic result markers into civic worker context bundles.
-- The civic registry assigns a worker role and output contract per service.
+- The civic registry assigns a module mode, book role, skill mode, worker role,
+  and output contract per service.
 - Wenyu book-lane worker registration creates a service-specific civic worker
   when a civic MoonBook is present.
 

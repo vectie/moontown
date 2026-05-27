@@ -4,6 +4,17 @@ pub struct CivicServiceHealth {
   title : String
   book_id : String
   service_kind : String
+  module_mode : String
+  book_role : String
+  skill_mode : String
+  protocol_status : String
+  protocol_ready : Bool
+  protocol_inbox_count : Int
+  protocol_contribution_count : Int
+  protocol_reduction_count : Int
+  protocol_outbox_count : Int
+  protocol_review_count : Int
+  latest_protocol_summary : String
   workspace_root : String
   status : String
   operable : Bool
@@ -76,6 +87,7 @@ pub async fn write_wenyu_civic_status(
 ) -> String {
   let portfolio = inspect_wenyu_civic_services(book_catalog_path~, status_path~)
   write_text_file(status_path, portfolio.to_json().stringify(indent=2))
+  ignore(write_wenyu_building_protocol_status())
   write_text_file(
     portfolio.markdown_path,
     render_wenyu_civic_portfolio(portfolio),
@@ -113,6 +125,8 @@ async fn inspect_wenyu_civic_service(
     @fs.exists("\{root}/\{service.skill_path}")
   let moonclaw_profile_ready = civic_moonclaw_profile_ready(root)
   let latest_result_path = civic_service_result_path(service)
+  let protocol = @civic.wenyu_building_protocol_for_service(service)
+  let protocol_snapshot = inspect_wenyu_building_protocol(protocol)
   let latest_result = read_civic_book_result(latest_result_path)
   let latest_summary = match latest_result {
     Some(result) => result.summary
@@ -171,6 +185,17 @@ async fn inspect_wenyu_civic_service(
     title: service.title,
     book_id: service.book_id,
     service_kind: service.service_kind,
+    module_mode: service.module_mode,
+    book_role: service.book_role,
+    skill_mode: service.skill_mode,
+    protocol_status: protocol_snapshot.status,
+    protocol_ready: protocol_snapshot.ready,
+    protocol_inbox_count: protocol_snapshot.inbox_count,
+    protocol_contribution_count: protocol_snapshot.contribution_count,
+    protocol_reduction_count: protocol_snapshot.reduction_count,
+    protocol_outbox_count: protocol_snapshot.outbox_count,
+    protocol_review_count: protocol_snapshot.review_count,
+    latest_protocol_summary: protocol_snapshot.latest_reduction_summary,
     workspace_root: root,
     status,
     operable,
@@ -244,12 +269,12 @@ fn render_wenyu_civic_portfolio(portfolio : CivicServicePortfolio) -> String {
     "Total: \{portfolio.total}; operable: \{portfolio.operable_count}; proven by result: \{portfolio.proven_count}; review: \{portfolio.review_count}; blocked: \{portfolio.blocked_count}; missing/incomplete: \{portfolio.missing_count}.\n\n",
   )
   builder.write_string(
-    "| Service | Status | Operable | Latest decision | Changed pages | Accepted facts | Review items | Missing paths |\n",
+    "| Service | Mode | Skill | Protocol | Status | Operable | Latest decision | Changed pages | Accepted facts | Review items | Missing paths |\n",
   )
-  builder.write_string("|---|---:|---:|---|---:|---:|---:|---|\n")
+  builder.write_string("|---|---|---|---:|---:|---:|---|---:|---:|---:|---|\n")
   for service in portfolio.services {
     builder.write_string(
-      "|\{service.title}|\{service.status}|\{yes_no(service.operable)}|\{service.latest_decision}|\{service.latest_pages_changed}|\{service.latest_accepted_facts}|\{service.latest_review_items}|\{compact_missing_paths(service.missing_required_paths)}|\n",
+      "|\{service.title}|\{service.module_mode}|\{service.skill_mode}|\{service.protocol_status}|\{service.status}|\{yes_no(service.operable)}|\{service.latest_decision}|\{service.latest_pages_changed}|\{service.latest_accepted_facts}|\{service.latest_review_items}|\{compact_missing_paths(service.missing_required_paths)}|\n",
     )
   }
   builder.write_string("\n## Notes\n\n")

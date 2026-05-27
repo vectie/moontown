@@ -11,6 +11,12 @@ The Wenyu Valley product plan is tracked separately in
 That document defines the programmable roadmap for turning the current town
 prototype into a MoonBook/MoonClaw-backed civic AI town.
 
+The civic-building protocol correction is tracked in
+[WENYU_BUILDING_PROTOCOL_PLAN.md](/Users/kq/Workspace/moontown/docs/WENYU_BUILDING_PROTOCOL_PLAN.md).
+That document defines the next architecture step: each Wenyu building should
+act as an AI-mediated protocol place for aggregation, exchange, reduction, and
+distribution, not merely as a research book or static UI card.
+
 ## Layer Responsibilities
 
 ### `moontown`
@@ -194,11 +200,32 @@ rows.
 ### Wenyu Civic Service Bootstrap
 
 Wenyu civic modules use the same ownership rule as research lanes, but they are
-configured as long-lived civic services rather than one-off research topics.
+configured as long-lived civic modules rather than one-off research topics. A
+module can be an `agent-workspace`, `exchange-place`, `projection-surface`,
+`gateway`, or `hybrid`; MoonBook is a durable support workspace only when that
+module needs memory, wiki pages, review queues, or generated projections.
+
+The stronger target model is building-as-protocol:
+
+```text
+input packets
+  -> building inbox
+  -> AI-guided aggregation
+  -> building-specific exchange
+  -> AI-guided reduction
+  -> review/safety gate
+  -> distribution to MoonBook, UI, agents, mayor, or external handoff
+```
+
+This is similar to map/reduce, but only the envelope, routing, ledgers,
+channels, permissions, and review gates should be hardcoded. The building
+skill pack should guide MoonClaw to choose the right reduction strategy for the
+building's social responsibility.
 
 ```text
 civic service registry
-  -> canonical wenyu-* MoonBook catalog entries
+  -> module mode + dedicated skill mode
+  -> canonical wenyu-* support MoonBook catalog entries
   -> civic workspace seeds
   -> module schemas, wiki pages, review queues
   -> generic and module-specific MoonClaw skills
@@ -209,20 +236,62 @@ civic service registry
 Current implementation lives in:
 
 - [civic/services.mbt](/Users/kq/Workspace/moontown/civic/services.mbt)
+- [civic/protocols.mbt](/Users/kq/Workspace/moontown/civic/protocols.mbt)
 - [civic_workspace.mbt](/Users/kq/Workspace/moontown/civic_workspace.mbt)
 - [civic_status.mbt](/Users/kq/Workspace/moontown/civic_status.mbt)
+- [civic_protocol_runtime.mbt](/Users/kq/Workspace/moontown/civic_protocol_runtime.mbt)
+
+Implemented protocol pieces:
+
+- building protocol definitions for inbox, contribution, reduction,
+  distribution, and review channels
+- append-only protocol ledgers under `.moontown/civic/protocols/<building-id>/`
+- civic workspace `BUILDING_PROTOCOL_CONTRACT.md` seed files
+- Social Square proof ledgers with one consent-gated review slice
+- Social Square embodied-robotics salon slice with 10 sub-area MoonBooks, 10
+  perspective packets, five cross-area idea reductions, and a reviewable
+  question backlog
+- salon effectiveness metrics for idea yield, research-question yield,
+  cross-book links, home-book coverage, and returned idea-home records
+- return-home pages in each participating sub-area MoonBook so reduced ideas
+  leave the building and become local reviewable work
+- wall-clock civic salon schedules under `.moontown/civic/salons.json`
+- append-only civic salon round records under `.moontown/civic/salon-runs/`
+- daemon-tick integration that runs due salons without hard-coding them into
+  the frontend
+
+Still planned:
+
+- MoonClaw reducer packets that read `SKILL.md` and choose the module-native
+  aggregation/reduction behavior
+- real scenario packets for each non-Social-Square civic building
+- MoonBook accept/reject persistence for reductions
+- richer viewport projection fields for inbox pressure, active reduction,
+  pending review, and recent distribution history
 
 The CLI entry is:
 
 ```bash
 moon run cmd/main -- civic bootstrap
+moon run cmd/main -- civic protocols bootstrap
+moon run cmd/main -- civic protocols status
+moon run cmd/main -- civic protocols robotics-salon
+moon run cmd/main -- civic protocols salons status
+moon run cmd/main -- civic protocols salons tick
+moon run cmd/main -- civic doctor
 ```
+
+The recurring-salon path is intentionally schedule-driven. Operators can edit
+`.moontown/civic/salons.json` to enable/disable salons or adjust
+`interval_ms`; the daemon tick calls the same due-check as
+`civic protocols salons tick`, then records completion in JSONL for restart
+inspection.
 
 The registry covers Town Shell, Resident Twin Homes, Policy Hall, Contest
 Express, Social Square, Talent Avenue, Vitality Tower, AI Science Garden,
 Physical Bridge, Valley Market, and Story Radar. Each service has a book id,
-schema pages, wiki pages, review queues, worker role, skill pack, output
-contract, and projection summary.
+module mode, book role, skill mode, schema pages, wiki pages, review queues,
+worker role, skill pack, output contract, and projection summary.
 
 Civic books intentionally bypass the Wenyu product research/bootstrap quality
 gate. Their first task is the registry-defined `civic-service-workflow`, while
@@ -234,6 +303,15 @@ belongs in MoonBook, and tool execution still belongs in MoonClaw. As the
 contract stabilizes, reusable civic workspace templates should move into
 MoonBook so Moontown requests workspace creation instead of writing every seed
 file itself.
+
+Protocol ownership remains the same:
+
+- Moontown owns building routing, inbox/outbox ledgers, review gates, protocol
+  status, and mayor supervision.
+- MoonBook owns durable accepted civic records, schemas, review queues, and
+  generated projections.
+- MoonClaw owns AI-guided aggregation, reduction, drafting, source discovery
+  when required, and result packaging.
 
 ### Standing Goal Run
 
