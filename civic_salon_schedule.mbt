@@ -126,9 +126,9 @@ pub async fn render_civic_salon_schedule_status(
   )
   let now_ms = @env.now()
   let builder = StringBuilder::new()
-  builder.write_string("# Civic Salon Schedule Status\n\n")
+  builder.write_string("# Civic Communication Pattern Schedule Status\n\n")
   builder.write_string(
-    "| Salon | Building | Enabled | Due | Interval min | Rounds | Latest |\n",
+    "| Pattern session | Building | Enabled | Due | Interval min | Rounds | Latest |\n",
   )
   builder.write_string("| --- | --- | ---:| ---:| ---:| ---:| --- |\n")
   for schedule in schedules {

@@ -67,7 +67,24 @@ test "Protocol status labels follow packet lifecycle" {
 }
 
 ///|
-test "civic salon scenario carries participant books and cross-area ideas" {
+test "civic communication patterns describe reusable protocol shapes" {
+  let patterns = civic_communication_patterns()
+  assert_true(patterns.length() >= 8)
+  match civic_communication_pattern_for_id("research-salon") {
+    Some(pattern) => {
+      assert_eq(pattern.title, "Research Salon")
+      assert_eq(pattern.protocol_mode, "exchange-reduce-distribute")
+    }
+    None => fail("expected research salon pattern")
+  }
+  let service = @civic.wenyu_civic_services().filter(fn(item) {
+      item.id == "social-square"
+    })[0]
+  assert_eq(civic_communication_pattern_id_for_service(service), "match-market")
+}
+
+///|
+test "civic salon scenario carries participant workspaces and cross-area ideas" {
   let scenario = test_civic_salon_scenario()
   let participants = scenario.participants
   let ideas = scenario.ideas
@@ -143,7 +160,7 @@ async test "civic salon scenario template can seed a non-hardcoded domain" {
     reducer_mode=FixtureReducer,
   )
   assert_true(summary.contains("Future Energy Social Square Salon"))
-  assert_true(summary.contains("2 participant MoonBook"))
+  assert_true(summary.contains("2 internal participant perspective"))
   assert_true(
     @fs.exists(
       "\{root}/books/future-energy-storage/raw/bootstrap/FUTURE_ENERGY_SALON_CONTRACT.md",
@@ -154,10 +171,80 @@ async test "civic salon scenario template can seed a non-hardcoded domain" {
   ).text()
   assert_true(projection.contains("Future Energy Social Square Salon"))
   assert_true(projection.contains("future energy"))
+  assert_true(projection.contains("\"projection_scope\": \"public\""))
   let returned = @fs.read_file(
     "\{root}/books/future-energy-grid-ai/wiki/queries/salon-returned-ideas.md",
   ).text()
   assert_true(returned.contains("Storage-Grid Control Contract"))
+  let participant_projection = @fs.read_file(
+    "\{root}/books/future-energy-grid-ai/book/moonbook-ui-state.json",
+  ).text()
+  assert_true(
+    participant_projection.contains("\"projection_scope\": \"internal\""),
+  )
+  assert_true(participant_projection.contains("\"participant-workspace\""))
+}
+
+///|
+async test "civic salon scenario can define a building protocol without registry code" {
+  let root = "/tmp/moontown-civic-salon-generic-building"
+  ignore_checked_command("rm", ["-rf", root])
+  let scenario = {
+    ..test_civic_salon_scenario(),
+    id: "future-energy-forum",
+    title: "Future Energy Forum Salon",
+    building_id: "future-energy-forum",
+    building_book_id: "future-energy-forum-book",
+  }
+  let summary = bootstrap_civic_salon_scenario(
+    scenario,
+    book_catalog_path="\{root}/catalog.json",
+    round_id="future-energy-forum-round-1",
+    round_number=1,
+    workspace_base=root,
+    reducer_mode=FixtureReducer,
+  )
+  assert_true(summary.contains("Future Energy Forum Salon"))
+  assert_true(
+    @fs.exists(
+      "\{root}/books/future-energy-forum-book/book/moonbook-ui-state.json",
+    ),
+  )
+  let projection = @fs.read_file(
+    "\{root}/books/future-energy-forum-book/book/moonbook-ui-state.json",
+  ).text()
+  assert_true(projection.contains("\"book_id\": \"future-energy-forum-book\""))
+  assert_true(projection.contains("\"projection_scope\": \"public\""))
+  let protocol = civic_salon_protocol_for_scenario(scenario)
+  assert_eq(protocol.building_id, "future-energy-forum")
+  assert_eq(protocol.book_id, "future-energy-forum-book")
+  assert_eq(protocol.input_channels.length(), 1)
+  assert_eq(protocol.input_channels[0], "domain_perspective")
+}
+
+///|
+test "civic salon participant workspaces do not pollute the public catalog" {
+  let scenario = test_civic_salon_scenario()
+  let stale_participant = @moonbook.BookCatalogEntry::new(
+    id=scenario.participants[0].book_id,
+    name="Old participant",
+    purpose="stale intermediate participant book",
+    workspace_root="/tmp/moontown-civic-salon-template/books/\{scenario.participants[0].book_id}",
+  )
+  let durable_book = @moonbook.BookCatalogEntry::new(
+    id=scenario.building_book_id,
+    name="Durable building book",
+    purpose="public salon aggregate",
+    workspace_root="/tmp/moontown-civic-salon-template/books/\{scenario.building_book_id}",
+  )
+  let merged = merge_civic_salon_catalog(
+    scenario,
+    [durable_book, stale_participant],
+    scenario.participants,
+    "/tmp/moontown-civic-salon-template",
+  )
+  assert_eq(merged.length(), 1)
+  assert_eq(merged[0].id, scenario.building_book_id)
 }
 
 ///|
@@ -205,6 +292,8 @@ fn test_civic_salon_scenario() -> CivicSalonScenario {
   {
     id: "future-energy-social-square",
     title: "Future Energy Social Square Salon",
+    communication_pattern_id: Some("research-salon"),
+    communication_pattern_label: Some("Research Salon"),
     building_id: "social-square",
     building_book_id: "wenyu-social-square",
     domain_label: "future energy",

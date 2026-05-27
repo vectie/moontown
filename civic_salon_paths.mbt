@@ -2,7 +2,7 @@
 pub fn default_civic_salon_schedule_path(
   snapshot_path? : String = @storage.default_snapshot_path(),
 ) -> String {
-  "\{civic_salon_base_dir(snapshot_path)}/salons.json"
+  "\{civic_salon_base_dir(snapshot_path)}/pattern-schedules.json"
 }
 
 ///|
@@ -10,7 +10,7 @@ pub fn default_civic_salon_run_ledger_path(
   salon_id : String,
   snapshot_path? : String = @storage.default_snapshot_path(),
 ) -> String {
-  "\{civic_salon_base_dir(snapshot_path)}/salon-runs/\{safe_salon_id(salon_id)}.jsonl"
+  "\{civic_salon_base_dir(snapshot_path)}/pattern-runs/\{safe_salon_id(salon_id)}.jsonl"
 }
 
 ///|
@@ -18,7 +18,7 @@ pub fn civic_salon_scenario_path(
   salon_id : String,
   snapshot_path? : String = @storage.default_snapshot_path(),
 ) -> String {
-  "\{civic_salon_base_dir(snapshot_path)}/salon-scenarios/\{safe_salon_id(salon_id)}.json"
+  "\{civic_salon_base_dir(snapshot_path)}/pattern-scenarios/\{safe_salon_id(salon_id)}.json"
 }
 
 ///|
@@ -57,16 +57,11 @@ fn civic_salon_protocol_ledger_path(
 }
 
 ///|
-fn civic_salon_projection_path(
-  schedule : CivicSalonSchedule,
+fn civic_salon_projection_path_for_scenario(
+  scenario : CivicSalonScenario,
   snapshot_path : String,
 ) -> String {
-  let book_id = match
-    @civic.wenyu_building_protocol_for_building_id(schedule.building_id) {
-    Some(protocol) => protocol.book_id
-    None => schedule.building_id
-  }
-  "\{civic_salon_workspace_base(snapshot_path)}/books/\{book_id}/book/moonbook-ui-state.json"
+  "\{civic_salon_workspace_base(snapshot_path)}/books/\{scenario.building_book_id}/book/moonbook-ui-state.json"
 }
 
 ///|

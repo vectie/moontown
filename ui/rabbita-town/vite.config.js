@@ -13,6 +13,7 @@ const watcherDir = path.resolve(process.cwd(), '../../.moontown/watchers')
 const operatorRequestDir = path.resolve(process.cwd(), '../../.moontown/operator-requests')
 const operatorRequestLedgerPath = path.join(operatorRequestDir, 'requests.jsonl')
 const booksRootPath = path.resolve(process.cwd(), '../../.moontown/books')
+const bookProjectionPolicyPath = path.resolve(process.cwd(), '../../.moontown/book-projection-policy.json')
 const bookResultDir = path.resolve(process.cwd(), '../../.moontown/book-results')
 const moondeskRootPath = path.resolve(process.cwd(), '../../../moondesk')
 const moondeskDispatchDir = path.resolve(process.cwd(), '../../.moontown/moondesk-dispatches')
@@ -157,12 +158,63 @@ function normalizeJourneyArray(value, maxItems = 5) {
     : []
 }
 
+function normalizeStringArray(value) {
+  return Array.isArray(value)
+    ? value.map(item => String(item).toLowerCase()).filter(Boolean)
+    : []
+}
+
+async function loadBookProjectionPolicy() {
+  const policy = await readJsonFile(bookProjectionPolicyPath, {})
+  return {
+    public_book_ids: normalizeStringArray(policy?.public_book_ids),
+    hidden_book_ids: normalizeStringArray(policy?.hidden_book_ids),
+    hidden_book_prefixes: normalizeStringArray(policy?.hidden_book_prefixes),
+    hidden_tags: [
+      'hidden',
+      'internal',
+      'intermediate',
+      'participant-workspace',
+      ...normalizeStringArray(policy?.hidden_tags),
+    ],
+    hidden_scopes: [
+      'hidden',
+      'internal',
+      'intermediate',
+      'private',
+      ...normalizeStringArray(policy?.hidden_scopes),
+    ],
+  }
+}
+
+function isIntermediateBookProjection(bookId, state, policy) {
+  const normalizedBookId = String(bookId).toLowerCase()
+  if (policy.public_book_ids.includes(normalizedBookId)) {
+    return false
+  }
+  if (policy.hidden_book_ids.includes(normalizedBookId)) {
+    return true
+  }
+  if (policy.hidden_book_prefixes.some(prefix => normalizedBookId.startsWith(prefix))) {
+    return true
+  }
+  const tags = Array.isArray(state?.tags)
+    ? state.tags.map(tag => String(tag).toLowerCase())
+    : []
+  const scope = String(state?.projection_scope || state?.visibility || 'public').toLowerCase()
+  if (policy.hidden_scopes.includes(scope)) {
+    return true
+  }
+  return tags.some(tag => policy.hidden_tags.includes(tag))
+}
+
 async function loadModuleProjectionIndex() {
   if (!existsSync(booksRootPath)) {
     return { generated_at: new Date().toISOString(), projections: [] }
   }
 
   const entries = await readdir(booksRootPath, { withFileTypes: true })
+  const projectionPolicy = await loadBookProjectionPolicy()
   const projections = []
   for (const entry of entries) {
     if (!entry.isDirectory()) {
@@ -173,6 +225,9 @@ async function loadModuleProjectionIndex() {
     const uiStatePath = path.join(bookRoot, 'book/moonbook-ui-state.json')
     const state = await readJsonFile(uiStatePath, null)
     if (!state) {
+      continue
+    }
+    if (isIntermediateBookProjection(bookId, state, projectionPolicy)) {
       continue
     }
     projections.push({

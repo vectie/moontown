@@ -31,13 +31,13 @@ pub async fn run_due_civic_salons(
   }
   save_civic_salon_schedules(schedule_path, updated)
   if summaries.length() == 0 && refreshes.length() == 0 {
-    "No civic salons due at now_ms=\{now_ms}."
+    "No civic communication-pattern schedules due at now_ms=\{now_ms}."
   } else if summaries.length() == 0 {
-    "Refreshed \{refreshes.length()} civic salon projection(s): \{refreshes.join("; ")}"
+    "Refreshed \{refreshes.length()} civic communication-pattern projection(s): \{refreshes.join("; ")}"
   } else if refreshes.length() == 0 {
-    "Ran \{summaries.length()} civic salon(s): \{summaries.join("; ")}"
+    "Ran \{summaries.length()} civic communication-pattern schedule(s): \{summaries.join("; ")}"
   } else {
-    "Ran \{summaries.length()} civic salon(s): \{summaries.join("; ")}; refreshed \{refreshes.length()} stale projection(s): \{refreshes.join("; ")}"
+    "Ran \{summaries.length()} civic communication-pattern schedule(s): \{summaries.join("; ")}; refreshed \{refreshes.length()} stale projection(s): \{refreshes.join("; ")}"
   }
 }
 
@@ -125,7 +125,7 @@ fn run_unsupported_civic_salon_round(
   schedule : CivicSalonSchedule,
   now_ms : UInt64,
 ) -> (CivicSalonSchedule, String) {
-  let summary = "Unsupported civic salon schedule `\{schedule.id}`; no round executed."
+  let summary = "Unsupported civic communication-pattern schedule `\{schedule.id}`; no round executed."
   let round_id = civic_salon_round_id(schedule)
   (
     {

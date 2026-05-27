@@ -49,7 +49,7 @@ pub fn default_daemon_jobs() -> Array[ScheduledJob] {
       kind: "standing-goal",
       interval_seconds: 30,
     },
-    { id: "run-civic-salons", kind: "civic-salon", interval_seconds: 30 },
+    { id: "run-civic-patterns", kind: "civic-pattern", interval_seconds: 30 },
     { id: "refresh-health", kind: "health", interval_seconds: 60 },
     { id: "project-ui-state", kind: "projection", interval_seconds: 60 },
   ]

@@ -1,12 +1,20 @@
-# Civic Salon Scenario Templates
+# Research Salon Communication Pattern Templates
 
 Last updated: 2026-05-27
 
-The civic salon runtime is template-driven. A domain should not require a new
-MoonBit runner. A building gets a scenario template, the template names its
-participant MoonBooks, skill rules, protocol channels, output paths, review
-gate, and optional fixture idea examples, and Moontown runs the same
-exchange-reduce-distribute envelope for every scenario.
+The research salon is one reusable civic communication pattern. It is the
+knowledge-exchange pattern where specialist workspaces bring perspectives into
+a building, MoonClaw reduces the plurality into research questions, and
+MoonBook receives returned follow-up work.
+
+The runtime is template-driven. A domain should not require a new MoonBit
+runner. A building gets a scenario template, the template names its internal
+participant workspaces, communication pattern, skill rules, protocol channels,
+output paths, review gate, and optional fixture idea examples, and Moontown
+runs the same exchange-reduce-distribute envelope for every scenario.
+
+For the broader pattern taxonomy, see
+[CIVIC_COMMUNICATION_PATTERNS.md](/Users/kq/Workspace/moontown/docs/CIVIC_COMMUNICATION_PATTERNS.md).
 
 ## Design Goal
 
@@ -40,12 +48,12 @@ input.
 ## Runtime Files
 
 - [civic_salon_scenario_types.mbt](/Users/kq/Workspace/moontown/civic_salon_scenario_types.mbt)
-  defines `CivicSalonScenario`, participant books, ideas, metrics, and
+  defines `CivicSalonScenario`, participant workspaces, ideas, metrics, and
   home-return records.
 - [civic_salon_scenario_runtime.mbt](/Users/kq/Workspace/moontown/civic_salon_scenario_runtime.mbt)
   loads scenario templates, materializes MoonClaw reducer output into
-  participant MoonBooks, runs the protocol ledger slice, and writes the
-  building projection.
+  intermediate participant workspaces, runs the protocol ledger slice, and
+  writes the public building projection.
 - [civic_salon_reducer.mbt](/Users/kq/Workspace/moontown/civic_salon_reducer.mbt)
   owns the reducer modes: `MoonClawReducer` for production,
   `PersistedReducer` for stale projection refresh, and `FixtureReducer` for
@@ -62,17 +70,17 @@ input.
 Recurring schedules load templates from:
 
 ```text
-.moontown/civic/salon-scenarios/<salon-id>.json
+.moontown/civic/pattern-scenarios/<session-id>.json
 ```
 
 No scenario is auto-seeded. Recurring salons are explicit: create a schedule in
-`.moontown/civic/salons.json` and create a matching template at this path. New
+`.moontown/civic/pattern-schedules.json` and create a matching template at this path. New
 domains should arrive as data and skills, not new MoonBit branches.
 
 One-off runs can use any template path:
 
 ```bash
-moon run cmd/main -- civic protocols salon-template templates/civic-salons/robotics-mini-salon.json
+moon run cmd/main -- civic protocols pattern-template templates/civic-salons/robotics-mini-salon.json
 ```
 
 ## Template Contract
@@ -80,6 +88,9 @@ moon run cmd/main -- civic protocols salon-template templates/civic-salons/robot
 Required high-level fields:
 
 - `id`: stable salon id; for recurring jobs this must match the schedule id.
+- `communication_pattern_id`: normally `research-salon` for this runtime.
+- `communication_pattern_label`: human-facing label, normally
+  `Research Salon`.
 - `building_id`: target civic building, for example `social-square`.
 - `building_book_id`: central building MoonBook, for example
   `wenyu-social-square`.
@@ -92,7 +103,8 @@ Required high-level fields:
 - `review_gate`, `review_owner`, `review_reason`: review routing.
 - `backlog_path`, `synthesis_path`, `metrics_path`, `review_path`,
   `returned_ideas_path`, `participant_contract_path`: MoonBook output paths.
-- `participants`: participant MoonBooks and their current perspectives.
+- `participants`: internal participant workspaces and their current
+  perspectives.
 - `ideas`: fixture examples only. Production rounds must use MoonClaw output
   from `raw/bootstrap/civic-salon-ideas.json`; stale projection refreshes use
   the last persisted reducer output.
@@ -100,19 +112,47 @@ Required high-level fields:
 The key extensibility rule is that future domains should change these fields,
 not add `if domain == ...` branches to Moontown.
 
+Participant workspaces are internal salon workspaces by default. The durable
+surface book is the building book, such as `wenyu-social-square`; participant
+workspaces may keep return-home pages for audit and follow-up, but they are not
+promoted into the public MoonBook catalog unless a future product decision makes
+that participant workspace a first-class standing book.
+
+Generated projections make that boundary explicit. Building books emit
+`projection_scope: public`; participant workspaces emit
+`projection_scope: internal` plus tags such as `participant-workspace`. The
+Rabbita bridge filters by those metadata fields and by
+`.moontown/book-projection-policy.json`, not by domain-specific MoonBit code.
+
+## Building Protocol Resolution
+
+Salon templates are extensible at the building level:
+
+- If `building_id` matches an existing Wenyu civic building, Moontown uses the
+  registered protocol definition.
+- If `building_id` is not registered, Moontown creates a generic
+  exchange-reduce-distribute protocol from the scenario fields.
+- The fallback protocol uses `building_book_id` as the public MoonBook surface,
+  `protocol_channel` as the inbox, `output_channel` as the outbox, and
+  `review_gate` as the required review boundary.
+
+This keeps the MoonBit layer responsible for protocol envelopes, ledgers, and
+idempotent materialization, while the scenario `SKILL.md` controls domain
+reasoning and reducer quality.
+
 ## Adding A New Domain
 
 1. Copy `templates/civic-salons/robotics-mini-salon.json`.
 2. Rename `id`, `title`, `domain_label`, `topic`, and all output paths.
-3. Add participant books that represent independent perspectives, not duplicate
-   researchers.
+3. Add participant workspaces that represent independent perspectives, not
+   duplicate researchers.
 4. Write `skill_rules` that tell the agents how to behave in the building.
 5. Add `ideas` only if you need deterministic fixture/smoke data. Do not rely
    on them for production reduction; the generated skill should guide
    MoonClaw to produce round-specific ideas.
-6. For recurring use, add or edit `.moontown/civic/salons.json` so the schedule
+6. For recurring use, add or edit `.moontown/civic/pattern-schedules.json` so the schedule
    id matches the template file name.
-7. Run `moon run cmd/main -- civic protocols salons tick` or wait for the
+7. Run `moon run cmd/main -- civic protocols schedules tick` or wait for the
    daemon.
 
 ## Reducer Modes

@@ -26,8 +26,8 @@ civic workspace runtime
 civic protocol runtime
   building inbox/contribution/reduction/outbox/review ledgers
 
-civic salon runtime
-  recurring multi-book exchange schedules and salon round audit ledgers
+civic communication-pattern runtime
+  reusable exchange/review/watch/match/triage patterns and round audit ledgers
 
 ui/rabbita-town
   operator console, viewport, module interiors, protocol projection
@@ -49,9 +49,12 @@ by Moontown and MoonBook.
 
 - The former `civic_protocol_runtime.mbt` monolith has been split into
   registry/bootstrap, ledger store, status runtime, markdown helpers, Social
-  Square fixture, and generic civic salon scenario runtime files. The salon
-  code is no longer meant to grow one MoonBit path per domain; domains should
-  arrive as `CivicSalonScenario` templates plus skill rules.
+  Square fixture, and generic communication-pattern scenario runtime files.
+  The research salon code is no longer meant to grow one MoonBit path per
+  domain; domains should arrive as templates plus skill rules.
+- `research-salon` is now one pattern in the civic communication-pattern
+  registry, alongside `signal-watch`, `triage-desk`, `review-council`,
+  `match-market`, `learning-cohort`, `story-forge`, and `incident-bridge`.
 - The former `civic_salon_daemon.mbt` has been split into schedule types,
   paths, schedule persistence, reconciliation, and runner files.
 - `runtime_status.mbt` now invokes a generic daemon scheduled-job dispatcher,
@@ -78,8 +81,8 @@ Goals:
 
 Acceptance:
 
-- `civic protocols salons tick` still advances or refreshes the salon
-- daemon tick still records civic salon events when a salon actually runs
+- `civic protocols schedules tick` still advances or refreshes the communication-pattern session
+- daemon tick still records civic communication-pattern events when a session actually runs
 - the Social Square viewport still reads the latest round from projections
 - targeted salon and daemon scheduled-job tests pass
 
@@ -104,8 +107,8 @@ Acceptance:
   clear reason
 - protocol store tests cover append/read/latest/count behavior
 - fixture tests remain separate from runtime tests
-- a non-robotics scenario template can seed participant MoonBooks and building
-  projection without changing the runner
+- a non-robotics scenario template can seed internal participant workspaces and
+  building projection without changing the runner
 
 Current files:
 
@@ -123,6 +126,20 @@ Current files:
   projection.
 - `templates/civic-salons/robotics-mini-salon.json`: copyable scenario
   template proving new domains can be configured without MoonBit code.
+- `civic_communication_patterns.mbt`: reusable pattern registry and Wenyu
+  civic service-to-pattern mapping.
+
+Current extension rule:
+
+- Wenyu-registered buildings still use the Wenyu civic protocol registry.
+- A salon scenario may also define a new building with only
+  `building_id`, `building_book_id`, channels, review gate, skill rules, and
+  participants.
+- If no registry protocol exists, Moontown synthesizes a generic
+  exchange-reduce-distribute building protocol from the scenario instead of
+  skipping materialization or requiring a MoonBit branch.
+- Participant workspaces are internal by projection metadata, not by
+  hardcoded frontend id matching.
 
 ### Stage 3: Package Split
 
@@ -154,6 +171,8 @@ Acceptance:
 
 - Social Square can run any valid salon scenario through a skill-driven
   MoonClaw reducer and produce reviewable outputs
+- a new salon building can be added by scenario template plus schedule entry
+  without changing Moontown MoonBit code
 - deterministic fixture mode is retained only for tests and explicit smoke
   demos
 - stale projection refresh replays persisted reducer output and never consumes

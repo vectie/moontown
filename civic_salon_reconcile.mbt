@@ -11,7 +11,9 @@ async fn refresh_civic_salon_projection_if_stale(
   }
   match load_civic_salon_scenario_for_schedule(schedule, snapshot_path) {
     Some(scenario) => {
-      let projection_path = civic_salon_projection_path(schedule, snapshot_path)
+      let projection_path = civic_salon_projection_path_for_scenario(
+        scenario, snapshot_path,
+      )
       let text = read_text_or_empty(projection_path)
       let projection_current = text.contains(schedule.latest_round_id) &&
         text.contains("round \{schedule.round_count}")

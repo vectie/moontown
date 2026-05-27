@@ -257,22 +257,26 @@ Bootstrap and inspect the building protocol runtime with:
 ```bash
 moon run cmd/main -- civic protocols bootstrap
 moon run cmd/main -- civic protocols status
-moon run cmd/main -- civic protocols salon-template templates/civic-salons/robotics-mini-salon.json
+moon run cmd/main -- civic protocols patterns
+moon run cmd/main -- civic protocols pattern-template templates/civic-salons/robotics-mini-salon.json
+moon run cmd/main -- civic protocols pattern-template templates/civic-salons/robotics-mini-salon.json
 moon run cmd/main -- civic doctor
 ```
 
 The protocol bootstrap writes the town-level protocol registry under
 `.moontown/civic/protocols.json` and per-building protocol ledgers under
 `.moontown/civic/protocols/<building-id>/`. Social Square has a protocol proof
-slice and can run additional salon scenarios from `CivicSalonScenario` JSON
-templates. A salon creates the participant MoonBooks declared by the template,
+slice and can run additional `research-salon` communication-pattern scenarios
+from `CivicSalonScenario` JSON templates. A research salon creates the
+internal participant workspaces declared by the template,
 receives perspective packets, reduces them into cross-area research ideas, and
 projects the result through the same module interior counters. It also writes
 template-defined metrics in the Social Square book and returns relevant ideas
 to each participant home book at
 `wiki/queries/salon-returned-ideas.md`.
 
-The salon projection is now fed by generic `CivicSalonScenario` templates.
+The research-salon projection is now fed by generic `CivicSalonScenario`
+templates.
 There is no domain-specific default proof scenario in MoonBit; new domains
 arrive as template JSON and generated skill rules instead of frontend or
 MoonBit branches.
@@ -385,6 +389,10 @@ Current status:
   keyed by normalized module id
 - the Vite bridge now scans `.moontown/books/*/book/moonbook-ui-state.json`
   and publishes `module-projections.json`
+- book projection visibility is explicit: public building books use
+  `projection_scope: public`, internal salon workspaces use
+  `projection_scope: internal`, and operators can adjust policy in
+  `.moontown/book-projection-policy.json` without frontend code changes
 - module interiors now show MoonBook summary, chips, metrics, readiness,
   review queue, page families, output links, and latest journey when a bound
   book fragment exists

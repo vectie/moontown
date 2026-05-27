@@ -56,6 +56,6 @@ test "daemon tick migrates persisted job list to current defaults" {
   ]
   let old_daemon = DaemonState::new(jobs=old_jobs)
   let (daemon, _, _) = plan_daemon_tick(old_daemon, town, report)
-  assert_true(daemon.jobs.any(fn(job) { job.id == "run-civic-salons" }))
+  assert_true(daemon.jobs.any(fn(job) { job.id == "run-civic-patterns" }))
   assert_eq(daemon.jobs.length(), default_daemon_jobs().length())
 }

@@ -1,0 +1,16 @@
+{
+  "public_book_ids": [],
+  "hidden_book_ids": [],
+  "hidden_book_prefixes": [],
+  "hidden_tags": [
+    "internal",
+    "intermediate",
+    "participant-workspace"
+  ],
+  "hidden_scopes": [
+    "internal",
+    "intermediate",
+    "private",
+    "hidden"
+  ]
+}

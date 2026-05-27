@@ -22,6 +22,13 @@ The implementation refactor plan is tracked in
 document is the source of truth for splitting the current working prototype
 into stable package boundaries without changing behavior first.
 
+The stable-state cookbook is tracked in
+[COOKBOOK.md](/Users/kq/Workspace/moontown/docs/COOKBOOK.md). The cookbook is a
+MoonBook-generated control book that indexes canonical docs, machine-readable
+definitions, and restart-readable runtime state. Moondesk should manage the
+human desktop surface for that cookbook; Moontown consumes its manifest for
+stable-state checks and drift review.
+
 ## Layer Responsibilities
 
 ### `moontown`
@@ -41,6 +48,7 @@ It should own:
 - cross-book research synthesis
 - town-level acceptance and quality gates
 - high-level civic runtime facade calls
+- cookbook manifest consumption and drift checks
 
 It should not become:
 
@@ -60,6 +68,7 @@ It should own:
 - context hydration
 - local planning
 - result review and persistence decisions
+- generated cookbook workspace and stable-state wiki pages
 
 It should not become:
 
@@ -229,10 +238,11 @@ channels, permissions, and review gates should be hardcoded. The building
 skill pack should guide MoonClaw to choose the right reduction strategy for the
 building's social responsibility.
 
-Refactor rule: the daemon may run a scheduled civic salon job, but it must not
-know the details of any building-specific scenario. Those details belong in a
-`CivicSalonScenario` template and the building's skill rules, behind a civic
-salon/protocol runtime boundary.
+Refactor rule: the daemon may run a scheduled civic communication-pattern job,
+but it must not know the details of any building-specific scenario. Those
+details belong in a scenario template, selected communication pattern, and
+building skill rules, behind a civic protocol runtime boundary.
+`research-salon` is one pattern, not the whole abstraction.
 
 ```text
 civic service registry
@@ -268,16 +278,19 @@ Implemented protocol pieces:
 - civic workspace `BUILDING_PROTOCOL_CONTRACT.md` seed files
 - Social Square proof ledgers with one consent-gated review slice
 - Social Square salon slices loaded from `CivicSalonScenario` templates, with
-  participant MoonBooks, perspective packets, cross-area idea reductions, and a
-  reviewable question backlog
+  intermediate participant workspaces, perspective packets, cross-area idea
+  reductions, and a reviewable question backlog surfaced through the building
+  book
 - generic `CivicSalonScenario` loading so a new domain can be added by JSON
   template and schedule entry rather than a new MoonBit branch
 - salon effectiveness metrics for idea yield, research-question yield,
   cross-book links, home-book coverage, and returned idea-home records
-- return-home pages in each participating sub-area MoonBook so reduced ideas
+- return-home pages in each participating internal workspace so reduced ideas
   leave the building and become local reviewable work
-- wall-clock civic salon schedules under `.moontown/civic/salons.json`
-- append-only civic salon round records under `.moontown/civic/salon-runs/`
+- public projection filtering so intermediate salon participant workspaces and stale
+  retry attempts do not crowd the operator book list
+- wall-clock communication-pattern schedules under `.moontown/civic/pattern-schedules.json`
+- append-only communication-pattern round records under `.moontown/civic/pattern-runs/`
 - daemon-tick integration that runs due salons without hard-coding them into
   the frontend
 
@@ -296,19 +309,19 @@ The CLI entry is:
 moon run cmd/main -- civic bootstrap
 moon run cmd/main -- civic protocols bootstrap
 moon run cmd/main -- civic protocols status
-moon run cmd/main -- civic protocols salon-template templates/civic-salons/robotics-mini-salon.json
-moon run cmd/main -- civic protocols salons status
-moon run cmd/main -- civic protocols salons tick
+moon run cmd/main -- civic protocols pattern-template templates/civic-salons/robotics-mini-salon.json
+moon run cmd/main -- civic protocols schedules status
+moon run cmd/main -- civic protocols schedules tick
 moon run cmd/main -- civic doctor
 ```
 
 The recurring-salon path is intentionally schedule-driven and
-template-driven. Operators can edit `.moontown/civic/salons.json` to
+template-driven. Operators can edit `.moontown/civic/pattern-schedules.json` to
 enable/disable salons or adjust `interval_ms`, and can edit
-`.moontown/civic/salon-scenarios/<salon-id>.json` to change the domain,
+`.moontown/civic/pattern-scenarios/<session-id>.json` to change the domain,
 participants, skill rules, output paths, and review gate without changing
 MoonBit. The daemon tick calls the same due-check as
-`civic protocols salons tick`, then records completion in JSONL for restart
+`civic protocols schedules tick`, then records completion in JSONL for restart
 inspection.
 
 The registry covers Town Shell, Resident Twin Homes, Policy Hall, Contest
@@ -471,6 +484,38 @@ The daemon launcher resolves the command from `MOONTOWN_DAEMON_COMMAND`,
 `moon run cmd/main -- daemon ...`. Hosts that reap detached descendants should
 run `daemon run` under their own process manager instead of relying on
 `daemon start`.
+
+### Stable-State Cookbook
+
+The cookbook is the control book for durable definitions and operating
+procedures:
+
+```text
+MoonBook cookbook workspace
+  -> stable-state manifest
+  -> docs / definitions / runtime-state index
+  -> Moondesk human editing surface
+  -> Moontown drift checks and operator guidance
+```
+
+Current implementation lives in:
+
+- [cookbook.mbt](/Users/kq/Workspace/moontown/cookbook.mbt)
+- [docs/COOKBOOK.md](/Users/kq/Workspace/moontown/docs/COOKBOOK.md)
+
+The CLI entry is:
+
+```bash
+moon run cmd/main -- cookbook bootstrap
+moon run cmd/main -- cookbook status
+moon run cmd/main -- cookbook doctor
+```
+
+`cookbook bootstrap` creates `.moontown/books/moontown-cookbook/`, registers it
+in `.moontown/moonbooks.json`, and writes
+`.moontown/cookbook/stable-state.json`. The cookbook does not reinterpret
+domain knowledge. It names the canonical artifacts and records whether the
+stable state is complete enough to operate.
 
 ### Dispatch
 

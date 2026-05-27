@@ -62,26 +62,31 @@ Implemented:
   tell MoonClaw to read the building protocol contract before acting.
 - Social Square has a deterministic proof slice with durable inbox,
   contribution, reduction, outbox, and review ledgers.
-- Social Square can run any `CivicSalonScenario` template as a salon proof
-  slice: participant MoonBooks contribute domain perspectives, the building
-  asks MoonClaw to reduce them into cross-area research ideas, and the output
-  is distributed to a question backlog and review queue.
-- Salon templates publish structural effectiveness metrics: participant count,
+- Social Square can run any `CivicSalonScenario` template as a `research-salon`
+  communication-pattern proof slice: internal participant workspaces
+  contribute domain perspectives, the building asks MoonClaw to reduce them
+  into cross-area research ideas, and the output is distributed to a question
+  backlog and review queue.
+- `research-salon` is one reusable communication pattern. Other civic
+  workflows should use patterns such as `signal-watch`, `triage-desk`,
+  `review-council`, `match-market`, `learning-cohort`, `story-forge`, and
+  `incident-bridge` instead of copying salon logic.
+- Research-salon templates publish structural effectiveness metrics: participant count,
   idea reductions, testable research questions, participant-idea links,
   covered home books, and returned idea-home records.
-- Each participating salon MoonBook receives
+- Each participating internal salon workspace receives
   `wiki/queries/salon-returned-ideas.md`, so reduced ideas do not stay inside
   the Social Square building. They return home for review, refinement, or
   rejection.
 - `moon run cmd/main -- civic protocols status` shows protocol state across
   all buildings.
-- `moon run cmd/main -- civic protocols salon-template <path>` runs any valid
+- `moon run cmd/main -- civic protocols pattern-template <path>` runs any valid
   `CivicSalonScenario` template through the same Social Square/building
   protocol envelope. This is the extensibility seam for new domains.
-- `moon run cmd/main -- civic protocols salons status` shows recurring salon
-  schedules from `.moontown/civic/salons.json`.
-- `moon run cmd/main -- civic protocols salons tick` runs only wall-clock-due
-  salons and appends round records to `.moontown/civic/salon-runs/`.
+- `moon run cmd/main -- civic protocols schedules status` shows recurring
+  communication-pattern schedules from `.moontown/civic/pattern-schedules.json`.
+- `moon run cmd/main -- civic protocols schedules tick` runs only wall-clock-due
+  sessions and appends round records to `.moontown/civic/pattern-runs/`.
 - `moon run cmd/main -- civic doctor` projects protocol status into the civic
   service status consumed by the viewport.
 - the viewport interior can show Social Square protocol state: `review`, one
@@ -108,10 +113,10 @@ exchange place. The scenario is intentionally multi-book rather than
 single-agent, but the domain comes from JSON:
 
 ```bash
-moon run cmd/main -- civic protocols salon-template templates/civic-salons/robotics-mini-salon.json
+moon run cmd/main -- civic protocols pattern-template templates/civic-salons/robotics-mini-salon.json
 ```
 
-Each participant MoonBook receives a small workspace, a salon skill, a current
+Each participant receives a small internal workspace, a salon skill, a current
 perspective page, and an open-question page. The building receives perspective
 packets through the protocol inbox, maps them into contributions, asks the
 MoonClaw reducer to turn cross-area tensions into research ideas, and
@@ -135,9 +140,9 @@ becomes accepted long-horizon research work.
 
 This is now a reusable template pattern, not a robotics-only MoonBit path.
 To propagate it to another domain, create a scenario JSON that names the
-building, participant books, skill rules, output paths, review gate, and
+building, participant workspaces, skill rules, output paths, review gate, and
 optional fixture examples. The same runtime will run a MoonClaw reducer, write
-participant MoonBooks, run the protocol ledgers, compute structural metrics,
+internal participant workspaces, run the protocol ledgers, compute structural metrics,
 and return ideas home.
 
 ## Template-Driven Salon Runtime
@@ -145,18 +150,18 @@ and return ideas home.
 Recurring salon schedules load scenario files from:
 
 ```text
-.moontown/civic/salon-scenarios/<salon-id>.json
+.moontown/civic/pattern-scenarios/<session-id>.json
 ```
 
 One-off salon runs can load any template file:
 
 ```bash
-moon run cmd/main -- civic protocols salon-template templates/civic-salons/robotics-mini-salon.json
+moon run cmd/main -- civic protocols pattern-template templates/civic-salons/robotics-mini-salon.json
 ```
 
 The template controls:
 
-- participant MoonBook roster and perspectives
+- participant workspace roster and perspectives
 - generated salon `SKILL.md` behavior
 - quality rules for the round
 - protocol channel and reduction kind
@@ -182,19 +187,19 @@ domain. Operators create schedules explicitly:
 }
 ```
 
-The schedule is stored in `.moontown/civic/salons.json`, and a matching
-template must exist at `.moontown/civic/salon-scenarios/<salon-id>.json`. Each
+The schedule is stored in `.moontown/civic/pattern-schedules.json`, and a matching
+template must exist at `.moontown/civic/pattern-scenarios/<session-id>.json`. Each
 daemon tick calls the civic salon due-check, compares real wall-clock time with
 `next_due_ms`, runs due salons, advances `round_count`, sets the next due time,
-and appends a round record under `.moontown/civic/salon-runs/`. This makes the
-Social Square pattern long-running: participant books periodically meet, ideas
-are reduced, and relevant outputs return to the home MoonBooks.
+and appends a round record under `.moontown/civic/pattern-runs/`. This makes the
+Social Square pattern long-running: participant workspaces periodically meet,
+ideas are reduced, and relevant outputs return to the home workspaces.
 
 The recurring runner now defaults to `MoonClawReducer`. A due round writes the
 building reducer workspace, generated `SKILL.md`, participant JSON, reducer
 contract, and `moonclaw.jobs.json`; imports a MoonClaw proposal; waits for a
 valid `raw/bootstrap/civic-salon-ideas.json`; then materializes those ideas
-into ledgers, participant books, review queues, and projections. If MoonClaw
+into ledgers, participant workspaces, review queues, and projections. If MoonClaw
 does not produce a valid non-empty `CivicSalonIdea` contract, the round is
 recorded as blocked and retried later instead of silently falling back to
 template examples.

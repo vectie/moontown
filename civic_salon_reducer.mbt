@@ -247,13 +247,14 @@ fn civic_salon_reducer_packet(
   round_id : String,
   round_number : Int,
 ) -> @moonclaw.ExternalProposalPacket {
+  let pattern = civic_salon_pattern_for_scenario(scenario)
   @moonclaw.ExternalProposalPacket::new(
     packet_id~,
     title="Reduce \{scenario.title} round \{round_number}",
-    summary="Run the \{scenario.domain_label} building reducer and emit CivicSalonIdea JSON for \{scenario.title}.",
+    summary="Run the \{scenario.domain_label} \{pattern.title} reducer and emit CivicSalonIdea JSON for \{scenario.title}.",
     request_text=civic_salon_reducer_request(scenario, round_id, round_number),
     profile="civic_salon_reducer_worker",
-    output_contract="civic.salon.idea_reduction.v1",
+    output_contract=pattern.output_contract,
     context_pages=[
       "raw/bootstrap/civic-salon-reducer-contract.md", "raw/bootstrap/civic-salon-participants.json",
       "raw/bootstrap/civic-salon-reducer-input.md",
@@ -263,13 +264,21 @@ fn civic_salon_reducer_packet(
       "Read the generated SKILL.md before reducing ideas.", "Do not use template-provided seed ideas; only participant context and contract files are input.",
       "Write raw/bootstrap/civic-salon-ideas.json with the exact CivicSalonIdea contract.",
     ],
-    tags=["civic-salon", "reducer", scenario.id, scenario.building_id],
+    tags=[
+      "civic-communication-pattern",
+      pattern.id,
+      "reducer",
+      scenario.id,
+      scenario.building_id,
+    ],
     metadata={
       "producer": "moontown".to_json(),
       "building_id": scenario.building_id.to_json(),
       "book_id": scenario.building_book_id.to_json(),
       "round_id": round_id.to_json(),
       "round_number": round_number.to_json(),
+      "communication_pattern_id": pattern.id.to_json(),
+      "communication_pattern_title": pattern.title.to_json(),
       "disable_waiting_for_input": true.to_json(),
       "best_effort_on_missing_input": true.to_json(),
       "profile_metadata": {
@@ -278,7 +287,7 @@ fn civic_salon_reducer_packet(
       },
       "step_metadata": {
         "kind": "civic_salon_reducer".to_json(),
-        "output_contract": "civic.salon.idea_reduction.v1".to_json(),
+        "output_contract": pattern.output_contract.to_json(),
         "preferred_skills": [scenario.skill_name].to_json(),
         "target_pages": ["raw/bootstrap/civic-salon-ideas.json"].to_json(),
         "disable_waiting_for_input": true.to_json(),
@@ -294,11 +303,12 @@ fn civic_salon_reducer_request(
   round_id : String,
   round_number : Int,
 ) -> String {
+  let pattern = civic_salon_pattern_for_scenario(scenario)
   [
-    "You are the MoonClaw reducer for `\{scenario.title}`.",
+    "You are the MoonClaw reducer for `\{scenario.title}` using the `\{pattern.title}` communication pattern.",
     "Round: `\{round_id}` (#\{round_number}).",
     "Read `skills/\{scenario.skill_name}/SKILL.md` first, then read the reducer contract and participant JSON.",
-    "Reduce participant perspectives into novel, testable, cross-area research ideas.",
+    "Reduce participant perspectives according to this pattern: \{pattern.summary}",
     "Write the result to `raw/bootstrap/civic-salon-ideas.json`.",
     "Do not wait for user input. If evidence is incomplete, produce best-effort ideas with explicit research questions and next experiments.",
   ].join("\n")
@@ -306,6 +316,7 @@ fn civic_salon_reducer_request(
 
 ///|
 fn civic_salon_reducer_skill_text(scenario : CivicSalonScenario) -> String {
+  let pattern = civic_salon_pattern_for_scenario(scenario)
   [
     "---",
     "name: \{scenario.skill_name}",
@@ -314,7 +325,9 @@ fn civic_salon_reducer_skill_text(scenario : CivicSalonScenario) -> String {
     "",
     "# \{scenario.title} Reducer Skill",
     "",
-    "This skill controls the building-level reducer for a civic salon. The reducer is an agentic map-reduce place: participant MoonBooks map domain perspectives into packets, then this worker reduces them into useful questions and experiments for return-home work.",
+    "This skill controls the building-level reducer for the `\{pattern.title}` communication pattern. The reducer is an agentic map-reduce place: internal participant workspaces map domain perspectives into packets, then this worker reduces them into useful questions and experiments for return-home work.",
+    "",
+    "Pattern summary: \{pattern.summary}",
     "",
     "## Required Behavior",
     "",
@@ -327,7 +340,7 @@ fn civic_salon_reducer_skill_text(scenario : CivicSalonScenario) -> String {
     "## Reduction Rules",
     "",
     "- Read every participant in `raw/bootstrap/civic-salon-participants.json`.",
-    "- Use at least two participant books for each idea unless the participant set itself has only one book.",
+    "- Use at least two participant workspaces for each idea unless the participant set itself has only one workspace.",
     "- Generate ideas from tensions, dependencies, missing interfaces, evaluation gaps, or shared bottlenecks.",
     "- Prefer questions that can become benchmarks, protocols, schemas, experiments, or review gates.",
     "- Do not claim the idea is accepted knowledge. It is a returned research direction.",
@@ -335,7 +348,7 @@ fn civic_salon_reducer_skill_text(scenario : CivicSalonScenario) -> String {
     "",
     "## Output Contract",
     "",
-    "Emit the same `CivicSalonIdea` contract that Moontown materializes into building ledgers, participant MoonBooks, review queues, and projections.",
+    "Emit the same `CivicSalonIdea` contract that Moontown materializes into building ledgers, internal participant workspaces, review queues, and projections.",
     "",
     "Write `raw/bootstrap/civic-salon-ideas.json` exactly as JSON:",
     "",
@@ -346,7 +359,7 @@ fn civic_salon_reducer_skill_text(scenario : CivicSalonScenario) -> String {
     "      \"id\": \"lowercase-stable-id\",",
     "      \"title\": \"Short cross-area idea title\",",
     "      \"summary\": \"One or two precise sentences explaining the cross-area dependency.\",",
-    "      \"participating_books\": [\"book-a\", \"book-b\"],",
+    "      \"participating_books\": [\"workspace-a\", \"workspace-b\"],",
     "      \"research_questions\": [",
     "        \"A testable question that belongs in follow-up work\",",
     "        \"A second question that forces a concrete experiment or review gate\"",
@@ -361,7 +374,7 @@ fn civic_salon_reducer_skill_text(scenario : CivicSalonScenario) -> String {
     "",
     "## Concrete Example",
     "",
-    "For a robotics salon with VLA, world-model, manipulation, and safety books, a good idea links perception-action policy limits to world-model uncertainty and proposes a concrete benchmark. A poor idea merely says \"combine VLA and world models\" without a test, owner books, or review gate.",
+    "For a robotics salon with VLA, world-model, manipulation, and safety workspaces, a good idea links perception-action policy limits to world-model uncertainty and proposes a concrete benchmark. A poor idea merely says \"combine VLA and world models\" without a test, owner workspaces, or review gate.",
   ].join("\n")
 }
 
@@ -371,10 +384,12 @@ fn civic_salon_reducer_input_markdown(
   round_id : String,
   round_number : Int,
 ) -> String {
+  let pattern = civic_salon_pattern_for_scenario(scenario)
   [
-    "# Civic Salon Reducer Input",
+    "# Civic Communication Pattern Reducer Input",
     "",
-    "- Salon: \{scenario.title}",
+    "- Scenario: \{scenario.title}",
+    "- Communication pattern: \{pattern.title} (`\{pattern.id}`)",
     "- Domain: \{scenario.domain_label}",
     "- Topic: \{scenario.topic}",
     "- Building: `\{scenario.building_id}`",
@@ -401,19 +416,20 @@ fn civic_salon_reducer_contract_markdown(
     "- `id`: stable lowercase id",
     "- `title`: human-readable idea title",
     "- `summary`: cross-area dependency or tension",
-    "- `participating_books`: participant book ids from the input JSON",
+    "- `participating_books`: participant workspace ids from the input JSON",
     "- `research_questions`: at least one testable follow-up question",
     "- `why_it_matters`: judgement about why the idea is worth tracking",
     "- `next_experiment`: smallest useful next experiment or artifact",
     "",
-    "The reducer must not create accepted facts. It creates reviewable directions that are distributed back to participant MoonBooks through `\{scenario.output_channel}` and reviewed by `\{scenario.review_gate}`.",
+    "The reducer must not create accepted facts. It creates reviewable directions that are distributed back to internal participant workspaces through `\{scenario.output_channel}` and reviewed by `\{scenario.review_gate}`.",
   ].join("\n")
 }
 
 ///|
 fn civic_salon_reducer_profile_json(scenario : CivicSalonScenario) -> String {
+  let pattern = civic_salon_pattern_for_scenario(scenario)
   let parsed = @json.parse(
-    "{ \"jobs\": { \"profiles\": { \"civic_salon_reducer_worker\": { \"family\": \"civic_salon_reducer_worker\", \"role\": \"worker\", \"priority\": 155, \"tags\": [\"civic\", \"salon\", \"reducer\", \{json_string(scenario.building_id)}], \"match\": { \"all\": [\"civic-salon\", \"reducer\"], \"any\": [\{json_string(scenario.id)}, \{json_string(scenario.building_id)}] }, \"steps\": [{ \"id\": \"reduce_civic_salon_ideas\", \"title\": \"Reduce civic salon participant packets into ideas\", \"kind\": \"job.analysis\", \"prompt_template\": \"Read ${proposal.request_text}. Then read the listed context pages and skill_paths. Write raw/bootstrap/civic-salon-ideas.json only after validating the CivicSalonIdea contract. Do not wait for input and do not use template seed ideas.\", \"metadata\": { \"preferred_skills\": [\{json_string(scenario.skill_name)}], \"enable_tools\": true, \"web_search\": false, \"disable_waiting_for_input\": true, \"best_effort_on_missing_input\": true, \"timeout_ms\": 600000, \"board_lane\": \"Salon Reducer\", \"board_order\": 0, \"role_runtime\": { \"planning_layer\": \"domain\", \"runtime_mode\": \"reducer\", \"tool_access\": \"workspace\", \"memory_scope\": \"domain\", \"allow_delegate\": false, \"allow_workspace_write\": true, \"allow_execution_tools\": true, \"output_contract\": \"civic.salon.idea_reduction.v1\" } } }] } } } }",
+    "{ \"jobs\": { \"profiles\": { \"civic_salon_reducer_worker\": { \"family\": \"civic_salon_reducer_worker\", \"role\": \"worker\", \"priority\": 155, \"tags\": [\"civic\", \"communication-pattern\", \{json_string(pattern.id)}, \"reducer\", \{json_string(scenario.building_id)}], \"match\": { \"all\": [\"civic-communication-pattern\", \"reducer\"], \"any\": [\{json_string(pattern.id)}, \{json_string(scenario.id)}, \{json_string(scenario.building_id)}] }, \"steps\": [{ \"id\": \"reduce_civic_pattern_ideas\", \"title\": \"Reduce communication-pattern participant packets into ideas\", \"kind\": \"job.analysis\", \"prompt_template\": \"Read ${proposal.request_text}. Then read the listed context pages and skill_paths. Write raw/bootstrap/civic-salon-ideas.json only after validating the CivicSalonIdea contract. Do not wait for input and do not use template seed ideas.\", \"metadata\": { \"preferred_skills\": [\{json_string(scenario.skill_name)}], \"enable_tools\": true, \"web_search\": false, \"disable_waiting_for_input\": true, \"best_effort_on_missing_input\": true, \"timeout_ms\": 600000, \"board_lane\": \{json_string(pattern.title)}, \"board_order\": 0, \"communication_pattern_id\": \{json_string(pattern.id)}, \"role_runtime\": { \"planning_layer\": \"domain\", \"runtime_mode\": \"reducer\", \"tool_access\": \"workspace\", \"memory_scope\": \"domain\", \"allow_delegate\": false, \"allow_workspace_write\": true, \"allow_execution_tools\": true, \"output_contract\": \{json_string(pattern.output_contract)} } } }] } } } }",
   ) catch {
     _ => Json::object({})
   }

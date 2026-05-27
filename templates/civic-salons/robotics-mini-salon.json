@@ -1,6 +1,8 @@
 {
   "id": "robotics-mini-social-square",
   "title": "Robotics Mini Social Square Salon",
+  "communication_pattern_id": "research-salon",
+  "communication_pattern_label": "Research Salon",
   "building_id": "social-square",
   "building_book_id": "wenyu-social-square",
   "domain_label": "robotics",

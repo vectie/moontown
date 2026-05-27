@@ -13,6 +13,8 @@ The short answer is:
   execution, generated projections, and operator workflow: about 50-54% complete
 - as a true civic-building protocol town where buildings aggregate, exchange,
   reduce, and distribute agent/info packets: about 40-45% complete
+- as a stable definition system with a generated cookbook/control book: about
+  35-40% complete
 
 The project is no longer just markdown or a static map. It now has a real
 terrain viewport, modular civic buildings, daemon/watch state, MoonBook/MoonClaw
@@ -24,8 +26,8 @@ review queues, projections, role-specific MoonClaw skill contracts, and building
 protocol contracts. Social Square has a durable protocol proof slice with
 inbox, contribution, reduction, outbox, review, home-return, and effectiveness
 metric ledgers. The template-driven salon path now proves that a building can
-hold a multi-book exchange, reduce ideas, measure output yield, and return
-reduced ideas back to each participant MoonBook. The remaining work is mostly
+hold a multi-perspective exchange, reduce ideas, measure output yield, and
+return reduced ideas back to each internal participant workspace. The remaining work is mostly
 integration depth: the other civic buildings still need repeated scenario
 packets, real MoonClaw reductions, MoonBook accept/reject persistence, and
 reviewable service histories before they can be called reliable civic services.
@@ -33,6 +35,8 @@ The plan is tracked in
 [WENYU_BUILDING_PROTOCOL_PLAN.md](/Users/kq/Workspace/moontown/docs/WENYU_BUILDING_PROTOCOL_PLAN.md).
 The structural refactor plan is tracked in
 [REFACTOR_PLAN.md](/Users/kq/Workspace/moontown/docs/REFACTOR_PLAN.md).
+The stable-state cookbook plan is tracked in
+[COOKBOOK.md](/Users/kq/Workspace/moontown/docs/COOKBOOK.md).
 
 ## Distance To Fully Functioning Town
 
@@ -49,8 +53,9 @@ service-specific execution for each civic module.
 | Research watchers | Medium | OPC and LLM standing watches run through real books and ledgers; both are visible in the watch portfolio, but the current latest LLM watcher is still `NeedsReview` and the OPC watcher is still running |
 | Civic modules | Medium | Policy, contest, social, talent, market, bridge, story, education, resident, vitality, and town-shell modules now have generated MoonBook workspaces, schemas, review queues, projections, and skill contracts; end-to-end service runs still need soak testing |
 | Building protocol layer | Far-medium | Buildings have modes and skills, but do not yet have durable inbox/contribution/reduction/outbox ledgers or AI-guided map/reduce-style protocol execution |
-| Runtime architecture | Medium | Civic protocol behavior now has a documented refactor path, the salon scheduler is split away from generic daemon code, daemon scheduled jobs use a dispatcher, and protocol registry/store/status/fixtures are separated; package-level civic runtime splits and MoonClaw-driven reducers are still pending |
+| Runtime architecture | Medium | Civic protocol behavior now has a documented refactor path, the communication-pattern scheduler is split away from generic daemon code, daemon scheduled jobs use a dispatcher, and protocol registry/store/status/fixtures are separated; package-level civic runtime splits and MoonClaw-driven reducers are still pending |
 | Designer/operator tooling | Medium | JSON config works, the standalone viewport has view/editor/output modes, editor mode shows town-level Moondesk handoff lanes, and detailed single-agent/workspace editing remains in Moondesk |
+| Cookbook/control book | Medium-far | `cookbook bootstrap` creates a MoonBook-backed stable-state cookbook, generated wiki pages, generated site, and `.moontown/cookbook/stable-state.json` | Needs Moondesk-native browsing/editing, drift review UI, import/export, and MoonBook-native templates upstream |
 | Production deployment | Far | Auth, backups, permissions, packaged supervisor, and recovery playbooks are not complete |
 
 ## Definition Of Fully Functioning
@@ -93,6 +98,7 @@ A fully functioning Wenyu town means:
 | MoonClaw execution binding | Proposal/run boundary and worker execution path exist; every Wenyu civic module now has a role-specific skill pack path and output contract injected into worker context | 56% | Need repeated successful module-specific service executions and stricter result parsing per contract |
 | Real civic services | Moontown can create the civic service lanes and route civic workflow tasks | 35% | Policy, contest, social, talent, bridge, market, story, and education modules still need service-specific live runs, operator review, and accepted output histories |
 | Designer workflow | Manual JSON config plus standalone editor mode and handoff/bridge visibility | 48% | Needs write-back import/export, asset manifest checks, richer collision preview, and automatic Moondesk artifact ingestion |
+| Stable-state cookbook | MoonBook cookbook workspace, stable-state manifest, ownership pages, generated site, and CLI status are in place | 38% | Needs Moondesk management UI, drift comparison, review workflow, and integration into operator dashboard |
 | Production readiness | Local development works; build/check pass | 25% | Needs packaged daemon, auth, permissions, backups, observability, and deployment model |
 
 ## What Is Real Today
@@ -163,27 +169,30 @@ Implemented and validated:
   initial Social Square protocol ledgers.
 - `moon run cmd/main -- civic protocols status` reports protocol state across
   all Wenyu civic buildings.
-- `moon run cmd/main -- civic protocols salon-template <path>` now runs the
-  same civic salon envelope from a `CivicSalonScenario` JSON file, so future
-  domains can be added by template and schedule instead of editing MoonBit
-  runner code.
-- `moon run cmd/main -- civic protocols salons status` and
-  `moon run cmd/main -- civic protocols salons tick` expose the recurring
-  salon scheduler. The daemon now checks the same schedule on every tick and
-  runs enabled salons when real wall-clock `next_due_ms` has arrived.
-- Salon templates write template-defined metrics pages,
+- `moon run cmd/main -- civic protocols patterns` lists reusable communication
+  patterns; `research-salon` is the current concrete knowledge-exchange
+  pattern.
+- `moon run cmd/main -- civic protocols pattern-template <path>` now runs the
+  same communication-pattern envelope from a `CivicSalonScenario` JSON file, so
+  future domains can be added by template and schedule instead of editing
+  MoonBit runner code.
+- `moon run cmd/main -- civic protocols schedules status` and
+  `moon run cmd/main -- civic protocols schedules tick` expose the recurring
+  communication-pattern scheduler. The daemon now checks the same schedule on
+  every tick and runs enabled sessions when real wall-clock `next_due_ms` has arrived.
+- Research-salon templates write template-defined metrics pages,
   `.moontown/civic/protocols/social-square/metrics.json`, and a
   `home_returns.jsonl` ledger. The structural effectiveness metric tracks
-  participant books, reduced ideas, research questions, participant-idea links,
+  participant workspaces, reduced ideas, research questions, participant-idea links,
   covered books, and returned idea-home records.
 - Recurring salon rounds write an additional
-  `.moontown/civic/salon-runs/<salon-id>.jsonl` ledger for long-horizon audit
+  `.moontown/civic/pattern-runs/<session-id>.jsonl` ledger for long-horizon audit
   and restart inspection.
-- Each salon participant book receives
+- Each research-salon participant workspace receives
   `wiki/queries/salon-returned-ideas.md`, so the Social Square building output
-  returns to the relevant home MoonBooks instead of staying as a central
+  returns to the relevant home workspaces instead of staying as a central
   summary only.
-- Social Square currently has protocol status `review`; salon templates can add
+- Social Square currently has protocol status `review`; pattern templates can add
   inbox packets, contributions, reductions, outbox records, home-return records,
   and review gates without adding new MoonBit domain branches.
 - The civic registry defines `town-shell`, `resident-twins`, `policy-hall`,

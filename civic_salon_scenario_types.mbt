@@ -69,6 +69,8 @@ pub struct CivicSalonHomeReturn {
 pub struct CivicSalonScenario {
   id : String
   title : String
+  communication_pattern_id : String?
+  communication_pattern_label : String?
   building_id : String
   building_book_id : String
   domain_label : String

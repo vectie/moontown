@@ -15,6 +15,7 @@ It covers:
 - the Rabbita frontend
 - the current limits of the repo
 - the Wenyu civic MoonBook bootstrap
+- the MoonBook-generated stable-state cookbook
 
 ## What You Can Use Right Now
 
@@ -28,6 +29,7 @@ Right now, `moontown` is usable as:
 - a mayor-level synthesis and quality-gate surface for parallel research lanes
 - typed runtime status and one-shot daemon tick commands
 - persisted standing goals, a continuous daemon-loop command, and a supervised background daemon
+- a MoonBook-generated cookbook for docs, definitions, and stable-state control
 - a scene-based dashboard
 - a Rabbita simulation frontend
 - a starter asset pipeline
@@ -199,20 +201,25 @@ Use view mode to present the town, editor mode to check module placement and
 bindings, and output mode to retrieve MoonBook-generated sites, reports,
 review queues, and page-family summaries.
 
-## 1.5 Run A Building Protocol Salon Template
+## 1.5 Run A Building Communication Pattern Template
 
-Social Square can run any `CivicSalonScenario` JSON template through the
-building protocol model:
+Social Square can run a research-salon `CivicSalonScenario` JSON template
+through the generic building communication-pattern model:
 
 ```bash
-moon run cmd/main -- civic protocols salon-template templates/civic-salons/robotics-mini-salon.json
+moon run cmd/main -- civic protocols patterns
+moon run cmd/main -- civic protocols pattern-template templates/civic-salons/robotics-mini-salon.json
 moon run cmd/main -- civic protocols status
 ```
 
-That command creates the participant MoonBooks declared by the template, sends
-their domain perspectives through Social Square, runs a MoonClaw reducer
-guided by the generated `SKILL.md`, and writes relevant ideas back to each
-home book after the reducer emits `raw/bootstrap/civic-salon-ideas.json`.
+That command creates the internal participant workspaces declared by the
+template, sends their domain perspectives through Social Square, runs a
+MoonClaw reducer guided by the generated `SKILL.md`, and writes relevant ideas
+back to each home workspace after the reducer emits
+`raw/bootstrap/civic-salon-ideas.json`. Participant workspaces are treated as
+intermediate pattern state. The public UI and main MoonBook catalog surface the
+building book, such as `wenyu-social-square`, rather than every temporary
+participant workspace.
 
 Important outputs:
 
@@ -227,7 +234,7 @@ cross-book links, home-book coverage, and return-home records. It proves the
 building performed exchange-reduce-distribute; it does not bypass the review
 queue or claim the ideas are already correct.
 
-The salon path is not robotics-hardcoded. `civic protocols salon-template
+The pattern path is not robotics-hardcoded. `civic protocols pattern-template
 <path>` loads a `CivicSalonScenario` JSON file and runs the same protocol
 envelope for that domain. Use
 [CIVIC_SALON_TEMPLATES.md](/Users/kq/Workspace/moontown/docs/CIVIC_SALON_TEMPLATES.md)
@@ -251,6 +258,39 @@ Useful bridge artifacts:
   opens the live bridge ledger built from `.moontown/moondesk-*` and
   `.moontown/book-results`.
 
+## 1.6 Generate The Stable-State Cookbook
+
+Generate or refresh the cookbook control book:
+
+```bash
+moon run cmd/main -- cookbook bootstrap
+moon run cmd/main -- cookbook status
+```
+
+This registers the `moontown-cookbook` MoonBook, writes the generated
+workspace under `.moontown/books/moontown-cookbook/`, and emits the
+stable-state manifest at:
+
+```text
+.moontown/cookbook/stable-state.json
+```
+
+The cookbook tracks canonical docs, machine-readable definitions, and optional
+runtime state files. It is the control surface for stable Moontown definitions:
+MoonBook generates it, Moondesk should manage the human editing/browsing
+surface, and Moontown consumes it for drift checks and operator guidance.
+
+Use the cookbook when you want to answer:
+
+- which docs are canonical
+- which JSON registries define the town
+- which runtime files prove the daemon/civic systems are alive
+- which missing files are real drift versus optional not-yet-started state
+
+More detail:
+
+- [COOKBOOK.md](/Users/kq/Workspace/moontown/docs/COOKBOOK.md)
+
 For overnight macOS runs, prefer launchd. This runs the foreground worker under
 the OS instead of relying on a detached child process:
 
@@ -272,7 +312,7 @@ Stop it with:
 ./scripts/uninstall-launchd-daemon.sh
 ```
 
-## 1.5 Bootstrap Wenyu Civic MoonBooks
+## 1.7 Bootstrap Wenyu Civic MoonBooks
 
 Create or refresh the Wenyu civic service workspaces:
 
@@ -350,9 +390,10 @@ Inspect the civic-building protocol layer:
 moon run cmd/main -- civic protocols bootstrap
 moon run cmd/main -- civic protocols status
 moon run cmd/main -- civic protocols doctor
-moon run cmd/main -- civic protocols salon-template templates/civic-salons/robotics-mini-salon.json
-moon run cmd/main -- civic protocols salons status
-moon run cmd/main -- civic protocols salons tick
+moon run cmd/main -- civic protocols patterns
+moon run cmd/main -- civic protocols pattern-template templates/civic-salons/robotics-mini-salon.json
+moon run cmd/main -- civic protocols schedules status
+moon run cmd/main -- civic protocols schedules tick
 ```
 
 `civic protocols bootstrap` writes `.moontown/civic/protocols.json`, per-building
@@ -361,19 +402,28 @@ moon run cmd/main -- civic protocols salons tick
 building protocol table. `civic protocols doctor` refreshes
 `.moontown/civic/protocol-status.json` and `.moontown/civic/protocol-status.md`.
 
-`civic protocols salon-template <path>` runs a domain scenario from JSON. The
-template defines participants, skill rules, quality rules, output paths, and
-review gate. Template `ideas` are fixture examples only; production runs use
-the MoonClaw reducer output contract. For recurring daemon use, place the file at
-`.moontown/civic/salon-scenarios/<salon-id>.json` and make sure
-`.moontown/civic/salons.json` has a schedule with the same `id`.
+`civic protocols patterns` lists reusable communication patterns such as
+`research-salon`, `signal-watch`, `triage-desk`, `review-council`,
+`match-market`, `learning-cohort`, `story-forge`, and `incident-bridge`.
 
-`civic protocols salons status` reports the persisted recurring salon schedule
-from `.moontown/civic/salons.json`. `civic protocols salons tick` performs the
+`civic protocols pattern-template <path>` runs a communication-pattern scenario
+from JSON. The current concrete runtime is the `research-salon` pattern, which
+still uses the `CivicSalonIdea` output contract. The template defines
+participants, pattern id, skill rules, quality rules, output paths, and review
+gate. Template `ideas` are fixture examples only; production runs use the
+MoonClaw reducer output contract. If the `building_id` is not already in the
+Wenyu registry, Moontown synthesizes a generic exchange-reduce-distribute
+protocol from the scenario fields. For recurring daemon use, place the file at
+`.moontown/civic/pattern-scenarios/<session-id>.json` and make sure
+`.moontown/civic/pattern-schedules.json` has a schedule with the same `id`.
+
+`civic protocols schedules status` reports the persisted recurring
+communication-pattern schedule from `.moontown/civic/pattern-schedules.json`.
+`civic protocols schedules tick` performs the
 same due-check used by the daemon: it compares real wall-clock time against
-`next_due_ms`, runs only due salons, advances the schedule, and appends a
-round record to `.moontown/civic/salon-runs/<salon-id>.jsonl`. There is no
-built-in recurring salon; operators add schedules and matching templates
+`next_due_ms`, runs only due sessions, advances the schedule, and appends a
+round record to `.moontown/civic/pattern-runs/<session-id>.jsonl`. There is no
+built-in recurring pattern session; operators add schedules and matching templates
 explicitly while the system is experimental.
 
 Run `civic doctor` after protocol updates so `civic-status.json` includes
@@ -384,10 +434,10 @@ Overnight validation checklist:
 - `moon run cmd/main -- daemon doctor` should report a fresh heartbeat and a
   non-stale runtime.
 - `.moontown/daemon.json` should show `tick_sequence` increasing.
-- `.moontown/civic/salons.json` should show `round_count` increasing roughly
-  every 30 minutes for enabled due salons.
-- `.moontown/civic/salon-runs/<salon-id>.jsonl` should
-  contain one JSON line per completed salon round.
+- `.moontown/civic/pattern-schedules.json` should show `round_count` increasing
+  roughly every 30 minutes for enabled due sessions.
+- `.moontown/civic/pattern-runs/<session-id>.jsonl` should
+  contain one JSON line per completed communication-pattern round.
 - `.moontown/watchers/watch-opc-news.jsonl` should contain a new record after
   the OPC standing goal reaches `next_due_tick`.
 - `.moontown/watchers/watch-llm-training.jsonl` should contain a new record

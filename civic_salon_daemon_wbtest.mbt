@@ -1,10 +1,10 @@
 ///|
-test "default civic salon schedules are explicit opt-in" {
+test "default civic communication-pattern schedules are explicit opt-in" {
   assert_eq(default_civic_salon_schedules().length(), 0)
 }
 
 ///|
-test "civic salon schedule uses real wall-clock due checks" {
+test "civic communication-pattern schedule uses real wall-clock due checks" {
   let schedule = daemon_civic_salon_schedule(next_due_ms=10UL)
   assert_true(!civic_salon_is_due(schedule, 9UL))
   assert_true(civic_salon_is_due(schedule, 10UL))
@@ -59,7 +59,7 @@ async test "due civic salon rounds persist schedule and run ledger" {
     now_ms=1_000UL,
     reducer_mode=FixtureReducer,
   )
-  assert_true(summary.has_prefix("Ran 1 civic salon"))
+  assert_true(summary.has_prefix("Ran 1 civic communication-pattern"))
   let schedule_path = default_civic_salon_schedule_path(snapshot_path~)
   let ledger_path = default_civic_salon_run_ledger_path(
     "future-energy-social-square",
@@ -100,12 +100,13 @@ async test "stale civic salon projection refreshes without forcing another round
     default_civic_salon_schedule_path(snapshot_path~),
     [schedule],
   )
+  let scenario = daemon_civic_salon_scenario()
   write_text_file(
     civic_salon_scenario_path(schedule.id, snapshot_path~),
-    daemon_civic_salon_scenario().to_json().stringify(indent=2),
+    scenario.to_json().stringify(indent=2),
   )
   write_text_file(
-    civic_salon_projection_path(schedule, snapshot_path),
+    civic_salon_projection_path_for_scenario(scenario, snapshot_path),
     "{\"book_id\":\"wenyu-social-square\",\"status_chips\":[{\"label\":\"round 1\",\"tone\":\"info\"}]}",
   )
   write_text_file(
@@ -120,7 +121,9 @@ async test "stale civic salon projection refreshes without forcing another round
     tick=99,
     now_ms=2_000UL,
   )
-  assert_true(summary.has_prefix("Refreshed 1 civic salon projection"))
+  assert_true(
+    summary.has_prefix("Refreshed 1 civic communication-pattern projection"),
+  )
   let refreshed = @fs.read_file(
     "\{root}/books/wenyu-social-square/book/moonbook-ui-state.json",
   ).text()
@@ -154,6 +157,8 @@ fn daemon_civic_salon_scenario() -> CivicSalonScenario {
   {
     id: "future-energy-social-square",
     title: "Future Energy Social Square Salon",
+    communication_pattern_id: Some("research-salon"),
+    communication_pattern_label: Some("Research Salon"),
     building_id: "social-square",
     building_book_id: "wenyu-social-square",
     domain_label: "future energy",

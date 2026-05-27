@@ -15,6 +15,7 @@ It is designed for:
 - embedded role-specialized planning runtimes
 - long-lived town state and snapshots
 - scene-based operator visibility
+- stable docs/definition cookbook control
 - browser-facing simulation dashboards
 
 ## What Moontown Feels Like
@@ -67,6 +68,11 @@ Implemented today:
 - Wenyu civic service registry and `civic bootstrap` command that creates
   module-mode-aware support workspaces, schemas, review queues, generated
   projections, and dedicated MoonClaw skill contracts for enabled civic modules
+- civic communication-pattern registry: `research-salon`, `signal-watch`,
+  `triage-desk`, `review-council`, `match-market`, `learning-cohort`,
+  `story-forge`, and `incident-bridge`
+- MoonBook-generated `moontown-cookbook` control book for canonical docs,
+  definitions, runtime-state indexes, and stable-state drift checks
 
 Wenyu Valley product readiness is tracked in:
 
@@ -74,6 +80,8 @@ Wenyu Valley product readiness is tracked in:
 - [docs/WENYU_UI_MODULE_SYSTEM.md](/Users/kq/Workspace/moontown/docs/WENYU_UI_MODULE_SYSTEM.md)
 - [docs/WENYU_BUILDING_PROTOCOL_PLAN.md](/Users/kq/Workspace/moontown/docs/WENYU_BUILDING_PROTOCOL_PLAN.md)
 - [docs/WENYU_TOWN_STATUS.md](/Users/kq/Workspace/moontown/docs/WENYU_TOWN_STATUS.md)
+- [docs/CIVIC_COMMUNICATION_PATTERNS.md](/Users/kq/Workspace/moontown/docs/CIVIC_COMMUNICATION_PATTERNS.md)
+- [docs/COOKBOOK.md](/Users/kq/Workspace/moontown/docs/COOKBOOK.md)
 
 The status document is the source of truth for the latest observed distance to
 a fully functioning town. It separates the visual town shell, the local 24/7
@@ -149,27 +157,43 @@ Inspect protocol state with:
 ```bash
 moon run cmd/main -- civic protocols bootstrap
 moon run cmd/main -- civic protocols status
-moon run cmd/main -- civic protocols salon-template templates/civic-salons/robotics-mini-salon.json
-moon run cmd/main -- civic protocols salons status
-moon run cmd/main -- civic protocols salons tick
+moon run cmd/main -- civic protocols patterns
+moon run cmd/main -- civic protocols pattern-template templates/civic-salons/robotics-mini-salon.json
+moon run cmd/main -- civic protocols schedules status
+moon run cmd/main -- civic protocols schedules tick
 moon run cmd/main -- civic doctor
 ```
 
-The salon runtime is now template-driven. New domains should provide a
+The communication-pattern runtime is template-driven. New domains should provide a
 `CivicSalonScenario` JSON file with participant books, skill rules, quality
-rules, output paths, and review gates. `civic protocols salon-template <path>`
-runs a scenario directly; recurring salon jobs load a matching template from
-`.moontown/civic/salon-scenarios/<salon-id>.json`. Moontown should not grow one
+rules, output paths, and review gates. `civic protocols pattern-template <path>`
+runs a scenario directly; recurring pattern schedules load a matching template from
+`.moontown/civic/pattern-scenarios/<session-id>.json`. Moontown should not grow one
 MoonBit branch per domain. See
 [docs/CIVIC_SALON_TEMPLATES.md](/Users/kq/Workspace/moontown/docs/CIVIC_SALON_TEMPLATES.md).
 
-The salon is also wired into the 24/7 daemon path. `civic protocols salons
-status` shows `.moontown/civic/salons.json`; `civic protocols salons tick`
-runs only wall-clock-due salons and appends round records under
-`.moontown/civic/salon-runs/`. There is no built-in recurring domain; add a
+The pattern scheduler is also wired into the 24/7 daemon path. `civic protocols
+schedules status` shows `.moontown/civic/pattern-schedules.json`; `civic
+protocols schedules tick` runs only wall-clock-due sessions and appends round records under
+`.moontown/civic/pattern-runs/`. There is no built-in recurring domain; add a
 schedule plus a matching scenario template to make `daemon run` or
 `daemon start` periodically bring participant books into the building, reduce
 ideas, and return them home.
+
+## Stable-State Cookbook
+
+Generate or refresh the cookbook with:
+
+```bash
+moon run cmd/main -- cookbook bootstrap
+moon run cmd/main -- cookbook status
+```
+
+This creates `.moontown/books/moontown-cookbook/`, registers it in
+`.moontown/moonbooks.json`, and writes
+`.moontown/cookbook/stable-state.json`. MoonBook generates and stores the
+cookbook, Moondesk should become the human desktop surface for managing it, and
+Moontown consumes the manifest for drift checks and operator guidance.
 
 ## Standing Goal Model
 
