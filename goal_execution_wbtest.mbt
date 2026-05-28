@@ -48,10 +48,10 @@ async test "research persistence handoff uses topic artifacts instead of runtime
 }
 
 ///|
-test "moonclaw supervision seconds parser accepts only positive integers" {
-  assert_eq(parse_positive_seconds("900", fallback=3600), 900)
-  assert_eq(parse_positive_seconds(" 1800 ", fallback=3600), 1800)
-  assert_eq(parse_positive_seconds("", fallback=3600), 3600)
-  assert_eq(parse_positive_seconds("0", fallback=3600), 3600)
-  assert_eq(parse_positive_seconds("10m", fallback=3600), 3600)
+test "moonclaw supervision seconds parser accepts zero for nonblocking mode" {
+  assert_eq(parse_non_negative_seconds("900", fallback=0), 900)
+  assert_eq(parse_non_negative_seconds(" 1800 ", fallback=0), 1800)
+  assert_eq(parse_non_negative_seconds("0", fallback=3600), 0)
+  assert_eq(parse_non_negative_seconds("", fallback=3600), 3600)
+  assert_eq(parse_non_negative_seconds("10m", fallback=3600), 3600)
 }

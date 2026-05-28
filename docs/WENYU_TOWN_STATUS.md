@@ -1,20 +1,20 @@
 # Wenyu Valley Town Status
 
-Last updated: 2026-05-28 00:20 CST
+Last updated: 2026-05-28 12:49 CST
 
 This document answers one question: how far is the current Wenyu Valley
 implementation from a fully functioning town?
 
 The short answer is:
 
-- as a visual, inspectable town shell: about 70% complete
-- as a local 24/7 AI control-plane prototype: about 64% complete
+- as a visual, inspectable town shell: about 72% complete
+- as a local 24/7 AI control-plane prototype: about 68% complete
 - as a fully functioning civic AI town with real services, persistent memory,
-  execution, generated projections, and operator workflow: about 50-54% complete
+  execution, generated projections, and operator workflow: about 52-56% complete
 - as a true civic-building protocol town where buildings aggregate, exchange,
-  reduce, and distribute agent/info packets: about 48-52% complete
+  reduce, and distribute agent/info packets: about 55-58% complete
 - as a stable definition system with a generated cookbook/control book: about
-  35-40% complete
+  38-42% complete
 
 The project is no longer just markdown or a static map. It now has a real
 terrain viewport, modular civic buildings, daemon/watch state, MoonBook/MoonClaw
@@ -26,11 +26,13 @@ review queues, projections, role-specific MoonClaw skill contracts, and building
 protocol contracts. Social Square has a durable protocol proof slice with
 inbox, contribution, reduction, outbox, review, home-return, and effectiveness
 metric ledgers. The template-driven communication-pattern path now covers all
-11 Wenyu buildings through JSON scenarios and a manifest installer, so every
-building can be scheduled without adding a new MoonBit runner branch. The
-remaining work is mostly integration depth: most civic buildings still need
-repeated real MoonClaw reductions, MoonBook accept/reject persistence, and
-reviewable service histories before they can be called reliable civic services.
+11 Wenyu buildings through JSON scenarios and a manifest installer, and the
+final integration portfolio adds five long-horizon research watches for OPC,
+LLM training, robotics, agents, and hardware. The current local daemon is
+healthy under a supervisor, but the remaining work is still integration depth:
+most civic buildings need repeated real MoonClaw reductions, MoonBook
+accept/reject persistence, and reviewable service histories before they can be
+called reliable civic services.
 The plan is tracked in
 [WENYU_BUILDING_PROTOCOL_PLAN.md](/Users/kq/Workspace/moontown/docs/WENYU_BUILDING_PROTOCOL_PLAN.md).
 The structural refactor plan is tracked in
@@ -40,22 +42,23 @@ The stable-state cookbook plan is tracked in
 
 ## Distance To Fully Functioning Town
 
-The current system is roughly halfway to the full Wenyu Valley vision. The map,
-daemon skeleton, standing watchers, truthful runtime projection, and civic
-workspace bootstrap are real. The main missing layer is repeated, reviewed,
-service-specific execution for each civic module.
+The current system is past the pure shell stage. The map, supervised local
+daemon, standing watchers, truthful runtime projection, civic workspace
+bootstrap, and recurring communication-pattern schedules are real. The main
+missing layer is repeated, reviewed, service-specific execution for each civic
+module.
 
 | Layer | Current Distance | Why |
 |---|---:|---|
 | Visual town shell | Near | The 256 x 144 Wenyu map, drag/zoom, module buildings, interiors, water overlays, and validation are in place |
 | Truthful runtime UI | Medium-near | `visual-projection.json` now has module status, module interiors can read MoonBook UI fragments, and the viewport avoids fake busy state; civic books still need full coverage |
-| Long-running mayor loop | Medium | The daemon worker is healthy locally with zero recorded failures in the current runtime file; the service supervisor wrapper is not currently active, so install/service hardening and multi-day recovery evidence are still required |
-| Research watchers | Medium | OPC and LLM standing watches run through real books and ledgers; both are visible in the watch portfolio, but the current latest LLM watcher is still `NeedsReview` and the OPC watcher is still running |
-| Civic modules | Medium | Policy, contest, social, talent, market, bridge, story, education, resident, vitality, and town-shell modules now have generated MoonBook workspaces, schemas, review queues, projections, and skill contracts; end-to-end service runs still need soak testing |
-| Building protocol layer | Medium | Buildings have modes, skills, protocol definitions, ledgers, and default communication-pattern scenario templates; Social Square has live proof slices, while most other buildings still need repeated live reducer evidence |
-| Runtime architecture | Medium | Civic protocol behavior now has a documented refactor path, the communication-pattern scheduler is split away from generic daemon code, daemon scheduled jobs use a dispatcher, and protocol registry/store/status/fixtures are separated; package-level civic runtime splits and MoonClaw-driven reducers are still pending |
+| Long-running mayor loop | Medium-near | The daemon worker is healthy locally with zero recorded failures in the current runtime file, and standing-watch dispatch is now nonblocking so long MoonClaw runs do not serialize the whole town; install/service hardening and multi-day recovery evidence are still required |
+| Research watchers | Medium-near | The final integration portfolio installs five standing watches: OPC, LLM training, Robotics, Agents, and Hardware. They are visible in the watch portfolio and run through real books/ledgers, but overnight proof still depends on repeated accepted deltas rather than only operational records |
+| Civic modules | Medium | Policy, contest, social, talent, market, bridge, story, education, resident, vitality, and town-shell modules now have generated MoonBook workspaces, schemas, review queues, projections, and skill contracts; accepted service-result histories are still missing |
+| Building protocol layer | Medium-near | Buildings have modes, skills, protocol definitions, ledgers, default communication-pattern scenario templates, and recurring schedules; accepted MoonBook persistence and UI protocol history still need repeated live evidence |
+| Runtime architecture | Medium-near | Civic protocol behavior now has a documented refactor path, the communication-pattern scheduler is split away from generic daemon code, daemon scheduled jobs use a dispatcher, and protocol registry/store/status/fixtures are separated; package-level civic runtime splits and stronger contract validation are still pending |
 | Designer/operator tooling | Medium | JSON config works, the standalone viewport has view/editor/output modes, editor mode shows town-level Moondesk handoff lanes, and detailed single-agent/workspace editing remains in Moondesk |
-| Cookbook/control book | Medium-far | `cookbook bootstrap` creates a MoonBook-backed stable-state cookbook, generated wiki pages, generated site, and `.moontown/cookbook/stable-state.json` | Needs Moondesk-native browsing/editing, drift review UI, import/export, and MoonBook-native templates upstream |
+| Cookbook/control book | Medium-far | `cookbook bootstrap` creates a MoonBook-backed stable-state cookbook, generated wiki pages, generated site, and `.moontown/cookbook/stable-state.json`; needs Moondesk-native browsing/editing, drift review UI, import/export, and MoonBook-native templates upstream |
 | Production deployment | Far | Auth, backups, permissions, packaged supervisor, and recovery playbooks are not complete |
 
 ## Definition Of Fully Functioning
@@ -92,11 +95,11 @@ A fully functioning Wenyu town means:
 | Water effects | Runtime overlay adds depth, reflection, and bridge shadow | 35% | Needs richer segmented river logic and seasonal/weather response |
 | Agents on map | Visual agent projection exists; active module workers route to module entrances and idle/completed workers stay hidden | 60% | Needs Wenyu-specific task projection coverage for every civic module |
 | Operator dashboard | Shows daemon/watch progress, a multi-topic watch portfolio, request composer, portal to canonical viewport, output mode, and Moondesk bridge visibility | 68% | Needs approval queues and richer per-book progress panels |
-| Mayor daemon | Local run/start/doctor/stop, heartbeat, stale detection, standing-goal dispatch | 62% | Needs long-run soak testing, service install hardening, and recovery playbooks |
-| Standing watchers | Data-driven standing goals and watcher ledgers exist; the UI now aggregates all watcher ledgers instead of only the OPC lane | 64% | Need stronger MoonBook quality accounting and accepted-change views |
+| Mayor daemon | Local run/start/doctor/stop, heartbeat, stale detection, standing-goal dispatch, supervisor/worker runtime health, and nonblocking MoonClaw supervision | 68% | Needs multi-day soak evidence, deployment hardening, and recovery playbooks |
+| Standing watchers | Data-driven standing goals and watcher ledgers exist; the final portfolio installs OPC, LLM training, Robotics, Agents, and Hardware watches | 68% | Need stronger accepted-change views and longer evidence that no-change cycles do not inflate progress |
 | MoonBook memory binding | Research books and generated projections work for research lanes; Wenyu civic books can be bootstrapped with canonical schemas, wiki pages, review queues, and `moonbook-ui-state.json` fragments | 62% | MoonBook should eventually own native civic templates upstream instead of relying on Moontown-generated seeds |
 | MoonClaw execution binding | Proposal/run boundary and worker execution path exist; every Wenyu civic module now has a role-specific skill pack path and output contract injected into worker context | 56% | Need repeated successful module-specific service executions and stricter result parsing per contract |
-| Real civic services | Moontown can create the civic service lanes and route civic workflow tasks | 35% | Policy, contest, social, talent, bridge, market, story, and education modules still need service-specific live runs, operator review, and accepted output histories |
+| Real civic services | Moontown can create civic lanes, install recurring protocol schedules, and run building communication patterns | 40% | Policy, contest, social, talent, bridge, market, story, and education modules still need service-specific accepted output histories |
 | Designer workflow | Manual JSON config plus standalone editor mode and handoff/bridge visibility | 48% | Needs write-back import/export, asset manifest checks, richer collision preview, and automatic Moondesk artifact ingestion |
 | Stable-state cookbook | MoonBook cookbook workspace, stable-state manifest, ownership pages, generated site, and CLI status are in place | 38% | Needs Moondesk management UI, drift comparison, review workflow, and integration into operator dashboard |
 | Production readiness | Local development works; build/check pass | 25% | Needs packaged daemon, auth, permissions, backups, observability, and deployment model |
@@ -231,48 +234,61 @@ Implemented and validated:
 
 ## Current Runtime Snapshot
 
-Checked on 2026-05-26 16:59 CST with:
+Checked on 2026-05-28 12:49 CST with:
 
 ```bash
 moon run cmd/main -- status
 moon run cmd/main -- daemon doctor
+moon run cmd/main -- integration final status
+moon run cmd/main -- civic status
+moon run cmd/main -- civic protocols schedules status
 ```
 
 Observed state:
 
 - daemon doctor reports `runtime=healthy`
-- daemon status is `ticking`
-- worker process is alive and heartbeat age is still below the stale threshold
-- no new completed daemon tick was observed since the 16:47 status update;
-  the runtime is still healthy, but the current OPC watch remains in progress
-- service supervisor wrapper is not currently alive (`supervisor_pid=0`), so
-  this is a live local worker loop, not yet a packaged durable service
-- daemon runtime is at tick 5875 with 1836 successful cycles and 0 recorded
-  failures
-- town snapshot contains 2 active research books, 12 workers, 77 tasks, 77
-  executions, and 190 watcher records
-- current execution mix is 1 running, 75 review, 0 failed, and 0 stale
+- daemon status is `running`
+- supervisor process and worker process are both alive
+- heartbeat age is below the stale threshold
+- daemon runtime is at tick `10069` with `6032` successful cycles and `0`
+  recorded failures
+- town snapshot contains `4` books, `20` workers, `237` tasks, `237`
+  executions, and `370` watcher records
+- current execution mix is `1` running, `228` review, `0` failed, and `0`
+  stale
+- final integration domain watch coverage is `5/5`
 - active long-horizon books are:
   - `research-opc`
   - `research-how-llms-are-trained-in-very-detail`
+  - `research-embodied-robotics`
+  - `research-ai-agents`
+  - `research-ai-hardware`
 - the current planned daemon actions are:
-  - `poll-run`: `standing-watch-opc-news-tick-5876` / `Running`
-  - `standing-goal-due`: `watch-opc-news` -> `research-opc`
-- the latest watcher record is `watch-llm-training/NeedsReview`
-- the next due watcher tick is scheduled for tick 5892
-- there is currently 1 due standing goal and 2 planned daemon actions
+  - `run-start`: `standing-watch-ai-agents-tick-10069` / `RunConfirmed`
+  - `standing-goal-due`: `watch-ai-agents` -> `research-ai-agents`
+- the latest watcher record is `watch-ai-agents/Deferred`
+- the next due watcher tick is scheduled for tick `10070`
+- all 11 Wenyu civic service workspaces are operable, with `0` blocked and `0`
+  missing/incomplete modules
+- civic service `proven by result` is still `0`, meaning the workspaces are
+  seeded and schedulable but not yet backed by accepted service-result histories
+- 12 recurring communication-pattern schedules are enabled at 30-minute
+  intervals: the embodied robotics Social Square salon plus 11 Wenyu civic
+  building patterns
+- current schedule history includes rounds for Town Shell, Resident Twins,
+  Policy Hall, Contest Express, Social Square, Talent Avenue, Vitality Tower,
+  AI Garden, Physical Bridge, Valley Market, and Broadcast Tower
 
 Interpretation:
 
-- the local daemon/watch loop is alive
-- the town can run background research maintenance, but the current snapshot
-  has not advanced past tick 5875 since the prior check
-- the LLM watcher has produced a reviewable event, and the OPC watcher is still
-  in progress
-- the current background work is still research-book maintenance, not yet the
-  full Wenyu civic service layer
-- the inactive supervisor wrapper means this is not yet production-grade 24/7
-  supervision, even though the worker loop itself is healthy
+- the local daemon/watch loop is alive under supervisor/worker management
+- the five-domain research portfolio is installed and visible to the operator
+  console
+- the current active watch is the Agents lane, while the other standing goals
+  are waiting for their next cadence tick
+- communication-pattern schedules are running as recurring civic work, but
+  accepted civic service results are not yet flowing back into the civic
+  MoonBooks
 - the UI should present no-change watcher cycles as operational diligence,
   review-needed cycles as pending judgment, and accepted changes as real
   knowledge progress
@@ -429,14 +445,26 @@ Goal:
 
 The town should run unattended for days.
 
-Required work:
+Implemented:
 
-- Installable supervisor for local machines.
-- Heartbeat, stale worker restart, and no-progress alerts.
-- Daily digest generation.
+- Local supervisor/worker process model.
+- Launchd installation path for local macOS development.
+- Heartbeat, stale worker detection, restart counters, and daemon doctor.
+- Nonblocking MoonClaw supervision by default so one long watch does not block
+  other standing goals or civic pattern schedules.
 - Watcher summary separated into operational activity and domain knowledge
   changes.
+- Five standing watches installed through the final integration portfolio.
+- Recurring civic communication-pattern schedules installed from JSON.
+
+Remaining:
+
+- Multi-day soak evidence with restart/recovery logs.
+- Daily digest generation.
+- No-progress alerts.
 - Backup and recovery of `.moontown`, MoonBook workspaces, and watcher ledgers.
+- Production service packaging beyond the current local launchd development
+  seam.
 
 Acceptance:
 
@@ -465,19 +493,21 @@ Acceptance:
 
 ## Recommended Next Order
 
-1. Run `moon run cmd/main -- civic bootstrap` after clearing or creating a new
-   Wenyu town workspace so every civic module has a MoonBook projection.
-2. Execute live civic service tasks for Policy Hall, Contest Express, Social
-   Square, Talent Avenue, AI Garden, Physical Bridge, Valley Market, Broadcast
-   Tower, Resident Twin Homes, Vitality Tower, and Town Shell.
-3. Generate final module assets and register them in the manifest.
-4. Add a standalone module config, placement, and asset validator.
-5. Move reusable civic workspace templates into MoonBook so Moontown only
+1. Let the current supervised daemon run through another overnight window and
+   inspect whether each of the five standing watches produced update,
+   no-change, deferred, review, or failed records with strict accounting.
+2. Turn civic communication-pattern rounds into accepted civic service results:
+   Policy Hall, Contest Express, Social Square, Talent Avenue, AI Garden,
+   Physical Bridge, Valley Market, Broadcast Tower, Resident Twin Homes,
+   Vitality Tower, and Town Shell should each have at least one accepted or
+   reviewed service result in its MoonBook.
+3. Add accepted-change summaries to the MoonBook UI-state contract and surface
+   them in module interiors and output mode.
+4. Add daily digest generation for watcher and civic-pattern cycles.
+5. Generate final module assets and register them in the manifest.
+6. Add a standalone module config, placement, and asset validator.
+7. Move reusable civic workspace templates into MoonBook so Moontown only
    requests service creation rather than generating all initial files itself.
-6. Add accepted-change summaries to the MoonBook UI-state contract and surface
-   them in interiors.
-7. Run a 24-hour daemon soak test with at least two standing goals and one
-   Wenyu civic module workflow.
 8. Add Moondesk-style output browsing for produced wiki pages, reports, assets,
    and task artifacts.
 9. Package the daemon as a durable local service with backup/recovery checks.

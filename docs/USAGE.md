@@ -16,6 +16,7 @@ It covers:
 - the current limits of the repo
 - the Wenyu civic MoonBook bootstrap
 - the MoonBook-generated stable-state cookbook
+- the final Wenyu integration portfolio
 
 ## What You Can Use Right Now
 
@@ -438,6 +439,68 @@ Overnight validation checklist:
   roughly every 30 minutes for enabled due sessions.
 - `.moontown/civic/pattern-runs/<session-id>.jsonl` should
   contain one JSON line per completed communication-pattern round.
+
+## 1.8 Install The Final Wenyu Integration Portfolio
+
+Install the current “everything together” local integration:
+
+```bash
+moon run cmd/main -- integration final install
+moon run cmd/main -- integration final status
+```
+
+The default manifest is:
+
+```text
+templates/integration/wenyu-final-integration.json
+```
+
+It maps the current domain interests to the least surprising operating form:
+
+- OPC: `signal-watch` into `research-opc`
+- LLM training: `signal-watch` into
+  `research-how-llms-are-trained-in-very-detail`
+- Robotics: `signal-watch` plus the recurring Social Square `research-salon`
+- Agents: `signal-watch` into `research-ai-agents`
+- Hardware: `signal-watch` into `research-ai-hardware`
+- Wenyu civic buildings: data-driven communication pattern scenarios from
+  `templates/civic-patterns/wenyu-civic-patterns.json`
+
+The installer does not hardcode a domain workflow into MoonBit. It reads the
+manifest, upserts `.moontown/standing-goals.json`, refreshes Wenyu civic
+MoonBook workspaces, refreshes building protocol definitions, installs the
+recurring civic pattern schedules, and writes:
+
+```text
+.moontown/integration/wenyu-final-integration-status.json
+```
+
+After installing, run or keep alive the daemon:
+
+```bash
+moon run cmd/main -- daemon run
+```
+
+or use the launchd installer described above for overnight checks.
+
+Standing-watch dispatch is nonblocking by default. Moontown starts or polls the
+MoonClaw run, records the current state, and returns to the mayor loop so other
+domain watches and civic schedules can keep advancing. Set
+`MOONTOWN_MOONCLAW_SUPERVISION_SECONDS` to a positive value only for debugging a
+single run where you explicitly want Moontown to wait inline.
+
+The expected 24/7 loop is:
+
+1. Mayor dispatches due domain standing watches.
+2. MoonBook owns each domain book and accepts only useful deltas.
+3. MoonClaw executes web-first/source-first watch work and returns accounting.
+4. Civic buildings run scheduled communication patterns on wall-clock due
+   checks.
+5. Pattern reducers generate reviewable ideas, questions, and next actions.
+6. Building books receive the public synthesis/review surface.
+7. Participant/home workspaces receive returned follow-up work.
+8. The Rabbita UI shows standing-watch cards, civic protocol summaries,
+   worker state, the phone-like mayor message thread, and final output links.
 - `.moontown/watchers/watch-opc-news.jsonl` should contain a new record after
   the OPC standing goal reaches `next_due_tick`.
 - `.moontown/watchers/watch-llm-training.jsonl` should contain a new record

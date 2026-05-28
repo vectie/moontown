@@ -1,0 +1,87 @@
+{
+  "id": "wenyu-final-integration",
+  "title": "Wenyu Valley Final Integration Portfolio",
+  "domain_watches": [
+    {
+      "order": 1,
+      "domain": "OPC",
+      "form": "signal-watch",
+      "id": "watch-opc-news",
+      "title": "Track One Person Company news",
+      "prompt": "Maintain a 24/7 web-first research watch on One Person Company (OPC). Look for new advantages, failure modes, examples, policy or legal changes, practical operating patterns, and non-obvious questions. Update the research-opc MoonBook only when there is meaningful new evidence, a better synthesis, a useful uncertainty, or a new solution direction. Keep strict accounting: checked sources, new sources found, accepted facts, rejected facts, pages changed, and whether the book actually changed.",
+      "target_book_id": "research-opc",
+      "cadence_ticks": 60,
+      "quality_threshold": 88,
+      "source_policy": "web-first",
+      "initial_stagger_ticks": 3
+    },
+    {
+      "order": 2,
+      "domain": "LLM Training",
+      "form": "signal-watch",
+      "id": "watch-llm-training",
+      "title": "Track LLM training systems",
+      "prompt": "Maintain a 24/7 web-first research watch on how LLMs are trained in deep technical detail. Look for changes in data pipelines, tokenizer decisions, architecture, pretraining, post-training, RLHF/RLAIF/DPO variants, evals, scaling laws, inference constraints, safety, infrastructure, and cost. Update the research-how-llms-are-trained-in-very-detail MoonBook only when the new material improves the durable explanation, opens a strong question, or changes a practical solution path.",
+      "target_book_id": "research-how-llms-are-trained-in-very-detail",
+      "cadence_ticks": 60,
+      "quality_threshold": 92,
+      "source_policy": "web-first",
+      "initial_stagger_ticks": 9
+    },
+    {
+      "order": 3,
+      "domain": "Robotics",
+      "form": "signal-watch + research-salon",
+      "id": "watch-embodied-robotics",
+      "title": "Track embodied robotics frontier",
+      "prompt": "Maintain a 24/7 web-first research watch on embodied robotics. Watch VLA, world models, robot foundation models, data engines, sim2real, locomotion, manipulation, robot brains, deployment safety, evaluation, and hardware/software co-design. Update the research-embodied-robotics MoonBook when the evidence changes what the Social Square robotics research salon should ask next, what experiment is worth trying, or what solution architecture is becoming plausible.",
+      "target_book_id": "research-embodied-robotics",
+      "cadence_ticks": 60,
+      "quality_threshold": 90,
+      "source_policy": "web-first",
+      "initial_stagger_ticks": 15
+    },
+    {
+      "order": 4,
+      "domain": "Agents",
+      "form": "signal-watch",
+      "id": "watch-ai-agents",
+      "title": "Track Agents / AI agent systems",
+      "prompt": "Maintain a 24/7 web-first research watch on AI agent systems. Look for durable changes in tool use, memory, planning, multi-agent orchestration, computer-use, ACP/MCP protocols, benchmarks, reliability, safety boundaries, product workflows, and agentic software engineering. Update the research-ai-agents MoonBook only when the watch finds a real new advantage, a stronger open question, or a solution pattern that should feed Moontown, MoonBook, MoonClaw, or Moondesk design.",
+      "target_book_id": "research-ai-agents",
+      "cadence_ticks": 60,
+      "quality_threshold": 90,
+      "source_policy": "web-first",
+      "initial_stagger_ticks": 21
+    },
+    {
+      "order": 5,
+      "domain": "Hardware",
+      "form": "signal-watch",
+      "id": "watch-ai-hardware",
+      "title": "Track AI hardware and compute",
+      "prompt": "Maintain a 24/7 web-first research watch on AI hardware and compute. Look for advances in GPUs, ASICs, HBM, photonics, networking, packaging, power, inference accelerators, training clusters, edge robotics compute, and supply-chain constraints. Update the research-ai-hardware MoonBook only when a new fact changes practical strategy, creates a non-obvious question, or suggests a solution worth testing.",
+      "target_book_id": "research-ai-hardware",
+      "cadence_ticks": 60,
+      "quality_threshold": 90,
+      "source_policy": "web-first",
+      "initial_stagger_ticks": 27
+    }
+  ],
+  "civic_pattern_manifests": [
+    {
+      "order": 6,
+      "form": "all-wenyu-civic-patterns",
+      "path": "templates/civic-patterns/wenyu-civic-patterns.json",
+      "note": "Installs triage desk, review council, match market, signal watch, learning cohort, incident bridge, and story forge scenarios for all configured Wenyu civic buildings."
+    }
+  ],
+  "civic_scenarios": [
+    {
+      "order": 7,
+      "form": "research-salon",
+      "path": "templates/civic-salons/embodied-robotics-social-square.json",
+      "note": "Keeps the robotics Social Square running as a 10-perspective research exchange that reduces cross-area tensions into questions, ideas, and returned follow-up work."
+    }
+  ]
+}

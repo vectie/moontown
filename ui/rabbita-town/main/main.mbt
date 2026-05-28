@@ -678,6 +678,16 @@ extern "js" fn current_viewport_mode_param() -> String =
   #| }
 
 ///|
+extern "js" fn current_viewport_module_param() -> String =
+  #| () => {
+  #|   try {
+  #|     return new URL(globalThis.location?.href || "http://local/").searchParams.get("module") || "";
+  #|   } catch (_) {
+  #|     return "";
+  #|   }
+  #| }
+
+///|
 extern "js" fn reference_tile_code_at(grid_x : Int, grid_y : Int) -> String =
   #| (gridX, gridY) => globalThis.__wenyuReferenceLabels?.rows?.[gridY]?.[gridX] || ""
 
@@ -699,6 +709,16 @@ fn initial_viewport_mode() -> ViewportMode {
 }
 
 ///|
+fn initial_selection() -> Selection {
+  let module_id = current_viewport_module_param()
+  if module_id.is_empty() {
+    Selection::Overview
+  } else {
+    Selection::Node(module_id)
+  }
+}
+
+///|
 fn init_model() -> Model {
   let projection_snapshot = parse_bootstrap_town_snapshot()
   let visual_projection = parse_bootstrap_visual_projection()
@@ -714,7 +734,7 @@ fn init_model() -> Model {
     tick: 0,
     paused: false,
     strategy: Strategy::Balanced,
-    selection: Selection::Overview,
+    selection: initial_selection(),
     state_source: initial_state_source(projection_snapshot),
     viewport_mode: initial_viewport_mode(),
     projection_snapshot,
@@ -7376,7 +7396,7 @@ fn civic_status_summary(model : Model) -> String {
 
 ///|
 fn render_wenyu_module_building(
-  dispatch : Dispatch[Msg],
+  _dispatch : Dispatch[Msg],
   model : Model,
   civic : WenyuTownModule,
   executions : Array[@core.TaskExecutionRecord],
@@ -7423,11 +7443,11 @@ fn render_wenyu_module_building(
       span(class="wenyu-module-state-source", runtime.source_label),
     ]),
   )
-  button(
+  a(
+    href="./viewport.html?assets=generated&mode=view&module=\{civic.id}&v=module-\{civic.id}",
     class="wenyu-module-building wenyu-module-\{civic.building_kind} \{runtime.status_class}\{selected_suffix}\{issue_suffix}",
     style~,
     title="\{civic.title}: \{runtime.status_label}. \{runtime.detail}",
-    on_click=dispatch(SelectNode(civic.id)),
     children,
   )
 }
@@ -7896,9 +7916,9 @@ fn render_wenyu_module_interior(
         h2(civic.title),
         p(class="scene-node-key", "\{civic.id} / \{civic.book_id}"),
       ]),
-      button(
-        class="control-button",
-        on_click=dispatch(SelectOverview),
+      a(
+        href="./viewport.html?assets=generated&mode=view&v=wenyu-modules",
+        class="control-button viewport-back-town",
         "Back To Town",
       ),
     ]),
@@ -8602,6 +8622,8 @@ fn feed_event_title(event : @core.TownEvent) -> String {
     "review" => "Keeper review needed\{suffix}"
     "daemon" => "Daemon heartbeat"
     "supervision" => "Mayor supervision"
+    "civic-pattern" => "Civic pattern round"
+    "civic-salon" => "Civic pattern round"
     _ => "Town message\{suffix}"
   }
 }
@@ -8616,7 +8638,10 @@ fn feed_event_tone(event : @core.TownEvent) -> String {
     "calm"
   } else if event.kind == "persist" || event.kind == "projection" {
     "calm"
-  } else if event.kind == "review" || event.kind == "supervision" {
+  } else if event.kind == "review" ||
+    event.kind == "supervision" ||
+    event.kind == "civic-pattern" ||
+    event.kind == "civic-salon" {
     "hot"
   } else {
     "neutral"
@@ -8633,7 +8658,9 @@ fn feed_event_visible(event : @core.TownEvent) -> Bool {
   event.kind == "summary" ||
   event.kind == "review" ||
   event.kind == "daemon" ||
-  event.kind == "supervision"
+  event.kind == "supervision" ||
+  event.kind == "civic-pattern" ||
+  event.kind == "civic-salon"
 }
 
 ///|
@@ -8909,17 +8936,17 @@ fn selection_body(
         button(
           class="inspector-action",
           on_click=dispatch(InjectBudget),
-          "Inject Budget",
+          "Inspector Inject Budget",
         ),
         button(
           class="inspector-action",
           on_click=dispatch(RelieveQueue),
-          "Relieve Queue",
+          "Inspector Relieve Queue",
         ),
         button(
           class="inspector-action",
           on_click=dispatch(StabilityDrill),
-          "Stability Drill",
+          "Inspector Stability Drill",
         ),
       ]
     Node(node_key) => {
@@ -8964,12 +8991,12 @@ fn selection_body(
             button(
               class="inspector-action",
               on_click=dispatch(RelieveQueue),
-              "Relieve Queue",
+              "Worker Relieve Queue",
             ),
             button(
               class="inspector-action",
               on_click=dispatch(StabilityDrill),
-              "Stability Drill",
+              "Worker Stability Drill",
             ),
             button(
               class="inspector-action",

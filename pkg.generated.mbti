@@ -104,6 +104,8 @@ pub async fn install_civic_pattern_scenario_file(String, snapshot_path? : String
 
 pub async fn install_civic_pattern_scenario_manifest(String, snapshot_path? : String) -> String
 
+pub async fn install_wenyu_final_integration(manifest_path? : String, snapshot_path? : String, standing_goal_path? : String) -> String
+
 pub async fn load_or_create_civic_salon_schedules(path? : String) -> Array[CivicSalonSchedule]
 
 pub async fn load_or_create_demo_dashboard(path? : String, book_catalog_path? : String) -> String
@@ -131,6 +133,8 @@ pub fn render_state_dashboard(@core.TownState) -> String
 pub async fn render_wenyu_building_protocol_status(status_path? : String, registry_path? : String) -> String
 
 pub async fn render_wenyu_civic_status(book_catalog_path? : String) -> String
+
+pub async fn render_wenyu_final_integration_status(manifest_path? : String, snapshot_path? : String, standing_goal_path? : String) -> String
 
 pub async fn run_due_civic_salons(snapshot_path? : String, book_catalog_path? : String, tick? : Int, now_ms? : UInt64, reducer_mode? : CivicSalonReductionMode) -> String
 
@@ -382,6 +386,12 @@ pub struct DaemonRuntimeState {
 pub fn DaemonRuntimeState::heartbeat_age_ms(Self, UInt64) -> UInt64
 pub fn DaemonRuntimeState::is_stale(Self, UInt64, UInt64) -> Bool
 pub fn DaemonRuntimeState::new(daemon_id? : String, status? : String, supervisor_pid? : Int, worker_pid? : Int, supervisor_run_id? : String, worker_run_id? : String, started_at_ms? : UInt64, last_heartbeat_ms? : UInt64, last_tick_started_ms? : UInt64, last_tick_finished_ms? : UInt64, last_success_ms? : UInt64, last_failure_ms? : UInt64, tick_success_count? : Int, tick_failure_count? : Int, stop_requested? : Bool, last_error? : String, log_path? : String) -> Self
+
+type FinalIntegrationManifest derive(Eq, ToJson, @debug.Debug, @json.FromJson)
+
+type FinalIntegrationTemplateSpec derive(Eq, ToJson, @debug.Debug, @json.FromJson)
+
+type FinalIntegrationWatchSpec derive(Eq, ToJson, @debug.Debug, @json.FromJson)
 
 pub struct MoontownCookbookManifest {
   book_id : String

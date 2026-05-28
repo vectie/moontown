@@ -29,6 +29,8 @@ async fn run_daemon_scheduled_job(
   match job.kind {
     "civic-pattern" =>
       Some(run_due_civic_salons(snapshot_path~, book_catalog_path~, tick~))
+    "civic-salon" =>
+      Some(run_due_civic_salons(snapshot_path~, book_catalog_path~, tick~))
     _ => None
   }
 }
@@ -39,7 +41,8 @@ fn daemon_scheduled_job_event_for_summary(
   tick : Int,
   summary : String,
 ) -> @core.TownEvent? {
-  if job.kind == "civic-pattern" && summary.has_prefix("Ran ") {
+  if (job.kind == "civic-pattern" || job.kind == "civic-salon") &&
+    summary.has_prefix("Ran ") {
     Some(
       @core.TownEvent::new(
         id="event-\{job.id}-\{tick}",

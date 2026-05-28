@@ -374,10 +374,16 @@ Moontown asks the target MoonBook history for the final standing-watch decision,
 records a corrected watcher ledger row, and advances the standing goal from
 that MoonBook decision.
 
-The first default standing goal is `watch-opc-news`, which targets the dynamic
-`research-opc` book and uses a web-first source policy. The Mayor owns when it
-runs. The `research-opc` keeper owns what gets remembered. MoonClaw workers own
-how the bounded research job is executed.
+The final integration portfolio currently installs five standing goals:
+
+- `watch-opc-news` -> `research-opc`
+- `watch-llm-training` -> `research-how-llms-are-trained-in-very-detail`
+- `watch-embodied-robotics` -> `research-embodied-robotics`
+- `watch-ai-agents` -> `research-ai-agents`
+- `watch-ai-hardware` -> `research-ai-hardware`
+
+The Mayor owns when each goal runs. The target MoonBook keeper owns what gets
+remembered. MoonClaw workers own how the bounded research job is executed.
 
 This is the core long-standing split:
 
@@ -479,6 +485,16 @@ installer runs `daemon supervise --worker` so the OS keeps the supervisor alive,
 and the supervisor keeps the worker alive. Remaining hardening is
 systemd/container packaging, external watchdog integration, and browser/backend
 live sync.
+
+MoonClaw supervision is nonblocking by default:
+
+```bash
+MOONTOWN_MOONCLAW_SUPERVISION_SECONDS=0
+```
+
+This is the correct default for 24/7 operation because a long-running watcher
+should not serialize unrelated standing goals or civic communication-pattern
+schedules. Set a positive value only when debugging one specific run inline.
 
 The daemon launcher resolves the command from `MOONTOWN_DAEMON_COMMAND`,
 `MOON_BIN`, then `$HOME/.moon/bin/moon`. The default dev path launches

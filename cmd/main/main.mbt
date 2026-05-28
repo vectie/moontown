@@ -47,6 +47,14 @@ async fn main {
       println(@moontown.run_due_civic_salons())
     ["civic", "protocols", "schedules", "status"] =>
       println(@moontown.render_civic_salon_schedule_status())
+    ["integration", "final", "install"] =>
+      println(@moontown.install_wenyu_final_integration())
+    ["integration", "final", "install", manifest_path] =>
+      println(@moontown.install_wenyu_final_integration(manifest_path~))
+    ["integration", "final", "status"] =>
+      println(@moontown.render_wenyu_final_integration_status())
+    ["integration", "final", "status", manifest_path] =>
+      println(@moontown.render_wenyu_final_integration_status(manifest_path~))
     ["run", .. rest] =>
       println(@moontown.render_goal_run(rest.to_owned().join(" ")))
     _ => println(@moontown.load_or_create_demo_dashboard())

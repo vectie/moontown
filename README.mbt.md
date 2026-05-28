@@ -71,6 +71,8 @@ Implemented today:
 - civic communication-pattern registry: `research-salon`, `signal-watch`,
   `triage-desk`, `review-council`, `match-market`, `learning-cohort`,
   `story-forge`, and `incident-bridge`
+- final integration portfolio installer that combines the current five
+  long-horizon research domains with the Wenyu civic pattern manifest
 - MoonBook-generated `moontown-cookbook` control book for canonical docs,
   definitions, runtime-state indexes, and stable-state drift checks
 
@@ -81,11 +83,13 @@ Wenyu Valley product readiness is tracked in:
 - [docs/WENYU_BUILDING_PROTOCOL_PLAN.md](/Users/kq/Workspace/moontown/docs/WENYU_BUILDING_PROTOCOL_PLAN.md)
 - [docs/WENYU_TOWN_STATUS.md](/Users/kq/Workspace/moontown/docs/WENYU_TOWN_STATUS.md)
 - [docs/CIVIC_COMMUNICATION_PATTERNS.md](/Users/kq/Workspace/moontown/docs/CIVIC_COMMUNICATION_PATTERNS.md)
+- [docs/FINAL_INTEGRATION.md](/Users/kq/Workspace/moontown/docs/FINAL_INTEGRATION.md)
 - [docs/COOKBOOK.md](/Users/kq/Workspace/moontown/docs/COOKBOOK.md)
 
 The status document is the source of truth for the latest observed distance to
 a fully functioning town. It separates the visual town shell, the local 24/7
-control-plane prototype, and the unfinished production civic-service system.
+control-plane prototype, the final research/civic integration portfolio, and
+the unfinished production civic-service system.
 
 Still incomplete:
 
@@ -97,8 +101,10 @@ Still incomplete:
 
 So the current repo now has a local supervised 24/7 daemon seam. It can run a
 background supervisor/worker pair, detect stale workers, restart them, and
-record runtime health, but it is not yet packaged and proven as an
-operating-system service.
+record runtime health. The active local portfolio currently covers OPC, LLM
+training, Robotics, Agents, Hardware, and recurring Wenyu civic pattern
+schedules. It is still not a production service until it has packaged
+deployment, backups, auth, and multi-day recovery evidence.
 
 ## Current Capabilities
 
@@ -123,6 +129,29 @@ operating-system service.
   - budget/energy/pressure/stability metrics
   - activity feed and anomaly surfacing
   - scroll-safe scene viewport on smaller screens
+
+## Final Integration Portfolio
+
+Install the current all-up local portfolio with:
+
+```bash
+moon run cmd/main -- integration final install
+moon run cmd/main -- integration final status
+```
+
+The manifest lives at:
+
+- `templates/integration/wenyu-final-integration.json`
+
+It is data-driven and currently installs:
+
+- five standing watches: OPC, LLM training, Robotics, Agents, and Hardware
+- a Robotics Social Square research-salon scenario
+- the Wenyu civic pattern manifest for all 11 civic buildings
+
+The daemon reads those standing goals and pattern schedules during normal
+ticks. Domain-specific research state still belongs in each MoonBook; Moontown
+only owns scheduling, dispatch, runtime accounting, and operator visibility.
 
 ## Wenyu Civic Bootstrap
 

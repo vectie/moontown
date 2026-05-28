@@ -578,6 +578,9 @@ async fn wait_for_moonclaw_run(
     cwd=workspace_root,
     detect_orphan=false,
   )
+  if supervision_seconds <= 0 {
+    return latest
+  }
   for attempt = 0; attempt < supervision_seconds; attempt = attempt + 1 {
     if !is_live_moonclaw_status(latest.status) {
       return latest
@@ -600,13 +603,13 @@ async fn wait_for_moonclaw_run(
 ///|
 fn moontown_moonclaw_supervision_seconds() -> Int {
   match optional_env_text("MOONTOWN_MOONCLAW_SUPERVISION_SECONDS") {
-    Some(value) => parse_positive_seconds(value, fallback=3600)
-    None => 3600
+    Some(value) => parse_non_negative_seconds(value, fallback=0)
+    None => 0
   }
 }
 
 ///|
-fn parse_positive_seconds(text : String, fallback~ : Int) -> Int {
+fn parse_non_negative_seconds(text : String, fallback~ : Int) -> Int {
   let mut seen = false
   let mut value = 0
   for char in text.trim() {
@@ -617,7 +620,7 @@ fn parse_positive_seconds(text : String, fallback~ : Int) -> Int {
       return fallback
     }
   }
-  if seen && value > 0 {
+  if seen {
     value
   } else {
     fallback

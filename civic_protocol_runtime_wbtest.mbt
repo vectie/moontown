@@ -375,6 +375,28 @@ async test "MoonClaw reducer workspace excludes template seed ideas" {
 }
 
 ///|
+async test "civic salon reducer profile preserves existing civic service worker profile" {
+  let root = "/tmp/moontown-civic-salon-profile-merge"
+  ignore_checked_command("rm", ["-rf", root])
+  write_text_file(
+    "\{root}/moonclaw.jobs.json",
+    "{ \"jobs\": { \"profiles\": { \"wenyu_civic_service_worker\": { \"family\": \"wenyu_civic_service_worker\", \"steps\": [{\"id\":\"execute_civic_service\"},{\"id\":\"review_civic_service\"}] } } } }",
+  )
+  write_civic_salon_reducer_workspace(
+    test_civic_salon_scenario(),
+    root,
+    "future-energy-round-3",
+    3,
+  )
+  let merged = @fs.read_file("\{root}/moonclaw.jobs.json").text()
+  assert_true(merged.contains("\"wenyu_civic_service_worker\""))
+  assert_true(merged.contains("\"execute_civic_service\""))
+  assert_true(merged.contains("\"review_civic_service\""))
+  assert_true(merged.contains("\"civic_salon_reducer_worker\""))
+  assert_true(merged.contains("\"reduce_civic_pattern_outputs\""))
+}
+
+///|
 async test "civic salon reducer parses object ideas contract" {
   let root = "/tmp/moontown-civic-salon-reducer-contract"
   ignore_checked_command("rm", ["-rf", root])

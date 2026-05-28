@@ -191,6 +191,16 @@ card that links to `viewport.html?assets=generated&v=wenyu`, the canonical
 standalone tilemap viewport. This avoids divergence between a small dashboard
 map and the actual Wenyu Valley viewport.
 
+Current operator-console expectations:
+
+- show every enabled standing watch as a portfolio card
+- distinguish watcher no-change, review, update, deferred, and failed states
+- reserve "progress" wording for accepted facts, queued review, changed wiki
+  pages, or `book_changed: yes`
+- link to the standalone Wenyu viewport instead of rendering an inline map
+- expose request submission through the Mayor queue rather than executing work
+  directly in the browser
+
 ## Standalone Viewport Modes
 
 The canonical Wenyu viewport now has three explicit modes. These modes are
@@ -200,6 +210,10 @@ selected from the viewport HUD and can also be opened directly by URL:
   - clean public town presentation
   - click buildings to inspect live module interiors
   - no editor panel or output-browser chrome
+- `viewport.html?assets=generated&mode=view&module=town-shell&v=module-town-shell`
+  - direct deep link to a building interior
+  - `module=<module-id>` is the URL-addressable building contract
+  - Back To Town returns to the canonical map view
 - `viewport.html?assets=generated&mode=editor&v=wenyu`
   - town-designer workspace
   - shows module placement, entrance tile, runtime state, validation issues,
@@ -222,6 +236,15 @@ This separation is intentional:
 
 The mode switch uses the same runtime data in all cases. It does not invent
 book content or duplicate the Wenyu map.
+
+Latest validated UI behavior:
+
+- main console shows the five-domain standing-watch portfolio
+- viewport loads 11 civic building links
+- clicking a building opens a module interior by URL
+- Back To Town returns to the map view without leaving a stale interior shell
+- output mode lists generated MoonBook outputs and Moondesk bridge context
+- browser console validation reported no runtime errors for the checked paths
 
 Editor-mode boundary:
 

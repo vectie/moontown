@@ -236,8 +236,37 @@ async fn write_civic_salon_reducer_workspace(
   )
   write_text_file(
     "\{root}/moonclaw.jobs.json",
-    civic_salon_reducer_profile_json(scenario),
+    merged_civic_salon_reducer_profile_json(root, scenario),
   )
+}
+
+///|
+async fn merged_civic_salon_reducer_profile_json(
+  root : String,
+  scenario : CivicSalonScenario,
+) -> String {
+  let path = "\{root}/moonclaw.jobs.json"
+  let existing = if @fs.exists(path) {
+    @json.parse(@fs.read_file(path).text()) catch {
+      _ => Json::object({})
+    }
+  } else {
+    Json::object({})
+  }
+  let reducer_root = @json.parse(civic_salon_reducer_profile_json(scenario)) catch {
+    _ => Json::object({})
+  }
+  let reducer_root_object = json_object_copy(Some(reducer_root))
+  let reducer_jobs = json_object_copy(reducer_root_object.get("jobs"))
+  let reducer_profiles = json_object_copy(reducer_jobs.get("profiles"))
+  let reducer_profile = match
+    reducer_profiles.get("civic_salon_reducer_worker") {
+    Some(profile) => profile
+    None => Json::object({})
+  }
+  upsert_root_moonclaw_job_profile_json(
+    existing, "civic_salon_reducer_worker", reducer_profile,
+  ).stringify(indent=2)
 }
 
 ///|

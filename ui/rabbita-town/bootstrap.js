@@ -360,6 +360,26 @@ function installViewportDragPan() {
     applyZoom(zoom + (zoomIn ? zoomStep : -zoomStep))
   }
 
+  function onViewportNavigationClick(event) {
+    const link = event.target?.closest?.(
+      'a.wenyu-module-building[href], a.viewport-back-town[href]',
+    )
+    if (!link) {
+      return
+    }
+    const href = link.getAttribute('href')
+    if (!href) {
+      return
+    }
+    event.preventDefault()
+    event.stopPropagation()
+    event.stopImmediatePropagation?.()
+    globalThis.location.href = href
+    requestAnimationFrame(() => {
+      globalThis.location.reload()
+    })
+  }
+
   function onPointerDown(event) {
     const activeFrame = frame || findFrame()
     if (!activeFrame || shouldIgnoreDragStart(event.target)) {
@@ -424,6 +444,7 @@ function installViewportDragPan() {
   document.addEventListener('pointermove', onPointerMove, { passive: false })
   document.addEventListener('pointerup', stopDrag)
   document.addEventListener('pointercancel', stopDrag)
+  document.addEventListener('click', onViewportNavigationClick, true)
   document.addEventListener('click', onZoomClick, true)
   document.addEventListener(
     'click',
