@@ -119,6 +119,33 @@ fn DaemonRuntimeHealth::supervisor_active(self : DaemonRuntimeHealth) -> Bool {
 }
 
 ///|
+fn DaemonRuntimeHealth::durable_worker_active(
+  self : DaemonRuntimeHealth,
+) -> Bool {
+  self.healthy() && self.supervisor_alive
+}
+
+///|
+fn daemon_runtime_start_already_active(health : DaemonRuntimeHealth) -> Bool {
+  health.durable_worker_active() || health.supervisor_active()
+}
+
+///|
+fn daemon_runtime_doctor_action(health : DaemonRuntimeHealth) -> String {
+  if daemon_runtime_start_already_active(health) {
+    "none"
+  } else if health.healthy() {
+    "daemon start"
+  } else if health.stop_requested {
+    "wait-or-stop"
+  } else if health.stale || !health.worker_alive {
+    "daemon start"
+  } else {
+    "inspect-log"
+  }
+}
+
+///|
 pub fn daemon_runtime_health_summary(health : DaemonRuntimeHealth) -> String {
   let health_label = if health.healthy() {
     "healthy"
@@ -726,8 +753,7 @@ pub async fn daemon_start_saved_town(
 ) -> String {
   let command = daemon_command_or_current(command)
   let health = inspect_daemon_runtime(snapshot_path~, stale_after_ms~)
-  if health.healthy() ||
-    (!health.stop_requested && health.supervisor_alive && !health.stale) {
+  if daemon_runtime_start_already_active(health) {
     return "Moontown daemon already active\n\{daemon_runtime_health_summary(health)}"
   }
   clear_daemon_stop_request(snapshot_path)
@@ -915,15 +941,10 @@ pub async fn daemon_doctor_saved_town(
   let builder = StringBuilder::new()
   builder.write_string("Moontown daemon doctor\n")
   builder.write_string("\{daemon_runtime_health_summary(health)}\n")
-  if health.healthy() || health.supervisor_active() {
-    builder.write_string("action=none\n")
-  } else if health.stop_requested {
-    builder.write_string("action=wait-or-stop\n")
-  } else if health.stale || !health.worker_alive {
-    builder.write_string("action=daemon start\n")
-  } else {
-    builder.write_string("action=inspect-log\n")
+  if health.healthy() && !health.supervisor_alive {
+    builder.write_string("durable=false reason=worker-without-supervisor\n")
   }
+  builder.write_string("action=\{daemon_runtime_doctor_action(health)}\n")
   if !health.last_error.is_empty() {
     builder.write_string("last_error=\{health.last_error}\n")
   }

@@ -159,6 +159,7 @@ moon run cmd/main -- civic protocols bootstrap
 moon run cmd/main -- civic protocols status
 moon run cmd/main -- civic protocols patterns
 moon run cmd/main -- civic protocols pattern-template templates/civic-salons/robotics-mini-salon.json
+moon run cmd/main -- civic protocols pattern-template templates/civic-salons/embodied-robotics-social-square.json
 moon run cmd/main -- civic protocols schedules status
 moon run cmd/main -- civic protocols schedules tick
 moon run cmd/main -- civic doctor
@@ -167,18 +168,18 @@ moon run cmd/main -- civic doctor
 The communication-pattern runtime is template-driven. New domains should provide a
 `CivicSalonScenario` JSON file with participant books, skill rules, quality
 rules, output paths, and review gates. `civic protocols pattern-template <path>`
-runs a scenario directly; recurring pattern schedules load a matching template from
-`.moontown/civic/pattern-scenarios/<session-id>.json`. Moontown should not grow one
-MoonBit branch per domain. See
+runs a scenario directly, persists the scenario into
+`.moontown/civic/pattern-scenarios/<session-id>.json`, and upserts the recurring
+schedule in `.moontown/civic/pattern-schedules.json`. Moontown should not grow
+one MoonBit branch per domain. See
 [docs/CIVIC_SALON_TEMPLATES.md](/Users/kq/Workspace/moontown/docs/CIVIC_SALON_TEMPLATES.md).
 
 The pattern scheduler is also wired into the 24/7 daemon path. `civic protocols
 schedules status` shows `.moontown/civic/pattern-schedules.json`; `civic
-protocols schedules tick` runs only wall-clock-due sessions and appends round records under
-`.moontown/civic/pattern-runs/`. There is no built-in recurring domain; add a
-schedule plus a matching scenario template to make `daemon run` or
-`daemon start` periodically bring participant books into the building, reduce
-ideas, and return them home.
+protocols schedules tick` runs only wall-clock-due sessions, claims a due
+schedule before launching MoonClaw, and appends round records under
+`.moontown/civic/pattern-runs/`. Add or remove pattern sessions by editing the
+JSON schedule/template files.
 
 ## Stable-State Cookbook
 
@@ -399,8 +400,9 @@ the foreground instead:
 moon run cmd/main -- daemon run
 ```
 
-On macOS, install the foreground worker under launchd so it survives shell,
-Codex, and terminal cleanup:
+On macOS, install the supervisor under launchd so it survives shell, Codex, and
+terminal cleanup. The supervisor keeps the worker alive and restarts it when the
+heartbeat becomes stale:
 
 ```bash
 ./scripts/install-launchd-daemon.sh

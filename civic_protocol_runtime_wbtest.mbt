@@ -183,6 +183,19 @@ async test "civic salon scenario template can seed a non-hardcoded domain" {
     participant_projection.contains("\"projection_scope\": \"internal\""),
   )
   assert_true(participant_projection.contains("\"participant-workspace\""))
+  let snapshot_path = "\{root}/town.json"
+  assert_true(
+    @fs.exists(civic_salon_scenario_path(scenario.id, snapshot_path~)),
+  )
+  let schedules = load_or_create_civic_salon_schedules(
+    path=default_civic_salon_schedule_path(snapshot_path~),
+  )
+  assert_eq(schedules.length(), 1)
+  let schedule = schedules[0]
+  assert_eq(schedule.id, scenario.id)
+  assert_eq(schedule.round_count, 1)
+  assert_eq(schedule.latest_round_id, "future-energy-round-1")
+  assert_true(schedule.next_due_ms > schedule.last_run_ms)
 }
 
 ///|

@@ -1,0 +1,143 @@
+{
+  "id": "embodied-robotics-social-square",
+  "title": "Embodied Robotics Social Square Salon",
+  "communication_pattern_id": "research-salon",
+  "communication_pattern_label": "Research Salon",
+  "building_id": "social-square",
+  "building_book_id": "wenyu-social-square",
+  "domain_label": "embodied robotics",
+  "topic": "embodied robotics cross-area exchange",
+  "cadence": "every 30 minutes",
+  "skill_name": "embodied-robotics-salon",
+  "skill_description": "Run an embodied robotics communication-pattern reduction across specialist MoonBooks and return concrete research directions home.",
+  "protocol_channel": "subarea_perspective",
+  "reduction_kind": "cross_area_research_idea",
+  "output_channel": "research_question_backlog",
+  "review_gate": "research_program_quality",
+  "review_owner": "keeper",
+  "review_reason": "keeper reviews novelty, feasibility, evidence gaps, owner books, and whether the idea is worth becoming a long-horizon research program",
+  "backlog_path": "wiki/queries/embodied-robotics-salon.md",
+  "synthesis_path": "wiki/civic/embodied-robotics-salon.md",
+  "metrics_path": "wiki/metrics/embodied-robotics-salon.md",
+  "review_path": "wiki/reviews/embodied-robotics-salon.md",
+  "returned_ideas_path": "wiki/queries/salon-returned-ideas.md",
+  "participant_contract_path": "raw/bootstrap/EMBODIED_ROBOTICS_SUBAREA_CONTRACT.md",
+  "quality_rules": [
+    "A good output is not a generic robotics report; it is a cross-area exchange result.",
+    "Every idea must connect at least two specialist MoonBooks and expose a dependency, tension, missing interface, benchmark gap, or review gate.",
+    "Every idea must include testable research questions and a smallest useful next experiment.",
+    "Separate domain insight from operational chatter and never count infrastructure logs as research progress.",
+    "Preserve plurality: specialist books may disagree before the building reduces their views into reviewable directions.",
+    "Do not treat reduced ideas as accepted facts; return them to owner books for follow-up review."
+  ],
+  "skill_rules": [
+    "Read every participant perspective before reducing.",
+    "Look for cross-area bottlenecks that no single specialist book can solve alone.",
+    "Prefer ideas that can become benchmarks, schemas, architecture contracts, experiments, or safety gates.",
+    "Reject vague combinations like 'combine VLA and world models' unless the output names a concrete failure mode and test.",
+    "Return each idea to the most relevant home books with an explicit next artifact."
+  ],
+  "participants": [
+    {
+      "book_id": "embodied-robotics-large-models",
+      "title": "Large Models Desk",
+      "focus_area": "robot foundation models and multimodal pretraining",
+      "perspective": "Foundation models can contribute reusable semantic and behavioral priors, but robotics needs falsifiable embodiment assumptions instead of confidence-only language priors.",
+      "cadence": "every 30 minutes",
+      "current_question": "Which parts of robotic intelligence should be learned as general priors, and which must remain robot-specific?",
+      "contribution": "Large-model work contributes semantic priors, multimodal grounding, synthetic task variation, and failure explanations that other robotics areas can test.",
+      "next_artifact": "wiki/queries/foundation-model-grounding.md"
+    },
+    {
+      "book_id": "embodied-robotics-agent-systems",
+      "title": "Agent Systems Desk",
+      "focus_area": "planner-agent loops, tool use, memory, and self-correction",
+      "perspective": "Robots need agent loops that can recover, ask for help, and remember useful failures without accumulating unsafe habits.",
+      "cadence": "every 30 minutes",
+      "current_question": "What memory and review loop lets a robot agent improve without quietly accumulating unsafe habits?",
+      "contribution": "Agent-system work contributes planning loops, memory promotion rules, self-correction patterns, and operator-review interfaces.",
+      "next_artifact": "wiki/queries/robot-agent-memory.md"
+    },
+    {
+      "book_id": "embodied-robotics-vla",
+      "title": "VLA Desk",
+      "focus_area": "vision-language-action policies and instruction following",
+      "perspective": "VLA systems are promising but brittle unless they are evaluated on long-horizon recovery under changed layouts, tools, and lighting.",
+      "cadence": "every 30 minutes",
+      "current_question": "How can VLA policies be tested for long-horizon recovery under changed layouts, tools, and lighting?",
+      "contribution": "VLA work contributes instruction-following failure cases, perception-action grounding gaps, and policy interfaces for high-level requests.",
+      "next_artifact": "wiki/queries/vla-long-horizon-eval.md"
+    },
+    {
+      "book_id": "embodied-robotics-world-models",
+      "title": "World Models Desk",
+      "focus_area": "predictive dynamics, spatial memory, and counterfactual simulation",
+      "perspective": "A useful robot world model should veto risky actions before contact, occlusion, or tool failure becomes physical damage.",
+      "cadence": "every 30 minutes",
+      "current_question": "Can a robot reject an action plan because its world model predicts contact, occlusion, or tool failure?",
+      "contribution": "World-model work contributes predictive uncertainty, counterfactual rollouts, spatial memory, and pre-action failure forecasts.",
+      "next_artifact": "wiki/queries/world-model-veto.md"
+    },
+    {
+      "book_id": "embodied-robotics-locomotion",
+      "title": "Locomotion Desk",
+      "focus_area": "mobility, balance, terrain adaptation, and whole-body control",
+      "perspective": "High-level agents must request movement through interfaces that respect balance, terrain, energy, and physical safety constraints.",
+      "cadence": "every 30 minutes",
+      "current_question": "What interface lets high-level agents request movement without breaking balance, energy, or safety constraints?",
+      "contribution": "Locomotion work contributes feasibility constraints, terrain adaptation signals, balance failures, and whole-body safety limits.",
+      "next_artifact": "wiki/queries/locomotion-agent-interface.md"
+    },
+    {
+      "book_id": "embodied-robotics-manipulation",
+      "title": "Manipulation Desk",
+      "focus_area": "grasping, dexterity, tool use, contact, and tactile feedback",
+      "perspective": "Useful robot intelligence depends on contact dynamics and recovery from grasp failures, not only language-level task plans.",
+      "cadence": "every 30 minutes",
+      "current_question": "Which tactile and force signals should be promoted into language-visible robot memory?",
+      "contribution": "Manipulation work contributes tactile failures, force signatures, tool affordances, grasp uncertainty, and contact-rich recovery examples.",
+      "next_artifact": "wiki/queries/contact-memory.md"
+    },
+    {
+      "book_id": "embodied-robotics-brain",
+      "title": "Robot Brain Desk",
+      "focus_area": "runtime architecture, arbitration, memory, policy routing, and safety envelope",
+      "perspective": "Embodied systems need an explicit arbitration layer between policies, world-model warnings, controller constraints, memory, and safety gates.",
+      "cadence": "every 30 minutes",
+      "current_question": "How should the robot brain arbitrate between VLA policy, world model warning, and safety gate?",
+      "contribution": "Robot-brain work contributes runtime contracts, routing policies, memory scope, review gates, and explanation records.",
+      "next_artifact": "wiki/queries/robot-brain-arbitration.md"
+    },
+    {
+      "book_id": "embodied-robotics-data-engine",
+      "title": "Data Engine Desk",
+      "focus_area": "robot data flywheels, simulation, teleoperation, video, and failure mining",
+      "perspective": "The next robotics bottleneck may be data accounting quality: knowing which samples improve real transfer and which just inflate benchmarks.",
+      "cadence": "every 30 minutes",
+      "current_question": "Which data should enter the robot learning loop after a failure, and how should provenance be tracked?",
+      "contribution": "Data-engine work contributes source provenance, failure-mining loops, teleoperation labels, synthetic data boundaries, and promotion gates.",
+      "next_artifact": "wiki/queries/robot-data-flywheel.md"
+    },
+    {
+      "book_id": "embodied-robotics-sim2real",
+      "title": "Sim2Real Desk",
+      "focus_area": "simulation transfer, domain randomization, digital twins, and real-world validation",
+      "perspective": "Simulation is useful only when it predicts which policies will fail safely or dangerously outside the simulator.",
+      "cadence": "every 30 minutes",
+      "current_question": "What simulation signals predict whether a policy will fail safely or dangerously in the real world?",
+      "contribution": "Sim2Real work contributes transfer diagnostics, digital-twin boundaries, domain-randomization limits, and reality-gap measurements.",
+      "next_artifact": "wiki/queries/sim2real-risk-signals.md"
+    },
+    {
+      "book_id": "embodied-robotics-evaluation-safety",
+      "title": "Evaluation and Safety Desk",
+      "focus_area": "benchmarks, red-team tests, physical safety, interpretability, and operator review",
+      "perspective": "A robot is not mature until it knows when to stop, ask, recover, refuse, and explain why under realistic disturbances.",
+      "cadence": "every 30 minutes",
+      "current_question": "What benchmark reveals whether a robot knows when to stop, ask, recover, or refuse?",
+      "contribution": "Evaluation and safety work contributes red-team cases, benchmark design, refusal criteria, interpretability needs, and operator review gates.",
+      "next_artifact": "wiki/queries/recovery-benchmark.md"
+    }
+  ],
+  "ideas": []
+}

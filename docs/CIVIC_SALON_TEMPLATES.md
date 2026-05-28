@@ -73,14 +73,18 @@ Recurring schedules load templates from:
 .moontown/civic/pattern-scenarios/<session-id>.json
 ```
 
-No scenario is auto-seeded. Recurring salons are explicit: create a schedule in
-`.moontown/civic/pattern-schedules.json` and create a matching template at this path. New
-domains should arrive as data and skills, not new MoonBit branches.
+No scenario is auto-seeded by domain-specific MoonBit code. Recurring salons are
+explicit data: create a schedule in `.moontown/civic/pattern-schedules.json`
+and create a matching template at this path. New domains should arrive as data
+and skills, not new MoonBit branches.
 
-One-off runs can use any template path:
+One-off runs can use any template path. A successful `pattern-template` run also
+copies the scenario into `.moontown/civic/pattern-scenarios/` and upserts a
+30-minute recurring schedule, so the same pattern can continue under the daemon:
 
 ```bash
 moon run cmd/main -- civic protocols pattern-template templates/civic-salons/robotics-mini-salon.json
+moon run cmd/main -- civic protocols pattern-template templates/civic-salons/embodied-robotics-social-square.json
 ```
 
 ## Template Contract

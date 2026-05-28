@@ -138,6 +138,8 @@ pub async fn save_civic_salon_schedules(String, Array[CivicSalonSchedule]) -> Un
 
 pub async fn supervise_saved_town(snapshot_path? : String, book_catalog_path? : String) -> String
 
+pub async fn upsert_civic_salon_schedule_for_scenario(CivicSalonScenario, path? : String, now_ms? : UInt64) -> CivicSalonSchedule
+
 pub async fn write_wenyu_building_protocol_status(status_path? : String, registry_path? : String) -> String
 
 pub async fn write_wenyu_civic_status(book_catalog_path? : String, status_path? : String) -> String

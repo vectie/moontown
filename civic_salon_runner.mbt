@@ -8,15 +8,30 @@ pub async fn run_due_civic_salons(
 ) -> String {
   let schedule_path = default_civic_salon_schedule_path(snapshot_path~)
   let schedules = load_or_create_civic_salon_schedules(path=schedule_path)
-  let updated : Array[CivicSalonSchedule] = []
   let summaries : Array[String] = []
   let refreshes : Array[String] = []
   for schedule in schedules {
     if civic_salon_is_due(schedule, now_ms) {
+      let claimed = claim_civic_salon_schedule(schedule, now_ms)
+      save_civic_salon_schedules(
+        schedule_path,
+        replace_civic_salon_schedule(
+          load_or_create_civic_salon_schedules(path=schedule_path),
+          schedule.id,
+          claimed,
+        ),
+      )
       let (next, summary) = run_due_civic_salon_round(
         schedule, snapshot_path, book_catalog_path, tick, now_ms, reducer_mode,
       )
-      updated.push(next)
+      save_civic_salon_schedules(
+        schedule_path,
+        replace_civic_salon_schedule(
+          load_or_create_civic_salon_schedules(path=schedule_path),
+          schedule.id,
+          next,
+        ),
+      )
       summaries.push(summary)
     } else {
       match
@@ -26,10 +41,8 @@ pub async fn run_due_civic_salons(
         Some(summary) => refreshes.push(summary)
         None => ()
       }
-      updated.push(schedule)
     }
   }
-  save_civic_salon_schedules(schedule_path, updated)
   if summaries.length() == 0 && refreshes.length() == 0 {
     "No civic communication-pattern schedules due at now_ms=\{now_ms}."
   } else if summaries.length() == 0 {
@@ -39,6 +52,34 @@ pub async fn run_due_civic_salons(
   } else {
     "Ran \{summaries.length()} civic communication-pattern schedule(s): \{summaries.join("; ")}; refreshed \{refreshes.length()} stale projection(s): \{refreshes.join("; ")}"
   }
+}
+
+///|
+fn claim_civic_salon_schedule(
+  schedule : CivicSalonSchedule,
+  now_ms : UInt64,
+) -> CivicSalonSchedule {
+  {
+    ..schedule,
+    latest_round_id: civic_salon_round_id(schedule),
+    latest_summary: "Running civic communication-pattern round; schedule claimed before worker launch.",
+    next_due_ms: now_ms + 300_000UL,
+  }
+}
+
+///|
+fn replace_civic_salon_schedule(
+  schedules : Array[CivicSalonSchedule],
+  target_id : String,
+  replacement : CivicSalonSchedule,
+) -> Array[CivicSalonSchedule] {
+  schedules.map(fn(schedule) {
+    if schedule.id == target_id {
+      replacement
+    } else {
+      schedule
+    }
+  })
 }
 
 ///|

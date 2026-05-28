@@ -25,7 +25,8 @@ cat > "$plist" <<PLIST
     <string>cmd/main</string>
     <string>--</string>
     <string>daemon</string>
-    <string>run</string>
+    <string>supervise</string>
+    <string>--worker</string>
   </array>
   <key>WorkingDirectory</key>
   <string>$root</string>

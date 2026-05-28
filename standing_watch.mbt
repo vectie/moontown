@@ -58,6 +58,25 @@ async fn run_standing_goal_watch_cycle(
   let route = mayor.decide_dispatch(state, planned_task)
   state.record_event(route_event(route.decision, state.events.length()))
   let worker_id = assigned_worker_id(route.decision)
+  match route.decision {
+    @dispatch.RouteDecision::Deferred(reason) => {
+      let decision = @core.WatcherDecisionKind::Deferred
+      let updated = goal.mark_watcher_decision(tick, decision)
+      let record = @core.WatcherRunRecord::new(
+        goal_id=goal.id,
+        tick~,
+        target_book_id~,
+        decision~,
+        detail="Mayor deferred standing goal because no watcher was currently eligible: \{reason}",
+        task_id=Some(task.id),
+        next_due_tick=updated.next_due_tick,
+      )
+      append_standing_watch_record(goal.id, ledger_dir, record)
+      record_standing_watch_event(state, record)
+      return updated
+    }
+    _ => ()
+  }
   let execution_tick = supervision_tick(state)
   publish_running_standing_watch_snapshot(
     state,

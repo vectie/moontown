@@ -152,6 +152,10 @@ fn standing_watch_failure_superseded(
     Some(prefix) => prefix
     None => return false
   }
+  if failed.summary.contains("no eligible worker") &&
+    standing_watch_neighbor_completed(executions, failed, prefix) {
+    return true
+  }
   let mut after_failed = false
   for execution in executions {
     if execution.task_id == failed.task_id {
@@ -175,6 +179,44 @@ fn standing_watch_failure_superseded(
 }
 
 ///|
+fn standing_watch_neighbor_completed(
+  executions : Array[@core.TaskExecutionRecord],
+  failed : @core.TaskExecutionRecord,
+  prefix : String,
+) -> Bool {
+  let failed_tick = match standing_watch_task_tick(failed.task_id) {
+    Some(tick) => tick
+    None => return false
+  }
+  for execution in executions {
+    if execution.task_id == failed.task_id ||
+      execution.book_id != failed.book_id {
+      continue
+    }
+    match standing_watch_task_prefix(execution.task_id) {
+      Some(other_prefix) if other_prefix == prefix =>
+        if standing_watch_successful_terminal(execution.status) {
+          match standing_watch_task_tick(execution.task_id) {
+            Some(tick) if tick >= failed_tick - 1 && tick <= failed_tick =>
+              return true
+            _ => ()
+          }
+        }
+      _ => ()
+    }
+  }
+  false
+}
+
+///|
+fn standing_watch_successful_terminal(
+  status : @core.TaskExecutionStatus,
+) -> Bool {
+  status == @core.TaskExecutionStatus::Completed ||
+  status == @core.TaskExecutionStatus::ReviewQueued
+}
+
+///|
 fn standing_watch_task_prefix(task_id : String) -> String? {
   let normalized = task_id.to_lower()
   if !normalized.has_prefix("standing-") || !normalized.contains("-tick-") {
@@ -186,4 +228,24 @@ fn standing_watch_task_prefix(task_id : String) -> String? {
   } else {
     Some(parts[0].to_string())
   }
+}
+
+///|
+fn standing_watch_task_tick(task_id : String) -> Int? {
+  let parts = task_id.split("-tick-").to_array()
+  if parts.length() < 2 {
+    return None
+  }
+  let suffix = parts[1].trim()
+  if suffix.is_empty() {
+    return None
+  }
+  let mut value = 0
+  for char in suffix {
+    if char < '0' || char > '9' {
+      return None
+    }
+    value = value * 10 + (char.to_int() - '0'.to_int())
+  }
+  Some(value)
 }

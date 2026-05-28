@@ -475,9 +475,10 @@ The daemon persists:
   due ticks
 
 This is now local multi-day process management. On macOS, the included launchd
-installer runs `daemon run` as a foreground worker supervised by the OS. Remaining
-hardening is systemd/container packaging, external watchdog integration, and
-browser/backend live sync.
+installer runs `daemon supervise --worker` so the OS keeps the supervisor alive,
+and the supervisor keeps the worker alive. Remaining hardening is
+systemd/container packaging, external watchdog integration, and browser/backend
+live sync.
 
 The daemon launcher resolves the command from `MOONTOWN_DAEMON_COMMAND`,
 `MOON_BIN`, then `$HOME/.moon/bin/moon`. The default dev path launches
