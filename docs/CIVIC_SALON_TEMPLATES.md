@@ -1,17 +1,18 @@
-# Research Salon Communication Pattern Templates
+# Civic Communication Pattern Templates
 
-Last updated: 2026-05-27
+Last updated: 2026-05-28
 
-The research salon is one reusable civic communication pattern. It is the
-knowledge-exchange pattern where specialist workspaces bring perspectives into
-a building, MoonClaw reduces the plurality into research questions, and
-MoonBook receives returned follow-up work.
+The research salon is one reusable civic communication pattern. The same
+template runner now covers the other Wenyu civic patterns as well: signal
+watch, triage desk, review council, match market, learning cohort, story forge,
+and incident bridge.
 
-The runtime is template-driven. A domain should not require a new MoonBit
-runner. A building gets a scenario template, the template names its internal
-participant workspaces, communication pattern, skill rules, protocol channels,
-output paths, review gate, and optional fixture idea examples, and Moontown
-runs the same exchange-reduce-distribute envelope for every scenario.
+The runtime is template-driven. A domain or civic building should not require a
+new MoonBit runner. A building gets a scenario template, the template names its
+internal participant workspaces, communication pattern, skill rules, protocol
+channels, output paths, review gate, and optional fixture examples, and
+Moontown runs the same schedule, reducer, ledger, MoonBook, and projection
+envelope for every scenario.
 
 For the broader pattern taxonomy, see
 [CIVIC_COMMUNICATION_PATTERNS.md](/Users/kq/Workspace/moontown/docs/CIVIC_COMMUNICATION_PATTERNS.md).
@@ -63,7 +64,9 @@ input.
 - [civic_salon_reconcile.mbt](/Users/kq/Workspace/moontown/civic_salon_reconcile.mbt)
   refreshes stale projections from the same scenario template.
 - [templates/civic-salons/robotics-mini-salon.json](/Users/kq/Workspace/moontown/templates/civic-salons/robotics-mini-salon.json)
-  is a small copyable example.
+  is a small copyable research-salon example.
+- [templates/civic-patterns/wenyu-civic-patterns.json](/Users/kq/Workspace/moontown/templates/civic-patterns/wenyu-civic-patterns.json)
+  installs the default scenario set for all 11 Wenyu civic buildings.
 
 ## Where Templates Live
 
@@ -87,14 +90,26 @@ moon run cmd/main -- civic protocols pattern-template templates/civic-salons/rob
 moon run cmd/main -- civic protocols pattern-template templates/civic-salons/embodied-robotics-social-square.json
 ```
 
+To install recurring Wenyu civic patterns without immediately running every
+MoonClaw reducer, use the manifest installer:
+
+```bash
+moon run cmd/main -- civic protocols pattern-manifest templates/civic-patterns/wenyu-civic-patterns.json
+```
+
+The manifest copies each scenario into `.moontown/civic/pattern-scenarios/` and
+creates staggered 30-minute schedules. It does not materialize MoonBook outputs
+until the daemon or `civic protocols schedules tick` reaches a due session.
+
 ## Template Contract
 
 Required high-level fields:
 
 - `id`: stable salon id; for recurring jobs this must match the schedule id.
-- `communication_pattern_id`: normally `research-salon` for this runtime.
-- `communication_pattern_label`: human-facing label, normally
-  `Research Salon`.
+- `communication_pattern_id`: one of the pattern ids from
+  `civic communication patterns`, for example `triage-desk`,
+  `match-market`, or `story-forge`.
+- `communication_pattern_label`: human-facing label for that pattern.
 - `building_id`: target civic building, for example `social-square`.
 - `building_book_id`: central building MoonBook, for example
   `wenyu-social-square`.
@@ -113,8 +128,8 @@ Required high-level fields:
   from `raw/bootstrap/civic-salon-ideas.json`; stale projection refreshes use
   the last persisted reducer output.
 
-The key extensibility rule is that future domains should change these fields,
-not add `if domain == ...` branches to Moontown.
+The key extensibility rule is that future domains and civic services should
+change these fields, not add `if domain == ...` branches to Moontown.
 
 Participant workspaces are internal salon workspaces by default. The durable
 surface book is the building book, such as `wenyu-social-square`; participant
@@ -146,7 +161,8 @@ reasoning and reducer quality.
 
 ## Adding A New Domain
 
-1. Copy `templates/civic-salons/robotics-mini-salon.json`.
+1. Copy a close template from `templates/civic-patterns/` or
+   `templates/civic-salons/robotics-mini-salon.json`.
 2. Rename `id`, `title`, `domain_label`, `topic`, and all output paths.
 3. Add participant workspaces that represent independent perspectives, not
    duplicate researchers.
@@ -172,3 +188,21 @@ reasoning and reducer quality.
   only mode allowed to consume template `ideas`.
 - Template quality matters. Bad participant perspectives or vague skill rules
   will produce weak salon rounds even if the runtime is correct.
+
+## Default Wenyu Pattern Set
+
+The default set is data, not code:
+
+| Building | Pattern | Template |
+| --- | --- | --- |
+| Town Shell | `triage-desk` | `town-shell-triage-desk.json` |
+| Resident Twin Homes | `review-council` | `resident-twins-review-council.json` |
+| Policy Hall | `triage-desk` | `policy-hall-triage-desk.json` |
+| Contest Express | `review-council` | `contest-express-review-council.json` |
+| Social Square | `match-market` | `social-square-match-market.json` |
+| Talent Avenue | `match-market` | `talent-avenue-match-market.json` |
+| Vitality Tower | `signal-watch` | `vitality-dashboard-signal-watch.json` |
+| AI Garden | `learning-cohort` | `ai-garden-learning-cohort.json` |
+| Physical Bridge | `incident-bridge` | `physical-bridge-incident-bridge.json` |
+| Valley Market | `match-market` | `valley-market-match-market.json` |
+| Broadcast Tower | `story-forge` | `broadcast-tower-story-forge.json` |

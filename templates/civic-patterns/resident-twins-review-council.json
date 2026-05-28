@@ -1,0 +1,68 @@
+{
+  "id": "wenyu-resident-twins-review",
+  "title": "Resident Twin Review Council",
+  "communication_pattern_id": "review-council",
+  "communication_pattern_label": "Review Council",
+  "building_id": "resident-twins",
+  "building_book_id": "wenyu-resident-twins",
+  "domain_label": "resident memory",
+  "topic": "private memory promotion and projection-safe resident presence",
+  "cadence": "every 30 minutes",
+  "skill_name": "wenyu-resident-twins-review",
+  "skill_description": "Review resident memory changes, privacy boundaries, and projection-safe next actions.",
+  "protocol_channel": "resident_memory_submission",
+  "reduction_kind": "review_decision",
+  "output_channel": "resident_memory_review_queue",
+  "review_gate": "resident_privacy_review",
+  "review_owner": "keeper",
+  "review_reason": "keeper reviews consent, projection scope, sensitivity, and usefulness before memory promotion",
+  "backlog_path": "wiki/reviews/resident-memory.md",
+  "synthesis_path": "wiki/civic/resident-twins.md",
+  "metrics_path": "wiki/metrics/resident-twins-review.md",
+  "review_path": "wiki/reviews/resident-memory.md",
+  "returned_ideas_path": "wiki/queries/pattern-returned-items.md",
+  "participant_contract_path": "raw/bootstrap/RESIDENT_TWINS_REVIEW_CONTRACT.md",
+  "quality_rules": [
+    "Never leak private resident context into public projection outputs.",
+    "Every decision must classify accept, revise, reject, or ask-for-consent.",
+    "Sensitive changes require a review question before persistence."
+  ],
+  "skill_rules": [
+    "Treat resident context as private by default.",
+    "Prefer projection-safe summaries over raw facts.",
+    "Return missing consent or ambiguity as explicit review questions."
+  ],
+  "participants": [
+    {
+      "book_id": "resident-twins-private-memory",
+      "title": "Private Memory Desk",
+      "focus_area": "resident preferences and durable private context",
+      "perspective": "Private memory is valuable only when it is accurate, consented, and scoped.",
+      "cadence": "every 30 minutes",
+      "current_question": "Which memory candidates are explicit enough to keep?",
+      "contribution": "Provides candidate facts, consent status, source context, and sensitivity labels.",
+      "next_artifact": "wiki/entities/residents.md"
+    },
+    {
+      "book_id": "resident-twins-projection-safety",
+      "title": "Projection Safety Desk",
+      "focus_area": "public-safe resident cards",
+      "perspective": "A resident twin should expose useful presence without exposing private history.",
+      "cadence": "every 30 minutes",
+      "current_question": "Which projected fields are safe, useful, and reversible?",
+      "contribution": "Provides redaction rules, public-card boundaries, and leakage risks.",
+      "next_artifact": "wiki/concepts/privacy-boundaries.md"
+    },
+    {
+      "book_id": "resident-twins-next-actions",
+      "title": "Next Action Desk",
+      "focus_area": "helpful follow-up without overreach",
+      "perspective": "The twin should suggest actions only when the basis is clear and resident benefit is plausible.",
+      "cadence": "every 30 minutes",
+      "current_question": "Which next action is helpful enough to offer but not assume?",
+      "contribution": "Provides action candidates, uncertainty, and review triggers.",
+      "next_artifact": "wiki/queries/resident-next-actions.md"
+    }
+  ],
+  "ideas": []
+}

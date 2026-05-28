@@ -1,0 +1,68 @@
+{
+  "id": "wenyu-ai-garden-learning",
+  "title": "AI Garden Learning Cohort",
+  "communication_pattern_id": "learning-cohort",
+  "communication_pattern_label": "Learning Cohort",
+  "building_id": "ai-garden",
+  "building_book_id": "wenyu-ai-garden",
+  "domain_label": "AI education",
+  "topic": "learner needs, lesson generation, exercises, and outcome review",
+  "cadence": "every 30 minutes",
+  "skill_name": "wenyu-ai-garden-learning",
+  "skill_description": "Assess learner progress, generate useful AI lessons, assign exercises, and review measurable outcomes.",
+  "protocol_channel": "learner_progress_packet",
+  "reduction_kind": "lesson_plan",
+  "output_channel": "learning_quest_backlog",
+  "review_gate": "lesson_quality_review",
+  "review_owner": "keeper",
+  "review_reason": "keeper reviews skill gap fit, exercise clarity, safety, and measurable outcome",
+  "backlog_path": "wiki/queries/learning-quests.md",
+  "synthesis_path": "wiki/civic/ai-garden.md",
+  "metrics_path": "wiki/metrics/ai-garden-learning.md",
+  "review_path": "wiki/reviews/lesson-quality.md",
+  "returned_ideas_path": "wiki/queries/pattern-returned-items.md",
+  "participant_contract_path": "raw/bootstrap/AI_GARDEN_LEARNING_CONTRACT.md",
+  "quality_rules": [
+    "Every output must name learner level, skill gap, exercise, and measurable outcome.",
+    "Do not create vague lessons without practice and review.",
+    "Safety and age appropriateness must be explicit when relevant."
+  ],
+  "skill_rules": [
+    "Assess before teaching.",
+    "Prefer small project-based exercises over abstract explanations.",
+    "Return misunderstood concepts as follow-up questions."
+  ],
+  "participants": [
+    {
+      "book_id": "ai-garden-learner-needs",
+      "title": "Learner Needs Desk",
+      "focus_area": "skill gaps and learner context",
+      "perspective": "A useful lesson begins with the learner's current confusion and goal.",
+      "cadence": "every 30 minutes",
+      "current_question": "Which skill gap should the next lesson target?",
+      "contribution": "Provides learner level, goal, misconceptions, and constraints.",
+      "next_artifact": "wiki/schemas/learning-path.md"
+    },
+    {
+      "book_id": "ai-garden-lesson-builder",
+      "title": "Lesson Builder Desk",
+      "focus_area": "lesson structure and examples",
+      "perspective": "AI education needs concrete examples and tasks that produce visible artifacts.",
+      "cadence": "every 30 minutes",
+      "current_question": "What smallest lesson can create a useful artifact?",
+      "contribution": "Provides lesson outline, example, resource, and artifact goal.",
+      "next_artifact": "wiki/queries/learning-quests.md"
+    },
+    {
+      "book_id": "ai-garden-practice-review",
+      "title": "Practice Review Desk",
+      "focus_area": "exercise quality and outcome review",
+      "perspective": "Learning sticks when practice is reviewed against clear criteria.",
+      "cadence": "every 30 minutes",
+      "current_question": "How should the learner prove the skill improved?",
+      "contribution": "Provides exercise rubric, review questions, and next practice step.",
+      "next_artifact": "wiki/reviews/lesson-quality.md"
+    }
+  ],
+  "ideas": []
+}

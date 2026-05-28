@@ -37,6 +37,10 @@ async fn main {
       println(@moontown.write_wenyu_building_protocol_status())
     ["civic", "protocols", "patterns"] =>
       println(@moontown.render_civic_communication_patterns())
+    ["civic", "protocols", "pattern-install", template_path] =>
+      println(@moontown.install_civic_pattern_scenario_file(template_path))
+    ["civic", "protocols", "pattern-manifest", manifest_path] =>
+      println(@moontown.install_civic_pattern_scenario_manifest(manifest_path))
     ["civic", "protocols", "pattern-template", template_path] =>
       println(@moontown.bootstrap_civic_salon_scenario_file(template_path))
     ["civic", "protocols", "schedules", "tick"] =>

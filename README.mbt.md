@@ -160,18 +160,24 @@ moon run cmd/main -- civic protocols status
 moon run cmd/main -- civic protocols patterns
 moon run cmd/main -- civic protocols pattern-template templates/civic-salons/robotics-mini-salon.json
 moon run cmd/main -- civic protocols pattern-template templates/civic-salons/embodied-robotics-social-square.json
+moon run cmd/main -- civic protocols pattern-install templates/civic-patterns/policy-hall-triage-desk.json
+moon run cmd/main -- civic protocols pattern-manifest templates/civic-patterns/wenyu-civic-patterns.json
 moon run cmd/main -- civic protocols schedules status
 moon run cmd/main -- civic protocols schedules tick
 moon run cmd/main -- civic doctor
 ```
 
-The communication-pattern runtime is template-driven. New domains should provide a
-`CivicSalonScenario` JSON file with participant books, skill rules, quality
-rules, output paths, and review gates. `civic protocols pattern-template <path>`
-runs a scenario directly, persists the scenario into
-`.moontown/civic/pattern-scenarios/<session-id>.json`, and upserts the recurring
-schedule in `.moontown/civic/pattern-schedules.json`. Moontown should not grow
-one MoonBit branch per domain. See
+The communication-pattern runtime is template-driven. New domains and civic
+services should provide a `CivicSalonScenario` JSON file with participant
+books, pattern id, skill rules, quality rules, output paths, and review gates.
+`civic protocols pattern-template <path>` runs a scenario directly, persists
+the scenario into `.moontown/civic/pattern-scenarios/<session-id>.json`, and
+upserts the recurring schedule in `.moontown/civic/pattern-schedules.json`.
+`pattern-install <path>` installs one recurring scenario without running it;
+`pattern-manifest <path>` installs a set of scenarios with staggered due times.
+The default Wenyu manifest covers all 11 civic buildings in
+`templates/civic-patterns/`. Moontown should not grow one MoonBit branch per
+domain or civic service. See
 [docs/CIVIC_SALON_TEMPLATES.md](/Users/kq/Workspace/moontown/docs/CIVIC_SALON_TEMPLATES.md).
 
 The pattern scheduler is also wired into the 24/7 daemon path. `civic protocols

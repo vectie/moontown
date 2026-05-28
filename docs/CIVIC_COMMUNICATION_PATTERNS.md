@@ -1,6 +1,6 @@
 # Civic Communication Patterns
 
-Last updated: 2026-05-27
+Last updated: 2026-05-28
 
 Moontown buildings should not be hardcoded as one-off workflows. A building is
 a place that runs a communication protocol pattern: it receives packets from
@@ -59,9 +59,17 @@ A scenario template can declare:
 ```
 
 If the fields are absent, the current civic exchange runtime defaults to
-`research-salon` because it still materializes the `CivicSalonIdea` contract.
-New pattern runtimes should keep the same envelope but use their own output
-contracts and skill templates.
+`research-salon` because the compatibility materializer still uses the
+`CivicSalonIdea` record shape. The scenario skill now treats that record as a
+generic reviewable pattern-output contract: for non-research patterns,
+`research_questions` means follow-up/review questions, and `next_experiment`
+means the smallest useful next action, artifact, drill, lesson, match review,
+or story draft.
+
+Default Wenyu civic pattern scenarios live under
+[templates/civic-patterns](/Users/kq/Workspace/moontown/templates/civic-patterns)
+and are installed together by
+[wenyu-civic-patterns.json](/Users/kq/Workspace/moontown/templates/civic-patterns/wenyu-civic-patterns.json).
 
 ## Civic Mapping
 
@@ -70,20 +78,24 @@ Current recommended Wenyu mappings:
 - `town-shell`: `triage-desk`
 - `resident-twins`: `review-council`
 - `policy-hall`: `triage-desk`
-- `contest-stage`: `review-council`
+- `contest-express`: `review-council`
 - `social-square`: `match-market`
-- `talent-graph`: `match-market`
-- `vitality-analytics`: `signal-watch`
-- `education-workshop`: `learning-cohort`
+- `talent-avenue`: `match-market`
+- `vitality-dashboard`: `signal-watch`
+- `ai-garden`: `learning-cohort`
 - `physical-bridge`: `incident-bridge`
-- `resource-market`: `match-market`
-- `story-studio`: `story-forge`
+- `valley-market`: `match-market`
+- `broadcast-tower`: `story-forge`
 
 ## Implementation Direction
 
-The current research-salon runtime is the first concrete pattern. The next
-pattern to implement should not copy its code blindly. Extract shared envelope
-steps first:
+The current runtime has one shared compatibility materializer that can run all
+eight pattern ids from scenario data. Do not add a MoonBit branch per civic
+building. Extract or replace the compatibility type only when the pattern needs
+new structural fields that cannot be expressed through the current generic
+output shape.
+
+Shared envelope steps:
 
 - load scenario
 - resolve pattern
@@ -94,7 +106,7 @@ steps first:
 - update MoonBook pages
 - update projection
 
-Then each pattern provides only:
+Each pattern should provide only:
 
 - output contract
 - generated `SKILL.md`

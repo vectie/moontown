@@ -1,0 +1,68 @@
+{
+  "id": "wenyu-town-shell-triage",
+  "title": "Town Shell Triage Desk",
+  "communication_pattern_id": "triage-desk",
+  "communication_pattern_label": "Triage Desk",
+  "building_id": "town-shell",
+  "building_book_id": "wenyu-town-shell",
+  "domain_label": "town supervision",
+  "topic": "mayor-level intake, recovery, and operator routing",
+  "cadence": "every 30 minutes",
+  "skill_name": "wenyu-town-shell-triage",
+  "skill_description": "Classify town runtime signals, route operator requests, and return auditable mayor recovery actions.",
+  "protocol_channel": "operator_or_runtime_request",
+  "reduction_kind": "routing_decision",
+  "output_channel": "mayor_recovery_backlog",
+  "review_gate": "mayor_operation_review",
+  "review_owner": "mayor",
+  "review_reason": "mayor reviews priority, owner building, recovery risk, and whether operator approval is required",
+  "backlog_path": "wiki/reviews/town-operations.md",
+  "synthesis_path": "wiki/civic/town-shell.md",
+  "metrics_path": "wiki/metrics/town-shell-triage.md",
+  "review_path": "wiki/reviews/town-operations.md",
+  "returned_ideas_path": "wiki/queries/pattern-returned-items.md",
+  "participant_contract_path": "raw/bootstrap/TOWN_SHELL_TRIAGE_CONTRACT.md",
+  "quality_rules": [
+    "Every output must name an owner building or explain why the item should be closed.",
+    "Separate real service degradation from cosmetic projection warnings.",
+    "Route risky actions to mayor/operator review instead of executing them silently."
+  ],
+  "skill_rules": [
+    "Read runtime, daemon, and module-health perspectives before deciding.",
+    "Prefer reversible recovery actions with clear evidence.",
+    "Return unclear requests to an explicit missing-input question."
+  ],
+  "participants": [
+    {
+      "book_id": "town-shell-mayor-runtime",
+      "title": "Mayor Runtime Desk",
+      "focus_area": "daemon health, schedules, and recovery state",
+      "perspective": "The town shell must keep the whole system awake without confusing retries with progress.",
+      "cadence": "every 30 minutes",
+      "current_question": "Which due or degraded item needs mayor action before the next tick?",
+      "contribution": "Provides daemon heartbeat, due schedule, stale worker, and recovery-loop evidence.",
+      "next_artifact": "wiki/history/mayor-journal.md"
+    },
+    {
+      "book_id": "town-shell-operator-inbox",
+      "title": "Operator Inbox Desk",
+      "focus_area": "human requests and approvals",
+      "perspective": "Operator requests need classification, priority, and safe handoff before agents act.",
+      "cadence": "every 30 minutes",
+      "current_question": "Which request is actionable, blocked, or approval-gated?",
+      "contribution": "Provides request intent, missing input, risk level, and response expectation.",
+      "next_artifact": "wiki/queries/operator-requests.md"
+    },
+    {
+      "book_id": "town-shell-recovery-review",
+      "title": "Recovery Review Desk",
+      "focus_area": "failure recovery and no-change accounting",
+      "perspective": "A healthy 24/7 town must distinguish useful recovery from repeated churn.",
+      "cadence": "every 30 minutes",
+      "current_question": "Which retry pattern should be stopped, escalated, or converted into a bug?",
+      "contribution": "Provides blocker patterns, retry history, and recovery acceptance criteria.",
+      "next_artifact": "wiki/reviews/recovery-actions.md"
+    }
+  ],
+  "ideas": []
+}

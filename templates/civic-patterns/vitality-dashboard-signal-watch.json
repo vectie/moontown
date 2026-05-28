@@ -1,0 +1,68 @@
+{
+  "id": "wenyu-vitality-dashboard-watch",
+  "title": "Vitality Tower Signal Watch",
+  "communication_pattern_id": "signal-watch",
+  "communication_pattern_label": "Signal Watch",
+  "building_id": "vitality-dashboard",
+  "building_book_id": "wenyu-vitality-dashboard",
+  "domain_label": "town vitality",
+  "topic": "daemon, watcher, service, and projection change accounting",
+  "cadence": "every 30 minutes",
+  "skill_name": "wenyu-vitality-dashboard-watch",
+  "skill_description": "Watch town signals, separate operational churn from real changes, and emit concise recovery/accounting digests.",
+  "protocol_channel": "runtime_or_service_signal",
+  "reduction_kind": "change_no_change_digest",
+  "output_channel": "vitality_digest_backlog",
+  "review_gate": "service_health_review",
+  "review_owner": "mayor",
+  "review_reason": "mayor reviews stale modules, false progress, accepted changes, and recovery priority",
+  "backlog_path": "wiki/reviews/service-alerts.md",
+  "synthesis_path": "wiki/civic/vitality-dashboard.md",
+  "metrics_path": "wiki/metrics/vitality-dashboard-watch.md",
+  "review_path": "wiki/reviews/service-alerts.md",
+  "returned_ideas_path": "wiki/queries/pattern-returned-items.md",
+  "participant_contract_path": "raw/bootstrap/VITALITY_DASHBOARD_WATCH_CONTRACT.md",
+  "quality_rules": [
+    "Separate operational evidence from domain evidence.",
+    "No-change cycles must not inflate progress claims.",
+    "Every alert must include a source signal, severity, and next check/action."
+  ],
+  "skill_rules": [
+    "Inspect watcher records, daemon health, and projection freshness together.",
+    "Prefer factual digests over motivational status copy.",
+    "Return stale or ambiguous signals as reviewable recovery questions."
+  ],
+  "participants": [
+    {
+      "book_id": "vitality-daemon-watch",
+      "title": "Daemon Watch Desk",
+      "focus_area": "supervisor heartbeat and tick health",
+      "perspective": "A town is 24/7 only if its daemon state is inspectable and restart-safe.",
+      "cadence": "every 30 minutes",
+      "current_question": "Is the daemon alive, stale, failed, or merely idle?",
+      "contribution": "Provides heartbeat, worker PID, tick result, and restart evidence.",
+      "next_artifact": "wiki/schemas/town-runtime.md"
+    },
+    {
+      "book_id": "vitality-book-change-accounting",
+      "title": "Book Change Accounting Desk",
+      "focus_area": "domain changes versus operational writes",
+      "perspective": "Generated logs and retries should not count as domain knowledge progress.",
+      "cadence": "every 30 minutes",
+      "current_question": "Which book changed in a domain-relevant way since the prior check?",
+      "contribution": "Provides changed pages, evidence type, accepted facts, and no-change records.",
+      "next_artifact": "wiki/metrics/change-accounting.md"
+    },
+    {
+      "book_id": "vitality-recovery-queue",
+      "title": "Recovery Queue Desk",
+      "focus_area": "service degradation and recovery actions",
+      "perspective": "Warnings should become prioritized recovery work or be retired.",
+      "cadence": "every 30 minutes",
+      "current_question": "Which warning should trigger recovery, escalation, or suppression?",
+      "contribution": "Provides alert severity, owner module, retry history, and next action.",
+      "next_artifact": "wiki/reviews/service-alerts.md"
+    }
+  ],
+  "ideas": []
+}

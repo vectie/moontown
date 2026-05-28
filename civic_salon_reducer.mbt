@@ -310,7 +310,7 @@ fn civic_salon_reducer_request(
     "Read `skills/\{scenario.skill_name}/SKILL.md` first, then read the reducer contract and participant JSON.",
     "Reduce participant perspectives according to this pattern: \{pattern.summary}",
     "Write the result to `raw/bootstrap/civic-salon-ideas.json`.",
-    "Do not wait for user input. If evidence is incomplete, produce best-effort ideas with explicit research questions and next experiments.",
+    "Do not wait for user input. If evidence is incomplete, produce best-effort pattern outputs with explicit follow-up questions and next experiments/artifacts.",
   ].join("\n")
 }
 
@@ -325,7 +325,7 @@ fn civic_salon_reducer_skill_text(scenario : CivicSalonScenario) -> String {
     "",
     "# \{scenario.title} Reducer Skill",
     "",
-    "This skill controls the building-level reducer for the `\{pattern.title}` communication pattern. The reducer is an agentic map-reduce place: internal participant workspaces map domain perspectives into packets, then this worker reduces them into useful questions and experiments for return-home work.",
+    "This skill controls the building-level reducer for the `\{pattern.title}` communication pattern. The reducer is an agentic map-reduce place: internal participant workspaces map perspectives, requests, constraints, signals, or artifacts into packets, then this worker reduces them into useful reviewable outputs for return-home work.",
     "",
     "Pattern summary: \{pattern.summary}",
     "",
@@ -341,14 +341,14 @@ fn civic_salon_reducer_skill_text(scenario : CivicSalonScenario) -> String {
     "",
     "- Read every participant in `raw/bootstrap/civic-salon-participants.json`.",
     "- Use at least two participant workspaces for each idea unless the participant set itself has only one workspace.",
-    "- Generate ideas from tensions, dependencies, missing interfaces, evaluation gaps, or shared bottlenecks.",
-    "- Prefer questions that can become benchmarks, protocols, schemas, experiments, or review gates.",
-    "- Do not claim the idea is accepted knowledge. It is a returned research direction.",
+    "- Generate outputs from tensions, dependencies, missing interfaces, evaluation gaps, shared bottlenecks, matching opportunities, routing needs, or safety gates.",
+    "- Prefer follow-up questions that can become benchmarks, protocols, schemas, experiments, service actions, matched introductions, lesson plans, stories, recovery steps, or review gates.",
+    "- Do not claim the output is accepted knowledge. It is a returned direction for the owning books and review gate.",
     "- Do not copy or consume template seed ideas. If seed examples exist elsewhere, ignore them.",
     "",
     "## Output Contract",
     "",
-    "Emit the same `CivicSalonIdea` contract that Moontown materializes into building ledgers, internal participant workspaces, review queues, and projections.",
+    "Emit the same `CivicSalonIdea` contract that Moontown materializes into building ledgers, internal participant workspaces, review queues, and projections. For non-research patterns, treat `research_questions` as testable follow-up or review questions and `next_experiment` as the smallest useful next artifact/action.",
     "",
     "Write `raw/bootstrap/civic-salon-ideas.json` exactly as JSON:",
     "",
@@ -357,15 +357,15 @@ fn civic_salon_reducer_skill_text(scenario : CivicSalonScenario) -> String {
     "  \"ideas\": [",
     "    {",
     "      \"id\": \"lowercase-stable-id\",",
-    "      \"title\": \"Short cross-area idea title\",",
-    "      \"summary\": \"One or two precise sentences explaining the cross-area dependency.\",",
+    "      \"title\": \"Short pattern output title\",",
+    "      \"summary\": \"One or two precise sentences explaining the cross-area dependency, routing decision, match, lesson plan, story angle, or recovery action.\",",
     "      \"participating_books\": [\"workspace-a\", \"workspace-b\"],",
     "      \"research_questions\": [",
     "        \"A testable question that belongs in follow-up work\",",
     "        \"A second question that forces a concrete experiment or review gate\"",
     "      ],",
-    "      \"why_it_matters\": \"Why this could change the domain program.\",",
-    "      \"next_experiment\": \"The smallest useful next experiment, prototype, benchmark, schema, or review exercise.\"",
+    "      \"why_it_matters\": \"Why this could change the domain program or civic service outcome.\",",
+    "      \"next_experiment\": \"The smallest useful next experiment, prototype, benchmark, schema, service action, story draft, match review, lesson exercise, or recovery drill.\"",
     "    }",
     "  ],",
     "  \"summary\": \"Reducer-level summary.\"",
@@ -374,7 +374,7 @@ fn civic_salon_reducer_skill_text(scenario : CivicSalonScenario) -> String {
     "",
     "## Concrete Example",
     "",
-    "For a robotics salon with VLA, world-model, manipulation, and safety workspaces, a good idea links perception-action policy limits to world-model uncertainty and proposes a concrete benchmark. A poor idea merely says \"combine VLA and world models\" without a test, owner workspaces, or review gate.",
+    "For a robotics research salon with VLA, world-model, manipulation, and safety workspaces, a good idea links perception-action policy limits to world-model uncertainty and proposes a concrete benchmark. For a policy triage desk, a good output routes a resident question to official-source extraction plus review instead of inventing eligibility advice. A poor output merely says \"combine sources\" or \"help the resident\" without owner workspaces, a checkable follow-up question, or a review gate.",
   ].join("\n")
 }
 
@@ -407,21 +407,21 @@ fn civic_salon_reducer_contract_markdown(
   scenario : CivicSalonScenario,
 ) -> String {
   [
-    "# Civic Salon Idea Contract",
+    "# Civic Communication Pattern Output Contract",
     "",
-    "Emit a non-empty set of `CivicSalonIdea` records to `raw/bootstrap/civic-salon-ideas.json`.",
+    "Emit a non-empty set of `CivicSalonIdea` records to `raw/bootstrap/civic-salon-ideas.json`. The legacy type name is reused for every civic communication pattern while the runtime is experimental.",
     "",
     "Each idea must include:",
     "",
     "- `id`: stable lowercase id",
     "- `title`: human-readable idea title",
-    "- `summary`: cross-area dependency or tension",
+    "- `summary`: cross-area dependency, routing decision, match proposal, lesson plan, story angle, or recovery action",
     "- `participating_books`: participant workspace ids from the input JSON",
-    "- `research_questions`: at least one testable follow-up question",
-    "- `why_it_matters`: judgement about why the idea is worth tracking",
-    "- `next_experiment`: smallest useful next experiment or artifact",
+    "- `research_questions`: at least one testable follow-up or review question",
+    "- `why_it_matters`: judgement about why the output is worth tracking",
+    "- `next_experiment`: smallest useful next experiment, action, artifact, drill, or review exercise",
     "",
-    "The reducer must not create accepted facts. It creates reviewable directions that are distributed back to internal participant workspaces through `\{scenario.output_channel}` and reviewed by `\{scenario.review_gate}`.",
+    "The reducer must not create accepted facts. It creates reviewable directions or service outputs that are distributed back to internal participant workspaces through `\{scenario.output_channel}` and reviewed by `\{scenario.review_gate}`.",
   ].join("\n")
 }
 
@@ -429,7 +429,7 @@ fn civic_salon_reducer_contract_markdown(
 fn civic_salon_reducer_profile_json(scenario : CivicSalonScenario) -> String {
   let pattern = civic_salon_pattern_for_scenario(scenario)
   let parsed = @json.parse(
-    "{ \"jobs\": { \"profiles\": { \"civic_salon_reducer_worker\": { \"family\": \"civic_salon_reducer_worker\", \"role\": \"worker\", \"priority\": 155, \"tags\": [\"civic\", \"communication-pattern\", \{json_string(pattern.id)}, \"reducer\", \{json_string(scenario.building_id)}], \"match\": { \"all\": [\"civic-communication-pattern\", \"reducer\"], \"any\": [\{json_string(pattern.id)}, \{json_string(scenario.id)}, \{json_string(scenario.building_id)}] }, \"steps\": [{ \"id\": \"reduce_civic_pattern_ideas\", \"title\": \"Reduce communication-pattern participant packets into ideas\", \"kind\": \"job.analysis\", \"prompt_template\": \"Read ${proposal.request_text}. Then read the listed context pages and skill_paths. Write raw/bootstrap/civic-salon-ideas.json only after validating the CivicSalonIdea contract. Do not wait for input and do not use template seed ideas.\", \"metadata\": { \"preferred_skills\": [\{json_string(scenario.skill_name)}], \"enable_tools\": true, \"web_search\": false, \"disable_waiting_for_input\": true, \"best_effort_on_missing_input\": true, \"timeout_ms\": 600000, \"board_lane\": \{json_string(pattern.title)}, \"board_order\": 0, \"communication_pattern_id\": \{json_string(pattern.id)}, \"role_runtime\": { \"planning_layer\": \"domain\", \"runtime_mode\": \"reducer\", \"tool_access\": \"workspace\", \"memory_scope\": \"domain\", \"allow_delegate\": false, \"allow_workspace_write\": true, \"allow_execution_tools\": true, \"output_contract\": \{json_string(pattern.output_contract)} } } }] } } } }",
+    "{ \"jobs\": { \"profiles\": { \"civic_salon_reducer_worker\": { \"family\": \"civic_salon_reducer_worker\", \"role\": \"worker\", \"priority\": 155, \"tags\": [\"civic\", \"communication-pattern\", \{json_string(pattern.id)}, \"reducer\", \{json_string(scenario.building_id)}], \"match\": { \"all\": [\"civic-communication-pattern\", \"reducer\"], \"any\": [\{json_string(pattern.id)}, \{json_string(scenario.id)}, \{json_string(scenario.building_id)}] }, \"steps\": [{ \"id\": \"reduce_civic_pattern_outputs\", \"title\": \"Reduce communication-pattern participant packets into reviewable outputs\", \"kind\": \"job.analysis\", \"prompt_template\": \"Read ${proposal.request_text}. Then read the listed context pages and skill_paths. Write raw/bootstrap/civic-salon-ideas.json only after validating the CivicSalonIdea compatibility contract. Do not wait for input and do not use template seed ideas.\", \"metadata\": { \"preferred_skills\": [\{json_string(scenario.skill_name)}], \"enable_tools\": true, \"web_search\": false, \"disable_waiting_for_input\": true, \"best_effort_on_missing_input\": true, \"timeout_ms\": 600000, \"board_lane\": \{json_string(pattern.title)}, \"board_order\": 0, \"communication_pattern_id\": \{json_string(pattern.id)}, \"role_runtime\": { \"planning_layer\": \"domain\", \"runtime_mode\": \"reducer\", \"tool_access\": \"workspace\", \"memory_scope\": \"domain\", \"allow_delegate\": false, \"allow_workspace_write\": true, \"allow_execution_tools\": true, \"output_contract\": \{json_string(pattern.output_contract)} } } }] } } } }",
   ) catch {
     _ => Json::object({})
   }

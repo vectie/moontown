@@ -1,6 +1,6 @@
 # Wenyu Valley Town Status
 
-Last updated: 2026-05-27 17:20 CST
+Last updated: 2026-05-28 00:20 CST
 
 This document answers one question: how far is the current Wenyu Valley
 implementation from a fully functioning town?
@@ -12,7 +12,7 @@ The short answer is:
 - as a fully functioning civic AI town with real services, persistent memory,
   execution, generated projections, and operator workflow: about 50-54% complete
 - as a true civic-building protocol town where buildings aggregate, exchange,
-  reduce, and distribute agent/info packets: about 40-45% complete
+  reduce, and distribute agent/info packets: about 48-52% complete
 - as a stable definition system with a generated cookbook/control book: about
   35-40% complete
 
@@ -25,11 +25,11 @@ The Wenyu buildings now have generated civic MoonBook workspace seeds, schemas,
 review queues, projections, role-specific MoonClaw skill contracts, and building
 protocol contracts. Social Square has a durable protocol proof slice with
 inbox, contribution, reduction, outbox, review, home-return, and effectiveness
-metric ledgers. The template-driven salon path now proves that a building can
-hold a multi-perspective exchange, reduce ideas, measure output yield, and
-return reduced ideas back to each internal participant workspace. The remaining work is mostly
-integration depth: the other civic buildings still need repeated scenario
-packets, real MoonClaw reductions, MoonBook accept/reject persistence, and
+metric ledgers. The template-driven communication-pattern path now covers all
+11 Wenyu buildings through JSON scenarios and a manifest installer, so every
+building can be scheduled without adding a new MoonBit runner branch. The
+remaining work is mostly integration depth: most civic buildings still need
+repeated real MoonClaw reductions, MoonBook accept/reject persistence, and
 reviewable service histories before they can be called reliable civic services.
 The plan is tracked in
 [WENYU_BUILDING_PROTOCOL_PLAN.md](/Users/kq/Workspace/moontown/docs/WENYU_BUILDING_PROTOCOL_PLAN.md).
@@ -52,7 +52,7 @@ service-specific execution for each civic module.
 | Long-running mayor loop | Medium | The daemon worker is healthy locally with zero recorded failures in the current runtime file; the service supervisor wrapper is not currently active, so install/service hardening and multi-day recovery evidence are still required |
 | Research watchers | Medium | OPC and LLM standing watches run through real books and ledgers; both are visible in the watch portfolio, but the current latest LLM watcher is still `NeedsReview` and the OPC watcher is still running |
 | Civic modules | Medium | Policy, contest, social, talent, market, bridge, story, education, resident, vitality, and town-shell modules now have generated MoonBook workspaces, schemas, review queues, projections, and skill contracts; end-to-end service runs still need soak testing |
-| Building protocol layer | Far-medium | Buildings have modes and skills, but do not yet have durable inbox/contribution/reduction/outbox ledgers or AI-guided map/reduce-style protocol execution |
+| Building protocol layer | Medium | Buildings have modes, skills, protocol definitions, ledgers, and default communication-pattern scenario templates; Social Square has live proof slices, while most other buildings still need repeated live reducer evidence |
 | Runtime architecture | Medium | Civic protocol behavior now has a documented refactor path, the communication-pattern scheduler is split away from generic daemon code, daemon scheduled jobs use a dispatcher, and protocol registry/store/status/fixtures are separated; package-level civic runtime splits and MoonClaw-driven reducers are still pending |
 | Designer/operator tooling | Medium | JSON config works, the standalone viewport has view/editor/output modes, editor mode shows town-level Moondesk handoff lanes, and detailed single-agent/workspace editing remains in Moondesk |
 | Cookbook/control book | Medium-far | `cookbook bootstrap` creates a MoonBook-backed stable-state cookbook, generated wiki pages, generated site, and `.moontown/cookbook/stable-state.json` | Needs Moondesk-native browsing/editing, drift review UI, import/export, and MoonBook-native templates upstream |
@@ -170,12 +170,17 @@ Implemented and validated:
 - `moon run cmd/main -- civic protocols status` reports protocol state across
   all Wenyu civic buildings.
 - `moon run cmd/main -- civic protocols patterns` lists reusable communication
-  patterns; `research-salon` is the current concrete knowledge-exchange
-  pattern.
+  patterns: `research-salon`, `signal-watch`, `triage-desk`, `review-council`,
+  `match-market`, `learning-cohort`, `story-forge`, and `incident-bridge`.
 - `moon run cmd/main -- civic protocols pattern-template <path>` now runs the
   same communication-pattern envelope from a `CivicSalonScenario` JSON file, so
   future domains can be added by template and schedule instead of editing
   MoonBit runner code.
+- `moon run cmd/main -- civic protocols pattern-install <path>` installs one
+  scenario as a recurring schedule without immediately running MoonClaw.
+- `moon run cmd/main -- civic protocols pattern-manifest templates/civic-patterns/wenyu-civic-patterns.json`
+  installs the default Wenyu scenario set for all 11 civic buildings with
+  staggered due times.
 - `moon run cmd/main -- civic protocols schedules status` and
   `moon run cmd/main -- civic protocols schedules tick` expose the recurring
   communication-pattern scheduler. The daemon now checks the same schedule on
@@ -192,9 +197,12 @@ Implemented and validated:
   `wiki/queries/salon-returned-ideas.md`, so the Social Square building output
   returns to the relevant home workspaces instead of staying as a central
   summary only.
-- Social Square currently has protocol status `review`; pattern templates can add
-  inbox packets, contributions, reductions, outbox records, home-return records,
-  and review gates without adding new MoonBit domain branches.
+- Social Square currently has protocol status `review`; pattern templates can
+  add inbox packets, contributions, reductions, outbox records, home-return
+  records, and review gates without adding new MoonBit domain branches.
+- The default civic pattern templates cover Town Shell, Resident Twins, Policy
+  Hall, Contest Express, Social Square, Talent Avenue, Vitality Tower, AI
+  Garden, Physical Bridge, Valley Market, and Broadcast Tower as data.
 - The civic registry defines `town-shell`, `resident-twins`, `policy-hall`,
   `contest-express`, `social-square`, `talent-avenue`, `vitality-dashboard`,
   `ai-garden`, `physical-bridge`, `valley-market`, and `broadcast-tower`.

@@ -1,0 +1,68 @@
+{
+  "id": "wenyu-policy-hall-triage",
+  "title": "Policy Hall Triage Desk",
+  "communication_pattern_id": "triage-desk",
+  "communication_pattern_label": "Triage Desk",
+  "building_id": "policy-hall",
+  "building_book_id": "wenyu-policy-hall",
+  "domain_label": "policy service",
+  "topic": "source-backed policy intake and eligibility routing",
+  "cadence": "every 30 minutes",
+  "skill_name": "wenyu-policy-hall-triage",
+  "skill_description": "Classify policy questions, route official-source research, and return cited checklist work to review.",
+  "protocol_channel": "resident_policy_question",
+  "reduction_kind": "policy_routing_decision",
+  "output_channel": "policy_question_backlog",
+  "review_gate": "policy_citation_review",
+  "review_owner": "keeper",
+  "review_reason": "keeper reviews official-source quality, eligibility interpretation, uncertainty, and user-facing advice risk",
+  "backlog_path": "wiki/queries/policy-questions.md",
+  "synthesis_path": "wiki/civic/policy-hall.md",
+  "metrics_path": "wiki/metrics/policy-hall-triage.md",
+  "review_path": "wiki/reviews/policy-citations.md",
+  "returned_ideas_path": "wiki/queries/pattern-returned-items.md",
+  "participant_contract_path": "raw/bootstrap/POLICY_HALL_TRIAGE_CONTRACT.md",
+  "quality_rules": [
+    "Prefer official sources; label secondary or uncertain sources clearly.",
+    "Do not provide final application advice without review.",
+    "Each output must name the next source, checklist, or missing resident input."
+  ],
+  "skill_rules": [
+    "Classify the request before answering it.",
+    "Separate cited policy facts from interpretation.",
+    "Route missing eligibility inputs back as precise questions."
+  ],
+  "participants": [
+    {
+      "book_id": "policy-hall-official-sources",
+      "title": "Official Sources Desk",
+      "focus_area": "policy source discovery and citation quality",
+      "perspective": "Policy service quality starts with verified source provenance, not generic summaries.",
+      "cadence": "every 30 minutes",
+      "current_question": "Which official source should be fetched or refreshed before answering?",
+      "contribution": "Provides source reliability, update cadence, responsible office, and citation gaps.",
+      "next_artifact": "wiki/sources/policies.md"
+    },
+    {
+      "book_id": "policy-hall-resident-intake",
+      "title": "Resident Intake Desk",
+      "focus_area": "questions, eligibility context, and missing inputs",
+      "perspective": "A policy answer is useful only when it knows which resident context is required and what remains missing.",
+      "cadence": "every 30 minutes",
+      "current_question": "What eligibility context is needed before a checklist is safe?",
+      "contribution": "Provides request intent, resident-provided facts, missing documents, and urgency.",
+      "next_artifact": "wiki/queries/policy-questions.md"
+    },
+    {
+      "book_id": "policy-hall-review-gate",
+      "title": "Policy Review Gate",
+      "focus_area": "fact/interpretation boundary and advice risk",
+      "perspective": "Policy service must be helpful while keeping reviewed facts separate from advice.",
+      "cadence": "every 30 minutes",
+      "current_question": "Which uncertainty requires keeper review before publication?",
+      "contribution": "Provides risk flags, citation review criteria, and recommended output scope.",
+      "next_artifact": "wiki/reviews/policy-citations.md"
+    }
+  ],
+  "ideas": []
+}

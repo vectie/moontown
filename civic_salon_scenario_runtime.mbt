@@ -2,28 +2,138 @@
 pub async fn bootstrap_civic_salon_scenario_file(
   template_path : String,
   book_catalog_path? : String = @moonbook.default_catalog_path(),
-  round_id? : String = "civic-salon-round-001",
+  round_id? : String = "",
   round_number? : Int = 1,
   workspace_base? : String = "",
   reducer_mode? : CivicSalonReductionMode = MoonClawReducer,
 ) -> String {
   match load_civic_salon_scenario_file(template_path) {
     Some(scenario) => {
+      let resolved_round_id = civic_pattern_round_id_for_scenario(
+        scenario, round_id, round_number,
+      )
       let summary = bootstrap_civic_salon_scenario(
         scenario,
         book_catalog_path~,
-        round_id~,
+        round_id=resolved_round_id,
         round_number~,
         workspace_base~,
         reducer_mode~,
       )
       install_civic_salon_scenario_for_daemon(
-        scenario, workspace_base, round_id, round_number, summary,
+        scenario, workspace_base, resolved_round_id, round_number, summary,
       )
       summary
     }
     None => "Could not load civic salon scenario template: \{template_path}"
   }
+}
+
+///|
+priv struct CivicPatternScenarioManifest {
+  templates : Array[String]
+} derive(FromJson)
+
+///|
+pub async fn install_civic_pattern_scenario_file(
+  template_path : String,
+  snapshot_path? : String = @storage.default_snapshot_path(),
+  due_now? : Bool = false,
+) -> String {
+  match load_civic_salon_scenario_file(template_path) {
+    Some(scenario) => {
+      let now_ms = @env.now()
+      let due_ms = if due_now { now_ms } else { now_ms + 1_800_000UL }
+      let schedule = install_civic_pattern_scenario(
+        scenario, snapshot_path, due_ms,
+      )
+      "Installed civic communication pattern `\{schedule.id}` for `\{schedule.building_id}`; next_due_ms=\{schedule.next_due_ms}."
+    }
+    None =>
+      "Could not load civic communication pattern scenario: \{template_path}"
+  }
+}
+
+///|
+pub async fn install_civic_pattern_scenario_manifest(
+  manifest_path : String,
+  snapshot_path? : String = @storage.default_snapshot_path(),
+) -> String {
+  if !@fs.exists(manifest_path) {
+    return "Could not load civic communication pattern manifest: \{manifest_path}"
+  }
+  let text = @fs.read_file(manifest_path).text() catch {
+    _ =>
+      return "Could not read civic communication pattern manifest: \{manifest_path}"
+  }
+  let parsed = @json.parse(text) catch {
+    _ =>
+      return "Could not parse civic communication pattern manifest: \{manifest_path}"
+  }
+  let manifest : CivicPatternScenarioManifest = @json.from_json(parsed) catch {
+    _ => return "Invalid civic communication pattern manifest: \{manifest_path}"
+  }
+  let summaries : Array[String] = []
+  let base_dir = @path.Path::dirname(manifest_path).to_string()
+  let mut due_ms = @env.now() + 300_000UL
+  for template in manifest.templates {
+    match
+      load_civic_salon_scenario_file(
+        resolve_manifest_template_path(base_dir, template),
+      ) {
+      Some(scenario) => {
+        let schedule = install_civic_pattern_scenario(
+          scenario, snapshot_path, due_ms,
+        )
+        summaries.push("\{schedule.id}@\{schedule.building_id}")
+        due_ms = due_ms + 300_000UL
+      }
+      None => summaries.push("missing:\{template}")
+    }
+  }
+  "Installed \{summaries.length()} civic communication pattern scenario(s): \{summaries.join(", ")}"
+}
+
+///|
+fn resolve_manifest_template_path(
+  base_dir : String,
+  template : String,
+) -> String {
+  if template.has_prefix("/") || base_dir == "." || base_dir == "" {
+    template
+  } else {
+    "\{base_dir}/\{template}"
+  }
+}
+
+///|
+fn civic_pattern_round_id_for_scenario(
+  scenario : CivicSalonScenario,
+  round_id : String,
+  round_number : Int,
+) -> String {
+  if round_id.trim().is_empty() {
+    "\{scenario.id}-round-\{round_number}"
+  } else {
+    round_id
+  }
+}
+
+///|
+async fn install_civic_pattern_scenario(
+  scenario : CivicSalonScenario,
+  snapshot_path : String,
+  first_due_ms : UInt64,
+) -> CivicSalonSchedule {
+  write_text_file(
+    civic_salon_scenario_path(scenario.id, snapshot_path~),
+    scenario.to_json().stringify(indent=2),
+  )
+  upsert_civic_salon_schedule_for_scenario(
+    scenario,
+    path=default_civic_salon_schedule_path(snapshot_path~),
+    now_ms=first_due_ms,
+  )
 }
 
 ///|
@@ -37,16 +147,10 @@ async fn install_civic_salon_scenario_for_daemon(
   let snapshot_path = civic_salon_snapshot_path_for_workspace_base(
     workspace_base,
   )
-  write_text_file(
-    civic_salon_scenario_path(scenario.id, snapshot_path~),
-    scenario.to_json().stringify(indent=2),
-  )
   let now_ms = @env.now()
   let schedule_path = default_civic_salon_schedule_path(snapshot_path~)
-  let installed = upsert_civic_salon_schedule_for_scenario(
-    scenario,
-    path=schedule_path,
-    now_ms~,
+  let installed = install_civic_pattern_scenario(
+    scenario, snapshot_path, now_ms,
   )
   let next = if summary.has_prefix("Blocked ") {
     retry_civic_salon_schedule(installed, now_ms, round_id, summary)
@@ -110,14 +214,17 @@ fn civic_salon_snapshot_path_for_workspace_base(
 pub async fn bootstrap_civic_salon_scenario(
   scenario : CivicSalonScenario,
   book_catalog_path? : String = @moonbook.default_catalog_path(),
-  round_id? : String = "civic-salon-round-001",
+  round_id? : String = "",
   round_number? : Int = 1,
   workspace_base? : String = "",
   reducer_mode? : CivicSalonReductionMode = MoonClawReducer,
 ) -> String {
+  let resolved_round_id = civic_pattern_round_id_for_scenario(
+    scenario, round_id, round_number,
+  )
   let reduction = reduce_civic_salon_ideas(
     scenario,
-    round_id~,
+    round_id=resolved_round_id,
     round_number~,
     workspace_base~,
     mode=reducer_mode,
@@ -128,14 +235,14 @@ pub async fn bootstrap_civic_salon_scenario(
       scenario,
       reduction.ideas,
       book_catalog_path~,
-      round_id~,
+      round_id=resolved_round_id,
       round_number~,
       workspace_base~,
       reducer_summary=Some(reduction.summary),
     )
   } else {
-    write_civic_salon_reducer_blocker(scenario, reduction, round_id)
-    "Blocked \{scenario.title} \{round_id}: \{reduction.summary}"
+    write_civic_salon_reducer_blocker(scenario, reduction, resolved_round_id)
+    "Blocked \{scenario.title} \{resolved_round_id}: \{reduction.summary}"
   }
 }
 
@@ -150,7 +257,7 @@ async fn materialize_civic_salon_scenario(
   reducer_summary? : String? = None,
 ) -> String {
   if ideas.length() == 0 {
-    return "Blocked \{scenario.title} \{round_id}: reducer produced no civic salon ideas."
+    return "Blocked \{scenario.title} \{round_id}: reducer produced no civic communication-pattern outputs."
   }
   let participants = scenario.participants
   let metrics = civic_salon_metrics(scenario, participants, ideas)
@@ -189,7 +296,7 @@ async fn materialize_civic_salon_scenario(
     Some(summary) => " Reducer: \{summary}"
     None => ""
   }
-  "Seeded \{scenario.title} \{round_id}: \{participants.length()} internal participant perspective(s), \{ideas.length()} cross-area idea reduction(s), \{metrics.research_question_count} research question(s), and \{metrics.idea_return_home_count} returned idea-home route(s).\{source}"
+  "Seeded \{scenario.title} \{round_id}: \{participants.length()} internal participant perspective(s), \{ideas.length()} reviewable pattern output(s), \{metrics.research_question_count} follow-up question(s), and \{metrics.idea_return_home_count} returned output-home route(s).\{source}"
 }
 
 ///|
@@ -330,7 +437,7 @@ async fn seed_civic_salon_protocol_slice(
         target_kind: "participant_question_backlog",
         target_id: protocol.book_id,
         target_path: scenario.backlog_path,
-        summary: "Distributed cross-area question set for `\{idea.title}` to \{idea.participating_books.length()} internal participant workspace(s).",
+        summary: "Distributed reviewable pattern output `\{idea.title}` to \{idea.participating_books.length()} internal participant workspace(s).",
         review_status: "pending",
         idempotency_key: "\{scenario.id}/outbox/\{idea.id}/round-\{round_number}",
       }.to_json(),
@@ -428,7 +535,7 @@ fn civic_salon_metrics(
     idea_return_home_count,
     average_books_per_idea,
     structural_effectiveness_score,
-    summary: "The salon converted \{participants.length()} \{scenario.domain_label} participant perspectives into \{ideas.length()} cross-area ideas, \{research_question_count} testable questions, and \{idea_return_home_count} returned idea-home records.",
+    summary: "The pattern round converted \{participants.length()} \{scenario.domain_label} participant perspectives into \{ideas.length()} reviewable outputs, \{research_question_count} testable follow-up questions, and \{idea_return_home_count} returned output-home records.",
   }
 }
 
@@ -533,7 +640,7 @@ fn civic_salon_home_return_records(
         idea_id: idea.id,
         target_book_id: book_id,
         target_path: scenario.returned_ideas_path,
-        summary: "Returned `\{idea.title}` to \{book_id} for review and follow-up research shaping.",
+        summary: "Returned `\{idea.title}` to \{book_id} for review and follow-up work.",
         review_status: "pending",
       })
     }
@@ -700,7 +807,7 @@ fn civic_salon_participant_index(
     "- Communication pattern: \{pattern.title}",
     "- Cadence: \{participant.cadence}",
     "- Shared building: `\{scenario.building_id}`",
-    "- Communication protocol: map current perspective into the building, let the building reduce cross-area tensions into questions, then pull relevant questions back into this home workspace.",
+    "- Communication protocol: map current perspective into the building, let the building reduce the exchange into reviewable outputs, then pull relevant follow-up questions back into this home workspace.",
     "",
     "## Perspective",
     "",
@@ -710,12 +817,12 @@ fn civic_salon_participant_index(
     "",
     participant.current_question,
     "",
-    "## Returned Ideas From \{scenario.title}",
+    "## Returned Outputs From \{scenario.title}",
     "",
     if returned_ideas.length() == 0 {
-      "No returned salon ideas yet."
+      "No returned pattern outputs yet."
     } else {
-      "This workspace received \{returned_ideas.length()} reduced idea(s) back from \{scenario.title}. See `\{scenario.returned_ideas_path}`."
+      "This workspace received \{returned_ideas.length()} reduced output(s) back from \{scenario.title}. See `\{scenario.returned_ideas_path}`."
     },
   ].join("\n")
 }
@@ -732,9 +839,9 @@ fn civic_salon_participant_contract(
     "- Workspace id: `\{participant.book_id}`",
     "- Focus area: \{participant.focus_area}",
     "- Communication pattern: \{pattern.title}",
-    "- Salon cadence: \{participant.cadence}",
+    "- Pattern cadence: \{participant.cadence}",
     "- Building channel: `\{scenario.protocol_channel}`",
-    "- Expected output: short perspective packet, open question, evidence gap, and useful cross-area dependency.",
+    "- Expected output: short perspective packet, open question, evidence gap, and useful pattern-specific dependency, match, route, lesson gap, story angle, or recovery constraint.",
     "",
     "## Rules",
     "",
@@ -764,12 +871,12 @@ fn civic_salon_skill_text(scenario : CivicSalonScenario) -> String {
     "## Output Example",
     "",
     "```md",
-    "salon_decision: update",
-    "participant_focus: VLA",
-    "bottleneck: short-horizon demos hide recovery failures",
-    "cross_area_dependency: world models and safety evaluation",
-    "research_question: How should a VLA policy revise its plan when the expected tool is missing?",
-    "next_artifact: wiki/queries/vla-long-horizon-eval.md",
+    "pattern_decision: update",
+    "participant_focus: policy-source-review",
+    "bottleneck: resident intake lacks required eligibility facts",
+    "cross_area_dependency: official source selection and review gate",
+    "follow_up_question: Which missing input should be requested before a checklist is safe?",
+    "next_artifact: wiki/queries/policy-questions.md",
     "```",
   ].join("\n")
 }
@@ -789,7 +896,7 @@ fn civic_salon_participant_perspective(
     "",
     participant.perspective,
     "",
-    "## Contribution To Salon",
+    "## Contribution To Building Pattern",
     "",
     participant.contribution,
     "",
@@ -811,10 +918,10 @@ fn civic_salon_participant_question_page(
     "",
     participant.current_question,
     "",
-    "## What Would Make This Worth Ongoing Research",
+    "## What Would Make This Worth Ongoing Follow-up",
     "",
     "- It connects this participant perspective to another \{scenario.domain_label} bottleneck.",
-    "- It can become a benchmark, experiment, architecture contract, or data schema.",
+    "- It can become a benchmark, experiment, architecture contract, data schema, route, match, lesson, story, or recovery drill.",
     "- It changes what the shared building should ask next.",
   ].join("\n")
 }
@@ -828,18 +935,18 @@ fn civic_salon_returned_ideas_page(
   round_number : Int,
 ) -> String {
   let builder = StringBuilder::new()
-  builder.write_string("# Returned Ideas From \{scenario.title}\n\n")
+  builder.write_string("# Returned Outputs From \{scenario.title}\n\n")
   builder.write_string(
-    "This page records which `\{scenario.building_id}` salon reductions came back home to `\{participant.book_id}` in round `\{round_id}` (#\{round_number}).\n\n",
+    "This page records which `\{scenario.building_id}` pattern reductions came back home to `\{participant.book_id}` in round `\{round_id}` (#\{round_number}).\n\n",
   )
   builder.write_string(
-    "A returned idea is not yet accepted truth. It is a reviewable research direction that this home workspace should evaluate, refine, or reject.\n\n",
+    "A returned output is not yet accepted truth. It is a reviewable direction that this home workspace should evaluate, refine, or reject.\n\n",
   )
   if returned_ideas.length() == 0 {
     builder.write_string("No returned ideas for this workspace yet.\n")
   } else {
     builder.write_string(
-      "| Idea | Why this workspace is involved | Next experiment |\n",
+      "| Output | Why this workspace is involved | Next artifact/action |\n",
     )
     builder.write_string("| --- | --- | --- |\n")
     for idea in returned_ideas {
@@ -847,7 +954,7 @@ fn civic_salon_returned_ideas_page(
         "|\{idea.title}|\{idea.summary}|\{idea.next_experiment}|\n",
       )
     }
-    builder.write_string("\n## Research Questions\n\n")
+    builder.write_string("\n## Follow-up Questions\n\n")
     for idea in returned_ideas {
       builder.write_string("### ")
       builder.write_string(idea.title)
@@ -873,7 +980,7 @@ fn civic_salon_participant_projection(
 ) -> Json {
   let pattern_label = civic_salon_pattern_label(scenario)
   @json.parse(
-    "{ \"book_id\": \"\{json_escape(participant.book_id)}\", \"visibility\": \"internal\", \"projection_scope\": \"internal\", \"tags\": [\"civic-communication-pattern\", \"internal\", \"participant-workspace\", \"\{json_escape(scenario.id)}\", \"\{json_escape(scenario.building_id)}\"], \"title\": \"\{json_escape(scenario.domain_label)} / \{json_escape(participant.title)}\", \"summary\": \"\{json_escape(participant.contribution)}\", \"status_chips\": [{\"label\":\"\{json_escape(pattern_label)}\",\"tone\":\"info\"},{\"label\":\"\{json_escape(scenario.cadence)}\",\"tone\":\"healthy\"},{\"label\":\"round \{round_number}\",\"tone\":\"info\"},{\"label\":\"returned ideas \{returned_ideas.length()}\",\"tone\":\"review\"}], \"metrics\": [{\"label\":\"Focus\",\"value\":\"\{json_escape(participant.focus_area)}\",\"note\":\"participant\",\"tone\":\"info\"},{\"label\":\"Returned ideas\",\"value\":\"\{returned_ideas.length()}\",\"note\":\"from \{json_escape(scenario.building_id)}\",\"tone\":\"healthy\"}], \"readiness\": [{\"title\":\"Returned pattern ideas\",\"detail\":\"\{json_escape(scenario.returned_ideas_path)}\",\"meta\":\"Reviewable\"}], \"review_queue\": [{\"title\":\"Review returned ideas\",\"detail\":\"\{json_escape(scenario.returned_ideas_path)}\",\"meta\":\"Pending\"}], \"page_families\": \{participant_returned_idea_page_families_json(returned_ideas)}, \"journey\": [{\"title\":\"Pattern return-home \{json_escape(round_id)}\",\"stage\":\"distribute\",\"status\":\"review\",\"summary\":\"\{json_escape(scenario.title)} returned \{returned_ideas.length()} relevant cross-area idea(s) to this internal participant workspace in round \{round_number}.\",\"highlights\": []}] }",
+    "{ \"book_id\": \"\{json_escape(participant.book_id)}\", \"visibility\": \"internal\", \"projection_scope\": \"internal\", \"tags\": [\"civic-communication-pattern\", \"internal\", \"participant-workspace\", \"\{json_escape(scenario.id)}\", \"\{json_escape(scenario.building_id)}\"], \"title\": \"\{json_escape(scenario.domain_label)} / \{json_escape(participant.title)}\", \"summary\": \"\{json_escape(participant.contribution)}\", \"status_chips\": [{\"label\":\"\{json_escape(pattern_label)}\",\"tone\":\"info\"},{\"label\":\"\{json_escape(scenario.cadence)}\",\"tone\":\"healthy\"},{\"label\":\"round \{round_number}\",\"tone\":\"info\"},{\"label\":\"returned outputs \{returned_ideas.length()}\",\"tone\":\"review\"}], \"metrics\": [{\"label\":\"Focus\",\"value\":\"\{json_escape(participant.focus_area)}\",\"note\":\"participant\",\"tone\":\"info\"},{\"label\":\"Returned outputs\",\"value\":\"\{returned_ideas.length()}\",\"note\":\"from \{json_escape(scenario.building_id)}\",\"tone\":\"healthy\"}], \"readiness\": [{\"title\":\"Returned pattern outputs\",\"detail\":\"\{json_escape(scenario.returned_ideas_path)}\",\"meta\":\"Reviewable\"}], \"review_queue\": [{\"title\":\"Review returned outputs\",\"detail\":\"\{json_escape(scenario.returned_ideas_path)}\",\"meta\":\"Pending\"}], \"page_families\": \{participant_returned_idea_page_families_json(returned_ideas)}, \"journey\": [{\"title\":\"Pattern return-home \{json_escape(round_id)}\",\"stage\":\"distribute\",\"status\":\"review\",\"summary\":\"\{json_escape(scenario.title)} returned \{returned_ideas.length()} relevant pattern output(s) to this internal participant workspace in round \{round_number}.\",\"highlights\": []}] }",
   ) catch {
     _ => Json::object({})
   }
@@ -884,11 +991,11 @@ fn participant_returned_idea_page_families_json(
   returned_ideas : Array[CivicSalonIdea],
 ) -> String {
   let items : Array[String] = [
-    "{\"title\":\"Returned salon ideas\",\"detail\":\"wiki/queries/salon-returned-ideas.md\",\"meta\":\"Question backlog\"}",
+    "{\"title\":\"Returned pattern outputs\",\"detail\":\"wiki/queries/salon-returned-ideas.md\",\"meta\":\"Follow-up backlog\"}",
   ]
   for idea in returned_ideas {
     items.push(
-      "{\"title\":\{json_string(idea.title)},\"detail\":\{json_string(idea.id)},\"meta\":\"Returned idea\"}",
+      "{\"title\":\{json_string(idea.title)},\"detail\":\{json_string(idea.id)},\"meta\":\"Returned output\"}",
     )
   }
   "[\{items.join(",")}]"
@@ -913,7 +1020,7 @@ fn civic_salon_participant_html(
     "<p>\{participant.perspective}</p>",
     "<h2>Contribution</h2><p>\{participant.contribution}</p>",
     "<h2>Question</h2><p>\{participant.current_question}</p>",
-    "<h2>Returned Ideas</h2>",
+    "<h2>Returned Outputs</h2>",
     civic_salon_returned_idea_cards(returned_ideas),
     "</section></main></body></html>",
   ].join("\n")
@@ -924,12 +1031,12 @@ fn civic_salon_returned_idea_cards(
   returned_ideas : Array[CivicSalonIdea],
 ) -> String {
   if returned_ideas.length() == 0 {
-    "<p>No returned ideas yet.</p>"
+    "<p>No returned outputs yet.</p>"
   } else {
     let builder = StringBuilder::new()
     for idea in returned_ideas {
       builder.write_string(
-        "<article><h3>\{idea.title}</h3><p>\{idea.summary}</p><p><strong>Questions:</strong> \{idea.research_questions.length()}</p><p><strong>Next:</strong> \{idea.next_experiment}</p></article>",
+        "<article><h3>\{idea.title}</h3><p>\{idea.summary}</p><p><strong>Follow-up questions:</strong> \{idea.research_questions.length()}</p><p><strong>Next:</strong> \{idea.next_experiment}</p></article>",
       )
     }
     builder.to_string()
@@ -953,13 +1060,13 @@ fn civic_salon_building_synthesis(
     "- Round: `\{round_id}`",
     "- Round number: `\{round_number}`",
     "",
-    "This is a live `\{pattern.title}` communication-pattern test for `\{protocol.title}` as a domain exchange building. Internal participant workspaces contribute focused perspectives, and the building reduces them into research ideas and questions worth ongoing work.",
+    "This is a live `\{pattern.title}` communication-pattern test for `\{protocol.title}` as a domain exchange building. Internal participant workspaces contribute focused perspectives, and the building reduces them into reviewable outputs and follow-up questions worth ongoing work.",
     "",
     "## Participants",
     "",
     civic_salon_participant_table(participants),
     "",
-    "## Cross-area Ideas",
+    "## Reduced Pattern Outputs",
     "",
     civic_salon_idea_sections(ideas),
     "",
@@ -967,7 +1074,7 @@ fn civic_salon_building_synthesis(
     "",
     civic_salon_metrics_table(metrics),
     "",
-    "This metric is structural: it proves the building moved from exchange to reduction to distribution. It does not claim the ideas are correct; the review queue still decides which become accepted research programs.",
+    "This metric is structural: it proves the building moved from exchange to reduction to distribution. It does not claim the outputs are correct; the review queue still decides which become accepted service work.",
     "",
     "## Quality Standard",
     "",
@@ -981,9 +1088,9 @@ fn civic_salon_idea_backlog(
   ideas : Array[CivicSalonIdea],
 ) -> String {
   [
-    "# \{scenario.title} Open Question Backlog",
+    "# \{scenario.title} Follow-up Backlog",
     "",
-    "Questions generated by \{scenario.title}.",
+    "Reviewable outputs and follow-up questions generated by \{scenario.title}.",
     "",
     civic_salon_idea_sections(ideas),
   ].join("\n")
@@ -1023,30 +1130,30 @@ fn civic_salon_metrics_markdown(
     "",
     metrics.summary,
     "",
-    "These metrics evaluate whether the building actually held an exchange, reduced new shared ideas, and returned them to the right home workspaces. They do not certify scientific truth; they certify protocol effectiveness for this round.",
+    "These metrics evaluate whether the building actually held an exchange, reduced new shared outputs, and returned them to the right home workspaces. They do not certify truth; they certify protocol effectiveness for this round.",
     "",
     "## Score",
     "",
     "- Structural effectiveness score: \{metrics.structural_effectiveness_score}/100",
     "- Participant perspectives: \{metrics.participant_count}",
-    "- Cross-area idea reductions: \{metrics.idea_count}",
-    "- Research questions generated: \{metrics.research_question_count}",
-    "- Participant-idea links: \{metrics.participant_idea_links}",
-    "- Participant workspaces covered by at least one idea: \{metrics.participating_book_coverage_count}/\{participants.length()}",
-    "- Idea-home return records: \{metrics.idea_return_home_count}",
-    "- Average participant workspaces per idea: \{metrics.average_books_per_idea}",
+    "- Reviewable output reductions: \{metrics.idea_count}",
+    "- Follow-up questions generated: \{metrics.research_question_count}",
+    "- Participant-output links: \{metrics.participant_idea_links}",
+    "- Participant workspaces covered by at least one output: \{metrics.participating_book_coverage_count}/\{participants.length()}",
+    "- Output-home return records: \{metrics.idea_return_home_count}",
+    "- Average participant workspaces per output: \{metrics.average_books_per_idea}",
     "",
     "## Formula",
     "",
-    "The structural score allocates 20 points each to participant coverage, idea yield, research-question yield, workspace coverage, and return-home completion.",
+    "The structural score allocates 20 points each to participant coverage, output yield, follow-up-question yield, workspace coverage, and return-home completion.",
     "",
-    "## Ideas",
+    "## Outputs",
     "",
     civic_salon_idea_metric_table(ideas),
     "",
     "## Return Home Contract",
     "",
-    "Each participating workspace receives `\{scenario.returned_ideas_path}` with the reduced ideas relevant to its perspective. That page is the next place for each home workspace to review, accept, refine, or reject the salon output.",
+    "Each participating workspace receives `\{scenario.returned_ideas_path}` with the reduced outputs relevant to its perspective. That page is the next place for each home workspace to review, accept, refine, or reject the pattern output.",
   ].join("\n")
 }
 
@@ -1056,20 +1163,22 @@ fn civic_salon_metrics_table(metrics : CivicSalonMetric) -> String {
     "| Metric | Value | Meaning |",
     "| --- | ---: | --- |",
     "| Structural effectiveness score | \{metrics.structural_effectiveness_score}/100 | Exchange-reduce-distribute completion, not truth certification |",
-    "| Participant perspectives | \{metrics.participant_count} | Distinct internal perspectives in the salon |",
-    "| Idea reductions | \{metrics.idea_count} | New cross-area ideas produced by the building |",
-    "| Research questions | \{metrics.research_question_count} | Testable questions attached to those ideas |",
-    "| Participant-idea links | \{metrics.participant_idea_links} | Cross-pollination edges between ideas and home workspaces |",
-    "| Covered workspaces | \{metrics.participating_book_coverage_count} | Home workspaces receiving at least one returned idea |",
-    "| Return-home records | \{metrics.idea_return_home_count} | Idea-to-book distributions written back home |",
-    "| Average workspaces per idea | \{metrics.average_books_per_idea} | Breadth of each reduced idea |",
+    "| Participant perspectives | \{metrics.participant_count} | Distinct internal perspectives in the pattern round |",
+    "| Output reductions | \{metrics.idea_count} | New reviewable outputs produced by the building |",
+    "| Follow-up questions | \{metrics.research_question_count} | Testable questions attached to those outputs |",
+    "| Participant-output links | \{metrics.participant_idea_links} | Cross-pollination edges between outputs and home workspaces |",
+    "| Covered workspaces | \{metrics.participating_book_coverage_count} | Home workspaces receiving at least one returned output |",
+    "| Return-home records | \{metrics.idea_return_home_count} | Output-to-book distributions written back home |",
+    "| Average workspaces per output | \{metrics.average_books_per_idea} | Breadth of each reduced output |",
   ].join("\n")
 }
 
 ///|
 fn civic_salon_idea_metric_table(ideas : Array[CivicSalonIdea]) -> String {
   let builder = StringBuilder::new()
-  builder.write_string("| Idea | Workspaces | Questions | Home workspaces |\n")
+  builder.write_string(
+    "| Output | Workspaces | Questions | Home workspaces |\n",
+  )
   builder.write_string("| --- | ---:| ---:| --- |\n")
   for idea in ideas {
     builder.write_string(
@@ -1094,15 +1203,15 @@ fn civic_salon_building_projection_json(
   let highlights : Array[String] = [
     "Round \{round_number}: \{round_id}",
     "\{participants.length()} internal participant perspectives joined the round",
-    "\{ideas.length()} cross-area idea reductions were produced",
-    "\{metrics.research_question_count} testable research questions were generated",
-    "\{metrics.idea_return_home_count} idea-home records were distributed back to internal participant workspaces",
-    "Outputs are review-gated before becoming long-horizon research programs",
+    "\{ideas.length()} reviewable pattern outputs were produced",
+    "\{metrics.research_question_count} testable follow-up questions were generated",
+    "\{metrics.idea_return_home_count} output-home records were distributed back to internal participant workspaces",
+    "Outputs are review-gated before becoming accepted service work",
     "Cadence: \{scenario.cadence}",
   ]
-  let summary = "\{participants.length()} \{scenario.domain_label} participant perspectives use the \{pattern_label} pattern through \{scenario.building_id} and reduce into testable research questions."
+  let summary = "\{participants.length()} \{scenario.domain_label} participant perspectives use the \{pattern_label} pattern through \{scenario.building_id} and reduce into reviewable outputs with testable follow-up questions."
   let journey_title = "\{scenario.title} round \{round_number}"
-  let journey_summary = "The building received \{participants.length()} domain perspectives and reduced them into \{ideas.length()} research programs worth ongoing review."
+  let journey_summary = "The building received \{participants.length()} domain perspectives and reduced them into \{ideas.length()} reviewable outputs worth ongoing review."
   [
     "{",
     "  \"book_id\": \{json_string(protocol.book_id)},",
@@ -1119,15 +1228,15 @@ fn civic_salon_building_projection_json(
     "  ],",
     "  \"metrics\": [",
     "    {\"label\":\"Participant perspectives\",\"value\":\"\{participants.length()}\",\"note\":\"internal workspaces\",\"tone\":\"healthy\"},",
-    "    {\"label\":\"Idea reductions\",\"value\":\"\{ideas.length()}\",\"note\":\"cross-area questions\",\"tone\":\"healthy\"},",
+    "    {\"label\":\"Output reductions\",\"value\":\"\{ideas.length()}\",\"note\":\"pattern outputs\",\"tone\":\"healthy\"},",
     "    {\"label\":\"Effectiveness\",\"value\":\"\{metrics.structural_effectiveness_score}/100\",\"note\":\"structural exchange score\",\"tone\":\"healthy\"},",
-    "    {\"label\":\"Research questions\",\"value\":\"\{metrics.research_question_count}\",\"note\":\"testable follow-ups\",\"tone\":\"healthy\"},",
+    "    {\"label\":\"Follow-up questions\",\"value\":\"\{metrics.research_question_count}\",\"note\":\"testable follow-ups\",\"tone\":\"healthy\"},",
     "    {\"label\":\"Home returns\",\"value\":\"\{metrics.idea_return_home_count}\",\"note\":\"idea-workspace routes\",\"tone\":\"healthy\"},",
     "    {\"label\":\"Review gates\",\"value\":\"1\",\"note\":\{json_string(scenario.review_gate)},\"tone\":\"review\"}",
     "  ],",
     "  \"readiness\": [",
     "    {\"title\":\"Building synthesis\",\"detail\":\{json_string(scenario.synthesis_path)},\"meta\":\"Ready\"},",
-    "    {\"title\":\"Question backlog\",\"detail\":\{json_string(scenario.backlog_path)},\"meta\":\"Ready\"},",
+    "    {\"title\":\"Follow-up backlog\",\"detail\":\{json_string(scenario.backlog_path)},\"meta\":\"Ready\"},",
     "    {\"title\":\"Effectiveness metrics\",\"detail\":\{json_string(scenario.metrics_path)},\"meta\":\"Ready\"},",
     "    {\"title\":\"Review queue\",\"detail\":\{json_string(scenario.review_path)},\"meta\":\"Pending\"}",
     "  ],",
@@ -1139,7 +1248,7 @@ fn civic_salon_building_projection_json(
     "    {\"title\":\{json_string(journey_title)},\"stage\":\"exchange-reduce-distribute\",\"status\":\"review\",\"summary\":\{json_string(journey_summary)},\"highlights\": \{json_string_array(highlights)}}",
     "  ],",
     "  \"links\": [",
-    "    {\"label\":\"Question backlog\",\"kind\":\"wiki\",\"url\":\{json_string(scenario.backlog_path)}},",
+    "    {\"label\":\"Follow-up backlog\",\"kind\":\"wiki\",\"url\":\{json_string(scenario.backlog_path)}},",
     "    {\"label\":\"Effectiveness metrics\",\"kind\":\"wiki\",\"url\":\{json_string(scenario.metrics_path)}},",
     "    {\"label\":\"Review queue\",\"kind\":\"wiki\",\"url\":\{json_string(scenario.review_path)}}",
     "  ]",
@@ -1160,7 +1269,7 @@ fn projection_page_families_json(
   }
   for idea in ideas {
     items.push(
-      "{\"title\":\{json_string(idea.title)},\"detail\":\{json_string(idea.id)},\"meta\":\"Idea reduction\"}",
+      "{\"title\":\{json_string(idea.title)},\"detail\":\{json_string(idea.id)},\"meta\":\"Output reduction\"}",
     )
   }
   "[\{items.join(",")}]"
@@ -1206,18 +1315,18 @@ fn civic_salon_building_html(
     "    <p class=\"eyebrow\">\{protocol.title} / \{pattern_label}</p>",
     "    <h1>\{scenario.title}</h1>",
     "    <p><code>\{round_id}</code> <code>\{pattern_label}</code> <code>round \{round_number}</code></p>",
-    "    <p>\{participants.length()} internal participant perspectives exchange focused views on \{scenario.cadence}, then \{scenario.building_id} reduces the plurality into research questions worth ongoing work.</p>",
-    "    <p><code>\{participants.length()} internal perspectives</code> <code>\{ideas.length()} idea reductions</code> <code>review gated</code></p>",
+    "    <p>\{participants.length()} internal participant perspectives exchange focused views on \{scenario.cadence}, then \{scenario.building_id} reduces the plurality into reviewable outputs worth ongoing work.</p>",
+    "    <p><code>\{participants.length()} internal perspectives</code> <code>\{ideas.length()} output reductions</code> <code>review gated</code></p>",
     "    <div class=\"metric\">",
     "      <div class=\"stat\"><b>\{metrics.structural_effectiveness_score}/100</b><span>structural effectiveness</span></div>",
-    "      <div class=\"stat\"><b>\{metrics.research_question_count}</b><span>research questions</span></div>",
-    "      <div class=\"stat\"><b>\{metrics.idea_return_home_count}</b><span>idea-home returns</span></div>",
-    "      <div class=\"stat\"><b>\{metrics.average_books_per_idea}</b><span>workspaces per idea</span></div>",
+    "      <div class=\"stat\"><b>\{metrics.research_question_count}</b><span>follow-up questions</span></div>",
+    "      <div class=\"stat\"><b>\{metrics.idea_return_home_count}</b><span>output-home returns</span></div>",
+    "      <div class=\"stat\"><b>\{metrics.average_books_per_idea}</b><span>workspaces per output</span></div>",
     "    </div>",
     "  </section>",
     "  <h2>Internal Perspectives</h2>",
     "  <section class=\"grid\">\{civic_salon_participant_cards(participants)}</section>",
-    "  <h2>Reduced Research Ideas</h2>",
+    "  <h2>Reduced Pattern Outputs</h2>",
     "  <section class=\"grid\">\{civic_salon_idea_cards(ideas)}</section>",
     "</main></body></html>",
   ].join("\n")
@@ -1277,13 +1386,13 @@ fn civic_salon_idea_sections(ideas : Array[CivicSalonIdea]) -> String {
     builder.write_string("Why it matters: ")
     builder.write_string(idea.why_it_matters)
     builder.write_string("\n\n")
-    builder.write_string("Research questions:\n")
+    builder.write_string("Follow-up questions:\n")
     for question in idea.research_questions {
       builder.write_string("- ")
       builder.write_string(question)
       builder.write_char('\n')
     }
-    builder.write_string("\nNext experiment: ")
+    builder.write_string("\nNext artifact/action: ")
     builder.write_string(idea.next_experiment)
     builder.write_string("\n\n")
   }

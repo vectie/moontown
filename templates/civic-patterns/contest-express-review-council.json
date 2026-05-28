@@ -1,0 +1,68 @@
+{
+  "id": "wenyu-contest-express-review",
+  "title": "Contest Express Review Council",
+  "communication_pattern_id": "review-council",
+  "communication_pattern_label": "Review Council",
+  "building_id": "contest-express",
+  "building_book_id": "wenyu-contest-express",
+  "domain_label": "contest service",
+  "topic": "contest readiness, submission review, and mock judging",
+  "cadence": "every 30 minutes",
+  "skill_name": "wenyu-contest-express-review",
+  "skill_description": "Review contest opportunities, readiness gaps, team fit, and submission revision plans.",
+  "protocol_channel": "contest_artifact_submission",
+  "reduction_kind": "contest_review_decision",
+  "output_channel": "contest_readiness_backlog",
+  "review_gate": "contest_submission_review",
+  "review_owner": "keeper",
+  "review_reason": "keeper reviews eligibility, deadline risk, criteria fit, and revision actionability",
+  "backlog_path": "wiki/queries/contest-readiness.md",
+  "synthesis_path": "wiki/civic/contest-express.md",
+  "metrics_path": "wiki/metrics/contest-express-review.md",
+  "review_path": "wiki/reviews/contest-submissions.md",
+  "returned_ideas_path": "wiki/queries/pattern-returned-items.md",
+  "participant_contract_path": "raw/bootstrap/CONTEST_EXPRESS_REVIEW_CONTRACT.md",
+  "quality_rules": [
+    "Every output must name criteria, readiness gap, or revision action.",
+    "Deadline and eligibility uncertainty must be explicit.",
+    "Mock-judge feedback must be concrete enough for the team to act."
+  ],
+  "skill_rules": [
+    "Compare opportunities against explicit criteria.",
+    "Separate calendar tracking from submission quality.",
+    "Return next revision tasks to the owner workspace."
+  ],
+  "participants": [
+    {
+      "book_id": "contest-express-deadline-watch",
+      "title": "Deadline Watch Desk",
+      "focus_area": "contest calls, dates, and requirements",
+      "perspective": "The best contest advice is useless if deadline and eligibility facts are stale.",
+      "cadence": "every 30 minutes",
+      "current_question": "Which deadline or requirement changes the readiness plan?",
+      "contribution": "Provides contest calls, dates, eligibility requirements, and missing official sources.",
+      "next_artifact": "wiki/sources/contests.md"
+    },
+    {
+      "book_id": "contest-express-team-readiness",
+      "title": "Team Readiness Desk",
+      "focus_area": "team capability and submission state",
+      "perspective": "A contest route should fit team evidence, not only ambition.",
+      "cadence": "every 30 minutes",
+      "current_question": "Which team capability gap blocks a strong submission?",
+      "contribution": "Provides team profile, artifact maturity, missing proof, and preparation tasks.",
+      "next_artifact": "wiki/entities/teams.md"
+    },
+    {
+      "book_id": "contest-express-mock-judge",
+      "title": "Mock Judge Desk",
+      "focus_area": "criteria-based feedback",
+      "perspective": "A review council should translate judging criteria into revision work, not praise.",
+      "cadence": "every 30 minutes",
+      "current_question": "Which criterion would a judge likely mark down, and why?",
+      "contribution": "Provides mock-judge scoring, evidence gaps, and revised pitch/checklist actions.",
+      "next_artifact": "wiki/reviews/contest-submissions.md"
+    }
+  ],
+  "ideas": []
+}

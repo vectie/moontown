@@ -1,0 +1,15 @@
+{
+  "templates": [
+    "town-shell-triage-desk.json",
+    "resident-twins-review-council.json",
+    "policy-hall-triage-desk.json",
+    "contest-express-review-council.json",
+    "social-square-match-market.json",
+    "talent-avenue-match-market.json",
+    "vitality-dashboard-signal-watch.json",
+    "ai-garden-learning-cohort.json",
+    "physical-bridge-incident-bridge.json",
+    "valley-market-match-market.json",
+    "broadcast-tower-story-forge.json"
+  ]
+}

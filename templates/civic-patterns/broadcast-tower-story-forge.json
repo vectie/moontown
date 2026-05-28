@@ -1,0 +1,68 @@
+{
+  "id": "wenyu-broadcast-tower-story",
+  "title": "Broadcast Tower Story Forge",
+  "communication_pattern_id": "story-forge",
+  "communication_pattern_label": "Story Forge",
+  "building_id": "broadcast-tower",
+  "building_book_id": "wenyu-broadcast-tower",
+  "domain_label": "public storytelling",
+  "topic": "verified achievements, event records, and public-safe stories",
+  "cadence": "every 30 minutes",
+  "skill_name": "wenyu-broadcast-tower-story",
+  "skill_description": "Turn verified town achievements and consented evidence into public-safe story drafts with reviewable claims.",
+  "protocol_channel": "story_evidence_packet",
+  "reduction_kind": "public_story_draft",
+  "output_channel": "story_publication_backlog",
+  "review_gate": "public_story_review",
+  "review_owner": "keeper",
+  "review_reason": "keeper reviews consent, accuracy, public value, tone, and claim support before publication",
+  "backlog_path": "wiki/queries/public-stories.md",
+  "synthesis_path": "wiki/civic/broadcast-tower.md",
+  "metrics_path": "wiki/metrics/broadcast-tower-story.md",
+  "review_path": "wiki/reviews/public-stories.md",
+  "returned_ideas_path": "wiki/queries/pattern-returned-items.md",
+  "participant_contract_path": "raw/bootstrap/BROADCAST_TOWER_STORY_CONTRACT.md",
+  "quality_rules": [
+    "Every story angle must link to verified evidence or clearly request more evidence.",
+    "Consent and redaction state must be explicit.",
+    "Do not turn operational activity into public success without substantive outcome proof."
+  ],
+  "skill_rules": [
+    "Collect evidence before drafting narrative.",
+    "Prefer specific public value over promotional copy.",
+    "Return unsupported claims to evidence collection or review."
+  ],
+  "participants": [
+    {
+      "book_id": "broadcast-tower-achievement-signals",
+      "title": "Achievement Signals Desk",
+      "focus_area": "validated outcomes and milestones",
+      "perspective": "A public story needs a real achievement, not just task logs.",
+      "cadence": "every 30 minutes",
+      "current_question": "Which achievement is verified enough to tell publicly?",
+      "contribution": "Provides outcome evidence, source pages, people involved, and uncertainty.",
+      "next_artifact": "wiki/sources/story-evidence.md"
+    },
+    {
+      "book_id": "broadcast-tower-redaction-review",
+      "title": "Redaction Review Desk",
+      "focus_area": "consent, privacy, and claim safety",
+      "perspective": "Public stories should be safe for residents, teams, and civic partners.",
+      "cadence": "every 30 minutes",
+      "current_question": "Which detail needs consent, redaction, or removal?",
+      "contribution": "Provides consent status, redaction needs, and risky claims.",
+      "next_artifact": "wiki/reviews/public-stories.md"
+    },
+    {
+      "book_id": "broadcast-tower-public-story-draft",
+      "title": "Public Story Draft Desk",
+      "focus_area": "narrative synthesis and publication shape",
+      "perspective": "A story should explain what changed, why it matters, and what happens next.",
+      "cadence": "every 30 minutes",
+      "current_question": "Which story form best serves the public without overclaiming?",
+      "contribution": "Provides story angle, audience, claim list, and next publication artifact.",
+      "next_artifact": "wiki/queries/public-stories.md"
+    }
+  ],
+  "ideas": []
+}

@@ -1,0 +1,68 @@
+{
+  "id": "wenyu-social-square-match",
+  "title": "Social Square Match Market",
+  "communication_pattern_id": "match-market",
+  "communication_pattern_label": "Match Market",
+  "building_id": "social-square",
+  "building_book_id": "wenyu-social-square",
+  "domain_label": "social matching",
+  "topic": "consent-aware introductions, events, and community requests",
+  "cadence": "every 30 minutes",
+  "skill_name": "wenyu-social-square-match",
+  "skill_description": "Aggregate needs, offers, consent state, and event signals into reviewable social match proposals.",
+  "protocol_channel": "community_need_or_offer",
+  "reduction_kind": "match_proposal",
+  "output_channel": "social_match_backlog",
+  "review_gate": "social_introduction_review",
+  "review_owner": "keeper",
+  "review_reason": "keeper reviews consent, fit, asymmetry, risk, and follow-up plan before introductions",
+  "backlog_path": "wiki/queries/community-requests.md",
+  "synthesis_path": "wiki/civic/social-square.md",
+  "metrics_path": "wiki/metrics/social-square-match.md",
+  "review_path": "wiki/reviews/social-introductions.md",
+  "returned_ideas_path": "wiki/queries/pattern-returned-items.md",
+  "participant_contract_path": "raw/bootstrap/SOCIAL_SQUARE_MATCH_CONTRACT.md",
+  "quality_rules": [
+    "No external introduction can bypass consent review.",
+    "Each match must explain mutual value and uncertainty.",
+    "Every output must include a low-risk next interaction or ask-for-consent step."
+  ],
+  "skill_rules": [
+    "Aggregate needs, offers, constraints, and trust signals before matching.",
+    "Avoid overconfident social inference.",
+    "Prefer small reversible interactions over broad public exposure."
+  ],
+  "participants": [
+    {
+      "book_id": "social-square-consent-ledger",
+      "title": "Consent Ledger Desk",
+      "focus_area": "permission state and privacy limits",
+      "perspective": "Matching quality depends on explicit consent and scoped disclosure.",
+      "cadence": "every 30 minutes",
+      "current_question": "Which introduction requires consent before any action?",
+      "contribution": "Provides allowed contact scope, blocked topics, and review flags.",
+      "next_artifact": "wiki/reviews/social-introductions.md"
+    },
+    {
+      "book_id": "social-square-community-requests",
+      "title": "Community Requests Desk",
+      "focus_area": "needs, offers, and shared interests",
+      "perspective": "Weak-tie value comes from matching concrete needs and offers, not generic affinity.",
+      "cadence": "every 30 minutes",
+      "current_question": "Which need/offer pair creates useful but low-risk contact?",
+      "contribution": "Provides request summaries, offer summaries, constraints, and possible next actions.",
+      "next_artifact": "wiki/queries/community-requests.md"
+    },
+    {
+      "book_id": "social-square-event-loop",
+      "title": "Event Loop Desk",
+      "focus_area": "events, RSVPs, and follow-up memory",
+      "perspective": "Events are social protocols that need invitation, reminder, and outcome records.",
+      "cadence": "every 30 minutes",
+      "current_question": "Which match should become a small event rather than a direct introduction?",
+      "contribution": "Provides event context, RSVP state, and follow-up capture plan.",
+      "next_artifact": "wiki/schemas/event-plan.md"
+    }
+  ],
+  "ideas": []
+}

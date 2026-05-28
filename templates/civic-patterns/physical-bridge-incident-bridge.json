@@ -1,0 +1,68 @@
+{
+  "id": "wenyu-physical-bridge-incident",
+  "title": "Physical Bridge Incident Bridge",
+  "communication_pattern_id": "incident-bridge",
+  "communication_pattern_label": "Incident Bridge",
+  "building_id": "physical-bridge",
+  "building_book_id": "wenyu-physical-bridge",
+  "domain_label": "physical bridge",
+  "topic": "confirmation-gated virtual-to-real operations and recovery",
+  "cadence": "every 30 minutes",
+  "skill_name": "wenyu-physical-bridge-incident",
+  "skill_description": "Coordinate physical-world handoff signals, operator confirmation, venue constraints, and recovery actions.",
+  "protocol_channel": "handoff_or_status_packet",
+  "reduction_kind": "coordination_plan",
+  "output_channel": "physical_bridge_backlog",
+  "review_gate": "physical_handoff_review",
+  "review_owner": "operator",
+  "review_reason": "operator reviews safety, venue, responsibility, confirmation, and recovery status before external action",
+  "backlog_path": "wiki/queries/offline-service.md",
+  "synthesis_path": "wiki/civic/physical-bridge.md",
+  "metrics_path": "wiki/metrics/physical-bridge-incident.md",
+  "review_path": "wiki/reviews/offline-handoffs.md",
+  "returned_ideas_path": "wiki/queries/pattern-returned-items.md",
+  "participant_contract_path": "raw/bootstrap/PHYSICAL_BRIDGE_INCIDENT_CONTRACT.md",
+  "quality_rules": [
+    "No physical-world action can bypass explicit operator confirmation.",
+    "Every output must name owner, safety risk, and recovery or handoff state.",
+    "Unclear telemetry or venue constraints must become review questions."
+  ],
+  "skill_rules": [
+    "Treat real-world handoff as safety-gated by default.",
+    "Prefer status, escalation, and recovery plans over direct execution.",
+    "Return every unsafe or ambiguous action to the operator gate."
+  ],
+  "participants": [
+    {
+      "book_id": "physical-bridge-operator-confirmation",
+      "title": "Operator Confirmation Desk",
+      "focus_area": "human approval and accountability",
+      "perspective": "Physical-world actions require an accountable human approval boundary.",
+      "cadence": "every 30 minutes",
+      "current_question": "Which step needs explicit operator confirmation?",
+      "contribution": "Provides approval state, responsible person, and handoff limits.",
+      "next_artifact": "wiki/reviews/offline-handoffs.md"
+    },
+    {
+      "book_id": "physical-bridge-venue-constraints",
+      "title": "Venue Constraints Desk",
+      "focus_area": "site rules, availability, and constraints",
+      "perspective": "A virtual request becomes real only when venue constraints are known.",
+      "cadence": "every 30 minutes",
+      "current_question": "Which venue constraint blocks or changes the action plan?",
+      "contribution": "Provides location rules, timing, equipment, access, and contact requirements.",
+      "next_artifact": "wiki/queries/offline-service.md"
+    },
+    {
+      "book_id": "physical-bridge-device-telemetry",
+      "title": "Device Telemetry Desk",
+      "focus_area": "robotics/demo status and incident signals",
+      "perspective": "Telemetry should inform recovery, not trigger unsafe autonomous escalation.",
+      "cadence": "every 30 minutes",
+      "current_question": "Which signal indicates normal, degraded, or unsafe state?",
+      "contribution": "Provides device state, incident signal, confidence, and recovery suggestion.",
+      "next_artifact": "wiki/schemas/physical-handoff.md"
+    }
+  ],
+  "ideas": []
+}

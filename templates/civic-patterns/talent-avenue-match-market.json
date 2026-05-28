@@ -1,0 +1,68 @@
+{
+  "id": "wenyu-talent-avenue-match",
+  "title": "Talent Avenue Match Market",
+  "communication_pattern_id": "match-market",
+  "communication_pattern_label": "Match Market",
+  "building_id": "talent-avenue",
+  "building_book_id": "wenyu-talent-avenue",
+  "domain_label": "talent graph",
+  "topic": "skill evidence, project needs, mentor routes, and reception paths",
+  "cadence": "every 30 minutes",
+  "skill_name": "wenyu-talent-avenue-match",
+  "skill_description": "Match verified talent evidence to project needs, mentors, and reception routes with reviewable rationale.",
+  "protocol_channel": "talent_or_project_signal",
+  "reduction_kind": "talent_match_proposal",
+  "output_channel": "talent_match_backlog",
+  "review_gate": "talent_claim_review",
+  "review_owner": "keeper",
+  "review_reason": "keeper reviews evidence, self-claim boundaries, consent, conflict, and next action",
+  "backlog_path": "wiki/queries/talent-matches.md",
+  "synthesis_path": "wiki/civic/talent-avenue.md",
+  "metrics_path": "wiki/metrics/talent-avenue-match.md",
+  "review_path": "wiki/reviews/talent-claims.md",
+  "returned_ideas_path": "wiki/queries/pattern-returned-items.md",
+  "participant_contract_path": "raw/bootstrap/TALENT_AVENUE_MATCH_CONTRACT.md",
+  "quality_rules": [
+    "Every match must link to evidence or clearly label it as a claim.",
+    "Project-fit rationale must name skill, availability, and next action.",
+    "Sensitive reception or VIP notes must remain projection-safe."
+  ],
+  "skill_rules": [
+    "Normalize talent signals into skills, evidence, availability, and interests.",
+    "Match needs to capabilities with uncertainty instead of ranking people generically.",
+    "Return weak evidence to the claim-review queue."
+  ],
+  "participants": [
+    {
+      "book_id": "talent-avenue-skill-graph",
+      "title": "Skill Graph Desk",
+      "focus_area": "skills, evidence, and claim boundaries",
+      "perspective": "The talent graph is only useful if it distinguishes verified work from aspiration.",
+      "cadence": "every 30 minutes",
+      "current_question": "Which skill edge has enough evidence to use in a match?",
+      "contribution": "Provides skill edges, proof sources, confidence, and missing verification.",
+      "next_artifact": "wiki/entities/talent-graph.md"
+    },
+    {
+      "book_id": "talent-avenue-project-needs",
+      "title": "Project Needs Desk",
+      "focus_area": "project requirements and collaboration needs",
+      "perspective": "A good match starts with the project bottleneck and collaboration context.",
+      "cadence": "every 30 minutes",
+      "current_question": "Which project need is specific enough to match against evidence?",
+      "contribution": "Provides project requirements, role needs, timing, and collaboration constraints.",
+      "next_artifact": "wiki/entities/projects.md"
+    },
+    {
+      "book_id": "talent-avenue-mentor-routes",
+      "title": "Mentor Routes Desk",
+      "focus_area": "mentor paths and reception journeys",
+      "perspective": "Mentor and reception routes should be justified by goals, not status.",
+      "cadence": "every 30 minutes",
+      "current_question": "Which mentor or reception path has clear mutual purpose?",
+      "contribution": "Provides route candidates, purpose, context window, and public-safe notes.",
+      "next_artifact": "wiki/queries/mentor-routes.md"
+    }
+  ],
+  "ideas": []
+}

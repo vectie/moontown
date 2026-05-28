@@ -71,6 +71,10 @@ Implemented:
   workflows should use patterns such as `signal-watch`, `triage-desk`,
   `review-council`, `match-market`, `learning-cohort`, `story-forge`, and
   `incident-bridge` instead of copying salon logic.
+- all 11 Wenyu civic buildings now have default communication-pattern scenario
+  templates under `templates/civic-patterns/`, plus a manifest installer that
+  copies them into `.moontown/civic/pattern-scenarios/` and staggers recurring
+  schedules.
 - Research-salon templates publish structural effectiveness metrics: participant count,
   idea reductions, testable research questions, participant-idea links,
   covered home books, and returned idea-home records.
@@ -93,9 +97,10 @@ Implemented:
   or more inbox packets, reductions, outbox records, and review items.
 
 This is not the complete civic runtime yet. Social Square has the first full
-ledger proof slices; the other buildings have protocol definitions and
-MoonBook/MoonClaw contracts, but they still need real scenario packets,
-reducers, accepted/rejected MoonBook persistence, and UI history.
+live ledger proof slices; the other buildings now have protocol definitions,
+MoonBook/MoonClaw contracts, and installable scenario packets, but most still
+need repeated real reducer runs, accepted/rejected MoonBook persistence, and UI
+history.
 
 The first implementation was intentionally direct so the protocol loop could be
 validated end to end. The follow-up refactor is documented in
@@ -114,6 +119,7 @@ single-agent, but the domain comes from JSON:
 
 ```bash
 moon run cmd/main -- civic protocols pattern-template templates/civic-salons/robotics-mini-salon.json
+moon run cmd/main -- civic protocols pattern-manifest templates/civic-patterns/wenyu-civic-patterns.json
 ```
 
 Each participant receives a small internal workspace, a salon skill, a current
@@ -168,10 +174,11 @@ The template controls:
 - output paths for backlog, synthesis, metrics, reviews, and home returns
 - review gate, review owner, and review reason
 
-Moontown should not grow one MoonBit branch per domain. If a robotics,
-education, policy, finance, or healthcare salon needs different behavior, the
-first move is a new scenario template and stronger skill rules. MoonBit changes
-are reserved for new protocol capabilities, not new topic names.
+Moontown should not grow one MoonBit branch per domain or civic service. If a
+robotics, education, policy, finance, healthcare, market, story, or bridge
+workflow needs different behavior, the first move is a new scenario template
+and stronger skill rules. MoonBit changes are reserved for new protocol
+capabilities, not new topic names.
 
 ## 24/7 Salon Loop
 

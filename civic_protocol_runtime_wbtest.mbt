@@ -84,6 +84,78 @@ test "civic communication patterns describe reusable protocol shapes" {
 }
 
 ///|
+async test "Wenyu civic pattern manifest covers every civic building as data" {
+  let manifest_path = "templates/civic-patterns/wenyu-civic-patterns.json"
+  let text = @fs.read_file(manifest_path).text()
+  let parsed = @json.parse(text) catch { _ => fail("manifest should parse") }
+  let manifest : CivicPatternScenarioManifest = @json.from_json(parsed) catch {
+    _ => fail("manifest should match schema")
+  }
+  let seen : Array[String] = []
+  let services = @civic.wenyu_civic_services()
+  for template in manifest.templates {
+    let path = "templates/civic-patterns/\{template}"
+    match load_civic_salon_scenario_file(path) {
+      Some(scenario) => {
+        assert_true(!seen.contains(scenario.building_id))
+        seen.push(scenario.building_id)
+        assert_eq(scenario.ideas.length(), 0)
+        let matched = services.filter(fn(service) {
+          service.id == scenario.building_id
+        })
+        assert_eq(matched.length(), 1)
+        let service = matched[0]
+        assert_eq(scenario.building_book_id, service.book_id)
+        let pattern_id = match scenario.communication_pattern_id {
+          Some(id) => id
+          None => ""
+        }
+        assert_eq(
+          pattern_id,
+          civic_communication_pattern_id_for_service(service),
+        )
+        match civic_communication_pattern_for_id(pattern_id) {
+          Some(_) => ()
+          None => fail("unknown communication pattern id")
+        }
+        assert_true(scenario.participants.length() >= 3)
+      }
+      None => fail("expected civic pattern template to load")
+    }
+  }
+  assert_eq(seen.length(), services.length())
+  for service in services {
+    assert_true(seen.contains(service.id))
+  }
+}
+
+///|
+async test "civic pattern manifest installs staggered schedules without running workers" {
+  let root = "/tmp/moontown-civic-pattern-manifest"
+  ignore_checked_command("rm", ["-rf", root])
+  let snapshot_path = "\{root}/town.json"
+  let summary = install_civic_pattern_scenario_manifest(
+    "templates/civic-patterns/wenyu-civic-patterns.json",
+    snapshot_path~,
+  )
+  assert_true(summary.contains("Installed 11 civic communication pattern"))
+  let schedule_path = default_civic_salon_schedule_path(snapshot_path~)
+  let schedules = load_or_create_civic_salon_schedules(path=schedule_path)
+  assert_eq(schedules.length(), 11)
+  for index in 1..<schedules.length() {
+    assert_true(schedules[index].next_due_ms > schedules[index - 1].next_due_ms)
+  }
+  for schedule in schedules {
+    assert_true(
+      @fs.exists(civic_salon_scenario_path(schedule.id, snapshot_path~)),
+    )
+  }
+  assert_true(
+    !@fs.exists("\{root}/books/wenyu-social-square/book/moonbook-ui-state.json"),
+  )
+}
+
+///|
 test "civic salon scenario carries participant workspaces and cross-area ideas" {
   let scenario = test_civic_salon_scenario()
   let participants = scenario.participants
@@ -196,6 +268,27 @@ async test "civic salon scenario template can seed a non-hardcoded domain" {
   assert_eq(schedule.round_count, 1)
   assert_eq(schedule.latest_round_id, "future-energy-round-1")
   assert_true(schedule.next_due_ms > schedule.last_run_ms)
+}
+
+///|
+async test "civic pattern template uses scenario round id by default" {
+  let root = "/tmp/moontown-civic-pattern-template-default-round"
+  ignore_checked_command("rm", ["-rf", root])
+  let template_path = "\{root}/template.json"
+  let scenario = test_civic_salon_scenario()
+  write_text_file(template_path, scenario.to_json().stringify(indent=2))
+  let summary = bootstrap_civic_salon_scenario_file(
+    template_path,
+    book_catalog_path="\{root}/catalog.json",
+    workspace_base=root,
+    reducer_mode=FixtureReducer,
+  )
+  assert_true(summary.contains("future-energy-social-square-round-1"))
+  let schedules = load_or_create_civic_salon_schedules(
+    path=default_civic_salon_schedule_path(snapshot_path="\{root}/town.json"),
+  )
+  assert_eq(schedules.length(), 1)
+  assert_eq(schedules[0].latest_round_id, "future-energy-social-square-round-1")
 }
 
 ///|

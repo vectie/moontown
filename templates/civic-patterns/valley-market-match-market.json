@@ -1,0 +1,68 @@
+{
+  "id": "wenyu-valley-market-match",
+  "title": "Valley Market Match Market",
+  "communication_pattern_id": "match-market",
+  "communication_pattern_label": "Match Market",
+  "building_id": "valley-market",
+  "building_book_id": "wenyu-valley-market",
+  "domain_label": "market service",
+  "topic": "needs, offers, points, rewards, and anti-abuse review",
+  "cadence": "every 30 minutes",
+  "skill_name": "wenyu-valley-market-match",
+  "skill_description": "Match needs and offers with points/reward accounting and anti-abuse review.",
+  "protocol_channel": "market_need_or_offer",
+  "reduction_kind": "market_match_proposal",
+  "output_channel": "market_match_backlog",
+  "review_gate": "market_abuse_review",
+  "review_owner": "keeper",
+  "review_reason": "keeper reviews fit, consent, points integrity, abuse risk, and fulfillment next action",
+  "backlog_path": "wiki/queries/market-requests.md",
+  "synthesis_path": "wiki/civic/valley-market.md",
+  "metrics_path": "wiki/metrics/valley-market-match.md",
+  "review_path": "wiki/reviews/market-abuse.md",
+  "returned_ideas_path": "wiki/queries/pattern-returned-items.md",
+  "participant_contract_path": "raw/bootstrap/VALLEY_MARKET_MATCH_CONTRACT.md",
+  "quality_rules": [
+    "Every proposal must include need, offer, value signal, and next fulfillment step.",
+    "Points or reward changes require an audit reason.",
+    "Suspicious or asymmetric exchanges must go to review."
+  ],
+  "skill_rules": [
+    "Aggregate needs and offers before proposing a match.",
+    "Separate social/community value from points accounting.",
+    "Return uncertain fairness or abuse signals to the review queue."
+  ],
+  "participants": [
+    {
+      "book_id": "valley-market-needs-offers",
+      "title": "Needs and Offers Desk",
+      "focus_area": "market requests and available help",
+      "perspective": "A market building should expose clear reciprocal value without becoming spam.",
+      "cadence": "every 30 minutes",
+      "current_question": "Which need/offer pair has enough context to act?",
+      "contribution": "Provides request, offer, constraints, and fulfillment context.",
+      "next_artifact": "wiki/queries/market-requests.md"
+    },
+    {
+      "book_id": "valley-market-points-ledger",
+      "title": "Points Ledger Desk",
+      "focus_area": "reward and points accounting",
+      "perspective": "Points must reflect accepted service value, not raw activity.",
+      "cadence": "every 30 minutes",
+      "current_question": "Which points event is justified by accepted value?",
+      "contribution": "Provides points proposal, evidence, ledger effect, and audit reason.",
+      "next_artifact": "wiki/schemas/points-ledger.md"
+    },
+    {
+      "book_id": "valley-market-abuse-review",
+      "title": "Abuse Review Desk",
+      "focus_area": "fairness, spam, and manipulation risk",
+      "perspective": "Market liquidity is harmful if it rewards spam or unfair extraction.",
+      "cadence": "every 30 minutes",
+      "current_question": "Which exchange pattern needs review before publication?",
+      "contribution": "Provides abuse flags, conflict risk, fairness concern, and mitigation.",
+      "next_artifact": "wiki/reviews/market-abuse.md"
+    }
+  ],
+  "ideas": []
+}

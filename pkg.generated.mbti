@@ -100,6 +100,10 @@ pub async fn inspect_wenyu_building_protocols(status_path? : String, registry_pa
 
 pub async fn inspect_wenyu_civic_services(book_catalog_path? : String, status_path? : String) -> CivicServicePortfolio
 
+pub async fn install_civic_pattern_scenario_file(String, snapshot_path? : String, due_now? : Bool) -> String
+
+pub async fn install_civic_pattern_scenario_manifest(String, snapshot_path? : String) -> String
+
 pub async fn load_or_create_civic_salon_schedules(path? : String) -> Array[CivicSalonSchedule]
 
 pub async fn load_or_create_demo_dashboard(path? : String, book_catalog_path? : String) -> String
