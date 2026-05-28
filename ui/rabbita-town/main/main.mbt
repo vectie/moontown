@@ -501,11 +501,17 @@ priv struct WenyuTownModule {
   grid_y : Int
   footprint_w : Int
   footprint_h : Int
+  display_w : Int
+  display_h : Int
   entrance_x : Int
   entrance_y : Int
   interior_kind : String
+  style_family : String
   asset_base : String
   asset_roof : String
+  protocol_pattern : String
+  use_case : String
+  agent_flow : String
   summary : String
 } derive(FromJson)
 
@@ -6321,6 +6327,16 @@ fn abs_int(value : Int) -> Int {
 }
 
 ///|
+fn min_int(left : Int, right : Int) -> Int {
+  if left < right { left } else { right }
+}
+
+///|
+fn max_int(left : Int, right : Int) -> Int {
+  if left > right { left } else { right }
+}
+
+///|
 fn in_rect(
   grid_x : Int,
   grid_y : Int,
@@ -6966,6 +6982,68 @@ fn render_water_effect_layer() -> @rabbita.Html {
 }
 
 ///|
+fn module_road_hub_x() -> Int {
+  128
+}
+
+///|
+fn module_road_hub_y() -> Int {
+  82
+}
+
+///|
+fn module_road_tile(
+  grid_x : Int,
+  grid_y : Int,
+  class_suffix : String,
+) -> @rabbita.Html {
+  let style = [
+    "left: \{iso_tile_left(clamp_visual_grid_x(grid_x), clamp_visual_grid_y(grid_y))}px",
+    "top: \{iso_tile_top(clamp_visual_grid_x(grid_x), clamp_visual_grid_y(grid_y))}px",
+  ]
+  span(class="module-road-tile module-road-\{class_suffix}", style~, no_children())
+}
+
+///|
+fn render_module_road_for(civic : WenyuTownModule) -> Array[@rabbita.Html] {
+  let tiles : Array[@rabbita.Html] = []
+  let hub_x = module_road_hub_x()
+  let hub_y = module_road_hub_y()
+  let x_start = min_int(civic.entrance_x, hub_x)
+  let x_end = max_int(civic.entrance_x, hub_x)
+  let y_start = min_int(civic.entrance_y, hub_y)
+  let y_end = max_int(civic.entrance_y, hub_y)
+  for x in x_start..=x_end {
+    if (x - x_start) % 2 == 0 {
+      tiles.push(module_road_tile(x, civic.entrance_y, "local"))
+    }
+  }
+  for y in y_start..=y_end {
+    if (y - y_start) % 2 == 0 {
+      tiles.push(module_road_tile(hub_x, y, "local"))
+    }
+  }
+  tiles.push(module_road_tile(civic.entrance_x, civic.entrance_y, "entrance"))
+  tiles
+}
+
+///|
+fn render_wenyu_module_road_layer() -> @rabbita.Html {
+  if !standalone_viewport_requested() {
+    return div(class="wenyu-road-layer wenyu-road-layer-empty", no_children())
+  }
+  let children : Array[@rabbita.Html] = [
+    module_road_tile(module_road_hub_x(), module_road_hub_y(), "hub"),
+  ]
+  for civic in wenyu_modules() {
+    for tile in render_module_road_for(civic) {
+      children.push(tile)
+    }
+  }
+  div(class="wenyu-road-layer", children)
+}
+
+///|
 fn find_module_execution(
   civic : WenyuTownModule,
   executions : Array[@core.TaskExecutionRecord],
@@ -7091,6 +7169,24 @@ fn module_tile_blocks_entrance(kind : String, civic : WenyuTownModule) -> Bool {
 }
 
 ///|
+fn module_corner_tile_blocks(civic : WenyuTownModule) -> Array[String] {
+  let blocked : Array[String] = []
+  let corners = [
+    (civic.grid_x, civic.grid_y),
+    (civic.grid_x + civic.footprint_w - 1, civic.grid_y),
+    (civic.grid_x, civic.grid_y + civic.footprint_h - 1),
+    (civic.grid_x + civic.footprint_w - 1, civic.grid_y + civic.footprint_h - 1),
+  ]
+  for corner in corners {
+    let kind = tile_kind_at(corner.0, corner.1)
+    if module_tile_blocks_building(kind, civic) {
+      blocked.push("\{corner.0},\{corner.1} on \{kind}")
+    }
+  }
+  blocked
+}
+
+///|
 fn module_validation_issues(civic : WenyuTownModule) -> Array[String] {
   let issues : Array[String] = []
   if civic.book_id == "" {
@@ -7102,9 +7198,22 @@ fn module_validation_issues(civic : WenyuTownModule) -> Array[String] {
   if civic.footprint_w <= 0 || civic.footprint_h <= 0 {
     issues.push("invalid footprint")
   }
+  if civic.display_w <= 0 || civic.display_h <= 0 {
+    issues.push("invalid display size")
+  }
+  if civic.style_family == "" {
+    issues.push("missing style_family")
+  }
+  if civic.protocol_pattern == "" {
+    issues.push("missing protocol_pattern")
+  }
   let anchor_kind = module_anchor_tile_kind(civic)
   if module_tile_blocks_building(anchor_kind, civic) {
     issues.push("anchor on \{anchor_kind}")
+  }
+  let corner_blocks = module_corner_tile_blocks(civic)
+  if !corner_blocks.is_empty() {
+    issues.push("footprint overlap \{corner_blocks.join("; ")}")
   }
   let entrance_kind = module_entrance_tile_kind(civic)
   if module_tile_blocks_entrance(entrance_kind, civic) {
@@ -7403,8 +7512,8 @@ fn render_wenyu_module_building(
   selected_node_key : String?,
 ) -> @rabbita.Html {
   let runtime = wenyu_module_runtime_state(model, civic, executions)
-  let width = 92 + civic.footprint_w * 7
-  let height = 76 + civic.footprint_h * 8
+  let width = civic.display_w
+  let height = civic.display_h
   let selected_suffix = if selected_node_key == Some(civic.id) {
     " selected"
   } else {
@@ -7417,10 +7526,13 @@ fn render_wenyu_module_building(
     "z-index: \{260 + civic.grid_x + civic.grid_y}",
     "--module-width: \{width}px",
     "--module-height: \{height}px",
+    "--module-footprint-w: \{civic.footprint_w}",
+    "--module-footprint-h: \{civic.footprint_h}",
     "--module-image: url('\{civic.asset_base}')",
     "--module-roof-image: url('\{civic.asset_roof}')",
   ]
   let children : Array[@rabbita.Html] = [
+    span(class="wenyu-module-footprint", no_children()),
     span(class="wenyu-module-shadow", no_children()),
     span(class="wenyu-module-sprite", no_children()),
     span(class="wenyu-module-light", no_children()),
@@ -7445,7 +7557,7 @@ fn render_wenyu_module_building(
   )
   a(
     href="./viewport.html?assets=generated&mode=view&module=\{civic.id}&v=module-\{civic.id}",
-    class="wenyu-module-building wenyu-module-\{civic.building_kind} \{runtime.status_class}\{selected_suffix}\{issue_suffix}",
+    class="wenyu-module-building wenyu-module-\{civic.building_kind} style-\{civic.style_family} \{runtime.status_class}\{selected_suffix}\{issue_suffix}",
     style~,
     title="\{civic.title}: \{runtime.status_label}. \{runtime.detail}",
     children,
@@ -7543,6 +7655,13 @@ fn module_interior_furniture(civic : WenyuTownModule) -> Array[@rabbita.Html] {
         div(class="furniture furniture-map-table", [span("Offline Map")]),
         div(class="furniture furniture-review-table", [span("Confirm Gate")]),
       ]
+    "research" =>
+      [
+        div(class="furniture furniture-desk", [span("Research Desk")]),
+        div(class="furniture furniture-bookshelf", [span("Source Wall")]),
+        div(class="furniture furniture-map-table", [span("Synthesis Map")]),
+        div(class="furniture furniture-review-table", [span("Review Gate")]),
+      ]
     "market" =>
       [
         div(class="furniture furniture-market-stall", [span("Point Stall")]),
@@ -7608,6 +7727,47 @@ fn render_module_runtime_counters(
     span("Review \{runtime.review_count}"),
     span("Blocked \{runtime.blocked_count}"),
     span("Done \{runtime.completed_count}"),
+  ])
+}
+
+///|
+fn render_module_protocol_card(civic : WenyuTownModule) -> @rabbita.Html {
+  article(class="module-protocol-card", [
+    div(class="module-civic-health-head", [
+      span(class="module-book-chip projection-tone-info", "Building Protocol"),
+      span(class="module-civic-status", civic.protocol_pattern),
+    ]),
+    p(class="module-book-summary", civic.use_case),
+    div(class="module-book-metric-grid", [
+      render_projection_metric(
+        ProjectionMetricSnapshot::{
+          label: "Footprint",
+          value: "\{civic.footprint_w}x\{civic.footprint_h}",
+          note: "tile occupancy",
+          tone: "info",
+        },
+      ),
+      render_projection_metric(
+        ProjectionMetricSnapshot::{
+          label: "Entrance",
+          value: "\{civic.entrance_x},\{civic.entrance_y}",
+          note: "road-facing tile",
+          tone: "info",
+        },
+      ),
+      render_projection_metric(
+        ProjectionMetricSnapshot::{
+          label: "Style",
+          value: civic.style_family,
+          note: civic.asset_base,
+          tone: "info",
+        },
+      ),
+    ]),
+    div(class="module-agent-flow", [
+      span(class="module-detail-label", "Agent Flow"),
+      p(civic.agent_flow),
+    ]),
   ])
 }
 
@@ -7939,6 +8099,7 @@ fn render_wenyu_module_interior(
       p(class="module-runtime-detail", runtime.detail),
       render_module_runtime_counters(runtime),
       render_module_issue_list(civic),
+      render_module_protocol_card(civic),
       render_module_book_projection(model, civic),
       div(class="interior-floor", module_interior_furniture(civic)),
       div(
@@ -9113,6 +9274,7 @@ fn render_town_viewport(
         ),
         render_tilemap_layer(),
         render_water_effect_layer(),
+        render_wenyu_module_road_layer(),
         render_wenyu_module_building_layer(
           dispatch, model, executions, selected_node_key,
         ),
@@ -9542,8 +9704,9 @@ fn render_editor_module_row(
       span(class="editor-module-meta", "\{civic.id} / \{civic.book_id}"),
       span(
         class="editor-module-meta",
-        "\{civic.grid_x},\{civic.grid_y} -> \{civic.entrance_x},\{civic.entrance_y}",
+        "\{civic.grid_x},\{civic.grid_y} / \{civic.footprint_w}x\{civic.footprint_h} -> \{civic.entrance_x},\{civic.entrance_y}",
       ),
+      span(class="editor-module-meta", "\{civic.style_family} / \{civic.protocol_pattern}"),
       span(class="editor-module-runtime", runtime.status_label),
       span(class="editor-module-meta", projection_status),
       span(class="editor-module-issues", issue_text),

@@ -1890,6 +1890,7 @@ body,
 }
 
 .water-effect-layer,
+.wenyu-road-layer,
 .wenyu-module-layer {
   position: absolute;
   inset: 0;
@@ -1900,6 +1901,48 @@ body,
 .water-effect-layer {
   z-index: 2;
   mix-blend-mode: multiply;
+}
+
+.wenyu-road-layer {
+  z-index: 3;
+}
+
+.module-road-tile {
+  position: absolute;
+  width: 42px;
+  height: 22px;
+  transform: translate(-10px, 5px) rotate(26deg) skewX(-28deg);
+  transform-origin: center;
+  border-radius: 999px;
+  background:
+    linear-gradient(90deg, rgba(255, 255, 255, 0.36), transparent 34% 66%, rgba(75, 91, 91, 0.14)),
+    linear-gradient(180deg, rgba(218, 231, 222, 0.88), rgba(166, 190, 176, 0.88));
+  box-shadow:
+    inset 0 1px 0 rgba(255, 255, 255, 0.7),
+    0 5px 10px rgba(34, 52, 36, 0.13);
+  opacity: 0.86;
+}
+
+.module-road-hub {
+  width: 58px;
+  height: 30px;
+  background:
+    radial-gradient(circle, rgba(124, 220, 255, 0.42), transparent 52%),
+    linear-gradient(180deg, rgba(245, 251, 248, 0.95), rgba(180, 206, 194, 0.92));
+  box-shadow:
+    0 0 0 2px rgba(82, 126, 134, 0.22),
+    0 0 22px rgba(91, 190, 230, 0.22);
+}
+
+.module-road-entrance {
+  width: 50px;
+  height: 26px;
+  background:
+    linear-gradient(90deg, rgba(110, 192, 229, 0.26), transparent 32% 68%, rgba(110, 192, 229, 0.2)),
+    linear-gradient(180deg, rgba(243, 250, 247, 0.96), rgba(173, 201, 188, 0.94));
+  box-shadow:
+    0 0 0 2px rgba(70, 111, 116, 0.18),
+    0 8px 12px rgba(38, 56, 37, 0.14);
 }
 
 .water-depth,
@@ -2018,7 +2061,7 @@ body,
 }
 
 .wenyu-module-layer {
-  z-index: 4;
+  z-index: 5;
 }
 
 .wenyu-module-building {
@@ -2032,16 +2075,32 @@ body,
   transform-origin: 50% 100%;
   pointer-events: auto;
   cursor: pointer;
-  image-rendering: pixelated;
+  image-rendering: auto;
   contain: layout paint style;
 }
 
+.wenyu-module-footprint,
 .wenyu-module-shadow,
 .wenyu-module-sprite,
 .wenyu-module-light,
 .wenyu-module-label {
   position: absolute;
   pointer-events: none;
+}
+
+.wenyu-module-footprint {
+  left: 50%;
+  bottom: 4px;
+  width: calc(var(--module-footprint-w) * 22px);
+  height: calc(var(--module-footprint-h) * 14px);
+  transform: translate(-50%, 0) rotate(26deg) skewX(-28deg);
+  transform-origin: center;
+  border-radius: 18px;
+  background:
+    linear-gradient(180deg, rgba(238, 246, 241, 0.86), rgba(184, 207, 192, 0.72));
+  box-shadow:
+    inset 0 1px 0 rgba(255, 255, 255, 0.72),
+    0 8px 16px rgba(40, 57, 33, 0.15);
 }
 
 .wenyu-module-shadow {
@@ -2062,6 +2121,28 @@ body,
   background-position: center bottom;
   filter: drop-shadow(6px 8px 0 rgba(39, 30, 14, 0.16));
   transition: transform 160ms steps(2), filter 160ms steps(2);
+}
+
+.wenyu-module-building.style-white-tech-pavilion .wenyu-module-sprite {
+  image-rendering: auto;
+  filter:
+    drop-shadow(0 12px 18px rgba(31, 47, 49, 0.18))
+    drop-shadow(8px 10px 0 rgba(39, 52, 49, 0.08));
+}
+
+.wenyu-module-building.style-white-tech-pavilion .wenyu-module-shadow {
+  background: rgba(23, 44, 44, 0.16);
+  filter: blur(4px);
+}
+
+.wenyu-module-building.style-white-tech-pavilion .wenyu-module-light {
+  width: 18px;
+  height: 18px;
+  border-radius: 999px;
+  background: rgba(112, 205, 255, 0.92);
+  box-shadow:
+    0 0 0 2px rgba(255, 255, 255, 0.58),
+    0 0 24px rgba(88, 194, 255, 0.55);
 }
 
 .wenyu-module-light {
@@ -2153,9 +2234,10 @@ body,
 .wenyu-module-building:hover .wenyu-module-sprite,
 .wenyu-module-building:focus-visible .wenyu-module-sprite,
 .wenyu-module-building.selected .wenyu-module-sprite {
-  transform: translateY(-6px);
+  transform: translateY(-7px) scale(1.015);
   filter:
-    drop-shadow(8px 10px 0 rgba(39, 30, 14, 0.2))
+    drop-shadow(0 16px 22px rgba(31, 47, 49, 0.2))
+    drop-shadow(8px 10px 0 rgba(39, 52, 49, 0.12))
     brightness(1.08)
     saturate(1.08);
 }
@@ -2203,6 +2285,33 @@ body,
   font-weight: 800;
   letter-spacing: 0.08em;
   text-transform: uppercase;
+}
+
+.module-protocol-card {
+  display: grid;
+  gap: 12px;
+  padding: 16px;
+  border: 1px solid rgba(44, 76, 82, 0.16);
+  border-radius: 18px;
+  background:
+    linear-gradient(135deg, rgba(250, 255, 252, 0.96), rgba(232, 245, 246, 0.9)),
+    radial-gradient(circle at 18% 10%, rgba(100, 194, 237, 0.14), transparent 34%);
+  box-shadow: 0 14px 30px rgba(32, 53, 49, 0.08);
+}
+
+.module-agent-flow {
+  display: grid;
+  gap: 6px;
+  padding: 12px;
+  border-radius: 14px;
+  background: rgba(255, 255, 255, 0.68);
+  color: var(--ink);
+}
+
+.module-agent-flow p {
+  margin: 0;
+  color: var(--muted);
+  line-height: 1.45;
 }
 
 @keyframes module-alert-pulse {

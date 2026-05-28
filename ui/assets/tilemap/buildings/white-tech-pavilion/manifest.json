@@ -1,0 +1,27 @@
+{
+  "id": "white-tech-pavilion-v1",
+  "style_family": "white-tech-pavilion",
+  "generated_at": "2026-05-28",
+  "source_dir": "ui/assets/tilemap/buildings/white-tech-pavilion/source",
+  "alpha_dir": "ui/assets/tilemap/buildings/white-tech-pavilion/alpha",
+  "prompt_doc": "ui/assets/tilemap/prompts/white-tech-pavilion-building-prompts.md",
+  "contact_sheet": "ui/assets/tilemap/buildings/white-tech-pavilion/white-tech-pavilion-contact-sheet.png",
+  "buildings": [
+    { "id": "town-shell", "task": "Wenyu Town Shell mayor and civic command center", "alpha_asset": "alpha/town-shell.png", "source_asset": "source/town-shell.png" },
+    { "id": "resident-twins", "task": "resident twin homes and personal memory hub", "alpha_asset": "alpha/resident-twins.png", "source_asset": "source/resident-twins.png" },
+    { "id": "policy-hall", "task": "policy intelligence and civic service", "alpha_asset": "alpha/policy-hall.png", "source_asset": "source/policy-hall.png" },
+    { "id": "contest-express", "task": "competition coaching and opportunity dispatch", "alpha_asset": "alpha/contest-express.png", "source_asset": "source/contest-express.png" },
+    { "id": "social-square", "task": "agent and resident exchange", "alpha_asset": "alpha/social-square.png", "source_asset": "source/social-square.png" },
+    { "id": "talent-avenue", "task": "talent graph and opportunity matching", "alpha_asset": "alpha/talent-avenue.png", "source_asset": "source/talent-avenue.png" },
+    { "id": "vitality-dashboard", "task": "observability, health, and dashboarding", "alpha_asset": "alpha/vitality-dashboard.png", "source_asset": "source/vitality-dashboard.png" },
+    { "id": "ai-garden", "task": "AI education and experimentation garden", "alpha_asset": "alpha/ai-garden.png", "source_asset": "source/ai-garden.png" },
+    { "id": "physical-bridge", "task": "confirmation-gated real-world handoff", "alpha_asset": "alpha/physical-bridge.png", "source_asset": "source/physical-bridge.png" },
+    { "id": "valley-market", "task": "civic market and collaboration exchange", "alpha_asset": "alpha/valley-market.png", "source_asset": "source/valley-market.png" },
+    { "id": "story-radar", "task": "public story, media, and broadcast insight", "alpha_asset": "alpha/story-radar.png", "source_asset": "source/story-radar.png" },
+    { "id": "research-opc", "task": "one-person-company research", "alpha_asset": "alpha/research-opc.png", "source_asset": "source/research-opc.png" },
+    { "id": "research-llm-training", "task": "LLM training research", "alpha_asset": "alpha/research-llm-training.png", "source_asset": "source/research-llm-training.png" },
+    { "id": "research-embodied-robotics", "task": "embodied robotics research", "alpha_asset": "alpha/research-embodied-robotics.png", "source_asset": "source/research-embodied-robotics.png" },
+    { "id": "research-ai-agents", "task": "AI agents research", "alpha_asset": "alpha/research-ai-agents.png", "source_asset": "source/research-ai-agents.png" },
+    { "id": "research-ai-hardware", "task": "AI hardware research", "alpha_asset": "alpha/research-ai-hardware.png", "source_asset": "source/research-ai-hardware.png" }
+  ]
+}

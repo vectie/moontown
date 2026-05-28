@@ -510,6 +510,12 @@ Remaining:
 
 - A designer can remove a building by setting `enabled` to `false`.
 - A designer can move a building by changing `grid_x` and `grid_y`.
+- A designer can move its door and road endpoint by changing `entrance_x` and
+  `entrance_y`.
+- A designer can size the module using `footprint_w`, `footprint_h`,
+  `display_w`, and `display_h` without changing renderer code.
+- A designer can bind behavior using `protocol_pattern`, `use_case`, and
+  `agent_flow`; the interior panel must show these fields.
 - A designer can add a new building by adding one JSON object and one asset.
 - The viewport still loads if a module asset is missing.
 - Hover/focus reveals building information; labels are hidden otherwise.

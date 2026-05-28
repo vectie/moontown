@@ -88,9 +88,9 @@ A fully functioning Wenyu town means:
 | Area | Current State | Completion | Main Gap |
 |---|---|---:|---|
 | Wenyu terrain map | 256 x 144 tiled visual surface with river, lakes, farms, roads, bridges, drag, and zoom | 70% | Needs richer depth, seasonal overlays, fog/cloud layers, and perf budgets for lower-end browsers |
-| Civic module registry | `wenyu-town-modules.json` can add, remove, move, and configure feature buildings; runtime validation now catches missing bindings and bad placement | 65% | Needs standalone schema checks, asset checks, and designer preview |
+| Civic module registry | `wenyu-town-modules.json` can add, remove, move, size, style, and configure feature buildings; runtime validation now catches missing bindings, bad footprints, and bad placement | 70% | Needs standalone schema checks, asset checks, write-back editor, and designer preview |
 | Building protocol registry | Protocol definitions exist for every Wenyu civic building; Social Square has durable inbox/contribution/reduction/outbox/review/home-return proof slices plus effectiveness metrics; the UI can show protocol review pressure | 48% | Need real scenario packets, AI reducers, MoonBook accept/reject persistence, and UI protocol history for every building |
-| Module buildings | 11 configurable module buildings render above terrain and open interiors | 50% | Assets are still reused/early-stage; each module needs custom generated sprites and roof/depth variants |
+| Module buildings | 16 configurable white-tech pavilion buildings render above terrain, including 11 civic modules and 5 research-domain homes; generated roads connect module entrances to the town hub | 62% | Needs base/roof/shadow/glow split layers and more precise collision/occlusion |
 | Module interiors | Click opens module-specific interior furniture with runtime source, counters, validation state, worker roster slots, MoonBook fragments, and output links when available | 64% | Seeded civic books exist; interiors still need accepted-change history and live service run evidence |
 | Water effects | Runtime overlay adds depth, reflection, and bridge shadow | 35% | Needs richer segmented river logic and seasonal/weather response |
 | Agents on map | Visual agent projection exists; active module workers route to module entrances and idle/completed workers stay hidden | 60% | Needs Wenyu-specific task projection coverage for every civic module |
@@ -110,8 +110,8 @@ Implemented and validated:
 
 - `viewport.html?assets=generated&v=wenyu-modules` renders the canonical Wenyu
   tile viewport.
-- `ui/assets/tilemap/modules/wenyu-town-modules.json` defines 11 enabled civic
-  modules.
+- `ui/assets/tilemap/modules/wenyu-town-modules.json` defines 16 enabled Wenyu
+  modules: 11 civic buildings and 5 long-horizon research-domain homes.
 - The Rabbita bootstrap loads the module registry at runtime.
 - MoonBit parses enabled modules and renders them as a separate layer above the
   terrain.
@@ -121,6 +121,12 @@ Implemented and validated:
   fragments, and module-config load version.
 - Module placement validation reports missing bindings, missing assets, invalid
   footprints, and bad water/road placement.
+- Module buildings now declare `style_family`, `asset_base`, `footprint_w`,
+  `footprint_h`, `display_w`, `display_h`, `protocol_pattern`, `use_case`, and
+  `agent_flow`, so placement, behavior, and art are config-driven.
+- The viewport draws a generated road layer from the module hub to each
+  building entrance, making the walking path visible before agent animation is
+  fully bound to every civic workflow.
 - Module interiors show runtime source, status counters, current detail,
   validation state, and active worker roster slots.
 - The Vite bridge exposes `module-projections.json` by scanning
@@ -343,8 +349,9 @@ Implemented:
 - the browser bridge now merges MoonBook UI fragments by `book_id`
 - interiors now expose module-specific output links, review gaps, metrics, and
   recent MoonBook journey entries when the bound book has generated state
-- the viewport was validated with 11 modules, 11 clean placements, 0 issue
-  badges, and 0 fake active-agent badges
+- the viewport was validated with 16 modules, 16 clean placements, 0 issue
+  badges, working view/editor/output modes, zoom controls, and direct module
+  interior links
 
 Remaining:
 
@@ -367,9 +374,11 @@ Each module should look like a distinct civic building.
 
 Required work:
 
-- Generate final transparent PNG sprites for each module.
+- Generate final transparent PNG sprites for each module. The first white-tech
+  pavilion pack is complete and registered for the 16 active modules.
 - Split each building into base, roof, shadow, and optional glow layers.
-- Add asset prompts under `ui/assets/tilemap/prompts/`.
+- Add asset prompts under `ui/assets/tilemap/prompts/`. The white-tech pavilion
+  prompt set is now documented for reuse.
 - Validate image dimensions and transparency before rendering.
 - Reject buildings that overlap water or roads unless the module is explicitly a
   bridge/harbor.
@@ -378,7 +387,8 @@ Acceptance:
 
 - Policy Hall, Contest Express, Social Square, Talent Avenue, AI Garden,
   Physical Bridge, Valley Market, Broadcast Tower, Resident Twin Homes, Vitality
-  Tower, and Town Shell are visually distinguishable at a glance.
+  Tower, Town Shell, OPC, LLM Training, Robotics, Agents, and Hardware are
+  visually distinguishable at a glance.
 
 ### Gate 3: Civic Book Schemas
 
@@ -504,8 +514,10 @@ Acceptance:
 3. Add accepted-change summaries to the MoonBook UI-state contract and surface
    them in module interiors and output mode.
 4. Add daily digest generation for watcher and civic-pattern cycles.
-5. Generate final module assets and register them in the manifest.
-6. Add a standalone module config, placement, and asset validator.
+5. Split the current single-layer building PNGs into optional base, roof,
+   shadow, and glow layers for stronger 2.5D depth.
+6. Add a standalone module config, placement, and asset validator with editor
+   write-back.
 7. Move reusable civic workspace templates into MoonBook so Moontown only
    requests service creation rather than generating all initial files itself.
 8. Add Moondesk-style output browsing for produced wiki pages, reports, assets,
