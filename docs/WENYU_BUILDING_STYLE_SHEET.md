@@ -61,8 +61,8 @@ The pack is now registered in
 `ui/assets/tilemap/modules/wenyu-town-modules.json`. Each building entry
 declares its visual asset, footprint, display size, entrance tile, protocol
 pattern, use case, and agent flow. The viewport uses that data to place the
-building on the map, draw the approach road, expose protocol details in the
-interior view, and show the same metadata in editor mode.
+building on the map, expose protocol details in the interior view, and show the
+same metadata in editor mode.
 
 This makes the building layer an editable town plan rather than a hardcoded
 sprite list:
@@ -76,10 +76,10 @@ sprite list:
 - Replace its art by changing `asset_base`.
 - Disable it by setting `enabled` to `false`.
 
-The current renderer also draws a light road network from a central module hub
-to each enabled building entrance. This is intentionally generated from the
-module registry, so future buildings can join the town route system without a
-MoonBit code change.
+The reference Wenyu terrain remains the source of truth for roads. Module
+entrances are still configured for agent routing, but the renderer should not
+paint a second synthetic road network on top of the map unless a future editor
+explicitly regenerates the base terrain layer.
 
 ## Implementation Rule
 

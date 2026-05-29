@@ -534,6 +534,37 @@ in `.moontown/moonbooks.json`, and writes
 domain knowledge. It names the canonical artifacts and records whether the
 stable state is complete enough to operate.
 
+### Planbook
+
+The planbook is the control book for code/product change plans:
+
+```text
+operator idea / bug / voice note / town anomaly
+  -> Mayor routes to a planbook
+  -> MoonBook writes plans/<date>-<slug>/plan.md
+  -> MoonClaw executes against the plan
+  -> acceptance criteria and execution evidence are recorded
+  -> cookbook is updated only if stable state changed
+```
+
+This is intentionally separate from research and course books:
+
+- research books maintain domain truth
+- course books teach workflows
+- planbooks control implementation work and quality gates
+- the cookbook records stable definitions after plans are accepted
+
+Current documentation lives in:
+
+- [docs/PLANBOOK.md](/Users/kq/Workspace/moontown/docs/PLANBOOK.md)
+- [docs/DOC_STRUCTURE.md](/Users/kq/Workspace/moontown/docs/DOC_STRUCTURE.md)
+- [templates/planbook/PLAN_TEMPLATE.md](/Users/kq/Workspace/moontown/templates/planbook/PLAN_TEMPLATE.md)
+
+The future MoonBook-native implementation should expose a `planbook` workspace
+template and `code-plan` skill route. Until then, Moontown treats the planbook
+contract as an operating rule: non-trivial changes should have a durable plan
+before execution.
+
 ### Dispatch
 
 ```text

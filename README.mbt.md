@@ -75,9 +75,13 @@ Implemented today:
   long-horizon research domains with the Wenyu civic pattern manifest
 - MoonBook-generated `moontown-cookbook` control book for canonical docs,
   definitions, runtime-state indexes, and stable-state drift checks
+- planbook operating model for durable `plan.md` driven code/product changes,
+  separate from research books and course books
 
 Wenyu Valley product readiness is tracked in:
 
+- [docs/DOC_STRUCTURE.md](/Users/kq/Workspace/moontown/docs/DOC_STRUCTURE.md)
+- [docs/PLANBOOK.md](/Users/kq/Workspace/moontown/docs/PLANBOOK.md)
 - [docs/WENYU_VALLEY_PRD.md](/Users/kq/Workspace/moontown/docs/WENYU_VALLEY_PRD.md)
 - [docs/WENYU_UI_MODULE_SYSTEM.md](/Users/kq/Workspace/moontown/docs/WENYU_UI_MODULE_SYSTEM.md)
 - [docs/WENYU_BUILDING_PROTOCOL_PLAN.md](/Users/kq/Workspace/moontown/docs/WENYU_BUILDING_PROTOCOL_PLAN.md)
@@ -230,6 +234,29 @@ This creates `.moontown/books/moontown-cookbook/`, registers it in
 `.moontown/cookbook/stable-state.json`. MoonBook generates and stores the
 cookbook, Moondesk should become the human desktop surface for managing it, and
 Moontown consumes the manifest for drift checks and operator guidance.
+
+## Planbook Workflow
+
+Moontown now distinguishes three active MoonBook work types:
+
+- `research-book`
+  discovers and maintains domain knowledge.
+- `course-book`
+  teaches a beginner through lessons, exercises, and checkpoints.
+- `planbook`
+  writes durable `plan.md` files for code, product, UI, daemon, docs, or civic
+  implementation work.
+
+The planbook is inspired by a plan-first workflow: capture an idea, bug,
+screenshot, operator note, or voice transcript; turn it into a structured
+`plan.md`; then let MoonClaw execute against that plan and mark acceptance
+criteria. The plan file is the restart point when context is lost.
+
+See:
+
+- [docs/PLANBOOK.md](/Users/kq/Workspace/moontown/docs/PLANBOOK.md)
+- [docs/DOC_STRUCTURE.md](/Users/kq/Workspace/moontown/docs/DOC_STRUCTURE.md)
+- [templates/planbook/PLAN_TEMPLATE.md](/Users/kq/Workspace/moontown/templates/planbook/PLAN_TEMPLATE.md)
 
 ## Standing Goal Model
 
@@ -609,6 +636,8 @@ Detailed docs:
 
 - [docs/USAGE.md](/Users/kq/Workspace/moontown/docs/USAGE.md)
 - [docs/ARCHITECTURE.md](/Users/kq/Workspace/moontown/docs/ARCHITECTURE.md)
+- [docs/DOC_STRUCTURE.md](/Users/kq/Workspace/moontown/docs/DOC_STRUCTURE.md)
+- [docs/PLANBOOK.md](/Users/kq/Workspace/moontown/docs/PLANBOOK.md)
 - [docs/PACKAGES.md](/Users/kq/Workspace/moontown/docs/PACKAGES.md)
 - [docs/FRONTEND.md](/Users/kq/Workspace/moontown/docs/FRONTEND.md)
 - [docs/DEVELOPMENT.md](/Users/kq/Workspace/moontown/docs/DEVELOPMENT.md)

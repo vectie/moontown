@@ -45,6 +45,33 @@ The stable-state manifest tracks three artifact classes:
 Missing required artifacts are drift. Optional runtime artifacts may be absent
 before the daemon, civic doctor, or recurring communication-pattern schedule has been started.
 
+## Relationship To Planbooks
+
+The cookbook is not the place where every active idea lives. It records stable
+state after a decision has been accepted.
+
+Use a planbook when the town needs to decide or implement:
+
+- a code refactor
+- a product change
+- a UI redesign
+- a daemon reliability fix
+- a civic workflow change
+- a docs reorganization
+
+After the plan is accepted and validated, update the cookbook only if the
+stable operating state changed.
+
+```text
+planbook
+  -> active plan, acceptance criteria, execution log, review notes
+  -> accepted change
+  -> cookbook stable-state update
+```
+
+This keeps the cookbook from becoming a task tracker while still allowing it to
+index the final accepted state.
+
 ## Commands
 
 ```bash

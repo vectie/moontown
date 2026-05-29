@@ -398,14 +398,20 @@ fn packet_step_metadata(task : @moonbook.BookTask?) -> Json {
   match task {
     Some(task) => {
       let provider_kind = provider_task_kind_for_book_task(task)
-      let research_bootstrap = is_moontown_research_bootstrap_task(task)
+      let course_task = is_moontown_course_task(task)
+      let research_bootstrap = !course_task &&
+        is_moontown_research_bootstrap_task(task)
       let task_prompt = if research_bootstrap {
         research_bootstrap_task_prompt()
+      } else if course_task {
+        course_task_prompt()
       } else {
         task.prompt
       }
       let target_pages = if research_bootstrap {
         research_bootstrap_target_pages()
+      } else if course_task {
+        course_target_pages()
       } else {
         task.target_pages
       }
@@ -452,6 +458,33 @@ fn research_bootstrap_target_pages() -> Array[String] {
     "raw/bootstrap/evidence-matrix.md", "raw/bootstrap/local-sources.md", "raw/bootstrap/synthesis-brief.md",
     "raw/bootstrap/deep-report.md", "raw/bootstrap/marketing-brief.md",
   ]
+}
+
+///|
+fn course_task_prompt() -> String {
+  [
+    "Produce MoonClaw beginner-course artifacts only.", "Load `skills/wenyu-beginner-course/SKILL.md` and `skills/wiki-course/SKILL.md` before writing.",
+    "Write a beginner workbook, not a research report.", "Use evidence only as support behind lessons.",
+    "Do not materialize unrelated durable wiki pages; MoonBook owns broader wiki materialization.",
+  ].join(" ")
+}
+
+///|
+fn course_target_pages() -> Array[String] {
+  [
+    "raw/bootstrap/course-outline.md", "raw/bootstrap/deep-report.md", "wiki/synthesis/beginner-course.md",
+  ]
+}
+
+///|
+fn is_moontown_course_task(task : @moonbook.BookTask) -> Bool {
+  let combined = "\{task.id} \{task.title} \{task.prompt}".to_lower()
+  combined.contains("course") ||
+  combined.contains("syllabus") ||
+  combined.contains("learning path") ||
+  combined.contains("beginner") ||
+  combined.contains("workbook") ||
+  combined.contains("lesson")
 }
 
 ///|

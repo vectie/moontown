@@ -76,6 +76,25 @@ Important packages:
 
 `ui/rabbita-town` is its own nested module for the browser frontend.
 
+## Plan-First Rule
+
+For any change larger than a trivial one-line fix, create or update a durable
+plan before implementation. Use:
+
+- [docs/PLANBOOK.md](/Users/kq/Workspace/moontown/docs/PLANBOOK.md)
+- [templates/planbook/PLAN_TEMPLATE.md](/Users/kq/Workspace/moontown/templates/planbook/PLAN_TEMPLATE.md)
+
+The plan should name the problem, affected files, implementation steps,
+acceptance criteria, validation commands, and rollback path. This lets a new
+Codex, MoonClaw, or human session continue after context loss.
+
+Use the right MoonBook type:
+
+- research book for knowledge discovery
+- course book for beginner learning material
+- planbook for implementation control
+- cookbook for accepted stable state
+
 ## Persistence Files
 
 Runtime state is stored under:
