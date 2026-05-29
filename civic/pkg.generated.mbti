@@ -80,6 +80,7 @@ pub(all) struct BuildingProtocolDefinition {
   title : String
   book_id : String
   protocol_mode : String
+  persistence_mode : String
   social_responsibility : String
   participant_roles : Array[String]
   input_channels : Array[String]
@@ -111,6 +112,7 @@ pub(all) struct BuildingProtocolSnapshot {
   title : String
   book_id : String
   protocol_mode : String
+  persistence_mode : String
   social_responsibility : String
   status : String
   ready : Bool
@@ -158,6 +160,7 @@ pub struct CivicServiceDefinition {
   book_id : String
   service_kind : String
   module_mode : String
+  persistence_mode : String
   book_role : String
   skill_mode : String
   purpose : String

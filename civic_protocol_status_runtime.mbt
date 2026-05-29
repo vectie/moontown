@@ -69,6 +69,7 @@ async fn inspect_wenyu_building_protocol(
     title: protocol.title,
     book_id: protocol.book_id,
     protocol_mode: protocol.protocol_mode,
+    persistence_mode: protocol.persistence_mode,
     social_responsibility: protocol.social_responsibility,
     status,
     ready: status == "reduced" || status == "review",

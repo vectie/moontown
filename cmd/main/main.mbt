@@ -25,6 +25,20 @@ async fn main {
     ["cookbook", "doctor"] => println(@moontown.bootstrap_moontown_cookbook())
     ["cookbook", "status"] =>
       println(@moontown.render_moontown_cookbook_status())
+    ["planbook", "bootstrap"] =>
+      println(@moontown.bootstrap_moontown_planbook())
+    ["planbook", "status"] =>
+      println(@moontown.render_moontown_planbook_status())
+    ["course", "wenyu-game-design", "bootstrap"] =>
+      println(@moontown.bootstrap_wenyu_game_design_course_book())
+    ["course", "wenyu-game-design", "status"] =>
+      println(@moontown.render_wenyu_game_design_course_status())
+    ["books", "quality"] => println(@moontown.render_book_quality())
+    ["books", "bootstrap"] =>
+      println(@moontown.bootstrap_registered_book_workspaces())
+    ["books", "doctor"] => println(@moontown.write_book_quality_audit())
+    ["books", "ai-review-packets"] =>
+      println(@moontown.write_book_quality_review_packets())
     ["civic", "bootstrap"] =>
       println(@moontown.bootstrap_wenyu_civic_workspaces())
     ["civic", "status"] => println(@moontown.render_wenyu_civic_status())

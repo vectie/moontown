@@ -62,10 +62,36 @@ operational purpose, not by the order features were added.
 | Course book | Teach a beginner a workflow | lessons, exercises, checkpoints |
 | Planbook | Drive code/product implementation | `plan.md`, acceptance criteria, execution log |
 | Cookbook | Preserve stable town state | canonical docs index, definitions, drift report |
+| Civic protocol support workspace | Persist accepted or reviewable outputs from one building protocol | schemas when needed, service ledgers, exchange ledgers, review queues, service history, projection-safe output |
+| Operational book | Preserve private operating memory | review policy, journey log, keeper skill, projection-safe operating notes |
 
 The docs should make this distinction visible. A research report should not be
 used as a code plan. A course should not be used as a bug tracker. A planbook
-should not become a permanent domain wiki.
+should not become a permanent domain wiki. A civic building should not be
+reduced to a book: the building is a protocol place, while MoonBook is the
+optional durable support surface.
+
+## Book Quality Checks
+
+Moontown keeps book quality checks split into two responsibilities:
+
+- `books doctor`
+  runs deterministic structural checks and writes
+  `.moontown/book-quality/audit.json` plus `.moontown/book-quality/audit.md`.
+- `books ai-review-packets`
+  writes review packets that an AI reviewer should judge with
+  `BOOK_QUALITY_REVIEW_SKILL.md` and the book's own contract/skill files.
+
+Structural checks are allowed to be hard-coded because they protect invariants:
+workspace exists, contract exists, projection exists, and service books have
+real service-loop output. They must be presented as readiness only. Actual
+quality should not be hard-coded. Depth, insight, usefulness, originality,
+correctness, and genre fit belong to the AI semantic review pass, with results
+written to `.moontown/book-quality/ai-review-results/<book-id>.md`.
+
+`books bootstrap` should stay genre-aware. It should repair canonical
+registered book workspaces without turning course, civic, planbook, cookbook,
+or operational books into research books.
 
 ## Update Rules
 

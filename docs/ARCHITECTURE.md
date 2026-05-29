@@ -17,6 +17,12 @@ That document defines the next architecture step: each Wenyu building should
 act as an AI-mediated protocol place for aggregation, exchange, reduction, and
 distribution, not merely as a research book or static UI card.
 
+For Wenyu civic modules, “book” is not the primary abstraction. The primary
+abstraction is a building protocol with typed inboxes, ledgers, review gates,
+and distribution policies. A MoonBook may support that building as durable
+memory, but the support mode differs by building: workspace-backed,
+ledger-backed, projection-backed, handoff-ledger-backed, or mixed-memory-backed.
+
 The implementation refactor plan is tracked in
 [REFACTOR_PLAN.md](/Users/kq/Workspace/moontown/docs/REFACTOR_PLAN.md). That
 document is the source of truth for splitting the current working prototype
@@ -554,16 +560,72 @@ This is intentionally separate from research and course books:
 - planbooks control implementation work and quality gates
 - the cookbook records stable definitions after plans are accepted
 
-Current documentation lives in:
+Current documentation and bootstrap commands:
 
 - [docs/PLANBOOK.md](/Users/kq/Workspace/moontown/docs/PLANBOOK.md)
 - [docs/DOC_STRUCTURE.md](/Users/kq/Workspace/moontown/docs/DOC_STRUCTURE.md)
 - [templates/planbook/PLAN_TEMPLATE.md](/Users/kq/Workspace/moontown/templates/planbook/PLAN_TEMPLATE.md)
 
-The future MoonBook-native implementation should expose a `planbook` workspace
-template and `code-plan` skill route. Until then, Moontown treats the planbook
-contract as an operating rule: non-trivial changes should have a durable plan
-before execution.
+```bash
+moon run cmd/main -- planbook bootstrap
+moon run cmd/main -- planbook status
+```
+
+Moontown can now register and bootstrap a first-class planbook workspace with
+plan index, execution evidence, active review, decision log, schema, generated
+site, and code-plan/code-review/doc-sync skills. The remaining MoonBook-side
+work is to make `planbook` a native provider/profile so future plan creation,
+plan repair, and review can run as normal MoonBook book work instead of only
+through Moontown bootstrap.
+
+`books bootstrap` is the canonical bootstrap repair command for the currently
+registered book families. It materializes operational, cookbook, planbook,
+course, and civic service workspaces with different contracts and skill packs
+instead of treating every book as research.
+
+### Book Quality Governance
+
+Book quality has two layers:
+
+- Structural doctor
+  checks whether each registered book has the expected workspace, contracts,
+  skill files, projections, and role-specific evidence. This is readiness, not
+  quality.
+- Semantic AI review
+  asks MoonClaw/MoonBook to judge usefulness, correctness, originality, role
+  fit, evidence accounting, and next repair using the book's own `SKILL.md`.
+
+The structural layer is implemented in
+[book_quality.mbt](/Users/kq/Workspace/moontown/book_quality.mbt). It should
+not pretend to know whether a report, course, plan, or civic service is
+world-class. It only prevents obvious scaffold-only books from being reported
+as ready.
+
+Current structural readiness expectations are book-type specific:
+
+- course books require course contract, outline, source boundary, lessons,
+  exercises, rubric, course skill, and generated projection
+- planbooks require plan index, plan, quality gates, execution evidence, active
+  review, decision log, schema, skills, and generated projection
+- cookbooks require stable-state definitions, ownership, book types, runtime
+  boundaries, doctor/governance procedures, schema, and generated projection
+- civic protocol support workspaces require service contract, building protocol
+  contract, generic and module-specific civic skills, schemas, wiki pages when
+  needed, ledgers, review queues, service history, MoonClaw profile, and
+  generated projection. The expected shape depends on `persistence_mode`; a
+  ledger-backed exchange place is not judged like a research book.
+
+The semantic review packet layer writes:
+
+- `.moontown/book-quality/ai-review-packets/BOOK_QUALITY_REVIEW_SKILL.md`
+- `.moontown/book-quality/ai-review-packets/<book-id>.json`
+
+The semantic review result layer reads:
+
+- `.moontown/book-quality/ai-review-results/<book-id>.md`
+
+Those packets are the handoff to AI judgment. The Mayor should use structural
+failures for routing and use semantic review findings for quality repair.
 
 ### Dispatch
 

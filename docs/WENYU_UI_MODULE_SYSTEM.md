@@ -448,7 +448,7 @@ Current status:
 
 - the civic registry defines one service contract per enabled civic building
 - Mayor decomposition uses that registry to create isolated service lanes
-- civic books route directly to the service workflow first, rather than through
+- civic protocol support workspaces route directly to the service workflow first, rather than through
   the Wenyu research/bootstrap gate used by product-build books
 - worker context enrichment adds generic and module-specific civic skill files
 - each civic output contract uses explicit markers such as

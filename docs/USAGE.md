@@ -468,7 +468,7 @@ It maps the current domain interests to the least surprising operating form:
 
 The installer does not hardcode a domain workflow into MoonBit. It reads the
 manifest, upserts `.moontown/standing-goals.json`, refreshes Wenyu civic
-MoonBook workspaces, refreshes building protocol definitions, installs the
+protocol support workspaces, refreshes building protocol definitions, installs the
 recurring civic pattern schedules, and writes:
 
 ```text
@@ -606,6 +606,71 @@ The demo town persists runtime bootstrap files under:
 - `.moontown/books/wenyu-*/` for civic MoonBook workspaces created by
   `moon run cmd/main -- civic bootstrap`
 - `.moontown/town-synthesis/` for mayor-level cross-book reports
+
+## 2.1 Manage Book Types And Quality
+
+Bootstrap the stable cookbook:
+
+```bash
+moon run cmd/main -- cookbook bootstrap
+moon run cmd/main -- cookbook status
+```
+
+Bootstrap the current planbook:
+
+```bash
+moon run cmd/main -- planbook bootstrap
+moon run cmd/main -- planbook status
+```
+
+Bootstrap the Wenyu beginner course book:
+
+```bash
+moon run cmd/main -- course wenyu-game-design bootstrap
+moon run cmd/main -- course wenyu-game-design status
+```
+
+Repair canonical registered book workspaces, then inspect structural readiness:
+
+```bash
+moon run cmd/main -- books bootstrap
+moon run cmd/main -- books doctor
+moon run cmd/main -- books quality
+```
+
+Generate AI semantic review packets:
+
+```bash
+moon run cmd/main -- books ai-review-packets
+```
+
+The `books doctor` structural readiness column is intentionally deterministic.
+It checks whether a book has the expected workspace, contract, skills,
+projection, and service-loop artifacts. It should not be treated as a book
+quality score.
+
+`books bootstrap` repairs the canonical book families together:
+
+- coding and finance operational books
+- `moontown-cookbook`
+- `plan-moontown-quality`
+- `course-wenyu-game-design`
+- all Wenyu civic protocol support workspaces
+
+Each family is bootstrapped with a different workspace shape. Course books use
+course contracts, lessons, exercises, and checkpoints. Planbooks use plan
+indexes, execution evidence, active review, decision logs, and plan schemas.
+Cookbook uses stable-state definitions and operating procedures. Civic protocol
+support workspaces use the substrate required by their persistence mode:
+schemas, service ledgers, exchange ledgers, review queues, service history,
+generated projections, and MoonClaw skill contracts. The civic building itself
+remains the protocol place.
+
+The AI review packets are the semantic layer. They ask MoonClaw/MoonBook to read
+the book's own contract and `SKILL.md`, then judge role fit, correctness,
+usefulness, curiosity, originality, evidence accounting, and next repairs. That
+is where “world-class” quality should be decided. Write those review results to
+`.moontown/book-quality/ai-review-results/<book-id>.md`.
 
 What they do:
 

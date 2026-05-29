@@ -320,6 +320,7 @@ fn civic_salon_generic_protocol_for_scenario(
     title: scenario.title,
     book_id: scenario.building_book_id,
     protocol_mode: pattern.protocol_mode,
+    persistence_mode: "ledger-backed",
     social_responsibility: pattern.summary,
     participant_roles: [
       pattern.input_contract,

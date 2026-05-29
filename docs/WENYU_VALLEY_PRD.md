@@ -68,8 +68,8 @@ Moontown owns:
 - Cross-book synthesis.
 - Operator and pixel-town UI.
 - Runtime projection contract consumed by the browser.
-- The Wenyu civic service registry and temporary local bootstrap bridge for
-  creating civic MoonBook workspaces until MoonBook owns native templates.
+- The Wenyu civic protocol registry and temporary local bootstrap bridge for
+  creating civic support workspaces until MoonBook owns native templates.
 
 Moontown must not own:
 
@@ -83,7 +83,8 @@ MoonBook is the durable workspace and memory layer.
 
 MoonBook owns:
 
-- One civic workspace per domain.
+- Durable support workspaces for civic protocols when the building needs
+  accepted records, ledgers, review queues, private memory, or projections.
 - Resident memory streams.
 - Domain wiki pages.
 - Quest records and review queues.
@@ -132,7 +133,7 @@ Required features:
 - Pixel-art overview map.
 - North, Central, and South district zones.
 - City Hall for Mayor.
-- Civic houses for MoonBook workspaces.
+- Civic buildings whose protocols may bind to MoonBook support workspaces.
 - Worker yard for MoonClaw agents.
 - Anomaly/recovery area.
 - Day-night, season, and weather state.
@@ -160,8 +161,8 @@ Acceptance criteria:
 - No broken assets.
 - No false degradation warnings during normal lifecycle states.
 - Operator can inspect a resident, worker, place, quest, and module.
-- `moon run cmd/main -- civic bootstrap` can create the civic module books
-  required by the viewport bindings.
+- `moon run cmd/main -- civic bootstrap` can create the civic protocol support
+  workspaces required by the viewport bindings.
 
 Implementation note:
 
@@ -660,13 +661,15 @@ Acceptance criteria:
 
 Status:
 
-- Implemented on the Moontown side as a civic service registry and bootstrap
-  bridge.
-- The registry now distinguishes module mode from MoonBook support role:
+- Implemented on the Moontown side as a civic protocol/service registry and
+  bootstrap bridge.
+- The registry now distinguishes module mode, persistence mode, and MoonBook
+  support role:
   `agent-workspace`, `exchange-place`, `projection-surface`, `gateway`, and
-  `hybrid`.
+  `hybrid`; plus `workspace-backed`, `ledger-backed`, `projection-backed`,
+  `handoff-ledger-backed`, and `mixed-memory-backed`.
 
-Implemented civic workspaces:
+Implemented civic protocol support workspaces:
 
 - `wenyu-town-shell`
 - `wenyu-resident-twins`
@@ -682,7 +685,8 @@ Implemented civic workspaces:
 
 Acceptance criteria:
 
-- Each support workspace has wiki root, dedicated skill pack, projection
+- Each support workspace has the durable substrate required by its persistence
+  mode: wiki root when needed, dedicated skill pack, ledgers, projection
   fragment, and readiness summary. Implemented for seeded workspaces.
 - Moontown can bootstrap all civic support workspaces. Implemented with
   `moon run cmd/main -- civic bootstrap`.

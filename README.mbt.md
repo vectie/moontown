@@ -165,14 +165,16 @@ Create the current Wenyu civic support workspaces with:
 moon run cmd/main -- civic bootstrap
 ```
 
-The bootstrap creates canonical `wenyu-*` support books for Town Shell, Resident Twin
-Homes, Policy Hall, Contest Express, Social Square, Talent Avenue, Vitality
-Tower, AI Science Garden, Physical Bridge, Valley Market, and Story Radar. Each
-book is seeded with workspace contracts, schemas, review queues, generated
-projection files, and dedicated MoonClaw skill contracts. The registry also
-marks whether the building is an agent workspace, exchange place, projection
-surface, gateway, or hybrid. This gives the town real civic module bindings; it
-does not mean every civic feature should behave like a research book.
+The bootstrap creates canonical `wenyu-*` support books for Town Shell,
+Resident Twin Homes, Policy Hall, Contest Express, Social Square, Talent
+Avenue, Vitality Tower, AI Science Garden, Physical Bridge, Valley Market, and
+Story Radar. These are not the civic features themselves. The feature boundary
+is the building protocol; the MoonBook workspace is the durable support surface
+for accepted records, ledgers, review queues, and projection fragments. The
+registry marks both `module_mode` and `persistence_mode`, so a building can be
+an agent workspace, exchange place, projection surface, gateway, or hybrid, and
+can be workspace-backed, ledger-backed, projection-backed,
+handoff-ledger-backed, or mixed-memory-backed.
 
 The building-as-protocol layer has started. Each civic building now has a
 protocol definition and seeded `BUILDING_PROTOCOL_CONTRACT.md`; Social Square
@@ -237,7 +239,7 @@ Moontown consumes the manifest for drift checks and operator guidance.
 
 ## Planbook Workflow
 
-Moontown now distinguishes three active MoonBook work types:
+Moontown now distinguishes four active MoonBook work types:
 
 - `research-book`
   discovers and maintains domain knowledge.
@@ -246,6 +248,8 @@ Moontown now distinguishes three active MoonBook work types:
 - `planbook`
   writes durable `plan.md` files for code, product, UI, daemon, docs, or civic
   implementation work.
+- `cookbook`
+  preserves stable definitions, current operating state, and accepted docs.
 
 The planbook is inspired by a plan-first workflow: capture an idea, bug,
 screenshot, operator note, or voice transcript; turn it into a structured
@@ -257,6 +261,58 @@ See:
 - [docs/PLANBOOK.md](/Users/kq/Workspace/moontown/docs/PLANBOOK.md)
 - [docs/DOC_STRUCTURE.md](/Users/kq/Workspace/moontown/docs/DOC_STRUCTURE.md)
 - [templates/planbook/PLAN_TEMPLATE.md](/Users/kq/Workspace/moontown/templates/planbook/PLAN_TEMPLATE.md)
+
+Bootstrap the current first-class planbook with:
+
+```bash
+moon run cmd/main -- planbook bootstrap
+moon run cmd/main -- planbook status
+```
+
+## Book Quality Governance
+
+Use the structural doctor first:
+
+```bash
+moon run cmd/main -- books bootstrap
+moon run cmd/main -- books doctor
+moon run cmd/main -- books quality
+```
+
+This writes `.moontown/book-quality/audit.json` and
+`.moontown/book-quality/audit.md`. The structural readiness column is
+deliberately deterministic: it checks required workspaces, contracts, skills,
+projections, and whether a civic service has at least one real service-loop
+result. It is not a quality score.
+
+`books bootstrap` now materializes the canonical registered book families, not
+only the default operational books:
+
+- operational books for coding and finance memory
+- the stable-state cookbook
+- the implementation planbook
+- the Wenyu beginner course book
+- the Wenyu civic protocol support workspaces
+
+The generated workspaces are intentionally genre-specific. Course books get
+lessons and exercises, planbooks get plans/evidence/review logs, cookbook gets
+stable-state definitions, and civic protocol support workspaces get the minimum
+durable substrate required by their persistence mode: schemas, ledgers, review
+queues, service history, projections, and building-protocol contracts. A
+ledger-backed exchange place should not be judged like a research book.
+
+Generate semantic AI review packets with:
+
+```bash
+moon run cmd/main -- books ai-review-packets
+```
+
+Those packets live under `.moontown/book-quality/ai-review-packets/` and should
+be reviewed by MoonClaw/MoonBook using `BOOK_QUALITY_REVIEW_SKILL.md` plus each
+book's own contract and `SKILL.md`. The resulting `ai_quality_score` should be
+written to `.moontown/book-quality/ai-review-results/<book-id>.md`. World-class
+quality should be decided by that AI review layer, not by hard-coded
+file-existence checks.
 
 ## Standing Goal Model
 

@@ -5,6 +5,7 @@ pub(all) struct BuildingProtocolDefinition {
   title : String
   book_id : String
   protocol_mode : String
+  persistence_mode : String
   social_responsibility : String
   participant_roles : Array[String]
   input_channels : Array[String]
@@ -99,6 +100,7 @@ pub(all) struct BuildingProtocolSnapshot {
   title : String
   book_id : String
   protocol_mode : String
+  persistence_mode : String
   social_responsibility : String
   status : String
   ready : Bool
@@ -139,6 +141,7 @@ pub fn wenyu_building_protocol_for_service(
     title: service.title,
     book_id: service.book_id,
     protocol_mode: protocol_mode_for_service(service),
+    persistence_mode: service.persistence_mode,
     social_responsibility: social_responsibility_for_service(service),
     participant_roles: participant_roles_for_service(service),
     input_channels: input_channels_for_service(service),

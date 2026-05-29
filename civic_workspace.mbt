@@ -116,6 +116,7 @@ async fn write_wenyu_civic_workspace_seed_for_service(
   write_civic_schema_pages(root, service)
   write_civic_wiki_pages(root, service)
   write_civic_review_queues(root, service)
+  write_civic_service_ledgers(root, service)
   write_civic_projection(root, service)
   write_civic_html_pages(root, service)
   ensure_wenyu_civic_moonclaw_profile(root)
@@ -158,6 +159,25 @@ async fn write_civic_review_queues(
       civic_review_queue_text(service, path),
     )
   }
+}
+
+///|
+async fn write_civic_service_ledgers(
+  root : String,
+  service : @civic.CivicServiceDefinition,
+) -> Unit {
+  write_text_file_if_missing(
+    "\{root}/wiki/ledgers/service-ledger.md",
+    civic_service_ledger_text(service),
+  )
+  write_text_file_if_missing(
+    "\{root}/wiki/ledgers/exchange-ledger.md",
+    civic_exchange_ledger_text(service),
+  )
+  write_text_file_if_missing(
+    "\{root}/wiki/history/service-history.md",
+    civic_service_history_text(service),
+  )
 }
 
 ///|
@@ -233,12 +253,12 @@ fn civic_workspace_index_text(
   [
     "# \{service.title}",
     "",
-    "This workspace supports the Wenyu Valley `\{service.title}` civic module. It is not automatically a research lane; its role is `\{service.book_role}` for a `\{service.module_mode}` building.",
+    "This workspace supports the Wenyu Valley `\{service.title}` civic module. The building itself is the protocol place; this MoonBook is only the `\{service.persistence_mode}` durable support surface for a `\{service.module_mode}` building.",
     "",
     "## Ownership",
     "",
     "- Moontown owns routing, daemon supervision, UI projection, and cross-module resource policy.",
-    "- MoonBook owns this workspace's schemas, wiki pages, review queues, memory, and generated site.",
+    "- MoonBook owns only the accepted records, schemas, review queues, memory, and generated projections that the building protocol sends here.",
     "- MoonClaw owns bounded execution through the service skill pack `\{service.skill_pack}`.",
     "",
     "## Service",
@@ -246,6 +266,7 @@ fn civic_workspace_index_text(
     "- Book: `\{entry.id}`",
     "- Kind: `\{service.service_kind}`",
     "- Module mode: `\{service.module_mode}`",
+    "- Persistence mode: `\{service.persistence_mode}`",
     "- MoonBook role: `\{service.book_role}`",
     "- Skill mode: `\{service.skill_mode}`",
     "- Output contract: `\{service.output_contract}`",
@@ -278,6 +299,7 @@ fn civic_service_contract_text(
     "- Module id: `\{service.id}`",
     "- Service kind: `\{service.service_kind}`",
     "- Module mode: `\{service.module_mode}`",
+    "- Persistence mode: `\{service.persistence_mode}`",
     "- MoonBook role: `\{service.book_role}`",
     "- Skill mode: `\{service.skill_mode}`",
     "- Output contract: `\{service.output_contract}`",
@@ -322,6 +344,7 @@ fn civic_service_contract_text(
     "- If evidence is thin, write the blocker and next source class instead of inventing confidence.",
     "- Operational records must not inflate domain evidence counts.",
     "- Do not turn this module into generic research unless its skill mode explicitly requires source research.",
+    "- Do not treat this support MoonBook as the civic place itself. The civic place is the building protocol and its runtime ledgers; this workspace persists only accepted or reviewable outputs.",
   ].join("\n")
 }
 
@@ -343,6 +366,7 @@ fn civic_workspace_building_protocol_contract_text(
     "",
     "- Building id: `\{protocol.building_id}`",
     "- Protocol mode: `\{protocol.protocol_mode}`",
+    "- Persistence mode: `\{protocol.persistence_mode}`",
     "- Privacy scope: `\{protocol.privacy_scope}`",
     "- Projection contract: `\{protocol.projection_contract}`",
     "",
@@ -382,6 +406,7 @@ fn civic_workspace_building_protocol_contract_text(
     "- Moontown hardcodes the envelope, routing, ledgers, idempotency, allowed channels, and review gates.",
     "- MoonClaw uses the skill pack to choose the building-native aggregation and reduction strategy.",
     "- MoonBook persists accepted civic records and review queues.",
+    "- A module may be ledger-backed, projection-backed, handoff-ledger-backed, mixed-memory-backed, or workspace-backed; do not assume it is a research book.",
   ].join("\n")
 }
 
@@ -392,6 +417,7 @@ fn wenyu_civic_service_skill_text() -> String {
     "---", "", "# Wenyu Civic Service Skill", "", "Use this generic skill with the module-specific skill pack in the same workspace.",
     "", "## Rules", "", "- Read `raw/bootstrap/CIVIC_SERVICE_CONTRACT.md` and `raw/bootstrap/BUILDING_PROTOCOL_CONTRACT.md` before acting.",
     "- First identify the module mode: agent-workspace, exchange-place, projection-surface, gateway, or hybrid.",
+    "- Then identify the persistence mode: workspace-backed, ledger-backed, projection-backed, handoff-ledger-backed, or mixed-memory-backed.",
     "- Do not force every civic module into research. Use research only when the module-specific skill asks for source discovery or evidence verification.",
     "- Choose the next useful service action from current book state, place state, and review gates; do not follow a fixed script.",
     "- For exchange-place modules, produce consent, ledger, match, request, or follow-up records rather than long reports.",
@@ -401,6 +427,7 @@ fn wenyu_civic_service_skill_text() -> String {
     "- Treat the building as a protocol place: map inputs into contributions, group compatible contributions, reduce them into a module-native output, and distribute only through allowed channels.",
     "- Use source evidence for knowledge claims and record source gaps clearly when knowledge claims are part of the module work.",
     "- Persist durable results to the MoonBook role defined in the contract and projection summaries to `book/moonbook-ui-state.json` only through review-safe records.",
+    "- If the persistence mode is ledger-backed or projection-backed, prefer compact records and summaries over wiki essays.",
     "- Queue review for public, legal, financial, personal, booking, robot, or offline-impact actions.",
     "- Separate operational activity from domain progress.", "", "## Required Output Shape",
     "", "Return Markdown with these fields:", "", "- `civic_service_decision: update | no_change | needs_review | blocked`",
@@ -431,6 +458,7 @@ fn civic_module_skill_text(service : @civic.CivicServiceDefinition) -> String {
     "## Mode",
     "",
     "- Module mode: `\{service.module_mode}`",
+    "- Persistence mode: `\{service.persistence_mode}`",
     "- MoonBook role: `\{service.book_role}`",
     "- Skill mode: `\{service.skill_mode}`",
     "",
@@ -440,7 +468,8 @@ fn civic_module_skill_text(service : @civic.CivicServiceDefinition) -> String {
     "",
     "## What To Decide",
     "",
-    "- Inspect the current MoonBook workspace and decide whether the next service action is an update, no-change digest, review queue, or blocker.",
+    "- Inspect the current MoonBook support workspace and decide whether the next service action is an update, no-change digest, review queue, or blocker.",
+    "- Treat the MoonBook as supporting memory, not necessarily the product surface or the civic place.",
     "- Prefer the highest-value action for a real civic operator and resident, not a generic wiki maintenance step.",
     "- Do not produce a generic research report unless this module's skill mode explicitly requires source research.",
     "- Use imagination, curiosity, and judgment: ask what would genuinely help the resident, operator, or town ecosystem, then constrain the answer by evidence and safety.",
@@ -544,7 +573,7 @@ fn civic_schema_page_text(
     "",
     "Schema for `\{service.title}` (`\{service.service_kind}`).",
     "",
-    "Module mode: `\{service.module_mode}`. MoonBook role: `\{service.book_role}`. Skill mode: `\{service.skill_mode}`.",
+    "Module mode: `\{service.module_mode}`. Persistence mode: `\{service.persistence_mode}`. MoonBook role: `\{service.book_role}`. Skill mode: `\{service.skill_mode}`.",
     "",
     "## Required Fields",
     "",
@@ -611,6 +640,64 @@ fn civic_review_queue_text(
     "## Review Rules",
     "",
     markdown_bullets(service.acceptance),
+  ].join("\n")
+}
+
+///|
+fn civic_service_ledger_text(service : @civic.CivicServiceDefinition) -> String {
+  [
+    "# Service Ledger",
+    "",
+    "Durable service ledger for Wenyu Valley `\{service.title}`.",
+    "",
+    "| ID | Kind | Decision | Accepted Facts | Review Items | Projection Delta | Status |",
+    "| --- | --- | --- | ---: | ---: | --- | --- |",
+    "| seed-\{service.id}-ledger | bootstrap | seeded | 0 | 1 | workspace initialized; no domain/service facts accepted yet | pending-review |",
+    "",
+    "## Ledger Rules",
+    "",
+    "- Accepted facts must be domain/service facts, not daemon retries or bootstrap activity.",
+    "- Every public or external-impact action needs an explicit review state.",
+    "- A no-change cycle should still record checked sources/inputs, but it must not inflate accepted facts.",
+  ].join("\n")
+}
+
+///|
+fn civic_exchange_ledger_text(
+  service : @civic.CivicServiceDefinition,
+) -> String {
+  [
+    "# Exchange Ledger",
+    "",
+    "Place-level aggregation/exchange/reduction/distribution ledger for `\{service.title}`.",
+    "",
+    "| ID | Input | Aggregation | Reduction | Distribution | Review State |",
+    "| --- | --- | --- | --- | --- | --- |",
+    "| seed-\{service.id}-exchange | bootstrap contracts | group by module mode `\{service.module_mode}` | no service output yet | book-local projection only | pending |",
+    "",
+    "## Protocol Shape",
+    "",
+    "- Aggregate compatible inputs.",
+    "- Exchange information only inside allowed privacy scope.",
+    "- Reduce to the module-native output contract `\{service.output_contract}`.",
+    "- Distribute only through allowed output channels and review gates.",
+  ].join("\n")
+}
+
+///|
+fn civic_service_history_text(
+  service : @civic.CivicServiceDefinition,
+) -> String {
+  [
+    "# Service History",
+    "",
+    "Chronological history for `\{service.title}`.",
+    "",
+    "## Bootstrap",
+    "",
+    "- Workspace seeded with schemas, wiki pages, review queues, service skill pack, MoonClaw profile, and projection state.",
+    "- No completed civic service result has been accepted yet unless `.moontown/book-results/goal-\{service.book_id}-civic-service.json` exists.",
+    "- Next meaningful work should be module-native: `\{service.skill_mode}`.",
   ].join("\n")
 }
 

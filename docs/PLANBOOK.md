@@ -189,8 +189,19 @@ Moondesk should implement:
 
 ## Immediate Moontown Rule
 
-Until first-class planbook automation exists, use this repository rule:
+Moontown now has a first-class bootstrap for the current planbook workspace:
+
+```bash
+moon run cmd/main -- planbook bootstrap
+moon run cmd/main -- planbook status
+```
+
+Use this repository rule:
 
 If a change is larger than a trivial one-line fix, write or update a plan under
 `docs/plans/` or a planbook workspace before implementation. The plan should be
 good enough for a new Codex/MoonClaw session to continue after context loss.
+
+The remaining upgrade belongs mostly in MoonBook: add a native `planbook`
+provider/profile so future plan creation, plan review, and plan repair run
+through MoonBook skills instead of only through Moontown bootstrap.

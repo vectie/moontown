@@ -229,9 +229,15 @@ resident / operator / mayor / watcher / book / worker / external source
   -> distribution to books, agents, UI, queues, or external handoff
 ```
 
-The building is the social and protocol boundary. MoonBook is the durable
-memory and review substrate. MoonClaw is the reasoning/execution substrate.
+The building is the social and protocol boundary. MoonBook is the optional
+durable support substrate for accepted records, review queues, private memory,
+ledgers, and projections. MoonClaw is the reasoning/execution substrate.
 Moontown is the mayor, router, runtime supervisor, and projection owner.
+
+This distinction matters: some buildings are mostly information exchanges or
+projection surfaces, not “books.” They may still bind to a MoonBook support
+workspace, but the workspace is not the product feature. The product feature is
+the building protocol and the information transformation it performs.
 
 ## Protocol Envelope
 
@@ -244,6 +250,7 @@ Required fields:
 - `title`
 - `social_responsibility`
 - `protocol_mode`
+- `persistence_mode`
 - `participant_roles`
 - `input_channels`
 - `output_channels`
@@ -269,6 +276,7 @@ Example shape:
   "title": "Social Square",
   "social_responsibility": "Consent-aware community matching and weak-tie exchange",
   "protocol_mode": "exchange-reduce-distribute",
+  "persistence_mode": "ledger-backed",
   "participant_roles": ["resident", "matchmaker_agent", "reviewer", "mayor"],
   "input_channels": ["resident_request", "profile_projection", "event_signal"],
   "output_channels": ["consent_request", "match_candidate", "event_plan", "review_item"],
@@ -351,7 +359,7 @@ Moontown should not own:
 
 MoonBook owns:
 
-- durable building memory
+- durable support memory when a protocol needs it
 - schemas for accepted building records
 - review queues
 - generated civic projections
@@ -363,6 +371,7 @@ MoonBook should not own:
 - town-wide routing
 - cross-building scheduling
 - worker process supervision
+- the civic place identity itself
 
 ### MoonClaw
 
@@ -404,6 +413,23 @@ the deep workspace editor.
 | Physical Bridge | Gate virtual-to-real handoffs | venue requests, robot status, confirmations | handoff packet or blocker | operator queue, bridge book, device layer |
 | Valley Market | Govern value exchange and rewards | offers, needs, points, abuse signals | ledger update or redemption review | market book, resident projection |
 | Story Radar | Convert verified town activity into public narrative | achievements, events, reviewed facts | story draft or redaction task | broadcast book, public projection |
+
+## Persistence Modes
+
+Not every civic module is a MoonBook in the same sense.
+
+| Persistence Mode | Meaning | Typical Buildings |
+|---|---|---|
+| `workspace-backed` | The building needs a substantial domain workspace with source pages, task records, and durable wiki pages. | Policy Hall, Contest Express, AI Science Garden |
+| `ledger-backed` | The building mainly records exchanges, consent, offers, matches, points, or follow-ups. | Social Square, Valley Market |
+| `projection-backed` | The building mainly summarizes runtime state and exposes a safe UI/status projection. | Town Shell, Vitality Tower |
+| `handoff-ledger-backed` | The building mainly records confirmation-gated virtual-to-real handoff packets and blockers. | Physical Bridge |
+| `mixed-memory-backed` | The building combines private memory, public projection, and reviewable records. | Resident Twin Homes, Talent Avenue, Story Radar |
+
+Quality review must follow the persistence mode. A ledger-backed exchange place
+is good when its packets, consent records, reductions, review gates, and
+follow-up history are good. It should not be penalized for lacking a long
+research report.
 
 ## Implementation Plan
 

@@ -5,6 +5,7 @@ pub struct CivicServiceDefinition {
   book_id : String
   service_kind : String
   module_mode : String
+  persistence_mode : String
   book_role : String
   skill_mode : String
   purpose : String
@@ -442,6 +443,7 @@ fn civic_service(
     book_id,
     service_kind,
     module_mode,
+    persistence_mode: civic_persistence_mode(module_mode),
     book_role,
     skill_mode,
     purpose,
@@ -464,6 +466,9 @@ fn civic_service(
         ..schema_pages,
         ..wiki_pages,
         ..review_queues,
+        "wiki/ledgers/service-ledger.md",
+        "wiki/ledgers/exchange-ledger.md",
+        "wiki/history/service-history.md",
         "book/moonbook-ui-state.json",
         "book/site/generated/index.html",
       ],
@@ -534,6 +539,7 @@ pub fn wenyu_civic_book_entry(
       service.id,
       service.service_kind,
       "module-mode:\{service.module_mode}",
+      "persistence-mode:\{service.persistence_mode}",
       "book-role:\{service.book_role}",
       "parallel-lane",
     ],
@@ -585,8 +591,10 @@ pub fn civic_service_task_prompt(
     "## Module Mode",
     "",
     "- Module mode: `\{service.module_mode}`.",
+    "- Persistence mode: `\{service.persistence_mode}`.",
     "- MoonBook role: `\{service.book_role}`.",
     "- Skill mode: `\{service.skill_mode}`.",
+    "- The building is the civic protocol boundary. MoonBook is only the durable support surface named by the persistence mode.",
     "- Do not force this module into a generic research-report workflow; perform the module-native work described by the skill pack.",
     "",
     "## Agent Work",
@@ -626,6 +634,18 @@ pub fn civic_service_task_prompt(
 fn civic_binding_key(text : String) -> String {
   let stripped = strip_prefix(strip_prefix(text, "book-"), "wenyu-")
   stripped.to_lower()
+}
+
+///|
+fn civic_persistence_mode(module_mode : String) -> String {
+  match module_mode {
+    "agent-workspace" => "workspace-backed"
+    "exchange-place" => "ledger-backed"
+    "projection-surface" => "projection-backed"
+    "gateway" => "handoff-ledger-backed"
+    "hybrid" => "mixed-memory-backed"
+    _ => "support-backed"
+  }
 }
 
 ///|

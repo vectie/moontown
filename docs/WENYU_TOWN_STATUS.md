@@ -51,10 +51,10 @@ module.
 | Layer | Current Distance | Why |
 |---|---:|---|
 | Visual town shell | Near | The 256 x 144 Wenyu map, drag/zoom, module buildings, interiors, water overlays, and validation are in place |
-| Truthful runtime UI | Medium-near | `visual-projection.json` now has module status, module interiors can read MoonBook UI fragments, and the viewport avoids fake busy state; civic books still need full coverage |
+| Truthful runtime UI | Medium-near | `visual-projection.json` now has module status, module interiors can read MoonBook UI fragments, and the viewport avoids fake busy state; civic protocol support workspaces still need full coverage |
 | Long-running mayor loop | Medium-near | The daemon worker is healthy locally with zero recorded failures in the current runtime file, and standing-watch dispatch is now nonblocking so long MoonClaw runs do not serialize the whole town; install/service hardening and multi-day recovery evidence are still required |
 | Research watchers | Medium-near | The final integration portfolio installs five standing watches: OPC, LLM training, Robotics, Agents, and Hardware. They are visible in the watch portfolio and run through real books/ledgers, but overnight proof still depends on repeated accepted deltas rather than only operational records |
-| Civic modules | Medium | Policy, contest, social, talent, market, bridge, story, education, resident, vitality, and town-shell modules now have generated MoonBook workspaces, schemas, review queues, projections, and skill contracts; accepted service-result histories are still missing |
+| Civic modules | Medium | Policy, contest, social, talent, market, bridge, story, education, resident, vitality, and town-shell modules now have building protocols plus MoonBook support workspaces, schemas, review queues, projections, and skill contracts; accepted protocol-result histories are still missing |
 | Building protocol layer | Medium-near | Buildings have modes, skills, protocol definitions, ledgers, default communication-pattern scenario templates, and recurring schedules; accepted MoonBook persistence and UI protocol history still need repeated live evidence |
 | Runtime architecture | Medium-near | Civic protocol behavior now has a documented refactor path, the communication-pattern scheduler is split away from generic daemon code, daemon scheduled jobs use a dispatcher, and protocol registry/store/status/fixtures are separated; package-level civic runtime splits and stronger contract validation are still pending |
 | Designer/operator tooling | Medium | JSON config works, the standalone viewport has view/editor/output modes, editor mode shows town-level Moondesk handoff lanes, and detailed single-agent/workspace editing remains in Moondesk |
@@ -67,7 +67,9 @@ A fully functioning Wenyu town means:
 
 1. The map is a stable, beautiful, navigable Wenyu Valley surface.
 2. Each civic feature is a configurable building, not hardcoded UI.
-3. Each building has a MoonBook workspace with durable wiki/memory state.
+3. Each building has a clear persistence mode and, when needed, a MoonBook
+   support workspace for durable wiki, ledger, memory, review, or projection
+   state.
 4. Each building also has a protocol envelope for inbox, aggregation,
    exchange, AI-guided reduction, review, and distribution.
 5. MoonClaw workers execute bounded tasks for those workspaces and building
@@ -91,13 +93,13 @@ A fully functioning Wenyu town means:
 | Civic module registry | `wenyu-town-modules.json` can add, remove, move, size, style, and configure feature buildings; runtime validation now catches missing bindings, bad footprints, and bad placement | 70% | Needs standalone schema checks, asset checks, write-back editor, and designer preview |
 | Building protocol registry | Protocol definitions exist for every Wenyu civic building; Social Square has durable inbox/contribution/reduction/outbox/review/home-return proof slices plus effectiveness metrics; the UI can show protocol review pressure | 48% | Need real scenario packets, AI reducers, MoonBook accept/reject persistence, and UI protocol history for every building |
 | Module buildings | 16 configurable white-tech pavilion buildings render above terrain, including 11 civic modules and 5 research-domain homes; entrances bind to the existing map road/urban fabric | 62% | Needs base/roof/shadow/glow split layers and more precise collision/occlusion |
-| Module interiors | Click opens module-specific interior furniture with runtime source, counters, validation state, worker roster slots, MoonBook fragments, and output links when available | 64% | Seeded civic books exist; interiors still need accepted-change history and live service run evidence |
+| Module interiors | Click opens module-specific interior furniture with runtime source, counters, validation state, worker roster slots, MoonBook fragments, and output links when available | 64% | Seeded civic protocol support workspaces exist; interiors still need accepted-change history and live service run evidence |
 | Water effects | Runtime overlay adds depth, reflection, and bridge shadow | 35% | Needs richer segmented river logic and seasonal/weather response |
 | Agents on map | Visual agent projection exists; active module workers route to module entrances and idle/completed workers stay hidden | 60% | Needs Wenyu-specific task projection coverage for every civic module |
 | Operator dashboard | Shows daemon/watch progress, a multi-topic watch portfolio, request composer, portal to canonical viewport, output mode, and Moondesk bridge visibility | 68% | Needs approval queues and richer per-book progress panels |
 | Mayor daemon | Local run/start/doctor/stop, heartbeat, stale detection, standing-goal dispatch, supervisor/worker runtime health, and nonblocking MoonClaw supervision | 68% | Needs multi-day soak evidence, deployment hardening, and recovery playbooks |
 | Standing watchers | Data-driven standing goals and watcher ledgers exist; the final portfolio installs OPC, LLM training, Robotics, Agents, and Hardware watches | 68% | Need stronger accepted-change views and longer evidence that no-change cycles do not inflate progress |
-| MoonBook memory binding | Research books and generated projections work for research lanes; Wenyu civic books can be bootstrapped with canonical schemas, wiki pages, review queues, and `moonbook-ui-state.json` fragments | 62% | MoonBook should eventually own native civic templates upstream instead of relying on Moontown-generated seeds |
+| MoonBook memory binding | Research books and generated projections work for research lanes; Wenyu civic protocol support workspaces can be bootstrapped with canonical schemas, wiki pages when needed, ledgers, review queues, and `moonbook-ui-state.json` fragments | 62% | MoonBook should eventually own native civic templates upstream instead of relying on Moontown-generated seeds |
 | MoonClaw execution binding | Proposal/run boundary and worker execution path exist; every Wenyu civic module now has a role-specific skill pack path and output contract injected into worker context | 56% | Need repeated successful module-specific service executions and stricter result parsing per contract |
 | Real civic services | Moontown can create civic lanes, install recurring protocol schedules, and run building communication patterns | 40% | Policy, contest, social, talent, bridge, market, story, and education modules still need service-specific accepted output histories |
 | Designer workflow | Manual JSON config plus standalone editor mode and handoff/bridge visibility | 48% | Needs write-back import/export, asset manifest checks, richer collision preview, and automatic Moondesk artifact ingestion |
@@ -308,7 +310,7 @@ The following items are visible but not fully real yet:
   workspaces can now be bootstrapped locally. Those books are seeded service
   workspaces, not yet mature books with long accepted service histories.
 - Agent movement is only as complete as the current visual projection; Wenyu
-  civic books still need module-specific task/run fragments.
+  civic protocol support workspaces still need module-specific task/run fragments.
 - The module registry is manually edited JSON; editor mode validates, inspects,
   and displays import contracts but does not yet write config changes back or
   automatically merge Moondesk module packs.

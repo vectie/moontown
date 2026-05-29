@@ -18,9 +18,15 @@ pub async fn bootstrap_civic_salon_scenario_file(String, book_catalog_path? : St
 
 pub async fn bootstrap_moontown_cookbook(book_catalog_path? : String, workspace_root? : String, manifest_path? : String) -> String
 
+pub async fn bootstrap_moontown_planbook(book_catalog_path? : String, workspace_root? : String) -> String
+
+pub async fn bootstrap_registered_book_workspaces(book_catalog_path? : String) -> String
+
 pub async fn bootstrap_wenyu_building_protocols(registry_path? : String, status_path? : String) -> String
 
 pub async fn bootstrap_wenyu_civic_workspaces(book_catalog_path? : String) -> String
+
+pub async fn bootstrap_wenyu_game_design_course_book(book_catalog_path? : String, workspace_root? : String, source_workspace_root? : String) -> String
 
 pub fn build_visual_projection(@core.TownState, tick? : Int) -> VisualProjection
 
@@ -48,6 +54,12 @@ pub async fn daemon_supervise_saved_town(snapshot_path? : String, command? : Str
 
 pub async fn daemon_tick_saved_town(snapshot_path? : String, book_catalog_path? : String) -> String
 
+pub fn default_book_quality_audit_path() -> String
+
+pub fn default_book_quality_review_dir() -> String
+
+pub fn default_book_quality_review_result_dir() -> String
+
 pub fn default_civic_salon_run_ledger_path(String, snapshot_path? : String) -> String
 
 pub fn default_civic_salon_schedule_path(snapshot_path? : String) -> String
@@ -70,9 +82,17 @@ pub fn default_daemon_stop_path(snapshot_path? : String) -> String
 
 pub fn default_daemon_supervisor_pid_path(snapshot_path? : String) -> String
 
+pub fn default_planbook_book_id() -> String
+
+pub fn default_planbook_workspace_root() -> String
+
 pub fn default_visual_projection_path(String) -> String
 
 pub fn default_wenyu_civic_status_path() -> String
+
+pub fn default_wenyu_course_book_id() -> String
+
+pub fn default_wenyu_course_workspace_root() -> String
 
 pub fn default_wenyu_protocol_registry_path() -> String
 
@@ -89,6 +109,8 @@ pub fn demo_state_from_catalog(Array[@moonbook.BookCatalogEntry]) -> @core.TownS
 pub fn demo_state_snapshot() -> String
 
 pub fn[Provider : @core.BookProvider] demo_state_with_provider(Provider) -> @core.TownState
+
+pub async fn inspect_book_quality(book_catalog_path? : String) -> BookQualityAudit
 
 pub async fn inspect_daemon_runtime(snapshot_path? : String, stale_after_ms? : UInt64) -> DaemonRuntimeHealth
 
@@ -118,6 +140,8 @@ pub async fn load_or_create_modeled_demo_state(path? : String, book_catalog_path
 
 pub async fn persist_visual_projection(@core.TownState, String, tick? : Int) -> Unit
 
+pub async fn render_book_quality(book_catalog_path? : String) -> String
+
 pub fn render_civic_communication_patterns() -> String
 
 pub async fn render_civic_salon_schedule_status(snapshot_path? : String) -> String
@@ -125,6 +149,8 @@ pub async fn render_civic_salon_schedule_status(snapshot_path? : String) -> Stri
 pub async fn render_goal_run(String, book_id? : String?, task_limit_per_book? : Int, snapshot_path? : String, book_catalog_path? : String) -> String
 
 pub async fn render_moontown_cookbook_status(workspace_root? : String, manifest_path? : String) -> String
+
+pub async fn render_moontown_planbook_status(workspace_root? : String) -> String
 
 pub async fn render_saved_town_status(snapshot_path? : String) -> String
 
@@ -135,6 +161,8 @@ pub async fn render_wenyu_building_protocol_status(status_path? : String, regist
 pub async fn render_wenyu_civic_status(book_catalog_path? : String) -> String
 
 pub async fn render_wenyu_final_integration_status(manifest_path? : String, snapshot_path? : String, standing_goal_path? : String) -> String
+
+pub async fn render_wenyu_game_design_course_status(workspace_root? : String) -> String
 
 pub async fn run_due_civic_salons(snapshot_path? : String, book_catalog_path? : String, tick? : Int, now_ms? : UInt64, reducer_mode? : CivicSalonReductionMode) -> String
 
@@ -148,6 +176,10 @@ pub async fn supervise_saved_town(snapshot_path? : String, book_catalog_path? : 
 
 pub async fn upsert_civic_salon_schedule_for_scenario(CivicSalonScenario, path? : String, now_ms? : UInt64) -> CivicSalonSchedule
 
+pub async fn write_book_quality_audit(book_catalog_path? : String, audit_path? : String) -> String
+
+pub async fn write_book_quality_review_packets(book_catalog_path? : String, review_dir? : String) -> String
+
 pub async fn write_wenyu_building_protocol_status(status_path? : String, registry_path? : String) -> String
 
 pub async fn write_wenyu_civic_status(book_catalog_path? : String, status_path? : String) -> String
@@ -155,6 +187,46 @@ pub async fn write_wenyu_civic_status(book_catalog_path? : String, status_path? 
 // Errors
 
 // Types and methods
+pub struct BookQualityAudit {
+  generated_at : String
+  catalog_path : String
+  total : Int
+  world_class_count : Int
+  ready_count : Int
+  weakest_book_id : String
+  weakest_score : Int
+  scores : Array[BookQualityScore]
+} derive(Eq, ToJson, @json.FromJson)
+
+pub struct BookQualityReviewPacket {
+  book_id : String
+  book_type : String
+  workspace_root : String
+  structural_score : Int
+  review_skill_path : String
+  context_pages : Array[String]
+  prompt : String
+  output_contract : String
+} derive(Eq, ToJson, @json.FromJson)
+
+pub struct BookQualityScore {
+  book_id : String
+  title : String
+  book_type : String
+  workspace_root : String
+  structural_score : Int
+  structural_grade : String
+  semantic_score : Int?
+  semantic_grade : String
+  quality_status : String
+  score : Int
+  grade : String
+  ready : Bool
+  strengths : Array[String]
+  gaps : Array[String]
+  next_action : String
+} derive(Eq, ToJson, @json.FromJson)
+
 pub struct CivicCommunicationPattern {
   id : String
   title : String
