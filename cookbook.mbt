@@ -244,6 +244,14 @@ async fn cookbook_artifacts() -> Array[CookbookArtifact] {
       ".moontown/daemon-runtime.json", "runtime-state", "moontown", "daemon supervisor and worker process state",
       false,
     ),
+    cookbook_artifact(
+      ".moontown/live-autonomy.json", "runtime-state", "moontown", "current live autonomy spine for UI/operator decisions",
+      false,
+    ),
+    cookbook_artifact(
+      ".moontown/town-journal.jsonl", "runtime-state", "moontown", "append-only town journal for daemon ticks and live-state transitions",
+      false,
+    ),
   ]
 }
 
@@ -283,6 +291,10 @@ async fn write_cookbook_workspace(
   write_text_file(
     "\{root}/wiki/definitions/runtime-boundaries.md",
     cookbook_runtime_boundaries_markdown(),
+  )
+  write_text_file(
+    "\{root}/wiki/definitions/live-autonomy-spine.md",
+    cookbook_live_autonomy_spine_markdown(),
   )
   write_text_file(
     "\{root}/wiki/history/stable-state-ledger.md",
@@ -342,6 +354,7 @@ fn cookbook_index_markdown(
     "- `wiki/definitions/ownership.md`",
     "- `wiki/definitions/book-types.md`",
     "- `wiki/definitions/runtime-boundaries.md`",
+    "- `wiki/definitions/live-autonomy-spine.md`",
     "- `wiki/operating-procedures/doctor.md`",
     "- `wiki/operating-procedures/book-governance.md`",
     "- `raw/bootstrap/COOKBOOK_CONTRACT.md`",
@@ -386,7 +399,7 @@ fn cookbook_book_types_markdown() -> String {
     "", "| Type | Managed By | Intended Output | Not Allowed To Become |", "| --- | --- | --- | --- |",
     "| Research book | MoonBook + MoonClaw researcher | source-backed reports, evidence matrix, findings, standing watch | generic task log |",
     "| Course book | MoonBook course profile | lessons, exercises, checkpoints, learner artifacts | research report |",
-    "| Civic service book | MoonBook service profile | schemas, ledgers, review queues, service results, projection-safe state | static UI card or generic report |",
+    "| Civic protocol support workspace | MoonBook support profile | schemas when needed, ledgers, review queues, service results, projection-safe state | static UI card, generic report, or the civic place itself |",
     "| Planbook | MoonBook planning profile | implementation plans, acceptance gates, execution evidence, review notes | chat transcript or vague roadmap |",
     "| Cookbook | MoonBook stable-state profile | definitions, operating procedures, runtime boundaries, manifest | source of live daemon authority |",
     "| Operational book | MoonBook keeper profile | private operating memory and review rules | public projection or domain evidence store |",
@@ -400,6 +413,20 @@ fn cookbook_runtime_boundaries_markdown() -> String {
     "", "## MoonBook", "", "MoonBook owns each durable workspace: wiki pages, schemas, skills, review queues, generated site projections, and book-local memory rules.",
     "", "## MoonClaw", "", "MoonClaw executes bounded work and returns results, memory candidates, artifacts, blockers, and review requests. It should not own long-term book state.",
     "", "## Moondesk", "", "Moondesk is the human desktop surface for browsing, editing, exporting, and curating MoonBook-controlled workspaces. It should not become the daemon or worker executor.",
+  ].join("\n")
+}
+
+///|
+fn cookbook_live_autonomy_spine_markdown() -> String {
+  [
+    "# Live Autonomy Spine", "", "The live autonomy spine is the current control-plane contract that makes the town feel alive instead of merely configured.",
+    "", "## Runtime Artifacts", "", "- `.moontown/live-autonomy.json`: current status, accepted updates, no-change cycles, blocked work, due goals, visual projection path, and next actions.",
+    "- `.moontown/town-journal.jsonl`: append-only journal of live spine refreshes and daemon ticks.",
+    "- `.moontown/visual-projection.json`: task-to-agent and task-to-building visual projection consumed by the town UI.",
+    "", "## Lifecycle", "", "```text", "Mayor daemon tick", "-> standing goals and civic schedules",
+    "-> MoonClaw/MoonBook work", "-> accepted/no-change/review/blocked accounting",
+    "-> visual projection", "-> live autonomy spine", "-> town journal", "-> operator UI",
+    "```", "", "## Rule", "", "The spine reports activity; it does not create domain truth. Accepted domain or civic records still belong in MoonBook and must pass the relevant review gates.",
   ].join("\n")
 }
 

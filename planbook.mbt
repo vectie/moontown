@@ -29,10 +29,11 @@ pub async fn render_moontown_planbook_status(
 ) -> String {
   let checks = [
     "wiki/index.md", "raw/bootstrap/PLANBOOK_CONTRACT.md", "plans/2026-05-29-book-quality-upgrade/plan.md",
-    "plans/index.md", "wiki/planning/quality-gates.md", "wiki/planning/execution-evidence.md",
-    "wiki/reviews/active-plan-review.md", "wiki/history/decision-log.md", "schemas/plan-record.schema.md",
-    "skills/code-plan/SKILL.md", "skills/code-review/SKILL.md", "skills/doc-sync/SKILL.md",
-    "book/moonbook-ui-state.json", "book/site/generated/index.html",
+    "plans/2026-05-29-live-autonomy-spine/plan.md", "plans/index.md", "wiki/planning/quality-gates.md",
+    "wiki/planning/execution-evidence.md", "wiki/reviews/active-plan-review.md",
+    "wiki/history/decision-log.md", "schemas/plan-record.schema.md", "skills/code-plan/SKILL.md",
+    "skills/code-review/SKILL.md", "skills/doc-sync/SKILL.md", "book/moonbook-ui-state.json",
+    "book/site/generated/index.html",
   ]
   let missing : Array[String] = []
   for path in checks {
@@ -100,6 +101,10 @@ async fn write_planbook_workspace(entry : @moonbook.BookCatalogEntry) -> Unit {
     "\{root}/plans/2026-05-29-book-quality-upgrade/plan.md",
     planbook_seed_plan_markdown(),
   )
+  write_text_file(
+    "\{root}/plans/2026-05-29-live-autonomy-spine/plan.md",
+    planbook_live_autonomy_plan_markdown(),
+  )
   write_text_file("\{root}/plans/index.md", planbook_plans_index_markdown())
   write_text_file(
     "\{root}/wiki/planning/quality-gates.md",
@@ -166,6 +171,7 @@ fn planbook_index_markdown(entry : @moonbook.BookCatalogEntry) -> String {
     "",
     "- `raw/bootstrap/PLANBOOK_CONTRACT.md`",
     "- `plans/index.md`",
+    "- `plans/2026-05-29-live-autonomy-spine/plan.md`",
     "- `plans/2026-05-29-book-quality-upgrade/plan.md`",
     "- `wiki/planning/quality-gates.md`",
     "- `wiki/planning/execution-evidence.md`",
@@ -208,8 +214,34 @@ fn planbook_seed_plan_markdown() -> String {
 fn planbook_plans_index_markdown() -> String {
   [
     "# Plans Index", "", "| Plan | Status | Owner | Stable-State Impact |", "| --- | --- | --- | --- |",
+    "| `2026-05-29-live-autonomy-spine/plan.md` | top-priority | Moontown Mayor + MoonBook + MoonClaw | connects daemon, workers, accepted outputs, journal, projection, and operator UI |",
     "| `2026-05-29-book-quality-upgrade/plan.md` | active-review | Moontown + MoonBook | separates structural readiness from semantic quality and formalizes planbook/cookbook/course/civic workspaces |",
     "", "Planbook rule: update the existing plan and evidence pages instead of creating noisy `v1`, `v2`, `v3` copies.",
+  ].join("\n")
+}
+
+///|
+fn planbook_live_autonomy_plan_markdown() -> String {
+  [
+    "# Plan: Live Autonomy Spine", "", "## Priority", "", "Top priority. The town already has daemon, watchers, MoonBook workspaces, MoonClaw execution, civic protocols, and UI projection. The missing work is the connective spine that makes those components behave as one live autonomous town.",
+    "", "## Problem", "", "Runtime state is spread across daemon files, watcher ledgers, MoonBook outputs, civic protocol ledgers, and visual projections. The UI can show pieces, but there is no single accepted lifecycle artifact that says what is working, what changed, what is only no-change activity, what needs review, and what the Mayor should do next.",
+    "", "## Goal", "", "- Maintain `.moontown/live-autonomy.json` as the current town spine.",
+    "- Append `.moontown/town-journal.jsonl` on each daemon tick or manual refresh.",
+    "- Refresh `visual-projection.json` from real task/worker/protocol state during daemon ticks.",
+    "- Classify town activity into working, watching, reviewing, or needs-recovery.",
+    "- Separate accepted updates, no-change cycles, failed cycles, and review-gated outputs.",
+    "- Make cookbook treat the live spine and journal as stable runtime artifacts.",
+    "", "## Ownership", "", "- Moontown Mayor owns the spine, scheduling, retry, projection, and journal.",
+    "- MoonBook owns accepted durable records and support workspaces.", "- MoonClaw owns worker execution and structured result packets.",
+    "- Moondesk later owns human browsing/editing of the cookbook and workspace files.",
+    "", "## Acceptance Criteria", "", "- [x] `moon run cmd/main -- live refresh` writes `.moontown/live-autonomy.json`.",
+    "- [x] `moon run cmd/main -- live status` renders the current spine.", "- [x] Daemon tick refreshes `visual-projection.json` and live autonomy state.",
+    "- [x] The spine records active workers, reviews, blocked work, accepted updates, no-change cycles, due goals, and next actions.",
+    "- [x] Cookbook tracks the live spine and journal as runtime-state artifacts.",
+    "- [ ] UI consumes the live spine directly for the operator message panel.",
+    "- [ ] Every MoonClaw result writes a strict accepted/no-change/review/blocked contract before projection.",
+    "", "## Validation", "", "- `moon run cmd/main -- live refresh`", "- `moon run cmd/main -- live status`",
+    "- `moon run cmd/main -- daemon run --once`", "- `moon check --no-render`", "- `moon test`",
   ].join("\n")
 }
 
@@ -333,11 +365,12 @@ fn planbook_ui_state_json(entry : @moonbook.BookCatalogEntry) -> String {
     "    {\"label\":\"cookbook handoff\",\"tone\":\"info\"}",
     "  ],",
     "  \"metrics\": [",
-    "    {\"label\":\"Seed plans\",\"value\":\"1\",\"note\":\"quality upgrade plan\",\"tone\":\"healthy\"},",
+    "    {\"label\":\"Seed plans\",\"value\":\"2\",\"note\":\"quality governance and live autonomy spine\",\"tone\":\"healthy\"},",
     "    {\"label\":\"Skills\",\"value\":\"3\",\"note\":\"plan, review, doc sync\",\"tone\":\"healthy\"}",
     "  ],",
     "  \"readiness\": [",
     "    {\"title\":\"Planbook contract\",\"detail\":\"raw/bootstrap/PLANBOOK_CONTRACT.md\",\"meta\":\"Ready\"},",
+    "    {\"title\":\"Top priority live spine\",\"detail\":\"plans/2026-05-29-live-autonomy-spine/plan.md\",\"meta\":\"Top Priority\"},",
     "    {\"title\":\"Quality plan\",\"detail\":\"plans/2026-05-29-book-quality-upgrade/plan.md\",\"meta\":\"Ready\"}",
     "  ],",
     "  \"review_queue\": [",

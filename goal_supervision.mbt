@@ -113,6 +113,13 @@ async fn run_supervision_cycle(
   standing_goals? : Array[@core.StandingGoal] = [],
 ) -> Unit {
   reconcile_live_executions(state, catalog, snapshot_path, standing_goals)
+  reconcile_review_queued_standing_watch_outputs(
+    state, catalog, snapshot_path, standing_goals,
+  )
+  reconcile_failed_standing_watch_outputs(
+    state, catalog, snapshot_path, standing_goals,
+  )
+  reconcile_persisted_non_review_outputs(state, snapshot_path)
   release_orphaned_blocked_workers(state)
   let packet = mayor.supervise(state, supervision_tick(state))
   if packet.directives.is_empty() {
@@ -138,6 +145,76 @@ async fn run_supervision_cycle(
       state, mayor, catalog, directive, snapshot_path, standing_goals,
     )
   }
+}
+
+///|
+async fn reconcile_persisted_non_review_outputs(
+  state : @core.TownState,
+  snapshot_path : String,
+) -> Unit {
+  let snapshot = state.executions.copy()
+  for execution in snapshot {
+    if execution.status != @core.TaskExecutionStatus::ReviewQueued {
+      continue
+    }
+    match persisted_non_review_book_result(snapshot_path, execution.task_id) {
+      Some(result) => {
+        let completed = copy_execution_with(
+          execution,
+          status=@core.TaskExecutionStatus::Completed,
+          summary="\{execution.summary}\nkeeper_auto_triage: persisted_non_review_result\npersisted_result_summary: \{result.summary}",
+          heartbeat_tick=supervision_tick(state),
+          next_retry_tick=None,
+        )
+        state.replace_execution(completed)
+        state.replace_task(task_for_supervision(state, completed))
+        sync_worker_from_execution(state, completed)
+        state.record_event(
+          @core.TownEvent::new(
+            id="event-persisted-non-review-\{state.events.length()}-\{completed.task_id}",
+            kind="review",
+            detail="Mayor closed review queue for `\{completed.task_id}` because MoonBook already persisted a non-review result.",
+            related_task_id=Some(completed.task_id),
+            related_book_id=Some(completed.book_id),
+            related_run_id=completed.run_id,
+          ),
+        )
+      }
+      None => ()
+    }
+  }
+}
+
+///|
+async fn persisted_non_review_book_result(
+  snapshot_path : String,
+  task_id : String,
+) -> @moonbook.BookResult? {
+  let path = book_result_path_for_snapshot(snapshot_path, task_id)
+  if !@fs.exists(path) {
+    return None
+  }
+  let parsed = @json.parse(@fs.read_file(path).text()) catch {
+    _ => return None
+  }
+  let result : @moonbook.BookResult = @json.from_json(parsed) catch {
+    _ => return None
+  }
+  if result.requires_review {
+    None
+  } else {
+    Some(result)
+  }
+}
+
+///|
+fn book_result_path_for_snapshot(
+  snapshot_path : String,
+  task_id : String,
+) -> String {
+  let base = @path.Path::dirname(snapshot_path).to_string()
+  let root = if base == "." || base == "" { ".moontown" } else { base }
+  "\{root}/book-results/\{task_id}.json"
 }
 
 ///|
@@ -286,12 +363,8 @@ async fn reconcile_live_executions(
           status=polled.status,
           summary=polled.summary,
           heartbeat_tick=tick,
-          stale_after_tick=tick + 3,
+          stale_after_tick=tick + polled_execution_stale_window_ticks(execution),
         )
-        if execution.status is @core.TaskExecutionStatus::Stale &&
-          !terminal_execution_status(polled.status) {
-          continue
-        }
         state.replace_execution(updated)
         state.replace_task(task_for_supervision(state, updated))
         sync_worker_from_execution(state, updated)
@@ -334,6 +407,16 @@ fn live_execution_status(status : @core.TaskExecutionStatus) -> Bool {
     @core.TaskExecutionStatus::RunConfirmed => true
     @core.TaskExecutionStatus::Running => true
     _ => false
+  }
+}
+
+///|
+fn polled_execution_stale_window_ticks(
+  execution : @core.TaskExecutionRecord,
+) -> Int {
+  match execution.run_id {
+    Some(_) => 30
+    None => 3
   }
 }
 

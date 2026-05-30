@@ -23,7 +23,7 @@ async test "cookbook bootstrap writes manifest and MoonBook workspace" {
   assert_true(status.ready)
   assert_eq(status.docs_count, 8)
   assert_eq(status.definition_count, 4)
-  assert_eq(status.runtime_state_count, 4)
+  assert_eq(status.runtime_state_count, 6)
 }
 
 ///|
@@ -48,4 +48,5 @@ async test "cookbook status reports stable state control book" {
   assert_true(markdown.contains("moontown-cookbook"))
   assert_true(markdown.contains("Docs tracked: `8`"))
   assert_true(markdown.contains("Definitions tracked: `4`"))
+  assert_true(markdown.contains("Runtime states tracked: `6`"))
 }

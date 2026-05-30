@@ -7,6 +7,8 @@ async fn main {
       println(@moontown.render_goal_run(goal, book_id=Some(book_id)))
     ["supervise"] => println(@moontown.supervise_saved_town())
     ["status"] => println(@moontown.render_saved_town_status())
+    ["live", "status"] => println(@moontown.render_live_autonomy_status())
+    ["live", "refresh"] => println(@moontown.refresh_live_autonomy_spine())
     ["daemon", "tick"] => println(@moontown.daemon_tick_saved_town())
     ["daemon", "start"] => println(@moontown.daemon_start_saved_town())
     ["daemon", "stop"] => println(@moontown.daemon_stop_saved_town())

@@ -218,6 +218,10 @@ pub async fn daemon_tick_saved_town(
     book_catalog_path,
     next_tick_sequence,
   )
+  let watcher_records = load_watcher_records_for_goals(
+    snapshot_path, updated_goals,
+  )
+  persist_visual_projection(state, snapshot_path)
   persist_town_checkpoint(state, snapshot_path)
   let report = @health.inspect_town(state)
   let (next_daemon, tick, _) = @scheduler.plan_daemon_tick(
@@ -234,6 +238,17 @@ pub async fn daemon_tick_saved_town(
       detail=tick.summary,
     ),
   )
+  ignore(
+    write_live_autonomy_spine(
+      state,
+      snapshot_path~,
+      standing_goals=updated_goals,
+      watcher_records~,
+      tick_summary=tick.summary,
+      daemon_tick=Some(tick.sequence),
+    ),
+  )
+  persist_visual_projection(state, snapshot_path)
   persist_town_checkpoint(state, snapshot_path)
   render_saved_town_status(snapshot_path~)
 }
@@ -291,7 +306,12 @@ fn watcher_status_summary(records : Array[@core.WatcherRunRecord]) -> String {
   if records.is_empty() {
     return "latest=none"
   }
-  let latest = records[records.length() - 1]
+  let mut latest = records[0]
+  for record in records {
+    if record.tick >= latest.tick {
+      latest = record
+    }
+  }
   "latest=\{latest.goal_id}/\{latest.decision.to_string()} next_due_tick=\{latest.next_due_tick}"
 }
 
@@ -326,13 +346,10 @@ pub async fn daemon_run_saved_town(
       break
     }
     mark_daemon_tick_started(snapshot_path, worker_run_id)
-    let mut ok = true
-    latest = daemon_tick_saved_town(snapshot_path~, book_catalog_path~) catch {
-      error => {
-        ok = false
-        "daemon tick failed: \{error}"
-      }
-    }
+    let (ok, tick_summary) = run_daemon_tick_with_heartbeat(
+      snapshot_path, book_catalog_path,
+    )
+    latest = tick_summary
     mark_daemon_tick_finished(snapshot_path, ok, latest)
     append_daemon_log(
       log_path,
@@ -356,6 +373,34 @@ pub async fn daemon_run_saved_town(
     append_daemon_log(log_path, "worker completed bounded run=\{worker_run_id}")
   }
   "Moontown daemon run completed ticks=\{ticks}\n\{latest}"
+}
+
+///|
+async fn run_daemon_tick_with_heartbeat(
+  snapshot_path : String,
+  book_catalog_path : String,
+) -> (Bool, String) {
+  @async.with_task_group(group => {
+    let mut done = false
+    let heartbeat = group.spawn(() => {
+      while !done {
+        @async.sleep(10_000)
+        if !done {
+          touch_daemon_heartbeat(snapshot_path, status="ticking")
+        }
+      }
+    })
+    let mut ok = true
+    let summary = daemon_tick_saved_town(snapshot_path~, book_catalog_path~) catch {
+      error => {
+        ok = false
+        "daemon tick failed: \{error}"
+      }
+    }
+    done = true
+    heartbeat.wait()
+    (ok, summary)
+  })
 }
 
 ///|

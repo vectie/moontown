@@ -119,6 +119,21 @@ async function refreshDaemonSnapshot() {
   }
 }
 
+async function refreshLiveAutonomy() {
+  try {
+    const response = await fetch(`./live-autonomy.json?ts=${Date.now()}`, { cache: 'no-store' })
+    if (response.ok) {
+      globalThis.__moontownLiveAutonomyJson = await response.text()
+      globalThis.__moontownLiveAutonomyVersion =
+        (globalThis.__moontownLiveAutonomyVersion || 0) + 1
+    } else {
+      globalThis.__moontownLiveAutonomyJson = ''
+    }
+  } catch {
+    globalThis.__moontownLiveAutonomyJson = ''
+  }
+}
+
 async function refreshStandingGoals() {
   try {
     const response = await fetch(`./standing-goals.json?ts=${Date.now()}`, { cache: 'no-store' })
@@ -202,6 +217,7 @@ async function refreshRuntimeSnapshots() {
     refreshCivicStatus(),
     refreshMoondeskHandoff(),
     refreshDaemonSnapshot(),
+    refreshLiveAutonomy(),
     refreshStandingGoals(),
     refreshWatcherRecords(),
     refreshOperatorRequests(),

@@ -303,9 +303,7 @@ async fn daemon_pid_alive(pid : Int) -> Bool {
   if pid <= 0 {
     return false
   }
-  let code = @process.run("sh", ["-c", "kill -0 \{pid} 2>/dev/null"]) catch {
-    _ => return false
-  }
+  let code = @process.run("kill", ["-0", "\{pid}"]) catch { _ => return false }
   code == 0
 }
 
@@ -334,10 +332,48 @@ async fn kill_daemon_pid(pid : Int) -> Bool {
   if pid <= 0 {
     return false
   }
-  let code = @process.run("sh", ["-c", "kill -TERM \{pid} 2>/dev/null"]) catch {
+  let code = @process.run("kill", ["-TERM", "\{pid}"]) catch {
     _ => return false
   }
   code == 0
+}
+
+///|
+async fn kill_daemon_pid_force(pid : Int) -> Bool {
+  if pid <= 0 {
+    return false
+  }
+  if !kill_daemon_pid(pid) {
+    return false
+  }
+  @async.sleep(300)
+  if !daemon_pid_alive(pid) {
+    return true
+  }
+  let code = @process.run("kill", ["-KILL", "\{pid}"]) catch {
+    _ => return false
+  }
+  @async.sleep(100)
+  code == 0 && !daemon_pid_alive(pid)
+}
+
+///|
+async fn cleanup_stale_daemon_runtime(
+  snapshot_path : String,
+  health : DaemonRuntimeHealth,
+  reason : String,
+) -> Unit {
+  if health.worker_alive {
+    ignore(kill_daemon_pid_force(health.worker_pid))
+  }
+  if health.supervisor_alive {
+    ignore(kill_daemon_pid_force(health.supervisor_pid))
+  }
+  mark_daemon_stopped(snapshot_path, reason)
+  append_daemon_log(
+    default_daemon_log_path(snapshot_path~),
+    "cleaned stale daemon runtime reason=\{reason} worker_pid=\{health.worker_pid} supervisor_pid=\{health.supervisor_pid}",
+  )
 }
 
 ///|
@@ -492,6 +528,25 @@ async fn mark_daemon_tick_started(
     last_heartbeat_ms: now,
     last_tick_started_ms: now,
     stop_requested: false,
+    log_path,
+  })
+}
+
+///|
+async fn touch_daemon_heartbeat(
+  snapshot_path : String,
+  status? : String = "ticking",
+) -> Unit {
+  let runtime_path = default_daemon_runtime_path(snapshot_path~)
+  let log_path = default_daemon_log_path(snapshot_path~)
+  let now = @env.now()
+  let previous = load_daemon_runtime_state(runtime_path).unwrap_or(
+    DaemonRuntimeState::new(log_path~),
+  )
+  save_daemon_runtime_state(runtime_path, {
+    ..previous,
+    status,
+    last_heartbeat_ms: now,
     log_path,
   })
 }
@@ -756,6 +811,11 @@ pub async fn daemon_start_saved_town(
   if daemon_runtime_start_already_active(health) {
     return "Moontown daemon already active\n\{daemon_runtime_health_summary(health)}"
   }
+  if health.stale || health.stop_requested {
+    cleanup_stale_daemon_runtime(
+      snapshot_path, health, "start cleaned stale or stopping runtime",
+    )
+  }
   clear_daemon_stop_request(snapshot_path)
   if daemon_launchd_preferred() && daemon_launchd_available() {
     append_daemon_log(
@@ -922,8 +982,8 @@ pub async fn daemon_stop_saved_town(
   let launchd_stopped = stop_daemon_with_launchd()
   write_daemon_stop_request(snapshot_path)
   let health = inspect_daemon_runtime(snapshot_path~)
-  let worker_killed = kill_daemon_pid(health.worker_pid)
-  let supervisor_killed = kill_daemon_pid(health.supervisor_pid)
+  let worker_killed = kill_daemon_pid_force(health.worker_pid)
+  let supervisor_killed = kill_daemon_pid_force(health.supervisor_pid)
   mark_daemon_stopped(snapshot_path, "stop requested")
   append_daemon_log(
     default_daemon_log_path(snapshot_path~),

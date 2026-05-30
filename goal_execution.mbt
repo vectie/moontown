@@ -479,7 +479,7 @@ async fn execute_goal_book_task(
     assigned_worker_id~,
     attempt=1,
     heartbeat_tick=tick,
-    stale_after_tick=tick + 3,
+    stale_after_tick=tick + external_execution_stale_window_ticks(),
     next_retry_tick=None,
     requires_review=execution
       .map(fn(result) { result.0.requires_review })
@@ -525,7 +525,7 @@ fn local_wenyu_build_execution_record(
     assigned_worker_id~,
     attempt=1,
     heartbeat_tick=tick,
-    stale_after_tick=tick + 3,
+    stale_after_tick=tick + local_execution_stale_window_ticks(),
     next_retry_tick=None,
     requires_review=task.requires_review || task.kind == "code-patch",
     notify_town=true,
@@ -541,6 +541,16 @@ fn moontown_moonclaw_inline_enabled() -> Bool {
     }
     None => false
   }
+}
+
+///|
+fn external_execution_stale_window_ticks() -> Int {
+  30
+}
+
+///|
+fn local_execution_stale_window_ticks() -> Int {
+  3
 }
 
 ///|

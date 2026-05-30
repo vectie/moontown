@@ -85,3 +85,43 @@ test "standing watch no-eligible collision is superseded by neighboring active r
   )
   assert_eq(report.book_health[0].level, HealthLevel::Healthy)
 }
+
+///|
+test "standing watch stale execution is superseded by active retry" {
+  let state = @core.empty_state(
+    @core.TownConfig::new(id="test-town", name="Test Town"),
+  )
+  state.register_book(
+    @core.BookRef::new(
+      id="research-agents",
+      name="Research Agents",
+      purpose="Watch agent systems",
+      workspace_root="/tmp/research-agents",
+    ),
+  )
+  state.register_execution(
+    @core.TaskExecutionRecord::new(
+      task_id="standing-watch-ai-agents-tick-12994",
+      book_id="research-agents",
+      packet_id="packet-12994-a",
+      packet_path="packet-12994-a.json",
+      status=@core.TaskExecutionStatus::Stale,
+      summary="missed heartbeat before retry",
+      output_contract="standing-watch",
+    ),
+  )
+  state.register_execution(
+    @core.TaskExecutionRecord::new(
+      task_id="standing-watch-ai-agents-tick-12995",
+      book_id="research-agents",
+      packet_id="packet-12995-b",
+      packet_path="packet-12995-b.json",
+      status=@core.TaskExecutionStatus::RunConfirmed,
+      summary="retry is active",
+      output_contract="standing-watch",
+    ),
+  )
+  let report = inspect_town(state)
+  assert_true(report.anomalies.is_empty())
+  assert_eq(report.book_health[0].level, HealthLevel::Healthy)
+}

@@ -73,10 +73,7 @@ async fn persisted_civic_salon_reduction(
     scenario.building_book_id,
     workspace_base,
   )
-  match
-    load_civic_salon_ideas_file(
-      civic_salon_reducer_output_path(scenario, workspace_base),
-    ) {
+  match load_persisted_civic_salon_reducer_output(scenario, workspace_base) {
     Some(loaded) => {
       let ideas = validated_civic_salon_ideas(scenario, loaded)
       CivicSalonReductionResult::{
@@ -177,6 +174,18 @@ async fn moonclaw_civic_salon_reduction(
       workspace_root: root,
       reducer_kind: "moonclaw",
     }
+  } else if civic_salon_reduction_status_live(status) {
+    {
+      ideas: [],
+      status,
+      summary: "MoonClaw reducer is still active for `\{scenario.id}`. status=\{status}; \{worker_summary}",
+      packet_id: Some(packet_id),
+      packet_path: Some(packet_path),
+      proposal_id: Some(imported.proposal_id),
+      run_id: imported.run_id,
+      workspace_root: root,
+      reducer_kind: "moonclaw",
+    }
   } else {
     failed_civic_salon_reduction(
       root,
@@ -187,6 +196,16 @@ async fn moonclaw_civic_salon_reduction(
       run_id=imported.run_id,
     )
   }
+}
+
+///|
+fn civic_salon_reduction_status_live(
+  status : @core.TaskExecutionStatus,
+) -> Bool {
+  status is @core.TaskExecutionStatus::ProposalImported ||
+  status is @core.TaskExecutionStatus::RunConfirmed ||
+  status is @core.TaskExecutionStatus::Running ||
+  status is @core.TaskExecutionStatus::AwaitingPersistence
 }
 
 ///|
@@ -472,14 +491,7 @@ async fn load_civic_salon_reducer_output_after_run(
   root : String,
   run_id : String?,
 ) -> Array[CivicSalonIdea] {
-  match
-    load_civic_salon_ideas_file(
-      civic_salon_reducer_output_path(scenario, workspace_base),
-    ) {
-    Some(ideas) => return validated_civic_salon_ideas(scenario, ideas)
-    None => ()
-  }
-  match run_id {
+  let run_ideas = match run_id {
     Some(run_id) =>
       match @moonclaw.run_workspace_dir(run_id, cwd=root) {
         Some(workspace_dir) =>
@@ -502,6 +514,30 @@ async fn load_civic_salon_reducer_output_after_run(
       }
     None => []
   }
+  if run_ideas.length() > 0 {
+    return run_ideas
+  }
+  match load_persisted_civic_salon_reducer_output(scenario, workspace_base) {
+    Some(ideas) => validated_civic_salon_ideas(scenario, ideas)
+    None => []
+  }
+}
+
+///|
+async fn load_persisted_civic_salon_reducer_output(
+  scenario : CivicSalonScenario,
+  workspace_base : String,
+) -> Array[CivicSalonIdea]? {
+  match
+    load_civic_salon_ideas_file(
+      civic_salon_scenario_output_path(scenario, workspace_base),
+    ) {
+    Some(ideas) => return Some(ideas)
+    None => ()
+  }
+  load_civic_salon_ideas_file(
+    civic_salon_reducer_output_path(scenario, workspace_base),
+  )
 }
 
 ///|
@@ -576,9 +612,17 @@ async fn persist_civic_salon_reducer_output(
     Json::object({ "ideas": ideas.to_json() }).stringify(indent=2),
   )
   write_text_file(
-    "\{civic_salon_workspace_root(scenario.building_book_id, workspace_base)}/raw/bootstrap/\{scenario.id}-ideas.json",
+    civic_salon_scenario_output_path(scenario, workspace_base),
     Json::object({ "ideas": ideas.to_json() }).stringify(indent=2),
   )
+}
+
+///|
+fn civic_salon_scenario_output_path(
+  scenario : CivicSalonScenario,
+  workspace_base : String,
+) -> String {
+  "\{civic_salon_workspace_root(scenario.building_book_id, workspace_base)}/raw/bootstrap/\{scenario.id}-ideas.json"
 }
 
 ///|

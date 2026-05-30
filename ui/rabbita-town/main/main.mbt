@@ -70,6 +70,8 @@ priv struct Model {
   moondesk_bridge_version : Int
   daemon_snapshot : DaemonSnapshot?
   daemon_snapshot_version : Int
+  live_autonomy : LiveAutonomySnapshot?
+  live_autonomy_version : Int
   standing_goals : Array[StandingGoalSnapshot]
   standing_goals_version : Int
   watcher_records : Array[WatcherRunRecordSnapshot]
@@ -285,6 +287,27 @@ priv struct DaemonSnapshot {
   last_heartbeat_event_count : Int
   active_goal_ids : Array[String]
   jobs : Array[DaemonJobSnapshot]
+} derive(FromJson)
+
+///|
+priv struct LiveAutonomySnapshot {
+  generated_at_ms : String
+  tick : Int
+  status : String
+  summary : String
+  active_worker_count : Int
+  review_count : Int
+  blocked_count : Int
+  accepted_update_count : Int
+  no_change_count : Int
+  failed_count : Int
+  due_goal_count : Int
+  standing_goal_count : Int
+  latest_watcher_summary : String
+  visual_projection_path : String
+  journal_path : String
+  digest_path : String
+  next_actions : Array[String]
 } derive(FromJson)
 
 ///|
@@ -587,6 +610,14 @@ extern "js" fn daemon_snapshot_version() -> Int =
   #| () => globalThis.__moontownDaemonSnapshotVersion || 0
 
 ///|
+extern "js" fn load_bootstrap_live_autonomy_json() -> String =
+  #| () => globalThis.__moontownLiveAutonomyJson || ""
+
+///|
+extern "js" fn live_autonomy_version() -> Int =
+  #| () => globalThis.__moontownLiveAutonomyVersion || 0
+
+///|
 extern "js" fn load_bootstrap_standing_goals_json() -> String =
   #| () => globalThis.__moontownStandingGoalsJson || "[]"
 
@@ -733,6 +764,7 @@ fn init_model() -> Model {
   let moondesk_handoff_artifacts = parse_bootstrap_moondesk_handoff_artifacts()
   let moondesk_bridge = parse_bootstrap_moondesk_bridge()
   let daemon_snapshot = parse_bootstrap_daemon_snapshot()
+  let live_autonomy = parse_bootstrap_live_autonomy()
   let standing_goals = parse_bootstrap_standing_goals()
   let watcher_records = parse_bootstrap_watcher_records()
   let operator_requests = parse_bootstrap_operator_requests()
@@ -757,6 +789,8 @@ fn init_model() -> Model {
     moondesk_bridge_version: moondesk_bridge_version(),
     daemon_snapshot,
     daemon_snapshot_version: daemon_snapshot_version(),
+    live_autonomy,
+    live_autonomy_version: live_autonomy_version(),
     standing_goals,
     standing_goals_version: standing_goals_version(),
     watcher_records,
@@ -850,6 +884,16 @@ fn parse_bootstrap_moondesk_bridge() -> MoondeskBridgeIndex? {
 ///|
 fn parse_bootstrap_daemon_snapshot() -> DaemonSnapshot? {
   let text = load_bootstrap_daemon_snapshot_json()
+  if text == "" {
+    return None
+  }
+  let parsed = @json.parse(text) catch { _ => return None }
+  Some(@json.from_json(parsed) catch { _ => return None })
+}
+
+///|
+fn parse_bootstrap_live_autonomy() -> LiveAutonomySnapshot? {
+  let text = load_bootstrap_live_autonomy_json()
   if text == "" {
     return None
   }
@@ -1268,6 +1312,16 @@ fn advance_model(model : Model) -> Model {
   } else {
     model.daemon_snapshot
   }
+  let refreshed_live_autonomy_version = live_autonomy_version()
+  let refreshed_live_autonomy = if refreshed_live_autonomy_version !=
+    model.live_autonomy_version {
+    match parse_bootstrap_live_autonomy() {
+      Some(snapshot) => Some(snapshot)
+      None => model.live_autonomy
+    }
+  } else {
+    model.live_autonomy
+  }
   let refreshed_standing_goals_version = standing_goals_version()
   let refreshed_standing_goals = if refreshed_standing_goals_version !=
     model.standing_goals_version {
@@ -1376,6 +1430,8 @@ fn advance_model(model : Model) -> Model {
     moondesk_bridge_version: refreshed_moondesk_bridge_version,
     daemon_snapshot: refreshed_daemon_snapshot,
     daemon_snapshot_version: refreshed_daemon_version,
+    live_autonomy: refreshed_live_autonomy,
+    live_autonomy_version: refreshed_live_autonomy_version,
     standing_goals: refreshed_standing_goals,
     standing_goals_version: refreshed_standing_goals_version,
     watcher_records: refreshed_watcher_records,
@@ -2303,6 +2359,57 @@ fn daemon_cadence_label(model : Model) -> String {
 }
 
 ///|
+fn live_autonomy_status_label(model : Model) -> String {
+  match model.live_autonomy {
+    Some(spine) => spine.status
+    None => "not-connected"
+  }
+}
+
+///|
+fn live_autonomy_summary_label(model : Model) -> String {
+  match model.live_autonomy {
+    Some(spine) => spine.summary
+    None =>
+      "No `.moontown/live-autonomy.json` loaded yet. The daemon can still run, but the operator console is missing the single live spine."
+  }
+}
+
+///|
+fn live_autonomy_detail_label(model : Model) -> String {
+  match model.live_autonomy {
+    Some(spine) =>
+      "accepted \{spine.accepted_update_count}, no-change \{spine.no_change_count}, review \{spine.review_count}, blocked \{spine.blocked_count}, due goals \{spine.due_goal_count}. Digest: \{spine.digest_path}."
+    None => "Run a live refresh or daemon tick to connect the spine."
+  }
+}
+
+///|
+fn live_autonomy_active_worker_label(
+  model : Model,
+  fallback : Int,
+) -> String {
+  match model.live_autonomy {
+    Some(spine) => spine.active_worker_count.to_string()
+    None => fallback.to_string()
+  }
+}
+
+///|
+fn live_autonomy_tone(model : Model) -> String {
+  match model.live_autonomy {
+    Some(spine) =>
+      match spine.status {
+        "needs-recovery" => "alert"
+        "working" => "live"
+        "reviewing" => "alert"
+        _ => "calm"
+      }
+    None => "alert"
+  }
+}
+
+///|
 fn active_standing_goal(model : Model) -> StandingGoalSnapshot? {
   for goal in model.standing_goals {
     if goal.enabled {
@@ -3180,6 +3287,9 @@ fn render_operator_command_center(
     Some(snapshot) => snapshot.active_goal_ids.length()
     None => 0
   }
+  let live_status = live_autonomy_status_label(model)
+  let live_summary = live_autonomy_summary_label(model)
+  let live_tone = live_autonomy_tone(model)
   section(class="operator-console", [
     div(class="operator-console-head", [
       div([
@@ -3192,6 +3302,7 @@ fn render_operator_command_center(
       ]),
       div(class="operator-console-status", [
         status_chip(daemon_cadence_label(model), "chip-clock"),
+        status_chip("Live spine \{live_status}", "chip-neutral"),
         status_chip("Daemon \{daemon_identity}", "chip-neutral"),
         status_chip("Active due goals \{active_goal_count}", "chip-neutral"),
         status_chip(
@@ -3206,9 +3317,15 @@ fn render_operator_command_center(
         div(class="operator-stat-grid", [
           render_operator_stat(
             "Current workers",
-            running_workers.to_string(),
-            "Visible active workers in the current town projection.",
+            live_autonomy_active_worker_label(model, running_workers),
+            live_summary,
             "live",
+          ),
+          render_operator_stat(
+            "Live spine",
+            live_status,
+            live_autonomy_detail_label(model),
+            live_tone,
           ),
           render_operator_stat(
             "Latest decision",
@@ -8927,6 +9044,7 @@ fn feed_items(
     detail: standing_watch_connected_detail(model),
     tone: "calm",
   })
+  push_live_autonomy_messages(feed, model)
   push_recent_event_messages(feed, events)
   push_worker_alert_messages(feed, workers, standing_watch_idle_detail(model))
   push_execution_messages(feed, executions)
@@ -8938,6 +9056,42 @@ fn feed_items(
     })
   }
   feed
+}
+
+///|
+fn push_live_autonomy_messages(feed : Array[FeedItem], model : Model) -> Unit {
+  match model.live_autonomy {
+    Some(spine) => {
+      feed.push({
+        title: "Live spine is \{spine.status}",
+        detail: spine.summary,
+        tone: live_autonomy_tone(model),
+      })
+      feed.push({
+        title: "Live digest updated",
+        detail: "Mayor wrote \{spine.digest_path} with current watch state, blockers, and next actions.",
+        tone: "calm",
+      })
+      let mut pushed = 0
+      for action in spine.next_actions {
+        if pushed >= 2 {
+          break
+        }
+        feed.push({
+          title: "Mayor next action",
+          detail: action,
+          tone: if spine.status == "needs-recovery" { "alert" } else { "calm" },
+        })
+        pushed += 1
+      }
+    }
+    None =>
+      feed.push({
+        title: "Live spine not connected",
+        detail: "Run `moon run cmd/main -- live refresh` or one daemon tick to publish `.moontown/live-autonomy.json` for the operator console.",
+        tone: "alert",
+      })
+  }
 }
 
 ///|

@@ -182,11 +182,16 @@ fn running_standing_watch_execution(
     assigned_worker_id=Some(worker_id),
     attempt=1,
     heartbeat_tick=tick,
-    stale_after_tick=tick + 3,
+    stale_after_tick=tick + standing_watch_stale_window_ticks(),
     next_retry_tick=None,
     requires_review=task.requires_review,
     notify_town=true,
   )
+}
+
+///|
+fn standing_watch_stale_window_ticks() -> Int {
+  30
 }
 
 ///|
@@ -465,6 +470,242 @@ async fn finalize_standing_watch_supervision_record(
   record_standing_watch_event(state, record)
   save_standing_goal_update_for_watcher(snapshot_path, updated_goal)
   observed
+}
+
+///|
+async fn reconcile_review_queued_standing_watch_outputs(
+  state : @core.TownState,
+  catalog : Array[@moonbook.BookCatalogEntry],
+  snapshot_path : String,
+  standing_goals : Array[@core.StandingGoal],
+) -> Unit {
+  let snapshot = state.executions.copy()
+  for execution in snapshot {
+    if execution.status != @core.TaskExecutionStatus::ReviewQueued {
+      continue
+    }
+    let goal = match
+      standing_goal_for_execution_task(standing_goals, execution.task_id) {
+      Some(goal) => goal
+      None => continue
+    }
+    let entry = match @moonbook.entry_for_book_id(catalog, execution.book_id) {
+      Some(entry) => entry
+      None => continue
+    }
+    let observed = standing_watch_observed_for_auto_triage(
+      entry, execution, snapshot_path,
+    )
+    let decision = standing_watch_recovery_decision_from_execution(observed)
+    if !standing_watch_auto_triage_allowed(goal, observed, decision) {
+      if observed != execution {
+        state.replace_execution(observed)
+      }
+      continue
+    }
+    let completed = copy_execution_with(
+      observed,
+      status=@core.TaskExecutionStatus::Completed,
+      summary=standing_watch_auto_triage_summary(goal, observed, decision),
+      heartbeat_tick=supervision_tick(state),
+      next_retry_tick=None,
+    )
+    state.replace_execution(completed)
+    state.replace_task(task_for_supervision(state, completed))
+    sync_worker_from_execution(state, completed)
+    state.record_event(
+      @core.TownEvent::new(
+        id="event-watch-auto-triage-\{state.events.length()}-\{completed.task_id}",
+        kind="standing-watch",
+        detail="Mayor auto-triaged standing watch `\{completed.task_id}` as \{decision.to_string()} using MoonBook keeper markers and goal threshold \{goal.quality_threshold}.",
+        related_task_id=Some(completed.task_id),
+        related_book_id=Some(completed.book_id),
+        related_run_id=completed.run_id,
+      ),
+    )
+    let finalized = finalize_standing_watch_supervision_record(
+      state, entry, completed, standing_goals, snapshot_path,
+    )
+    if finalized != completed {
+      state.replace_execution(finalized)
+      state.replace_task(task_for_supervision(state, finalized))
+      sync_worker_from_execution(state, finalized)
+    }
+  }
+}
+
+///|
+async fn reconcile_failed_standing_watch_outputs(
+  state : @core.TownState,
+  catalog : Array[@moonbook.BookCatalogEntry],
+  snapshot_path : String,
+  standing_goals : Array[@core.StandingGoal],
+) -> Unit {
+  let snapshot = state.executions.copy()
+  for execution in snapshot {
+    if execution.status != @core.TaskExecutionStatus::Failed {
+      continue
+    }
+    let goal = match
+      standing_goal_for_execution_task(standing_goals, execution.task_id) {
+      Some(goal) => goal
+      None => continue
+    }
+    let entry = match @moonbook.entry_for_book_id(catalog, execution.book_id) {
+      Some(entry) => entry
+      None => continue
+    }
+    let observed = standing_watch_observed_for_auto_triage(
+      entry, execution, snapshot_path,
+    )
+    let decision = standing_watch_recovery_decision_from_execution(observed)
+    if !standing_watch_recovery_allowed(goal, observed, decision) {
+      if observed != execution {
+        state.replace_execution(observed)
+      }
+      continue
+    }
+    let completed = copy_execution_with(
+      observed,
+      status=@core.TaskExecutionStatus::Completed,
+      summary=standing_watch_recovery_summary(goal, observed, decision),
+      heartbeat_tick=supervision_tick(state),
+      next_retry_tick=None,
+    )
+    state.replace_execution(completed)
+    state.replace_task(task_for_supervision(state, completed))
+    sync_worker_from_execution(state, completed)
+    state.record_event(
+      @core.TownEvent::new(
+        id="event-watch-auto-recovery-\{state.events.length()}-\{completed.task_id}",
+        kind="standing-watch",
+        detail="Mayor recovered failed standing watch `\{completed.task_id}` as \{decision.to_string()} because MoonBook persisted a terminal keeper marker.",
+        related_task_id=Some(completed.task_id),
+        related_book_id=Some(completed.book_id),
+        related_run_id=completed.run_id,
+      ),
+    )
+    let finalized = finalize_standing_watch_supervision_record(
+      state, entry, completed, standing_goals, snapshot_path,
+    )
+    if finalized != completed {
+      state.replace_execution(finalized)
+      state.replace_task(task_for_supervision(state, finalized))
+      sync_worker_from_execution(state, finalized)
+    }
+  }
+}
+
+///|
+async fn standing_watch_observed_for_auto_triage(
+  entry : @moonbook.BookCatalogEntry,
+  execution : @core.TaskExecutionRecord,
+  snapshot_path : String,
+) -> @core.TaskExecutionRecord {
+  let observed = standing_watch_execution_with_book_decision(entry, execution)
+  let decision = standing_watch_decision_from_execution(observed)
+  if decision != @core.WatcherDecisionKind::NeedsReview {
+    return observed
+  }
+  match
+    standing_watch_no_change_summary_from_book_result(snapshot_path, execution) {
+    Some(summary) =>
+      copy_execution_with(observed, summary="\{observed.summary}\n\{summary}")
+    None => observed
+  }
+}
+
+///|
+async fn standing_watch_no_change_summary_from_book_result(
+  snapshot_path : String,
+  execution : @core.TaskExecutionRecord,
+) -> String? {
+  let path = standing_watch_book_result_path(snapshot_path, execution.task_id)
+  if !@fs.exists(path) {
+    return None
+  }
+  let parsed = @json.parse(@fs.read_file(path).text()) catch {
+    _ => return None
+  }
+  let result : @moonbook.BookResult = @json.from_json(parsed) catch {
+    _ => return None
+  }
+  if result.requires_review || !result.memory_candidates.is_empty() {
+    return None
+  }
+  if standing_watch_marker_decision(result.summary.to_lower()) != None {
+    return None
+  }
+  if !result.summary.contains("Workflow completed") {
+    return None
+  }
+  Some(
+    "standing_goal_decision: no_change\ndelta_score: 0\nnew_source_count: 0\nnext_check_hint: normal\nchecked_sources_count: 0\nnew_sources_found: 0\naccepted_facts_count: 0\nrejected_facts_count: 0\nwiki_pages_changed_count: 0\nbook_changed: no\nbook_watch_record_id: \{execution.task_id}\nMoonBook result was an empty, non-review operational completion; mayor classified it as no_change so it does not block live autonomy.",
+  )
+}
+
+///|
+fn standing_watch_book_result_path(
+  snapshot_path : String,
+  task_id : String,
+) -> String {
+  let base = @path.Path::dirname(snapshot_path).to_string()
+  let root = if base == "." || base == "" { ".moontown" } else { base }
+  "\{root}/book-results/\{task_id}.json"
+}
+
+///|
+fn standing_watch_auto_triage_allowed(
+  goal : @core.StandingGoal,
+  execution : @core.TaskExecutionRecord,
+  decision : @core.WatcherDecisionKind,
+) -> Bool {
+  match decision {
+    @core.WatcherDecisionKind::NoChange => true
+    @core.WatcherDecisionKind::Update =>
+      standing_watch_delta_score(execution) >= goal.quality_threshold
+    _ => false
+  }
+}
+
+///|
+fn standing_watch_auto_triage_summary(
+  goal : @core.StandingGoal,
+  execution : @core.TaskExecutionRecord,
+  decision : @core.WatcherDecisionKind,
+) -> String {
+  "\{execution.summary}\nkeeper_auto_triage: accepted\nauto_triage_decision: \{decision.to_string()}\nauto_triage_threshold: \{goal.quality_threshold}\nauto_triage_reason: MoonBook standing-watch marker was sufficient for keeper-level autonomous closure."
+}
+
+///|
+fn standing_watch_recovery_allowed(
+  goal : @core.StandingGoal,
+  execution : @core.TaskExecutionRecord,
+  decision : @core.WatcherDecisionKind,
+) -> Bool {
+  if decision == @core.WatcherDecisionKind::NoChange {
+    return true
+  }
+  decision == @core.WatcherDecisionKind::Update &&
+  standing_watch_delta_score(execution) >= goal.quality_threshold
+}
+
+///|
+fn standing_watch_recovery_decision_from_execution(
+  execution : @core.TaskExecutionRecord,
+) -> @core.WatcherDecisionKind {
+  standing_watch_marker_decision(execution.summary.to_lower()).unwrap_or(
+    standing_watch_decision_from_execution(execution),
+  )
+}
+
+///|
+fn standing_watch_recovery_summary(
+  goal : @core.StandingGoal,
+  execution : @core.TaskExecutionRecord,
+  decision : @core.WatcherDecisionKind,
+) -> String {
+  "\{execution.summary}\nkeeper_auto_recovery: accepted\nauto_recovery_decision: \{decision.to_string()}\nauto_recovery_threshold: \{goal.quality_threshold}\nauto_recovery_reason: Failed transport/index status was superseded by a terminal MoonBook standing-watch marker, so mayor closed it without operator intervention."
 }
 
 ///|

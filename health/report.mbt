@@ -86,17 +86,19 @@ fn detect_anomalies(
   for execution in executions {
     match execution.status {
       @core.TaskExecutionStatus::Failed =>
-        if !standing_watch_failure_superseded(executions, execution) {
+        if !standing_watch_issue_superseded(executions, execution) {
           anomalies.push({
             title: "execution-failed",
             detail: "\{execution.task_id} failed after packet \{execution.packet_id}",
           })
         }
       @core.TaskExecutionStatus::Stale =>
-        anomalies.push({
-          title: "execution-stale",
-          detail: "\{execution.task_id} missed heartbeat and needs mayor recovery",
-        })
+        if !standing_watch_issue_superseded(executions, execution) {
+          anomalies.push({
+            title: "execution-stale",
+            detail: "\{execution.task_id} missed heartbeat and needs mayor recovery",
+          })
+        }
       _ => ()
     }
   }
@@ -133,10 +135,13 @@ fn book_level(town : @core.TownState, book_id : String) -> HealthLevel {
     }
     match execution.status {
       @core.TaskExecutionStatus::Failed =>
-        if !standing_watch_failure_superseded(town.executions, execution) {
+        if !standing_watch_issue_superseded(town.executions, execution) {
           return Critical
         }
-      @core.TaskExecutionStatus::Stale => return Critical
+      @core.TaskExecutionStatus::Stale =>
+        if !standing_watch_issue_superseded(town.executions, execution) {
+          return Critical
+        }
       _ => ()
     }
   }
@@ -144,25 +149,25 @@ fn book_level(town : @core.TownState, book_id : String) -> HealthLevel {
 }
 
 ///|
-fn standing_watch_failure_superseded(
+fn standing_watch_issue_superseded(
   executions : Array[@core.TaskExecutionRecord],
-  failed : @core.TaskExecutionRecord,
+  issue : @core.TaskExecutionRecord,
 ) -> Bool {
-  let prefix = match standing_watch_task_prefix(failed.task_id) {
+  let prefix = match standing_watch_task_prefix(issue.task_id) {
     Some(prefix) => prefix
     None => return false
   }
-  if failed.summary.contains("no eligible worker") &&
-    standing_watch_neighbor_completed(executions, failed, prefix) {
+  if issue.summary.contains("no eligible worker") &&
+    standing_watch_neighbor_completed(executions, issue, prefix) {
     return true
   }
-  let mut after_failed = false
+  let mut after_issue = false
   for execution in executions {
-    if execution.task_id == failed.task_id {
-      after_failed = true
+    if execution.task_id == issue.task_id {
+      after_issue = true
       continue
     }
-    if !after_failed || execution.book_id != failed.book_id {
+    if !after_issue || execution.book_id != issue.book_id {
       continue
     }
     match standing_watch_task_prefix(execution.task_id) {

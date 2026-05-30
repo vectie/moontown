@@ -35,11 +35,28 @@ pub async fn run_due_civic_salons(
       summaries.push(summary)
     } else {
       match
-        refresh_civic_salon_projection_if_stale(
-          schedule, snapshot_path, book_catalog_path,
+        reconcile_civic_salon_schedule_if_completed(
+          schedule, snapshot_path, book_catalog_path, tick, now_ms,
         ) {
-        Some(summary) => refreshes.push(summary)
-        None => ()
+        Some((next, summary)) => {
+          save_civic_salon_schedules(
+            schedule_path,
+            replace_civic_salon_schedule(
+              load_or_create_civic_salon_schedules(path=schedule_path),
+              schedule.id,
+              next,
+            ),
+          )
+          refreshes.push(summary)
+        }
+        None =>
+          match
+            refresh_civic_salon_projection_if_stale(
+              schedule, snapshot_path, book_catalog_path,
+            ) {
+            Some(summary) => refreshes.push(summary)
+            None => ()
+          }
       }
     }
   }
@@ -136,6 +153,8 @@ async fn run_civic_salon_scenario_round(
         reducer_summary=Some(reduction.summary),
       ),
     )
+  } else if civic_salon_reduction_status_live(reduction.status) {
+    ("running", "Running \{scenario.title} \{round_id}: \{reduction.summary}")
   } else {
     write_civic_salon_reducer_blocker(scenario, reduction, round_id)
     ("blocked", "Blocked \{scenario.title} \{round_id}: \{reduction.summary}")
@@ -192,4 +211,80 @@ fn retry_civic_salon_schedule(
     latest_summary: summary,
     next_due_ms: now_ms + 300_000UL,
   }
+}
+
+///|
+async fn reconcile_civic_salon_schedule_if_completed(
+  schedule : CivicSalonSchedule,
+  snapshot_path : String,
+  book_catalog_path : String,
+  tick : Int,
+  now_ms : UInt64,
+) -> (CivicSalonSchedule, String)? {
+  if !schedule.enabled ||
+    schedule.latest_round_id.is_empty() ||
+    !civic_salon_summary_is_active(schedule.latest_summary) {
+    return None
+  }
+  match load_civic_salon_scenario_for_schedule(schedule, snapshot_path) {
+    Some(scenario) => {
+      let workspace_base = civic_salon_workspace_base(snapshot_path)
+      let reduction = reduce_civic_salon_ideas(
+        scenario,
+        round_id=schedule.latest_round_id,
+        round_number=schedule.round_count + 1,
+        workspace_base~,
+        mode=PersistedReducer,
+      )
+      if !(reduction.status is @core.TaskExecutionStatus::Completed) ||
+        reduction.ideas.length() == 0 {
+        return None
+      }
+      let summary = materialize_civic_salon_scenario(
+        scenario,
+        reduction.ideas,
+        book_catalog_path~,
+        round_id=schedule.latest_round_id,
+        round_number=schedule.round_count + 1,
+        workspace_base~,
+        reducer_summary=Some(reduction.summary),
+      )
+      let metrics = civic_salon_metrics(
+        scenario,
+        scenario.participants,
+        reduction.ideas,
+      )
+      append_civic_salon_round_record(
+        default_civic_salon_run_ledger_path(schedule.id, snapshot_path~),
+        civic_salon_round_record(
+          schedule,
+          schedule.latest_round_id,
+          tick,
+          schedule.last_run_ms,
+          @env.now(),
+          metrics,
+          "review",
+          summary,
+        ),
+      )
+      Some(
+        (
+          complete_civic_salon_schedule(
+            schedule,
+            now_ms,
+            schedule.latest_round_id,
+            summary,
+          ),
+          "\{schedule.id}: completed active reducer round \{schedule.latest_round_id}; \{summary}",
+        ),
+      )
+    }
+    None => None
+  }
+}
+
+///|
+fn civic_salon_summary_is_active(summary : String) -> Bool {
+  summary.has_prefix("Running ") ||
+  summary.contains("MoonClaw reducer is still active")
 }

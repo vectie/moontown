@@ -6,6 +6,8 @@ import path from 'node:path'
 
 const townSnapshotPath = path.resolve(process.cwd(), '../../.moontown/town.json')
 const visualProjectionPath = path.resolve(process.cwd(), '../../.moontown/visual-projection.json')
+const liveAutonomyPath = path.resolve(process.cwd(), '../../.moontown/live-autonomy.json')
+const liveDigestPath = path.resolve(process.cwd(), '../../.moontown/live-digest.md')
 const daemonSnapshotPath = path.resolve(process.cwd(), '../../.moontown/daemon.json')
 const standingGoalsPath = path.resolve(process.cwd(), '../../.moontown/standing-goals.json')
 const civicStatusPath = path.resolve(process.cwd(), '../../.moontown/civic/status.json')
@@ -637,6 +639,29 @@ function moontownSnapshotPlugin() {
         res.setHeader('Content-Type', 'application/json')
         res.end(contents)
       })
+      server.middlewares.use('/live-autonomy.json', async (_req, res) => {
+        if (!serveJsonSnapshot(res, liveAutonomyPath, 'missing live autonomy spine')) {
+          return
+        }
+
+        const contents = await readFile(liveAutonomyPath, 'utf8')
+        res.statusCode = 200
+        res.setHeader('Content-Type', 'application/json')
+        res.end(contents)
+      })
+      server.middlewares.use('/live-digest.md', async (_req, res) => {
+        if (!existsSync(liveDigestPath)) {
+          res.statusCode = 404
+          res.setHeader('Content-Type', 'text/plain')
+          res.end('missing live digest')
+          return
+        }
+
+        const contents = await readFile(liveDigestPath, 'utf8')
+        res.statusCode = 200
+        res.setHeader('Content-Type', 'text/markdown; charset=utf-8')
+        res.end(contents)
+      })
       server.middlewares.use('/standing-goals.json', async (_req, res) => {
         if (!serveJsonSnapshot(res, standingGoalsPath, 'missing standing goals')) {
           return
@@ -735,6 +760,21 @@ function moontownSnapshotPlugin() {
         await writeFile(
           path.join(distDir, 'daemon.json'),
           await readFile(daemonSnapshotPath, 'utf8'),
+          'utf8',
+        )
+      }
+
+      if (existsSync(liveAutonomyPath)) {
+        await writeFile(
+          path.join(distDir, 'live-autonomy.json'),
+          await readFile(liveAutonomyPath, 'utf8'),
+          'utf8',
+        )
+      }
+      if (existsSync(liveDigestPath)) {
+        await writeFile(
+          path.join(distDir, 'live-digest.md'),
+          await readFile(liveDigestPath, 'utf8'),
           'utf8',
         )
       }

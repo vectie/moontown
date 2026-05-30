@@ -38,6 +38,35 @@ test "civic salon round record captures exchange effectiveness" {
 }
 
 ///|
+test "live civic reducer statuses remain running rather than blocked" {
+  assert_true(
+    civic_salon_reduction_status_live(
+      @core.TaskExecutionStatus::ProposalImported,
+    ),
+  )
+  assert_true(
+    civic_salon_reduction_status_live(@core.TaskExecutionStatus::RunConfirmed),
+  )
+  assert_true(
+    civic_salon_reduction_status_live(@core.TaskExecutionStatus::Running),
+  )
+  assert_true(
+    !civic_salon_reduction_status_live(@core.TaskExecutionStatus::Failed),
+  )
+  assert_true(
+    !civic_salon_reduction_status_live(@core.TaskExecutionStatus::Completed),
+  )
+}
+
+///|
+test "legacy pending civic blocker summaries normalize to running" {
+  let summary = "Blocked Social Square Match Market round-3: MoonClaw reducer did not produce a valid non-empty CivicSalonIdea contract. status=RunConfirmed; MoonClaw run run-1 is Pending."
+  let normalized = normalize_civic_pending_summary(summary)
+  assert_true(normalized.has_prefix("Running Social Square Match Market"))
+  assert_true(!normalized.has_prefix("Blocked "))
+}
+
+///|
 async test "due civic salon rounds persist schedule and run ledger" {
   let root = "/tmp/moontown-civic-salon-daemon"
   ignore_checked_command("rm", ["-rf", root])
@@ -135,6 +164,75 @@ async test "stale civic salon projection refreshes without forcing another round
   let persisted = schedules.get(0).unwrap()
   assert_eq(persisted.round_count, 2)
   assert_eq(persisted.next_due_ms, 999_999UL)
+}
+
+///|
+async test "persisted civic reducer prefers scenario-specific output over shared building output" {
+  let root = "/tmp/moontown-civic-salon-specific-output"
+  ignore_checked_command("rm", ["-rf", root])
+  let scenario = daemon_civic_salon_scenario()
+  let workspace_base = root
+  let raw_root = "\{root}/books/wenyu-social-square/raw/bootstrap"
+  write_text_file(
+    "\{raw_root}/civic-salon-ideas.json",
+    Json::object({
+      "ideas": [{ ..scenario.ideas[0], participating_books: ["other-book"] }].to_json(),
+    }).stringify(indent=2),
+  )
+  write_text_file(
+    "\{raw_root}/future-energy-social-square-ideas.json",
+    Json::object({ "ideas": scenario.ideas.to_json() }).stringify(indent=2),
+  )
+  let reduction = reduce_civic_salon_ideas(
+    scenario,
+    round_id="future-energy-social-square-round-1",
+    round_number=1,
+    workspace_base~,
+    mode=PersistedReducer,
+  )
+  assert_true(reduction.status is @core.TaskExecutionStatus::Completed)
+  assert_eq(reduction.ideas.length(), 1)
+  assert_eq(reduction.ideas[0].id, "storage-grid-control-contract")
+}
+
+///|
+async test "active civic schedule reconciles completed persisted reducer output" {
+  let root = "/tmp/moontown-civic-salon-active-reconcile"
+  ignore_checked_command("rm", ["-rf", root])
+  let snapshot_path = "\{root}/town.json"
+  let book_catalog_path = "\{root}/books/catalog.json"
+  let schedule = {
+    ..daemon_civic_salon_schedule(next_due_ms=999_999UL),
+    latest_round_id: "future-energy-social-square-round-1",
+    latest_summary: "Running Future Energy Social Square Salon future-energy-social-square-round-1: MoonClaw reducer is still active.",
+  }
+  let scenario = daemon_civic_salon_scenario()
+  save_civic_salon_schedules(
+    default_civic_salon_schedule_path(snapshot_path~),
+    [schedule],
+  )
+  write_text_file(
+    civic_salon_scenario_path(schedule.id, snapshot_path~),
+    scenario.to_json().stringify(indent=2),
+  )
+  write_text_file(
+    "\{root}/books/wenyu-social-square/raw/bootstrap/future-energy-social-square-ideas.json",
+    Json::object({ "ideas": scenario.ideas.to_json() }).stringify(indent=2),
+  )
+  let summary = run_due_civic_salons(
+    snapshot_path~,
+    book_catalog_path~,
+    tick=100,
+    now_ms=2_000UL,
+  )
+  assert_true(summary.contains("completed active reducer round"))
+  let schedules = load_or_create_civic_salon_schedules(
+    path=default_civic_salon_schedule_path(snapshot_path~),
+  )
+  let persisted = schedules.get(0).unwrap()
+  assert_eq(persisted.round_count, 1)
+  assert_eq(persisted.latest_round_id, "future-energy-social-square-round-1")
+  assert_true(persisted.latest_summary.contains("Seeded"))
 }
 
 ///|

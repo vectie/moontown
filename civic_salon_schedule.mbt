@@ -143,13 +143,38 @@ pub async fn load_or_create_civic_salon_schedules(
         _ => []
       }
       if schedules.length() > 0 {
-        return schedules
+        let normalized = schedules.map(normalize_civic_salon_schedule)
+        if normalized != schedules {
+          save_civic_salon_schedules(path, normalized)
+        }
+        return normalized
       }
     }
   }
   let schedules = default_civic_salon_schedules()
   save_civic_salon_schedules(path, schedules)
   schedules
+}
+
+///|
+fn normalize_civic_salon_schedule(
+  schedule : CivicSalonSchedule,
+) -> CivicSalonSchedule {
+  {
+    ..schedule,
+    latest_summary: normalize_civic_pending_summary(schedule.latest_summary),
+  }
+}
+
+///|
+fn normalize_civic_pending_summary(summary : String) -> String {
+  if summary.has_prefix("Blocked ") &&
+    summary.contains("status=RunConfirmed") &&
+    summary.contains(" is Pending.") {
+    "Running \{summary[8:]}"
+  } else {
+    summary
+  }
 }
 
 ///|

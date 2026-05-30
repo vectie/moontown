@@ -55,8 +55,12 @@ async fn inspect_wenyu_building_protocol(
     protocol.building_id,
     "reviews",
   )
-  let latest_reduction = latest_protocol_reduction(protocol.building_id)
-  let latest_distribution = latest_protocol_distribution(protocol.building_id)
+  let latest_reduction_summary = latest_protocol_reduction_summary(
+    protocol.building_id,
+  )
+  let latest_distribution_summary = latest_protocol_distribution_summary(
+    protocol.building_id,
+  )
   let status = protocol_status_label(
     inbox_count~,
     contribution_count~,
@@ -78,14 +82,8 @@ async fn inspect_wenyu_building_protocol(
     reduction_count,
     outbox_count,
     review_count,
-    latest_reduction_summary: match latest_reduction {
-      Some(result) => result.summary
-      None => ""
-    },
-    latest_distribution_summary: match latest_distribution {
-      Some(record) => record.summary
-      None => ""
-    },
+    latest_reduction_summary,
+    latest_distribution_summary,
     skill_packs: protocol.skill_packs,
   }
 }

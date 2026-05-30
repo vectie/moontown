@@ -82,9 +82,15 @@ pub fn default_daemon_stop_path(snapshot_path? : String) -> String
 
 pub fn default_daemon_supervisor_pid_path(snapshot_path? : String) -> String
 
+pub fn default_live_autonomy_path(snapshot_path? : String) -> String
+
+pub fn default_live_digest_path(snapshot_path? : String) -> String
+
 pub fn default_planbook_book_id() -> String
 
 pub fn default_planbook_workspace_root() -> String
+
+pub fn default_town_journal_path(snapshot_path? : String) -> String
 
 pub fn default_visual_projection_path(String) -> String
 
@@ -140,6 +146,8 @@ pub async fn load_or_create_modeled_demo_state(path? : String, book_catalog_path
 
 pub async fn persist_visual_projection(@core.TownState, String, tick? : Int) -> Unit
 
+pub async fn refresh_live_autonomy_spine(snapshot_path? : String) -> String
+
 pub async fn render_book_quality(book_catalog_path? : String) -> String
 
 pub fn render_civic_communication_patterns() -> String
@@ -147,6 +155,8 @@ pub fn render_civic_communication_patterns() -> String
 pub async fn render_civic_salon_schedule_status(snapshot_path? : String) -> String
 
 pub async fn render_goal_run(String, book_id? : String?, task_limit_per_book? : Int, snapshot_path? : String, book_catalog_path? : String) -> String
+
+pub async fn render_live_autonomy_status(snapshot_path? : String) -> String
 
 pub async fn render_moontown_cookbook_status(workspace_root? : String, manifest_path? : String) -> String
 
@@ -179,6 +189,8 @@ pub async fn upsert_civic_salon_schedule_for_scenario(CivicSalonScenario, path? 
 pub async fn write_book_quality_audit(book_catalog_path? : String, audit_path? : String) -> String
 
 pub async fn write_book_quality_review_packets(book_catalog_path? : String, review_dir? : String) -> String
+
+pub async fn write_live_autonomy_spine(@core.TownState, snapshot_path? : String, standing_goals? : Array[@core.StandingGoal], watcher_records? : Array[@core.WatcherRunRecord], tick_summary? : String, daemon_tick? : Int?) -> LiveAutonomySpine
 
 pub async fn write_wenyu_building_protocol_status(status_path? : String, registry_path? : String) -> String
 
@@ -464,6 +476,26 @@ type FinalIntegrationManifest derive(Eq, ToJson, @debug.Debug, @json.FromJson)
 type FinalIntegrationTemplateSpec derive(Eq, ToJson, @debug.Debug, @json.FromJson)
 
 type FinalIntegrationWatchSpec derive(Eq, ToJson, @debug.Debug, @json.FromJson)
+
+pub struct LiveAutonomySpine {
+  generated_at_ms : UInt64
+  tick : Int
+  status : String
+  summary : String
+  active_worker_count : Int
+  review_count : Int
+  blocked_count : Int
+  accepted_update_count : Int
+  no_change_count : Int
+  failed_count : Int
+  due_goal_count : Int
+  standing_goal_count : Int
+  latest_watcher_summary : String
+  visual_projection_path : String
+  journal_path : String
+  digest_path : String
+  next_actions : Array[String]
+} derive(Eq, ToJson, @debug.Debug, @json.FromJson)
 
 pub struct MoontownCookbookManifest {
   book_id : String
