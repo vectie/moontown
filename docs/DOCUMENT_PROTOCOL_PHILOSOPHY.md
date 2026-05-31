@@ -152,6 +152,15 @@ review queues, but the product concept is the protocol place.
   contract; MoonClaw launches the configured Codex ACP target; Codex patches the
   repository; PlanBook records validation, diff hygiene, commit readiness, and
   review evidence.
+- Future self-build work belongs in the PlanBook backlog JSON and its generated
+  MoonBook pages. The daemon may select from that backlog, but it should not
+  invent feature lists in MoonBit code.
+- Stop criteria, progress, and cadence are also documents. If a worker discovers
+  a task is already done or a plan is stale, it updates the PlanBook evidence
+  and plan/backlog documents instead of producing code for activity.
+- MoonClaw worker runs are temporary freelance processes. Bookkeepers are
+  resident MoonBook roles that wake through events or schedules and decide what
+  becomes durable memory. Mayor owns town routing and cadence.
 
 ## Boundary Table
 

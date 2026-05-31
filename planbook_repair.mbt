@@ -646,6 +646,12 @@ fn planbook_repair_source_root() -> String {
 ///|
 fn planbook_repair_target_files(criterion_id : String) -> Array[String] {
   let root = planbook_repair_source_root()
+  let backlog_targets = planbook_backlog_target_files_for_criterion(
+    criterion_id, root,
+  )
+  if !backlog_targets.is_empty() {
+    return backlog_targets
+  }
   match criterion_id {
     "editor-mode-real-pipeline" =>
       [
@@ -847,8 +853,11 @@ fn planbook_repair_request_text(criterion : PlanbookCriterionStatus) -> String {
     "6. Run the required validation commands unless the result explicitly explains why a command could not run.",
     "7. Inspect `git status --short`, `git diff --check`, and the focused diff before declaring success.",
     "8. If validation passes and files changed, prepare a local commit with a clear message according to the repair packet git policy; do not push unless policy allows it.",
-    "9. Write `raw/repair/repair-result.md` with decision, files changed, validation, diff summary, commit status, remaining blockers, and cookbook impact.",
-    "10. Do not mark the criterion satisfied unless evidence exists after validation.",
+    "9. If you reach the code-building step and discover the requested work is already done, do not patch for activity. Update the PlanBook progress/backlog documents and write completion evidence.",
+    "10. If the plan is stale, update the plan/backlog document first, then either stop with `no_change` or continue only if the updated plan still requires code.",
+    "11. For backlog criteria named `backlog-*`, also write `raw/backlog/completed/<backlog-id>.md` after validation or after accepted `no_change`, where `<backlog-id>` is the criterion id without the `backlog-` prefix.",
+    "12. Write `raw/repair/repair-result.md` with decision, files changed, validation, diff summary, commit status, plan update status, remaining blockers, and cookbook impact.",
+    "13. Do not mark the criterion satisfied unless evidence exists after validation.",
     "",
     "Target files:",
     planbook_repair_target_files_markdown(criterion.id),
@@ -916,12 +925,15 @@ fn planbook_repair_skill_markdown() -> String {
     "", "## Required Decision", "", "- `repair_decision`: accepted | needs_external_owner | blocked | no_change",
     "- `criterion_id`: the criterion being repaired", "- `files_changed`: exact files changed, or `none`",
     "- `validation`: commands run and results", "- `diff_summary`: git status/diff hygiene and important changed hunks",
-    "- `commit_status`: committed | ready_to_commit | skipped_no_change | blocked",
+    "- `plan_update_status`: unchanged | updated | stale_blocked", "- `commit_status`: committed | ready_to_commit | skipped_no_change | blocked",
     "- `commit_message`: proposed or actual local commit message", "- `push_status`: not_pushed_by_policy | pushed | blocked",
     "- `remaining_blockers`: unresolved gaps", "- `cookbook_impact`: none | update_needed | updated",
     "", "## Rules", "", "- Fix Moontown-owned routing/live-spine/UI/docs issues inside Moontown.",
     "- For `editor-selected-feature-implementation`, read `raw/editor-pipeline/next-feature.json` and implement the selected feature; do not choose a different feature in code.",
     "- For selected editor features, write `raw/editor-pipeline/selected-feature-implementation.md` with `contract: moontown.editor_selected_feature_implementation.v1`, `selected_feature: <id>`, and `implementation_status: accepted` only after validation.",
+    "- For `backlog-*` criteria, write `raw/backlog/completed/<backlog-id>.md` only after validation and include the backlog id in `raw/repair/repair-result.md`.",
+    "- If the backlog item is already done, update progress/backlog evidence and return `repair_decision: no_change` or `accepted` with no source patch; do not invent code churn.",
+    "- If the plan is stale, update the PlanBook plan/backlog documents first and record `plan_update_status`.",
     "- For MoonBook-native provider/profile work, produce a MoonBook patch plan or patch only when executing inside MoonBook.",
     "- For MoonClaw runtime/provider work, produce a MoonClaw patch plan or patch only when executing inside MoonClaw.",
     "- When execution mode is `acp`, use the configured Codex ACP target to patch the repository source root, not just the PlanBook workspace.",
@@ -955,6 +967,11 @@ async fn write_planbook_repair_status(
   write_text_file(
     "\{workspace_root}/wiki/planning/self-healing-repair.md",
     render_planbook_repair_markdown(task),
+  )
+  append_planbook_change_log(
+    workspace_root,
+    "repair task \{task.status}",
+    "Repair `\{task.id}` for criterion `\{task.criterion_id}` is `\{task.status}`. Summary: \{task.summary}",
   )
 }
 
@@ -1132,6 +1149,7 @@ fn planbook_repair_result_satisfies_contract(
     text.contains("\"repair_decision\": \"accepted\"")
   let has_engineering_evidence = text.contains("validation:") &&
     text.contains("diff_summary:") &&
+    text.contains("plan_update_status:") &&
     text.contains("commit_status:") &&
     text.contains("commit_message:") &&
     text.contains("push_status:")

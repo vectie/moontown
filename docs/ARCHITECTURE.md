@@ -149,6 +149,21 @@ Current shape:
 - memory scope: domain
 - tools limited to book-local control surfaces
 
+The keeper is a resident book role, not a freelance worker. It should be
+logically live through scheduled or event-driven MoonBook keeper ticks:
+
+- wake when a worker result arrives
+- wake when standing-watch history changes
+- wake when review queues or projections are stale
+- wake when source/evidence ledgers need cleanup
+- wake when an operator asks the book to act
+
+The keeper owns book-local memory decisions: what stays as working memory, what
+is promoted to durable wiki/source/evidence pages, what is rejected as
+operational noise, what needs review, and what questions should be pursued next.
+It should not hold town-global authority and should not run arbitrary
+tool-heavy execution directly.
+
 In the current repo, `moontown` now prepares real keeper proposal packets using
 book-harness-shaped context from the moonbook adapter. The actual keeper
 implementation still belongs on the `moonbook` side. MoonBook now provides a
@@ -167,6 +182,11 @@ Current worker runtime metadata:
 - full tool access
 - workspace memory scope
 - task/result envelope boundary
+
+Workers are freelance executors. They should spawn when a bounded packet needs
+tool-heavy work, emit structured results/evidence/artifacts/memory candidates,
+and then leave. They do not own durable memory, book wiki promotion,
+standing-goal cadence, or cross-book policy.
 
 ## Data Ownership
 
@@ -401,7 +421,8 @@ The final integration portfolio currently installs five standing goals:
 - `watch-ai-hardware` -> `research-ai-hardware`
 
 The Mayor owns when each goal runs. The target MoonBook keeper owns what gets
-remembered. MoonClaw workers own how the bounded research job is executed.
+remembered and what should be forgotten, reviewed, or promoted. MoonClaw workers
+own how a bounded execution job is carried out and then exit.
 
 This is the core long-standing split:
 
@@ -588,11 +609,12 @@ moon run cmd/main -- planbook repair status
 ```
 
 Moontown can now register and bootstrap a first-class planbook workspace with
-plan index, execution evidence, active review, decision log, schema, generated
-site, and code-plan/code-review/doc-sync skills. It also runs a PlanBook
-autonomy doctor during daemon ticks. That doctor writes
+plan index, implementation backlog, backlog progress, stop policy, execution
+evidence, active review, decision log, live change log, schema, generated site,
+and code-plan/code-review/doc-sync skills. It also runs a PlanBook autonomy doctor during daemon ticks. That doctor writes
 `.moontown/planbook/autonomy.json`, updates the PlanBook evidence/review pages,
-and adds `planbook_open_count` plus repair actions to the live autonomy spine.
+updates the backlog projection/progress/stop policy and change log, and adds
+`planbook_open_count` plus repair actions to the live autonomy spine.
 
 When the doctor finds open gaps, the daemon queues exactly one bounded repair
 packet through the PlanBook repair bridge. The bridge materializes a repair
@@ -607,7 +629,12 @@ self-build spine: detect gaps, turn the top gap into executable source work,
 preserve ownership boundaries, validate, inspect git status/diff hygiene, record
 commit status/message, and rerun the doctor. The default policy can prepare a
 local commit after validation, while push remains disabled unless an explicit
-future policy enables it.
+future policy enables it. If no stricter self-build criterion is open, the
+doctor can surface the highest-priority open item from
+`raw/backlog/implementation-backlog.json` as the next bounded repair. Open items
+are taken one at a time. Once the backlog is clear, the code-building check
+decays to a 30-minute interval. If a worker discovers the item is already done,
+the right output is completion/progress/plan evidence, not code churn.
 
 Daemon supervision also preserves the supervisor-recorded worker PID instead of
 letting a worker loop overwrite it with an unreliable self-detected PID. That

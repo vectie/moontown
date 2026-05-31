@@ -277,6 +277,13 @@ moon run cmd/main -- planbook repair status
 `.moontown/planbook/autonomy.md`, updates the PlanBook workspace evidence and
 review pages, and is also run during daemon ticks. This makes self-build gaps
 visible in the live autonomy spine instead of leaving them as static docs.
+The PlanBook workspace also owns `raw/backlog/implementation-backlog.json`,
+`wiki/planning/implementation-backlog.md`,
+`wiki/planning/backlog-progress.md`, `wiki/planning/stop-policy.md`, and
+`wiki/history/change-log.md`, so future implementation goals, stop criteria,
+cadence, and live changes are managed as MoonBook documents instead of code
+constants. While backlog items are open, the town can take them one at a time;
+when the backlog is clear, the code-building check decays to 30 minutes.
 
 `planbook repair` turns the first open self-build gap into a bounded repair
 packet under the PlanBook workspace. It writes repair context, a repair
@@ -287,9 +294,12 @@ active repair, it dispatches one bounded repair packet through MoonClaw with
 the Moontown source root and return software-engineering evidence. Accepted
 repairs must run validation, inspect `git status --short`, pass
 `git diff --check`, summarize the focused diff, and record commit status/message
-under the repair result contract. Use `planbook repair --dispatch` as an
-explicit operator/debug trigger; daemon ticks are the normal self-patching route
-and do not duplicate active repairs.
+under the repair result contract. Backlog-driven repairs must also write
+completion evidence under `raw/backlog/completed/<id>.md`. Use `planbook repair
+--dispatch` as an explicit operator/debug trigger; daemon ticks are the normal
+self-patching route and do not duplicate active repairs. If a worker discovers
+the requested work is already done, it should update the plan/progress evidence
+instead of generating code churn.
 
 ## Book Quality Governance
 
@@ -347,11 +357,17 @@ Mayor -> Book Keeper -> Worker Claws
 - `Mayor`
   owns standing goals, daemon ticks, routing, health, and recovery.
 - `Book Keeper`
-  owns durable book memory, wiki updates, review policy, and generated
-  projection quality.
+  is a resident book role. It is logically live through scheduled or event-driven
+  keeper ticks and owns durable book memory, wiki promotion, review policy,
+  source/evidence ledgers, next questions, and generated projection quality.
 - `Worker Claws`
-  execute bounded jobs such as search, fetch, synthesis, coding, image
-  generation, review, and result packaging.
+  are freelance executors. They spawn for bounded jobs such as search, fetch,
+  synthesis, coding, image generation, review, and result packaging, then leave.
+
+Bookkeepers do not need to burn a hot process continuously, but every important
+MoonBook should have a keeper policy/profile that can wake on new results,
+standing-watch updates, stale projections, review queue changes, or explicit
+operator requests.
 
 Standing goals are data-driven. Add long-horizon watchers by editing
 `.moontown/standing-goals.json`; the daemon reads the registry on each tick, so

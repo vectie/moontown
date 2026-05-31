@@ -69,6 +69,31 @@ implementation.
 The cookbook is the stable control book. A planbook is a working decision book.
 Plans may update the cookbook after they are accepted.
 
+## Mayor, Bookkeeper, And Worker Roles
+
+PlanBook must distinguish three kinds of active AI role:
+
+- `Mayor`
+  is the town-level supervisor. It is logically long-lived through the daemon
+  and owns standing goals, routing, scheduling, escalation, recovery,
+  cross-book priority, and civic/building protocol dispatch.
+- `MoonBook Bookkeeper`
+  is a resident role for one book. It is logically live through scheduled or
+  event-driven keeper ticks, not necessarily a continuously burning process. It
+  wakes when results arrive, reviews change, projections age, or the operator
+  asks the book to act. It owns working memory, durable wiki promotion,
+  evidence/source ledgers, review policy, book health, next questions, and
+  generated site quality.
+- `MoonClaw Worker`
+  is a freelance bounded executor. It spawns for one packet, uses tools,
+  produces observations/results/artifacts/memory candidates, and exits. It does
+  not own durable memory or town policy.
+
+Future plans must say which role is responsible. If a task is about durable
+book memory, route it to the bookkeeper. If a task is tool-heavy execution,
+spawn a worker. If a task is cross-book priority or cadence, keep it in the
+Mayor.
+
 ## Lifecycle
 
 ```text
@@ -106,6 +131,7 @@ idea / bug / operator voice note / town anomaly
     index.md
     planning/decision-records.md
     planning/open-questions.md
+    planning/role-model.md
     planning/quality-gates.md
     history/journey.md
   skills/
@@ -179,6 +205,43 @@ MoonClaw execution should:
 The planbook is allowed to evolve a plan in place, but it must preserve a
 decision trail.
 
+## Implementation Backlog And Change Log
+
+The live town must have planned work to choose from. That source of future work
+is a MoonBook-managed PlanBook document, not a hardcoded MoonBit list:
+
+- `raw/backlog/implementation-backlog.json`
+  is the editable backlog. Operators or future MoonBook tools can add, remove,
+  reprioritize, pause, or close implementation goals by changing this JSON.
+- `wiki/planning/implementation-backlog.md`
+  is the generated human-readable projection of that backlog.
+- `wiki/planning/backlog-progress.md`
+  shows open/completed/blocked counts and the next code-building check cadence.
+- `wiki/planning/stop-policy.md`
+  defines when a worker should stop instead of generating more code.
+- `wiki/history/change-log.md`
+  records live PlanBook autonomy and repair events over time.
+- `raw/backlog/completed/<id>.md`
+  is the completion evidence for an accepted backlog item.
+
+The daemon chooses the highest-priority open backlog item only when no stricter
+self-build criterion is already open. This keeps the town active without letting
+it invent unbounded work.
+
+Stop conditions are explicit:
+
+- Stop when completion evidence exists for the selected item.
+- Stop when the item is `done`, `blocked`, or `paused`.
+- Stop when the worker discovers the requested feature is already complete; it
+  should update progress/backlog evidence, not create code churn.
+- Stop when validation fails or the focused diff would cross ownership
+  boundaries.
+- Stop and update the plan/backlog first when the plan is stale.
+
+Cadence is also explicit. While open backlog work exists, the town can take the
+next bounded task immediately, one at a time. Once the backlog is clear, the
+code-building visit decays to a 30-minute check interval.
+
 ## Self-Build And Self-Healing Loop
 
 The current Moontown runtime now has a PlanBook autonomy doctor. It is not a
@@ -191,6 +254,7 @@ daemon tick / manual doctor
   -> write .moontown/planbook/autonomy.json
   -> write .moontown/planbook/autonomy.md
   -> update PlanBook execution evidence and active review pages
+  -> update PlanBook backlog projection, progress, stop policy, and live change log
   -> expose open gap count in .moontown/live-autonomy.json
   -> queue one bounded repair packet for the first open gap
   -> Mayor sees active repair work as live next action
@@ -205,13 +269,18 @@ The doctor checks concrete criteria such as:
 - AI semantic review results are persisted.
 - PlanBook repair can route repository source patches through Codex ACP instead
   of only asking Codex-in-this-chat to edit files.
+- PlanBook has an editable implementation backlog and live change history.
 - Validation evidence is recorded.
 - MoonBook has a native PlanBook skill and MoonClaw planbook profiles.
 
 This keeps the town honest: open implementation gaps remain visible to the
 Mayor and operator until they are implemented, validated, and recorded.
 When all criteria are satisfied, the live autonomy spine reports
-`planbook_open=0` and stale repair packets no longer count as active work.
+`planbook_open=0` and stale repair packets no longer count as active work. If
+the implementation backlog contains open items, `planbook_open` should remain
+above zero and the daemon should dispatch one bounded repair at a time. When a
+worker visits the code-building lane and finds the work already done, the correct
+output is a plan/progress update plus completion evidence, not more code.
 
 The repair bridge is intentionally bounded. It does not let the town run an
 unconstrained generic agent loop. Instead, it writes:
@@ -252,7 +321,8 @@ evidence expected from a human-quality code change: validation command results,
 `git diff --check`, `git status --short`, a focused diff summary, commit
 status/message, and push status. The default policy allows local commit
 preparation after validation but does not push unless a future policy explicitly
-enables it.
+enables it. For `backlog-*` criteria, the repair worker must also write
+completion evidence under `raw/backlog/completed/<id>.md`.
 
 ## Relation To Voice And Parallel Work
 

@@ -735,6 +735,8 @@ pub struct PlanbookCriterionStatus {
   next_action : String
 } derive(Eq, ToJson, @debug.Debug, @json.FromJson)
 
+type PlanbookImplementationBacklogItem derive(Eq, ToJson, @debug.Debug, @json.FromJson)
+
 pub struct PlanbookRepairTask {
   id : String
   criterion_id : String

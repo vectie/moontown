@@ -20,13 +20,39 @@ async test "planbook autonomy doctor writes self-healing evidence" {
   let review = read_text_or_empty(
     "\{workspace_root}/wiki/reviews/active-plan-review.md",
   )
+  let backlog = read_text_or_empty(
+    "\{workspace_root}/wiki/planning/implementation-backlog.md",
+  )
+  let change_log = read_text_or_empty(
+    "\{workspace_root}/wiki/history/change-log.md",
+  )
+  let progress = read_text_or_empty(
+    "\{workspace_root}/wiki/planning/backlog-progress.md",
+  )
+  let stop_policy = read_text_or_empty(
+    "\{workspace_root}/wiki/planning/stop-policy.md",
+  )
+  let role_model = read_text_or_empty(
+    "\{workspace_root}/wiki/planning/role-model.md",
+  )
   assert_true(status_text.contains("\"status\": \"self-healing-open\""))
   assert_true(status_text.contains("editor-mode-real-pipeline"))
   assert_true(status_text.contains("planbook-source-patch-loop"))
   assert_true(status_text.contains("planbook-software-engineering-loop"))
+  assert_true(status_text.contains("backlog-live-change-log-projection"))
   assert_true(status_text.contains("moonbook-native-planbook-provider"))
   assert_true(evidence.contains("PlanBook autonomy doctor"))
   assert_true(review.contains("needs-fix"))
+  assert_true(backlog.contains("live-change-log-projection"))
+  assert_true(change_log.contains("autonomy doctor"))
+  assert_true(progress.contains("next_check_interval_ms"))
+  assert_true(progress.contains("take the next bounded task immediately"))
+  assert_true(stop_policy.contains("The town should stop implementing"))
+  assert_true(stop_policy.contains("already complete"))
+  assert_true(role_model.contains("Mayor"))
+  assert_true(role_model.contains("MoonBook Bookkeeper"))
+  assert_true(role_model.contains("MoonClaw Worker"))
+  assert_true(role_model.contains("freelance executor"))
 }
 
 ///|
@@ -380,6 +406,43 @@ async test "planbook repair queues bounded packet without marking it active befo
 }
 
 ///|
+async test "planbook backlog item can drive bounded repair packet from json" {
+  let root = "/tmp/moontown-planbook-backlog-repair-wbtest"
+  ignore_checked_command("rm", ["-rf", root])
+  let snapshot_path = "\{root}/town.json"
+  let workspace_root = "\{root}/books/plan-moontown-quality"
+  ignore(
+    bootstrap_moontown_planbook(
+      book_catalog_path="\{root}/catalog.json",
+      workspace_root~,
+    ),
+  )
+  let item = match first_open_planbook_backlog_item(workspace_root) {
+    Some(item) => item
+    None => fail("expected open backlog item")
+  }
+  let criterion = planbook_backlog_criterion_for_item(item, workspace_root)
+  let task = materialize_planbook_repair_task(
+    criterion,
+    snapshot_path,
+    workspace_root,
+    "\{root}/catalog.json",
+    false,
+  )
+  let packet_text = read_text_or_empty(task.packet_path)
+  let skill_text = read_text_or_empty(
+    "\{workspace_root}/skills/planbook-repair/SKILL.md",
+  )
+  assert_true(task.criterion_id.contains("backlog-"))
+  assert_true(packet_text.contains("implementation-backlog.json"))
+  assert_true(packet_text.contains("raw/backlog/completed"))
+  assert_true(skill_text.contains("For `backlog-*` criteria"))
+  assert_true(skill_text.contains("already done"))
+  assert_true(skill_text.contains("plan_update_status"))
+  assert_eq(planbook_repair_active_count(snapshot_path~), 0)
+}
+
+///|
 async test "editor pipeline repair packet keeps course source context bounded" {
   let root = "/tmp/moontown-editor-pipeline-repair-packet-wbtest"
   ignore_checked_command("rm", ["-rf", root])
@@ -477,7 +540,7 @@ test "planbook repair result contract rejects best-effort timeout placeholders" 
       [
         "repair_decision: accepted", "criterion_id: editor-mode-real-pipeline", "files_changed: editor_pipeline.mbt",
         "validation: moon check --no-render passed", "diff_summary: git diff --check passed",
-        "commit_status: ready_to_commit", "commit_message: Add editor pipeline verification",
+        "plan_update_status: unchanged", "commit_status: ready_to_commit", "commit_message: Add editor pipeline verification",
         "push_status: not_pushed_by_policy",
       ].join("\n"),
       criterion_id,

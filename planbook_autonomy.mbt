@@ -114,6 +114,7 @@ async fn write_planbook_autonomy_workspace(
   status : PlanbookAutonomyStatus,
   workspace_root : String,
 ) -> Unit {
+  ignore(ensure_planbook_backlog(workspace_root))
   write_text_file(
     "\{workspace_root}/wiki/planning/execution-evidence.md",
     planbook_autonomy_execution_evidence(status),
@@ -129,6 +130,11 @@ async fn write_planbook_autonomy_workspace(
   write_text_file(
     "\{workspace_root}/book/moonbook-ui-state.json",
     planbook_autonomy_ui_state_json(status),
+  )
+  append_planbook_change_log(
+    workspace_root,
+    "autonomy doctor",
+    "Status `\{status.status}` with \{status.open_count} open gap(s) and \{status.satisfied_count} satisfied criterion/criteria.",
   )
 }
 
@@ -149,6 +155,7 @@ async fn planbook_autonomy_criteria(
     planbook_editor_selected_feature_implementation_criterion(workspace_root),
     planbook_source_patch_loop_criterion(),
     planbook_engineering_loop_criterion(),
+    planbook_implementation_backlog_criterion(workspace_root),
     planbook_validation_criterion(snapshot_path),
     planbook_runtime_recovery_criterion(snapshot_path),
     planbook_moonbook_provider_criterion(),
@@ -390,6 +397,21 @@ async fn planbook_engineering_loop_criterion() -> PlanbookCriterionStatus {
 }
 
 ///|
+async fn planbook_implementation_backlog_criterion(
+  workspace_root : String,
+) -> PlanbookCriterionStatus {
+  match first_open_planbook_backlog_item(workspace_root) {
+    Some(item) => planbook_backlog_criterion_for_item(item, workspace_root)
+    None =>
+      planbook_criterion(
+        "planbook-implementation-backlog", "docs/PLANBOOK.md", "PlanBook implementation backlog is clear",
+        "moontown+planbook", true, "No open implementation backlog item is waiting for self-build dispatch",
+        "add future implementation work to `raw/backlog/implementation-backlog.json` instead of hardcoding feature selection in MoonBit",
+      )
+  }
+}
+
+///|
 async fn planbook_validation_criterion(
   snapshot_path : String,
 ) -> PlanbookCriterionStatus {
@@ -612,6 +634,7 @@ fn planbook_autonomy_execution_evidence(
     "- Validation command output after each implementation cycle.",
     "- AI semantic review files for book-quality governance.",
     "- Accepted/no-change/review/blocked result contracts for generic MoonClaw execution paths.",
+    "- Change-log entries in `wiki/history/change-log.md` for every live autonomy cycle.",
     "- Cookbook updates only after the behavior is validated as stable state.",
   ].join("\n")
 }
@@ -665,7 +688,11 @@ fn planbook_autonomy_ui_state_json(status : PlanbookAutonomyStatus) -> String {
     "  ],",
     "  \"readiness\": [",
     "    {\"title\":\"Self-healing status\",\"detail\":\"wiki/planning/self-healing.md\",\"meta\":\"Generated\"},",
-    "    {\"title\":\"Execution evidence\",\"detail\":\"wiki/planning/execution-evidence.md\",\"meta\":\"Generated\"}",
+    "    {\"title\":\"Execution evidence\",\"detail\":\"wiki/planning/execution-evidence.md\",\"meta\":\"Generated\"},",
+    "    {\"title\":\"Implementation backlog\",\"detail\":\"wiki/planning/implementation-backlog.md\",\"meta\":\"Document-controlled\"},",
+    "    {\"title\":\"Backlog progress\",\"detail\":\"wiki/planning/backlog-progress.md\",\"meta\":\"Cadence\"},",
+    "    {\"title\":\"Stop policy\",\"detail\":\"wiki/planning/stop-policy.md\",\"meta\":\"Safety\"},",
+    "    {\"title\":\"Change log\",\"detail\":\"wiki/history/change-log.md\",\"meta\":\"Live history\"}",
     "  ],",
     "  \"review_queue\": [",
     "    {\"title\":\"PlanBook repair backlog\",\"detail\":\"wiki/reviews/active-plan-review.md\",\"meta\":\"\{review_meta}\"}",

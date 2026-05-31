@@ -31,9 +31,11 @@ pub async fn render_moontown_planbook_status(
     "wiki/index.md", "raw/bootstrap/PLANBOOK_CONTRACT.md", "plans/2026-05-29-book-quality-upgrade/plan.md",
     "plans/2026-05-29-live-autonomy-spine/plan.md", "plans/2026-05-31-editor-mode-real-pipeline/plan.md",
     "plans/index.md", "wiki/planning/quality-gates.md", "wiki/planning/execution-evidence.md",
-    "wiki/reviews/active-plan-review.md", "wiki/history/decision-log.md", "schemas/plan-record.schema.md",
-    "skills/code-plan/SKILL.md", "skills/code-review/SKILL.md", "skills/doc-sync/SKILL.md",
-    "book/moonbook-ui-state.json", "book/site/generated/index.html",
+    "wiki/planning/role-model.md", "wiki/reviews/active-plan-review.md", "wiki/history/decision-log.md",
+    "wiki/history/change-log.md", "wiki/planning/implementation-backlog.md", "wiki/planning/backlog-progress.md",
+    "wiki/planning/stop-policy.md", "raw/backlog/implementation-backlog.json", "raw/backlog/progress.json",
+    "schemas/plan-record.schema.md", "skills/code-plan/SKILL.md", "skills/code-review/SKILL.md",
+    "skills/doc-sync/SKILL.md", "book/moonbook-ui-state.json", "book/site/generated/index.html",
   ]
   let missing : Array[String] = []
   for path in checks {
@@ -123,6 +125,10 @@ async fn write_planbook_workspace(entry : @moonbook.BookCatalogEntry) -> Unit {
     planbook_open_questions_markdown(),
   )
   write_text_file(
+    "\{root}/wiki/planning/role-model.md",
+    planbook_role_model_markdown(),
+  )
+  write_text_file(
     "\{root}/wiki/reviews/active-plan-review.md",
     planbook_active_review_markdown(),
   )
@@ -130,6 +136,11 @@ async fn write_planbook_workspace(entry : @moonbook.BookCatalogEntry) -> Unit {
     "\{root}/wiki/history/decision-log.md",
     planbook_decision_log_markdown(),
   )
+  write_text_file(
+    "\{root}/wiki/history/change-log.md",
+    planbook_change_log_seed_markdown(),
+  )
+  ignore(ensure_planbook_backlog(root))
   write_text_file(
     "\{root}/schemas/plan-record.schema.md",
     planbook_record_schema_markdown(),
@@ -150,6 +161,14 @@ async fn write_planbook_workspace(entry : @moonbook.BookCatalogEntry) -> Unit {
   let html = planbook_generated_site_html(entry)
   write_text_file("\{root}/book/Home.html", html)
   write_text_file("\{root}/book/site/generated/index.html", html)
+}
+
+///|
+fn planbook_change_log_seed_markdown() -> String {
+  [
+    "# PlanBook Change Log", "", "This log records live changes in the PlanBook-managed self-build system.",
+    "", "## Seed", "", "- PlanBook workspace bootstrapped.",
+  ].join("\n")
 }
 
 ///|
@@ -179,9 +198,14 @@ fn planbook_index_markdown(entry : @moonbook.BookCatalogEntry) -> String {
     "- `plans/2026-05-29-book-quality-upgrade/plan.md`",
     "- `plans/2026-05-31-editor-mode-real-pipeline/plan.md`",
     "- `wiki/planning/quality-gates.md`",
+    "- `wiki/planning/role-model.md`",
     "- `wiki/planning/execution-evidence.md`",
     "- `wiki/reviews/active-plan-review.md`",
     "- `wiki/history/decision-log.md`",
+    "- `wiki/history/change-log.md`",
+    "- `wiki/planning/implementation-backlog.md`",
+    "- `wiki/planning/backlog-progress.md`",
+    "- `wiki/planning/stop-policy.md`",
     "- `skills/code-plan/SKILL.md`",
   ].join("\n")
 }
@@ -194,7 +218,28 @@ fn planbook_contract_markdown() -> String {
     "- Include problem, current state, decision, alternatives, affected files, steps, acceptance criteria, validation, rollback, and follow-up.",
     "- If the task changes Moontown/MoonBook/MoonClaw/Moondesk ownership, state the boundary explicitly.",
     "- Execution must update evidence and review notes before claiming completion.",
+    "- MoonClaw workers are freelance bounded executors. They spawn for a job, write result/evidence/artifacts, then leave.",
+    "- MoonBook bookkeepers are resident book roles. They are logically live through scheduled/event-driven keeper ticks and own what becomes memory.",
+    "- Mayor owns town-wide routing and supervision; Bookkeepers own book-local memory decisions; Workers own bounded execution only.",
     "- Quality repair is allowed as review work, but the plan should aim to pass on the first implementation attempt.",
+  ].join("\n")
+}
+
+///|
+fn planbook_role_model_markdown() -> String {
+  [
+    "# Mayor, Bookkeeper, And Worker Role Model", "", "This page prevents future implementation plans from confusing durable memory ownership with temporary execution.",
+    "", "## Mayor", "", "- Scope: town-wide.", "- Runtime: logically long-lived through the daemon and live autonomy spine.",
+    "- Owns: standing goals, routing, scheduling, escalation, recovery, cross-book priority, and civic/building protocol dispatch.",
+    "- Does not own: domain truth, book wiki contents, or low-level tool execution.",
+    "", "## MoonBook Bookkeeper", "", "- Scope: one MoonBook workspace.", "- Runtime: resident role, logically live through scheduled/event-driven keeper ticks; it does not need to burn a hot process continuously.",
+    "- Wakes on: new worker result, standing-watch update, review queue change, stale projection interval, explicit operator/book request, or memory-health check.",
+    "- Owns: working memory, durable wiki promotion, source/evidence ledgers, review policy, generated site/projection quality, next questions, and book health.",
+    "- Does not own: town-global routing or arbitrary tool-heavy execution.", "",
+    "## MoonClaw Worker", "", "- Scope: one bounded task.", "- Runtime: freelance executor. Spawn when needed, execute the packet, emit structured result/evidence/artifacts, then exit.",
+    "- Owns: tool use, observations, synthesis, coding, review, image generation, result packaging, and memory candidates.",
+    "- Does not own: durable memory, wiki promotion, standing-goal cadence, or cross-book policy.",
+    "", "## Rule", "", "A future plan should specify whether it needs Mayor supervision, Bookkeeper memory work, or freelance Worker execution. If the answer is unclear, update this PlanBook before coding.",
   ].join("\n")
 }
 

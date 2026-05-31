@@ -635,6 +635,22 @@ Daemon ticks run the same check and the live spine exposes
 `planbook_open_count`, so unresolved implementation gaps stay visible while the
 town is running.
 
+The editable implementation backlog lives in the PlanBook workspace:
+
+- `raw/backlog/implementation-backlog.json`
+- `wiki/planning/implementation-backlog.md`
+- `wiki/planning/backlog-progress.md`
+- `wiki/planning/stop-policy.md`
+- `wiki/history/change-log.md`
+- `raw/backlog/completed/<id>.md`
+
+Add future self-build work by editing the JSON backlog. The daemon will pick the
+highest-priority open item after stricter self-build criteria are satisfied.
+Open items are taken one at a time. When the backlog is clear, the code-building
+check decays to a 30-minute interval. If a worker discovers the selected item is
+already done, it should write completion/progress evidence and update the plan
+or backlog instead of producing unnecessary code.
+
 `planbook repair` queues the first open self-build gap as a bounded PlanBook
 repair packet. It writes repair context, repair skill instructions, a restartable
 repair plan, and `.moontown/planbook/repair-task.json`. During live operation,
@@ -644,8 +660,10 @@ acp` and `execution_target: codex-main`, so Codex ACP can patch the Moontown
 source root and return software-engineering evidence. Accepted repairs must run
 validation, inspect `git status --short`, pass `git diff --check`, summarize the
 focused diff, and record commit status/message under the repair result contract.
-Use `planbook repair --dispatch` as an explicit operator/debug trigger. Daemon
-ticks leave active repairs alone until they are resolved or inspected.
+For `backlog-*` criteria, accepted repairs must also write
+`raw/backlog/completed/<id>.md` and record `plan_update_status`. Use
+`planbook repair --dispatch` as an explicit operator/debug trigger. Daemon ticks
+leave active repairs alone until they are resolved or inspected.
 
 For live operation, use `daemon doctor` to verify the supervisor and worker are
 healthy:
@@ -833,6 +851,19 @@ Important current functions:
 - `Mayor.prepare_keeper_packet(...)`
 
 This is the right entry if you want to extend strategic orchestration.
+
+Role lifetime rule:
+
+- Mayor is the long-lived town supervisor through daemon ticks.
+- Bookkeeper is the resident MoonBook role. It wakes on new results, standing
+  watch updates, stale projections, review queue changes, or explicit operator
+  requests, then decides what belongs in durable book memory.
+- Worker claws are freelance bounded executors. They spawn for a packet, use
+  tools, emit result/evidence/artifacts, and exit.
+
+Do not model every worker as a persistent resident. Do not let temporary workers
+own durable memory. For memory promotion, wiki upkeep, review queues, and
+generated-site quality, route through the target MoonBook bookkeeper.
 
 ## 6. Use The Scene Dashboard Model
 
