@@ -147,6 +147,10 @@ review queues, but the product concept is the protocol place.
   new MoonBit branch.
 - MoonBit code should implement reusable protocol capabilities, not hardcoded
   per-domain reasoning.
+- Self-patching is allowed only as a bounded document protocol: PlanBook names
+  the gap, target files, acceptance criteria, validation commands, and output
+  contract; MoonClaw launches the configured Codex ACP target; Codex patches the
+  repository; PlanBook records validation and review evidence.
 
 ## Boundary Table
 

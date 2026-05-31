@@ -637,11 +637,13 @@ town is running.
 
 `planbook repair` queues the first open self-build gap as a bounded PlanBook
 repair packet. It writes repair context, repair skill instructions, a restartable
-repair plan, and `.moontown/planbook/repair-task.json`. Use
-`planbook repair --dispatch` when the MoonClaw/Codex target is configured and
-you want the town to attempt the repair through the worker runtime. Daemon ticks
-queue one repair at a time and leave active repairs alone until they are
-resolved or inspected.
+repair plan, and `.moontown/planbook/repair-task.json`. During live operation,
+daemon ticks run the same path automatically: if a gap is open and no repair is
+active, the town dispatches one repair through MoonClaw using `execution_mode:
+acp` and `execution_target: codex-main`, so Codex ACP can patch the Moontown
+source root and return validation evidence. Use `planbook repair --dispatch` as
+an explicit operator/debug trigger. Daemon ticks leave active repairs alone until
+they are resolved or inspected.
 
 For live operation, use `daemon doctor` to verify the supervisor and worker are
 healthy:

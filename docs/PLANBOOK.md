@@ -203,6 +203,8 @@ The doctor checks concrete criteria such as:
 - Operator UI references live autonomy state.
 - Standing-watch outputs have a strict result contract.
 - AI semantic review results are persisted.
+- PlanBook repair can route repository source patches through Codex ACP instead
+  of only asking Codex-in-this-chat to edit files.
 - Validation evidence is recorded.
 - MoonBook has a native PlanBook skill and MoonClaw planbook profiles.
 
@@ -232,8 +234,19 @@ moon run cmd/main -- planbook repair --dispatch
 Without `--dispatch`, Moontown only queues the repair packet and records the
 active repair. With `--dispatch`, the packet is imported into MoonClaw using the
 PlanBook repair skill and the `planbook.repair.result.v1` output contract.
+For Moontown-owned source repairs, the repair profile uses
+`execution_mode: acp` and `execution_target: codex-main`; the configured ACP
+target runs from the repository source root, not only the PlanBook workspace.
+That is the intended self-patching path: Mayor/PlanBook choose and bound the
+gap, MoonClaw launches Codex ACP as the code executor, Codex patches the repo,
+and PlanBook reconciles the result contract after validation.
 If the gap belongs in MoonBook or MoonClaw, the repair worker must return a
 precise ownership blocker instead of moving that responsibility into Moontown.
+
+This still must stay bounded. The town should not run an unconstrained generic
+agent loop with arbitrary authority. A self-patch must name target files,
+acceptance criteria, validation commands, and the durable PlanBook evidence it
+will update.
 
 ## Relation To Voice And Parallel Work
 

@@ -22,6 +22,7 @@ async test "planbook autonomy doctor writes self-healing evidence" {
   )
   assert_true(status_text.contains("\"status\": \"self-healing-open\""))
   assert_true(status_text.contains("editor-mode-real-pipeline"))
+  assert_true(status_text.contains("planbook-source-patch-loop"))
   assert_true(status_text.contains("moonbook-native-planbook-provider"))
   assert_true(evidence.contains("PlanBook autonomy doctor"))
   assert_true(review.contains("needs-fix"))
@@ -348,11 +349,23 @@ async test "planbook repair queues bounded packet without marking it active befo
   assert_true(task_text.contains("semantic-ai-review-results"))
   assert_true(packet_text.contains("planbook.repair.result.v1"))
   assert_true(packet_text.contains("\"target_files\""))
+  assert_true(
+    packet_text.contains("\"execution_mode\":\"acp\"") ||
+    packet_text.contains("\"execution_mode\": \"acp\""),
+  )
+  assert_true(
+    packet_text.contains("\"execution_target\":\"codex-main\"") ||
+    packet_text.contains("\"execution_target\": \"codex-main\""),
+  )
   assert_true(packet_text.contains("\"best_effort_on_timeout\":false"))
   assert_true(skill_text.contains("PlanBook Repair Skill"))
   assert_true(skill_text.contains("Use exact `target_files`"))
+  assert_true(skill_text.contains("configured Codex ACP target"))
+  assert_true(skill_text.contains("repository source root"))
   assert_true(profile_text.contains("planbook_repair_worker"))
   assert_true(profile_text.contains("repair_planbook_gap"))
+  assert_true(profile_text.contains("\"execution_mode\": \"acp\""))
+  assert_true(profile_text.contains("\"execution_target\": \"codex-main\""))
   assert_eq(planbook_repair_active_count(snapshot_path~), 0)
 }
 
@@ -515,6 +528,7 @@ async test "planbook repair acp target uses resolved codex command" {
     ),
   )
   let target = read_text_or_empty("\{workspace_root}/.moonclaw/moonclaw.json")
+  let source_root = planbook_repair_source_root()
   assert_true(
     target.contains(
       "\"command\": \"/Users/kq/.nvm/versions/node/v22.22.1/bin/node\"",
@@ -526,6 +540,9 @@ async test "planbook repair acp target uses resolved codex command" {
     ),
   )
   assert_true(!target.contains("\"command\": \"codex\""))
+  assert_true(target.contains("\"cwd\": \"\{source_root}\""))
+  assert_true(target.contains("\"workspace\": \"\{source_root}\""))
+  assert_true(!target.contains("\"cwd\": \"\{workspace_root}\""))
 }
 
 ///|

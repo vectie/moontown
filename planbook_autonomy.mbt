@@ -147,6 +147,7 @@ async fn planbook_autonomy_criteria(
     planbook_semantic_review_criterion(snapshot_path, book_catalog_path),
     planbook_editor_feature_selection_criterion(workspace_root),
     planbook_editor_selected_feature_implementation_criterion(workspace_root),
+    planbook_source_patch_loop_criterion(),
     planbook_validation_criterion(snapshot_path),
     planbook_runtime_recovery_criterion(snapshot_path),
     planbook_moonbook_provider_criterion(),
@@ -325,6 +326,32 @@ async fn planbook_editor_selected_feature_implementation_criterion(
     ready,
     editor_selected_feature_implementation_evidence(workspace_root),
     editor_selected_feature_implementation_next_action(workspace_root),
+  )
+}
+
+///|
+async fn planbook_source_patch_loop_criterion() -> PlanbookCriterionStatus {
+  let repair_file = "planbook_repair.mbt"
+  let acp_ready = text_file_contains(repair_file, "\"execution_mode\": \"acp\"") &&
+    text_file_contains(repair_file, "\"execution_target\": \"codex-main\"") &&
+    text_file_contains(repair_file, "write_planbook_repair_acp_target") &&
+    text_file_contains(repair_file, "\"cwd\": source_root") &&
+    text_file_contains(repair_file, "codex-acp-repo-patch")
+  let skill_ready = text_file_contains(
+    repair_file, "Codex ACP source-patching target",
+  )
+  planbook_criterion(
+    "planbook-source-patch-loop",
+    "2026-05-31-editor-mode-real-pipeline",
+    "PlanBook repair can patch repository source through Codex ACP",
+    "moontown+moonclaw+codex-acp",
+    acp_ready && skill_ready,
+    if acp_ready && skill_ready {
+      "PlanBook repair packets use `execution_mode: acp`, target `codex-main`, and a Codex ACP target rooted at the repository source tree"
+    } else {
+      "PlanBook repair still cannot prove a source-patching ACP route; it may only plan or validate without editing repository code"
+    },
+    "route PlanBook repair packets through Codex ACP with source-root cwd/workspace, then require repair-result evidence after validation",
   )
 }
 

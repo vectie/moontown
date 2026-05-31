@@ -142,7 +142,7 @@ pub async fn render_moontown_planbook_repair_status(
             return render_planbook_repair_markdown(index_task, result_text~)
           }
           None =>
-            return "PlanBook repair task at \{path} is stale: autonomy now has open gap `\{criterion.id}`. Run `moon run cmd/main -- planbook repair --dispatch` to refresh and dispatch the bounded repair."
+            return "PlanBook repair task at \{path} is stale: autonomy now has open gap `\{criterion.id}`. The next daemon tick will refresh and dispatch one bounded Codex ACP repair; run `moon run cmd/main -- planbook repair --dispatch` only for an explicit operator retry."
         }
       None => ()
     }
@@ -461,7 +461,7 @@ async fn materialize_planbook_repair_task(
   let mut proposal_id : String? = None
   let mut run_id : String? = None
   let mut task_status = "queued"
-  let mut summary = "Queued bounded repair packet for `\{criterion.id}`. Dispatch with `moon run cmd/main -- planbook repair --dispatch` when MoonClaw/Codex execution is available."
+  let mut summary = "Queued bounded repair packet for `\{criterion.id}`. Daemon ticks dispatch one Codex ACP repair automatically when no repair is active; `planbook repair --dispatch` is the explicit operator/debug trigger."
   if dispatch {
     let imported = @moonclaw.import_packet(
       packet,
@@ -583,6 +583,7 @@ async fn write_planbook_repair_moonclaw_profile(
 async fn write_planbook_repair_acp_target(workspace_root : String) -> Unit {
   let home = "\{workspace_root}/.moonclaw"
   let path = "\{home}/moonclaw.json"
+  let source_root = planbook_repair_source_root()
   let base = if @fs.exists(path) {
     @json.parse(@fs.read_file(path).text()) catch {
       _ => Json::object({})
@@ -597,8 +598,8 @@ async fn write_planbook_repair_acp_target(workspace_root : String) -> Unit {
   targets["codex-main"] = {
     "backend": "codex",
     "label": "Codex PlanBook Repair",
-    "cwd": workspace_root,
-    "workspace": workspace_root,
+    "cwd": source_root,
+    "workspace": source_root,
     "command": codex_command,
     "args": resolved_codex_args(),
     "model": "gpt-5",
@@ -724,7 +725,8 @@ fn planbook_repair_worker_profile_json() -> Json {
         "metadata": {
           "preferred_skills": ["planbook-repair", "code-plan", "code-review"],
           "enable_tools": true,
-          "execution_mode": "local",
+          "execution_mode": "acp",
+          "execution_target": "codex-main",
           "output_contract": "planbook.repair.result.v1",
           "source_root": planbook_repair_source_root(),
           "target_files": planbook_repair_target_files("default"),
@@ -739,7 +741,7 @@ fn planbook_repair_worker_profile_json() -> Json {
           "role_runtime": {
             "planning_layer": "town-self-healing",
             "runtime_mode": "bounded-repair",
-            "tool_access": "workspace-and-repo",
+            "tool_access": "codex-acp-repo-patch",
             "memory_scope": "planbook",
             "allow_delegate": false,
             "allow_workspace_write": true,
@@ -796,7 +798,8 @@ fn planbook_repair_packet(
       },
       "step_metadata": {
         "kind": "planbook_repair".to_json(),
-        "execution_mode": "local".to_json(),
+        "execution_mode": "acp".to_json(),
+        "execution_target": "codex-main".to_json(),
         "output_contract": "planbook.repair.result.v1".to_json(),
         "preferred_skills": ["planbook-repair", "code-plan", "code-review"].to_json(),
         "source_root": planbook_repair_source_root().to_json(),
@@ -827,7 +830,7 @@ fn planbook_repair_request_text(criterion : PlanbookCriterionStatus) -> String {
     "1. Read `skills/planbook-repair/SKILL.md` and the repair context.",
     "2. Decide whether this can be fixed inside Moontown or must be handed to MoonBook/MoonClaw.",
     "3. Use only the exact target files first; do not run broad `find .`, broad `rg`, or whole-repo `search_files` unless those target files prove insufficient.",
-    "4. If it can be fixed safely, apply the smallest code/docs change using MoonClaw's tool-enabled local execution path.",
+    "4. If it can be fixed safely, apply the smallest code/docs change through the configured Codex ACP source-patching target.",
     "5. If the criterion is `editor-selected-feature-implementation`, treat `raw/editor-pipeline/next-feature.json` as the source of truth. Do not replace it with a fixed feature list. Implement the selected feature acceptance criteria and write `raw/editor-pipeline/selected-feature-implementation.md` with `contract: moontown.editor_selected_feature_implementation.v1`, `selected_feature: <id>`, and `implementation_status: accepted` only after validation.",
     "6. Run or name validation commands.",
     "7. Write `raw/repair/repair-result.md` with decision, files changed, validation, remaining blockers, and cookbook impact.",
@@ -893,7 +896,7 @@ fn planbook_repair_plan_markdown(criterion : PlanbookCriterionStatus) -> String 
 fn planbook_repair_skill_markdown() -> String {
   [
     "---", "name: planbook-repair", "description: Repair one bounded PlanBook self-build gap while preserving Moontown/MoonBook/MoonClaw ownership boundaries.",
-    "---", "", "# PlanBook Repair Skill", "", "You repair exactly one self-build criterion. Prefer small patches, direct validation, and explicit blockers over broad rewrites.",
+    "---", "", "# PlanBook Repair Skill", "", "You repair exactly one self-build criterion. Prefer small source patches, direct validation, and explicit blockers over broad rewrites.",
     "", "## Required Decision", "", "- `repair_decision`: accepted | needs_external_owner | blocked | no_change",
     "- `criterion_id`: the criterion being repaired", "- `files_changed`: exact files changed, or `none`",
     "- `validation`: commands run and results", "- `remaining_blockers`: unresolved gaps",
@@ -902,6 +905,7 @@ fn planbook_repair_skill_markdown() -> String {
     "- For selected editor features, write `raw/editor-pipeline/selected-feature-implementation.md` with `contract: moontown.editor_selected_feature_implementation.v1`, `selected_feature: <id>`, and `implementation_status: accepted` only after validation.",
     "- For MoonBook-native provider/profile work, produce a MoonBook patch plan or patch only when executing inside MoonBook.",
     "- For MoonClaw runtime/provider work, produce a MoonClaw patch plan or patch only when executing inside MoonClaw.",
+    "- When execution mode is `acp`, use the configured Codex ACP target to patch the repository source root, not just the PlanBook workspace.",
     "- Never claim success because a markdown plan exists.", "- Rerun the PlanBook doctor after a local repair.",
     "- Use exact `target_files` before any broad search.", "- Do not run whole-repo `find`, `rg`, or `search_files` until the exact target files prove insufficient.",
     "", "## Concrete Example", "", "```md", "repair_decision: accepted", "criterion_id: planbook-live-spine",

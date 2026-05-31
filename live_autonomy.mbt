@@ -545,7 +545,7 @@ fn live_autonomy_next_actions(
     )
   } else if planbook_open > 0 {
     actions.push(
-      "PlanBook has \{planbook_open} open self-build gap(s); Mayor should queue or dispatch the top repair packet and validate it.",
+      "PlanBook has \{planbook_open} open self-build gap(s); the next daemon tick will queue and dispatch the top bounded Codex ACP repair packet when no repair is active.",
     )
   }
   if active_workers == 0 && due_goals == 0 {

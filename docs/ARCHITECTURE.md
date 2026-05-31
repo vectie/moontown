@@ -598,10 +598,13 @@ When the doctor finds open gaps, the daemon queues exactly one bounded repair
 packet through the PlanBook repair bridge. The bridge materializes a repair
 context, repair `SKILL.md`, repair plan, and MoonClaw packet under the PlanBook
 workspace, then records `.moontown/planbook/repair-task.json`. The packet uses
-the `planbook.repair.result.v1` contract and can be dispatched explicitly with
-`planbook repair --dispatch`. This is the current self-build spine: detect gaps,
-turn the top gap into executable work, preserve ownership boundaries, then
-validate and rerun the doctor.
+the `planbook.repair.result.v1` contract and, during daemon ticks, is dispatched
+through MoonClaw with `execution_mode: acp` and `execution_target: codex-main`.
+The Codex ACP target is rooted at the Moontown source tree, so the town can patch
+its own repository instead of stopping at plan-only output. `planbook repair
+--dispatch` remains an explicit operator/debug trigger. This is the current
+self-build spine: detect gaps, turn the top gap into executable source work,
+preserve ownership boundaries, validate, and rerun the doctor.
 
 Daemon supervision also preserves the supervisor-recorded worker PID instead of
 letting a worker loop overwrite it with an unreliable self-detected PID. That

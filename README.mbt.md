@@ -281,10 +281,12 @@ visible in the live autonomy spine instead of leaving them as static docs.
 `planbook repair` turns the first open self-build gap into a bounded repair
 packet under the PlanBook workspace. It writes repair context, a repair
 `SKILL.md`, a restartable repair plan, `.moontown/planbook/repair-task.json`,
-and `.moontown/planbook/repair-task.md`. Use
-`planbook repair --dispatch` only when the MoonClaw/Codex execution target is
-available; otherwise the packet remains queued for safe inspection. Daemon ticks
-queue one repair packet at a time and do not duplicate active repairs.
+and `.moontown/planbook/repair-task.md`. When the daemon sees an open gap and no
+active repair, it dispatches one bounded repair packet through MoonClaw with
+`execution_mode: acp` and `execution_target: codex-main`, so Codex ACP can patch
+the Moontown source root and return validation evidence. Use
+`planbook repair --dispatch` as an explicit operator/debug trigger; daemon ticks
+are the normal self-patching route and do not duplicate active repairs.
 
 ## Book Quality Governance
 
