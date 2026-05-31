@@ -641,9 +641,11 @@ repair plan, and `.moontown/planbook/repair-task.json`. During live operation,
 daemon ticks run the same path automatically: if a gap is open and no repair is
 active, the town dispatches one repair through MoonClaw using `execution_mode:
 acp` and `execution_target: codex-main`, so Codex ACP can patch the Moontown
-source root and return validation evidence. Use `planbook repair --dispatch` as
-an explicit operator/debug trigger. Daemon ticks leave active repairs alone until
-they are resolved or inspected.
+source root and return software-engineering evidence. Accepted repairs must run
+validation, inspect `git status --short`, pass `git diff --check`, summarize the
+focused diff, and record commit status/message under the repair result contract.
+Use `planbook repair --dispatch` as an explicit operator/debug trigger. Daemon
+ticks leave active repairs alone until they are resolved or inspected.
 
 For live operation, use `daemon doctor` to verify the supervisor and worker are
 healthy:

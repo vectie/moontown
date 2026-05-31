@@ -604,7 +604,10 @@ The Codex ACP target is rooted at the Moontown source tree, so the town can patc
 its own repository instead of stopping at plan-only output. `planbook repair
 --dispatch` remains an explicit operator/debug trigger. This is the current
 self-build spine: detect gaps, turn the top gap into executable source work,
-preserve ownership boundaries, validate, and rerun the doctor.
+preserve ownership boundaries, validate, inspect git status/diff hygiene, record
+commit status/message, and rerun the doctor. The default policy can prepare a
+local commit after validation, while push remains disabled unless an explicit
+future policy enables it.
 
 Daemon supervision also preserves the supervisor-recorded worker PID instead of
 letting a worker loop overwrite it with an unreliable self-detected PID. That

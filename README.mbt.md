@@ -284,9 +284,12 @@ packet under the PlanBook workspace. It writes repair context, a repair
 and `.moontown/planbook/repair-task.md`. When the daemon sees an open gap and no
 active repair, it dispatches one bounded repair packet through MoonClaw with
 `execution_mode: acp` and `execution_target: codex-main`, so Codex ACP can patch
-the Moontown source root and return validation evidence. Use
-`planbook repair --dispatch` as an explicit operator/debug trigger; daemon ticks
-are the normal self-patching route and do not duplicate active repairs.
+the Moontown source root and return software-engineering evidence. Accepted
+repairs must run validation, inspect `git status --short`, pass
+`git diff --check`, summarize the focused diff, and record commit status/message
+under the repair result contract. Use `planbook repair --dispatch` as an
+explicit operator/debug trigger; daemon ticks are the normal self-patching route
+and do not duplicate active repairs.
 
 ## Book Quality Governance
 

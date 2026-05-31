@@ -148,6 +148,7 @@ async fn planbook_autonomy_criteria(
     planbook_editor_feature_selection_criterion(workspace_root),
     planbook_editor_selected_feature_implementation_criterion(workspace_root),
     planbook_source_patch_loop_criterion(),
+    planbook_engineering_loop_criterion(),
     planbook_validation_criterion(snapshot_path),
     planbook_runtime_recovery_criterion(snapshot_path),
     planbook_moonbook_provider_criterion(),
@@ -352,6 +353,39 @@ async fn planbook_source_patch_loop_criterion() -> PlanbookCriterionStatus {
       "PlanBook repair still cannot prove a source-patching ACP route; it may only plan or validate without editing repository code"
     },
     "route PlanBook repair packets through Codex ACP with source-root cwd/workspace, then require repair-result evidence after validation",
+  )
+}
+
+///|
+async fn planbook_engineering_loop_criterion() -> PlanbookCriterionStatus {
+  let repair_file = "planbook_repair.mbt"
+  let metadata_ready = text_file_contains(
+      repair_file, "required_engineering_steps",
+    ) &&
+    text_file_contains(repair_file, "git_policy") &&
+    text_file_contains(repair_file, "commit_after_validation") &&
+    text_file_contains(repair_file, "push_after_commit")
+  let skill_ready = text_file_contains(repair_file, "diff_summary") &&
+    text_file_contains(repair_file, "commit_status") &&
+    text_file_contains(repair_file, "git diff --check") &&
+    text_file_contains(repair_file, "git status --short")
+  let validation_ready = text_file_contains(
+      repair_file, "planbook_repair_required_commands",
+    ) &&
+    text_file_contains(repair_file, "moon test --no-render") &&
+    text_file_contains(repair_file, "moon info")
+  planbook_criterion(
+    "planbook-software-engineering-loop",
+    "2026-05-31-editor-mode-real-pipeline",
+    "PlanBook repair uses a full software-engineering loop, not patch-only execution",
+    "moontown+moonclaw+codex-acp",
+    metadata_ready && skill_ready && validation_ready,
+    if metadata_ready && skill_ready && validation_ready {
+      "PlanBook repair packets require validation commands, git diff/status hygiene, commit policy, and commit evidence fields"
+    } else {
+      "PlanBook repair can patch source but does not yet prove testing, diff hygiene, and commit discipline"
+    },
+    "extend PlanBook repair packets and skills with required validation, diff inspection, commit policy, and durable engineering evidence",
   )
 }
 

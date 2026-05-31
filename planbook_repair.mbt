@@ -804,6 +804,18 @@ fn planbook_repair_packet(
         "preferred_skills": ["planbook-repair", "code-plan", "code-review"].to_json(),
         "source_root": planbook_repair_source_root().to_json(),
         "target_files": planbook_repair_target_files(criterion.id).to_json(),
+        "required_validation_commands": planbook_repair_required_commands().to_json(),
+        "required_engineering_steps": [
+          "inspect-plan", "apply-small-patch", "run-validation", "inspect-git-diff",
+          "write-repair-result", "prepare-commit-summary",
+        ].to_json(),
+        "git_policy": {
+          "inspect_status": true.to_json(),
+          "inspect_diff": true.to_json(),
+          "commit_after_validation": true.to_json(),
+          "push_after_commit": false.to_json(),
+          "commit_message_required": true.to_json(),
+        }.to_json(),
         "target_pages": [
           "raw/repair/repair-result.md", "wiki/reviews/active-plan-review.md", "wiki/planning/execution-evidence.md",
         ].to_json(),
@@ -832,9 +844,11 @@ fn planbook_repair_request_text(criterion : PlanbookCriterionStatus) -> String {
     "3. Use only the exact target files first; do not run broad `find .`, broad `rg`, or whole-repo `search_files` unless those target files prove insufficient.",
     "4. If it can be fixed safely, apply the smallest code/docs change through the configured Codex ACP source-patching target.",
     "5. If the criterion is `editor-selected-feature-implementation`, treat `raw/editor-pipeline/next-feature.json` as the source of truth. Do not replace it with a fixed feature list. Implement the selected feature acceptance criteria and write `raw/editor-pipeline/selected-feature-implementation.md` with `contract: moontown.editor_selected_feature_implementation.v1`, `selected_feature: <id>`, and `implementation_status: accepted` only after validation.",
-    "6. Run or name validation commands.",
-    "7. Write `raw/repair/repair-result.md` with decision, files changed, validation, remaining blockers, and cookbook impact.",
-    "8. Do not mark the criterion satisfied unless evidence exists after validation.",
+    "6. Run the required validation commands unless the result explicitly explains why a command could not run.",
+    "7. Inspect `git status --short`, `git diff --check`, and the focused diff before declaring success.",
+    "8. If validation passes and files changed, prepare a local commit with a clear message according to the repair packet git policy; do not push unless policy allows it.",
+    "9. Write `raw/repair/repair-result.md` with decision, files changed, validation, diff summary, commit status, remaining blockers, and cookbook impact.",
+    "10. Do not mark the criterion satisfied unless evidence exists after validation.",
     "",
     "Target files:",
     planbook_repair_target_files_markdown(criterion.id),
@@ -886,7 +900,9 @@ fn planbook_repair_plan_markdown(criterion : PlanbookCriterionStatus) -> String 
     "## Acceptance Criteria",
     "",
     "- [ ] Repair worker writes `raw/repair/repair-result.md`.",
-    "- [ ] Validation command is recorded.",
+    "- [ ] Required validation commands are run or explicitly blocked.",
+    "- [ ] `git diff --check`, `git status --short`, and focused diff hygiene are recorded.",
+    "- [ ] Local commit readiness is recorded; if files changed and validation passed, the worker prepares a commit according to policy.",
     "- [ ] PlanBook autonomy doctor reruns and updates `.moontown/planbook/autonomy.json`.",
     "- [ ] If ownership is outside Moontown, the result names the correct repository and does not fake completion.",
   ].join("\n")
@@ -899,19 +915,26 @@ fn planbook_repair_skill_markdown() -> String {
     "---", "", "# PlanBook Repair Skill", "", "You repair exactly one self-build criterion. Prefer small source patches, direct validation, and explicit blockers over broad rewrites.",
     "", "## Required Decision", "", "- `repair_decision`: accepted | needs_external_owner | blocked | no_change",
     "- `criterion_id`: the criterion being repaired", "- `files_changed`: exact files changed, or `none`",
-    "- `validation`: commands run and results", "- `remaining_blockers`: unresolved gaps",
-    "- `cookbook_impact`: none | update_needed | updated", "", "## Rules", "", "- Fix Moontown-owned routing/live-spine/UI/docs issues inside Moontown.",
+    "- `validation`: commands run and results", "- `diff_summary`: git status/diff hygiene and important changed hunks",
+    "- `commit_status`: committed | ready_to_commit | skipped_no_change | blocked",
+    "- `commit_message`: proposed or actual local commit message", "- `push_status`: not_pushed_by_policy | pushed | blocked",
+    "- `remaining_blockers`: unresolved gaps", "- `cookbook_impact`: none | update_needed | updated",
+    "", "## Rules", "", "- Fix Moontown-owned routing/live-spine/UI/docs issues inside Moontown.",
     "- For `editor-selected-feature-implementation`, read `raw/editor-pipeline/next-feature.json` and implement the selected feature; do not choose a different feature in code.",
     "- For selected editor features, write `raw/editor-pipeline/selected-feature-implementation.md` with `contract: moontown.editor_selected_feature_implementation.v1`, `selected_feature: <id>`, and `implementation_status: accepted` only after validation.",
     "- For MoonBook-native provider/profile work, produce a MoonBook patch plan or patch only when executing inside MoonBook.",
     "- For MoonClaw runtime/provider work, produce a MoonClaw patch plan or patch only when executing inside MoonClaw.",
     "- When execution mode is `acp`, use the configured Codex ACP target to patch the repository source root, not just the PlanBook workspace.",
     "- Never claim success because a markdown plan exists.", "- Rerun the PlanBook doctor after a local repair.",
+    "- Run validation, inspect the focused diff, run `git diff --check`, and record `git status --short`.",
+    "- If files changed and validation passed, create or prepare a local commit according to packet policy; do not push unless the policy explicitly allows it.",
     "- Use exact `target_files` before any broad search.", "- Do not run whole-repo `find`, `rg`, or `search_files` until the exact target files prove insufficient.",
     "", "## Concrete Example", "", "```md", "repair_decision: accepted", "criterion_id: planbook-live-spine",
     "files_changed: live_autonomy.mbt, planbook_autonomy.mbt", "validation: moon check --no-render passed; moon test planbook_autonomy_wbtest.mbt passed",
-    "remaining_blockers: none for this criterion", "cookbook_impact: update_needed",
-    "```",
+    "diff_summary: git diff --check passed; focused diff only changed live autonomy criterion wiring",
+    "commit_status: ready_to_commit", "commit_message: Route PlanBook live repair through autonomy spine",
+    "push_status: not_pushed_by_policy", "remaining_blockers: none for this criterion",
+    "cookbook_impact: update_needed", "```",
   ].join("\n")
 }
 
@@ -1104,7 +1127,15 @@ fn planbook_repair_result_satisfies_contract(
     text.contains("\"repair_decision\": \"needs_external_owner\"") ||
     text.contains("\"repair_decision\": \"blocked\"") ||
     text.contains("\"repair_decision\": \"no_change\"")
-  has_criterion && has_decision
+  let accepted = text.contains("repair_decision: accepted") ||
+    text.contains("\"repair_decision\":\"accepted\"") ||
+    text.contains("\"repair_decision\": \"accepted\"")
+  let has_engineering_evidence = text.contains("validation:") &&
+    text.contains("diff_summary:") &&
+    text.contains("commit_status:") &&
+    text.contains("commit_message:") &&
+    text.contains("push_status:")
+  has_criterion && has_decision && (!accepted || has_engineering_evidence)
 }
 
 ///|
@@ -1155,5 +1186,13 @@ fn planbook_noop_repair_task(
 
 ///|
 fn planbook_repair_validation_command() -> String {
-  "moon check --no-render && moon test planbook_autonomy_wbtest.mbt live_autonomy_wbtest.mbt && moon test"
+  planbook_repair_required_commands().join(" && ")
+}
+
+///|
+fn planbook_repair_required_commands() -> Array[String] {
+  [
+    "moon check --no-render", "moon test planbook_autonomy_wbtest.mbt live_autonomy_wbtest.mbt --no-render",
+    "moon test --no-render", "moon fmt", "moon info", "git diff --check",
+  ]
 }

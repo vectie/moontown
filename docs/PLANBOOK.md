@@ -239,14 +239,20 @@ For Moontown-owned source repairs, the repair profile uses
 target runs from the repository source root, not only the PlanBook workspace.
 That is the intended self-patching path: Mayor/PlanBook choose and bound the
 gap, MoonClaw launches Codex ACP as the code executor, Codex patches the repo,
-and PlanBook reconciles the result contract after validation.
+and PlanBook reconciles the result contract after validation, diff inspection,
+and commit readiness.
 If the gap belongs in MoonBook or MoonClaw, the repair worker must return a
 precise ownership blocker instead of moving that responsibility into Moontown.
 
 This still must stay bounded. The town should not run an unconstrained generic
 agent loop with arbitrary authority. A self-patch must name target files,
 acceptance criteria, validation commands, and the durable PlanBook evidence it
-will update.
+will update. An accepted repair must also record the software-engineering
+evidence expected from a human-quality code change: validation command results,
+`git diff --check`, `git status --short`, a focused diff summary, commit
+status/message, and push status. The default policy allows local commit
+preparation after validation but does not push unless a future policy explicitly
+enables it.
 
 ## Relation To Voice And Parallel Work
 

@@ -23,6 +23,7 @@ async test "planbook autonomy doctor writes self-healing evidence" {
   assert_true(status_text.contains("\"status\": \"self-healing-open\""))
   assert_true(status_text.contains("editor-mode-real-pipeline"))
   assert_true(status_text.contains("planbook-source-patch-loop"))
+  assert_true(status_text.contains("planbook-software-engineering-loop"))
   assert_true(status_text.contains("moonbook-native-planbook-provider"))
   assert_true(evidence.contains("PlanBook autonomy doctor"))
   assert_true(review.contains("needs-fix"))
@@ -357,11 +358,20 @@ async test "planbook repair queues bounded packet without marking it active befo
     packet_text.contains("\"execution_target\":\"codex-main\"") ||
     packet_text.contains("\"execution_target\": \"codex-main\""),
   )
+  assert_true(packet_text.contains("required_engineering_steps"))
+  assert_true(packet_text.contains("required_validation_commands"))
+  assert_true(packet_text.contains("git_policy"))
+  assert_true(packet_text.contains("commit_after_validation"))
+  assert_true(packet_text.contains("push_after_commit"))
   assert_true(packet_text.contains("\"best_effort_on_timeout\":false"))
   assert_true(skill_text.contains("PlanBook Repair Skill"))
   assert_true(skill_text.contains("Use exact `target_files`"))
   assert_true(skill_text.contains("configured Codex ACP target"))
   assert_true(skill_text.contains("repository source root"))
+  assert_true(skill_text.contains("diff_summary"))
+  assert_true(skill_text.contains("commit_status"))
+  assert_true(skill_text.contains("git diff --check"))
+  assert_true(skill_text.contains("git status --short"))
   assert_true(profile_text.contains("planbook_repair_worker"))
   assert_true(profile_text.contains("repair_planbook_gap"))
   assert_true(profile_text.contains("\"execution_mode\": \"acp\""))
@@ -454,10 +464,21 @@ test "planbook repair result contract rejects best-effort timeout placeholders" 
     ),
   )
   assert_true(
-    planbook_repair_result_satisfies_contract(
+    !planbook_repair_result_satisfies_contract(
       [
         "repair_decision: accepted", "criterion_id: editor-mode-real-pipeline", "files_changed: editor_pipeline.mbt",
         "validation: moon check --no-render passed",
+      ].join("\n"),
+      criterion_id,
+    ),
+  )
+  assert_true(
+    planbook_repair_result_satisfies_contract(
+      [
+        "repair_decision: accepted", "criterion_id: editor-mode-real-pipeline", "files_changed: editor_pipeline.mbt",
+        "validation: moon check --no-render passed", "diff_summary: git diff --check passed",
+        "commit_status: ready_to_commit", "commit_message: Add editor pipeline verification",
+        "push_status: not_pushed_by_policy",
       ].join("\n"),
       criterion_id,
     ),
