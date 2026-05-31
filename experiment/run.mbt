@@ -5,7 +5,7 @@ pub enum ExperimentPhase {
   CoolingDown
   Complete
   Halted
-} derive(Show, Eq)
+} derive(Debug, Eq)
 
 ///|
 pub fn experiment_phases() -> Array[ExperimentPhase] {
@@ -17,7 +17,7 @@ pub struct Cohort {
   id : String
   name : String
   participants : Array[String]
-} derive(Show, Eq)
+} derive(Debug, Eq)
 
 ///|
 pub fn Cohort::new(
@@ -34,7 +34,7 @@ pub struct Intervention {
   title : String
   detail : String
   target_book_ids : Array[String]
-} derive(Show, Eq)
+} derive(Debug, Eq)
 
 ///|
 pub fn Intervention::new(
@@ -51,7 +51,7 @@ pub struct Measurement {
   metric : String
   value : Double
   note : String
-} derive(Show, Eq)
+} derive(Debug, Eq)
 
 ///|
 pub fn Measurement::new(
@@ -67,7 +67,7 @@ pub struct StopRule {
   metric : String
   threshold : Double
   direction : String
-} derive(Show, Eq)
+} derive(Debug, Eq)
 
 ///|
 pub fn StopRule::new(
@@ -86,7 +86,7 @@ pub struct ExperimentDefinition {
   target_book_ids : Array[String]
   interventions : Array[Intervention]
   stop_rules : Array[StopRule]
-} derive(Show, Eq)
+} derive(Debug, Eq)
 
 ///|
 pub fn ExperimentDefinition::new(
@@ -108,14 +108,14 @@ pub struct ExperimentRun {
   cohorts : Array[Cohort]
   measurements : Array[Measurement]
   spawned_task_ids : Array[String]
-} derive(Show, Eq)
+} derive(Debug, Eq)
 
 ///|
 pub struct ExperimentOutcome {
   run_id : String
   summary : String
   should_stop : Bool
-} derive(Show, Eq)
+} derive(Debug, Eq)
 
 ///|
 pub fn start_experiment(

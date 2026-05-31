@@ -6,14 +6,14 @@ pub(all) enum WorkDomain {
   Operations
   SocialExperiment
   Custom(String)
-} derive(Show, Eq, ToJson, FromJson)
+} derive(Debug, Eq, ToJson, FromJson)
 
 ///|
 pub(all) enum MemoryScope {
   SharedTown
   BookPrivate
   TaskEphemeral
-} derive(Show, Eq, ToJson, FromJson)
+} derive(Debug, Eq, ToJson, FromJson)
 
 ///|
 pub(all) enum WorkerRole {
@@ -24,7 +24,7 @@ pub(all) enum WorkerRole {
   MemoryKeeper
   Watcher
   Operator
-} derive(Show, Eq, ToJson, FromJson)
+} derive(Debug, Eq, ToJson, FromJson)
 
 ///|
 pub(all) enum WorkerStatus {
@@ -33,7 +33,7 @@ pub(all) enum WorkerStatus {
   Waiting
   Blocked
   Offline
-} derive(Show, Eq, ToJson, FromJson)
+} derive(Debug, Eq, ToJson, FromJson)
 
 ///|
 pub(all) enum TownTaskStatus {
@@ -44,7 +44,7 @@ pub(all) enum TownTaskStatus {
   Blocked
   Done
   Failed
-} derive(Show, Eq, ToJson, FromJson)
+} derive(Debug, Eq, ToJson, FromJson)
 
 ///|
 pub(all) enum IsolationMode {
@@ -52,7 +52,7 @@ pub(all) enum IsolationMode {
   BookWorkspace
   Worktree
   Sandboxed
-} derive(Show, Eq, ToJson, FromJson)
+} derive(Debug, Eq, ToJson, FromJson)
 
 ///|
 pub(all) enum TaskExecutionStatus {
@@ -65,7 +65,7 @@ pub(all) enum TaskExecutionStatus {
   Completed
   Stale
   Failed
-} derive(Show, Eq, ToJson, FromJson)
+} derive(Debug, Eq, ToJson, FromJson)
 
 ///|
 pub struct TownConfig {
@@ -73,7 +73,7 @@ pub struct TownConfig {
   name : String
   heartbeat_seconds : Int
   max_concurrent_tasks : Int
-} derive(Show, Eq, ToJson, FromJson)
+} derive(Debug, Eq, ToJson, FromJson)
 
 ///|
 pub fn TownConfig::new(
@@ -93,7 +93,7 @@ pub struct BookRef {
   workspace_root : String
   memory_scope : MemoryScope
   tags : Array[String]
-} derive(Show, Eq, ToJson, FromJson)
+} derive(Debug, Eq, ToJson, FromJson)
 
 ///|
 pub fn BookRef::new(
@@ -115,7 +115,7 @@ pub struct WorkerRef {
   role : WorkerRole
   capabilities : Array[String]
   status : WorkerStatus
-} derive(Show, Eq, ToJson, FromJson)
+} derive(Debug, Eq, ToJson, FromJson)
 
 ///|
 pub fn WorkerRef::new(
@@ -139,7 +139,7 @@ pub struct TownTask {
   required_role : WorkerRole?
   required_capabilities : Array[String]
   status : TownTaskStatus
-} derive(Show, Eq, ToJson, FromJson)
+} derive(Debug, Eq, ToJson, FromJson)
 
 ///|
 pub fn TownTask::new(
@@ -176,7 +176,7 @@ pub struct StandingGoal {
   enabled : Bool
   source_policy : String
   quality_threshold : Int
-} derive(Show, Eq, ToJson, FromJson)
+} derive(Debug, Eq, ToJson, FromJson)
 
 ///|
 pub fn StandingGoal::new(
@@ -226,7 +226,7 @@ pub(all) enum WatcherDecisionKind {
   NeedsReview
   Failed
   Deferred
-} derive(Show, Eq, ToJson, FromJson)
+} derive(Debug, Eq, ToJson, FromJson)
 
 ///|
 pub struct WatcherRunRecord {
@@ -240,7 +240,7 @@ pub struct WatcherRunRecord {
   task_id : String?
   run_id : String?
   next_due_tick : Int
-} derive(Show, Eq, ToJson, FromJson)
+} derive(Debug, Eq, ToJson, FromJson)
 
 ///|
 pub fn WatcherRunRecord::new(
@@ -321,7 +321,7 @@ pub struct AssignmentPlan {
   book_id : String
   isolation : IsolationMode
   reason : String
-} derive(Show, Eq, ToJson, FromJson)
+} derive(Debug, Eq, ToJson, FromJson)
 
 ///|
 pub fn AssignmentPlan::new(
@@ -356,7 +356,7 @@ pub struct TaskExecutionRecord {
   result_decision : String
   requires_review : Bool
   notify_town : Bool
-} derive(Show, Eq, ToJson, FromJson)
+} derive(Debug, Eq, ToJson, FromJson)
 
 ///|
 pub fn TaskExecutionRecord::new(
@@ -414,7 +414,7 @@ pub struct TownEvent {
   related_book_id : String?
   related_proposal_id : String?
   related_run_id : String?
-} derive(Show, Eq, ToJson, FromJson)
+} derive(Debug, Eq, ToJson, FromJson)
 
 ///|
 pub fn TownEvent::new(
@@ -445,7 +445,7 @@ pub struct TownState {
   tasks : Array[TownTask]
   executions : Array[TaskExecutionRecord]
   events : Array[TownEvent]
-} derive(Show, Eq, ToJson, FromJson)
+} derive(Debug, Eq, ToJson, FromJson)
 
 ///|
 pub fn empty_state(config : TownConfig) -> TownState {
@@ -550,7 +550,7 @@ pub(open) trait BookProvider {
 ///|
 pub struct StaticBookProvider {
   entries : Array[BookRef]
-} derive(Show, Eq)
+} derive(Debug, Eq)
 
 ///|
 pub fn StaticBookProvider::new(entries : Array[BookRef]) -> StaticBookProvider {

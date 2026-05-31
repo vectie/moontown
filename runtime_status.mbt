@@ -18,7 +18,7 @@ pub struct TownRuntimeStatus {
   watcher_summary : String
   daemon_actions : Array[@scheduler.SchedulerAction]
   summary : String
-} derive(Show, Eq, ToJson, FromJson)
+} derive(Debug, Eq, ToJson, FromJson)
 
 ///|
 pub async fn inspect_saved_town(

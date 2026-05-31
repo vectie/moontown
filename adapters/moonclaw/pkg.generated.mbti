@@ -2,6 +2,7 @@
 package "vectie/moontown/adapters/moonclaw"
 
 import {
+  "moonbitlang/core/debug",
   "moonbitlang/core/json",
   "vectie/moontown/adapters/moonbook",
   "vectie/moontown/core",
@@ -58,7 +59,7 @@ pub struct AssignTaskRequest {
   workspace_root : String
   context_summary : String
   skills : Array[String]
-} derive(Eq, Show)
+} derive(Eq, @debug.Debug)
 pub fn AssignTaskRequest::new(assignment~ : @core.AssignmentPlan, workspace_root~ : String, context_summary~ : String, skills? : Array[String]) -> Self
 
 pub enum EmbeddedHandoffKind {
@@ -66,14 +67,16 @@ pub enum EmbeddedHandoffKind {
   DomainToExecution
   ExecutionToDomain
   DomainToStrategic
-} derive(Eq, Show)
+} derive(Eq, @debug.Debug)
+pub impl Show for EmbeddedHandoffKind
 
 pub enum EmbeddedMemoryScope {
   Step
   Workspace
   Domain
   Global
-} derive(Eq, Show)
+} derive(Eq, @debug.Debug)
+pub impl Show for EmbeddedMemoryScope
 
 pub struct EmbeddedMoonclawRuntime {
   runtime_id : String
@@ -90,14 +93,15 @@ pub struct EmbeddedMoonclawRuntime {
   skills : Array[String]
   output_contract : String?
   authority_scope : String
-} derive(Eq, Show)
+} derive(Eq, @debug.Debug)
 pub fn EmbeddedMoonclawRuntime::new(runtime_id~ : String, display_name~ : String, role_id~ : String, planning_layer? : EmbeddedPlanningLayer, runtime_mode? : EmbeddedRuntimeMode, tool_access? : EmbeddedToolAccess, memory_scope? : EmbeddedMemoryScope, allow_delegate? : Bool, allow_workspace_write? : Bool, allow_execution_tools? : Bool, visible_tools? : Array[String], skills? : Array[String], output_contract? : String?, authority_scope~ : String) -> Self
 
 pub enum EmbeddedPlanningLayer {
   Strategic
   Domain
   Execution
-} derive(Eq, Show)
+} derive(Eq, @debug.Debug)
+pub impl Show for EmbeddedPlanningLayer
 
 pub struct EmbeddedRuntimeHandoff {
   kind : EmbeddedHandoffKind
@@ -106,19 +110,21 @@ pub struct EmbeddedRuntimeHandoff {
   constraints : Array[String]
   output_contract : String?
   target_role_id : String
-} derive(Eq, Show)
+} derive(Eq, @debug.Debug)
 pub fn EmbeddedRuntimeHandoff::new(kind~ : EmbeddedHandoffKind, objective~ : String, scope_summary~ : String, constraints? : Array[String], output_contract? : String?, target_role_id~ : String) -> Self
 
 pub enum EmbeddedRuntimeMode {
   PlannerOnly
   Executor
-} derive(Eq, Show)
+} derive(Eq, @debug.Debug)
+pub impl Show for EmbeddedRuntimeMode
 
 pub enum EmbeddedToolAccess {
   Disabled
   Limited
   Full
-} derive(Eq, Show)
+} derive(Eq, @debug.Debug)
+pub impl Show for EmbeddedToolAccess
 
 pub struct ExternalProposalPacket {
   packet_id : String
@@ -132,14 +138,14 @@ pub struct ExternalProposalPacket {
   notes : Array[String]
   tags : Array[String]
   metadata : Json
-} derive(Eq, Show, ToJson, @json.FromJson)
+} derive(Eq, ToJson, @debug.Debug, @json.FromJson)
 pub fn ExternalProposalPacket::new(packet_id~ : String, title~ : String, summary~ : String, request_text~ : String, profile~ : String, output_contract~ : String, context_pages? : Array[String], skill_paths? : Array[String], notes? : Array[String], tags? : Array[String], metadata? : Json) -> Self
 
 pub struct PollWorkerResponse {
   worker_id : String
   status : @core.WorkerStatus
   detail : String
-} derive(Eq, Show)
+} derive(Eq, @debug.Debug)
 pub fn PollWorkerResponse::new(worker_id~ : String, status~ : @core.WorkerStatus, detail~ : String) -> Self
 
 pub struct ProposalImportReceipt {
@@ -150,7 +156,7 @@ pub struct ProposalImportReceipt {
   status : @core.TaskExecutionStatus
   command : String
   summary : String
-} derive(Eq, Show, ToJson, @json.FromJson)
+} derive(Eq, ToJson, @debug.Debug, @json.FromJson)
 
 pub struct ProposalPollResponse {
   task_id : String
@@ -161,23 +167,23 @@ pub struct ProposalPollResponse {
   result_decision : String
   requires_review : Bool
   notify_town : Bool
-} derive(Eq, Show, ToJson, @json.FromJson)
+} derive(Eq, ToJson, @debug.Debug, @json.FromJson)
 
-type RunsIndexFile derive(Eq, Show, ToJson, @json.FromJson)
+type RunsIndexFile derive(Eq, ToJson, @debug.Debug, @json.FromJson)
 
 pub struct SpawnWorkerRequest {
   worker : @core.WorkerRef
-} derive(Eq, Show)
+} derive(Eq, @debug.Debug)
 pub fn SpawnWorkerRequest::new(worker~ : @core.WorkerRef) -> Self
 
-type StoredRun derive(Eq, Show, ToJson, @json.FromJson)
+type StoredRun derive(Eq, ToJson, @debug.Debug, @json.FromJson)
 
 pub struct TaskResultResponse {
   task_id : String
   status : @core.TownTaskStatus
   summary : String
   memory_candidates : Array[String]
-} derive(Eq, Show)
+} derive(Eq, @debug.Debug)
 pub fn TaskResultResponse::new(task_id~ : String, status~ : @core.TownTaskStatus, summary~ : String, memory_candidates? : Array[String]) -> Self
 
 // Type aliases

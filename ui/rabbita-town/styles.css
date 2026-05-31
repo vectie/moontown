@@ -3656,25 +3656,25 @@ body,
 }
 
 .worker-sprite-mayor .worker-sprite {
-  background-image: url("tilemap/actors/mayor_walk_strip.png");
+  background-image: url("/tilemap/actors/mayor_walk_strip.png");
   background-size: 400% 100%;
   animation: worker-walk-cycle 760ms steps(3) infinite;
 }
 
 .worker-sprite-keeper .worker-sprite {
-  background-image: url("tilemap/actors/keeper_walk_strip.png");
+  background-image: url("/tilemap/actors/keeper_walk_strip.png");
   background-size: 400% 100%;
   animation: worker-walk-cycle 760ms steps(3) infinite;
 }
 
 .worker-sprite-worker .worker-sprite {
-  background-image: url("tilemap/actors/worker_walk_strip.png");
+  background-image: url("/tilemap/actors/worker_walk_strip.png");
   background-size: 400% 100%;
   animation: worker-walk-cycle 760ms steps(3) infinite;
 }
 
 .worker-sprite-researcher .worker-sprite {
-  background-image: url("tilemap/actors/researcher_walk_strip.png");
+  background-image: url("/tilemap/actors/researcher_walk_strip.png");
   background-size: 400% 100%;
   animation: worker-walk-cycle 760ms steps(3) infinite;
 }

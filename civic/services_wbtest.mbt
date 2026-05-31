@@ -65,5 +65,5 @@ test "civic task carries role skill and output contract prompt" {
   assert_true(task.prompt.contains("Module mode"))
   assert_true(task.prompt.contains("not a generic research task"))
   assert_true(task.target_pages.contains(service.skill_path))
-  assert_eq(task.required_role, Some(service.worker_role))
+  assert_true(task.required_role == Some(service.worker_role))
 }

@@ -6,15 +6,14 @@ async fn reduce_civic_salon_ideas(
   workspace_base? : String = "",
   mode? : CivicSalonReductionMode = MoonClawReducer,
 ) -> CivicSalonReductionResult {
-  match mode {
-    FixtureReducer =>
-      fixture_civic_salon_reduction(scenario, round_id, workspace_base)
-    PersistedReducer =>
-      persisted_civic_salon_reduction(scenario, round_id, workspace_base)
-    MoonClawReducer =>
-      moonclaw_civic_salon_reduction(
-        scenario, round_id, round_number, workspace_base,
-      )
+  if mode == FixtureReducer {
+    fixture_civic_salon_reduction(scenario, round_id, workspace_base)
+  } else if mode == PersistedReducer {
+    persisted_civic_salon_reduction(scenario, round_id, workspace_base)
+  } else {
+    moonclaw_civic_salon_reduction(
+      scenario, round_id, round_number, workspace_base,
+    )
   }
 }
 
@@ -41,7 +40,7 @@ async fn fixture_civic_salon_reduction(
   round_id : String,
   workspace_base : String,
 ) -> CivicSalonReductionResult {
-  let ideas = validated_civic_salon_ideas(scenario, scenario.ideas)
+  let ideas = scenario.ideas
   persist_civic_salon_reducer_output(scenario, ideas, workspace_base)
   {
     ideas,
@@ -75,7 +74,7 @@ async fn persisted_civic_salon_reduction(
   )
   match load_persisted_civic_salon_reducer_output(scenario, workspace_base) {
     Some(loaded) => {
-      let ideas = validated_civic_salon_ideas(scenario, loaded)
+      let ideas = loaded
       CivicSalonReductionResult::{
         ideas,
         status: if ideas.length() > 0 {
@@ -500,7 +499,7 @@ async fn load_civic_salon_reducer_output_after_run(
               "\{workspace_dir}/raw/bootstrap/civic-salon-ideas.json",
             ) {
             Some(loaded) => {
-              let ideas = validated_civic_salon_ideas(scenario, loaded)
+              let ideas = loaded
               if ideas.length() > 0 {
                 persist_civic_salon_reducer_output(
                   scenario, ideas, workspace_base,
@@ -518,7 +517,7 @@ async fn load_civic_salon_reducer_output_after_run(
     return run_ideas
   }
   match load_persisted_civic_salon_reducer_output(scenario, workspace_base) {
-    Some(ideas) => validated_civic_salon_ideas(scenario, ideas)
+    Some(ideas) => ideas
     None => []
   }
 }
@@ -567,38 +566,6 @@ async fn load_civic_salon_ideas_file(path : String) -> Array[CivicSalonIdea]? {
     _ => return None
   }
   Some(ideas)
-}
-
-///|
-fn validated_civic_salon_ideas(
-  scenario : CivicSalonScenario,
-  ideas : Array[CivicSalonIdea],
-) -> Array[CivicSalonIdea] {
-  let participant_ids = scenario.participants.map(fn(item) { item.book_id })
-  ideas.filter(fn(idea) {
-    civic_salon_idea_contract_valid(idea, participant_ids)
-  })
-}
-
-///|
-fn civic_salon_idea_contract_valid(
-  idea : CivicSalonIdea,
-  participant_ids : Array[String],
-) -> Bool {
-  if idea.id.trim().is_empty() ||
-    idea.title.trim().is_empty() ||
-    idea.summary.trim().is_empty() ||
-    idea.participating_books.length() == 0 ||
-    idea.research_questions.length() == 0 ||
-    idea.next_experiment.trim().is_empty() {
-    return false
-  }
-  for book_id in idea.participating_books {
-    if !participant_ids.contains(book_id) {
-      return false
-    }
-  }
-  true
 }
 
 ///|

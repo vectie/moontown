@@ -3,20 +3,20 @@ pub enum EmbeddedPlanningLayer {
   Strategic
   Domain
   Execution
-} derive(Show, Eq)
+} derive(Debug, Eq)
 
 ///|
 pub enum EmbeddedRuntimeMode {
   PlannerOnly
   Executor
-} derive(Show, Eq)
+} derive(Debug, Eq)
 
 ///|
 pub enum EmbeddedToolAccess {
   Disabled
   Limited
   Full
-} derive(Show, Eq)
+} derive(Debug, Eq)
 
 ///|
 pub enum EmbeddedMemoryScope {
@@ -24,7 +24,7 @@ pub enum EmbeddedMemoryScope {
   Workspace
   Domain
   Global
-} derive(Show, Eq)
+} derive(Debug, Eq)
 
 ///|
 pub enum EmbeddedHandoffKind {
@@ -32,7 +32,53 @@ pub enum EmbeddedHandoffKind {
   DomainToExecution
   ExecutionToDomain
   DomainToStrategic
-} derive(Show, Eq)
+} derive(Debug, Eq)
+
+///|
+pub impl Show for EmbeddedPlanningLayer with fn output(self, logger) {
+  match self {
+    Strategic => logger.write_string("Strategic")
+    Domain => logger.write_string("Domain")
+    Execution => logger.write_string("Execution")
+  }
+}
+
+///|
+pub impl Show for EmbeddedRuntimeMode with fn output(self, logger) {
+  match self {
+    PlannerOnly => logger.write_string("PlannerOnly")
+    Executor => logger.write_string("Executor")
+  }
+}
+
+///|
+pub impl Show for EmbeddedToolAccess with fn output(self, logger) {
+  match self {
+    Disabled => logger.write_string("Disabled")
+    Limited => logger.write_string("Limited")
+    Full => logger.write_string("Full")
+  }
+}
+
+///|
+pub impl Show for EmbeddedMemoryScope with fn output(self, logger) {
+  match self {
+    Step => logger.write_string("Step")
+    Workspace => logger.write_string("Workspace")
+    Domain => logger.write_string("Domain")
+    Global => logger.write_string("Global")
+  }
+}
+
+///|
+pub impl Show for EmbeddedHandoffKind with fn output(self, logger) {
+  match self {
+    StrategicToDomain => logger.write_string("StrategicToDomain")
+    DomainToExecution => logger.write_string("DomainToExecution")
+    ExecutionToDomain => logger.write_string("ExecutionToDomain")
+    DomainToStrategic => logger.write_string("DomainToStrategic")
+  }
+}
 
 ///|
 pub struct EmbeddedMoonclawRuntime {
@@ -50,7 +96,7 @@ pub struct EmbeddedMoonclawRuntime {
   skills : Array[String]
   output_contract : String?
   authority_scope : String
-} derive(Show, Eq)
+} derive(Debug, Eq)
 
 ///|
 pub fn EmbeddedMoonclawRuntime::new(
@@ -95,7 +141,7 @@ pub struct EmbeddedRuntimeHandoff {
   constraints : Array[String]
   output_contract : String?
   target_role_id : String
-} derive(Show, Eq)
+} derive(Debug, Eq)
 
 ///|
 pub fn embedded_runtime_policy_examples() -> Array[EmbeddedMoonclawRuntime] {
@@ -193,7 +239,7 @@ pub struct ExternalProposalPacket {
   notes : Array[String]
   tags : Array[String]
   metadata : Json
-} derive(Show, Eq, ToJson, FromJson)
+} derive(Debug, Eq, ToJson, FromJson)
 
 ///|
 pub fn ExternalProposalPacket::new(
@@ -233,7 +279,7 @@ pub struct ProposalImportReceipt {
   status : @core.TaskExecutionStatus
   command : String
   summary : String
-} derive(Show, Eq, ToJson, FromJson)
+} derive(Debug, Eq, ToJson, FromJson)
 
 ///|
 pub struct ProposalPollResponse {
@@ -245,7 +291,7 @@ pub struct ProposalPollResponse {
   result_decision : String
   requires_review : Bool
   notify_town : Bool
-} derive(Show, Eq, ToJson, FromJson)
+} derive(Debug, Eq, ToJson, FromJson)
 
 ///|
 pub fn timed_out_poll_response(
@@ -268,7 +314,7 @@ pub fn timed_out_poll_response(
 ///|
 struct RunsIndexFile {
   runs : Array[StoredRun]
-} derive(Show, Eq, ToJson, FromJson)
+} derive(Debug, Eq, ToJson, FromJson)
 
 ///|
 struct StoredRun {
@@ -277,12 +323,12 @@ struct StoredRun {
   status : String
   summary : String?
   error : String?
-} derive(Show, Eq, ToJson, FromJson)
+} derive(Debug, Eq, ToJson, FromJson)
 
 ///|
 pub struct SpawnWorkerRequest {
   worker : @core.WorkerRef
-} derive(Show, Eq)
+} derive(Debug, Eq)
 
 ///|
 pub fn SpawnWorkerRequest::new(worker~ : @core.WorkerRef) -> SpawnWorkerRequest {
@@ -295,7 +341,7 @@ pub struct AssignTaskRequest {
   workspace_root : String
   context_summary : String
   skills : Array[String]
-} derive(Show, Eq)
+} derive(Debug, Eq)
 
 ///|
 pub fn AssignTaskRequest::new(
@@ -312,7 +358,7 @@ pub struct PollWorkerResponse {
   worker_id : String
   status : @core.WorkerStatus
   detail : String
-} derive(Show, Eq)
+} derive(Debug, Eq)
 
 ///|
 pub fn PollWorkerResponse::new(
@@ -329,7 +375,7 @@ pub struct TaskResultResponse {
   status : @core.TownTaskStatus
   summary : String
   memory_candidates : Array[String]
-} derive(Show, Eq)
+} derive(Debug, Eq)
 
 ///|
 pub fn TaskResultResponse::new(

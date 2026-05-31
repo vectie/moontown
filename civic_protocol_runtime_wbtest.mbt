@@ -427,6 +427,7 @@ fn test_civic_salon_scenario() -> CivicSalonScenario {
     domain_label: "future energy",
     topic: "future energy cross-area exchange",
     cadence: "operator-triggered salon",
+    interval_ms: None,
     skill_name: "future-energy-salon",
     skill_description: "Exchange future-energy perspectives and reduce them into testable research questions.",
     protocol_channel: "domain_perspective",

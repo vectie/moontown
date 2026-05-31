@@ -2,6 +2,7 @@
 package "vectie/moontown/adapters/moonbook"
 
 import {
+  "moonbitlang/core/debug",
   "moonbitlang/core/json",
   "vectie/moontown/core",
 }
@@ -66,7 +67,7 @@ pub struct BookCatalogEntry {
   memory_scope : @core.MemoryScope
   tags : Array[String]
   skills : Array[String]
-} derive(Eq, Show, ToJson, @json.FromJson)
+} derive(Eq, ToJson, @debug.Debug, @json.FromJson)
 pub fn BookCatalogEntry::new(id~ : String, name~ : String, purpose~ : String, workspace_root~ : String, memory_scope? : @core.MemoryScope, tags? : Array[String], skills? : Array[String]) -> Self
 pub fn BookCatalogEntry::to_book_ref(Self) -> @core.BookRef
 
@@ -76,7 +77,7 @@ pub struct BookGoalAcceptance {
   reason : String
   task_count : Int
   summary : String
-} derive(Eq, Show, ToJson, @json.FromJson)
+} derive(Eq, ToJson, @debug.Debug, @json.FromJson)
 
 pub struct BookHealthReport {
   level : String
@@ -87,7 +88,7 @@ pub struct BookHealthReport {
   keeper_working_count : Int
   evidence_count : Int
   issues : Array[String]
-} derive(Eq, Show, ToJson, @json.FromJson)
+} derive(Eq, ToJson, @debug.Debug, @json.FromJson)
 
 pub struct BookResult {
   task_id : String
@@ -96,7 +97,7 @@ pub struct BookResult {
   memory_candidates : Array[MemoryCandidate]
   requires_review : Bool
   notify_town : Bool
-} derive(Eq, Show, ToJson, @json.FromJson)
+} derive(Eq, ToJson, @debug.Debug, @json.FromJson)
 pub fn BookResult::new(task_id~ : String, summary~ : String, artifacts? : Array[String], memory_candidates? : Array[MemoryCandidate], requires_review? : Bool, notify_town? : Bool) -> Self
 
 pub struct BookStateSummary {
@@ -121,7 +122,7 @@ pub struct BookStateSummary {
   operational_evidence_count : Int
   substantive_coverage_ready : Bool
   summary : String
-} derive(Eq, Show, ToJson, @json.FromJson)
+} derive(Eq, ToJson, @debug.Debug, @json.FromJson)
 pub fn BookStateSummary::new(book_id~ : String, root~ : String, page_count~ : Int, source_count~ : Int, source_page_count? : Int, candidate_source_count? : Int, provisional_source_count? : Int, verified_source_count? : Int, entity_count~ : Int, entity_page_count? : Int, concept_count~ : Int, concept_page_count? : Int, query_note_count? : Int, pending_review_count~ : Int, keeper_memory_count~ : Int, keeper_working_count~ : Int, evidence_count~ : Int, total_evidence_count? : Int, operational_evidence_count? : Int, substantive_coverage_ready? : Bool, summary~ : String) -> Self
 
 pub struct BookTask {
@@ -134,7 +135,7 @@ pub struct BookTask {
   requires_review : Bool
   target_pages : Array[String]
   required_role : @core.WorkerRole?
-} derive(Eq, Show, ToJson, @json.FromJson)
+} derive(Eq, ToJson, @debug.Debug, @json.FromJson)
 pub fn BookTask::new(id~ : String, goal? : String?, title~ : String, kind~ : String, prompt~ : String, priority~ : Int, requires_review~ : Bool, target_pages? : Array[String], required_role? : @core.WorkerRole?) -> Self
 
 pub struct BookTaskBatch {
@@ -142,19 +143,19 @@ pub struct BookTaskBatch {
   goal : String
   summary : String
   tasks : Array[BookTask]
-} derive(Eq, Show, ToJson, @json.FromJson)
+} derive(Eq, ToJson, @debug.Debug, @json.FromJson)
 
-type BookTaskProviderManifestEntry derive(Eq, Show, ToJson, @json.FromJson)
+type BookTaskProviderManifestEntry derive(Eq, ToJson, @debug.Debug, @json.FromJson)
 
-type BookTaskProviderMetadata derive(Eq, Show, ToJson, @json.FromJson)
+type BookTaskProviderMetadata derive(Eq, ToJson, @debug.Debug, @json.FromJson)
 
-type EvidenceAccounting derive(Eq, Show)
+type EvidenceAccounting derive(Eq, @debug.Debug)
 
-type ExternalBookStateSummary derive(Eq, Show, ToJson, @json.FromJson)
+type ExternalBookStateSummary derive(Eq, ToJson, @debug.Debug, @json.FromJson)
 
-type ExternalBookTask derive(Eq, Show, ToJson, @json.FromJson)
+type ExternalBookTask derive(Eq, ToJson, @debug.Debug, @json.FromJson)
 
-type ExternalBookTaskBatch derive(Eq, Show, ToJson, @json.FromJson)
+type ExternalBookTaskBatch derive(Eq, ToJson, @debug.Debug, @json.FromJson)
 
 pub struct MemoryCandidate {
   kind : String
@@ -162,12 +163,12 @@ pub struct MemoryCandidate {
   detail : String
   durable : Bool
   target_page : String?
-} derive(Eq, Show, ToJson, @json.FromJson)
+} derive(Eq, ToJson, @debug.Debug, @json.FromJson)
 pub fn MemoryCandidate::new(kind~ : String, title~ : String, detail~ : String, durable? : Bool, target_page? : String?) -> Self
 
 pub struct MoonbookCatalogProvider {
   catalog : Array[BookCatalogEntry]
-} derive(Eq, Show)
+} derive(Eq, @debug.Debug)
 pub fn MoonbookCatalogProvider::book_refs(Self) -> Array[@core.BookRef]
 pub fn MoonbookCatalogProvider::new(Array[BookCatalogEntry]) -> Self
 pub impl @core.BookProvider for MoonbookCatalogProvider
@@ -178,7 +179,7 @@ pub struct PersistResultOutcome {
   review_queued : Bool
   notify_town : Bool
   evidence_id : String
-} derive(Eq, Show, ToJson, @json.FromJson)
+} derive(Eq, ToJson, @debug.Debug, @json.FromJson)
 
 pub struct WorkerContextBundle {
   book_id : String
@@ -194,7 +195,7 @@ pub struct WorkerContextBundle {
   working_memory : Array[String]
   memory_summary : String
   output_contract : Array[String]
-} derive(Eq, Show, ToJson, @json.FromJson)
+} derive(Eq, ToJson, @debug.Debug, @json.FromJson)
 
 // Type aliases
 

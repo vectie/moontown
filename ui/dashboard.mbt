@@ -440,7 +440,16 @@ fn require_area(layout : TownSceneLayout, key : String) -> SceneArea {
       return area
     }
   }
-  panic()
+  {
+    key: "missing-\{key}",
+    title: "Missing Area: \{key}",
+    kind: AnomalyCorner,
+    x: 0,
+    y: 0,
+    width: 160,
+    height: 96,
+    asset_keys: ["anomaly-signal"],
+  }
 }
 
 ///|

@@ -166,7 +166,7 @@ async test "Wenyu civic books are excluded from research quality gates" {
     purpose="test",
     workspace_root="/tmp/wenyu-policy-hall",
   )
-  assert_eq(research_quality_gaps(entry), [])
+  assert_true(research_quality_gaps(entry).is_empty())
 }
 
 ///|
@@ -192,8 +192,8 @@ test "Wenyu civic persistence creates service and review candidates" {
   assert_true(artifacts.contains("book/moonbook-ui-state.json"))
   let candidates = civic_persist_memory_candidates(service, execution)
   assert_eq(candidates.length(), 2)
-  assert_eq(candidates[0].target_page, Some("civic/policy-hall.md"))
-  assert_eq(candidates[1].target_page, Some("reviews/policy-citations.md"))
+  assert_true(candidates[0].target_page == Some("civic/policy-hall.md"))
+  assert_true(candidates[1].target_page == Some("reviews/policy-citations.md"))
 }
 
 ///|

@@ -26,7 +26,7 @@ test "AI quality parser reads semantic review score" {
   let score = parse_ai_quality_score(
     "ai_quality_score: 82\nai_quality_grade: strong\n",
   )
-  assert_eq(score, Some(82))
+  assert_true(score == Some(82))
 }
 
 ///|

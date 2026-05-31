@@ -23,7 +23,7 @@ pub struct CivicServiceDefinition {
   acceptance : Array[String]
   projection_summary : String
   legacy_book_ids : Array[String]
-} derive(Show, Eq)
+} derive(Debug, Eq)
 
 ///|
 pub fn wenyu_civic_services() -> Array[CivicServiceDefinition] {

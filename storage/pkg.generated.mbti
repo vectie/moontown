@@ -62,7 +62,7 @@ pub impl Show for EventCursor
 pub struct TownSnapshot {
   town : @core.TownState
   event_count : Int
-} derive(Eq, Show, ToJson, @json.FromJson)
+} derive(Eq, ToJson, @debug.Debug, @json.FromJson)
 
 // Type aliases
 

@@ -44,7 +44,7 @@ test "standing goal marks next dispatch window" {
   assert_true(!goal.is_due(1))
   assert_true(goal.is_due(2))
   let dispatched = goal.mark_dispatched(2)
-  assert_eq(dispatched.last_run_tick, Some(2))
+  assert_true(dispatched.last_run_tick == Some(2))
   assert_eq(dispatched.next_due_tick, 8)
 }
 

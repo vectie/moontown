@@ -29,7 +29,7 @@ pub impl Show for Checkpoint with fn output(self : Checkpoint, logger : &Logger)
 pub struct TownSnapshot {
   town : @core.TownState
   event_count : Int
-} derive(Show, Eq, ToJson, FromJson)
+} derive(Debug, Eq, ToJson, FromJson)
 
 ///|
 pub fn snapshot_of(town : @core.TownState) -> TownSnapshot {

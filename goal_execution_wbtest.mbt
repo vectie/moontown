@@ -41,10 +41,16 @@ async test "research persistence handoff uses topic artifacts instead of runtime
   assert_true(artifacts.contains("raw/bootstrap/deep-report.md"))
   let candidates = research_persist_memory_candidates(entry, execution)
   assert_eq(candidates.length(), 4)
-  assert_eq(candidates[0].target_page, Some("sources/opc-screened-sources.md"))
-  assert_eq(candidates[1].target_page, Some("entities/opc.md"))
-  assert_eq(candidates[2].target_page, Some("concepts/opc-research-thesis.md"))
-  assert_eq(candidates[3].target_page, Some("synthesis/opc-research-thesis.md"))
+  assert_true(
+    candidates[0].target_page == Some("sources/opc-screened-sources.md"),
+  )
+  assert_true(candidates[1].target_page == Some("entities/opc.md"))
+  assert_true(
+    candidates[2].target_page == Some("concepts/opc-research-thesis.md"),
+  )
+  assert_true(
+    candidates[3].target_page == Some("synthesis/opc-research-thesis.md"),
+  )
 }
 
 ///|
@@ -77,7 +83,7 @@ test "successful book persistence reconciles failed execution into review queue"
     execution, outcome, 42,
   )
   assert_eq(reconciled.status, @core.TaskExecutionStatus::ReviewQueued)
-  assert_eq(reconciled.next_retry_tick, None)
+  assert_true(reconciled.next_retry_tick == None)
   assert_eq(reconciled.result_decision, "persisted-review")
   assert_true(
     reconciled.summary.contains("keeper_auto_triage: persisted_terminal_result"),

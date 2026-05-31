@@ -76,6 +76,7 @@ pub struct CivicSalonScenario {
   domain_label : String
   topic : String
   cadence : String
+  interval_ms : UInt64?
   skill_name : String
   skill_description : String
   protocol_channel : String

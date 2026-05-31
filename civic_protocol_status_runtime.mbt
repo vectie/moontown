@@ -28,8 +28,9 @@ pub async fn inspect_wenyu_building_protocols(
   registry_path? : String = default_wenyu_protocol_registry_path(),
 ) -> @civic.BuildingProtocolPortfolio {
   let snapshots : Array[@civic.BuildingProtocolSnapshot] = []
+  let ledger_base_dir = protocol_ledger_base_dir_for_status_path(status_path)
   for protocol in @civic.wenyu_building_protocols() {
-    snapshots.push(inspect_wenyu_building_protocol(protocol))
+    snapshots.push(inspect_wenyu_building_protocol(protocol, ledger_base_dir~))
   }
   building_protocol_portfolio(snapshots, status_path, registry_path)
 }
@@ -37,29 +38,40 @@ pub async fn inspect_wenyu_building_protocols(
 ///|
 async fn inspect_wenyu_building_protocol(
   protocol : @civic.BuildingProtocolDefinition,
+  ledger_base_dir? : String = default_protocol_ledger_base_dir(),
 ) -> @civic.BuildingProtocolSnapshot {
-  let inbox_count = count_protocol_jsonl_records(protocol.building_id, "inbox")
+  let inbox_count = count_protocol_jsonl_records(
+    protocol.building_id,
+    "inbox",
+    ledger_base_dir~,
+  )
   let contribution_count = count_protocol_jsonl_records(
     protocol.building_id,
     "contributions",
+    ledger_base_dir~,
   )
   let reduction_count = count_protocol_jsonl_records(
     protocol.building_id,
     "reductions",
+    ledger_base_dir~,
   )
   let outbox_count = count_protocol_jsonl_records(
     protocol.building_id,
     "outbox",
+    ledger_base_dir~,
   )
   let review_count = count_protocol_jsonl_records(
     protocol.building_id,
     "reviews",
+    ledger_base_dir~,
   )
   let latest_reduction_summary = latest_protocol_reduction_summary(
     protocol.building_id,
+    ledger_base_dir~,
   )
   let latest_distribution_summary = latest_protocol_distribution_summary(
     protocol.building_id,
+    ledger_base_dir~,
   )
   let status = protocol_status_label(
     inbox_count~,

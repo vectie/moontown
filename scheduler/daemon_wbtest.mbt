@@ -34,7 +34,7 @@ test "daemon tick records active due goal ids" {
     standing_goals=[goal],
   )
   assert_eq(tick.sequence, 1)
-  assert_eq(daemon.active_goal_ids, ["watch-opc-news"])
+  assert_true(daemon.active_goal_ids == ["watch-opc-news"])
   assert_true(actions.any(fn(action) { action.kind == "standing-goal-due" }))
 }
 

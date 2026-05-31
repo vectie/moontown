@@ -138,9 +138,16 @@ async fn run_civic_salon_scenario_round(
   )
   let ideas = reduction.ideas
   let metrics = civic_salon_metrics(scenario, participants, ideas)
+  let validation_errors = if reduction.status
+    is @core.TaskExecutionStatus::Completed {
+    civic_salon_round_validation_errors(scenario, ideas)
+  } else {
+    []
+  }
   let (decision, summary) = if reduction.status
     is @core.TaskExecutionStatus::Completed &&
-    ideas.length() > 0 {
+    ideas.length() > 0 &&
+    validation_errors.length() == 0 {
     (
       "review",
       materialize_civic_salon_scenario(
@@ -152,6 +159,11 @@ async fn run_civic_salon_scenario_round(
         workspace_base=civic_salon_workspace_base(snapshot_path),
         reducer_summary=Some(reduction.summary),
       ),
+    )
+  } else if validation_errors.length() > 0 {
+    (
+      "blocked",
+      "Blocked \{scenario.title} \{round_id}: invalid civic communication-pattern output: \{validation_errors.join("; ")}",
     )
   } else if civic_salon_reduction_status_live(reduction.status) {
     ("running", "Running \{scenario.title} \{round_id}: \{reduction.summary}")

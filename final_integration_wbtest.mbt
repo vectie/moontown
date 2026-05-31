@@ -46,9 +46,9 @@ test "final integration merges domain watches without dropping existing history"
   let opc = find_standing_goal_by_id(merged, "watch-opc-news").unwrap()
   assert_eq(opc.title, "Track OPC")
   assert_eq(opc.next_due_tick, 103)
-  assert_eq(opc.last_run_tick, Some(21))
+  assert_true(opc.last_run_tick == Some(21))
   let agents = find_standing_goal_by_id(merged, "watch-ai-agents").unwrap()
-  assert_eq(agents.target_book_id, Some("research-ai-agents"))
+  assert_true(agents.target_book_id == Some("research-ai-agents"))
   assert_eq(agents.next_due_tick, 109)
 }
 

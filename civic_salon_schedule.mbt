@@ -26,10 +26,18 @@ fn civic_salon_schedule_for_scenario(
         title=scenario.title,
         building_id=scenario.building_id,
         topic=scenario.topic,
-        interval_ms=1_800_000UL,
+        interval_ms=civic_salon_scenario_interval_ms(scenario),
         next_due_ms=now_ms,
         participant_book_ids=scenario.participants.map(fn(item) { item.book_id }),
       )
+  }
+}
+
+///|
+fn civic_salon_scenario_interval_ms(scenario : CivicSalonScenario) -> UInt64 {
+  match scenario.interval_ms {
+    Some(value) if value > 0UL => value
+    _ => 1_800_000UL
   }
 }
 

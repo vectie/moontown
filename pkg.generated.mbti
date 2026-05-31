@@ -380,6 +380,7 @@ pub struct CivicSalonScenario {
   domain_label : String
   topic : String
   cadence : String
+  interval_ms : UInt64?
   skill_name : String
   skill_description : String
   protocol_channel : String
@@ -639,7 +640,7 @@ pub struct TownRuntimeStatus {
   watcher_summary : String
   daemon_actions : Array[@scheduler.SchedulerAction]
   summary : String
-} derive(Eq, Show, ToJson, @json.FromJson)
+} derive(Eq, ToJson, @debug.Debug, @json.FromJson)
 
 pub struct VisualAgentProjection {
   worker_id : String

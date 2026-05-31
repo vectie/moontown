@@ -1,6 +1,10 @@
 // Generated using `moon info`, DON'T EDIT IT
 package "vectie/moontown/experiment"
 
+import {
+  "moonbitlang/core/debug",
+}
+
 // Values
 pub fn evaluate_run(ExperimentRun, ExperimentDefinition) -> ExperimentOutcome
 
@@ -15,7 +19,7 @@ pub struct Cohort {
   id : String
   name : String
   participants : Array[String]
-} derive(Eq, Show)
+} derive(Eq, @debug.Debug)
 pub fn Cohort::new(id~ : String, name~ : String, participants? : Array[String]) -> Self
 
 pub struct ExperimentDefinition {
@@ -25,14 +29,14 @@ pub struct ExperimentDefinition {
   target_book_ids : Array[String]
   interventions : Array[Intervention]
   stop_rules : Array[StopRule]
-} derive(Eq, Show)
+} derive(Eq, @debug.Debug)
 pub fn ExperimentDefinition::new(id~ : String, title~ : String, hypothesis~ : String, target_book_ids? : Array[String], interventions? : Array[Intervention], stop_rules? : Array[StopRule]) -> Self
 
 pub struct ExperimentOutcome {
   run_id : String
   summary : String
   should_stop : Bool
-} derive(Eq, Show)
+} derive(Eq, @debug.Debug)
 
 pub enum ExperimentPhase {
   Draft
@@ -40,7 +44,7 @@ pub enum ExperimentPhase {
   CoolingDown
   Complete
   Halted
-} derive(Eq, Show)
+} derive(Eq, @debug.Debug)
 
 pub struct ExperimentRun {
   id : String
@@ -49,7 +53,7 @@ pub struct ExperimentRun {
   cohorts : Array[Cohort]
   measurements : Array[Measurement]
   spawned_task_ids : Array[String]
-} derive(Eq, Show)
+} derive(Eq, @debug.Debug)
 pub fn ExperimentRun::record_measurement(Self, Measurement) -> Self
 
 pub struct Intervention {
@@ -57,21 +61,21 @@ pub struct Intervention {
   title : String
   detail : String
   target_book_ids : Array[String]
-} derive(Eq, Show)
+} derive(Eq, @debug.Debug)
 pub fn Intervention::new(id~ : String, title~ : String, detail~ : String, target_book_ids? : Array[String]) -> Self
 
 pub struct Measurement {
   metric : String
   value : Double
   note : String
-} derive(Eq, Show)
+} derive(Eq, @debug.Debug)
 pub fn Measurement::new(metric~ : String, value~ : Double, note? : String) -> Self
 
 pub struct StopRule {
   metric : String
   threshold : Double
   direction : String
-} derive(Eq, Show)
+} derive(Eq, @debug.Debug)
 pub fn StopRule::new(metric~ : String, threshold~ : Double, direction? : String) -> Self
 
 // Type aliases

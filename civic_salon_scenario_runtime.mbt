@@ -259,6 +259,10 @@ async fn materialize_civic_salon_scenario(
   if ideas.length() == 0 {
     return "Blocked \{scenario.title} \{round_id}: reducer produced no civic communication-pattern outputs."
   }
+  let validation_errors = civic_salon_round_validation_errors(scenario, ideas)
+  if validation_errors.length() > 0 {
+    return "Blocked \{scenario.title} \{round_id}: invalid civic communication-pattern output: \{validation_errors.join("; ")}"
+  }
   let participants = scenario.participants
   let metrics = civic_salon_metrics(scenario, participants, ideas)
   let catalog = @moonbook.load_or_create_catalog(path=book_catalog_path)
@@ -450,8 +454,10 @@ async fn seed_civic_salon_protocol_slice(
     gate: scenario.review_gate,
     status: "pending",
     reason: scenario.review_reason,
-    related_packet_id: "pkt-\{scenario.id}-\{round_id}-\{participants.get(0).unwrap().book_id}",
-    related_reduction_id: "red-\{round_id}-\{ideas.get(0).unwrap().id}",
+    related_packet_id: civic_salon_first_packet_id(
+      scenario, participants, round_id,
+    ),
+    related_reduction_id: civic_salon_first_reduction_id(ideas, round_id),
     owner: scenario.review_owner,
   }
   write_protocol_jsonl_records(
@@ -666,13 +672,6 @@ fn merge_civic_salon_catalog(
     }
   }
   merged
-}
-
-///|
-fn civic_salon_participant_book_ids(
-  participants : Array[CivicSalonParticipantBook],
-) -> Array[String] {
-  participants.map(fn(item) { item.book_id })
 }
 
 ///|

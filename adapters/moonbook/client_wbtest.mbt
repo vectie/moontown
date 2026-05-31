@@ -10,7 +10,7 @@ test "book-local moonclaw provider manifest entry is stable" {
   assert_eq(provider.name, "moonbook")
   assert_eq(provider.kind, "task-provider")
   assert_eq(provider.metadata.command, "moon")
-  assert_eq(provider.metadata.args, ["run", "cmd/main", "--"])
+  assert_true(provider.metadata.args == ["run", "cmd/main", "--"])
   assert_eq(provider.metadata.cwd, moonbook_root)
   assert_eq(provider.metadata.workspace_root, root)
   assert_true(provider.capabilities.contains("moonbook.bookapi"))
@@ -110,10 +110,13 @@ test "versioned explicit research book id canonicalizes to stable topic book" {
     entry.id,
     "research-euv-lithography-machine-new-advantages-and-supplements",
   )
-  assert_eq(entry.tags, [
-    "research", "euv-lithography-machine-new-advantages-and-supplements", "topic:euv-lithography-machine-new-advantages-and-supplements",
-    "explicit-book", "requested-book:research-euv-native-quality-v2",
-  ])
+  assert_true(
+    entry.tags ==
+    [
+      "research", "euv-lithography-machine-new-advantages-and-supplements", "topic:euv-lithography-machine-new-advantages-and-supplements",
+      "explicit-book", "requested-book:research-euv-native-quality-v2",
+    ],
+  )
   assert_true(entry.purpose.contains("do not create v1/v2/v3 forks"))
   let request = research_request_text(entry).to_lower()
   assert_true(
@@ -122,6 +125,46 @@ test "versioned explicit research book id canonicalizes to stable topic book" {
     ),
   )
   assert_true(!request.contains("topic: euv native-quality-v2"))
+}
+
+///|
+test "catalog provider exposes book refs without leaking provider internals" {
+  let entry = BookCatalogEntry::new(
+    id="finance",
+    name="Finance",
+    purpose="Maintain private finance state",
+    workspace_root="/tmp/finance",
+    tags=["finance"],
+    skills=["ledger"],
+  )
+  let provider = MoonbookCatalogProvider::new([entry])
+  let refs = provider.book_refs()
+  assert_eq(refs.length(), 1)
+  assert_eq(refs[0].id, "finance")
+  assert_eq(refs[0].workspace_root, "/tmp/finance")
+  assert_true(refs[0].tags == ["finance"])
+}
+
+///|
+test "book id lookup creates only valid dynamic research entries" {
+  let catalog = default_catalog()
+  match entry_for_book_id(catalog, "research-ai-hardware") {
+    Some(entry) => {
+      assert_eq(entry.id, "research-ai-hardware")
+      assert_true(entry.tags.contains("topic:ai-hardware"))
+    }
+    None => fail("expected dynamic research entry")
+  }
+  assert_true(entry_for_book_id(catalog, "unknown-book") == None)
+}
+
+///|
+test "explicit research lookup honors existing catalog entries first" {
+  let catalog = default_catalog()
+  match entry_for_explicit_research_book(catalog, "coding", "research coding") {
+    Some(entry) => assert_eq(entry.id, "coding")
+    None => fail("expected existing catalog entry")
+  }
 }
 
 ///|
@@ -304,8 +347,8 @@ test "sparse worker context gets keeper-safe defaults before MoonClaw import" {
     output_contract: [],
   }
   let clean = finalize_worker_context_bundle(entry, task, bundle)
-  assert_eq(clean.context_pages, ["wiki/index.md", "wiki/log.md"])
-  assert_eq(clean.skill_paths, ["skills/wiki-maintainer/SKILL.md"])
+  assert_true(clean.context_pages == ["wiki/index.md", "wiki/log.md"])
+  assert_true(clean.skill_paths == ["skills/wiki-maintainer/SKILL.md"])
 }
 
 ///|
@@ -342,8 +385,8 @@ test "sparse worker context prefers book skills and task target pages" {
     output_contract: [],
   }
   let clean = finalize_worker_context_bundle(entry, task, bundle)
-  assert_eq(clean.context_pages, ["wiki/synthesis/overview.md"])
-  assert_eq(clean.skill_paths, ["skills/ledger-review/SKILL.md"])
+  assert_true(clean.context_pages == ["wiki/synthesis/overview.md"])
+  assert_true(clean.skill_paths == ["skills/ledger-review/SKILL.md"])
 }
 
 ///|

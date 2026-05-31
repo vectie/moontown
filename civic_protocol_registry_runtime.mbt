@@ -21,6 +21,7 @@ pub async fn bootstrap_wenyu_building_protocols(
   status_path? : String = default_wenyu_protocol_status_path(),
 ) -> String {
   let protocols = @civic.wenyu_building_protocols()
+  let ledger_base_dir = protocol_ledger_base_dir_for_status_path(status_path)
   let registry_document = BuildingProtocolRegistryDocument::{
     generated_at: "bootstrap",
     description: "Wenyu building protocol registry. Buildings are protocol places for aggregation, exchange, AI-guided reduction, review, and distribution.",
@@ -32,12 +33,13 @@ pub async fn bootstrap_wenyu_building_protocols(
   )
   for protocol in protocols {
     write_text_file_if_missing(
-      protocol_contract_path(protocol.building_id),
+      protocol_contract_path(protocol.building_id, ledger_base_dir~),
       building_protocol_markdown(protocol),
     )
   }
   match @civic.wenyu_building_protocol_for_building_id("social-square") {
-    Some(protocol) => seed_social_square_protocol_slice(protocol)
+    Some(protocol) =>
+      seed_social_square_protocol_slice(protocol, ledger_base_dir~)
     None => ()
   }
   ignore(write_wenyu_building_protocol_status(status_path~, registry_path~))

@@ -130,7 +130,7 @@ test "failed execution record keeps assigned worker for cleanup" {
     "failed",
     assigned_worker_id=Some("watcher"),
   )
-  assert_eq(execution.assigned_worker_id, Some("watcher"))
+  assert_true(execution.assigned_worker_id == Some("watcher"))
   assert_eq(
     worker_status_for_execution(execution.status),
     @core.WorkerStatus::Idle,
