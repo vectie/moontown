@@ -126,12 +126,22 @@ async fn run_standing_goal_watch_cycle(
   if observed_execution != final_execution {
     state.replace_execution(observed_execution)
   }
-  persist_execution_into_book(state, entry, observed_execution)
+  let reconciled_execution = match
+    persist_execution_into_book(state, entry, observed_execution) {
+    Some(outcome) =>
+      execution_after_successful_book_persist(observed_execution, outcome, tick)
+    None => observed_execution
+  }
+  if reconciled_execution != observed_execution {
+    state.replace_task(to_town_task(entry, task, reconciled_execution.status))
+    state.replace_execution(reconciled_execution)
+    sync_worker_from_execution(state, reconciled_execution)
+  }
   collapse_standing_watch_book_history(entry, observed_execution)
   if terminal_execution_status(observed_execution.status) {
-    finalize_goal_book_entry(state, entry, 0, [observed_execution.task_id])
+    finalize_goal_book_entry(state, entry, 0, [reconciled_execution.task_id])
   }
-  let decision = standing_watch_decision_from_execution(observed_execution)
+  let decision = standing_watch_decision_from_execution(reconciled_execution)
   let next_no_change_streak = if decision == @core.WatcherDecisionKind::NoChange {
     no_change_streak + 1
   } else {
@@ -729,7 +739,7 @@ fn standing_watch_tick_for_goal_task(
 ) -> Int? {
   let prefix = "standing-\{compact_watch_segment(goal.id)}-tick-"
   if task_id.has_prefix(prefix) {
-    first_non_negative_int(task_id[prefix.length():].to_string())
+    first_non_negative_int(task_id[prefix.length():].to_owned())
   } else {
     None
   }
@@ -838,9 +848,9 @@ fn remove_standing_watch_history_block(
   let mut skipping = false
   let mut removed = false
   for raw in history.split("\n") {
-    let line = raw.to_string()
+    let line = raw.to_owned()
     if line.has_prefix("### ") {
-      if line.trim().to_string() == heading {
+      if line.trim().to_owned() == heading {
         skipping = true
         removed = true
         continue
@@ -864,14 +874,14 @@ fn standing_watch_latest_provider_decision_summary(history : String) -> String? 
   let mut current_id = ""
   let current_lines : Array[String] = []
   for raw in history.split("\n") {
-    let line = raw.to_string()
+    let line = raw.to_owned()
     if line.has_prefix("### ") {
       if current_id.has_prefix("provider-standing-watch-") {
         return standing_watch_summary_from_history_block(
           current_id, current_lines,
         )
       }
-      let heading = line[4:].trim().to_string()
+      let heading = line[4:].trim().to_owned()
       current_id = heading
       current_lines.clear()
     } else if current_id != "" {
@@ -894,7 +904,7 @@ fn standing_watch_history_decision_summary_for_task(
   let mut current_id = ""
   let current_lines : Array[String] = []
   for raw in history.split("\n") {
-    let line = raw.to_string()
+    let line = raw.to_owned()
     if line.has_prefix("### ") {
       if saw_task && current_id != "" {
         match
@@ -903,7 +913,7 @@ fn standing_watch_history_decision_summary_for_task(
           None => ()
         }
       }
-      let heading = line[4:].trim().to_string()
+      let heading = line[4:].trim().to_owned()
       if saw_task && heading.has_prefix("standing-watch-") && heading != task_id {
         return None
       }
@@ -1011,9 +1021,9 @@ fn standing_watch_history_field(
 ) -> String? {
   for line in lines {
     if line.has_prefix(prefix) {
-      let value = line[prefix.length():].trim().to_string()
+      let value = line[prefix.length():].trim().to_owned()
       if value.has_suffix("`") {
-        return Some(value[:value.length() - 1].to_string())
+        return Some(value[:value.length() - 1].to_owned())
       }
       return Some(value)
     }
@@ -1030,13 +1040,13 @@ fn standing_watch_history_summary_text(lines : Array[String]) -> String {
   for line in lines {
     if line.has_prefix(prefix) {
       collecting = true
-      let value = line[prefix.length():].trim().to_string()
+      let value = line[prefix.length():].trim().to_owned()
       if !value.is_blank() {
         builder.write_string(value)
         wrote = true
       }
     } else if collecting {
-      let value = line.trim().to_string()
+      let value = line.trim().to_owned()
       if value.is_blank() || line.has_prefix("- ") {
         break
       }
@@ -1055,12 +1065,12 @@ fn standing_watch_marker_value(summary : String, key : String) -> String? {
   let key_colon = "\{key}:"
   let key_equals = "\{key}="
   for raw in summary.split("\n") {
-    let line = raw.trim().to_string()
+    let line = raw.trim().to_owned()
     let lower = line.to_lower()
     if lower.has_prefix(key_colon) {
-      return Some(line[key_colon.length():].trim(chars=" `").to_string())
+      return Some(line[key_colon.length():].trim(chars=" `").to_owned())
     } else if lower.has_prefix(key_equals) {
-      return Some(line[key_equals.length():].trim(chars=" `").to_string())
+      return Some(line[key_equals.length():].trim(chars=" `").to_owned())
     }
   }
   None
@@ -1075,7 +1085,7 @@ fn standing_watch_marker_int(
   let key_colon = "\{key}:"
   let key_equals = "\{key}="
   for raw in summary.to_lower().split("\n") {
-    let line = raw.trim().to_string()
+    let line = raw.trim().to_owned()
     if line.has_prefix(key_colon) || line.has_prefix(key_equals) {
       match first_non_negative_int(line) {
         Some(value) => return value
@@ -1166,7 +1176,7 @@ fn compact_watch_segment(text : String) -> String {
       last_dash = true
     }
   }
-  let value = builder.to_string().trim(chars="-").to_string()
+  let value = builder.to_string().trim(chars="-").to_owned()
   if value.is_empty() {
     "standing-goal"
   } else {

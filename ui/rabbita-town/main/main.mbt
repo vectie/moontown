@@ -980,8 +980,8 @@ fn find_wenyu_module(module_id : String) -> WenyuTownModule? {
 ///|
 fn strip_prefix_once(text : String, prefix : String) -> String {
   if text.length() >= prefix.length() &&
-    text[:prefix.length()].to_string() == prefix {
-    text[prefix.length():].to_string()
+    text[:prefix.length()].to_owned() == prefix {
+    text[prefix.length():].to_owned()
   } else {
     text
   }
@@ -1192,8 +1192,8 @@ fn update(dispatch : Dispatch[Msg], msg : Msg, model : Model) -> (Cmd, Model) {
     SetRequestQualityThreshold(value) =>
       (@rabbita.none, { ..model, request_quality_threshold: value })
     SubmitOperatorRequest =>
-      if model.request_title.trim().to_string().is_empty() ||
-        model.request_prompt.trim().to_string().is_empty() {
+      if model.request_title.trim().to_owned().is_empty() ||
+        model.request_prompt.trim().to_owned().is_empty() {
         (
           @rabbita.none,
           {
@@ -2535,7 +2535,7 @@ fn standing_goal_progress(model : Model, goal : StandingGoalSnapshot) -> Int {
 ///|
 fn one_line(text : String) -> String {
   for line in text.split("\n") {
-    return line.trim().to_string()
+    return line.trim().to_owned()
   }
   text
 }

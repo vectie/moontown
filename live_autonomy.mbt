@@ -12,6 +12,8 @@ pub struct LiveAutonomySpine {
   failed_count : Int
   due_goal_count : Int
   standing_goal_count : Int
+  planbook_open_count : Int
+  planbook_repair_active_count : Int
   latest_watcher_summary : String
   visual_projection_path : String
   journal_path : String
@@ -50,8 +52,11 @@ pub async fn write_live_autonomy_spine(
   daemon_tick? : Int? = None,
 ) -> LiveAutonomySpine {
   let journal_path = default_town_journal_path(snapshot_path~)
+  let planbook_open = planbook_open_gap_count(snapshot_path~)
+  let planbook_repair_active = planbook_repair_active_count(snapshot_path~)
   let spine = build_live_autonomy_spine(
     state, snapshot_path, standing_goals, watcher_records, tick_summary, daemon_tick,
+    planbook_open, planbook_repair_active,
   )
   write_text_file(
     default_live_autonomy_path(snapshot_path~),
@@ -74,16 +79,31 @@ pub async fn render_live_autonomy_status(
 ) -> String {
   let path = default_live_autonomy_path(snapshot_path~)
   if !@fs.exists(path) {
-    return "No live autonomy spine exists at \{path}. Run `moon run cmd/main -- daemon tick` or `moon run cmd/main -- live refresh`."
+    ignore(refresh_live_autonomy_spine(snapshot_path~))
+    if !@fs.exists(path) {
+      return "No live autonomy spine exists at \{path}. Run `moon run cmd/main -- daemon tick` or `moon run cmd/main -- live refresh`."
+    }
   }
   let parsed = @json.parse(@fs.read_file(path).text()) catch {
     _ =>
       return "Live autonomy spine exists at \{path}, but it is not valid JSON."
   }
-  let spine : LiveAutonomySpine = @json.from_json(parsed) catch {
-    _ =>
-      return "Live autonomy spine exists at \{path}, but it does not match the contract."
+  let decoded = match decode_live_autonomy_spine(parsed) {
+    Some(value) => value
+    None => {
+      ignore(refresh_live_autonomy_spine(snapshot_path~))
+      let refreshed = @json.parse(@fs.read_file(path).text()) catch {
+        _ =>
+          return "Live autonomy spine exists at \{path}, but it is not valid JSON after refresh."
+      }
+      match decode_live_autonomy_spine(refreshed) {
+        Some(value) => value
+        None =>
+          return "Live autonomy spine exists at \{path}, but it does not match the contract after refresh."
+      }
+    }
   }
+  let spine = sync_live_autonomy_planbook_counts(decoded, snapshot_path)
   [
     "# Live Autonomy Spine",
     "",
@@ -97,6 +117,8 @@ pub async fn render_live_autonomy_status(
     "- Unresolved failures: `\{spine.failed_count}`",
     "- Standing goals: `\{spine.standing_goal_count}`",
     "- Due goals: `\{spine.due_goal_count}`",
+    "- PlanBook open gaps: `\{spine.planbook_open_count}`",
+    "- PlanBook active repairs: `\{spine.planbook_repair_active_count}`",
     "- Visual projection: `\{spine.visual_projection_path}`",
     "- Journal: `\{spine.journal_path}`",
     "- Digest: `\{spine.digest_path}`",
@@ -117,6 +139,13 @@ pub async fn render_live_autonomy_status(
       markdown_bullets(spine.next_actions)
     },
   ].join("\n")
+}
+
+///|
+fn decode_live_autonomy_spine(json : Json) -> LiveAutonomySpine? {
+  Some(@json.from_json(json)) catch {
+    _ => None
+  }
 }
 
 ///|
@@ -141,9 +170,102 @@ pub async fn refresh_live_autonomy_spine(
       )
       "Refreshed live autonomy spine at \{default_live_autonomy_path(snapshot_path=snapshot_path)}: \{spine.summary}"
     }
-    None =>
-      "No saved town snapshot exists at \{snapshot_path}; cannot refresh live autonomy spine."
+    None => {
+      let goals = @storage.load_or_create_standing_goals(
+        path=live_autonomy_standing_goal_path(snapshot_path),
+      )
+      let records = load_live_autonomy_watcher_records(snapshot_path, goals)
+      let daemon = load_daemon_state(default_daemon_state_path(snapshot_path))
+      let spine = write_live_autonomy_spine(
+        empty_live_autonomy_state(),
+        snapshot_path~,
+        standing_goals=goals,
+        watcher_records=records,
+        tick_summary="manual live autonomy refresh without saved town snapshot",
+        daemon_tick=Some(daemon.tick_sequence),
+      )
+      "Refreshed live autonomy spine without saved town snapshot at \{default_live_autonomy_path(snapshot_path=snapshot_path)}: \{spine.summary}"
+    }
   }
+}
+
+///|
+async fn sync_live_autonomy_planbook_counts(
+  spine : LiveAutonomySpine,
+  snapshot_path : String,
+) -> LiveAutonomySpine {
+  let planbook_open = planbook_open_gap_count(snapshot_path~)
+  let planbook_repair_active = planbook_repair_active_count(snapshot_path~)
+  if planbook_open == spine.planbook_open_count &&
+    planbook_repair_active == spine.planbook_repair_active_count {
+    spine
+  } else {
+    let summary = synced_live_autonomy_summary(
+      spine.summary,
+      spine.tick,
+      spine.active_worker_count,
+      spine.review_count,
+      spine.blocked_count,
+      spine.accepted_update_count,
+      spine.no_change_count,
+      planbook_open,
+    )
+    let synced = {
+      ..spine,
+      generated_at_ms: @env.now(),
+      planbook_open_count: planbook_open,
+      planbook_repair_active_count: planbook_repair_active,
+      summary,
+      next_actions: live_autonomy_next_actions(
+        spine.active_worker_count,
+        spine.review_count,
+        spine.blocked_count,
+        spine.due_goal_count,
+        [],
+        planbook_open,
+        planbook_repair_active,
+      ),
+    }
+    write_text_file(
+      default_live_autonomy_path(snapshot_path~),
+      synced.to_json().stringify(indent=2),
+    )
+    synced
+  }
+}
+
+///|
+fn synced_live_autonomy_summary(
+  previous : String,
+  tick : Int,
+  active_workers : Int,
+  review : Int,
+  blocked : Int,
+  accepted_updates : Int,
+  no_change : Int,
+  planbook_open : Int,
+) -> String {
+  let mut prefix = ""
+  for part in previous.split(";") {
+    prefix = part.trim().to_owned()
+    break
+  }
+  let metrics = "tick=\{tick} active=\{active_workers} review=\{review} blocked=\{blocked} accepted_updates=\{accepted_updates} no_change=\{no_change} planbook_open=\{planbook_open}"
+  if prefix.is_blank() || prefix.has_prefix("tick=") {
+    "\{metrics}; planbook counts reconciled from authoritative state"
+  } else {
+    "\{prefix}; \{metrics}; planbook counts reconciled from authoritative state"
+  }
+}
+
+///|
+fn empty_live_autonomy_state() -> @core.TownState {
+  @core.empty_state(
+    @core.TownConfig::new(
+      id="moontown-live-autonomy",
+      name="Moontown Live Autonomy",
+    ),
+  )
 }
 
 ///|
@@ -154,6 +276,8 @@ fn build_live_autonomy_spine(
   watcher_records : Array[@core.WatcherRunRecord],
   tick_summary : String,
   daemon_tick : Int?,
+  planbook_open : Int,
+  planbook_repair_active : Int,
 ) -> LiveAutonomySpine {
   let tick = match daemon_tick {
     Some(value) => value
@@ -178,9 +302,9 @@ fn build_live_autonomy_spine(
   let status = live_autonomy_status(active_workers, review, blocked)
   let latest = latest_watcher_record_summary(watcher_records, standing_goals)
   let summary = if tick_summary == "" {
-    "tick=\{tick} active=\{active_workers} review=\{review} blocked=\{blocked} accepted_updates=\{accepted_updates} no_change=\{no_change}"
+    "tick=\{tick} active=\{active_workers} review=\{review} blocked=\{blocked} accepted_updates=\{accepted_updates} no_change=\{no_change} planbook_open=\{planbook_open}"
   } else {
-    "\{tick_summary}; tick=\{tick} active=\{active_workers} review=\{review} blocked=\{blocked} accepted_updates=\{accepted_updates} no_change=\{no_change}"
+    "\{tick_summary}; tick=\{tick} active=\{active_workers} review=\{review} blocked=\{blocked} accepted_updates=\{accepted_updates} no_change=\{no_change} planbook_open=\{planbook_open}"
   }
   {
     generated_at_ms: @env.now(),
@@ -195,6 +319,8 @@ fn build_live_autonomy_spine(
     failed_count: failed,
     due_goal_count: due_goals.length(),
     standing_goal_count: standing_goals.length(),
+    planbook_open_count: planbook_open,
+    planbook_repair_active_count: planbook_repair_active,
     latest_watcher_summary: latest,
     visual_projection_path: default_visual_projection_path(snapshot_path),
     journal_path: default_town_journal_path(snapshot_path~),
@@ -205,6 +331,8 @@ fn build_live_autonomy_spine(
       blocked,
       due_goals.length(),
       watcher_records,
+      planbook_open,
+      planbook_repair_active,
     ),
   }
 }
@@ -239,7 +367,13 @@ fn render_live_autonomy_digest(
   builder.write_string("- blocked_or_unhealthy: `\{spine.blocked_count}`\n")
   builder.write_string("- unresolved_failures: `\{spine.failed_count}`\n")
   builder.write_string("- accepted_updates: `\{spine.accepted_update_count}`\n")
-  builder.write_string("- no_change_cycles: `\{spine.no_change_count}`\n\n")
+  builder.write_string("- no_change_cycles: `\{spine.no_change_count}`\n")
+  builder.write_string(
+    "- planbook_open_gaps: `\{spine.planbook_open_count}`\n\n",
+  )
+  builder.write_string(
+    "- planbook_active_repairs: `\{spine.planbook_repair_active_count}`\n\n",
+  )
   builder.write_string("## Current Interpretation\n\n")
   builder.write_string(live_autonomy_digest_interpretation(spine))
   builder.write_string("\n\n")
@@ -390,6 +524,8 @@ fn live_autonomy_next_actions(
   blocked : Int,
   due_goals : Int,
   watcher_records : Array[@core.WatcherRunRecord],
+  planbook_open : Int,
+  planbook_repair_active : Int,
 ) -> Array[String] {
   let actions : Array[String] = []
   if blocked > 0 {
@@ -402,6 +538,15 @@ fn live_autonomy_next_actions(
   }
   if due_goals > 0 {
     actions.push("Dispatch due standing goals on the next daemon tick.")
+  }
+  if planbook_repair_active > 0 {
+    actions.push(
+      "PlanBook has an active self-repair packet; monitor repair status before creating another one.",
+    )
+  } else if planbook_open > 0 {
+    actions.push(
+      "PlanBook has \{planbook_open} open self-build gap(s); Mayor should queue or dispatch the top repair packet and validate it.",
+    )
   }
   if active_workers == 0 && due_goals == 0 {
     actions.push(

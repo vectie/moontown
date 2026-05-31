@@ -40,6 +40,8 @@ pub fn proposal_packet_from_bundle(@moonbook.WorkerContextBundle, String, String
 
 pub async fn run_confirmed_run(String, moonclaw_root? : String, home? : String, cwd? : String) -> String
 
+pub async fn run_process_alive(String) -> Bool
+
 pub async fn run_workspace_dir(String, home? : String, cwd? : String) -> String?
 
 pub async fn save_packet_file(String, ExternalProposalPacket) -> Unit
@@ -156,6 +158,7 @@ pub struct ProposalPollResponse {
   status : @core.TaskExecutionStatus
   summary : String
   memory_candidates : Array[String]
+  result_decision : String
   requires_review : Bool
   notify_town : Bool
 } derive(Eq, Show, ToJson, @json.FromJson)

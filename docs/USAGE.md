@@ -621,7 +621,40 @@ Bootstrap the current planbook:
 ```bash
 moon run cmd/main -- planbook bootstrap
 moon run cmd/main -- planbook status
+moon run cmd/main -- planbook doctor
+moon run cmd/main -- planbook autonomy
+moon run cmd/main -- planbook repair
+moon run cmd/main -- planbook repair status
 ```
+
+`planbook doctor` is the self-build check. It writes
+`.moontown/planbook/autonomy.json`, `.moontown/planbook/autonomy.md`, and the
+PlanBook workspace pages `wiki/planning/execution-evidence.md`,
+`wiki/planning/self-healing.md`, and `wiki/reviews/active-plan-review.md`.
+Daemon ticks run the same check and the live spine exposes
+`planbook_open_count`, so unresolved implementation gaps stay visible while the
+town is running.
+
+`planbook repair` queues the first open self-build gap as a bounded PlanBook
+repair packet. It writes repair context, repair skill instructions, a restartable
+repair plan, and `.moontown/planbook/repair-task.json`. Use
+`planbook repair --dispatch` when the MoonClaw/Codex target is configured and
+you want the town to attempt the repair through the worker runtime. Daemon ticks
+queue one repair at a time and leave active repairs alone until they are
+resolved or inspected.
+
+For live operation, use `daemon doctor` to verify the supervisor and worker are
+healthy:
+
+```bash
+moon run cmd/main -- daemon doctor
+moon run cmd/main -- live status
+```
+
+The daemon preserves the supervisor-recorded worker PID so a worker does not
+corrupt its own runtime identity and cause duplicate daemon workers. If
+`daemon doctor` reports stale runtime, restart the daemon before trusting live
+status.
 
 Bootstrap the Wenyu beginner course book:
 

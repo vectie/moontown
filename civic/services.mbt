@@ -651,8 +651,8 @@ fn civic_persistence_mode(module_mode : String) -> String {
 ///|
 fn strip_prefix(text : String, prefix : String) -> String {
   if text.length() >= prefix.length() &&
-    text[:prefix.length()].to_string() == prefix {
-    text[prefix.length():].to_string()
+    text[:prefix.length()].to_owned() == prefix {
+    text[prefix.length():].to_owned()
   } else {
     text
   }
@@ -677,5 +677,5 @@ fn bullet_lines(values : Array[String]) -> String {
     builder.write_string(value)
     builder.write_char('\n')
   }
-  builder.to_string().trim().to_string()
+  builder.to_string().trim().to_owned()
 }

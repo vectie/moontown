@@ -1,14 +1,29 @@
 ///|
 pub struct EventCursor {
   offset : Int
-} derive(Show, Eq, ToJson, FromJson)
+} derive(Debug, Eq, ToJson, FromJson)
+
+///|
+pub impl Show for EventCursor with fn output(
+  self : EventCursor,
+  logger : &Logger,
+) -> Unit {
+  logger.write_string("EventCursor(offset=\{self.offset})")
+}
 
 ///|
 pub struct Checkpoint {
   run_id : String
   summary : String
   event_count : Int
-} derive(Show, Eq, ToJson, FromJson)
+} derive(Debug, Eq, ToJson, FromJson)
+
+///|
+pub impl Show for Checkpoint with fn output(self : Checkpoint, logger : &Logger) -> Unit {
+  logger.write_string(
+    "Checkpoint(run_id=\{self.run_id}, summary=\{self.summary}, event_count=\{self.event_count})",
+  )
+}
 
 ///|
 pub struct TownSnapshot {
@@ -147,7 +162,7 @@ pub async fn load_watcher_run_records_file(
   }
   let text = @fs.read_file(path).text() catch { _ => return records }
   for raw in text.split("\n") {
-    let line = raw.trim().to_string()
+    let line = raw.trim().to_owned()
     if line.is_empty() {
       continue
     }
@@ -247,7 +262,7 @@ fn safe_watcher_goal_id(goal_id : String) -> String {
       last_dash = true
     }
   }
-  let value = builder.to_string().trim(chars="-").to_string()
+  let value = builder.to_string().trim(chars="-").to_owned()
   if value.is_empty() {
     "standing-goal"
   } else {

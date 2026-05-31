@@ -11,7 +11,7 @@ pub struct ResearchReadiness {
   pending_review_count : Int
   substantive_coverage_ready : Bool
   gaps : Array[String]
-} derive(Show, Eq, ToJson, FromJson)
+} derive(Debug, Eq, ToJson, FromJson)
 
 ///|
 pub fn ResearchReadiness::from_summary(

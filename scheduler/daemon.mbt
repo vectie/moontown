@@ -2,14 +2,34 @@
 pub struct SchedulerTick {
   sequence : Int
   summary : String
-} derive(Show, Eq, ToJson, FromJson)
+} derive(Debug, Eq, ToJson, FromJson)
+
+///|
+pub impl Show for SchedulerTick with fn output(
+  self : SchedulerTick,
+  logger : &Logger,
+) -> Unit {
+  logger.write_string(
+    "SchedulerTick(sequence=\{self.sequence}, summary=\{self.summary})",
+  )
+}
 
 ///|
 pub struct ScheduledJob {
   id : String
   kind : String
   interval_seconds : Int
-} derive(Show, Eq, ToJson, FromJson)
+} derive(Debug, Eq, ToJson, FromJson)
+
+///|
+pub impl Show for ScheduledJob with fn output(
+  self : ScheduledJob,
+  logger : &Logger,
+) -> Unit {
+  logger.write_string(
+    "ScheduledJob(id=\{self.id}, kind=\{self.kind}, interval_seconds=\{self.interval_seconds})",
+  )
+}
 
 ///|
 pub struct DaemonState {
@@ -19,7 +39,17 @@ pub struct DaemonState {
   last_heartbeat_event_count : Int
   active_goal_ids : Array[String]
   jobs : Array[ScheduledJob]
-} derive(Show, Eq, ToJson, FromJson)
+} derive(Debug, Eq, ToJson, FromJson)
+
+///|
+pub impl Show for DaemonState with fn output(
+  self : DaemonState,
+  logger : &Logger,
+) -> Unit {
+  logger.write_string(
+    "DaemonState(daemon_id=\{self.daemon_id}, lease_owner=\{self.lease_owner}, tick_sequence=\{self.tick_sequence}, last_heartbeat_event_count=\{self.last_heartbeat_event_count}, active_goals=\{self.active_goal_ids.length()}, jobs=\{self.jobs.length()})",
+  )
+}
 
 ///|
 pub fn DaemonState::new(
@@ -77,7 +107,17 @@ pub fn merge_default_daemon_jobs(
 pub struct SchedulerAction {
   kind : String
   detail : String
-} derive(Show, Eq, ToJson, FromJson)
+} derive(Debug, Eq, ToJson, FromJson)
+
+///|
+pub impl Show for SchedulerAction with fn output(
+  self : SchedulerAction,
+  logger : &Logger,
+) -> Unit {
+  logger.write_string(
+    "SchedulerAction(kind=\{self.kind}, detail=\{self.detail})",
+  )
+}
 
 ///|
 pub fn collect_due_tasks(town : @core.TownState) -> Array[@core.TownTask] {

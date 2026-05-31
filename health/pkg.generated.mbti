@@ -2,6 +2,7 @@
 package "vectie/moontown/health"
 
 import {
+  "moonbitlang/core/debug",
   "vectie/moontown/core",
 }
 
@@ -16,36 +17,42 @@ pub fn recovery_actions(HealthReport) -> Array[RecoveryAction]
 pub struct Anomaly {
   title : String
   detail : String
-} derive(Eq, Show)
+} derive(Eq, @debug.Debug)
+pub impl Show for Anomaly
 
 pub struct BookHealth {
   book_id : String
   level : HealthLevel
   note : String
-} derive(Eq, Show)
+} derive(Eq, @debug.Debug)
+pub impl Show for BookHealth
 
 pub enum HealthLevel {
   Healthy
   Degraded
   Critical
-} derive(Eq, Show)
+} derive(Eq, @debug.Debug)
+pub impl Show for HealthLevel
 
 pub struct HealthReport {
   worker_health : Array[WorkerHealth]
   book_health : Array[BookHealth]
   anomalies : Array[Anomaly]
-} derive(Eq, Show)
+} derive(Eq, @debug.Debug)
+pub impl Show for HealthReport
 
 pub struct RecoveryAction {
   kind : String
   detail : String
-} derive(Eq, Show)
+} derive(Eq, @debug.Debug)
+pub impl Show for RecoveryAction
 
 pub struct WorkerHealth {
   worker_id : String
   level : HealthLevel
   note : String
-} derive(Eq, Show)
+} derive(Eq, @debug.Debug)
+pub impl Show for WorkerHealth
 
 // Type aliases
 

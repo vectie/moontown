@@ -55,3 +55,55 @@ test "moonclaw supervision seconds parser accepts zero for nonblocking mode" {
   assert_eq(parse_non_negative_seconds("", fallback=3600), 3600)
   assert_eq(parse_non_negative_seconds("10m", fallback=3600), 3600)
 }
+
+///|
+test "successful book persistence reconciles failed execution into review queue" {
+  let execution = @core.TaskExecutionRecord::new(
+    task_id="goal-synthesis",
+    book_id="coding",
+    packet_id="packet",
+    packet_path="packet.json",
+    status=@core.TaskExecutionStatus::Failed,
+    summary="ExternalProposalPacket: context_pages must not be empty",
+    output_contract="wiki.update",
+    requires_review=true,
+  )
+  let outcome : @moonbook.PersistResultOutcome = @json.from_json(
+    @json.parse(
+      "{\"log_path\":\"/tmp/book/result.json\",\"updated_pages\":[\"wiki/index.md\"],\"review_queued\":true,\"notify_town\":false,\"evidence_id\":\"EV-goal-synthesis\"}",
+    ),
+  )
+  let reconciled = execution_after_successful_book_persist(
+    execution, outcome, 42,
+  )
+  assert_eq(reconciled.status, @core.TaskExecutionStatus::ReviewQueued)
+  assert_eq(reconciled.next_retry_tick, None)
+  assert_eq(reconciled.result_decision, "persisted-review")
+  assert_true(
+    reconciled.summary.contains("keeper_auto_triage: persisted_terminal_result"),
+  )
+}
+
+///|
+test "successful non-review book persistence closes stale execution" {
+  let execution = @core.TaskExecutionRecord::new(
+    task_id="goal-course",
+    book_id="course",
+    packet_id="packet",
+    packet_path="packet.json",
+    status=@core.TaskExecutionStatus::Stale,
+    summary="missed heartbeat",
+    output_contract="course.update",
+  )
+  let outcome : @moonbook.PersistResultOutcome = @json.from_json(
+    @json.parse(
+      "{\"log_path\":\"/tmp/book/result.json\",\"updated_pages\":[\"wiki/index.md\"],\"review_queued\":false,\"notify_town\":false,\"evidence_id\":\"EV-goal-course\"}",
+    ),
+  )
+  let reconciled = execution_after_successful_book_persist(
+    execution, outcome, 43,
+  )
+  assert_eq(reconciled.status, @core.TaskExecutionStatus::Completed)
+  assert_eq(reconciled.result_decision, "persisted")
+  assert_true(reconciled.summary.contains("persisted_evidence_id"))
+}

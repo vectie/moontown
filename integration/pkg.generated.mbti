@@ -1,6 +1,10 @@
 // Generated using `moon info`, DON'T EDIT IT
 package "vectie/moontown/integration"
 
+import {
+  "moonbitlang/core/debug",
+}
+
 // Values
 pub fn render_command(String, Array[String]) -> String
 
@@ -23,7 +27,7 @@ pub struct CompletedCommand {
   status : Int
   stdout : String
   stderr : String
-} derive(Eq, Show, ToJson)
+} derive(Eq, ToJson, @debug.Debug)
 
 // Type aliases
 

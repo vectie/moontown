@@ -353,6 +353,7 @@ pub struct TaskExecutionRecord {
   heartbeat_tick : Int
   stale_after_tick : Int
   next_retry_tick : Int?
+  result_decision : String
   requires_review : Bool
   notify_town : Bool
 } derive(Show, Eq, ToJson, FromJson)
@@ -376,6 +377,7 @@ pub fn TaskExecutionRecord::new(
   heartbeat_tick? : Int = 0,
   stale_after_tick? : Int = 3,
   next_retry_tick? : Int? = None,
+  result_decision? : String = "pending",
   requires_review? : Bool = false,
   notify_town? : Bool = false,
 ) -> TaskExecutionRecord {
@@ -397,6 +399,7 @@ pub fn TaskExecutionRecord::new(
     heartbeat_tick,
     stale_after_tick,
     next_retry_tick,
+    result_decision,
     requires_review,
     notify_town,
   }
@@ -541,7 +544,7 @@ pub fn find_task(town : TownState, task_id : String) -> TownTask? {
 
 ///|
 pub(open) trait BookProvider {
-  books(self : Self) -> Array[BookRef]
+  fn books(self : Self) -> Array[BookRef]
 }
 
 ///|
@@ -555,7 +558,7 @@ pub fn StaticBookProvider::new(entries : Array[BookRef]) -> StaticBookProvider {
 }
 
 ///|
-pub impl BookProvider for StaticBookProvider with books(
+pub impl BookProvider for StaticBookProvider with fn books(
   self : StaticBookProvider,
 ) -> Array[BookRef] {
   self.entries

@@ -267,7 +267,24 @@ Bootstrap the current first-class planbook with:
 ```bash
 moon run cmd/main -- planbook bootstrap
 moon run cmd/main -- planbook status
+moon run cmd/main -- planbook doctor
+moon run cmd/main -- planbook autonomy
+moon run cmd/main -- planbook repair
+moon run cmd/main -- planbook repair status
 ```
+
+`planbook doctor` writes `.moontown/planbook/autonomy.json` and
+`.moontown/planbook/autonomy.md`, updates the PlanBook workspace evidence and
+review pages, and is also run during daemon ticks. This makes self-build gaps
+visible in the live autonomy spine instead of leaving them as static docs.
+
+`planbook repair` turns the first open self-build gap into a bounded repair
+packet under the PlanBook workspace. It writes repair context, a repair
+`SKILL.md`, a restartable repair plan, `.moontown/planbook/repair-task.json`,
+and `.moontown/planbook/repair-task.md`. Use
+`planbook repair --dispatch` only when the MoonClaw/Codex execution target is
+available; otherwise the packet remains queued for safe inspection. Daemon ticks
+queue one repair packet at a time and do not duplicate active repairs.
 
 ## Book Quality Governance
 

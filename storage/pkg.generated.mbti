@@ -2,6 +2,7 @@
 package "vectie/moontown/storage"
 
 import {
+  "moonbitlang/core/debug",
   "moonbitlang/core/json",
   "vectie/moontown/core",
 }
@@ -50,11 +51,13 @@ pub struct Checkpoint {
   run_id : String
   summary : String
   event_count : Int
-} derive(Eq, Show, ToJson, @json.FromJson)
+} derive(Eq, ToJson, @debug.Debug, @json.FromJson)
+pub impl Show for Checkpoint
 
 pub struct EventCursor {
   offset : Int
-} derive(Eq, Show, ToJson, @json.FromJson)
+} derive(Eq, ToJson, @debug.Debug, @json.FromJson)
+pub impl Show for EventCursor
 
 pub struct TownSnapshot {
   town : @core.TownState

@@ -34,8 +34,13 @@ test "dashboard renders town square and dispatch log" {
 
 ///|
 async test "load or create demo state persists a snapshot" {
-  let path = ".moontown/test-town-modeled.json"
-  let state = @moontown.load_or_create_modeled_demo_state(path~)
+  let base = "/tmp/moontown-test-town-modeled-\{@async.now().to_int()}"
+  let path = "\{base}.json"
+  let catalog_path = "\{base}-catalog.json"
+  let state = @moontown.load_or_create_modeled_demo_state(
+    path~,
+    book_catalog_path=catalog_path,
+  )
   assert_eq(state.books.length(), 2)
   let snapshot = @storage.load_snapshot_file(path)
   assert_true(snapshot is Some(saved) && saved.event_count == 8)
@@ -43,7 +48,7 @@ async test "load or create demo state persists a snapshot" {
 
 ///|
 async test "load or create demo state accepts injected book provider" {
-  let snapshot_path = ".moontown/test-provider-town.json"
+  let snapshot_path = "/tmp/moontown-test-provider-town-\{@async.now().to_int()}.json"
   let provider = @core.StaticBookProvider::new([
     @core.BookRef::new(
       id="lab",

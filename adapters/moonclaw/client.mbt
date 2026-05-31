@@ -242,6 +242,7 @@ pub struct ProposalPollResponse {
   status : @core.TaskExecutionStatus
   summary : String
   memory_candidates : Array[String]
+  result_decision : String
   requires_review : Bool
   notify_town : Bool
 } derive(Show, Eq, ToJson, FromJson)
@@ -258,6 +259,7 @@ pub fn timed_out_poll_response(
     status: @core.TaskExecutionStatus::Failed,
     summary,
     memory_candidates: [],
+    result_decision: "blocked",
     requires_review: true,
     notify_town: true,
   }
@@ -580,6 +582,7 @@ pub async fn import_packet(
   let resolved_home = resolve_home_path(home, resolved_cwd)
   let resolved_packet_path = resolve_packet_path(packet_path)
   save_packet_file(resolved_packet_path, packet)
+  let moon = moon_command()
   let args = [
     "-C",
     moonclaw_root,
@@ -605,8 +608,8 @@ pub async fn import_packet(
       []
     },
   ]
-  let command = @integration.render_command("moon", args)
-  let output = @integration.run_json("moon", args)
+  let command = @integration.render_command(moon, args)
+  let output = @integration.run_json(moon, args)
   let proposal_id = parse_json_string(output, "proposal_id").unwrap_or(
     "proposal-\{packet.packet_id}",
   )
@@ -651,14 +654,27 @@ pub async fn run_confirmed_run(
 ) -> String {
   let resolved_cwd = resolve_root_path(cwd)
   let resolved_home = resolve_home_path(home, resolved_cwd)
+  let moon = moon_command()
   let args = [
     "-C", moonclaw_root, "run", "cmd/main", "--", "proposal", "run", run_id, "--cwd",
     resolved_cwd, "--home", resolved_home,
   ]
-  let command = @integration.render_command("moon", args)
-  let shell_command = build_detached_shell_command("moon", args)
+  let command = @integration.render_command(moon, args)
+  let shell_command = build_detached_shell_command(moon, args)
   ignore(@integration.run_checked("/bin/zsh", ["-lc", shell_command]))
   command
+}
+
+///|
+fn moon_command() -> String {
+  match @sys.get_env_var("MOON_BIN") {
+    Some(value) if !value.is_empty() => value
+    _ =>
+      match @sys.get_env_var("HOME") {
+        Some(home) if !home.is_empty() => home + "/.moon/bin/moon"
+        _ => "moon"
+      }
+  }
 }
 
 ///|
@@ -706,6 +722,15 @@ pub async fn poll_run(
       } else {
         indexed_status
       }
+      let result_decision = parse_json_string(result_payload, "result_decision").unwrap_or(
+        if status == @core.TaskExecutionStatus::Failed {
+          "blocked"
+        } else if status == @core.TaskExecutionStatus::Completed {
+          "accepted"
+        } else {
+          "pending"
+        },
+      )
       {
         task_id,
         run_id,
@@ -716,6 +741,7 @@ pub async fn poll_run(
           run_summary(run, result_payload)
         },
         memory_candidates: [],
+        result_decision,
         requires_review: parse_json_bool(result_payload, "requires_review").unwrap_or(
           false,
         ),
@@ -731,6 +757,7 @@ pub async fn poll_run(
         status: @core.TaskExecutionStatus::Running,
         summary: "Run \{run_id} has not been indexed in MoonClaw yet.",
         memory_candidates: [],
+        result_decision: "pending",
         requires_review: false,
         notify_town: false,
       }
@@ -746,6 +773,11 @@ pub async fn run_workspace_dir(
   let resolved_cwd = resolve_root_path(cwd)
   let resolved_home = resolve_home_path(home, resolved_cwd)
   load_run(run_id, resolved_home).bind(fn(run) { run.workspace_dir })
+}
+
+///|
+pub async fn run_process_alive(run_id : String) -> Bool {
+  moonclaw_run_process_alive(run_id)
 }
 
 ///|
@@ -876,7 +908,7 @@ fn run_summary(run : StoredRun, result_payload : Json) -> String {
         "MoonClaw run \{run.id} completed: \{detail}\{workspace_suffix}"
       }
     "Failed" | "Cancelled" =>
-      "MoonClaw run \{run.id} failed: \{run.error.unwrap_or(detail).trim().to_string()}\{workspace_suffix}"
+      "MoonClaw run \{run.id} failed: \{run.error.unwrap_or(detail).trim().to_owned()}\{workspace_suffix}"
     "WaitingForInput" =>
       "MoonClaw run \{run.id} is waiting for input.\{workspace_suffix}"
     _ =>

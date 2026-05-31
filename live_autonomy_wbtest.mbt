@@ -109,3 +109,52 @@ async test "live autonomy distinguishes historical watcher failures from current
   let live_text = render_live_autonomy_status(snapshot_path~)
   assert_true(live_text.contains("Unresolved failures: `0`"))
 }
+
+///|
+async test "live status reconciles stale planbook counts from authoritative state" {
+  let root = "/tmp/moontown-live-autonomy-planbook-reconcile-check"
+  ignore_checked_command("rm", ["-rf", root])
+  let snapshot_path = "\{root}/town.json"
+  let workspace_root = "\{root}/books/plan-moontown-quality"
+  ignore(
+    write_moontown_planbook_autonomy(
+      snapshot_path~,
+      workspace_root~,
+      book_catalog_path="\{root}/catalog.json",
+    ),
+  )
+  let state = visual_projection_test_state(
+    worker_status=@core.WorkerStatus::Idle,
+    execution_status=@core.TaskExecutionStatus::Completed,
+  )
+  let spine = write_live_autonomy_spine(
+    state,
+    snapshot_path~,
+    tick_summary="stale planbook count setup",
+  )
+  let stale_spine = {
+    ..spine,
+    planbook_open_count: 99,
+    planbook_repair_active_count: 99,
+  }
+  write_text_file(
+    default_live_autonomy_path(snapshot_path~),
+    stale_spine.to_json().stringify(indent=2),
+  )
+  let status = render_live_autonomy_status(snapshot_path~)
+  assert_true(!status.contains("PlanBook open gaps: `99`"))
+  assert_true(!status.contains("PlanBook active repairs: `99`"))
+  assert_true(status.contains("planbook counts reconciled"))
+}
+
+///|
+async test "live refresh works without saved town snapshot" {
+  let root = "/tmp/moontown-live-autonomy-no-snapshot-refresh-check"
+  ignore_checked_command("rm", ["-rf", root])
+  let snapshot_path = "\{root}/town.json"
+  let message = refresh_live_autonomy_spine(snapshot_path~)
+  assert_true(message.contains("without saved town snapshot"))
+  let status = render_live_autonomy_status(snapshot_path~)
+  assert_true(status.contains("# Live Autonomy Spine"))
+  assert_true(status.contains("Active workers: `0`"))
+}

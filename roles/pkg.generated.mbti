@@ -18,7 +18,7 @@ pub fn keeper_runtime(@core.BookRef) -> @moonclaw.EmbeddedMoonclawRuntime
 // Types and methods
 pub struct Mayor {
   runtime : @moonclaw.EmbeddedMoonclawRuntime
-} derive(Eq, Show)
+} derive(Eq)
 pub fn Mayor::decide_dispatch(Self, @core.TownState, @core.TownTask) -> MayorDispatchPacket
 pub fn Mayor::handoff_to_keeper(Self, @core.BookRef, String, String, constraints? : Array[String]) -> @moonclaw.EmbeddedRuntimeHandoff
 pub fn Mayor::new() -> Self
@@ -27,18 +27,21 @@ pub fn Mayor::plan_goal(Self, Array[@moonbook.BookCatalogEntry], String, explici
 pub async fn Mayor::prepare_keeper_packet(Self, @moonbook.BookCatalogEntry, @moonbook.BookTask, packet_dir? : String) -> MayorKeeperPacket
 pub fn Mayor::runtime(Self) -> @moonclaw.EmbeddedMoonclawRuntime
 pub fn Mayor::supervise(Self, @core.TownState, Int) -> MayorSupervisionPacket
+pub impl Show for Mayor
 
 pub struct MayorDispatchPacket {
   decision : @dispatch.RouteDecision
   output_contract : String
   rationale : String
-} derive(Eq, Show)
+} derive(Eq)
+pub impl Show for MayorDispatchPacket
 
 pub struct MayorGoalLane {
   entry : @moonbook.BookCatalogEntry
   objective : String
   rationale : String
-} derive(Eq, Show)
+} derive(Eq)
+pub impl Show for MayorGoalLane
 
 pub struct MayorGoalPlan {
   output_contract : String
@@ -46,14 +49,16 @@ pub struct MayorGoalPlan {
   parallelizable : Bool
   summary : String
   lanes : Array[MayorGoalLane]
-} derive(Eq, Show)
+} derive(Eq)
+pub impl Show for MayorGoalPlan
 
 pub struct MayorKeeperPacket {
   handoff : @moonclaw.EmbeddedRuntimeHandoff
   packet : @moonclaw.ExternalProposalPacket
   packet_path : String
   rationale : String
-} derive(Eq, Show)
+} derive(Eq)
+pub impl Show for MayorKeeperPacket
 
 pub struct MayorPatrolPacket {
   output_contract : String
@@ -61,7 +66,8 @@ pub struct MayorPatrolPacket {
   actions : Array[@scheduler.SchedulerAction]
   tick : @scheduler.SchedulerTick
   recovery : Array[@health.RecoveryAction]
-} derive(Eq, Show)
+} derive(Eq)
+pub impl Show for MayorPatrolPacket
 
 pub struct MayorSupervisionDirective {
   kind : String
@@ -69,14 +75,16 @@ pub struct MayorSupervisionDirective {
   execution_status : @core.TaskExecutionStatus
   detail : String
   next_retry_tick : Int?
-} derive(Eq, Show)
+} derive(Eq)
+pub impl Show for MayorSupervisionDirective
 
 pub struct MayorSupervisionPacket {
   output_contract : String
   tick : Int
   summary : String
   directives : Array[MayorSupervisionDirective]
-} derive(Eq, Show)
+} derive(Eq)
+pub impl Show for MayorSupervisionPacket
 
 // Type aliases
 

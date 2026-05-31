@@ -3,40 +3,96 @@ pub enum HealthLevel {
   Healthy
   Degraded
   Critical
-} derive(Show, Eq)
+} derive(Debug, Eq)
+
+///|
+pub impl Show for HealthLevel with fn output(
+  self : HealthLevel,
+  logger : &Logger,
+) -> Unit {
+  logger.write_string(
+    match self {
+      Healthy => "Healthy"
+      Degraded => "Degraded"
+      Critical => "Critical"
+    },
+  )
+}
 
 ///|
 pub struct WorkerHealth {
   worker_id : String
   level : HealthLevel
   note : String
-} derive(Show, Eq)
+} derive(Debug, Eq)
+
+///|
+pub impl Show for WorkerHealth with fn output(
+  self : WorkerHealth,
+  logger : &Logger,
+) -> Unit {
+  logger.write_string(
+    "WorkerHealth(worker_id=\{self.worker_id}, level=\{self.level.to_string()}, note=\{self.note})",
+  )
+}
 
 ///|
 pub struct BookHealth {
   book_id : String
   level : HealthLevel
   note : String
-} derive(Show, Eq)
+} derive(Debug, Eq)
+
+///|
+pub impl Show for BookHealth with fn output(self : BookHealth, logger : &Logger) -> Unit {
+  logger.write_string(
+    "BookHealth(book_id=\{self.book_id}, level=\{self.level.to_string()}, note=\{self.note})",
+  )
+}
 
 ///|
 pub struct Anomaly {
   title : String
   detail : String
-} derive(Show, Eq)
+} derive(Debug, Eq)
+
+///|
+pub impl Show for Anomaly with fn output(self : Anomaly, logger : &Logger) -> Unit {
+  logger.write_string("Anomaly(title=\{self.title}, detail=\{self.detail})")
+}
 
 ///|
 pub struct RecoveryAction {
   kind : String
   detail : String
-} derive(Show, Eq)
+} derive(Debug, Eq)
+
+///|
+pub impl Show for RecoveryAction with fn output(
+  self : RecoveryAction,
+  logger : &Logger,
+) -> Unit {
+  logger.write_string(
+    "RecoveryAction(kind=\{self.kind}, detail=\{self.detail})",
+  )
+}
 
 ///|
 pub struct HealthReport {
   worker_health : Array[WorkerHealth]
   book_health : Array[BookHealth]
   anomalies : Array[Anomaly]
-} derive(Show, Eq)
+} derive(Debug, Eq)
+
+///|
+pub impl Show for HealthReport with fn output(
+  self : HealthReport,
+  logger : &Logger,
+) -> Unit {
+  logger.write_string(
+    "HealthReport(worker_health=\{self.worker_health.length()}, book_health=\{self.book_health.length()}, anomalies=\{self.anomalies.length()})",
+  )
+}
 
 ///|
 pub fn inspect_town(town : @core.TownState) -> HealthReport {
@@ -86,14 +142,14 @@ fn detect_anomalies(
   for execution in executions {
     match execution.status {
       @core.TaskExecutionStatus::Failed =>
-        if !standing_watch_issue_superseded(executions, execution) {
+        if !execution_issue_superseded(executions, execution) {
           anomalies.push({
             title: "execution-failed",
             detail: "\{execution.task_id} failed after packet \{execution.packet_id}",
           })
         }
       @core.TaskExecutionStatus::Stale =>
-        if !standing_watch_issue_superseded(executions, execution) {
+        if !execution_issue_superseded(executions, execution) {
           anomalies.push({
             title: "execution-stale",
             detail: "\{execution.task_id} missed heartbeat and needs mayor recovery",
@@ -135,17 +191,36 @@ fn book_level(town : @core.TownState, book_id : String) -> HealthLevel {
     }
     match execution.status {
       @core.TaskExecutionStatus::Failed =>
-        if !standing_watch_issue_superseded(town.executions, execution) {
+        if !execution_issue_superseded(town.executions, execution) {
           return Critical
         }
       @core.TaskExecutionStatus::Stale =>
-        if !standing_watch_issue_superseded(town.executions, execution) {
+        if !execution_issue_superseded(town.executions, execution) {
           return Critical
         }
       _ => ()
     }
   }
   Healthy
+}
+
+///|
+fn execution_issue_superseded(
+  executions : Array[@core.TaskExecutionRecord],
+  issue : @core.TaskExecutionRecord,
+) -> Bool {
+  standing_watch_issue_superseded(executions, issue) ||
+  repaired_context_packet_import_failure(issue)
+}
+
+///|
+fn repaired_context_packet_import_failure(
+  issue : @core.TaskExecutionRecord,
+) -> Bool {
+  if !issue.summary.contains("context_pages must not be empty") {
+    return false
+  }
+  issue.context_pages.length() > 0
 }
 
 ///|
@@ -231,7 +306,7 @@ fn standing_watch_task_prefix(task_id : String) -> String? {
   if parts.length() == 0 || parts[0].is_empty() {
     None
   } else {
-    Some(parts[0].to_string())
+    Some(parts[0].to_owned())
   }
 }
 

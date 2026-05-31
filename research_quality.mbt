@@ -478,11 +478,11 @@ fn research_text_contains_topic(lower : String, topic : String) -> Bool {
       return true
     }
   }
-  let normalized = topic.replace(old="-", new=" ").to_string()
+  let normalized = topic.replace(old="-", new=" ")
   let mut first_topic_word : String? = None
   let mut hits = 0
   for piece in normalized.split(" ") {
-    let word = piece.trim().to_string()
+    let word = piece.trim().to_owned()
     if first_topic_word is None && !word.is_empty() && word != "research" {
       first_topic_word = Some(word)
     }
@@ -509,7 +509,7 @@ fn topic_page_aliases(topic : String) -> Array[String] {
     topic.contains("large language model") {
     [
       topic,
-      topic.replace(old="-", new=" ").to_string(),
+      topic.replace(old="-", new=" "),
       "llm training",
       "llm trained",
       "llms are trained",
@@ -519,7 +519,7 @@ fn topic_page_aliases(topic : String) -> Array[String] {
       "large language model post-training",
     ]
   } else {
-    [topic, topic.replace(old="-", new=" ").to_string()]
+    [topic, topic.replace(old="-", new=" ")]
   }
 }
 
@@ -542,7 +542,7 @@ fn count_included_screened_sources(text : String) -> Int {
   let mut in_non_included_source_section = false
   let mut pending_source_heading = false
   for raw in text.split("\n") {
-    let line = raw.trim().to_string().to_lower()
+    let line = raw.trim().to_owned().to_lower()
     if line.has_prefix("## included") || line.has_prefix("### included") {
       in_included_section = true
       in_non_included_source_section = false
@@ -694,7 +694,7 @@ async fn directory_has_topic_named_page(
     if file.is_empty() {
       continue
     }
-    let lower_name = path_basename(file.to_string()).to_lower()
+    let lower_name = path_basename(file.to_owned()).to_lower()
     for page_alias in aliases {
       if lower_name.contains(page_alias) {
         return true
@@ -723,7 +723,7 @@ async fn directory_has_topic_source_page(
     if file.is_empty() {
       continue
     }
-    let lower_name = path_basename(file.to_string()).to_lower()
+    let lower_name = path_basename(file.to_owned()).to_lower()
     let lower_content = @fs.read_file(file).text().to_lower() catch { _ => "" }
     for page_alias in aliases {
       if lower_name.contains(page_alias) || lower_content.contains(page_alias) {
@@ -738,7 +738,7 @@ async fn directory_has_topic_source_page(
 fn quality_topic_for_entry(entry : @moonbook.BookCatalogEntry) -> String {
   for tag in entry.tags {
     if tag.has_prefix("topic:") {
-      let topic = tag[6:].to_string()
+      let topic = tag[6:].to_owned()
       if !topic.is_empty() {
         return topic
       }
@@ -757,7 +757,7 @@ fn quality_topic_for_entry(entry : @moonbook.BookCatalogEntry) -> String {
 fn count_markdown_sections(markdown : String) -> Int {
   let mut count = 0
   for line in markdown.split("\n") {
-    let trimmed = line.trim().to_string()
+    let trimmed = line.trim().to_owned()
     if trimmed.has_prefix("## ") {
       count += 1
     }
@@ -768,7 +768,7 @@ fn count_markdown_sections(markdown : String) -> Int {
 ///|
 fn markdown_has_table(markdown : String) -> Bool {
   for line in markdown.split("\n") {
-    let trimmed = line.trim().to_string()
+    let trimmed = line.trim().to_owned()
     if trimmed.has_prefix("|") && trimmed.contains("---") {
       return true
     }

@@ -2,6 +2,7 @@
 package "vectie/moontown/scheduler"
 
 import {
+  "moonbitlang/core/debug",
   "moonbitlang/core/json",
   "vectie/moontown/core",
   "vectie/moontown/health",
@@ -34,24 +35,28 @@ pub struct DaemonState {
   last_heartbeat_event_count : Int
   active_goal_ids : Array[String]
   jobs : Array[ScheduledJob]
-} derive(Eq, Show, ToJson, @json.FromJson)
+} derive(Eq, ToJson, @debug.Debug, @json.FromJson)
 pub fn DaemonState::new(daemon_id? : String, lease_owner? : String, tick_sequence? : Int, last_heartbeat_event_count? : Int, active_goal_ids? : Array[String], jobs? : Array[ScheduledJob]) -> Self
+pub impl Show for DaemonState
 
 pub struct ScheduledJob {
   id : String
   kind : String
   interval_seconds : Int
-} derive(Eq, Show, ToJson, @json.FromJson)
+} derive(Eq, ToJson, @debug.Debug, @json.FromJson)
+pub impl Show for ScheduledJob
 
 pub struct SchedulerAction {
   kind : String
   detail : String
-} derive(Eq, Show, ToJson, @json.FromJson)
+} derive(Eq, ToJson, @debug.Debug, @json.FromJson)
+pub impl Show for SchedulerAction
 
 pub struct SchedulerTick {
   sequence : Int
   summary : String
-} derive(Eq, Show, ToJson, @json.FromJson)
+} derive(Eq, ToJson, @debug.Debug, @json.FromJson)
+pub impl Show for SchedulerTick
 
 // Type aliases
 

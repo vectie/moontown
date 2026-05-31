@@ -3,12 +3,12 @@ async fn persist_execution_into_book(
   state : @core.TownState,
   entry : @moonbook.BookCatalogEntry,
   execution : @core.TaskExecutionRecord,
-) -> Unit {
+) -> @moonbook.PersistResultOutcome? {
   if execution.summary.trim().is_blank() ||
     execution.status is @core.TaskExecutionStatus::ProposalImported ||
     execution.status is @core.TaskExecutionStatus::RunConfirmed ||
     execution.status is @core.TaskExecutionStatus::Running {
-    return
+    return None
   }
   let result_summary = book_persist_summary(entry, execution)
   let result_artifacts = book_persist_artifacts(entry, execution)
@@ -35,7 +35,7 @@ async fn persist_execution_into_book(
           related_run_id=execution.run_id,
         ),
       )
-      return
+      return None
     }
   }
   state.record_event(
@@ -48,6 +48,44 @@ async fn persist_execution_into_book(
       related_proposal_id=execution.proposal_id,
       related_run_id=execution.run_id,
     ),
+  )
+  Some(outcome)
+}
+
+///|
+fn execution_after_successful_book_persist(
+  execution : @core.TaskExecutionRecord,
+  outcome : @moonbook.PersistResultOutcome,
+  tick : Int,
+) -> @core.TaskExecutionRecord {
+  let status = match execution.status {
+    @core.TaskExecutionStatus::Failed
+    | @core.TaskExecutionStatus::Stale
+    | @core.TaskExecutionStatus::AwaitingPersistence =>
+      if outcome.review_queued {
+        @core.TaskExecutionStatus::ReviewQueued
+      } else {
+        @core.TaskExecutionStatus::Completed
+      }
+    _ => execution.status
+  }
+  if status == execution.status {
+    return execution
+  }
+  let decision = if outcome.review_queued {
+    "persisted-review"
+  } else {
+    "persisted"
+  }
+  copy_execution_with(
+    execution,
+    status~,
+    summary="\{execution.summary}\nkeeper_auto_triage: persisted_terminal_result\npersisted_result_review: \{outcome.review_queued}\npersisted_evidence_id: \{outcome.evidence_id}",
+    heartbeat_tick=tick,
+    next_retry_tick=None,
+    result_decision=decision,
+    requires_review=outcome.review_queued,
+    notify_town=outcome.notify_town,
   )
 }
 
@@ -348,7 +386,7 @@ fn civic_persist_memory_candidates(
 ///|
 fn civic_workspace_target_page(path : String) -> String {
   if path.has_prefix("wiki/") {
-    path[5:].to_string()
+    path[5:].to_owned()
   } else {
     path
   }
@@ -363,12 +401,12 @@ fn civic_marker_value(
   let key_colon = "\{key}:"
   let key_equals = "\{key}="
   for raw in summary.split("\n") {
-    let line = raw.trim().to_string()
+    let line = raw.trim().to_owned()
     let lower = line.to_lower()
     if lower.has_prefix(key_colon) {
-      return line[key_colon.length():].trim(chars=" `").to_string()
+      return line[key_colon.length():].trim(chars=" `").to_owned()
     } else if lower.has_prefix(key_equals) {
-      return line[key_equals.length():].trim(chars=" `").to_string()
+      return line[key_equals.length():].trim(chars=" `").to_owned()
     }
   }
   fallback
@@ -391,7 +429,7 @@ fn research_persist_display(entry : @moonbook.BookCatalogEntry) -> String {
   } else if !entry.name.trim().is_blank() {
     entry.name
   } else {
-    topic.replace(old="-", new=" ").to_string()
+    topic.replace(old="-", new=" ")
   }
 }
 
@@ -414,7 +452,7 @@ fn compact_markdown_for_candidate(text : String) -> String {
   let builder = StringBuilder::new()
   let mut wrote = false
   for raw in text.split("\n") {
-    let line = raw.trim().to_string()
+    let line = raw.trim().to_owned()
     if line.is_empty() ||
       line.has_prefix("#") ||
       line.has_prefix("| ---") ||
@@ -481,6 +519,9 @@ async fn execute_goal_book_task(
     heartbeat_tick=tick,
     stale_after_tick=tick + external_execution_stale_window_ticks(),
     next_retry_tick=None,
+    result_decision=execution
+      .map(fn(result) { result.0.result_decision })
+      .unwrap_or("pending"),
     requires_review=execution
       .map(fn(result) { result.0.requires_review })
       .unwrap_or(task.requires_review),

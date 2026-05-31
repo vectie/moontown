@@ -52,13 +52,15 @@ pub async fn daemon_stop_saved_town(snapshot_path? : String) -> String
 
 pub async fn daemon_supervise_saved_town(snapshot_path? : String, command? : String, max_checks? : Int, sleep_ms? : Int, stale_after_ms? : UInt64) -> String
 
-pub async fn daemon_tick_saved_town(snapshot_path? : String, book_catalog_path? : String) -> String
+pub async fn daemon_tick_saved_town(snapshot_path? : String, book_catalog_path? : String, respect_runtime_lock? : Bool) -> String
 
 pub fn default_book_quality_audit_path() -> String
 
 pub fn default_book_quality_review_dir() -> String
 
 pub fn default_book_quality_review_result_dir() -> String
+
+pub fn default_book_quality_review_run_path() -> String
 
 pub fn default_civic_salon_run_ledger_path(String, snapshot_path? : String) -> String
 
@@ -86,7 +88,15 @@ pub fn default_live_autonomy_path(snapshot_path? : String) -> String
 
 pub fn default_live_digest_path(snapshot_path? : String) -> String
 
+pub fn default_planbook_autonomy_digest_path(snapshot_path? : String) -> String
+
+pub fn default_planbook_autonomy_path(snapshot_path? : String) -> String
+
 pub fn default_planbook_book_id() -> String
+
+pub fn default_planbook_repair_markdown_path(snapshot_path? : String) -> String
+
+pub fn default_planbook_repair_path(snapshot_path? : String) -> String
 
 pub fn default_planbook_workspace_root() -> String
 
@@ -116,11 +126,15 @@ pub fn demo_state_snapshot() -> String
 
 pub fn[Provider : @core.BookProvider] demo_state_with_provider(Provider) -> @core.TownState
 
+pub async fn dispatch_next_book_quality_ai_review(book_catalog_path? : String, review_dir? : String, result_dir? : String, run_path? : String) -> String
+
 pub async fn inspect_book_quality(book_catalog_path? : String) -> BookQualityAudit
 
 pub async fn inspect_daemon_runtime(snapshot_path? : String, stale_after_ms? : UInt64) -> DaemonRuntimeHealth
 
 pub async fn inspect_moontown_cookbook(workspace_root? : String, manifest_path? : String) -> MoontownCookbookStatus
+
+pub async fn inspect_moontown_planbook_autonomy(snapshot_path? : String, workspace_root? : String, book_catalog_path? : String) -> PlanbookAutonomyStatus
 
 pub async fn inspect_saved_town(snapshot_path? : String) -> TownRuntimeStatus
 
@@ -146,9 +160,17 @@ pub async fn load_or_create_modeled_demo_state(path? : String, book_catalog_path
 
 pub async fn persist_visual_projection(@core.TownState, String, tick? : Int) -> Unit
 
+pub async fn planbook_open_gap_count(snapshot_path? : String) -> Int
+
+pub async fn planbook_repair_active_count(snapshot_path? : String) -> Int
+
+pub async fn reconcile_book_quality_ai_review_results(result_dir? : String, run_path? : String) -> Int
+
 pub async fn refresh_live_autonomy_spine(snapshot_path? : String) -> String
 
 pub async fn render_book_quality(book_catalog_path? : String) -> String
+
+pub async fn render_book_quality_ai_review_status(result_dir? : String, run_path? : String) -> String
 
 pub fn render_civic_communication_patterns() -> String
 
@@ -159,6 +181,10 @@ pub async fn render_goal_run(String, book_id? : String?, task_limit_per_book? : 
 pub async fn render_live_autonomy_status(snapshot_path? : String) -> String
 
 pub async fn render_moontown_cookbook_status(workspace_root? : String, manifest_path? : String) -> String
+
+pub async fn render_moontown_planbook_autonomy_status(snapshot_path? : String, workspace_root? : String, book_catalog_path? : String) -> String
+
+pub async fn render_moontown_planbook_repair_status(snapshot_path? : String) -> String
 
 pub async fn render_moontown_planbook_status(workspace_root? : String) -> String
 
@@ -192,6 +218,12 @@ pub async fn write_book_quality_review_packets(book_catalog_path? : String, revi
 
 pub async fn write_live_autonomy_spine(@core.TownState, snapshot_path? : String, standing_goals? : Array[@core.StandingGoal], watcher_records? : Array[@core.WatcherRunRecord], tick_summary? : String, daemon_tick? : Int?) -> LiveAutonomySpine
 
+pub async fn write_moontown_planbook_autonomy(snapshot_path? : String, workspace_root? : String, book_catalog_path? : String) -> String
+
+pub async fn write_moontown_planbook_repair_task(snapshot_path? : String, workspace_root? : String, book_catalog_path? : String, dispatch? : Bool) -> String
+
+pub async fn write_moontown_planbook_validation_evidence(snapshot_path? : String, note? : String) -> String
+
 pub async fn write_wenyu_building_protocol_status(status_path? : String, registry_path? : String) -> String
 
 pub async fn write_wenyu_civic_status(book_catalog_path? : String, status_path? : String) -> String
@@ -219,6 +251,21 @@ pub struct BookQualityReviewPacket {
   context_pages : Array[String]
   prompt : String
   output_contract : String
+} derive(Eq, ToJson, @json.FromJson)
+
+pub struct BookQualityReviewRun {
+  book_id : String
+  packet_path : String
+  result_path : String
+  proposal_id : String?
+  run_id : String?
+  status : String
+  summary : String
+  generated_at_ms : UInt64
+} derive(Eq, ToJson, @json.FromJson)
+
+pub struct BookQualityReviewRunLedger {
+  runs : Array[BookQualityReviewRun]
 } derive(Eq, ToJson, @json.FromJson)
 
 pub struct BookQualityScore {
@@ -490,6 +537,8 @@ pub struct LiveAutonomySpine {
   failed_count : Int
   due_goal_count : Int
   standing_goal_count : Int
+  planbook_open_count : Int
+  planbook_repair_active_count : Int
   latest_watcher_summary : String
   visual_projection_path : String
   journal_path : String
@@ -520,6 +569,41 @@ pub struct MoontownCookbookStatus {
   ready : Bool
 } derive(Eq, ToJson, @debug.Debug)
 
+pub struct PlanbookAutonomyStatus {
+  generated_at_ms : UInt64
+  book_id : String
+  workspace_root : String
+  status : String
+  open_count : Int
+  satisfied_count : Int
+  criteria : Array[PlanbookCriterionStatus]
+} derive(Eq, ToJson, @debug.Debug, @json.FromJson)
+
+pub struct PlanbookCriterionStatus {
+  id : String
+  plan_id : String
+  title : String
+  owner : String
+  satisfied : Bool
+  evidence : String
+  next_action : String
+} derive(Eq, ToJson, @debug.Debug, @json.FromJson)
+
+pub struct PlanbookRepairTask {
+  id : String
+  criterion_id : String
+  title : String
+  status : String
+  owner : String
+  workspace_root : String
+  packet_path : String
+  proposal_id : String?
+  run_id : String?
+  summary : String
+  validation_command : String
+  generated_at_ms : UInt64
+} derive(Eq, ToJson, @debug.Debug, @json.FromJson)
+
 pub struct ResearchReadiness {
   book_id : String
   root : String
@@ -532,7 +616,7 @@ pub struct ResearchReadiness {
   pending_review_count : Int
   substantive_coverage_ready : Bool
   gaps : Array[String]
-} derive(Eq, Show, ToJson, @json.FromJson)
+} derive(Eq, ToJson, @debug.Debug, @json.FromJson)
 pub fn ResearchReadiness::from_summary(@moonbook.BookStateSummary, extra_gaps? : Array[String]) -> Self
 pub fn ResearchReadiness::summary_line(Self) -> String
 

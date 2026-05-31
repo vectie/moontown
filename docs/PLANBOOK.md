@@ -80,7 +80,18 @@ idea / bug / operator voice note / town anomaly
     code-plan/SKILL.md
     code-review/SKILL.md
     doc-sync/SKILL.md
+.moontown/
+  planbook/
+    autonomy.json
+    autonomy.md
+    latest-validation.md
 ```
+
+MoonBook also seeds a native `planbook` skill for new workspaces at
+`skills/planbook/SKILL.md`. When the MoonClaw extension is enabled, MoonBook
+exposes dedicated `wiki_planbook_controller` and `wiki_planbook_worker`
+profiles. Those profiles use the PlanBook skill and explicitly avoid injecting
+research-report or course structure into implementation plans.
 
 The planbook should not store long-term domain research unless that research is
 needed for a plan. Domain facts still belong in research books. Beginner
@@ -131,6 +142,62 @@ MoonClaw execution should:
 
 The planbook is allowed to evolve a plan in place, but it must preserve a
 decision trail.
+
+## Self-Build And Self-Healing Loop
+
+The current Moontown runtime now has a PlanBook autonomy doctor. It is not a
+replacement for MoonBook-native planning, but it is the first live spine for
+self-build governance:
+
+```text
+daemon tick / manual doctor
+  -> inspect PlanBook criteria
+  -> write .moontown/planbook/autonomy.json
+  -> write .moontown/planbook/autonomy.md
+  -> update PlanBook execution evidence and active review pages
+  -> expose open gap count in .moontown/live-autonomy.json
+  -> queue one bounded repair packet for the first open gap
+  -> Mayor sees active repair work as live next action
+```
+
+The doctor checks concrete criteria such as:
+
+- PlanBook workspace exists with plans, skills, and quality gates.
+- Live autonomy spine exposes PlanBook open-gap count.
+- Operator UI references live autonomy state.
+- Standing-watch outputs have a strict result contract.
+- AI semantic review results are persisted.
+- Validation evidence is recorded.
+- MoonBook has a native PlanBook skill and MoonClaw planbook profiles.
+
+This keeps the town honest: open implementation gaps remain visible to the
+Mayor and operator until they are implemented, validated, and recorded.
+When all criteria are satisfied, the live autonomy spine reports
+`planbook_open=0` and stale repair packets no longer count as active work.
+
+The repair bridge is intentionally bounded. It does not let the town run an
+unconstrained generic agent loop. Instead, it writes:
+
+- `.moontown/planbook/repair-task.json`
+- `.moontown/planbook/repair-task.md`
+- `raw/repair/PLANBOOK_REPAIR_CONTEXT.md`
+- `skills/planbook-repair/SKILL.md`
+- `plans/self-healing-repair/plan.md`
+- `raw/repair/planbook-repair-*.packet.json`
+
+Use the repair commands directly when inspecting or dispatching self-repair:
+
+```bash
+moon run cmd/main -- planbook repair
+moon run cmd/main -- planbook repair status
+moon run cmd/main -- planbook repair --dispatch
+```
+
+Without `--dispatch`, Moontown only queues the repair packet and records the
+active repair. With `--dispatch`, the packet is imported into MoonClaw using the
+PlanBook repair skill and the `planbook.repair.result.v1` output contract.
+If the gap belongs in MoonBook or MoonClaw, the repair worker must return a
+precise ownership blocker instead of moving that responsibility into Moontown.
 
 ## Relation To Voice And Parallel Work
 
@@ -194,6 +261,10 @@ Moontown now has a first-class bootstrap for the current planbook workspace:
 ```bash
 moon run cmd/main -- planbook bootstrap
 moon run cmd/main -- planbook status
+moon run cmd/main -- planbook doctor
+moon run cmd/main -- planbook autonomy
+moon run cmd/main -- planbook repair
+moon run cmd/main -- planbook repair status
 ```
 
 Use this repository rule:
@@ -204,4 +275,5 @@ good enough for a new Codex/MoonClaw session to continue after context loss.
 
 The remaining upgrade belongs mostly in MoonBook: add a native `planbook`
 provider/profile so future plan creation, plan review, and plan repair run
-through MoonBook skills instead of only through Moontown bootstrap.
+through MoonBook skills instead of only through Moontown bootstrap. Until that
+exists, Moontown's PlanBook doctor keeps the gap explicit in live runtime state.

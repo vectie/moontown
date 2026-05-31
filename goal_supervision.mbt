@@ -63,6 +63,11 @@ fn copy_execution_with(
   heartbeat_tick? : Int = execution.heartbeat_tick,
   stale_after_tick? : Int = execution.stale_after_tick,
   next_retry_tick? : Int? = execution.next_retry_tick,
+  context_pages? : Array[String] = execution.context_pages,
+  skill_paths? : Array[String] = execution.skill_paths,
+  result_decision? : String = execution.result_decision,
+  requires_review? : Bool = execution.requires_review,
+  notify_town? : Bool = execution.notify_town,
 ) -> @core.TaskExecutionRecord {
   @core.TaskExecutionRecord::new(
     task_id=execution.task_id,
@@ -74,16 +79,17 @@ fn copy_execution_with(
     status~,
     summary~,
     output_contract=execution.output_contract,
-    context_pages=execution.context_pages,
-    skill_paths=execution.skill_paths,
+    context_pages~,
+    skill_paths~,
     last_command=execution.last_command,
     assigned_worker_id=execution.assigned_worker_id,
     attempt~,
     heartbeat_tick~,
     stale_after_tick~,
     next_retry_tick~,
-    requires_review=execution.requires_review,
-    notify_town=execution.notify_town,
+    result_decision~,
+    requires_review~,
+    notify_town~,
   )
 }
 
@@ -120,6 +126,8 @@ async fn run_supervision_cycle(
     state, catalog, snapshot_path, standing_goals,
   )
   reconcile_persisted_non_review_outputs(state, snapshot_path)
+  reconcile_persisted_terminal_outputs(state, snapshot_path)
+  reconcile_repaired_context_import_failures(state)
   release_orphaned_blocked_workers(state)
   let packet = mayor.supervise(state, supervision_tick(state))
   if packet.directives.is_empty() {
@@ -133,6 +141,18 @@ async fn run_supervision_cycle(
     ),
   )
   for directive in packet.directives {
+    if directive.kind == "retry-execution" &&
+      live_external_execution_count(state) >= max_live_external_executions() {
+      state.record_event(
+        @core.TownEvent::new(
+          id="event-supervise-\{directive.task_id}-retry-deferred-cap",
+          kind="supervision",
+          detail="Mayor deferred retry for \{directive.task_id} because live external execution count reached \{max_live_external_executions()}.",
+          related_task_id=Some(directive.task_id),
+        ),
+      )
+      continue
+    }
     state.record_event(
       @core.TownEvent::new(
         id="event-supervise-\{directive.task_id}-\{directive.kind}",
@@ -145,6 +165,71 @@ async fn run_supervision_cycle(
       state, mayor, catalog, directive, snapshot_path, standing_goals,
     )
   }
+}
+
+///|
+async fn reconcile_repaired_context_import_failures(
+  state : @core.TownState,
+) -> Unit {
+  let snapshot = state.executions.copy()
+  for execution in snapshot {
+    if execution.status != @core.TaskExecutionStatus::Failed ||
+      !execution.summary.contains("context_pages must not be empty") {
+      continue
+    }
+    match @moonclaw.load_packet_file(execution.packet_path) {
+      Some(packet) if packet.context_pages.length() > 0 => {
+        let completed = copy_execution_with(
+          execution,
+          status=@core.TaskExecutionStatus::Completed,
+          summary="\{execution.summary}\nkeeper_auto_triage: superseded_context_import_failure\nreconciled_detail: referenced packet now has \{packet.context_pages.length()} context page(s), so the stale import-validation failure no longer represents active work.",
+          context_pages=packet.context_pages,
+          skill_paths=packet.skill_paths,
+          heartbeat_tick=supervision_tick(state),
+          next_retry_tick=None,
+          result_decision="superseded",
+          requires_review=false,
+          notify_town=false,
+        )
+        state.replace_execution(completed)
+        state.replace_task(task_for_supervision(state, completed))
+        sync_worker_from_execution(state, completed)
+        state.record_event(
+          @core.TownEvent::new(
+            id="event-repaired-context-import-\{state.events.length()}-\{completed.task_id}",
+            kind="recovery",
+            detail="Mayor reconciled stale import failure `\{completed.task_id}` because the saved packet now contains keeper context.",
+            related_task_id=Some(completed.task_id),
+            related_book_id=Some(completed.book_id),
+            related_run_id=completed.run_id,
+          ),
+        )
+      }
+      _ => ()
+    }
+  }
+}
+
+///|
+fn live_external_execution_count(state : @core.TownState) -> Int {
+  let mut count = 0
+  for execution in state.executions {
+    match execution.status {
+      @core.TaskExecutionStatus::ProposalImported
+      | @core.TaskExecutionStatus::RunConfirmed
+      | @core.TaskExecutionStatus::Running =>
+        if execution.run_id is Some(_) {
+          count += 1
+        }
+      _ => ()
+    }
+  }
+  count
+}
+
+///|
+fn max_live_external_executions() -> Int {
+  8
 }
 
 ///|
@@ -186,7 +271,63 @@ async fn reconcile_persisted_non_review_outputs(
 }
 
 ///|
+async fn reconcile_persisted_terminal_outputs(
+  state : @core.TownState,
+  snapshot_path : String,
+) -> Unit {
+  let snapshot = state.executions.copy()
+  for execution in snapshot {
+    if execution.status != @core.TaskExecutionStatus::Failed &&
+      execution.status != @core.TaskExecutionStatus::Stale &&
+      execution.status != @core.TaskExecutionStatus::AwaitingPersistence {
+      continue
+    }
+    match persisted_book_result(snapshot_path, execution.task_id) {
+      Some(result) => {
+        let outcome : @moonbook.PersistResultOutcome = @json.from_json(
+          @json.parse(
+            "{\"log_path\":\"\",\"updated_pages\":[],\"review_queued\":\{result.requires_review},\"notify_town\":\{result.notify_town},\"evidence_id\":\"persisted-book-result\"}",
+          ),
+        )
+        let reconciled = execution_after_successful_book_persist(
+          execution,
+          outcome,
+          supervision_tick(state),
+        )
+        if reconciled != execution {
+          state.replace_execution(reconciled)
+          state.replace_task(task_for_supervision(state, reconciled))
+          sync_worker_from_execution(state, reconciled)
+          state.record_event(
+            @core.TownEvent::new(
+              id="event-persisted-terminal-\{state.events.length()}-\{reconciled.task_id}",
+              kind="recovery",
+              detail="Mayor reconciled `\{reconciled.task_id}` because MoonBook already has a persisted terminal result.",
+              related_task_id=Some(reconciled.task_id),
+              related_book_id=Some(reconciled.book_id),
+              related_run_id=reconciled.run_id,
+            ),
+          )
+        }
+      }
+      None => ()
+    }
+  }
+}
+
+///|
 async fn persisted_non_review_book_result(
+  snapshot_path : String,
+  task_id : String,
+) -> @moonbook.BookResult? {
+  match persisted_book_result(snapshot_path, task_id) {
+    Some(result) if !result.requires_review => Some(result)
+    _ => None
+  }
+}
+
+///|
+async fn persisted_book_result(
   snapshot_path : String,
   task_id : String,
 ) -> @moonbook.BookResult? {
@@ -200,11 +341,7 @@ async fn persisted_non_review_book_result(
   let result : @moonbook.BookResult = @json.from_json(parsed) catch {
     _ => return None
   }
-  if result.requires_review {
-    None
-  } else {
-    Some(result)
-  }
+  Some(result)
 }
 
 ///|
@@ -375,12 +512,26 @@ async fn reconcile_live_executions(
           )
           match @moonbook.entry_for_book_id(catalog, updated.book_id) {
             Some(entry) => {
-              persist_execution_into_book(state, entry, updated)
-              finalize_goal_book_entry(state, entry, 0, [updated.task_id])
+              let reconciled = match
+                persist_execution_into_book(state, entry, updated) {
+                Some(outcome) =>
+                  execution_after_successful_book_persist(
+                    updated,
+                    outcome,
+                    supervision_tick(state),
+                  )
+                None => updated
+              }
+              if reconciled != updated {
+                state.replace_execution(reconciled)
+                state.replace_task(task_for_supervision(state, reconciled))
+                sync_worker_from_execution(state, reconciled)
+              }
+              finalize_goal_book_entry(state, entry, 0, [reconciled.task_id])
               let observed = finalize_standing_watch_supervision_record(
-                state, entry, updated, standing_goals, snapshot_path,
+                state, entry, reconciled, standing_goals, snapshot_path,
               )
-              if observed != updated {
+              if observed != reconciled {
                 state.replace_execution(observed)
                 state.replace_task(task_for_supervision(state, observed))
                 sync_worker_from_execution(state, observed)
@@ -446,7 +597,22 @@ async fn apply_supervision_directive(
   match directive.kind {
     "persist-result" =>
       match @moonbook.entry_for_book_id(catalog, execution.book_id) {
-        Some(entry) => persist_execution_into_book(state, entry, execution)
+        Some(entry) =>
+          match persist_execution_into_book(state, entry, execution) {
+            Some(outcome) => {
+              let reconciled = execution_after_successful_book_persist(
+                execution,
+                outcome,
+                supervision_tick(state),
+              )
+              if reconciled != execution {
+                state.replace_execution(reconciled)
+                state.replace_task(task_for_supervision(state, reconciled))
+                sync_worker_from_execution(state, reconciled)
+              }
+            }
+            None => ()
+          }
         None => ()
       }
     "mark-stale-retry" | "mark-stale-failed" => {
@@ -561,13 +727,26 @@ async fn retry_execution(
   state.replace_execution(updated)
   state.replace_task(task_for_supervision(state, updated))
   sync_worker_from_execution(state, updated)
-  persist_execution_into_book(state, entry, updated)
+  let reconciled = match persist_execution_into_book(state, entry, updated) {
+    Some(outcome) =>
+      execution_after_successful_book_persist(
+        updated,
+        outcome,
+        supervision_tick(state),
+      )
+    None => updated
+  }
+  if reconciled != updated {
+    state.replace_execution(reconciled)
+    state.replace_task(task_for_supervision(state, reconciled))
+    sync_worker_from_execution(state, reconciled)
+  }
   if terminal_execution_status(updated.status) {
-    finalize_goal_book_entry(state, entry, 0, [updated.task_id])
+    finalize_goal_book_entry(state, entry, 0, [reconciled.task_id])
     let observed = finalize_standing_watch_supervision_record(
-      state, entry, updated, standing_goals, snapshot_path,
+      state, entry, reconciled, standing_goals, snapshot_path,
     )
-    if observed != updated {
+    if observed != reconciled {
       state.replace_execution(observed)
       state.replace_task(task_for_supervision(state, observed))
       sync_worker_from_execution(state, observed)

@@ -9,7 +9,17 @@ pub struct SceneRenderNode {
   height : Int
   asset_paths : Array[String]
   lines : Array[String]
-} derive(Show, Eq)
+} derive(Debug, Eq)
+
+///|
+pub impl Show for SceneRenderNode with fn output(
+  self : SceneRenderNode,
+  logger : &Logger,
+) -> Unit {
+  logger.write_string(
+    "SceneRenderNode(key=\{self.key}, title=\{self.title}, class_name=\{self.class_name}, x=\{self.x}, y=\{self.y}, width=\{self.width}, height=\{self.height}, assets=\{self.asset_paths.length()}, lines=\{self.lines.length()})",
+  )
+}
 
 ///|
 pub struct SceneRenderModel {
@@ -19,7 +29,17 @@ pub struct SceneRenderModel {
   background_path : String
   alerts : Array[String]
   nodes : Array[SceneRenderNode]
-} derive(Show, Eq)
+} derive(Debug, Eq)
+
+///|
+pub impl Show for SceneRenderModel with fn output(
+  self : SceneRenderModel,
+  logger : &Logger,
+) -> Unit {
+  logger.write_string(
+    "SceneRenderModel(title=\{self.title}, width=\{self.width}, height=\{self.height}, background_path=\{self.background_path}, alerts=\{self.alerts.length()}, nodes=\{self.nodes.length()})",
+  )
+}
 
 ///|
 pub fn build_scene_render(model : DashboardModel) -> SceneRenderModel {

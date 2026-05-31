@@ -89,10 +89,11 @@ pub struct TaskExecutionRecord {
   heartbeat_tick : Int
   stale_after_tick : Int
   next_retry_tick : Int?
+  result_decision : String
   requires_review : Bool
   notify_town : Bool
 } derive(Eq, Show, ToJson, @json.FromJson)
-pub fn TaskExecutionRecord::new(task_id~ : String, book_id~ : String, packet_id~ : String, packet_path~ : String, proposal_id? : String?, run_id? : String?, status~ : TaskExecutionStatus, summary~ : String, output_contract~ : String, context_pages? : Array[String], skill_paths? : Array[String], last_command? : String?, assigned_worker_id? : String?, attempt? : Int, heartbeat_tick? : Int, stale_after_tick? : Int, next_retry_tick? : Int?, requires_review? : Bool, notify_town? : Bool) -> Self
+pub fn TaskExecutionRecord::new(task_id~ : String, book_id~ : String, packet_id~ : String, packet_path~ : String, proposal_id? : String?, run_id? : String?, status~ : TaskExecutionStatus, summary~ : String, output_contract~ : String, context_pages? : Array[String], skill_paths? : Array[String], last_command? : String?, assigned_worker_id? : String?, attempt? : Int, heartbeat_tick? : Int, stale_after_tick? : Int, next_retry_tick? : Int?, result_decision? : String, requires_review? : Bool, notify_town? : Bool) -> Self
 
 pub(all) enum TaskExecutionStatus {
   PacketReady

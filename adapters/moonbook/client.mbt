@@ -144,7 +144,7 @@ fn is_research_goal(goal : String) -> Bool {
 
 ///|
 fn normalize_topic_id(topic : String) -> String {
-  let normalized = topic.to_lower().trim().to_string()
+  let normalized = topic.to_lower().trim().to_owned()
   match normalized {
     "moontown" => "moontown"
     "moonbook" => "moonbook"
@@ -157,15 +157,15 @@ fn normalize_topic_id(topic : String) -> String {
 
 ///|
 fn strip_research_attempt_suffix(topic : String) -> String {
-  let cleaned = topic.to_lower().trim().to_string()
+  let cleaned = topic.to_lower().trim().to_owned()
   let parts = cleaned.split("-").to_array()
   if parts.length() < 2 {
     return cleaned
   }
-  let last = parts[parts.length() - 1].to_string()
+  let last = parts[parts.length() - 1].to_owned()
   if !(last.length() > 1 &&
     last[0] == 'v' &&
-    string_is_digits(last[1:].to_string())) {
+    string_is_digits(last[1:].to_owned())) {
     return cleaned
   }
   let builder = StringBuilder::new()
@@ -173,7 +173,7 @@ fn strip_research_attempt_suffix(topic : String) -> String {
     if index > 0 {
       builder.write_char('-')
     }
-    builder.write_string(parts[index].to_string())
+    builder.write_string(parts[index].to_owned())
   }
   builder.to_string()
 }
@@ -204,12 +204,12 @@ fn compact_topic_segment(text : String) -> String {
       last_dash = true
     }
   }
-  builder.to_string().trim(chars="-").to_string()
+  builder.to_string().trim(chars="-").to_owned()
 }
 
 ///|
 fn research_topic_from_goal(goal : String) -> String? {
-  let trimmed = goal.trim().trim(chars=" .:;!?\"'`").to_string()
+  let trimmed = goal.trim().trim(chars=" .:;!?\"'`").to_owned()
   if trimmed.is_empty() {
     return None
   }
@@ -224,7 +224,7 @@ fn research_topic_from_goal(goal : String) -> String? {
       let topic = trimmed[prefix.length():]
         .trim()
         .trim(chars=" .:;!?\"'`")
-        .to_string()
+        .to_owned()
       if !topic.is_empty() {
         return Some(topic)
       }
@@ -304,7 +304,7 @@ pub fn entry_for_book_id(
       if book_id.has_prefix("research-") {
         let parts = book_id.split("research-").to_array()
         if parts.length() > 1 {
-          Some(parallel_research_entry(parts[1].to_string()))
+          Some(parallel_research_entry(parts[1].to_owned()))
         } else {
           None
         }
@@ -324,7 +324,7 @@ pub fn entry_for_explicit_research_book(
     Some(entry) => Some(entry)
     None =>
       if book_id.has_prefix("research-") {
-        let storage_topic = book_id[9:].to_string()
+        let storage_topic = book_id[9:].to_owned()
         let stable_storage_topic = strip_research_attempt_suffix(storage_topic)
         let goal_topic = research_topic_from_goal(goal)
         let goal_topic_id = match goal_topic {
@@ -333,7 +333,7 @@ pub fn entry_for_explicit_research_book(
         }
         let storage_topic_id = normalize_topic_id(stable_storage_topic)
         let has_attempt_suffix = stable_storage_topic !=
-          storage_topic.to_lower().trim().to_string()
+          storage_topic.to_lower().trim().to_owned()
         let book_topic_id = if has_attempt_suffix && !goal_topic_id.is_empty() {
           goal_topic_id
         } else {
@@ -752,15 +752,23 @@ pub async fn hydrate_worker_context(
     task.id,
   ]) catch {
     _ =>
-      return enrich_worker_context_bundle(
+      return finalize_worker_context_bundle(
         entry,
-        fallback_worker_context_bundle(entry, task),
+        task,
+        enrich_worker_context_bundle(
+          entry,
+          fallback_worker_context_bundle(entry, task),
+        ),
       )
   }
   let parsed : WorkerContextBundle = @json.from_json(json) catch {
     _ => fallback_worker_context_bundle(entry, task)
   }
-  enrich_worker_context_bundle(entry, parsed)
+  finalize_worker_context_bundle(
+    entry,
+    task,
+    enrich_worker_context_bundle(entry, parsed),
+  )
 }
 
 ///|
@@ -792,7 +800,7 @@ fn fallback_worker_context_bundle(
       "Report changed files, artifacts, blockers, and validation results.",
     ],
     skill_paths: ["skills/wiki-maintainer/SKILL.md"],
-    context_pages: task.target_pages,
+    context_pages: default_keeper_context_pages(task),
     active_memory: [],
     user_memory: [],
     working_memory: [],
@@ -801,6 +809,69 @@ fn fallback_worker_context_bundle(
       "task_id", "summary", "artifacts", "memory_candidates", "requires_review",
       "notify_town",
     ],
+  }
+}
+
+///|
+fn finalize_worker_context_bundle(
+  entry : BookCatalogEntry,
+  task : BookTask,
+  bundle : WorkerContextBundle,
+) -> WorkerContextBundle {
+  let bundle_skill_paths = unique_nonblank_paths(bundle.skill_paths)
+  let skill_paths = if bundle_skill_paths.length() == 0 {
+    default_keeper_skill_paths(entry)
+  } else {
+    bundle_skill_paths
+  }
+  let bundle_context_pages = unique_nonblank_paths(bundle.context_pages)
+  let context_pages = if bundle_context_pages.length() == 0 {
+    default_keeper_context_pages(task)
+  } else {
+    bundle_context_pages
+  }
+  {
+    book_id: bundle.book_id,
+    workspace_root: bundle.workspace_root,
+    task_id: bundle.task_id,
+    prompt: bundle.prompt,
+    policy: bundle.policy,
+    routines: bundle.routines,
+    skill_paths: if skill_paths.length() == 0 {
+      ["skills/wiki-maintainer/SKILL.md"]
+    } else {
+      skill_paths
+    },
+    context_pages: if context_pages.length() == 0 {
+      ["wiki/index.md"]
+    } else {
+      context_pages
+    },
+    active_memory: bundle.active_memory,
+    user_memory: bundle.user_memory,
+    working_memory: bundle.working_memory,
+    memory_summary: bundle.memory_summary,
+    output_contract: bundle.output_contract,
+  }
+}
+
+///|
+fn default_keeper_skill_paths(entry : BookCatalogEntry) -> Array[String] {
+  let skill_paths = unique_nonblank_paths(entry.skills)
+  if skill_paths.length() == 0 {
+    ["skills/wiki-maintainer/SKILL.md"]
+  } else {
+    skill_paths
+  }
+}
+
+///|
+fn default_keeper_context_pages(task : BookTask) -> Array[String] {
+  let context_pages = unique_nonblank_paths(task.target_pages)
+  if context_pages.length() == 0 {
+    ["wiki/index.md", "wiki/log.md"]
+  } else {
+    context_pages
   }
 }
 
@@ -920,7 +991,7 @@ fn evidence_record_blocks(content : String) -> Array[String] {
   let mut current = ""
   let mut active = false
   for raw in content.split("\n") {
-    let line = raw.to_string()
+    let line = raw.to_owned()
     if line.has_prefix("### ") {
       if active {
         blocks.push(current)
@@ -971,15 +1042,15 @@ fn standing_watch_block_has_domain_delta(block : String) -> Bool {
 fn summary_field(content : String, key : String) -> String {
   let prefix = key.to_lower() + ":"
   for raw in content.split("\n") {
-    let mut line = raw.trim().to_string()
+    let mut line = raw.trim().to_owned()
     if line.has_prefix("- ") {
-      line = line[2:].trim().to_string()
+      line = line[2:].trim().to_owned()
     }
     if line.to_lower().has_prefix("summary:") {
-      line = line[8:].trim().to_string()
+      line = line[8:].trim().to_owned()
     }
     if line.to_lower().has_prefix(prefix) {
-      return line[prefix.length():].trim().trim(chars="`").to_string()
+      return line[prefix.length():].trim().trim(chars="`").to_owned()
     }
   }
   ""
@@ -1643,6 +1714,18 @@ fn unique_paths(values : Array[String]) -> Array[String] {
   for value in values {
     if !next.contains(value) {
       next.push(value)
+    }
+  }
+  next
+}
+
+///|
+fn unique_nonblank_paths(values : Array[String]) -> Array[String] {
+  let next : Array[String] = []
+  for value in values {
+    let path = value.trim().to_owned()
+    if !path.is_blank() && !next.contains(path) {
+      next.push(path)
     }
   }
   next
@@ -2742,14 +2825,14 @@ fn repo_source_materialize_skill_text(entry : BookCatalogEntry) -> String {
 fn research_topic_id(entry : BookCatalogEntry) -> String {
   for tag in entry.tags {
     if tag.has_prefix("topic:") {
-      let topic = tag[6:].to_string()
+      let topic = tag[6:].to_owned()
       if !topic.is_empty() {
         return topic
       }
     }
   }
   if entry.id.has_prefix("research-") {
-    entry.id[9:].to_string()
+    entry.id[9:].to_owned()
   } else {
     normalize_topic_id(entry.id)
   }

@@ -42,6 +42,23 @@ pub struct BookQualityReviewPacket {
 } derive(Eq, ToJson, FromJson)
 
 ///|
+pub struct BookQualityReviewRun {
+  book_id : String
+  packet_path : String
+  result_path : String
+  proposal_id : String?
+  run_id : String?
+  status : String
+  summary : String
+  generated_at_ms : UInt64
+} derive(Eq, ToJson, FromJson)
+
+///|
+pub struct BookQualityReviewRunLedger {
+  runs : Array[BookQualityReviewRun]
+} derive(Eq, ToJson, FromJson)
+
+///|
 pub fn default_book_quality_audit_path() -> String {
   ".moontown/book-quality/audit.json"
 }
@@ -54,6 +71,11 @@ pub fn default_book_quality_review_dir() -> String {
 ///|
 pub fn default_book_quality_review_result_dir() -> String {
   ".moontown/book-quality/ai-review-results"
+}
+
+///|
+pub fn default_book_quality_review_run_path() -> String {
+  ".moontown/book-quality/ai-review-runs.json"
 }
 
 ///|
@@ -129,6 +151,144 @@ pub async fn write_book_quality_review_packets(
     book_quality_review_readme(audit, packets),
   )
   "Wrote \{packets.length()} AI quality review packet(s) to \{review_dir}. Run these with MoonClaw/MoonBook and write results to \{default_book_quality_review_result_dir()}/<book-id>.md; structural checks only gate readiness."
+}
+
+///|
+pub async fn dispatch_next_book_quality_ai_review(
+  book_catalog_path? : String = @moonbook.default_catalog_path(),
+  review_dir? : String = default_book_quality_review_dir(),
+  result_dir? : String = default_book_quality_review_result_dir(),
+  run_path? : String = default_book_quality_review_run_path(),
+) -> String {
+  ignore(write_book_quality_review_packets(book_catalog_path~, review_dir~))
+  let audit = inspect_book_quality(book_catalog_path~)
+  let score = first_pending_ai_review_book(audit, result_dir)
+  match score {
+    None =>
+      "No pending AI semantic book-quality review remains. Results are stored under \{result_dir}."
+    Some(score) => {
+      write_book_quality_review_moonclaw_profile(review_dir)
+      let packet = book_quality_review_packet(score, review_dir)
+      let external = book_quality_external_review_packet(packet, result_dir)
+      let packet_path = book_quality_external_packet_path(
+        review_dir,
+        score.book_id,
+      )
+      let imported = @moonclaw.import_packet(
+        external,
+        packet_path,
+        cwd=book_quality_review_root(review_dir),
+        home=book_quality_moonclaw_home(review_dir),
+        confirm=true,
+        run_inline=moontown_moonclaw_inline_enabled(),
+      ) catch {
+        error => {
+          let run = BookQualityReviewRun::{
+            book_id: score.book_id,
+            packet_path,
+            result_path: "\{result_dir}/\{score.book_id}.md",
+            proposal_id: None,
+            run_id: None,
+            status: "blocked",
+            summary: "MoonClaw AI review dispatch failed: \{error}",
+            generated_at_ms: @env.now(),
+          }
+          append_book_quality_review_run(run_path, run)
+          return run.summary
+        }
+      }
+      let launch_command = match imported.run_id {
+        Some(run_id) if !moontown_moonclaw_inline_enabled() =>
+          Some(
+            @moonclaw.run_confirmed_run(
+              run_id,
+              cwd=book_quality_review_root(review_dir),
+              home=book_quality_moonclaw_home(review_dir),
+            ),
+          )
+        _ => None
+      }
+      let run = BookQualityReviewRun::{
+        book_id: score.book_id,
+        packet_path,
+        result_path: "\{result_dir}/\{score.book_id}.md",
+        proposal_id: Some(imported.proposal_id),
+        run_id: imported.run_id,
+        status: if imported.run_id is Some(_) {
+          "dispatched"
+        } else {
+          "queued"
+        },
+        summary: match launch_command {
+          Some(command) => "\{imported.summary} Detached runner: \{command}"
+          None => imported.summary
+        },
+        generated_at_ms: @env.now(),
+      }
+      append_book_quality_review_run(run_path, run)
+      "Dispatched AI semantic book-quality review for `\{score.book_id}`. \{run.summary}"
+    }
+  }
+}
+
+///|
+pub async fn render_book_quality_ai_review_status(
+  result_dir? : String = default_book_quality_review_result_dir(),
+  run_path? : String = default_book_quality_review_run_path(),
+) -> String {
+  ignore(reconcile_book_quality_ai_review_results(result_dir~, run_path~))
+  let ledger = load_book_quality_review_run_ledger(run_path)
+  let lines : Array[String] = [
+    "# Book Quality AI Review Runs",
+    "",
+    "- run ledger: `\{run_path}`",
+    "- result dir: `\{result_dir}`",
+    "- runs: `\{ledger.runs.length()}`",
+    "",
+    "| Book | Status | Result | Run | Summary |",
+    "| --- | --- | --- | --- | --- |",
+  ]
+  for run in ledger.runs {
+    let result_state = if @fs.exists(run.result_path) {
+      "written"
+    } else {
+      "pending"
+    }
+    lines.push(
+      "|\{run.book_id}|\{run.status}|\{result_state}|`\{run.run_id.unwrap_or("none")}`|\{markdown_inline(run.summary)}|",
+    )
+  }
+  lines.join("\n")
+}
+
+///|
+pub async fn reconcile_book_quality_ai_review_results(
+  result_dir? : String = default_book_quality_review_result_dir(),
+  run_path? : String = default_book_quality_review_run_path(),
+) -> Int {
+  let ledger = load_book_quality_review_run_ledger(run_path)
+  let mut written = 0
+  for run in ledger.runs {
+    if @fs.exists(run.result_path) {
+      continue
+    }
+    match run.run_id {
+      Some(run_id) => {
+        let content = book_quality_review_result_content_from_run(
+          run_id,
+          book_quality_review_root_from_run_path(run_path),
+          book_quality_moonclaw_home_from_run_path(run_path),
+        )
+        if content.contains("ai_quality_score:") &&
+          content.contains("book_role_fit:") {
+          write_text_file("\{result_dir}/\{run.book_id}.md", content)
+          written += 1
+        }
+      }
+      None => ()
+    }
+  }
+  written
 }
 
 ///|
@@ -943,6 +1103,308 @@ fn book_quality_review_readme(
     "",
     rows.join("\n"),
   ].join("\n")
+}
+
+///|
+async fn first_pending_ai_review_book(
+  audit : BookQualityAudit,
+  result_dir : String,
+) -> BookQualityScore? {
+  let mut candidate : BookQualityScore? = None
+  for score in audit.scores {
+    if @fs.exists("\{result_dir}/\{score.book_id}.md") {
+      continue
+    }
+    match candidate {
+      Some(current) if current.structural_score <= score.structural_score => ()
+      _ => candidate = Some(score)
+    }
+  }
+  candidate
+}
+
+///|
+fn book_quality_external_review_packet(
+  packet : BookQualityReviewPacket,
+  result_dir : String,
+) -> @moonclaw.ExternalProposalPacket {
+  let root = absolute_path(packet.workspace_root)
+  let context_pages : Array[String] = []
+  for page in packet.context_pages {
+    context_pages.push(@path.Path(root).join(@path.Path(page)).to_string())
+  }
+  let skill_path = absolute_path(packet.review_skill_path)
+  @moonclaw.ExternalProposalPacket::new(
+    packet_id="book-quality-ai-review-\{packet.book_id}",
+    title="AI semantic quality review: \{packet.book_id}",
+    summary="Semantic quality review for MoonBook `\{packet.book_id}`.",
+    request_text=book_quality_external_review_request(packet, result_dir),
+    profile="book_quality_ai_reviewer",
+    output_contract=packet.output_contract,
+    context_pages~,
+    skill_paths=[skill_path],
+    notes=[
+      "This is a semantic review, not a structural existence check.", "Do not modify the book workspace; return the required review contract.",
+      "Do not inflate score for operational logs or scaffolding.",
+    ],
+    tags=["book-quality", "ai-review", packet.book_type, packet.book_id],
+    metadata={
+      "producer": "moontown".to_json(),
+      "book_id": packet.book_id.to_json(),
+      "book_type": packet.book_type.to_json(),
+      "result_path": "\{result_dir}/\{packet.book_id}.md".to_json(),
+      "disable_waiting_for_input": true.to_json(),
+      "best_effort_on_missing_input": true.to_json(),
+      "profile_metadata": {
+        "disable_waiting_for_input": true.to_json(),
+        "best_effort_on_missing_input": true.to_json(),
+      },
+      "step_metadata": {
+        "kind": "book_quality_ai_review".to_json(),
+        "execution_mode": "acp".to_json(),
+        "execution_target": "codex-main".to_json(),
+        "output_contract": packet.output_contract.to_json(),
+        "preferred_skills": ["book-quality-ai-review"].to_json(),
+        "disable_waiting_for_input": true.to_json(),
+        "best_effort_on_missing_input": true.to_json(),
+      },
+    },
+  )
+}
+
+///|
+fn book_quality_external_review_request(
+  packet : BookQualityReviewPacket,
+  result_dir : String,
+) -> String {
+  [
+    "You are the MoonBook semantic quality reviewer for Moontown.",
+    "",
+    "Book id: `\{packet.book_id}`",
+    "Book type: `\{packet.book_type}`",
+    "Workspace root: `\{absolute_path(packet.workspace_root)}`",
+    "Structural score: `\{packet.structural_score}`",
+    "Result target after reconciliation: `\{result_dir}/\{packet.book_id}.md`",
+    "",
+    "Task:",
+    "1. Read the review skill and the listed context pages.",
+    "2. Judge the book's real quality for its role, not file completeness.",
+    "3. Separate domain/service evidence from operational logs and scaffolding.",
+    "4. Return exactly the `moontown.book_quality.ai_review.v1` Markdown contract.",
+    "5. Do not write repository files directly; Moontown will reconcile your returned contract into the durable result path.",
+    "",
+    packet.prompt,
+  ].join("\n")
+}
+
+///|
+async fn write_book_quality_review_moonclaw_profile(
+  review_dir : String,
+) -> Unit {
+  let root = book_quality_review_root(review_dir)
+  write_text_file(
+    "\{root}/moonclaw.jobs.json",
+    book_quality_review_moonclaw_profile_json().stringify(indent=2),
+  )
+  let home = "\{root}/.moonclaw"
+  let config_path = "\{home}/moonclaw.json"
+  write_text_file(
+    config_path,
+    book_quality_review_acp_config_json().stringify(indent=2),
+  )
+}
+
+///|
+fn book_quality_review_moonclaw_profile_json() -> Json {
+  {
+    "jobs": {
+      "profiles": {
+        "book_quality_ai_reviewer": {
+          "family": "book_quality_ai_reviewer",
+          "role": "reviewer",
+          "priority": 170,
+          "tags": ["book-quality", "ai-review", "semantic-review"],
+          "match": {
+            "all": ["book-quality", "ai-review"],
+            "any": [
+              "research-book", "course-book", "planbook", "cookbook", "civic-protocol-support",
+              "operational-book",
+            ],
+          },
+          "steps": [
+            {
+              "id": "review_book_semantic_quality",
+              "title": "Review one MoonBook workspace for real semantic quality",
+              "kind": "job.analysis",
+              "prompt_template": "Read ${proposal.request_text}. Read all absolute context_pages and skill_paths. Return exactly the requested book quality AI review contract. Do not write files.",
+              "metadata": {
+                "preferred_skills": ["book-quality-ai-review"],
+                "enable_tools": true,
+                "execution_mode": "acp",
+                "execution_target": "codex-main",
+                "output_contract": "moontown.book_quality.ai_review.v1",
+                "disable_waiting_for_input": true,
+                "best_effort_on_missing_input": true,
+                "role_runtime": {
+                  "planning_layer": "town-quality-governance",
+                  "runtime_mode": "semantic-review",
+                  "tool_access": "workspace-read",
+                  "memory_scope": "book-quality",
+                  "allow_delegate": false,
+                  "allow_workspace_write": false,
+                  "allow_execution_tools": true,
+                  "output_contract": "moontown.book_quality.ai_review.v1",
+                },
+              },
+            },
+          ],
+        },
+      },
+    },
+  }
+}
+
+///|
+fn book_quality_review_acp_config_json() -> Json {
+  let root = absolute_path(".")
+  {
+    "acp": {
+      "targets": {
+        "codex-main": {
+          "backend": "codex",
+          "label": "Codex Book Quality Reviewer",
+          "cwd": root,
+          "workspace": root,
+          "command": resolved_codex_command(),
+          "args": resolved_codex_args(),
+          "model": "gpt-5",
+        },
+      },
+    },
+  }
+}
+
+///|
+fn book_quality_external_packet_path(
+  review_dir : String,
+  book_id : String,
+) -> String {
+  "\{book_quality_review_root(review_dir)}/moonclaw-packets/book-quality-ai-review-\{book_id}.json"
+}
+
+///|
+fn book_quality_review_root(review_dir : String) -> String {
+  if review_dir.has_suffix("/ai-review-packets") {
+    review_dir[:review_dir.length() - "/ai-review-packets".length()].to_owned()
+  } else {
+    ".moontown/book-quality"
+  }
+}
+
+///|
+fn book_quality_review_root_from_run_path(run_path : String) -> String {
+  if run_path.has_suffix("/ai-review-runs.json") {
+    run_path[:run_path.length() - "/ai-review-runs.json".length()].to_owned()
+  } else {
+    ".moontown/book-quality"
+  }
+}
+
+///|
+fn book_quality_moonclaw_home(review_dir : String) -> String {
+  ignore(review_dir)
+  ".moonclaw"
+}
+
+///|
+fn book_quality_moonclaw_home_from_run_path(run_path : String) -> String {
+  ignore(run_path)
+  ".moonclaw"
+}
+
+///|
+async fn append_book_quality_review_run(
+  run_path : String,
+  run : BookQualityReviewRun,
+) -> Unit {
+  let ledger = load_book_quality_review_run_ledger(run_path)
+  let runs : Array[BookQualityReviewRun] = []
+  for existing in ledger.runs {
+    if existing.book_id != run.book_id || existing.run_id != run.run_id {
+      runs.push(existing)
+    }
+  }
+  runs.push(run)
+  write_text_file(
+    run_path,
+    BookQualityReviewRunLedger::{ runs, }.to_json().stringify(indent=2),
+  )
+}
+
+///|
+async fn load_book_quality_review_run_ledger(
+  run_path : String,
+) -> BookQualityReviewRunLedger {
+  if !@fs.exists(run_path) {
+    return { runs: [] }
+  }
+  let parsed = @json.parse(@fs.read_file(run_path).text()) catch {
+    _ => return { runs: [] }
+  }
+  @json.from_json(parsed) catch {
+    _ => { runs: [] }
+  }
+}
+
+///|
+async fn book_quality_review_result_content_from_run(
+  run_id : String,
+  cwd : String,
+  home : String,
+) -> String {
+  let workspace_dir = match @moonclaw.run_workspace_dir(run_id, cwd~, home~) {
+    Some(workspace_dir) => workspace_dir
+    None => return ""
+  }
+  let result_path = "\{workspace_dir}/result.json"
+  if !@fs.exists(result_path) {
+    return ""
+  }
+  let parsed = @json.parse(@fs.read_file(result_path).text()) catch {
+    _ => return ""
+  }
+  book_quality_json_string_field(parsed, "content").unwrap_or(
+    book_quality_json_string_field(parsed, "summary").unwrap_or(""),
+  )
+}
+
+///|
+fn book_quality_json_string_field(value : Json, key : String) -> String? {
+  match value {
+    Object(object) =>
+      match object.get(key) {
+        Some(String(text)) => Some(text)
+        _ => None
+      }
+    _ => None
+  }
+}
+
+///|
+fn absolute_path(path : String) -> String {
+  if path.has_prefix("/") {
+    path
+  } else {
+    match @env.current_dir() {
+      Some(dir) => @path.Path(dir).join(@path.Path(path)).to_string()
+      None => path
+    }
+  }
+}
+
+///|
+fn markdown_inline(text : String) -> String {
+  text.replace(old="\n", new=" ").replace(old="|", new="\\|")
 }
 
 ///|

@@ -878,7 +878,7 @@ fn markdown_bullets(values : Array[String]) -> String {
     builder.write_string(value)
     builder.write_char('\n')
   }
-  builder.to_string().trim().to_string()
+  builder.to_string().trim().to_owned()
 }
 
 ///|

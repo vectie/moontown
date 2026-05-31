@@ -182,25 +182,18 @@ pub async fn render_saved_town_status(
 pub async fn daemon_tick_saved_town(
   snapshot_path? : String = @storage.default_snapshot_path(),
   book_catalog_path? : String = @moonbook.default_catalog_path(),
+  respect_runtime_lock? : Bool = true,
 ) -> String {
-  let snapshot = @storage.load_snapshot_file(snapshot_path)
+  if respect_runtime_lock && daemon_tick_runtime_lock_active(snapshot_path) {
+    return "Moontown daemon tick skipped because another live daemon worker is already ticking. Use the existing daemon loop instead of overlapping manual ticks."
+  }
   let catalog = @moonbook.load_or_create_catalog(path=book_catalog_path)
   let daemon_path = default_daemon_state_path(snapshot_path)
   let daemon = load_daemon_state(daemon_path)
   let goal_path = default_standing_goal_state_path(snapshot_path)
   let standing_goals = @storage.load_or_create_standing_goals(path=goal_path)
   let mayor = demo_mayor()
-  let saved = match snapshot {
-    Some(saved) => saved
-    None => {
-      let state = load_or_create_demo_state(
-        path=snapshot_path,
-        book_catalog_path~,
-      )
-      @storage.snapshot_of(state)
-    }
-  }
-  let state = saved.town
+  let state = load_or_create_demo_state(path=snapshot_path, book_catalog_path~)
   let next_tick_sequence = daemon.tick_sequence + 1
   run_supervision_cycle(state, mayor, catalog, snapshot_path~, standing_goals~)
   let standing_goals_after_supervision = @storage.load_or_create_standing_goals(
@@ -218,6 +211,20 @@ pub async fn daemon_tick_saved_town(
     book_catalog_path,
     next_tick_sequence,
   )
+  let planbook_summary = write_moontown_planbook_autonomy(
+    snapshot_path~,
+    book_catalog_path~,
+  )
+  let repair_active = planbook_repair_active_count(snapshot_path~)
+  let planbook_repair_summary = if repair_active == 0 {
+    write_moontown_planbook_repair_task(
+      snapshot_path~,
+      book_catalog_path~,
+      dispatch=true,
+    )
+  } else {
+    "PlanBook repair already active; daemon did not create a duplicate repair task."
+  }
   let watcher_records = load_watcher_records_for_goals(
     snapshot_path, updated_goals,
   )
@@ -238,6 +245,20 @@ pub async fn daemon_tick_saved_town(
       detail=tick.summary,
     ),
   )
+  state.record_event(
+    @core.TownEvent::new(
+      id="event-planbook-\{tick.sequence}",
+      kind="planbook",
+      detail=planbook_summary,
+    ),
+  )
+  state.record_event(
+    @core.TownEvent::new(
+      id="event-planbook-repair-\{tick.sequence}",
+      kind="planbook-repair",
+      detail=planbook_repair_summary,
+    ),
+  )
   ignore(
     write_live_autonomy_spine(
       state,
@@ -254,6 +275,15 @@ pub async fn daemon_tick_saved_town(
 }
 
 ///|
+async fn daemon_tick_runtime_lock_active(snapshot_path : String) -> Bool {
+  let runtime = inspect_daemon_runtime(snapshot_path~)
+  runtime.status == "ticking" &&
+  runtime.worker_alive &&
+  !runtime.stale &&
+  runtime.heartbeat_age_ms < 120_000UL
+}
+
+///|
 async fn dispatch_due_standing_goals(
   state : @core.TownState,
   mayor : @roles.Mayor,
@@ -265,6 +295,18 @@ async fn dispatch_due_standing_goals(
   let updated : Array[@core.StandingGoal] = []
   for goal in goals {
     if goal.is_due(tick) {
+      if live_external_execution_count(state) >= max_live_external_executions() {
+        state.record_event(
+          @core.TownEvent::new(
+            id="event-standing-goal-\{tick}-\{goal.id}-deferred-cap",
+            kind="standing-goal",
+            detail="Mayor deferred standing goal \{goal.id} because live external execution count reached \{max_live_external_executions()}.",
+            related_book_id=goal.target_book_id,
+          ),
+        )
+        updated.push(goal)
+        continue
+      }
       let target = goal.target_book_id.unwrap_or("mayor-selected-book")
       state.record_event(
         @core.TownEvent::new(
@@ -323,9 +365,24 @@ pub async fn daemon_run_saved_town(
   sleep_ms? : Int = 30_000,
   preserve_supervisor? : Bool = false,
 ) -> String {
-  let worker_run_id = daemon_run_id("worker")
   let log_path = default_daemon_log_path(snapshot_path~)
-  let worker_pid = daemon_current_process_pid(snapshot_path)
+  let observed_worker_pid = daemon_current_process_pid(snapshot_path)
+  let prior_health = inspect_daemon_runtime(snapshot_path~)
+  let prior_state = load_daemon_runtime_state(
+    default_daemon_runtime_path(snapshot_path~),
+  )
+  let worker_pid = if prior_health.worker_pid > 0 &&
+    prior_health.worker_alive &&
+    !prior_health.stale {
+    prior_health.worker_pid
+  } else {
+    observed_worker_pid
+  }
+  let worker_run_id = match prior_state {
+    Some(state) if worker_pid == state.worker_pid &&
+      !state.worker_run_id.is_empty() => state.worker_run_id
+    _ => daemon_run_id("worker")
+  }
   if worker_pid > 0 {
     mark_daemon_worker_started(
       snapshot_path,
@@ -391,7 +448,11 @@ async fn run_daemon_tick_with_heartbeat(
       }
     })
     let mut ok = true
-    let summary = daemon_tick_saved_town(snapshot_path~, book_catalog_path~) catch {
+    let summary = daemon_tick_saved_town(
+      snapshot_path~,
+      book_catalog_path~,
+      respect_runtime_lock=false,
+    ) catch {
       error => {
         ok = false
         "daemon tick failed: \{error}"

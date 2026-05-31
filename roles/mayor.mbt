@@ -1,7 +1,14 @@
 ///|
 pub struct Mayor {
   runtime : @moonclaw.EmbeddedMoonclawRuntime
-} derive(Show, Eq)
+} derive(Eq)
+
+///|
+pub impl Show for Mayor with fn output(self : Mayor, logger : &Logger) -> Unit {
+  logger.write_string(
+    "Mayor(runtime=\{self.runtime.runtime_id}, role=\{self.runtime.role_id})",
+  )
+}
 
 ///|
 pub fn Mayor::new() -> Mayor {
@@ -18,14 +25,34 @@ pub struct MayorDispatchPacket {
   decision : @dispatch.RouteDecision
   output_contract : String
   rationale : String
-} derive(Show, Eq)
+} derive(Eq)
+
+///|
+pub impl Show for MayorDispatchPacket with fn output(
+  self : MayorDispatchPacket,
+  logger : &Logger,
+) -> Unit {
+  logger.write_string(
+    "MayorDispatchPacket(output_contract=\{self.output_contract}, rationale=\{self.rationale})",
+  )
+}
 
 ///|
 pub struct MayorGoalLane {
   entry : @moonbook.BookCatalogEntry
   objective : String
   rationale : String
-} derive(Show, Eq)
+} derive(Eq)
+
+///|
+pub impl Show for MayorGoalLane with fn output(
+  self : MayorGoalLane,
+  logger : &Logger,
+) -> Unit {
+  logger.write_string(
+    "MayorGoalLane(book=\{self.entry.id}, objective=\{self.objective}, rationale=\{self.rationale})",
+  )
+}
 
 ///|
 pub struct MayorGoalPlan {
@@ -34,7 +61,17 @@ pub struct MayorGoalPlan {
   parallelizable : Bool
   summary : String
   lanes : Array[MayorGoalLane]
-} derive(Show, Eq)
+} derive(Eq)
+
+///|
+pub impl Show for MayorGoalPlan with fn output(
+  self : MayorGoalPlan,
+  logger : &Logger,
+) -> Unit {
+  logger.write_string(
+    "MayorGoalPlan(output_contract=\{self.output_contract}, parallelizable=\{self.parallelizable}, summary=\{self.summary}, lanes=\{self.lanes.length()})",
+  )
+}
 
 ///|
 pub struct MayorSupervisionDirective {
@@ -43,7 +80,17 @@ pub struct MayorSupervisionDirective {
   execution_status : @core.TaskExecutionStatus
   detail : String
   next_retry_tick : Int?
-} derive(Show, Eq)
+} derive(Eq)
+
+///|
+pub impl Show for MayorSupervisionDirective with fn output(
+  self : MayorSupervisionDirective,
+  logger : &Logger,
+) -> Unit {
+  logger.write_string(
+    "MayorSupervisionDirective(kind=\{self.kind}, task_id=\{self.task_id}, status=\{self.execution_status.to_string()}, detail=\{self.detail})",
+  )
+}
 
 ///|
 pub struct MayorSupervisionPacket {
@@ -51,7 +98,17 @@ pub struct MayorSupervisionPacket {
   tick : Int
   summary : String
   directives : Array[MayorSupervisionDirective]
-} derive(Show, Eq)
+} derive(Eq)
+
+///|
+pub impl Show for MayorSupervisionPacket with fn output(
+  self : MayorSupervisionPacket,
+  logger : &Logger,
+) -> Unit {
+  logger.write_string(
+    "MayorSupervisionPacket(output_contract=\{self.output_contract}, tick=\{self.tick}, summary=\{self.summary}, directives=\{self.directives.length()})",
+  )
+}
 
 ///|
 pub fn Mayor::decide_dispatch(
@@ -224,7 +281,17 @@ pub struct MayorKeeperPacket {
   packet : @moonclaw.ExternalProposalPacket
   packet_path : String
   rationale : String
-} derive(Show, Eq)
+} derive(Eq)
+
+///|
+pub impl Show for MayorKeeperPacket with fn output(
+  self : MayorKeeperPacket,
+  logger : &Logger,
+) -> Unit {
+  logger.write_string(
+    "MayorKeeperPacket(packet_path=\{self.packet_path}, rationale=\{self.rationale})",
+  )
+}
 
 ///|
 pub struct MayorPatrolPacket {
@@ -233,7 +300,17 @@ pub struct MayorPatrolPacket {
   actions : Array[@scheduler.SchedulerAction]
   tick : @scheduler.SchedulerTick
   recovery : Array[@health.RecoveryAction]
-} derive(Show, Eq)
+} derive(Eq)
+
+///|
+pub impl Show for MayorPatrolPacket with fn output(
+  self : MayorPatrolPacket,
+  logger : &Logger,
+) -> Unit {
+  logger.write_string(
+    "MayorPatrolPacket(output_contract=\{self.output_contract}, actions=\{self.actions.length()}, recovery=\{self.recovery.length()})",
+  )
+}
 
 ///|
 pub fn Mayor::patrol(
@@ -300,7 +377,7 @@ pub async fn Mayor::prepare_keeper_packet(
 ) -> MayorKeeperPacket {
   let bundle = @moonbook.hydrate_worker_context(entry, task)
   let packet_id = compact_keeper_packet_id(entry.id, task.id)
-  let profile = moonclaw_profile_for_task(task)
+  let profile = moonclaw_profile_for_entry_task(entry, task)
   let packet = @moonclaw.proposal_packet_from_bundle(
     bundle,
     task.title,
@@ -333,7 +410,7 @@ pub fn keeper_runtime(
 
 ///|
 fn compact_keeper_packet_id(book_id : String, task_id : String) -> String {
-  let hash = task_id.hash().to_string().trim(chars="-").to_string()
+  let hash = task_id.hash().to_string().trim(chars="-").to_owned()
   let prefix = compact_id_segment(book_id, 24)
   let body = compact_id_segment(task_id, 40)
   "keeper-\{prefix}-\{body}-\{hash}"
@@ -361,7 +438,7 @@ fn compact_id_segment(text : String, limit : Int) -> String {
       last_dash = true
     }
   }
-  let slug = builder.to_string().trim(chars="-").to_string()
+  let slug = builder.to_string().trim(chars="-").to_owned()
   if slug.is_blank() {
     "task"
   } else {
@@ -385,6 +462,20 @@ fn moonclaw_profile_for_task(task : @moonbook.BookTask) -> String {
     "review" | "planning" => "wiki_lint_controller"
     "analysis" | "synthesis" => "wiki_query_controller"
     _ => "wiki_query_controller"
+  }
+}
+
+///|
+fn moonclaw_profile_for_entry_task(
+  entry : @moonbook.BookCatalogEntry,
+  task : @moonbook.BookTask,
+) -> String {
+  if entry.id == "plan-moontown-quality" {
+    return "planbook_repair_worker"
+  }
+  match @civic.wenyu_civic_service_for_book_id(entry.id) {
+    Some(_) => "wenyu_civic_service_worker"
+    None => moonclaw_profile_for_task(task)
   }
 }
 
@@ -468,6 +559,18 @@ fn supervision_directive_for(
     })
   }
   match execution.status {
+    @core.TaskExecutionStatus::PacketReady =>
+      match execution.next_retry_tick {
+        Some(next_tick) if next_tick > tick => None
+        _ =>
+          Some({
+            kind: "retry-execution",
+            task_id: execution.task_id,
+            execution_status: execution.status,
+            detail: "Execution \{execution.task_id} is queued as packet-ready and should launch when live worker capacity is available.",
+            next_retry_tick: Some(tick + retry_backoff_ticks(1)),
+          })
+      }
     @core.TaskExecutionStatus::AwaitingPersistence =>
       Some({
         kind: "persist-result",
@@ -503,6 +606,17 @@ fn supervision_directive_for(
       }
     @core.TaskExecutionStatus::Stale | @core.TaskExecutionStatus::Failed =>
       match execution.next_retry_tick {
+        _ if recoverable_profile_dispatch_failure(execution) &&
+          execution.attempt < 5 =>
+          Some({
+            kind: "retry-execution",
+            task_id: execution.task_id,
+            execution_status: execution.status,
+            detail: "Execution \{execution.task_id} failed during profile dispatch and is eligible for a bounded self-heal retry after profile routing/provisioning changes.",
+            next_retry_tick: Some(
+              tick + retry_backoff_ticks(execution.attempt + 1),
+            ),
+          })
         Some(next_tick) if execution.attempt < 3 && next_tick <= tick =>
           Some({
             kind: "retry-execution",
@@ -513,10 +627,29 @@ fn supervision_directive_for(
               tick + retry_backoff_ticks(execution.attempt + 1),
             ),
           })
+        None if execution.attempt < 3 =>
+          Some({
+            kind: "retry-execution",
+            task_id: execution.task_id,
+            execution_status: execution.status,
+            detail: "Execution \{execution.task_id} has no scheduled retry but is still within the bounded recovery budget.",
+            next_retry_tick: Some(
+              tick + retry_backoff_ticks(execution.attempt + 1),
+            ),
+          })
         _ => None
       }
     _ => None
   }
+}
+
+///|
+fn recoverable_profile_dispatch_failure(
+  execution : @core.TaskExecutionRecord,
+) -> Bool {
+  execution.summary.contains("Unknown external proposal profile") ||
+  execution.summary.contains("Proposal import failed") ||
+  execution.summary.contains("Resource temporarily unavailable")
 }
 
 ///|

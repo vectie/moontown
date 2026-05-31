@@ -258,11 +258,32 @@ async fn launch_goal_book(
   launch : GoalBookLaunch,
 ) -> Unit {
   for task in launch.tasks {
+    let tick = supervision_tick(state)
     let planned_task = to_town_task(
       launch.entry,
       task,
       @core.TaskExecutionStatus::PacketReady,
     )
+    if live_external_execution_count(state) >= max_live_external_executions() {
+      let queued_execution = queued_goal_execution_record(
+        launch.entry,
+        task,
+        tick,
+        "Mayor queued \{task.id} because live external execution count reached \{max_live_external_executions()}; the supervision loop will launch it when capacity is available.",
+      )
+      state.replace_task(planned_task)
+      state.replace_execution(queued_execution)
+      state.record_event(
+        @core.TownEvent::new(
+          id="event-queue-\{state.events.length()}-\{task.id}",
+          kind="execution-queue",
+          detail=queued_execution.summary,
+          related_task_id=Some(task.id),
+          related_book_id=Some(launch.entry.id),
+        ),
+      )
+      continue
+    }
     let decision = mayor.decide_dispatch(state, planned_task)
     state.record_event(route_event(decision.decision, state.events.length()))
     let worker_id = assigned_worker_id(decision.decision)
@@ -271,7 +292,7 @@ async fn launch_goal_book(
       launch.entry,
       task,
       assigned_worker_id=worker_id,
-      tick=supervision_tick(state),
+      tick~,
     ) catch {
       error =>
         failed_execution_record(
@@ -294,16 +315,59 @@ async fn launch_goal_book(
     state.record_event(
       execution_event(completed_execution, state.executions.length() - 1),
     )
-    persist_execution_into_book(state, launch.entry, completed_execution)
+    let reconciled_execution = match
+      persist_execution_into_book(state, launch.entry, completed_execution) {
+      Some(outcome) =>
+        execution_after_successful_book_persist(
+          completed_execution, outcome, tick,
+        )
+      None => completed_execution
+    }
+    if reconciled_execution != completed_execution {
+      state.replace_task(
+        to_town_task(launch.entry, task, reconciled_execution.status),
+      )
+      state.replace_execution(reconciled_execution)
+      sync_worker_from_execution(state, reconciled_execution)
+    }
     if terminal_execution_status(completed_execution.status) {
       finalize_goal_book_entry(
         state,
         launch.entry,
         launch.pending_review_baseline,
-        [completed_execution.task_id],
+        [reconciled_execution.task_id],
       )
     }
   }
+}
+
+///|
+fn queued_goal_execution_record(
+  entry : @moonbook.BookCatalogEntry,
+  task : @moonbook.BookTask,
+  tick : Int,
+  summary : String,
+) -> @core.TaskExecutionRecord {
+  @core.TaskExecutionRecord::new(
+    task_id=task.id,
+    book_id=entry.id,
+    packet_id="queued-\{entry.id}-\{task.id}",
+    packet_path="",
+    proposal_id=None,
+    run_id=None,
+    status=@core.TaskExecutionStatus::PacketReady,
+    summary~,
+    output_contract="moontown.queued.execution.v1",
+    context_pages=task.target_pages,
+    skill_paths=entry.skills,
+    last_command=None,
+    attempt=0,
+    heartbeat_tick=tick,
+    stale_after_tick=tick + 30,
+    next_retry_tick=Some(tick + 1),
+    requires_review=task.requires_review,
+    notify_town=true,
+  )
 }
 
 ///|

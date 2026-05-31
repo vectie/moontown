@@ -125,3 +125,33 @@ test "standing watch stale execution is superseded by active retry" {
   assert_true(report.anomalies.is_empty())
   assert_eq(report.book_health[0].level, HealthLevel::Healthy)
 }
+
+///|
+test "repaired context packet import failure does not keep town degraded when execution carries context" {
+  let state = @core.empty_state(
+    @core.TownConfig::new(id="test-town", name="Test Town"),
+  )
+  state.register_book(
+    @core.BookRef::new(
+      id="coding",
+      name="Coding",
+      purpose="Coding memory",
+      workspace_root="/tmp/coding",
+    ),
+  )
+  state.register_execution(
+    @core.TaskExecutionRecord::new(
+      task_id="coding-synthesis",
+      book_id="coding",
+      packet_id="keeper-coding-synthesis",
+      packet_path="packet.json",
+      status=@core.TaskExecutionStatus::Failed,
+      summary="MoonClaw proposal import failed: ExternalProposalPacket: context_pages must not be empty",
+      output_contract="keeper.plan.packet.v1",
+      context_pages=["wiki/index.md"],
+    ),
+  )
+  let report = inspect_town(state)
+  assert_true(report.anomalies.is_empty())
+  assert_eq(report.book_health[0].level, HealthLevel::Healthy)
+}

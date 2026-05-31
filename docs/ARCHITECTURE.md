@@ -73,6 +73,8 @@ It should own:
 - memory policy and durable memory
 - context hydration
 - local planning
+- native book-type skills and profiles, including research, course, PlanBook,
+  and standing-watch workflows
 - result review and persistence decisions
 - generated cookbook workspace and stable-state wiki pages
 
@@ -142,7 +144,10 @@ Current shape:
 
 In the current repo, `moontown` now prepares real keeper proposal packets using
 book-harness-shaped context from the moonbook adapter. The actual keeper
-implementation still belongs on the `moonbook` side.
+implementation still belongs on the `moonbook` side. MoonBook now provides a
+native PlanBook skill plus `wiki_planbook_controller` and
+`wiki_planbook_worker` extension profiles so code-planning books do not fall
+back to research or course profiles.
 
 ### Worker
 
@@ -569,14 +574,39 @@ Current documentation and bootstrap commands:
 ```bash
 moon run cmd/main -- planbook bootstrap
 moon run cmd/main -- planbook status
+moon run cmd/main -- planbook doctor
+moon run cmd/main -- planbook autonomy
+moon run cmd/main -- planbook repair
+moon run cmd/main -- planbook repair status
 ```
 
 Moontown can now register and bootstrap a first-class planbook workspace with
 plan index, execution evidence, active review, decision log, schema, generated
-site, and code-plan/code-review/doc-sync skills. The remaining MoonBook-side
-work is to make `planbook` a native provider/profile so future plan creation,
-plan repair, and review can run as normal MoonBook book work instead of only
-through Moontown bootstrap.
+site, and code-plan/code-review/doc-sync skills. It also runs a PlanBook
+autonomy doctor during daemon ticks. That doctor writes
+`.moontown/planbook/autonomy.json`, updates the PlanBook evidence/review pages,
+and adds `planbook_open_count` plus repair actions to the live autonomy spine.
+
+When the doctor finds open gaps, the daemon queues exactly one bounded repair
+packet through the PlanBook repair bridge. The bridge materializes a repair
+context, repair `SKILL.md`, repair plan, and MoonClaw packet under the PlanBook
+workspace, then records `.moontown/planbook/repair-task.json`. The packet uses
+the `planbook.repair.result.v1` contract and can be dispatched explicitly with
+`planbook repair --dispatch`. This is the current self-build spine: detect gaps,
+turn the top gap into executable work, preserve ownership boundaries, then
+validate and rerun the doctor.
+
+Daemon supervision also preserves the supervisor-recorded worker PID instead of
+letting a worker loop overwrite it with an unreliable self-detected PID. That
+matters for live autonomy: if the recorded worker PID is corrupted, the
+supervisor can wrongly conclude the worker died and spawn duplicate workers.
+The current daemon path keeps one live worker pair and exposes stale/duplicate
+conditions through `daemon doctor`.
+
+The remaining MoonBook-side work is to make `planbook` a native
+provider/profile so future plan creation, plan repair, and review can run as
+normal MoonBook book work instead of only through Moontown bootstrap and
+deterministic self-inspection.
 
 `books bootstrap` is the canonical bootstrap repair command for the currently
 registered book families. It materializes operational, cookbook, planbook,

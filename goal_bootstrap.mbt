@@ -222,7 +222,7 @@ async fn preseed_reference_style_inputs(
 fn optional_env_text(key : String) -> String? {
   match @sys.get_env_var(key) {
     Some(value) => {
-      let trimmed = value.trim().to_string()
+      let trimmed = value.trim().to_owned()
       if trimmed.is_empty() {
         None
       } else {
@@ -885,7 +885,7 @@ async fn ignore_checked_command(command : String, args : Array[String]) -> Unit 
 fn path_basename(path : String) -> String {
   let parts = path.split("/").to_array()
   match parts.get(parts.length() - 1) {
-    Some(part) => part.to_string()
+    Some(part) => part.to_owned()
     None => path
   }
 }
@@ -895,7 +895,7 @@ fn bootstrap_ingest_task(
   entry : @moonbook.BookCatalogEntry,
   goal : String,
 ) -> @moonbook.BookTask {
-  let normalized_goal = goal.trim().to_string()
+  let normalized_goal = goal.trim().to_owned()
   let prompt = if is_wenyu_valley_goal(normalized_goal) {
     "Bootstrap this Wenyu Valley module before implementation. Use `../../../docs/WENYU_VALLEY_PRD.md` as the primary contract from this book workspace, run web search before local file search for comparable civic/AI innovation town patterns, then inspect local project files. Produce lane-specific raw bootstrap artifacts, a claim-level evidence matrix, module entities/concepts, implementation tasks, acceptance criteria, risk list, and a marketing/product brief. The result must be specific to this Wenyu module and must not collapse all Wenyu modules into one generic page."
   } else {

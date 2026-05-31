@@ -5,7 +5,7 @@ pub struct CompletedCommand {
   status : Int
   stdout : String
   stderr : String
-} derive(Show, Eq, ToJson)
+} derive(Debug, Eq, ToJson)
 
 ///|
 pub suberror CommandFailed {
@@ -13,7 +13,7 @@ pub suberror CommandFailed {
 } derive(ToJson)
 
 ///|
-pub impl Show for CommandFailed with output(
+pub impl Show for CommandFailed with fn output(
   self : CommandFailed,
   logger : &Logger,
 ) -> Unit {
@@ -24,11 +24,11 @@ pub impl Show for CommandFailed with output(
   command.status.output(logger)
   if !command.stdout.trim().is_blank() {
     logger.write_string(".\nstdout:\n")
-    logger.write_string(command.stdout.trim().to_string())
+    logger.write_string(command.stdout.trim().to_owned())
   }
   if !command.stderr.trim().is_blank() {
     logger.write_string(".\nstderr:\n")
-    logger.write_string(command.stderr.trim().to_string())
+    logger.write_string(command.stderr.trim().to_owned())
   }
 }
 
@@ -97,21 +97,21 @@ pub async fn run_json(
 
 ///|
 fn parse_json_stdout(completed : CompletedCommand) -> Json raise {
-  let trimmed = completed.stdout.trim().to_string()
+  let trimmed = completed.stdout.trim().to_owned()
   @json.parse(trimmed) catch {
     _ => {
       let lines = trimmed.split("\n").to_array()
       let count = lines.length()
       for offset in 0..<count {
         let start = count - offset - 1
-        let line = lines[start].trim().to_string()
+        let line = lines[start].trim().to_owned()
         if line.has_prefix("{") || line.has_prefix("[") {
           let builder = StringBuilder::new()
           for index in start..<count {
             if index > start {
               builder.write_char('\n')
             }
-            builder.write_string(lines[index].to_string())
+            builder.write_string(lines[index].to_owned())
           }
           let candidate = builder.to_string()
           let parsed = @json.parse(candidate) catch { _ => continue }

@@ -195,7 +195,7 @@ async fn render_wenyu_lane_briefs(plan : @roles.MayorGoalPlan) -> String {
       builder.write_string("\n\n")
     }
   }
-  builder.to_string().trim().to_string()
+  builder.to_string().trim().to_owned()
 }
 
 ///|
@@ -582,15 +582,15 @@ fn remove_first_markdown_title(report : String) -> String {
   let builder = StringBuilder::new()
   let mut skipped = false
   for line in report.split("\n") {
-    let trimmed = line.trim().to_string()
+    let trimmed = line.trim().to_owned()
     if !skipped && trimmed.has_prefix("# ") {
       skipped = true
       continue
     }
-    builder.write_string(line.to_string())
+    builder.write_string(line.to_owned())
     builder.write_string("\n")
   }
-  builder.to_string().trim().to_string()
+  builder.to_string().trim().to_owned()
 }
 
 ///|
@@ -604,7 +604,7 @@ fn demote_markdown_headings(markdown : String) -> String {
     } else if line.has_prefix("##") {
       builder.write_string("#\{line}\n")
     } else {
-      builder.write_string(line.to_string())
+      builder.write_string(line.to_owned())
       builder.write_string("\n")
     }
   }
@@ -616,7 +616,7 @@ fn section_body(report : String, heading : String) -> String {
   let builder = StringBuilder::new()
   let mut in_section = false
   for line in report.split("\n") {
-    let trimmed = line.trim().to_string()
+    let trimmed = line.trim().to_owned()
     if trimmed == heading {
       in_section = true
       continue
@@ -625,18 +625,18 @@ fn section_body(report : String, heading : String) -> String {
       break
     }
     if in_section {
-      builder.write_string(line.to_string())
+      builder.write_string(line.to_owned())
       builder.write_string("\n")
     }
   }
-  builder.to_string().trim().to_string()
+  builder.to_string().trim().to_owned()
 }
 
 ///|
 fn first_non_heading_paragraph(markdown : String) -> String {
   let builder = StringBuilder::new()
   for line in markdown.split("\n") {
-    let trimmed = line.trim().to_string()
+    let trimmed = line.trim().to_owned()
     if trimmed.is_blank() {
       if !builder.to_string().trim().is_blank() {
         break
@@ -651,7 +651,7 @@ fn first_non_heading_paragraph(markdown : String) -> String {
     builder.write_string(trimmed)
     builder.write_string(" ")
   }
-  builder.to_string().trim().to_string()
+  builder.to_string().trim().to_owned()
 }
 
 ///|
@@ -835,7 +835,7 @@ fn lane_research_status(state : @core.TownState, book_id : String) -> String {
 fn markdown_excerpt(text : String, limit : Int) -> String {
   let trimmed = text.trim()
   if trimmed.length() <= limit {
-    return trimmed.to_string()
+    return trimmed.to_owned()
   }
   let builder = StringBuilder::new()
   let mut emitted = 0
@@ -883,7 +883,7 @@ fn town_goal_slug(goal : String) -> String {
       emitted += 1
     }
   }
-  let slug = builder.to_string().trim(chars="-").to_string()
+  let slug = builder.to_string().trim(chars="-").to_owned()
   if slug.is_empty() {
     "goal"
   } else {

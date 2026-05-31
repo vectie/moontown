@@ -545,9 +545,24 @@ async fn build_live_state_from_catalog(
     }
     let limit = desired_task_count(entry)
     let mut emitted = 0
-    for task in batch.tasks {
+    for raw_task in batch.tasks {
       if emitted >= limit {
         break
+      }
+      let task = town_scoped_book_task(entry, raw_task)
+      if live_external_execution_count(state) >= max_live_external_executions() {
+        let queued_execution = queued_goal_execution_record(
+          entry,
+          task,
+          supervision_tick(state),
+          "Mayor queued \{task.id} during catalog bootstrap because live external execution count reached \{max_live_external_executions()}; the supervision loop will launch it when capacity is available.",
+        )
+        state.enqueue_task(
+          to_town_task(entry, task, @core.TaskExecutionStatus::PacketReady),
+        )
+        state.register_execution(queued_execution)
+        emitted += 1
+        continue
       }
       let execution = live_execution_record_for_book_task(mayor, entry, task) catch {
         error =>
@@ -568,16 +583,53 @@ async fn build_live_state_from_catalog(
 }
 
 ///|
+fn town_scoped_book_task(
+  entry : @moonbook.BookCatalogEntry,
+  task : @moonbook.BookTask,
+) -> @moonbook.BookTask {
+  if task.id.has_prefix("\{entry.id}-") || task.id.contains("-\{entry.id}-") {
+    return task
+  }
+  @moonbook.BookTask::new(
+    id="\{entry.id}-\{task.id}",
+    goal=task.goal,
+    title=task.title,
+    kind=task.kind,
+    prompt=task.prompt,
+    priority=task.priority,
+    requires_review=task.requires_review,
+    required_role=task.required_role,
+    target_pages=task.target_pages,
+  )
+}
+
+///|
 fn snapshot_requires_refresh(snapshot : @storage.TownSnapshot) -> Bool {
   snapshot.town.books.any(fn(book : @core.BookRef) {
     book.workspace_root.contains("/workspace/")
   }) ||
+  snapshot_has_duplicate_execution_task_ids(snapshot) ||
   snapshot.town.executions.any(fn(execution : @core.TaskExecutionRecord) {
     execution.summary.contains("Synthetic lifecycle") ||
     execution.summary.contains("No such file or directory") ||
+    execution.summary.contains("MoonBook task planning failed") ||
     execution.summary.contains("metadata must be object") ||
     execution.summary.contains("Unknown external proposal profile")
   })
+}
+
+///|
+fn snapshot_has_duplicate_execution_task_ids(
+  snapshot : @storage.TownSnapshot,
+) -> Bool {
+  let seen : Array[String] = []
+  for execution in snapshot.town.executions {
+    if seen.contains(execution.task_id) {
+      return true
+    }
+    seen.push(execution.task_id)
+  }
+  false
 }
 
 ///|

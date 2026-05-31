@@ -2,6 +2,7 @@
 package "vectie/moontown/ui"
 
 import {
+  "moonbitlang/core/debug",
   "vectie/moontown/core",
   "vectie/moontown/health",
 }
@@ -23,7 +24,8 @@ pub fn render_scene_html(SceneRenderModel) -> String
 pub struct AlertBanner {
   level : String
   text : String
-} derive(Eq, Show)
+} derive(Eq, @debug.Debug)
+pub impl Show for AlertBanner
 
 pub struct DashboardModel {
   title : String
@@ -31,12 +33,14 @@ pub struct DashboardModel {
   scene_layout : TownSceneLayout
   town_map : Array[TownMapPlace]
   sections : Array[DashboardSection]
-} derive(Eq, Show)
+} derive(Eq, @debug.Debug)
+pub impl Show for DashboardModel
 
 pub struct DashboardSection {
   title : String
   lines : Array[String]
-} derive(Eq, Show)
+} derive(Eq, @debug.Debug)
+pub impl Show for DashboardSection
 
 pub struct SceneArea {
   key : String
@@ -47,7 +51,8 @@ pub struct SceneArea {
   width : Int
   height : Int
   asset_keys : Array[String]
-} derive(Eq, Show)
+} derive(Eq, @debug.Debug)
+pub impl Show for SceneArea
 
 pub enum SceneAreaKind {
   CityHall
@@ -55,13 +60,15 @@ pub enum SceneAreaKind {
   WorkerYard
   AnomalyCorner
   Gate
-} derive(Eq, Show)
+} derive(Eq, @debug.Debug)
+pub impl Show for SceneAreaKind
 
 pub struct SceneAsset {
   key : String
   path : String
   purpose : String
-} derive(Eq, Show)
+} derive(Eq, @debug.Debug)
+pub impl Show for SceneAsset
 
 pub struct SceneRenderModel {
   title : String
@@ -70,7 +77,8 @@ pub struct SceneRenderModel {
   background_path : String
   alerts : Array[String]
   nodes : Array[SceneRenderNode]
-} derive(Eq, Show)
+} derive(Eq, @debug.Debug)
+pub impl Show for SceneRenderModel
 
 pub struct SceneRenderNode {
   key : String
@@ -82,7 +90,8 @@ pub struct SceneRenderNode {
   height : Int
   asset_paths : Array[String]
   lines : Array[String]
-} derive(Eq, Show)
+} derive(Eq, @debug.Debug)
+pub impl Show for SceneRenderNode
 
 pub struct TownMapPlace {
   key : String
@@ -95,7 +104,8 @@ pub struct TownMapPlace {
   height : Int
   asset_paths : Array[String]
   lines : Array[String]
-} derive(Eq, Show)
+} derive(Eq, @debug.Debug)
+pub impl Show for TownMapPlace
 
 pub struct TownSceneLayout {
   width : Int
@@ -103,7 +113,8 @@ pub struct TownSceneLayout {
   background : SceneAsset
   areas : Array[SceneArea]
   assets : Array[SceneAsset]
-} derive(Eq, Show)
+} derive(Eq, @debug.Debug)
+pub impl Show for TownSceneLayout
 
 // Type aliases
 
