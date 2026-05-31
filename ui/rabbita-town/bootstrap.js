@@ -134,6 +134,21 @@ async function refreshLiveAutonomy() {
   }
 }
 
+async function refreshEditorPipeline() {
+  try {
+    const response = await fetch(`./editor-pipeline.json?ts=${Date.now()}`, { cache: 'no-store' })
+    if (response.ok) {
+      globalThis.__moontownEditorPipelineJson = await response.text()
+      globalThis.__moontownEditorPipelineVersion =
+        (globalThis.__moontownEditorPipelineVersion || 0) + 1
+    } else {
+      globalThis.__moontownEditorPipelineJson = ''
+    }
+  } catch {
+    globalThis.__moontownEditorPipelineJson = ''
+  }
+}
+
 async function refreshStandingGoals() {
   try {
     const response = await fetch(`./standing-goals.json?ts=${Date.now()}`, { cache: 'no-store' })
@@ -218,6 +233,7 @@ async function refreshRuntimeSnapshots() {
     refreshMoondeskHandoff(),
     refreshDaemonSnapshot(),
     refreshLiveAutonomy(),
+    refreshEditorPipeline(),
     refreshStandingGoals(),
     refreshWatcherRecords(),
     refreshOperatorRequests(),

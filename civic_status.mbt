@@ -1,4 +1,13 @@
 ///|
+pub struct ProtocolHistoryEntry {
+  step : String
+  status : String
+  title : String
+  detail : String
+  evidence_ref : String
+} derive(Eq, ToJson, FromJson)
+
+///|
 pub struct CivicServiceHealth {
   service_id : String
   title : String
@@ -15,6 +24,8 @@ pub struct CivicServiceHealth {
   protocol_outbox_count : Int
   protocol_review_count : Int
   latest_protocol_summary : String
+  protocol_history : Array[ProtocolHistoryEntry]
+  protocol_history_state : String
   workspace_root : String
   status : String
   operable : Bool
@@ -127,6 +138,7 @@ async fn inspect_wenyu_civic_service(
   let latest_result_path = civic_service_result_path(service)
   let protocol = @civic.wenyu_building_protocol_for_service(service)
   let protocol_snapshot = inspect_wenyu_building_protocol(protocol)
+  let protocol_history = civic_protocol_history(protocol.building_id)
   let latest_result = read_civic_book_result(latest_result_path)
   let latest_summary = match latest_result {
     Some(result) => result.summary
@@ -196,6 +208,11 @@ async fn inspect_wenyu_civic_service(
     protocol_outbox_count: protocol_snapshot.outbox_count,
     protocol_review_count: protocol_snapshot.review_count,
     latest_protocol_summary: protocol_snapshot.latest_reduction_summary,
+    protocol_history,
+    protocol_history_state: civic_protocol_history_state(
+      protocol_snapshot.status,
+      protocol_history,
+    ),
     workspace_root: root,
     status,
     operable,
@@ -437,4 +454,185 @@ fn yes_no(value : Bool) -> String {
   } else {
     "no"
   }
+}
+
+///|
+async fn civic_protocol_history(
+  building_id : String,
+) -> Array[ProtocolHistoryEntry] {
+  let entries : Array[ProtocolHistoryEntry] = []
+  match
+    protocol_history_entry(
+      building_id,
+      "inbox",
+      "Inbox",
+      protocol_ledger_path(building_id, "inbox"),
+    ) {
+    Some(entry) => entries.push(entry)
+    None => ()
+  }
+  match
+    protocol_history_entry(
+      building_id,
+      "reduction",
+      "Reduction",
+      protocol_ledger_path(building_id, "reductions"),
+    ) {
+    Some(entry) => entries.push(entry)
+    None => ()
+  }
+  match
+    protocol_history_entry(
+      building_id,
+      "review",
+      "Review",
+      protocol_ledger_path(building_id, "reviews"),
+    ) {
+    Some(entry) => entries.push(entry)
+    None => ()
+  }
+  match
+    protocol_history_entry(
+      building_id,
+      "accepted-result",
+      "Accepted Result",
+      protocol_ledger_path(building_id, "reductions"),
+    ) {
+    Some(entry) => entries.push(entry)
+    None => ()
+  }
+  match
+    protocol_history_entry(
+      building_id,
+      "outbox",
+      "Outbox",
+      protocol_ledger_path(building_id, "outbox"),
+    ) {
+    Some(entry) => entries.push(entry)
+    None => ()
+  }
+  entries
+}
+
+///|
+fn civic_protocol_history_state(
+  protocol_status : String,
+  history : Array[ProtocolHistoryEntry],
+) -> String {
+  if !history.is_empty() {
+    "ready"
+  } else if protocol_status == "defined" {
+    "no-events-yet"
+  } else {
+    "invalid-or-missing"
+  }
+}
+
+///|
+async fn protocol_history_entry(
+  building_id : String,
+  step : String,
+  title : String,
+  evidence_ref : String,
+) -> ProtocolHistoryEntry? {
+  match
+    latest_protocol_json_line(building_id, protocol_history_ledger_name(step)) {
+    Some(line) =>
+      protocol_history_entry_from_line(step, title, line, evidence_ref)
+    None => None
+  }
+}
+
+///|
+fn protocol_history_ledger_name(step : String) -> String {
+  match step {
+    "inbox" => "inbox"
+    "reduction" => "reductions"
+    "review" => "reviews"
+    "accepted-result" => "reductions"
+    "outbox" => "outbox"
+    _ => step
+  }
+}
+
+///|
+fn protocol_history_entry_from_line(
+  step : String,
+  title : String,
+  line : String,
+  evidence_ref : String,
+) -> ProtocolHistoryEntry? {
+  let parsed = @json.parse(line) catch { _ => return None }
+  match parsed {
+    Object(map) => {
+      let status = protocol_history_status(step, map)
+      let detail = protocol_history_detail(step, map)
+      let entry_title = protocol_history_title(title, map)
+      Some({ step, status, title: entry_title, detail, evidence_ref })
+    }
+    _ => None
+  }
+}
+
+///|
+fn protocol_history_status(step : String, map : Map[String, Json]) -> String {
+  match step {
+    "inbox" => json_object_string(map, "review_status").unwrap_or("received")
+    "reduction" =>
+      json_object_string(map, "review_status").unwrap_or(
+        json_object_string(map, "decision").unwrap_or("reduced"),
+      )
+    "review" => json_object_string(map, "status").unwrap_or("review")
+    "accepted-result" =>
+      if json_object_string(map, "review_status") == Some("accepted") {
+        "accepted"
+      } else {
+        "pending"
+      }
+    "outbox" =>
+      json_object_string(map, "review_status").unwrap_or("distributed")
+    _ => "unknown"
+  }
+}
+
+///|
+fn protocol_history_title(title : String, map : Map[String, Json]) -> String {
+  json_object_string(map, "id").unwrap_or(title)
+}
+
+///|
+fn protocol_history_detail(step : String, map : Map[String, Json]) -> String {
+  match step {
+    "accepted-result" =>
+      first_non_empty_json_string(
+        [map.get("accepted_records"), map.get("summary")],
+        "Accepted result record is present.",
+      )
+    _ =>
+      first_non_empty_json_string(
+        [map.get("summary"), map.get("reason"), map.get("payload")],
+        "Protocol record is present.",
+      )
+  }
+}
+
+///|
+fn first_non_empty_json_string(
+  values : Array[Json?],
+  fallback : String,
+) -> String {
+  for item in values {
+    match item {
+      Some(String(value)) if !value.trim().is_empty() => return value
+      Some(Array(items)) =>
+        for child in items {
+          match child {
+            String(value) if !value.trim().is_empty() => return value
+            _ => ()
+          }
+        }
+      _ => ()
+    }
+  }
+  fallback
 }

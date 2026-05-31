@@ -7,6 +7,11 @@ a place that runs a communication protocol pattern: it receives packets from
 MoonBook workspaces, lets MoonClaw reduce or route them with a skill contract,
 writes ledgers, and distributes reviewable outputs back to the right homes.
 
+This follows the document protocol philosophy: durable truth lives in
+documents/books, active behavior is protocol execution over those documents,
+and agents are temporary workers inside the protocol. See
+[DOCUMENT_PROTOCOL_PHILOSOPHY.md](/Users/kq/Workspace/moontown/docs/DOCUMENT_PROTOCOL_PHILOSOPHY.md).
+
 The old "salon" naming is now treated as one pattern: `research-salon`.
 Research salons are useful for knowledge work, but other civic tasks need
 different patterns and different `SKILL.md` contracts.
@@ -19,6 +24,8 @@ Moontown owns:
 - schedule and wall-clock due checks
 - inbox, contribution, reduction, outbox, return-home, and review ledgers
 - projection metadata and UI-safe summaries
+- protocol document-pack conventions such as `charter.md`, `protocol.md`,
+  `agenda/current.md`, `ledger.jsonl`, `outbox/`, `review/`, and `state.json`
 
 MoonBook owns:
 
@@ -99,6 +106,7 @@ Shared envelope steps:
 
 - load scenario
 - resolve pattern
+- load or create the building document protocol pack
 - create reducer workspace
 - import MoonClaw packet
 - validate output contract

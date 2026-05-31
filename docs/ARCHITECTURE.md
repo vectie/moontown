@@ -17,6 +17,13 @@ That document defines the next architecture step: each Wenyu building should
 act as an AI-mediated protocol place for aggregation, exchange, reduction, and
 distribution, not merely as a research book or static UI card.
 
+The document/book-first doctrine is tracked in
+[DOCUMENT_PROTOCOL_PHILOSOPHY.md](/Users/kq/Workspace/moontown/docs/DOCUMENT_PROTOCOL_PHILOSOPHY.md).
+The core rule is: durable state lives in documents/books, active behavior is a
+protocol over those documents, agents are temporary workers, and buildings are
+protocol places. This rule should guide future PlanBook self-build work and
+prevent agent runs from becoming hidden source of truth.
+
 For Wenyu civic modules, “book” is not the primary abstraction. The primary
 abstraction is a building protocol with typed inboxes, ledgers, review gates,
 and distribution policies. A MoonBook may support that building as durable

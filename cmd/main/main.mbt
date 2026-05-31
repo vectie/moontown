@@ -45,6 +45,17 @@ async fn main {
       println(@moontown.write_moontown_planbook_repair_task(dispatch=true))
     ["planbook", "repair", "status"] =>
       println(@moontown.render_moontown_planbook_repair_status())
+    ["editor-pipeline"] => println(@moontown.render_editor_pipeline_status())
+    ["editor-pipeline", "status"] =>
+      println(@moontown.render_editor_pipeline_status())
+    ["editor-pipeline", "refresh"] =>
+      println(@moontown.render_editor_pipeline_status())
+    ["editor-pipeline", "feature-select"] =>
+      println(@moontown.write_editor_feature_selection_task())
+    ["editor-pipeline", "feature-select", "--dispatch"] =>
+      println(@moontown.write_editor_feature_selection_task(dispatch=true))
+    ["editor-pipeline", "feature-select", "status"] =>
+      println(@moontown.render_editor_feature_selection_status())
     ["course", "wenyu-game-design", "bootstrap"] =>
       println(@moontown.bootstrap_wenyu_game_design_course_book())
     ["course", "wenyu-game-design", "status"] =>

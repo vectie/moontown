@@ -15,6 +15,11 @@ async test "planbook bootstrap creates durable plan workspace and status" {
       "\{workspace_root}/plans/2026-05-29-book-quality-upgrade/plan.md",
     ),
   )
+  assert_true(
+    @fs.exists(
+      "\{workspace_root}/plans/2026-05-31-editor-mode-real-pipeline/plan.md",
+    ),
+  )
   assert_true(@fs.exists("\{workspace_root}/skills/code-plan/SKILL.md"))
   let status = render_moontown_planbook_status(workspace_root~)
   assert_true(status.contains("Ready: `true`"))

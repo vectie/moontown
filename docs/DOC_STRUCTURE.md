@@ -11,13 +11,16 @@ operational purpose, not by the order features were added.
    - system boundaries, data flow, packages, daemon, and ownership
 3. [docs/PLANBOOK.md](/Users/kq/Workspace/moontown/docs/PLANBOOK.md)
    - plan-first workflow for code/product changes
-4. [docs/COOKBOOK.md](/Users/kq/Workspace/moontown/docs/COOKBOOK.md)
+4. [docs/DOCUMENT_PROTOCOL_PHILOSOPHY.md](/Users/kq/Workspace/moontown/docs/DOCUMENT_PROTOCOL_PHILOSOPHY.md)
+   - document/book-first system philosophy for buildings, agents, protocols,
+     and future self-build work
+5. [docs/COOKBOOK.md](/Users/kq/Workspace/moontown/docs/COOKBOOK.md)
    - stable-state control book and drift checks
-5. [docs/DEVELOPMENT.md](/Users/kq/Workspace/moontown/docs/DEVELOPMENT.md)
+6. [docs/DEVELOPMENT.md](/Users/kq/Workspace/moontown/docs/DEVELOPMENT.md)
    - local development commands and validation rules
-6. [docs/FRONTEND.md](/Users/kq/Workspace/moontown/docs/FRONTEND.md)
+7. [docs/FRONTEND.md](/Users/kq/Workspace/moontown/docs/FRONTEND.md)
    - operator UI and Rabbita viewport guidance
-7. [docs/WENYU_VALLEY_PRD.md](/Users/kq/Workspace/moontown/docs/WENYU_VALLEY_PRD.md)
+8. [docs/WENYU_VALLEY_PRD.md](/Users/kq/Workspace/moontown/docs/WENYU_VALLEY_PRD.md)
    - Wenyu product specification
 
 ## Doc Families
@@ -33,6 +36,7 @@ operational purpose, not by the order features were added.
 
 - [docs/COOKBOOK.md](/Users/kq/Workspace/moontown/docs/COOKBOOK.md)
 - [docs/PLANBOOK.md](/Users/kq/Workspace/moontown/docs/PLANBOOK.md)
+- [docs/DOCUMENT_PROTOCOL_PHILOSOPHY.md](/Users/kq/Workspace/moontown/docs/DOCUMENT_PROTOCOL_PHILOSOPHY.md)
 - [docs/REFACTOR_PLAN.md](/Users/kq/Workspace/moontown/docs/REFACTOR_PLAN.md)
 
 ### Wenyu Valley Product
@@ -70,6 +74,19 @@ used as a code plan. A course should not be used as a bug tracker. A planbook
 should not become a permanent domain wiki. A civic building should not be
 reduced to a book: the building is a protocol place, while MoonBook is the
 optional durable support surface.
+
+## Document-First Rule
+
+The stable interface of the town is documents and books, not agent runs.
+Agent runs are temporary process-like workers. Buildings are protocol places
+that exchange and reduce document packets. MoonBook owns durable book state.
+Moontown schedules and projects protocols. MoonClaw executes bounded roles.
+Moondesk should expose the durable document tree to humans.
+
+Use
+[docs/DOCUMENT_PROTOCOL_PHILOSOPHY.md](/Users/kq/Workspace/moontown/docs/DOCUMENT_PROTOCOL_PHILOSOPHY.md)
+as the canonical doctrine when deciding whether a new feature is a book, a
+building protocol, a worker role, or a UI projection.
 
 ## Book Quality Checks
 
@@ -119,6 +136,7 @@ research / watch / compare -> research book
 teach / course / beginner -> course book
 build / fix / refactor / implement -> planbook
 stable definition / operating procedure -> cookbook
+civic exchange / meeting / marketplace / service -> building protocol over books
 ```
 
 This keeps Moontown from turning every task into research and keeps MoonBook

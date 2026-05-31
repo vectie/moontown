@@ -84,6 +84,16 @@ pub fn default_daemon_stop_path(snapshot_path? : String) -> String
 
 pub fn default_daemon_supervisor_pid_path(snapshot_path? : String) -> String
 
+pub fn default_editor_feature_selection_markdown_path(snapshot_path? : String) -> String
+
+pub fn default_editor_feature_selection_path(snapshot_path? : String) -> String
+
+pub fn default_editor_pipeline_markdown_path(snapshot_path? : String) -> String
+
+pub fn default_editor_pipeline_path(snapshot_path? : String) -> String
+
+pub fn default_editor_placement_proposal_path(workspace_root? : String) -> String
+
 pub fn default_live_autonomy_path(snapshot_path? : String) -> String
 
 pub fn default_live_digest_path(snapshot_path? : String) -> String
@@ -127,6 +137,10 @@ pub fn demo_state_snapshot() -> String
 pub fn[Provider : @core.BookProvider] demo_state_with_provider(Provider) -> @core.TownState
 
 pub async fn dispatch_next_book_quality_ai_review(book_catalog_path? : String, review_dir? : String, result_dir? : String, run_path? : String) -> String
+
+pub async fn editor_feature_selection_evidence(workspace_root? : String) -> String
+
+pub async fn editor_feature_selection_ready(workspace_root? : String) -> Bool
 
 pub async fn inspect_book_quality(book_catalog_path? : String) -> BookQualityAudit
 
@@ -176,6 +190,10 @@ pub fn render_civic_communication_patterns() -> String
 
 pub async fn render_civic_salon_schedule_status(snapshot_path? : String) -> String
 
+pub async fn render_editor_feature_selection_status(snapshot_path? : String, workspace_root? : String) -> String
+
+pub async fn render_editor_pipeline_status(snapshot_path? : String, workspace_root? : String) -> String
+
 pub async fn render_goal_run(String, book_id? : String?, task_limit_per_book? : Int, snapshot_path? : String, book_catalog_path? : String) -> String
 
 pub async fn render_live_autonomy_status(snapshot_path? : String) -> String
@@ -215,6 +233,10 @@ pub async fn upsert_civic_salon_schedule_for_scenario(CivicSalonScenario, path? 
 pub async fn write_book_quality_audit(book_catalog_path? : String, audit_path? : String) -> String
 
 pub async fn write_book_quality_review_packets(book_catalog_path? : String, review_dir? : String) -> String
+
+pub async fn write_editor_feature_selection_task(snapshot_path? : String, workspace_root? : String, dispatch? : Bool) -> String
+
+pub async fn write_editor_pipeline_state(snapshot_path? : String, workspace_root? : String) -> String
 
 pub async fn write_live_autonomy_spine(@core.TownState, snapshot_path? : String, standing_goals? : Array[@core.StandingGoal], watcher_records? : Array[@core.WatcherRunRecord], tick_summary? : String, daemon_tick? : Int?) -> LiveAutonomySpine
 
@@ -433,6 +455,8 @@ pub struct CivicServiceHealth {
   protocol_outbox_count : Int
   protocol_review_count : Int
   latest_protocol_summary : String
+  protocol_history : Array[ProtocolHistoryEntry]
+  protocol_history_state : String
   workspace_root : String
   status : String
   operable : Bool
@@ -519,6 +543,127 @@ pub fn DaemonRuntimeState::heartbeat_age_ms(Self, UInt64) -> UInt64
 pub fn DaemonRuntimeState::is_stale(Self, UInt64, UInt64) -> Bool
 pub fn DaemonRuntimeState::new(daemon_id? : String, status? : String, supervisor_pid? : Int, worker_pid? : Int, supervisor_run_id? : String, worker_run_id? : String, started_at_ms? : UInt64, last_heartbeat_ms? : UInt64, last_tick_started_ms? : UInt64, last_tick_finished_ms? : UInt64, last_success_ms? : UInt64, last_failure_ms? : UInt64, tick_success_count? : Int, tick_failure_count? : Int, stop_requested? : Bool, last_error? : String, log_path? : String) -> Self
 
+pub struct EditorFeatureSelectionTask {
+  id : String
+  status : String
+  workspace_root : String
+  packet_path : String
+  result_path : String
+  proposal_id : String?
+  run_id : String?
+  summary : String
+  generated_at_ms : UInt64
+} derive(Eq, ToJson, @debug.Debug, @json.FromJson)
+
+pub struct EditorPipelineLifecycleRecord {
+  change_id : String
+  selected_feature : String
+  title : String
+  lifecycle_status : String
+  summary : String
+  course_ref : String
+  plan_ref : String
+  repair_ref : String
+  output_ref : String
+} derive(Eq, ToJson, @debug.Debug, @json.FromJson)
+
+type EditorPipelineModuleConfig derive(Eq, @debug.Debug, @json.FromJson)
+
+type EditorPipelineModuleConfigEntry derive(Eq, @debug.Debug, @json.FromJson)
+
+pub struct EditorPipelineMovementLoopRecord {
+  module_id : String
+  module_title : String
+  book_id : String
+  status : String
+  home_ref : String
+  entrance_ref : String
+  output_ref : String
+  return_ref : String
+  missing_reason : String
+} derive(Eq, ToJson, @debug.Debug, @json.FromJson)
+
+pub struct EditorPipelinePlacementDiffRecord {
+  module_id : String
+  module_title : String
+  change_kind : String
+  status : String
+  before_ref : String
+  after_ref : String
+  entrance_ref : String
+  terrain_status : String
+  reason : String
+} derive(Eq, ToJson, @debug.Debug, @json.FromJson)
+
+pub struct EditorPipelineStage {
+  id : String
+  title : String
+  status : String
+  summary : String
+  evidence : String
+} derive(Eq, ToJson, @debug.Debug, @json.FromJson)
+
+pub struct EditorPipelineState {
+  contract : String
+  status : String
+  source_course_book : String
+  source_course_page : String
+  planbook_id : String
+  plan_id : String
+  repair_status : String
+  editor_mode_url : String
+  output_mode_url : String
+  generated_at_ms : UInt64
+  stages : Array[EditorPipelineStage]
+  lifecycle : EditorPipelineLifecycleRecord
+  movement_loops : Array[EditorPipelineMovementLoopRecord]
+  placement_diffs : Array[EditorPipelinePlacementDiffRecord]
+  terrain_layers : Array[EditorPipelineTerrainLayerRecord]
+  terrain_reasons : Array[EditorPipelineTerrainReasonRecord]
+  style_candidates : Array[EditorPipelineStyleCandidateRecord]
+  style_selection : EditorPipelineStyleSelectionRecord
+} derive(Eq, ToJson, @debug.Debug, @json.FromJson)
+
+pub struct EditorPipelineStyleCandidateRecord {
+  style_id : String
+  title : String
+  status : String
+  evidence_ref : String
+  asset_ref : String
+  rationale : String
+  tradeoff : String
+  selected : Bool
+} derive(Eq, ToJson, @debug.Debug, @json.FromJson)
+
+pub struct EditorPipelineStyleSelectionRecord {
+  target_module_id : String
+  target_module_title : String
+  selected_style_id : String
+  selected_style_title : String
+  status : String
+  decision_ref : String
+  critique : String
+} derive(Eq, ToJson, @debug.Debug, @json.FromJson)
+
+pub struct EditorPipelineTerrainLayerRecord {
+  layer_id : String
+  title : String
+  status : String
+  evidence_ref : String
+  summary : String
+} derive(Eq, ToJson, @debug.Debug, @json.FromJson)
+
+pub struct EditorPipelineTerrainReasonRecord {
+  module_id : String
+  module_title : String
+  terrain_layer : String
+  status : String
+  placement_ref : String
+  reason : String
+} derive(Eq, ToJson, @debug.Debug, @json.FromJson)
+
+type EditorSelectedFeature derive(Eq, @debug.Debug)
+
 type FinalIntegrationManifest derive(Eq, ToJson, @debug.Debug, @json.FromJson)
 
 type FinalIntegrationTemplateSpec derive(Eq, ToJson, @debug.Debug, @json.FromJson)
@@ -604,6 +749,14 @@ pub struct PlanbookRepairTask {
   validation_command : String
   generated_at_ms : UInt64
 } derive(Eq, ToJson, @debug.Debug, @json.FromJson)
+
+pub struct ProtocolHistoryEntry {
+  step : String
+  status : String
+  title : String
+  detail : String
+  evidence_ref : String
+} derive(Eq, ToJson, @json.FromJson)
 
 pub struct ResearchReadiness {
   book_id : String

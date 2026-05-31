@@ -25,6 +25,38 @@ a stable checkpoint that explains why the direction is correct.
 
 The planbook fixes that.
 
+## Document Protocol Philosophy
+
+PlanBook must preserve the town's baseline architecture rule:
+
+> Everything durable is a document/book. Everything active is a protocol
+> running over documents. Agents are temporary workers that read/write
+> documents through protocols. Buildings are protocol places.
+
+This rule is documented in
+[docs/DOCUMENT_PROTOCOL_PHILOSOPHY.md](/Users/kq/Workspace/moontown/docs/DOCUMENT_PROTOCOL_PHILOSOPHY.md)
+and in the PlanBook workspace at
+[wiki/planning/document-protocol-philosophy.md](/Users/kq/Workspace/moontown/.moontown/books/plan-moontown-quality/wiki/planning/document-protocol-philosophy.md).
+
+For future self-build work, the planbook should model durable state as files,
+books, ledgers, schemas, and review queues. It should model active behavior as
+protocol rounds over those documents. It should model MoonClaw agents as
+temporary process-like participants, reducers, critics, reviewers, and
+bookkeepers, not as the durable source of truth.
+
+Every non-trivial implementation plan should include a `Document Protocol Fit`
+section:
+
+- source of truth: which document/book owns durable state?
+- protocol owner: which building or plan owns active exchange?
+- agent roles: which temporary workers are needed?
+- ledgers: where are events and decisions appended?
+- review gate: what must be accepted before promotion?
+- projection: which UI or site reads the resulting state?
+
+If a plan cannot answer those questions, it is not ready for autonomous
+implementation.
+
 ## Book Types
 
 | Book type | Primary question | Durable output | Main owner |
@@ -104,6 +136,7 @@ Every non-trivial plan should include:
 - Problem statement
 - Current state, with links to files or docs
 - Goal and non-goals
+- Document Protocol Fit
 - Design decision
 - Alternatives considered
 - Affected files
@@ -121,6 +154,9 @@ as the default shape.
 A plan is not ready for execution if:
 
 - it does not name the problem
+- it does not identify the durable document/book source of truth
+- it treats an agent run as the source of truth instead of a protocol over
+  documents
 - it does not mention affected files or packages
 - it hides unresolved decisions
 - it has no acceptance criteria

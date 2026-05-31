@@ -45,6 +45,23 @@ The stable-state manifest tracks three artifact classes:
 Missing required artifacts are drift. Optional runtime artifacts may be absent
 before the daemon, civic doctor, or recurring communication-pattern schedule has been started.
 
+## Stable Doctrine
+
+The cookbook should treat
+[DOCUMENT_PROTOCOL_PHILOSOPHY.md](/Users/kq/Workspace/moontown/docs/DOCUMENT_PROTOCOL_PHILOSOPHY.md)
+as a stable architecture document once PlanBook accepts the rule. The summary
+is:
+
+```text
+Everything durable is a document/book.
+Everything active is a protocol running over documents.
+Agents are temporary workers that read/write documents through protocols.
+Buildings are protocol places.
+```
+
+This means cookbook drift checks should prefer stable files, manifests,
+ledgers, and protocol documents over transient agent-run logs.
+
 ## Relationship To Planbooks
 
 The cookbook is not the place where every active idea lives. It records stable

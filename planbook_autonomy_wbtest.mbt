@@ -21,6 +21,7 @@ async test "planbook autonomy doctor writes self-healing evidence" {
     "\{workspace_root}/wiki/reviews/active-plan-review.md",
   )
   assert_true(status_text.contains("\"status\": \"self-healing-open\""))
+  assert_true(status_text.contains("editor-mode-real-pipeline"))
   assert_true(status_text.contains("moonbook-native-planbook-provider"))
   assert_true(evidence.contains("PlanBook autonomy doctor"))
   assert_true(review.contains("needs-fix"))
@@ -74,6 +75,247 @@ async test "live autonomy includes planbook repair action" {
 }
 
 ///|
+async test "editor pipeline refresh writes runtime contract" {
+  let root = "/tmp/moontown-editor-pipeline-wbtest"
+  ignore_checked_command("rm", ["-rf", root])
+  let snapshot_path = "\{root}/town.json"
+  let workspace_root = "\{root}/books/plan-moontown-quality"
+  ignore(
+    bootstrap_moontown_planbook(
+      book_catalog_path="\{root}/catalog.json",
+      workspace_root~,
+    ),
+  )
+  let path = write_editor_pipeline_state(snapshot_path~, workspace_root~)
+  let text = read_text_or_empty(path)
+  let digest = read_text_or_empty(
+    default_editor_pipeline_markdown_path(snapshot_path~),
+  )
+  assert_true(text.contains("moontown.editor_pipeline.v1"))
+  assert_true(text.contains("command-contract"))
+  assert_true(text.contains("feature-selection"))
+  assert_true(text.contains("viewport-binding"))
+  assert_true(text.contains("movement-loop-evidence"))
+  assert_true(text.contains("placement-diff-preview"))
+  assert_true(text.contains("terrain-label-map"))
+  assert_true(text.contains("style-comparison-workbench"))
+  assert_true(text.contains("\"movement_loops\""))
+  assert_true(text.contains("\"placement_diffs\""))
+  assert_true(text.contains("\"terrain_layers\""))
+  assert_true(text.contains("\"terrain_reasons\""))
+  assert_true(text.contains("\"style_candidates\""))
+  assert_true(text.contains("\"style_selection\""))
+  assert_true(text.contains("\"lifecycle_status\": \"planned\""))
+  assert_true(text.contains("\"selected_feature\": \"none\""))
+  assert_true(digest.contains("Editor Pipeline Status"))
+  assert_true(digest.contains("Movement Loop Evidence"))
+  assert_true(digest.contains("Placement Diff Preview"))
+  assert_true(digest.contains("Terrain Label Map"))
+  assert_true(digest.contains("Style Comparison Workbench"))
+  write_text_file(
+    "\{workspace_root}/raw/editor-pipeline/next-feature.json",
+    "{\"contract\":\"moontown.editor_feature_selection.v1\",\"selected_feature\":\"output-readiness-lifecycle\",\"title\":\"Output Readiness Lifecycle\",\"score\":1,\"implementation_hint\":\"add lifecycle\",\"acceptance\":[\"ready-to-export visible\"]}",
+  )
+  write_text_file(
+    "\{workspace_root}/raw/editor-pipeline/selected-feature-implementation.md",
+    "contract: moontown.editor_selected_feature_implementation.v1\nselected_feature: output-readiness-lifecycle\nimplementation_status: accepted\nvalidation: test",
+  )
+  let ready_path = write_editor_pipeline_state(snapshot_path~, workspace_root~)
+  let ready_text = read_text_or_empty(ready_path)
+  assert_true(ready_text.contains("\"status\": \"ready\""))
+  assert_true(ready_text.contains("\"lifecycle_status\": \"ready-to-export\""))
+  assert_true(
+    ready_text.contains("\"selected_feature\": \"output-readiness-lifecycle\""),
+  )
+  write_text_file(
+    "\{workspace_root}/raw/editor-pipeline/next-feature.json",
+    "{\"contract\":\"moontown.editor_feature_selection.v1\",\"selected_feature\":\"movement-loop-evidence\",\"title\":\"Movement Loop Evidence\",\"score\":1,\"implementation_hint\":\"add route proof\",\"acceptance\":[\"home to entrance to output to home visible\"]}",
+  )
+  write_text_file(
+    "\{workspace_root}/raw/editor-pipeline/selected-feature-implementation.md",
+    "contract: moontown.editor_selected_feature_implementation.v1\nselected_feature: movement-loop-evidence\nimplementation_status: accepted\nvalidation: test",
+  )
+  let movement_path = write_editor_pipeline_state(
+    snapshot_path~,
+    workspace_root~,
+  )
+  let movement_text = read_text_or_empty(movement_path)
+  assert_true(movement_text.contains("\"status\": \"ready\""))
+  assert_true(
+    movement_text.contains("\"selected_feature\": \"movement-loop-evidence\""),
+  )
+  assert_true(movement_text.contains("\"home_ref\": \"book:"))
+  assert_true(movement_text.contains("\"entrance_ref\": \"tile:"))
+  assert_true(movement_text.contains("\"output_ref\": \"viewport:output#"))
+  write_text_file(
+    "\{workspace_root}/raw/editor-pipeline/next-feature.json",
+    "{\"contract\":\"moontown.editor_feature_selection.v1\",\"selected_feature\":\"placement-diff-preview\",\"title\":\"Placement Diff Preview\",\"score\":1,\"implementation_hint\":\"add reviewable placement diff\",\"acceptance\":[\"placement diff visible before export\"]}",
+  )
+  write_text_file(
+    default_editor_placement_proposal_path(workspace_root~),
+    "{\"version\":2,\"description\":\"test placement proposal\",\"modules\":[{\"id\":\"town-shell\",\"enabled\":true,\"title\":\"Town Shell\",\"book_id\":\"wenyu-town-shell\",\"district\":\"civic-core\",\"building_kind\":\"town-shell\",\"grid_x\":130,\"grid_y\":74,\"footprint_w\":8,\"footprint_h\":6,\"display_w\":230,\"display_h\":170,\"entrance_x\":130,\"entrance_y\":81,\"interior_kind\":\"mayor\",\"style_family\":\"white-tech-pavilion\",\"asset_base\":\"tilemap/buildings/white-tech-pavilion/alpha/town-shell.png\",\"asset_roof\":\"\",\"protocol_pattern\":\"mayor-supervision\",\"use_case\":\"Mayor supervision\",\"agent_flow\":\"Agents route through mayor\",\"summary\":\"Mayor supervision\"}]}",
+  )
+  write_text_file(
+    "\{workspace_root}/raw/editor-pipeline/selected-feature-implementation.md",
+    "contract: moontown.editor_selected_feature_implementation.v1\nselected_feature: placement-diff-preview\nimplementation_status: accepted\nvalidation: test",
+  )
+  let placement_path = write_editor_pipeline_state(
+    snapshot_path~,
+    workspace_root~,
+  )
+  let placement_text = read_text_or_empty(placement_path)
+  assert_true(placement_text.contains("\"status\": \"ready\""))
+  assert_true(
+    placement_text.contains("\"selected_feature\": \"placement-diff-preview\""),
+  )
+  assert_true(placement_text.contains("\"change_kind\": \"moved\""))
+  assert_true(placement_text.contains("\"terrain_status\":"))
+  assert_true(placement_text.contains("\"before_ref\": \"tile:"))
+  assert_true(placement_text.contains("\"after_ref\": \"tile:130,74/8x6\""))
+  write_text_file(
+    "\{workspace_root}/raw/editor-pipeline/next-feature.json",
+    "{\"contract\":\"moontown.editor_feature_selection.v1\",\"selected_feature\":\"terrain-label-map\",\"title\":\"Terrain Label Map Layers\",\"score\":1,\"implementation_hint\":\"add terrain label evidence\",\"acceptance\":[\"terrain labels visible before export\"]}",
+  )
+  write_text_file(
+    "\{workspace_root}/raw/editor-pipeline/selected-feature-implementation.md",
+    "contract: moontown.editor_selected_feature_implementation.v1\nselected_feature: terrain-label-map\nimplementation_status: accepted\nvalidation: test",
+  )
+  let terrain_path = write_editor_pipeline_state(
+    snapshot_path~,
+    workspace_root~,
+  )
+  let terrain_text = read_text_or_empty(terrain_path)
+  let terrain_digest = read_text_or_empty(
+    default_editor_pipeline_markdown_path(snapshot_path~),
+  )
+  assert_true(terrain_text.contains("\"status\": \"ready\""))
+  assert_true(
+    terrain_text.contains("\"selected_feature\": \"terrain-label-map\""),
+  )
+  assert_true(terrain_text.contains("\"layer_id\": \"water\""))
+  assert_true(terrain_text.contains("\"layer_id\": \"roads\""))
+  assert_true(terrain_text.contains("\"layer_id\": \"farms\""))
+  assert_true(terrain_text.contains("\"layer_id\": \"forests\""))
+  assert_true(terrain_text.contains("\"terrain_layer\":"))
+  assert_true(terrain_text.contains("\"placement_ref\": \"tile:"))
+  assert_true(terrain_digest.contains("Module Terrain Reasons"))
+  write_text_file(
+    "\{workspace_root}/raw/editor-pipeline/next-feature.json",
+    "{\"contract\":\"moontown.editor_feature_selection.v1\",\"selected_feature\":\"style-comparison-workbench\",\"title\":\"Building Style Comparison Workbench\",\"score\":2,\"implementation_hint\":\"compare visual styles\",\"acceptance\":[\"three style candidates visible\"]}",
+  )
+  write_text_file(
+    "\{workspace_root}/raw/editor-pipeline/selected-feature-implementation.md",
+    "contract: moontown.editor_selected_feature_implementation.v1\nselected_feature: style-comparison-workbench\nimplementation_status: accepted\nvalidation: test",
+  )
+  let style_path = write_editor_pipeline_state(snapshot_path~, workspace_root~)
+  let style_text = read_text_or_empty(style_path)
+  let style_digest = read_text_or_empty(
+    default_editor_pipeline_markdown_path(snapshot_path~),
+  )
+  assert_true(style_text.contains("\"status\": \"ready\""))
+  assert_true(
+    style_text.contains("\"selected_feature\": \"style-comparison-workbench\""),
+  )
+  assert_true(style_text.contains("\"style_id\": \"white-tech-pavilion\""))
+  assert_true(style_text.contains("\"style_id\": \"wenyu-pixel-backup\""))
+  assert_true(style_text.contains("\"style_id\": \"shape-label-workbench\""))
+  assert_true(style_text.contains("\"selected\": true"))
+  assert_true(
+    style_text.contains("\"selected_style_id\": \"white-tech-pavilion\""),
+  )
+  assert_true(style_digest.contains("Style Comparison Workbench"))
+}
+
+///|
+async test "editor feature selection packet asks ai to choose from course evidence" {
+  let root = "/tmp/moontown-editor-feature-selection-wbtest"
+  ignore_checked_command("rm", ["-rf", root])
+  let snapshot_path = "\{root}/town.json"
+  let workspace_root = "\{root}/books/plan-moontown-quality"
+  let message = write_editor_feature_selection_task(
+    snapshot_path~,
+    workspace_root~,
+  )
+  let task_text = read_text_or_empty(
+    default_editor_feature_selection_path(snapshot_path~),
+  )
+  let packet_text = read_text_or_empty(
+    "\{workspace_root}/raw/editor-pipeline/editor-feature-selection.packet.json",
+  )
+  let skill_text = read_text_or_empty(
+    "\{workspace_root}/skills/editor-feature-rater/SKILL.md",
+  )
+  let profile_text = read_text_or_empty("\{workspace_root}/moonclaw.jobs.json")
+  assert_true(message.contains("Editor feature selection task"))
+  assert_true(task_text.contains("\"status\": \"queued\""))
+  assert_true(packet_text.contains("moontown.editor_feature_selection.v1"))
+  assert_true(packet_text.contains("course-wenyu-game-design"))
+  assert_true(packet_text.contains("\"best_effort_on_timeout\":false"))
+  assert_true(packet_text.contains("Do not rely on a hardcoded candidate list"))
+  assert_true(skill_text.contains("Editor Feature Rater Skill"))
+  assert_true(skill_text.contains("Scoring Rubric"))
+  assert_true(profile_text.contains("editor_feature_rater"))
+  assert_true(
+    read_text_or_empty(
+      "\{workspace_root}/plans/2026-05-31-editor-mode-real-pipeline/plan.md",
+    ).contains("Editor Mode Real Pipeline"),
+  )
+  assert_true(
+    packet_text.contains(
+      "Write JSON to `\{workspace_root}/raw/editor-pipeline/next-feature.json`",
+    ),
+  )
+  assert_true(
+    !packet_text.contains(
+      "Write JSON to `.moontown/books/plan-moontown-quality/raw/editor-pipeline/next-feature.json`",
+    ),
+  )
+  assert_true(!editor_feature_selection_ready(workspace_root~))
+  write_text_file(
+    "\{workspace_root}/raw/editor-pipeline/next-feature.json",
+    "{\"contract\":\"moontown.editor_feature_selection.v1\",\"selected_feature\":\"x\",\"score\":1,\"implementation_hint\":\"small\",\"acceptance\":[\"visible\"]}",
+  )
+  assert_true(editor_feature_selection_ready(workspace_root~))
+  let status = inspect_moontown_planbook_autonomy(
+    snapshot_path~,
+    workspace_root~,
+    book_catalog_path="\{root}/catalog.json",
+  )
+  assert_true(
+    status.criteria.any(fn(item) {
+      item.id == "editor-selected-feature-implementation" &&
+      !item.satisfied &&
+      item.evidence.contains("AI selected `x`")
+    }),
+  )
+  write_text_file(
+    "\{workspace_root}/raw/editor-pipeline/selected-feature-implementation.md",
+    "contract: moontown.editor_selected_feature_implementation.v1\nselected_feature: x\nimplementation_status: accepted\nvalidation: test",
+  )
+  assert_true(editor_selected_feature_implementation_ready(workspace_root))
+  ignore(write_editor_feature_selection_task(snapshot_path~, workspace_root~))
+  let repeat_packet_text = read_text_or_empty(
+    "\{workspace_root}/raw/editor-pipeline/editor-feature-selection.packet.json",
+  )
+  let repeat_context = read_text_or_empty(
+    "\{workspace_root}/raw/editor-pipeline/FEATURE_SELECTION_CONTEXT.md",
+  )
+  let ledger = read_text_or_empty(
+    "\{workspace_root}/raw/editor-pipeline/implemented-features.md",
+  )
+  assert_true(repeat_packet_text.contains("Already Implemented Features"))
+  assert_true(repeat_packet_text.contains("exclude every feature"))
+  assert_true(repeat_context.contains("## Already Implemented Features"))
+  assert_true(repeat_context.contains("- `x`"))
+  assert_true(ledger.contains("- `x`"))
+  assert_true(
+    @fs.exists(
+      "\{workspace_root}/raw/editor-pipeline/implemented-features/x.selection.json",
+    ),
+  )
+}
+
+///|
 async test "planbook repair queues bounded packet without marking it active before dispatch" {
   let root = "/tmp/moontown-planbook-repair-wbtest"
   ignore_checked_command("rm", ["-rf", root])
@@ -105,10 +347,109 @@ async test "planbook repair queues bounded packet without marking it active befo
   assert_true(task_text.contains("\"status\": \"queued\""))
   assert_true(task_text.contains("semantic-ai-review-results"))
   assert_true(packet_text.contains("planbook.repair.result.v1"))
+  assert_true(packet_text.contains("\"target_files\""))
+  assert_true(packet_text.contains("\"best_effort_on_timeout\":false"))
   assert_true(skill_text.contains("PlanBook Repair Skill"))
+  assert_true(skill_text.contains("Use exact `target_files`"))
   assert_true(profile_text.contains("planbook_repair_worker"))
   assert_true(profile_text.contains("repair_planbook_gap"))
   assert_eq(planbook_repair_active_count(snapshot_path~), 0)
+}
+
+///|
+async test "editor pipeline repair packet keeps course source context bounded" {
+  let root = "/tmp/moontown-editor-pipeline-repair-packet-wbtest"
+  ignore_checked_command("rm", ["-rf", root])
+  let workspace_root = "\{root}/books/plan-moontown-quality"
+  let criterion : PlanbookCriterionStatus = {
+    id: "editor-mode-real-pipeline",
+    plan_id: "2026-05-31-editor-mode-real-pipeline",
+    title: "Editor mode creates a real PlanBook-to-MoonClaw implementation pipeline",
+    owner: "moontown+planbook+moonclaw",
+    satisfied: false,
+    evidence: "PlanBook has the editor pipeline plan, but Moontown still lacks the command/state/UI integration",
+    next_action: "use the Wenyu course book as source context, then implement a restartable editor-pipeline contract, command surface, UI binding, and validation evidence through PlanBook repair",
+  }
+  ignore(
+    materialize_planbook_repair_task(
+      criterion,
+      "\{root}/town.json",
+      workspace_root,
+      "\{root}/catalog.json",
+      false,
+    ),
+  )
+  let packet_text = read_text_or_empty(
+    "\{workspace_root}/raw/repair/planbook-repair-editor-mode-real-pipeline.packet.json",
+  )
+  assert_true(packet_text.contains("planbook.repair.result.v1"))
+  assert_true(packet_text.contains("\"target_files\""))
+  assert_true(packet_text.contains("\"best_effort_on_timeout\":false"))
+  assert_true(packet_text.contains("course-wenyu-game-design"))
+  assert_true(packet_text.contains("2026-05-31-editor-mode-real-pipeline"))
+}
+
+///|
+async test "selected editor feature repair packet is driven by ai selection artifact" {
+  let root = "/tmp/moontown-selected-editor-feature-repair-wbtest"
+  ignore_checked_command("rm", ["-rf", root])
+  let workspace_root = "\{root}/books/plan-moontown-quality"
+  write_text_file(
+    "\{workspace_root}/raw/editor-pipeline/next-feature.json",
+    "{\"contract\":\"moontown.editor_feature_selection.v1\",\"selected_feature\":\"building-protocol-history\",\"title\":\"Building Protocol History\",\"score\":1,\"current_gap\":\"history missing\",\"implementation_hint\":\"render protocol history\",\"acceptance\":[\"visible history\"]}",
+  )
+  let criterion : PlanbookCriterionStatus = {
+    id: "editor-selected-feature-implementation",
+    plan_id: "2026-05-31-editor-mode-real-pipeline",
+    title: "Implement the AI-selected editor-mode feature",
+    owner: "moontown+planbook+moonclaw",
+    satisfied: false,
+    evidence: editor_selected_feature_implementation_evidence(workspace_root),
+    next_action: editor_selected_feature_implementation_next_action(
+      workspace_root,
+    ),
+  }
+  ignore(
+    materialize_planbook_repair_task(
+      criterion,
+      "\{root}/town.json",
+      workspace_root,
+      "\{root}/catalog.json",
+      false,
+    ),
+  )
+  let packet_text = read_text_or_empty(
+    "\{workspace_root}/raw/repair/planbook-repair-editor-selected-feature-implementation.packet.json",
+  )
+  let skill_text = read_text_or_empty(
+    "\{workspace_root}/skills/planbook-repair/SKILL.md",
+  )
+  assert_true(packet_text.contains("editor-selected-feature-implementation"))
+  assert_true(packet_text.contains("building-protocol-history"))
+  assert_true(packet_text.contains("next-feature.json"))
+  assert_true(packet_text.contains("selected-feature-implementation.md"))
+  assert_true(skill_text.contains("do not choose a different feature"))
+}
+
+///|
+test "planbook repair result contract rejects best-effort timeout placeholders" {
+  let criterion_id = "editor-mode-real-pipeline"
+  assert_true(
+    !planbook_repair_result_satisfies_contract(
+      "Analysis step repair_planbook_gap timed out after 600000ms; continuing because `best_effort_on_timeout` is enabled.",
+      criterion_id,
+    ),
+  )
+  assert_true(
+    planbook_repair_result_satisfies_contract(
+      [
+        "repair_decision: accepted", "criterion_id: editor-mode-real-pipeline", "files_changed: editor_pipeline.mbt",
+        "validation: moon check --no-render passed",
+      ].join("\n"),
+      criterion_id,
+    ),
+  )
+  assert_eq(planbook_task_status_from_run_status(Some("Succeeded")), "failed")
 }
 
 ///|

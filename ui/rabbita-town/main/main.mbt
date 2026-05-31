@@ -72,6 +72,8 @@ priv struct Model {
   daemon_snapshot_version : Int
   live_autonomy : LiveAutonomySnapshot?
   live_autonomy_version : Int
+  editor_pipeline : EditorPipelineSnapshot?
+  editor_pipeline_version : Int
   standing_goals : Array[StandingGoalSnapshot]
   standing_goals_version : Int
   watcher_records : Array[WatcherRunRecordSnapshot]
@@ -311,6 +313,117 @@ priv struct LiveAutonomySnapshot {
 } derive(FromJson)
 
 ///|
+priv struct EditorPipelineStageSnapshot {
+  id : String
+  title : String
+  status : String
+  summary : String
+  evidence : String
+} derive(FromJson)
+
+///|
+priv struct EditorPipelineLifecycleSnapshot {
+  change_id : String
+  selected_feature : String
+  title : String
+  lifecycle_status : String
+  summary : String
+  course_ref : String
+  plan_ref : String
+  repair_ref : String
+  output_ref : String
+} derive(FromJson)
+
+///|
+priv struct EditorPipelineMovementLoopSnapshot {
+  module_id : String
+  module_title : String
+  book_id : String
+  status : String
+  home_ref : String
+  entrance_ref : String
+  output_ref : String
+  return_ref : String
+  missing_reason : String
+} derive(FromJson)
+
+///|
+priv struct EditorPipelinePlacementDiffSnapshot {
+  module_id : String
+  module_title : String
+  change_kind : String
+  status : String
+  before_ref : String
+  after_ref : String
+  entrance_ref : String
+  terrain_status : String
+  reason : String
+} derive(FromJson)
+
+///|
+priv struct EditorPipelineTerrainLayerSnapshot {
+  layer_id : String
+  title : String
+  status : String
+  evidence_ref : String
+  summary : String
+} derive(FromJson)
+
+///|
+priv struct EditorPipelineTerrainReasonSnapshot {
+  module_id : String
+  module_title : String
+  terrain_layer : String
+  status : String
+  placement_ref : String
+  reason : String
+} derive(FromJson)
+
+///|
+priv struct EditorPipelineStyleCandidateSnapshot {
+  style_id : String
+  title : String
+  status : String
+  evidence_ref : String
+  asset_ref : String
+  rationale : String
+  tradeoff : String
+  selected : Bool
+} derive(FromJson)
+
+///|
+priv struct EditorPipelineStyleSelectionSnapshot {
+  target_module_id : String
+  target_module_title : String
+  selected_style_id : String
+  selected_style_title : String
+  status : String
+  decision_ref : String
+  critique : String
+} derive(FromJson)
+
+///|
+priv struct EditorPipelineSnapshot {
+  contract : String
+  status : String
+  source_course_book : String
+  source_course_page : String
+  planbook_id : String
+  plan_id : String
+  repair_status : String
+  editor_mode_url : String
+  output_mode_url : String
+  stages : Array[EditorPipelineStageSnapshot]
+  lifecycle : EditorPipelineLifecycleSnapshot
+  movement_loops : Array[EditorPipelineMovementLoopSnapshot]
+  placement_diffs : Array[EditorPipelinePlacementDiffSnapshot]
+  terrain_layers : Array[EditorPipelineTerrainLayerSnapshot]
+  terrain_reasons : Array[EditorPipelineTerrainReasonSnapshot]
+  style_candidates : Array[EditorPipelineStyleCandidateSnapshot]
+  style_selection : EditorPipelineStyleSelectionSnapshot
+} derive(FromJson)
+
+///|
 priv struct StandingGoalSnapshot {
   id : String
   title : String
@@ -425,6 +538,15 @@ priv struct ModuleProjectionIndex {
 } derive(FromJson)
 
 ///|
+priv struct ProtocolHistoryEntrySnapshot {
+  step : String
+  status : String
+  title : String
+  detail : String
+  evidence_ref : String
+} derive(FromJson)
+
+///|
 priv struct CivicServiceHealthSnapshot {
   service_id : String
   title : String
@@ -441,6 +563,8 @@ priv struct CivicServiceHealthSnapshot {
   protocol_outbox_count : Int
   protocol_review_count : Int
   latest_protocol_summary : String
+  protocol_history : Array[ProtocolHistoryEntrySnapshot]
+  protocol_history_state : String
   status : String
   operable : Bool
   proven_by_result : Bool
@@ -618,6 +742,14 @@ extern "js" fn live_autonomy_version() -> Int =
   #| () => globalThis.__moontownLiveAutonomyVersion || 0
 
 ///|
+extern "js" fn load_bootstrap_editor_pipeline_json() -> String =
+  #| () => globalThis.__moontownEditorPipelineJson || ""
+
+///|
+extern "js" fn editor_pipeline_version() -> Int =
+  #| () => globalThis.__moontownEditorPipelineVersion || 0
+
+///|
 extern "js" fn load_bootstrap_standing_goals_json() -> String =
   #| () => globalThis.__moontownStandingGoalsJson || "[]"
 
@@ -765,6 +897,7 @@ fn init_model() -> Model {
   let moondesk_bridge = parse_bootstrap_moondesk_bridge()
   let daemon_snapshot = parse_bootstrap_daemon_snapshot()
   let live_autonomy = parse_bootstrap_live_autonomy()
+  let editor_pipeline = parse_bootstrap_editor_pipeline()
   let standing_goals = parse_bootstrap_standing_goals()
   let watcher_records = parse_bootstrap_watcher_records()
   let operator_requests = parse_bootstrap_operator_requests()
@@ -791,6 +924,8 @@ fn init_model() -> Model {
     daemon_snapshot_version: daemon_snapshot_version(),
     live_autonomy,
     live_autonomy_version: live_autonomy_version(),
+    editor_pipeline,
+    editor_pipeline_version: editor_pipeline_version(),
     standing_goals,
     standing_goals_version: standing_goals_version(),
     watcher_records,
@@ -894,6 +1029,16 @@ fn parse_bootstrap_daemon_snapshot() -> DaemonSnapshot? {
 ///|
 fn parse_bootstrap_live_autonomy() -> LiveAutonomySnapshot? {
   let text = load_bootstrap_live_autonomy_json()
+  if text == "" {
+    return None
+  }
+  let parsed = @json.parse(text) catch { _ => return None }
+  Some(@json.from_json(parsed) catch { _ => return None })
+}
+
+///|
+fn parse_bootstrap_editor_pipeline() -> EditorPipelineSnapshot? {
+  let text = load_bootstrap_editor_pipeline_json()
   if text == "" {
     return None
   }
@@ -1322,6 +1467,16 @@ fn advance_model(model : Model) -> Model {
   } else {
     model.live_autonomy
   }
+  let refreshed_editor_pipeline_version = editor_pipeline_version()
+  let refreshed_editor_pipeline = if refreshed_editor_pipeline_version !=
+    model.editor_pipeline_version {
+    match parse_bootstrap_editor_pipeline() {
+      Some(snapshot) => Some(snapshot)
+      None => model.editor_pipeline
+    }
+  } else {
+    model.editor_pipeline
+  }
   let refreshed_standing_goals_version = standing_goals_version()
   let refreshed_standing_goals = if refreshed_standing_goals_version !=
     model.standing_goals_version {
@@ -1432,6 +1587,8 @@ fn advance_model(model : Model) -> Model {
     daemon_snapshot_version: refreshed_daemon_version,
     live_autonomy: refreshed_live_autonomy,
     live_autonomy_version: refreshed_live_autonomy_version,
+    editor_pipeline: refreshed_editor_pipeline,
+    editor_pipeline_version: refreshed_editor_pipeline_version,
     standing_goals: refreshed_standing_goals,
     standing_goals_version: refreshed_standing_goals_version,
     watcher_records: refreshed_watcher_records,
@@ -8113,11 +8270,7 @@ fn render_module_civic_health(
           span(class="module-civic-status", civic_health_status_label(health.status)),
         ]),
         p(class="module-book-summary", civic_health_detail(health)),
-        if health.latest_protocol_summary.is_empty() {
-          span(class="module-book-empty", "No building protocol reduction has been recorded yet.")
-        } else {
-          p(class="module-book-summary", health.latest_protocol_summary)
-        },
+        render_protocol_history_group(health),
         div(class="module-book-metric-grid", [
           render_projection_metric(
             ProjectionMetricSnapshot::{
@@ -9869,6 +10022,394 @@ fn render_editor_module_row(
 }
 
 ///|
+fn editor_pipeline_stage_class(status : String) -> String {
+  match status {
+    "ready" => "artifact-status-ready"
+    "completed" => "artifact-status-ready"
+    "running" => "artifact-status-review"
+    "dispatched" => "artifact-status-review"
+    "failed" => "artifact-status-alert"
+    "stale" => "artifact-status-alert"
+    "missing" => "artifact-status-alert"
+    _ => "artifact-status-neutral"
+  }
+}
+
+///|
+fn editor_lifecycle_status_class(status : String) -> String {
+  match status {
+    "ready-to-export" => "artifact-status-ready"
+    "accepted" => "artifact-status-live"
+    "running" => "artifact-status-review"
+    "blocked" => "artifact-status-alert"
+    "planned" => "artifact-status-neutral"
+    _ => "artifact-status-neutral"
+  }
+}
+
+///|
+fn render_editor_pipeline_lifecycle(
+  lifecycle : EditorPipelineLifecycleSnapshot,
+) -> @rabbita.Html {
+  article(class="editor-pipeline-stage \{editor_lifecycle_status_class(lifecycle.lifecycle_status)}", [
+    div(class="handoff-artifact-heading", [
+      span(class="handoff-kind", "lifecycle"),
+      span(class="handoff-status", lifecycle.lifecycle_status),
+    ]),
+    h3(lifecycle.title),
+    p(lifecycle.summary),
+    div(class="viewport-output-links", [
+      span("Course / \{lifecycle.course_ref}"),
+      span("Plan / \{lifecycle.plan_ref}"),
+      span("Repair / \{lifecycle.repair_ref}"),
+      span("Output / \{lifecycle.output_ref}"),
+    ]),
+  ])
+}
+
+///|
+fn render_editor_pipeline_stage(
+  stage : EditorPipelineStageSnapshot,
+) -> @rabbita.Html {
+  article(class="editor-pipeline-stage \{editor_pipeline_stage_class(stage.status)}", [
+    div(class="handoff-artifact-heading", [
+      span(class="handoff-kind", stage.id),
+      span(class="handoff-status", stage.status),
+    ]),
+    h3(stage.title),
+    p(stage.summary),
+    p(class="handoff-scope", stage.evidence),
+  ])
+}
+
+///|
+fn render_editor_pipeline_movement_loop(
+  record : EditorPipelineMovementLoopSnapshot,
+) -> @rabbita.Html {
+  article(class="editor-pipeline-stage \{editor_pipeline_stage_class(record.status)}", [
+    div(class="handoff-artifact-heading", [
+      span(class="handoff-kind", record.module_id),
+      span(class="handoff-status", record.status),
+    ]),
+    h3(record.module_title),
+    p(record.missing_reason),
+    div(class="viewport-output-links", [
+      span("Home / \{record.home_ref}"),
+      span("Entrance / \{record.entrance_ref}"),
+      span("Output / \{record.output_ref}"),
+      span("Return / \{record.return_ref}"),
+    ]),
+  ])
+}
+
+///|
+fn render_editor_pipeline_movement_loops(
+  pipeline : EditorPipelineSnapshot,
+) -> @rabbita.Html {
+  let loops : Array[@rabbita.Html] = []
+  for record in pipeline.movement_loops {
+    loops.push(render_editor_pipeline_movement_loop(record))
+  }
+  section(class="editor-pipeline-panel", [
+    div(class="viewport-panel-heading", [
+      p(class="eyebrow", "Movement Loop Evidence"),
+      h2("Home to Building to Output to Home"),
+      p(
+        "The editor pipeline publishes route proof from module configuration: book home, building entrance, output surface, and return-home binding.",
+      ),
+    ]),
+    div(
+      class="handoff-artifact-grid",
+      if loops.is_empty() {
+        [
+          article(class="viewport-output-empty", [
+            h2("No Movement Loops"),
+            p("No enabled Wenyu modules were available for movement-loop proof."),
+          ]),
+        ]
+      } else {
+        loops
+      },
+    ),
+  ])
+}
+
+///|
+fn render_editor_pipeline_placement_diff(
+  record : EditorPipelinePlacementDiffSnapshot,
+) -> @rabbita.Html {
+  article(class="editor-pipeline-stage \{editor_pipeline_stage_class(record.status)}", [
+    div(class="handoff-artifact-heading", [
+      span(class="handoff-kind", "\{record.change_kind} / \{record.module_id}"),
+      span(class="handoff-status", record.status),
+    ]),
+    h3(record.module_title),
+    p(record.reason),
+    div(class="viewport-output-links", [
+      span("Before / \{record.before_ref}"),
+      span("After / \{record.after_ref}"),
+      span("Entrance / \{record.entrance_ref}"),
+      span("Terrain / \{record.terrain_status}"),
+    ]),
+  ])
+}
+
+///|
+fn render_editor_pipeline_placement_diffs(
+  pipeline : EditorPipelineSnapshot,
+) -> @rabbita.Html {
+  let diffs : Array[@rabbita.Html] = []
+  for record in pipeline.placement_diffs {
+    diffs.push(render_editor_pipeline_placement_diff(record))
+  }
+  section(class="editor-pipeline-panel", [
+    div(class="viewport-panel-heading", [
+      p(class="eyebrow", "Placement Diff Preview"),
+      h2("Review Module Placement Before Export"),
+      p(
+        "The editor pipeline compares current and proposed building placements, including coordinates, footprint, entrance tile, and terrain readiness.",
+      ),
+    ]),
+    div(
+      class="handoff-artifact-grid",
+      if diffs.is_empty() {
+        [
+          article(class="viewport-output-empty", [
+            h2("No Placement Diff"),
+            p(
+              "No placement proposal or current module records were available for review.",
+            ),
+          ]),
+        ]
+      } else {
+        diffs
+      },
+    ),
+  ])
+}
+
+///|
+fn render_editor_pipeline_terrain_layer(
+  record : EditorPipelineTerrainLayerSnapshot,
+) -> @rabbita.Html {
+  article(class="editor-pipeline-stage \{editor_pipeline_stage_class(record.status)}", [
+    div(class="handoff-artifact-heading", [
+      span(class="handoff-kind", record.layer_id),
+      span(class="handoff-status", record.status),
+    ]),
+    h3(record.title),
+    p(record.summary),
+    p(class="handoff-scope", record.evidence_ref),
+  ])
+}
+
+///|
+fn render_editor_pipeline_terrain_reason(
+  record : EditorPipelineTerrainReasonSnapshot,
+) -> @rabbita.Html {
+  article(class="editor-pipeline-stage \{editor_pipeline_stage_class(record.status)}", [
+    div(class="handoff-artifact-heading", [
+      span(class="handoff-kind", "\{record.terrain_layer} / \{record.module_id}"),
+      span(class="handoff-status", record.status),
+    ]),
+    h3(record.module_title),
+    p(record.reason),
+    div(class="viewport-output-links", [
+      span("Layer / \{record.terrain_layer}"),
+      span("Placement / \{record.placement_ref}"),
+    ]),
+  ])
+}
+
+///|
+fn render_editor_pipeline_terrain_labels(
+  pipeline : EditorPipelineSnapshot,
+) -> @rabbita.Html {
+  let layers : Array[@rabbita.Html] = []
+  for record in pipeline.terrain_layers {
+    layers.push(render_editor_pipeline_terrain_layer(record))
+  }
+  let reasons : Array[@rabbita.Html] = []
+  for record in pipeline.terrain_reasons {
+    reasons.push(render_editor_pipeline_terrain_reason(record))
+  }
+  section(class="editor-pipeline-panel", [
+    div(class="viewport-panel-heading", [
+      p(class="eyebrow", "Terrain Label Map"),
+      h2("Map Semantics Before Export"),
+      p(
+        "The editor pipeline publishes terrain labels and per-building placement reasons so map edits are reviewed against water, roads, districts, farms, forests, and future civic land.",
+      ),
+    ]),
+    div(
+      class="handoff-artifact-grid",
+      if layers.is_empty() {
+        [
+          article(class="viewport-output-empty", [
+            h2("No Terrain Layers"),
+            p("No terrain label layers were available from current map/module data."),
+          ]),
+        ]
+      } else {
+        layers
+      },
+    ),
+    div(
+      class="handoff-artifact-grid",
+      if reasons.is_empty() {
+        [
+          article(class="viewport-output-empty", [
+            h2("No Module Terrain Reasons"),
+            p("No module placement reasons were available for terrain review."),
+          ]),
+        ]
+      } else {
+        reasons
+      },
+    ),
+  ])
+}
+
+///|
+fn render_editor_pipeline_style_candidate(
+  record : EditorPipelineStyleCandidateSnapshot,
+) -> @rabbita.Html {
+  article(
+    class="editor-pipeline-stage \{editor_pipeline_stage_class(record.status)} \{if record.selected { "is-selected-style" } else { "" }}",
+    [
+      div(class="handoff-artifact-heading", [
+        span(class="handoff-kind", record.style_id),
+        span(
+          class="handoff-status",
+          if record.selected { "selected" } else { record.status },
+        ),
+      ]),
+      h3(record.title),
+      p(record.rationale),
+      p(record.tradeoff),
+      div(class="viewport-output-links", [
+        span("Evidence / \{record.evidence_ref}"),
+        span("Assets / \{record.asset_ref}"),
+      ]),
+    ],
+  )
+}
+
+///|
+fn render_editor_pipeline_style_comparison(
+  pipeline : EditorPipelineSnapshot,
+) -> @rabbita.Html {
+  let candidates : Array[@rabbita.Html] = []
+  for record in pipeline.style_candidates {
+    candidates.push(render_editor_pipeline_style_candidate(record))
+  }
+  section(class="editor-pipeline-panel", [
+    div(class="viewport-panel-heading", [
+      p(class="eyebrow", "Style Comparison Workbench"),
+      h2("Compare Building Visual Systems"),
+      p(
+        "The editor pipeline records at least three visual systems, critiques the tradeoffs, and makes the selected style visible before output export.",
+      ),
+    ]),
+    div(class="viewport-editor-stats", [
+      render_module_detail(
+        "Target",
+        "\{pipeline.style_selection.target_module_title} / \{pipeline.style_selection.target_module_id}",
+      ),
+      render_module_detail(
+        "Selected",
+        pipeline.style_selection.selected_style_title,
+      ),
+      render_module_detail("Status", pipeline.style_selection.status),
+      render_module_detail("Decision", pipeline.style_selection.decision_ref),
+    ]),
+    article(class="editor-pipeline-stage \{editor_pipeline_stage_class(pipeline.style_selection.status)}", [
+      div(class="handoff-artifact-heading", [
+        span(class="handoff-kind", pipeline.style_selection.selected_style_id),
+        span(class="handoff-status", pipeline.style_selection.status),
+      ]),
+      h3(pipeline.style_selection.selected_style_title),
+      p(pipeline.style_selection.critique),
+    ]),
+    div(
+      class="handoff-artifact-grid",
+      if candidates.is_empty() {
+        [
+          article(class="viewport-output-empty", [
+            h2("No Style Candidates"),
+            p("No style comparison candidates were available from current runtime data."),
+          ]),
+        ]
+      } else {
+        candidates
+      },
+    ),
+  ])
+}
+
+///|
+fn render_editor_pipeline_panel(model : Model) -> @rabbita.Html {
+  match model.editor_pipeline {
+    Some(pipeline) => {
+      let stages : Array[@rabbita.Html] = []
+      for stage in pipeline.stages {
+        stages.push(render_editor_pipeline_stage(stage))
+      }
+      section(class="editor-pipeline-panel", [
+        div(class="viewport-panel-heading", [
+          p(class="eyebrow", "Editor Pipeline"),
+          h2("PlanBook to MoonClaw Implementation Loop"),
+          p(
+            "Editor mode is connected to a runtime contract instead of static prose. The pipeline links the Wenyu course, PlanBook plan, repair status, and final output surface.",
+          ),
+        ]),
+        div(class="viewport-editor-stats", [
+          render_module_detail("Contract", pipeline.contract),
+          render_module_detail("Status", pipeline.status),
+          render_module_detail("Repair", pipeline.repair_status),
+          render_module_detail("Plan", pipeline.plan_id),
+          render_module_detail("Lifecycle", pipeline.lifecycle.lifecycle_status),
+          render_module_detail("Feature", pipeline.lifecycle.selected_feature),
+        ]),
+        render_editor_pipeline_lifecycle(pipeline.lifecycle),
+        render_editor_pipeline_movement_loops(pipeline),
+        render_editor_pipeline_terrain_labels(pipeline),
+        render_editor_pipeline_style_comparison(pipeline),
+        render_editor_pipeline_placement_diffs(pipeline),
+        div(class="handoff-link-row", [
+          a(
+            href="./editor-pipeline.json",
+            class="module-book-link module-book-link-config",
+            "Open Pipeline JSON",
+          ),
+          a(
+            href=pipeline.editor_mode_url,
+            class="module-book-link module-book-link-config",
+            "Editor Mode",
+          ),
+          a(
+            href=pipeline.output_mode_url,
+            class="module-book-link module-book-link-config",
+            "Final Output",
+          ),
+        ]),
+        div(class="handoff-artifact-grid", stages),
+      ])
+    }
+    None =>
+      section(class="editor-pipeline-panel", [
+        div(class="viewport-panel-heading", [
+          p(class="eyebrow", "Editor Pipeline"),
+          h2("Pipeline State Missing"),
+          p(
+            "Run `moon run cmd/main -- editor-pipeline refresh` to publish `.moontown/editor-pipeline.json` for editor mode.",
+          ),
+        ]),
+      ])
+  }
+}
+
+///|
 fn render_viewport_editor_panel(
   dispatch : Dispatch[Msg],
   model : Model,
@@ -9893,6 +10434,7 @@ fn render_viewport_editor_panel(
       ),
       render_module_detail("Config Version", "v\{wenyu_modules_version()}"),
     ]),
+    render_editor_pipeline_panel(model),
     render_town_editor_boundary_panel(model),
     render_moondesk_handoff_panel(model),
     render_moondesk_bridge_panel(model),
@@ -9975,6 +10517,43 @@ fn render_final_output_empty_state() -> @rabbita.Html {
 }
 
 ///|
+fn render_output_lifecycle_panel(model : Model) -> @rabbita.Html {
+  match model.editor_pipeline {
+    Some(pipeline) =>
+      section(class="editor-pipeline-panel", [
+        div(class="viewport-panel-heading", [
+          p(class="eyebrow", "Output Readiness"),
+          h2("Current Change Lifecycle"),
+          p(
+            "Output mode mirrors the same editor-pipeline lifecycle so operators can see whether a visible artifact is still planned, running, accepted, blocked, or ready to export.",
+          ),
+        ]),
+        div(class="viewport-editor-stats", [
+          render_module_detail("Lifecycle", pipeline.lifecycle.lifecycle_status),
+          render_module_detail("Feature", pipeline.lifecycle.selected_feature),
+          render_module_detail("Repair", pipeline.repair_status),
+          render_module_detail("Output", pipeline.lifecycle.output_ref),
+        ]),
+        render_editor_pipeline_lifecycle(pipeline.lifecycle),
+        render_editor_pipeline_movement_loops(pipeline),
+        render_editor_pipeline_terrain_labels(pipeline),
+        render_editor_pipeline_style_comparison(pipeline),
+        render_editor_pipeline_placement_diffs(pipeline),
+      ])
+    None =>
+      section(class="editor-pipeline-panel", [
+        div(class="viewport-panel-heading", [
+          p(class="eyebrow", "Output Readiness"),
+          h2("No Editor-Pipeline Change Yet"),
+          p(
+            "No editor-pipeline change has been started yet. Publish `editor-pipeline.json` before treating output mode as proof of a completed implementation loop.",
+          ),
+        ]),
+      ])
+  }
+}
+
+///|
 fn render_viewport_output_body(model : Model) -> @rabbita.Html {
   let cards : Array[@rabbita.Html] = []
   for projection in model.module_projections {
@@ -9996,6 +10575,7 @@ fn render_viewport_output_body(model : Model) -> @rabbita.Html {
       render_module_detail("Civic", civic_status_summary(model)),
       render_module_detail("Local Time", real_time_label()),
     ]),
+    render_output_lifecycle_panel(model),
     div(
       class="viewport-output-grid",
       if cards.is_empty() {
@@ -10363,4 +10943,48 @@ fn main {
     view=(dispatch, model) => render_scene(dispatch, model),
   )
   @rabbita.new(app)..with_init(schedule_tick(dispatch)).mount("app")
+}
+
+
+///|
+fn render_protocol_history_group(
+  health : CivicServiceHealthSnapshot,
+) -> @rabbita.Html {
+  let children : Array[@rabbita.Html] = [h3("Protocol History")]
+  if !health.protocol_history.is_empty() {
+    for entry in health.protocol_history {
+      children.push(render_protocol_history_entry(entry))
+    }
+  } else if health.protocol_history_state == "no-events-yet" {
+    children.push(
+      p(
+        class="module-book-empty",
+        "No protocol events yet. This building has a durable protocol definition, but no inbox, reduction, review, accepted result, or outbox record has been written yet.",
+      ),
+    )
+  } else {
+    children.push(
+      p(
+        class="module-book-empty",
+        "Protocol history is missing or invalid for the current pipeline state. Inspect the building ledger files and rerun `moon run cmd/main -- civic doctor`.",
+      ),
+    )
+  }
+  div(class="module-book-group", children)
+}
+
+///|
+fn render_protocol_history_entry(
+  entry : ProtocolHistoryEntrySnapshot,
+) -> @rabbita.Html {
+  article(class="module-book-item module-book-item-protocol-history", [
+    h3(entry_label(entry)),
+    p(entry.detail),
+    span("\{entry.title} / \{entry.evidence_ref}"),
+  ])
+}
+
+///|
+fn entry_label(entry : ProtocolHistoryEntrySnapshot) -> String {
+  "\{entry.step} / \{entry.status}"
 }

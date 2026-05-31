@@ -16,6 +16,42 @@ permissions, ledgers, and safety gates. MoonClaw, guided by building-specific
 `SKILL.md` files, should decide how to aggregate, compare, judge, synthesize,
 and distribute for each building.
 
+## Document Protocol Baseline
+
+The civic-building model follows the town-wide document protocol philosophy:
+
+> Everything durable is a document/book. Everything active is a protocol
+> running over documents. Agents are temporary workers that read/write
+> documents through protocols. Buildings are protocol places.
+
+The canonical version is
+[DOCUMENT_PROTOCOL_PHILOSOPHY.md](/Users/kq/Workspace/moontown/docs/DOCUMENT_PROTOCOL_PHILOSOPHY.md).
+
+A building is therefore not a single MoonClaw job. A building is a named place
+where document packets are exchanged, reduced, reviewed, and distributed. A
+MoonClaw run is only a temporary process inside one protocol round. MoonBook
+support workspaces can persist accepted outputs and review queues, but the
+building protocol remains the product boundary.
+
+The minimum durable shape for a real building should be:
+
+```text
+building/
+  charter.md
+  protocol.md
+  inbox/*.md
+  agenda/current.md
+  round/YYYYMMDD-HHMM.md
+  ledger.jsonl
+  outbox/*.md
+  review/*.md
+  state.json
+```
+
+This shape keeps future buildings inspectable by Moondesk, resumable by the
+daemon, reviewable by MoonBook, and executable by MoonClaw without hidden
+agent-run state.
+
 ## Current Gap
 
 The current Wenyu civic model has useful pieces:

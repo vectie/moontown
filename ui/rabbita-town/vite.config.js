@@ -8,6 +8,7 @@ const townSnapshotPath = path.resolve(process.cwd(), '../../.moontown/town.json'
 const visualProjectionPath = path.resolve(process.cwd(), '../../.moontown/visual-projection.json')
 const liveAutonomyPath = path.resolve(process.cwd(), '../../.moontown/live-autonomy.json')
 const liveDigestPath = path.resolve(process.cwd(), '../../.moontown/live-digest.md')
+const editorPipelinePath = path.resolve(process.cwd(), '../../.moontown/editor-pipeline.json')
 const daemonSnapshotPath = path.resolve(process.cwd(), '../../.moontown/daemon.json')
 const standingGoalsPath = path.resolve(process.cwd(), '../../.moontown/standing-goals.json')
 const civicStatusPath = path.resolve(process.cwd(), '../../.moontown/civic/status.json')
@@ -649,6 +650,16 @@ function moontownSnapshotPlugin() {
         res.setHeader('Content-Type', 'application/json')
         res.end(contents)
       })
+      server.middlewares.use('/editor-pipeline.json', async (_req, res) => {
+        if (!serveJsonSnapshot(res, editorPipelinePath, 'missing editor pipeline')) {
+          return
+        }
+
+        const contents = await readFile(editorPipelinePath, 'utf8')
+        res.statusCode = 200
+        res.setHeader('Content-Type', 'application/json')
+        res.end(contents)
+      })
       server.middlewares.use('/live-digest.md', async (_req, res) => {
         if (!existsSync(liveDigestPath)) {
           res.statusCode = 404
@@ -768,6 +779,13 @@ function moontownSnapshotPlugin() {
         await writeFile(
           path.join(distDir, 'live-autonomy.json'),
           await readFile(liveAutonomyPath, 'utf8'),
+          'utf8',
+        )
+      }
+      if (existsSync(editorPipelinePath)) {
+        await writeFile(
+          path.join(distDir, 'editor-pipeline.json'),
+          await readFile(editorPipelinePath, 'utf8'),
           'utf8',
         )
       }

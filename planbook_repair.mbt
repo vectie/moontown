@@ -48,7 +48,10 @@ pub async fn write_moontown_planbook_repair_task(
         ) {
         Some(task) => task
         None =>
-          match existing_planbook_repair_in_flight(criterion, snapshot_path) {
+          match
+            existing_planbook_repair_in_flight(
+              criterion, snapshot_path, workspace_root,
+            ) {
             Some(task) => task
             None =>
               materialize_planbook_repair_task(
@@ -71,24 +74,41 @@ pub async fn write_moontown_planbook_repair_task(
 async fn existing_planbook_repair_in_flight(
   criterion : PlanbookCriterionStatus,
   snapshot_path : String,
+  workspace_root : String,
 ) -> PlanbookRepairTask? {
   let path = default_planbook_repair_path(snapshot_path~)
   if !@fs.exists(path) {
-    return None
+    return latest_planbook_repair_task_from_job_index(criterion, workspace_root)
   }
   let parsed = @json.parse(@fs.read_file(path).text()) catch {
-    _ => return None
+    _ =>
+      return latest_planbook_repair_task_from_job_index(
+        criterion, workspace_root,
+      )
   }
   let task : PlanbookRepairTask = @json.from_json(parsed) catch {
-    _ => return None
+    _ =>
+      return latest_planbook_repair_task_from_job_index(
+        criterion, workspace_root,
+      )
   }
   if task.criterion_id != criterion.id {
-    return None
+    match
+      latest_planbook_repair_task_from_job_index(criterion, workspace_root) {
+      Some(index_task) if planbook_repair_task_in_flight(index_task) =>
+        return Some(index_task)
+      _ => return None
+    }
   }
   if planbook_repair_task_in_flight(task) {
     Some(task)
   } else {
-    None
+    match
+      latest_planbook_repair_task_from_job_index(criterion, workspace_root) {
+      Some(index_task) if planbook_repair_task_in_flight(index_task) =>
+        Some(index_task)
+      _ => None
+    }
   }
 }
 
@@ -112,12 +132,24 @@ pub async fn render_moontown_planbook_repair_status(
     let status = inspect_moontown_planbook_autonomy(snapshot_path~)
     match first_planbook_open_criterion(status) {
       Some(criterion) =>
-        return "PlanBook repair task at \{path} is stale: autonomy now has open gap `\{criterion.id}`. Run `moon run cmd/main -- planbook repair --dispatch` to refresh and dispatch the bounded repair."
+        match
+          latest_planbook_repair_task_from_job_index(
+            criterion,
+            default_planbook_workspace_root(),
+          ) {
+          Some(index_task) => {
+            let result_text = reconcile_planbook_repair_result(index_task)
+            return render_planbook_repair_markdown(index_task, result_text~)
+          }
+          None =>
+            return "PlanBook repair task at \{path} is stale: autonomy now has open gap `\{criterion.id}`. Run `moon run cmd/main -- planbook repair --dispatch` to refresh and dispatch the bounded repair."
+        }
       None => ()
     }
   }
-  let result_text = reconcile_planbook_repair_result(task)
-  render_planbook_repair_markdown(task, result_text~)
+  let refreshed = refresh_planbook_repair_task_from_run(task)
+  let result_text = reconcile_planbook_repair_result(refreshed)
+  render_planbook_repair_markdown(refreshed, result_text~)
 }
 
 ///|
@@ -168,7 +200,15 @@ async fn planbook_repair_run_status(
   task : PlanbookRepairTask,
   run_id : String,
 ) -> String? {
-  let path = "\{task.workspace_root}/.moonclaw/jobs/index/runs.json"
+  planbook_repair_run_status_in_workspace(task.workspace_root, run_id)
+}
+
+///|
+async fn planbook_repair_run_status_in_workspace(
+  workspace_root : String,
+  run_id : String,
+) -> String? {
+  let path = "\{workspace_root}/.moonclaw/jobs/index/runs.json"
   if !@fs.exists(path) {
     return None
   }
@@ -193,6 +233,138 @@ async fn planbook_repair_run_status(
         _ => None
       }
     _ => None
+  }
+}
+
+///|
+async fn latest_planbook_repair_task_from_job_index(
+  criterion : PlanbookCriterionStatus,
+  workspace_root : String,
+) -> PlanbookRepairTask? {
+  let path = "\{workspace_root}/.moonclaw/jobs/job_proposals.json"
+  if !@fs.exists(path) {
+    return None
+  }
+  let parsed = @json.parse(@fs.read_file(path).text()) catch {
+    _ => return None
+  }
+  match parsed {
+    Object(root) =>
+      match root.get("proposals") {
+        Some(Array(proposals)) => {
+          let mut found : PlanbookRepairTask? = None
+          for item in proposals {
+            match item {
+              Object(proposal) => {
+                let request_text = json_object_string(proposal, "request_text").unwrap_or(
+                  "",
+                )
+                if request_text.contains("Open criterion: `\{criterion.id}`") {
+                  let proposal_id = json_object_string(proposal, "id")
+                  let run_id = json_object_string(proposal, "last_run_id")
+                  let run_status = match run_id {
+                    Some(id) =>
+                      planbook_repair_run_status_in_workspace(
+                        workspace_root, id,
+                      )
+                    None => None
+                  }
+                  let run_alive = match run_id {
+                    Some(id) => @moonclaw.run_process_alive(id)
+                    None => false
+                  }
+                  let task_status = planbook_task_status_from_run(
+                    workspace_root,
+                    criterion.id,
+                    run_id,
+                    run_alive,
+                    run_status,
+                  )
+                  found = Some({
+                    id: "planbook-repair-\{criterion.id}",
+                    criterion_id: criterion.id,
+                    title: criterion.title,
+                    status: task_status,
+                    owner: criterion.owner,
+                    workspace_root,
+                    packet_path: "\{workspace_root}/raw/repair/planbook-repair-\{criterion.id}.packet.json",
+                    proposal_id,
+                    run_id,
+                    summary: planbook_repair_index_recovery_summary(
+                      criterion, run_id, run_status, task_status,
+                    ),
+                    validation_command: planbook_repair_validation_command(),
+                    generated_at_ms: @env.now(),
+                  })
+                }
+              }
+              _ => ()
+            }
+          }
+          found
+        }
+        _ => None
+      }
+    _ => None
+  }
+}
+
+///|
+async fn planbook_task_status_from_run(
+  workspace_root : String,
+  criterion_id : String,
+  run_id : String?,
+  run_alive : Bool,
+  status : String?,
+) -> String {
+  match status {
+    Some("Pending") if !run_alive => "stale"
+    Some("Running") if !run_alive => "stale"
+    Some("WaitingForInput") if !run_alive => "stale"
+    Some("Succeeded") =>
+      match run_id {
+        Some(id) =>
+          if planbook_run_has_valid_repair_result(
+              workspace_root, id, criterion_id,
+            ) {
+            "completed"
+          } else {
+            "failed"
+          }
+        None => "failed"
+      }
+    _ => planbook_task_status_from_run_status(status)
+  }
+}
+
+///|
+fn planbook_task_status_from_run_status(status : String?) -> String {
+  match status {
+    Some("Pending") => "dispatched"
+    Some("Running") => "running"
+    Some("WaitingForInput") => "running"
+    Some("Succeeded") => "failed"
+    Some("Failed") => "failed"
+    Some("Cancelled") => "failed"
+    _ => "dispatched"
+  }
+}
+
+///|
+fn planbook_repair_index_recovery_summary(
+  criterion : PlanbookCriterionStatus,
+  run_id : String?,
+  status : String?,
+  task_status : String,
+) -> String {
+  let run_label = run_id.unwrap_or("none")
+  let status_label = status.unwrap_or("unknown")
+  if task_status == "stale" {
+    "Recovered stale repair task from MoonClaw proposal index for criterion `\{criterion.id}`. Run `\{run_label}` is indexed as `\{status_label}`, but no live runner process exists."
+  } else if task_status == "failed" && status_label == "Succeeded" {
+    "Recovered repair task from MoonClaw proposal index for criterion `\{criterion.id}`. Run `\{run_label}` is indexed as `Succeeded`, but it did not emit a valid `planbook.repair.result.v1` result for this criterion."
+  } else {
+    "Recovered repair task from MoonClaw proposal index for criterion `\{criterion.id}`."
   }
 }
 
@@ -463,6 +635,65 @@ fn planbook_repair_timeout_ms_json() -> Json {
 }
 
 ///|
+fn planbook_repair_source_root() -> String {
+  match @env.current_dir() {
+    Some(dir) => dir
+    None => "."
+  }
+}
+
+///|
+fn planbook_repair_target_files(criterion_id : String) -> Array[String] {
+  let root = planbook_repair_source_root()
+  match criterion_id {
+    "editor-mode-real-pipeline" =>
+      [
+        "\{root}/planbook_autonomy.mbt",
+        "\{root}/planbook_repair.mbt",
+        "\{root}/planbook.mbt",
+        "\{root}/cmd/main/main.mbt",
+        "\{root}/ui/rabbita-town/main/main.mbt",
+        "\{root}/course_book.mbt",
+        "\{root}/.moontown/books/course-wenyu-game-design/wiki/course/beginner-course.md",
+        "\{root}/.moontown/books/plan-moontown-quality/plans/2026-05-31-editor-mode-real-pipeline/plan.md",
+      ]
+    "editor-selected-feature-implementation" =>
+      [
+        "\{root}/editor_feature_selection.mbt",
+        "\{root}/editor_pipeline.mbt",
+        "\{root}/planbook_autonomy.mbt",
+        "\{root}/planbook_repair.mbt",
+        "\{root}/civic_protocol_store.mbt",
+        "\{root}/civic_status.mbt",
+        "\{root}/civic_protocol_registry_runtime.mbt",
+        "\{root}/ui/rabbita-town/main/main.mbt",
+        "\{root}/ui/rabbita-town/bootstrap.js",
+        "\{root}/.moontown/books/course-wenyu-game-design/wiki/course/beginner-course.md",
+        "\{root}/.moontown/books/course-wenyu-game-design/wiki/course/exercises.md",
+        "\{root}/.moontown/books/course-wenyu-game-design/wiki/course/progress-rubric.md",
+        "\{root}/.moontown/books/plan-moontown-quality/raw/editor-pipeline/next-feature.json",
+        "\{root}/docs/WENYU_UI_MODULE_SYSTEM.md",
+      ]
+    _ =>
+      [
+        "\{root}/planbook_autonomy.mbt",
+        "\{root}/planbook_repair.mbt",
+        "\{root}/planbook.mbt",
+        "\{root}/cmd/main/main.mbt",
+      ]
+  }
+}
+
+///|
+fn planbook_repair_target_files_markdown(criterion_id : String) -> String {
+  let lines : Array[String] = []
+  for path in planbook_repair_target_files(criterion_id) {
+    lines.push("- `\{path}`")
+  }
+  lines.join("\n")
+}
+
+///|
 fn upsert_planbook_repair_profile_json(base : Json) -> Json {
   let root = json_object_copy(Some(base))
   let jobs = json_object_copy(root.get("jobs"))
@@ -489,20 +720,21 @@ fn planbook_repair_worker_profile_json() -> Json {
         "id": "repair_planbook_gap",
         "title": "Repair one bounded PlanBook self-build gap",
         "kind": "job.analysis",
-        "prompt_template": "Read ${proposal.request_text}. Then read context_pages and skill_paths. Make the smallest safe repair or return a precise ownership blocker. Write raw/repair/repair-result.md with the planbook.repair.result.v1 contract.",
+        "prompt_template": "Read ${proposal.request_text}. Then read context_pages and skill_paths. Use the exact target_files before any broader search. Make the smallest safe repair or return a precise ownership blocker. Write raw/repair/repair-result.md with the planbook.repair.result.v1 contract.",
         "metadata": {
           "preferred_skills": ["planbook-repair", "code-plan", "code-review"],
           "enable_tools": true,
-          "execution_mode": "acp",
-          "execution_target": "codex-main",
+          "execution_mode": "local",
           "output_contract": "planbook.repair.result.v1",
+          "source_root": planbook_repair_source_root(),
+          "target_files": planbook_repair_target_files("default"),
           "target_pages": [
             "raw/repair/repair-result.md", "wiki/reviews/active-plan-review.md",
             "wiki/planning/execution-evidence.md",
           ],
           "disable_waiting_for_input": true,
           "best_effort_on_missing_input": true,
-          "best_effort_on_timeout": true,
+          "best_effort_on_timeout": false,
           "timeout_ms": 600000,
           "role_runtime": {
             "planning_layer": "town-self-healing",
@@ -554,26 +786,27 @@ fn planbook_repair_packet(
       "owner": criterion.owner.to_json(),
       "disable_waiting_for_input": true.to_json(),
       "best_effort_on_missing_input": true.to_json(),
-      "best_effort_on_timeout": true.to_json(),
+      "best_effort_on_timeout": false.to_json(),
       "timeout_ms": planbook_repair_timeout_ms_json(),
       "profile_metadata": {
         "disable_waiting_for_input": true.to_json(),
         "best_effort_on_missing_input": true.to_json(),
-        "best_effort_on_timeout": true.to_json(),
+        "best_effort_on_timeout": false.to_json(),
         "timeout_ms": planbook_repair_timeout_ms_json(),
       },
       "step_metadata": {
         "kind": "planbook_repair".to_json(),
-        "execution_mode": "acp".to_json(),
-        "execution_target": "codex-main".to_json(),
+        "execution_mode": "local".to_json(),
         "output_contract": "planbook.repair.result.v1".to_json(),
         "preferred_skills": ["planbook-repair", "code-plan", "code-review"].to_json(),
+        "source_root": planbook_repair_source_root().to_json(),
+        "target_files": planbook_repair_target_files(criterion.id).to_json(),
         "target_pages": [
           "raw/repair/repair-result.md", "wiki/reviews/active-plan-review.md", "wiki/planning/execution-evidence.md",
         ].to_json(),
         "disable_waiting_for_input": true.to_json(),
         "best_effort_on_missing_input": true.to_json(),
-        "best_effort_on_timeout": true.to_json(),
+        "best_effort_on_timeout": false.to_json(),
         "timeout_ms": planbook_repair_timeout_ms_json(),
       },
     },
@@ -593,10 +826,15 @@ fn planbook_repair_request_text(criterion : PlanbookCriterionStatus) -> String {
     "Task:",
     "1. Read `skills/planbook-repair/SKILL.md` and the repair context.",
     "2. Decide whether this can be fixed inside Moontown or must be handed to MoonBook/MoonClaw.",
-    "3. If it can be fixed safely, apply the smallest code/docs change.",
-    "4. Run or name validation commands.",
-    "5. Write `raw/repair/repair-result.md` with decision, files changed, validation, remaining blockers, and cookbook impact.",
-    "6. Do not mark the criterion satisfied unless evidence exists after validation.",
+    "3. Use only the exact target files first; do not run broad `find .`, broad `rg`, or whole-repo `search_files` unless those target files prove insufficient.",
+    "4. If it can be fixed safely, apply the smallest code/docs change using MoonClaw's tool-enabled local execution path.",
+    "5. If the criterion is `editor-selected-feature-implementation`, treat `raw/editor-pipeline/next-feature.json` as the source of truth. Do not replace it with a fixed feature list. Implement the selected feature acceptance criteria and write `raw/editor-pipeline/selected-feature-implementation.md` with `contract: moontown.editor_selected_feature_implementation.v1`, `selected_feature: <id>`, and `implementation_status: accepted` only after validation.",
+    "6. Run or name validation commands.",
+    "7. Write `raw/repair/repair-result.md` with decision, files changed, validation, remaining blockers, and cookbook impact.",
+    "8. Do not mark the criterion satisfied unless evidence exists after validation.",
+    "",
+    "Target files:",
+    planbook_repair_target_files_markdown(criterion.id),
   ].join("\n")
 }
 
@@ -615,9 +853,17 @@ fn planbook_repair_context_markdown(
     "- Evidence: \{criterion.evidence}",
     "- Next action: \{criterion.next_action}",
     "",
+    "## Target Files",
+    "",
+    planbook_repair_target_files_markdown(criterion.id),
+    "",
     "## Boundary Rule",
     "",
     "Moontown may repair routing, daemon, live-spine, UI projection, and PlanBook evidence plumbing. MoonBook owns native book profiles/templates/projections. MoonClaw owns execution runtime behavior and provider retry stability. Do not copy another project into Moontown to fake ownership.",
+    "",
+    "## AI-Selected Editor Feature",
+    "",
+    "When the criterion is `editor-selected-feature-implementation`, use `raw/editor-pipeline/next-feature.json` as the durable AI decision record. The repair worker may implement the chosen feature, but must not silently choose a different feature.",
   ].join("\n")
 }
 
@@ -652,9 +898,12 @@ fn planbook_repair_skill_markdown() -> String {
     "- `criterion_id`: the criterion being repaired", "- `files_changed`: exact files changed, or `none`",
     "- `validation`: commands run and results", "- `remaining_blockers`: unresolved gaps",
     "- `cookbook_impact`: none | update_needed | updated", "", "## Rules", "", "- Fix Moontown-owned routing/live-spine/UI/docs issues inside Moontown.",
+    "- For `editor-selected-feature-implementation`, read `raw/editor-pipeline/next-feature.json` and implement the selected feature; do not choose a different feature in code.",
+    "- For selected editor features, write `raw/editor-pipeline/selected-feature-implementation.md` with `contract: moontown.editor_selected_feature_implementation.v1`, `selected_feature: <id>`, and `implementation_status: accepted` only after validation.",
     "- For MoonBook-native provider/profile work, produce a MoonBook patch plan or patch only when executing inside MoonBook.",
     "- For MoonClaw runtime/provider work, produce a MoonClaw patch plan or patch only when executing inside MoonClaw.",
     "- Never claim success because a markdown plan exists.", "- Rerun the PlanBook doctor after a local repair.",
+    "- Use exact `target_files` before any broad search.", "- Do not run whole-repo `find`, `rg`, or `search_files` until the exact target files prove insufficient.",
     "", "## Concrete Example", "", "```md", "repair_decision: accepted", "criterion_id: planbook-live-spine",
     "files_changed: live_autonomy.mbt, planbook_autonomy.mbt", "validation: moon check --no-render passed; moon test planbook_autonomy_wbtest.mbt passed",
     "remaining_blockers: none for this criterion", "cookbook_impact: update_needed",
@@ -693,6 +942,39 @@ async fn reconcile_planbook_repair_result(task : PlanbookRepairTask) -> String {
     write_text_file(planbook_repair_result_path(task), run_result)
   }
   run_result
+}
+
+///|
+async fn refresh_planbook_repair_task_from_run(
+  task : PlanbookRepairTask,
+) -> PlanbookRepairTask {
+  let run_id = match task.run_id {
+    Some(id) => id
+    None => return task
+  }
+  let run_status = planbook_repair_run_status_in_workspace(
+    task.workspace_root,
+    run_id,
+  )
+  let run_alive = @moonclaw.run_process_alive(run_id)
+  let status = planbook_task_status_from_run(
+    task.workspace_root,
+    task.criterion_id,
+    Some(run_id),
+    run_alive,
+    run_status,
+  )
+  let status_label = run_status.unwrap_or("unknown")
+  let summary = if status == task.status {
+    task.summary
+  } else if status == "failed" && status_label == "Succeeded" {
+    "\{task.summary} Latest run is indexed as `Succeeded`, but no valid `planbook.repair.result.v1` result for criterion `\{task.criterion_id}` was emitted."
+  } else if status == "stale" {
+    "\{task.summary} Latest run is indexed as `\{status_label}`, but no live runner process exists."
+  } else {
+    "\{task.summary} Latest run status reconciled to `\{status}` from MoonClaw index status `\{status_label}`."
+  }
+  { ..task, status, summary }
 }
 
 ///|
@@ -741,9 +1023,7 @@ async fn planbook_repair_result_text_for_task(
   task : PlanbookRepairTask,
 ) -> String {
   let text = read_text_or_empty(planbook_repair_result_path(task))
-  if text.contains("criterion_id: \{task.criterion_id}") ||
-    text.contains("\"criterion_id\":\"\{task.criterion_id}\"") ||
-    text.contains("\"criterion_id\": \"\{task.criterion_id}\"") {
+  if planbook_repair_result_satisfies_contract(text, task.criterion_id) {
     text
   } else {
     ""
@@ -771,13 +1051,56 @@ async fn planbook_repair_result_text_from_run(
     _ => return ""
   }
   let content = json_string_field(parsed, "content").unwrap_or("")
-  if content.contains("criterion_id: \{task.criterion_id}") ||
-    content.contains("\"criterion_id\":\"\{task.criterion_id}\"") ||
-    content.contains("\"criterion_id\": \"\{task.criterion_id}\"") {
+  if planbook_repair_result_satisfies_contract(content, task.criterion_id) {
     content
   } else {
     ""
   }
+}
+
+///|
+async fn planbook_run_has_valid_repair_result(
+  workspace_root : String,
+  run_id : String,
+  criterion_id : String,
+) -> Bool {
+  let workspace_dir = match
+    @moonclaw.run_workspace_dir(run_id, cwd=workspace_root) {
+    Some(workspace_dir) => workspace_dir
+    None => return false
+  }
+  let result_path = "\{workspace_dir}/result.json"
+  if !@fs.exists(result_path) {
+    return false
+  }
+  let parsed = @json.parse(@fs.read_file(result_path).text()) catch {
+    _ => return false
+  }
+  let content = json_string_field(parsed, "content").unwrap_or("")
+  planbook_repair_result_satisfies_contract(content, criterion_id)
+}
+
+///|
+fn planbook_repair_result_satisfies_contract(
+  text : String,
+  criterion_id : String,
+) -> Bool {
+  let has_criterion = text.contains("criterion_id: \{criterion_id}") ||
+    text.contains("\"criterion_id\":\"\{criterion_id}\"") ||
+    text.contains("\"criterion_id\": \"\{criterion_id}\"")
+  let has_decision = text.contains("repair_decision: accepted") ||
+    text.contains("repair_decision: needs_external_owner") ||
+    text.contains("repair_decision: blocked") ||
+    text.contains("repair_decision: no_change") ||
+    text.contains("\"repair_decision\":\"accepted\"") ||
+    text.contains("\"repair_decision\":\"needs_external_owner\"") ||
+    text.contains("\"repair_decision\":\"blocked\"") ||
+    text.contains("\"repair_decision\":\"no_change\"") ||
+    text.contains("\"repair_decision\": \"accepted\"") ||
+    text.contains("\"repair_decision\": \"needs_external_owner\"") ||
+    text.contains("\"repair_decision\": \"blocked\"") ||
+    text.contains("\"repair_decision\": \"no_change\"")
+  has_criterion && has_decision
 }
 
 ///|

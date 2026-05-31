@@ -29,11 +29,11 @@ pub async fn render_moontown_planbook_status(
 ) -> String {
   let checks = [
     "wiki/index.md", "raw/bootstrap/PLANBOOK_CONTRACT.md", "plans/2026-05-29-book-quality-upgrade/plan.md",
-    "plans/2026-05-29-live-autonomy-spine/plan.md", "plans/index.md", "wiki/planning/quality-gates.md",
-    "wiki/planning/execution-evidence.md", "wiki/reviews/active-plan-review.md",
-    "wiki/history/decision-log.md", "schemas/plan-record.schema.md", "skills/code-plan/SKILL.md",
-    "skills/code-review/SKILL.md", "skills/doc-sync/SKILL.md", "book/moonbook-ui-state.json",
-    "book/site/generated/index.html",
+    "plans/2026-05-29-live-autonomy-spine/plan.md", "plans/2026-05-31-editor-mode-real-pipeline/plan.md",
+    "plans/index.md", "wiki/planning/quality-gates.md", "wiki/planning/execution-evidence.md",
+    "wiki/reviews/active-plan-review.md", "wiki/history/decision-log.md", "schemas/plan-record.schema.md",
+    "skills/code-plan/SKILL.md", "skills/code-review/SKILL.md", "skills/doc-sync/SKILL.md",
+    "book/moonbook-ui-state.json", "book/site/generated/index.html",
   ]
   let missing : Array[String] = []
   for path in checks {
@@ -105,6 +105,10 @@ async fn write_planbook_workspace(entry : @moonbook.BookCatalogEntry) -> Unit {
     "\{root}/plans/2026-05-29-live-autonomy-spine/plan.md",
     planbook_live_autonomy_plan_markdown(),
   )
+  write_text_file(
+    "\{root}/plans/2026-05-31-editor-mode-real-pipeline/plan.md",
+    planbook_editor_pipeline_plan_markdown(),
+  )
   write_text_file("\{root}/plans/index.md", planbook_plans_index_markdown())
   write_text_file(
     "\{root}/wiki/planning/quality-gates.md",
@@ -173,6 +177,7 @@ fn planbook_index_markdown(entry : @moonbook.BookCatalogEntry) -> String {
     "- `plans/index.md`",
     "- `plans/2026-05-29-live-autonomy-spine/plan.md`",
     "- `plans/2026-05-29-book-quality-upgrade/plan.md`",
+    "- `plans/2026-05-31-editor-mode-real-pipeline/plan.md`",
     "- `wiki/planning/quality-gates.md`",
     "- `wiki/planning/execution-evidence.md`",
     "- `wiki/reviews/active-plan-review.md`",
@@ -215,8 +220,38 @@ fn planbook_plans_index_markdown() -> String {
   [
     "# Plans Index", "", "| Plan | Status | Owner | Stable-State Impact |", "| --- | --- | --- | --- |",
     "| `2026-05-29-live-autonomy-spine/plan.md` | top-priority | Moontown Mayor + MoonBook + MoonClaw | connects daemon, workers, accepted outputs, journal, projection, and operator UI |",
+    "| `2026-05-31-editor-mode-real-pipeline/plan.md` | self-build-test | Moontown PlanBook + MoonClaw | turns Wenyu editor-mode guidance into a real plan-to-code pipeline |",
     "| `2026-05-29-book-quality-upgrade/plan.md` | active-review | Moontown + MoonBook | separates structural readiness from semantic quality and formalizes planbook/cookbook/course/civic workspaces |",
     "", "Planbook rule: update the existing plan and evidence pages instead of creating noisy `v1`, `v2`, `v3` copies.",
+  ].join("\n")
+}
+
+///|
+fn planbook_editor_pipeline_plan_markdown() -> String {
+  [
+    "# Plan: Editor Mode Real Pipeline", "", "## Source", "", "- Course book: `course-wenyu-game-design`.",
+    "- Course page: `wiki/course/beginner-course.md`.", "- Relevant lessons: map labeling, roads before buildings, buildings as protocols, and mode separation.",
+    "", "## Problem", "", "Wenyu editor mode is currently a useful validation surface, but it is not yet a complete town-owned implementation pipeline. A designer can inspect modules, runtime bindings, Moondesk handoff artifacts, and output coverage, but the editor does not create a durable PlanBook goal, dispatch bounded MoonClaw implementation work, track repair evidence, and expose final output readiness as one connected lifecycle.",
+    "", "## Goal", "", "- Treat editor mode changes as plan-first town work.", "- Use the course book as teaching/source context, not as hardcoded UI logic.",
+    "- Let PlanBook store the plan, acceptance criteria, evidence, and review state.",
+    "- Let MoonClaw execute bounded code/docs changes from the PlanBook packet.",
+    "- Let the UI show editor pipeline status from runtime state rather than static copy.",
+    "- Keep Moondesk focused on detailed human workspace/file editing and portable artifacts.",
+    "", "## Ownership", "", "- Moontown owns the editor-pipeline contract, command surface, runtime state, and operator UI binding.",
+    "- PlanBook owns the durable plan, acceptance gates, repair packet, execution evidence, and review notes.",
+    "- MoonBook owns the course book content and any generated course projection.",
+    "- MoonClaw owns bounded implementation execution and structured result packaging.",
+    "- Moondesk later owns rich human editing of individual files, prompts, and single-agent workspaces.",
+    "", "## Implementation Shape", "", "1. Add a restartable editor-pipeline state contract under `.moontown/editor-pipeline.json` or equivalent.",
+    "2. Add a Moontown command that refreshes/renders that state and references the PlanBook plan.",
+    "3. Connect editor-mode UI to the contract so it shows source course, current plan, dispatch status, validation status, and output readiness.",
+    "4. Ensure a bounded PlanBook repair packet can dispatch the missing implementation work through MoonClaw.",
+    "5. Record validation evidence before claiming the pipeline is accepted.", "",
+    "## Acceptance Criteria", "", "- [ ] A command can refresh/render editor-pipeline status without manually editing UI data.",
+    "- [ ] The status links the Wenyu course book, this PlanBook plan, the current repair task, and final output mode.",
+    "- [ ] Editor mode shows pipeline status from runtime state, not static prose.",
+    "- [ ] A PlanBook repair dispatch can implement or repair this pipeline through MoonClaw.",
+    "- [ ] Validation records command/test output in PlanBook evidence.", "- [ ] The output mode can explain whether a change is planned, running, accepted, blocked, or ready to export.",
   ].join("\n")
 }
 
@@ -365,12 +400,13 @@ fn planbook_ui_state_json(entry : @moonbook.BookCatalogEntry) -> String {
     "    {\"label\":\"cookbook handoff\",\"tone\":\"info\"}",
     "  ],",
     "  \"metrics\": [",
-    "    {\"label\":\"Seed plans\",\"value\":\"2\",\"note\":\"quality governance and live autonomy spine\",\"tone\":\"healthy\"},",
+    "    {\"label\":\"Seed plans\",\"value\":\"3\",\"note\":\"quality governance, live autonomy spine, and editor pipeline\",\"tone\":\"healthy\"},",
     "    {\"label\":\"Skills\",\"value\":\"3\",\"note\":\"plan, review, doc sync\",\"tone\":\"healthy\"}",
     "  ],",
     "  \"readiness\": [",
     "    {\"title\":\"Planbook contract\",\"detail\":\"raw/bootstrap/PLANBOOK_CONTRACT.md\",\"meta\":\"Ready\"},",
     "    {\"title\":\"Top priority live spine\",\"detail\":\"plans/2026-05-29-live-autonomy-spine/plan.md\",\"meta\":\"Top Priority\"},",
+    "    {\"title\":\"Editor pipeline self-build test\",\"detail\":\"plans/2026-05-31-editor-mode-real-pipeline/plan.md\",\"meta\":\"Self Build\"},",
     "    {\"title\":\"Quality plan\",\"detail\":\"plans/2026-05-29-book-quality-upgrade/plan.md\",\"meta\":\"Ready\"}",
     "  ],",
     "  \"review_queue\": [",
