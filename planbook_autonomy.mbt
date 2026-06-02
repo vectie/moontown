@@ -73,6 +73,8 @@ pub async fn write_moontown_planbook_autonomy(
 ) -> String {
   if !@fs.exists("\{workspace_root}/wiki/index.md") {
     ignore(bootstrap_moontown_planbook(book_catalog_path~, workspace_root~))
+  } else {
+    ensure_planbook_seed_files(workspace_root)
   }
   let status = inspect_moontown_planbook_autonomy(
     snapshot_path~,
@@ -128,6 +130,10 @@ async fn write_planbook_autonomy_workspace(
     render_planbook_autonomy_markdown(status),
   )
   write_text_file(
+    "\{workspace_root}/wiki/history/daily-engineering-digest.md",
+    planbook_daily_engineering_digest_markdown(status, workspace_root),
+  )
+  write_text_file(
     "\{workspace_root}/book/moonbook-ui-state.json",
     planbook_autonomy_ui_state_json(status),
   )
@@ -151,6 +157,9 @@ async fn planbook_autonomy_criteria(
     planbook_ui_operator_criterion(),
     planbook_result_contract_criterion(),
     planbook_semantic_review_criterion(snapshot_path, book_catalog_path),
+    planbook_runtime_book_quality_coverage_criterion(
+      snapshot_path, book_catalog_path,
+    ),
     planbook_editor_feature_selection_criterion(workspace_root),
     planbook_editor_selected_feature_implementation_criterion(workspace_root),
     planbook_source_patch_loop_criterion(),
@@ -158,6 +167,7 @@ async fn planbook_autonomy_criteria(
     planbook_implementation_backlog_criterion(workspace_root),
     planbook_validation_criterion(snapshot_path),
     planbook_runtime_recovery_criterion(snapshot_path),
+    planbook_civic_service_reconciliation_criterion(book_catalog_path),
     planbook_moonbook_provider_criterion(),
   ]
 }
@@ -287,8 +297,7 @@ async fn planbook_semantic_review_criterion(
   snapshot_path : String,
   book_catalog_path : String,
 ) -> PlanbookCriterionStatus {
-  ignore(snapshot_path)
-  let audit = inspect_book_quality(book_catalog_path~)
+  let audit = inspect_book_quality(book_catalog_path~, snapshot_path~)
   let ready = audit.scores.any(fn(score) { score.semantic_score is Some(_) })
   planbook_criterion(
     "semantic-ai-review-results",
@@ -303,6 +312,48 @@ async fn planbook_semantic_review_criterion(
     },
     "dispatch MoonClaw reviewers through the book-quality review packets and persist accepted review results",
   )
+}
+
+///|
+async fn planbook_runtime_book_quality_coverage_criterion(
+  snapshot_path : String,
+  book_catalog_path : String,
+) -> PlanbookCriterionStatus {
+  let audit = inspect_book_quality(book_catalog_path~, snapshot_path~)
+  match @storage.load_snapshot_file(snapshot_path) {
+    Some(snapshot) => {
+      let missing : Array[String] = []
+      for book in snapshot.town.books {
+        if !audit.scores.any(fn(score) { score.book_id == book.id }) {
+          missing.push(book.id)
+        }
+      }
+      let ready = missing.is_empty()
+      planbook_criterion(
+        "runtime-books-in-quality-audit",
+        "2026-05-29-book-quality-upgrade",
+        "Live runtime books are included in MoonBook quality audit",
+        "moontown+moonbook",
+        ready,
+        if ready {
+          "quality audit covers \{snapshot.town.books.length()} live runtime book(s) and \{audit.total} total managed book(s)"
+        } else {
+          "quality audit is missing live runtime book(s): \{missing.join(", ")}"
+        },
+        "merge saved town snapshot books into the book-quality audit without mutating the curated MoonBook catalog",
+      )
+    }
+    None =>
+      planbook_criterion(
+        "runtime-books-in-quality-audit",
+        "2026-05-29-book-quality-upgrade",
+        "Live runtime books are included in MoonBook quality audit",
+        "moontown+moonbook",
+        false,
+        "no saved town snapshot exists at \{snapshot_path}",
+        "start the town daemon or create a saved snapshot before judging runtime book quality coverage",
+      )
+  }
 }
 
 ///|
@@ -530,6 +581,31 @@ async fn planbook_runtime_recovery_criterion(
 }
 
 ///|
+async fn planbook_civic_service_reconciliation_criterion(
+  book_catalog_path : String,
+) -> PlanbookCriterionStatus {
+  let portfolio = inspect_wenyu_civic_services(book_catalog_path~)
+  let ready = portfolio.total > 0 &&
+    portfolio.operable_count == portfolio.total &&
+    portfolio.proven_count == portfolio.total &&
+    portfolio.blocked_count == 0 &&
+    portfolio.missing_count == 0
+  planbook_criterion(
+    "civic-service-result-reconciliation",
+    "2026-05-31-live-autonomy-spine",
+    "Civic protocol outputs reconcile into MoonBook service results",
+    "moontown+moonbook",
+    ready,
+    if ready {
+      "\{portfolio.proven_count}/\{portfolio.total} civic services have current service-result proof with 0 blocked and 0 missing"
+    } else {
+      "\{portfolio.proven_count}/\{portfolio.total} civic services have service-result proof; blocked=\{portfolio.blocked_count}; missing=\{portfolio.missing_count}; operable=\{portfolio.operable_count}"
+    },
+    "run `moon run cmd/main -- civic reconcile`; if still open, inspect protocol ledgers and MoonBook persistence for the missing civic service",
+  )
+}
+
+///|
 priv struct PlanbookRuntimeFailureSummary {
   count : Int
   sample : String
@@ -658,6 +734,61 @@ fn planbook_autonomy_active_review(status : PlanbookAutonomyStatus) -> String {
 }
 
 ///|
+fn planbook_daily_engineering_digest_markdown(
+  status : PlanbookAutonomyStatus,
+  workspace_root : String,
+) -> String {
+  let open_items : Array[String] = []
+  let satisfied_items : Array[String] = []
+  for item in status.criteria {
+    if item.satisfied {
+      satisfied_items.push("- `\{item.id}`: \{item.evidence}")
+    } else {
+      open_items.push(
+        "- `\{item.id}`: \{item.evidence}. Next: \{item.next_action}",
+      )
+    }
+  }
+  [
+    "# Daily Engineering Digest",
+    "",
+    "- generated_at_ms: `\{status.generated_at_ms}`",
+    "- status: `\{status.status}`",
+    "- open_gaps: `\{status.open_count}`",
+    "- satisfied_criteria: `\{status.satisfied_count}`",
+    "- active_review: `wiki/reviews/active-plan-review.md`",
+    "- change_log: `wiki/history/change-log.md`",
+    "- backlog_progress: `wiki/planning/backlog-progress.md`",
+    "- latest_validation: `.moontown/planbook/latest-validation.md`",
+    "",
+    "## Current Open Work",
+    "",
+    if open_items.is_empty() {
+      "- none; the town is in stable watch mode until operator input, web/search evidence, or a new backlog item creates a gap"
+    } else {
+      open_items.join("\n")
+    },
+    "",
+    "## Satisfied Work",
+    "",
+    if satisfied_items.is_empty() {
+      "- none"
+    } else {
+      satisfied_items.join("\n")
+    },
+    "",
+    "## Source-Control Policy",
+    "",
+    "- Repair packets require validation commands, `git diff --check`, `git status --short`, focused diff summary, `commit_status`, `commit_message`, and `push_status`.",
+    "- Local commit readiness is allowed after validation. Push remains disabled unless a future explicit policy changes it.",
+    "",
+    "## Workspace",
+    "",
+    "- `\{workspace_root}`",
+  ].join("\n")
+}
+
+///|
 fn planbook_autonomy_ui_state_json(status : PlanbookAutonomyStatus) -> String {
   let summary = json_string(
     "Self-build, self-healing, execution evidence, and review state for Moontown quality work.",
@@ -692,7 +823,8 @@ fn planbook_autonomy_ui_state_json(status : PlanbookAutonomyStatus) -> String {
     "    {\"title\":\"Implementation backlog\",\"detail\":\"wiki/planning/implementation-backlog.md\",\"meta\":\"Document-controlled\"},",
     "    {\"title\":\"Backlog progress\",\"detail\":\"wiki/planning/backlog-progress.md\",\"meta\":\"Cadence\"},",
     "    {\"title\":\"Stop policy\",\"detail\":\"wiki/planning/stop-policy.md\",\"meta\":\"Safety\"},",
-    "    {\"title\":\"Change log\",\"detail\":\"wiki/history/change-log.md\",\"meta\":\"Live history\"}",
+    "    {\"title\":\"Change log\",\"detail\":\"wiki/history/change-log.md\",\"meta\":\"Live history\"},",
+    "    {\"title\":\"Daily engineering digest\",\"detail\":\"wiki/history/daily-engineering-digest.md\",\"meta\":\"Overnight review\"}",
     "  ],",
     "  \"review_queue\": [",
     "    {\"title\":\"PlanBook repair backlog\",\"detail\":\"wiki/reviews/active-plan-review.md\",\"meta\":\"\{review_meta}\"}",

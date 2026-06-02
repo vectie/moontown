@@ -2,7 +2,7 @@
 test "demo state seeds books workers tasks and dispatch events" {
   let state = @moontown.demo_state()
   assert_eq(state.books.length(), 2)
-  assert_eq(state.workers.length(), 4)
+  assert_eq(state.workers.length(), 6)
   assert_eq(state.tasks.length(), 4)
   assert_eq(state.executions.length(), 4)
   assert_eq(state.events.length(), 8)

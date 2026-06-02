@@ -57,5 +57,28 @@ test "daemon tick migrates persisted job list to current defaults" {
   let old_daemon = DaemonState::new(jobs=old_jobs)
   let (daemon, _, _) = plan_daemon_tick(old_daemon, town, report)
   assert_true(daemon.jobs.any(fn(job) { job.id == "run-civic-patterns" }))
+  assert_true(daemon.jobs.any(fn(job) { job.id == "reconcile-civic-services" }))
+  assert_true(daemon.jobs.any(fn(job) { job.id == "review-book-quality" }))
+  assert_true(
+    daemon.jobs.any(fn(job) { job.id == "process-book-template-requests" }),
+  )
+  assert_eq(daemon.jobs.length(), default_daemon_jobs().length())
+}
+
+///|
+test "daemon tick drops deprecated civic salon job during migration" {
+  let town = @core.empty_state(
+    @core.TownConfig::new(id="town", name="Moontown"),
+  )
+  let report = @health.inspect_town(town)
+  let old_jobs = [
+    { id: "run-civic-salons", kind: "civic-salon", interval_seconds: 30 },
+    { id: "refresh-health", kind: "health", interval_seconds: 60 },
+  ]
+  let old_daemon = DaemonState::new(jobs=old_jobs)
+  let (daemon, _, _) = plan_daemon_tick(old_daemon, town, report)
+  assert_true(!daemon.jobs.any(fn(job) { job.id == "run-civic-salons" }))
+  assert_true(!daemon.jobs.any(fn(job) { job.kind == "civic-salon" }))
+  assert_true(daemon.jobs.any(fn(job) { job.id == "run-civic-patterns" }))
   assert_eq(daemon.jobs.length(), default_daemon_jobs().length())
 }

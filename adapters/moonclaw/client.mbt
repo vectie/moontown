@@ -526,11 +526,29 @@ fn course_target_pages() -> Array[String] {
 
 ///|
 fn is_moontown_course_task(task : @moonbook.BookTask) -> Bool {
-  let combined = "\{task.id} \{task.title} \{task.prompt}".to_lower()
-  combined.contains("course") ||
+  let route_text = "\{task.kind} \{task.id} \{task.title}".to_lower()
+  route_text.contains("course") ||
+  route_text.contains("syllabus") ||
+  route_text.contains("learning path") ||
+  route_text.contains("beginner") ||
+  route_text.contains("workbook") ||
+  route_text.contains("lesson") ||
+  positive_course_prompt_signal(task.prompt)
+}
+
+///|
+fn positive_course_prompt_signal(prompt : String) -> Bool {
+  let combined = prompt.to_lower()
+  combined.contains("produce moonclaw beginner-course") ||
+  combined.contains("produce beginner-course") ||
+  combined.contains("produce course artifacts") ||
+  combined.contains("write a beginner workbook") ||
+  combined.contains("run course projection repair") ||
+  combined.contains("create a course") ||
+  combined.contains("build a course") ||
+  combined.contains("generate a course") ||
   combined.contains("syllabus") ||
   combined.contains("learning path") ||
-  combined.contains("beginner") ||
   combined.contains("workbook") ||
   combined.contains("lesson")
 }
@@ -680,6 +698,283 @@ pub async fn import_packet(
 }
 
 ///|
+pub async fn import_packet_detached(
+  packet : ExternalProposalPacket,
+  packet_path : String,
+  moonclaw_root? : String = "../moonclaw",
+  home? : String = default_moonclaw_home(),
+  cwd? : String = ".",
+  confirm? : Bool = false,
+  run_inline? : Bool = false,
+) -> ProposalImportReceipt {
+  let resolved_cwd = resolve_root_path(cwd)
+  let resolved_home = resolve_home_path(home, resolved_cwd)
+  let resolved_packet_path = resolve_packet_path(packet_path)
+  let receipt_path = detached_import_receipt_path(resolved_packet_path)
+  let stderr_path = receipt_path + ".err"
+  save_packet_file(resolved_packet_path, packet)
+  ensure_parent_directory(receipt_path)
+  let moon = moon_command()
+  let args = [
+    "-C",
+    moonclaw_root,
+    "run",
+    "cmd/main",
+    "--",
+    "proposal",
+    "import",
+    resolved_packet_path,
+    "--json",
+    "--cwd",
+    resolved_cwd,
+    "--home",
+    resolved_home,
+    ..if confirm {
+      ["--confirm"]
+    } else {
+      []
+    },
+    ..if confirm && run_inline {
+      ["--inline"]
+    } else {
+      []
+    },
+  ]
+  let command = @integration.render_command(moon, args)
+  let shell_command = build_detached_shell_command_with_output(
+    moon, args, receipt_path, stderr_path,
+  )
+  ignore(@integration.run_checked("/bin/zsh", ["-lc", shell_command]))
+  {
+    packet_id: packet.packet_id,
+    packet_path: resolved_packet_path,
+    proposal_id: "detached-\{packet.packet_id}",
+    run_id: None,
+    status: @core.TaskExecutionStatus::ProposalImported,
+    command: "\{command} > \{receipt_path} 2> \{stderr_path}",
+    summary: "Launched detached MoonClaw import for \{packet.packet_id}; waiting for receipt \{receipt_path}.",
+  }
+}
+
+///|
+pub async fn detached_import_receipt(
+  packet_id : String,
+  packet_path : String,
+) -> ProposalImportReceipt? {
+  let resolved_packet_path = resolve_packet_path(packet_path)
+  let receipt_path = detached_import_receipt_path(resolved_packet_path)
+  if !@fs.exists(receipt_path) {
+    return None
+  }
+  let text = @fs.read_file(receipt_path).text() catch { _ => return None }
+  let parsed = parse_json_from_command_text(text) catch {
+    _ =>
+      return detached_import_failure_receipt(
+        packet_id, resolved_packet_path, text,
+      )
+  }
+  let proposal_id = parse_json_string(parsed, "proposal_id").unwrap_or(
+    "proposal-\{packet_id}",
+  )
+  let run_id = parse_json_string(parsed, "run_id")
+  let receipt_status = import_receipt_status(
+    run_id,
+    parse_json_string(parsed, "status"),
+  )
+  Some({
+    packet_id,
+    packet_path: resolved_packet_path,
+    proposal_id,
+    run_id,
+    status: receipt_status,
+    command: "detached MoonClaw import receipt \{receipt_path}",
+    summary: if receipt_status == @core.TaskExecutionStatus::Completed {
+      "Detached MoonClaw import completed for \{packet_id}; inline run finished."
+    } else if run_id is Some(run_id) {
+      "Detached MoonClaw import completed for \{packet_id}; run \{run_id} is ready for supervision."
+    } else {
+      "Detached MoonClaw import completed for \{packet_id}; no run id was returned yet."
+    },
+  })
+}
+
+///|
+fn detached_import_failure_receipt(
+  packet_id : String,
+  packet_path : String,
+  text : String,
+) -> ProposalImportReceipt? {
+  if detached_import_text_is_nonterminal_log_noise(text) {
+    return None
+  }
+  let detail = compact_detached_import_failure_text(text)
+  if detail.is_empty() {
+    None
+  } else {
+    Some({
+      packet_id,
+      packet_path,
+      proposal_id: "proposal-\{packet_id}",
+      run_id: None,
+      status: @core.TaskExecutionStatus::Failed,
+      command: "detached MoonClaw import failure receipt \{detached_import_receipt_path(packet_path)}",
+      summary: "Detached MoonClaw import failed for \{packet_id}: \{detail}",
+    })
+  }
+}
+
+///|
+fn detached_import_text_is_nonterminal_log_noise(text : String) -> Bool {
+  if detached_import_text_is_only_runtime_event_logs(text) {
+    return true
+  }
+  let lowered = text.to_lower()
+  let has_startup_log = lowered.contains("\"tag\":\"model\"") ||
+    lowered.contains("\"tag\":\"job-analysis\"") ||
+    lowered.contains("loading skills from directory") ||
+    lowered.contains("loaded skill")
+  let has_runtime_event = lowered.contains("\"msg\":\"received event\"") ||
+    lowered.contains("\"msg\":\"tokencounted\"") ||
+    lowered.contains("\"msg\":\"contextpruned\"")
+  (has_startup_log || has_runtime_event) &&
+  !detached_import_text_has_top_level_terminal_failure_signal(text)
+}
+
+///|
+fn detached_import_text_is_only_runtime_event_logs(text : String) -> Bool {
+  let mut saw_log = false
+  for raw in text.split("\n") {
+    let line = raw.trim()
+    if line.is_empty() {
+      continue
+    }
+    let parsed = @json.parse(line) catch { _ => return false }
+    if !json_looks_like_moonclaw_runtime_log(parsed) {
+      return false
+    }
+    if json_runtime_log_has_terminal_failure_signal(parsed) {
+      return false
+    }
+    saw_log = true
+  }
+  saw_log
+}
+
+///|
+fn detached_import_text_has_top_level_terminal_failure_signal(
+  text : String,
+) -> Bool {
+  for raw in text.split("\n") {
+    let line = raw.trim()
+    if line.is_empty() {
+      continue
+    }
+    let parsed = @json.parse(line) catch {
+      _ =>
+        if detached_import_non_json_line_has_terminal_failure_signal(
+            line.to_owned().to_lower(),
+          ) {
+          return true
+        } else {
+          continue
+        }
+    }
+    if json_looks_like_moonclaw_runtime_log(parsed) {
+      if json_runtime_log_has_terminal_failure_signal(parsed) {
+        return true
+      }
+    } else if !json_looks_like_import_receipt(parsed) &&
+      detached_import_non_json_line_has_terminal_failure_signal(
+        line.to_owned().to_lower(),
+      ) {
+      return true
+    }
+  }
+  false
+}
+
+///|
+fn detached_import_non_json_line_has_terminal_failure_signal(
+  lowered : String,
+) -> Bool {
+  detached_import_text_has_terminal_failure_signal(lowered)
+}
+
+///|
+fn json_looks_like_moonclaw_runtime_log(json : Json) -> Bool {
+  match json {
+    Object(object) =>
+      object.get("level") is Some(_) &&
+      object.get("msg") is Some(_) &&
+      object.get("tag") is Some(_)
+    _ => false
+  }
+}
+
+///|
+fn json_runtime_log_has_terminal_failure_signal(json : Json) -> Bool {
+  match parse_json_string(json, "msg") {
+    Some(message) =>
+      detached_import_text_has_terminal_failure_signal(message.to_lower())
+    None => false
+  }
+}
+
+///|
+fn detached_import_text_has_terminal_failure_signal(lowered : String) -> Bool {
+  lowered.contains("failure(") ||
+  lowered.contains(" failed:") ||
+  lowered.contains("runtime error") ||
+  lowered.contains("jsondecodeerror") ||
+  lowered.contains("abort() called") ||
+  lowered.contains("panic")
+}
+
+///|
+fn compact_detached_import_failure_text(text : String) -> String {
+  let builder = StringBuilder::new()
+  let mut count = 0
+  for raw in text.split("\n") {
+    if count >= 6 {
+      break
+    }
+    let line = raw.trim()
+    if line.is_empty() {
+      continue
+    }
+    if count > 0 {
+      builder.write_string(" | ")
+    }
+    builder.write_string(line.to_owned())
+    count += 1
+  }
+  builder.to_string()
+}
+
+///|
+fn import_receipt_status(
+  run_id : String?,
+  status_text : String?,
+) -> @core.TaskExecutionStatus {
+  match status_text.map(fn(text) { text.to_lower() }) {
+    Some("succeeded") | Some("completed") =>
+      @core.TaskExecutionStatus::Completed
+    Some("failed") => @core.TaskExecutionStatus::Failed
+    _ =>
+      if run_id is Some(_) {
+        @core.TaskExecutionStatus::RunConfirmed
+      } else {
+        @core.TaskExecutionStatus::ProposalImported
+      }
+  }
+}
+
+///|
+pub fn detached_import_receipt_path(packet_path : String) -> String {
+  resolve_packet_path(packet_path) + ".import.json"
+}
+
+///|
 pub fn confirm_imported_run(
   receipt : ProposalImportReceipt,
 ) -> ProposalImportReceipt {
@@ -740,6 +1035,28 @@ fn build_detached_shell_command(
 }
 
 ///|
+fn build_detached_shell_command_with_output(
+  command : String,
+  args : Array[String],
+  stdout_path : String,
+  stderr_path : String,
+) -> String {
+  let builder = StringBuilder::new()
+  builder.write_string("nohup ")
+  builder.write_string(shell_quote(command))
+  for arg in args {
+    builder.write_char(' ')
+    builder.write_string(shell_quote(arg))
+  }
+  builder.write_string(" >")
+  builder.write_string(shell_quote(stdout_path))
+  builder.write_string(" 2>")
+  builder.write_string(shell_quote(stderr_path))
+  builder.write_string(" &")
+  builder.to_string()
+}
+
+///|
 fn shell_quote(text : String) -> String {
   let escaped = text.replace(old="'", new="'\"'\"'")
   "'\{escaped}'"
@@ -761,7 +1078,7 @@ pub async fn poll_run(
       let result_payload = load_run_result_payload(workspace_dir)
       let indexed_status = town_status_for_run_status(run.status)
       let orphaned = detect_orphan &&
-        indexed_status == @core.TaskExecutionStatus::Running &&
+        orphan_detectable_run_status(indexed_status) &&
         !moonclaw_run_process_alive(run.id)
       let status = if orphaned {
         @core.TaskExecutionStatus::Failed
@@ -808,6 +1125,12 @@ pub async fn poll_run(
         notify_town: false,
       }
   }
+}
+
+///|
+fn orphan_detectable_run_status(status : @core.TaskExecutionStatus) -> Bool {
+  status == @core.TaskExecutionStatus::RunConfirmed ||
+  status == @core.TaskExecutionStatus::Running
 }
 
 ///|
@@ -866,6 +1189,56 @@ fn parse_json_bool(json : Json, key : String) -> Bool? {
 }
 
 ///|
+fn parse_json_from_command_text(text : String) -> Json raise {
+  let trimmed = text.trim().to_owned()
+  let whole = @json.parse(trimmed) catch {
+    _ => {
+      let lines = trimmed.split("\n").to_array()
+      let count = lines.length()
+      for offset in 0..<count {
+        let start = count - offset - 1
+        let line = lines[start].trim().to_owned()
+        if line.has_prefix("{") || line.has_prefix("[") {
+          let builder = StringBuilder::new()
+          for index in start..<count {
+            if index > start {
+              builder.write_char('\n')
+            }
+            builder.write_string(lines[index].to_owned())
+          }
+          let candidate = builder.to_string()
+          let parsed = @json.parse(candidate) catch { _ => continue }
+          if json_looks_like_import_receipt(parsed) {
+            return parsed
+          }
+          let single = @json.parse(line) catch { _ => continue }
+          if json_looks_like_import_receipt(single) {
+            return single
+          }
+        }
+      }
+      raise Failure::Failure("Expected JSON output in command text.")
+    }
+  }
+  if json_looks_like_import_receipt(whole) {
+    whole
+  } else {
+    raise Failure::Failure("Expected MoonClaw import receipt JSON.")
+  }
+}
+
+///|
+fn json_looks_like_import_receipt(json : Json) -> Bool {
+  match json {
+    Object(object) =>
+      object.get("proposal_id") is Some(_) ||
+      object.get("run_id") is Some(_) ||
+      object.get("status") is Some(_)
+    _ => false
+  }
+}
+
+///|
 fn resolve_packet_path(packet_path : String) -> String {
   resolve_root_path(packet_path)
 }
@@ -901,13 +1274,40 @@ async fn load_run(run_id : String, home : String) -> StoredRun? {
   let path = @path.Path(run_store_root(home))
     .join(@path.Path("index/runs.json"))
     .to_string()
+  let indexed = if @fs.exists(path) {
+    let text = @fs.read_file(path).text() catch { _ => "" }
+    let parsed = @json.parse(text) catch { _ => {} }
+    let index : RunsIndexFile = @json.from_json(parsed) catch {
+      _ => { runs: [] }
+    }
+    index.runs.iter().find_first(fn(run) { run.id == run_id })
+  } else {
+    None
+  }
+  match load_run_meta(run_id, home) {
+    Some(meta) => Some(meta)
+    None => indexed
+  }
+}
+
+///|
+async fn load_run_meta(run_id : String, home : String) -> StoredRun? {
+  let path = @path.Path(run_store_root(home))
+    .join(@path.Path("runs"))
+    .join(@path.Path(run_id))
+    .join(@path.Path("meta.json"))
+    .to_string()
   if !@fs.exists(path) {
     return None
   }
-  let text = @fs.read_file(path).text()
+  let text = @fs.read_file(path).text() catch { _ => return None }
   let parsed = @json.parse(text) catch { _ => return None }
-  let index : RunsIndexFile = @json.from_json(parsed) catch { _ => return None }
-  index.runs.iter().find_first(fn(run) { run.id == run_id })
+  let meta : StoredRun = @json.from_json(parsed) catch { _ => return None }
+  if meta.id == run_id {
+    Some(meta)
+  } else {
+    None
+  }
 }
 
 ///|

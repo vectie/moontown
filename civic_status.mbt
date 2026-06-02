@@ -135,7 +135,7 @@ async fn inspect_wenyu_civic_service(
   let skill_ready = @fs.exists("\{root}/skills/wenyu-civic-service/SKILL.md") &&
     @fs.exists("\{root}/\{service.skill_path}")
   let moonclaw_profile_ready = civic_moonclaw_profile_ready(root)
-  let latest_result_path = civic_service_result_path(service)
+  let latest_result_path = civic_service_result_path(service, root~)
   let protocol = @civic.wenyu_building_protocol_for_service(service)
   let protocol_snapshot = inspect_wenyu_building_protocol(protocol)
   let protocol_history = civic_protocol_history(protocol.building_id)
@@ -350,8 +350,22 @@ async fn read_civic_book_result(path : String) -> @moonbook.BookResult? {
 }
 
 ///|
-fn civic_service_result_path(service : @civic.CivicServiceDefinition) -> String {
-  ".moontown/book-results/goal-\{service.book_id}-civic-service.json"
+fn civic_service_result_path(
+  service : @civic.CivicServiceDefinition,
+  root? : String = "",
+) -> String {
+  if civic_service_uses_town_result_root(root) {
+    ".moontown/book-results/goal-\{service.book_id}-civic-service.json"
+  } else {
+    "\{root}/book-results/goal-\{service.book_id}-civic-service.json"
+  }
+}
+
+///|
+fn civic_service_uses_town_result_root(root : String) -> Bool {
+  root.trim().is_empty() ||
+  root.has_prefix(".moontown/books/") ||
+  root.contains("/.moontown/books/")
 }
 
 ///|

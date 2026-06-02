@@ -42,6 +42,44 @@ definitions, and restart-readable runtime state. Moondesk should manage the
 human desktop surface for that cookbook; Moontown consumes its manifest for
 stable-state checks and drift review.
 
+## Canonical Operating Architecture
+
+The system should be understood as a live document/protocol machine, not a pile
+of agents:
+
+```text
+documents/books/ledgers
+  -> protocol places and schedules
+  -> temporary worker execution
+  -> bookkeeper memory/review/projection
+  -> mayor supervision and next action
+  -> updated documents/books/ledgers
+```
+
+The non-negotiable boundaries are:
+
+- Durable truth lives in MoonBook documents, ledgers, schemas, review queues,
+  plans, cookbook entries, and generated projections.
+- Active behavior is a protocol over those durable artifacts.
+- Wenyu buildings are protocol places. They aggregate packets, let participants
+  exchange information, reduce outputs, run review gates, and distribute results
+  back to the right homes.
+- The Mayor is a town-level supervisor. It owns cadence, routing, health,
+  escalation, cross-book priority, and operator-visible next actions.
+- MoonBook bookkeepers are resident book roles. They wake on schedules/events
+  and decide what becomes memory, what is rejected, what needs review, and what
+  gets projected.
+- MoonClaw workers are freelance bounded executors. They spawn for one packet,
+  use tools, produce structured results/artifacts/memory candidates, and leave.
+- Moondesk is the future human desktop over books/files; it should not become
+  the town supervisor or worker runtime.
+
+Growth must be visible and accountable. A live town should grow through changed
+MoonBook pages, civic protocol ledgers, PlanBook plans/evidence, code/tests,
+projections, or explicit no-change decisions. Retries, regenerated sites,
+daemon logs, and operational journals are useful telemetry, but they must not
+inflate domain knowledge or implementation progress.
+
 ## Layer Responsibilities
 
 ### `moontown`
@@ -187,6 +225,13 @@ Workers are freelance executors. They should spawn when a bounded packet needs
 tool-heavy work, emit structured results/evidence/artifacts/memory candidates,
 and then leave. They do not own durable memory, book wiki promotion,
 standing-goal cadence, or cross-book policy.
+
+Every registered book must still expose a book-scoped watcher lane. Built-in
+operational books such as `coding` and `finance` can keep specialized harness,
+review, or domain workers, but standing-watch goals are book-local protocols.
+The Mayor therefore provisions `claw-<book-id>-watcher` for each registered
+book so a standing goal does not become an endless deferred retry just because
+the target book lacks a watcher slot.
 
 ## Data Ownership
 
@@ -463,6 +508,27 @@ make this distinction explicit:
 
 This prevents a long-running town from mistaking retries, site rebuilds,
 generated logs, or no-change patrols for research progress.
+The same rule applies to worker-loss recovery. If MoonClaw still indexes a run
+as `Running` but Moontown can no longer find the live proposal process, the
+Mayor treats that as deferred infrastructure recovery unless MoonBook has
+persisted a terminal standing-watch marker. Those orphaned-run records are not
+counted as effective no-change cycles in the live autonomy spine. If the latest
+watcher record is deferred, the operator-facing next action says so explicitly
+instead of presenting the town as simply idle and waiting for cadence.
+Historical transient infrastructure records remain visible as
+`transient_infrastructure_debt` in the live autonomy spine. They are separated
+from unresolved failures and no-change cycles so the town can mature its
+operational reliability without counting infrastructure retries as book
+knowledge growth.
+
+Stable waiting is also explicit live-spine evidence. `stable_waiting` is true
+only when the town has no active workers/executions, review queue, unresolved
+failure, due standing goal, PlanBook open/repair gap, or pending/failed book
+template request. `stable_waiting_observation_streak` counts consecutive quiet
+daemon observations from `town-journal.jsonl`, and
+`stable_waiting_blockers` explains why a tick is not cleanly waiting. This lets
+overnight checks prove durability instead of inferring health from one latest
+status line.
 
 ### Readiness and Quality Gates
 
@@ -509,6 +575,10 @@ The daemon persists:
   success/failure counters, stop-request state, and last error
 - `.moontown/daemon.log`
   append-only supervisor/worker lifecycle and guarded tick records
+- `.moontown/daemon.restart`
+  reload request marker written after validated self-patches. The worker
+  consumes it between ticks, preserves supervisor state, exits cleanly, and lets
+  the supervisor or launchd start a fresh worker with current source.
 - `.moontown/daemon.pid`
   current daemon worker process id
 - `.moontown/daemon-supervisor.pid`
@@ -518,6 +588,37 @@ The daemon persists:
 - `.moontown/watchers/*.jsonl`
   standing-watch decisions, no-change/update/review/failure records, and next
   due ticks
+- `.moontown/book-template-requests.json`
+  document-first book creation inbox used by Moondesk, Mayor, or other
+  operators. The scheduled `book-template-request` job installs pending
+  template requests, and the runtime/live-autonomy status exposes request,
+  pending, and failed counts.
+- `.moontown/book-template-request-events.jsonl`
+  append-only lifecycle journal for processed book-template requests. Each
+  event records the request id, template id, resolved config, status, tick,
+  timestamp, and installer summary, so unattended book creation is auditable
+  without relying on transient daemon logs.
+
+Template-created books may also be archived instead of deleted. For
+`pdf-evidence-watch`, archiving disables every standing goal targeting that
+book, including the PDF watcher and any `book-quality-repair-<book-id>` repair
+goal. The workspace is kept for audit, the catalog entry is tagged
+hidden/internal, and an `archived` event is written to the lifecycle journal.
+That keeps smoke proofs and retired watches out of the autonomous cadence while
+preserving evidence. Runtime status and the live autonomy spine therefore report
+both enabled and disabled standing-goal counts. Enabled goals are active 24/7
+workload; disabled goals are preserved audit state and must not be interpreted
+as current town capacity demand.
+
+Standing goals have two important operating modes:
+
+- Topic watches are cadence checks. They compare new evidence against the
+  current MoonBook baseline and can legitimately return `no_change`.
+- Book-quality repair goals are active gap-closing loops. They are created from
+  semantic review output, read the affected book's
+  `wiki/reviews/book-quality-repair.md`, and should create or revise the named
+  artifacts before returning a terminal marker. They should not degrade into a
+  passive watch while the review queue still names missing artifacts.
 
 This is now local multi-day process management. On macOS, the included launchd
 installer runs `daemon supervise --worker` so the OS keeps the supervisor alive,
@@ -534,6 +635,20 @@ MOONTOWN_MOONCLAW_SUPERVISION_SECONDS=0
 This is the correct default for 24/7 operation because a long-running watcher
 should not serialize unrelated standing goals or civic communication-pattern
 schedules. Set a positive value only when debugging one specific run inline.
+Standing-watch imports are still launched as detached child processes, but the
+child honors `MOONTOWN_MOONCLAW_INLINE=1` and passes `--inline` to MoonClaw
+after confirmation. That keeps the Mayor loop nonblocking while preventing
+confirmed runs from sitting in storage without a runner. If the detached import
+fails before producing a receipt, Moontown preserves the `.import.json.err`
+excerpt in the stale execution summary so MoonClaw/runtime errors are visible
+to the supervision layer.
+Before launching a standing-watch import, Moontown also checks the target
+book-local MoonClaw job store for oversized active JSON indexes. When
+`job_proposals.json`, `definitions.json`, or `index/artifacts.json` exceeds the
+runtime safety threshold, the Mayor archives the file under
+`.moonclaw/jobs/archive/tick-<tick>/` and replaces the active file with a valid
+empty index. Historical files remain available for audit, while the hot store
+stays small enough for MoonClaw proposal import/save operations.
 
 The daemon launcher resolves the command from `MOONTOWN_DAEMON_COMMAND`,
 `MOON_BIN`, then `$HOME/.moon/bin/moon`. The default dev path launches
@@ -572,6 +687,12 @@ in `.moontown/moonbooks.json`, and writes
 `.moontown/cookbook/stable-state.json`. The cookbook does not reinterpret
 domain knowledge. It names the canonical artifacts and records whether the
 stable state is complete enough to operate.
+
+Book governance now has two inputs: the curated MoonBook catalog and the saved
+town snapshot. The catalog defines canonical books; the snapshot proves which
+books are actually alive at runtime. The book-quality audit merges both views so
+live standing-watch books cannot avoid review simply because they were spawned
+by the Mayor rather than hand-entered into the catalog.
 
 ### Planbook
 
@@ -696,6 +817,27 @@ The semantic review result layer reads:
 
 Those packets are the handoff to AI judgment. The Mayor should use structural
 failures for routing and use semantic review findings for quality repair.
+The status surface collapses the run ledger into a current row per book and a
+separate historical-attempt table. This keeps recovered orphaned or blocked
+MoonClaw attempts visible for audit without presenting them as current live
+degradation after a later review result has been harvested.
+The repair bridge is also responsible for retirement: when a later semantic
+review reaches the quality threshold, or when the target book is archived,
+hidden/internal, or no longer managed, the corresponding
+`book-quality-repair-<book-id>` standing goal is disabled. That prevents the
+autonomous loop from polling satisfied or retired gaps forever.
+
+The daemon owns the cadence for this semantic layer through the
+`review-book-quality` scheduled job. That job is deliberately bounded: it
+reconciles finished results, dispatches only one pending MoonClaw review, and
+does not enqueue a duplicate while an active review process is alive. This keeps
+book maturation live while preserving the Mayor -> MoonBook -> MoonClaw
+responsibility boundary.
+
+Scheduled jobs honor their declared `interval_seconds` against the daemon's
+real worker tick. Thirty-second jobs can run every tick; sixty-second jobs run
+every two ticks; the semantic book-review job runs on the thirty-minute cadence
+unless an operator dispatches a manual review.
 
 ### Dispatch
 
@@ -803,6 +945,8 @@ Real now:
 - MoonBook persistence/build after terminal goal runs
 - parallel research-lane decomposition for multi-topic goals
 - mayor-level research quality gates
+- generic civic service reconciliation from building protocol ledgers into
+  MoonBook service-result records
 - town synthesis artifacts under `.moontown/town-synthesis/`
 - integrated research narrative with W-source and L-source evidence references
 - proposal/run lifecycle tracking
@@ -816,13 +960,14 @@ Stubbed now:
 - experiment runtime progression
 - backend-synced Rabbita frontend state
 - production-grade cross-platform service packaging
-- repeated accepted-output histories for every Wenyu civic service
+- repeated externally accepted-output histories for every Wenyu civic service
 
 ## Next Integration Milestones
 
 The clean next order is:
 
-1. run and validate each Wenyu civic service lane through MoonClaw and MoonBook
+1. let every Wenyu civic service accumulate multiple reconciled result
+   histories over real daemon time
 2. parse `wenyu.civic.*.v1` result contracts into structured service ledgers
 3. move reusable civic workspace templates into MoonBook
 4. add backend-synced Rabbita frontend state

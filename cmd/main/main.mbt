@@ -11,6 +11,10 @@ async fn main {
     ["live", "refresh"] => println(@moontown.refresh_live_autonomy_spine())
     ["daemon", "tick"] => println(@moontown.daemon_tick_saved_town())
     ["daemon", "start"] => println(@moontown.daemon_start_saved_town())
+    ["daemon", "restart"] =>
+      println(@moontown.write_daemon_restart_request(reason="manual request"))
+    ["daemon", "restart", reason] =>
+      println(@moontown.write_daemon_restart_request(reason~))
     ["daemon", "stop"] => println(@moontown.daemon_stop_saved_town())
     ["daemon", "doctor"] => println(@moontown.daemon_doctor_saved_town())
     ["daemon", "supervise", "--worker"] =>
@@ -63,17 +67,46 @@ async fn main {
     ["books", "quality"] => println(@moontown.render_book_quality())
     ["books", "bootstrap"] =>
       println(@moontown.bootstrap_registered_book_workspaces())
+    ["books", "templates"] => println(@moontown.render_book_template_registry())
+    ["books", "templates", "status"] =>
+      println(@moontown.render_book_template_registry())
+    ["books", "template", "install", template_id, config_path] =>
+      println(@moontown.install_book_template_config(template_id, config_path))
+    ["books", "template", "requests"] =>
+      println(@moontown.render_book_template_request_status())
+    ["books", "template", "requests", "status"] =>
+      println(@moontown.render_book_template_request_status())
+    ["books", "template", "requests", "process"] =>
+      println(@moontown.process_book_template_requests())
+    ["books", "pdf-watch", "bootstrap"] =>
+      println(@moontown.bootstrap_pdf_evidence_watch_book())
+    ["books", "pdf-watch", "bootstrap", book_id] =>
+      println(@moontown.bootstrap_pdf_evidence_watch_book(book_id~))
+    ["books", "pdf-watch", "install", config_path] =>
+      println(@moontown.install_pdf_evidence_watch_book_config(config_path))
+    ["books", "pdf-watch", "archive", book_id] =>
+      println(@moontown.archive_pdf_evidence_watch_book(book_id~))
+    ["books", "pdf-watch", "status"] =>
+      println(@moontown.render_pdf_evidence_watch_book_status())
+    ["books", "pdf-watch", "status", book_id] =>
+      println(@moontown.render_pdf_evidence_watch_book_status(book_id~))
     ["books", "doctor"] => println(@moontown.write_book_quality_audit())
     ["books", "ai-review-packets"] =>
       println(@moontown.write_book_quality_review_packets())
     ["books", "ai-review", "--dispatch"] =>
       println(@moontown.dispatch_next_book_quality_ai_review())
+    ["books", "ai-review", "bridge"] =>
+      println(@moontown.reconcile_book_quality_repair_bridge())
     ["books", "ai-review", "status"] =>
       println(@moontown.render_book_quality_ai_review_status())
+    ["moonclaw", "stores", "compact"] =>
+      println(@moontown.compact_registered_moonclaw_job_stores())
     ["civic", "bootstrap"] =>
       println(@moontown.bootstrap_wenyu_civic_workspaces())
     ["civic", "status"] => println(@moontown.render_wenyu_civic_status())
     ["civic", "doctor"] => println(@moontown.write_wenyu_civic_status())
+    ["civic", "reconcile"] =>
+      println(@moontown.reconcile_wenyu_civic_service_results())
     ["civic", "protocols", "bootstrap"] =>
       println(@moontown.bootstrap_wenyu_building_protocols())
     ["civic", "protocols", "status"] =>

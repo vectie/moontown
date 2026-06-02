@@ -11,6 +11,15 @@ test "daemon runtime stale detection uses real heartbeat age" {
 }
 
 ///|
+test "daemon pid liveness trusts fresh heartbeat when process probe is blocked" {
+  assert_true(daemon_pid_effectively_alive(false, 42, true, true))
+  assert_true(!daemon_pid_effectively_alive(false, 42, false, true))
+  assert_true(!daemon_pid_effectively_alive(false, 0, true, true))
+  assert_true(!daemon_pid_effectively_alive(false, 42, true, false))
+  assert_true(daemon_pid_effectively_alive(true, 42, false, false))
+}
+
+///|
 test "daemon runtime health summary marks healthy worker" {
   let health = {
     status: "running",
@@ -61,6 +70,26 @@ test "daemon start requires supervisor for durable worker" {
   assert_true(supervised_worker.durable_worker_active())
   assert_true(daemon_runtime_start_already_active(supervised_worker))
   assert_eq(daemon_runtime_doctor_action(supervised_worker), "none")
+}
+
+///|
+test "launchd supervisor service runs worker inline" {
+  assert_true(
+    daemon_supervisor_should_run_inline_for_service_name(
+      "com.vectie.moontown.daemon",
+    ),
+  )
+  assert_true(
+    !daemon_supervisor_should_run_inline_for_service_name(
+      "com.apple.some-other-service",
+    ),
+  )
+}
+
+///|
+async test "manual worker only clears missing supervisor when requested" {
+  assert_true(daemon_worker_should_keep_supervisor(0, false))
+  assert_true(!daemon_worker_should_keep_supervisor(0, true))
 }
 
 ///|
@@ -158,6 +187,54 @@ test "daemon runtime paths follow snapshot directory" {
     default_daemon_supervisor_pid_path(snapshot_path=".moontown/town.json"),
     ".moontown/daemon-supervisor.pid",
   )
+  assert_eq(
+    default_daemon_restart_path(snapshot_path=".moontown/town.json"),
+    ".moontown/daemon.restart",
+  )
+}
+
+///|
+async test "daemon restart request writes and clears reload marker" {
+  let snapshot_path = "/tmp/moontown-daemon-restart-wbtest/town.json"
+  let restart_path = default_daemon_restart_path(snapshot_path~)
+  remove_file_if_exists(restart_path)
+  assert_true(!daemon_restart_requested(snapshot_path))
+  let message = write_daemon_restart_request(
+    snapshot_path~,
+    reason="unit test reload",
+  )
+  assert_true(message.contains("Moontown daemon restart requested"))
+  assert_true(message.contains("unit test reload"))
+  assert_true(daemon_restart_requested(snapshot_path))
+  clear_daemon_restart_request(snapshot_path)
+  assert_true(!daemon_restart_requested(snapshot_path))
+}
+
+///|
+async test "daemon worker reload keeps supervisor state" {
+  let snapshot_path = "/tmp/moontown-daemon-reload-state-wbtest/town.json"
+  let runtime_path = default_daemon_runtime_path(snapshot_path~)
+  save_daemon_runtime_state(
+    runtime_path,
+    DaemonRuntimeState::new(
+      status="running",
+      supervisor_pid=101,
+      worker_pid=202,
+      supervisor_run_id="supervisor-test",
+      worker_run_id="worker-test",
+      log_path=default_daemon_log_path(snapshot_path~),
+    ),
+  )
+  write_daemon_pid_file(default_daemon_pid_path(snapshot_path~), 202)
+  ignore(write_daemon_restart_request(snapshot_path~, reason="unit test"))
+  mark_daemon_worker_reload_requested(snapshot_path, "unit test reload")
+  let state = load_daemon_runtime_state(runtime_path).unwrap()
+  assert_eq(state.status, "supervising")
+  assert_eq(state.supervisor_pid, 101)
+  assert_eq(state.worker_pid, 0)
+  assert_eq(state.worker_run_id, "")
+  assert_true(!@fs.exists(default_daemon_pid_path(snapshot_path~)))
+  assert_true(!daemon_restart_requested(snapshot_path))
 }
 
 ///|

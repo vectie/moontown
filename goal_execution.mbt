@@ -475,6 +475,7 @@ async fn execute_goal_book_task(
   task : @moonbook.BookTask,
   assigned_worker_id? : String? = None,
   tick? : Int = 0,
+  run_inline? : Bool = moontown_moonclaw_inline_enabled(),
 ) -> @core.TaskExecutionRecord {
   if is_wenyu_book(entry) && is_local_wenyu_build_fallback_task(task.kind) {
     return local_wenyu_build_execution_record(
@@ -486,13 +487,27 @@ async fn execute_goal_book_task(
   }
   let prepared = mayor.prepare_keeper_packet(entry, task)
   let workspace_root = @moonbook.workspace_root(entry)
-  let imported = @moonclaw.import_packet(
-    prepared.packet,
-    prepared.packet_path,
-    cwd=workspace_root,
-    confirm=true,
-    run_inline=moontown_moonclaw_inline_enabled(),
-  )
+  let maintenance_summary = if is_detached_standing_watch_task(task) {
+    compact_moonclaw_job_store_if_needed(workspace_root, tick)
+  } else {
+    ""
+  }
+  let imported = if is_detached_standing_watch_task(task) {
+    @moonclaw.import_packet_detached(
+      prepared.packet,
+      prepared.packet_path,
+      cwd=workspace_root,
+      confirm=true,
+      run_inline~,
+    )
+  } else {
+    import_packet_with_daemon_timeout(
+      prepared.packet,
+      prepared.packet_path,
+      workspace_root,
+      run_inline,
+    )
+  }
   let execution = match imported.run_id {
     Some(run_id) => ensure_run_execution(task.id, run_id, workspace_root)
     None => None
@@ -508,8 +523,18 @@ async fn execute_goal_book_task(
       .map(fn(result) { result.0.status })
       .unwrap_or(imported.status),
     summary=execution
-      .map(fn(result) { result.0.summary })
-      .unwrap_or(imported.summary),
+      .map(fn(result) {
+        append_execution_maintenance_summary(
+          result.0.summary,
+          maintenance_summary,
+        )
+      })
+      .unwrap_or(
+        append_execution_maintenance_summary(
+          imported.summary,
+          maintenance_summary,
+        ),
+      ),
     output_contract=prepared.packet.output_contract,
     context_pages=prepared.packet.context_pages,
     skill_paths=prepared.packet.skill_paths,
@@ -529,6 +554,47 @@ async fn execute_goal_book_task(
       .map(fn(result) { result.0.notify_town })
       .unwrap_or(true),
   )
+}
+
+///|
+fn append_execution_maintenance_summary(
+  summary : String,
+  maintenance_summary : String,
+) -> String {
+  if maintenance_summary.trim().is_empty() {
+    summary
+  } else {
+    "\{maintenance_summary}\n\{summary}"
+  }
+}
+
+///|
+async fn import_packet_with_daemon_timeout(
+  packet : @moonclaw.ExternalProposalPacket,
+  packet_path : String,
+  workspace_root : String,
+  run_inline : Bool,
+) -> @moonclaw.ProposalImportReceipt {
+  let timeout_ms = moontown_moonclaw_import_timeout_ms()
+  @async.with_timeout(timeout_ms, () => {
+    @moonclaw.import_packet(
+      packet,
+      packet_path,
+      cwd=workspace_root,
+      confirm=true,
+      run_inline~,
+    )
+  }) catch {
+    _ =>
+      raise Failure::Failure(
+        "Moontown external import timed out while importing MoonClaw proposal `\{packet.packet_id}` after \{timeout_ms}ms.",
+      )
+  }
+}
+
+///|
+fn is_detached_standing_watch_task(task : @moonbook.BookTask) -> Bool {
+  task.kind == "standing-watch"
 }
 
 ///|
@@ -656,6 +722,14 @@ fn moontown_moonclaw_supervision_seconds() -> Int {
   match optional_env_text("MOONTOWN_MOONCLAW_SUPERVISION_SECONDS") {
     Some(value) => parse_non_negative_seconds(value, fallback=0)
     None => 0
+  }
+}
+
+///|
+fn moontown_moonclaw_import_timeout_ms() -> Int {
+  match optional_env_text("MOONTOWN_MOONCLAW_IMPORT_TIMEOUT_MS") {
+    Some(value) => parse_non_negative_seconds(value, fallback=20_000)
+    None => 20_000
   }
 }
 

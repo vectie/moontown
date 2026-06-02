@@ -63,6 +63,17 @@ test "moonclaw supervision seconds parser accepts zero for nonblocking mode" {
 }
 
 ///|
+test "moonclaw import timeout defaults to bounded daemon work" {
+  assert_eq(moontown_moonclaw_import_timeout_ms(), 20_000)
+  assert_eq(
+    transient_external_dependency_error(
+      "Moontown external import timed out while importing MoonClaw proposal.",
+    ),
+    true,
+  )
+}
+
+///|
 test "successful book persistence reconciles failed execution into review queue" {
   let execution = @core.TaskExecutionRecord::new(
     task_id="goal-synthesis",

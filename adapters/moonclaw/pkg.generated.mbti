@@ -19,11 +19,17 @@ pub fn default_moonclaw_home() -> String
 
 pub fn default_packet_directory() -> String
 
+pub async fn detached_import_receipt(String, String) -> ProposalImportReceipt?
+
+pub fn detached_import_receipt_path(String) -> String
+
 pub fn embedded_handoff_examples() -> Array[EmbeddedRuntimeHandoff]
 
 pub fn embedded_runtime_policy_examples() -> Array[EmbeddedMoonclawRuntime]
 
 pub async fn import_packet(ExternalProposalPacket, String, moonclaw_root? : String, home? : String, cwd? : String, confirm? : Bool, run_inline? : Bool) -> ProposalImportReceipt
+
+pub async fn import_packet_detached(ExternalProposalPacket, String, moonclaw_root? : String, home? : String, cwd? : String, confirm? : Bool, run_inline? : Bool) -> ProposalImportReceipt
 
 pub fn keeper_runtime(@core.BookRef) -> EmbeddedMoonclawRuntime
 

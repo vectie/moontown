@@ -1269,7 +1269,7 @@ body,
 
 .operator-stat-grid {
   display: grid;
-  grid-template-columns: repeat(4, minmax(0, 1fr));
+  grid-template-columns: repeat(auto-fit, minmax(170px, 1fr));
   gap: 12px;
 }
 
@@ -1300,6 +1300,14 @@ body,
 
 .operator-stat-calm {
   border-color: rgba(15, 118, 110, 0.32);
+}
+
+.operator-stat-book {
+  border-color: rgba(46, 111, 96, 0.34);
+}
+
+.operator-stat-neutral {
+  border-color: rgba(85, 123, 151, 0.28);
 }
 
 .operator-stat-value {
@@ -1497,6 +1505,18 @@ body,
   gap: 10px;
 }
 
+.operator-request-stack {
+  display: grid;
+  gap: 16px;
+  align-content: start;
+}
+
+.book-template-composer {
+  background:
+    linear-gradient(135deg, rgba(207, 232, 223, 0.78), rgba(255, 247, 210, 0.92)),
+    var(--paper);
+}
+
 .request-field {
   display: grid;
   gap: 6px;
@@ -1535,6 +1555,10 @@ body,
   min-height: 132px;
   resize: vertical;
   padding: 12px;
+}
+
+.request-textarea-compact {
+  min-height: 82px;
 }
 
 .request-input:focus,

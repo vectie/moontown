@@ -27,12 +27,16 @@ pub async fn bootstrap_moontown_planbook(
 pub async fn render_moontown_planbook_status(
   workspace_root? : String = default_planbook_workspace_root(),
 ) -> String {
+  if @fs.exists("\{workspace_root}/wiki/index.md") {
+    ensure_planbook_seed_files(workspace_root)
+  }
   let checks = [
     "wiki/index.md", "raw/bootstrap/PLANBOOK_CONTRACT.md", "plans/2026-05-29-book-quality-upgrade/plan.md",
     "plans/2026-05-29-live-autonomy-spine/plan.md", "plans/2026-05-31-editor-mode-real-pipeline/plan.md",
     "plans/index.md", "wiki/planning/quality-gates.md", "wiki/planning/execution-evidence.md",
-    "wiki/planning/role-model.md", "wiki/reviews/active-plan-review.md", "wiki/history/decision-log.md",
-    "wiki/history/change-log.md", "wiki/planning/implementation-backlog.md", "wiki/planning/backlog-progress.md",
+    "wiki/planning/role-model.md", "wiki/planning/operating-architecture.md", "wiki/reviews/active-plan-review.md",
+    "wiki/history/decision-log.md", "wiki/history/change-log.md", "wiki/history/daily-engineering-digest.md",
+    "wiki/planning/implementation-backlog.md", "wiki/planning/backlog-progress.md",
     "wiki/planning/stop-policy.md", "raw/backlog/implementation-backlog.json", "raw/backlog/progress.json",
     "schemas/plan-record.schema.md", "skills/code-plan/SKILL.md", "skills/code-review/SKILL.md",
     "skills/doc-sync/SKILL.md", "book/moonbook-ui-state.json", "book/site/generated/index.html",
@@ -129,6 +133,10 @@ async fn write_planbook_workspace(entry : @moonbook.BookCatalogEntry) -> Unit {
     planbook_role_model_markdown(),
   )
   write_text_file(
+    "\{root}/wiki/planning/operating-architecture.md",
+    planbook_operating_architecture_markdown(),
+  )
+  write_text_file(
     "\{root}/wiki/reviews/active-plan-review.md",
     planbook_active_review_markdown(),
   )
@@ -139,6 +147,10 @@ async fn write_planbook_workspace(entry : @moonbook.BookCatalogEntry) -> Unit {
   write_text_file(
     "\{root}/wiki/history/change-log.md",
     planbook_change_log_seed_markdown(),
+  )
+  write_text_file(
+    "\{root}/wiki/history/daily-engineering-digest.md",
+    planbook_daily_engineering_digest_seed_markdown(),
   )
   ignore(ensure_planbook_backlog(root))
   write_text_file(
@@ -164,10 +176,74 @@ async fn write_planbook_workspace(entry : @moonbook.BookCatalogEntry) -> Unit {
 }
 
 ///|
+async fn ensure_planbook_seed_files(workspace_root : String) -> Unit {
+  write_text_file_if_missing(
+    "\{workspace_root}/wiki/planning/quality-gates.md",
+    planbook_quality_gates_markdown(),
+  )
+  write_text_file_if_missing(
+    "\{workspace_root}/wiki/planning/execution-evidence.md",
+    planbook_execution_evidence_markdown(),
+  )
+  write_text_file_if_missing(
+    "\{workspace_root}/wiki/planning/open-questions.md",
+    planbook_open_questions_markdown(),
+  )
+  write_text_file_if_missing(
+    "\{workspace_root}/wiki/planning/role-model.md",
+    planbook_role_model_markdown(),
+  )
+  write_text_file_if_missing(
+    "\{workspace_root}/wiki/planning/operating-architecture.md",
+    planbook_operating_architecture_markdown(),
+  )
+  write_text_file_if_missing(
+    "\{workspace_root}/wiki/reviews/active-plan-review.md",
+    planbook_active_review_markdown(),
+  )
+  write_text_file_if_missing(
+    "\{workspace_root}/wiki/history/decision-log.md",
+    planbook_decision_log_markdown(),
+  )
+  write_text_file_if_missing(
+    "\{workspace_root}/wiki/history/change-log.md",
+    planbook_change_log_seed_markdown(),
+  )
+  write_text_file_if_missing(
+    "\{workspace_root}/wiki/history/daily-engineering-digest.md",
+    planbook_daily_engineering_digest_seed_markdown(),
+  )
+  write_text_file_if_missing(
+    "\{workspace_root}/schemas/plan-record.schema.md",
+    planbook_record_schema_markdown(),
+  )
+  write_text_file_if_missing(
+    "\{workspace_root}/skills/code-plan/SKILL.md",
+    code_plan_skill_markdown(),
+  )
+  write_text_file_if_missing(
+    "\{workspace_root}/skills/code-review/SKILL.md",
+    code_review_skill_markdown(),
+  )
+  write_text_file_if_missing(
+    "\{workspace_root}/skills/doc-sync/SKILL.md",
+    doc_sync_skill_markdown(),
+  )
+}
+
+///|
 fn planbook_change_log_seed_markdown() -> String {
   [
     "# PlanBook Change Log", "", "This log records live changes in the PlanBook-managed self-build system.",
     "", "## Seed", "", "- PlanBook workspace bootstrapped.",
+  ].join("\n")
+}
+
+///|
+fn planbook_daily_engineering_digest_seed_markdown() -> String {
+  [
+    "# Daily Engineering Digest", "", "This digest summarizes PlanBook self-build progress, validations, blockers, and commit readiness for overnight review.",
+    "", "## Seed", "", "- No autonomy doctor run has refreshed this digest yet.",
   ].join("\n")
 }
 
@@ -199,10 +275,12 @@ fn planbook_index_markdown(entry : @moonbook.BookCatalogEntry) -> String {
     "- `plans/2026-05-31-editor-mode-real-pipeline/plan.md`",
     "- `wiki/planning/quality-gates.md`",
     "- `wiki/planning/role-model.md`",
+    "- `wiki/planning/operating-architecture.md`",
     "- `wiki/planning/execution-evidence.md`",
     "- `wiki/reviews/active-plan-review.md`",
     "- `wiki/history/decision-log.md`",
     "- `wiki/history/change-log.md`",
+    "- `wiki/history/daily-engineering-digest.md`",
     "- `wiki/planning/implementation-backlog.md`",
     "- `wiki/planning/backlog-progress.md`",
     "- `wiki/planning/stop-policy.md`",
@@ -221,6 +299,9 @@ fn planbook_contract_markdown() -> String {
     "- MoonClaw workers are freelance bounded executors. They spawn for a job, write result/evidence/artifacts, then leave.",
     "- MoonBook bookkeepers are resident book roles. They are logically live through scheduled/event-driven keeper ticks and own what becomes memory.",
     "- Mayor owns town-wide routing and supervision; Bookkeepers own book-local memory decisions; Workers own bounded execution only.",
+    "- Every registered book must have a book-scoped watcher slot. Standing-watch goals are book-local protocols and should self-heal capacity instead of deferring forever because an operational book lacks a watcher.",
+    "- Buildings are protocol places. They aggregate, exchange, reduce, review, and distribute document packets; they are not generic agent containers.",
+    "- Durable growth must be visible as changed books, ledgers, plans, code, tests, projections, or explicit no-change decisions.",
     "- Quality repair is allowed as review work, but the plan should aim to pass on the first implementation attempt.",
   ].join("\n")
 }
@@ -240,6 +321,34 @@ fn planbook_role_model_markdown() -> String {
     "- Owns: tool use, observations, synthesis, coding, review, image generation, result packaging, and memory candidates.",
     "- Does not own: durable memory, wiki promotion, standing-goal cadence, or cross-book policy.",
     "", "## Rule", "", "A future plan should specify whether it needs Mayor supervision, Bookkeeper memory work, or freelance Worker execution. If the answer is unclear, update this PlanBook before coding.",
+  ].join("\n")
+}
+
+///|
+fn planbook_operating_architecture_markdown() -> String {
+  [
+    "# Operating Architecture", "", "This page is the PlanBook-local contract for keeping Moontown coherent while it runs and changes itself.",
+    "", "## Core Doctrine", "", "- Durable state lives in MoonBook documents, ledgers, schemas, plans, reviews, and generated projections.",
+    "- Active behavior is a protocol over those documents.", "- Buildings are protocol places: they accept packets, aggregate context, coordinate exchange, reduce outputs, run review gates, and distribute results home.",
+    "- MoonClaw workers are temporary freelance executors. They do bounded tool-heavy work and return structured output.",
+    "- Bookkeepers are resident MoonBook roles. They wake on schedules/events to decide what becomes memory and what needs review.",
+    "- The Mayor owns town-wide cadence, routing, health, escalation, and cross-book priority.",
+    "- Every registered book owns a watcher lane so standing goals can always be routed to the target book before any domain-specific worker is required.",
+    "", "## Runtime Spine", "", "```text", "operator goal / standing goal / civic schedule / planbook gap",
+    "  -> Mayor routes and schedules", "  -> target MoonBook or building protocol hydrates durable context",
+    "  -> MoonClaw worker executes one bounded packet", "  -> MoonBook bookkeeper reviews memory, wiki, ledgers, projections",
+    "  -> Moontown records town-level ledger, health, visual state, and next action",
+    "```", "", "## Growth Contract", "", "The town is considered alive only when at least one of these changes over time:",
+    "", "- research/course/plan/cookbook/civic books gain accepted pages, review items, or explicit no-change decisions",
+    "- civic protocol ledgers gain inbox, contribution, reduction, outbox, review, or return-home records",
+    "- PlanBook backlog items become plans, patches, validation evidence, or blockers",
+    "- code changes land through the PlanBook repair loop with tests, diff hygiene, and commit readiness",
+    "- UI projections refresh from runtime state rather than hand-authored demo text",
+    "", "Operational activity alone is not growth. Retries, regenerated sites, no-change ticks, and logs must be accounted separately from domain knowledge or implementation progress.",
+    "", "## Stable Watch State", "", "The desired mature state is healthy watching, not permanent motion: daemon healthy, active workers zero, unresolved failures zero, PlanBook open gaps zero, due standing goals zero, civic schedules enabled for the next interval, and review queues visible without being counted as accepted progress.",
+    "", "Routine review-gated artifacts do not block the live loop by themselves. They stay visible for bookkeeper/operator/AI-review judgment while the Mayor continues scheduled watches and civic protocol rounds.",
+    "", "## Civic Wiring Rule", "", "Every civic building must have a document protocol pack with an inbox, ledger, reducer contract, review gate, distribution policy, and return-home rule. New ideas are not complete until they are sent back to the owning MoonBook or explicitly parked in a review queue.",
+    "", "## PlanBook Rule", "", "Future code work should come from a PlanBook plan or backlog item. If the daemon finds that the requested work is already done, it updates the plan/backlog/progress evidence instead of creating code churn.",
   ].join("\n")
 }
 
@@ -308,7 +417,7 @@ fn planbook_live_autonomy_plan_markdown() -> String {
     "", "## Goal", "", "- Maintain `.moontown/live-autonomy.json` as the current town spine.",
     "- Append `.moontown/town-journal.jsonl` on each daemon tick or manual refresh.",
     "- Refresh `visual-projection.json` from real task/worker/protocol state during daemon ticks.",
-    "- Classify town activity into working, watching, reviewing, or needs-recovery.",
+    "- Classify town activity into working, watching, or needs-recovery; keep review queues visible without letting routine review block the watch loop.",
     "- Separate accepted updates, no-change cycles, failed cycles, and review-gated outputs.",
     "- Make cookbook treat the live spine and journal as stable runtime artifacts.",
     "", "## Ownership", "", "- Moontown Mayor owns the spine, scheduling, retry, projection, and journal.",
@@ -394,11 +503,20 @@ fn code_plan_skill_markdown() -> String {
     "---", "name: code-plan", "description: Produce implementation-grade plans for code, product, UI, daemon, documentation, or multi-agent changes.",
     "---", "", "# Code Plan Skill", "", "Create a durable plan that a fresh MoonClaw or Codex session can execute without hidden chat context.",
     "", "## Required Shape", "", "- Problem", "- Current state with file/doc references",
-    "- Goal and non-goals", "- Design decision", "- Alternatives considered", "- Affected files and packages",
-    "- Implementation steps", "- Acceptance criteria with checkboxes", "- Validation commands",
-    "- Rollback/recovery path", "- Follow-up tasks", "", "## Quality Bar", "", "- Be specific to this repo and this runtime.",
-    "- Avoid generic advice.", "- Explain ownership boundaries.", "- Make the plan small enough to execute, but complete enough to resume.",
+    "- Goal and non-goals", "- Operating architecture fit", "- Design decision",
+    "- Alternatives considered", "- Affected files and packages", "- Implementation steps",
+    "- Acceptance criteria with checkboxes", "- Validation commands", "- Growth and monitoring evidence",
+    "- Rollback/recovery path", "- Follow-up tasks", "", "## Architecture Rules",
+    "", "- State which durable document/book/ledger owns the truth.", "- State whether the active protocol is Mayor supervision, MoonBook bookkeeper work, MoonClaw worker execution, civic building exchange, or Moondesk human workspace.",
+    "- Treat civic buildings as protocol places, not generic agent containers.",
+    "- Treat MoonClaw workers as freelance bounded executors, not durable memory owners.",
+    "- Treat MoonBook bookkeepers as resident roles that wake on schedules/events and decide memory promotion, review, and projection quality.",
+    "- Include how accepted output returns home to the owning book or review queue.",
+    "", "## Quality Bar", "", "- Be specific to this repo and this runtime.", "- Avoid generic advice.",
+    "- Explain ownership boundaries.", "- Make the plan small enough to execute, but complete enough to resume.",
+    "- Say what should grow over time: book pages, protocol ledgers, PlanBook evidence, code/tests, UI projections, or explicit no-change records.",
     "", "## Concrete Example", "", "```md", "# Plan: Add Book Quality Audit", "Problem: registered books can drift without a durable score.",
+    "Operating architecture fit: PlanBook owns the change plan; Moontown runs the audit; MoonClaw may review; MoonBook stores review evidence.",
     "Affected files: `book_quality.mbt`, `cmd/main/main.mbt`, `docs/USAGE.md`.",
     "Acceptance: `books doctor` writes JSON/Markdown; weak books are listed first; `moon check` passes.",
     "```",

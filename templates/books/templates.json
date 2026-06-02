@@ -1,0 +1,34 @@
+{
+  "templates": [
+    {
+      "template_id": "pdf-evidence-watch",
+      "book_type": "research-book",
+      "specialization": "pdf-evidence-watch",
+      "title": "PDF Evidence Watch Book",
+      "purpose": "Watch configured websites for PDFs, download and extract full text, analyze with a book-owned method, and notify only when accepted knowledge changes.",
+      "root": "templates/books/pdf-evidence-watch",
+      "install_example": "templates/books/pdf-evidence-watch/install.example.json",
+      "install_command": "moon run cmd/main -- books template install pdf-evidence-watch <config.json>",
+      "status_command": "moon run cmd/main -- books pdf-watch status <book-id>",
+      "required_paths": [
+        "book.json",
+        "install.example.json",
+        "analysis-method.example.md",
+        "raw/bootstrap/PDF_WATCH_CONTRACT.md",
+        "wiki/index.md",
+        "wiki/methods/analysis-method.md",
+        "skills/pdf-watch/SKILL.md",
+        "skills/pdf-analysis/SKILL.md",
+        "schemas/pdf-source.schema.md",
+        "schemas/analysis-result.schema.md"
+      ],
+      "editable_files": [
+        "install.example.json",
+        "analysis-method.example.md",
+        "wiki/methods/analysis-method.md",
+        "skills/pdf-watch/SKILL.md",
+        "skills/pdf-analysis/SKILL.md"
+      ]
+    }
+  ]
+}

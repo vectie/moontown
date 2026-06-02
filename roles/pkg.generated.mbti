@@ -11,6 +11,8 @@ import {
 }
 
 // Values
+pub fn keeper_packet_id(String, String) -> String
+
 pub fn keeper_runtime(@core.BookRef) -> @moonclaw.EmbeddedMoonclawRuntime
 
 // Errors

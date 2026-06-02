@@ -156,6 +156,9 @@ It is data-driven and currently installs:
 The daemon reads those standing goals and pattern schedules during normal
 ticks. Domain-specific research state still belongs in each MoonBook; Moontown
 only owns scheduling, dispatch, runtime accounting, and operator visibility.
+The book-quality audit also merges live books from the saved town snapshot, so
+standing-watch books are audited even before they are manually curated into the
+MoonBook catalog.
 
 ## Wenyu Civic Bootstrap
 
@@ -199,6 +202,7 @@ moon run cmd/main -- civic protocols pattern-install templates/civic-patterns/po
 moon run cmd/main -- civic protocols pattern-manifest templates/civic-patterns/wenyu-civic-patterns.json
 moon run cmd/main -- civic protocols schedules status
 moon run cmd/main -- civic protocols schedules tick
+moon run cmd/main -- civic reconcile
 moon run cmd/main -- civic doctor
 ```
 
@@ -222,6 +226,12 @@ schedule before launching MoonClaw, and appends round records under
 `.moontown/civic/pattern-runs/`. Add or remove pattern sessions by editing the
 JSON schedule/template files.
 
+`civic reconcile` is the service-result bridge. It reads protocol-active
+buildings, writes `.moontown/book-results/goal-<book-id>-civic-service.json`
+through MoonBook, and marks review-gated civic outputs as `needs_review`
+instead of accepted facts. The daemon runs this reconciliation as a generic
+scheduled job after pattern rounds.
+
 ## Stable-State Cookbook
 
 Generate or refresh the cookbook with:
@@ -241,8 +251,38 @@ Moontown consumes the manifest for drift checks and operator guidance.
 
 Moontown now distinguishes four active MoonBook work types:
 
+Book templates are listed in
+[templates/books/templates.json](/Users/kq/Workspace/moontown/templates/books/templates.json)
+and can be inspected with `moon run cmd/main -- books templates`. Moondesk
+should use that registry as its creation palette. Runtime book creation requests
+can be written to `.moontown/book-template-requests.json`; the daemon’s
+`book-template-request` job processes pending requests. `status` reports
+pending and failed request counts so autonomous book creation is visible in the
+same runtime spine as standing watchers.
+`live status` and `.moontown/live-autonomy.json` also surface the same request
+counts, so a Moondesk-created book request is visible before and after the
+daemon turns it into a MoonBook workspace.
+The Rabbita operator console also exposes this path during development through
+`POST /api/book-template-requests`, currently for the `pdf-evidence-watch`
+template. That endpoint writes the same config and request documents; it does
+not bypass the daemon or create a browser-only workflow.
+Processed requests are also appended to
+`.moontown/book-template-request-events.jsonl`, which is the durable install
+and failure audit trail for autonomous book creation.
+
 - `research-book`
   discovers and maintains domain knowledge.
+- `pdf-evidence-watch`
+  is a specialized research-book template for website/PDF monitoring:
+  discover PDFs, download, extract full text, analyze with a book-owned method,
+  and notify only when accepted knowledge changes. The reusable template lives
+  at [templates/books/pdf-evidence-watch/](/Users/kq/Workspace/moontown/templates/books/pdf-evidence-watch).
+  Instantiate it with
+  `moon run cmd/main -- books pdf-watch bootstrap <book-id>`; the command
+  registers the MoonBook catalog entry and standing goal that Moondesk should
+  later expose through a creation wizard. For a complete Moondesk-style handoff,
+  use `moon run cmd/main -- books pdf-watch install <config.json>` with
+  [templates/books/pdf-evidence-watch/install.example.json](/Users/kq/Workspace/moontown/templates/books/pdf-evidence-watch/install.example.json).
 - `course-book`
   teaches a beginner through lessons, exercises, and checkpoints.
 - `planbook`
@@ -291,7 +331,9 @@ packet under the PlanBook workspace. It writes repair context, a repair
 and `.moontown/planbook/repair-task.md`. When the daemon sees an open gap and no
 active repair, it dispatches one bounded repair packet through MoonClaw with
 `execution_mode: acp` and `execution_target: codex-main`, so Codex ACP can patch
-the Moontown source root and return software-engineering evidence. Accepted
+the Moontown source root and return software-engineering evidence. Daemon
+dispatch is detached by default; the live loop records the run id and keeps
+ticking instead of waiting for a long source-repair process inline. Accepted
 repairs must run validation, inspect `git status --short`, pass
 `git diff --check`, summarize the focused diff, and record commit status/message
 under the repair result contract. Backlog-driven repairs must also write
@@ -300,6 +342,15 @@ completion evidence under `raw/backlog/completed/<id>.md`. Use `planbook repair
 self-patching route and do not duplicate active repairs. If a worker discovers
 the requested work is already done, it should update the plan/progress evidence
 instead of generating code churn.
+Transient repair dispatch contention is treated as queued retry, not a blocked
+PlanBook gap.
+
+Every registered book also needs a book-scoped watcher lane. Built-in
+operational books such as `coding` and `finance` still keep their specialized
+harness/reviewer/specialist workers, but the Mayor now provisions a matching
+`claw-<book-id>-watcher` slot as well. A standing watch is a book-local protocol,
+so it must not retry forever only because an operational book lacks a watcher
+worker.
 
 ## Book Quality Governance
 
@@ -337,6 +388,7 @@ Generate semantic AI review packets with:
 
 ```bash
 moon run cmd/main -- books ai-review-packets
+moon run cmd/main -- books ai-review bridge
 ```
 
 Those packets live under `.moontown/book-quality/ai-review-packets/` and should
@@ -345,6 +397,25 @@ book's own contract and `SKILL.md`. The resulting `ai_quality_score` should be
 written to `.moontown/book-quality/ai-review-results/<book-id>.md`. World-class
 quality should be decided by that AI review layer, not by hard-coded
 file-existence checks.
+
+The daemon includes a bounded `review-book-quality` cadence that dispatches one
+pending semantic review at a time, suppresses duplicate active reviews, and
+launches scheduled review work detached from the daemon tick so the Mayor loop
+keeps supervising other work.
+Before dispatching another review, the same cadence reconciles completed weak
+AI reviews into durable repair work: it writes
+`wiki/reviews/book-quality-repair.md` inside the affected MoonBook workspace,
+updates `.moontown/book-quality/repair-bridge.json`, and creates or refreshes a
+`book-quality-repair-<book-id>` standing goal. That makes quality findings part
+of the live growth loop instead of a dead-end report. Archived, hidden, or
+internal books are excluded from this repair bridge, so retired smoke proofs
+stay auditable without being reactivated by semantic review. If a later AI
+review shows the book has crossed the quality threshold, the bridge retires the
+stale repair standing goal so the daemon can return to stable watching instead
+of repeatedly polling a satisfied gap.
+`books ai-review status` reports the latest current state per book first, then
+keeps older blocked/orphaned attempts in a historical section. A recovered old
+failure remains auditable without making the town look degraded.
 
 ## Standing Goal Model
 
@@ -411,6 +482,32 @@ daemon tick
   -> Moontown records .moontown/watchers/<goal-id>.jsonl
   -> next_due_tick advances with update/no-change/review/failure backoff
 ```
+
+Daemon-triggered standing-watch handoffs are detached from the tick loop. The
+Mayor records the run id, persists a running snapshot, and later reconciles the
+MoonBook standing-watch marker, instead of holding the daemon inside a long
+MoonClaw import/run. When the supervised environment sets
+`MOONTOWN_MOONCLAW_INLINE=1`, the detached child still asks MoonClaw to confirm
+and run the proposal inline inside that child process; the Mayor loop stays
+nonblocking while avoiding orphaned confirmed runs.
+If a detached import times out, the stale execution summary includes the
+captured `.import.json.err` excerpt so ownership is visible instead of being
+reported as a generic missing-receipt timeout.
+The Mayor also compacts oversized book-local MoonClaw hot-store JSON files
+before standing-watch imports by archiving them under
+`.moonclaw/jobs/archive/tick-<tick>/` and replacing the active files with valid
+empty indexes. This keeps long-lived books from stalling on proposal-store
+serialization growth while preserving historical audit material.
+Transient dispatch failures such as temporary file/resource contention are
+classified as `deferred` with immediate retry cadence, not as domain research
+findings or durable review progress.
+Likewise, an orphaned MoonClaw run that is still indexed as `Running` but has
+no live proposal process is not counted as `no_change` unless MoonBook also
+persisted a terminal standing-watch marker. Without that marker it remains
+deferred infrastructure recovery accounting, so no-change totals measure real
+baseline checks instead of hidden worker loss. When the latest watcher is
+deferred, the live autonomy spine reports it as retry/accounting debt instead
+of showing the generic idle “wait for cadence” action.
 
 If a MoonClaw run is retried, the Mayor records the retry as operational
 history and then re-reads the MoonBook standing-watch decision after the retry
@@ -564,6 +661,10 @@ heartbeat becomes stale:
 ./scripts/install-launchd-daemon.sh
 moon run cmd/main -- daemon doctor
 ```
+
+The launchd installer enables bounded inline MoonClaw execution for supervised
+handoffs, so PlanBook repair and semantic book-review jobs can mature the town
+without waiting for a human shell to run detached commands.
 
 Stop the launchd-managed daemon:
 

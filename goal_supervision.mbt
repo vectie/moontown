@@ -14,6 +14,15 @@ fn supervision_tick(state : @core.TownState) -> Int {
 }
 
 ///|
+fn resolved_supervision_tick(state : @core.TownState, tick : Int?) -> Int {
+  let fallback = supervision_tick(state)
+  match tick {
+    Some(value) => max_int(fallback, value)
+    None => fallback
+  }
+}
+
+///|
 fn assigned_worker_id(decision : @dispatch.RouteDecision) -> String? {
   match decision {
     Assigned(plan) => Some(plan.worker_id)
@@ -65,6 +74,10 @@ fn copy_execution_with(
   next_retry_tick? : Int? = execution.next_retry_tick,
   context_pages? : Array[String] = execution.context_pages,
   skill_paths? : Array[String] = execution.skill_paths,
+  packet_id? : String = execution.packet_id,
+  packet_path? : String = execution.packet_path,
+  proposal_id? : String? = execution.proposal_id,
+  run_id? : String? = execution.run_id,
   result_decision? : String = execution.result_decision,
   requires_review? : Bool = execution.requires_review,
   notify_town? : Bool = execution.notify_town,
@@ -72,10 +85,10 @@ fn copy_execution_with(
   @core.TaskExecutionRecord::new(
     task_id=execution.task_id,
     book_id=execution.book_id,
-    packet_id=execution.packet_id,
-    packet_path=execution.packet_path,
-    proposal_id=execution.proposal_id,
-    run_id=execution.run_id,
+    packet_id~,
+    packet_path~,
+    proposal_id~,
+    run_id~,
     status~,
     summary~,
     output_contract=execution.output_contract,
@@ -117,8 +130,32 @@ async fn run_supervision_cycle(
   catalog : Array[@moonbook.BookCatalogEntry],
   snapshot_path? : String = @storage.default_snapshot_path(),
   standing_goals? : Array[@core.StandingGoal] = [],
+  tick? : Int? = None,
 ) -> Unit {
-  reconcile_live_executions(state, catalog, snapshot_path, standing_goals)
+  let cycle_tick = resolved_supervision_tick(state, tick)
+  reconcile_live_executions(
+    state,
+    catalog,
+    snapshot_path,
+    standing_goals,
+    tick=cycle_tick,
+  )
+  rehydrate_orphaned_deferred_watcher_records(
+    state, snapshot_path, standing_goals, cycle_tick,
+  )
+  reconcile_late_detached_import_receipts(
+    state,
+    cycle_tick,
+    catalog~,
+    snapshot_path~,
+    standing_goals~,
+  )
+  reconcile_terminal_detached_watcher_ledgers(
+    state, catalog, snapshot_path, standing_goals,
+  )
+  reconcile_persisted_standing_watch_records(
+    state, snapshot_path, standing_goals,
+  )
   reconcile_review_queued_standing_watch_outputs(
     state, catalog, snapshot_path, standing_goals,
   )
@@ -126,10 +163,29 @@ async fn run_supervision_cycle(
     state, catalog, snapshot_path, standing_goals,
   )
   reconcile_persisted_non_review_outputs(state, snapshot_path)
+  reconcile_transient_dependency_failures(
+    state,
+    catalog~,
+    snapshot_path~,
+    standing_goals~,
+  )
   reconcile_persisted_terminal_outputs(state, snapshot_path)
+  reconcile_transient_dependency_failures(
+    state,
+    catalog~,
+    snapshot_path~,
+    standing_goals~,
+  )
+  reconcile_persisted_non_review_outputs(state, snapshot_path)
   reconcile_repaired_context_import_failures(state)
+  reconcile_transient_dependency_failures(
+    state,
+    catalog~,
+    snapshot_path~,
+    standing_goals~,
+  )
   release_orphaned_blocked_workers(state)
-  let packet = mayor.supervise(state, supervision_tick(state))
+  let packet = mayor.supervise(state, cycle_tick)
   if packet.directives.is_empty() {
     return
   }
@@ -164,6 +220,69 @@ async fn run_supervision_cycle(
     apply_supervision_directive(
       state, mayor, catalog, directive, snapshot_path, standing_goals,
     )
+  }
+}
+
+///|
+async fn reconcile_transient_dependency_failures(
+  state : @core.TownState,
+  catalog? : Array[@moonbook.BookCatalogEntry] = [],
+  snapshot_path? : String = @storage.default_snapshot_path(),
+  standing_goals? : Array[@core.StandingGoal] = [],
+) -> Unit {
+  let snapshot = state.executions.copy()
+  for execution in snapshot {
+    if !transient_dependency_reconcilable_status(execution.status) ||
+      !transient_external_dependency_error(execution.summary) {
+      continue
+    }
+    let completed = copy_execution_with(
+      execution,
+      status=@core.TaskExecutionStatus::Completed,
+      summary="\{execution.summary}\nkeeper_auto_triage: transient_infrastructure_contention\nreconciled_detail: MoonBook/MoonClaw dependency-lock or transport contention was classified as operational retry noise, not durable domain/task failure.",
+      heartbeat_tick=supervision_tick(state),
+      next_retry_tick=None,
+      result_decision="deferred-transient-infrastructure",
+      requires_review=false,
+      notify_town=false,
+    )
+    state.replace_execution(completed)
+    state.replace_task(task_for_supervision(state, completed))
+    sync_worker_from_execution(state, completed)
+    match @moonbook.entry_for_book_id(catalog, completed.book_id) {
+      Some(entry) => {
+        let observed = finalize_standing_watch_supervision_record(
+          state, entry, completed, standing_goals, snapshot_path,
+        )
+        if observed != completed {
+          state.replace_execution(observed)
+          state.replace_task(task_for_supervision(state, observed))
+          sync_worker_from_execution(state, observed)
+        }
+      }
+      None => ()
+    }
+    state.record_event(
+      @core.TownEvent::new(
+        id="event-transient-infra-\{state.events.length()}-\{completed.task_id}",
+        kind="recovery",
+        detail="Mayor cleared transient infrastructure failure `\{completed.task_id}`; future cadence can retry normally.",
+        related_task_id=Some(completed.task_id),
+        related_book_id=Some(completed.book_id),
+        related_run_id=completed.run_id,
+      ),
+    )
+  }
+}
+
+///|
+fn transient_dependency_reconcilable_status(
+  status : @core.TaskExecutionStatus,
+) -> Bool {
+  match status {
+    @core.TaskExecutionStatus::Failed
+    | @core.TaskExecutionStatus::ReviewQueued => true
+    _ => false
   }
 }
 
@@ -481,8 +600,8 @@ async fn reconcile_live_executions(
   catalog : Array[@moonbook.BookCatalogEntry],
   snapshot_path : String,
   standing_goals : Array[@core.StandingGoal],
+  tick? : Int = supervision_tick(state),
 ) -> Unit {
-  let tick = supervision_tick(state)
   let snapshot = state.executions.copy()
   for execution in snapshot {
     if !pollable_execution_status(execution.status) {
@@ -541,9 +660,507 @@ async fn reconcile_live_executions(
           }
         }
       }
+      None => reconcile_no_run_id_live_execution(state, execution, tick)
+    }
+  }
+}
+
+///|
+async fn reconcile_no_run_id_live_execution(
+  state : @core.TownState,
+  execution : @core.TaskExecutionRecord,
+  tick : Int,
+  launch_confirmed_run? : Bool = true,
+  launch_command_override? : String? = None,
+) -> Unit {
+  if execution.status == @core.TaskExecutionStatus::ProposalImported {
+    if reconcile_detached_import_receipt_if_available(
+        state,
+        execution,
+        tick,
+        launch_confirmed_run~,
+        launch_command_override~,
+      ) {
+      return
+    }
+  }
+  if no_run_id_live_execution_stale(execution, tick) {
+    let stderr_summary = detached_import_stderr_summary(
+      detached_import_packet_path_for_execution(execution),
+    )
+    let updated = copy_execution_with(
+      execution,
+      status=@core.TaskExecutionStatus::Failed,
+      summary="Standing watch execution failed for \{execution.book_id} / \{execution.task_id}: timed out while importing MoonClaw proposal; no run id or detached import receipt became available before the heartbeat window.\{stderr_summary}",
+      heartbeat_tick=tick,
+      next_retry_tick=None,
+      result_decision="deferred",
+      requires_review=false,
+      notify_town=false,
+    )
+    state.replace_execution(updated)
+    state.replace_task(task_for_supervision(state, updated))
+    sync_worker_from_execution(state, updated)
+  }
+}
+
+///|
+async fn reconcile_late_detached_import_receipts(
+  state : @core.TownState,
+  tick : Int,
+  catalog? : Array[@moonbook.BookCatalogEntry] = [],
+  snapshot_path? : String = @storage.default_snapshot_path(),
+  standing_goals? : Array[@core.StandingGoal] = [],
+) -> Unit {
+  let snapshot = state.executions.copy()
+  for execution in snapshot {
+    if !late_detached_import_receipt_candidate(execution) {
+      continue
+    }
+    if reconcile_detached_import_receipt_if_available(
+        state,
+        execution,
+        tick,
+        launch_confirmed_run=true,
+      ) {
+      let updated = @core.find_execution(state, execution.task_id).unwrap_or(
+        execution,
+      )
+      finalize_terminal_detached_watcher_ledger_if_needed(
+        state, catalog, snapshot_path, standing_goals, updated,
+      )
+    } else {
+      hydrate_detached_import_handle_if_missing(state, execution)
+    }
+  }
+}
+
+///|
+async fn reconcile_terminal_detached_watcher_ledgers(
+  state : @core.TownState,
+  catalog : Array[@moonbook.BookCatalogEntry],
+  snapshot_path : String,
+  standing_goals : Array[@core.StandingGoal],
+) -> Unit {
+  let snapshot = state.executions.copy()
+  for execution in snapshot {
+    if terminal_detached_watcher_ledger_candidate(
+        execution, standing_goals, snapshot_path,
+      ) {
+      finalize_terminal_detached_watcher_ledger_if_needed(
+        state, catalog, snapshot_path, standing_goals, execution,
+      )
+    }
+  }
+}
+
+///|
+async fn rehydrate_orphaned_deferred_watcher_records(
+  state : @core.TownState,
+  snapshot_path : String,
+  standing_goals : Array[@core.StandingGoal],
+  tick : Int,
+) -> Unit {
+  let ledger_dir = watcher_ledger_dir_for_snapshot(snapshot_path)
+  for goal in standing_goals {
+    if live_external_execution_count(state) >= max_live_external_executions() {
+      return
+    }
+    let records = @storage.load_watcher_run_records(goal.id, dir=ledger_dir)
+    match latest_orphaned_deferred_watcher_record(state, records) {
+      Some(record) =>
+        match deferred_watcher_packet_path(record) {
+          Some(packet_path) => {
+            let task_id = record.task_id.unwrap_or("")
+            let book_id = record.target_book_id
+            let packet_id = packet_id_from_packet_path(packet_path)
+            let task = @core.TownTask::new(
+              id=task_id,
+              book_id~,
+              title="Standing watch recovery: \{goal.title}",
+              prompt=goal.prompt,
+              domain=@core.WorkDomain::Research,
+              required_role=Some(@core.WorkerRole::Watcher),
+              status=@core.TownTaskStatus::Assigned,
+            )
+            let execution = @core.TaskExecutionRecord::new(
+              task_id~,
+              book_id~,
+              packet_id~,
+              packet_path~,
+              status=@core.TaskExecutionStatus::ProposalImported,
+              summary="Mayor rehydrated orphaned deferred watcher record for `\{goal.id}` from persisted ledger receipt path. Original detail: \{record.detail}",
+              output_contract="standing-watch",
+              heartbeat_tick=tick,
+              stale_after_tick=tick + 15,
+              result_decision="deferred",
+              requires_review=false,
+              notify_town=true,
+            )
+            state.replace_task(task)
+            state.replace_execution(execution)
+            ignore(
+              reconcile_detached_import_receipt_if_available(
+                state, execution, tick,
+              ),
+            )
+            state.record_event(
+              @core.TownEvent::new(
+                id="event-watch-rehydrate-\{state.events.length()}-\{task_id}",
+                kind="recovery",
+                detail="Mayor rehydrated orphaned deferred watcher `\{task_id}` for `\{goal.id}` so the detached MoonClaw import can be supervised again.",
+                related_task_id=Some(task_id),
+                related_book_id=Some(book_id),
+              ),
+            )
+          }
+          None => ()
+        }
       None => ()
     }
   }
+}
+
+///|
+fn latest_orphaned_deferred_watcher_record(
+  state : @core.TownState,
+  records : Array[@core.WatcherRunRecord],
+) -> @core.WatcherRunRecord? {
+  let mut latest : @core.WatcherRunRecord? = None
+  for record in records {
+    if !orphaned_deferred_watcher_record_candidate(state, records, record) {
+      continue
+    }
+    match latest {
+      Some(current) => if record.tick >= current.tick { latest = Some(record) }
+      None => latest = Some(record)
+    }
+  }
+  latest
+}
+
+///|
+fn orphaned_deferred_watcher_record_candidate(
+  state : @core.TownState,
+  records : Array[@core.WatcherRunRecord],
+  record : @core.WatcherRunRecord,
+) -> Bool {
+  if record.decision != @core.WatcherDecisionKind::Deferred {
+    return false
+  }
+  let task_id = match record.task_id {
+    Some(task_id) => task_id
+    None => return false
+  }
+  if @core.find_execution(state, task_id) is Some(_) {
+    return false
+  }
+  if deferred_watcher_record_has_terminal_successor(records, record) {
+    return false
+  }
+  deferred_watcher_packet_path(record) is Some(_)
+}
+
+///|
+fn deferred_watcher_record_has_terminal_successor(
+  records : Array[@core.WatcherRunRecord],
+  record : @core.WatcherRunRecord,
+) -> Bool {
+  for other in records {
+    if other.task_id == record.task_id &&
+      other.tick >= record.tick &&
+      other.decision != @core.WatcherDecisionKind::Deferred {
+      return true
+    }
+  }
+  false
+}
+
+///|
+fn deferred_watcher_packet_path(record : @core.WatcherRunRecord) -> String? {
+  let receipt_path = match deferred_watcher_receipt_path(record.detail) {
+    Some(path) => path
+    None => return None
+  }
+  if receipt_path.has_suffix(".import.json") {
+    Some(
+      receipt_path[:receipt_path.length() - ".import.json".length()].to_owned(),
+    )
+  } else {
+    None
+  }
+}
+
+///|
+fn deferred_watcher_receipt_path(detail : String) -> String? {
+  let needle = "waiting for receipt "
+  for line in detail.split("\n") {
+    let parts = line.split(needle).to_array()
+    if parts.length() < 2 {
+      continue
+    }
+    let candidate = parts[1].trim(chars=" .").to_owned()
+    if candidate.has_suffix(".import.json") {
+      return Some(candidate)
+    }
+  }
+  None
+}
+
+///|
+fn packet_id_from_packet_path(packet_path : String) -> String {
+  let basename = path_basename(packet_path)
+  if basename.has_suffix(".json") {
+    basename[:basename.length() - ".json".length()].to_owned()
+  } else {
+    basename
+  }
+}
+
+///|
+async fn terminal_detached_watcher_ledger_candidate(
+  execution : @core.TaskExecutionRecord,
+  standing_goals : Array[@core.StandingGoal],
+  snapshot_path : String,
+) -> Bool {
+  if !terminal_execution_status(execution.status) {
+    return false
+  }
+  let goal = match
+    standing_goal_for_execution_task(standing_goals, execution.task_id) {
+    Some(goal) => goal
+    None => return false
+  }
+  let ledger_dir = watcher_ledger_dir_for_snapshot(snapshot_path)
+  match terminal_watcher_record_for_execution(goal.id, ledger_dir, execution) {
+    Some(_) => return false
+    None => ()
+  }
+  detached_import_evidence_for_execution(execution)
+}
+
+///|
+async fn detached_import_evidence_for_execution(
+  execution : @core.TaskExecutionRecord,
+) -> Bool {
+  let command_matches = match execution.last_command {
+    Some(command) => command.contains(".import.json")
+    None => false
+  }
+  let packet_path = detached_import_packet_path_for_execution(execution)
+  let receipt_path = if packet_path.trim().is_empty() {
+    ""
+  } else {
+    @moonclaw.detached_import_receipt_path(packet_path)
+  }
+  command_matches ||
+  (!receipt_path.is_empty() && @fs.exists(receipt_path)) ||
+  execution.summary.contains("inline run finished") ||
+  execution.result_decision == "deferred-transient-infrastructure"
+}
+
+///|
+async fn finalize_terminal_detached_watcher_ledger_if_needed(
+  state : @core.TownState,
+  catalog : Array[@moonbook.BookCatalogEntry],
+  snapshot_path : String,
+  standing_goals : Array[@core.StandingGoal],
+  execution : @core.TaskExecutionRecord,
+) -> Unit {
+  match @moonbook.entry_for_book_id(catalog, execution.book_id) {
+    Some(entry) => {
+      let observed = finalize_standing_watch_supervision_record(
+        state, entry, execution, standing_goals, snapshot_path,
+      )
+      if observed != execution {
+        state.replace_execution(observed)
+        state.replace_task(task_for_supervision(state, observed))
+        sync_worker_from_execution(state, observed)
+      }
+    }
+    None => ()
+  }
+}
+
+///|
+fn hydrate_detached_import_handle_if_missing(
+  state : @core.TownState,
+  execution : @core.TaskExecutionRecord,
+) -> Unit {
+  let packet_id = detached_import_packet_id_for_execution(execution)
+  let packet_path = detached_import_packet_path_for_execution(execution)
+  if packet_id == execution.packet_id && packet_path == execution.packet_path {
+    return
+  }
+  let updated = copy_execution_with(execution, packet_id~, packet_path~)
+  state.replace_execution(updated)
+  state.replace_task(task_for_supervision(state, updated))
+  sync_worker_from_execution(state, updated)
+}
+
+///|
+fn late_detached_import_receipt_candidate(
+  execution : @core.TaskExecutionRecord,
+) -> Bool {
+  let command_matches = match execution.last_command {
+    Some(command) => command.contains(".import.json")
+    None => false
+  }
+  let packet_path = detached_import_packet_path_for_execution(execution)
+  let packet_path_matches = !packet_path.trim().is_empty()
+  execution.run_id is None &&
+  !live_execution_status(execution.status) &&
+  execution.result_decision == "deferred-transient-infrastructure" &&
+  (command_matches || packet_path_matches)
+}
+
+///|
+async fn reconcile_detached_import_receipt_if_available(
+  state : @core.TownState,
+  execution : @core.TaskExecutionRecord,
+  tick : Int,
+  launch_confirmed_run? : Bool = true,
+  launch_command_override? : String? = None,
+) -> Bool {
+  let packet_id = detached_import_packet_id_for_execution(execution)
+  let packet_path = detached_import_packet_path_for_execution(execution)
+  if packet_path.trim().is_empty() {
+    return false
+  }
+  match @moonclaw.detached_import_receipt(packet_id, packet_path) {
+    Some(receipt) => {
+      let should_launch = launch_confirmed_run &&
+        receipt.status == @core.TaskExecutionStatus::RunConfirmed
+      let launch_command = match receipt.run_id {
+        Some(run_id) if should_launch =>
+          match launch_command_override {
+            Some(command) => Some(command)
+            None =>
+              Some(
+                @moonclaw.run_confirmed_run(
+                  run_id,
+                  cwd=book_workspace_root(state, execution.book_id),
+                ),
+              )
+          }
+        _ => None
+      }
+      let summary = match launch_command {
+        Some(command) => "\{receipt.summary} Detached runner: \{command}"
+        None => receipt.summary
+      }
+      let updated = copy_execution_with(
+        execution,
+        packet_id=receipt.packet_id,
+        packet_path=receipt.packet_path,
+        proposal_id=Some(receipt.proposal_id),
+        run_id=receipt.run_id,
+        status=receipt.status,
+        summary~,
+        heartbeat_tick=tick,
+        stale_after_tick=tick + polled_execution_stale_window_ticks(execution),
+        result_decision=if receipt.status ==
+          @core.TaskExecutionStatus::Completed {
+          "completed"
+        } else {
+          execution.result_decision
+        },
+        requires_review=if receipt.status ==
+          @core.TaskExecutionStatus::Completed {
+          false
+        } else {
+          execution.requires_review
+        },
+      )
+      state.replace_execution(updated)
+      state.replace_task(task_for_supervision(state, updated))
+      sync_worker_from_execution(state, updated)
+      true
+    }
+    None => false
+  }
+}
+
+///|
+fn detached_import_packet_id_for_execution(
+  execution : @core.TaskExecutionRecord,
+) -> String {
+  if execution.packet_id.trim().is_empty() ||
+    execution.packet_id.has_prefix("pending-") {
+    @roles.keeper_packet_id(execution.book_id, execution.task_id)
+  } else {
+    execution.packet_id
+  }
+}
+
+///|
+fn detached_import_packet_path_for_execution(
+  execution : @core.TaskExecutionRecord,
+) -> String {
+  if !execution.packet_path.trim().is_empty() {
+    return execution.packet_path
+  }
+  let packet_id = detached_import_packet_id_for_execution(execution)
+  if packet_id.trim().is_empty() {
+    ""
+  } else {
+    @moonclaw.packet_file_path(@moonclaw.default_packet_directory(), packet_id)
+  }
+}
+
+///|
+async fn detached_import_stderr_summary(packet_path : String) -> String {
+  if packet_path.trim().is_empty() {
+    return ""
+  }
+  let stderr_path = @moonclaw.detached_import_receipt_path(packet_path) + ".err"
+  let text = read_text_or_empty(stderr_path).trim().to_owned()
+  if text.is_empty() {
+    return ""
+  }
+  let compact = compact_detached_import_stderr(text)
+  if compact.is_empty() {
+    ""
+  } else {
+    " Detached import stderr: \{compact}"
+  }
+}
+
+///|
+fn compact_detached_import_stderr(text : String) -> String {
+  let builder = StringBuilder::new()
+  let mut count = 0
+  for line in text.split("\n") {
+    if count >= 8 {
+      break
+    }
+    let trimmed = line.trim()
+    if trimmed.is_empty() {
+      continue
+    }
+    if count > 0 {
+      builder.write_string(" | ")
+    }
+    builder.write_string(trimmed.to_owned())
+    count += 1
+  }
+  builder.to_string()
+}
+
+///|
+fn no_run_id_live_execution_stale(
+  execution : @core.TaskExecutionRecord,
+  tick : Int,
+) -> Bool {
+  if !live_execution_status(execution.status) {
+    return false
+  }
+  tick >= execution.stale_after_tick ||
+  (
+    execution.run_id is None &&
+    tick >=
+    execution.heartbeat_tick + polled_execution_stale_window_ticks(execution)
+  )
 }
 
 ///|
@@ -566,8 +1183,8 @@ fn polled_execution_stale_window_ticks(
   execution : @core.TaskExecutionRecord,
 ) -> Int {
   match execution.run_id {
-    Some(_) => 30
-    None => 3
+    Some(_) => 120
+    None => 15
   }
 }
 
@@ -710,6 +1327,7 @@ async fn retry_execution(
     retry_task,
     assigned_worker_id=execution.assigned_worker_id,
     tick=supervision_tick(state),
+    run_inline=false,
   ) catch {
     error =>
       failed_execution_record(

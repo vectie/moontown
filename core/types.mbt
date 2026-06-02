@@ -283,7 +283,7 @@ pub fn StandingGoal::next_due_after_watcher_decision(
     WatcherDecisionKind::NoChange => tick + cadence
     WatcherDecisionKind::NeedsReview => tick + max_int(1, cadence / 2)
     WatcherDecisionKind::Failed => tick + max_int(1, cadence / 4)
-    WatcherDecisionKind::Deferred => tick + 1
+    WatcherDecisionKind::Deferred => tick + cadence
   }
 }
 
@@ -480,13 +480,16 @@ pub fn TownState::replace_execution(
   self : TownState,
   execution : TaskExecutionRecord,
 ) -> Unit {
+  let mut replaced = false
   for index in 0..<self.executions.length() {
     if self.executions[index].task_id == execution.task_id {
       self.executions[index] = execution
-      return
+      replaced = true
     }
   }
-  self.executions.push(execution)
+  if !replaced {
+    self.executions.push(execution)
+  }
 }
 
 ///|

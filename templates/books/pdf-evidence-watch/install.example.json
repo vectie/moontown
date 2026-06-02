@@ -1,0 +1,13 @@
+{
+  "book_id": "research-my-domain-pdf-watch",
+  "title": "My Domain PDF Watch",
+  "purpose": "Watch approved websites for relevant PDFs, extract full text, analyze with the book-owned method, and notify only when accepted knowledge changes.",
+  "websites": [
+    "https://example.org/reports",
+    "https://example.com/publications"
+  ],
+  "analysis_method": "",
+  "analysis_method_path": "analysis-method.example.md",
+  "cadence_ticks": 30,
+  "workspace_root": ""
+}

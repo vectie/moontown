@@ -173,4 +173,63 @@ test "civic portfolio counts operable and review services" {
   assert_eq(portfolio.review_count, 1)
   assert_eq(portfolio.missing_count, 1)
   assert_eq(portfolio.markdown_path, ".moontown/civic/status.md")
+  let json_text = portfolio.to_json().stringify()
+  assert_true(json_text.contains("protocol_history"))
+  assert_true(json_text.contains("protocol_history_state"))
+}
+
+///|
+test "civic service reconciliation uses protocol work without accepting facts" {
+  let service = @civic.wenyu_civic_service_for_book_id("wenyu-policy-hall").unwrap()
+  let health = CivicServiceHealth::{
+    service_id: "policy-hall",
+    title: "Policy Hall",
+    book_id: "wenyu-policy-hall",
+    service_kind: "policy-service",
+    module_mode: "agent-workspace",
+    book_role: "source-backed-service-workspace",
+    skill_mode: "policy-intelligence",
+    protocol_status: "review",
+    protocol_ready: true,
+    protocol_inbox_count: 3,
+    protocol_contribution_count: 3,
+    protocol_reduction_count: 3,
+    protocol_outbox_count: 3,
+    protocol_review_count: 1,
+    latest_protocol_summary: "Policy Hall reduced source packets into a pending checklist review.",
+    protocol_history: [],
+    protocol_history_state: "ready",
+    workspace_root: "/tmp/policy",
+    status: "seeded",
+    operable: true,
+    proven_by_result: false,
+    workspace_exists: true,
+    schema_ready: true,
+    wiki_ready: true,
+    review_ready: true,
+    projection_ready: true,
+    skill_ready: true,
+    moonclaw_profile_ready: true,
+    latest_result_path: ".moontown/book-results/goal-wenyu-policy-hall-civic-service.json",
+    latest_result_found: false,
+    latest_decision: "none",
+    latest_book_changed: "unknown",
+    latest_pages_changed: 0,
+    latest_accepted_facts: 0,
+    latest_review_items: 0,
+    next_check_hint: "unknown",
+    missing_required_paths: [],
+    notes: [],
+  }
+  assert_true(civic_service_has_reconcilable_protocol_work(health))
+  assert_eq(civic_service_reconciled_decision(health), "needs_review")
+  let summary = civic_service_reconciled_summary(service, health)
+  assert_true(summary.contains("civic_service_decision: needs_review"))
+  assert_true(summary.contains("accepted_facts_count: 0"))
+  assert_true(summary.contains("review_items_created_count: 1"))
+  assert_true(
+    summary.contains(
+      "does not claim the review-gated outputs are accepted facts",
+    ),
+  )
 }

@@ -160,6 +160,8 @@ It reads:
 - `.moontown/watchers/*.jsonl` through `watchers/index.json` for the durable
   multi-topic watcher ledger.
 - `.moontown/operator-requests/requests.jsonl` for browser-submitted requests.
+- `.moontown/live-autonomy.json` for the live spine, including PlanBook
+  self-build status and the Moondesk/Major book-template request inbox.
 
 The progress surface shows:
 
@@ -170,6 +172,11 @@ The progress surface shows:
 - accepted/rejected fact counts
 - whether the target book actually changed
 - update/review/no-change/failed decision mix
+- book-template request totals, pending count, failed count, and inbox summary
+- latest book-template lifecycle event, so an operator can see whether the
+  newest specialized book request was installed or failed
+- active versus archived standing-watch counts, so disabled audit records do
+  not appear as live work
 - a standing-watch portfolio for every enabled long-horizon topic
 - per-goal progress toward the next due tick
 - the last five watcher records with source, delta, task, and run metadata
@@ -186,6 +193,16 @@ record and creates or replaces the matching standing goal in
 `.moontown/standing-goals.json`. The daemon is still the executor; the UI only
 adds durable work to the Mayor queue.
 
+The book-template composer writes through the Vite dev endpoint
+`POST /api/book-template-requests`. The first supported template is
+`pdf-evidence-watch`: the operator provides a title, book id, websites,
+cadence, purpose, and optional method override; the endpoint writes a config
+file under `.moontown/book-template-configs/` and queues a durable request in
+`.moontown/book-template-requests.json`. The daemon or
+`books template requests process` installs the actual MoonBook workspace and
+standing goal. This keeps browser UI, Moondesk, and Mayor automation on the
+same document-first creation path.
+
 The operator dashboard does not render the Wenyu map inline. It shows a portal
 card that links to `viewport.html?assets=generated&v=wenyu`, the canonical
 standalone tilemap viewport. This avoids divergence between a small dashboard
@@ -200,6 +217,10 @@ Current operator-console expectations:
 - link to the standalone Wenyu viewport instead of rendering an inline map
 - expose request submission through the Mayor queue rather than executing work
   directly in the browser
+- expose pending and failed book-template requests so Moondesk-created books
+  are visible before the daemon installs them as MoonBook workspaces
+- show active and archived standing-watch counts from `.moontown/live-autonomy.json`
+  before drilling into individual watch cards
 
 ## Standalone Viewport Modes
 

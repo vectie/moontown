@@ -77,7 +77,7 @@ async fn run_standing_goal_watch_cycle(
     }
     _ => ()
   }
-  let execution_tick = supervision_tick(state)
+  let execution_tick = tick
   publish_running_standing_watch_snapshot(
     state,
     entry,
@@ -96,13 +96,25 @@ async fn run_standing_goal_watch_cycle(
         assigned_worker_id=worker_id,
         tick=execution_tick,
       ) catch {
-        error =>
-          failed_execution_record(
-            entry,
-            task,
-            "Standing watch execution failed for \{entry.id} / \{task.id}: \{error}",
-            assigned_worker_id=worker_id,
-          )
+        error => {
+          let detail = "Standing watch execution failed for \{entry.id} / \{task.id}: \{error}"
+          if standing_watch_transient_dispatch_error(detail) {
+            transient_deferred_standing_watch_execution_record(
+              entry,
+              task,
+              detail,
+              assigned_worker_id=worker_id,
+              tick=execution_tick,
+            )
+          } else {
+            failed_execution_record(
+              entry,
+              task,
+              detail,
+              assigned_worker_id=worker_id,
+            )
+          }
+        }
       }
     _ =>
       failed_execution_record(
@@ -132,16 +144,19 @@ async fn run_standing_goal_watch_cycle(
       execution_after_successful_book_persist(observed_execution, outcome, tick)
     None => observed_execution
   }
-  if reconciled_execution != observed_execution {
-    state.replace_task(to_town_task(entry, task, reconciled_execution.status))
-    state.replace_execution(reconciled_execution)
-    sync_worker_from_execution(state, reconciled_execution)
+  let stabilized_execution = stabilize_deferred_standing_watch_execution(
+    reconciled_execution, tick,
+  )
+  if stabilized_execution != observed_execution {
+    state.replace_task(to_town_task(entry, task, stabilized_execution.status))
+    state.replace_execution(stabilized_execution)
+    sync_worker_from_execution(state, stabilized_execution)
   }
   collapse_standing_watch_book_history(entry, observed_execution)
   if terminal_execution_status(observed_execution.status) {
-    finalize_goal_book_entry(state, entry, 0, [reconciled_execution.task_id])
+    finalize_goal_book_entry(state, entry, 0, [stabilized_execution.task_id])
   }
-  let decision = standing_watch_decision_from_execution(reconciled_execution)
+  let decision = standing_watch_decision_from_execution(stabilized_execution)
   let next_no_change_streak = if decision == @core.WatcherDecisionKind::NoChange {
     no_change_streak + 1
   } else {
@@ -157,16 +172,39 @@ async fn run_standing_goal_watch_cycle(
     tick~,
     target_book_id~,
     decision~,
-    delta_score=standing_watch_delta_score(observed_execution),
-    new_source_count=standing_watch_new_source_count(observed_execution),
-    detail=observed_execution.summary,
-    task_id=Some(observed_execution.task_id),
-    run_id=observed_execution.run_id,
+    delta_score=standing_watch_delta_score(stabilized_execution),
+    new_source_count=standing_watch_new_source_count(stabilized_execution),
+    detail=stabilized_execution.summary,
+    task_id=Some(stabilized_execution.task_id),
+    run_id=stabilized_execution.run_id,
     next_due_tick=updated.next_due_tick,
   )
   append_standing_watch_record(goal.id, ledger_dir, record)
   record_standing_watch_event(state, record)
   updated
+}
+
+///|
+fn stabilize_deferred_standing_watch_execution(
+  execution : @core.TaskExecutionRecord,
+  tick : Int,
+) -> @core.TaskExecutionRecord {
+  let decision = standing_watch_recovery_decision_from_execution(execution)
+  if decision == @core.WatcherDecisionKind::Deferred &&
+    standing_watch_infrastructure_failure_summary(execution.summary) {
+    copy_execution_with(
+      execution,
+      status=@core.TaskExecutionStatus::Completed,
+      summary="\{execution.summary}\nkeeper_auto_triage: deferred\nkeeper_auto_triage_reason: transient standing-watch infrastructure failure is retry accounting, not durable review debt.",
+      heartbeat_tick=tick,
+      next_retry_tick=None,
+      result_decision="deferred",
+      requires_review=false,
+      notify_town=false,
+    )
+  } else {
+    execution
+  }
 }
 
 ///|
@@ -176,11 +214,16 @@ fn running_standing_watch_execution(
   worker_id : String,
   tick : Int,
 ) -> @core.TaskExecutionRecord {
+  let packet_id = @roles.keeper_packet_id(entry.id, task.id)
+  let packet_path = @moonclaw.packet_file_path(
+    @moonclaw.default_packet_directory(),
+    packet_id,
+  )
   @core.TaskExecutionRecord::new(
     task_id=task.id,
     book_id=entry.id,
-    packet_id="pending-\{entry.id}-\{task.id}",
-    packet_path="",
+    packet_id~,
+    packet_path~,
     proposal_id=None,
     run_id=None,
     status=@core.TaskExecutionStatus::Running,
@@ -200,8 +243,42 @@ fn running_standing_watch_execution(
 }
 
 ///|
+fn transient_deferred_standing_watch_execution_record(
+  entry : @moonbook.BookCatalogEntry,
+  task : @moonbook.BookTask,
+  detail : String,
+  assigned_worker_id? : String? = None,
+  tick? : Int = 0,
+) -> @core.TaskExecutionRecord {
+  let packet_id = @roles.keeper_packet_id(entry.id, task.id)
+  let packet_path = @moonclaw.packet_file_path(
+    @moonclaw.default_packet_directory(),
+    packet_id,
+  )
+  @core.TaskExecutionRecord::new(
+    task_id=task.id,
+    book_id=entry.id,
+    packet_id~,
+    packet_path~,
+    status=@core.TaskExecutionStatus::Completed,
+    summary="\{detail}\nstanding_goal_decision: deferred\nstanding_watch_transient_retry: true\nnext_check_hint: immediate",
+    output_contract="standing-watch-live-snapshot",
+    assigned_worker_id~,
+    heartbeat_tick=tick,
+    next_retry_tick=Some(tick + 1),
+    requires_review=false,
+    notify_town=true,
+  )
+}
+
+///|
+fn standing_watch_transient_dispatch_error(detail : String) -> Bool {
+  transient_external_dependency_error(detail)
+}
+
+///|
 fn standing_watch_stale_window_ticks() -> Int {
-  30
+  120
 }
 
 ///|
@@ -324,7 +401,33 @@ fn standing_watch_prompt(
     $|- accepted_facts_count and wiki_pages_changed_count must be 0 for failed and ordinary no_change cycles.
     $|- book_changed is yes only when durable book knowledge changed or review was queued.
     $|- Generated site rebuilds, retries, history entries, and operational logs do not count as research progress.
-  prompt
+  if standing_goal_is_book_quality_repair(goal) {
+    "\{prompt}\n\{standing_watch_book_quality_repair_appendix()}"
+  } else {
+    prompt
+  }
+}
+
+///|
+fn standing_goal_is_book_quality_repair(goal : @core.StandingGoal) -> Bool {
+  goal.id.has_prefix("book-quality-repair-")
+}
+
+///|
+fn standing_watch_book_quality_repair_appendix() -> String {
+  let appendix =
+    $|
+    $|Book-quality repair mode:
+    $|- This standing goal is not a passive latest-news watch. It exists because a semantic MoonBook quality review found a concrete gap.
+    $|- Read `wiki/reviews/book-quality-repair.md` and execute the named repair task before deciding.
+    $|- If the repair queue names missing artifacts, create or revise those artifacts using the book's own SKILL.md, contracts, local source hints, approved web/source tools, and current workspace state.
+    $|- If web search/fetch is unavailable, record that blocker but still use approved local/source hints and existing book context to make bounded progress when possible.
+    $|- Do not return ordinary `no_change` merely because no fresh source was found while the repair queue still names missing artifacts.
+    $|- Return `no_change` only when the required artifacts already exist, the named gap is already satisfied, or the review queue is stale and no longer applies.
+    $|- Return `needs_review` when source authority, policy, privacy, or evidence uncertainty prevents autonomous promotion after useful repair work.
+    $|- Return `update` when durable book artifacts, accepted evidence, or review-gated repair artifacts were created or revised.
+    $|- Keep the repair book-local. Do not create v1/v2/v3/v4 alternate books.
+  appendix
 }
 
 ///|
@@ -362,11 +465,186 @@ fn standing_watch_decision_from_execution(
     @core.TaskExecutionStatus::Failed | @core.TaskExecutionStatus::Stale =>
       @core.WatcherDecisionKind::Failed
     @core.TaskExecutionStatus::ReviewQueued =>
-      marker_decision.unwrap_or(@core.WatcherDecisionKind::NeedsReview)
+      standing_watch_review_or_marker_decision(execution, marker_decision)
     @core.TaskExecutionStatus::Completed =>
-      marker_decision.unwrap_or(@core.WatcherDecisionKind::NeedsReview)
+      standing_watch_review_or_marker_decision(execution, marker_decision)
     _ => @core.WatcherDecisionKind::Deferred
   }
+}
+
+///|
+fn standing_watch_review_or_marker_decision(
+  execution : @core.TaskExecutionRecord,
+  marker_decision : @core.WatcherDecisionKind?,
+) -> @core.WatcherDecisionKind {
+  if marker_decision is None &&
+    standing_watch_orphaned_running_failure_summary(execution.summary) {
+    return @core.WatcherDecisionKind::Deferred
+  }
+  if standing_watch_operational_no_change_summary(execution.summary) {
+    return @core.WatcherDecisionKind::NoChange
+  }
+  match marker_decision {
+    Some(@core.WatcherDecisionKind::NeedsReview) =>
+      if standing_watch_infrastructure_failure_summary(execution.summary) &&
+        standing_watch_marker_int(execution.summary, "delta_score", fallback=0) ==
+        0 &&
+        standing_watch_marker_int(
+          execution.summary,
+          "new_source_count",
+          fallback=0,
+        ) ==
+        0 {
+        @core.WatcherDecisionKind::Failed
+      } else {
+        @core.WatcherDecisionKind::NeedsReview
+      }
+    Some(decision) => decision
+    None => @core.WatcherDecisionKind::NeedsReview
+  }
+}
+
+///|
+fn standing_watch_operational_no_change_summary(summary : String) -> Bool {
+  if standing_watch_orphaned_running_failure_summary(summary) {
+    return false
+  }
+  let lowered = summary.to_lower()
+  (
+    lowered.contains("persisted_result_review: false") ||
+    lowered.contains("keeper_auto_triage: persisted_non_review_result") ||
+    lowered.contains("keeper_auto_triage: transient_infrastructure_contention")
+  ) &&
+  standing_watch_marker_int(summary, "delta_score", fallback=0) == 0 &&
+  standing_watch_marker_int(summary, "new_source_count", fallback=0) == 0
+}
+
+///|
+fn standing_watch_orphaned_running_failure_summary(summary : String) -> Bool {
+  let lowered = summary.to_lower()
+  (
+    lowered.contains("indexed as running") &&
+    lowered.contains("no live proposal process was found")
+  ) ||
+  lowered.contains("treating it as failed for mayor recovery")
+}
+
+///|
+fn standing_watch_infrastructure_failure_summary(summary : String) -> Bool {
+  let lowered = summary.to_lower()
+  lowered.contains("standing watch execution failed") &&
+  (
+    transient_external_dependency_error(lowered) ||
+    lowered.contains("runtime error: abort() called") ||
+    lowered.contains("stringbuilder::grow_if_necessary") ||
+    lowered.contains("systemstore::save_job_proposals")
+  )
+}
+
+///|
+fn watcher_record_effective_decision(
+  record : @core.WatcherRunRecord,
+) -> @core.WatcherDecisionKind {
+  if standing_watch_orphaned_running_failure_summary(record.detail) &&
+    record.delta_score == 0 &&
+    record.new_source_count == 0 {
+    return @core.WatcherDecisionKind::Deferred
+  }
+  if record.decision == @core.WatcherDecisionKind::Failed &&
+    record.delta_score == 0 &&
+    record.new_source_count == 0 &&
+    standing_watch_detached_import_log_noise_summary(record.detail) {
+    return @core.WatcherDecisionKind::Deferred
+  }
+  if record.decision == @core.WatcherDecisionKind::Failed &&
+    record.delta_score == 0 &&
+    record.new_source_count == 0 &&
+    standing_watch_infrastructure_failure_summary(record.detail) &&
+    transient_external_dependency_error(record.detail) {
+    return @core.WatcherDecisionKind::Deferred
+  }
+  if record.decision != @core.WatcherDecisionKind::NeedsReview {
+    return record.decision
+  }
+  if record.delta_score == 0 &&
+    record.new_source_count == 0 &&
+    standing_watch_operational_no_change_summary(record.detail) {
+    return @core.WatcherDecisionKind::NoChange
+  }
+  if record.delta_score == 0 &&
+    record.new_source_count == 0 &&
+    standing_watch_infrastructure_failure_summary(record.detail) {
+    return @core.WatcherDecisionKind::Failed
+  }
+  record.decision
+}
+
+///|
+fn standing_watch_detached_import_log_noise_summary(detail : String) -> Bool {
+  let lowered = detail.to_lower()
+  let detached_import = lowered.contains("detached moonclaw import failed for")
+  let startup_log = lowered.contains("\"tag\":\"model\"") ||
+    lowered.contains("\"tag\":\"job-analysis\"") ||
+    lowered.contains("loading skills from directory") ||
+    lowered.contains("loaded skill")
+  let terminal_signal = lowered.contains("failure(") ||
+    lowered.contains(" failed:") ||
+    lowered.contains("runtime error") ||
+    lowered.contains("jsondecodeerror") ||
+    lowered.contains("abort() called") ||
+    lowered.contains("panic")
+  detached_import && startup_log && !terminal_signal
+}
+
+///|
+fn watcher_record_same_terminal_identity(
+  left : @core.WatcherRunRecord,
+  right : @core.WatcherRunRecord,
+) -> Bool {
+  left.goal_id == right.goal_id &&
+  left.tick == right.tick &&
+  left.task_id == right.task_id &&
+  left.run_id == right.run_id
+}
+
+///|
+fn watcher_record_observation_quality(record : @core.WatcherRunRecord) -> Int {
+  if record.decision == @core.WatcherDecisionKind::Deferred {
+    return 0
+  }
+  if record.detail.contains("standing_goal_decision:") ||
+    record.detail.contains("standing_goal_decision=") ||
+    record.detail.contains("book_watch_record_id:") {
+    return 4
+  }
+  if record.decision == @core.WatcherDecisionKind::NeedsReview &&
+    record.delta_score == 0 &&
+    record.new_source_count == 0 &&
+    record.detail.contains("Workflow completed") {
+    return 1
+  }
+  if watcher_record_effective_decision(record) != record.decision {
+    return 3
+  }
+  2
+}
+
+///|
+fn watcher_record_prefer_candidate(
+  current : @core.WatcherRunRecord,
+  candidate : @core.WatcherRunRecord,
+) -> Bool {
+  if candidate.tick > current.tick {
+    return true
+  }
+  if candidate.tick < current.tick {
+    return false
+  }
+  if watcher_record_same_terminal_identity(current, candidate) {
+    return watcher_record_observation_quality(candidate) >
+      watcher_record_observation_quality(current)
+  }
+  true
 }
 
 ///|
@@ -375,6 +653,8 @@ fn standing_watch_marker_decision(
 ) -> @core.WatcherDecisionKind? {
   if standing_watch_summary_has_decision(summary, "failed") {
     Some(@core.WatcherDecisionKind::Failed)
+  } else if standing_watch_summary_has_decision(summary, "deferred") {
+    Some(@core.WatcherDecisionKind::Deferred)
   } else if standing_watch_summary_has_decision(summary, "no_change") {
     Some(@core.WatcherDecisionKind::NoChange)
   } else if standing_watch_summary_has_decision(summary, "needs_review") {
@@ -445,6 +725,13 @@ async fn finalize_standing_watch_supervision_record(
     goal.id,
     dir=ledger_dir,
   )
+  match terminal_watcher_record_for_execution(goal.id, ledger_dir, observed) {
+    Some(record) =>
+      if watcher_record_effective_decision(record) == decision {
+        return observed
+      }
+    None => ()
+  }
   if standing_watch_record_already_exists(
       previous_records,
       observed.task_id,
@@ -499,14 +786,146 @@ async fn reconcile_review_queued_standing_watch_outputs(
       Some(goal) => goal
       None => continue
     }
+    if standing_watch_review_superseded_by_newer_review(
+        snapshot, standing_goals, goal, execution,
+      ) {
+      let completed = copy_execution_with(
+        execution,
+        status=@core.TaskExecutionStatus::Completed,
+        summary="\{execution.summary}\nkeeper_auto_triage: superseded_review\nkeeper_auto_triage_reason: a newer standing-watch cycle already reached a terminal non-review state for the same standing goal, so this older review is historical accounting rather than active keeper debt.",
+        heartbeat_tick=supervision_tick(state),
+        next_retry_tick=None,
+        result_decision="superseded-review",
+        requires_review=false,
+        notify_town=false,
+      )
+      state.replace_execution(completed)
+      state.replace_task(task_for_supervision(state, completed))
+      sync_worker_from_execution(state, completed)
+      state.record_event(
+        @core.TownEvent::new(
+          id="event-watch-superseded-review-\{state.events.length()}-\{completed.task_id}",
+          kind="standing-watch",
+          detail="Mayor closed superseded review `\{completed.task_id}` because a newer terminal standing-watch cycle exists for `\{goal.id}`.",
+          related_task_id=Some(completed.task_id),
+          related_book_id=Some(completed.book_id),
+          related_run_id=completed.run_id,
+        ),
+      )
+      continue
+    }
     let entry = match @moonbook.entry_for_book_id(catalog, execution.book_id) {
       Some(entry) => entry
       None => continue
+    }
+    if legacy_review_queued_retry_accounting_standing_watch(execution) {
+      let completed = copy_execution_with(
+        execution,
+        status=@core.TaskExecutionStatus::Completed,
+        summary="\{execution.summary}\nkeeper_auto_triage: deferred\nkeeper_auto_triage_reason: legacy review-queued standing-watch record was transient infrastructure retry accounting, not durable keeper review debt.",
+        heartbeat_tick=supervision_tick(state),
+        next_retry_tick=None,
+        result_decision="deferred",
+        requires_review=false,
+        notify_town=false,
+      )
+      state.replace_execution(completed)
+      state.replace_task(task_for_supervision(state, completed))
+      sync_worker_from_execution(state, completed)
+      state.record_event(
+        @core.TownEvent::new(
+          id="event-watch-legacy-review-reconcile-\{state.events.length()}-\{completed.task_id}",
+          kind="standing-watch",
+          detail="Mayor closed legacy review-queued standing watch `\{completed.task_id}` as deferred retry accounting.",
+          related_task_id=Some(completed.task_id),
+          related_book_id=Some(completed.book_id),
+          related_run_id=completed.run_id,
+        ),
+      )
+      continue
     }
     let observed = standing_watch_observed_for_auto_triage(
       entry, execution, snapshot_path,
     )
     let decision = standing_watch_recovery_decision_from_execution(observed)
+    if standing_watch_autonomous_repair_still_open(goal, observed, decision) {
+      let completed = copy_execution_with(
+        observed,
+        status=@core.TaskExecutionStatus::Completed,
+        summary="\{observed.summary}\nkeeper_auto_triage: repair_still_open\nkeeper_auto_triage_reason: book-quality repair produced only a generic empty completion, so the standing repair goal should retry autonomously instead of creating human review debt.",
+        heartbeat_tick=supervision_tick(state),
+        next_retry_tick=None,
+        result_decision="repair-still-open",
+        requires_review=false,
+        notify_town=false,
+      )
+      state.replace_execution(completed)
+      state.replace_task(task_for_supervision(state, completed))
+      sync_worker_from_execution(state, completed)
+      state.record_event(
+        @core.TownEvent::new(
+          id="event-watch-repair-still-open-\{state.events.length()}-\{completed.task_id}",
+          kind="standing-watch",
+          detail="Mayor kept book-quality repair `\{completed.task_id}` in the autonomous standing-goal loop instead of leaving generic empty completion as human review debt.",
+          related_task_id=Some(completed.task_id),
+          related_book_id=Some(completed.book_id),
+          related_run_id=completed.run_id,
+        ),
+      )
+      continue
+    }
+    if standing_watch_empty_completion_is_no_change(goal, observed, decision) {
+      let completed = copy_execution_with(
+        observed,
+        status=@core.TaskExecutionStatus::Completed,
+        summary="\{observed.summary}\nkeeper_auto_triage: empty_completion_no_change\nkeeper_auto_triage_reason: watcher completed without a standing-goal decision marker, candidate insight, evidence delta, or source delta, so mayor treats it as no_change instead of human review debt.\nstanding_goal_decision: no_change\ndelta_score: 0\nnew_source_count: 0\nbook_changed: no",
+        heartbeat_tick=supervision_tick(state),
+        next_retry_tick=None,
+        result_decision="NoChange",
+        requires_review=false,
+        notify_town=false,
+      )
+      state.replace_execution(completed)
+      state.replace_task(task_for_supervision(state, completed))
+      sync_worker_from_execution(state, completed)
+      state.record_event(
+        @core.TownEvent::new(
+          id="event-watch-empty-no-change-\{state.events.length()}-\{completed.task_id}",
+          kind="standing-watch",
+          detail="Mayor closed empty standing-watch completion `\{completed.task_id}` as no_change rather than human review debt.",
+          related_task_id=Some(completed.task_id),
+          related_book_id=Some(completed.book_id),
+          related_run_id=completed.run_id,
+        ),
+      )
+      continue
+    }
+    if decision == @core.WatcherDecisionKind::Deferred {
+      let completed = copy_execution_with(
+        observed,
+        status=@core.TaskExecutionStatus::Completed,
+        summary="\{observed.summary}\nkeeper_auto_triage: deferred\nkeeper_auto_triage_reason: deferred standing-watch marker is operational retry accounting, not a durable review item.",
+        heartbeat_tick=supervision_tick(state),
+        next_retry_tick=None,
+        result_decision="deferred",
+        requires_review=false,
+        notify_town=false,
+      )
+      state.replace_execution(completed)
+      state.replace_task(task_for_supervision(state, completed))
+      sync_worker_from_execution(state, completed)
+      state.record_event(
+        @core.TownEvent::new(
+          id="event-watch-deferred-\{state.events.length()}-\{completed.task_id}",
+          kind="standing-watch",
+          detail="Mayor closed deferred standing watch `\{completed.task_id}` as operational retry accounting, not keeper review.",
+          related_task_id=Some(completed.task_id),
+          related_book_id=Some(completed.book_id),
+          related_run_id=completed.run_id,
+        ),
+      )
+      continue
+    }
     if !standing_watch_auto_triage_allowed(goal, observed, decision) {
       if observed != execution {
         state.replace_execution(observed)
@@ -545,6 +964,186 @@ async fn reconcile_review_queued_standing_watch_outputs(
 }
 
 ///|
+fn standing_watch_empty_completion_is_no_change(
+  goal : @core.StandingGoal,
+  execution : @core.TaskExecutionRecord,
+  decision : @core.WatcherDecisionKind,
+) -> Bool {
+  !goal.id.has_prefix("book-quality-repair-") &&
+  decision == @core.WatcherDecisionKind::NeedsReview &&
+  standing_watch_delta_score(execution) == 0 &&
+  standing_watch_new_source_count(execution) == 0 &&
+  standing_watch_generic_empty_repair_review_summary(execution.summary)
+}
+
+///|
+fn standing_watch_autonomous_repair_still_open(
+  goal : @core.StandingGoal,
+  execution : @core.TaskExecutionRecord,
+  decision : @core.WatcherDecisionKind,
+) -> Bool {
+  goal.id.has_prefix("book-quality-repair-") &&
+  decision == @core.WatcherDecisionKind::NeedsReview &&
+  standing_watch_delta_score(execution) == 0 &&
+  standing_watch_new_source_count(execution) == 0 &&
+  standing_watch_generic_empty_repair_review_summary(execution.summary)
+}
+
+///|
+fn standing_watch_generic_empty_repair_review_summary(summary : String) -> Bool {
+  let lowered = summary.to_lower()
+  let generic_completion = lowered.contains("inline run finished") ||
+    lowered.contains("workflow completed")
+  generic_completion &&
+  !lowered.contains("standing_goal_decision") &&
+  !lowered.contains("candidate insight") &&
+  !lowered.contains("pending_review") &&
+  !lowered.contains("book_watch_record_id")
+}
+
+///|
+fn standing_watch_review_superseded_by_newer_review(
+  executions : Array[@core.TaskExecutionRecord],
+  standing_goals : Array[@core.StandingGoal],
+  goal : @core.StandingGoal,
+  execution : @core.TaskExecutionRecord,
+) -> Bool {
+  let current_tick = match
+    standing_watch_tick_for_goal_task(goal, execution.task_id) {
+    Some(tick) => tick
+    None => return false
+  }
+  for candidate in executions {
+    if candidate.task_id == execution.task_id {
+      continue
+    }
+    match standing_goal_for_execution_task(standing_goals, candidate.task_id) {
+      Some(candidate_goal) => if candidate_goal.id != goal.id { continue }
+      None => continue
+    }
+    match standing_watch_tick_for_goal_task(goal, candidate.task_id) {
+      Some(candidate_tick) if candidate_tick > current_tick =>
+        if standing_watch_cycle_supersedes_review(candidate) {
+          return true
+        }
+      _ => ()
+    }
+  }
+  false
+}
+
+///|
+fn standing_watch_cycle_supersedes_review(
+  execution : @core.TaskExecutionRecord,
+) -> Bool {
+  match execution.status {
+    @core.TaskExecutionStatus::ReviewQueued => true
+    @core.TaskExecutionStatus::Completed => {
+      let decision = standing_watch_decision_from_execution(execution)
+      decision == @core.WatcherDecisionKind::NoChange ||
+      decision == @core.WatcherDecisionKind::Update ||
+      decision == @core.WatcherDecisionKind::Deferred
+    }
+    _ => false
+  }
+}
+
+///|
+async fn reconcile_persisted_standing_watch_records(
+  state : @core.TownState,
+  snapshot_path : String,
+  standing_goals : Array[@core.StandingGoal],
+) -> Unit {
+  let ledger_dir = watcher_ledger_dir_for_snapshot(snapshot_path)
+  let snapshot = state.executions.copy()
+  for execution in snapshot {
+    let goal = match
+      standing_goal_for_execution_task(standing_goals, execution.task_id) {
+      Some(goal) => goal
+      None => continue
+    }
+    match
+      terminal_watcher_record_for_execution(goal.id, ledger_dir, execution) {
+      Some(record) => {
+        if watcher_record_effective_decision(record) ==
+          @core.WatcherDecisionKind::NeedsReview &&
+          standing_watch_review_superseded_by_newer_review(
+            snapshot, standing_goals, goal, execution,
+          ) {
+          continue
+        }
+        let status = task_status_for_terminal_watcher_decision(record.decision)
+        let reconciled = copy_execution_with(
+          execution,
+          status~,
+          summary="\{record.detail}\nkeeper_auto_triage: reconciled_from_watcher_ledger\nreconciled_watcher_decision: \{record.decision.to_string()}",
+          heartbeat_tick=supervision_tick(state),
+          next_retry_tick=None,
+          result_decision=record.decision.to_string(),
+          requires_review=record.decision ==
+            @core.WatcherDecisionKind::NeedsReview,
+        )
+        state.replace_execution(reconciled)
+        state.replace_task(task_for_supervision(state, reconciled))
+        sync_worker_from_execution(state, reconciled)
+        state.record_event(
+          @core.TownEvent::new(
+            id="event-watch-ledger-reconcile-\{state.events.length()}-\{reconciled.task_id}",
+            kind="standing-watch",
+            detail="Mayor reconciled `\{reconciled.task_id}` from the persisted watcher ledger as \{record.decision.to_string()}.",
+            related_task_id=Some(reconciled.task_id),
+            related_book_id=Some(reconciled.book_id),
+            related_run_id=reconciled.run_id,
+          ),
+        )
+      }
+      None => ()
+    }
+  }
+}
+
+///|
+async fn terminal_watcher_record_for_execution(
+  goal_id : String,
+  ledger_dir : String,
+  execution : @core.TaskExecutionRecord,
+) -> @core.WatcherRunRecord? {
+  let records = @storage.load_watcher_run_records(goal_id, dir=ledger_dir)
+  let mut found : @core.WatcherRunRecord? = None
+  for record in records {
+    if record.task_id == Some(execution.task_id) &&
+      watcher_record_run_matches_execution(record, execution) &&
+      record.decision != @core.WatcherDecisionKind::Deferred {
+      found = Some(record)
+    }
+  }
+  found
+}
+
+///|
+fn watcher_record_run_matches_execution(
+  record : @core.WatcherRunRecord,
+  execution : @core.TaskExecutionRecord,
+) -> Bool {
+  match execution.run_id {
+    Some(run_id) => record.run_id == Some(run_id)
+    None => true
+  }
+}
+
+///|
+fn task_status_for_terminal_watcher_decision(
+  decision : @core.WatcherDecisionKind,
+) -> @core.TaskExecutionStatus {
+  match decision {
+    @core.WatcherDecisionKind::NeedsReview =>
+      @core.TaskExecutionStatus::ReviewQueued
+    @core.WatcherDecisionKind::Failed => @core.TaskExecutionStatus::Failed
+    _ => @core.TaskExecutionStatus::Completed
+  }
+}
+
+///|
 async fn reconcile_failed_standing_watch_outputs(
   state : @core.TownState,
   catalog : Array[@moonbook.BookCatalogEntry],
@@ -553,7 +1152,8 @@ async fn reconcile_failed_standing_watch_outputs(
 ) -> Unit {
   let snapshot = state.executions.copy()
   for execution in snapshot {
-    if execution.status != @core.TaskExecutionStatus::Failed {
+    if execution.status != @core.TaskExecutionStatus::Failed &&
+      execution.status != @core.TaskExecutionStatus::Stale {
       continue
     }
     let goal = match
@@ -564,6 +1164,32 @@ async fn reconcile_failed_standing_watch_outputs(
     let entry = match @moonbook.entry_for_book_id(catalog, execution.book_id) {
       Some(entry) => entry
       None => continue
+    }
+    if legacy_tick_domain_stale_standing_watch(execution) {
+      let completed = copy_execution_with(
+        execution,
+        status=@core.TaskExecutionStatus::Completed,
+        summary="\{execution.summary}\nkeeper_auto_triage: deferred\nkeeper_auto_triage_reason: legacy prelaunch standing-watch heartbeat used an event-count tick while the task id used the daemon tick; mayor closed it as retry accounting.",
+        heartbeat_tick=supervision_tick(state),
+        next_retry_tick=None,
+        result_decision="deferred",
+        requires_review=false,
+        notify_town=false,
+      )
+      state.replace_execution(completed)
+      state.replace_task(task_for_supervision(state, completed))
+      sync_worker_from_execution(state, completed)
+      state.record_event(
+        @core.TownEvent::new(
+          id="event-watch-legacy-tick-reconcile-\{state.events.length()}-\{completed.task_id}",
+          kind="standing-watch",
+          detail="Mayor closed legacy tick-domain standing watch `\{completed.task_id}` as deferred retry accounting.",
+          related_task_id=Some(completed.task_id),
+          related_book_id=Some(completed.book_id),
+          related_run_id=completed.run_id,
+        ),
+      )
+      continue
     }
     let observed = standing_watch_observed_for_auto_triage(
       entry, execution, snapshot_path,
@@ -604,6 +1230,39 @@ async fn reconcile_failed_standing_watch_outputs(
       sync_worker_from_execution(state, finalized)
     }
   }
+}
+
+///|
+fn legacy_tick_domain_stale_standing_watch(
+  execution : @core.TaskExecutionRecord,
+) -> Bool {
+  execution.status == @core.TaskExecutionStatus::Stale &&
+  execution.run_id is None &&
+  execution.output_contract == "standing-watch-live-snapshot" &&
+  execution.summary.contains("missed its heartbeat window") &&
+  tick_from_task_id(execution.task_id) > execution.stale_after_tick
+}
+
+///|
+fn legacy_review_queued_retry_accounting_standing_watch(
+  execution : @core.TaskExecutionRecord,
+) -> Bool {
+  if execution.status != @core.TaskExecutionStatus::ReviewQueued {
+    return false
+  }
+  if !standing_watch_infrastructure_failure_summary(execution.summary) {
+    return false
+  }
+  let task_tick = tick_from_task_id(execution.task_id)
+  task_tick > execution.stale_after_tick ||
+  standing_watch_recovery_decision_from_execution(execution) ==
+  @core.WatcherDecisionKind::Deferred ||
+  (
+    standing_watch_recovery_decision_from_execution(execution) ==
+    @core.WatcherDecisionKind::Failed &&
+    standing_watch_delta_score(execution) == 0 &&
+    standing_watch_new_source_count(execution) == 0
+  )
 }
 
 ///|

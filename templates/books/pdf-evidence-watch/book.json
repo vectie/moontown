@@ -1,0 +1,61 @@
+{
+  "template_id": "pdf-evidence-watch",
+  "template_version": 1,
+  "book_type": "research-book",
+  "specialization": "pdf-evidence-watch",
+  "title": "PDF Evidence Watch Book",
+  "purpose": "Watch configured websites for relevant PDFs, extract their full text, analyze them with a book-owned method, and notify the operator only when accepted new knowledge changes the book.",
+  "tags": [
+    "research",
+    "standing-watch",
+    "pdf-evidence",
+    "source-first",
+    "domain-specific-analysis"
+  ],
+  "required_paths": [
+    "raw/bootstrap/PDF_WATCH_CONTRACT.md",
+    "wiki/index.md",
+    "wiki/methods/analysis-method.md",
+    "skills/pdf-watch/SKILL.md",
+    "skills/pdf-analysis/SKILL.md",
+    "schemas/pdf-source.schema.md",
+    "schemas/analysis-result.schema.md"
+  ],
+  "watch": {
+    "cadence_minutes": 30,
+    "source_policy": "web-first",
+    "websites": [],
+    "file_types": [
+      "pdf"
+    ],
+    "dedupe_by": [
+      "url",
+      "title",
+      "sha256"
+    ],
+    "notify_on": [
+      "new_accepted_source",
+      "new_accepted_finding",
+      "changed_conclusion",
+      "needs_operator_review"
+    ]
+  },
+  "analysis": {
+    "method_page": "wiki/methods/analysis-method.md",
+    "source_schema": "schemas/pdf-source.schema.md",
+    "result_schema": "schemas/analysis-result.schema.md",
+    "output_contract": "moontown.pdf_evidence_watch.result.v1"
+  },
+  "moondesk": {
+    "creation_form": "pdf-evidence-watch",
+    "editable_fields": [
+      "title",
+      "purpose",
+      "watch.websites",
+      "watch.cadence_minutes",
+      "watch.notify_on",
+      "wiki/methods/analysis-method.md"
+    ],
+    "portable_output": "moondesk.book-template-export.v1"
+  }
+}

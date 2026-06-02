@@ -36,6 +36,19 @@ Use only high-signal inputs.
 - MoonBook pages
 - external best-practice or community findings, if needed
 
+## Operating Architecture Fit
+
+- Durable source of truth:
+- Active protocol/place:
+- Mayor responsibility:
+- MoonBook bookkeeper responsibility:
+- MoonClaw worker responsibility:
+- Civic building responsibility, if any:
+- Moondesk responsibility, if any:
+- Return-home target:
+- Review gate:
+- Projection/UI surface:
+
 ## Design Decision
 
 State the chosen approach and why it is better than the alternatives.
@@ -75,6 +88,17 @@ moon info
 ```
 
 Add package-specific or UI-specific commands here.
+
+## Growth / Monitoring Evidence
+
+State what should visibly grow or change after the plan runs.
+
+- Book/wiki pages:
+- Civic ledgers:
+- PlanBook evidence:
+- Code/tests:
+- UI/projection:
+- Explicit no-change record:
 
 ## Rollback / Recovery
 

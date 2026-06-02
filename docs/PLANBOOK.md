@@ -57,6 +57,35 @@ section:
 If a plan cannot answer those questions, it is not ready for autonomous
 implementation.
 
+## Operating Architecture To Preserve
+
+Every PlanBook plan, repair, and review must preserve this architecture:
+
+```text
+Mayor routes and supervises
+  -> building protocol or target MoonBook hydrates durable context
+  -> MoonClaw worker executes one bounded packet
+  -> MoonBook bookkeeper reviews and persists memory/projection changes
+  -> Moontown records health, visual state, and next action
+```
+
+Do not blur these roles:
+
+- A civic building is a protocol place for exchange and reduction, not a
+  generic persistent agent.
+- A MoonBook is the durable book/workspace and memory surface.
+- A MoonBook bookkeeper is the resident role that wakes to maintain that book.
+- A MoonClaw worker is a temporary executor.
+- A PlanBook is the durable implementation-control book.
+- The Cookbook is the accepted stable-state book.
+
+Plans must say how output returns home. For research, this means source/wiki/
+synthesis/review pages. For course work, this means lessons, exercises, and
+checkpoints. For civic work, this means inbox/contribution/reduction/outbox/
+review/return-home ledgers. For implementation work, this means code changes,
+tests, validation evidence, commit readiness, and cookbook impact when stable
+definitions change.
+
 ## Book Types
 
 | Book type | Primary question | Durable output | Main owner |
@@ -93,6 +122,58 @@ Future plans must say which role is responsible. If a task is about durable
 book memory, route it to the bookkeeper. If a task is tool-heavy execution,
 spawn a worker. If a task is cross-book priority or cadence, keep it in the
 Mayor.
+
+## Stable Watch State
+
+A mature town is not always busy. The desired stable state is:
+
+- daemon healthy
+- active workers `0`
+- stable waiting reported as `true` in the live autonomy spine
+- stable waiting observation streak increasing across consecutive quiet daemon
+  observations
+- unresolved failures `0`
+- PlanBook open gaps `0`
+- due standing goals `0`
+- MoonBook quality audit includes every live runtime book from the saved town
+  snapshot, not only the curated catalog
+- review queues visible but not counted as accepted progress
+- transient infrastructure failures cleared or deferred without becoming
+  durable domain evidence or review debt
+- detached MoonClaw startup logs do not count as terminal watcher failure when
+  a receipt/run is still pending or has already been confirmed
+- scheduler-only deferrals do not count as watcher decisions. If the Mayor
+  defers a due standing goal because the per-tick dispatch budget or live
+  external-execution cap is full, the goal must remain due until an actual
+  watcher cycle writes a durable watcher ledger record.
+- transient infrastructure debt visible as its own live-spine metric, separate
+  from unresolved failures and no-change cycles
+- civic protocol schedules enabled for the next real-world interval
+- civic service reconciliation current for protocol-active buildings; review
+  gated exchanges should appear as `needs_review`, not accepted facts
+
+Visible review queues do not block the live loop by themselves. They mean the
+town has review-gated artifacts waiting for a bookkeeper, operator, or later
+AI-review pass. The Mayor should keep watching and dispatching scheduled work
+while keeping those queues visible.
+
+For overnight or long-horizon checks, do not infer stability only from the
+latest status text. The authoritative evidence is the live autonomy spine:
+
+- `stable_waiting`
+- `stable_waiting_observation_streak`
+- `stable_waiting_blockers`
+- `town-journal.jsonl`
+
+`stable_waiting_blockers` must be empty before the town can claim it is waiting
+cleanly. The streak proves that the condition survived repeated daemon
+observations rather than one lucky tick.
+
+Weak live books are not allowed to disappear just because they were created by
+standing watches rather than hand-registered in the MoonBook catalog. The
+book-quality audit merges the saved runtime snapshot into the catalog view, so
+research books such as OPC, LLM training, robotics, agents, and hardware are
+judged by the same structural and semantic review loop as canonical books.
 
 ## Lifecycle
 
@@ -242,6 +323,27 @@ Cadence is also explicit. While open backlog work exists, the town can take the
 next bounded task immediately, one at a time. Once the backlog is clear, the
 code-building visit decays to a 30-minute check interval.
 
+## Overnight Monitoring Expectations
+
+When the daemon is left running, the next morning review should be able to
+answer these questions from durable artifacts rather than chat memory:
+
+- Did the daemon remain healthy, with success count increasing and failure
+  count stable?
+- Did standing-watch books gain accepted facts, review items, questions, or
+  explicit no-change decisions?
+- Did civic building protocols add round records and return-home outputs?
+- Did PlanBook either close a gap, dispatch a bounded repair, or record a clear
+  blocker/no-change decision?
+- Did code/test state change only when a PlanBook repair had validation
+  evidence and commit readiness?
+- Did UI projections read the live state rather than static demo content?
+
+If the answer is no, the correct repair is usually a wiring fix: connect the
+existing daemon, schedule, building protocol, MoonBook bookkeeper, MoonClaw
+worker, PlanBook evidence, and UI projection surfaces. Do not add a second
+hardcoded workflow that bypasses those documents.
+
 ## Self-Build And Self-Healing Loop
 
 The current Moontown runtime now has a PlanBook autonomy doctor. It is not a
@@ -267,6 +369,14 @@ The doctor checks concrete criteria such as:
 - Operator UI references live autonomy state.
 - Standing-watch outputs have a strict result contract.
 - AI semantic review results are persisted.
+- The daemon has a bounded semantic-review cadence that dispatches at most one
+  book-quality review at a time.
+- Standing-goal cadence accounting only advances when a real watcher cycle is
+  launched and recorded. Budget/cap deferrals remain due and are not allowed to
+  make work disappear until the next cadence window.
+- Weak semantic-review results are bridged into the owning MoonBook review
+  queue and into a bounded standing repair goal, so Mayor supervision can mature
+  books without treating failed/no-change review records as accepted evidence.
 - PlanBook repair can route repository source patches through Codex ACP instead
   of only asking Codex-in-this-chat to edit files.
 - PlanBook has an editable implementation backlog and live change history.
@@ -306,6 +416,8 @@ PlanBook repair skill and the `planbook.repair.result.v1` output contract.
 For Moontown-owned source repairs, the repair profile uses
 `execution_mode: acp` and `execution_target: codex-main`; the configured ACP
 target runs from the repository source root, not only the PlanBook workspace.
+Daemon-created repair dispatches are detached; operator `--dispatch` may still
+use inline execution when the environment explicitly enables it for debugging.
 That is the intended self-patching path: Mayor/PlanBook choose and bound the
 gap, MoonClaw launches Codex ACP as the code executor, Codex patches the repo,
 and PlanBook reconciles the result contract after validation, diff inspection,
@@ -323,6 +435,11 @@ status/message, and push status. The default policy allows local commit
 preparation after validation but does not push unless a future policy explicitly
 enables it. For `backlog-*` criteria, the repair worker must also write
 completion evidence under `raw/backlog/completed/<id>.md`.
+If the repair changes source code that the live daemon depends on, the worker
+must also request a clean reload after validation with
+`moon run cmd/main -- daemon restart "validated source patch"` and then inspect
+fresh live evidence. A packet produced by a pre-reload daemon does not prove the
+new code path.
 
 ## Relation To Voice And Parallel Work
 

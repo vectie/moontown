@@ -48,6 +48,8 @@ cat > "$plist" <<PLIST
     <string>$moon_bin</string>
     <key>MOONTOWN_ROOT</key>
     <string>$root</string>
+    <key>MOONTOWN_MOONCLAW_INLINE</key>
+    <string>1</string>
     <key>PATH</key>
     <string>$HOME/.moon/bin:/opt/homebrew/bin:/usr/local/bin:/usr/bin:/bin:/usr/sbin:/sbin</string>
   </dict>

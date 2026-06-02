@@ -60,6 +60,25 @@ operational purpose, not by the order features were added.
 
 ## Book Types And Doc Outputs
 
+Book templates are discoverable through the registry at
+[templates/books/templates.json](/Users/kq/Workspace/moontown/templates/books/templates.json).
+Use:
+
+```bash
+moon run cmd/main -- books templates
+moon run cmd/main -- books template install <template-id> <config.json>
+moon run cmd/main -- books template requests process
+```
+
+Moondesk should use this registry as its book-creation palette. The Mayor can
+also use it later when a task says “create a specialized book” and the system
+needs to choose a reusable template rather than inventing a one-off workspace.
+The file `.moontown/book-template-requests.json` is the document-first inbox
+for that handoff: Moondesk or Mayor writes pending template requests, and the
+daemon’s `book-template-request` scheduled job installs them.
+The sibling `.moontown/book-template-request-events.jsonl` file is the
+append-only proof trail for those installs and failures.
+
 | Book | Purpose | Typical docs generated or updated |
 | --- | --- | --- |
 | Research book | Discover and synthesize domain knowledge | research reports, evidence, source pages |
@@ -74,6 +93,37 @@ used as a code plan. A course should not be used as a bug tracker. A planbook
 should not become a permanent domain wiki. A civic building should not be
 reduced to a book: the building is a protocol place, while MoonBook is the
 optional durable support surface.
+
+### Specialized Research Book Templates
+
+Some domain books need a stricter evidence pipeline while still remaining
+research books. The first reusable template is:
+
+- [templates/books/pdf-evidence-watch/](/Users/kq/Workspace/moontown/templates/books/pdf-evidence-watch)
+
+Use `pdf-evidence-watch` when a domain should repeatedly watch websites for
+PDFs, download and extract full text, analyze with a book-owned method, and
+notify only when accepted knowledge changes. This is not a new top-level book
+family. It is a `research-book` plus template data, schemas, and dedicated
+`SKILL.md` files.
+
+Moondesk should be the human creation surface for this kind of book: edit
+source websites, cadence, notification policy, and
+`wiki/methods/analysis-method.md`; then export a portable MoonBook folder and a
+standing-goal record for Moontown. The current Moontown CLI bridge is:
+
+```bash
+moon run cmd/main -- books pdf-watch bootstrap <book-id>
+moon run cmd/main -- books pdf-watch install <config.json>
+moon run cmd/main -- books pdf-watch status <book-id>
+```
+
+That bridge installs the template into `.moontown/books/<book-id>/`, registers
+the MoonBook catalog entry, and upserts a standing goal. Moondesk should wrap
+this behavior with a file-manager-style wizard rather than duplicating the
+template logic. The config-driven route is the preferred Moondesk contract
+because it carries websites, cadence, workspace override, and
+`analysis_method_path` without a Moontown code change.
 
 ## Document-First Rule
 
@@ -105,6 +155,13 @@ real service-loop output. They must be presented as readiness only. Actual
 quality should not be hard-coded. Depth, insight, usefulness, originality,
 correctness, and genre fit belong to the AI semantic review pass, with results
 written to `.moontown/book-quality/ai-review-results/<book-id>.md`.
+
+Weak AI semantic reviews are actionable repair records, not accepted knowledge.
+The daemon bridges them into `wiki/reviews/book-quality-repair.md` inside the
+owning MoonBook workspace, records the bridge in
+`.moontown/book-quality/repair-bridge.json`, and queues a bounded standing
+repair goal. This keeps book growth live while preserving the rule that
+operational review evidence is separate from domain/service evidence.
 
 `books bootstrap` should stay genre-aware. It should repair canonical
 registered book workspaces without turning course, civic, planbook, cookbook,

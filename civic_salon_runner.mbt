@@ -5,6 +5,7 @@ pub async fn run_due_civic_salons(
   tick? : Int = 0,
   now_ms? : UInt64 = @env.now(),
   reducer_mode? : CivicSalonReductionMode = MoonClawReducer,
+  run_inline? : Bool = moontown_moonclaw_inline_enabled(),
 ) -> String {
   let schedule_path = default_civic_salon_schedule_path(snapshot_path~)
   let schedules = load_or_create_civic_salon_schedules(path=schedule_path)
@@ -22,7 +23,7 @@ pub async fn run_due_civic_salons(
         ),
       )
       let (next, summary) = run_due_civic_salon_round(
-        schedule, snapshot_path, book_catalog_path, tick, now_ms, reducer_mode,
+        schedule, snapshot_path, book_catalog_path, tick, now_ms, reducer_mode, run_inline,
       )
       save_civic_salon_schedules(
         schedule_path,
@@ -107,11 +108,13 @@ async fn run_due_civic_salon_round(
   tick : Int,
   now_ms : UInt64,
   reducer_mode : CivicSalonReductionMode,
+  run_inline : Bool,
 ) -> (CivicSalonSchedule, String) {
   match load_civic_salon_scenario_for_schedule(schedule, snapshot_path) {
     Some(scenario) =>
       run_civic_salon_scenario_round(
         scenario, schedule, snapshot_path, book_catalog_path, tick, now_ms, reducer_mode,
+        run_inline,
       )
     None => run_unsupported_civic_salon_round(schedule, now_ms)
   }
@@ -126,6 +129,7 @@ async fn run_civic_salon_scenario_round(
   tick : Int,
   now_ms : UInt64,
   reducer_mode : CivicSalonReductionMode,
+  run_inline : Bool,
 ) -> (CivicSalonSchedule, String) {
   let participants = scenario.participants
   let round_id = civic_salon_round_id(schedule)
@@ -135,6 +139,7 @@ async fn run_civic_salon_scenario_round(
     round_number=schedule.round_count + 1,
     workspace_base=civic_salon_workspace_base(snapshot_path),
     mode=reducer_mode,
+    run_inline~,
   )
   let ideas = reduction.ideas
   let metrics = civic_salon_metrics(scenario, participants, ideas)

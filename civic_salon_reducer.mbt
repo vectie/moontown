@@ -5,6 +5,7 @@ async fn reduce_civic_salon_ideas(
   round_number? : Int = 1,
   workspace_base? : String = "",
   mode? : CivicSalonReductionMode = MoonClawReducer,
+  run_inline? : Bool = moontown_moonclaw_inline_enabled(),
 ) -> CivicSalonReductionResult {
   if mode == FixtureReducer {
     fixture_civic_salon_reduction(scenario, round_id, workspace_base)
@@ -12,7 +13,7 @@ async fn reduce_civic_salon_ideas(
     persisted_civic_salon_reduction(scenario, round_id, workspace_base)
   } else {
     moonclaw_civic_salon_reduction(
-      scenario, round_id, round_number, workspace_base,
+      scenario, round_id, round_number, workspace_base, run_inline,
     )
   }
 }
@@ -116,6 +117,7 @@ async fn moonclaw_civic_salon_reduction(
   round_id : String,
   round_number : Int,
   workspace_base : String,
+  run_inline : Bool,
 ) -> CivicSalonReductionResult {
   let root = civic_salon_workspace_root(
     scenario.building_book_id,
@@ -134,7 +136,7 @@ async fn moonclaw_civic_salon_reduction(
     packet_path,
     cwd=root,
     confirm=true,
-    run_inline=moontown_moonclaw_inline_enabled(),
+    run_inline~,
   ) catch {
     error =>
       return failed_civic_salon_reduction(
@@ -392,6 +394,10 @@ fn civic_salon_reducer_skill_text(scenario : CivicSalonScenario) -> String {
     "- Prefer follow-up questions that can become benchmarks, protocols, schemas, experiments, service actions, matched introductions, lesson plans, stories, recovery steps, or review gates.",
     "- Do not claim the output is accepted knowledge. It is a returned direction for the owning books and review gate.",
     "- Do not copy or consume template seed ideas. If seed examples exist elsewhere, ignore them.",
+    "- Every output must name the home books that should receive the returned idea, question, match, lesson, story, or service action.",
+    "- Every output must include a next action small enough for one bookkeeper or one bounded worker packet.",
+    "- Prefer outputs that create useful tension between participants rather than averaging them into generic consensus.",
+    "- If no substantive exchange is possible, emit a blocker-style output with the missing participant context and review gate instead of hallucinating civic progress.",
     "",
     "## Output Contract",
     "",

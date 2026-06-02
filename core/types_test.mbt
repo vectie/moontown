@@ -32,6 +32,50 @@ test "core state registers books workers and tasks" {
 }
 
 ///|
+test "core state replaces all duplicate execution records for same task" {
+  let state = empty_state(TownConfig::new(id="town", name="Moontown"))
+  state.register_execution(
+    TaskExecutionRecord::new(
+      task_id="task-1",
+      book_id="coding",
+      packet_id="packet-1",
+      packet_path="packet-1.json",
+      status=TaskExecutionStatus::Running,
+      summary="old running",
+      output_contract="test",
+    ),
+  )
+  state.register_execution(
+    TaskExecutionRecord::new(
+      task_id="task-1",
+      book_id="coding",
+      packet_id="packet-1b",
+      packet_path="packet-1b.json",
+      status=TaskExecutionStatus::Running,
+      summary="duplicate running",
+      output_contract="test",
+    ),
+  )
+  state.replace_execution(
+    TaskExecutionRecord::new(
+      task_id="task-1",
+      book_id="coding",
+      packet_id="packet-1-final",
+      packet_path="packet-1-final.json",
+      status=TaskExecutionStatus::ReviewQueued,
+      summary="final",
+      output_contract="test",
+    ),
+  )
+  assert_eq(state.executions.length(), 2)
+  assert_true(
+    state.executions.all(fn(execution) {
+      execution.status == TaskExecutionStatus::ReviewQueued
+    }),
+  )
+}
+
+///|
 test "standing goal marks next dispatch window" {
   let goal = StandingGoal::new(
     id="watch-opc-news",
@@ -69,5 +113,5 @@ test "standing goal watcher decisions keep normal half-hour cadence on no-change
   let failed = goal.mark_watcher_decision(10, WatcherDecisionKind::Failed)
   assert_eq(failed.next_due_tick, 12)
   let deferred = goal.mark_watcher_decision(10, WatcherDecisionKind::Deferred)
-  assert_eq(deferred.next_due_tick, 11)
+  assert_eq(deferred.next_due_tick, 18)
 }

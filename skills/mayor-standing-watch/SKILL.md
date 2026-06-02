@@ -18,9 +18,15 @@ as `watch-opc-news`.
 - Do not force a full research rewrite just because a standing goal is due.
 - The target MoonBook owns baseline comparison, source fingerprints, wiki
   updates, digest history, and generated projection.
+- The target MoonBook bookkeeper decides what is remembered, rejected, queued
+  for review, or projected.
 - MoonClaw owns bounded search/fetch/read/summarize execution.
 - If a previous watcher execution is still active, defer instead of dispatching
   a duplicate run.
+- A watcher tick should grow the book only when new accepted facts, changed
+  pages, review items, or useful questions exist. Otherwise record a no-change
+  decision and back off.
+- Do not count operational watcher records as domain evidence.
 
 ## Output Contract
 

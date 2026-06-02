@@ -33,6 +33,19 @@ templates/planbook/PLAN_TEMPLATE.md
 - Prefer concrete repository facts over generic advice.
 - Use checkboxes for acceptance criteria.
 - Name ownership boundaries between Moontown, MoonBook, MoonClaw, and Moondesk.
+- Preserve the operating architecture: durable truth lives in MoonBook
+  documents/ledgers, active behavior is a protocol, civic buildings are
+  protocol places, Mayor owns routing/cadence, Bookkeepers own memory, and
+  MoonClaw workers are bounded freelance executors.
+- Say how the output returns home: which book, ledger, review queue, projection,
+  or cookbook stable-state entry changes after execution.
+- Say what should grow over time: book content, civic protocol ledgers,
+  PlanBook evidence, code/tests, UI projections, or explicit no-change records.
+- If execution changes Moontown source used by the live daemon, include a
+  post-validation reload step:
+  `moon run cmd/main -- daemon restart "validated source patch"`.
+  Fresh packets after that reload are the live proof; pre-reload daemon output
+  does not prove the new code path.
 - If the request is actually research, route to a research book.
 - If the request is actually teaching, route to a course book.
 - If the request changes stable operating definitions, mark cookbook impact.

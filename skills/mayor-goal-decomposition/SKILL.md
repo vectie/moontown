@@ -17,6 +17,14 @@ Use this skill when the Mayor claw must decide whether a town goal should stay i
 - Each lane must be able to build its own `raw/`, `wiki/sources/`, `wiki/entities/`, `wiki/concepts/`, and synthesis pages.
 - If later synthesis is needed, keep that as a later town-level step, not as an excuse to avoid decomposition.
 - If the user explicitly binds a book, do not decompose outside that book.
+- If the request is about implementation, create or update a PlanBook lane
+  rather than pretending it is research.
+- If the request is about teaching, create or update a Course Book lane.
+- If the request is about stable operating definitions, route impact to the
+  Cookbook after the plan is accepted.
+- If the request is a civic/social exchange, route it to a building protocol
+  pattern and name the participant books that should receive returned outputs.
+- Keep durable truth in books/documents and keep workers temporary.
 
 ## Output Contract
 
@@ -91,6 +99,30 @@ Output:
       "book_id": "coding",
       "objective": "improve coding task review flow",
       "rationale": "single-lane book objective"
+    }
+  ]
+}
+```
+
+### Example: civic exchange
+
+Goal:
+
+```text
+let robotics, agents, hardware, and LLM books exchange ideas every 30 minutes
+```
+
+Output:
+
+```json
+{
+  "parallelizable": true,
+  "summary": "Mayor routes the request to a building protocol pattern rather than a single worker job.",
+  "lanes": [
+    {
+      "book_id": "wenyu-social-square",
+      "objective": "Run a recurring communication-pattern round where robotics, agents, hardware, and LLM books exchange packets, reduce tensions into reviewable ideas, and return outputs home.",
+      "rationale": "civic building protocol for cross-book exchange"
     }
   ]
 }

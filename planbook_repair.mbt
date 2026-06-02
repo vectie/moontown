@@ -34,6 +34,7 @@ pub async fn write_moontown_planbook_repair_task(
   workspace_root? : String = default_planbook_workspace_root(),
   book_catalog_path? : String = @moonbook.default_catalog_path(),
   dispatch? : Bool = false,
+  run_inline? : Bool = moontown_moonclaw_inline_enabled(),
 ) -> String {
   let status = inspect_moontown_planbook_autonomy(
     snapshot_path~,
@@ -56,6 +57,7 @@ pub async fn write_moontown_planbook_repair_task(
             None =>
               materialize_planbook_repair_task(
                 criterion, snapshot_path, workspace_root, book_catalog_path, dispatch,
+                run_inline,
               )
           }
       }
@@ -450,6 +452,7 @@ async fn materialize_planbook_repair_task(
   workspace_root : String,
   book_catalog_path : String,
   dispatch : Bool,
+  run_inline : Bool,
 ) -> PlanbookRepairTask {
   ignore(snapshot_path)
   ignore(book_catalog_path)
@@ -468,9 +471,27 @@ async fn materialize_planbook_repair_task(
       packet_path,
       cwd=workspace_root,
       confirm=true,
-      run_inline=moontown_moonclaw_inline_enabled(),
+      run_inline~,
     ) catch {
-      error =>
+      error => {
+        let detail = "MoonClaw repair dispatch failed: \{error}"
+        if planbook_repair_transient_dispatch_error(detail) {
+          @moonclaw.save_packet_file(packet_path, packet)
+          return {
+            id: task_id,
+            criterion_id: criterion.id,
+            title: criterion.title,
+            status: "queued",
+            owner: criterion.owner,
+            workspace_root,
+            packet_path,
+            proposal_id: None,
+            run_id: None,
+            summary: "MoonClaw repair dispatch deferred due to transient transport/resource contention: \{error}. Daemon will retry while the gap remains open.",
+            validation_command: planbook_repair_validation_command(),
+            generated_at_ms: @env.now(),
+          }
+        }
         return {
           id: task_id,
           criterion_id: criterion.id,
@@ -485,11 +506,12 @@ async fn materialize_planbook_repair_task(
           validation_command: planbook_repair_validation_command(),
           generated_at_ms: @env.now(),
         }
+      }
     }
     proposal_id = Some(imported.proposal_id)
     run_id = imported.run_id
     let launch_command = match imported.run_id {
-      Some(run_id) if !moontown_moonclaw_inline_enabled() =>
+      Some(run_id) if !run_inline =>
         Some(@moonclaw.run_confirmed_run(run_id, cwd=workspace_root))
       _ => None
     }
@@ -519,6 +541,11 @@ async fn materialize_planbook_repair_task(
     validation_command: planbook_repair_validation_command(),
     generated_at_ms: @env.now(),
   }
+}
+
+///|
+fn planbook_repair_transient_dispatch_error(detail : String) -> Bool {
+  transient_external_dependency_error(detail)
 }
 
 ///|
@@ -934,6 +961,9 @@ fn planbook_repair_skill_markdown() -> String {
     "- For `backlog-*` criteria, write `raw/backlog/completed/<backlog-id>.md` only after validation and include the backlog id in `raw/repair/repair-result.md`.",
     "- If the backlog item is already done, update progress/backlog evidence and return `repair_decision: no_change` or `accepted` with no source patch; do not invent code churn.",
     "- If the plan is stale, update the PlanBook plan/backlog documents first and record `plan_update_status`.",
+    "- Preserve the operating architecture: durable truth in MoonBook documents/ledgers, active behavior as protocols, buildings as protocol places, Mayor for routing/cadence, Bookkeepers for memory, Workers for bounded execution.",
+    "- For civic work, prove information exchange with inbox/contribution/reduction/outbox/review/return-home records instead of only adding UI labels.",
+    "- For live autonomy work, prove growth with changed books, protocol ledgers, PlanBook evidence, code/tests, UI projections, or explicit no-change decisions.",
     "- For MoonBook-native provider/profile work, produce a MoonBook patch plan or patch only when executing inside MoonBook.",
     "- For MoonClaw runtime/provider work, produce a MoonClaw patch plan or patch only when executing inside MoonClaw.",
     "- When execution mode is `acp`, use the configured Codex ACP target to patch the repository source root, not just the PlanBook workspace.",

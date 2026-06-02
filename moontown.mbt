@@ -97,10 +97,31 @@ fn register_demo_workers(state : @core.TownState) -> Unit {
     ),
   )
   for book in state.books {
+    register_book_watch_worker(state, book)
     if book.id != "coding" && book.id != "finance" {
       register_book_lane_workers(state, book)
     }
   }
+}
+
+///|
+fn register_book_watch_worker(
+  state : @core.TownState,
+  book : @core.BookRef,
+) -> Unit {
+  register_worker_if_missing(
+    state,
+    @core.WorkerRef::new(
+      id="claw-\{book.id}-watcher",
+      name="\{book.name} Watcher",
+      book_id=book.id,
+      role=@core.WorkerRole::Watcher,
+      capabilities=[
+        "standing-watch", "web-search", "source-screening", "delta-detection", "digest",
+        "memory", "review",
+      ],
+    ),
+  )
 }
 
 ///|
@@ -128,19 +149,7 @@ fn register_book_lane_workers(
       )
     None => ()
   }
-  register_worker_if_missing(
-    state,
-    @core.WorkerRef::new(
-      id="claw-\{book.id}-watcher",
-      name="\{book.name} Watcher",
-      book_id=book.id,
-      role=@core.WorkerRole::Watcher,
-      capabilities=[
-        "standing-watch", "web-search", "source-screening", "delta-detection", "digest",
-        "memory", "review",
-      ],
-    ),
-  )
+  register_book_watch_worker(state, book)
   register_worker_if_missing(
     state,
     @core.WorkerRef::new(

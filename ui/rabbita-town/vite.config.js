@@ -11,6 +11,8 @@ const liveDigestPath = path.resolve(process.cwd(), '../../.moontown/live-digest.
 const editorPipelinePath = path.resolve(process.cwd(), '../../.moontown/editor-pipeline.json')
 const daemonSnapshotPath = path.resolve(process.cwd(), '../../.moontown/daemon.json')
 const standingGoalsPath = path.resolve(process.cwd(), '../../.moontown/standing-goals.json')
+const bookTemplateRequestPath = path.resolve(process.cwd(), '../../.moontown/book-template-requests.json')
+const bookTemplateConfigDir = path.resolve(process.cwd(), '../../.moontown/book-template-configs')
 const civicStatusPath = path.resolve(process.cwd(), '../../.moontown/civic/status.json')
 const watcherDir = path.resolve(process.cwd(), '../../.moontown/watchers')
 const operatorRequestDir = path.resolve(process.cwd(), '../../.moontown/operator-requests')
@@ -75,6 +77,13 @@ async function readJsonArray(filePath) {
   const text = await readFile(filePath, 'utf8')
   const parsed = JSON.parse(text)
   return Array.isArray(parsed) ? parsed : []
+}
+
+async function readBookTemplateRequestLedger() {
+  const parsed = await readJsonFile(bookTemplateRequestPath, { requests: [] })
+  return {
+    requests: Array.isArray(parsed?.requests) ? parsed.requests : [],
+  }
 }
 
 async function appendJsonLine(filePath, value) {
@@ -581,6 +590,83 @@ async function handleOperatorRequest(req, res) {
   }
 }
 
+async function handleBookTemplateRequest(req, res) {
+  try {
+    const payload = JSON.parse(await readBody(req))
+    const templateId = String(payload.template_id || 'pdf-evidence-watch').trim() || 'pdf-evidence-watch'
+    const title = String(payload.title || '').trim()
+    const bookId = safeSegment(payload.book_id || title, 'research-pdf-evidence-watch')
+    const purpose = String(payload.purpose || '').trim()
+      || 'Watch approved websites for relevant PDFs, extract full text, analyze with the book-owned method, and notify only when accepted knowledge changes.'
+    const websites = Array.isArray(payload.websites)
+      ? payload.websites.map(item => String(item || '').trim()).filter(Boolean)
+      : String(payload.websites || '').split(/\r?\n|,/).map(item => item.trim()).filter(Boolean)
+    const cadenceTicks = Math.max(1, Number.parseInt(payload.cadence_ticks, 10) || 60)
+    const analysisMethod = String(payload.analysis_method || '').trim()
+
+    if (templateId !== 'pdf-evidence-watch') {
+      res.statusCode = 400
+      res.setHeader('Content-Type', 'application/json')
+      res.end(JSON.stringify({ ok: false, error: `unsupported template_id: ${templateId}` }))
+      return
+    }
+    if (!title || websites.length === 0) {
+      res.statusCode = 400
+      res.setHeader('Content-Type', 'application/json')
+      res.end(JSON.stringify({ ok: false, error: 'title and at least one website are required' }))
+      return
+    }
+
+    const requestId = `book-template-${Date.now()}-${safeSegment(title)}`
+    const configRelativePath = `book-template-configs/${requestId}.json`
+    const configPath = path.join(bookTemplateConfigDir, `${requestId}.json`)
+    const config = {
+      book_id: bookId,
+      title,
+      purpose,
+      websites,
+      analysis_method: analysisMethod,
+      analysis_method_path: '',
+      cadence_ticks: cadenceTicks,
+      workspace_root: '',
+    }
+    const request = {
+      id: requestId,
+      template_id: templateId,
+      config_path: configRelativePath,
+      status: 'pending',
+      summary: `Queued ${title} for ${templateId}; ${websites.length} website(s).`,
+      last_processed_tick: 0,
+    }
+    const ledger = await readBookTemplateRequestLedger()
+    const existingIndex = ledger.requests.findIndex(item => item && item.id === requestId)
+    if (existingIndex >= 0) {
+      ledger.requests[existingIndex] = request
+    } else {
+      ledger.requests.push(request)
+    }
+
+    await mkdir(bookTemplateConfigDir, { recursive: true })
+    await writeFile(configPath, JSON.stringify(config, null, 2), 'utf8')
+    await mkdir(path.dirname(bookTemplateRequestPath), { recursive: true })
+    await writeFile(bookTemplateRequestPath, JSON.stringify(ledger, null, 2), 'utf8')
+
+    res.statusCode = 200
+    res.setHeader('Content-Type', 'application/json')
+    res.end(JSON.stringify({
+      ok: true,
+      request_id: requestId,
+      status: 'pending',
+      template_id: templateId,
+      config_path: configRelativePath,
+    }))
+  } catch (error) {
+    res.statusCode = 500
+    res.setHeader('Content-Type', 'application/json')
+    res.end(JSON.stringify({ ok: false, error: String(error?.message || error) }))
+  }
+}
+
 function moontownSnapshotPlugin() {
   return {
     name: 'moontown-town-snapshot',
@@ -709,6 +795,16 @@ function moontownSnapshotPlugin() {
         }
 
         await handleOperatorRequest(req, res)
+      })
+      server.middlewares.use('/api/book-template-requests', async (req, res) => {
+        if (req.method !== 'POST') {
+          res.statusCode = 405
+          res.setHeader('Content-Type', 'application/json')
+          res.end(JSON.stringify({ ok: false, error: 'POST required' }))
+          return
+        }
+
+        await handleBookTemplateRequest(req, res)
       })
     },
     async closeBundle() {

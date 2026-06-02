@@ -114,6 +114,38 @@ Shared envelope steps:
 - update MoonBook pages
 - update projection
 
+The proof of exchange is not the existence of a building card. A healthy round
+must leave durable evidence in the building protocol and in participant homes:
+
+- inbox packet or schedule claim
+- participant contribution packets
+- reducer output with participating books
+- review gate record
+- outbox/distribution record
+- return-home record or review item in each affected MoonBook
+- projection update that references the latest round
+
+If a pattern cannot write these artifacts, it should report a blocker instead
+of producing generic ideas.
+
+## Service-Result Reconciliation
+
+Protocol rounds and civic service results are separate layers.
+
+- Protocol rounds prove that a building exchanged information: inbox,
+  contributions, reductions, outbox, review, and return-home ledgers.
+- Civic service results prove that the building's MoonBook support workspace
+  has reconciled that exchange into its service contract.
+- Review-gated protocol outputs must reconcile as `needs_review`, not as
+  accepted facts.
+
+The daemon runs a generic `civic-service` scheduled job after protocol rounds.
+That job calls `reconcile_wenyu_civic_service_results`, reads the service
+registry and protocol ledgers, and writes
+`.moontown/book-results/goal-<book-id>-civic-service.json` through MoonBook.
+This is intentionally registry-driven: adding a future building should require
+a service definition and pattern scenario, not a new MoonBit branch.
+
 Each pattern should provide only:
 
 - output contract

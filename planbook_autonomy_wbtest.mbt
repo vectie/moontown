@@ -26,6 +26,9 @@ async test "planbook autonomy doctor writes self-healing evidence" {
   let change_log = read_text_or_empty(
     "\{workspace_root}/wiki/history/change-log.md",
   )
+  let engineering_digest = read_text_or_empty(
+    "\{workspace_root}/wiki/history/daily-engineering-digest.md",
+  )
   let progress = read_text_or_empty(
     "\{workspace_root}/wiki/planning/backlog-progress.md",
   )
@@ -34,6 +37,9 @@ async test "planbook autonomy doctor writes self-healing evidence" {
   )
   let role_model = read_text_or_empty(
     "\{workspace_root}/wiki/planning/role-model.md",
+  )
+  let operating_architecture = read_text_or_empty(
+    "\{workspace_root}/wiki/planning/operating-architecture.md",
   )
   assert_true(status_text.contains("\"status\": \"self-healing-open\""))
   assert_true(status_text.contains("editor-mode-real-pipeline"))
@@ -45,6 +51,8 @@ async test "planbook autonomy doctor writes self-healing evidence" {
   assert_true(review.contains("needs-fix"))
   assert_true(backlog.contains("live-change-log-projection"))
   assert_true(change_log.contains("autonomy doctor"))
+  assert_true(engineering_digest.contains("Daily Engineering Digest"))
+  assert_true(engineering_digest.contains("Source-Control Policy"))
   assert_true(progress.contains("next_check_interval_ms"))
   assert_true(progress.contains("take the next bounded task immediately"))
   assert_true(stop_policy.contains("The town should stop implementing"))
@@ -53,6 +61,9 @@ async test "planbook autonomy doctor writes self-healing evidence" {
   assert_true(role_model.contains("MoonBook Bookkeeper"))
   assert_true(role_model.contains("MoonClaw Worker"))
   assert_true(role_model.contains("freelance executor"))
+  assert_true(operating_architecture.contains("Operating Architecture"))
+  assert_true(operating_architecture.contains("Growth Contract"))
+  assert_true(operating_architecture.contains("Civic Wiring Rule"))
 }
 
 ///|
@@ -72,6 +83,32 @@ async test "planbook validation evidence requires explicit validation contract" 
   assert_true(planbook_validation_evidence_ready(text))
   assert_true(text.contains("contract: planbook.validation.v1"))
   assert_true(text.contains("validation_status: passed"))
+}
+
+///|
+async test "planbook autonomy doctor repairs missing seed architecture page" {
+  let root = "/tmp/moontown-planbook-seed-repair-wbtest"
+  ignore_checked_command("rm", ["-rf", root])
+  let snapshot_path = "\{root}/town.json"
+  let workspace_root = "\{root}/books/plan-moontown-quality"
+  write_text_file(
+    "\{workspace_root}/wiki/index.md",
+    "# Existing PlanBook\n\nDo not overwrite existing operator-authored content.",
+  )
+  ignore(
+    write_moontown_planbook_autonomy(
+      snapshot_path~,
+      workspace_root~,
+      book_catalog_path="\{root}/catalog.json",
+    ),
+  )
+  let index = read_text_or_empty("\{workspace_root}/wiki/index.md")
+  let operating_architecture = read_text_or_empty(
+    "\{workspace_root}/wiki/planning/operating-architecture.md",
+  )
+  assert_true(index.contains("Do not overwrite existing"))
+  assert_true(operating_architecture.contains("Operating Architecture"))
+  assert_true(operating_architecture.contains("Stable Watch State"))
 }
 
 ///|
@@ -365,15 +402,26 @@ async test "planbook repair queues bounded packet without marking it active befo
   let task_text = read_text_or_empty(
     default_planbook_repair_path(snapshot_path~),
   )
-  let packet_text = read_text_or_empty(
+  let semantic_packet_text = read_text_or_empty(
     "\{workspace_root}/raw/repair/planbook-repair-semantic-ai-review-results.packet.json",
   )
+  let runtime_packet_text = read_text_or_empty(
+    "\{workspace_root}/raw/repair/planbook-repair-runtime-books-in-quality-audit.packet.json",
+  )
+  let packet_text = if semantic_packet_text.is_empty() {
+    runtime_packet_text
+  } else {
+    semantic_packet_text
+  }
   let skill_text = read_text_or_empty(
     "\{workspace_root}/skills/planbook-repair/SKILL.md",
   )
   let profile_text = read_text_or_empty("\{workspace_root}/moonclaw.jobs.json")
   assert_true(task_text.contains("\"status\": \"queued\""))
-  assert_true(task_text.contains("semantic-ai-review-results"))
+  assert_true(
+    task_text.contains("semantic-ai-review-results") ||
+    task_text.contains("runtime-books-in-quality-audit"),
+  )
   assert_true(packet_text.contains("planbook.repair.result.v1"))
   assert_true(packet_text.contains("\"target_files\""))
   assert_true(
@@ -428,6 +476,7 @@ async test "planbook backlog item can drive bounded repair packet from json" {
     workspace_root,
     "\{root}/catalog.json",
     false,
+    false,
   )
   let packet_text = read_text_or_empty(task.packet_path)
   let skill_text = read_text_or_empty(
@@ -462,6 +511,7 @@ async test "editor pipeline repair packet keeps course source context bounded" {
       "\{root}/town.json",
       workspace_root,
       "\{root}/catalog.json",
+      false,
       false,
     ),
   )
@@ -501,6 +551,7 @@ async test "selected editor feature repair packet is driven by ai selection arti
       "\{root}/town.json",
       workspace_root,
       "\{root}/catalog.json",
+      false,
       false,
     ),
   )
@@ -576,6 +627,7 @@ async test "planbook repair supersedes stale runtime handoff evidence" {
     workspace_root,
     "\{root}/catalog.json",
     false,
+    false,
   )
   let result_text = read_text_or_empty(
     "\{workspace_root}/raw/repair/repair-result.md",
@@ -608,6 +660,7 @@ async test "planbook repair acp target uses resolved codex command" {
       "\{root}/town.json",
       workspace_root,
       "\{root}/catalog.json",
+      false,
       false,
     ),
   )
@@ -720,4 +773,33 @@ async test "planbook repair does not treat orphaned running run as active" {
     "{\"runs\":[{\"id\":\"run-orphaned\",\"status\":\"Running\"}]}",
   )
   assert_eq(planbook_repair_active_count(snapshot_path~), 0)
+}
+
+///|
+test "planbook repair treats temporary dispatch contention as retryable" {
+  assert_true(
+    planbook_repair_transient_dispatch_error(
+      "MoonClaw repair dispatch failed: Resource temporarily unavailable",
+    ),
+  )
+  assert_true(
+    planbook_repair_transient_dispatch_error(
+      "MoonClaw repair dispatch failed: {bad request}",
+    ),
+  )
+  assert_true(
+    planbook_repair_transient_dispatch_error(
+      "Error: Failed to resolve the module dependency graph\nUnable to lock folder `/Users/kq/Workspace/moonclaw/.mooncakes` for downloading dependencies\nOperation not permitted (os error 1)",
+    ),
+  )
+  assert_true(
+    planbook_repair_transient_dispatch_error(
+      "RUNTIME ERROR: abort() called\nStringBuilder::grow_if_necessary\n@vectie/moonclaw/job.SystemStore::save_job_proposals",
+    ),
+  )
+  assert_true(
+    !planbook_repair_transient_dispatch_error(
+      "MoonClaw repair dispatch failed: schema violation",
+    ),
+  )
 }

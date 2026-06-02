@@ -59,6 +59,27 @@ pub struct BookQualityReviewRunLedger {
 } derive(Eq, ToJson, FromJson)
 
 ///|
+struct BookQualityRepairBridgeItem {
+  book_id : String
+  book_type : String
+  workspace_root : String
+  semantic_score : Int
+  semantic_grade : String
+  repair_owner : String
+  next_repair_task : String
+  review_result_path : String
+  book_review_path : String
+  standing_goal_id : String
+  status : String
+  generated_at_ms : UInt64
+} derive(Eq, ToJson, FromJson)
+
+///|
+struct BookQualityRepairBridgeLedger {
+  items : Array[BookQualityRepairBridgeItem]
+} derive(Eq, ToJson, FromJson)
+
+///|
 pub fn default_book_quality_audit_path() -> String {
   ".moontown/book-quality/audit.json"
 }
@@ -79,13 +100,25 @@ pub fn default_book_quality_review_run_path() -> String {
 }
 
 ///|
+fn default_book_quality_repair_bridge_path() -> String {
+  ".moontown/book-quality/repair-bridge.json"
+}
+
+///|
 pub async fn inspect_book_quality(
   book_catalog_path? : String = @moonbook.default_catalog_path(),
+  snapshot_path? : String = @storage.default_snapshot_path(),
 ) -> BookQualityAudit {
-  let catalog = @moonbook.load_or_create_catalog(path=book_catalog_path)
+  let catalog = quality_catalog_with_runtime_books(
+    @moonbook.load_or_create_catalog(path=book_catalog_path),
+    snapshot_path,
+  )
   let scores : Array[BookQualityScore] = []
+  let review_result_dir = book_quality_review_result_dir_for_snapshot(
+    snapshot_path,
+  )
   for entry in catalog {
-    scores.push(score_book(entry))
+    scores.push(score_book(entry, review_result_dir))
   }
   let weakest = weakest_score(scores)
   {
@@ -107,19 +140,54 @@ pub async fn inspect_book_quality(
 }
 
 ///|
+async fn quality_catalog_with_runtime_books(
+  catalog : Array[@moonbook.BookCatalogEntry],
+  snapshot_path : String,
+) -> Array[@moonbook.BookCatalogEntry] {
+  let merged : Array[@moonbook.BookCatalogEntry] = []
+  for entry in catalog {
+    merged.push(entry)
+  }
+  match @storage.load_snapshot_file(snapshot_path) {
+    Some(snapshot) =>
+      for book in snapshot.town.books {
+        if !merged.any(fn(entry) { entry.id == book.id }) {
+          merged.push(
+            @moonbook.BookCatalogEntry::new(
+              id=book.id,
+              name=book.name,
+              purpose=book.purpose,
+              workspace_root=book.workspace_root,
+              memory_scope=book.memory_scope,
+              tags=book.tags,
+              skills=[],
+            ),
+          )
+        }
+      }
+    None => ()
+  }
+  merged
+}
+
+///|
 pub async fn render_book_quality(
   book_catalog_path? : String = @moonbook.default_catalog_path(),
+  snapshot_path? : String = @storage.default_snapshot_path(),
 ) -> String {
-  render_book_quality_audit(inspect_book_quality(book_catalog_path~))
+  render_book_quality_audit(
+    inspect_book_quality(book_catalog_path~, snapshot_path~),
+  )
 }
 
 ///|
 pub async fn write_book_quality_audit(
   book_catalog_path? : String = @moonbook.default_catalog_path(),
+  snapshot_path? : String = @storage.default_snapshot_path(),
   audit_path? : String = default_book_quality_audit_path(),
 ) -> String {
   ignore(bootstrap_default_operational_books(book_catalog_path))
-  let audit = inspect_book_quality(book_catalog_path~)
+  let audit = inspect_book_quality(book_catalog_path~, snapshot_path~)
   write_text_file(audit_path, audit.to_json().stringify(indent=2))
   let markdown_path = book_quality_markdown_path(audit_path)
   write_text_file(markdown_path, render_book_quality_audit(audit))
@@ -129,10 +197,11 @@ pub async fn write_book_quality_audit(
 ///|
 pub async fn write_book_quality_review_packets(
   book_catalog_path? : String = @moonbook.default_catalog_path(),
+  snapshot_path? : String = @storage.default_snapshot_path(),
   review_dir? : String = default_book_quality_review_dir(),
 ) -> String {
   ignore(bootstrap_default_operational_books(book_catalog_path))
-  let audit = inspect_book_quality(book_catalog_path~)
+  let audit = inspect_book_quality(book_catalog_path~, snapshot_path~)
   write_text_file(
     "\{review_dir}/BOOK_QUALITY_REVIEW_SKILL.md",
     book_quality_ai_review_skill_markdown(),
@@ -156,12 +225,25 @@ pub async fn write_book_quality_review_packets(
 ///|
 pub async fn dispatch_next_book_quality_ai_review(
   book_catalog_path? : String = @moonbook.default_catalog_path(),
+  snapshot_path? : String = @storage.default_snapshot_path(),
   review_dir? : String = default_book_quality_review_dir(),
   result_dir? : String = default_book_quality_review_result_dir(),
   run_path? : String = default_book_quality_review_run_path(),
+  run_inline? : Bool = moontown_moonclaw_inline_enabled(),
 ) -> String {
-  ignore(write_book_quality_review_packets(book_catalog_path~, review_dir~))
-  let audit = inspect_book_quality(book_catalog_path~)
+  ignore(reconcile_book_quality_ai_review_results(result_dir~, run_path~))
+  let active = book_quality_ai_review_active_count(result_dir~, run_path~)
+  if active > 0 {
+    return "AI semantic book-quality review already active; daemon will not dispatch a duplicate. active=\{active}"
+  }
+  ignore(
+    write_book_quality_review_packets(
+      book_catalog_path~,
+      snapshot_path~,
+      review_dir~,
+    ),
+  )
+  let audit = inspect_book_quality(book_catalog_path~, snapshot_path~)
   let score = first_pending_ai_review_book(audit, result_dir)
   match score {
     None =>
@@ -180,7 +262,7 @@ pub async fn dispatch_next_book_quality_ai_review(
         cwd=book_quality_review_root(review_dir),
         home=book_quality_moonclaw_home(review_dir),
         confirm=true,
-        run_inline=moontown_moonclaw_inline_enabled(),
+        run_inline~,
       ) catch {
         error => {
           let run = BookQualityReviewRun::{
@@ -198,7 +280,7 @@ pub async fn dispatch_next_book_quality_ai_review(
         }
       }
       let launch_command = match imported.run_id {
-        Some(run_id) if !moontown_moonclaw_inline_enabled() =>
+        Some(run_id) if !run_inline =>
           Some(
             @moonclaw.run_confirmed_run(
               run_id,
@@ -232,23 +314,439 @@ pub async fn dispatch_next_book_quality_ai_review(
 }
 
 ///|
+pub async fn reconcile_book_quality_repair_bridge(
+  book_catalog_path? : String = @moonbook.default_catalog_path(),
+  snapshot_path? : String = @storage.default_snapshot_path(),
+  result_dir? : String = default_book_quality_review_result_dir(),
+  bridge_path? : String = default_book_quality_repair_bridge_path(),
+) -> String {
+  let catalog = quality_catalog_with_runtime_books(
+    @moonbook.load_or_create_catalog(path=book_catalog_path),
+    snapshot_path,
+  )
+  let repairable_book_ids = book_quality_repairable_book_ids(catalog)
+  let audit = inspect_book_quality(book_catalog_path~, snapshot_path~)
+  let current_tick = book_quality_current_daemon_tick(snapshot_path)
+  let goals_path = book_quality_standing_goal_path(snapshot_path)
+  let goals = @storage.load_or_create_standing_goals(path=goals_path)
+  let retired_goal_ids = retire_satisfied_book_quality_repair_goals(
+    goals,
+    audit.scores,
+    repairable_book_ids,
+    result_dir,
+  )
+  let repaired : Array[BookQualityRepairBridgeItem] = []
+  for score in audit.scores {
+    if !repairable_book_ids.contains(score.book_id) {
+      continue
+    }
+    let result_path = "\{result_dir}/\{score.book_id}.md"
+    let result_text = read_text_or_empty(result_path)
+    if result_text.is_empty() {
+      continue
+    }
+    match parse_ai_quality_score(result_text) {
+      Some(value) if value < 80 => {
+        let item = book_quality_repair_bridge_item(
+          score, result_path, result_text, value,
+        )
+        write_book_quality_repair_review_page(item, result_text)
+        upsert_book_quality_repair_standing_goal(goals, item, current_tick)
+        repaired.push(item)
+      }
+      _ => ()
+    }
+  }
+  @storage.save_standing_goals_file(goals_path, goals)
+  write_text_file(
+    bridge_path,
+    BookQualityRepairBridgeLedger::{ items: repaired }
+    .to_json()
+    .stringify(indent=2),
+  )
+  if repaired.is_empty() {
+    if retired_goal_ids.is_empty() {
+      "No weak AI semantic book-quality review needed repair bridging."
+    } else {
+      "No weak AI semantic book-quality review needed repair bridging. Retired \{retired_goal_ids.length()} stale repair goal(s): \{retired_goal_ids.join(", ")}."
+    }
+  } else {
+    let ids = repaired.map(fn(item) { item.book_id }).join(", ")
+    if retired_goal_ids.is_empty() {
+      "Bridged \{repaired.length()} weak AI semantic book-quality review(s) into MoonBook review queues and standing repair goals: \{ids}."
+    } else {
+      "Bridged \{repaired.length()} weak AI semantic book-quality review(s) into MoonBook review queues and standing repair goals: \{ids}. Retired \{retired_goal_ids.length()} stale repair goal(s): \{retired_goal_ids.join(", ")}."
+    }
+  }
+}
+
+///|
+async fn retire_satisfied_book_quality_repair_goals(
+  goals : Array[@core.StandingGoal],
+  scores : Array[BookQualityScore],
+  repairable_book_ids : Array[String],
+  result_dir : String,
+) -> Array[String] {
+  let retired : Array[String] = []
+  for index in 0..<goals.length() {
+    let goal = goals[index]
+    if book_quality_should_retire_repair_goal(
+        goal, scores, repairable_book_ids, result_dir,
+      ) {
+      goals[index] = disabled_book_quality_repair_goal(goal)
+      retired.push(goal.id)
+    }
+  }
+  retired
+}
+
+///|
+async fn book_quality_should_retire_repair_goal(
+  goal : @core.StandingGoal,
+  scores : Array[BookQualityScore],
+  repairable_book_ids : Array[String],
+  result_dir : String,
+) -> Bool {
+  if !goal.enabled || !goal.id.has_prefix("book-quality-repair-") {
+    return false
+  }
+  match goal.target_book_id {
+    None => false
+    Some(book_id) => {
+      if !book_quality_score_exists(scores, book_id) {
+        return true
+      }
+      if !repairable_book_ids.contains(book_id) {
+        return true
+      }
+      let result_text = read_text_or_empty("\{result_dir}/\{book_id}.md")
+      match parse_ai_quality_score(result_text) {
+        Some(value) => value >= 80
+        None => false
+      }
+    }
+  }
+}
+
+///|
+fn book_quality_score_exists(
+  scores : Array[BookQualityScore],
+  book_id : String,
+) -> Bool {
+  for score in scores {
+    if score.book_id == book_id {
+      return true
+    }
+  }
+  false
+}
+
+///|
+fn disabled_book_quality_repair_goal(
+  goal : @core.StandingGoal,
+) -> @core.StandingGoal {
+  @core.StandingGoal::new(
+    id=goal.id,
+    title=goal.title,
+    prompt=goal.prompt,
+    target_book_id=goal.target_book_id,
+    cadence_ticks=goal.cadence_ticks,
+    next_due_tick=goal.next_due_tick,
+    last_run_tick=goal.last_run_tick,
+    enabled=false,
+    source_policy=goal.source_policy,
+    quality_threshold=goal.quality_threshold,
+  )
+}
+
+///|
+fn book_quality_repairable_book_ids(
+  catalog : Array[@moonbook.BookCatalogEntry],
+) -> Array[String] {
+  let ids : Array[String] = []
+  for entry in catalog {
+    if book_quality_repairable_catalog_entry(entry) {
+      ids.push(entry.id)
+    }
+  }
+  ids
+}
+
+///|
+fn book_quality_repairable_catalog_entry(
+  entry : @moonbook.BookCatalogEntry,
+) -> Bool {
+  !entry.tags.contains("archived") &&
+  !entry.tags.contains("hidden") &&
+  !entry.tags.contains("internal")
+}
+
+///|
+fn book_quality_repair_bridge_item(
+  score : BookQualityScore,
+  result_path : String,
+  result_text : String,
+  semantic_score : Int,
+) -> BookQualityRepairBridgeItem {
+  let repair_owner = book_quality_contract_field(result_text, "repair_owner").unwrap_or(
+    "mixed",
+  )
+  let task = book_quality_contract_field(result_text, "next_repair_task").unwrap_or(
+    score.next_action,
+  )
+  let semantic_grade = book_quality_contract_field(
+    result_text, "ai_quality_grade",
+  ).unwrap_or(score.semantic_grade)
+  {
+    book_id: score.book_id,
+    book_type: score.book_type,
+    workspace_root: score.workspace_root,
+    semantic_grade,
+    repair_owner,
+    next_repair_task: task,
+    review_result_path: result_path,
+    book_review_path: "\{score.workspace_root}/wiki/reviews/book-quality-repair.md",
+    standing_goal_id: book_quality_repair_goal_id(score.book_id),
+    status: "queued",
+    generated_at_ms: @env.now(),
+    semantic_score,
+  }
+}
+
+///|
+async fn write_book_quality_repair_review_page(
+  item : BookQualityRepairBridgeItem,
+  result_text : String,
+) -> Unit {
+  write_text_file(
+    item.book_review_path,
+    [
+      "# Book Quality Repair Queue",
+      "",
+      "This page is generated from Moontown's semantic book-quality review. It is a repair queue, not accepted domain evidence.",
+      "",
+      "## Current Repair",
+      "",
+      "- Book: `\{item.book_id}`",
+      "- Type: `\{item.book_type}`",
+      "- AI quality: `\{item.semantic_score}` / `\{item.semantic_grade}`",
+      "- Repair owner: `\{item.repair_owner}`",
+      "- Standing repair goal: `\{item.standing_goal_id}`",
+      "- Status: `\{item.status}`",
+      "",
+      "## Next Repair Task",
+      "",
+      item.next_repair_task,
+      "",
+      "## Review Contract",
+      "",
+      "```md",
+      result_text.trim().to_owned(),
+      "```",
+      "",
+      "## Accounting Rule",
+      "",
+      "Do not mark this repair as accepted progress until the owning MoonBook or civic protocol has updated durable domain/service artifacts and a later semantic review no longer reports this gap.",
+    ].join("\n"),
+  )
+}
+
+///|
+fn upsert_book_quality_repair_standing_goal(
+  goals : Array[@core.StandingGoal],
+  item : BookQualityRepairBridgeItem,
+  current_tick : Int,
+) -> Unit {
+  let replacement = @core.StandingGoal::new(
+    id=item.standing_goal_id,
+    title="Repair book quality: \{item.book_id}",
+    prompt=book_quality_repair_goal_prompt(item),
+    target_book_id=Some(item.book_id),
+    cadence_ticks=60,
+    next_due_tick=current_tick + 1,
+    source_policy=book_quality_repair_source_policy(item.book_type),
+    quality_threshold=80,
+  )
+  let mut replaced = false
+  for index in 0..<goals.length() {
+    if goals[index].id == replacement.id {
+      let existing = goals[index]
+      goals[index] = @core.StandingGoal::new(
+        id=item.standing_goal_id,
+        title="Repair book quality: \{item.book_id}",
+        prompt=book_quality_repair_goal_prompt(item),
+        target_book_id=Some(item.book_id),
+        cadence_ticks=60,
+        next_due_tick=existing.next_due_tick,
+        last_run_tick=existing.last_run_tick,
+        enabled=true,
+        source_policy=book_quality_repair_source_policy(item.book_type),
+        quality_threshold=80,
+      )
+      replaced = true
+    }
+  }
+  if !replaced {
+    goals.push(replacement)
+  }
+}
+
+///|
+fn book_quality_repair_goal_prompt(
+  item : BookQualityRepairBridgeItem,
+) -> String {
+  [
+    "A semantic MoonBook quality review found that this book is not ready.",
+    "",
+    "Book id: `\{item.book_id}`",
+    "Book type: `\{item.book_type}`",
+    "AI quality: `\{item.semantic_score}` / `\{item.semantic_grade}`",
+    "Repair owner: `\{item.repair_owner}`",
+    "Review queue: `wiki/reviews/book-quality-repair.md`",
+    "",
+    "Repair task from the AI review:",
+    item.next_repair_task,
+    "",
+    "Rules:",
+    "- Repair the existing book in place; do not create v1/v2/v3/v4 alternates.",
+    "- Follow the book's own contract and SKILL.md; do not force a research genre onto civic, course, planbook, cookbook, or operational books.",
+    "- Separate operational logs from domain/service evidence.",
+    "- If the repair needs web evidence and source policy allows it, search/fetch web sources before local fallback.",
+    "- Return a strict standing-goal decision marker so Moontown can account for real growth.",
+  ].join("\n")
+}
+
+///|
+fn book_quality_repair_source_policy(book_type : String) -> String {
+  match book_type {
+    "research-book" => "web-first"
+    _ => "book-first"
+  }
+}
+
+///|
+fn book_quality_repair_goal_id(book_id : String) -> String {
+  "book-quality-repair-\{book_id}"
+}
+
+///|
+fn book_quality_contract_field(text : String, key : String) -> String? {
+  let needle = "\{key.to_lower()}:"
+  for raw in text.split("\n") {
+    let line = raw.trim()
+    let lower = line.to_lower()
+    if lower.has_prefix(needle) {
+      return Some(line[needle.length():].trim().to_owned())
+    }
+  }
+  None
+}
+
+///|
+async fn book_quality_current_daemon_tick(snapshot_path : String) -> Int {
+  let path = book_quality_daemon_state_path(snapshot_path)
+  if !@fs.exists(path) {
+    return 0
+  }
+  let parsed = @json.parse(@fs.read_file(path).text()) catch { _ => return 0 }
+  match parsed {
+    Object(object) =>
+      match object.get("tick_sequence") {
+        Some(Number(value, ..)) => value.to_int()
+        _ => 0
+      }
+    _ => 0
+  }
+}
+
+///|
+fn book_quality_daemon_state_path(snapshot_path : String) -> String {
+  let base = @path.Path::dirname(snapshot_path).to_string()
+  if base == "." || base == "" {
+    ".moontown/daemon.json"
+  } else {
+    "\{base}/daemon.json"
+  }
+}
+
+///|
+fn book_quality_standing_goal_path(snapshot_path : String) -> String {
+  let base = @path.Path::dirname(snapshot_path).to_string()
+  if base == "." || base == "" {
+    @storage.default_standing_goal_path()
+  } else {
+    "\{base}/standing-goals.json"
+  }
+}
+
+///|
+async fn book_quality_ai_review_active_count(
+  result_dir? : String = default_book_quality_review_result_dir(),
+  run_path? : String = default_book_quality_review_run_path(),
+) -> Int {
+  let ledger = load_book_quality_review_run_ledger(run_path)
+  let now = @env.now()
+  let mut active = 0
+  for run in ledger.runs {
+    if book_quality_review_run_active(run, result_dir, now~) {
+      active += 1
+    }
+  }
+  active
+}
+
+///|
+async fn book_quality_review_run_active(
+  run : BookQualityReviewRun,
+  result_dir : String,
+  now? : UInt64 = @env.now(),
+) -> Bool {
+  if @fs.exists("\{result_dir}/\{run.book_id}.md") ||
+    @fs.exists(run.result_path) {
+    return false
+  }
+  if run.status != "dispatched" &&
+    run.status != "queued" &&
+    run.status != "running" {
+    return false
+  }
+  match run.run_id {
+    Some(run_id) if @moonclaw.run_process_alive(run_id) => true
+    Some(_) => now < run.generated_at_ms + book_quality_review_stale_after_ms()
+    None => now < run.generated_at_ms + book_quality_review_stale_after_ms()
+  }
+}
+
+///|
 pub async fn render_book_quality_ai_review_status(
   result_dir? : String = default_book_quality_review_result_dir(),
   run_path? : String = default_book_quality_review_run_path(),
 ) -> String {
   ignore(reconcile_book_quality_ai_review_results(result_dir~, run_path~))
   let ledger = load_book_quality_review_run_ledger(run_path)
+  let active = book_quality_ai_review_active_count(result_dir~, run_path~)
+  let current_runs = current_book_quality_review_runs(ledger)
+  let historical_attempts = ledger.runs.length() - current_runs.length()
+  let historical_problem_attempts = historical_book_quality_problem_attempt_count(
+    ledger, current_runs,
+  )
   let lines : Array[String] = [
     "# Book Quality AI Review Runs",
     "",
     "- run ledger: `\{run_path}`",
     "- result dir: `\{result_dir}`",
+    "- active reviews: `\{active}`",
     "- runs: `\{ledger.runs.length()}`",
+    "- current books: `\{current_runs.length()}`",
+    "- historical attempts: `\{historical_attempts}`",
+    "- historical problem attempts: `\{historical_problem_attempts}`",
+    "",
+    "## Current By Book",
     "",
     "| Book | Status | Result | Run | Summary |",
     "| --- | --- | --- | --- | --- |",
   ]
-  for run in ledger.runs {
+  for run in current_runs {
     let result_state = if @fs.exists(run.result_path) {
       "written"
     } else {
@@ -258,7 +756,83 @@ pub async fn render_book_quality_ai_review_status(
       "|\{run.book_id}|\{run.status}|\{result_state}|`\{run.run_id.unwrap_or("none")}`|\{markdown_inline(run.summary)}|",
     )
   }
+  if historical_attempts > 0 {
+    lines.push("")
+    lines.push("## Historical Attempts")
+    lines.push("")
+    lines.push(
+      "Historical attempts are audit trail. If a later current row is `written`, earlier `orphaned` or `blocked` rows are recovered failures, not current unresolved work.",
+    )
+    lines.push("")
+    lines.push("| Book | Status | Result | Run | Summary |")
+    lines.push("| --- | --- | --- | --- | --- |")
+    for run in ledger.runs {
+      if book_quality_review_run_is_current(run, current_runs) {
+        continue
+      }
+      let result_state = if @fs.exists(run.result_path) {
+        "written"
+      } else {
+        "pending"
+      }
+      lines.push(
+        "|\{run.book_id}|\{run.status}|\{result_state}|`\{run.run_id.unwrap_or("none")}`|\{markdown_inline(run.summary)}|",
+      )
+    }
+  }
   lines.join("\n")
+}
+
+///|
+fn current_book_quality_review_runs(
+  ledger : BookQualityReviewRunLedger,
+) -> Array[BookQualityReviewRun] {
+  let current : Array[BookQualityReviewRun] = []
+  for run in ledger.runs {
+    let mut found = false
+    for index in 0..<current.length() {
+      if current[index].book_id == run.book_id {
+        current[index] = run
+        found = true
+        break
+      }
+    }
+    if !found {
+      current.push(run)
+    }
+  }
+  current
+}
+
+///|
+fn book_quality_review_run_is_current(
+  run : BookQualityReviewRun,
+  current_runs : Array[BookQualityReviewRun],
+) -> Bool {
+  current_runs.any(fn(current) {
+    current.book_id == run.book_id &&
+    current.generated_at_ms == run.generated_at_ms &&
+    current.run_id == run.run_id &&
+    current.status == run.status &&
+    current.summary == run.summary
+  })
+}
+
+///|
+fn historical_book_quality_problem_attempt_count(
+  ledger : BookQualityReviewRunLedger,
+  current_runs : Array[BookQualityReviewRun],
+) -> Int {
+  let mut count = 0
+  for run in ledger.runs {
+    if book_quality_review_run_is_current(run, current_runs) {
+      continue
+    }
+    if run.status == "orphaned" || run.status == "blocked" {
+      count += 1
+    }
+  }
+  count
 }
 
 ///|
@@ -267,28 +841,129 @@ pub async fn reconcile_book_quality_ai_review_results(
   run_path? : String = default_book_quality_review_run_path(),
 ) -> Int {
   let ledger = load_book_quality_review_run_ledger(run_path)
+  let reconciled : Array[BookQualityReviewRun] = []
   let mut written = 0
+  let mut changed = false
+  let root = book_quality_review_root_from_run_path(run_path)
+  let home = book_quality_moonclaw_home_from_run_path(run_path)
   for run in ledger.runs {
     if @fs.exists(run.result_path) {
+      let terminal = corrected_terminal_book_quality_review_run(run)
+      if terminal.status == run.status && terminal.summary == run.summary {
+        reconciled.push(run)
+      } else {
+        reconciled.push(terminal)
+        changed = true
+      }
       continue
     }
+    let mut current = run
     match run.run_id {
       Some(run_id) => {
         let content = book_quality_review_result_content_from_run(
-          run_id,
-          book_quality_review_root_from_run_path(run_path),
-          book_quality_moonclaw_home_from_run_path(run_path),
+          run_id, root, home,
         )
         if content.contains("ai_quality_score:") &&
           content.contains("book_role_fit:") {
           write_text_file("\{result_dir}/\{run.book_id}.md", content)
           written += 1
+          current = {
+            ..run,
+            status: "written",
+            summary: "Harvested MoonClaw AI semantic review result from \{run_id}.",
+            generated_at_ms: @env.now(),
+          }
+          changed = true
+        } else {
+          let reconciled_run = stale_book_quality_review_run(
+            run,
+            root,
+            home,
+            now_ms=@env.now(),
+          )
+          if reconciled_run.status != run.status ||
+            reconciled_run.summary != run.summary {
+            changed = true
+          }
+          current = reconciled_run
         }
       }
       None => ()
     }
+    reconciled.push(current)
+  }
+  if changed {
+    write_text_file(
+      run_path,
+      BookQualityReviewRunLedger::{ runs: reconciled }
+      .to_json()
+      .stringify(indent=2),
+    )
   }
   written
+}
+
+///|
+fn corrected_terminal_book_quality_review_run(
+  run : BookQualityReviewRun,
+) -> BookQualityReviewRun {
+  if run.summary.contains("Marked orphaned") {
+    { ..run, status: "orphaned" }
+  } else if run.summary.contains("MoonClaw AI review dispatch failed") {
+    { ..run, status: "blocked" }
+  } else if run.status == "dispatched" ||
+    run.status == "queued" ||
+    run.status == "running" {
+    { ..run, status: "written" }
+  } else {
+    run
+  }
+}
+
+///|
+fn book_quality_review_stale_after_ms() -> UInt64 {
+  600_000UL
+}
+
+///|
+async fn stale_book_quality_review_run(
+  run : BookQualityReviewRun,
+  root : String,
+  home : String,
+  now_ms? : UInt64 = @env.now(),
+) -> BookQualityReviewRun {
+  match run.run_id {
+    Some(run_id) => {
+      if @moonclaw.run_process_alive(run_id) {
+        return run
+      }
+      if run.status != "dispatched" &&
+        run.status != "queued" &&
+        run.status != "running" {
+        return run
+      }
+      if now_ms < run.generated_at_ms + book_quality_review_stale_after_ms() {
+        return run
+      }
+      let poll = @moonclaw.poll_run(
+        "book-quality-ai-review-\{run.book_id}",
+        run_id,
+        cwd=root,
+        home~,
+      )
+      {
+        ..run,
+        status: "orphaned",
+        summary: if poll.summary.is_empty() {
+          "MoonClaw AI semantic review run \{run_id} is stale, has no result artifact, and no live process was found; marked orphaned so governance can retry."
+        } else {
+          "\{poll.summary} Marked orphaned by Book Quality reconciliation because no result artifact was produced."
+        },
+        generated_at_ms: now_ms,
+      }
+    }
+    None => run
+  }
 }
 
 ///|
@@ -334,16 +1009,31 @@ async fn bootstrap_default_operational_books(book_catalog_path : String) -> Int 
 }
 
 ///|
-async fn score_book(entry : @moonbook.BookCatalogEntry) -> BookQualityScore {
+fn book_quality_review_result_dir_for_snapshot(
+  snapshot_path : String,
+) -> String {
+  let base = @path.Path::dirname(snapshot_path).to_string()
+  if base == "." || base == "" {
+    default_book_quality_review_result_dir()
+  } else {
+    "\{base}/book-quality/ai-review-results"
+  }
+}
+
+///|
+async fn score_book(
+  entry : @moonbook.BookCatalogEntry,
+  review_result_dir : String,
+) -> BookQualityScore {
   let kind = book_quality_type(entry)
   match kind {
-    "research-book" => score_research_book(entry)
-    "course-book" => score_course_book(entry)
-    "planbook" => score_planbook(entry)
-    "cookbook" => score_cookbook(entry)
-    "civic-protocol-support" => score_civic_book(entry)
-    "operational-book" => score_operational_book(entry)
-    _ => score_general_book(entry)
+    "research-book" => score_research_book(entry, review_result_dir)
+    "course-book" => score_course_book(entry, review_result_dir)
+    "planbook" => score_planbook(entry, review_result_dir)
+    "cookbook" => score_cookbook(entry, review_result_dir)
+    "civic-protocol-support" => score_civic_book(entry, review_result_dir)
+    "operational-book" => score_operational_book(entry, review_result_dir)
+    _ => score_general_book(entry, review_result_dir)
   }
 }
 
@@ -379,6 +1069,7 @@ fn book_quality_type(entry : @moonbook.BookCatalogEntry) -> String {
 ///|
 async fn score_research_book(
   entry : @moonbook.BookCatalogEntry,
+  review_result_dir : String,
 ) -> BookQualityScore {
   let root = @moonbook.workspace_root(entry)
   let strengths : Array[String] = []
@@ -417,12 +1108,15 @@ async fn score_research_book(
   } else {
     gaps.push("deep report is missing or shallow")
   }
-  finalize_score(entry, "research-book", root, score, strengths, gaps)
+  finalize_score(
+    entry, "research-book", root, score, strengths, gaps, review_result_dir,
+  )
 }
 
 ///|
 async fn score_course_book(
   entry : @moonbook.BookCatalogEntry,
+  review_result_dir : String,
 ) -> BookQualityScore {
   let root = @moonbook.workspace_root(entry)
   let strengths : Array[String] = []
@@ -458,11 +1152,16 @@ async fn score_course_book(
     score += 8
     strengths.push("course identity is explicit")
   }
-  finalize_score(entry, "course-book", root, score, strengths, gaps)
+  finalize_score(
+    entry, "course-book", root, score, strengths, gaps, review_result_dir,
+  )
 }
 
 ///|
-async fn score_planbook(entry : @moonbook.BookCatalogEntry) -> BookQualityScore {
+async fn score_planbook(
+  entry : @moonbook.BookCatalogEntry,
+  review_result_dir : String,
+) -> BookQualityScore {
   let root = @moonbook.workspace_root(entry)
   let strengths : Array[String] = []
   let gaps : Array[String] = []
@@ -491,11 +1190,16 @@ async fn score_planbook(entry : @moonbook.BookCatalogEntry) -> BookQualityScore 
   score += path_score(
     root, "book/site/generated/index.html", 6, strengths, gaps,
   )
-  finalize_score(entry, "planbook", root, score, strengths, gaps)
+  finalize_score(
+    entry, "planbook", root, score, strengths, gaps, review_result_dir,
+  )
 }
 
 ///|
-async fn score_cookbook(entry : @moonbook.BookCatalogEntry) -> BookQualityScore {
+async fn score_cookbook(
+  entry : @moonbook.BookCatalogEntry,
+  review_result_dir : String,
+) -> BookQualityScore {
   let root = @moonbook.workspace_root(entry)
   let strengths : Array[String] = []
   let gaps : Array[String] = []
@@ -536,12 +1240,15 @@ async fn score_cookbook(entry : @moonbook.BookCatalogEntry) -> BookQualityScore 
   } else {
     gaps.push("book quality audit has not been written yet")
   }
-  finalize_score(entry, "cookbook", root, score, strengths, gaps)
+  finalize_score(
+    entry, "cookbook", root, score, strengths, gaps, review_result_dir,
+  )
 }
 
 ///|
 async fn score_civic_book(
   entry : @moonbook.BookCatalogEntry,
+  review_result_dir : String,
 ) -> BookQualityScore {
   let root = @moonbook.workspace_root(entry)
   let strengths : Array[String] = []
@@ -575,7 +1282,7 @@ async fn score_civic_book(
         root, "wiki/history/service-history.md", 5, strengths, gaps,
       )
       score += path_score(root, service.skill_path, 10, strengths, gaps)
-      let result_path = ".moontown/book-results/goal-\{service.book_id}-civic-service.json"
+      let result_path = civic_service_result_path(service, root~)
       if @fs.exists(result_path) {
         score += 10
         strengths.push("latest civic service result exists")
@@ -587,12 +1294,15 @@ async fn score_civic_book(
     }
     None => gaps.push("no civic service definition matched this book")
   }
-  finalize_score(entry, "civic-protocol-support", root, score, strengths, gaps)
+  finalize_score(
+    entry, "civic-protocol-support", root, score, strengths, gaps, review_result_dir,
+  )
 }
 
 ///|
 async fn score_operational_book(
   entry : @moonbook.BookCatalogEntry,
+  review_result_dir : String,
 ) -> BookQualityScore {
   let root = @moonbook.workspace_root(entry)
   let strengths : Array[String] = []
@@ -611,12 +1321,15 @@ async fn score_operational_book(
   score += path_score(
     root, "book/site/generated/index.html", 10, strengths, gaps,
   )
-  finalize_score(entry, "operational-book", root, score, strengths, gaps)
+  finalize_score(
+    entry, "operational-book", root, score, strengths, gaps, review_result_dir,
+  )
 }
 
 ///|
 async fn score_general_book(
   entry : @moonbook.BookCatalogEntry,
+  review_result_dir : String,
 ) -> BookQualityScore {
   let root = @moonbook.workspace_root(entry)
   let strengths : Array[String] = []
@@ -624,7 +1337,9 @@ async fn score_general_book(
   let score = base_workspace_score(root, strengths, gaps) +
     path_score(root, "wiki/index.md", 20, strengths, gaps) +
     path_score(root, "book/moonbook-ui-state.json", 15, strengths, gaps)
-  finalize_score(entry, "general-book", root, score, strengths, gaps)
+  finalize_score(
+    entry, "general-book", root, score, strengths, gaps, review_result_dir,
+  )
 }
 
 ///|
@@ -707,13 +1422,14 @@ async fn finalize_score(
   raw_score : Int,
   strengths : Array[String],
   gaps : Array[String],
+  review_result_dir : String,
 ) -> BookQualityScore {
   let score = if gaps.is_empty() {
     clamp_score(raw_score)
   } else {
     clamp_score(raw_score).min(89)
   }
-  let semantic = read_ai_quality_score(entry.id)
+  let semantic = read_ai_quality_score(entry.id, review_result_dir)
   let semantic_grade = match semantic {
     Some(value) => quality_grade(value)
     None => "pending-ai-review"
@@ -734,10 +1450,20 @@ async fn finalize_score(
     quality_status,
     score,
     grade: quality_grade(score),
-    ready: score >= 80 && gaps.is_empty(),
+    ready: score >= 80 &&
+    gaps.is_empty() &&
+    semantic_quality_allows_ready(semantic),
     strengths,
     gaps,
-    next_action: next_book_quality_action(book_type, gaps, score),
+    next_action: next_book_quality_action(book_type, gaps, score, semantic),
+  }
+}
+
+///|
+fn semantic_quality_allows_ready(score : Int?) -> Bool {
+  match score {
+    Some(value) => value >= 80
+    None => true
   }
 }
 
@@ -957,7 +1683,13 @@ fn next_book_quality_action(
   book_type : String,
   gaps : Array[String],
   score : Int,
+  semantic_score : Int?,
 ) -> String {
+  match semantic_score {
+    Some(value) if value < 80 =>
+      return "Use the AI semantic review to repair real book quality, not just structure."
+    _ => ()
+  }
   if gaps.is_empty() && score >= 90 {
     "Keep running standing review; no immediate repair."
   } else {
@@ -1472,8 +2204,8 @@ fn render_book_quality_audit(audit : BookQualityAudit) -> String {
 }
 
 ///|
-async fn read_ai_quality_score(book_id : String) -> Int? {
-  let path = "\{default_book_quality_review_result_dir()}/\{book_id}.md"
+async fn read_ai_quality_score(book_id : String, result_dir : String) -> Int? {
+  let path = "\{result_dir}/\{book_id}.md"
   let text = read_text_or_empty(path)
   if text.is_empty() {
     return None

@@ -87,6 +87,14 @@ priv struct Model {
   request_quality_threshold : String
   request_submitting : Bool
   request_status : String
+  book_request_title : String
+  book_request_book_id : String
+  book_request_purpose : String
+  book_request_websites : String
+  book_request_cadence : String
+  book_request_analysis_method : String
+  book_request_submitting : Bool
+  book_request_status : String
   budget : Int
   energy : Int
   pressure : Int
@@ -124,6 +132,14 @@ priv enum Msg {
   SetRequestQualityThreshold(String)
   SubmitOperatorRequest
   OperatorRequestSubmitted(String)
+  SetBookRequestTitle(String)
+  SetBookRequestBookId(String)
+  SetBookRequestPurpose(String)
+  SetBookRequestWebsites(String)
+  SetBookRequestCadence(String)
+  SetBookRequestAnalysisMethod(String)
+  SubmitBookTemplateRequest
+  BookTemplateRequestSubmitted(String)
 }
 
 ///|
@@ -305,10 +321,22 @@ priv struct LiveAutonomySnapshot {
   failed_count : Int
   due_goal_count : Int
   standing_goal_count : Int
+  enabled_standing_goal_count : Int
+  disabled_standing_goal_count : Int
+  planbook_open_count : Int
+  planbook_repair_active_count : Int
+  book_template_request_count : Int
+  pending_book_template_request_count : Int
+  failed_book_template_request_count : Int
+  book_template_request_summary : String
+  book_template_latest_event_summary : String
   latest_watcher_summary : String
   visual_projection_path : String
   journal_path : String
   digest_path : String
+  planbook_change_log_path : String
+  planbook_engineering_digest_path : String
+  latest_change_summary : String
   next_actions : Array[String]
 } derive(FromJson)
 
@@ -563,8 +591,8 @@ priv struct CivicServiceHealthSnapshot {
   protocol_outbox_count : Int
   protocol_review_count : Int
   latest_protocol_summary : String
-  protocol_history : Array[ProtocolHistoryEntrySnapshot]
-  protocol_history_state : String
+  protocol_history : Array[ProtocolHistoryEntrySnapshot]?
+  protocol_history_state : String?
   status : String
   operable : Bool
   proven_by_result : Bool
@@ -821,6 +849,48 @@ extern "js" fn submit_operator_request_json(
   #| }
 
 ///|
+extern "js" fn submit_book_template_request_json(
+  title : String,
+  book_id : String,
+  purpose : String,
+  websites : String,
+  cadence_ticks : String,
+  analysis_method : String,
+) -> String =
+  #| async (title, bookId, purpose, websites, cadenceTicks, analysisMethod) => {
+  #|   try {
+  #|     const response = await fetch("./api/book-template-requests", {
+  #|       method: "POST",
+  #|       headers: { "Content-Type": "application/json" },
+  #|       body: JSON.stringify({
+  #|         template_id: "pdf-evidence-watch",
+  #|         title,
+  #|         book_id: bookId,
+  #|         purpose,
+  #|         websites,
+  #|         cadence_ticks: cadenceTicks,
+  #|         analysis_method: analysisMethod,
+  #|       }),
+  #|     });
+  #|     const text = await response.text();
+  #|     if (globalThis.__moontownRefreshRuntimeSnapshots) {
+  #|       await globalThis.__moontownRefreshRuntimeSnapshots();
+  #|     }
+  #|     if (!response.ok) {
+  #|       try {
+  #|         const parsed = JSON.parse(text);
+  #|         return JSON.stringify({ ok: false, error: parsed.error || text });
+  #|       } catch (_) {
+  #|         return JSON.stringify({ ok: false, error: text || response.statusText });
+  #|       }
+  #|     }
+  #|     return text;
+  #|   } catch (error) {
+  #|     return JSON.stringify({ ok: false, error: String(error) });
+  #|   }
+  #| }
+
+///|
 extern "js" fn real_time_label() -> String =
   #| () => new Date().toLocaleTimeString(undefined, { hour: "2-digit", minute: "2-digit", second: "2-digit" })
 
@@ -939,6 +1009,14 @@ fn init_model() -> Model {
     request_quality_threshold: "85",
     request_submitting: false,
     request_status: "Ready to submit a standing watch request.",
+    book_request_title: "PDF Evidence Watch",
+    book_request_book_id: "research-pdf-evidence-watch",
+    book_request_purpose: "Watch approved websites for related PDFs, extract full text, analyze with the book-owned method, and notify only when accepted knowledge changes.",
+    book_request_websites: "https://example.org/reports\nhttps://example.com/publications",
+    book_request_cadence: "60",
+    book_request_analysis_method: "",
+    book_request_submitting: false,
+    book_request_status: "Ready to queue a PDF Evidence Watch MoonBook request.",
     budget: 76,
     energy: 68,
     pressure: 34,
@@ -991,8 +1069,9 @@ fn parse_bootstrap_civic_status() -> CivicServicePortfolioSnapshot? {
 }
 
 ///|
-fn parse_bootstrap_moondesk_handoff_artifacts(
-) -> Array[MoondeskHandoffArtifact] {
+fn parse_bootstrap_moondesk_handoff_artifacts() -> Array[
+  MoondeskHandoffArtifact,
+] {
   let text = load_bootstrap_moondesk_handoff_json()
   if text == "" {
     return []
@@ -1033,7 +1112,108 @@ fn parse_bootstrap_live_autonomy() -> LiveAutonomySnapshot? {
     return None
   }
   let parsed = @json.parse(text) catch { _ => return None }
-  Some(@json.from_json(parsed) catch { _ => return None })
+  let decoded : LiveAutonomySnapshot = @json.from_json(parsed) catch {
+    _ =>
+      match parsed {
+        Object(object) => live_autonomy_snapshot_from_object(object)
+        _ => return None
+      }
+  }
+  Some(decoded)
+}
+
+///|
+fn live_json_int(object : Map[String, Json], key : String) -> Int {
+  match object.get(key) {
+    Some(Number(value, ..)) => value.to_int()
+    _ => 0
+  }
+}
+
+///|
+fn live_json_string(
+  object : Map[String, Json],
+  key : String,
+  fallback : String,
+) -> String {
+  match object.get(key) {
+    Some(String(value)) => value
+    _ => fallback
+  }
+}
+
+///|
+fn live_json_string_array(
+  object : Map[String, Json],
+  key : String,
+) -> Array[String] {
+  match object.get(key) {
+    Some(value) => @json.from_json(value) catch { _ => [] }
+    None => []
+  }
+}
+
+///|
+fn live_autonomy_snapshot_from_object(
+  object : Map[String, Json],
+) -> LiveAutonomySnapshot {
+  {
+    generated_at_ms: live_json_string(object, "generated_at_ms", ""),
+    tick: live_json_int(object, "tick"),
+    status: live_json_string(object, "status", "unknown"),
+    summary: live_json_string(object, "summary", ""),
+    active_worker_count: live_json_int(object, "active_worker_count"),
+    review_count: live_json_int(object, "review_count"),
+    blocked_count: live_json_int(object, "blocked_count"),
+    accepted_update_count: live_json_int(object, "accepted_update_count"),
+    no_change_count: live_json_int(object, "no_change_count"),
+    failed_count: live_json_int(object, "failed_count"),
+    due_goal_count: live_json_int(object, "due_goal_count"),
+    standing_goal_count: live_json_int(object, "standing_goal_count"),
+    enabled_standing_goal_count: live_json_int(
+      object, "enabled_standing_goal_count",
+    ),
+    disabled_standing_goal_count: live_json_int(
+      object, "disabled_standing_goal_count",
+    ),
+    planbook_open_count: live_json_int(object, "planbook_open_count"),
+    planbook_repair_active_count: live_json_int(
+      object, "planbook_repair_active_count",
+    ),
+    book_template_request_count: live_json_int(
+      object, "book_template_request_count",
+    ),
+    pending_book_template_request_count: live_json_int(
+      object, "pending_book_template_request_count",
+    ),
+    failed_book_template_request_count: live_json_int(
+      object, "failed_book_template_request_count",
+    ),
+    book_template_request_summary: live_json_string(
+      object, "book_template_request_summary", "none",
+    ),
+    book_template_latest_event_summary: live_json_string(
+      object, "book_template_latest_event_summary", "none",
+    ),
+    latest_watcher_summary: live_json_string(
+      object, "latest_watcher_summary", "none",
+    ),
+    visual_projection_path: live_json_string(
+      object, "visual_projection_path", "",
+    ),
+    journal_path: live_json_string(object, "journal_path", ""),
+    digest_path: live_json_string(object, "digest_path", ""),
+    planbook_change_log_path: live_json_string(
+      object, "planbook_change_log_path", "",
+    ),
+    planbook_engineering_digest_path: live_json_string(
+      object, "planbook_engineering_digest_path", "",
+    ),
+    latest_change_summary: live_json_string(
+      object, "latest_change_summary", "none",
+    ),
+    next_actions: live_json_string_array(object, "next_actions"),
+  }
 }
 
 ///|
@@ -1336,6 +1516,18 @@ fn update(dispatch : Dispatch[Msg], msg : Msg, model : Model) -> (Cmd, Model) {
       (@rabbita.none, { ..model, request_cadence: value })
     SetRequestQualityThreshold(value) =>
       (@rabbita.none, { ..model, request_quality_threshold: value })
+    SetBookRequestTitle(value) =>
+      (@rabbita.none, { ..model, book_request_title: value })
+    SetBookRequestBookId(value) =>
+      (@rabbita.none, { ..model, book_request_book_id: value })
+    SetBookRequestPurpose(value) =>
+      (@rabbita.none, { ..model, book_request_purpose: value })
+    SetBookRequestWebsites(value) =>
+      (@rabbita.none, { ..model, book_request_websites: value })
+    SetBookRequestCadence(value) =>
+      (@rabbita.none, { ..model, book_request_cadence: value })
+    SetBookRequestAnalysisMethod(value) =>
+      (@rabbita.none, { ..model, book_request_analysis_method: value })
     SubmitOperatorRequest =>
       if model.request_title.trim().to_owned().is_empty() ||
         model.request_prompt.trim().to_owned().is_empty() {
@@ -1353,6 +1545,26 @@ fn update(dispatch : Dispatch[Msg], msg : Msg, model : Model) -> (Cmd, Model) {
             ..model,
             request_submitting: true,
             request_status: "Submitting request to the local Moontown standing-goal inbox...",
+          },
+        )
+      }
+    SubmitBookTemplateRequest =>
+      if model.book_request_title.trim().to_owned().is_empty() ||
+        model.book_request_websites.trim().to_owned().is_empty() {
+        (
+          @rabbita.none,
+          {
+            ..model,
+            book_request_status: "Add a title and at least one website before queueing the book.",
+          },
+        )
+      } else {
+        (
+          submit_book_template_request_cmd(dispatch, model),
+          {
+            ..model,
+            book_request_submitting: true,
+            book_request_status: "Queueing PDF Evidence Watch request in the book-template inbox...",
           },
         )
       }
@@ -1382,6 +1594,33 @@ fn update(dispatch : Dispatch[Msg], msg : Msg, model : Model) -> (Cmd, Model) {
             ..model,
             request_submitting: false,
             request_status: "Request failed: \{error}",
+          },
+        )
+      }
+    }
+    BookTemplateRequestSubmitted(raw) => {
+      let result = parse_operator_request_submit_result(raw)
+      if result.ok {
+        let request_id = result.request_id.unwrap_or("book-template-request")
+        let status = result.status.unwrap_or("pending")
+        (
+          @rabbita.none,
+          {
+            ..model,
+            book_request_submitting: false,
+            book_request_status: "Queued `\{request_id}` (`\{status}`). The daemon will install it through the book-template request job.",
+            live_autonomy: parse_bootstrap_live_autonomy(),
+            live_autonomy_version: live_autonomy_version(),
+          },
+        )
+      } else {
+        let error = result.error.unwrap_or("unknown error")
+        (
+          @rabbita.none,
+          {
+            ..model,
+            book_request_submitting: false,
+            book_request_status: "Book request failed: \{error}",
           },
         )
       }
@@ -1431,8 +1670,8 @@ fn advance_model(model : Model) -> Model {
     model.module_projections
   }
   let refreshed_moondesk_handoff_version = moondesk_handoff_version()
-  let refreshed_moondesk_handoff_artifacts = if
-    refreshed_moondesk_handoff_version != model.moondesk_handoff_version {
+  let refreshed_moondesk_handoff_artifacts = if refreshed_moondesk_handoff_version !=
+    model.moondesk_handoff_version {
     parse_bootstrap_moondesk_handoff_artifacts()
   } else {
     model.moondesk_handoff_artifacts
@@ -1655,6 +1894,23 @@ fn next_state_source(source : StateSourceKind) -> StateSourceKind {
     StateSourceKind::DemoSimulation => StateSourceKind::SnapshotFile
     StateSourceKind::SnapshotFile => StateSourceKind::DemoSimulation
   }
+}
+
+///|
+fn submit_book_template_request_cmd(
+  dispatch : Dispatch[Msg],
+  model : Model,
+) -> Cmd {
+  @rabbita.perform(fn(raw) { dispatch(BookTemplateRequestSubmitted(raw)) }, fn() noraise {
+    submit_book_template_request_json(
+      model.book_request_title,
+      model.book_request_book_id,
+      model.book_request_purpose,
+      model.book_request_websites,
+      model.book_request_cadence,
+      model.book_request_analysis_method,
+    )
+  })
 }
 
 ///|
@@ -2536,16 +2792,40 @@ fn live_autonomy_summary_label(model : Model) -> String {
 fn live_autonomy_detail_label(model : Model) -> String {
   match model.live_autonomy {
     Some(spine) =>
-      "accepted \{spine.accepted_update_count}, no-change \{spine.no_change_count}, review \{spine.review_count}, blocked \{spine.blocked_count}, due goals \{spine.due_goal_count}. Digest: \{spine.digest_path}."
+      "accepted \{spine.accepted_update_count}, no-change \{spine.no_change_count}, review \{spine.review_count}, blocked \{spine.blocked_count}, goals \{spine.enabled_standing_goal_count} active / \{spine.disabled_standing_goal_count} archived, due goals \{spine.due_goal_count}, plan gaps \{spine.planbook_open_count}, template inbox \{spine.pending_book_template_request_count}/\{spine.failed_book_template_request_count}. Latest book event: \{spine.book_template_latest_event_summary}. Digest: \{spine.digest_path}. Engineering: \{spine.planbook_engineering_digest_path}. Change log: \{spine.planbook_change_log_path}. Latest: \{compact_live_change_summary(spine.latest_change_summary)}"
     None => "Run a live refresh or daemon tick to connect the spine."
   }
 }
 
 ///|
-fn live_autonomy_active_worker_label(
-  model : Model,
-  fallback : Int,
-) -> String {
+fn compact_live_change_summary(summary : String) -> String {
+  let normalized = StringBuilder::new()
+  for char in summary {
+    if char == '\n' || char == '\r' || char == '\t' {
+      normalized.write_char(' ')
+    } else {
+      normalized.write_char(char)
+    }
+  }
+  let one_line = normalized.to_string().trim().to_owned()
+  if one_line.length() <= 180 {
+    one_line
+  } else {
+    let builder = StringBuilder::new()
+    let mut emitted = 0
+    for char in one_line {
+      if emitted >= 180 {
+        break
+      }
+      builder.write_char(char)
+      emitted += 1
+    }
+    "\{builder.to_string()}..."
+  }
+}
+
+///|
+fn live_autonomy_active_worker_label(model : Model, fallback : Int) -> String {
   match model.live_autonomy {
     Some(spine) => spine.active_worker_count.to_string()
     None => fallback.to_string()
@@ -2553,14 +2833,92 @@ fn live_autonomy_active_worker_label(
 }
 
 ///|
+fn live_template_request_count(model : Model) -> Int {
+  match model.live_autonomy {
+    Some(spine) => spine.book_template_request_count
+    None => 0
+  }
+}
+
+///|
+fn live_pending_template_request_count(model : Model) -> Int {
+  match model.live_autonomy {
+    Some(spine) => spine.pending_book_template_request_count
+    None => 0
+  }
+}
+
+///|
+fn live_failed_template_request_count(model : Model) -> Int {
+  match model.live_autonomy {
+    Some(spine) => spine.failed_book_template_request_count
+    None => 0
+  }
+}
+
+///|
+fn live_enabled_standing_goal_count(model : Model) -> Int {
+  match model.live_autonomy {
+    Some(spine) =>
+      if spine.standing_goal_count > 0 &&
+        spine.enabled_standing_goal_count == 0 &&
+        model.standing_goals.length() > 0 {
+        enabled_standing_goal_count(model)
+      } else {
+        spine.enabled_standing_goal_count
+      }
+    None => 0
+  }
+}
+
+///|
+fn live_disabled_standing_goal_count(model : Model) -> Int {
+  match model.live_autonomy {
+    Some(spine) =>
+      if spine.standing_goal_count > 0 &&
+        spine.disabled_standing_goal_count == 0 &&
+        model.standing_goals.length() > 0 {
+        disabled_standing_goal_count(model)
+      } else {
+        spine.disabled_standing_goal_count
+      }
+    None => 0
+  }
+}
+
+///|
+fn live_template_request_summary(model : Model) -> String {
+  match model.live_autonomy {
+    Some(spine) => spine.book_template_request_summary
+    None => "No book-template request inbox has been loaded yet."
+  }
+}
+
+///|
+fn live_template_latest_event_summary(model : Model) -> String {
+  match model.live_autonomy {
+    Some(spine) => spine.book_template_latest_event_summary
+    None => "No book-template lifecycle event has been loaded yet."
+  }
+}
+
+///|
 fn live_autonomy_tone(model : Model) -> String {
   match model.live_autonomy {
     Some(spine) =>
-      match spine.status {
-        "needs-recovery" => "alert"
-        "working" => "live"
-        "reviewing" => "alert"
-        _ => "calm"
+      if spine.failed_book_template_request_count > 0 ||
+        spine.planbook_repair_active_count > 0 {
+        "alert"
+      } else if spine.pending_book_template_request_count > 0 ||
+        spine.planbook_open_count > 0 {
+        "book"
+      } else {
+        match spine.status {
+          "needs-recovery" => "alert"
+          "working" => "live"
+          "reviewing" => "alert"
+          _ => "calm"
+        }
       }
     None => "alert"
   }
@@ -3388,6 +3746,106 @@ fn render_request_composer(
 }
 
 ///|
+fn render_book_template_composer(
+  dispatch : Dispatch[Msg],
+  model : Model,
+) -> @rabbita.Html {
+  let submit_label = if model.book_request_submitting {
+    "Queueing..."
+  } else {
+    "Queue PDF Watch Book"
+  }
+  article(class="request-composer book-template-composer", [
+    div(class="request-composer-head", [
+      div([
+        p(class="eyebrow", "New MoonBook"),
+        h3("Create a PDF evidence watch"),
+      ]),
+      div(class="request-composer-actions-top", [
+        status_chip("Writes book-template-requests.json", "chip-book"),
+        button(
+          class="control-button request-submit",
+          on_click=dispatch(SubmitBookTemplateRequest),
+          submit_label,
+        ),
+      ]),
+    ]),
+    p(
+      class="request-last",
+      "Use this for domain-specific books that fetch PDFs from approved websites, extract text, apply your method, and notify only when accepted knowledge changes.",
+    ),
+    div(class="request-field-grid", [
+      div(class="request-field request-field-wide", [
+        p(class="request-label", "Book title"),
+        input(
+          class="request-input",
+          placeholder="One Person Company PDF Watch",
+          value=model.book_request_title,
+          on_input=value => dispatch(SetBookRequestTitle(value)),
+          "",
+        ),
+      ]),
+      div(class="request-field", [
+        p(class="request-label", "Book id"),
+        input(
+          class="request-input",
+          placeholder="research-opc-pdf-watch",
+          value=model.book_request_book_id,
+          on_input=value => dispatch(SetBookRequestBookId(value)),
+          "",
+        ),
+      ]),
+      div(class="request-field", [
+        p(class="request-label", "Cadence ticks"),
+        input(
+          class="request-input",
+          placeholder="60",
+          value=model.book_request_cadence,
+          on_input=value => dispatch(SetBookRequestCadence(value)),
+          "",
+        ),
+      ]),
+    ]),
+    div(class="request-field", [
+      p(class="request-label", "Websites"),
+      textarea(
+        class="request-textarea request-textarea-compact",
+        placeholder="https://example.org/reports\nhttps://example.com/publications",
+        value=model.book_request_websites,
+        on_input=value => dispatch(SetBookRequestWebsites(value)),
+        no_children(),
+      ),
+    ]),
+    div(class="request-field", [
+      p(class="request-label", "Purpose"),
+      textarea(
+        class="request-textarea request-textarea-compact",
+        placeholder="Describe what this book should watch and what counts as new knowledge.",
+        value=model.book_request_purpose,
+        on_input=value => dispatch(SetBookRequestPurpose(value)),
+        no_children(),
+      ),
+    ]),
+    div(class="request-field", [
+      p(class="request-label", "Analysis method override"),
+      textarea(
+        class="request-textarea request-textarea-compact",
+        placeholder="Optional. Leave blank to use the template method, or describe the exact analysis rules.",
+        value=model.book_request_analysis_method,
+        on_input=value => dispatch(SetBookRequestAnalysisMethod(value)),
+        no_children(),
+      ),
+    ]),
+    div(class="request-actions", [
+      p(
+        class="request-status tone-\{request_status_tone(model.book_request_status)}",
+        model.book_request_status,
+      ),
+    ]),
+  ])
+}
+
+///|
 fn render_operator_command_center(
   dispatch : Dispatch[Msg],
   model : Model,
@@ -3447,6 +3905,16 @@ fn render_operator_command_center(
   let live_status = live_autonomy_status_label(model)
   let live_summary = live_autonomy_summary_label(model)
   let live_tone = live_autonomy_tone(model)
+  let template_request_count = live_template_request_count(model)
+  let pending_template_requests = live_pending_template_request_count(model)
+  let failed_template_requests = live_failed_template_request_count(model)
+  let template_request_tone = if failed_template_requests > 0 {
+    "alert"
+  } else if pending_template_requests > 0 {
+    "book"
+  } else {
+    "neutral"
+  }
   section(class="operator-console", [
     div(class="operator-console-head", [
       div([
@@ -3466,6 +3934,16 @@ fn render_operator_command_center(
           "Requests \{model.operator_requests.length()}",
           "chip-neutral",
         ),
+        status_chip(
+          "Book requests \{pending_template_requests}/\{failed_template_requests}",
+          if failed_template_requests > 0 {
+            "chip-alert"
+          } else if pending_template_requests > 0 {
+            "chip-book"
+          } else {
+            "chip-neutral"
+          },
+        ),
         status_chip("Executions \{executions.length()}", "chip-neutral"),
       ]),
     ]),
@@ -3483,6 +3961,18 @@ fn render_operator_command_center(
             live_status,
             live_autonomy_detail_label(model),
             live_tone,
+          ),
+          render_operator_stat(
+            "Standing watches",
+            "\{live_enabled_standing_goal_count(model)} active / \{live_disabled_standing_goal_count(model)} archived",
+            "Disabled standing goals are preserved for audit but do not consume autonomous cadence.",
+            "neutral",
+          ),
+          render_operator_stat(
+            "Book creation",
+            "\{pending_template_requests} pending / \{failed_template_requests} failed",
+            "Template inbox total \{template_request_count}. \{live_template_request_summary(model)} Latest event: \{live_template_latest_event_summary(model)}",
+            template_request_tone,
           ),
           render_operator_stat(
             "Latest decision",
@@ -3514,7 +4004,10 @@ fn render_operator_command_center(
         render_standing_goal_portfolio(model),
         render_watcher_timeline(model),
       ]),
-      render_request_composer(dispatch, model),
+      div(class="operator-request-stack", [
+        render_request_composer(dispatch, model),
+        render_book_template_composer(dispatch, model),
+      ]),
     ]),
   ])
 }
@@ -6602,12 +7095,20 @@ fn abs_int(value : Int) -> Int {
 
 ///|
 fn min_int(left : Int, right : Int) -> Int {
-  if left < right { left } else { right }
+  if left < right {
+    left
+  } else {
+    right
+  }
 }
 
 ///|
 fn max_int(left : Int, right : Int) -> Int {
-  if left > right { left } else { right }
+  if left > right {
+    left
+  } else {
+    right
+  }
 }
 
 ///|
@@ -7275,7 +7776,11 @@ fn module_road_tile(
     "left: \{iso_tile_left(clamp_visual_grid_x(grid_x), clamp_visual_grid_y(grid_y))}px",
     "top: \{iso_tile_top(clamp_visual_grid_x(grid_x), clamp_visual_grid_y(grid_y))}px",
   ]
-  span(class="module-road-tile module-road-\{class_suffix}", style~, no_children())
+  span(
+    class="module-road-tile module-road-\{class_suffix}",
+    style~,
+    no_children(),
+  )
 }
 
 ///|
@@ -7287,12 +7792,12 @@ fn render_module_road_for(civic : WenyuTownModule) -> Array[@rabbita.Html] {
   let x_end = max_int(civic.entrance_x, hub_x)
   let y_start = min_int(civic.entrance_y, hub_y)
   let y_end = max_int(civic.entrance_y, hub_y)
-  for x in x_start..=x_end {
+  for x in x_start..<=x_end {
     if (x - x_start) % 2 == 0 {
       tiles.push(module_road_tile(x, civic.entrance_y, "local"))
     }
   }
-  for y in y_start..=y_end {
+  for y in y_start..<=y_end {
     if (y - y_start) % 2 == 0 {
       tiles.push(module_road_tile(hub_x, y, "local"))
     }
@@ -7686,7 +8191,11 @@ fn wenyu_module_runtime_state(
                     source_label: "Civic Doctor",
                     detail: civic_health_detail(health),
                     running_count: 0,
-                    waiting_count: if health.status == "seeded" { 1 } else { 0 },
+                    waiting_count: if health.status == "seeded" {
+                      1
+                    } else {
+                      0
+                    },
                     review_count: health.latest_review_items,
                     blocked_count: if health.status == "blocked" ||
                       health.status == "missing-workspace" ||
@@ -7696,9 +8205,14 @@ fn wenyu_module_runtime_state(
                     } else {
                       0
                     },
-                    completed_count: if health.proven_by_result { 1 } else { 0 },
+                    completed_count: if health.proven_by_result {
+                      1
+                    } else {
+                      0
+                    },
                     visible_agent_count: active_agents.length(),
-                    issue_count: issue_count + health.missing_required_paths.length(),
+                    issue_count: issue_count +
+                    health.missing_required_paths.length(),
                   }
                 }
                 None =>
@@ -7767,11 +8281,15 @@ fn civic_health_detail(health : CivicServiceHealthSnapshot) -> String {
 fn civic_status_summary(model : Model) -> String {
   match model.civic_status {
     Some(status) => {
+      let mut protocol_ready_count = 0
       let mut protocol_review_count = 0
       for service in status.services {
+        if service.protocol_ready {
+          protocol_ready_count += 1
+        }
         protocol_review_count += service.protocol_review_count
       }
-      "\{status.operable_count}/\{status.total} operable, \{status.proven_count} proven, \{protocol_review_count} protocol review"
+      "\{status.operable_count}/\{status.total} operable, \{protocol_ready_count} protocol-active, \{protocol_review_count} review gates, \{status.proven_count} service-result proof"
     }
     None => "not loaded"
   }
@@ -8013,30 +8531,24 @@ fn render_module_protocol_card(civic : WenyuTownModule) -> @rabbita.Html {
     ]),
     p(class="module-book-summary", civic.use_case),
     div(class="module-book-metric-grid", [
-      render_projection_metric(
-        ProjectionMetricSnapshot::{
-          label: "Footprint",
-          value: "\{civic.footprint_w}x\{civic.footprint_h}",
-          note: "tile occupancy",
-          tone: "info",
-        },
-      ),
-      render_projection_metric(
-        ProjectionMetricSnapshot::{
-          label: "Entrance",
-          value: "\{civic.entrance_x},\{civic.entrance_y}",
-          note: "road-facing tile",
-          tone: "info",
-        },
-      ),
-      render_projection_metric(
-        ProjectionMetricSnapshot::{
-          label: "Style",
-          value: civic.style_family,
-          note: civic.asset_base,
-          tone: "info",
-        },
-      ),
+      render_projection_metric(ProjectionMetricSnapshot::{
+        label: "Footprint",
+        value: "\{civic.footprint_w}x\{civic.footprint_h}",
+        note: "tile occupancy",
+        tone: "info",
+      }),
+      render_projection_metric(ProjectionMetricSnapshot::{
+        label: "Entrance",
+        value: "\{civic.entrance_x},\{civic.entrance_y}",
+        note: "road-facing tile",
+        tone: "info",
+      }),
+      render_projection_metric(ProjectionMetricSnapshot::{
+        label: "Style",
+        value: civic.style_family,
+        note: civic.asset_base,
+        tone: "info",
+      }),
     ]),
     div(class="module-agent-flow", [
       span(class="module-detail-label", "Agent Flow"),
@@ -8264,56 +8776,76 @@ fn render_module_civic_health(
 ) -> @rabbita.Html {
   match find_module_civic_health(model, civic) {
     Some(health) =>
-      article(class="module-civic-health \{civic_health_status_class(health.status)}", [
-        div(class="module-civic-health-head", [
-          span(class="module-book-chip projection-tone-info", "Civic Doctor"),
-          span(class="module-civic-status", civic_health_status_label(health.status)),
-        ]),
-        p(class="module-book-summary", civic_health_detail(health)),
-        render_protocol_history_group(health),
-        div(class="module-book-metric-grid", [
-          render_projection_metric(
-            ProjectionMetricSnapshot::{
+      article(
+        class="module-civic-health \{civic_health_status_class(health.status)}",
+        [
+          div(class="module-civic-health-head", [
+            span(class="module-book-chip projection-tone-info", "Civic Doctor"),
+            span(
+              class="module-civic-status",
+              civic_health_status_label(health.status),
+            ),
+          ]),
+          p(class="module-book-summary", civic_health_detail(health)),
+          render_protocol_history_group(health),
+          div(class="module-book-metric-grid", [
+            render_projection_metric(ProjectionMetricSnapshot::{
               label: "Operable",
-              value: if health.operable { "yes" } else { "no" },
+              value: if health.operable {
+                "yes"
+              } else {
+                "no"
+              },
               note: "\{health.missing_required_paths.length()} missing paths",
-              tone: if health.operable { "healthy" } else { "alert" },
-            },
-          ),
-          render_projection_metric(
-            ProjectionMetricSnapshot::{
+              tone: if health.operable {
+                "healthy"
+              } else {
+                "alert"
+              },
+            }),
+            render_projection_metric(ProjectionMetricSnapshot::{
               label: "Result Proof",
-              value: if health.proven_by_result { "present" } else { "missing" },
+              value: if health.proven_by_result {
+                "present"
+              } else {
+                "missing"
+              },
               note: health.latest_decision,
-              tone: if health.proven_by_result { "healthy" } else { "review" },
-            },
-          ),
-          render_projection_metric(
-            ProjectionMetricSnapshot::{
+              tone: if health.proven_by_result {
+                "healthy"
+              } else {
+                "review"
+              },
+            }),
+            render_projection_metric(ProjectionMetricSnapshot::{
               label: "Mode",
               value: health.module_mode,
               note: health.skill_mode,
               tone: "info",
-            },
-          ),
-          render_projection_metric(
-            ProjectionMetricSnapshot::{
+            }),
+            render_projection_metric(ProjectionMetricSnapshot::{
               label: "Protocol",
               value: health.protocol_status,
               note: "in \{health.protocol_inbox_count} / red \{health.protocol_reduction_count} / out \{health.protocol_outbox_count}",
-              tone: if health.protocol_ready { "healthy" } else { "review" },
-            },
-          ),
-          render_projection_metric(
-            ProjectionMetricSnapshot::{
+              tone: if health.protocol_ready {
+                "healthy"
+              } else {
+                "review"
+              },
+            }),
+            render_projection_metric(ProjectionMetricSnapshot::{
               label: "Review",
               value: "\{health.latest_review_items}",
               note: "items",
-              tone: if health.latest_review_items > 0 { "review" } else { "info" },
-            },
-          ),
-        ]),
-      ])
+              tone: if health.latest_review_items > 0 {
+                "review"
+              } else {
+                "info"
+              },
+            }),
+          ]),
+        ],
+      )
     None =>
       article(class="module-civic-health module-status-unbound", [
         div(class="module-civic-health-head", [
@@ -9225,6 +9757,18 @@ fn push_live_autonomy_messages(feed : Array[FeedItem], model : Model) -> Unit {
         detail: "Mayor wrote \{spine.digest_path} with current watch state, blockers, and next actions.",
         tone: "calm",
       })
+      if spine.pending_book_template_request_count > 0 ||
+        spine.failed_book_template_request_count > 0 {
+        feed.push({
+          title: "Book creation inbox",
+          detail: "\{spine.pending_book_template_request_count} pending, \{spine.failed_book_template_request_count} failed. \{spine.book_template_request_summary}. Latest event: \{spine.book_template_latest_event_summary}",
+          tone: if spine.failed_book_template_request_count > 0 {
+            "alert"
+          } else {
+            "book"
+          },
+        })
+      }
       let mut pushed = 0
       for action in spine.next_actions {
         if pushed >= 2 {
@@ -9233,7 +9777,11 @@ fn push_live_autonomy_messages(feed : Array[FeedItem], model : Model) -> Unit {
         feed.push({
           title: "Mayor next action",
           detail: action,
-          tone: if spine.status == "needs-recovery" { "alert" } else { "calm" },
+          tone: if spine.status == "needs-recovery" {
+            "alert"
+          } else {
+            "calm"
+          },
         })
         pushed += 1
       }
@@ -9252,6 +9800,17 @@ fn enabled_standing_goal_count(model : Model) -> Int {
   let mut count = 0
   for goal in model.standing_goals {
     if goal.enabled {
+      count += 1
+    }
+  }
+  count
+}
+
+///|
+fn disabled_standing_goal_count(model : Model) -> Int {
+  let mut count = 0
+  for goal in model.standing_goals {
+    if !goal.enabled {
       count += 1
     }
   }
@@ -9694,7 +10253,10 @@ fn render_viewport_mode_switch(
   model : Model,
 ) -> @rabbita.Html {
   div(class="viewport-mode-switch", [
-    span(class="viewport-mode-current", viewport_mode_label(model.viewport_mode)),
+    span(
+      class="viewport-mode-current",
+      viewport_mode_label(model.viewport_mode),
+    ),
     render_viewport_mode_button(dispatch, model, ViewportMode::ViewMode),
     render_viewport_mode_button(dispatch, model, ViewportMode::EditorMode),
     render_viewport_mode_button(dispatch, model, ViewportMode::OutputMode),
@@ -9919,7 +10481,9 @@ fn render_moondesk_bridge_panel(model : Model) -> @rabbita.Html {
         [
           article(class="viewport-output-empty", [
             h2("No Bridge Records"),
-            p("No Moondesk dispatch, request, or book-result records were found yet."),
+            p(
+              "No Moondesk dispatch, request, or book-result records were found yet.",
+            ),
           ]),
         ]
       } else {
@@ -9966,20 +10530,19 @@ fn render_viewport_view_body(
     Node(node_key) =>
       match find_wenyu_module(node_key) {
         Some(civic) =>
-          render_wenyu_module_interior(dispatch, model, civic, workers, executions)
+          render_wenyu_module_interior(
+            dispatch, model, civic, workers, executions,
+          )
         None => render_building_interior(dispatch, scene, workers, node_key)
       }
     _ =>
       section(class="viewport-view-mode", [
-        p(class="viewport-mode-note", viewport_mode_summary(ViewportMode::ViewMode)),
+        p(
+          class="viewport-mode-note",
+          viewport_mode_summary(ViewportMode::ViewMode),
+        ),
         render_standalone_viewport_map(
-          dispatch,
-          model,
-          scene,
-          workers,
-          executions,
-          selected_node_key,
-          selected_worker_id,
+          dispatch, model, scene, workers, executions, selected_node_key, selected_worker_id,
         ),
       ])
   }
@@ -10013,7 +10576,10 @@ fn render_editor_module_row(
         class="editor-module-meta",
         "\{civic.grid_x},\{civic.grid_y} / \{civic.footprint_w}x\{civic.footprint_h} -> \{civic.entrance_x},\{civic.entrance_y}",
       ),
-      span(class="editor-module-meta", "\{civic.style_family} / \{civic.protocol_pattern}"),
+      span(
+        class="editor-module-meta",
+        "\{civic.style_family} / \{civic.protocol_pattern}",
+      ),
       span(class="editor-module-runtime", runtime.status_label),
       span(class="editor-module-meta", projection_status),
       span(class="editor-module-issues", issue_text),
@@ -10051,55 +10617,64 @@ fn editor_lifecycle_status_class(status : String) -> String {
 fn render_editor_pipeline_lifecycle(
   lifecycle : EditorPipelineLifecycleSnapshot,
 ) -> @rabbita.Html {
-  article(class="editor-pipeline-stage \{editor_lifecycle_status_class(lifecycle.lifecycle_status)}", [
-    div(class="handoff-artifact-heading", [
-      span(class="handoff-kind", "lifecycle"),
-      span(class="handoff-status", lifecycle.lifecycle_status),
-    ]),
-    h3(lifecycle.title),
-    p(lifecycle.summary),
-    div(class="viewport-output-links", [
-      span("Course / \{lifecycle.course_ref}"),
-      span("Plan / \{lifecycle.plan_ref}"),
-      span("Repair / \{lifecycle.repair_ref}"),
-      span("Output / \{lifecycle.output_ref}"),
-    ]),
-  ])
+  article(
+    class="editor-pipeline-stage \{editor_lifecycle_status_class(lifecycle.lifecycle_status)}",
+    [
+      div(class="handoff-artifact-heading", [
+        span(class="handoff-kind", "lifecycle"),
+        span(class="handoff-status", lifecycle.lifecycle_status),
+      ]),
+      h3(lifecycle.title),
+      p(lifecycle.summary),
+      div(class="viewport-output-links", [
+        span("Course / \{lifecycle.course_ref}"),
+        span("Plan / \{lifecycle.plan_ref}"),
+        span("Repair / \{lifecycle.repair_ref}"),
+        span("Output / \{lifecycle.output_ref}"),
+      ]),
+    ],
+  )
 }
 
 ///|
 fn render_editor_pipeline_stage(
   stage : EditorPipelineStageSnapshot,
 ) -> @rabbita.Html {
-  article(class="editor-pipeline-stage \{editor_pipeline_stage_class(stage.status)}", [
-    div(class="handoff-artifact-heading", [
-      span(class="handoff-kind", stage.id),
-      span(class="handoff-status", stage.status),
-    ]),
-    h3(stage.title),
-    p(stage.summary),
-    p(class="handoff-scope", stage.evidence),
-  ])
+  article(
+    class="editor-pipeline-stage \{editor_pipeline_stage_class(stage.status)}",
+    [
+      div(class="handoff-artifact-heading", [
+        span(class="handoff-kind", stage.id),
+        span(class="handoff-status", stage.status),
+      ]),
+      h3(stage.title),
+      p(stage.summary),
+      p(class="handoff-scope", stage.evidence),
+    ],
+  )
 }
 
 ///|
 fn render_editor_pipeline_movement_loop(
   record : EditorPipelineMovementLoopSnapshot,
 ) -> @rabbita.Html {
-  article(class="editor-pipeline-stage \{editor_pipeline_stage_class(record.status)}", [
-    div(class="handoff-artifact-heading", [
-      span(class="handoff-kind", record.module_id),
-      span(class="handoff-status", record.status),
-    ]),
-    h3(record.module_title),
-    p(record.missing_reason),
-    div(class="viewport-output-links", [
-      span("Home / \{record.home_ref}"),
-      span("Entrance / \{record.entrance_ref}"),
-      span("Output / \{record.output_ref}"),
-      span("Return / \{record.return_ref}"),
-    ]),
-  ])
+  article(
+    class="editor-pipeline-stage \{editor_pipeline_stage_class(record.status)}",
+    [
+      div(class="handoff-artifact-heading", [
+        span(class="handoff-kind", record.module_id),
+        span(class="handoff-status", record.status),
+      ]),
+      h3(record.module_title),
+      p(record.missing_reason),
+      div(class="viewport-output-links", [
+        span("Home / \{record.home_ref}"),
+        span("Entrance / \{record.entrance_ref}"),
+        span("Output / \{record.output_ref}"),
+        span("Return / \{record.return_ref}"),
+      ]),
+    ],
+  )
 }
 
 ///|
@@ -10124,7 +10699,9 @@ fn render_editor_pipeline_movement_loops(
         [
           article(class="viewport-output-empty", [
             h2("No Movement Loops"),
-            p("No enabled Wenyu modules were available for movement-loop proof."),
+            p(
+              "No enabled Wenyu modules were available for movement-loop proof.",
+            ),
           ]),
         ]
       } else {
@@ -10138,20 +10715,26 @@ fn render_editor_pipeline_movement_loops(
 fn render_editor_pipeline_placement_diff(
   record : EditorPipelinePlacementDiffSnapshot,
 ) -> @rabbita.Html {
-  article(class="editor-pipeline-stage \{editor_pipeline_stage_class(record.status)}", [
-    div(class="handoff-artifact-heading", [
-      span(class="handoff-kind", "\{record.change_kind} / \{record.module_id}"),
-      span(class="handoff-status", record.status),
-    ]),
-    h3(record.module_title),
-    p(record.reason),
-    div(class="viewport-output-links", [
-      span("Before / \{record.before_ref}"),
-      span("After / \{record.after_ref}"),
-      span("Entrance / \{record.entrance_ref}"),
-      span("Terrain / \{record.terrain_status}"),
-    ]),
-  ])
+  article(
+    class="editor-pipeline-stage \{editor_pipeline_stage_class(record.status)}",
+    [
+      div(class="handoff-artifact-heading", [
+        span(
+          class="handoff-kind",
+          "\{record.change_kind} / \{record.module_id}",
+        ),
+        span(class="handoff-status", record.status),
+      ]),
+      h3(record.module_title),
+      p(record.reason),
+      div(class="viewport-output-links", [
+        span("Before / \{record.before_ref}"),
+        span("After / \{record.after_ref}"),
+        span("Entrance / \{record.entrance_ref}"),
+        span("Terrain / \{record.terrain_status}"),
+      ]),
+    ],
+  )
 }
 
 ///|
@@ -10192,33 +10775,42 @@ fn render_editor_pipeline_placement_diffs(
 fn render_editor_pipeline_terrain_layer(
   record : EditorPipelineTerrainLayerSnapshot,
 ) -> @rabbita.Html {
-  article(class="editor-pipeline-stage \{editor_pipeline_stage_class(record.status)}", [
-    div(class="handoff-artifact-heading", [
-      span(class="handoff-kind", record.layer_id),
-      span(class="handoff-status", record.status),
-    ]),
-    h3(record.title),
-    p(record.summary),
-    p(class="handoff-scope", record.evidence_ref),
-  ])
+  article(
+    class="editor-pipeline-stage \{editor_pipeline_stage_class(record.status)}",
+    [
+      div(class="handoff-artifact-heading", [
+        span(class="handoff-kind", record.layer_id),
+        span(class="handoff-status", record.status),
+      ]),
+      h3(record.title),
+      p(record.summary),
+      p(class="handoff-scope", record.evidence_ref),
+    ],
+  )
 }
 
 ///|
 fn render_editor_pipeline_terrain_reason(
   record : EditorPipelineTerrainReasonSnapshot,
 ) -> @rabbita.Html {
-  article(class="editor-pipeline-stage \{editor_pipeline_stage_class(record.status)}", [
-    div(class="handoff-artifact-heading", [
-      span(class="handoff-kind", "\{record.terrain_layer} / \{record.module_id}"),
-      span(class="handoff-status", record.status),
-    ]),
-    h3(record.module_title),
-    p(record.reason),
-    div(class="viewport-output-links", [
-      span("Layer / \{record.terrain_layer}"),
-      span("Placement / \{record.placement_ref}"),
-    ]),
-  ])
+  article(
+    class="editor-pipeline-stage \{editor_pipeline_stage_class(record.status)}",
+    [
+      div(class="handoff-artifact-heading", [
+        span(
+          class="handoff-kind",
+          "\{record.terrain_layer} / \{record.module_id}",
+        ),
+        span(class="handoff-status", record.status),
+      ]),
+      h3(record.module_title),
+      p(record.reason),
+      div(class="viewport-output-links", [
+        span("Layer / \{record.terrain_layer}"),
+        span("Placement / \{record.placement_ref}"),
+      ]),
+    ],
+  )
 }
 
 ///|
@@ -10247,7 +10839,9 @@ fn render_editor_pipeline_terrain_labels(
         [
           article(class="viewport-output-empty", [
             h2("No Terrain Layers"),
-            p("No terrain label layers were available from current map/module data."),
+            p(
+              "No terrain label layers were available from current map/module data.",
+            ),
           ]),
         ]
       } else {
@@ -10281,7 +10875,11 @@ fn render_editor_pipeline_style_candidate(
         span(class="handoff-kind", record.style_id),
         span(
           class="handoff-status",
-          if record.selected { "selected" } else { record.status },
+          if record.selected {
+            "selected"
+          } else {
+            record.status
+          },
         ),
       ]),
       h3(record.title),
@@ -10323,21 +10921,26 @@ fn render_editor_pipeline_style_comparison(
       render_module_detail("Status", pipeline.style_selection.status),
       render_module_detail("Decision", pipeline.style_selection.decision_ref),
     ]),
-    article(class="editor-pipeline-stage \{editor_pipeline_stage_class(pipeline.style_selection.status)}", [
-      div(class="handoff-artifact-heading", [
-        span(class="handoff-kind", pipeline.style_selection.selected_style_id),
-        span(class="handoff-status", pipeline.style_selection.status),
-      ]),
-      h3(pipeline.style_selection.selected_style_title),
-      p(pipeline.style_selection.critique),
-    ]),
+    article(
+      class="editor-pipeline-stage \{editor_pipeline_stage_class(pipeline.style_selection.status)}",
+      [
+        div(class="handoff-artifact-heading", [
+          span(class="handoff-kind", pipeline.style_selection.selected_style_id),
+          span(class="handoff-status", pipeline.style_selection.status),
+        ]),
+        h3(pipeline.style_selection.selected_style_title),
+        p(pipeline.style_selection.critique),
+      ],
+    ),
     div(
       class="handoff-artifact-grid",
       if candidates.is_empty() {
         [
           article(class="viewport-output-empty", [
             h2("No Style Candidates"),
-            p("No style comparison candidates were available from current runtime data."),
+            p(
+              "No style comparison candidates were available from current runtime data.",
+            ),
           ]),
         ]
       } else {
@@ -10417,7 +11020,9 @@ fn render_viewport_editor_panel(
 ) -> @rabbita.Html {
   let module_rows : Array[@rabbita.Html] = []
   for civic in wenyu_modules() {
-    module_rows.push(render_editor_module_row(dispatch, model, civic, executions))
+    module_rows.push(
+      render_editor_module_row(dispatch, model, civic, executions),
+    )
   }
   aside(class="viewport-editor-panel", [
     div(class="viewport-panel-heading", [
@@ -10454,13 +11059,7 @@ fn render_viewport_editor_body(
 ) -> @rabbita.Html {
   section(class="viewport-editor-layout", [
     render_standalone_viewport_map(
-      dispatch,
-      model,
-      scene,
-      workers,
-      executions,
-      selected_node_key,
-      selected_worker_id,
+      dispatch, model, scene, workers, executions, selected_node_key, selected_worker_id,
     ),
     render_viewport_editor_panel(dispatch, model, executions),
   ])
@@ -10566,7 +11165,10 @@ fn render_viewport_output_body(model : Model) -> @rabbita.Html {
       p(viewport_mode_summary(ViewportMode::OutputMode)),
     ]),
     div(class="viewport-output-stats", [
-      render_module_detail("Book Fragments", "\{model.module_projections.length()}"),
+      render_module_detail(
+        "Book Fragments",
+        "\{model.module_projections.length()}",
+      ),
       render_module_detail(
         "Bound Modules",
         "\{module_projection_count_for_configured_modules(model)}",
@@ -10608,68 +11210,67 @@ fn render_scene(dispatch : Dispatch[Msg], model : Model) -> @rabbita.Html {
     let viewport_body = match model.viewport_mode {
       ViewMode =>
         render_viewport_view_body(
-          dispatch,
-          model,
-          scene,
-          workers,
-          executions,
-          selected_node_key,
-          selected_worker_id,
+          dispatch, model, scene, workers, executions, selected_node_key, selected_worker_id,
         )
       EditorMode =>
         render_viewport_editor_body(
-          dispatch,
-          model,
-          scene,
-          workers,
-          executions,
-          selected_node_key,
-          selected_worker_id,
+          dispatch, model, scene, workers, executions, selected_node_key, selected_worker_id,
         )
       OutputMode => render_viewport_output_body(model)
     }
     return section(
       class="viewport-page viewport-mode-\{viewport_mode_slug(model.viewport_mode)}",
       [
-      header(class="viewport-hud", [
-        div(class="viewport-title", [
-          p(class="eyebrow", "Moontown Viewport"),
-          h1(scene.title),
-          p(class="viewport-mode-subtitle", viewport_mode_summary(model.viewport_mode)),
+        header(class="viewport-hud", [
+          div(class="viewport-title", [
+            p(class="eyebrow", "Moontown Viewport"),
+            h1(scene.title),
+            p(
+              class="viewport-mode-subtitle",
+              viewport_mode_summary(model.viewport_mode),
+            ),
+          ]),
+          div(class="viewport-actions", [
+            render_viewport_mode_switch(dispatch, model),
+            status_chip(
+              if model.paused {
+                "Paused"
+              } else {
+                "Live"
+              },
+              "chip-live",
+            ),
+            status_chip("Local time \{real_time_label()}", "chip-clock"),
+            status_chip(daemon_tick_label(model), "chip-neutral"),
+            status_chip(
+              "Modules \{wenyu_module_count()} / clean \{wenyu_clean_module_count()} / civic \{civic_status_summary(model)} / v\{wenyu_modules_version()}",
+              "chip-book",
+            ),
+            button(
+              class="control-button viewport-zoom-button viewport-zoom-out",
+              on_click=dispatch(ViewportControlNoop),
+              "Zoom Out",
+            ),
+            button(
+              class="control-button viewport-zoom-button viewport-zoom-in",
+              on_click=dispatch(ViewportControlNoop),
+              "Zoom In",
+            ),
+            button(
+              class="control-button",
+              on_click=dispatch(TogglePause),
+              if model.paused {
+                "Resume"
+              } else {
+                "Pause"
+              },
+            ),
+            button(class="control-button", on_click=dispatch(Step), "Step"),
+          ]),
         ]),
-        div(class="viewport-actions", [
-          render_viewport_mode_switch(dispatch, model),
-          status_chip(if model.paused { "Paused" } else { "Live" }, "chip-live"),
-          status_chip("Local time \{real_time_label()}", "chip-clock"),
-          status_chip(daemon_tick_label(model), "chip-neutral"),
-          status_chip(
-            "Modules \{wenyu_module_count()} / clean \{wenyu_clean_module_count()} / civic \{civic_status_summary(model)} / v\{wenyu_modules_version()}",
-            "chip-book",
-          ),
-          button(
-            class="control-button viewport-zoom-button viewport-zoom-out",
-            on_click=dispatch(ViewportControlNoop),
-            "Zoom Out",
-          ),
-          button(
-            class="control-button viewport-zoom-button viewport-zoom-in",
-            on_click=dispatch(ViewportControlNoop),
-            "Zoom In",
-          ),
-          button(
-            class="control-button",
-            on_click=dispatch(TogglePause),
-            if model.paused {
-              "Resume"
-            } else {
-              "Pause"
-            },
-          ),
-          button(class="control-button", on_click=dispatch(Step), "Step"),
-        ]),
-      ]),
-      viewport_body,
-    ])
+        viewport_body,
+      ],
+    )
   }
   section(class="town-shell", [
     header(class="town-header", [
@@ -10945,17 +11546,21 @@ fn main {
   @rabbita.new(app)..with_init(schedule_tick(dispatch)).mount("app")
 }
 
-
 ///|
 fn render_protocol_history_group(
   health : CivicServiceHealthSnapshot,
 ) -> @rabbita.Html {
   let children : Array[@rabbita.Html] = [h3("Protocol History")]
-  if !health.protocol_history.is_empty() {
-    for entry in health.protocol_history {
+  let history = match health.protocol_history {
+    Some(entries) => entries
+    None => []
+  }
+  let history_state = health.protocol_history_state.unwrap_or("missing")
+  if !history.is_empty() {
+    for entry in history {
       children.push(render_protocol_history_entry(entry))
     }
-  } else if health.protocol_history_state == "no-events-yet" {
+  } else if history_state == "no-events-yet" {
     children.push(
       p(
         class="module-book-empty",

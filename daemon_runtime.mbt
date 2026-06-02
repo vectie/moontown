@@ -185,6 +185,13 @@ pub fn default_daemon_stop_path(
 }
 
 ///|
+pub fn default_daemon_restart_path(
+  snapshot_path? : String = @storage.default_snapshot_path(),
+) -> String {
+  "\{daemon_base_dir(snapshot_path)}/daemon.restart"
+}
+
+///|
 pub fn default_daemon_pid_path(
   snapshot_path? : String = @storage.default_snapshot_path(),
 ) -> String {
@@ -270,7 +277,8 @@ async fn daemon_current_process_pid(snapshot_path : String) -> Int {
     _ => return 0
   }
   let status = @process.run("sh", [
-    "-c", "printf '%s\\n' \"$PPID\" > \"$1\"", "moontown-pid", tmp_path,
+    "-c", "ppid=\"$PPID\"; gpid=\"$(ps -o ppid= -p \"$ppid\" | tr -d ' ')\"; if [ -n \"$gpid\" ] && [ \"$gpid\" != \"0\" ]; then printf '%s\\n' \"$gpid\" > \"$1\"; else printf '%s\\n' \"$ppid\" > \"$1\"; fi",
+    "moontown-pid", tmp_path,
   ]) catch {
     _ => return 0
   }
@@ -303,8 +311,28 @@ async fn daemon_pid_alive(pid : Int) -> Bool {
   if pid <= 0 {
     return false
   }
-  let code = @process.run("kill", ["-0", "\{pid}"]) catch { _ => return false }
-  code == 0
+  let ps_code = @process.run("sh", [
+    "-c",
+    "ps -p \"$1\" >/dev/null 2>&1",
+    "moontown-pid-probe",
+    "\{pid}",
+  ]) catch {
+    _ => -1
+  }
+  ps_code == 0
+}
+
+///|
+fn daemon_pid_effectively_alive(
+  probed_alive : Bool,
+  pid : Int,
+  heartbeat_fresh : Bool,
+  runtime_active : Bool,
+) -> Bool {
+  if probed_alive {
+    return true
+  }
+  pid > 0 && heartbeat_fresh && runtime_active
 }
 
 ///|
@@ -313,8 +341,18 @@ async fn daemon_stop_requested(snapshot_path : String) -> Bool {
 }
 
 ///|
+async fn daemon_restart_requested(snapshot_path : String) -> Bool {
+  @fs.exists(default_daemon_restart_path(snapshot_path~))
+}
+
+///|
 async fn clear_daemon_stop_request(snapshot_path : String) -> Unit {
   remove_file_if_exists(default_daemon_stop_path(snapshot_path~))
+}
+
+///|
+async fn clear_daemon_restart_request(snapshot_path : String) -> Unit {
+  remove_file_if_exists(default_daemon_restart_path(snapshot_path~))
 }
 
 ///|
@@ -325,6 +363,24 @@ async fn write_daemon_stop_request(snapshot_path : String) -> Unit {
   ) catch {
     _ => ()
   }
+}
+
+///|
+pub async fn write_daemon_restart_request(
+  snapshot_path? : String = @storage.default_snapshot_path(),
+  reason? : String = "reload requested",
+) -> String {
+  write_text_file(
+    default_daemon_restart_path(snapshot_path~),
+    "restart requested at \{@env.now()}\nreason: \{reason}\n",
+  ) catch {
+    error => return "Moontown daemon restart request failed: \{error}"
+  }
+  append_daemon_log(
+    default_daemon_log_path(snapshot_path~),
+    "restart requested reason=\{reason}",
+  )
+  "Moontown daemon restart requested\npath=\{default_daemon_restart_path(snapshot_path~)}\nreason=\{reason}"
 }
 
 ///|
@@ -401,9 +457,24 @@ pub async fn inspect_daemon_runtime(
       }
     Some(state) => {
       let now = @env.now()
-      let supervisor_alive = daemon_pid_alive(state.supervisor_pid)
-      let worker_alive = daemon_pid_alive(state.worker_pid)
-      let stale = state.is_stale(now, stale_after_ms) ||
+      let heartbeat_stale = state.is_stale(now, stale_after_ms)
+      let heartbeat_fresh = !heartbeat_stale
+      let runtime_active = state.status == "running" ||
+        state.status == "ticking" ||
+        state.status == "supervising"
+      let supervisor_alive = daemon_pid_effectively_alive(
+        daemon_pid_alive(state.supervisor_pid),
+        state.supervisor_pid,
+        heartbeat_fresh,
+        runtime_active,
+      )
+      let worker_alive = daemon_pid_effectively_alive(
+        daemon_pid_alive(state.worker_pid),
+        state.worker_pid,
+        heartbeat_fresh,
+        runtime_active,
+      )
+      let stale = heartbeat_stale ||
         (
           (state.status == "running" || state.status == "ticking") &&
           state.worker_pid > 0 &&
@@ -474,18 +545,22 @@ async fn mark_daemon_worker_started(
   let previous = load_daemon_runtime_state(runtime_path).unwrap_or(
     DaemonRuntimeState::new(log_path~),
   )
+  let keep_supervisor = daemon_worker_should_keep_supervisor(
+    previous.supervisor_pid,
+    clear_supervisor,
+  )
   save_daemon_runtime_state(runtime_path, {
     ..previous,
     status: "running",
-    supervisor_pid: if clear_supervisor {
-      0
-    } else {
+    supervisor_pid: if keep_supervisor {
       previous.supervisor_pid
-    },
-    supervisor_run_id: if clear_supervisor {
-      ""
     } else {
+      0
+    },
+    supervisor_run_id: if keep_supervisor {
       previous.supervisor_run_id
+    } else {
+      ""
     },
     worker_pid,
     worker_run_id,
@@ -500,9 +575,17 @@ async fn mark_daemon_worker_started(
     log_path,
   })
   write_daemon_pid_file(default_daemon_pid_path(snapshot_path~), worker_pid)
-  if clear_supervisor {
+  if !keep_supervisor {
     remove_file_if_exists(default_daemon_supervisor_pid_path(snapshot_path~))
   }
+}
+
+///|
+async fn daemon_worker_should_keep_supervisor(
+  supervisor_pid : Int,
+  clear_supervisor : Bool,
+) -> Bool {
+  !clear_supervisor || (supervisor_pid > 0 && daemon_pid_alive(supervisor_pid))
 }
 
 ///|
@@ -611,6 +694,35 @@ async fn mark_daemon_stopped(snapshot_path : String, reason : String) -> Unit {
 }
 
 ///|
+async fn mark_daemon_worker_reload_requested(
+  snapshot_path : String,
+  reason : String,
+) -> Unit {
+  let runtime_path = default_daemon_runtime_path(snapshot_path~)
+  let log_path = default_daemon_log_path(snapshot_path~)
+  let now = @env.now()
+  let previous = load_daemon_runtime_state(runtime_path).unwrap_or(
+    DaemonRuntimeState::new(log_path~),
+  )
+  save_daemon_runtime_state(runtime_path, {
+    ..previous,
+    status: if previous.supervisor_pid > 0 {
+      "supervising"
+    } else {
+      "stopped"
+    },
+    worker_pid: 0,
+    worker_run_id: "",
+    last_heartbeat_ms: now,
+    stop_requested: false,
+    last_error: reason,
+    log_path,
+  })
+  remove_file_if_exists(default_daemon_pid_path(snapshot_path~))
+  clear_daemon_restart_request(snapshot_path)
+}
+
+///|
 fn daemon_path_basename(path : String) -> String {
   let parts = path.split("/").to_array()
   match parts.get(parts.length() - 1) {
@@ -693,6 +805,21 @@ fn daemon_launchd_preferred() -> Bool {
   match @sys.get_env_var("MOONTOWN_DAEMON_BACKEND") {
     Some("detached") | Some("shell") | Some("none") => false
     _ => true
+  }
+}
+
+///|
+fn daemon_supervisor_should_run_inline_for_service_name(
+  service_name : String,
+) -> Bool {
+  service_name.contains("moontown.daemon")
+}
+
+///|
+fn daemon_supervisor_should_run_inline_worker() -> Bool {
+  match @sys.get_env_var("XPC_SERVICE_NAME") {
+    Some(value) => daemon_supervisor_should_run_inline_for_service_name(value)
+    None => false
   }
 }
 
@@ -826,7 +953,7 @@ pub async fn daemon_start_saved_town(
       let launchd = inspect_daemon_runtime_after_start(
         snapshot_path, stale_after_ms,
       )
-      if launchd.healthy() || launchd.supervisor_active() {
+      if daemon_runtime_start_already_active(launchd) {
         return "Moontown daemon launchd started\n\{daemon_runtime_health_summary(launchd)}"
       }
       append_daemon_log(
@@ -863,7 +990,7 @@ pub async fn daemon_start_saved_town(
     "supervisor started pid=\{pid} run=\{supervisor_run_id}",
   )
   let next = inspect_daemon_runtime_after_start(snapshot_path, stale_after_ms)
-  if next.healthy() || next.supervisor_active() {
+  if daemon_runtime_start_already_active(next) {
     return "Moontown daemon supervisor started pid=\{pid}\n\{daemon_runtime_health_summary(next)}"
   }
   append_daemon_log(
@@ -915,6 +1042,19 @@ pub async fn daemon_supervise_saved_town(
     default_daemon_log_path(snapshot_path~),
     "supervisor loop entered run=\{run_id} pid=\{supervisor_pid}",
   )
+  if daemon_supervisor_should_run_inline_worker() {
+    append_daemon_log(
+      default_daemon_log_path(snapshot_path~),
+      "launchd supervisor running worker loop inline",
+    )
+    return daemon_run_saved_town(
+      snapshot_path~,
+      max_ticks=0,
+      sleep_ms~,
+      preserve_supervisor=true,
+      inline_under_supervisor=true,
+    )
+  }
   let mut checks = 0
   let mut latest = ""
   while max_checks <= 0 || checks < max_checks {

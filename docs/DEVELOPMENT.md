@@ -132,6 +132,71 @@ Do not put durable research memory in Moontown. Standing goals belong to the
 Mayor, book-local memory belongs to MoonBook, and bounded execution belongs to
 MoonClaw.
 
+Detached MoonClaw imports can write structured startup logs before the actual
+proposal receipt appears. Treat `Model` / `job-analysis` startup logs as
+nonterminal operational noise unless the text also contains a concrete terminal
+failure signal such as `Failure(...)`, `JsonDecodeError`, `runtime error`, or
+`abort() called`. A confirmed receipt or later run result supersedes any
+transient import-log accounting row.
+
+Book-quality repair standing goals are a special standing-goal mode. A normal
+topic watch may truthfully return `no_change` after checking sources. A
+`book-quality-repair-<book-id>` goal exists because semantic review already
+found a concrete book gap, so Mayor must prompt the worker to read
+`wiki/reviews/book-quality-repair.md` and actively close the named gap first.
+It should return ordinary `no_change` only when the required artifacts already
+exist, the gap is stale/satisfied, or the book state proves no repair remains.
+
+## Live Growth Loop
+
+When validating the live town, check for durable growth instead of just process
+liveness:
+
+- `moon run cmd/main -- daemon doctor`
+  should show a healthy supervisor/worker pair and increasing success count.
+  Do not accept `worker-without-supervisor` as a durable 24/7 state. On macOS
+  launchd, the worker loop runs inline under the launchd-managed process, so
+  the same durable PID may appear as both supervisor and worker.
+- `moon run cmd/main -- daemon restart "validated source patch"`
+  should be requested after autonomous code repair changes Moontown source and
+  validation passes. The request writes `.moontown/daemon.restart`; the worker
+  consumes it between ticks and the supervisor/launchd starts a fresh worker.
+  If new packets still show pre-patch prompts or old routing after source files
+  changed, inspect this reload seam before blaming MoonBook skills.
+- `moon run cmd/main -- live status`
+  should expose standing-goal status, PlanBook open gaps, accepted updates,
+  no-change cycles, and next actions.
+- `moon run cmd/main -- civic protocols schedules status`
+  should show enabled building protocol schedules with round counts increasing
+  over wall-clock time.
+- `moon run cmd/main -- civic protocols status`
+  should show protocol ledgers and review/distribution history.
+- `moon run cmd/main -- civic reconcile`
+  should normally report `Reconciled 0` after the first successful bridge,
+  because service-result proof is already current for protocol-active
+  buildings.
+- `moon run cmd/main -- planbook doctor`
+  should update PlanBook autonomy evidence and either close gaps, queue one
+  bounded repair, or record a clear blocker.
+- `moon run cmd/main -- books quality`
+  should include live books from `.moontown/town.json`, not only catalog books.
+  Weak live books are legitimate growth gaps; they should remain visible until
+  standing watches, bookkeepers, or AI semantic review improve them.
+- `moon run cmd/main -- books ai-review status`
+  should show no duplicate active semantic reviews. The daemon's
+  `review-book-quality` job dispatches one pending review at a time and waits
+  for it to finish before launching another. It also honors its
+  `interval_seconds` cadence instead of running every worker tick.
+
+Growth can be: accepted MoonBook pages, review items, civic ledgers, returned
+ideas, PlanBook evidence, code/tests, UI projections, or explicit no-change
+records. Do not treat retries, daemon logs, or generated site rebuilds as
+domain or implementation growth.
+
+For repair goals, repeated `no_change` without closing the named repair queue
+is not maturity. It is a signal to inspect the repair prompt, skill pack,
+source/tool availability, and MoonBook projection path.
+
 ## Testing Notes
 
 Package tests currently cover:

@@ -23,6 +23,30 @@ test "dispatch routes coding work to same-book harness worker" {
 }
 
 ///|
+test "dispatch routes coding standing watch to same-book watcher worker" {
+  let state = demo_state()
+  let decision = @dispatch.route_task(
+    state,
+    @dispatch.RouteRequest::new(
+      task=@core.TownTask::new(
+        id="standing-watch-coding-tick-1",
+        book_id="coding",
+        title="Repair coding book quality",
+        prompt="Run a book-quality standing watch against the coding book.",
+        domain=@core.WorkDomain::Coding,
+        required_role=Some(@core.WorkerRole::Watcher),
+        required_capabilities=["standing-watch"],
+      ),
+    ),
+  )
+  assert_true(
+    decision is Assigned(plan) &&
+    plan.worker_id == "claw-coding-watcher" &&
+    plan.isolation == @core.IsolationMode::Worktree,
+  )
+}
+
+///|
 test "finance work prefers isolated execution" {
   let book = @core.BookRef::new(
     id="finance",

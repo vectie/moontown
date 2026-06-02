@@ -376,7 +376,7 @@ pub async fn Mayor::prepare_keeper_packet(
   packet_dir? : String = @moonclaw.default_packet_directory(),
 ) -> MayorKeeperPacket {
   let bundle = @moonbook.hydrate_worker_context(entry, task)
-  let packet_id = compact_keeper_packet_id(entry.id, task.id)
+  let packet_id = keeper_packet_id(entry.id, task.id)
   let profile = moonclaw_profile_for_entry_task(entry, task)
   let packet = @moonclaw.proposal_packet_from_bundle(
     bundle,
@@ -409,7 +409,7 @@ pub fn keeper_runtime(
 }
 
 ///|
-fn compact_keeper_packet_id(book_id : String, task_id : String) -> String {
+pub fn keeper_packet_id(book_id : String, task_id : String) -> String {
   let hash = task_id.hash().to_string().trim(chars="-").to_owned()
   let prefix = compact_id_segment(book_id, 24)
   let body = compact_id_segment(task_id, 40)
