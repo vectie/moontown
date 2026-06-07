@@ -74,9 +74,15 @@ async fn planbook_ui_operator_criterion() -> PlanbookCriterionStatus {
 
 ///|
 async fn planbook_result_contract_criterion() -> PlanbookCriterionStatus {
-  let standing_ready = text_file_contains("standing_watch.mbt", "book_changed") &&
-    text_file_contains("standing_watch.mbt", "accepted_facts_count") &&
-    text_file_contains("standing_watch.mbt", "standing_goal_decision")
+  let standing_ready = text_file_contains(
+      "standing_watch_task.mbt", "standing_goal_decision",
+    ) &&
+    text_file_contains("standing_watch_task.mbt", "accepted_facts_count") &&
+    text_file_contains("standing_watch_task.mbt", "book_changed") &&
+    text_file_contains(
+      "standing_watch_history_summary_render.mbt", "accepted_facts_count",
+    ) &&
+    text_file_contains("standing_watch_marker_decision.mbt", "needs_review")
   let generic_ready = text_file_contains(
       "adapters/moonclaw/packet_types.mbt", "result_decision",
     ) &&

@@ -6,12 +6,29 @@ async fn planbook_editor_pipeline_criterion(
     "\{workspace_root}/plans/2026-05-31-editor-mode-real-pipeline/plan.md",
   )
   let command_ready = @fs.exists("editor_pipeline.mbt") &&
-    text_file_contains("cmd/main/main.mbt", "editor-pipeline")
+    text_file_contains("cmd/main/main.mbt", "editor-pipeline") &&
+    text_file_contains(
+      "cmd/main/planning_commands.mbt", "render_editor_pipeline_command",
+    )
+  let state_ready = text_file_contains(
+      "editor_pipeline.mbt", "moontown.editor_pipeline.v1",
+    ) &&
+    text_file_contains(
+      "editor_pipeline_lifecycle.mbt", "selected-feature-implementation",
+    )
   let ui_ready = text_file_contains(
-      "ui/rabbita-town/main/main.mbt", "editor_pipeline",
-    ) ||
-    text_file_contains("ui/rabbita-town/main/main.mbt", "Editor Pipeline")
-  let ready = plan_ready && command_ready && ui_ready
+      "ui/rabbita-town/main/bootstrap_moondesk.mbt", "parse_bootstrap_editor_pipeline",
+    ) &&
+    text_file_contains(
+      "ui/rabbita-town/main/app_tick_optional_refresh.mbt", "refresh_editor_pipeline",
+    ) &&
+    text_file_contains(
+      "ui/rabbita-town/main/viewport_mode_editor.mbt", "render_editor_pipeline_panel",
+    ) &&
+    text_file_contains(
+      "ui/rabbita-town/main/viewport_output.mbt", "render_editor_pipeline_lifecycle",
+    )
+  let ready = plan_ready && command_ready && state_ready && ui_ready
   planbook_criterion(
     "editor-mode-real-pipeline",
     "2026-05-31-editor-mode-real-pipeline",

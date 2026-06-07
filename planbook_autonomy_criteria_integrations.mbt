@@ -23,16 +23,23 @@ async fn planbook_app_tool_book_template_criterion() -> PlanbookCriterionStatus 
     "templates/books/templates.json", "\"template_id\": \"app-tool-book\"",
   )
   let installer_ready = text_file_contains(
-      "book_templates.mbt", "\"app-tool-book\"",
+      "book_templates_installers.mbt", "\"app-tool-book\"",
     ) &&
-    text_file_contains("book_templates.mbt", "install_app_tool_book_config")
+    text_file_contains(
+      "book_templates_installers.mbt", "install_app_tool_book_config",
+    )
   let template_ready = @fs.exists("templates/books/app-tool-book/book.json") &&
     @fs.exists("templates/books/app-tool-book/tool-spec.example.md") &&
     @fs.exists("templates/books/app-tool-book/skills/tool-build/SKILL.md") &&
     @fs.exists("templates/books/app-tool-book/schemas/tool-manifest.schema.md")
   let runtime_ready = @fs.exists("app_tool_book.mbt") &&
-    text_file_contains("app_tool_book.mbt", "tool-manifest.json") &&
-    text_file_contains("app_tool_book.mbt", "book/site/generated/tool.html") &&
+    text_file_contains("app_tool_book_contracts.mbt", "tool-manifest.json") &&
+    text_file_contains(
+      "app_tool_book_contracts.mbt", "book/site/generated/tool.html",
+    ) &&
+    text_file_contains(
+      "app_tool_book_workspace.mbt", "book/site/generated/tool.html",
+    ) &&
     text_file_contains("app_tool_book.mbt", "civic_building_id")
   let ready = registry_ready &&
     installer_ready &&
