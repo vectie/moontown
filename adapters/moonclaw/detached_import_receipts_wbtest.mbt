@@ -31,6 +31,24 @@ test "detached import receipt parser skips moonclaw json startup logs" {
 }
 
 ///|
+async test "detached import oversized receipt is failed without parsing" {
+  let root = "/tmp/moontown-oversized-receipt-test"
+  let packet_path = "\{root}/packet.json"
+  let receipt_path = detached_import_receipt_path(packet_path)
+  let builder = StringBuilder::new()
+  for _ in 0..<1_010 {
+    builder.write_string("0123456789".repeat(100))
+    builder.write_char('\n')
+  }
+  moonclaw_write_text_file(receipt_path, builder.to_string())
+  let receipt = detached_import_receipt("packet", packet_path)
+  assert_true(receipt is Some(_))
+  let loaded = receipt.unwrap()
+  assert_eq(loaded.status, @core.TaskExecutionStatus::Failed)
+  assert_true(loaded.summary.contains("oversized receipt"))
+}
+
+///|
 test "detached import startup logs are not terminal failure receipts" {
   let receipt = detached_import_failure_receipt(
     "packet",

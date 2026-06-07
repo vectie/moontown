@@ -42,6 +42,19 @@ pub async fn detached_import_receipt(
 ) -> ProposalImportReceipt? {
   let resolved_packet_path = resolve_packet_path(packet_path)
   let receipt_path = detached_import_receipt_path(resolved_packet_path)
+  match moonclaw_optional_file_size(receipt_path) {
+    Some(size) if size > 1_000_000L =>
+      return Some({
+        packet_id,
+        packet_path: resolved_packet_path,
+        proposal_id: "proposal-\{packet_id}",
+        run_id: None,
+        status: @core.TaskExecutionStatus::Failed,
+        command: "detached MoonClaw import oversized receipt \{receipt_path}",
+        summary: "Detached MoonClaw import produced an oversized receipt for \{packet_id} (\{size} bytes); treating it as failed operational output instead of parsing daemon stdout as JSON.",
+      })
+    _ => ()
+  }
   let text = match moonclaw_read_optional_text(receipt_path) {
     Some(text) => text
     None => return None
