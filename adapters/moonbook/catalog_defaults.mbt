@@ -1,0 +1,38 @@
+///|
+pub fn default_catalog() -> Array[BookCatalogEntry] {
+  [
+    BookCatalogEntry::new(
+      id="coding",
+      name="Moonbook / Coding",
+      purpose="Harness engineering for source work, repo memory, and execution policy.",
+      workspace_root=default_workspace_root("coding"),
+      memory_scope=@core.MemoryScope::BookPrivate,
+      tags=["moonbit", "git", "review"],
+      skills=["analysis", "memory", "review"],
+    ),
+    BookCatalogEntry::new(
+      id="finance",
+      name="Moonbook / Finance",
+      purpose="Private daily finance operations with isolated memory and task artifacts.",
+      workspace_root=default_workspace_root("finance"),
+      memory_scope=@core.MemoryScope::TaskEphemeral,
+      tags=["ledger", "planning", "ops"],
+      skills=["planning", "memory", "reporting"],
+    ),
+  ]
+}
+
+///|
+pub fn default_workspace_root(book_id : String) -> String {
+  ".moontown/books/\{book_id}"
+}
+
+///|
+pub fn default_catalog_path() -> String {
+  ".moontown/moonbooks.json"
+}
+
+///|
+pub fn default_moonbook_root() -> String {
+  "../moonbook"
+}

@@ -1,0 +1,54 @@
+///|
+test "Protocol status labels follow packet lifecycle" {
+  assert_eq(
+    protocol_status_label(
+      inbox_count=0,
+      contribution_count=0,
+      reduction_count=0,
+      outbox_count=0,
+      review_count=0,
+    ),
+    "defined",
+  )
+  assert_eq(
+    protocol_status_label(
+      inbox_count=1,
+      contribution_count=0,
+      reduction_count=0,
+      outbox_count=0,
+      review_count=0,
+    ),
+    "inbox",
+  )
+  assert_eq(
+    protocol_status_label(
+      inbox_count=1,
+      contribution_count=1,
+      reduction_count=1,
+      outbox_count=1,
+      review_count=0,
+    ),
+    "reduced",
+  )
+  assert_eq(
+    protocol_status_label(
+      inbox_count=1,
+      contribution_count=1,
+      reduction_count=1,
+      outbox_count=1,
+      review_count=1,
+    ),
+    "review",
+  )
+}
+
+///|
+test "Protocol ready statuses are explicit lifecycle states" {
+  assert_true(!protocol_status_is_ready("defined"))
+  assert_true(!protocol_status_is_ready("inbox"))
+  assert_true(!protocol_status_is_ready("aggregating"))
+  assert_true(!protocol_status_is_ready("reducing"))
+  assert_true(protocol_status_is_ready("reduced"))
+  assert_true(protocol_status_is_ready("review"))
+  assert_true(!protocol_status_is_ready("blocked"))
+}

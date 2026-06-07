@@ -9,6 +9,19 @@ async fn read_optional_text(path : String) -> String? {
 }
 
 ///|
+async fn read_optional_json_file(path : String) -> Json? {
+  match read_optional_text(path) {
+    Some(text) => Some(@json.parse(text)) catch { _ => None }
+    None => None
+  }
+}
+
+///|
+async fn read_json_file_or_empty_object(path : String) -> Json {
+  read_optional_json_file(path).unwrap_or(Json::object({}))
+}
+
+///|
 async fn read_text_or_empty(path : String) -> String {
   if !@fs.exists(path) {
     return ""

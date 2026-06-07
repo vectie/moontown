@@ -14,6 +14,8 @@ import {
 // Values
 pub async fn archive_pdf_evidence_watch_book(book_id? : String, reason? : String, book_catalog_path? : String, standing_goal_path? : String, request_event_path? : String) -> String
 
+pub async fn bootstrap_app_tool_book(book_id? : String, title? : String, purpose? : String, websites? : Array[String], analysis_method? : String, tool_spec? : String, civic_building_id? : String, cadence_ticks? : Int, book_catalog_path? : String, standing_goal_path? : String, workspace_root? : String, template_root? : String) -> String
+
 pub async fn bootstrap_civic_salon_scenario(CivicSalonScenario, book_catalog_path? : String, round_id? : String, round_number? : Int, workspace_base? : String, reducer_mode? : CivicSalonReductionMode) -> String
 
 pub async fn bootstrap_civic_salon_scenario_file(String, book_catalog_path? : String, round_id? : String, round_number? : Int, workspace_base? : String, reducer_mode? : CivicSalonReductionMode) -> String
@@ -59,6 +61,12 @@ pub async fn daemon_stop_saved_town(snapshot_path? : String) -> String
 pub async fn daemon_supervise_saved_town(snapshot_path? : String, command? : String, max_checks? : Int, sleep_ms? : Int, stale_after_ms? : UInt64) -> String
 
 pub async fn daemon_tick_saved_town(snapshot_path? : String, book_catalog_path? : String, respect_runtime_lock? : Bool) -> String
+
+pub fn default_app_tool_book_id() -> String
+
+pub fn default_app_tool_book_template_root() -> String
+
+pub fn default_app_tool_book_workspace_root(book_id? : String) -> String
 
 pub fn default_book_quality_audit_path() -> String
 
@@ -162,6 +170,8 @@ pub async fn editor_feature_selection_evidence(workspace_root? : String) -> Stri
 
 pub async fn editor_feature_selection_ready(workspace_root? : String) -> Bool
 
+pub async fn inspect_app_tool_book(book_id? : String, workspace_root? : String, book_catalog_path? : String, standing_goal_path? : String) -> AppToolBookStatus
+
 pub async fn inspect_book_quality(book_catalog_path? : String, snapshot_path? : String) -> BookQualityAudit
 
 pub async fn inspect_book_template_registry(registry_path? : String) -> BookTemplateRegistry
@@ -181,6 +191,8 @@ pub async fn inspect_saved_town(snapshot_path? : String) -> TownRuntimeStatus
 pub async fn inspect_wenyu_building_protocols(status_path? : String, registry_path? : String) -> @civic.BuildingProtocolPortfolio
 
 pub async fn inspect_wenyu_civic_services(book_catalog_path? : String, status_path? : String) -> CivicServicePortfolio
+
+pub async fn install_app_tool_book_config(String, book_catalog_path? : String, standing_goal_path? : String, template_root? : String) -> String
 
 pub async fn install_book_template_config(String, String, registry_path? : String, book_catalog_path? : String, standing_goal_path? : String) -> String
 
@@ -217,6 +229,8 @@ pub async fn reconcile_book_quality_repair_bridge(book_catalog_path? : String, s
 pub async fn reconcile_wenyu_civic_service_results(book_catalog_path? : String, status_path? : String) -> String
 
 pub async fn refresh_live_autonomy_spine(snapshot_path? : String) -> String
+
+pub async fn render_app_tool_book_status(book_id? : String, workspace_root? : String, book_catalog_path? : String, standing_goal_path? : String) -> String
 
 pub async fn render_book_quality(book_catalog_path? : String, snapshot_path? : String) -> String
 
@@ -299,6 +313,47 @@ pub async fn write_wenyu_civic_status(book_catalog_path? : String, status_path? 
 // Errors
 
 // Types and methods
+type AppToolBookAnalysisSettings derive(Eq, ToJson, @debug.Debug, @json.FromJson)
+
+type AppToolBookAppSettings derive(Eq, ToJson, @debug.Debug, @json.FromJson)
+
+type AppToolBookCivicSettings derive(Eq, ToJson, @debug.Debug, @json.FromJson)
+
+type AppToolBookConfig derive(Eq, ToJson, @debug.Debug, @json.FromJson)
+
+pub struct AppToolBookInstallSpec {
+  book_id : String
+  title : String
+  purpose : String
+  websites : Array[String]
+  analysis_method : String
+  analysis_method_path : String
+  tool_spec : String
+  tool_spec_path : String
+  civic_building_id : String
+  cadence_ticks : Int
+  workspace_root : String
+} derive(Eq, ToJson, @debug.Debug, @json.FromJson)
+
+type AppToolBookMoondeskSettings derive(Eq, ToJson, @debug.Debug, @json.FromJson)
+
+pub struct AppToolBookStatus {
+  book_id : String
+  workspace_root : String
+  required_count : Int
+  missing_count : Int
+  missing_paths : Array[String]
+  has_catalog_entry : Bool
+  has_standing_goal : Bool
+  standing_goal_enabled : Bool
+  has_tool_manifest : Bool
+  ready : Bool
+} derive(Eq, ToJson, @debug.Debug, @json.FromJson)
+
+type AppToolBookWatchSettings derive(Eq, ToJson, @debug.Debug, @json.FromJson)
+
+type AppToolManifest derive(Eq, ToJson, @debug.Debug, @json.FromJson)
+
 pub struct BookQualityAudit {
   generated_at : String
   catalog_path : String
@@ -309,6 +364,10 @@ pub struct BookQualityAudit {
   weakest_score : Int
   scores : Array[BookQualityScore]
 } derive(Eq, ToJson, @json.FromJson)
+
+type BookQualityContextSpec derive(Eq, @debug.Debug)
+
+type BookQualityPolicySpec derive(Eq, @debug.Debug)
 
 type BookQualityRepairBridgeItem derive(Eq, ToJson, @json.FromJson)
 
@@ -371,6 +430,8 @@ pub struct BookTemplateDescriptor {
   required_paths : Array[String]
   editable_files : Array[String]
 } derive(Eq, ToJson, @debug.Debug, @json.FromJson)
+
+type BookTemplateInstaller derive(Eq, @debug.Debug)
 
 pub struct BookTemplateRegistry {
   registry_path : String
@@ -614,6 +675,8 @@ pub struct CookbookArtifact {
   required : Bool
   exists : Bool
 } derive(Eq, ToJson, @debug.Debug)
+
+type CookbookArtifactSummary derive(Eq, @debug.Debug)
 
 pub struct DaemonRuntimeHealth {
   status : String
@@ -990,6 +1053,8 @@ pub struct VisualAgentProjection {
   grid_y : Int
   z : Int
 } derive(Eq, ToJson, @debug.Debug, @json.FromJson)
+
+type VisualBuildingActivity derive(Eq, @debug.Debug)
 
 pub struct VisualBuildingProjection {
   book_id : String

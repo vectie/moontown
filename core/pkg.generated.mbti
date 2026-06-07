@@ -7,11 +7,21 @@ import {
 }
 
 // Values
+pub fn absolute_path_from_base(String, String) -> String
+
+pub fn absolute_path_from_cwd(String) -> String
+
 pub fn empty_state(TownConfig) -> TownState
 
 pub fn find_execution(TownState, String) -> TaskExecutionRecord?
 
 pub fn find_task(TownState, String) -> TownTask?
+
+pub fn json_object_copy(Json?) -> Map[String, Json]
+
+pub fn upsert_moonclaw_job_profile_json(Json, String, Json) -> Json
+
+pub fn upsert_nested_object_entry_json(Json, section_key~ : String, collection_key~ : String, entry_key~ : String, entry~ : Json) -> Json
 
 // Errors
 

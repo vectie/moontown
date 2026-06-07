@@ -177,7 +177,6 @@ pub struct CivicServiceDefinition {
   target_pages : Array[String]
   acceptance : Array[String]
   projection_summary : String
-  legacy_book_ids : Array[String]
 } derive(Eq, @debug.Debug)
 
 // Type aliases

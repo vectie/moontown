@@ -50,3 +50,81 @@ async test "cookbook status reports stable state control book" {
   assert_true(markdown.contains("Definitions tracked: `4`"))
   assert_true(markdown.contains("Runtime states tracked: `6`"))
 }
+
+///|
+test "cookbook artifact summary owns artifact kind counts and required drift" {
+  let summary = CookbookArtifactSummary::from_artifacts([
+    test_cookbook_artifact("docs/A.md", "doc", required=true, exists=true),
+    test_cookbook_artifact("docs/B.md", "doc", required=true, exists=false),
+    test_cookbook_artifact(
+      ".moontown/books.json",
+      "definition",
+      required=true,
+      exists=true,
+    ),
+    test_cookbook_artifact(
+      ".moontown/daemon.json",
+      "runtime-state",
+      required=false,
+      exists=false,
+    ),
+    test_cookbook_artifact("scratch.txt", "note", required=false, exists=false),
+  ])
+  assert_eq(summary.docs_count, 2)
+  assert_eq(summary.definition_count, 1)
+  assert_eq(summary.runtime_state_count, 1)
+  assert_eq(summary.required_missing_count(), 1)
+  assert_eq(summary.required_missing_paths.length(), 1)
+  assert_eq(summary.required_missing_paths[0], "docs/B.md")
+}
+
+///|
+test "cookbook projection helpers render stable UI contracts" {
+  let chips = cookbook_status_chips_json().join("\n")
+  assert_true(chips.contains("\"label\":\"cookbook\""))
+  assert_true(chips.contains("\"tone\":\"review\""))
+  let metrics = cookbook_metrics_json(
+    json_string("8"),
+    json_string("4"),
+    json_string("6"),
+    json_string("0"),
+  ).join("\n")
+  assert_true(metrics.contains("\"label\":\"Docs\""))
+  assert_true(metrics.contains("\"value\":\"8\""))
+  assert_true(metrics.contains("restart-readable state files"))
+  let readiness = cookbook_readiness_json(
+    json_string(".moontown/cookbook.json"),
+  ).join("\n")
+  assert_true(readiness.contains("Stable-state manifest"))
+  assert_true(readiness.contains("raw/bootstrap/COOKBOOK_CONTRACT.md"))
+}
+
+///|
+test "cookbook generated site escapes artifact cards" {
+  let artifact = test_cookbook_artifact(
+    "docs/<A>.md",
+    "doc",
+    required=true,
+    exists=false,
+  )
+  let card = cookbook_artifact_card_html({
+    ..artifact,
+    owner: "MoonBook & Moondesk",
+    stable_role: "stable \"contract\"",
+  })
+  assert_true(card.contains("docs/&lt;A&gt;.md"))
+  assert_true(card.contains("MoonBook &amp; Moondesk"))
+  assert_true(card.contains("stable &quot;contract&quot;"))
+  assert_true(card.contains("required=true; exists=false"))
+  assert_true(cookbook_site_style_html().contains("grid-template-columns"))
+}
+
+///|
+fn test_cookbook_artifact(
+  path : String,
+  kind : String,
+  required~ : Bool,
+  exists~ : Bool,
+) -> CookbookArtifact {
+  { path, kind, owner: "test", stable_role: "test artifact", required, exists }
+}

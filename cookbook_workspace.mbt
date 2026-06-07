@@ -1,0 +1,58 @@
+///|
+async fn write_cookbook_workspace(
+  entry : @moonbook.BookCatalogEntry,
+  manifest : MoontownCookbookManifest,
+) -> Unit {
+  let root = entry.workspace_root
+  write_text_file(
+    "\{root}/wiki/index.md",
+    cookbook_index_markdown(entry, manifest),
+  )
+  write_text_file(
+    "\{root}/wiki/definitions/stable-state.md",
+    cookbook_stable_state_markdown(manifest),
+  )
+  write_text_file(
+    "\{root}/wiki/definitions/ownership.md",
+    cookbook_ownership_markdown(),
+  )
+  write_text_file(
+    "\{root}/wiki/definitions/book-types.md",
+    cookbook_book_types_markdown(),
+  )
+  write_text_file(
+    "\{root}/wiki/definitions/runtime-boundaries.md",
+    cookbook_runtime_boundaries_markdown(),
+  )
+  write_text_file(
+    "\{root}/wiki/definitions/live-autonomy-spine.md",
+    cookbook_live_autonomy_spine_markdown(),
+  )
+  write_text_file(
+    "\{root}/wiki/history/stable-state-ledger.md",
+    cookbook_stable_state_ledger_markdown(manifest),
+  )
+  write_text_file(
+    "\{root}/wiki/operating-procedures/doctor.md",
+    cookbook_doctor_markdown(),
+  )
+  write_text_file(
+    "\{root}/wiki/operating-procedures/book-governance.md",
+    cookbook_book_governance_markdown(),
+  )
+  write_text_file(
+    "\{root}/raw/bootstrap/COOKBOOK_CONTRACT.md",
+    cookbook_contract_markdown(),
+  )
+  write_text_file(
+    "\{root}/schemas/stable-state-manifest.schema.md",
+    cookbook_schema_markdown(),
+  )
+  write_text_file(
+    "\{root}/book/moonbook-ui-state.json",
+    cookbook_ui_state_json(entry, manifest),
+  )
+  let html = cookbook_generated_site_html(entry, manifest)
+  write_text_file("\{root}/book/Home.html", html)
+  write_text_file("\{root}/book/site/generated/index.html", html)
+}

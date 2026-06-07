@@ -1,0 +1,52 @@
+///|
+fn moonclaw_run_result_path(workspace_dir : String) -> String {
+  "\{workspace_dir}/result.json"
+}
+
+///|
+async fn moonclaw_run_result_text_from_workspace(
+  workspace_dir : String,
+  fallback_summary? : Bool = false,
+) -> String {
+  let result_path = moonclaw_run_result_path(workspace_dir)
+  if !@fs.exists(result_path) {
+    return ""
+  }
+  let parsed = @json.parse(@fs.read_file(result_path).text()) catch {
+    _ => return ""
+  }
+  json_string_field(parsed, "content").unwrap_or(
+    if fallback_summary {
+      json_string_field(parsed, "summary").unwrap_or("")
+    } else {
+      ""
+    },
+  )
+}
+
+///|
+async fn moonclaw_run_result_text_from_run(
+  run_id : String,
+  cwd : String,
+  fallback_summary? : Bool = false,
+) -> String {
+  let workspace_dir = match @moonclaw.run_workspace_dir(run_id, cwd~) {
+    Some(workspace_dir) => workspace_dir
+    None => return ""
+  }
+  moonclaw_run_result_text_from_workspace(workspace_dir, fallback_summary~)
+}
+
+///|
+async fn moonclaw_run_result_text_from_run_with_home(
+  run_id : String,
+  cwd : String,
+  home : String,
+  fallback_summary? : Bool = false,
+) -> String {
+  let workspace_dir = match @moonclaw.run_workspace_dir(run_id, cwd~, home~) {
+    Some(workspace_dir) => workspace_dir
+    None => return ""
+  }
+  moonclaw_run_result_text_from_workspace(workspace_dir, fallback_summary~)
+}

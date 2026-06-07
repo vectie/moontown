@@ -17,15 +17,15 @@ fn building_protocol_markdown(
     "",
     "## Input Channels",
     "",
-    protocol_markdown_bullets(protocol.input_channels),
+    markdown_bullets(protocol.input_channels),
     "",
     "## Output Channels",
     "",
-    protocol_markdown_bullets(protocol.output_channels),
+    markdown_bullets(protocol.output_channels),
     "",
     "## Review Gates",
     "",
-    protocol_markdown_bullets(protocol.review_gates),
+    markdown_bullets(protocol.review_gates),
     "",
     "## AI Reducer Boundary",
     "",
@@ -33,15 +33,6 @@ fn building_protocol_markdown(
     "- MoonClaw chooses the building-native reduction strategy through the skill packs.",
     "- MoonBook persists accepted civic records and review queues.",
   ].join("\n")
-}
-
-///|
-fn protocol_markdown_bullets(items : Array[String]) -> String {
-  let builder = StringBuilder::new()
-  for item in items {
-    builder.write_string("- \{item}\n")
-  }
-  builder.to_string().trim().to_owned()
 }
 
 ///|

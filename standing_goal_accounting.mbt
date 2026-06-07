@@ -1,15 +1,25 @@
 ///|
-fn count_enabled_standing_goals(goals : Array[@core.StandingGoal]) -> Int {
-  let mut count = 0
-  for goal in goals {
-    if goal.enabled {
-      count += 1
-    }
-  }
-  count
+priv struct StandingGoalCounts {
+  total : Int
+  enabled : Int
+  disabled : Int
+  due : Int
 }
 
 ///|
-fn count_disabled_standing_goals(goals : Array[@core.StandingGoal]) -> Int {
-  goals.length() - count_enabled_standing_goals(goals)
+fn standing_goal_counts(
+  goals : Array[@core.StandingGoal],
+  next_tick : Int,
+) -> StandingGoalCounts {
+  let mut enabled = 0
+  let mut due = 0
+  for goal in goals {
+    if goal.enabled {
+      enabled += 1
+    }
+    if goal.is_due(next_tick) {
+      due += 1
+    }
+  }
+  { total: goals.length(), enabled, disabled: goals.length() - enabled, due }
 }

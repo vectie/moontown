@@ -47,6 +47,14 @@ test "mayor plans parallel research lanes for multi-subject goal" {
   assert_eq(plan.lanes[1].entry.id, "research-moonbook")
   assert_eq(plan.lanes[2].entry.id, "research-moonclaw")
   assert_true(plan.lanes[0].objective.contains("Own only the"))
+  assert_true(
+    plan.prompt.contains(
+      "Required output contract: mayor.goal.decomposition.v1",
+    ),
+  )
+  assert_true(
+    plan.prompt.contains("each lane must own an isolated wiki/workspace"),
+  )
 }
 
 ///|
@@ -71,6 +79,14 @@ test "mayor decomposes Wenyu Valley PRD build into civic lanes" {
     plan.lanes[0].objective.contains("../../../docs/WENYU_VALLEY_PRD.md"),
   )
   assert_true(plan.lanes[0].objective.contains("Town Shell"))
+  assert_true(plan.lanes[0].objective.contains("Service kind:"))
+  assert_true(plan.lanes[0].objective.contains("Output contract:"))
+  assert_true(
+    plan.lanes[0].objective.contains("Do not solve other Wenyu modules"),
+  )
+  assert_true(
+    plan.lanes[0].rationale.contains("isolated MoonBook owns this module"),
+  )
 }
 
 ///|

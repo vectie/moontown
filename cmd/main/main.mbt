@@ -1,140 +1,26 @@
 ///|
 async fn main {
   let args = @env.args()
-  match args[1:] {
-    ["run", goal] => println(@moontown.render_goal_run(goal))
-    ["run", "--book", book_id, goal] =>
-      println(@moontown.render_goal_run(goal, book_id=Some(book_id)))
-    ["supervise"] => println(@moontown.supervise_saved_town())
-    ["status"] => println(@moontown.render_saved_town_status())
-    ["live", "status"] => println(@moontown.render_live_autonomy_status())
-    ["live", "refresh"] => println(@moontown.refresh_live_autonomy_spine())
-    ["daemon", "tick"] => println(@moontown.daemon_tick_saved_town())
-    ["daemon", "start"] => println(@moontown.daemon_start_saved_town())
-    ["daemon", "restart"] =>
-      println(@moontown.write_daemon_restart_request(reason="manual request"))
-    ["daemon", "restart", reason] =>
-      println(@moontown.write_daemon_restart_request(reason~))
-    ["daemon", "stop"] => println(@moontown.daemon_stop_saved_town())
-    ["daemon", "doctor"] => println(@moontown.daemon_doctor_saved_town())
-    ["daemon", "supervise", "--worker"] =>
-      println(@moontown.daemon_supervise_saved_town())
-    ["daemon", "supervise", "--once"] =>
-      println(@moontown.daemon_supervise_saved_town(max_checks=1, sleep_ms=0))
-    ["daemon", "run", "--once"] =>
-      println(@moontown.daemon_run_saved_town(max_ticks=1, sleep_ms=0))
-    ["daemon", "run", "--worker"] =>
-      println(@moontown.daemon_run_saved_town(preserve_supervisor=true))
-    ["daemon", "run"] => println(@moontown.daemon_run_saved_town())
-    ["cookbook", "bootstrap"] =>
-      println(@moontown.bootstrap_moontown_cookbook())
-    ["cookbook", "doctor"] => println(@moontown.bootstrap_moontown_cookbook())
-    ["cookbook", "status"] =>
-      println(@moontown.render_moontown_cookbook_status())
-    ["planbook", "bootstrap"] =>
-      println(@moontown.bootstrap_moontown_planbook())
-    ["planbook", "status"] =>
-      println(@moontown.render_moontown_planbook_status())
-    ["planbook", "doctor"] =>
-      println(@moontown.write_moontown_planbook_autonomy())
-    ["planbook", "validation"] =>
-      println(@moontown.write_moontown_planbook_validation_evidence())
-    ["planbook", "validate"] =>
-      println(@moontown.write_moontown_planbook_validation_evidence())
-    ["planbook", "autonomy"] =>
-      println(@moontown.render_moontown_planbook_autonomy_status())
-    ["planbook", "repair"] =>
-      println(@moontown.write_moontown_planbook_repair_task())
-    ["planbook", "repair", "--dispatch"] =>
-      println(@moontown.write_moontown_planbook_repair_task(dispatch=true))
-    ["planbook", "repair", "status"] =>
-      println(@moontown.render_moontown_planbook_repair_status())
-    ["editor-pipeline"] => println(@moontown.render_editor_pipeline_status())
-    ["editor-pipeline", "status"] =>
-      println(@moontown.render_editor_pipeline_status())
-    ["editor-pipeline", "refresh"] =>
-      println(@moontown.render_editor_pipeline_status())
-    ["editor-pipeline", "feature-select"] =>
-      println(@moontown.write_editor_feature_selection_task())
-    ["editor-pipeline", "feature-select", "--dispatch"] =>
-      println(@moontown.write_editor_feature_selection_task(dispatch=true))
-    ["editor-pipeline", "feature-select", "status"] =>
-      println(@moontown.render_editor_feature_selection_status())
-    ["course", "wenyu-game-design", "bootstrap"] =>
-      println(@moontown.bootstrap_wenyu_game_design_course_book())
-    ["course", "wenyu-game-design", "status"] =>
-      println(@moontown.render_wenyu_game_design_course_status())
-    ["books", "quality"] => println(@moontown.render_book_quality())
-    ["books", "bootstrap"] =>
-      println(@moontown.bootstrap_registered_book_workspaces())
-    ["books", "templates"] => println(@moontown.render_book_template_registry())
-    ["books", "templates", "status"] =>
-      println(@moontown.render_book_template_registry())
-    ["books", "template", "install", template_id, config_path] =>
-      println(@moontown.install_book_template_config(template_id, config_path))
-    ["books", "template", "requests"] =>
-      println(@moontown.render_book_template_request_status())
-    ["books", "template", "requests", "status"] =>
-      println(@moontown.render_book_template_request_status())
-    ["books", "template", "requests", "process"] =>
-      println(@moontown.process_book_template_requests())
-    ["books", "pdf-watch", "bootstrap"] =>
-      println(@moontown.bootstrap_pdf_evidence_watch_book())
-    ["books", "pdf-watch", "bootstrap", book_id] =>
-      println(@moontown.bootstrap_pdf_evidence_watch_book(book_id~))
-    ["books", "pdf-watch", "install", config_path] =>
-      println(@moontown.install_pdf_evidence_watch_book_config(config_path))
-    ["books", "pdf-watch", "archive", book_id] =>
-      println(@moontown.archive_pdf_evidence_watch_book(book_id~))
-    ["books", "pdf-watch", "status"] =>
-      println(@moontown.render_pdf_evidence_watch_book_status())
-    ["books", "pdf-watch", "status", book_id] =>
-      println(@moontown.render_pdf_evidence_watch_book_status(book_id~))
-    ["books", "doctor"] => println(@moontown.write_book_quality_audit())
-    ["books", "ai-review-packets"] =>
-      println(@moontown.write_book_quality_review_packets())
-    ["books", "ai-review", "--dispatch"] =>
-      println(@moontown.dispatch_next_book_quality_ai_review())
-    ["books", "ai-review", "bridge"] =>
-      println(@moontown.reconcile_book_quality_repair_bridge())
-    ["books", "ai-review", "status"] =>
-      println(@moontown.render_book_quality_ai_review_status())
-    ["moonclaw", "stores", "compact"] =>
-      println(@moontown.compact_registered_moonclaw_job_stores())
-    ["civic", "bootstrap"] =>
-      println(@moontown.bootstrap_wenyu_civic_workspaces())
-    ["civic", "status"] => println(@moontown.render_wenyu_civic_status())
-    ["civic", "doctor"] => println(@moontown.write_wenyu_civic_status())
-    ["civic", "reconcile"] =>
-      println(@moontown.reconcile_wenyu_civic_service_results())
-    ["civic", "protocols", "bootstrap"] =>
-      println(@moontown.bootstrap_wenyu_building_protocols())
-    ["civic", "protocols", "status"] =>
-      println(@moontown.render_wenyu_building_protocol_status())
-    ["civic", "protocols", "doctor"] =>
-      println(@moontown.write_wenyu_building_protocol_status())
-    ["civic", "protocols", "patterns"] =>
-      println(@moontown.render_civic_communication_patterns())
-    ["civic", "protocols", "pattern-install", template_path] =>
-      println(@moontown.install_civic_pattern_scenario_file(template_path))
-    ["civic", "protocols", "pattern-manifest", manifest_path] =>
-      println(@moontown.install_civic_pattern_scenario_manifest(manifest_path))
-    ["civic", "protocols", "pattern-template", template_path] =>
-      println(@moontown.bootstrap_civic_salon_scenario_file(template_path))
-    ["civic", "protocols", "schedules", "tick"] =>
-      println(@moontown.run_due_civic_salons())
-    ["civic", "protocols", "schedules", "status"] =>
-      println(@moontown.render_civic_salon_schedule_status())
-    ["integration", "final", "install"] =>
-      println(@moontown.install_wenyu_final_integration())
-    ["integration", "final", "install", manifest_path] =>
-      println(@moontown.install_wenyu_final_integration(manifest_path~))
-    ["integration", "final", "status"] =>
-      println(@moontown.render_wenyu_final_integration_status())
-    ["integration", "final", "status", manifest_path] =>
-      println(@moontown.render_wenyu_final_integration_status(manifest_path~))
-    ["run", .. rest] =>
-      println(@moontown.render_goal_run(rest.to_owned().join(" ")))
-    _ => println(@moontown.load_or_create_demo_dashboard())
+  println(render_cli_command(args[1:].to_owned()))
+}
+
+///|
+async fn render_cli_command(args : Array[String]) -> String {
+  match args {
+    ["run", .. rest] => render_run_command(rest.to_owned())
+    ["supervise"] => @moontown.supervise_saved_town()
+    ["status"] => @moontown.render_saved_town_status()
+    ["live", .. rest] => render_live_command(rest.to_owned())
+    ["daemon", .. rest] => render_daemon_command(rest.to_owned())
+    ["cookbook", .. rest] => render_cookbook_command(rest.to_owned())
+    ["planbook", .. rest] => render_planbook_command(rest.to_owned())
+    ["editor-pipeline", .. rest] =>
+      render_editor_pipeline_command(rest.to_owned())
+    ["course", .. rest] => render_course_command(rest.to_owned())
+    ["books", .. rest] => render_books_command(rest.to_owned())
+    ["moonclaw", .. rest] => render_moonclaw_command(rest.to_owned())
+    ["civic", .. rest] => render_civic_command(rest.to_owned())
+    ["integration", .. rest] => render_integration_command(rest.to_owned())
+    _ => @moontown.load_or_create_demo_dashboard()
   }
 }

@@ -19,3 +19,35 @@ fn json_string_array(items : Array[String]) -> String {
   }
   "[\{encoded.join(",")}]"
 }
+
+///|
+fn json_object_string(object : Map[String, Json], key : String) -> String? {
+  match object.get(key) {
+    Some(String(value)) => Some(value)
+    _ => None
+  }
+}
+
+///|
+fn json_object_field_summary(
+  object : Map[String, Json],
+  key : String,
+) -> String? {
+  match object.get(key) {
+    Some(value) => Some(value.stringify())
+    None => None
+  }
+}
+
+///|
+fn json_string_field(value : Json, key : String) -> String? {
+  match value {
+    Object(object) => json_object_string(object, key)
+    _ => None
+  }
+}
+
+///|
+fn json_object_copy(value : Json?) -> Map[String, Json] {
+  @core.json_object_copy(value)
+}

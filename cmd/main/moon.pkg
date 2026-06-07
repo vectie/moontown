@@ -1,6 +1,6 @@
 import {
   "moonbitlang/async",
-  "moonbitlang/core/env" @env,
+  "moonbitlang/core/env",
   "vectie/moontown",
 }
 

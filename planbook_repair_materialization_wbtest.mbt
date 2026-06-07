@@ -1,0 +1,197 @@
+///|
+async test "planbook repair queues bounded packet without marking it active before dispatch" {
+  let workspace = planbook_autonomy_test_workspace(
+    "/tmp/moontown-planbook-repair-wbtest",
+  )
+  let snapshot_path = workspace.snapshot_path
+  let workspace_root = workspace.workspace_root
+  ignore(
+    write_moontown_planbook_autonomy(
+      snapshot_path~,
+      workspace_root~,
+      book_catalog_path=workspace.catalog_path,
+    ),
+  )
+  let message = write_moontown_planbook_repair_task(
+    snapshot_path~,
+    workspace_root~,
+    book_catalog_path=workspace.catalog_path,
+  )
+  assert_true(message.contains("PlanBook repair task"))
+  let task_text = read_text_or_empty(
+    default_planbook_repair_path(snapshot_path~),
+  )
+  let task_json = @json.parse(task_text) catch {
+    _ => abort("repair task should be valid JSON")
+  }
+  let task : PlanbookRepairTask = @json.from_json(task_json) catch {
+    _ => abort("repair task should satisfy PlanbookRepairTask")
+  }
+  let packet_text = read_text_or_empty(task.packet_path)
+  let skill_text = read_text_or_empty(
+    planbook_repair_path_in_workspace(
+      workspace_root,
+      planbook_repair_skill_relative_path(),
+    ),
+  )
+  let profile_text = read_text_or_empty("\{workspace_root}/moonclaw.jobs.json")
+  assert_eq(task.status, "queued")
+  assert_true(task.id.contains(task.criterion_id))
+  assert_true(task.packet_path.contains(task.id))
+  assert_true(packet_text.contains(planbook_repair_result_contract()))
+  assert_true(packet_text.contains(task.criterion_id))
+  assert_true(packet_text.contains("\"target_files\""))
+  assert_true(
+    packet_text.contains("\"execution_mode\":\"acp\"") ||
+    packet_text.contains("\"execution_mode\": \"acp\""),
+  )
+  assert_true(
+    packet_text.contains("\"execution_target\":\"codex-main\"") ||
+    packet_text.contains("\"execution_target\": \"codex-main\""),
+  )
+  assert_true(packet_text.contains("required_engineering_steps"))
+  assert_true(packet_text.contains("required_validation_commands"))
+  assert_true(packet_text.contains("git_policy"))
+  assert_true(packet_text.contains("commit_after_validation"))
+  assert_true(packet_text.contains("push_after_commit"))
+  assert_true(packet_text.contains("\"best_effort_on_timeout\":false"))
+  assert_true(skill_text.contains("PlanBook Repair Skill"))
+  assert_true(skill_text.contains("Use exact `target_files`"))
+  assert_true(skill_text.contains("configured Codex ACP target"))
+  assert_true(skill_text.contains("repository source root"))
+  assert_true(skill_text.contains("diff_summary"))
+  assert_true(skill_text.contains("commit_status"))
+  assert_true(skill_text.contains("git diff --check"))
+  assert_true(skill_text.contains("git status --short"))
+  assert_true(profile_text.contains("planbook_repair_worker"))
+  assert_true(profile_text.contains("repair_planbook_gap"))
+  assert_true(profile_text.contains("\"execution_mode\": \"acp\""))
+  assert_true(profile_text.contains("\"execution_target\": \"codex-main\""))
+  assert_eq(planbook_repair_active_count(snapshot_path~), 0)
+}
+
+///|
+async test "planbook backlog item can drive bounded repair packet from json" {
+  let workspace = planbook_autonomy_test_workspace(
+    "/tmp/moontown-planbook-backlog-repair-wbtest",
+  )
+  let snapshot_path = workspace.snapshot_path
+  let workspace_root = workspace.workspace_root
+  ignore(
+    bootstrap_moontown_planbook(
+      book_catalog_path=workspace.catalog_path,
+      workspace_root~,
+    ),
+  )
+  let item = match first_open_planbook_backlog_item(workspace_root) {
+    Some(item) => item
+    None => fail("expected open backlog item")
+  }
+  let criterion = planbook_backlog_criterion_for_item(item, workspace_root)
+  let task = materialize_planbook_repair_task(
+    criterion,
+    snapshot_path,
+    workspace_root,
+    workspace.catalog_path,
+    false,
+    false,
+  )
+  let packet_text = read_text_or_empty(task.packet_path)
+  let skill_text = read_text_or_empty(
+    planbook_repair_path_in_workspace(
+      workspace_root,
+      planbook_repair_skill_relative_path(),
+    ),
+  )
+  assert_true(task.criterion_id.contains("backlog-"))
+  assert_true(packet_text.contains("implementation-backlog.json"))
+  assert_true(packet_text.contains("raw/backlog/completed"))
+  assert_true(skill_text.contains("For `backlog-*` criteria"))
+  assert_true(skill_text.contains("already done"))
+  assert_true(skill_text.contains("plan_update_status"))
+  assert_eq(planbook_repair_active_count(snapshot_path~), 0)
+}
+
+///|
+async test "planbook repair supersedes stale runtime handoff evidence" {
+  let workspace = planbook_autonomy_test_workspace(
+    "/tmp/moontown-planbook-repair-stale-handoff-wbtest",
+  )
+  let workspace_root = workspace.workspace_root
+  let criterion : PlanbookCriterionStatus = {
+    id: "live-runtime-recovery",
+    plan_id: "test",
+    title: "Live runtime failures are visible to PlanBook repair",
+    owner: "moontown+moonclaw",
+    satisfied: false,
+    evidence: "1 failed/stale executions remain: research-opc/task-opc-watch",
+    next_action: "repair the current failure set",
+  }
+  write_text_file(
+    planbook_repair_result_path_for_workspace(workspace_root),
+    [
+      "repair_decision: needs_external_owner", "criterion_id: live-runtime-recovery",
+      "remaining_blockers: 18 failed town executions remain.",
+    ].join("\n"),
+  )
+  let task = materialize_planbook_repair_task(
+    criterion,
+    workspace.snapshot_path,
+    workspace_root,
+    workspace.catalog_path,
+    false,
+    false,
+  )
+  let result_text = read_text_or_empty(
+    planbook_repair_result_path_for_workspace(workspace_root),
+  )
+  let superseded = read_text_or_empty(
+    planbook_repair_superseded_result_path(workspace_root),
+  )
+  assert_eq(task.status, "queued")
+  assert_true(result_text == "")
+  assert_true(superseded.contains("18 failed town executions"))
+}
+
+///|
+async test "planbook repair acp target uses resolved codex command" {
+  let workspace = planbook_autonomy_test_workspace(
+    "/tmp/moontown-planbook-repair-acp-target-wbtest",
+  )
+  let workspace_root = workspace.workspace_root
+  let criterion : PlanbookCriterionStatus = {
+    id: "live-runtime-recovery",
+    plan_id: "test",
+    title: "Live runtime failures are visible to PlanBook repair",
+    owner: "moontown+moonclaw",
+    satisfied: false,
+    evidence: "1 failed/stale executions remain: research-opc/task-opc-watch",
+    next_action: "repair the current failure set",
+  }
+  ignore(
+    materialize_planbook_repair_task(
+      criterion,
+      workspace.snapshot_path,
+      workspace_root,
+      workspace.catalog_path,
+      false,
+      false,
+    ),
+  )
+  let target = read_text_or_empty("\{workspace_root}/.moonclaw/moonclaw.json")
+  let source_root = planbook_repair_source_root()
+  assert_true(
+    target.contains(
+      "\"command\": \"/Users/kq/.nvm/versions/node/v22.22.1/bin/node\"",
+    ),
+  )
+  assert_true(
+    target.contains(
+      "/Users/kq/.nvm/versions/node/v22.22.1/lib/node_modules/@openai/codex/bin/codex.js",
+    ),
+  )
+  assert_true(!target.contains("\"command\": \"codex\""))
+  assert_true(target.contains("\"cwd\": \"\{source_root}\""))
+  assert_true(target.contains("\"workspace\": \"\{source_root}\""))
+  assert_true(!target.contains("\"cwd\": \"\{workspace_root}\""))
+}

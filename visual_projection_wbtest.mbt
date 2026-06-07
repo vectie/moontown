@@ -70,6 +70,31 @@ test "visual projection connects active worker to execution task" {
 }
 
 ///|
+test "visual phase taxonomy drives routing visibility and effects" {
+  assert_true(visual_phase_is_handoff("packet"))
+  assert_true(visual_phase_is_handoff("importing"))
+  assert_true(!visual_phase_is_handoff("running"))
+  assert_true(visual_phase_is_working("running"))
+  assert_true(!visual_phase_is_working("persisting"))
+  assert_true(visual_phase_is_keeper_bound("persisting"))
+  assert_true(visual_phase_is_keeper_bound("review"))
+  assert_true(visual_phase_is_recovery("failed"))
+  assert_true(visual_phase_is_recovery("stale"))
+  assert_true(visual_phase_is_recovery("blocked"))
+  assert_true(visual_phase_is_completed_or_idle("completed"))
+  assert_true(visual_phase_is_completed_or_idle("idle"))
+  assert_true(visual_agent_visible_on_overworld("packet"))
+  assert_true(visual_agent_visible_on_overworld("review"))
+  assert_true(!visual_agent_visible_on_overworld("completed"))
+  assert_eq(visual_location_label("research-opc", "packet"), "city-hall")
+  assert_eq(
+    visual_destination_label("research-opc", "review"),
+    "keeper-desk-research-opc",
+  )
+  assert_eq(visual_effect_for_phase("blocked"), "alert-pulse")
+}
+
+///|
 test "visual projection hides completed and idle workers inside buildings" {
   let agent = build_visual_projection(
       visual_projection_test_state(
@@ -120,6 +145,26 @@ test "visual projection summarizes book building activity" {
   assert_eq(building.review_count, 0)
   assert_eq(building.effect, "work-particles")
   assert_true(building.message.contains("active worker"))
+}
+
+///|
+test "visual building activity owns effect status and message priority" {
+  let activity : VisualBuildingActivity = {
+    running_count: 2,
+    waiting_count: 1,
+    review_count: 1,
+    blocked_count: 1,
+    completed_count: 3,
+  }
+  let book = @core.BookRef::new(
+    id="research-opc",
+    name="One Person Company Research",
+    purpose="Track OPC changes",
+    workspace_root="/tmp/research-opc",
+  )
+  assert_eq(activity.effect(), "alert-pulse")
+  assert_eq(activity.module_status(), "alert")
+  assert_true(activity.message(book).contains("needs recovery"))
 }
 
 ///|

@@ -37,27 +37,6 @@ async fn run_daemon_scheduled_jobs(
 }
 
 ///|
-fn daemon_scheduled_job_due(job : @scheduler.ScheduledJob, tick : Int) -> Bool {
-  let interval_ticks = daemon_scheduled_job_interval_ticks(job)
-  tick % interval_ticks == 0
-}
-
-///|
-fn daemon_scheduled_job_interval_ticks(job : @scheduler.ScheduledJob) -> Int {
-  let interval = if job.interval_seconds <= 0 {
-    30
-  } else {
-    job.interval_seconds
-  }
-  let ticks = (interval + 29) / 30
-  if ticks < 1 {
-    1
-  } else {
-    ticks
-  }
-}
-
-///|
 async fn run_daemon_scheduled_job(
   job : @scheduler.ScheduledJob,
   snapshot_path : String,
@@ -116,65 +95,4 @@ async fn run_book_quality_review_cycle(
     run_inline=false,
   )
   "\{bridge} \{dispatch}"
-}
-
-///|
-fn daemon_scheduled_job_event_for_summary(
-  job : @scheduler.ScheduledJob,
-  tick : Int,
-  summary : String,
-) -> @core.TownEvent? {
-  if (job.kind == "civic-pattern" || job.kind == "civic-salon") &&
-    summary.has_prefix("Ran ") {
-    Some(
-      @core.TownEvent::new(
-        id="event-\{job.id}-\{tick}",
-        kind=job.kind,
-        detail=summary,
-      ),
-    )
-  } else if job.kind == "civic-service" &&
-    summary.has_prefix("Reconciled ") &&
-    !summary.has_prefix("Reconciled 0 ") {
-    Some(
-      @core.TownEvent::new(
-        id="event-\{job.id}-\{tick}",
-        kind=job.kind,
-        detail=summary,
-      ),
-    )
-  } else if job.kind == "book-quality" &&
-    summary.has_prefix("Wrote book management audit") {
-    Some(
-      @core.TownEvent::new(
-        id="event-\{job.id}-\{tick}",
-        kind=job.kind,
-        detail=summary,
-      ),
-    )
-  } else if job.kind == "book-quality-review" &&
-    (
-      summary.contains("Dispatched AI semantic book-quality review") ||
-      summary.has_prefix("Bridged ")
-    ) {
-    Some(
-      @core.TownEvent::new(
-        id="event-\{job.id}-\{tick}",
-        kind=job.kind,
-        detail=summary,
-      ),
-    )
-  } else if job.kind == "book-template-request" &&
-    summary.has_prefix("Processed ") &&
-    !summary.has_prefix("Processed 0 ") {
-    Some(
-      @core.TownEvent::new(
-        id="event-\{job.id}-\{tick}",
-        kind=job.kind,
-        detail=summary,
-      ),
-    )
-  } else {
-    None
-  }
 }

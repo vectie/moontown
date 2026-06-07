@@ -45,7 +45,7 @@ test "Wenyu civic registry distinguishes workspaces from places" {
 }
 
 ///|
-test "legacy module book ids resolve to canonical Wenyu books" {
+test "module ids and canonical book ids resolve to Wenyu services" {
   match wenyu_civic_service_for_book_id("policy-hall") {
     Some(service) => assert_eq(service.book_id, "wenyu-policy-hall")
     None => abort("expected policy service")
