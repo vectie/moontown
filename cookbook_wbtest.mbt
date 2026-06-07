@@ -15,14 +15,26 @@ async test "cookbook bootstrap writes manifest and MoonBook workspace" {
   assert_true(@fs.exists("\{workspace_root}/wiki/index.md"))
   assert_true(@fs.exists("\{workspace_root}/wiki/definitions/stable-state.md"))
   assert_true(@fs.exists("\{workspace_root}/wiki/describer/overview.md"))
+  assert_true(@fs.exists("\{workspace_root}/book/describer/overview.html"))
   assert_true(@fs.exists("\{workspace_root}/wiki/describer/algorithms.md"))
+  assert_true(@fs.exists("\{workspace_root}/book/describer/algorithms.html"))
   assert_true(@fs.exists("\{workspace_root}/wiki/describer/data-structures.md"))
+  assert_true(
+    @fs.exists("\{workspace_root}/book/describer/data-structures.html"),
+  )
   assert_true(@fs.exists("\{workspace_root}/wiki/describer/data-flow.md"))
+  assert_true(@fs.exists("\{workspace_root}/book/describer/data-flow.html"))
   assert_true(@fs.exists("\{workspace_root}/wiki/describer/core-features.md"))
+  assert_true(@fs.exists("\{workspace_root}/book/describer/core-features.html"))
   assert_true(@fs.exists("\{workspace_root}/wiki/describer/feature-guide.md"))
+  assert_true(@fs.exists("\{workspace_root}/book/describer/feature-guide.html"))
   assert_true(@fs.exists("\{workspace_root}/wiki/describer/content-rules.md"))
+  assert_true(@fs.exists("\{workspace_root}/book/describer/content-rules.html"))
   assert_true(
     @fs.exists("\{workspace_root}/skills/cookbook-generation/SKILL.md"),
+  )
+  assert_true(
+    @fs.exists("\{workspace_root}/book/skills/cookbook-generation.html"),
   )
   assert_true(
     @fs.exists("\{workspace_root}/raw/bootstrap/COOKBOOK_CONTRACT.md"),
@@ -145,6 +157,42 @@ test "cookbook describer pages explain codebase algorithms and data flow" {
   assert_true(skill.contains("name: cookbook-generation"))
   assert_true(skill.contains("Do not write a directory tour"))
   assert_true(skill.contains("Data flow"))
+}
+
+///|
+test "cookbook renders markdown pages as clickable HTML" {
+  let html = cookbook_generated_site_html(
+    cookbook_book_entry("/tmp/clickable-cookbook"),
+    {
+      book_id: "moontown-cookbook",
+      title: "Moontown Stable-State Cookbook",
+      generated_by: "MoonBook",
+      managed_by: "Moondesk",
+      consumed_by: "Moontown",
+      workspace_root: "/tmp/clickable-cookbook",
+      manifest_path: "/tmp/clickable-cookbook/stable-state.json",
+      artifacts: [],
+    },
+  )
+  assert_true(html.contains("href=\"../../describer/algorithms.html\""))
+  assert_true(html.contains("Open rendered page"))
+  assert_true(html.contains("href=\"../../skills/cookbook-generation.html\""))
+  let rendered = cookbook_rendered_markdown_html(
+    "Algorithms",
+    "wiki/describer/algorithms.md",
+    cookbook_algorithms_markdown(),
+  )
+  assert_true(rendered.contains("<h1>Algorithms Used In Moontown</h1>"))
+  assert_true(rendered.contains("<h2>2. Daemon Tick Phase Pipeline</h2>"))
+  assert_true(rendered.contains("<pre><code>"))
+  assert_true(rendered.contains("href=\"../site/generated/index.html\""))
+  let structures = cookbook_rendered_markdown_html(
+    "Data Structures",
+    "wiki/describer/data-structures.md",
+    cookbook_data_structures_markdown(),
+  )
+  assert_true(structures.contains("<table><tbody>"))
+  assert_true(structures.contains("<code>TownState</code>"))
 }
 
 ///|

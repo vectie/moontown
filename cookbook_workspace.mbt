@@ -33,28 +33,84 @@ async fn write_cookbook_workspace(
     cookbook_describer_overview_markdown(),
   )
   write_text_file(
+    "\{root}/book/describer/overview.html",
+    cookbook_rendered_markdown_html(
+      "Moontown Codebase Describer",
+      "wiki/describer/overview.md",
+      cookbook_describer_overview_markdown(),
+    ),
+  )
+  write_text_file(
     "\{root}/wiki/describer/algorithms.md",
     cookbook_algorithms_markdown(),
+  )
+  write_text_file(
+    "\{root}/book/describer/algorithms.html",
+    cookbook_rendered_markdown_html(
+      "Algorithms Used In Moontown",
+      "wiki/describer/algorithms.md",
+      cookbook_algorithms_markdown(),
+    ),
   )
   write_text_file(
     "\{root}/wiki/describer/data-structures.md",
     cookbook_data_structures_markdown(),
   )
   write_text_file(
+    "\{root}/book/describer/data-structures.html",
+    cookbook_rendered_markdown_html(
+      "Moontown Data Structures",
+      "wiki/describer/data-structures.md",
+      cookbook_data_structures_markdown(),
+    ),
+  )
+  write_text_file(
     "\{root}/wiki/describer/data-flow.md",
     cookbook_data_flow_markdown(),
+  )
+  write_text_file(
+    "\{root}/book/describer/data-flow.html",
+    cookbook_rendered_markdown_html(
+      "Moontown Data Flow",
+      "wiki/describer/data-flow.md",
+      cookbook_data_flow_markdown(),
+    ),
   )
   write_text_file(
     "\{root}/wiki/describer/core-features.md",
     cookbook_core_features_markdown(),
   )
   write_text_file(
+    "\{root}/book/describer/core-features.html",
+    cookbook_rendered_markdown_html(
+      "Core Features In Code",
+      "wiki/describer/core-features.md",
+      cookbook_core_features_markdown(),
+    ),
+  )
+  write_text_file(
     "\{root}/wiki/describer/feature-guide.md",
     cookbook_feature_guide_markdown(),
   )
   write_text_file(
+    "\{root}/book/describer/feature-guide.html",
+    cookbook_rendered_markdown_html(
+      "Moontown Feature Guide",
+      "wiki/describer/feature-guide.md",
+      cookbook_feature_guide_markdown(),
+    ),
+  )
+  write_text_file(
     "\{root}/wiki/describer/content-rules.md",
     cookbook_content_rules_markdown(),
+  )
+  write_text_file(
+    "\{root}/book/describer/content-rules.html",
+    cookbook_rendered_markdown_html(
+      "Content-Specific Description Rules",
+      "wiki/describer/content-rules.md",
+      cookbook_content_rules_markdown(),
+    ),
   )
   write_text_file(
     "\{root}/wiki/history/stable-state-ledger.md",
@@ -79,6 +135,14 @@ async fn write_cookbook_workspace(
   write_text_file(
     "\{root}/skills/cookbook-generation/SKILL.md",
     cookbook_skill_markdown(),
+  )
+  write_text_file(
+    "\{root}/book/skills/cookbook-generation.html",
+    cookbook_rendered_skill_html(
+      "Moontown Cookbook Generation Skill",
+      "skills/cookbook-generation/SKILL.md",
+      cookbook_skill_markdown(),
+    ),
   )
   write_text_file(
     "\{root}/book/moonbook-ui-state.json",
