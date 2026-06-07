@@ -28,6 +28,9 @@ fn cookbook_index_markdown(
     "- `wiki/definitions/book-types.md`",
     "- `wiki/definitions/runtime-boundaries.md`",
     "- `wiki/definitions/live-autonomy-spine.md`",
+    "- `wiki/describer/overview.md`",
+    "- `wiki/describer/feature-guide.md`",
+    "- `wiki/describer/content-rules.md`",
     "- `wiki/operating-procedures/doctor.md`",
     "- `wiki/operating-procedures/book-governance.md`",
     "- `raw/bootstrap/COOKBOOK_CONTRACT.md`",
@@ -165,5 +168,225 @@ fn cookbook_schema_markdown() -> String {
     "- `kind`: `doc`, `definition`, or `runtime-state`.", "- `owner`: project responsible for changing the artifact.",
     "- `stable_role`: why the artifact belongs in the cookbook.", "- `required`: whether missing path blocks a clean cookbook.",
     "- `exists`: generated existence check at bootstrap time.",
+  ].join("\n")
+}
+
+///|
+fn cookbook_describer_overview_markdown() -> String {
+  [
+    "# Moontown Describer", "", "The cookbook is the town describer. It should explain what each part of Moontown is, which durable files define it, which runtime protocols move it, how AI participates, and what evidence proves that it worked.",
+    "", "The describer does not replace source docs or live ledgers. It translates them into operating knowledge for Moondesk, the Mayor, future MoonClaw maintainers, and a human operator opening the book.",
+    "", "## Describer Contract", "", "- Product features are described as civic experiences, owner splits, and acceptance evidence.",
+    "- Protocol features are described as packet flow, ledgers, reducers, review gates, and distribution.",
+    "- Runtime features are described as tick inputs, state files, decisions, and recovery behavior.",
+    "- Book features are described as durable workspaces, page families, review queues, and projection outputs.",
+    "- UI features are described as projection contracts and visible inspection paths, not as source-of-truth state.",
+    "", "## Core Loop", "", "```text", "resident / operator / schedule / watcher",
+    "  -> Mayor routes intent", "  -> building protocol or target book hydrates durable context",
+    "  -> MoonClaw performs bounded AI reduction or execution", "  -> MoonBook persists accepted records, reviews, and projections",
+    "  -> Moontown records health, runtime state, and next action", "  -> cookbook explains the stable contract for the next operator",
+    "```", "", "## Start With", "", "- `wiki/describer/feature-guide.md` for feature-by-feature internals.",
+    "- `wiki/describer/content-rules.md` for how different source content should be summarized.",
+    "- `wiki/definitions/runtime-boundaries.md` for ownership boundaries.", "- `wiki/definitions/live-autonomy-spine.md` for the live town state contract.",
+  ].join("\n")
+}
+
+///|
+fn cookbook_content_rules_markdown() -> String {
+  [
+    "# Content-Specific Description Rules", "", "The cookbook should describe different content in different ways. A source document, a runtime state file, a protocol ledger, and a product feature do not need the same narrative shape.",
+    "", "## Canonical Docs", "", "Describe docs by intent, stable doctrine, owner, downstream readers, and which implementation files or commands prove the doctrine is live. Link back to the source doc instead of copying it wholesale.",
+    "", "## Machine Definitions", "", "Describe definitions as contracts: schema shape, required ids, generated path, bootstrap command, consumer, and drift behavior when the file is missing or stale.",
+    "", "## Runtime State", "", "Describe runtime state as a lifecycle: who writes it, when it changes, what fields the UI/operator trusts, what is only telemetry, and how recovery treats missing or stale data.",
+    "", "## Civic Features", "", "Describe civic features as building protocols. Each section should name the resident-facing job, the building protocol pattern, the MoonBook support workspace, the MoonClaw skill behavior, ledgers, review gates, and UI projection.",
+    "", "## AI Work", "", "Describe AI as bounded protocol work. The AI may classify, compare, synthesize, reduce, draft, or review inside an allowed envelope. It does not become durable truth until MoonBook or a review gate accepts the result.",
+    "", "## Procedures", "", "Describe procedures as commands, preconditions, expected files, success evidence, failure evidence, and safe follow-up. A procedure page should be short enough to run during an incident.",
+  ].join("\n")
+}
+
+///|
+fn cookbook_feature_guide_markdown() -> String {
+  [
+    "# Moontown Feature Guide",
+    "",
+    "This page is the cookbook's feature-level description of Moontown. It explains the visible feature, the internal protocol, and how AI is allowed to help.",
+    "",
+    cookbook_feature_section(
+      "Town Shell",
+      "A pixel-art civic gateway that makes Wenyu Valley inspectable as places, residents, workers, modules, alerts, and output surfaces.",
+      "Moontown owns the terrain/module registry, runtime projection, placement validation, town counters, and operator controls. MoonBook contributes per-book projection fragments; MoonClaw contributes activity packets that can become visible worker motion or review pressure.",
+      [
+        "Load module config from `ui/assets/tilemap/modules/wenyu-town-modules.json`.",
+        "Combine saved town state, civic status, protocol status, live autonomy, and visual projection.",
+        "Render the Rabbita viewport from projection data instead of making browser state the source of truth.",
+        "Expose view, editor, and output modes for presentation, module validation, and generated-output browsing.",
+      ],
+      "AI can propose module descriptions, placement review notes, and output summaries, but durable placement/config still lives in module files and MoonBook projections.",
+    ),
+    cookbook_feature_section(
+      "Mayor And Daemon",
+      "The always-on town supervisor that turns goals, schedules, and failures into bounded work or explicit no-change decisions.",
+      "Moontown owns cadence, dispatch budget, daemon health, standing-goal routing, stale execution reconciliation, and restart-readable state under `.moontown`.",
+      [
+        "A tick loads `.moontown/town.json`, `.moontown/daemon.json`, and standing-goal registries.",
+        "The Mayor dispatches due goals to book-local watcher lanes and records running executions without blocking the tick on long MoonClaw work.",
+        "Later ticks reconcile receipts, MoonBook watcher markers, run results, failures, and next due times.",
+        "Supervisor state, heartbeat, restart markers, and logs make recovery inspectable after process failure.",
+      ],
+      "AI appears through Mayor planning and worker proposals, but scheduling authority and final runtime accounting stay in Moontown state files.",
+    ),
+    cookbook_feature_section(
+      "MoonBook Workspace Layer",
+      "The durable memory and publishing layer for research books, course books, PlanBooks, ToolBooks, civic support workspaces, and this cookbook.",
+      "MoonBook owns book folders, wiki pages, raw inputs, schemas, generated sites, review queues, memory rules, and projection JSON. Moontown registers and consumes these books.",
+      [
+        "Catalog entries identify book id, workspace root, purpose, memory scope, tags, and skills.",
+        "Bootstrap commands create required folder shapes and seed contracts.", "Bookkeepers review worker results and decide what is accepted, rejected, or queued.",
+        "Generated sites and UI-state JSON become safe surfaces for Moondesk and the town viewport.",
+      ],
+      "AI can summarize, draft, research, or maintain book pages through bounded packets; MoonBook decides which outputs become durable book state.",
+    ),
+    cookbook_feature_section(
+      "MoonClaw Worker Layer",
+      "The temporary execution layer for tool-heavy research, synthesis, reduction, review, and repair work.",
+      "MoonClaw owns role runtimes, skill execution, tool use, result packets, memory candidates, and execution journals. It does not own durable civic truth.",
+      [
+        "Moontown or MoonBook creates a bounded task packet with context, skill rules, and output expectations.",
+        "MoonClaw imports or runs the proposal and writes structured outputs or blockers.",
+        "Moontown reconciles operational status; MoonBook reviews durable memory candidates and artifacts.",
+        "Failed or missing outputs become visible blockers rather than silent progress.",
+      ],
+      "AI behavior is strongest here: classify, compare, synthesize, reduce, draft, and inspect. The contract keeps it temporary and reviewable.",
+    ),
+    cookbook_civic_feature_sections(),
+    cookbook_feature_section(
+      "Live Autonomy Spine",
+      "The compact live-state spine that tells the operator whether the town is active, waiting, blocked, or drifting.",
+      "Moontown writes `.moontown/live-autonomy.json`, `.moontown/town-journal.jsonl`, and `.moontown/visual-projection.json` from daemon and civic runtime facts.",
+      [
+        "Collect recent daemon ticks, active workers, accepted updates, no-change cycles, due goals, blockers, and projection paths.",
+        "Separate stable waiting from unresolved failures, transient debt, and review queues.",
+        "Append journal entries so long-running behavior is auditable across restarts.",
+        "Feed the viewport and operator status without turning the UI into source of truth.",
+      ],
+      "AI may interpret blockers or propose next actions, but the spine reports accepted runtime evidence and explicit no-change accounting.",
+    ),
+    cookbook_feature_section(
+      "PlanBook And Cookbook",
+      "PlanBook controls active implementation decisions; the cookbook records accepted stable state and explains how the system works.",
+      "MoonBook generates both book types. Moontown consumes their manifests, plans, audits, and review status. Moondesk is the intended human editing surface.",
+      [
+        "PlanBook stores active plans, acceptance criteria, execution evidence, review notes, and document-protocol fit.",
+        "Accepted implementation changes may update source, tests, docs, and then cookbook stable-state pages.",
+        "The cookbook indexes docs, definitions, runtime state, ownership boundaries, and feature internals.",
+        "Cookbook doctor refreshes the workspace and manifest so drift is visible.",
+      ],
+      "AI can write plans, review packets, and describer drafts, but promotion to cookbook state should preserve source links and ownership boundaries.",
+    ),
+  ].join("\n")
+}
+
+///|
+fn cookbook_civic_feature_sections() -> String {
+  [
+    cookbook_civic_feature_section(
+      "Resident Digital Twins", "Visible resident identities with memory summaries, needs, plans, consent scope, and recent agent activity.",
+      "review-council / mixed-memory-backed", "Resident requests and memory candidates enter resident-home or review channels; MoonBook stores private memory and projection-safe summaries; MoonClaw drafts reflections, plans, and profile updates for review.",
+      "memory candidate -> resident review -> accepted private note or projection-safe field -> UI avatar/card update",
+    ),
+    cookbook_civic_feature_section(
+      "Policy Hall", "Policy reading becomes cited eligibility help, scenario comparison, and application checklists.",
+      "triage-desk / workspace-backed", "Official sources and resident questions enter a policy inbox; MoonClaw extracts requirements and uncertainties; MoonBook persists reviewed policy pages, checklists, and low-confidence review items.",
+      "question -> source packet -> cited interpretation -> review gate -> checklist or uncertainty queue",
+    ),
+    cookbook_civic_feature_section(
+      "Contest Express", "Contest participation becomes a readiness workflow with deadlines, material checks, mock-judge feedback, and reminders.",
+      "review-council / workspace-backed", "Contest calls and participant materials are grouped by deadline/project; MoonClaw reviews decks and rules; MoonBook stores readiness scores, revision tasks, and champion-wall candidates.",
+      "contest call + materials -> completeness check -> mock review -> revision plan -> readiness projection",
+    ),
+    cookbook_civic_feature_section(
+      "Social Square", "Weak ties become consent-aware matches, event plans, follow-ups, or explicit no-change notes.",
+      "match-market / ledger-backed", "Profiles, needs, interests, and event signals enter exchange ledgers; MoonClaw reduces them into match candidates or event plans; review gates protect consent and sensitive identity details.",
+      "interest packets -> contribution ledger -> AI match reduction -> consent/review gate -> resident or event outbox",
+    ),
+    cookbook_civic_feature_section(
+      "Talent Avenue", "Talent density becomes public-safe cards, skill graph signals, reception notes, and evidence-backed achievements.",
+      "match-market / mixed-memory-backed", "Claims, project needs, skills, and evidence are aggregated; MoonClaw verifies or summarizes; MoonBook stores talent graph records and public projection fields only after review.",
+      "claim/evidence -> skill edge draft -> verification review -> talent card or operator note",
+    ),
+    cookbook_civic_feature_section(
+      "Vitality Dashboard", "Town activity becomes a health digest that separates real progress from noise.",
+      "signal-watch / projection-backed", "Daemon, watcher, worker, projection, and review records are reduced into counters, stale-state warnings, recovery queues, and stable-waiting evidence.",
+      "runtime records -> signal digest -> recovery or no-change decision -> operator dashboard",
+    ),
+    cookbook_civic_feature_section(
+      "AI Science Garden", "AI learning becomes tutorial quests, tool trials, examples, workshops, and before/after comparisons.",
+      "learning-cohort / workspace-backed", "Learner needs and tool questions enter cohort workspaces; MoonClaw drafts examples and exercises; MoonBook stores tutorials, assessments, progress, and review queues.",
+      "learning need -> lesson draft -> exercise/checkpoint -> review -> learner projection",
+    ),
+    cookbook_civic_feature_section(
+      "Physical Bridge", "Virtual requests become confirmation-gated venue, robot, attendance, or offline handoff packets.",
+      "incident-bridge / handoff-ledger-backed", "Requests, constraints, device/venue status, and operator approvals move through bridge ledgers; MoonClaw may prepare approved calls or blocker reports but cannot bypass confirmation gates.",
+      "request -> risk/constraint check -> human gate -> handoff packet or blocker -> bridge status",
+    ),
+    cookbook_civic_feature_section(
+      "Valley Market", "Needs, offers, points, and rewards become governed exchanges with abuse checks and redemption review.",
+      "match-market / ledger-backed", "Offer and need packets are grouped with point ledgers and risk signals; MoonClaw proposes matches or ledger updates; MoonBook records accepted exchanges and review items.",
+      "offer/need -> match or points proposal -> abuse/review gate -> ledger update",
+    ),
+    cookbook_civic_feature_section(
+      "Story Radar", "Verified town activity becomes public-safe narratives, achievement broadcasts, or redaction tasks.",
+      "story-forge / mixed-memory-backed", "Achievements, events, reviewed facts, and consent labels enter story workspaces; MoonClaw drafts narratives; MoonBook stores claim evidence, redactions, and publishable projections.",
+      "reviewed facts -> story draft -> claim/consent review -> broadcast projection",
+    ),
+  ].join("\n")
+}
+
+///|
+fn cookbook_feature_section(
+  title : String,
+  purpose : String,
+  ownership : String,
+  internal_steps : Array[String],
+  ai_behavior : String,
+) -> String {
+  [
+    "## \{title}",
+    "",
+    "Purpose: \{purpose}",
+    "",
+    "Ownership: \{ownership}",
+    "",
+    "Internal flow:",
+    markdown_bullets(internal_steps),
+    "",
+    "AI behavior: \{ai_behavior}",
+  ].join("\n")
+}
+
+///|
+fn cookbook_civic_feature_section(
+  title : String,
+  purpose : String,
+  pattern : String,
+  internal_protocol : String,
+  evidence_flow : String,
+) -> String {
+  [
+    "## \{title}",
+    "",
+    "Resident-facing job: \{purpose}",
+    "",
+    "Protocol shape: \{pattern}.",
+    "",
+    "Internal protocol: \{internal_protocol}",
+    "",
+    "Evidence flow:",
+    "",
+    "```text",
+    evidence_flow,
+    "```",
+    "",
+    "AI behavior: MoonClaw uses the building skill to reduce inputs into a module-native output, while Moontown enforces envelope, schedule, ledgers, privacy, review gates, and allowed destinations.",
   ].join("\n")
 }

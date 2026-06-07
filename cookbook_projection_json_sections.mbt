@@ -56,6 +56,9 @@ fn cookbook_review_queue_json() -> Array[String] {
     cookbook_item_json(
       "Stable-state drift", "wiki/definitions/stable-state.md", "Review when required_missing > 0",
     ),
+    cookbook_item_json(
+      "Describer coverage", "wiki/describer/feature-guide.md", "Review when a feature lacks internals, AI behavior, or evidence flow",
+    ),
   ]
 }
 
@@ -70,6 +73,12 @@ fn cookbook_page_families_json() -> Array[String] {
     ),
     cookbook_item_json(
       "Doctor", "wiki/operating-procedures/doctor.md", "Procedure",
+    ),
+    cookbook_item_json(
+      "Describer", "wiki/describer/feature-guide.md", "Feature internals",
+    ),
+    cookbook_item_json(
+      "Content Rules", "wiki/describer/content-rules.md", "AI summarization policy",
     ),
   ]
 }
@@ -89,6 +98,17 @@ fn cookbook_journey_json(
         "Manifest: \{manifest.manifest_path}",
         "Workspace: \{entry.workspace_root}",
         "Moondesk can curate this book as the human desktop surface.",
+        "Feature guide: wiki/describer/feature-guide.md",
+      ],
+    ),
+    cookbook_journey_item_json(
+      "Describer upgrade",
+      "generated",
+      "ready",
+      "The cookbook now explains Moontown by feature, protocol, runtime state, and AI role instead of only listing artifacts.",
+      [
+        "Overview: wiki/describer/overview.md", "Feature internals: wiki/describer/feature-guide.md",
+        "Content rules: wiki/describer/content-rules.md",
       ],
     ),
   ]
@@ -101,6 +121,15 @@ fn cookbook_links_json() -> Array[String] {
       "Stable state", "wiki", "wiki/definitions/stable-state.md",
     ),
     cookbook_link_json("Ownership", "wiki", "wiki/definitions/ownership.md"),
+    cookbook_link_json(
+      "Describer overview", "wiki", "wiki/describer/overview.md",
+    ),
+    cookbook_link_json(
+      "Feature guide", "wiki", "wiki/describer/feature-guide.md",
+    ),
+    cookbook_link_json(
+      "Content rules", "wiki", "wiki/describer/content-rules.md",
+    ),
     cookbook_link_json("Doctor", "wiki", "wiki/operating-procedures/doctor.md"),
   ]
 }

@@ -14,6 +14,9 @@ async test "cookbook bootstrap writes manifest and MoonBook workspace" {
   assert_true(@fs.exists(manifest_path))
   assert_true(@fs.exists("\{workspace_root}/wiki/index.md"))
   assert_true(@fs.exists("\{workspace_root}/wiki/definitions/stable-state.md"))
+  assert_true(@fs.exists("\{workspace_root}/wiki/describer/overview.md"))
+  assert_true(@fs.exists("\{workspace_root}/wiki/describer/feature-guide.md"))
+  assert_true(@fs.exists("\{workspace_root}/wiki/describer/content-rules.md"))
   assert_true(
     @fs.exists("\{workspace_root}/raw/bootstrap/COOKBOOK_CONTRACT.md"),
   )
@@ -97,6 +100,26 @@ test "cookbook projection helpers render stable UI contracts" {
   ).join("\n")
   assert_true(readiness.contains("Stable-state manifest"))
   assert_true(readiness.contains("raw/bootstrap/COOKBOOK_CONTRACT.md"))
+  let families = cookbook_page_families_json().join("\n")
+  assert_true(families.contains("wiki/describer/feature-guide.md"))
+  let links = cookbook_links_json().join("\n")
+  assert_true(links.contains("wiki/describer/content-rules.md"))
+}
+
+///|
+test "cookbook describer pages explain features with AI internals" {
+  let overview = cookbook_describer_overview_markdown()
+  assert_true(overview.contains("# Moontown Describer"))
+  assert_true(overview.contains("MoonClaw performs bounded AI reduction"))
+  let guide = cookbook_feature_guide_markdown()
+  assert_true(guide.contains("## Policy Hall"))
+  assert_true(guide.contains("## Social Square"))
+  assert_true(guide.contains("## Physical Bridge"))
+  assert_true(guide.contains("AI behavior:"))
+  assert_true(guide.contains("Evidence flow:"))
+  let rules = cookbook_content_rules_markdown()
+  assert_true(rules.contains("## Runtime State"))
+  assert_true(rules.contains("## Civic Features"))
 }
 
 ///|

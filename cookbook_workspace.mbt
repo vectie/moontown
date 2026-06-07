@@ -29,6 +29,18 @@ async fn write_cookbook_workspace(
     cookbook_live_autonomy_spine_markdown(),
   )
   write_text_file(
+    "\{root}/wiki/describer/overview.md",
+    cookbook_describer_overview_markdown(),
+  )
+  write_text_file(
+    "\{root}/wiki/describer/feature-guide.md",
+    cookbook_feature_guide_markdown(),
+  )
+  write_text_file(
+    "\{root}/wiki/describer/content-rules.md",
+    cookbook_content_rules_markdown(),
+  )
+  write_text_file(
     "\{root}/wiki/history/stable-state-ledger.md",
     cookbook_stable_state_ledger_markdown(manifest),
   )
