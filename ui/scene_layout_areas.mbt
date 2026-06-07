@@ -1,0 +1,67 @@
+///|
+fn default_scene_areas() -> Array[SceneArea] {
+  [
+    {
+      key: "gate",
+      title: "Town Gate",
+      kind: Gate,
+      x: 560,
+      y: 604,
+      width: 180,
+      height: 72,
+      asset_keys: ["gate-sign"],
+    },
+    {
+      key: "city-hall",
+      title: "City Hall",
+      kind: CityHall,
+      x: 610,
+      y: 100,
+      width: 280,
+      height: 180,
+      asset_keys: ["city-hall", "city-hall-roof", "mayor-claw"],
+    },
+    {
+      key: "book-coding",
+      title: "Moonbook / Coding",
+      kind: BookHouse,
+      x: 116,
+      y: 372,
+      width: 260,
+      height: 180,
+      asset_keys: ["book-house-coding", "book-house-coding-roof", "keeper-claw"],
+    },
+    {
+      key: "book-finance",
+      title: "Moonbook / Finance",
+      kind: BookHouse,
+      x: 796,
+      y: 366,
+      width: 260,
+      height: 180,
+      asset_keys: [
+        "book-house-finance", "book-house-finance-roof", "keeper-claw",
+      ],
+    },
+    {
+      key: "worker-yard",
+      title: "Worker Yard",
+      kind: WorkerYard,
+      x: 594,
+      y: 468,
+      width: 400,
+      height: 118,
+      asset_keys: ["worker-yard", "worker-yard-roof", "worker-claw"],
+    },
+    {
+      key: "anomaly-corner",
+      title: "Anomaly Corner",
+      kind: AnomalyCorner,
+      x: 820,
+      y: 118,
+      width: 190,
+      height: 140,
+      asset_keys: ["anomaly-signal"],
+    },
+  ]
+}
