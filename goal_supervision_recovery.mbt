@@ -56,6 +56,7 @@ fn transient_dependency_reconcilable_status(
 ) -> Bool {
   match status {
     @core.TaskExecutionStatus::Failed
+    | @core.TaskExecutionStatus::Stale
     | @core.TaskExecutionStatus::ReviewQueued => true
     _ => false
   }

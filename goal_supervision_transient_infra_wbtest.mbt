@@ -34,6 +34,49 @@ async test "supervision clears transient dependency lock failures" {
 }
 
 ///|
+async test "supervision clears stale selfpatch transient dependency lock proof" {
+  let state = @core.empty_state(@core.TownConfig::new(id="test", name="Test"))
+  let book = @core.BookRef::new(
+    id="coding",
+    name="Coding",
+    purpose="Coding workspace",
+    workspace_root="/tmp/coding",
+  )
+  let task = @core.TownTask::new(
+    id="selfpatch-runtime-transient-stale-proof-tick-999999",
+    book_id="coding",
+    title="Selfpatch stale proof",
+    prompt="Probe stale transient runtime recovery",
+    domain=@core.WorkDomain::Coding,
+    status=@core.TownTaskStatus::Blocked,
+  )
+  state.register_book(book)
+  state.enqueue_task(task)
+  state.register_execution(
+    @core.TaskExecutionRecord::new(
+      task_id="selfpatch-runtime-transient-stale-proof-tick-999999",
+      book_id="coding",
+      packet_id="selfpatch-runtime-transient-stale-proof",
+      packet_path=".moontown/packets/selfpatch-runtime-transient-stale-proof.json",
+      run_id=Some("run-selfpatch-runtime-transient-stale-proof"),
+      status=@core.TaskExecutionStatus::Stale,
+      summary="Error: Failed to resolve the module dependency graph\nUnable to lock folder `/Users/kq/Workspace/moonclaw/.mooncakes` for downloading dependencies\nOperation not permitted (os error 1)\nselfpatch_runtime_autonomy_probe: stale transient infrastructure failure should be reconciled by autonomous repair path",
+      output_contract="standing-watch-live-snapshot",
+      result_decision="pending",
+    ),
+  )
+  reconcile_transient_dependency_failures(state)
+  let execution = @core.find_execution(
+    state, "selfpatch-runtime-transient-stale-proof-tick-999999",
+  ).unwrap()
+  assert_eq(execution.status, @core.TaskExecutionStatus::Completed)
+  assert_eq(execution.result_decision, "deferred-transient-infrastructure")
+  assert_true(execution.next_retry_tick is None)
+  assert_eq(state.tasks[0].status, @core.TownTaskStatus::Done)
+  assert_true(execution.summary.contains("transient_infrastructure_contention"))
+}
+
+///|
 async test "supervision clears transient dependency failures already queued for review" {
   let state = @core.empty_state(@core.TownConfig::new(id="test", name="Test"))
   let book = @core.BookRef::new(
