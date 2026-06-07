@@ -80,6 +80,35 @@ fn planbook_repair_target_files(criterion_id : String) -> Array[String] {
         "\{root}/../moonclaw/job/analysis_contracts.mbt",
         "\{root}/../moonclaw/job/analysis_wbtest.mbt",
       ]
+    "live-runtime-recovery" =>
+      [
+        "\{root}/planbook_autonomy_criteria_runtime.mbt",
+        "\{root}/planbook_repair.mbt",
+        "\{root}/planbook_repair_active.mbt",
+        "\{root}/planbook_repair_result.mbt",
+        "\{root}/planbook_repair_targets.mbt",
+        "\{root}/live_autonomy.mbt",
+        "\{root}/live_autonomy_current.mbt",
+        "\{root}/live_autonomy_refresh.mbt",
+        "\{root}/live_autonomy_wbtest.mbt",
+        "\{root}/goal_supervision_recovery.mbt",
+        "\{root}/goal_supervision_core.mbt",
+        "\{root}/goal_supervision_status_helpers.mbt",
+        "\{root}/goal_supervision_transient_infra_wbtest.mbt",
+        "\{root}/goal_supervision_standing_watch_ledger_wbtest.mbt",
+        "\{root}/standing_watch_recovery_policy.mbt",
+        "\{root}/standing_watch_recovery_legacy.mbt",
+        "\{root}/standing_watch_recovery_context.mbt",
+        "\{root}/standing_watch_recovery_policy_wbtest.mbt",
+        "\{root}/standing_watch_recovery_context_wbtest.mbt",
+        "\{root}/runtime_status_lifecycle_wbtest.mbt",
+        "\{root}/daemon_tick_saved_town.mbt",
+        "\{root}/daemon_tick_planbook_phase.mbt",
+        "\{root}/adapters/moonclaw/run_polling.mbt",
+        "\{root}/adapters/moonclaw/run_polling_wbtest.mbt",
+        "\{root}/../moonclaw/job/analysis_acp_runner.mbt",
+        "\{root}/../moonclaw/job/analysis_contracts.mbt",
+      ]
     _ =>
       [
         "\{root}/planbook_autonomy.mbt",

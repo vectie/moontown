@@ -178,3 +178,53 @@ test "planbook repair run result keeps blocked acp output from completing" {
     ),
   )
 }
+
+///|
+async test "planbook source patch receipt survives repair result supersession through run index" {
+  let workspace_root = "/tmp/moontown-planbook-source-patch-receipt-index-wbtest"
+  let criterion_id = "planbook-source-patch-loop"
+  let run_id = "run-source-patch-receipt-index"
+  let content = [
+    "repair_decision: accepted",
+    "criterion_id: \{criterion_id}",
+    "files_changed: planbook_repair_patch_receipt.mbt",
+    ..planbook_test_validation_lines(),
+    "diff_summary: git diff --check passed",
+    "plan_update_status: updated",
+    "commit_status: committed",
+    "commit_message: Preserve source patch receipt evidence",
+    "push_status: not_pushed_by_policy",
+  ].join("\n")
+  write_text_file(
+    planbook_repair_job_proposals_path(workspace_root),
+    {
+      "proposals": [
+        {
+          "id": "proposal-source-patch",
+          "request_text": "Open criterion: `planbook-source-patch-loop`.",
+          "last_run_id": run_id,
+        },
+      ],
+    }.to_json().stringify(),
+  )
+  write_text_file(
+    "\{workspace_root}/.moonclaw/jobs/runs/\{run_id}/meta.json",
+    {
+      "id": run_id,
+      "workspace_dir": "\{workspace_root}/moonclaw-jobs/\{run_id}",
+      "status": "Succeeded",
+      "summary": "accepted source patch",
+    }.to_json().stringify(),
+  )
+  write_text_file(
+    "\{workspace_root}/moonclaw-jobs/\{run_id}/result.json",
+    Json::object({
+      "content": content.to_json(),
+      "patch_receipt": planbook_test_valid_patch_receipt(
+        criterion_id,
+        run_id~,
+      ),
+    }).stringify(),
+  )
+  assert_true(planbook_latest_repair_patch_receipt_ready(workspace_root))
+}

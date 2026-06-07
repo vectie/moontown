@@ -28,6 +28,13 @@ test "planbook repair treats temporary dispatch contention as retryable" {
 }
 
 ///|
+test "planbook repair runs inline by default for autonomous self patching" {
+  assert_true(planbook_repair_run_inline_enabled_from_env(None))
+  assert_true(planbook_repair_run_inline_enabled_from_env(Some("true")))
+  assert_true(!planbook_repair_run_inline_enabled_from_env(Some("false")))
+}
+
+///|
 test "planbook repair packet helpers expose stable worker policy" {
   assert_eq(
     planbook_repair_preferred_skills().join(","),

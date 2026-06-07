@@ -92,6 +92,22 @@ test "planbook source patch loop target list covers self patch plumbing" {
 }
 
 ///|
+test "planbook live runtime recovery target list covers reconciliation plumbing" {
+  let targets = planbook_repair_target_files("live-runtime-recovery").join(
+    "\n",
+  )
+  assert_true(targets.contains("planbook_autonomy_criteria_runtime.mbt"))
+  assert_true(targets.contains("planbook_repair_targets.mbt"))
+  assert_true(targets.contains("goal_supervision_recovery.mbt"))
+  assert_true(targets.contains("goal_supervision_transient_infra_wbtest.mbt"))
+  assert_true(targets.contains("standing_watch_recovery_policy.mbt"))
+  assert_true(targets.contains("standing_watch_recovery_legacy.mbt"))
+  assert_true(targets.contains("live_autonomy_wbtest.mbt"))
+  assert_true(targets.contains("adapters/moonclaw/run_polling.mbt"))
+  assert_true(targets.contains("../moonclaw/job/analysis_acp_runner.mbt"))
+}
+
+///|
 async test "planbook backlog item can drive bounded repair packet from json" {
   let workspace = planbook_autonomy_test_workspace(
     "/tmp/moontown-planbook-backlog-repair-wbtest",

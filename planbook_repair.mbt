@@ -34,7 +34,7 @@ pub async fn write_moontown_planbook_repair_task(
   workspace_root? : String = default_planbook_workspace_root(),
   book_catalog_path? : String = @moonbook.default_catalog_path(),
   dispatch? : Bool = false,
-  run_inline? : Bool = moontown_moonclaw_inline_enabled(),
+  run_inline? : Bool = planbook_repair_run_inline_enabled(),
 ) -> String {
   let status = inspect_moontown_planbook_autonomy(
     snapshot_path~,
@@ -69,6 +69,24 @@ pub async fn write_moontown_planbook_repair_task(
       write_planbook_repair_status(task, workspace_root, snapshot_path)
       "PlanBook has no open repair task."
     }
+  }
+}
+
+///|
+fn planbook_repair_run_inline_enabled() -> Bool {
+  planbook_repair_run_inline_enabled_from_env(
+    optional_env_text("MOONTOWN_PLANBOOK_REPAIR_INLINE"),
+  )
+}
+
+///|
+fn planbook_repair_run_inline_enabled_from_env(value : String?) -> Bool {
+  match value {
+    Some(value) => {
+      let lower = value.to_lower()
+      lower == "1" || lower == "true" || lower == "yes" || lower == "on"
+    }
+    None => true
   }
 }
 
