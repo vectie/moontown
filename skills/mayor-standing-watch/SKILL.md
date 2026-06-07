@@ -21,6 +21,9 @@ as `watch-opc-news`.
 - The target MoonBook bookkeeper decides what is remembered, rejected, queued
   for review, or projected.
 - MoonClaw owns bounded search/fetch/read/summarize execution.
+- For App ToolBooks, MoonBook owns accepted data, latest report, app source,
+  `tool-manifest.json`, generated tool page, and tool review queue. Moontown
+  should only schedule and expose the civic-building link.
 - If a previous watcher execution is still active, defer instead of dispatching
   a duplicate run.
 - A watcher tick should grow the book only when new accepted facts, changed
@@ -43,6 +46,8 @@ accepted_facts_count: <integer>
 rejected_facts_count: <integer>
 wiki_pages_changed_count: <integer>
 book_changed: yes | no
+tool_changed: yes | no
+tool_build_status: passed | failed | skipped
 ```
 
 Moontown records that marker as `WatcherRunRecord` under:

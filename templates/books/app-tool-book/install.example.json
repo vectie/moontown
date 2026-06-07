@@ -1,0 +1,16 @@
+{
+  "book_id": "toolbook-market-signal-lab",
+  "title": "Market Signal Lab",
+  "purpose": "Watch approved data sources, analyze useful changes, and expose an interactive dashboard through a civic building.",
+  "websites": [
+    "https://example.org/data",
+    "https://example.com/reports"
+  ],
+  "analysis_method": "",
+  "analysis_method_path": "analysis-method.example.md",
+  "tool_spec": "",
+  "tool_spec_path": "tool-spec.example.md",
+  "civic_building_id": "market-signal-lab",
+  "cadence_ticks": 60,
+  "workspace_root": ""
+}

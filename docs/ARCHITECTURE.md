@@ -30,6 +30,13 @@ and distribution policies. A MoonBook may support that building as durable
 memory, but the support mode differs by building: workspace-backed,
 ledger-backed, projection-backed, handoff-ledger-backed, or mixed-memory-backed.
 
+For generated tools, the durable abstraction is an App ToolBook: a MoonBook
+that owns accepted data, analysis reports, tool source, tool manifest,
+generated web pages, and review state. Moontown may expose that tool from a
+civic building, but Moontown should not become the tool source owner. Moondesk
+edits the book config/spec, MoonClaw performs bounded watch/analyze/build work,
+MoonBook persists the result, and Moontown links to it.
+
 The implementation refactor plan is tracked in
 [REFACTOR_PLAN.md](/Users/kq/Workspace/moontown/docs/REFACTOR_PLAN.md). That
 document is the source of truth for splitting the current working prototype
@@ -119,9 +126,10 @@ It should own:
 - context hydration
 - local planning
 - native book-type skills and profiles, including research, course, PlanBook,
-  and standing-watch workflows
+  ToolBook/AppBook, and standing-watch workflows
 - result review and persistence decisions
 - generated cookbook workspace and stable-state wiki pages
+- generated app/tool source and site projection for App ToolBooks
 
 It should not become:
 
@@ -598,6 +606,18 @@ The daemon persists:
   event records the request id, template id, resolved config, status, tick,
   timestamp, and installer summary, so unattended book creation is auditable
   without relying on transient daemon logs.
+
+The book-template registry currently includes:
+
+- `pdf-evidence-watch`
+  for source/PDF/text evidence watching and notification.
+- `app-tool-book`
+  for books that watch data, produce analysis reports, maintain app source, and
+  publish a generated web tool through a civic building.
+
+Both use the same durable inbox. Future book types should add a template
+descriptor, template assets, installer, and skills, then let the daemon process
+request documents. They should not require Codex to hand-create workspaces.
 
 Template-created books may also be archived instead of deleted. For
 `pdf-evidence-watch`, archiving disables every standing goal targeting that

@@ -48,6 +48,13 @@ templates/planbook/PLAN_TEMPLATE.md
   does not prove the new code path.
 - If the request is actually research, route to a research book.
 - If the request is actually teaching, route to a course book.
+- If the request asks for a usable web tool backed by watched data, book
+  knowledge, reports, dashboards, calculators, explorers, maps, simulations, or
+  other interactive output, route it to an `app-tool-book` request. Do not
+  hand-author a one-off Moontown page. The ToolBook owns `tool-manifest.json`,
+  `wiki/reports/latest-analysis.md`, `wiki/tools/tool-spec.md`, `app/`, and
+  `book/site/generated/tool.html`; Moontown only schedules it and links it from
+  the civic building.
 - If the request changes stable operating definitions, mark cookbook impact.
 
 ## Quality Gate

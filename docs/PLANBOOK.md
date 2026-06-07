@@ -4,6 +4,7 @@ The planbook is the third durable MoonBook book type in Moontown.
 
 Research books answer "what is true or changing?"
 Course books teach "how should a beginner learn this?"
+ToolBooks expose "what usable tool should this book power?"
 Planbooks decide "what should we build, change, verify, and ship?"
 
 The goal is to make planning a persisted artifact, not a chat side effect.
@@ -81,9 +82,11 @@ Do not blur these roles:
 
 Plans must say how output returns home. For research, this means source/wiki/
 synthesis/review pages. For course work, this means lessons, exercises, and
-checkpoints. For civic work, this means inbox/contribution/reduction/outbox/
-review/return-home ledgers. For implementation work, this means code changes,
-tests, validation evidence, commit readiness, and cookbook impact when stable
+checkpoints. For ToolBooks, this means accepted data, analysis reports, app
+source, tool manifest, generated web tool, review queue, and civic building
+route. For civic work, this means inbox/contribution/reduction/outbox/review/
+return-home ledgers. For implementation work, this means code changes, tests,
+validation evidence, commit readiness, and cookbook impact when stable
 definitions change.
 
 ## Book Types
@@ -92,11 +95,60 @@ definitions change.
 | --- | --- | --- | --- |
 | Research book | What is true, new, or uncertain? | sources, evidence, synthesis, reports | MoonBook |
 | Course book | How should someone learn this? | lessons, exercises, checkpoints | MoonBook |
+| ToolBook / AppBook | What usable tool should this knowledge power? | reports, data, `tool-manifest.json`, app source, generated tool page | MoonBook + Moondesk |
 | Planbook | What should be built and how will we know it worked? | `plan.md`, acceptance criteria, execution log, review notes | MoonBook + Mayor |
 | Cookbook | What is the stable state of the town? | canonical docs, definitions, runtime index | MoonBook |
 
 The cookbook is the stable control book. A planbook is a working decision book.
 Plans may update the cookbook after they are accepted.
+
+## ToolBook / AppBook Roadmap
+
+A ToolBook is a MoonBook whose durable output includes an interactive web tool,
+not only markdown pages. The book still follows document protocol philosophy:
+the source of truth is files in the book, and active agents are temporary
+workers that update those files through protocols.
+
+Canonical flow:
+
+```text
+Moondesk writes an App ToolBook config/request document
+  -> Moontown daemon processes the book-template request
+  -> MoonBook workspace is created with report, app, manifest, and review files
+  -> Moontown registers a standing goal for the book
+  -> MoonClaw watches sources, analyzes data, updates app source, validates tool
+  -> MoonBook bookkeeper accepts or reviews data/tool changes
+  -> Moontown civic building links to the live generated tool and latest report
+```
+
+Required durable files:
+
+- `book.json`
+- `tool-manifest.json`
+- `raw/data/latest.json`
+- `wiki/methods/analysis-method.md`
+- `wiki/tools/tool-spec.md`
+- `wiki/reports/latest-analysis.md`
+- `wiki/reviews/tool-review.md`
+- `app/index.html`
+- `book/site/generated/tool.html`
+
+The template is `app-tool-book` in `templates/books/app-tool-book/`. It is
+installed through the same request inbox as other book templates, so a Mayor,
+Moondesk, or future planning agent can create one without Codex manually
+copying files:
+
+```text
+.moontown/book-template-requests.json
+  request.template_id = "app-tool-book"
+  request.config_path = "<config>.json"
+```
+
+PlanBook acceptance rule: if a plan asks for a book-backed usable tool, it must
+create or update an App ToolBook request rather than hardcoding a one-off page
+inside Moontown. Moontown presents the building and route; MoonBook owns the
+tool source and generated page; MoonClaw performs bounded watch/analyze/build
+work; Moondesk edits the method/spec and approves durable changes.
 
 ## Mayor, Bookkeeper, And Worker Roles
 

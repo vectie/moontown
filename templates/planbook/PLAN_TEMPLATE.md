@@ -49,6 +49,18 @@ Use only high-signal inputs.
 - Review gate:
 - Projection/UI surface:
 
+## ToolBook Fit, If Applicable
+
+- Requires App ToolBook: yes | no
+- Template request id:
+- ToolBook id:
+- Civic building id:
+- Tool manifest:
+- App source path:
+- Generated tool page:
+- Latest analysis page:
+- Moondesk editable files:
+
 ## Design Decision
 
 State the chosen approach and why it is better than the alternatives.

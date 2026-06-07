@@ -20,6 +20,10 @@ Use this skill when the Mayor claw must decide whether a town goal should stay i
 - If the request is about implementation, create or update a PlanBook lane
   rather than pretending it is research.
 - If the request is about teaching, create or update a Course Book lane.
+- If the request asks for a usable webpage tool, dashboard, calculator,
+  comparator, explorer, map, simulation, or app backed by watched data or book
+  knowledge, create an `app-tool-book` template request instead of treating it
+  as only research or only UI.
 - If the request is about stable operating definitions, route impact to the
   Cookbook after the plan is accepted.
 - If the request is a civic/social exchange, route it to a building protocol
@@ -123,6 +127,30 @@ Output:
       "book_id": "wenyu-social-square",
       "objective": "Run a recurring communication-pattern round where robotics, agents, hardware, and LLM books exchange packets, reduce tensions into reviewable ideas, and return outputs home.",
       "rationale": "civic building protocol for cross-book exchange"
+    }
+  ]
+}
+```
+
+### Example: generated tool book
+
+Goal:
+
+```text
+watch public market data, analyze the trend, and give me a dashboard tool in the town
+```
+
+Output:
+
+```json
+{
+  "parallelizable": false,
+  "summary": "Mayor routes the request to an App ToolBook because the durable output includes both analysis and a usable web tool.",
+  "lanes": [
+    {
+      "book_id": "toolbook-market-data-dashboard",
+      "objective": "Create an app-tool-book request that watches configured data sources, maintains accepted analysis, generates or repairs the dashboard tool, and binds it to the appropriate civic building.",
+      "rationale": "ToolBook lane for durable watched data plus generated app"
     }
   ]
 }

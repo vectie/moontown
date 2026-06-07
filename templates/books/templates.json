@@ -29,6 +29,43 @@
         "skills/pdf-watch/SKILL.md",
         "skills/pdf-analysis/SKILL.md"
       ]
+    },
+    {
+      "template_id": "app-tool-book",
+      "book_type": "toolbook",
+      "specialization": "app-tool-book",
+      "title": "App ToolBook",
+      "purpose": "Watch configured websites or data sources, maintain analysis reports, and publish a durable generated web tool that Moontown can expose from a civic building.",
+      "root": "templates/books/app-tool-book",
+      "install_example": "templates/books/app-tool-book/install.example.json",
+      "install_command": "moon run cmd/main -- books template install app-tool-book <config.json>",
+      "status_command": "moon run cmd/main -- books app-tool status <book-id>",
+      "required_paths": [
+        "book.json",
+        "install.example.json",
+        "analysis-method.example.md",
+        "tool-spec.example.md",
+        "raw/bootstrap/APP_TOOL_BOOK_CONTRACT.md",
+        "wiki/index.md",
+        "wiki/methods/analysis-method.md",
+        "wiki/tools/tool-spec.md",
+        "wiki/reports/latest-analysis.md",
+        "wiki/reviews/tool-review.md",
+        "skills/tool-watch/SKILL.md",
+        "skills/tool-build/SKILL.md",
+        "schemas/tool-manifest.schema.md",
+        "app/tool.js",
+        "app/styles.css"
+      ],
+      "editable_files": [
+        "install.example.json",
+        "analysis-method.example.md",
+        "tool-spec.example.md",
+        "wiki/methods/analysis-method.md",
+        "wiki/tools/tool-spec.md",
+        "skills/tool-watch/SKILL.md",
+        "skills/tool-build/SKILL.md"
+      ]
     }
   ]
 }

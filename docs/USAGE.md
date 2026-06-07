@@ -774,6 +774,90 @@ book unchanged. This is healthy 24/7 behavior. A no-change cycle is only a
 problem if `checked_sources_count` stays zero during cycles that claim to have
 searched.
 
+### App ToolBooks
+
+For domains where the book should produce both knowledge and a usable web tool,
+use the `app-tool-book` template:
+
+```text
+templates/books/app-tool-book/
+```
+
+This template creates a MoonBook workspace with:
+
+- `tool-manifest.json`
+- `wiki/reports/latest-analysis.md`
+- `wiki/tools/tool-spec.md`
+- `app/index.html`
+- `book/site/generated/tool.html`
+- `skills/tool-watch/SKILL.md`
+- `skills/tool-build/SKILL.md`
+
+Ownership split:
+
+```text
+Moondesk edits config, method, tool spec, and review decisions
+  -> Moontown installs the template and registers a standing goal
+  -> MoonBook owns data, reports, app source, generated site, manifest, review
+  -> MoonClaw watches sources, analyzes deltas, updates/repairs the tool
+  -> Moontown links the generated tool from a civic building
+```
+
+Create a default App ToolBook:
+
+```bash
+moon run cmd/main -- books app-tool bootstrap
+moon run cmd/main -- books app-tool status
+```
+
+Install one from a Moondesk/exported config:
+
+```bash
+moon run cmd/main -- books app-tool install templates/books/app-tool-book/install.example.json
+moon run cmd/main -- books app-tool status toolbook-market-signal-lab
+```
+
+The config file shape is:
+
+```json
+{
+  "book_id": "toolbook-market-signal-lab",
+  "title": "Market Signal Lab",
+  "purpose": "Watch approved data sources, analyze useful changes, and expose an interactive dashboard through a civic building.",
+  "websites": ["https://example.org/data"],
+  "analysis_method": "",
+  "analysis_method_path": "analysis-method.example.md",
+  "tool_spec": "",
+  "tool_spec_path": "tool-spec.example.md",
+  "civic_building_id": "market-signal-lab",
+  "cadence_ticks": 60,
+  "workspace_root": ""
+}
+```
+
+The generic template-request inbox also supports this book type:
+
+```json
+{
+  "requests": [
+    {
+      "id": "create-market-signal-lab",
+      "template_id": "app-tool-book",
+      "config_path": "book-template-configs/market-signal-lab.json",
+      "status": "pending",
+      "summary": "",
+      "last_processed_tick": 0
+    }
+  ]
+}
+```
+
+The daemon's `book-template-request` job processes that request without Codex
+manual file creation. Once installed, the standing goal keeps the book alive;
+MoonClaw should update `raw/data/latest.json`, `wiki/reports/latest-analysis.md`,
+`app/`, `book/site/generated/tool.html`, and `tool-manifest.json` only when the
+book's accepted knowledge or tool behavior changes.
+
 ## 2. Use The Persisted Town State
 
 The demo town persists runtime bootstrap files under:
@@ -806,6 +890,7 @@ Install a book through the generic template registry:
 
 ```bash
 moon run cmd/main -- books template install pdf-evidence-watch templates/books/pdf-evidence-watch/install.example.json
+moon run cmd/main -- books template install app-tool-book templates/books/app-tool-book/install.example.json
 ```
 
 Process Moondesk or Mayor-submitted book creation requests:

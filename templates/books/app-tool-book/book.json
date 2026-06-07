@@ -1,0 +1,13 @@
+{
+  "template_id": "app-tool-book",
+  "template_version": "1",
+  "book_type": "app-tool-book",
+  "title": "App ToolBook",
+  "purpose": "Watch data, produce analysis, and expose a durable generated web tool.",
+  "required_outputs": [
+    "tool-manifest.json",
+    "wiki/reports/latest-analysis.md",
+    "app/index.html",
+    "book/site/generated/tool.html"
+  ]
+}
