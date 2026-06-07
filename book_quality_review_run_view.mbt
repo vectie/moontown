@@ -7,15 +7,34 @@ priv struct BookQualityReviewLedgerView {
 ///|
 fn book_quality_review_ledger_view(
   ledger : BookQualityReviewRunLedger,
+  active_book_ids? : Array[String] = [],
 ) -> BookQualityReviewLedgerView {
-  let current_runs = current_book_quality_review_runs(ledger)
+  let latest_runs = current_book_quality_review_runs(ledger)
+  let current_runs : Array[BookQualityReviewRun] = []
+  for run in latest_runs {
+    if book_quality_review_run_active_for_view(run, active_book_ids) {
+      current_runs.push(run)
+    }
+  }
   let historical_runs : Array[BookQualityReviewRun] = []
   for run in ledger.runs {
-    if !book_quality_review_run_is_current(run, current_runs) {
+    if book_quality_review_run_is_current(run, latest_runs) {
+      if !book_quality_review_run_active_for_view(run, active_book_ids) {
+        historical_runs.push(run)
+      }
+    } else {
       historical_runs.push(run)
     }
   }
   { current_runs, historical_runs }
+}
+
+///|
+fn book_quality_review_run_active_for_view(
+  run : BookQualityReviewRun,
+  active_book_ids : Array[String],
+) -> Bool {
+  active_book_ids.is_empty() || active_book_ids.contains(run.book_id)
 }
 
 ///|

@@ -2,11 +2,16 @@
 pub async fn render_book_quality_ai_review_status(
   result_dir? : String = default_book_quality_review_result_dir(),
   run_path? : String = default_book_quality_review_run_path(),
+  book_catalog_path? : String = @moonbook.default_catalog_path(),
+  snapshot_path? : String = @storage.default_snapshot_path(),
 ) -> String {
   ignore(reconcile_book_quality_ai_review_results(result_dir~, run_path~))
   let ledger = load_book_quality_review_run_ledger(run_path)
   let active = book_quality_ai_review_active_count(result_dir~, run_path~)
-  let view = book_quality_review_ledger_view(ledger)
+  let active_book_ids = book_quality_ai_review_active_book_ids(
+    book_catalog_path, snapshot_path,
+  )
+  let view = book_quality_review_ledger_view(ledger, active_book_ids~)
   [
     ..book_quality_review_status_summary_lines(
       run_path, result_dir, active, ledger, view,
@@ -14,6 +19,18 @@ pub async fn render_book_quality_ai_review_status(
     ..book_quality_review_current_section(view.current_runs),
     ..book_quality_review_historical_section(view.historical_runs),
   ].join("\n")
+}
+
+///|
+async fn book_quality_ai_review_active_book_ids(
+  book_catalog_path : String,
+  snapshot_path : String,
+) -> Array[String] {
+  let catalog = quality_catalog_with_runtime_books(
+    @moonbook.load_or_create_catalog(path=book_catalog_path),
+    snapshot_path,
+  )
+  catalog.map(fn(entry) { entry.id })
 }
 
 ///|

@@ -234,7 +234,7 @@ pub async fn render_app_tool_book_status(book_id? : String, workspace_root? : St
 
 pub async fn render_book_quality(book_catalog_path? : String, snapshot_path? : String) -> String
 
-pub async fn render_book_quality_ai_review_status(result_dir? : String, run_path? : String) -> String
+pub async fn render_book_quality_ai_review_status(result_dir? : String, run_path? : String, book_catalog_path? : String, snapshot_path? : String) -> String
 
 pub async fn render_book_template_registry(registry_path? : String) -> String
 
