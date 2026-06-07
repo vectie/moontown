@@ -38,3 +38,54 @@ async test "poll run prefers terminal meta over stale running index" {
   assert_eq(response.status, @core.TaskExecutionStatus::Completed)
   assert_true(response.summary.contains("Workflow completed"))
 }
+
+///|
+async test "poll run forces review when succeeded result text says fail" {
+  let root = "/tmp/moontown-moonclaw-poll-review-fail-wbtest-\{@async.now().to_int()}"
+  test_ignore_checked_command("rm", ["-rf", root])
+  test_write_text_file(
+    "\{root}/.moonclaw/jobs/runs/run-review-fail/meta.json",
+    (
+      $|{
+      $|  "id": "run-review-fail",
+      $|  "workspace_dir": "\{root}/workspace",
+      $|  "status": "Succeeded",
+      $|  "summary": "Review step completed"
+      $|}
+    ),
+  )
+  test_write_text_file(
+    "\{root}/workspace/result.json",
+    (
+      $|{
+      $|  "result_decision": "accepted",
+      $|  "requires_review": false,
+      $|  "content": "- **Pass/Fail:** FAIL. Blockers: Missing changed_pages. The result should be rejected because it treats incomplete progress as complete."
+      $|}
+    ),
+  )
+  let response = poll_run(
+    "task-review-fail",
+    "run-review-fail",
+    home=".moonclaw",
+    cwd=root,
+    detect_orphan=false,
+  )
+  assert_eq(response.status, @core.TaskExecutionStatus::Completed)
+  assert_eq(response.result_decision, "needs_review")
+  assert_true(response.requires_review)
+}
+
+///|
+test "moonclaw review text detector does not flag pass labels" {
+  assert_false(
+    moonclaw_result_text_requires_review(
+      "- **Pass/Fail:** PASS\nAll checks passed.",
+    ),
+  )
+  assert_true(
+    moonclaw_result_text_requires_review(
+      "- **Pass/Fail:** FAIL\nMissing fields.",
+    ),
+  )
+}

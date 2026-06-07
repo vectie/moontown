@@ -149,7 +149,8 @@ fn wenyu_civic_execute_action_rule_text() -> String {
 fn wenyu_civic_service_result_fields() -> Array[String] {
   [
     "civic_service_decision", "book_changed", "wiki_pages_changed_count", "accepted_facts_count",
-    "review_items_created_count", "projection_updated", "next_check_hint", "artifacts",
+    "changed_pages", "review_items_created_count", "review_items", "projection_updated",
+    "projection_delta", "protocol_decision_basis", "next_check_hint", "artifacts",
     "blockers", "review items",
   ]
 }

@@ -12,6 +12,12 @@ test "generic civic service skill preserves protocol-place rules" {
   )
   assert_true(text.contains("## Required Output Shape"))
   assert_true(text.contains("civic_service_decision: update | no_change"))
+  assert_true(
+    text.contains("changed_pages: comma-separated durable page paths"),
+  )
+  assert_true(text.contains("protocol_decision_basis"))
+  assert_true(text.contains("projection_delta"))
+  assert_true(text.contains("review_items: comma-separated"))
   assert_true(text.contains(civic_accepted_facts_accounting_rule()))
   assert_true(text.contains("## Concrete Example"))
 }

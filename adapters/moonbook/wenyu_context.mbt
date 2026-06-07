@@ -26,9 +26,13 @@ fn enrich_wenyu_worker_context_bundle(
         "civic_service_decision: update | no_change | needs_review | blocked",
         "book_changed: yes | no",
         "wiki_pages_changed_count: <integer>",
+        "changed_pages: comma-separated durable page paths, or none",
         "accepted_facts_count: <integer>",
         "review_items_created_count: <integer>",
+        "review_items: comma-separated review item ids/paths, or none",
         "projection_updated: yes | no",
+        "projection_delta: one sentence explaining the projection-safe change, or blocked:<reason>",
+        "protocol_decision_basis: one sentence naming the evidence, ledger, or blocker basis for the decision",
         "next_check_hint: normal | faster | slower | review",
       ],
     )

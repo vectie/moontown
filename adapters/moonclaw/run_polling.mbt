@@ -21,15 +21,23 @@ pub async fn poll_run(
       } else {
         indexed_status
       }
-      let result_decision = parse_json_string(result_payload, "result_decision").unwrap_or(
-        if status == @core.TaskExecutionStatus::Failed {
-          "blocked"
-        } else if status == @core.TaskExecutionStatus::Completed {
-          "accepted"
-        } else {
-          "pending"
-        },
+      let result_text = moonclaw_result_payload_text(result_payload)
+      let result_decision = guarded_moonclaw_result_decision(
+        parse_json_string(result_payload, "result_decision").unwrap_or(
+          if status == @core.TaskExecutionStatus::Failed {
+            "blocked"
+          } else if status == @core.TaskExecutionStatus::Completed {
+            "accepted"
+          } else {
+            "pending"
+          },
+        ),
+        result_text,
       )
+      let requires_review = parse_json_bool(result_payload, "requires_review").unwrap_or(
+          false,
+        ) ||
+        moonclaw_result_text_requires_review(result_text)
       {
         task_id,
         run_id,
@@ -41,9 +49,7 @@ pub async fn poll_run(
         },
         memory_candidates: [],
         result_decision,
-        requires_review: parse_json_bool(result_payload, "requires_review").unwrap_or(
-          false,
-        ),
+        requires_review,
         notify_town: parse_json_bool(result_payload, "notify_town").unwrap_or(
           status == @core.TaskExecutionStatus::Completed,
         ),
@@ -61,6 +67,47 @@ pub async fn poll_run(
         notify_town: false,
       }
   }
+}
+
+///|
+fn moonclaw_result_payload_text(payload : Json) -> String {
+  match parse_json_string(payload, "content") {
+    Some(content) => content
+    None =>
+      match parse_json_string(payload, "summary") {
+        Some(summary) => summary
+        None => ""
+      }
+  }
+}
+
+///|
+fn guarded_moonclaw_result_decision(
+  decision : String,
+  result_text : String,
+) -> String {
+  if moonclaw_result_text_requires_review(result_text) {
+    "needs_review"
+  } else {
+    decision
+  }
+}
+
+///|
+fn moonclaw_result_text_requires_review(result_text : String) -> Bool {
+  if result_text.is_empty() {
+    return false
+  }
+  for raw in result_text.split("\n") {
+    let line = raw.trim().to_owned().to_lower()
+    if line.contains("pass/fail:** fail") ||
+      line.contains("pass/fail: fail") ||
+      line.contains("review outcome: rejected") ||
+      line.contains("result should be rejected") {
+      return true
+    }
+  }
+  false
 }
 
 ///|

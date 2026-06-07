@@ -88,4 +88,10 @@ test "wenyu civic context adds civic protocol skills and pages" {
   assert_true(
     enriched.output_contract.join("\n").contains("civic_service_decision"),
   )
+  assert_true(enriched.output_contract.join("\n").contains("changed_pages"))
+  assert_true(enriched.output_contract.join("\n").contains("review_items"))
+  assert_true(enriched.output_contract.join("\n").contains("projection_delta"))
+  assert_true(
+    enriched.output_contract.join("\n").contains("protocol_decision_basis"),
+  )
 }
