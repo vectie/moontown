@@ -28,18 +28,21 @@ fn parse_json_from_command_text(text : String) -> Json raise {
   let trimmed = text.trim().to_owned()
   let whole = @json.parse(trimmed) catch {
     _ => {
-      let lines = trimmed.split("\n").to_array()
+      let lines : Array[String] = []
+      for line in trimmed.split("\n") {
+        lines.push(line.to_owned())
+      }
       let count = lines.length()
       for offset in 0..<count {
         let start = count - offset - 1
-        let line = lines[start].trim().to_owned()
+        let line = lines[start].trim()
         if line.has_prefix("{") || line.has_prefix("[") {
           let builder = StringBuilder::new()
           for index in start..<count {
             if index > start {
               builder.write_char('\n')
             }
-            builder.write_string(lines[index].to_owned())
+            builder.write_string(lines[index])
           }
           let candidate = builder.to_string()
           let parsed = @json.parse(candidate) catch { _ => continue }
