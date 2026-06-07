@@ -573,6 +573,11 @@ The daemon implementation now has three levels:
   process. The supervisor watches process liveness and heartbeat age, then
   restarts a missing or stale worker.
 
+Standing-goal execution uses bounded parallelism. A daemon tick may dispatch up
+to three due standing goals, while the global live external execution cap remains
+eight runs. This lets quality-repair and watch work mature faster without
+turning the mayor into an unbounded launcher.
+
 The daemon persists:
 
 - `.moontown/daemon.json`

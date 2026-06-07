@@ -34,27 +34,47 @@ async test "budget deferred standing goals stay due and are not marked run" {
     book_id="missing-first",
     next_due_tick=10,
   )
-  let deferred = runtime_status_standing_goal(
+  let launched_second = runtime_status_standing_goal(
     id="watch-second",
     title="Second due watch",
     prompt="second",
     book_id="missing-second",
     next_due_tick=10,
   )
+  let launched_third = runtime_status_standing_goal(
+    id="watch-third",
+    title="Third due watch",
+    prompt="third",
+    book_id="missing-third",
+    next_due_tick=10,
+  )
+  let deferred = runtime_status_standing_goal(
+    id="watch-fourth",
+    title="Fourth due watch",
+    prompt="fourth",
+    book_id="missing-fourth",
+    next_due_tick=10,
+  )
   let updated = dispatch_due_standing_goals(
     state,
     @roles.Mayor::new(),
     [],
-    [launched, deferred],
+    [launched, launched_second, launched_third, deferred],
     10,
     "\{root}/town.json",
   )
   let first = standing_goal_registry_find(updated, "watch-first").unwrap()
   let second = standing_goal_registry_find(updated, "watch-second").unwrap()
+  let third = standing_goal_registry_find(updated, "watch-third").unwrap()
+  let fourth = standing_goal_registry_find(updated, "watch-fourth").unwrap()
   assert_true(first.last_run_tick is Some(10))
   assert_eq(first.next_due_tick, 25)
   assert_true(second.last_run_tick is None)
   assert_eq(second.next_due_tick, 10)
+  assert_true(third.last_run_tick is Some(10))
+  assert_eq(third.next_due_tick, 25)
+  assert_true(fourth.last_run_tick is Some(10))
+  assert_eq(fourth.next_due_tick, 25)
   assert_true(
     state.events.any(fn(event) {
       event.id == "event-standing-goal-10-watch-second-deferred-budget"
@@ -177,7 +197,7 @@ test "standing goal save merge preserves externally added repair goals" {
 
 ///|
 test "standing goal dispatch budget is intentionally bounded" {
-  assert_eq(max_standing_goal_dispatches_per_tick(), 1)
+  assert_eq(max_standing_goal_dispatches_per_tick(), 3)
   assert_eq(standing_goal_dispatch_index(0, 4, 5), 1)
   assert_eq(standing_goal_dispatch_index(3, 4, 5), 0)
   let goal = runtime_status_standing_goal(

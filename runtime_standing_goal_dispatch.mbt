@@ -100,7 +100,7 @@ fn standing_goal_dispatch_index(
 
 ///|
 fn max_standing_goal_dispatches_per_tick() -> Int {
-  1
+  3
 }
 
 ///|
