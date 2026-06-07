@@ -22,8 +22,12 @@ async fn planbook_workspace_criterion(
 
 ///|
 async fn planbook_live_spine_criterion() -> PlanbookCriterionStatus {
-  let ready = @fs.exists("live_autonomy.mbt") &&
-    text_file_contains("live_autonomy.mbt", "planbook_open_count")
+  let ready = text_file_contains(
+      "live_autonomy_types.mbt", "planbook_open_count",
+    ) &&
+    text_file_contains("live_autonomy_digest_header.mbt", "planbook_open_gaps") &&
+    text_file_contains("live_autonomy_render.mbt", "PlanBook open gaps") &&
+    text_file_contains("live_autonomy_planbook_sync.mbt", "planbook_open_count")
   planbook_criterion(
     "planbook-live-spine",
     "2026-05-29-live-autonomy-spine",
@@ -31,9 +35,9 @@ async fn planbook_live_spine_criterion() -> PlanbookCriterionStatus {
     "moontown",
     ready,
     if ready {
-      "`live_autonomy.mbt` carries PlanBook open-gap count"
+      "live autonomy type, digest, render, and PlanBook sync paths carry PlanBook open-gap count"
     } else {
-      "`live_autonomy.mbt` does not expose PlanBook gaps yet"
+      "live autonomy split modules do not yet expose PlanBook gaps end-to-end"
     },
     "add PlanBook gap fields to the live spine and digest",
   )
@@ -42,9 +46,17 @@ async fn planbook_live_spine_criterion() -> PlanbookCriterionStatus {
 ///|
 async fn planbook_ui_operator_criterion() -> PlanbookCriterionStatus {
   let ready = text_file_contains(
-      "ui/rabbita-town/bootstrap.js", "live-autonomy",
-    ) ||
-    text_file_contains("ui/rabbita-town/main/main.mbt", "live-autonomy")
+      "ui/rabbita-town/runtime_snapshot_manifest.js", "live-autonomy.json",
+    ) &&
+    text_file_contains(
+      "ui/rabbita-town/main/bootstrap_live_autonomy.mbt", "planbook_open_count",
+    ) &&
+    text_file_contains(
+      "ui/rabbita-town/main/viewport_live_autonomy_status.mbt", "planbook_open_count",
+    ) &&
+    text_file_contains(
+      "ui/rabbita-town/main/viewport_operator_metrics.mbt", "live_autonomy_operator_view",
+    )
   planbook_criterion(
     "ui-live-spine-operator-panel",
     "2026-05-29-live-autonomy-spine",
@@ -66,10 +78,11 @@ async fn planbook_result_contract_criterion() -> PlanbookCriterionStatus {
     text_file_contains("standing_watch.mbt", "accepted_facts_count") &&
     text_file_contains("standing_watch.mbt", "standing_goal_decision")
   let generic_ready = text_file_contains(
-      "adapters/moonclaw/client.mbt", "result_decision",
+      "adapters/moonclaw/packet_types.mbt", "result_decision",
     ) &&
+    text_file_contains("adapters/moonclaw/run_polling.mbt", "result_decision") &&
     text_file_contains("goal_execution.mbt", "result_decision") &&
-    text_file_contains("core/types.mbt", "result_decision")
+    text_file_contains("core/execution_types.mbt", "result_decision")
   planbook_criterion(
     "strict-moonclaw-result-contract",
     "2026-05-29-live-autonomy-spine",
@@ -90,19 +103,18 @@ async fn planbook_result_contract_criterion() -> PlanbookCriterionStatus {
 ///|
 async fn planbook_source_patch_loop_criterion() -> PlanbookCriterionStatus {
   let repair_workspace_file = "planbook_repair_workspace.mbt"
+  let profile_file = "planbook_repair_profile.mbt"
+  let acp_file = "planbook_repair_acp.mbt"
   let acp_ready = text_file_contains(
-      repair_workspace_file, "\"execution_mode\": \"acp\"",
-    ) &&
-    text_file_contains(
-      repair_workspace_file, "\"execution_target\": \"codex-main\"",
-    ) &&
-    text_file_contains(
       repair_workspace_file, "write_planbook_repair_acp_target",
     ) &&
-    text_file_contains(repair_workspace_file, "\"cwd\": source_root") &&
-    text_file_contains(repair_workspace_file, "codex-acp-repo-patch")
+    text_file_contains(profile_file, "execution_mode=\"acp\"") &&
+    text_file_contains(profile_file, "execution_target=Some(\"codex-main\")") &&
+    text_file_contains(profile_file, "tool_access=\"codex-acp-repo-patch\"") &&
+    text_file_contains(acp_file, "\"cwd\": source_root") &&
+    text_file_contains(acp_file, "codex-main")
   let skill_ready = text_file_contains(
-    repair_workspace_file, "Codex ACP source-patching target",
+    "planbook_repair_request_rules.mbt", "Codex ACP source-patching target",
   )
   planbook_criterion(
     "planbook-source-patch-loop",
@@ -121,22 +133,24 @@ async fn planbook_source_patch_loop_criterion() -> PlanbookCriterionStatus {
 
 ///|
 async fn planbook_engineering_loop_criterion() -> PlanbookCriterionStatus {
-  let repair_file = "planbook_repair.mbt"
+  let metadata_file = "planbook_repair_packet_metadata.mbt"
+  let policy_file = "planbook_repair_policy.mbt"
+  let skill_file = "planbook_repair_skill_page.mbt"
   let metadata_ready = text_file_contains(
-      repair_file, "required_engineering_steps",
+      metadata_file, "required_engineering_steps",
     ) &&
-    text_file_contains(repair_file, "git_policy") &&
-    text_file_contains(repair_file, "commit_after_validation") &&
-    text_file_contains(repair_file, "push_after_commit")
-  let skill_ready = text_file_contains(repair_file, "diff_summary") &&
-    text_file_contains(repair_file, "commit_status") &&
-    text_file_contains(repair_file, "git diff --check") &&
-    text_file_contains(repair_file, "git status --short")
+    text_file_contains(metadata_file, "git_policy") &&
+    text_file_contains(metadata_file, "commit_after_validation") &&
+    text_file_contains(metadata_file, "push_after_commit")
+  let skill_ready = text_file_contains(skill_file, "diff_summary") &&
+    text_file_contains(skill_file, "commit_status") &&
+    text_file_contains(skill_file, "git diff --check") &&
+    text_file_contains(skill_file, "git status --short")
   let validation_ready = text_file_contains(
-      repair_file, "planbook_repair_required_commands",
+      policy_file, "planbook_repair_required_commands",
     ) &&
-    text_file_contains(repair_file, "moon test --no-render") &&
-    text_file_contains(repair_file, "moon info")
+    text_file_contains(policy_file, "moon test --no-render") &&
+    text_file_contains(policy_file, "moon info")
   planbook_criterion(
     "planbook-software-engineering-loop",
     "2026-05-31-editor-mode-real-pipeline",
