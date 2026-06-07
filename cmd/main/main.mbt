@@ -10,6 +10,7 @@ async fn render_cli_command(args : Array[String]) -> String {
     ["run", .. rest] => render_run_command(rest.to_owned())
     ["supervise"] => @moontown.supervise_saved_town()
     ["status"] => @moontown.render_saved_town_status()
+    ["runtime"] | ["runtime", "status"] => @moontown.render_saved_town_status()
     ["live", .. rest] => render_live_command(rest.to_owned())
     ["daemon", .. rest] => render_daemon_command(rest.to_owned())
     ["cookbook", .. rest] => render_cookbook_command(rest.to_owned())
