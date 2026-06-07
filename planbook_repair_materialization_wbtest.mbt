@@ -53,6 +53,10 @@ async test "planbook repair queues bounded packet without marking it active befo
   assert_true(packet_text.contains("required_validation_commands"))
   assert_true(packet_text.contains("git_policy"))
   assert_true(packet_text.contains("commit_after_validation"))
+  assert_true(packet_text.contains("commit_only_repair_owned_files"))
+  assert_true(
+    packet_text.contains("preserve_preexisting_unrelated_dirty_files"),
+  )
   assert_true(packet_text.contains("push_after_commit"))
   assert_true(packet_text.contains("\"best_effort_on_timeout\":false"))
   assert_true(skill_text.contains("PlanBook Repair Skill"))
@@ -61,6 +65,8 @@ async test "planbook repair queues bounded packet without marking it active befo
   assert_true(skill_text.contains("repository source root"))
   assert_true(skill_text.contains("diff_summary"))
   assert_true(skill_text.contains("commit_status"))
+  assert_true(skill_text.contains("repair-owned files"))
+  assert_true(skill_text.contains("pre-existing unrelated dirty files"))
   assert_true(skill_text.contains("git diff --check"))
   assert_true(skill_text.contains("git status --short"))
   assert_true(profile_text.contains("planbook_repair_worker"))
@@ -68,6 +74,21 @@ async test "planbook repair queues bounded packet without marking it active befo
   assert_true(profile_text.contains("\"execution_mode\": \"acp\""))
   assert_true(profile_text.contains("\"execution_target\": \"codex-main\""))
   assert_eq(planbook_repair_active_count(snapshot_path~), 0)
+}
+
+///|
+test "planbook source patch loop target list covers self patch plumbing" {
+  let targets = planbook_repair_target_files("planbook-source-patch-loop").join(
+    "\n",
+  )
+  assert_true(targets.contains("planbook_repair_active.mbt"))
+  assert_true(targets.contains("planbook_repair_targets.mbt"))
+  assert_true(targets.contains("planbook_repair_request_rules.mbt"))
+  assert_true(targets.contains("planbook_repair_skill_page.mbt"))
+  assert_true(targets.contains("adapters/moonclaw/run_polling.mbt"))
+  assert_true(targets.contains("live_autonomy_wbtest.mbt"))
+  assert_true(targets.contains("../moonclaw/acp/runner.mbt"))
+  assert_true(targets.contains("../moonclaw/job/analysis_contracts.mbt"))
 }
 
 ///|
@@ -151,6 +172,49 @@ async test "planbook repair supersedes stale runtime handoff evidence" {
   assert_eq(task.status, "queued")
   assert_true(result_text == "")
   assert_true(superseded.contains("18 failed town executions"))
+}
+
+///|
+async test "planbook repair retries source patch loop after blocked result without receipt" {
+  let workspace = planbook_autonomy_test_workspace(
+    "/tmp/moontown-planbook-repair-source-patch-stale-result-wbtest",
+  )
+  let workspace_root = workspace.workspace_root
+  let criterion : PlanbookCriterionStatus = {
+    id: "planbook-source-patch-loop",
+    plan_id: "test",
+    title: "PlanBook repair can patch repository source through Codex ACP",
+    owner: "moontown+moonclaw+codex-acp",
+    satisfied: false,
+    evidence: "no accepted patch receipt",
+    next_action: "retry through ACP source patch loop",
+  }
+  write_text_file(
+    planbook_repair_result_path_for_workspace(workspace_root),
+    [
+      "contract: planbook.repair.result.v1", "repair_decision: blocked", "criterion_id: planbook-source-patch-loop",
+      "validation:", "  - moon check --no-render: passed", "diff_summary: previous run blocked before receipt",
+      "plan_update_status: unchanged", "commit_status: blocked", "commit_message: Repair PlanBook patch receipt metadata",
+      "push_status: not_pushed_by_policy", "patch_receipt: not_applicable_for_blocked_result",
+    ].join("\n"),
+  )
+  let task = materialize_planbook_repair_task(
+    criterion,
+    workspace.snapshot_path,
+    workspace_root,
+    workspace.catalog_path,
+    false,
+    false,
+  )
+  let result_text = read_text_or_empty(
+    planbook_repair_result_path_for_workspace(workspace_root),
+  )
+  let superseded = read_text_or_empty(
+    planbook_repair_superseded_result_path(workspace_root),
+  )
+  assert_eq(task.status, "queued")
+  assert_true(result_text == "")
+  assert_true(superseded.contains("patch_receipt: not_applicable"))
 }
 
 ///|

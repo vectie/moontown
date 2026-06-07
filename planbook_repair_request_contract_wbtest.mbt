@@ -43,7 +43,13 @@ test "planbook repair request rules keep full engineering loop explicit" {
     planbook_repair_diff_hygiene_task_rule().contains("git diff --check"),
   )
   assert_true(
-    planbook_repair_commit_task_rule().contains("prepare a local commit"),
+    planbook_repair_commit_task_rule().contains("create a local commit"),
+  )
+  assert_true(planbook_repair_commit_task_rule().contains("repair-owned"))
+  assert_true(
+    planbook_repair_commit_task_rule().contains(
+      "pre-existing unrelated dirty files",
+    ),
   )
   assert_true(
     planbook_repair_no_churn_task_rule().contains("do not patch for activity"),
@@ -78,6 +84,8 @@ test "planbook repair request text preserves the full bounded worker contract" {
   assert_true(request.contains("Task:"))
   assert_true(request.contains("1. Read `skills/planbook-repair/SKILL.md`"))
   assert_true(request.contains("4. If it can be fixed safely"))
+  assert_true(request.contains("repair-owned"))
+  assert_true(request.contains("pre-existing unrelated dirty files"))
   assert_true(
     request.contains(
       "5. If the criterion is `editor-selected-feature-implementation`",

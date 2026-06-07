@@ -38,8 +38,14 @@ test "planbook repair packet helpers expose stable worker policy" {
   )
   assert_true(
     planbook_repair_required_engineering_steps().contains(
-      "prepare-commit-summary",
+      "commit-repair-owned-files-only",
     ),
+  )
+  assert_true(
+    planbook_repair_patch_receipt_required_fields().contains("contract"),
+  )
+  assert_true(
+    planbook_repair_patch_receipt_required_fields().contains("commit_sha"),
   )
   let wait_policy = planbook_repair_wait_policy_json().stringify()
   assert_true(wait_policy.contains("\"disable_waiting_for_input\":true"))
@@ -48,6 +54,10 @@ test "planbook repair packet helpers expose stable worker policy" {
   assert_true(wait_policy.contains("\"timeout_ms\":600000"))
   let git_policy = planbook_repair_git_policy_json().stringify()
   assert_true(git_policy.contains("\"commit_after_validation\":true"))
+  assert_true(git_policy.contains("\"commit_only_repair_owned_files\":true"))
+  assert_true(
+    git_policy.contains("\"preserve_preexisting_unrelated_dirty_files\":true"),
+  )
   assert_true(git_policy.contains("\"push_after_commit\":false"))
   assert_true(git_policy.contains("\"commit_message_required\":true"))
 }

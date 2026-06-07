@@ -89,3 +89,23 @@ test "moonclaw review text detector does not flag pass labels" {
     ),
   )
 }
+
+///|
+test "moonclaw process liveness only accepts proposal run argv sequence" {
+  assert_true(
+    moonclaw_process_line_is_proposal_run(
+      "501 123 1 0 ?? moon -C ../moonclaw run cmd/main -- proposal run run-1 --cwd /tmp",
+      "run-1",
+    ),
+  )
+  assert_false(
+    moonclaw_process_line_is_proposal_run(
+      "501 123 1 0 ?? codex prompt mentions proposal run run-1 in source text", "run-1",
+    ),
+  )
+  assert_false(
+    moonclaw_process_line_is_proposal_run(
+      "501 123 1 0 ?? moon -C ../moonclaw run cmd/main -- proposal run run-1,", "run-1",
+    ),
+  )
+}

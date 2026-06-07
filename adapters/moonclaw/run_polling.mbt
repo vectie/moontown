@@ -135,11 +135,36 @@ pub async fn run_process_alive(run_id : String) -> Bool {
 ///|
 async fn moonclaw_run_process_alive(run_id : String) -> Bool {
   let listed = @integration.run_checked("ps", ["-ef"]) catch {
-    _ => return true
+    _ => return false
   }
-  let needle = "proposal run \{run_id}"
   for line in listed.stdout.split("\n") {
-    if line.contains(needle) {
+    if moonclaw_process_line_is_proposal_run(line.to_owned(), run_id) {
+      return true
+    }
+  }
+  false
+}
+
+///|
+fn moonclaw_process_line_is_proposal_run(
+  line : String,
+  run_id : String,
+) -> Bool {
+  let tokens : Array[String] = []
+  for token in line.split(" ") {
+    let token = token.trim().to_owned()
+    if !token.is_blank() {
+      tokens.push(token)
+    }
+  }
+  if tokens.length() < 4 {
+    return false
+  }
+  for index in 1..<(tokens.length() - 2) {
+    if tokens[index - 1] == "--" &&
+      tokens[index] == "proposal" &&
+      tokens[index + 1] == "run" &&
+      tokens[index + 2] == run_id {
       return true
     }
   }

@@ -70,7 +70,7 @@ fn planbook_repair_skill_rules() -> Array[String] {
     "- Never claim success because a markdown plan exists.",
     "- Rerun the PlanBook doctor after a local repair.",
     "- Run validation, inspect the focused diff, run `git diff --check`, and record `git status --short`.",
-    "- If files changed and validation passed, create or prepare a local commit according to packet policy; do not push unless the policy explicitly allows it.",
+    "- If files changed and validation passed, create a local commit according to packet policy; commit only repair-owned files and preserve pre-existing unrelated dirty files; do not push unless the policy explicitly allows it.",
     "- Use exact `target_files` before any broad search.",
     "- Do not run whole-repo `find`, `rg`, or `search_files` until the exact target files prove insufficient.",
   ]

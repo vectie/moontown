@@ -58,7 +58,7 @@ fn planbook_repair_diff_hygiene_task_rule() -> String {
 
 ///|
 fn planbook_repair_commit_task_rule() -> String {
-  "8. If validation passes and files changed, prepare a local commit with a clear message according to the repair packet git policy; do not push unless policy allows it."
+  "8. If validation passes and files changed, create a local commit with a clear message according to the repair packet git policy. Commit only repair-owned changed files; preserve pre-existing unrelated dirty files and record them as pre-existing. Do not push unless policy allows it."
 }
 
 ///|

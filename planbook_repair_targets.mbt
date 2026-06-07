@@ -54,6 +54,32 @@ fn planbook_repair_target_files(criterion_id : String) -> Array[String] {
         editor_feature_selection_result_path(planbook_root),
         "\{root}/docs/WENYU_UI_MODULE_SYSTEM.md",
       ]
+    "planbook-source-patch-loop" =>
+      [
+        "\{root}/planbook_autonomy.mbt",
+        "\{root}/planbook_autonomy_criteria_self_build.mbt",
+        "\{root}/planbook_repair.mbt",
+        "\{root}/planbook_repair_active.mbt",
+        "\{root}/planbook_repair_result.mbt",
+        "\{root}/planbook_repair_packet_metadata.mbt",
+        "\{root}/planbook_repair_patch_receipt.mbt",
+        "\{root}/planbook_repair_targets.mbt",
+        "\{root}/planbook_repair_request_rules.mbt",
+        "\{root}/planbook_repair_skill_page.mbt",
+        "\{root}/planbook_repair_materialization_wbtest.mbt",
+        "\{root}/planbook_repair_request_contract_wbtest.mbt",
+        "\{root}/planbook_repair_worker_policy_wbtest.mbt",
+        "\{root}/adapters/moonclaw/run_polling.mbt",
+        "\{root}/adapters/moonclaw/run_polling_wbtest.mbt",
+        "\{root}/live_autonomy_wbtest.mbt",
+        "\{root}/planbook.mbt",
+        "\{root}/cmd/main/main.mbt",
+        "\{root}/../moonclaw/acp/runner.mbt",
+        "\{root}/../moonclaw/acp/runner_wbtest.mbt",
+        "\{root}/../moonclaw/job/analysis_acp_runner.mbt",
+        "\{root}/../moonclaw/job/analysis_contracts.mbt",
+        "\{root}/../moonclaw/job/analysis_wbtest.mbt",
+      ]
     _ =>
       [
         "\{root}/planbook_autonomy.mbt",
