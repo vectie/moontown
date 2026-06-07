@@ -121,6 +121,34 @@ test "book quality type classification preserves role precedence" {
 }
 
 ///|
+test "book quality active catalog filter excludes only archive and smoke artifacts" {
+  let contest = book_quality_catalog_entry(
+    id="wenyu-contest-express",
+    name="Contest Express",
+    purpose="contest service protocol",
+    workspace_root="/tmp/contest",
+    tags=["civic-service"],
+  )
+  assert_true(book_quality_active_catalog_entry(contest))
+  let smoke = book_quality_catalog_entry(
+    id="research-codex-pdf-watch-smoke-20260602",
+    name="Codex PDF Watch Smoke",
+    purpose="Smoke test PDF Evidence Watch publish handoff.",
+    workspace_root="/tmp/smoke",
+    tags=["research"],
+  )
+  assert_false(book_quality_active_catalog_entry(smoke))
+  let archived = book_quality_catalog_entry(
+    id="research-old",
+    name="Old Research",
+    purpose="Archived by operator.",
+    workspace_root="/tmp/old",
+    tags=["research", "archived"],
+  )
+  assert_false(book_quality_active_catalog_entry(archived))
+}
+
+///|
 test "book quality review context specs provide typed pages and safe fallback" {
   let custom_spec = book_quality_context_spec("custom-book", ["middle.md"])
   assert_eq(custom_spec.book_type, "custom-book")

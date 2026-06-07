@@ -118,7 +118,5 @@ fn book_quality_repairable_book_ids(
 fn book_quality_repairable_catalog_entry(
   entry : @moonbook.BookCatalogEntry,
 ) -> Bool {
-  !entry.tags.contains("archived") &&
-  !entry.tags.contains("hidden") &&
-  !entry.tags.contains("internal")
+  book_quality_active_catalog_entry(entry)
 }

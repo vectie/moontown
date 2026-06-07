@@ -47,14 +47,24 @@ async fn quality_catalog_with_runtime_books(
   snapshot_path : String,
 ) -> Array[@moonbook.BookCatalogEntry] {
   let merged : Array[@moonbook.BookCatalogEntry] = []
+  let ignored_ids : Array[String] = []
   for entry in catalog {
-    merged.push(entry)
+    if book_quality_active_catalog_entry(entry) {
+      merged.push(entry)
+    } else {
+      ignored_ids.push(entry.id)
+    }
   }
   match @storage.load_snapshot_file(snapshot_path) {
     Some(snapshot) =>
       for book in snapshot.town.books {
-        if !merged.any(fn(entry) { entry.id == book.id }) {
-          merged.push(book_quality_catalog_entry_from_runtime_book(book))
+        if ignored_ids.contains(book.id) {
+          continue
+        }
+        let entry = book_quality_catalog_entry_from_runtime_book(book)
+        if book_quality_active_catalog_entry(entry) &&
+          !merged.any(fn(item) { item.id == entry.id }) {
+          merged.push(entry)
         }
       }
     None => ()

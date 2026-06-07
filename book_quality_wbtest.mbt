@@ -108,3 +108,74 @@ async test "book quality includes live runtime books outside catalog" {
   )
   assert_true(rendered.contains("|research-opc|research-book|"))
 }
+
+///|
+async test "book quality excludes archived and smoke books from active audit" {
+  let root = cleaned_book_quality_test_root(
+    "/tmp/moontown-book-quality-active-filter-wbtest",
+  )
+  let catalog_path = "\{root}/moonbooks.json"
+  let snapshot_path = "\{root}/town.json"
+  @moonbook.save_catalog_file(catalog_path, [
+    book_quality_catalog_entry(
+      id="research-opc",
+      name="OPC Research",
+      purpose="Track One Person Company research over time.",
+      workspace_root="\{root}/books/research-opc",
+      tags=["research"],
+    ),
+    book_quality_catalog_entry(
+      id="codex-smoke-pdf-watch",
+      name="Smoke PDF Watch",
+      purpose="Smoke test PDF evidence watch request path.",
+      workspace_root="\{root}/books/codex-smoke-pdf-watch",
+      tags=["research"],
+    ),
+    book_quality_catalog_entry(
+      id="archived-research",
+      name="Archived Research",
+      purpose="Archived by operator.",
+      workspace_root="\{root}/books/archived-research",
+      tags=["research", "archived"],
+    ),
+  ])
+  let state = @core.empty_state(
+    @core.TownConfig::new(id="quality-filter", name="Quality Filter Town"),
+  )
+  state.register_book(
+    @core.BookRef::new(
+      id="research-runtime-smoke",
+      name="Runtime Smoke Research",
+      purpose="Smoke test runtime-only research book.",
+      workspace_root="\{root}/books/research-runtime-smoke",
+      tags=["research"],
+    ),
+  )
+  state.register_book(
+    @core.BookRef::new(
+      id="research-runtime-real",
+      name="Runtime Real Research",
+      purpose="Durable runtime-only research book.",
+      workspace_root="\{root}/books/research-runtime-real",
+      tags=["research"],
+    ),
+  )
+  @storage.save_snapshot_file(snapshot_path, @storage.snapshot_of(state))
+  let audit = inspect_book_quality(
+    book_catalog_path=catalog_path,
+    snapshot_path~,
+  )
+  assert_true(audit.scores.any(fn(score) { score.book_id == "research-opc" }))
+  assert_true(
+    audit.scores.any(fn(score) { score.book_id == "research-runtime-real" }),
+  )
+  assert_false(
+    audit.scores.any(fn(score) { score.book_id == "codex-smoke-pdf-watch" }),
+  )
+  assert_false(
+    audit.scores.any(fn(score) { score.book_id == "archived-research" }),
+  )
+  assert_false(
+    audit.scores.any(fn(score) { score.book_id == "research-runtime-smoke" }),
+  )
+}

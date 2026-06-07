@@ -29,31 +29,36 @@ async fn planbook_runtime_book_quality_coverage_criterion(
   match @storage.load_snapshot_file(snapshot_path) {
     Some(snapshot) => {
       let missing : Array[String] = []
+      let active_runtime_books : Array[@moonbook.BookCatalogEntry] = []
       for book in snapshot.town.books {
-        if !audit.scores.any(fn(score) { score.book_id == book.id }) {
-          missing.push(book.id)
+        let entry = book_quality_catalog_entry_from_runtime_book(book)
+        if book_quality_active_catalog_entry(entry) {
+          active_runtime_books.push(entry)
+          if !audit.scores.any(fn(score) { score.book_id == book.id }) {
+            missing.push(book.id)
+          }
         }
       }
       let ready = missing.is_empty()
       planbook_criterion(
         "runtime-books-in-quality-audit",
         "2026-05-29-book-quality-upgrade",
-        "Live runtime books are included in MoonBook quality audit",
+        "Active live runtime books are included in MoonBook quality audit",
         "moontown+moonbook",
         ready,
         if ready {
-          "quality audit covers \{snapshot.town.books.length()} live runtime book(s) and \{audit.total} total managed book(s)"
+          "quality audit covers \{active_runtime_books.length()} active live runtime book(s), excluding archived/internal/smoke artifacts, and \{audit.total} total managed book(s)"
         } else {
-          "quality audit is missing live runtime book(s): \{missing.join(", ")}"
+          "quality audit is missing active live runtime book(s): \{missing.join(", ")}"
         },
-        "merge saved town snapshot books into the book-quality audit without mutating the curated MoonBook catalog",
+        "merge active saved town snapshot books into the book-quality audit without mutating the curated MoonBook catalog; keep smoke/archive artifacts out of product-quality accounting",
       )
     }
     None =>
       planbook_criterion(
         "runtime-books-in-quality-audit",
         "2026-05-29-book-quality-upgrade",
-        "Live runtime books are included in MoonBook quality audit",
+        "Active live runtime books are included in MoonBook quality audit",
         "moontown+moonbook",
         false,
         "no saved town snapshot exists at \{snapshot_path}",
