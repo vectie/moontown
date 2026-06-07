@@ -46,6 +46,22 @@ async fn refresh_planbook_repair_task_from_run(
 }
 
 ///|
+async fn planbook_repair_prefer_completed_index_task(
+  task : PlanbookRepairTask,
+  criterion : PlanbookCriterionStatus,
+  workspace_root : String,
+) -> PlanbookRepairTask {
+  if task.status != "stale" && task.status != "failed" {
+    return task
+  }
+  match latest_planbook_repair_task_from_job_index(criterion, workspace_root) {
+    Some(index_task) if index_task.status == "completed" &&
+      index_task.run_id != task.run_id => index_task
+    _ => task
+  }
+}
+
+///|
 async fn planbook_repair_result_text_for_task(
   task : PlanbookRepairTask,
 ) -> String {

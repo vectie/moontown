@@ -93,9 +93,7 @@ test "planbook source patch loop target list covers self patch plumbing" {
 
 ///|
 test "planbook live runtime recovery target list covers reconciliation plumbing" {
-  let targets = planbook_repair_target_files("live-runtime-recovery").join(
-    "\n",
-  )
+  let targets = planbook_repair_target_files("live-runtime-recovery").join("\n")
   assert_true(targets.contains("planbook_autonomy_criteria_runtime.mbt"))
   assert_true(targets.contains("planbook_repair_targets.mbt"))
   assert_true(targets.contains("goal_supervision_recovery.mbt"))

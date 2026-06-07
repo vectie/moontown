@@ -205,7 +205,9 @@ async test "planbook source patch receipt survives repair result supersession th
           "last_run_id": run_id,
         },
       ],
-    }.to_json().stringify(),
+    }
+    .to_json()
+    .stringify(),
   )
   write_text_file(
     "\{workspace_root}/.moonclaw/jobs/runs/\{run_id}/meta.json",
@@ -214,17 +216,102 @@ async test "planbook source patch receipt survives repair result supersession th
       "workspace_dir": "\{workspace_root}/moonclaw-jobs/\{run_id}",
       "status": "Succeeded",
       "summary": "accepted source patch",
-    }.to_json().stringify(),
+    }
+    .to_json()
+    .stringify(),
   )
   write_text_file(
     "\{workspace_root}/moonclaw-jobs/\{run_id}/result.json",
     Json::object({
       "content": content.to_json(),
-      "patch_receipt": planbook_test_valid_patch_receipt(
-        criterion_id,
-        run_id~,
-      ),
+      "patch_receipt": planbook_test_valid_patch_receipt(criterion_id, run_id~),
     }).stringify(),
   )
   assert_true(planbook_latest_repair_patch_receipt_ready(workspace_root))
+}
+
+///|
+async test "planbook repair recovers accepted run from proposal job id when last run id is absent" {
+  let workspace_root = "/tmp/moontown-planbook-repair-run-index-fallback-wbtest"
+  let criterion_id = "live-runtime-recovery"
+  let proposal_id = "proposal-live-runtime"
+  let run_id = "run-live-runtime-receipt-index"
+  let content = [
+    "repair_decision: accepted",
+    "criterion_id: \{criterion_id}",
+    "files_changed: goal_supervision_recovery.mbt",
+    ..planbook_test_validation_lines(),
+    "diff_summary: git diff --check passed",
+    "plan_update_status: unchanged",
+    "commit_status: committed",
+    "commit_message: Repair live-runtime-recovery through ACP",
+    "push_status: not_pushed_by_policy",
+  ].join("\n")
+  write_text_file(
+    planbook_repair_job_proposals_path(workspace_root),
+    {
+      "proposals": [
+        {
+          "id": proposal_id,
+          "request_text": "Open criterion: `live-runtime-recovery`.",
+        },
+      ],
+    }
+    .to_json()
+    .stringify(),
+  )
+  write_text_file(
+    planbook_repair_job_index_path(workspace_root),
+    {
+      "runs": [
+        {
+          "id": run_id,
+          "job_id": "job.proposal.\{proposal_id}",
+          "status": "Succeeded",
+        },
+      ],
+    }
+    .to_json()
+    .stringify(),
+  )
+  write_text_file(
+    "\{workspace_root}/.moonclaw/jobs/runs/\{run_id}/meta.json",
+    {
+      "id": run_id,
+      "job_id": "job.proposal.\{proposal_id}",
+      "workspace_dir": "\{workspace_root}/moonclaw-jobs/\{run_id}",
+      "status": "Succeeded",
+      "summary": "accepted source patch",
+    }
+    .to_json()
+    .stringify(),
+  )
+  write_text_file(
+    "\{workspace_root}/moonclaw-jobs/\{run_id}/result.json",
+    Json::object({
+      "content": content.to_json(),
+      "metadata": Json::object({
+        "patch_receipt": planbook_test_valid_patch_receipt(
+          criterion_id,
+          run_id~,
+        ),
+      }),
+    }).stringify(),
+  )
+  let criterion : PlanbookCriterionStatus = {
+    id: criterion_id,
+    plan_id: "test",
+    title: "Live runtime failures are visible to PlanBook repair",
+    owner: "moontown+moonclaw",
+    satisfied: false,
+    evidence: "1 failed/stale executions remain",
+    next_action: "repair",
+  }
+  let task = match
+    latest_planbook_repair_task_from_job_index(criterion, workspace_root) {
+    Some(task) => task
+    None => fail("expected recovered task")
+  }
+  assert_eq(task.run_id.unwrap_or(""), run_id)
+  assert_eq(task.status, "completed")
 }

@@ -81,7 +81,12 @@ async fn latest_planbook_repair_task_from_job_index(
                 )
                 if request_text.contains("Open criterion: `\{criterion.id}`") {
                   let proposal_id = json_object_string(proposal, "id")
-                  let run_id = json_object_string(proposal, "last_run_id")
+                  let run_id = planbook_best_run_id_for_repair_proposal(
+                    workspace_root,
+                    criterion.id,
+                    proposal_id,
+                    json_object_string(proposal, "last_run_id"),
+                  )
                   let run_status = match run_id {
                     Some(id) =>
                       planbook_repair_run_status_in_workspace(
@@ -129,5 +134,69 @@ async fn latest_planbook_repair_task_from_job_index(
         _ => None
       }
     _ => None
+  }
+}
+
+///|
+async fn planbook_best_run_id_for_repair_proposal(
+  workspace_root : String,
+  criterion_id : String,
+  proposal_id : String?,
+  fallback_run_id : String?,
+) -> String? {
+  let run_ids = match proposal_id {
+    Some(proposal_id) =>
+      planbook_repair_run_ids_for_proposal(workspace_root, proposal_id)
+    None => []
+  }
+  for offset in 0..<run_ids.length() {
+    let run_id = run_ids[run_ids.length() - offset - 1]
+    if planbook_run_has_accepted_repair_result(
+        workspace_root, run_id, criterion_id,
+      ) {
+      return Some(run_id)
+    }
+  }
+  if !run_ids.is_empty() {
+    Some(run_ids[run_ids.length() - 1])
+  } else {
+    fallback_run_id
+  }
+}
+
+///|
+async fn planbook_repair_run_ids_for_proposal(
+  workspace_root : String,
+  proposal_id : String,
+) -> Array[String] {
+  let path = planbook_repair_job_index_path(workspace_root)
+  if !@fs.exists(path) {
+    return []
+  }
+  let parsed = @json.parse(@fs.read_file(path).text()) catch { _ => return [] }
+  match parsed {
+    Object(root) =>
+      match root.get("runs") {
+        Some(Array(runs)) => {
+          let run_ids : Array[String] = []
+          for item in runs {
+            match item {
+              Object(run) =>
+                if json_object_string(run, "job_id") ==
+                  Some("job.proposal.\{proposal_id}") {
+                  match json_object_string(run, "id") {
+                    Some(run_id) if !run_ids.contains(run_id) =>
+                      run_ids.push(run_id)
+                    _ => ()
+                  }
+                }
+              _ => ()
+            }
+          }
+          run_ids
+        }
+        _ => []
+      }
+    _ => []
   }
 }

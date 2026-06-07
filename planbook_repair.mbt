@@ -145,8 +145,17 @@ pub async fn render_moontown_planbook_repair_status(
     }
   }
   let refreshed = refresh_planbook_repair_task_from_run(task)
-  let result_text = reconcile_planbook_repair_result(refreshed)
-  render_planbook_repair_markdown(refreshed, result_text~)
+  let effective = match first_planbook_open_criterion(status) {
+    Some(criterion) if criterion.id == refreshed.criterion_id =>
+      planbook_repair_prefer_completed_index_task(
+        refreshed,
+        criterion,
+        default_planbook_workspace_root(),
+      )
+    _ => refreshed
+  }
+  let result_text = reconcile_planbook_repair_result(effective)
+  render_planbook_repair_markdown(effective, result_text~)
 }
 
 ///|

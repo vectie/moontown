@@ -236,7 +236,9 @@ async fn planbook_latest_repair_patch_receipt_ready(
   workspace_root : String,
 ) -> Bool {
   planbook_repair_source_patch_receipt_text_ready(
-    read_text_or_empty(planbook_repair_result_path_for_workspace(workspace_root)),
+    read_text_or_empty(
+      planbook_repair_result_path_for_workspace(workspace_root),
+    ),
   ) ||
   planbook_repair_source_patch_receipt_text_ready(
     read_text_or_empty(planbook_repair_superseded_result_path(workspace_root)),
@@ -250,19 +252,18 @@ async fn planbook_repair_source_patch_receipt_from_index_ready(
 ) -> Bool {
   let criterion_id = "planbook-source-patch-loop"
   let run_ids = planbook_repair_run_ids_for_criterion(
-    workspace_root,
-    criterion_id,
+    workspace_root, criterion_id,
   )
   for offset in 0..<run_ids.length() {
     let run_id = run_ids[run_ids.length() - offset - 1]
     match moonclaw_run_result_payload_from_run(run_id, workspace_root) {
       Some(payload) =>
         if planbook_repair_payload_has_valid_patch_receipt(
-          payload,
-          criterion_id,
-          planbook_repair_source_root(),
-          run_id,
-        ) {
+            payload,
+            criterion_id,
+            planbook_repair_source_root(),
+            run_id,
+          ) {
           return true
         }
       _ => ()
@@ -300,14 +301,27 @@ async fn planbook_repair_run_ids_for_criterion(
           for item in proposals {
             match item {
               Object(proposal) => {
-                let request_text = json_object_string(
-                  proposal,
-                  "request_text",
-                ).unwrap_or("")
+                let request_text = json_object_string(proposal, "request_text").unwrap_or(
+                  "",
+                )
                 if request_text.contains("Open criterion: `\{criterion_id}`") {
-                  match json_object_string(proposal, "last_run_id") {
-                    Some(run_id) => run_ids.push(run_id)
+                  match json_object_string(proposal, "id") {
+                    Some(proposal_id) =>
+                      for
+                        run_id in planbook_repair_run_ids_for_proposal(
+                          workspace_root, proposal_id,
+                        ) {
+                        if !run_ids.contains(run_id) {
+                          run_ids.push(run_id)
+                        }
+                      }
                     None => ()
+                  }
+                  match json_object_string(proposal, "last_run_id") {
+                    Some(run_id) if !run_ids.contains(run_id) =>
+                      run_ids.push(run_id)
+                    None => ()
+                    _ => ()
                   }
                 }
               }
