@@ -9,9 +9,12 @@ async fn finalize_score(
   review_result_dir : String,
 ) -> BookQualityScore {
   let structural = assess_structural_quality(raw_score, gaps)
-  let semantic = semantic_quality_assessment(
-    read_ai_quality_score(entry.id, review_result_dir),
+  let semantic_result_text = read_ai_quality_result_text(
+    entry.id,
+    review_result_dir,
   )
+  let semantic_score = parse_ai_quality_score(semantic_result_text)
+  let semantic = semantic_quality_assessment(semantic_score)
   {
     book_id: entry.id,
     title: entry.name,
@@ -32,6 +35,9 @@ async fn finalize_score(
       gaps,
       structural.score,
       semantic.score,
+      semantic_repair_task=book_quality_semantic_repair_task(
+        semantic_result_text,
+      ),
     ),
   }
 }

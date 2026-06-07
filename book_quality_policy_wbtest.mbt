@@ -9,6 +9,18 @@ test "semantic quality gates readiness and next action" {
     Some(64),
   )
   assert_true(action.contains("AI semantic review"))
+  let specific_action = next_book_quality_action(
+    book_quality_research_type(),
+    [],
+    100,
+    Some(64),
+    semantic_repair_task=Some(
+      "Create an evidence matrix from verified sources.",
+    ),
+  )
+  assert_eq(
+    specific_action, "AI semantic review repair: Create an evidence matrix from verified sources.",
+  )
 }
 
 ///|

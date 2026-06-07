@@ -30,7 +30,7 @@ fn render_book_quality_audit(audit : BookQualityAudit) -> String {
       None => "pending"
     }
     builder.write_string(
-      "|\{score.book_id}|\{score.book_type}|\{score.structural_score} / \{score.structural_grade}|\{ai_quality}|\{score.quality_status}|\{score.ready}|\{score.next_action}|\n",
+      "|\{score.book_id}|\{score.book_type}|\{score.structural_score} / \{score.structural_grade}|\{ai_quality}|\{score.quality_status}|\{score.ready}|\{markdown_inline(score.next_action)}|\n",
     )
   }
   builder.write_string("\n## Gaps By Book\n\n")
@@ -47,13 +47,13 @@ fn render_book_quality_audit(audit : BookQualityAudit) -> String {
 }
 
 ///|
-async fn read_ai_quality_score(book_id : String, result_dir : String) -> Int? {
+async fn read_ai_quality_result_text(
+  book_id : String,
+  result_dir : String,
+) -> String {
   let path = book_quality_ai_review_result_path(result_dir, book_id)
   let text = read_text_or_empty(path)
-  if text.is_empty() {
-    return None
-  }
-  parse_ai_quality_score(text)
+  text
 }
 
 ///|
@@ -89,6 +89,11 @@ fn first_int(text : String) -> Int? {
   } else {
     None
   }
+}
+
+///|
+fn book_quality_semantic_repair_task(text : String) -> String? {
+  book_quality_contract_field(text, "next_repair_task")
 }
 
 ///|

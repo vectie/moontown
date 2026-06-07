@@ -32,9 +32,10 @@ fn next_book_quality_action(
   gaps : Array[String],
   score : Int,
   semantic_score : Int?,
+  semantic_repair_task? : String? = None,
 ) -> String {
   if semantic_review_requires_repair(semantic_score) {
-    semantic_quality_repair_action()
+    semantic_quality_repair_action(semantic_repair_task~)
   } else if structural_quality_is_stable(gaps, score) {
     stable_book_quality_action()
   } else {
@@ -56,8 +57,15 @@ fn semantic_quality_ready_threshold() -> Int {
 }
 
 ///|
-fn semantic_quality_repair_action() -> String {
-  "Use the AI semantic review to repair real book quality, not just structure."
+fn semantic_quality_repair_action(
+  semantic_repair_task? : String? = None,
+) -> String {
+  match semantic_repair_task {
+    Some(task) if !task.trim().is_empty() =>
+      "AI semantic review repair: \{task.trim()}"
+    _ =>
+      "Use the AI semantic review to repair real book quality, not just structure."
+  }
 }
 
 ///|

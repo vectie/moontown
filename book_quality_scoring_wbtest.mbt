@@ -7,6 +7,14 @@ test "AI quality parser reads semantic review score" {
 }
 
 ///|
+test "AI quality parser reads concrete repair task" {
+  let task = book_quality_semantic_repair_task(
+    "ai_quality_score: 42\nnext_repair_task: Create a source screen and revise the projection.\n",
+  )
+  assert_true(task == Some("Create a source screen and revise the projection."))
+}
+
+///|
 test "book quality structural assessment caps gapped scores below excellent" {
   let clean = assess_structural_quality(120, [])
   assert_eq(clean.score, 100)
