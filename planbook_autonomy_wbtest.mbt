@@ -137,3 +137,29 @@ async test "live autonomy includes planbook repair action" {
   )
   assert_true(status.contains("PlanBook open gaps"))
 }
+
+///|
+async test "self-patching criteria stay open without accepted patch receipt evidence" {
+  let workspace = planbook_autonomy_test_workspace(
+    "/tmp/moontown-planbook-self-patch-receipt-wbtest",
+  )
+  let status = inspect_moontown_planbook_autonomy(
+    snapshot_path=workspace.snapshot_path,
+    workspace_root=workspace.workspace_root,
+    book_catalog_path=workspace.catalog_path,
+  )
+  let source_patch = status.criteria
+    .iter()
+    .find_first(fn(item) { item.id == "planbook-source-patch-loop" })
+    .unwrap()
+  let engineering = status.criteria
+    .iter()
+    .find_first(fn(item) { item.id == "planbook-software-engineering-loop" })
+    .unwrap()
+  assert_true(!source_patch.satisfied)
+  assert_true(!engineering.satisfied)
+  assert_true(
+    source_patch.evidence.contains(planbook_repair_patch_receipt_contract()),
+  )
+  assert_true(engineering.evidence.contains("accepted ACP patch evidence"))
+}

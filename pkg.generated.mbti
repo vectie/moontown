@@ -214,6 +214,8 @@ pub async fn[Provider : @core.BookProvider] load_or_create_demo_state_with_provi
 
 pub async fn load_or_create_modeled_demo_state(path? : String, book_catalog_path? : String) -> @core.TownState
 
+pub fn moonbook_skill_quality_is_strong(String) -> Bool
+
 pub async fn persist_visual_projection(@core.TownState, String, tick? : Int) -> Unit
 
 pub async fn planbook_open_gap_count(snapshot_path? : String) -> Int

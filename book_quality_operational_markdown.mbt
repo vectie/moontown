@@ -86,6 +86,8 @@ fn default_operational_skill(title : String) -> String {
     "- Write concise journey notes for material decisions.",
     "- Queue review for sensitive, financial, external, or code-quality-impacting changes.",
     "",
+    moonbook_skill_quality_contract_section(),
+    "",
     "## Concrete Example",
     "",
     "```md",

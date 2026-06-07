@@ -16,6 +16,7 @@ fn wenyu_civic_service_skill_text() -> String {
     "",
     "Use this generic skill with the module-specific skill pack in the same workspace.",
     civic_generic_service_rules_section(),
+    moonbook_skill_quality_contract_section(),
     civic_required_output_shape_section(),
     civic_generic_service_example_section(),
   ].join("\n")
@@ -35,6 +36,7 @@ fn civic_module_skill_text(service : @civic.CivicServiceDefinition) -> String {
     civic_module_mode_section(service),
     civic_module_purpose_section(service),
     civic_module_decision_section(),
+    moonbook_skill_quality_contract_section(),
     civic_module_work_section("Agent Work", service.agent_work),
     civic_module_work_section("Place / Exchange Work", service.place_work),
     civic_module_work_section("Workflow Hints", service.workflow),

@@ -112,10 +112,48 @@ test "planbook repair result contract accepts structured non-accepted decisions"
 
 ///|
 test "planbook repair result helpers classify decisions and evidence markers" {
+  let criterion_id = "live-runtime-recovery"
+  let receipt : Json = {
+    "contract": planbook_repair_patch_receipt_contract(),
+    "criterion_id": criterion_id,
+    "source_root": planbook_repair_source_root(),
+    "execution_mode": "acp",
+    "execution_target": "codex-main",
+    "run_id": "run-1",
+    "acp_run_id": "acp-run-1",
+    "base_head": "0000001",
+    "final_head": "0000002",
+    "changed_files": ["planbook_repair_result.mbt"],
+    "validation_commands": planbook_repair_required_commands(),
+    "diff_check_status": "passed",
+    "commit_status": "committed",
+    "commit_sha": "0000002",
+    "commit_message": "Repair live runtime",
+    "push_status": "not_pushed_by_policy",
+    "result_decision": "accepted",
+  }
   let accepted = [
-    "repair_decision: accepted", "criterion_id: live-runtime-recovery", "validation: ok",
-    "diff_summary: clean", "plan_update_status: unchanged", "commit_status: ready_to_commit",
-    "commit_message: Repair live runtime", "push_status: not_pushed_by_policy",
+    "repair_decision: accepted",
+    "criterion_id: \{criterion_id}",
+    ..planbook_repair_required_commands().map(fn(command) {
+      "validation: \{command} passed"
+    }),
+    "diff_summary: git diff --check passed",
+    "plan_update_status: unchanged",
+    "commit_status: committed",
+    "commit_message: Repair live runtime",
+    "push_status: not_pushed_by_policy",
+    planbook_repair_patch_receipt_text(receipt),
+  ].join("\n")
+  let marker_only_accepted = [
+    "repair_decision: accepted",
+    "criterion_id: \{criterion_id}",
+    "validation: ok",
+    "diff_summary: clean",
+    "plan_update_status: unchanged",
+    "commit_status: ready_to_commit",
+    "commit_message: Repair live runtime",
+    "push_status: not_pushed_by_policy",
   ].join("\n")
   let handoff = [
     "\"criterion_id\": \"live-runtime-recovery\"", "\"repair_decision\": \"needs_external_owner\"",
@@ -137,6 +175,9 @@ test "planbook repair result helpers classify decisions and evidence markers" {
   assert_true(planbook_repair_result_has_handoff_decision(blocked))
   assert_true(!planbook_repair_result_has_handoff_decision(no_change))
   assert_true(planbook_repair_result_has_engineering_evidence(accepted))
+  assert_true(
+    !planbook_repair_result_has_engineering_evidence(marker_only_accepted),
+  )
   assert_eq(
     planbook_repair_result_engineering_evidence_markers().join("|"),
     "validation:|diff_summary:|plan_update_status:|commit_status:|commit_message:|push_status:",

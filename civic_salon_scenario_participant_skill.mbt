@@ -17,6 +17,8 @@ fn civic_salon_skill_text(scenario : CivicSalonScenario) -> String {
     "",
     markdown_bullets(scenario.skill_rules),
     "",
+    moonbook_skill_quality_contract_section(),
+    "",
     "## Output Example",
     "",
     "```md",

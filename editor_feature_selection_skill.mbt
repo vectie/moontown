@@ -49,5 +49,7 @@ fn editor_feature_rater_skill_markdown() -> String {
     "- Name specific evidence paths.",
     "- Keep the implementation hint bounded enough for one repair packet.",
     "- If evidence is insufficient, still choose the best-supported candidate and state the uncertainty.",
+    "",
+    moonbook_skill_quality_contract_section(),
   ].join("\n")
 }

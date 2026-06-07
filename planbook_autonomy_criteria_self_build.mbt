@@ -107,7 +107,9 @@ async fn planbook_result_contract_criterion() -> PlanbookCriterionStatus {
 }
 
 ///|
-async fn planbook_source_patch_loop_criterion() -> PlanbookCriterionStatus {
+async fn planbook_source_patch_loop_criterion(
+  workspace_root : String,
+) -> PlanbookCriterionStatus {
   let repair_workspace_file = "planbook_repair_workspace.mbt"
   let profile_file = "planbook_repair_profile.mbt"
   let acp_file = "planbook_repair_acp.mbt"
@@ -122,14 +124,17 @@ async fn planbook_source_patch_loop_criterion() -> PlanbookCriterionStatus {
   let skill_ready = text_file_contains(
     "planbook_repair_request_rules.mbt", "Codex ACP source-patching target",
   )
+  let receipt_ready = planbook_latest_repair_patch_receipt_ready(workspace_root)
   planbook_criterion(
     "planbook-source-patch-loop",
     "2026-05-31-editor-mode-real-pipeline",
     "PlanBook repair can patch repository source through Codex ACP",
     "moontown+moonclaw+codex-acp",
-    acp_ready && skill_ready,
-    if acp_ready && skill_ready {
-      "PlanBook repair packets use `execution_mode: acp`, target `codex-main`, and a Codex ACP target rooted at the repository source tree"
+    acp_ready && skill_ready && receipt_ready,
+    if acp_ready && skill_ready && receipt_ready {
+      "PlanBook repair has accepted `\{planbook_repair_patch_receipt_contract()}` evidence from a Codex ACP source-root patch run"
+    } else if acp_ready && skill_ready {
+      "PlanBook repair ACP wiring exists, but no accepted `\{planbook_repair_patch_receipt_contract()}` source patch receipt has been consumed yet"
     } else {
       "PlanBook repair still cannot prove a source-patching ACP route; it may only plan or validate without editing repository code"
     },
@@ -138,7 +143,9 @@ async fn planbook_source_patch_loop_criterion() -> PlanbookCriterionStatus {
 }
 
 ///|
-async fn planbook_engineering_loop_criterion() -> PlanbookCriterionStatus {
+async fn planbook_engineering_loop_criterion(
+  workspace_root : String,
+) -> PlanbookCriterionStatus {
   let metadata_file = "planbook_repair_packet_metadata.mbt"
   let policy_file = "planbook_repair_policy.mbt"
   let skill_file = "planbook_repair_skill_page.mbt"
@@ -157,14 +164,17 @@ async fn planbook_engineering_loop_criterion() -> PlanbookCriterionStatus {
     ) &&
     text_file_contains(policy_file, "moon test --no-render") &&
     text_file_contains(policy_file, "moon info")
+  let receipt_ready = planbook_latest_repair_patch_receipt_ready(workspace_root)
   planbook_criterion(
     "planbook-software-engineering-loop",
     "2026-05-31-editor-mode-real-pipeline",
     "PlanBook repair uses a full software-engineering loop, not patch-only execution",
     "moontown+moonclaw+codex-acp",
-    metadata_ready && skill_ready && validation_ready,
-    if metadata_ready && skill_ready && validation_ready {
-      "PlanBook repair packets require validation commands, git diff/status hygiene, commit policy, and commit evidence fields"
+    metadata_ready && skill_ready && validation_ready && receipt_ready,
+    if metadata_ready && skill_ready && validation_ready && receipt_ready {
+      "Accepted PlanBook repair receipt proves validation commands, git diff hygiene, local commit evidence, and no push by policy"
+    } else if metadata_ready && skill_ready && validation_ready {
+      "PlanBook repair packets request validation, diff hygiene, and commit evidence, but PlanBook has not consumed accepted ACP patch evidence yet"
     } else {
       "PlanBook repair can patch source but does not yet prove testing, diff hygiene, and commit discipline"
     },

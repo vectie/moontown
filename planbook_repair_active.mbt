@@ -91,20 +91,26 @@ fn planbook_repair_handoff_is_stale(
 ///|
 async fn planbook_repair_criterion_now_satisfied(
   task : PlanbookRepairTask,
+  snapshot_path? : String = @storage.default_snapshot_path(),
+  book_catalog_path? : String = @moonbook.default_catalog_path(),
 ) -> Bool {
-  match task.criterion_id {
-    "moonbook-native-planbook-provider" =>
-      @fs.exists("../moonbook/seed/wiki/skills/code-plan/SKILL.md") ||
-      @fs.exists("../moonbook/seed/wiki/skills/planbook/SKILL.md")
-    "live-runtime-recovery" => {
-      let status = inspect_moontown_planbook_autonomy()
-      for item in status.criteria {
-        if item.id == "live-runtime-recovery" {
-          return item.satisfied
-        }
-      }
-      false
+  let status = inspect_moontown_planbook_autonomy(
+    snapshot_path~,
+    workspace_root=task.workspace_root,
+    book_catalog_path~,
+  )
+  planbook_repair_task_satisfied_by_status(task, status)
+}
+
+///|
+fn planbook_repair_task_satisfied_by_status(
+  task : PlanbookRepairTask,
+  status : PlanbookAutonomyStatus,
+) -> Bool {
+  for item in status.criteria {
+    if item.id == task.criterion_id {
+      return item.satisfied
     }
-    _ => false
   }
+  false
 }

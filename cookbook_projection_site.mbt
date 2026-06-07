@@ -20,32 +20,32 @@ fn cookbook_generated_site_html(
     "<h2>Codebase Describer Pages</h2>",
     "<div class=\"grid\">",
     cookbook_describer_card_html(
-      "Overview", "../../describer/overview.html", "wiki/describer/overview.md",
+      "Overview", "../../describer/overview.html?v=codebase-rendered", "wiki/describer/overview.md",
       "Engineer-facing mental model and reading order for Moontown as a typed, file-backed control plane.",
     ),
     cookbook_describer_card_html(
-      "Algorithms", "../../describer/algorithms.html", "wiki/describer/algorithms.md",
+      "Algorithms", "../../describer/algorithms.html?v=codebase-rendered", "wiki/describer/algorithms.md",
       "Daemon phases, standing-watch dispatch, civic map/reduce, scenario materialization, request processing, live autonomy, and visual projection.",
     ),
     cookbook_describer_card_html(
-      "Data Structures", "../../describer/data-structures.html", "wiki/describer/data-structures.md",
-      "TownState, execution records, standing goals, civic protocol packets, reductions, review gates, snapshots, and cookbook manifests.",
+      "Data Structures", "../../describer/data-structures.html?v=codebase-rendered",
+      "wiki/describer/data-structures.md", "TownState, execution records, standing goals, civic protocol packets, reductions, review gates, snapshots, and cookbook manifests.",
     ),
     cookbook_describer_card_html(
-      "Data Flow", "../../describer/data-flow.html", "wiki/describer/data-flow.md",
+      "Data Flow", "../../describer/data-flow.html?v=codebase-rendered", "wiki/describer/data-flow.md",
       "How operator inputs, schedules, Mayor routing, MoonBook packets, MoonClaw runs, ledgers, and projections move through the system.",
     ),
     cookbook_describer_card_html(
-      "Core Features", "../../describer/core-features.html", "wiki/describer/core-features.md",
-      "Implementation guide for the saved town runtime, Mayor, MoonBook/MoonClaw bridge, civic protocols, live autonomy, UI projection, PlanBook, and cookbook.",
+      "Core Features", "../../describer/core-features.html?v=codebase-rendered",
+      "wiki/describer/core-features.md", "Implementation guide for the saved town runtime, Mayor, MoonBook/MoonClaw bridge, civic protocols, live autonomy, UI projection, PlanBook, and cookbook.",
     ),
     cookbook_describer_card_html(
-      "Content Rules", "../../describer/content-rules.html", "wiki/describer/content-rules.md",
-      "How docs, definitions, runtime state, civic protocols, AI work, and procedures should be described differently.",
+      "Content Rules", "../../describer/content-rules.html?v=codebase-rendered",
+      "wiki/describer/content-rules.md", "How docs, definitions, runtime state, civic protocols, AI work, and procedures should be described differently.",
     ),
     cookbook_describer_card_html(
-      "Cookbook Skill", "../../skills/cookbook-generation.html", "skills/cookbook-generation/SKILL.md",
-      "Instructions future AI maintainers must follow so the cookbook stays a codebase describer.",
+      "Cookbook Skill", "../../skills/cookbook-generation.html?v=codebase-rendered",
+      "skills/cookbook-generation/SKILL.md", "Instructions future AI maintainers must follow so the cookbook stays a codebase describer.",
     ),
     "</div>",
     "</section>",
@@ -109,7 +109,7 @@ fn cookbook_rendered_markdown_html(
     "<html><head><meta charset=\"utf-8\"><title>\{html_escape(title)}</title>",
     cookbook_rendered_page_style_html(),
     "</head><body><main>",
-    "<nav><a href=\"../site/generated/index.html\">Cookbook Home</a> <span>/</span> <code>\{html_escape(source_path)}</code></nav>",
+    "<nav><a href=\"../site/generated/index.html?v=codebase-rendered\">Cookbook Home</a> <span>/</span> <code>\{html_escape(source_path)}</code></nav>",
     markdown_to_html(markdown),
     "</main></body></html>",
   ].join("\n")
@@ -126,7 +126,7 @@ fn cookbook_rendered_skill_html(
     "<html><head><meta charset=\"utf-8\"><title>\{html_escape(title)}</title>",
     cookbook_rendered_page_style_html(),
     "</head><body><main>",
-    "<nav><a href=\"../site/generated/index.html\">Cookbook Home</a> <span>/</span> <code>\{html_escape(source_path)}</code></nav>",
+    "<nav><a href=\"../site/generated/index.html?v=codebase-rendered\">Cookbook Home</a> <span>/</span> <code>\{html_escape(source_path)}</code></nav>",
     markdown_to_html(markdown),
     "</main></body></html>",
   ].join("\n")
@@ -274,12 +274,15 @@ fn markdown_table_separator(line : String) -> Bool {
   if !line.has_prefix("|") {
     return false
   }
-  let stripped = line
-    .replace(old="|", new="")
-    .replace(old="-", new="")
-    .replace(old=":", new="")
-    .replace(old=" ", new="")
-  stripped.is_empty()
+  let mut has_dash = false
+  for char in line {
+    match char {
+      '|' | ':' | ' ' | '\t' => ()
+      '-' => has_dash = true
+      _ => return false
+    }
+  }
+  has_dash
 }
 
 ///|

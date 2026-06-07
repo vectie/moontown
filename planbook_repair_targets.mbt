@@ -57,9 +57,15 @@ fn planbook_repair_target_files(criterion_id : String) -> Array[String] {
     _ =>
       [
         "\{root}/planbook_autonomy.mbt",
+        "\{root}/planbook_autonomy_criteria_self_build.mbt",
         "\{root}/planbook_repair.mbt",
+        "\{root}/planbook_repair_result.mbt",
+        "\{root}/planbook_repair_packet_metadata.mbt",
+        "\{root}/planbook_repair_patch_receipt.mbt",
         "\{root}/planbook.mbt",
         "\{root}/cmd/main/main.mbt",
+        "\{root}/../moonclaw/acp/runner.mbt",
+        "\{root}/../moonclaw/acp/runner_wbtest.mbt",
       ]
   }
 }

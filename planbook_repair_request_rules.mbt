@@ -78,10 +78,10 @@ fn planbook_repair_backlog_completion_task_rule() -> String {
 
 ///|
 fn planbook_repair_result_write_task_rule() -> String {
-  "12. Write `\{planbook_repair_result_relative_path()}` with decision, files changed, validation, diff summary, commit status, plan update status, remaining blockers, and cookbook impact."
+  "12. Write `\{planbook_repair_result_relative_path()}` with decision, files changed, validation, diff summary, commit status, plan update status, remaining blockers, cookbook impact, and `patch_receipt` using `\{planbook_repair_patch_receipt_contract()}` for accepted repairs."
 }
 
 ///|
 fn planbook_repair_satisfaction_gate_task_rule() -> String {
-  "13. Do not mark the criterion satisfied unless evidence exists after validation."
+  "13. Do not mark the criterion satisfied unless accepted source-root ACP patch receipt evidence exists after validation; do not directly fix individual live/runtime autonomy symptoms while repairing self-patching."
 }

@@ -334,14 +334,16 @@ active repair, it dispatches one bounded repair packet through MoonClaw with
 the Moontown source root and return software-engineering evidence. Daemon
 dispatch is detached by default; the live loop records the run id and keeps
 ticking instead of waiting for a long source-repair process inline. Accepted
-repairs must run validation, inspect `git status --short`, pass
-`git diff --check`, summarize the focused diff, and record commit status/message
-under the repair result contract. Backlog-driven repairs must also write
-completion evidence under `raw/backlog/completed/<id>.md`. Use `planbook repair
---dispatch` as an explicit operator/debug trigger; daemon ticks are the normal
-self-patching route and do not duplicate active repairs. If a worker discovers
-the requested work is already done, it should update the plan/progress evidence
-instead of generating code churn.
+source repairs must do more than claim success: they must include a
+`planbook.repair.patch_receipt.v1` receipt proving source-root ACP execution,
+changed files, validation, `git diff --check`, `git status --short`, commit
+status/message, and push policy. Without that receipt, PlanBook treats ACP as
+wired but not yet proven. Backlog-driven repairs must also write completion
+evidence under `raw/backlog/completed/<id>.md`. Use `planbook repair --dispatch`
+as an explicit operator/debug trigger; daemon ticks are the normal self-patching
+route and do not duplicate active repairs. If a worker discovers the requested
+work is already done, it should update the plan/progress evidence instead of
+generating code churn.
 Transient repair dispatch contention is treated as queued retry, not a blocked
 PlanBook gap.
 

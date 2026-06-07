@@ -21,6 +21,8 @@ fn civic_salon_reducer_skill_text(scenario : CivicSalonScenario) -> String {
     "",
     markdown_bullets(scenario.quality_rules),
     "",
+    moonbook_skill_quality_contract_section(),
+    "",
     "## Reduction Rules",
     "",
     markdown_bullets(civic_salon_reducer_reduction_rules()),

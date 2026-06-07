@@ -174,9 +174,17 @@ test "cookbook renders markdown pages as clickable HTML" {
       artifacts: [],
     },
   )
-  assert_true(html.contains("href=\"../../describer/algorithms.html\""))
+  assert_true(
+    html.contains(
+      "href=\"../../describer/algorithms.html?v=codebase-rendered\"",
+    ),
+  )
   assert_true(html.contains("Open rendered page"))
-  assert_true(html.contains("href=\"../../skills/cookbook-generation.html\""))
+  assert_true(
+    html.contains(
+      "href=\"../../skills/cookbook-generation.html?v=codebase-rendered\"",
+    ),
+  )
   let rendered = cookbook_rendered_markdown_html(
     "Algorithms",
     "wiki/describer/algorithms.md",
@@ -185,7 +193,11 @@ test "cookbook renders markdown pages as clickable HTML" {
   assert_true(rendered.contains("<h1>Algorithms Used In Moontown</h1>"))
   assert_true(rendered.contains("<h2>2. Daemon Tick Phase Pipeline</h2>"))
   assert_true(rendered.contains("<pre><code>"))
-  assert_true(rendered.contains("href=\"../site/generated/index.html\""))
+  assert_true(
+    rendered.contains(
+      "href=\"../site/generated/index.html?v=codebase-rendered\"",
+    ),
+  )
   let structures = cookbook_rendered_markdown_html(
     "Data Structures",
     "wiki/describer/data-structures.md",
@@ -193,6 +205,7 @@ test "cookbook renders markdown pages as clickable HTML" {
   )
   assert_true(structures.contains("<table><tbody>"))
   assert_true(structures.contains("<code>TownState</code>"))
+  assert_false(structures.contains("<td>---</td>"))
 }
 
 ///|

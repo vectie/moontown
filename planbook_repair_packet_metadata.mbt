@@ -23,10 +23,13 @@ fn planbook_repair_packet_step_metadata(
     output_contract=planbook_repair_result_contract(),
   )
   fields["kind"] = "planbook_repair".to_json()
+  fields["criterion_id"] = criterion.id.to_json()
   fields["source_root"] = planbook_repair_source_root().to_json()
   fields["target_files"] = planbook_repair_target_files(criterion.id).to_json()
   fields["required_validation_commands"] = planbook_repair_required_commands().to_json()
   fields["required_engineering_steps"] = planbook_repair_required_engineering_steps().to_json()
+  fields["patch_receipt_contract"] = planbook_repair_patch_receipt_contract().to_json()
+  fields["patch_receipt_required_fields"] = planbook_repair_patch_receipt_required_fields().to_json()
   fields["git_policy"] = planbook_repair_git_policy_json()
   fields["target_pages"] = planbook_repair_result_target_pages().to_json()
   add_planbook_repair_wait_policy(fields)
@@ -52,7 +55,17 @@ fn planbook_repair_preferred_skills() -> Array[String] {
 fn planbook_repair_required_engineering_steps() -> Array[String] {
   [
     "inspect-plan", "apply-small-patch", "run-validation", "inspect-git-diff", "write-repair-result",
-    "prepare-commit-summary",
+    "write-patch-receipt", "prepare-commit-summary",
+  ]
+}
+
+///|
+fn planbook_repair_patch_receipt_required_fields() -> Array[String] {
+  [
+    "criterion_id", "source_root", "execution_mode", "execution_target", "run_id",
+    "acp_run_id", "base_head", "final_head", "changed_files", "validation_commands",
+    "diff_check_status", "commit_status", "commit_sha", "commit_message", "push_status",
+    "result_decision",
   ]
 }
 

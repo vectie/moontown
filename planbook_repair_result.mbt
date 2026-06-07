@@ -65,22 +65,82 @@ async fn planbook_repair_result_text_from_run(
     Some(run_id) => run_id
     None => return ""
   }
-  let content = moonclaw_run_result_text_from_run(run_id, task.workspace_root)
-  if planbook_repair_result_satisfies_contract(content, task.criterion_id) {
-    content
+  let payload = match
+    moonclaw_run_result_payload_from_run(run_id, task.workspace_root) {
+    Some(payload) => payload
+    None => return ""
+  }
+  let content = json_string_field(payload, "content").unwrap_or(
+    json_string_field(payload, "summary").unwrap_or(""),
+  )
+  if planbook_repair_run_result_satisfies_contract(
+      payload,
+      content,
+      task.workspace_root,
+      run_id,
+      task.criterion_id,
+    ) {
+    planbook_repair_result_text_with_patch_receipt(content, payload)
   } else {
     ""
   }
 }
 
 ///|
-async fn planbook_run_has_valid_repair_result(
+async fn planbook_run_has_accepted_repair_result(
   workspace_root : String,
   run_id : String,
   criterion_id : String,
 ) -> Bool {
-  let content = moonclaw_run_result_text_from_run(run_id, workspace_root)
-  planbook_repair_result_satisfies_contract(content, criterion_id)
+  let payload = match
+    moonclaw_run_result_payload_from_run(run_id, workspace_root) {
+    Some(payload) => payload
+    None => return false
+  }
+  let content = json_string_field(payload, "content").unwrap_or(
+    json_string_field(payload, "summary").unwrap_or(""),
+  )
+  planbook_repair_run_result_has_accepted_evidence(
+    payload, content, run_id, criterion_id,
+  )
+}
+
+///|
+fn planbook_repair_run_result_satisfies_contract(
+  payload : Json,
+  text : String,
+  workspace_root : String,
+  run_id : String,
+  criterion_id : String,
+) -> Bool {
+  ignore(workspace_root)
+  if !planbook_repair_result_mentions_criterion(text, criterion_id) {
+    return false
+  }
+  if !planbook_repair_result_has_any_decision(text) {
+    return false
+  }
+  !planbook_repair_result_has_accepted_decision(text) ||
+  planbook_repair_run_result_has_accepted_evidence(
+    payload, text, run_id, criterion_id,
+  )
+}
+
+///|
+fn planbook_repair_run_result_has_accepted_evidence(
+  payload : Json,
+  text : String,
+  run_id : String,
+  criterion_id : String,
+) -> Bool {
+  planbook_repair_result_has_accepted_decision(text) &&
+  planbook_repair_result_has_engineering_evidence(text) &&
+  planbook_repair_payload_has_valid_patch_receipt(
+    payload,
+    criterion_id,
+    planbook_repair_source_root(),
+    run_id,
+  )
 }
 
 ///|
@@ -95,7 +155,14 @@ fn planbook_repair_result_satisfies_contract(
     return false
   }
   !planbook_repair_result_has_accepted_decision(text) ||
-  planbook_repair_result_has_engineering_evidence(text)
+  (
+    planbook_repair_result_has_engineering_evidence(text) &&
+    planbook_repair_text_has_valid_patch_receipt(
+      text,
+      criterion_id,
+      planbook_repair_source_root(),
+    )
+  )
 }
 
 ///|
@@ -158,6 +225,7 @@ fn planbook_repair_result_decisions() -> Array[String] {
 
 ///|
 fn planbook_repair_result_has_engineering_evidence(text : String) -> Bool {
+  planbook_repair_result_records_validation_passes(text) &&
   planbook_repair_result_engineering_evidence_markers().all(fn(marker) {
     text.contains(marker)
   })

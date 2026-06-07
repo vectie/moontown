@@ -437,6 +437,13 @@ The doctor checks concrete criteria such as:
 
 This keeps the town honest: open implementation gaps remain visible to the
 Mayor and operator until they are implemented, validated, and recorded.
+The latest accounting is stricter than earlier versions: ACP route wiring is not
+the same as proven self-patching. A PlanBook source-repair criterion must remain
+open until an accepted MoonClaw result includes
+`planbook.repair.patch_receipt.v1` evidence from a Codex ACP run rooted at the
+Moontown source tree. Text-only claims, read-only sandbox attempts,
+`files_changed: none`, or review-only ACP runs are useful diagnostics, but they
+do not prove that the town patched its own code.
 When all criteria are satisfied, the live autonomy spine reports
 `planbook_open=0` and stale repair packets no longer count as active work. If
 the implementation backlog contains open items, `planbook_open` should remain
@@ -474,6 +481,13 @@ That is the intended self-patching path: Mayor/PlanBook choose and bound the
 gap, MoonClaw launches Codex ACP as the code executor, Codex patches the repo,
 and PlanBook reconciles the result contract after validation, diff inspection,
 and commit readiness.
+For a source patch, accepted reconciliation also requires a
+`planbook.repair.patch_receipt.v1` receipt. The receipt is the durable boundary
+between “Codex ACP was configured” and “Codex ACP actually changed, validated,
+and accounted for source code.” It must identify the criterion, source root,
+execution mode/target, changed files, validation commands, diff hygiene, commit
+status/message, and push status. PlanBook rejects accepted source-repair claims
+that do not carry this evidence.
 If the gap belongs in MoonBook or MoonClaw, the repair worker must return a
 precise ownership blocker instead of moving that responsibility into Moontown.
 

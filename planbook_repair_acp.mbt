@@ -35,7 +35,7 @@ fn resolved_codex_args() -> Array[String] {
     None =>
       [
         "/Users/kq/.nvm/versions/node/v22.22.1/lib/node_modules/@openai/codex/bin/codex.js",
-        "exec",
+        "exec", "--sandbox", "workspace-write",
       ]
   }
 }

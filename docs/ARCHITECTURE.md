@@ -769,13 +769,23 @@ workspace, then records `.moontown/planbook/repair-task.json`. The packet uses
 the `planbook.repair.result.v1` contract and, during daemon ticks, is dispatched
 through MoonClaw with `execution_mode: acp` and `execution_target: codex-main`.
 The Codex ACP target is rooted at the Moontown source tree, so the town can patch
-its own repository instead of stopping at plan-only output. `planbook repair
---dispatch` remains an explicit operator/debug trigger. This is the current
-self-build spine: detect gaps, turn the top gap into executable source work,
-preserve ownership boundaries, validate, inspect git status/diff hygiene, record
-commit status/message, and rerun the doctor. The default policy can prepare a
-local commit after validation, while push remains disabled unless an explicit
-future policy enables it. If no stricter self-build criterion is open, the
+its own repository instead of stopping at plan-only output.
+
+Current accounting separates route configuration from proof. ACP wiring alone is
+not accepted self-patching evidence. A Moontown-owned source repair is accepted
+only when the MoonClaw result carries a `planbook.repair.patch_receipt.v1`
+receipt proving source-root ACP execution, changed files, validation command
+results, `git diff --check`, `git status --short`, commit status/message, and
+push policy. If the result lacks that receipt, PlanBook can record diagnostics or
+ownership blockers, but it must not close the source-patch/software-engineering
+criteria.
+
+`planbook repair --dispatch` remains an explicit operator/debug trigger. This is
+the current self-build spine: detect gaps, turn the top gap into executable
+source work, preserve ownership boundaries, validate, inspect git status/diff
+hygiene, record commit evidence, and rerun the doctor. The default policy can
+prepare a local commit after validation, while push remains disabled unless an
+explicit future policy enables it. If no stricter self-build criterion is open, the
 doctor can surface the highest-priority open item from
 `raw/backlog/implementation-backlog.json` as the next bounded repair. Open items
 are taken one at a time. Once the backlog is clear, the code-building check

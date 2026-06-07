@@ -1043,9 +1043,12 @@ active, the town dispatches one repair through MoonClaw using `execution_mode:
 acp` and `execution_target: codex-main`, so Codex ACP can patch the Moontown
 source root and return software-engineering evidence. Daemon dispatch is
 detached, so long code-repair runs cannot stall real-world watcher cadence.
-Accepted repairs must run
-validation, inspect `git status --short`, pass `git diff --check`, summarize the
-focused diff, and record commit status/message under the repair result contract.
+Accepted source repairs must include `planbook.repair.patch_receipt.v1`
+evidence. That receipt proves source-root ACP execution, changed files,
+validation command results, `git status --short`, `git diff --check`, focused
+diff summary, commit status/message, and push policy. Without the receipt, the
+result can still be a useful diagnostic, blocker, or no-change record, but it
+must not close the source-patch criteria.
 For `backlog-*` criteria, accepted repairs must also write
 `raw/backlog/completed/<id>.md` and record `plan_update_status`. Use
 `planbook repair --dispatch` as an explicit operator/debug trigger. Daemon ticks

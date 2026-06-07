@@ -154,6 +154,57 @@ async test "planbook repair supersedes stale runtime handoff evidence" {
 }
 
 ///|
+test "planbook repair ignores stale task when criterion is now satisfied" {
+  let task : PlanbookRepairTask = {
+    id: "planbook-repair-runtime-books-in-quality-audit",
+    criterion_id: "runtime-books-in-quality-audit",
+    title: "Active live runtime books are included in MoonBook quality audit",
+    status: "failed",
+    owner: "moontown+moonbook",
+    workspace_root: "/tmp/planbook",
+    packet_path: "/tmp/planbook/raw/repair/planbook-repair-runtime-books-in-quality-audit.packet.json",
+    proposal_id: Some("proposal-1"),
+    run_id: Some("run-1"),
+    summary: "stale runtime repair task",
+    validation_command: planbook_repair_validation_command(),
+    generated_at_ms: 1,
+  }
+  let status : PlanbookAutonomyStatus = {
+    generated_at_ms: 1,
+    book_id: default_planbook_book_id(),
+    workspace_root: "/tmp/planbook",
+    status: "self-healing-open",
+    open_count: 1,
+    satisfied_count: 1,
+    criteria: [
+      {
+        id: "runtime-books-in-quality-audit",
+        plan_id: "test",
+        title: "Active live runtime books are included in MoonBook quality audit",
+        owner: "moontown+moonbook",
+        satisfied: true,
+        evidence: "quality audit covers active live runtime books",
+        next_action: "none",
+      },
+      {
+        id: "planbook-source-patch-loop",
+        plan_id: "test",
+        title: "PlanBook repair can patch repository source through Codex ACP",
+        owner: "moontown+moonclaw+codex-acp",
+        satisfied: false,
+        evidence: "no accepted patch receipt",
+        next_action: "route PlanBook repair through Codex ACP",
+      },
+    ],
+  }
+  assert_true(planbook_repair_task_satisfied_by_status(task, status))
+  match first_planbook_open_criterion(status) {
+    Some(open) => assert_eq(open.id, "planbook-source-patch-loop")
+    None => abort("expected open self-patching criterion")
+  }
+}
+
+///|
 async test "planbook repair acp target uses resolved codex command" {
   let workspace = planbook_autonomy_test_workspace(
     "/tmp/moontown-planbook-repair-acp-target-wbtest",
@@ -190,6 +241,8 @@ async test "planbook repair acp target uses resolved codex command" {
       "/Users/kq/.nvm/versions/node/v22.22.1/lib/node_modules/@openai/codex/bin/codex.js",
     ),
   )
+  assert_true(target.contains("\"--sandbox\""))
+  assert_true(target.contains("\"workspace-write\""))
   assert_true(!target.contains("\"command\": \"codex\""))
   assert_true(target.contains("\"cwd\": \"\{source_root}\""))
   assert_true(target.contains("\"workspace\": \"\{source_root}\""))

@@ -152,6 +152,11 @@ review queues, but the product concept is the protocol place.
   contract; MoonClaw launches the configured Codex ACP target; Codex patches the
   repository; PlanBook records validation, diff hygiene, commit readiness, and
   review evidence.
+- ACP configuration is only a route. It becomes accepted self-patching evidence
+  only after a `planbook.repair.patch_receipt.v1` receipt proves source-root
+  execution, changed files, validation, diff hygiene, commit status/message, and
+  push policy. This prevents the town from confusing planning/review output with
+  real software engineering work.
 - Future self-build work belongs in the PlanBook backlog JSON and its generated
   MoonBook pages. The daemon may select from that backlog, but it should not
   invent feature lists in MoonBit code.

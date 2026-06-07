@@ -163,6 +163,10 @@ liveness:
   consumes it between ticks and the supervisor/launchd starts a fresh worker.
   If new packets still show pre-patch prompts or old routing after source files
   changed, inspect this reload seam before blaming MoonBook skills.
+- PlanBook source-repair success requires a
+  `planbook.repair.patch_receipt.v1` receipt. Treat ACP runs that only produce
+  review text, blocker analysis, `files_changed: none`, or read-only sandbox
+  diagnostics as useful evidence, not as proven source-code self-patching.
 - `moon run cmd/main -- live status`
   should expose standing-goal status, PlanBook open gaps, accepted updates,
   no-change cycles, and next actions.

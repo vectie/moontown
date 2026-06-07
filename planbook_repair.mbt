@@ -88,8 +88,27 @@ pub async fn render_moontown_planbook_repair_status(
     _ =>
       return "PlanBook repair task exists at \{path}, but it does not match the contract."
   }
+  let status = inspect_moontown_planbook_autonomy(snapshot_path~)
+  if planbook_repair_task_satisfied_by_status(task, status) {
+    match first_planbook_open_criterion(status) {
+      Some(criterion) if criterion.id != task.criterion_id =>
+        match
+          latest_planbook_repair_task_from_job_index(
+            criterion,
+            default_planbook_workspace_root(),
+          ) {
+          Some(index_task) => {
+            let result_text = reconcile_planbook_repair_result(index_task)
+            return render_planbook_repair_markdown(index_task, result_text~)
+          }
+          None =>
+            return "PlanBook repair task at \{path} is stale: criterion `\{task.criterion_id}` is now satisfied and autonomy now has open gap `\{criterion.id}`. The next daemon tick will refresh and dispatch one bounded Codex ACP repair; run `moon run cmd/main -- planbook repair --dispatch` only for an explicit operator retry."
+        }
+      _ =>
+        return "PlanBook repair task at \{path} is stale: criterion `\{task.criterion_id}` is now satisfied."
+    }
+  }
   if task.criterion_id == "none" {
-    let status = inspect_moontown_planbook_autonomy(snapshot_path~)
     match first_planbook_open_criterion(status) {
       Some(criterion) =>
         match
@@ -124,7 +143,7 @@ pub async fn planbook_repair_active_count(
   let task : PlanbookRepairTask = @json.from_json(parsed) catch {
     _ => return 0
   }
-  if planbook_repair_criterion_now_satisfied(task) {
+  if planbook_repair_criterion_now_satisfied(task, snapshot_path~) {
     return 0
   }
   if reconcile_planbook_repair_result(task) != "" {

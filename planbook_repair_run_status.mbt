@@ -12,7 +12,7 @@ async fn planbook_task_status_from_run(
     Some(status) if planbook_repair_moonclaw_status_is_succeeded(status) =>
       match run_id {
         Some(id) =>
-          if planbook_run_has_valid_repair_result(
+          if planbook_run_has_accepted_repair_result(
               workspace_root, id, criterion_id,
             ) {
             "completed"
@@ -90,7 +90,7 @@ fn planbook_repair_index_recovery_summary(
     "Recovered stale repair task from MoonClaw proposal index for criterion `\{criterion.id}`. Run `\{run_label}` is indexed as `\{status_label}`, but no live runner process exists."
   } else if task_status == "failed" &&
     planbook_repair_moonclaw_status_is_succeeded(status_label) {
-    "Recovered repair task from MoonClaw proposal index for criterion `\{criterion.id}`. Run `\{run_label}` is indexed as `Succeeded`, but it did not emit a valid `\{planbook_repair_result_contract()}` result for this criterion."
+    "Recovered repair task from MoonClaw proposal index for criterion `\{criterion.id}`. Run `\{run_label}` is indexed as `Succeeded`, but it did not emit accepted `\{planbook_repair_result_contract()}` evidence for this criterion."
   } else {
     "Recovered repair task from MoonClaw proposal index for criterion `\{criterion.id}`."
   }
