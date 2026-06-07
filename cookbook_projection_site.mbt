@@ -14,19 +14,31 @@ fn cookbook_generated_site_html(
     "</head><body><main>",
     "<p>MoonBook generated / Moondesk managed / Moontown consumed</p>",
     "<h1>Moontown Stable-State Cookbook</h1>",
-    "<p>The cookbook is now the Moontown describer: it explains each feature by product role, internal protocol, AI behavior, durable owner, and evidence flow.</p>",
+    "<p>The cookbook is the Moontown codebase describer: it explains algorithms, data structures, data flow, core feature implementation, AI boundaries, and stable evidence files.</p>",
     "<p>Workspace <code>\{html_escape(entry.workspace_root)}</code>; manifest <code>\{html_escape(manifest.manifest_path)}</code>.</p>",
     "<section>",
-    "<h2>Describer Pages</h2>",
+    "<h2>Codebase Describer Pages</h2>",
     "<div class=\"grid\">",
     cookbook_describer_card_html(
-      "Overview", "wiki/describer/overview.md", "The cookbook contract for explaining Moontown as a live document/protocol machine.",
+      "Overview", "wiki/describer/overview.md", "Engineer-facing mental model and reading order for Moontown as a typed, file-backed control plane.",
     ),
     cookbook_describer_card_html(
-      "Feature Guide", "wiki/describer/feature-guide.md", "Feature-by-feature internals for the Mayor, books, workers, civic buildings, live autonomy, PlanBook, and cookbook.",
+      "Algorithms", "wiki/describer/algorithms.md", "Daemon phases, standing-watch dispatch, civic map/reduce, scenario materialization, request processing, live autonomy, and visual projection.",
+    ),
+    cookbook_describer_card_html(
+      "Data Structures", "wiki/describer/data-structures.md", "TownState, execution records, standing goals, civic protocol packets, reductions, review gates, snapshots, and cookbook manifests.",
+    ),
+    cookbook_describer_card_html(
+      "Data Flow", "wiki/describer/data-flow.md", "How operator inputs, schedules, Mayor routing, MoonBook packets, MoonClaw runs, ledgers, and projections move through the system.",
+    ),
+    cookbook_describer_card_html(
+      "Core Features", "wiki/describer/core-features.md", "Implementation guide for the saved town runtime, Mayor, MoonBook/MoonClaw bridge, civic protocols, live autonomy, UI projection, PlanBook, and cookbook.",
     ),
     cookbook_describer_card_html(
       "Content Rules", "wiki/describer/content-rules.md", "How docs, definitions, runtime state, civic protocols, AI work, and procedures should be described differently.",
+    ),
+    cookbook_describer_card_html(
+      "Cookbook Skill", "skills/cookbook-generation/SKILL.md", "Instructions future AI maintainers must follow so the cookbook stays a codebase describer.",
     ),
     "</div>",
     "</section>",

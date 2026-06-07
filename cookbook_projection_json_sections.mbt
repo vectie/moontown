@@ -45,6 +45,12 @@ fn cookbook_readiness_json(manifest_path_value : String) -> Array[String] {
       "Ownership map", "wiki/definitions/ownership.md", "Ready",
     ),
     cookbook_item_json(
+      "Codebase algorithms", "wiki/describer/algorithms.md", "Ready",
+    ),
+    cookbook_item_json(
+      "Cookbook skill", "skills/cookbook-generation/SKILL.md", "Ready",
+    ),
+    cookbook_item_json(
       "Doctor procedure", "wiki/operating-procedures/doctor.md", "Ready",
     ),
   ]
@@ -57,7 +63,7 @@ fn cookbook_review_queue_json() -> Array[String] {
       "Stable-state drift", "wiki/definitions/stable-state.md", "Review when required_missing > 0",
     ),
     cookbook_item_json(
-      "Describer coverage", "wiki/describer/feature-guide.md", "Review when a feature lacks internals, AI behavior, or evidence flow",
+      "Describer coverage", "wiki/describer/core-features.md", "Review when a feature lacks algorithms, data structures, data flow, AI boundaries, or evidence files",
     ),
   ]
 }
@@ -75,7 +81,16 @@ fn cookbook_page_families_json() -> Array[String] {
       "Doctor", "wiki/operating-procedures/doctor.md", "Procedure",
     ),
     cookbook_item_json(
-      "Describer", "wiki/describer/feature-guide.md", "Feature internals",
+      "Algorithms", "wiki/describer/algorithms.md", "Code behavior",
+    ),
+    cookbook_item_json(
+      "Data Structures", "wiki/describer/data-structures.md", "Record contracts",
+    ),
+    cookbook_item_json(
+      "Data Flow", "wiki/describer/data-flow.md", "Runtime movement",
+    ),
+    cookbook_item_json(
+      "Core Features", "wiki/describer/core-features.md", "Implementation guide",
     ),
     cookbook_item_json(
       "Content Rules", "wiki/describer/content-rules.md", "AI summarization policy",
@@ -98,17 +113,20 @@ fn cookbook_journey_json(
         "Manifest: \{manifest.manifest_path}",
         "Workspace: \{entry.workspace_root}",
         "Moondesk can curate this book as the human desktop surface.",
-        "Feature guide: wiki/describer/feature-guide.md",
+        "Algorithms: wiki/describer/algorithms.md",
+        "Data flow: wiki/describer/data-flow.md",
+        "Cookbook skill: skills/cookbook-generation/SKILL.md",
       ],
     ),
     cookbook_journey_item_json(
-      "Describer upgrade",
+      "Codebase describer upgrade",
       "generated",
       "ready",
-      "The cookbook now explains Moontown by feature, protocol, runtime state, and AI role instead of only listing artifacts.",
+      "The cookbook now explains Moontown by algorithm, data structure, data flow, feature implementation, AI boundary, and evidence file instead of only listing artifacts.",
       [
-        "Overview: wiki/describer/overview.md", "Feature internals: wiki/describer/feature-guide.md",
-        "Content rules: wiki/describer/content-rules.md",
+        "Overview: wiki/describer/overview.md", "Algorithms: wiki/describer/algorithms.md",
+        "Data structures: wiki/describer/data-structures.md", "Data flow: wiki/describer/data-flow.md",
+        "Core features: wiki/describer/core-features.md", "Content rules: wiki/describer/content-rules.md",
       ],
     ),
   ]
@@ -124,11 +142,22 @@ fn cookbook_links_json() -> Array[String] {
     cookbook_link_json(
       "Describer overview", "wiki", "wiki/describer/overview.md",
     ),
+    cookbook_link_json("Algorithms", "wiki", "wiki/describer/algorithms.md"),
+    cookbook_link_json(
+      "Data structures", "wiki", "wiki/describer/data-structures.md",
+    ),
+    cookbook_link_json("Data flow", "wiki", "wiki/describer/data-flow.md"),
+    cookbook_link_json(
+      "Core features", "wiki", "wiki/describer/core-features.md",
+    ),
     cookbook_link_json(
       "Feature guide", "wiki", "wiki/describer/feature-guide.md",
     ),
     cookbook_link_json(
       "Content rules", "wiki", "wiki/describer/content-rules.md",
+    ),
+    cookbook_link_json(
+      "Cookbook skill", "skill", "skills/cookbook-generation/SKILL.md",
     ),
     cookbook_link_json("Doctor", "wiki", "wiki/operating-procedures/doctor.md"),
   ]

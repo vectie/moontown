@@ -15,8 +15,15 @@ async test "cookbook bootstrap writes manifest and MoonBook workspace" {
   assert_true(@fs.exists("\{workspace_root}/wiki/index.md"))
   assert_true(@fs.exists("\{workspace_root}/wiki/definitions/stable-state.md"))
   assert_true(@fs.exists("\{workspace_root}/wiki/describer/overview.md"))
+  assert_true(@fs.exists("\{workspace_root}/wiki/describer/algorithms.md"))
+  assert_true(@fs.exists("\{workspace_root}/wiki/describer/data-structures.md"))
+  assert_true(@fs.exists("\{workspace_root}/wiki/describer/data-flow.md"))
+  assert_true(@fs.exists("\{workspace_root}/wiki/describer/core-features.md"))
   assert_true(@fs.exists("\{workspace_root}/wiki/describer/feature-guide.md"))
   assert_true(@fs.exists("\{workspace_root}/wiki/describer/content-rules.md"))
+  assert_true(
+    @fs.exists("\{workspace_root}/skills/cookbook-generation/SKILL.md"),
+  )
   assert_true(
     @fs.exists("\{workspace_root}/raw/bootstrap/COOKBOOK_CONTRACT.md"),
   )
@@ -100,26 +107,44 @@ test "cookbook projection helpers render stable UI contracts" {
   ).join("\n")
   assert_true(readiness.contains("Stable-state manifest"))
   assert_true(readiness.contains("raw/bootstrap/COOKBOOK_CONTRACT.md"))
+  assert_true(readiness.contains("wiki/describer/algorithms.md"))
+  assert_true(readiness.contains("skills/cookbook-generation/SKILL.md"))
   let families = cookbook_page_families_json().join("\n")
-  assert_true(families.contains("wiki/describer/feature-guide.md"))
+  assert_true(families.contains("wiki/describer/data-structures.md"))
+  assert_true(families.contains("wiki/describer/data-flow.md"))
+  assert_true(families.contains("wiki/describer/core-features.md"))
   let links = cookbook_links_json().join("\n")
   assert_true(links.contains("wiki/describer/content-rules.md"))
+  assert_true(links.contains("skills/cookbook-generation/SKILL.md"))
 }
 
 ///|
-test "cookbook describer pages explain features with AI internals" {
+test "cookbook describer pages explain codebase algorithms and data flow" {
   let overview = cookbook_describer_overview_markdown()
-  assert_true(overview.contains("# Moontown Describer"))
-  assert_true(overview.contains("MoonClaw performs bounded AI reduction"))
-  let guide = cookbook_feature_guide_markdown()
-  assert_true(guide.contains("## Policy Hall"))
-  assert_true(guide.contains("## Social Square"))
-  assert_true(guide.contains("## Physical Bridge"))
-  assert_true(guide.contains("AI behavior:"))
-  assert_true(guide.contains("Evidence flow:"))
+  assert_true(overview.contains("# Moontown Codebase Describer"))
+  assert_true(overview.contains("typed records and restart-readable files"))
+  let algorithms = cookbook_algorithms_markdown()
+  assert_true(algorithms.contains("## 2. Daemon Tick Phase Pipeline"))
+  assert_true(algorithms.contains("## 4. Civic Building Protocol Map/Reduce"))
+  assert_true(algorithms.contains("Standing-Watch Dispatch"))
+  let structures = cookbook_data_structures_markdown()
+  assert_true(structures.contains("`TownState`"))
+  assert_true(structures.contains("`TaskExecutionRecord`"))
+  assert_true(structures.contains("`BuildingReductionResult`"))
+  let flow = cookbook_data_flow_markdown()
+  assert_true(flow.contains("Goal Execution Flow"))
+  assert_true(flow.contains("Civic Building Flow"))
+  let features = cookbook_core_features_markdown()
+  assert_true(features.contains("## MoonBook/MoonClaw Execution Bridge"))
+  assert_true(features.contains("## Civic Building Protocols"))
+  assert_true(features.contains("Evidence to inspect:"))
   let rules = cookbook_content_rules_markdown()
   assert_true(rules.contains("## Runtime State"))
   assert_true(rules.contains("## Civic Features"))
+  let skill = cookbook_skill_markdown()
+  assert_true(skill.contains("name: cookbook-generation"))
+  assert_true(skill.contains("Do not write a directory tour"))
+  assert_true(skill.contains("Data flow"))
 }
 
 ///|

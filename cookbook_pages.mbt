@@ -29,8 +29,13 @@ fn cookbook_index_markdown(
     "- `wiki/definitions/runtime-boundaries.md`",
     "- `wiki/definitions/live-autonomy-spine.md`",
     "- `wiki/describer/overview.md`",
+    "- `wiki/describer/algorithms.md`",
+    "- `wiki/describer/data-structures.md`",
+    "- `wiki/describer/data-flow.md`",
+    "- `wiki/describer/core-features.md`",
     "- `wiki/describer/feature-guide.md`",
     "- `wiki/describer/content-rules.md`",
+    "- `skills/cookbook-generation/SKILL.md`",
     "- `wiki/operating-procedures/doctor.md`",
     "- `wiki/operating-procedures/book-governance.md`",
     "- `raw/bootstrap/COOKBOOK_CONTRACT.md`",
@@ -173,22 +178,7 @@ fn cookbook_schema_markdown() -> String {
 
 ///|
 fn cookbook_describer_overview_markdown() -> String {
-  [
-    "# Moontown Describer", "", "The cookbook is the town describer. It should explain what each part of Moontown is, which durable files define it, which runtime protocols move it, how AI participates, and what evidence proves that it worked.",
-    "", "The describer does not replace source docs or live ledgers. It translates them into operating knowledge for Moondesk, the Mayor, future MoonClaw maintainers, and a human operator opening the book.",
-    "", "## Describer Contract", "", "- Product features are described as civic experiences, owner splits, and acceptance evidence.",
-    "- Protocol features are described as packet flow, ledgers, reducers, review gates, and distribution.",
-    "- Runtime features are described as tick inputs, state files, decisions, and recovery behavior.",
-    "- Book features are described as durable workspaces, page families, review queues, and projection outputs.",
-    "- UI features are described as projection contracts and visible inspection paths, not as source-of-truth state.",
-    "", "## Core Loop", "", "```text", "resident / operator / schedule / watcher",
-    "  -> Mayor routes intent", "  -> building protocol or target book hydrates durable context",
-    "  -> MoonClaw performs bounded AI reduction or execution", "  -> MoonBook persists accepted records, reviews, and projections",
-    "  -> Moontown records health, runtime state, and next action", "  -> cookbook explains the stable contract for the next operator",
-    "```", "", "## Start With", "", "- `wiki/describer/feature-guide.md` for feature-by-feature internals.",
-    "- `wiki/describer/content-rules.md` for how different source content should be summarized.",
-    "- `wiki/definitions/runtime-boundaries.md` for ownership boundaries.", "- `wiki/definitions/live-autonomy-spine.md` for the live town state contract.",
-  ].join("\n")
+  cookbook_codebase_overview_markdown()
 }
 
 ///|

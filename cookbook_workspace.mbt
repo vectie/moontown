@@ -33,6 +33,22 @@ async fn write_cookbook_workspace(
     cookbook_describer_overview_markdown(),
   )
   write_text_file(
+    "\{root}/wiki/describer/algorithms.md",
+    cookbook_algorithms_markdown(),
+  )
+  write_text_file(
+    "\{root}/wiki/describer/data-structures.md",
+    cookbook_data_structures_markdown(),
+  )
+  write_text_file(
+    "\{root}/wiki/describer/data-flow.md",
+    cookbook_data_flow_markdown(),
+  )
+  write_text_file(
+    "\{root}/wiki/describer/core-features.md",
+    cookbook_core_features_markdown(),
+  )
+  write_text_file(
     "\{root}/wiki/describer/feature-guide.md",
     cookbook_feature_guide_markdown(),
   )
@@ -59,6 +75,10 @@ async fn write_cookbook_workspace(
   write_text_file(
     "\{root}/schemas/stable-state-manifest.schema.md",
     cookbook_schema_markdown(),
+  )
+  write_text_file(
+    "\{root}/skills/cookbook-generation/SKILL.md",
+    cookbook_skill_markdown(),
   )
   write_text_file(
     "\{root}/book/moonbook-ui-state.json",
