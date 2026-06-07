@@ -76,8 +76,8 @@ fn daemon_pid_effectively_alive(
   heartbeat_fresh : Bool,
   runtime_active : Bool,
 ) -> Bool {
-  if probed_alive {
-    return true
-  }
-  pid > 0 && heartbeat_fresh && runtime_active
+  ignore(pid)
+  ignore(heartbeat_fresh)
+  ignore(runtime_active)
+  probed_alive
 }
