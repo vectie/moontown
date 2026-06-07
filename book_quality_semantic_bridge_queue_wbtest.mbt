@@ -48,7 +48,7 @@ async test "semantic review bridge queues repair page and standing goal" {
     bridge_path~,
   )
   assert_true(
-    summary.contains("Bridged 1 weak AI semantic book-quality review"),
+    summary.contains("Queued 1 new weak AI semantic book-quality repair"),
   )
   assert_true(
     @fs.exists("\{workspace_root}/wiki/reviews/book-quality-repair.md"),
@@ -65,4 +65,16 @@ async test "semantic review bridge queues repair page and standing goal" {
   assert_eq(goals[0].next_due_tick, 42)
   assert_eq(goals[0].source_policy, book_quality_web_first_policy())
   assert_true(@fs.exists(bridge_path))
+  let second_summary = reconcile_book_quality_repair_bridge(
+    book_catalog_path=catalog_path,
+    snapshot_path~,
+    result_dir~,
+    bridge_path~,
+  )
+  assert_true(
+    second_summary.contains(
+      "Refreshed 1 existing weak AI semantic book-quality repair",
+    ),
+  )
+  assert_false(second_summary.contains("Queued 1 new weak"))
 }

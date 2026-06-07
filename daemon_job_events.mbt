@@ -17,7 +17,8 @@ fn daemon_scheduled_job_event_for_summary(
   } else if job.kind == "book-quality-review" &&
     (
       summary.contains("Dispatched AI semantic book-quality review") ||
-      summary.has_prefix("Bridged ")
+      summary.has_prefix("Queued ") ||
+      summary.has_prefix("Refreshed ")
     ) {
     Some(daemon_scheduled_job_event(job, tick, summary))
   } else if job.kind == "book-template-request" &&

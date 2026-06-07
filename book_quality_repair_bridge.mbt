@@ -14,6 +14,9 @@ pub async fn reconcile_book_quality_repair_bridge(
     context.repairable_book_ids,
     result_dir,
   )
+  let existing_repair_goal_ids = current_book_quality_repair_goal_ids(
+    context.goals,
+  )
   let repaired = apply_book_quality_repair_bridge_candidates(
     context.audit.scores,
     context.repairable_book_ids,
@@ -22,7 +25,9 @@ pub async fn reconcile_book_quality_repair_bridge(
     context.current_tick,
   )
   persist_book_quality_repair_bridge(context, bridge_path, repaired)
-  book_quality_repair_bridge_summary(repaired, retired_goal_ids)
+  book_quality_repair_bridge_summary(
+    repaired, retired_goal_ids, existing_repair_goal_ids,
+  )
 }
 
 ///|
@@ -139,16 +144,59 @@ async fn book_quality_repair_bridge_candidate(
 fn book_quality_repair_bridge_summary(
   repaired : Array[BookQualityRepairBridgeItem],
   retired_goal_ids : Array[String],
+  existing_repair_goal_ids : Array[String],
 ) -> String {
+  let new_items : Array[BookQualityRepairBridgeItem] = []
+  let refreshed_items : Array[BookQualityRepairBridgeItem] = []
+  for item in repaired {
+    if existing_repair_goal_ids.contains(item.standing_goal_id) {
+      refreshed_items.push(item)
+    } else {
+      new_items.push(item)
+    }
+  }
   let repair_summary = if repaired.is_empty() {
     "No weak AI semantic book-quality review needed repair bridging."
   } else {
-    let ids = repaired.map(fn(item) { item.book_id }).join(", ")
-    "Bridged \{repaired.length()} weak AI semantic book-quality review(s) into MoonBook review queues and standing repair goals: \{ids}."
+    book_quality_repair_bridge_action_summary(new_items, refreshed_items)
   }
   if retired_goal_ids.is_empty() {
     repair_summary
   } else {
     "\{repair_summary} Retired \{retired_goal_ids.length()} stale repair goal(s): \{retired_goal_ids.join(", ")}."
   }
+}
+
+///|
+fn current_book_quality_repair_goal_ids(
+  goals : Array[@core.StandingGoal],
+) -> Array[String] {
+  let ids : Array[String] = []
+  for goal in goals {
+    if goal.id.has_prefix("book-quality-repair-") {
+      ids.push(goal.id)
+    }
+  }
+  ids
+}
+
+///|
+fn book_quality_repair_bridge_action_summary(
+  new_items : Array[BookQualityRepairBridgeItem],
+  refreshed_items : Array[BookQualityRepairBridgeItem],
+) -> String {
+  let parts : Array[String] = []
+  if !new_items.is_empty() {
+    let ids = new_items.map(fn(item) { item.book_id }).join(", ")
+    parts.push(
+      "Queued \{new_items.length()} new weak AI semantic book-quality repair(s): \{ids}.",
+    )
+  }
+  if !refreshed_items.is_empty() {
+    let ids = refreshed_items.map(fn(item) { item.book_id }).join(", ")
+    parts.push(
+      "Refreshed \{refreshed_items.length()} existing weak AI semantic book-quality repair(s): \{ids}.",
+    )
+  }
+  parts.join(" ")
 }
