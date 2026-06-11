@@ -1,5 +1,5 @@
 ///|
-struct CookbookArtifactSummary {
+pub(all) struct CookbookArtifactSummary {
   docs_count : Int
   definition_count : Int
   runtime_state_count : Int
@@ -7,7 +7,7 @@ struct CookbookArtifactSummary {
 } derive(Debug, Eq)
 
 ///|
-fn CookbookArtifactSummary::from_artifacts(
+pub fn CookbookArtifactSummary::from_artifacts(
   artifacts : Array[CookbookArtifact],
 ) -> CookbookArtifactSummary {
   let required_missing_paths : Array[String] = []
@@ -29,7 +29,7 @@ fn CookbookArtifactSummary::from_artifacts(
 }
 
 ///|
-fn CookbookArtifactSummary::required_missing_count(
+pub fn CookbookArtifactSummary::required_missing_count(
   self : CookbookArtifactSummary,
 ) -> Int {
   self.required_missing_paths.length()

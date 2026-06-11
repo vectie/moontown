@@ -3,6 +3,8 @@ import {
   "vectie/moontown/skill_quality",
   "vectie/moontown/book_quality",
   "vectie/moontown/book_templates",
+  "vectie/moontown/cookbook",
+  "vectie/moontown/planbook",
   "vectie/moontown/app_tool_book",
   "vectie/moontown/editor_pipeline",
   "vectie/moontown/planbook_policy",

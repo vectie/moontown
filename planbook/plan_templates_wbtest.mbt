@@ -1,6 +1,6 @@
 ///|
 test "editor pipeline plan preserves course source and ownership boundaries" {
-  let plan = planbook_editor_pipeline_plan_markdown()
+  let plan = editor_pipeline_plan_markdown()
   assert_true(plan.contains("# Plan: Editor Mode Real Pipeline"))
   assert_true(plan.contains("Course book: `course-wenyu-game-design`"))
   assert_true(plan.contains("buildings as protocols"))
@@ -13,7 +13,7 @@ test "editor pipeline plan preserves course source and ownership boundaries" {
 
 ///|
 test "editor pipeline plan keeps implementation and acceptance gates explicit" {
-  let plan = planbook_editor_pipeline_plan_markdown()
+  let plan = editor_pipeline_plan_markdown()
   assert_true(plan.contains("restartable editor-pipeline state contract"))
   assert_true(plan.contains("Connect editor-mode UI to the contract"))
   assert_true(plan.contains("bounded PlanBook repair packet"))
@@ -31,7 +31,7 @@ test "editor pipeline plan keeps implementation and acceptance gates explicit" {
 
 ///|
 test "quality governance seed plan keeps contract-specific goals" {
-  let plan = planbook_seed_plan_markdown()
+  let plan = seed_plan_markdown()
   assert_true(plan.contains("# Plan: Raise MoonBook Quality Governance"))
   assert_true(plan.contains("PlanBook was only documented"))
   assert_true(plan.contains("Make course books visibly course-shaped"))
@@ -43,7 +43,7 @@ test "quality governance seed plan keeps contract-specific goals" {
 
 ///|
 test "plans index rows keep stable-state impact explicit" {
-  let index = planbook_plans_index_markdown()
+  let index = plans_index_markdown()
   assert_true(index.contains("2026-05-29-live-autonomy-spine/plan.md"))
   assert_true(index.contains("connects daemon, workers"))
   assert_true(index.contains("2026-05-31-editor-mode-real-pipeline/plan.md"))
@@ -52,7 +52,7 @@ test "plans index rows keep stable-state impact explicit" {
 
 ///|
 test "live autonomy plan sections preserve ownership and validation gates" {
-  let plan = planbook_live_autonomy_plan_markdown()
+  let plan = live_autonomy_plan_markdown()
   assert_true(plan.contains("# Plan: Live Autonomy Spine"))
   assert_true(plan.contains("connective spine"))
   assert_true(plan.contains(".moontown/live-autonomy.json"))

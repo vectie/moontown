@@ -1,5 +1,5 @@
 ///|
-fn planbook_quality_gates_markdown() -> String {
+pub fn quality_gates_markdown() -> String {
   [
     "# Planbook Quality Gates", "", "| Gate | Required Evidence |", "| --- | --- |",
     "| Intent | problem, goal, non-goals, owner boundary |", "| Design | selected approach plus alternatives |",
@@ -9,7 +9,7 @@ fn planbook_quality_gates_markdown() -> String {
 }
 
 ///|
-fn planbook_execution_evidence_markdown() -> String {
+pub fn execution_evidence_markdown() -> String {
   [
     "# Execution Evidence", "", "This page records what changed for active plans. It is intentionally separate from the plan text so execution can continue without rewriting the intent.",
     "", "## Current Evidence", "", "- Planbook workspace exists as a registered MoonBook.",
@@ -21,7 +21,7 @@ fn planbook_execution_evidence_markdown() -> String {
 }
 
 ///|
-fn planbook_active_review_markdown() -> String {
+pub fn active_review_markdown() -> String {
   [
     "# Active Plan Review", "", "## Review State", "", "- Status: active-review",
     "- Reviewer: keeper/operator or MoonClaw reviewer", "- Decision: pending semantic review",
@@ -33,7 +33,7 @@ fn planbook_active_review_markdown() -> String {
 }
 
 ///|
-fn planbook_decision_log_markdown() -> String {
+pub fn decision_log_markdown() -> String {
   [
     "# Decision Log", "", "| Date | Decision | Reason |", "| --- | --- | --- |",
     "| 2026-05-29 | Separate structural readiness from semantic quality | File completeness cannot judge usefulness, originality, correctness, or genre fit. |",
@@ -42,7 +42,7 @@ fn planbook_decision_log_markdown() -> String {
 }
 
 ///|
-fn planbook_record_schema_markdown() -> String {
+pub fn record_schema_markdown() -> String {
   [
     "# Plan Record Schema", "", "- `id`: stable plan id", "- `status`: proposed, active, blocked, active-review, accepted, superseded",
     "- `problem`: why the plan exists", "- `owner_boundary`: Moontown, MoonBook, MoonClaw, Moondesk responsibility split",
@@ -53,7 +53,7 @@ fn planbook_record_schema_markdown() -> String {
 }
 
 ///|
-fn planbook_open_questions_markdown() -> String {
+pub fn open_questions_markdown() -> String {
   [
     "# Open Planning Questions", "", "- Which book has the weakest current quality score?",
     "- Is the weakness a MoonBook skill/profile issue, a Moontown routing issue, or a MoonClaw execution issue?",

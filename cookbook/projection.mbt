@@ -1,5 +1,5 @@
 ///|
-fn cookbook_ui_state_json(
+pub fn ui_state_json(
   entry : @moonbook.BookCatalogEntry,
   manifest : MoontownCookbookManifest,
 ) -> String {

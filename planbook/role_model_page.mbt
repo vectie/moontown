@@ -1,5 +1,5 @@
 ///|
-fn planbook_role_model_markdown() -> String {
+pub fn role_model_markdown() -> String {
   planbook_markdown_page(
     [
       "# Mayor, Bookkeeper, And Worker Role Model", "", "This page prevents future implementation plans from confusing durable memory ownership with temporary execution.",

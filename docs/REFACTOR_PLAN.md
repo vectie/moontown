@@ -277,6 +277,11 @@ Goals:
   page/status renderers, bootstrap/install summary wording, standing-goal
   semantics, path lists, or readiness policy locally, and should not keep
   root-local default/config/manifest shims
+- keep Cookbook DTOs, artifact summary accounting, required-missing drift
+  semantics, and operator-facing Cookbook status Markdown in `cookbook/`; root
+  may discover artifact existence, register/catalog the MoonBook workspace,
+  write generated pages, and expose CLI command facades, but should not define
+  duplicate docs/definition/runtime-state counters or Cookbook status wording
 - keep generic standing-watch task construction, task kind, prompt/id contract,
   compact id segment formatting, target pages, strict accounting markers,
   marker parsing, MoonBook history block parsing, provider-decision collapse

@@ -1,5 +1,5 @@
 ///|
-fn planbook_contract_markdown() -> String {
+pub fn contract_markdown() -> String {
   planbook_markdown_page(
     [
       "# Planbook Contract", "", "A planbook exists to make non-trivial change safe, resumable, and reviewable.",

@@ -9,6 +9,7 @@ import {
   "vectie/moontown/book_quality",
   "vectie/moontown/book_templates",
   "vectie/moontown/civic",
+  "vectie/moontown/cookbook",
   "vectie/moontown/core",
   "vectie/moontown/daemon_runtime_policy",
   "vectie/moontown/live_autonomy_policy",
@@ -162,7 +163,7 @@ pub async fn inspect_book_template_request_status(request_path? : String) -> @bo
 
 pub async fn inspect_daemon_runtime(snapshot_path? : String, stale_after_ms? : UInt64) -> @daemon_runtime_policy.DaemonRuntimeHealth
 
-pub async fn inspect_moontown_cookbook(workspace_root? : String, manifest_path? : String) -> MoontownCookbookStatus
+pub async fn inspect_moontown_cookbook(workspace_root? : String, manifest_path? : String) -> @cookbook.MoontownCookbookStatus
 
 pub async fn inspect_moontown_planbook_autonomy(snapshot_path? : String, workspace_root? : String, book_catalog_path? : String) -> @planbook_policy.PlanbookAutonomyStatus
 
@@ -353,17 +354,6 @@ pub struct CivicServicePortfolio {
   services : Array[CivicServiceHealth]
 } derive(Eq, ToJson, @json.FromJson)
 
-pub struct CookbookArtifact {
-  path : String
-  kind : String
-  owner : String
-  stable_role : String
-  required : Bool
-  exists : Bool
-} derive(Eq, ToJson, @debug.Debug)
-
-type CookbookArtifactSummary derive(Eq, @debug.Debug)
-
 type EditorPipelineModuleConfig derive(Eq, @debug.Debug, @json.FromJson)
 
 type EditorPipelineModuleConfigEntry derive(Eq, @debug.Debug, @json.FromJson)
@@ -377,29 +367,6 @@ type FinalIntegrationTemplateSpec derive(Eq, ToJson, @debug.Debug, @json.FromJso
 type FinalIntegrationWatchSpec derive(Eq, ToJson, @debug.Debug, @json.FromJson)
 
 type MoonClawStoreCompactionTarget derive(Eq, @debug.Debug)
-
-pub struct MoontownCookbookManifest {
-  book_id : String
-  title : String
-  generated_by : String
-  managed_by : String
-  consumed_by : String
-  workspace_root : String
-  manifest_path : String
-  artifacts : Array[CookbookArtifact]
-} derive(Eq, ToJson, @debug.Debug)
-
-pub struct MoontownCookbookStatus {
-  book_id : String
-  workspace_root : String
-  manifest_path : String
-  docs_count : Int
-  definition_count : Int
-  runtime_state_count : Int
-  required_missing_count : Int
-  required_missing_paths : Array[String]
-  ready : Bool
-} derive(Eq, ToJson, @debug.Debug)
 
 type PdfEvidenceWatchAnalysisSettings derive(Eq, ToJson, @debug.Debug, @json.FromJson)
 
@@ -538,11 +505,17 @@ pub using @civic {type CivicSalonScenario}
 
 pub using @civic {type CivicSalonSchedule}
 
+pub using @cookbook {type CookbookArtifact}
+
 pub using @daemon_runtime_policy {type DaemonRuntimeHealth}
 
 pub using @daemon_runtime_policy {type DaemonRuntimeState}
 
 pub using @live_autonomy_policy {type LiveAutonomySpine}
+
+pub using @cookbook {type MoontownCookbookManifest}
+
+pub using @cookbook {type MoontownCookbookStatus}
 
 pub using @planbook_policy {type PlanbookAutonomyStatus}
 

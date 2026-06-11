@@ -1,5 +1,5 @@
 ///|
-fn cookbook_generated_site_html(
+pub fn generated_site_html(
   entry : @moonbook.BookCatalogEntry,
   manifest : MoontownCookbookManifest,
 ) -> String {
@@ -76,7 +76,7 @@ fn cookbook_describer_card_html(
 }
 
 ///|
-fn cookbook_artifact_card_html(artifact : CookbookArtifact) -> String {
+pub fn cookbook_artifact_card_html(artifact : CookbookArtifact) -> String {
   [
     "<article class=\"card\">",
     "<h3>\{html_escape(artifact.path)}</h3>",
@@ -88,7 +88,7 @@ fn cookbook_artifact_card_html(artifact : CookbookArtifact) -> String {
 }
 
 ///|
-fn cookbook_site_style_html() -> String {
+pub fn cookbook_site_style_html() -> String {
   [
     "<style>", "body{font-family:Georgia,serif;background:#f7ecd0;color:#2c2114;margin:0;padding:32px}",
     "main{max-width:1120px;margin:auto}", "section{margin-top:28px}", ".grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(260px,1fr));gap:16px}",
@@ -99,7 +99,7 @@ fn cookbook_site_style_html() -> String {
 }
 
 ///|
-fn cookbook_rendered_markdown_html(
+pub fn cookbook_rendered_markdown_html(
   title : String,
   source_path : String,
   markdown : String,
@@ -116,7 +116,7 @@ fn cookbook_rendered_markdown_html(
 }
 
 ///|
-fn cookbook_rendered_skill_html(
+pub fn cookbook_rendered_skill_html(
   title : String,
   source_path : String,
   markdown : String,

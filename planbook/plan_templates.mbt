@@ -1,5 +1,5 @@
 ///|
-fn planbook_seed_plan_markdown() -> String {
+pub fn seed_plan_markdown() -> String {
   [
     "# Plan: Raise MoonBook Quality Governance",
     planbook_quality_problem_section(),
@@ -10,7 +10,7 @@ fn planbook_seed_plan_markdown() -> String {
 }
 
 ///|
-fn planbook_plans_index_markdown() -> String {
+pub fn plans_index_markdown() -> String {
   [
     "# Plans Index",
     "",
@@ -34,7 +34,7 @@ fn planbook_plans_index_markdown() -> String {
 }
 
 ///|
-fn planbook_editor_pipeline_plan_markdown() -> String {
+pub fn editor_pipeline_plan_markdown() -> String {
   [
     "# Plan: Editor Mode Real Pipeline",
     "",
@@ -48,7 +48,7 @@ fn planbook_editor_pipeline_plan_markdown() -> String {
 }
 
 ///|
-fn planbook_live_autonomy_plan_markdown() -> String {
+pub fn live_autonomy_plan_markdown() -> String {
   [
     "# Plan: Live Autonomy Spine",
     live_autonomy_priority_section(),

@@ -1,6 +1,6 @@
 ///|
 test "planbook contract preserves role and growth boundaries" {
-  let contract = planbook_contract_markdown()
+  let contract = contract_markdown()
   assert_true(contract.contains("# Planbook Contract"))
   assert_true(contract.contains(planbook_worker_residency_rule()))
   assert_true(contract.contains(planbook_bookkeeper_residency_rule()))
@@ -12,7 +12,7 @@ test "planbook contract preserves role and growth boundaries" {
 
 ///|
 test "planbook role model keeps mayor bookkeeper worker separation" {
-  let role_model = planbook_role_model_markdown()
+  let role_model = role_model_markdown()
   assert_true(role_model.contains("## Mayor"))
   assert_true(role_model.contains("## MoonBook Bookkeeper"))
   assert_true(role_model.contains("## MoonClaw Worker"))
@@ -24,7 +24,7 @@ test "planbook role model keeps mayor bookkeeper worker separation" {
 
 ///|
 test "planbook operating architecture treats buildings as document protocols" {
-  let architecture = planbook_operating_architecture_markdown()
+  let architecture = operating_architecture_markdown()
   assert_true(
     architecture.contains("Durable state lives in MoonBook documents"),
   )

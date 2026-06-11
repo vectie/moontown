@@ -1,5 +1,5 @@
 ///|
-async fn write_cookbook_workspace(
+pub async fn write_workspace(
   entry : @moonbook.BookCatalogEntry,
   manifest : MoontownCookbookManifest,
 ) -> Unit {
@@ -146,9 +146,9 @@ async fn write_cookbook_workspace(
   )
   write_text_file(
     "\{root}/book/moonbook-ui-state.json",
-    cookbook_ui_state_json(entry, manifest),
+    ui_state_json(entry, manifest),
   )
-  let html = cookbook_generated_site_html(entry, manifest)
+  let html = generated_site_html(entry, manifest)
   write_text_file("\{root}/book/Home.html", html)
   write_text_file("\{root}/book/site/generated/index.html", html)
 }

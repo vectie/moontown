@@ -177,12 +177,12 @@ fn cookbook_schema_markdown() -> String {
 }
 
 ///|
-fn cookbook_describer_overview_markdown() -> String {
+pub fn cookbook_describer_overview_markdown() -> String {
   cookbook_codebase_overview_markdown()
 }
 
 ///|
-fn cookbook_content_rules_markdown() -> String {
+pub fn cookbook_content_rules_markdown() -> String {
   [
     "# Content-Specific Description Rules", "", "The cookbook should describe different content in different ways. A source document, a runtime state file, a protocol ledger, and a product feature do not need the same narrative shape.",
     "", "## Canonical Docs", "", "Describe docs by intent, stable doctrine, owner, downstream readers, and which implementation files or commands prove the doctrine is live. Link back to the source doc instead of copying it wholesale.",

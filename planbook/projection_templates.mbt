@@ -1,5 +1,5 @@
 ///|
-fn planbook_ui_state_json(entry : @moonbook.BookCatalogEntry) -> String {
+pub fn ui_state_json(entry : @moonbook.BookCatalogEntry) -> String {
   [
     "{",
     "  \"book_id\": \{json_string(entry.id)},",
@@ -34,7 +34,7 @@ fn planbook_ui_state_json(entry : @moonbook.BookCatalogEntry) -> String {
 }
 
 ///|
-fn planbook_generated_site_html(entry : @moonbook.BookCatalogEntry) -> String {
+pub fn generated_site_html(entry : @moonbook.BookCatalogEntry) -> String {
   [
     planbook_generated_site_head(),
     planbook_generated_site_body_open(),

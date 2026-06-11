@@ -219,6 +219,16 @@ spawning, launchd interaction, runtime file IO, PID-file IO, stop/restart flag
 cleanup, and stale-process cleanup, but future plans should not add root-local
 copies of daemon runtime status vocabulary, canonical file naming, transition
 semantics, or health interpretation.
+
+Cookbook policy lives in the dedicated
+[cookbook](/Users/kq/Workspace/moontown/cookbook) package. It owns Cookbook
+DTOs, artifact summary accounting, required-missing drift semantics, and
+operator-facing Cookbook status Markdown. Root code may keep the async
+bootstrap/status command facade, construct observed artifact records from the
+filesystem, register the MoonBook catalog entry, and write generated pages, but
+future plans should not add root-local copies of docs/definition/runtime-state
+counting or status wording.
+
 Book-template request DTOs and lifecycle semantics live in the dedicated
 [book_templates](/Users/kq/Workspace/moontown/book_templates) package.
 PlanBook should treat template installation as another policy-loop support

@@ -1,0 +1,56 @@
+// Generated using `moon info`, DON'T EDIT IT
+package "vectie/moontown/planbook"
+
+import {
+  "vectie/moontown/adapters/moonbook",
+}
+
+// Values
+pub fn active_review_markdown() -> String
+
+pub fn change_log_seed_markdown() -> String
+
+pub fn code_plan_skill_markdown() -> String
+
+pub fn code_review_skill_markdown() -> String
+
+pub fn contract_markdown() -> String
+
+pub fn daily_engineering_digest_seed_markdown() -> String
+
+pub fn decision_log_markdown() -> String
+
+pub fn doc_sync_skill_markdown() -> String
+
+pub fn editor_pipeline_plan_markdown() -> String
+
+pub fn execution_evidence_markdown() -> String
+
+pub fn generated_site_html(@moonbook.BookCatalogEntry) -> String
+
+pub fn live_autonomy_plan_markdown() -> String
+
+pub fn open_questions_markdown() -> String
+
+pub fn operating_architecture_markdown() -> String
+
+pub fn plans_index_markdown() -> String
+
+pub fn quality_gates_markdown() -> String
+
+pub fn record_schema_markdown() -> String
+
+pub fn role_model_markdown() -> String
+
+pub fn seed_plan_markdown() -> String
+
+pub fn ui_state_json(@moonbook.BookCatalogEntry) -> String
+
+// Errors
+
+// Types and methods
+
+// Type aliases
+
+// Traits
+

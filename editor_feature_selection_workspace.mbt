@@ -7,7 +7,7 @@ async fn write_editor_feature_selection_workspace(
     editor_pipeline_plan_path(
       workspace_root, "2026-05-31-editor-mode-real-pipeline",
     ),
-    planbook_editor_pipeline_plan_markdown(),
+    @planbook.editor_pipeline_plan_markdown(),
   )
   write_text_file(
     editor_feature_selection_context_path(workspace_root),

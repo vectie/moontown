@@ -1,5 +1,5 @@
 ///|
-fn planbook_operating_architecture_markdown() -> String {
+pub fn operating_architecture_markdown() -> String {
   planbook_markdown_page(
     [
       "# Operating Architecture", "", "This page is the PlanBook-local contract for keeping Moontown coherent while it runs and changes itself.",

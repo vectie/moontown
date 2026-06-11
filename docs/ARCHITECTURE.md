@@ -175,6 +175,18 @@ book owns. The implementation now has a first-class `policy` package:
   construction policy, and goal-list membership/enabled checks. Root may
   persist those goals, but it must not fork the loop instructions or goal
   semantics.
+- [cookbook/](/Users/kq/Workspace/moontown/cookbook)
+  owns Cookbook DTOs, stable-state artifact summary accounting, and the
+  operator-facing Cookbook status Markdown. Root Moontown may discover artifact
+  existence, register the MoonBook workspace, write files, and call MoonBook
+  catalog APIs, but it should not redefine docs/definition/runtime-state counts,
+  required-missing drift semantics, or Cookbook status wording locally.
+- [planbook/](/Users/kq/Workspace/moontown/planbook)
+  owns PlanBook static content: contract pages, governance pages, role model,
+  operating architecture, seed plans, generated-site templates, and PlanBook
+  skill templates. Root Moontown may bootstrap/update the workspace and dispatch
+  PlanBook repair/autonomy runtime work, but it should not keep root-local
+  copies of durable PlanBook prose, generated-site markup, or skill text.
 - [standing_watch_policy/](/Users/kq/Workspace/moontown/standing_watch_policy)
   owns the generic standing-watch `BookTask` contract: task kind, task id
   derivation, compact id segment formatting, target page set, prompt text,

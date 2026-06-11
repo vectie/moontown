@@ -1,0 +1,115 @@
+// Generated using `moon info`, DON'T EDIT IT
+package "vectie/moontown/cookbook"
+
+import {
+  "moonbitlang/core/debug",
+  "vectie/moontown/adapters/moonbook",
+}
+
+// Values
+pub fn book_entry(String) -> @moonbook.BookCatalogEntry
+
+pub fn cookbook_algorithms_markdown() -> String
+
+pub fn cookbook_artifact_card_html(CookbookArtifact) -> String
+
+pub fn cookbook_codebase_overview_markdown() -> String
+
+pub fn cookbook_content_rules_markdown() -> String
+
+pub fn cookbook_core_features_markdown() -> String
+
+pub fn cookbook_data_flow_markdown() -> String
+
+pub fn cookbook_data_structures_markdown() -> String
+
+pub fn cookbook_describer_overview_markdown() -> String
+
+pub fn cookbook_journey_json(@moonbook.BookCatalogEntry, MoontownCookbookManifest) -> Array[String]
+
+pub fn cookbook_links_json() -> Array[String]
+
+pub fn cookbook_metrics_json(String, String, String, String) -> Array[String]
+
+pub fn cookbook_page_families_json() -> Array[String]
+
+pub fn cookbook_readiness_json(String) -> Array[String]
+
+pub fn cookbook_rendered_markdown_html(String, String, String) -> String
+
+pub fn cookbook_rendered_skill_html(String, String, String) -> String
+
+pub fn cookbook_review_queue_json() -> Array[String]
+
+pub fn cookbook_site_style_html() -> String
+
+pub fn cookbook_skill_markdown() -> String
+
+pub fn cookbook_status_chips_json() -> Array[String]
+
+pub fn default_book_id() -> String
+
+pub fn default_manifest_path() -> String
+
+pub fn default_workspace_root() -> String
+
+pub fn generated_site_html(@moonbook.BookCatalogEntry, MoontownCookbookManifest) -> String
+
+pub async fn manifest(String, String) -> MoontownCookbookManifest
+
+pub fn merge_catalog(Array[@moonbook.BookCatalogEntry], @moonbook.BookCatalogEntry) -> Array[@moonbook.BookCatalogEntry]
+
+pub fn status_markdown(MoontownCookbookStatus) -> String
+
+pub fn ui_state_json(@moonbook.BookCatalogEntry, MoontownCookbookManifest) -> String
+
+pub async fn write_workspace(@moonbook.BookCatalogEntry, MoontownCookbookManifest) -> Unit
+
+// Errors
+
+// Types and methods
+pub(all) struct CookbookArtifact {
+  path : String
+  kind : String
+  owner : String
+  stable_role : String
+  required : Bool
+  exists : Bool
+} derive(Eq, ToJson, @debug.Debug)
+
+pub(all) struct CookbookArtifactSummary {
+  docs_count : Int
+  definition_count : Int
+  runtime_state_count : Int
+  required_missing_paths : Array[String]
+} derive(Eq, @debug.Debug)
+pub fn CookbookArtifactSummary::from_artifacts(Array[CookbookArtifact]) -> Self
+pub fn CookbookArtifactSummary::required_missing_count(Self) -> Int
+
+pub(all) struct MoontownCookbookManifest {
+  book_id : String
+  title : String
+  generated_by : String
+  managed_by : String
+  consumed_by : String
+  workspace_root : String
+  manifest_path : String
+  artifacts : Array[CookbookArtifact]
+} derive(Eq, ToJson, @debug.Debug)
+
+pub(all) struct MoontownCookbookStatus {
+  book_id : String
+  workspace_root : String
+  manifest_path : String
+  docs_count : Int
+  definition_count : Int
+  runtime_state_count : Int
+  required_missing_count : Int
+  required_missing_paths : Array[String]
+  ready : Bool
+} derive(Eq, ToJson, @debug.Debug)
+
+// Type aliases
+
+// Traits
+

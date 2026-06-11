@@ -6,7 +6,7 @@ test "planbook generated site keeps plan execute review identity" {
     purpose="planbook",
     workspace_root="/tmp/planbook",
   )
-  let html = planbook_generated_site_html(entry)
+  let html = generated_site_html(entry)
   assert_true(html.contains("<title>Moontown Quality Planbook</title>"))
   assert_true(
     html.contains("MoonBook managed / Mayor routed / MoonClaw executed"),
@@ -25,7 +25,7 @@ test "planbook generated site escapes workspace root in hero" {
     purpose="planbook",
     workspace_root="/tmp/planbook/<unsafe>",
   )
-  let html = planbook_generated_site_html(entry)
+  let html = generated_site_html(entry)
   assert_true(html.contains("/tmp/planbook/&lt;unsafe&gt;"))
   assert_true(!html.contains("/tmp/planbook/<unsafe>"))
 }

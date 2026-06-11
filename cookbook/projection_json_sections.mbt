@@ -1,5 +1,5 @@
 ///|
-fn cookbook_status_chips_json() -> Array[String] {
+pub fn cookbook_status_chips_json() -> Array[String] {
   [
     cookbook_chip_json("cookbook", "healthy"),
     cookbook_chip_json("moonbook generated", "info"),
@@ -9,7 +9,7 @@ fn cookbook_status_chips_json() -> Array[String] {
 }
 
 ///|
-fn cookbook_metrics_json(
+pub fn cookbook_metrics_json(
   docs_value : String,
   definitions_value : String,
   runtime_value : String,
@@ -30,7 +30,7 @@ fn cookbook_metrics_json(
 }
 
 ///|
-fn cookbook_readiness_json(manifest_path_value : String) -> Array[String] {
+pub fn cookbook_readiness_json(manifest_path_value : String) -> Array[String] {
   [
     cookbook_item_json(
       "Stable-state manifest",
@@ -57,7 +57,7 @@ fn cookbook_readiness_json(manifest_path_value : String) -> Array[String] {
 }
 
 ///|
-fn cookbook_review_queue_json() -> Array[String] {
+pub fn cookbook_review_queue_json() -> Array[String] {
   [
     cookbook_item_json(
       "Stable-state drift", "wiki/definitions/stable-state.md", "Review when required_missing > 0",
@@ -69,7 +69,7 @@ fn cookbook_review_queue_json() -> Array[String] {
 }
 
 ///|
-fn cookbook_page_families_json() -> Array[String] {
+pub fn cookbook_page_families_json() -> Array[String] {
   [
     cookbook_item_json(
       "Stable State", "wiki/definitions/stable-state.md", "Definitions",
@@ -99,7 +99,7 @@ fn cookbook_page_families_json() -> Array[String] {
 }
 
 ///|
-fn cookbook_journey_json(
+pub fn cookbook_journey_json(
   entry : @moonbook.BookCatalogEntry,
   manifest : MoontownCookbookManifest,
 ) -> Array[String] {
@@ -133,7 +133,7 @@ fn cookbook_journey_json(
 }
 
 ///|
-fn cookbook_links_json() -> Array[String] {
+pub fn cookbook_links_json() -> Array[String] {
   [
     cookbook_link_json(
       "Stable state", "wiki", "wiki/definitions/stable-state.md",

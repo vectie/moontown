@@ -14,9 +14,15 @@ test "Moontown generated skill templates keep exploration quality" {
     tags=[],
   )
   let service = @civic.wenyu_civic_service_for_book_id("wenyu-policy-hall").unwrap()
-  assert_moonbook_skill_quality("code-plan", code_plan_skill_markdown())
-  assert_moonbook_skill_quality("code-review", code_review_skill_markdown())
-  assert_moonbook_skill_quality("doc-sync", doc_sync_skill_markdown())
+  assert_moonbook_skill_quality(
+    "code-plan",
+    @planbook.code_plan_skill_markdown(),
+  )
+  assert_moonbook_skill_quality(
+    "code-review",
+    @planbook.code_review_skill_markdown(),
+  )
+  assert_moonbook_skill_quality("doc-sync", @planbook.doc_sync_skill_markdown())
   assert_moonbook_skill_quality(
     "planbook-repair",
     @planbook_policy.repair_skill_markdown(),
@@ -34,7 +40,7 @@ test "Moontown generated skill templates keep exploration quality" {
   )
   assert_moonbook_skill_quality(
     "cookbook-generation",
-    cookbook_skill_markdown(),
+    @cookbook.cookbook_skill_markdown(),
   )
   assert_moonbook_skill_quality(
     "editor-feature-rater",

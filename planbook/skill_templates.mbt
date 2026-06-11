@@ -1,5 +1,5 @@
 ///|
-fn code_plan_skill_markdown() -> String {
+pub fn code_plan_skill_markdown() -> String {
   [
     "---",
     "name: code-plan",
@@ -58,7 +58,7 @@ fn code_plan_skill_markdown() -> String {
 }
 
 ///|
-fn code_review_skill_markdown() -> String {
+pub fn code_review_skill_markdown() -> String {
   [
     "---",
     "name: code-review",
@@ -92,7 +92,7 @@ fn code_review_skill_markdown() -> String {
 }
 
 ///|
-fn doc_sync_skill_markdown() -> String {
+pub fn doc_sync_skill_markdown() -> String {
   [
     "---",
     "name: doc-sync",

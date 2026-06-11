@@ -1,5 +1,5 @@
 ///|
-fn cookbook_codebase_overview_markdown() -> String {
+pub fn cookbook_codebase_overview_markdown() -> String {
   [
     "# Moontown Codebase Describer", "", "This cookbook should help an engineer understand how Moontown works as code. It is not a directory tour. It describes the algorithms, data records, state files, control loops, AI boundaries, and evidence paths that make the town run.",
     "", "## Mental Model", "", "Moontown is a MoonBit control plane built around typed records and restart-readable files. Most behavior follows this pattern:",
@@ -16,7 +16,7 @@ fn cookbook_codebase_overview_markdown() -> String {
 }
 
 ///|
-fn cookbook_algorithms_markdown() -> String {
+pub fn cookbook_algorithms_markdown() -> String {
   [
     "# Algorithms Used In Moontown", "", "Moontown mostly uses explicit orchestration algorithms over typed records. The important algorithms are phase pipelines, reconciliation loops, map/reduce-style civic protocols, due-schedule checks, and projection derivations.",
     "", "## 1. Town State Mutation Algorithm", "", "Core files: `core/town_state_types.mbt`, `core/types.mbt`, `core/execution_types.mbt`.",
@@ -60,7 +60,7 @@ fn cookbook_algorithms_markdown() -> String {
 }
 
 ///|
-fn cookbook_data_structures_markdown() -> String {
+pub fn cookbook_data_structures_markdown() -> String {
   [
     "# Moontown Data Structures", "", "Moontown's main data model is a set of MoonBit records that can be serialized to JSON and reconciled after restart. The cookbook should teach these records before it teaches directories.",
     "", "## Town Runtime Records", "", "| Record | Key Fields | Purpose | Mutation Pattern |",
@@ -90,7 +90,7 @@ fn cookbook_data_structures_markdown() -> String {
 }
 
 ///|
-fn cookbook_data_flow_markdown() -> String {
+pub fn cookbook_data_flow_markdown() -> String {
   [
     "# Moontown Data Flow", "", "Moontown data flow is file-backed and phase-driven. The same facts usually appear in three forms: a MoonBit record while a command is running, a JSON/Markdown file for restart and review, and a projection for UI or operators.",
     "", "## Goal Execution Flow", "", "```text", "operator / standing goal / daemon schedule",
@@ -122,7 +122,7 @@ fn cookbook_data_flow_markdown() -> String {
 }
 
 ///|
-fn cookbook_core_features_markdown() -> String {
+pub fn cookbook_core_features_markdown() -> String {
   [
     "# Core Features In Code",
     "",
@@ -279,7 +279,7 @@ fn cookbook_core_feature(
 }
 
 ///|
-fn cookbook_skill_markdown() -> String {
+pub fn cookbook_skill_markdown() -> String {
   [
     "---",
     "name: cookbook-generation",

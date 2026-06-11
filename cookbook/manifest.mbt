@@ -1,7 +1,24 @@
 ///|
-fn cookbook_book_entry(workspace_root : String) -> @moonbook.BookCatalogEntry {
+
+///|
+pub fn default_book_id() -> String {
+  "moontown-cookbook"
+}
+
+///|
+pub fn default_workspace_root() -> String {
+  @moonbook.default_workspace_root(default_book_id())
+}
+
+///|
+pub fn default_manifest_path() -> String {
+  ".moontown/cookbook/stable-state.json"
+}
+
+///|
+pub fn book_entry(workspace_root : String) -> @moonbook.BookCatalogEntry {
   @moonbook.BookCatalogEntry::new(
-    id=default_cookbook_book_id(),
+    id=default_book_id(),
     name="MoonBook / Moontown Cookbook",
     purpose="Canonical generated operating cookbook for Moontown docs, definitions, stable state, and runtime contracts. Moondesk can curate it as the human desktop surface; Moontown consumes it as a stable-state index.",
     workspace_root~,
@@ -12,7 +29,7 @@ fn cookbook_book_entry(workspace_root : String) -> @moonbook.BookCatalogEntry {
 }
 
 ///|
-fn merge_cookbook_catalog(
+pub fn merge_catalog(
   catalog : Array[@moonbook.BookCatalogEntry],
   cookbook : @moonbook.BookCatalogEntry,
 ) -> Array[@moonbook.BookCatalogEntry] {
@@ -27,12 +44,12 @@ fn merge_cookbook_catalog(
 }
 
 ///|
-async fn cookbook_manifest(
+pub async fn manifest(
   workspace_root : String,
   manifest_path : String,
 ) -> MoontownCookbookManifest {
   {
-    book_id: default_cookbook_book_id(),
+    book_id: default_book_id(),
     title: "Moontown Stable-State Cookbook",
     generated_by: "MoonBook",
     managed_by: "Moondesk",

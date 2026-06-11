@@ -8,39 +8,39 @@ async fn ensure_planbook_seed_files(workspace_root : String) -> Unit {
 async fn ensure_planbook_wiki_seed_files(root : String) -> Unit {
   write_text_file_if_missing(
     "\{root}/wiki/planning/quality-gates.md",
-    planbook_quality_gates_markdown(),
+    @planbook.quality_gates_markdown(),
   )
   write_text_file_if_missing(
     "\{root}/wiki/planning/execution-evidence.md",
-    planbook_execution_evidence_markdown(),
+    @planbook.execution_evidence_markdown(),
   )
   write_text_file_if_missing(
     "\{root}/wiki/planning/open-questions.md",
-    planbook_open_questions_markdown(),
+    @planbook.open_questions_markdown(),
   )
   write_text_file_if_missing(
     "\{root}/wiki/planning/role-model.md",
-    planbook_role_model_markdown(),
+    @planbook.role_model_markdown(),
   )
   write_text_file_if_missing(
     "\{root}/wiki/planning/operating-architecture.md",
-    planbook_operating_architecture_markdown(),
+    @planbook.operating_architecture_markdown(),
   )
   write_text_file_if_missing(
     "\{root}/wiki/reviews/active-plan-review.md",
-    planbook_active_review_markdown(),
+    @planbook.active_review_markdown(),
   )
   write_text_file_if_missing(
     "\{root}/wiki/history/decision-log.md",
-    planbook_decision_log_markdown(),
+    @planbook.decision_log_markdown(),
   )
   write_text_file_if_missing(
     "\{root}/wiki/history/change-log.md",
-    planbook_change_log_seed_markdown(),
+    @planbook.change_log_seed_markdown(),
   )
   write_text_file_if_missing(
     "\{root}/wiki/history/daily-engineering-digest.md",
-    planbook_daily_engineering_digest_seed_markdown(),
+    @planbook.daily_engineering_digest_seed_markdown(),
   )
 }
 
@@ -48,18 +48,18 @@ async fn ensure_planbook_wiki_seed_files(root : String) -> Unit {
 async fn ensure_planbook_schema_and_skill_files(root : String) -> Unit {
   write_text_file_if_missing(
     "\{root}/schemas/plan-record.schema.md",
-    planbook_record_schema_markdown(),
+    @planbook.record_schema_markdown(),
   )
   write_text_file_if_missing(
     "\{root}/skills/code-plan/SKILL.md",
-    code_plan_skill_markdown(),
+    @planbook.code_plan_skill_markdown(),
   )
   write_text_file_if_missing(
     "\{root}/skills/code-review/SKILL.md",
-    code_review_skill_markdown(),
+    @planbook.code_review_skill_markdown(),
   )
   write_text_file_if_missing(
     "\{root}/skills/doc-sync/SKILL.md",
-    doc_sync_skill_markdown(),
+    @planbook.doc_sync_skill_markdown(),
   )
 }
