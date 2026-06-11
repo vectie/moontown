@@ -45,7 +45,7 @@ pub async fn editor_feature_selection_evidence(
   if editor_feature_selection_result_satisfies_contract(text) {
     "valid AI-rated feature selection exists at `\{result_path}`"
   } else if @fs.exists(result_path) {
-    "feature selection result exists at `\{result_path}`, but it does not satisfy `\{editor_feature_selection_result_contract()}`"
+    "feature selection result exists at `\{result_path}`, but it does not satisfy `\{@editor_pipeline.feature_selection_result_contract()}`"
   } else {
     "no AI-rated feature selection exists at `\{result_path}`"
   }

@@ -38,8 +38,10 @@ fn standing_watch_recovery_allowed(
 fn standing_watch_recovery_decision_from_execution(
   execution : @core.TaskExecutionRecord,
 ) -> @core.WatcherDecisionKind {
-  standing_watch_marker_decision(execution.summary.to_lower()).unwrap_or(
-    standing_watch_decision_from_execution(execution),
+  @standing_watch_policy.standing_watch_marker_decision(
+    execution.summary.to_lower(),
+  ).unwrap_or(
+    @standing_watch_policy.standing_watch_decision_from_execution(execution),
   )
 }
 
@@ -80,7 +82,8 @@ fn standing_watch_delta_meets_threshold(
   goal : @core.StandingGoal,
   execution : @core.TaskExecutionRecord,
 ) -> Bool {
-  standing_watch_delta_score(execution) >= goal.quality_threshold
+  @standing_watch_policy.standing_watch_delta_score(execution) >=
+  goal.quality_threshold
 }
 
 ///|

@@ -3,7 +3,7 @@ priv struct LiveAutonomyDerivedState {
   tick : Int
   status : String
   metrics : LiveAutonomyMetricCounts
-  template_request_counts : BookTemplateRequestCounts
+  template_request_counts : @book_templates.BookTemplateRuntimeCounts
   waiting : LiveAutonomyWaitingState
   latest_watcher_summary : String
   summary : String
@@ -26,20 +26,22 @@ fn live_autonomy_derived_state(
   let metrics = live_autonomy_metric_counts(
     state, standing_goals, watcher_records, tick,
   )
-  let status = live_autonomy_status(
+  let status = @live_autonomy_policy.live_autonomy_status(
     metrics.active_workers,
     metrics.review,
     metrics.blocked,
   )
-  let template_request_counts = book_template_request_counts(
+  let template_request_counts = @book_templates.request_runtime_counts(
     book_template_request_status,
   )
-  let waiting = live_autonomy_waiting_state(
-    metrics,
-    planbook_open,
-    planbook_repair_active,
-    template_request_counts.pending,
-    template_request_counts.failed,
+  let waiting = @live_autonomy_policy.live_autonomy_waiting_state(
+    live_autonomy_blocker_context(
+      metrics,
+      planbook_open,
+      planbook_repair_active,
+      template_request_counts.pending,
+      template_request_counts.failed,
+    ),
     prior_stable_waiting_observation_streak,
   )
   let latest = latest_watcher_record_summary(watcher_records, standing_goals)
@@ -57,7 +59,7 @@ fn live_autonomy_derived_state(
     waiting,
     summary,
     latest_watcher_summary: latest,
-    next_actions: live_autonomy_next_actions_for(
+    next_actions: @live_autonomy_policy.live_autonomy_next_actions_for(
       live_autonomy_action_context(
         metrics,
         watcher_records,

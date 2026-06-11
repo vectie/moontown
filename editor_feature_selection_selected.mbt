@@ -46,7 +46,7 @@ async fn editor_selected_feature_implementation_ready(
     editor_selected_feature_implementation_path(workspace_root),
   )
   text.contains(
-    "contract: \{editor_selected_feature_implementation_contract()}",
+    "contract: \{@editor_pipeline.selected_feature_implementation_contract()}",
   ) &&
   text.contains("selected_feature: \{feature.selected_feature}") &&
   text.contains("implementation_status: accepted")

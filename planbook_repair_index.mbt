@@ -8,7 +8,7 @@ async fn planbook_repair_task_in_flight(task : PlanbookRepairTask) -> Bool {
     None => return false
   }
   match planbook_repair_run_status(task, run_id) {
-    Some(status) if planbook_repair_moonclaw_status_needs_live_runner(status) =>
+    Some(status) if @planbook_policy.moonclaw_status_needs_live_runner(status) =>
       @moonclaw.run_process_alive(run_id)
     Some(_) => false
     None => @moonclaw.run_process_alive(run_id)

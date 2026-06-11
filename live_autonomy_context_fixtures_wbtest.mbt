@@ -22,7 +22,9 @@ fn live_autonomy_action_context_fixture(
       pending_book_template_requests~,
       failed_book_template_requests~,
     ),
-    watcher_records,
+    latest_watcher_decision: live_autonomy_latest_watcher_decision(
+      watcher_records,
+    ),
     transient_infrastructure_debt,
   }
 }

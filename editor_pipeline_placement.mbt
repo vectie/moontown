@@ -23,8 +23,5 @@ fn editor_pipeline_placement_diff_ready(
   lifecycle : EditorPipelineLifecycleRecord,
   records : Array[EditorPipelinePlacementDiffRecord],
 ) -> Bool {
-  if lifecycle.selected_feature != "placement-diff-preview" {
-    return true
-  }
-  !records.is_empty()
+  @editor_pipeline.placement_diff_ready(lifecycle, records)
 }

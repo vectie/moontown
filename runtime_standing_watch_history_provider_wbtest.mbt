@@ -30,7 +30,7 @@ test "standing watch history parser reads provider decision for current task" {
     $|### standing-watch-opc-news-tick-3
     $|
     $|- Decision: `unknown`
-  let summary = standing_watch_history_decision_summary_for_task(
+  let summary = @standing_watch_policy.standing_watch_history_decision_summary_for_task(
     history, "standing-watch-opc-news-tick-4",
   ).unwrap()
   assert_true(summary.contains("standing_goal_decision: no_change"))
@@ -67,7 +67,9 @@ test "standing watch history parser reads newest provider decision before task b
     $|### standing-watch-opc-news-tick-4
     $|
     $|- Decision: `unknown`
-  let summary = standing_watch_latest_provider_decision_summary(history).unwrap()
+  let summary = @standing_watch_policy.standing_watch_latest_provider_decision_summary(
+    history,
+  ).unwrap()
   assert_true(summary.contains("standing_goal_decision: no_change"))
   assert_true(summary.contains("delta_score: 5"))
   assert_true(summary.contains("checked_sources_count: 7"))
@@ -98,7 +100,7 @@ test "standing watch collapse removes folded provider decision block" {
     $|### standing-watch-opc-news-tick-4
     $|
     $|- Decision: `unknown`
-  let collapsed = remove_standing_watch_history_block(
+  let collapsed = @standing_watch_policy.remove_standing_watch_history_block(
     history, "provider-standing-watch-456",
   )
   assert_true(collapsed.contains("### standing-watch-opc-news-tick-5"))

@@ -8,14 +8,17 @@ async fn reconcile_persisted_standing_watch_records(
   let snapshot = state.executions.copy()
   for execution in snapshot {
     let goal = match
-      standing_goal_for_execution_task(standing_goals, execution.task_id) {
+      @standing_watch_policy.standing_goal_for_execution_task(
+        standing_goals,
+        execution.task_id,
+      ) {
       Some(goal) => goal
       None => continue
     }
     match
       terminal_watcher_record_for_execution(goal.id, ledger_dir, execution) {
       Some(record) => {
-        if watcher_record_effective_decision(record) ==
+        if @standing_watch_policy.watcher_record_effective_decision(record) ==
           @core.WatcherDecisionKind::NeedsReview &&
           standing_watch_review_superseded_by_newer_review(
             snapshot, standing_goals, goal, execution,

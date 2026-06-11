@@ -30,7 +30,7 @@ async fn inspect_editor_pipeline_lifecycle(
   let implementation_text = read_text_or_empty(implementation_path)
   let change_id = "editor-pipeline-\{selected_feature.selected_feature}"
   let accepted_proof = implementation_text.contains(
-      "contract: \{editor_selected_feature_implementation_contract()}",
+      "contract: \{@editor_pipeline.selected_feature_implementation_contract()}",
     ) &&
     implementation_text.contains(
       "selected_feature: \{selected_feature.selected_feature}",

@@ -1,0 +1,38 @@
+// Generated using `moon info`, DON'T EDIT IT
+package "vectie/moontown/adapters/codex"
+
+// Values
+pub fn args() -> Array[String]
+
+pub fn args_normalized_with_model(Array[String], String) -> Array[String]
+
+pub fn codex_acp_target_json(String, String, String, Array[String], String) -> Json
+
+pub fn codex_main_target_id() -> String
+
+pub fn codex_main_target_json(String, label? : String) -> Json
+
+pub fn command() -> String
+
+pub fn model() -> String
+
+pub fn moontown_args() -> Array[String]
+
+pub fn moontown_target_id() -> String
+
+pub fn moontown_target_json() -> Json
+
+pub fn upsert_acp_target_json(Json, String, Json) -> Json
+
+pub fn upsert_codex_main_target_json(Json, String, label? : String) -> Json
+
+pub fn upsert_moontown_target_json(Json, String) -> Json
+
+// Errors
+
+// Types and methods
+
+// Type aliases
+
+// Traits
+

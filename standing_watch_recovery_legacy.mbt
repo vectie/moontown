@@ -16,7 +16,9 @@ fn legacy_review_queued_retry_accounting_standing_watch(
   if execution.status != @core.TaskExecutionStatus::ReviewQueued {
     return false
   }
-  if !standing_watch_infrastructure_failure_summary(execution.summary) {
+  if !@standing_watch_policy.standing_watch_infrastructure_failure_summary(
+      execution.summary,
+    ) {
     return false
   }
   let task_tick = tick_from_task_id(execution.task_id)
@@ -25,7 +27,9 @@ fn legacy_review_queued_retry_accounting_standing_watch(
   decision == @core.WatcherDecisionKind::Deferred ||
   (
     decision == @core.WatcherDecisionKind::Failed &&
-    standing_watch_execution_has_zero_material_delta(execution)
+    @standing_watch_policy.standing_watch_execution_has_zero_material_delta(
+      execution,
+    )
   )
 }
 

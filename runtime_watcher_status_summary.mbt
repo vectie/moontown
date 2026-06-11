@@ -8,7 +8,9 @@ fn watcher_status_summary(
   }
   let latest = latest_preferred_watcher_record(records)
   let current_next = current_goal_next_due_tick(latest.goal_id, goals)
-  let latest_decision = watcher_record_effective_decision(latest).to_string()
+  let latest_decision = @standing_watch_policy.watcher_record_effective_decision(
+    latest,
+  ).to_string()
   match current_next {
     Some(next_due_tick) =>
       if next_due_tick == latest.next_due_tick {
@@ -27,7 +29,7 @@ fn latest_preferred_watcher_record(
 ) -> @core.WatcherRunRecord {
   let mut latest = records[0]
   for record in records {
-    if watcher_record_prefer_candidate(latest, record) {
+    if @standing_watch_policy.watcher_record_prefer_candidate(latest, record) {
       latest = record
     }
   }

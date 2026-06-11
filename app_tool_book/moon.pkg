@@ -1,0 +1,6 @@
+import {
+  "vectie/moontown/core",
+  "vectie/moontown/adapters/moonbook",
+  "moonbitlang/async/fs",
+  "moonbitlang/core/json",
+}

@@ -33,7 +33,20 @@ fn live_autonomy_action_context(
       metrics, planbook_open, planbook_repair_active, pending_book_template_requests,
       failed_book_template_requests,
     ),
-    watcher_records,
+    latest_watcher_decision: live_autonomy_latest_watcher_decision(
+      watcher_records,
+    ),
     transient_infrastructure_debt: metrics.transient_infrastructure_debt,
+  }
+}
+
+///|
+fn live_autonomy_latest_watcher_decision(
+  watcher_records : Array[@core.WatcherRunRecord],
+) -> @core.WatcherDecisionKind? {
+  match latest_watcher_record(watcher_records) {
+    Some(record) =>
+      Some(@standing_watch_policy.watcher_record_effective_decision(record))
+    None => None
   }
 }

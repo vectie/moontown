@@ -12,7 +12,7 @@ fn render_wenyu_building_protocol_portfolio(
   )
   builder.write_string("|---|---|---:|---:|---:|---:|---:|---:|---|\n")
   for protocol in portfolio.protocols {
-    builder.write_string(building_protocol_markdown_row(protocol))
+    builder.write_string(@civic.building_protocol_markdown_row(protocol))
   }
   builder.to_string()
 }

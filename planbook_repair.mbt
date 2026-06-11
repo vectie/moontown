@@ -1,18 +1,5 @@
 ///|
-pub struct PlanbookRepairTask {
-  id : String
-  criterion_id : String
-  title : String
-  status : String
-  owner : String
-  workspace_root : String
-  packet_path : String
-  proposal_id : String?
-  run_id : String?
-  summary : String
-  validation_command : String
-  generated_at_ms : UInt64
-} derive(Debug, Eq, ToJson, FromJson)
+pub type PlanbookRepairTask = @planbook_policy.PlanbookRepairTask
 
 ///|
 pub fn default_planbook_repair_path(

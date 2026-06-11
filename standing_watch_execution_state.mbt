@@ -5,7 +5,9 @@ fn stabilize_deferred_standing_watch_execution(
 ) -> @core.TaskExecutionRecord {
   let decision = standing_watch_recovery_decision_from_execution(execution)
   if decision == @core.WatcherDecisionKind::Deferred &&
-    standing_watch_infrastructure_failure_summary(execution.summary) {
+    @standing_watch_policy.standing_watch_infrastructure_failure_summary(
+      execution.summary,
+    ) {
     copy_execution_with(
       execution,
       status=@core.TaskExecutionStatus::Completed,
@@ -87,7 +89,7 @@ fn transient_deferred_standing_watch_execution_record(
 
 ///|
 fn standing_watch_transient_dispatch_error(detail : String) -> Bool {
-  transient_external_dependency_error(detail)
+  @runtime_error_policy.transient_external_dependency_error(detail)
 }
 
 ///|
@@ -133,7 +135,7 @@ fn has_active_standing_watch_execution(
   state : @core.TownState,
   goal_id : String,
 ) -> Bool {
-  let prefix = "standing-\{compact_watch_segment(goal_id)}-"
+  let prefix = @standing_watch_policy.standing_watch_task_prefix(goal_id)
   for execution in state.executions {
     if execution.task_id.has_prefix(prefix) &&
       (

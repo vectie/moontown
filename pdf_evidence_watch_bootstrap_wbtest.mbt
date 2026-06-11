@@ -14,6 +14,7 @@ async test "bootstrap pdf evidence watch book installs workspace catalog and sta
     standing_goal_path=goals_path,
     workspace_root=root,
   )
+  assert_true(summary.contains(@book_templates.install_success_marker()))
   assert_true(summary.contains("research-domain-pdfs"))
   assert_true(@fs.exists("\{root}/book.json"))
   assert_true(@fs.exists("\{root}/raw/pdfs/.keep"))

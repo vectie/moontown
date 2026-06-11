@@ -71,13 +71,13 @@ async fn prior_live_autonomy_stable_waiting_observation_streak(
       continue
     }
     if probe.tick == last_tick {
-      if !live_autonomy_stability_probe_is_stable(probe) {
+      if !@live_autonomy_policy.live_autonomy_stability_probe_is_stable(probe) {
         streak = 0
       }
       continue
     }
     last_tick = probe.tick
-    if live_autonomy_stability_probe_is_stable(probe) {
+    if @live_autonomy_policy.live_autonomy_stability_probe_is_stable(probe) {
       streak += 1
     } else {
       streak = 0
@@ -92,7 +92,7 @@ async fn load_live_autonomy_watcher_records(
   goals : Array[@core.StandingGoal],
 ) -> Array[@core.WatcherRunRecord] {
   let records : Array[@core.WatcherRunRecord] = []
-  let ledger_dir = "\{live_autonomy_base_dir(snapshot_path)}/watchers"
+  let ledger_dir = "\{@live_autonomy_policy.live_autonomy_base_dir_for_snapshot(snapshot_path)}/watchers"
   for goal in goals {
     for record in @storage.load_watcher_run_records(goal.id, dir=ledger_dir) {
       records.push(record)

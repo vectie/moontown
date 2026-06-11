@@ -32,5 +32,5 @@ pub async fn inspect_wenyu_building_protocols(
   for protocol in @civic.wenyu_building_protocols() {
     snapshots.push(inspect_wenyu_building_protocol(protocol, ledger_base_dir~))
   }
-  building_protocol_portfolio(snapshots, status_path, registry_path)
+  @civic.building_protocol_portfolio(snapshots, status_path, registry_path)
 }

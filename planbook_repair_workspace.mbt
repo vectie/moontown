@@ -9,7 +9,7 @@ async fn write_planbook_repair_workspace(
   )
   write_text_file(
     planbook_repair_skill_path(workspace_root),
-    planbook_repair_skill_markdown(),
+    @planbook_policy.repair_skill_markdown(),
   )
   write_text_file(
     planbook_repair_plan_path(workspace_root),

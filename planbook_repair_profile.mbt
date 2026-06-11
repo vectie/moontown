@@ -61,7 +61,7 @@ fn planbook_repair_worker_step_metadata_json() -> Json {
   planbook_bounded_step_metadata_json(
     preferred_skills=planbook_repair_preferred_skills(),
     execution_mode="acp",
-    execution_target=Some("codex-main"),
+    execution_target=Some(@codex.codex_main_target_id()),
     output_contract=planbook_repair_result_contract(),
     source_root=planbook_repair_source_root(),
     target_files=planbook_repair_target_files("default"),

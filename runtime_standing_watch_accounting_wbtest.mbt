@@ -34,7 +34,7 @@ test "standing watch history parser reads accounting markers from summary body" 
     $|### standing-watch-opc-news-tick-3795
     $|
     $|- Decision: `unknown`
-  let summary = standing_watch_history_decision_summary_for_task(
+  let summary = @standing_watch_policy.standing_watch_history_decision_summary_for_task(
     history, "standing-watch-opc-news-tick-3870",
   ).unwrap()
   assert_true(summary.contains("checked_sources_count: 4"))
@@ -46,7 +46,7 @@ test "standing watch history parser reads accounting markers from summary body" 
 
 ///|
 test "standing watch history parser applies update accounting fallbacks" {
-  let summary = standing_watch_summary_from_history_block(
+  let summary = @standing_watch_policy.standing_watch_summary_from_history_block(
     "provider-standing-watch-update",
     [
       "- Decision: `update`", "- Delta score: `8`", "- New source count: `3`", "- Next check hint: `normal`",

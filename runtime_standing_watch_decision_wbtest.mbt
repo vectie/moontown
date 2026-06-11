@@ -4,23 +4,30 @@ test "standing watch decision reads MoonBook no-change marker" {
     summary="standing_goal_decision: no_change\ndelta_score: 0\nnew_source_count: 0",
   )
   assert_eq(
-    standing_watch_decision_from_execution(execution),
+    @standing_watch_policy.standing_watch_decision_from_execution(execution),
     @core.WatcherDecisionKind::NoChange,
   )
-  assert_eq(standing_watch_delta_score(execution), 0)
-  assert_eq(standing_watch_new_source_count(execution), 0)
-  assert_true(standing_watch_execution_has_zero_material_delta(execution))
+  assert_eq(@standing_watch_policy.standing_watch_delta_score(execution), 0)
+  assert_eq(
+    @standing_watch_policy.standing_watch_new_source_count(execution),
+    0,
+  )
+  assert_true(
+    @standing_watch_policy.standing_watch_execution_has_zero_material_delta(
+      execution,
+    ),
+  )
 }
 
 ///|
 test "standing watch material delta helpers centralize zero-delta checks" {
   assert_true(
-    standing_watch_summary_has_zero_material_delta(
+    @standing_watch_policy.standing_watch_summary_has_zero_material_delta(
       "standing_goal_decision: no_change\ndelta_score: 0\nnew_source_count: 0",
     ),
   )
   assert_true(
-    !standing_watch_summary_has_zero_material_delta(
+    !@standing_watch_policy.standing_watch_summary_has_zero_material_delta(
       "standing_goal_decision: update\ndelta_score: 5\nnew_source_count: 0",
     ),
   )
@@ -32,7 +39,9 @@ test "standing watch material delta helpers centralize zero-delta checks" {
     delta_score=0,
     new_source_count=0,
   )
-  assert_true(watcher_record_has_zero_material_delta(record))
+  assert_true(
+    @standing_watch_policy.watcher_record_has_zero_material_delta(record),
+  )
   let changed = @core.WatcherRunRecord::new(
     goal_id="research-opc",
     tick=1,
@@ -41,44 +50,75 @@ test "standing watch material delta helpers centralize zero-delta checks" {
     delta_score=0,
     new_source_count=1,
   )
-  assert_true(!watcher_record_has_zero_material_delta(changed))
+  assert_true(
+    !@standing_watch_policy.watcher_record_has_zero_material_delta(changed),
+  )
 }
 
 ///|
 test "standing watch decision text classifies book-changing outcomes" {
-  assert_true(standing_watch_decision_text_marks_update("update"))
-  assert_true(!standing_watch_decision_text_marks_update("needs_review"))
-  assert_true(standing_watch_decision_text_marks_book_changed("update"))
-  assert_true(standing_watch_decision_text_marks_book_changed("needs_review"))
-  assert_true(!standing_watch_decision_text_marks_book_changed("no_change"))
-  assert_true(!standing_watch_decision_text_marks_book_changed("deferred"))
+  assert_true(
+    @standing_watch_policy.standing_watch_decision_text_marks_update("update"),
+  )
+  assert_true(
+    !@standing_watch_policy.standing_watch_decision_text_marks_update(
+      "needs_review",
+    ),
+  )
+  assert_true(
+    @standing_watch_policy.standing_watch_decision_text_marks_book_changed(
+      "update",
+    ),
+  )
+  assert_true(
+    @standing_watch_policy.standing_watch_decision_text_marks_book_changed(
+      "needs_review",
+    ),
+  )
+  assert_true(
+    !@standing_watch_policy.standing_watch_decision_text_marks_book_changed(
+      "no_change",
+    ),
+  )
+  assert_true(
+    !@standing_watch_policy.standing_watch_decision_text_marks_book_changed(
+      "deferred",
+    ),
+  )
 }
 
 ///|
 test "standing watch marker decision rules parse known decision markers in order" {
-  assert_eq(standing_watch_marker_decision_rules().length(), 5)
   assert_true(
-    standing_watch_marker_decision("standing_goal_decision: failed") ==
+    @standing_watch_policy.standing_watch_marker_decision(
+      "standing_goal_decision: failed",
+    ) ==
     Some(@core.WatcherDecisionKind::Failed),
   )
   assert_true(
-    standing_watch_marker_decision("standing_goal_decision=deferred") ==
+    @standing_watch_policy.standing_watch_marker_decision(
+      "standing_goal_decision=deferred",
+    ) ==
     Some(@core.WatcherDecisionKind::Deferred),
   )
   assert_true(
-    standing_watch_marker_decision("decision: no_change") ==
+    @standing_watch_policy.standing_watch_marker_decision("decision: no_change") ==
     Some(@core.WatcherDecisionKind::NoChange),
   )
   assert_true(
-    standing_watch_marker_decision("decision=needs_review") ==
+    @standing_watch_policy.standing_watch_marker_decision(
+      "decision=needs_review",
+    ) ==
     Some(@core.WatcherDecisionKind::NeedsReview),
   )
   assert_true(
-    standing_watch_marker_decision("standing_goal_decision: update") ==
+    @standing_watch_policy.standing_watch_marker_decision(
+      "standing_goal_decision: update",
+    ) ==
     Some(@core.WatcherDecisionKind::Update),
   )
   assert_true(
-    standing_watch_marker_decision(
+    @standing_watch_policy.standing_watch_marker_decision(
       "standing_goal_decision: failed\nstanding_goal_decision: update",
     ) ==
     Some(@core.WatcherDecisionKind::Failed),
@@ -120,11 +160,14 @@ test "standing watch decision treats missing marker as review instead of update"
     summary="Workflow completed workspace=/tmp/book",
   )
   assert_eq(
-    standing_watch_decision_from_execution(execution),
+    @standing_watch_policy.standing_watch_decision_from_execution(execution),
     @core.WatcherDecisionKind::NeedsReview,
   )
-  assert_eq(standing_watch_delta_score(execution), 0)
-  assert_eq(standing_watch_new_source_count(execution), 0)
+  assert_eq(@standing_watch_policy.standing_watch_delta_score(execution), 0)
+  assert_eq(
+    @standing_watch_policy.standing_watch_new_source_count(execution),
+    0,
+  )
 }
 
 ///|
@@ -134,11 +177,15 @@ test "standing watch decision honors marker even when execution is review queued
     summary="standing_goal_decision: no_change\ndelta_score: 9\nnew_source_count: 0\nnext_check_hint: slower",
   )
   assert_eq(
-    standing_watch_decision_from_execution(execution),
+    @standing_watch_policy.standing_watch_decision_from_execution(execution),
     @core.WatcherDecisionKind::NoChange,
   )
-  assert_eq(standing_watch_delta_score(execution), 9)
-  assert_false(standing_watch_execution_has_zero_material_delta(execution))
+  assert_eq(@standing_watch_policy.standing_watch_delta_score(execution), 9)
+  assert_false(
+    @standing_watch_policy.standing_watch_execution_has_zero_material_delta(
+      execution,
+    ),
+  )
 }
 
 ///|
@@ -147,7 +194,7 @@ test "standing watch transient dispatch marker defers immediate retry" {
     summary="Resource temporarily unavailable\nstanding_goal_decision: deferred\nstanding_watch_transient_retry: true",
   )
   assert_eq(
-    standing_watch_decision_from_execution(execution),
+    @standing_watch_policy.standing_watch_decision_from_execution(execution),
     @core.WatcherDecisionKind::Deferred,
   )
 }

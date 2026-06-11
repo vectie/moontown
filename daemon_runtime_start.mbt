@@ -6,8 +6,8 @@ pub async fn daemon_start_saved_town(
 ) -> String {
   let command = daemon_command_or_current(command)
   let health = inspect_daemon_runtime(snapshot_path~, stale_after_ms~)
-  if daemon_runtime_start_already_active(health) {
-    return "Moontown daemon already active\n\{daemon_runtime_health_summary(health)}"
+  if @daemon_runtime_policy.daemon_runtime_start_already_active(health) {
+    return "Moontown daemon already active\n\{@daemon_runtime_policy.daemon_runtime_health_summary(health)}"
   }
   if health.stale || health.stop_requested {
     cleanup_stale_daemon_runtime(
@@ -24,8 +24,8 @@ pub async fn daemon_start_saved_town(
       let launchd = inspect_daemon_runtime_after_start(
         snapshot_path, stale_after_ms,
       )
-      if daemon_runtime_start_already_active(launchd) {
-        return "Moontown daemon launchd started\n\{daemon_runtime_health_summary(launchd)}"
+      if @daemon_runtime_policy.daemon_runtime_start_already_active(launchd) {
+        return "Moontown daemon launchd started\n\{@daemon_runtime_policy.daemon_runtime_health_summary(launchd)}"
       }
       append_daemon_log(
         default_daemon_log_path(snapshot_path~),
@@ -61,8 +61,8 @@ pub async fn daemon_start_saved_town(
     "supervisor started pid=\{pid} run=\{supervisor_run_id}",
   )
   let next = inspect_daemon_runtime_after_start(snapshot_path, stale_after_ms)
-  if daemon_runtime_start_already_active(next) {
-    return "Moontown daemon supervisor started pid=\{pid}\n\{daemon_runtime_health_summary(next)}"
+  if @daemon_runtime_policy.daemon_runtime_start_already_active(next) {
+    return "Moontown daemon supervisor started pid=\{pid}\n\{@daemon_runtime_policy.daemon_runtime_health_summary(next)}"
   }
   append_daemon_log(
     default_daemon_log_path(snapshot_path~),
@@ -72,9 +72,9 @@ pub async fn daemon_start_saved_town(
     let launchd = inspect_daemon_runtime_after_start(
       snapshot_path, stale_after_ms,
     )
-    return "Moontown daemon launchd fallback started after detached pid=\{pid}\n\{daemon_runtime_health_summary(launchd)}"
+    return "Moontown daemon launchd fallback started after detached pid=\{pid}\n\{@daemon_runtime_policy.daemon_runtime_health_summary(launchd)}"
   }
-  "Moontown daemon supervisor started pid=\{pid} but degraded\n\{daemon_runtime_health_summary(next)}\nlaunchd_fallback=failed-or-unavailable"
+  "Moontown daemon supervisor started pid=\{pid} but degraded\n\{@daemon_runtime_policy.daemon_runtime_health_summary(next)}\nlaunchd_fallback=failed-or-unavailable"
 }
 
 ///|

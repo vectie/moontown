@@ -37,33 +37,18 @@ test "live autonomy metric predicates name active worker and execution rules" {
     ),
   )
   assert_true(
-    execution_status_in(@core.TaskExecutionStatus::Running, [
-      @core.TaskExecutionStatus::ProposalImported,
-      @core.TaskExecutionStatus::Running,
-    ]),
-  )
-  assert_false(
-    execution_status_in(@core.TaskExecutionStatus::Completed, [
-      @core.TaskExecutionStatus::ProposalImported,
-      @core.TaskExecutionStatus::Running,
-    ]),
-  )
-  assert_true(
-    execution_status_in(
+    @runtime_status_policy.runtime_status_active_execution_status(
       @core.TaskExecutionStatus::AwaitingPersistence,
-      active_execution_statuses(),
     ),
   )
   assert_false(
-    execution_status_in(
+    @runtime_status_policy.runtime_status_active_execution_status(
       @core.TaskExecutionStatus::ReviewQueued,
-      active_execution_statuses(),
     ),
   )
   assert_true(
-    execution_status_in(
+    @runtime_status_policy.runtime_status_review_execution_status(
       @core.TaskExecutionStatus::ReviewQueued,
-      review_execution_statuses(),
     ),
   )
 }
@@ -88,7 +73,7 @@ test "live autonomy transient infrastructure debt predicate is explicit" {
 
 ///|
 test "shared standing goal counts include enabled disabled and due goals" {
-  let counts = standing_goal_counts(
+  let counts = @runtime_status_policy.runtime_status_standing_goal_counts(
     [
       live_autonomy_watch_goal(
         id="watch-due",
@@ -138,7 +123,10 @@ test "shared health anomaly counter matches exact anomaly titles" {
     ),
   )
   let report = @health.inspect_town(state)
-  assert_eq(count_health_anomalies_by_title(report, "execution-failed"), 2)
-  assert_eq(count_health_anomalies_by_title(report, "worker-health"), 0)
-  assert_eq(count_health_anomalies_by_title(report, "missing"), 0)
+  assert_eq(
+    @health.count_health_anomalies_by_title(report, "execution-failed"),
+    2,
+  )
+  assert_eq(@health.count_health_anomalies_by_title(report, "worker-health"), 0)
+  assert_eq(@health.count_health_anomalies_by_title(report, "missing"), 0)
 }

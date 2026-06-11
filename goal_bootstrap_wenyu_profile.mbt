@@ -111,7 +111,7 @@ fn wenyu_build_step_metadata(
     board_lane~,
     board_order~,
   )
-  fields["model"] = "gpt-5.4".to_json()
+  fields["model"] = @codex.model().to_json()
   Json::object(fields)
 }
 

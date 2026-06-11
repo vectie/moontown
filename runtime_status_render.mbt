@@ -11,46 +11,17 @@ pub async fn render_saved_town_status(
   if !status.has_snapshot {
     return builder.to_string()
   }
-  write_runtime_status_snapshot_summary(builder, status, daemon, runtime)
-  write_runtime_status_daemon_actions(builder, status.daemon_actions)
+  builder.write_string(
+    @runtime_status_policy.render_runtime_status_report(
+      status,
+      daemon_id=daemon.daemon_id,
+      saved_tick=daemon.tick_sequence,
+      lease_owner=daemon.lease_owner,
+      daemon_job_count=daemon.jobs.length(),
+      runtime_health_summary=@daemon_runtime_policy.daemon_runtime_health_summary(
+        runtime,
+      ),
+    ),
+  )
   builder.to_string()
-}
-
-///|
-fn write_runtime_status_snapshot_summary(
-  builder : StringBuilder,
-  status : TownRuntimeStatus,
-  daemon : @scheduler.DaemonState,
-  runtime : DaemonRuntimeHealth,
-) -> Unit {
-  builder.write_string("snapshot=\{status.snapshot_path}\n")
-  builder.write_string(
-    "daemon=\{daemon.daemon_id} tick=\{status.daemon_tick} saved_tick=\{daemon.tick_sequence} lease=\{daemon.lease_owner} jobs=\{daemon.jobs.length()}\n",
-  )
-  builder.write_string("\{daemon_runtime_health_summary(runtime)}\n")
-  builder.write_string(
-    "standing_goals=\{status.standing_goal_count} enabled=\{status.enabled_standing_goal_count} disabled=\{status.disabled_standing_goal_count} due_next_tick=\{status.due_standing_goal_count}\n",
-  )
-  builder.write_string(
-    "watcher_records=\{status.watcher_record_count} \{status.watcher_summary}\n",
-  )
-  builder.write_string(
-    "book_template_requests=\{status.book_template_request_count} pending=\{status.pending_book_template_request_count} failed=\{status.failed_book_template_request_count} \{status.book_template_request_summary}\n",
-  )
-  builder.write_string(
-    "book_template_latest_event=\{status.book_template_latest_event_summary}\n",
-  )
-  builder.write_string(
-    "planned daemon actions=\{status.daemon_actions.length()}\n",
-  )
-}
-
-///|
-fn write_runtime_status_daemon_actions(
-  builder : StringBuilder,
-  actions : Array[@scheduler.SchedulerAction],
-) -> Unit {
-  for action in actions {
-    builder.write_string("- \{action.kind}: \{action.detail}\n")
-  }
 }

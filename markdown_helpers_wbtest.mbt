@@ -1,9 +1,4 @@
 ///|
-test "markdown inline escapes table separators and newlines" {
-  assert_eq(markdown_inline("alpha|beta\ngamma"), "alpha\\|beta gamma")
-}
-
-///|
 test "first non-heading paragraph skips markdown scaffolding and stops at blank" {
   let markdown = [
     "# Report Title", "", "| Column |", "| --- |", "## Section", "", "First useful sentence.",

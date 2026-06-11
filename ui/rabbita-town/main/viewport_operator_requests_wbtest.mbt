@@ -11,6 +11,14 @@ test "book template request submit labels reflect pending state" {
 }
 
 ///|
+test "book template target label follows package-owned inbox filename" {
+  assert_eq(
+    book_template_request_target_label(),
+    "Writes \{@book_templates.request_file_name()}",
+  )
+}
+
+///|
 test "book template intro explains durable PDF evidence workflow" {
   let intro = book_template_request_intro()
   assert_true(intro.contains("fetch PDFs"))

@@ -9,23 +9,9 @@ fn civic_salon_round_record(
   decision : String,
   summary : String,
 ) -> CivicSalonRoundRecord {
-  {
-    id: round_id,
-    salon_id: schedule.id,
-    building_id: schedule.building_id,
-    tick,
-    round_number: schedule.round_count + 1,
-    started_ms,
-    finished_ms,
-    participant_count: metrics.participant_count,
-    idea_count: metrics.idea_count,
-    research_question_count: metrics.research_question_count,
-    participant_idea_links: metrics.participant_idea_links,
-    idea_return_home_count: metrics.idea_return_home_count,
-    structural_effectiveness_score: metrics.structural_effectiveness_score,
-    decision,
-    summary,
-  }
+  @civic.civic_salon_round_record(
+    schedule, round_id, tick, started_ms, finished_ms, metrics, decision, summary,
+  )
 }
 
 ///|

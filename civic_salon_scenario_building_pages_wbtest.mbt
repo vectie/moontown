@@ -1,7 +1,7 @@
 ///|
 test "civic salon building synthesis separates protocol structure from truth claims" {
   let scenario = building_pages_test_scenario()
-  let protocol = civic_salon_generic_protocol_for_scenario(scenario)
+  let protocol = @civic.salon_protocol_for_scenario(scenario)
   let participants = scenario.participants
   let ideas = scenario.ideas
   let metrics = civic_salon_metrics(scenario, participants, ideas)
@@ -14,7 +14,7 @@ test "civic salon building synthesis separates protocol structure from truth cla
   assert_true(markdown.contains("## Participants"))
   assert_true(markdown.contains("## Reduced Pattern Outputs"))
   assert_true(markdown.contains("## Effectiveness Metrics"))
-  assert_true(markdown.contains(civic_salon_structural_metric_note()))
+  assert_true(markdown.contains(@civic.salon_structural_metric_note()))
   assert_true(markdown.contains("It does not claim the outputs are correct"))
 }
 
@@ -34,12 +34,12 @@ test "civic salon metrics markdown explains protocol effectiveness and return ho
     "robotics-round-1",
     1,
   )
-  assert_true(markdown.contains(civic_salon_metrics_certification_note()))
+  assert_true(markdown.contains(@civic.salon_metrics_certification_note()))
   assert_true(markdown.contains("Structural effectiveness score"))
   assert_true(markdown.contains("## Formula"))
   assert_true(markdown.contains("## Return Home Contract"))
   assert_true(
-    markdown.contains(civic_salon_return_home_contract_note(scenario)),
+    markdown.contains(@civic.salon_return_home_contract_note(scenario)),
   )
   assert_true(markdown.contains("wiki/queries/returned.md"))
 }

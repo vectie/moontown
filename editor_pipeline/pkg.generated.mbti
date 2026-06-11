@@ -1,0 +1,243 @@
+// Generated using `moon info`, DON'T EDIT IT
+package "vectie/moontown/editor_pipeline"
+
+import {
+  "moonbitlang/core/debug",
+  "moonbitlang/core/json",
+}
+
+// Values
+pub fn feature_rater_skill_markdown() -> String
+
+pub fn feature_selection_candidate_extraction_rule() -> String
+
+pub fn feature_selection_exclusion_rule() -> String
+
+pub fn feature_selection_goal_prompt() -> String
+
+pub fn feature_selection_lowest_score_rule() -> String
+
+pub fn feature_selection_no_code_edit_rule() -> String
+
+pub fn feature_selection_profile_prompt_template() -> String
+
+pub fn feature_selection_request_rules(String) -> Array[String]
+
+pub fn feature_selection_request_text(String, Array[String]) -> String
+
+pub fn feature_selection_result_contract() -> String
+
+pub fn feature_selection_result_satisfies_contract(String) -> Bool
+
+pub fn feature_selection_role_prompt() -> String
+
+pub fn feature_selection_score_rule() -> String
+
+pub fn feature_selection_skill_first_rule() -> String
+
+pub fn feature_selection_target_files_markdown(Array[String]) -> String
+
+pub fn feature_selection_target_files_rule() -> String
+
+pub fn first_enabled_module(Array[EditorPipelineModulePlacement]) -> EditorPipelineModulePlacement?
+
+pub fn movement_loop_ready(EditorPipelineLifecycleRecord, Array[EditorPipelineMovementLoopRecord]) -> Bool
+
+pub fn movement_loop_record_for_module(EditorPipelineModulePlacement) -> EditorPipelineMovementLoopRecord
+
+pub fn movement_loop_records(Array[EditorPipelineModulePlacement], limit? : Int) -> Array[EditorPipelineMovementLoopRecord]
+
+pub fn pipeline_stages(EditorPipelineStageInputs) -> Array[EditorPipelineStage]
+
+pub fn pipeline_status(EditorPipelineStageInputs) -> String
+
+pub fn placement_diff_ready(EditorPipelineLifecycleRecord, Array[EditorPipelinePlacementDiffRecord]) -> Bool
+
+pub fn placement_diff_records(Array[EditorPipelineModulePlacement], Array[EditorPipelineModulePlacement]) -> Array[EditorPipelinePlacementDiffRecord]
+
+pub fn render_pipeline_markdown(EditorPipelineState) -> String
+
+pub fn required_stage_status(Bool) -> String
+
+pub fn selected_feature_implementation_contract() -> String
+
+pub fn selected_feature_stage_status(Bool, EditorPipelineLifecycleRecord, String) -> String
+
+pub fn selected_style_candidate(Array[EditorPipelineStyleCandidateRecord]) -> EditorPipelineStyleCandidateRecord?
+
+pub fn selected_style_family(Array[EditorPipelineModulePlacement]) -> String
+
+pub fn style_asset_ref(String) -> String
+
+pub fn style_comparison_ready(EditorPipelineLifecycleRecord, Array[EditorPipelineStyleCandidateRecord], EditorPipelineStyleSelectionRecord) -> Bool
+
+pub fn style_title(String) -> String
+
+pub fn terrain_label_ready(EditorPipelineLifecycleRecord, Array[EditorPipelineTerrainLayerRecord], Array[EditorPipelineTerrainReasonRecord]) -> Bool
+
+pub fn terrain_layers_for_modules(Array[EditorPipelineModulePlacement]) -> Array[EditorPipelineTerrainLayerRecord]
+
+pub fn terrain_reason_for_module(EditorPipelineModulePlacement) -> EditorPipelineTerrainReasonRecord
+
+pub fn terrain_reason_records(Array[EditorPipelineModulePlacement], limit? : Int) -> Array[EditorPipelineTerrainReasonRecord]
+
+// Errors
+
+// Types and methods
+pub(all) struct EditorFeatureSelectionTask {
+  id : String
+  status : String
+  workspace_root : String
+  packet_path : String
+  result_path : String
+  proposal_id : String?
+  run_id : String?
+  summary : String
+  generated_at_ms : UInt64
+} derive(Eq, ToJson, @debug.Debug, @json.FromJson)
+
+pub(all) struct EditorPipelineLifecycleRecord {
+  change_id : String
+  selected_feature : String
+  title : String
+  lifecycle_status : String
+  summary : String
+  course_ref : String
+  plan_ref : String
+  repair_ref : String
+  output_ref : String
+} derive(Eq, ToJson, @debug.Debug, @json.FromJson)
+
+pub(all) struct EditorPipelineModulePlacement {
+  id : String
+  enabled : Bool
+  title : String
+  book_id : String
+  district : String
+  building_kind : String
+  grid_x : Int
+  grid_y : Int
+  footprint_w : Int
+  footprint_h : Int
+  entrance_x : Int
+  entrance_y : Int
+  style_family : String
+} derive(Eq, ToJson, @debug.Debug, @json.FromJson)
+
+pub(all) struct EditorPipelineMovementLoopRecord {
+  module_id : String
+  module_title : String
+  book_id : String
+  status : String
+  home_ref : String
+  entrance_ref : String
+  output_ref : String
+  return_ref : String
+  missing_reason : String
+} derive(Eq, ToJson, @debug.Debug, @json.FromJson)
+
+pub(all) struct EditorPipelinePlacementDiffRecord {
+  module_id : String
+  module_title : String
+  change_kind : String
+  status : String
+  before_ref : String
+  after_ref : String
+  entrance_ref : String
+  terrain_status : String
+  reason : String
+} derive(Eq, ToJson, @debug.Debug, @json.FromJson)
+
+pub(all) struct EditorPipelineStage {
+  id : String
+  title : String
+  status : String
+  summary : String
+  evidence : String
+} derive(Eq, ToJson, @debug.Debug, @json.FromJson)
+
+pub(all) struct EditorPipelineStageInputs {
+  course_page : String
+  plan_path : String
+  feature_selection_result_path : String
+  repair_task_path : String
+  module_config_ref : String
+  placement_proposal_path : String
+  course_ready : Bool
+  plan_ready : Bool
+  command_ready : Bool
+  ui_ready : Bool
+  repair_status : String
+  feature_selection_status : String
+  feature_selection_summary : String
+  lifecycle : EditorPipelineLifecycleRecord
+  feature_history_ready : Bool
+  movement_loop_ready : Bool
+  placement_diff_ready : Bool
+  terrain_label_ready : Bool
+  style_comparison_ready : Bool
+}
+
+pub(all) struct EditorPipelineState {
+  contract : String
+  status : String
+  source_course_book : String
+  source_course_page : String
+  planbook_id : String
+  plan_id : String
+  repair_status : String
+  editor_mode_url : String
+  output_mode_url : String
+  generated_at_ms : UInt64
+  stages : Array[EditorPipelineStage]
+  lifecycle : EditorPipelineLifecycleRecord
+  movement_loops : Array[EditorPipelineMovementLoopRecord]
+  placement_diffs : Array[EditorPipelinePlacementDiffRecord]
+  terrain_layers : Array[EditorPipelineTerrainLayerRecord]
+  terrain_reasons : Array[EditorPipelineTerrainReasonRecord]
+  style_candidates : Array[EditorPipelineStyleCandidateRecord]
+  style_selection : EditorPipelineStyleSelectionRecord
+} derive(Eq, ToJson, @debug.Debug, @json.FromJson)
+
+pub(all) struct EditorPipelineStyleCandidateRecord {
+  style_id : String
+  title : String
+  status : String
+  evidence_ref : String
+  asset_ref : String
+  rationale : String
+  tradeoff : String
+  selected : Bool
+} derive(Eq, ToJson, @debug.Debug, @json.FromJson)
+
+pub(all) struct EditorPipelineStyleSelectionRecord {
+  target_module_id : String
+  target_module_title : String
+  selected_style_id : String
+  selected_style_title : String
+  status : String
+  decision_ref : String
+  critique : String
+} derive(Eq, ToJson, @debug.Debug, @json.FromJson)
+
+pub(all) struct EditorPipelineTerrainLayerRecord {
+  layer_id : String
+  title : String
+  status : String
+  evidence_ref : String
+  summary : String
+} derive(Eq, ToJson, @debug.Debug, @json.FromJson)
+
+pub(all) struct EditorPipelineTerrainReasonRecord {
+  module_id : String
+  module_title : String
+  terrain_layer : String
+  status : String
+  placement_ref : String
+  reason : String
+} derive(Eq, ToJson, @debug.Debug, @json.FromJson)
+
+// Type aliases
+
+// Traits
+

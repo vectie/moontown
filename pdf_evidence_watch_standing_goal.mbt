@@ -66,7 +66,7 @@ fn pdf_evidence_watch_should_disable_goal_for_book(
   if goal.id == pdf_evidence_watch_goal_id(book_id) {
     return true
   }
-  if goal.id == book_quality_repair_goal_id(book_id) {
+  if goal.id == @book_quality.repair_goal_id(book_id) {
     return true
   }
   match goal.target_book_id {

@@ -70,7 +70,7 @@ test "standing watch infrastructure failure with stale review marker is not revi
     output_contract="test",
   )
   assert_eq(
-    standing_watch_decision_from_execution(execution),
+    @standing_watch_policy.standing_watch_decision_from_execution(execution),
     @core.WatcherDecisionKind::Failed,
   )
   let record = @core.WatcherRunRecord::new(
@@ -83,7 +83,7 @@ test "standing watch infrastructure failure with stale review marker is not revi
     detail=execution.summary,
   )
   assert_eq(
-    watcher_record_effective_decision(record),
+    @standing_watch_policy.watcher_record_effective_decision(record),
     @core.WatcherDecisionKind::Failed,
   )
 }
@@ -102,7 +102,7 @@ test "standing watch transient failed record stays deferred accounting" {
     next_due_tick=18047,
   )
   assert_eq(
-    watcher_record_effective_decision(record),
+    @standing_watch_policy.watcher_record_effective_decision(record),
     @core.WatcherDecisionKind::Deferred,
   )
 }
@@ -123,7 +123,7 @@ test "standing watch detached startup-log failure record stays deferred accounti
     next_due_tick=18137,
   )
   assert_eq(
-    watcher_record_effective_decision(record),
+    @standing_watch_policy.watcher_record_effective_decision(record),
     @core.WatcherDecisionKind::Deferred,
   )
   let summary = watcher_status_summary([record], [])
@@ -145,7 +145,7 @@ test "standing watch persisted orphaned running recovery stays deferred" {
     requires_review=true,
   )
   assert_eq(
-    standing_watch_decision_from_execution(execution),
+    @standing_watch_policy.standing_watch_decision_from_execution(execution),
     @core.WatcherDecisionKind::Deferred,
   )
   let record = @core.WatcherRunRecord::new(
@@ -158,7 +158,7 @@ test "standing watch persisted orphaned running recovery stays deferred" {
     detail=summary,
   )
   assert_eq(
-    watcher_record_effective_decision(record),
+    @standing_watch_policy.watcher_record_effective_decision(record),
     @core.WatcherDecisionKind::Deferred,
   )
 }

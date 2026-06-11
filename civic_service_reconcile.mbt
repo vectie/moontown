@@ -51,9 +51,11 @@ pub async fn reconcile_wenyu_civic_service_results(
 fn civic_service_has_reconcilable_protocol_work(
   health : CivicServiceHealth,
 ) -> Bool {
-  health.protocol_ready &&
-  health.protocol_reduction_count > 0 &&
-  health.protocol_outbox_count > 0
+  @civic.civic_service_has_reconcilable_protocol_work(
+    protocol_ready=health.protocol_ready,
+    protocol_reduction_count=health.protocol_reduction_count,
+    protocol_outbox_count=health.protocol_outbox_count,
+  )
 }
 
 ///|
@@ -61,11 +63,12 @@ fn civic_service_reconciled_result_is_current(
   service : @civic.CivicServiceDefinition,
   health : CivicServiceHealth,
 ) -> Bool {
-  if !health.latest_result_found {
-    return false
-  }
   let plan = civic_service_reconcile_plan(service, health)
-  health.latest_decision == plan.decision &&
-  health.latest_pages_changed == plan.page_count &&
-  health.latest_review_items == plan.review_items
+  @civic.civic_service_reconciled_result_is_current(
+    latest_result_found=health.latest_result_found,
+    latest_decision=health.latest_decision,
+    latest_pages_changed=health.latest_pages_changed,
+    latest_review_items=health.latest_review_items,
+    plan,
+  )
 }

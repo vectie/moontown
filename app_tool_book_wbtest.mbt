@@ -17,6 +17,7 @@ async test "app tool book bootstraps durable app and civic manifest" {
     standing_goal_path=goals_path,
     workspace_root~,
   )
+  assert_true(summary.contains(@book_templates.install_success_marker()))
   assert_true(summary.contains("Bootstrapped App ToolBook"))
   let status = inspect_app_tool_book(
     book_id="toolbook-opc-dashboard",
@@ -45,7 +46,7 @@ async test "app tool book config installer resolves method and spec files" {
   let workspace_root = "\{base}/workspace"
   write_text_file(method_path, "# File Method\n\nUse file method.")
   write_text_file(spec_path, "# File Tool Spec\n\nUse file tool spec.")
-  let spec = AppToolBookInstallSpec::{
+  let spec = @app_tool_book.AppToolBookInstallSpec::{
     book_id: "toolbook-file-config",
     title: "File Config ToolBook",
     purpose: "Installed from a Moondesk-style config.",
@@ -64,6 +65,7 @@ async test "app tool book config installer resolves method and spec files" {
     book_catalog_path=catalog_path,
     standing_goal_path=goals_path,
   )
+  assert_true(summary.contains(@book_templates.install_success_marker()))
   assert_true(summary.contains("Installed App ToolBook config"))
   assert_true(
     read_text_or_empty("\{workspace_root}/wiki/methods/analysis-method.md").contains(
@@ -81,42 +83,13 @@ async test "app tool book config installer resolves method and spec files" {
 async test "app tool book status helper reports required path gaps" {
   let root = "/tmp/moontown-app-tool-book-status-helper-wbtest"
   ignore_checked_command("rm", ["-rf", root])
-  let missing_before = missing_app_tool_book_required_paths(root)
-  assert_eq(missing_before.length(), app_tool_book_required_paths().length())
+  let missing_before = @app_tool_book.missing_required_paths(root)
+  assert_eq(missing_before.length(), @app_tool_book.required_paths().length())
   write_text_file("\{root}/book.json", "{}")
   write_text_file("\{root}/tool-manifest.json", "{}")
-  let missing_after = missing_app_tool_book_required_paths(root)
+  let missing_after = @app_tool_book.missing_required_paths(root)
   assert_true(missing_after.length() < missing_before.length())
   assert_true(!missing_after.contains("book.json"))
   assert_true(!missing_after.contains("tool-manifest.json"))
   assert_true(missing_after.contains("wiki/index.md"))
-}
-
-///|
-test "app tool book copy paths are part of the required workspace contract" {
-  let required = app_tool_book_required_paths()
-  for path in app_tool_book_template_copy_paths() {
-    assert_true(required.contains(path))
-  }
-  assert_true(!app_tool_book_template_copy_paths().contains("book.json"))
-  assert_true(app_tool_book_template_copy_paths().contains("app/tool.js"))
-}
-
-///|
-test "app tool book generated html keeps tool and report affordances" {
-  let entry = app_tool_book_catalog_entry(
-    "toolbook-html", "HTML ToolBook", "Expose a generated app.", "/tmp/toolbook-html",
-  )
-  let index = app_tool_book_site_index_html(
-    entry, "HTML ToolBook", "Expose a generated app.", "html-lab",
-  )
-  assert_true(index.contains("href=\"tool.html\""))
-  assert_true(index.contains("href=\"../../wiki/reports/latest-analysis.md\""))
-  assert_true(index.contains("civic building html-lab"))
-  let app = app_tool_book_app_html(
-    entry, "HTML ToolBook", "Expose a generated app.", "html-lab",
-  )
-  assert_true(app.contains("<script src=\"tool.js\"></script>"))
-  assert_true(app.contains("id=\"refresh-tool\""))
-  assert_true(app.contains("Building: html-lab"))
 }

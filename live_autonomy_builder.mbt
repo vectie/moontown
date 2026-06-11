@@ -11,7 +11,7 @@ priv struct LiveAutonomyBuildInput {
   planbook_change_log_path : String
   planbook_engineering_digest_path : String
   latest_change_summary : String
-  book_template_request_status : BookTemplateRequestStatus
+  book_template_request_status : @book_templates.BookTemplateRequestStatus
   prior_stable_waiting_observation_streak : Int
 }
 

@@ -2,8 +2,15 @@
 fn editor_pipeline_first_enabled_module(
   modules : Array[EditorPipelineModuleConfigEntry],
 ) -> EditorPipelineModuleConfigEntry? {
+  let placement = match
+    @editor_pipeline.first_enabled_module(
+      editor_pipeline_module_placements(modules),
+    ) {
+    Some(placement) => placement
+    None => return None
+  }
   for module_entry in modules {
-    if module_entry.enabled {
+    if module_entry.id == placement.id {
       return Some(module_entry)
     }
   }
@@ -14,12 +21,7 @@ fn editor_pipeline_first_enabled_module(
 fn editor_pipeline_selected_style_candidate(
   candidates : Array[EditorPipelineStyleCandidateRecord],
 ) -> EditorPipelineStyleCandidateRecord? {
-  for candidate in candidates {
-    if candidate.selected {
-      return Some(candidate)
-    }
-  }
-  None
+  @editor_pipeline.selected_style_candidate(candidates)
 }
 
 ///|
@@ -28,10 +30,5 @@ fn editor_pipeline_style_comparison_ready(
   candidates : Array[EditorPipelineStyleCandidateRecord],
   selection : EditorPipelineStyleSelectionRecord,
 ) -> Bool {
-  if lifecycle.selected_feature != "style-comparison-workbench" {
-    return true
-  }
-  candidates.length() >= 3 &&
-  candidates.any(fn(candidate) { candidate.selected }) &&
-  selection.status == "selected"
+  @editor_pipeline.style_comparison_ready(lifecycle, candidates, selection)
 }

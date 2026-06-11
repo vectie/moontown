@@ -1,7 +1,7 @@
 ///|
 async fn retire_satisfied_book_quality_repair_goals(
   goals : Array[@core.StandingGoal],
-  scores : Array[BookQualityScore],
+  scores : Array[@book_quality.BookQualityScore],
   repairable_book_ids : Array[String],
   result_dir : String,
 ) -> Array[String] {
@@ -11,7 +11,7 @@ async fn retire_satisfied_book_quality_repair_goals(
     if book_quality_should_retire_repair_goal(
         goal, scores, repairable_book_ids, result_dir,
       ) {
-      goals[index] = disabled_book_quality_repair_goal(goal)
+      goals[index] = @book_quality.disabled_repair_standing_goal(goal)
       retired.push(goal.id)
     }
   }
@@ -19,52 +19,34 @@ async fn retire_satisfied_book_quality_repair_goals(
 }
 
 ///|
-priv enum BookQualityRepairGoalRetirementDecision {
-  NotRepairGoal
-  MissingTargetBook
-  MissingBookScore
-  NoLongerRepairableBook
-  ReadySemanticReview
-  StillNeedsRepair
-}
-
-///|
-fn BookQualityRepairGoalRetirementDecision::should_retire(
-  self : BookQualityRepairGoalRetirementDecision,
-) -> Bool {
-  match self {
-    MissingBookScore | NoLongerRepairableBook | ReadySemanticReview => true
-    NotRepairGoal | MissingTargetBook | StillNeedsRepair => false
-  }
-}
-
-///|
 async fn book_quality_repair_goal_retirement_decision(
   goal : @core.StandingGoal,
-  scores : Array[BookQualityScore],
+  scores : Array[@book_quality.BookQualityScore],
   repairable_book_ids : Array[String],
   result_dir : String,
-) -> BookQualityRepairGoalRetirementDecision {
-  if !goal.enabled || !goal.id.has_prefix("book-quality-repair-") {
-    return NotRepairGoal
-  }
+) -> @book_quality.BookQualityRepairGoalRetirementDecision {
   match goal.target_book_id {
-    None => MissingTargetBook
-    Some(book_id) => {
-      if !book_quality_score_exists(scores, book_id) {
-        return MissingBookScore
-      }
-      if !repairable_book_ids.contains(book_id) {
-        return NoLongerRepairableBook
-      }
-      let result_text = read_text_or_empty(
-        book_quality_ai_review_result_path(result_dir, book_id),
+    None =>
+      @book_quality.repair_goal_retirement_decision(
+        goal.id,
+        goal.enabled,
+        has_target_book=false,
+        score_exists=false,
+        repairable_book=false,
+        semantic_score=None,
       )
-      match parse_ai_quality_score(result_text) {
-        Some(value) if semantic_quality_allows_ready(Some(value)) =>
-          ReadySemanticReview
-        _ => StillNeedsRepair
-      }
+    Some(book_id) => {
+      let result_text = read_text_or_empty(
+        @book_quality.review_result_path(result_dir, book_id),
+      )
+      @book_quality.repair_goal_retirement_decision(
+        goal.id,
+        goal.enabled,
+        has_target_book=true,
+        score_exists=@book_quality.score_exists(scores, book_id),
+        repairable_book=repairable_book_ids.contains(book_id),
+        semantic_score=@book_quality.parse_ai_quality_score(result_text),
+      )
     }
   }
 }
@@ -72,33 +54,15 @@ async fn book_quality_repair_goal_retirement_decision(
 ///|
 async fn book_quality_should_retire_repair_goal(
   goal : @core.StandingGoal,
-  scores : Array[BookQualityScore],
+  scores : Array[@book_quality.BookQualityScore],
   repairable_book_ids : Array[String],
   result_dir : String,
 ) -> Bool {
-  book_quality_repair_goal_retirement_decision(
-    goal, scores, repairable_book_ids, result_dir,
-  ).should_retire()
-}
-
-///|
-fn book_quality_score_exists(
-  scores : Array[BookQualityScore],
-  book_id : String,
-) -> Bool {
-  for score in scores {
-    if score.book_id == book_id {
-      return true
-    }
-  }
-  false
-}
-
-///|
-fn disabled_book_quality_repair_goal(
-  goal : @core.StandingGoal,
-) -> @core.StandingGoal {
-  standing_goal_registry_with_enabled(goal, false)
+  @book_quality.repair_goal_retirement_decision_should_retire(
+    book_quality_repair_goal_retirement_decision(
+      goal, scores, repairable_book_ids, result_dir,
+    ),
+  )
 }
 
 ///|
@@ -118,5 +82,10 @@ fn book_quality_repairable_book_ids(
 fn book_quality_repairable_catalog_entry(
   entry : @moonbook.BookCatalogEntry,
 ) -> Bool {
-  book_quality_active_catalog_entry(entry)
+  @book_quality.catalog_entry_active(
+    entry.id,
+    entry.name,
+    entry.purpose,
+    entry.tags,
+  )
 }

@@ -19,7 +19,7 @@ fn planbook_repair_packet_step_metadata(
   let fields = moonclaw_execution_metadata_fields(
     preferred_skills=planbook_repair_preferred_skills(),
     execution_mode="acp",
-    execution_target=Some("codex-main"),
+    execution_target=Some(@codex.codex_main_target_id()),
     output_contract=planbook_repair_result_contract(),
   )
   fields["kind"] = "planbook_repair".to_json()
@@ -28,7 +28,7 @@ fn planbook_repair_packet_step_metadata(
   fields["target_files"] = planbook_repair_target_files(criterion.id).to_json()
   fields["required_validation_commands"] = planbook_repair_required_commands().to_json()
   fields["required_engineering_steps"] = planbook_repair_required_engineering_steps().to_json()
-  fields["patch_receipt_contract"] = planbook_repair_patch_receipt_contract().to_json()
+  fields["patch_receipt_contract"] = @planbook_policy.repair_patch_receipt_contract().to_json()
   fields["patch_receipt_required_fields"] = planbook_repair_patch_receipt_required_fields().to_json()
   fields["git_policy"] = planbook_repair_git_policy_json()
   fields["target_pages"] = planbook_repair_result_target_pages().to_json()

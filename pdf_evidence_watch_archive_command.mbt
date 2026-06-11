@@ -4,7 +4,9 @@ pub async fn archive_pdf_evidence_watch_book(
   reason? : String = "Archived by operator.",
   book_catalog_path? : String = @moonbook.default_catalog_path(),
   standing_goal_path? : String = @storage.default_standing_goal_path(),
-  request_event_path? : String = default_book_template_request_event_path(),
+  request_event_path? : String = @book_templates.request_event_path_for_request(
+    @book_templates.request_path_for_snapshot(@storage.default_snapshot_path()),
+  ),
 ) -> String {
   let catalog = @moonbook.load_or_create_catalog(path=book_catalog_path)
   let archived_catalog = archive_pdf_evidence_watch_catalog_entry(
@@ -44,7 +46,7 @@ async fn append_pdf_evidence_watch_archive_event(
   request_event_path : String,
 ) -> Unit {
   let summary = "Archived PDF Evidence Watch book `\{book_id}`; standing goal `\{goal_id}` enabled=`\{status.standing_goal_enabled}`; disabled_goals=\{disabled_count}. Reason: \{reason}"
-  append_book_template_request_event(request_event_path, {
+  @book_templates.append_request_event(request_event_path, {
     id: "archive-\{book_id}-\{@env.now()}",
     request_id: "archive-\{book_id}",
     template_id: "pdf-evidence-watch",

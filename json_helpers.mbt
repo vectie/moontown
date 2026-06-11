@@ -46,8 +46,3 @@ fn json_string_field(value : Json, key : String) -> String? {
     _ => None
   }
 }
-
-///|
-fn json_object_copy(value : Json?) -> Map[String, Json] {
-  @core.json_object_copy(value)
-}

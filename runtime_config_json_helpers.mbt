@@ -29,29 +29,3 @@ fn upsert_nested_object_entry_json(
     entry~,
   )
 }
-
-///|
-fn upsert_acp_target_json(
-  config : Json,
-  target_id : String,
-  target : Json,
-) -> Json {
-  upsert_nested_object_entry_json(
-    config,
-    section_key="acp",
-    collection_key="targets",
-    entry_key=target_id,
-    entry=target,
-  )
-}
-
-///|
-fn upsert_agent_default_json(config : Json, key : String, value : Json) -> Json {
-  let root = json_object_copy(Some(config))
-  let agents = json_object_copy(root.get("agents"))
-  let defaults = json_object_copy(agents.get("defaults"))
-  defaults[key] = value
-  agents["defaults"] = Json::object(defaults)
-  root["agents"] = Json::object(agents)
-  Json::object(root)
-}

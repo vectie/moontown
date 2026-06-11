@@ -29,7 +29,7 @@ test "runtime status summarizes execution lifecycle counts" {
 ///|
 test "runtime status summary composes stable metric groups" {
   let state = runtime_status_test_state()
-  let summary = runtime_status_summary(
+  let summary = @runtime_status_policy.runtime_status_summary(
     state,
     { running: 1, review: 2, failed: 3, stale: 4, completed: 5 },
     { total: 6, enabled: 5, disabled: 1, due: 2 },
@@ -99,11 +99,6 @@ test "runtime status keeps later duplicate when lifecycle rank ties" {
       "later live snapshot with the same lifecycle rank",
     ),
   )
-  assert_false(effective_execution_record(state, 0))
-  assert_true(effective_execution_record(state, 1))
-  let indexes = effective_execution_indexes(state)
-  assert_eq(indexes.length(), 1)
-  assert_eq(indexes[0], 1)
   let status = runtime_status_from_state(state, "/tmp/town.json")
   assert_eq(status.running_count, 1)
   assert_eq(status.execution_count, 2)
@@ -130,22 +125,9 @@ test "runtime execution counts use effective execution indexes" {
       "completed",
     ),
   )
-  assert_eq(
-    count_runtime_executions_in_indexes(
-      state,
-      effective_execution_indexes(state),
-      [
-        @core.TaskExecutionStatus::Running,
-        @core.TaskExecutionStatus::AwaitingPersistence,
-      ],
-    ),
-    1,
-  )
-  assert_true(
-    execution_status_in(@core.TaskExecutionStatus::Running, [
-      @core.TaskExecutionStatus::Running,
-    ]),
-  )
+  let status = runtime_status_from_state(state, "/tmp/town.json")
+  assert_eq(status.running_count, 1)
+  assert_eq(status.completed_count, 1)
 }
 
 ///|

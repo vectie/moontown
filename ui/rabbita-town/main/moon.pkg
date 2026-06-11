@@ -3,6 +3,7 @@ import {
   "moonbit-community/rabbita",
   "moonbit-community/rabbita/html",
   "vectie/moontown/core",
+  "vectie/moontown/book_templates",
   "vectie/moontown/health",
   "vectie/moontown/ui",
 }

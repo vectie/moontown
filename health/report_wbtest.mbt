@@ -113,3 +113,33 @@ test "repaired context packet import failure does not keep town degraded when ex
   assert_true(report.anomalies.is_empty())
   assert_eq(report.book_health[0].level, HealthLevel::Healthy)
 }
+
+///|
+test "health anomaly counter matches exact anomaly titles" {
+  let state = health_report_state_with_book(
+    id="research-opc",
+    name="Research OPC",
+    purpose="Watch OPC",
+    workspace_root="/tmp/research-opc",
+  )
+  register_health_report_executions(state, [
+    health_report_execution(
+      task_id="research-opc-failed-a",
+      book_id="research-opc",
+      packet_id="packet-a",
+      status=@core.TaskExecutionStatus::Failed,
+      summary="first failure",
+    ),
+    health_report_execution(
+      task_id="research-opc-failed-b",
+      book_id="research-opc",
+      packet_id="packet-b",
+      status=@core.TaskExecutionStatus::Failed,
+      summary="second failure",
+    ),
+  ])
+  let report = inspect_town(state)
+  assert_eq(count_health_anomalies_by_title(report, "execution-failed"), 2)
+  assert_eq(count_health_anomalies_by_title(report, "worker-health"), 0)
+  assert_eq(count_health_anomalies_by_title(report, "missing"), 0)
+}

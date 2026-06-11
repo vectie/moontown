@@ -35,8 +35,8 @@ async fn refresh_planbook_repair_task_from_run(
   let summary = if status == task.status {
     task.summary
   } else if status == "failed" &&
-    planbook_repair_moonclaw_status_is_succeeded(status_label) {
-    "\{task.summary} Latest run is indexed as `Succeeded`, but no valid `\{planbook_repair_result_contract()}` result for criterion `\{task.criterion_id}` was emitted."
+    @planbook_policy.moonclaw_status_is_succeeded(status_label) {
+    "\{task.summary} Latest run is indexed as `Succeeded`, but no valid `\{@planbook_policy.repair_result_contract()}` result for criterion `\{task.criterion_id}` was emitted."
   } else if status == "stale" {
     "\{task.summary} Latest run is indexed as `\{status_label}`, but no live runner process exists."
   } else {
@@ -96,7 +96,7 @@ async fn planbook_repair_result_text_from_run(
       run_id,
       task.criterion_id,
     ) {
-    planbook_repair_result_text_with_patch_receipt(content, payload)
+    @planbook_policy.repair_result_text_with_patch_receipt(content, payload)
   } else {
     ""
   }
@@ -130,15 +130,12 @@ fn planbook_repair_run_result_satisfies_contract(
   criterion_id : String,
 ) -> Bool {
   ignore(workspace_root)
-  if !planbook_repair_result_mentions_criterion(text, criterion_id) {
-    return false
-  }
-  if !planbook_repair_result_has_any_decision(text) {
-    return false
-  }
-  !planbook_repair_result_has_accepted_decision(text) ||
-  planbook_repair_run_result_has_accepted_evidence(
-    payload, text, run_id, criterion_id,
+  @planbook_policy.repair_run_result_satisfies_contract(
+    payload,
+    text,
+    run_id,
+    criterion_id,
+    planbook_repair_source_root(),
   )
 }
 
@@ -149,13 +146,12 @@ fn planbook_repair_run_result_has_accepted_evidence(
   run_id : String,
   criterion_id : String,
 ) -> Bool {
-  planbook_repair_result_has_accepted_decision(text) &&
-  planbook_repair_result_has_engineering_evidence(text) &&
-  planbook_repair_payload_has_valid_patch_receipt(
+  @planbook_policy.repair_run_result_has_accepted_evidence(
     payload,
+    text,
+    run_id,
     criterion_id,
     planbook_repair_source_root(),
-    run_id,
   )
 }
 
@@ -164,20 +160,10 @@ fn planbook_repair_result_satisfies_contract(
   text : String,
   criterion_id : String,
 ) -> Bool {
-  if !planbook_repair_result_mentions_criterion(text, criterion_id) {
-    return false
-  }
-  if !planbook_repair_result_has_any_decision(text) {
-    return false
-  }
-  !planbook_repair_result_has_accepted_decision(text) ||
-  (
-    planbook_repair_result_has_engineering_evidence(text) &&
-    planbook_repair_text_has_valid_patch_receipt(
-      text,
-      criterion_id,
-      planbook_repair_source_root(),
-    )
+  @planbook_policy.repair_result_satisfies_contract(
+    text,
+    criterion_id,
+    planbook_repair_source_root(),
   )
 }
 
@@ -186,71 +172,20 @@ fn planbook_repair_result_mentions_criterion(
   text : String,
   criterion_id : String,
 ) -> Bool {
-  text.contains("criterion_id: \{criterion_id}") ||
-  text.contains("\"criterion_id\":\"\{criterion_id}\"") ||
-  text.contains("\"criterion_id\": \"\{criterion_id}\"")
-}
-
-///|
-fn planbook_repair_result_has_any_decision(text : String) -> Bool {
-  planbook_repair_result_decisions().any(fn(decision) {
-    planbook_repair_result_has_decision(text, decision)
-  })
+  @planbook_policy.repair_result_mentions_criterion(text, criterion_id)
 }
 
 ///|
 fn planbook_repair_result_has_accepted_decision(text : String) -> Bool {
-  planbook_repair_result_has_decision(text, "accepted")
-}
-
-///|
-fn planbook_repair_result_has_external_owner_decision(text : String) -> Bool {
-  planbook_repair_result_has_decision(text, "needs_external_owner")
-}
-
-///|
-fn planbook_repair_result_has_blocked_decision(text : String) -> Bool {
-  planbook_repair_result_has_decision(text, "blocked")
+  @planbook_policy.repair_result_has_accepted_decision(text)
 }
 
 ///|
 fn planbook_repair_result_has_no_change_decision(text : String) -> Bool {
-  planbook_repair_result_has_decision(text, "no_change")
+  @planbook_policy.repair_result_has_no_change_decision(text)
 }
 
 ///|
 fn planbook_repair_result_has_handoff_decision(text : String) -> Bool {
-  planbook_repair_result_has_external_owner_decision(text) ||
-  planbook_repair_result_has_blocked_decision(text)
-}
-
-///|
-fn planbook_repair_result_has_decision(
-  text : String,
-  decision : String,
-) -> Bool {
-  text.contains("repair_decision: \{decision}") ||
-  text.contains("\"repair_decision\":\"\{decision}\"") ||
-  text.contains("\"repair_decision\": \"\{decision}\"")
-}
-
-///|
-fn planbook_repair_result_decisions() -> Array[String] {
-  ["accepted", "needs_external_owner", "blocked", "no_change"]
-}
-
-///|
-fn planbook_repair_result_has_engineering_evidence(text : String) -> Bool {
-  planbook_repair_result_records_validation_passes(text) &&
-  planbook_repair_result_engineering_evidence_markers().all(fn(marker) {
-    text.contains(marker)
-  })
-}
-
-///|
-fn planbook_repair_result_engineering_evidence_markers() -> Array[String] {
-  [
-    "validation:", "diff_summary:", "plan_update_status:", "commit_status:", "commit_message:",
-    "push_status:",
-  ]
+  @planbook_policy.repair_result_has_handoff_decision(text)
 }

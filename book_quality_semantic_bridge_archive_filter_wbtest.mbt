@@ -52,7 +52,7 @@ async test "semantic review bridge skips archived hidden internal books" {
       cadence_ticks=60,
       next_due_tick=42,
       enabled=true,
-      source_policy=book_quality_web_first_policy(),
+      source_policy=@book_quality.web_first_policy(),
       quality_threshold=80,
     ),
   ])

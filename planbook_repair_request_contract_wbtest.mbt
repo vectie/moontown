@@ -1,6 +1,6 @@
 ///|
 test "planbook repair request rules keep selected feature source of truth" {
-  let selected_rule = planbook_repair_selected_feature_task_rule()
+  let selected_rule = @planbook_policy.repair_selected_feature_task_rule()
   assert_true(selected_rule.contains("editor-selected-feature-implementation"))
   assert_true(selected_rule.contains("raw/editor-pipeline/next-feature.json"))
   assert_true(
@@ -12,7 +12,9 @@ test "planbook repair request rules keep selected feature source of truth" {
     ),
   )
   assert_true(
-    selected_rule.contains(editor_selected_feature_implementation_contract()),
+    selected_rule.contains(
+      @editor_pipeline.selected_feature_implementation_contract(),
+    ),
   )
   assert_true(selected_rule.contains("implementation_status: accepted"))
   assert_true(selected_rule.contains("only after validation"))
@@ -20,46 +22,56 @@ test "planbook repair request rules keep selected feature source of truth" {
 
 ///|
 test "planbook repair request rules keep full engineering loop explicit" {
-  assert_eq(planbook_repair_request_task_rules().length(), 13)
+  assert_eq(@planbook_policy.repair_request_task_rules().length(), 13)
   assert_true(
-    planbook_repair_request_task_rules()[0].contains(
+    @planbook_policy.repair_request_task_rules()[0].contains(
       "Read `skills/planbook-repair/SKILL.md`",
     ),
   )
   assert_true(
-    planbook_repair_request_task_rules()[12].contains(
+    @planbook_policy.repair_request_task_rules()[12].contains(
       "evidence exists after validation",
     ),
   )
   assert_true(
-    planbook_repair_validation_task_rule().contains(
+    @planbook_policy.repair_validation_task_rule().contains(
       "required validation commands",
     ),
   )
   assert_true(
-    planbook_repair_diff_hygiene_task_rule().contains("git status --short"),
+    @planbook_policy.repair_diff_hygiene_task_rule().contains(
+      "git status --short",
+    ),
   )
   assert_true(
-    planbook_repair_diff_hygiene_task_rule().contains("git diff --check"),
+    @planbook_policy.repair_diff_hygiene_task_rule().contains(
+      "git diff --check",
+    ),
   )
   assert_true(
-    planbook_repair_commit_task_rule().contains("create a local commit"),
+    @planbook_policy.repair_commit_task_rule().contains("create a local commit"),
   )
-  assert_true(planbook_repair_commit_task_rule().contains("repair-owned"))
   assert_true(
-    planbook_repair_commit_task_rule().contains(
+    @planbook_policy.repair_commit_task_rule().contains("repair-owned"),
+  )
+  assert_true(
+    @planbook_policy.repair_commit_task_rule().contains(
       "pre-existing unrelated dirty files",
     ),
   )
   assert_true(
-    planbook_repair_no_churn_task_rule().contains("do not patch for activity"),
-  )
-  assert_true(planbook_repair_stale_plan_task_rule().contains("plan is stale"))
-  assert_true(
-    planbook_repair_result_write_task_rule().contains("commit status"),
+    @planbook_policy.repair_no_churn_task_rule().contains(
+      "do not patch for activity",
+    ),
   )
   assert_true(
-    planbook_repair_satisfaction_gate_task_rule().contains(
+    @planbook_policy.repair_stale_plan_task_rule().contains("plan is stale"),
+  )
+  assert_true(
+    @planbook_policy.repair_result_write_task_rule().contains("commit status"),
+  )
+  assert_true(
+    @planbook_policy.repair_satisfaction_gate_task_rule().contains(
       "evidence exists after validation",
     ),
   )

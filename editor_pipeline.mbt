@@ -75,10 +75,16 @@ async fn inspect_editor_pipeline_state(
     lifecycle, style_candidates, style_selection,
   )
   let stage_inputs : EditorPipelineStageInputs = {
-    snapshot_path,
-    workspace_root,
     course_page,
     plan_path,
+    feature_selection_result_path: editor_feature_selection_result_path(
+      workspace_root,
+    ),
+    repair_task_path: default_planbook_repair_path(snapshot_path~),
+    module_config_ref: default_editor_pipeline_module_config_ref(),
+    placement_proposal_path: default_editor_placement_proposal_path(
+      workspace_root~,
+    ),
     plan_ready,
     course_ready,
     command_ready,

@@ -5,7 +5,8 @@ fn count_watcher_decisions(
 ) -> Int {
   let mut count = 0
   for record in records {
-    if watcher_record_effective_decision(record) == decision {
+    if @standing_watch_policy.watcher_record_effective_decision(record) ==
+      decision {
       count += 1
     }
   }
@@ -21,7 +22,7 @@ fn latest_watcher_record(
   } else {
     let mut latest = records[0]
     for record in records {
-      if watcher_record_prefer_candidate(latest, record) {
+      if @standing_watch_policy.watcher_record_prefer_candidate(latest, record) {
         latest = record
       }
     }
@@ -41,7 +42,9 @@ fn latest_record_for_goal(
     }
     match latest {
       Some(current) =>
-        if watcher_record_prefer_candidate(current, record) {
+        if @standing_watch_policy.watcher_record_prefer_candidate(
+            current, record,
+          ) {
           latest = Some(record)
         }
       None => latest = Some(record)
@@ -58,7 +61,9 @@ fn latest_watcher_record_summary(
   match latest_watcher_record(records) {
     Some(record) => {
       let next_due = latest_watcher_summary_next_due(record, standing_goals)
-      let decision = watcher_record_effective_decision(record).to_string()
+      let decision = @standing_watch_policy.watcher_record_effective_decision(
+        record,
+      ).to_string()
       "\{record.goal_id} -> \{decision} sources=\{record.new_source_count} delta=\{record.delta_score} next_due=\{next_due}"
     }
     None => "No watcher records yet."

@@ -53,7 +53,11 @@ test "civic service reconciliation plan centralizes review outcome markers" {
   )
   assert_true(summary.contains("review_items_created_count: 1"))
   assert_true(summary.contains("next_check_hint: review"))
-  let contract = civic_service_reconciled_contract_block(health, plan)
+  let contract = @civic.civic_service_reconciled_contract_block(
+    plan,
+    protocol_reduction_count=health.protocol_reduction_count,
+    protocol_outbox_count=health.protocol_outbox_count,
+  )
   assert_true(contract.has_prefix("civic_service_decision: needs_review\n"))
   assert_true(contract.contains("accepted_facts_count: 0"))
   assert_true(contract.contains("protocol_reductions_count: 2"))
@@ -65,10 +69,12 @@ test "civic service reconciliation plan centralizes review outcome markers" {
     ),
   )
   assert_true(
-    civic_service_reconciled_narrative(service).contains(service.title),
+    @civic.civic_service_reconciled_narrative(service).contains(service.title),
   )
   assert_true(
-    civic_service_reconciled_mode_line(service).contains(service.module_mode),
+    @civic.civic_service_reconciled_mode_line(service).contains(
+      service.module_mode,
+    ),
   )
 }
 

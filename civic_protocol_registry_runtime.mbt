@@ -34,7 +34,7 @@ pub async fn bootstrap_wenyu_building_protocols(
   for protocol in protocols {
     write_text_file_if_missing(
       protocol_contract_path(protocol.building_id, ledger_base_dir~),
-      building_protocol_markdown(protocol),
+      @civic.building_protocol_markdown(protocol),
     )
   }
   match @civic.wenyu_building_protocol_for_building_id("social-square") {

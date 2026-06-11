@@ -27,7 +27,9 @@ async test "editor feature selection packet asks ai to choose from course eviden
   let profile_text = read_text_or_empty("\{workspace_root}/moonclaw.jobs.json")
   assert_true(message.contains("Editor feature selection task"))
   assert_true(task_text.contains("\"status\": \"queued\""))
-  assert_true(packet_text.contains(editor_feature_selection_result_contract()))
+  assert_true(
+    packet_text.contains(@editor_pipeline.feature_selection_result_contract()),
+  )
   assert_true(packet_text.contains("course-wenyu-game-design"))
   assert_true(packet_text.contains("\"disable_waiting_for_input\":true"))
   assert_true(packet_text.contains("\"best_effort_on_missing_input\":true"))

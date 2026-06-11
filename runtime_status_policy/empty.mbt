@@ -1,0 +1,31 @@
+///|
+pub fn empty_runtime_status(snapshot_path : String) -> TownRuntimeStatus {
+  {
+    snapshot_path,
+    has_snapshot: false,
+    book_count: 0,
+    worker_count: 0,
+    task_count: 0,
+    execution_count: 0,
+    event_count: 0,
+    running_count: 0,
+    review_count: 0,
+    failed_count: 0,
+    stale_count: 0,
+    completed_count: 0,
+    standing_goal_count: 0,
+    enabled_standing_goal_count: 0,
+    disabled_standing_goal_count: 0,
+    due_standing_goal_count: 0,
+    watcher_record_count: 0,
+    watcher_summary: "No watcher ledger records.",
+    book_template_request_count: 0,
+    pending_book_template_request_count: 0,
+    failed_book_template_request_count: 0,
+    book_template_request_summary: "No book-template request inbox.",
+    book_template_latest_event_summary: "none",
+    daemon_tick: 0,
+    daemon_actions: [],
+    summary: "No saved town snapshot exists at \{snapshot_path}.",
+  }
+}

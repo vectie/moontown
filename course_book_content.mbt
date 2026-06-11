@@ -82,7 +82,7 @@ fn course_builder_skill_markdown() -> String {
     "- The course should teach judgment, not just commands.",
     "- Do not use research-report headings like `Evidence Matrix` unless the lesson is explicitly about research.",
     "",
-    moonbook_skill_quality_contract_section(),
+    @skill_quality.exploration_quality_contract_section(),
     "",
     "## Concrete Example",
     "",

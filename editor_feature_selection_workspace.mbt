@@ -19,7 +19,7 @@ async fn write_editor_feature_selection_workspace(
   )
   write_text_file(
     "\{workspace_root}/skills/editor-feature-rater/SKILL.md",
-    editor_feature_rater_skill_markdown(),
+    @editor_pipeline.feature_rater_skill_markdown(),
   )
   write_editor_feature_selection_moonclaw_profile(workspace_root)
 }
@@ -35,7 +35,7 @@ async fn editor_feature_selection_context_markdown(
     "- Course book: `\{default_wenyu_course_book_id()}`",
     "- Course root: `\{default_wenyu_course_workspace_root()}`",
     "- PlanBook root: `\{workspace_root}`",
-    "- Output contract: `\{editor_feature_selection_result_contract()}`",
+    "- Output contract: `\{@editor_pipeline.feature_selection_result_contract()}`",
     "",
     "## Intent",
     "",

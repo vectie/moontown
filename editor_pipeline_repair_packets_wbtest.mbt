@@ -75,9 +75,9 @@ async test "selected editor feature repair packet is driven by ai selection arti
     ),
   )
   let skill_text = read_text_or_empty(
-    planbook_repair_path_in_workspace(
+    @planbook_policy.repair_path_in_workspace(
       workspace_root,
-      planbook_repair_skill_relative_path(),
+      @planbook_policy.repair_skill_relative_path(),
     ),
   )
   assert_true(packet_text.contains("editor-selected-feature-implementation"))

@@ -1,0 +1,193 @@
+// Generated using `moon info`, DON'T EDIT IT
+package "vectie/moontown/planbook_policy"
+
+import {
+  "moonbitlang/core/debug",
+  "moonbitlang/core/json",
+}
+
+// Values
+pub fn moonclaw_status_bucket(String?) -> String
+
+pub fn moonclaw_status_is_failed_terminal(String) -> Bool
+
+pub fn moonclaw_status_is_pending(String) -> Bool
+
+pub fn moonclaw_status_is_running(String) -> Bool
+
+pub fn moonclaw_status_is_succeeded(String) -> Bool
+
+pub fn moonclaw_status_needs_live_runner(String) -> Bool
+
+pub fn repair_backlog_completion_task_rule() -> String
+
+pub fn repair_commit_task_rule() -> String
+
+pub fn repair_context_pages() -> Array[String]
+
+pub fn repair_context_path(String) -> String
+
+pub fn repair_context_relative_path() -> String
+
+pub fn repair_diff_hygiene_task_rule() -> String
+
+pub fn repair_exact_targets_task_rule() -> String
+
+pub fn repair_job_index_path(String) -> String
+
+pub fn repair_job_proposals_path(String) -> String
+
+pub fn repair_no_churn_task_rule() -> String
+
+pub fn repair_ownership_decision_task_rule() -> String
+
+pub fn repair_packet_path(String, String) -> String
+
+pub fn repair_packet_path_for_criterion(String, String) -> String
+
+pub fn repair_patch_receipt_block_from_text(String) -> Json?
+
+pub fn repair_patch_receipt_contract() -> String
+
+pub fn repair_patch_receipt_from_payload(Json) -> Json?
+
+pub fn repair_patch_receipt_from_text(String) -> Json?
+
+pub fn repair_patch_receipt_satisfies_contract(Json, String, String, run_id? : String?) -> Bool
+
+pub fn repair_patch_receipt_text(Json) -> String
+
+pub fn repair_path_in_workspace(String, String) -> String
+
+pub fn repair_payload_has_valid_patch_receipt(Json, String, String, String) -> Bool
+
+pub fn repair_plan_path(String) -> String
+
+pub fn repair_plan_relative_path() -> String
+
+pub fn repair_raw_dir(String) -> String
+
+pub fn repair_read_context_task_rule() -> String
+
+pub fn repair_request_task_rules() -> Array[String]
+
+pub fn repair_required_commands() -> Array[String]
+
+pub fn repair_result_contract() -> String
+
+pub fn repair_result_decisions() -> Array[String]
+
+pub fn repair_result_engineering_evidence_markers() -> Array[String]
+
+pub fn repair_result_has_accepted_decision(String) -> Bool
+
+pub fn repair_result_has_any_decision(String) -> Bool
+
+pub fn repair_result_has_blocked_decision(String) -> Bool
+
+pub fn repair_result_has_decision(String, String) -> Bool
+
+pub fn repair_result_has_engineering_evidence(String) -> Bool
+
+pub fn repair_result_has_external_owner_decision(String) -> Bool
+
+pub fn repair_result_has_handoff_decision(String) -> Bool
+
+pub fn repair_result_has_no_change_decision(String) -> Bool
+
+pub fn repair_result_mentions_criterion(String, String) -> Bool
+
+pub fn repair_result_path(PlanbookRepairTask) -> String
+
+pub fn repair_result_path_for_workspace(String) -> String
+
+pub fn repair_result_records_validation_passes(String) -> Bool
+
+pub fn repair_result_relative_path() -> String
+
+pub fn repair_result_satisfies_contract(String, String, String) -> Bool
+
+pub fn repair_result_target_pages() -> Array[String]
+
+pub fn repair_result_text_with_patch_receipt(String, Json) -> String
+
+pub fn repair_result_write_task_rule() -> String
+
+pub fn repair_run_result_has_accepted_evidence(Json, String, String, String, String) -> Bool
+
+pub fn repair_run_result_satisfies_contract(Json, String, String, String, String) -> Bool
+
+pub fn repair_satisfaction_gate_task_rule() -> String
+
+pub fn repair_selected_feature_task_rule() -> String
+
+pub fn repair_skill_markdown() -> String
+
+pub fn repair_skill_path(String) -> String
+
+pub fn repair_skill_paths() -> Array[String]
+
+pub fn repair_skill_relative_path() -> String
+
+pub fn repair_small_patch_task_rule() -> String
+
+pub fn repair_stale_plan_task_rule() -> String
+
+pub fn repair_superseded_result_path(String) -> String
+
+pub fn repair_superseded_result_relative_path() -> String
+
+pub fn repair_task_id(String) -> String
+
+pub fn repair_text_has_valid_patch_receipt(String, String, String) -> Bool
+
+pub fn repair_validation_command() -> String
+
+pub fn repair_validation_task_rule() -> String
+
+pub fn repair_workspace_status_page_path(String) -> String
+
+pub fn task_status_from_run_status(String?) -> String
+
+// Errors
+
+// Types and methods
+pub(all) struct PlanbookAutonomyStatus {
+  generated_at_ms : UInt64
+  book_id : String
+  workspace_root : String
+  status : String
+  open_count : Int
+  satisfied_count : Int
+  criteria : Array[PlanbookCriterionStatus]
+} derive(Eq, ToJson, @debug.Debug, @json.FromJson)
+
+pub(all) struct PlanbookCriterionStatus {
+  id : String
+  plan_id : String
+  title : String
+  owner : String
+  satisfied : Bool
+  evidence : String
+  next_action : String
+} derive(Eq, ToJson, @debug.Debug, @json.FromJson)
+
+pub(all) struct PlanbookRepairTask {
+  id : String
+  criterion_id : String
+  title : String
+  status : String
+  owner : String
+  workspace_root : String
+  packet_path : String
+  proposal_id : String?
+  run_id : String?
+  summary : String
+  validation_command : String
+  generated_at_ms : UInt64
+} derive(Eq, ToJson, @debug.Debug, @json.FromJson)
+
+// Type aliases
+
+// Traits
+

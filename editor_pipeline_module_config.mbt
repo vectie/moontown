@@ -61,3 +61,31 @@ async fn load_editor_pipeline_module_config(
   }
   Some(config)
 }
+
+///|
+fn editor_pipeline_module_placement(
+  module_entry : EditorPipelineModuleConfigEntry,
+) -> EditorPipelineModulePlacement {
+  {
+    id: module_entry.id,
+    enabled: module_entry.enabled,
+    title: module_entry.title,
+    book_id: module_entry.book_id,
+    district: module_entry.district,
+    building_kind: module_entry.building_kind,
+    grid_x: module_entry.grid_x,
+    grid_y: module_entry.grid_y,
+    footprint_w: module_entry.footprint_w,
+    footprint_h: module_entry.footprint_h,
+    entrance_x: module_entry.entrance_x,
+    entrance_y: module_entry.entrance_y,
+    style_family: module_entry.style_family,
+  }
+}
+
+///|
+fn editor_pipeline_module_placements(
+  modules : Array[EditorPipelineModuleConfigEntry],
+) -> Array[EditorPipelineModulePlacement] {
+  modules.map(editor_pipeline_module_placement)
+}

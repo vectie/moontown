@@ -1,0 +1,81 @@
+// Generated using `moon info`, DON'T EDIT IT
+package "vectie/moontown/standing_watch_policy"
+
+import {
+  "vectie/moontown/adapters/moonbook",
+  "vectie/moontown/core",
+}
+
+// Values
+pub fn compact_watch_segment(String) -> String
+
+pub fn remove_standing_watch_history_block(String, String) -> String
+
+pub fn standing_goal_for_execution_task(Array[@core.StandingGoal], String) -> @core.StandingGoal?
+
+pub fn standing_watch_decision_from_execution(@core.TaskExecutionRecord) -> @core.WatcherDecisionKind
+
+pub fn standing_watch_decision_text_marks_book_changed(String) -> Bool
+
+pub fn standing_watch_decision_text_marks_update(String) -> Bool
+
+pub fn standing_watch_delta_score(@core.TaskExecutionRecord) -> Int
+
+pub fn standing_watch_detached_import_log_noise_summary(String) -> Bool
+
+pub fn standing_watch_execution_has_zero_material_delta(@core.TaskExecutionRecord) -> Bool
+
+pub fn standing_watch_history_decision_summary_for_task(String, String) -> String?
+
+pub fn standing_watch_infrastructure_failure_summary(String) -> Bool
+
+pub fn standing_watch_latest_provider_decision_summary(String) -> String?
+
+pub fn standing_watch_marker_decision(String) -> @core.WatcherDecisionKind?
+
+pub fn standing_watch_marker_int(String, String, fallback~ : Int) -> Int
+
+pub fn standing_watch_marker_value(String, String) -> String?
+
+pub fn standing_watch_new_source_count(@core.TaskExecutionRecord) -> Int
+
+pub fn standing_watch_operational_no_change_summary(String) -> Bool
+
+pub fn standing_watch_orphaned_running_failure_summary(String) -> Bool
+
+pub fn standing_watch_prompt(@core.StandingGoal, String, Int, Int) -> String
+
+pub fn standing_watch_summary_from_history_block(String, Array[String]) -> String?
+
+pub fn standing_watch_summary_has_decision(String, String) -> Bool
+
+pub fn standing_watch_summary_has_zero_material_delta(String) -> Bool
+
+pub fn standing_watch_target_pages() -> Array[String]
+
+pub fn standing_watch_task(@core.StandingGoal, String, Int, Int) -> @moonbook.BookTask
+
+pub fn standing_watch_task_id(String, Int) -> String
+
+pub fn standing_watch_task_kind() -> String
+
+pub fn standing_watch_task_prefix(String) -> String
+
+pub fn standing_watch_task_tick_prefix(String) -> String
+
+pub fn standing_watch_tick_for_goal_task(@core.StandingGoal, String) -> Int?
+
+pub fn watcher_record_effective_decision(@core.WatcherRunRecord) -> @core.WatcherDecisionKind
+
+pub fn watcher_record_has_zero_material_delta(@core.WatcherRunRecord) -> Bool
+
+pub fn watcher_record_prefer_candidate(@core.WatcherRunRecord, @core.WatcherRunRecord) -> Bool
+
+// Errors
+
+// Types and methods
+
+// Type aliases
+
+// Traits
+

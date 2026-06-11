@@ -48,3 +48,23 @@ fn write_live_autonomy_digest_standing_watch_row(
     "|\{goal.id}|\{book}|\{goal.next_due_tick}|\{due_in_ticks}|\{live_autonomy_due_in_label(due_in_ticks)}|\{decision}|\{evidence}|\n",
   )
 }
+
+///|
+fn live_autonomy_due_in_label(ticks : Int) -> String {
+  let seconds = ticks * standing_goal_tick_seconds()
+  if seconds <= 0 {
+    "due now"
+  } else if seconds < 60 {
+    "\{seconds}s"
+  } else if seconds < 3600 {
+    "\{seconds / 60}m"
+  } else {
+    let hours = seconds / 3600
+    let minutes = seconds % 3600 / 60
+    if minutes == 0 {
+      "\{hours}h"
+    } else {
+      "\{hours}h \{minutes}m"
+    }
+  }
+}

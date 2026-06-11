@@ -1,0 +1,7 @@
+import {
+  "vectie/moontown/core",
+  "vectie/moontown/book_templates",
+  "vectie/moontown/health",
+  "vectie/moontown/scheduler",
+  "moonbitlang/core/json",
+}

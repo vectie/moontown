@@ -6,7 +6,7 @@ priv struct LiveAutonomyWriteMetadata {
   planbook_change_log_path : String
   planbook_engineering_digest_path : String
   latest_change_summary : String
-  book_template_request_status : BookTemplateRequestStatus
+  book_template_request_status : @book_templates.BookTemplateRequestStatus
   prior_stable_waiting_observation_streak : Int
 }
 
@@ -59,7 +59,7 @@ async fn live_autonomy_write_metadata(
     planbook_engineering_digest_path: planbook.planbook_engineering_digest_path,
     latest_change_summary: planbook.latest_change_summary,
     book_template_request_status: inspect_book_template_request_status(
-      request_path=default_book_template_request_path(snapshot_path~),
+      request_path=@book_templates.request_path_for_snapshot(snapshot_path),
     ),
     prior_stable_waiting_observation_streak: prior_live_autonomy_stable_waiting_observation_streak(
       snapshot_path, tick,

@@ -6,7 +6,9 @@ test "standing watch prompt requires strict research accounting" {
     prompt="Track latest OPC signals with judgement.",
     target_book_id=Some("research-opc"),
   )
-  let prompt = standing_watch_prompt(goal, "research-opc", 12, 2)
+  let prompt = @standing_watch_policy.standing_watch_prompt(
+    goal, "research-opc", 12, 2,
+  )
   assert_true(prompt.contains("Research temperament"))
   assert_true(prompt.contains("Use imagination"))
   assert_true(prompt.contains("checked_sources_count"))
@@ -24,7 +26,7 @@ test "book quality repair prompt requires active gap closure" {
     prompt="Run a source-screening and synthesis pass that creates missing artifacts.",
     target_book_id=Some("research-embodied-robotics"),
   )
-  let prompt = standing_watch_prompt(
+  let prompt = @standing_watch_policy.standing_watch_prompt(
     goal, "research-embodied-robotics", 18084, 3,
   )
   assert_true(prompt.contains("Book-quality repair mode"))

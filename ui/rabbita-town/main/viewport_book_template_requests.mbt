@@ -47,6 +47,11 @@ fn book_template_request_intro() -> String {
 }
 
 ///|
+fn book_template_request_target_label() -> String {
+  "Writes \{@book_templates.request_file_name()}"
+}
+
+///|
 fn render_book_template_request_header(
   dispatch : Dispatch[Msg],
   model : Model,
@@ -57,7 +62,7 @@ fn render_book_template_request_header(
       h3("Create a PDF evidence watch"),
     ]),
     div(class="request-composer-actions-top", [
-      status_chip("Writes book-template-requests.json", "chip-book"),
+      status_chip(book_template_request_target_label(), "chip-book"),
       button(
         class="control-button request-submit",
         on_click=dispatch(SubmitBookTemplateRequest),

@@ -32,7 +32,9 @@ async fn spawn_daemon_detached(
   snapshot_path : String,
   kind : String,
 ) -> Int {
-  let base_dir = daemon_base_dir(snapshot_path)
+  let base_dir = @daemon_runtime_policy.daemon_base_dir_for_snapshot(
+    snapshot_path,
+  )
   let log_path = default_daemon_log_path(snapshot_path~)
   let pid_path = "\{base_dir}/daemon-\{kind}-spawn.pid.tmp"
   ensure_parent_directory(log_path) catch {

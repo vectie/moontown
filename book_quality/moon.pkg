@@ -1,0 +1,18 @@
+import {
+  "moonbitlang/async/fs",
+  "moonbitlang/core/encoding/utf8" @encoding/utf8,
+  "moonbitlang/core/env",
+  "moonbitlang/core/json",
+  "moonbitlang/x/path",
+  "vectie/moontown/adapters/codex",
+  "vectie/moontown/adapters/moonbook",
+  "vectie/moontown/adapters/moonclaw",
+  "vectie/moontown/civic",
+  "vectie/moontown/core",
+  "vectie/moontown/policy",
+}
+
+import {
+  "moonbitlang/async",
+  "vectie/moontown/skill_quality",
+} for "wbtest"

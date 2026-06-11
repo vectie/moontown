@@ -5,10 +5,16 @@ import {
   "moonbitlang/core/debug",
   "moonbitlang/core/json",
   "vectie/moontown/adapters/moonbook",
+  "vectie/moontown/app_tool_book",
+  "vectie/moontown/book_quality",
+  "vectie/moontown/book_templates",
   "vectie/moontown/civic",
   "vectie/moontown/core",
+  "vectie/moontown/daemon_runtime_policy",
+  "vectie/moontown/live_autonomy_policy",
+  "vectie/moontown/planbook_policy",
   "vectie/moontown/roles",
-  "vectie/moontown/scheduler",
+  "vectie/moontown/runtime_status_policy",
 }
 
 // Values
@@ -16,9 +22,9 @@ pub async fn archive_pdf_evidence_watch_book(book_id? : String, reason? : String
 
 pub async fn bootstrap_app_tool_book(book_id? : String, title? : String, purpose? : String, websites? : Array[String], analysis_method? : String, tool_spec? : String, civic_building_id? : String, cadence_ticks? : Int, book_catalog_path? : String, standing_goal_path? : String, workspace_root? : String, template_root? : String) -> String
 
-pub async fn bootstrap_civic_salon_scenario(CivicSalonScenario, book_catalog_path? : String, round_id? : String, round_number? : Int, workspace_base? : String, reducer_mode? : CivicSalonReductionMode) -> String
+pub async fn bootstrap_civic_salon_scenario(@civic.CivicSalonScenario, book_catalog_path? : String, round_id? : String, round_number? : Int, workspace_base? : String, reducer_mode? : @civic.CivicSalonReductionMode) -> String
 
-pub async fn bootstrap_civic_salon_scenario_file(String, book_catalog_path? : String, round_id? : String, round_number? : Int, workspace_base? : String, reducer_mode? : CivicSalonReductionMode) -> String
+pub async fn bootstrap_civic_salon_scenario_file(String, book_catalog_path? : String, round_id? : String, round_number? : Int, workspace_base? : String, reducer_mode? : @civic.CivicSalonReductionMode) -> String
 
 pub async fn bootstrap_moontown_cookbook(book_catalog_path? : String, workspace_root? : String, manifest_path? : String) -> String
 
@@ -36,13 +42,13 @@ pub async fn bootstrap_wenyu_game_design_course_book(book_catalog_path? : String
 
 pub fn build_visual_projection(@core.TownState, tick? : Int) -> VisualProjection
 
-pub fn civic_communication_pattern_for_id(String) -> CivicCommunicationPattern?
+pub fn civic_communication_pattern_for_id(String) -> @civic.CivicCommunicationPattern?
 
 pub fn civic_communication_pattern_id_for_service(@civic.CivicServiceDefinition) -> String
 
-pub fn civic_communication_patterns() -> Array[CivicCommunicationPattern]
+pub fn civic_communication_patterns() -> Array[@civic.CivicCommunicationPattern]
 
-pub fn civic_salon_is_due(CivicSalonSchedule, UInt64) -> Bool
+pub fn civic_salon_is_due(@civic.CivicSalonSchedule, UInt64) -> Bool
 
 pub fn civic_salon_scenario_path(String, snapshot_path? : String) -> String
 
@@ -52,8 +58,6 @@ pub async fn daemon_doctor_saved_town(snapshot_path? : String, stale_after_ms? :
 
 pub async fn daemon_run_saved_town(snapshot_path? : String, book_catalog_path? : String, max_ticks? : Int, sleep_ms? : Int, preserve_supervisor? : Bool, inline_under_supervisor? : Bool) -> String
 
-pub fn daemon_runtime_health_summary(DaemonRuntimeHealth) -> String
-
 pub async fn daemon_start_saved_town(snapshot_path? : String, command? : String, stale_after_ms? : UInt64) -> String
 
 pub async fn daemon_stop_saved_town(snapshot_path? : String) -> String
@@ -62,31 +66,11 @@ pub async fn daemon_supervise_saved_town(snapshot_path? : String, command? : Str
 
 pub async fn daemon_tick_saved_town(snapshot_path? : String, book_catalog_path? : String, respect_runtime_lock? : Bool) -> String
 
-pub fn default_app_tool_book_id() -> String
-
-pub fn default_app_tool_book_template_root() -> String
-
-pub fn default_app_tool_book_workspace_root(book_id? : String) -> String
-
-pub fn default_book_quality_audit_path() -> String
-
-pub fn default_book_quality_review_dir() -> String
-
-pub fn default_book_quality_review_result_dir() -> String
-
-pub fn default_book_quality_review_run_path() -> String
-
-pub fn default_book_template_registry_path() -> String
-
-pub fn default_book_template_request_event_path(request_path? : String) -> String
-
-pub fn default_book_template_request_path(snapshot_path? : String) -> String
-
 pub fn default_civic_salon_run_ledger_path(String, snapshot_path? : String) -> String
 
 pub fn default_civic_salon_schedule_path(snapshot_path? : String) -> String
 
-pub fn default_civic_salon_schedules() -> Array[CivicSalonSchedule]
+pub fn default_civic_salon_schedules() -> Array[@civic.CivicSalonSchedule]
 
 pub fn default_cookbook_book_id() -> String
 
@@ -170,23 +154,21 @@ pub async fn editor_feature_selection_evidence(workspace_root? : String) -> Stri
 
 pub async fn editor_feature_selection_ready(workspace_root? : String) -> Bool
 
-pub async fn inspect_app_tool_book(book_id? : String, workspace_root? : String, book_catalog_path? : String, standing_goal_path? : String) -> AppToolBookStatus
+pub async fn inspect_app_tool_book(book_id? : String, workspace_root? : String, book_catalog_path? : String, standing_goal_path? : String) -> @app_tool_book.AppToolBookStatus
 
-pub async fn inspect_book_quality(book_catalog_path? : String, snapshot_path? : String) -> BookQualityAudit
+pub async fn inspect_book_quality(book_catalog_path? : String, snapshot_path? : String) -> @book_quality.BookQualityAudit
 
-pub async fn inspect_book_template_registry(registry_path? : String) -> BookTemplateRegistry
+pub async fn inspect_book_template_request_status(request_path? : String) -> @book_templates.BookTemplateRequestStatus
 
-pub async fn inspect_book_template_request_status(request_path? : String) -> BookTemplateRequestStatus
-
-pub async fn inspect_daemon_runtime(snapshot_path? : String, stale_after_ms? : UInt64) -> DaemonRuntimeHealth
+pub async fn inspect_daemon_runtime(snapshot_path? : String, stale_after_ms? : UInt64) -> @daemon_runtime_policy.DaemonRuntimeHealth
 
 pub async fn inspect_moontown_cookbook(workspace_root? : String, manifest_path? : String) -> MoontownCookbookStatus
 
-pub async fn inspect_moontown_planbook_autonomy(snapshot_path? : String, workspace_root? : String, book_catalog_path? : String) -> PlanbookAutonomyStatus
+pub async fn inspect_moontown_planbook_autonomy(snapshot_path? : String, workspace_root? : String, book_catalog_path? : String) -> @planbook_policy.PlanbookAutonomyStatus
 
 pub async fn inspect_pdf_evidence_watch_book(book_id? : String, workspace_root? : String, book_catalog_path? : String, standing_goal_path? : String) -> PdfEvidenceWatchBookStatus
 
-pub async fn inspect_saved_town(snapshot_path? : String) -> TownRuntimeStatus
+pub async fn inspect_saved_town(snapshot_path? : String) -> @runtime_status_policy.TownRuntimeStatus
 
 pub async fn inspect_wenyu_building_protocols(status_path? : String, registry_path? : String) -> @civic.BuildingProtocolPortfolio
 
@@ -204,7 +186,7 @@ pub async fn install_pdf_evidence_watch_book_config(String, book_catalog_path? :
 
 pub async fn install_wenyu_final_integration(manifest_path? : String, snapshot_path? : String, standing_goal_path? : String) -> String
 
-pub async fn load_or_create_civic_salon_schedules(path? : String) -> Array[CivicSalonSchedule]
+pub async fn load_or_create_civic_salon_schedules(path? : String) -> Array[@civic.CivicSalonSchedule]
 
 pub async fn load_or_create_demo_dashboard(path? : String, book_catalog_path? : String) -> String
 
@@ -213,8 +195,6 @@ pub async fn load_or_create_demo_state(path? : String, book_catalog_path? : Stri
 pub async fn[Provider : @core.BookProvider] load_or_create_demo_state_with_provider(Provider, path? : String) -> @core.TownState
 
 pub async fn load_or_create_modeled_demo_state(path? : String, book_catalog_path? : String) -> @core.TownState
-
-pub fn moonbook_skill_quality_is_strong(String) -> Bool
 
 pub async fn persist_visual_projection(@core.TownState, String, tick? : Int) -> Unit
 
@@ -276,19 +256,17 @@ pub async fn render_wenyu_final_integration_status(manifest_path? : String, snap
 
 pub async fn render_wenyu_game_design_course_status(workspace_root? : String) -> String
 
-pub async fn run_due_civic_salons(snapshot_path? : String, book_catalog_path? : String, tick? : Int, now_ms? : UInt64, reducer_mode? : CivicSalonReductionMode, run_inline? : Bool) -> String
+pub async fn run_due_civic_salons(snapshot_path? : String, book_catalog_path? : String, tick? : Int, now_ms? : UInt64, reducer_mode? : @civic.CivicSalonReductionMode, run_inline? : Bool) -> String
 
 pub async fn run_goal(String, book_id? : String?, task_limit_per_book? : Int, snapshot_path? : String, book_catalog_path? : String) -> @core.TownState
 
-pub fn runtime_status_from_state(@core.TownState, String, standing_goals? : Array[@core.StandingGoal], daemon_tick? : Int, watcher_records? : Array[@core.WatcherRunRecord], book_template_request_status? : BookTemplateRequestStatus?) -> TownRuntimeStatus
+pub fn runtime_status_from_state(@core.TownState, String, standing_goals? : Array[@core.StandingGoal], daemon_tick? : Int, watcher_records? : Array[@core.WatcherRunRecord], book_template_request_status? : @book_templates.BookTemplateRequestStatus?) -> @runtime_status_policy.TownRuntimeStatus
 
-pub async fn save_book_template_request_ledger(String, BookTemplateRequestLedger) -> Unit
-
-pub async fn save_civic_salon_schedules(String, Array[CivicSalonSchedule]) -> Unit
+pub async fn save_civic_salon_schedules(String, Array[@civic.CivicSalonSchedule]) -> Unit
 
 pub async fn supervise_saved_town(snapshot_path? : String, book_catalog_path? : String) -> String
 
-pub async fn upsert_civic_salon_schedule_for_scenario(CivicSalonScenario, path? : String, now_ms? : UInt64) -> CivicSalonSchedule
+pub async fn upsert_civic_salon_schedule_for_scenario(@civic.CivicSalonScenario, path? : String, now_ms? : UInt64) -> @civic.CivicSalonSchedule
 
 pub async fn write_book_quality_audit(book_catalog_path? : String, snapshot_path? : String, audit_path? : String) -> String
 
@@ -300,7 +278,7 @@ pub async fn write_editor_feature_selection_task(snapshot_path? : String, worksp
 
 pub async fn write_editor_pipeline_state(snapshot_path? : String, workspace_root? : String) -> String
 
-pub async fn write_live_autonomy_spine(@core.TownState, snapshot_path? : String, standing_goals? : Array[@core.StandingGoal], watcher_records? : Array[@core.WatcherRunRecord], tick_summary? : String, daemon_tick? : Int?) -> LiveAutonomySpine
+pub async fn write_live_autonomy_spine(@core.TownState, snapshot_path? : String, standing_goals? : Array[@core.StandingGoal], watcher_records? : Array[@core.WatcherRunRecord], tick_summary? : String, daemon_tick? : Int?) -> @live_autonomy_policy.LiveAutonomySpine
 
 pub async fn write_moontown_planbook_autonomy(snapshot_path? : String, workspace_root? : String, book_catalog_path? : String) -> String
 
@@ -315,303 +293,9 @@ pub async fn write_wenyu_civic_status(book_catalog_path? : String, status_path? 
 // Errors
 
 // Types and methods
-type AppToolBookAnalysisSettings derive(Eq, ToJson, @debug.Debug, @json.FromJson)
-
-type AppToolBookAppSettings derive(Eq, ToJson, @debug.Debug, @json.FromJson)
-
-type AppToolBookCivicSettings derive(Eq, ToJson, @debug.Debug, @json.FromJson)
-
-type AppToolBookConfig derive(Eq, ToJson, @debug.Debug, @json.FromJson)
-
-pub struct AppToolBookInstallSpec {
-  book_id : String
-  title : String
-  purpose : String
-  websites : Array[String]
-  analysis_method : String
-  analysis_method_path : String
-  tool_spec : String
-  tool_spec_path : String
-  civic_building_id : String
-  cadence_ticks : Int
-  workspace_root : String
-} derive(Eq, ToJson, @debug.Debug, @json.FromJson)
-
-type AppToolBookMoondeskSettings derive(Eq, ToJson, @debug.Debug, @json.FromJson)
-
-pub struct AppToolBookStatus {
-  book_id : String
-  workspace_root : String
-  required_count : Int
-  missing_count : Int
-  missing_paths : Array[String]
-  has_catalog_entry : Bool
-  has_standing_goal : Bool
-  standing_goal_enabled : Bool
-  has_tool_manifest : Bool
-  ready : Bool
-} derive(Eq, ToJson, @debug.Debug, @json.FromJson)
-
-type AppToolBookWatchSettings derive(Eq, ToJson, @debug.Debug, @json.FromJson)
-
-type AppToolManifest derive(Eq, ToJson, @debug.Debug, @json.FromJson)
-
-pub struct BookQualityAudit {
-  generated_at : String
-  catalog_path : String
-  total : Int
-  world_class_count : Int
-  ready_count : Int
-  weakest_book_id : String
-  weakest_score : Int
-  scores : Array[BookQualityScore]
-} derive(Eq, ToJson, @json.FromJson)
-
-type BookQualityContextSpec derive(Eq, @debug.Debug)
-
-type BookQualityPolicySpec derive(Eq, @debug.Debug)
-
-type BookQualityRepairBridgeItem derive(Eq, ToJson, @json.FromJson)
-
-type BookQualityRepairBridgeLedger derive(Eq, ToJson, @json.FromJson)
-
-pub struct BookQualityReviewPacket {
-  book_id : String
-  book_type : String
-  workspace_root : String
-  structural_score : Int
-  review_skill_path : String
-  context_pages : Array[String]
-  prompt : String
-  output_contract : String
-} derive(Eq, ToJson, @json.FromJson)
-
-pub struct BookQualityReviewRun {
-  book_id : String
-  packet_path : String
-  result_path : String
-  proposal_id : String?
-  run_id : String?
-  status : String
-  summary : String
-  generated_at_ms : UInt64
-} derive(Eq, ToJson, @json.FromJson)
-
-pub struct BookQualityReviewRunLedger {
-  runs : Array[BookQualityReviewRun]
-} derive(Eq, ToJson, @json.FromJson)
-
-pub struct BookQualityScore {
-  book_id : String
-  title : String
-  book_type : String
-  workspace_root : String
-  structural_score : Int
-  structural_grade : String
-  semantic_score : Int?
-  semantic_grade : String
-  quality_status : String
-  score : Int
-  grade : String
-  ready : Bool
-  strengths : Array[String]
-  gaps : Array[String]
-  next_action : String
-} derive(Eq, ToJson, @json.FromJson)
-
-pub struct BookTemplateDescriptor {
-  template_id : String
-  book_type : String
-  specialization : String
-  title : String
-  purpose : String
-  root : String
-  install_example : String
-  install_command : String
-  status_command : String
-  required_paths : Array[String]
-  editable_files : Array[String]
-} derive(Eq, ToJson, @debug.Debug, @json.FromJson)
-
 type BookTemplateInstaller derive(Eq, @debug.Debug)
 
-pub struct BookTemplateRegistry {
-  registry_path : String
-  templates : Array[BookTemplateDescriptor]
-  missing_count : Int
-  missing_paths : Array[String]
-  ready : Bool
-} derive(Eq, ToJson, @debug.Debug, @json.FromJson)
-
-type BookTemplateRegistryFile derive(Eq, ToJson, @debug.Debug, @json.FromJson)
-
-pub struct BookTemplateRequest {
-  id : String
-  template_id : String
-  config_path : String
-  status : String
-  summary : String
-  last_processed_tick : Int
-} derive(Eq, ToJson, @debug.Debug, @json.FromJson)
-
-pub struct BookTemplateRequestEvent {
-  id : String
-  request_id : String
-  template_id : String
-  status : String
-  config_path : String
-  summary : String
-  tick : Int
-  generated_at_ms : UInt64
-} derive(Eq, ToJson, @debug.Debug, @json.FromJson)
-
-pub struct BookTemplateRequestLedger {
-  requests : Array[BookTemplateRequest]
-} derive(Eq, ToJson, @debug.Debug, @json.FromJson)
-
-pub struct BookTemplateRequestStatus {
-  request_path : String
-  event_path : String
-  request_count : Int
-  pending_count : Int
-  installed_count : Int
-  failed_count : Int
-  retry_count : Int
-  ready : Bool
-  summary : String
-  latest_event_summary : String
-} derive(Eq, ToJson, @debug.Debug, @json.FromJson)
-
-pub struct CivicCommunicationPattern {
-  id : String
-  title : String
-  category : String
-  summary : String
-  protocol_mode : String
-  input_contract : String
-  reduction_contract : String
-  output_contract : String
-  review_contract : String
-  cadence_hint : String
-  good_for : Array[String]
-  civic_examples : Array[String]
-} derive(Eq, ToJson, @debug.Debug, @json.FromJson)
-
-pub struct CivicSalonHomeReturn {
-  id : String
-  building_id : String
-  idea_id : String
-  target_book_id : String
-  target_path : String
-  summary : String
-  review_status : String
-} derive(Eq, ToJson, @debug.Debug, @json.FromJson)
-
-pub struct CivicSalonIdea {
-  id : String
-  title : String
-  summary : String
-  participating_books : Array[String]
-  research_questions : Array[String]
-  why_it_matters : String
-  next_experiment : String
-} derive(Eq, ToJson, @debug.Debug, @json.FromJson)
-
-pub struct CivicSalonMetric {
-  participant_count : Int
-  idea_count : Int
-  research_question_count : Int
-  participant_idea_links : Int
-  participating_book_coverage_count : Int
-  idea_return_home_count : Int
-  average_books_per_idea : String
-  structural_effectiveness_score : Int
-  summary : String
-} derive(Eq, ToJson, @debug.Debug, @json.FromJson)
-
-pub struct CivicSalonParticipantBook {
-  book_id : String
-  title : String
-  focus_area : String
-  perspective : String
-  cadence : String
-  current_question : String
-  contribution : String
-  next_artifact : String
-} derive(Eq, ToJson, @debug.Debug, @json.FromJson)
-
-pub enum CivicSalonReductionMode {
-  MoonClawReducer
-  PersistedReducer
-  FixtureReducer
-} derive(Eq, @debug.Debug)
-
 type CivicSalonReductionResult derive(Eq)
-
-pub struct CivicSalonRoundRecord {
-  id : String
-  salon_id : String
-  building_id : String
-  tick : Int
-  round_number : Int
-  started_ms : UInt64
-  finished_ms : UInt64
-  participant_count : Int
-  idea_count : Int
-  research_question_count : Int
-  participant_idea_links : Int
-  idea_return_home_count : Int
-  structural_effectiveness_score : Int
-  decision : String
-  summary : String
-} derive(Eq, ToJson, @debug.Debug, @json.FromJson)
-
-pub struct CivicSalonScenario {
-  id : String
-  title : String
-  communication_pattern_id : String?
-  communication_pattern_label : String?
-  building_id : String
-  building_book_id : String
-  domain_label : String
-  topic : String
-  cadence : String
-  interval_ms : UInt64?
-  skill_name : String
-  skill_description : String
-  protocol_channel : String
-  reduction_kind : String
-  output_channel : String
-  review_gate : String
-  review_owner : String
-  review_reason : String
-  backlog_path : String
-  synthesis_path : String
-  metrics_path : String
-  review_path : String
-  returned_ideas_path : String
-  participant_contract_path : String
-  quality_rules : Array[String]
-  skill_rules : Array[String]
-  participants : Array[CivicSalonParticipantBook]
-  ideas : Array[CivicSalonIdea]
-} derive(Eq, ToJson, @debug.Debug, @json.FromJson)
-
-pub struct CivicSalonSchedule {
-  id : String
-  title : String
-  building_id : String
-  topic : String
-  interval_ms : UInt64
-  participant_book_ids : Array[String]
-  enabled : Bool
-  last_run_ms : UInt64
-  next_due_ms : UInt64
-  round_count : Int
-  latest_round_id : String
-  latest_summary : String
-} derive(Eq, ToJson, @debug.Debug, @json.FromJson)
-pub fn CivicSalonSchedule::new(id~ : String, title~ : String, building_id~ : String, topic~ : String, interval_ms? : UInt64, participant_book_ids? : Array[String], enabled? : Bool, last_run_ms? : UInt64, next_due_ms? : UInt64, round_count? : Int, latest_round_id? : String, latest_summary? : String) -> Self
 
 pub struct CivicServiceHealth {
   service_id : String
@@ -680,163 +364,9 @@ pub struct CookbookArtifact {
 
 type CookbookArtifactSummary derive(Eq, @debug.Debug)
 
-pub struct DaemonRuntimeHealth {
-  status : String
-  supervisor_pid : Int
-  worker_pid : Int
-  supervisor_alive : Bool
-  worker_alive : Bool
-  heartbeat_age_ms : UInt64
-  stale : Bool
-  stop_requested : Bool
-  tick_success_count : Int
-  tick_failure_count : Int
-  last_error : String
-  log_path : String
-} derive(Eq, ToJson, @debug.Debug, @json.FromJson)
-pub fn DaemonRuntimeHealth::healthy(Self) -> Bool
-
-pub struct DaemonRuntimeState {
-  daemon_id : String
-  status : String
-  supervisor_pid : Int
-  worker_pid : Int
-  supervisor_run_id : String
-  worker_run_id : String
-  started_at_ms : UInt64
-  last_heartbeat_ms : UInt64
-  last_tick_started_ms : UInt64
-  last_tick_finished_ms : UInt64
-  last_success_ms : UInt64
-  last_failure_ms : UInt64
-  tick_success_count : Int
-  tick_failure_count : Int
-  stop_requested : Bool
-  last_error : String
-  log_path : String
-} derive(Eq, ToJson, @debug.Debug, @json.FromJson)
-pub fn DaemonRuntimeState::heartbeat_age_ms(Self, UInt64) -> UInt64
-pub fn DaemonRuntimeState::is_stale(Self, UInt64, UInt64) -> Bool
-pub fn DaemonRuntimeState::new(daemon_id? : String, status? : String, supervisor_pid? : Int, worker_pid? : Int, supervisor_run_id? : String, worker_run_id? : String, started_at_ms? : UInt64, last_heartbeat_ms? : UInt64, last_tick_started_ms? : UInt64, last_tick_finished_ms? : UInt64, last_success_ms? : UInt64, last_failure_ms? : UInt64, tick_success_count? : Int, tick_failure_count? : Int, stop_requested? : Bool, last_error? : String, log_path? : String) -> Self
-
-pub struct EditorFeatureSelectionTask {
-  id : String
-  status : String
-  workspace_root : String
-  packet_path : String
-  result_path : String
-  proposal_id : String?
-  run_id : String?
-  summary : String
-  generated_at_ms : UInt64
-} derive(Eq, ToJson, @debug.Debug, @json.FromJson)
-
-pub struct EditorPipelineLifecycleRecord {
-  change_id : String
-  selected_feature : String
-  title : String
-  lifecycle_status : String
-  summary : String
-  course_ref : String
-  plan_ref : String
-  repair_ref : String
-  output_ref : String
-} derive(Eq, ToJson, @debug.Debug, @json.FromJson)
-
 type EditorPipelineModuleConfig derive(Eq, @debug.Debug, @json.FromJson)
 
 type EditorPipelineModuleConfigEntry derive(Eq, @debug.Debug, @json.FromJson)
-
-pub struct EditorPipelineMovementLoopRecord {
-  module_id : String
-  module_title : String
-  book_id : String
-  status : String
-  home_ref : String
-  entrance_ref : String
-  output_ref : String
-  return_ref : String
-  missing_reason : String
-} derive(Eq, ToJson, @debug.Debug, @json.FromJson)
-
-pub struct EditorPipelinePlacementDiffRecord {
-  module_id : String
-  module_title : String
-  change_kind : String
-  status : String
-  before_ref : String
-  after_ref : String
-  entrance_ref : String
-  terrain_status : String
-  reason : String
-} derive(Eq, ToJson, @debug.Debug, @json.FromJson)
-
-pub struct EditorPipelineStage {
-  id : String
-  title : String
-  status : String
-  summary : String
-  evidence : String
-} derive(Eq, ToJson, @debug.Debug, @json.FromJson)
-
-pub struct EditorPipelineState {
-  contract : String
-  status : String
-  source_course_book : String
-  source_course_page : String
-  planbook_id : String
-  plan_id : String
-  repair_status : String
-  editor_mode_url : String
-  output_mode_url : String
-  generated_at_ms : UInt64
-  stages : Array[EditorPipelineStage]
-  lifecycle : EditorPipelineLifecycleRecord
-  movement_loops : Array[EditorPipelineMovementLoopRecord]
-  placement_diffs : Array[EditorPipelinePlacementDiffRecord]
-  terrain_layers : Array[EditorPipelineTerrainLayerRecord]
-  terrain_reasons : Array[EditorPipelineTerrainReasonRecord]
-  style_candidates : Array[EditorPipelineStyleCandidateRecord]
-  style_selection : EditorPipelineStyleSelectionRecord
-} derive(Eq, ToJson, @debug.Debug, @json.FromJson)
-
-pub struct EditorPipelineStyleCandidateRecord {
-  style_id : String
-  title : String
-  status : String
-  evidence_ref : String
-  asset_ref : String
-  rationale : String
-  tradeoff : String
-  selected : Bool
-} derive(Eq, ToJson, @debug.Debug, @json.FromJson)
-
-pub struct EditorPipelineStyleSelectionRecord {
-  target_module_id : String
-  target_module_title : String
-  selected_style_id : String
-  selected_style_title : String
-  status : String
-  decision_ref : String
-  critique : String
-} derive(Eq, ToJson, @debug.Debug, @json.FromJson)
-
-pub struct EditorPipelineTerrainLayerRecord {
-  layer_id : String
-  title : String
-  status : String
-  evidence_ref : String
-  summary : String
-} derive(Eq, ToJson, @debug.Debug, @json.FromJson)
-
-pub struct EditorPipelineTerrainReasonRecord {
-  module_id : String
-  module_title : String
-  terrain_layer : String
-  status : String
-  placement_ref : String
-  reason : String
-} derive(Eq, ToJson, @debug.Debug, @json.FromJson)
 
 type EditorSelectedFeature derive(Eq, @debug.Debug)
 
@@ -845,46 +375,6 @@ type FinalIntegrationManifest derive(Eq, ToJson, @debug.Debug, @json.FromJson)
 type FinalIntegrationTemplateSpec derive(Eq, ToJson, @debug.Debug, @json.FromJson)
 
 type FinalIntegrationWatchSpec derive(Eq, ToJson, @debug.Debug, @json.FromJson)
-
-type LiveAutonomyJournalTick derive(@json.FromJson)
-
-pub struct LiveAutonomySpine {
-  generated_at_ms : UInt64
-  tick : Int
-  status : String
-  summary : String
-  stable_waiting : Bool
-  stable_waiting_observation_streak : Int
-  stable_waiting_blockers : Array[String]
-  active_worker_count : Int
-  review_count : Int
-  blocked_count : Int
-  accepted_update_count : Int
-  no_change_count : Int
-  failed_count : Int
-  transient_infrastructure_debt_count : Int
-  due_goal_count : Int
-  standing_goal_count : Int
-  enabled_standing_goal_count : Int
-  disabled_standing_goal_count : Int
-  planbook_open_count : Int
-  planbook_repair_active_count : Int
-  book_template_request_count : Int
-  pending_book_template_request_count : Int
-  failed_book_template_request_count : Int
-  book_template_request_summary : String
-  book_template_latest_event_summary : String
-  latest_watcher_summary : String
-  visual_projection_path : String
-  journal_path : String
-  digest_path : String
-  planbook_change_log_path : String
-  planbook_engineering_digest_path : String
-  latest_change_summary : String
-  next_actions : Array[String]
-} derive(Eq, ToJson, @debug.Debug, @json.FromJson)
-
-type LiveAutonomyStabilityProbe derive(@json.FromJson)
 
 type MoonClawStoreCompactionTarget derive(Eq, @debug.Debug)
 
@@ -942,42 +432,7 @@ type PdfEvidenceWatchMoondeskSettings derive(Eq, ToJson, @debug.Debug, @json.Fro
 
 type PdfEvidenceWatchSettings derive(Eq, ToJson, @debug.Debug, @json.FromJson)
 
-pub struct PlanbookAutonomyStatus {
-  generated_at_ms : UInt64
-  book_id : String
-  workspace_root : String
-  status : String
-  open_count : Int
-  satisfied_count : Int
-  criteria : Array[PlanbookCriterionStatus]
-} derive(Eq, ToJson, @debug.Debug, @json.FromJson)
-
-pub struct PlanbookCriterionStatus {
-  id : String
-  plan_id : String
-  title : String
-  owner : String
-  satisfied : Bool
-  evidence : String
-  next_action : String
-} derive(Eq, ToJson, @debug.Debug, @json.FromJson)
-
 type PlanbookImplementationBacklogItem derive(Eq, ToJson, @debug.Debug, @json.FromJson)
-
-pub struct PlanbookRepairTask {
-  id : String
-  criterion_id : String
-  title : String
-  status : String
-  owner : String
-  workspace_root : String
-  packet_path : String
-  proposal_id : String?
-  run_id : String?
-  summary : String
-  validation_command : String
-  generated_at_ms : UInt64
-} derive(Eq, ToJson, @debug.Debug, @json.FromJson)
 
 pub struct ProtocolHistoryEntry {
   step : String
@@ -1002,35 +457,6 @@ pub struct ResearchReadiness {
 } derive(Eq, ToJson, @debug.Debug, @json.FromJson)
 pub fn ResearchReadiness::from_summary(@moonbook.BookStateSummary, extra_gaps? : Array[String]) -> Self
 pub fn ResearchReadiness::summary_line(Self) -> String
-
-pub struct TownRuntimeStatus {
-  snapshot_path : String
-  has_snapshot : Bool
-  book_count : Int
-  worker_count : Int
-  task_count : Int
-  execution_count : Int
-  event_count : Int
-  running_count : Int
-  review_count : Int
-  failed_count : Int
-  stale_count : Int
-  completed_count : Int
-  standing_goal_count : Int
-  enabled_standing_goal_count : Int
-  disabled_standing_goal_count : Int
-  due_standing_goal_count : Int
-  watcher_record_count : Int
-  watcher_summary : String
-  book_template_request_count : Int
-  pending_book_template_request_count : Int
-  failed_book_template_request_count : Int
-  book_template_request_summary : String
-  book_template_latest_event_summary : String
-  daemon_tick : Int
-  daemon_actions : Array[@scheduler.SchedulerAction]
-  summary : String
-} derive(Eq, ToJson, @debug.Debug, @json.FromJson)
 
 pub struct VisualAgentProjection {
   worker_id : String
@@ -1096,6 +522,35 @@ pub struct VisualProjection {
 } derive(Eq, ToJson, @debug.Debug, @json.FromJson)
 
 // Type aliases
+pub using @civic {type CivicSalonHomeReturn}
+
+pub using @civic {type CivicSalonIdea}
+
+pub using @civic {type CivicSalonMetric}
+
+pub using @civic {type CivicSalonParticipantBook}
+
+pub using @civic {type CivicSalonReductionMode}
+
+pub using @civic {type CivicSalonRoundRecord}
+
+pub using @civic {type CivicSalonScenario}
+
+pub using @civic {type CivicSalonSchedule}
+
+pub using @daemon_runtime_policy {type DaemonRuntimeHealth}
+
+pub using @daemon_runtime_policy {type DaemonRuntimeState}
+
+pub using @live_autonomy_policy {type LiveAutonomySpine}
+
+pub using @planbook_policy {type PlanbookAutonomyStatus}
+
+pub using @planbook_policy {type PlanbookCriterionStatus}
+
+pub using @planbook_policy {type PlanbookRepairTask}
+
+pub using @runtime_status_policy {type TownRuntimeStatus}
 
 // Traits
 

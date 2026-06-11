@@ -152,7 +152,7 @@ fn civic_salon_protocol_for_scenario(
 ) -> @civic.BuildingProtocolDefinition {
   match @civic.wenyu_building_protocol_for_building_id(scenario.building_id) {
     Some(protocol) => protocol
-    None => civic_salon_generic_protocol_for_scenario(scenario)
+    None => @civic.salon_protocol_for_scenario(scenario)
   }
 }
 

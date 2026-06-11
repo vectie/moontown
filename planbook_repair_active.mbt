@@ -84,7 +84,7 @@ fn planbook_repair_handoff_is_stale(
 ) -> Bool {
   match criterion.id {
     "planbook-source-patch-loop" =>
-      !planbook_repair_text_has_valid_patch_receipt(
+      !@planbook_policy.repair_text_has_valid_patch_receipt(
         result_text,
         criterion.id,
         planbook_repair_source_root(),

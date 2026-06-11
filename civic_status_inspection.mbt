@@ -20,7 +20,7 @@ async fn inspect_wenyu_civic_service(
   let readiness = inspect_civic_service_workspace_readiness(service, entry)
   let latest = inspect_civic_service_latest_result(service, readiness.root)
   let protocol = inspect_civic_service_protocol(service)
-  let status = civic_service_status_label(
+  let status = @civic.civic_service_status_label(
     workspace_exists=readiness.workspace_exists,
     missing_required_paths=readiness.missing_required_paths,
     skill_ready=readiness.skill_ready,
@@ -50,7 +50,7 @@ async fn inspect_wenyu_civic_service(
     workspace_root: readiness.root,
     status,
     operable: readiness.operable,
-    proven_by_result: civic_service_result_is_proven(latest.decision),
+    proven_by_result: @civic.civic_service_result_is_proven(latest.decision),
     workspace_exists: readiness.workspace_exists,
     schema_ready: readiness.schema_ready,
     wiki_ready: readiness.wiki_ready,
@@ -67,7 +67,7 @@ async fn inspect_wenyu_civic_service(
     latest_review_items: latest.review_items,
     next_check_hint: latest.next_check_hint,
     missing_required_paths: readiness.missing_required_paths,
-    notes: civic_health_notes(
+    notes: @civic.civic_health_notes(
       operable=readiness.operable,
       status~,
       missing_required_paths=readiness.missing_required_paths,
@@ -89,22 +89,22 @@ fn civic_service_portfolio(
       item.proven_by_result
     }),
     seeded_count: count_civic_services_by(services, fn(item) {
-      civic_service_status_is_seeded(item.status)
+      @civic.civic_service_status_is_seeded(item.status)
     }),
     missing_count: count_civic_services_by(services, fn(item) {
-      civic_service_status_is_missing_or_incomplete(item.status)
+      @civic.civic_service_status_is_missing_or_incomplete(item.status)
     }),
     review_count: count_civic_services_by(services, fn(item) {
-      civic_service_status_is_review(item.status)
+      @civic.civic_service_status_is_review(item.status)
     }),
     blocked_count: count_civic_services_by(services, fn(item) {
-      civic_service_status_is_blocked(item.status)
+      @civic.civic_service_status_is_blocked(item.status)
     }),
     changed_count: count_civic_services_by(services, fn(item) {
-      civic_service_status_is_changed(item.status)
+      @civic.civic_service_status_is_changed(item.status)
     }),
     no_change_count: count_civic_services_by(services, fn(item) {
-      civic_service_status_is_no_change(item.status)
+      @civic.civic_service_status_is_no_change(item.status)
     }),
     status_path,
     markdown_path: civic_markdown_status_path(status_path),

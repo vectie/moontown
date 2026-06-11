@@ -6,7 +6,7 @@ fn test_editor_feature_selection_json(
   implementation_hint : String,
   acceptance : String,
 ) -> String {
-  "{\"contract\":\"\{editor_feature_selection_result_contract()}\",\"selected_feature\":\"\{feature_id}\",\"title\":\"\{title}\",\"score\":\{score},\"implementation_hint\":\"\{implementation_hint}\",\"acceptance\":[\"\{acceptance}\"]}"
+  "{\"contract\":\"\{@editor_pipeline.feature_selection_result_contract()}\",\"selected_feature\":\"\{feature_id}\",\"title\":\"\{title}\",\"score\":\{score},\"implementation_hint\":\"\{implementation_hint}\",\"acceptance\":[\"\{acceptance}\"]}"
 }
 
 ///|
@@ -17,12 +17,12 @@ fn test_editor_feature_selection_json_with_gap(
   implementation_hint : String,
   acceptance : String,
 ) -> String {
-  "{\"contract\":\"\{editor_feature_selection_result_contract()}\",\"selected_feature\":\"\{feature_id}\",\"title\":\"\{title}\",\"score\":1,\"current_gap\":\"\{current_gap}\",\"implementation_hint\":\"\{implementation_hint}\",\"acceptance\":[\"\{acceptance}\"]}"
+  "{\"contract\":\"\{@editor_pipeline.feature_selection_result_contract()}\",\"selected_feature\":\"\{feature_id}\",\"title\":\"\{title}\",\"score\":1,\"current_gap\":\"\{current_gap}\",\"implementation_hint\":\"\{implementation_hint}\",\"acceptance\":[\"\{acceptance}\"]}"
 }
 
 ///|
 fn test_editor_feature_implementation_proof(feature_id : String) -> String {
-  "contract: \{editor_selected_feature_implementation_contract()}\nselected_feature: \{feature_id}\nimplementation_status: accepted\nvalidation: test"
+  "contract: \{@editor_pipeline.selected_feature_implementation_contract()}\nselected_feature: \{feature_id}\nimplementation_status: accepted\nvalidation: test"
 }
 
 ///|

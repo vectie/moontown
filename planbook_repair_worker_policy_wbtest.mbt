@@ -90,7 +90,7 @@ test "planbook bounded step metadata uses shared nonblocking policy" {
   let metadata = planbook_bounded_step_metadata_json(
     preferred_skills=["planbook-repair"],
     execution_mode="acp",
-    execution_target=Some("codex-main"),
+    execution_target=Some(@codex.codex_main_target_id()),
     output_contract="planbook.repair.result.v1",
     source_root="/tmp/moontown",
     target_files=["planbook.mbt"],

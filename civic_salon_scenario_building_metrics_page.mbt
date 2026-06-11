@@ -15,7 +15,7 @@ fn civic_salon_metrics_markdown(
     "",
     metrics.summary,
     "",
-    civic_salon_metrics_certification_note(),
+    @civic.salon_metrics_certification_note(),
     "",
     "## Score",
     "",
@@ -38,6 +38,6 @@ fn civic_salon_metrics_markdown(
     "",
     "## Return Home Contract",
     "",
-    civic_salon_return_home_contract_note(scenario),
+    @civic.salon_return_home_contract_note(scenario),
   ].join("\n")
 }

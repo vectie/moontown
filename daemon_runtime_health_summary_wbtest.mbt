@@ -1,6 +1,6 @@
 ///|
 test "daemon runtime health summary marks healthy worker" {
-  let health = {
+  let health : DaemonRuntimeHealth = {
     status: "running",
     supervisor_pid: 10,
     worker_pid: 11,
@@ -15,7 +15,7 @@ test "daemon runtime health summary marks healthy worker" {
     log_path: ".moontown/daemon.log",
   }
   assert_true(health.healthy())
-  let summary = daemon_runtime_health_summary(health)
+  let summary = @daemon_runtime_policy.daemon_runtime_health_summary(health)
   assert_true(summary.contains("runtime=healthy"))
   assert_true(summary.contains("worker_pid=11"))
   assert_true(summary.contains("successes=3"))
@@ -23,7 +23,7 @@ test "daemon runtime health summary marks healthy worker" {
 
 ///|
 test "daemon runtime health summary marks active supervisor" {
-  let health = {
+  let health : DaemonRuntimeHealth = {
     status: "supervising",
     supervisor_pid: 10,
     worker_pid: 0,
@@ -39,14 +39,14 @@ test "daemon runtime health summary marks active supervisor" {
   }
   assert_true(!health.healthy())
   assert_true(health.supervisor_active())
-  let summary = daemon_runtime_health_summary(health)
+  let summary = @daemon_runtime_policy.daemon_runtime_health_summary(health)
   assert_true(summary.contains("runtime=supervising"))
   assert_true(summary.contains("supervisor_pid=10"))
 }
 
 ///|
 test "daemon runtime health summary marks stale worker" {
-  let health = {
+  let health : DaemonRuntimeHealth = {
     status: "ticking",
     supervisor_pid: 10,
     worker_pid: 11,
@@ -61,14 +61,14 @@ test "daemon runtime health summary marks stale worker" {
     log_path: ".moontown/daemon.log",
   }
   assert_true(!health.healthy())
-  let summary = daemon_runtime_health_summary(health)
+  let summary = @daemon_runtime_policy.daemon_runtime_health_summary(health)
   assert_true(summary.contains("runtime=stale"))
   assert_true(summary.contains("failures=1"))
 }
 
 ///|
 test "daemon runtime health label precedence is explicit" {
-  let running = {
+  let running : DaemonRuntimeHealth = {
     status: "running",
     supervisor_pid: 10,
     worker_pid: 11,
@@ -82,14 +82,26 @@ test "daemon runtime health label precedence is explicit" {
     last_error: "",
     log_path: ".moontown/daemon.log",
   }
-  assert_eq(daemon_runtime_health_label(running), "healthy")
   assert_eq(
-    daemon_runtime_health_label({ ..running, stop_requested: true }),
+    @daemon_runtime_policy.daemon_runtime_health_label(running),
+    "healthy",
+  )
+  assert_eq(
+    @daemon_runtime_policy.daemon_runtime_health_label({
+      ..running,
+      stop_requested: true,
+    }),
     "stopping",
   )
-  assert_eq(daemon_runtime_health_label({ ..running, stale: true }), "stale")
   assert_eq(
-    daemon_runtime_health_label({
+    @daemon_runtime_policy.daemon_runtime_health_label({
+      ..running,
+      stale: true,
+    }),
+    "stale",
+  )
+  assert_eq(
+    @daemon_runtime_policy.daemon_runtime_health_label({
       ..running,
       status: "missing",
       worker_alive: false,
@@ -100,7 +112,7 @@ test "daemon runtime health label precedence is explicit" {
 
 ///|
 test "daemon runtime health summary fields keep stable operator order" {
-  let health = {
+  let health : DaemonRuntimeHealth = {
     status: "running",
     supervisor_pid: 10,
     worker_pid: 11,
@@ -114,7 +126,9 @@ test "daemon runtime health summary fields keep stable operator order" {
     last_error: "",
     log_path: ".moontown/daemon.log",
   }
-  let fields = daemon_runtime_health_summary_fields("healthy", health)
+  let fields = @daemon_runtime_policy.daemon_runtime_health_summary_fields(
+    "healthy", health,
+  )
   assert_eq(fields[0], "runtime=healthy")
   assert_eq(fields[1], "status=running")
   assert_eq(fields[2], "supervisor_pid=10")

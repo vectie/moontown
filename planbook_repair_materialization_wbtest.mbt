@@ -29,9 +29,9 @@ async test "planbook repair queues bounded packet without marking it active befo
   }
   let packet_text = read_text_or_empty(task.packet_path)
   let skill_text = read_text_or_empty(
-    planbook_repair_path_in_workspace(
+    @planbook_policy.repair_path_in_workspace(
       workspace_root,
-      planbook_repair_skill_relative_path(),
+      @planbook_policy.repair_skill_relative_path(),
     ),
   )
   let profile_text = read_text_or_empty("\{workspace_root}/moonclaw.jobs.json")
@@ -83,8 +83,9 @@ test "planbook source patch loop target list covers self patch plumbing" {
   )
   assert_true(targets.contains("planbook_repair_active.mbt"))
   assert_true(targets.contains("planbook_repair_targets.mbt"))
-  assert_true(targets.contains("planbook_repair_request_rules.mbt"))
-  assert_true(targets.contains("planbook_repair_skill_page.mbt"))
+  assert_true(targets.contains("planbook_policy/request_rules.mbt"))
+  assert_true(targets.contains("planbook_policy/repair_paths.mbt"))
+  assert_true(targets.contains("planbook_policy/skill_text.mbt"))
   assert_true(targets.contains("adapters/moonclaw/run_polling.mbt"))
   assert_true(targets.contains("live_autonomy_wbtest.mbt"))
   assert_true(targets.contains("../moonclaw/acp/runner.mbt"))
@@ -133,9 +134,9 @@ async test "planbook backlog item can drive bounded repair packet from json" {
   )
   let packet_text = read_text_or_empty(task.packet_path)
   let skill_text = read_text_or_empty(
-    planbook_repair_path_in_workspace(
+    @planbook_policy.repair_path_in_workspace(
       workspace_root,
-      planbook_repair_skill_relative_path(),
+      @planbook_policy.repair_skill_relative_path(),
     ),
   )
   assert_true(task.criterion_id.contains("backlog-"))
@@ -321,6 +322,8 @@ async test "planbook repair acp target uses resolved codex command" {
   )
   assert_true(target.contains("\"--sandbox\""))
   assert_true(target.contains("\"workspace-write\""))
+  assert_true(target.contains("\"--model\""))
+  assert_true(target.contains("\"gpt-5.5\""))
   assert_true(!target.contains("\"command\": \"codex\""))
   assert_true(target.contains("\"cwd\": \"\{source_root}\""))
   assert_true(target.contains("\"workspace\": \"\{source_root}\""))

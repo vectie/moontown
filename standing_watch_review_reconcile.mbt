@@ -11,7 +11,10 @@ async fn reconcile_review_queued_standing_watch_outputs(
       continue
     }
     let goal = match
-      standing_goal_for_execution_task(standing_goals, execution.task_id) {
+      @standing_watch_policy.standing_goal_for_execution_task(
+        standing_goals,
+        execution.task_id,
+      ) {
       Some(goal) => goal
       None => continue
     }

@@ -34,13 +34,10 @@ fn planbook_noop_repair_task(
 
 ///|
 fn planbook_repair_validation_command() -> String {
-  planbook_repair_required_commands().join(" && ")
+  @planbook_policy.repair_validation_command()
 }
 
 ///|
 fn planbook_repair_required_commands() -> Array[String] {
-  [
-    "moon check --no-render", "moon test planbook_autonomy_wbtest.mbt live_autonomy_wbtest.mbt --no-render",
-    "moon test --no-render", "moon fmt", "moon info", "git diff --check",
-  ]
+  @planbook_policy.repair_required_commands()
 }

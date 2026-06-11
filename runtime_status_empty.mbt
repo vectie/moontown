@@ -1,50 +1,15 @@
 ///|
 fn empty_runtime_status(snapshot_path : String) -> TownRuntimeStatus {
-  {
-    snapshot_path,
-    has_snapshot: false,
-    book_count: 0,
-    worker_count: 0,
-    task_count: 0,
-    execution_count: 0,
-    event_count: 0,
-    running_count: 0,
-    review_count: 0,
-    failed_count: 0,
-    stale_count: 0,
-    completed_count: 0,
-    standing_goal_count: 0,
-    enabled_standing_goal_count: 0,
-    disabled_standing_goal_count: 0,
-    due_standing_goal_count: 0,
-    watcher_record_count: 0,
-    watcher_summary: "No watcher ledger records.",
-    book_template_request_count: 0,
-    pending_book_template_request_count: 0,
-    failed_book_template_request_count: 0,
-    book_template_request_summary: "No book-template request inbox.",
-    book_template_latest_event_summary: "none",
-    daemon_tick: 0,
-    daemon_actions: [],
-    summary: "No saved town snapshot exists at \{snapshot_path}.",
-  }
+  @runtime_status_policy.empty_runtime_status(snapshot_path)
 }
 
 ///|
 fn empty_book_template_request_status(
   snapshot_path : String,
-) -> BookTemplateRequestStatus {
-  let request_path = default_book_template_request_path(snapshot_path~)
-  {
-    request_path,
-    event_path: default_book_template_request_event_path(request_path~),
-    request_count: 0,
-    pending_count: 0,
-    installed_count: 0,
-    failed_count: 0,
-    retry_count: 0,
-    ready: true,
-    summary: "book_template_requests=0 pending=0 retry=0 installed=0 failed=0",
-    latest_event_summary: "none",
-  }
+) -> @book_templates.BookTemplateRequestStatus {
+  let request_path = @book_templates.request_path_for_snapshot(snapshot_path)
+  @book_templates.empty_request_status(
+    request_path~,
+    event_path=@book_templates.request_event_path_for_request(request_path),
+  )
 }

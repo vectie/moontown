@@ -41,9 +41,11 @@ async test "live autonomy stable waiting streak resets on due journal work" {
     pending_book_template_request_count: 0,
     failed_book_template_request_count: 0,
   }
-  assert_false(live_autonomy_stability_probe_is_stable(due_probe))
+  assert_false(
+    @live_autonomy_policy.live_autonomy_stability_probe_is_stable(due_probe),
+  )
   assert_true(
-    live_autonomy_stable_waiting_blockers_for({
+    @live_autonomy_policy.live_autonomy_stable_waiting_blockers_for({
       active_workers: 0,
       review: 0,
       blocked: 0,

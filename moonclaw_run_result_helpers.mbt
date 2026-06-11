@@ -58,17 +58,3 @@ async fn moonclaw_run_result_text_from_run(
   }
   moonclaw_run_result_text_from_workspace(workspace_dir, fallback_summary~)
 }
-
-///|
-async fn moonclaw_run_result_text_from_run_with_home(
-  run_id : String,
-  cwd : String,
-  home : String,
-  fallback_summary? : Bool = false,
-) -> String {
-  let workspace_dir = match @moonclaw.run_workspace_dir(run_id, cwd~, home~) {
-    Some(workspace_dir) => workspace_dir
-    None => return ""
-  }
-  moonclaw_run_result_text_from_workspace(workspace_dir, fallback_summary~)
-}

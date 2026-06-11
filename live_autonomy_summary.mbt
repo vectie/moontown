@@ -14,7 +14,7 @@ fn live_autonomy_summary_context(
   metrics : LiveAutonomyMetricCounts,
   waiting : LiveAutonomyWaitingState,
   planbook_open : Int,
-  template_request_counts : BookTemplateRequestCounts,
+  template_request_counts : @book_templates.BookTemplateRuntimeCounts,
 ) -> LiveAutonomySummaryContext {
   {
     tick,

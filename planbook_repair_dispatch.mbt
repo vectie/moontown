@@ -98,7 +98,7 @@ async fn materialize_planbook_repair_task(
 
 ///|
 fn planbook_repair_transient_dispatch_error(detail : String) -> Bool {
-  transient_external_dependency_error(detail)
+  @runtime_error_policy.transient_external_dependency_error(detail)
 }
 
 ///|

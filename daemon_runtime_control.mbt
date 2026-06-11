@@ -23,11 +23,15 @@ pub async fn daemon_doctor_saved_town(
   let health = inspect_daemon_runtime(snapshot_path~, stale_after_ms~)
   let builder = StringBuilder::new()
   builder.write_string("Moontown daemon doctor\n")
-  builder.write_string("\{daemon_runtime_health_summary(health)}\n")
+  builder.write_string(
+    "\{@daemon_runtime_policy.daemon_runtime_health_summary(health)}\n",
+  )
   if health.healthy() && !health.supervisor_alive {
     builder.write_string("durable=false reason=worker-without-supervisor\n")
   }
-  builder.write_string("action=\{daemon_runtime_doctor_action(health)}\n")
+  builder.write_string(
+    "action=\{@daemon_runtime_policy.daemon_runtime_doctor_action(health)}\n",
+  )
   if !health.last_error.is_empty() {
     builder.write_string("last_error=\{health.last_error}\n")
   }

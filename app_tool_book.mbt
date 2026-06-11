@@ -1,8 +1,8 @@
 ///|
 pub async fn bootstrap_app_tool_book(
-  book_id? : String = default_app_tool_book_id(),
+  book_id? : String = @app_tool_book.default_book_id(),
   title? : String = "Data Watch ToolBook",
-  purpose? : String = default_app_tool_book_purpose(),
+  purpose? : String = @app_tool_book.default_purpose(),
   websites? : Array[String] = [],
   analysis_method? : String = "",
   tool_spec? : String = "",
@@ -11,14 +11,14 @@ pub async fn bootstrap_app_tool_book(
   book_catalog_path? : String = @moonbook.default_catalog_path(),
   standing_goal_path? : String = @storage.default_standing_goal_path(),
   workspace_root? : String = "",
-  template_root? : String = default_app_tool_book_template_root(),
+  template_root? : String = @app_tool_book.template_root(),
 ) -> String {
   let root = if workspace_root.is_empty() {
-    default_app_tool_book_workspace_root(book_id~)
+    @moonbook.default_workspace_root(book_id)
   } else {
     workspace_root
   }
-  let entry = app_tool_book_catalog_entry(book_id, title, purpose, root)
+  let entry = @app_tool_book.catalog_entry(book_id, title, purpose, root)
   let catalog = @moonbook.load_or_create_catalog(path=book_catalog_path)
   @moonbook.save_catalog_file(
     book_catalog_path,
@@ -29,12 +29,12 @@ pub async fn bootstrap_app_tool_book(
     cadence_ticks, template_root,
   )
   let goals = @storage.load_or_create_standing_goals(path=standing_goal_path)
-  let goal = app_tool_book_standing_goal(
+  let goal = @app_tool_book.standing_goal(
     book_id, title, purpose, websites, civic_building_id, cadence_ticks,
   )
   @storage.save_standing_goals_file(
     standing_goal_path,
-    upsert_app_tool_book_standing_goal(goals, goal),
+    @app_tool_book.upsert_standing_goal(goals, goal),
   )
   let status = inspect_app_tool_book(
     book_id~,
@@ -43,14 +43,17 @@ pub async fn bootstrap_app_tool_book(
     standing_goal_path~,
   )
   [
-    "Bootstrapped App ToolBook `\{book_id}`.",
-    "- Workspace: `\{root}`",
-    "- Catalog: `\{book_catalog_path}`",
-    "- Standing goal: `\{goal.id}` in `\{standing_goal_path}`",
-    "- Civic building: `\{civic_building_id}`",
-    "- Websites: `\{websites.length()}`",
-    "- Ready: `\{status.ready}`",
-    "- Missing required: `\{status.missing_count}`",
+    @book_templates.install_success_marker(),
+    @app_tool_book.bootstrap_summary(
+      book_id,
+      root,
+      book_catalog_path,
+      goal.id,
+      standing_goal_path,
+      civic_building_id,
+      websites.length(),
+      status,
+    ),
   ].join("\n")
 }
 
@@ -59,7 +62,7 @@ pub async fn install_app_tool_book_config(
   config_path : String,
   book_catalog_path? : String = @moonbook.default_catalog_path(),
   standing_goal_path? : String = @storage.default_standing_goal_path(),
-  template_root? : String = default_app_tool_book_template_root(),
+  template_root? : String = @app_tool_book.template_root(),
 ) -> String {
   match load_app_tool_book_install_spec(config_path) {
     Some(spec) =>
@@ -72,7 +75,7 @@ pub async fn install_app_tool_book_config(
 
 ///|
 async fn install_loaded_app_tool_book_spec(
-  spec : AppToolBookInstallSpec,
+  spec : @app_tool_book.AppToolBookInstallSpec,
   config_path : String,
   book_catalog_path : String,
   standing_goal_path : String,
@@ -92,7 +95,7 @@ async fn install_loaded_app_tool_book_spec(
   let workspace_root = resolve_book_template_config_workspace_root(
     base_dir,
     spec.workspace_root,
-    default_app_tool_book_workspace_root(book_id=spec.book_id),
+    @moonbook.default_workspace_root(spec.book_id),
   )
   let summary = bootstrap_app_tool_book(
     book_id=spec.book_id,
@@ -108,5 +111,5 @@ async fn install_loaded_app_tool_book_spec(
     workspace_root~,
     template_root~,
   )
-  "Installed App ToolBook config `\{config_path}`.\n\{summary}"
+  @app_tool_book.install_config_summary(config_path, summary)
 }

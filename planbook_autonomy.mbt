@@ -1,24 +1,8 @@
 ///|
-pub struct PlanbookCriterionStatus {
-  id : String
-  plan_id : String
-  title : String
-  owner : String
-  satisfied : Bool
-  evidence : String
-  next_action : String
-} derive(Debug, Eq, ToJson, FromJson)
+pub type PlanbookCriterionStatus = @planbook_policy.PlanbookCriterionStatus
 
 ///|
-pub struct PlanbookAutonomyStatus {
-  generated_at_ms : UInt64
-  book_id : String
-  workspace_root : String
-  status : String
-  open_count : Int
-  satisfied_count : Int
-  criteria : Array[PlanbookCriterionStatus]
-} derive(Debug, Eq, ToJson, FromJson)
+pub type PlanbookAutonomyStatus = @planbook_policy.PlanbookAutonomyStatus
 
 ///|
 pub fn default_planbook_autonomy_path(

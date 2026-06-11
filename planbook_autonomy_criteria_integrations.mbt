@@ -20,7 +20,8 @@ async fn planbook_moonbook_provider_criterion() -> PlanbookCriterionStatus {
 ///|
 async fn planbook_app_tool_book_template_criterion() -> PlanbookCriterionStatus {
   let registry_ready = text_file_contains(
-    "templates/books/templates.json", "\"template_id\": \"app-tool-book\"",
+    @book_templates.default_registry_path(),
+    "\"template_id\": \"app-tool-book\"",
   )
   let installer_ready = text_file_contains(
       "book_templates_installers.mbt", "\"app-tool-book\"",

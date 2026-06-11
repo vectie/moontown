@@ -1,10 +1,6 @@
 ///|
 fn editor_feature_selection_result_satisfies_contract(text : String) -> Bool {
-  text.contains(editor_feature_selection_result_contract()) &&
-  text.contains("selected_feature") &&
-  text.contains("score") &&
-  text.contains("implementation_hint") &&
-  text.contains("acceptance")
+  @editor_pipeline.feature_selection_result_satisfies_contract(text)
 }
 
 ///|
@@ -18,7 +14,7 @@ async fn editor_feature_selection_result_summary(
   if editor_feature_selection_result_satisfies_contract(text) {
     "Valid selection contract exists at `\{result_path}`."
   } else {
-    "Result exists at `\{result_path}`, but it does not satisfy `\{editor_feature_selection_result_contract()}`."
+    "Result exists at `\{result_path}`, but it does not satisfy `\{@editor_pipeline.feature_selection_result_contract()}`."
   }
 }
 

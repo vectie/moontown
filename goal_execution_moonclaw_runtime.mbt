@@ -36,7 +36,7 @@ async fn import_packet_with_daemon_timeout(
 
 ///|
 fn is_detached_standing_watch_task(task : @moonbook.BookTask) -> Bool {
-  task.kind == "standing-watch"
+  task.kind == @standing_watch_policy.standing_watch_task_kind()
 }
 
 ///|

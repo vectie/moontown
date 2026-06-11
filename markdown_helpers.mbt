@@ -1,9 +1,4 @@
 ///|
-fn markdown_inline(text : String) -> String {
-  text.replace(old="\n", new=" ").replace(old="|", new="\\|")
-}
-
-///|
 fn markdown_bullets(values : Array[String]) -> String {
   let builder = StringBuilder::new()
   for value in values {

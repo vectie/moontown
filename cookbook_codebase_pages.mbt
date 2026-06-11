@@ -311,7 +311,7 @@ fn cookbook_skill_markdown() -> String {
     "5. Run `moon check`, focused cookbook tests, `moon info`, and `moon fmt`.",
     "6. Regenerate the book with `moon run cmd/main -- cookbook bootstrap`.",
     "",
-    moonbook_skill_quality_contract_section(),
+    @skill_quality.exploration_quality_contract_section(),
     "",
     "## Acceptance Checklist",
     "",

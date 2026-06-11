@@ -10,7 +10,7 @@ pub async fn inspect_saved_town(
       )
       let watcher_records = load_watcher_records_for_goals(snapshot_path, goals)
       let template_request_status = inspect_book_template_request_status(
-        request_path=default_book_template_request_path(snapshot_path~),
+        request_path=@book_templates.request_path_for_snapshot(snapshot_path),
       )
       let daemon_tick = effective_daemon_tick(
         snapshot_path,
@@ -39,20 +39,24 @@ pub fn runtime_status_from_state(
   standing_goals? : Array[@core.StandingGoal] = [],
   daemon_tick? : Int = 0,
   watcher_records? : Array[@core.WatcherRunRecord] = [],
-  book_template_request_status? : BookTemplateRequestStatus? = None,
+  book_template_request_status? : @book_templates.BookTemplateRequestStatus? = None,
 ) -> TownRuntimeStatus {
   let report = @health.inspect_town(state)
   let actions = @scheduler.plan_tick(state, report)
   let next_tick = daemon_tick + 1
-  let standing_goal_counts = standing_goal_counts(standing_goals, next_tick)
+  let standing_goal_counts = @runtime_status_policy.runtime_status_standing_goal_counts(
+    standing_goals, next_tick,
+  )
   for action in @scheduler.plan_standing_goal_actions(standing_goals, next_tick) {
     actions.push(action)
   }
-  let execution_counts = runtime_status_execution_counts(state, report)
+  let execution_counts = @runtime_status_policy.runtime_status_execution_counts(
+    state, report,
+  )
   let template_request_status = book_template_request_status.unwrap_or(
     empty_book_template_request_status(snapshot_path),
   )
-  let template_request_counts = book_template_request_counts(
+  let template_request_counts = @book_templates.request_runtime_counts(
     template_request_status,
   )
   {
@@ -81,7 +85,7 @@ pub fn runtime_status_from_state(
     book_template_latest_event_summary: template_request_status.latest_event_summary,
     daemon_tick,
     daemon_actions: actions,
-    summary: runtime_status_summary(
+    summary: @runtime_status_policy.runtime_status_summary(
       state,
       execution_counts,
       standing_goal_counts,

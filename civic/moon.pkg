@@ -1,5 +1,6 @@
 import {
   "moonbitlang/core/json",
   "vectie/moontown/core",
+  "vectie/moontown/skill_quality",
   "vectie/moontown/adapters/moonbook",
 }

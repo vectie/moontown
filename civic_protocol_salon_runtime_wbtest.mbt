@@ -27,7 +27,7 @@ test "civic salon metrics count idea yield and home returns" {
   let participants = scenario.participants
   let ideas = scenario.ideas
   let metrics = civic_salon_metrics(scenario, participants, ideas)
-  let counts = civic_salon_metric_counts(participants, ideas)
+  let counts = @civic.civic_salon_metric_counts(participants, ideas)
   assert_eq(counts.participant_count, 2)
   assert_eq(counts.idea_count, 1)
   assert_eq(counts.research_question_count, 2)
@@ -41,7 +41,10 @@ test "civic salon metrics count idea yield and home returns" {
   assert_eq(metrics.participating_book_coverage_count, 2)
   assert_eq(metrics.idea_return_home_count, 2)
   assert_eq(metrics.average_books_per_idea, "2/1 = 2.0")
-  assert_eq(metrics.summary, civic_salon_metric_summary(scenario, counts))
+  assert_eq(
+    metrics.summary,
+    "The pattern round converted 2 future energy participant perspectives into 1 reviewable outputs, 2 testable follow-up questions, and 2 returned output-home records.",
+  )
   assert_true(
     metrics.summary.contains("future energy participant perspectives"),
   )

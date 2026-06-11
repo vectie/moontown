@@ -50,7 +50,7 @@ async fn editor_current_accepted_feature_id(workspace_root : String) -> String? 
     editor_selected_feature_implementation_path(workspace_root),
   )
   if !text.contains(
-      "contract: \{editor_selected_feature_implementation_contract()}",
+      "contract: \{@editor_pipeline.selected_feature_implementation_contract()}",
     ) ||
     !text.contains("implementation_status: accepted") {
     return None

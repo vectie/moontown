@@ -8,13 +8,13 @@ fn civic_salon_building_synthesis(
   round_id : String,
   round_number : Int,
 ) -> String {
-  let pattern = civic_salon_pattern_for_scenario(scenario)
+  let pattern = @civic.salon_pattern_for_scenario(scenario)
   [
     "# \{scenario.title}",
     "",
     civic_salon_round_metadata(round_id, round_number),
     "",
-    civic_salon_building_intro(pattern, protocol),
+    @civic.salon_building_intro(pattern, protocol),
     "",
     "## Participants",
     "",
@@ -28,7 +28,7 @@ fn civic_salon_building_synthesis(
     "",
     civic_salon_metrics_table(metrics),
     "",
-    civic_salon_structural_metric_note(),
+    @civic.salon_structural_metric_note(),
     "",
     "## Quality Standard",
     "",

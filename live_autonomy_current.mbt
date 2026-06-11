@@ -42,7 +42,7 @@ async fn current_live_autonomy_build_input(
     planbook_engineering_digest_path: fallback.planbook_engineering_digest_path,
     latest_change_summary: fallback.latest_change_summary,
     book_template_request_status: inspect_book_template_request_status(
-      request_path=default_book_template_request_path(snapshot_path~),
+      request_path=@book_templates.request_path_for_snapshot(snapshot_path),
     ),
     prior_stable_waiting_observation_streak: prior_live_autonomy_stable_waiting_observation_streak(
       snapshot_path,

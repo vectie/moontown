@@ -3,7 +3,7 @@ test "planbook repair paths centralize durable workspace layout" {
   let workspace_root = "/tmp/moontown-planbook-repair-paths"
   assert_eq(planbook_repair_result_contract(), "planbook.repair.result.v1")
   assert_eq(
-    planbook_repair_raw_dir(workspace_root),
+    @planbook_policy.repair_raw_dir(workspace_root),
     "\{workspace_root}/raw/repair",
   )
   assert_eq(
@@ -11,7 +11,7 @@ test "planbook repair paths centralize durable workspace layout" {
     "planbook-repair-live-runtime-recovery",
   )
   assert_eq(
-    planbook_repair_context_relative_path(),
+    @planbook_policy.repair_context_relative_path(),
     "raw/repair/PLANBOOK_REPAIR_CONTEXT.md",
   )
   assert_eq(
@@ -19,11 +19,11 @@ test "planbook repair paths centralize durable workspace layout" {
     "raw/repair/repair-result.md",
   )
   assert_eq(
-    planbook_repair_skill_relative_path(),
+    @planbook_policy.repair_skill_relative_path(),
     "skills/planbook-repair/SKILL.md",
   )
   assert_eq(
-    planbook_repair_plan_relative_path(),
+    @planbook_policy.repair_plan_relative_path(),
     "plans/self-healing-repair/plan.md",
   )
   assert_eq(
@@ -114,7 +114,7 @@ test "planbook repair result contract accepts structured non-accepted decisions"
 test "planbook repair result helpers classify decisions and evidence markers" {
   let criterion_id = "live-runtime-recovery"
   let receipt : Json = {
-    "contract": planbook_repair_patch_receipt_contract(),
+    "contract": @planbook_policy.repair_patch_receipt_contract(),
     "criterion_id": criterion_id,
     "source_root": planbook_repair_source_root(),
     "execution_mode": "acp",
@@ -143,7 +143,7 @@ test "planbook repair result helpers classify decisions and evidence markers" {
     "commit_status: committed",
     "commit_message: Repair live runtime",
     "push_status: not_pushed_by_policy",
-    planbook_repair_patch_receipt_text(receipt),
+    @planbook_policy.repair_patch_receipt_text(receipt),
   ].join("\n")
   let marker_only_accepted = [
     "repair_decision: accepted",
@@ -165,72 +165,96 @@ test "planbook repair result helpers classify decisions and evidence markers" {
     "criterion_id: live-runtime-recovery", "repair_decision: no_change",
   ].join("\n")
   assert_true(
-    planbook_repair_result_mentions_criterion(accepted, "live-runtime-recovery"),
+    @planbook_policy.repair_result_mentions_criterion(
+      accepted, "live-runtime-recovery",
+    ),
   )
-  assert_true(planbook_repair_result_has_accepted_decision(accepted))
-  assert_true(planbook_repair_result_has_external_owner_decision(handoff))
-  assert_true(planbook_repair_result_has_blocked_decision(blocked))
-  assert_true(planbook_repair_result_has_no_change_decision(no_change))
-  assert_true(planbook_repair_result_has_handoff_decision(handoff))
-  assert_true(planbook_repair_result_has_handoff_decision(blocked))
-  assert_true(!planbook_repair_result_has_handoff_decision(no_change))
-  assert_true(planbook_repair_result_has_engineering_evidence(accepted))
+  assert_true(@planbook_policy.repair_result_has_accepted_decision(accepted))
   assert_true(
-    !planbook_repair_result_has_engineering_evidence(marker_only_accepted),
+    @planbook_policy.repair_result_has_external_owner_decision(handoff),
+  )
+  assert_true(@planbook_policy.repair_result_has_blocked_decision(blocked))
+  assert_true(@planbook_policy.repair_result_has_no_change_decision(no_change))
+  assert_true(@planbook_policy.repair_result_has_handoff_decision(handoff))
+  assert_true(@planbook_policy.repair_result_has_handoff_decision(blocked))
+  assert_true(!@planbook_policy.repair_result_has_handoff_decision(no_change))
+  assert_true(@planbook_policy.repair_result_has_engineering_evidence(accepted))
+  assert_true(
+    !@planbook_policy.repair_result_has_engineering_evidence(
+      marker_only_accepted,
+    ),
   )
   assert_eq(
-    planbook_repair_result_engineering_evidence_markers().join("|"),
+    @planbook_policy.repair_result_engineering_evidence_markers().join("|"),
     "validation:|diff_summary:|plan_update_status:|commit_status:|commit_message:|push_status:",
   )
 }
 
 ///|
 test "planbook repair run status predicates centralize moonclaw lifecycle mapping" {
-  assert_eq(planbook_repair_moonclaw_status_bucket(Some("Pending")), "pending")
-  assert_eq(planbook_repair_moonclaw_status_bucket(Some("Running")), "running")
+  assert_eq(@planbook_policy.moonclaw_status_bucket(Some("Pending")), "pending")
+  assert_eq(@planbook_policy.moonclaw_status_bucket(Some("Running")), "running")
   assert_eq(
-    planbook_repair_moonclaw_status_bucket(Some("WaitingForInput")),
+    @planbook_policy.moonclaw_status_bucket(Some("WaitingForInput")),
     "running",
   )
   assert_eq(
-    planbook_repair_moonclaw_status_bucket(Some("Succeeded")),
+    @planbook_policy.moonclaw_status_bucket(Some("Succeeded")),
     "succeeded",
   )
   assert_eq(
-    planbook_repair_moonclaw_status_bucket(Some("Failed")),
+    @planbook_policy.moonclaw_status_bucket(Some("Failed")),
     "failed-terminal",
   )
   assert_eq(
-    planbook_repair_moonclaw_status_bucket(Some("Cancelled")),
+    @planbook_policy.moonclaw_status_bucket(Some("Cancelled")),
     "failed-terminal",
   )
-  assert_eq(planbook_repair_moonclaw_status_bucket(Some("Unknown")), "unknown")
-  assert_eq(planbook_repair_moonclaw_status_bucket(None), "unknown")
-  assert_true(planbook_repair_moonclaw_status_is_pending("Pending"))
-  assert_true(!planbook_repair_moonclaw_status_is_pending("Running"))
-  assert_true(planbook_repair_moonclaw_status_is_running("Running"))
-  assert_true(planbook_repair_moonclaw_status_is_running("WaitingForInput"))
-  assert_true(!planbook_repair_moonclaw_status_is_running("Succeeded"))
-  assert_true(planbook_repair_moonclaw_status_is_succeeded("Succeeded"))
-  assert_true(!planbook_repair_moonclaw_status_is_succeeded("Running"))
-  assert_true(planbook_repair_moonclaw_status_is_failed_terminal("Failed"))
-  assert_true(planbook_repair_moonclaw_status_is_failed_terminal("Cancelled"))
-  assert_true(!planbook_repair_moonclaw_status_is_failed_terminal("Succeeded"))
-  assert_true(planbook_repair_moonclaw_status_needs_live_runner("Pending"))
-  assert_true(planbook_repair_moonclaw_status_needs_live_runner("Running"))
+  assert_eq(@planbook_policy.moonclaw_status_bucket(Some("Unknown")), "unknown")
+  assert_eq(@planbook_policy.moonclaw_status_bucket(None), "unknown")
+  assert_true(@planbook_policy.moonclaw_status_is_pending("Pending"))
+  assert_true(!@planbook_policy.moonclaw_status_is_pending("Running"))
+  assert_true(@planbook_policy.moonclaw_status_is_running("Running"))
+  assert_true(@planbook_policy.moonclaw_status_is_running("WaitingForInput"))
+  assert_true(!@planbook_policy.moonclaw_status_is_running("Succeeded"))
+  assert_true(@planbook_policy.moonclaw_status_is_succeeded("Succeeded"))
+  assert_true(!@planbook_policy.moonclaw_status_is_succeeded("Running"))
+  assert_true(@planbook_policy.moonclaw_status_is_failed_terminal("Failed"))
+  assert_true(@planbook_policy.moonclaw_status_is_failed_terminal("Cancelled"))
+  assert_true(!@planbook_policy.moonclaw_status_is_failed_terminal("Succeeded"))
+  assert_true(@planbook_policy.moonclaw_status_needs_live_runner("Pending"))
+  assert_true(@planbook_policy.moonclaw_status_needs_live_runner("Running"))
   assert_true(
-    planbook_repair_moonclaw_status_needs_live_runner("WaitingForInput"),
+    @planbook_policy.moonclaw_status_needs_live_runner("WaitingForInput"),
   )
-  assert_true(!planbook_repair_moonclaw_status_needs_live_runner("Succeeded"))
-  assert_eq(planbook_task_status_from_run_status(Some("Pending")), "dispatched")
-  assert_eq(planbook_task_status_from_run_status(Some("Running")), "running")
+  assert_true(!@planbook_policy.moonclaw_status_needs_live_runner("Succeeded"))
   assert_eq(
-    planbook_task_status_from_run_status(Some("WaitingForInput")),
+    @planbook_policy.task_status_from_run_status(Some("Pending")),
+    "dispatched",
+  )
+  assert_eq(
+    @planbook_policy.task_status_from_run_status(Some("Running")),
     "running",
   )
-  assert_eq(planbook_task_status_from_run_status(Some("Succeeded")), "failed")
-  assert_eq(planbook_task_status_from_run_status(Some("Failed")), "failed")
-  assert_eq(planbook_task_status_from_run_status(Some("Cancelled")), "failed")
-  assert_eq(planbook_task_status_from_run_status(Some("Unknown")), "dispatched")
-  assert_eq(planbook_task_status_from_run_status(None), "dispatched")
+  assert_eq(
+    @planbook_policy.task_status_from_run_status(Some("WaitingForInput")),
+    "running",
+  )
+  assert_eq(
+    @planbook_policy.task_status_from_run_status(Some("Succeeded")),
+    "failed",
+  )
+  assert_eq(
+    @planbook_policy.task_status_from_run_status(Some("Failed")),
+    "failed",
+  )
+  assert_eq(
+    @planbook_policy.task_status_from_run_status(Some("Cancelled")),
+    "failed",
+  )
+  assert_eq(
+    @planbook_policy.task_status_from_run_status(Some("Unknown")),
+    "dispatched",
+  )
+  assert_eq(@planbook_policy.task_status_from_run_status(None), "dispatched")
 }

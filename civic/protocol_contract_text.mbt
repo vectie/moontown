@@ -1,0 +1,36 @@
+///|
+pub fn building_protocol_markdown(
+  protocol : BuildingProtocolDefinition,
+) -> String {
+  [
+    "# \{protocol.title} Building Protocol",
+    "",
+    protocol.social_responsibility,
+    "",
+    "## Protocol",
+    "",
+    "- Building: `\{protocol.building_id}`",
+    "- Mode: `\{protocol.protocol_mode}`",
+    "- Book: `\{protocol.book_id}`",
+    "- MoonBook role: `\{protocol.moonbook_role}`",
+    "- Projection contract: `\{protocol.projection_contract}`",
+    "",
+    "## Input Channels",
+    "",
+    markdown_bullets(protocol.input_channels),
+    "",
+    "## Output Channels",
+    "",
+    markdown_bullets(protocol.output_channels),
+    "",
+    "## Review Gates",
+    "",
+    markdown_bullets(protocol.review_gates),
+    "",
+    "## AI Reducer Boundary",
+    "",
+    "- Moontown owns the envelope, channels, ledgers, idempotency, and review gates.",
+    "- MoonClaw chooses the building-native reduction strategy through the skill packs.",
+    "- MoonBook persists accepted civic records and review queues.",
+  ].join("\n")
+}

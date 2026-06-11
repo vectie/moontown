@@ -19,7 +19,10 @@ fn standing_watch_recovery_context(
   execution : @core.TaskExecutionRecord,
 ) -> StandingWatchRecoveryContext? {
   let goal = match
-    standing_goal_for_execution_task(standing_goals, execution.task_id) {
+    @standing_watch_policy.standing_goal_for_execution_task(
+      standing_goals,
+      execution.task_id,
+    ) {
     Some(goal) => goal
     None => return None
   }

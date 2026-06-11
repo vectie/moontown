@@ -113,16 +113,21 @@ async fn planbook_source_patch_loop_criterion(
   let repair_workspace_file = "planbook_repair_workspace.mbt"
   let profile_file = "planbook_repair_profile.mbt"
   let acp_file = "planbook_repair_acp.mbt"
+  let codex_target_file = "adapters/codex/targets.mbt"
+  let codex_defaults_file = "adapters/codex/defaults.mbt"
   let acp_ready = text_file_contains(
       repair_workspace_file, "write_planbook_repair_acp_target",
     ) &&
     text_file_contains(profile_file, "execution_mode=\"acp\"") &&
-    text_file_contains(profile_file, "execution_target=Some(\"codex-main\")") &&
+    text_file_contains(profile_file, "@codex.codex_main_target_id()") &&
     text_file_contains(profile_file, "tool_access=\"codex-acp-repo-patch\"") &&
-    text_file_contains(acp_file, "\"cwd\": source_root") &&
-    text_file_contains(acp_file, "codex-main")
+    text_file_contains(acp_file, "@codex.upsert_codex_main_target_json") &&
+    text_file_contains(acp_file, "source_root") &&
+    text_file_contains(codex_target_file, "codex_main_target_json") &&
+    text_file_contains(codex_target_file, "\"codex-main\"") &&
+    text_file_contains(codex_defaults_file, "\"--model\"")
   let skill_ready = text_file_contains(
-    "planbook_repair_request_rules.mbt", "Codex ACP source-patching target",
+    "planbook_policy/request_rules.mbt", "Codex ACP source-patching target",
   )
   let receipt_ready = planbook_latest_repair_patch_receipt_ready(workspace_root)
   planbook_criterion(
@@ -132,9 +137,9 @@ async fn planbook_source_patch_loop_criterion(
     "moontown+moonclaw+codex-acp",
     acp_ready && skill_ready && receipt_ready,
     if acp_ready && skill_ready && receipt_ready {
-      "PlanBook repair has accepted `\{planbook_repair_patch_receipt_contract()}` evidence from a Codex ACP source-root patch run"
+      "PlanBook repair has accepted `\{@planbook_policy.repair_patch_receipt_contract()}` evidence from a Codex ACP source-root patch run"
     } else if acp_ready && skill_ready {
-      "PlanBook repair ACP wiring exists, but no accepted `\{planbook_repair_patch_receipt_contract()}` source patch receipt has been consumed yet"
+      "PlanBook repair ACP wiring exists, but no accepted `\{@planbook_policy.repair_patch_receipt_contract()}` source patch receipt has been consumed yet"
     } else {
       "PlanBook repair still cannot prove a source-patching ACP route; it may only plan or validate without editing repository code"
     },
@@ -148,7 +153,8 @@ async fn planbook_engineering_loop_criterion(
 ) -> PlanbookCriterionStatus {
   let metadata_file = "planbook_repair_packet_metadata.mbt"
   let policy_file = "planbook_repair_policy.mbt"
-  let skill_file = "planbook_repair_skill_page.mbt"
+  let policy_package_file = "planbook_policy/repair_commands.mbt"
+  let skill_file = "planbook_policy/skill_text.mbt"
   let metadata_ready = text_file_contains(
       metadata_file, "required_engineering_steps",
     ) &&
@@ -162,8 +168,8 @@ async fn planbook_engineering_loop_criterion(
   let validation_ready = text_file_contains(
       policy_file, "planbook_repair_required_commands",
     ) &&
-    text_file_contains(policy_file, "moon test --no-render") &&
-    text_file_contains(policy_file, "moon info")
+    text_file_contains(policy_package_file, "moon test --no-render") &&
+    text_file_contains(policy_package_file, "moon info")
   let receipt_ready = planbook_latest_repair_patch_receipt_ready(workspace_root)
   planbook_criterion(
     "planbook-software-engineering-loop",

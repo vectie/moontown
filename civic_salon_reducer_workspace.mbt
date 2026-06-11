@@ -7,7 +7,7 @@ async fn write_civic_salon_reducer_workspace(
 ) -> Unit {
   write_text_file(
     "\{root}/skills/\{scenario.skill_name}/SKILL.md",
-    civic_salon_reducer_skill_text(scenario),
+    @civic.salon_reducer_skill_text(scenario),
   )
   write_text_file(
     "\{root}/raw/bootstrap/civic-salon-participants.json",
@@ -15,11 +15,11 @@ async fn write_civic_salon_reducer_workspace(
   )
   write_text_file(
     "\{root}/raw/bootstrap/civic-salon-reducer-input.md",
-    civic_salon_reducer_input_markdown(scenario, round_id, round_number),
+    @civic.salon_reducer_input_markdown(scenario, round_id, round_number),
   )
   write_text_file(
     "\{root}/raw/bootstrap/civic-salon-reducer-contract.md",
-    civic_salon_reducer_contract_markdown(scenario),
+    @civic.salon_reducer_contract_markdown(scenario),
   )
   write_text_file(
     "\{root}/moonclaw.jobs.json",
@@ -42,7 +42,7 @@ async fn merged_civic_salon_reducer_profile_json(
 
 ///|
 fn civic_salon_reducer_profile_json(scenario : CivicSalonScenario) -> Json {
-  let pattern = civic_salon_pattern_for_scenario(scenario)
+  let pattern = @civic.salon_pattern_for_scenario(scenario)
   {
     "family": "civic_salon_reducer_worker",
     "role": "worker",
@@ -78,7 +78,7 @@ fn civic_salon_reducer_prompt_template() -> String {
 ///|
 fn civic_salon_reducer_step_metadata(
   scenario : CivicSalonScenario,
-  pattern : CivicCommunicationPattern,
+  pattern : @civic.CivicCommunicationPattern,
 ) -> Json {
   let fields = moonclaw_step_metadata_fields(
     preferred_skills=[scenario.skill_name],
@@ -95,7 +95,7 @@ fn civic_salon_reducer_step_metadata(
 
 ///|
 fn civic_salon_reducer_role_runtime(
-  pattern : CivicCommunicationPattern,
+  pattern : @civic.CivicCommunicationPattern,
 ) -> Json {
   {
     "planning_layer": "domain",

@@ -44,7 +44,9 @@ pub async fn inspect_daemon_runtime(
       let now = @env.now()
       let heartbeat_stale = state.is_stale(now, stale_after_ms)
       let heartbeat_fresh = !heartbeat_stale
-      let runtime_active = daemon_runtime_status_active(state.status)
+      let runtime_active = @daemon_runtime_policy.daemon_runtime_status_active(
+        state.status,
+      )
       let supervisor_alive = daemon_pid_effectively_alive(
         daemon_pid_alive(state.supervisor_pid),
         state.supervisor_pid,
@@ -59,12 +61,16 @@ pub async fn inspect_daemon_runtime(
       )
       let stale = heartbeat_stale ||
         (
-          daemon_runtime_status_requires_worker(state.status) &&
+          @daemon_runtime_policy.daemon_runtime_status_requires_worker(
+            state.status,
+          ) &&
           state.worker_pid > 0 &&
           !worker_alive
         ) ||
         (
-          daemon_runtime_status_requires_supervisor(state.status) &&
+          @daemon_runtime_policy.daemon_runtime_status_requires_supervisor(
+            state.status,
+          ) &&
           state.supervisor_pid > 0 &&
           !supervisor_alive
         )

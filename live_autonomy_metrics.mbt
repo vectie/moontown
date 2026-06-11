@@ -11,9 +11,7 @@ fn count_live_workers(state : @core.TownState) -> Int {
 
 ///|
 fn worker_is_live(worker : @core.WorkerRef) -> Bool {
-  worker.status == @core.WorkerStatus::Running ||
-  worker.status == @core.WorkerStatus::Waiting ||
-  worker.status == @core.WorkerStatus::Blocked
+  @live_autonomy_policy.worker_is_live(worker)
 }
 
 ///|
@@ -23,21 +21,7 @@ fn count_live_activity(state : @core.TownState) -> Int {
 
 ///|
 fn count_live_active_executions(state : @core.TownState) -> Int {
-  count_live_executions(state, active_execution_statuses())
-}
-
-///|
-fn count_live_executions(
-  state : @core.TownState,
-  statuses : Array[@core.TaskExecutionStatus],
-) -> Int {
-  let mut count = 0
-  for execution in state.executions {
-    if execution_status_in(execution.status, statuses) {
-      count += 1
-    }
-  }
-  count
+  @live_autonomy_policy.count_live_active_executions(state)
 }
 
 ///|
@@ -55,16 +39,10 @@ fn count_transient_infrastructure_debt(state : @core.TownState) -> Int {
 fn execution_is_transient_infrastructure_debt(
   execution : @core.TaskExecutionRecord,
 ) -> Bool {
-  execution.result_decision == "deferred-transient-infrastructure"
+  @live_autonomy_policy.execution_is_transient_infrastructure_debt(execution)
 }
 
 ///|
 fn live_autonomy_tick(state : @core.TownState) -> Int {
-  let mut tick = state.events.length()
-  for execution in state.executions {
-    if execution.heartbeat_tick > tick {
-      tick = execution.heartbeat_tick
-    }
-  }
-  tick
+  @live_autonomy_policy.live_autonomy_tick(state)
 }

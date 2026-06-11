@@ -1,5 +1,17 @@
 import {
   "vectie/moontown/core",
+  "vectie/moontown/skill_quality",
+  "vectie/moontown/book_quality",
+  "vectie/moontown/book_templates",
+  "vectie/moontown/app_tool_book",
+  "vectie/moontown/editor_pipeline",
+  "vectie/moontown/planbook_policy",
+  "vectie/moontown/standing_watch_policy",
+  "vectie/moontown/live_autonomy_policy",
+  "vectie/moontown/runtime_status_policy",
+  "vectie/moontown/daemon_runtime_policy",
+  "vectie/moontown/runtime_error_policy",
+  "vectie/moontown/adapters/codex",
   "vectie/moontown/adapters/moonbook",
   "vectie/moontown/adapters/moonclaw",
   "vectie/moontown/civic",
@@ -19,3 +31,7 @@ import {
   "moonbitlang/x/sys",
   "moonbitlang/x/path",
 }
+
+import {
+  "vectie/moontown/policy",
+} for "wbtest"

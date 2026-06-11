@@ -36,7 +36,7 @@ fn editor_feature_rater_profile_json(workspace_root : String) -> Json {
             "editor-feature-rater", "course-builder", "code-plan",
           ],
           execution_mode="local",
-          output_contract=editor_feature_selection_result_contract(),
+          output_contract=@editor_pipeline.feature_selection_result_contract(),
           source_root=planbook_repair_source_root(),
           target_files=editor_feature_selection_target_files(),
           target_pages=[editor_feature_selection_result_path(workspace_root)],

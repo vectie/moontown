@@ -20,9 +20,15 @@ async fn standing_watch_book_decision_summary(
   if history.trim().is_blank() {
     None
   } else {
-    match standing_watch_history_decision_summary_for_task(history, task_id) {
+    match
+      @standing_watch_policy.standing_watch_history_decision_summary_for_task(
+        history, task_id,
+      ) {
       Some(summary) => Some(summary)
-      None => standing_watch_latest_provider_decision_summary(history)
+      None =>
+        @standing_watch_policy.standing_watch_latest_provider_decision_summary(
+          history,
+        )
     }
   }
 }
@@ -32,7 +38,7 @@ async fn collapse_standing_watch_book_history(
   entry : @moonbook.BookCatalogEntry,
   execution : @core.TaskExecutionRecord,
 ) -> Unit {
-  let provider_id = standing_watch_marker_value(
+  let provider_id = @standing_watch_policy.standing_watch_marker_value(
     execution.summary,
     "book_watch_record_id",
   ).unwrap_or("")
@@ -45,39 +51,10 @@ async fn collapse_standing_watch_book_history(
   if history.trim().is_blank() {
     return
   }
-  let collapsed = remove_standing_watch_history_block(history, provider_id)
+  let collapsed = @standing_watch_policy.remove_standing_watch_history_block(
+    history, provider_id,
+  )
   if collapsed != history {
     write_text_file(path, collapsed)
-  }
-}
-
-///|
-fn remove_standing_watch_history_block(
-  history : String,
-  block_id : String,
-) -> String {
-  let heading = "### \{block_id}"
-  let builder = StringBuilder::new()
-  let mut skipping = false
-  let mut removed = false
-  for raw in history.split("\n") {
-    let line = raw.to_owned()
-    if line.has_prefix("### ") {
-      if line.trim().to_owned() == heading {
-        skipping = true
-        removed = true
-        continue
-      }
-      skipping = false
-    }
-    if !skipping {
-      builder.write_string(line)
-      builder.write_char('\n')
-    }
-  }
-  if removed {
-    builder.to_string()
-  } else {
-    history
   }
 }

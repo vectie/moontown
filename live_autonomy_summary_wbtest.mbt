@@ -32,9 +32,24 @@ test "live autonomy summary metrics are grouped by subsystem" {
 
 ///|
 test "live autonomy stable waiting streak advances only while stable" {
-  assert_eq(next_live_autonomy_stable_waiting_observation_streak(true, 0), 1)
-  assert_eq(next_live_autonomy_stable_waiting_observation_streak(true, 4), 5)
-  assert_eq(next_live_autonomy_stable_waiting_observation_streak(false, 4), 0)
+  assert_eq(
+    @live_autonomy_policy.next_live_autonomy_stable_waiting_observation_streak(
+      true, 0,
+    ),
+    1,
+  )
+  assert_eq(
+    @live_autonomy_policy.next_live_autonomy_stable_waiting_observation_streak(
+      true, 4,
+    ),
+    5,
+  )
+  assert_eq(
+    @live_autonomy_policy.next_live_autonomy_stable_waiting_observation_streak(
+      false, 4,
+    ),
+    0,
+  )
 }
 
 ///|
@@ -51,11 +66,17 @@ test "live autonomy waiting state owns blocker and streak rules" {
     disabled_standing_goals: 0,
     due_goals: 0,
   }
-  let stable = live_autonomy_waiting_state(metrics, 0, 0, 0, 0, 2)
+  let stable = @live_autonomy_policy.live_autonomy_waiting_state(
+    live_autonomy_blocker_context(metrics, 0, 0, 0, 0),
+    2,
+  )
   assert_true(stable.stable_waiting)
   assert_eq(stable.stable_waiting_observation_streak, 3)
   assert_true(stable.stable_waiting_blockers.is_empty())
-  let blocked = live_autonomy_waiting_state(metrics, 1, 0, 0, 0, 2)
+  let blocked = @live_autonomy_policy.live_autonomy_waiting_state(
+    live_autonomy_blocker_context(metrics, 1, 0, 0, 0),
+    2,
+  )
   assert_false(blocked.stable_waiting)
   assert_eq(blocked.stable_waiting_observation_streak, 0)
   assert_true(blocked.stable_waiting_blockers.contains("PlanBook open gaps: 1"))

@@ -11,7 +11,7 @@ async test "book quality status separates current success from historical failed
     "\{result_dir}/wenyu-contest-express.md",
     Some("proposal-old"),
     Some("run-old"),
-    book_quality_review_run_orphaned_status(),
+    @book_quality.review_run_orphaned_status(),
     "Marked orphaned by Book Quality reconciliation because no result artifact was produced.",
     1UL,
   )
@@ -19,7 +19,7 @@ async test "book quality status separates current success from historical failed
     old_run,
     proposal_id=Some("proposal-current"),
     run_id=Some("run-current"),
-    status=Some(book_quality_review_run_written_status()),
+    status=Some(@book_quality.review_run_written_status()),
     summary=Some(
       "Harvested MoonClaw AI semantic review result from run-current.",
     ),
@@ -79,7 +79,7 @@ async test "book quality status treats inactive smoke current rows as historical
     "\{result_dir}/research-llm.md",
     Some("proposal-llm"),
     Some("run-llm"),
-    book_quality_review_run_written_status(),
+    @book_quality.review_run_written_status(),
     "Harvested MoonClaw AI semantic review result from run-llm.",
     1UL,
   )
@@ -89,7 +89,7 @@ async test "book quality status treats inactive smoke current rows as historical
     "\{result_dir}/codex-smoke-pdf-watch.md",
     Some("proposal-smoke"),
     Some("run-smoke"),
-    book_quality_review_run_written_status(),
+    @book_quality.review_run_written_status(),
     "Smoke review result should remain audit trail, not active status.",
     2UL,
   )

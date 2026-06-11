@@ -38,6 +38,6 @@ async fn BookTemplateInstaller::install_config(
         book_catalog_path~,
         standing_goal_path~,
       )
-    id => "Book template `\{id}` is registered but has no installer yet."
+    id => @book_templates.registered_without_installer_summary(id)
   }
 }

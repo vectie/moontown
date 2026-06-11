@@ -27,7 +27,10 @@ test "planbook repair result contract rejects best-effort timeout placeholders" 
       criterion_id,
     ),
   )
-  assert_eq(planbook_task_status_from_run_status(Some("Succeeded")), "failed")
+  assert_eq(
+    @planbook_policy.task_status_from_run_status(Some("Succeeded")),
+    "failed",
+  )
 }
 
 ///|
@@ -43,7 +46,7 @@ fn planbook_test_valid_patch_receipt(
   run_id? : String = "run-1",
 ) -> Json {
   {
-    "contract": planbook_repair_patch_receipt_contract(),
+    "contract": @planbook_policy.repair_patch_receipt_contract(),
     "criterion_id": criterion_id,
     "source_root": planbook_repair_source_root(),
     "execution_mode": "acp",
@@ -79,7 +82,7 @@ test "planbook repair result contract accepts structural patch receipt evidence"
     "push_status: not_pushed_by_policy",
     "remaining_blockers: none",
     "cookbook_impact: none",
-    planbook_repair_patch_receipt_text(receipt),
+    @planbook_policy.repair_patch_receipt_text(receipt),
   ].join("\n")
   assert_true(planbook_repair_result_satisfies_contract(text, criterion_id))
 }

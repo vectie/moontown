@@ -71,7 +71,7 @@ pub async fn daemon_supervise_saved_town(
       )
       latest = "worker started pid=\{pid}"
     } else {
-      latest = daemon_runtime_health_summary(health)
+      latest = @daemon_runtime_policy.daemon_runtime_health_summary(health)
     }
     checks += 1
     if max_checks > 0 && checks >= max_checks {

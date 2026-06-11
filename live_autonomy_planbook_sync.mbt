@@ -66,17 +66,18 @@ async fn synced_live_autonomy_waiting_state(
   planbook_open : Int,
   planbook_repair_active : Int,
 ) -> LiveAutonomySyncedWaitingState {
-  let stable_waiting_blockers = live_autonomy_stable_waiting_blockers_for({
-    active_workers: spine.active_worker_count,
-    review: spine.review_count,
-    blocked: spine.blocked_count,
-    failed: spine.failed_count,
-    due_goals: spine.due_goal_count,
-    planbook_open,
-    planbook_repair_active,
-    pending_book_template_requests: spine.pending_book_template_request_count,
-    failed_book_template_requests: spine.failed_book_template_request_count,
-  })
+  let stable_waiting_blockers = @live_autonomy_policy.live_autonomy_stable_waiting_blockers_for({
+      active_workers: spine.active_worker_count,
+      review: spine.review_count,
+      blocked: spine.blocked_count,
+      failed: spine.failed_count,
+      due_goals: spine.due_goal_count,
+      planbook_open,
+      planbook_repair_active,
+      pending_book_template_requests: spine.pending_book_template_request_count,
+      failed_book_template_requests: spine.failed_book_template_request_count,
+    },
+  )
   let stable_waiting = stable_waiting_blockers.is_empty()
   {
     stable_waiting,
@@ -114,7 +115,7 @@ fn synced_live_autonomy_next_actions(
   planbook_open : Int,
   planbook_repair_active : Int,
 ) -> Array[String] {
-  live_autonomy_next_actions_for({
+  @live_autonomy_policy.live_autonomy_next_actions_for({
     blockers: {
       active_workers: spine.active_worker_count,
       review: spine.review_count,
@@ -126,7 +127,9 @@ fn synced_live_autonomy_next_actions(
       pending_book_template_requests: spine.pending_book_template_request_count,
       failed_book_template_requests: spine.failed_book_template_request_count,
     },
-    watcher_records,
+    latest_watcher_decision: live_autonomy_latest_watcher_decision(
+      watcher_records,
+    ),
     transient_infrastructure_debt: spine.transient_infrastructure_debt_count,
   })
 }

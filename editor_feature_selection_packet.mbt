@@ -10,7 +10,7 @@ fn editor_feature_selection_packet(
     summary="AI-rated feature selection from the existing Wenyu game-design course book.",
     request_text=editor_feature_selection_request_text(result_path),
     profile="editor_feature_rater",
-    output_contract=editor_feature_selection_result_contract(),
+    output_contract=@editor_pipeline.feature_selection_result_contract(),
     context_pages=[
       editor_feature_selection_context_path(workspace_root),
       editor_feature_selection_current_evidence_path(workspace_root),
@@ -45,7 +45,7 @@ fn editor_feature_selection_step_metadata(result_path : String) -> Json {
   let fields = moonclaw_execution_metadata_fields(
     preferred_skills=["editor-feature-rater", "course-builder", "code-plan"],
     execution_mode="local",
-    output_contract=editor_feature_selection_result_contract(),
+    output_contract=@editor_pipeline.feature_selection_result_contract(),
   )
   add_planbook_bounded_wait_policy(fields)
   fields["kind"] = "editor_feature_selection".to_json()

@@ -141,7 +141,7 @@ test "standing watch recovery decision trusts terminal marker over failed status
     status=@core.TaskExecutionStatus::Failed,
   )
   assert_eq(
-    standing_watch_decision_from_execution(execution),
+    @standing_watch_policy.standing_watch_decision_from_execution(execution),
     @core.WatcherDecisionKind::Failed,
   )
   assert_eq(

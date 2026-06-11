@@ -8,8 +8,8 @@ fn civic_salon_building_projection_json(
   round_id : String,
   round_number : Int,
 ) -> String {
-  let pattern = civic_salon_pattern_for_scenario(scenario)
-  let pattern_label = civic_salon_pattern_label(scenario)
+  let pattern = @civic.salon_pattern_for_scenario(scenario)
+  let pattern_label = @civic.salon_pattern_label(scenario)
   let highlights : Array[String] = [
     "Round \{round_number}: \{round_id}",
     "\{participants.length()} internal participant perspectives joined the round",

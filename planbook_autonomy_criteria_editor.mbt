@@ -58,7 +58,7 @@ async fn planbook_editor_feature_selection_criterion(
     "moontown+planbook+moonclaw",
     ready,
     editor_feature_selection_evidence(workspace_root~),
-    "run `moon run cmd/main -- editor-pipeline feature-select --dispatch`, then verify `raw/editor-pipeline/next-feature.json` satisfies `\{editor_feature_selection_result_contract()}`",
+    "run `moon run cmd/main -- editor-pipeline feature-select --dispatch`, then verify `raw/editor-pipeline/next-feature.json` satisfies `\{@editor_pipeline.feature_selection_result_contract()}`",
   )
 }
 

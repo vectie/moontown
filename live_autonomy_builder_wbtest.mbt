@@ -108,13 +108,13 @@ test "live autonomy builder maps metrics into blocker and action contexts" {
     disabled_standing_goals: 9,
     due_goals: 10,
   }
-  let blockers = live_autonomy_stable_waiting_blockers_for(
+  let blockers = @live_autonomy_policy.live_autonomy_stable_waiting_blockers_for(
     live_autonomy_blocker_context(metrics, 11, 12, 13, 14),
   )
   assert_true(blockers.contains("active workers or executions: 1"))
   assert_true(blockers.contains("PlanBook open gaps: 11"))
   assert_true(blockers.contains("failed book-template requests: 14"))
-  let actions = live_autonomy_next_actions_for(
+  let actions = @live_autonomy_policy.live_autonomy_next_actions_for(
     live_autonomy_action_context(metrics, [], 11, 0, 13, 0),
   )
   assert_true(

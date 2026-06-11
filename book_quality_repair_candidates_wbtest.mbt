@@ -4,10 +4,10 @@ async test "book quality repair bridge candidate only accepts weak semantic revi
     "/tmp/moontown-book-quality-bridge-candidate-wbtest",
   )
   let result_dir = "\{root}/book-quality/ai-review-results"
-  let score = BookQualityScore::{
+  let score = @book_quality.BookQualityScore::{
     book_id: "research-robotics",
     title: "Robotics",
-    book_type: book_quality_research_type(),
+    book_type: @book_quality.research_type(),
     workspace_root: "\{root}/books/research-robotics",
     structural_score: 77,
     structural_grade: "usable",
@@ -25,7 +25,7 @@ async test "book quality repair bridge candidate only accepts weak semantic revi
   write_book_quality_ai_review_result_fixture(
     result_dir,
     score.book_id,
-    semantic_quality_ready_threshold(),
+    @book_quality.semantic_ready_threshold(),
     grade="usable",
     next_repair_task="should not queue",
   )
@@ -33,7 +33,7 @@ async test "book quality repair bridge candidate only accepts weak semantic revi
   write_book_quality_ai_review_result_fixture(
     result_dir,
     score.book_id,
-    semantic_quality_ready_threshold() - 1,
+    @book_quality.semantic_ready_threshold() - 1,
     grade="usable",
   )
   match book_quality_repair_bridge_candidate(score, result_dir) {
@@ -41,7 +41,7 @@ async test "book quality repair bridge candidate only accepts weak semantic revi
       assert_eq(candidate.item.book_id, "research-robotics")
       assert_eq(
         candidate.item.semantic_score,
-        semantic_quality_ready_threshold() - 1,
+        @book_quality.semantic_ready_threshold() - 1,
       )
       assert_eq(candidate.item.repair_owner, "moonbook")
       assert_eq(candidate.item.next_repair_task, "improve source synthesis")
@@ -59,12 +59,12 @@ async test "book quality repair bridge applies only repairable weak candidates" 
   let result_dir = "\{root}/results"
   let repairable = book_quality_score_fixture(
     "research-robotics",
-    book_quality_research_type(),
+    @book_quality.research_type(),
     "\{root}/books/research-robotics",
   )
   let archived = book_quality_score_fixture(
     "archived-research",
-    book_quality_research_type(),
+    @book_quality.research_type(),
     "\{root}/books/archived-research",
   )
   for book_id in ["research-robotics", "archived-research"] {
@@ -91,6 +91,6 @@ async test "book quality repair bridge applies only repairable weak candidates" 
     ),
   )
   assert_eq(goals.length(), 1)
-  assert_eq(goals[0].id, book_quality_repair_goal_id("research-robotics"))
+  assert_eq(goals[0].id, @book_quality.repair_goal_id("research-robotics"))
   assert_eq(goals[0].next_due_tick, 13)
 }

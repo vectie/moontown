@@ -5,7 +5,9 @@ async fn standing_watch_observed_for_auto_triage(
   snapshot_path : String,
 ) -> @core.TaskExecutionRecord {
   let observed = standing_watch_execution_with_book_decision(entry, execution)
-  let decision = standing_watch_decision_from_execution(observed)
+  let decision = @standing_watch_policy.standing_watch_decision_from_execution(
+    observed,
+  )
   if decision != @core.WatcherDecisionKind::NeedsReview {
     return observed
   }
@@ -35,7 +37,10 @@ async fn standing_watch_no_change_summary_from_book_result(
   if result.requires_review || !result.memory_candidates.is_empty() {
     return None
   }
-  if standing_watch_marker_decision(result.summary.to_lower()) != None {
+  if @standing_watch_policy.standing_watch_marker_decision(
+      result.summary.to_lower(),
+    ) !=
+    None {
     return None
   }
   if !result.summary.contains("Workflow completed") {

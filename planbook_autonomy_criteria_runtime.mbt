@@ -32,7 +32,12 @@ async fn planbook_runtime_book_quality_coverage_criterion(
       let active_runtime_books : Array[@moonbook.BookCatalogEntry] = []
       for book in snapshot.town.books {
         let entry = book_quality_catalog_entry_from_runtime_book(book)
-        if book_quality_active_catalog_entry(entry) {
+        if @book_quality.catalog_entry_active(
+            entry.id,
+            entry.name,
+            entry.purpose,
+            entry.tags,
+          ) {
           active_runtime_books.push(entry)
           if !audit.scores.any(fn(score) { score.book_id == book.id }) {
             missing.push(book.id)

@@ -1,29 +1,4 @@
 ///|
-fn standing_goal_for_execution_task(
-  goals : Array[@core.StandingGoal],
-  task_id : String,
-) -> @core.StandingGoal? {
-  for goal in goals {
-    match standing_watch_tick_for_goal_task(goal, task_id) {
-      Some(_) => return Some(goal)
-      None => ()
-    }
-  }
-  None
-}
-
-///|
-fn standing_watch_tick_for_goal_task(
-  goal : @core.StandingGoal,
-  task_id : String,
-) -> Int? {
-  let prefix = "standing-\{compact_watch_segment(goal.id)}-tick-"
-  if task_id.has_prefix(prefix) {
-    first_non_negative_int(task_id[prefix.length():].to_owned())
-  } else {
-    None
-  }
-}
 
 ///|
 fn standing_watch_record_already_exists(

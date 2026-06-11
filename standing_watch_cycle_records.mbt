@@ -41,7 +41,9 @@ async fn record_completed_standing_watch_cycle(
   execution : @core.TaskExecutionRecord,
   previous_no_change_streak : Int,
 ) -> @core.StandingGoal {
-  let decision = standing_watch_decision_from_execution(execution)
+  let decision = @standing_watch_policy.standing_watch_decision_from_execution(
+    execution,
+  )
   let next_no_change_streak = if decision == @core.WatcherDecisionKind::NoChange {
     previous_no_change_streak + 1
   } else {
@@ -57,8 +59,10 @@ async fn record_completed_standing_watch_cycle(
     execution.summary,
     task_id=Some(execution.task_id),
     run_id=execution.run_id,
-    delta_score=standing_watch_delta_score(execution),
-    new_source_count=standing_watch_new_source_count(execution),
+    delta_score=@standing_watch_policy.standing_watch_delta_score(execution),
+    new_source_count=@standing_watch_policy.standing_watch_new_source_count(
+      execution,
+    ),
     no_change_streak=next_no_change_streak,
   )
 }

@@ -1,6 +1,8 @@
 ///|
 test "civic reducer skill names map-reduce role reduction rules and contract" {
-  let text = civic_salon_reducer_skill_text(civic_reducer_skill_test_scenario())
+  let text = @civic.salon_reducer_skill_text(
+    civic_reducer_skill_test_scenario(),
+  )
   assert_true(text.contains("agentic map-reduce place"))
   assert_true(text.contains("## Reduction Rules"))
   assert_true(text.contains("Read every participant"))
@@ -13,13 +15,15 @@ test "civic reducer skill names map-reduce role reduction rules and contract" {
 
 ///|
 test "civic reducer skill examples distinguish good research service and poor output" {
-  let examples = civic_salon_reducer_concrete_examples()
-  assert_true(examples.contains("robotics research salon"))
-  assert_true(examples.contains("world-model uncertainty"))
-  assert_true(examples.contains("policy triage desk"))
-  assert_true(examples.contains("official-source extraction plus review"))
-  assert_true(examples.contains("A poor output merely says"))
-  assert_true(examples.contains("checkable follow-up question"))
+  let text = @civic.salon_reducer_skill_text(
+    civic_reducer_skill_test_scenario(),
+  )
+  assert_true(text.contains("robotics research salon"))
+  assert_true(text.contains("world-model uncertainty"))
+  assert_true(text.contains("policy triage desk"))
+  assert_true(text.contains("official-source extraction plus review"))
+  assert_true(text.contains("A poor output merely says"))
+  assert_true(text.contains("checkable follow-up question"))
 }
 
 ///|

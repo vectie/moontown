@@ -5,10 +5,11 @@ test "acp target upsert preserves existing targets" {
   ) catch {
     _ => fail("expected base config to parse")
   }
-  let next = upsert_acp_target_json(base, "codex-main", {
-    "backend": "codex",
-    "label": "Codex",
-  })
+  let next = @codex.upsert_acp_target_json(
+    base,
+    @codex.codex_main_target_id(),
+    { "backend": "codex", "label": "Codex" },
+  )
   let text = next.stringify()
   assert_true(text.contains("\"existing\":{\"backend\":\"noop\"}"))
   assert_true(
@@ -39,43 +40,6 @@ test "moonclaw job profile upsert preserves existing profiles" {
 }
 
 ///|
-test "agent default upsert preserves existing defaults" {
-  let base = @json.parse(
-    "{\"agents\":{\"defaults\":{\"model\":\"gpt-5\"}},\"keep\":\"yes\"}",
-  ) catch {
-    _ => fail("expected base config to parse")
-  }
-  let next = upsert_agent_default_json(
-    base,
-    "workspace",
-    "/tmp/moontown".to_json(),
-  )
-  let text = next.stringify()
-  assert_true(text.contains("\"model\":\"gpt-5\""))
-  assert_true(text.contains("\"workspace\":\"/tmp/moontown\""))
-  assert_true(text.contains("\"keep\":\"yes\""))
-}
-
-///|
-test "agent defaults and acp target helpers compose without clobbering sections" {
-  let with_default = upsert_agent_default_json(
-    Json::object({}),
-    "workspace",
-    "/tmp/book".to_json(),
-  )
-  let next = upsert_acp_target_json(with_default, "builder", {
-    "backend": "codex",
-  })
-  let text = next.stringify()
-  assert_true(
-    text.contains("\"agents\":{\"defaults\":{\"workspace\":\"/tmp/book\"}}"),
-  )
-  assert_true(
-    text.contains("\"acp\":{\"targets\":{\"builder\":{\"backend\":\"codex\"}}}"),
-  )
-}
-
-///|
 test "moonclaw no-input policy helper emits both nonblocking flags" {
   let text = moonclaw_no_input_policy_json().stringify()
   assert_true(text.contains("\"disable_waiting_for_input\":true"))
@@ -93,7 +57,7 @@ test "moonclaw execution metadata fields include target and no-input policy" {
   let fields = moonclaw_execution_metadata_fields(
     preferred_skills=["planbook-repair", "code-review"],
     execution_mode="acp",
-    execution_target=Some("codex-main"),
+    execution_target=Some(@codex.codex_main_target_id()),
     output_contract="moontown.planbook.repair.v1",
   )
   let text = Json::object(fields).stringify()

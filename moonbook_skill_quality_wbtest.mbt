@@ -1,17 +1,7 @@
 ///|
 fn assert_moonbook_skill_quality(label : String, text : String) -> Unit raise {
   ignore(label)
-  assert_true(moonbook_skill_quality_is_strong(text))
-}
-
-///|
-test "MoonBook skill quality contract exposes simple metrics" {
-  let text = moonbook_skill_quality_contract_section()
-  assert_true(moonbook_skill_quality_has_depth(text))
-  assert_true(moonbook_skill_quality_has_breadth(text))
-  assert_true(moonbook_skill_quality_generates_questions(text))
-  assert_true(moonbook_skill_quality_generates_directions(text))
-  assert_true(moonbook_skill_quality_prefers_meaningful_length(text))
+  assert_true(@skill_quality.exploration_quality_contract_is_strong(text))
 }
 
 ///|
@@ -29,11 +19,14 @@ test "Moontown generated skill templates keep exploration quality" {
   assert_moonbook_skill_quality("doc-sync", doc_sync_skill_markdown())
   assert_moonbook_skill_quality(
     "planbook-repair",
-    planbook_repair_skill_markdown(),
+    @planbook_policy.repair_skill_markdown(),
   )
   assert_moonbook_skill_quality(
     "operational-keeper",
-    default_operational_skill("Operations Book"),
+    @book_quality.operational_skill(
+      "Operations Book",
+      @skill_quality.exploration_quality_contract_section(),
+    ),
   )
   assert_moonbook_skill_quality(
     "course-builder",
@@ -45,15 +38,15 @@ test "Moontown generated skill templates keep exploration quality" {
   )
   assert_moonbook_skill_quality(
     "editor-feature-rater",
-    editor_feature_rater_skill_markdown(),
+    @editor_pipeline.feature_rater_skill_markdown(),
   )
   assert_moonbook_skill_quality(
     "wenyu-civic-service",
-    wenyu_civic_service_skill_text(),
+    @civic.wenyu_civic_service_skill_text(),
   )
   assert_moonbook_skill_quality(
     "wenyu-civic-module",
-    civic_module_skill_text(service),
+    @civic.civic_module_skill_text(service),
   )
   assert_moonbook_skill_quality("wenyu-build", wenyu_build_skill_text(entry))
   assert_moonbook_skill_quality(

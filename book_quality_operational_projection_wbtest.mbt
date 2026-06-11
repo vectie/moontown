@@ -1,8 +1,10 @@
 ///|
 test "default operational UI state renders valid projection JSON" {
   let entry = operational_projection_test_entry()
-  let text = default_operational_ui_state(
-    entry, "Ops <Book>", "Keeps review memory & operating boundaries.",
+  let text = @book_quality.operational_ui_state(
+    entry.id,
+    "Ops <Book>",
+    "Keeps review memory & operating boundaries.",
   )
   let parsed = @json.parse(text) catch {
     _ => abort("default operational UI state should be valid JSON")
@@ -21,8 +23,10 @@ test "default operational site escapes title summary and workspace path" {
   let entry = operational_projection_test_entry(
     workspace_root="/tmp/moontown/<ops>",
   )
-  let html = default_operational_site(
-    entry, "Ops <Book>", "Keeps review memory & operating boundaries.",
+  let html = @book_quality.operational_site(
+    entry.workspace_root,
+    "Ops <Book>",
+    "Keeps review memory & operating boundaries.",
   )
   assert_true(html.has_prefix("<!doctype html><html><head>"))
   assert_true(html.contains("<style>"))

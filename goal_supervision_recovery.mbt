@@ -8,7 +8,9 @@ async fn reconcile_transient_dependency_failures(
   let snapshot = state.executions.copy()
   for execution in snapshot {
     if !transient_dependency_reconcilable_status(execution.status) ||
-      !transient_external_dependency_error(execution.summary) {
+      !@runtime_error_policy.transient_external_dependency_error(
+        execution.summary,
+      ) {
       continue
     }
     let completed = copy_execution_with(

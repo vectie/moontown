@@ -29,7 +29,9 @@ test "editor feature rater profile uses shared prompt and bounded metadata" {
   assert_true(profile.contains("\"prompt_template\""))
   assert_true(profile.contains("CURRENT_UI_EVIDENCE.md"))
   assert_true(profile.contains("FEATURE_SELECTION_CONTEXT.md"))
-  assert_true(profile.contains(editor_feature_selection_result_contract()))
+  assert_true(
+    profile.contains(@editor_pipeline.feature_selection_result_contract()),
+  )
   assert_true(profile.contains("\"runtime_mode\":\"bounded-selection\""))
   assert_true(profile.contains("\"planning_layer\":\"town-self-build\""))
   assert_true(profile.contains("\"editor-feature-rater\""))

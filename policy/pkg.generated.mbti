@@ -1,0 +1,139 @@
+// Generated using `moon info`, DON'T EDIT IT
+package "vectie/moontown/policy"
+
+import {
+  "moonbitlang/core/debug",
+  "moonbitlang/core/json",
+}
+
+// Values
+pub fn civic_protocol() -> BookPolicy
+
+pub fn cookbook() -> BookPolicy
+
+pub fn course() -> BookPolicy
+
+pub fn evaluate_health(BookPolicy, Int, Int?, Array[String]) -> PolicyHealth
+
+pub fn execute_skills(BookPolicy) -> Array[SkillSpec]
+
+pub fn file(String, Bool, String) -> FileSpec
+
+pub fn general() -> BookPolicy
+
+pub fn has_skill(BookPolicy, String) -> Bool
+
+pub fn loop_markdown(BookPolicy) -> String
+
+pub fn loop_plan(BookPolicy) -> BookLoopPlan
+
+pub fn markdown(BookPolicy) -> String
+
+pub fn new(Array[SkillSpec], Array[FileSpec], QualityCriteria, OutputSpec) -> BookPolicy
+
+pub fn operational() -> BookPolicy
+
+pub fn output(String, String, String) -> OutputSpec
+
+pub fn output_contract(BookPolicy) -> String
+
+pub fn output_projection_path(BookPolicy) -> String
+
+pub fn output_surface(BookPolicy) -> String
+
+pub fn planbook() -> BookPolicy
+
+pub fn quality(Int, Int, Bool, String) -> QualityCriteria
+
+pub fn required_file_paths(BookPolicy) -> Array[String]
+
+pub fn required_file_specs(BookPolicy) -> Array[FileSpec]
+
+pub fn research() -> BookPolicy
+
+pub fn skill(String, String, String, String) -> SkillSpec
+
+pub fn skill_specs(BookPolicy) -> Array[SkillSpec]
+
+pub fn tend_skills(BookPolicy) -> Array[SkillSpec]
+
+pub fn with_file(BookPolicy, FileSpec) -> BookPolicy
+
+pub fn with_output(BookPolicy, OutputSpec) -> BookPolicy
+
+pub fn with_pdf_watch(BookPolicy) -> BookPolicy
+
+pub fn with_quality(BookPolicy, QualityCriteria) -> BookPolicy
+
+pub fn with_skill(BookPolicy, SkillSpec) -> BookPolicy
+
+pub fn with_standing_watch(BookPolicy) -> BookPolicy
+
+pub fn with_web_tool_surface(BookPolicy, contract? : String, projection_path? : String) -> BookPolicy
+
+// Errors
+
+// Types and methods
+pub struct BookLoopPlan {
+  steps : Array[BookLoopStep]
+  execute_step_count : Int
+  tend_step_count : Int
+  required_record_contract : String
+  health_gate : String
+} derive(Eq, ToJson, @debug.Debug, @json.FromJson)
+
+pub struct BookLoopStep {
+  order : Int
+  phase : String
+  lane : String
+  subject : String
+  summary : String
+} derive(Eq, ToJson, @debug.Debug, @json.FromJson)
+
+pub struct BookPolicy {
+  skills : Array[SkillSpec]
+  required_files : Array[FileSpec]
+  quality_criteria : QualityCriteria
+  output : OutputSpec
+} derive(Eq, ToJson, @debug.Debug, @json.FromJson)
+
+pub struct FileSpec {
+  path : String
+  required : Bool
+  purpose : String
+} derive(Eq, ToJson, @debug.Debug, @json.FromJson)
+
+pub struct OutputSpec {
+  surface : String
+  contract : String
+  projection_path : String
+} derive(Eq, ToJson, @debug.Debug, @json.FromJson)
+
+pub struct PolicyHealth {
+  structural_score : Int
+  semantic_score : Int?
+  missing_required_files : Array[String]
+  execute_skill_count : Int
+  tend_skill_count : Int
+  ready : Bool
+  status : String
+} derive(Eq, ToJson, @debug.Debug, @json.FromJson)
+
+pub struct QualityCriteria {
+  threshold : Int
+  semantic_threshold : Int
+  review_required : Bool
+  description : String
+} derive(Eq, ToJson, @debug.Debug, @json.FromJson)
+
+pub struct SkillSpec {
+  id : String
+  lane : String
+  cadence : String
+  purpose : String
+} derive(Eq, ToJson, @debug.Debug, @json.FromJson)
+
+// Type aliases
+
+// Traits
+

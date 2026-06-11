@@ -71,7 +71,7 @@ async fn run_daemon_scheduled_job(
     "book-template-request" =>
       Some(
         process_book_template_requests(
-          request_path=default_book_template_request_path(snapshot_path~),
+          request_path=@book_templates.request_path_for_snapshot(snapshot_path),
           book_catalog_path~,
           tick~,
         ),

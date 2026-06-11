@@ -7,6 +7,8 @@ import {
 }
 
 // Values
+pub fn count_health_anomalies_by_title(HealthReport, String) -> Int
+
 pub fn inspect_town(@core.TownState) -> HealthReport
 
 pub fn recovery_actions(HealthReport) -> Array[RecoveryAction]

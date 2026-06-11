@@ -1,0 +1,207 @@
+// Generated using `moon info`, DON'T EDIT IT
+package "vectie/moontown/book_templates"
+
+import {
+  "moonbitlang/core/debug",
+  "moonbitlang/core/json",
+}
+
+// Values
+pub async fn append_request_event(String, BookTemplateRequestEvent) -> Unit
+
+pub fn append_request_event_text(String, BookTemplateRequestEvent) -> String
+
+pub fn decode_request_event_line(String) -> BookTemplateRequestEvent?
+
+pub fn default_registry_path() -> String
+
+pub fn descriptor_check_paths(BookTemplateDescriptor) -> Array[String]
+
+pub fn empty_request_status(request_path~ : String, event_path~ : String) -> BookTemplateRequestStatus
+
+pub fn find_registry_descriptor(Array[BookTemplateDescriptor], String) -> BookTemplateDescriptor?
+
+pub async fn inspect_registry(registry_path? : String) -> BookTemplateRegistry
+
+pub fn install_status_for_summary(String) -> String
+
+pub fn install_success_marker() -> String
+
+pub fn install_summary_success(String) -> Bool
+
+pub async fn latest_request_event_summary(String) -> String
+
+pub fn latest_request_event_summary_from_lines(Array[String]) -> String
+
+pub async fn load_request_event_lines(String) -> Array[String]
+
+pub async fn load_request_event_request_ids(String) -> Array[String]
+
+pub async fn load_request_ledger(String) -> BookTemplateRequestLedger
+
+pub fn registered_without_installer_summary(String) -> String
+
+pub fn registry_from_observed(registry_path~ : String, templates~ : Array[BookTemplateDescriptor], missing_paths~ : Array[String]) -> BookTemplateRegistry
+
+pub fn registry_ready(Array[BookTemplateDescriptor], Array[String]) -> Bool
+
+pub fn render_registry_markdown(BookTemplateRegistry) -> String
+
+pub fn render_request_process_summary(BookTemplateRequestLedger, processed~ : Int, reconciled_events~ : Int) -> String
+
+pub fn render_request_process_summary_with_counts(processed~ : Int, reconciled_events~ : Int, counts~ : BookTemplateRequestStatusCounts) -> String
+
+pub fn render_request_status_markdown(BookTemplateRequestStatus, BookTemplateRequestLedger) -> String
+
+pub fn request_after_install_result(BookTemplateRequest, String, String, Int) -> BookTemplateRequest
+
+pub fn request_event(BookTemplateRequest, Int, UInt64, id~ : String) -> BookTemplateRequestEvent
+
+pub fn request_event_file_name() -> String
+
+pub fn request_event_id(String, Int, UInt64) -> String
+
+pub fn request_event_lines_from_text(String) -> Array[String]
+
+pub fn request_event_path_for_request(String) -> String
+
+pub fn request_event_request_ids_from_lines(Array[String]) -> Array[String]
+
+pub fn request_event_summary(BookTemplateRequestEvent) -> String
+
+pub fn request_file_name() -> String
+
+pub fn request_needs_event_reconcile(BookTemplateRequest, Array[String]) -> Bool
+
+pub fn request_path_for_snapshot(String) -> String
+
+pub fn request_process_result(BookTemplateRequest, processed~ : Bool, reconciled_event~ : Bool) -> BookTemplateRequestProcessResult
+
+pub fn request_processing_outcome(Array[BookTemplateRequestProcessResult]) -> BookTemplateRequestProcessingOutcome
+
+pub fn request_reconcile_event_id(String, Int, UInt64) -> String
+
+pub fn request_runtime_counts(BookTemplateRequestStatus) -> BookTemplateRuntimeCounts
+
+pub fn request_status_counts(BookTemplateRequestLedger) -> BookTemplateRequestStatusCounts
+
+pub fn request_status_failed() -> String
+
+pub fn request_status_from_counts(request_path~ : String, event_path~ : String, counts~ : BookTemplateRequestStatusCounts, latest_event_summary~ : String) -> BookTemplateRequestStatus
+
+pub fn request_status_installed() -> String
+
+pub fn request_status_needs_event_reconcile(String) -> Bool
+
+pub fn request_status_pending() -> String
+
+pub fn request_status_ready(BookTemplateRequestStatusCounts) -> Bool
+
+pub fn request_status_retry() -> String
+
+pub fn request_status_should_install(String) -> Bool
+
+pub fn request_status_summary(BookTemplateRequestStatusCounts) -> String
+
+pub fn resolve_request_path(String, String) -> String
+
+pub async fn save_request_ledger(String, BookTemplateRequestLedger) -> Unit
+
+pub fn unknown_template_summary(String) -> String
+
+// Errors
+
+// Types and methods
+pub(all) struct BookTemplateDescriptor {
+  template_id : String
+  book_type : String
+  specialization : String
+  title : String
+  purpose : String
+  root : String
+  install_example : String
+  install_command : String
+  status_command : String
+  required_paths : Array[String]
+  editable_files : Array[String]
+} derive(Eq, ToJson, @debug.Debug, @json.FromJson)
+
+pub(all) struct BookTemplateRegistry {
+  registry_path : String
+  templates : Array[BookTemplateDescriptor]
+  missing_count : Int
+  missing_paths : Array[String]
+  ready : Bool
+} derive(Eq, ToJson, @debug.Debug, @json.FromJson)
+
+pub(all) struct BookTemplateRegistryFile {
+  templates : Array[BookTemplateDescriptor]
+} derive(Eq, ToJson, @debug.Debug, @json.FromJson)
+
+pub(all) struct BookTemplateRequest {
+  id : String
+  template_id : String
+  config_path : String
+  status : String
+  summary : String
+  last_processed_tick : Int
+} derive(Eq, ToJson, @debug.Debug, @json.FromJson)
+
+pub(all) struct BookTemplateRequestEvent {
+  id : String
+  request_id : String
+  template_id : String
+  status : String
+  config_path : String
+  summary : String
+  tick : Int
+  generated_at_ms : UInt64
+} derive(Eq, ToJson, @debug.Debug, @json.FromJson)
+
+pub(all) struct BookTemplateRequestLedger {
+  requests : Array[BookTemplateRequest]
+} derive(Eq, ToJson, @debug.Debug, @json.FromJson)
+
+pub(all) struct BookTemplateRequestProcessResult {
+  request : BookTemplateRequest
+  processed : Bool
+  reconciled_event : Bool
+} derive(Eq, @debug.Debug)
+
+pub(all) struct BookTemplateRequestProcessingOutcome {
+  ledger : BookTemplateRequestLedger
+  processed : Int
+  reconciled_events : Int
+} derive(Eq, @debug.Debug)
+
+pub(all) struct BookTemplateRequestStatus {
+  request_path : String
+  event_path : String
+  request_count : Int
+  pending_count : Int
+  installed_count : Int
+  failed_count : Int
+  retry_count : Int
+  ready : Bool
+  summary : String
+  latest_event_summary : String
+} derive(Eq, ToJson, @debug.Debug, @json.FromJson)
+
+pub(all) struct BookTemplateRequestStatusCounts {
+  total : Int
+  pending : Int
+  installed : Int
+  failed : Int
+  retry : Int
+} derive(Eq, @debug.Debug)
+
+pub(all) struct BookTemplateRuntimeCounts {
+  total : Int
+  pending : Int
+  failed : Int
+} derive(Eq, @debug.Debug)
+
+// Type aliases
+
+// Traits
+

@@ -5,7 +5,7 @@ fn civic_salon_reducer_packet(
   round_id : String,
   round_number : Int,
 ) -> @moonclaw.ExternalProposalPacket {
-  let pattern = civic_salon_pattern_for_scenario(scenario)
+  let pattern = @civic.salon_pattern_for_scenario(scenario)
   @moonclaw.ExternalProposalPacket::new(
     packet_id~,
     title="Reduce \{scenario.title} round \{round_number}",
@@ -38,7 +38,7 @@ fn civic_salon_reducer_packet(
 ///|
 fn civic_salon_reducer_packet_metadata(
   scenario : CivicSalonScenario,
-  pattern : CivicCommunicationPattern,
+  pattern : @civic.CivicCommunicationPattern,
   round_id : String,
   round_number : Int,
 ) -> Json {
@@ -61,7 +61,7 @@ fn civic_salon_reducer_packet_metadata(
 ///|
 fn civic_salon_reducer_packet_step_metadata(
   scenario : CivicSalonScenario,
-  pattern : CivicCommunicationPattern,
+  pattern : @civic.CivicCommunicationPattern,
 ) -> Json {
   let fields : Map[String, Json] = {}
   fields["kind"] = "civic_salon_reducer".to_json()
@@ -78,7 +78,7 @@ fn civic_salon_reducer_request(
   round_id : String,
   round_number : Int,
 ) -> String {
-  let pattern = civic_salon_pattern_for_scenario(scenario)
+  let pattern = @civic.salon_pattern_for_scenario(scenario)
   [
     "You are the MoonClaw reducer for `\{scenario.title}` using the `\{pattern.title}` communication pattern.",
     "Round: `\{round_id}` (#\{round_number}).",

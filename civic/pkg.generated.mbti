@@ -9,9 +9,151 @@ import {
 }
 
 // Values
+pub fn building_protocol_contract_text(CivicServiceDefinition) -> String
+
+pub fn building_protocol_is_active(BuildingProtocolSnapshot) -> Bool
+
+pub fn building_protocol_is_blocked(BuildingProtocolSnapshot) -> Bool
+
+pub fn building_protocol_is_ready(BuildingProtocolSnapshot) -> Bool
+
+pub fn building_protocol_markdown(BuildingProtocolDefinition) -> String
+
+pub fn building_protocol_markdown_row(BuildingProtocolSnapshot) -> String
+
+pub fn building_protocol_needs_review(BuildingProtocolSnapshot) -> Bool
+
+pub fn building_protocol_portfolio(Array[BuildingProtocolSnapshot], String, String) -> BuildingProtocolPortfolio
+
+pub fn building_protocol_snapshot(BuildingProtocolDefinition, inbox_count~ : Int, contribution_count~ : Int, reduction_count~ : Int, outbox_count~ : Int, review_count~ : Int, latest_reduction_summary~ : String, latest_distribution_summary~ : String) -> BuildingProtocolSnapshot
+
+pub fn civic_communication_pattern_for_id(String) -> CivicCommunicationPattern?
+
+pub fn civic_communication_pattern_id_for_service(CivicServiceDefinition) -> String
+
+pub fn civic_communication_patterns() -> Array[CivicCommunicationPattern]
+
+pub fn civic_health_notes(operable~ : Bool, status~ : String, missing_required_paths~ : Array[String], latest_decision~ : String, latest_review_items~ : Int) -> Array[String]
+
+pub fn civic_module_skill_text(CivicServiceDefinition) -> String
+
+pub fn civic_salon_is_due(CivicSalonSchedule, UInt64) -> Bool
+
+pub fn civic_salon_metric_counts(Array[CivicSalonParticipantBook], Array[CivicSalonIdea]) -> CivicSalonMetricCounts
+
+pub fn civic_salon_metrics(CivicSalonScenario, Array[CivicSalonParticipantBook], Array[CivicSalonIdea]) -> CivicSalonMetric
+
+pub fn civic_salon_returned_ideas_for_book(String, Array[CivicSalonIdea]) -> Array[CivicSalonIdea]
+
+pub fn civic_salon_round_id(CivicSalonSchedule) -> String
+
+pub fn civic_salon_round_record(CivicSalonSchedule, String, Int, UInt64, UInt64, CivicSalonMetric, String, String) -> CivicSalonRoundRecord
+
+pub fn civic_service_has_reconcilable_protocol_work(protocol_ready~ : Bool, protocol_reduction_count~ : Int, protocol_outbox_count~ : Int) -> Bool
+
+pub fn civic_service_reconcile_plan(CivicServiceDefinition, protocol_reduction_count~ : Int, protocol_outbox_count~ : Int, protocol_review_count~ : Int) -> CivicServiceReconcilePlan
+
+pub fn civic_service_reconciled_artifacts_line(CivicServiceDefinition) -> String
+
+pub fn civic_service_reconciled_contract_block(CivicServiceReconcilePlan, protocol_reduction_count~ : Int, protocol_outbox_count~ : Int) -> String
+
+pub fn civic_service_reconciled_decision(protocol_reduction_count~ : Int, protocol_review_count~ : Int) -> String
+
+pub fn civic_service_reconciled_mode_line(CivicServiceDefinition) -> String
+
+pub fn civic_service_reconciled_narrative(CivicServiceDefinition) -> String
+
+pub fn civic_service_reconciled_page_count(CivicServiceDefinition, protocol_outbox_count~ : Int) -> Int
+
+pub fn civic_service_reconciled_protocol_summary(String) -> String
+
+pub fn civic_service_reconciled_result_is_current(latest_result_found~ : Bool, latest_decision~ : String, latest_pages_changed~ : Int, latest_review_items~ : Int, CivicServiceReconcilePlan) -> Bool
+
+pub fn civic_service_reconciled_summary(CivicServiceDefinition, latest_protocol_summary~ : String, protocol_reduction_count~ : Int, protocol_outbox_count~ : Int, CivicServiceReconcilePlan) -> String
+
+pub fn civic_service_result_is_proven(String) -> Bool
+
+pub fn civic_service_status_bucket(String) -> String
+
+pub fn civic_service_status_is_blocked(String) -> Bool
+
+pub fn civic_service_status_is_changed(String) -> Bool
+
+pub fn civic_service_status_is_missing_or_incomplete(String) -> Bool
+
+pub fn civic_service_status_is_no_change(String) -> Bool
+
+pub fn civic_service_status_is_review(String) -> Bool
+
+pub fn civic_service_status_is_seeded(String) -> Bool
+
+pub fn civic_service_status_label(workspace_exists~ : Bool, missing_required_paths~ : Array[String], skill_ready~ : Bool, moonclaw_profile_ready~ : Bool, latest_result_found~ : Bool, latest_decision~ : String, latest_review_items~ : Int) -> String
+
 pub fn civic_service_task_prompt(CivicServiceDefinition, String) -> String
 
+pub fn civic_status_note(String, String, Int) -> String?
+
+pub fn complete_civic_salon_schedule(CivicSalonSchedule, UInt64, String, String) -> CivicSalonSchedule
+
+pub fn exchange_ledger_text(CivicServiceDefinition) -> String
+
+pub fn incident_bridge_pattern() -> CivicCommunicationPattern
+
 pub fn is_wenyu_civic_book_id(String) -> Bool
+
+pub fn learning_cohort_pattern() -> CivicCommunicationPattern
+
+pub fn match_market_pattern() -> CivicCommunicationPattern
+
+pub fn protocol_status_is_ready(String) -> Bool
+
+pub fn protocol_status_label(inbox_count~ : Int, contribution_count~ : Int, reduction_count~ : Int, outbox_count~ : Int, review_count~ : Int) -> String
+
+pub fn research_salon_pattern() -> CivicCommunicationPattern
+
+pub fn review_council_pattern() -> CivicCommunicationPattern
+
+pub fn review_queue_text(CivicServiceDefinition, String) -> String
+
+pub fn salon_building_intro(CivicCommunicationPattern, BuildingProtocolDefinition) -> String
+
+pub fn salon_metrics_certification_note() -> String
+
+pub fn salon_participant_skill_text(CivicSalonScenario) -> String
+
+pub fn salon_pattern_for_scenario(CivicSalonScenario) -> CivicCommunicationPattern
+
+pub fn salon_pattern_id(CivicSalonScenario) -> String
+
+pub fn salon_pattern_label(CivicSalonScenario) -> String
+
+pub fn salon_protocol_for_scenario(CivicSalonScenario) -> BuildingProtocolDefinition
+
+pub fn salon_reducer_contract_markdown(CivicSalonScenario) -> String
+
+pub fn salon_reducer_input_markdown(CivicSalonScenario, String, Int) -> String
+
+pub fn salon_reducer_skill_text(CivicSalonScenario) -> String
+
+pub fn salon_return_home_contract_note(CivicSalonScenario) -> String
+
+pub fn salon_structural_metric_note() -> String
+
+pub fn schema_page_text(CivicServiceDefinition, String) -> String
+
+pub fn service_contract_text(@moonbook.BookCatalogEntry, CivicServiceDefinition, String) -> String
+
+pub fn service_history_text(CivicServiceDefinition) -> String
+
+pub fn service_ledger_text(CivicServiceDefinition) -> String
+
+pub fn service_skill_path(String, CivicServiceDefinition) -> String
+
+pub fn signal_watch_pattern() -> CivicCommunicationPattern
+
+pub fn story_forge_pattern() -> CivicCommunicationPattern
+
+pub fn triage_desk_pattern() -> CivicCommunicationPattern
 
 pub fn wenyu_building_protocol_for_book_id(String) -> BuildingProtocolDefinition?
 
@@ -27,9 +169,15 @@ pub fn wenyu_civic_service_for_book_id(String) -> CivicServiceDefinition?
 
 pub fn wenyu_civic_service_for_module_id(String) -> CivicServiceDefinition?
 
+pub fn wenyu_civic_service_skill_text() -> String
+
 pub fn wenyu_civic_service_task(CivicServiceDefinition, String) -> @moonbook.BookTask
 
 pub fn wenyu_civic_services() -> Array[CivicServiceDefinition]
+
+pub fn wiki_page_text(CivicServiceDefinition, String) -> String
+
+pub fn workspace_index_text(@moonbook.BookCatalogEntry, CivicServiceDefinition) -> String
 
 // Errors
 
@@ -154,6 +302,144 @@ pub(all) struct BuildingReviewGateRecord {
   owner : String
 } derive(Eq, ToJson, @debug.Debug, @json.FromJson)
 
+pub(all) struct CivicCommunicationPattern {
+  id : String
+  title : String
+  category : String
+  summary : String
+  protocol_mode : String
+  input_contract : String
+  reduction_contract : String
+  output_contract : String
+  review_contract : String
+  cadence_hint : String
+  good_for : Array[String]
+  civic_examples : Array[String]
+} derive(Eq, ToJson, @debug.Debug, @json.FromJson)
+
+pub(all) struct CivicSalonHomeReturn {
+  id : String
+  building_id : String
+  idea_id : String
+  target_book_id : String
+  target_path : String
+  summary : String
+  review_status : String
+} derive(Eq, ToJson, @debug.Debug, @json.FromJson)
+
+pub(all) struct CivicSalonIdea {
+  id : String
+  title : String
+  summary : String
+  participating_books : Array[String]
+  research_questions : Array[String]
+  why_it_matters : String
+  next_experiment : String
+} derive(Eq, ToJson, @debug.Debug, @json.FromJson)
+
+pub(all) struct CivicSalonMetric {
+  participant_count : Int
+  idea_count : Int
+  research_question_count : Int
+  participant_idea_links : Int
+  participating_book_coverage_count : Int
+  idea_return_home_count : Int
+  average_books_per_idea : String
+  structural_effectiveness_score : Int
+  summary : String
+} derive(Eq, ToJson, @debug.Debug, @json.FromJson)
+
+pub(all) struct CivicSalonMetricCounts {
+  participant_count : Int
+  idea_count : Int
+  research_question_count : Int
+  participant_idea_links : Int
+  participating_book_coverage_count : Int
+  idea_return_home_count : Int
+} derive(Eq, @debug.Debug)
+
+pub(all) struct CivicSalonParticipantBook {
+  book_id : String
+  title : String
+  focus_area : String
+  perspective : String
+  cadence : String
+  current_question : String
+  contribution : String
+  next_artifact : String
+} derive(Eq, ToJson, @debug.Debug, @json.FromJson)
+
+pub(all) enum CivicSalonReductionMode {
+  MoonClawReducer
+  PersistedReducer
+  FixtureReducer
+} derive(Eq, @debug.Debug)
+
+pub(all) struct CivicSalonRoundRecord {
+  id : String
+  salon_id : String
+  building_id : String
+  tick : Int
+  round_number : Int
+  started_ms : UInt64
+  finished_ms : UInt64
+  participant_count : Int
+  idea_count : Int
+  research_question_count : Int
+  participant_idea_links : Int
+  idea_return_home_count : Int
+  structural_effectiveness_score : Int
+  decision : String
+  summary : String
+} derive(Eq, ToJson, @debug.Debug, @json.FromJson)
+
+pub(all) struct CivicSalonScenario {
+  id : String
+  title : String
+  communication_pattern_id : String?
+  communication_pattern_label : String?
+  building_id : String
+  building_book_id : String
+  domain_label : String
+  topic : String
+  cadence : String
+  interval_ms : UInt64?
+  skill_name : String
+  skill_description : String
+  protocol_channel : String
+  reduction_kind : String
+  output_channel : String
+  review_gate : String
+  review_owner : String
+  review_reason : String
+  backlog_path : String
+  synthesis_path : String
+  metrics_path : String
+  review_path : String
+  returned_ideas_path : String
+  participant_contract_path : String
+  quality_rules : Array[String]
+  skill_rules : Array[String]
+  participants : Array[CivicSalonParticipantBook]
+  ideas : Array[CivicSalonIdea]
+} derive(Eq, ToJson, @debug.Debug, @json.FromJson)
+
+pub(all) struct CivicSalonSchedule {
+  id : String
+  title : String
+  building_id : String
+  topic : String
+  interval_ms : UInt64
+  participant_book_ids : Array[String]
+  enabled : Bool
+  last_run_ms : UInt64
+  next_due_ms : UInt64
+  round_count : Int
+  latest_round_id : String
+  latest_summary : String
+} derive(Eq, ToJson, @debug.Debug, @json.FromJson)
+pub fn CivicSalonSchedule::new(id~ : String, title~ : String, building_id~ : String, topic~ : String, interval_ms? : UInt64, participant_book_ids? : Array[String], enabled? : Bool, last_run_ms? : UInt64, next_due_ms? : UInt64, round_count? : Int, latest_round_id? : String, latest_summary? : String) -> Self
+
 pub struct CivicServiceDefinition {
   id : String
   title : String
@@ -178,6 +464,13 @@ pub struct CivicServiceDefinition {
   acceptance : Array[String]
   projection_summary : String
 } derive(Eq, @debug.Debug)
+
+pub(all) struct CivicServiceReconcilePlan {
+  decision : String
+  page_count : Int
+  review_items : Int
+  next_check_hint : String
+}
 
 // Type aliases
 

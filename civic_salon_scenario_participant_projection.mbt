@@ -52,7 +52,7 @@ fn civic_salon_participant_projection_status_chips(
   round_number : Int,
 ) -> Json {
   [
-    participant_projection_chip(civic_salon_pattern_label(scenario), "info"),
+    participant_projection_chip(@civic.salon_pattern_label(scenario), "info"),
     participant_projection_chip(scenario.cadence, "healthy"),
     participant_projection_chip("round \{round_number}", "info"),
     participant_projection_chip(

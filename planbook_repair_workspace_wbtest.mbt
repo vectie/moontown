@@ -52,7 +52,7 @@ test "planbook repair plan requires validation and ownership evidence" {
 
 ///|
 test "planbook repair skill exposes strict engineering result contract" {
-  let skill = planbook_repair_skill_markdown()
+  let skill = @planbook_policy.repair_skill_markdown()
   assert_true(skill.contains("name: planbook-repair"))
   assert_true(skill.contains("## Required Decision"))
   assert_true(skill.contains("repair_decision"))

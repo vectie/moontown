@@ -23,7 +23,7 @@ fn planbook_repair_request_header(
 
 ///|
 fn planbook_repair_request_task_section() -> String {
-  ["Task:", planbook_repair_request_task_rules().join("\n")].join("\n")
+  ["Task:", @planbook_policy.repair_request_task_rules().join("\n")].join("\n")
 }
 
 ///|

@@ -10,12 +10,12 @@ test "building protocol portfolio buckets use named protocol predicates" {
     review_count=1,
   )
   let blocked = test_protocol_snapshot(status="blocked")
-  assert_true(!building_protocol_is_active(defined))
-  assert_true(building_protocol_is_active(active))
-  assert_true(building_protocol_is_ready(review))
-  assert_true(building_protocol_needs_review(review))
-  assert_true(building_protocol_is_blocked(blocked))
-  let portfolio = building_protocol_portfolio(
+  assert_true(!@civic.building_protocol_is_active(defined))
+  assert_true(@civic.building_protocol_is_active(active))
+  assert_true(@civic.building_protocol_is_ready(review))
+  assert_true(@civic.building_protocol_needs_review(review))
+  assert_true(@civic.building_protocol_is_blocked(blocked))
+  let portfolio = @civic.building_protocol_portfolio(
     [defined, active, review, blocked],
     "/tmp/protocol-status.json",
     "/tmp/protocol-registry.json",
@@ -29,7 +29,7 @@ test "building protocol portfolio buckets use named protocol predicates" {
 
 ///|
 test "building protocol markdown row renders compact protocol evidence" {
-  let row = building_protocol_markdown_row(
+  let row = @civic.building_protocol_markdown_row(
     test_protocol_snapshot(
       status="review",
       ready=true,

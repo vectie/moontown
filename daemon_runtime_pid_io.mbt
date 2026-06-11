@@ -19,7 +19,7 @@ fn daemon_parse_positive_int(text : String) -> Int {
 
 ///|
 async fn daemon_current_process_pid(snapshot_path : String) -> Int {
-  let tmp_path = "\{daemon_base_dir(snapshot_path)}/daemon-current.pid.tmp"
+  let tmp_path = "\{@daemon_runtime_policy.daemon_base_dir_for_snapshot(snapshot_path)}/daemon-current.pid.tmp"
   ensure_parent_directory(tmp_path) catch {
     _ => return 0
   }
