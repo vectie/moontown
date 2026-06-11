@@ -126,8 +126,35 @@ Current files:
   projection.
 - `templates/civic-salons/robotics-mini-salon.json`: copyable scenario
   template proving new domains can be configured without MoonBit code.
-- `civic_communication_patterns.mbt`: reusable pattern registry and Wenyu
-  civic service-to-pattern mapping.
+- `civic/communication_pattern_registry.mbt`: reusable pattern registry and
+  Wenyu civic service-to-pattern mapping.
+- `civic/salon_scenario_types.mbt`: reusable salon scenario, participant, idea,
+  metric, reduction-mode, and home-return DTOs.
+- `civic/salon_scenario_policy.mbt`: reusable scenario pattern resolution,
+  pattern-label fallback, building-protocol derivation, and salon protocol
+  notes.
+- `civic/skill_text.mbt`: reusable generic civic service skill, module skill,
+  salon participant skill, and salon reducer skill/contract/input text.
+- `civic/workspace_text.mbt`: reusable civic workspace index, service
+  contract, building protocol contract, schema/wiki/review seed pages, and
+  service/exchange/history ledger text.
+- `civic/salon_metrics.mbt`: reusable structural effectiveness and
+  return-home metric calculation for communication-pattern rounds.
+- `civic/salon_schedule_types.mbt` and `civic/salon_schedule_policy.mbt`:
+  reusable schedule/round-record vocabulary and pure transition helpers.
+- `civic/status_labels.mbt`: reusable service/protocol status labels, buckets,
+  readiness checks, result-proven checks, and health-note semantics.
+- `civic/service_reconcile_policy.mbt`: reusable civic service reconciliation
+  decision/accounting/current-result/reconcilable-work/result-contract wording
+  for converting protocol ledgers into MoonBook service results.
+- `civic/protocol_contract_text.mbt`: reusable building protocol contract
+  Markdown text for protocol ledger directories.
+- `civic/protocol_portfolio.mbt`: reusable protocol portfolio bucket
+  predicates, count aggregation, and compact Markdown row rendering.
+- `civic/protocol_snapshot.mbt`: reusable snapshot construction from protocol
+  definition plus observed ledger counts/summaries.
+- `civic_communication_patterns.mbt`: root compatibility facade for rendering
+  and existing CLI/tests; it must stay thin.
 
 Current extension rule:
 
@@ -149,6 +176,143 @@ Goals:
   `civic/workspace`, `civic/protocol_runtime`, and `civic/salon`
 - leave root-package wrapper functions for CLI compatibility
 - reduce root `pkg.generated.mbti` to high-level public facade APIs
+- keep reusable civic communication patterns in `civic/`; root may only adapt
+  them into runtime scenario artifacts
+- keep reusable scenario DTOs in `civic/`; root may keep aliases during the
+  package split, but should not define new scenario record shapes
+- keep reusable scenario pattern/protocol derivation in `civic/`; root may
+  load templates and persist pages, but should not manually build those
+  protocol contracts
+- keep civic skill text contracts in `civic/`; root may write `SKILL.md` files
+  and reducer contract files, but should not assemble civic service/reducer
+  skill text locally
+- keep civic workspace seed text in `civic/`; root may select paths and write
+  files, but should not assemble service contracts, building protocol
+  contracts, schema/wiki/review seeds, or civic ledger templates locally
+- keep communication-pattern metric semantics in `civic/`; root may persist,
+  render, or dispatch against metrics but should not compute them independently
+- keep schedule DTOs and pure transitions in `civic/`; root may store,
+  claim/retry, and run schedules but should not define schedule vocabulary
+- keep civic service/protocol status semantics in `civic/`; root may inspect
+  files and render status, but should not define independent status buckets or
+  readiness checks
+- keep building-protocol portfolio semantics in `civic/`; root may inspect
+  ledgers and write status files, but should not define bucket predicates,
+  aggregate counts, or row formatting
+- keep building-protocol contract text in `civic/`; root may write contract
+  files beside ledgers, but should not assemble reusable protocol contract
+  Markdown locally
+- keep building-protocol snapshot construction in `civic/`; root may count
+  ledger records and read latest summaries, but should not assemble
+  `BuildingProtocolSnapshot` records directly
+- keep civic service reconciliation policy in `civic/`; root may build and
+  persist MoonBook results from observed health, but should not define decision
+  vocabulary, accounting, current-result checks, reconcilable-work gates, or
+  result-contract wording
+- keep editor pipeline DTOs, contract ids, skill policy, stage/status policy,
+  selected-style lookup, selected-feature readiness gates, module-placement
+  DTOs, movement-loop record policy, placement-diff record policy,
+  terrain-layer/reason record policy, canonical Markdown renderer, and style
+  metadata in `editor_pipeline/`; root may inspect source/runtime state,
+  materialize PlanBook files, dispatch packets, compute evidence paths, load
+  module JSON, convert config entries into package DTOs, and read results, but
+  should not define editor feature-selection contract ids, feature-rater skill
+  text, stage readiness decisions, status Markdown sections,
+  selected-style policy, selected-feature readiness gates,
+  module-placement policy, terrain-labeling policy, or reusable style metadata
+  locally, and should not keep root-local compatibility shims over those
+  package APIs
+- keep PlanBook self-repair DTOs, validation command policy, repair result
+  contracts, ACP patch-receipt validation, repair-decision semantics, and
+  MoonClaw run-status bucket policy in `planbook_policy/`; the same package
+  owns pure repair layout paths such as repair context/result filenames,
+  packet path derivation, skill/plan page paths, target pages, and MoonClaw
+  repair index paths, pure repair request task-rule wording, and generated
+  `planbook-repair` skill text; root may
+  resolve source roots, materialize repair files, dispatch MoonClaw/ACP packets,
+  read run outputs, and reconcile filesystem evidence, but should not duplicate
+  validation commands, receipt fields, repair paths, repair request rules,
+  generated repair skill text, repair decision vocabulary, or lifecycle status
+  mapping locally
+- keep live-autonomy spine DTOs, journal/probe DTOs, active worker/execution
+  metric policy, transient-infrastructure-debt recognition, autonomy tick
+  calculation, aggregate metric-count DTO/assembly, stable-waiting blocker
+  policy, waiting-streak progression, next-action wording, status
+  classification, canonical live-autonomy path derivation, and canonical
+  live-status Markdown rendering in
+  `live_autonomy_policy/`; root may refresh snapshots, persist journals and
+  digests, inspect health, read watcher ledgers, derive latest watcher
+  decisions, and sync PlanBook counts, but should not redefine "live", stable
+  waiting, transient debt, metric-count shape, live-autonomy file naming, or the
+  operator-facing autonomy surface
+- keep runtime-status DTOs, empty-status shape, effective execution
+  de-duplication, lifecycle ranking, active/review execution-status set
+  membership, standing-goal runtime counts, and stable metric-summary/report
+  rendering language in `runtime_status_policy/`; root and live-autonomy code
+  may load snapshots, daemon state, watcher records, standing goals, template
+  request inboxes, and root-only daemon health strings, but should not define
+  duplicate runtime status buckets, active/review status lists, standing-goal
+  runtime counts, summary wording, or operator report formatting
+- keep health anomaly detection and exact-title anomaly counts in `health/`;
+  runtime-status and live-autonomy code may consume `HealthReport` values, but
+  should not duplicate execution-failed, execution-stale, worker-health, or
+  future anomaly title counting semantics
+- keep daemon-runtime state/health DTOs, status-mode classification, heartbeat
+  staleness rules, durable-worker/supervisor predicates, doctor/start actions,
+  health labels, health summary field ordering, canonical daemon path
+  derivation, and pure daemon transition builders in `daemon_runtime_policy/`;
+  root may supply storage defaults, inspect PIDs, spawn/stop processes, persist
+  runtime files, manage PID/stop/restart files, and integrate launchd, but
+  should not define duplicate daemon runtime vocabulary, file naming,
+  transition semantics, or health interpretation
+- keep App ToolBook install/status DTOs, default identity, path/template-copy
+  policy, catalog name/tags/skills, catalog-identity-aware config construction,
+  config and manifest constructors, readiness gates, history Markdown, site
+  index HTML, generated tool HTML, status Markdown, bootstrap/install summary
+  wording, and standing-goal construction/list semantics in `app_tool_book/`;
+  root may load operator config JSON, resolve file overrides, inspect
+  filesystem/catalog/goal state, copy templates, write the package-rendered
+  files, adapt package identity into MoonBook catalog entries, and persist
+  standing goals, but should not define ToolBook schemas, catalog identity,
+  page/status renderers, bootstrap/install summary wording, standing-goal
+  semantics, path lists, or readiness policy locally, and should not keep
+  root-local default/config/manifest shims
+- keep generic standing-watch task construction, task kind, prompt/id contract,
+  compact id segment formatting, target pages, strict accounting markers,
+  marker parsing, MoonBook history block parsing, provider-decision collapse
+  policy, material-delta metrics, execution-summary classification,
+  effective watcher-record decision selection, terminal-record preference
+  ordering, and repair-mode appendix composition in `standing_watch_policy/`;
+  root may schedule, route, persist, read/write book history files, append
+  watcher ledgers, and reconcile watcher cycles, but should not own the
+  reusable standing-watch contract, parser, history collapse semantics,
+  accounting policy, no-change/update/deferred/review inference, or terminal
+  watcher-record selection
+- keep reusable transient external dependency classification in
+  `runtime_error_policy/`; root recovery, standing-watch, and PlanBook code may
+  consume it, but should not duplicate provider-infrastructure string
+  predicates locally
+- keep book-template install-success markers and lifecycle classification in
+  `book_templates/`; template installers may emit the package-owned success
+  marker, but request processing should not infer installed/failed state from
+  human-readable PDF/AppTool summary prose or carry raw pending/retry/installed/
+  failed status decisions outside package-owned predicates; request-status
+  readiness/summary construction and request inbox Markdown rendering are
+  package-owned too; registry descriptor and registry-file manifest schemas,
+  registry descriptor check-path expansion, descriptor lookup, registry
+  readiness, and registry Markdown rendering are package-owned as well;
+  request-event identity/DTO construction, event JSONL text normalization/
+  append format, event-line parsing, latest-event fallback, unique request-id
+  extraction, post-install request-state transitions, terminal-event reconcile
+  gates, process-result records, processed/reconciled outcome aggregation,
+  empty request-status construction, canonical request/event filenames, path
+  derivation, and summary wording are package-owned, with root event files and
+  concrete request execution remaining IO/orchestration only; root must not
+  keep default path shim functions for book-template registry, request inbox, or
+  request-event paths;
+  unknown-template and registered-without-installer outcome wording is
+  package-owned, while root installer dispatch remains concrete
+  IO/orchestration
 
 Acceptance:
 

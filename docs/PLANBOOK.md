@@ -58,6 +58,327 @@ section:
 If a plan cannot answer those questions, it is not ready for autonomous
 implementation.
 
+## BookPolicy Compass
+
+PlanBook should treat every future book feature as a policy change first, not
+as a new hardcoded book type.
+
+The policy model lives in the dedicated
+[policy](/Users/kq/Workspace/moontown/policy) package. New plans should import
+and compose that package directly. Root-level code may contain adapters from
+legacy labels to policy values, but it should not grow a parallel policy API.
+The same package owns the executable loop description through
+`loop_plan(policy)` and `loop_markdown(policy)`: read the policy, execute
+execute-lane skills, record results under the output contract, run tend-lane
+skills, and evaluate health. Future repair plans should reference that API
+instead of writing their own loop sequence into prompt text, review criteria, or
+status pages.
+
+The book-quality migration adapter lives in the dedicated
+[book_quality](/Users/kq/Workspace/moontown/book_quality) package. It owns the
+temporary mapping from legacy labels such as `research-book`, `course-book`, and
+`civic-protocol-support` into composed `BookPolicy` values and repair actions.
+It also owns catalog string/tag classification rules such as
+archived/transient and cookbook/planbook/course/research/civic/operational
+classification. It also owns book-quality path contract helpers such as
+workspace path composition, wiki index path, projection state path, generated
+site path, and review result path. It owns base workspace, per-path, and typed
+path-set score calculation and strength/gap wording too; root may observe which
+files exist or are missing, but it should pass that observation into
+`book_quality` assessment helpers instead of redefining scoring math. It also
+owns research word-count thresholds, course identity scoring, civic latest-result
+scoring, cookbook audit-link scoring, and generated-skill exploration quality
+contracts. Skill templates should call `@book_quality.skill_quality_*` helpers
+for depth, breadth, curiosity, judgment, long-horizon memory, and auditable
+progress requirements instead of defining root-local MoonBook skill predicates.
+Root may pass observed facts, but it
+should not own thresholds, point values, or note wording. Root may adapt MoonBook catalog entries into those classifier
+inputs, but it should not redefine the labels. It also owns the public
+audit/review DTOs: score records, audit summaries, review packets, review runs,
+and review run ledgers. It also owns semantic review packet templates:
+context-page selection, reviewer skill markdown, AI review output contract,
+packet construction, and packet-pack README rendering.
+Static profile scoring rules such as research/course/PlanBook/Cookbook/civic
+required-path lists are also package-owned data. Root scoring may check whether
+those paths exist in a workspace, but it should not define the profile lists.
+Root book-quality files may still orchestrate audits, write files, dispatch
+MoonClaw, and run repair bridges, but they should operate on
+`@book_quality.*` contracts instead of defining their own domain records or
+packet semantics. Review-run ledger paths, parsing, serialization, and append
+semantics are package-owned storage contracts; root code should only decide
+when to dispatch or reconcile. Accepted review result storage is package-owned
+too; root should not define the result path or accepted-result write helper.
+Review lifecycle vocabulary is also package
+owned: queued/dispatched/running/written/orphaned/blocked status names,
+bucket classification, terminal correction, stale-window math, accepted review
+transformations, review result paths, review-run construction, review
+reconciliation result DTOs, review ledger views, and Markdown rendering
+contracts belong to `book_quality/`, not root orchestration. Reconciliation
+record construction for unchanged runs and existing result files also belongs
+there; root code should observe files, fetch MoonClaw content, and ask the
+package to build the durable reconcile result. Repair bridge ledger/item schemas
+also belong to `book_quality/`; root code may translate those items into Mayor
+standing goals, but the durable book-quality repair record format should have
+one package owner. Structural and semantic
+assessment rules also belong there, so root scoring can assemble a score from
+workspace files without redefining what "strong", "ready", or "needs repair"
+means. AI review result parsing belongs there too; root code may read result
+files, but `book_quality/` defines how `ai_quality_score`, `repair_owner`, and
+`next_repair_task` are interpreted. Audit aggregation and Markdown rendering
+also belong there, so root commands write audit files without owning the report
+format. Semantic review candidate filtering and ordering also belong there:
+`book_quality/` decides which scores remain pending by inspecting semantic
+review result files through its package API, and it decides which pending
+book-quality score is weaker and should be reviewed first. Root orchestration
+should pass the audit and result directory, not construct completed-id lists.
+Review-status summary rendering, active-review counting/status policy,
+stale/orphan review reconciliation policy, and result-state wording also belong
+there; root may pass observed filesystem/process facts, but should not own the
+ledger summary language, duplicate-dispatch active count, orphaning rules, or
+the pending/written display decision. Semantic review profile policy
+also belongs there: profile id, execution target, preferred skills, and
+role-runtime envelope, MoonClaw jobs profile JSON, and packet step metadata are
+package-owned. The semantic-review ACP target JSON shape is package-owned too;
+root may pass the observed source root, resolved Codex command, args, and model,
+but it should not define the `codex-main` target schema or reviewer label.
+The transformation from a `BookQualityReviewPacket` into a MoonClaw external
+proposal packet is also package-owned; root should dispatch the returned packet
+instead of constructing packet ids, context page paths, skill paths, tags,
+notes, request text, or metadata itself.
+Root must resolve Codex ACP defaults through the `adapters/codex` boundary:
+`model()`, `command()`, `args()`, `moontown_args()`, reusable `codex-main`
+target JSON/upsert helpers, and target JSON builders.
+Do not hard-code separate Codex model strings in PlanBook, book-quality, Wenyu
+build, or future self-build profiles. The configured args must include
+`--model <model>` because MoonClaw exposes the model as launch metadata/env and
+does not automatically rewrite Codex CLI arguments.
+Book-quality's semantic-review ACP config builder enforces this by normalizing
+caller-provided args: if `--model` is missing it is appended, and if the flag is
+present with a stale value it is rewritten to the configured model. Future
+repair profiles should follow the same adapter-first model boundary rather than
+treating metadata-only model fields as executable proof.
+PlanBook source repair now uses the adapter-owned `codex-main` target builder,
+so future repair work should not reconstruct backend/label/cwd/workspace/
+command/args/model target JSON in root files.
+PlanBook source-repair policy lives in the dedicated
+[planbook_policy](/Users/kq/Workspace/moontown/planbook_policy) package. It
+owns the autonomy/repair DTOs, validation command list, repair result contract,
+repair decision vocabulary, engineering-evidence markers, ACP patch-receipt
+contract, MoonClaw status bucket mapping, and the pure repair workspace layout
+paths. That includes repair context/result filenames, packet path derivation,
+skill/plan page paths, target pages, and MoonClaw repair index paths. It also
+owns the repair request task-rule wording that tells workers how to load
+context, respect ownership boundaries, edit exact target files first, handle
+selected editor features, validate, inspect diffs, commit, avoid churn, update
+stale plans, complete backlog items, write results, and satisfy gates. It also
+owns the generated `planbook-repair` skill text because that text defines the
+worker contract, concrete example, accepted patch-receipt requirements, and
+no-churn rules. Root
+PlanBook code may still inspect workspaces, materialize repair files, dispatch
+MoonClaw packets, and read run outputs, but future plans should not add
+root-local copies of repair receipt fields, validation commands, repair paths,
+repair request rules, generated repair skill text, or run-status predicates.
+Live-autonomy policy lives in the dedicated
+[live_autonomy_policy](/Users/kq/Workspace/moontown/live_autonomy_policy)
+package. It owns the live spine DTO, journal/probe DTOs, active worker and
+execution counting rules, transient-infrastructure-debt predicate, autonomy
+tick calculation, aggregate metric-count DTO/assembly, stable-waiting blocker
+policy, waiting-streak progression, next-action wording, status classification,
+canonical live-status Markdown renderer, and canonical live-autonomy path
+derivation. Root code may supply the current snapshot path and PlanBook
+workspace root, perform filesystem refresh, snapshot reconciliation, health inspection, watcher-ledger reads,
+latest-watcher-decision derivation, and PlanBook count synchronization, but
+future plans should not add root-local copies of live-worker semantics,
+metric-count shape, stable-waiting rules, transient-debt recognition,
+next-action wording, live-autonomy file naming, or the operator status Markdown
+contract.
+Health anomaly detection and exact-title anomaly counts live in the dedicated
+[health](/Users/kq/Workspace/moontown/health) package. Runtime-status and
+live-autonomy code should consume `HealthReport` values and call health-owned
+counting helpers instead of reimplementing anomaly-title semantics locally.
+Runtime-status policy lives in the dedicated
+[runtime_status_policy](/Users/kq/Workspace/moontown/runtime_status_policy)
+package. It owns the runtime status DTO, empty-status contract, effective
+execution de-duplication, lifecycle ranking, active/review execution-status set
+membership, standing-goal runtime accounting, stable summary metric language,
+and reusable operator report rendering. Root code and live-autonomy policy may
+load snapshots, daemon state, watcher ledgers, and book-template request
+inboxes, then pass observed state and root-only daemon health strings into the
+package. Future plans should not add root-local copies of execution ranking,
+active/review status lists, status-count semantics, runtime summary wording, or
+status report formatting.
+Daemon-runtime policy lives in the dedicated
+[daemon_runtime_policy](/Users/kq/Workspace/moontown/daemon_runtime_policy)
+package. It owns daemon runtime state/health DTOs, status-mode classification,
+heartbeat age/staleness rules, durable-worker/supervisor activity predicates,
+doctor/start actions, health labels, health summary field ordering, and pure
+daemon path derivation from snapshot paths plus transition-state builders for
+supervisor start, worker start, heartbeat, tick start/finish, stop, and worker
+reload. Root code may supply storage defaults, perform PID checks, process
+spawning, launchd interaction, runtime file IO, PID-file IO, stop/restart flag
+cleanup, and stale-process cleanup, but future plans should not add root-local
+copies of daemon runtime status vocabulary, canonical file naming, transition
+semantics, or health interpretation.
+Book-template request DTOs and lifecycle semantics live in the dedicated
+[book_templates](/Users/kq/Workspace/moontown/book_templates) package.
+PlanBook should treat template installation as another policy-loop support
+system: package-owned contracts describe registry descriptors, requests,
+registry-file manifests, events, ledgers, registry readiness/output rendering,
+descriptor filesystem check-path policy, descriptor lookup semantics, status
+counts, retry-as-pending runtime accounting, status vocabulary/predicates,
+installer availability failure
+wording, install-success marker/classification, request-status construction/
+readiness/summary wording, empty request-status shape, request inbox Markdown
+rendering, request-event identity/DTO construction, request-event summary
+wording, and process-summary wording; request-event JSONL text normalization/
+append format, line parsing, latest-event fallback, and unique request-id
+extraction are package-owned too.
+Post-install request-state transitions and terminal-event reconcile gates are
+also package-owned. Per-request process-result records and processed/
+reconciled outcome aggregation are package-owned; root may execute each
+request and pass those result records back to `book_templates`.
+Canonical registry, request inbox, and request-event filenames are also
+package-owned; root may pass the current snapshot path into the package path
+deriver. Root should not reintroduce local default path wrappers for
+book-template registry, request inbox, or request-event paths; PlanBook repair
+work should call `@book_templates` path helpers directly.
+Root adapters may perform filesystem IO and call template-specific installers.
+Do not recreate registry readiness pages,
+descriptor path expansion, descriptor lookup, installer failure messages,
+request status buckets, raw status decisions, prose-based success matching,
+request inbox rendering, request event identities, request event DTOs, request
+event summaries, event-log text append/normalization, event-line parsing,
+latest-event fallback, request-id extraction, process-result booleans, updated
+ledger aggregation, processed/reconciled counters, empty request-status fields,
+canonical inbox/event-log filenames, or operator summary language in
+root code. Do not construct post-install request records or terminal event
+backfill gates in root code.
+App ToolBook contracts live in the dedicated
+[app_tool_book](/Users/kq/Workspace/moontown/app_tool_book) package. It owns
+the stable template root, default book identity, default purpose, install/status
+DTOs, required workspace path set, template-copy path set, config/manifest
+schemas, catalog-identity-aware config construction, catalog identity,
+generated history/site/tool page shape, status Markdown, standing-goal
+construction/list policy, and readiness gate. Root code may execute the
+bootstrap workflow, inspect files/catalog/goals, copy files, write
+package-rendered pages, return package-rendered bootstrap/install summaries,
+adapt package identity into the MoonBook catalog, and persist standing goals,
+but future plans should not add new root-local ToolBook path lists, catalog tags
+or skills, generated-page renderers, status renderers, bootstrap/install summary
+wording, ToolBook standing-goal semantics, config/manifest schemas, default
+identity wrappers, or readiness rules.
+Generic standing-watch policy lives in
+[standing_watch_policy](/Users/kq/Workspace/moontown/standing_watch_policy).
+It owns the standing-watch `BookTask` kind, id format, compact id segment
+policy, target pages, prompt text, strict accounting marker vocabulary, marker
+parser, MoonBook history block parser, provider-decision collapse policy,
+material-delta metrics, execution-summary classification, effective
+watcher-record decision selection, watcher-record preference ordering, and
+repair-mode appendix composition. Root may schedule standing goals, launch
+MoonClaw/MoonBook work, persist town snapshots, read and write book history
+files, and append watcher ledgers, but future plans should not add root-local
+standing-watch task builders, prompt copies, id-format helpers, marker
+vocabulary forks, history parser clones, material-delta accounting clones,
+no-change/update/deferred/review inference, or terminal-record selection.
+Reusable transient external dependency classification lives in
+[runtime_error_policy](/Users/kq/Workspace/moontown/runtime_error_policy).
+Future plans should route provider infrastructure, temporary resource, storage
+abort, and `{bad request}` classification through that package instead of
+copying string predicates into root recovery, standing-watch, or PlanBook code.
+External review packet request text, notes, tags, and metadata are
+package-owned too; root may materialize MoonClaw profile/config files, resolve
+paths, and instantiate external packets, but should not define the reviewer
+persona, job shape, or semantic packet contract. Active review lifecycle
+policy also belongs there; root may observe result-file/process state, but
+`book_quality/` decides how those observations combine with statuses and stale
+windows. Book-quality repair standing-goal semantics also belong there: repair
+goal id, cadence, source policy, base prompt language, `StandingGoal`
+construction, existing-goal refresh/upsert behavior, repair-goal id filtering,
+disabled-state transition, standing-watch repair-mode appendix, and generic
+empty repair-output classification are package-owned policy. Root may persist
+the registry, append the package-provided mode text to the watcher prompt, and
+combine package classifiers with execution state, but it should not define the
+repair loop's intent, recurrence, standing-goal shape, id filtering, disable
+transition, or generic-completion accounting.
+Review dispatch status messages also belong there; root may observe active runs
+and pending candidates, but it should not define the operator-facing
+semantic-review message contract.
+Review status section and table rendering also belong there; root may observe
+whether result files exist and pass display rows into the package, but headings,
+historical-attempt explanation, table headers, and row formatting are
+book-quality presentation policy.
+Stale-run reconciliation vocabulary also belongs there; root may check process
+liveness and poll MoonClaw for a summary, but the transition to `orphaned`,
+retry-facing summary text, and timestamped review-run record are book-quality
+domain policy.
+Accepted-result reconciliation records also belong there; root may harvest
+MoonClaw content and write accepted result files, but the transition to
+`written`, harvested summary text, written-count flag, and changed flag are
+book-quality domain policy. Ledger-level reconciliation aggregation also
+belongs there: root may supply per-run reconcile results, but order
+preservation, written-count accumulation, and changed-state folding are
+book-quality accounting rules.
+Repair-goal retirement policy also belongs there; root may observe standing
+goal state, result files, repairable book ids, and parsed semantic scores, but
+`book_quality/` owns score-table existence checks, the decision vocabulary, and
+the "should retire" rule. Repair
+bridge summary wording also belongs there; root may apply candidates and
+persist ledgers, but it should not define what queued/refreshed/retired means
+to the operator. The repair review page Markdown also belongs there; root may
+write `wiki/reviews/book-quality-repair.md`, but the sections, accounting rule,
+and embedded review-contract presentation are book-quality contracts. Repair
+bridge item construction also belongs there; root may pass observed score,
+result, and clock inputs, but `book_quality/` owns the durable item schema
+mapping from AI review fields and the decision that weak review text should
+become a repair candidate. Repair-goal identity also belongs there:
+`book_quality/` owns the repair-goal prefix, id construction, and id
+recognition predicate. Root code may iterate standing goals, but should call the
+package predicate instead of matching literal prefixes.
+Operational book bootstrap templates also belong there. The index, contract,
+review policy, journey page, operational-keeper skill, `moonbook-ui-state.json`,
+and generated-site shell are book-quality package templates. Root may derive
+title/summary/focus fields from the catalog and write the files, but it should
+not own the wording, UI-state schema, or generated-site HTML for operational
+books.
+
+The core loop is:
+
+```text
+read BookPolicy -> run execute-lane skills -> record artifacts
+                -> run tend-lane review -> update health/projection
+```
+
+A `BookPolicy` contains:
+
+- `skills`: the execute/tend skill set the book runs
+- `required_files`: the durable files that prove the workspace exists
+- `quality_criteria`: what good means for this book
+- `output`: the contract and projection surface the book owns
+
+Research, course, PlanBook, Cookbook, ToolBook, civic-support, and operational
+books are policy presets, not permanent runtime categories. They are useful
+names for common combinations of skills and evidence, but future autonomous
+implementation should prefer composing policies over adding more `if book_type`
+branches.
+
+Use capability composition for features that can attach to more than one book
+shape:
+
+- PDF evidence watch: `with_pdf_watch(base_policy)`
+- generated web tool: `with_web_tool_surface(base_policy, ...)`
+- recurring watch: `with_standing_watch(base_policy)`
+
+Do not create a new hardcoded category when a policy capability is enough.
+
+Every implementation plan should say which policy it changes or creates. If
+the work cannot name a policy, it is probably still a loose task rather than a
+stable product capability.
+
+When a plan invokes book-quality repair or semantic review, the generated packet
+must include the composed `BookPolicy`. The reviewer should judge the book
+against execute-lane skills, tend-lane skills, required files, quality criteria,
+and output contract, not merely against a label such as `research-book`.
+
 ## Operating Architecture To Preserve
 
 Every PlanBook plan, repair, and review must preserve this architecture:
@@ -174,6 +495,80 @@ Future plans must say which role is responsible. If a task is about durable
 book memory, route it to the bookkeeper. If a task is tool-heavy execution,
 spawn a worker. If a task is cross-book priority or cadence, keep it in the
 Mayor.
+
+For civic work, PlanBook must also preserve the protocol boundary: the reusable
+communication-pattern taxonomy lives in the `civic/` package, while root
+Moontown only adapts those patterns into scenario files, ledgers, runtime
+packets, CLI output, and UI projection. A future plan that adds a civic
+building should compose or add a `civic/` pattern/service definition first,
+then bind it through configuration; it should not encode a new building's
+social logic directly in the daemon or viewport.
+
+The same rule applies to scenario data. `CivicSalonScenario`,
+`CivicSalonIdea`, `CivicSalonMetric`, participant records, home-return records,
+and reduction-mode vocabulary are civic protocol DTOs. Root code may keep thin
+facade aliases for compatibility, but new durable data fields should be added
+inside `civic/` first.
+
+Scenario policy is civic-owned too. Pattern id fallback, pattern-label
+fallback, generic building-protocol derivation, and reusable building/metric/
+return-home notes belong in `civic/salon_scenario_policy.mbt`. Root runtime
+files may materialize scenario pages and packets, but they should call the
+package policy instead of reconstructing protocol contracts.
+
+Civic skill contracts are civic-owned too. Generic Wenyu civic service skills,
+module-specific skills, salon participant skills, and salon reducer skill/
+input/contract text belong in `civic/skill_text.mbt`. Root may write generated
+`SKILL.md` and reducer contract files to workspaces, but future plans should
+not add root-local skill text helpers for civic service behavior.
+
+Civic workspace seed text is civic-owned too. Workspace index pages, service
+contracts, building protocol contracts, schema pages, wiki seed pages, review
+queue pages, service ledgers, exchange ledgers, and service history pages
+belong in `civic/workspace_text.mbt`. Root may choose paths, create
+directories, and write the generated files, but future plans should not add
+root-local page or ledger template helpers for civic service behavior.
+
+Metric semantics are also civic-owned. If a plan changes how a building
+measures exchange yield, returned-home coverage, or structural effectiveness,
+the implementation belongs in `civic/salon_metrics.mbt`; root may only display
+or persist those metrics.
+
+Schedule vocabulary is civic-owned too. `CivicSalonSchedule`,
+`CivicSalonRoundRecord`, due checks, round ids, completion cadence, and round
+record construction belong in `civic/`. Root owns wall-clock IO, schedule files,
+daemon claiming/retry policy, and append-only persistence.
+
+Civic status vocabulary is civic-owned as well. Service buckets, protocol
+readiness, result-proven checks, and operator-facing health-note wording belong
+in `civic/status_labels.mbt`. Root may inspect files and render portfolio
+status, but it should call the civic package for all status-string semantics so
+UI, daemon, and review gates cannot drift.
+
+Civic reconciliation policy is also civic-owned. When a building protocol round
+is converted into a MoonBook service result, `civic/service_reconcile_policy.mbt`
+owns the decision vocabulary, page-count rule, review-count rule,
+`next_check_hint`, reconcilable-work gate, current-result check, contract block,
+and narrative wording. Root may observe `CivicServiceHealth`, build a MoonBook
+`BookResult`, and call MoonBook persistence, but it should not define a
+separate result-contract grammar or duplicate reconciliation predicates for
+civic service reconciliation.
+
+Building-protocol status portfolio rules are civic-owned too. Ready, active,
+review, and blocked predicates, portfolio count aggregation, and compact
+Markdown row formatting belong in `civic/protocol_portfolio.mbt`. Root may
+inspect JSONL ledgers and write status Markdown files, but it should not own a
+second definition of protocol health buckets.
+
+Building-protocol contract text is civic-owned too. The reusable Markdown for a
+building protocol contract belongs in `civic/protocol_contract_text.mbt`. Root
+may write that text into protocol ledger directories, but future plans should
+not add root-local building protocol contract renderers.
+
+Building-protocol snapshot construction is civic-owned too. Root may observe
+ledger counts and latest summaries; `civic/protocol_snapshot.mbt` owns how those
+observations become `BuildingProtocolSnapshot`, including status labels and
+readiness. Plans should not build protocol snapshots manually in runtime code.
 
 ## Stable Watch State
 
@@ -475,12 +870,31 @@ PlanBook repair skill and the `planbook.repair.result.v1` output contract.
 For Moontown-owned source repairs, the repair profile uses
 `execution_mode: acp` and `execution_target: codex-main`; the configured ACP
 target runs from the repository source root, not only the PlanBook workspace.
+The target model is not a book policy decision. It is a Moontown ACP adapter
+default, currently `gpt-5.5` unless `MOONTOWN_CODEX_ACP_MODEL` overrides it.
 Daemon-created repair dispatches are detached; operator `--dispatch` may still
 use inline execution when the environment explicitly enables it for debugging.
 That is the intended self-patching path: Mayor/PlanBook choose and bound the
 gap, MoonClaw launches Codex ACP as the code executor, Codex patches the repo,
 and PlanBook reconciles the result contract after validation, diff inspection,
 and commit readiness.
+
+Editor-mode pipeline work follows the same package-owned policy rule. The
+`editor_pipeline/` package owns the pipeline DTOs, feature-selection result
+contract, selected-feature implementation contract, feature-rater skill text,
+stage/status policy, selected-style lookup, selected-feature readiness gates,
+module-placement DTO and record policy, canonical status Markdown renderer, and
+style-catalog metadata. PlanBook may decide when to run feature selection,
+which course/book evidence to include, and how to reconcile the selected
+feature into a repair task. Root Moontown may inspect runtime state, create
+files, compute evidence paths, load module JSON, convert config entries into
+package DTOs, and dispatch workers, but future plans must not add a second
+root-local editor record shape, stage readiness policy, status renderer, rubric,
+selected-style policy, selected-feature readiness gates, module-placement
+policy, terrain-labeling policy, or style catalog. Root should also avoid
+compatibility wrappers over those package APIs; PlanBook/editor callers should
+use `editor_pipeline/` directly.
+
 For a source patch, accepted reconciliation also requires a
 `planbook.repair.patch_receipt.v1` receipt. The receipt is the durable boundary
 between “Codex ACP was configured” and “Codex ACP actually changed, validated,
