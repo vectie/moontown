@@ -46,7 +46,7 @@ async fn effective_daemon_tick(
 fn latest_execution_task_tick(state : @core.TownState) -> Int {
   let mut tick = 0
   for execution in state.executions {
-    let value = tick_from_task_id(execution.task_id)
+    let value = @core.tick_from_task_id(execution.task_id)
     if value > tick {
       tick = value
     }
@@ -78,43 +78,4 @@ fn latest_standing_goal_tick(goals : Array[@core.StandingGoal]) -> Int {
     }
   }
   latest
-}
-
-///|
-fn tick_from_task_id(task_id : String) -> Int {
-  match tick_marker_index(task_id) {
-    Some(index) => trailing_int(task_id[index + 5:].to_owned())
-    None => 0
-  }
-}
-
-///|
-fn tick_marker_index(task_id : String) -> Int? {
-  let marker = "tick-"
-  let limit = task_id.length() - marker.length()
-  if limit < 0 {
-    return None
-  }
-  let mut found : Int? = None
-  for index in 0..<=limit {
-    if task_id[index:index + marker.length()].to_owned() == marker {
-      found = Some(index)
-    }
-  }
-  found
-}
-
-///|
-fn trailing_int(text : String) -> Int {
-  let mut value = 0
-  let mut seen = false
-  for char in text {
-    if char >= '0' && char <= '9' {
-      value = value * 10 + (char.to_int() - '0'.to_int())
-      seen = true
-    } else if seen {
-      return value
-    }
-  }
-  value
 }

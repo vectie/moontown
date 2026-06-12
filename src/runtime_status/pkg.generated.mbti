@@ -21,8 +21,6 @@ pub async fn render_saved_town_status(snapshot_path? : String) -> String
 
 pub fn runtime_status_from_state(@core.TownState, String, standing_goals? : Array[@core.StandingGoal], daemon_tick? : Int, watcher_records? : Array[@core.WatcherRunRecord], book_template_request_status? : @book_templates.BookTemplateRequestStatus?) -> @runtime_status_policy.TownRuntimeStatus
 
-pub fn tick_from_task_id(String) -> Int
-
 pub fn watcher_status_summary(Array[@core.WatcherRunRecord], Array[@core.StandingGoal]) -> String
 
 // Errors

@@ -47,6 +47,8 @@ pub fn standing_goal_registry_replace_or_append(Array[StandingGoal], StandingGoa
 
 pub fn terminal_execution_status(TaskExecutionStatus) -> Bool
 
+pub fn tick_from_task_id(String) -> Int
+
 pub fn town_task_status_for_execution(TaskExecutionStatus) -> TownTaskStatus
 
 pub fn upsert_moonclaw_job_profile_json(Json, String, Json) -> Json

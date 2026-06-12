@@ -148,3 +148,14 @@ test "town execution aggregation counts only live external runs" {
   assert_true(has_live_executions(state))
   assert_true(has_retry_pending_executions(state, 20))
 }
+
+///|
+test "task id tick parser extracts the latest daemon tick marker" {
+  assert_eq(tick_from_task_id("standing-watch-opc-news-tick-15949"), 15949)
+  assert_eq(
+    tick_from_task_id("standing-watch-opc-news-tick-15949-extra"),
+    15949,
+  )
+  assert_eq(tick_from_task_id("task-tick-3-retry-tick-42"), 42)
+  assert_eq(tick_from_task_id("standing-watch-without-daemon-tick"), 0)
+}

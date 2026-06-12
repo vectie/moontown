@@ -73,45 +73,10 @@ pub fn daemon_rebased_to_tick_floor(
 fn latest_execution_task_tick(state : @core.TownState) -> Int {
   let mut tick = 0
   for execution in state.executions {
-    let value = tick_from_task_id(execution.task_id)
+    let value = @core.tick_from_task_id(execution.task_id)
     if value > tick {
       tick = value
     }
   }
   tick
-}
-
-///|
-pub fn tick_from_task_id(task_id : String) -> Int {
-  if !task_id.contains("-tick-") {
-    return 0
-  }
-  let parts = task_id.split("-tick-").to_array()
-  match parts.get(parts.length() - 1) {
-    Some(suffix) =>
-      match first_non_negative_int(suffix.to_owned()) {
-        Some(value) => value
-        None => 0
-      }
-    None => 0
-  }
-}
-
-///|
-fn first_non_negative_int(text : String) -> Int? {
-  let mut seen = false
-  let mut value = 0
-  for char in text {
-    if char >= '0' && char <= '9' {
-      value = value * 10 + (char.to_int() - '0'.to_int())
-      seen = true
-    } else if seen {
-      return Some(value)
-    }
-  }
-  if seen {
-    Some(value)
-  } else {
-    None
-  }
 }

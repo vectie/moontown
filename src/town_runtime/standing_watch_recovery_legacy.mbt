@@ -6,8 +6,7 @@ fn legacy_tick_domain_stale_standing_watch(
   execution.run_id is None &&
   execution.output_contract == "standing-watch-live-snapshot" &&
   execution.summary.contains("missed its heartbeat window") &&
-  @runtime_status.tick_from_task_id(execution.task_id) >
-  execution.stale_after_tick
+  @core.tick_from_task_id(execution.task_id) > execution.stale_after_tick
 }
 
 ///|
@@ -22,7 +21,7 @@ fn legacy_review_queued_retry_accounting_standing_watch(
     ) {
     return false
   }
-  let task_tick = @runtime_status.tick_from_task_id(execution.task_id)
+  let task_tick = @core.tick_from_task_id(execution.task_id)
   let decision = @standing_watch_policy.standing_watch_recovery_decision_from_execution(
     execution,
   )

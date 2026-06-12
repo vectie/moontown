@@ -147,7 +147,10 @@ test "daemon tick floor includes execution task tick" {
       "running",
     ),
   )
-  assert_eq(tick_from_task_id("standing-watch-opc-news-tick-15949"), 15949)
+  assert_eq(
+    @core.tick_from_task_id("standing-watch-opc-news-tick-15949"),
+    15949,
+  )
   assert_eq(latest_execution_task_tick(state), 15949)
 }
 
