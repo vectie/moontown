@@ -4,7 +4,7 @@ async test "live autonomy does not count orphaned worker loss as no-change" {
     "/tmp/moontown-live-autonomy-orphaned-worker-check",
   )
   let snapshot_path = workspace.snapshot_path
-  let state = visual_projection_test_state(
+  let state = @test_fixtures.visual_projection_test_state(
     worker_status=@core.WorkerStatus::Idle,
     execution_status=@core.TaskExecutionStatus::Completed,
   )

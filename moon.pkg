@@ -42,4 +42,5 @@ import {
 
 import {
   "vectie/moontown/policy",
+  "vectie/moontown/test_fixtures",
 } for "wbtest"

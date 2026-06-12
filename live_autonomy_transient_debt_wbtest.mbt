@@ -4,7 +4,7 @@ async test "live autonomy surfaces transient infrastructure debt separately" {
     "/tmp/moontown-live-autonomy-transient-debt",
   )
   let snapshot_path = workspace.snapshot_path
-  let state = visual_projection_test_state(
+  let state = @test_fixtures.visual_projection_test_state(
     worker_status=@core.WorkerStatus::Idle,
     execution_status=@core.TaskExecutionStatus::Completed,
   )

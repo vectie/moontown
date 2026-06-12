@@ -121,7 +121,7 @@ async test "live autonomy includes planbook repair action" {
       book_catalog_path=workspace.catalog_path,
     ),
   )
-  let state = visual_projection_test_state(
+  let state = @test_fixtures.visual_projection_test_state(
     worker_status=@core.WorkerStatus::Idle,
     execution_status=@core.TaskExecutionStatus::Completed,
   )

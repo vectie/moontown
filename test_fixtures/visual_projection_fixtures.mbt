@@ -1,5 +1,5 @@
 ///|
-fn visual_projection_test_state(
+pub fn visual_projection_test_state(
   worker_status? : @core.WorkerStatus = @core.WorkerStatus::Running,
   execution_status? : @core.TaskExecutionStatus = @core.TaskExecutionStatus::Running,
 ) -> @core.TownState {

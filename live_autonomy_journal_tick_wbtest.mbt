@@ -4,7 +4,7 @@ async test "live autonomy journal tick floor is monotonic" {
     "/tmp/moontown-live-autonomy-tick-floor",
   )
   let snapshot_path = workspace.snapshot_path
-  let state = visual_projection_test_state(
+  let state = @test_fixtures.visual_projection_test_state(
     worker_status=@core.WorkerStatus::Idle,
     execution_status=@core.TaskExecutionStatus::Completed,
   )

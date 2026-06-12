@@ -13,7 +13,7 @@ async test "live status reconciles stale planbook counts from authoritative stat
       book_catalog_path="\{root}/catalog.json",
     ),
   )
-  let state = visual_projection_test_state(
+  let state = @test_fixtures.visual_projection_test_state(
     worker_status=@core.WorkerStatus::Idle,
     execution_status=@core.TaskExecutionStatus::Completed,
   )

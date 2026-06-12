@@ -108,7 +108,7 @@ test "shared standing goal counts include enabled disabled and due goals" {
 
 ///|
 test "shared health anomaly counter matches exact anomaly titles" {
-  let state = visual_projection_test_state(
+  let state = @test_fixtures.visual_projection_test_state(
     worker_status=@core.WorkerStatus::Idle,
     execution_status=@core.TaskExecutionStatus::Failed,
   )

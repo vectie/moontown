@@ -1,6 +1,6 @@
 ///|
 test "clean research projection recovers late failed bootstrap execution" {
-  let state = research_quality_test_state()
+  let state = @test_fixtures.research_quality_test_state()
   state.register_worker(
     @core.WorkerRef::new(
       id="worker-research-opc",
@@ -50,10 +50,14 @@ test "clean research projection recovers late failed bootstrap execution" {
 
 ///|
 async test "research quality gate schedules in-place repair retry" {
-  let root = cleaned_research_quality_test_root("/tmp/moontown-quality-retry")
-  let state = research_quality_test_state()
+  let root = @test_fixtures.cleaned_research_quality_test_root(
+    "/tmp/moontown-quality-retry",
+  )
+  let state = @test_fixtures.research_quality_test_state()
   state.register_book(
-    llm_research_book_ref("research-how-llm-are-trained-in-very-detail", root),
+    @test_fixtures.llm_research_book_ref(
+      "research-how-llm-are-trained-in-very-detail", root,
+    ),
   )
   let task_id = "goal-research-how-llm-are-trained-in-very-detail-research-bootstrap-ingest"
   state.enqueue_task(
@@ -67,7 +71,7 @@ async test "research quality gate schedules in-place repair retry" {
     ),
   )
   state.register_execution(
-    research_quality_execution(
+    @test_fixtures.research_quality_execution(
       task_id,
       "research-how-llm-are-trained-in-very-detail",
       @core.TaskExecutionStatus::Completed,
@@ -89,7 +93,7 @@ async test "research quality gate schedules in-place repair retry" {
   assert_true(trigger.contains("in-place review/repair"))
   assert_true(trigger.contains("do not create a new v1/v2/v3/v4 book"))
   write_research_quality_review_resolved(
-    llm_research_catalog_entry(
+    @test_fixtures.llm_research_catalog_entry(
       "research-how-llm-are-trained-in-very-detail", root,
     ),
     "post-run quality gate",
@@ -101,12 +105,14 @@ async test "research quality gate schedules in-place repair retry" {
 
 ///|
 async test "research quality gate retries failed bootstrap before version forking" {
-  let root = cleaned_research_quality_test_root(
+  let root = @test_fixtures.cleaned_research_quality_test_root(
     "/tmp/moontown-quality-failed-retry",
   )
-  let state = research_quality_test_state()
+  let state = @test_fixtures.research_quality_test_state()
   state.register_book(
-    llm_research_book_ref("research-how-llms-are-trained-in-very-detail", root),
+    @test_fixtures.llm_research_book_ref(
+      "research-how-llms-are-trained-in-very-detail", root,
+    ),
   )
   let task_id = "goal-research-how-llms-are-trained-in-very-detail-research-bootstrap-ingest"
   state.enqueue_task(
@@ -120,7 +126,7 @@ async test "research quality gate retries failed bootstrap before version forkin
     ),
   )
   state.register_execution(
-    research_quality_execution(
+    @test_fixtures.research_quality_execution(
       task_id,
       "research-how-llms-are-trained-in-very-detail",
       @core.TaskExecutionStatus::Failed,

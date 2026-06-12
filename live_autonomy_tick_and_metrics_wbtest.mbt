@@ -7,7 +7,7 @@ test "live autonomy build tick prefers daemon override then state tick" {
     ),
     99,
   )
-  let event_state = visual_projection_test_state(
+  let event_state = @test_fixtures.visual_projection_test_state(
     worker_status=@core.WorkerStatus::Idle,
     execution_status=@core.TaskExecutionStatus::Completed,
   )

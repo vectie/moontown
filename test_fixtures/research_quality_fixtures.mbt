@@ -1,16 +1,16 @@
 ///|
-async fn cleaned_research_quality_test_root(root : String) -> String {
+pub async fn cleaned_research_quality_test_root(root : String) -> String {
   @support.ignore_checked_command("rm", ["-rf", root])
   root
 }
 
 ///|
-fn research_quality_test_state() -> @core.TownState {
+pub fn research_quality_test_state() -> @core.TownState {
   @core.empty_state(@core.TownConfig::new(id="test", name="Test Town"))
 }
 
 ///|
-fn llm_research_book_ref(id : String, root : String) -> @core.BookRef {
+pub fn llm_research_book_ref(id : String, root : String) -> @core.BookRef {
   @core.BookRef::new(
     id~,
     name="LLM Training Research",
@@ -20,7 +20,7 @@ fn llm_research_book_ref(id : String, root : String) -> @core.BookRef {
 }
 
 ///|
-fn llm_research_catalog_entry(
+pub fn llm_research_catalog_entry(
   id : String,
   root : String,
 ) -> @moonbook.BookCatalogEntry {
@@ -33,7 +33,7 @@ fn llm_research_catalog_entry(
 }
 
 ///|
-fn research_quality_execution(
+pub fn research_quality_execution(
   task_id : String,
   book_id : String,
   status : @core.TaskExecutionStatus,
