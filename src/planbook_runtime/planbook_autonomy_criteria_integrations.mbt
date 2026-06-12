@@ -29,10 +29,16 @@ async fn planbook_app_tool_book_template_criterion() -> PlanbookCriterionStatus 
     text_file_contains(
       "src/book_templates/installers.mbt", "install_app_tool_book_config",
     )
-  let template_ready = @fs.exists("templates/books/app-tool-book/book.json") &&
-    @fs.exists("templates/books/app-tool-book/tool-spec.example.md") &&
-    @fs.exists("templates/books/app-tool-book/skills/tool-build/SKILL.md") &&
-    @fs.exists("templates/books/app-tool-book/schemas/tool-manifest.schema.md")
+  let template_ready = @fs.exists(
+      "assets/templates/books/app-tool-book/book.json",
+    ) &&
+    @fs.exists("assets/templates/books/app-tool-book/tool-spec.example.md") &&
+    @fs.exists(
+      "assets/templates/books/app-tool-book/skills/tool-build/SKILL.md",
+    ) &&
+    @fs.exists(
+      "assets/templates/books/app-tool-book/schemas/tool-manifest.schema.md",
+    )
   let runtime_ready = @fs.exists("src/app_tool_book/runtime.mbt") &&
     text_file_contains("src/app_tool_book/contracts.mbt", "tool-manifest.json") &&
     text_file_contains(

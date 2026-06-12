@@ -4,7 +4,7 @@ _build/
 .moonagent/
 .moontown/
 .moonclaw/
-raw/
+/raw/
 ui/rabbita-town/dist/
 ui/rabbita-town/node_modules/
 src/ui/rabbita-town/dist/

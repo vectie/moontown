@@ -1,6 +1,6 @@
 ///|
 test "app tool book contract exposes stable defaults" {
-  assert_eq(template_root(), "templates/books/app-tool-book")
+  assert_eq(template_root(), "assets/templates/books/app-tool-book")
   assert_eq(default_book_id(), "toolbook-data-watch-dashboard")
   assert_true(default_purpose().contains("usable generated web tool"))
 }

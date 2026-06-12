@@ -1,6 +1,6 @@
 ///|
 test "request paths derive canonical inbox and event files" {
-  assert_eq(default_registry_path(), "templates/books/templates.json")
+  assert_eq(default_registry_path(), "assets/templates/books/templates.json")
   assert_eq(request_file_name(), "book-template-requests.json")
   assert_eq(request_event_file_name(), "book-template-request-events.jsonl")
   assert_eq(

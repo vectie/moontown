@@ -147,7 +147,7 @@ moon run src/cmd/main -- integration final status
 
 The manifest lives at:
 
-- `templates/integration/wenyu-final-integration.json`
+- `assets/templates/integration/wenyu-final-integration.json`
 
 It is data-driven and currently installs:
 
@@ -198,10 +198,10 @@ Inspect protocol state with:
 moon run src/cmd/main -- civic protocols bootstrap
 moon run src/cmd/main -- civic protocols status
 moon run src/cmd/main -- civic protocols patterns
-moon run src/cmd/main -- civic protocols pattern-template templates/civic-salons/robotics-mini-salon.json
-moon run src/cmd/main -- civic protocols pattern-template templates/civic-salons/embodied-robotics-social-square.json
-moon run src/cmd/main -- civic protocols pattern-install templates/civic-patterns/policy-hall-triage-desk.json
-moon run src/cmd/main -- civic protocols pattern-manifest templates/civic-patterns/wenyu-civic-patterns.json
+moon run src/cmd/main -- civic protocols pattern-template assets/templates/civic-salons/robotics-mini-salon.json
+moon run src/cmd/main -- civic protocols pattern-template assets/templates/civic-salons/embodied-robotics-social-square.json
+moon run src/cmd/main -- civic protocols pattern-install assets/templates/civic-patterns/policy-hall-triage-desk.json
+moon run src/cmd/main -- civic protocols pattern-manifest assets/templates/civic-patterns/wenyu-civic-patterns.json
 moon run src/cmd/main -- civic protocols schedules status
 moon run src/cmd/main -- civic protocols schedules tick
 moon run src/cmd/main -- civic reconcile
@@ -217,7 +217,7 @@ upserts the recurring schedule in `.moontown/civic/pattern-schedules.json`.
 `pattern-install <path>` installs one recurring scenario without running it;
 `pattern-manifest <path>` installs a set of scenarios with staggered due times.
 The default Wenyu manifest covers all 11 civic buildings in
-`templates/civic-patterns/`. Moontown should not grow one MoonBit branch per
+`assets/templates/civic-patterns/`. Moontown should not grow one MoonBit branch per
 domain or civic service. See
 [docs/CIVIC_SALON_TEMPLATES.md](/Users/kq/Workspace/moontown/docs/CIVIC_SALON_TEMPLATES.md).
 
@@ -254,7 +254,7 @@ Moontown consumes the manifest for drift checks and operator guidance.
 Moontown now distinguishes four active MoonBook work types:
 
 Book templates are listed in
-[templates/books/templates.json](/Users/kq/Workspace/moontown/templates/books/templates.json)
+[assets/templates/books/templates.json](/Users/kq/Workspace/moontown/assets/templates/books/templates.json)
 and can be inspected with `moon run src/cmd/main -- books templates`. Moondesk
 should use that registry as its creation palette. Runtime book creation requests
 can be written to `.moontown/book-template-requests.json`; the daemon’s
@@ -278,13 +278,13 @@ and failure audit trail for autonomous book creation.
   is a specialized research-book template for website/PDF monitoring:
   discover PDFs, download, extract full text, analyze with a book-owned method,
   and notify only when accepted knowledge changes. The reusable template lives
-  at [templates/books/pdf-evidence-watch/](/Users/kq/Workspace/moontown/templates/books/pdf-evidence-watch).
+  at [assets/templates/books/pdf-evidence-watch/](/Users/kq/Workspace/moontown/assets/templates/books/pdf-evidence-watch).
   Instantiate it with
   `moon run src/cmd/main -- books pdf-watch bootstrap <book-id>`; the command
   registers the MoonBook catalog entry and standing goal that Moondesk should
   later expose through a creation wizard. For a complete Moondesk-style handoff,
   use `moon run src/cmd/main -- books pdf-watch install <config.json>` with
-  [templates/books/pdf-evidence-watch/install.example.json](/Users/kq/Workspace/moontown/templates/books/pdf-evidence-watch/install.example.json).
+  [assets/templates/books/pdf-evidence-watch/install.example.json](/Users/kq/Workspace/moontown/assets/templates/books/pdf-evidence-watch/install.example.json).
 - `course-book`
   teaches a beginner through lessons, exercises, and checkpoints.
 - `planbook`
@@ -302,7 +302,7 @@ See:
 
 - [docs/PLANBOOK.md](/Users/kq/Workspace/moontown/docs/PLANBOOK.md)
 - [docs/DOC_STRUCTURE.md](/Users/kq/Workspace/moontown/docs/DOC_STRUCTURE.md)
-- [templates/planbook/PLAN_TEMPLATE.md](/Users/kq/Workspace/moontown/templates/planbook/PLAN_TEMPLATE.md)
+- [assets/templates/planbook/PLAN_TEMPLATE.md](/Users/kq/Workspace/moontown/assets/templates/planbook/PLAN_TEMPLATE.md)
 
 Bootstrap the current first-class planbook with:
 

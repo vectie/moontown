@@ -198,7 +198,8 @@ pub fn cookbook_core_features_markdown() -> String {
       ],
       "The reducer can be AI-guided, but empty or invalid output blocks the round. Fixture output is only a test/smoke path.",
       [
-        "templates/civic-patterns/*.json", ".moontown/civic/pattern-runs/", "participant `wiki/queries/salon-returned-ideas.md`",
+        "assets/templates/civic-patterns/*.json", ".moontown/civic/pattern-runs/",
+        "participant `wiki/queries/salon-returned-ideas.md`",
       ],
     ),
     cookbook_core_feature(

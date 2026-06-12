@@ -63,9 +63,9 @@ input.
   runs due schedules by loading the matching scenario template.
 - [civic_salon_reconcile.mbt](/Users/kq/Workspace/moontown/src/civic_runtime/civic_salon_reconcile.mbt)
   refreshes stale projections from the same scenario template.
-- [templates/civic-salons/robotics-mini-salon.json](/Users/kq/Workspace/moontown/templates/civic-salons/robotics-mini-salon.json)
+- [assets/templates/civic-salons/robotics-mini-salon.json](/Users/kq/Workspace/moontown/assets/templates/civic-salons/robotics-mini-salon.json)
   is a small copyable research-salon example.
-- [templates/civic-patterns/wenyu-civic-patterns.json](/Users/kq/Workspace/moontown/templates/civic-patterns/wenyu-civic-patterns.json)
+- [assets/templates/civic-patterns/wenyu-civic-patterns.json](/Users/kq/Workspace/moontown/assets/templates/civic-patterns/wenyu-civic-patterns.json)
   installs the default scenario set for all 11 Wenyu civic buildings.
 
 ## Where Templates Live
@@ -86,15 +86,15 @@ copies the scenario into `.moontown/civic/pattern-scenarios/` and upserts a
 30-minute recurring schedule, so the same pattern can continue under the daemon:
 
 ```bash
-moon run src/cmd/main -- civic protocols pattern-template templates/civic-salons/robotics-mini-salon.json
-moon run src/cmd/main -- civic protocols pattern-template templates/civic-salons/embodied-robotics-social-square.json
+moon run src/cmd/main -- civic protocols pattern-template assets/templates/civic-salons/robotics-mini-salon.json
+moon run src/cmd/main -- civic protocols pattern-template assets/templates/civic-salons/embodied-robotics-social-square.json
 ```
 
 To install recurring Wenyu civic patterns without immediately running every
 MoonClaw reducer, use the manifest installer:
 
 ```bash
-moon run src/cmd/main -- civic protocols pattern-manifest templates/civic-patterns/wenyu-civic-patterns.json
+moon run src/cmd/main -- civic protocols pattern-manifest assets/templates/civic-patterns/wenyu-civic-patterns.json
 ```
 
 The manifest copies each scenario into `.moontown/civic/pattern-scenarios/` and
@@ -161,8 +161,8 @@ reasoning and reducer quality.
 
 ## Adding A New Domain
 
-1. Copy a close template from `templates/civic-patterns/` or
-   `templates/civic-salons/robotics-mini-salon.json`.
+1. Copy a close template from `assets/templates/civic-patterns/` or
+   `assets/templates/civic-salons/robotics-mini-salon.json`.
 2. Rename `id`, `title`, `domain_label`, `topic`, and all output paths.
 3. Add participant workspaces that represent independent perspectives, not
    duplicate researchers.

@@ -8,8 +8,8 @@ You can browse and install extra skills here:
 ## Project Structure
 
 - Source packages live under `src/`. The repo root should stay limited to
-  module metadata, docs, scripts, templates, runtime state directories, and
-  other non-package project files.
+  module metadata, docs, scripts, assets, runtime state directories, and other
+  non-package project files.
 
 - Project-specific identity, memory, user, routine, and Wenyu vision notes live
   under `docs/project/`. Do not add new project-note files to the repo root.

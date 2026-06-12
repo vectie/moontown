@@ -1,6 +1,6 @@
 ///|
 pub fn template_root() -> String {
-  "templates/books/app-tool-book"
+  "assets/templates/books/app-tool-book"
 }
 
 ///|

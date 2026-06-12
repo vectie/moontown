@@ -464,7 +464,7 @@ Required durable files:
 - `app/index.html`
 - `book/site/generated/tool.html`
 
-The template is `app-tool-book` in `templates/books/app-tool-book/`. It is
+The template is `app-tool-book` in `assets/templates/books/app-tool-book/`. It is
 installed through the same request inbox as other book templates, so a Mayor,
 Moondesk, or future planning agent can create one without Codex manually
 copying files:
@@ -710,7 +710,7 @@ Every non-trivial plan should include:
 - Rollback or recovery path
 - Follow-up tasks
 
-Use [templates/planbook/PLAN_TEMPLATE.md](/Users/kq/Workspace/moontown/templates/planbook/PLAN_TEMPLATE.md)
+Use [assets/templates/planbook/PLAN_TEMPLATE.md](/Users/kq/Workspace/moontown/assets/templates/planbook/PLAN_TEMPLATE.md)
 as the default shape.
 
 ## Plan Quality Rules

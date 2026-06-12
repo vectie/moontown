@@ -190,7 +190,7 @@ Implemented and validated:
   MoonBit runner code.
 - `moon run src/cmd/main -- civic protocols pattern-install <path>` installs one
   scenario as a recurring schedule without immediately running MoonClaw.
-- `moon run src/cmd/main -- civic protocols pattern-manifest templates/civic-patterns/wenyu-civic-patterns.json`
+- `moon run src/cmd/main -- civic protocols pattern-manifest assets/templates/civic-patterns/wenyu-civic-patterns.json`
   installs the default Wenyu scenario set for all 11 civic buildings with
   staggered due times.
 - `moon run src/cmd/main -- civic protocols schedules status` and

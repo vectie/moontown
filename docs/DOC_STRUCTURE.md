@@ -61,7 +61,7 @@ operational purpose, not by the order features were added.
 ## Book Types And Doc Outputs
 
 Book templates are discoverable through the registry at
-[templates/books/templates.json](/Users/kq/Workspace/moontown/templates/books/templates.json).
+[assets/templates/books/templates.json](/Users/kq/Workspace/moontown/assets/templates/books/templates.json).
 Use:
 
 ```bash
@@ -99,7 +99,7 @@ optional durable support surface.
 Some domain books need a stricter evidence pipeline while still remaining
 research books. The first reusable template is:
 
-- [templates/books/pdf-evidence-watch/](/Users/kq/Workspace/moontown/templates/books/pdf-evidence-watch)
+- [assets/templates/books/pdf-evidence-watch/](/Users/kq/Workspace/moontown/assets/templates/books/pdf-evidence-watch)
 
 Use `pdf-evidence-watch` when a domain should repeatedly watch websites for
 PDFs, download and extract full text, analyze with a book-owned method, and

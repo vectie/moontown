@@ -108,7 +108,7 @@ Implemented:
   `review-council`, `match-market`, `learning-cohort`, `story-forge`, and
   `incident-bridge` instead of copying salon logic.
 - all 11 Wenyu civic buildings now have default communication-pattern scenario
-  templates under `templates/civic-patterns/`, plus a manifest installer that
+  templates under `assets/templates/civic-patterns/`, plus a manifest installer that
   copies them into `.moontown/civic/pattern-scenarios/` and staggers recurring
   schedules.
 - Research-salon templates publish structural effectiveness metrics: participant count,
@@ -154,8 +154,8 @@ exchange place. The scenario is intentionally multi-book rather than
 single-agent, but the domain comes from JSON:
 
 ```bash
-moon run src/cmd/main -- civic protocols pattern-template templates/civic-salons/robotics-mini-salon.json
-moon run src/cmd/main -- civic protocols pattern-manifest templates/civic-patterns/wenyu-civic-patterns.json
+moon run src/cmd/main -- civic protocols pattern-template assets/templates/civic-salons/robotics-mini-salon.json
+moon run src/cmd/main -- civic protocols pattern-manifest assets/templates/civic-patterns/wenyu-civic-patterns.json
 ```
 
 Each participant receives a small internal workspace, a salon skill, a current
@@ -198,7 +198,7 @@ Recurring salon schedules load scenario files from:
 One-off salon runs can load any template file:
 
 ```bash
-moon run src/cmd/main -- civic protocols pattern-template templates/civic-salons/robotics-mini-salon.json
+moon run src/cmd/main -- civic protocols pattern-template assets/templates/civic-salons/robotics-mini-salon.json
 ```
 
 The template controls:

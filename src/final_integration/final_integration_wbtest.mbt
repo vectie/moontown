@@ -55,7 +55,7 @@ test "final integration merges domain watches without dropping existing history"
 ///|
 async test "final integration manifest declares five domains and Wenyu patterns" {
   let manifest = load_final_integration_manifest(
-    "templates/integration/wenyu-final-integration.json",
+    "assets/templates/integration/wenyu-final-integration.json",
   ).unwrap()
   assert_eq(manifest.domain_watches.length(), 5)
   assert_eq(manifest.domain_watches[0].domain, "OPC")

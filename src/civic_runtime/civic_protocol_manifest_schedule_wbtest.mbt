@@ -5,7 +5,7 @@ async test "civic pattern manifest installs staggered schedules without running 
   )
   let snapshot_path = "\{root}/town.json"
   let summary = install_civic_pattern_scenario_manifest(
-    "templates/civic-patterns/wenyu-civic-patterns.json",
+    "assets/templates/civic-patterns/wenyu-civic-patterns.json",
     snapshot_path~,
   )
   assert_true(summary.contains("Installed 11 civic communication pattern"))

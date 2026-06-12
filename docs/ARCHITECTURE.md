@@ -923,7 +923,7 @@ The CLI entry is:
 moon run src/cmd/main -- civic bootstrap
 moon run src/cmd/main -- civic protocols bootstrap
 moon run src/cmd/main -- civic protocols status
-moon run src/cmd/main -- civic protocols pattern-template templates/civic-salons/robotics-mini-salon.json
+moon run src/cmd/main -- civic protocols pattern-template assets/templates/civic-salons/robotics-mini-salon.json
 moon run src/cmd/main -- civic protocols schedules status
 moon run src/cmd/main -- civic protocols schedules tick
 moon run src/cmd/main -- civic doctor
@@ -1269,7 +1269,7 @@ Current documentation and bootstrap commands:
 
 - [docs/PLANBOOK.md](/Users/kq/Workspace/moontown/docs/PLANBOOK.md)
 - [docs/DOC_STRUCTURE.md](/Users/kq/Workspace/moontown/docs/DOC_STRUCTURE.md)
-- [templates/planbook/PLAN_TEMPLATE.md](/Users/kq/Workspace/moontown/templates/planbook/PLAN_TEMPLATE.md)
+- [assets/templates/planbook/PLAN_TEMPLATE.md](/Users/kq/Workspace/moontown/assets/templates/planbook/PLAN_TEMPLATE.md)
 
 ```bash
 moon run src/cmd/main -- planbook bootstrap

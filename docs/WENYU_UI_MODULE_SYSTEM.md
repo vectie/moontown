@@ -258,8 +258,8 @@ Bootstrap and inspect the building protocol runtime with:
 moon run src/cmd/main -- civic protocols bootstrap
 moon run src/cmd/main -- civic protocols status
 moon run src/cmd/main -- civic protocols patterns
-moon run src/cmd/main -- civic protocols pattern-template templates/civic-salons/robotics-mini-salon.json
-moon run src/cmd/main -- civic protocols pattern-template templates/civic-salons/robotics-mini-salon.json
+moon run src/cmd/main -- civic protocols pattern-template assets/templates/civic-salons/robotics-mini-salon.json
+moon run src/cmd/main -- civic protocols pattern-template assets/templates/civic-salons/robotics-mini-salon.json
 moon run src/cmd/main -- civic doctor
 ```
 

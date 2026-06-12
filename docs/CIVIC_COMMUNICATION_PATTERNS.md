@@ -74,9 +74,9 @@ means the smallest useful next action, artifact, drill, lesson, match review,
 or story draft.
 
 Default Wenyu civic pattern scenarios live under
-[templates/civic-patterns](/Users/kq/Workspace/moontown/templates/civic-patterns)
+[assets/templates/civic-patterns](/Users/kq/Workspace/moontown/assets/templates/civic-patterns)
 and are installed together by
-[wenyu-civic-patterns.json](/Users/kq/Workspace/moontown/templates/civic-patterns/wenyu-civic-patterns.json).
+[wenyu-civic-patterns.json](/Users/kq/Workspace/moontown/assets/templates/civic-patterns/wenyu-civic-patterns.json).
 
 ## Civic Mapping
 

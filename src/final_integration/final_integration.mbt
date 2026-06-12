@@ -32,7 +32,7 @@ struct FinalIntegrationTemplateSpec {
 
 ///|
 pub async fn install_wenyu_final_integration(
-  manifest_path? : String = "templates/integration/wenyu-final-integration.json",
+  manifest_path? : String = "assets/templates/integration/wenyu-final-integration.json",
   snapshot_path? : String = @storage.default_snapshot_path(),
   standing_goal_path? : String = @storage.default_standing_goal_path(),
 ) -> String {
@@ -88,7 +88,7 @@ pub async fn install_wenyu_final_integration(
 
 ///|
 pub async fn render_wenyu_final_integration_status(
-  manifest_path? : String = "templates/integration/wenyu-final-integration.json",
+  manifest_path? : String = "assets/templates/integration/wenyu-final-integration.json",
   snapshot_path? : String = @storage.default_snapshot_path(),
   standing_goal_path? : String = @storage.default_standing_goal_path(),
 ) -> String {

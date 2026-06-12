@@ -124,7 +124,7 @@ Current files:
 - `civic_salon_scenario_runtime.mbt`: generic scenario template loader,
   MoonBook workspace writes, protocol ledger slice, metrics, and generated
   projection.
-- `templates/civic-salons/robotics-mini-salon.json`: copyable scenario
+- `assets/templates/civic-salons/robotics-mini-salon.json`: copyable scenario
   template proving new domains can be configured without MoonBit code.
 - `civic/communication_pattern_registry.mbt`: reusable pattern registry and
   Wenyu civic service-to-pattern mapping.

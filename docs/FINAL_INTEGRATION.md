@@ -4,7 +4,7 @@ Last updated: 2026-05-28
 
 The final local integration combines the user’s current research interests with
 the Wenyu civic-building protocol set. It is intentionally data-driven: change
-`templates/integration/wenyu-final-integration.json` to change the portfolio.
+`assets/templates/integration/wenyu-final-integration.json` to change the portfolio.
 Do not add a MoonBit branch per domain.
 
 ## Ordered Portfolio

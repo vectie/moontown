@@ -56,8 +56,8 @@ Create a small top-level docs layer:
 
 - [docs/PLANBOOK.md](/Users/kq/Workspace/moontown/docs/PLANBOOK.md)
 - [docs/DOC_STRUCTURE.md](/Users/kq/Workspace/moontown/docs/DOC_STRUCTURE.md)
-- [templates/planbook/PLAN_TEMPLATE.md](/Users/kq/Workspace/moontown/templates/planbook/PLAN_TEMPLATE.md)
-- [templates/planbook/PLANBOOK_CONTRACT.md](/Users/kq/Workspace/moontown/templates/planbook/PLANBOOK_CONTRACT.md)
+- [assets/templates/planbook/PLAN_TEMPLATE.md](/Users/kq/Workspace/moontown/assets/templates/planbook/PLAN_TEMPLATE.md)
+- [assets/templates/planbook/PLANBOOK_CONTRACT.md](/Users/kq/Workspace/moontown/assets/templates/planbook/PLANBOOK_CONTRACT.md)
 
 Then link the model from README, architecture, cookbook, and development docs.
 
@@ -80,7 +80,7 @@ Then link the model from README, architecture, cookbook, and development docs.
 | `docs/DEVELOPMENT.md` | Add plan-first rule. |
 | `docs/PLANBOOK.md` | Define planbook lifecycle and ownership. |
 | `docs/DOC_STRUCTURE.md` | Define reading order and doc families. |
-| `templates/planbook/*` | Provide reusable plan contract and template. |
+| `assets/templates/planbook/*` | Provide reusable plan contract and template. |
 
 ## Implementation Steps
 

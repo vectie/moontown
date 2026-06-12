@@ -5,7 +5,7 @@ This is a multi-package MoonBit module with implementation packages under
 `src/ui/rabbita-town`.
 
 The repository root should not contain implementation packages. Keep root
-limited to module metadata, docs, scripts, templates, runtime state directories,
+limited to module metadata, docs, scripts, assets, runtime state directories,
 and other non-source project files. `moon.mod` sets `source: "src"` so imports
 remain `vectie/moontown/...`.
 
@@ -88,7 +88,7 @@ For any change larger than a trivial one-line fix, create or update a durable
 plan before implementation. Use:
 
 - [docs/PLANBOOK.md](/Users/kq/Workspace/moontown/docs/PLANBOOK.md)
-- [templates/planbook/PLAN_TEMPLATE.md](/Users/kq/Workspace/moontown/templates/planbook/PLAN_TEMPLATE.md)
+- [assets/templates/planbook/PLAN_TEMPLATE.md](/Users/kq/Workspace/moontown/assets/templates/planbook/PLAN_TEMPLATE.md)
 
 The plan should name the problem, affected files, implementation steps,
 acceptance criteria, validation commands, and rollback path. This lets a new

@@ -72,8 +72,8 @@ test "Moontown generated skill templates keep exploration quality" {
 async test "Moontown static book skill templates keep exploration quality" {
   for
     path in [
-      "templates/books/app-tool-book/skills/tool-watch/SKILL.md", "templates/books/app-tool-book/skills/tool-build/SKILL.md",
-      "templates/books/pdf-evidence-watch/skills/pdf-watch/SKILL.md", "templates/books/pdf-evidence-watch/skills/pdf-analysis/SKILL.md",
+      "assets/templates/books/app-tool-book/skills/tool-watch/SKILL.md", "assets/templates/books/app-tool-book/skills/tool-build/SKILL.md",
+      "assets/templates/books/pdf-evidence-watch/skills/pdf-watch/SKILL.md", "assets/templates/books/pdf-evidence-watch/skills/pdf-analysis/SKILL.md",
     ] {
     assert_moonbook_skill_quality(path, @fs.read_file(path).text())
   }

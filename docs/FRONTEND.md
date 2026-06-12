@@ -316,7 +316,7 @@ The short version:
 - projection visibility is metadata-driven: generated fragments can set
   `projection_scope` or `visibility`, and operators can override visibility
   through `.moontown/book-projection-policy.json` using the template at
-  `templates/book-projection-policy.json`
+  `assets/templates/book-projection-policy.json`
 - `moon run src/cmd/main -- civic bootstrap` can create the canonical Wenyu civic
   MoonBook projection fragments consumed by the module interiors
 - `moon run src/cmd/main -- civic status` prints the civic-service portfolio without

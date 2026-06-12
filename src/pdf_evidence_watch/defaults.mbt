@@ -1,6 +1,6 @@
 ///|
 pub fn default_pdf_evidence_watch_template_root() -> String {
-  "templates/books/pdf-evidence-watch"
+  "assets/templates/books/pdf-evidence-watch"
 }
 
 ///|

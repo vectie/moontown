@@ -6,8 +6,8 @@
       "specialization": "pdf-evidence-watch",
       "title": "PDF Evidence Watch Book",
       "purpose": "Watch configured websites for PDFs, download and extract full text, analyze with a book-owned method, and notify only when accepted knowledge changes.",
-      "root": "templates/books/pdf-evidence-watch",
-      "install_example": "templates/books/pdf-evidence-watch/install.example.json",
+      "root": "assets/templates/books/pdf-evidence-watch",
+      "install_example": "assets/templates/books/pdf-evidence-watch/install.example.json",
       "install_command": "moon run cmd/main -- books template install pdf-evidence-watch <config.json>",
       "status_command": "moon run cmd/main -- books pdf-watch status <book-id>",
       "required_paths": [
@@ -36,8 +36,8 @@
       "specialization": "app-tool-book",
       "title": "App ToolBook",
       "purpose": "Watch configured websites or data sources, maintain analysis reports, and publish a durable generated web tool that Moontown can expose from a civic building.",
-      "root": "templates/books/app-tool-book",
-      "install_example": "templates/books/app-tool-book/install.example.json",
+      "root": "assets/templates/books/app-tool-book",
+      "install_example": "assets/templates/books/app-tool-book/install.example.json",
       "install_command": "moon run cmd/main -- books template install app-tool-book <config.json>",
       "status_command": "moon run cmd/main -- books app-tool status <book-id>",
       "required_paths": [

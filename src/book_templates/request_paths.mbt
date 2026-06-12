@@ -1,6 +1,6 @@
 ///|
 pub fn default_registry_path() -> String {
-  "templates/books/templates.json"
+  "assets/templates/books/templates.json"
 }
 
 ///|

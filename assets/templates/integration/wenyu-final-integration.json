@@ -72,7 +72,7 @@
     {
       "order": 6,
       "form": "all-wenyu-civic-patterns",
-      "path": "templates/civic-patterns/wenyu-civic-patterns.json",
+      "path": "assets/templates/civic-patterns/wenyu-civic-patterns.json",
       "note": "Installs triage desk, review council, match market, signal watch, learning cohort, incident bridge, and story forge scenarios for all configured Wenyu civic buildings."
     }
   ],
@@ -80,7 +80,7 @@
     {
       "order": 7,
       "form": "research-salon",
-      "path": "templates/civic-salons/embodied-robotics-social-square.json",
+      "path": "assets/templates/civic-salons/embodied-robotics-social-square.json",
       "note": "Keeps the robotics Social Square running as a 10-perspective research exchange that reduces cross-area tensions into questions, ideas, and returned follow-up work."
     }
   ]

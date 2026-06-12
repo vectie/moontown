@@ -23,7 +23,7 @@ plans/<yyyy-mm-dd>-<slug>/plan.md
 The plan must follow:
 
 ```text
-templates/planbook/PLAN_TEMPLATE.md
+assets/templates/planbook/PLAN_TEMPLATE.md
 ```
 
 ## Rules

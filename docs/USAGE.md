@@ -247,7 +247,7 @@ through the generic building communication-pattern model:
 
 ```bash
 moon run src/cmd/main -- civic protocols patterns
-moon run src/cmd/main -- civic protocols pattern-template templates/civic-salons/robotics-mini-salon.json
+moon run src/cmd/main -- civic protocols pattern-template assets/templates/civic-salons/robotics-mini-salon.json
 moon run src/cmd/main -- civic protocols status
 ```
 
@@ -277,7 +277,7 @@ The pattern path is not robotics-hardcoded. `civic protocols pattern-template
 <path>` loads a `CivicSalonScenario` JSON file and runs the same protocol
 envelope for that domain. Use
 [CIVIC_SALON_TEMPLATES.md](/Users/kq/Workspace/moontown/docs/CIVIC_SALON_TEMPLATES.md)
-and [robotics-mini-salon.json](/Users/kq/Workspace/moontown/templates/civic-salons/robotics-mini-salon.json)
+and [robotics-mini-salon.json](/Users/kq/Workspace/moontown/assets/templates/civic-salons/robotics-mini-salon.json)
 as the copyable contract.
 
 The viewport editor is intentionally town-level. Use it to compose modules,
@@ -440,7 +440,7 @@ moon run src/cmd/main -- civic protocols bootstrap
 moon run src/cmd/main -- civic protocols status
 moon run src/cmd/main -- civic protocols doctor
 moon run src/cmd/main -- civic protocols patterns
-moon run src/cmd/main -- civic protocols pattern-template templates/civic-salons/robotics-mini-salon.json
+moon run src/cmd/main -- civic protocols pattern-template assets/templates/civic-salons/robotics-mini-salon.json
 moon run src/cmd/main -- civic protocols schedules status
 moon run src/cmd/main -- civic protocols schedules tick
 ```
@@ -502,7 +502,7 @@ moon run src/cmd/main -- integration final status
 The default manifest is:
 
 ```text
-templates/integration/wenyu-final-integration.json
+assets/templates/integration/wenyu-final-integration.json
 ```
 
 It maps the current domain interests to the least surprising operating form:
@@ -514,7 +514,7 @@ It maps the current domain interests to the least surprising operating form:
 - Agents: `signal-watch` into `research-ai-agents`
 - Hardware: `signal-watch` into `research-ai-hardware`
 - Wenyu civic buildings: data-driven communication pattern scenarios from
-  `templates/civic-patterns/wenyu-civic-patterns.json`
+  `assets/templates/civic-patterns/wenyu-civic-patterns.json`
 
 The installer does not hardcode a domain workflow into MoonBit. It reads the
 manifest, upserts `.moontown/standing-goals.json`, refreshes Wenyu civic
@@ -597,7 +597,7 @@ fetch related PDFs, extract all text, analyze using my method, and notify me
 when new knowledge appears”, use a specialized research-book template:
 
 ```text
-templates/books/pdf-evidence-watch/
+assets/templates/books/pdf-evidence-watch/
 ```
 
 This template keeps the same ownership split:
@@ -662,7 +662,7 @@ look like live autonomous workload.
 Install a fully configured PDF-watch book from a Moondesk/exported JSON file:
 
 ```bash
-moon run src/cmd/main -- books pdf-watch install templates/books/pdf-evidence-watch/install.example.json
+moon run src/cmd/main -- books pdf-watch install assets/templates/books/pdf-evidence-watch/install.example.json
 ```
 
 The config file shape is:
@@ -780,7 +780,7 @@ For domains where the book should produce both knowledge and a usable web tool,
 use the `app-tool-book` template:
 
 ```text
-templates/books/app-tool-book/
+assets/templates/books/app-tool-book/
 ```
 
 This template creates a MoonBook workspace with:
@@ -813,7 +813,7 @@ moon run src/cmd/main -- books app-tool status
 Install one from a Moondesk/exported config:
 
 ```bash
-moon run src/cmd/main -- books app-tool install templates/books/app-tool-book/install.example.json
+moon run src/cmd/main -- books app-tool install assets/templates/books/app-tool-book/install.example.json
 moon run src/cmd/main -- books app-tool status toolbook-market-signal-lab
 ```
 
@@ -889,8 +889,8 @@ moon run src/cmd/main -- books templates status
 Install a book through the generic template registry:
 
 ```bash
-moon run src/cmd/main -- books template install pdf-evidence-watch templates/books/pdf-evidence-watch/install.example.json
-moon run src/cmd/main -- books template install app-tool-book templates/books/app-tool-book/install.example.json
+moon run src/cmd/main -- books template install pdf-evidence-watch assets/templates/books/pdf-evidence-watch/install.example.json
+moon run src/cmd/main -- books template install app-tool-book assets/templates/books/app-tool-book/install.example.json
 ```
 
 Process Moondesk or Mayor-submitted book creation requests:
@@ -988,7 +988,7 @@ Mayor submits a new book request, this line should change before the daemon
 installs the book.
 
 The registry is data-driven by
-`templates/books/templates.json`. Moondesk should read the same registry to
+`assets/templates/books/templates.json`. Moondesk should read the same registry to
 show available book types, editable files, install examples, and required
 template assets. The generic installer dispatches to the template-specific
 installer but keeps the UI/Mayor contract stable.
