@@ -131,8 +131,6 @@ pub fn demo_state() -> @core.TownState
 
 pub fn demo_state_from_catalog(Array[@moonbook.BookCatalogEntry]) -> @core.TownState
 
-pub fn demo_state_snapshot() -> String
-
 pub fn[Provider : @core.BookProvider] demo_state_with_provider(Provider) -> @core.TownState
 
 pub async fn dispatch_next_book_quality_ai_review(book_catalog_path? : String, snapshot_path? : String, review_dir? : String, result_dir? : String, run_path? : String, run_inline? : Bool) -> String
