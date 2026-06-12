@@ -18,7 +18,7 @@ async fn execute_goal_book_task(
   let prepared = mayor.prepare_keeper_packet(entry, task)
   let workspace_root = @moonbook.workspace_root(entry)
   let maintenance_summary = if is_detached_standing_watch_task(task) {
-    compact_moonclaw_job_store_if_needed(workspace_root, tick)
+    @moonclaw_runtime.compact_moonclaw_job_store_if_needed(workspace_root, tick)
   } else {
     ""
   }

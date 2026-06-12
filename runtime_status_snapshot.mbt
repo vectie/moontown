@@ -11,7 +11,7 @@ pub async fn inspect_saved_town(
         path=@daemon_runtime.default_standing_goal_state_path(snapshot_path),
       )
       let watcher_records = load_watcher_records_for_goals(snapshot_path, goals)
-      let template_request_status = inspect_book_template_request_status(
+      let template_request_status = @book_templates.inspect_book_template_request_status(
         request_path=@book_templates.request_path_for_snapshot(snapshot_path),
       )
       let daemon_tick = effective_daemon_tick(

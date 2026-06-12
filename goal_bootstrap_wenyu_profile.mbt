@@ -57,7 +57,7 @@ fn wenyu_build_moonclaw_profile_json() -> Json {
     },
     "steps": [wenyu_build_execute_step_json(), wenyu_build_review_step_json()],
     "metadata": {
-      "profile_metadata": moonclaw_no_input_policy_json(),
+      "profile_metadata": @moonclaw_runtime.moonclaw_no_input_policy_json(),
       "role_runtime": wenyu_build_role_runtime_json(),
     },
   }
@@ -103,7 +103,7 @@ fn wenyu_build_step_metadata(
   board_lane~ : String,
   board_order~ : Int,
 ) -> Json {
-  let fields = moonclaw_step_metadata_fields(
+  let fields = @moonclaw_runtime.moonclaw_step_metadata_fields(
     preferred_skills~,
     enable_tools=true,
     web_search=false,

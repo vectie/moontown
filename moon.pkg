@@ -13,7 +13,6 @@ import {
   "vectie/moontown/research_quality",
   "vectie/moontown/course_book",
   "vectie/moontown/moonclaw_runtime",
-  "vectie/moontown/app_tool_book",
   "vectie/moontown/standing_watch_policy",
   "vectie/moontown/live_autonomy_runtime",
   "vectie/moontown/runtime_status_policy",

@@ -5,13 +5,13 @@ async fn render_books_command(args : Array[String]) -> String {
     ["bootstrap"] =>
       @book_quality_runtime.bootstrap_registered_book_workspaces()
     ["templates"] | ["templates", "status"] =>
-      @moontown.render_book_template_registry()
+      @book_templates.render_book_template_registry()
     ["template", "install", template_id, config_path] =>
-      @moontown.install_book_template_config(template_id, config_path)
+      @book_templates.install_book_template_config(template_id, config_path)
     ["template", "requests"] | ["template", "requests", "status"] =>
-      @moontown.render_book_template_request_status()
+      @book_templates.render_book_template_request_status()
     ["template", "requests", "process"] =>
-      @moontown.process_book_template_requests()
+      @book_templates.process_book_template_requests()
     ["pdf-watch", .. rest] => render_pdf_watch_command(rest.to_owned())
     ["app-tool", .. rest] => render_app_tool_command(rest.to_owned())
     ["doctor"] => @book_quality_runtime.write_book_quality_audit()
@@ -47,12 +47,12 @@ async fn render_pdf_watch_command(args : Array[String]) -> String {
 ///|
 async fn render_app_tool_command(args : Array[String]) -> String {
   match args {
-    ["bootstrap"] => @moontown.bootstrap_app_tool_book()
-    ["bootstrap", book_id] => @moontown.bootstrap_app_tool_book(book_id~)
+    ["bootstrap"] => @app_tool_book.bootstrap_app_tool_book()
+    ["bootstrap", book_id] => @app_tool_book.bootstrap_app_tool_book(book_id~)
     ["install", config_path] =>
-      @moontown.install_app_tool_book_config(config_path)
-    ["status"] => @moontown.render_app_tool_book_status()
-    ["status", book_id] => @moontown.render_app_tool_book_status(book_id~)
+      @app_tool_book.install_app_tool_book_config(config_path)
+    ["status"] => @app_tool_book.render_app_tool_book_status()
+    ["status", book_id] => @app_tool_book.render_app_tool_book_status(book_id~)
     _ => @moontown.load_or_create_demo_dashboard()
   }
 }

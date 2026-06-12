@@ -95,7 +95,7 @@ test "moonclaw execution metadata fields omit optional target" {
 
 ///|
 test "moonclaw step metadata fields include shared runtime controls" {
-  let fields = moonclaw_step_metadata_fields(
+  let fields = @moonclaw_runtime.moonclaw_step_metadata_fields(
     preferred_skills=["skill-a", "skill-b"],
     enable_tools=true,
     web_search=false,

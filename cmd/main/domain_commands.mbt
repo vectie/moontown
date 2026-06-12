@@ -1,7 +1,8 @@
 ///|
 async fn render_moonclaw_command(args : Array[String]) -> String {
   match args {
-    ["stores", "compact"] => @moontown.compact_registered_moonclaw_job_stores()
+    ["stores", "compact"] =>
+      @moonclaw_runtime.compact_registered_moonclaw_job_stores()
     _ => @moontown.load_or_create_demo_dashboard()
   }
 }

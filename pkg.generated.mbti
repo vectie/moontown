@@ -3,7 +3,6 @@ package "vectie/moontown"
 
 import {
   "vectie/moontown/adapters/moonbook",
-  "vectie/moontown/app_tool_book",
   "vectie/moontown/book_templates",
   "vectie/moontown/cookbook",
   "vectie/moontown/core",
@@ -12,13 +11,9 @@ import {
 }
 
 // Values
-pub async fn bootstrap_app_tool_book(book_id? : String, title? : String, purpose? : String, websites? : Array[String], analysis_method? : String, tool_spec? : String, civic_building_id? : String, cadence_ticks? : Int, book_catalog_path? : String, standing_goal_path? : String, workspace_root? : String, template_root? : String) -> String
-
 pub async fn bootstrap_moontown_cookbook(book_catalog_path? : String, workspace_root? : String, manifest_path? : String) -> String
 
 pub async fn bootstrap_wenyu_game_design_course_book(book_catalog_path? : String, workspace_root? : String, source_workspace_root? : String) -> String
-
-pub async fn compact_registered_moonclaw_job_stores(book_catalog_path? : String, snapshot_path? : String, tick? : Int, max_store_bytes? : Int64) -> String
 
 pub async fn daemon_run_saved_town(snapshot_path? : String, book_catalog_path? : String, max_ticks? : Int, sleep_ms? : Int, preserve_supervisor? : Bool, inline_under_supervisor? : Bool) -> String
 
@@ -46,17 +41,9 @@ pub fn demo_state_from_catalog(Array[@moonbook.BookCatalogEntry]) -> @core.TownS
 
 pub fn[Provider : @core.BookProvider] demo_state_with_provider(Provider) -> @core.TownState
 
-pub async fn inspect_app_tool_book(book_id? : String, workspace_root? : String, book_catalog_path? : String, standing_goal_path? : String) -> @app_tool_book.AppToolBookStatus
-
-pub async fn inspect_book_template_request_status(request_path? : String) -> @book_templates.BookTemplateRequestStatus
-
 pub async fn inspect_moontown_cookbook(workspace_root? : String, manifest_path? : String) -> @cookbook.MoontownCookbookStatus
 
 pub async fn inspect_saved_town(snapshot_path? : String) -> @runtime_status_policy.TownRuntimeStatus
-
-pub async fn install_app_tool_book_config(String, book_catalog_path? : String, standing_goal_path? : String, template_root? : String) -> String
-
-pub async fn install_book_template_config(String, String, registry_path? : String, book_catalog_path? : String, standing_goal_path? : String) -> String
 
 pub async fn load_or_create_demo_dashboard(path? : String, book_catalog_path? : String) -> String
 
@@ -65,14 +52,6 @@ pub async fn load_or_create_demo_state(path? : String, book_catalog_path? : Stri
 pub async fn[Provider : @core.BookProvider] load_or_create_demo_state_with_provider(Provider, path? : String) -> @core.TownState
 
 pub async fn load_or_create_modeled_demo_state(path? : String, book_catalog_path? : String) -> @core.TownState
-
-pub async fn process_book_template_requests(request_path? : String, registry_path? : String, book_catalog_path? : String, standing_goal_path? : String, tick? : Int) -> String
-
-pub async fn render_app_tool_book_status(book_id? : String, workspace_root? : String, book_catalog_path? : String, standing_goal_path? : String) -> String
-
-pub async fn render_book_template_registry(registry_path? : String) -> String
-
-pub async fn render_book_template_request_status(request_path? : String) -> String
 
 pub async fn render_goal_run(String, book_id? : String?, task_limit_per_book? : Int, snapshot_path? : String, book_catalog_path? : String) -> String
 
