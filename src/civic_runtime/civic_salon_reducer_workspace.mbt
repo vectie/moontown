@@ -10,15 +10,15 @@ async fn write_civic_salon_reducer_workspace(
     @civic.salon_reducer_skill_text(scenario),
   )
   @support.write_text_file(
-    "\{root}/raw/bootstrap/civic-salon-participants.json",
+    "\{root}/\{@civic.civic_reducer_participants_relative_path()}",
     scenario.participants.to_json().stringify(indent=2),
   )
   @support.write_text_file(
-    "\{root}/raw/bootstrap/civic-salon-reducer-input.md",
+    "\{root}/\{@civic.civic_reducer_input_relative_path()}",
     @civic.salon_reducer_input_markdown(scenario, round_id, round_number),
   )
   @support.write_text_file(
-    "\{root}/raw/bootstrap/civic-salon-reducer-contract.md",
+    "\{root}/\{@civic.civic_reducer_contract_relative_path()}",
     @civic.salon_reducer_contract_markdown(scenario),
   )
   @support.write_text_file(
@@ -36,7 +36,9 @@ async fn merged_civic_salon_reducer_profile_json(
   let existing = @support.read_json_file_or_empty_object(path)
   let reducer_profile = civic_salon_reducer_profile_json(scenario)
   @support.upsert_moonclaw_job_profile_json(
-    existing, "civic_salon_reducer_worker", reducer_profile,
+    existing,
+    @civic.civic_reducer_profile_family(),
+    reducer_profile,
   ).stringify(indent=2)
 }
 
@@ -44,7 +46,7 @@ async fn merged_civic_salon_reducer_profile_json(
 fn civic_salon_reducer_profile_json(scenario : CivicSalonScenario) -> Json {
   let pattern = @civic.salon_pattern_for_scenario(scenario)
   {
-    "family": "civic_salon_reducer_worker",
+    "family": @civic.civic_reducer_profile_family(),
     "role": "worker",
     "priority": 155,
     "tags": [
@@ -72,7 +74,7 @@ fn civic_salon_reducer_profile_json(scenario : CivicSalonScenario) -> Json {
 
 ///|
 fn civic_salon_reducer_prompt_template() -> String {
-  "Read ${proposal.request_text}. Then read the listed context pages and skill_paths. Write raw/bootstrap/civic-salon-ideas.json only after validating the CivicSalonIdea compatibility contract. Do not wait for input and do not use template seed ideas."
+  "Read ${proposal.request_text}. Then read the listed context pages and skill_paths. Write \{@civic.civic_reducer_output_relative_path()} only after validating the \{@civic.civic_reducer_output_contract_type_name()} contract. Do not wait for input and do not use template seed ideas."
 }
 
 ///|

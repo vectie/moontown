@@ -116,7 +116,7 @@ pub fn salon_reducer_skill_text(scenario : CivicSalonScenario) -> String {
     "",
     civic_salon_reducer_output_contract_summary(),
     "",
-    "Write `raw/bootstrap/civic-salon-ideas.json` exactly as JSON:",
+    "Write `\{civic_reducer_output_relative_path()}` exactly as JSON:",
     "",
     civic_salon_reducer_output_contract_json_example(),
     "",
@@ -155,7 +155,7 @@ pub fn salon_reducer_contract_markdown(scenario : CivicSalonScenario) -> String 
   [
     "# Civic Communication Pattern Output Contract",
     "",
-    "Emit a non-empty set of `CivicSalonIdea` records to `raw/bootstrap/civic-salon-ideas.json`. The legacy type name is reused for every civic communication pattern while the runtime is experimental.",
+    "Emit a non-empty set of `\{civic_reducer_output_contract_type_name()}` records to `\{civic_reducer_output_relative_path()}`. The record is the generic civic communication output shape while the runtime continues to migrate away from salon-specific names.",
     "",
     "Each idea must include:",
     "",
@@ -401,7 +401,8 @@ fn civic_salon_reducer_role_description(
 ///|
 fn civic_salon_reducer_reduction_rules() -> Array[String] {
   [
-    "Read every participant in `raw/bootstrap/civic-salon-participants.json`.", "Use at least two participant workspaces for each idea unless the participant set itself has only one workspace.",
+    "Read every participant in `\{civic_reducer_participants_relative_path()}`.",
+    "Use at least two participant workspaces for each idea unless the participant set itself has only one workspace.",
     "Generate outputs from tensions, dependencies, missing interfaces, evaluation gaps, shared bottlenecks, matching opportunities, routing needs, or safety gates.",
     "Prefer follow-up questions that can become benchmarks, protocols, schemas, experiments, service actions, matched introductions, lesson plans, stories, recovery steps, or review gates.",
     "Do not claim the output is accepted knowledge. It is a returned direction for the owning books and review gate.",

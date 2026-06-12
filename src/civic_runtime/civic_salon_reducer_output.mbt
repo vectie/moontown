@@ -110,11 +110,11 @@ async fn write_civic_salon_reducer_blocker(
   round_id : String,
 ) -> Unit {
   @support.write_text_file(
-    "\{reduction.workspace_root}/raw/bootstrap/civic-salon-reducer-blocker.md",
+    "\{reduction.workspace_root}/\{@civic.civic_reducer_blocker_relative_path()}",
     [
-      "# Civic Salon Reducer Blocker",
+      "# Civic Communication Reducer Blocker",
       "",
-      "- Salon: `\{scenario.id}`",
+      "- Scenario: `\{scenario.id}`",
       "- Round: `\{round_id}`",
       "- Reducer: `\{reduction.reducer_kind}`",
       "- Status: `\{reduction.status}`",

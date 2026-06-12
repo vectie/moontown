@@ -9,18 +9,20 @@ fn civic_salon_reducer_packet(
   @moonclaw.ExternalProposalPacket::new(
     packet_id~,
     title="Reduce \{scenario.title} round \{round_number}",
-    summary="Run the \{scenario.domain_label} \{pattern.title} reducer and emit CivicSalonIdea JSON for \{scenario.title}.",
+    summary="Run the \{scenario.domain_label} \{pattern.title} reducer and emit \{@civic.civic_reducer_output_contract_type_name()} JSON for \{scenario.title}.",
     request_text=civic_salon_reducer_request(scenario, round_id, round_number),
-    profile="civic_salon_reducer_worker",
+    profile=@civic.civic_reducer_profile_family(),
     output_contract=pattern.output_contract,
     context_pages=[
-      "raw/bootstrap/civic-salon-reducer-contract.md", "raw/bootstrap/civic-salon-participants.json",
-      "raw/bootstrap/civic-salon-reducer-input.md",
+      @civic.civic_reducer_contract_relative_path(),
+      @civic.civic_reducer_participants_relative_path(),
+      @civic.civic_reducer_input_relative_path(),
     ],
     skill_paths=["skills/\{scenario.skill_name}/SKILL.md"],
     notes=[
-      "Read the generated SKILL.md before reducing ideas.", "Do not use template-provided seed ideas; only participant context and contract files are input.",
-      "Write raw/bootstrap/civic-salon-ideas.json with the exact CivicSalonIdea contract.",
+      "Read the generated SKILL.md before reducing ideas.",
+      "Do not use template-provided seed ideas; only participant context and contract files are input.",
+      "Write \{@civic.civic_reducer_output_relative_path()} with the exact \{@civic.civic_reducer_output_contract_type_name()} contract.",
     ],
     tags=[
       "civic-communication-pattern",
@@ -64,10 +66,10 @@ fn civic_salon_reducer_packet_step_metadata(
   pattern : @civic.CivicCommunicationPattern,
 ) -> Json {
   let fields : Map[String, Json] = {}
-  fields["kind"] = "civic_salon_reducer".to_json()
+  fields["kind"] = @civic.civic_reducer_step_kind().to_json()
   fields["output_contract"] = pattern.output_contract.to_json()
   fields["preferred_skills"] = [scenario.skill_name].to_json()
-  fields["target_pages"] = ["raw/bootstrap/civic-salon-ideas.json"].to_json()
+  fields["target_pages"] = [@civic.civic_reducer_output_relative_path()].to_json()
   @moonclaw_runtime.add_moonclaw_no_input_policy(fields)
   Json::object(fields)
 }
@@ -84,7 +86,7 @@ fn civic_salon_reducer_request(
     "Round: `\{round_id}` (#\{round_number}).",
     "Read `skills/\{scenario.skill_name}/SKILL.md` first, then read the reducer contract and participant JSON.",
     "Reduce participant perspectives according to this pattern: \{pattern.summary}",
-    "Write the result to `raw/bootstrap/civic-salon-ideas.json`.",
+    "Write the result to `\{@civic.civic_reducer_output_relative_path()}`.",
     "Do not wait for user input. If evidence is incomplete, produce best-effort pattern outputs with explicit follow-up questions and next experiments/artifacts.",
   ].join("\n")
 }

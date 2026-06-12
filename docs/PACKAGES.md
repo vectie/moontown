@@ -604,6 +604,8 @@ Purpose:
 
 - `src/civic` owns service definitions, target page contracts, skill paths,
   protocol vocabulary, and civic helper paths.
+- `src/civic` owns civic communication reducer contract helpers: reducer input,
+  participant, output, blocker, step-kind, and MoonClaw profile-family names.
 - `src/civic_runtime` owns workspace writes, ledgers, generated pages, and
   scenario execution persistence.
 - `src/civic_runtime` owns civic-service MoonBook persistence payloads:
@@ -613,6 +615,8 @@ Purpose:
 Boundary:
 
 - civic runtime writes generated pages through `@civic` path helpers.
+- civic runtime writes reducer workspaces through `@civic` reducer-contract
+  helpers; it should not hardcode reducer filenames or profile family ids.
 - `src/town_runtime` may choose when a civic service result should be persisted,
   but should not assemble civic persistence summaries, artifact lists, or memory
   candidates.

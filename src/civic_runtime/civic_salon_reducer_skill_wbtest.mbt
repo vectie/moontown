@@ -10,7 +10,7 @@ test "civic reducer skill names map-reduce role reduction rules and contract" {
   assert_true(text.contains("Do not copy or consume template seed ideas"))
   assert_true(text.contains("Every output must name the home books"))
   assert_true(text.contains("CivicSalonIdea"))
-  assert_true(text.contains("raw/bootstrap/civic-salon-ideas.json"))
+  assert_true(text.contains(@civic.civic_reducer_output_relative_path()))
 }
 
 ///|

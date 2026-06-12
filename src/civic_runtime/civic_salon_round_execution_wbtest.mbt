@@ -71,7 +71,7 @@ async test "stale civic salon projection refreshes without forcing another round
     "{\"book_id\":\"wenyu-social-square\",\"status_chips\":[{\"label\":\"round 1\",\"tone\":\"info\"}]}",
   )
   @support.write_text_file(
-    "\{root}/books/wenyu-social-square/raw/bootstrap/civic-salon-ideas.json",
+    "\{root}/books/wenyu-social-square/\{@civic.civic_reducer_output_relative_path()}",
     Json::object({ "ideas": daemon_civic_salon_scenario().ideas.to_json() }).stringify(
       indent=2,
     ),
@@ -106,7 +106,7 @@ async test "persisted civic reducer prefers scenario-specific output over shared
   let workspace_base = root
   let raw_root = "\{root}/books/wenyu-social-square/raw/bootstrap"
   @support.write_text_file(
-    "\{raw_root}/civic-salon-ideas.json",
+    "\{raw_root}/civic-communication-results.json",
     Json::object({
       "ideas": [{ ..scenario.ideas[0], participating_books: ["other-book"] }].to_json(),
     }).stringify(indent=2),

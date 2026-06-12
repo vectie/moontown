@@ -903,6 +903,11 @@ registry, civic service-kind to pattern mapping, and reusable salon/scenario
 DTOs such as `CivicSalonScenario`, `CivicSalonIdea`, `CivicSalonMetric`, and
 `CivicSalonHomeReturn`, plus the structural effectiveness calculation that
 turns participant and idea packets into metrics. It also owns
+generic reducer contract helpers: reducer input path, participant path, output
+path, blocker path, step kind, output contract name, and MoonClaw profile
+family. Runtime packages must consume those helpers instead of embedding
+reducer filenames or profile ids.
+It also owns
 `CivicSalonSchedule`, `CivicSalonRoundRecord`, and pure schedule transition
 semantics. Scenario pattern resolution, pattern-label fallback, generic
 building-protocol derivation, and reusable salon protocol notes live in

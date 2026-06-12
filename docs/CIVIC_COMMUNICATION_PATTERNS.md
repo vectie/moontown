@@ -66,12 +66,16 @@ A scenario template can declare:
 ```
 
 If the fields are absent, the current civic exchange runtime defaults to
-`research-salon` because the compatibility materializer still uses the
-`CivicSalonIdea` record shape. The scenario skill now treats that record as a
+`research-salon`. The scenario skill treats the current reducer record as a
 generic reviewable pattern-output contract: for non-research patterns,
 `research_questions` means follow-up/review questions, and `next_experiment`
 means the smallest useful next action, artifact, drill, lesson, match review,
 or story draft.
+
+Reducer filesystem/profile names are not owned by `civic_runtime`. They are
+owned by `src/civic/communication_reducer_contract.mbt` so every building
+pattern uses the same policy helpers for reducer input, participant records,
+output records, blocker files, step kind, and MoonClaw profile family.
 
 Default Wenyu civic pattern scenarios live under
 [assets/templates/civic-patterns](/Users/kq/Workspace/moontown/assets/templates/civic-patterns)
@@ -96,11 +100,11 @@ Current recommended Wenyu mappings:
 
 ## Implementation Direction
 
-The current runtime has one shared compatibility materializer that can run all
-eight pattern ids from scenario data. Do not add a MoonBit branch per civic
-building. Extract or replace the compatibility type only when the pattern needs
-new structural fields that cannot be expressed through the current generic
-output shape.
+The current runtime has one shared communication-pattern reducer that can run
+all eight pattern ids from scenario data. Do not add a MoonBit branch per civic
+building. Extend the civic-owned reducer contract only when a pattern needs new
+structural fields that cannot be expressed through the current generic output
+shape.
 
 Shared envelope steps:
 

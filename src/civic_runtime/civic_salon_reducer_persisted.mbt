@@ -35,7 +35,7 @@ async fn persisted_civic_salon_reduction(
       {
         ideas: [],
         status: @core.TaskExecutionStatus::Failed,
-        summary: "No persisted civic salon reducer output found at `raw/bootstrap/civic-salon-ideas.json`; refresh skipped instead of falling back to template seed ideas.",
+        summary: "No persisted civic communication reducer output found at `\{@civic.civic_reducer_output_relative_path()}`; refresh skipped instead of falling back to template seed ideas.",
         packet_id: None,
         packet_path: None,
         proposal_id: None,

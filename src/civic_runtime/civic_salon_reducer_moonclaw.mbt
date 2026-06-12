@@ -11,7 +11,7 @@ async fn moonclaw_civic_salon_reduction(
     workspace_base,
   )
   write_civic_salon_reducer_workspace(scenario, root, round_id, round_number)
-  let packet_id = "civic-salon-reducer-\{scenario.id}-\{round_id}"
+  let packet_id = "civic-communication-reducer-\{scenario.id}-\{round_id}"
   let packet_path = civic_salon_reducer_packet_path(
     scenario, round_id, workspace_base,
   )

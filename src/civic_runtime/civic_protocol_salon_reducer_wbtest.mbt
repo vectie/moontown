@@ -8,10 +8,10 @@ async test "MoonClaw reducer workspace excludes template seed ideas" {
     scenario, root, "future-energy-round-2", 2,
   )
   let input = @fs.read_file(
-    "\{root}/raw/bootstrap/civic-salon-reducer-input.md",
+    "\{root}/\{@civic.civic_reducer_input_relative_path()}",
   ).text()
   let participants = @fs.read_file(
-    "\{root}/raw/bootstrap/civic-salon-participants.json",
+    "\{root}/\{@civic.civic_reducer_participants_relative_path()}",
   ).text()
   let skill = @fs.read_file("\{root}/skills/future-energy-salon/SKILL.md").text()
   assert_true(!input.contains("storage-grid-control-contract"))
@@ -39,7 +39,7 @@ async test "civic salon reducer profile preserves existing civic service worker 
   assert_true(merged.contains("\"wenyu_civic_service_worker\""))
   assert_true(merged.contains("\"execute_civic_service\""))
   assert_true(merged.contains("\"review_civic_service\""))
-  assert_true(merged.contains("\"civic_salon_reducer_worker\""))
+  assert_true(merged.contains("\"\{@civic.civic_reducer_profile_family()}\""))
   assert_true(merged.contains("\"reduce_civic_pattern_outputs\""))
 }
 
@@ -63,6 +63,6 @@ async test "civic salon reducer parses object ideas contract" {
   }
   assert_eq(
     civic_salon_reducer_output_path(scenario, "/tmp/moontown"),
-    "/tmp/moontown/books/wenyu-social-square/raw/bootstrap/civic-salon-ideas.json",
+    "/tmp/moontown/books/wenyu-social-square/\{@civic.civic_reducer_output_relative_path()}",
   )
 }
