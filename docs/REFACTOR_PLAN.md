@@ -94,6 +94,9 @@ Status: implemented for root-package file structure.
 
 Goals:
 
+- keep repository root free of implementation source files
+- keep `src/` root as a facade-only package with implementation moved into
+  named packages
 - split the protocol runtime into protocol registry/bootstrap,
   protocol ledger store, protocol status projection, Social Square proof
   fixture, generic civic salon scenario records, scenario runtime, and
@@ -105,6 +108,10 @@ Goals:
 
 Acceptance:
 
+- `./scripts/audit-source-layout.sh` passes
+- repo root has no implementation-like MoonBit/JS/TS/CSS source files
+- `src/` root contains only `facade.mbt`, `moon.pkg`, and
+  `pkg.generated.mbti`
 - no file in the root package exceeds roughly 1,200 lines unless there is a
   clear reason
 - protocol store tests cover append/read/latest/count behavior

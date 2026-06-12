@@ -9,6 +9,11 @@ limited to module metadata, docs, scripts, assets, runtime state directories,
 and other non-source project files. `moon.mod` sets `source: "src"` so imports
 remain `vectie/moontown/...`.
 
+The root `src/` package should also stay thin. It may contain only the public
+facade (`src/facade.mbt`), `src/moon.pkg`, and the generated interface file.
+All real implementation belongs in named packages such as `src/town_runtime`,
+`src/civic`, `src/planbook_runtime`, or `src/ui`.
+
 ## Core Commands
 
 From the repo root:
@@ -32,11 +37,18 @@ Build the frontend:
 ./scripts/build-rabbita-ui.sh
 ```
 
+Check source layout boundaries:
+
+```bash
+./scripts/audit-source-layout.sh
+```
+
 ## Recommended Local Loop
 
 For normal code changes:
 
 ```bash
+./scripts/audit-source-layout.sh
 moon check
 moon test
 moon info
@@ -46,6 +58,7 @@ moon fmt
 For UI changes:
 
 ```bash
+./scripts/audit-source-layout.sh
 moon check
 moon test
 moon info

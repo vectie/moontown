@@ -114,6 +114,8 @@ deployment, backups, auth, and multi-day recovery evidence.
 
 - source packages live under `src/`; root stays limited to metadata, docs,
   scripts, templates, and runtime state
+- `src/` root is a facade only; implementation files must live in named
+  packages, and `./scripts/audit-source-layout.sh` enforces this boundary
 - `src/core` town, book, worker, task, and event modeling
 - `src/dispatch` routing and isolation decisions
 - `src/storage` snapshot persistence
