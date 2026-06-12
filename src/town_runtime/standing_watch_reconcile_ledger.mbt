@@ -25,7 +25,9 @@ async fn reconcile_persisted_standing_watch_records(
           ) {
           continue
         }
-        let status = task_status_for_terminal_watcher_decision(record.decision)
+        let status = @standing_watch_policy.task_status_for_terminal_watcher_decision(
+          record.decision,
+        )
         let reconciled = copy_execution_with(
           execution,
           status~,

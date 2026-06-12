@@ -92,3 +92,59 @@ test "standing watch marker parser owns emitted contract fields" {
   )
   assert_true(!standing_watch_summary_has_zero_material_delta(summary))
 }
+
+///|
+test "watcher record execution matching uses concrete run id when present" {
+  let execution = @core.TaskExecutionRecord::new(
+    task_id="standing-watch-opc-tick-1",
+    book_id="research-opc",
+    packet_id="packet",
+    packet_path="packet.json",
+    status=@core.TaskExecutionStatus::Completed,
+    summary="standing_goal_decision: update",
+    output_contract="standing-watch-live-snapshot",
+    run_id=Some("run-1"),
+  )
+  let matching = @core.WatcherRunRecord::new(
+    goal_id="watch-opc",
+    tick=1,
+    target_book_id="research-opc",
+    decision=@core.WatcherDecisionKind::Update,
+    task_id=Some("standing-watch-opc-tick-1"),
+    run_id=Some("run-1"),
+  )
+  let stale = @core.WatcherRunRecord::new(
+    goal_id="watch-opc",
+    tick=1,
+    target_book_id="research-opc",
+    decision=@core.WatcherDecisionKind::Update,
+    task_id=Some("standing-watch-opc-tick-1"),
+    run_id=Some("run-old"),
+  )
+  assert_true(watcher_record_matches_execution(matching, execution))
+  assert_true(!watcher_record_matches_execution(stale, execution))
+}
+
+///|
+test "terminal watcher decision maps to execution status" {
+  assert_eq(
+    task_status_for_terminal_watcher_decision(
+      @core.WatcherDecisionKind::NeedsReview,
+    ),
+    @core.TaskExecutionStatus::ReviewQueued,
+  )
+  assert_eq(
+    task_status_for_terminal_watcher_decision(@core.WatcherDecisionKind::Failed),
+    @core.TaskExecutionStatus::Failed,
+  )
+  assert_eq(
+    task_status_for_terminal_watcher_decision(@core.WatcherDecisionKind::Update),
+    @core.TaskExecutionStatus::Completed,
+  )
+  assert_eq(
+    task_status_for_terminal_watcher_decision(
+      @core.WatcherDecisionKind::NoChange,
+    ),
+    @core.TaskExecutionStatus::Completed,
+  )
+}

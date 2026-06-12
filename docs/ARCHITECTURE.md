@@ -264,16 +264,19 @@ book owns. The implementation now has a first-class `policy` package:
   derivation, compact id segment formatting, target page set, prompt text,
   strict accounting markers, marker parsing, MoonBook standing-watch history
   block parsing, provider-decision collapse policy, material-delta metrics, and
-  book-quality repair appendix composition. It also owns keeper auto-triage and
-  recovery closure policy: whether no-change/update markers satisfy a goal
-  threshold, how terminal markers supersede failed transport status, and the
-  accepted keeper metadata appended to execution summaries. Root may decide
+  book-quality repair appendix composition. It also owns watcher-record matching
+  against execution records, terminal watcher-decision to execution-status
+  mapping, keeper auto-triage, and recovery closure policy: whether
+  no-change/update markers satisfy a goal threshold, how terminal markers
+  supersede failed transport status, and the accepted keeper metadata appended
+  to execution summaries. Root may decide
   when a standing goal is due, route it through the Mayor, persist snapshots,
   read/write MoonBook history files, apply package-owned reconciliation
   decisions to `TownState`, and append watcher ledgers, but it must not redefine
   the standing-watch prompt, marker vocabulary/parser, history parser/collapse
   semantics, material-delta accounting, task kind, id format, keeper closure
-  thresholds, or auto-triage/recovery summary wording locally.
+  thresholds, watcher-record matching/status mapping, or auto-triage/recovery
+  summary wording locally.
 
 The root package must not re-export every policy constructor. Root systems may
 map legacy book labels into a `BookPolicy` while migration continues, but new

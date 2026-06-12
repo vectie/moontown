@@ -39,6 +39,29 @@ pub fn watcher_record_has_zero_material_delta(
 }
 
 ///|
+pub fn watcher_record_matches_execution(
+  record : @core.WatcherRunRecord,
+  execution : @core.TaskExecutionRecord,
+) -> Bool {
+  match execution.run_id {
+    Some(run_id) => record.run_id == Some(run_id)
+    None => true
+  }
+}
+
+///|
+pub fn task_status_for_terminal_watcher_decision(
+  decision : @core.WatcherDecisionKind,
+) -> @core.TaskExecutionStatus {
+  match decision {
+    @core.WatcherDecisionKind::NeedsReview =>
+      @core.TaskExecutionStatus::ReviewQueued
+    @core.WatcherDecisionKind::Failed => @core.TaskExecutionStatus::Failed
+    _ => @core.TaskExecutionStatus::Completed
+  }
+}
+
+///|
 fn watcher_record_same_terminal_identity(
   left : @core.WatcherRunRecord,
   right : @core.WatcherRunRecord,

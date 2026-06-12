@@ -75,9 +75,13 @@ pub fn standing_watch_task_tick_prefix(String) -> String
 
 pub fn standing_watch_tick_for_goal_task(@core.StandingGoal, String) -> Int?
 
+pub fn task_status_for_terminal_watcher_decision(@core.WatcherDecisionKind) -> @core.TaskExecutionStatus
+
 pub fn watcher_record_effective_decision(@core.WatcherRunRecord) -> @core.WatcherDecisionKind
 
 pub fn watcher_record_has_zero_material_delta(@core.WatcherRunRecord) -> Bool
+
+pub fn watcher_record_matches_execution(@core.WatcherRunRecord, @core.TaskExecutionRecord) -> Bool
 
 pub fn watcher_record_prefer_candidate(@core.WatcherRunRecord, @core.WatcherRunRecord) -> Bool
 
