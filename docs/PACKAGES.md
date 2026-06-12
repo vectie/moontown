@@ -148,6 +148,7 @@ Purpose:
 - standing-watch event shape for watcher run records
 - standing-watch live snapshot stale-window policy and transient dispatch-error
   classification
+- empty completion `no_change` marker summary contract
 - keeper auto-triage/recovery closure policy, thresholds, and summary wording
 
 Boundary:
@@ -157,7 +158,7 @@ Boundary:
 - `src/town_runtime` should not own standing-watch marker vocabulary, closure
   thresholds, watcher-record matching/status mapping, standing-watch event
   shape, live snapshot stale windows, transient dispatch classification, or
-  auto-triage/recovery summary text.
+  empty-completion `no_change` marker text.
 
 ## Storage
 

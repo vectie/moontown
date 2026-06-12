@@ -71,7 +71,9 @@ fn standing_watch_empty_review_completion_summary(
     observed.summary,
     "keeper_auto_triage: empty_completion_no_change",
     standing_watch_empty_review_completion_reason_line(),
-    standing_watch_empty_completion_no_change_summary(observed.task_id),
+    @standing_watch_policy.standing_watch_empty_completion_no_change_summary(
+      observed.task_id,
+    ),
   ].join("\n")
 }
 

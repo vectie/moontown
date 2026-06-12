@@ -177,3 +177,15 @@ test "standing watch transient dispatch and stale window policy are centralized"
   assert_true(standing_watch_transient_dispatch_error(detail))
   assert_eq(standing_watch_stale_window_ticks(), 120)
 }
+
+///|
+test "empty completion no-change summary keeps accounting contract stable" {
+  let summary = standing_watch_empty_completion_no_change_summary("watch-task")
+  let lines = summary.split("\n").to_array()
+  assert_eq(lines.length(), 12)
+  assert_eq(lines[0], "standing_goal_decision: no_change")
+  assert_eq(lines[1], "delta_score: 0")
+  assert_eq(lines[2], "new_source_count: 0")
+  assert_eq(lines[10], "book_watch_record_id: watch-task")
+  assert_true(lines[11].contains("mayor classified it as no_change"))
+}

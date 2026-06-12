@@ -1,6 +1,6 @@
 ///|
 test "empty completion recovery summary exposes strict no-change accounting" {
-  let summary = standing_watch_empty_completion_no_change_summary(
+  let summary = @standing_watch_policy.standing_watch_empty_completion_no_change_summary(
     "keeper-opc-watch-tick-42",
   )
   assert_true(summary.contains("standing_goal_decision: no_change"))
@@ -17,13 +17,4 @@ test "empty completion recovery summary exposes strict no-change accounting" {
     summary.contains("book_watch_record_id: keeper-opc-watch-tick-42"),
   )
   assert_true(summary.contains("mayor classified it as no_change"))
-}
-
-///|
-test "empty completion recovery lines keep accounting order stable" {
-  let lines = standing_watch_empty_completion_no_change_lines("watch-task")
-  assert_eq(lines.length(), 12)
-  assert_eq(lines[0], "standing_goal_decision: no_change")
-  assert_eq(lines[10], "book_watch_record_id: watch-task")
-  assert_eq(lines[11], standing_watch_empty_completion_no_change_reason())
 }
