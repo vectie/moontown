@@ -522,7 +522,7 @@ inside `civic/` first.
 
 Scenario policy is civic-owned too. Pattern id fallback, pattern-label
 fallback, generic building-protocol derivation, and reusable building/metric/
-return-home notes belong in `civic/salon_scenario_policy.mbt`. Root runtime
+return-home notes belong in `civic/communication_scenario_policy.mbt`. Root runtime
 files may materialize scenario pages and packets, but they should call the
 package policy instead of reconstructing protocol contracts.
 

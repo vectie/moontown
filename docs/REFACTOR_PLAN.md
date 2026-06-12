@@ -132,7 +132,7 @@ Current files:
   Wenyu civic service-to-pattern mapping.
 - `civic/salon_scenario_types.mbt`: reusable salon scenario, participant, idea,
   metric, reduction-mode, and home-return DTOs.
-- `civic/salon_scenario_policy.mbt`: reusable scenario pattern resolution,
+- `civic/communication_scenario_policy.mbt`: reusable scenario pattern resolution,
   pattern-label fallback, building-protocol derivation, and salon protocol
   notes.
 - `civic/skill_text.mbt`: reusable generic civic service skill, module skill,

@@ -97,9 +97,12 @@ test "salon scenario policy resolves pattern defaults and labels" {
     participants: [],
     ideas: [],
   }
-  assert_eq(salon_pattern_id(scenario), "research-salon")
-  assert_eq(salon_pattern_for_scenario(scenario).id, "research-salon")
-  assert_eq(salon_pattern_label(scenario), "Research Salon")
+  assert_eq(communication_pattern_id_for_scenario(scenario), "research-salon")
+  assert_eq(communication_pattern_for_scenario(scenario).id, "research-salon")
+  assert_eq(
+    communication_pattern_label_for_scenario(scenario),
+    "Research Salon",
+  )
 }
 
 ///|
@@ -134,15 +137,15 @@ test "salon scenario policy builds building protocol from pattern contract" {
     participants: [],
     ideas: [],
   }
-  let protocol = salon_protocol_for_scenario(scenario)
+  let protocol = communication_protocol_for_scenario(scenario)
   assert_eq(protocol.building_id, "social-square")
   assert_eq(protocol.service_id, "robotics-salon")
   assert_eq(protocol.protocol_mode, "aggregate-match-distribute")
   assert_eq(protocol.skill_packs.length(), 2)
   assert_eq(protocol.skill_packs[0], "match-market")
   assert_eq(protocol.skill_packs[1], "robotics-salon")
-  let intro = salon_building_intro(
-    salon_pattern_for_scenario(scenario),
+  let intro = communication_building_intro(
+    communication_pattern_for_scenario(scenario),
     protocol,
   )
   assert_true(intro.contains("Robotics Research Salon"))

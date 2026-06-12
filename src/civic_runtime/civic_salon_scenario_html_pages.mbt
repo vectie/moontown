@@ -8,7 +8,7 @@ fn civic_salon_building_html(
   round_id : String,
   round_number : Int,
 ) -> String {
-  let pattern_label = @civic.salon_pattern_label(scenario)
+  let pattern_label = @civic.communication_pattern_label_for_scenario(scenario)
   [
     "<!doctype html>",
     "<html lang=\"en\">",

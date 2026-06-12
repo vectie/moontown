@@ -44,7 +44,7 @@ async fn merged_civic_salon_reducer_profile_json(
 
 ///|
 fn civic_salon_reducer_profile_json(scenario : CivicSalonScenario) -> Json {
-  let pattern = @civic.salon_pattern_for_scenario(scenario)
+  let pattern = @civic.communication_pattern_for_scenario(scenario)
   {
     "family": @civic.civic_reducer_profile_family(),
     "role": "worker",

@@ -5,7 +5,7 @@ fn civic_salon_reducer_packet(
   round_id : String,
   round_number : Int,
 ) -> @moonclaw.ExternalProposalPacket {
-  let pattern = @civic.salon_pattern_for_scenario(scenario)
+  let pattern = @civic.communication_pattern_for_scenario(scenario)
   @moonclaw.ExternalProposalPacket::new(
     packet_id~,
     title="Reduce \{scenario.title} round \{round_number}",
@@ -80,7 +80,7 @@ fn civic_salon_reducer_request(
   round_id : String,
   round_number : Int,
 ) -> String {
-  let pattern = @civic.salon_pattern_for_scenario(scenario)
+  let pattern = @civic.communication_pattern_for_scenario(scenario)
   [
     "You are the MoonClaw reducer for `\{scenario.title}` using the `\{pattern.title}` communication pattern.",
     "Round: `\{round_id}` (#\{round_number}).",

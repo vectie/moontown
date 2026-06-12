@@ -4,7 +4,7 @@ fn civic_salon_participant_index(
   participant : CivicSalonParticipantBook,
   returned_ideas : Array[CivicSalonIdea],
 ) -> String {
-  let pattern = @civic.salon_pattern_for_scenario(scenario)
+  let pattern = @civic.communication_pattern_for_scenario(scenario)
   [
     "# \{participant.title}",
     "",
@@ -39,7 +39,7 @@ fn civic_salon_participant_contract(
   scenario : CivicSalonScenario,
   participant : CivicSalonParticipantBook,
 ) -> String {
-  let pattern = @civic.salon_pattern_for_scenario(scenario)
+  let pattern = @civic.communication_pattern_for_scenario(scenario)
   [
     "# \{scenario.title} Participant Contract",
     "",

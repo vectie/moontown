@@ -1,7 +1,7 @@
 ///|
 test "civic salon building synthesis separates protocol structure from truth claims" {
   let scenario = building_pages_test_scenario()
-  let protocol = @civic.salon_protocol_for_scenario(scenario)
+  let protocol = @civic.communication_protocol_for_scenario(scenario)
   let participants = scenario.participants
   let ideas = scenario.ideas
   let metrics = civic_salon_metrics(scenario, participants, ideas)

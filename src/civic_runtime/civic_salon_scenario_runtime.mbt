@@ -74,7 +74,7 @@ async fn materialize_civic_salon_scenario(
       civic_salon_workspace_root(participant.book_id, workspace_base),
     )
   }
-  let protocol = civic_salon_protocol_for_scenario(scenario)
+  let protocol = civic_communication_protocol_for_scenario(scenario)
   seed_civic_salon_protocol_slice(
     scenario, protocol, participants, ideas, round_id, round_number,
   )
@@ -147,12 +147,12 @@ fn civic_salon_seeded_reducer_suffix(reducer_summary : String?) -> String {
 }
 
 ///|
-fn civic_salon_protocol_for_scenario(
+fn civic_communication_protocol_for_scenario(
   scenario : CivicSalonScenario,
 ) -> @civic.BuildingProtocolDefinition {
   match @civic.wenyu_building_protocol_for_building_id(scenario.building_id) {
     Some(protocol) => protocol
-    None => @civic.salon_protocol_for_scenario(scenario)
+    None => @civic.communication_protocol_for_scenario(scenario)
   }
 }
 

@@ -911,7 +911,7 @@ It also owns
 `CivicSalonSchedule`, `CivicSalonRoundRecord`, and pure schedule transition
 semantics. Scenario pattern resolution, pattern-label fallback, generic
 building-protocol derivation, and reusable salon protocol notes live in
-`civic/salon_scenario_policy.mbt`; root may pass scenario templates into those
+`civic/communication_scenario_policy.mbt`; root may pass scenario templates into those
 functions, but it must not rebuild those protocol contracts manually. Civic
 service skill text, module-specific skill text, salon participant skill text,
 and salon reducer skill/contract/input text live in `civic/skill_text.mbt`;
@@ -970,7 +970,7 @@ Current implementation lives in:
 - [civic/protocols.mbt](/Users/kq/Workspace/moontown/src/civic/protocols.mbt)
 - [civic/communication_pattern_registry.mbt](/Users/kq/Workspace/moontown/src/civic/communication_pattern_registry.mbt)
 - [civic/salon_scenario_types.mbt](/Users/kq/Workspace/moontown/src/civic/salon_scenario_types.mbt)
-- [civic/salon_scenario_policy.mbt](/Users/kq/Workspace/moontown/src/civic/salon_scenario_policy.mbt)
+- [civic/communication_scenario_policy.mbt](/Users/kq/Workspace/moontown/src/civic/communication_scenario_policy.mbt)
 - [civic/skill_text.mbt](/Users/kq/Workspace/moontown/src/civic/skill_text.mbt)
 - [civic/workspace_text.mbt](/Users/kq/Workspace/moontown/src/civic/workspace_text.mbt)
 - [civic/salon_metrics.mbt](/Users/kq/Workspace/moontown/src/civic/salon_metrics.mbt)

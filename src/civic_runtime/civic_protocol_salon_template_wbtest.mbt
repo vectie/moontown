@@ -104,7 +104,7 @@ async test "civic salon scenario can define a building protocol without registry
   ).text()
   assert_true(projection.contains("\"book_id\": \"future-energy-forum-book\""))
   assert_true(projection.contains("\"projection_scope\": \"public\""))
-  let protocol = civic_salon_protocol_for_scenario(scenario)
+  let protocol = civic_communication_protocol_for_scenario(scenario)
   assert_eq(protocol.building_id, "future-energy-forum")
   assert_eq(protocol.book_id, "future-energy-forum-book")
   assert_eq(protocol.input_channels.length(), 1)

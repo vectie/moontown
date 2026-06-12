@@ -1,5 +1,7 @@
 ///|
-pub fn salon_pattern_id(scenario : CivicSalonScenario) -> String {
+pub fn communication_pattern_id_for_scenario(
+  scenario : CivicSalonScenario,
+) -> String {
   match scenario.communication_pattern_id {
     Some(id) => if id.trim().is_empty() { "research-salon" } else { id }
     None => "research-salon"
@@ -7,33 +9,38 @@ pub fn salon_pattern_id(scenario : CivicSalonScenario) -> String {
 }
 
 ///|
-pub fn salon_pattern_for_scenario(
+pub fn communication_pattern_for_scenario(
   scenario : CivicSalonScenario,
 ) -> CivicCommunicationPattern {
-  match civic_communication_pattern_for_id(salon_pattern_id(scenario)) {
+  match
+    civic_communication_pattern_for_id(
+      communication_pattern_id_for_scenario(scenario),
+    ) {
     Some(pattern) => pattern
     None => research_salon_pattern()
   }
 }
 
 ///|
-pub fn salon_pattern_label(scenario : CivicSalonScenario) -> String {
+pub fn communication_pattern_label_for_scenario(
+  scenario : CivicSalonScenario,
+) -> String {
   match scenario.communication_pattern_label {
     Some(label) =>
       if label.trim().is_empty() {
-        salon_pattern_for_scenario(scenario).title
+        communication_pattern_for_scenario(scenario).title
       } else {
         label
       }
-    None => salon_pattern_for_scenario(scenario).title
+    None => communication_pattern_for_scenario(scenario).title
   }
 }
 
 ///|
-pub fn salon_protocol_for_scenario(
+pub fn communication_protocol_for_scenario(
   scenario : CivicSalonScenario,
 ) -> BuildingProtocolDefinition {
-  let pattern = salon_pattern_for_scenario(scenario)
+  let pattern = communication_pattern_for_scenario(scenario)
   {
     building_id: scenario.building_id,
     service_id: scenario.id,
@@ -62,7 +69,7 @@ pub fn salon_protocol_for_scenario(
 }
 
 ///|
-pub fn salon_building_intro(
+pub fn communication_building_intro(
   pattern : CivicCommunicationPattern,
   protocol : BuildingProtocolDefinition,
 ) -> String {
