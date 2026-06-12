@@ -38,3 +38,10 @@ fn book_task_priority_score(
   }
   kind_score + task.priority
 }
+
+///|
+pub fn research_bootstrap_book_task(task : @moonbook.BookTask) -> Bool {
+  task.kind == "ingest" &&
+  task.id.contains("research-bootstrap-ingest") &&
+  @policy.research_goal_text(task.prompt)
+}

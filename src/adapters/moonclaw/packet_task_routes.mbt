@@ -9,7 +9,7 @@ priv struct PacketTaskRoute {
 fn packet_task_route(task : @moonbook.BookTask) -> PacketTaskRoute {
   let course_task = is_moontown_course_task(task)
   let research_bootstrap = !course_task &&
-    is_moontown_research_bootstrap_task(task)
+    @dispatch.research_bootstrap_book_task(task)
   if research_bootstrap {
     {
       kind: provider_task_kind_for_book_task(task),
@@ -75,13 +75,6 @@ fn is_moontown_course_task(task : @moonbook.BookTask) -> Bool {
 ///|
 fn positive_course_prompt_signal(prompt : String) -> Bool {
   text_contains_any_signal(prompt, positive_course_prompt_signals())
-}
-
-///|
-fn is_moontown_research_bootstrap_task(task : @moonbook.BookTask) -> Bool {
-  task.kind == "ingest" &&
-  task.id.contains("research-bootstrap-ingest") &&
-  task.prompt.to_lower().contains("research")
 }
 
 ///|

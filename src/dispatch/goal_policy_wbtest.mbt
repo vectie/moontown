@@ -53,3 +53,52 @@ test "dispatch gives review and planning higher weight for non-research goals" {
   assert_eq(ordered[1].id, "ingest")
   assert_eq(ordered[2].id, "planning")
 }
+
+///|
+test "dispatch classifies research bootstrap book tasks for route consumers" {
+  let task = @moonbook.BookTask::new(
+    id="goal-research-opc-research-bootstrap-ingest",
+    title="Bootstrap verified research coverage",
+    kind="ingest",
+    prompt="Bootstrap this book before answering the research question.",
+    priority=100,
+    requires_review=true,
+  )
+  assert_true(research_bootstrap_book_task(task))
+  assert_true(
+    !research_bootstrap_book_task(
+      @moonbook.BookTask::new(
+        id="goal-research-opc-research-bootstrap-ingest",
+        title="Bootstrap verified research coverage",
+        kind="analysis",
+        prompt="Bootstrap this book before answering the research question.",
+        priority=100,
+        requires_review=true,
+      ),
+    ),
+  )
+  assert_true(
+    !research_bootstrap_book_task(
+      @moonbook.BookTask::new(
+        id="goal-research-opc-ingest",
+        title="Bootstrap verified research coverage",
+        kind="ingest",
+        prompt="Bootstrap this book before answering the research question.",
+        priority=100,
+        requires_review=true,
+      ),
+    ),
+  )
+  assert_true(
+    !research_bootstrap_book_task(
+      @moonbook.BookTask::new(
+        id="goal-research-opc-research-bootstrap-ingest",
+        title="Bootstrap verified research coverage",
+        kind="ingest",
+        prompt="Bootstrap this operational book.",
+        priority=100,
+        requires_review=true,
+      ),
+    ),
+  )
+}

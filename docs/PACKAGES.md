@@ -97,6 +97,7 @@ Purpose:
 - classify books and MoonBook task kinds into town `WorkDomain` values
 - apply policy-owned goal text for routing/planning purposes
 - prioritize MoonBook task batches for dispatch order
+- classify special MoonBook task routes such as research bootstrap tasks
 - choose assignment vs escalation vs deferral
 - choose isolation modes
 
@@ -106,6 +107,8 @@ Boundary:
   both decisions affect routing.
 - `src/dispatch` owns MoonBook task ordering policy and may expose routing
   helpers that apply `src/policy` goal-text vocabulary.
+- `src/dispatch` owns shared MoonBook task route classifiers that are consumed
+  by Mayor role planning and MoonClaw packet/profile routing.
 - `src/town_runtime` may construct `TownTask` records from MoonBook tasks, but
   should not maintain its own mapping from book ids or task kinds to
   `WorkDomain`.
@@ -277,6 +280,13 @@ Purpose:
 - strategic/domain/execution role profiles
 - external proposal packet boundary
 - proposal/run lifecycle receipts
+
+Boundary:
+
+- `src/adapters/moonclaw` owns packet construction, command wiring, receipts,
+  and MoonClaw-specific prompt/target-page adaptation.
+- shared task-route classification belongs in `src/dispatch`; MoonClaw adapter
+  code should not duplicate BookTask kind/id/prompt classifiers.
 
 Current real pieces:
 

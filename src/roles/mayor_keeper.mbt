@@ -95,7 +95,7 @@ fn compact_id_segment(text : String, limit : Int) -> String {
 
 ///|
 fn moonclaw_profile_for_task(task : @moonbook.BookTask) -> String {
-  if is_research_bootstrap_task(task) {
+  if @dispatch.research_bootstrap_book_task(task) {
     return "moontown_research_bootstrap_worker"
   }
   match task.kind {
@@ -124,11 +124,4 @@ fn moonclaw_profile_for_entry_task(
     Some(_) => "wenyu_civic_service_worker"
     None => moonclaw_profile_for_task(task)
   }
-}
-
-///|
-fn is_research_bootstrap_task(task : @moonbook.BookTask) -> Bool {
-  task.kind == "ingest" &&
-  task.id.contains("research-bootstrap-ingest") &&
-  task.prompt.to_lower().contains("research")
 }
