@@ -285,8 +285,10 @@ Boundary:
 
 - `src/adapters/moonclaw` owns packet construction, command wiring, receipts,
   and MoonClaw-specific prompt/target-page adaptation.
-- shared task-route classification belongs in `src/dispatch`; MoonClaw adapter
-  code should not duplicate BookTask kind/id/prompt classifiers.
+- shared task-route classification belongs in semantic owner packages:
+  `src/dispatch` owns research-bootstrap routing, and `src/course_book` owns
+  course-book intent detection. MoonClaw adapter code should not duplicate
+  BookTask kind/id/prompt classifiers.
 
 Current real pieces:
 
@@ -461,10 +463,14 @@ Purpose:
 - bootstrap the Wenyu beginner course MoonBook workspace
 - keep course output course-shaped rather than research-shaped
 - write generated course projection content
+- classify course-book task intent for adapter routing
 
 Boundary:
 
 - course-specific content and course workspace files belong here.
+- course-book identity and positive course prompt signals belong here; adapters
+  may consume the classifier but should keep only adapter-specific packet
+  prompts and target-page lists locally.
 - default generated-site path semantics belong to `src/policy`; CourseBook
   consumes `policy.default_generated_site_projection_path()` rather than
   redefining the projection path.

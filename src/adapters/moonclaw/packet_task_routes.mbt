@@ -7,7 +7,7 @@ priv struct PacketTaskRoute {
 
 ///|
 fn packet_task_route(task : @moonbook.BookTask) -> PacketTaskRoute {
-  let course_task = is_moontown_course_task(task)
+  let course_task = @course_book.course_book_task(task)
   let research_bootstrap = !course_task &&
     @dispatch.research_bootstrap_book_task(task)
   if research_bootstrap {
@@ -66,18 +66,6 @@ fn course_target_pages() -> Array[String] {
 }
 
 ///|
-fn is_moontown_course_task(task : @moonbook.BookTask) -> Bool {
-  let route_text = "\{task.kind} \{task.id} \{task.title}".to_lower()
-  text_contains_any_signal(route_text, course_route_signals()) ||
-  positive_course_prompt_signal(task.prompt)
-}
-
-///|
-fn positive_course_prompt_signal(prompt : String) -> Bool {
-  text_contains_any_signal(prompt, positive_course_prompt_signals())
-}
-
-///|
 fn provider_task_kind_for_book_task(task : @moonbook.BookTask) -> String {
   let combined = "\{task.kind} \{task.title} \{task.prompt}".to_lower()
   if task.kind == "ingest" && combined.contains("bootstrap") {
@@ -85,25 +73,4 @@ fn provider_task_kind_for_book_task(task : @moonbook.BookTask) -> String {
   } else {
     task.kind
   }
-}
-
-///|
-fn text_contains_any_signal(text : String, signals : Array[String]) -> Bool {
-  let combined = text.to_lower()
-  signals.any(fn(signal) { combined.contains(signal) })
-}
-
-///|
-fn course_route_signals() -> Array[String] {
-  ["course", "syllabus", "learning path", "beginner", "workbook", "lesson"]
-}
-
-///|
-fn positive_course_prompt_signals() -> Array[String] {
-  [
-    "produce moonclaw beginner-course", "produce beginner-course", "produce course artifacts",
-    "write a beginner workbook", "run course projection repair", "create a course",
-    "build a course", "generate a course", "syllabus", "learning path", "workbook",
-    "lesson",
-  ]
 }

@@ -30,12 +30,12 @@ test "explicit course task still receives course artifact routing" {
 ///|
 test "course prompt signal requires positive course intent" {
   assert_true(
-    positive_course_prompt_signal(
+    @course_book.positive_course_prompt_signal(
       "Run course projection repair with lessons and checkpoints.",
     ),
   )
   assert_true(
-    !positive_course_prompt_signal(
+    !@course_book.positive_course_prompt_signal(
       "Do not force a research genre onto civic, course, planbook, cookbook, or operational books.",
     ),
   )

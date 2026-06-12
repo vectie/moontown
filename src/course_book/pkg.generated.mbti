@@ -1,14 +1,24 @@
 // Generated using `moon info`, DON'T EDIT IT
 package "vectie/moontown/course_book"
 
+import {
+  "vectie/moontown/adapters/moonbook",
+}
+
 // Values
 pub async fn bootstrap_wenyu_game_design_course_book(book_catalog_path? : String, workspace_root? : String, source_workspace_root? : String) -> String
 
+pub fn course_book_task(@moonbook.BookTask) -> Bool
+
 pub fn course_builder_skill_markdown() -> String
+
+pub fn course_route_text(String) -> Bool
 
 pub fn default_wenyu_course_book_id() -> String
 
 pub fn default_wenyu_course_workspace_root() -> String
+
+pub fn positive_course_prompt_signal(String) -> Bool
 
 pub async fn render_wenyu_game_design_course_status(workspace_root? : String) -> String
 
