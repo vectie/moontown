@@ -1,5 +1,5 @@
 ///|
-async fn workspace_missing_relative_paths(
+pub async fn workspace_missing_relative_paths(
   root : String,
   paths : Array[String],
 ) -> Array[String] {
@@ -13,7 +13,7 @@ async fn workspace_missing_relative_paths(
 }
 
 ///|
-async fn workspace_relative_paths_ready(
+pub async fn workspace_relative_paths_ready(
   root : String,
   paths : Array[String],
 ) -> Bool {

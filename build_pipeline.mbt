@@ -13,7 +13,7 @@ async fn wenyu_book_ready_for_build(entry : @moonbook.BookCatalogEntry) -> Bool 
     "raw/bootstrap/deep-report.md", "raw/bootstrap/evidence-matrix.md", "raw/bootstrap/marketing-brief.md",
     "raw/bootstrap/local-sources.md", "mounted-sources/MANIFEST.md",
   ]
-  workspace_relative_paths_ready(root, required)
+  @support.workspace_relative_paths_ready(root, required)
 }
 
 ///|

@@ -108,5 +108,5 @@ fn merge_standing_goal_updates(
   latest : Array[@core.StandingGoal],
   updated : Array[@core.StandingGoal],
 ) -> Array[@core.StandingGoal] {
-  standing_goal_registry_merge_updates(latest, updated)
+  @core.standing_goal_registry_merge_updates(latest, updated)
 }

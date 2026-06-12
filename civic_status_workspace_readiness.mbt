@@ -62,12 +62,12 @@ async fn civic_missing_paths(
   root : String,
   paths : Array[String],
 ) -> Array[String] {
-  workspace_missing_relative_paths(root, paths)
+  @support.workspace_missing_relative_paths(root, paths)
 }
 
 ///|
 async fn civic_paths_ready(root : String, paths : Array[String]) -> Bool {
-  workspace_relative_paths_ready(root, paths)
+  @support.workspace_relative_paths_ready(root, paths)
 }
 
 ///|

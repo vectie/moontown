@@ -1,7 +1,7 @@
 ///|
 async test "workspace relative path readiness reports missing paths" {
   let root = "/tmp/moontown-workspace-path-readiness-wbtest"
-  ignore_checked_command("rm", ["-rf", root])
+  ignore(@integration.run_checked("rm", ["-rf", root]))
   let required = ["wiki/index.md", "book/site/generated/index.html"]
   let missing_before = workspace_missing_relative_paths(root, required)
   assert_eq(missing_before.length(), 2)

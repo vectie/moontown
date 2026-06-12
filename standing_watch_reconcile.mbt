@@ -24,6 +24,8 @@ async fn save_standing_goal_update_for_watcher(
 ) -> Unit {
   let path = default_standing_goal_state_path(snapshot_path)
   let goals = @storage.load_or_create_standing_goals(path~)
-  let updated = standing_goal_registry_replace_or_append(goals, updated_goal)
+  let updated = @core.standing_goal_registry_replace_or_append(
+    goals, updated_goal,
+  )
   @storage.save_standing_goals_file(path, updated)
 }

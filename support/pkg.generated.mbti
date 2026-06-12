@@ -44,6 +44,10 @@ pub fn upsert_moonclaw_job_profile_json(Json, String, Json) -> Json
 
 pub fn upsert_nested_object_entry_json(Json, section_key~ : String, collection_key~ : String, entry_key~ : String, entry~ : Json) -> Json
 
+pub async fn workspace_missing_relative_paths(String, Array[String]) -> Array[String]
+
+pub async fn workspace_relative_paths_ready(String, Array[String]) -> Bool
+
 pub async fn write_text_file(String, String) -> Unit
 
 pub async fn write_text_file_if_missing(String, String) -> Unit

@@ -63,10 +63,10 @@ async test "budget deferred standing goals stay due and are not marked run" {
     10,
     "\{root}/town.json",
   )
-  let first = standing_goal_registry_find(updated, "watch-first").unwrap()
-  let second = standing_goal_registry_find(updated, "watch-second").unwrap()
-  let third = standing_goal_registry_find(updated, "watch-third").unwrap()
-  let fourth = standing_goal_registry_find(updated, "watch-fourth").unwrap()
+  let first = @core.standing_goal_registry_find(updated, "watch-first").unwrap()
+  let second = @core.standing_goal_registry_find(updated, "watch-second").unwrap()
+  let third = @core.standing_goal_registry_find(updated, "watch-third").unwrap()
+  let fourth = @core.standing_goal_registry_find(updated, "watch-fourth").unwrap()
   assert_true(first.last_run_tick is Some(10))
   assert_eq(first.next_due_tick, 25)
   assert_true(second.last_run_tick is None)
@@ -108,7 +108,7 @@ async test "budget deferred standing goal state self repairs without watcher rec
     [corrupted],
     "\{root}/town.json",
   )
-  let goal = standing_goal_registry_find(repaired, "watch-second").unwrap()
+  let goal = @core.standing_goal_registry_find(repaired, "watch-second").unwrap()
   assert_true(goal.last_run_tick is None)
   assert_eq(goal.next_due_tick, 10)
   assert_true(
@@ -151,7 +151,7 @@ async test "cap deferred standing goals stay due and are not marked run" {
     10,
     "\{root}/town.json",
   )
-  let kept = standing_goal_registry_find(updated, "watch-cap").unwrap()
+  let kept = @core.standing_goal_registry_find(updated, "watch-cap").unwrap()
   assert_true(kept.last_run_tick is None)
   assert_eq(kept.next_due_tick, 10)
   assert_true(

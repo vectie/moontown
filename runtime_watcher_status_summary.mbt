@@ -64,7 +64,7 @@ fn current_goal_next_due_tick(
   goal_id : String,
   goals : Array[@core.StandingGoal],
 ) -> Int? {
-  match standing_goal_registry_find(goals, goal_id) {
+  match @core.standing_goal_registry_find(goals, goal_id) {
     Some(goal) => Some(goal.next_due_tick)
     None => None
   }

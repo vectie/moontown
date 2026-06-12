@@ -22,7 +22,7 @@ fn merge_final_integration_standing_goals(
       source_policy=final_integration_source_policy(spec),
       quality_threshold=min_int(100, max_int(1, spec.quality_threshold)),
     )
-    merged = standing_goal_registry_replace_or_append(merged, replacement)
+    merged = @core.standing_goal_registry_replace_or_append(merged, replacement)
   }
   merged
 }
@@ -32,7 +32,7 @@ fn find_standing_goal_by_id(
   goals : Array[@core.StandingGoal],
   id : String,
 ) -> @core.StandingGoal? {
-  standing_goal_registry_find(goals, id)
+  @core.standing_goal_registry_find(goals, id)
 }
 
 ///|

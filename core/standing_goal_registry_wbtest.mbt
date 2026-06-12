@@ -3,8 +3,8 @@ fn test_standing_goal(
   id : String,
   enabled? : Bool = true,
   cadence_ticks? : Int = 60,
-) -> @core.StandingGoal {
-  @core.StandingGoal::new(
+) -> StandingGoal {
+  StandingGoal::new(
     id~,
     title="Goal \{id}",
     prompt="Keep \{id} alive.",
@@ -15,10 +15,10 @@ fn test_standing_goal(
 
 ///|
 fn standing_goal_registry_upsert(
-  goals : Array[@core.StandingGoal],
-  replacement : @core.StandingGoal,
-) -> Array[@core.StandingGoal] {
-  let updated : Array[@core.StandingGoal] = []
+  goals : Array[StandingGoal],
+  replacement : StandingGoal,
+) -> Array[StandingGoal] {
+  let updated : Array[StandingGoal] = []
   for goal in goals {
     if goal.id != replacement.id {
       updated.push(goal)
@@ -30,10 +30,10 @@ fn standing_goal_registry_upsert(
 
 ///|
 fn standing_goal_registry_with_enabled(
-  goal : @core.StandingGoal,
+  goal : StandingGoal,
   enabled : Bool,
-) -> @core.StandingGoal {
-  @core.StandingGoal::new(
+) -> StandingGoal {
+  StandingGoal::new(
     id=goal.id,
     title=goal.title,
     prompt=goal.prompt,
@@ -49,7 +49,7 @@ fn standing_goal_registry_with_enabled(
 
 ///|
 fn standing_goal_registry_contains(
-  goals : Array[@core.StandingGoal],
+  goals : Array[StandingGoal],
   goal_id : String,
 ) -> Bool {
   standing_goal_registry_find(goals, goal_id) is Some(_)
@@ -57,7 +57,7 @@ fn standing_goal_registry_contains(
 
 ///|
 fn standing_goal_registry_enabled(
-  goals : Array[@core.StandingGoal],
+  goals : Array[StandingGoal],
   goal_id : String,
 ) -> Bool {
   match standing_goal_registry_find(goals, goal_id) {
@@ -139,7 +139,7 @@ test "standing goal registry merge updates preserves latest order and appends ne
 
 ///|
 test "standing goal registry with enabled preserves scheduling metadata" {
-  let original = @core.StandingGoal::new(
+  let original = StandingGoal::new(
     id="goal",
     title="Goal",
     prompt="Prompt",
