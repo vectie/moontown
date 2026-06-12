@@ -219,6 +219,14 @@ Purpose:
 This package is where town code stops talking to raw agent runtime metadata and
 starts talking to a role-specific API.
 
+Boundary:
+
+- `src/roles` may compose Mayor prompts, lane plans, dispatch packets, and
+  keeper handoffs.
+- `src/roles` should consume `src/policy` goal-text vocabulary and
+  `src/dispatch` routing helpers instead of redefining research/Wenyu trigger
+  words or task-domain tables.
+
 ## Moonbook Adapter
 
 - [src/adapters/moonbook/client.mbt](/Users/kq/Workspace/moontown/src/adapters/moonbook/client.mbt)

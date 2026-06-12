@@ -15,12 +15,7 @@ fn mayor_research_lane_topics(goal : String) -> Array[String] {
 
 ///|
 fn mayor_should_parallelize_goal(goal : String, topics : Array[String]) -> Bool {
-  let notes = goal.to_lower()
-  let research_like = notes.contains("research") ||
-    notes.contains("compare") ||
-    notes.contains("survey") ||
-    notes.contains("map")
-  research_like && topics.length() > 1
+  @policy.research_request_goal_text(goal) && topics.length() > 1
 }
 
 ///|

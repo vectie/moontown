@@ -58,6 +58,19 @@ test "mayor plans parallel research lanes for multi-subject goal" {
 }
 
 ///|
+test "mayor uses policy research request vocabulary for parallel lanes" {
+  let mayor = Mayor::new()
+  let plan = mayor.plan_goal(
+    @moonbook.default_catalog(),
+    "compare moonbook and moonclaw",
+  )
+  assert_true(plan.parallelizable)
+  assert_eq(plan.lanes.length(), 2)
+  assert_eq(plan.lanes[0].entry.id, "research-moonbook")
+  assert_eq(plan.lanes[1].entry.id, "research-moonclaw")
+}
+
+///|
 test "mayor decomposes Wenyu Valley PRD build into civic lanes" {
   let mayor = Mayor::new()
   let plan = mayor.plan_goal(
