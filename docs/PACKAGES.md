@@ -146,6 +146,8 @@ Purpose:
 - material-delta metrics, watcher-record matching, and watcher-record decision
   selection
 - standing-watch event shape for watcher run records
+- standing-watch live snapshot stale-window policy and transient dispatch-error
+  classification
 - keeper auto-triage/recovery closure policy, thresholds, and summary wording
 
 Boundary:
@@ -154,7 +156,8 @@ Boundary:
   decisions to `TownState`, persist snapshots, and append watcher ledgers.
 - `src/town_runtime` should not own standing-watch marker vocabulary, closure
   thresholds, watcher-record matching/status mapping, standing-watch event
-  shape, or auto-triage/recovery summary text.
+  shape, live snapshot stale windows, transient dispatch classification, or
+  auto-triage/recovery summary text.
 
 ## Storage
 

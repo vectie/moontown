@@ -54,3 +54,13 @@ pub fn standing_watch_detached_import_log_noise_summary(
     lowered.contains("panic")
   detached_import && startup_log && !terminal_signal
 }
+
+///|
+pub fn standing_watch_transient_dispatch_error(detail : String) -> Bool {
+  @runtime_error_policy.transient_external_dependency_error(detail)
+}
+
+///|
+pub fn standing_watch_stale_window_ticks() -> Int {
+  120
+}

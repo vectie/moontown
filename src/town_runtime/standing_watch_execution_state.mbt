@@ -53,7 +53,8 @@ fn running_standing_watch_execution(
     assigned_worker_id=Some(worker_id),
     attempt=1,
     heartbeat_tick=tick,
-    stale_after_tick=tick + standing_watch_stale_window_ticks(),
+    stale_after_tick=tick +
+      @standing_watch_policy.standing_watch_stale_window_ticks(),
     next_retry_tick=None,
     requires_review=task.requires_review,
     notify_town=true,
@@ -87,16 +88,6 @@ fn transient_deferred_standing_watch_execution_record(
     requires_review=false,
     notify_town=true,
   )
-}
-
-///|
-fn standing_watch_transient_dispatch_error(detail : String) -> Bool {
-  @runtime_error_policy.transient_external_dependency_error(detail)
-}
-
-///|
-fn standing_watch_stale_window_ticks() -> Int {
-  120
 }
 
 ///|

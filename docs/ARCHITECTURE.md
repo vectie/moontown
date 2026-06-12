@@ -266,8 +266,9 @@ book owns. The implementation now has a first-class `policy` package:
   block parsing, provider-decision collapse policy, material-delta metrics, and
   book-quality repair appendix composition. It also owns watcher-record matching
   against execution records, terminal watcher-decision to execution-status
-  mapping, standing-watch event shape, keeper auto-triage, and recovery closure
-  policy: whether
+  mapping, standing-watch event shape, live snapshot stale-window policy,
+  transient dispatch-error classification, keeper auto-triage, and recovery
+  closure policy: whether
   no-change/update markers satisfy a goal threshold, how terminal markers
   supersede failed transport status, and the accepted keeper metadata appended
   to execution summaries. Root may decide
@@ -276,8 +277,9 @@ book owns. The implementation now has a first-class `policy` package:
   decisions to `TownState`, and append watcher ledgers, but it must not redefine
   the standing-watch prompt, marker vocabulary/parser, history parser/collapse
   semantics, material-delta accounting, task kind, id format, keeper closure
-  thresholds, watcher-record matching/status mapping, event shape, or
-  auto-triage/recovery summary wording locally.
+  thresholds, watcher-record matching/status mapping, event shape, live snapshot
+  stale windows, transient dispatch classification, or auto-triage/recovery
+  summary wording locally.
 
 Watcher ledger path derivation and append/load mechanics belong to `storage/`.
 Runtime packages may pass snapshot paths and goal ids, but they should not

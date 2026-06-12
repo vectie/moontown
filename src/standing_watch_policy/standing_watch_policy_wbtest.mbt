@@ -170,3 +170,10 @@ test "standing watch event shape comes from policy" {
   assert_true(event.related_task_id == Some("standing-watch-opc-tick-7"))
   assert_true(event.related_run_id == Some("run-7"))
 }
+
+///|
+test "standing watch transient dispatch and stale window policy are centralized" {
+  let detail = "Standing watch execution failed. RUNTIME ERROR: abort() called\nStringBuilder::grow_if_necessary\nSystemStore::save_job_proposals"
+  assert_true(standing_watch_transient_dispatch_error(detail))
+  assert_eq(standing_watch_stale_window_ticks(), 120)
+}

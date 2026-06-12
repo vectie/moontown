@@ -18,7 +18,9 @@ async fn execute_dispatched_standing_watch_task(
       ) catch {
         error => {
           let detail = "Standing watch execution failed for \{entry.id} / \{task.id}: \{error}"
-          if standing_watch_transient_dispatch_error(detail) {
+          if @standing_watch_policy.standing_watch_transient_dispatch_error(
+              detail,
+            ) {
             transient_deferred_standing_watch_execution_record(
               entry,
               task,

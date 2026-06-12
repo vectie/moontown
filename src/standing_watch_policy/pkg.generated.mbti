@@ -57,6 +57,8 @@ pub fn standing_watch_recovery_decision_from_execution(@core.TaskExecutionRecord
 
 pub fn standing_watch_recovery_summary(@core.StandingGoal, @core.TaskExecutionRecord, @core.WatcherDecisionKind) -> String
 
+pub fn standing_watch_stale_window_ticks() -> Int
+
 pub fn standing_watch_summary_from_history_block(String, Array[String]) -> String?
 
 pub fn standing_watch_summary_has_decision(String, String) -> Bool
@@ -76,6 +78,8 @@ pub fn standing_watch_task_prefix(String) -> String
 pub fn standing_watch_task_tick_prefix(String) -> String
 
 pub fn standing_watch_tick_for_goal_task(@core.StandingGoal, String) -> Int?
+
+pub fn standing_watch_transient_dispatch_error(String) -> Bool
 
 pub fn task_status_for_terminal_watcher_decision(@core.WatcherDecisionKind) -> @core.TaskExecutionStatus
 

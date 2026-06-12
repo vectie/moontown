@@ -202,7 +202,10 @@ test "standing watch transient dispatch marker defers immediate retry" {
 ///|
 test "standing watch classifies MoonClaw proposal store abort as transient" {
   let detail = "Standing watch execution failed. RUNTIME ERROR: abort() called\nStringBuilder::grow_if_necessary\n/vectie/moonclaw/job/system_storage.mbt:886 by SystemStore::save_job_proposals"
-  assert_eq(standing_watch_transient_dispatch_error(detail), true)
+  assert_eq(
+    @standing_watch_policy.standing_watch_transient_dispatch_error(detail),
+    true,
+  )
 }
 
 ///|
