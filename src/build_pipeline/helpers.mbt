@@ -1,16 +1,36 @@
 ///|
-fn is_wenyu_book(entry : @moonbook.BookCatalogEntry) -> Bool {
+pub fn is_wenyu_book(entry : @moonbook.BookCatalogEntry) -> Bool {
   entry.id.has_prefix("wenyu-")
 }
 
 ///|
-fn wenyu_module_name(entry : @moonbook.BookCatalogEntry) -> String {
+pub fn wenyu_module_name(entry : @moonbook.BookCatalogEntry) -> String {
   let prefix = "Wenyu Valley / "
   if entry.name.has_prefix(prefix) {
     entry.name.replace(old=prefix, new="")
   } else {
     entry.name
   }
+}
+
+///|
+pub async fn wenyu_book_ready_for_build(
+  entry : @moonbook.BookCatalogEntry,
+) -> Bool {
+  if !is_wenyu_book(entry) {
+    return false
+  }
+  let root = @moonbook.workspace_root(entry)
+  let required = [
+    "raw/bootstrap/deep-report.md", "raw/bootstrap/evidence-matrix.md", "raw/bootstrap/marketing-brief.md",
+    "raw/bootstrap/local-sources.md", "mounted-sources/MANIFEST.md",
+  ]
+  @support.workspace_relative_paths_ready(root, required)
+}
+
+///|
+pub fn is_local_wenyu_build_fallback_task(kind : String) -> Bool {
+  kind == "implementation-backlog" || kind == "image-asset"
 }
 
 ///|

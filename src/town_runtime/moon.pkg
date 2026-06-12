@@ -16,7 +16,6 @@ import {
   "vectie/moontown/daemon_runtime_policy",
   "vectie/moontown/daemon_runtime",
   "vectie/moontown/runtime_error_policy",
-  "vectie/moontown/adapters/codex",
   "vectie/moontown/adapters/moonbook",
   "vectie/moontown/adapters/moonclaw",
   "vectie/moontown/civic",

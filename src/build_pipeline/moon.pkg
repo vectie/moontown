@@ -3,10 +3,16 @@ import {
   "moonbitlang/core/json",
   "vectie/moontown/adapters/codex",
   "vectie/moontown/adapters/moonbook",
+  "vectie/moontown/book_templates",
   "vectie/moontown/civic",
+  "vectie/moontown/civic_runtime",
   "vectie/moontown/core",
   "vectie/moontown/moonclaw_runtime",
   "vectie/moontown/policy",
   "vectie/moontown/research_quality",
   "vectie/moontown/support",
 }
+
+import {
+  "moonbitlang/async",
+} for "wbtest"

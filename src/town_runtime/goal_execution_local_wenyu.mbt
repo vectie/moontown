@@ -1,6 +1,6 @@
 ///|
 fn is_local_wenyu_build_fallback_task(kind : String) -> Bool {
-  kind == "implementation-backlog" || kind == "image-asset"
+  @build_pipeline.is_local_wenyu_build_fallback_task(kind)
 }
 
 ///|

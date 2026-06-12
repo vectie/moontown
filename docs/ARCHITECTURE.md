@@ -410,10 +410,14 @@ task construction, including prompts, target pages, priorities, review flags,
 worker roles, and fallback artifact materialization. It also owns the Wenyu
 MoonClaw build-controller profile: output contract id, ACP execution/review
 steps, preferred skills, no-input metadata, model metadata, and execute/review
-prompt templates. `town_runtime/` may decide that a Wenyu book is ready for
+prompt templates. Wenyu workspace preseed also belongs there: PRD/vision copies,
+research requests, source hints, mounted source snapshots, generated Wenyu
+skills, civic seed dispatch, build profile installation, and Codex ACP target
+registration. `town_runtime/` may decide that a Wenyu book is ready for
 bootstrap/build, pass the current repository root, and ask `build_pipeline/` to
-install the profile, but it should not reconstruct those build tasks, Wenyu
-bootstrap tasks, or MoonClaw profile contracts locally.
+preseed or build the workspace, but it should not reconstruct those build tasks,
+Wenyu bootstrap tasks, source bundles, Codex target JSON, generated build-skill
+installation, or MoonClaw profile contracts locally.
 
 Live-autonomy policy belongs to the `live_autonomy_policy/` package. That
 package owns the `LiveAutonomySpine` JSON contract, journal/probe DTOs, live

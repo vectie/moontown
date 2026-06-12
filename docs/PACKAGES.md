@@ -286,6 +286,9 @@ Key files:
 - [src/build_pipeline/build_pipeline_tasks.mbt](/Users/kq/Workspace/moontown/src/build_pipeline/build_pipeline_tasks.mbt)
 - [src/build_pipeline/build_pipeline_prompts.mbt](/Users/kq/Workspace/moontown/src/build_pipeline/build_pipeline_prompts.mbt)
 - [src/build_pipeline/build_pipeline_artifacts.mbt](/Users/kq/Workspace/moontown/src/build_pipeline/build_pipeline_artifacts.mbt)
+- [src/build_pipeline/preseed_workspace.mbt](/Users/kq/Workspace/moontown/src/build_pipeline/preseed_workspace.mbt)
+- [src/build_pipeline/source_bundle.mbt](/Users/kq/Workspace/moontown/src/build_pipeline/source_bundle.mbt)
+- [src/build_pipeline/codex_acp_target.mbt](/Users/kq/Workspace/moontown/src/build_pipeline/codex_acp_target.mbt)
 
 Purpose:
 
@@ -294,18 +297,24 @@ Purpose:
 - own the Wenyu MoonClaw build-controller profile, output contract, ACP step
   metadata, preferred skills, no-input policy, and execute/review prompts
 - own Wenyu build prompts and fallback artifact materialization
+- own Wenyu bootstrap workspace preseed: PRD/vision copies, research request,
+  source hints, mounted source snapshots, generated Wenyu skills, civic seed,
+  MoonClaw build profile, and Codex ACP target registration
 - keep build-stage target pages, worker roles, priorities, and review flags
   close to the build feature instead of the town scheduler
 
 Boundary:
 
 - `src/town_runtime` may decide when a Wenyu book is ready for bootstrap/build,
-  supply the current repo root, and ask this package to install the profile.
+  supply the current repo root, and ask this package to preseed or build a
+  Wenyu workspace.
 - `src/build_pipeline` owns the Wenyu bootstrap/build task contracts and may
   compose target pages through `src/policy`, `src/research_quality`, and civic
   service definitions.
 - `src/town_runtime` should not own Wenyu build output-contract ids, MoonClaw
-  profile JSON, ACP step metadata, or build/review prompt templates.
+  profile JSON, ACP step metadata, source-bundle manifests, source-hint pages,
+  generated build-skill installation, Codex ACP target JSON, or build/review
+  prompt templates.
 
 ## PlanBook Policy And Runtime
 
