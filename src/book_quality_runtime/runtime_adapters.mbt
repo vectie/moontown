@@ -199,7 +199,10 @@ async fn write_planbook_workspace(entry : @moonbook.BookCatalogEntry) -> Unit {
   )
   let html = @planbook.generated_site_html(entry)
   @support.write_text_file("\{root}/book/Home.html", html)
-  @support.write_text_file("\{root}/book/site/generated/index.html", html)
+  @support.write_text_file(
+    @book_quality.workspace_path(root, @book_quality.generated_site_path()),
+    html,
+  )
 }
 
 ///|

@@ -63,7 +63,7 @@ test "book quality required path constructor keeps scoring contract explicit" {
   )
   assert_eq(
     @book_quality.generated_site_path(),
-    "book/site/generated/index.html",
+    @policy.default_generated_site_projection_path(),
   )
   assert_eq(
     @book_quality.workspace_path("/tmp/book", @book_quality.wiki_index_path()),

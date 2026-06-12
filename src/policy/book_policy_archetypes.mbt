@@ -180,7 +180,11 @@ pub fn general() -> BookPolicy {
     ],
     [
       file("index.md", true, "workspace index"),
-      file("book/site/generated/index.html", false, "projection surface"),
+      file(
+        default_generated_site_projection_path(),
+        false,
+        "projection surface",
+      ),
     ],
     quality(
       70, 65, true, "General book quality is provisional until a more specific composed policy is selected.",
