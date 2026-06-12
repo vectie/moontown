@@ -3,6 +3,11 @@ test "app tool book contract exposes stable defaults" {
   assert_eq(template_root(), "assets/templates/books/app-tool-book")
   assert_eq(default_book_id(), "toolbook-data-watch-dashboard")
   assert_true(default_purpose().contains("usable generated web tool"))
+  assert_eq(generated_tool_path(), "book/site/generated/tool.html")
+  assert_eq(
+    generated_site_path(),
+    @policy.default_generated_site_projection_path(),
+  )
 }
 
 ///|
@@ -42,7 +47,8 @@ test "app tool book required paths include generated tool and editable app" {
   let required = required_paths()
   assert_true(required.contains("tool-manifest.json"))
   assert_true(required.contains("app/index.html"))
-  assert_true(required.contains("book/site/generated/tool.html"))
+  assert_true(required.contains(generated_tool_path()))
+  assert_true(required.contains(generated_site_path()))
   for path in template_copy_paths() {
     assert_true(required.contains(path))
   }

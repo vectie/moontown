@@ -291,6 +291,30 @@ Boundary:
   consumes `policy.default_generated_site_projection_path()` rather than
   redefining the projection path.
 
+## App ToolBook
+
+Key files:
+
+- [src/app_tool_book/contracts.mbt](/Users/kq/Workspace/moontown/src/app_tool_book/contracts.mbt)
+- [src/app_tool_book/workspace_runtime.mbt](/Users/kq/Workspace/moontown/src/app_tool_book/workspace_runtime.mbt)
+- [src/app_tool_book/standing_watch.mbt](/Users/kq/Workspace/moontown/src/app_tool_book/standing_watch.mbt)
+
+Purpose:
+
+- bootstrap MoonBook workspaces that include a durable generated web tool
+- install tool specs, report paths, app manifests, generated tool pages, and
+  standing-watch loops
+- expose civic-building actions that let Moontown open reports, tools, and
+  Moondesk configuration surfaces
+
+Boundary:
+
+- App ToolBook owns the generated tool page path and generated-tool workspace
+  contract because those are tool-specific.
+- default generated-site index path semantics belong to `src/policy`; App
+  ToolBook consumes `policy.default_generated_site_projection_path()` rather
+  than redefining the projection path.
+
 ## PDF Evidence Watch
 
 Key files:

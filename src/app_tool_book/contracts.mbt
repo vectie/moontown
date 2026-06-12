@@ -14,6 +14,26 @@ pub fn default_purpose() -> String {
 }
 
 ///|
+fn generated_site_path() -> String {
+  @policy.default_generated_site_projection_path()
+}
+
+///|
+fn generated_site_workspace_path(root : String) -> String {
+  "\{root}/\{generated_site_path()}"
+}
+
+///|
+fn generated_tool_path() -> String {
+  "book/site/generated/tool.html"
+}
+
+///|
+fn generated_tool_workspace_path(root : String) -> String {
+  "\{root}/\{generated_tool_path()}"
+}
+
+///|
 pub fn config(
   book_id : String,
   title : String,
@@ -44,8 +64,10 @@ pub fn config(
         "review_required",
       ],
       required_outputs: [
-        "wiki/reports/latest-analysis.md", "tool-manifest.json", "app/index.html",
-        "book/site/generated/tool.html",
+        "wiki/reports/latest-analysis.md",
+        "tool-manifest.json",
+        "app/index.html",
+        generated_tool_path(),
       ],
     },
     analysis: {
@@ -59,7 +81,7 @@ pub fn config(
       manifest_path: "tool-manifest.json",
       app_root: "app/",
       app_entrypoint: "app/index.html",
-      generated_tool_path: "book/site/generated/tool.html",
+      generated_tool_path: generated_tool_path(),
       build_command: "moon run src/cmd/main -- books app-tool status \{book_id}",
       review_status: "draft",
     },
@@ -76,7 +98,11 @@ pub fn config(
         "skills/tool-watch/SKILL.md", "skills/tool-build/SKILL.md",
       ],
       output_files: [
-        "raw/data/", "wiki/reports/", "app/", "book/site/generated/tool.html", "book/site/generated/index.html",
+        "raw/data/",
+        "wiki/reports/",
+        "app/",
+        generated_tool_path(),
+        generated_site_path(),
       ],
     },
   }
@@ -121,7 +147,7 @@ pub fn manifest(
     civic_building_id,
     report_path: "wiki/reports/latest-analysis.md",
     app_entrypoint: "app/index.html",
-    generated_tool_path: "book/site/generated/tool.html",
+    generated_tool_path: generated_tool_path(),
     data_path: "raw/data/latest.json",
     tool_spec_path: "wiki/tools/tool-spec.md",
     build_command: "moon run src/cmd/main -- books app-tool status \{book_id}",
@@ -150,8 +176,8 @@ fn path_specs() -> Array[AppToolBookPathSpec] {
     { path: "app/index.html", copy_from_template: false },
     { path: "app/tool.js", copy_from_template: true },
     { path: "app/styles.css", copy_from_template: true },
-    { path: "book/site/generated/index.html", copy_from_template: false },
-    { path: "book/site/generated/tool.html", copy_from_template: false },
+    { path: generated_site_path(), copy_from_template: false },
+    { path: generated_tool_path(), copy_from_template: false },
   ]
 }
 

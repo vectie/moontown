@@ -174,7 +174,8 @@ book owns. The implementation now has a first-class `policy` package:
   owns App ToolBook defaults, required workspace paths, template-copy path
   policy, config/manifest schema construction, catalog-identity-aware config
   construction, and readiness-gate construction for books with generated web
-  tool surfaces.
+  tool surfaces. It owns the generated tool page path, but delegates the
+  default generated-site index path to `policy.default_generated_site_projection_path()`.
 - [app_tool_book/catalog.mbt](/Users/kq/Workspace/moontown/src/app_tool_book/catalog.mbt)
   owns the App ToolBook catalog name, tags, and skill list. Root may adapt
   those fields into a MoonBook catalog entry, but it must not fork ToolBook

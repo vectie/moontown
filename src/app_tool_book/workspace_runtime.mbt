@@ -48,9 +48,9 @@ async fn write_app_tool_book_workspace(
   }
   let app_html = app_html(entry.id, title, purpose, civic_building_id)
   write_text_file("\{root}/app/index.html", app_html)
-  write_text_file("\{root}/book/site/generated/tool.html", app_html)
+  write_text_file(generated_tool_workspace_path(root), app_html)
   write_text_file(
-    "\{root}/book/site/generated/index.html",
+    generated_site_workspace_path(root),
     site_index_html(entry.id, title, purpose, civic_building_id),
   )
   write_text_file(
