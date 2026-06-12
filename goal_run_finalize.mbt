@@ -14,7 +14,7 @@ async fn finalize_goal_book_entry(
     Some(summary) => summary
     None => return
   }
-  let quality_gaps = research_quality_gaps(entry)
+  let quality_gaps = @research_quality.research_quality_gaps(entry)
   queue_goal_book_reviews_if_needed(
     state, entry, summary, pending_review_baseline, task_ids, quality_gaps,
   )
@@ -156,7 +156,7 @@ fn goal_book_summary_event_detail(
   summary : @moonbook.BookStateSummary,
   quality_gaps : Array[String],
 ) -> String {
-  let readiness = ResearchReadiness::from_summary(
+  let readiness = @research_quality.ResearchReadiness::from_summary(
     summary,
     extra_gaps=quality_gaps,
   )

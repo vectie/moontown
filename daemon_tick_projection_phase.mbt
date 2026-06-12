@@ -12,7 +12,7 @@ async fn run_daemon_projection_phase(
     snapshot_path, standing_goals,
   )
   append_daemon_tick_phase_log(paths.log_path, "projection", tick_sequence)
-  persist_visual_projection(state, snapshot_path)
+  @visual_projection.persist_visual_projection(state, snapshot_path)
   persist_town_checkpoint(state, snapshot_path)
   let report = @health.inspect_town(state)
   let (next_daemon, tick, _) = @scheduler.plan_daemon_tick(
@@ -39,7 +39,7 @@ async fn run_daemon_projection_phase(
       daemon_tick=Some(tick.sequence),
     ),
   )
-  persist_visual_projection(state, snapshot_path)
+  @visual_projection.persist_visual_projection(state, snapshot_path)
   persist_town_checkpoint(state, snapshot_path)
   render_saved_town_status(snapshot_path~)
 }

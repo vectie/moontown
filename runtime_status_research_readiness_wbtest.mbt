@@ -13,7 +13,7 @@ test "research readiness exposes typed coverage gaps" {
     evidence_count=0,
     summary="empty",
   )
-  let readiness = ResearchReadiness::from_summary(summary)
+  let readiness = @research_quality.ResearchReadiness::from_summary(summary)
   assert_true(!readiness.substantive_coverage_ready)
   assert_true(readiness.gaps.length() >= 4)
 }
@@ -37,7 +37,7 @@ test "research readiness reports pending review without treating it as coverage 
     evidence_count=3,
     summary="ready with human review backlog",
   )
-  let readiness = ResearchReadiness::from_summary(summary)
+  let readiness = @research_quality.ResearchReadiness::from_summary(summary)
   assert_true(readiness.substantive_coverage_ready)
   assert_eq(readiness.pending_review_count, 1)
   assert_true(readiness.gaps.is_empty())

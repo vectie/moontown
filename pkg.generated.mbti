@@ -15,10 +15,8 @@ import {
   "vectie/moontown/live_autonomy_policy",
   "vectie/moontown/pdf_evidence_watch",
   "vectie/moontown/planbook_policy",
-  "vectie/moontown/research_quality",
   "vectie/moontown/roles",
   "vectie/moontown/runtime_status_policy",
-  "vectie/moontown/visual_projection",
 }
 
 // Values
@@ -43,8 +41,6 @@ pub async fn bootstrap_wenyu_building_protocols(registry_path? : String, status_
 pub async fn bootstrap_wenyu_civic_workspaces(book_catalog_path? : String) -> String
 
 pub async fn bootstrap_wenyu_game_design_course_book(book_catalog_path? : String, workspace_root? : String, source_workspace_root? : String) -> String
-
-pub fn build_visual_projection(@core.TownState, tick? : Int) -> @visual_projection.VisualProjection
 
 pub fn civic_communication_pattern_for_id(String) -> @civic.CivicCommunicationPattern?
 
@@ -122,8 +118,6 @@ pub fn default_planbook_workspace_root() -> String
 
 pub fn default_town_journal_path(snapshot_path? : String) -> String
 
-pub fn default_visual_projection_path(String) -> String
-
 pub fn default_wenyu_civic_status_path() -> String
 
 pub fn default_wenyu_course_book_id() -> String
@@ -193,8 +187,6 @@ pub async fn load_or_create_demo_state(path? : String, book_catalog_path? : Stri
 pub async fn[Provider : @core.BookProvider] load_or_create_demo_state_with_provider(Provider, path? : String) -> @core.TownState
 
 pub async fn load_or_create_modeled_demo_state(path? : String, book_catalog_path? : String) -> @core.TownState
-
-pub async fn persist_visual_projection(@core.TownState, String, tick? : Int) -> Unit
 
 pub async fn planbook_open_gap_count(snapshot_path? : String) -> Int
 
@@ -410,17 +402,7 @@ pub using @planbook_policy {type PlanbookCriterionStatus}
 
 pub using @planbook_policy {type PlanbookRepairTask}
 
-pub using @research_quality {type ResearchReadiness}
-
 pub using @runtime_status_policy {type TownRuntimeStatus}
-
-pub using @visual_projection {type VisualAgentProjection}
-
-pub using @visual_projection {type VisualBuildingProjection}
-
-pub using @visual_projection {type VisualModuleProjection}
-
-pub using @visual_projection {type VisualProjection}
 
 // Traits
 

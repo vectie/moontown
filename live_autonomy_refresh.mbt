@@ -8,7 +8,7 @@ pub async fn refresh_live_autonomy_spine(
         snapshot_path,
         snapshot.town,
       )
-      persist_visual_projection(snapshot.town, snapshot_path)
+      @visual_projection.persist_visual_projection(snapshot.town, snapshot_path)
       let spine = write_live_autonomy_refresh_spine(
         snapshot.town,
         snapshot_path,

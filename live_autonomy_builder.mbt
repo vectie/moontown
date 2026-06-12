@@ -70,7 +70,9 @@ fn live_autonomy_spine_from(
     book_template_request_summary: book_template_request_status.summary,
     book_template_latest_event_summary: book_template_request_status.latest_event_summary,
     latest_watcher_summary: derived.latest_watcher_summary,
-    visual_projection_path: default_visual_projection_path(snapshot_path),
+    visual_projection_path: @visual_projection.default_visual_projection_path(
+      snapshot_path,
+    ),
     journal_path: default_town_journal_path(snapshot_path~),
     digest_path: default_live_digest_path(snapshot_path~),
     planbook_change_log_path,
