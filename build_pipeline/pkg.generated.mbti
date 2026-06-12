@@ -1,0 +1,25 @@
+// Generated using `moon info`, DON'T EDIT IT
+package "vectie/moontown/build_pipeline"
+
+import {
+  "vectie/moontown/adapters/moonbook",
+  "vectie/moontown/core",
+}
+
+// Values
+pub async fn complete_wenyu_build_artifacts_if_needed(@moonbook.BookCatalogEntry, @moonbook.BookTask, @core.TaskExecutionRecord) -> @core.TaskExecutionRecord
+
+pub fn wenyu_asset_pack_prompt(@moonbook.BookCatalogEntry, String, String) -> String
+
+pub fn wenyu_code_patch_prompt(@moonbook.BookCatalogEntry, String, String) -> String
+
+pub fn wenyu_implementation_backlog_prompt(@moonbook.BookCatalogEntry, String, String) -> String
+
+// Errors
+
+// Types and methods
+
+// Type aliases
+
+// Traits
+

@@ -51,7 +51,9 @@ fn wenyu_build_tasks(
       goal=Some(objective),
       title="Compile implementation backlog for \{module_name}",
       kind="implementation-backlog",
-      prompt=wenyu_implementation_backlog_prompt(entry, objective, repo_root),
+      prompt=@build_pipeline.wenyu_implementation_backlog_prompt(
+        entry, objective, repo_root,
+      ),
       priority=120,
       requires_review=true,
       target_pages=[
@@ -66,7 +68,9 @@ fn wenyu_build_tasks(
       goal=Some(objective),
       title="Implement code slice for \{module_name}",
       kind="code-patch",
-      prompt=wenyu_code_patch_prompt(entry, objective, repo_root),
+      prompt=@build_pipeline.wenyu_code_patch_prompt(
+        entry, objective, repo_root,
+      ),
       priority=115,
       requires_review=true,
       target_pages=[
@@ -79,7 +83,9 @@ fn wenyu_build_tasks(
       goal=Some(objective),
       title="Generate asset and projection pack for \{module_name}",
       kind="image-asset",
-      prompt=wenyu_asset_pack_prompt(entry, objective, repo_root),
+      prompt=@build_pipeline.wenyu_asset_pack_prompt(
+        entry, objective, repo_root,
+      ),
       priority=110,
       requires_review=true,
       target_pages=[

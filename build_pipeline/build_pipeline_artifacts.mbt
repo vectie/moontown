@@ -1,5 +1,5 @@
 ///|
-async fn complete_wenyu_build_artifacts_if_needed(
+pub async fn complete_wenyu_build_artifacts_if_needed(
   entry : @moonbook.BookCatalogEntry,
   task : @moonbook.BookTask,
   execution : @core.TaskExecutionRecord,

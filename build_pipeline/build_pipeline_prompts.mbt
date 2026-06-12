@@ -1,5 +1,5 @@
 ///|
-fn wenyu_implementation_backlog_prompt(
+pub fn wenyu_implementation_backlog_prompt(
   entry : @moonbook.BookCatalogEntry,
   objective : String,
   repo_root : String,
@@ -33,7 +33,7 @@ fn wenyu_implementation_backlog_prompt(
 }
 
 ///|
-fn wenyu_code_patch_prompt(
+pub fn wenyu_code_patch_prompt(
   entry : @moonbook.BookCatalogEntry,
   objective : String,
   repo_root : String,
@@ -71,7 +71,7 @@ fn wenyu_code_patch_prompt(
 }
 
 ///|
-fn wenyu_asset_pack_prompt(
+pub fn wenyu_asset_pack_prompt(
   entry : @moonbook.BookCatalogEntry,
   objective : String,
   repo_root : String,

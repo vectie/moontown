@@ -1,0 +1,5 @@
+import {
+  "vectie/moontown/adapters/moonbook",
+  "vectie/moontown/core",
+  "vectie/moontown/support",
+}
