@@ -3,7 +3,10 @@ async fn planbook_semantic_review_criterion(
   snapshot_path : String,
   book_catalog_path : String,
 ) -> PlanbookCriterionStatus {
-  let audit = inspect_book_quality(book_catalog_path~, snapshot_path~)
+  let audit = @book_quality_runtime.inspect_book_quality(
+    book_catalog_path~,
+    snapshot_path~,
+  )
   let ready = audit.scores.any(fn(score) { score.semantic_score is Some(_) })
   planbook_criterion(
     "semantic-ai-review-results",
@@ -25,13 +28,18 @@ async fn planbook_runtime_book_quality_coverage_criterion(
   snapshot_path : String,
   book_catalog_path : String,
 ) -> PlanbookCriterionStatus {
-  let audit = inspect_book_quality(book_catalog_path~, snapshot_path~)
+  let audit = @book_quality_runtime.inspect_book_quality(
+    book_catalog_path~,
+    snapshot_path~,
+  )
   match @storage.load_snapshot_file(snapshot_path) {
     Some(snapshot) => {
       let missing : Array[String] = []
       let active_runtime_books : Array[@moonbook.BookCatalogEntry] = []
       for book in snapshot.town.books {
-        let entry = book_quality_catalog_entry_from_runtime_book(book)
+        let entry = @book_quality_runtime.book_quality_catalog_entry_from_runtime_book(
+          book,
+        )
         if @book_quality.catalog_entry_active(
             entry.id,
             entry.name,

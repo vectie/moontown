@@ -2,6 +2,7 @@ import {
   "moonbitlang/async",
   "moonbitlang/core/env",
   "vectie/moontown",
+  "vectie/moontown/book_quality_runtime",
   "vectie/moontown/civic_runtime",
   "vectie/moontown/editor_runtime",
   "vectie/moontown/live_autonomy_runtime",

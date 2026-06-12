@@ -1,8 +1,9 @@
 ///|
 async fn render_books_command(args : Array[String]) -> String {
   match args {
-    ["quality"] => @moontown.render_book_quality()
-    ["bootstrap"] => @moontown.bootstrap_registered_book_workspaces()
+    ["quality"] => @book_quality_runtime.render_book_quality()
+    ["bootstrap"] =>
+      @book_quality_runtime.bootstrap_registered_book_workspaces()
     ["templates"] | ["templates", "status"] =>
       @moontown.render_book_template_registry()
     ["template", "install", template_id, config_path] =>
@@ -13,12 +14,15 @@ async fn render_books_command(args : Array[String]) -> String {
       @moontown.process_book_template_requests()
     ["pdf-watch", .. rest] => render_pdf_watch_command(rest.to_owned())
     ["app-tool", .. rest] => render_app_tool_command(rest.to_owned())
-    ["doctor"] => @moontown.write_book_quality_audit()
-    ["ai-review-packets"] => @moontown.write_book_quality_review_packets()
+    ["doctor"] => @book_quality_runtime.write_book_quality_audit()
+    ["ai-review-packets"] =>
+      @book_quality_runtime.write_book_quality_review_packets()
     ["ai-review", "--dispatch"] =>
-      @moontown.dispatch_next_book_quality_ai_review()
-    ["ai-review", "bridge"] => @moontown.reconcile_book_quality_repair_bridge()
-    ["ai-review", "status"] => @moontown.render_book_quality_ai_review_status()
+      @book_quality_runtime.dispatch_next_book_quality_ai_review()
+    ["ai-review", "bridge"] =>
+      @book_quality_runtime.reconcile_book_quality_repair_bridge()
+    ["ai-review", "status"] =>
+      @book_quality_runtime.render_book_quality_ai_review_status()
     _ => @moontown.load_or_create_demo_dashboard()
   }
 }

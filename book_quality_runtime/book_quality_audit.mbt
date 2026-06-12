@@ -59,7 +59,7 @@ async fn quality_catalog_with_runtime_books(
 }
 
 ///|
-fn book_quality_catalog_entry_from_runtime_book(
+pub fn book_quality_catalog_entry_from_runtime_book(
   book : @core.BookRef,
 ) -> @moonbook.BookCatalogEntry {
   @moonbook.BookCatalogEntry::new(

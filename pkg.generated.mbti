@@ -6,7 +6,6 @@ import {
   "moonbitlang/core/json",
   "vectie/moontown/adapters/moonbook",
   "vectie/moontown/app_tool_book",
-  "vectie/moontown/book_quality",
   "vectie/moontown/book_templates",
   "vectie/moontown/civic",
   "vectie/moontown/cookbook",
@@ -23,8 +22,6 @@ pub async fn bootstrap_app_tool_book(book_id? : String, title? : String, purpose
 pub async fn bootstrap_moontown_cookbook(book_catalog_path? : String, workspace_root? : String, manifest_path? : String) -> String
 
 pub async fn bootstrap_moontown_planbook(book_catalog_path? : String, workspace_root? : String) -> String
-
-pub async fn bootstrap_registered_book_workspaces(book_catalog_path? : String) -> String
 
 pub async fn bootstrap_wenyu_game_design_course_book(book_catalog_path? : String, workspace_root? : String, source_workspace_root? : String) -> String
 
@@ -92,11 +89,7 @@ pub fn demo_state_from_catalog(Array[@moonbook.BookCatalogEntry]) -> @core.TownS
 
 pub fn[Provider : @core.BookProvider] demo_state_with_provider(Provider) -> @core.TownState
 
-pub async fn dispatch_next_book_quality_ai_review(book_catalog_path? : String, snapshot_path? : String, review_dir? : String, result_dir? : String, run_path? : String, run_inline? : Bool) -> String
-
 pub async fn inspect_app_tool_book(book_id? : String, workspace_root? : String, book_catalog_path? : String, standing_goal_path? : String) -> @app_tool_book.AppToolBookStatus
-
-pub async fn inspect_book_quality(book_catalog_path? : String, snapshot_path? : String) -> @book_quality.BookQualityAudit
 
 pub async fn inspect_book_template_request_status(request_path? : String) -> @book_templates.BookTemplateRequestStatus
 
@@ -128,15 +121,7 @@ pub async fn planbook_repair_active_count(snapshot_path? : String) -> Int
 
 pub async fn process_book_template_requests(request_path? : String, registry_path? : String, book_catalog_path? : String, standing_goal_path? : String, tick? : Int) -> String
 
-pub async fn reconcile_book_quality_ai_review_results(result_dir? : String, run_path? : String) -> Int
-
-pub async fn reconcile_book_quality_repair_bridge(book_catalog_path? : String, snapshot_path? : String, result_dir? : String, bridge_path? : String) -> String
-
 pub async fn render_app_tool_book_status(book_id? : String, workspace_root? : String, book_catalog_path? : String, standing_goal_path? : String) -> String
-
-pub async fn render_book_quality(book_catalog_path? : String, snapshot_path? : String) -> String
-
-pub async fn render_book_quality_ai_review_status(result_dir? : String, run_path? : String, book_catalog_path? : String, snapshot_path? : String) -> String
 
 pub async fn render_book_template_registry(registry_path? : String) -> String
 
@@ -167,10 +152,6 @@ pub async fn run_goal(String, book_id? : String?, task_limit_per_book? : Int, sn
 pub fn runtime_status_from_state(@core.TownState, String, standing_goals? : Array[@core.StandingGoal], daemon_tick? : Int, watcher_records? : Array[@core.WatcherRunRecord], book_template_request_status? : @book_templates.BookTemplateRequestStatus?) -> @runtime_status_policy.TownRuntimeStatus
 
 pub async fn supervise_saved_town(snapshot_path? : String, book_catalog_path? : String) -> String
-
-pub async fn write_book_quality_audit(book_catalog_path? : String, snapshot_path? : String, audit_path? : String) -> String
-
-pub async fn write_book_quality_review_packets(book_catalog_path? : String, snapshot_path? : String, review_dir? : String) -> String
 
 pub async fn write_daemon_restart_request(snapshot_path? : String, reason? : String) -> String
 

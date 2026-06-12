@@ -1,0 +1,25 @@
+import {
+  "moonbitlang/async/fs",
+  "moonbitlang/core/env",
+  "moonbitlang/core/json",
+  "moonbitlang/x/path",
+  "moonbitlang/x/sys",
+  "vectie/moontown/adapters/codex",
+  "vectie/moontown/adapters/moonbook",
+  "vectie/moontown/adapters/moonclaw",
+  "vectie/moontown/book_quality",
+  "vectie/moontown/civic",
+  "vectie/moontown/civic_runtime",
+  "vectie/moontown/cookbook",
+  "vectie/moontown/core",
+  "vectie/moontown/course_book",
+  "vectie/moontown/planbook",
+  "vectie/moontown/skill_quality",
+  "vectie/moontown/storage",
+  "vectie/moontown/support",
+}
+
+import {
+  "moonbitlang/async",
+  "vectie/moontown/policy",
+} for "wbtest"

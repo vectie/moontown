@@ -67,7 +67,12 @@ async fn run_daemon_scheduled_job(
         @civic_runtime.reconcile_wenyu_civic_service_results(book_catalog_path~),
       )
     "book-quality" =>
-      Some(write_book_quality_audit(book_catalog_path~, snapshot_path~))
+      Some(
+        @book_quality_runtime.write_book_quality_audit(
+          book_catalog_path~,
+          snapshot_path~,
+        ),
+      )
     "book-quality-review" =>
       Some(run_book_quality_review_cycle(book_catalog_path, snapshot_path))
     "book-template-request" =>
@@ -87,11 +92,11 @@ async fn run_book_quality_review_cycle(
   book_catalog_path : String,
   snapshot_path : String,
 ) -> String {
-  let bridge = reconcile_book_quality_repair_bridge(
+  let bridge = @book_quality_runtime.reconcile_book_quality_repair_bridge(
     book_catalog_path~,
     snapshot_path~,
   )
-  let dispatch = dispatch_next_book_quality_ai_review(
+  let dispatch = @book_quality_runtime.dispatch_next_book_quality_ai_review(
     book_catalog_path~,
     snapshot_path~,
     run_inline=false,
