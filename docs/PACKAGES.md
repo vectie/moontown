@@ -30,8 +30,8 @@ Purpose:
 - `src/facade.mbt` preserves the public `vectie/moontown` API.
 - `src/town_runtime` owns demo bootstrap, dashboard rendering, goal runs,
   daemon entry points, standing-watch dispatch, and supervision internals.
-- `src/town_runtime` may assemble task target pages, but shared generated-site
-  output paths must come from `src/policy`, not local literals.
+- `src/town_runtime` may schedule package-provided task contracts, but
+  feature-specific task contracts should live in the owning feature package.
 - `src/integration_tests` owns cross-package API and skill-quality tests.
 - No implementation package should be added directly at repository root.
 
@@ -256,6 +256,29 @@ Boundary:
   packages may render it but should not redefine how execute/tend/quality
   map to information, recognition, and decisiveness.
 - downstream packages may read lane text but should not redefine lane semantics.
+
+## Build Pipeline
+
+Key files:
+
+- [src/build_pipeline/build_pipeline_tasks.mbt](/Users/kq/Workspace/moontown/src/build_pipeline/build_pipeline_tasks.mbt)
+- [src/build_pipeline/build_pipeline_prompts.mbt](/Users/kq/Workspace/moontown/src/build_pipeline/build_pipeline_prompts.mbt)
+- [src/build_pipeline/build_pipeline_artifacts.mbt](/Users/kq/Workspace/moontown/src/build_pipeline/build_pipeline_artifacts.mbt)
+
+Purpose:
+
+- own Wenyu build task contracts for implementation backlog, code patch, and
+  asset/projection work
+- own Wenyu build prompts and fallback artifact materialization
+- keep build-stage target pages, worker roles, priorities, and review flags
+  close to the build feature instead of the town scheduler
+
+Boundary:
+
+- `src/town_runtime` may decide when a Wenyu book is ready for build and supply
+  the current repo root.
+- `src/build_pipeline` owns the build task contract and may compose target pages
+  through `src/policy` and civic service definitions.
 
 ## PlanBook Policy And Runtime
 

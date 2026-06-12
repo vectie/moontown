@@ -11,6 +11,10 @@ pub async fn complete_wenyu_build_artifacts_if_needed(@moonbook.BookCatalogEntry
 
 pub fn wenyu_asset_pack_prompt(@moonbook.BookCatalogEntry, String, String) -> String
 
+pub fn wenyu_build_task_limit(Int) -> Int
+
+pub fn wenyu_build_tasks(@moonbook.BookCatalogEntry, String, String) -> Array[@moonbook.BookTask]
+
 pub fn wenyu_code_patch_prompt(@moonbook.BookCatalogEntry, String, String) -> String
 
 pub fn wenyu_implementation_backlog_prompt(@moonbook.BookCatalogEntry, String, String) -> String

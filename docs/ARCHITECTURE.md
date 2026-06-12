@@ -389,6 +389,13 @@ PlanBook generated-site writes follow the global output rule as well:
 `planbook_runtime/` consumes `policy.default_generated_site_projection_path()`
 for the default projection path instead of redefining it locally.
 
+Wenyu build-pipeline task contracts belong to `build_pipeline/`. The package
+owns implementation-backlog, code-patch, and asset-pack task construction,
+including prompts, target pages, priorities, review flags, worker roles, and
+fallback artifact materialization. `town_runtime/` may decide that a Wenyu book
+is ready for build and pass the current repository root, but it should not
+reconstruct those build task contracts locally.
+
 Live-autonomy policy belongs to the `live_autonomy_policy/` package. That
 package owns the `LiveAutonomySpine` JSON contract, journal/probe DTOs, live
 worker/execution counting, transient-infrastructure-debt recognition, autonomy
