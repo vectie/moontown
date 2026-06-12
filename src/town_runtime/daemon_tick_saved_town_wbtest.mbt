@@ -20,7 +20,7 @@ test "daemon tick paths keep runtime files beside snapshot" {
 ///|
 test "daemon planbook duplicate repair message is stable" {
   assert_eq(
-    daemon_planbook_repair_duplicate_message(),
+    @planbook_runtime.planbook_daemon_repair_duplicate_message(),
     "PlanBook repair already active; daemon did not create a duplicate repair task.",
   )
 }

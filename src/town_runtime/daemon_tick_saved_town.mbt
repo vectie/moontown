@@ -21,7 +21,7 @@ pub async fn daemon_tick_saved_town(
   )
   run_daemon_scheduled_jobs_phase(context, snapshot_path, book_catalog_path)
   append_daemon_context_phase_log(context, "planbook")
-  let planbook_phase = run_daemon_planbook_phase(
+  let planbook_phase = @planbook_runtime.run_planbook_daemon_phase(
     snapshot_path, book_catalog_path,
   )
   run_daemon_projection_phase(

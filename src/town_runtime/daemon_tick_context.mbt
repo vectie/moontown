@@ -6,12 +6,6 @@ priv struct DaemonTickPaths {
 }
 
 ///|
-priv struct DaemonPlanbookPhaseResult {
-  planbook_summary : String
-  repair_summary : String
-}
-
-///|
 priv struct DaemonTickContext {
   catalog : Array[@moonbook.BookCatalogEntry]
   paths : DaemonTickPaths

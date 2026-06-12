@@ -324,6 +324,7 @@ Key files:
 - [src/planbook_policy/repair_commands.mbt](/Users/kq/Workspace/moontown/src/planbook_policy/repair_commands.mbt)
 - [src/planbook_runtime/planbook_repair_run_status.mbt](/Users/kq/Workspace/moontown/src/planbook_runtime/planbook_repair_run_status.mbt)
 - [src/planbook_runtime/planbook_repair_result.mbt](/Users/kq/Workspace/moontown/src/planbook_runtime/planbook_repair_result.mbt)
+- [src/planbook_runtime/planbook_daemon_phase.mbt](/Users/kq/Workspace/moontown/src/planbook_runtime/planbook_daemon_phase.mbt)
 
 Purpose:
 
@@ -331,6 +332,9 @@ Purpose:
   and raw MoonClaw run-status normalization.
 - `src/planbook_runtime` owns workspace IO, run reconciliation, and
   evidence-aware repair lifecycle decisions.
+- `src/planbook_runtime` owns the daemon-facing PlanBook phase: write autonomy
+  status, avoid duplicate repair tasks, dispatch one bounded repair task when
+  no repair is active, and return the summaries that town projection records.
 
 Boundary:
 
@@ -341,6 +345,8 @@ Boundary:
 - default generated-site path semantics belong to `src/policy`; PlanBook
   runtime consumes `policy.default_generated_site_projection_path()` rather
   than redefining the projection path.
+- town runtime may call the PlanBook daemon phase and record its summaries, but
+  should not own duplicate-repair wording or PlanBook repair dispatch policy.
 
 ## Course Book
 

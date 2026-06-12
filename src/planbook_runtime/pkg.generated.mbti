@@ -24,6 +24,8 @@ pub fn default_planbook_workspace_root() -> String
 
 pub async fn inspect_moontown_planbook_autonomy(snapshot_path? : String, workspace_root? : String, book_catalog_path? : String) -> @planbook_policy.PlanbookAutonomyStatus
 
+pub fn planbook_daemon_repair_duplicate_message() -> String
+
 pub async fn planbook_open_gap_count(snapshot_path? : String) -> Int
 
 pub async fn planbook_repair_active_count(snapshot_path? : String) -> Int
@@ -34,6 +36,8 @@ pub async fn render_moontown_planbook_repair_status(snapshot_path? : String) -> 
 
 pub async fn render_moontown_planbook_status(workspace_root? : String) -> String
 
+pub async fn run_planbook_daemon_phase(String, String) -> PlanbookDaemonPhaseResult
+
 pub async fn write_moontown_planbook_autonomy(snapshot_path? : String, workspace_root? : String, book_catalog_path? : String) -> String
 
 pub async fn write_moontown_planbook_repair_task(snapshot_path? : String, workspace_root? : String, book_catalog_path? : String, dispatch? : Bool, run_inline? : Bool) -> String
@@ -43,6 +47,11 @@ pub async fn write_moontown_planbook_validation_evidence(snapshot_path? : String
 // Errors
 
 // Types and methods
+pub struct PlanbookDaemonPhaseResult {
+  planbook_summary : String
+  repair_summary : String
+}
+
 type PlanbookImplementationBacklogItem derive(Eq, ToJson, @debug.Debug, @json.FromJson)
 
 // Type aliases

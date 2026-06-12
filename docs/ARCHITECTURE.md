@@ -403,6 +403,13 @@ locally.
 PlanBook generated-site writes follow the global output rule as well:
 `planbook_runtime/` consumes `policy.default_generated_site_projection_path()`
 for the default projection path instead of redefining it locally.
+PlanBook daemon-tick phase policy belongs there too: `planbook_runtime/` writes
+the autonomy surface, detects whether a repair task is already active, creates
+one bounded repair task only when needed, owns duplicate-repair wording, and
+returns the summaries that town projection records as daemon events. Root
+`town_runtime/` may call that phase during a daemon tick and persist the
+resulting town events, but it should not reconstruct PlanBook repair dispatch
+or duplicate-repair policy locally.
 
 Wenyu build-pipeline task contracts belong to `build_pipeline/`. The package
 owns Wenyu bootstrap ingest, implementation-backlog, code-patch, and asset-pack

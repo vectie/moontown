@@ -6,7 +6,7 @@ async fn run_daemon_projection_phase(
   snapshot_path : String,
   tick_sequence : Int,
   standing_goals : Array[@core.StandingGoal],
-  planbook_phase : DaemonPlanbookPhaseResult,
+  planbook_phase : @planbook_runtime.PlanbookDaemonPhaseResult,
 ) -> String {
   let watcher_records = load_watcher_records_for_goals(
     snapshot_path, standing_goals,
