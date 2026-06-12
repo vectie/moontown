@@ -19,6 +19,6 @@ async fn preseed_goal_bootstrap_inputs(
   @build_pipeline.preseed_wenyu_goal_inputs(
     entry,
     objective,
-    moontown_repo_root(),
+    current_repo_root(),
   )
 }

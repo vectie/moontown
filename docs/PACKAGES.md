@@ -300,6 +300,9 @@ Purpose:
 - own Wenyu bootstrap workspace preseed: PRD/vision copies, research request,
   source hints, mounted source snapshots, generated Wenyu skills, civic seed,
   MoonClaw build profile, and Codex ACP target registration
+- own Wenyu build/civic task-plan helpers: Wenyu detection, build-readiness
+  paths, local fallback-task predicates, build task limit, positive task-limit
+  normalization, and civic-service task merge that removes bootstrap duplicates
 - keep build-stage target pages, worker roles, priorities, and review flags
   close to the build feature instead of the town scheduler
 
@@ -314,7 +317,8 @@ Boundary:
 - `src/town_runtime` should not own Wenyu build output-contract ids, MoonClaw
   profile JSON, ACP step metadata, source-bundle manifests, source-hint pages,
   generated build-skill installation, Codex ACP target JSON, or build/review
-  prompt templates.
+  prompt templates. It also should not own Wenyu build/civic task merge policy
+  beyond adapting package-owned tasks into the generic goal-book plan shape.
 
 ## PlanBook Policy And Runtime
 

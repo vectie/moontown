@@ -1,9 +1,4 @@
 ///|
-fn is_local_wenyu_build_fallback_task(kind : String) -> Bool {
-  @build_pipeline.is_local_wenyu_build_fallback_task(kind)
-}
-
-///|
 fn local_wenyu_build_execution_record(
   entry : @moonbook.BookCatalogEntry,
   task : @moonbook.BookTask,

@@ -424,7 +424,12 @@ registration. `town_runtime/` may decide that a Wenyu book is ready for
 bootstrap/build, pass the current repository root, and ask `build_pipeline/` to
 preseed or build the workspace, but it should not reconstruct those build tasks,
 Wenyu bootstrap tasks, source bundles, Codex target JSON, generated build-skill
-installation, or MoonClaw profile contracts locally.
+installation, or MoonClaw profile contracts locally. Wenyu build/civic task
+merge policy belongs there too: Wenyu detection, build-readiness paths, local
+fallback-task predicates, build task limits, positive task-limit normalization,
+and service-first task merging should be package-owned. `town_runtime/` may
+adapt those package-owned tasks into the generic goal-book plan shape, but it
+should not keep a parallel Wenyu planning layer.
 
 Live-autonomy policy belongs to the `live_autonomy_policy/` package. That
 package owns the `LiveAutonomySpine` JSON contract, journal/probe DTOs, live

@@ -15,6 +15,8 @@ pub fn is_local_wenyu_build_fallback_task(String) -> Bool
 
 pub fn is_wenyu_book(@moonbook.BookCatalogEntry) -> Bool
 
+pub fn positive_wenyu_task_limit(Int) -> Int
+
 pub async fn preseed_wenyu_goal_inputs(@moonbook.BookCatalogEntry, String, String) -> Unit
 
 pub fn wenyu_asset_pack_prompt(@moonbook.BookCatalogEntry, String, String) -> String
@@ -28,6 +30,8 @@ pub fn wenyu_build_packet_contract() -> String
 pub fn wenyu_build_task_limit(Int) -> Int
 
 pub fn wenyu_build_tasks(@moonbook.BookCatalogEntry, String, String) -> Array[@moonbook.BookTask]
+
+pub fn wenyu_civic_service_plan_tasks(@moonbook.BookCatalogEntry, String, Array[@moonbook.BookTask]) -> Array[@moonbook.BookTask]
 
 pub fn wenyu_code_patch_prompt(@moonbook.BookCatalogEntry, String, String) -> String
 

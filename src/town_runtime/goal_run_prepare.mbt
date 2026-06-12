@@ -114,7 +114,9 @@ async fn goal_book_task_plan(
           related_book_id=Some(entry.id),
         ),
       )
-      wenyu_civic_service_plan(entry, objective, batch_tasks, task_limit)
+      goal_book_wenyu_civic_service_plan(
+        entry, objective, batch_tasks, task_limit,
+      )
     }
     None =>
       goal_book_research_or_build_plan(
@@ -135,7 +137,8 @@ async fn goal_book_research_or_build_plan(
   let bootstrap = research_bootstrap_plan(
     entry, objective, initial_summary, batch_tasks, task_limit,
   )
-  if is_wenyu_book(entry) && wenyu_book_ready_for_build(entry) {
+  if @build_pipeline.is_wenyu_book(entry) &&
+    @build_pipeline.wenyu_book_ready_for_build(entry) {
     state.record_event(
       @core.TownEvent::new(
         id="event-build-plan-\{entry.id}",
@@ -144,9 +147,44 @@ async fn goal_book_research_or_build_plan(
         related_book_id=Some(entry.id),
       ),
     )
-    wenyu_build_plan(entry, objective, task_limit)
+    goal_book_wenyu_build_plan(entry, objective, task_limit)
   } else {
     bootstrap
+  }
+}
+
+///|
+fn goal_book_wenyu_build_plan(
+  entry : @moonbook.BookCatalogEntry,
+  objective : String,
+  task_limit : Int,
+) -> ResearchBootstrapPlan {
+  {
+    tasks: @build_pipeline.wenyu_build_tasks(
+      entry,
+      objective,
+      current_repo_root(),
+    ),
+    task_limit: @build_pipeline.wenyu_build_task_limit(task_limit),
+    bootstrap_active: false,
+  }
+}
+
+///|
+fn goal_book_wenyu_civic_service_plan(
+  entry : @moonbook.BookCatalogEntry,
+  objective : String,
+  tasks : Array[@moonbook.BookTask],
+  task_limit : Int,
+) -> ResearchBootstrapPlan {
+  {
+    tasks: @build_pipeline.wenyu_civic_service_plan_tasks(
+      entry,
+      objective,
+      prioritized_tasks(tasks, objective),
+    ),
+    task_limit: @build_pipeline.positive_wenyu_task_limit(task_limit),
+    bootstrap_active: false,
   }
 }
 

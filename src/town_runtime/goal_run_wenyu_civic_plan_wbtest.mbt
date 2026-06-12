@@ -1,7 +1,11 @@
 ///|
 test "Wenyu civic task includes service skill and projection target" {
   let entry = goal_run_wenyu_policy_hall_entry()
-  let tasks = wenyu_build_tasks(entry, "Build Wenyu Valley")
+  let tasks = @build_pipeline.wenyu_build_tasks(
+    entry,
+    "Build Wenyu Valley",
+    current_repo_root(),
+  )
   let service = tasks[0]
   assert_eq(service.kind, "civic-service-workflow")
   assert_true(
@@ -15,7 +19,7 @@ test "Wenyu civic task includes service skill and projection target" {
 test "Wenyu civic service plan skips research bootstrap" {
   let entry = goal_run_wenyu_policy_hall_entry()
   let bootstrap_like_task = goal_run_wenyu_bootstrap_like_task()
-  let plan = wenyu_civic_service_plan(
+  let plan = goal_book_wenyu_civic_service_plan(
     entry,
     "Build Wenyu Valley AI Innovation Town",
     [bootstrap_like_task],

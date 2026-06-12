@@ -7,7 +7,8 @@ async fn execute_goal_book_task(
   tick? : Int = 0,
   run_inline? : Bool = moontown_moonclaw_inline_enabled(),
 ) -> @core.TaskExecutionRecord {
-  if is_wenyu_book(entry) && is_local_wenyu_build_fallback_task(task.kind) {
+  if @build_pipeline.is_wenyu_book(entry) &&
+    @build_pipeline.is_local_wenyu_build_fallback_task(task.kind) {
     return local_wenyu_build_execution_record(
       entry,
       task,
