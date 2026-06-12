@@ -51,6 +51,44 @@ test "daemon runtime policy requires supervisor for durable worker" {
 }
 
 ///|
+test "daemon runtime policy owns supervisor worker spawn decisions" {
+  let running_worker = {
+    status: "running",
+    supervisor_pid: 10,
+    worker_pid: 11,
+    supervisor_alive: true,
+    worker_alive: true,
+    heartbeat_age_ms: 50UL,
+    stale: false,
+    stop_requested: false,
+    tick_success_count: 3,
+    tick_failure_count: 0,
+    last_error: "",
+    log_path: ".moontown/daemon.log",
+  }
+  assert_false(daemon_runtime_should_spawn_worker(running_worker))
+  assert_true(
+    daemon_runtime_should_spawn_worker({ ..running_worker, worker_alive: false }),
+  )
+  assert_true(
+    daemon_runtime_should_spawn_worker({ ..running_worker, stale: true }),
+  )
+  assert_true(
+    daemon_runtime_should_spawn_worker({ ..running_worker, status: "missing" }),
+  )
+  assert_true(
+    daemon_runtime_should_spawn_worker({ ..running_worker, status: "stopped" }),
+  )
+  assert_false(
+    daemon_runtime_should_spawn_worker({
+      ..running_worker,
+      worker_alive: false,
+      stop_requested: true,
+    }),
+  )
+}
+
+///|
 test "daemon runtime policy renders health summary in stable order" {
   let health = {
     status: "running",

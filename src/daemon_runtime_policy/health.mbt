@@ -55,6 +55,16 @@ pub fn daemon_runtime_start_already_active(
 }
 
 ///|
+pub fn daemon_runtime_should_spawn_worker(health : DaemonRuntimeHealth) -> Bool {
+  !health.stop_requested &&
+  (
+    health.stale ||
+    !health.worker_alive ||
+    daemon_runtime_mode(health.status) is InactiveRuntime
+  )
+}
+
+///|
 pub fn daemon_runtime_doctor_action(health : DaemonRuntimeHealth) -> String {
   if daemon_runtime_start_already_active(health) {
     "none"

@@ -260,6 +260,30 @@ Boundary:
   lacks required PlanBook repair evidence.
 - do not encode missing-evidence decisions in raw status normalization.
 
+## Daemon Runtime Policy And Runtime
+
+Key files:
+
+- [src/daemon_runtime_policy/health.mbt](/Users/kq/Workspace/moontown/src/daemon_runtime_policy/health.mbt)
+- [src/daemon_runtime_policy/transitions.mbt](/Users/kq/Workspace/moontown/src/daemon_runtime_policy/transitions.mbt)
+- [src/daemon_runtime/daemon_runtime_inspection.mbt](/Users/kq/Workspace/moontown/src/daemon_runtime/daemon_runtime_inspection.mbt)
+- [src/town_runtime/daemon_runtime_supervise.mbt](/Users/kq/Workspace/moontown/src/town_runtime/daemon_runtime_supervise.mbt)
+
+Purpose:
+
+- `src/daemon_runtime_policy` owns daemon state vocabulary, health labels,
+  heartbeat staleness, transition builders, doctor actions, and the pure
+  `daemon_runtime_should_spawn_worker(...)` supervision predicate.
+- `src/daemon_runtime` owns filesystem/process inspection, PID files, logs,
+  launchd integration, request files, and runtime state persistence.
+- `src/town_runtime` owns the town-level supervisor loop and worker spawning.
+
+Boundary:
+
+- supervisor loops must ask `daemon_runtime_policy` whether worker spawn is due.
+- town runtime may spawn or stop processes, but should not compare raw daemon
+  status strings such as `missing`, `stopped`, `running`, or `ticking`.
+
 ## Rabbita Frontend
 
 Key files:

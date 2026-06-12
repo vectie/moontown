@@ -42,10 +42,7 @@ pub async fn daemon_supervise_saved_town(
       snapshot_path~,
       stale_after_ms~,
     )
-    if !health.worker_alive ||
-      health.stale ||
-      health.status == "missing" ||
-      health.status == "stopped" {
+    if @daemon_runtime_policy.daemon_runtime_should_spawn_worker(health) {
       let worker_run_id = @daemon_runtime.daemon_run_id("worker")
       let pid = @daemon_runtime.spawn_daemon_worker(command, snapshot_path) catch {
         error => {

@@ -31,6 +31,8 @@ pub fn daemon_runtime_path_for_snapshot(String) -> String
 
 pub fn daemon_runtime_should_keep_supervisor(Int, Bool, Bool) -> Bool
 
+pub fn daemon_runtime_should_spawn_worker(DaemonRuntimeHealth) -> Bool
+
 pub fn daemon_runtime_start_already_active(DaemonRuntimeHealth) -> Bool
 
 pub fn daemon_runtime_status_active(String) -> Bool

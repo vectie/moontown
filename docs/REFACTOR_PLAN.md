@@ -268,8 +268,9 @@ Goals:
   future anomaly title counting semantics
 - keep daemon-runtime state/health DTOs, status-mode classification, heartbeat
   staleness rules, durable-worker/supervisor predicates, doctor/start actions,
-  health labels, health summary field ordering, canonical daemon path
-  derivation, and pure daemon transition builders in `daemon_runtime_policy/`;
+  worker-spawn predicates, health labels, health summary field ordering,
+  canonical daemon path derivation, and pure daemon transition builders in
+  `daemon_runtime_policy/`;
   root may supply storage defaults, inspect PIDs, spawn/stop processes, persist
   runtime files, manage PID/stop/restart files, and integrate launchd, but
   should not define duplicate daemon runtime vocabulary, file naming,
