@@ -20,6 +20,10 @@ pub fn research_text_contains_topic(String, String) -> Bool
 
 pub async fn research_wiki_materialization_gaps(@moonbook.BookCatalogEntry, String, String) -> Array[String]
 
+pub async fn write_research_quality_review_resolved(@moonbook.BookCatalogEntry, String) -> Unit
+
+pub async fn write_research_quality_review_trigger(@moonbook.BookCatalogEntry, Array[String], String) -> Unit
+
 // Errors
 
 // Types and methods

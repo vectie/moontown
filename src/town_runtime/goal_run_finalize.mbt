@@ -98,7 +98,9 @@ async fn queue_goal_book_reviews_if_needed(
   if !quality_gaps.is_empty() {
     queue_research_quality_gate(state, entry.id, task_ids, quality_gaps)
   } else {
-    write_research_quality_review_resolved(entry, "post-run quality gate")
+    @research_quality.write_research_quality_review_resolved(
+      entry, "post-run quality gate",
+    )
     complete_recovered_research_bootstrap_if_clean(state, entry.id, task_ids)
   }
 }

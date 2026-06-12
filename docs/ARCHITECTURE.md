@@ -219,8 +219,11 @@ book owns. The implementation now has a first-class `policy` package:
   owns research-readiness DTOs and quality-gate semantics: required research
   artifacts, source-depth checks, topic matching, deep-report structure/length
   checks, wiki materialization checks, generated-site specificity checks, and
-  process-noise rejection. Root Moontown may mutate town executions when a gate
-  fails, but it should call this package for the actual quality judgment.
+  process-noise rejection. It also owns the `raw/bootstrap/QUALITY_REPAIR.md`
+  trigger/resolution file contract used for in-place research repair. Root
+  Moontown may mutate town executions when a gate fails and decide when to write
+  or resolve a repair trigger, but it should call this package for the actual
+  quality judgment, repair-trigger path, and repair-trigger wording.
   Generated-site quality checks consume `policy.default_generated_site_projection_path()`
   for the default projection path instead of redefining it locally.
 - [course_book/](/Users/kq/Workspace/moontown/src/course_book)

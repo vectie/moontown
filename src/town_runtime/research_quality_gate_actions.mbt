@@ -65,7 +65,9 @@ async fn write_research_quality_review_trigger_for_state(
       memory_scope=book.memory_scope,
       tags=book.tags,
     )
-    write_research_quality_review_trigger(entry, quality_gaps, reason)
+    @research_quality.write_research_quality_review_trigger(
+      entry, quality_gaps, reason,
+    )
     return
   }
 }

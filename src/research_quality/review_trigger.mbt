@@ -1,12 +1,11 @@
 ///|
-async fn write_research_quality_review_trigger(
+pub async fn write_research_quality_review_trigger(
   entry : @moonbook.BookCatalogEntry,
   quality_gaps : Array[String],
   reason : String,
 ) -> Unit {
   guard entry.id.has_prefix("research-") else { return }
-  let root = @moonbook.workspace_root(entry)
-  let raw_root = "\{root}/raw/bootstrap"
+  let raw_root = research_quality_bootstrap_raw_root(entry)
   @support.ignore_checked_command("mkdir", ["-p", raw_root])
   @support.write_text_file(
     "\{raw_root}/QUALITY_REPAIR.md",
@@ -31,14 +30,12 @@ async fn write_research_quality_review_trigger(
 }
 
 ///|
-async fn write_research_quality_review_resolved(
+pub async fn write_research_quality_review_resolved(
   entry : @moonbook.BookCatalogEntry,
   reason : String,
 ) -> Unit {
   guard entry.id.has_prefix("research-") else { return }
-  let root = @moonbook.workspace_root(entry)
-  let raw_root = "\{root}/raw/bootstrap"
-  let path = "\{raw_root}/QUALITY_REPAIR.md"
+  let path = "\{research_quality_bootstrap_raw_root(entry)}/QUALITY_REPAIR.md"
   guard @fs.exists(path) else { return }
   @support.write_text_file(
     path,
@@ -57,4 +54,11 @@ async fn write_research_quality_review_resolved(
       "- do not enter repair mode from this file unless new active quality gaps are written below",
     ].join("\n"),
   )
+}
+
+///|
+fn research_quality_bootstrap_raw_root(
+  entry : @moonbook.BookCatalogEntry,
+) -> String {
+  "\{@moonbook.workspace_root(entry)}/raw/bootstrap"
 }

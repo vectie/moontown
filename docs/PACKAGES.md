@@ -422,18 +422,24 @@ Key files:
 - [src/research_quality/readiness.mbt](/Users/kq/Workspace/moontown/src/research_quality/readiness.mbt)
 - [src/research_quality/projection_gaps.mbt](/Users/kq/Workspace/moontown/src/research_quality/projection_gaps.mbt)
 - [src/research_quality/source_depth_gaps.mbt](/Users/kq/Workspace/moontown/src/research_quality/source_depth_gaps.mbt)
+- [src/research_quality/review_trigger.mbt](/Users/kq/Workspace/moontown/src/research_quality/review_trigger.mbt)
 
 Purpose:
 
 - evaluate research-readiness and quality gate gaps
 - detect weak source depth, process noise, generic generated-site projections,
   and missing topic-specific wiki materialization
+- write and resolve the canonical `raw/bootstrap/QUALITY_REPAIR.md` repair
+  trigger for in-place research quality repair
 - expose quality judgments that town runtime can use without reimplementing
   research semantics
 
 Boundary:
 
-- research quality owns the judgment, wording, and topic-specific signal checks.
+- research quality owns the judgment, repair-trigger file contract, repair
+  wording, and topic-specific signal checks.
+- `src/town_runtime` may decide that a repair trigger should be written or
+  resolved, but should not own the trigger path or prose.
 - default generated-site path semantics belong to `src/policy`; Research
   Quality consumes `policy.default_generated_site_projection_path()` rather
   than redefining the projection path.
