@@ -1,8 +1,8 @@
 ///|
 async fn render_cookbook_command(args : Array[String]) -> String {
   match args {
-    ["bootstrap"] | ["doctor"] => @moontown.bootstrap_moontown_cookbook()
-    ["status"] => @moontown.render_moontown_cookbook_status()
+    ["bootstrap"] | ["doctor"] => @cookbook.bootstrap_moontown_cookbook()
+    ["status"] => @cookbook.render_moontown_cookbook_status()
     _ => @moontown.load_or_create_demo_dashboard()
   }
 }
@@ -43,9 +43,9 @@ async fn render_editor_pipeline_command(args : Array[String]) -> String {
 async fn render_course_command(args : Array[String]) -> String {
   match args {
     ["wenyu-game-design", "bootstrap"] =>
-      @moontown.bootstrap_wenyu_game_design_course_book()
+      @course_book.bootstrap_wenyu_game_design_course_book()
     ["wenyu-game-design", "status"] =>
-      @moontown.render_wenyu_game_design_course_status()
+      @course_book.render_wenyu_game_design_course_status()
     _ => @moontown.load_or_create_demo_dashboard()
   }
 }

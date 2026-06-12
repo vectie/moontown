@@ -3,31 +3,16 @@ package "vectie/moontown"
 
 import {
   "vectie/moontown/adapters/moonbook",
-  "vectie/moontown/cookbook",
   "vectie/moontown/core",
   "vectie/moontown/roles",
 }
 
 // Values
-pub async fn bootstrap_moontown_cookbook(book_catalog_path? : String, workspace_root? : String, manifest_path? : String) -> String
-
-pub async fn bootstrap_wenyu_game_design_course_book(book_catalog_path? : String, workspace_root? : String, source_workspace_root? : String) -> String
-
 pub async fn daemon_run_saved_town(snapshot_path? : String, book_catalog_path? : String, max_ticks? : Int, sleep_ms? : Int, preserve_supervisor? : Bool, inline_under_supervisor? : Bool) -> String
 
 pub async fn daemon_supervise_saved_town(snapshot_path? : String, command? : String, max_checks? : Int, sleep_ms? : Int, stale_after_ms? : UInt64) -> String
 
 pub async fn daemon_tick_saved_town(snapshot_path? : String, book_catalog_path? : String, respect_runtime_lock? : Bool) -> String
-
-pub fn default_cookbook_book_id() -> String
-
-pub fn default_cookbook_manifest_path() -> String
-
-pub fn default_cookbook_workspace_root() -> String
-
-pub fn default_wenyu_course_book_id() -> String
-
-pub fn default_wenyu_course_workspace_root() -> String
 
 pub fn demo_dashboard() -> String
 
@@ -39,8 +24,6 @@ pub fn demo_state_from_catalog(Array[@moonbook.BookCatalogEntry]) -> @core.TownS
 
 pub fn[Provider : @core.BookProvider] demo_state_with_provider(Provider) -> @core.TownState
 
-pub async fn inspect_moontown_cookbook(workspace_root? : String, manifest_path? : String) -> @cookbook.MoontownCookbookStatus
-
 pub async fn load_or_create_demo_dashboard(path? : String, book_catalog_path? : String) -> String
 
 pub async fn load_or_create_demo_state(path? : String, book_catalog_path? : String) -> @core.TownState
@@ -51,11 +34,7 @@ pub async fn load_or_create_modeled_demo_state(path? : String, book_catalog_path
 
 pub async fn render_goal_run(String, book_id? : String?, task_limit_per_book? : Int, snapshot_path? : String, book_catalog_path? : String) -> String
 
-pub async fn render_moontown_cookbook_status(workspace_root? : String, manifest_path? : String) -> String
-
 pub fn render_state_dashboard(@core.TownState) -> String
-
-pub async fn render_wenyu_game_design_course_status(workspace_root? : String) -> String
 
 pub async fn run_goal(String, book_id? : String?, task_limit_per_book? : Int, snapshot_path? : String, book_catalog_path? : String) -> @core.TownState
 

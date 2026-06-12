@@ -6,4 +6,9 @@ import {
   "vectie/moontown/adapters/moonbook",
   "vectie/moontown/core",
   "vectie/moontown/skill_quality",
+  "vectie/moontown/support",
 }
+
+import {
+  "moonbitlang/async",
+} for "wbtest"

@@ -9,6 +9,8 @@ import {
 // Values
 pub fn book_entry(String) -> @moonbook.BookCatalogEntry
 
+pub async fn bootstrap_moontown_cookbook(book_catalog_path? : String, workspace_root? : String, manifest_path? : String) -> String
+
 pub fn cookbook_algorithms_markdown() -> String
 
 pub fn cookbook_artifact_card_html(CookbookArtifact) -> String
@@ -49,15 +51,25 @@ pub fn cookbook_status_chips_json() -> Array[String]
 
 pub fn default_book_id() -> String
 
+pub fn default_cookbook_book_id() -> String
+
+pub fn default_cookbook_manifest_path() -> String
+
+pub fn default_cookbook_workspace_root() -> String
+
 pub fn default_manifest_path() -> String
 
 pub fn default_workspace_root() -> String
 
 pub fn generated_site_html(@moonbook.BookCatalogEntry, MoontownCookbookManifest) -> String
 
+pub async fn inspect_moontown_cookbook(workspace_root? : String, manifest_path? : String) -> MoontownCookbookStatus
+
 pub async fn manifest(String, String) -> MoontownCookbookManifest
 
 pub fn merge_catalog(Array[@moonbook.BookCatalogEntry], @moonbook.BookCatalogEntry) -> Array[@moonbook.BookCatalogEntry]
+
+pub async fn render_moontown_cookbook_status(workspace_root? : String, manifest_path? : String) -> String
 
 pub fn status_markdown(MoontownCookbookStatus) -> String
 

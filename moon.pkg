@@ -5,13 +5,11 @@ import {
   "vectie/moontown/book_quality_runtime",
   "vectie/moontown/book_templates",
   "vectie/moontown/build_pipeline",
-  "vectie/moontown/cookbook",
   "vectie/moontown/planbook_runtime",
   "vectie/moontown/town_synthesis",
   "vectie/moontown/visual_projection",
   "vectie/moontown/support",
   "vectie/moontown/research_quality",
-  "vectie/moontown/course_book",
   "vectie/moontown/moonclaw_runtime",
   "vectie/moontown/standing_watch_policy",
   "vectie/moontown/live_autonomy_runtime",
@@ -40,6 +38,8 @@ import {
 }
 
 import {
+  "vectie/moontown/cookbook",
+  "vectie/moontown/course_book",
   "vectie/moontown/editor_pipeline",
   "vectie/moontown/moonclaw_runtime",
   "vectie/moontown/planbook",

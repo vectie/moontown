@@ -1,16 +1,16 @@
 ///|
 pub fn default_cookbook_book_id() -> String {
-  @cookbook.default_book_id()
+  default_book_id()
 }
 
 ///|
 pub fn default_cookbook_workspace_root() -> String {
-  @cookbook.default_workspace_root()
+  default_workspace_root()
 }
 
 ///|
 pub fn default_cookbook_manifest_path() -> String {
-  @cookbook.default_manifest_path()
+  default_manifest_path()
 }
 
 ///|
@@ -19,18 +19,15 @@ pub async fn bootstrap_moontown_cookbook(
   workspace_root? : String = default_cookbook_workspace_root(),
   manifest_path? : String = default_cookbook_manifest_path(),
 ) -> String {
-  let entry = @cookbook.book_entry(workspace_root)
+  let entry = book_entry(workspace_root)
   let catalog = @moonbook.load_or_create_catalog(path=book_catalog_path)
-  @moonbook.save_catalog_file(
-    book_catalog_path,
-    @cookbook.merge_catalog(catalog, entry),
-  )
-  let manifest = @cookbook.manifest(workspace_root, manifest_path)
+  @moonbook.save_catalog_file(book_catalog_path, merge_catalog(catalog, entry))
+  let manifest = manifest(workspace_root, manifest_path)
   @support.write_text_file(
     manifest_path,
     manifest.to_json().stringify(indent=2),
   )
-  @cookbook.write_workspace(entry, manifest)
+  write_workspace(entry, manifest)
   let status = inspect_moontown_cookbook(workspace_root~, manifest_path~)
   "Bootstrapped MoonBook cookbook `\{entry.id}` at \{workspace_root}; wrote \{manifest_path}; required_missing=\{status.required_missing_count}."
 }
@@ -39,11 +36,9 @@ pub async fn bootstrap_moontown_cookbook(
 pub async fn inspect_moontown_cookbook(
   workspace_root? : String = default_cookbook_workspace_root(),
   manifest_path? : String = default_cookbook_manifest_path(),
-) -> @cookbook.MoontownCookbookStatus {
-  let manifest = @cookbook.manifest(workspace_root, manifest_path)
-  let summary = @cookbook.CookbookArtifactSummary::from_artifacts(
-    manifest.artifacts,
-  )
+) -> MoontownCookbookStatus {
+  let manifest = manifest(workspace_root, manifest_path)
+  let summary = CookbookArtifactSummary::from_artifacts(manifest.artifacts)
   let workspace_ready = @fs.exists("\{workspace_root}/wiki/index.md") &&
     @fs.exists("\{workspace_root}/book/moonbook-ui-state.json")
   {
@@ -65,5 +60,5 @@ pub async fn render_moontown_cookbook_status(
   manifest_path? : String = default_cookbook_manifest_path(),
 ) -> String {
   let status = inspect_moontown_cookbook(workspace_root~, manifest_path~)
-  @cookbook.status_markdown(status)
+  status_markdown(status)
 }
