@@ -53,7 +53,7 @@ fn civic_service(
         "wiki/ledgers/exchange-ledger.md",
         "wiki/history/service-history.md",
         "book/moonbook-ui-state.json",
-        "book/site/generated/index.html",
+        civic_generated_site_path(),
       ],
     ),
     acceptance,

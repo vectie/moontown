@@ -16,5 +16,8 @@ async fn write_civic_html_pages(
 ) -> Unit {
   let html = civic_generated_site_html(service)
   @support.write_text_file("\{root}/book/Home.html", html)
-  @support.write_text_file("\{root}/book/site/generated/index.html", html)
+  @support.write_text_file(
+    @civic.civic_generated_site_workspace_path(root),
+    html,
+  )
 }

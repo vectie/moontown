@@ -75,7 +75,7 @@ async fn write_civic_salon_participant_workspace(
     ).stringify(indent=2),
   )
   @support.write_text_file(
-    "\{root}/book/site/generated/index.html",
+    @civic.civic_generated_site_workspace_path(root),
     civic_salon_participant_html(
       scenario, participant, returned_ideas, round_id, round_number,
     ),
@@ -131,5 +131,8 @@ async fn write_civic_salon_building_pages(
     ),
   )
   @support.write_text_file("\{root}/book/Home.html", html)
-  @support.write_text_file("\{root}/book/site/generated/index.html", html)
+  @support.write_text_file(
+    @civic.civic_generated_site_workspace_path(root),
+    html,
+  )
 }

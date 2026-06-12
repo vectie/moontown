@@ -33,6 +33,10 @@ pub fn civic_communication_pattern_id_for_service(CivicServiceDefinition) -> Str
 
 pub fn civic_communication_patterns() -> Array[CivicCommunicationPattern]
 
+pub fn civic_generated_site_path() -> String
+
+pub fn civic_generated_site_workspace_path(String) -> String
+
 pub fn civic_health_notes(operable~ : Bool, status~ : String, missing_required_paths~ : Array[String], latest_decision~ : String, latest_review_items~ : Int) -> Array[String]
 
 pub fn civic_module_skill_text(CivicServiceDefinition) -> String

@@ -19,6 +19,7 @@ test "Wenyu civic services expose book workspace and skill contracts" {
     assert_true(service.output_contract.has_prefix("wenyu.civic."))
     assert_true(service.target_pages.contains(service.skill_path))
     assert_true(service.target_pages.contains("book/moonbook-ui-state.json"))
+    assert_true(service.target_pages.contains(civic_generated_site_path()))
     assert_true(!service.module_mode.is_empty())
     assert_true(!service.book_role.is_empty())
     assert_true(!service.skill_mode.is_empty())
@@ -26,6 +27,18 @@ test "Wenyu civic services expose book workspace and skill contracts" {
     assert_true(!service.place_work.is_empty())
     assert_true(!service.acceptance.is_empty())
   }
+}
+
+///|
+test "civic generated site path follows policy projection default" {
+  assert_eq(
+    civic_generated_site_path(),
+    @policy.default_generated_site_projection_path(),
+  )
+  assert_eq(
+    civic_generated_site_workspace_path("/tmp/civic"),
+    "/tmp/civic/\{@policy.default_generated_site_projection_path()}",
+  )
 }
 
 ///|

@@ -291,6 +291,28 @@ Boundary:
   consumes `policy.default_generated_site_projection_path()` rather than
   redefining the projection path.
 
+## Civic Definitions And Runtime
+
+Key files:
+
+- [src/civic/services.mbt](/Users/kq/Workspace/moontown/src/civic/services.mbt)
+- [src/civic/services_paths.mbt](/Users/kq/Workspace/moontown/src/civic/services_paths.mbt)
+- [src/civic_runtime/civic_workspace_projection.mbt](/Users/kq/Workspace/moontown/src/civic_runtime/civic_workspace_projection.mbt)
+- [src/civic_runtime/civic_salon_scenario_workspace.mbt](/Users/kq/Workspace/moontown/src/civic_runtime/civic_salon_scenario_workspace.mbt)
+
+Purpose:
+
+- `src/civic` owns service definitions, target page contracts, skill paths,
+  protocol vocabulary, and civic helper paths.
+- `src/civic_runtime` owns workspace writes, ledgers, generated pages, and
+  scenario execution persistence.
+
+Boundary:
+
+- civic runtime writes generated pages through `@civic` path helpers.
+- `src/civic` delegates default generated-site semantics to `src/policy`;
+  civic modules should not redefine the generated-site path locally.
+
 ## Daemon Runtime Policy And Runtime
 
 Key files:
