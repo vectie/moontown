@@ -41,7 +41,9 @@ test "planbook repair paths centralize durable workspace layout" {
     "\{workspace_root}/raw/repair/planbook-repair-live-runtime-recovery.packet.json",
   )
   assert_eq(
-    moonclaw_run_result_path("\{workspace_root}/.moonclaw/run-1"),
+    @moonclaw_runtime.moonclaw_run_result_path(
+      "\{workspace_root}/.moonclaw/run-1",
+    ),
     "\{workspace_root}/.moonclaw/run-1/result.json",
   )
   assert_eq(

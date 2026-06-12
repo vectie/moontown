@@ -361,8 +361,6 @@ type FinalIntegrationTemplateSpec derive(Eq, ToJson, @debug.Debug, @json.FromJso
 
 type FinalIntegrationWatchSpec derive(Eq, ToJson, @debug.Debug, @json.FromJson)
 
-type MoonClawStoreCompactionTarget derive(Eq, @debug.Debug)
-
 type PlanbookImplementationBacklogItem derive(Eq, ToJson, @debug.Debug, @json.FromJson)
 
 pub struct ProtocolHistoryEntry {

@@ -1,5 +1,5 @@
 ///|
-async fn compact_moonclaw_job_store_if_needed(
+pub async fn compact_moonclaw_job_store_if_needed(
   workspace_root : String,
   tick : Int,
   max_store_bytes? : Int64 = 50_000_000,
@@ -11,20 +11,20 @@ async fn compact_moonclaw_job_store_if_needed(
     match moonclaw_file_size(item.path) {
       Some(size) if size > max_store_bytes => {
         let archive_path = "\{jobs_root}/archive/tick-\{tick}/\{item.name}"
-        ensure_parent_directory(archive_path)
+        @support.ensure_parent_directory(archive_path)
         ignore(@integration.run_checked("mv", [item.path, archive_path])) catch {
           _ => continue
         }
-        write_text_file(item.path, item.empty_json)
+        @support.write_text_file(item.path, item.empty_json)
         rotated.push("\{item.name}=\{size}B")
       }
       Some(_) if reset_reason is Some(reason) => {
         let archive_path = "\{jobs_root}/archive/tick-\{tick}/\{item.name}"
-        ensure_parent_directory(archive_path)
+        @support.ensure_parent_directory(archive_path)
         ignore(@integration.run_checked("mv", [item.path, archive_path])) catch {
           _ => continue
         }
-        write_text_file(item.path, item.empty_json)
+        @support.write_text_file(item.path, item.empty_json)
         rotated.push("\{item.name}=\{reason}")
       }
       _ => ()

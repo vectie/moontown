@@ -1,10 +1,10 @@
 ///|
-fn moonclaw_run_result_path(workspace_dir : String) -> String {
+pub fn moonclaw_run_result_path(workspace_dir : String) -> String {
   "\{workspace_dir}/result.json"
 }
 
 ///|
-async fn moonclaw_run_result_text_from_workspace(
+pub async fn moonclaw_run_result_text_from_workspace(
   workspace_dir : String,
   fallback_summary? : Bool = false,
 ) -> String {
@@ -12,9 +12,9 @@ async fn moonclaw_run_result_text_from_workspace(
     Some(parsed) => parsed
     None => return ""
   }
-  json_string_field(parsed, "content").unwrap_or(
+  @support.json_string_field(parsed, "content").unwrap_or(
     if fallback_summary {
-      json_string_field(parsed, "summary").unwrap_or("")
+      @support.json_string_field(parsed, "summary").unwrap_or("")
     } else {
       ""
     },
@@ -22,7 +22,7 @@ async fn moonclaw_run_result_text_from_workspace(
 }
 
 ///|
-async fn moonclaw_run_result_payload_from_workspace(
+pub async fn moonclaw_run_result_payload_from_workspace(
   workspace_dir : String,
 ) -> Json? {
   let result_path = moonclaw_run_result_path(workspace_dir)
@@ -35,7 +35,7 @@ async fn moonclaw_run_result_payload_from_workspace(
 }
 
 ///|
-async fn moonclaw_run_result_payload_from_run(
+pub async fn moonclaw_run_result_payload_from_run(
   run_id : String,
   cwd : String,
 ) -> Json? {
@@ -47,7 +47,7 @@ async fn moonclaw_run_result_payload_from_run(
 }
 
 ///|
-async fn moonclaw_run_result_text_from_run(
+pub async fn moonclaw_run_result_text_from_run(
   run_id : String,
   cwd : String,
   fallback_summary? : Bool = false,

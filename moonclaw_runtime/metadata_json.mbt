@@ -1,18 +1,18 @@
 ///|
-fn moonclaw_no_input_policy_json() -> Json {
+pub fn moonclaw_no_input_policy_json() -> Json {
   let fields : Map[String, Json] = {}
   add_moonclaw_no_input_policy(fields)
   Json::object(fields)
 }
 
 ///|
-fn add_moonclaw_no_input_policy(fields : Map[String, Json]) -> Unit {
+pub fn add_moonclaw_no_input_policy(fields : Map[String, Json]) -> Unit {
   fields["disable_waiting_for_input"] = true.to_json()
   fields["best_effort_on_missing_input"] = true.to_json()
 }
 
 ///|
-fn moonclaw_execution_metadata_fields(
+pub fn moonclaw_execution_metadata_fields(
   preferred_skills~ : Array[String],
   execution_mode~ : String,
   execution_target? : String? = None,
@@ -31,7 +31,7 @@ fn moonclaw_execution_metadata_fields(
 }
 
 ///|
-fn moonclaw_step_metadata_fields(
+pub fn moonclaw_step_metadata_fields(
   preferred_skills~ : Array[String],
   enable_tools~ : Bool,
   web_search~ : Bool,

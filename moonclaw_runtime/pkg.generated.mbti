@@ -1,0 +1,39 @@
+// Generated using `moon info`, DON'T EDIT IT
+package "vectie/moontown/moonclaw_runtime"
+
+import {
+  "moonbitlang/core/debug",
+}
+
+// Values
+pub fn add_moonclaw_no_input_policy(Map[String, Json]) -> Unit
+
+pub async fn compact_moonclaw_job_store_if_needed(String, Int, max_store_bytes? : Int64) -> String
+
+pub async fn compact_registered_moonclaw_job_stores(book_catalog_path? : String, snapshot_path? : String, tick? : Int, max_store_bytes? : Int64) -> String
+
+pub fn moonclaw_execution_metadata_fields(preferred_skills~ : Array[String], execution_mode~ : String, execution_target? : String?, output_contract~ : String) -> Map[String, Json]
+
+pub fn moonclaw_no_input_policy_json() -> Json
+
+pub fn moonclaw_run_result_path(String) -> String
+
+pub async fn moonclaw_run_result_payload_from_run(String, String) -> Json?
+
+pub async fn moonclaw_run_result_payload_from_workspace(String) -> Json?
+
+pub async fn moonclaw_run_result_text_from_run(String, String, fallback_summary? : Bool) -> String
+
+pub async fn moonclaw_run_result_text_from_workspace(String, fallback_summary? : Bool) -> String
+
+pub fn moonclaw_step_metadata_fields(preferred_skills~ : Array[String], enable_tools~ : Bool, web_search~ : Bool, timeout_ms~ : Int, board_lane~ : String, board_order~ : Int) -> Map[String, Json]
+
+// Errors
+
+// Types and methods
+type MoonClawStoreCompactionTarget derive(Eq, @debug.Debug)
+
+// Type aliases
+
+// Traits
+

@@ -341,6 +341,9 @@ Goals:
 - keep Wenyu course-book bootstrap, generated course content, course-builder
   skill text, UI-state JSON, and generated course site projection in
   `course_book/`; root should expose only command-compatible wrappers
+- keep Moontown-side MoonClaw metadata, run-result lookup, and job-store
+  compaction helpers in `moonclaw_runtime/`; root should keep only wrappers
+  needed by existing commands and runtime callers
 
 Acceptance:
 
