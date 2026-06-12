@@ -14,7 +14,7 @@ fn town_synthesis_task_id(goal : String) -> String {
 }
 
 ///|
-fn town_goal_slug(goal : String) -> String {
+pub fn town_goal_slug(goal : String) -> String {
   let builder = StringBuilder::new()
   let mut last_dash = false
   let mut emitted = 0

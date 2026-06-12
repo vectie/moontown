@@ -1,5 +1,5 @@
 ///|
-async fn write_town_goal_synthesis(
+pub async fn write_town_goal_synthesis(
   state : @core.TownState,
   goal : String,
   plan : @roles.MayorGoalPlan,
@@ -12,8 +12,8 @@ async fn write_town_goal_synthesis(
   let path = "\{synthesis_dir}/\{town_goal_slug(goal)}.md"
   let latest_path = "\{synthesis_dir}/latest.md"
   let content = render_town_goal_synthesis(state, goal, plan)
-  write_text_file(path, content)
-  write_text_file(latest_path, content)
+  @support.write_text_file(path, content)
+  @support.write_text_file(latest_path, content)
   register_town_synthesis_execution(state, goal, plan, path)
   state.record_event(
     @core.TownEvent::new(

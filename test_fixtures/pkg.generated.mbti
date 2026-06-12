@@ -1,0 +1,29 @@
+// Generated using `moon info`, DON'T EDIT IT
+package "vectie/moontown/test_fixtures"
+
+import {
+  "vectie/moontown/adapters/moonbook",
+  "vectie/moontown/core",
+}
+
+// Values
+pub async fn cleaned_research_quality_test_root(String) -> String
+
+pub fn llm_research_book_ref(String, String) -> @core.BookRef
+
+pub fn llm_research_catalog_entry(String, String) -> @moonbook.BookCatalogEntry
+
+pub fn research_quality_execution(String, String, @core.TaskExecutionStatus, String) -> @core.TaskExecutionRecord
+
+pub fn research_quality_test_state() -> @core.TownState
+
+pub fn visual_projection_test_state(worker_status? : @core.WorkerStatus, execution_status? : @core.TaskExecutionStatus) -> @core.TownState
+
+// Errors
+
+// Types and methods
+
+// Type aliases
+
+// Traits
+

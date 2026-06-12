@@ -1,0 +1,23 @@
+// Generated using `moon info`, DON'T EDIT IT
+package "vectie/moontown/town_synthesis"
+
+import {
+  "vectie/moontown/core",
+  "vectie/moontown/roles",
+}
+
+// Values
+pub fn lane_research_status(@core.TownState, String) -> String
+
+pub fn town_goal_slug(String) -> String
+
+pub async fn write_town_goal_synthesis(@core.TownState, String, @roles.MayorGoalPlan, String) -> Unit
+
+// Errors
+
+// Types and methods
+
+// Type aliases
+
+// Traits
+

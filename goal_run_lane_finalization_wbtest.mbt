@@ -19,7 +19,10 @@ test "lane status prefers review queued over complete" {
       summary="quality gate",
     ),
   )
-  assert_eq(lane_research_status(state, "research-moonbook"), "review queued")
+  assert_eq(
+    @town_synthesis.lane_research_status(state, "research-moonbook"),
+    "review queued",
+  )
 }
 
 ///|

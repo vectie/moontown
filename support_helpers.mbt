@@ -67,26 +67,6 @@ fn markdown_bullets(values : Array[String]) -> String {
 }
 
 ///|
-fn remove_first_markdown_title(report : String) -> String {
-  @support.remove_first_markdown_title(report)
-}
-
-///|
-fn demote_markdown_headings(markdown : String) -> String {
-  @support.demote_markdown_headings(markdown)
-}
-
-///|
-fn section_body(report : String, heading : String) -> String {
-  @support.section_body(report, heading)
-}
-
-///|
-fn first_non_heading_paragraph(markdown : String) -> String {
-  @support.first_non_heading_paragraph(markdown)
-}
-
-///|
 fn markdown_excerpt(text : String, limit : Int) -> String {
   @support.markdown_excerpt(text, limit)
 }

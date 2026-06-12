@@ -9,12 +9,12 @@ async fn first_deep_report_summary(
       if report.is_blank() {
         return "No deep report was available for this lane."
       }
-      let body = section_body(report, "## Executive Summary")
-      let compact = first_non_heading_paragraph(body)
+      let body = @support.section_body(report, "## Executive Summary")
+      let compact = @support.first_non_heading_paragraph(body)
       if compact.is_blank() {
         "Deep report exists, but no usable executive-summary paragraph was found."
       } else {
-        markdown_excerpt(compact, 520)
+        @support.markdown_excerpt(compact, 520)
       }
     }
     None => "No matching lane was found."
@@ -32,8 +32,11 @@ async fn render_lane_deep_report_for_topic(
       if report.is_blank() {
         return render_missing_deep_report_block(entry)
       }
-      let body = remove_first_markdown_title(report)
-      let excerpt = markdown_excerpt(demote_markdown_headings(body), 9000)
+      let body = @support.remove_first_markdown_title(report)
+      let excerpt = @support.markdown_excerpt(
+        @support.demote_markdown_headings(body),
+        9000,
+      )
       "\{excerpt}\n\nSource lane report: `\{@moonbook.workspace_root(entry)}/raw/bootstrap/deep-report.md`"
     }
     None => "- No lane report found for `\{topic}`."

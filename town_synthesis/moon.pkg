@@ -1,0 +1,8 @@
+import {
+  "vectie/moontown/core",
+  "vectie/moontown/adapters/moonbook",
+  "vectie/moontown/roles",
+  "vectie/moontown/research_quality",
+  "vectie/moontown/support",
+  "moonbitlang/x/path",
+}

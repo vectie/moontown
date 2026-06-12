@@ -81,7 +81,10 @@ fn count_lanes_by_status(
 }
 
 ///|
-fn lane_research_status(state : @core.TownState, book_id : String) -> String {
+pub fn lane_research_status(
+  state : @core.TownState,
+  book_id : String,
+) -> String {
   let mut saw_running = false
   let mut saw_review = false
   let mut saw_failed = false
