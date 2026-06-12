@@ -5,8 +5,6 @@ async fn queue_research_quality_gate(
   task_ids : Array[String],
   gaps : Array[String],
 ) -> Unit {
-  let gap_summary = gaps.join("; ")
-  let detail = "Research quality gate failed for \{book_id}: \{gap_summary}"
   let mut marked = 0
   write_research_quality_review_trigger_for_state(
     state, book_id, gaps, "post-run quality gate",
@@ -25,7 +23,11 @@ async fn queue_research_quality_gate(
           let updated = copy_execution_with(
             execution,
             status=@core.TaskExecutionStatus::ReviewQueued,
-            summary="\{execution.summary} / quality_gate_failed=\{gaps.length()} / auto_retry=\{retry_tick != None}",
+            summary=@research_quality.research_quality_gate_execution_summary(
+              execution.summary,
+              gaps.length(),
+              retry_tick != None,
+            ),
             next_retry_tick=retry_tick,
           )
           state.replace_execution(updated)
@@ -40,7 +42,9 @@ async fn queue_research_quality_gate(
     @core.TownEvent::new(
       id="event-quality-\{book_id}",
       kind="review",
-      detail="\{detail}; mayor marked \{marked} task(s) as review-queued and scheduled in-place repair retries when attempts remain.",
+      detail=@research_quality.research_quality_gate_event_detail(
+        book_id, gaps, marked,
+      ),
       related_book_id=Some(book_id),
     ),
   )
@@ -93,7 +97,9 @@ fn complete_recovered_research_bootstrap_if_clean(
           let updated = copy_execution_with(
             execution,
             status=@core.TaskExecutionStatus::Completed,
-            summary="\{execution.summary} / quality_gate_recovered=clean_research_projection",
+            summary=@research_quality.recovered_research_bootstrap_execution_summary(
+              execution.summary,
+            ),
           )
           state.replace_execution(updated)
           state.replace_task(task_for_supervision(state, updated))
@@ -108,7 +114,9 @@ fn complete_recovered_research_bootstrap_if_clean(
       @core.TownEvent::new(
         id="event-quality-recovered-\{book_id}",
         kind="recovery",
-        detail="Research bootstrap for \{book_id} recovered after late worker failure because MoonBook artifacts, wiki materialization, and generated site passed quality gates.",
+        detail=@research_quality.recovered_research_bootstrap_event_detail(
+          book_id,
+        ),
         related_book_id=Some(book_id),
       ),
     )

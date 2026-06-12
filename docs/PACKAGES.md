@@ -434,6 +434,7 @@ Key files:
 - [src/research_quality/review_trigger.mbt](/Users/kq/Workspace/moontown/src/research_quality/review_trigger.mbt)
 - [src/research_quality/persistence_payload.mbt](/Users/kq/Workspace/moontown/src/research_quality/persistence_payload.mbt)
 - [src/research_quality/bootstrap_artifacts.mbt](/Users/kq/Workspace/moontown/src/research_quality/bootstrap_artifacts.mbt)
+- [src/research_quality/quality_gate_events.mbt](/Users/kq/Workspace/moontown/src/research_quality/quality_gate_events.mbt)
 
 Purpose:
 
@@ -446,6 +447,8 @@ Purpose:
   trigger for in-place research quality repair
 - translate completed research bootstrap artifacts into persistence summaries,
   artifact paths, and MoonBook memory candidates
+- own research quality-gate execution-summary suffixes and recovery/review
+  event wording
 - expose quality judgments that town runtime can use without reimplementing
   research semantics
 
@@ -454,12 +457,14 @@ Boundary:
 - research quality owns the generic research bootstrap contract, judgment,
   repair-trigger file contract, repair wording, topic-specific signal checks,
   bootstrap artifact reading, persistence-summary wording, artifact list, and
-  memory-candidate target-page contract.
+  memory-candidate target-page contract. It also owns quality-gate and recovered
+  bootstrap message semantics.
 - `src/town_runtime` may decide that a repair trigger should be written or
   resolved, may choose between Wenyu and research bootstrap, and may dispatch
-  persistence to the owning package, but should not own research bootstrap
-  prompt/target pages, the trigger path/prose, or research persistence payload
-  semantics.
+  persistence to the owning package. It may apply review/recovery transitions to
+  town executions and workers, but should not own research bootstrap
+  prompt/target pages, the trigger path/prose, research persistence payload
+  semantics, or quality-gate/recovery wording.
 - default generated-site path semantics belong to `src/policy`; Research
   Quality consumes `policy.default_generated_site_projection_path()` rather
   than redefining the projection path.

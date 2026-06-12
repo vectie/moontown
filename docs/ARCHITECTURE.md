@@ -225,11 +225,13 @@ book owns. The implementation now has a first-class `policy` package:
   file contract used for in-place research repair. It also owns research
   bootstrap artifact reading and the persistence payload that turns those
   artifacts into MoonBook summaries, artifact paths, and durable memory
-  candidates. Root Moontown may mutate town executions when a gate fails, decide
-  when to schedule bootstrap or repair, and dispatch persistence through this
-  package, but it should call this package for the actual quality judgment,
-  bootstrap research contract, repair-trigger path, repair-trigger wording, and
-  research persistence semantics.
+  candidates. Research quality also owns quality-gate summary suffixes and
+  recovery/review event wording. Root Moontown may mutate town executions when a
+  gate fails, decide when to schedule bootstrap or repair, dispatch persistence
+  through this package, and apply review/recovery state transitions, but it
+  should call this package for the actual quality judgment, bootstrap research
+  contract, repair-trigger path, repair-trigger wording, research persistence
+  semantics, and quality-gate/recovery messages.
   Generated-site quality checks consume `policy.default_generated_site_projection_path()`
   for the default projection path instead of redefining it locally.
 - [course_book/](/Users/kq/Workspace/moontown/src/course_book)

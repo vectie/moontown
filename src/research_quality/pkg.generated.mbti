@@ -13,6 +13,10 @@ pub fn deep_report_quality_gaps(@moonbook.BookCatalogEntry, String) -> Array[Str
 
 pub fn quality_topic_for_entry(@moonbook.BookCatalogEntry) -> String
 
+pub fn recovered_research_bootstrap_event_detail(String) -> String
+
+pub fn recovered_research_bootstrap_execution_summary(String) -> String
+
 pub fn research_bootstrap_ingest_target_pages() -> Array[String]
 
 pub fn research_bootstrap_ingest_task(@moonbook.BookCatalogEntry, String) -> @moonbook.BookTask
@@ -26,6 +30,10 @@ pub async fn research_persist_memory_candidates(@moonbook.BookCatalogEntry, @cor
 pub async fn research_persist_summary(@moonbook.BookCatalogEntry, @core.TaskExecutionRecord) -> String
 
 pub async fn research_quality_gaps(@moonbook.BookCatalogEntry) -> Array[String]
+
+pub fn research_quality_gate_event_detail(String, Array[String], Int) -> String
+
+pub fn research_quality_gate_execution_summary(String, Int, Bool) -> String
 
 pub fn research_text_contains_topic(String, String) -> Bool
 
