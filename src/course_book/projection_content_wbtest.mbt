@@ -27,3 +27,20 @@ test "course generated site escapes workspace root in hero" {
   assert_true(html.contains("/tmp/course/&lt;unsafe&gt;"))
   assert_true(!html.contains("/tmp/course/<unsafe>"))
 }
+
+///|
+test "course book generated site path follows policy default" {
+  assert_eq(
+    wenyu_course_generated_site_path(),
+    @policy.default_generated_site_projection_path(),
+  )
+  assert_true(
+    wenyu_course_status_required_paths().contains(
+      @policy.default_generated_site_projection_path(),
+    ),
+  )
+  assert_eq(
+    wenyu_course_generated_site_workspace_path("/tmp/course"),
+    "/tmp/course/\{@policy.default_generated_site_projection_path()}",
+  )
+}

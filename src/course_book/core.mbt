@@ -9,6 +9,29 @@ pub fn default_wenyu_course_workspace_root() -> String {
 }
 
 ///|
+fn wenyu_course_generated_site_path() -> String {
+  @policy.default_generated_site_projection_path()
+}
+
+///|
+fn wenyu_course_generated_site_workspace_path(root : String) -> String {
+  "\{root}/\{wenyu_course_generated_site_path()}"
+}
+
+///|
+fn wenyu_course_status_required_paths() -> Array[String] {
+  [
+    "wiki/index.md",
+    "wiki/course/beginner-course.md",
+    "raw/bootstrap/COURSE_CONTRACT.md",
+    "raw/bootstrap/course-outline.md",
+    "skills/course-builder/SKILL.md",
+    "book/moonbook-ui-state.json",
+    wenyu_course_generated_site_path(),
+  ]
+}
+
+///|
 pub async fn bootstrap_wenyu_game_design_course_book(
   book_catalog_path? : String = @moonbook.default_catalog_path(),
   workspace_root? : String = default_wenyu_course_workspace_root(),
@@ -30,11 +53,7 @@ pub async fn bootstrap_wenyu_game_design_course_book(
 pub async fn render_wenyu_game_design_course_status(
   workspace_root? : String = default_wenyu_course_workspace_root(),
 ) -> String {
-  let checks = [
-    "wiki/index.md", "wiki/course/beginner-course.md", "raw/bootstrap/COURSE_CONTRACT.md",
-    "raw/bootstrap/course-outline.md", "skills/course-builder/SKILL.md", "book/moonbook-ui-state.json",
-    "book/site/generated/index.html",
-  ]
+  let checks = wenyu_course_status_required_paths()
   let missing : Array[String] = []
   for path in checks {
     if !@fs.exists("\{workspace_root}/\{path}") {
@@ -129,5 +148,8 @@ async fn write_wenyu_course_workspace(
   )
   let html = wenyu_course_generated_site_html(entry)
   @support.write_text_file("\{root}/book/Home.html", html)
-  @support.write_text_file("\{root}/book/site/generated/index.html", html)
+  @support.write_text_file(
+    wenyu_course_generated_site_workspace_path(root),
+    html,
+  )
 }

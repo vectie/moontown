@@ -3,6 +3,7 @@ import {
   "moonbitlang/core/json",
   "vectie/moontown/adapters/moonbook",
   "vectie/moontown/core",
+  "vectie/moontown/policy",
   "vectie/moontown/skill_quality",
   "vectie/moontown/support",
 }

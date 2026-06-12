@@ -270,6 +270,27 @@ Boundary:
   lacks required PlanBook repair evidence.
 - do not encode missing-evidence decisions in raw status normalization.
 
+## Course Book
+
+Key files:
+
+- [src/course_book/core.mbt](/Users/kq/Workspace/moontown/src/course_book/core.mbt)
+- [src/course_book/content.mbt](/Users/kq/Workspace/moontown/src/course_book/content.mbt)
+- [src/course_book/projection_content.mbt](/Users/kq/Workspace/moontown/src/course_book/projection_content.mbt)
+
+Purpose:
+
+- bootstrap the Wenyu beginner course MoonBook workspace
+- keep course output course-shaped rather than research-shaped
+- write generated course projection content
+
+Boundary:
+
+- course-specific content and course workspace files belong here.
+- default generated-site path semantics belong to `src/policy`; CourseBook
+  consumes `policy.default_generated_site_projection_path()` rather than
+  redefining the projection path.
+
 ## Daemon Runtime Policy And Runtime
 
 Key files:
