@@ -6,8 +6,8 @@ This is a multi-package MoonBit module with implementation packages under
 
 The repository root should not contain implementation packages. Keep root
 limited to module metadata, docs, scripts, templates, runtime state directories,
-and other non-source project files. `moon.mod.json` sets `"source": "src"` so
-imports remain `vectie/moontown/...`.
+and other non-source project files. `moon.mod` sets `source: "src"` so imports
+remain `vectie/moontown/...`.
 
 ## Core Commands
 

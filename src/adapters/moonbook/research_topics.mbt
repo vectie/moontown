@@ -131,10 +131,10 @@ fn research_local_paths(topic : String) -> Array[String] {
     "moontown" =>
       [
         "/Users/kq/Workspace/moontown/README.md", "/Users/kq/Workspace/moontown/README.mbt.md",
-        "/Users/kq/Workspace/moontown/AGENTS.md", "/Users/kq/Workspace/moontown/moon.mod.json",
-        "/Users/kq/Workspace/moontown/src/cmd/main/main.mbt", "/Users/kq/Workspace/moontown/goal_run.mbt",
-        "/Users/kq/Workspace/moontown/adapters/moonbook/client.mbt", "/Users/kq/Workspace/moontown/adapters/moonclaw/client.mbt",
-        "/Users/kq/Workspace/moontown/roles/mayor.mbt",
+        "/Users/kq/Workspace/moontown/AGENTS.md", "/Users/kq/Workspace/moontown/moon.mod",
+        "/Users/kq/Workspace/moontown/src/cmd/main/main.mbt", "/Users/kq/Workspace/moontown/src/town_runtime/goal_run.mbt",
+        "/Users/kq/Workspace/moontown/src/adapters/moonbook/client.mbt", "/Users/kq/Workspace/moontown/src/adapters/moonclaw/import.mbt",
+        "/Users/kq/Workspace/moontown/src/roles/mayor.mbt",
       ]
     "moonbook" =>
       [

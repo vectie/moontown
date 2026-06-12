@@ -27,7 +27,7 @@ async fn preseed_wenyu_goal_inputs(
   let root = @moonbook.workspace_root(entry)
   let repo_root = moontown_repo_root()
   let prd_path = "\{repo_root}/docs/WENYU_VALLEY_PRD.md"
-  let vision_path = "\{repo_root}/wenyu.md"
+  let vision_path = "\{repo_root}/docs/project/wenyu.md"
   copy_optional_bootstrap_text(
     source=prd_path,
     dest="\{root}/raw/bootstrap/WENYU_VALLEY_PRD.md",
@@ -112,7 +112,7 @@ async fn write_wenyu_source_hints(
       "- `\{prd_path}`: absolute path to product requirements and module contract for Wenyu Valley.",
       "- `\{vision_path}`: absolute path to original user-facing vision/reference file when present.",
       "- `../../../docs/WENYU_VALLEY_PRD.md`: product requirements and module contract for Wenyu Valley.",
-      "- `../../../wenyu.md`: original user-facing vision/reference file when present.",
+      "- `../../../docs/project/wenyu.md`: original user-facing vision/reference file when present.",
       "",
       "## Local Implementation Sources",
       "",
@@ -125,7 +125,7 @@ async fn write_wenyu_source_hints(
       "- `mounted-sources/moontown/scheduler-daemon.mbt`: daemon scheduling and supervision primitives snapshot.",
       "- `mounted-sources/moontown/moontown.mbt`: town runtime, workers, dispatch, and lifecycle snapshot.",
       "- `mounted-sources/moontown/adapters-moonbook-client.mbt`: MoonBook workspace/task/projection adapter snapshot.",
-      "- `mounted-sources/moontown/adapters-moonclaw-client.mbt`: MoonClaw execution adapter snapshot.",
+      "- `mounted-sources/moontown/adapters-moonclaw-import.mbt`: MoonClaw execution adapter snapshot.",
       "- `mounted-sources/moonbook/research-report-skill.md`: MoonBook deep research report skill snapshot.",
       "- `mounted-sources/moonbook/wiki-ingest-skill.md`: MoonBook wiki ingest skill snapshot.",
       "- `mounted-sources/moonbook/wiki-marketing-skill.md`: MoonBook marketing projection skill snapshot.",
@@ -142,15 +142,15 @@ async fn write_wenyu_source_hints(
       "- `\{repo_root}/src/town_runtime/goal_bootstrap.mbt`: bootstrap-first routing for research/build lanes.",
       "- `\{repo_root}/src/scheduler/daemon.mbt`: daemon scheduling and supervision primitives.",
       "- `\{repo_root}/src/adapters/moonbook/client.mbt`: MoonBook workspace/task/projection adapter.",
-      "- `\{repo_root}/src/adapters/moonclaw/client.mbt`: MoonClaw execution adapter.",
+      "- `\{repo_root}/src/adapters/moonclaw/import.mbt`: MoonClaw execution adapter.",
       "- `../../../src/ui/rabbita-town/main/main.mbt`: gamified town UI implementation.",
       "- `../../../src/ui/rabbita-town/styles.css`: gamified town visual system.",
-      "- `../../../roles/mayor.mbt`: mayor decomposition and strategic routing.",
-      "- `../../../goal_run.mbt`: town goal launch and book orchestration.",
-      "- `../../../goal_bootstrap.mbt`: bootstrap-first routing for research/build lanes.",
-      "- `../../../scheduler/daemon.mbt`: daemon scheduling and supervision primitives.",
-      "- `../../../adapters/moonbook/client.mbt`: MoonBook workspace/task/projection adapter.",
-      "- `../../../adapters/moonclaw/client.mbt`: MoonClaw execution adapter.",
+      "- `../../../src/roles/mayor.mbt`: mayor decomposition and strategic routing.",
+      "- `../../../src/town_runtime/goal_run.mbt`: town goal launch and book orchestration.",
+      "- `../../../src/town_runtime/goal_bootstrap.mbt`: bootstrap-first routing for research/build lanes.",
+      "- `../../../src/scheduler/daemon.mbt`: daemon scheduling and supervision primitives.",
+      "- `../../../src/adapters/moonbook/client.mbt`: MoonBook workspace/task/projection adapter.",
+      "- `../../../src/adapters/moonclaw/import.mbt`: MoonClaw execution adapter.",
       "",
       "## Adjacent Repositories",
       "",

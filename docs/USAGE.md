@@ -1280,7 +1280,7 @@ Current Mayor capabilities:
 
 Current embedded moonclaw runtime metadata:
 
-- [adapters/moonclaw/client.mbt](/Users/kq/Workspace/moontown/src/adapters/moonclaw/import.mbt)
+- [adapters/moonclaw/import.mbt](/Users/kq/Workspace/moontown/src/adapters/moonclaw/import.mbt)
 
 Important current functions:
 
@@ -1383,7 +1383,7 @@ The relevant code is in:
 
 - [core/types.mbt](/Users/kq/Workspace/moontown/src/core/types.mbt)
 - [adapters/moonbook/client.mbt](/Users/kq/Workspace/moontown/src/adapters/moonbook/client.mbt)
-- [adapters/moonclaw/client.mbt](/Users/kq/Workspace/moontown/src/adapters/moonclaw/import.mbt)
+- [adapters/moonclaw/import.mbt](/Users/kq/Workspace/moontown/src/adapters/moonclaw/import.mbt)
 - [roles/mayor.mbt](/Users/kq/Workspace/moontown/src/roles/mayor.mbt)
 
 The current lifecycle is:

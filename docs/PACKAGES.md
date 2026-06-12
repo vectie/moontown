@@ -6,7 +6,7 @@ is intentionally kept thin.
 
 ## Root Module
 
-- [moon.mod.json](/Users/kq/Workspace/moontown/moon.mod)
+- [moon.mod](/Users/kq/Workspace/moontown/moon.mod)
 
 Module name:
 
@@ -175,7 +175,7 @@ total is exposed as `total_evidence_count`.
 
 ## Moonclaw Adapter
 
-- [adapters/moonclaw/client.mbt](/Users/kq/Workspace/moontown/src/adapters/moonclaw/import.mbt)
+- [adapters/moonclaw/import.mbt](/Users/kq/Workspace/moontown/src/adapters/moonclaw/import.mbt)
 
 Purpose:
 

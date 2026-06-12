@@ -12,7 +12,7 @@ async fn preseed_wenyu_source_bundle(root : String, repo_root : String) -> Unit 
       "- `moontown/goal-bootstrap.mbt` from `src/town_runtime/goal_bootstrap.mbt`",
       "- `moontown/scheduler-daemon.mbt` from `src/scheduler/daemon.mbt`", "- `moontown/moontown.mbt` from `src/town_runtime/moontown.mbt`",
       "- `moontown/adapters-moonbook-client.mbt` from `src/adapters/moonbook/client.mbt`",
-      "- `moontown/adapters-moonclaw-client.mbt` from `src/adapters/moonclaw/client.mbt`",
+      "- `moontown/adapters-moonclaw-import.mbt` from `src/adapters/moonclaw/import.mbt`",
       "", "## MoonBook", "", "- `moonbook/research-report-skill.md` from `../moonbook/seed/wiki/skills/research-report/SKILL.md`",
       "- `moonbook/wiki-ingest-skill.md` from `../moonbook/seed/wiki/skills/wiki-ingest/SKILL.md`",
       "- `moonbook/wiki-marketing-skill.md` from `../moonbook/seed/wiki/skills/wiki-marketing/SKILL.md`",
@@ -59,8 +59,8 @@ async fn preseed_wenyu_source_bundle(root : String, repo_root : String) -> Unit 
     dest="\{bundle_root}/moontown/adapters-moonbook-client.mbt",
   )
   copy_source_snapshot(
-    source="\{repo_root}/src/adapters/moonclaw/client.mbt",
-    dest="\{bundle_root}/moontown/adapters-moonclaw-client.mbt",
+    source="\{repo_root}/src/adapters/moonclaw/import.mbt",
+    dest="\{bundle_root}/moontown/adapters-moonclaw-import.mbt",
   )
   copy_source_snapshot(
     source="\{repo_root}/../moonbook/seed/wiki/skills/research-report/SKILL.md",

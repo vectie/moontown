@@ -11,6 +11,9 @@ You can browse and install extra skills here:
   module metadata, docs, scripts, templates, runtime state directories, and
   other non-package project files.
 
+- Project-specific identity, memory, user, routine, and Wenyu vision notes live
+  under `docs/project/`. Do not add new project-note files to the repo root.
+
 - MoonBit packages are organized per directory; each directory contains a
   `moon.pkg` file listing its dependencies. Each package has its files and
   blackbox test files (ending in `_test.mbt`) and whitebox test files (ending in

@@ -630,7 +630,7 @@ The town embeds a constrained moonclaw runtime as `Mayor`.
 Current implementation lives in:
 
 - [roles/mayor.mbt](/Users/kq/Workspace/moontown/src/roles/mayor.mbt)
-- [adapters/moonclaw/client.mbt](/Users/kq/Workspace/moontown/src/adapters/moonclaw/import.mbt)
+- [adapters/moonclaw/import.mbt](/Users/kq/Workspace/moontown/src/adapters/moonclaw/import.mbt)
 
 Current properties:
 
