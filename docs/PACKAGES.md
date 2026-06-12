@@ -95,7 +95,7 @@ Purpose:
 
 - route tasks to workers
 - classify books and MoonBook task kinds into town `WorkDomain` values
-- classify goal text for routing/planning purposes
+- apply policy-owned goal text for routing/planning purposes
 - prioritize MoonBook task batches for dispatch order
 - choose assignment vs escalation vs deferral
 - choose isolation modes
@@ -104,9 +104,8 @@ Boundary:
 
 - `src/dispatch` owns task-domain classification and isolation policy because
   both decisions affect routing.
-- `src/dispatch` owns goal-text routing predicates and MoonBook task ordering
-  policy because both decisions affect which book lanes and tasks are dispatched
-  first.
+- `src/dispatch` owns MoonBook task ordering policy and may expose routing
+  helpers that apply `src/policy` goal-text vocabulary.
 - `src/town_runtime` may construct `TownTask` records from MoonBook tasks, but
   should not maintain its own mapping from book ids or task kinds to
   `WorkDomain`.
@@ -322,6 +321,7 @@ Key files:
 - [src/policy/book_policy_lanes.mbt](/Users/kq/Workspace/moontown/src/policy/book_policy_lanes.mbt)
 - [src/policy/book_policy_loop.mbt](/Users/kq/Workspace/moontown/src/policy/book_policy_loop.mbt)
 - [src/policy/book_policy_distance.mbt](/Users/kq/Workspace/moontown/src/policy/book_policy_distance.mbt)
+- [src/policy/goal_text.mbt](/Users/kq/Workspace/moontown/src/policy/goal_text.mbt)
 
 Purpose:
 
@@ -331,6 +331,8 @@ Purpose:
 - policy-composed loop plans and health gates
 - policy-derived internal-distance plans for information, recognition, and
   decisiveness
+- reusable goal-text vocabulary for research, research-request, and Wenyu
+  routing signals
 
 Boundary:
 
@@ -338,6 +340,9 @@ Boundary:
 - `src/policy` owns default output path and surface constants for composed
   policies.
 - `src/policy` owns lane normalization and lane-based skill selection.
+- `src/policy` owns pure goal-text vocabulary. Dispatch, roles, runtime, and
+  adapters may consume it, but should not redefine research/Wenyu trigger
+  words locally.
 - `src/policy` owns the internal-distance growth-vector view; downstream
   packages may render it but should not redefine how execute/tend/quality
   map to information, recognition, and decisiveness.

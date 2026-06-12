@@ -67,11 +67,17 @@ pub fn required_file_specs(BookPolicy) -> Array[FileSpec]
 
 pub fn research() -> BookPolicy
 
+pub fn research_goal_text(String) -> Bool
+
+pub fn research_request_goal_text(String) -> Bool
+
 pub fn skill(String, String, String, String) -> SkillSpec
 
 pub fn skill_specs(BookPolicy) -> Array[SkillSpec]
 
 pub fn tend_skills(BookPolicy) -> Array[SkillSpec]
+
+pub fn wenyu_valley_goal_text(String) -> Bool
 
 pub fn with_file(BookPolicy, FileSpec) -> BookPolicy
 

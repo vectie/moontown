@@ -1,13 +1,4 @@
 ///|
-fn is_research_goal(goal : String) -> Bool {
-  let notes = goal.to_lower()
-  notes.contains("research") ||
-  notes.contains("compare") ||
-  notes.contains("survey") ||
-  notes.contains("map")
-}
-
-///|
 fn normalize_topic_id(topic : String) -> String {
   let normalized = topic.to_lower().trim().to_owned()
   match normalized {

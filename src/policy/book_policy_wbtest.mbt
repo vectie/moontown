@@ -181,3 +181,21 @@ test "policy markdown includes internal distance section" {
   assert_true(text.contains("repair-dispatch"))
   assert_true(text.contains("architecture-review"))
 }
+
+///|
+test "policy owns reusable goal text vocabulary" {
+  assert_true(research_goal_text("research OPC companies"))
+  assert_true(research_goal_text("Compare Moontown MoonBook and MoonClaw"))
+  assert_true(
+    research_goal_text(
+      "Build Wenyu Valley AI Innovation Town according to docs/WENYU_VALLEY_PRD.md",
+    ),
+  )
+  assert_true(wenyu_valley_goal_text("Wenyu Valley AI Innovation Town PRD"))
+  assert_true(research_request_goal_text("compare lithography routes"))
+  assert_true(research_request_goal_text("survey robotics world models"))
+  assert_true(research_request_goal_text("map the hardware agent ecosystem"))
+  assert_true(!research_goal_text("Create a bookkeeping workspace"))
+  assert_true(!research_request_goal_text("Create a bookkeeping workspace"))
+  assert_true(!wenyu_valley_goal_text("Create a bookkeeping workspace"))
+}

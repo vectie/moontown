@@ -16,7 +16,7 @@ pub fn research_lane_topics(goal : String) -> Array[String] {
 ///|
 pub fn should_parallelize_goal(goal : String) -> Bool {
   let topics = research_lane_topics(goal)
-  is_research_goal(goal) && topics.length() > 1
+  @policy.research_request_goal_text(goal) && topics.length() > 1
 }
 
 ///|

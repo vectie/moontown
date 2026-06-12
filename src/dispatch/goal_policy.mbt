@@ -1,19 +1,11 @@
 ///|
 pub fn research_goal_text(goal : String) -> Bool {
-  let notes = goal.to_lower()
-  notes.contains("research") ||
-  notes.contains("moontown") ||
-  notes.contains("moonbook") ||
-  notes.contains("moonclaw") ||
-  wenyu_valley_goal_text(goal)
+  @policy.research_goal_text(goal)
 }
 
 ///|
 pub fn wenyu_valley_goal_text(goal : String) -> Bool {
-  let notes = goal.to_lower()
-  notes.contains("wenyu") ||
-  notes.contains("wenyu valley") ||
-  (notes.contains("innovation town") && notes.contains("prd"))
+  @policy.wenyu_valley_goal_text(goal)
 }
 
 ///|
