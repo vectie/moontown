@@ -105,6 +105,11 @@ book owns. The implementation now has a first-class `policy` package:
 
 - [policy/book_policy.mbt](/Users/kq/Workspace/moontown/src/policy/book_policy.mbt)
   owns the typed `BookPolicy`, skill, file, quality, and output model.
+- [policy/book_policy_lanes.mbt](/Users/kq/Workspace/moontown/src/policy/book_policy_lanes.mbt)
+  owns the canonical loop lane model: `control`, `execute`, and `tend`.
+  `BookPolicy` still serializes lane fields as strings for stable JSON
+  contracts, but lane parsing, normalization, and lane-based skill selection
+  now pass through this typed boundary instead of ad hoc string comparisons.
 - [policy/book_policy_archetypes.mbt](/Users/kq/Workspace/moontown/src/policy/book_policy_archetypes.mbt)
   owns reusable policy presets.
 - [policy/book_policy_capabilities.mbt](/Users/kq/Workspace/moontown/src/policy/book_policy_capabilities.mbt)

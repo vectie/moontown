@@ -11,6 +11,28 @@ test "book policy separates execute and tend lanes" {
 }
 
 ///|
+test "book policy lanes are parsed through explicit lane model" {
+  assert_eq(lane_from_text("execute"), BookLane::Execute)
+  assert_eq(lane_from_text("TEND"), BookLane::Tend)
+  assert_eq(lane_text(BookLane::Control), "control")
+  let custom = lane_from_text("experimental")
+  assert_true(custom is BookLane::Unknown("experimental"))
+  let policy = new(
+    [
+      skill("run", " EXECUTE ", "now", "run fast loop"),
+      skill("reflect", "tend", "slow", "slow loop"),
+      skill("invalid", "invented", "never", "should not join core lanes"),
+    ],
+    [],
+    quality(0, 0, false, "lane test"),
+    output("none", "test", "none"),
+  )
+  assert_eq(execute_skills(policy).length(), 1)
+  assert_eq(tend_skills(policy).length(), 1)
+  assert_true(has_skill(policy, "invalid"))
+}
+
+///|
 test "book policy required files include only required paths" {
   let policy = research()
   let required = required_file_paths(policy)

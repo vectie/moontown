@@ -191,6 +191,9 @@ Goals:
   contracts, schema/wiki/review seeds, or civic ledger templates locally
 - keep communication-pattern metric semantics in `civic/`; root may persist,
   render, or dispatch against metrics but should not compute them independently
+- keep execute/tend/control loop-lane semantics in `policy/`; downstream
+  packages may read serialized lane strings, but `policy/` owns parsing,
+  normalization, and lane-based skill selection
 - keep schedule DTOs and pure transitions in `civic/`; root may store,
   claim/retry, and run schedules but should not define schedule vocabulary
 - keep civic service/protocol status semantics in `civic/`; root may inspect

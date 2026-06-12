@@ -23,6 +23,10 @@ pub fn general() -> BookPolicy
 
 pub fn has_skill(BookPolicy, String) -> Bool
 
+pub fn lane_from_text(String) -> BookLane
+
+pub fn lane_text(BookLane) -> String
+
 pub fn loop_markdown(BookPolicy) -> String
 
 pub fn loop_plan(BookPolicy) -> BookLoopPlan
@@ -74,6 +78,14 @@ pub fn with_web_tool_surface(BookPolicy, contract? : String, projection_path? : 
 // Errors
 
 // Types and methods
+pub(all) enum BookLane {
+  Control
+  Execute
+  Tend
+  Unknown(String)
+} derive(Eq, ToJson, @debug.Debug, @json.FromJson)
+pub impl Show for BookLane
+
 pub struct BookLoopPlan {
   steps : Array[BookLoopStep]
   execute_step_count : Int

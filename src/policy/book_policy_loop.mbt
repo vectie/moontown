@@ -48,7 +48,11 @@ pub fn loop_plan(policy : BookPolicy) -> BookLoopPlan {
   let mut order = 1
   steps.push(
     loop_step(
-      order, "read-policy", "control", "book-policy", "Load the composed book policy as the source of truth for skills, required files, quality gates, and output surface.",
+      order,
+      "read-policy",
+      control_lane(),
+      "book-policy",
+      "Load the composed book policy as the source of truth for skills, required files, quality gates, and output surface.",
     ),
   )
   order += 1

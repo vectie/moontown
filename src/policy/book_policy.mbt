@@ -48,16 +48,6 @@ fn clamp_score(score : Int) -> Int {
 }
 
 ///|
-fn execute_lane() -> String {
-  "execute"
-}
-
-///|
-fn tend_lane() -> String {
-  "tend"
-}
-
-///|
 pub fn skill(
   id : String,
   lane : String,
@@ -173,18 +163,18 @@ pub fn with_output(policy : BookPolicy, output : OutputSpec) -> BookPolicy {
 }
 
 ///|
-fn lane_skills(policy : BookPolicy, lane : String) -> Array[SkillSpec] {
-  policy.skills.filter(skill => skill.lane == lane)
+fn lane_skills(policy : BookPolicy, lane : BookLane) -> Array[SkillSpec] {
+  policy.skills.filter(skill => skill_in_lane(skill, lane))
 }
 
 ///|
 pub fn execute_skills(policy : BookPolicy) -> Array[SkillSpec] {
-  lane_skills(policy, execute_lane())
+  lane_skills(policy, Execute)
 }
 
 ///|
 pub fn tend_skills(policy : BookPolicy) -> Array[SkillSpec] {
-  lane_skills(policy, tend_lane())
+  lane_skills(policy, Tend)
 }
 
 ///|
