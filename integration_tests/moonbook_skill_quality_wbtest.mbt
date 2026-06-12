@@ -54,14 +54,17 @@ test "Moontown generated skill templates keep exploration quality" {
     "wenyu-civic-module",
     @civic.civic_module_skill_text(service),
   )
-  assert_moonbook_skill_quality("wenyu-build", wenyu_build_skill_text(entry))
+  assert_moonbook_skill_quality(
+    "wenyu-build",
+    @book_templates.wenyu_build_skill_text(entry),
+  )
   assert_moonbook_skill_quality(
     "wenyu-code-patch",
-    wenyu_code_patch_skill_text(entry),
+    @book_templates.wenyu_code_patch_skill_text(entry),
   )
   assert_moonbook_skill_quality(
     "wenyu-asset-pack",
-    wenyu_asset_pack_skill_text(entry),
+    @book_templates.wenyu_asset_pack_skill_text(entry),
   )
 }
 

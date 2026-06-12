@@ -1,6 +1,5 @@
 import {
   "vectie/moontown/core",
-  "vectie/moontown/skill_quality",
   "vectie/moontown/book_quality",
   "vectie/moontown/book_quality_runtime",
   "vectie/moontown/book_templates",
@@ -38,11 +37,5 @@ import {
 }
 
 import {
-  "vectie/moontown/cookbook",
-  "vectie/moontown/course_book",
-  "vectie/moontown/editor_pipeline",
-  "vectie/moontown/moonclaw_runtime",
-  "vectie/moontown/planbook",
-  "vectie/moontown/planbook_policy",
   "vectie/moontown/test_fixtures",
 } for "wbtest"

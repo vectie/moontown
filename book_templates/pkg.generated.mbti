@@ -4,6 +4,7 @@ package "vectie/moontown/book_templates"
 import {
   "moonbitlang/core/debug",
   "moonbitlang/core/json",
+  "vectie/moontown/adapters/moonbook",
 }
 
 // Values
@@ -118,6 +119,14 @@ pub fn resolve_request_path(String, String) -> String
 pub async fn save_request_ledger(String, BookTemplateRequestLedger) -> Unit
 
 pub fn unknown_template_summary(String) -> String
+
+pub fn wenyu_asset_pack_skill_text(@moonbook.BookCatalogEntry) -> String
+
+pub fn wenyu_build_skill_text(@moonbook.BookCatalogEntry) -> String
+
+pub fn wenyu_code_patch_skill_text(@moonbook.BookCatalogEntry) -> String
+
+pub async fn write_wenyu_build_skills(String, @moonbook.BookCatalogEntry) -> Unit
 
 // Errors
 

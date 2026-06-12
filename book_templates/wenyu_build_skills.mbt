@@ -1,5 +1,5 @@
 ///|
-async fn write_wenyu_build_skills(
+pub async fn write_wenyu_build_skills(
   root : String,
   entry : @moonbook.BookCatalogEntry,
 ) -> Unit {
@@ -18,7 +18,7 @@ async fn write_wenyu_build_skills(
 }
 
 ///|
-fn wenyu_build_skill_text(entry : @moonbook.BookCatalogEntry) -> String {
+pub fn wenyu_build_skill_text(entry : @moonbook.BookCatalogEntry) -> String {
   let module_name = wenyu_module_name(entry)
   [
     "---",
@@ -63,7 +63,9 @@ fn wenyu_build_skill_text(entry : @moonbook.BookCatalogEntry) -> String {
 }
 
 ///|
-fn wenyu_code_patch_skill_text(entry : @moonbook.BookCatalogEntry) -> String {
+pub fn wenyu_code_patch_skill_text(
+  entry : @moonbook.BookCatalogEntry,
+) -> String {
   let module_name = wenyu_module_name(entry)
   [
     "---",
@@ -77,71 +79,76 @@ fn wenyu_code_patch_skill_text(entry : @moonbook.BookCatalogEntry) -> String {
     "",
     "## Execution Rules",
     "",
-    "- Prefer a small, reviewable code slice over a broad rewrite.",
-    "- Use the backlog and evidence files before editing.",
-    "- Keep responsibilities clean: Moontown orchestrates and projects; MoonBook stores durable book memory; MoonClaw/OpenClaw executes tasks.",
-    "- If Codex ACP or write access is unavailable, write `build/CODE_BLOCKERS.md` with exact blocker details instead of pretending success.",
-    "- If UI code changes, run the UI build.",
-    "",
-    "## Required Result Record",
-    "",
-    "Write `build/CODE_PATCH.md` containing:",
-    "",
-    "- changed files",
-    "- user-facing behavior",
-    "- boundary rationale",
-    "- tests/build commands",
-    "- residual risks",
+    "- Read `build/IMPLEMENTATION_BACKLOG.md` and choose one small codex-ready slice.",
+    "- Patch the relevant repository files directly when the task grants workspace write access.",
+    "- Keep Moontown as control plane, MoonBook as workspace/memory, MoonClaw as worker runtime.",
+    "- Do not move single-agent editing into Moontown; leave complex personal workspace editing to Moondesk.",
+    "- Run the narrowest validation command that proves the slice works.",
+    "- If code cannot be changed, write `build/BLOCKED_CODE_PATCH.md` with exact missing permission or missing file.",
     "",
     @skill_quality.exploration_quality_contract_section(),
     "",
+    "## Required Output Contract",
+    "",
+    "Return a JSON object with:",
+    "",
+    "```json",
+    "{\"changed_files\":[\"path\"],\"validation\":[\"command\"],\"summary\":\"what changed\",\"blocked\":false}",
+    "```",
+    "",
     "## Concrete Example",
     "",
-    "```md",
-    "# Code Patch",
-    "",
-    "- Changed: `/Users/kq/Workspace/moontown/ui/rabbita-town/main/main.mbt`",
-    "- Behavior: \{module_name} district now renders a live queue and health meter",
-    "- Boundary: Moontown UI reads projected state; MoonBook remains source of book memory",
-    "- Validation: `npm run build` in `ui/rabbita-town` passed",
-    "- Risk: generated image assets are still prompt-only",
+    "```json",
+    "{\"changed_files\":[\"ui/rabbita-town/main/main.mbt\"],\"validation\":[\"moon check --no-render\"],\"summary\":\"Added \{module_name} district projection to the viewport model.\",\"blocked\":false}",
     "```",
   ].join("\n")
 }
 
 ///|
-fn wenyu_asset_pack_skill_text(entry : @moonbook.BookCatalogEntry) -> String {
+pub fn wenyu_asset_pack_skill_text(
+  entry : @moonbook.BookCatalogEntry,
+) -> String {
   let module_name = wenyu_module_name(entry)
   [
     "---",
     "name: wenyu-asset-pack",
-    "description: Produce module-specific image prompts, generated asset manifests, and projection notes for Wenyu Valley town districts.",
+    "description: Produce reusable visual prompts and projection-ready asset manifests for one Wenyu Valley module.",
     "---",
     "",
     "# Wenyu Asset Pack Skill: \{module_name}",
     "",
-    "Make this module visually distinct inside the town. Do not reuse generic cyber-city wording across modules.",
+    "You are preparing visual assets and UI projection instructions, not merely describing an idea.",
     "",
-    "## Required Outputs",
+    "## Asset Rules",
     "",
-    "- `build/ASSET_PROMPTS.md`: key art, icon, tile, resident/worker sprite, and background vignette prompts.",
-    "- `build/ASSET_MANIFEST.md`: paths, dimensions, usage location, alt text, status, and generation notes.",
-    "- Projection notes for how the module should appear in `ui/rabbita-town`.",
+    "- Use a coherent Wenyu Valley visual language: clean civic-tech, spring valley, river, modular buildings, readable map symbols.",
+    "- Produce prompts that can generate transparent or isolated assets suitable for tile-map composition.",
+    "- Specify scale, tile footprint, anchor point, orientation, day/night variants, and hover/click states.",
+    "- Connect every asset to its civic function and the MoonBook/MoonClaw workflow it represents.",
+    "- Write `build/ASSET_PROMPTS.md` and `build/ASSET_MANIFEST.md`.",
     "",
     @skill_quality.exploration_quality_contract_section(),
     "",
     "## Concrete Example",
     "",
     "```md",
-    "## District Tile Prompt",
+    "### Asset: \{module_name} pavilion",
     "",
-    "A warm civic AI innovation district for \{module_name}, clay-and-glass architectural model, visible tiny agent workers, public-service dashboard lights, Wenyu Valley signage, no generic neon cyberpunk, 16:9.",
-    "",
-    "## Manifest Row",
-    "",
-    "| Asset | Path | Size | Usage | Alt text | Status |",
-    "| --- | --- | --- | --- | --- | --- |",
-    "| District tile | `ui/rabbita-town/assets/wenyu-\{entry.id}-tile.png` | 1536x864 | map card | \{module_name} district with active AI workers | prompt-ready |",
+    "- Prompt: white tech pavilion, isometric 2.5D, glass roof, civic AI town, transparent background, spring valley palette",
+    "- Footprint: 4x3 tiles",
+    "- Anchor: south-center entrance tile",
+    "- States: idle, active salon, blocked review, completed output",
+    "- Runtime meaning: agents enter when the \{module_name} book has an active service task",
     "```",
   ].join("\n")
+}
+
+///|
+fn wenyu_module_name(entry : @moonbook.BookCatalogEntry) -> String {
+  let prefix = "Wenyu Valley / "
+  if entry.name.has_prefix(prefix) {
+    entry.name.replace(old=prefix, new="")
+  } else {
+    entry.name
+  }
 }

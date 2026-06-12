@@ -1,4 +1,9 @@
 ///|
+fn wenyu_build_packet_contract() -> String {
+  "wenyu.build.packet.v1"
+}
+
+///|
 async fn ensure_wenyu_build_moonclaw_profile(root : String) -> Unit {
   let path = "\{root}/moonclaw.jobs.json"
   let profile = wenyu_build_moonclaw_profile_json()

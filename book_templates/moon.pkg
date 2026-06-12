@@ -7,7 +7,9 @@ import {
   "vectie/moontown/adapters/moonbook",
   "vectie/moontown/app_tool_book",
   "vectie/moontown/pdf_evidence_watch",
+  "vectie/moontown/skill_quality",
   "vectie/moontown/storage",
+  "vectie/moontown/support",
 }
 
 import {
