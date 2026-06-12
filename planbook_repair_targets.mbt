@@ -21,8 +21,12 @@ fn planbook_repair_target_files(criterion_id : String) -> Array[String] {
   if !backlog_targets.is_empty() {
     return backlog_targets
   }
-  let planbook_root = planbook_workspace_root_for_source_root(root)
-  let course_root = wenyu_course_workspace_root_for_source_root(root)
+  let planbook_root = @editor_runtime.planbook_workspace_root_for_source_root(
+    root,
+  )
+  let course_root = @editor_runtime.wenyu_course_workspace_root_for_source_root(
+    root,
+  )
   match criterion_id {
     "editor-mode-real-pipeline" =>
       [
@@ -33,14 +37,14 @@ fn planbook_repair_target_files(criterion_id : String) -> Array[String] {
         "\{root}/ui/rabbita-town/main/main.mbt",
         "\{root}/course_book.mbt",
         "\{course_root}/wiki/course/beginner-course.md",
-        editor_pipeline_plan_path(
+        @editor_runtime.editor_pipeline_plan_path(
           planbook_root, "2026-05-31-editor-mode-real-pipeline",
         ),
       ]
     "editor-selected-feature-implementation" =>
       [
-        "\{root}/editor_feature_selection.mbt",
-        "\{root}/editor_pipeline.mbt",
+        "\{root}/editor_runtime/editor_feature_selection.mbt",
+        "\{root}/editor_runtime/editor_pipeline.mbt",
         "\{root}/planbook_autonomy.mbt",
         "\{root}/planbook_repair.mbt",
         "\{root}/civic_protocol_store.mbt",
@@ -51,7 +55,7 @@ fn planbook_repair_target_files(criterion_id : String) -> Array[String] {
         "\{course_root}/wiki/course/beginner-course.md",
         "\{course_root}/wiki/course/exercises.md",
         "\{course_root}/wiki/course/progress-rubric.md",
-        editor_feature_selection_result_path(planbook_root),
+        @editor_runtime.editor_feature_selection_result_path(planbook_root),
         "\{root}/docs/WENYU_UI_MODULE_SYSTEM.md",
       ]
     "planbook-source-patch-loop" =>

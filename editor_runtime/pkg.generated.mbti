@@ -1,0 +1,58 @@
+// Generated using `moon info`, DON'T EDIT IT
+package "vectie/moontown/editor_runtime"
+
+import {
+  "moonbitlang/core/debug",
+  "moonbitlang/core/json",
+}
+
+// Values
+pub fn default_editor_feature_selection_markdown_path(snapshot_path? : String) -> String
+
+pub fn default_editor_feature_selection_path(snapshot_path? : String) -> String
+
+pub fn default_editor_pipeline_markdown_path(snapshot_path? : String) -> String
+
+pub fn default_editor_pipeline_path(snapshot_path? : String) -> String
+
+pub fn default_editor_placement_proposal_path(workspace_root? : String) -> String
+
+pub async fn editor_feature_selection_evidence(workspace_root? : String) -> String
+
+pub async fn editor_feature_selection_ready(workspace_root? : String) -> Bool
+
+pub fn editor_feature_selection_result_path(String) -> String
+
+pub fn editor_pipeline_plan_path(String, String) -> String
+
+pub async fn editor_selected_feature_implementation_evidence(String) -> String
+
+pub async fn editor_selected_feature_implementation_next_action(String) -> String
+
+pub async fn editor_selected_feature_implementation_ready(String) -> Bool
+
+pub fn planbook_workspace_root_for_source_root(String) -> String
+
+pub async fn render_editor_feature_selection_status(snapshot_path? : String, workspace_root? : String) -> String
+
+pub async fn render_editor_pipeline_status(snapshot_path? : String, workspace_root? : String) -> String
+
+pub fn wenyu_course_workspace_root_for_source_root(String) -> String
+
+pub async fn write_editor_feature_selection_task(snapshot_path? : String, workspace_root? : String, dispatch? : Bool) -> String
+
+pub async fn write_editor_pipeline_state(snapshot_path? : String, workspace_root? : String) -> String
+
+// Errors
+
+// Types and methods
+type EditorPipelineModuleConfig derive(Eq, @debug.Debug, @json.FromJson)
+
+type EditorPipelineModuleConfigEntry derive(Eq, @debug.Debug, @json.FromJson)
+
+type EditorSelectedFeature derive(Eq, @debug.Debug)
+
+// Type aliases
+
+// Traits
+

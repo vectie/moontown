@@ -39,7 +39,7 @@ async fn editor_selected_feature_summary(
 }
 
 ///|
-async fn editor_selected_feature_implementation_ready(
+pub async fn editor_selected_feature_implementation_ready(
   workspace_root : String,
 ) -> Bool {
   let feature = match editor_selected_feature_summary(workspace_root) {
@@ -57,7 +57,7 @@ async fn editor_selected_feature_implementation_ready(
 }
 
 ///|
-async fn editor_selected_feature_implementation_evidence(
+pub async fn editor_selected_feature_implementation_evidence(
   workspace_root : String,
 ) -> String {
   let proof_path = editor_selected_feature_implementation_path(workspace_root)
@@ -74,7 +74,7 @@ async fn editor_selected_feature_implementation_evidence(
 }
 
 ///|
-async fn editor_selected_feature_implementation_next_action(
+pub async fn editor_selected_feature_implementation_next_action(
   workspace_root : String,
 ) -> String {
   match editor_selected_feature_summary(workspace_root) {

@@ -5,12 +5,8 @@ async test "editor pipeline refresh writes runtime contract" {
   )
   let snapshot_path = workspace.snapshot_path
   let workspace_root = workspace.workspace_root
-  ignore(
-    bootstrap_moontown_planbook(
-      book_catalog_path=workspace.catalog_path,
-      workspace_root~,
-    ),
-  )
+  ignore(workspace.catalog_path)
+  write_editor_feature_selection_workspace(workspace_root)
   let path = write_editor_pipeline_state(snapshot_path~, workspace_root~)
   let text = @support.read_text_or_empty(path)
   let digest = @support.read_text_or_empty(

@@ -13,7 +13,7 @@ pub fn default_editor_feature_selection_markdown_path(
 }
 
 ///|
-fn editor_feature_selection_result_path(workspace_root : String) -> String {
+pub fn editor_feature_selection_result_path(workspace_root : String) -> String {
   "\{editor_pipeline_raw_dir(workspace_root)}/next-feature.json"
 }
 
@@ -59,7 +59,7 @@ fn editor_implemented_feature_archive_path(
 }
 
 ///|
-fn editor_pipeline_plan_path(
+pub fn editor_pipeline_plan_path(
   workspace_root : String,
   plan_id : String,
 ) -> String {
@@ -67,12 +67,14 @@ fn editor_pipeline_plan_path(
 }
 
 ///|
-fn planbook_workspace_root_for_source_root(source_root : String) -> String {
+pub fn planbook_workspace_root_for_source_root(source_root : String) -> String {
   "\{source_root}/.moontown/books/\{default_planbook_book_id()}"
 }
 
 ///|
-fn wenyu_course_workspace_root_for_source_root(source_root : String) -> String {
+pub fn wenyu_course_workspace_root_for_source_root(
+  source_root : String,
+) -> String {
   "\{source_root}/.moontown/books/\{default_wenyu_course_book_id()}"
 }
 

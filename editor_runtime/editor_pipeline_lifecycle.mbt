@@ -106,8 +106,7 @@ async fn current_editor_pipeline_repair_status(
   if task.criterion_id != "editor-mode-real-pipeline" {
     return task.status
   }
-  let refreshed = refresh_planbook_repair_task_from_run(task)
-  refreshed.status
+  task.status
 }
 
 ///|

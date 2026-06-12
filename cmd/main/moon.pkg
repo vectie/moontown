@@ -3,6 +3,7 @@ import {
   "moonbitlang/core/env",
   "vectie/moontown",
   "vectie/moontown/civic_runtime",
+  "vectie/moontown/editor_runtime",
   "vectie/moontown/live_autonomy_runtime",
   "vectie/moontown/pdf_archive",
   "vectie/moontown/pdf_evidence_watch",

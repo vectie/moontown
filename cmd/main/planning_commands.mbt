@@ -27,12 +27,13 @@ async fn render_planbook_command(args : Array[String]) -> String {
 ///|
 async fn render_editor_pipeline_command(args : Array[String]) -> String {
   match args {
-    [] | ["status"] | ["refresh"] => @moontown.render_editor_pipeline_status()
-    ["feature-select"] => @moontown.write_editor_feature_selection_task()
+    [] | ["status"] | ["refresh"] =>
+      @editor_runtime.render_editor_pipeline_status()
+    ["feature-select"] => @editor_runtime.write_editor_feature_selection_task()
     ["feature-select", "--dispatch"] =>
-      @moontown.write_editor_feature_selection_task(dispatch=true)
+      @editor_runtime.write_editor_feature_selection_task(dispatch=true)
     ["feature-select", "status"] =>
-      @moontown.render_editor_feature_selection_status()
+      @editor_runtime.render_editor_feature_selection_status()
     _ => @moontown.load_or_create_demo_dashboard()
   }
 }

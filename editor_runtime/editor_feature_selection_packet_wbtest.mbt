@@ -63,17 +63,10 @@ async test "editor feature selection packet asks ai to choose from course eviden
     test_editor_feature_selection_json("x", "X", 1, "small", "visible"),
   )
   assert_true(editor_feature_selection_ready(workspace_root~))
-  let status = inspect_moontown_planbook_autonomy(
-    snapshot_path~,
-    workspace_root~,
-    book_catalog_path=workspace.catalog_path,
-  )
   assert_true(
-    status.criteria.any(fn(item) {
-      item.id == "editor-selected-feature-implementation" &&
-      !item.satisfied &&
-      item.evidence.contains("AI selected `x`")
-    }),
+    editor_selected_feature_implementation_evidence(workspace_root).contains(
+      "AI selected `x`",
+    ),
   )
   @support.write_text_file(
     implementation_path,

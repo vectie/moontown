@@ -5,16 +5,16 @@ async fn planbook_editor_pipeline_criterion(
   let plan_ready = @fs.exists(
     "\{workspace_root}/plans/2026-05-31-editor-mode-real-pipeline/plan.md",
   )
-  let command_ready = @fs.exists("editor_pipeline.mbt") &&
+  let command_ready = @fs.exists("editor_runtime/editor_pipeline.mbt") &&
     text_file_contains("cmd/main/main.mbt", "editor-pipeline") &&
     text_file_contains(
       "cmd/main/planning_commands.mbt", "render_editor_pipeline_command",
     )
   let state_ready = text_file_contains(
-      "editor_pipeline.mbt", "moontown.editor_pipeline.v1",
+      "editor_runtime/editor_pipeline.mbt", "moontown.editor_pipeline.v1",
     ) &&
     text_file_contains(
-      "editor_pipeline_lifecycle.mbt", "selected-feature-implementation",
+      "editor_runtime/editor_pipeline_lifecycle.mbt", "selected-feature-implementation",
     )
   let ui_ready = text_file_contains(
       "ui/rabbita-town/main/bootstrap_moondesk.mbt", "parse_bootstrap_editor_pipeline",
@@ -50,14 +50,14 @@ async fn planbook_editor_pipeline_criterion(
 async fn planbook_editor_feature_selection_criterion(
   workspace_root : String,
 ) -> PlanbookCriterionStatus {
-  let ready = editor_feature_selection_ready(workspace_root~)
+  let ready = @editor_runtime.editor_feature_selection_ready(workspace_root~)
   planbook_criterion(
     "editor-feature-ai-selection",
     "2026-05-31-editor-mode-real-pipeline",
     "AI selects the next missing editor-mode feature from the course book",
     "moontown+planbook+moonclaw",
     ready,
-    editor_feature_selection_evidence(workspace_root~),
+    @editor_runtime.editor_feature_selection_evidence(workspace_root~),
     "run `moon run cmd/main -- editor-pipeline feature-select --dispatch`, then verify `raw/editor-pipeline/next-feature.json` satisfies `\{@editor_pipeline.feature_selection_result_contract()}`",
   )
 }
@@ -66,14 +66,20 @@ async fn planbook_editor_feature_selection_criterion(
 async fn planbook_editor_selected_feature_implementation_criterion(
   workspace_root : String,
 ) -> PlanbookCriterionStatus {
-  let ready = editor_selected_feature_implementation_ready(workspace_root)
+  let ready = @editor_runtime.editor_selected_feature_implementation_ready(
+    workspace_root,
+  )
   planbook_criterion(
     "editor-selected-feature-implementation",
     "2026-05-31-editor-mode-real-pipeline",
     "Implement the AI-selected editor-mode feature",
     "moontown+planbook+moonclaw",
     ready,
-    editor_selected_feature_implementation_evidence(workspace_root),
-    editor_selected_feature_implementation_next_action(workspace_root),
+    @editor_runtime.editor_selected_feature_implementation_evidence(
+      workspace_root,
+    ),
+    @editor_runtime.editor_selected_feature_implementation_next_action(
+      workspace_root,
+    ),
   )
 }
