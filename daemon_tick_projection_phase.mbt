@@ -21,7 +21,7 @@ async fn run_daemon_projection_phase(
     report,
     standing_goals~,
   )
-  save_daemon_state(paths.daemon_path, next_daemon)
+  @daemon_runtime.save_daemon_state(paths.daemon_path, next_daemon)
   append_daemon_tick_phase_log(paths.log_path, "done", tick_sequence)
   record_daemon_tick_events(
     state,

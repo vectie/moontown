@@ -41,12 +41,12 @@ pub fn default_daemon_supervisor_pid_path(
 }
 
 ///|
-fn default_daemon_state_path(snapshot_path : String) -> String {
+pub fn default_daemon_state_path(snapshot_path : String) -> String {
   @daemon_runtime_policy.daemon_state_path_for_snapshot(snapshot_path)
 }
 
 ///|
-fn default_standing_goal_state_path(snapshot_path : String) -> String {
+pub fn default_standing_goal_state_path(snapshot_path : String) -> String {
   @daemon_runtime_policy.daemon_standing_goal_path_for_snapshot(
     snapshot_path,
     @storage.default_standing_goal_path(),

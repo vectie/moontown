@@ -10,7 +10,9 @@ async fn effective_daemon_tick(
     @support.max_int(
       @support.max_int(
         daemon.tick_sequence,
-        latest_daemon_log_sequence(default_daemon_log_path(snapshot_path~)),
+        @daemon_runtime.latest_daemon_log_sequence(
+          @daemon_runtime.default_daemon_log_path(snapshot_path~),
+        ),
       ),
       @live_autonomy_runtime.latest_live_autonomy_journal_tick(snapshot_path),
     ),
@@ -36,7 +38,7 @@ async fn daemon_tick_floor(
   let mut floor = daemon.tick_sequence
   for
     candidate in [
-      latest_daemon_log_sequence(log_path),
+      @daemon_runtime.latest_daemon_log_sequence(log_path),
       @live_autonomy_runtime.latest_live_autonomy_journal_tick(snapshot_path),
       latest_standing_goal_tick(standing_goals),
       latest_watcher_record_tick(watcher_records),

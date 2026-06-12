@@ -11,14 +11,14 @@ async fn run_daemon_scheduled_jobs(
     if !daemon_scheduled_job_due(job, tick) {
       continue
     }
-    append_daemon_log(
+    @daemon_runtime.append_daemon_log(
       log_path,
       "tick phase=scheduled-job-start sequence=\{tick} job=\{job.id} kind=\{job.kind}",
     )
     match
       run_daemon_scheduled_job(job, snapshot_path, book_catalog_path, tick) {
       Some(summary) => {
-        append_daemon_log(
+        @daemon_runtime.append_daemon_log(
           log_path,
           "tick phase=scheduled-job-done sequence=\{tick} job=\{job.id} kind=\{job.kind}",
         )
@@ -28,7 +28,7 @@ async fn run_daemon_scheduled_jobs(
         }
       }
       None =>
-        append_daemon_log(
+        @daemon_runtime.append_daemon_log(
           log_path,
           "tick phase=scheduled-job-skip sequence=\{tick} job=\{job.id} kind=\{job.kind}",
         )

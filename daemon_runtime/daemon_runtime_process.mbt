@@ -18,7 +18,7 @@ fn daemon_supervisor_should_run_inline_for_service_name(
 }
 
 ///|
-fn daemon_supervisor_should_run_inline_worker() -> Bool {
+pub fn daemon_supervisor_should_run_inline_worker() -> Bool {
   match @sys.get_env_var("XPC_SERVICE_NAME") {
     Some(value) => daemon_supervisor_should_run_inline_for_service_name(value)
     None => false
@@ -55,7 +55,10 @@ async fn spawn_daemon_detached(
 }
 
 ///|
-async fn spawn_daemon_worker(command : String, snapshot_path : String) -> Int {
+pub async fn spawn_daemon_worker(
+  command : String,
+  snapshot_path : String,
+) -> Int {
   spawn_daemon_detached(
     command,
     ["daemon", "run", "--worker"],

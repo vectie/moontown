@@ -22,12 +22,12 @@ async fn render_daemon_command(args : Array[String]) -> String {
   match args {
     [] | ["status"] => @moontown.render_saved_town_status()
     ["tick"] => @moontown.daemon_tick_saved_town()
-    ["start"] => @moontown.daemon_start_saved_town()
+    ["start"] => @daemon_runtime.daemon_start_saved_town()
     ["restart"] =>
-      @moontown.write_daemon_restart_request(reason="manual request")
-    ["restart", reason] => @moontown.write_daemon_restart_request(reason~)
-    ["stop"] => @moontown.daemon_stop_saved_town()
-    ["doctor"] => @moontown.daemon_doctor_saved_town()
+      @daemon_runtime.write_daemon_restart_request(reason="manual request")
+    ["restart", reason] => @daemon_runtime.write_daemon_restart_request(reason~)
+    ["stop"] => @daemon_runtime.daemon_stop_saved_town()
+    ["doctor"] => @daemon_runtime.daemon_doctor_saved_town()
     ["supervise", "--worker"] => @moontown.daemon_supervise_saved_town()
     ["supervise", "--once"] =>
       @moontown.daemon_supervise_saved_town(max_checks=1, sleep_ms=0)

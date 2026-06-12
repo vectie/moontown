@@ -36,7 +36,7 @@ async fn prepare_daemon_tick_context(
     snapshot_path, standing_goals,
   )
   let state = load_or_create_demo_state(path=snapshot_path, book_catalog_path~)
-  let loaded_daemon = load_daemon_state(paths.daemon_path)
+  let loaded_daemon = @daemon_runtime.load_daemon_state(paths.daemon_path)
   let tick_floor = daemon_tick_floor(
     snapshot_path,
     paths.log_path,
@@ -47,7 +47,7 @@ async fn prepare_daemon_tick_context(
   )
   let daemon = daemon_rebased_to_tick_floor(loaded_daemon, tick_floor)
   if daemon.tick_sequence > loaded_daemon.tick_sequence {
-    save_daemon_state(paths.daemon_path, daemon)
+    @daemon_runtime.save_daemon_state(paths.daemon_path, daemon)
   }
   {
     catalog,
@@ -63,8 +63,8 @@ async fn prepare_daemon_tick_context(
 ///|
 fn daemon_tick_paths(snapshot_path : String) -> DaemonTickPaths {
   {
-    daemon_path: default_daemon_state_path(snapshot_path),
-    log_path: default_daemon_log_path(snapshot_path~),
-    goal_path: default_standing_goal_state_path(snapshot_path),
+    daemon_path: @daemon_runtime.default_daemon_state_path(snapshot_path),
+    log_path: @daemon_runtime.default_daemon_log_path(snapshot_path~),
+    goal_path: @daemon_runtime.default_standing_goal_state_path(snapshot_path),
   }
 }

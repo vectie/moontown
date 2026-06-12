@@ -1,5 +1,5 @@
 ///|
-async fn mark_daemon_supervisor_started(
+pub async fn mark_daemon_supervisor_started(
   snapshot_path : String,
   supervisor_pid : Int,
   supervisor_run_id : String,
@@ -22,7 +22,7 @@ async fn mark_daemon_supervisor_started(
 }
 
 ///|
-async fn mark_daemon_worker_started(
+pub async fn mark_daemon_worker_started(
   snapshot_path : String,
   worker_pid : Int,
   worker_run_id : String,
@@ -63,7 +63,7 @@ async fn daemon_worker_should_keep_supervisor(
 }
 
 ///|
-async fn mark_daemon_tick_started(
+pub async fn mark_daemon_tick_started(
   snapshot_path : String,
   worker_run_id : String,
 ) -> Unit {
@@ -80,7 +80,7 @@ async fn mark_daemon_tick_started(
 }
 
 ///|
-async fn touch_daemon_heartbeat(
+pub async fn touch_daemon_heartbeat(
   snapshot_path : String,
   status? : String = "ticking",
 ) -> Unit {
@@ -97,7 +97,7 @@ async fn touch_daemon_heartbeat(
 }
 
 ///|
-async fn mark_daemon_tick_finished(
+pub async fn mark_daemon_tick_finished(
   snapshot_path : String,
   ok : Bool,
   summary : String,
@@ -116,7 +116,10 @@ async fn mark_daemon_tick_finished(
 }
 
 ///|
-async fn mark_daemon_stopped(snapshot_path : String, reason : String) -> Unit {
+pub async fn mark_daemon_stopped(
+  snapshot_path : String,
+  reason : String,
+) -> Unit {
   let ctx = daemon_runtime_transition_context(snapshot_path)
   save_daemon_runtime_state(
     ctx.runtime_path,
@@ -133,7 +136,7 @@ async fn mark_daemon_stopped(snapshot_path : String, reason : String) -> Unit {
 }
 
 ///|
-async fn mark_daemon_worker_reload_requested(
+pub async fn mark_daemon_worker_reload_requested(
   snapshot_path : String,
   reason : String,
 ) -> Unit {

@@ -46,7 +46,7 @@ fn daemon_process_command_line(
 }
 
 ///|
-fn daemon_command_or_current(command : String) -> String {
+pub fn daemon_command_or_current(command : String) -> String {
   if !command.is_empty() {
     return command
   }

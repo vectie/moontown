@@ -1,10 +1,10 @@
 ///|
-async fn daemon_stop_requested(snapshot_path : String) -> Bool {
+pub async fn daemon_stop_requested(snapshot_path : String) -> Bool {
   @fs.exists(default_daemon_stop_path(snapshot_path~))
 }
 
 ///|
-async fn daemon_restart_requested(snapshot_path : String) -> Bool {
+pub async fn daemon_restart_requested(snapshot_path : String) -> Bool {
   @fs.exists(default_daemon_restart_path(snapshot_path~))
 }
 

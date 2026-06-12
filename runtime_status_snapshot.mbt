@@ -4,9 +4,11 @@ pub async fn inspect_saved_town(
 ) -> TownRuntimeStatus {
   match @storage.load_snapshot_file(snapshot_path) {
     Some(snapshot) => {
-      let daemon = load_daemon_state(default_daemon_state_path(snapshot_path))
+      let daemon = @daemon_runtime.load_daemon_state(
+        @daemon_runtime.default_daemon_state_path(snapshot_path),
+      )
       let goals = @storage.load_or_create_standing_goals(
-        path=default_standing_goal_state_path(snapshot_path),
+        path=@daemon_runtime.default_standing_goal_state_path(snapshot_path),
       )
       let watcher_records = load_watcher_records_for_goals(snapshot_path, goals)
       let template_request_status = inspect_book_template_request_status(

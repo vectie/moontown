@@ -1,5 +1,5 @@
 ///|
-async fn load_daemon_state(path : String) -> @scheduler.DaemonState {
+pub async fn load_daemon_state(path : String) -> @scheduler.DaemonState {
   if !@fs.exists(path) {
     return @scheduler.DaemonState::new()
   }
@@ -15,7 +15,7 @@ async fn load_daemon_state(path : String) -> @scheduler.DaemonState {
 }
 
 ///|
-async fn save_daemon_state(
+pub async fn save_daemon_state(
   path : String,
   daemon : @scheduler.DaemonState,
 ) -> Unit {
@@ -23,7 +23,7 @@ async fn save_daemon_state(
 }
 
 ///|
-async fn load_daemon_runtime_state(path : String) -> DaemonRuntimeState? {
+pub async fn load_daemon_runtime_state(path : String) -> DaemonRuntimeState? {
   let parsed = match @support.read_optional_json_file(path) {
     Some(json) => json
     None => return None

@@ -7,11 +7,13 @@ pub async fn daemon_run_saved_town(
   preserve_supervisor? : Bool = false,
   inline_under_supervisor? : Bool = false,
 ) -> String {
-  let log_path = default_daemon_log_path(snapshot_path~)
-  let observed_worker_pid = daemon_current_process_pid(snapshot_path)
-  let prior_health = inspect_daemon_runtime(snapshot_path~)
-  let prior_state = load_daemon_runtime_state(
-    default_daemon_runtime_path(snapshot_path~),
+  let log_path = @daemon_runtime.default_daemon_log_path(snapshot_path~)
+  let observed_worker_pid = @daemon_runtime.daemon_current_process_pid(
+    snapshot_path,
+  )
+  let prior_health = @daemon_runtime.inspect_daemon_runtime(snapshot_path~)
+  let prior_state = @daemon_runtime.load_daemon_runtime_state(
+    @daemon_runtime.default_daemon_runtime_path(snapshot_path~),
   )
   let worker_pid = if inline_under_supervisor &&
     prior_health.supervisor_pid > 0 &&
@@ -27,7 +29,7 @@ pub async fn daemon_run_saved_town(
   let worker_run_id = match prior_state {
     Some(state) if worker_pid == state.worker_pid &&
       !state.worker_run_id.is_empty() => state.worker_run_id
-    _ => daemon_run_id("worker")
+    _ => @daemon_runtime.daemon_run_id("worker")
   }
   if inline_under_supervisor &&
     worker_pid > 0 &&
@@ -35,40 +37,42 @@ pub async fn daemon_run_saved_town(
     let supervisor_run_id = match prior_state {
       Some(state) if !state.supervisor_run_id.is_empty() =>
         state.supervisor_run_id
-      _ => daemon_run_id("supervisor")
+      _ => @daemon_runtime.daemon_run_id("supervisor")
     }
-    mark_daemon_supervisor_started(snapshot_path, worker_pid, supervisor_run_id)
+    @daemon_runtime.mark_daemon_supervisor_started(
+      snapshot_path, worker_pid, supervisor_run_id,
+    )
   }
   if worker_pid > 0 {
-    mark_daemon_worker_started(
+    @daemon_runtime.mark_daemon_worker_started(
       snapshot_path,
       worker_pid,
       worker_run_id,
       clear_supervisor=!preserve_supervisor,
     )
   }
-  append_daemon_log(
+  @daemon_runtime.append_daemon_log(
     log_path,
     "worker loop entered run=\{worker_run_id} pid=\{worker_pid} max_ticks=\{max_ticks} sleep_ms=\{sleep_ms}",
   )
   let mut ticks = 0
   let mut latest = ""
   while max_ticks <= 0 || ticks < max_ticks {
-    if daemon_stop_requested(snapshot_path) {
+    if @daemon_runtime.daemon_stop_requested(snapshot_path) {
       latest = "daemon stop requested"
       break
     }
-    if daemon_restart_requested(snapshot_path) {
+    if @daemon_runtime.daemon_restart_requested(snapshot_path) {
       latest = "daemon restart requested"
       break
     }
-    mark_daemon_tick_started(snapshot_path, worker_run_id)
+    @daemon_runtime.mark_daemon_tick_started(snapshot_path, worker_run_id)
     let (ok, tick_summary) = run_daemon_tick_with_heartbeat(
       snapshot_path, book_catalog_path,
     )
     latest = tick_summary
-    mark_daemon_tick_finished(snapshot_path, ok, latest)
-    append_daemon_log(
+    @daemon_runtime.mark_daemon_tick_finished(snapshot_path, ok, latest)
+    @daemon_runtime.append_daemon_log(
       log_path,
       if ok {
         "tick ok index=\{ticks + 1}"
@@ -83,16 +87,29 @@ pub async fn daemon_run_saved_town(
     @async.sleep(sleep_ms)
   }
   if latest == "daemon stop requested" {
-    mark_daemon_stopped(snapshot_path, "worker stopped by request")
-    append_daemon_log(log_path, "worker stopped run=\{worker_run_id}")
+    @daemon_runtime.mark_daemon_stopped(
+      snapshot_path, "worker stopped by request",
+    )
+    @daemon_runtime.append_daemon_log(
+      log_path,
+      "worker stopped run=\{worker_run_id}",
+    )
   } else if latest == "daemon restart requested" {
-    mark_daemon_worker_reload_requested(
+    @daemon_runtime.mark_daemon_worker_reload_requested(
       snapshot_path, "worker reload requested by restart marker",
     )
-    append_daemon_log(log_path, "worker reload requested run=\{worker_run_id}")
+    @daemon_runtime.append_daemon_log(
+      log_path,
+      "worker reload requested run=\{worker_run_id}",
+    )
   } else if max_ticks > 0 {
-    mark_daemon_stopped(snapshot_path, "worker completed bounded run")
-    append_daemon_log(log_path, "worker completed bounded run=\{worker_run_id}")
+    @daemon_runtime.mark_daemon_stopped(
+      snapshot_path, "worker completed bounded run",
+    )
+    @daemon_runtime.append_daemon_log(
+      log_path,
+      "worker completed bounded run=\{worker_run_id}",
+    )
   }
   "Moontown daemon run completed ticks=\{ticks}\n\{latest}"
 }
@@ -108,7 +125,10 @@ async fn run_daemon_tick_with_heartbeat(
       while !done {
         @async.sleep(10_000)
         if !done {
-          touch_daemon_heartbeat(snapshot_path, status="ticking")
+          @daemon_runtime.touch_daemon_heartbeat(
+            snapshot_path,
+            status="ticking",
+          )
         }
       }
     })

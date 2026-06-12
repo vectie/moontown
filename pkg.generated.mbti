@@ -10,7 +10,6 @@ import {
   "vectie/moontown/civic",
   "vectie/moontown/cookbook",
   "vectie/moontown/core",
-  "vectie/moontown/daemon_runtime_policy",
   "vectie/moontown/roles",
   "vectie/moontown/runtime_status_policy",
 }
@@ -30,13 +29,7 @@ pub fn civic_communication_patterns() -> Array[@civic.CivicCommunicationPattern]
 
 pub async fn compact_registered_moonclaw_job_stores(book_catalog_path? : String, snapshot_path? : String, tick? : Int, max_store_bytes? : Int64) -> String
 
-pub async fn daemon_doctor_saved_town(snapshot_path? : String, stale_after_ms? : UInt64) -> String
-
 pub async fn daemon_run_saved_town(snapshot_path? : String, book_catalog_path? : String, max_ticks? : Int, sleep_ms? : Int, preserve_supervisor? : Bool, inline_under_supervisor? : Bool) -> String
-
-pub async fn daemon_start_saved_town(snapshot_path? : String, command? : String, stale_after_ms? : UInt64) -> String
-
-pub async fn daemon_stop_saved_town(snapshot_path? : String) -> String
 
 pub async fn daemon_supervise_saved_town(snapshot_path? : String, command? : String, max_checks? : Int, sleep_ms? : Int, stale_after_ms? : UInt64) -> String
 
@@ -47,18 +40,6 @@ pub fn default_cookbook_book_id() -> String
 pub fn default_cookbook_manifest_path() -> String
 
 pub fn default_cookbook_workspace_root() -> String
-
-pub fn default_daemon_log_path(snapshot_path? : String) -> String
-
-pub fn default_daemon_pid_path(snapshot_path? : String) -> String
-
-pub fn default_daemon_restart_path(snapshot_path? : String) -> String
-
-pub fn default_daemon_runtime_path(snapshot_path? : String) -> String
-
-pub fn default_daemon_stop_path(snapshot_path? : String) -> String
-
-pub fn default_daemon_supervisor_pid_path(snapshot_path? : String) -> String
 
 pub fn default_wenyu_course_book_id() -> String
 
@@ -77,8 +58,6 @@ pub fn[Provider : @core.BookProvider] demo_state_with_provider(Provider) -> @cor
 pub async fn inspect_app_tool_book(book_id? : String, workspace_root? : String, book_catalog_path? : String, standing_goal_path? : String) -> @app_tool_book.AppToolBookStatus
 
 pub async fn inspect_book_template_request_status(request_path? : String) -> @book_templates.BookTemplateRequestStatus
-
-pub async fn inspect_daemon_runtime(snapshot_path? : String, stale_after_ms? : UInt64) -> @daemon_runtime_policy.DaemonRuntimeHealth
 
 pub async fn inspect_moontown_cookbook(workspace_root? : String, manifest_path? : String) -> @cookbook.MoontownCookbookStatus
 
@@ -126,8 +105,6 @@ pub fn runtime_status_from_state(@core.TownState, String, standing_goals? : Arra
 
 pub async fn supervise_saved_town(snapshot_path? : String, book_catalog_path? : String) -> String
 
-pub async fn write_daemon_restart_request(snapshot_path? : String, reason? : String) -> String
-
 // Errors
 
 // Types and methods
@@ -138,10 +115,6 @@ type FinalIntegrationTemplateSpec derive(Eq, ToJson, @debug.Debug, @json.FromJso
 type FinalIntegrationWatchSpec derive(Eq, ToJson, @debug.Debug, @json.FromJson)
 
 // Type aliases
-pub using @daemon_runtime_policy {type DaemonRuntimeHealth}
-
-pub using @daemon_runtime_policy {type DaemonRuntimeState}
-
 pub using @runtime_status_policy {type TownRuntimeStatus}
 
 // Traits

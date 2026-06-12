@@ -160,7 +160,7 @@ async test "daemon tick floor parses latest daemon log sequence" {
   @support.write_text_file(
     log_path, "[1780279335798] tick phase=standing-goals sequence=15888\n[1780279400000] tick phase=done sequence=15890\n",
   )
-  assert_eq(latest_daemon_log_sequence(log_path), 15890)
+  assert_eq(@daemon_runtime.latest_daemon_log_sequence(log_path), 15890)
 }
 
 ///|

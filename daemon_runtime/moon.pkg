@@ -1,0 +1,13 @@
+import {
+  "moonbitlang/async",
+  "moonbitlang/async/fs",
+  "moonbitlang/async/process",
+  "moonbitlang/core/encoding/utf8" @encoding/utf8,
+  "moonbitlang/core/env",
+  "moonbitlang/core/json",
+  "moonbitlang/x/sys",
+  "vectie/moontown/daemon_runtime_policy",
+  "vectie/moontown/scheduler",
+  "vectie/moontown/storage",
+  "vectie/moontown/support",
+}

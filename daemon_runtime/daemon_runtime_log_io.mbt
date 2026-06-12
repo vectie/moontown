@@ -1,5 +1,5 @@
 ///|
-async fn append_daemon_log(path : String, message : String) -> Unit {
+pub async fn append_daemon_log(path : String, message : String) -> Unit {
   @support.ensure_parent_directory(path) catch {
     _ => ()
   }
@@ -10,7 +10,7 @@ async fn append_daemon_log(path : String, message : String) -> Unit {
 }
 
 ///|
-async fn latest_daemon_log_sequence(log_path : String) -> Int {
+pub async fn latest_daemon_log_sequence(log_path : String) -> Int {
   let text = @support.read_text_or_empty(log_path)
   let mut latest = 0
   for line in text.split("\n") {
@@ -28,4 +28,23 @@ async fn latest_daemon_log_sequence(log_path : String) -> Int {
     }
   }
   latest
+}
+
+///|
+fn first_non_negative_int(text : String) -> Int? {
+  let mut seen = false
+  let mut value = 0
+  for char in text {
+    if char >= '0' && char <= '9' {
+      value = value * 10 + (char.to_int() - '0'.to_int())
+      seen = true
+    } else if seen {
+      return Some(value)
+    }
+  }
+  if seen {
+    Some(value)
+  } else {
+    None
+  }
 }
