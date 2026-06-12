@@ -1,8 +1,6 @@
 import {
   "vectie/moontown/core",
   "vectie/moontown/book_quality",
-  "vectie/moontown/book_quality_runtime",
-  "vectie/moontown/book_templates",
   "vectie/moontown/build_pipeline",
   "vectie/moontown/planbook_runtime",
   "vectie/moontown/town_synthesis",

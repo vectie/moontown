@@ -551,6 +551,7 @@ Key files:
 - [src/daemon_runtime_policy/health.mbt](/Users/kq/Workspace/moontown/src/daemon_runtime_policy/health.mbt)
 - [src/daemon_runtime_policy/transitions.mbt](/Users/kq/Workspace/moontown/src/daemon_runtime_policy/transitions.mbt)
 - [src/daemon_runtime/daemon_runtime_inspection.mbt](/Users/kq/Workspace/moontown/src/daemon_runtime/daemon_runtime_inspection.mbt)
+- [src/daemon_runtime/daemon_scheduled_jobs.mbt](/Users/kq/Workspace/moontown/src/daemon_runtime/daemon_scheduled_jobs.mbt)
 - [src/town_runtime/daemon_runtime_supervise.mbt](/Users/kq/Workspace/moontown/src/town_runtime/daemon_runtime_supervise.mbt)
 
 Purpose:
@@ -559,7 +560,8 @@ Purpose:
   heartbeat staleness, transition builders, doctor actions, and the pure
   `daemon_runtime_should_spawn_worker(...)` supervision predicate.
 - `src/daemon_runtime` owns filesystem/process inspection, PID files, logs,
-  launchd integration, request files, and runtime state persistence.
+  launchd integration, request files, runtime state persistence, scheduled-job
+  execution, and scheduled-job activity/noise filtering.
 - `src/town_runtime` owns the town-level supervisor loop and worker spawning.
 
 Boundary:
@@ -567,6 +569,9 @@ Boundary:
 - supervisor loops must ask `daemon_runtime_policy` whether worker spawn is due.
 - town runtime may spawn or stop processes, but should not compare raw daemon
   status strings such as `missing`, `stopped`, `running`, or `ticking`.
+- town runtime may call the scheduled-job phase during a tick, but should not
+  own scheduled-job interval math, scheduled-job dispatch, or the decision that
+  a summary is meaningful enough to become a town event.
 
 ## Rabbita Frontend
 

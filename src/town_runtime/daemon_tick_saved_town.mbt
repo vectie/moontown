@@ -58,7 +58,7 @@ async fn run_daemon_scheduled_jobs_phase(
   book_catalog_path : String,
 ) -> Unit {
   append_daemon_context_phase_log(context, "scheduled-jobs")
-  run_daemon_scheduled_jobs(
+  @daemon_runtime.run_daemon_scheduled_jobs(
     context.state,
     context.daemon.jobs,
     snapshot_path,

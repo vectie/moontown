@@ -478,6 +478,10 @@ stop/restart request files, spawn or stop supervisor/worker processes, and
 install launchd services, but it should not redefine what "running",
 "supervising", "stale", "healthy", "already active", "worker started", "tick
 finished", "reload requested", or canonical daemon file naming means.
+Daemon-runtime also owns scheduled-job execution and scheduled-job activity
+filtering. Root Moontown may call the scheduled-job phase during a daemon tick,
+but it should not own interval math, job-kind dispatch, or the decision that a
+job summary is meaningful enough to become a town event.
 
 Editor-pipeline policy text belongs to the `editor_pipeline/` package. The
 package owns the editor pipeline DTOs, feature-selection result contract,

@@ -2,6 +2,7 @@
 package "vectie/moontown/daemon_runtime"
 
 import {
+  "vectie/moontown/core",
   "vectie/moontown/daemon_runtime_policy",
   "vectie/moontown/scheduler",
 }
@@ -62,6 +63,8 @@ pub async fn mark_daemon_tick_started(String, String) -> Unit
 pub async fn mark_daemon_worker_reload_requested(String, String) -> Unit
 
 pub async fn mark_daemon_worker_started(String, Int, String, clear_supervisor? : Bool) -> Unit
+
+pub async fn run_daemon_scheduled_jobs(@core.TownState, Array[@scheduler.ScheduledJob], String, String, Int, String) -> Unit
 
 pub async fn save_daemon_state(String, @scheduler.DaemonState) -> Unit
 
