@@ -82,7 +82,7 @@ Current status:
 
 ## Health
 
-- [health/report.mbt](/Users/kq/Workspace/moontown/src/health/report.mbt)
+- [src/health/report.mbt](/Users/kq/Workspace/moontown/src/health/report.mbt)
 
 Purpose:
 
@@ -92,7 +92,7 @@ Purpose:
 
 ## Scheduler
 
-- [scheduler/daemon.mbt](/Users/kq/Workspace/moontown/src/scheduler/daemon.mbt)
+- [src/scheduler/daemon.mbt](/Users/kq/Workspace/moontown/src/scheduler/daemon.mbt)
 
 Purpose:
 
@@ -109,7 +109,7 @@ Current status:
 
 ## Storage
 
-- [storage/store.mbt](/Users/kq/Workspace/moontown/src/storage/store.mbt)
+- [src/storage/store.mbt](/Users/kq/Workspace/moontown/src/storage/store.mbt)
 
 Purpose:
 
@@ -127,7 +127,7 @@ Current persisted files:
 
 ## Roles
 
-- [roles/mayor.mbt](/Users/kq/Workspace/moontown/src/roles/mayor.mbt)
+- [src/roles/mayor.mbt](/Users/kq/Workspace/moontown/src/roles/mayor.mbt)
 
 Purpose:
 
@@ -143,7 +143,7 @@ starts talking to a role-specific API.
 
 ## Moonbook Adapter
 
-- [adapters/moonbook/client.mbt](/Users/kq/Workspace/moontown/src/adapters/moonbook/client.mbt)
+- [src/adapters/moonbook/client.mbt](/Users/kq/Workspace/moontown/src/adapters/moonbook/client.mbt)
 
 Purpose:
 
@@ -175,7 +175,7 @@ total is exposed as `total_evidence_count`.
 
 ## Moonclaw Adapter
 
-- [adapters/moonclaw/import.mbt](/Users/kq/Workspace/moontown/src/adapters/moonclaw/import.mbt)
+- [src/adapters/moonclaw/import.mbt](/Users/kq/Workspace/moontown/src/adapters/moonclaw/import.mbt)
 
 Purpose:
 
@@ -207,7 +207,7 @@ Important public types:
 Key files:
 
 - [src/ui/scene_layout.mbt](/Users/kq/Workspace/moontown/src/ui/scene_layout.mbt)
-- [ui/dashboard.mbt](/Users/kq/Workspace/moontown/src/ui/dashboard.mbt)
+- [src/ui/dashboard.mbt](/Users/kq/Workspace/moontown/src/ui/dashboard.mbt)
 - [src/ui/scene_render.mbt](/Users/kq/Workspace/moontown/src/ui/scene_render.mbt)
 
 Purpose:
@@ -216,6 +216,49 @@ Purpose:
 - dashboard state projection
 - renderer-facing scene model
 - HTML bridge
+
+## Loop Policy
+
+Key files:
+
+- [src/policy/book_policy.mbt](/Users/kq/Workspace/moontown/src/policy/book_policy.mbt)
+- [src/policy/book_policy_lanes.mbt](/Users/kq/Workspace/moontown/src/policy/book_policy_lanes.mbt)
+- [src/policy/book_policy_loop.mbt](/Users/kq/Workspace/moontown/src/policy/book_policy_loop.mbt)
+
+Purpose:
+
+- typed `BookPolicy` model
+- canonical `control`, `execute`, and `tend` lane parsing
+- policy-composed loop plans and health gates
+
+Boundary:
+
+- `BookPolicy` keeps serialized skill lanes as strings for stable JSON.
+- `src/policy` owns lane normalization and lane-based skill selection.
+- downstream packages may read lane text but should not redefine lane semantics.
+
+## PlanBook Policy And Runtime
+
+Key files:
+
+- [src/planbook_policy/run_status.mbt](/Users/kq/Workspace/moontown/src/planbook_policy/run_status.mbt)
+- [src/planbook_policy/repair_commands.mbt](/Users/kq/Workspace/moontown/src/planbook_policy/repair_commands.mbt)
+- [src/planbook_runtime/planbook_repair_run_status.mbt](/Users/kq/Workspace/moontown/src/planbook_runtime/planbook_repair_run_status.mbt)
+- [src/planbook_runtime/planbook_repair_result.mbt](/Users/kq/Workspace/moontown/src/planbook_runtime/planbook_repair_result.mbt)
+
+Purpose:
+
+- `src/planbook_policy` owns pure PlanBook contracts, repair command policy,
+  and raw MoonClaw run-status normalization.
+- `src/planbook_runtime` owns workspace IO, run reconciliation, and
+  evidence-aware repair lifecycle decisions.
+
+Boundary:
+
+- raw MoonClaw `Succeeded` means the external run completed.
+- `planbook_runtime` may still mark a repair task failed when a completed run
+  lacks required PlanBook repair evidence.
+- do not encode missing-evidence decisions in raw status normalization.
 
 ## Rabbita Frontend
 

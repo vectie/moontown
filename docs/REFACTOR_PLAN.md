@@ -194,6 +194,10 @@ Goals:
 - keep execute/tend/control loop-lane semantics in `policy/`; downstream
   packages may read serialized lane strings, but `policy/` owns parsing,
   normalization, and lane-based skill selection
+- keep raw MoonClaw run-status normalization in `planbook_policy/`; runtime
+  packages may downgrade a completed run when required repair evidence is
+  missing, but policy status normalization must not conflate `Succeeded` with
+  evidence failure
 - keep schedule DTOs and pure transitions in `civic/`; root may store,
   claim/retry, and run schedules but should not define schedule vocabulary
 - keep civic service/protocol status semantics in `civic/`; root may inspect

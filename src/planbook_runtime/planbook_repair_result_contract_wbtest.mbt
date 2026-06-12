@@ -29,7 +29,7 @@ test "planbook repair result contract rejects best-effort timeout placeholders" 
   )
   assert_eq(
     @planbook_policy.task_status_from_run_status(Some("Succeeded")),
-    "failed",
+    "completed",
   )
 }
 

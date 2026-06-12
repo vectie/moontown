@@ -228,7 +228,7 @@ test "payload patch receipt enforces run id" {
 test "moonclaw statuses map to repair task statuses" {
   assert_eq(moonclaw_status_bucket(Some("Pending")), "pending")
   assert_eq(moonclaw_status_bucket(Some("WaitingForInput")), "running")
-  assert_eq(task_status_from_run_status(Some("Succeeded")), "failed")
+  assert_eq(task_status_from_run_status(Some("Succeeded")), "completed")
   assert_eq(task_status_from_run_status(Some("Failed")), "failed")
   assert_eq(task_status_from_run_status(None), "dispatched")
 }

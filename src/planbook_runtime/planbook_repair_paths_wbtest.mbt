@@ -244,7 +244,7 @@ test "planbook repair run status predicates centralize moonclaw lifecycle mappin
   )
   assert_eq(
     @planbook_policy.task_status_from_run_status(Some("Succeeded")),
-    "failed",
+    "completed",
   )
   assert_eq(
     @planbook_policy.task_status_from_run_status(Some("Failed")),
