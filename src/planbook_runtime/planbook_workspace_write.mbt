@@ -113,5 +113,5 @@ async fn write_planbook_projection_files(
   )
   let html = @planbook.generated_site_html(entry)
   @support.write_text_file("\{root}/book/Home.html", html)
-  @support.write_text_file("\{root}/book/site/generated/index.html", html)
+  @support.write_text_file(planbook_generated_site_workspace_path(root), html)
 }

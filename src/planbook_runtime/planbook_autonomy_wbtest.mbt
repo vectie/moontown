@@ -62,6 +62,13 @@ async test "planbook autonomy doctor writes self-healing evidence" {
   assert_true(operating_architecture.contains("Operating Architecture"))
   assert_true(operating_architecture.contains("Growth Contract"))
   assert_true(operating_architecture.contains("Civic Wiring Rule"))
+  assert_eq(
+    planbook_generated_site_path(),
+    @policy.default_generated_site_projection_path(),
+  )
+  assert_true(
+    @fs.exists(planbook_generated_site_workspace_path(workspace.workspace_root)),
+  )
 }
 
 ///|

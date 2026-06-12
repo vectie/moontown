@@ -269,6 +269,9 @@ Boundary:
 - `planbook_runtime` may still mark a repair task failed when a completed run
   lacks required PlanBook repair evidence.
 - do not encode missing-evidence decisions in raw status normalization.
+- default generated-site path semantics belong to `src/policy`; PlanBook
+  runtime consumes `policy.default_generated_site_projection_path()` rather
+  than redefining the projection path.
 
 ## Course Book
 

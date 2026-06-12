@@ -377,6 +377,9 @@ indexes, dispatch ACP packets, and reconcile filesystem evidence, but it should
 not redefine repair paths, repair request rules, repair decisions, validation
 gates, receipt fields, generated repair skill text, or status bucket semantics
 locally.
+PlanBook generated-site writes follow the global output rule as well:
+`planbook_runtime/` consumes `policy.default_generated_site_projection_path()`
+for the default projection path instead of redefining it locally.
 
 Live-autonomy policy belongs to the `live_autonomy_policy/` package. That
 package owns the `LiveAutonomySpine` JSON contract, journal/probe DTOs, live
