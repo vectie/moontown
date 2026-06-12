@@ -2,8 +2,6 @@
 package "vectie/moontown"
 
 import {
-  "moonbitlang/core/debug",
-  "moonbitlang/core/json",
   "vectie/moontown/adapters/moonbook",
   "vectie/moontown/app_tool_book",
   "vectie/moontown/book_templates",
@@ -67,8 +65,6 @@ pub async fn install_app_tool_book_config(String, book_catalog_path? : String, s
 
 pub async fn install_book_template_config(String, String, registry_path? : String, book_catalog_path? : String, standing_goal_path? : String) -> String
 
-pub async fn install_wenyu_final_integration(manifest_path? : String, snapshot_path? : String, standing_goal_path? : String) -> String
-
 pub async fn load_or_create_demo_dashboard(path? : String, book_catalog_path? : String) -> String
 
 pub async fn load_or_create_demo_state(path? : String, book_catalog_path? : String) -> @core.TownState
@@ -95,8 +91,6 @@ pub async fn render_saved_town_status(snapshot_path? : String) -> String
 
 pub fn render_state_dashboard(@core.TownState) -> String
 
-pub async fn render_wenyu_final_integration_status(manifest_path? : String, snapshot_path? : String, standing_goal_path? : String) -> String
-
 pub async fn render_wenyu_game_design_course_status(workspace_root? : String) -> String
 
 pub async fn run_goal(String, book_id? : String?, task_limit_per_book? : Int, snapshot_path? : String, book_catalog_path? : String) -> @core.TownState
@@ -108,11 +102,6 @@ pub async fn supervise_saved_town(snapshot_path? : String, book_catalog_path? : 
 // Errors
 
 // Types and methods
-type FinalIntegrationManifest derive(Eq, ToJson, @debug.Debug, @json.FromJson)
-
-type FinalIntegrationTemplateSpec derive(Eq, ToJson, @debug.Debug, @json.FromJson)
-
-type FinalIntegrationWatchSpec derive(Eq, ToJson, @debug.Debug, @json.FromJson)
 
 // Type aliases
 pub using @runtime_status_policy {type TownRuntimeStatus}

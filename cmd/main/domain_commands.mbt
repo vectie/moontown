@@ -41,12 +41,13 @@ async fn render_civic_protocols_command(args : Array[String]) -> String {
 ///|
 async fn render_integration_command(args : Array[String]) -> String {
   match args {
-    ["final", "install"] => @moontown.install_wenyu_final_integration()
+    ["final", "install"] => @final_integration.install_wenyu_final_integration()
     ["final", "install", manifest_path] =>
-      @moontown.install_wenyu_final_integration(manifest_path~)
-    ["final", "status"] => @moontown.render_wenyu_final_integration_status()
+      @final_integration.install_wenyu_final_integration(manifest_path~)
+    ["final", "status"] =>
+      @final_integration.render_wenyu_final_integration_status()
     ["final", "status", manifest_path] =>
-      @moontown.render_wenyu_final_integration_status(manifest_path~)
+      @final_integration.render_wenyu_final_integration_status(manifest_path~)
     _ => @moontown.load_or_create_demo_dashboard()
   }
 }

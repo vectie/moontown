@@ -1,0 +1,26 @@
+// Generated using `moon info`, DON'T EDIT IT
+package "vectie/moontown/final_integration"
+
+import {
+  "moonbitlang/core/debug",
+  "moonbitlang/core/json",
+}
+
+// Values
+pub async fn install_wenyu_final_integration(manifest_path? : String, snapshot_path? : String, standing_goal_path? : String) -> String
+
+pub async fn render_wenyu_final_integration_status(manifest_path? : String, snapshot_path? : String, standing_goal_path? : String) -> String
+
+// Errors
+
+// Types and methods
+type FinalIntegrationManifest derive(Eq, ToJson, @debug.Debug, @json.FromJson)
+
+type FinalIntegrationTemplateSpec derive(Eq, ToJson, @debug.Debug, @json.FromJson)
+
+type FinalIntegrationWatchSpec derive(Eq, ToJson, @debug.Debug, @json.FromJson)
+
+// Type aliases
+
+// Traits
+
