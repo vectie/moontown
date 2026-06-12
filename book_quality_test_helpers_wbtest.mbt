@@ -1,6 +1,6 @@
 ///|
 async fn cleaned_book_quality_test_root(root : String) -> String {
-  ignore_checked_command("rm", ["-rf", root])
+  @support.ignore_checked_command("rm", ["-rf", root])
   root
 }
 

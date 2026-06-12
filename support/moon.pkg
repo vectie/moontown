@@ -4,9 +4,9 @@ import {
   "moonbitlang/core/encoding/utf8" @encoding/utf8,
   "moonbitlang/core/json",
   "moonbitlang/x/path",
+  "vectie/moontown/integration",
 }
 
 import {
   "moonbitlang/async",
-  "vectie/moontown/integration",
 } for "wbtest"

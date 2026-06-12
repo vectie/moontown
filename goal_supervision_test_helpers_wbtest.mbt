@@ -1,6 +1,6 @@
 ///|
 async fn cleaned_goal_supervision_test_root(root : String) -> String {
-  ignore_checked_command("rm", ["-rf", root])
+  @support.ignore_checked_command("rm", ["-rf", root])
   root
 }
 

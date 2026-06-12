@@ -9,7 +9,7 @@ struct PlanbookAutonomyTestWorkspace {
 async fn planbook_autonomy_test_workspace(
   root : String,
 ) -> PlanbookAutonomyTestWorkspace {
-  ignore_checked_command("rm", ["-rf", root])
+  @support.ignore_checked_command("rm", ["-rf", root])
   PlanbookAutonomyTestWorkspace::{
     snapshot_path: "\{root}/town.json",
     workspace_root: "\{root}/books/plan-moontown-quality",

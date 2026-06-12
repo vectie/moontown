@@ -1,6 +1,6 @@
 ///|
 fn daemon_command_uses_moon_runner(command : String) -> Bool {
-  let name = path_basename(command).to_lower()
+  let name = @support.path_basename(command).to_lower()
   name == "moon" || name == "moon.exe"
 }
 

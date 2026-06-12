@@ -10,6 +10,8 @@ pub fn first_non_heading_paragraph(String) -> String
 
 pub fn html_escape(String) -> String
 
+pub async fn ignore_checked_command(String, Array[String]) -> Unit
+
 pub fn json_escape(String) -> String
 
 pub fn json_object_field_summary(Map[String, Json], String) -> String?
@@ -31,6 +33,8 @@ pub fn markdown_excerpt(String, Int) -> String
 pub fn max_int(Int, Int) -> Int
 
 pub fn min_int(Int, Int) -> Int
+
+pub fn path_basename(String) -> String
 
 pub async fn read_json_file_or_empty_object(String) -> Json
 

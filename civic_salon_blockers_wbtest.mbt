@@ -1,7 +1,7 @@
 ///|
 async test "invalid civic scenario blocks instead of crashing protocol seeding" {
   let root = "/tmp/moontown-civic-salon-invalid-output"
-  ignore_checked_command("rm", ["-rf", root])
+  @support.ignore_checked_command("rm", ["-rf", root])
   let snapshot_path = "\{root}/town.json"
   let book_catalog_path = "\{root}/books/catalog.json"
   let schedule = daemon_civic_salon_schedule()
@@ -38,7 +38,7 @@ async test "invalid civic scenario blocks instead of crashing protocol seeding" 
 ///|
 async test "invalid civic idea participant reference is reviewable blocker" {
   let root = "/tmp/moontown-civic-salon-invalid-reference"
-  ignore_checked_command("rm", ["-rf", root])
+  @support.ignore_checked_command("rm", ["-rf", root])
   let snapshot_path = "\{root}/town.json"
   let book_catalog_path = "\{root}/books/catalog.json"
   let schedule = daemon_civic_salon_schedule()

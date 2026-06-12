@@ -1,7 +1,7 @@
 ///|
 async test "civic status marks bootstrapped service operable but unproven" {
   let root = "/tmp/moontown-civic-status-policy"
-  ignore_checked_command("rm", ["-rf", root])
+  @support.ignore_checked_command("rm", ["-rf", root])
   let service = @civic.wenyu_civic_service_for_book_id("wenyu-policy-hall").unwrap()
   let entry = @moonbook.BookCatalogEntry::new(
     id=service.book_id,
@@ -31,7 +31,7 @@ async test "civic status marks bootstrapped service operable but unproven" {
 ///|
 async test "civic workspace readiness separates structural gates" {
   let root = "/tmp/moontown-civic-readiness"
-  ignore_checked_command("rm", ["-rf", root])
+  @support.ignore_checked_command("rm", ["-rf", root])
   let service = @civic.wenyu_civic_service_for_book_id("wenyu-policy-hall").unwrap()
   let entry = @moonbook.BookCatalogEntry::new(
     id=service.book_id,
@@ -63,7 +63,7 @@ async test "civic workspace readiness separates structural gates" {
 ///|
 async test "civic latest result evidence parses contract markers" {
   let root = "/tmp/moontown-civic-latest-result"
-  ignore_checked_command("rm", ["-rf", root])
+  @support.ignore_checked_command("rm", ["-rf", root])
   let service = @civic.wenyu_civic_service_for_book_id("wenyu-policy-hall").unwrap()
   let missing = inspect_civic_service_latest_result(service, root)
   assert_true(!missing.found)

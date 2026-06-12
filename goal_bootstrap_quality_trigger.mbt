@@ -7,7 +7,7 @@ async fn write_research_quality_review_trigger(
   guard entry.id.has_prefix("research-") else { return }
   let root = @moonbook.workspace_root(entry)
   let raw_root = "\{root}/raw/bootstrap"
-  ignore_checked_command("mkdir", ["-p", raw_root])
+  @support.ignore_checked_command("mkdir", ["-p", raw_root])
   write_text_file(
     "\{raw_root}/QUALITY_REPAIR.md",
     [

@@ -1,7 +1,7 @@
 ///|
 async test "archive pdf evidence watch book disables standing watch and hides catalog entry" {
   let base = "/tmp/moontown-pdf-evidence-watch-wbtest/archive"
-  ignore_checked_command("rm", ["-rf", base])
+  @support.ignore_checked_command("rm", ["-rf", base])
   let workspace_root = "\{base}/workspace"
   let catalog_path = "\{base}/catalog.json"
   let goals_path = "\{base}/standing-goals.json"

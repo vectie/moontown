@@ -1,7 +1,7 @@
 ///|
 async test "research persistence handoff uses topic artifacts instead of runtime plumbing" {
   let root = "/tmp/moontown-research-persist-handoff"
-  ignore_checked_command("rm", ["-rf", root])
+  @support.ignore_checked_command("rm", ["-rf", root])
   write_text_file(
     root + "/raw/bootstrap/synthesis-brief.md",
     "# Synthesis Brief\n\nOne Person Company (OPC) is an evidence-limited solo-founder operating model.\n",

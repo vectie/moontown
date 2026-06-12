@@ -1,7 +1,7 @@
 ///|
 async test "editor pipeline module config loader handles missing invalid and valid files" {
   let root = "/tmp/moontown-editor-module-config-wbtest"
-  ignore_checked_command("rm", ["-rf", root])
+  @support.ignore_checked_command("rm", ["-rf", root])
   assert_true(
     load_editor_pipeline_module_config("\{root}/missing.json") is None,
   )

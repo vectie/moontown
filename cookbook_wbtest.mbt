@@ -1,7 +1,7 @@
 ///|
 async test "cookbook bootstrap writes manifest and MoonBook workspace" {
   let root = "/tmp/moontown-cookbook-wbtest"
-  ignore_checked_command("rm", ["-rf", root])
+  @support.ignore_checked_command("rm", ["-rf", root])
   let catalog_path = "\{root}/moonbooks.json"
   let workspace_root = "\{root}/books/moontown-cookbook"
   let manifest_path = "\{root}/stable-state.json"
@@ -51,7 +51,7 @@ async test "cookbook bootstrap writes manifest and MoonBook workspace" {
 ///|
 async test "cookbook status reports stable state control book" {
   let root = "/tmp/moontown-cookbook-status-wbtest"
-  ignore_checked_command("rm", ["-rf", root])
+  @support.ignore_checked_command("rm", ["-rf", root])
   let catalog_path = "\{root}/moonbooks.json"
   let workspace_root = "\{root}/books/moontown-cookbook"
   let manifest_path = "\{root}/stable-state.json"

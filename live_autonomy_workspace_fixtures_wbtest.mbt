@@ -8,7 +8,7 @@ struct LiveAutonomyTestWorkspace {
 async fn live_autonomy_test_workspace(
   root : String,
 ) -> LiveAutonomyTestWorkspace {
-  ignore_checked_command("rm", ["-rf", root])
+  @support.ignore_checked_command("rm", ["-rf", root])
   LiveAutonomyTestWorkspace::{ root, snapshot_path: "\{root}/town.json" }
 }
 

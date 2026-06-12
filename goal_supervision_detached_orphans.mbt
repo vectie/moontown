@@ -153,7 +153,7 @@ fn deferred_watcher_receipt_path(detail : String) -> String? {
 
 ///|
 fn packet_id_from_packet_path(packet_path : String) -> String {
-  let basename = path_basename(packet_path)
+  let basename = @support.path_basename(packet_path)
   if basename.has_suffix(".json") {
     basename[:basename.length() - ".json".length()].to_owned()
   } else {

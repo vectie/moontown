@@ -20,7 +20,7 @@ test "civic communication-pattern schedule uses real wall-clock due checks" {
 ///|
 async test "scenario interval config controls generated schedule cadence" {
   let root = "/tmp/moontown-civic-salon-interval"
-  ignore_checked_command("rm", ["-rf", root])
+  @support.ignore_checked_command("rm", ["-rf", root])
   let snapshot_path = "\{root}/town.json"
   let scenario = {
     ..daemon_civic_salon_scenario(),
@@ -81,7 +81,7 @@ test "civic salon due run summary keeps idle run and refresh states distinct" {
 ///|
 async test "persist civic salon schedule replaces only matching schedule" {
   let root = "/tmp/moontown-civic-salon-persist-schedule"
-  ignore_checked_command("rm", ["-rf", root])
+  @support.ignore_checked_command("rm", ["-rf", root])
   let path = "\{root}/schedules.json"
   let first = daemon_civic_salon_schedule()
   let second = {

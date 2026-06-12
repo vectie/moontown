@@ -1,7 +1,7 @@
 ///|
 async test "due civic salon rounds persist schedule and run ledger" {
   let root = "/tmp/moontown-civic-salon-daemon"
-  ignore_checked_command("rm", ["-rf", root])
+  @support.ignore_checked_command("rm", ["-rf", root])
   let snapshot_path = "\{root}/town.json"
   let book_catalog_path = "\{root}/books/catalog.json"
   let schedule = daemon_civic_salon_schedule()
@@ -46,7 +46,7 @@ async test "due civic salon rounds persist schedule and run ledger" {
 ///|
 async test "stale civic salon projection refreshes without forcing another round" {
   let root = "/tmp/moontown-civic-salon-refresh"
-  ignore_checked_command("rm", ["-rf", root])
+  @support.ignore_checked_command("rm", ["-rf", root])
   let snapshot_path = "\{root}/town.json"
   let book_catalog_path = "\{root}/books/catalog.json"
   let schedule = {
@@ -101,7 +101,7 @@ async test "stale civic salon projection refreshes without forcing another round
 ///|
 async test "persisted civic reducer prefers scenario-specific output over shared building output" {
   let root = "/tmp/moontown-civic-salon-specific-output"
-  ignore_checked_command("rm", ["-rf", root])
+  @support.ignore_checked_command("rm", ["-rf", root])
   let scenario = daemon_civic_salon_scenario()
   let workspace_base = root
   let raw_root = "\{root}/books/wenyu-social-square/raw/bootstrap"
@@ -130,7 +130,7 @@ async test "persisted civic reducer prefers scenario-specific output over shared
 ///|
 async test "active civic schedule reconciles completed persisted reducer output" {
   let root = "/tmp/moontown-civic-salon-active-reconcile"
-  ignore_checked_command("rm", ["-rf", root])
+  @support.ignore_checked_command("rm", ["-rf", root])
   let snapshot_path = "\{root}/town.json"
   let book_catalog_path = "\{root}/books/catalog.json"
   let schedule = {

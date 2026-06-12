@@ -5,7 +5,7 @@ fn runtime_status_test_state() -> @core.TownState {
 
 ///|
 async fn cleaned_runtime_status_test_root(root : String) -> String {
-  ignore_checked_command("rm", ["-rf", root])
+  @support.ignore_checked_command("rm", ["-rf", root])
   root
 }
 
