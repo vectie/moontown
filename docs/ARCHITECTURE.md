@@ -289,6 +289,10 @@ Default output paths are also policy-owned. Packages such as `book_quality/`
 may expose compatibility helpers like `generated_site_path()`, but those should
 delegate to `policy.default_generated_site_projection_path()` rather than
 redefining the path locally.
+Adapters may still detect legacy external layouts for compatibility. For
+example, the MoonBook adapter can discover older site output locations after a
+build, but its canonical Moontown generated-site path must delegate to the
+policy default.
 
 Every policy has two lanes:
 

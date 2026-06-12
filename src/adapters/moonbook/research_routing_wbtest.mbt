@@ -19,7 +19,7 @@ test "generated site index points at live generated MoonBook output layout" {
   let entry = moonbook_adapter_opc_research_entry(workspace_root=root)
   assert_eq(
     generated_site_index_path(entry),
-    "\{root}/book/site/generated/index.html",
+    "\{root}/\{@policy.default_generated_site_projection_path()}",
   )
 }
 

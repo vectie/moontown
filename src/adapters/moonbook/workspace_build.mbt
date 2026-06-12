@@ -18,9 +18,7 @@ pub async fn build_workspace(
 
 ///|
 pub fn generated_site_index_path(entry : BookCatalogEntry) -> String {
-  @path.Path(resolved_workspace_root(entry.workspace_root))
-  .join(@path.Path("book/site/generated/index.html"))
-  .to_string()
+  canonical_generated_site_path(resolved_workspace_root(entry.workspace_root))
 }
 
 ///|

@@ -173,6 +173,14 @@ the town-facing readiness count: domain evidence stays in `evidence_count`,
 watcher/run bookkeeping moves to `operational_evidence_count`, and the raw audit
 total is exposed as `total_evidence_count`.
 
+Boundary:
+
+- adapter fallback discovery may recognize MoonBook's historical generated-site
+  layouts after a build.
+- Moontown's canonical generated-site index path is still policy-owned; adapter
+  canonical path helpers delegate to
+  `policy.default_generated_site_projection_path()`.
+
 ## Moonclaw Adapter
 
 - [src/adapters/moonclaw/import.mbt](/Users/kq/Workspace/moontown/src/adapters/moonclaw/import.mbt)

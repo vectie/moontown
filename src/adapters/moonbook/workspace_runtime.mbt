@@ -1,7 +1,9 @@
 ///|
 async fn resolved_generated_site_index_after_build(root : String) -> String {
   let candidates = [
-    "book/site/generated/index.html", "site/generated/index.html", "site/index.html",
+    canonical_generated_site_relative_path(),
+    "site/generated/index.html",
+    "site/index.html",
   ]
   for relative in candidates {
     let path = @path.Path(root).join(@path.Path(relative)).to_string()
@@ -10,9 +12,7 @@ async fn resolved_generated_site_index_after_build(root : String) -> String {
       return path
     }
   }
-  @path.Path(root)
-  .join(@path.Path("book/site/generated/index.html"))
-  .to_string()
+  canonical_generated_site_path(root)
 }
 
 ///|

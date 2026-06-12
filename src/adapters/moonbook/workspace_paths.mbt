@@ -28,6 +28,18 @@ fn resolved_root_path(path : String) -> String {
 }
 
 ///|
+fn canonical_generated_site_relative_path() -> String {
+  @policy.default_generated_site_projection_path()
+}
+
+///|
+fn canonical_generated_site_path(root : String) -> String {
+  @path.Path(root)
+  .join(@path.Path(canonical_generated_site_relative_path()))
+  .to_string()
+}
+
+///|
 async fn ensure_parent_directory(path : String) -> Unit {
   let parent = @path.Path::dirname(path).to_string()
   ensure_directory(parent)
