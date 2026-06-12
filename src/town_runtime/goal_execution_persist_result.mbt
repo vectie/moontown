@@ -5,9 +5,7 @@ async fn persist_execution_into_book(
   execution : @core.TaskExecutionRecord,
 ) -> @moonbook.PersistResultOutcome? {
   if execution.summary.trim().is_blank() ||
-    execution.status is @core.TaskExecutionStatus::ProposalImported ||
-    execution.status is @core.TaskExecutionStatus::RunConfirmed ||
-    execution.status is @core.TaskExecutionStatus::Running {
+    @core.live_execution_status(execution.status) {
     return None
   }
   let result_summary = book_persist_summary(entry, execution)

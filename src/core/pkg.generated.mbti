@@ -11,6 +11,8 @@ pub fn absolute_path_from_base(String, String) -> String
 
 pub fn absolute_path_from_cwd(String) -> String
 
+pub fn active_work_execution_status(TaskExecutionStatus) -> Bool
+
 pub fn copy_task_with_status(TownTask, TownTaskStatus) -> TownTask
 
 pub fn empty_state(TownConfig) -> TownState
@@ -20,6 +22,8 @@ pub fn external_execution_stale_window_ticks() -> Int
 pub fn find_execution(TownState, String) -> TaskExecutionRecord?
 
 pub fn find_task(TownState, String) -> TownTask?
+
+pub fn has_active_work_executions(TownState) -> Bool
 
 pub fn has_live_executions(TownState) -> Bool
 

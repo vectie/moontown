@@ -48,6 +48,8 @@ Purpose:
 - pure lifecycle policy for mapping execution status into town task status
 - shared execution-status predicates, stale-window defaults, retry-pending
   detection, and live external execution cap/counting
+- shared distinction between live run-backed execution and broader active work
+  such as awaiting persistence
 - shared task-id conventions such as daemon tick extraction from
   `*-tick-N` task ids
 
@@ -71,7 +73,8 @@ Boundary:
   `TaskExecutionStatus` to `TownTaskStatus` and safe task-status copying,
   because that mapping is part of the shared town data model.
 - `src/core` owns generic execution-status categories such as terminal, live,
-  pollable, retry-pending, no-run stale, and live external execution capacity.
+  active work, pollable, retry-pending, no-run stale, and live external
+  execution capacity.
 - `src/core` owns generic task identity parsing such as extracting daemon ticks
   from execution task ids. Runtime packages should consume this helper instead
   of keeping duplicate parsers.

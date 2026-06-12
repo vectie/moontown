@@ -57,7 +57,5 @@ async fn wait_for_moonclaw_run(
 
 ///|
 fn is_live_moonclaw_status(status : @core.TaskExecutionStatus) -> Bool {
-  status is @core.TaskExecutionStatus::ProposalImported ||
-  status is @core.TaskExecutionStatus::RunConfirmed ||
-  status is @core.TaskExecutionStatus::Running
+  @core.live_execution_status(status)
 }

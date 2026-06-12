@@ -53,6 +53,12 @@ pub fn live_execution_status(status : TaskExecutionStatus) -> Bool {
 }
 
 ///|
+pub fn active_work_execution_status(status : TaskExecutionStatus) -> Bool {
+  live_execution_status(status) ||
+  status is TaskExecutionStatus::AwaitingPersistence
+}
+
+///|
 pub fn pollable_execution_status(status : TaskExecutionStatus) -> Bool {
   live_execution_status(status) || status is TaskExecutionStatus::Stale
 }
@@ -114,6 +120,16 @@ pub fn max_live_external_executions() -> Int {
 pub fn has_live_executions(state : TownState) -> Bool {
   for execution in state.executions {
     if live_execution_status(execution.status) {
+      return true
+    }
+  }
+  false
+}
+
+///|
+pub fn has_active_work_executions(state : TownState) -> Bool {
+  for execution in state.executions {
+    if active_work_execution_status(execution.status) {
       return true
     }
   }

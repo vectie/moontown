@@ -15,6 +15,21 @@ fn count_runtime_executions_in_indexes(
 }
 
 ///|
+fn count_active_work_executions_in_indexes(
+  state : @core.TownState,
+  indexes : Array[Int],
+) -> Int {
+  let mut count = 0
+  for index in indexes {
+    let execution = state.executions[index]
+    if @core.active_work_execution_status(execution.status) {
+      count += 1
+    }
+  }
+  count
+}
+
+///|
 fn effective_execution_indexes(state : @core.TownState) -> Array[Int] {
   let indexes : Array[Int] = []
   for index in 0..<state.executions.length() {
@@ -57,18 +72,6 @@ fn execution_status_rank(status : @core.TaskExecutionStatus) -> Int {
 }
 
 ///|
-fn runtime_status_active_execution_statuses() -> Array[
-  @core.TaskExecutionStatus,
-] {
-  [
-    @core.TaskExecutionStatus::ProposalImported,
-    @core.TaskExecutionStatus::RunConfirmed,
-    @core.TaskExecutionStatus::Running,
-    @core.TaskExecutionStatus::AwaitingPersistence,
-  ]
-}
-
-///|
 fn runtime_status_review_execution_statuses() -> Array[
   @core.TaskExecutionStatus,
 ] {
@@ -82,11 +85,7 @@ pub fn runtime_status_execution_counts(
 ) -> RuntimeStatusExecutionCounts {
   let effective_indexes = effective_execution_indexes(state)
   {
-    running: count_runtime_executions_in_indexes(
-      state,
-      effective_indexes,
-      runtime_status_active_execution_statuses(),
-    ),
+    running: count_active_work_executions_in_indexes(state, effective_indexes),
     review: count_runtime_executions_in_indexes(
       state,
       effective_indexes,
@@ -106,7 +105,7 @@ pub fn runtime_status_execution_counts(
 pub fn runtime_status_active_execution_status(
   status : @core.TaskExecutionStatus,
 ) -> Bool {
-  execution_status_in(status, runtime_status_active_execution_statuses())
+  @core.active_work_execution_status(status)
 }
 
 ///|

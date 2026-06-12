@@ -2,10 +2,7 @@
 fn civic_salon_reduction_status_live(
   status : @core.TaskExecutionStatus,
 ) -> Bool {
-  status is @core.TaskExecutionStatus::ProposalImported ||
-  status is @core.TaskExecutionStatus::RunConfirmed ||
-  status is @core.TaskExecutionStatus::Running ||
-  status is @core.TaskExecutionStatus::AwaitingPersistence
+  @core.active_work_execution_status(status)
 }
 
 ///|

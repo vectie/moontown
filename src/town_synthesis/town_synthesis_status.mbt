@@ -98,11 +98,10 @@ pub fn lane_research_status(
       @core.TaskExecutionStatus::ReviewQueued => saw_review = true
       @core.TaskExecutionStatus::Failed | @core.TaskExecutionStatus::Stale =>
         saw_failed = true
-      @core.TaskExecutionStatus::ProposalImported
-      | @core.TaskExecutionStatus::RunConfirmed
-      | @core.TaskExecutionStatus::Running
-      | @core.TaskExecutionStatus::AwaitingPersistence => saw_running = true
-      _ => ()
+      _ =>
+        if @core.active_work_execution_status(execution.status) {
+          saw_running = true
+        }
     }
   }
   if saw_running {

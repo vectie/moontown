@@ -131,12 +131,7 @@ fn has_active_standing_watch_execution(
   let prefix = @standing_watch_policy.standing_watch_task_prefix(goal_id)
   for execution in state.executions {
     if execution.task_id.has_prefix(prefix) &&
-      (
-        execution.status == @core.TaskExecutionStatus::ProposalImported ||
-        execution.status == @core.TaskExecutionStatus::RunConfirmed ||
-        execution.status == @core.TaskExecutionStatus::Running ||
-        execution.status == @core.TaskExecutionStatus::AwaitingPersistence
-      ) {
+      @core.active_work_execution_status(execution.status) {
       return true
     }
   }

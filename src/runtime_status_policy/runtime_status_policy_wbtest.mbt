@@ -103,10 +103,9 @@ test "runtime status policy counts only effective executions" {
     ),
   )
   assert_eq(
-    count_runtime_executions_in_indexes(
+    count_active_work_executions_in_indexes(
       state,
       effective_execution_indexes(state),
-      runtime_status_active_execution_statuses(),
     ),
     1,
   )

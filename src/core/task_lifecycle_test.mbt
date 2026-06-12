@@ -70,6 +70,12 @@ test "execution lifecycle predicates classify terminal live and pollable states"
   assert_true(live_execution_status(TaskExecutionStatus::RunConfirmed))
   assert_true(live_execution_status(TaskExecutionStatus::Running))
   assert_true(!live_execution_status(TaskExecutionStatus::ReviewQueued))
+  assert_true(!live_execution_status(TaskExecutionStatus::AwaitingPersistence))
+  assert_true(active_work_execution_status(TaskExecutionStatus::Running))
+  assert_true(
+    active_work_execution_status(TaskExecutionStatus::AwaitingPersistence),
+  )
+  assert_true(!active_work_execution_status(TaskExecutionStatus::ReviewQueued))
   assert_true(pollable_execution_status(TaskExecutionStatus::Running))
   assert_true(pollable_execution_status(TaskExecutionStatus::Stale))
   assert_true(!pollable_execution_status(TaskExecutionStatus::Completed))
@@ -146,6 +152,7 @@ test "town execution aggregation counts only live external runs" {
   state.replace_execution(retryable)
   assert_eq(live_external_execution_count(state), 1)
   assert_true(has_live_executions(state))
+  assert_true(has_active_work_executions(state))
   assert_true(has_retry_pending_executions(state, 20))
 }
 
