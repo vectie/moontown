@@ -133,12 +133,16 @@ book owns. The implementation now has a first-class `policy` package:
   archived/transient and cookbook/planbook/course/research/civic/operational
   mapping. These labels are migration handles for composed policies, not a
   second runtime type system.
+- [policy/book_policy_profiles.mbt](/Users/kq/Workspace/moontown/src/policy/book_policy_profiles.mbt)
+  owns the mapping from those migration labels into composed `BookPolicy`
+  values and source-policy mode. Book-quality can attach repair actions, but it
+  must not rebuild the policy profile map.
 - [book_quality/taxonomy.mbt](/Users/kq/Workspace/moontown/src/book_quality/taxonomy.mbt)
   exposes the policy-owned legacy labels to book-quality scoring and review
   callers while the migration away from runtime categories continues.
 - [book_quality/policy_specs.mbt](/Users/kq/Workspace/moontown/src/book_quality/policy_specs.mbt)
-  maps those legacy labels into composed `BookPolicy` values and repair
-  actions.
+  attaches book-quality repair actions to policy-owned profiles for review and
+  repair workflows.
 - [book_quality/skill_quality.mbt](/Users/kq/Workspace/moontown/src/skill_quality/contract.mbt)
   owns the shared exploration quality contract used by generated skills: depth,
   breadth, new questions, new directions, curiosity, judgment, long-horizon

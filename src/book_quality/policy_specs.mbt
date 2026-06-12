@@ -17,47 +17,44 @@ fn policy_spec(
 }
 
 ///|
-fn book_first_policy_spec(
-  book_type : String,
+fn policy_profile_spec(
+  profile : @policy.PolicyProfile,
   repair_action : String,
-  policy : @policy.BookPolicy,
 ) -> PolicySpec {
-  policy_spec(book_type, repair_action, book_first_policy(), policy)
+  policy_spec(
+    profile.book_type,
+    repair_action,
+    profile.source_policy,
+    profile.policy,
+  )
 }
 
 ///|
 fn policy_specs() -> Array[PolicySpec] {
   [
-    policy_spec(
-      research_type(),
+    policy_profile_spec(
+      @policy.policy_profile_for_type(research_type()).unwrap(),
       research_repair_action(),
-      web_first_policy(),
-      @policy.research(),
     ),
-    book_first_policy_spec(
-      course_type(),
+    policy_profile_spec(
+      @policy.policy_profile_for_type(course_type()).unwrap(),
       course_repair_action(),
-      @policy.course(),
     ),
-    book_first_policy_spec(
-      planbook_type(),
+    policy_profile_spec(
+      @policy.policy_profile_for_type(planbook_type()).unwrap(),
       planbook_repair_action(),
-      @policy.planbook(),
     ),
-    book_first_policy_spec(
-      cookbook_type(),
+    policy_profile_spec(
+      @policy.policy_profile_for_type(cookbook_type()).unwrap(),
       cookbook_repair_action(),
-      @policy.cookbook(),
     ),
-    book_first_policy_spec(
-      civic_type(),
+    policy_profile_spec(
+      @policy.policy_profile_for_type(civic_type()).unwrap(),
       civic_repair_action(),
-      @policy.civic_protocol(),
     ),
-    book_first_policy_spec(
-      operational_type(),
+    policy_profile_spec(
+      @policy.policy_profile_for_type(operational_type()).unwrap(),
       operational_repair_action(),
-      @policy.operational(),
     ),
   ]
 }
@@ -74,18 +71,12 @@ pub fn policy_spec_for_type(book_type : String) -> PolicySpec? {
 
 ///|
 pub fn source_policy_for_type(book_type : String) -> String {
-  match policy_spec_for_type(book_type) {
-    Some(spec) => spec.source_policy
-    None => book_first_policy()
-  }
+  @policy.source_policy_for_type(book_type)
 }
 
 ///|
 pub fn policy_for_type(book_type : String) -> @policy.BookPolicy {
-  match policy_spec_for_type(book_type) {
-    Some(spec) => spec.policy
-    None => @policy.general()
-  }
+  @policy.policy_for_type(book_type)
 }
 
 ///|

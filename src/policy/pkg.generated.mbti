@@ -81,6 +81,12 @@ pub fn planbook() -> BookPolicy
 
 pub fn planbook_type() -> String
 
+pub fn policy_for_type(String) -> BookPolicy
+
+pub fn policy_profile_for_type(String) -> PolicyProfile?
+
+pub fn policy_profiles() -> Array[PolicyProfile]
+
 pub fn quality(Int, Int, Bool, String) -> QualityCriteria
 
 pub fn required_file_paths(BookPolicy) -> Array[String]
@@ -100,6 +106,8 @@ pub fn reviewable_types() -> Array[String]
 pub fn skill(String, String, String, String) -> SkillSpec
 
 pub fn skill_specs(BookPolicy) -> Array[SkillSpec]
+
+pub fn source_policy_for_type(String) -> String
 
 pub fn tend_skills(BookPolicy) -> Array[SkillSpec]
 
@@ -192,6 +200,12 @@ pub struct PolicyHealth {
   ready : Bool
   status : String
 } derive(Eq, ToJson, @debug.Debug, @json.FromJson)
+
+pub struct PolicyProfile {
+  book_type : String
+  source_policy : String
+  policy : BookPolicy
+} derive(Eq, @debug.Debug)
 
 pub struct QualityCriteria {
   threshold : Int

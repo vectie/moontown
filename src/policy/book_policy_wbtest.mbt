@@ -96,6 +96,27 @@ test "policy owns catalog classification and legacy type labels" {
 }
 
 ///|
+test "policy profiles map legacy labels into composed policies" {
+  match policy_profile_for_type(research_type()) {
+    Some(profile) => {
+      assert_eq(profile.source_policy, web_first_policy())
+      assert_true(has_skill(profile.policy, "standing-watch"))
+    }
+    None => fail("expected research profile")
+  }
+  match policy_profile_for_type(civic_type()) {
+    Some(profile) => {
+      assert_eq(profile.source_policy, book_first_policy())
+      assert_true(has_skill(profile.policy, "protocol-round"))
+    }
+    None => fail("expected civic profile")
+  }
+  assert_true(policy_profile_for_type("unknown-book") is None)
+  assert_eq(source_policy_for_type("unknown-book"), book_first_policy())
+  assert_true(has_skill(policy_for_type("unknown-book"), "workspace-bootstrap"))
+}
+
+///|
 test "policy capabilities compose without duplicate skills or files" {
   let policy = general() |> with_pdf_watch() |> with_pdf_watch()
   let pdf_skills = skill_specs(policy).filter(skill => skill.id == "pdf-watch")
