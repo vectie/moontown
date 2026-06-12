@@ -22,7 +22,7 @@ cat > "$plist" <<PLIST
   <array>
     <string>$moon_bin</string>
     <string>run</string>
-    <string>cmd/main</string>
+    <string>src/cmd/main</string>
     <string>--</string>
     <string>daemon</string>
     <string>supervise</string>

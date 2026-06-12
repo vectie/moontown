@@ -3,7 +3,7 @@
 set -euo pipefail
 
 repo_root="$(cd "$(dirname "$0")/.." && pwd)"
-ui_dir="$repo_root/ui/rabbita-town"
+ui_dir="$repo_root/src/ui/rabbita-town"
 
 echo "[rabbita] formatting MoonBit UI package"
 moon -C "$ui_dir" fmt main
@@ -18,4 +18,3 @@ echo "[rabbita] building Vite bundle"
 npm --prefix "$ui_dir" run build
 
 echo "[rabbita] build complete"
-

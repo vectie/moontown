@@ -103,41 +103,41 @@ The policy is the durable contract for a book. It says which skills run, which
 files prove the book is real, what quality means, and which output surface the
 book owns. The implementation now has a first-class `policy` package:
 
-- [policy/book_policy.mbt](/Users/kq/Workspace/moontown/policy/book_policy.mbt)
+- [policy/book_policy.mbt](/Users/kq/Workspace/moontown/src/policy/book_policy.mbt)
   owns the typed `BookPolicy`, skill, file, quality, and output model.
-- [policy/book_policy_archetypes.mbt](/Users/kq/Workspace/moontown/policy/book_policy_archetypes.mbt)
+- [policy/book_policy_archetypes.mbt](/Users/kq/Workspace/moontown/src/policy/book_policy_archetypes.mbt)
   owns reusable policy presets.
-- [policy/book_policy_capabilities.mbt](/Users/kq/Workspace/moontown/policy/book_policy_capabilities.mbt)
+- [policy/book_policy_capabilities.mbt](/Users/kq/Workspace/moontown/src/policy/book_policy_capabilities.mbt)
   owns reusable policy capability composition.
-- [policy/book_policy_health.mbt](/Users/kq/Workspace/moontown/policy/book_policy_health.mbt)
+- [policy/book_policy_health.mbt](/Users/kq/Workspace/moontown/src/policy/book_policy_health.mbt)
   owns policy-level health evaluation.
-- [policy/book_policy_loop.mbt](/Users/kq/Workspace/moontown/policy/book_policy_loop.mbt)
+- [policy/book_policy_loop.mbt](/Users/kq/Workspace/moontown/src/policy/book_policy_loop.mbt)
   owns the first-class loop plan: read policy, run execute-lane skills, record
   results, run tend-lane skills, and evaluate health. Downstream packages
   should call `@policy.loop_plan(...)` or embed `@policy.loop_markdown(...)`
   instead of reconstructing the loop order in prompts, reviews, or status pages.
-- [book_quality/taxonomy.mbt](/Users/kq/Workspace/moontown/book_quality/taxonomy.mbt)
+- [book_quality/taxonomy.mbt](/Users/kq/Workspace/moontown/src/book_quality/taxonomy.mbt)
   owns legacy book-quality labels such as research/course/civic while the
   migration away from runtime categories continues.
-- [book_quality/policy_specs.mbt](/Users/kq/Workspace/moontown/book_quality/policy_specs.mbt)
+- [book_quality/policy_specs.mbt](/Users/kq/Workspace/moontown/src/book_quality/policy_specs.mbt)
   maps those legacy labels into composed `BookPolicy` values and repair
   actions.
-- [book_quality/skill_quality.mbt](/Users/kq/Workspace/moontown/book_quality/skill_quality.mbt)
+- [book_quality/skill_quality.mbt](/Users/kq/Workspace/moontown/src/skill_quality/contract.mbt)
   owns the shared exploration quality contract used by generated skills: depth,
   breadth, new questions, new directions, curiosity, judgment, long-horizon
   memory, and auditable progress.
-- [book_templates/types.mbt](/Users/kq/Workspace/moontown/book_templates/types.mbt)
+- [book_templates/types.mbt](/Users/kq/Workspace/moontown/src/book_templates/types.mbt)
   owns book-template registry, registry-file manifest, request, request-ledger,
   event, status, process-result, and processing-outcome DTOs.
-- [book_templates/registry_policy.mbt](/Users/kq/Workspace/moontown/book_templates/registry_policy.mbt)
+- [book_templates/registry_policy.mbt](/Users/kq/Workspace/moontown/src/book_templates/registry_policy.mbt)
   owns registry readiness construction, descriptor filesystem check-path
   expansion, and registry Markdown rendering. Root may observe missing files,
   but it should not decide what a ready registry means, which descriptor paths
   prove a template exists, or assemble the operator-facing registry page.
-- [book_templates/installer_policy.mbt](/Users/kq/Workspace/moontown/book_templates/installer_policy.mbt)
+- [book_templates/installer_policy.mbt](/Users/kq/Workspace/moontown/src/book_templates/installer_policy.mbt)
   owns unsupported/unknown template installer outcome wording. Root may dispatch
   concrete installers, but it should not phrase installer availability failures.
-- [book_templates/request_policy.mbt](/Users/kq/Workspace/moontown/book_templates/request_policy.mbt)
+- [book_templates/request_policy.mbt](/Users/kq/Workspace/moontown/src/book_templates/request_policy.mbt)
   owns request lifecycle counting, retry-as-pending runtime accounting,
   lifecycle status vocabulary and predicates, install-success marker/classification,
   post-install request-state transitions, terminal-event reconcile gating,
@@ -148,90 +148,90 @@ book owns. The implementation now has a first-class `policy` package:
   request-id extraction, process-summary wording,
   process-result construction, processed/reconciled outcome aggregation, and
   request-relative path resolution.
-- [book_templates/request_paths.mbt](/Users/kq/Workspace/moontown/book_templates/request_paths.mbt)
+- [book_templates/request_paths.mbt](/Users/kq/Workspace/moontown/src/book_templates/request_paths.mbt)
   owns canonical book-template registry, request inbox, and request-event file
   names plus path derivation from observed snapshot/request paths. Root may
   supply the current snapshot path, but it should not duplicate those filenames
   or keep root-local default path shim functions.
-- [book_templates/](/Users/kq/Workspace/moontown/book_templates)
+- [book_templates/](/Users/kq/Workspace/moontown/src/book_templates)
   also owns concrete template runtime dispatch, request processing, request
   reconciliation, request status rendering, registry rendering, and installer
   dispatch. Root Moontown may expose CLI-compatible wrapper functions, but it
   should not keep template lifecycle code in the root package.
-- [app_tool_book/contracts.mbt](/Users/kq/Workspace/moontown/app_tool_book/contracts.mbt)
+- [app_tool_book/contracts.mbt](/Users/kq/Workspace/moontown/src/app_tool_book/contracts.mbt)
   owns App ToolBook defaults, required workspace paths, template-copy path
   policy, config/manifest schema construction, catalog-identity-aware config
   construction, and readiness-gate construction for books with generated web
   tool surfaces.
-- [app_tool_book/catalog.mbt](/Users/kq/Workspace/moontown/app_tool_book/catalog.mbt)
+- [app_tool_book/catalog.mbt](/Users/kq/Workspace/moontown/src/app_tool_book/catalog.mbt)
   owns the App ToolBook catalog name, tags, and skill list. Root may adapt
   those fields into a MoonBook catalog entry, but it must not fork ToolBook
   identity.
-- [app_tool_book/rendering.mbt](/Users/kq/Workspace/moontown/app_tool_book/rendering.mbt)
+- [app_tool_book/rendering.mbt](/Users/kq/Workspace/moontown/src/app_tool_book/rendering.mbt)
   owns the App ToolBook bootstrap/install summaries, history, generated site
   index, and tool-page rendering contracts. Root may write those pages and
   return those summaries, but it must not redefine their canonical shape.
-- [app_tool_book/status_rendering.mbt](/Users/kq/Workspace/moontown/app_tool_book/status_rendering.mbt)
+- [app_tool_book/status_rendering.mbt](/Users/kq/Workspace/moontown/src/app_tool_book/status_rendering.mbt)
   owns the operator-facing App ToolBook status Markdown. Root may inspect
   filesystem/catalog/standing-goal state, but it should not format status
   independently.
-- [app_tool_book/standing_watch.mbt](/Users/kq/Workspace/moontown/app_tool_book/standing_watch.mbt)
+- [app_tool_book/standing_watch.mbt](/Users/kq/Workspace/moontown/src/app_tool_book/standing_watch.mbt)
   owns the App ToolBook standing-watch goal id, prompt language, `StandingGoal`
   construction policy, and goal-list membership/enabled checks. Root may
   persist those goals, but it must not fork the loop instructions or goal
   semantics.
-- [app_tool_book/](/Users/kq/Workspace/moontown/app_tool_book)
+- [app_tool_book/](/Users/kq/Workspace/moontown/src/app_tool_book)
   owns App ToolBook bootstrap, config installation, workspace materialization,
   status inspection, and status rendering. Root Moontown may keep wrapper
   functions for existing commands, but generated-tool book behavior belongs in
   this package.
-- [pdf_evidence_watch/](/Users/kq/Workspace/moontown/pdf_evidence_watch)
+- [pdf_evidence_watch/](/Users/kq/Workspace/moontown/src/pdf_evidence_watch)
   owns PDF Evidence Watch bootstrap, config installation, workspace
   materialization, standing-watch goal construction, and status inspection.
   Root Moontown may coordinate archive lifecycle events because archiving spans
   catalog state, standing-goal state, and book-template request-event logs.
-- [visual_projection/](/Users/kq/Workspace/moontown/visual_projection)
+- [visual_projection/](/Users/kq/Workspace/moontown/src/visual_projection)
   owns town-state-to-visual-projection DTOs and derivation: agent phases,
   routing, behavior/effect labels, building activity summaries, module
   projection rows, grid placement, and projection persistence. Root Moontown may
   expose compatibility wrappers and provide test fixtures, but visual semantics
   should not live in the root package.
-- [support/](/Users/kq/Workspace/moontown/support)
+- [support/](/Users/kq/Workspace/moontown/src/support)
   owns generic support helpers for file I/O, JSON string/object extraction,
   Markdown shaping, HTML escaping, text-label formatting, and nested runtime
   config JSON upserts. Root Moontown may keep private compatibility wrappers,
   but generic utility implementation should not be scattered across the root
   package.
-- [research_quality/](/Users/kq/Workspace/moontown/research_quality)
+- [research_quality/](/Users/kq/Workspace/moontown/src/research_quality)
   owns research-readiness DTOs and quality-gate semantics: required research
   artifacts, source-depth checks, topic matching, deep-report structure/length
   checks, wiki materialization checks, generated-site specificity checks, and
   process-noise rejection. Root Moontown may mutate town executions when a gate
   fails, but it should call this package for the actual quality judgment.
-- [course_book/](/Users/kq/Workspace/moontown/course_book)
+- [course_book/](/Users/kq/Workspace/moontown/src/course_book)
   owns the Wenyu game-design course book: catalog entry construction,
   workspace materialization, course contract/outline/exercises/rubric text,
   course-builder skill text, generated course UI state, and generated course
   site HTML. Root Moontown may keep CLI-compatible wrappers, but course content
   and projection semantics should not live in the root package.
-- [moonclaw_runtime/](/Users/kq/Workspace/moontown/moonclaw_runtime)
+- [moonclaw_runtime/](/Users/kq/Workspace/moontown/src/moonclaw_runtime)
   owns Moontown-side MoonClaw runtime helpers: no-input metadata flags,
   execution/step metadata maps, run result payload lookup, and MoonClaw job
   store compaction. Root Moontown may expose command-compatible wrappers, but
   MoonClaw runtime maintenance details should not live as loose root files.
-- [cookbook/](/Users/kq/Workspace/moontown/cookbook)
+- [cookbook/](/Users/kq/Workspace/moontown/src/cookbook)
   owns Cookbook DTOs, stable-state artifact summary accounting, and the
   operator-facing Cookbook status Markdown. Root Moontown may discover artifact
   existence, register the MoonBook workspace, write files, and call MoonBook
   catalog APIs, but it should not redefine docs/definition/runtime-state counts,
   required-missing drift semantics, or Cookbook status wording locally.
-- [planbook/](/Users/kq/Workspace/moontown/planbook)
+- [planbook/](/Users/kq/Workspace/moontown/src/planbook)
   owns PlanBook static content: contract pages, governance pages, role model,
   operating architecture, seed plans, generated-site templates, and PlanBook
   skill templates. Root Moontown may bootstrap/update the workspace and dispatch
   PlanBook repair/autonomy runtime work, but it should not keep root-local
   copies of durable PlanBook prose, generated-site markup, or skill text.
-- [standing_watch_policy/](/Users/kq/Workspace/moontown/standing_watch_policy)
+- [standing_watch_policy/](/Users/kq/Workspace/moontown/src/standing_watch_policy)
   owns the generic standing-watch `BookTask` contract: task kind, task id
   derivation, compact id segment formatting, target page set, prompt text,
   strict accounting markers, marker parsing, MoonBook standing-watch history
@@ -629,8 +629,8 @@ The town embeds a constrained moonclaw runtime as `Mayor`.
 
 Current implementation lives in:
 
-- [roles/mayor.mbt](/Users/kq/Workspace/moontown/roles/mayor.mbt)
-- [adapters/moonclaw/client.mbt](/Users/kq/Workspace/moontown/adapters/moonclaw/client.mbt)
+- [roles/mayor.mbt](/Users/kq/Workspace/moontown/src/roles/mayor.mbt)
+- [adapters/moonclaw/client.mbt](/Users/kq/Workspace/moontown/src/adapters/moonclaw/import.mbt)
 
 Current properties:
 
@@ -858,30 +858,30 @@ civic service registry
 
 Current implementation lives in:
 
-- [civic/services.mbt](/Users/kq/Workspace/moontown/civic/services.mbt)
-- [civic/protocols.mbt](/Users/kq/Workspace/moontown/civic/protocols.mbt)
-- [civic/communication_pattern_registry.mbt](/Users/kq/Workspace/moontown/civic/communication_pattern_registry.mbt)
-- [civic/salon_scenario_types.mbt](/Users/kq/Workspace/moontown/civic/salon_scenario_types.mbt)
-- [civic/salon_scenario_policy.mbt](/Users/kq/Workspace/moontown/civic/salon_scenario_policy.mbt)
-- [civic/skill_text.mbt](/Users/kq/Workspace/moontown/civic/skill_text.mbt)
-- [civic/workspace_text.mbt](/Users/kq/Workspace/moontown/civic/workspace_text.mbt)
-- [civic/salon_metrics.mbt](/Users/kq/Workspace/moontown/civic/salon_metrics.mbt)
-- [civic/salon_schedule_types.mbt](/Users/kq/Workspace/moontown/civic/salon_schedule_types.mbt)
-- [civic/salon_schedule_policy.mbt](/Users/kq/Workspace/moontown/civic/salon_schedule_policy.mbt)
-- [civic/status_labels.mbt](/Users/kq/Workspace/moontown/civic/status_labels.mbt)
-- [civic/service_reconcile_policy.mbt](/Users/kq/Workspace/moontown/civic/service_reconcile_policy.mbt)
-- [civic/protocol_contract_text.mbt](/Users/kq/Workspace/moontown/civic/protocol_contract_text.mbt)
-- [civic/protocol_portfolio.mbt](/Users/kq/Workspace/moontown/civic/protocol_portfolio.mbt)
-- [civic/protocol_snapshot.mbt](/Users/kq/Workspace/moontown/civic/protocol_snapshot.mbt)
-- [civic_workspace.mbt](/Users/kq/Workspace/moontown/civic_workspace.mbt)
-- [civic_status.mbt](/Users/kq/Workspace/moontown/civic_status.mbt)
-- [civic_protocol_registry_runtime.mbt](/Users/kq/Workspace/moontown/civic_protocol_registry_runtime.mbt)
-- [civic_protocol_store.mbt](/Users/kq/Workspace/moontown/civic_protocol_store.mbt)
-- [civic_protocol_status_runtime.mbt](/Users/kq/Workspace/moontown/civic_protocol_status_runtime.mbt)
-- [civic_protocol_social_square_fixture.mbt](/Users/kq/Workspace/moontown/civic_protocol_social_square_fixture.mbt)
-- [civic_salon_scenario_types.mbt](/Users/kq/Workspace/moontown/civic_salon_scenario_types.mbt)
-- [civic_salon_scenario_runtime.mbt](/Users/kq/Workspace/moontown/civic_salon_scenario_runtime.mbt)
-- [civic_salon_runner.mbt](/Users/kq/Workspace/moontown/civic_salon_runner.mbt)
+- [civic/services.mbt](/Users/kq/Workspace/moontown/src/civic/services.mbt)
+- [civic/protocols.mbt](/Users/kq/Workspace/moontown/src/civic/protocols.mbt)
+- [civic/communication_pattern_registry.mbt](/Users/kq/Workspace/moontown/src/civic/communication_pattern_registry.mbt)
+- [civic/salon_scenario_types.mbt](/Users/kq/Workspace/moontown/src/civic/salon_scenario_types.mbt)
+- [civic/salon_scenario_policy.mbt](/Users/kq/Workspace/moontown/src/civic/salon_scenario_policy.mbt)
+- [civic/skill_text.mbt](/Users/kq/Workspace/moontown/src/civic/skill_text.mbt)
+- [civic/workspace_text.mbt](/Users/kq/Workspace/moontown/src/civic/workspace_text.mbt)
+- [civic/salon_metrics.mbt](/Users/kq/Workspace/moontown/src/civic/salon_metrics.mbt)
+- [civic/salon_schedule_types.mbt](/Users/kq/Workspace/moontown/src/civic/salon_schedule_types.mbt)
+- [civic/salon_schedule_policy.mbt](/Users/kq/Workspace/moontown/src/civic/salon_schedule_policy.mbt)
+- [civic/status_labels.mbt](/Users/kq/Workspace/moontown/src/civic/status_labels.mbt)
+- [civic/service_reconcile_policy.mbt](/Users/kq/Workspace/moontown/src/civic/service_reconcile_policy.mbt)
+- [civic/protocol_contract_text.mbt](/Users/kq/Workspace/moontown/src/civic/protocol_contract_text.mbt)
+- [civic/protocol_portfolio.mbt](/Users/kq/Workspace/moontown/src/civic/protocol_portfolio.mbt)
+- [civic/protocol_snapshot.mbt](/Users/kq/Workspace/moontown/src/civic/protocol_snapshot.mbt)
+- [civic_workspace.mbt](/Users/kq/Workspace/moontown/src/civic_runtime/civic_workspace.mbt)
+- [civic_status.mbt](/Users/kq/Workspace/moontown/src/civic_runtime/civic_status.mbt)
+- [civic_protocol_registry_runtime.mbt](/Users/kq/Workspace/moontown/src/civic_runtime/civic_protocol_registry_runtime.mbt)
+- [civic_protocol_store.mbt](/Users/kq/Workspace/moontown/src/civic_runtime/civic_protocol_store.mbt)
+- [civic_protocol_status_runtime.mbt](/Users/kq/Workspace/moontown/src/civic_runtime/civic_protocol_status_runtime.mbt)
+- [civic_protocol_social_square_fixture.mbt](/Users/kq/Workspace/moontown/src/civic_runtime/civic_protocol_social_square_fixture.mbt)
+- [civic_salon_scenario_types.mbt](/Users/kq/Workspace/moontown/src/civic_runtime/civic_salon_scenario_types.mbt)
+- [civic_salon_scenario_runtime.mbt](/Users/kq/Workspace/moontown/src/civic_runtime/civic_salon_scenario_runtime.mbt)
+- [civic_salon_runner.mbt](/Users/kq/Workspace/moontown/src/civic_runtime/civic_salon_runner.mbt)
 - [docs/CIVIC_SALON_TEMPLATES.md](/Users/kq/Workspace/moontown/docs/CIVIC_SALON_TEMPLATES.md)
 
 Implemented protocol pieces:
@@ -920,13 +920,13 @@ Still planned:
 The CLI entry is:
 
 ```bash
-moon run cmd/main -- civic bootstrap
-moon run cmd/main -- civic protocols bootstrap
-moon run cmd/main -- civic protocols status
-moon run cmd/main -- civic protocols pattern-template templates/civic-salons/robotics-mini-salon.json
-moon run cmd/main -- civic protocols schedules status
-moon run cmd/main -- civic protocols schedules tick
-moon run cmd/main -- civic doctor
+moon run src/cmd/main -- civic bootstrap
+moon run src/cmd/main -- civic protocols bootstrap
+moon run src/cmd/main -- civic protocols status
+moon run src/cmd/main -- civic protocols pattern-template templates/civic-salons/robotics-mini-salon.json
+moon run src/cmd/main -- civic protocols schedules status
+moon run src/cmd/main -- civic protocols schedules tick
+moon run src/cmd/main -- civic doctor
 ```
 
 The recurring-salon path is intentionally schedule-driven and
@@ -1069,7 +1069,7 @@ only relying on Markdown string markers.
 
 Current town-side readiness model:
 
-- [research_readiness.mbt](/Users/kq/Workspace/moontown/research_readiness.mbt)
+- [research_readiness.mbt](/Users/kq/Workspace/moontown/src/research_quality/readiness.mbt)
 
 It consumes MoonBook-owned summary fields such as verified source count, entity
 page count, concept page count, query note count, and pending review count.
@@ -1083,8 +1083,8 @@ Moontown only decides whether a lane is acceptable for town-level synthesis.
 
 Moontown exposes an operator-readable runtime status seam:
 
-- [runtime_status.mbt](/Users/kq/Workspace/moontown/runtime_status.mbt)
-- [runtime_status_policy](/Users/kq/Workspace/moontown/runtime_status_policy)
+- [runtime_status.mbt](/Users/kq/Workspace/moontown/src/runtime_status/runtime_status_snapshot.mbt)
+- [runtime_status_policy](/Users/kq/Workspace/moontown/src/runtime_status_policy)
   owns reusable status DTO/count/summary/rendering policy.
 
 The daemon implementation now has three levels:
@@ -1203,7 +1203,7 @@ stays small enough for MoonClaw proposal import/save operations.
 
 The daemon launcher resolves the command from `MOONTOWN_DAEMON_COMMAND`,
 `MOON_BIN`, then `$HOME/.moon/bin/moon`. The default dev path launches
-`moon run cmd/main -- daemon ...`. Hosts that reap detached descendants should
+`moon run src/cmd/main -- daemon ...`. Hosts that reap detached descendants should
 run `daemon run` under their own process manager instead of relying on
 `daemon start`.
 
@@ -1222,15 +1222,15 @@ MoonBook cookbook workspace
 
 Current implementation lives in:
 
-- [cookbook.mbt](/Users/kq/Workspace/moontown/cookbook.mbt)
+- [cookbook.mbt](/Users/kq/Workspace/moontown/src/cookbook/pages.mbt)
 - [docs/COOKBOOK.md](/Users/kq/Workspace/moontown/docs/COOKBOOK.md)
 
 The CLI entry is:
 
 ```bash
-moon run cmd/main -- cookbook bootstrap
-moon run cmd/main -- cookbook status
-moon run cmd/main -- cookbook doctor
+moon run src/cmd/main -- cookbook bootstrap
+moon run src/cmd/main -- cookbook status
+moon run src/cmd/main -- cookbook doctor
 ```
 
 `cookbook bootstrap` creates `.moontown/books/moontown-cookbook/`, registers it
@@ -1272,12 +1272,12 @@ Current documentation and bootstrap commands:
 - [templates/planbook/PLAN_TEMPLATE.md](/Users/kq/Workspace/moontown/templates/planbook/PLAN_TEMPLATE.md)
 
 ```bash
-moon run cmd/main -- planbook bootstrap
-moon run cmd/main -- planbook status
-moon run cmd/main -- planbook doctor
-moon run cmd/main -- planbook autonomy
-moon run cmd/main -- planbook repair
-moon run cmd/main -- planbook repair status
+moon run src/cmd/main -- planbook bootstrap
+moon run src/cmd/main -- planbook status
+moon run src/cmd/main -- planbook doctor
+moon run src/cmd/main -- planbook autonomy
+moon run src/cmd/main -- planbook repair
+moon run src/cmd/main -- planbook repair status
 ```
 
 Moontown can now register and bootstrap a first-class planbook workspace with
@@ -1355,7 +1355,7 @@ Book quality has two layers:
   fit, evidence accounting, and next repair using the book's own `SKILL.md`.
 
 The structural layer is implemented in
-[book_quality.mbt](/Users/kq/Workspace/moontown/book_quality.mbt). It should
+[book_quality.mbt](/Users/kq/Workspace/moontown/src/book_quality/assessment.mbt). It should
 not pretend to know whether a report, course, plan, or civic service is
 world-class. It only prevents obvious scaffold-only books from being reported
 as ready.
@@ -1445,23 +1445,23 @@ The packet lifecycle is intentionally split across package boundaries:
 The root package is now split so bootstrap planning is not buried inside the
 goal runner:
 
-- [goal_run.mbt](/Users/kq/Workspace/moontown/goal_run.mbt)
+- [goal_run.mbt](/Users/kq/Workspace/moontown/src/town_runtime/goal_run.mbt)
   - high-level goal orchestration, book launch, quality gates, and persistence handoff
-- [goal_bootstrap.mbt](/Users/kq/Workspace/moontown/goal_bootstrap.mbt)
+- [goal_bootstrap.mbt](/Users/kq/Workspace/moontown/src/town_runtime/goal_bootstrap.mbt)
   - research bootstrap task selection and ingest-first planning
-- [goal_execution.mbt](/Users/kq/Workspace/moontown/goal_execution.mbt)
+- [goal_execution.mbt](/Users/kq/Workspace/moontown/src/town_runtime/goal_execution.mbt)
   - MoonClaw proposal/run launch and MoonBook result persistence
-- [goal_supervision.mbt](/Users/kq/Workspace/moontown/goal_supervision.mbt)
+- [goal_supervision.mbt](/Users/kq/Workspace/moontown/src/town_runtime/goal_supervision.mbt)
   - live execution polling, retry directives, worker status sync, and settle loop
-- [research_quality.mbt](/Users/kq/Workspace/moontown/research_quality.mbt)
+- [research_quality.mbt](/Users/kq/Workspace/moontown/src/research_quality/core.mbt)
   - research quality gates, deep-report checks, and review-queue marking
-- [town_synthesis.mbt](/Users/kq/Workspace/moontown/town_synthesis.mbt)
+- [town_synthesis.mbt](/Users/kq/Workspace/moontown/src/town_synthesis/town_synthesis.mbt)
   - mayor-owned cross-book synthesis rendering and synthesis execution registration
-- [file_io.mbt](/Users/kq/Workspace/moontown/file_io.mbt)
+- [file_io.mbt](/Users/kq/Workspace/moontown/src/support/file_io.mbt)
   - root-package local text/file helpers used by synthesis, status, and quality checks
-- [research_readiness.mbt](/Users/kq/Workspace/moontown/research_readiness.mbt)
+- [research_readiness.mbt](/Users/kq/Workspace/moontown/src/research_quality/readiness.mbt)
   - typed research readiness model
-- [runtime_status.mbt](/Users/kq/Workspace/moontown/runtime_status.mbt)
+- [runtime_status.mbt](/Users/kq/Workspace/moontown/src/runtime_status/runtime_status_snapshot.mbt)
   - persisted snapshot status and daemon tick entry points
 
 ### Patrol
@@ -1496,8 +1496,8 @@ Current persisted files:
 
 Current implementation:
 
-- [adapters/moonbook/client.mbt](/Users/kq/Workspace/moontown/adapters/moonbook/client.mbt)
-- [storage/store.mbt](/Users/kq/Workspace/moontown/storage/store.mbt)
+- [adapters/moonbook/client.mbt](/Users/kq/Workspace/moontown/src/adapters/moonbook/client.mbt)
+- [storage/store.mbt](/Users/kq/Workspace/moontown/src/storage/store.mbt)
 
 ## What Is Real vs Stubbed
 

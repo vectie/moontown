@@ -41,7 +41,7 @@ MoonClaw owns:
 ## Pattern Registry
 
 The registry lives in
-[civic_communication_patterns.mbt](/Users/kq/Workspace/moontown/civic_communication_patterns.mbt).
+[civic_communication_patterns.mbt](/Users/kq/Workspace/moontown/src/civic/communication_pattern_registry.mbt).
 
 | Pattern | Use It For | Typical Output |
 | --- | --- | --- |

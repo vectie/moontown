@@ -161,7 +161,7 @@ Acceptance criteria:
 - No broken assets.
 - No false degradation warnings during normal lifecycle states.
 - Operator can inspect a resident, worker, place, quest, and module.
-- `moon run cmd/main -- civic bootstrap` can create the civic protocol support
+- `moon run src/cmd/main -- civic bootstrap` can create the civic protocol support
   workspaces required by the viewport bindings.
 
 Implementation note:
@@ -170,7 +170,7 @@ Implementation note:
   hardcoded viewport decorations. See
   [WENYU_UI_MODULE_SYSTEM.md](/Users/kq/Workspace/moontown/docs/WENYU_UI_MODULE_SYSTEM.md).
 - A town designer should be able to add, remove, or move feature buildings by
-  editing `ui/assets/tilemap/modules/wenyu-town-modules.json`.
+  editing `src/ui/assets/tilemap/modules/wenyu-town-modules.json`.
 - The clean terrain layer should remain separate from service buildings,
   interiors, agents, and runtime effects.
 - The Moontown editor should stay at the multi-agent system level: module
@@ -689,7 +689,7 @@ Acceptance criteria:
   mode: wiki root when needed, dedicated skill pack, ledgers, projection
   fragment, and readiness summary. Implemented for seeded workspaces.
 - Moontown can bootstrap all civic support workspaces. Implemented with
-  `moon run cmd/main -- civic bootstrap`.
+  `moon run src/cmd/main -- civic bootstrap`.
 - MoonBook generated site exposes module pages. Implemented as seeded
   `book/site/generated/index.html`; MoonBook-native templates are still the
   long-term target.

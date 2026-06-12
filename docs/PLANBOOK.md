@@ -64,7 +64,7 @@ PlanBook should treat every future book feature as a policy change first, not
 as a new hardcoded book type.
 
 The policy model lives in the dedicated
-[policy](/Users/kq/Workspace/moontown/policy) package. New plans should import
+[policy](/Users/kq/Workspace/moontown/src/policy) package. New plans should import
 and compose that package directly. Root-level code may contain adapters from
 legacy labels to policy values, but it should not grow a parallel policy API.
 The same package owns the executable loop description through
@@ -75,7 +75,7 @@ instead of writing their own loop sequence into prompt text, review criteria, or
 status pages.
 
 The book-quality migration adapter lives in the dedicated
-[book_quality](/Users/kq/Workspace/moontown/book_quality) package. It owns the
+[book_quality](/Users/kq/Workspace/moontown/src/book_quality) package. It owns the
 temporary mapping from legacy labels such as `research-book`, `course-book`, and
 `civic-protocol-support` into composed `BookPolicy` values and repair actions.
 It also owns catalog string/tag classification rules such as
@@ -161,7 +161,7 @@ PlanBook source repair now uses the adapter-owned `codex-main` target builder,
 so future repair work should not reconstruct backend/label/cwd/workspace/
 command/args/model target JSON in root files.
 PlanBook source-repair policy lives in the dedicated
-[planbook_policy](/Users/kq/Workspace/moontown/planbook_policy) package. It
+[planbook_policy](/Users/kq/Workspace/moontown/src/planbook_policy) package. It
 owns the autonomy/repair DTOs, validation command list, repair result contract,
 repair decision vocabulary, engineering-evidence markers, ACP patch-receipt
 contract, MoonClaw status bucket mapping, and the pure repair workspace layout
@@ -179,7 +179,7 @@ MoonClaw packets, and read run outputs, but future plans should not add
 root-local copies of repair receipt fields, validation commands, repair paths,
 repair request rules, generated repair skill text, or run-status predicates.
 Live-autonomy policy lives in the dedicated
-[live_autonomy_policy](/Users/kq/Workspace/moontown/live_autonomy_policy)
+[live_autonomy_policy](/Users/kq/Workspace/moontown/src/live_autonomy_policy)
 package. It owns the live spine DTO, journal/probe DTOs, active worker and
 execution counting rules, transient-infrastructure-debt predicate, autonomy
 tick calculation, aggregate metric-count DTO/assembly, stable-waiting blocker
@@ -193,11 +193,11 @@ metric-count shape, stable-waiting rules, transient-debt recognition,
 next-action wording, live-autonomy file naming, or the operator status Markdown
 contract.
 Health anomaly detection and exact-title anomaly counts live in the dedicated
-[health](/Users/kq/Workspace/moontown/health) package. Runtime-status and
+[health](/Users/kq/Workspace/moontown/src/health) package. Runtime-status and
 live-autonomy code should consume `HealthReport` values and call health-owned
 counting helpers instead of reimplementing anomaly-title semantics locally.
 Runtime-status policy lives in the dedicated
-[runtime_status_policy](/Users/kq/Workspace/moontown/runtime_status_policy)
+[runtime_status_policy](/Users/kq/Workspace/moontown/src/runtime_status_policy)
 package. It owns the runtime status DTO, empty-status contract, effective
 execution de-duplication, lifecycle ranking, active/review execution-status set
 membership, standing-goal runtime accounting, stable summary metric language,
@@ -208,7 +208,7 @@ package. Future plans should not add root-local copies of execution ranking,
 active/review status lists, status-count semantics, runtime summary wording, or
 status report formatting.
 Daemon-runtime policy lives in the dedicated
-[daemon_runtime_policy](/Users/kq/Workspace/moontown/daemon_runtime_policy)
+[daemon_runtime_policy](/Users/kq/Workspace/moontown/src/daemon_runtime_policy)
 package. It owns daemon runtime state/health DTOs, status-mode classification,
 heartbeat age/staleness rules, durable-worker/supervisor activity predicates,
 doctor/start actions, health labels, health summary field ordering, and pure
@@ -221,7 +221,7 @@ copies of daemon runtime status vocabulary, canonical file naming, transition
 semantics, or health interpretation.
 
 Cookbook policy lives in the dedicated
-[cookbook](/Users/kq/Workspace/moontown/cookbook) package. It owns Cookbook
+[cookbook](/Users/kq/Workspace/moontown/src/cookbook) package. It owns Cookbook
 DTOs, artifact summary accounting, required-missing drift semantics, and
 operator-facing Cookbook status Markdown. Root code may keep the async
 bootstrap/status command facade, construct observed artifact records from the
@@ -230,7 +230,7 @@ future plans should not add root-local copies of docs/definition/runtime-state
 counting or status wording.
 
 Book-template request DTOs and lifecycle semantics live in the dedicated
-[book_templates](/Users/kq/Workspace/moontown/book_templates) package.
+[book_templates](/Users/kq/Workspace/moontown/src/book_templates) package.
 PlanBook should treat template installation as another policy-loop support
 system: package-owned contracts describe registry descriptors, requests,
 registry-file manifests, events, ledgers, registry readiness/output rendering,
@@ -264,7 +264,7 @@ canonical inbox/event-log filenames, or operator summary language in
 root code. Do not construct post-install request records or terminal event
 backfill gates in root code.
 App ToolBook contracts live in the dedicated
-[app_tool_book](/Users/kq/Workspace/moontown/app_tool_book) package. It owns
+[app_tool_book](/Users/kq/Workspace/moontown/src/app_tool_book) package. It owns
 the stable template root, default book identity, default purpose, install/status
 DTOs, required workspace path set, template-copy path set, config/manifest
 schemas, catalog-identity-aware config construction, catalog identity,
@@ -278,7 +278,7 @@ or skills, generated-page renderers, status renderers, bootstrap/install summary
 wording, ToolBook standing-goal semantics, config/manifest schemas, default
 identity wrappers, or readiness rules.
 Generic standing-watch policy lives in
-[standing_watch_policy](/Users/kq/Workspace/moontown/standing_watch_policy).
+[standing_watch_policy](/Users/kq/Workspace/moontown/src/standing_watch_policy).
 It owns the standing-watch `BookTask` kind, id format, compact id segment
 policy, target pages, prompt text, strict accounting marker vocabulary, marker
 parser, MoonBook history block parser, provider-decision collapse policy,
@@ -291,7 +291,7 @@ standing-watch task builders, prompt copies, id-format helpers, marker
 vocabulary forks, history parser clones, material-delta accounting clones,
 no-change/update/deferred/review inference, or terminal-record selection.
 Reusable transient external dependency classification lives in
-[runtime_error_policy](/Users/kq/Workspace/moontown/runtime_error_policy).
+[runtime_error_policy](/Users/kq/Workspace/moontown/src/runtime_error_policy).
 Future plans should route provider infrastructure, temporary resource, storage
 abort, and `{bad request}` classification through that package instead of
 copying string predicates into root recovery, standing-watch, or PlanBook code.
@@ -869,9 +869,9 @@ unconstrained generic agent loop. Instead, it writes:
 Use the repair commands directly when inspecting or dispatching self-repair:
 
 ```bash
-moon run cmd/main -- planbook repair
-moon run cmd/main -- planbook repair status
-moon run cmd/main -- planbook repair --dispatch
+moon run src/cmd/main -- planbook repair
+moon run src/cmd/main -- planbook repair status
+moon run src/cmd/main -- planbook repair --dispatch
 ```
 
 Without `--dispatch`, Moontown only queues the repair packet and records the
@@ -927,7 +927,7 @@ enables it. For `backlog-*` criteria, the repair worker must also write
 completion evidence under `raw/backlog/completed/<id>.md`.
 If the repair changes source code that the live daemon depends on, the worker
 must also request a clean reload after validation with
-`moon run cmd/main -- daemon restart "validated source patch"` and then inspect
+`moon run src/cmd/main -- daemon restart "validated source patch"` and then inspect
 fresh live evidence. A packet produced by a pre-reload daemon does not prove the
 new code path.
 
@@ -991,12 +991,12 @@ Moondesk should implement:
 Moontown now has a first-class bootstrap for the current planbook workspace:
 
 ```bash
-moon run cmd/main -- planbook bootstrap
-moon run cmd/main -- planbook status
-moon run cmd/main -- planbook doctor
-moon run cmd/main -- planbook autonomy
-moon run cmd/main -- planbook repair
-moon run cmd/main -- planbook repair status
+moon run src/cmd/main -- planbook bootstrap
+moon run src/cmd/main -- planbook status
+moon run src/cmd/main -- planbook doctor
+moon run src/cmd/main -- planbook autonomy
+moon run src/cmd/main -- planbook repair
+moon run src/cmd/main -- planbook repair status
 ```
 
 Use this repository rule:

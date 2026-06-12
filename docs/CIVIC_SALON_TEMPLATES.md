@@ -48,20 +48,20 @@ input.
 
 ## Runtime Files
 
-- [civic_salon_scenario_types.mbt](/Users/kq/Workspace/moontown/civic_salon_scenario_types.mbt)
+- [civic_salon_scenario_types.mbt](/Users/kq/Workspace/moontown/src/civic_runtime/civic_salon_scenario_types.mbt)
   defines `CivicSalonScenario`, participant workspaces, ideas, metrics, and
   home-return records.
-- [civic_salon_scenario_runtime.mbt](/Users/kq/Workspace/moontown/civic_salon_scenario_runtime.mbt)
+- [civic_salon_scenario_runtime.mbt](/Users/kq/Workspace/moontown/src/civic_runtime/civic_salon_scenario_runtime.mbt)
   loads scenario templates, materializes MoonClaw reducer output into
   intermediate participant workspaces, runs the protocol ledger slice, and
   writes the public building projection.
-- [civic_salon_reducer.mbt](/Users/kq/Workspace/moontown/civic_salon_reducer.mbt)
+- [civic_salon_reducer.mbt](/Users/kq/Workspace/moontown/src/civic_runtime/civic_salon_reducer.mbt)
   owns the reducer modes: `MoonClawReducer` for production,
   `PersistedReducer` for stale projection refresh, and `FixtureReducer` for
   deterministic tests/smoke demos.
-- [civic_salon_runner.mbt](/Users/kq/Workspace/moontown/civic_salon_runner.mbt)
+- [civic_salon_runner.mbt](/Users/kq/Workspace/moontown/src/civic_runtime/civic_salon_runner.mbt)
   runs due schedules by loading the matching scenario template.
-- [civic_salon_reconcile.mbt](/Users/kq/Workspace/moontown/civic_salon_reconcile.mbt)
+- [civic_salon_reconcile.mbt](/Users/kq/Workspace/moontown/src/civic_runtime/civic_salon_reconcile.mbt)
   refreshes stale projections from the same scenario template.
 - [templates/civic-salons/robotics-mini-salon.json](/Users/kq/Workspace/moontown/templates/civic-salons/robotics-mini-salon.json)
   is a small copyable research-salon example.
@@ -86,15 +86,15 @@ copies the scenario into `.moontown/civic/pattern-scenarios/` and upserts a
 30-minute recurring schedule, so the same pattern can continue under the daemon:
 
 ```bash
-moon run cmd/main -- civic protocols pattern-template templates/civic-salons/robotics-mini-salon.json
-moon run cmd/main -- civic protocols pattern-template templates/civic-salons/embodied-robotics-social-square.json
+moon run src/cmd/main -- civic protocols pattern-template templates/civic-salons/robotics-mini-salon.json
+moon run src/cmd/main -- civic protocols pattern-template templates/civic-salons/embodied-robotics-social-square.json
 ```
 
 To install recurring Wenyu civic patterns without immediately running every
 MoonClaw reducer, use the manifest installer:
 
 ```bash
-moon run cmd/main -- civic protocols pattern-manifest templates/civic-patterns/wenyu-civic-patterns.json
+moon run src/cmd/main -- civic protocols pattern-manifest templates/civic-patterns/wenyu-civic-patterns.json
 ```
 
 The manifest copies each scenario into `.moontown/civic/pattern-scenarios/` and
@@ -172,7 +172,7 @@ reasoning and reducer quality.
    MoonClaw to produce round-specific ideas.
 6. For recurring use, add or edit `.moontown/civic/pattern-schedules.json` so the schedule
    id matches the template file name.
-7. Run `moon run cmd/main -- civic protocols schedules tick` or wait for the
+7. Run `moon run src/cmd/main -- civic protocols schedules tick` or wait for the
    daemon.
 
 ## Reducer Modes

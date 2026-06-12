@@ -1,0 +1,12 @@
+import {
+  "moonbitlang/core/json",
+  "moonbit-community/rabbita",
+  "moonbit-community/rabbita/html",
+  "vectie/moontown/core",
+  "vectie/moontown/health",
+  "vectie/moontown/ui",
+}
+
+options(
+  "is-main": true,
+)

@@ -7,13 +7,18 @@ You can browse and install extra skills here:
 
 ## Project Structure
 
+- Source packages live under `src/`. The repo root should stay limited to
+  module metadata, docs, scripts, templates, runtime state directories, and
+  other non-package project files.
+
 - MoonBit packages are organized per directory; each directory contains a
   `moon.pkg` file listing its dependencies. Each package has its files and
   blackbox test files (ending in `_test.mbt`) and whitebox test files (ending in
   `_wbtest.mbt`).
 
 - In the toplevel directory, there is a `moon.mod.json` file listing module
-  metadata.
+  metadata. It sets `"source": "src"` so package paths remain
+  `vectie/moontown/...` even though implementation packages are below `src/`.
 
 ## Coding convention
 

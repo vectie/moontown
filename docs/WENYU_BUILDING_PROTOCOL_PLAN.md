@@ -118,16 +118,16 @@ Implemented:
   `wiki/queries/salon-returned-ideas.md`, so reduced ideas do not stay inside
   the Social Square building. They return home for review, refinement, or
   rejection.
-- `moon run cmd/main -- civic protocols status` shows protocol state across
+- `moon run src/cmd/main -- civic protocols status` shows protocol state across
   all buildings.
-- `moon run cmd/main -- civic protocols pattern-template <path>` runs any valid
+- `moon run src/cmd/main -- civic protocols pattern-template <path>` runs any valid
   `CivicSalonScenario` template through the same Social Square/building
   protocol envelope. This is the extensibility seam for new domains.
-- `moon run cmd/main -- civic protocols schedules status` shows recurring
+- `moon run src/cmd/main -- civic protocols schedules status` shows recurring
   communication-pattern schedules from `.moontown/civic/pattern-schedules.json`.
-- `moon run cmd/main -- civic protocols schedules tick` runs only wall-clock-due
+- `moon run src/cmd/main -- civic protocols schedules tick` runs only wall-clock-due
   sessions and appends round records to `.moontown/civic/pattern-runs/`.
-- `moon run cmd/main -- civic doctor` projects protocol status into the civic
+- `moon run src/cmd/main -- civic doctor` projects protocol status into the civic
   service status consumed by the viewport.
 - the viewport interior can show Social Square protocol state: `review`, one
   or more inbox packets, reductions, outbox records, and review items.
@@ -154,8 +154,8 @@ exchange place. The scenario is intentionally multi-book rather than
 single-agent, but the domain comes from JSON:
 
 ```bash
-moon run cmd/main -- civic protocols pattern-template templates/civic-salons/robotics-mini-salon.json
-moon run cmd/main -- civic protocols pattern-manifest templates/civic-patterns/wenyu-civic-patterns.json
+moon run src/cmd/main -- civic protocols pattern-template templates/civic-salons/robotics-mini-salon.json
+moon run src/cmd/main -- civic protocols pattern-manifest templates/civic-patterns/wenyu-civic-patterns.json
 ```
 
 Each participant receives a small internal workspace, a salon skill, a current
@@ -198,7 +198,7 @@ Recurring salon schedules load scenario files from:
 One-off salon runs can load any template file:
 
 ```bash
-moon run cmd/main -- civic protocols pattern-template templates/civic-salons/robotics-mini-salon.json
+moon run src/cmd/main -- civic protocols pattern-template templates/civic-salons/robotics-mini-salon.json
 ```
 
 The template controls:
@@ -486,7 +486,7 @@ Expected code locations:
 
 - `civic/protocols.mbt`
 - `civic/protocols_wbtest.mbt`
-- `ui/assets/tilemap/modules/wenyu-town-modules.json`
+- `src/ui/assets/tilemap/modules/wenyu-town-modules.json`
 - `.moontown/civic/protocols.json`
 
 ### Phase 2: Building Packet Envelope

@@ -113,7 +113,7 @@ Implemented and validated:
 
 - `viewport.html?assets=generated&v=wenyu-modules` renders the canonical Wenyu
   tile viewport.
-- `ui/assets/tilemap/modules/wenyu-town-modules.json` defines 16 enabled Wenyu
+- `src/ui/assets/tilemap/modules/wenyu-town-modules.json` defines 16 enabled Wenyu
   modules: 11 civic buildings and 5 long-horizon research-domain homes.
 - The Rabbita bootstrap loads the module registry at runtime.
 - MoonBit parses enabled modules and renders them as a separate layer above the
@@ -169,32 +169,32 @@ Implemented and validated:
   `.moontown/book-results` files.
 - Editor mode and final output mode both show Moondesk handoff lanes and recent
   bridge records.
-- `moon run cmd/main -- civic bootstrap` bootstraps 11 Wenyu civic support
+- `moon run src/cmd/main -- civic bootstrap` bootstraps 11 Wenyu civic support
   workspaces and updates `.moontown/moonbooks.json`.
-- `moon run cmd/main -- civic status` reports module operability, latest civic
+- `moon run src/cmd/main -- civic status` reports module operability, latest civic
   service decision, review load, missing files, and accepted-change proof.
-- `moon run cmd/main -- civic doctor` writes `.moontown/civic/status.json` and
+- `moon run src/cmd/main -- civic doctor` writes `.moontown/civic/status.json` and
   `.moontown/civic/status.md`; the viewport bridge exposes that file as
   `civic-status.json`.
-- `moon run cmd/main -- civic protocols bootstrap` writes
+- `moon run src/cmd/main -- civic protocols bootstrap` writes
   `.moontown/civic/protocols.json`, per-building `PROTOCOL.md` files, and the
   initial Social Square protocol ledgers.
-- `moon run cmd/main -- civic protocols status` reports protocol state across
+- `moon run src/cmd/main -- civic protocols status` reports protocol state across
   all Wenyu civic buildings.
-- `moon run cmd/main -- civic protocols patterns` lists reusable communication
+- `moon run src/cmd/main -- civic protocols patterns` lists reusable communication
   patterns: `research-salon`, `signal-watch`, `triage-desk`, `review-council`,
   `match-market`, `learning-cohort`, `story-forge`, and `incident-bridge`.
-- `moon run cmd/main -- civic protocols pattern-template <path>` now runs the
+- `moon run src/cmd/main -- civic protocols pattern-template <path>` now runs the
   same communication-pattern envelope from a `CivicSalonScenario` JSON file, so
   future domains can be added by template and schedule instead of editing
   MoonBit runner code.
-- `moon run cmd/main -- civic protocols pattern-install <path>` installs one
+- `moon run src/cmd/main -- civic protocols pattern-install <path>` installs one
   scenario as a recurring schedule without immediately running MoonClaw.
-- `moon run cmd/main -- civic protocols pattern-manifest templates/civic-patterns/wenyu-civic-patterns.json`
+- `moon run src/cmd/main -- civic protocols pattern-manifest templates/civic-patterns/wenyu-civic-patterns.json`
   installs the default Wenyu scenario set for all 11 civic buildings with
   staggered due times.
-- `moon run cmd/main -- civic protocols schedules status` and
-  `moon run cmd/main -- civic protocols schedules tick` expose the recurring
+- `moon run src/cmd/main -- civic protocols schedules status` and
+  `moon run src/cmd/main -- civic protocols schedules tick` expose the recurring
   communication-pattern scheduler. The daemon now checks the same schedule on
   every tick and runs enabled sessions when real wall-clock `next_due_ms` has arrived.
 - Research-salon templates write template-defined metrics pages,
@@ -246,11 +246,11 @@ Implemented and validated:
 Checked on 2026-05-28 12:49 CST with:
 
 ```bash
-moon run cmd/main -- status
-moon run cmd/main -- daemon doctor
-moon run cmd/main -- integration final status
-moon run cmd/main -- civic status
-moon run cmd/main -- civic protocols schedules status
+moon run src/cmd/main -- status
+moon run src/cmd/main -- daemon doctor
+moon run src/cmd/main -- integration final status
+moon run src/cmd/main -- civic status
+moon run src/cmd/main -- civic protocols schedules status
 ```
 
 Observed state:
@@ -382,7 +382,7 @@ Required work:
 - Generate final transparent PNG sprites for each module. The first white-tech
   pavilion pack is complete and registered for the 16 active modules.
 - Split each building into base, roof, shadow, and optional glow layers.
-- Add asset prompts under `ui/assets/tilemap/prompts/`. The white-tech pavilion
+- Add asset prompts under `src/ui/assets/tilemap/prompts/`. The white-tech pavilion
   prompt set is now documented for reuse.
 - Validate image dimensions and transparency before rendering.
 - Reject buildings that overlap water or roads unless the module is explicitly a
@@ -406,7 +406,7 @@ Implemented:
 - `civic/services.mbt` defines canonical book ids, service kinds, schema pages,
   wiki pages, review queues, target pages, worker roles, skill pack names, and
   output contracts for 11 Wenyu civic services.
-- `moon run cmd/main -- civic bootstrap` writes the civic MoonBook workspace
+- `moon run src/cmd/main -- civic bootstrap` writes the civic MoonBook workspace
   seeds and generated UI fragments.
 - The generated workspaces include schema pages, civic wiki pages, review queue
   pages, `book/moonbook-ui-state.json`, `book/Home.html`, and
@@ -534,7 +534,7 @@ Acceptance:
 Use these checks after town UI or runtime changes:
 
 ```bash
-cd ui/rabbita-town
+cd src/ui/rabbita-town
 npm run build
 ```
 
@@ -543,11 +543,11 @@ moon check
 ```
 
 ```bash
-moon run cmd/main -- daemon doctor
+moon run src/cmd/main -- daemon doctor
 ```
 
 ```bash
-moon run cmd/main -- status
+moon run src/cmd/main -- status
 ```
 
 Browser validation target:

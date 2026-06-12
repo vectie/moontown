@@ -112,17 +112,19 @@ deployment, backups, auth, and multi-day recovery evidence.
 
 ## Current Capabilities
 
-- `core` town, book, worker, task, and event modeling
-- `dispatch` routing and isolation decisions
-- `storage` snapshot persistence
-- `health` anomaly and recovery reporting
-- `scheduler` tick planning
-- `scheduler` standing-goal due planning
-- `roles` strategic `Mayor` role adapter
-- `adapters/moonbook` persisted book catalog plus real MoonBook CLI-backed harness requests
-- `adapters/moonclaw` embedded runtime profiles plus real MoonClaw proposal import, run, and polling boundary
-- `ui` scene layout, dashboard projection, and HTML render bridge
-- `ui/rabbita-town` live browser dashboard with:
+- source packages live under `src/`; root stays limited to metadata, docs,
+  scripts, templates, and runtime state
+- `src/core` town, book, worker, task, and event modeling
+- `src/dispatch` routing and isolation decisions
+- `src/storage` snapshot persistence
+- `src/health` anomaly and recovery reporting
+- `src/scheduler` tick planning
+- `src/scheduler` standing-goal due planning
+- `src/roles` strategic `Mayor` role adapter
+- `src/adapters/moonbook` persisted book catalog plus real MoonBook CLI-backed harness requests
+- `src/adapters/moonclaw` embedded runtime profiles plus real MoonClaw proposal import, run, and polling boundary
+- `src/ui` scene layout, dashboard projection, and HTML render bridge
+- `src/ui/rabbita-town` live browser dashboard with:
   - tick loop
   - pause/resume/step controls
   - strategy switching
@@ -139,8 +141,8 @@ deployment, backups, auth, and multi-day recovery evidence.
 Install the current all-up local portfolio with:
 
 ```bash
-moon run cmd/main -- integration final install
-moon run cmd/main -- integration final status
+moon run src/cmd/main -- integration final install
+moon run src/cmd/main -- integration final status
 ```
 
 The manifest lives at:
@@ -165,7 +167,7 @@ MoonBook catalog.
 Create the current Wenyu civic support workspaces with:
 
 ```bash
-moon run cmd/main -- civic bootstrap
+moon run src/cmd/main -- civic bootstrap
 ```
 
 The bootstrap creates canonical `wenyu-*` support books for Town Shell,
@@ -193,17 +195,17 @@ confirmation-gated external handoff. See
 Inspect protocol state with:
 
 ```bash
-moon run cmd/main -- civic protocols bootstrap
-moon run cmd/main -- civic protocols status
-moon run cmd/main -- civic protocols patterns
-moon run cmd/main -- civic protocols pattern-template templates/civic-salons/robotics-mini-salon.json
-moon run cmd/main -- civic protocols pattern-template templates/civic-salons/embodied-robotics-social-square.json
-moon run cmd/main -- civic protocols pattern-install templates/civic-patterns/policy-hall-triage-desk.json
-moon run cmd/main -- civic protocols pattern-manifest templates/civic-patterns/wenyu-civic-patterns.json
-moon run cmd/main -- civic protocols schedules status
-moon run cmd/main -- civic protocols schedules tick
-moon run cmd/main -- civic reconcile
-moon run cmd/main -- civic doctor
+moon run src/cmd/main -- civic protocols bootstrap
+moon run src/cmd/main -- civic protocols status
+moon run src/cmd/main -- civic protocols patterns
+moon run src/cmd/main -- civic protocols pattern-template templates/civic-salons/robotics-mini-salon.json
+moon run src/cmd/main -- civic protocols pattern-template templates/civic-salons/embodied-robotics-social-square.json
+moon run src/cmd/main -- civic protocols pattern-install templates/civic-patterns/policy-hall-triage-desk.json
+moon run src/cmd/main -- civic protocols pattern-manifest templates/civic-patterns/wenyu-civic-patterns.json
+moon run src/cmd/main -- civic protocols schedules status
+moon run src/cmd/main -- civic protocols schedules tick
+moon run src/cmd/main -- civic reconcile
+moon run src/cmd/main -- civic doctor
 ```
 
 The communication-pattern runtime is template-driven. New domains and civic
@@ -237,8 +239,8 @@ scheduled job after pattern rounds.
 Generate or refresh the cookbook with:
 
 ```bash
-moon run cmd/main -- cookbook bootstrap
-moon run cmd/main -- cookbook status
+moon run src/cmd/main -- cookbook bootstrap
+moon run src/cmd/main -- cookbook status
 ```
 
 This creates `.moontown/books/moontown-cookbook/`, registers it in
@@ -253,7 +255,7 @@ Moontown now distinguishes four active MoonBook work types:
 
 Book templates are listed in
 [templates/books/templates.json](/Users/kq/Workspace/moontown/templates/books/templates.json)
-and can be inspected with `moon run cmd/main -- books templates`. Moondesk
+and can be inspected with `moon run src/cmd/main -- books templates`. Moondesk
 should use that registry as its creation palette. Runtime book creation requests
 can be written to `.moontown/book-template-requests.json`; the daemon’s
 `book-template-request` job processes pending requests. `status` reports
@@ -278,10 +280,10 @@ and failure audit trail for autonomous book creation.
   and notify only when accepted knowledge changes. The reusable template lives
   at [templates/books/pdf-evidence-watch/](/Users/kq/Workspace/moontown/templates/books/pdf-evidence-watch).
   Instantiate it with
-  `moon run cmd/main -- books pdf-watch bootstrap <book-id>`; the command
+  `moon run src/cmd/main -- books pdf-watch bootstrap <book-id>`; the command
   registers the MoonBook catalog entry and standing goal that Moondesk should
   later expose through a creation wizard. For a complete Moondesk-style handoff,
-  use `moon run cmd/main -- books pdf-watch install <config.json>` with
+  use `moon run src/cmd/main -- books pdf-watch install <config.json>` with
   [templates/books/pdf-evidence-watch/install.example.json](/Users/kq/Workspace/moontown/templates/books/pdf-evidence-watch/install.example.json).
 - `course-book`
   teaches a beginner through lessons, exercises, and checkpoints.
@@ -305,12 +307,12 @@ See:
 Bootstrap the current first-class planbook with:
 
 ```bash
-moon run cmd/main -- planbook bootstrap
-moon run cmd/main -- planbook status
-moon run cmd/main -- planbook doctor
-moon run cmd/main -- planbook autonomy
-moon run cmd/main -- planbook repair
-moon run cmd/main -- planbook repair status
+moon run src/cmd/main -- planbook bootstrap
+moon run src/cmd/main -- planbook status
+moon run src/cmd/main -- planbook doctor
+moon run src/cmd/main -- planbook autonomy
+moon run src/cmd/main -- planbook repair
+moon run src/cmd/main -- planbook repair status
 ```
 
 `planbook doctor` writes `.moontown/planbook/autonomy.json` and
@@ -359,9 +361,9 @@ worker.
 Use the structural doctor first:
 
 ```bash
-moon run cmd/main -- books bootstrap
-moon run cmd/main -- books doctor
-moon run cmd/main -- books quality
+moon run src/cmd/main -- books bootstrap
+moon run src/cmd/main -- books doctor
+moon run src/cmd/main -- books quality
 ```
 
 This writes `.moontown/book-quality/audit.json` and
@@ -389,8 +391,8 @@ ledger-backed exchange place should not be judged like a research book.
 Generate semantic AI review packets with:
 
 ```bash
-moon run cmd/main -- books ai-review-packets
-moon run cmd/main -- books ai-review bridge
+moon run src/cmd/main -- books ai-review-packets
+moon run src/cmd/main -- books ai-review bridge
 ```
 
 Those packets live under `.moontown/book-quality/ai-review-packets/` and should
@@ -576,7 +578,7 @@ activity and judgement, not pretend that the book improved.
   embedded runtime profiles plus real MoonClaw proposal import, run, and polling boundary
 - `ui`
   scene contract, dashboard model, and render model
-- `ui/rabbita-town`
+- `src/ui/rabbita-town`
   browser simulation dashboard
 
 ## Embedded Role Model
@@ -620,39 +622,39 @@ cd ~/Workspace/moontown
 Run the text dashboard:
 
 ```bash
-moon run cmd/main
+moon run src/cmd/main
 ```
 
 Run one restart-safe daemon tick:
 
 ```bash
-moon run cmd/main -- daemon tick
+moon run src/cmd/main -- daemon tick
 ```
 
 Run the durable daemon loop:
 
 ```bash
-moon run cmd/main -- daemon run
+moon run src/cmd/main -- daemon run
 ```
 
 Start the supervised background daemon:
 
 ```bash
-moon run cmd/main -- daemon start
-moon run cmd/main -- daemon doctor
+moon run src/cmd/main -- daemon start
+moon run src/cmd/main -- daemon doctor
 ```
 
 Stop the supervised background daemon:
 
 ```bash
-moon run cmd/main -- daemon stop
+moon run src/cmd/main -- daemon stop
 ```
 
 If the host process manager cleans up detached children, run the worker loop in
 the foreground instead:
 
 ```bash
-moon run cmd/main -- daemon run
+moon run src/cmd/main -- daemon run
 ```
 
 On macOS, install the supervisor under launchd so it survives shell, Codex, and
@@ -661,7 +663,7 @@ heartbeat becomes stale:
 
 ```bash
 ./scripts/install-launchd-daemon.sh
-moon run cmd/main -- daemon doctor
+moon run src/cmd/main -- daemon doctor
 ```
 
 The launchd installer enables bounded inline MoonClaw execution for supervised
@@ -677,7 +679,7 @@ Stop the launchd-managed daemon:
 Run a single daemon-loop iteration for verification:
 
 ```bash
-moon run cmd/main -- daemon run --once
+moon run src/cmd/main -- daemon run --once
 ```
 
 Validate the module:
@@ -698,7 +700,7 @@ Build the Rabbita frontend:
 Or work directly in the frontend package:
 
 ```bash
-cd ui/rabbita-town
+cd src/ui/rabbita-town
 npm install
 npm run dev
 ```
@@ -780,9 +782,9 @@ TownState
 
 The semantic town scene lives in:
 
-- `ui/scene_layout.mbt`
+- `src/ui/scene_layout.mbt`
 - `ui/dashboard.mbt`
-- `ui/scene_render.mbt`
+- `src/ui/scene_render.mbt`
 
 Current scene places:
 
@@ -795,18 +797,18 @@ Current scene places:
 
 Current asset folders:
 
-- `ui/assets/backgrounds/`
-- `ui/assets/buildings/`
-- `ui/assets/actors/`
-- `ui/assets/props/`
-- `ui/assets/effects/`
+- `src/ui/assets/backgrounds/`
+- `src/ui/assets/buildings/`
+- `src/ui/assets/actors/`
+- `src/ui/assets/props/`
+- `src/ui/assets/effects/`
 
 The current assets are original `moontown` starter SVGs, not copied `sou`
 assets.
 
 ## Rabbita Frontend
 
-`ui/rabbita-town/` is the browser-facing simulation dashboard. It is not a game
+`src/ui/rabbita-town/` is the browser-facing simulation dashboard. It is not a game
 engine, but it is already game-adjacent in structure:
 
 - live tick loop

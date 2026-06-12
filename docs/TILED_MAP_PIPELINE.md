@@ -24,9 +24,9 @@ TownState
 ```
 
 The grass, river, trees, flowers, paths, plaza, and bridge use generated PNG
-assets under `ui/assets/tilemap/`. Rabbita currently assembles an overscanned
-procedural map directly in `ui/rabbita-town/main/main.mbt`, with a smaller
-reference map JSON under `ui/assets/tilemap/maps/wenyu-valley.json`.
+assets under `src/ui/assets/tilemap/`. Rabbita currently assembles an overscanned
+procedural map directly in `src/ui/rabbita-town/main/main.mbt`, with a smaller
+reference map JSON under `src/ui/assets/tilemap/maps/wenyu-valley.json`.
 
 The next scalable target is:
 
@@ -330,8 +330,8 @@ Post-process each accepted asset:
 
 Add every accepted asset to:
 
-- `ui/assets/tilemap/manifest.json`
-- `ui/assets/README.md`
+- `src/ui/assets/tilemap/manifest.json`
+- `src/ui/assets/README.md`
 - the map JSON or Tiled map
 
 ### 4. Assemble Map
@@ -386,7 +386,7 @@ semantic contract is stable.
 
 Before accepting a new map/assets batch:
 
-- `npm run build` passes in `ui/rabbita-town`
+- `npm run build` passes in `src/ui/rabbita-town`
 - `/Users/kq/.moon/bin/moon check ui` passes
 - viewport renders in Codex browser
 - viewport renders in Safari

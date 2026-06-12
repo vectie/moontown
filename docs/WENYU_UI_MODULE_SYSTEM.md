@@ -229,7 +229,7 @@ The current canonical support book ids are:
 Bootstrap the civic workspaces with:
 
 ```bash
-moon run cmd/main -- civic bootstrap
+moon run src/cmd/main -- civic bootstrap
 ```
 
 That command updates `.moontown/moonbooks.json` and creates a seeded support
@@ -255,12 +255,12 @@ receives:
 Bootstrap and inspect the building protocol runtime with:
 
 ```bash
-moon run cmd/main -- civic protocols bootstrap
-moon run cmd/main -- civic protocols status
-moon run cmd/main -- civic protocols patterns
-moon run cmd/main -- civic protocols pattern-template templates/civic-salons/robotics-mini-salon.json
-moon run cmd/main -- civic protocols pattern-template templates/civic-salons/robotics-mini-salon.json
-moon run cmd/main -- civic doctor
+moon run src/cmd/main -- civic protocols bootstrap
+moon run src/cmd/main -- civic protocols status
+moon run src/cmd/main -- civic protocols patterns
+moon run src/cmd/main -- civic protocols pattern-template templates/civic-salons/robotics-mini-salon.json
+moon run src/cmd/main -- civic protocols pattern-template templates/civic-salons/robotics-mini-salon.json
+moon run src/cmd/main -- civic doctor
 ```
 
 The protocol bootstrap writes the town-level protocol registry under
@@ -396,7 +396,7 @@ Current status:
 - module interiors now show MoonBook summary, chips, metrics, readiness,
   review queue, page families, output links, and latest journey when a bound
   book fragment exists
-- `moon run cmd/main -- civic bootstrap` can populate each Wenyu feature
+- `moon run src/cmd/main -- civic bootstrap` can populate each Wenyu feature
   building with a seeded MoonBook projection, schemas, review queues, and
   service skills
 - the remaining gap is execution maturity: every civic service needs repeated
@@ -406,7 +406,7 @@ Current status:
 ### Stage 5: Asset Pipeline
 
 - Generate missing building variants with image generation.
-- Keep prompts in `ui/assets/tilemap/prompts/`.
+- Keep prompts in `src/ui/assets/tilemap/prompts/`.
 - Slice assets into transparent PNG sprites.
 - Register assets in `manifest.json`.
 - Never bake text into building sprites.

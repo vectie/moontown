@@ -22,9 +22,9 @@ Do not add a MoonBit branch per domain.
 ## Runtime Commands
 
 ```bash
-moon run cmd/main -- integration final install
-moon run cmd/main -- integration final status
-moon run cmd/main -- daemon run
+moon run src/cmd/main -- integration final install
+moon run src/cmd/main -- integration final status
+moon run src/cmd/main -- daemon run
 ```
 
 The daemon uses nonblocking MoonClaw supervision by default:
@@ -40,9 +40,9 @@ should wait inline for a single MoonClaw run to settle.
 For a bounded local check:
 
 ```bash
-moon run cmd/main -- daemon run --once
-moon run cmd/main -- civic protocols schedules status
-moon run cmd/main -- civic doctor
+moon run src/cmd/main -- daemon run --once
+moon run src/cmd/main -- civic protocols schedules status
+moon run src/cmd/main -- civic doctor
 ```
 
 ## Validated Local State
@@ -71,11 +71,11 @@ MoonBook updates are domain or civic-service proof.
 Useful inspection commands:
 
 ```bash
-moon run cmd/main -- status
-moon run cmd/main -- daemon doctor
-moon run cmd/main -- integration final status
-moon run cmd/main -- civic status
-moon run cmd/main -- civic protocols schedules status
+moon run src/cmd/main -- status
+moon run src/cmd/main -- daemon doctor
+moon run src/cmd/main -- integration final status
+moon run src/cmd/main -- civic status
+moon run src/cmd/main -- civic protocols schedules status
 ```
 
 ## Responsibility Split

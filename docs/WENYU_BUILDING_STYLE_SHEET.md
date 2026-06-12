@@ -9,7 +9,7 @@ buildings.
 
 Preview image:
 
-- [wenyu-building-style-sheet-v1.png](/Users/kq/Workspace/moontown/ui/assets/tilemap/style-sheets/wenyu-building-style-sheet-v1.png)
+- [wenyu-building-style-sheet-v1.png](/Users/kq/Workspace/moontown/src/ui/assets/tilemap/style-sheets/wenyu-building-style-sheet-v1.png)
 
 ## Style Options
 
@@ -46,19 +46,19 @@ The first selected pack has been generated for 16 buildings:
 
 Preview:
 
-- [white-tech-pavilion-contact-sheet.png](/Users/kq/Workspace/moontown/ui/assets/tilemap/buildings/white-tech-pavilion/white-tech-pavilion-contact-sheet.png)
+- [white-tech-pavilion-contact-sheet.png](/Users/kq/Workspace/moontown/src/ui/assets/tilemap/buildings/white-tech-pavilion/white-tech-pavilion-contact-sheet.png)
 
 Assets:
 
 - source PNGs:
-  [source](/Users/kq/Workspace/moontown/ui/assets/tilemap/buildings/white-tech-pavilion/source)
+  [source](/Users/kq/Workspace/moontown/src/ui/assets/tilemap/buildings/white-tech-pavilion/source)
 - transparent PNGs:
-  [alpha](/Users/kq/Workspace/moontown/ui/assets/tilemap/buildings/white-tech-pavilion/alpha)
+  [alpha](/Users/kq/Workspace/moontown/src/ui/assets/tilemap/buildings/white-tech-pavilion/alpha)
 - reusable prompts:
-  [white-tech-pavilion-building-prompts.md](/Users/kq/Workspace/moontown/ui/assets/tilemap/prompts/white-tech-pavilion-building-prompts.md)
+  [white-tech-pavilion-building-prompts.md](/Users/kq/Workspace/moontown/src/ui/assets/tilemap/prompts/white-tech-pavilion-building-prompts.md)
 
 The pack is now registered in
-`ui/assets/tilemap/modules/wenyu-town-modules.json`. Each building entry
+`src/ui/assets/tilemap/modules/wenyu-town-modules.json`. Each building entry
 declares its visual asset, footprint, display size, entrance tile, protocol
 pattern, use case, and agent flow. The viewport uses that data to place the
 building on the map, expose protocol details in the interior view, and show the

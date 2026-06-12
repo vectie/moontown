@@ -1,48 +1,41 @@
 # Package Map
 
-This repo is organized as multiple MoonBit packages under one module.
+This repo is organized as multiple MoonBit packages under one module. Source
+packages live under [src](/Users/kq/Workspace/moontown/src); the repository root
+is intentionally kept thin.
 
 ## Root Module
 
-- [moon.mod.json](/Users/kq/Workspace/moontown/moon.mod.json)
+- [moon.mod.json](/Users/kq/Workspace/moontown/moon.mod)
 
 Module name:
 
 - `vectie/moontown`
 
+Source root:
+
+- `src`
+
 ## Root Package
 
 Primary root package files:
 
-- [moon.pkg](/Users/kq/Workspace/moontown/moon.pkg)
-- [moontown.mbt](/Users/kq/Workspace/moontown/moontown.mbt)
-- [goal_run.mbt](/Users/kq/Workspace/moontown/goal_run.mbt)
-- [goal_bootstrap.mbt](/Users/kq/Workspace/moontown/goal_bootstrap.mbt)
-- [goal_execution.mbt](/Users/kq/Workspace/moontown/goal_execution.mbt)
-- [goal_supervision.mbt](/Users/kq/Workspace/moontown/goal_supervision.mbt)
-- [research_quality.mbt](/Users/kq/Workspace/moontown/research_quality.mbt)
-- [town_synthesis.mbt](/Users/kq/Workspace/moontown/town_synthesis.mbt)
-- [file_io.mbt](/Users/kq/Workspace/moontown/file_io.mbt)
-- [research_readiness.mbt](/Users/kq/Workspace/moontown/research_readiness.mbt)
-- [runtime_status.mbt](/Users/kq/Workspace/moontown/runtime_status.mbt)
-- [moontown_test.mbt](/Users/kq/Workspace/moontown/moontown_test.mbt)
-- [moontown_wbtest.mbt](/Users/kq/Workspace/moontown/moontown_wbtest.mbt)
+- [src/moon.pkg](/Users/kq/Workspace/moontown/src/moon.pkg)
+- [src/facade.mbt](/Users/kq/Workspace/moontown/src/facade.mbt)
+- [src/town_runtime](/Users/kq/Workspace/moontown/src/town_runtime)
+- [src/integration_tests](/Users/kq/Workspace/moontown/src/integration_tests)
 
 Purpose:
 
-- convenience facade for demo bootstrap
-- current text dashboard entry surface
-- goal-run orchestration, research bootstrap planning, and execution launch
-- standing-goal dispatch, daemon-loop entry points, and persisted runtime status
-- standing-watch task dispatch and watcher-ledger projection for 24/7 topics
-- research quality gates and typed readiness
-- mayor-level town synthesis rendering
-- package-local file IO helpers shared by root features
-- package-level tests
+- `src/facade.mbt` preserves the public `vectie/moontown` API.
+- `src/town_runtime` owns demo bootstrap, dashboard rendering, goal runs,
+  daemon entry points, standing-watch dispatch, and supervision internals.
+- `src/integration_tests` owns cross-package API and skill-quality tests.
+- No implementation package should be added directly at repository root.
 
 ## Core
 
-- [core/types.mbt](/Users/kq/Workspace/moontown/core/types.mbt)
+- [src/core/types.mbt](/Users/kq/Workspace/moontown/src/core/types.mbt)
 
 Purpose:
 
@@ -66,7 +59,7 @@ Important public types:
 
 ## Dispatch
 
-- [dispatch/router.mbt](/Users/kq/Workspace/moontown/dispatch/router.mbt)
+- [src/dispatch/router.mbt](/Users/kq/Workspace/moontown/src/dispatch/router.mbt)
 
 Purpose:
 
@@ -76,7 +69,7 @@ Purpose:
 
 ## Experiment
 
-- [experiment/run.mbt](/Users/kq/Workspace/moontown/experiment/run.mbt)
+- [src/experiment/run.mbt](/Users/kq/Workspace/moontown/src/experiment/run.mbt)
 
 Purpose:
 
@@ -89,7 +82,7 @@ Current status:
 
 ## Health
 
-- [health/report.mbt](/Users/kq/Workspace/moontown/health/report.mbt)
+- [health/report.mbt](/Users/kq/Workspace/moontown/src/health/report.mbt)
 
 Purpose:
 
@@ -99,7 +92,7 @@ Purpose:
 
 ## Scheduler
 
-- [scheduler/daemon.mbt](/Users/kq/Workspace/moontown/scheduler/daemon.mbt)
+- [scheduler/daemon.mbt](/Users/kq/Workspace/moontown/src/scheduler/daemon.mbt)
 
 Purpose:
 
@@ -116,7 +109,7 @@ Current status:
 
 ## Storage
 
-- [storage/store.mbt](/Users/kq/Workspace/moontown/storage/store.mbt)
+- [storage/store.mbt](/Users/kq/Workspace/moontown/src/storage/store.mbt)
 
 Purpose:
 
@@ -134,7 +127,7 @@ Current persisted files:
 
 ## Roles
 
-- [roles/mayor.mbt](/Users/kq/Workspace/moontown/roles/mayor.mbt)
+- [roles/mayor.mbt](/Users/kq/Workspace/moontown/src/roles/mayor.mbt)
 
 Purpose:
 
@@ -150,7 +143,7 @@ starts talking to a role-specific API.
 
 ## Moonbook Adapter
 
-- [adapters/moonbook/client.mbt](/Users/kq/Workspace/moontown/adapters/moonbook/client.mbt)
+- [adapters/moonbook/client.mbt](/Users/kq/Workspace/moontown/src/adapters/moonbook/client.mbt)
 
 Purpose:
 
@@ -182,7 +175,7 @@ total is exposed as `total_evidence_count`.
 
 ## Moonclaw Adapter
 
-- [adapters/moonclaw/client.mbt](/Users/kq/Workspace/moontown/adapters/moonclaw/client.mbt)
+- [adapters/moonclaw/client.mbt](/Users/kq/Workspace/moontown/src/adapters/moonclaw/import.mbt)
 
 Purpose:
 
@@ -213,9 +206,9 @@ Important public types:
 
 Key files:
 
-- [ui/scene_layout.mbt](/Users/kq/Workspace/moontown/ui/scene_layout.mbt)
-- [ui/dashboard.mbt](/Users/kq/Workspace/moontown/ui/dashboard.mbt)
-- [ui/scene_render.mbt](/Users/kq/Workspace/moontown/ui/scene_render.mbt)
+- [src/ui/scene_layout.mbt](/Users/kq/Workspace/moontown/src/ui/scene_layout.mbt)
+- [ui/dashboard.mbt](/Users/kq/Workspace/moontown/src/ui/dashboard.mbt)
+- [src/ui/scene_render.mbt](/Users/kq/Workspace/moontown/src/ui/scene_render.mbt)
 
 Purpose:
 
@@ -228,11 +221,11 @@ Purpose:
 
 Key files:
 
-- [ui/rabbita-town/main/main.mbt](/Users/kq/Workspace/moontown/ui/rabbita-town/main/main.mbt)
-- [ui/rabbita-town/styles.css](/Users/kq/Workspace/moontown/ui/rabbita-town/styles.css)
-- [ui/rabbita-town/index.html](/Users/kq/Workspace/moontown/ui/rabbita-town/index.html)
-- [ui/rabbita-town/package.json](/Users/kq/Workspace/moontown/ui/rabbita-town/package.json)
-- [ui/rabbita-town/vite.config.js](/Users/kq/Workspace/moontown/ui/rabbita-town/vite.config.js)
+- [src/ui/rabbita-town/main/main.mbt](/Users/kq/Workspace/moontown/src/ui/rabbita-town/main/main.mbt)
+- [src/ui/rabbita-town/styles.css](/Users/kq/Workspace/moontown/src/ui/rabbita-town/styles.css)
+- [src/ui/rabbita-town/index.html](/Users/kq/Workspace/moontown/src/ui/rabbita-town/index.html)
+- [src/ui/rabbita-town/package.json](/Users/kq/Workspace/moontown/src/ui/rabbita-town/package.json)
+- [src/ui/rabbita-town/vite.config.js](/Users/kq/Workspace/moontown/src/ui/rabbita-town/vite.config.js)
 
 Purpose:
 

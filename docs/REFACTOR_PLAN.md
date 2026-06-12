@@ -59,7 +59,7 @@ by Moontown and MoonBook.
   paths, schedule persistence, reconciliation, and runner files.
 - `runtime_status.mbt` now invokes a generic daemon scheduled-job dispatcher,
   but the dispatcher still lives in the root package pending a package split.
-- `ui/rabbita-town/main/main.mbt` is a monolithic 10k-line frontend package.
+- `src/ui/rabbita-town/main/main.mbt` is a monolithic 10k-line frontend package.
 - The salon reducer boundary now exists. Production rounds use MoonClaw to
   emit `CivicSalonIdea` JSON from generated skills and participant context;
   deterministic template ideas are isolated behind explicit fixture mode.
@@ -382,7 +382,7 @@ Acceptance:
 
 Goals:
 
-- split `ui/rabbita-town/main/main.mbt` into focused frontend files: bootstrap
+- split `src/ui/rabbita-town/main/main.mbt` into focused frontend files: bootstrap
   sources and parsers, operator console, Wenyu tile map, module
   building/interior renderer, protocol projection panels, and standing-watch
   messenger

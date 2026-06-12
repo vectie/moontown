@@ -1,7 +1,13 @@
 # Development Workflow
 
-This is a multi-package MoonBit module with an additional Rabbita frontend
-submodule.
+This is a multi-package MoonBit module with implementation packages under
+`src/` and an additional Rabbita frontend submodule under
+`src/ui/rabbita-town`.
+
+The repository root should not contain implementation packages. Keep root
+limited to module metadata, docs, scripts, templates, runtime state directories,
+and other non-source project files. `moon.mod.json` sets `"source": "src"` so
+imports remain `vectie/moontown/...`.
 
 ## Core Commands
 
@@ -17,7 +23,7 @@ moon fmt
 Run the text dashboard:
 
 ```bash
-moon run cmd/main
+moon run src/cmd/main
 ```
 
 Build the frontend:
@@ -49,7 +55,7 @@ moon fmt
 
 Current UI work usually touches two different surfaces:
 
-- `ui/rabbita-town/`
+- `src/ui/rabbita-town/`
   - owned by this repo
   - must always be rebuilt after UI edits
 - `.moontown/books/*/site/`
@@ -58,23 +64,23 @@ Current UI work usually touches two different surfaces:
 
 ## Package Boundaries
 
-Each directory with a `moon.pkg` is a separate package.
+Each directory under `src/` with a `moon.pkg` is a separate package.
 
 Important packages:
 
-- `core`
-- `dispatch`
-- `experiment`
-- `health`
-- `scheduler`
-- `storage`
-- `roles`
-- `adapters/moonbook`
-- `adapters/moonclaw`
-- `ui`
-- `cmd/main`
+- `src/core`
+- `src/dispatch`
+- `src/experiment`
+- `src/health`
+- `src/scheduler`
+- `src/storage`
+- `src/roles`
+- `src/adapters/moonbook`
+- `src/adapters/moonclaw`
+- `src/ui`
+- `src/cmd/main`
 
-`ui/rabbita-town` is its own nested module for the browser frontend.
+`src/ui/rabbita-town` is its own nested module for the browser frontend.
 
 ## Plan-First Rule
 
@@ -118,12 +124,12 @@ Mayor -> Book Keeper -> Worker Claws
 Use these commands while developing the loop:
 
 ```bash
-moon run cmd/main -- status
-moon run cmd/main -- daemon tick
-moon run cmd/main -- daemon run --once
-moon run cmd/main -- daemon start
-moon run cmd/main -- daemon doctor
-moon run cmd/main -- daemon stop
+moon run src/cmd/main -- status
+moon run src/cmd/main -- daemon tick
+moon run src/cmd/main -- daemon run --once
+moon run src/cmd/main -- daemon start
+moon run src/cmd/main -- daemon doctor
+moon run src/cmd/main -- daemon stop
 ./scripts/install-launchd-daemon.sh
 ./scripts/uninstall-launchd-daemon.sh
 ```
@@ -152,12 +158,12 @@ exist, the gap is stale/satisfied, or the book state proves no repair remains.
 When validating the live town, check for durable growth instead of just process
 liveness:
 
-- `moon run cmd/main -- daemon doctor`
+- `moon run src/cmd/main -- daemon doctor`
   should show a healthy supervisor/worker pair and increasing success count.
   Do not accept `worker-without-supervisor` as a durable 24/7 state. On macOS
   launchd, the worker loop runs inline under the launchd-managed process, so
   the same durable PID may appear as both supervisor and worker.
-- `moon run cmd/main -- daemon restart "validated source patch"`
+- `moon run src/cmd/main -- daemon restart "validated source patch"`
   should be requested after autonomous code repair changes Moontown source and
   validation passes. The request writes `.moontown/daemon.restart`; the worker
   consumes it between ticks and the supervisor/launchd starts a fresh worker.
@@ -167,26 +173,26 @@ liveness:
   `planbook.repair.patch_receipt.v1` receipt. Treat ACP runs that only produce
   review text, blocker analysis, `files_changed: none`, or read-only sandbox
   diagnostics as useful evidence, not as proven source-code self-patching.
-- `moon run cmd/main -- live status`
+- `moon run src/cmd/main -- live status`
   should expose standing-goal status, PlanBook open gaps, accepted updates,
   no-change cycles, and next actions.
-- `moon run cmd/main -- civic protocols schedules status`
+- `moon run src/cmd/main -- civic protocols schedules status`
   should show enabled building protocol schedules with round counts increasing
   over wall-clock time.
-- `moon run cmd/main -- civic protocols status`
+- `moon run src/cmd/main -- civic protocols status`
   should show protocol ledgers and review/distribution history.
-- `moon run cmd/main -- civic reconcile`
+- `moon run src/cmd/main -- civic reconcile`
   should normally report `Reconciled 0` after the first successful bridge,
   because service-result proof is already current for protocol-active
   buildings.
-- `moon run cmd/main -- planbook doctor`
+- `moon run src/cmd/main -- planbook doctor`
   should update PlanBook autonomy evidence and either close gaps, queue one
   bounded repair, or record a clear blocker.
-- `moon run cmd/main -- books quality`
+- `moon run src/cmd/main -- books quality`
   should include live books from `.moontown/town.json`, not only catalog books.
   Weak live books are legitimate growth gaps; they should remain visible until
   standing watches, bookkeepers, or AI semantic review improve them.
-- `moon run cmd/main -- books ai-review status`
+- `moon run src/cmd/main -- books ai-review status`
   should show no duplicate active semantic reviews. The daemon's
   `review-book-quality` job dispatches one pending review at a time and waits
   for it to finish before launching another. It also honors its
@@ -217,8 +223,8 @@ If a change affects dashboard output or scene contracts, update the relevant
 tests in:
 
 - `moontown_test.mbt`
-- `ui/scene_layout_test.mbt`
-- `ui/scene_render_test.mbt`
+- `src/ui/scene_layout_test.mbt`
+- `src/ui/scene_render_test.mbt`
 - `roles/mayor_test.mbt`
 - `runtime_status_wbtest.mbt`
 - `scheduler/daemon_wbtest.mbt`
@@ -244,5 +250,5 @@ the wording in:
 
 Also update UI-local docs when relevant:
 
-- [ui/rabbita-town/README.md](/Users/kq/Workspace/moontown/ui/rabbita-town/README.md)
-- [ui/assets/README.md](/Users/kq/Workspace/moontown/ui/assets/README.md)
+- [src/ui/rabbita-town/README.md](/Users/kq/Workspace/moontown/src/ui/rabbita-town/README.md)
+- [src/ui/assets/README.md](/Users/kq/Workspace/moontown/src/ui/assets/README.md)

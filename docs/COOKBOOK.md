@@ -92,9 +92,9 @@ index the final accepted state.
 ## Commands
 
 ```bash
-moon run cmd/main -- cookbook bootstrap
-moon run cmd/main -- cookbook status
-moon run cmd/main -- cookbook doctor
+moon run src/cmd/main -- cookbook bootstrap
+moon run src/cmd/main -- cookbook status
+moon run src/cmd/main -- cookbook doctor
 ```
 
 `cookbook bootstrap` creates or refreshes the control MoonBook and stable-state

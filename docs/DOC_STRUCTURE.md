@@ -65,9 +65,9 @@ Book templates are discoverable through the registry at
 Use:
 
 ```bash
-moon run cmd/main -- books templates
-moon run cmd/main -- books template install <template-id> <config.json>
-moon run cmd/main -- books template requests process
+moon run src/cmd/main -- books templates
+moon run src/cmd/main -- books template install <template-id> <config.json>
+moon run src/cmd/main -- books template requests process
 ```
 
 Moondesk should use this registry as its book-creation palette. The Mayor can
@@ -113,9 +113,9 @@ source websites, cadence, notification policy, and
 standing-goal record for Moontown. The current Moontown CLI bridge is:
 
 ```bash
-moon run cmd/main -- books pdf-watch bootstrap <book-id>
-moon run cmd/main -- books pdf-watch install <config.json>
-moon run cmd/main -- books pdf-watch status <book-id>
+moon run src/cmd/main -- books pdf-watch bootstrap <book-id>
+moon run src/cmd/main -- books pdf-watch install <config.json>
+moon run src/cmd/main -- books pdf-watch status <book-id>
 ```
 
 That bridge installs the template into `.moontown/books/<book-id>/`, registers

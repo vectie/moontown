@@ -3,7 +3,7 @@
 `moontown` has two UI layers:
 
 - renderer-agnostic scene modeling in the root module
-- Rabbita browser rendering in `ui/rabbita-town`
+- Rabbita browser rendering in `src/ui/rabbita-town`
 
 ## UI Stack
 
@@ -20,13 +20,13 @@ TownState
 Files by layer:
 
 - scene contract
-  - [ui/scene_layout.mbt](/Users/kq/Workspace/moontown/ui/scene_layout.mbt)
+  - [src/ui/scene_layout.mbt](/Users/kq/Workspace/moontown/src/ui/scene_layout.mbt)
 - town-to-scene projection
-  - [ui/dashboard.mbt](/Users/kq/Workspace/moontown/ui/dashboard.mbt)
+  - [ui/dashboard.mbt](/Users/kq/Workspace/moontown/src/ui/dashboard.mbt)
 - renderer bridge
-  - [ui/scene_render.mbt](/Users/kq/Workspace/moontown/ui/scene_render.mbt)
+  - [src/ui/scene_render.mbt](/Users/kq/Workspace/moontown/src/ui/scene_render.mbt)
 - Rabbita frontend
-  - [ui/rabbita-town/main/main.mbt](/Users/kq/Workspace/moontown/ui/rabbita-town/main/main.mbt)
+  - [src/ui/rabbita-town/main/main.mbt](/Users/kq/Workspace/moontown/src/ui/rabbita-town/main/main.mbt)
 
 ## Semantic Scene Model
 
@@ -240,7 +240,7 @@ selected from the viewport HUD and can also be opened directly by URL:
   - shows module placement, entrance tile, runtime state, validation issues,
     and whether each building has a connected MoonBook output fragment
   - changing a module still happens in
-    `ui/assets/tilemap/modules/wenyu-town-modules.json`
+    `src/ui/assets/tilemap/modules/wenyu-town-modules.json`
   - scope is multi-agent/town composition, not deep single-agent editing
 - `viewport.html?assets=generated&mode=output&v=wenyu`
   - final retrieval surface
@@ -308,7 +308,7 @@ The short version:
 
 - the base terrain stays clean and mostly rasterized for drag/zoom performance
 - each civic feature is a configurable building on the map
-- buildings are loaded from `ui/assets/tilemap/modules/wenyu-town-modules.json`
+- buildings are loaded from `src/ui/assets/tilemap/modules/wenyu-town-modules.json`
 - each building binds to a MoonBook through `book_id`
 - clicking a building opens a module-specific interior
 - the Vite bridge scans `.moontown/books/*/book/moonbook-ui-state.json` and
@@ -317,11 +317,11 @@ The short version:
   `projection_scope` or `visibility`, and operators can override visibility
   through `.moontown/book-projection-policy.json` using the template at
   `templates/book-projection-policy.json`
-- `moon run cmd/main -- civic bootstrap` can create the canonical Wenyu civic
+- `moon run src/cmd/main -- civic bootstrap` can create the canonical Wenyu civic
   MoonBook projection fragments consumed by the module interiors
-- `moon run cmd/main -- civic status` prints the civic-service portfolio without
+- `moon run src/cmd/main -- civic status` prints the civic-service portfolio without
   changing files
-- `moon run cmd/main -- civic doctor` writes `.moontown/civic/status.json` and
+- `moon run src/cmd/main -- civic doctor` writes `.moontown/civic/status.json` and
   `.moontown/civic/status.md` so the viewport can show seeded, changed,
   blocked, review, and misconfigured civic modules from real workspace state
 - generated MoonBook HTML outputs are served and copied under
@@ -360,18 +360,18 @@ Current frontend maturity:
 
 Original example assets live under:
 
-- [ui/assets/backgrounds](/Users/kq/Workspace/moontown/ui/assets/backgrounds)
-- [ui/assets/buildings](/Users/kq/Workspace/moontown/ui/assets/buildings)
-- [ui/assets/actors](/Users/kq/Workspace/moontown/ui/assets/actors)
-- [ui/assets/props](/Users/kq/Workspace/moontown/ui/assets/props)
-- [ui/assets/effects](/Users/kq/Workspace/moontown/ui/assets/effects)
+- [src/ui/assets/backgrounds](/Users/kq/Workspace/moontown/src/ui/assets/backgrounds)
+- [src/ui/assets/buildings](/Users/kq/Workspace/moontown/src/ui/assets/buildings)
+- [src/ui/assets/actors](/Users/kq/Workspace/moontown/src/ui/assets/actors)
+- [src/ui/assets/props](/Users/kq/Workspace/moontown/src/ui/assets/props)
+- [src/ui/assets/effects](/Users/kq/Workspace/moontown/src/ui/assets/effects)
 
 Current examples are SVG placeholders with original `moontown` styling, not
 borrowed `sou` assets.
 
 For the next-generation tiled map, generated assets should be registered under:
 
-- [ui/assets/tilemap](/Users/kq/Workspace/moontown/ui/assets/tilemap)
+- [src/ui/assets/tilemap](/Users/kq/Workspace/moontown/src/ui/assets/tilemap)
 
 That folder holds the generated tilesets, sliced tile PNGs, object sprites,
 building sprites, reference map JSON, prompts, and manifest described by the
@@ -382,7 +382,7 @@ tiled-map pipeline.
 From the frontend directory:
 
 ```bash
-cd ui/rabbita-town
+cd src/ui/rabbita-town
 npm install
 npm run dev
 npm run build
@@ -396,7 +396,7 @@ From the repo root:
 
 Build output lands in:
 
-- `ui/rabbita-town/dist/`
+- `src/ui/rabbita-town/dist/`
 
 The Vite build uses a relative base path, so the generated `dist/index.html`
 can be opened from `file://` as well as served through Vite preview.
