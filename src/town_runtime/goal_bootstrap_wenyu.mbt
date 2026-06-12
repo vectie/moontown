@@ -223,7 +223,9 @@ fn wenyu_build_tasks(
       priority=110,
       requires_review=true,
       target_pages=[
-        "build/ASSET_PROMPTS.md", "build/ASSET_MANIFEST.md", "book/site/generated/index.html",
+        "build/ASSET_PROMPTS.md",
+        "build/ASSET_MANIFEST.md",
+        @policy.default_generated_site_projection_path(),
       ],
       required_role=Some(@core.WorkerRole::Specialist),
     ),

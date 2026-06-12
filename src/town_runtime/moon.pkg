@@ -4,6 +4,7 @@ import {
   "vectie/moontown/book_quality_runtime",
   "vectie/moontown/book_templates",
   "vectie/moontown/build_pipeline",
+  "vectie/moontown/policy",
   "vectie/moontown/planbook_runtime",
   "vectie/moontown/town_synthesis",
   "vectie/moontown/visual_projection",

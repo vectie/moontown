@@ -72,7 +72,8 @@ test "goal book projection event keeps book scoped identifiers" {
     workspace_root="/tmp/research-llm-training",
   )
   let event = goal_book_projection_event(
-    entry, "book/site/generated/index.html",
+    entry,
+    @policy.default_generated_site_projection_path(),
   )
   assert_eq(event.id, "event-build-research-llm-training")
   assert_eq(event.kind, "projection")

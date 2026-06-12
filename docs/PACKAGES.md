@@ -30,6 +30,8 @@ Purpose:
 - `src/facade.mbt` preserves the public `vectie/moontown` API.
 - `src/town_runtime` owns demo bootstrap, dashboard rendering, goal runs,
   daemon entry points, standing-watch dispatch, and supervision internals.
+- `src/town_runtime` may assemble task target pages, but shared generated-site
+  output paths must come from `src/policy`, not local literals.
 - `src/integration_tests` owns cross-package API and skill-quality tests.
 - No implementation package should be added directly at repository root.
 

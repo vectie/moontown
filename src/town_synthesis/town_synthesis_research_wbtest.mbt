@@ -54,7 +54,7 @@ test "town synthesis technical resources render lane-owned artifacts" {
   assert_true(row.contains(plan.lanes[0].entry.id))
   assert_true(row.contains("raw/bootstrap/deep-report.md"))
   assert_true(row.contains("raw/bootstrap/evidence-matrix.md"))
-  assert_true(row.contains("book/site/generated/index.html"))
+  assert_true(row.contains(@policy.default_generated_site_projection_path()))
   assert_true(
     town_report_technical_quality_standard().contains("research-report"),
   )
