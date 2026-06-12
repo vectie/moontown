@@ -10,36 +10,6 @@ fn research_quality_test_state() -> @core.TownState {
 }
 
 ///|
-fn included_source_screen(source_count : Int) -> String {
-  let rows : Array[String] = []
-  for index = 1 {
-    if index > source_count {
-      break
-    }
-    rows.push("| W\{index} | include |")
-    continue index + 1
-  }
-  [
-    "# Source Screen",
-    "",
-    "| Source ID | Decision |",
-    "| --- | --- |",
-    rows.join("\n"),
-    "",
-  ].join("\n")
-}
-
-///|
-fn opc_research_catalog_entry(root : String) -> @moonbook.BookCatalogEntry {
-  @moonbook.BookCatalogEntry::new(
-    id="research-opc",
-    name="One Person Company",
-    purpose="Track OPC",
-    workspace_root=root,
-  )
-}
-
-///|
 fn llm_research_book_ref(id : String, root : String) -> @core.BookRef {
   @core.BookRef::new(
     id~,

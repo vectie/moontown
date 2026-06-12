@@ -202,6 +202,12 @@ book owns. The implementation now has a first-class `policy` package:
   config JSON upserts. Root Moontown may keep private compatibility wrappers,
   but generic utility implementation should not be scattered across the root
   package.
+- [research_quality/](/Users/kq/Workspace/moontown/research_quality)
+  owns research-readiness DTOs and quality-gate semantics: required research
+  artifacts, source-depth checks, topic matching, deep-report structure/length
+  checks, wiki materialization checks, generated-site specificity checks, and
+  process-noise rejection. Root Moontown may mutate town executions when a gate
+  fails, but it should call this package for the actual quality judgment.
 - [cookbook/](/Users/kq/Workspace/moontown/cookbook)
   owns Cookbook DTOs, stable-state artifact summary accounting, and the
   operator-facing Cookbook status Markdown. Root Moontown may discover artifact

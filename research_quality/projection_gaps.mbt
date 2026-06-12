@@ -1,5 +1,5 @@
 ///|
-async fn research_wiki_materialization_gaps(
+pub async fn research_wiki_materialization_gaps(
   entry : @moonbook.BookCatalogEntry,
   root : String,
   topic : String,
@@ -36,7 +36,7 @@ async fn research_wiki_materialization_gaps(
 }
 
 ///|
-async fn research_generated_site_gaps(
+pub async fn research_generated_site_gaps(
   root : String,
   topic : String,
 ) -> Array[String] {

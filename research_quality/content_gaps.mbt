@@ -10,11 +10,11 @@ async fn research_content_quality_gaps(
   let search_log_path = "\{root}/raw/bootstrap/search-log.md"
   let source_screen_path = "\{root}/raw/bootstrap/source-screen.md"
   let tool_blockers_path = "\{root}/raw/bootstrap/tool-blockers.md"
-  let brief = read_optional_text(brief_path)
-  let overview = read_optional_text(overview_path)
-  let search_log = read_optional_text(search_log_path)
-  let source_screen = read_optional_text(source_screen_path)
-  let tool_blockers = read_optional_text(tool_blockers_path)
+  let brief = @support.read_optional_text(brief_path)
+  let overview = @support.read_optional_text(overview_path)
+  let search_log = @support.read_optional_text(search_log_path)
+  let source_screen = @support.read_optional_text(source_screen_path)
+  let tool_blockers = @support.read_optional_text(tool_blockers_path)
   match brief {
     Some(text) => {
       let lower = text.to_lower()
@@ -71,7 +71,7 @@ async fn research_content_quality_gaps(
     None => ()
   }
   let deep_report_path = "\{root}/raw/bootstrap/deep-report.md"
-  match read_optional_text(deep_report_path) {
+  match @support.read_optional_text(deep_report_path) {
     Some(text) => {
       for gap in deep_report_quality_gaps(entry, text) {
         gaps.push(gap)

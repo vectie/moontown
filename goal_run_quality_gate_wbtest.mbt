@@ -6,7 +6,10 @@ test "deep report quality gate accepts research-shaped report" {
     workspace_root="/tmp/moonbook",
   )
   assert_eq(
-    deep_report_quality_gaps(entry, goal_run_research_shaped_report()).length(),
+    @research_quality.deep_report_quality_gaps(
+      entry,
+      goal_run_research_shaped_report(),
+    ).length(),
     0,
   )
 }
@@ -18,7 +21,10 @@ test "deep report quality gate rejects shallow process output" {
     name="MoonClaw Research",
     workspace_root="/tmp/moonclaw",
   )
-  let gaps = deep_report_quality_gaps(entry, goal_run_shallow_process_report())
+  let gaps = @research_quality.deep_report_quality_gaps(
+    entry,
+    goal_run_shallow_process_report(),
+  )
   assert_true(gaps.length() >= 5)
 }
 
@@ -32,7 +38,10 @@ async test "Wenyu civic books are excluded from research quality gates" {
 test "Wenyu deep report quality gate uses module topic" {
   let entry = goal_run_wenyu_town_shell_entry()
   assert_eq(
-    deep_report_quality_gaps(entry, goal_run_wenyu_deep_report()).length(),
+    @research_quality.deep_report_quality_gaps(
+      entry,
+      goal_run_wenyu_deep_report(),
+    ).length(),
     0,
   )
 }

@@ -48,8 +48,8 @@ async test "OPC wiki quality rejects runtime entity contamination" {
   let root = cleaned_research_quality_test_root(
     "/tmp/moontown-opc-wiki-quality-bad",
   )
-  write_text_file(root + "/wiki/entities/moonclaw.md", "# MoonClaw\n")
-  write_text_file(
+  @support.write_text_file(root + "/wiki/entities/moonclaw.md", "# MoonClaw\n")
+  @support.write_text_file(
     root + "/wiki/sources/research-evidence.md",
     "# Research Evidence\n\nOne Person Company evidence.\n",
   )
@@ -77,12 +77,15 @@ async test "OPC wiki quality accepts topic materialization pages" {
   let root = cleaned_research_quality_test_root(
     "/tmp/moontown-opc-wiki-quality-good",
   )
-  write_text_file(root + "/wiki/entities/opc.md", "# One Person Company\n")
-  write_text_file(
+  @support.write_text_file(
+    root + "/wiki/entities/opc.md",
+    "# One Person Company\n",
+  )
+  @support.write_text_file(
     root + "/wiki/concepts/opc-research-thesis.md",
     "# OPC Research Thesis\n",
   )
-  write_text_file(
+  @support.write_text_file(
     root + "/wiki/sources/research-evidence.md",
     "# Research Evidence\n\nOne Person Company evidence.\n",
   )
@@ -95,11 +98,11 @@ async test "OPC generated site quality rejects static scaffold" {
   let root = cleaned_research_quality_test_root(
     "/tmp/moontown-opc-site-quality-bad",
   )
-  write_text_file(
+  @support.write_text_file(
     root + "/book/site/generated/index.html",
     "<!doctype html><title>LLM Wiki Website</title><h1>Markdown. Wiki. Website.</h1><p>Turn a maintained knowledge workspace into something people can understand.</p>",
   )
-  write_text_file(
+  @support.write_text_file(
     root + "/book/site/index.html",
     "<!doctype html><title>LLM Wiki Website</title><h1>Markdown. Wiki. Website.</h1>",
   )
@@ -126,11 +129,11 @@ async test "OPC generated site quality accepts topic marketing and deep research
   let root = cleaned_research_quality_test_root(
     "/tmp/moontown-opc-site-quality-good",
   )
-  write_text_file(
+  @support.write_text_file(
     root + "/book/site/generated/index.html",
     "<!doctype html><title>One Person Company (OPC) Marketing Projection</title><h1>Build a real company before you build a full team.</h1><section><p>Deep research</p><h2>One Person Company (OPC): Deep Research Analysis</h2><h3>Executive Summary</h3><table class=\"report-table\"><tr><td>Claim</td></tr></table></section>",
   )
-  write_text_file(
+  @support.write_text_file(
     root + "/book/site/index.html",
     "<!doctype html><meta http-equiv=\"refresh\" content=\"0; url=./generated/index.html\"><title>One Person Company (OPC) Marketing Projection</title>",
   )

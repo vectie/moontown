@@ -1,5 +1,5 @@
 ///|
-fn deep_report_quality_gaps(
+pub fn deep_report_quality_gaps(
   entry : @moonbook.BookCatalogEntry,
   report : String,
 ) -> Array[String] {
@@ -45,7 +45,8 @@ async fn reference_report_length_gaps(
   report : String,
 ) -> Array[String] {
   let gaps : Array[String] = []
-  match read_optional_text("\{root}/raw/bootstrap/REFERENCE_OUTPUT.md") {
+  match
+    @support.read_optional_text("\{root}/raw/bootstrap/REFERENCE_OUTPUT.md") {
     Some(reference) => {
       let reference_lines = count_text_lines(reference)
       let report_lines = count_text_lines(report)

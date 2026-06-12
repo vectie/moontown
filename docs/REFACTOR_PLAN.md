@@ -334,6 +334,10 @@ Goals:
 - keep generic file, JSON, Markdown, HTML, text-label, and runtime-config JSON
   helper implementation in `support/`; root may expose private compatibility
   wrappers, but support code should not remain as many unrelated root files
+- keep research readiness and quality-gate semantics in `research_quality/`;
+  root may still own mayor/execution mutation for failed gates, but it should
+  not own source-depth, report-length, wiki-materialization, or marketing-site
+  specificity rules
 
 Acceptance:
 

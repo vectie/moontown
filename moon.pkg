@@ -8,6 +8,7 @@ import {
   "vectie/moontown/pdf_evidence_watch",
   "vectie/moontown/visual_projection",
   "vectie/moontown/support",
+  "vectie/moontown/research_quality",
   "vectie/moontown/app_tool_book",
   "vectie/moontown/editor_pipeline",
   "vectie/moontown/planbook_policy",
