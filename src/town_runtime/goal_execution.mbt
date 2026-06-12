@@ -9,7 +9,7 @@ async fn execute_goal_book_task(
 ) -> @core.TaskExecutionRecord {
   if @build_pipeline.is_wenyu_book(entry) &&
     @build_pipeline.is_local_wenyu_build_fallback_task(task.kind) {
-    return local_wenyu_build_execution_record(
+    return @build_pipeline.local_wenyu_build_execution_record(
       entry,
       task,
       assigned_worker_id~,

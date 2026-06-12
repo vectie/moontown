@@ -15,6 +15,10 @@ pub fn is_local_wenyu_build_fallback_task(String) -> Bool
 
 pub fn is_wenyu_book(@moonbook.BookCatalogEntry) -> Bool
 
+pub fn local_wenyu_build_execution_record(@moonbook.BookCatalogEntry, @moonbook.BookTask, assigned_worker_id? : String?, tick? : Int) -> @core.TaskExecutionRecord
+
+pub fn local_wenyu_execution_stale_window_ticks() -> Int
+
 pub fn positive_wenyu_task_limit(Int) -> Int
 
 pub async fn preseed_wenyu_goal_inputs(@moonbook.BookCatalogEntry, String, String) -> Unit

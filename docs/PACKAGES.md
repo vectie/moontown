@@ -289,6 +289,7 @@ Key files:
 - [src/build_pipeline/preseed_workspace.mbt](/Users/kq/Workspace/moontown/src/build_pipeline/preseed_workspace.mbt)
 - [src/build_pipeline/source_bundle.mbt](/Users/kq/Workspace/moontown/src/build_pipeline/source_bundle.mbt)
 - [src/build_pipeline/codex_acp_target.mbt](/Users/kq/Workspace/moontown/src/build_pipeline/codex_acp_target.mbt)
+- [src/build_pipeline/local_execution.mbt](/Users/kq/Workspace/moontown/src/build_pipeline/local_execution.mbt)
 
 Purpose:
 
@@ -303,6 +304,9 @@ Purpose:
 - own Wenyu build/civic task-plan helpers: Wenyu detection, build-readiness
   paths, local fallback-task predicates, build task limit, positive task-limit
   normalization, and civic-service task merge that removes bootstrap duplicates
+- own local Wenyu build fallback execution-record construction, including
+  packet ids, local packet paths, materializer proposal id, skill paths, review
+  requirement, stale window, and output contract
 - keep build-stage target pages, worker roles, priorities, and review flags
   close to the build feature instead of the town scheduler
 
@@ -318,7 +322,9 @@ Boundary:
   profile JSON, ACP step metadata, source-bundle manifests, source-hint pages,
   generated build-skill installation, Codex ACP target JSON, or build/review
   prompt templates. It also should not own Wenyu build/civic task merge policy
-  beyond adapting package-owned tasks into the generic goal-book plan shape.
+  beyond adapting package-owned tasks into the generic goal-book plan shape, or
+  local build fallback execution-record semantics beyond dispatching to this
+  package.
 
 ## PlanBook Policy And Runtime
 

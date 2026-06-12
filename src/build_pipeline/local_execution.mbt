@@ -1,5 +1,5 @@
 ///|
-fn local_wenyu_build_execution_record(
+pub fn local_wenyu_build_execution_record(
   entry : @moonbook.BookCatalogEntry,
   task : @moonbook.BookTask,
   assigned_worker_id? : String? = None,
@@ -20,7 +20,7 @@ fn local_wenyu_build_execution_record(
     run_id=None,
     status~,
     summary="Moontown used the local Wenyu build materializer for `\{task.kind}` because the current MoonClaw/Codex ACP path can start build controllers but does not provide reliable writable repository execution yet.",
-    output_contract=@build_pipeline.wenyu_build_packet_contract(),
+    output_contract=wenyu_build_packet_contract(),
     context_pages=task.target_pages,
     skill_paths=[
       "skills/wenyu-build/SKILL.md", "skills/wenyu-code-patch/SKILL.md", "skills/wenyu-asset-pack/SKILL.md",
@@ -28,7 +28,7 @@ fn local_wenyu_build_execution_record(
     assigned_worker_id~,
     attempt=1,
     heartbeat_tick=tick,
-    stale_after_tick=tick + local_execution_stale_window_ticks(),
+    stale_after_tick=tick + local_wenyu_execution_stale_window_ticks(),
     next_retry_tick=None,
     requires_review=task.requires_review || task.kind == "code-patch",
     notify_town=true,
@@ -36,6 +36,6 @@ fn local_wenyu_build_execution_record(
 }
 
 ///|
-fn local_execution_stale_window_ticks() -> Int {
+pub fn local_wenyu_execution_stale_window_ticks() -> Int {
   3
 }

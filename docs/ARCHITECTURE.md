@@ -429,7 +429,11 @@ merge policy belongs there too: Wenyu detection, build-readiness paths, local
 fallback-task predicates, build task limits, positive task-limit normalization,
 and service-first task merging should be package-owned. `town_runtime/` may
 adapt those package-owned tasks into the generic goal-book plan shape, but it
-should not keep a parallel Wenyu planning layer.
+should not keep a parallel Wenyu planning layer. Local Wenyu build fallback
+execution-record construction also belongs in `build_pipeline/`: packet ids,
+local packet paths, materializer proposal id, skill paths, review requirement,
+stale window, and output contract are Wenyu build semantics, not generic town
+runtime semantics.
 
 Live-autonomy policy belongs to the `live_autonomy_policy/` package. That
 package owns the `LiveAutonomySpine` JSON contract, journal/probe DTOs, live
