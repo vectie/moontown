@@ -401,10 +401,13 @@ for the default projection path instead of redefining it locally.
 Wenyu build-pipeline task contracts belong to `build_pipeline/`. The package
 owns Wenyu bootstrap ingest, implementation-backlog, code-patch, and asset-pack
 task construction, including prompts, target pages, priorities, review flags,
-worker roles, and fallback artifact materialization. `town_runtime/` may decide
-that a Wenyu book is ready for bootstrap/build and pass the current repository
-root, but it should not reconstruct those build or Wenyu bootstrap task
-contracts locally.
+worker roles, and fallback artifact materialization. It also owns the Wenyu
+MoonClaw build-controller profile: output contract id, ACP execution/review
+steps, preferred skills, no-input metadata, model metadata, and execute/review
+prompt templates. `town_runtime/` may decide that a Wenyu book is ready for
+bootstrap/build, pass the current repository root, and ask `build_pipeline/` to
+install the profile, but it should not reconstruct those build tasks, Wenyu
+bootstrap tasks, or MoonClaw profile contracts locally.
 
 Live-autonomy policy belongs to the `live_autonomy_policy/` package. That
 package owns the `LiveAutonomySpine` JSON contract, journal/probe DTOs, live

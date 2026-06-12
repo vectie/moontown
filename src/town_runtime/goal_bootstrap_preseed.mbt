@@ -39,7 +39,7 @@ async fn preseed_wenyu_goal_inputs(
   preseed_wenyu_source_bundle(root, repo_root)
   @book_templates.write_wenyu_build_skills(root, entry)
   @civic_runtime.write_wenyu_civic_workspace_seed(entry, objective)
-  ensure_wenyu_build_moonclaw_profile(root)
+  @build_pipeline.ensure_wenyu_build_moonclaw_profile(root)
   ensure_wenyu_codex_acp_target(root)
   write_wenyu_research_request(root, entry, objective)
   write_wenyu_source_hints(root, prd_path, vision_path, repo_root)

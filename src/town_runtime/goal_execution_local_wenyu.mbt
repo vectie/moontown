@@ -25,7 +25,7 @@ fn local_wenyu_build_execution_record(
     run_id=None,
     status~,
     summary="Moontown used the local Wenyu build materializer for `\{task.kind}` because the current MoonClaw/Codex ACP path can start build controllers but does not provide reliable writable repository execution yet.",
-    output_contract=wenyu_build_packet_contract(),
+    output_contract=@build_pipeline.wenyu_build_packet_contract(),
     context_pages=task.target_pages,
     skill_paths=[
       "skills/wenyu-build/SKILL.md", "skills/wenyu-code-patch/SKILL.md", "skills/wenyu-asset-pack/SKILL.md",

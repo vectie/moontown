@@ -1,7 +1,11 @@
 import {
+  "moonbitlang/async/fs",
+  "moonbitlang/core/json",
+  "vectie/moontown/adapters/codex",
   "vectie/moontown/adapters/moonbook",
   "vectie/moontown/civic",
   "vectie/moontown/core",
+  "vectie/moontown/moonclaw_runtime",
   "vectie/moontown/policy",
   "vectie/moontown/research_quality",
   "vectie/moontown/support",
