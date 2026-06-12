@@ -294,6 +294,29 @@ Boundary:
   consumes `policy.default_generated_site_projection_path()` rather than
   redefining the projection path.
 
+## Cookbook
+
+Key files:
+
+- [src/cookbook/workspace.mbt](/Users/kq/Workspace/moontown/src/cookbook/workspace.mbt)
+- [src/cookbook/manifest.mbt](/Users/kq/Workspace/moontown/src/cookbook/manifest.mbt)
+- [src/cookbook/pages.mbt](/Users/kq/Workspace/moontown/src/cookbook/pages.mbt)
+
+Purpose:
+
+- bootstrap the stable-state control MoonBook workspace
+- materialize durable definitions, ownership rules, operating procedures, and
+  codebase describer pages
+- render cookbook status and stable-state drift accounting
+
+Boundary:
+
+- stable-state definitions, cookbook page content, manifest accounting, and
+  cookbook status wording belong here.
+- default generated-site path semantics belong to `src/policy`; Cookbook
+  consumes `policy.default_generated_site_projection_path()` rather than
+  redefining the projection path.
+
 ## App ToolBook
 
 Key files:

@@ -150,5 +150,15 @@ pub async fn write_workspace(
   )
   let html = generated_site_html(entry, manifest)
   write_text_file("\{root}/book/Home.html", html)
-  write_text_file("\{root}/book/site/generated/index.html", html)
+  write_text_file(cookbook_generated_site_workspace_path(root), html)
+}
+
+///|
+fn cookbook_generated_site_path() -> String {
+  @policy.default_generated_site_projection_path()
+}
+
+///|
+fn cookbook_generated_site_workspace_path(root : String) -> String {
+  "\{root}/\{cookbook_generated_site_path()}"
 }

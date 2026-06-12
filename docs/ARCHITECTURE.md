@@ -237,7 +237,9 @@ book owns. The implementation now has a first-class `policy` package:
   operator-facing Cookbook status Markdown. Root Moontown may discover artifact
   existence, register the MoonBook workspace, write files, and call MoonBook
   catalog APIs, but it should not redefine docs/definition/runtime-state counts,
-  required-missing drift semantics, or Cookbook status wording locally.
+  required-missing drift semantics, or Cookbook status wording locally. Cookbook
+  generated-site writes consume `policy.default_generated_site_projection_path()`
+  for the default projection path instead of redefining it locally.
 - [planbook/](/Users/kq/Workspace/moontown/src/planbook)
   owns PlanBook static content: contract pages, governance pages, role model,
   operating architecture, seed plans, generated-site templates, and PlanBook

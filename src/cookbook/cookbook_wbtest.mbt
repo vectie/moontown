@@ -40,7 +40,13 @@ async test "cookbook bootstrap writes manifest and MoonBook workspace" {
     @fs.exists("\{workspace_root}/raw/bootstrap/COOKBOOK_CONTRACT.md"),
   )
   assert_true(@fs.exists("\{workspace_root}/book/moonbook-ui-state.json"))
-  assert_true(@fs.exists("\{workspace_root}/book/site/generated/index.html"))
+  assert_eq(
+    cookbook_generated_site_path(),
+    @policy.default_generated_site_projection_path(),
+  )
+  assert_true(
+    @fs.exists(cookbook_generated_site_workspace_path(workspace_root)),
+  )
   let status = inspect_moontown_cookbook(workspace_root~, manifest_path~)
   assert_true(status.ready)
   assert_eq(status.docs_count, 8)
