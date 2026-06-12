@@ -291,6 +291,28 @@ Boundary:
   consumes `policy.default_generated_site_projection_path()` rather than
   redefining the projection path.
 
+## PDF Evidence Watch
+
+Key files:
+
+- [src/pdf_evidence_watch/workspace.mbt](/Users/kq/Workspace/moontown/src/pdf_evidence_watch/workspace.mbt)
+- [src/pdf_evidence_watch/standing_goal.mbt](/Users/kq/Workspace/moontown/src/pdf_evidence_watch/standing_goal.mbt)
+- [src/pdf_evidence_watch/status.mbt](/Users/kq/Workspace/moontown/src/pdf_evidence_watch/status.mbt)
+
+Purpose:
+
+- bootstrap domain-specific PDF watcher MoonBook workspaces
+- install source-first analysis contracts, skills, schemas, and watcher state
+- write the initial generated evidence-watch projection
+
+Boundary:
+
+- PDF source discovery, extraction, analysis-method, and notification contract
+  semantics belong here.
+- default generated-site path semantics belong to `src/policy`; PDF Evidence
+  Watch consumes `policy.default_generated_site_projection_path()` rather than
+  redefining the projection path.
+
 ## Civic Definitions And Runtime
 
 Key files:

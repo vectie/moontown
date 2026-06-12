@@ -54,7 +54,17 @@ async fn write_pdf_evidence_watch_workspace(
     entry, title, purpose, websites,
   )
   write_text_file("\{root}/book/Home.html", html)
-  write_text_file("\{root}/book/site/generated/index.html", html)
+  write_text_file(pdf_evidence_watch_generated_site_workspace_path(root), html)
+}
+
+///|
+fn pdf_evidence_watch_generated_site_path() -> String {
+  @policy.default_generated_site_projection_path()
+}
+
+///|
+fn pdf_evidence_watch_generated_site_workspace_path(root : String) -> String {
+  "\{root}/\{pdf_evidence_watch_generated_site_path()}"
 }
 
 ///|
@@ -98,8 +108,10 @@ fn pdf_evidence_watch_config(
         "important_revision_detected",
       ],
       required_outputs: [
-        "wiki/sources/*.md", "wiki/findings/*.md", "wiki/history/standing-watch.md",
-        "book/site/generated/index.html",
+        "wiki/sources/*.md",
+        "wiki/findings/*.md",
+        "wiki/history/standing-watch.md",
+        pdf_evidence_watch_generated_site_path(),
       ],
     },
     analysis: {
@@ -115,7 +127,11 @@ fn pdf_evidence_watch_config(
         "skills/pdf-analysis/SKILL.md",
       ],
       output_files: [
-        "raw/pdfs/", "raw/extracted/", "wiki/sources/", "wiki/findings/", "book/site/generated/index.html",
+        "raw/pdfs/",
+        "raw/extracted/",
+        "wiki/sources/",
+        "wiki/findings/",
+        pdf_evidence_watch_generated_site_path(),
       ],
     },
   }
@@ -134,12 +150,23 @@ fn pdf_evidence_watch_template_copy_paths() -> Array[String] {
 ///|
 fn pdf_evidence_watch_required_paths() -> Array[String] {
   [
-    "book.json", "raw/bootstrap/PDF_WATCH_CONTRACT.md", "raw/pdfs/.keep", "raw/extracted/.keep",
-    "raw/analysis-runs/.keep", "wiki/index.md", "wiki/methods/analysis-method.md",
-    "wiki/sources/README.md", "wiki/findings/README.md", "wiki/reviews/pdf-watch-review.md",
-    "wiki/history/standing-watch.md", "skills/pdf-watch/SKILL.md", "skills/pdf-analysis/SKILL.md",
-    "schemas/pdf-source.schema.md", "schemas/analysis-result.schema.md", "book/Home.html",
-    "book/site/generated/index.html",
+    "book.json",
+    "raw/bootstrap/PDF_WATCH_CONTRACT.md",
+    "raw/pdfs/.keep",
+    "raw/extracted/.keep",
+    "raw/analysis-runs/.keep",
+    "wiki/index.md",
+    "wiki/methods/analysis-method.md",
+    "wiki/sources/README.md",
+    "wiki/findings/README.md",
+    "wiki/reviews/pdf-watch-review.md",
+    "wiki/history/standing-watch.md",
+    "skills/pdf-watch/SKILL.md",
+    "skills/pdf-analysis/SKILL.md",
+    "schemas/pdf-source.schema.md",
+    "schemas/analysis-result.schema.md",
+    "book/Home.html",
+    pdf_evidence_watch_generated_site_path(),
   ]
 }
 

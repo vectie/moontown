@@ -21,7 +21,13 @@ async test "bootstrap pdf evidence watch book installs workspace catalog and sta
   assert_true(@fs.exists("\{root}/raw/extracted/.keep"))
   assert_true(@fs.exists("\{root}/skills/pdf-watch/SKILL.md"))
   assert_true(@fs.exists("\{root}/skills/pdf-analysis/SKILL.md"))
-  assert_true(@fs.exists("\{root}/book/site/generated/index.html"))
+  assert_eq(
+    pdf_evidence_watch_generated_site_path(),
+    @policy.default_generated_site_projection_path(),
+  )
+  assert_true(
+    @fs.exists(pdf_evidence_watch_generated_site_workspace_path(root)),
+  )
   let config = read_text_or_empty("\{root}/book.json")
   assert_true(config.contains("\"book_type\": \"pdf-evidence-watch\""))
   assert_true(config.contains("https://example.org/reports"))
