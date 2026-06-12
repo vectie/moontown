@@ -11,8 +11,8 @@ async fn render_run_command(args : Array[String]) -> String {
 ///|
 async fn render_live_command(args : Array[String]) -> String {
   match args {
-    ["status"] => @moontown.render_live_autonomy_status()
-    ["refresh"] => @moontown.refresh_live_autonomy_spine()
+    ["status"] => @live_autonomy_runtime.render_live_autonomy_status()
+    ["refresh"] => @live_autonomy_runtime.refresh_live_autonomy_spine()
     _ => @moontown.load_or_create_demo_dashboard()
   }
 }

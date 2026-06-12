@@ -5,13 +5,9 @@ async test "live status reconciles stale planbook counts from authoritative stat
   )
   let root = workspace.root
   let snapshot_path = workspace.snapshot_path
-  let workspace_root = "\{workspace.root}/books/plan-moontown-quality"
-  ignore(
-    write_moontown_planbook_autonomy(
-      snapshot_path~,
-      workspace_root~,
-      book_catalog_path="\{root}/catalog.json",
-    ),
+  @support.write_text_file(
+    default_planbook_autonomy_path(snapshot_path),
+    "{\n  \"open_count\": 0,\n  \"status\": \"stable\"\n}",
   )
   let state = @test_fixtures.visual_projection_test_state(
     worker_status=@core.WorkerStatus::Idle,

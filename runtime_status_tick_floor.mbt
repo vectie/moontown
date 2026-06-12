@@ -12,7 +12,7 @@ async fn effective_daemon_tick(
         daemon.tick_sequence,
         latest_daemon_log_sequence(default_daemon_log_path(snapshot_path~)),
       ),
-      latest_live_autonomy_journal_tick(snapshot_path),
+      @live_autonomy_runtime.latest_live_autonomy_journal_tick(snapshot_path),
     ),
     @support.max_int(
       @support.max_int(
@@ -37,7 +37,7 @@ async fn daemon_tick_floor(
   for
     candidate in [
       latest_daemon_log_sequence(log_path),
-      latest_live_autonomy_journal_tick(snapshot_path),
+      @live_autonomy_runtime.latest_live_autonomy_journal_tick(snapshot_path),
       latest_standing_goal_tick(standing_goals),
       latest_watcher_record_tick(watcher_records),
       latest_execution_task_tick(state),

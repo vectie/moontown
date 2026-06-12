@@ -1,5 +1,5 @@
 ///|
-async fn latest_live_autonomy_journal_tick(snapshot_path : String) -> Int {
+pub async fn latest_live_autonomy_journal_tick(snapshot_path : String) -> Int {
   let mut latest = 0
   let journal_path = default_town_journal_path(snapshot_path~)
   if @fs.exists(journal_path) {

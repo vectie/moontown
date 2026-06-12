@@ -127,14 +127,14 @@ async test "live autonomy includes planbook repair action" {
     worker_status=@core.WorkerStatus::Idle,
     execution_status=@core.TaskExecutionStatus::Completed,
   )
-  let spine = write_live_autonomy_spine(
+  let spine = @live_autonomy_runtime.write_live_autonomy_spine(
     state,
     snapshot_path=workspace.snapshot_path,
     tick_summary="planbook action check",
   )
   assert_true(spine.planbook_open_count > 0)
   assert_true(spine.next_actions.join("\n").contains("PlanBook has"))
-  let status = render_live_autonomy_status(
+  let status = @live_autonomy_runtime.render_live_autonomy_status(
     snapshot_path=workspace.snapshot_path,
   )
   assert_true(status.contains("PlanBook open gaps"))

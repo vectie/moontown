@@ -30,7 +30,7 @@ async fn run_daemon_projection_phase(
     planbook_phase.repair_summary,
   )
   ignore(
-    write_live_autonomy_spine(
+    @live_autonomy_runtime.write_live_autonomy_spine(
       state,
       snapshot_path~,
       standing_goals~,

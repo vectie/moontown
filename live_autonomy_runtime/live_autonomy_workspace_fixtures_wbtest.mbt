@@ -40,8 +40,11 @@ fn live_autonomy_build_input_fixture(
     planbook_change_log_path: "/tmp/moontown-live-autonomy-build-input/change.log",
     planbook_engineering_digest_path: "/tmp/moontown-live-autonomy-build-input/digest.md",
     latest_change_summary: "none",
-    book_template_request_status: empty_book_template_request_status(
-      snapshot_path,
+    book_template_request_status: @book_templates.empty_request_status(
+      request_path=@book_templates.request_path_for_snapshot(snapshot_path),
+      event_path=@book_templates.request_event_path_for_request(
+        @book_templates.request_path_for_snapshot(snapshot_path),
+      ),
     ),
     prior_stable_waiting_observation_streak: 0,
   }

@@ -12,7 +12,6 @@ import {
   "vectie/moontown/cookbook",
   "vectie/moontown/core",
   "vectie/moontown/daemon_runtime_policy",
-  "vectie/moontown/live_autonomy_policy",
   "vectie/moontown/planbook_policy",
   "vectie/moontown/roles",
   "vectie/moontown/runtime_status_policy",
@@ -77,10 +76,6 @@ pub fn default_editor_pipeline_path(snapshot_path? : String) -> String
 
 pub fn default_editor_placement_proposal_path(workspace_root? : String) -> String
 
-pub fn default_live_autonomy_path(snapshot_path? : String) -> String
-
-pub fn default_live_digest_path(snapshot_path? : String) -> String
-
 pub fn default_planbook_autonomy_digest_path(snapshot_path? : String) -> String
 
 pub fn default_planbook_autonomy_path(snapshot_path? : String) -> String
@@ -92,8 +87,6 @@ pub fn default_planbook_repair_markdown_path(snapshot_path? : String) -> String
 pub fn default_planbook_repair_path(snapshot_path? : String) -> String
 
 pub fn default_planbook_workspace_root() -> String
-
-pub fn default_town_journal_path(snapshot_path? : String) -> String
 
 pub fn default_wenyu_course_book_id() -> String
 
@@ -153,8 +146,6 @@ pub async fn reconcile_book_quality_ai_review_results(result_dir? : String, run_
 
 pub async fn reconcile_book_quality_repair_bridge(book_catalog_path? : String, snapshot_path? : String, result_dir? : String, bridge_path? : String) -> String
 
-pub async fn refresh_live_autonomy_spine(snapshot_path? : String) -> String
-
 pub async fn render_app_tool_book_status(book_id? : String, workspace_root? : String, book_catalog_path? : String, standing_goal_path? : String) -> String
 
 pub async fn render_book_quality(book_catalog_path? : String, snapshot_path? : String) -> String
@@ -172,8 +163,6 @@ pub async fn render_editor_feature_selection_status(snapshot_path? : String, wor
 pub async fn render_editor_pipeline_status(snapshot_path? : String, workspace_root? : String) -> String
 
 pub async fn render_goal_run(String, book_id? : String?, task_limit_per_book? : Int, snapshot_path? : String, book_catalog_path? : String) -> String
-
-pub async fn render_live_autonomy_status(snapshot_path? : String) -> String
 
 pub async fn render_moontown_cookbook_status(workspace_root? : String, manifest_path? : String) -> String
 
@@ -207,8 +196,6 @@ pub async fn write_editor_feature_selection_task(snapshot_path? : String, worksp
 
 pub async fn write_editor_pipeline_state(snapshot_path? : String, workspace_root? : String) -> String
 
-pub async fn write_live_autonomy_spine(@core.TownState, snapshot_path? : String, standing_goals? : Array[@core.StandingGoal], watcher_records? : Array[@core.WatcherRunRecord], tick_summary? : String, daemon_tick? : Int?) -> @live_autonomy_policy.LiveAutonomySpine
-
 pub async fn write_moontown_planbook_autonomy(snapshot_path? : String, workspace_root? : String, book_catalog_path? : String) -> String
 
 pub async fn write_moontown_planbook_repair_task(snapshot_path? : String, workspace_root? : String, book_catalog_path? : String, dispatch? : Bool, run_inline? : Bool) -> String
@@ -236,8 +223,6 @@ type PlanbookImplementationBacklogItem derive(Eq, ToJson, @debug.Debug, @json.Fr
 pub using @daemon_runtime_policy {type DaemonRuntimeHealth}
 
 pub using @daemon_runtime_policy {type DaemonRuntimeState}
-
-pub using @live_autonomy_policy {type LiveAutonomySpine}
 
 pub using @planbook_policy {type PlanbookAutonomyStatus}
 

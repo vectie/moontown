@@ -1,0 +1,32 @@
+// Generated using `moon info`, DON'T EDIT IT
+package "vectie/moontown/live_autonomy_runtime"
+
+import {
+  "vectie/moontown/core",
+  "vectie/moontown/live_autonomy_policy",
+}
+
+// Values
+pub fn default_live_autonomy_path(snapshot_path? : String) -> String
+
+pub fn default_live_digest_path(snapshot_path? : String) -> String
+
+pub fn default_town_journal_path(snapshot_path? : String) -> String
+
+pub async fn latest_live_autonomy_journal_tick(String) -> Int
+
+pub async fn refresh_live_autonomy_spine(snapshot_path? : String) -> String
+
+pub async fn render_live_autonomy_status(snapshot_path? : String) -> String
+
+pub async fn write_live_autonomy_spine(@core.TownState, snapshot_path? : String, standing_goals? : Array[@core.StandingGoal], watcher_records? : Array[@core.WatcherRunRecord], tick_summary? : String, daemon_tick? : Int?) -> @live_autonomy_policy.LiveAutonomySpine
+
+// Errors
+
+// Types and methods
+
+// Type aliases
+pub using @live_autonomy_policy {type LiveAutonomySpine}
+
+// Traits
+
