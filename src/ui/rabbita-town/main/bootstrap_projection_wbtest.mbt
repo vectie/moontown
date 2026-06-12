@@ -1,6 +1,6 @@
 ///|
 fn projection_test_ready_snapshot(model : Model) -> ProjectionSnapshot {
-  { town: demo_state(model), event_count: 0 }
+  { town: simulation_state(model), event_count: 0 }
 }
 
 ///|

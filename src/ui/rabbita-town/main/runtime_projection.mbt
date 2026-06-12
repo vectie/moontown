@@ -27,7 +27,7 @@ fn town_scene(model : Model) -> @ui.SceneRenderModel {
 ///|
 fn state_for_model(model : Model) -> @core.TownState {
   match model.state_source {
-    StateSourceKind::DemoSimulation => demo_state(model)
+    StateSourceKind::DemoSimulation => simulation_state(model)
     StateSourceKind::SnapshotFile => projection_state(model)
   }
 }

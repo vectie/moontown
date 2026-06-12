@@ -5,9 +5,9 @@ async fn build_live_state_from_catalog(
   let state = @core.empty_state(
     @core.TownConfig::new(id="moonrise", name="Moontown / Moonrise"),
   )
-  let mayor = demo_mayor()
-  register_demo_books(state, @moonbook.catalog_to_book_refs(catalog))
-  register_demo_workers(state)
+  let mayor = default_mayor()
+  register_town_books(state, @moonbook.catalog_to_book_refs(catalog))
+  register_town_workers(state)
   for entry in catalog {
     let batch = @moonbook.produce_task_batch(entry, goal_for_book(entry)) catch {
       error => {
@@ -69,50 +69,50 @@ async fn build_live_state_from_catalog(
 }
 
 ///|
-pub fn demo_state_from_catalog(
+pub fn modeled_state_from_catalog(
   catalog : Array[@moonbook.BookCatalogEntry],
 ) -> @core.TownState {
   let state = @core.empty_state(
     @core.TownConfig::new(id="moonrise", name="Moontown / Moonrise"),
   )
-  register_demo_books(state, @moonbook.catalog_to_book_refs(catalog))
-  register_demo_workers(state)
+  register_town_books(state, @moonbook.catalog_to_book_refs(catalog))
+  register_town_workers(state)
   seed_catalog_tasks(state, catalog)
   append_routes_and_events(state)
   state
 }
 
 ///|
-pub fn[Provider : @core.BookProvider] demo_state_with_provider(
+pub fn[Provider : @core.BookProvider] modeled_state_with_provider(
   provider : Provider,
 ) -> @core.TownState {
   let state = @core.empty_state(
     @core.TownConfig::new(id="moonrise", name="Moontown / Moonrise"),
   )
-  register_demo_books(state, provider.books())
-  register_demo_workers(state)
+  register_town_books(state, provider.books())
+  register_town_workers(state)
   seed_provider_overview_tasks(state)
   append_routes_and_events(state)
   state
 }
 
 ///|
-pub fn demo_mayor() -> @roles.Mayor {
+pub fn default_mayor() -> @roles.Mayor {
   @roles.Mayor::new()
 }
 
 ///|
-pub fn demo_state() -> @core.TownState {
-  demo_state_from_catalog(@moonbook.default_catalog())
+pub fn modeled_state() -> @core.TownState {
+  modeled_state_from_catalog(@moonbook.default_catalog())
 }
 
 ///|
-pub fn demo_dashboard() -> String {
-  render_state_dashboard(demo_state())
+pub fn modeled_dashboard() -> String {
+  render_state_dashboard(modeled_state())
 }
 
 ///|
-pub async fn load_or_create_demo_state(
+pub async fn load_or_create_saved_state(
   path? : String = @storage.default_snapshot_path(),
   book_catalog_path? : String = @moonbook.default_catalog_path(),
 ) -> @core.TownState {
@@ -128,33 +128,33 @@ pub async fn load_or_create_demo_state(
 }
 
 ///|
-pub async fn load_or_create_modeled_demo_state(
+pub async fn load_or_create_modeled_state(
   path? : String = @storage.default_snapshot_path(),
   book_catalog_path? : String = @moonbook.default_catalog_path(),
 ) -> @core.TownState {
   let catalog = @moonbook.load_or_create_catalog(path=book_catalog_path)
   let snapshot = @storage.load_or_create_snapshot(path, () => {
-    demo_state_from_catalog(catalog)
+    modeled_state_from_catalog(catalog)
   })
   snapshot.town
 }
 
 ///|
-pub async fn[Provider : @core.BookProvider] load_or_create_demo_state_with_provider(
+pub async fn[Provider : @core.BookProvider] load_or_create_modeled_state_with_provider(
   provider : Provider,
   path? : String = @storage.default_snapshot_path(),
 ) -> @core.TownState {
   let snapshot = @storage.load_or_create_snapshot(path, () => {
-    demo_state_with_provider(provider)
+    modeled_state_with_provider(provider)
   })
   snapshot.town
 }
 
 ///|
-pub async fn load_or_create_demo_dashboard(
+pub async fn load_or_create_saved_dashboard(
   path? : String = @storage.default_snapshot_path(),
   book_catalog_path? : String = @moonbook.default_catalog_path(),
 ) -> String {
-  let state = load_or_create_demo_state(path~, book_catalog_path~)
+  let state = load_or_create_saved_state(path~, book_catalog_path~)
   render_state_dashboard(state)
 }

@@ -1,6 +1,6 @@
 ///|
 pub fn render_state_dashboard(state : @core.TownState) -> String {
-  let mayor = demo_mayor()
+  let mayor = default_mayor()
   let report = @health.inspect_town(state)
   let model = @ui.build_dashboard(state, report)
   let tick = @scheduler.next_tick(1, @scheduler.plan_tick(state, report))

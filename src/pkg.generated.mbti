@@ -14,23 +14,23 @@ pub async fn daemon_supervise_saved_town(snapshot_path? : String, command? : Str
 
 pub async fn daemon_tick_saved_town(snapshot_path? : String, book_catalog_path? : String, respect_runtime_lock? : Bool) -> String
 
-pub fn demo_dashboard() -> String
+pub fn default_mayor() -> @roles.Mayor
 
-pub fn demo_mayor() -> @roles.Mayor
+pub async fn load_or_create_modeled_state(path? : String, book_catalog_path? : String) -> @core.TownState
 
-pub fn demo_state() -> @core.TownState
+pub async fn[Provider : @core.BookProvider] load_or_create_modeled_state_with_provider(Provider, path? : String) -> @core.TownState
 
-pub fn demo_state_from_catalog(Array[@moonbook.BookCatalogEntry]) -> @core.TownState
+pub async fn load_or_create_saved_dashboard(path? : String, book_catalog_path? : String) -> String
 
-pub fn[Provider : @core.BookProvider] demo_state_with_provider(Provider) -> @core.TownState
+pub async fn load_or_create_saved_state(path? : String, book_catalog_path? : String) -> @core.TownState
 
-pub async fn load_or_create_demo_dashboard(path? : String, book_catalog_path? : String) -> String
+pub fn modeled_dashboard() -> String
 
-pub async fn load_or_create_demo_state(path? : String, book_catalog_path? : String) -> @core.TownState
+pub fn modeled_state() -> @core.TownState
 
-pub async fn[Provider : @core.BookProvider] load_or_create_demo_state_with_provider(Provider, path? : String) -> @core.TownState
+pub fn modeled_state_from_catalog(Array[@moonbook.BookCatalogEntry]) -> @core.TownState
 
-pub async fn load_or_create_modeled_demo_state(path? : String, book_catalog_path? : String) -> @core.TownState
+pub fn[Provider : @core.BookProvider] modeled_state_with_provider(Provider) -> @core.TownState
 
 pub async fn render_goal_run(String, book_id? : String?, task_limit_per_book? : Int, snapshot_path? : String, book_catalog_path? : String) -> String
 

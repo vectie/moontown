@@ -27,9 +27,11 @@ Primary root package files:
 
 Purpose:
 
-- `src/facade.mbt` preserves the public `vectie/moontown` API.
-- `src/town_runtime` owns demo bootstrap, dashboard rendering, goal runs,
-  daemon entry points, standing-watch dispatch, and supervision internals.
+- `src/facade.mbt` preserves the public `vectie/moontown` API without keeping
+  root-local implementation logic.
+- `src/town_runtime` owns modeled bootstrap fixtures, saved-state bootstrap,
+  dashboard rendering, goal runs, daemon entry points, standing-watch dispatch,
+  and supervision internals.
 - `src/town_runtime` may schedule package-provided task contracts, but
   feature-specific task contracts should live in the owning feature package.
 - `src/integration_tests` owns cross-package API and skill-quality tests.

@@ -23,7 +23,7 @@ async fn render_books_command(args : Array[String]) -> String {
       @book_quality_runtime.reconcile_book_quality_repair_bridge()
     ["ai-review", "status"] =>
       @book_quality_runtime.render_book_quality_ai_review_status()
-    _ => @moontown.load_or_create_demo_dashboard()
+    _ => @moontown.load_or_create_saved_dashboard()
   }
 }
 
@@ -40,7 +40,7 @@ async fn render_pdf_watch_command(args : Array[String]) -> String {
     ["status"] => @pdf_evidence_watch.render_pdf_evidence_watch_book_status()
     ["status", book_id] =>
       @pdf_evidence_watch.render_pdf_evidence_watch_book_status(book_id~)
-    _ => @moontown.load_or_create_demo_dashboard()
+    _ => @moontown.load_or_create_saved_dashboard()
   }
 }
 
@@ -53,6 +53,6 @@ async fn render_app_tool_command(args : Array[String]) -> String {
       @app_tool_book.install_app_tool_book_config(config_path)
     ["status"] => @app_tool_book.render_app_tool_book_status()
     ["status", book_id] => @app_tool_book.render_app_tool_book_status(book_id~)
-    _ => @moontown.load_or_create_demo_dashboard()
+    _ => @moontown.load_or_create_saved_dashboard()
   }
 }

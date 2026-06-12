@@ -3,7 +3,7 @@ async fn render_cookbook_command(args : Array[String]) -> String {
   match args {
     ["bootstrap"] | ["doctor"] => @cookbook.bootstrap_moontown_cookbook()
     ["status"] => @cookbook.render_moontown_cookbook_status()
-    _ => @moontown.load_or_create_demo_dashboard()
+    _ => @moontown.load_or_create_saved_dashboard()
   }
 }
 
@@ -21,7 +21,7 @@ async fn render_planbook_command(args : Array[String]) -> String {
       @planbook_runtime.write_moontown_planbook_repair_task(dispatch=true)
     ["repair", "status"] =>
       @planbook_runtime.render_moontown_planbook_repair_status()
-    _ => @moontown.load_or_create_demo_dashboard()
+    _ => @moontown.load_or_create_saved_dashboard()
   }
 }
 
@@ -35,7 +35,7 @@ async fn render_editor_pipeline_command(args : Array[String]) -> String {
       @editor_runtime.write_editor_feature_selection_task(dispatch=true)
     ["feature-select", "status"] =>
       @editor_runtime.render_editor_feature_selection_status()
-    _ => @moontown.load_or_create_demo_dashboard()
+    _ => @moontown.load_or_create_saved_dashboard()
   }
 }
 
@@ -46,6 +46,6 @@ async fn render_course_command(args : Array[String]) -> String {
       @course_book.bootstrap_wenyu_game_design_course_book()
     ["wenyu-game-design", "status"] =>
       @course_book.render_wenyu_game_design_course_status()
-    _ => @moontown.load_or_create_demo_dashboard()
+    _ => @moontown.load_or_create_saved_dashboard()
   }
 }

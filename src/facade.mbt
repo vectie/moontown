@@ -1,62 +1,62 @@
 ///|
-pub fn demo_state_from_catalog(
+pub fn modeled_state_from_catalog(
   catalog : Array[@moonbook.BookCatalogEntry],
 ) -> @core.TownState {
-  @town_runtime.demo_state_from_catalog(catalog)
+  @town_runtime.modeled_state_from_catalog(catalog)
 }
 
 ///|
-pub fn[Provider : @core.BookProvider] demo_state_with_provider(
+pub fn[Provider : @core.BookProvider] modeled_state_with_provider(
   provider : Provider,
 ) -> @core.TownState {
-  @town_runtime.demo_state_with_provider(provider)
+  @town_runtime.modeled_state_with_provider(provider)
 }
 
 ///|
-pub fn demo_mayor() -> @roles.Mayor {
-  @town_runtime.demo_mayor()
+pub fn default_mayor() -> @roles.Mayor {
+  @town_runtime.default_mayor()
 }
 
 ///|
-pub fn demo_state() -> @core.TownState {
-  @town_runtime.demo_state()
+pub fn modeled_state() -> @core.TownState {
+  @town_runtime.modeled_state()
 }
 
 ///|
-pub fn demo_dashboard() -> String {
-  @town_runtime.demo_dashboard()
+pub fn modeled_dashboard() -> String {
+  @town_runtime.modeled_dashboard()
 }
 
 ///|
-pub async fn load_or_create_demo_state(
+pub async fn load_or_create_saved_state(
   path? : String = @storage.default_snapshot_path(),
   book_catalog_path? : String = @moonbook.default_catalog_path(),
 ) -> @core.TownState {
-  @town_runtime.load_or_create_demo_state(path~, book_catalog_path~)
+  @town_runtime.load_or_create_saved_state(path~, book_catalog_path~)
 }
 
 ///|
-pub async fn load_or_create_modeled_demo_state(
+pub async fn load_or_create_modeled_state(
   path? : String = @storage.default_snapshot_path(),
   book_catalog_path? : String = @moonbook.default_catalog_path(),
 ) -> @core.TownState {
-  @town_runtime.load_or_create_modeled_demo_state(path~, book_catalog_path~)
+  @town_runtime.load_or_create_modeled_state(path~, book_catalog_path~)
 }
 
 ///|
-pub async fn[Provider : @core.BookProvider] load_or_create_demo_state_with_provider(
+pub async fn[Provider : @core.BookProvider] load_or_create_modeled_state_with_provider(
   provider : Provider,
   path? : String = @storage.default_snapshot_path(),
 ) -> @core.TownState {
-  @town_runtime.load_or_create_demo_state_with_provider(provider, path~)
+  @town_runtime.load_or_create_modeled_state_with_provider(provider, path~)
 }
 
 ///|
-pub async fn load_or_create_demo_dashboard(
+pub async fn load_or_create_saved_dashboard(
   path? : String = @storage.default_snapshot_path(),
   book_catalog_path? : String = @moonbook.default_catalog_path(),
 ) -> String {
-  @town_runtime.load_or_create_demo_dashboard(path~, book_catalog_path~)
+  @town_runtime.load_or_create_saved_dashboard(path~, book_catalog_path~)
 }
 
 ///|

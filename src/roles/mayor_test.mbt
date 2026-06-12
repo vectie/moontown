@@ -14,7 +14,7 @@ test "mayor runtime is strategic planner only with constrained tools" {
 ///|
 test "mayor dispatch delegates to town routing logic" {
   let mayor = Mayor::new()
-  let state = @moontown.demo_state()
+  let state = @moontown.modeled_state()
   let packet = mayor.decide_dispatch(state, state.tasks[0])
   ignore(packet.decision)
   assert_eq(packet.output_contract, "mayor.dispatch.packet.v1")
@@ -24,7 +24,7 @@ test "mayor dispatch delegates to town routing logic" {
 ///|
 test "mayor handoff targets keeper role" {
   let mayor = Mayor::new()
-  let state = @moontown.demo_state()
+  let state = @moontown.modeled_state()
   let handoff = mayor.handoff_to_keeper(
     state.books[0],
     "hydrate coding context",
@@ -126,7 +126,7 @@ test "mayor creates dynamic OPC research book for standing goal target" {
 ///|
 test "mayor supervision marks stale executions for recovery" {
   let mayor = Mayor::new()
-  let state = @moontown.demo_state()
+  let state = @moontown.modeled_state()
   let current = state.executions[0]
   let execution = @core.TaskExecutionRecord::new(
     task_id=current.task_id,

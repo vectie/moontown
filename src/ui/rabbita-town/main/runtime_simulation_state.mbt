@@ -1,5 +1,5 @@
 ///|
-fn demo_state(model : Model) -> @core.TownState {
+fn simulation_state(model : Model) -> @core.TownState {
   let state = @core.empty_state(
     @core.TownConfig::new(
       id="wenyu-valley",

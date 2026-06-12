@@ -1,6 +1,6 @@
 ///|
-test "demo state seeds books workers tasks and dispatch events" {
-  let state = @moontown.demo_state()
+test "modeled state seeds books workers tasks and dispatch events" {
+  let state = @moontown.modeled_state()
   assert_eq(state.books.length(), 2)
   assert_eq(state.workers.length(), 6)
   assert_eq(state.tasks.length(), 4)
@@ -12,7 +12,7 @@ test "demo state seeds books workers tasks and dispatch events" {
 
 ///|
 test "dashboard renders town square and dispatch log" {
-  let dashboard = @moontown.demo_dashboard()
+  let dashboard = @moontown.modeled_dashboard()
   assert_true(dashboard.contains("Dashboard / Moontown / Moonrise"))
   assert_true(dashboard.contains("## Town Map"))
   assert_true(dashboard.contains("scene: 1280x720"))
@@ -33,11 +33,11 @@ test "dashboard renders town square and dispatch log" {
 }
 
 ///|
-async test "load or create demo state persists a snapshot" {
+async test "load or create modeled state persists a snapshot" {
   let base = "/tmp/moontown-test-town-modeled-\{@async.now().to_int()}"
   let path = "\{base}.json"
   let catalog_path = "\{base}-catalog.json"
-  let state = @moontown.load_or_create_modeled_demo_state(
+  let state = @moontown.load_or_create_modeled_state(
     path~,
     book_catalog_path=catalog_path,
   )
@@ -47,7 +47,7 @@ async test "load or create demo state persists a snapshot" {
 }
 
 ///|
-async test "load or create demo state accepts injected book provider" {
+async test "load or create modeled state accepts injected book provider" {
   let snapshot_path = "/tmp/moontown-test-provider-town-\{@async.now().to_int()}.json"
   let provider = @core.StaticBookProvider::new([
     @core.BookRef::new(
@@ -59,7 +59,7 @@ async test "load or create demo state accepts injected book provider" {
       tags=["experiments", "observation"],
     ),
   ])
-  let state = @moontown.load_or_create_demo_state_with_provider(
+  let state = @moontown.load_or_create_modeled_state_with_provider(
     provider,
     path=snapshot_path,
   )

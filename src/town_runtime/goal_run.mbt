@@ -29,14 +29,14 @@ async fn run_goal_into_state(
   book_catalog_path? : String = @moonbook.default_catalog_path(),
 ) -> @core.TownState {
   let catalog = @moonbook.load_or_create_catalog(path=book_catalog_path)
-  let mayor = demo_mayor()
+  let mayor = default_mayor()
   let plan = mayor.plan_goal(catalog, goal, explicit_book_id=book_id)
   let books : Array[@core.BookRef] = []
   for lane in plan.lanes {
     books.push(lane.entry.to_book_ref())
   }
-  register_demo_books(state, books)
-  register_demo_workers(state)
+  register_town_books(state, books)
+  register_town_workers(state)
   let event_index = state.events.length()
   state.record_event(
     @core.TownEvent::new(
@@ -97,7 +97,7 @@ pub async fn supervise_saved_town(
 ) -> String {
   let snapshot = @storage.load_snapshot_file(snapshot_path)
   let catalog = @moonbook.load_or_create_catalog(path=book_catalog_path)
-  let mayor = demo_mayor()
+  let mayor = default_mayor()
   match snapshot {
     Some(saved) => {
       let state = saved.town

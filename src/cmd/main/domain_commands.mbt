@@ -3,7 +3,7 @@ async fn render_moonclaw_command(args : Array[String]) -> String {
   match args {
     ["stores", "compact"] =>
       @moonclaw_runtime.compact_registered_moonclaw_job_stores()
-    _ => @moontown.load_or_create_demo_dashboard()
+    _ => @moontown.load_or_create_saved_dashboard()
   }
 }
 
@@ -15,7 +15,7 @@ async fn render_civic_command(args : Array[String]) -> String {
     ["doctor"] => @civic_runtime.write_wenyu_civic_status()
     ["reconcile"] => @civic_runtime.reconcile_wenyu_civic_service_results()
     ["protocols", .. rest] => render_civic_protocols_command(rest.to_owned())
-    _ => @moontown.load_or_create_demo_dashboard()
+    _ => @moontown.load_or_create_saved_dashboard()
   }
 }
 
@@ -35,7 +35,7 @@ async fn render_civic_protocols_command(args : Array[String]) -> String {
     ["schedules", "tick"] => @civic_runtime.run_due_civic_salons()
     ["schedules", "status"] =>
       @civic_runtime.render_civic_salon_schedule_status()
-    _ => @moontown.load_or_create_demo_dashboard()
+    _ => @moontown.load_or_create_saved_dashboard()
   }
 }
 
@@ -49,6 +49,6 @@ async fn render_integration_command(args : Array[String]) -> String {
       @final_integration.render_wenyu_final_integration_status()
     ["final", "status", manifest_path] =>
       @final_integration.render_wenyu_final_integration_status(manifest_path~)
-    _ => @moontown.load_or_create_demo_dashboard()
+    _ => @moontown.load_or_create_saved_dashboard()
   }
 }

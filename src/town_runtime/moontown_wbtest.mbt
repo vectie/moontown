@@ -1,6 +1,6 @@
 ///|
 test "dispatch routes coding work to same-book harness worker" {
-  let state = demo_state()
+  let state = modeled_state()
   let decision = @dispatch.route_task(
     state,
     @dispatch.RouteRequest::new(
@@ -24,7 +24,7 @@ test "dispatch routes coding work to same-book harness worker" {
 
 ///|
 test "dispatch routes coding standing watch to same-book watcher worker" {
-  let state = demo_state()
+  let state = modeled_state()
   let decision = @dispatch.route_task(
     state,
     @dispatch.RouteRequest::new(

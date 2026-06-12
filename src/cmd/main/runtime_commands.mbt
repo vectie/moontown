@@ -13,7 +13,7 @@ async fn render_live_command(args : Array[String]) -> String {
   match args {
     ["status"] => @live_autonomy_runtime.render_live_autonomy_status()
     ["refresh"] => @live_autonomy_runtime.refresh_live_autonomy_spine()
-    _ => @moontown.load_or_create_demo_dashboard()
+    _ => @moontown.load_or_create_saved_dashboard()
   }
 }
 
@@ -36,6 +36,6 @@ async fn render_daemon_command(args : Array[String]) -> String {
     ["run", "--worker"] =>
       @moontown.daemon_run_saved_town(preserve_supervisor=true)
     ["run"] => @moontown.daemon_run_saved_town()
-    _ => @moontown.load_or_create_demo_dashboard()
+    _ => @moontown.load_or_create_saved_dashboard()
   }
 }

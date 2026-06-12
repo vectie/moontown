@@ -38,8 +38,8 @@ async fn run_standing_goal_watch_cycle(
         "Mayor could not resolve target MoonBook `\{target_book_id}` for standing goal.",
       )
   }
-  register_demo_books(state, [entry.to_book_ref()])
-  register_demo_workers(state)
+  register_town_books(state, [entry.to_book_ref()])
+  register_town_workers(state)
   let task = @standing_watch_policy.standing_watch_task(
     goal, target_book_id, tick, no_change_streak,
   )

@@ -1,5 +1,5 @@
 ///|
-fn register_demo_books(
+fn register_town_books(
   state : @core.TownState,
   books : Array[@core.BookRef],
 ) -> Unit {
@@ -9,7 +9,7 @@ fn register_demo_books(
 }
 
 ///|
-fn register_demo_workers(state : @core.TownState) -> Unit {
+fn register_town_workers(state : @core.TownState) -> Unit {
   register_worker_if_missing(
     state,
     @core.WorkerRef::new(
