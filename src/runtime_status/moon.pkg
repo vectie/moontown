@@ -1,6 +1,5 @@
 import {
   "moonbitlang/core/json",
-  "moonbitlang/x/path",
   "vectie/moontown/book_templates",
   "vectie/moontown/core",
   "vectie/moontown/daemon_runtime",

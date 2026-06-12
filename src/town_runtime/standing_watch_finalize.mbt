@@ -26,7 +26,7 @@ async fn finalize_standing_watch_supervision_record(
     goal,
     observed.task_id,
   ).unwrap_or(supervision_tick(state))
-  let ledger_dir = watcher_ledger_dir_for_snapshot(snapshot_path)
+  let ledger_dir = @storage.watcher_ledger_dir_for_snapshot(snapshot_path)
   let previous_records = @storage.load_watcher_run_records(
     goal.id,
     dir=ledger_dir,
@@ -72,8 +72,10 @@ async fn finalize_standing_watch_supervision_record(
     run_id=observed.run_id,
     next_due_tick=updated_goal.next_due_tick,
   )
-  append_standing_watch_record(goal.id, ledger_dir, record)
-  record_standing_watch_event(state, record)
+  @storage.append_watcher_run_record(goal.id, record, dir=ledger_dir)
+  state.record_event(
+    @standing_watch_policy.standing_watch_event_for_record(record),
+  )
   save_standing_goal_update_for_watcher(snapshot_path, updated_goal)
   observed
 }

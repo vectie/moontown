@@ -145,6 +145,7 @@ Purpose:
 - MoonBook standing-watch history parsing and provider-decision collapse policy
 - material-delta metrics, watcher-record matching, and watcher-record decision
   selection
+- standing-watch event shape for watcher run records
 - keeper auto-triage/recovery closure policy, thresholds, and summary wording
 
 Boundary:
@@ -152,8 +153,8 @@ Boundary:
 - `src/town_runtime` may schedule standing-watch work, apply package-owned
   decisions to `TownState`, persist snapshots, and append watcher ledgers.
 - `src/town_runtime` should not own standing-watch marker vocabulary, closure
-  thresholds, watcher-record matching/status mapping, or auto-triage/recovery
-  summary text.
+  thresholds, watcher-record matching/status mapping, standing-watch event
+  shape, or auto-triage/recovery summary text.
 
 ## Storage
 
@@ -165,6 +166,8 @@ Purpose:
 - checkpoint model
 - standing-goal registry persistence
 - watcher ledger persistence
+- watcher ledger path derivation from town snapshot paths
+- watcher run record append/load helpers
 
 Current persisted files:
 

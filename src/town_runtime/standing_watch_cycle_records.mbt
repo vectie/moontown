@@ -26,8 +26,10 @@ async fn record_standing_watch_cycle_decision(
     run_id~,
     next_due_tick=updated.next_due_tick,
   )
-  append_standing_watch_record(goal.id, ledger_dir, record)
-  record_standing_watch_event(state, record)
+  @storage.append_watcher_run_record(goal.id, record, dir=ledger_dir)
+  state.record_event(
+    @standing_watch_policy.standing_watch_event_for_record(record),
+  )
   updated
 }
 

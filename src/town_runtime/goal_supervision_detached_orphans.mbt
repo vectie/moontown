@@ -5,7 +5,7 @@ async fn rehydrate_orphaned_deferred_watcher_records(
   standing_goals : Array[@core.StandingGoal],
   tick : Int,
 ) -> Unit {
-  let ledger_dir = watcher_ledger_dir_for_snapshot(snapshot_path)
+  let ledger_dir = @storage.watcher_ledger_dir_for_snapshot(snapshot_path)
   for goal in standing_goals {
     if @core.live_external_execution_count(state) >=
       @core.max_live_external_executions() {

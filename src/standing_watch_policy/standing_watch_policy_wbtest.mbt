@@ -148,3 +148,25 @@ test "terminal watcher decision maps to execution status" {
     @core.TaskExecutionStatus::Completed,
   )
 }
+
+///|
+test "standing watch event shape comes from policy" {
+  let event = standing_watch_event_for_record(
+    @core.WatcherRunRecord::new(
+      goal_id="watch-opc",
+      tick=7,
+      target_book_id="research-opc",
+      decision=@core.WatcherDecisionKind::Update,
+      detail="standing_goal_decision: update",
+      task_id=Some("standing-watch-opc-tick-7"),
+      run_id=Some("run-7"),
+      next_due_tick=37,
+    ),
+  )
+  assert_eq(event.id, "event-watch-7-watch-opc")
+  assert_eq(event.kind, "standing-watch")
+  assert_true(event.detail.contains("watch-opc -> Update"))
+  assert_true(event.related_book_id == Some("research-opc"))
+  assert_true(event.related_task_id == Some("standing-watch-opc-tick-7"))
+  assert_true(event.related_run_id == Some("run-7"))
+}

@@ -16,9 +16,8 @@ async test "orphaned deferred watcher record rehydrates detached import supervis
     prompt="watch opc",
     book_id="research-opc",
   )
-  append_standing_watch_record(
+  @storage.append_watcher_run_record(
     goal.id,
-    "\{root}/watchers",
     @core.WatcherRunRecord::new(
       goal_id=goal.id,
       tick=50,
@@ -28,6 +27,7 @@ async test "orphaned deferred watcher record rehydrates detached import supervis
       task_id=Some("standing-watch-opc-news-tick-50"),
       next_due_tick=110,
     ),
+    dir="\{root}/watchers",
   )
   let state = goal_supervision_test_state()
   state.register_book(research_opc_book_ref(root, purpose="watch opc"))
@@ -64,9 +64,8 @@ async test "orphaned deferred watcher record ignores already superseded terminal
     prompt="watch opc",
     book_id="research-opc",
   )
-  append_standing_watch_record(
+  @storage.append_watcher_run_record(
     goal.id,
-    "\{root}/watchers",
     @core.WatcherRunRecord::new(
       goal_id=goal.id,
       tick=50,
@@ -76,10 +75,10 @@ async test "orphaned deferred watcher record ignores already superseded terminal
       task_id=Some("standing-watch-opc-news-tick-50"),
       next_due_tick=110,
     ),
+    dir="\{root}/watchers",
   )
-  append_standing_watch_record(
+  @storage.append_watcher_run_record(
     goal.id,
-    "\{root}/watchers",
     @core.WatcherRunRecord::new(
       goal_id=goal.id,
       tick=50,
@@ -90,6 +89,7 @@ async test "orphaned deferred watcher record ignores already superseded terminal
       run_id=Some("run-detached"),
       next_due_tick=110,
     ),
+    dir="\{root}/watchers",
   )
   let state = goal_supervision_test_state()
   rehydrate_orphaned_deferred_watcher_records(state, snapshot_path, [goal], 51)

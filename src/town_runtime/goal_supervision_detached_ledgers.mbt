@@ -15,7 +15,7 @@ async fn terminal_detached_watcher_ledger_candidate(
     Some(goal) => goal
     None => return false
   }
-  let ledger_dir = watcher_ledger_dir_for_snapshot(snapshot_path)
+  let ledger_dir = @storage.watcher_ledger_dir_for_snapshot(snapshot_path)
   match terminal_watcher_record_for_execution(goal.id, ledger_dir, execution) {
     Some(_) => return false
     None => ()

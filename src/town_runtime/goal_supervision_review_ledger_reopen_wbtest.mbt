@@ -10,9 +10,8 @@ async test "superseded standing watch review is not reopened from ledger" {
     prompt="repair",
     book_id="wenyu-physical-bridge",
   )
-  append_standing_watch_record(
+  @storage.append_watcher_run_record(
     goal.id,
-    "\{root}/watchers",
     @core.WatcherRunRecord::new(
       goal_id=goal.id,
       tick=10,
@@ -23,6 +22,7 @@ async test "superseded standing watch review is not reopened from ledger" {
       run_id=Some("run-old"),
       next_due_tick=70,
     ),
+    dir="\{root}/watchers",
   )
   let state = goal_supervision_test_state()
   state.register_execution(

@@ -12,6 +12,25 @@ pub fn watcher_ledger_path(
 }
 
 ///|
+pub fn watcher_ledger_dir_for_snapshot(snapshot_path : String) -> String {
+  let base = @path.Path::dirname(snapshot_path).to_string()
+  if base == "." || base == "" {
+    default_watcher_ledger_dir()
+  } else {
+    "\{base}/watchers"
+  }
+}
+
+///|
+pub async fn append_watcher_run_record(
+  goal_id : String,
+  record : @core.WatcherRunRecord,
+  dir? : String = default_watcher_ledger_dir(),
+) -> Unit {
+  append_watcher_run_record_file(watcher_ledger_path(goal_id, dir~), record)
+}
+
+///|
 pub async fn append_watcher_run_record_file(
   path : String,
   record : @core.WatcherRunRecord,

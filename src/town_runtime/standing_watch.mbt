@@ -8,7 +8,7 @@ async fn run_standing_goal_watch_cycle(
   snapshot_path : String,
 ) -> @core.StandingGoal {
   let target_book_id = goal.target_book_id.unwrap_or("mayor-selected-book")
-  let ledger_dir = watcher_ledger_dir_for_snapshot(snapshot_path)
+  let ledger_dir = @storage.watcher_ledger_dir_for_snapshot(snapshot_path)
   let previous_records = @storage.load_watcher_run_records(
     goal.id,
     dir=ledger_dir,

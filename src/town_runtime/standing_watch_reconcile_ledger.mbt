@@ -4,7 +4,7 @@ async fn reconcile_persisted_standing_watch_records(
   snapshot_path : String,
   standing_goals : Array[@core.StandingGoal],
 ) -> Unit {
-  let ledger_dir = watcher_ledger_dir_for_snapshot(snapshot_path)
+  let ledger_dir = @storage.watcher_ledger_dir_for_snapshot(snapshot_path)
   let snapshot = state.executions.copy()
   for execution in snapshot {
     let goal = match

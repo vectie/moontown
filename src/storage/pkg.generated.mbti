@@ -8,6 +8,8 @@ import {
 }
 
 // Values
+pub async fn append_watcher_run_record(String, @core.WatcherRunRecord, dir? : String) -> Unit
+
 pub async fn append_watcher_run_record_file(String, @core.WatcherRunRecord) -> Unit
 
 pub fn consecutive_no_change_count(Array[@core.WatcherRunRecord]) -> Int
@@ -41,6 +43,8 @@ pub async fn save_snapshot_file(String, TownSnapshot) -> Unit
 pub async fn save_standing_goals_file(String, Array[@core.StandingGoal]) -> Unit
 
 pub fn snapshot_of(@core.TownState) -> TownSnapshot
+
+pub fn watcher_ledger_dir_for_snapshot(String) -> String
 
 pub fn watcher_ledger_path(String, dir? : String) -> String
 

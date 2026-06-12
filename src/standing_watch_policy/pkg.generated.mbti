@@ -27,6 +27,8 @@ pub fn standing_watch_delta_score(@core.TaskExecutionRecord) -> Int
 
 pub fn standing_watch_detached_import_log_noise_summary(String) -> Bool
 
+pub fn standing_watch_event_for_record(@core.WatcherRunRecord) -> @core.TownEvent
+
 pub fn standing_watch_execution_has_zero_material_delta(@core.TaskExecutionRecord) -> Bool
 
 pub fn standing_watch_history_decision_summary_for_task(String, String) -> String?

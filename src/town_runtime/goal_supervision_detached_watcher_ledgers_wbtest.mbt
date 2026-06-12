@@ -25,9 +25,8 @@ async test "late detached receipt appends terminal watcher ledger record" {
     book_id="research-opc",
   )
   @storage.save_standing_goals_file("\{root}/standing-goals.json", [goal])
-  append_standing_watch_record(
+  @storage.append_watcher_run_record(
     goal.id,
-    "\{root}/watchers",
     @core.WatcherRunRecord::new(
       goal_id=goal.id,
       tick=10,
@@ -37,6 +36,7 @@ async test "late detached receipt appends terminal watcher ledger record" {
       task_id=Some(task_id),
       next_due_tick=70,
     ),
+    dir="\{root}/watchers",
   )
   let entry = research_opc_book_entry(book_root)
   let state = goal_supervision_test_state()
@@ -98,9 +98,8 @@ async test "terminal detached watcher ledger reconciliation handles already comp
     prompt="watch terminal ledger",
     book_id="research-opc",
   )
-  append_standing_watch_record(
+  @storage.append_watcher_run_record(
     goal.id,
-    "\{root}/watchers",
     @core.WatcherRunRecord::new(
       goal_id=goal.id,
       tick=10,
@@ -110,6 +109,7 @@ async test "terminal detached watcher ledger reconciliation handles already comp
       task_id=Some(task_id),
       next_due_tick=70,
     ),
+    dir="\{root}/watchers",
   )
   let entry = research_opc_book_entry(book_root)
   let state = goal_supervision_test_state()
