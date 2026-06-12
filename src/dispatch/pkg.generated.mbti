@@ -18,7 +18,13 @@ pub fn domain_for_provider_overview(@core.BookRef) -> @core.WorkDomain
 
 pub fn escalate(String) -> RouteDecision
 
+pub fn prioritized_book_tasks(Array[@moonbook.BookTask], String) -> Array[@moonbook.BookTask]
+
+pub fn research_goal_text(String) -> Bool
+
 pub fn route_task(@core.TownState, RouteRequest) -> RouteDecision
+
+pub fn wenyu_valley_goal_text(String) -> Bool
 
 // Errors
 

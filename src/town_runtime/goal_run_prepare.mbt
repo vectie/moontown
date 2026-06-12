@@ -181,7 +181,7 @@ fn goal_book_wenyu_civic_service_plan(
     tasks: @build_pipeline.wenyu_civic_service_plan_tasks(
       entry,
       objective,
-      prioritized_tasks(tasks, objective),
+      @dispatch.prioritized_book_tasks(tasks, objective),
     ),
     task_limit: @build_pipeline.positive_wenyu_task_limit(task_limit),
     bootstrap_active: false,

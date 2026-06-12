@@ -40,7 +40,7 @@ pub fn Mayor::plan_goal(
           }
       }
     None => {
-      if is_wenyu_valley_goal(goal) {
+      if @dispatch.wenyu_valley_goal_text(goal) {
         let lanes = wenyu_valley_goal_lanes(goal)
         return {
           output_contract: "mayor.goal.decomposition.v1",

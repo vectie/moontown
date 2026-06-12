@@ -5,7 +5,7 @@ async fn research_goal_needs_bootstrap(
   summary : @moonbook.BookStateSummary,
   quality_gaps? : Array[String] = [],
 ) -> Bool {
-  if !is_research_goal(goal) {
+  if !@dispatch.research_goal_text(goal) {
     return false
   }
   let no_substantive_tree = !has_substantive_research_tree(entry)

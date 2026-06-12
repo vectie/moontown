@@ -1,12 +1,4 @@
 ///|
-fn is_wenyu_valley_goal(goal : String) -> Bool {
-  let notes = goal.to_lower()
-  notes.contains("wenyu") ||
-  notes.contains("wenyu valley") ||
-  (notes.contains("innovation town") && notes.contains("prd"))
-}
-
-///|
 fn wenyu_valley_goal_lanes(goal : String) -> Array[MayorGoalLane] {
   @civic.wenyu_civic_services().map(fn(service) {
     let entry = @civic.wenyu_civic_book_entry(service)

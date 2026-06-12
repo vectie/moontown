@@ -6,7 +6,7 @@ test "bootstrap planning keeps a single-task ingest-first limit" {
 ///|
 test "Wenyu Valley PRD build goals trigger bootstrap coverage" {
   assert_true(
-    is_research_goal(
+    @dispatch.research_goal_text(
       "Build Wenyu Valley AI Innovation Town according to docs/WENYU_VALLEY_PRD.md",
     ),
   )

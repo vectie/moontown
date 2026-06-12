@@ -95,6 +95,8 @@ Purpose:
 
 - route tasks to workers
 - classify books and MoonBook task kinds into town `WorkDomain` values
+- classify goal text for routing/planning purposes
+- prioritize MoonBook task batches for dispatch order
 - choose assignment vs escalation vs deferral
 - choose isolation modes
 
@@ -102,9 +104,14 @@ Boundary:
 
 - `src/dispatch` owns task-domain classification and isolation policy because
   both decisions affect routing.
+- `src/dispatch` owns goal-text routing predicates and MoonBook task ordering
+  policy because both decisions affect which book lanes and tasks are dispatched
+  first.
 - `src/town_runtime` may construct `TownTask` records from MoonBook tasks, but
   should not maintain its own mapping from book ids or task kinds to
   `WorkDomain`.
+- `src/town_runtime` may ask for prioritized task batches, but should not own
+  task-kind score tables or Wenyu/research goal-text classifiers.
 
 ## Experiment
 

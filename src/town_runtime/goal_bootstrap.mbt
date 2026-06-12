@@ -13,7 +13,7 @@ async fn research_bootstrap_plan(
   tasks : Array[@moonbook.BookTask],
   task_limit : Int,
 ) -> ResearchBootstrapPlan {
-  let ordered = prioritized_tasks(tasks, goal)
+  let ordered = @dispatch.prioritized_book_tasks(tasks, goal)
   let quality_gaps = @research_quality.research_quality_gaps(entry)
   let bootstrap_active = research_goal_needs_bootstrap(
     entry,
