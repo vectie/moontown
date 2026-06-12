@@ -2,10 +2,7 @@
 pub fn collect_due_tasks(town : @core.TownState) -> Array[@core.TownTask] {
   let tasks : Array[@core.TownTask] = []
   for task in town.tasks {
-    if task.status == @core.TownTaskStatus::Pending ||
-      task.status == @core.TownTaskStatus::Planned ||
-      task.status == @core.TownTaskStatus::Assigned ||
-      task.status == @core.TownTaskStatus::Running {
+    if @core.schedulable_task_status(task.status) {
       tasks.push(task)
     }
   }

@@ -45,6 +45,8 @@ pub fn pollable_execution_status(TaskExecutionStatus) -> Bool
 
 pub fn polled_execution_stale_window_ticks(TaskExecutionRecord) -> Int
 
+pub fn schedulable_task_status(TownTaskStatus) -> Bool
+
 pub fn standing_goal_registry_find(Array[StandingGoal], String) -> StandingGoal?
 
 pub fn standing_goal_registry_merge_updates(Array[StandingGoal], Array[StandingGoal]) -> Array[StandingGoal]

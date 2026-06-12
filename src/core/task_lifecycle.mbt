@@ -33,6 +33,19 @@ pub fn copy_task_with_status(
 }
 
 ///|
+pub fn schedulable_task_status(status : TownTaskStatus) -> Bool {
+  match status {
+    TownTaskStatus::Pending => true
+    TownTaskStatus::Planned => true
+    TownTaskStatus::Assigned => true
+    TownTaskStatus::Running => true
+    TownTaskStatus::Blocked => false
+    TownTaskStatus::Done => false
+    TownTaskStatus::Failed => false
+  }
+}
+
+///|
 pub fn terminal_execution_status(status : TaskExecutionStatus) -> Bool {
   match status {
     TaskExecutionStatus::Completed => true

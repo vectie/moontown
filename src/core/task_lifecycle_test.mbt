@@ -61,6 +61,17 @@ test "copy task with status preserves task identity and routing fields" {
 }
 
 ///|
+test "schedulable task status keeps only open work in the daemon loop" {
+  assert_true(schedulable_task_status(TownTaskStatus::Pending))
+  assert_true(schedulable_task_status(TownTaskStatus::Planned))
+  assert_true(schedulable_task_status(TownTaskStatus::Assigned))
+  assert_true(schedulable_task_status(TownTaskStatus::Running))
+  assert_true(!schedulable_task_status(TownTaskStatus::Blocked))
+  assert_true(!schedulable_task_status(TownTaskStatus::Done))
+  assert_true(!schedulable_task_status(TownTaskStatus::Failed))
+}
+
+///|
 test "execution lifecycle predicates classify terminal live and pollable states" {
   assert_true(terminal_execution_status(TaskExecutionStatus::Completed))
   assert_true(terminal_execution_status(TaskExecutionStatus::Failed))
