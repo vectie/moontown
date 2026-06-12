@@ -4,6 +4,7 @@ import {
   "moonbitlang/x/path",
   "vectie/moontown/civic_runtime",
   "vectie/moontown/core",
+  "vectie/moontown/policy",
   "vectie/moontown/scheduler",
   "vectie/moontown/storage",
   "vectie/moontown/support",

@@ -1,19 +1,15 @@
 ///|
 pub struct PolicySpec {
-  book_type : String
+  profile : @policy.PolicyProfile
   repair_action : String
-  source_policy : String
-  policy : @policy.BookPolicy
 } derive(Debug, Eq)
 
 ///|
 fn policy_spec(
-  book_type : String,
+  profile : @policy.PolicyProfile,
   repair_action : String,
-  source_policy : String,
-  policy : @policy.BookPolicy,
 ) -> PolicySpec {
-  { book_type, repair_action, source_policy, policy }
+  { profile, repair_action }
 }
 
 ///|
@@ -21,12 +17,7 @@ fn policy_profile_spec(
   profile : @policy.PolicyProfile,
   repair_action : String,
 ) -> PolicySpec {
-  policy_spec(
-    profile.book_type,
-    repair_action,
-    profile.source_policy,
-    profile.policy,
-  )
+  policy_spec(profile, repair_action)
 }
 
 ///|
@@ -62,7 +53,7 @@ fn policy_specs() -> Array[PolicySpec] {
 ///|
 pub fn policy_spec_for_type(book_type : String) -> PolicySpec? {
   for spec in policy_specs() {
-    if spec.book_type == book_type {
+    if spec.profile.book_type == book_type {
       return Some(spec)
     }
   }

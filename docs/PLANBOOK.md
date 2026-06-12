@@ -80,7 +80,8 @@ belongs in `policy/book_policy_profiles.mbt`. The book-quality migration
 adapter lives in the dedicated
 [book_quality](/Users/kq/Workspace/moontown/src/book_quality) package; it may
 attach repair actions to those profiles for scoring/review workflows, but it
-must not rebuild the profile map. Catalog string/tag classification rules such as
+must not rebuild the profile map or duplicate source-policy fields outside
+`@policy.PolicyProfile`. Catalog string/tag classification rules such as
 archived/transient and cookbook/planbook/course/research/civic/operational
 classification belong in `policy/book_policy_catalog.mbt`, not book-quality.
 Book-quality may expose facade helpers for its scoring callers, but future

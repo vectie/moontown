@@ -57,7 +57,7 @@ fn final_integration_watch_coverage(
 ///|
 fn final_integration_source_policy(spec : FinalIntegrationWatchSpec) -> String {
   if spec.source_policy.trim().is_empty() {
-    "web-first"
+    @policy.web_first_policy()
   } else {
     spec.source_policy
   }

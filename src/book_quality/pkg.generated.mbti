@@ -401,10 +401,8 @@ pub(all) struct BookQualityWorkspaceAssessment {
 } derive(Eq, ToJson, @json.FromJson)
 
 pub struct PolicySpec {
-  book_type : String
+  profile : @policy.PolicyProfile
   repair_action : String
-  source_policy : String
-  policy : @policy.BookPolicy
 } derive(Eq, @debug.Debug)
 
 // Type aliases

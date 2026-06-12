@@ -142,7 +142,8 @@ book owns. The implementation now has a first-class `policy` package:
   callers while the migration away from runtime categories continues.
 - [book_quality/policy_specs.mbt](/Users/kq/Workspace/moontown/src/book_quality/policy_specs.mbt)
   attaches book-quality repair actions to policy-owned profiles for review and
-  repair workflows.
+  repair workflows. Its `PolicySpec` wraps `@policy.PolicyProfile` rather than
+  duplicating policy/source fields.
 - [book_quality/skill_quality.mbt](/Users/kq/Workspace/moontown/src/skill_quality/contract.mbt)
   owns the shared exploration quality contract used by generated skills: depth,
   breadth, new questions, new directions, curiosity, judgment, long-horizon

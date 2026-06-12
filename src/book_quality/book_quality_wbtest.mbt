@@ -295,19 +295,22 @@ test "book quality package owns repair standing goal upsert" {
 test "book quality package maps legacy labels to composed policies" {
   match policy_spec_for_type(research_type()) {
     Some(spec) => {
-      assert_eq(spec.source_policy, web_first_policy())
+      assert_eq(spec.profile.source_policy, web_first_policy())
       assert_true(spec.repair_action.contains("research quality review"))
-      assert_true(@policy.has_skill(spec.policy, "source-diarize"))
-      assert_true(@policy.tend_skills(spec.policy).length() > 0)
+      assert_true(@policy.has_skill(spec.profile.policy, "source-diarize"))
+      assert_true(@policy.tend_skills(spec.profile.policy).length() > 0)
     }
     None => fail("expected research policy spec")
   }
   match policy_spec_for_type(civic_type()) {
     Some(spec) => {
-      assert_eq(spec.source_policy, book_first_policy())
+      assert_eq(spec.profile.source_policy, book_first_policy())
       assert_true(spec.repair_action.contains("protocol-native loop"))
-      assert_true(@policy.has_skill(spec.policy, "protocol-round"))
-      assert_eq(@policy.output_contract(spec.policy), "moontown.book.civic.v1")
+      assert_true(@policy.has_skill(spec.profile.policy, "protocol-round"))
+      assert_eq(
+        @policy.output_contract(spec.profile.policy),
+        "moontown.book.civic.v1",
+      )
     }
     None => fail("expected civic policy spec")
   }

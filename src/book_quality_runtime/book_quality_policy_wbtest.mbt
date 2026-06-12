@@ -71,19 +71,22 @@ test "book quality policy separates semantic structural and type actions" {
 test "book quality policy specs keep repair actions and source policy together" {
   match @book_quality.policy_spec_for_type(@book_quality.research_type()) {
     Some(spec) => {
-      assert_eq(spec.source_policy, @book_quality.web_first_policy())
+      assert_eq(spec.profile.source_policy, @book_quality.web_first_policy())
       assert_true(spec.repair_action.contains("research quality review"))
-      assert_true(@policy.has_skill(spec.policy, "source-diarize"))
-      assert_true(@policy.tend_skills(spec.policy).length() > 0)
+      assert_true(@policy.has_skill(spec.profile.policy, "source-diarize"))
+      assert_true(@policy.tend_skills(spec.profile.policy).length() > 0)
     }
     None => fail("expected research policy spec")
   }
   match @book_quality.policy_spec_for_type(@book_quality.civic_type()) {
     Some(spec) => {
-      assert_eq(spec.source_policy, @book_quality.book_first_policy())
+      assert_eq(spec.profile.source_policy, @book_quality.book_first_policy())
       assert_true(spec.repair_action.contains("protocol-native loop"))
-      assert_true(@policy.has_skill(spec.policy, "protocol-round"))
-      assert_eq(@policy.output_contract(spec.policy), "moontown.book.civic.v1")
+      assert_true(@policy.has_skill(spec.profile.policy, "protocol-round"))
+      assert_eq(
+        @policy.output_contract(spec.profile.policy),
+        "moontown.book.civic.v1",
+      )
     }
     None => fail("expected civic policy spec")
   }
