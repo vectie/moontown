@@ -115,6 +115,8 @@ pub fn civic_status_note(String, String, Int) -> String?
 
 pub fn communication_building_intro(CivicCommunicationPattern, BuildingProtocolDefinition) -> String
 
+pub fn communication_metrics_certification_note() -> String
+
 pub fn communication_pattern_for_scenario(CivicSalonScenario) -> CivicCommunicationPattern
 
 pub fn communication_pattern_id_for_scenario(CivicSalonScenario) -> String
@@ -144,8 +146,6 @@ pub fn research_salon_pattern() -> CivicCommunicationPattern
 pub fn review_council_pattern() -> CivicCommunicationPattern
 
 pub fn review_queue_text(CivicServiceDefinition, String) -> String
-
-pub fn salon_metrics_certification_note() -> String
 
 pub fn salon_participant_skill_text(CivicSalonScenario) -> String
 

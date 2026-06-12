@@ -15,7 +15,7 @@ fn civic_salon_metrics_markdown(
     "",
     metrics.summary,
     "",
-    @civic.salon_metrics_certification_note(),
+    @civic.communication_metrics_certification_note(),
     "",
     "## Score",
     "",

@@ -89,7 +89,7 @@ pub fn salon_structural_metric_note() -> String {
 }
 
 ///|
-pub fn salon_metrics_certification_note() -> String {
+pub fn communication_metrics_certification_note() -> String {
   [
     "These metrics evaluate whether the building actually held an exchange, reduced new shared outputs, and returned them to the right home workspaces.",
     "They do not certify truth; they certify protocol effectiveness for this round.",

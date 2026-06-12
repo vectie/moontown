@@ -34,7 +34,9 @@ test "civic salon metrics markdown explains protocol effectiveness and return ho
     "robotics-round-1",
     1,
   )
-  assert_true(markdown.contains(@civic.salon_metrics_certification_note()))
+  assert_true(
+    markdown.contains(@civic.communication_metrics_certification_note()),
+  )
   assert_true(markdown.contains("Structural effectiveness score"))
   assert_true(markdown.contains("## Formula"))
   assert_true(markdown.contains("## Return Home Contract"))

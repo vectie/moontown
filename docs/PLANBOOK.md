@@ -541,8 +541,8 @@ root-local page or ledger template helpers for civic service behavior.
 
 Metric semantics are also civic-owned. If a plan changes how a building
 measures exchange yield, returned-home coverage, or structural effectiveness,
-the implementation belongs in `civic/salon_metrics.mbt`; root may only display
-or persist those metrics.
+the implementation belongs in `civic/communication_metrics.mbt`; root may only
+display or persist those metrics.
 
 Schedule vocabulary is civic-owned too. `CivicSalonSchedule`,
 `CivicSalonRoundRecord`, due checks, round ids, completion cadence, and round

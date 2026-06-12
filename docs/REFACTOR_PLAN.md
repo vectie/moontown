@@ -128,7 +128,7 @@ Current files:
   status projection.
 - `civic_protocol_markdown.mbt`: protocol contract markdown rendering.
 - `civic_protocol_social_square_fixture.mbt`: Social Square proof-slice seed.
-- `civic_salon_scenario_types.mbt`: generic salon scenario, participant, idea,
+- `civic/communication_scenario_types.mbt`: generic communication scenario, participant, idea,
   metric, and home-return record shapes.
 - `civic_salon_scenario_runtime.mbt`: generic scenario template loader,
   MoonBook workspace writes, protocol ledger slice, metrics, and generated
@@ -137,7 +137,7 @@ Current files:
   template proving new domains can be configured without MoonBit code.
 - `civic/communication_pattern_registry.mbt`: reusable pattern registry and
   Wenyu civic service-to-pattern mapping.
-- `civic/salon_scenario_types.mbt`: reusable salon scenario, participant, idea,
+- `civic/communication_scenario_types.mbt`: reusable communication scenario, participant, idea,
   metric, reduction-mode, and home-return DTOs.
 - `civic/communication_scenario_policy.mbt`: reusable scenario pattern resolution,
   pattern-label fallback, building-protocol derivation, and salon protocol
@@ -147,9 +147,9 @@ Current files:
 - `civic/workspace_text.mbt`: reusable civic workspace index, service
   contract, building protocol contract, schema/wiki/review seed pages, and
   service/exchange/history ledger text.
-- `civic/salon_metrics.mbt`: reusable structural effectiveness and
+- `civic/communication_metrics.mbt`: reusable structural effectiveness and
   return-home metric calculation for communication-pattern rounds.
-- `civic/salon_schedule_types.mbt` and `civic/salon_schedule_policy.mbt`:
+- `civic/communication_schedule_types.mbt` and `civic/communication_schedule_policy.mbt`:
   reusable schedule/round-record vocabulary and pure transition helpers.
 - `civic/status_labels.mbt`: reusable service/protocol status labels, buckets,
   readiness checks, result-proven checks, and health-note semantics.
