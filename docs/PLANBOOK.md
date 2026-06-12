@@ -76,11 +76,14 @@ status pages.
 
 The book-quality migration adapter lives in the dedicated
 [book_quality](/Users/kq/Workspace/moontown/src/book_quality) package. It owns the
-temporary mapping from legacy labels such as `research-book`, `course-book`, and
-`civic-protocol-support` into composed `BookPolicy` values and repair actions.
-It also owns catalog string/tag classification rules such as
+temporary mapping from policy-owned legacy labels such as `research-book`,
+`course-book`, and `civic-protocol-support` into composed `BookPolicy` values
+and repair actions. Catalog string/tag classification rules such as
 archived/transient and cookbook/planbook/course/research/civic/operational
-classification. It also owns book-quality path contract helpers such as
+classification belong in `policy/book_policy_catalog.mbt`, not book-quality.
+Book-quality may expose facade helpers for its scoring callers, but future
+plans should change classification in `policy/` first. It also owns
+book-quality path contract helpers such as
 workspace path composition, wiki index path, projection state path, generated
 site path, and review result path. It owns base workspace, per-path, and typed
 path-set score calculation and strength/gap wording too; root may observe which

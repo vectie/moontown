@@ -128,9 +128,14 @@ book owns. The implementation now has a first-class `policy` package:
   owns the typed internal-distance plan: information, recognition, and
   decisiveness. It derives the growth-vector view from the composed policy
   without changing the persisted `BookPolicy` JSON schema.
+- [policy/book_policy_catalog.mbt](/Users/kq/Workspace/moontown/src/policy/book_policy_catalog.mbt)
+  owns legacy type labels and catalog classification inputs such as
+  archived/transient and cookbook/planbook/course/research/civic/operational
+  mapping. These labels are migration handles for composed policies, not a
+  second runtime type system.
 - [book_quality/taxonomy.mbt](/Users/kq/Workspace/moontown/src/book_quality/taxonomy.mbt)
-  owns legacy book-quality labels such as research/course/civic while the
-  migration away from runtime categories continues.
+  exposes the policy-owned legacy labels to book-quality scoring and review
+  callers while the migration away from runtime categories continues.
 - [book_quality/policy_specs.mbt](/Users/kq/Workspace/moontown/src/book_quality/policy_specs.mbt)
   maps those legacy labels into composed `BookPolicy` values and repair
   actions.
@@ -582,8 +587,9 @@ accepted-result storage, reconciliation record construction, ledger reconciliati
 repair-goal identity/prompt/cadence policy,
 repair-goal retirement policy, repair bridge summary policy, or repair bridge
 candidate/item construction, repair review page Markdown contracts, or book-quality data
-schemas. It also must not own catalog classification rules beyond adapting
-external MoonBook catalog records into package-owned classifier inputs.
+schemas. Catalog classification rules belong in `policy/book_policy_catalog.mbt`;
+book-quality may adapt external MoonBook catalog records into those policy-owned
+classifier inputs, but it must not define a parallel classifier.
 The package also owns the pure transformation from a `BookQualityReviewPacket`
 to the MoonClaw external proposal packet used for semantic review. Root may
 choose when to dispatch that packet and where to store imported run state, but

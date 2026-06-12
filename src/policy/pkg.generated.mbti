@@ -7,11 +7,27 @@ import {
 }
 
 // Values
+pub fn book_first_policy() -> String
+
+pub fn catalog_entry_active(String, String, String, Array[String]) -> Bool
+
+pub fn catalog_entry_archived(Array[String]) -> Bool
+
+pub fn catalog_entry_transient(String, String, String) -> Bool
+
+pub fn catalog_entry_type(String, String, Array[String]) -> String
+
 pub fn civic_protocol() -> BookPolicy
+
+pub fn civic_type() -> String
 
 pub fn cookbook() -> BookPolicy
 
+pub fn cookbook_type() -> String
+
 pub fn course() -> BookPolicy
+
+pub fn course_type() -> String
 
 pub fn default_generated_site_projection_path() -> String
 
@@ -24,6 +40,8 @@ pub fn execute_skills(BookPolicy) -> Array[SkillSpec]
 pub fn file(String, Bool, String) -> FileSpec
 
 pub fn general() -> BookPolicy
+
+pub fn general_type() -> String
 
 pub fn has_skill(BookPolicy, String) -> Bool
 
@@ -49,6 +67,8 @@ pub fn new(Array[SkillSpec], Array[FileSpec], QualityCriteria, OutputSpec) -> Bo
 
 pub fn operational() -> BookPolicy
 
+pub fn operational_type() -> String
+
 pub fn output(String, String, String) -> OutputSpec
 
 pub fn output_contract(BookPolicy) -> String
@@ -58,6 +78,8 @@ pub fn output_projection_path(BookPolicy) -> String
 pub fn output_surface(BookPolicy) -> String
 
 pub fn planbook() -> BookPolicy
+
+pub fn planbook_type() -> String
 
 pub fn quality(Int, Int, Bool, String) -> QualityCriteria
 
@@ -71,11 +93,17 @@ pub fn research_goal_text(String) -> Bool
 
 pub fn research_request_goal_text(String) -> Bool
 
+pub fn research_type() -> String
+
+pub fn reviewable_types() -> Array[String]
+
 pub fn skill(String, String, String, String) -> SkillSpec
 
 pub fn skill_specs(BookPolicy) -> Array[SkillSpec]
 
 pub fn tend_skills(BookPolicy) -> Array[SkillSpec]
+
+pub fn web_first_policy() -> String
 
 pub fn wenyu_valley_goal_text(String) -> Bool
 

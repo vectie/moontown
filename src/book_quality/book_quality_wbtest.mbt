@@ -6,14 +6,7 @@ test "book quality taxonomy is a package boundary" {
 }
 
 ///|
-test "book quality package owns catalog classification policy" {
-  assert_true(catalog_entry_archived(["internal"]))
-  assert_false(catalog_entry_archived(["research"]))
-  assert_true(
-    catalog_entry_transient(
-      "research-smoke", "Smoke Test", "temporary smoke test",
-    ),
-  )
+test "book quality delegates catalog classification to policy package" {
   assert_false(
     catalog_entry_active(
       "research-smoke",

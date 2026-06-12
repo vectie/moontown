@@ -1,56 +1,49 @@
 ///|
 pub fn research_type() -> String {
-  "research-book"
+  @policy.research_type()
 }
 
 ///|
 pub fn course_type() -> String {
-  "course-book"
+  @policy.course_type()
 }
 
 ///|
 pub fn planbook_type() -> String {
-  "planbook"
+  @policy.planbook_type()
 }
 
 ///|
 pub fn cookbook_type() -> String {
-  "cookbook"
+  @policy.cookbook_type()
 }
 
 ///|
 pub fn civic_type() -> String {
-  "civic-protocol-support"
+  @policy.civic_type()
 }
 
 ///|
 pub fn operational_type() -> String {
-  "operational-book"
+  @policy.operational_type()
 }
 
 ///|
 pub fn general_type() -> String {
-  "general-book"
+  @policy.general_type()
 }
 
 ///|
 pub fn reviewable_types() -> Array[String] {
-  [
-    research_type(),
-    course_type(),
-    planbook_type(),
-    cookbook_type(),
-    civic_type(),
-    operational_type(),
-  ]
+  @policy.reviewable_types()
 }
 
 ///|
 pub fn web_first_policy() -> String {
-  "web-first"
+  @policy.web_first_policy()
 }
 
 ///|
 pub fn book_first_policy() -> String {
-  "book-first"
+  @policy.book_first_policy()
 }

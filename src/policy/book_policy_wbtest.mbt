@@ -55,6 +55,47 @@ test "policy archetypes are composable presets not runtime categories" {
 }
 
 ///|
+test "policy owns catalog classification and legacy type labels" {
+  assert_eq(research_type(), "research-book")
+  assert_eq(course_type(), "course-book")
+  assert_true(reviewable_types().contains(civic_type()))
+  assert_true(catalog_entry_archived(["internal"]))
+  assert_false(catalog_entry_archived(["research"]))
+  assert_true(
+    catalog_entry_transient(
+      "research-smoke", "Smoke Test", "temporary smoke test",
+    ),
+  )
+  assert_false(
+    catalog_entry_active(
+      "research-smoke",
+      "Smoke Test",
+      "temporary smoke test",
+      ["research"],
+    ),
+  )
+  assert_true(
+    catalog_entry_active("research-opc", "One Person Company", "domain watch", [
+      "research",
+    ]),
+  )
+  assert_eq(
+    catalog_entry_type("plan-moontown-quality", "Moontown Quality", []),
+    planbook_type(),
+  )
+  assert_eq(
+    catalog_entry_type("course-wenyu-game-design", "Game Design", []),
+    course_type(),
+  )
+  assert_eq(
+    catalog_entry_type("wenyu-policy-hall", "Policy Hall", []),
+    civic_type(),
+  )
+  assert_eq(catalog_entry_type("coding", "Coding", []), operational_type())
+  assert_eq(catalog_entry_type("unknown", "Unknown", []), general_type())
+}
+
+///|
 test "policy capabilities compose without duplicate skills or files" {
   let policy = general() |> with_pdf_watch() |> with_pdf_watch()
   let pdf_skills = skill_specs(policy).filter(skill => skill.id == "pdf-watch")
