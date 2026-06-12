@@ -1,36 +1,4 @@
 ///|
-fn domain_for_book(entry : @moonbook.BookCatalogEntry) -> @core.WorkDomain {
-  match entry.id {
-    "finance" => @core.WorkDomain::Finance
-    "coding" => @core.WorkDomain::Coding
-    _ => @core.WorkDomain::Operations
-  }
-}
-
-///|
-fn domain_for_provider_overview(book : @core.BookRef) -> @core.WorkDomain {
-  match book.id {
-    "finance" => @core.WorkDomain::Finance
-    _ => @core.WorkDomain::Coding
-  }
-}
-
-///|
-fn domain_for_book_task(
-  entry : @moonbook.BookCatalogEntry,
-  task : @moonbook.BookTask,
-) -> @core.WorkDomain {
-  match task.kind {
-    "standing-watch" => @core.WorkDomain::Research
-    "civic-service-workflow" => @core.WorkDomain::SocialExperiment
-    "code-patch" | "test-fix" | "projection-schema" => @core.WorkDomain::Coding
-    "image-asset" => @core.WorkDomain::Coding
-    "implementation-backlog" => @core.WorkDomain::Operations
-    _ => domain_for_book(entry)
-  }
-}
-
-///|
 fn to_town_task(
   entry : @moonbook.BookCatalogEntry,
   task : @moonbook.BookTask,
@@ -41,7 +9,7 @@ fn to_town_task(
     book_id=entry.id,
     title=task.title,
     prompt=task.prompt,
-    domain=domain_for_book_task(entry, task),
+    domain=@dispatch.domain_for_book_task(entry, task),
     required_role=task.required_role,
     required_capabilities=entry.skills,
     status=town_task_status_for_execution(status),
@@ -81,7 +49,7 @@ fn provider_overview_task(book : @core.BookRef, index : Int) -> @core.TownTask {
     book_id=book.id,
     title="Book overview for \{book.name}",
     prompt="Summarize the current state for \{book.name}.",
-    domain=domain_for_provider_overview(book),
+    domain=@dispatch.domain_for_provider_overview(book),
     required_role=Some(@core.WorkerRole::Planner),
     required_capabilities=book.tags,
     status=town_task_status_for_execution(execution_status),

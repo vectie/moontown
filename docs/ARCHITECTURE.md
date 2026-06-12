@@ -1499,11 +1499,18 @@ unless an operator dispatches a manual review.
 
 ```text
 TownTask
+  -> dispatch classifies domain/isolation
   -> Mayor.decide_dispatch(...)
   -> Mayor.prepare_keeper_packet(...)
   -> external proposal packet
   -> proposal/run lifecycle record
 ```
+
+Task-domain classification is part of dispatch policy. The mapping from
+MoonBook task kinds and book ids to `WorkDomain` belongs in `dispatch/`, not in
+`town_runtime/`, because domain affects routing, isolation, and worker
+selection. Runtime code may adapt a MoonBook task into a `TownTask`, but it
+should call dispatch-owned domain policy instead of duplicating kind strings.
 
 ## Packet Lifecycle Ownership
 

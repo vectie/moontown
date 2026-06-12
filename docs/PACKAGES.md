@@ -62,12 +62,22 @@ Important public types:
 ## Dispatch
 
 - [src/dispatch/router.mbt](/Users/kq/Workspace/moontown/src/dispatch/router.mbt)
+- [src/dispatch/domain_policy.mbt](/Users/kq/Workspace/moontown/src/dispatch/domain_policy.mbt)
 
 Purpose:
 
 - route tasks to workers
+- classify books and MoonBook task kinds into town `WorkDomain` values
 - choose assignment vs escalation vs deferral
 - choose isolation modes
+
+Boundary:
+
+- `src/dispatch` owns task-domain classification and isolation policy because
+  both decisions affect routing.
+- `src/town_runtime` may construct `TownTask` records from MoonBook tasks, but
+  should not maintain its own mapping from book ids or task kinds to
+  `WorkDomain`.
 
 ## Experiment
 

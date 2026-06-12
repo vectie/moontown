@@ -3,11 +3,18 @@ package "vectie/moontown/dispatch"
 
 import {
   "moonbitlang/core/debug",
+  "vectie/moontown/adapters/moonbook",
   "vectie/moontown/core",
 }
 
 // Values
 pub fn choose_isolation(@core.TownTask, @core.WorkerRef, @core.BookRef) -> @core.IsolationMode
+
+pub fn domain_for_book(@moonbook.BookCatalogEntry) -> @core.WorkDomain
+
+pub fn domain_for_book_task(@moonbook.BookCatalogEntry, @moonbook.BookTask) -> @core.WorkDomain
+
+pub fn domain_for_provider_overview(@core.BookRef) -> @core.WorkDomain
 
 pub fn escalate(String) -> RouteDecision
 
