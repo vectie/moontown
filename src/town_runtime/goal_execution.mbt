@@ -73,7 +73,7 @@ async fn execute_goal_book_task(
     assigned_worker_id~,
     attempt=1,
     heartbeat_tick=tick,
-    stale_after_tick=tick + external_execution_stale_window_ticks(),
+    stale_after_tick=tick + @core.external_execution_stale_window_ticks(),
     next_retry_tick=None,
     result_decision=execution
       .map(fn(result) { result.0.result_decision })

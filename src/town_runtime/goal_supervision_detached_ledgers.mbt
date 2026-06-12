@@ -4,7 +4,7 @@ async fn terminal_detached_watcher_ledger_candidate(
   standing_goals : Array[@core.StandingGoal],
   snapshot_path : String,
 ) -> Bool {
-  if !terminal_execution_status(execution.status) {
+  if !@core.terminal_execution_status(execution.status) {
     return false
   }
   let goal = match

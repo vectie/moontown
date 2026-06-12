@@ -1544,11 +1544,13 @@ The packet lifecycle is intentionally split across package boundaries:
   - owns pure lifecycle translation from `TaskExecutionStatus` to
     `TownTaskStatus`
   - owns task-status copy helpers that preserve task identity and routing fields
+  - owns shared execution-status categories, stale-window defaults,
+    retry-pending detection, and live external execution capacity
 
 `town_runtime/` may observe executions and update live `TownTask` values during
 supervision, but it should call `core` for lifecycle translation. Runtime code
 should not redefine which execution states count as planned, assigned, running,
-blocked, done, or failed.
+blocked, done, failed, terminal, live, pollable, retry-pending, or stale.
 
 ## Refactor Boundaries
 

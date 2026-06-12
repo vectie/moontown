@@ -11,7 +11,8 @@ async fn launch_goal_book(
       task,
       @core.TaskExecutionStatus::PacketReady,
     )
-    if live_external_execution_count(state) >= max_live_external_executions() {
+    if @core.live_external_execution_count(state) >=
+      @core.max_live_external_executions() {
       queue_goal_book_task(state, launch.entry, task, planned_task, tick)
       continue
     }
@@ -70,7 +71,7 @@ async fn launch_goal_book_task(
   if reconciled_execution != completed_execution {
     record_goal_execution(state, entry, task, reconciled_execution)
   }
-  if terminal_execution_status(completed_execution.status) {
+  if @core.terminal_execution_status(completed_execution.status) {
     finalize_goal_book_entry(state, entry, pending_review_baseline, [
       reconciled_execution.task_id,
     ])
@@ -89,7 +90,7 @@ fn queue_goal_book_task(
     entry,
     task,
     tick,
-    "Mayor queued \{task.id} because live external execution count reached \{max_live_external_executions()}; the supervision loop will launch it when capacity is available.",
+    "Mayor queued \{task.id} because live external execution count reached \{@core.max_live_external_executions()}; the supervision loop will launch it when capacity is available.",
   )
   state.replace_task(planned_task)
   state.replace_execution(queued_execution)

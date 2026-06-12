@@ -25,7 +25,7 @@ fn late_detached_import_receipt_candidate(
   let packet_path = detached_import_packet_path_for_execution(execution)
   let packet_path_matches = !packet_path.trim().is_empty()
   execution.run_id is None &&
-  !live_execution_status(execution.status) &&
+  !@core.live_execution_status(execution.status) &&
   execution.result_decision == "deferred-transient-infrastructure" &&
   (command_matches || packet_path_matches)
 }
@@ -74,7 +74,8 @@ async fn reconcile_detached_import_receipt_if_available(
         status=receipt.status,
         summary~,
         heartbeat_tick=tick,
-        stale_after_tick=tick + polled_execution_stale_window_ticks(execution),
+        stale_after_tick=tick +
+          @core.polled_execution_stale_window_ticks(execution),
         result_decision=if receipt.status ==
           @core.TaskExecutionStatus::Completed {
           "completed"

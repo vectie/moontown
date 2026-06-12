@@ -124,7 +124,7 @@ async test "cap deferred standing goals stay due and are not marked run" {
     "/tmp/moontown-standing-cap-deferral-check",
   )
   let state = runtime_status_test_state()
-  for index in 0..<max_live_external_executions() {
+  for index in 0..<@core.max_live_external_executions() {
     state.register_execution(
       runtime_status_test_execution(
         "live-external-\{index}",

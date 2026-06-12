@@ -35,12 +35,13 @@ async fn build_live_state_from_catalog(
         break
       }
       let task = town_scoped_book_task(entry, raw_task)
-      if live_external_execution_count(state) >= max_live_external_executions() {
+      if @core.live_external_execution_count(state) >=
+        @core.max_live_external_executions() {
         let queued_execution = queued_goal_execution_record(
           entry,
           task,
           supervision_tick(state),
-          "Mayor queued \{task.id} during catalog bootstrap because live external execution count reached \{max_live_external_executions()}; the supervision loop will launch it when capacity is available.",
+          "Mayor queued \{task.id} during catalog bootstrap because live external execution count reached \{@core.max_live_external_executions()}; the supervision loop will launch it when capacity is available.",
         )
         state.enqueue_task(
           to_town_task(entry, task, @core.TaskExecutionStatus::PacketReady),

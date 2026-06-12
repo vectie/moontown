@@ -132,12 +132,13 @@ async fn apply_mayor_supervision_directive_with_cap(
   standing_goals : Array[@core.StandingGoal],
 ) -> Unit {
   if directive.kind == "retry-execution" &&
-    live_external_execution_count(state) >= max_live_external_executions() {
+    @core.live_external_execution_count(state) >=
+    @core.max_live_external_executions() {
     state.record_event(
       @core.TownEvent::new(
         id="event-supervise-\{directive.task_id}-retry-deferred-cap",
         kind="supervision",
-        detail="Mayor deferred retry for \{directive.task_id} because live external execution count reached \{max_live_external_executions()}.",
+        detail="Mayor deferred retry for \{directive.task_id} because live external execution count reached \{@core.max_live_external_executions()}.",
         related_task_id=Some(directive.task_id),
       ),
     )

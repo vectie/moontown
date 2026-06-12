@@ -8,7 +8,7 @@ async fn reconcile_live_executions(
 ) -> Unit {
   let snapshot = state.executions.copy()
   for execution in snapshot {
-    if !pollable_execution_status(execution.status) {
+    if !@core.pollable_execution_status(execution.status) {
       continue
     }
     match execution.run_id {
@@ -41,11 +41,11 @@ async fn reconcile_run_backed_live_execution(
     status=polled.status,
     summary=polled.summary,
     heartbeat_tick=tick,
-    stale_after_tick=tick + polled_execution_stale_window_ticks(execution),
+    stale_after_tick=tick + @core.polled_execution_stale_window_ticks(execution),
   )
   replace_execution_task_and_worker(state, updated)
   if updated.status != execution.status &&
-    terminal_execution_status(updated.status) {
+    @core.terminal_execution_status(updated.status) {
     reconcile_terminal_live_execution(
       state, catalog, snapshot_path, standing_goals, updated,
     )
@@ -128,7 +128,7 @@ async fn reconcile_no_run_id_live_execution(
       return
     }
   }
-  if no_run_id_live_execution_stale(execution, tick) {
+  if @core.no_run_id_live_execution_stale(execution, tick) {
     fail_stale_no_run_id_execution(state, execution, tick)
   }
 }

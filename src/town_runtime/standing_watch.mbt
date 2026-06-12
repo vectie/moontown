@@ -100,7 +100,7 @@ async fn run_standing_goal_watch_cycle(
     )
   }
   collapse_standing_watch_book_history(entry, observed_execution)
-  if terminal_execution_status(observed_execution.status) {
+  if @core.terminal_execution_status(observed_execution.status) {
     finalize_goal_book_entry(state, entry, 0, [stabilized_execution.task_id])
   }
   record_completed_standing_watch_cycle(

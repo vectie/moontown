@@ -46,6 +46,8 @@ Purpose:
 - `BookProvider` abstraction
 - town/book/worker/task/event records
 - pure lifecycle policy for mapping execution status into town task status
+- shared execution-status predicates, stale-window defaults, retry-pending
+  detection, and live external execution cap/counting
 
 Important public types:
 
@@ -66,9 +68,11 @@ Boundary:
 - `src/core` owns generic lifecycle translation such as
   `TaskExecutionStatus` to `TownTaskStatus` and safe task-status copying,
   because that mapping is part of the shared town data model.
+- `src/core` owns generic execution-status categories such as terminal, live,
+  pollable, retry-pending, no-run stale, and live external execution capacity.
 - `src/town_runtime` may apply those pure helpers while polling and
   supervising runs, but it should not maintain a second execution-to-task
-  status table.
+  status table, live-run cap, or stale-window table.
 
 ## Dispatch
 

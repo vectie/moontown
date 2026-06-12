@@ -17,7 +17,8 @@ async fn dispatch_due_standing_goals(
         updated.push(goal)
         continue
       }
-      if live_external_execution_count(state) >= max_live_external_executions() {
+      if @core.live_external_execution_count(state) >=
+        @core.max_live_external_executions() {
         record_standing_goal_dispatch_deferred_for_capacity(state, goal, tick)
         updated.push(goal)
         continue
@@ -62,7 +63,7 @@ fn record_standing_goal_dispatch_deferred_for_capacity(
     @core.TownEvent::new(
       id="event-standing-goal-\{tick}-\{goal.id}-deferred-cap",
       kind="standing-goal",
-      detail="Mayor deferred standing goal \{goal.id} because live external execution count reached \{max_live_external_executions()}.",
+      detail="Mayor deferred standing goal \{goal.id} because live external execution count reached \{@core.max_live_external_executions()}.",
       related_book_id=goal.target_book_id,
     ),
   )

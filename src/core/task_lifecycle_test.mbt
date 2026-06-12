@@ -59,3 +59,92 @@ test "copy task with status preserves task identity and routing fields" {
   assert_eq(copied.required_capabilities[0], "codex")
   assert_eq(copied.status, TownTaskStatus::Done)
 }
+
+///|
+test "execution lifecycle predicates classify terminal live and pollable states" {
+  assert_true(terminal_execution_status(TaskExecutionStatus::Completed))
+  assert_true(terminal_execution_status(TaskExecutionStatus::Failed))
+  assert_true(terminal_execution_status(TaskExecutionStatus::Stale))
+  assert_true(!terminal_execution_status(TaskExecutionStatus::Running))
+  assert_true(live_execution_status(TaskExecutionStatus::ProposalImported))
+  assert_true(live_execution_status(TaskExecutionStatus::RunConfirmed))
+  assert_true(live_execution_status(TaskExecutionStatus::Running))
+  assert_true(!live_execution_status(TaskExecutionStatus::ReviewQueued))
+  assert_true(pollable_execution_status(TaskExecutionStatus::Running))
+  assert_true(pollable_execution_status(TaskExecutionStatus::Stale))
+  assert_true(!pollable_execution_status(TaskExecutionStatus::Completed))
+}
+
+///|
+test "execution stale windows distinguish imported runs from no-run snapshots" {
+  let with_run = TaskExecutionRecord::new(
+    task_id="task-run",
+    book_id="book",
+    packet_id="packet",
+    packet_path="packet.json",
+    status=TaskExecutionStatus::Running,
+    summary="running",
+    output_contract="test",
+    run_id=Some("run-1"),
+    heartbeat_tick=10,
+    stale_after_tick=130,
+  )
+  let without_run = TaskExecutionRecord::new(
+    task_id="task-pending",
+    book_id="book",
+    packet_id="packet",
+    packet_path="packet.json",
+    status=TaskExecutionStatus::Running,
+    summary="running",
+    output_contract="test",
+    heartbeat_tick=10,
+    stale_after_tick=130,
+  )
+  assert_eq(polled_execution_stale_window_ticks(with_run), 120)
+  assert_eq(polled_execution_stale_window_ticks(without_run), 15)
+  assert_true(!no_run_id_live_execution_stale(without_run, 24))
+  assert_true(no_run_id_live_execution_stale(without_run, 25))
+  assert_true(!no_run_id_live_execution_stale(with_run, 129))
+  assert_true(no_run_id_live_execution_stale(with_run, 130))
+}
+
+///|
+test "town execution aggregation counts only live external runs" {
+  let state = empty_state(TownConfig::new(id="town", name="Town"))
+  let live_with_run = TaskExecutionRecord::new(
+    task_id="task-live-run",
+    book_id="book",
+    packet_id="packet",
+    packet_path="packet.json",
+    status=TaskExecutionStatus::Running,
+    summary="running",
+    output_contract="test",
+    run_id=Some("run-1"),
+  )
+  let live_without_run = TaskExecutionRecord::new(
+    task_id="task-live-pending",
+    book_id="book",
+    packet_id="packet",
+    packet_path="packet.json",
+    status=TaskExecutionStatus::Running,
+    summary="running",
+    output_contract="test",
+  )
+  let retryable = TaskExecutionRecord::new(
+    task_id="task-retry",
+    book_id="book",
+    packet_id="packet",
+    packet_path="packet.json",
+    status=TaskExecutionStatus::Failed,
+    summary="failed",
+    output_contract="test",
+    attempt=1,
+    next_retry_tick=Some(30),
+  )
+  state.replace_execution(live_with_run)
+  state.replace_execution(live_without_run)
+  state.replace_execution(retryable)
+  assert_eq(live_external_execution_count(state), 1)
+  assert_true(has_live_executions(state))
+  assert_true(has_retry_pending_executions(state, 20))
+}

@@ -15,17 +15,37 @@ pub fn copy_task_with_status(TownTask, TownTaskStatus) -> TownTask
 
 pub fn empty_state(TownConfig) -> TownState
 
+pub fn external_execution_stale_window_ticks() -> Int
+
 pub fn find_execution(TownState, String) -> TaskExecutionRecord?
 
 pub fn find_task(TownState, String) -> TownTask?
 
+pub fn has_live_executions(TownState) -> Bool
+
+pub fn has_retry_pending_executions(TownState, Int) -> Bool
+
 pub fn json_object_copy(Json?) -> Map[String, Json]
+
+pub fn live_execution_status(TaskExecutionStatus) -> Bool
+
+pub fn live_external_execution_count(TownState) -> Int
+
+pub fn max_live_external_executions() -> Int
+
+pub fn no_run_id_live_execution_stale(TaskExecutionRecord, Int) -> Bool
+
+pub fn pollable_execution_status(TaskExecutionStatus) -> Bool
+
+pub fn polled_execution_stale_window_ticks(TaskExecutionRecord) -> Int
 
 pub fn standing_goal_registry_find(Array[StandingGoal], String) -> StandingGoal?
 
 pub fn standing_goal_registry_merge_updates(Array[StandingGoal], Array[StandingGoal]) -> Array[StandingGoal]
 
 pub fn standing_goal_registry_replace_or_append(Array[StandingGoal], StandingGoal) -> Array[StandingGoal]
+
+pub fn terminal_execution_status(TaskExecutionStatus) -> Bool
 
 pub fn town_task_status_for_execution(TaskExecutionStatus) -> TownTaskStatus
 

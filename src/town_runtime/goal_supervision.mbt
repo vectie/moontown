@@ -35,13 +35,13 @@ async fn wait_for_goal_settle(
   for cycle = 0; cycle < cycles; cycle = cycle + 1 {
     run_supervision_cycle(state, mayor, catalog, snapshot_path~)
     persist_town_checkpoint(state, snapshot_path)
-    if !has_live_executions(state) &&
-      !has_retry_pending_executions(state, supervision_tick(state)) {
+    if !@core.has_live_executions(state) &&
+      !@core.has_retry_pending_executions(state, supervision_tick(state)) {
       return
     }
     @async.sleep(sleep_ms)
   }
-  if has_live_executions(state) {
+  if @core.has_live_executions(state) {
     state.record_event(
       @core.TownEvent::new(
         id="event-settle-timeout-\{supervision_tick(state)}",

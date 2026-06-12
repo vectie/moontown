@@ -10,11 +10,6 @@ fn moontown_moonclaw_inline_enabled() -> Bool {
 }
 
 ///|
-fn external_execution_stale_window_ticks() -> Int {
-  30
-}
-
-///|
 fn moontown_moonclaw_supervision_seconds() -> Int {
   match optional_env_text("MOONTOWN_MOONCLAW_SUPERVISION_SECONDS") {
     Some(value) => parse_non_negative_seconds(value, fallback=0)

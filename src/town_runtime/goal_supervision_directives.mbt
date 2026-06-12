@@ -125,7 +125,7 @@ async fn retry_execution(
     state.replace_task(task_for_supervision(state, reconciled))
     sync_worker_from_execution(state, reconciled)
   }
-  if terminal_execution_status(updated.status) {
+  if @core.terminal_execution_status(updated.status) {
     finalize_goal_book_entry(state, entry, 0, [reconciled.task_id])
     let observed = finalize_standing_watch_supervision_record(
       state, entry, reconciled, standing_goals, snapshot_path,
