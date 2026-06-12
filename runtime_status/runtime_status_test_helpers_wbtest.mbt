@@ -56,3 +56,46 @@ fn runtime_status_standing_goal(
     last_run_tick~,
   )
 }
+
+///|
+fn runtime_status_watcher_record(
+  goal_id~ : String,
+  tick~ : Int,
+  book_id~ : String,
+  decision~ : @core.WatcherDecisionKind,
+  detail? : String = "",
+  delta_score? : Int = 0,
+  new_source_count? : Int = 0,
+  task_id? : String? = None,
+  run_id? : String? = None,
+  next_due_tick~ : Int,
+) -> @core.WatcherRunRecord {
+  @core.WatcherRunRecord::new(
+    goal_id~,
+    tick~,
+    target_book_id=book_id,
+    decision~,
+    detail~,
+    delta_score~,
+    new_source_count~,
+    task_id~,
+    run_id~,
+    next_due_tick~,
+  )
+}
+
+///|
+fn runtime_status_standing_watch_execution(
+  task_id : String,
+  status : @core.TaskExecutionStatus,
+  summary : String,
+) -> @core.TaskExecutionRecord {
+  runtime_status_test_execution(
+    task_id,
+    "research-opc",
+    "packet",
+    status,
+    summary,
+    output_contract="standing-watch",
+  )
+}

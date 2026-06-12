@@ -1,0 +1,36 @@
+// Generated using `moon info`, DON'T EDIT IT
+package "vectie/moontown/runtime_status"
+
+import {
+  "vectie/moontown/book_templates",
+  "vectie/moontown/core",
+  "vectie/moontown/runtime_status_policy",
+  "vectie/moontown/scheduler",
+}
+
+// Values
+pub fn daemon_rebased_to_tick_floor(@scheduler.DaemonState, Int) -> @scheduler.DaemonState
+
+pub async fn daemon_tick_floor(String, String, @scheduler.DaemonState, Array[@core.StandingGoal], Array[@core.WatcherRunRecord], @core.TownState) -> Int
+
+pub async fn effective_daemon_tick(String, @scheduler.DaemonState, @core.TownState, Array[@core.StandingGoal], Array[@core.WatcherRunRecord]) -> Int
+
+pub async fn inspect_saved_town(snapshot_path? : String) -> @runtime_status_policy.TownRuntimeStatus
+
+pub async fn render_saved_town_status(snapshot_path? : String) -> String
+
+pub fn runtime_status_from_state(@core.TownState, String, standing_goals? : Array[@core.StandingGoal], daemon_tick? : Int, watcher_records? : Array[@core.WatcherRunRecord], book_template_request_status? : @book_templates.BookTemplateRequestStatus?) -> @runtime_status_policy.TownRuntimeStatus
+
+pub fn tick_from_task_id(String) -> Int
+
+pub fn watcher_status_summary(Array[@core.WatcherRunRecord], Array[@core.StandingGoal]) -> String
+
+// Errors
+
+// Types and methods
+
+// Type aliases
+pub using @runtime_status_policy {type TownRuntimeStatus}
+
+// Traits
+

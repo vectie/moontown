@@ -126,7 +126,7 @@ test "standing watch detached startup-log failure record stays deferred accounti
     @standing_watch_policy.watcher_record_effective_decision(record),
     @core.WatcherDecisionKind::Deferred,
   )
-  let summary = watcher_status_summary([record], [])
+  let summary = @runtime_status.watcher_status_summary([record], [])
   assert_true(summary.contains("latest=watch-opc-news/Deferred"))
   assert_true(!summary.contains("Failed"))
 }

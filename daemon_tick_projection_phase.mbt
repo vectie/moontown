@@ -41,7 +41,7 @@ async fn run_daemon_projection_phase(
   )
   @visual_projection.persist_visual_projection(state, snapshot_path)
   persist_town_checkpoint(state, snapshot_path)
-  render_saved_town_status(snapshot_path~)
+  @runtime_status.render_saved_town_status(snapshot_path~)
 }
 
 ///|

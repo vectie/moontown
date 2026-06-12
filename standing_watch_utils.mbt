@@ -1,23 +1,4 @@
 ///|
-fn first_non_negative_int(text : String) -> Int? {
-  let mut seen = false
-  let mut value = 0
-  for char in text {
-    if char >= '0' && char <= '9' {
-      value = value * 10 + (char.to_int() - '0'.to_int())
-      seen = true
-    } else if seen {
-      return Some(value)
-    }
-  }
-  if seen {
-    Some(value)
-  } else {
-    None
-  }
-}
-
-///|
 async fn append_standing_watch_record(
   goal_id : String,
   ledger_dir : String,

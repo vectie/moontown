@@ -1,5 +1,5 @@
 ///|
-async fn effective_daemon_tick(
+pub async fn effective_daemon_tick(
   snapshot_path : String,
   daemon : @scheduler.DaemonState,
   state : @core.TownState,
@@ -27,7 +27,7 @@ async fn effective_daemon_tick(
 }
 
 ///|
-async fn daemon_tick_floor(
+pub async fn daemon_tick_floor(
   snapshot_path : String,
   log_path : String,
   daemon : @scheduler.DaemonState,
@@ -52,7 +52,7 @@ async fn daemon_tick_floor(
 }
 
 ///|
-fn daemon_rebased_to_tick_floor(
+pub fn daemon_rebased_to_tick_floor(
   daemon : @scheduler.DaemonState,
   tick_floor : Int,
 ) -> @scheduler.DaemonState {
@@ -82,7 +82,7 @@ fn latest_execution_task_tick(state : @core.TownState) -> Int {
 }
 
 ///|
-fn tick_from_task_id(task_id : String) -> Int {
+pub fn tick_from_task_id(task_id : String) -> Int {
   if !task_id.contains("-tick-") {
     return 0
   }
@@ -94,5 +94,24 @@ fn tick_from_task_id(task_id : String) -> Int {
         None => 0
       }
     None => 0
+  }
+}
+
+///|
+fn first_non_negative_int(text : String) -> Int? {
+  let mut seen = false
+  let mut value = 0
+  for char in text {
+    if char >= '0' && char <= '9' {
+      value = value * 10 + (char.to_int() - '0'.to_int())
+      seen = true
+    } else if seen {
+      return Some(value)
+    }
+  }
+  if seen {
+    Some(value)
+  } else {
+    None
   }
 }

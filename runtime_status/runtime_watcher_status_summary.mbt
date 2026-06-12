@@ -1,5 +1,5 @@
 ///|
-fn watcher_status_summary(
+pub fn watcher_status_summary(
   records : Array[@core.WatcherRunRecord],
   goals : Array[@core.StandingGoal],
 ) -> String {

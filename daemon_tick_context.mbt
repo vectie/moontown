@@ -37,7 +37,7 @@ async fn prepare_daemon_tick_context(
   )
   let state = load_or_create_demo_state(path=snapshot_path, book_catalog_path~)
   let loaded_daemon = @daemon_runtime.load_daemon_state(paths.daemon_path)
-  let tick_floor = daemon_tick_floor(
+  let tick_floor = @runtime_status.daemon_tick_floor(
     snapshot_path,
     paths.log_path,
     loaded_daemon,
@@ -45,7 +45,9 @@ async fn prepare_daemon_tick_context(
     watcher_records_for_floor,
     state,
   )
-  let daemon = daemon_rebased_to_tick_floor(loaded_daemon, tick_floor)
+  let daemon = @runtime_status.daemon_rebased_to_tick_floor(
+    loaded_daemon, tick_floor,
+  )
   if daemon.tick_sequence > loaded_daemon.tick_sequence {
     @daemon_runtime.save_daemon_state(paths.daemon_path, daemon)
   }

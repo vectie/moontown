@@ -20,7 +20,7 @@ async fn render_live_command(args : Array[String]) -> String {
 ///|
 async fn render_daemon_command(args : Array[String]) -> String {
   match args {
-    [] | ["status"] => @moontown.render_saved_town_status()
+    [] | ["status"] => @runtime_status.render_saved_town_status()
     ["tick"] => @moontown.daemon_tick_saved_town()
     ["start"] => @daemon_runtime.daemon_start_saved_town()
     ["restart"] =>

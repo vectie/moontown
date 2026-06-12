@@ -8,7 +8,7 @@ test "runtime status includes due standing goal actions" {
     book_id="research-opc",
     next_due_tick=1,
   )
-  let status = runtime_status_from_state(
+  let status = @runtime_status.runtime_status_from_state(
     state,
     "/tmp/town.json",
     standing_goals=[goal],
