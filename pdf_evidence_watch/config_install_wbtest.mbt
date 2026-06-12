@@ -25,7 +25,7 @@ async test "install pdf evidence watch book from moondesk config file" {
     book_catalog_path=catalog_path,
     standing_goal_path=goals_path,
   )
-  assert_true(summary.contains(@book_templates.install_success_marker()))
+  assert_true(summary.contains("book_template_install_status: installed"))
   assert_true(summary.contains("Installed PDF Evidence Watch config"))
   let config = read_text_or_empty("\{workspace_root}/book.json")
   assert_true(config.contains("https://example.net/papers"))

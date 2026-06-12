@@ -14,6 +14,59 @@ fn test_standing_goal(
 }
 
 ///|
+fn standing_goal_registry_upsert(
+  goals : Array[@core.StandingGoal],
+  replacement : @core.StandingGoal,
+) -> Array[@core.StandingGoal] {
+  let updated : Array[@core.StandingGoal] = []
+  for goal in goals {
+    if goal.id != replacement.id {
+      updated.push(goal)
+    }
+  }
+  updated.push(replacement)
+  updated
+}
+
+///|
+fn standing_goal_registry_with_enabled(
+  goal : @core.StandingGoal,
+  enabled : Bool,
+) -> @core.StandingGoal {
+  @core.StandingGoal::new(
+    id=goal.id,
+    title=goal.title,
+    prompt=goal.prompt,
+    target_book_id=goal.target_book_id,
+    cadence_ticks=goal.cadence_ticks,
+    next_due_tick=goal.next_due_tick,
+    last_run_tick=goal.last_run_tick,
+    enabled~,
+    source_policy=goal.source_policy,
+    quality_threshold=goal.quality_threshold,
+  )
+}
+
+///|
+fn standing_goal_registry_contains(
+  goals : Array[@core.StandingGoal],
+  goal_id : String,
+) -> Bool {
+  standing_goal_registry_find(goals, goal_id) is Some(_)
+}
+
+///|
+fn standing_goal_registry_enabled(
+  goals : Array[@core.StandingGoal],
+  goal_id : String,
+) -> Bool {
+  match standing_goal_registry_find(goals, goal_id) {
+    Some(goal) => goal.enabled
+    None => false
+  }
+}
+
+///|
 test "standing goal registry upsert replaces matching id" {
   let original = test_standing_goal("same", cadence_ticks=10)
   let other = test_standing_goal("other", cadence_ticks=20)

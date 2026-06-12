@@ -16,6 +16,6 @@ pub fn default_pdf_evidence_watch_workspace_root(
 }
 
 ///|
-fn default_pdf_evidence_watch_purpose() -> String {
+pub fn default_pdf_evidence_watch_purpose() -> String {
   "Standing MoonBook workspace for website-driven PDF discovery, download, extraction, method-specific analysis, durable findings, and operator notification when accepted new knowledge appears."
 }

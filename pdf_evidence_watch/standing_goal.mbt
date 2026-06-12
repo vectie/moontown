@@ -43,59 +43,6 @@ fn pdf_evidence_watch_goal_enabled_in(
 }
 
 ///|
-fn disable_pdf_evidence_watch_book_standing_goals(
-  goals : Array[@core.StandingGoal],
-  book_id : String,
-) -> Array[@core.StandingGoal] {
-  let updated : Array[@core.StandingGoal] = []
-  for goal in goals {
-    if pdf_evidence_watch_should_disable_goal_for_book(goal, book_id) {
-      updated.push(standing_goal_registry_with_enabled(goal, false))
-    } else {
-      updated.push(goal)
-    }
-  }
-  updated
-}
-
-///|
-fn pdf_evidence_watch_should_disable_goal_for_book(
-  goal : @core.StandingGoal,
-  book_id : String,
-) -> Bool {
-  if goal.id == pdf_evidence_watch_goal_id(book_id) {
-    return true
-  }
-  if goal.id == @book_quality.repair_goal_id(book_id) {
-    return true
-  }
-  match goal.target_book_id {
-    Some(target) => target == book_id
-    None => false
-  }
-}
-
-///|
-fn count_disabled_pdf_evidence_watch_book_standing_goals(
-  before : Array[@core.StandingGoal],
-  after : Array[@core.StandingGoal],
-  book_id : String,
-) -> Int {
-  let mut count = 0
-  for goal in before {
-    if goal.enabled &&
-      pdf_evidence_watch_should_disable_goal_for_book(goal, book_id) {
-      for candidate in after {
-        if candidate.id == goal.id && !candidate.enabled {
-          count += 1
-        }
-      }
-    }
-  }
-  count
-}
-
-///|
 fn pdf_evidence_watch_goal_id(book_id : String) -> String {
   "watch-\{book_id}-pdfs"
 }

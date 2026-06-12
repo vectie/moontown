@@ -17,7 +17,7 @@ async test "app tool book bootstraps durable app and civic manifest" {
     standing_goal_path=goals_path,
     workspace_root~,
   )
-  assert_true(summary.contains(@book_templates.install_success_marker()))
+  assert_true(summary.contains("book_template_install_status: installed"))
   assert_true(summary.contains("Bootstrapped App ToolBook"))
   let status = inspect_app_tool_book(
     book_id="toolbook-opc-dashboard",
@@ -46,7 +46,7 @@ async test "app tool book config installer resolves method and spec files" {
   let workspace_root = "\{base}/workspace"
   write_text_file(method_path, "# File Method\n\nUse file method.")
   write_text_file(spec_path, "# File Tool Spec\n\nUse file tool spec.")
-  let spec = @app_tool_book.AppToolBookInstallSpec::{
+  let spec = AppToolBookInstallSpec::{
     book_id: "toolbook-file-config",
     title: "File Config ToolBook",
     purpose: "Installed from a Moondesk-style config.",
@@ -65,7 +65,7 @@ async test "app tool book config installer resolves method and spec files" {
     book_catalog_path=catalog_path,
     standing_goal_path=goals_path,
   )
-  assert_true(summary.contains(@book_templates.install_success_marker()))
+  assert_true(summary.contains("book_template_install_status: installed"))
   assert_true(summary.contains("Installed App ToolBook config"))
   assert_true(
     read_text_or_empty("\{workspace_root}/wiki/methods/analysis-method.md").contains(
@@ -83,11 +83,11 @@ async test "app tool book config installer resolves method and spec files" {
 async test "app tool book status helper reports required path gaps" {
   let root = "/tmp/moontown-app-tool-book-status-helper-wbtest"
   ignore_checked_command("rm", ["-rf", root])
-  let missing_before = @app_tool_book.missing_required_paths(root)
-  assert_eq(missing_before.length(), @app_tool_book.required_paths().length())
+  let missing_before = missing_required_paths(root)
+  assert_eq(missing_before.length(), required_paths().length())
   write_text_file("\{root}/book.json", "{}")
   write_text_file("\{root}/tool-manifest.json", "{}")
-  let missing_after = @app_tool_book.missing_required_paths(root)
+  let missing_after = missing_required_paths(root)
   assert_true(missing_after.length() < missing_before.length())
   assert_true(!missing_after.contains("book.json"))
   assert_true(!missing_after.contains("tool-manifest.json"))

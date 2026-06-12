@@ -40,7 +40,7 @@ pub async fn bootstrap_pdf_evidence_watch_book(
     standing_goal_path~,
   )
   [
-    @book_templates.install_success_marker(),
+    "book_template_install_status: installed",
     "Bootstrapped PDF Evidence Watch book `\{book_id}`.",
     "- Workspace: `\{root}`",
     "- Catalog: `\{book_catalog_path}`",

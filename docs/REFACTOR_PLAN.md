@@ -316,8 +316,17 @@ Goals:
   keep default path shim functions for book-template registry, request inbox, or
   request-event paths;
   unknown-template and registered-without-installer outcome wording is
-  package-owned, while root installer dispatch remains concrete
-  IO/orchestration
+  package-owned; concrete template runtime dispatch, request processing,
+  request reconciliation, request status rendering, registry rendering, and
+  installer dispatch are now package-owned too, while root keeps only
+  CLI-compatible wrapper functions
+- keep App ToolBook bootstrap/install/status/workspace behavior in
+  `app_tool_book/`; root may expose wrappers for existing commands, but should
+  not carry generated-tool book runtime implementation
+- keep PDF Evidence Watch bootstrap/install/status/workspace behavior in
+  `pdf_evidence_watch/`; root may coordinate archive lifecycle events because
+  archiving crosses book-template request logs, standing goals, and catalog
+  tags
 
 Acceptance:
 

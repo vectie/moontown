@@ -153,6 +153,11 @@ book owns. The implementation now has a first-class `policy` package:
   names plus path derivation from observed snapshot/request paths. Root may
   supply the current snapshot path, but it should not duplicate those filenames
   or keep root-local default path shim functions.
+- [book_templates/](/Users/kq/Workspace/moontown/book_templates)
+  also owns concrete template runtime dispatch, request processing, request
+  reconciliation, request status rendering, registry rendering, and installer
+  dispatch. Root Moontown may expose CLI-compatible wrapper functions, but it
+  should not keep template lifecycle code in the root package.
 - [app_tool_book/contracts.mbt](/Users/kq/Workspace/moontown/app_tool_book/contracts.mbt)
   owns App ToolBook defaults, required workspace paths, template-copy path
   policy, config/manifest schema construction, catalog-identity-aware config
@@ -175,6 +180,16 @@ book owns. The implementation now has a first-class `policy` package:
   construction policy, and goal-list membership/enabled checks. Root may
   persist those goals, but it must not fork the loop instructions or goal
   semantics.
+- [app_tool_book/](/Users/kq/Workspace/moontown/app_tool_book)
+  owns App ToolBook bootstrap, config installation, workspace materialization,
+  status inspection, and status rendering. Root Moontown may keep wrapper
+  functions for existing commands, but generated-tool book behavior belongs in
+  this package.
+- [pdf_evidence_watch/](/Users/kq/Workspace/moontown/pdf_evidence_watch)
+  owns PDF Evidence Watch bootstrap, config installation, workspace
+  materialization, standing-watch goal construction, and status inspection.
+  Root Moontown may coordinate archive lifecycle events because archiving spans
+  catalog state, standing-goal state, and book-template request-event logs.
 - [cookbook/](/Users/kq/Workspace/moontown/cookbook)
   owns Cookbook DTOs, stable-state artifact summary accounting, and the
   operator-facing Cookbook status Markdown. Root Moontown may discover artifact

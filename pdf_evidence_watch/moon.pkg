@@ -1,12 +1,12 @@
 import {
+  "moonbitlang/async/fs",
   "moonbitlang/core/env",
   "moonbitlang/core/encoding/utf8" @encoding/utf8,
-  "vectie/moontown/core",
-  "vectie/moontown/adapters/moonbook",
-  "vectie/moontown/storage",
-  "moonbitlang/async/fs",
   "moonbitlang/core/json",
   "moonbitlang/x/path",
+  "vectie/moontown/adapters/moonbook",
+  "vectie/moontown/core",
+  "vectie/moontown/storage",
 }
 
 import {

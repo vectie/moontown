@@ -2,7 +2,7 @@
 async test "book template request inbox reports empty ledger through shared summary" {
   let base = "/tmp/moontown-book-template-empty-request-wbtest"
   let request_path = "\{base}/book-template-requests.json"
-  @book_templates.save_request_ledger(request_path, { requests: [] })
+  save_request_ledger(request_path, { requests: [] })
   assert_eq(
     process_book_template_requests(request_path~),
     "Processed 0 book template request(s); reconciled_events=0 pending=0 installed=0 failed=0.",
@@ -21,7 +21,7 @@ async test "book template request inbox processes pending requests" {
   write_text_file(
     method_path, "# Request Method\n\nUpdate only on real deltas.",
   )
-  let spec = PdfEvidenceWatchInstallSpec::{
+  let spec = @pdf_evidence_watch.PdfEvidenceWatchInstallSpec::{
     book_id: "research-request-pdfs",
     title: "Request PDF Watch",
     purpose: "Installed from the book-template request inbox.",
@@ -32,13 +32,13 @@ async test "book template request inbox processes pending requests" {
     workspace_root,
   }
   write_text_file(config_path, spec.to_json().stringify(indent=2))
-  @book_templates.save_request_ledger(request_path, {
+  save_request_ledger(request_path, {
     requests: [
       {
         id: "request-pdf-watch",
         template_id: "pdf-evidence-watch",
         config_path: "pdf-watch.json",
-        status: @book_templates.request_status_pending(),
+        status: request_status_pending(),
         summary: "",
         last_processed_tick: 0,
       },
@@ -56,15 +56,10 @@ async test "book template request inbox processes pending requests" {
   assert_true(status.contains("last_processed_tick") == false)
   assert_true(status.contains("book-template-request-events.jsonl"))
   assert_true(status.contains("installed: `request-pdf-watch` tick=42"))
-  assert_true(
-    @fs.exists(@book_templates.request_event_path_for_request(request_path)),
-  )
+  assert_true(@fs.exists(request_event_path_for_request(request_path)))
   assert_true(@fs.exists("\{workspace_root}/book.json"))
-  let ledger = @book_templates.load_request_ledger(request_path)
-  assert_eq(
-    ledger.requests[0].status,
-    @book_templates.request_status_installed(),
-  )
+  let ledger = load_request_ledger(request_path)
+  assert_eq(ledger.requests[0].status, request_status_installed())
   assert_eq(ledger.requests[0].last_processed_tick, 42)
 }
 
@@ -90,13 +85,13 @@ async test "book template request inbox processes app tool book requests" {
     workspace_root,
   }
   write_text_file(config_path, spec.to_json().stringify(indent=2))
-  @book_templates.save_request_ledger(request_path, {
+  save_request_ledger(request_path, {
     requests: [
       {
         id: "request-app-tool",
         template_id: "app-tool-book",
         config_path: "app-tool.json",
-        status: @book_templates.request_status_pending(),
+        status: request_status_pending(),
         summary: "",
         last_processed_tick: 0,
       },
@@ -119,19 +114,19 @@ async test "book template request inbox processes app tool book requests" {
 async test "book template request processor backfills missing terminal events" {
   let base = "/tmp/moontown-book-template-request-event-backfill-wbtest"
   let request_path = "\{base}/book-template-requests.json"
-  let event_path = @book_templates.request_event_path_for_request(request_path)
+  let event_path = request_event_path_for_request(request_path)
   if @fs.exists(event_path) {
     @fs.remove(event_path) catch {
       _ => ()
     }
   }
-  @book_templates.save_request_ledger(request_path, {
+  save_request_ledger(request_path, {
     requests: [
       {
         id: "already-installed",
         template_id: "pdf-evidence-watch",
         config_path: "\{base}/installed.json",
-        status: @book_templates.request_status_installed(),
+        status: request_status_installed(),
         summary: "Installed earlier.",
         last_processed_tick: 7,
       },

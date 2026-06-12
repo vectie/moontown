@@ -1,6 +1,6 @@
 ///|
 async test "book template registry exposes pdf evidence watch template" {
-  let registry = @book_templates.inspect_registry()
+  let registry = inspect_registry()
   assert_true(registry.ready)
   assert_eq(registry.missing_count, 0)
   let mut found = false
@@ -28,7 +28,7 @@ async test "book template registry exposes pdf evidence watch template" {
 
 ///|
 async test "book template registry reports missing manifest as not ready" {
-  let registry = @book_templates.inspect_registry(
+  let registry = inspect_registry(
     registry_path="/tmp/moontown-missing-book-template-registry.json",
   )
   assert_false(registry.ready)
@@ -47,7 +47,7 @@ async test "generic book template installer dispatches pdf evidence watch" {
   write_text_file(
     method_path, "# Registry Method\n\nPromote only durable deltas.",
   )
-  let spec = PdfEvidenceWatchInstallSpec::{
+  let spec = @pdf_evidence_watch.PdfEvidenceWatchInstallSpec::{
     book_id: "research-registry-pdfs",
     title: "Registry PDF Watch",
     purpose: "Installed through generic template registry.",
@@ -64,7 +64,7 @@ async test "generic book template installer dispatches pdf evidence watch" {
     book_catalog_path=catalog_path,
     standing_goal_path=goals_path,
   )
-  assert_true(summary.contains(@book_templates.install_success_marker()))
+  assert_true(summary.contains(install_success_marker()))
   assert_true(summary.contains("Installed PDF Evidence Watch config"))
   assert_true(@fs.exists("\{workspace_root}/book.json"))
   let method_text = read_text_or_empty(
@@ -104,7 +104,7 @@ async test "generic book template installer dispatches app tool book" {
     book_catalog_path=catalog_path,
     standing_goal_path=goals_path,
   )
-  assert_true(summary.contains(@book_templates.install_success_marker()))
+  assert_true(summary.contains(install_success_marker()))
   assert_true(summary.contains("Installed App ToolBook config"))
   assert_true(@fs.exists("\{workspace_root}/tool-manifest.json"))
   assert_true(@fs.exists("\{workspace_root}/book/site/generated/tool.html"))
@@ -134,8 +134,5 @@ async test "generic book template installer reports registered templates without
     book_catalog_path="\{base}/catalog.json",
     standing_goal_path="\{base}/standing-goals.json",
   )
-  assert_eq(
-    summary,
-    @book_templates.registered_without_installer_summary("experimental-only"),
-  )
+  assert_eq(summary, registered_without_installer_summary("experimental-only"))
 }

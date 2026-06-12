@@ -21,7 +21,11 @@ pub fn empty_request_status(request_path~ : String, event_path~ : String) -> Boo
 
 pub fn find_registry_descriptor(Array[BookTemplateDescriptor], String) -> BookTemplateDescriptor?
 
+pub async fn inspect_book_template_request_status(request_path? : String) -> BookTemplateRequestStatus
+
 pub async fn inspect_registry(registry_path? : String) -> BookTemplateRegistry
+
+pub async fn install_book_template_config(String, String, registry_path? : String, book_catalog_path? : String, standing_goal_path? : String) -> String
 
 pub fn install_status_for_summary(String) -> String
 
@@ -39,11 +43,17 @@ pub async fn load_request_event_request_ids(String) -> Array[String]
 
 pub async fn load_request_ledger(String) -> BookTemplateRequestLedger
 
+pub async fn process_book_template_requests(request_path? : String, registry_path? : String, book_catalog_path? : String, standing_goal_path? : String, tick? : Int) -> String
+
 pub fn registered_without_installer_summary(String) -> String
 
 pub fn registry_from_observed(registry_path~ : String, templates~ : Array[BookTemplateDescriptor], missing_paths~ : Array[String]) -> BookTemplateRegistry
 
 pub fn registry_ready(Array[BookTemplateDescriptor], Array[String]) -> Bool
+
+pub async fn render_book_template_registry(registry_path? : String) -> String
+
+pub async fn render_book_template_request_status(request_path? : String) -> String
 
 pub fn render_registry_markdown(BookTemplateRegistry) -> String
 
@@ -125,6 +135,8 @@ pub(all) struct BookTemplateDescriptor {
   required_paths : Array[String]
   editable_files : Array[String]
 } derive(Eq, ToJson, @debug.Debug, @json.FromJson)
+
+type BookTemplateInstaller derive(Eq, @debug.Debug)
 
 pub(all) struct BookTemplateRegistry {
   registry_path : String

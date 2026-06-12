@@ -39,7 +39,7 @@ struct PdfEvidenceWatchMoondeskSettings {
 } derive(Debug, Eq, ToJson, FromJson)
 
 ///|
-pub struct PdfEvidenceWatchInstallSpec {
+pub(all) struct PdfEvidenceWatchInstallSpec {
   book_id : String
   title : String
   purpose : String

@@ -1,5 +1,5 @@
 ///|
-pub struct PdfEvidenceWatchBookStatus {
+pub(all) struct PdfEvidenceWatchBookStatus {
   book_id : String
   workspace_root : String
   required_count : Int
