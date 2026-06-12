@@ -276,5 +276,7 @@ pub fn markdown(policy : BookPolicy) -> String {
     "- projection path: `\{output_projection_path(policy)}`",
     "",
     loop_markdown(policy),
+    "",
+    internal_distance_markdown(policy),
   ].join("\n")
 }

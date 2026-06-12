@@ -23,6 +23,14 @@ pub fn general() -> BookPolicy
 
 pub fn has_skill(BookPolicy, String) -> Bool
 
+pub fn internal_distance_layer_from_text(String) -> InternalDistanceLayer
+
+pub fn internal_distance_layer_text(InternalDistanceLayer) -> String
+
+pub fn internal_distance_markdown(BookPolicy) -> String
+
+pub fn internal_distance_plan(BookPolicy) -> Array[InternalDistanceStep]
+
 pub fn lane_from_text(String) -> BookLane
 
 pub fn lane_text(BookLane) -> String
@@ -113,6 +121,22 @@ pub struct FileSpec {
   path : String
   required : Bool
   purpose : String
+} derive(Eq, ToJson, @debug.Debug, @json.FromJson)
+
+pub(all) enum InternalDistanceLayer {
+  Information
+  Recognition
+  Decisiveness
+  Unknown(String)
+} derive(Eq, ToJson, @debug.Debug, @json.FromJson)
+pub impl Show for InternalDistanceLayer
+
+pub struct InternalDistanceStep {
+  layer : String
+  distance : String
+  bridge : String
+  subjects : Array[String]
+  summary : String
 } derive(Eq, ToJson, @debug.Debug, @json.FromJson)
 
 pub struct OutputSpec {

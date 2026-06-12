@@ -196,6 +196,10 @@ Goals:
 - keep execute/tend/control loop-lane semantics in `policy/`; downstream
   packages may read serialized lane strings, but `policy/` owns parsing,
   normalization, and lane-based skill selection
+- keep internal-distance semantics in `policy/`; downstream packages may render
+  information/recognition/decisiveness plans, but `policy/` owns the mapping
+  from execute skills, tend skills, quality gates, and output contracts into
+  that growth-vector view
 - keep raw MoonClaw run-status normalization in `planbook_policy/`; runtime
   packages may downgrade a completed run when required repair evidence is
   missing, but policy status normalization must not conflate `Succeeded` with

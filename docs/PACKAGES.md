@@ -224,17 +224,23 @@ Key files:
 - [src/policy/book_policy.mbt](/Users/kq/Workspace/moontown/src/policy/book_policy.mbt)
 - [src/policy/book_policy_lanes.mbt](/Users/kq/Workspace/moontown/src/policy/book_policy_lanes.mbt)
 - [src/policy/book_policy_loop.mbt](/Users/kq/Workspace/moontown/src/policy/book_policy_loop.mbt)
+- [src/policy/book_policy_distance.mbt](/Users/kq/Workspace/moontown/src/policy/book_policy_distance.mbt)
 
 Purpose:
 
 - typed `BookPolicy` model
 - canonical `control`, `execute`, and `tend` lane parsing
 - policy-composed loop plans and health gates
+- policy-derived internal-distance plans for information, recognition, and
+  decisiveness
 
 Boundary:
 
 - `BookPolicy` keeps serialized skill lanes as strings for stable JSON.
 - `src/policy` owns lane normalization and lane-based skill selection.
+- `src/policy` owns the internal-distance growth-vector view; downstream
+  packages may render it but should not redefine how execute/tend/quality
+  map to information, recognition, and decisiveness.
 - downstream packages may read lane text but should not redefine lane semantics.
 
 ## PlanBook Policy And Runtime

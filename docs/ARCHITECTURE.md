@@ -121,6 +121,10 @@ book owns. The implementation now has a first-class `policy` package:
   results, run tend-lane skills, and evaluate health. Downstream packages
   should call `@policy.loop_plan(...)` or embed `@policy.loop_markdown(...)`
   instead of reconstructing the loop order in prompts, reviews, or status pages.
+- [policy/book_policy_distance.mbt](/Users/kq/Workspace/moontown/src/policy/book_policy_distance.mbt)
+  owns the typed internal-distance plan: information, recognition, and
+  decisiveness. It derives the growth-vector view from the composed policy
+  without changing the persisted `BookPolicy` JSON schema.
 - [book_quality/taxonomy.mbt](/Users/kq/Workspace/moontown/src/book_quality/taxonomy.mbt)
   owns legacy book-quality labels such as research/course/civic while the
   migration away from runtime categories continues.
@@ -286,6 +290,12 @@ The policy loop should also cultivate three internal distances:
 - information: discover what is unknown
 - recognition: decide what matters
 - decisiveness: act when confidence, urgency, and safety allow action
+
+These distances are not a separate book type or a third runtime lane. They are
+a policy-owned derived view in
+[policy/book_policy_distance.mbt](/Users/kq/Workspace/moontown/src/policy/book_policy_distance.mbt):
+execute-lane skills bridge information, tend-lane skills bridge recognition,
+and the quality/output contract bridges decisiveness.
 
 This is the current refactor direction. Existing book-quality orchestration
 still lives mostly in the root package, but the legacy label-to-policy map,

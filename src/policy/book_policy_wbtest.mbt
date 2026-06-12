@@ -136,3 +136,34 @@ test "policy loop markdown names dual lanes and health gate" {
   assert_true(text.contains("result contract: `moontown.book.planbook.v1`"))
   assert_true(text.contains("validation evidence"))
 }
+
+///|
+test "policy internal distance plan maps execute tend and quality gates" {
+  assert_eq(
+    internal_distance_layer_from_text("Information"),
+    InternalDistanceLayer::Information,
+  )
+  assert_eq(
+    internal_distance_layer_text(InternalDistanceLayer::Decisiveness),
+    "decisiveness",
+  )
+  let steps = internal_distance_plan(research())
+  assert_eq(steps.length(), 3)
+  assert_eq(steps[0].layer, "information")
+  assert_true(steps[0].subjects.contains("standing-watch"))
+  assert_eq(steps[1].layer, "recognition")
+  assert_true(steps[1].subjects.contains("claim-audit"))
+  assert_eq(steps[2].layer, "decisiveness")
+  assert_true(steps[2].subjects.contains("moontown.book.research.v1"))
+}
+
+///|
+test "policy markdown includes internal distance section" {
+  let text = markdown(planbook())
+  assert_true(text.contains("Internal distances:"))
+  assert_true(text.contains("unknown -> known"))
+  assert_true(text.contains("known -> matters"))
+  assert_true(text.contains("matters -> act"))
+  assert_true(text.contains("repair-dispatch"))
+  assert_true(text.contains("architecture-review"))
+}
