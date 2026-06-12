@@ -463,6 +463,7 @@ Key files:
 
 - [src/civic/services.mbt](/Users/kq/Workspace/moontown/src/civic/services.mbt)
 - [src/civic/services_paths.mbt](/Users/kq/Workspace/moontown/src/civic/services_paths.mbt)
+- [src/civic_runtime/civic_service_persist.mbt](/Users/kq/Workspace/moontown/src/civic_runtime/civic_service_persist.mbt)
 - [src/civic_runtime/civic_workspace_projection.mbt](/Users/kq/Workspace/moontown/src/civic_runtime/civic_workspace_projection.mbt)
 - [src/civic_runtime/civic_salon_scenario_workspace.mbt](/Users/kq/Workspace/moontown/src/civic_runtime/civic_salon_scenario_workspace.mbt)
 
@@ -472,10 +473,16 @@ Purpose:
   protocol vocabulary, and civic helper paths.
 - `src/civic_runtime` owns workspace writes, ledgers, generated pages, and
   scenario execution persistence.
+- `src/civic_runtime` owns civic-service MoonBook persistence payloads:
+  execution detection, summary text, artifact lists, memory candidates, review
+  candidate routing, and civic target-page trimming.
 
 Boundary:
 
 - civic runtime writes generated pages through `@civic` path helpers.
+- `src/town_runtime` may choose when a civic service result should be persisted,
+  but should not assemble civic persistence summaries, artifact lists, or memory
+  candidates.
 - `src/civic` delegates default generated-site semantics to `src/policy`;
   civic modules should not redefine the generated-site path locally.
 

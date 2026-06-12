@@ -49,31 +49,6 @@ fn goal_run_wenyu_bootstrap_like_task() -> @moonbook.BookTask {
 }
 
 ///|
-fn goal_run_completed_civic_service_execution() -> @core.TaskExecutionRecord {
-  @core.TaskExecutionRecord::new(
-    task_id="goal-wenyu-policy-hall-civic-service",
-    book_id="wenyu-policy-hall",
-    packet_id="packet-civic",
-    packet_path="packet-civic.json",
-    run_id=Some("run-civic"),
-    status=@core.TaskExecutionStatus::Completed,
-    summary=goal_run_completed_civic_service_summary(),
-    output_contract="wenyu.civic.policy_service.v1",
-    context_pages=["raw/bootstrap/CIVIC_SERVICE_CONTRACT.md"],
-    requires_review=true,
-  )
-}
-
-///|
-fn goal_run_completed_civic_service_summary() -> String {
-  [
-    "civic_service_decision: update", "book_changed: yes", "wiki_pages_changed_count: 2",
-    "accepted_facts_count: 4", "review_items_created_count: 1", "projection_updated: yes",
-    "next_check_hint: normal", "", "Updated cited policy checklist.",
-  ].join("\n")
-}
-
-///|
 fn goal_run_test_state() -> @core.TownState {
   @core.empty_state(@core.TownConfig::new(id="test", name="Test Town"))
 }

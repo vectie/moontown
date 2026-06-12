@@ -887,6 +887,12 @@ package policy inputs, persist MoonBook results, and persist schedules/round
 ledgers, but they must not own the
 reusable pattern taxonomy, scenario record shapes, metric semantics, schedule
 vocabulary, status vocabulary, or civic service result-contract wording.
+MoonBook persistence payloads for civic service executions are runtime-owned by
+`civic_runtime/`: service-result summaries, artifact lists, memory candidates,
+review-candidate routing, execution detection, and civic target-page trimming
+belong there. Root may ask for those payloads when a service execution is
+persisted, but it must not reconstruct civic persistence summaries or memory
+candidate targets locally.
 Building-protocol portfolio semantics are package-owned too: ready/active/
 review/blocked bucket predicates, portfolio count construction, and compact
 Markdown row rendering live in `civic/protocol_portfolio.mbt`. Root may write

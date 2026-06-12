@@ -1,5 +1,7 @@
 ///|
-fn is_civic_service_execution(execution : @core.TaskExecutionRecord) -> Bool {
+pub fn is_civic_service_execution(
+  execution : @core.TaskExecutionRecord,
+) -> Bool {
   execution.task_id.contains("civic-service") ||
   execution.output_contract.contains("civic_service_decision") ||
   execution.output_contract.contains("wenyu.civic.") ||
@@ -10,41 +12,41 @@ fn is_civic_service_execution(execution : @core.TaskExecutionRecord) -> Bool {
 }
 
 ///|
-fn civic_persist_summary(
+pub fn civic_persist_summary(
   service : @civic.CivicServiceDefinition,
   execution : @core.TaskExecutionRecord,
 ) -> String {
-  let decision = @civic_runtime.civic_marker_value(
+  let decision = civic_marker_value(
     execution.summary,
     "civic_service_decision",
     fallback="needs_review",
   )
-  let book_changed = @civic_runtime.civic_marker_value(
+  let book_changed = civic_marker_value(
     execution.summary,
     "book_changed",
     fallback="unknown",
   )
-  let changed_pages = @civic_runtime.civic_marker_int(
+  let changed_pages = civic_marker_int(
     execution.summary,
     "wiki_pages_changed_count",
     fallback=0,
   )
-  let accepted_facts = @civic_runtime.civic_marker_int(
+  let accepted_facts = civic_marker_int(
     execution.summary,
     "accepted_facts_count",
     fallback=0,
   )
-  let review_items = @civic_runtime.civic_marker_int(
+  let review_items = civic_marker_int(
     execution.summary,
     "review_items_created_count",
     fallback=0,
   )
-  let projection_updated = @civic_runtime.civic_marker_value(
+  let projection_updated = civic_marker_value(
     execution.summary,
     "projection_updated",
     fallback="unknown",
   )
-  let next_check = @civic_runtime.civic_marker_value(
+  let next_check = civic_marker_value(
     execution.summary,
     "next_check_hint",
     fallback="review",
@@ -54,7 +56,7 @@ fn civic_persist_summary(
     None => ""
   }
   let evidence = @support.markdown_excerpt(
-    compact_markdown_for_candidate(execution.summary),
+    civic_compact_markdown_for_candidate(execution.summary),
     900,
   )
   [
@@ -73,7 +75,7 @@ fn civic_persist_summary(
 }
 
 ///|
-fn civic_persist_artifacts(
+pub fn civic_persist_artifacts(
   service : @civic.CivicServiceDefinition,
   execution : @core.TaskExecutionRecord,
 ) -> Array[String] {
@@ -89,7 +91,7 @@ fn civic_persist_artifacts(
 }
 
 ///|
-fn civic_persist_memory_candidates(
+pub fn civic_persist_memory_candidates(
   service : @civic.CivicServiceDefinition,
   execution : @core.TaskExecutionRecord,
 ) -> Array[@moonbook.MemoryCandidate] {
@@ -103,7 +105,7 @@ fn civic_persist_memory_candidates(
       target_page=Some(civic_workspace_target_page(service.wiki_pages[0])),
     ),
   ]
-  let review_items = @civic_runtime.civic_marker_int(
+  let review_items = civic_marker_int(
     execution.summary,
     "review_items_created_count",
     fallback=if execution.requires_review { 1 } else { 0 },
@@ -123,10 +125,22 @@ fn civic_persist_memory_candidates(
 }
 
 ///|
-fn civic_workspace_target_page(path : String) -> String {
-  if path.has_prefix("wiki/") {
-    path[5:].to_owned()
-  } else {
-    path
+fn civic_compact_markdown_for_candidate(text : String) -> String {
+  let builder = StringBuilder::new()
+  let mut wrote = false
+  for raw in text.split("\n") {
+    let line = raw.trim().to_owned()
+    if line.is_empty() ||
+      line.has_prefix("#") ||
+      line.has_prefix("| ---") ||
+      line.has_prefix("```") {
+      continue
+    }
+    if wrote {
+      builder.write_string(" ")
+    }
+    builder.write_string(line)
+    wrote = true
   }
+  builder.to_string()
 }

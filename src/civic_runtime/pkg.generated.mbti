@@ -5,6 +5,7 @@ import {
   "moonbitlang/core/json",
   "vectie/moontown/adapters/moonbook",
   "vectie/moontown/civic",
+  "vectie/moontown/core",
 }
 
 // Values
@@ -19,6 +20,12 @@ pub async fn bootstrap_wenyu_civic_workspaces(book_catalog_path? : String) -> St
 pub fn civic_marker_int(String, String, fallback~ : Int) -> Int
 
 pub fn civic_marker_value(String, String, fallback~ : String) -> String
+
+pub fn civic_persist_artifacts(@civic.CivicServiceDefinition, @core.TaskExecutionRecord) -> Array[String]
+
+pub fn civic_persist_memory_candidates(@civic.CivicServiceDefinition, @core.TaskExecutionRecord) -> Array[@moonbook.MemoryCandidate]
+
+pub fn civic_persist_summary(@civic.CivicServiceDefinition, @core.TaskExecutionRecord) -> String
 
 pub fn civic_salon_is_due(@civic.CivicSalonSchedule, UInt64) -> Bool
 
@@ -47,6 +54,8 @@ pub async fn inspect_wenyu_civic_services(book_catalog_path? : String, status_pa
 pub async fn install_civic_pattern_scenario_file(String, snapshot_path? : String, due_now? : Bool) -> String
 
 pub async fn install_civic_pattern_scenario_manifest(String, snapshot_path? : String) -> String
+
+pub fn is_civic_service_execution(@core.TaskExecutionRecord) -> Bool
 
 pub async fn latest_protocol_json_line(String, String, ledger_base_dir? : String) -> String?
 
