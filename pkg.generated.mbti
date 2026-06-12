@@ -5,7 +5,6 @@ import {
   "vectie/moontown/adapters/moonbook",
   "vectie/moontown/app_tool_book",
   "vectie/moontown/book_templates",
-  "vectie/moontown/civic",
   "vectie/moontown/cookbook",
   "vectie/moontown/core",
   "vectie/moontown/roles",
@@ -18,12 +17,6 @@ pub async fn bootstrap_app_tool_book(book_id? : String, title? : String, purpose
 pub async fn bootstrap_moontown_cookbook(book_catalog_path? : String, workspace_root? : String, manifest_path? : String) -> String
 
 pub async fn bootstrap_wenyu_game_design_course_book(book_catalog_path? : String, workspace_root? : String, source_workspace_root? : String) -> String
-
-pub fn civic_communication_pattern_for_id(String) -> @civic.CivicCommunicationPattern?
-
-pub fn civic_communication_pattern_id_for_service(@civic.CivicServiceDefinition) -> String
-
-pub fn civic_communication_patterns() -> Array[@civic.CivicCommunicationPattern]
 
 pub async fn compact_registered_moonclaw_job_stores(book_catalog_path? : String, snapshot_path? : String, tick? : Int, max_store_bytes? : Int64) -> String
 
@@ -80,8 +73,6 @@ pub async fn render_app_tool_book_status(book_id? : String, workspace_root? : St
 pub async fn render_book_template_registry(registry_path? : String) -> String
 
 pub async fn render_book_template_request_status(request_path? : String) -> String
-
-pub fn render_civic_communication_patterns() -> String
 
 pub async fn render_goal_run(String, book_id? : String?, task_limit_per_book? : Int, snapshot_path? : String, book_catalog_path? : String) -> String
 

@@ -16,6 +16,10 @@ pub async fn bootstrap_wenyu_building_protocols(registry_path? : String, status_
 
 pub async fn bootstrap_wenyu_civic_workspaces(book_catalog_path? : String) -> String
 
+pub fn civic_marker_int(String, String, fallback~ : Int) -> Int
+
+pub fn civic_marker_value(String, String, fallback~ : String) -> String
+
 pub fn civic_salon_is_due(@civic.CivicSalonSchedule, UInt64) -> Bool
 
 pub fn civic_salon_scenario_path(String, snapshot_path? : String) -> String
@@ -61,6 +65,8 @@ pub fn protocol_ledger_path(String, String, ledger_base_dir? : String) -> String
 pub fn protocol_status_markdown_path(String) -> String
 
 pub async fn reconcile_wenyu_civic_service_results(book_catalog_path? : String, status_path? : String) -> String
+
+pub fn render_civic_communication_patterns() -> String
 
 pub async fn render_civic_salon_schedule_status(snapshot_path? : String) -> String
 

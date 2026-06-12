@@ -24,7 +24,7 @@ async fn render_civic_protocols_command(args : Array[String]) -> String {
     ["bootstrap"] => @civic_runtime.bootstrap_wenyu_building_protocols()
     ["status"] => @civic_runtime.render_wenyu_building_protocol_status()
     ["doctor"] => @civic_runtime.write_wenyu_building_protocol_status()
-    ["patterns"] => @moontown.render_civic_communication_patterns()
+    ["patterns"] => @civic_runtime.render_civic_communication_patterns()
     ["pattern-install", template_path] =>
       @civic_runtime.install_civic_pattern_scenario_file(template_path)
     ["pattern-manifest", manifest_path] =>

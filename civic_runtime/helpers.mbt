@@ -52,7 +52,7 @@ fn first_non_negative_int(text : String) -> Int? {
 }
 
 ///|
-fn civic_marker_value(
+pub fn civic_marker_value(
   summary : String,
   key : String,
   fallback~ : String,
@@ -73,7 +73,7 @@ fn civic_marker_value(
 }
 
 ///|
-fn civic_marker_int(summary : String, key : String, fallback~ : Int) -> Int {
+pub fn civic_marker_int(summary : String, key : String, fallback~ : Int) -> Int {
   let value = civic_marker_value(summary, key, fallback="")
   match first_non_negative_int(value) {
     Some(parsed) => parsed

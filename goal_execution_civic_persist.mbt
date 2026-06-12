@@ -14,37 +14,37 @@ fn civic_persist_summary(
   service : @civic.CivicServiceDefinition,
   execution : @core.TaskExecutionRecord,
 ) -> String {
-  let decision = civic_marker_value(
+  let decision = @civic_runtime.civic_marker_value(
     execution.summary,
     "civic_service_decision",
     fallback="needs_review",
   )
-  let book_changed = civic_marker_value(
+  let book_changed = @civic_runtime.civic_marker_value(
     execution.summary,
     "book_changed",
     fallback="unknown",
   )
-  let changed_pages = civic_marker_int(
+  let changed_pages = @civic_runtime.civic_marker_int(
     execution.summary,
     "wiki_pages_changed_count",
     fallback=0,
   )
-  let accepted_facts = civic_marker_int(
+  let accepted_facts = @civic_runtime.civic_marker_int(
     execution.summary,
     "accepted_facts_count",
     fallback=0,
   )
-  let review_items = civic_marker_int(
+  let review_items = @civic_runtime.civic_marker_int(
     execution.summary,
     "review_items_created_count",
     fallback=0,
   )
-  let projection_updated = civic_marker_value(
+  let projection_updated = @civic_runtime.civic_marker_value(
     execution.summary,
     "projection_updated",
     fallback="unknown",
   )
-  let next_check = civic_marker_value(
+  let next_check = @civic_runtime.civic_marker_value(
     execution.summary,
     "next_check_hint",
     fallback="review",
@@ -103,7 +103,7 @@ fn civic_persist_memory_candidates(
       target_page=Some(civic_workspace_target_page(service.wiki_pages[0])),
     ),
   ]
-  let review_items = civic_marker_int(
+  let review_items = @civic_runtime.civic_marker_int(
     execution.summary,
     "review_items_created_count",
     fallback=if execution.requires_review { 1 } else { 0 },
