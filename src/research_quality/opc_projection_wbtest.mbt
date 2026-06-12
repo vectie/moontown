@@ -98,8 +98,12 @@ async test "OPC generated site quality rejects static scaffold" {
   let root = cleaned_research_quality_test_root(
     "/tmp/moontown-opc-site-quality-bad",
   )
+  assert_eq(
+    research_quality_generated_site_path(),
+    @policy.default_generated_site_projection_path(),
+  )
   @support.write_text_file(
-    root + "/book/site/generated/index.html",
+    research_quality_generated_site_workspace_path(root),
     "<!doctype html><title>LLM Wiki Website</title><h1>Markdown. Wiki. Website.</h1><p>Turn a maintained knowledge workspace into something people can understand.</p>",
   )
   @support.write_text_file(
@@ -130,7 +134,7 @@ async test "OPC generated site quality accepts topic marketing and deep research
     "/tmp/moontown-opc-site-quality-good",
   )
   @support.write_text_file(
-    root + "/book/site/generated/index.html",
+    research_quality_generated_site_workspace_path(root),
     "<!doctype html><title>One Person Company (OPC) Marketing Projection</title><h1>Build a real company before you build a full team.</h1><section><p>Deep research</p><h2>One Person Company (OPC): Deep Research Analysis</h2><h3>Executive Summary</h3><table class=\"report-table\"><tr><td>Claim</td></tr></table></section>",
   )
   @support.write_text_file(

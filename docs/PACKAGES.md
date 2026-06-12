@@ -363,6 +363,29 @@ Boundary:
   Watch consumes `policy.default_generated_site_projection_path()` rather than
   redefining the projection path.
 
+## Research Quality
+
+Key files:
+
+- [src/research_quality/readiness.mbt](/Users/kq/Workspace/moontown/src/research_quality/readiness.mbt)
+- [src/research_quality/projection_gaps.mbt](/Users/kq/Workspace/moontown/src/research_quality/projection_gaps.mbt)
+- [src/research_quality/source_depth_gaps.mbt](/Users/kq/Workspace/moontown/src/research_quality/source_depth_gaps.mbt)
+
+Purpose:
+
+- evaluate research-readiness and quality gate gaps
+- detect weak source depth, process noise, generic generated-site projections,
+  and missing topic-specific wiki materialization
+- expose quality judgments that town runtime can use without reimplementing
+  research semantics
+
+Boundary:
+
+- research quality owns the judgment, wording, and topic-specific signal checks.
+- default generated-site path semantics belong to `src/policy`; Research
+  Quality consumes `policy.default_generated_site_projection_path()` rather
+  than redefining the projection path.
+
 ## Civic Definitions And Runtime
 
 Key files:

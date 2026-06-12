@@ -44,7 +44,7 @@ pub async fn research_generated_site_gaps(
     return []
   }
   let gaps : Array[String] = []
-  let generated_path = "\{root}/book/site/generated/index.html"
+  let generated_path = research_quality_generated_site_workspace_path(root)
   if !@fs.exists(generated_path) {
     gaps.push(
       "missing live generated marketing projection at `book/site/generated/index.html`",

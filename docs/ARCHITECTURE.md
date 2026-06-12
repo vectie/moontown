@@ -221,6 +221,8 @@ book owns. The implementation now has a first-class `policy` package:
   checks, wiki materialization checks, generated-site specificity checks, and
   process-noise rejection. Root Moontown may mutate town executions when a gate
   fails, but it should call this package for the actual quality judgment.
+  Generated-site quality checks consume `policy.default_generated_site_projection_path()`
+  for the default projection path instead of redefining it locally.
 - [course_book/](/Users/kq/Workspace/moontown/src/course_book)
   owns the Wenyu game-design course book: catalog entry construction,
   workspace materialization, course contract/outline/exercises/rubric text,
