@@ -2,7 +2,7 @@
 fn wenyu_course_ui_state_json(entry : @moonbook.BookCatalogEntry) -> String {
   [
     "{",
-    "  \"book_id\": \{json_string(entry.id)},",
+    "  \"book_id\": \{@support.json_string(entry.id)},",
     "  \"title\": \"Wenyu Valley Game Design Course\",",
     "  \"summary\": \"Beginner course for learning tile-map UI, modular building placement, agent movement, and editor/view/output modes.\",",
     "  \"status_chips\": [",
@@ -100,7 +100,7 @@ fn wenyu_course_generated_site_hero(
     "<p>MoonBook Course</p>",
     "<h1>Wenyu Valley Game Design Course</h1>",
     "<p>A beginner learning path for tile maps, terrain, buildings, roads, agents, and editor/view/output modes.</p>",
-    "<p><code>\{html_escape(entry.workspace_root)}</code></p>",
+    "<p><code>\{@support.html_escape(entry.workspace_root)}</code></p>",
     "</section>",
   ].join("")
 }

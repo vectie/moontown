@@ -36,7 +36,7 @@ test "Moontown generated skill templates keep exploration quality" {
   )
   assert_moonbook_skill_quality(
     "course-builder",
-    course_builder_skill_markdown(),
+    @course_book.course_builder_skill_markdown(),
   )
   assert_moonbook_skill_quality(
     "cookbook-generation",

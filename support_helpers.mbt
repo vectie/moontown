@@ -92,11 +92,6 @@ fn markdown_excerpt(text : String, limit : Int) -> String {
 }
 
 ///|
-fn html_escape(text : String) -> String {
-  @support.html_escape(text)
-}
-
-///|
 fn label_from_slug(value : String) -> String {
   @support.label_from_slug(value)
 }

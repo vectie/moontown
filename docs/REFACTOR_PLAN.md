@@ -338,6 +338,9 @@ Goals:
   root may still own mayor/execution mutation for failed gates, but it should
   not own source-depth, report-length, wiki-materialization, or marketing-site
   specificity rules
+- keep Wenyu course-book bootstrap, generated course content, course-builder
+  skill text, UI-state JSON, and generated course site projection in
+  `course_book/`; root should expose only command-compatible wrappers
 
 Acceptance:
 

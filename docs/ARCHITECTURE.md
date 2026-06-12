@@ -208,6 +208,12 @@ book owns. The implementation now has a first-class `policy` package:
   checks, wiki materialization checks, generated-site specificity checks, and
   process-noise rejection. Root Moontown may mutate town executions when a gate
   fails, but it should call this package for the actual quality judgment.
+- [course_book/](/Users/kq/Workspace/moontown/course_book)
+  owns the Wenyu game-design course book: catalog entry construction,
+  workspace materialization, course contract/outline/exercises/rubric text,
+  course-builder skill text, generated course UI state, and generated course
+  site HTML. Root Moontown may keep CLI-compatible wrappers, but course content
+  and projection semantics should not live in the root package.
 - [cookbook/](/Users/kq/Workspace/moontown/cookbook)
   owns Cookbook DTOs, stable-state artifact summary accounting, and the
   operator-facing Cookbook status Markdown. Root Moontown may discover artifact

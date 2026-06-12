@@ -53,7 +53,7 @@ fn wenyu_course_outline_markdown() -> String {
 }
 
 ///|
-fn course_builder_skill_markdown() -> String {
+pub fn course_builder_skill_markdown() -> String {
   [
     "---",
     "name: course-builder",
