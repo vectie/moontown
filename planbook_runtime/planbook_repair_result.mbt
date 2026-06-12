@@ -181,11 +181,6 @@ fn planbook_repair_result_has_accepted_decision(text : String) -> Bool {
 }
 
 ///|
-fn planbook_repair_result_has_no_change_decision(text : String) -> Bool {
-  @planbook_policy.repair_result_has_no_change_decision(text)
-}
-
-///|
 fn planbook_repair_result_has_handoff_decision(text : String) -> Bool {
   @planbook_policy.repair_result_has_handoff_decision(text)
 }

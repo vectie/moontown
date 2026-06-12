@@ -1,0 +1,29 @@
+import {
+  "moonbitlang/async/fs",
+  "moonbitlang/core/env",
+  "moonbitlang/core/json",
+  "moonbitlang/x/path",
+  "moonbitlang/x/sys",
+  "vectie/moontown/adapters/codex",
+  "vectie/moontown/adapters/moonbook",
+  "vectie/moontown/adapters/moonclaw",
+  "vectie/moontown/book_quality",
+  "vectie/moontown/book_quality_runtime",
+  "vectie/moontown/book_templates",
+  "vectie/moontown/civic_runtime",
+  "vectie/moontown/core",
+  "vectie/moontown/editor_pipeline",
+  "vectie/moontown/editor_runtime",
+  "vectie/moontown/moonclaw_runtime",
+  "vectie/moontown/planbook",
+  "vectie/moontown/planbook_policy",
+  "vectie/moontown/runtime_error_policy",
+  "vectie/moontown/storage",
+  "vectie/moontown/support",
+}
+
+import {
+  "moonbitlang/async",
+  "vectie/moontown/live_autonomy_runtime",
+  "vectie/moontown/test_fixtures",
+} for "wbtest"

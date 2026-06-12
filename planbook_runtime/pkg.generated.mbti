@@ -1,0 +1,56 @@
+// Generated using `moon info`, DON'T EDIT IT
+package "vectie/moontown/planbook_runtime"
+
+import {
+  "moonbitlang/core/debug",
+  "moonbitlang/core/json",
+  "vectie/moontown/planbook_policy",
+}
+
+// Values
+pub async fn bootstrap_moontown_planbook(book_catalog_path? : String, workspace_root? : String) -> String
+
+pub fn default_planbook_autonomy_digest_path(snapshot_path? : String) -> String
+
+pub fn default_planbook_autonomy_path(snapshot_path? : String) -> String
+
+pub fn default_planbook_book_id() -> String
+
+pub fn default_planbook_repair_markdown_path(snapshot_path? : String) -> String
+
+pub fn default_planbook_repair_path(snapshot_path? : String) -> String
+
+pub fn default_planbook_workspace_root() -> String
+
+pub async fn inspect_moontown_planbook_autonomy(snapshot_path? : String, workspace_root? : String, book_catalog_path? : String) -> @planbook_policy.PlanbookAutonomyStatus
+
+pub async fn planbook_open_gap_count(snapshot_path? : String) -> Int
+
+pub async fn planbook_repair_active_count(snapshot_path? : String) -> Int
+
+pub async fn render_moontown_planbook_autonomy_status(snapshot_path? : String, workspace_root? : String, book_catalog_path? : String) -> String
+
+pub async fn render_moontown_planbook_repair_status(snapshot_path? : String) -> String
+
+pub async fn render_moontown_planbook_status(workspace_root? : String) -> String
+
+pub async fn write_moontown_planbook_autonomy(snapshot_path? : String, workspace_root? : String, book_catalog_path? : String) -> String
+
+pub async fn write_moontown_planbook_repair_task(snapshot_path? : String, workspace_root? : String, book_catalog_path? : String, dispatch? : Bool, run_inline? : Bool) -> String
+
+pub async fn write_moontown_planbook_validation_evidence(snapshot_path? : String, note? : String) -> String
+
+// Errors
+
+// Types and methods
+type PlanbookImplementationBacklogItem derive(Eq, ToJson, @debug.Debug, @json.FromJson)
+
+// Type aliases
+pub using @planbook_policy {type PlanbookAutonomyStatus}
+
+pub using @planbook_policy {type PlanbookCriterionStatus}
+
+pub using @planbook_policy {type PlanbookRepairTask}
+
+// Traits
+

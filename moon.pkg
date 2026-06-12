@@ -5,7 +5,7 @@ import {
   "vectie/moontown/book_quality_runtime",
   "vectie/moontown/book_templates",
   "vectie/moontown/cookbook",
-  "vectie/moontown/planbook",
+  "vectie/moontown/planbook_runtime",
   "vectie/moontown/town_synthesis",
   "vectie/moontown/visual_projection",
   "vectie/moontown/support",
@@ -13,9 +13,6 @@ import {
   "vectie/moontown/course_book",
   "vectie/moontown/moonclaw_runtime",
   "vectie/moontown/app_tool_book",
-  "vectie/moontown/editor_pipeline",
-  "vectie/moontown/editor_runtime",
-  "vectie/moontown/planbook_policy",
   "vectie/moontown/standing_watch_policy",
   "vectie/moontown/live_autonomy_runtime",
   "vectie/moontown/runtime_status_policy",
@@ -44,5 +41,9 @@ import {
 }
 
 import {
+  "vectie/moontown/editor_pipeline",
+  "vectie/moontown/moonclaw_runtime",
+  "vectie/moontown/planbook",
+  "vectie/moontown/planbook_policy",
   "vectie/moontown/test_fixtures",
 } for "wbtest"

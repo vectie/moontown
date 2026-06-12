@@ -3,7 +3,7 @@ async fn run_daemon_planbook_phase(
   snapshot_path : String,
   book_catalog_path : String,
 ) -> DaemonPlanbookPhaseResult {
-  let planbook_summary = write_moontown_planbook_autonomy(
+  let planbook_summary = @planbook_runtime.write_moontown_planbook_autonomy(
     snapshot_path~,
     book_catalog_path~,
   )
@@ -20,8 +20,8 @@ async fn ensure_daemon_planbook_repair_task(
   snapshot_path : String,
   book_catalog_path : String,
 ) -> String {
-  if planbook_repair_active_count(snapshot_path~) == 0 {
-    write_moontown_planbook_repair_task(
+  if @planbook_runtime.planbook_repair_active_count(snapshot_path~) == 0 {
+    @planbook_runtime.write_moontown_planbook_repair_task(
       snapshot_path~,
       book_catalog_path~,
       dispatch=true,

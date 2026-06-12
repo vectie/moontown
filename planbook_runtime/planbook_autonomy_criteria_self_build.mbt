@@ -23,11 +23,17 @@ async fn planbook_workspace_criterion(
 ///|
 async fn planbook_live_spine_criterion() -> PlanbookCriterionStatus {
   let ready = text_file_contains(
-      "live_autonomy_types.mbt", "planbook_open_count",
+      "live_autonomy_runtime/live_autonomy_types.mbt", "planbook_open_count",
     ) &&
-    text_file_contains("live_autonomy_digest_header.mbt", "planbook_open_gaps") &&
-    text_file_contains("live_autonomy_render.mbt", "PlanBook open gaps") &&
-    text_file_contains("live_autonomy_planbook_sync.mbt", "planbook_open_count")
+    text_file_contains(
+      "live_autonomy_runtime/live_autonomy_digest_header.mbt", "planbook_open_gaps",
+    ) &&
+    text_file_contains(
+      "live_autonomy_runtime/live_autonomy_render.mbt", "PlanBook open gaps",
+    ) &&
+    text_file_contains(
+      "live_autonomy_runtime/live_autonomy_planbook_sync.mbt", "planbook_open_count",
+    )
   planbook_criterion(
     "planbook-live-spine",
     "2026-05-29-live-autonomy-spine",
@@ -110,9 +116,9 @@ async fn planbook_result_contract_criterion() -> PlanbookCriterionStatus {
 async fn planbook_source_patch_loop_criterion(
   workspace_root : String,
 ) -> PlanbookCriterionStatus {
-  let repair_workspace_file = "planbook_repair_workspace.mbt"
-  let profile_file = "planbook_repair_profile.mbt"
-  let acp_file = "planbook_repair_acp.mbt"
+  let repair_workspace_file = "planbook_runtime/planbook_repair_workspace.mbt"
+  let profile_file = "planbook_runtime/planbook_repair_profile.mbt"
+  let acp_file = "planbook_runtime/planbook_repair_acp.mbt"
   let codex_target_file = "adapters/codex/targets.mbt"
   let codex_defaults_file = "adapters/codex/defaults.mbt"
   let acp_ready = text_file_contains(
@@ -151,8 +157,8 @@ async fn planbook_source_patch_loop_criterion(
 async fn planbook_engineering_loop_criterion(
   workspace_root : String,
 ) -> PlanbookCriterionStatus {
-  let metadata_file = "planbook_repair_packet_metadata.mbt"
-  let policy_file = "planbook_repair_policy.mbt"
+  let metadata_file = "planbook_runtime/planbook_repair_packet_metadata.mbt"
+  let policy_file = "planbook_runtime/planbook_repair_policy.mbt"
   let policy_package_file = "planbook_policy/repair_commands.mbt"
   let skill_file = "planbook_policy/skill_text.mbt"
   let metadata_ready = text_file_contains(

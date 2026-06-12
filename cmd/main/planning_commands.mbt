@@ -10,16 +10,17 @@ async fn render_cookbook_command(args : Array[String]) -> String {
 ///|
 async fn render_planbook_command(args : Array[String]) -> String {
   match args {
-    ["bootstrap"] => @moontown.bootstrap_moontown_planbook()
-    ["status"] => @moontown.render_moontown_planbook_status()
-    ["doctor"] => @moontown.write_moontown_planbook_autonomy()
+    ["bootstrap"] => @planbook_runtime.bootstrap_moontown_planbook()
+    ["status"] => @planbook_runtime.render_moontown_planbook_status()
+    ["doctor"] => @planbook_runtime.write_moontown_planbook_autonomy()
     ["validation"] | ["validate"] =>
-      @moontown.write_moontown_planbook_validation_evidence()
-    ["autonomy"] => @moontown.render_moontown_planbook_autonomy_status()
-    ["repair"] => @moontown.write_moontown_planbook_repair_task()
+      @planbook_runtime.write_moontown_planbook_validation_evidence()
+    ["autonomy"] => @planbook_runtime.render_moontown_planbook_autonomy_status()
+    ["repair"] => @planbook_runtime.write_moontown_planbook_repair_task()
     ["repair", "--dispatch"] =>
-      @moontown.write_moontown_planbook_repair_task(dispatch=true)
-    ["repair", "status"] => @moontown.render_moontown_planbook_repair_status()
+      @planbook_runtime.write_moontown_planbook_repair_task(dispatch=true)
+    ["repair", "status"] =>
+      @planbook_runtime.render_moontown_planbook_repair_status()
     _ => @moontown.load_or_create_demo_dashboard()
   }
 }

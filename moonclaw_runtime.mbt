@@ -4,26 +4,6 @@ fn moonclaw_no_input_policy_json() -> Json {
 }
 
 ///|
-fn add_moonclaw_no_input_policy(fields : Map[String, Json]) -> Unit {
-  @moonclaw_runtime.add_moonclaw_no_input_policy(fields)
-}
-
-///|
-fn moonclaw_execution_metadata_fields(
-  preferred_skills~ : Array[String],
-  execution_mode~ : String,
-  execution_target? : String? = None,
-  output_contract~ : String,
-) -> Map[String, Json] {
-  @moonclaw_runtime.moonclaw_execution_metadata_fields(
-    preferred_skills~,
-    execution_mode~,
-    execution_target~,
-    output_contract~,
-  )
-}
-
-///|
 fn moonclaw_step_metadata_fields(
   preferred_skills~ : Array[String],
   enable_tools~ : Bool,
@@ -39,27 +19,6 @@ fn moonclaw_step_metadata_fields(
     timeout_ms~,
     board_lane~,
     board_order~,
-  )
-}
-
-///|
-async fn moonclaw_run_result_payload_from_run(
-  run_id : String,
-  cwd : String,
-) -> Json? {
-  @moonclaw_runtime.moonclaw_run_result_payload_from_run(run_id, cwd)
-}
-
-///|
-async fn moonclaw_run_result_text_from_run(
-  run_id : String,
-  cwd : String,
-  fallback_summary? : Bool = false,
-) -> String {
-  @moonclaw_runtime.moonclaw_run_result_text_from_run(
-    run_id,
-    cwd,
-    fallback_summary~,
   )
 }
 

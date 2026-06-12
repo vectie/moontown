@@ -41,11 +41,11 @@ test "moonclaw job profile upsert preserves existing profiles" {
 
 ///|
 test "moonclaw no-input policy helper emits both nonblocking flags" {
-  let text = moonclaw_no_input_policy_json().stringify()
+  let text = @moonclaw_runtime.moonclaw_no_input_policy_json().stringify()
   assert_true(text.contains("\"disable_waiting_for_input\":true"))
   assert_true(text.contains("\"best_effort_on_missing_input\":true"))
   let fields : Map[String, Json] = { "kind": "packet".to_json() }
-  add_moonclaw_no_input_policy(fields)
+  @moonclaw_runtime.add_moonclaw_no_input_policy(fields)
   let merged = Json::object(fields).stringify()
   assert_true(merged.contains("\"kind\":\"packet\""))
   assert_true(merged.contains("\"disable_waiting_for_input\":true"))
@@ -54,7 +54,7 @@ test "moonclaw no-input policy helper emits both nonblocking flags" {
 
 ///|
 test "moonclaw execution metadata fields include target and no-input policy" {
-  let fields = moonclaw_execution_metadata_fields(
+  let fields = @moonclaw_runtime.moonclaw_execution_metadata_fields(
     preferred_skills=["planbook-repair", "code-review"],
     execution_mode="acp",
     execution_target=Some(@codex.codex_main_target_id()),
@@ -75,7 +75,7 @@ test "moonclaw execution metadata fields include target and no-input policy" {
 
 ///|
 test "moonclaw execution metadata fields omit optional target" {
-  let fields = moonclaw_execution_metadata_fields(
+  let fields = @moonclaw_runtime.moonclaw_execution_metadata_fields(
     preferred_skills=["editor-feature-rater"],
     execution_mode="local",
     output_contract="moontown.editor.feature-selection.v1",
