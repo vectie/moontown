@@ -4,7 +4,7 @@ async test "optional json file reader handles missing invalid and valid files" {
   let missing_path = "\{root}/missing.json"
   let invalid_path = "\{root}/invalid.json"
   let valid_path = "\{root}/valid.json"
-  ignore_checked_command("rm", ["-rf", root])
+  ignore(@integration.run_checked("rm", ["-rf", root]))
   assert_true(read_optional_json_file(missing_path) is None)
   write_text_file(invalid_path, "{not json")
   assert_true(read_optional_json_file(invalid_path) is None)
@@ -23,7 +23,7 @@ async test "optional json file reader handles missing invalid and valid files" {
 ///|
 async test "json file empty object reader preserves fallback contract" {
   let root = "/tmp/moontown-file-io-json-empty-object-wbtest"
-  ignore_checked_command("rm", ["-rf", root])
+  ignore(@integration.run_checked("rm", ["-rf", root]))
   let missing = read_json_file_or_empty_object("\{root}/missing.json")
   assert_true(missing is Object(_))
   write_text_file("\{root}/invalid.json", "{bad json")

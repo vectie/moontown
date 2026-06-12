@@ -5,3 +5,8 @@ import {
   "moonbitlang/core/json",
   "moonbitlang/x/path",
 }
+
+import {
+  "moonbitlang/async",
+  "vectie/moontown/integration",
+} for "wbtest"
