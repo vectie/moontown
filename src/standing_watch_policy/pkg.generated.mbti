@@ -21,6 +21,10 @@ pub fn standing_watch_auto_triage_allowed(@core.StandingGoal, @core.TaskExecutio
 
 pub fn standing_watch_auto_triage_summary(@core.StandingGoal, @core.TaskExecutionRecord, @core.WatcherDecisionKind) -> String
 
+pub fn standing_watch_autonomous_repair_still_open(@core.StandingGoal, @core.TaskExecutionRecord, @core.WatcherDecisionKind) -> Bool
+
+pub fn standing_watch_cycle_supersedes_review(@core.TaskExecutionRecord) -> Bool
+
 pub fn standing_watch_decision_from_execution(@core.TaskExecutionRecord) -> @core.WatcherDecisionKind
 
 pub fn standing_watch_decision_text_marks_book_changed(String) -> Bool
@@ -30,6 +34,8 @@ pub fn standing_watch_decision_text_marks_update(String) -> Bool
 pub fn standing_watch_delta_score(@core.TaskExecutionRecord) -> Int
 
 pub fn standing_watch_detached_import_log_noise_summary(String) -> Bool
+
+pub fn standing_watch_empty_completion_is_no_change(@core.StandingGoal, @core.TaskExecutionRecord, @core.WatcherDecisionKind) -> Bool
 
 pub fn standing_watch_empty_completion_no_change_summary(String) -> String
 
@@ -49,6 +55,8 @@ pub fn standing_watch_marker_int(String, String, fallback~ : Int) -> Int
 
 pub fn standing_watch_marker_value(String, String) -> String?
 
+pub fn standing_watch_needs_review_with_zero_material_delta(@core.TaskExecutionRecord, @core.WatcherDecisionKind) -> Bool
+
 pub fn standing_watch_new_source_count(@core.TaskExecutionRecord) -> Int
 
 pub fn standing_watch_operational_no_change_summary(String) -> Bool
@@ -62,6 +70,8 @@ pub fn standing_watch_recovery_allowed(@core.StandingGoal, @core.TaskExecutionRe
 pub fn standing_watch_recovery_decision_from_execution(@core.TaskExecutionRecord) -> @core.WatcherDecisionKind
 
 pub fn standing_watch_recovery_summary(@core.StandingGoal, @core.TaskExecutionRecord, @core.WatcherDecisionKind) -> String
+
+pub fn standing_watch_review_superseded_by_newer_review(Array[@core.TaskExecutionRecord], Array[@core.StandingGoal], @core.StandingGoal, @core.TaskExecutionRecord) -> Bool
 
 pub fn standing_watch_stale_window_ticks() -> Int
 

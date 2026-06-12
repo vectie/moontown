@@ -20,7 +20,7 @@ async fn reconcile_persisted_standing_watch_records(
       Some(record) => {
         if @standing_watch_policy.watcher_record_effective_decision(record) ==
           @core.WatcherDecisionKind::NeedsReview &&
-          standing_watch_review_superseded_by_newer_review(
+          @standing_watch_policy.standing_watch_review_superseded_by_newer_review(
             snapshot, standing_goals, goal, execution,
           ) {
           continue

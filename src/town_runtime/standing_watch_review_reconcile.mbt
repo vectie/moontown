@@ -18,7 +18,7 @@ async fn reconcile_review_queued_standing_watch_outputs(
       Some(goal) => goal
       None => continue
     }
-    if standing_watch_review_superseded_by_newer_review(
+    if @standing_watch_policy.standing_watch_review_superseded_by_newer_review(
         snapshot, standing_goals, goal, execution,
       ) {
       complete_review_queued_standing_watch(
@@ -71,7 +71,9 @@ async fn reconcile_observed_review_queued_standing_watch(
   let decision = @standing_watch_policy.standing_watch_recovery_decision_from_execution(
     observed,
   )
-  if standing_watch_autonomous_repair_still_open(goal, observed, decision) {
+  if @standing_watch_policy.standing_watch_autonomous_repair_still_open(
+      goal, observed, decision,
+    ) {
     complete_review_queued_standing_watch(
       state,
       observed,
@@ -83,7 +85,9 @@ async fn reconcile_observed_review_queued_standing_watch(
     )
     return
   }
-  if standing_watch_empty_completion_is_no_change(goal, observed, decision) {
+  if @standing_watch_policy.standing_watch_empty_completion_is_no_change(
+      goal, observed, decision,
+    ) {
     complete_empty_standing_watch_as_no_change(state, observed)
     return
   }

@@ -131,13 +131,13 @@ test "standing watch reconcile helper detects review with zero material delta" {
     summary="standing_goal_decision: needs_review\ndelta_score: 0\nnew_source_count: 0",
   )
   assert_true(
-    standing_watch_needs_review_with_zero_material_delta(
+    @standing_watch_policy.standing_watch_needs_review_with_zero_material_delta(
       execution,
       @core.WatcherDecisionKind::NeedsReview,
     ),
   )
   assert_true(
-    !standing_watch_needs_review_with_zero_material_delta(
+    !@standing_watch_policy.standing_watch_needs_review_with_zero_material_delta(
       execution,
       @core.WatcherDecisionKind::Update,
     ),
@@ -147,7 +147,7 @@ test "standing watch reconcile helper detects review with zero material delta" {
     summary="standing_goal_decision: needs_review\ndelta_score: 2\nnew_source_count: 0",
   )
   assert_true(
-    !standing_watch_needs_review_with_zero_material_delta(
+    !@standing_watch_policy.standing_watch_needs_review_with_zero_material_delta(
       changed,
       @core.WatcherDecisionKind::NeedsReview,
     ),
