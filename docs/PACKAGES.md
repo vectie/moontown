@@ -295,7 +295,16 @@ Purpose:
 - semantic town scene layout
 - dashboard state projection
 - renderer-facing scene model
+- reusable UI view-policy helpers such as execution-status stage grouping
 - HTML bridge
+
+Boundary:
+
+- `src/ui` owns product-agnostic dashboard, scene layout, and view-policy
+  helpers that can be consumed by multiple frontends.
+- UI applications should consume shared helpers such as
+  `execution_view_stage_for_status(...)` instead of duplicating town execution
+  status taxonomies locally.
 
 ## Loop Policy
 
@@ -618,6 +627,13 @@ Purpose:
 - browser implementation of the town dashboard
 - live simulation UI
 - Vite build/dev workflow
+
+Boundary:
+
+- `src/ui/rabbita-town/main` owns browser bridges, event handlers, concrete
+  HTML/CSS view composition, and app-specific fallback wording.
+- reusable projection policy belongs in `src/ui` or `src/visual_projection`,
+  not in the browser main package.
 
 ## Scripts
 

@@ -1,28 +1,8 @@
 ///|
-priv enum CivicExecutionStage {
-  Packet
-  Running
-  Persisting
-  Review
-  Completed
-  Recovery
-}
-
-///|
 fn civic_execution_stage(
   status : @core.TaskExecutionStatus,
-) -> CivicExecutionStage {
-  match status {
-    @core.TaskExecutionStatus::PacketReady
-    | @core.TaskExecutionStatus::ProposalImported => Packet
-    @core.TaskExecutionStatus::RunConfirmed
-    | @core.TaskExecutionStatus::Running => Running
-    @core.TaskExecutionStatus::AwaitingPersistence => Persisting
-    @core.TaskExecutionStatus::ReviewQueued => Review
-    @core.TaskExecutionStatus::Completed => Completed
-    @core.TaskExecutionStatus::Failed | @core.TaskExecutionStatus::Stale =>
-      Recovery
-  }
+) -> @ui.ExecutionViewStage {
+  @ui.execution_view_stage_for_status(status)
 }
 
 ///|
@@ -69,12 +49,12 @@ fn civic_execution_stage_label_for_status(
   phrases : CivicExecutionStagePhrases,
 ) -> String {
   match civic_execution_stage(status) {
-    Packet => phrases.packet
-    Running => phrases.running
-    Persisting => phrases.persisting
-    Review => phrases.review
-    Completed => phrases.completed
-    Recovery => phrases.recovery
+    @ui.ExecutionViewStage::Packet => phrases.packet
+    @ui.ExecutionViewStage::Running => phrases.running
+    @ui.ExecutionViewStage::Persisting => phrases.persisting
+    @ui.ExecutionViewStage::Review => phrases.review
+    @ui.ExecutionViewStage::Completed => phrases.completed
+    @ui.ExecutionViewStage::Recovery => phrases.recovery
   }
 }
 
@@ -185,11 +165,11 @@ fn civic_execution_score_for_status(
   policy : CivicExecutionScorePolicy,
 ) -> Int {
   match civic_execution_stage(status) {
-    Packet => policy.packet
-    Running => policy.running
-    Persisting => policy.persisting
-    Review => policy.review
-    Completed => policy.completed
-    Recovery => policy.recovery
+    @ui.ExecutionViewStage::Packet => policy.packet
+    @ui.ExecutionViewStage::Running => policy.running
+    @ui.ExecutionViewStage::Persisting => policy.persisting
+    @ui.ExecutionViewStage::Review => policy.review
+    @ui.ExecutionViewStage::Completed => policy.completed
+    @ui.ExecutionViewStage::Recovery => policy.recovery
   }
 }

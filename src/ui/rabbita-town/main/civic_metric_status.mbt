@@ -26,15 +26,17 @@ fn civic_health_after_execution(
 ///|
 fn civic_health_after_execution_stage(
   base : Int,
-  stage : CivicExecutionStage,
+  stage : @ui.ExecutionViewStage,
   policy : CivicHealthExecutionPolicy,
 ) -> Int {
   match stage {
-    Persisting => clamp_metric(base + policy.awaiting_delta)
-    Review => clamp_metric(base + policy.review_delta)
-    Recovery => clamp_metric(base + policy.failed_delta)
-    Completed => clamp_metric(base + policy.completed_delta)
-    Packet | Running => base
+    @ui.ExecutionViewStage::Persisting =>
+      clamp_metric(base + policy.awaiting_delta)
+    @ui.ExecutionViewStage::Review => clamp_metric(base + policy.review_delta)
+    @ui.ExecutionViewStage::Recovery => clamp_metric(base + policy.failed_delta)
+    @ui.ExecutionViewStage::Completed =>
+      clamp_metric(base + policy.completed_delta)
+    @ui.ExecutionViewStage::Packet | @ui.ExecutionViewStage::Running => base
   }
 }
 

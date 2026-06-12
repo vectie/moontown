@@ -1,32 +1,40 @@
 ///|
 test "civic execution stage centralizes task execution status groups" {
   assert_true(
-    civic_execution_stage(@core.TaskExecutionStatus::PacketReady) is Packet,
+    civic_execution_stage(@core.TaskExecutionStatus::PacketReady)
+    is @ui.ExecutionViewStage::Packet,
   )
   assert_true(
-    civic_execution_stage(@core.TaskExecutionStatus::ProposalImported) is Packet,
+    civic_execution_stage(@core.TaskExecutionStatus::ProposalImported)
+    is @ui.ExecutionViewStage::Packet,
   )
   assert_true(
-    civic_execution_stage(@core.TaskExecutionStatus::RunConfirmed) is Running,
+    civic_execution_stage(@core.TaskExecutionStatus::RunConfirmed)
+    is @ui.ExecutionViewStage::Running,
   )
   assert_true(
-    civic_execution_stage(@core.TaskExecutionStatus::Running) is Running,
+    civic_execution_stage(@core.TaskExecutionStatus::Running)
+    is @ui.ExecutionViewStage::Running,
   )
   assert_true(
     civic_execution_stage(@core.TaskExecutionStatus::AwaitingPersistence)
-    is Persisting,
+    is @ui.ExecutionViewStage::Persisting,
   )
   assert_true(
-    civic_execution_stage(@core.TaskExecutionStatus::ReviewQueued) is Review,
+    civic_execution_stage(@core.TaskExecutionStatus::ReviewQueued)
+    is @ui.ExecutionViewStage::Review,
   )
   assert_true(
-    civic_execution_stage(@core.TaskExecutionStatus::Completed) is Completed,
+    civic_execution_stage(@core.TaskExecutionStatus::Completed)
+    is @ui.ExecutionViewStage::Completed,
   )
   assert_true(
-    civic_execution_stage(@core.TaskExecutionStatus::Failed) is Recovery,
+    civic_execution_stage(@core.TaskExecutionStatus::Failed)
+    is @ui.ExecutionViewStage::Recovery,
   )
   assert_true(
-    civic_execution_stage(@core.TaskExecutionStatus::Stale) is Recovery,
+    civic_execution_stage(@core.TaskExecutionStatus::Stale)
+    is @ui.ExecutionViewStage::Recovery,
   )
 }
 

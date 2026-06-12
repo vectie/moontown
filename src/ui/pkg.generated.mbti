@@ -14,6 +14,8 @@ pub fn build_scene_render(DashboardModel) -> SceneRenderModel
 
 pub fn default_town_scene_layout() -> TownSceneLayout
 
+pub fn execution_view_stage_for_status(@core.TaskExecutionStatus) -> ExecutionViewStage
+
 pub fn render_dashboard(DashboardModel) -> String
 
 pub fn render_scene_html(SceneRenderModel) -> String
@@ -41,6 +43,15 @@ pub struct DashboardSection {
   lines : Array[String]
 } derive(Eq, @debug.Debug)
 pub impl Show for DashboardSection
+
+pub(all) enum ExecutionViewStage {
+  Packet
+  Running
+  Persisting
+  Review
+  Completed
+  Recovery
+} derive(Eq, @debug.Debug)
 
 pub struct SceneArea {
   key : String

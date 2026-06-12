@@ -145,12 +145,54 @@ test "civic health execution adjustment uses shared execution stage policy" {
     failed_delta: -20,
     completed_delta: 7,
   }
-  assert_eq(civic_health_after_execution_stage(50, Packet, policy), 50)
-  assert_eq(civic_health_after_execution_stage(50, Running, policy), 50)
-  assert_eq(civic_health_after_execution_stage(50, Persisting, policy), 45)
-  assert_eq(civic_health_after_execution_stage(50, Review, policy), 40)
-  assert_eq(civic_health_after_execution_stage(50, Recovery, policy), 30)
-  assert_eq(civic_health_after_execution_stage(98, Completed, policy), 100)
+  assert_eq(
+    civic_health_after_execution_stage(
+      50,
+      @ui.ExecutionViewStage::Packet,
+      policy,
+    ),
+    50,
+  )
+  assert_eq(
+    civic_health_after_execution_stage(
+      50,
+      @ui.ExecutionViewStage::Running,
+      policy,
+    ),
+    50,
+  )
+  assert_eq(
+    civic_health_after_execution_stage(
+      50,
+      @ui.ExecutionViewStage::Persisting,
+      policy,
+    ),
+    45,
+  )
+  assert_eq(
+    civic_health_after_execution_stage(
+      50,
+      @ui.ExecutionViewStage::Review,
+      policy,
+    ),
+    40,
+  )
+  assert_eq(
+    civic_health_after_execution_stage(
+      50,
+      @ui.ExecutionViewStage::Recovery,
+      policy,
+    ),
+    30,
+  )
+  assert_eq(
+    civic_health_after_execution_stage(
+      98,
+      @ui.ExecutionViewStage::Completed,
+      policy,
+    ),
+    100,
+  )
 }
 
 ///|
