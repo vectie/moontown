@@ -119,7 +119,7 @@ async fn append_pdf_evidence_watch_archive_event(
   reason : String,
   goal_id : String,
   disabled_count : Int,
-  status : PdfEvidenceWatchBookStatus,
+  status : @pdf_evidence_watch.PdfEvidenceWatchBookStatus,
   request_event_path : String,
 ) -> Unit {
   let summary = "Archived PDF Evidence Watch book `\{book_id}`; standing goal `\{goal_id}` enabled=`\{status.standing_goal_enabled}`; disabled_goals=\{disabled_count}. Reason: \{reason}"
@@ -143,7 +143,7 @@ fn render_pdf_evidence_watch_archive_summary(
   goal_id : String,
   disabled_count : Int,
   request_event_path : String,
-  status : PdfEvidenceWatchBookStatus,
+  status : @pdf_evidence_watch.PdfEvidenceWatchBookStatus,
 ) -> String {
   [
     "Archived PDF Evidence Watch book `\{book_id}`.",

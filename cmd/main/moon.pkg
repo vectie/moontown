@@ -2,6 +2,8 @@ import {
   "moonbitlang/async",
   "moonbitlang/core/env",
   "vectie/moontown",
+  "vectie/moontown/pdf_archive",
+  "vectie/moontown/pdf_evidence_watch",
 }
 
 options(

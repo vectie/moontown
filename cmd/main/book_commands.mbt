@@ -26,15 +26,16 @@ async fn render_books_command(args : Array[String]) -> String {
 ///|
 async fn render_pdf_watch_command(args : Array[String]) -> String {
   match args {
-    ["bootstrap"] => @moontown.bootstrap_pdf_evidence_watch_book()
+    ["bootstrap"] => @pdf_evidence_watch.bootstrap_pdf_evidence_watch_book()
     ["bootstrap", book_id] =>
-      @moontown.bootstrap_pdf_evidence_watch_book(book_id~)
+      @pdf_evidence_watch.bootstrap_pdf_evidence_watch_book(book_id~)
     ["install", config_path] =>
-      @moontown.install_pdf_evidence_watch_book_config(config_path)
-    ["archive", book_id] => @moontown.archive_pdf_evidence_watch_book(book_id~)
-    ["status"] => @moontown.render_pdf_evidence_watch_book_status()
+      @pdf_evidence_watch.install_pdf_evidence_watch_book_config(config_path)
+    ["archive", book_id] =>
+      @pdf_archive.archive_pdf_evidence_watch_book(book_id~)
+    ["status"] => @pdf_evidence_watch.render_pdf_evidence_watch_book_status()
     ["status", book_id] =>
-      @moontown.render_pdf_evidence_watch_book_status(book_id~)
+      @pdf_evidence_watch.render_pdf_evidence_watch_book_status(book_id~)
     _ => @moontown.load_or_create_demo_dashboard()
   }
 }

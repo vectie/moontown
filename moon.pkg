@@ -5,7 +5,6 @@ import {
   "vectie/moontown/book_templates",
   "vectie/moontown/cookbook",
   "vectie/moontown/planbook",
-  "vectie/moontown/pdf_evidence_watch",
   "vectie/moontown/town_synthesis",
   "vectie/moontown/visual_projection",
   "vectie/moontown/support",

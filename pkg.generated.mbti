@@ -13,15 +13,12 @@ import {
   "vectie/moontown/core",
   "vectie/moontown/daemon_runtime_policy",
   "vectie/moontown/live_autonomy_policy",
-  "vectie/moontown/pdf_evidence_watch",
   "vectie/moontown/planbook_policy",
   "vectie/moontown/roles",
   "vectie/moontown/runtime_status_policy",
 }
 
 // Values
-pub async fn archive_pdf_evidence_watch_book(book_id? : String, reason? : String, book_catalog_path? : String, standing_goal_path? : String, request_event_path? : String) -> String
-
 pub async fn bootstrap_app_tool_book(book_id? : String, title? : String, purpose? : String, websites? : Array[String], analysis_method? : String, tool_spec? : String, civic_building_id? : String, cadence_ticks? : Int, book_catalog_path? : String, standing_goal_path? : String, workspace_root? : String, template_root? : String) -> String
 
 pub async fn bootstrap_civic_salon_scenario(@civic.CivicSalonScenario, book_catalog_path? : String, round_id? : String, round_number? : Int, workspace_base? : String, reducer_mode? : @civic.CivicSalonReductionMode) -> String
@@ -31,8 +28,6 @@ pub async fn bootstrap_civic_salon_scenario_file(String, book_catalog_path? : St
 pub async fn bootstrap_moontown_cookbook(book_catalog_path? : String, workspace_root? : String, manifest_path? : String) -> String
 
 pub async fn bootstrap_moontown_planbook(book_catalog_path? : String, workspace_root? : String) -> String
-
-pub async fn bootstrap_pdf_evidence_watch_book(book_id? : String, title? : String, purpose? : String, websites? : Array[String], analysis_method? : String, cadence_ticks? : Int, book_catalog_path? : String, standing_goal_path? : String, workspace_root? : String, template_root? : String) -> String
 
 pub async fn bootstrap_registered_book_workspaces(book_catalog_path? : String) -> String
 
@@ -158,8 +153,6 @@ pub async fn inspect_moontown_cookbook(workspace_root? : String, manifest_path? 
 
 pub async fn inspect_moontown_planbook_autonomy(snapshot_path? : String, workspace_root? : String, book_catalog_path? : String) -> @planbook_policy.PlanbookAutonomyStatus
 
-pub async fn inspect_pdf_evidence_watch_book(book_id? : String, workspace_root? : String, book_catalog_path? : String, standing_goal_path? : String) -> @pdf_evidence_watch.PdfEvidenceWatchBookStatus
-
 pub async fn inspect_saved_town(snapshot_path? : String) -> @runtime_status_policy.TownRuntimeStatus
 
 pub async fn inspect_wenyu_building_protocols(status_path? : String, registry_path? : String) -> @civic.BuildingProtocolPortfolio
@@ -173,8 +166,6 @@ pub async fn install_book_template_config(String, String, registry_path? : Strin
 pub async fn install_civic_pattern_scenario_file(String, snapshot_path? : String, due_now? : Bool) -> String
 
 pub async fn install_civic_pattern_scenario_manifest(String, snapshot_path? : String) -> String
-
-pub async fn install_pdf_evidence_watch_book_config(String, book_catalog_path? : String, standing_goal_path? : String, template_root? : String) -> String
 
 pub async fn install_wenyu_final_integration(manifest_path? : String, snapshot_path? : String, standing_goal_path? : String) -> String
 
@@ -231,8 +222,6 @@ pub async fn render_moontown_planbook_autonomy_status(snapshot_path? : String, w
 pub async fn render_moontown_planbook_repair_status(snapshot_path? : String) -> String
 
 pub async fn render_moontown_planbook_status(workspace_root? : String) -> String
-
-pub async fn render_pdf_evidence_watch_book_status(book_id? : String, workspace_root? : String, book_catalog_path? : String, standing_goal_path? : String) -> String
 
 pub async fn render_saved_town_status(snapshot_path? : String) -> String
 
@@ -385,10 +374,6 @@ pub using @daemon_runtime_policy {type DaemonRuntimeHealth}
 pub using @daemon_runtime_policy {type DaemonRuntimeState}
 
 pub using @live_autonomy_policy {type LiveAutonomySpine}
-
-pub using @pdf_evidence_watch {type PdfEvidenceWatchBookStatus}
-
-pub using @pdf_evidence_watch {type PdfEvidenceWatchInstallSpec}
 
 pub using @planbook_policy {type PlanbookAutonomyStatus}
 
