@@ -7,7 +7,7 @@ fn supervision_tick(state : @core.TownState) -> Int {
 fn resolved_supervision_tick(state : @core.TownState, tick : Int?) -> Int {
   let fallback = supervision_tick(state)
   match tick {
-    Some(value) => max_int(fallback, value)
+    Some(value) => @support.max_int(fallback, value)
     None => fallback
   }
 }

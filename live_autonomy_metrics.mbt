@@ -16,7 +16,10 @@ fn worker_is_live(worker : @core.WorkerRef) -> Bool {
 
 ///|
 fn count_live_activity(state : @core.TownState) -> Int {
-  max_int(count_live_workers(state), count_live_active_executions(state))
+  @support.max_int(
+    count_live_workers(state),
+    count_live_active_executions(state),
+  )
 }
 
 ///|

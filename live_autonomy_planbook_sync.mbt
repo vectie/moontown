@@ -95,7 +95,7 @@ async fn synced_live_autonomy_waiting_streak(
   stable_waiting : Bool,
 ) -> Int {
   if stable_waiting {
-    max_int(
+    @support.max_int(
       spine.stable_waiting_observation_streak,
       prior_live_autonomy_stable_waiting_observation_streak(
         snapshot_path,

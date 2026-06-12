@@ -6,16 +6,16 @@ async fn effective_daemon_tick(
   standing_goals : Array[@core.StandingGoal],
   watcher_records : Array[@core.WatcherRunRecord],
 ) -> Int {
-  max_int(
-    max_int(
-      max_int(
+  @support.max_int(
+    @support.max_int(
+      @support.max_int(
         daemon.tick_sequence,
         latest_daemon_log_sequence(default_daemon_log_path(snapshot_path~)),
       ),
       latest_live_autonomy_journal_tick(snapshot_path),
     ),
-    max_int(
-      max_int(
+    @support.max_int(
+      @support.max_int(
         latest_standing_goal_tick(standing_goals),
         latest_watcher_record_tick(watcher_records),
       ),

@@ -6,13 +6,14 @@ fn merge_final_integration_standing_goals(
 ) -> Array[@core.StandingGoal] {
   let mut merged = existing.copy()
   for spec in specs {
-    let next_due_tick = current_tick + max_int(0, spec.initial_stagger_ticks)
+    let next_due_tick = current_tick +
+      @support.max_int(0, spec.initial_stagger_ticks)
     let replacement = @core.StandingGoal::new(
       id=spec.id,
       title=spec.title,
       prompt=spec.prompt,
       target_book_id=Some(spec.target_book_id),
-      cadence_ticks=max_int(1, spec.cadence_ticks),
+      cadence_ticks=@support.max_int(1, spec.cadence_ticks),
       next_due_tick~,
       last_run_tick=match find_standing_goal_by_id(merged, spec.id) {
         Some(goal) => goal.last_run_tick
@@ -20,7 +21,10 @@ fn merge_final_integration_standing_goals(
       },
       enabled=true,
       source_policy=final_integration_source_policy(spec),
-      quality_threshold=min_int(100, max_int(1, spec.quality_threshold)),
+      quality_threshold=@support.min_int(
+        100,
+        @support.max_int(1, spec.quality_threshold),
+      ),
     )
     merged = @core.standing_goal_registry_replace_or_append(merged, replacement)
   }

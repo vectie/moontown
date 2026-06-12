@@ -28,6 +28,10 @@ pub fn markdown_bullets(Array[String]) -> String
 
 pub fn markdown_excerpt(String, Int) -> String
 
+pub fn max_int(Int, Int) -> Int
+
+pub fn min_int(Int, Int) -> Int
+
 pub async fn read_json_file_or_empty_object(String) -> Json
 
 pub async fn read_optional_json_file(String) -> Json?
