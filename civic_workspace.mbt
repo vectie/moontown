@@ -51,23 +51,23 @@ async fn write_wenyu_civic_workspace_seed_for_service(
   objective : String,
 ) -> Unit {
   let root = @moonbook.workspace_root(entry)
-  write_text_file_if_missing(
+  @support.write_text_file_if_missing(
     "\{root}/wiki/index.md",
     @civic.workspace_index_text(entry, service),
   )
-  write_text_file(
+  @support.write_text_file(
     "\{root}/raw/bootstrap/CIVIC_SERVICE_CONTRACT.md",
     @civic.service_contract_text(entry, service, objective),
   )
-  write_text_file(
+  @support.write_text_file(
     "\{root}/raw/bootstrap/BUILDING_PROTOCOL_CONTRACT.md",
     @civic.building_protocol_contract_text(service),
   )
-  write_text_file(
+  @support.write_text_file(
     "\{root}/skills/wenyu-civic-service/SKILL.md",
     @civic.wenyu_civic_service_skill_text(),
   )
-  write_text_file(
+  @support.write_text_file(
     @civic.service_skill_path(root, service),
     @civic.civic_module_skill_text(service),
   )
@@ -86,7 +86,7 @@ async fn write_civic_schema_pages(
   service : @civic.CivicServiceDefinition,
 ) -> Unit {
   for path in service.schema_pages {
-    write_text_file_if_missing(
+    @support.write_text_file_if_missing(
       "\{root}/\{path}",
       @civic.schema_page_text(service, path),
     )
@@ -99,7 +99,7 @@ async fn write_civic_wiki_pages(
   service : @civic.CivicServiceDefinition,
 ) -> Unit {
   for path in service.wiki_pages {
-    write_text_file_if_missing(
+    @support.write_text_file_if_missing(
       "\{root}/\{path}",
       @civic.wiki_page_text(service, path),
     )
@@ -112,7 +112,7 @@ async fn write_civic_review_queues(
   service : @civic.CivicServiceDefinition,
 ) -> Unit {
   for path in service.review_queues {
-    write_text_file_if_missing(
+    @support.write_text_file_if_missing(
       "\{root}/\{path}",
       @civic.review_queue_text(service, path),
     )
@@ -124,15 +124,15 @@ async fn write_civic_service_ledgers(
   root : String,
   service : @civic.CivicServiceDefinition,
 ) -> Unit {
-  write_text_file_if_missing(
+  @support.write_text_file_if_missing(
     "\{root}/wiki/ledgers/service-ledger.md",
     @civic.service_ledger_text(service),
   )
-  write_text_file_if_missing(
+  @support.write_text_file_if_missing(
     "\{root}/wiki/ledgers/exchange-ledger.md",
     @civic.exchange_ledger_text(service),
   )
-  write_text_file_if_missing(
+  @support.write_text_file_if_missing(
     "\{root}/wiki/history/service-history.md",
     @civic.service_history_text(service),
   )

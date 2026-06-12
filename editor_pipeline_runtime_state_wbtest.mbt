@@ -12,8 +12,8 @@ async test "editor pipeline refresh writes runtime contract" {
     ),
   )
   let path = write_editor_pipeline_state(snapshot_path~, workspace_root~)
-  let text = read_text_or_empty(path)
-  let digest = read_text_or_empty(
+  let text = @support.read_text_or_empty(path)
+  let digest = @support.read_text_or_empty(
     default_editor_pipeline_markdown_path(snapshot_path~),
   )
   assert_editor_pipeline_initial_contract(text, digest)
@@ -37,7 +37,7 @@ async test "editor pipeline refresh writes runtime contract" {
   write_editor_feature_implementation_fixture(
     workspace_root, "placement-diff-preview",
   )
-  let placement_text = read_text_or_empty(
+  let placement_text = @support.read_text_or_empty(
     write_editor_pipeline_state(snapshot_path~, workspace_root~),
   )
   assert_editor_pipeline_ready_feature(placement_text, "placement-diff-preview")
@@ -46,7 +46,7 @@ async test "editor pipeline refresh writes runtime contract" {
     snapshot_path, workspace_root, "terrain-label-map", "Terrain Label Map Layers",
     1, "add terrain label evidence", "terrain labels visible before export",
   )
-  let terrain_digest = read_text_or_empty(
+  let terrain_digest = @support.read_text_or_empty(
     default_editor_pipeline_markdown_path(snapshot_path~),
   )
   assert_editor_pipeline_ready_feature(terrain_text, "terrain-label-map")
@@ -55,7 +55,7 @@ async test "editor pipeline refresh writes runtime contract" {
     snapshot_path, workspace_root, "style-comparison-workbench", "Building Style Comparison Workbench",
     2, "compare visual styles", "three style candidates visible",
   )
-  let style_digest = read_text_or_empty(
+  let style_digest = @support.read_text_or_empty(
     default_editor_pipeline_markdown_path(snapshot_path~),
   )
   assert_editor_pipeline_ready_feature(style_text, "style-comparison-workbench")

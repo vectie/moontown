@@ -13,7 +13,7 @@ async test "late detached receipt appends terminal watcher ledger record" {
     $|  "status": "Succeeded"
     $|}
 
-  write_text_file(packet_path + ".import.json", receipt)
+  @support.write_text_file(packet_path + ".import.json", receipt)
   let book_root = "\{root}/book"
   write_standing_watch_history_marker(
     book_root, "provider-standing-watch-late-ledger", "no_change", 0, 0, "no",
@@ -84,7 +84,7 @@ async test "terminal detached watcher ledger reconciliation handles already comp
   let snapshot_path = "\{root}/town.json"
   let packet_path = "\{root}/packets/packet.json"
   let task_id = "standing-watch-terminal-ledger-tick-10"
-  write_text_file(
+  @support.write_text_file(
     packet_path + ".import.json",
     detached_import_receipt_json(status="Succeeded"),
   )

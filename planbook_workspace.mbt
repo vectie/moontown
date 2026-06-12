@@ -44,7 +44,7 @@ pub async fn render_moontown_planbook_status(
     if missing.is_empty() {
       "- none"
     } else {
-      markdown_bullets(missing)
+      @support.markdown_bullets(missing)
     },
   ].join("\n")
 }

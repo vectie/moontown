@@ -52,7 +52,7 @@ fn civic_salon_participant_contract(
     "",
     "## Rules",
     "",
-    markdown_bullets(scenario.quality_rules),
+    @support.markdown_bullets(scenario.quality_rules),
   ].join("\n")
 }
 

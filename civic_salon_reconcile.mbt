@@ -14,7 +14,7 @@ async fn refresh_civic_salon_projection_if_stale(
       let projection_path = civic_salon_projection_path_for_scenario(
         scenario, snapshot_path,
       )
-      let text = read_text_or_empty(projection_path)
+      let text = @support.read_text_or_empty(projection_path)
       let projection_current = text.contains(schedule.latest_round_id) &&
         text.contains("round \{schedule.round_count}")
       let protocol_ledgers_current = civic_salon_protocol_ledgers_current(
@@ -64,7 +64,7 @@ async fn civic_salon_protocol_ledgers_current(
     ledger in [
       "inbox", "contributions", "reductions", "outbox", "home_returns", "reviews",
     ] {
-    let text = read_text_or_empty(
+    let text = @support.read_text_or_empty(
       civic_salon_protocol_ledger_path(schedule.building_id, ledger),
     )
     if text.trim().is_empty() || !text.contains(schedule.latest_round_id) {

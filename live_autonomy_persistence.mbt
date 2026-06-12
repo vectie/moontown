@@ -6,7 +6,7 @@ async fn persist_live_autonomy_spine(
   standing_goals : Array[@core.StandingGoal],
   watcher_records : Array[@core.WatcherRunRecord],
 ) -> Unit {
-  write_text_file(
+  @support.write_text_file(
     default_live_autonomy_path(snapshot_path~),
     spine.to_json().stringify(indent=2),
   )

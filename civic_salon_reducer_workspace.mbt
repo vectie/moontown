@@ -5,23 +5,23 @@ async fn write_civic_salon_reducer_workspace(
   round_id : String,
   round_number : Int,
 ) -> Unit {
-  write_text_file(
+  @support.write_text_file(
     "\{root}/skills/\{scenario.skill_name}/SKILL.md",
     @civic.salon_reducer_skill_text(scenario),
   )
-  write_text_file(
+  @support.write_text_file(
     "\{root}/raw/bootstrap/civic-salon-participants.json",
     scenario.participants.to_json().stringify(indent=2),
   )
-  write_text_file(
+  @support.write_text_file(
     "\{root}/raw/bootstrap/civic-salon-reducer-input.md",
     @civic.salon_reducer_input_markdown(scenario, round_id, round_number),
   )
-  write_text_file(
+  @support.write_text_file(
     "\{root}/raw/bootstrap/civic-salon-reducer-contract.md",
     @civic.salon_reducer_contract_markdown(scenario),
   )
-  write_text_file(
+  @support.write_text_file(
     "\{root}/moonclaw.jobs.json",
     merged_civic_salon_reducer_profile_json(root, scenario),
   )
@@ -33,9 +33,9 @@ async fn merged_civic_salon_reducer_profile_json(
   scenario : CivicSalonScenario,
 ) -> String {
   let path = "\{root}/moonclaw.jobs.json"
-  let existing = read_json_file_or_empty_object(path)
+  let existing = @support.read_json_file_or_empty_object(path)
   let reducer_profile = civic_salon_reducer_profile_json(scenario)
-  upsert_moonclaw_job_profile_json(
+  @support.upsert_moonclaw_job_profile_json(
     existing, "civic_salon_reducer_worker", reducer_profile,
   ).stringify(indent=2)
 }

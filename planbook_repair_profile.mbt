@@ -3,10 +3,10 @@ async fn write_planbook_repair_moonclaw_profile(
   workspace_root : String,
 ) -> Unit {
   let path = "\{workspace_root}/moonclaw.jobs.json"
-  let base = read_json_file_or_empty_object(path)
-  write_text_file(
+  let base = @support.read_json_file_or_empty_object(path)
+  @support.write_text_file(
     path,
-    upsert_moonclaw_job_profile_json(
+    @support.upsert_moonclaw_job_profile_json(
       base,
       planbook_repair_worker_profile_id(),
       planbook_repair_worker_profile_json(),

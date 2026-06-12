@@ -30,6 +30,8 @@ async test "live autonomy surfaces transient infrastructure debt separately" {
   assert_eq(spine.transient_infrastructure_debt_count, 1)
   let live_text = render_live_autonomy_status(snapshot_path~)
   assert_true(live_text.contains("Transient infrastructure debt: `1`"))
-  let digest = read_text_or_empty(default_live_digest_path(snapshot_path~))
+  let digest = @support.read_text_or_empty(
+    default_live_digest_path(snapshot_path~),
+  )
   assert_true(digest.contains("transient_infrastructure_debt: `1`"))
 }

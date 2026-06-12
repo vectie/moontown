@@ -8,7 +8,7 @@ async fn write_research_quality_review_trigger(
   let root = @moonbook.workspace_root(entry)
   let raw_root = "\{root}/raw/bootstrap"
   @support.ignore_checked_command("mkdir", ["-p", raw_root])
-  write_text_file(
+  @support.write_text_file(
     "\{raw_root}/QUALITY_REPAIR.md",
     [
       "# Research Review Trigger",
@@ -40,7 +40,7 @@ async fn write_research_quality_review_resolved(
   let raw_root = "\{root}/raw/bootstrap"
   let path = "\{raw_root}/QUALITY_REPAIR.md"
   guard @fs.exists(path) else { return }
-  write_text_file(
+  @support.write_text_file(
     path,
     [
       "# Research Review Trigger",

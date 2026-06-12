@@ -11,22 +11,26 @@ struct EditorSelectedFeature {
 async fn editor_selected_feature_summary(
   workspace_root : String,
 ) -> EditorSelectedFeature? {
-  let text = read_text_or_empty(
+  let text = @support.read_text_or_empty(
     editor_feature_selection_result_path(workspace_root),
   )
   let parsed = @json.parse(text) catch { _ => return None }
   match parsed {
     Object(object) =>
       Some({
-        selected_feature: json_object_string(object, "selected_feature").unwrap_or(
-          "unknown-feature",
+        selected_feature: @support.json_object_string(
+          object, "selected_feature",
+        ).unwrap_or("unknown-feature"),
+        title: @support.json_object_string(object, "title").unwrap_or(
+          "Untitled feature",
         ),
-        title: json_object_string(object, "title").unwrap_or("Untitled feature"),
-        score: json_object_field_summary(object, "score").unwrap_or("unknown"),
-        implementation_hint: json_object_string(object, "implementation_hint").unwrap_or(
-          "No implementation hint was provided.",
+        score: @support.json_object_field_summary(object, "score").unwrap_or(
+          "unknown",
         ),
-        current_gap: json_object_string(object, "current_gap").unwrap_or(
+        implementation_hint: @support.json_object_string(
+          object, "implementation_hint",
+        ).unwrap_or("No implementation hint was provided."),
+        current_gap: @support.json_object_string(object, "current_gap").unwrap_or(
           "No current gap was provided.",
         ),
       })
@@ -42,7 +46,7 @@ async fn editor_selected_feature_implementation_ready(
     Some(feature) => feature
     None => return false
   }
-  let text = read_text_or_empty(
+  let text = @support.read_text_or_empty(
     editor_selected_feature_implementation_path(workspace_root),
   )
   text.contains(

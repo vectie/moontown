@@ -3,15 +3,15 @@ async fn write_wenyu_build_skills(
   root : String,
   entry : @moonbook.BookCatalogEntry,
 ) -> Unit {
-  write_text_file(
+  @support.write_text_file(
     "\{root}/skills/wenyu-build/SKILL.md",
     wenyu_build_skill_text(entry),
   )
-  write_text_file(
+  @support.write_text_file(
     "\{root}/skills/wenyu-code-patch/SKILL.md",
     wenyu_code_patch_skill_text(entry),
   )
-  write_text_file(
+  @support.write_text_file(
     "\{root}/skills/wenyu-asset-pack/SKILL.md",
     wenyu_asset_pack_skill_text(entry),
   )

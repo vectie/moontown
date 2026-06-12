@@ -19,9 +19,12 @@ async fn preseed_reference_style_inputs(
   let mut copied_source_hint_lines = 0
   match report_path {
     Some(path) =>
-      match read_optional_text(path) {
+      match @support.read_optional_text(path) {
         Some(text) => {
-          write_text_file("\{bootstrap_root}/REFERENCE_OUTPUT.md", text)
+          @support.write_text_file(
+            "\{bootstrap_root}/REFERENCE_OUTPUT.md",
+            text,
+          )
           copied_report = true
           copied_report_lines = count_reference_lines(text)
         }
@@ -31,14 +34,20 @@ async fn preseed_reference_style_inputs(
   }
   match visual_path {
     Some(path) =>
-      write_text_file("\{bootstrap_root}/REFERENCE_VISUAL_PATH.txt", path)
+      @support.write_text_file(
+        "\{bootstrap_root}/REFERENCE_VISUAL_PATH.txt",
+        path,
+      )
     None => ()
   }
   match source_hints_path {
     Some(path) =>
-      match read_optional_text(path) {
+      match @support.read_optional_text(path) {
         Some(text) => {
-          write_text_file("\{bootstrap_root}/REFERENCE_SOURCE_HINTS.md", text)
+          @support.write_text_file(
+            "\{bootstrap_root}/REFERENCE_SOURCE_HINTS.md",
+            text,
+          )
           copied_source_hints = true
           copied_source_hint_lines = count_reference_lines(text)
         }
@@ -46,7 +55,7 @@ async fn preseed_reference_style_inputs(
       }
     None => ()
   }
-  write_text_file(
+  @support.write_text_file(
     "\{bootstrap_root}/REFERENCE_STYLE.md",
     reference_style_seed_text(
       entry, objective, report_path, visual_path, source_hints_path, copied_report,

@@ -4,23 +4,23 @@ async fn write_planbook_autonomy_workspace(
   workspace_root : String,
 ) -> Unit {
   ignore(ensure_planbook_backlog(workspace_root))
-  write_text_file(
+  @support.write_text_file(
     "\{workspace_root}/wiki/planning/execution-evidence.md",
     planbook_autonomy_execution_evidence(status),
   )
-  write_text_file(
+  @support.write_text_file(
     "\{workspace_root}/wiki/reviews/active-plan-review.md",
     planbook_autonomy_active_review(status),
   )
-  write_text_file(
+  @support.write_text_file(
     "\{workspace_root}/wiki/planning/self-healing.md",
     render_planbook_autonomy_markdown(status),
   )
-  write_text_file(
+  @support.write_text_file(
     "\{workspace_root}/wiki/history/daily-engineering-digest.md",
     planbook_daily_engineering_digest_markdown(status, workspace_root),
   )
-  write_text_file(
+  @support.write_text_file(
     "\{workspace_root}/book/moonbook-ui-state.json",
     planbook_autonomy_ui_state_json(status),
   )

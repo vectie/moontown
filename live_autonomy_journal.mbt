@@ -37,14 +37,14 @@ async fn append_live_autonomy_journal(
   path : String,
   spine : LiveAutonomySpine,
 ) -> Unit {
-  let existing = read_text_or_empty(path)
+  let existing = @support.read_text_or_empty(path)
   let line = spine.to_json().stringify()
   let content = if existing == "" {
     "\{line}\n"
   } else {
     "\{existing.trim_end()}\n\{line}\n"
   }
-  write_text_file(path, content)
+  @support.write_text_file(path, content)
 }
 
 ///|

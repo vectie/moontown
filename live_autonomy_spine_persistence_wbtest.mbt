@@ -42,11 +42,15 @@ async test "live autonomy spine persists current state and journal" {
       blocker.contains("review queue")
     }),
   )
-  let live_text = read_text_or_empty(default_live_autonomy_path(snapshot_path~))
-  let journal_text = read_text_or_empty(
+  let live_text = @support.read_text_or_empty(
+    default_live_autonomy_path(snapshot_path~),
+  )
+  let journal_text = @support.read_text_or_empty(
     default_town_journal_path(snapshot_path~),
   )
-  let digest_text = read_text_or_empty(default_live_digest_path(snapshot_path~))
+  let digest_text = @support.read_text_or_empty(
+    default_live_digest_path(snapshot_path~),
+  )
   assert_true(live_text.contains("\"status\": \"watching\""))
   assert_true(live_text.contains("\"stable_waiting\": false"))
   assert_true(live_text.contains("\"digest_path\""))

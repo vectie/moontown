@@ -26,7 +26,7 @@ async test "planbook bootstrap creates durable plan workspace and status" {
   assert_true(
     @fs.exists("\{workspace_root}/wiki/history/daily-engineering-digest.md"),
   )
-  let architecture = read_text_or_empty(
+  let architecture = @support.read_text_or_empty(
     "\{workspace_root}/wiki/planning/operating-architecture.md",
   )
   assert_true(architecture.contains("Buildings are protocol places"))
@@ -42,7 +42,7 @@ async test "course bootstrap creates course-shaped MoonBook workspace" {
   let catalog_path = "\{root}/moonbooks.json"
   let workspace_root = "\{root}/books/course-wenyu-game-design"
   let source_workspace_root = "\{root}/source"
-  write_text_file(
+  @support.write_text_file(
     "\{source_workspace_root}/raw/bootstrap/deep-report.md",
     "# Beginner Course\n\n## Lesson 1\n\nStart from map reading, then build one tile.",
   )

@@ -23,7 +23,7 @@ pub async fn write_moontown_planbook_validation_evidence(
 ) -> String {
   let path = "\{planbook_autonomy_base_dir(snapshot_path)}/planbook/latest-validation.md"
   let text = render_planbook_validation_evidence(note)
-  write_text_file(path, text)
+  @support.write_text_file(path, text)
   path
 }
 

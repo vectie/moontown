@@ -8,7 +8,7 @@ async test "semantic review bridge skips archived hidden internal books" {
   let result_dir = "\{root}/book-quality/ai-review-results"
   let bridge_path = "\{root}/book-quality/repair-bridge.json"
   let workspace_root = "\{root}/books/codex-smoke-pdf-watch"
-  write_text_file(
+  @support.write_text_file(
     "\{root}/daemon.json",
     "{\"daemon_id\":\"test\",\"tick_sequence\":41}",
   )

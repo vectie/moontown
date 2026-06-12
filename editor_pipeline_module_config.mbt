@@ -52,7 +52,7 @@ async fn load_default_editor_pipeline_module_config() -> EditorPipelineModuleCon
 async fn load_editor_pipeline_module_config(
   path : String,
 ) -> EditorPipelineModuleConfig? {
-  let parsed = match read_optional_json_file(path) {
+  let parsed = match @support.read_optional_json_file(path) {
     Some(json) => json
     None => return None
   }

@@ -1,6 +1,6 @@
 ///|
 async fn append_daemon_log(path : String, message : String) -> Unit {
-  ensure_parent_directory(path) catch {
+  @support.ensure_parent_directory(path) catch {
     _ => ()
   }
   let line = "[\{@env.now()}] \{message}\n"
@@ -11,7 +11,7 @@ async fn append_daemon_log(path : String, message : String) -> Unit {
 
 ///|
 async fn latest_daemon_log_sequence(log_path : String) -> Int {
-  let text = read_text_or_empty(log_path)
+  let text = @support.read_text_or_empty(log_path)
   let mut latest = 0
   for line in text.split("\n") {
     if !line.contains("sequence=") {

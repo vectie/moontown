@@ -3,8 +3,8 @@ async fn write_planbook_repair_acp_target(workspace_root : String) -> Unit {
   let home = "\{workspace_root}/.moonclaw"
   let path = "\{home}/moonclaw.json"
   let source_root = planbook_repair_source_root()
-  let base = read_json_file_or_empty_object(path)
-  write_text_file(
+  let base = @support.read_json_file_or_empty_object(path)
+  @support.write_text_file(
     path,
     @codex.upsert_codex_main_target_json(
       base,

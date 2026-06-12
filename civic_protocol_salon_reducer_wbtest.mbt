@@ -25,7 +25,7 @@ async test "civic salon reducer profile preserves existing civic service worker 
   let root = cleaned_civic_protocol_test_root(
     "/tmp/moontown-civic-salon-profile-merge",
   )
-  write_text_file(
+  @support.write_text_file(
     "\{root}/moonclaw.jobs.json",
     "{ \"jobs\": { \"profiles\": { \"wenyu_civic_service_worker\": { \"family\": \"wenyu_civic_service_worker\", \"steps\": [{\"id\":\"execute_civic_service\"},{\"id\":\"review_civic_service\"}] } } } }",
   )
@@ -50,7 +50,7 @@ async test "civic salon reducer parses object ideas contract" {
   )
   let scenario = test_civic_salon_scenario()
   let path = civic_salon_reducer_output_path_in_workspace(root)
-  write_text_file(
+  @support.write_text_file(
     path,
     Json::object({ "ideas": scenario.ideas.to_json() }).stringify(indent=2),
   )

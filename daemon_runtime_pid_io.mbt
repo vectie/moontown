@@ -20,7 +20,7 @@ fn daemon_parse_positive_int(text : String) -> Int {
 ///|
 async fn daemon_current_process_pid(snapshot_path : String) -> Int {
   let tmp_path = "\{@daemon_runtime_policy.daemon_base_dir_for_snapshot(snapshot_path)}/daemon-current.pid.tmp"
-  ensure_parent_directory(tmp_path) catch {
+  @support.ensure_parent_directory(tmp_path) catch {
     _ => return 0
   }
   let status = @process.run("sh", [
@@ -39,7 +39,7 @@ async fn daemon_current_process_pid(snapshot_path : String) -> Int {
 
 ///|
 async fn write_daemon_pid_file(path : String, pid : Int) -> Unit {
-  write_text_file(path, "\{pid}\n") catch {
+  @support.write_text_file(path, "\{pid}\n") catch {
     _ => ()
   }
 }

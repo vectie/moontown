@@ -124,7 +124,7 @@ async fn write_book_quality_ai_review_result_fixture(
   repair_owner? : String = "moonbook",
   next_repair_task? : String = "improve source synthesis",
 ) -> Unit {
-  write_text_file(
+  @support.write_text_file(
     @book_quality.review_result_path(result_dir, book_id),
     [
       "ai_quality_score: \{score}",
@@ -166,16 +166,16 @@ async fn seed_complete_civic_service_workspace(
       "wiki/service/protocol.md",
       "moonclaw.jobs.json",
     ] {
-    write_text_file("\{root}/\{path}", "# Civic Base\n")
+    @support.write_text_file("\{root}/\{path}", "# Civic Base\n")
   }
   for path in service.schema_pages {
-    write_text_file("\{root}/\{path}", "# Schema\n")
+    @support.write_text_file("\{root}/\{path}", "# Schema\n")
   }
   for path in service.wiki_pages {
-    write_text_file("\{root}/\{path}", "# Wiki\n")
+    @support.write_text_file("\{root}/\{path}", "# Wiki\n")
   }
   for path in service.review_queues {
-    write_text_file("\{root}/\{path}", "# Review\n")
+    @support.write_text_file("\{root}/\{path}", "# Review\n")
   }
   for
     path in [
@@ -184,9 +184,9 @@ async fn seed_complete_civic_service_workspace(
       "wiki/history/service-history.md",
       service.skill_path,
     ] {
-    write_text_file("\{root}/\{path}", "# Required\n")
+    @support.write_text_file("\{root}/\{path}", "# Required\n")
   }
-  write_text_file(
+  @support.write_text_file(
     "\{root}/book-results/goal-\{service.book_id}-civic-service.json",
     "{}\n",
   )

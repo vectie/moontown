@@ -157,7 +157,7 @@ async test "daemon tick floor parses latest daemon log sequence" {
     "/tmp/moontown-daemon-log-sequence-test",
   )
   let log_path = "\{root}/daemon.log"
-  write_text_file(
+  @support.write_text_file(
     log_path, "[1780279335798] tick phase=standing-goals sequence=15888\n[1780279400000] tick phase=done sequence=15890\n",
   )
   assert_eq(latest_daemon_log_sequence(log_path), 15890)

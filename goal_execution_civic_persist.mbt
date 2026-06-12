@@ -53,7 +53,7 @@ fn civic_persist_summary(
     Some(run_id) => " Worker run: `\{run_id}`."
     None => ""
   }
-  let evidence = markdown_excerpt(
+  let evidence = @support.markdown_excerpt(
     compact_markdown_for_candidate(execution.summary),
     900,
   )

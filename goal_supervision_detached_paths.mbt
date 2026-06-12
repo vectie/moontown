@@ -31,7 +31,7 @@ async fn detached_import_stderr_summary(packet_path : String) -> String {
     return ""
   }
   let stderr_path = @moonclaw.detached_import_receipt_path(packet_path) + ".err"
-  let text = read_text_or_empty(stderr_path).trim().to_owned()
+  let text = @support.read_text_or_empty(stderr_path).trim().to_owned()
   if text.is_empty() {
     return ""
   }

@@ -68,7 +68,7 @@ async fn install_civic_pattern_scenario(
   snapshot_path : String,
   first_due_ms : UInt64,
 ) -> CivicSalonSchedule {
-  write_text_file(
+  @support.write_text_file(
     civic_salon_scenario_path(scenario.id, snapshot_path~),
     scenario.to_json().stringify(indent=2),
   )
@@ -155,7 +155,7 @@ fn civic_salon_snapshot_path_for_workspace_base(
 
 ///|
 async fn load_civic_salon_scenario_file(path : String) -> CivicSalonScenario? {
-  let parsed = match read_optional_json_file(path) {
+  let parsed = match @support.read_optional_json_file(path) {
     Some(json) => json
     None => return None
   }

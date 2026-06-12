@@ -58,7 +58,9 @@ async test "book doctor writes structural audit and AI review packets" {
   assert_true(@fs.exists("\{review_dir}/BOOK_QUALITY_REVIEW_SKILL.md"))
   assert_true(@fs.exists("\{review_dir}/coding.json"))
   assert_true(@fs.exists("\{review_dir}/wenyu-policy-hall.json"))
-  let skill = read_text_or_empty("\{review_dir}/BOOK_QUALITY_REVIEW_SKILL.md")
+  let skill = @support.read_text_or_empty(
+    "\{review_dir}/BOOK_QUALITY_REVIEW_SKILL.md",
+  )
   assert_true(
     skill.contains(
       "Do not score a book as world-class just because files exist",

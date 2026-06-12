@@ -27,7 +27,7 @@ async test "book quality review candidate selection favors the weakest pending s
   let candidate = @book_quality.first_pending_review_score(audit, result_dir)
   assert_true(candidate is Some(_))
   assert_eq(candidate.unwrap().book_id, "weak-book")
-  write_text_file(
+  @support.write_text_file(
     @book_quality.review_result_path(result_dir, "weak-book"),
     "ai_quality_score: 82\n",
   )
@@ -73,7 +73,7 @@ async test "book quality review packet helpers expose paths and result state" {
   assert_false(
     @fs.exists(@book_quality.review_result_path(result_dir, "course-example")),
   )
-  write_text_file(
+  @support.write_text_file(
     @book_quality.review_result_path(result_dir, "course-example"),
     "ai_quality_score: 88\n",
   )

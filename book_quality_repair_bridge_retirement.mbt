@@ -36,7 +36,7 @@ async fn book_quality_repair_goal_retirement_decision(
         semantic_score=None,
       )
     Some(book_id) => {
-      let result_text = read_text_or_empty(
+      let result_text = @support.read_text_or_empty(
         @book_quality.review_result_path(result_dir, book_id),
       )
       @book_quality.repair_goal_retirement_decision(

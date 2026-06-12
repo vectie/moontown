@@ -12,7 +12,7 @@ async test "late inline detached receipt reconciles deferred no-run execution" {
     $|  "status": "Succeeded"
     $|}
 
-  write_text_file(packet_path + ".import.json", receipt)
+  @support.write_text_file(packet_path + ".import.json", receipt)
   let state = goal_supervision_test_state()
   state.register_book(research_opc_book_ref(root))
   let execution = standing_watch_execution_fixture(

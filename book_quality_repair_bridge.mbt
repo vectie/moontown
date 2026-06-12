@@ -61,7 +61,7 @@ async fn persist_book_quality_repair_bridge(
   repaired : Array[@book_quality.BookQualityRepairBridgeItem],
 ) -> Unit {
   @storage.save_standing_goals_file(context.goals_path, context.goals)
-  write_text_file(
+  @support.write_text_file(
     bridge_path,
     @book_quality.BookQualityRepairBridgeLedger::{ items: repaired }
     .to_json()
@@ -119,7 +119,7 @@ async fn book_quality_repair_bridge_candidate(
   result_dir : String,
 ) -> BookQualityRepairBridgeCandidate? {
   let result_path = @book_quality.review_result_path(result_dir, score.book_id)
-  let result_text = read_text_or_empty(result_path)
+  let result_text = @support.read_text_or_empty(result_path)
   if result_text.is_empty() {
     return None
   }

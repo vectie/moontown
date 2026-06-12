@@ -62,7 +62,7 @@ async fn write_live_autonomy_journal_probe_lines(
   snapshot_path : String,
   lines : Array[String],
 ) -> Unit {
-  write_text_file(
+  @support.write_text_file(
     default_town_journal_path(snapshot_path~),
     lines.join("\n") + "\n",
   )

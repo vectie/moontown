@@ -26,8 +26,8 @@ async fn inspect_editor_pipeline_lifecycle(
     workspace_root,
   )
   let output_ref = "./viewport.html?assets=generated&mode=output&v=editor-pipeline"
-  let repair_text = read_text_or_empty(repair_path)
-  let implementation_text = read_text_or_empty(implementation_path)
+  let repair_text = @support.read_text_or_empty(repair_path)
+  let implementation_text = @support.read_text_or_empty(implementation_path)
   let change_id = "editor-pipeline-\{selected_feature.selected_feature}"
   let accepted_proof = implementation_text.contains(
       "contract: \{@editor_pipeline.selected_feature_implementation_contract()}",
@@ -112,7 +112,7 @@ async fn current_editor_pipeline_repair_status(
 
 ///|
 async fn editor_pipeline_feature_history_ready(workspace_root : String) -> Bool {
-  let proof_ready = read_text_or_empty(
+  let proof_ready = @support.read_text_or_empty(
     editor_selected_feature_implementation_path(workspace_root),
   )
   let civic_status_ready = text_file_contains(

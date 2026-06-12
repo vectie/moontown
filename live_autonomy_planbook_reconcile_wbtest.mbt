@@ -44,7 +44,7 @@ async test "live status reconciles stale planbook counts from authoritative stat
     next_due_tick=16000,
   )
   write_live_autonomy_watcher_record_line(root, "watch-sync-deferred", record)
-  write_text_file(
+  @support.write_text_file(
     default_live_autonomy_path(snapshot_path~),
     stale_spine.to_json().stringify(indent=2),
   )

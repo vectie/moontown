@@ -31,5 +31,5 @@ async fn append_civic_salon_round_record(
   } else {
     "\{previous}\n"
   }
-  write_text_file(path, "\{prefix}\{record.to_json().stringify()}\n")
+  @support.write_text_file(path, "\{prefix}\{record.to_json().stringify()}\n")
 }

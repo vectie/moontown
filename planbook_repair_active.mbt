@@ -48,7 +48,7 @@ async fn existing_planbook_repair_handoff(
 ) -> PlanbookRepairTask? {
   ignore(snapshot_path)
   let result_path = planbook_repair_result_path_for_workspace(workspace_root)
-  let result_text = read_text_or_empty(result_path)
+  let result_text = @support.read_text_or_empty(result_path)
   if !planbook_repair_result_mentions_criterion(result_text, criterion.id) {
     return None
   }

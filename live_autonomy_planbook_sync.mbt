@@ -44,7 +44,7 @@ async fn sync_live_autonomy_planbook_counts(
         spine, records, planbook_open, planbook_repair_active,
       ),
     }
-    write_text_file(
+    @support.write_text_file(
       default_live_autonomy_path(snapshot_path~),
       synced.to_json().stringify(indent=2),
     )

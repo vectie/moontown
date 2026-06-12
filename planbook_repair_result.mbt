@@ -6,7 +6,7 @@ async fn reconcile_planbook_repair_result(task : PlanbookRepairTask) -> String {
   }
   let run_result = planbook_repair_result_text_from_run(task)
   if run_result != "" {
-    write_text_file(planbook_repair_result_path(task), run_result)
+    @support.write_text_file(planbook_repair_result_path(task), run_result)
   }
   run_result
 }
@@ -65,7 +65,7 @@ async fn planbook_repair_prefer_completed_index_task(
 async fn planbook_repair_result_text_for_task(
   task : PlanbookRepairTask,
 ) -> String {
-  let text = read_text_or_empty(planbook_repair_result_path(task))
+  let text = @support.read_text_or_empty(planbook_repair_result_path(task))
   if planbook_repair_result_satisfies_contract(text, task.criterion_id) {
     text
   } else {
@@ -86,8 +86,8 @@ async fn planbook_repair_result_text_from_run(
     Some(payload) => payload
     None => return ""
   }
-  let content = json_string_field(payload, "content").unwrap_or(
-    json_string_field(payload, "summary").unwrap_or(""),
+  let content = @support.json_string_field(payload, "content").unwrap_or(
+    @support.json_string_field(payload, "summary").unwrap_or(""),
   )
   if planbook_repair_run_result_satisfies_contract(
       payload,
@@ -113,8 +113,8 @@ async fn planbook_run_has_accepted_repair_result(
     Some(payload) => payload
     None => return false
   }
-  let content = json_string_field(payload, "content").unwrap_or(
-    json_string_field(payload, "summary").unwrap_or(""),
+  let content = @support.json_string_field(payload, "content").unwrap_or(
+    @support.json_string_field(payload, "summary").unwrap_or(""),
   )
   planbook_repair_run_result_has_accepted_evidence(
     payload, content, run_id, criterion_id,

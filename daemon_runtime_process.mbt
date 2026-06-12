@@ -37,7 +37,7 @@ async fn spawn_daemon_detached(
   )
   let log_path = default_daemon_log_path(snapshot_path~)
   let pid_path = "\{base_dir}/daemon-\{kind}-spawn.pid.tmp"
-  ensure_parent_directory(log_path) catch {
+  @support.ensure_parent_directory(log_path) catch {
     _ => return 0
   }
   remove_file_if_exists(pid_path)

@@ -22,11 +22,11 @@ async fn write_dispatched_planbook_repair_with_run_status(
     validation_command: "moon test",
     generated_at_ms: 1,
   }
-  write_text_file(
+  @support.write_text_file(
     default_planbook_repair_path(snapshot_path~),
     task.to_json().stringify(indent=2),
   )
-  write_text_file(
+  @support.write_text_file(
     planbook_repair_job_index_path(workspace_root),
     "{\"runs\":[{\"id\":\"\{run_id}\",\"status\":\"\{run_status}\"}]}",
   )

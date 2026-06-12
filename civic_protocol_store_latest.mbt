@@ -82,7 +82,7 @@ async fn latest_protocol_json_line(
   ledger : String,
   ledger_base_dir? : String = default_protocol_ledger_base_dir(),
 ) -> String? {
-  let text = read_text_or_empty(
+  let text = @support.read_text_or_empty(
     protocol_ledger_path(building_id, ledger, ledger_base_dir~),
   )
   let mut latest = ""
@@ -106,7 +106,7 @@ async fn latest_protocol_json_string_field(
   field : String,
   ledger_base_dir? : String = default_protocol_ledger_base_dir(),
 ) -> String {
-  let text = read_text_or_empty(
+  let text = @support.read_text_or_empty(
     protocol_ledger_path(building_id, ledger, ledger_base_dir~),
   )
   let mut latest = ""

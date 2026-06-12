@@ -19,12 +19,12 @@ async fn save_daemon_state(
   path : String,
   daemon : @scheduler.DaemonState,
 ) -> Unit {
-  write_text_file(path, daemon.to_json().stringify())
+  @support.write_text_file(path, daemon.to_json().stringify())
 }
 
 ///|
 async fn load_daemon_runtime_state(path : String) -> DaemonRuntimeState? {
-  let parsed = match read_optional_json_file(path) {
+  let parsed = match @support.read_optional_json_file(path) {
     Some(json) => json
     None => return None
   }
@@ -36,7 +36,7 @@ async fn save_daemon_runtime_state(
   path : String,
   state : DaemonRuntimeState,
 ) -> Unit {
-  write_text_file(path, state.to_json().stringify()) catch {
+  @support.write_text_file(path, state.to_json().stringify()) catch {
     _ => ()
   }
 }

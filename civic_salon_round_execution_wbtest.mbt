@@ -9,7 +9,7 @@ async test "due civic salon rounds persist schedule and run ledger" {
     default_civic_salon_schedule_path(snapshot_path~),
     [schedule],
   )
-  write_text_file(
+  @support.write_text_file(
     civic_salon_scenario_path(schedule.id, snapshot_path~),
     daemon_civic_salon_scenario().to_json().stringify(indent=2),
   )
@@ -62,15 +62,15 @@ async test "stale civic salon projection refreshes without forcing another round
     [schedule],
   )
   let scenario = daemon_civic_salon_scenario()
-  write_text_file(
+  @support.write_text_file(
     civic_salon_scenario_path(schedule.id, snapshot_path~),
     scenario.to_json().stringify(indent=2),
   )
-  write_text_file(
+  @support.write_text_file(
     civic_salon_projection_path_for_scenario(scenario, snapshot_path),
     "{\"book_id\":\"wenyu-social-square\",\"status_chips\":[{\"label\":\"round 1\",\"tone\":\"info\"}]}",
   )
-  write_text_file(
+  @support.write_text_file(
     "\{root}/books/wenyu-social-square/raw/bootstrap/civic-salon-ideas.json",
     Json::object({ "ideas": daemon_civic_salon_scenario().ideas.to_json() }).stringify(
       indent=2,
@@ -105,13 +105,13 @@ async test "persisted civic reducer prefers scenario-specific output over shared
   let scenario = daemon_civic_salon_scenario()
   let workspace_base = root
   let raw_root = "\{root}/books/wenyu-social-square/raw/bootstrap"
-  write_text_file(
+  @support.write_text_file(
     "\{raw_root}/civic-salon-ideas.json",
     Json::object({
       "ideas": [{ ..scenario.ideas[0], participating_books: ["other-book"] }].to_json(),
     }).stringify(indent=2),
   )
-  write_text_file(
+  @support.write_text_file(
     "\{raw_root}/future-energy-social-square-ideas.json",
     Json::object({ "ideas": scenario.ideas.to_json() }).stringify(indent=2),
   )
@@ -143,11 +143,11 @@ async test "active civic schedule reconciles completed persisted reducer output"
     default_civic_salon_schedule_path(snapshot_path~),
     [schedule],
   )
-  write_text_file(
+  @support.write_text_file(
     civic_salon_scenario_path(schedule.id, snapshot_path~),
     scenario.to_json().stringify(indent=2),
   )
-  write_text_file(
+  @support.write_text_file(
     "\{root}/books/wenyu-social-square/raw/bootstrap/future-energy-social-square-ideas.json",
     Json::object({ "ideas": scenario.ideas.to_json() }).stringify(indent=2),
   )

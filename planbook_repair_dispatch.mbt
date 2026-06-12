@@ -107,15 +107,15 @@ async fn clear_stale_planbook_repair_result(
   criterion : PlanbookCriterionStatus,
 ) -> Unit {
   let result_path = planbook_repair_result_path_for_workspace(workspace_root)
-  let result_text = read_text_or_empty(result_path)
+  let result_text = @support.read_text_or_empty(result_path)
   if result_text != "" &&
     planbook_repair_handoff_is_stale(criterion, result_text) {
-    write_text_file(
+    @support.write_text_file(
       planbook_repair_superseded_result_path(workspace_root),
       result_text,
     )
     @fs.remove(result_path) catch {
-      _ => write_text_file(result_path, "")
+      _ => @support.write_text_file(result_path, "")
     }
   }
 }
@@ -126,15 +126,15 @@ async fn write_planbook_repair_status(
   workspace_root : String,
   snapshot_path : String,
 ) -> Unit {
-  write_text_file(
+  @support.write_text_file(
     default_planbook_repair_path(snapshot_path~),
     task.to_json().stringify(indent=2),
   )
-  write_text_file(
+  @support.write_text_file(
     default_planbook_repair_markdown_path(snapshot_path~),
     render_planbook_repair_markdown(task),
   )
-  write_text_file(
+  @support.write_text_file(
     planbook_repair_workspace_status_page_path(workspace_root),
     render_planbook_repair_markdown(task),
   )

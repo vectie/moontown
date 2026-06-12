@@ -12,7 +12,7 @@ fn civic_protocol_test_template_path(root : String) -> String {
 ///|
 async fn write_test_civic_salon_template(root : String) -> String {
   let template_path = civic_protocol_test_template_path(root)
-  write_text_file(
+  @support.write_text_file(
     template_path,
     test_civic_salon_scenario().to_json().stringify(indent=2),
   )

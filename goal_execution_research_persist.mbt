@@ -106,7 +106,7 @@ fn research_persist_display(entry : @moonbook.BookCatalogEntry) -> String {
   } else if !entry.name.trim().is_blank() {
     entry.name
   } else {
-    label_from_slug(topic)
+    @support.label_from_slug(topic)
   }
 }
 
@@ -118,7 +118,7 @@ fn first_non_empty_compact_excerpt(
   for text in texts {
     let compact = compact_markdown_for_candidate(text)
     if !compact.is_blank() {
-      return markdown_excerpt(compact, limit)
+      return @support.markdown_excerpt(compact, limit)
     }
   }
   "No non-empty research artifact text was available at persistence time."

@@ -75,7 +75,7 @@ async test "stale detached import failure keeps MoonClaw stderr evidence" {
     $|deprecated.mbt:62 at @moonbitlang/core/builtin.StringBuilder::grow_if_necessary
     $|/Users/kq/Workspace/moonclaw/job/system_storage.mbt:886 by @vectie/moonclaw/job.SystemStore::save_job_proposals
 
-  write_text_file(packet_path + ".import.json.err", stderr)
+  @support.write_text_file(packet_path + ".import.json.err", stderr)
   let state = goal_supervision_test_state()
   let execution = standing_watch_execution_fixture(
     task_id="standing-watch-llm-training-tick-10",

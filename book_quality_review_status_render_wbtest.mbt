@@ -25,7 +25,7 @@ async test "book quality status separates current success from historical failed
     ),
     generated_at_ms=Some(2UL),
   )
-  write_text_file(
+  @support.write_text_file(
     "\{result_dir}/wenyu-contest-express.md",
     "ai_quality_score: 82\nbook_role_fit: strong\n",
   )
@@ -93,11 +93,11 @@ async test "book quality status treats inactive smoke current rows as historical
     "Smoke review result should remain audit trail, not active status.",
     2UL,
   )
-  write_text_file(
+  @support.write_text_file(
     "\{result_dir}/research-llm.md",
     "ai_quality_score: 91\nbook_role_fit: strong\n",
   )
-  write_text_file(
+  @support.write_text_file(
     "\{result_dir}/codex-smoke-pdf-watch.md",
     "ai_quality_score: 40\nbook_role_fit: smoke\n",
   )

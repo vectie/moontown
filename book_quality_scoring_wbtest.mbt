@@ -76,11 +76,11 @@ async test "book quality package scorer reports general strengths and gaps" {
   let root = cleaned_book_quality_test_root(
     "/tmp/moontown-book-quality-general-score",
   )
-  write_text_file(
+  @support.write_text_file(
     @book_quality.workspace_path(root, @book_quality.wiki_index_path()),
     "# Index\n",
   )
-  write_text_file(
+  @support.write_text_file(
     @book_quality.workspace_path(root, @book_quality.projection_state_path()),
     "{}\n",
   )
@@ -114,7 +114,7 @@ async test "book quality package scorer reports missing general projection" {
   let root = cleaned_book_quality_test_root(
     "/tmp/moontown-book-quality-general-missing-projection",
   )
-  write_text_file(
+  @support.write_text_file(
     @book_quality.workspace_path(root, @book_quality.wiki_index_path()),
     "# Index\n",
   )

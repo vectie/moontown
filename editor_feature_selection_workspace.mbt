@@ -3,21 +3,21 @@ async fn write_editor_feature_selection_workspace(
   workspace_root : String,
 ) -> Unit {
   record_accepted_editor_feature_if_present(workspace_root)
-  write_text_file(
+  @support.write_text_file(
     editor_pipeline_plan_path(
       workspace_root, "2026-05-31-editor-mode-real-pipeline",
     ),
     @planbook.editor_pipeline_plan_markdown(),
   )
-  write_text_file(
+  @support.write_text_file(
     editor_feature_selection_context_path(workspace_root),
     editor_feature_selection_context_markdown(workspace_root),
   )
-  write_text_file(
+  @support.write_text_file(
     editor_feature_selection_current_evidence_path(workspace_root),
     editor_feature_selection_current_evidence_markdown(workspace_root),
   )
-  write_text_file(
+  @support.write_text_file(
     "\{workspace_root}/skills/editor-feature-rater/SKILL.md",
     @editor_pipeline.feature_rater_skill_markdown(),
   )

@@ -141,7 +141,7 @@ async test "standing watch auto triage closes empty persisted book result" {
     requires_review=false,
     notify_town=false,
   )
-  write_text_file(
+  @support.write_text_file(
     "\{root}/book-results/standing-watch-empty-result-tick-12.json",
     result.to_json().stringify(),
   )

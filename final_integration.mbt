@@ -63,7 +63,7 @@ pub async fn install_wenyu_final_integration(
   let status = final_integration_status_json(
     manifest, merged, current_tick, civic_workspace_summary, protocol_summary, install_summaries,
   )
-  write_text_file(
+  @support.write_text_file(
     ".moontown/integration/\{manifest.id}-status.json",
     status.stringify(indent=2),
   )

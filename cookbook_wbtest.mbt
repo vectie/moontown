@@ -106,16 +106,16 @@ test "cookbook projection helpers render stable UI contracts" {
   assert_true(chips.contains("\"label\":\"cookbook\""))
   assert_true(chips.contains("\"tone\":\"review\""))
   let metrics = @cookbook.cookbook_metrics_json(
-    json_string("8"),
-    json_string("4"),
-    json_string("6"),
-    json_string("0"),
+    @support.json_string("8"),
+    @support.json_string("4"),
+    @support.json_string("6"),
+    @support.json_string("0"),
   ).join("\n")
   assert_true(metrics.contains("\"label\":\"Docs\""))
   assert_true(metrics.contains("\"value\":\"8\""))
   assert_true(metrics.contains("restart-readable state files"))
   let readiness = @cookbook.cookbook_readiness_json(
-    json_string(".moontown/cookbook.json"),
+    @support.json_string(".moontown/cookbook.json"),
   ).join("\n")
   assert_true(readiness.contains("Stable-state manifest"))
   assert_true(readiness.contains("raw/bootstrap/COOKBOOK_CONTRACT.md"))

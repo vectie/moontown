@@ -32,7 +32,9 @@ pub async fn editor_feature_selection_ready(
   workspace_root? : String = default_planbook_workspace_root(),
 ) -> Bool {
   editor_feature_selection_result_satisfies_contract(
-    read_text_or_empty(editor_feature_selection_result_path(workspace_root)),
+    @support.read_text_or_empty(
+      editor_feature_selection_result_path(workspace_root),
+    ),
   )
 }
 
@@ -41,7 +43,7 @@ pub async fn editor_feature_selection_evidence(
   workspace_root? : String = default_planbook_workspace_root(),
 ) -> String {
   let result_path = editor_feature_selection_result_path(workspace_root)
-  let text = read_text_or_empty(result_path)
+  let text = @support.read_text_or_empty(result_path)
   if editor_feature_selection_result_satisfies_contract(text) {
     "valid AI-rated feature selection exists at `\{result_path}`"
   } else if @fs.exists(result_path) {

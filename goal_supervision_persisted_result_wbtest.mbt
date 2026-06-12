@@ -18,7 +18,7 @@ async test "review queue closes when MoonBook already persisted non-review resul
     requires_review=false,
     notify_town=false,
   )
-  write_text_file(
+  @support.write_text_file(
     "\{root}/book-results/goal-course-bootstrap.json",
     result.to_json().stringify(),
   )
@@ -56,7 +56,7 @@ async test "failed execution closes into review when MoonBook already persisted 
     requires_review=true,
     notify_town=false,
   )
-  write_text_file(
+  @support.write_text_file(
     "\{root}/book-results/goal-synthesis.json",
     result.to_json().stringify(),
   )

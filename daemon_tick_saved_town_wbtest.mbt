@@ -48,7 +48,7 @@ async test "daemon context phase logger uses context sequence" {
   let context = prepare_daemon_tick_context(snapshot_path, catalog_path)
   append_daemon_context_phase_log(context, "custom-phase")
   assert_true(
-    read_text_or_empty(context.paths.log_path).contains(
+    @support.read_text_or_empty(context.paths.log_path).contains(
       daemon_tick_log_line("custom-phase", context.next_tick_sequence),
     ),
   )

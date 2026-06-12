@@ -59,7 +59,7 @@ async fn inspect_civic_service_latest_result(
 
 ///|
 async fn read_civic_book_result(path : String) -> @moonbook.BookResult? {
-  let text = read_text_or_empty(path)
+  let text = @support.read_text_or_empty(path)
   if text.trim().is_empty() {
     return None
   }

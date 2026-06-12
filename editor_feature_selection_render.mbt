@@ -7,7 +7,7 @@ fn editor_feature_selection_result_satisfies_contract(text : String) -> Bool {
 async fn editor_feature_selection_result_summary(
   result_path : String,
 ) -> String {
-  let text = read_text_or_empty(result_path)
+  let text = @support.read_text_or_empty(result_path)
   if text == "" {
     return "No result has been written yet."
   }

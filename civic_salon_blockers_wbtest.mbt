@@ -10,7 +10,7 @@ async test "invalid civic scenario blocks instead of crashing protocol seeding" 
     default_civic_salon_schedule_path(snapshot_path~),
     [schedule],
   )
-  write_text_file(
+  @support.write_text_file(
     civic_salon_scenario_path(schedule.id, snapshot_path~),
     scenario.to_json().stringify(indent=2),
   )
@@ -52,7 +52,7 @@ async test "invalid civic idea participant reference is reviewable blocker" {
     default_civic_salon_schedule_path(snapshot_path~),
     [schedule],
   )
-  write_text_file(
+  @support.write_text_file(
     civic_salon_scenario_path(schedule.id, snapshot_path~),
     scenario.to_json().stringify(indent=2),
   )

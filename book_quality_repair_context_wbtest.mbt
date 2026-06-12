@@ -6,7 +6,7 @@ async test "book quality repair bridge context loads and persists bridge state" 
   let catalog_path = "\{root}/moonbooks.json"
   let snapshot_path = "\{root}/town.json"
   let bridge_path = "\{root}/book-quality/repair-bridge.json"
-  write_text_file(
+  @support.write_text_file(
     "\{root}/daemon.json",
     "{\"daemon_id\":\"test\",\"tick_sequence\":41}",
   )
@@ -62,6 +62,6 @@ async test "book quality repair bridge context loads and persists bridge state" 
   ]
   persist_book_quality_repair_bridge(context, bridge_path, repaired)
   assert_true(@fs.exists("\{root}/standing-goals.json"))
-  let ledger_text = read_text_or_empty(bridge_path)
+  let ledger_text = @support.read_text_or_empty(bridge_path)
   assert_true(ledger_text.contains("\"book_id\": \"research-robotics\""))
 }

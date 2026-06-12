@@ -9,7 +9,7 @@ async test "standing watch retry completion appends corrected watcher record" {
     book_id="research-opc",
   )
   @storage.save_standing_goals_file("\{root}/standing-goals.json", [goal])
-  write_text_file("\{root}/watchers/watch-retry-ledger.jsonl", "")
+  @support.write_text_file("\{root}/watchers/watch-retry-ledger.jsonl", "")
   let book_root = "\{root}/book"
   write_standing_watch_history_marker(
     book_root,

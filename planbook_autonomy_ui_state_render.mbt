@@ -1,6 +1,6 @@
 ///|
 fn planbook_autonomy_ui_state_json(status : PlanbookAutonomyStatus) -> String {
-  let summary = json_string(
+  let summary = @support.json_string(
     "Self-build, self-healing, execution evidence, and review state for Moontown quality work.",
   )
   let chip_tone = if status.open_count == 0 { "healthy" } else { "review" }
@@ -11,12 +11,12 @@ fn planbook_autonomy_ui_state_json(status : PlanbookAutonomyStatus) -> String {
   } else {
     "review"
   }
-  let journey_summary = json_string(
+  let journey_summary = @support.json_string(
     "Inspected self-build criteria and produced repair evidence.",
   )
   [
     "{",
-    "  \"book_id\": \{json_string(status.book_id)},",
+    "  \"book_id\": \{@support.json_string(status.book_id)},",
     "  \"title\": \"Moontown Quality Planbook\",",
     "  \"summary\": \{summary},",
     "  \"status_chips\": [",

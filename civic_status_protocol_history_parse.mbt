@@ -20,27 +20,28 @@ fn protocol_history_entry_from_line(
 ///|
 fn protocol_history_status(step : String, map : Map[String, Json]) -> String {
   match step {
-    "inbox" => json_object_string(map, "review_status").unwrap_or("received")
+    "inbox" =>
+      @support.json_object_string(map, "review_status").unwrap_or("received")
     "reduction" =>
-      json_object_string(map, "review_status").unwrap_or(
-        json_object_string(map, "decision").unwrap_or("reduced"),
+      @support.json_object_string(map, "review_status").unwrap_or(
+        @support.json_object_string(map, "decision").unwrap_or("reduced"),
       )
-    "review" => json_object_string(map, "status").unwrap_or("review")
+    "review" => @support.json_object_string(map, "status").unwrap_or("review")
     "accepted-result" =>
-      if json_object_string(map, "review_status") == Some("accepted") {
+      if @support.json_object_string(map, "review_status") == Some("accepted") {
         "accepted"
       } else {
         "pending"
       }
     "outbox" =>
-      json_object_string(map, "review_status").unwrap_or("distributed")
+      @support.json_object_string(map, "review_status").unwrap_or("distributed")
     _ => "unknown"
   }
 }
 
 ///|
 fn protocol_history_title(title : String, map : Map[String, Json]) -> String {
-  json_object_string(map, "id").unwrap_or(title)
+  @support.json_object_string(map, "id").unwrap_or(title)
 }
 
 ///|

@@ -42,8 +42,8 @@ async fn planbook_repair_run_status_in_workspace(
           for item in runs {
             match item {
               Object(run) =>
-                if json_object_string(run, "id") == Some(run_id) {
-                  return json_object_string(run, "status")
+                if @support.json_object_string(run, "id") == Some(run_id) {
+                  return @support.json_object_string(run, "status")
                 }
               _ => ()
             }
@@ -76,16 +76,16 @@ async fn latest_planbook_repair_task_from_job_index(
           for item in proposals {
             match item {
               Object(proposal) => {
-                let request_text = json_object_string(proposal, "request_text").unwrap_or(
-                  "",
-                )
+                let request_text = @support.json_object_string(
+                  proposal, "request_text",
+                ).unwrap_or("")
                 if request_text.contains("Open criterion: `\{criterion.id}`") {
-                  let proposal_id = json_object_string(proposal, "id")
+                  let proposal_id = @support.json_object_string(proposal, "id")
                   let run_id = planbook_best_run_id_for_repair_proposal(
                     workspace_root,
                     criterion.id,
                     proposal_id,
-                    json_object_string(proposal, "last_run_id"),
+                    @support.json_object_string(proposal, "last_run_id"),
                   )
                   let run_status = match run_id {
                     Some(id) =>
@@ -182,9 +182,9 @@ async fn planbook_repair_run_ids_for_proposal(
           for item in runs {
             match item {
               Object(run) =>
-                if json_object_string(run, "job_id") ==
+                if @support.json_object_string(run, "job_id") ==
                   Some("job.proposal.\{proposal_id}") {
-                  match json_object_string(run, "id") {
+                  match @support.json_object_string(run, "id") {
                     Some(run_id) if !run_ids.contains(run_id) =>
                       run_ids.push(run_id)
                     _ => ()

@@ -53,7 +53,7 @@ async fn load_persisted_civic_salon_reducer_output(
 
 ///|
 async fn load_civic_salon_ideas_file(path : String) -> Array[CivicSalonIdea]? {
-  let parsed = match read_optional_json_file(path) {
+  let parsed = match @support.read_optional_json_file(path) {
     Some(json) => json
     None => return None
   }
@@ -85,11 +85,11 @@ async fn persist_civic_salon_reducer_output(
   ideas : Array[CivicSalonIdea],
   workspace_base : String,
 ) -> Unit {
-  write_text_file(
+  @support.write_text_file(
     civic_salon_reducer_output_path(scenario, workspace_base),
     Json::object({ "ideas": ideas.to_json() }).stringify(indent=2),
   )
-  write_text_file(
+  @support.write_text_file(
     civic_salon_scenario_output_path(scenario, workspace_base),
     Json::object({ "ideas": ideas.to_json() }).stringify(indent=2),
   )
@@ -109,7 +109,7 @@ async fn write_civic_salon_reducer_blocker(
   reduction : CivicSalonReductionResult,
   round_id : String,
 ) -> Unit {
-  write_text_file(
+  @support.write_text_file(
     "\{reduction.workspace_root}/raw/bootstrap/civic-salon-reducer-blocker.md",
     [
       "# Civic Salon Reducer Blocker",

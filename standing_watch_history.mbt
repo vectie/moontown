@@ -16,7 +16,9 @@ async fn standing_watch_book_decision_summary(
   task_id : String,
 ) -> String? {
   let root = @moonbook.workspace_root(entry)
-  let history = read_text_or_empty("\{root}/wiki/history/standing-watch.md")
+  let history = @support.read_text_or_empty(
+    "\{root}/wiki/history/standing-watch.md",
+  )
   if history.trim().is_blank() {
     None
   } else {
@@ -47,7 +49,7 @@ async fn collapse_standing_watch_book_history(
   }
   let root = @moonbook.workspace_root(entry)
   let path = "\{root}/wiki/history/standing-watch.md"
-  let history = read_text_or_empty(path)
+  let history = @support.read_text_or_empty(path)
   if history.trim().is_blank() {
     return
   }
@@ -55,6 +57,6 @@ async fn collapse_standing_watch_book_history(
     history, provider_id,
   )
   if collapsed != history {
-    write_text_file(path, collapsed)
+    @support.write_text_file(path, collapsed)
   }
 }

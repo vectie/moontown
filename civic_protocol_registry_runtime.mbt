@@ -27,12 +27,12 @@ pub async fn bootstrap_wenyu_building_protocols(
     description: "Wenyu building protocol registry. Buildings are protocol places for aggregation, exchange, AI-guided reduction, review, and distribution.",
     protocols,
   }
-  write_text_file(
+  @support.write_text_file(
     registry_path,
     registry_document.to_json().stringify(indent=2),
   )
   for protocol in protocols {
-    write_text_file_if_missing(
+    @support.write_text_file_if_missing(
       protocol_contract_path(protocol.building_id, ledger_base_dir~),
       @civic.building_protocol_markdown(protocol),
     )

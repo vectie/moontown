@@ -34,7 +34,7 @@ async fn write_editor_feature_selection_fixture(
   implementation_hint : String,
   acceptance : String,
 ) -> Unit {
-  write_text_file(
+  @support.write_text_file(
     editor_feature_selection_result_path(workspace_root),
     test_editor_feature_selection_json(
       feature_id, title, score, implementation_hint, acceptance,
@@ -47,7 +47,7 @@ async fn write_editor_feature_implementation_fixture(
   workspace_root : String,
   feature_id : String,
 ) -> Unit {
-  write_text_file(
+  @support.write_text_file(
     editor_selected_feature_implementation_path(workspace_root),
     test_editor_feature_implementation_proof(feature_id),
   )
@@ -67,7 +67,7 @@ async fn select_implemented_editor_feature_and_refresh(
     workspace_root, feature_id, title, score, implementation_hint, acceptance,
   )
   write_editor_feature_implementation_fixture(workspace_root, feature_id)
-  read_text_or_empty(
+  @support.read_text_or_empty(
     write_editor_pipeline_state(snapshot_path~, workspace_root~),
   )
 }
@@ -116,7 +116,7 @@ fn assert_editor_pipeline_movement_contract(text : String) -> Unit raise {
 async fn write_editor_placement_proposal_fixture(
   workspace_root : String,
 ) -> Unit {
-  write_text_file(
+  @support.write_text_file(
     default_editor_placement_proposal_path(workspace_root~),
     editor_placement_proposal_fixture_json().stringify(),
   )

@@ -17,14 +17,16 @@ async test "editor feature selection packet asks ai to choose from course eviden
     snapshot_path~,
     workspace_root~,
   )
-  let task_text = read_text_or_empty(
+  let task_text = @support.read_text_or_empty(
     default_editor_feature_selection_path(snapshot_path~),
   )
-  let packet_text = read_text_or_empty(packet_path)
-  let skill_text = read_text_or_empty(
+  let packet_text = @support.read_text_or_empty(packet_path)
+  let skill_text = @support.read_text_or_empty(
     "\{workspace_root}/skills/editor-feature-rater/SKILL.md",
   )
-  let profile_text = read_text_or_empty("\{workspace_root}/moonclaw.jobs.json")
+  let profile_text = @support.read_text_or_empty(
+    "\{workspace_root}/moonclaw.jobs.json",
+  )
   assert_true(message.contains("Editor feature selection task"))
   assert_true(task_text.contains("\"status\": \"queued\""))
   assert_true(
@@ -39,7 +41,7 @@ async test "editor feature selection packet asks ai to choose from course eviden
   assert_true(skill_text.contains("Scoring Rubric"))
   assert_true(profile_text.contains("editor_feature_rater"))
   assert_true(
-    read_text_or_empty(
+    @support.read_text_or_empty(
       editor_pipeline_plan_path(
         workspace_root, "2026-05-31-editor-mode-real-pipeline",
       ),
@@ -56,7 +58,7 @@ async test "editor feature selection packet asks ai to choose from course eviden
     ),
   )
   assert_true(!editor_feature_selection_ready(workspace_root~))
-  write_text_file(
+  @support.write_text_file(
     selection_path,
     test_editor_feature_selection_json("x", "X", 1, "small", "visible"),
   )
@@ -73,17 +75,17 @@ async test "editor feature selection packet asks ai to choose from course eviden
       item.evidence.contains("AI selected `x`")
     }),
   )
-  write_text_file(
+  @support.write_text_file(
     implementation_path,
     test_editor_feature_implementation_proof("x"),
   )
   assert_true(editor_selected_feature_implementation_ready(workspace_root))
   ignore(write_editor_feature_selection_task(snapshot_path~, workspace_root~))
-  let repeat_packet_text = read_text_or_empty(packet_path)
-  let repeat_context = read_text_or_empty(
+  let repeat_packet_text = @support.read_text_or_empty(packet_path)
+  let repeat_context = @support.read_text_or_empty(
     editor_feature_selection_context_path(workspace_root),
   )
-  let ledger = read_text_or_empty(
+  let ledger = @support.read_text_or_empty(
     editor_implemented_features_ledger_path(workspace_root),
   )
   assert_true(repeat_packet_text.contains("Already Implemented Features"))

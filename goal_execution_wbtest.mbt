@@ -2,19 +2,19 @@
 async test "research persistence handoff uses topic artifacts instead of runtime plumbing" {
   let root = "/tmp/moontown-research-persist-handoff"
   @support.ignore_checked_command("rm", ["-rf", root])
-  write_text_file(
+  @support.write_text_file(
     root + "/raw/bootstrap/synthesis-brief.md",
     "# Synthesis Brief\n\nOne Person Company (OPC) is an evidence-limited solo-founder operating model.\n",
   )
-  write_text_file(
+  @support.write_text_file(
     root + "/raw/bootstrap/source-screen.md",
     "# Source Screen\n\n| Source ID | Decision |\n| --- | --- |\n| W1 | include |\n",
   )
-  write_text_file(
+  @support.write_text_file(
     root + "/raw/bootstrap/evidence-matrix.md",
     "# Evidence Matrix\n\n| Claim ID | Claim |\n| --- | --- |\n| C1 | OPC uses leverage. |\n",
   )
-  write_text_file(
+  @support.write_text_file(
     root + "/raw/bootstrap/deep-report.md",
     "# One Person Company (OPC): Deep Research Analysis\n\n## Executive Summary\n\nOPC research summary.\n",
   )

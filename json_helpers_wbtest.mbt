@@ -26,7 +26,7 @@ test "moonclaw job profile upsert preserves existing profiles" {
   ) catch {
     _ => fail("expected base config to parse")
   }
-  let next = upsert_moonclaw_job_profile_json(base, "worker", {
+  let next = @support.upsert_moonclaw_job_profile_json(base, "worker", {
     "family": "worker",
     "role": "worker",
   })
@@ -121,11 +121,16 @@ test "json string field helper reads object string fields safely" {
   ) catch {
     _ => fail("expected json to parse")
   }
-  assert_eq(json_string_field(parsed, "content").unwrap(), "accepted result")
-  assert_eq(json_string_field(parsed, "summary").unwrap(), "fallback")
-  assert_true(json_string_field(parsed, "count") is None)
-  assert_true(json_string_field(parsed, "missing") is None)
-  assert_true(json_string_field("not object".to_json(), "content") is None)
+  assert_eq(
+    @support.json_string_field(parsed, "content").unwrap(),
+    "accepted result",
+  )
+  assert_eq(@support.json_string_field(parsed, "summary").unwrap(), "fallback")
+  assert_true(@support.json_string_field(parsed, "count") is None)
+  assert_true(@support.json_string_field(parsed, "missing") is None)
+  assert_true(
+    @support.json_string_field("not object".to_json(), "content") is None,
+  )
 }
 
 ///|
@@ -139,12 +144,15 @@ test "json object field summary preserves non-string values" {
     Object(object) => object
     _ => fail("expected object")
   }
-  assert_eq(json_object_string(object, "name").unwrap(), "moontown")
-  assert_eq(json_object_field_summary(object, "name").unwrap(), "\"moontown\"")
-  assert_eq(json_object_field_summary(object, "score").unwrap(), "3")
+  assert_eq(@support.json_object_string(object, "name").unwrap(), "moontown")
   assert_eq(
-    json_object_field_summary(object, "flags").unwrap(),
+    @support.json_object_field_summary(object, "name").unwrap(),
+    "\"moontown\"",
+  )
+  assert_eq(@support.json_object_field_summary(object, "score").unwrap(), "3")
+  assert_eq(
+    @support.json_object_field_summary(object, "flags").unwrap(),
     "[\"a\",\"b\"]",
   )
-  assert_true(json_object_field_summary(object, "missing") is None)
+  assert_true(@support.json_object_field_summary(object, "missing") is None)
 }

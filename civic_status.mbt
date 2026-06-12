@@ -97,9 +97,9 @@ pub async fn write_wenyu_civic_status(
   status_path? : String = default_wenyu_civic_status_path(),
 ) -> String {
   let portfolio = inspect_wenyu_civic_services(book_catalog_path~, status_path~)
-  write_text_file(status_path, portfolio.to_json().stringify(indent=2))
+  @support.write_text_file(status_path, portfolio.to_json().stringify(indent=2))
   ignore(write_wenyu_building_protocol_status())
-  write_text_file(
+  @support.write_text_file(
     portfolio.markdown_path,
     render_wenyu_civic_portfolio(portfolio),
   )

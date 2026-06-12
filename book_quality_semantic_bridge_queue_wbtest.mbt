@@ -8,7 +8,7 @@ async test "semantic review bridge queues repair page and standing goal" {
   let result_dir = "\{root}/book-quality/ai-review-results"
   let bridge_path = "\{root}/book-quality/repair-bridge.json"
   let workspace_root = "\{root}/books/research-robotics"
-  write_text_file(
+  @support.write_text_file(
     "\{root}/daemon.json",
     "{\"daemon_id\":\"test\",\"tick_sequence\":41}",
   )
@@ -53,7 +53,7 @@ async test "semantic review bridge queues repair page and standing goal" {
   assert_true(
     @fs.exists("\{workspace_root}/wiki/reviews/book-quality-repair.md"),
   )
-  let review = read_text_or_empty(
+  let review = @support.read_text_or_empty(
     "\{workspace_root}/wiki/reviews/book-quality-repair.md",
   )
   assert_true(review.contains("Build source-screen and evidence-matrix"))

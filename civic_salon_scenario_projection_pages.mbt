@@ -24,15 +24,15 @@ fn civic_salon_building_projection_json(
   let journey_summary = "The building received \{participants.length()} domain perspectives and reduced them into \{ideas.length()} reviewable outputs worth ongoing review."
   [
     "{",
-    "  \"book_id\": \{json_string(protocol.book_id)},",
+    "  \"book_id\": \{@support.json_string(protocol.book_id)},",
     "  \"visibility\": \"public\",",
     "  \"projection_scope\": \"public\",",
-    "  \"tags\": [\"civic-communication-pattern\", \"building-surface\", \{json_string(pattern.id)}, \{json_string(scenario.id)}, \{json_string(scenario.building_id)}],",
-    "  \"title\": \{json_string(scenario.title)},",
-    "  \"summary\": \{json_string(summary)},",
+    "  \"tags\": [\"civic-communication-pattern\", \"building-surface\", \{@support.json_string(pattern.id)}, \{@support.json_string(scenario.id)}, \{@support.json_string(scenario.building_id)}],",
+    "  \"title\": \{@support.json_string(scenario.title)},",
+    "  \"summary\": \{@support.json_string(summary)},",
     "  \"status_chips\": [",
-    "    {\"label\":\{json_string(pattern_label)},\"tone\":\"healthy\"},",
-    "    {\"label\":\{json_string(scenario.cadence)},\"tone\":\"info\"},",
+    "    {\"label\":\{@support.json_string(pattern_label)},\"tone\":\"healthy\"},",
+    "    {\"label\":\{@support.json_string(scenario.cadence)},\"tone\":\"info\"},",
     "    {\"label\":\"round \{round_number}\",\"tone\":\"info\"},",
     "    {\"label\":\"review gated\",\"tone\":\"review\"}",
     "  ],",
@@ -42,25 +42,25 @@ fn civic_salon_building_projection_json(
     "    {\"label\":\"Effectiveness\",\"value\":\"\{metrics.structural_effectiveness_score}/100\",\"note\":\"structural exchange score\",\"tone\":\"healthy\"},",
     "    {\"label\":\"Follow-up questions\",\"value\":\"\{metrics.research_question_count}\",\"note\":\"testable follow-ups\",\"tone\":\"healthy\"},",
     "    {\"label\":\"Home returns\",\"value\":\"\{metrics.idea_return_home_count}\",\"note\":\"idea-workspace routes\",\"tone\":\"healthy\"},",
-    "    {\"label\":\"Review gates\",\"value\":\"1\",\"note\":\{json_string(scenario.review_gate)},\"tone\":\"review\"}",
+    "    {\"label\":\"Review gates\",\"value\":\"1\",\"note\":\{@support.json_string(scenario.review_gate)},\"tone\":\"review\"}",
     "  ],",
     "  \"readiness\": [",
-    "    {\"title\":\"Building synthesis\",\"detail\":\{json_string(scenario.synthesis_path)},\"meta\":\"Ready\"},",
-    "    {\"title\":\"Follow-up backlog\",\"detail\":\{json_string(scenario.backlog_path)},\"meta\":\"Ready\"},",
-    "    {\"title\":\"Effectiveness metrics\",\"detail\":\{json_string(scenario.metrics_path)},\"meta\":\"Ready\"},",
-    "    {\"title\":\"Review queue\",\"detail\":\{json_string(scenario.review_path)},\"meta\":\"Pending\"}",
+    "    {\"title\":\"Building synthesis\",\"detail\":\{@support.json_string(scenario.synthesis_path)},\"meta\":\"Ready\"},",
+    "    {\"title\":\"Follow-up backlog\",\"detail\":\{@support.json_string(scenario.backlog_path)},\"meta\":\"Ready\"},",
+    "    {\"title\":\"Effectiveness metrics\",\"detail\":\{@support.json_string(scenario.metrics_path)},\"meta\":\"Ready\"},",
+    "    {\"title\":\"Review queue\",\"detail\":\{@support.json_string(scenario.review_path)},\"meta\":\"Pending\"}",
     "  ],",
     "  \"review_queue\": [",
-    "    {\"title\":\{json_string(scenario.review_gate)},\"detail\":\{json_string(scenario.review_path)},\"meta\":\"Pending\"}",
+    "    {\"title\":\{@support.json_string(scenario.review_gate)},\"detail\":\{@support.json_string(scenario.review_path)},\"meta\":\"Pending\"}",
     "  ],",
     "  \"page_families\": \{projection_page_families_json(participants, ideas)},",
     "  \"journey\": [",
-    "    {\"title\":\{json_string(journey_title)},\"stage\":\"exchange-reduce-distribute\",\"status\":\"review\",\"summary\":\{json_string(journey_summary)},\"highlights\": \{json_string_array(highlights)}}",
+    "    {\"title\":\{@support.json_string(journey_title)},\"stage\":\"exchange-reduce-distribute\",\"status\":\"review\",\"summary\":\{@support.json_string(journey_summary)},\"highlights\": \{@support.json_string_array(highlights)}}",
     "  ],",
     "  \"links\": [",
-    "    {\"label\":\"Follow-up backlog\",\"kind\":\"wiki\",\"url\":\{json_string(scenario.backlog_path)}},",
-    "    {\"label\":\"Effectiveness metrics\",\"kind\":\"wiki\",\"url\":\{json_string(scenario.metrics_path)}},",
-    "    {\"label\":\"Review queue\",\"kind\":\"wiki\",\"url\":\{json_string(scenario.review_path)}}",
+    "    {\"label\":\"Follow-up backlog\",\"kind\":\"wiki\",\"url\":\{@support.json_string(scenario.backlog_path)}},",
+    "    {\"label\":\"Effectiveness metrics\",\"kind\":\"wiki\",\"url\":\{@support.json_string(scenario.metrics_path)}},",
+    "    {\"label\":\"Review queue\",\"kind\":\"wiki\",\"url\":\{@support.json_string(scenario.review_path)}}",
     "  ]",
     "}",
   ].join("\n")
@@ -74,12 +74,12 @@ fn projection_page_families_json(
   let items : Array[String] = []
   for participant in participants {
     items.push(
-      "{\"title\":\{json_string(participant.title)},\"detail\":\{json_string(participant.book_id)},\"meta\":\"Internal perspective\"}",
+      "{\"title\":\{@support.json_string(participant.title)},\"detail\":\{@support.json_string(participant.book_id)},\"meta\":\"Internal perspective\"}",
     )
   }
   for idea in ideas {
     items.push(
-      "{\"title\":\{json_string(idea.title)},\"detail\":\{json_string(idea.id)},\"meta\":\"Output reduction\"}",
+      "{\"title\":\{@support.json_string(idea.title)},\"detail\":\{@support.json_string(idea.id)},\"meta\":\"Output reduction\"}",
     )
   }
   "[\{items.join(",")}]"

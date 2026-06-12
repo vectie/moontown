@@ -1,6 +1,6 @@
 ///|
 async fn latest_planbook_change_summary(path : String) -> String {
-  let text = read_text_or_empty(path)
+  let text = @support.read_text_or_empty(path)
   if text.trim().is_empty() {
     return "No PlanBook change log is available yet."
   }

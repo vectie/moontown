@@ -198,7 +198,7 @@ async test "planbook source patch receipt survives repair result supersession th
     "commit_message: Preserve source patch receipt evidence",
     "push_status: not_pushed_by_policy",
   ].join("\n")
-  write_text_file(
+  @support.write_text_file(
     planbook_repair_job_proposals_path(workspace_root),
     {
       "proposals": [
@@ -212,7 +212,7 @@ async test "planbook source patch receipt survives repair result supersession th
     .to_json()
     .stringify(),
   )
-  write_text_file(
+  @support.write_text_file(
     "\{workspace_root}/.moonclaw/jobs/runs/\{run_id}/meta.json",
     {
       "id": run_id,
@@ -223,7 +223,7 @@ async test "planbook source patch receipt survives repair result supersession th
     .to_json()
     .stringify(),
   )
-  write_text_file(
+  @support.write_text_file(
     "\{workspace_root}/moonclaw-jobs/\{run_id}/result.json",
     Json::object({
       "content": content.to_json(),
@@ -250,7 +250,7 @@ async test "planbook repair recovers accepted run from proposal job id when last
     "commit_message: Repair live-runtime-recovery through ACP",
     "push_status: not_pushed_by_policy",
   ].join("\n")
-  write_text_file(
+  @support.write_text_file(
     planbook_repair_job_proposals_path(workspace_root),
     {
       "proposals": [
@@ -263,7 +263,7 @@ async test "planbook repair recovers accepted run from proposal job id when last
     .to_json()
     .stringify(),
   )
-  write_text_file(
+  @support.write_text_file(
     planbook_repair_job_index_path(workspace_root),
     {
       "runs": [
@@ -277,7 +277,7 @@ async test "planbook repair recovers accepted run from proposal job id when last
     .to_json()
     .stringify(),
   )
-  write_text_file(
+  @support.write_text_file(
     "\{workspace_root}/.moonclaw/jobs/runs/\{run_id}/meta.json",
     {
       "id": run_id,
@@ -289,7 +289,7 @@ async test "planbook repair recovers accepted run from proposal job id when last
     .to_json()
     .stringify(),
   )
-  write_text_file(
+  @support.write_text_file(
     "\{workspace_root}/moonclaw-jobs/\{run_id}/result.json",
     Json::object({
       "content": content.to_json(),

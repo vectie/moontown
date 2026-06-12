@@ -4,7 +4,10 @@ async test "detached import receipt promotes proposal imported execution to run 
     "/tmp/moontown-detached-import-receipt-wbtest",
   )
   let packet_path = "\{root}/packets/packet.json"
-  write_text_file(packet_path + ".import.json", detached_import_receipt_json())
+  @support.write_text_file(
+    packet_path + ".import.json",
+    detached_import_receipt_json(),
+  )
   let state = goal_supervision_test_state()
   let execution = standing_watch_execution_fixture(
     task_id="standing-watch-opc-news-tick-10",
@@ -33,7 +36,10 @@ async test "detached import receipt can launch confirmed run command" {
     "/tmp/moontown-detached-import-launch-wbtest",
   )
   let packet_path = "\{root}/packets/packet.json"
-  write_text_file(packet_path + ".import.json", detached_import_receipt_json())
+  @support.write_text_file(
+    packet_path + ".import.json",
+    detached_import_receipt_json(),
+  )
   let state = goal_supervision_test_state()
   state.register_book(research_opc_book_ref(root))
   let execution = standing_watch_execution_fixture(

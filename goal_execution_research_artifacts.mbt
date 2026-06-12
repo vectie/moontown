@@ -12,10 +12,16 @@ async fn read_research_bootstrap_artifacts(
 ) -> ResearchBootstrapArtifacts {
   let root = @moonbook.workspace_root(entry)
   {
-    brief: read_text_or_empty("\{root}/raw/bootstrap/synthesis-brief.md"),
-    report: read_text_or_empty("\{root}/raw/bootstrap/deep-report.md"),
-    source_screen: read_text_or_empty("\{root}/raw/bootstrap/source-screen.md"),
-    evidence: read_text_or_empty("\{root}/raw/bootstrap/evidence-matrix.md"),
+    brief: @support.read_text_or_empty(
+      "\{root}/raw/bootstrap/synthesis-brief.md",
+    ),
+    report: @support.read_text_or_empty("\{root}/raw/bootstrap/deep-report.md"),
+    source_screen: @support.read_text_or_empty(
+      "\{root}/raw/bootstrap/source-screen.md",
+    ),
+    evidence: @support.read_text_or_empty(
+      "\{root}/raw/bootstrap/evidence-matrix.md",
+    ),
   }
 }
 

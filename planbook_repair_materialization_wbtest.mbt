@@ -18,7 +18,7 @@ async test "planbook repair queues bounded packet without marking it active befo
     book_catalog_path=workspace.catalog_path,
   )
   assert_true(message.contains("PlanBook repair task"))
-  let task_text = read_text_or_empty(
+  let task_text = @support.read_text_or_empty(
     default_planbook_repair_path(snapshot_path~),
   )
   let task_json = @json.parse(task_text) catch {
@@ -27,14 +27,16 @@ async test "planbook repair queues bounded packet without marking it active befo
   let task : PlanbookRepairTask = @json.from_json(task_json) catch {
     _ => abort("repair task should satisfy PlanbookRepairTask")
   }
-  let packet_text = read_text_or_empty(task.packet_path)
-  let skill_text = read_text_or_empty(
+  let packet_text = @support.read_text_or_empty(task.packet_path)
+  let skill_text = @support.read_text_or_empty(
     @planbook_policy.repair_path_in_workspace(
       workspace_root,
       @planbook_policy.repair_skill_relative_path(),
     ),
   )
-  let profile_text = read_text_or_empty("\{workspace_root}/moonclaw.jobs.json")
+  let profile_text = @support.read_text_or_empty(
+    "\{workspace_root}/moonclaw.jobs.json",
+  )
   assert_eq(task.status, "queued")
   assert_true(task.id.contains(task.criterion_id))
   assert_true(task.packet_path.contains(task.id))
@@ -132,8 +134,8 @@ async test "planbook backlog item can drive bounded repair packet from json" {
     false,
     false,
   )
-  let packet_text = read_text_or_empty(task.packet_path)
-  let skill_text = read_text_or_empty(
+  let packet_text = @support.read_text_or_empty(task.packet_path)
+  let skill_text = @support.read_text_or_empty(
     @planbook_policy.repair_path_in_workspace(
       workspace_root,
       @planbook_policy.repair_skill_relative_path(),
@@ -163,7 +165,7 @@ async test "planbook repair supersedes stale runtime handoff evidence" {
     evidence: "1 failed/stale executions remain: research-opc/task-opc-watch",
     next_action: "repair the current failure set",
   }
-  write_text_file(
+  @support.write_text_file(
     planbook_repair_result_path_for_workspace(workspace_root),
     [
       "repair_decision: needs_external_owner", "criterion_id: live-runtime-recovery",
@@ -178,10 +180,10 @@ async test "planbook repair supersedes stale runtime handoff evidence" {
     false,
     false,
   )
-  let result_text = read_text_or_empty(
+  let result_text = @support.read_text_or_empty(
     planbook_repair_result_path_for_workspace(workspace_root),
   )
-  let superseded = read_text_or_empty(
+  let superseded = @support.read_text_or_empty(
     planbook_repair_superseded_result_path(workspace_root),
   )
   assert_eq(task.status, "queued")
@@ -204,7 +206,7 @@ async test "planbook repair retries source patch loop after blocked result witho
     evidence: "no accepted patch receipt",
     next_action: "retry through ACP source patch loop",
   }
-  write_text_file(
+  @support.write_text_file(
     planbook_repair_result_path_for_workspace(workspace_root),
     [
       "contract: planbook.repair.result.v1", "repair_decision: blocked", "criterion_id: planbook-source-patch-loop",
@@ -221,10 +223,10 @@ async test "planbook repair retries source patch loop after blocked result witho
     false,
     false,
   )
-  let result_text = read_text_or_empty(
+  let result_text = @support.read_text_or_empty(
     planbook_repair_result_path_for_workspace(workspace_root),
   )
-  let superseded = read_text_or_empty(
+  let superseded = @support.read_text_or_empty(
     planbook_repair_superseded_result_path(workspace_root),
   )
   assert_eq(task.status, "queued")
@@ -308,7 +310,9 @@ async test "planbook repair acp target uses resolved codex command" {
       false,
     ),
   )
-  let target = read_text_or_empty("\{workspace_root}/.moonclaw/moonclaw.json")
+  let target = @support.read_text_or_empty(
+    "\{workspace_root}/.moonclaw/moonclaw.json",
+  )
   let source_root = planbook_repair_source_root()
   assert_true(
     target.contains(

@@ -17,7 +17,7 @@ async fn write_wenyu_code_patch_handoff(
   task : @moonbook.BookTask,
   module_name : String,
 ) -> Unit {
-  write_text_file(
+  @support.write_text_file(
     "\{root}/build/CODE_PATCH.md",
     [
       "# \{module_name} Code Patch Handoff",
@@ -47,7 +47,7 @@ async fn write_wenyu_code_blockers(
   module_name : String,
   execution : @core.TaskExecutionRecord,
 ) -> Unit {
-  write_text_file(
+  @support.write_text_file(
     "\{root}/build/CODE_BLOCKERS.md",
     [
       "# \{module_name} Code Execution Blockers",
@@ -72,7 +72,7 @@ async fn write_wenyu_code_test_results(
   root : String,
   module_name : String,
 ) -> Unit {
-  write_text_file(
+  @support.write_text_file(
     "\{root}/build/TEST_RESULTS.md",
     [
       "# \{module_name} Test Results",

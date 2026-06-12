@@ -6,7 +6,10 @@ async test "orphaned deferred watcher record rehydrates detached import supervis
   let snapshot_path = "\{root}/town.json"
   let packet_path = "\{root}/packets/keeper-research-opc-standing-watch-opc-news-tick-50-abc.json"
   let receipt_path = packet_path + ".import.json"
-  write_text_file(receipt_path, detached_import_receipt_json(status="Pending"))
+  @support.write_text_file(
+    receipt_path,
+    detached_import_receipt_json(status="Pending"),
+  )
   let goal = standing_watch_goal_fixture(
     id="watch-opc-news",
     title="Track OPC",
@@ -51,7 +54,10 @@ async test "orphaned deferred watcher record ignores already superseded terminal
   let snapshot_path = "\{root}/town.json"
   let packet_path = "\{root}/packets/keeper-research-opc-standing-watch-opc-news-tick-50-abc.json"
   let receipt_path = packet_path + ".import.json"
-  write_text_file(receipt_path, detached_import_receipt_json(status="Pending"))
+  @support.write_text_file(
+    receipt_path,
+    detached_import_receipt_json(status="Pending"),
+  )
   let goal = standing_watch_goal_fixture(
     id="watch-opc-news",
     title="Track OPC",

@@ -3,9 +3,9 @@ async fn ensure_wenyu_build_moonclaw_profile(root : String) -> Unit {
   let path = "\{root}/moonclaw.jobs.json"
   let profile = wenyu_build_moonclaw_profile_json()
   if !@fs.exists(path) {
-    write_text_file(
+    @support.write_text_file(
       path,
-      upsert_moonclaw_job_profile_json(
+      @support.upsert_moonclaw_job_profile_json(
         Json::object({}),
         "wenyu_build_controller",
         profile,
@@ -13,18 +13,18 @@ async fn ensure_wenyu_build_moonclaw_profile(root : String) -> Unit {
     )
     return
   }
-  let text = read_text_or_empty(path)
+  let text = @support.read_text_or_empty(path)
   let parsed = @json.parse(text) catch {
     _ => {
       insert_wenyu_build_profile_text(path, text, profile)
       return
     }
   }
-  write_text_file(
+  @support.write_text_file(
     path,
-    upsert_moonclaw_job_profile_json(parsed, "wenyu_build_controller", profile).stringify(
-      indent=2,
-    ),
+    @support.upsert_moonclaw_job_profile_json(
+      parsed, "wenyu_build_controller", profile,
+    ).stringify(indent=2),
   )
 }
 
@@ -40,7 +40,7 @@ async fn insert_wenyu_build_profile_text(
   let marker = "\"profiles\": {"
   let replacement = "\"profiles\": {\n      \"wenyu_build_controller\": \{profile.stringify(indent=6)},"
   if text.contains(marker) {
-    write_text_file(path, text.replace(old=marker, new=replacement))
+    @support.write_text_file(path, text.replace(old=marker, new=replacement))
   }
 }
 

@@ -168,7 +168,7 @@ async test "book quality repair goal retirement decision names each policy reaso
     ),
     "still-needs-repair",
   )
-  write_text_file(
+  @support.write_text_file(
     @book_quality.review_result_path(result_dir, book_id),
     "ai_quality_score: 44\n",
   )
@@ -181,7 +181,7 @@ async test "book quality repair goal retirement decision names each policy reaso
     ),
     "still-needs-repair",
   )
-  write_text_file(
+  @support.write_text_file(
     @book_quality.review_result_path(result_dir, book_id),
     "ai_quality_score: \{@book_quality.semantic_ready_threshold()}\n",
   )

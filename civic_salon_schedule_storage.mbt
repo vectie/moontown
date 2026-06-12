@@ -49,5 +49,5 @@ pub async fn save_civic_salon_schedules(
   path : String,
   schedules : Array[CivicSalonSchedule],
 ) -> Unit {
-  write_text_file(path, schedules.to_json().stringify(indent=2))
+  @support.write_text_file(path, schedules.to_json().stringify(indent=2))
 }

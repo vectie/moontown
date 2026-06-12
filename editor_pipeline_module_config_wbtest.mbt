@@ -5,11 +5,11 @@ async test "editor pipeline module config loader handles missing invalid and val
   assert_true(
     load_editor_pipeline_module_config("\{root}/missing.json") is None,
   )
-  write_text_file("\{root}/invalid.json", "{bad json")
+  @support.write_text_file("\{root}/invalid.json", "{bad json")
   assert_true(
     load_editor_pipeline_module_config("\{root}/invalid.json") is None,
   )
-  write_text_file(
+  @support.write_text_file(
     "\{root}/valid.json",
     editor_pipeline_module_config_fixture_json().stringify(),
   )

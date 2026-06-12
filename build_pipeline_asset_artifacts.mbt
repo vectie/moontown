@@ -15,7 +15,7 @@ async fn write_wenyu_asset_prompts(
   task : @moonbook.BookTask,
   module_name : String,
 ) -> Unit {
-  write_text_file(
+  @support.write_text_file(
     "\{root}/build/ASSET_PROMPTS.md",
     [
       "# \{module_name} Asset Prompts",
@@ -47,7 +47,7 @@ async fn write_wenyu_asset_manifest(
   entry : @moonbook.BookCatalogEntry,
   module_name : String,
 ) -> Unit {
-  write_text_file(
+  @support.write_text_file(
     "\{root}/build/ASSET_MANIFEST.md",
     [
       "# \{module_name} Asset Manifest",

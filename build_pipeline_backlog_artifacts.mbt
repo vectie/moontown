@@ -17,7 +17,7 @@ async fn write_wenyu_implementation_backlog_page(
   task : @moonbook.BookTask,
   module_name : String,
 ) -> Unit {
-  write_text_file(
+  @support.write_text_file(
     "\{root}/build/IMPLEMENTATION_BACKLOG.md",
     [
       "# \{module_name} Implementation Backlog",
@@ -66,7 +66,7 @@ async fn write_wenyu_acceptance_tests_page(
   root : String,
   module_name : String,
 ) -> Unit {
-  write_text_file(
+  @support.write_text_file(
     "\{root}/build/ACCEPTANCE_TESTS.md",
     [
       "# \{module_name} Acceptance Tests",
@@ -87,7 +87,7 @@ async fn write_wenyu_build_plan_page(
   entry : @moonbook.BookCatalogEntry,
   module_name : String,
 ) -> Unit {
-  write_text_file(
+  @support.write_text_file(
     "\{root}/wiki/synthesis/\{entry.id}-build-plan.md",
     [
       "# \{module_name} Build Plan",

@@ -23,7 +23,7 @@ async test "editor pipeline repair packet keeps course source context bounded" {
       false,
     ),
   )
-  let packet_text = read_text_or_empty(
+  let packet_text = @support.read_text_or_empty(
     planbook_repair_packet_path_for_criterion(
       workspace_root, "editor-mode-real-pipeline",
     ),
@@ -41,7 +41,7 @@ async test "selected editor feature repair packet is driven by ai selection arti
     "/tmp/moontown-selected-editor-feature-repair-wbtest",
   )
   let workspace_root = workspace.workspace_root
-  write_text_file(
+  @support.write_text_file(
     editor_feature_selection_result_path(workspace_root),
     test_editor_feature_selection_json_with_gap(
       "building-protocol-history", "Building Protocol History", "history missing",
@@ -69,12 +69,12 @@ async test "selected editor feature repair packet is driven by ai selection arti
       false,
     ),
   )
-  let packet_text = read_text_or_empty(
+  let packet_text = @support.read_text_or_empty(
     planbook_repair_packet_path_for_criterion(
       workspace_root, "editor-selected-feature-implementation",
     ),
   )
-  let skill_text = read_text_or_empty(
+  let skill_text = @support.read_text_or_empty(
     @planbook_policy.repair_path_in_workspace(
       workspace_root,
       @planbook_policy.repair_skill_relative_path(),

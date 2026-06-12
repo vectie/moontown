@@ -26,7 +26,10 @@ pub async fn bootstrap_moontown_cookbook(
     @cookbook.merge_catalog(catalog, entry),
   )
   let manifest = @cookbook.manifest(workspace_root, manifest_path)
-  write_text_file(manifest_path, manifest.to_json().stringify(indent=2))
+  @support.write_text_file(
+    manifest_path,
+    manifest.to_json().stringify(indent=2),
+  )
   @cookbook.write_workspace(entry, manifest)
   let status = inspect_moontown_cookbook(workspace_root~, manifest_path~)
   "Bootstrapped MoonBook cookbook `\{entry.id}` at \{workspace_root}; wrote \{manifest_path}; required_missing=\{status.required_missing_count}."

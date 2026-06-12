@@ -4,7 +4,7 @@ async fn refresh_editor_feature_selection_task(
 ) -> EditorFeatureSelectionTask {
   if @fs.exists(task.result_path) &&
     editor_feature_selection_result_satisfies_contract(
-      read_text_or_empty(task.result_path),
+      @support.read_text_or_empty(task.result_path),
     ) {
     return {
       ..task,
@@ -18,7 +18,7 @@ async fn refresh_editor_feature_selection_task(
   }
   let content = editor_feature_selection_result_text_from_run(task, run_id)
   if editor_feature_selection_result_satisfies_contract(content) {
-    write_text_file(task.result_path, content)
+    @support.write_text_file(task.result_path, content)
     return {
       ..task,
       status: "completed",

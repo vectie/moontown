@@ -67,8 +67,11 @@ pub async fn write_moontown_planbook_autonomy(
   )
   let status_path = default_planbook_autonomy_path(snapshot_path~)
   let digest_path = default_planbook_autonomy_digest_path(snapshot_path~)
-  write_text_file(status_path, status.to_json().stringify(indent=2))
-  write_text_file(digest_path, render_planbook_autonomy_markdown(status))
+  @support.write_text_file(status_path, status.to_json().stringify(indent=2))
+  @support.write_text_file(
+    digest_path,
+    render_planbook_autonomy_markdown(status),
+  )
   write_planbook_autonomy_workspace(status, workspace_root)
   "PlanBook autonomy status: \{status.status}; open=\{status.open_count}; satisfied=\{status.satisfied_count}; wrote \{status_path} and \{digest_path}."
 }

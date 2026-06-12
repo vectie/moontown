@@ -4,8 +4,8 @@ pub async fn write_wenyu_building_protocol_status(
   registry_path? : String = default_wenyu_protocol_registry_path(),
 ) -> String {
   let portfolio = inspect_wenyu_building_protocols(status_path~, registry_path~)
-  write_text_file(status_path, portfolio.to_json().stringify(indent=2))
-  write_text_file(
+  @support.write_text_file(status_path, portfolio.to_json().stringify(indent=2))
+  @support.write_text_file(
     protocol_status_markdown_path(status_path),
     render_wenyu_building_protocol_portfolio(portfolio),
   )

@@ -49,7 +49,7 @@ async fn write_live_autonomy_watcher_record_line(
   goal_id : String,
   record : @core.WatcherRunRecord,
 ) -> Unit {
-  write_text_file(
+  @support.write_text_file(
     "\{root}/watchers/\{goal_id}.jsonl",
     record.to_json().stringify() + "\n",
   )

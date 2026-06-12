@@ -20,7 +20,7 @@ async fn clear_daemon_restart_request(snapshot_path : String) -> Unit {
 
 ///|
 async fn write_daemon_stop_request(snapshot_path : String) -> Unit {
-  write_text_file(
+  @support.write_text_file(
     default_daemon_stop_path(snapshot_path~),
     "stop requested at \{@env.now()}\n",
   ) catch {
@@ -33,7 +33,7 @@ pub async fn write_daemon_restart_request(
   snapshot_path? : String = @storage.default_snapshot_path(),
   reason? : String = "reload requested",
 ) -> String {
-  write_text_file(
+  @support.write_text_file(
     default_daemon_restart_path(snapshot_path~),
     "restart requested at \{@env.now()}\nreason: \{reason}\n",
   ) catch {

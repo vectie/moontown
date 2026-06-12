@@ -7,7 +7,7 @@ async fn record_accepted_editor_feature_if_present(
     None => return
   }
   let ledger_path = editor_implemented_features_ledger_path(workspace_root)
-  let current_ledger = read_text_or_empty(ledger_path)
+  let current_ledger = @support.read_text_or_empty(ledger_path)
   let entry = "- `\{feature_id}`"
   if !current_ledger.contains(entry) {
     let next_ledger = if current_ledger.trim().is_empty() {
@@ -18,24 +18,24 @@ async fn record_accepted_editor_feature_if_present(
     } else {
       "\{current_ledger.trim().to_owned()}\n\{entry}"
     }
-    write_text_file(ledger_path, next_ledger)
+    @support.write_text_file(ledger_path, next_ledger)
   }
-  let selection = read_text_or_empty(
+  let selection = @support.read_text_or_empty(
     editor_feature_selection_result_path(workspace_root),
   )
   if !selection.trim().is_empty() {
-    write_text_file(
+    @support.write_text_file(
       editor_implemented_feature_archive_path(
         workspace_root, feature_id, "selection.json",
       ),
       selection,
     )
   }
-  let proof = read_text_or_empty(
+  let proof = @support.read_text_or_empty(
     editor_selected_feature_implementation_path(workspace_root),
   )
   if !proof.trim().is_empty() {
-    write_text_file(
+    @support.write_text_file(
       editor_implemented_feature_archive_path(
         workspace_root, feature_id, "implementation.md",
       ),
@@ -46,7 +46,7 @@ async fn record_accepted_editor_feature_if_present(
 
 ///|
 async fn editor_current_accepted_feature_id(workspace_root : String) -> String? {
-  let text = read_text_or_empty(
+  let text = @support.read_text_or_empty(
     editor_selected_feature_implementation_path(workspace_root),
   )
   if !text.contains(
@@ -61,7 +61,7 @@ async fn editor_current_accepted_feature_id(workspace_root : String) -> String? 
 ///|
 async fn editor_accepted_feature_ids(workspace_root : String) -> Array[String] {
   let ids : Array[String] = []
-  let ledger = read_text_or_empty(
+  let ledger = @support.read_text_or_empty(
     editor_implemented_features_ledger_path(workspace_root),
   )
   for raw in ledger.split("\n") {

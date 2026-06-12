@@ -47,8 +47,8 @@ async fn preseed_wenyu_goal_inputs(
 
 ///|
 async fn copy_optional_bootstrap_text(source~ : String, dest~ : String) -> Unit {
-  match read_optional_text(source) {
-    Some(text) => write_text_file(dest, text)
+  match @support.read_optional_text(source) {
+    Some(text) => @support.write_text_file(dest, text)
     None => ()
   }
 }
@@ -60,7 +60,7 @@ async fn write_wenyu_research_request(
   objective : String,
 ) -> Unit {
   let module_name = wenyu_module_name(entry)
-  write_text_file(
+  @support.write_text_file(
     "\{root}/raw/bootstrap/RESEARCH_REQUEST.md",
     [
       "# Research Request",
@@ -100,7 +100,7 @@ async fn write_wenyu_source_hints(
   vision_path : String,
   repo_root : String,
 ) -> Unit {
-  write_text_file(
+  @support.write_text_file(
     "\{root}/raw/bootstrap/SOURCE_HINTS.md",
     [
       "# Source Hints",

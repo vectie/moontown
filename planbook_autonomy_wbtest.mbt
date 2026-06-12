@@ -9,34 +9,34 @@ async test "planbook autonomy doctor writes self-healing evidence" {
     book_catalog_path=workspace.catalog_path,
   )
   assert_true(message.contains("PlanBook autonomy status"))
-  let status_text = read_text_or_empty(
+  let status_text = @support.read_text_or_empty(
     default_planbook_autonomy_path(snapshot_path=workspace.snapshot_path),
   )
-  let evidence = read_text_or_empty(
+  let evidence = @support.read_text_or_empty(
     "\{workspace.workspace_root}/wiki/planning/execution-evidence.md",
   )
-  let review = read_text_or_empty(
+  let review = @support.read_text_or_empty(
     "\{workspace.workspace_root}/wiki/reviews/active-plan-review.md",
   )
-  let backlog = read_text_or_empty(
+  let backlog = @support.read_text_or_empty(
     "\{workspace.workspace_root}/wiki/planning/implementation-backlog.md",
   )
-  let change_log = read_text_or_empty(
+  let change_log = @support.read_text_or_empty(
     "\{workspace.workspace_root}/wiki/history/change-log.md",
   )
-  let engineering_digest = read_text_or_empty(
+  let engineering_digest = @support.read_text_or_empty(
     "\{workspace.workspace_root}/wiki/history/daily-engineering-digest.md",
   )
-  let progress = read_text_or_empty(
+  let progress = @support.read_text_or_empty(
     "\{workspace.workspace_root}/wiki/planning/backlog-progress.md",
   )
-  let stop_policy = read_text_or_empty(
+  let stop_policy = @support.read_text_or_empty(
     "\{workspace.workspace_root}/wiki/planning/stop-policy.md",
   )
-  let role_model = read_text_or_empty(
+  let role_model = @support.read_text_or_empty(
     "\{workspace.workspace_root}/wiki/planning/role-model.md",
   )
-  let operating_architecture = read_text_or_empty(
+  let operating_architecture = @support.read_text_or_empty(
     "\{workspace.workspace_root}/wiki/planning/operating-architecture.md",
   )
   assert_true(status_text.contains("\"status\": \"self-healing-open\""))
@@ -78,7 +78,7 @@ async test "planbook validation evidence requires explicit validation contract" 
     snapshot_path=workspace.snapshot_path,
     note="test validation record",
   )
-  let text = read_text_or_empty(path)
+  let text = @support.read_text_or_empty(path)
   assert_true(planbook_validation_evidence_ready(text))
   assert_true(text.contains("contract: planbook.validation.v1"))
   assert_true(text.contains("validation_status: passed"))
@@ -89,7 +89,7 @@ async test "planbook autonomy doctor repairs missing seed architecture page" {
   let workspace = planbook_autonomy_test_workspace(
     "/tmp/moontown-planbook-seed-repair-wbtest",
   )
-  write_text_file(
+  @support.write_text_file(
     "\{workspace.workspace_root}/wiki/index.md",
     "# Existing PlanBook\n\nDo not overwrite existing operator-authored content.",
   )
@@ -100,8 +100,10 @@ async test "planbook autonomy doctor repairs missing seed architecture page" {
       book_catalog_path=workspace.catalog_path,
     ),
   )
-  let index = read_text_or_empty("\{workspace.workspace_root}/wiki/index.md")
-  let operating_architecture = read_text_or_empty(
+  let index = @support.read_text_or_empty(
+    "\{workspace.workspace_root}/wiki/index.md",
+  )
+  let operating_architecture = @support.read_text_or_empty(
     "\{workspace.workspace_root}/wiki/planning/operating-architecture.md",
   )
   assert_true(index.contains("Do not overwrite existing"))

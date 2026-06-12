@@ -9,8 +9,8 @@ test "default operational UI state renders valid projection JSON" {
   let parsed = @json.parse(text) catch {
     _ => abort("default operational UI state should be valid JSON")
   }
-  assert_eq(json_string_field(parsed, "book_id").unwrap(), "ops-book")
-  assert_eq(json_string_field(parsed, "title").unwrap(), "Ops <Book>")
+  assert_eq(@support.json_string_field(parsed, "book_id").unwrap(), "ops-book")
+  assert_eq(@support.json_string_field(parsed, "title").unwrap(), "Ops <Book>")
   assert_true(text.contains("\"status_chips\""))
   assert_true(text.contains("\"operational-book\""))
   assert_true(text.contains("OPERATIONAL_BOOK_CONTRACT.md"))

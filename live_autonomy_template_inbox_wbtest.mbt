@@ -53,7 +53,9 @@ async test "live autonomy surfaces book template request inbox" {
   assert_true(status.contains("Disabled standing goals: `0`"))
   assert_true(status.contains("Latest book-template event: none"))
   assert_true(status.contains("Inspect failed book-template request configs"))
-  let digest_text = read_text_or_empty(default_live_digest_path(snapshot_path~))
+  let digest_text = @support.read_text_or_empty(
+    default_live_digest_path(snapshot_path~),
+  )
   assert_true(digest_text.contains("book_template_requests: `2`"))
   assert_true(digest_text.contains("enabled_standing_goals: `0`"))
   assert_true(digest_text.contains("disabled_standing_goals: `0`"))

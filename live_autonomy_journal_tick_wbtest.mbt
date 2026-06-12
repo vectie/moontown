@@ -16,7 +16,7 @@ async test "live autonomy journal tick floor is monotonic" {
       daemon_tick=Some(12),
     ),
   )
-  write_text_file(
+  @support.write_text_file(
     default_town_journal_path(snapshot_path~),
     live_autonomy_journal_snapshot_line(40) + "\n",
   )

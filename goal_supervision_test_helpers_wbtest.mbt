@@ -204,7 +204,7 @@ async fn write_standing_watch_history_marker(
   rejected_facts_count? : Int = 1,
   wiki_pages_changed_count? : Int = 0,
 ) -> Unit {
-  write_text_file(
+  @support.write_text_file(
     "\{book_root}/wiki/history/standing-watch.md",
     [
       "### \{marker}",

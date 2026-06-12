@@ -1,11 +1,11 @@
 ///|
 async fn ensure_wenyu_civic_moonclaw_profile(root : String) -> Unit {
   let path = "\{root}/moonclaw.jobs.json"
-  let existing = read_json_file_or_empty_object(path)
+  let existing = @support.read_json_file_or_empty_object(path)
   let profile = wenyu_civic_moonclaw_profile_json()
-  write_text_file(
+  @support.write_text_file(
     path,
-    upsert_moonclaw_job_profile_json(
+    @support.upsert_moonclaw_job_profile_json(
       existing, "wenyu_civic_service_worker", profile,
     ).stringify(indent=2),
   )
