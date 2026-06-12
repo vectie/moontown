@@ -82,6 +82,20 @@ test "web tool surface is a policy capability not a separate book type" {
 }
 
 ///|
+test "policy owns default generated site projection path" {
+  assert_eq(
+    default_generated_site_projection_path(),
+    "book/site/generated/index.html",
+  )
+  assert_eq(default_generated_site_surface(), "generated-site")
+  assert_eq(output_surface(research()), default_generated_site_surface())
+  assert_eq(
+    output_projection_path(research()),
+    default_generated_site_projection_path(),
+  )
+}
+
+///|
 test "policy health evaluates required files and lane availability" {
   let policy = research()
   let health = evaluate_health(policy, 95, Some(85), [

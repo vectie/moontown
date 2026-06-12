@@ -105,6 +105,9 @@ book owns. The implementation now has a first-class `policy` package:
 
 - [policy/book_policy.mbt](/Users/kq/Workspace/moontown/src/policy/book_policy.mbt)
   owns the typed `BookPolicy`, skill, file, quality, and output model.
+- [policy/book_policy_paths.mbt](/Users/kq/Workspace/moontown/src/policy/book_policy_paths.mbt)
+  owns default policy projection paths and output surface names, including the
+  generated-site projection path used by composed archetypes.
 - [policy/book_policy_lanes.mbt](/Users/kq/Workspace/moontown/src/policy/book_policy_lanes.mbt)
   owns the canonical loop lane model: `control`, `execute`, and `tend`.
   `BookPolicy` still serializes lane fields as strings for stable JSON
@@ -276,6 +279,11 @@ These functions are intentionally not separate book types. They are policy
 composition tools, so a future book can be a course with a tool surface, a
 research book with PDF watch, or a civic support book with standing watch
 without adding more runtime categories.
+
+Default output paths are also policy-owned. Packages such as `book_quality/`
+may expose compatibility helpers like `generated_site_path()`, but those should
+delegate to `policy.default_generated_site_projection_path()` rather than
+redefining the path locally.
 
 Every policy has two lanes:
 

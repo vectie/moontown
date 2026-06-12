@@ -45,5 +45,5 @@ pub fn projection_state_path() -> String {
 
 ///|
 pub fn generated_site_path() -> String {
-  "book/site/generated/index.html"
+  @policy.default_generated_site_projection_path()
 }

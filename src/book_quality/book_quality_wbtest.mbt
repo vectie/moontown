@@ -44,6 +44,14 @@ test "book quality package owns catalog classification policy" {
 }
 
 ///|
+test "book quality generated site path follows policy projection default" {
+  assert_eq(
+    generated_site_path(),
+    @policy.default_generated_site_projection_path(),
+  )
+}
+
+///|
 test "book quality package owns operational book templates" {
   let index = operational_index(
     "ops-book",

@@ -13,6 +13,10 @@ pub fn cookbook() -> BookPolicy
 
 pub fn course() -> BookPolicy
 
+pub fn default_generated_site_projection_path() -> String
+
+pub fn default_generated_site_surface() -> String
+
 pub fn evaluate_health(BookPolicy, Int, Int?, Array[String]) -> PolicyHealth
 
 pub fn execute_skills(BookPolicy) -> Array[SkillSpec]

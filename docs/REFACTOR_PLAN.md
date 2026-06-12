@@ -196,6 +196,9 @@ Goals:
 - keep execute/tend/control loop-lane semantics in `policy/`; downstream
   packages may read serialized lane strings, but `policy/` owns parsing,
   normalization, and lane-based skill selection
+- keep default policy output surface/path constants in `policy/`; downstream
+  packages may expose compatibility helpers, but they should delegate to policy
+  defaults instead of redefining generated-site paths locally
 - keep internal-distance semantics in `policy/`; downstream packages may render
   information/recognition/decisiveness plans, but `policy/` owns the mapping
   from execute skills, tend skills, quality gates, and output contracts into

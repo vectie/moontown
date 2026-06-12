@@ -1,6 +1,10 @@
 ///|
 fn default_projection_output(contract : String) -> OutputSpec {
-  output("generated-site", contract, "book/site/generated/index.html")
+  output(
+    default_generated_site_surface(),
+    contract,
+    default_generated_site_projection_path(),
+  )
 }
 
 ///|
