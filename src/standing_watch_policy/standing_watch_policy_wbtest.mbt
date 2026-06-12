@@ -189,3 +189,30 @@ test "empty completion no-change summary keeps accounting contract stable" {
   assert_eq(lines[10], "book_watch_record_id: watch-task")
   assert_true(lines[11].contains("mayor classified it as no_change"))
 }
+
+///|
+test "empty review completion summary reuses strict no-change accounting" {
+  let observed = @core.TaskExecutionRecord::new(
+    task_id="standing-watch-opc-tick-7",
+    book_id="research-opc",
+    packet_id="packet",
+    packet_path="packet.json",
+    status=@core.TaskExecutionStatus::ReviewQueued,
+    summary="Workflow completed without a decision marker.",
+    output_contract="standing-watch-live-snapshot",
+    requires_review=true,
+    notify_town=true,
+  )
+  let summary = standing_watch_empty_review_completion_summary(observed)
+  assert_true(
+    summary.contains("keeper_auto_triage: empty_completion_no_change"),
+  )
+  assert_true(summary.contains("keeper_auto_triage_reason: watcher completed"))
+  assert_true(summary.contains("standing_goal_decision: no_change"))
+  assert_true(summary.contains("checked_sources_count: 0"))
+  assert_true(summary.contains("accepted_facts_count: 0"))
+  assert_true(summary.contains("book_changed: no"))
+  assert_true(
+    summary.contains("book_watch_record_id: standing-watch-opc-tick-7"),
+  )
+}

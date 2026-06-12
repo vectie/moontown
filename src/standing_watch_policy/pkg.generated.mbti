@@ -39,6 +39,8 @@ pub fn standing_watch_empty_completion_is_no_change(@core.StandingGoal, @core.Ta
 
 pub fn standing_watch_empty_completion_no_change_summary(String) -> String
 
+pub fn standing_watch_empty_review_completion_summary(@core.TaskExecutionRecord) -> String
+
 pub fn standing_watch_event_for_record(@core.WatcherRunRecord) -> @core.TownEvent
 
 pub fn standing_watch_execution_has_zero_material_delta(@core.TaskExecutionRecord) -> Bool

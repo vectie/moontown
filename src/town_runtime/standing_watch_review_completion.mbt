@@ -41,7 +41,9 @@ fn complete_empty_standing_watch_as_no_change(
   let completed = copy_execution_with(
     observed,
     status=@core.TaskExecutionStatus::Completed,
-    summary=standing_watch_empty_review_completion_summary(observed),
+    summary=@standing_watch_policy.standing_watch_empty_review_completion_summary(
+      observed,
+    ),
     heartbeat_tick=supervision_tick(state),
     next_retry_tick=None,
     result_decision="NoChange",
@@ -61,31 +63,4 @@ fn complete_empty_standing_watch_as_no_change(
       related_run_id=completed.run_id,
     ),
   )
-}
-
-///|
-fn standing_watch_empty_review_completion_summary(
-  observed : @core.TaskExecutionRecord,
-) -> String {
-  [
-    observed.summary,
-    "keeper_auto_triage: empty_completion_no_change",
-    standing_watch_empty_review_completion_reason_line(),
-    @standing_watch_policy.standing_watch_empty_completion_no_change_summary(
-      observed.task_id,
-    ),
-  ].join("\n")
-}
-
-///|
-fn standing_watch_empty_review_completion_reason_line() -> String {
-  "keeper_auto_triage_reason: \{standing_watch_empty_review_completion_reason()}"
-}
-
-///|
-fn standing_watch_empty_review_completion_reason() -> String {
-  [
-    "watcher completed without a standing-goal decision marker, candidate insight, evidence delta, or source delta,",
-    "so mayor treats it as no_change instead of human review debt.",
-  ].join(" ")
 }

@@ -154,6 +154,7 @@ Purpose:
 - standing-watch live snapshot stale-window policy and transient dispatch-error
   classification
 - empty completion `no_change` marker summary contract
+- empty review completion keeper-triage summary contract
 - keeper auto-triage/recovery closure policy, thresholds, and summary wording
 - legacy standing-watch retry-accounting classification rules
 - review-triage predicates for empty completions, repair-goal still-open
@@ -166,8 +167,8 @@ Boundary:
 - `src/town_runtime` should not own standing-watch marker vocabulary, closure
   thresholds, watcher-record matching/status mapping, standing-watch event
   shape, live snapshot stale windows, transient dispatch classification, or
-  empty-completion `no_change` marker text, or legacy retry-accounting
-  predicates, or review-triage predicates.
+  empty-completion `no_change` marker text, empty review completion summary
+  text, legacy retry-accounting predicates, or review-triage predicates.
 
 ## Storage
 
