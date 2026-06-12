@@ -29,7 +29,7 @@ civic protocol runtime
 civic communication-pattern runtime
   reusable exchange/review/watch/match/triage patterns and round audit ledgers
 
-ui/rabbita-town
+src/ui/rabbita-town
   operator console, viewport, module interiors, protocol projection
 ```
 
@@ -39,7 +39,7 @@ The dependency direction should stay acyclic:
 cmd/main -> moontown root facade
 moontown root -> scheduler, civic, storage, moonbook, moonclaw adapters
 civic protocol/runtime -> civic definitions + MoonBook storage APIs
-ui/rabbita-town -> projection JSON only
+src/ui/rabbita-town -> projection JSON only
 ```
 
 The UI should not own civic truth. It should render runtime projections emitted
@@ -59,7 +59,9 @@ by Moontown and MoonBook.
   paths, schedule persistence, reconciliation, and runner files.
 - `runtime_status.mbt` now invokes a generic daemon scheduled-job dispatcher,
   but the dispatcher still lives in the root package pending a package split.
-- `src/ui/rabbita-town/main/main.mbt` is a monolithic 10k-line frontend package.
+- `src/ui/rabbita-town/main/main.mbt` has been split into focused frontend
+  files, but some policy/view clusters still need extraction so UI code remains
+  a projection layer instead of becoming a civic-policy layer.
 - The salon reducer boundary now exists. Production rounds use MoonClaw to
   emit `CivicSalonIdea` JSON from generated skills and participant context;
   deterministic template ideas are isolated behind explicit fixture mode.
@@ -387,12 +389,14 @@ Acceptance:
 
 ### Stage 5: Frontend Modularization
 
+Status: partially implemented.
+
 Goals:
 
-- split `src/ui/rabbita-town/main/main.mbt` into focused frontend files: bootstrap
+- finish extracting remaining frontend clusters into focused files: bootstrap
   sources and parsers, operator console, Wenyu tile map, module
-  building/interior renderer, protocol projection panels, and standing-watch
-  messenger
+  building/interior renderer, protocol projection panels, standing-watch
+  messenger, and small projection-mapping policy helpers
 - keep the frontend rendering projection JSON only
 
 Acceptance:

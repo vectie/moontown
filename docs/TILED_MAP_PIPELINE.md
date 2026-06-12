@@ -387,7 +387,7 @@ semantic contract is stable.
 Before accepting a new map/assets batch:
 
 - `npm run build` passes in `src/ui/rabbita-town`
-- `/Users/kq/.moon/bin/moon check ui` passes
+- `/Users/kq/.moon/bin/moon -C src/ui/rabbita-town check main` passes
 - viewport renders in Codex browser
 - viewport renders in Safari
 - no mayor/town control-plane book appears as a normal book house
