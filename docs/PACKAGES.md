@@ -432,6 +432,8 @@ Key files:
 - [src/research_quality/projection_gaps.mbt](/Users/kq/Workspace/moontown/src/research_quality/projection_gaps.mbt)
 - [src/research_quality/source_depth_gaps.mbt](/Users/kq/Workspace/moontown/src/research_quality/source_depth_gaps.mbt)
 - [src/research_quality/review_trigger.mbt](/Users/kq/Workspace/moontown/src/research_quality/review_trigger.mbt)
+- [src/research_quality/persistence_payload.mbt](/Users/kq/Workspace/moontown/src/research_quality/persistence_payload.mbt)
+- [src/research_quality/bootstrap_artifacts.mbt](/Users/kq/Workspace/moontown/src/research_quality/bootstrap_artifacts.mbt)
 
 Purpose:
 
@@ -442,17 +444,22 @@ Purpose:
   and missing topic-specific wiki materialization
 - write and resolve the canonical `raw/bootstrap/QUALITY_REPAIR.md` repair
   trigger for in-place research quality repair
+- translate completed research bootstrap artifacts into persistence summaries,
+  artifact paths, and MoonBook memory candidates
 - expose quality judgments that town runtime can use without reimplementing
   research semantics
 
 Boundary:
 
 - research quality owns the generic research bootstrap contract, judgment,
-  repair-trigger file contract, repair wording, and topic-specific signal
-  checks.
+  repair-trigger file contract, repair wording, topic-specific signal checks,
+  bootstrap artifact reading, persistence-summary wording, artifact list, and
+  memory-candidate target-page contract.
 - `src/town_runtime` may decide that a repair trigger should be written or
-  resolved, and may choose between Wenyu and research bootstrap, but should not
-  own research bootstrap prompt/target pages or the trigger path/prose.
+  resolved, may choose between Wenyu and research bootstrap, and may dispatch
+  persistence to the owning package, but should not own research bootstrap
+  prompt/target pages, the trigger path/prose, or research persistence payload
+  semantics.
 - default generated-site path semantics belong to `src/policy`; Research
   Quality consumes `policy.default_generated_site_projection_path()` rather
   than redefining the projection path.

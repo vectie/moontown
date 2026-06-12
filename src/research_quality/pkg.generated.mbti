@@ -5,6 +5,7 @@ import {
   "moonbitlang/core/debug",
   "moonbitlang/core/json",
   "vectie/moontown/adapters/moonbook",
+  "vectie/moontown/core",
 }
 
 // Values
@@ -17,6 +18,12 @@ pub fn research_bootstrap_ingest_target_pages() -> Array[String]
 pub fn research_bootstrap_ingest_task(@moonbook.BookCatalogEntry, String) -> @moonbook.BookTask
 
 pub async fn research_generated_site_gaps(String, String) -> Array[String]
+
+pub fn research_persist_artifacts(@moonbook.BookCatalogEntry, @core.TaskExecutionRecord) -> Array[String]
+
+pub async fn research_persist_memory_candidates(@moonbook.BookCatalogEntry, @core.TaskExecutionRecord) -> Array[@moonbook.MemoryCandidate]
+
+pub async fn research_persist_summary(@moonbook.BookCatalogEntry, @core.TaskExecutionRecord) -> String
 
 pub async fn research_quality_gaps(@moonbook.BookCatalogEntry) -> Array[String]
 

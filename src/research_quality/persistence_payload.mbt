@@ -1,5 +1,5 @@
 ///|
-async fn research_persist_summary(
+pub async fn research_persist_summary(
   entry : @moonbook.BookCatalogEntry,
   execution : @core.TaskExecutionRecord,
 ) -> String {
@@ -16,7 +16,7 @@ async fn research_persist_summary(
 }
 
 ///|
-fn research_persist_artifacts(
+pub fn research_persist_artifacts(
   entry : @moonbook.BookCatalogEntry,
   execution : @core.TaskExecutionRecord,
 ) -> Array[String] {
@@ -34,14 +34,14 @@ fn research_persist_artifacts(
 }
 
 ///|
-async fn research_persist_memory_candidates(
+pub async fn research_persist_memory_candidates(
   entry : @moonbook.BookCatalogEntry,
   execution : @core.TaskExecutionRecord,
 ) -> Array[@moonbook.MemoryCandidate] {
   if !is_research_bootstrap_execution(entry, execution) {
     return []
   }
-  let topic = @research_quality.quality_topic_for_entry(entry)
+  let topic = quality_topic_for_entry(entry)
   let display = research_persist_display(entry)
   let artifacts = read_research_bootstrap_artifacts(entry)
   let source_detail = artifacts.source_detail()
@@ -100,7 +100,7 @@ fn research_bootstrap_result_artifacts() -> Array[String] {
 
 ///|
 fn research_persist_display(entry : @moonbook.BookCatalogEntry) -> String {
-  let topic = @research_quality.quality_topic_for_entry(entry)
+  let topic = quality_topic_for_entry(entry)
   if topic == "opc" {
     "One Person Company (OPC)"
   } else if !entry.name.trim().is_blank() {
