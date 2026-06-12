@@ -1,5 +1,5 @@
 ///|
-fn html_escape(text : String) -> String {
+pub fn html_escape(text : String) -> String {
   let out = StringBuilder::new()
   for ch in text {
     match ch {

@@ -1,5 +1,5 @@
 ///|
-async fn read_optional_text(path : String) -> String? {
+pub async fn read_optional_text(path : String) -> String? {
   if !@fs.exists(path) {
     return None
   }
@@ -9,7 +9,7 @@ async fn read_optional_text(path : String) -> String? {
 }
 
 ///|
-async fn read_optional_json_file(path : String) -> Json? {
+pub async fn read_optional_json_file(path : String) -> Json? {
   match read_optional_text(path) {
     Some(text) => Some(@json.parse(text)) catch { _ => None }
     None => None
@@ -17,12 +17,12 @@ async fn read_optional_json_file(path : String) -> Json? {
 }
 
 ///|
-async fn read_json_file_or_empty_object(path : String) -> Json {
+pub async fn read_json_file_or_empty_object(path : String) -> Json {
   read_optional_json_file(path).unwrap_or(Json::object({}))
 }
 
 ///|
-async fn read_text_or_empty(path : String) -> String {
+pub async fn read_text_or_empty(path : String) -> String {
   if !@fs.exists(path) {
     return ""
   }
@@ -32,7 +32,7 @@ async fn read_text_or_empty(path : String) -> String {
 }
 
 ///|
-async fn write_text_file(path : String, content : String) -> Unit {
+pub async fn write_text_file(path : String, content : String) -> Unit {
   ensure_parent_directory(path)
   @fs.write_file(
     path,
@@ -43,7 +43,10 @@ async fn write_text_file(path : String, content : String) -> Unit {
 }
 
 ///|
-async fn write_text_file_if_missing(path : String, content : String) -> Unit {
+pub async fn write_text_file_if_missing(
+  path : String,
+  content : String,
+) -> Unit {
   let current = if @fs.exists(path) {
     @fs.read_file(path).text() catch {
       _ => ""
@@ -57,7 +60,7 @@ async fn write_text_file_if_missing(path : String, content : String) -> Unit {
 }
 
 ///|
-async fn ensure_parent_directory(path : String) -> Unit {
+pub async fn ensure_parent_directory(path : String) -> Unit {
   let parent = @path.Path::dirname(path).to_string()
   if parent == "." || parent == "" || @fs.exists(parent) {
     return

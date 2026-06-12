@@ -196,6 +196,12 @@ book owns. The implementation now has a first-class `policy` package:
   projection rows, grid placement, and projection persistence. Root Moontown may
   expose compatibility wrappers and provide test fixtures, but visual semantics
   should not live in the root package.
+- [support/](/Users/kq/Workspace/moontown/support)
+  owns generic support helpers for file I/O, JSON string/object extraction,
+  Markdown shaping, HTML escaping, text-label formatting, and nested runtime
+  config JSON upserts. Root Moontown may keep private compatibility wrappers,
+  but generic utility implementation should not be scattered across the root
+  package.
 - [cookbook/](/Users/kq/Workspace/moontown/cookbook)
   owns Cookbook DTOs, stable-state artifact summary accounting, and the
   operator-facing Cookbook status Markdown. Root Moontown may discover artifact

@@ -1,0 +1,58 @@
+// Generated using `moon info`, DON'T EDIT IT
+package "vectie/moontown/support"
+
+// Values
+pub fn demote_markdown_headings(String) -> String
+
+pub async fn ensure_parent_directory(String) -> Unit
+
+pub fn first_non_heading_paragraph(String) -> String
+
+pub fn html_escape(String) -> String
+
+pub fn json_escape(String) -> String
+
+pub fn json_object_field_summary(Map[String, Json], String) -> String?
+
+pub fn json_object_string(Map[String, Json], String) -> String?
+
+pub fn json_string(String) -> String
+
+pub fn json_string_array(Array[String]) -> String
+
+pub fn json_string_field(Json, String) -> String?
+
+pub fn label_from_slug(String) -> String
+
+pub fn markdown_bullets(Array[String]) -> String
+
+pub fn markdown_excerpt(String, Int) -> String
+
+pub async fn read_json_file_or_empty_object(String) -> Json
+
+pub async fn read_optional_json_file(String) -> Json?
+
+pub async fn read_optional_text(String) -> String?
+
+pub async fn read_text_or_empty(String) -> String
+
+pub fn remove_first_markdown_title(String) -> String
+
+pub fn section_body(String, String) -> String
+
+pub fn upsert_moonclaw_job_profile_json(Json, String, Json) -> Json
+
+pub fn upsert_nested_object_entry_json(Json, section_key~ : String, collection_key~ : String, entry_key~ : String, entry~ : Json) -> Json
+
+pub async fn write_text_file(String, String) -> Unit
+
+pub async fn write_text_file_if_missing(String, String) -> Unit
+
+// Errors
+
+// Types and methods
+
+// Type aliases
+
+// Traits
+

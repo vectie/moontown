@@ -1,5 +1,5 @@
 ///|
-fn upsert_moonclaw_job_profile_json(
+pub fn upsert_moonclaw_job_profile_json(
   config : Json,
   profile_id : String,
   profile : Json,
@@ -14,7 +14,7 @@ fn upsert_moonclaw_job_profile_json(
 }
 
 ///|
-fn upsert_nested_object_entry_json(
+pub fn upsert_nested_object_entry_json(
   config : Json,
   section_key~ : String,
   collection_key~ : String,

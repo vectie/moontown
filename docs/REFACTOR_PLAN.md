@@ -331,6 +331,9 @@ Goals:
   activity summaries, grid placement, and persistence in `visual_projection/`;
   root may expose compatibility wrappers, but it should not carry visual
   semantics
+- keep generic file, JSON, Markdown, HTML, text-label, and runtime-config JSON
+  helper implementation in `support/`; root may expose private compatibility
+  wrappers, but support code should not remain as many unrelated root files
 
 Acceptance:
 

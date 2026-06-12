@@ -1,5 +1,5 @@
 ///|
-fn json_escape(text : String) -> String {
+pub fn json_escape(text : String) -> String {
   text
   .replace(old="\\", new="\\\\")
   .replace(old="\"", new="\\\"")
@@ -7,12 +7,12 @@ fn json_escape(text : String) -> String {
 }
 
 ///|
-fn json_string(text : String) -> String {
+pub fn json_string(text : String) -> String {
   "\"\{json_escape(text)}\""
 }
 
 ///|
-fn json_string_array(items : Array[String]) -> String {
+pub fn json_string_array(items : Array[String]) -> String {
   let encoded : Array[String] = []
   for item in items {
     encoded.push(json_string(item))
@@ -21,7 +21,7 @@ fn json_string_array(items : Array[String]) -> String {
 }
 
 ///|
-fn json_object_string(object : Map[String, Json], key : String) -> String? {
+pub fn json_object_string(object : Map[String, Json], key : String) -> String? {
   match object.get(key) {
     Some(String(value)) => Some(value)
     _ => None
@@ -29,7 +29,7 @@ fn json_object_string(object : Map[String, Json], key : String) -> String? {
 }
 
 ///|
-fn json_object_field_summary(
+pub fn json_object_field_summary(
   object : Map[String, Json],
   key : String,
 ) -> String? {
@@ -40,7 +40,7 @@ fn json_object_field_summary(
 }
 
 ///|
-fn json_string_field(value : Json, key : String) -> String? {
+pub fn json_string_field(value : Json, key : String) -> String? {
   match value {
     Object(object) => json_object_string(object, key)
     _ => None

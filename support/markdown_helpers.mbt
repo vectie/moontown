@@ -1,5 +1,5 @@
 ///|
-fn markdown_bullets(values : Array[String]) -> String {
+pub fn markdown_bullets(values : Array[String]) -> String {
   let builder = StringBuilder::new()
   for value in values {
     builder.write_string("- ")
@@ -10,7 +10,7 @@ fn markdown_bullets(values : Array[String]) -> String {
 }
 
 ///|
-fn remove_first_markdown_title(report : String) -> String {
+pub fn remove_first_markdown_title(report : String) -> String {
   let builder = StringBuilder::new()
   let mut skipped = false
   for line in report.split("\n") {
@@ -26,7 +26,7 @@ fn remove_first_markdown_title(report : String) -> String {
 }
 
 ///|
-fn demote_markdown_headings(markdown : String) -> String {
+pub fn demote_markdown_headings(markdown : String) -> String {
   let builder = StringBuilder::new()
   for line in markdown.split("\n") {
     if line.has_prefix("####") {
@@ -44,7 +44,7 @@ fn demote_markdown_headings(markdown : String) -> String {
 }
 
 ///|
-fn section_body(report : String, heading : String) -> String {
+pub fn section_body(report : String, heading : String) -> String {
   let builder = StringBuilder::new()
   let mut in_section = false
   for line in report.split("\n") {
@@ -65,7 +65,7 @@ fn section_body(report : String, heading : String) -> String {
 }
 
 ///|
-fn first_non_heading_paragraph(markdown : String) -> String {
+pub fn first_non_heading_paragraph(markdown : String) -> String {
   let builder = StringBuilder::new()
   let mut emitted = false
   let mut in_code_block = false
@@ -95,7 +95,7 @@ fn first_non_heading_paragraph(markdown : String) -> String {
 }
 
 ///|
-fn markdown_excerpt(text : String, limit : Int) -> String {
+pub fn markdown_excerpt(text : String, limit : Int) -> String {
   let trimmed = text.trim()
   if limit <= 0 {
     return "..."
