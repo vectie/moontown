@@ -12,6 +12,10 @@ pub fn deep_report_quality_gaps(@moonbook.BookCatalogEntry, String) -> Array[Str
 
 pub fn quality_topic_for_entry(@moonbook.BookCatalogEntry) -> String
 
+pub fn research_bootstrap_ingest_target_pages() -> Array[String]
+
+pub fn research_bootstrap_ingest_task(@moonbook.BookCatalogEntry, String) -> @moonbook.BookTask
+
 pub async fn research_generated_site_gaps(String, String) -> Array[String]
 
 pub async fn research_quality_gaps(@moonbook.BookCatalogEntry) -> Array[String]

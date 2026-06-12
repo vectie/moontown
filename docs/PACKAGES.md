@@ -280,24 +280,26 @@ Boundary:
 
 Key files:
 
+- [src/build_pipeline/bootstrap_task.mbt](/Users/kq/Workspace/moontown/src/build_pipeline/bootstrap_task.mbt)
 - [src/build_pipeline/build_pipeline_tasks.mbt](/Users/kq/Workspace/moontown/src/build_pipeline/build_pipeline_tasks.mbt)
 - [src/build_pipeline/build_pipeline_prompts.mbt](/Users/kq/Workspace/moontown/src/build_pipeline/build_pipeline_prompts.mbt)
 - [src/build_pipeline/build_pipeline_artifacts.mbt](/Users/kq/Workspace/moontown/src/build_pipeline/build_pipeline_artifacts.mbt)
 
 Purpose:
 
-- own Wenyu build task contracts for implementation backlog, code patch, and
-  asset/projection work
+- own Wenyu bootstrap and build task contracts for bootstrap ingest,
+  implementation backlog, code patch, and asset/projection work
 - own Wenyu build prompts and fallback artifact materialization
 - keep build-stage target pages, worker roles, priorities, and review flags
   close to the build feature instead of the town scheduler
 
 Boundary:
 
-- `src/town_runtime` may decide when a Wenyu book is ready for build and supply
-  the current repo root.
-- `src/build_pipeline` owns the build task contract and may compose target pages
-  through `src/policy` and civic service definitions.
+- `src/town_runtime` may decide when a Wenyu book is ready for bootstrap/build
+  and supply the current repo root.
+- `src/build_pipeline` owns the Wenyu bootstrap/build task contracts and may
+  compose target pages through `src/policy`, `src/research_quality`, and civic
+  service definitions.
 
 ## PlanBook Policy And Runtime
 
@@ -419,6 +421,7 @@ Boundary:
 
 Key files:
 
+- [src/research_quality/bootstrap_task.mbt](/Users/kq/Workspace/moontown/src/research_quality/bootstrap_task.mbt)
 - [src/research_quality/readiness.mbt](/Users/kq/Workspace/moontown/src/research_quality/readiness.mbt)
 - [src/research_quality/projection_gaps.mbt](/Users/kq/Workspace/moontown/src/research_quality/projection_gaps.mbt)
 - [src/research_quality/source_depth_gaps.mbt](/Users/kq/Workspace/moontown/src/research_quality/source_depth_gaps.mbt)
@@ -427,6 +430,8 @@ Key files:
 Purpose:
 
 - evaluate research-readiness and quality gate gaps
+- own the generic research bootstrap ingest task contract, prompt, target pages,
+  review requirement, and worker role
 - detect weak source depth, process noise, generic generated-site projections,
   and missing topic-specific wiki materialization
 - write and resolve the canonical `raw/bootstrap/QUALITY_REPAIR.md` repair
@@ -436,10 +441,12 @@ Purpose:
 
 Boundary:
 
-- research quality owns the judgment, repair-trigger file contract, repair
-  wording, and topic-specific signal checks.
+- research quality owns the generic research bootstrap contract, judgment,
+  repair-trigger file contract, repair wording, and topic-specific signal
+  checks.
 - `src/town_runtime` may decide that a repair trigger should be written or
-  resolved, but should not own the trigger path or prose.
+  resolved, and may choose between Wenyu and research bootstrap, but should not
+  own research bootstrap prompt/target pages or the trigger path/prose.
 - default generated-site path semantics belong to `src/policy`; Research
   Quality consumes `policy.default_generated_site_projection_path()` rather
   than redefining the projection path.

@@ -219,11 +219,13 @@ book owns. The implementation now has a first-class `policy` package:
   owns research-readiness DTOs and quality-gate semantics: required research
   artifacts, source-depth checks, topic matching, deep-report structure/length
   checks, wiki materialization checks, generated-site specificity checks, and
-  process-noise rejection. It also owns the `raw/bootstrap/QUALITY_REPAIR.md`
-  trigger/resolution file contract used for in-place research repair. Root
-  Moontown may mutate town executions when a gate fails and decide when to write
-  or resolve a repair trigger, but it should call this package for the actual
-  quality judgment, repair-trigger path, and repair-trigger wording.
+  process-noise rejection. It also owns the generic research bootstrap ingest
+  task contract: title, prompt clauses, target pages, review requirement, and
+  worker role. It owns the `raw/bootstrap/QUALITY_REPAIR.md` trigger/resolution
+  file contract used for in-place research repair. Root Moontown may mutate town
+  executions when a gate fails and decide when to schedule bootstrap or repair,
+  but it should call this package for the actual quality judgment, bootstrap
+  research contract, repair-trigger path, and repair-trigger wording.
   Generated-site quality checks consume `policy.default_generated_site_projection_path()`
   for the default projection path instead of redefining it locally.
 - [course_book/](/Users/kq/Workspace/moontown/src/course_book)
@@ -397,11 +399,12 @@ PlanBook generated-site writes follow the global output rule as well:
 for the default projection path instead of redefining it locally.
 
 Wenyu build-pipeline task contracts belong to `build_pipeline/`. The package
-owns implementation-backlog, code-patch, and asset-pack task construction,
-including prompts, target pages, priorities, review flags, worker roles, and
-fallback artifact materialization. `town_runtime/` may decide that a Wenyu book
-is ready for build and pass the current repository root, but it should not
-reconstruct those build task contracts locally.
+owns Wenyu bootstrap ingest, implementation-backlog, code-patch, and asset-pack
+task construction, including prompts, target pages, priorities, review flags,
+worker roles, and fallback artifact materialization. `town_runtime/` may decide
+that a Wenyu book is ready for bootstrap/build and pass the current repository
+root, but it should not reconstruct those build or Wenyu bootstrap task
+contracts locally.
 
 Live-autonomy policy belongs to the `live_autonomy_policy/` package. That
 package owns the `LiveAutonomySpine` JSON contract, journal/probe DTOs, live

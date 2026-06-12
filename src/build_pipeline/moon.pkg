@@ -3,5 +3,6 @@ import {
   "vectie/moontown/civic",
   "vectie/moontown/core",
   "vectie/moontown/policy",
+  "vectie/moontown/research_quality",
   "vectie/moontown/support",
 }
