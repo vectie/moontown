@@ -59,6 +59,21 @@ pub fn active_work_execution_status(status : TaskExecutionStatus) -> Bool {
 }
 
 ///|
+pub fn execution_status_rank(status : TaskExecutionStatus) -> Int {
+  match status {
+    TaskExecutionStatus::PacketReady => 1
+    TaskExecutionStatus::ProposalImported => 2
+    TaskExecutionStatus::RunConfirmed
+    | TaskExecutionStatus::Running
+    | TaskExecutionStatus::AwaitingPersistence => 3
+    TaskExecutionStatus::ReviewQueued
+    | TaskExecutionStatus::Completed
+    | TaskExecutionStatus::Stale
+    | TaskExecutionStatus::Failed => 4
+  }
+}
+
+///|
 pub fn pollable_execution_status(status : TaskExecutionStatus) -> Bool {
   live_execution_status(status) || status is TaskExecutionStatus::Stale
 }

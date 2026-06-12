@@ -17,6 +17,8 @@ pub fn copy_task_with_status(TownTask, TownTaskStatus) -> TownTask
 
 pub fn empty_state(TownConfig) -> TownState
 
+pub fn execution_status_rank(TaskExecutionStatus) -> Int
+
 pub fn external_execution_stale_window_ticks() -> Int
 
 pub fn find_execution(TownState, String) -> TaskExecutionRecord?

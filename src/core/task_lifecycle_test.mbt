@@ -82,6 +82,22 @@ test "execution lifecycle predicates classify terminal live and pollable states"
 }
 
 ///|
+test "execution status rank preserves lifecycle precedence" {
+  assert_true(
+    execution_status_rank(TaskExecutionStatus::Completed) >
+    execution_status_rank(TaskExecutionStatus::Running),
+  )
+  assert_eq(
+    execution_status_rank(TaskExecutionStatus::AwaitingPersistence),
+    execution_status_rank(TaskExecutionStatus::Running),
+  )
+  assert_true(
+    execution_status_rank(TaskExecutionStatus::ProposalImported) <
+    execution_status_rank(TaskExecutionStatus::RunConfirmed),
+  )
+}
+
+///|
 test "execution stale windows distinguish imported runs from no-run snapshots" {
   let with_run = TaskExecutionRecord::new(
     task_id="task-run",

@@ -1,12 +1,12 @@
 ///|
 test "runtime status policy ranks terminal records above live snapshots" {
   assert_true(
-    execution_status_rank(@core.TaskExecutionStatus::Completed) >
-    execution_status_rank(@core.TaskExecutionStatus::Running),
+    @core.execution_status_rank(@core.TaskExecutionStatus::Completed) >
+    @core.execution_status_rank(@core.TaskExecutionStatus::Running),
   )
   assert_eq(
-    execution_status_rank(@core.TaskExecutionStatus::AwaitingPersistence),
-    execution_status_rank(@core.TaskExecutionStatus::Running),
+    @core.execution_status_rank(@core.TaskExecutionStatus::AwaitingPersistence),
+    @core.execution_status_rank(@core.TaskExecutionStatus::Running),
   )
 }
 

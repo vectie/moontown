@@ -51,24 +51,14 @@ fn effective_execution_record(state : @core.TownState, index : Int) -> Bool {
     if other.task_id != current.task_id {
       continue
     }
-    let other_rank = execution_status_rank(other.status)
-    let current_rank = execution_status_rank(current.status)
+    let other_rank = @core.execution_status_rank(other.status)
+    let current_rank = @core.execution_status_rank(current.status)
     if other_rank > current_rank ||
       (other_rank == current_rank && other_index > index) {
       return false
     }
   }
   true
-}
-
-///|
-fn execution_status_rank(status : @core.TaskExecutionStatus) -> Int {
-  match status {
-    PacketReady => 1
-    ProposalImported => 2
-    RunConfirmed | Running | AwaitingPersistence => 3
-    ReviewQueued | Completed | Stale | Failed => 4
-  }
 }
 
 ///|
