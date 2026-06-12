@@ -155,6 +155,7 @@ Purpose:
   classification
 - empty completion `no_change` marker summary contract
 - keeper auto-triage/recovery closure policy, thresholds, and summary wording
+- legacy standing-watch retry-accounting classification rules
 
 Boundary:
 
@@ -163,7 +164,8 @@ Boundary:
 - `src/town_runtime` should not own standing-watch marker vocabulary, closure
   thresholds, watcher-record matching/status mapping, standing-watch event
   shape, live snapshot stale windows, transient dispatch classification, or
-  empty-completion `no_change` marker text.
+  empty-completion `no_change` marker text, or legacy retry-accounting
+  predicates.
 
 ## Storage
 

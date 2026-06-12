@@ -9,6 +9,10 @@ import {
 // Values
 pub fn compact_watch_segment(String) -> String
 
+pub fn legacy_review_queued_retry_accounting_standing_watch(@core.TaskExecutionRecord) -> Bool
+
+pub fn legacy_tick_domain_stale_standing_watch(@core.TaskExecutionRecord) -> Bool
+
 pub fn remove_standing_watch_history_block(String, String) -> String
 
 pub fn standing_goal_for_execution_task(Array[@core.StandingGoal], String) -> @core.StandingGoal?

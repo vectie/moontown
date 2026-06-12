@@ -34,7 +34,10 @@ test "legacy standing watch stale record detects mixed tick domains" {
     heartbeat_tick=2155,
     stale_after_tick=2185,
   )
-  assert_eq(legacy_tick_domain_stale_standing_watch(execution), true)
+  assert_eq(
+    @standing_watch_policy.legacy_tick_domain_stale_standing_watch(execution),
+    true,
+  )
 }
 
 ///|
@@ -53,7 +56,9 @@ test "legacy review queued standing watch infrastructure failure is retry accoun
     notify_town=true,
   )
   assert_eq(
-    legacy_review_queued_retry_accounting_standing_watch(execution),
+    @standing_watch_policy.legacy_review_queued_retry_accounting_standing_watch(
+      execution,
+    ),
     true,
   )
 }

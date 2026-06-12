@@ -36,7 +36,9 @@ async fn reconcile_review_queued_standing_watch_outputs(
       Some(entry) => entry
       None => continue
     }
-    if legacy_review_queued_retry_accounting_standing_watch(execution) {
+    if @standing_watch_policy.legacy_review_queued_retry_accounting_standing_watch(
+        execution,
+      ) {
       complete_review_queued_standing_watch(
         state,
         execution,
