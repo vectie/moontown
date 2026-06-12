@@ -190,6 +190,12 @@ book owns. The implementation now has a first-class `policy` package:
   materialization, standing-watch goal construction, and status inspection.
   Root Moontown may coordinate archive lifecycle events because archiving spans
   catalog state, standing-goal state, and book-template request-event logs.
+- [visual_projection/](/Users/kq/Workspace/moontown/visual_projection)
+  owns town-state-to-visual-projection DTOs and derivation: agent phases,
+  routing, behavior/effect labels, building activity summaries, module
+  projection rows, grid placement, and projection persistence. Root Moontown may
+  expose compatibility wrappers and provide test fixtures, but visual semantics
+  should not live in the root package.
 - [cookbook/](/Users/kq/Workspace/moontown/cookbook)
   owns Cookbook DTOs, stable-state artifact summary accounting, and the
   operator-facing Cookbook status Markdown. Root Moontown may discover artifact

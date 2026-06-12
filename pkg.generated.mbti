@@ -17,6 +17,7 @@ import {
   "vectie/moontown/planbook_policy",
   "vectie/moontown/roles",
   "vectie/moontown/runtime_status_policy",
+  "vectie/moontown/visual_projection",
 }
 
 // Values
@@ -42,7 +43,7 @@ pub async fn bootstrap_wenyu_civic_workspaces(book_catalog_path? : String) -> St
 
 pub async fn bootstrap_wenyu_game_design_course_book(book_catalog_path? : String, workspace_root? : String, source_workspace_root? : String) -> String
 
-pub fn build_visual_projection(@core.TownState, tick? : Int) -> VisualProjection
+pub fn build_visual_projection(@core.TownState, tick? : Int) -> @visual_projection.VisualProjection
 
 pub fn civic_communication_pattern_for_id(String) -> @civic.CivicCommunicationPattern?
 
@@ -387,69 +388,6 @@ pub struct ResearchReadiness {
 pub fn ResearchReadiness::from_summary(@moonbook.BookStateSummary, extra_gaps? : Array[String]) -> Self
 pub fn ResearchReadiness::summary_line(Self) -> String
 
-pub struct VisualAgentProjection {
-  worker_id : String
-  worker_name : String
-  book_id : String
-  book_title : String
-  role : String
-  status : String
-  phase : String
-  task_id : String?
-  task_title : String?
-  run_id : String?
-  sprite_key : String
-  zone_key : String
-  location : String
-  destination : String
-  behavior : String
-  effect : String
-  visible_on_overworld : Bool
-  message : String
-  grid_x : Int
-  grid_y : Int
-  z : Int
-} derive(Eq, ToJson, @debug.Debug, @json.FromJson)
-
-type VisualBuildingActivity derive(Eq, @debug.Debug)
-
-pub struct VisualBuildingProjection {
-  book_id : String
-  title : String
-  zone_key : String
-  running_count : Int
-  waiting_count : Int
-  review_count : Int
-  blocked_count : Int
-  completed_count : Int
-  effect : String
-  message : String
-} derive(Eq, ToJson, @debug.Debug, @json.FromJson)
-
-pub struct VisualModuleProjection {
-  module_id : String
-  book_id : String
-  title : String
-  status : String
-  source : String
-  running_count : Int
-  waiting_count : Int
-  review_count : Int
-  blocked_count : Int
-  completed_count : Int
-  active_agent_count : Int
-  effect : String
-  message : String
-} derive(Eq, ToJson, @debug.Debug, @json.FromJson)
-
-pub struct VisualProjection {
-  tick : Int
-  agents : Array[VisualAgentProjection]
-  buildings : Array[VisualBuildingProjection]
-  modules : Array[VisualModuleProjection]
-  messages : Array[String]
-} derive(Eq, ToJson, @debug.Debug, @json.FromJson)
-
 // Type aliases
 pub using @civic {type CivicSalonHomeReturn}
 
@@ -490,6 +428,14 @@ pub using @planbook_policy {type PlanbookCriterionStatus}
 pub using @planbook_policy {type PlanbookRepairTask}
 
 pub using @runtime_status_policy {type TownRuntimeStatus}
+
+pub using @visual_projection {type VisualAgentProjection}
+
+pub using @visual_projection {type VisualBuildingProjection}
+
+pub using @visual_projection {type VisualModuleProjection}
+
+pub using @visual_projection {type VisualProjection}
 
 // Traits
 

@@ -327,6 +327,10 @@ Goals:
   `pdf_evidence_watch/`; root may coordinate archive lifecycle events because
   archiving crosses book-template request logs, standing goals, and catalog
   tags
+- keep visual projection DTOs, phase semantics, routing labels, building/module
+  activity summaries, grid placement, and persistence in `visual_projection/`;
+  root may expose compatibility wrappers, but it should not carry visual
+  semantics
 
 Acceptance:
 

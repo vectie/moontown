@@ -1,113 +1,33 @@
 ///|
-pub struct VisualAgentProjection {
-  worker_id : String
-  worker_name : String
-  book_id : String
-  book_title : String
-  role : String
-  status : String
-  phase : String
-  task_id : String?
-  task_title : String?
-  run_id : String?
-  sprite_key : String
-  zone_key : String
-  location : String
-  destination : String
-  behavior : String
-  effect : String
-  visible_on_overworld : Bool
-  message : String
-  grid_x : Int
-  grid_y : Int
-  z : Int
-} derive(Debug, Eq, ToJson, FromJson)
+pub type VisualAgentProjection = @visual_projection.VisualAgentProjection
 
 ///|
-pub struct VisualBuildingProjection {
-  book_id : String
-  title : String
-  zone_key : String
-  running_count : Int
-  waiting_count : Int
-  review_count : Int
-  blocked_count : Int
-  completed_count : Int
-  effect : String
-  message : String
-} derive(Debug, Eq, ToJson, FromJson)
+pub type VisualBuildingProjection = @visual_projection.VisualBuildingProjection
 
 ///|
-pub struct VisualModuleProjection {
-  module_id : String
-  book_id : String
-  title : String
-  status : String
-  source : String
-  running_count : Int
-  waiting_count : Int
-  review_count : Int
-  blocked_count : Int
-  completed_count : Int
-  active_agent_count : Int
-  effect : String
-  message : String
-} derive(Debug, Eq, ToJson, FromJson)
+pub type VisualModuleProjection = @visual_projection.VisualModuleProjection
 
 ///|
-pub struct VisualProjection {
-  tick : Int
-  agents : Array[VisualAgentProjection]
-  buildings : Array[VisualBuildingProjection]
-  modules : Array[VisualModuleProjection]
-  messages : Array[String]
-} derive(Debug, Eq, ToJson, FromJson)
+pub type VisualProjection = @visual_projection.VisualProjection
 
 ///|
 pub fn build_visual_projection(
   state : @core.TownState,
-  tick? : Int = visual_projection_tick(state),
-) -> VisualProjection {
-  let agents : Array[VisualAgentProjection] = []
-  for worker in state.workers {
-    agents.push(visual_agent_projection(state, worker))
-  }
-  let buildings : Array[VisualBuildingProjection] = []
-  for book in state.books {
-    buildings.push(visual_building_projection(state, book))
-  }
-  let modules : Array[VisualModuleProjection] = []
-  for building in buildings {
-    modules.push(visual_module_projection(building, agents))
-  }
-  {
-    tick,
-    agents,
-    buildings,
-    modules,
-    messages: visual_projection_messages(state, agents, buildings),
-  }
+  tick? : Int = @visual_projection.visual_projection_tick(state),
+) -> @visual_projection.VisualProjection {
+  @visual_projection.build_visual_projection(state, tick~)
 }
 
 ///|
 pub fn default_visual_projection_path(snapshot_path : String) -> String {
-  let base = @path.Path::dirname(snapshot_path).to_string()
-  if base == "." || base == "" {
-    ".moontown/visual-projection.json"
-  } else {
-    "\{base}/visual-projection.json"
-  }
+  @visual_projection.default_visual_projection_path(snapshot_path)
 }
 
 ///|
 pub async fn persist_visual_projection(
   state : @core.TownState,
   snapshot_path : String,
-  tick? : Int = visual_projection_tick(state),
+  tick? : Int = @visual_projection.visual_projection_tick(state),
 ) -> Unit {
-  let projection = build_visual_projection(state, tick~)
-  write_text_file(
-    default_visual_projection_path(snapshot_path),
-    projection.to_json().stringify(),
-  )
+  @visual_projection.persist_visual_projection(state, snapshot_path, tick~)
 }

@@ -192,8 +192,8 @@ async test "town checkpoint persists visual projection beside snapshot" {
   let root = "/tmp/moontown-visual-projection-check"
   ignore_checked_command("rm", ["-rf", root])
   let snapshot_path = "\{root}/town.json"
-  persist_town_checkpoint(visual_projection_test_state(), snapshot_path)
-  let text = read_text_or_empty(default_visual_projection_path(snapshot_path))
+  persist_visual_projection(visual_projection_test_state(), snapshot_path)
+  let text = @fs.read_file(default_visual_projection_path(snapshot_path)).text()
   assert_true(text.contains("\"worker_id\":\"worker-opc-researcher\""))
   assert_true(text.contains("\"phase\":\"running\""))
   assert_true(text.contains("\"effect\":\"work-particles\""))

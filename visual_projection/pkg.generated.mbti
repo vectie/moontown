@@ -1,0 +1,88 @@
+// Generated using `moon info`, DON'T EDIT IT
+package "vectie/moontown/visual_projection"
+
+import {
+  "moonbitlang/core/debug",
+  "moonbitlang/core/json",
+  "vectie/moontown/core",
+}
+
+// Values
+pub fn build_visual_projection(@core.TownState, tick? : Int) -> VisualProjection
+
+pub fn default_visual_projection_path(String) -> String
+
+pub async fn persist_visual_projection(@core.TownState, String, tick? : Int) -> Unit
+
+pub fn visual_projection_tick(@core.TownState) -> Int
+
+// Errors
+
+// Types and methods
+pub(all) struct VisualAgentProjection {
+  worker_id : String
+  worker_name : String
+  book_id : String
+  book_title : String
+  role : String
+  status : String
+  phase : String
+  task_id : String?
+  task_title : String?
+  run_id : String?
+  sprite_key : String
+  zone_key : String
+  location : String
+  destination : String
+  behavior : String
+  effect : String
+  visible_on_overworld : Bool
+  message : String
+  grid_x : Int
+  grid_y : Int
+  z : Int
+} derive(Eq, ToJson, @debug.Debug, @json.FromJson)
+
+type VisualBuildingActivity derive(Eq, @debug.Debug)
+
+pub(all) struct VisualBuildingProjection {
+  book_id : String
+  title : String
+  zone_key : String
+  running_count : Int
+  waiting_count : Int
+  review_count : Int
+  blocked_count : Int
+  completed_count : Int
+  effect : String
+  message : String
+} derive(Eq, ToJson, @debug.Debug, @json.FromJson)
+
+pub(all) struct VisualModuleProjection {
+  module_id : String
+  book_id : String
+  title : String
+  status : String
+  source : String
+  running_count : Int
+  waiting_count : Int
+  review_count : Int
+  blocked_count : Int
+  completed_count : Int
+  active_agent_count : Int
+  effect : String
+  message : String
+} derive(Eq, ToJson, @debug.Debug, @json.FromJson)
+
+pub(all) struct VisualProjection {
+  tick : Int
+  agents : Array[VisualAgentProjection]
+  buildings : Array[VisualBuildingProjection]
+  modules : Array[VisualModuleProjection]
+  messages : Array[String]
+} derive(Eq, ToJson, @debug.Debug, @json.FromJson)
+
+// Type aliases
+
+// Traits
+
