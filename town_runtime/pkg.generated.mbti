@@ -1,0 +1,50 @@
+// Generated using `moon info`, DON'T EDIT IT
+package "vectie/moontown/town_runtime"
+
+import {
+  "vectie/moontown/adapters/moonbook",
+  "vectie/moontown/core",
+  "vectie/moontown/roles",
+}
+
+// Values
+pub async fn daemon_run_saved_town(snapshot_path? : String, book_catalog_path? : String, max_ticks? : Int, sleep_ms? : Int, preserve_supervisor? : Bool, inline_under_supervisor? : Bool) -> String
+
+pub async fn daemon_supervise_saved_town(snapshot_path? : String, command? : String, max_checks? : Int, sleep_ms? : Int, stale_after_ms? : UInt64) -> String
+
+pub async fn daemon_tick_saved_town(snapshot_path? : String, book_catalog_path? : String, respect_runtime_lock? : Bool) -> String
+
+pub fn demo_dashboard() -> String
+
+pub fn demo_mayor() -> @roles.Mayor
+
+pub fn demo_state() -> @core.TownState
+
+pub fn demo_state_from_catalog(Array[@moonbook.BookCatalogEntry]) -> @core.TownState
+
+pub fn[Provider : @core.BookProvider] demo_state_with_provider(Provider) -> @core.TownState
+
+pub async fn load_or_create_demo_dashboard(path? : String, book_catalog_path? : String) -> String
+
+pub async fn load_or_create_demo_state(path? : String, book_catalog_path? : String) -> @core.TownState
+
+pub async fn[Provider : @core.BookProvider] load_or_create_demo_state_with_provider(Provider, path? : String) -> @core.TownState
+
+pub async fn load_or_create_modeled_demo_state(path? : String, book_catalog_path? : String) -> @core.TownState
+
+pub async fn render_goal_run(String, book_id? : String?, task_limit_per_book? : Int, snapshot_path? : String, book_catalog_path? : String) -> String
+
+pub fn render_state_dashboard(@core.TownState) -> String
+
+pub async fn run_goal(String, book_id? : String?, task_limit_per_book? : Int, snapshot_path? : String, book_catalog_path? : String) -> @core.TownState
+
+pub async fn supervise_saved_town(snapshot_path? : String, book_catalog_path? : String) -> String
+
+// Errors
+
+// Types and methods
+
+// Type aliases
+
+// Traits
+
