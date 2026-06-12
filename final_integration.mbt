@@ -48,18 +48,23 @@ pub async fn install_wenyu_final_integration(
     current_tick,
   )
   @storage.save_standing_goals_file(standing_goal_path, merged)
-  let civic_workspace_summary = bootstrap_wenyu_civic_workspaces()
-  let protocol_summary = bootstrap_wenyu_building_protocols()
+  let civic_workspace_summary = @civic_runtime.bootstrap_wenyu_civic_workspaces()
+  let protocol_summary = @civic_runtime.bootstrap_wenyu_building_protocols()
   let install_summaries : Array[String] = []
   for spec in manifest.civic_pattern_manifests {
-    install_summaries.push(install_civic_pattern_scenario_manifest(spec.path))
+    install_summaries.push(
+      @civic_runtime.install_civic_pattern_scenario_manifest(spec.path),
+    )
   }
   for spec in manifest.civic_scenarios {
     install_summaries.push(
-      install_civic_pattern_scenario_file(spec.path, due_now=false),
+      @civic_runtime.install_civic_pattern_scenario_file(
+        spec.path,
+        due_now=false,
+      ),
     )
   }
-  ignore(write_wenyu_civic_status())
+  ignore(@civic_runtime.write_wenyu_civic_status())
   let status = final_integration_status_json(
     manifest, merged, current_tick, civic_workspace_summary, protocol_summary, install_summaries,
   )

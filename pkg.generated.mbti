@@ -21,19 +21,11 @@ import {
 // Values
 pub async fn bootstrap_app_tool_book(book_id? : String, title? : String, purpose? : String, websites? : Array[String], analysis_method? : String, tool_spec? : String, civic_building_id? : String, cadence_ticks? : Int, book_catalog_path? : String, standing_goal_path? : String, workspace_root? : String, template_root? : String) -> String
 
-pub async fn bootstrap_civic_salon_scenario(@civic.CivicSalonScenario, book_catalog_path? : String, round_id? : String, round_number? : Int, workspace_base? : String, reducer_mode? : @civic.CivicSalonReductionMode) -> String
-
-pub async fn bootstrap_civic_salon_scenario_file(String, book_catalog_path? : String, round_id? : String, round_number? : Int, workspace_base? : String, reducer_mode? : @civic.CivicSalonReductionMode) -> String
-
 pub async fn bootstrap_moontown_cookbook(book_catalog_path? : String, workspace_root? : String, manifest_path? : String) -> String
 
 pub async fn bootstrap_moontown_planbook(book_catalog_path? : String, workspace_root? : String) -> String
 
 pub async fn bootstrap_registered_book_workspaces(book_catalog_path? : String) -> String
-
-pub async fn bootstrap_wenyu_building_protocols(registry_path? : String, status_path? : String) -> String
-
-pub async fn bootstrap_wenyu_civic_workspaces(book_catalog_path? : String) -> String
 
 pub async fn bootstrap_wenyu_game_design_course_book(book_catalog_path? : String, workspace_root? : String, source_workspace_root? : String) -> String
 
@@ -42,10 +34,6 @@ pub fn civic_communication_pattern_for_id(String) -> @civic.CivicCommunicationPa
 pub fn civic_communication_pattern_id_for_service(@civic.CivicServiceDefinition) -> String
 
 pub fn civic_communication_patterns() -> Array[@civic.CivicCommunicationPattern]
-
-pub fn civic_salon_is_due(@civic.CivicSalonSchedule, UInt64) -> Bool
-
-pub fn civic_salon_scenario_path(String, snapshot_path? : String) -> String
 
 pub async fn compact_registered_moonclaw_job_stores(book_catalog_path? : String, snapshot_path? : String, tick? : Int, max_store_bytes? : Int64) -> String
 
@@ -60,12 +48,6 @@ pub async fn daemon_stop_saved_town(snapshot_path? : String) -> String
 pub async fn daemon_supervise_saved_town(snapshot_path? : String, command? : String, max_checks? : Int, sleep_ms? : Int, stale_after_ms? : UInt64) -> String
 
 pub async fn daemon_tick_saved_town(snapshot_path? : String, book_catalog_path? : String, respect_runtime_lock? : Bool) -> String
-
-pub fn default_civic_salon_run_ledger_path(String, snapshot_path? : String) -> String
-
-pub fn default_civic_salon_schedule_path(snapshot_path? : String) -> String
-
-pub fn default_civic_salon_schedules() -> Array[@civic.CivicSalonSchedule]
 
 pub fn default_cookbook_book_id() -> String
 
@@ -113,15 +95,9 @@ pub fn default_planbook_workspace_root() -> String
 
 pub fn default_town_journal_path(snapshot_path? : String) -> String
 
-pub fn default_wenyu_civic_status_path() -> String
-
 pub fn default_wenyu_course_book_id() -> String
 
 pub fn default_wenyu_course_workspace_root() -> String
-
-pub fn default_wenyu_protocol_registry_path() -> String
-
-pub fn default_wenyu_protocol_status_path() -> String
 
 pub fn demo_dashboard() -> String
 
@@ -153,21 +129,11 @@ pub async fn inspect_moontown_planbook_autonomy(snapshot_path? : String, workspa
 
 pub async fn inspect_saved_town(snapshot_path? : String) -> @runtime_status_policy.TownRuntimeStatus
 
-pub async fn inspect_wenyu_building_protocols(status_path? : String, registry_path? : String) -> @civic.BuildingProtocolPortfolio
-
-pub async fn inspect_wenyu_civic_services(book_catalog_path? : String, status_path? : String) -> CivicServicePortfolio
-
 pub async fn install_app_tool_book_config(String, book_catalog_path? : String, standing_goal_path? : String, template_root? : String) -> String
 
 pub async fn install_book_template_config(String, String, registry_path? : String, book_catalog_path? : String, standing_goal_path? : String) -> String
 
-pub async fn install_civic_pattern_scenario_file(String, snapshot_path? : String, due_now? : Bool) -> String
-
-pub async fn install_civic_pattern_scenario_manifest(String, snapshot_path? : String) -> String
-
 pub async fn install_wenyu_final_integration(manifest_path? : String, snapshot_path? : String, standing_goal_path? : String) -> String
-
-pub async fn load_or_create_civic_salon_schedules(path? : String) -> Array[@civic.CivicSalonSchedule]
 
 pub async fn load_or_create_demo_dashboard(path? : String, book_catalog_path? : String) -> String
 
@@ -187,8 +153,6 @@ pub async fn reconcile_book_quality_ai_review_results(result_dir? : String, run_
 
 pub async fn reconcile_book_quality_repair_bridge(book_catalog_path? : String, snapshot_path? : String, result_dir? : String, bridge_path? : String) -> String
 
-pub async fn reconcile_wenyu_civic_service_results(book_catalog_path? : String, status_path? : String) -> String
-
 pub async fn refresh_live_autonomy_spine(snapshot_path? : String) -> String
 
 pub async fn render_app_tool_book_status(book_id? : String, workspace_root? : String, book_catalog_path? : String, standing_goal_path? : String) -> String
@@ -202,8 +166,6 @@ pub async fn render_book_template_registry(registry_path? : String) -> String
 pub async fn render_book_template_request_status(request_path? : String) -> String
 
 pub fn render_civic_communication_patterns() -> String
-
-pub async fn render_civic_salon_schedule_status(snapshot_path? : String) -> String
 
 pub async fn render_editor_feature_selection_status(snapshot_path? : String, workspace_root? : String) -> String
 
@@ -225,25 +187,15 @@ pub async fn render_saved_town_status(snapshot_path? : String) -> String
 
 pub fn render_state_dashboard(@core.TownState) -> String
 
-pub async fn render_wenyu_building_protocol_status(status_path? : String, registry_path? : String) -> String
-
-pub async fn render_wenyu_civic_status(book_catalog_path? : String) -> String
-
 pub async fn render_wenyu_final_integration_status(manifest_path? : String, snapshot_path? : String, standing_goal_path? : String) -> String
 
 pub async fn render_wenyu_game_design_course_status(workspace_root? : String) -> String
-
-pub async fn run_due_civic_salons(snapshot_path? : String, book_catalog_path? : String, tick? : Int, now_ms? : UInt64, reducer_mode? : @civic.CivicSalonReductionMode, run_inline? : Bool) -> String
 
 pub async fn run_goal(String, book_id? : String?, task_limit_per_book? : Int, snapshot_path? : String, book_catalog_path? : String) -> @core.TownState
 
 pub fn runtime_status_from_state(@core.TownState, String, standing_goals? : Array[@core.StandingGoal], daemon_tick? : Int, watcher_records? : Array[@core.WatcherRunRecord], book_template_request_status? : @book_templates.BookTemplateRequestStatus?) -> @runtime_status_policy.TownRuntimeStatus
 
-pub async fn save_civic_salon_schedules(String, Array[@civic.CivicSalonSchedule]) -> Unit
-
 pub async fn supervise_saved_town(snapshot_path? : String, book_catalog_path? : String) -> String
-
-pub async fn upsert_civic_salon_schedule_for_scenario(@civic.CivicSalonScenario, path? : String, now_ms? : UInt64) -> @civic.CivicSalonSchedule
 
 pub async fn write_book_quality_audit(book_catalog_path? : String, snapshot_path? : String, audit_path? : String) -> String
 
@@ -263,71 +215,9 @@ pub async fn write_moontown_planbook_repair_task(snapshot_path? : String, worksp
 
 pub async fn write_moontown_planbook_validation_evidence(snapshot_path? : String, note? : String) -> String
 
-pub async fn write_wenyu_building_protocol_status(status_path? : String, registry_path? : String) -> String
-
-pub async fn write_wenyu_civic_status(book_catalog_path? : String, status_path? : String) -> String
-
 // Errors
 
 // Types and methods
-type CivicSalonReductionResult derive(Eq)
-
-pub struct CivicServiceHealth {
-  service_id : String
-  title : String
-  book_id : String
-  service_kind : String
-  module_mode : String
-  book_role : String
-  skill_mode : String
-  protocol_status : String
-  protocol_ready : Bool
-  protocol_inbox_count : Int
-  protocol_contribution_count : Int
-  protocol_reduction_count : Int
-  protocol_outbox_count : Int
-  protocol_review_count : Int
-  latest_protocol_summary : String
-  protocol_history : Array[ProtocolHistoryEntry]
-  protocol_history_state : String
-  workspace_root : String
-  status : String
-  operable : Bool
-  proven_by_result : Bool
-  workspace_exists : Bool
-  schema_ready : Bool
-  wiki_ready : Bool
-  review_ready : Bool
-  projection_ready : Bool
-  skill_ready : Bool
-  moonclaw_profile_ready : Bool
-  latest_result_path : String
-  latest_result_found : Bool
-  latest_decision : String
-  latest_book_changed : String
-  latest_pages_changed : Int
-  latest_accepted_facts : Int
-  latest_review_items : Int
-  next_check_hint : String
-  missing_required_paths : Array[String]
-  notes : Array[String]
-} derive(Eq, ToJson, @json.FromJson)
-
-pub struct CivicServicePortfolio {
-  total : Int
-  operable_count : Int
-  proven_count : Int
-  seeded_count : Int
-  missing_count : Int
-  review_count : Int
-  blocked_count : Int
-  changed_count : Int
-  no_change_count : Int
-  status_path : String
-  markdown_path : String
-  services : Array[CivicServiceHealth]
-} derive(Eq, ToJson, @json.FromJson)
-
 type EditorPipelineModuleConfig derive(Eq, @debug.Debug, @json.FromJson)
 
 type EditorPipelineModuleConfigEntry derive(Eq, @debug.Debug, @json.FromJson)
@@ -342,31 +232,7 @@ type FinalIntegrationWatchSpec derive(Eq, ToJson, @debug.Debug, @json.FromJson)
 
 type PlanbookImplementationBacklogItem derive(Eq, ToJson, @debug.Debug, @json.FromJson)
 
-pub struct ProtocolHistoryEntry {
-  step : String
-  status : String
-  title : String
-  detail : String
-  evidence_ref : String
-} derive(Eq, ToJson, @json.FromJson)
-
 // Type aliases
-pub using @civic {type CivicSalonHomeReturn}
-
-pub using @civic {type CivicSalonIdea}
-
-pub using @civic {type CivicSalonMetric}
-
-pub using @civic {type CivicSalonParticipantBook}
-
-pub using @civic {type CivicSalonReductionMode}
-
-pub using @civic {type CivicSalonRoundRecord}
-
-pub using @civic {type CivicSalonScenario}
-
-pub using @civic {type CivicSalonSchedule}
-
 pub using @daemon_runtime_policy {type DaemonRuntimeHealth}
 
 pub using @daemon_runtime_policy {type DaemonRuntimeState}

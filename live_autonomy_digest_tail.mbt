@@ -23,7 +23,7 @@ fn write_live_autonomy_digest_tail(
   } else {
     for event in recent_events {
       builder.write_string(
-        "- `\{event.kind}`: \{normalize_civic_pending_summary(event.detail)}\n",
+        "- `\{event.kind}`: \{@civic_runtime.normalize_civic_pending_summary(event.detail)}\n",
       )
     }
   }

@@ -8,7 +8,7 @@ async fn preseed_goal_bootstrap_inputs(
   }
   match @civic.wenyu_civic_service_for_book_id(entry.id) {
     Some(_) => {
-      write_wenyu_civic_workspace_seed(entry, objective)
+      @civic_runtime.write_wenyu_civic_workspace_seed(entry, objective)
       return
     }
     None => ()
@@ -38,7 +38,7 @@ async fn preseed_wenyu_goal_inputs(
   )
   preseed_wenyu_source_bundle(root, repo_root)
   write_wenyu_build_skills(root, entry)
-  write_wenyu_civic_workspace_seed(entry, objective)
+  @civic_runtime.write_wenyu_civic_workspace_seed(entry, objective)
   ensure_wenyu_build_moonclaw_profile(root)
   ensure_wenyu_codex_acp_target(root)
   write_wenyu_research_request(root, entry, objective)

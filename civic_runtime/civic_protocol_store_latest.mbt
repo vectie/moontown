@@ -77,7 +77,7 @@ async fn latest_protocol_distribution_summary(
 }
 
 ///|
-async fn latest_protocol_json_line(
+pub async fn latest_protocol_json_line(
   building_id : String,
   ledger : String,
   ledger_base_dir? : String = default_protocol_ledger_base_dir(),

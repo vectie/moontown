@@ -46,7 +46,7 @@ async fn run_daemon_scheduled_job(
   match job.kind {
     "civic-pattern" =>
       Some(
-        run_due_civic_salons(
+        @civic_runtime.run_due_civic_salons(
           snapshot_path~,
           book_catalog_path~,
           tick~,
@@ -55,7 +55,7 @@ async fn run_daemon_scheduled_job(
       )
     "civic-salon" =>
       Some(
-        run_due_civic_salons(
+        @civic_runtime.run_due_civic_salons(
           snapshot_path~,
           book_catalog_path~,
           tick~,
@@ -63,7 +63,9 @@ async fn run_daemon_scheduled_job(
         ),
       )
     "civic-service" =>
-      Some(reconcile_wenyu_civic_service_results(book_catalog_path~))
+      Some(
+        @civic_runtime.reconcile_wenyu_civic_service_results(book_catalog_path~),
+      )
     "book-quality" =>
       Some(write_book_quality_audit(book_catalog_path~, snapshot_path~))
     "book-quality-review" =>

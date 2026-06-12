@@ -1,0 +1,15 @@
+import {
+  "moonbitlang/async",
+  "moonbitlang/async/fs",
+  "moonbitlang/core/env",
+  "moonbitlang/core/json",
+  "moonbitlang/x/sys",
+  "moonbitlang/x/path",
+  "vectie/moontown/adapters/moonbook",
+  "vectie/moontown/adapters/moonclaw",
+  "vectie/moontown/civic",
+  "vectie/moontown/core",
+  "vectie/moontown/moonclaw_runtime",
+  "vectie/moontown/storage",
+  "vectie/moontown/support",
+}

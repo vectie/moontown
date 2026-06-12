@@ -1,5 +1,5 @@
 ///|
-fn protocol_contract_path(
+pub fn protocol_contract_path(
   building_id : String,
   ledger_base_dir? : String = default_protocol_ledger_base_dir(),
 ) -> String {
@@ -7,7 +7,7 @@ fn protocol_contract_path(
 }
 
 ///|
-fn protocol_ledger_path(
+pub fn protocol_ledger_path(
   building_id : String,
   ledger : String,
   ledger_base_dir? : String = default_protocol_ledger_base_dir(),
@@ -16,7 +16,7 @@ fn protocol_ledger_path(
 }
 
 ///|
-fn protocol_ledger_dir(
+pub fn protocol_ledger_dir(
   building_id : String,
   ledger_base_dir? : String = default_protocol_ledger_base_dir(),
 ) -> String {
@@ -24,12 +24,12 @@ fn protocol_ledger_dir(
 }
 
 ///|
-fn default_protocol_ledger_base_dir() -> String {
+pub fn default_protocol_ledger_base_dir() -> String {
   ".moontown/civic/protocols"
 }
 
 ///|
-fn protocol_ledger_base_dir_for_status_path(status_path : String) -> String {
+pub fn protocol_ledger_base_dir_for_status_path(status_path : String) -> String {
   let parent = @path.Path::dirname(status_path).to_string()
   if parent.is_empty() || parent == "." {
     "protocols"
@@ -39,7 +39,7 @@ fn protocol_ledger_base_dir_for_status_path(status_path : String) -> String {
 }
 
 ///|
-fn protocol_status_markdown_path(status_path : String) -> String {
+pub fn protocol_status_markdown_path(status_path : String) -> String {
   if status_path.has_suffix(".json") {
     status_path[:status_path.length() - 5].to_owned() + ".md"
   } else {

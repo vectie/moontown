@@ -120,7 +120,9 @@ async fn planbook_runtime_recovery_criterion(
 async fn planbook_civic_service_reconciliation_criterion(
   book_catalog_path : String,
 ) -> PlanbookCriterionStatus {
-  let portfolio = inspect_wenyu_civic_services(book_catalog_path~)
+  let portfolio = @civic_runtime.inspect_wenyu_civic_services(
+    book_catalog_path~,
+  )
   let ready = portfolio.total > 0 &&
     portfolio.operable_count == portfolio.total &&
     portfolio.proven_count == portfolio.total &&

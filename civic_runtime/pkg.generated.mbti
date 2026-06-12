@@ -1,0 +1,176 @@
+// Generated using `moon info`, DON'T EDIT IT
+package "vectie/moontown/civic_runtime"
+
+import {
+  "moonbitlang/core/json",
+  "vectie/moontown/adapters/moonbook",
+  "vectie/moontown/civic",
+}
+
+// Values
+pub async fn bootstrap_civic_salon_scenario(@civic.CivicSalonScenario, book_catalog_path? : String, round_id? : String, round_number? : Int, workspace_base? : String, reducer_mode? : @civic.CivicSalonReductionMode) -> String
+
+pub async fn bootstrap_civic_salon_scenario_file(String, book_catalog_path? : String, round_id? : String, round_number? : Int, workspace_base? : String, reducer_mode? : @civic.CivicSalonReductionMode) -> String
+
+pub async fn bootstrap_wenyu_building_protocols(registry_path? : String, status_path? : String) -> String
+
+pub async fn bootstrap_wenyu_civic_workspaces(book_catalog_path? : String) -> String
+
+pub fn civic_salon_is_due(@civic.CivicSalonSchedule, UInt64) -> Bool
+
+pub fn civic_salon_scenario_path(String, snapshot_path? : String) -> String
+
+pub async fn count_protocol_jsonl_records(String, String, ledger_base_dir? : String) -> Int
+
+pub fn default_civic_salon_run_ledger_path(String, snapshot_path? : String) -> String
+
+pub fn default_civic_salon_schedule_path(snapshot_path? : String) -> String
+
+pub fn default_civic_salon_schedules() -> Array[@civic.CivicSalonSchedule]
+
+pub fn default_protocol_ledger_base_dir() -> String
+
+pub fn default_wenyu_civic_status_path() -> String
+
+pub fn default_wenyu_protocol_registry_path() -> String
+
+pub fn default_wenyu_protocol_status_path() -> String
+
+pub async fn inspect_wenyu_building_protocols(status_path? : String, registry_path? : String) -> @civic.BuildingProtocolPortfolio
+
+pub async fn inspect_wenyu_civic_services(book_catalog_path? : String, status_path? : String) -> CivicServicePortfolio
+
+pub async fn install_civic_pattern_scenario_file(String, snapshot_path? : String, due_now? : Bool) -> String
+
+pub async fn install_civic_pattern_scenario_manifest(String, snapshot_path? : String) -> String
+
+pub async fn latest_protocol_json_line(String, String, ledger_base_dir? : String) -> String?
+
+pub async fn load_or_create_civic_salon_schedules(path? : String) -> Array[@civic.CivicSalonSchedule]
+
+pub fn normalize_civic_pending_summary(String) -> String
+
+pub fn protocol_contract_path(String, ledger_base_dir? : String) -> String
+
+pub fn protocol_ledger_base_dir_for_status_path(String) -> String
+
+pub fn protocol_ledger_dir(String, ledger_base_dir? : String) -> String
+
+pub fn protocol_ledger_path(String, String, ledger_base_dir? : String) -> String
+
+pub fn protocol_status_markdown_path(String) -> String
+
+pub async fn reconcile_wenyu_civic_service_results(book_catalog_path? : String, status_path? : String) -> String
+
+pub async fn render_civic_salon_schedule_status(snapshot_path? : String) -> String
+
+pub async fn render_wenyu_building_protocol_status(status_path? : String, registry_path? : String) -> String
+
+pub async fn render_wenyu_civic_status(book_catalog_path? : String) -> String
+
+pub async fn run_due_civic_salons(snapshot_path? : String, book_catalog_path? : String, tick? : Int, now_ms? : UInt64, reducer_mode? : @civic.CivicSalonReductionMode, run_inline? : Bool) -> String
+
+pub async fn save_civic_salon_schedules(String, Array[@civic.CivicSalonSchedule]) -> Unit
+
+pub async fn upsert_civic_salon_schedule_for_scenario(@civic.CivicSalonScenario, path? : String, now_ms? : UInt64) -> @civic.CivicSalonSchedule
+
+pub async fn write_protocol_jsonl_record(String, String, Json, ledger_base_dir? : String) -> Unit
+
+pub async fn write_protocol_jsonl_records(String, String, Array[Json], ledger_base_dir? : String) -> Unit
+
+pub async fn write_wenyu_building_protocol_status(status_path? : String, registry_path? : String) -> String
+
+pub async fn write_wenyu_civic_status(book_catalog_path? : String, status_path? : String) -> String
+
+pub async fn write_wenyu_civic_workspace_seed(@moonbook.BookCatalogEntry, String) -> Unit
+
+pub async fn write_wenyu_civic_workspace_seed_for_service(@moonbook.BookCatalogEntry, @civic.CivicServiceDefinition, String) -> Unit
+
+// Errors
+
+// Types and methods
+type CivicSalonReductionResult derive(Eq)
+
+pub struct CivicServiceHealth {
+  service_id : String
+  title : String
+  book_id : String
+  service_kind : String
+  module_mode : String
+  book_role : String
+  skill_mode : String
+  protocol_status : String
+  protocol_ready : Bool
+  protocol_inbox_count : Int
+  protocol_contribution_count : Int
+  protocol_reduction_count : Int
+  protocol_outbox_count : Int
+  protocol_review_count : Int
+  latest_protocol_summary : String
+  protocol_history : Array[ProtocolHistoryEntry]
+  protocol_history_state : String
+  workspace_root : String
+  status : String
+  operable : Bool
+  proven_by_result : Bool
+  workspace_exists : Bool
+  schema_ready : Bool
+  wiki_ready : Bool
+  review_ready : Bool
+  projection_ready : Bool
+  skill_ready : Bool
+  moonclaw_profile_ready : Bool
+  latest_result_path : String
+  latest_result_found : Bool
+  latest_decision : String
+  latest_book_changed : String
+  latest_pages_changed : Int
+  latest_accepted_facts : Int
+  latest_review_items : Int
+  next_check_hint : String
+  missing_required_paths : Array[String]
+  notes : Array[String]
+} derive(Eq, ToJson, @json.FromJson)
+
+pub struct CivicServicePortfolio {
+  total : Int
+  operable_count : Int
+  proven_count : Int
+  seeded_count : Int
+  missing_count : Int
+  review_count : Int
+  blocked_count : Int
+  changed_count : Int
+  no_change_count : Int
+  status_path : String
+  markdown_path : String
+  services : Array[CivicServiceHealth]
+} derive(Eq, ToJson, @json.FromJson)
+
+pub struct ProtocolHistoryEntry {
+  step : String
+  status : String
+  title : String
+  detail : String
+  evidence_ref : String
+} derive(Eq, ToJson, @json.FromJson)
+
+// Type aliases
+pub using @civic {type CivicSalonHomeReturn}
+
+pub using @civic {type CivicSalonIdea}
+
+pub using @civic {type CivicSalonMetric}
+
+pub using @civic {type CivicSalonParticipantBook}
+
+pub using @civic {type CivicSalonReductionMode}
+
+pub using @civic {type CivicSalonRoundRecord}
+
+pub using @civic {type CivicSalonScenario}
+
+pub using @civic {type CivicSalonSchedule}
+
+// Traits
+

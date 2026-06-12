@@ -1,5 +1,5 @@
 ///|
-async fn write_protocol_jsonl_record(
+pub async fn write_protocol_jsonl_record(
   building_id : String,
   ledger : String,
   value : Json,
@@ -12,7 +12,7 @@ async fn write_protocol_jsonl_record(
 }
 
 ///|
-async fn write_protocol_jsonl_records(
+pub async fn write_protocol_jsonl_records(
   building_id : String,
   ledger : String,
   values : Array[Json],
@@ -30,7 +30,7 @@ async fn write_protocol_jsonl_records(
 }
 
 ///|
-async fn count_protocol_jsonl_records(
+pub async fn count_protocol_jsonl_records(
   building_id : String,
   ledger : String,
   ledger_base_dir? : String = default_protocol_ledger_base_dir(),

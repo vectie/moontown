@@ -80,7 +80,7 @@ fn civic_salon_reducer_step_metadata(
   scenario : CivicSalonScenario,
   pattern : @civic.CivicCommunicationPattern,
 ) -> Json {
-  let fields = moonclaw_step_metadata_fields(
+  let fields = @moonclaw_runtime.moonclaw_step_metadata_fields(
     preferred_skills=[scenario.skill_name],
     enable_tools=true,
     web_search=false,

@@ -50,8 +50,8 @@ fn civic_salon_reducer_packet_metadata(
   fields["round_number"] = round_number.to_json()
   fields["communication_pattern_id"] = pattern.id.to_json()
   fields["communication_pattern_title"] = pattern.title.to_json()
-  add_moonclaw_no_input_policy(fields)
-  fields["profile_metadata"] = moonclaw_no_input_policy_json()
+  @moonclaw_runtime.add_moonclaw_no_input_policy(fields)
+  fields["profile_metadata"] = @moonclaw_runtime.moonclaw_no_input_policy_json()
   fields["step_metadata"] = civic_salon_reducer_packet_step_metadata(
     scenario, pattern,
   )
@@ -68,7 +68,7 @@ fn civic_salon_reducer_packet_step_metadata(
   fields["output_contract"] = pattern.output_contract.to_json()
   fields["preferred_skills"] = [scenario.skill_name].to_json()
   fields["target_pages"] = ["raw/bootstrap/civic-salon-ideas.json"].to_json()
-  add_moonclaw_no_input_policy(fields)
+  @moonclaw_runtime.add_moonclaw_no_input_policy(fields)
   Json::object(fields)
 }
 

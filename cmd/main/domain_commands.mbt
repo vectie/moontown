@@ -9,10 +9,10 @@ async fn render_moonclaw_command(args : Array[String]) -> String {
 ///|
 async fn render_civic_command(args : Array[String]) -> String {
   match args {
-    ["bootstrap"] => @moontown.bootstrap_wenyu_civic_workspaces()
-    ["status"] => @moontown.render_wenyu_civic_status()
-    ["doctor"] => @moontown.write_wenyu_civic_status()
-    ["reconcile"] => @moontown.reconcile_wenyu_civic_service_results()
+    ["bootstrap"] => @civic_runtime.bootstrap_wenyu_civic_workspaces()
+    ["status"] => @civic_runtime.render_wenyu_civic_status()
+    ["doctor"] => @civic_runtime.write_wenyu_civic_status()
+    ["reconcile"] => @civic_runtime.reconcile_wenyu_civic_service_results()
     ["protocols", .. rest] => render_civic_protocols_command(rest.to_owned())
     _ => @moontown.load_or_create_demo_dashboard()
   }
@@ -21,18 +21,19 @@ async fn render_civic_command(args : Array[String]) -> String {
 ///|
 async fn render_civic_protocols_command(args : Array[String]) -> String {
   match args {
-    ["bootstrap"] => @moontown.bootstrap_wenyu_building_protocols()
-    ["status"] => @moontown.render_wenyu_building_protocol_status()
-    ["doctor"] => @moontown.write_wenyu_building_protocol_status()
+    ["bootstrap"] => @civic_runtime.bootstrap_wenyu_building_protocols()
+    ["status"] => @civic_runtime.render_wenyu_building_protocol_status()
+    ["doctor"] => @civic_runtime.write_wenyu_building_protocol_status()
     ["patterns"] => @moontown.render_civic_communication_patterns()
     ["pattern-install", template_path] =>
-      @moontown.install_civic_pattern_scenario_file(template_path)
+      @civic_runtime.install_civic_pattern_scenario_file(template_path)
     ["pattern-manifest", manifest_path] =>
-      @moontown.install_civic_pattern_scenario_manifest(manifest_path)
+      @civic_runtime.install_civic_pattern_scenario_manifest(manifest_path)
     ["pattern-template", template_path] =>
-      @moontown.bootstrap_civic_salon_scenario_file(template_path)
-    ["schedules", "tick"] => @moontown.run_due_civic_salons()
-    ["schedules", "status"] => @moontown.render_civic_salon_schedule_status()
+      @civic_runtime.bootstrap_civic_salon_scenario_file(template_path)
+    ["schedules", "tick"] => @civic_runtime.run_due_civic_salons()
+    ["schedules", "status"] =>
+      @civic_runtime.render_civic_salon_schedule_status()
     _ => @moontown.load_or_create_demo_dashboard()
   }
 }

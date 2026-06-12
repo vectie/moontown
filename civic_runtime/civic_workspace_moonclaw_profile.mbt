@@ -54,7 +54,7 @@ fn wenyu_civic_review_step_json() -> Json {
 
 ///|
 fn wenyu_civic_execute_step_metadata_json() -> Json {
-  let fields = moonclaw_step_metadata_fields(
+  let fields = @moonclaw_runtime.moonclaw_step_metadata_fields(
     preferred_skills=wenyu_civic_preferred_skills(),
     enable_tools=true,
     web_search=true,
@@ -69,7 +69,7 @@ fn wenyu_civic_execute_step_metadata_json() -> Json {
 ///|
 fn wenyu_civic_review_step_metadata_json() -> Json {
   Json::object(
-    moonclaw_step_metadata_fields(
+    @moonclaw_runtime.moonclaw_step_metadata_fields(
       preferred_skills=wenyu_civic_preferred_skills(),
       enable_tools=true,
       web_search=false,

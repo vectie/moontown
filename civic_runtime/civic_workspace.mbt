@@ -33,7 +33,7 @@ fn merge_wenyu_civic_catalog(
 }
 
 ///|
-async fn write_wenyu_civic_workspace_seed(
+pub async fn write_wenyu_civic_workspace_seed(
   entry : @moonbook.BookCatalogEntry,
   objective : String,
 ) -> Unit {
@@ -45,7 +45,7 @@ async fn write_wenyu_civic_workspace_seed(
 }
 
 ///|
-async fn write_wenyu_civic_workspace_seed_for_service(
+pub async fn write_wenyu_civic_workspace_seed_for_service(
   entry : @moonbook.BookCatalogEntry,
   service : @civic.CivicServiceDefinition,
   objective : String,

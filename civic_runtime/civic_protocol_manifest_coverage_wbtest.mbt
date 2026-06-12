@@ -27,9 +27,9 @@ async test "Wenyu civic pattern manifest covers every civic building as data" {
         }
         assert_eq(
           pattern_id,
-          civic_communication_pattern_id_for_service(service),
+          @civic.civic_communication_pattern_id_for_service(service),
         )
-        match civic_communication_pattern_for_id(pattern_id) {
+        match @civic.civic_communication_pattern_for_id(pattern_id) {
           Some(_) => ()
           None => fail("unknown communication pattern id")
         }

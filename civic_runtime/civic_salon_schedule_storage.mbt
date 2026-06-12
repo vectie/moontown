@@ -34,7 +34,7 @@ fn normalize_civic_salon_schedule(
 }
 
 ///|
-fn normalize_civic_pending_summary(summary : String) -> String {
+pub fn normalize_civic_pending_summary(summary : String) -> String {
   if summary.has_prefix("Blocked ") &&
     summary.contains("status=RunConfirmed") &&
     summary.contains(" is Pending.") {
