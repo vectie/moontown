@@ -38,12 +38,14 @@ Purpose:
 ## Core
 
 - [src/core/types.mbt](/Users/kq/Workspace/moontown/src/core/types.mbt)
+- [src/core/task_lifecycle.mbt](/Users/kq/Workspace/moontown/src/core/task_lifecycle.mbt)
 
 Purpose:
 
 - core town types
 - `BookProvider` abstraction
 - town/book/worker/task/event records
+- pure lifecycle policy for mapping execution status into town task status
 
 Important public types:
 
@@ -58,6 +60,15 @@ Important public types:
 - `TownEvent`
 - `TownState`
 - `BookProvider`
+
+Boundary:
+
+- `src/core` owns generic lifecycle translation such as
+  `TaskExecutionStatus` to `TownTaskStatus` and safe task-status copying,
+  because that mapping is part of the shared town data model.
+- `src/town_runtime` may apply those pure helpers while polling and
+  supervising runs, but it should not maintain a second execution-to-task
+  status table.
 
 ## Dispatch
 

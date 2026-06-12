@@ -10,25 +10,6 @@ fn execution_status_for_index(index : Int) -> @core.TaskExecutionStatus {
 }
 
 ///|
-fn town_task_status_for_execution(
-  status : @core.TaskExecutionStatus,
-) -> @core.TownTaskStatus {
-  match status {
-    @core.TaskExecutionStatus::PacketReady => @core.TownTaskStatus::Planned
-    @core.TaskExecutionStatus::ProposalImported =>
-      @core.TownTaskStatus::Assigned
-    @core.TaskExecutionStatus::RunConfirmed => @core.TownTaskStatus::Assigned
-    @core.TaskExecutionStatus::Running => @core.TownTaskStatus::Running
-    @core.TaskExecutionStatus::AwaitingPersistence =>
-      @core.TownTaskStatus::Running
-    @core.TaskExecutionStatus::ReviewQueued => @core.TownTaskStatus::Blocked
-    @core.TaskExecutionStatus::Completed => @core.TownTaskStatus::Done
-    @core.TaskExecutionStatus::Stale => @core.TownTaskStatus::Blocked
-    @core.TaskExecutionStatus::Failed => @core.TownTaskStatus::Failed
-  }
-}
-
-///|
 fn modeled_lifecycle_execution_record(
   task : @core.TownTask,
   index : Int,

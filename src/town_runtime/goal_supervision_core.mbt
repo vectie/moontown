@@ -56,23 +56,6 @@ fn copy_execution_with(
 }
 
 ///|
-fn copy_task_with_status(
-  task : @core.TownTask,
-  status : @core.TownTaskStatus,
-) -> @core.TownTask {
-  @core.TownTask::new(
-    id=task.id,
-    book_id=task.book_id,
-    title=task.title,
-    prompt=task.prompt,
-    domain=task.domain,
-    required_role=task.required_role,
-    required_capabilities=task.required_capabilities,
-    status~,
-  )
-}
-
-///|
 fn book_workspace_root(state : @core.TownState, book_id : String) -> String {
   for book in state.books {
     if book.id == book_id {
@@ -88,22 +71,11 @@ fn task_for_supervision(
   execution : @core.TaskExecutionRecord,
 ) -> @core.TownTask {
   match @core.find_task(state, execution.task_id) {
-    Some(task) => {
-      let status = match execution.status {
-        @core.TaskExecutionStatus::Completed => @core.TownTaskStatus::Done
-        @core.TaskExecutionStatus::Failed => @core.TownTaskStatus::Failed
-        @core.TaskExecutionStatus::Stale => @core.TownTaskStatus::Blocked
-        @core.TaskExecutionStatus::ReviewQueued => @core.TownTaskStatus::Blocked
-        @core.TaskExecutionStatus::Running
-        | @core.TaskExecutionStatus::AwaitingPersistence =>
-          @core.TownTaskStatus::Running
-        @core.TaskExecutionStatus::PacketReady => @core.TownTaskStatus::Planned
-        @core.TaskExecutionStatus::ProposalImported
-        | @core.TaskExecutionStatus::RunConfirmed =>
-          @core.TownTaskStatus::Assigned
-      }
-      copy_task_with_status(task, status)
-    }
+    Some(task) =>
+      @core.copy_task_with_status(
+        task,
+        @core.town_task_status_for_execution(execution.status),
+      )
     None =>
       @core.TownTask::new(
         id=execution.task_id,

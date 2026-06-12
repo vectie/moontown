@@ -11,6 +11,8 @@ pub fn absolute_path_from_base(String, String) -> String
 
 pub fn absolute_path_from_cwd(String) -> String
 
+pub fn copy_task_with_status(TownTask, TownTaskStatus) -> TownTask
+
 pub fn empty_state(TownConfig) -> TownState
 
 pub fn find_execution(TownState, String) -> TaskExecutionRecord?
@@ -24,6 +26,8 @@ pub fn standing_goal_registry_find(Array[StandingGoal], String) -> StandingGoal?
 pub fn standing_goal_registry_merge_updates(Array[StandingGoal], Array[StandingGoal]) -> Array[StandingGoal]
 
 pub fn standing_goal_registry_replace_or_append(Array[StandingGoal], StandingGoal) -> Array[StandingGoal]
+
+pub fn town_task_status_for_execution(TaskExecutionStatus) -> TownTaskStatus
 
 pub fn upsert_moonclaw_job_profile_json(Json, String, Json) -> Json
 

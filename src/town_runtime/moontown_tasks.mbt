@@ -12,7 +12,7 @@ fn to_town_task(
     domain=@dispatch.domain_for_book_task(entry, task),
     required_role=task.required_role,
     required_capabilities=entry.skills,
-    status=town_task_status_for_execution(status),
+    status=@core.town_task_status_for_execution(status),
   )
 }
 
@@ -52,7 +52,7 @@ fn provider_overview_task(book : @core.BookRef, index : Int) -> @core.TownTask {
     domain=@dispatch.domain_for_provider_overview(book),
     required_role=Some(@core.WorkerRole::Planner),
     required_capabilities=book.tags,
-    status=town_task_status_for_execution(execution_status),
+    status=@core.town_task_status_for_execution(execution_status),
   )
 }
 

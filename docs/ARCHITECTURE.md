@@ -1534,6 +1534,14 @@ The packet lifecycle is intentionally split across package boundaries:
   - maps MoonClaw terminal state into town execution records
 - `core`
   - records packet path, proposal id, run id, and execution status in `TaskExecutionRecord`
+  - owns pure lifecycle translation from `TaskExecutionStatus` to
+    `TownTaskStatus`
+  - owns task-status copy helpers that preserve task identity and routing fields
+
+`town_runtime/` may observe executions and update live `TownTask` values during
+supervision, but it should call `core` for lifecycle translation. Runtime code
+should not redefine which execution states count as planned, assigned, running,
+blocked, done, or failed.
 
 ## Refactor Boundaries
 
