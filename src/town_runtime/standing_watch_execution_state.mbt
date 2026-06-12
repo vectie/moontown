@@ -3,7 +3,9 @@ fn stabilize_deferred_standing_watch_execution(
   execution : @core.TaskExecutionRecord,
   tick : Int,
 ) -> @core.TaskExecutionRecord {
-  let decision = standing_watch_recovery_decision_from_execution(execution)
+  let decision = @standing_watch_policy.standing_watch_recovery_decision_from_execution(
+    execution,
+  )
   if decision == @core.WatcherDecisionKind::Deferred &&
     @standing_watch_policy.standing_watch_infrastructure_failure_summary(
       execution.summary,

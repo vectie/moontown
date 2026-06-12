@@ -45,7 +45,11 @@ async fn recover_observed_standing_watch_output(
   let completed = copy_execution_with(
     observed,
     status=@core.TaskExecutionStatus::Completed,
-    summary=standing_watch_recovery_summary(context.goal, observed, decision),
+    summary=@standing_watch_policy.standing_watch_recovery_summary(
+      context.goal,
+      observed,
+      decision,
+    ),
     heartbeat_tick=supervision_tick(state),
     next_retry_tick=None,
   )

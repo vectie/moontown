@@ -109,6 +109,25 @@ Current status:
 - plans standing-goal due actions for the daemon
 - records active standing goal ids in daemon state
 
+## Standing Watch Policy
+
+- [src/standing_watch_policy](/Users/kq/Workspace/moontown/src/standing_watch_policy)
+
+Purpose:
+
+- standing-watch task kind, ids, prompts, and target pages
+- strict watcher accounting markers and marker parsers
+- MoonBook standing-watch history parsing and provider-decision collapse policy
+- material-delta metrics and watcher-record decision selection
+- keeper auto-triage/recovery closure policy, thresholds, and summary wording
+
+Boundary:
+
+- `src/town_runtime` may schedule standing-watch work, apply package-owned
+  decisions to `TownState`, persist snapshots, and append watcher ledgers.
+- `src/town_runtime` should not own standing-watch marker vocabulary, closure
+  thresholds, or auto-triage/recovery summary text.
+
 ## Storage
 
 - [src/storage/store.mbt](/Users/kq/Workspace/moontown/src/storage/store.mbt)

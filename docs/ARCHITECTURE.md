@@ -253,12 +253,16 @@ book owns. The implementation now has a first-class `policy` package:
   derivation, compact id segment formatting, target page set, prompt text,
   strict accounting markers, marker parsing, MoonBook standing-watch history
   block parsing, provider-decision collapse policy, material-delta metrics, and
-  book-quality repair appendix composition. Root may decide when a standing goal
-  is due, route it through the Mayor, persist snapshots, read/write MoonBook
-  history files, reconcile MoonBook decisions, and append watcher ledgers, but
-  it must not redefine the standing-watch prompt, marker vocabulary/parser,
-  history parser/collapse semantics, material-delta accounting, task kind, or
-  id format locally.
+  book-quality repair appendix composition. It also owns keeper auto-triage and
+  recovery closure policy: whether no-change/update markers satisfy a goal
+  threshold, how terminal markers supersede failed transport status, and the
+  accepted keeper metadata appended to execution summaries. Root may decide
+  when a standing goal is due, route it through the Mayor, persist snapshots,
+  read/write MoonBook history files, apply package-owned reconciliation
+  decisions to `TownState`, and append watcher ledgers, but it must not redefine
+  the standing-watch prompt, marker vocabulary/parser, history parser/collapse
+  semantics, material-delta accounting, task kind, id format, keeper closure
+  thresholds, or auto-triage/recovery summary wording locally.
 
 The root package must not re-export every policy constructor. Root systems may
 map legacy book labels into a `BookPolicy` while migration continues, but new
@@ -578,7 +582,8 @@ shape, status Markdown, catalog identity, standing-goal construction/list
 semantics, and readiness rule, plus bootstrap/install summary wording. Generic
 standing-watch task kind, prompt/id contract, target pages, accounting markers,
 marker parsing, effective watcher-record decision selection, execution-summary
-classification, and ledger preference ordering belong to
+classification, ledger preference ordering, keeper closure policy, and
+auto-triage/recovery summary wording belong to
 `standing_watch_policy/`. Reusable transient external dependency vocabulary
 belongs to `runtime_error_policy/`; standing-watch and recovery code may
 consume that package, but root should not fork its own provider-infrastructure

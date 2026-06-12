@@ -23,7 +23,9 @@ fn legacy_review_queued_retry_accounting_standing_watch(
     return false
   }
   let task_tick = @runtime_status.tick_from_task_id(execution.task_id)
-  let decision = standing_watch_recovery_decision_from_execution(execution)
+  let decision = @standing_watch_policy.standing_watch_recovery_decision_from_execution(
+    execution,
+  )
   task_tick > execution.stale_after_tick ||
   decision == @core.WatcherDecisionKind::Deferred ||
   (

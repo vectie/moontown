@@ -66,7 +66,9 @@ async fn reconcile_observed_review_queued_standing_watch(
   let observed = standing_watch_observed_for_auto_triage(
     entry, execution, snapshot_path,
   )
-  let decision = standing_watch_recovery_decision_from_execution(observed)
+  let decision = @standing_watch_policy.standing_watch_recovery_decision_from_execution(
+    observed,
+  )
   if standing_watch_autonomous_repair_still_open(goal, observed, decision) {
     complete_review_queued_standing_watch(
       state,
@@ -95,7 +97,9 @@ async fn reconcile_observed_review_queued_standing_watch(
     )
     return
   }
-  if !standing_watch_auto_triage_allowed(goal, observed, decision) {
+  if !@standing_watch_policy.standing_watch_auto_triage_allowed(
+      goal, observed, decision,
+    ) {
     if observed != execution {
       state.replace_execution(observed)
     }
@@ -104,7 +108,9 @@ async fn reconcile_observed_review_queued_standing_watch(
   let completed = copy_execution_with(
     observed,
     status=@core.TaskExecutionStatus::Completed,
-    summary=standing_watch_auto_triage_summary(goal, observed, decision),
+    summary=@standing_watch_policy.standing_watch_auto_triage_summary(
+      goal, observed, decision,
+    ),
     heartbeat_tick=supervision_tick(state),
     next_retry_tick=None,
   )

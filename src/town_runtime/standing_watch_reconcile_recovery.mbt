@@ -23,8 +23,14 @@ async fn reconcile_failed_standing_watch_outputs(
       execution,
       snapshot_path,
     )
-    let decision = standing_watch_recovery_decision_from_execution(observed)
-    if !standing_watch_recovery_allowed(context.goal, observed, decision) {
+    let decision = @standing_watch_policy.standing_watch_recovery_decision_from_execution(
+      observed,
+    )
+    if !@standing_watch_policy.standing_watch_recovery_allowed(
+        context.goal,
+        observed,
+        decision,
+      ) {
       if observed != execution {
         state.replace_execution(observed)
       }

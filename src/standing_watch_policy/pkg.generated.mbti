@@ -13,6 +13,10 @@ pub fn remove_standing_watch_history_block(String, String) -> String
 
 pub fn standing_goal_for_execution_task(Array[@core.StandingGoal], String) -> @core.StandingGoal?
 
+pub fn standing_watch_auto_triage_allowed(@core.StandingGoal, @core.TaskExecutionRecord, @core.WatcherDecisionKind) -> Bool
+
+pub fn standing_watch_auto_triage_summary(@core.StandingGoal, @core.TaskExecutionRecord, @core.WatcherDecisionKind) -> String
+
 pub fn standing_watch_decision_from_execution(@core.TaskExecutionRecord) -> @core.WatcherDecisionKind
 
 pub fn standing_watch_decision_text_marks_book_changed(String) -> Bool
@@ -44,6 +48,12 @@ pub fn standing_watch_operational_no_change_summary(String) -> Bool
 pub fn standing_watch_orphaned_running_failure_summary(String) -> Bool
 
 pub fn standing_watch_prompt(@core.StandingGoal, String, Int, Int) -> String
+
+pub fn standing_watch_recovery_allowed(@core.StandingGoal, @core.TaskExecutionRecord, @core.WatcherDecisionKind) -> Bool
+
+pub fn standing_watch_recovery_decision_from_execution(@core.TaskExecutionRecord) -> @core.WatcherDecisionKind
+
+pub fn standing_watch_recovery_summary(@core.StandingGoal, @core.TaskExecutionRecord, @core.WatcherDecisionKind) -> String
 
 pub fn standing_watch_summary_from_history_block(String, Array[String]) -> String?
 
