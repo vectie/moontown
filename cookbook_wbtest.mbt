@@ -236,6 +236,6 @@ fn test_cookbook_artifact(
   kind : String,
   required~ : Bool,
   exists~ : Bool,
-) -> CookbookArtifact {
+) -> @cookbook.CookbookArtifact {
   { path, kind, owner: "test", stable_role: "test artifact", required, exists }
 }

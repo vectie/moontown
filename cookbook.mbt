@@ -36,7 +36,7 @@ pub async fn bootstrap_moontown_cookbook(
 pub async fn inspect_moontown_cookbook(
   workspace_root? : String = default_cookbook_workspace_root(),
   manifest_path? : String = default_cookbook_manifest_path(),
-) -> MoontownCookbookStatus {
+) -> @cookbook.MoontownCookbookStatus {
   let manifest = @cookbook.manifest(workspace_root, manifest_path)
   let summary = @cookbook.CookbookArtifactSummary::from_artifacts(
     manifest.artifacts,

@@ -380,17 +380,11 @@ pub using @civic {type CivicSalonScenario}
 
 pub using @civic {type CivicSalonSchedule}
 
-pub using @cookbook {type CookbookArtifact}
-
 pub using @daemon_runtime_policy {type DaemonRuntimeHealth}
 
 pub using @daemon_runtime_policy {type DaemonRuntimeState}
 
 pub using @live_autonomy_policy {type LiveAutonomySpine}
-
-pub using @cookbook {type MoontownCookbookManifest}
-
-pub using @cookbook {type MoontownCookbookStatus}
 
 pub using @pdf_evidence_watch {type PdfEvidenceWatchBookStatus}
 
