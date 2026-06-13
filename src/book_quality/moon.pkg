@@ -9,6 +9,7 @@ import {
   "vectie/moontown/adapters/moonclaw",
   "vectie/moontown/civic",
   "vectie/moontown/core",
+  "vectie/moontown/moonclaw_policy",
   "vectie/moontown/policy",
 }
 

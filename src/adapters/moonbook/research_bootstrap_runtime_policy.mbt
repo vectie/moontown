@@ -13,6 +13,5 @@ fn research_bootstrap_runtime_policy_json() -> Json {
 ///|
 fn add_research_bootstrap_runtime_policy(fields : Map[String, Json]) -> Unit {
   fields["disable_adaptive"] = true.to_json()
-  fields["disable_waiting_for_input"] = true.to_json()
-  fields["best_effort_on_missing_input"] = true.to_json()
+  @moonclaw_policy.add_no_input_policy(fields)
 }

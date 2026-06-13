@@ -250,10 +250,15 @@ book owns. The implementation now has a first-class `policy` package:
   course-builder skill text, generated course UI state, and generated course
   site HTML. Root Moontown may keep CLI-compatible wrappers, but course content
   and projection semantics should not live in the root package.
+- [moonclaw_policy/](/Users/kq/Workspace/moontown/src/moonclaw_policy)
+  owns reusable MoonClaw packet metadata semantics: no-input/best-effort
+  wait policy, execution metadata maps, and step metadata maps. Adapters,
+  runtime packages, and semantic review packets consume this package instead
+  of redefining those fields.
 - [moonclaw_runtime/](/Users/kq/Workspace/moontown/src/moonclaw_runtime)
-  owns Moontown-side MoonClaw runtime helpers: no-input metadata flags,
-  execution/step metadata maps, run result payload lookup, and MoonClaw job
-  store compaction. Root Moontown may expose command-compatible wrappers, but
+  owns Moontown-side MoonClaw runtime helpers: compatibility wrappers for
+  packet metadata policy, run result payload lookup, and MoonClaw job store
+  compaction. Root Moontown may expose command-compatible wrappers, but
   MoonClaw runtime maintenance details should not live as loose root files.
 - [cookbook/](/Users/kq/Workspace/moontown/src/cookbook)
   owns Cookbook DTOs, stable-state artifact summary accounting, and the

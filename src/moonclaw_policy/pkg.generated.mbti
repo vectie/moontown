@@ -1,0 +1,20 @@
+// Generated using `moon info`, DON'T EDIT IT
+package "vectie/moontown/moonclaw_policy"
+
+// Values
+pub fn add_no_input_policy(Map[String, Json]) -> Unit
+
+pub fn execution_metadata_fields(preferred_skills~ : Array[String], execution_mode~ : String, execution_target? : String?, output_contract~ : String) -> Map[String, Json]
+
+pub fn no_input_policy_json() -> Json
+
+pub fn step_metadata_fields(preferred_skills~ : Array[String], enable_tools~ : Bool, web_search~ : Bool, timeout_ms~ : Int, board_lane~ : String, board_order~ : Int) -> Map[String, Json]
+
+// Errors
+
+// Types and methods
+
+// Type aliases
+
+// Traits
+

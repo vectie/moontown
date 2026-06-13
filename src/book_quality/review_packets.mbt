@@ -181,15 +181,12 @@ fn review_external_request(
 
 ///|
 fn review_no_input_policy_json() -> Json {
-  let fields : Map[String, Json] = {}
-  add_review_no_input_policy(fields)
-  Json::object(fields)
+  @moonclaw_policy.no_input_policy_json()
 }
 
 ///|
 fn add_review_no_input_policy(fields : Map[String, Json]) -> Unit {
-  fields["disable_waiting_for_input"] = true.to_json()
-  fields["best_effort_on_missing_input"] = true.to_json()
+  @moonclaw_policy.add_no_input_policy(fields)
 }
 
 ///|

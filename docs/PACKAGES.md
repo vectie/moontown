@@ -336,6 +336,10 @@ Boundary:
   `src/dispatch` owns research-bootstrap routing, and `src/course_book` owns
   course-book intent detection. MoonClaw adapter code should not duplicate
   BookTask kind/id/prompt classifiers.
+- shared MoonClaw packet wait policy belongs in `src/moonclaw_policy`.
+  The adapter may merge those fields into external proposal packets, but it
+  should not redefine `disable_waiting_for_input` or
+  `best_effort_on_missing_input` locally.
 
 Current real pieces:
 
@@ -349,6 +353,27 @@ Current real pieces:
 - `save_packet_file(...)`
 - `import_packet(...)` via real `moonclaw proposal import --json`
 - `poll_run(...)`
+
+## MoonClaw Policy
+
+- [src/moonclaw_policy](/Users/kq/Workspace/moontown/src/moonclaw_policy)
+
+Purpose:
+
+- reusable MoonClaw packet wait policy
+- reusable execution metadata maps
+- reusable step metadata maps
+
+Boundary:
+
+- `src/moonclaw_policy` owns cross-package MoonClaw metadata semantics such as
+  no-input/best-effort behavior and standard execution/step metadata fields.
+- `src/moonclaw_runtime`, `src/adapters/moonclaw`, `src/adapters/moonbook`,
+  and `src/book_quality` may consume these helpers when building packets or
+  profile metadata.
+- Higher-level packages must not duplicate these fields directly. If the
+  MoonClaw packet contract changes, update this package first and let callers
+  inherit the new shape.
 
 Important public types:
 

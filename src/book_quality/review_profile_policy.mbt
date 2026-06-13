@@ -98,7 +98,6 @@ fn review_execution_metadata_fields(
   fields["execution_mode"] = "acp".to_json()
   fields["execution_target"] = review_execution_target().to_json()
   fields["output_contract"] = output_contract.to_json()
-  fields["disable_waiting_for_input"] = true.to_json()
-  fields["best_effort_on_missing_input"] = true.to_json()
+  @moonclaw_policy.add_no_input_policy(fields)
   fields
 }
