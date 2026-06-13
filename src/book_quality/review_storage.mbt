@@ -55,15 +55,6 @@ pub fn default_moonclaw_home() -> String {
 }
 
 ///|
-pub async fn write_accepted_review_result(
-  result_dir : String,
-  run : BookQualityReviewRun,
-  content : String,
-) -> Unit {
-  write_text_file(review_result_path(result_dir, run.book_id), content)
-}
-
-///|
 pub async fn read_review_result_text(
   result_dir : String,
   book_id : String,
@@ -113,27 +104,4 @@ pub fn review_run_ledger_to_text(ledger : BookQualityReviewRunLedger) -> String 
 ///|
 pub fn empty_review_run_ledger() -> BookQualityReviewRunLedger {
   BookQualityReviewRunLedger::{ runs: [] }
-}
-
-///|
-async fn write_text_file(path : String, content : String) -> Unit {
-  ensure_parent_directory(path)
-  @fs.write_file(
-    path,
-    @encoding/utf8.encode(content),
-    create=0o644,
-    truncate=true,
-  )
-}
-
-///|
-async fn ensure_parent_directory(path : String) -> Unit {
-  let parent = @path.Path::dirname(path).to_string()
-  if parent == "." || parent == "" || @fs.exists(parent) {
-    return
-  }
-  ensure_parent_directory(parent)
-  @fs.mkdir(parent, permission=0o755) catch {
-    _ => ()
-  }
 }

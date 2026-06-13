@@ -630,12 +630,13 @@ Book-quality stale-run reconciliation vocabulary is package-owned too. Root may
 check process liveness and poll MoonClaw for a run summary, but the transition
 to `orphaned`, retry-facing summary text, and timestamped review-run record
 belong to `book_quality/`.
-Accepted-result reconciliation records are package-owned too. Root may harvest
-MoonClaw content and write the accepted result file, but the transition to
-`written`, harvested summary text, written-count flag, and changed flag belong
-to `book_quality/`. Ledger-level reconciliation aggregation is runtime-owned:
-`book_quality_runtime/` loads the ledger, observes each run, writes accepted
-results, preserves run order, accumulates written counts, folds changed state,
+Accepted-result reconciliation records are package-owned too.
+`book_quality_runtime/` may harvest MoonClaw content and write the accepted
+result file, but the transition to `written`, harvested summary text,
+written-count flag, and changed flag belong to `book_quality/`. Ledger-level
+reconciliation aggregation is runtime-owned: `book_quality_runtime/` loads the
+ledger, observes each run, writes accepted results, preserves run order,
+accumulates written counts, folds changed state,
 and persists the updated ledger after calling the pure per-run transition.
 Book-quality repair-goal retirement policy is package-owned as well. Root may
 observe whether a standing goal is enabled, which book it targets, whether a
@@ -665,7 +666,7 @@ but it must not redefine the template text or projection schema.
 New systems should start from `BookPolicy` and
 `@book_quality.*` contracts; legacy book-type checks should become package
 adapters rather than root APIs. The root package may still perform filesystem
-audits, evaluate file existence, read/write review files, dispatch MoonClaw
+audits, evaluate file existence through runtime facades, dispatch MoonClaw
 jobs, and bind repair bridge items to Mayor standing goals, but it must not own
 semantic packet templates, static profile rules, assessment policy, review
 result parsing, audit rendering, candidate filtering/ordering policy,

@@ -30,6 +30,8 @@ pub async fn render_book_quality(book_catalog_path? : String, snapshot_path? : S
 
 pub async fn render_book_quality_ai_review_status(result_dir? : String, run_path? : String, book_catalog_path? : String, snapshot_path? : String) -> String
 
+pub async fn write_accepted_review_result(String, @book_quality.BookQualityReviewRun, String) -> Unit
+
 pub async fn write_book_quality_audit(book_catalog_path? : String, snapshot_path? : String, audit_path? : String) -> String
 
 pub async fn write_book_quality_review_packets(book_catalog_path? : String, snapshot_path? : String, review_dir? : String) -> String

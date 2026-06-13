@@ -384,6 +384,8 @@ Goals:
 - keep book-quality per-run reconciliation transitions in `book_quality/`;
   keep review-run ledger loading, result harvesting/writes, count aggregation,
   changed-state folding, and ledger persistence in `book_quality_runtime/`
+- keep book-quality accepted-result path/parsing policy in `book_quality/`;
+  keep accepted-result file writes in `book_quality_runtime/`
 - keep book-quality ledger parse/serialize/append semantics in `book_quality/`;
   keep ledger file load/write/append APIs in `book_quality_runtime/`
 - keep Wenyu course-book bootstrap, generated course content, course-builder

@@ -1455,28 +1455,6 @@ async test "book quality package existing result transition is internal" {
 }
 
 ///|
-async test "book quality package writes accepted review results" {
-  let result_dir = "/tmp/moontown-book-quality-package-accepted-result-wbtest/results"
-  let run = BookQualityReviewRun::{
-    book_id: "accepted-book",
-    packet_path: "packet.json",
-    result_path: "\{result_dir}/accepted-book.md",
-    proposal_id: None,
-    run_id: Some("run-accepted"),
-    status: review_run_dispatched_status(),
-    summary: "accepted",
-    generated_at_ms: 1UL,
-  }
-  write_accepted_review_result(
-    result_dir, run, "ai_quality_score: 91\nbook_role_fit: excellent\n",
-  )
-  let text = read_review_result_text(result_dir, "accepted-book")
-  assert_true(text.contains("ai_quality_score: 91"))
-  assert_true(text.contains("book_role_fit: excellent"))
-  assert_eq(read_review_result_text(result_dir, "missing-book"), "")
-}
-
-///|
 test "book quality package owns review markdown row formatting" {
   let run = BookQualityReviewRun::{
     book_id: "book-row",

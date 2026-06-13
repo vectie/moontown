@@ -577,6 +577,8 @@ Boundary:
   aggregation: load the ledger, observe filesystem/process/MoonClaw output,
   call package-owned per-run transitions, write accepted results, fold counts,
   and persist changed ledgers.
+- `src/book_quality_runtime` owns accepted semantic-review result file writes;
+  `src/book_quality` owns the result path contract and review-result parsing.
 - `src/book_quality_runtime` owns review-run ledger storage APIs used by
   dispatch, reconciliation, and status rendering: load, append, and write.
 - `src/book_quality/scoring_engine.mbt` owns book-type scoring orchestration.

@@ -248,8 +248,6 @@ pub fn wiki_index_path() -> String
 
 pub fn workspace_path(String, String) -> String
 
-pub async fn write_accepted_review_result(String, BookQualityReviewRun, String) -> Unit
-
 // Errors
 
 // Types and methods

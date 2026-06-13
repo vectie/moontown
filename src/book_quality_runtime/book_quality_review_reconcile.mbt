@@ -28,11 +28,7 @@ pub async fn reconcile_book_quality_ai_review_results(
       now_ms=@env.now(),
     )
     if result.written {
-      @book_quality.write_accepted_review_result(
-        result_dir,
-        run,
-        observation.result_content,
-      )
+      write_accepted_review_result(result_dir, run, observation.result_content)
       written += 1
     }
     changed = changed || result.changed
