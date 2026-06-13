@@ -157,7 +157,7 @@ fn review_external_request(
     "You are the MoonBook semantic quality reviewer for Moontown.",
     "",
     "Book id: `\{packet.book_id}`",
-    "Book type: `\{packet.book_type}`",
+    @policy.book_type_line(packet.book_type),
     "Workspace root: `\{absolute_workspace_root}`",
     "Structural score: `\{packet.structural_score}`",
     "Result target after reconciliation: `\{result_path}`",

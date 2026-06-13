@@ -40,7 +40,7 @@ pub fn repair_goal_prompt(item : BookQualityRepairBridgeItem) -> String {
     "A semantic MoonBook quality review found that this book is not ready.",
     "",
     "Book id: `\{item.book_id}`",
-    "Book type: `\{item.book_type}`",
+    @policy.book_type_line(item.book_type),
     "AI quality: `\{item.semantic_score}` / `\{item.semantic_grade}`",
     "Repair owner: `\{item.repair_owner}`",
     "Review queue: `wiki/reviews/book-quality-repair.md`",

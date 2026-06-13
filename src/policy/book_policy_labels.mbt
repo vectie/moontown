@@ -44,6 +44,11 @@ pub fn book_type_line(book_type : String) -> String {
 }
 
 ///|
+pub fn book_type_bullet(book_type : String) -> String {
+  "- Type: `\{book_type}`"
+}
+
+///|
 pub fn reviewable_types() -> Array[String] {
   [
     research_type(),

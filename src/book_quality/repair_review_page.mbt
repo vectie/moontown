@@ -11,7 +11,7 @@ pub fn repair_review_page_markdown(
     "## Current Repair",
     "",
     "- Book: `\{item.book_id}`",
-    "- Type: `\{item.book_type}`",
+    @policy.book_type_bullet(item.book_type),
     "- AI quality: `\{item.semantic_score}` / `\{item.semantic_grade}`",
     "- Repair owner: `\{item.repair_owner}`",
     "- Standing repair goal: `\{item.standing_goal_id}`",

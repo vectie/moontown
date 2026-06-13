@@ -9,6 +9,8 @@ import {
 // Values
 pub fn book_first_policy() -> String
 
+pub fn book_type_bullet(String) -> String
+
 pub fn book_type_line(String) -> String
 
 pub fn book_type_marker(String) -> String

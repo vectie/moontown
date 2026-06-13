@@ -60,6 +60,7 @@ test "policy owns catalog classification and legacy type labels" {
   assert_eq(course_type(), "course-book")
   assert_eq(book_type_marker(course_type()), "type: `course-book`")
   assert_eq(book_type_line(research_type()), "Book type: `research-book`")
+  assert_eq(book_type_bullet(civic_type()), "- Type: `civic-protocol-support`")
   assert_true(reviewable_types().contains(civic_type()))
   assert_true(catalog_entry_archived(["internal"]))
   assert_false(catalog_entry_archived(["research"]))

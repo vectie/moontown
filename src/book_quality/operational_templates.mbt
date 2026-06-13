@@ -15,7 +15,7 @@ pub fn operational_index(
     "",
     "- Book id: `\{book_id}`",
     "- Workspace: `\{workspace_root}`",
-    "- Type: `\{@policy.operational_type()}`",
+    @policy.book_type_bullet(@policy.operational_type()),
     "",
     "## Focus",
     "",
