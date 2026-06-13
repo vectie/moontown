@@ -820,6 +820,10 @@ Boundary:
 - civic runtime reducer helpers use `civic_communication_reducer_*` names.
 - civic runtime schedule/path helpers use `civic_communication_*` names and
   should preserve persisted `pattern-*` file locations.
+- civic runtime owns civic-specific filenames under `civic/`, but
+  snapshot-relative base directory fallback belongs to `src/storage`; do not
+  reimplement `dirname(snapshot_path)` for civic communication schedule,
+  scenario, run-ledger, or projection paths.
 - persisted scenario ids and template filenames may still contain
   domain-specific names such as `research-salon`, but implementation helpers
   should stay generic so new communication patterns do not require MoonBit

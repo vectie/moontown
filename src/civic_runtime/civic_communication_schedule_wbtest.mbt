@@ -4,6 +4,28 @@ test "default civic communication-pattern schedules are explicit opt-in" {
 }
 
 ///|
+test "civic communication paths use storage-owned snapshot base" {
+  assert_eq(
+    default_civic_communication_schedule_path(snapshot_path="town.json"),
+    ".moontown/civic/pattern-schedules.json",
+  )
+  assert_eq(
+    default_civic_communication_run_ledger_path(
+      "future energy/social square",
+      snapshot_path="/tmp/moontown/town.json",
+    ),
+    "/tmp/moontown/civic/pattern-runs/future-energy-social-square.jsonl",
+  )
+  assert_eq(
+    civic_communication_scenario_path(
+      "future energy/social square",
+      snapshot_path="/tmp/moontown/town.json",
+    ),
+    "/tmp/moontown/civic/pattern-scenarios/future-energy-social-square.json",
+  )
+}
+
+///|
 test "civic communication-pattern schedule uses real wall-clock due checks" {
   let schedule = daemon_civic_communication_schedule(next_due_ms=10UL)
   assert_true(!civic_communication_is_due(schedule, 9UL))

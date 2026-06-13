@@ -23,12 +23,7 @@ pub fn civic_communication_scenario_path(
 
 ///|
 fn civic_communication_base_dir(snapshot_path : String) -> String {
-  let base = @path.Path::dirname(snapshot_path).to_string()
-  if base == "." || base == "" {
-    ".moontown/civic"
-  } else {
-    "\{base}/civic"
-  }
+  "\{@storage.snapshot_base_dir(snapshot_path)}/civic"
 }
 
 ///|
@@ -66,10 +61,5 @@ fn civic_communication_projection_path_for_scenario(
 
 ///|
 fn civic_communication_workspace_base(snapshot_path : String) -> String {
-  let base = @path.Path::dirname(snapshot_path).to_string()
-  if base == "." || base == "" {
-    ".moontown"
-  } else {
-    base
-  }
+  @storage.snapshot_base_dir(snapshot_path)
 }
