@@ -249,7 +249,7 @@ async test "book quality package owns pending review selection from result files
 
 ///|
 test "book quality package owns imported review run status and launch summary" {
-  let dispatched = imported_review_run(
+  let dispatched = imported_review_run_from_observation(
     "book-run",
     "/tmp/packet.json",
     "/tmp/results",
@@ -270,7 +270,7 @@ test "book quality package owns imported review run status and launch summary" {
     "Imported proposal. Detached runner: moon run src/cmd/main -- proposal run run-id",
   )
   assert_eq(dispatched.generated_at_ms, 42UL)
-  let queued = imported_review_run(
+  let queued = imported_review_run_from_observation(
     "book-run",
     "/tmp/packet.json",
     "/tmp/results",

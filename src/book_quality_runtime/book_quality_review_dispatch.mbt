@@ -96,7 +96,7 @@ async fn dispatch_book_quality_ai_review_for_score(
       return run.summary
     }
   }
-  let run = @book_quality.imported_review_run_from_receipt(
+  let run = imported_book_quality_review_run_from_receipt(
     score.book_id,
     packet_path,
     result_dir,

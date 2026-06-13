@@ -5,7 +5,6 @@ import {
   "moonbitlang/core/debug",
   "moonbitlang/core/json",
   "vectie/moontown/adapters/moonbook",
-  "vectie/moontown/adapters/moonclaw",
   "vectie/moontown/core",
   "vectie/moontown/policy",
 }
@@ -65,7 +64,7 @@ pub async fn first_pending_review_score(BookQualityAudit, String) -> BookQuality
 
 pub fn generated_site_path() -> String
 
-pub async fn imported_review_run_from_receipt(String, String, String, @moonclaw.ProposalImportReceipt, String, Bool, UInt64) -> BookQualityReviewRun
+pub fn imported_review_run_from_observation(String, String, String, String, String?, String, String?, UInt64) -> BookQualityReviewRun
 
 pub fn is_repair_goal_id(String) -> Bool
 

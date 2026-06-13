@@ -162,6 +162,10 @@ MoonClaw external proposal packet at dispatch time. Root may pass the observed
 source root, resolved Codex command, args, and model, but it should not define
 the `codex-main` target schema, reviewer label, packet ids, context page paths,
 skill paths, tags, notes, request text, or metadata itself.
+Book-quality run-record semantics are package-owned, but MoonClaw import
+receipts and detached runner command lookup belong to `book_quality_runtime/`.
+Future plans should pass observed proposal/run fields into `book_quality/`
+instead of adding MoonClaw receipt types to the domain package.
 The same rule applies to ordinary catalog-backed keeper packets: caller code
 passes the catalog entry, task, and hydrated context, while
 `adapters/moonclaw` attaches the policy-owned context metadata and MoonClaw

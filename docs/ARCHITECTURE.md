@@ -409,7 +409,11 @@ those observations. The
 selection of the first pending semantic review, result-file filtering, the
 meaning of "weaker candidate should be reviewed first", the summary shape of the
 review ledger, and the active-run lifecycle decision from observed state belong
-to `book_quality/`.
+to `book_quality/`. Book-quality run records are also package-owned, but they
+are constructed from observed proposal id, run id, summary, optional launch
+command, and timestamp. `book_quality_runtime/` owns the MoonClaw import receipt
+adaptation and detached runner command lookup before calling that pure run-record
+constructor.
 
 Codex ACP defaults belong to the `adapters/codex` package. PlanBook repair,
 book-quality semantic review, and Wenyu source-build workers should not each
