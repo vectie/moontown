@@ -4,16 +4,16 @@ async test "due civic salon rounds persist schedule and run ledger" {
   @support.ignore_checked_command("rm", ["-rf", root])
   let snapshot_path = "\{root}/town.json"
   let book_catalog_path = "\{root}/books/catalog.json"
-  let schedule = daemon_civic_salon_schedule()
+  let schedule = daemon_civic_communication_schedule()
   save_civic_communication_schedules(
     default_civic_communication_schedule_path(snapshot_path~),
     [schedule],
   )
   @support.write_text_file(
     civic_communication_scenario_path(schedule.id, snapshot_path~),
-    daemon_civic_salon_scenario().to_json().stringify(indent=2),
+    daemon_civic_communication_scenario().to_json().stringify(indent=2),
   )
-  let summary = run_due_civic_salons(
+  let summary = run_due_civic_communication_patterns(
     snapshot_path~,
     book_catalog_path~,
     tick=3,
@@ -52,7 +52,7 @@ async test "stale civic salon projection refreshes without forcing another round
   let snapshot_path = "\{root}/town.json"
   let book_catalog_path = "\{root}/books/catalog.json"
   let schedule = {
-    ..daemon_civic_salon_schedule(),
+    ..daemon_civic_communication_schedule(),
     last_run_ms: 1_000UL,
     next_due_ms: 999_999UL,
     round_count: 2,
@@ -63,7 +63,7 @@ async test "stale civic salon projection refreshes without forcing another round
     default_civic_communication_schedule_path(snapshot_path~),
     [schedule],
   )
-  let scenario = daemon_civic_salon_scenario()
+  let scenario = daemon_civic_communication_scenario()
   @support.write_text_file(
     civic_communication_scenario_path(schedule.id, snapshot_path~),
     scenario.to_json().stringify(indent=2),
@@ -74,11 +74,11 @@ async test "stale civic salon projection refreshes without forcing another round
   )
   @support.write_text_file(
     "\{root}/books/wenyu-social-square/\{@civic.civic_reducer_output_relative_path()}",
-    Json::object({ "ideas": daemon_civic_salon_scenario().ideas.to_json() }).stringify(
-      indent=2,
-    ),
+    Json::object({
+      "ideas": daemon_civic_communication_scenario().ideas.to_json(),
+    }).stringify(indent=2),
   )
-  let summary = run_due_civic_salons(
+  let summary = run_due_civic_communication_patterns(
     snapshot_path~,
     book_catalog_path~,
     tick=99,
@@ -104,7 +104,7 @@ async test "stale civic salon projection refreshes without forcing another round
 async test "persisted civic reducer prefers scenario-specific output over shared building output" {
   let root = "/tmp/moontown-civic-salon-specific-output"
   @support.ignore_checked_command("rm", ["-rf", root])
-  let scenario = daemon_civic_salon_scenario()
+  let scenario = daemon_civic_communication_scenario()
   let workspace_base = root
   let raw_root = "\{root}/books/wenyu-social-square/raw/bootstrap"
   @support.write_text_file(
@@ -136,11 +136,11 @@ async test "active civic schedule reconciles completed persisted reducer output"
   let snapshot_path = "\{root}/town.json"
   let book_catalog_path = "\{root}/books/catalog.json"
   let schedule = {
-    ..daemon_civic_salon_schedule(next_due_ms=999_999UL),
+    ..daemon_civic_communication_schedule(next_due_ms=999_999UL),
     latest_round_id: "future-energy-social-square-round-1",
     latest_summary: "Running Future Energy Social Square Salon future-energy-social-square-round-1: MoonClaw reducer is still active.",
   }
-  let scenario = daemon_civic_salon_scenario()
+  let scenario = daemon_civic_communication_scenario()
   save_civic_communication_schedules(
     default_civic_communication_schedule_path(snapshot_path~),
     [schedule],
@@ -153,7 +153,7 @@ async test "active civic schedule reconciles completed persisted reducer output"
     "\{root}/books/wenyu-social-square/raw/bootstrap/future-energy-social-square-ideas.json",
     Json::object({ "ideas": scenario.ideas.to_json() }).stringify(indent=2),
   )
-  let summary = run_due_civic_salons(
+  let summary = run_due_civic_communication_patterns(
     snapshot_path~,
     book_catalog_path~,
     tick=100,

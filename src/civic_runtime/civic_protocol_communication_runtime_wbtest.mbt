@@ -1,6 +1,6 @@
 ///|
 test "civic salon scenario carries participant workspaces and cross-area ideas" {
-  let scenario = test_civic_salon_scenario()
+  let scenario = test_civic_communication_scenario()
   let participants = scenario.participants
   let ideas = scenario.ideas
   assert_eq(participants.length(), 2)
@@ -23,7 +23,7 @@ test "civic salon scenario carries participant workspaces and cross-area ideas" 
 
 ///|
 test "civic salon metrics count idea yield and home returns" {
-  let scenario = test_civic_salon_scenario()
+  let scenario = test_civic_communication_scenario()
   let participants = scenario.participants
   let ideas = scenario.ideas
   let metrics = civic_communication_metrics(scenario, participants, ideas)
@@ -60,7 +60,7 @@ test "civic salon metrics count idea yield and home returns" {
 
 ///|
 test "civic salon home return records map every idea to home books" {
-  let scenario = test_civic_salon_scenario()
+  let scenario = test_civic_communication_scenario()
   let ideas = scenario.ideas
   let records = civic_communication_home_return_records(
     scenario, "social-square", ideas,
@@ -74,17 +74,17 @@ test "civic salon home return records map every idea to home books" {
 
 ///|
 test "civic salon runtime summaries keep blocked and seeded states explicit" {
-  let scenario = test_civic_salon_scenario()
+  let scenario = test_civic_communication_scenario()
   let participants = scenario.participants
   let ideas = scenario.ideas
   let metrics = civic_communication_metrics(scenario, participants, ideas)
   assert_eq(
-    civic_salon_blocked_summary(
+    civic_communication_blocked_summary(
       scenario, "round-1", "reducer produced no outputs.",
     ),
     "Blocked Future Energy Social Square Salon round-1: reducer produced no outputs.",
   )
-  let seeded = civic_salon_seeded_summary(
+  let seeded = civic_communication_seeded_summary(
     scenario,
     "round-1",
     participants,
@@ -100,12 +100,12 @@ test "civic salon runtime summaries keep blocked and seeded states explicit" {
   assert_true(seeded.contains("2 follow-up question(s)"))
   assert_true(seeded.contains("2 returned output-home route(s)."))
   assert_true(seeded.contains("Reducer: fixture reducer"))
-  assert_eq(civic_salon_seeded_reducer_suffix(None), "")
+  assert_eq(civic_communication_seeded_reducer_suffix(None), "")
 }
 
 ///|
 test "civic salon participant workspaces do not pollute the public catalog" {
-  let scenario = test_civic_salon_scenario()
+  let scenario = test_civic_communication_scenario()
   let workspace_base = "/tmp/moontown-civic-salon-template"
   let stale_participant = civic_protocol_catalog_entry(
     id=scenario.participants[0].book_id,

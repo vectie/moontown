@@ -1,5 +1,5 @@
 ///|
-async fn bootstrap_civic_salon_scenario(
+pub async fn bootstrap_civic_communication_scenario(
   scenario : CivicCommunicationScenario,
   book_catalog_path? : String = @moonbook.default_catalog_path(),
   round_id? : String = "",
@@ -19,7 +19,7 @@ async fn bootstrap_civic_salon_scenario(
   )
   if reduction.status is @core.TaskExecutionStatus::Completed &&
     reduction.ideas.length() > 0 {
-    materialize_civic_salon_scenario(
+    materialize_civic_communication_scenario(
       scenario,
       reduction.ideas,
       book_catalog_path~,
@@ -32,12 +32,16 @@ async fn bootstrap_civic_salon_scenario(
     write_civic_communication_reducer_blocker(
       scenario, reduction, resolved_round_id,
     )
-    civic_salon_blocked_summary(scenario, resolved_round_id, reduction.summary)
+    civic_communication_blocked_summary(
+      scenario,
+      resolved_round_id,
+      reduction.summary,
+    )
   }
 }
 
 ///|
-async fn materialize_civic_salon_scenario(
+async fn materialize_civic_communication_scenario(
   scenario : CivicCommunicationScenario,
   ideas : Array[CivicCommunicationIdea],
   book_catalog_path? : String = @moonbook.default_catalog_path(),
@@ -47,7 +51,7 @@ async fn materialize_civic_salon_scenario(
   reducer_summary? : String? = None,
 ) -> String {
   if ideas.length() == 0 {
-    return civic_salon_blocked_summary(
+    return civic_communication_blocked_summary(
       scenario, round_id, "reducer produced no civic communication-pattern outputs.",
     )
   }
@@ -55,7 +59,7 @@ async fn materialize_civic_salon_scenario(
     scenario, ideas,
   )
   if validation_errors.length() > 0 {
-    return civic_salon_blocked_summary(
+    return civic_communication_blocked_summary(
       scenario,
       round_id,
       "invalid civic communication-pattern output: \{validation_errors.join("; ")}",
@@ -94,13 +98,13 @@ async fn materialize_civic_salon_scenario(
   )
   ignore(write_wenyu_building_protocol_status())
   ignore(write_wenyu_civic_status())
-  civic_salon_seeded_summary(
+  civic_communication_seeded_summary(
     scenario, round_id, participants, ideas, metrics, reducer_summary,
   )
 }
 
 ///|
-fn civic_salon_blocked_summary(
+fn civic_communication_blocked_summary(
   scenario : CivicCommunicationScenario,
   round_id : String,
   reason : String,
@@ -109,7 +113,7 @@ fn civic_salon_blocked_summary(
 }
 
 ///|
-fn civic_salon_seeded_summary(
+fn civic_communication_seeded_summary(
   scenario : CivicCommunicationScenario,
   round_id : String,
   participants : Array[CivicCommunicationParticipantBook],
@@ -118,15 +122,15 @@ fn civic_salon_seeded_summary(
   reducer_summary : String?,
 ) -> String {
   [
-    civic_salon_seeded_summary_core(
+    civic_communication_seeded_summary_core(
       scenario, round_id, participants, ideas, metrics,
     ),
-    civic_salon_seeded_reducer_suffix(reducer_summary),
+    civic_communication_seeded_reducer_suffix(reducer_summary),
   ].join("")
 }
 
 ///|
-fn civic_salon_seeded_summary_core(
+fn civic_communication_seeded_summary_core(
   scenario : CivicCommunicationScenario,
   round_id : String,
   participants : Array[CivicCommunicationParticipantBook],
@@ -143,7 +147,9 @@ fn civic_salon_seeded_summary_core(
 }
 
 ///|
-fn civic_salon_seeded_reducer_suffix(reducer_summary : String?) -> String {
+fn civic_communication_seeded_reducer_suffix(
+  reducer_summary : String?,
+) -> String {
   match reducer_summary {
     Some(summary) => " Reducer: \{summary}"
     None => ""

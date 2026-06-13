@@ -1,5 +1,5 @@
 ///|
-async fn render_civic_salon_schedule_status(
+pub async fn render_civic_communication_schedule_status(
   snapshot_path? : String = @storage.default_snapshot_path(),
 ) -> String {
   let schedules = load_or_create_civic_communication_schedules(

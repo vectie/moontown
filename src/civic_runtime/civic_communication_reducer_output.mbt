@@ -44,7 +44,7 @@ async fn load_persisted_civic_communication_reducer_output(
 ) -> Array[CivicCommunicationIdea]? {
   match
     load_civic_communication_outputs_file(
-      civic_salon_scenario_output_path(scenario, workspace_base),
+      civic_communication_scenario_output_path(scenario, workspace_base),
     ) {
     Some(ideas) => return Some(ideas)
     None => ()
@@ -95,13 +95,13 @@ async fn persist_civic_communication_reducer_output(
     Json::object({ "ideas": ideas.to_json() }).stringify(indent=2),
   )
   @support.write_text_file(
-    civic_salon_scenario_output_path(scenario, workspace_base),
+    civic_communication_scenario_output_path(scenario, workspace_base),
     Json::object({ "ideas": ideas.to_json() }).stringify(indent=2),
   )
 }
 
 ///|
-fn civic_salon_scenario_output_path(
+fn civic_communication_scenario_output_path(
   scenario : CivicCommunicationScenario,
   workspace_base : String,
 ) -> String {

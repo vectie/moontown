@@ -8,9 +8,10 @@ async fn run_due_civic_communication_round(
   reducer_mode : CivicCommunicationReductionMode,
   run_inline : Bool,
 ) -> (CivicCommunicationSchedule, String) {
-  match load_civic_salon_scenario_for_schedule(schedule, snapshot_path) {
+  match
+    load_civic_communication_scenario_for_schedule(schedule, snapshot_path) {
     Some(scenario) =>
-      run_civic_salon_scenario_round(
+      run_civic_communication_scenario_round(
         scenario, schedule, snapshot_path, book_catalog_path, tick, now_ms, reducer_mode,
         run_inline,
       )
@@ -19,7 +20,7 @@ async fn run_due_civic_communication_round(
 }
 
 ///|
-async fn run_civic_salon_scenario_round(
+async fn run_civic_communication_scenario_round(
   scenario : CivicCommunicationScenario,
   schedule : CivicCommunicationSchedule,
   snapshot_path : String,
@@ -95,7 +96,7 @@ async fn civic_communication_round_decision_summary(
     validation_errors.length() == 0 {
     return (
       "review",
-      materialize_civic_salon_scenario(
+      materialize_civic_communication_scenario(
         scenario,
         ideas,
         book_catalog_path~,

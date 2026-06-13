@@ -789,16 +789,18 @@ Boundary:
 
 - civic runtime writes generated pages through `@civic` path helpers.
 - civic runtime public APIs should use communication-pattern vocabulary.
-  `research-salon` is one configured pattern; old `civic_salon_*` helper names
-  are package-private implementation details while migration continues.
+  `research-salon` is one configured pattern; runtime helper names should use
+  `civic_communication_*` vocabulary rather than treating salon as the generic
+  abstraction.
 - civic runtime writes reducer workspaces through `@civic` reducer-contract
   helpers; it should not hardcode reducer filenames or profile family ids.
 - civic runtime reducer helpers use `civic_communication_reducer_*` names.
 - civic runtime schedule/path helpers use `civic_communication_*` names and
   should preserve persisted `pattern-*` file locations.
-- remaining `civic_salon_*` runtime helpers are legacy page/projection/workspace
-  materialization vocabulary and should be migrated in later focused passes
-  without changing persisted paths.
+- persisted scenario ids and template filenames may still contain
+  domain-specific names such as `research-salon`, but implementation helpers
+  should stay generic so new communication patterns do not require MoonBit
+  branches.
 - `src/town_runtime` may choose when a civic service result should be persisted,
   but should not assemble civic persistence summaries, artifact lists, or memory
   candidates.

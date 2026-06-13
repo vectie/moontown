@@ -1,5 +1,5 @@
 ///|
-async fn refresh_civic_salon_projection_if_stale(
+async fn refresh_civic_communication_projection_if_stale(
   schedule : CivicCommunicationSchedule,
   snapshot_path : String,
   book_catalog_path : String,
@@ -9,7 +9,8 @@ async fn refresh_civic_salon_projection_if_stale(
     schedule.latest_round_id.is_empty() {
     return None
   }
-  match load_civic_salon_scenario_for_schedule(schedule, snapshot_path) {
+  match
+    load_civic_communication_scenario_for_schedule(schedule, snapshot_path) {
     Some(scenario) => {
       let projection_path = civic_communication_projection_path_for_scenario(
         scenario, snapshot_path,
@@ -17,7 +18,7 @@ async fn refresh_civic_salon_projection_if_stale(
       let text = @support.read_text_or_empty(projection_path)
       let projection_current = text.contains(schedule.latest_round_id) &&
         text.contains("round \{schedule.round_count}")
-      let protocol_ledgers_current = civic_salon_protocol_ledgers_current(
+      let protocol_ledgers_current = civic_communication_protocol_ledgers_current(
         schedule,
       )
       if projection_current && protocol_ledgers_current {
@@ -33,7 +34,7 @@ async fn refresh_civic_salon_projection_if_stale(
         )
         if reduction.status is @core.TaskExecutionStatus::Completed &&
           reduction.ideas.length() > 0 {
-          let summary = materialize_civic_salon_scenario(
+          let summary = materialize_civic_communication_scenario(
             scenario,
             reduction.ideas,
             book_catalog_path~,
@@ -57,7 +58,7 @@ async fn refresh_civic_salon_projection_if_stale(
 }
 
 ///|
-async fn civic_salon_protocol_ledgers_current(
+async fn civic_communication_protocol_ledgers_current(
   schedule : CivicCommunicationSchedule,
 ) -> Bool {
   for

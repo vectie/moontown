@@ -1,5 +1,5 @@
 ///|
-async fn bootstrap_civic_salon_scenario_file(
+pub async fn bootstrap_civic_communication_scenario_file(
   template_path : String,
   book_catalog_path? : String = @moonbook.default_catalog_path(),
   round_id? : String = "",
@@ -7,12 +7,12 @@ async fn bootstrap_civic_salon_scenario_file(
   workspace_base? : String = "",
   reducer_mode? : CivicCommunicationReductionMode = MoonClawReducer,
 ) -> String {
-  match load_civic_salon_scenario_file(template_path) {
+  match load_civic_communication_scenario_file(template_path) {
     Some(scenario) => {
       let resolved_round_id = civic_pattern_round_id_for_scenario(
         scenario, round_id, round_number,
       )
-      let summary = bootstrap_civic_salon_scenario(
+      let summary = bootstrap_civic_communication_scenario(
         scenario,
         book_catalog_path~,
         round_id=resolved_round_id,
@@ -20,12 +20,13 @@ async fn bootstrap_civic_salon_scenario_file(
         workspace_base~,
         reducer_mode~,
       )
-      install_civic_salon_scenario_for_daemon(
+      install_civic_communication_scenario_for_daemon(
         scenario, workspace_base, resolved_round_id, round_number, summary,
       )
       summary
     }
-    None => "Could not load civic salon scenario template: \{template_path}"
+    None =>
+      "Could not load civic communication pattern scenario template: \{template_path}"
   }
 }
 
@@ -35,7 +36,7 @@ pub async fn install_civic_pattern_scenario_file(
   snapshot_path? : String = @storage.default_snapshot_path(),
   due_now? : Bool = false,
 ) -> String {
-  match load_civic_salon_scenario_file(template_path) {
+  match load_civic_communication_scenario_file(template_path) {
     Some(scenario) => {
       let now_ms = @env.now()
       let due_ms = if due_now { now_ms } else { now_ms + 1_800_000UL }
@@ -72,7 +73,7 @@ async fn install_civic_pattern_scenario(
     civic_communication_scenario_path(scenario.id, snapshot_path~),
     scenario.to_json().stringify(indent=2),
   )
-  upsert_civic_salon_schedule_for_scenario(
+  upsert_civic_communication_schedule_for_scenario(
     scenario,
     path=default_civic_communication_schedule_path(snapshot_path~),
     now_ms=first_due_ms,
@@ -80,14 +81,14 @@ async fn install_civic_pattern_scenario(
 }
 
 ///|
-async fn install_civic_salon_scenario_for_daemon(
+async fn install_civic_communication_scenario_for_daemon(
   scenario : CivicCommunicationScenario,
   workspace_base : String,
   round_id : String,
   round_number : Int,
   summary : String,
 ) -> Unit {
-  let snapshot_path = civic_salon_snapshot_path_for_workspace_base(
+  let snapshot_path = civic_communication_snapshot_path_for_workspace_base(
     workspace_base,
   )
   let now_ms = @env.now()
@@ -98,7 +99,7 @@ async fn install_civic_salon_scenario_for_daemon(
   let next = if summary.has_prefix("Blocked ") {
     retry_civic_communication_schedule(installed, now_ms, round_id, summary)
   } else {
-    mark_civic_salon_schedule_after_template_round(
+    mark_civic_communication_schedule_after_template_round(
       installed, now_ms, round_id, round_number, summary,
     )
   }
@@ -118,7 +119,7 @@ async fn install_civic_salon_scenario_for_daemon(
 }
 
 ///|
-fn mark_civic_salon_schedule_after_template_round(
+fn mark_civic_communication_schedule_after_template_round(
   schedule : CivicCommunicationSchedule,
   now_ms : UInt64,
   round_id : String,
@@ -145,7 +146,7 @@ fn mark_civic_salon_schedule_after_template_round(
 }
 
 ///|
-fn civic_salon_snapshot_path_for_workspace_base(
+fn civic_communication_snapshot_path_for_workspace_base(
   workspace_base : String,
 ) -> String {
   if workspace_base.trim().is_empty() {
@@ -156,7 +157,7 @@ fn civic_salon_snapshot_path_for_workspace_base(
 }
 
 ///|
-async fn load_civic_salon_scenario_file(
+async fn load_civic_communication_scenario_file(
   path : String,
 ) -> CivicCommunicationScenario? {
   let parsed = match @support.read_optional_json_file(path) {
@@ -169,7 +170,7 @@ async fn load_civic_salon_scenario_file(
 }
 
 ///|
-async fn load_civic_salon_scenario_for_schedule(
+async fn load_civic_communication_scenario_for_schedule(
   schedule : CivicCommunicationSchedule,
   snapshot_path : String,
 ) -> CivicCommunicationScenario? {
@@ -177,5 +178,5 @@ async fn load_civic_salon_scenario_for_schedule(
     schedule.id,
     snapshot_path~,
   )
-  load_civic_salon_scenario_file(template_path)
+  load_civic_communication_scenario_file(template_path)
 }

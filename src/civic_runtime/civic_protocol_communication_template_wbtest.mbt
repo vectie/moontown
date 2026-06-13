@@ -1,12 +1,12 @@
 ///|
-async test "civic salon scenario template can seed a non-hardcoded domain" {
+async test "civic communication scenario template can seed a non-hardcoded domain" {
   let root = cleaned_civic_protocol_test_root(
     "/tmp/moontown-civic-salon-template",
   )
-  let template_path = write_test_civic_salon_template(root)
+  let template_path = write_test_civic_communication_template(root)
   let book_catalog_path = "\{root}/catalog.json"
-  let scenario = test_civic_salon_scenario()
-  let summary = bootstrap_civic_salon_scenario_file(
+  let scenario = test_civic_communication_scenario()
+  let summary = bootstrap_civic_communication_scenario_file(
     template_path,
     book_catalog_path~,
     round_id="future-energy-round-1",
@@ -58,8 +58,8 @@ async test "civic pattern template uses scenario round id by default" {
   let root = cleaned_civic_protocol_test_root(
     "/tmp/moontown-civic-pattern-template-default-round",
   )
-  let template_path = write_test_civic_salon_template(root)
-  let summary = bootstrap_civic_salon_scenario_file(
+  let template_path = write_test_civic_communication_template(root)
+  let summary = bootstrap_civic_communication_scenario_file(
     template_path,
     book_catalog_path="\{root}/catalog.json",
     workspace_base=root,
@@ -81,13 +81,13 @@ async test "civic salon scenario can define a building protocol without registry
     "/tmp/moontown-civic-salon-generic-building",
   )
   let scenario = {
-    ..test_civic_salon_scenario(),
+    ..test_civic_communication_scenario(),
     id: "future-energy-forum",
     title: "Future Energy Forum Salon",
     building_id: "future-energy-forum",
     building_book_id: "future-energy-forum-book",
   }
-  let summary = bootstrap_civic_salon_scenario(
+  let summary = bootstrap_civic_communication_scenario(
     scenario,
     book_catalog_path="\{root}/catalog.json",
     round_id="future-energy-forum-round-1",

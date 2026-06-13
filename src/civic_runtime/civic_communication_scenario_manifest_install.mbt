@@ -27,7 +27,7 @@ pub async fn install_civic_pattern_scenario_manifest(
   let mut due_ms = @env.now() + 300_000UL
   for template in manifest.templates {
     match
-      load_civic_salon_scenario_file(
+      load_civic_communication_scenario_file(
         resolve_manifest_template_path(base_dir, template),
       ) {
       Some(scenario) => {

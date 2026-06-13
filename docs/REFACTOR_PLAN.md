@@ -55,14 +55,15 @@ by Moontown and MoonBook.
 - `research-salon` is now one pattern in the civic communication-pattern
   registry, alongside `signal-watch`, `triage-desk`, `review-council`,
   `match-market`, `learning-cohort`, `story-forge`, and `incident-bridge`.
-- The former salon daemon surface has been split into communication schedule
-  types, paths, schedule persistence, reconciliation, and runner files.
+- The former salon-specific daemon surface has been split into generic
+  communication schedule types, paths, schedule persistence, reconciliation,
+  and runner files.
 - `runtime_status.mbt` now invokes a generic daemon scheduled-job dispatcher,
   but the dispatcher still lives in the root package pending a package split.
 - `src/ui/rabbita-town/main/main.mbt` has been split into focused frontend
   files, but some policy/view clusters still need extraction so UI code remains
   a projection layer instead of becoming a civic-policy layer.
-- The salon reducer boundary now exists. Production rounds use MoonClaw to
+- The communication-pattern reducer boundary now exists. Production rounds use MoonClaw to
   emit `CivicCommunicationIdea` JSON from generated skills and participant context;
   deterministic template ideas are isolated behind explicit fixture mode.
 
@@ -74,9 +75,9 @@ Status: implemented in this refactor pass.
 
 Goals:
 
-- split the civic salon daemon into focused files
+- split the civic communication-pattern daemon into focused files
 - add a generic daemon scheduled-job dispatcher
-- route salon execution through salon definitions and scenario kinds instead
+- route communication-pattern execution through scenario definitions instead
   of matching raw schedule ids in the runner
 - keep existing CLI commands and generated files stable
 - keep `moon test`, `moon check`, `moon fmt`, and `moon info` passing
@@ -86,7 +87,7 @@ Acceptance:
 - `civic protocols schedules tick` still advances or refreshes the communication-pattern session
 - daemon tick still records civic communication-pattern events when a session actually runs
 - the Social Square viewport still reads the latest round from projections
-- targeted salon and daemon scheduled-job tests pass
+- targeted communication-pattern and daemon scheduled-job tests pass
 
 ### Stage 2: Protocol Runtime File Split
 
@@ -99,11 +100,11 @@ Goals:
   named packages
 - split the protocol runtime into protocol registry/bootstrap,
   protocol ledger store, protocol status projection, Social Square proof
-  fixture, generic civic salon scenario records, scenario runtime, and
+  fixture, generic civic communication scenario records, scenario runtime, and
   MoonBook projection writer
 - keep fixtures explicitly named as fixtures so they are not confused with the
   final MoonClaw reducer architecture
-- make domain-specific salons data-driven through scenario templates instead
+- make domain-specific communication patterns data-driven through scenario templates instead
   of adding new MoonBit branches
 
 Acceptance:
@@ -377,20 +378,20 @@ Acceptance:
 
 ### Stage 4: Skill-Driven Reducers
 
-Status: first production boundary implemented for civic salons.
+Status: first production boundary implemented for civic communication patterns.
 
 Goals:
 
-- replace deterministic salon idea reduction with MoonClaw role packets
+- replace deterministic fixture output reduction with MoonClaw role packets
 - keep the same building protocol envelope and ledgers
 - make each civic building choose reductions through generated `SKILL.md`
   plus scenario template context
 
 Acceptance:
 
-- Social Square can run any valid salon scenario through a skill-driven
+- Social Square can run any valid communication scenario through a skill-driven
   MoonClaw reducer and produce reviewable outputs
-- a new salon building can be added by scenario template plus schedule entry
+- a new communication-pattern building can be added by scenario template plus schedule entry
   without changing Moontown MoonBit code
 - deterministic fixture mode is retained only for tests and explicit smoke
   demos

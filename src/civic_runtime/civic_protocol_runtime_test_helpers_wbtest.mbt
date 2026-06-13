@@ -10,11 +10,11 @@ fn civic_protocol_test_template_path(root : String) -> String {
 }
 
 ///|
-async fn write_test_civic_salon_template(root : String) -> String {
+async fn write_test_civic_communication_template(root : String) -> String {
   let template_path = civic_protocol_test_template_path(root)
   @support.write_text_file(
     template_path,
-    test_civic_salon_scenario().to_json().stringify(indent=2),
+    test_civic_communication_scenario().to_json().stringify(indent=2),
   )
   template_path
 }
@@ -66,7 +66,7 @@ fn civic_protocol_catalog_entry(
 }
 
 ///|
-fn test_civic_salon_scenario() -> CivicCommunicationScenario {
+fn test_civic_communication_scenario() -> CivicCommunicationScenario {
   {
     id: "future-energy-social-square",
     title: "Future Energy Social Square Salon",

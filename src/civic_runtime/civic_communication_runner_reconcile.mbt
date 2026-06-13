@@ -1,5 +1,5 @@
 ///|
-async fn refresh_or_reconcile_civic_salon_schedule(
+async fn refresh_or_reconcile_civic_communication_schedule(
   schedule : CivicCommunicationSchedule,
   schedule_path : String,
   snapshot_path : String,
@@ -8,7 +8,7 @@ async fn refresh_or_reconcile_civic_salon_schedule(
   now_ms : UInt64,
 ) -> String? {
   match
-    reconcile_civic_salon_schedule_if_completed(
+    reconcile_civic_communication_schedule_if_completed(
       schedule, snapshot_path, book_catalog_path, tick, now_ms,
     ) {
     Some((next, summary)) => {
@@ -16,26 +16,27 @@ async fn refresh_or_reconcile_civic_salon_schedule(
       Some(summary)
     }
     None =>
-      refresh_civic_salon_projection_if_stale(
+      refresh_civic_communication_projection_if_stale(
         schedule, snapshot_path, book_catalog_path,
       )
   }
 }
 
 ///|
-async fn reconcile_civic_salon_schedule_if_completed(
+async fn reconcile_civic_communication_schedule_if_completed(
   schedule : CivicCommunicationSchedule,
   snapshot_path : String,
   book_catalog_path : String,
   tick : Int,
   now_ms : UInt64,
 ) -> (CivicCommunicationSchedule, String)? {
-  if !civic_salon_schedule_has_active_round(schedule) {
+  if !civic_communication_schedule_has_active_round(schedule) {
     return None
   }
-  match load_civic_salon_scenario_for_schedule(schedule, snapshot_path) {
+  match
+    load_civic_communication_scenario_for_schedule(schedule, snapshot_path) {
     Some(scenario) =>
-      reconcile_civic_salon_scenario_round(
+      reconcile_civic_communication_scenario_round(
         scenario, schedule, snapshot_path, book_catalog_path, tick, now_ms,
       )
     None => None
@@ -43,7 +44,7 @@ async fn reconcile_civic_salon_schedule_if_completed(
 }
 
 ///|
-fn civic_salon_schedule_has_active_round(
+fn civic_communication_schedule_has_active_round(
   schedule : CivicCommunicationSchedule,
 ) -> Bool {
   schedule.enabled &&
@@ -52,7 +53,7 @@ fn civic_salon_schedule_has_active_round(
 }
 
 ///|
-async fn reconcile_civic_salon_scenario_round(
+async fn reconcile_civic_communication_scenario_round(
   scenario : CivicCommunicationScenario,
   schedule : CivicCommunicationSchedule,
   snapshot_path : String,
@@ -72,7 +73,7 @@ async fn reconcile_civic_salon_scenario_round(
     reduction.ideas.length() == 0 {
     return None
   }
-  let summary = materialize_civic_salon_scenario(
+  let summary = materialize_civic_communication_scenario(
     scenario,
     reduction.ideas,
     book_catalog_path~,

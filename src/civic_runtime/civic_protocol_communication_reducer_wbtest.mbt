@@ -3,7 +3,7 @@ async test "MoonClaw reducer workspace excludes template seed ideas" {
   let root = cleaned_civic_protocol_test_root(
     "/tmp/moontown-civic-salon-reducer-input",
   )
-  let scenario = test_civic_salon_scenario()
+  let scenario = test_civic_communication_scenario()
   write_civic_communication_reducer_workspace(
     scenario, root, "future-energy-round-2", 2,
   )
@@ -30,7 +30,7 @@ async test "civic salon reducer profile preserves existing civic service worker 
     "{ \"jobs\": { \"profiles\": { \"wenyu_civic_service_worker\": { \"family\": \"wenyu_civic_service_worker\", \"steps\": [{\"id\":\"execute_civic_service\"},{\"id\":\"review_civic_service\"}] } } } }",
   )
   write_civic_communication_reducer_workspace(
-    test_civic_salon_scenario(),
+    test_civic_communication_scenario(),
     root,
     "future-energy-round-3",
     3,
@@ -48,7 +48,7 @@ async test "civic salon reducer parses object ideas contract" {
   let root = cleaned_civic_protocol_test_root(
     "/tmp/moontown-civic-salon-reducer-contract",
   )
-  let scenario = test_civic_salon_scenario()
+  let scenario = test_civic_communication_scenario()
   let path = civic_communication_reducer_output_path_in_workspace(root)
   @support.write_text_file(
     path,

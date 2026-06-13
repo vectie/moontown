@@ -4,8 +4,8 @@ async test "invalid civic scenario blocks instead of crashing protocol seeding" 
   @support.ignore_checked_command("rm", ["-rf", root])
   let snapshot_path = "\{root}/town.json"
   let book_catalog_path = "\{root}/books/catalog.json"
-  let schedule = daemon_civic_salon_schedule()
-  let scenario = { ..daemon_civic_salon_scenario(), participants: [] }
+  let schedule = daemon_civic_communication_schedule()
+  let scenario = { ..daemon_civic_communication_scenario(), participants: [] }
   save_civic_communication_schedules(
     default_civic_communication_schedule_path(snapshot_path~),
     [schedule],
@@ -14,7 +14,7 @@ async test "invalid civic scenario blocks instead of crashing protocol seeding" 
     civic_communication_scenario_path(schedule.id, snapshot_path~),
     scenario.to_json().stringify(indent=2),
   )
-  let summary = run_due_civic_salons(
+  let summary = run_due_civic_communication_patterns(
     snapshot_path~,
     book_catalog_path~,
     tick=5,
@@ -41,8 +41,8 @@ async test "invalid civic idea participant reference is reviewable blocker" {
   @support.ignore_checked_command("rm", ["-rf", root])
   let snapshot_path = "\{root}/town.json"
   let book_catalog_path = "\{root}/books/catalog.json"
-  let schedule = daemon_civic_salon_schedule()
-  let base = daemon_civic_salon_scenario()
+  let schedule = daemon_civic_communication_schedule()
+  let base = daemon_civic_communication_scenario()
   let bad_idea = {
     ..base.ideas[0],
     participating_books: ["future-energy-storage", "missing-book"],
@@ -56,7 +56,7 @@ async test "invalid civic idea participant reference is reviewable blocker" {
     civic_communication_scenario_path(schedule.id, snapshot_path~),
     scenario.to_json().stringify(indent=2),
   )
-  let summary = run_due_civic_salons(
+  let summary = run_due_civic_communication_patterns(
     snapshot_path~,
     book_catalog_path~,
     tick=6,

@@ -1,5 +1,5 @@
 ///|
-async fn run_due_civic_salons(
+pub async fn run_due_civic_communication_patterns(
   snapshot_path? : String = @storage.default_snapshot_path(),
   book_catalog_path? : String = @moonbook.default_catalog_path(),
   tick? : Int = 0,
@@ -27,7 +27,7 @@ async fn run_due_civic_salons(
       summaries.push(summary)
     } else {
       match
-        refresh_or_reconcile_civic_salon_schedule(
+        refresh_or_reconcile_civic_communication_schedule(
           schedule, schedule_path, snapshot_path, book_catalog_path, tick, now_ms,
         ) {
         Some(summary) => refreshes.push(summary)

@@ -10,7 +10,7 @@ async test "Wenyu civic pattern manifest covers every civic building as data" {
   let services = @civic.wenyu_civic_services()
   for template in manifest.templates {
     let path = "assets/templates/civic-patterns/\{template}"
-    match load_civic_salon_scenario_file(path) {
+    match load_civic_communication_scenario_file(path) {
       Some(scenario) => {
         assert_true(!seen.contains(scenario.building_id))
         seen.push(scenario.building_id)

@@ -156,11 +156,11 @@ pub fn merge_default_daemon_jobs(
 
 ///|
 fn daemon_job_deprecated(job : ScheduledJob) -> Bool {
-  retired_civic_salon_job(job)
+  retired_legacy_civic_communication_job(job)
 }
 
 ///|
-fn retired_civic_salon_job(job : ScheduledJob) -> Bool {
+fn retired_legacy_civic_communication_job(job : ScheduledJob) -> Bool {
   job.id == "run-civic-salons" || job.kind == "civic-salon"
 }
 
