@@ -514,6 +514,8 @@ Key files:
 
 - [src/book_quality/policy_specs.mbt](/Users/kq/Workspace/moontown/src/book_quality/policy_specs.mbt)
 - [src/book_quality/scoring_engine.mbt](/Users/kq/Workspace/moontown/src/book_quality/scoring_engine.mbt)
+- [src/book_quality/scoring_primitives.mbt](/Users/kq/Workspace/moontown/src/book_quality/scoring_primitives.mbt)
+- [src/book_quality/civic_service_scoring.mbt](/Users/kq/Workspace/moontown/src/book_quality/civic_service_scoring.mbt)
 - [src/book_quality/review_context.mbt](/Users/kq/Workspace/moontown/src/book_quality/review_context.mbt)
 - [src/book_quality/repair_goal_policy.mbt](/Users/kq/Workspace/moontown/src/book_quality/repair_goal_policy.mbt)
 
@@ -555,6 +557,10 @@ Boundary:
   come from `src/policy`.
 - `src/book_quality` owns quality scoring and repair-action wording, not the
   policy taxonomy itself.
+- `src/book_quality/scoring_engine.mbt` owns book-type scoring orchestration.
+  Reusable draft/finalization/path-scoring internals belong in
+  `scoring_primitives.mbt`; civic-service scoring details belong in
+  `civic_service_scoring.mbt`.
 
 ## Build Pipeline
 
