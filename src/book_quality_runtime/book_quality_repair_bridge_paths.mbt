@@ -1,6 +1,8 @@
 ///|
 async fn book_quality_current_daemon_tick(snapshot_path : String) -> Int {
-  let path = book_quality_daemon_state_path(snapshot_path)
+  let path = @daemon_runtime_policy.daemon_state_path_for_snapshot(
+    snapshot_path,
+  )
   if !@fs.exists(path) {
     return 0
   }
@@ -16,21 +18,9 @@ async fn book_quality_current_daemon_tick(snapshot_path : String) -> Int {
 }
 
 ///|
-fn book_quality_daemon_state_path(snapshot_path : String) -> String {
-  let base = @path.Path::dirname(snapshot_path).to_string()
-  if base == "." || base == "" {
-    ".moontown/daemon.json"
-  } else {
-    "\{base}/daemon.json"
-  }
-}
-
-///|
 fn book_quality_standing_goal_path(snapshot_path : String) -> String {
-  let base = @path.Path::dirname(snapshot_path).to_string()
-  if base == "." || base == "" {
-    @storage.default_standing_goal_path()
-  } else {
-    "\{base}/standing-goals.json"
-  }
+  @daemon_runtime_policy.daemon_standing_goal_path_for_snapshot(
+    snapshot_path,
+    @storage.default_standing_goal_path(),
+  )
 }

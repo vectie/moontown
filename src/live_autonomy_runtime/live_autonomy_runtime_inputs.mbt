@@ -11,7 +11,9 @@ async fn load_live_autonomy_runtime_inputs(
   state : @core.TownState,
 ) -> LiveAutonomyRuntimeInputs {
   let loaded = load_live_autonomy_watch_inputs(snapshot_path)
-  let daemon = load_daemon_state(default_daemon_state_path(snapshot_path))
+  let daemon = load_daemon_state(
+    @daemon_runtime_policy.daemon_state_path_for_snapshot(snapshot_path),
+  )
   let daemon_tick = effective_daemon_tick(
     snapshot_path,
     daemon,
@@ -31,7 +33,9 @@ async fn load_live_autonomy_runtime_inputs_without_snapshot(
   snapshot_path : String,
 ) -> LiveAutonomyRuntimeInputs {
   let loaded = load_live_autonomy_watch_inputs(snapshot_path)
-  let daemon = load_daemon_state(default_daemon_state_path(snapshot_path))
+  let daemon = load_daemon_state(
+    @daemon_runtime_policy.daemon_state_path_for_snapshot(snapshot_path),
+  )
   {
     standing_goals: loaded.standing_goals,
     watcher_records: loaded.watcher_records,

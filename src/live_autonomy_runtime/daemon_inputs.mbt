@@ -15,11 +15,6 @@ async fn load_daemon_state(path : String) -> @scheduler.DaemonState {
 }
 
 ///|
-fn default_daemon_state_path(snapshot_path : String) -> String {
-  @daemon_runtime_policy.daemon_state_path_for_snapshot(snapshot_path)
-}
-
-///|
 async fn effective_daemon_tick(
   snapshot_path : String,
   daemon : @scheduler.DaemonState,

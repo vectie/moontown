@@ -851,6 +851,10 @@ Boundary:
 - supervisor loops must ask `daemon_runtime_policy` whether worker spawn is due.
 - town runtime may spawn or stop processes, but should not compare raw daemon
   status strings such as `missing`, `stopped`, `running`, or `ticking`.
+- daemon-state and standing-goal paths derived from a town snapshot path must
+  come from `daemon_runtime_policy`; live-autonomy and book-quality runtime code
+  may read those files, but should not reimplement `dirname(snapshot)` path
+  logic locally.
 - town runtime may call the scheduled-job phase during a tick, but should not
   own scheduled-job interval math, scheduled-job dispatch, or the decision that
   a summary is meaningful enough to become a town event.
