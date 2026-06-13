@@ -260,8 +260,9 @@ book owns. The implementation now has a first-class `policy` package:
   checks, wiki materialization checks, generated-site specificity checks, and
   process-noise rejection. It also owns the generic research bootstrap ingest
   task contract: title, prompt clauses, target pages, review requirement, and
-  worker role. It owns the `raw/bootstrap/QUALITY_REPAIR.md` trigger/resolution
-  file contract used for in-place research repair. It also owns research
+  worker role. It owns the `raw/bootstrap/QUALITY_REPAIR.md` path and
+  trigger/resolution Markdown contract used for in-place research repair.
+  It also owns research
   bootstrap artifact reading and the persistence payload that turns those
   artifacts into MoonBook summaries, artifact paths, and durable memory
   candidates. Research quality also owns quality-gate summary suffixes and
@@ -273,6 +274,11 @@ book owns. The implementation now has a first-class `policy` package:
   semantics, and quality-gate/recovery messages.
   Generated-site quality checks consume `policy.default_generated_site_projection_path()`
   for the default projection path instead of redefining it locally.
+- [research_quality_runtime/](/Users/kq/Workspace/moontown/src/research_quality_runtime)
+  owns research-quality runtime side effects that cross into the filesystem:
+  writing active `QUALITY_REPAIR.md` trigger files, resolving those trigger
+  files, and preserving the package-owned trigger text/path contract without
+  keeping file-write code in `research_quality/`.
 - [course_book/](/Users/kq/Workspace/moontown/src/course_book)
   owns the Wenyu game-design course book identity, catalog-entry shape, course
   contract/outline/exercises/rubric text, course-builder skill text, generated

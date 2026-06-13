@@ -69,7 +69,7 @@ async fn write_research_quality_review_trigger_for_state(
       memory_scope=book.memory_scope,
       tags=book.tags,
     )
-    @research_quality.write_research_quality_review_trigger(
+    @research_quality_runtime.write_research_quality_review_trigger(
       entry, quality_gaps, reason,
     )
     return

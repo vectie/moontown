@@ -92,7 +92,7 @@ async test "research quality gate schedules in-place repair retry" {
   let trigger = @fs.read_file(root + "/raw/bootstrap/QUALITY_REPAIR.md").text()
   assert_true(trigger.contains("in-place review/repair"))
   assert_true(trigger.contains("do not create a new v1/v2/v3/v4 book"))
-  @research_quality.write_research_quality_review_resolved(
+  @research_quality_runtime.write_research_quality_review_resolved(
     @test_fixtures.llm_research_catalog_entry(
       "research-how-llm-are-trained-in-very-detail", root,
     ),

@@ -807,6 +807,7 @@ Key files:
 - [src/research_quality/persistence_payload.mbt](/Users/kq/Workspace/moontown/src/research_quality/persistence_payload.mbt)
 - [src/research_quality/bootstrap_artifacts.mbt](/Users/kq/Workspace/moontown/src/research_quality/bootstrap_artifacts.mbt)
 - [src/research_quality/quality_gate_events.mbt](/Users/kq/Workspace/moontown/src/research_quality/quality_gate_events.mbt)
+- [src/research_quality_runtime/review_trigger.mbt](/Users/kq/Workspace/moontown/src/research_quality_runtime/review_trigger.mbt)
 
 Purpose:
 
@@ -815,8 +816,9 @@ Purpose:
   review requirement, and worker role
 - detect weak source depth, process noise, generic generated-site projections,
   and missing topic-specific wiki materialization
-- write and resolve the canonical `raw/bootstrap/QUALITY_REPAIR.md` repair
-  trigger for in-place research quality repair
+- define the canonical `raw/bootstrap/QUALITY_REPAIR.md` path and Markdown
+  contract for in-place research quality repair
+- let the runtime package write and resolve that repair trigger file
 - translate completed research bootstrap artifacts into persistence summaries,
   artifact paths, and MoonBook memory candidates
 - own research quality-gate execution-summary suffixes and recovery/review
@@ -831,6 +833,8 @@ Boundary:
   bootstrap artifact reading, persistence-summary wording, artifact list, and
   memory-candidate target-page contract. It also owns quality-gate and recovered
   bootstrap message semantics.
+- `src/research_quality_runtime` owns the file side effects for active repair
+  trigger writes and resolved-trigger writes.
 - `src/town_runtime` may decide that a repair trigger should be written or
   resolved, may choose between Wenyu and research bootstrap, and may dispatch
   persistence to the owning package. It may apply review/recovery transitions to

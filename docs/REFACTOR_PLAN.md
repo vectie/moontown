@@ -371,7 +371,9 @@ Goals:
 - keep research readiness and quality-gate semantics in `research_quality/`;
   root may still own mayor/execution mutation for failed gates, but it should
   not own source-depth, report-length, wiki-materialization, or marketing-site
-  specificity rules
+  specificity rules; keep research-quality repair trigger path and Markdown
+  contract in `research_quality/`, but keep active/resolved trigger file writes
+  in `research_quality_runtime/`
 - keep Wenyu course-book bootstrap, generated course content, course-builder
   skill text, UI-state JSON, and generated course site projection in
   `course_book/`; root should expose only command-compatible wrappers

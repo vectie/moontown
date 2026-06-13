@@ -29,19 +29,23 @@ pub async fn research_persist_memory_candidates(@moonbook.BookCatalogEntry, @cor
 
 pub async fn research_persist_summary(@moonbook.BookCatalogEntry, @core.TaskExecutionRecord) -> String
 
+pub fn research_quality_entry_is_research(@moonbook.BookCatalogEntry) -> Bool
+
 pub async fn research_quality_gaps(@moonbook.BookCatalogEntry) -> Array[String]
 
 pub fn research_quality_gate_event_detail(String, Array[String], Int) -> String
 
 pub fn research_quality_gate_execution_summary(String, Int, Bool) -> String
 
+pub fn research_quality_review_resolved_markdown(String) -> String
+
+pub fn research_quality_review_trigger_markdown(Array[String], String) -> String
+
+pub fn research_quality_review_trigger_path(@moonbook.BookCatalogEntry) -> String
+
 pub fn research_text_contains_topic(String, String) -> Bool
 
 pub async fn research_wiki_materialization_gaps(@moonbook.BookCatalogEntry, String, String) -> Array[String]
-
-pub async fn write_research_quality_review_resolved(@moonbook.BookCatalogEntry, String) -> Unit
-
-pub async fn write_research_quality_review_trigger(@moonbook.BookCatalogEntry, Array[String], String) -> Unit
 
 // Errors
 
