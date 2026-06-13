@@ -132,6 +132,19 @@ if (( ${#civic_salon_runtime_files[@]} > 0 )); then
   failures+=("civic runtime contains salon-specific implementation filenames: ${civic_salon_runtime_files[*]}")
 fi
 
+snapshot_dirname_files=()
+while IFS= read -r file; do
+  snapshot_dirname_files+=("${file#./}")
+done < <(
+  find src -type f -name "*.mbt" \
+    -not -path "src/storage/*" \
+    -exec grep -lE 'Path::dirname\(snapshot_path\)|@path\.Path::dirname\(snapshot_path\)' {} + 2>/dev/null || true
+)
+
+if (( ${#snapshot_dirname_files[@]} > 0 )); then
+  failures+=("snapshot base derivation must use src/storage.snapshot_base_dir outside storage: ${snapshot_dirname_files[*]}")
+fi
+
 if (( ${#failures[@]} > 0 )); then
   print "source layout audit failed:"
   for failure in "${failures[@]}"; do

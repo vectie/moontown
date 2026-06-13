@@ -280,6 +280,9 @@ Boundary:
   `final_integration`, `visual_projection`, and `town_runtime` should append
   their local filenames to this storage-owned base rather than owning a second
   relative-snapshot fallback.
+- `scripts/audit-source-layout.sh` enforces that direct
+  `Path::dirname(snapshot_path)` snapshot-base derivation appears only inside
+  `src/storage`.
 
 ## Roles
 
