@@ -1485,6 +1485,8 @@ doctor can surface the highest-priority open item from
 are taken one at a time. Once the backlog is clear, the code-building check
 decays to a 30-minute interval. If a worker discovers the item is already done,
 the right output is completion/progress/plan evidence, not code churn.
+PlanBook repair policy constructors consume observed timestamps from runtime
+callers; they must not call wall-clock APIs directly.
 
 Daemon supervision also preserves the supervisor-recorded worker PID instead of
 letting a worker loop overwrite it with an unreliable self-detected PID. That

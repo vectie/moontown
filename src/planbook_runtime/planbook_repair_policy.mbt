@@ -14,6 +14,7 @@ fn first_planbook_open_criterion(
 fn planbook_noop_repair_task(
   snapshot_path : String,
   workspace_root : String,
+  generated_at_ms : UInt64,
 ) -> PlanbookRepairTask {
   ignore(snapshot_path)
   {
@@ -28,7 +29,7 @@ fn planbook_noop_repair_task(
     run_id: None,
     summary: "No open PlanBook gap was found.",
     validation_command: planbook_repair_validation_command(),
-    generated_at_ms: @env.now(),
+    generated_at_ms,
   }
 }
 

@@ -52,7 +52,11 @@ pub async fn write_moontown_planbook_repair_task(
       "PlanBook repair task `\{task.id}` is \{task.status}: \{task.summary}"
     }
     None => {
-      let task = planbook_noop_repair_task(snapshot_path, workspace_root)
+      let task = planbook_noop_repair_task(
+        snapshot_path,
+        workspace_root,
+        @env.now(),
+      )
       write_planbook_repair_status(task, workspace_root, snapshot_path)
       "PlanBook has no open repair task."
     }
