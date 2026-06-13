@@ -22,6 +22,13 @@ Source tree hygiene:
   templates, and runtime state directories
 - `src/` is for source packages only; its root package is a facade and
   implementation code belongs in named package directories
+- the only intended `src/` root source file is
+  [src/facade.mbt](/Users/kq/Workspace/moontown/src/facade.mbt); if a change
+  needs real behavior, create or use a cohesive package under `src/` instead
+  of adding more root-package implementation files
+- local root directories such as `.moontown`, `.moonclaw`, `_build`, and
+  `.mooncakes` are runtime/cache state, not package homes; source ownership is
+  still decided by the `src/` package tree
 - ignored generated/dependency directories such as `node_modules`, `_build`,
   `.mooncakes`, and `dist` must not be left under `src/` during architecture
   review; run `git clean -fdX src/ui/rabbita-town` after frontend builds if

@@ -11,6 +11,16 @@ You can browse and install extra skills here:
   module metadata, docs, scripts, assets, runtime state directories, and other
   non-package project files.
 
+- The `src/` root is a facade package only. Keep only `facade.mbt`, `moon.pkg`,
+  and generated interface metadata there; put implementation code in named
+  package directories such as `src/town_runtime`, `src/civic_runtime`, or a new
+  cohesive package directory.
+
+- Root runtime/cache directories such as `.moontown`, `.moonclaw`, `_build`,
+  and `.mooncakes` may exist locally, but they are not source architecture.
+  Do not move implementation code into those directories or treat them as
+  package homes.
+
 - Project-specific identity, memory, user, routine, and Wenyu vision notes live
   under `docs/project/`. Do not add new project-note files to the repo root.
 
