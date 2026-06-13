@@ -73,9 +73,10 @@ pub fn quality_topic_for_entry(entry : @moonbook.BookCatalogEntry) -> String {
       }
     }
   }
-  if entry.id.has_prefix("research-") {
+  if research_quality_entry_is_research(entry) &&
+    entry.id.has_prefix("research-") {
     entry.id.replace(old="research-", new="").to_lower()
-  } else if entry.id.has_prefix("wenyu-") {
+  } else if research_quality_entry_is_wenyu_support(entry) {
     @support.label_from_slug(entry.id.replace(old="wenyu-", new="")).to_lower()
   } else {
     entry.id.to_lower()

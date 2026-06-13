@@ -4,7 +4,7 @@ pub async fn write_research_quality_review_trigger(
   quality_gaps : Array[String],
   reason : String,
 ) -> Unit {
-  guard entry.id.has_prefix("research-") else { return }
+  guard research_quality_entry_is_research(entry) else { return }
   let raw_root = research_quality_bootstrap_raw_root(entry)
   @support.ignore_checked_command("mkdir", ["-p", raw_root])
   @support.write_text_file(
@@ -34,7 +34,7 @@ pub async fn write_research_quality_review_resolved(
   entry : @moonbook.BookCatalogEntry,
   reason : String,
 ) -> Unit {
-  guard entry.id.has_prefix("research-") else { return }
+  guard research_quality_entry_is_research(entry) else { return }
   let path = "\{research_quality_bootstrap_raw_root(entry)}/QUALITY_REPAIR.md"
   guard @fs.exists(path) else { return }
   @support.write_text_file(

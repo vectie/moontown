@@ -305,6 +305,10 @@ operational memory are no longer the intended runtime foundation. They are
 policy presets: convenient constructors that combine skill lanes, required
 files, quality criteria, and output contracts. Future work should compose or
 override policies instead of adding more hardcoded type branches.
+When code has catalog metadata, it should ask `src/policy` for the book type
+instead of checking storage prefixes such as `research-` or `wenyu-`.
+Prefixes are allowed as legacy naming fallbacks inside `policy/` or as artifact
+slug conventions, but they should not become scattered runtime gates.
 
 Policy extension should use pure capability constructors. For example:
 

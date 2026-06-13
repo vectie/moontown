@@ -92,7 +92,10 @@ must not rebuild the profile map or duplicate source-policy fields outside
 archived/transient and cookbook/planbook/course/research/civic/operational
 classification belong in `policy/book_policy_catalog.mbt`, not book-quality.
 Book-quality may expose facade helpers for its scoring callers, but future
-plans should change classification in `policy/` first. It also owns
+plans should change classification in `policy/` first. When catalog metadata is
+available, plans should require code to call policy classification instead of
+branching directly on storage prefixes like `research-` or `wenyu-`; those
+prefixes are compatibility and slug conventions, not the architecture. It also owns
 book-quality path contract helpers such as
 workspace path composition, wiki index path, projection state path, generated
 site path, and review result path. It owns base workspace, per-path, and typed

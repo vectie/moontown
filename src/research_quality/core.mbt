@@ -1,6 +1,6 @@
 ///|
 fn is_wenyu_book(entry : @moonbook.BookCatalogEntry) -> Bool {
-  entry.id.has_prefix("wenyu-")
+  research_quality_entry_is_wenyu_support(entry)
 }
 
 ///|
@@ -10,7 +10,7 @@ pub async fn research_quality_gaps(
   if @civic.is_wenyu_civic_book_id(entry.id) {
     return []
   }
-  if !entry.id.has_prefix("research-") && !is_wenyu_book(entry) {
+  if !research_quality_entry_is_research(entry) && !is_wenyu_book(entry) {
     return []
   }
   let root = @moonbook.workspace_root(entry)

@@ -82,7 +82,7 @@ fn complete_recovered_research_bootstrap_if_clean(
   book_id : String,
   task_ids : Array[String],
 ) -> Unit {
-  if !book_id.has_prefix("research-") {
+  if !state_book_is_research(state, book_id) {
     return
   }
   let mut recovered = 0
@@ -121,6 +121,17 @@ fn complete_recovered_research_bootstrap_if_clean(
       ),
     )
   }
+}
+
+///|
+fn state_book_is_research(state : @core.TownState, book_id : String) -> Bool {
+  for book in state.books {
+    if book.id == book_id {
+      return @policy.catalog_entry_type(book.id, book.name, book.tags) ==
+        @policy.research_type()
+    }
+  }
+  @policy.catalog_entry_type(book_id, "", []) == @policy.research_type()
 }
 
 ///|

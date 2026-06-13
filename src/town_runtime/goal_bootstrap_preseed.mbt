@@ -3,7 +3,7 @@ async fn preseed_goal_bootstrap_inputs(
   entry : @moonbook.BookCatalogEntry,
   objective : String,
 ) -> Unit {
-  if entry.id.has_prefix("research-") {
+  if town_runtime_entry_is_research(entry) {
     preseed_reference_style_inputs(entry, objective)
   }
   match @civic.wenyu_civic_service_for_book_id(entry.id) {
@@ -21,4 +21,10 @@ async fn preseed_goal_bootstrap_inputs(
     objective,
     current_repo_root(),
   )
+}
+
+///|
+fn town_runtime_entry_is_research(entry : @moonbook.BookCatalogEntry) -> Bool {
+  @policy.catalog_entry_type(entry.id, entry.name, entry.tags) ==
+  @policy.research_type()
 }

@@ -20,6 +20,7 @@ import {
   "vectie/moontown/dispatch",
   "vectie/moontown/health",
   "vectie/moontown/integration",
+  "vectie/moontown/policy",
   "vectie/moontown/roles",
   "vectie/moontown/scheduler",
   "vectie/moontown/storage",
@@ -33,6 +34,5 @@ import {
 }
 
 import {
-  "vectie/moontown/policy",
   "vectie/moontown/test_fixtures",
 } for "wbtest"

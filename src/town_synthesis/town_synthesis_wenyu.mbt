@@ -8,7 +8,12 @@ fn is_wenyu_town_synthesis_plan(
     return true
   }
   for lane in plan.lanes {
-    if lane.entry.id.has_prefix("wenyu-") {
+    if @policy.catalog_entry_type(
+        lane.entry.id,
+        lane.entry.name,
+        lane.entry.tags,
+      ) ==
+      @policy.civic_type() {
       return true
     }
   }

@@ -38,3 +38,23 @@ async test "research quality review trigger ignores non-research books" {
   assert_true(!@fs.exists("\{root}/raw/bootstrap/QUALITY_REPAIR.md"))
   @support.ignore_checked_command("rm", ["-rf", root])
 }
+
+///|
+async test "research quality review trigger accepts tagged research books" {
+  let root = "/tmp/moontown-tagged-research-quality-trigger"
+  @support.ignore_checked_command("rm", ["-rf", root])
+  let entry = @moonbook.BookCatalogEntry::new(
+    id="opc-lab",
+    name="OPC Lab",
+    purpose="Test tagged research guard.",
+    workspace_root=root,
+    tags=["research", "topic:opc"],
+  )
+  write_research_quality_review_trigger(entry, ["gap"], "tagged research")
+  let trigger = @fs.read_file("\{root}/raw/bootstrap/QUALITY_REPAIR.md").text()
+  assert_true(trigger.contains("tagged research"))
+  write_research_quality_review_resolved(entry, "resolved tagged research")
+  let resolved = @fs.read_file("\{root}/raw/bootstrap/QUALITY_REPAIR.md").text()
+  assert_true(resolved.contains("resolved tagged research"))
+  @support.ignore_checked_command("rm", ["-rf", root])
+}

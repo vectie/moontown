@@ -417,6 +417,10 @@ Boundary:
   `web-first`, or `book-first`.
 - `src/policy/book_policy_catalog.mbt` owns only catalog classification; it
   should not accumulate output, lane, label, or source-policy definitions.
+- Downstream packages should call policy classification helpers through
+  catalog metadata instead of treating storage prefixes such as `research-` or
+  `wenyu-` as architectural book-type gates. Prefixes may remain artifact naming
+  conventions, but they are not the product boundary.
 - `src/policy` owns default output path and surface constants for composed
   policies.
 - `src/policy` owns lane normalization and lane-based skill selection.

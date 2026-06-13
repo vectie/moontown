@@ -3,10 +3,10 @@ fn enrich_worker_context_bundle(
   entry : BookCatalogEntry,
   bundle : WorkerContextBundle,
 ) -> WorkerContextBundle {
-  if entry.id.has_prefix("wenyu-") {
+  if catalog_entry_is_civic(entry) {
     return enrich_wenyu_worker_context_bundle(entry, bundle)
   }
-  if !entry.id.has_prefix("research-") {
+  if !catalog_entry_is_research(entry) {
     return bundle
   }
   if is_standing_watch_context_bundle(bundle) {

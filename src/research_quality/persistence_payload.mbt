@@ -85,7 +85,7 @@ fn is_research_bootstrap_execution(
   entry : @moonbook.BookCatalogEntry,
   execution : @core.TaskExecutionRecord,
 ) -> Bool {
-  entry.id.has_prefix("research-") &&
+  research_quality_entry_is_research(entry) &&
   execution.task_id.contains("research-bootstrap-ingest")
 }
 

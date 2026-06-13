@@ -30,3 +30,32 @@ test "research bootstrap context is sanitized for direct MoonClaw worker" {
   )
   assert_true(!clean.prompt.contains("/Users/kq/Workspace/moonbook"))
 }
+
+///|
+test "tagged research context is enriched without research prefix" {
+  let entry = BookCatalogEntry::new(
+    id="opc-lab",
+    name="OPC Lab",
+    purpose="Research OPC.",
+    workspace_root="/tmp/opc-lab",
+    tags=["research", "topic:opc"],
+  )
+  let bundle = WorkerContextBundle::{
+    book_id: "opc-lab",
+    workspace_root: "/tmp/opc-lab",
+    task_id: "goal-opc-lab-research-bootstrap-ingest",
+    prompt: "Bootstrap this tagged research book.",
+    policy: [],
+    routines: [],
+    skill_paths: [],
+    context_pages: [],
+    active_memory: [],
+    user_memory: [],
+    working_memory: [],
+    memory_summary: "empty",
+    output_contract: [],
+  }
+  let clean = enrich_worker_context_bundle(entry, bundle)
+  assert_true(clean.skill_paths.contains("skills/web-first-research/SKILL.md"))
+  assert_true(clean.context_pages.contains("raw/bootstrap/RESEARCH_REQUEST.md"))
+}

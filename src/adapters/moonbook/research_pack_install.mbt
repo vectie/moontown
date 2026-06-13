@@ -3,7 +3,7 @@ async fn ensure_moontown_research_pack(
   root : String,
   entry : BookCatalogEntry,
 ) -> Unit {
-  guard entry.id.has_prefix("research-") else { return }
+  guard catalog_entry_is_research(entry) else { return }
   write_workspace_text(
     "\{root}/skills/web-first-research/SKILL.md",
     web_first_research_skill_text(entry),

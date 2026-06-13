@@ -2,11 +2,8 @@ import {
   "vectie/moontown/core",
   "vectie/moontown/adapters/moonbook",
   "vectie/moontown/roles",
+  "vectie/moontown/policy",
   "vectie/moontown/research_quality",
   "vectie/moontown/support",
   "moonbitlang/x/path",
 }
-
-import {
-  "vectie/moontown/policy",
-} for "wbtest"

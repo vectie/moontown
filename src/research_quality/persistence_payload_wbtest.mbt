@@ -53,3 +53,34 @@ async test "research persistence handoff uses topic artifacts instead of runtime
   )
   @support.ignore_checked_command("rm", ["-rf", root])
 }
+
+///|
+async test "research persistence handoff accepts tagged research book" {
+  let root = "/tmp/moontown-tagged-research-persist-handoff"
+  @support.ignore_checked_command("rm", ["-rf", root])
+  @support.write_text_file(
+    root + "/raw/bootstrap/synthesis-brief.md",
+    "# Synthesis Brief\n\nTagged OPC synthesis.\n",
+  )
+  let entry = @moonbook.BookCatalogEntry::new(
+    id="opc-lab",
+    name="OPC Lab",
+    purpose="Track OPC",
+    workspace_root=root,
+    tags=["research", "topic:opc"],
+  )
+  let execution = @core.TaskExecutionRecord::new(
+    task_id="goal-opc-lab-research-bootstrap-ingest",
+    book_id="opc-lab",
+    packet_id="packet-opc",
+    packet_path="packet-opc.json",
+    status=@core.TaskExecutionStatus::Completed,
+    summary="completed",
+    output_contract="moontown.research.raw.v1",
+  )
+  let summary = research_persist_summary(entry, execution)
+  assert_true(summary.contains("Research bootstrap completed"))
+  let artifacts = research_persist_artifacts(entry, execution)
+  assert_true(artifacts.contains("raw/bootstrap/deep-report.md"))
+  @support.ignore_checked_command("rm", ["-rf", root])
+}
