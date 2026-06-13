@@ -61,18 +61,18 @@ fn set_policy_metadata(
 ) -> Unit {
   match entry {
     Some(entry) => {
-      let book_type = @policy.catalog_entry_type(
-        entry.id,
-        entry.name,
-        entry.tags,
+      let policy_fields = @core.json_object_copy(
+        Some(
+          @policy.catalog_policy_context_metadata(
+            entry.id,
+            entry.name,
+            entry.tags,
+          ),
+        ),
       )
-      let book_policy = @policy.policy_for_type(book_type)
-      fields["book_type"] = book_type.to_json()
-      fields["book_policy"] = book_policy.to_json()
-      fields["book_loop_plan"] = @policy.loop_plan(book_policy).to_json()
-      fields["book_internal_distance_plan"] = @policy.internal_distance_plan(
-        book_policy,
-      ).to_json()
+      for key, value in policy_fields {
+        fields[key] = value
+      }
     }
     None => ()
   }

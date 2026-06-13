@@ -333,6 +333,10 @@ Adapters may still detect legacy external layouts for compatibility. For
 example, the MoonBook adapter can discover older site output locations after a
 build, but its canonical Moontown generated-site path must delegate to the
 policy default.
+Policy packet metadata is policy-owned too. Producers such as book-quality
+semantic review packets and MoonClaw keeper packets should merge the
+policy-provided context object instead of manually rebuilding `book_type`,
+`book_policy`, `book_loop_plan`, and `book_internal_distance_plan`.
 
 Every policy has two lanes:
 

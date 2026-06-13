@@ -137,12 +137,12 @@ fn review_external_metadata(
   add_review_no_input_policy(fields)
   fields["producer"] = "moontown".to_json()
   fields["book_id"] = packet.book_id.to_json()
-  fields["book_type"] = packet.book_type.to_json()
-  fields["book_policy"] = packet.policy.to_json()
-  fields["book_loop_plan"] = @policy.loop_plan(packet.policy).to_json()
-  fields["book_internal_distance_plan"] = @policy.internal_distance_plan(
-    packet.policy,
-  ).to_json()
+  let policy_fields = @core.json_object_copy(
+    Some(@policy.policy_context_metadata(packet.book_type, packet.policy)),
+  )
+  for key, value in policy_fields {
+    fields[key] = value
+  }
   fields["result_path"] = result_path.to_json()
   fields["profile_metadata"] = review_no_input_policy_json()
   fields["step_metadata"] = review_packet_step_metadata_json(

@@ -405,6 +405,8 @@ Purpose:
 - policy-composed loop plans and health gates
 - policy-derived internal-distance plans for information, recognition, and
   decisiveness
+- policy-owned serialized context metadata that combines book type,
+  `BookPolicy`, loop plan, and internal-distance plan for packet producers
 - reusable goal-text vocabulary for research, research-request, and Wenyu
   routing signals
 
@@ -430,6 +432,9 @@ Boundary:
 - `src/policy` owns the internal-distance growth-vector view; downstream
   packages may render it but should not redefine how execute/tend/quality
   map to information, recognition, and decisiveness.
+- `src/policy` owns the JSON field shape for policy context metadata. Packet
+  producers should merge that object instead of rebuilding `book_policy`,
+  `book_loop_plan`, or `book_internal_distance_plan` fields locally.
 - downstream packages may read lane text but should not redefine lane semantics.
 
 ## Book Quality

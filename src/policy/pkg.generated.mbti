@@ -23,6 +23,8 @@ pub fn catalog_entry_transient(String, String, String) -> Bool
 
 pub fn catalog_entry_type(String, String, Array[String]) -> String
 
+pub fn catalog_policy_context_metadata(String, String, Array[String]) -> Json
+
 pub fn civic_protocol() -> BookPolicy
 
 pub fn civic_type() -> String
@@ -86,6 +88,10 @@ pub fn output_surface(BookPolicy) -> String
 pub fn planbook() -> BookPolicy
 
 pub fn planbook_type() -> String
+
+pub fn policy_context_metadata(String, BookPolicy) -> Json
+
+pub fn policy_context_metadata_for_type(String) -> Json
 
 pub fn policy_for_type(String) -> BookPolicy
 

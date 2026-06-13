@@ -128,6 +128,27 @@ test "policy profiles map legacy labels into composed policies" {
 }
 
 ///|
+test "policy owns serialized loop metadata shape" {
+  let metadata = policy_context_metadata_for_type(research_type()).stringify()
+  assert_true(metadata.contains("\"book_type\":\"research-book\""))
+  assert_true(metadata.contains("\"book_policy\":{"))
+  assert_true(metadata.contains("\"book_loop_plan\":{"))
+  assert_true(metadata.contains("\"book_internal_distance_plan\":["))
+  assert_true(metadata.contains("\"phase\":\"read-policy\""))
+  assert_true(metadata.contains("\"layer\":\"information\""))
+  assert_true(metadata.contains("\"layer\":\"recognition\""))
+  assert_true(metadata.contains("\"layer\":\"decisiveness\""))
+  let catalog_metadata = catalog_policy_context_metadata(
+    "wenyu-policy-hall",
+    "Policy Hall",
+    [],
+  ).stringify()
+  assert_true(
+    catalog_metadata.contains("\"book_type\":\"civic-protocol-support\""),
+  )
+}
+
+///|
 test "policy capabilities compose without duplicate skills or files" {
   let policy = general() |> with_pdf_watch() |> with_pdf_watch()
   let pdf_skills = skill_specs(policy).filter(skill => skill.id == "pdf-watch")

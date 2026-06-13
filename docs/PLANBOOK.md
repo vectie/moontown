@@ -163,9 +163,9 @@ instead of constructing packet ids, context page paths, skill paths, tags,
 notes, request text, or metadata itself.
 The same rule applies to ordinary catalog-backed keeper packets: caller code
 passes the catalog entry, task, and hydrated context, while
-`adapters/moonclaw` attaches the policy-owned book type, book policy, loop
-plan, internal-distance plan, and MoonClaw keeper worker profile. PlanBook
-tasks should not copy those fields or profile ids into root orchestration.
+`adapters/moonclaw` attaches the policy-owned context metadata and MoonClaw
+keeper worker profile. PlanBook tasks should not copy policy context fields or
+profile ids into root orchestration.
 Root must resolve Codex ACP defaults through the `adapters/codex` boundary:
 `model()`, `command()`, `args()`, `moontown_args()`, reusable `codex-main`
 target JSON/upsert helpers, and target JSON builders.
