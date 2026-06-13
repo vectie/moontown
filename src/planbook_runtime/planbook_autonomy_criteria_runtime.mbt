@@ -84,7 +84,7 @@ async fn planbook_runtime_book_quality_coverage_criterion(
 async fn planbook_validation_criterion(
   snapshot_path : String,
 ) -> PlanbookCriterionStatus {
-  let base = planbook_autonomy_base_dir(snapshot_path)
+  let base = @storage.snapshot_base_dir(snapshot_path)
   let path = "\{base}/planbook/latest-validation.md"
   let text = @support.read_text_or_empty(path)
   let ready = @planbook_policy.validation_evidence_ready(text)

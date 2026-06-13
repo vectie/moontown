@@ -11,6 +11,16 @@ async fn ensure_parent_directory(path : String) -> Unit {
 }
 
 ///|
+pub fn snapshot_base_dir(snapshot_path : String) -> String {
+  let base = @path.Path::dirname(snapshot_path).to_string()
+  if base == "." || base == "" {
+    ".moontown"
+  } else {
+    base
+  }
+}
+
+///|
 fn safe_watcher_goal_id(goal_id : String) -> String {
   let builder = StringBuilder::new()
   let mut emitted = 0

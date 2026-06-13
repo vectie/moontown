@@ -30,13 +30,3 @@ async fn write_planbook_autonomy_workspace(
     "Status `\{status.status}` with \{status.open_count} open gap(s) and \{status.satisfied_count} satisfied criterion/criteria.",
   )
 }
-
-///|
-fn planbook_autonomy_base_dir(snapshot_path : String) -> String {
-  let base = @path.Path::dirname(snapshot_path).to_string()
-  if base == "." || base == "" {
-    ".moontown"
-  } else {
-    base
-  }
-}

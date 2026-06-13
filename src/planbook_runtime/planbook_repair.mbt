@@ -5,14 +5,14 @@ pub type PlanbookRepairTask = @planbook_policy.PlanbookRepairTask
 pub fn default_planbook_repair_path(
   snapshot_path? : String = @storage.default_snapshot_path(),
 ) -> String {
-  "\{planbook_autonomy_base_dir(snapshot_path)}/planbook/repair-task.json"
+  "\{@storage.snapshot_base_dir(snapshot_path)}/planbook/repair-task.json"
 }
 
 ///|
 pub fn default_planbook_repair_markdown_path(
   snapshot_path? : String = @storage.default_snapshot_path(),
 ) -> String {
-  "\{planbook_autonomy_base_dir(snapshot_path)}/planbook/repair-task.md"
+  "\{@storage.snapshot_base_dir(snapshot_path)}/planbook/repair-task.md"
 }
 
 ///|

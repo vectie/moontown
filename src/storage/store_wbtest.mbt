@@ -35,6 +35,8 @@ async test "watcher ledger appends and reads jsonl records" {
 ///|
 async test "watcher ledger derives snapshot-relative directory and appends by goal" {
   let root = "/tmp/moontown-watcher-ledger-dir-test"
+  assert_eq(snapshot_base_dir("\{root}/town.json"), root)
+  assert_eq(snapshot_base_dir("town.json"), ".moontown")
   let ledger_dir = watcher_ledger_dir_for_snapshot("\{root}/town.json")
   assert_eq(ledger_dir, "\{root}/watchers")
   assert_eq(

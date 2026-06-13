@@ -300,6 +300,11 @@ Watcher ledger path derivation and append/load mechanics belong to `storage/`.
 Runtime packages may pass snapshot paths and goal ids, but they should not
 duplicate `.moontown/watchers` path rules or construct watcher JSONL paths
 locally.
+Generic snapshot-base derivation also belongs to `storage/`: `town.json` in the
+current directory resolves to `.moontown`, while `/path/to/town.json` resolves
+to `/path/to`. Runtime packages such as PlanBook, live-autonomy, and editor
+pipeline may append their feature-specific filenames under that base, but they
+should not reimplement the fallback rule locally.
 
 The root package must not re-export every policy constructor. Root systems may
 map legacy book labels into a `BookPolicy` while migration continues, but new

@@ -2,14 +2,14 @@
 pub fn default_editor_feature_selection_path(
   snapshot_path? : String = @storage.default_snapshot_path(),
 ) -> String {
-  "\{planbook_autonomy_base_dir(snapshot_path)}/editor-feature-selection.json"
+  "\{@storage.snapshot_base_dir(snapshot_path)}/editor-feature-selection.json"
 }
 
 ///|
 pub fn default_editor_feature_selection_markdown_path(
   snapshot_path? : String = @storage.default_snapshot_path(),
 ) -> String {
-  "\{planbook_autonomy_base_dir(snapshot_path)}/editor-feature-selection.md"
+  "\{@storage.snapshot_base_dir(snapshot_path)}/editor-feature-selection.md"
 }
 
 ///|

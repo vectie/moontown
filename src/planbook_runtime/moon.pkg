@@ -2,7 +2,6 @@ import {
   "moonbitlang/async/fs",
   "moonbitlang/core/env",
   "moonbitlang/core/json",
-  "moonbitlang/x/path",
   "moonbitlang/x/sys",
   "vectie/moontown/adapters/codex",
   "vectie/moontown/adapters/moonbook",

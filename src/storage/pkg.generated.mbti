@@ -42,6 +42,8 @@ pub async fn save_snapshot_file(String, TownSnapshot) -> Unit
 
 pub async fn save_standing_goals_file(String, Array[@core.StandingGoal]) -> Unit
 
+pub fn snapshot_base_dir(String) -> String
+
 pub fn snapshot_of(@core.TownState) -> TownSnapshot
 
 pub fn watcher_ledger_dir_for_snapshot(String) -> String

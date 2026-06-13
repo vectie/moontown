@@ -30,20 +30,10 @@ fn planbook_repair_source_root() -> String {
 }
 
 ///|
-fn planbook_autonomy_base_dir(snapshot_path : String) -> String {
-  let base = @path.Path::dirname(snapshot_path).to_string()
-  if base == "." || base == "" {
-    ".moontown"
-  } else {
-    base
-  }
-}
-
-///|
 fn default_planbook_repair_path(
   snapshot_path? : String = @storage.default_snapshot_path(),
 ) -> String {
-  "\{planbook_autonomy_base_dir(snapshot_path)}/planbook/repair-task.json"
+  "\{@storage.snapshot_base_dir(snapshot_path)}/planbook/repair-task.json"
 }
 
 ///|

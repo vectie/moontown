@@ -38,22 +38,12 @@ async fn planbook_repair_active_count(
 
 ///|
 fn default_planbook_autonomy_path(snapshot_path : String) -> String {
-  "\{planbook_autonomy_base_dir(snapshot_path)}/planbook/autonomy.json"
+  "\{@storage.snapshot_base_dir(snapshot_path)}/planbook/autonomy.json"
 }
 
 ///|
 fn default_planbook_repair_path(snapshot_path : String) -> String {
-  "\{planbook_autonomy_base_dir(snapshot_path)}/planbook/repair-task.json"
-}
-
-///|
-fn planbook_autonomy_base_dir(snapshot_path : String) -> String {
-  let base = @path.Path::dirname(snapshot_path).to_string()
-  if base == "." || base == "" {
-    ".moontown"
-  } else {
-    base
-  }
+  "\{@storage.snapshot_base_dir(snapshot_path)}/planbook/repair-task.json"
 }
 
 ///|

@@ -13,8 +13,8 @@ pub fn watcher_ledger_path(
 
 ///|
 pub fn watcher_ledger_dir_for_snapshot(snapshot_path : String) -> String {
-  let base = @path.Path::dirname(snapshot_path).to_string()
-  if base == "." || base == "" {
+  let base = snapshot_base_dir(snapshot_path)
+  if base == ".moontown" {
     default_watcher_ledger_dir()
   } else {
     "\{base}/watchers"

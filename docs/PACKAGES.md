@@ -246,6 +246,7 @@ Purpose:
 
 - snapshot persistence
 - checkpoint model
+- generic snapshot-base directory derivation
 - standing-goal registry persistence
 - watcher ledger persistence
 - watcher ledger path derivation from town snapshot paths
@@ -257,6 +258,14 @@ Current persisted files:
 - `.moontown/standing-goals.json`
 - `.moontown/watchers/*.jsonl`
 - `.moontown/packets/` when keeper packets are exported
+
+Boundary:
+
+- `src/storage` owns the generic rule that `town.json` in the current
+  directory maps to `.moontown`, while `/path/to/town.json` maps to `/path/to`.
+- Runtime packages may derive their own feature-specific filenames under that
+  base, but should call `storage.snapshot_base_dir(...)` instead of
+  reimplementing `dirname(snapshot_path)` fallback logic.
 
 ## Roles
 

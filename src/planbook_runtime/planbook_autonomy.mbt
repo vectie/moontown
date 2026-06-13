@@ -8,14 +8,14 @@ pub type PlanbookAutonomyStatus = @planbook_policy.PlanbookAutonomyStatus
 pub fn default_planbook_autonomy_path(
   snapshot_path? : String = @storage.default_snapshot_path(),
 ) -> String {
-  "\{planbook_autonomy_base_dir(snapshot_path)}/planbook/autonomy.json"
+  "\{@storage.snapshot_base_dir(snapshot_path)}/planbook/autonomy.json"
 }
 
 ///|
 pub fn default_planbook_autonomy_digest_path(
   snapshot_path? : String = @storage.default_snapshot_path(),
 ) -> String {
-  "\{planbook_autonomy_base_dir(snapshot_path)}/planbook/autonomy.md"
+  "\{@storage.snapshot_base_dir(snapshot_path)}/planbook/autonomy.md"
 }
 
 ///|
