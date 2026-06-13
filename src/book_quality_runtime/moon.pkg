@@ -9,7 +9,7 @@ import {
   "vectie/moontown/book_quality",
   "vectie/moontown/civic",
   "vectie/moontown/civic_runtime",
-  "vectie/moontown/cookbook",
+  "vectie/moontown/cookbook_runtime",
   "vectie/moontown/core",
   "vectie/moontown/course_book",
   "vectie/moontown/course_book_runtime",

@@ -287,13 +287,16 @@ book owns. The implementation now has a first-class `policy` package:
   compaction. Root Moontown may expose command-compatible wrappers, but
   MoonClaw runtime maintenance details should not live as loose root files.
 - [cookbook/](/Users/kq/Workspace/moontown/src/cookbook)
-  owns Cookbook DTOs, stable-state artifact summary accounting, and the
-  operator-facing Cookbook status Markdown. Root Moontown may discover artifact
-  existence, register the MoonBook workspace, write files, and call MoonBook
-  catalog APIs, but it should not redefine docs/definition/runtime-state counts,
-  required-missing drift semantics, or Cookbook status wording locally. Cookbook
-  generated-site writes consume `policy.default_generated_site_projection_path()`
-  for the default projection path instead of redefining it locally.
+  owns deterministic Cookbook DTOs, manifest/page content, stable-state
+  artifact summary accounting, generated-site path policy, and
+  operator-facing Cookbook status Markdown. It does not inspect the filesystem
+  or write MoonBook workspaces.
+- [cookbook_runtime/](/Users/kq/Workspace/moontown/src/cookbook_runtime)
+  owns Cookbook runtime materialization: artifact existence observation,
+  MoonBook catalog registration, manifest persistence, workspace page writes,
+  generated-site writes, status inspection, and CLI bootstrap/status
+  entrypoints. Root commands should call this runtime package instead of
+  carrying Cookbook filesystem/catalog behavior.
 - [planbook/](/Users/kq/Workspace/moontown/src/planbook)
   owns PlanBook static content: contract pages, governance pages, role model,
   operating architecture, seed plans, generated-site templates, and PlanBook

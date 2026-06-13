@@ -25,27 +25,6 @@ fn moontown_moonclaw_inline_enabled() -> Bool {
 }
 
 ///|
-async fn bootstrap_moontown_cookbook(
-  book_catalog_path? : String = @moonbook.default_catalog_path(),
-  workspace_root? : String = @cookbook.default_workspace_root(),
-  manifest_path? : String = @cookbook.default_manifest_path(),
-) -> String {
-  let entry = @cookbook.book_entry(workspace_root)
-  let catalog = @moonbook.load_or_create_catalog(path=book_catalog_path)
-  @moonbook.save_catalog_file(
-    book_catalog_path,
-    @cookbook.merge_catalog(catalog, entry),
-  )
-  let manifest = @cookbook.manifest(workspace_root, manifest_path)
-  @support.write_text_file(
-    manifest_path,
-    manifest.to_json().stringify(indent=2),
-  )
-  @cookbook.write_workspace(entry, manifest)
-  "Bootstrapped MoonBook cookbook `\{entry.id}` at \{workspace_root}; wrote \{manifest_path}."
-}
-
-///|
 fn default_planbook_book_id() -> String {
   "plan-moontown-quality"
 }

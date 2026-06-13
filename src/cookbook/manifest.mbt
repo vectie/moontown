@@ -44,7 +44,7 @@ pub fn merge_catalog(
 }
 
 ///|
-pub async fn manifest(
+pub fn manifest(
   workspace_root : String,
   manifest_path : String,
 ) -> MoontownCookbookManifest {
@@ -61,7 +61,7 @@ pub async fn manifest(
 }
 
 ///|
-async fn cookbook_artifacts() -> Array[CookbookArtifact] {
+pub fn cookbook_artifacts() -> Array[CookbookArtifact] {
   [
     cookbook_artifact(
       "docs/ARCHITECTURE.md", "doc", "moontown", "layer boundaries and runtime ownership",
@@ -139,12 +139,28 @@ async fn cookbook_artifacts() -> Array[CookbookArtifact] {
 }
 
 ///|
-async fn cookbook_artifact(
+fn cookbook_artifact(
   path : String,
   kind : String,
   owner : String,
   stable_role : String,
   required : Bool,
 ) -> CookbookArtifact {
-  { path, kind, owner, stable_role, required, exists: @fs.exists(path) }
+  { path, kind, owner, stable_role, required, exists: false }
+}
+
+///|
+pub fn cookbook_artifact_with_exists(
+  artifact : CookbookArtifact,
+  exists : Bool,
+) -> CookbookArtifact {
+  { ..artifact, exists, }
+}
+
+///|
+pub fn cookbook_manifest_with_artifacts(
+  base : MoontownCookbookManifest,
+  artifacts : Array[CookbookArtifact],
+) -> MoontownCookbookManifest {
+  { ..base, artifacts, }
 }

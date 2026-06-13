@@ -1,5 +1,5 @@
 ///|
-fn cookbook_index_markdown(
+pub fn cookbook_index_markdown(
   entry : @moonbook.BookCatalogEntry,
   manifest : MoontownCookbookManifest,
 ) -> String {
@@ -43,7 +43,7 @@ fn cookbook_index_markdown(
 }
 
 ///|
-fn cookbook_stable_state_markdown(
+pub fn cookbook_stable_state_markdown(
   manifest : MoontownCookbookManifest,
 ) -> String {
   let rows : Array[String] = [
@@ -64,7 +64,7 @@ fn cookbook_stable_state_markdown(
 }
 
 ///|
-fn cookbook_ownership_markdown() -> String {
+pub fn cookbook_ownership_markdown() -> String {
   [
     "# Cookbook Ownership", "", "## MoonBook", "", "MoonBook owns the durable cookbook workspace, generated site, wiki pages, definitions index, review queue, and stable-state projection.",
     "", "## Moondesk", "", "Moondesk should present the cookbook as the human desktop for browsing, editing, reviewing, and exporting stable town definitions. It should not become the daemon, scheduler, or worker executor.",
@@ -74,7 +74,7 @@ fn cookbook_ownership_markdown() -> String {
 }
 
 ///|
-fn cookbook_book_types_markdown() -> String {
+pub fn cookbook_book_types_markdown() -> String {
   [
     "# Book Types", "", "The cookbook records book-type boundaries so future agents do not collapse every workspace into a research report.",
     "", "| Type | Managed By | Intended Output | Not Allowed To Become |", "| --- | --- | --- | --- |",
@@ -88,7 +88,7 @@ fn cookbook_book_types_markdown() -> String {
 }
 
 ///|
-fn cookbook_runtime_boundaries_markdown() -> String {
+pub fn cookbook_runtime_boundaries_markdown() -> String {
   [
     "# Runtime Boundaries", "", "## Moontown", "", "Moontown owns supervision, scheduling, routing, daemon heartbeats, civic protocol ledgers, and town UI projection. It should ask books for work and state, not store domain truth itself.",
     "", "## MoonBook", "", "MoonBook owns each durable workspace: wiki pages, schemas, skills, review queues, generated site projections, and book-local memory rules.",
@@ -98,7 +98,7 @@ fn cookbook_runtime_boundaries_markdown() -> String {
 }
 
 ///|
-fn cookbook_live_autonomy_spine_markdown() -> String {
+pub fn cookbook_live_autonomy_spine_markdown() -> String {
   [
     "# Live Autonomy Spine", "", "The live autonomy spine is the current control-plane contract that makes the town feel alive instead of merely configured.",
     "", "## Runtime Artifacts", "", "- `.moontown/live-autonomy.json`: current status, accepted updates, no-change cycles, blocked work, due goals, visual projection path, and next actions.",
@@ -112,7 +112,7 @@ fn cookbook_live_autonomy_spine_markdown() -> String {
 }
 
 ///|
-fn cookbook_stable_state_ledger_markdown(
+pub fn cookbook_stable_state_ledger_markdown(
   manifest : MoontownCookbookManifest,
 ) -> String {
   [
@@ -134,7 +134,7 @@ fn cookbook_stable_state_ledger_markdown(
 }
 
 ///|
-fn cookbook_doctor_markdown() -> String {
+pub fn cookbook_doctor_markdown() -> String {
   [
     "# Cookbook Doctor Procedure", "", "Run the cookbook doctor whenever docs, civic protocols, daemon settings, or Moondesk handoff formats change.",
     "", "```bash", "moon run src/cmd/main -- cookbook bootstrap", "moon run src/cmd/main -- cookbook status",
@@ -144,7 +144,7 @@ fn cookbook_doctor_markdown() -> String {
 }
 
 ///|
-fn cookbook_book_governance_markdown() -> String {
+pub fn cookbook_book_governance_markdown() -> String {
   [
     "# Book Governance Procedure", "", "Use this when deciding whether a book is healthy enough to trust.",
     "", "## Steps", "", "1. Run `moon run src/cmd/main -- books bootstrap` to ensure canonical registered books have workspaces.",
@@ -156,7 +156,7 @@ fn cookbook_book_governance_markdown() -> String {
 }
 
 ///|
-fn cookbook_contract_markdown() -> String {
+pub fn cookbook_contract_markdown() -> String {
   [
     "# Cookbook Contract", "", "The cookbook is the stable-state control book for Moontown.",
     "", "## Rules", "", "- Do not hardcode domain research or civic behavior into the cookbook.",
@@ -167,7 +167,7 @@ fn cookbook_contract_markdown() -> String {
 }
 
 ///|
-fn cookbook_schema_markdown() -> String {
+pub fn cookbook_schema_markdown() -> String {
   [
     "# Stable-State Manifest Schema", "", "Each artifact row contains:", "", "- `path`: repo or `.moontown` path.",
     "- `kind`: `doc`, `definition`, or `runtime-state`.", "- `owner`: project responsible for changing the artifact.",
@@ -195,7 +195,7 @@ pub fn cookbook_content_rules_markdown() -> String {
 }
 
 ///|
-fn cookbook_feature_guide_markdown() -> String {
+pub fn cookbook_feature_guide_markdown() -> String {
   [
     "# Moontown Feature Guide",
     "",

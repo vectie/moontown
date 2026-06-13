@@ -1,0 +1,22 @@
+// Generated using `moon info`, DON'T EDIT IT
+package "vectie/moontown/cookbook_runtime"
+
+import {
+  "vectie/moontown/cookbook",
+}
+
+// Values
+pub async fn bootstrap_moontown_cookbook(book_catalog_path? : String, workspace_root? : String, manifest_path? : String) -> String
+
+pub async fn inspect_moontown_cookbook(workspace_root? : String, manifest_path? : String) -> @cookbook.MoontownCookbookStatus
+
+pub async fn render_moontown_cookbook_status(workspace_root? : String, manifest_path? : String) -> String
+
+// Errors
+
+// Types and methods
+
+// Type aliases
+
+// Traits
+

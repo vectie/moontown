@@ -9,15 +9,23 @@ import {
 // Values
 pub fn book_entry(String) -> @moonbook.BookCatalogEntry
 
-pub async fn bootstrap_moontown_cookbook(book_catalog_path? : String, workspace_root? : String, manifest_path? : String) -> String
-
 pub fn cookbook_algorithms_markdown() -> String
 
 pub fn cookbook_artifact_card_html(CookbookArtifact) -> String
 
+pub fn cookbook_artifact_with_exists(CookbookArtifact, Bool) -> CookbookArtifact
+
+pub fn cookbook_artifacts() -> Array[CookbookArtifact]
+
+pub fn cookbook_book_governance_markdown() -> String
+
+pub fn cookbook_book_types_markdown() -> String
+
 pub fn cookbook_codebase_overview_markdown() -> String
 
 pub fn cookbook_content_rules_markdown() -> String
+
+pub fn cookbook_contract_markdown() -> String
 
 pub fn cookbook_core_features_markdown() -> String
 
@@ -27,11 +35,27 @@ pub fn cookbook_data_structures_markdown() -> String
 
 pub fn cookbook_describer_overview_markdown() -> String
 
+pub fn cookbook_doctor_markdown() -> String
+
+pub fn cookbook_feature_guide_markdown() -> String
+
+pub fn cookbook_generated_site_path() -> String
+
+pub fn cookbook_generated_site_workspace_path(String) -> String
+
+pub fn cookbook_index_markdown(@moonbook.BookCatalogEntry, MoontownCookbookManifest) -> String
+
 pub fn cookbook_journey_json(@moonbook.BookCatalogEntry, MoontownCookbookManifest) -> Array[String]
 
 pub fn cookbook_links_json() -> Array[String]
 
+pub fn cookbook_live_autonomy_spine_markdown() -> String
+
+pub fn cookbook_manifest_with_artifacts(MoontownCookbookManifest, Array[CookbookArtifact]) -> MoontownCookbookManifest
+
 pub fn cookbook_metrics_json(String, String, String, String) -> Array[String]
+
+pub fn cookbook_ownership_markdown() -> String
 
 pub fn cookbook_page_families_json() -> Array[String]
 
@@ -43,11 +67,21 @@ pub fn cookbook_rendered_skill_html(String, String, String) -> String
 
 pub fn cookbook_review_queue_json() -> Array[String]
 
+pub fn cookbook_runtime_boundaries_markdown() -> String
+
+pub fn cookbook_schema_markdown() -> String
+
 pub fn cookbook_site_style_html() -> String
 
 pub fn cookbook_skill_markdown() -> String
 
+pub fn cookbook_stable_state_ledger_markdown(MoontownCookbookManifest) -> String
+
+pub fn cookbook_stable_state_markdown(MoontownCookbookManifest) -> String
+
 pub fn cookbook_status_chips_json() -> Array[String]
+
+pub fn cookbook_status_from_manifest(String, String, MoontownCookbookManifest, Bool, Bool) -> MoontownCookbookStatus
 
 pub fn default_book_id() -> String
 
@@ -63,19 +97,13 @@ pub fn default_workspace_root() -> String
 
 pub fn generated_site_html(@moonbook.BookCatalogEntry, MoontownCookbookManifest) -> String
 
-pub async fn inspect_moontown_cookbook(workspace_root? : String, manifest_path? : String) -> MoontownCookbookStatus
-
-pub async fn manifest(String, String) -> MoontownCookbookManifest
+pub fn manifest(String, String) -> MoontownCookbookManifest
 
 pub fn merge_catalog(Array[@moonbook.BookCatalogEntry], @moonbook.BookCatalogEntry) -> Array[@moonbook.BookCatalogEntry]
-
-pub async fn render_moontown_cookbook_status(workspace_root? : String, manifest_path? : String) -> String
 
 pub fn status_markdown(MoontownCookbookStatus) -> String
 
 pub fn ui_state_json(@moonbook.BookCatalogEntry, MoontownCookbookManifest) -> String
-
-pub async fn write_workspace(@moonbook.BookCatalogEntry, MoontownCookbookManifest) -> Unit
 
 // Errors
 

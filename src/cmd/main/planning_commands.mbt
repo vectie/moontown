@@ -1,8 +1,9 @@
 ///|
 async fn render_cookbook_command(args : Array[String]) -> String {
   match args {
-    ["bootstrap"] | ["doctor"] => @cookbook.bootstrap_moontown_cookbook()
-    ["status"] => @cookbook.render_moontown_cookbook_status()
+    ["bootstrap"] | ["doctor"] =>
+      @cookbook_runtime.bootstrap_moontown_cookbook()
+    ["status"] => @cookbook_runtime.render_moontown_cookbook_status()
     _ => @moontown.load_or_create_saved_dashboard()
   }
 }
