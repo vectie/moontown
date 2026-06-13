@@ -47,6 +47,7 @@ test "civic salon round record captures exchange effectiveness" {
     "round complete",
   )
   assert_eq(record.tick, 7)
+  assert_eq(record.scenario_id, schedule.id)
   assert_eq(record.participant_count, 2)
   assert_eq(record.idea_count, 1)
   assert_eq(record.research_question_count, 2)

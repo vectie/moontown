@@ -772,6 +772,9 @@ Purpose:
 - `src/civic` exposes generic civic communication skill text and protocol note
   helpers. Public helper names should use communication-pattern vocabulary;
   `research-salon` remains one pattern constructor, not the skill API.
+- `src/civic` owns communication schedule and round-record DTOs. Public records
+  identify the scheduled scenario with `scenario_id`; they should not encode
+  `salon` as the generic record vocabulary.
 - `src/civic_runtime` owns workspace writes, ledgers, generated pages, and
   scenario execution persistence.
 - `src/civic_runtime` exposes generic civic communication-pattern runtime APIs

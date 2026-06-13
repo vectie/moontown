@@ -17,7 +17,7 @@ pub(all) struct CivicCommunicationSchedule {
 ///|
 pub(all) struct CivicCommunicationRoundRecord {
   id : String
-  salon_id : String
+  scenario_id : String
   building_id : String
   tick : Int
   round_number : Int

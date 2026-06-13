@@ -52,7 +52,7 @@ pub fn civic_communication_round_record(
 ) -> CivicCommunicationRoundRecord {
   {
     id: round_id,
-    salon_id: schedule.id,
+    scenario_id: schedule.id,
     building_id: schedule.building_id,
     tick,
     round_number: schedule.round_count + 1,

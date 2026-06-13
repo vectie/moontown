@@ -42,6 +42,7 @@ test "salon round id and record derive from schedule and metrics" {
   let record = civic_communication_round_record(
     schedule, "robotics-salon-round-3", 9, 100UL, 200UL, metrics, "review", "round complete",
   )
+  assert_eq(record.scenario_id, "robotics-salon")
   assert_eq(record.round_number, 3)
   assert_eq(record.tick, 9)
   assert_eq(record.structural_effectiveness_score, 72)
