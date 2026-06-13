@@ -40,9 +40,7 @@ async fn run_standing_goal_watch_cycle(
   }
   register_town_books(state, [entry.to_book_ref()])
   register_town_workers(state)
-  let task = @standing_watch_policy.standing_watch_task(
-    goal, target_book_id, tick, no_change_streak,
-  )
+  let task = standing_watch_task(goal, target_book_id, tick, no_change_streak)
   let planned_task = to_town_task(
     entry,
     task,

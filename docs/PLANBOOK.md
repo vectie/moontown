@@ -351,17 +351,22 @@ config/manifest schemas, default identity wrappers, readiness rules, or
 ToolBook file/catalog IO in `app_tool_book/`.
 Generic standing-watch policy lives in
 [standing_watch_policy](/Users/kq/Workspace/moontown/src/standing_watch_policy).
-It owns the standing-watch `BookTask` kind, id format, compact id segment
-policy, target pages, prompt text, strict accounting marker vocabulary, marker
-parser, MoonBook history block parser, provider-decision collapse policy,
-material-delta metrics, execution-summary classification, effective
-watcher-record decision selection, watcher-record preference ordering, and
-repair-mode appendix composition. Root may schedule standing goals, launch
-MoonClaw/MoonBook work, persist town snapshots, read and write book history
-files, and append watcher ledgers, but future plans should not add root-local
-standing-watch task builders, prompt copies, id-format helpers, marker
-vocabulary forks, history parser clones, material-delta accounting clones,
-no-change/update/deferred/review inference, or terminal-record selection.
+Adapter-safe standing-watch worker contracts live in
+[standing_watch_contracts](/Users/kq/Workspace/moontown/src/standing_watch_contracts).
+`standing_watch_contracts` owns skill path sets, context page sets, and
+output-contract lines. `standing_watch_policy` owns the standing-watch task
+kind, id format, compact id segment policy, target pages, prompt text, strict
+accounting marker vocabulary, marker parser, MoonBook history block parser,
+provider-decision collapse policy, material-delta metrics, execution-summary
+classification, effective watcher-record decision selection, watcher-record
+preference ordering, and repair-mode appendix composition. `town_runtime` may
+construct the concrete MoonBook `BookTask` from these policy values, schedule
+standing goals, launch MoonClaw/MoonBook work, persist town snapshots, read and
+write book history files, and append watcher ledgers. Future plans should not
+add root-local or adapter-local standing-watch context tables, output-contract
+tables, prompt copies, id-format helpers, marker vocabulary forks, history
+parser clones, material-delta accounting clones, no-change/update/deferred/review
+inference, or terminal-record selection.
 Reusable transient external dependency classification lives in
 [runtime_error_policy](/Users/kq/Workspace/moontown/src/runtime_error_policy).
 Future plans should route provider infrastructure, temporary resource, storage

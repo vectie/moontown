@@ -5,33 +5,19 @@ fn standing_watch_worker_context_bundle(
   let skill_paths = unique_paths(
     [
       ..bundle.skill_paths,
-      "skills/standing-watch/SKILL.md",
-      ..@research_policy.standing_watch_research_skill_paths(),
+      ..@standing_watch_contracts.standing_watch_skill_paths(),
     ],
   )
   let context_pages = unique_paths(
     [
       ..bundle.context_pages,
-      "wiki/history/standing-watch.md",
-      "wiki/history/journey.md",
-      "wiki/sources/",
-      "wiki/synthesis/overview.md",
-      "wiki/synthesis/claims.md",
+      ..@standing_watch_contracts.standing_watch_context_pages(),
     ],
   )
   let output_contract = unique_paths(
     [
       ..bundle.output_contract,
-      "standing_goal_decision: update | no_change | needs_review | failed",
-      "delta_score: 0-100",
-      "new_source_count: <integer>",
-      "next_check_hint: normal | slower | faster | review",
-      "checked_sources_count: <integer>",
-      "new_sources_found: <integer>",
-      "accepted_facts_count: <integer>",
-      "rejected_facts_count: <integer>",
-      "wiki_pages_changed_count: <integer>",
-      "book_changed: yes | no",
+      ..@standing_watch_contracts.standing_watch_output_contract_lines(),
     ],
   )
   {

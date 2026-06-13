@@ -1,0 +1,20 @@
+// Generated using `moon info`, DON'T EDIT IT
+package "vectie/moontown/standing_watch_contracts"
+
+// Values
+pub fn standing_watch_context_pages() -> Array[String]
+
+pub fn standing_watch_output_contract_lines() -> Array[String]
+
+pub fn standing_watch_skill_path() -> String
+
+pub fn standing_watch_skill_paths() -> Array[String]
+
+// Errors
+
+// Types and methods
+
+// Type aliases
+
+// Traits
+

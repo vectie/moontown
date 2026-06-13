@@ -2,7 +2,6 @@
 package "vectie/moontown/standing_watch_policy"
 
 import {
-  "vectie/moontown/adapters/moonbook",
   "vectie/moontown/core",
 }
 
@@ -84,8 +83,6 @@ pub fn standing_watch_summary_has_decision(String, String) -> Bool
 pub fn standing_watch_summary_has_zero_material_delta(String) -> Bool
 
 pub fn standing_watch_target_pages() -> Array[String]
-
-pub fn standing_watch_task(@core.StandingGoal, String, Int, Int) -> @moonbook.BookTask
 
 pub fn standing_watch_task_id(String, Int) -> String
 

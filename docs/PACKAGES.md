@@ -201,10 +201,12 @@ Boundary:
 ## Standing Watch Policy
 
 - [src/standing_watch_policy](/Users/kq/Workspace/moontown/src/standing_watch_policy)
+- [src/standing_watch_contracts](/Users/kq/Workspace/moontown/src/standing_watch_contracts)
 
 Purpose:
 
 - standing-watch task kind, ids, prompts, and target pages
+- standing-watch worker skill paths, context pages, and output-contract lines
 - strict watcher accounting markers and marker parsers
 - MoonBook standing-watch history parsing and provider-decision collapse policy
 - material-delta metrics, watcher-record matching, and watcher-record decision
@@ -221,13 +223,25 @@ Purpose:
 
 Boundary:
 
+- `src/standing_watch_contracts` owns the adapter-safe standing-watch worker
+  contract: skill path set, context page set, and result output-contract lines.
+  It is intentionally dependency-light so MoonBook adapters can consume it
+  without importing the full standing-watch policy package.
+- `src/standing_watch_policy` owns standing-watch prompts, ids, marker
+  vocabulary/parser, history semantics, material-delta accounting, keeper
+  closure policy, event shape, stale windows, transient dispatch
+  classification, and recovery/review predicates.
 - `src/town_runtime` may schedule standing-watch work, apply package-owned
-  decisions to `TownState`, persist snapshots, and append watcher ledgers.
+  decisions to `TownState`, persist snapshots, append watcher ledgers, and
+  construct the concrete MoonBook `BookTask` from standing-watch policy values.
 - `src/town_runtime` should not own standing-watch marker vocabulary, closure
   thresholds, watcher-record matching/status mapping, standing-watch event
   shape, live snapshot stale windows, transient dispatch classification, or
   empty-completion `no_change` marker text, empty review completion summary
   text, legacy retry-accounting predicates, or review-triage predicates.
+- `src/adapters/moonbook` may enrich standing-watch worker context using
+  `src/standing_watch_contracts`, but should not hardcode standing-watch skill
+  path tables, context-page tables, or output-contract lines.
 - `src/town_runtime` should use `src/storage` for generic snapshot-root/base
   path derivation before appending runtime-owned subdirectories such as
   `book-results`.

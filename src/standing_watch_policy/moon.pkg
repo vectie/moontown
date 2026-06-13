@@ -2,5 +2,4 @@ import {
   "vectie/moontown/core",
   "vectie/moontown/book_quality",
   "vectie/moontown/runtime_error_policy",
-  "vectie/moontown/adapters/moonbook",
 }

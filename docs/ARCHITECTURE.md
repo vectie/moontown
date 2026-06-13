@@ -337,23 +337,24 @@ book owns. The implementation now has a first-class `policy` package:
   skill templates. Root Moontown may bootstrap/update the workspace and dispatch
   PlanBook repair/autonomy runtime work, but it should not keep root-local
   copies of durable PlanBook prose, generated-site markup, or skill text.
+- [standing_watch_contracts/](/Users/kq/Workspace/moontown/src/standing_watch_contracts)
+  owns the adapter-safe standing-watch worker contract: skill path set, context
+  page set, and output-contract lines.
 - [standing_watch_policy/](/Users/kq/Workspace/moontown/src/standing_watch_policy)
-  owns the generic standing-watch `BookTask` contract: task kind, task id
-  derivation, compact id segment formatting, target page set, prompt text,
-  strict accounting markers, marker parsing, MoonBook standing-watch history
-  block parsing, provider-decision collapse policy, material-delta metrics, and
-  book-quality repair appendix composition. It also owns watcher-record matching
-  against execution records, terminal watcher-decision to execution-status
-  mapping, standing-watch event shape, live snapshot stale-window policy,
+  owns the generic standing-watch policy: task kind, task id derivation,
+  compact id segment formatting, target page set, prompt text, strict accounting
+  markers, marker parsing, MoonBook standing-watch history block parsing,
+  provider-decision collapse policy, material-delta metrics, and book-quality
+  repair appendix composition. It also owns watcher-record matching against
+  execution records, terminal watcher-decision to execution-status mapping,
+  standing-watch event shape, live snapshot stale-window policy,
   transient dispatch-error classification, empty-completion `no_change` marker
-  text, keeper auto-triage, and recovery closure policy: whether
-  no-change/update markers satisfy a goal threshold, how terminal markers
-  supersede failed transport status, and the accepted keeper metadata appended
-  to execution summaries. Root may decide
-  when a standing goal is due, route it through the Mayor, persist snapshots,
-  read/write MoonBook history files, apply package-owned reconciliation
-  decisions to `TownState`, and append watcher ledgers, but it must not redefine
-  the standing-watch prompt, marker vocabulary/parser, history parser/collapse
+  text, keeper auto-triage, and recovery closure policy. Root may construct the
+  concrete MoonBook `BookTask`, decide when a standing goal is due, route it
+  through the Mayor, persist snapshots, read/write MoonBook history files,
+  apply package-owned reconciliation decisions to `TownState`, and append
+  watcher ledgers, but it must not redefine standing-watch context/contract
+  tables, prompt text, marker vocabulary/parser, history parser/collapse
   semantics, material-delta accounting, task kind, id format, keeper closure
   thresholds, watcher-record matching/status mapping, event shape, live snapshot
   stale windows, transient dispatch classification, empty-completion
