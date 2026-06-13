@@ -325,12 +325,13 @@ Purpose:
 Boundary:
 
 - `src/adapters/moonclaw` owns packet construction, command wiring, receipts,
-  and MoonClaw-specific prompt/target-page adaptation.
+  MoonClaw worker-profile selection, and MoonClaw-specific prompt/target-page
+  adaptation.
 - Catalog-backed keeper packets preserve the composed book architecture by
   attaching `book_type`, `book_policy`, `book_loop_plan`, and
   `book_internal_distance_plan` to packet metadata. Mayor code may decide when
   to prepare a packet, but it should pass the catalog entry instead of
-  reconstructing book policy fields itself.
+  reconstructing book policy fields or worker profile strings itself.
 - shared task-route classification belongs in semantic owner packages:
   `src/dispatch` owns research-bootstrap routing, and `src/course_book` owns
   course-book intent detection. MoonClaw adapter code should not duplicate

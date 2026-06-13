@@ -1560,6 +1560,8 @@ The packet lifecycle is intentionally split across package boundaries:
   - performs town-level quality gating for cross-book research goals
 - `adapters/moonclaw`
   - shapes `ExternalProposalPacket`
+  - selects the MoonClaw keeper worker profile from catalog policy type plus
+    task route
   - attaches policy-owned `book_type`, `book_policy`, `book_loop_plan`, and
     `book_internal_distance_plan` metadata for catalog-backed keeper packets
   - models `ProposalImportReceipt`

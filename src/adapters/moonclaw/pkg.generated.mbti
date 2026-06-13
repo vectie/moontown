@@ -31,6 +31,10 @@ pub async fn import_packet(ExternalProposalPacket, String, moonclaw_root? : Stri
 
 pub async fn import_packet_detached(ExternalProposalPacket, String, moonclaw_root? : String, home? : String, cwd? : String, confirm? : Bool, run_inline? : Bool) -> ProposalImportReceipt
 
+pub fn keeper_profile_for_entry_task(@moonbook.BookCatalogEntry, @moonbook.BookTask) -> String
+
+pub fn keeper_profile_for_task(@moonbook.BookTask) -> String
+
 pub fn keeper_runtime(@core.BookRef) -> EmbeddedMoonclawRuntime
 
 pub async fn load_packet_file(String) -> ExternalProposalPacket?

@@ -24,7 +24,7 @@ pub async fn Mayor::prepare_keeper_packet(
 ) -> MayorKeeperPacket {
   let bundle = @moonbook.hydrate_worker_context(entry, task)
   let packet_id = keeper_packet_id(entry.id, task.id)
-  let profile = moonclaw_profile_for_entry_task(entry, task)
+  let profile = @moonclaw.keeper_profile_for_entry_task(entry, task)
   let packet = @moonclaw.proposal_packet_from_bundle(
     bundle,
     task.title,
@@ -91,38 +91,5 @@ fn compact_id_segment(text : String, limit : Int) -> String {
     "task"
   } else {
     slug
-  }
-}
-
-///|
-fn moonclaw_profile_for_task(task : @moonbook.BookTask) -> String {
-  if @dispatch.research_bootstrap_book_task(task) {
-    return "moontown_research_bootstrap_worker"
-  }
-  match task.kind {
-    "standing-watch" => "wiki_ingest_controller"
-    "implementation-backlog"
-    | "code-patch"
-    | "image-asset"
-    | "projection-schema"
-    | "test-fix" => "wenyu_build_controller"
-    "ingest" | "ingest-followup" => "wiki_ingest_controller"
-    "review" | "planning" => "wiki_lint_controller"
-    "analysis" | "synthesis" => "wiki_query_controller"
-    _ => "wiki_query_controller"
-  }
-}
-
-///|
-fn moonclaw_profile_for_entry_task(
-  entry : @moonbook.BookCatalogEntry,
-  task : @moonbook.BookTask,
-) -> String {
-  if entry.id == "plan-moontown-quality" {
-    return "planbook_repair_worker"
-  }
-  match @civic.wenyu_civic_service_for_book_id(entry.id) {
-    Some(_) => "wenyu_civic_service_worker"
-    None => moonclaw_profile_for_task(task)
   }
 }
