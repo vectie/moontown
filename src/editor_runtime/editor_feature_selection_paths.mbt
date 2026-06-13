@@ -92,5 +92,5 @@ fn editor_workspace_root_from_result_path(result_path : String) -> String {
 
 ///|
 fn editor_feature_absolute_path(path : String) -> String {
-  @core.absolute_path_from_base(planbook_repair_source_root(), path)
+  @support.absolute_path_from_base(planbook_repair_source_root(), path)
 }

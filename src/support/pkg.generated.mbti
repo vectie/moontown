@@ -2,6 +2,10 @@
 package "vectie/moontown/support"
 
 // Values
+pub fn absolute_path_from_base(String, String) -> String
+
+pub fn absolute_path_from_cwd(String) -> String
+
 pub fn count_english_word_tokens(String) -> Int
 
 pub fn demote_markdown_headings(String) -> String

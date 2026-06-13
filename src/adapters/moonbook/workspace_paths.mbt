@@ -24,7 +24,7 @@ fn resolved_workspace_root(workspace_root : String) -> String {
 
 ///|
 fn resolved_root_path(path : String) -> String {
-  @core.absolute_path_from_cwd(path)
+  @support.absolute_path_from_cwd(path)
 }
 
 ///|

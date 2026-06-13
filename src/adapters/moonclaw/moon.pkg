@@ -6,6 +6,7 @@ import {
   "vectie/moontown/integration",
   "vectie/moontown/moonclaw_policy",
   "vectie/moontown/policy",
+  "vectie/moontown/support",
   "moonbitlang/async/fs",
   "moonbitlang/core/encoding/utf8" @encoding/utf8,
   "moonbitlang/core/env",

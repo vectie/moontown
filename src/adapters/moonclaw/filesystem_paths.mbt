@@ -5,12 +5,12 @@ fn resolve_packet_path(packet_path : String) -> String {
 
 ///|
 fn resolve_root_path(path : String) -> String {
-  @core.absolute_path_from_cwd(path)
+  @support.absolute_path_from_cwd(path)
 }
 
 ///|
 fn resolve_home_path(home : String, cwd : String) -> String {
-  @core.absolute_path_from_base(cwd, home)
+  @support.absolute_path_from_base(cwd, home)
 }
 
 ///|

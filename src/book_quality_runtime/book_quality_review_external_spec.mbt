@@ -7,7 +7,7 @@ fn review_external_proposal_spec(
     packet,
     result_dir,
     @codex.codex_main_target_id(),
-    @core.absolute_path_from_cwd(packet.workspace_root),
-    @core.absolute_path_from_cwd(packet.review_skill_path),
+    @support.absolute_path_from_cwd(packet.workspace_root),
+    @support.absolute_path_from_cwd(packet.review_skill_path),
   )
 }

@@ -5,7 +5,6 @@ import {
   "moonbitlang/x/sys",
   "moonbitlang/x/path",
   "vectie/moontown/adapters/moonclaw",
-  "vectie/moontown/core",
   "vectie/moontown/course_book",
   "vectie/moontown/editor_pipeline",
   "vectie/moontown/moonclaw_runtime",

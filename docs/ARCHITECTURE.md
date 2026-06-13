@@ -266,9 +266,10 @@ book owns. The implementation now has a first-class `policy` package:
   into visual projection policy.
 - [support/](/Users/kq/Workspace/moontown/src/support)
   owns generic support helpers for file I/O, JSON string/object extraction,
-  workspace-relative path readiness, Markdown shaping, HTML escaping,
-  text-label formatting, text metrics such as English word-token counting, and
-  nested runtime config JSON upserts. Root Moontown and domain quality packages
+  cwd-aware path resolution, workspace-relative path readiness, Markdown
+  shaping, HTML escaping, text-label formatting, text metrics such as English
+  word-token counting, and nested runtime config JSON upserts. Root Moontown
+  and domain quality packages
   may consume these helpers, but generic utility implementation should not be
   scattered across runtime or quality packages.
 - [research_quality/](/Users/kq/Workspace/moontown/src/research_quality)

@@ -9,8 +9,6 @@ import {
 // Values
 pub fn absolute_path_from_base(String, String) -> String
 
-pub fn absolute_path_from_cwd(String) -> String
-
 pub fn active_work_execution_status(TaskExecutionStatus) -> Bool
 
 pub fn copy_task_with_status(TownTask, TownTaskStatus) -> TownTask

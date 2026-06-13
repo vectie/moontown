@@ -79,6 +79,7 @@ Purpose:
 - shared lifecycle rank/precedence for deduping repeated execution records
 - shared task-id conventions such as daemon tick extraction from
   `*-tick-N` task ids
+- pure path joining from an explicit base path
 
 Important public types:
 
@@ -107,6 +108,9 @@ Boundary:
 - `src/core` owns generic task identity parsing such as extracting daemon ticks
   from execution task ids. Runtime packages should consume this helper instead
   of keeping duplicate parsers.
+- `src/core` must not read process environment, current working directory,
+  filesystem state, or clocks. If code needs cwd-aware path resolution, use
+  `src/support.absolute_path_from_cwd(...)` from a runtime/adapter package.
 - `StandingGoal.source_policy` is an uninterpreted string in `src/core`.
   `src/core` must not choose defaults such as `web-first` or `book-first`;
   policy-aware packages must supply values from `src/policy`.
@@ -1131,6 +1135,7 @@ Boundary:
 Purpose:
 
 - generic file I/O and parent-directory helpers
+- cwd-aware and explicit-base absolute path helpers
 - workspace-relative path readiness helpers
 - JSON helper functions
 - Markdown, HTML, and text-label helpers
@@ -1143,6 +1148,8 @@ Boundary:
 - Feature packages such as `src/book_quality` and `src/research_quality`
   should consume `src/support` helpers instead of keeping local copies of file,
   path, or text-metric logic.
+- Runtime packages and adapters should use `src/support` for cwd-aware path
+  helpers. `src/core` only owns pure path joins from an explicit base.
 - `src/support` must not own domain policy. If a helper needs to know what
   "good research" or "good civic service" means, it belongs in the feature
   package, not here.
