@@ -75,6 +75,13 @@ pub(all) struct BookQualityReviewRunLedger {
 } derive(ToJson, FromJson)
 
 ///|
+pub(all) struct BookQualityReviewRunObservation {
+  run : BookQualityReviewRun
+  has_result : Bool
+  process_alive : Bool
+} derive(Eq)
+
+///|
 priv struct BookQualityReviewRunDisplayRow {
   run : BookQualityReviewRun
   result_state : String

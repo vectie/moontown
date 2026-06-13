@@ -10,7 +10,7 @@ import {
 }
 
 // Values
-pub async fn active_review_count(result_dir? : String, run_path? : String) -> Int
+pub fn active_review_count_for_observations(Array[BookQualityReviewRunObservation], UInt64) -> Int
 
 pub fn active_review_dispatch_message(Int) -> String
 
@@ -216,7 +216,7 @@ pub fn review_skill_markdown() -> String
 
 pub fn review_skill_path(String) -> String
 
-pub async fn review_status_markdown_from_files(String, String, active_book_ids~ : Array[String]) -> String
+pub fn review_status_markdown_from_observations(String, String, active_book_ids~ : Array[String], BookQualityReviewRunLedger, Array[BookQualityReviewRunObservation], UInt64) -> String
 
 pub async fn score_book(@moonbook.BookCatalogEntry, String) -> BookQualityScore
 
@@ -357,6 +357,12 @@ pub(all) struct BookQualityReviewRun {
 pub(all) struct BookQualityReviewRunLedger {
   runs : Array[BookQualityReviewRun]
 } derive(ToJson, @json.FromJson)
+
+pub(all) struct BookQualityReviewRunObservation {
+  run : BookQualityReviewRun
+  has_result : Bool
+  process_alive : Bool
+} derive(Eq)
 
 pub(all) struct BookQualityReviewRunReconcileResult {
   run : BookQualityReviewRun

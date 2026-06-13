@@ -431,13 +431,17 @@ interpretation also live there, so the meaning of fields such as `ai_quality_sco
 Audit summary aggregation and audit Markdown rendering are package-owned too.
 Review packets attach the composed `BookPolicy`, readiness uses policy-owned
 health checks, semantic-review candidate ordering is package-owned too, and
-book-quality review-status summary rendering is package-owned. Semantic review
-profile policy is package-owned too: review profile id, execution-target
-metadata contract, preferred skills, role-runtime envelope, target-parameterized
-MoonClaw jobs profile JSON, packet step metadata, neutral review proposal spec,
-request text, notes, tags, and review metadata belong to `book_quality/`, while
-root only materializes those values into MoonClaw profile files and resolves
-paths for external packets.
+book-quality review-status summary rendering is package-owned. That rendering
+must be fed by explicit observations instead of loading files or clocks itself:
+`book_quality/` owns the ledger/status vocabulary and active-run decision,
+while `book_quality_runtime/` owns result-file existence checks, ledger file
+loading, and current-time observation. Semantic review profile policy is
+package-owned too: review profile id, execution-target metadata contract,
+preferred skills, role-runtime envelope, target-parameterized MoonClaw jobs
+profile JSON, packet step metadata, neutral review proposal spec, request text,
+notes, tags, and review metadata belong to `book_quality/`, while root only
+materializes those values into MoonClaw profile files and resolves paths for
+external packets.
 `book_quality_runtime/` owns the concrete `.moonclaw` ACP config for review
 work by combining book-quality reviewer semantics with adapter-owned Codex
 target JSON. It also adapts the neutral review proposal spec into a MoonClaw

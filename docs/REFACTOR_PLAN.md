@@ -374,6 +374,10 @@ Goals:
   specificity rules; keep research-quality repair trigger path and Markdown
   contract in `research_quality/`, but keep active/resolved trigger file writes
   in `research_quality_runtime/`
+- keep book-quality review ledger/status semantics, active-review counting, and
+  observation-fed status Markdown in `book_quality/`; keep review ledger file
+  loading, result-file checks, current-time observation, and status command
+  rendering in `book_quality_runtime/`
 - keep Wenyu course-book bootstrap, generated course content, course-builder
   skill text, UI-state JSON, and generated course site projection in
   `course_book/`; root should expose only command-compatible wrappers

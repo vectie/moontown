@@ -48,13 +48,15 @@ fn review_status_markdown(
 }
 
 ///|
-pub async fn review_status_markdown_from_files(
+pub fn review_status_markdown_from_observations(
   run_path : String,
   result_dir : String,
   active_book_ids~ : Array[String],
+  ledger : BookQualityReviewRunLedger,
+  observations : Array[BookQualityReviewRunObservation],
+  now_ms : UInt64,
 ) -> String {
-  let ledger = load_review_run_ledger_file(run_path)
-  let active = active_review_count(result_dir~, run_path~)
+  let active = active_review_count_for_observations(observations, now_ms)
   let view = book_quality_review_ledger_view(ledger, active_book_ids~)
   review_status_markdown(
     run_path,
@@ -62,22 +64,39 @@ pub async fn review_status_markdown_from_files(
     active,
     ledger,
     view,
-    review_display_rows_for_runs(view.current_runs),
-    review_display_rows_for_runs(view.historical_runs),
+    review_display_rows_for_observed_runs(view.current_runs, observations),
+    review_display_rows_for_observed_runs(view.historical_runs, observations),
   )
 }
 
 ///|
-async fn review_display_rows_for_runs(
+fn review_display_rows_for_observed_runs(
   runs : Array[BookQualityReviewRun],
+  observations : Array[BookQualityReviewRunObservation],
 ) -> Array[BookQualityReviewRunDisplayRow] {
   let rows : Array[BookQualityReviewRunDisplayRow] = []
   for run in runs {
     rows.push(
-      review_run_display_row_for_result_exists(run, @fs.exists(run.result_path)),
+      review_run_display_row_for_result_exists(
+        run,
+        review_result_exists_for_observed_run(run, observations),
+      ),
     )
   }
   rows
+}
+
+///|
+fn review_result_exists_for_observed_run(
+  run : BookQualityReviewRun,
+  observations : Array[BookQualityReviewRunObservation],
+) -> Bool {
+  for observation in observations {
+    if book_quality_review_run_same_record(observation.run, run) {
+      return observation.has_result
+    }
+  }
+  false
 }
 
 ///|

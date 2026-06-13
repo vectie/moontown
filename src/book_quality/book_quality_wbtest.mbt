@@ -1317,14 +1317,27 @@ async test "book quality package counts active review runs" {
     result_path: "\{result_dir}/written.md",
     status: review_run_written_status(),
   }
+  let observations = [
+    BookQualityReviewRunObservation::{
+      run: recent,
+      has_result: false,
+      process_alive: false,
+    },
+    BookQualityReviewRunObservation::{
+      run: stale,
+      has_result: false,
+      process_alive: false,
+    },
+    BookQualityReviewRunObservation::{
+      run: written,
+      has_result: true,
+      process_alive: false,
+    },
+  ]
+  assert_eq(active_review_count_for_observations(observations, 200UL), 2)
   assert_eq(
-    active_review_count_for_runs([recent, stale, written], result_dir, 200UL),
-    2,
-  )
-  assert_eq(
-    active_review_count_for_runs(
-      [recent, stale, written],
-      result_dir,
+    active_review_count_for_observations(
+      observations,
       100UL + review_stale_after_ms(),
     ),
     0,
@@ -1369,8 +1382,23 @@ async test "book quality package owns public active boundary through internal ch
     summary: "recent runner",
     generated_at_ms: 1_000UL,
   }
-  assert_true(review_run_active(run, result_dir, now_ms=600_999UL))
-  assert_false(review_run_active(run, result_dir, now_ms=601_000UL))
+  assert_eq(result_dir, "\{root}/book-quality/ai-review-results")
+  assert_true(
+    review_run_active_by_observation(
+      run,
+      has_result=false,
+      process_alive=false,
+      now_ms=600_999UL,
+    ),
+  )
+  assert_false(
+    review_run_active_by_observation(
+      run,
+      has_result=false,
+      process_alive=false,
+      now_ms=601_000UL,
+    ),
+  )
 }
 
 ///|

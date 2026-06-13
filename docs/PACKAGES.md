@@ -518,6 +518,7 @@ Key files:
 - [src/book_quality/civic_service_scoring.mbt](/Users/kq/Workspace/moontown/src/book_quality/civic_service_scoring.mbt)
 - [src/book_quality/review_context.mbt](/Users/kq/Workspace/moontown/src/book_quality/review_context.mbt)
 - [src/book_quality/repair_goal_policy.mbt](/Users/kq/Workspace/moontown/src/book_quality/repair_goal_policy.mbt)
+- [src/book_quality_runtime/book_quality_review_run_render.mbt](/Users/kq/Workspace/moontown/src/book_quality_runtime/book_quality_review_run_render.mbt)
 
 Purpose:
 
@@ -557,6 +558,12 @@ Boundary:
   come from `src/policy`.
 - `src/book_quality` owns quality scoring and repair-action wording, not the
   policy taxonomy itself.
+- `src/book_quality` owns review-run ledger/status vocabulary, display row
+  construction, active-review counting, and status Markdown rendering from
+  explicit runtime observations.
+- `src/book_quality_runtime` owns review status observation: loading the run
+  ledger file, checking result-file existence, observing current time, and
+  passing those facts into `src/book_quality`.
 - `src/book_quality/scoring_engine.mbt` owns book-type scoring orchestration.
   Reusable draft/finalization/path-scoring internals belong in
   `scoring_primitives.mbt`; civic-service scoring details belong in
