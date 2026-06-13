@@ -3,9 +3,21 @@ package "vectie/moontown/research_quality_runtime"
 
 import {
   "vectie/moontown/adapters/moonbook",
+  "vectie/moontown/core",
+  "vectie/moontown/research_quality",
 }
 
 // Values
+pub fn research_persist_artifacts(@moonbook.BookCatalogEntry, @core.TaskExecutionRecord) -> Array[String]
+
+pub async fn research_persist_memory_candidates(@moonbook.BookCatalogEntry, @core.TaskExecutionRecord) -> Array[@moonbook.MemoryCandidate]
+
+pub async fn research_persist_summary(@moonbook.BookCatalogEntry, @core.TaskExecutionRecord) -> String
+
+pub async fn research_quality_gaps(@moonbook.BookCatalogEntry) -> Array[String]
+
+pub async fn research_quality_observation(@moonbook.BookCatalogEntry) -> @research_quality.ResearchQualityObservation
+
 pub async fn write_research_quality_review_resolved(@moonbook.BookCatalogEntry, String) -> Unit
 
 pub async fn write_research_quality_review_trigger(@moonbook.BookCatalogEntry, Array[String], String) -> Unit

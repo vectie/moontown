@@ -246,10 +246,13 @@ Boundary:
 - `src/adapters/moonbook` may consume those constants while building provider
   requests and generated `SKILL.md` guidance, but should not define its own
   competing research-depth thresholds.
-- `src/research_quality` owns runtime quality gates, readiness checks,
-  repair/review triggers, and persisted research artifacts. It should consume
-  policy vocabulary when thresholds must be shared, but should not become an
-  adapter dependency.
+- `src/research_quality` owns research quality semantics from explicit
+  observations: readiness DTOs, required research paths, quality gates,
+  repair/review trigger contracts, and persistence wording contracts.
+  `src/research_quality_runtime` owns collecting filesystem/MoonBook
+  observations and persisted research-artifact handoff. Research quality should
+  consume policy vocabulary when thresholds must be shared, but should not
+  become an adapter or filesystem dependency.
 
 ## Storage
 
@@ -876,9 +879,9 @@ Key files:
 - [src/research_quality/projection_gaps.mbt](/Users/kq/Workspace/moontown/src/research_quality/projection_gaps.mbt)
 - [src/research_quality/source_depth_gaps.mbt](/Users/kq/Workspace/moontown/src/research_quality/source_depth_gaps.mbt)
 - [src/research_quality/review_trigger.mbt](/Users/kq/Workspace/moontown/src/research_quality/review_trigger.mbt)
-- [src/research_quality/persistence_payload.mbt](/Users/kq/Workspace/moontown/src/research_quality/persistence_payload.mbt)
-- [src/research_quality/bootstrap_artifacts.mbt](/Users/kq/Workspace/moontown/src/research_quality/bootstrap_artifacts.mbt)
 - [src/research_quality/quality_gate_events.mbt](/Users/kq/Workspace/moontown/src/research_quality/quality_gate_events.mbt)
+- [src/research_quality_runtime/quality_observation.mbt](/Users/kq/Workspace/moontown/src/research_quality_runtime/quality_observation.mbt)
+- [src/research_quality_runtime/persistence_payload.mbt](/Users/kq/Workspace/moontown/src/research_quality_runtime/persistence_payload.mbt)
 - [src/research_quality_runtime/review_trigger.mbt](/Users/kq/Workspace/moontown/src/research_quality_runtime/review_trigger.mbt)
 
 Purpose:
@@ -890,9 +893,11 @@ Purpose:
   and missing topic-specific wiki materialization
 - define the canonical `raw/bootstrap/QUALITY_REPAIR.md` path and Markdown
   contract for in-place research quality repair
-- let the runtime package write and resolve that repair trigger file
-- translate completed research bootstrap artifacts into persistence summaries,
-  artifact paths, and MoonBook memory candidates
+- define observation-fed research quality judgment so runtime can collect facts
+  without moving semantics into filesystem code
+- let the runtime package collect observations, write and resolve the repair
+  trigger file, and translate completed research bootstrap artifacts into
+  persistence summaries, artifact paths, and MoonBook memory candidates
 - own research quality-gate execution-summary suffixes and recovery/review
   event wording
 - expose quality judgments that town runtime can use without reimplementing
@@ -900,13 +905,15 @@ Purpose:
 
 Boundary:
 
-- research quality owns the generic research bootstrap contract, judgment,
-  repair-trigger file contract, repair wording, topic-specific signal checks,
-  bootstrap artifact reading, persistence-summary wording, artifact list, and
-  memory-candidate target-page contract. It also owns quality-gate and recovered
-  bootstrap message semantics.
-- `src/research_quality_runtime` owns the file side effects for active repair
-  trigger writes and resolved-trigger writes.
+- research quality owns the generic research bootstrap contract, observation
+  DTOs, judgment from observations, repair-trigger file contract, repair
+  wording, topic-specific signal checks, persistence-summary wording,
+  artifact-list contract, memory-candidate target-page contract, and
+  quality-gate/recovered-bootstrap message semantics.
+- `src/research_quality_runtime` owns filesystem/MoonBook observation for
+  quality gates: required-path checks, source-marker scans, MoonBook summary
+  reads, bootstrap artifact reads, generated-site reads, topic page scans,
+  active repair trigger writes, and resolved-trigger writes.
 - `src/town_runtime` may decide that a repair trigger should be written or
   resolved, may choose between Wenyu and research bootstrap, and may dispatch
   persistence to the owning package. It may apply review/recovery transitions to

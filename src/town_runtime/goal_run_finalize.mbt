@@ -14,7 +14,7 @@ async fn finalize_goal_book_entry(
     Some(summary) => summary
     None => return
   }
-  let quality_gaps = @research_quality.research_quality_gaps(entry)
+  let quality_gaps = @research_quality_runtime.research_quality_gaps(entry)
   queue_goal_book_reviews_if_needed(
     state, entry, summary, pending_review_baseline, task_ids, quality_gaps,
   )

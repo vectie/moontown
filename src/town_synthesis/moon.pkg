@@ -3,7 +3,7 @@ import {
   "vectie/moontown/adapters/moonbook",
   "vectie/moontown/roles",
   "vectie/moontown/policy",
-  "vectie/moontown/research_quality",
+  "vectie/moontown/research_quality_runtime",
   "vectie/moontown/storage",
   "vectie/moontown/support",
 }

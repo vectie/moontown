@@ -42,7 +42,7 @@ async fn render_wenyu_readiness(
       _ => None
     }
     let status = lane_research_status(state, lane.entry.id)
-    let gaps = @research_quality.research_quality_gaps(lane.entry)
+    let gaps = @research_quality_runtime.research_quality_gaps(lane.entry)
     let gate = if gaps.is_empty() { "ready" } else { gaps.join("; ") }
     match summary {
       Some(summary) =>

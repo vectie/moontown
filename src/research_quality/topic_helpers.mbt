@@ -3,7 +3,7 @@ fn projection_contains_topic(lower : String, topic : String) -> Bool {
   if research_text_contains_topic(lower, topic) {
     return true
   }
-  for topic_alias in topic_page_aliases(topic) {
+  for topic_alias in research_topic_page_aliases(topic) {
     if lower.contains(topic_alias.to_lower()) {
       return true
     }
@@ -13,7 +13,7 @@ fn projection_contains_topic(lower : String, topic : String) -> Bool {
 
 ///|
 pub fn research_text_contains_topic(lower : String, topic : String) -> Bool {
-  for topic_alias in topic_page_aliases(topic) {
+  for topic_alias in research_topic_page_aliases(topic) {
     if lower.contains(topic_alias.to_lower()) {
       return true
     }
@@ -41,7 +41,7 @@ pub fn research_text_contains_topic(lower : String, topic : String) -> Bool {
 }
 
 ///|
-fn topic_page_aliases(topic : String) -> Array[String] {
+pub fn research_topic_page_aliases(topic : String) -> Array[String] {
   if topic == "opc" {
     ["opc", "one-person-company", "one person company", "one-person company"]
   } else if topic.contains("llm") ||

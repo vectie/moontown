@@ -31,7 +31,7 @@ test "deep report quality gate rejects shallow process output" {
 ///|
 async test "Wenyu civic books are excluded from research quality gates" {
   let entry = goal_run_wenyu_policy_hall_entry()
-  assert_true(@research_quality.research_quality_gaps(entry).is_empty())
+  assert_true(@research_quality_runtime.research_quality_gaps(entry).is_empty())
 }
 
 ///|

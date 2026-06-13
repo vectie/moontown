@@ -14,6 +14,29 @@ pub struct ResearchReadiness {
 } derive(Debug, Eq, ToJson, FromJson)
 
 ///|
+pub(all) struct ResearchQualityObservation {
+  root : String
+  missing_required_paths : Array[String]
+  has_research_source_marker : Bool
+  readiness : ResearchReadiness?
+  brief : String?
+  overview : String?
+  search_log : String?
+  source_screen : String?
+  tool_blockers : String?
+  deep_report : String?
+  reference_output : String?
+  has_runtime_entity_contamination : Bool
+  has_topic_entity_page : Bool
+  has_topic_concept_page : Bool
+  has_topic_source_page : Bool
+  generated_site : String?
+  generated_site_read_error : Bool
+  site_entry : String?
+  site_entry_read_error : Bool
+} derive(Debug, Eq, ToJson, FromJson)
+
+///|
 pub fn ResearchReadiness::from_summary(
   summary : @moonbook.BookStateSummary,
   extra_gaps? : Array[String] = [],

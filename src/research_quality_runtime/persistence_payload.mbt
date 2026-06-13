@@ -41,7 +41,7 @@ pub async fn research_persist_memory_candidates(
   if !is_research_bootstrap_execution(entry, execution) {
     return []
   }
-  let topic = quality_topic_for_entry(entry)
+  let topic = @research_quality.quality_topic_for_entry(entry)
   let display = research_persist_display(entry)
   let artifacts = read_research_bootstrap_artifacts(entry)
   let source_detail = artifacts.source_detail()
@@ -85,7 +85,7 @@ fn is_research_bootstrap_execution(
   entry : @moonbook.BookCatalogEntry,
   execution : @core.TaskExecutionRecord,
 ) -> Bool {
-  research_quality_entry_is_research(entry) &&
+  @research_quality.research_quality_entry_is_research(entry) &&
   execution.task_id.contains("research-bootstrap-ingest")
 }
 
@@ -100,7 +100,7 @@ fn research_bootstrap_result_artifacts() -> Array[String] {
 
 ///|
 fn research_persist_display(entry : @moonbook.BookCatalogEntry) -> String {
-  let topic = quality_topic_for_entry(entry)
+  let topic = @research_quality.quality_topic_for_entry(entry)
   if topic == "opc" {
     "One Person Company (OPC)"
   } else if !entry.name.trim().is_blank() {

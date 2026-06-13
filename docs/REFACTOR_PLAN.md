@@ -369,12 +369,15 @@ Goals:
 - keep generic file, JSON, Markdown, HTML, text-label, and runtime-config JSON
   helper implementation in `support/`; root may expose private compatibility
   wrappers, but support code should not remain as many unrelated root files
-- keep research readiness and quality-gate semantics in `research_quality/`;
-  root may still own mayor/execution mutation for failed gates, but it should
-  not own source-depth, report-length, wiki-materialization, or marketing-site
-  specificity rules; keep research-quality repair trigger path and Markdown
-  contract in `research_quality/`, but keep active/resolved trigger file writes
-  in `research_quality_runtime/`
+- keep research readiness, observation DTOs, and quality-gate semantics in
+  `research_quality/`; root may still own mayor/execution mutation for failed
+  gates, but it should not own source-depth, report-length, wiki-materialization,
+  or marketing-site specificity rules; keep research-quality repair trigger
+  path, Markdown contract, persistence wording, artifact-list contract, and
+  memory-candidate target-page contract in `research_quality/`; keep
+  filesystem/MoonBook observation collection, bootstrap artifact reads,
+  persistence handoff, and active/resolved trigger file writes in
+  `research_quality_runtime/`
 - keep book-quality review ledger/status semantics, active-review counting, and
   observation-fed status Markdown in `book_quality/`; keep review ledger file
   loading, result-file checks, current-time observation, and status command

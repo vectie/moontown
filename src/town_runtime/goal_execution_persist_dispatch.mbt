@@ -10,7 +10,7 @@ async fn book_persist_summary(
       }
     None => ()
   }
-  @research_quality.research_persist_summary(entry, execution)
+  @research_quality_runtime.research_persist_summary(entry, execution)
 }
 
 ///|
@@ -25,7 +25,7 @@ fn book_persist_artifacts(
       }
     None => ()
   }
-  @research_quality.research_persist_artifacts(entry, execution)
+  @research_quality_runtime.research_persist_artifacts(entry, execution)
 }
 
 ///|
@@ -42,5 +42,5 @@ async fn book_persist_memory_candidates(
       }
     None => ()
   }
-  @research_quality.research_persist_memory_candidates(entry, execution)
+  @research_quality_runtime.research_persist_memory_candidates(entry, execution)
 }

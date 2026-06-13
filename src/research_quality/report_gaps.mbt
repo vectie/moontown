@@ -40,13 +40,12 @@ pub fn deep_report_quality_gaps(
 }
 
 ///|
-async fn reference_report_length_gaps(
-  root : String,
+fn reference_report_length_gaps(
+  reference_output : String?,
   report : String,
 ) -> Array[String] {
   let gaps : Array[String] = []
-  match
-    @support.read_optional_text("\{root}/raw/bootstrap/REFERENCE_OUTPUT.md") {
+  match reference_output {
     Some(reference) => {
       let reference_lines = count_text_lines(reference)
       let report_lines = count_text_lines(report)

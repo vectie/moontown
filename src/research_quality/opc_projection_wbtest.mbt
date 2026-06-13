@@ -44,17 +44,18 @@ test "OPC deep report rejects repository interpretation" {
 }
 
 ///|
-async test "OPC wiki quality rejects runtime entity contamination" {
-  let root = cleaned_research_quality_test_root(
-    "/tmp/moontown-opc-wiki-quality-bad",
+test "OPC wiki quality rejects runtime entity contamination" {
+  let entry = opc_research_catalog_entry("/tmp/moontown-opc-wiki-quality-bad")
+  let gaps = research_wiki_materialization_gaps_from_observation(
+    entry,
+    "opc",
+    research_quality_observation_fixture(
+      has_runtime_entity_contamination=true,
+      has_topic_entity_page=false,
+      has_topic_concept_page=false,
+      has_topic_source_page=true,
+    ),
   )
-  @support.write_text_file(root + "/wiki/entities/moonclaw.md", "# MoonClaw\n")
-  @support.write_text_file(
-    root + "/wiki/sources/research-evidence.md",
-    "# Research Evidence\n\nOne Person Company evidence.\n",
-  )
-  let entry = opc_research_catalog_entry(root)
-  let gaps = research_wiki_materialization_gaps(entry, root, "opc")
   assert_true(
     gaps.contains(
       "OPC wiki materialization promoted Moon* runtime entities instead of only OPC domain entities",
@@ -73,44 +74,31 @@ async test "OPC wiki quality rejects runtime entity contamination" {
 }
 
 ///|
-async test "OPC wiki quality accepts topic materialization pages" {
-  let root = cleaned_research_quality_test_root(
-    "/tmp/moontown-opc-wiki-quality-good",
+test "OPC wiki quality accepts topic materialization pages" {
+  let entry = opc_research_catalog_entry("/tmp/moontown-opc-wiki-quality-good")
+  assert_eq(
+    research_wiki_materialization_gaps_from_observation(
+      entry,
+      "opc",
+      research_quality_observation_fixture(),
+    ).length(),
+    0,
   )
-  @support.write_text_file(
-    root + "/wiki/entities/opc.md",
-    "# One Person Company\n",
-  )
-  @support.write_text_file(
-    root + "/wiki/concepts/opc-research-thesis.md",
-    "# OPC Research Thesis\n",
-  )
-  @support.write_text_file(
-    root + "/wiki/sources/research-evidence.md",
-    "# Research Evidence\n\nOne Person Company evidence.\n",
-  )
-  let entry = opc_research_catalog_entry(root)
-  assert_eq(research_wiki_materialization_gaps(entry, root, "opc").length(), 0)
 }
 
 ///|
-async test "OPC generated site quality rejects static scaffold" {
-  let root = cleaned_research_quality_test_root(
-    "/tmp/moontown-opc-site-quality-bad",
+test "OPC generated site quality rejects static scaffold" {
+  let gaps = research_generated_site_gaps_from_observation(
+    "opc",
+    research_quality_observation_fixture(
+      generated_site=Some(
+        "<!doctype html><title>LLM Wiki Website</title><h1>Markdown. Wiki. Website.</h1><p>Turn a maintained knowledge workspace into something people can understand.</p>",
+      ),
+      site_entry=Some(
+        "<!doctype html><title>LLM Wiki Website</title><h1>Markdown. Wiki. Website.</h1>",
+      ),
+    ),
   )
-  assert_eq(
-    research_quality_generated_site_path(),
-    @policy.default_generated_site_projection_path(),
-  )
-  @support.write_text_file(
-    research_quality_generated_site_workspace_path(root),
-    "<!doctype html><title>LLM Wiki Website</title><h1>Markdown. Wiki. Website.</h1><p>Turn a maintained knowledge workspace into something people can understand.</p>",
-  )
-  @support.write_text_file(
-    root + "/book/site/index.html",
-    "<!doctype html><title>LLM Wiki Website</title><h1>Markdown. Wiki. Website.</h1>",
-  )
-  let gaps = research_generated_site_gaps(root, "opc")
   assert_true(
     gaps.contains(
       "generated marketing projection is still the generic MoonBook scaffold",
@@ -129,17 +117,19 @@ async test "OPC generated site quality rejects static scaffold" {
 }
 
 ///|
-async test "OPC generated site quality accepts topic marketing and deep research" {
-  let root = cleaned_research_quality_test_root(
-    "/tmp/moontown-opc-site-quality-good",
+test "OPC generated site quality accepts topic marketing and deep research" {
+  assert_eq(
+    research_generated_site_gaps_from_observation(
+      "opc",
+      research_quality_observation_fixture(
+        generated_site=Some(
+          "<!doctype html><title>One Person Company (OPC) Marketing Projection</title><h1>Build a real company before you build a full team.</h1><section><p>Deep research</p><h2>One Person Company (OPC): Deep Research Analysis</h2><h3>Executive Summary</h3><table class=\"report-table\"><tr><td>Claim</td></tr></table></section>",
+        ),
+        site_entry=Some(
+          "<!doctype html><meta http-equiv=\"refresh\" content=\"0; url=./generated/index.html\"><title>One Person Company (OPC) Marketing Projection</title>",
+        ),
+      ),
+    ).length(),
+    0,
   )
-  @support.write_text_file(
-    research_quality_generated_site_workspace_path(root),
-    "<!doctype html><title>One Person Company (OPC) Marketing Projection</title><h1>Build a real company before you build a full team.</h1><section><p>Deep research</p><h2>One Person Company (OPC): Deep Research Analysis</h2><h3>Executive Summary</h3><table class=\"report-table\"><tr><td>Claim</td></tr></table></section>",
-  )
-  @support.write_text_file(
-    root + "/book/site/index.html",
-    "<!doctype html><meta http-equiv=\"refresh\" content=\"0; url=./generated/index.html\"><title>One Person Company (OPC) Marketing Projection</title>",
-  )
-  assert_eq(research_generated_site_gaps(root, "opc").length(), 0)
 }

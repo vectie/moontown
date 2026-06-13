@@ -8,7 +8,7 @@ async fn render_town_evidence_and_limits(
   builder.write_string(render_town_lane_matrix(state, plan))
   builder.write_string("\n### Readiness\n\n")
   for lane in plan.lanes {
-    let gaps = @research_quality.research_quality_gaps(lane.entry)
+    let gaps = @research_quality_runtime.research_quality_gaps(lane.entry)
     if gaps.is_empty() {
       builder.write_string(
         "- \{lane.entry.id}: ready for cross-lane synthesis.\n",

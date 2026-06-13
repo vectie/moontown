@@ -1,21 +1,11 @@
 ///|
-async fn research_content_quality_gaps(
+fn research_content_quality_gaps_from_observation(
   entry : @moonbook.BookCatalogEntry,
-  root : String,
+  observation : ResearchQualityObservation,
 ) -> Array[String] {
   let gaps : Array[String] = []
   let topic = quality_topic_for_entry(entry)
-  let brief_path = "\{root}/raw/bootstrap/synthesis-brief.md"
-  let overview_path = "\{root}/wiki/synthesis/overview.md"
-  let search_log_path = "\{root}/raw/bootstrap/search-log.md"
-  let source_screen_path = "\{root}/raw/bootstrap/source-screen.md"
-  let tool_blockers_path = "\{root}/raw/bootstrap/tool-blockers.md"
-  let brief = @support.read_optional_text(brief_path)
-  let overview = @support.read_optional_text(overview_path)
-  let search_log = @support.read_optional_text(search_log_path)
-  let source_screen = @support.read_optional_text(source_screen_path)
-  let tool_blockers = @support.read_optional_text(tool_blockers_path)
-  match brief {
+  match observation.brief {
     Some(text) => {
       let lower = text.to_lower()
       if !research_text_contains_topic(lower, topic) {
@@ -28,7 +18,7 @@ async fn research_content_quality_gaps(
     }
     None => ()
   }
-  match overview {
+  match observation.overview {
     Some(text) => {
       let lower = text.to_lower()
       if lower.contains("web evidence is still provisional") ||
@@ -38,7 +28,7 @@ async fn research_content_quality_gaps(
     }
     None => ()
   }
-  match search_log {
+  match observation.search_log {
     Some(text) => {
       let lower = text.to_lower()
       if lower.contains("may enrich it later") {
@@ -47,7 +37,7 @@ async fn research_content_quality_gaps(
     }
     None => ()
   }
-  match source_screen {
+  match observation.source_screen {
     Some(text) => {
       let lower = text.to_lower()
       if lower.contains("provisional web candidates") &&
@@ -61,17 +51,16 @@ async fn research_content_quality_gaps(
       for
         gap in source_discovery_fallback_gaps(
           topic,
-          search_log.unwrap_or(""),
+          observation.search_log.unwrap_or(""),
           text,
-          tool_blockers.unwrap_or(""),
+          observation.tool_blockers.unwrap_or(""),
         ) {
         gaps.push(gap)
       }
     }
     None => ()
   }
-  let deep_report_path = "\{root}/raw/bootstrap/deep-report.md"
-  match @support.read_optional_text(deep_report_path) {
+  match observation.deep_report {
     Some(text) => {
       for gap in deep_report_quality_gaps(entry, text) {
         gaps.push(gap)
@@ -80,20 +69,24 @@ async fn research_content_quality_gaps(
         gap in deep_report_word_count_gaps(
           topic,
           text,
-          source_screen.unwrap_or(""),
+          observation.source_screen.unwrap_or(""),
         ) {
         gaps.push(gap)
       }
-      for gap in reference_report_length_gaps(root, text) {
+      for
+        gap in reference_report_length_gaps(observation.reference_output, text) {
         gaps.push(gap)
       }
     }
     None => gaps.push("missing `raw/bootstrap/deep-report.md`")
   }
-  for gap in research_wiki_materialization_gaps(entry, root, topic) {
+  for
+    gap in research_wiki_materialization_gaps_from_observation(
+      entry, topic, observation,
+    ) {
     gaps.push(gap)
   }
-  for gap in research_generated_site_gaps(root, topic) {
+  for gap in research_generated_site_gaps_from_observation(topic, observation) {
     gaps.push(gap)
   }
   gaps
