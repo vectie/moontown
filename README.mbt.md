@@ -221,7 +221,7 @@ upserts the recurring schedule in `.moontown/civic/pattern-schedules.json`.
 The default Wenyu manifest covers all 11 civic buildings in
 `assets/templates/civic-patterns/`. Moontown should not grow one MoonBit branch per
 domain or civic service. See
-[docs/CIVIC_SALON_TEMPLATES.md](/Users/kq/Workspace/moontown/docs/CIVIC_SALON_TEMPLATES.md).
+[docs/CIVIC_COMMUNICATION_TEMPLATES.md](/Users/kq/Workspace/moontown/docs/CIVIC_COMMUNICATION_TEMPLATES.md).
 
 The pattern scheduler is also wired into the 24/7 daemon path. `civic protocols
 schedules status` shows `.moontown/civic/pattern-schedules.json`; `civic

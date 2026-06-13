@@ -998,10 +998,10 @@ Current implementation lives in:
 - [civic_protocol_store.mbt](/Users/kq/Workspace/moontown/src/civic_runtime/civic_protocol_store.mbt)
 - [civic_protocol_status_runtime.mbt](/Users/kq/Workspace/moontown/src/civic_runtime/civic_protocol_status_runtime.mbt)
 - [civic_protocol_social_square_fixture.mbt](/Users/kq/Workspace/moontown/src/civic_runtime/civic_protocol_social_square_fixture.mbt)
-- [civic_salon_scenario_types.mbt](/Users/kq/Workspace/moontown/src/civic_runtime/civic_salon_scenario_types.mbt)
-- [civic_salon_scenario_runtime.mbt](/Users/kq/Workspace/moontown/src/civic_runtime/civic_salon_scenario_runtime.mbt)
-- [civic_salon_runner.mbt](/Users/kq/Workspace/moontown/src/civic_runtime/civic_salon_runner.mbt)
-- [docs/CIVIC_SALON_TEMPLATES.md](/Users/kq/Workspace/moontown/docs/CIVIC_SALON_TEMPLATES.md)
+- [civic_communication_scenario_types.mbt](/Users/kq/Workspace/moontown/src/civic_runtime/civic_communication_scenario_types.mbt)
+- [civic_communication_scenario_runtime.mbt](/Users/kq/Workspace/moontown/src/civic_runtime/civic_communication_scenario_runtime.mbt)
+- [civic_communication_runner.mbt](/Users/kq/Workspace/moontown/src/civic_runtime/civic_communication_runner.mbt)
+- [docs/CIVIC_COMMUNICATION_TEMPLATES.md](/Users/kq/Workspace/moontown/docs/CIVIC_COMMUNICATION_TEMPLATES.md)
 
 Implemented protocol pieces:
 

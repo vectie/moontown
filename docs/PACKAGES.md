@@ -600,7 +600,7 @@ Key files:
 - [src/civic/services_paths.mbt](/Users/kq/Workspace/moontown/src/civic/services_paths.mbt)
 - [src/civic_runtime/civic_service_persist.mbt](/Users/kq/Workspace/moontown/src/civic_runtime/civic_service_persist.mbt)
 - [src/civic_runtime/civic_workspace_projection.mbt](/Users/kq/Workspace/moontown/src/civic_runtime/civic_workspace_projection.mbt)
-- [src/civic_runtime/civic_salon_scenario_workspace.mbt](/Users/kq/Workspace/moontown/src/civic_runtime/civic_salon_scenario_workspace.mbt)
+- [src/civic_runtime/civic_communication_scenario_workspace.mbt](/Users/kq/Workspace/moontown/src/civic_runtime/civic_communication_scenario_workspace.mbt)
 
 Purpose:
 

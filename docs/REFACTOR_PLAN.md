@@ -55,8 +55,8 @@ by Moontown and MoonBook.
 - `research-salon` is now one pattern in the civic communication-pattern
   registry, alongside `signal-watch`, `triage-desk`, `review-council`,
   `match-market`, `learning-cohort`, `story-forge`, and `incident-bridge`.
-- The former `civic_salon_daemon.mbt` has been split into schedule types,
-  paths, schedule persistence, reconciliation, and runner files.
+- The former salon daemon surface has been split into communication schedule
+  types, paths, schedule persistence, reconciliation, and runner files.
 - `runtime_status.mbt` now invokes a generic daemon scheduled-job dispatcher,
   but the dispatcher still lives in the root package pending a package split.
 - `src/ui/rabbita-town/main/main.mbt` has been split into focused frontend
@@ -130,7 +130,7 @@ Current files:
 - `civic_protocol_social_square_fixture.mbt`: Social Square proof-slice seed.
 - `civic/communication_scenario_types.mbt`: generic communication scenario, participant, idea,
   metric, and home-return record shapes.
-- `civic_salon_scenario_runtime.mbt`: generic scenario template loader,
+- `civic_communication_scenario_runtime.mbt`: generic scenario template loader,
   MoonBook workspace writes, protocol ledger slice, metrics, and generated
   projection.
 - `assets/templates/civic-salons/robotics-mini-salon.json`: copyable scenario
@@ -182,7 +182,7 @@ Current extension rule:
 Goals:
 
 - move civic runtime files into focused packages once file split is stable:
-  `civic/workspace`, `civic/protocol_runtime`, and `civic/salon`
+  `civic/workspace`, `civic/protocol_runtime`, and `civic/communication`
 - leave root-package wrapper functions for CLI compatibility
 - reduce root `pkg.generated.mbti` to high-level public facade APIs
 - keep reusable civic communication patterns in `civic/`; root may only adapt

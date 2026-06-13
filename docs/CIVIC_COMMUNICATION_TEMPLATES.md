@@ -48,20 +48,20 @@ input.
 
 ## Runtime Files
 
-- [civic_salon_scenario_types.mbt](/Users/kq/Workspace/moontown/src/civic_runtime/civic_salon_scenario_types.mbt)
+- [civic_communication_scenario_types.mbt](/Users/kq/Workspace/moontown/src/civic_runtime/civic_communication_scenario_types.mbt)
   defines `CivicSalonScenario`, participant workspaces, ideas, metrics, and
   home-return records.
-- [civic_salon_scenario_runtime.mbt](/Users/kq/Workspace/moontown/src/civic_runtime/civic_salon_scenario_runtime.mbt)
+- [civic_communication_scenario_runtime.mbt](/Users/kq/Workspace/moontown/src/civic_runtime/civic_communication_scenario_runtime.mbt)
   loads scenario templates, materializes MoonClaw reducer output into
   intermediate participant workspaces, runs the protocol ledger slice, and
   writes the public building projection.
-- [civic_salon_reducer.mbt](/Users/kq/Workspace/moontown/src/civic_runtime/civic_salon_reducer.mbt)
+- [civic_communication_reducer.mbt](/Users/kq/Workspace/moontown/src/civic_runtime/civic_communication_reducer.mbt)
   owns the reducer modes: `MoonClawReducer` for production,
   `PersistedReducer` for stale projection refresh, and `FixtureReducer` for
   deterministic tests/smoke demos.
-- [civic_salon_runner.mbt](/Users/kq/Workspace/moontown/src/civic_runtime/civic_salon_runner.mbt)
+- [civic_communication_runner.mbt](/Users/kq/Workspace/moontown/src/civic_runtime/civic_communication_runner.mbt)
   runs due schedules by loading the matching scenario template.
-- [civic_salon_reconcile.mbt](/Users/kq/Workspace/moontown/src/civic_runtime/civic_salon_reconcile.mbt)
+- [civic_communication_reconcile.mbt](/Users/kq/Workspace/moontown/src/civic_runtime/civic_communication_reconcile.mbt)
   refreshes stale projections from the same scenario template.
 - [assets/templates/civic-salons/robotics-mini-salon.json](/Users/kq/Workspace/moontown/assets/templates/civic-salons/robotics-mini-salon.json)
   is a small copyable research-salon example.
@@ -76,10 +76,10 @@ Recurring schedules load templates from:
 .moontown/civic/pattern-scenarios/<session-id>.json
 ```
 
-No scenario is auto-seeded by domain-specific MoonBit code. Recurring salons are
-explicit data: create a schedule in `.moontown/civic/pattern-schedules.json`
-and create a matching template at this path. New domains should arrive as data
-and skills, not new MoonBit branches.
+No scenario is auto-seeded by domain-specific MoonBit code. Recurring
+communication sessions are explicit data: create a schedule in
+`.moontown/civic/pattern-schedules.json` and create a matching template at this
+path. New domains should arrive as data and skills, not new MoonBit branches.
 
 One-off runs can use any template path. A successful `pattern-template` run also
 copies the scenario into `.moontown/civic/pattern-scenarios/` and upserts a

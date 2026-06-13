@@ -276,7 +276,7 @@ queue or claim the ideas are already correct.
 The pattern path is not robotics-hardcoded. `civic protocols pattern-template
 <path>` loads a `CivicSalonScenario` JSON file and runs the same protocol
 envelope for that domain. Use
-[CIVIC_SALON_TEMPLATES.md](/Users/kq/Workspace/moontown/docs/CIVIC_SALON_TEMPLATES.md)
+[CIVIC_COMMUNICATION_TEMPLATES.md](/Users/kq/Workspace/moontown/docs/CIVIC_COMMUNICATION_TEMPLATES.md)
 and [robotics-mini-salon.json](/Users/kq/Workspace/moontown/assets/templates/civic-salons/robotics-mini-salon.json)
 as the copyable contract.
 

@@ -48,6 +48,19 @@ for file in "${src_root_files[@]}"; do
   fi
 done
 
+civic_salon_runtime_files=()
+while IFS= read -r file; do
+  civic_salon_runtime_files+=("${file#./}")
+done < <(
+  find src/civic_runtime -maxdepth 1 -type f \
+    \( -name "civic_salon_*.mbt" -o -name "civic_protocol_salon_*.mbt" \) \
+    -print | sort
+)
+
+if (( ${#civic_salon_runtime_files[@]} > 0 )); then
+  failures+=("civic runtime contains salon-specific implementation filenames: ${civic_salon_runtime_files[*]}")
+fi
+
 if (( ${#failures[@]} > 0 )); then
   print "source layout audit failed:"
   for failure in "${failures[@]}"; do

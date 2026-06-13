@@ -145,7 +145,7 @@ current refactor pass moved the salon runtime to a scenario-template boundary:
 domain behavior is described by `CivicSalonScenario` JSON, while Moontown keeps
 the reusable schedule, ledger, MoonBook write, metrics, and projection
 envelope. See
-[CIVIC_SALON_TEMPLATES.md](/Users/kq/Workspace/moontown/docs/CIVIC_SALON_TEMPLATES.md).
+[CIVIC_COMMUNICATION_TEMPLATES.md](/Users/kq/Workspace/moontown/docs/CIVIC_COMMUNICATION_TEMPLATES.md).
 
 ## Salon Template Test
 
