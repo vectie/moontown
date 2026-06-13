@@ -96,6 +96,18 @@ test "policy owns catalog classification and legacy type labels" {
   )
   assert_eq(catalog_entry_type("coding", "Coding", []), operational_type())
   assert_eq(catalog_entry_type("unknown", "Unknown", []), general_type())
+  match
+    catalog_research_topic_hint("research-euv-v2", "EUV", [
+      "research", "topic:euv-lithography",
+    ]) {
+    Some(topic) => assert_eq(topic, "euv-lithography")
+    None => fail("expected tagged research topic")
+  }
+  match catalog_research_topic_hint("research-opc", "OPC", []) {
+    Some(topic) => assert_eq(topic, "opc")
+    None => fail("expected storage research topic")
+  }
+  assert_true(catalog_research_topic_hint("coding", "Coding", []) is None)
 }
 
 ///|

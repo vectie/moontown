@@ -60,3 +60,27 @@ pub fn catalog_entry_type(
   }
   general_type()
 }
+
+///|
+pub fn catalog_research_topic_hint(
+  id : String,
+  name : String,
+  tags : Array[String],
+) -> String? {
+  for tag in tags {
+    if tag.has_prefix("topic:") {
+      let topic = tag[6:].to_owned()
+      if !topic.is_empty() {
+        return Some(topic)
+      }
+    }
+  }
+  if catalog_entry_type(id, name, tags) == research_type() &&
+    id.has_prefix("research-") {
+    let topic = id[9:].to_owned()
+    if !topic.is_empty() {
+      return Some(topic)
+    }
+  }
+  None
+}

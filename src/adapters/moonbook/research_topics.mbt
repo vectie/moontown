@@ -1,17 +1,8 @@
 ///|
 fn research_topic_id(entry : BookCatalogEntry) -> String {
-  for tag in entry.tags {
-    if tag.has_prefix("topic:") {
-      let topic = tag[6:].to_owned()
-      if !topic.is_empty() {
-        return topic
-      }
-    }
-  }
-  if catalog_entry_is_research(entry) && entry.id.has_prefix("research-") {
-    entry.id[9:].to_owned()
-  } else {
-    normalize_topic_id(entry.id)
+  match @policy.catalog_research_topic_hint(entry.id, entry.name, entry.tags) {
+    Some(topic) => topic
+    None => normalize_topic_id(entry.id)
   }
 }
 

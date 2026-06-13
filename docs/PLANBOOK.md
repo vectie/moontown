@@ -111,6 +111,9 @@ MoonBook adapter plans must preserve catalog-first lookup, then use goal-derived
 topic policy for explicit research requests that name a non-canonical book id.
 They must not require the requested id itself to start with `research-`; the
 stable `research-*` slug is a storage target, not an eligibility rule.
+Research topic extraction from `topic:` tags or canonical `research-*` storage
+slugs belongs in `policy/`; adapters and quality packages should consume the
+policy hint and only own their local fallback behavior.
 Wenyu/civic plans must keep module identity predicates in `civic/`; town
 runtime may ask whether an entry is a Wenyu build book, but it must not branch
 directly on `wenyu-*` slugs. Build-pipeline and quality plans should follow the

@@ -65,20 +65,13 @@ pub fn research_topic_page_aliases(topic : String) -> Array[String] {
 
 ///|
 pub fn quality_topic_for_entry(entry : @moonbook.BookCatalogEntry) -> String {
-  for tag in entry.tags {
-    if tag.has_prefix("topic:") {
-      let topic = tag[6:].to_owned()
-      if !topic.is_empty() {
-        return topic
+  match @policy.catalog_research_topic_hint(entry.id, entry.name, entry.tags) {
+    Some(topic) => topic.to_lower()
+    None =>
+      if research_quality_entry_is_wenyu_support(entry) {
+        @support.label_from_slug(entry.id.replace(old="wenyu-", new="")).to_lower()
+      } else {
+        entry.id.to_lower()
       }
-    }
-  }
-  if research_quality_entry_is_research(entry) &&
-    entry.id.has_prefix("research-") {
-    entry.id.replace(old="research-", new="").to_lower()
-  } else if research_quality_entry_is_wenyu_support(entry) {
-    @support.label_from_slug(entry.id.replace(old="wenyu-", new="")).to_lower()
-  } else {
-    entry.id.to_lower()
   }
 }

@@ -25,6 +25,8 @@ pub fn catalog_entry_type(String, String, Array[String]) -> String
 
 pub fn catalog_policy_context_metadata(String, String, Array[String]) -> Json
 
+pub fn catalog_research_topic_hint(String, String, Array[String]) -> String?
+
 pub fn civic_protocol() -> BookPolicy
 
 pub fn civic_type() -> String
