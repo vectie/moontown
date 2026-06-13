@@ -1,0 +1,52 @@
+// Generated using `moon info`, DON'T EDIT IT
+package "vectie/moontown/civic_contracts"
+
+// Values
+pub fn wenyu_acceptance_tests_path() -> String
+
+pub fn wenyu_asset_pack_skill_path() -> String
+
+pub fn wenyu_base_context_pages() -> Array[String]
+
+pub fn wenyu_base_skill_paths() -> Array[String]
+
+pub fn wenyu_build_report_path() -> String
+
+pub fn wenyu_build_skill_path() -> String
+
+pub fn wenyu_civic_context_pages() -> Array[String]
+
+pub fn wenyu_civic_output_contract_lines() -> Array[String]
+
+pub fn wenyu_civic_service_contract_path() -> String
+
+pub fn wenyu_civic_service_skill_path() -> String
+
+pub fn wenyu_civic_skill_paths(Array[String]) -> Array[String]
+
+pub fn wenyu_code_patch_skill_path() -> String
+
+pub fn wenyu_evidence_matrix_path() -> String
+
+pub fn wenyu_implementation_backlog_path() -> String
+
+pub fn wenyu_local_sources_path() -> String
+
+pub fn wenyu_marketing_brief_path() -> String
+
+pub fn wenyu_moonbook_ui_state_path() -> String
+
+pub fn wenyu_mounted_sources_manifest_path() -> String
+
+pub fn wenyu_prd_path() -> String
+
+pub fn wenyu_vision_path() -> String
+
+// Errors
+
+// Types and methods
+
+// Type aliases
+
+// Traits
+

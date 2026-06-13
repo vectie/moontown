@@ -1073,6 +1073,7 @@ Key files:
 - [src/civic/services.mbt](/Users/kq/Workspace/moontown/src/civic/services.mbt)
 - [src/civic/services_paths.mbt](/Users/kq/Workspace/moontown/src/civic/services_paths.mbt)
 - [src/civic/services_result_paths.mbt](/Users/kq/Workspace/moontown/src/civic/services_result_paths.mbt)
+- [src/civic_contracts/wenyu_worker_contracts.mbt](/Users/kq/Workspace/moontown/src/civic_contracts/wenyu_worker_contracts.mbt)
 - [src/civic_runtime/civic_service_persist.mbt](/Users/kq/Workspace/moontown/src/civic_runtime/civic_service_persist.mbt)
 - [src/civic_runtime/civic_workspace_projection.mbt](/Users/kq/Workspace/moontown/src/civic_runtime/civic_workspace_projection.mbt)
 - [src/civic_runtime/civic_communication_scenario_workspace.mbt](/Users/kq/Workspace/moontown/src/civic_runtime/civic_communication_scenario_workspace.mbt)
@@ -1095,6 +1096,9 @@ Purpose:
 - `src/civic` owns communication schedule and round-record DTOs. Public records
   identify the scheduled scenario with `scenario_id`; they should not encode
   `salon` as the generic record vocabulary.
+- `src/civic_contracts` owns adapter-safe Wenyu worker contracts: Wenyu build
+  and civic-service skill path sets, Wenyu context page sets, bootstrap artifact
+  paths, and civic output-contract lines.
 - `src/civic_runtime` owns workspace writes, ledgers, generated pages, and
   scenario execution persistence.
 - `src/civic_runtime` exposes generic civic communication-pattern runtime APIs
@@ -1132,6 +1136,9 @@ Boundary:
   path derivation rules.
 - `src/civic` delegates default generated-site semantics to `src/policy`;
   civic modules should not redefine the generated-site path locally.
+- `src/adapters/moonbook` may consume `src/civic_contracts` to enrich Wenyu
+  worker bundles, but it must not hardcode Wenyu skill paths, Wenyu context
+  pages, bootstrap artifact path tables, or civic service output-contract lines.
 
 ## Daemon Runtime Policy And Runtime
 

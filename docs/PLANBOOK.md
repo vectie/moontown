@@ -617,6 +617,14 @@ not the reusable API. Root may write generated `SKILL.md` and reducer contract
 files to workspaces, but future plans should not add root-local skill text
 helpers for civic service behavior.
 
+Adapter-safe Wenyu worker contracts live in
+[civic_contracts](/Users/kq/Workspace/moontown/src/civic_contracts). Future
+plans that change Wenyu build/civic worker skill paths, context pages,
+bootstrap artifact paths, or civic service output contracts must update that
+package first. `adapters/moonbook` may detect civic context and append those
+contracts to a worker bundle, but it must not become the owner of Wenyu
+skill/context/output tables.
+
 Civic workspace seed text is civic-owned too. Workspace index pages, service
 contracts, building protocol contracts, schema pages, wiki seed pages, review
 queue pages, service ledgers, exchange ledgers, and service history pages

@@ -340,6 +340,12 @@ book owns. The implementation now has a first-class `policy` package:
 - [standing_watch_contracts/](/Users/kq/Workspace/moontown/src/standing_watch_contracts)
   owns the adapter-safe standing-watch worker contract: skill path set, context
   page set, and output-contract lines.
+- [civic_contracts/](/Users/kq/Workspace/moontown/src/civic_contracts)
+  owns the adapter-safe Wenyu worker contract: Wenyu build/civic skill path
+  sets, context page sets, bootstrap artifact paths, and civic output-contract
+  lines. MoonBook adapters may consume these contracts when shaping worker
+  context, but they should not define Wenyu skill tables, context-page tables,
+  or civic service output contracts locally.
 - [standing_watch_policy/](/Users/kq/Workspace/moontown/src/standing_watch_policy)
   owns the generic standing-watch policy: task kind, task id derivation,
   compact id segment formatting, target page set, prompt text, strict accounting
@@ -1754,6 +1760,24 @@ topic routing or artifact layout.
 - `research_quality/`
   - owns observation-driven quality semantics and readiness gaps, not adapter
     prompt construction
+
+## Wenyu Worker Contract Ownership
+
+Wenyu build and civic-service worker context is intentionally separate from the
+MoonBook adapter. The adapter may enrich a MoonBook worker bundle for a Wenyu
+book, but the reusable contract tables belong to `civic_contracts/`.
+
+- `civic_contracts/`
+  - owns Wenyu build, code-patch, asset-pack, and civic-service skill paths
+  - owns Wenyu PRD, vision, bootstrap report, evidence matrix, marketing brief,
+    local-source, mounted-source, backlog, acceptance-test, civic contract, and
+    MoonBook UI-state context paths
+  - owns the civic-service output contract lines consumed by MoonClaw workers
+- `adapters/moonbook/`
+  - may decide whether a worker bundle is civic-context or normal Wenyu work
+  - may append `civic_contracts/` skill/context/output contracts to a worker
+    bundle
+  - must not reintroduce adapter-local Wenyu skill/path/output-contract tables
 
 ## Refactor Boundaries
 
