@@ -113,6 +113,8 @@ pub fn skill_specs(BookPolicy) -> Array[SkillSpec]
 
 pub fn source_policy_for_type(String) -> String
 
+pub fn source_policy_or_default(String, String) -> String
+
 pub fn tend_skills(BookPolicy) -> Array[SkillSpec]
 
 pub fn web_first_policy() -> String

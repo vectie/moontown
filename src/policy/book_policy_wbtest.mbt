@@ -115,6 +115,14 @@ test "policy profiles map legacy labels into composed policies" {
   }
   assert_true(policy_profile_for_type("unknown-book") is None)
   assert_eq(source_policy_for_type("unknown-book"), book_first_policy())
+  assert_eq(
+    source_policy_or_default("", web_first_policy()),
+    web_first_policy(),
+  )
+  assert_eq(
+    source_policy_or_default(" book-first ", web_first_policy()),
+    book_first_policy(),
+  )
   assert_true(has_skill(policy_for_type("unknown-book"), "workspace-bootstrap"))
 }
 

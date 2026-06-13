@@ -56,9 +56,8 @@ fn final_integration_watch_coverage(
 
 ///|
 fn final_integration_source_policy(spec : FinalIntegrationWatchSpec) -> String {
-  if spec.source_policy.trim().is_empty() {
-    @policy.web_first_policy()
-  } else {
-    spec.source_policy
-  }
+  @policy.source_policy_or_default(
+    spec.source_policy,
+    @policy.web_first_policy(),
+  )
 }
