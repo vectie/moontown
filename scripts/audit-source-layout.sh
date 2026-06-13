@@ -24,6 +24,19 @@ if (( ${#root_source_files[@]} > 0 )); then
   failures+=("repo root contains implementation-like source files: ${root_source_files[*]}")
 fi
 
+generated_src_dirs=()
+while IFS= read -r dir; do
+  generated_src_dirs+=("${dir#./}")
+done < <(
+  find src -type d \
+    \( -name "node_modules" -o -name "_build" -o -name ".mooncakes" -o -name "dist" \) \
+    -prune -print | sort
+)
+
+if (( ${#generated_src_dirs[@]} > 0 )); then
+  failures+=("src contains generated/dependency directories; clean ignored artifacts before architecture review: ${generated_src_dirs[*]}")
+fi
+
 allowed_src_root_files=(
   "src/facade.mbt"
   "src/moon.pkg"

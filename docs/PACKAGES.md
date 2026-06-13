@@ -16,6 +16,19 @@ Source root:
 
 - `src`
 
+Source tree hygiene:
+
+- repository root should stay limited to metadata, docs, scripts, assets,
+  templates, and runtime state directories
+- `src/` is for source packages only; its root package is a facade and
+  implementation code belongs in named package directories
+- ignored generated/dependency directories such as `node_modules`, `_build`,
+  `.mooncakes`, and `dist` must not be left under `src/` during architecture
+  review; run `git clean -fdX src/ui/rabbita-town` after frontend builds if
+  those artifacts need to be removed from the visible source tree
+- `scripts/audit-source-layout.sh` enforces both the thin repository root and
+  the source-tree hygiene rule
+
 ## Root Package
 
 Primary root package files:

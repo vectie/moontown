@@ -116,6 +116,9 @@ deployment, backups, auth, and multi-day recovery evidence.
   scripts, templates, and runtime state
 - `src/` root is a facade only; implementation files must live in named
   packages, and `./scripts/audit-source-layout.sh` enforces this boundary
+- generated dependency/build directories under `src/` are treated as temporary
+  artifacts, not architecture; clean ignored frontend artifacts before source
+  review if `src/ui/rabbita-town/{node_modules,_build,.mooncakes,dist}` exists
 - `src/core` town, book, worker, task, and event modeling
 - `src/dispatch` routing and isolation decisions
 - `src/storage` snapshot persistence
