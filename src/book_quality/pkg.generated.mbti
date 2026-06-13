@@ -169,13 +169,9 @@ pub fn research_deep_report_word_assessment(Int) -> BookQualitySignalAssessment
 
 pub fn research_required_paths() -> Array[BookQualityRequiredPath]
 
-pub fn review_acp_config_json(String, String, Array[String], String) -> Json
+pub fn review_external_packet(BookQualityReviewPacket, String, String) -> @moonclaw.ExternalProposalPacket
 
-pub fn review_execution_target() -> String
-
-pub fn review_external_packet(BookQualityReviewPacket, String) -> @moonclaw.ExternalProposalPacket
-
-pub fn review_moonclaw_jobs_json() -> Json
+pub fn review_moonclaw_jobs_json(String) -> Json
 
 pub fn review_output_contract() -> String
 

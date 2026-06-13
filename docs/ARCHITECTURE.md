@@ -393,16 +393,17 @@ Audit summary aggregation and audit Markdown rendering are package-owned too.
 Review packets attach the composed `BookPolicy`, readiness uses policy-owned
 health checks, semantic-review candidate ordering is package-owned too, and
 book-quality review-status summary rendering is package-owned. Semantic review
-profile policy is package-owned too: review profile id, execution target,
-preferred skills, role-runtime envelope, MoonClaw jobs profile JSON, packet
-step metadata, external packet request text, notes, tags, and review metadata
-belong to `book_quality/`, while root only materializes those values into
-MoonClaw profile/config files and resolves paths for external packets. The
-semantic-review ACP target JSON shape is package-owned too; root may supply the
-observed source root, resolved Codex command, args, and model, but it should not
-define the `codex-main` target schema or reviewer label. Root
-orchestration may pass observed directories, process facts, and audits into the
-package, but it should not rebuild package policy from those observations. The
+profile policy is package-owned too: review profile id, execution-target
+metadata contract, preferred skills, role-runtime envelope, target-parameterized
+MoonClaw jobs profile JSON, packet step metadata, external packet request text,
+notes, tags, and review metadata belong to `book_quality/`, while root only
+materializes those values into MoonClaw profile files and resolves paths for
+external packets.
+`book_quality_runtime/` owns the concrete `.moonclaw` ACP config for review
+work by combining book-quality reviewer semantics with adapter-owned Codex
+target JSON. Root may supply observed directories, process facts, and audits
+into the package, but it should not define the `codex-main` target schema or
+reviewer label or rebuild package policy from those observations. The
 selection of the first pending semantic review, result-file filtering, the
 meaning of "weaker candidate should be reviewed first", the summary shape of the
 review ledger, and the active-run lifecycle decision from observed state belong

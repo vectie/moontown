@@ -152,11 +152,13 @@ stale/orphan review reconciliation policy, and result-state wording also belong
 there; root may pass observed filesystem/process facts, but should not own the
 ledger summary language, duplicate-dispatch active count, orphaning rules, or
 the pending/written display decision. Semantic review profile policy
-also belongs there: profile id, execution target, preferred skills, and
-role-runtime envelope, MoonClaw jobs profile JSON, and packet step metadata are
-package-owned. The semantic-review ACP target JSON shape is package-owned too;
-root may pass the observed source root, resolved Codex command, args, and model,
-but it should not define the `codex-main` target schema or reviewer label.
+also belongs there: profile id, execution-target metadata contract, preferred
+skills, role-runtime envelope, target-parameterized MoonClaw jobs profile JSON,
+and packet step metadata are package-owned. The semantic-review ACP config belongs to
+`book_quality_runtime/`, which combines those review semantics with the
+adapter-owned Codex target JSON. Root may pass the observed source root,
+resolved Codex command, args, and model, but it should not define the
+`codex-main` target schema or reviewer label.
 The transformation from a `BookQualityReviewPacket` into a MoonClaw external
 proposal packet is also package-owned; root should dispatch the returned packet
 instead of constructing packet ids, context page paths, skill paths, tags,

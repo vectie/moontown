@@ -645,46 +645,17 @@ test "book quality package owns repair bridge review-text candidate policy" {
 ///|
 test "book quality package owns semantic review profile policy" {
   assert_eq(review_profile_id(), "book_quality_ai_reviewer")
-  assert_eq(review_execution_target(), "codex-main")
   assert_true(review_preferred_skills().contains("book-quality-ai-review"))
   let role = review_role_runtime_json().stringify()
   assert_true(role.contains("\"runtime_mode\":\"semantic-review\""))
   assert_true(role.contains("\"memory_scope\":\"book-quality\""))
   assert_true(role.contains(review_output_contract()))
-  let jobs = review_moonclaw_jobs_json().stringify()
+  let jobs = review_moonclaw_jobs_json("codex-main").stringify()
   assert_true(jobs.contains("\"book_quality_ai_reviewer\""))
   assert_true(jobs.contains("\"review_book_semantic_quality\""))
   assert_true(jobs.contains("\"semantic-review\""))
   assert_true(jobs.contains("\"enable_tools\":true"))
-  let acp = review_acp_config_json(
-    "/repo",
-    "/bin/codex",
-    ["exec", "--sandbox", "workspace-write"],
-    "gpt-5",
-  ).stringify()
-  assert_true(acp.contains("\"codex-main\""))
-  assert_true(acp.contains("\"label\":\"Codex Book Quality Reviewer\""))
-  assert_true(acp.contains("\"cwd\":\"/repo\""))
-  assert_true(acp.contains("\"command\":\"/bin/codex\""))
-  assert_true(acp.contains("\"model\":\"gpt-5\""))
-  assert_true(acp.contains("\"--model\""))
-  assert_true(
-    acp.contains(
-      "\"args\":[\"exec\",\"--sandbox\",\"workspace-write\",\"--model\",\"gpt-5\"]",
-    ),
-  )
-  let corrected = review_acp_config_json(
-    "/repo",
-    "/bin/codex",
-    ["exec", "--model", "gpt-4.1", "--sandbox", "workspace-write"],
-    "gpt-5.5",
-  ).stringify()
-  assert_true(corrected.contains("\"model\":\"gpt-5.5\""))
-  assert_true(
-    corrected.contains(
-      "\"args\":[\"exec\",\"--model\",\"gpt-5.5\",\"--sandbox\",\"workspace-write\"]",
-    ),
-  )
+  assert_true(jobs.contains("\"execution_target\":\"codex-main\""))
 }
 
 ///|
@@ -700,7 +671,7 @@ test "book quality package owns external review packet contract" {
     prompt: "Review the book.",
     output_contract: review_output_contract(),
   }
-  let external = review_external_packet(packet, "/tmp/results")
+  let external = review_external_packet(packet, "/tmp/results", "codex-main")
   assert_true(
     external.notes.contains(
       "Do not inflate score for operational logs or scaffolding.",
@@ -749,7 +720,7 @@ test "book quality package builds external MoonClaw review packet" {
     prompt: "Review the book.",
     output_contract: review_output_contract(),
   }
-  let external = review_external_packet(packet, "/tmp/results")
+  let external = review_external_packet(packet, "/tmp/results", "codex-main")
   assert_eq(external.packet_id, "book-quality-ai-review-coding")
   assert_eq(external.profile, review_profile_id())
   assert_eq(external.output_contract, review_output_contract())

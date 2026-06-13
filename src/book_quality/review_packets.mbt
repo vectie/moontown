@@ -132,6 +132,7 @@ fn review_external_tags(packet : BookQualityReviewPacket) -> Array[String] {
 fn review_external_metadata(
   packet : BookQualityReviewPacket,
   result_path : String,
+  execution_target : String,
 ) -> Json {
   let fields : Map[String, Json] = {}
   add_review_no_input_policy(fields)
@@ -147,6 +148,7 @@ fn review_external_metadata(
   fields["profile_metadata"] = review_no_input_policy_json()
   fields["step_metadata"] = review_packet_step_metadata_json(
     packet.output_contract,
+    execution_target,
   )
   Json::object(fields)
 }

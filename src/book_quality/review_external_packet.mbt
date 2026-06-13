@@ -2,6 +2,7 @@
 pub fn review_external_packet(
   packet : BookQualityReviewPacket,
   result_dir : String,
+  execution_target : String,
 ) -> @moonclaw.ExternalProposalPacket {
   let root = @core.absolute_path_from_cwd(packet.workspace_root)
   let result_path = review_result_path(result_dir, packet.book_id)
@@ -21,6 +22,6 @@ pub fn review_external_packet(
     skill_paths=[skill_path],
     notes=review_external_notes(),
     tags=review_external_tags(packet),
-    metadata=review_external_metadata(packet, result_path),
+    metadata=review_external_metadata(packet, result_path, execution_target),
   )
 }

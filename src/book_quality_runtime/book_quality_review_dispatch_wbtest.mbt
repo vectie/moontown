@@ -49,7 +49,11 @@ test "book quality external review packet carries shared MoonClaw policy" {
     prompt: "Review the book.",
     output_contract: @book_quality.review_output_contract(),
   }
-  let external = @book_quality.review_external_packet(packet, "/tmp/results")
+  let external = @book_quality.review_external_packet(
+    packet,
+    "/tmp/results",
+    @codex.codex_main_target_id(),
+  )
   let metadata = external.metadata.stringify()
   assert_true(metadata.contains("\"disable_waiting_for_input\":true"))
   assert_true(metadata.contains("\"best_effort_on_missing_input\":true"))
