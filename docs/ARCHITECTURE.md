@@ -1738,6 +1738,7 @@ topic routing or artifact layout.
   - owns query/reference/local-source hint tables for known research topics
   - owns canonical research skill path contracts and grouped skill-path sets
     for bootstrap, enrichment, and standing-watch research support
+  - owns canonical research context pages and bootstrap output-contract lines
   - owns canonical `raw/bootstrap/*` artifact paths and topic-specific
     `wiki/sources`, `wiki/entities`, `wiki/concepts`, and `wiki/synthesis`
     paths
@@ -1747,6 +1748,8 @@ topic routing or artifact layout.
     `research_policy/`
   - must not hardcode research skill path tables; it should ask
     `research_policy/` which research skills a generated context should expose
+  - must not hardcode research bootstrap context-page sets or raw-artifact
+    output-contract lines
 - `research_quality/`
   - owns observation-driven quality semantics and readiness gaps, not adapter
     prompt construction

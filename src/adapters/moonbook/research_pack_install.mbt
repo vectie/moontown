@@ -47,11 +47,17 @@ async fn ensure_moontown_research_pack(
     repo_source_materialize_skill_text(entry),
   )
   write_workspace_text(
-    "\{root}/raw/bootstrap/RESEARCH_REQUEST.md",
+    @research_policy.workspace_artifact_path(
+      root,
+      @research_policy.research_request_context_page(),
+    ),
     research_request_text(entry),
   )
   write_workspace_text(
-    "\{root}/raw/bootstrap/SOURCE_HINTS.md",
+    @research_policy.workspace_artifact_path(
+      root,
+      @research_policy.source_hints_context_page(),
+    ),
     research_source_hints_text(entry),
   )
   write_workspace_text_if_missing(

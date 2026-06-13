@@ -78,6 +78,41 @@ pub fn ingest_required_raw_artifact_paths() -> Array[String] {
 }
 
 ///|
+pub fn artifact_bullets(
+  paths : Array[String],
+  indent : String,
+) -> Array[String] {
+  let lines : Array[String] = []
+  for path in paths {
+    lines.push("\{indent}- `\{path}`")
+  }
+  lines
+}
+
+///|
+pub fn raw_bootstrap_artifact_bullets(indent : String) -> Array[String] {
+  artifact_bullets(raw_bootstrap_artifact_paths(), indent)
+}
+
+///|
+pub fn ingest_required_raw_artifact_bullets(indent : String) -> Array[String] {
+  artifact_bullets(ingest_required_raw_artifact_paths(), indent)
+}
+
+///|
+pub fn raw_bootstrap_artifacts_sentence() -> String {
+  let quoted : Array[String] = []
+  for path in raw_bootstrap_artifact_paths() {
+    quoted.push("`\{path}`")
+  }
+  match quoted {
+    [] => ""
+    [only] => only
+    [.. rest, last] => "\{rest.join(", ")}, and \{last}"
+  }
+}
+
+///|
 pub fn topic_source_page(topic : String) -> String {
   "wiki/sources/\{topic}-web-and-local.md"
 }

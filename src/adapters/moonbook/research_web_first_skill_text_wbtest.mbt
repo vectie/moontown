@@ -58,7 +58,7 @@ test "web first research depth policy is centralized" {
 ///|
 test "web first required output uses shared bootstrap artifact paths" {
   let output = web_first_required_output_section("MoonClaw").join("\n")
-  for path in research_raw_bootstrap_artifact_paths() {
+  for path in @research_policy.raw_bootstrap_artifact_paths() {
     assert_true(output.contains("`\{path}`"))
   }
   assert_true(output.contains("Wiki-ready materialization notes"))

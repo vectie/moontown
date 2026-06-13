@@ -243,6 +243,7 @@ Purpose:
   local-vs-external routing hints
 - canonical raw/bootstrap artifact paths and topic-specific wiki page paths
 - canonical research skill path contracts and reusable skill-path sets
+- canonical research context-page sets and bootstrap output-contract lines
 - reusable vocabulary for MoonBook research skill prompts and future quality
   gates without introducing adapter/runtime dependency cycles
 
@@ -263,10 +264,14 @@ Boundary:
   `skills/research-evidence-synthesis/SKILL.md`,
   `skills/research-report/SKILL.md`, and the grouped skill sets for bootstrap,
   enrichment, and standing-watch research support.
+- `src/research_policy` owns the context pages and raw-artifact output contract
+  that define a research bootstrap handoff, including the `REFERENCE_*` context
+  pages and the required raw artifact sentence.
 - `src/adapters/moonbook` may consume those constants while building provider
   requests and generated `SKILL.md` guidance, but should not define its own
   competing research-depth thresholds, topic routing rules, query hint tables,
-  research skill path tables, or research artifact path tables.
+  research skill path tables, research context-page sets, output-contract
+  lines, or research artifact path tables.
 - `src/research_quality` owns research quality semantics from explicit
   observations: readiness DTOs, required research paths, quality gates,
   repair/review trigger contracts, and persistence wording contracts.

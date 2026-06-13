@@ -55,7 +55,7 @@ test "wiki ingest skill preserves durable raw and wiki artifact contract" {
 
 ///|
 test "research bootstrap context uses full raw handoff artifact contract" {
-  let contract = research_bootstrap_required_artifacts_contract()
+  let contract = @research_policy.bootstrap_required_artifacts_contract()
   assert_true(contract.contains(research_question_path()))
   assert_true(contract.contains(research_deep_report_path()))
   assert_true(contract.contains(research_marketing_brief_path()))

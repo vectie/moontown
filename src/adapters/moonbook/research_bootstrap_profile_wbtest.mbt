@@ -119,7 +119,7 @@ test "research bootstrap source-screening target prompt uses shared artifacts" {
 
 ///|
 test "research bootstrap worker context lists required raw artifacts" {
-  let contract = research_bootstrap_required_artifacts_contract()
+  let contract = @research_policy.bootstrap_required_artifacts_contract()
   assert_true(contract.contains("research-question.md"))
   assert_true(contract.contains("source-screen.md"))
   assert_true(contract.contains("evidence-matrix.md"))

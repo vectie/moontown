@@ -2,6 +2,14 @@
 package "vectie/moontown/research_policy"
 
 // Values
+pub fn artifact_bullets(Array[String], String) -> Array[String]
+
+pub fn bootstrap_context_pages() -> Array[String]
+
+pub fn bootstrap_output_contract_lines() -> Array[String]
+
+pub fn bootstrap_required_artifacts_contract() -> String
+
 pub fn bootstrap_worker_skill_paths() -> Array[String]
 
 pub fn command_fetch_pattern() -> String
@@ -14,6 +22,8 @@ pub fn discovery_attempt_limit() -> String
 
 pub fn display_topic_name(String) -> String
 
+pub fn enrichment_context_pages() -> Array[String]
+
 pub fn enrichment_skill_paths() -> Array[String]
 
 pub fn evidence_matrix_path() -> String
@@ -24,11 +34,15 @@ pub fn followup_query(String, String) -> String
 
 pub fn harvest_candidate_fetch_count() -> String
 
+pub fn ingest_required_raw_artifact_bullets(String) -> Array[String]
+
 pub fn ingest_required_raw_artifact_paths() -> Array[String]
 
 pub fn is_external_domain_topic(String) -> Bool
 
 pub fn is_local_project_topic(String) -> Bool
+
+pub fn journey_context_page() -> String
 
 pub fn local_paths(String) -> Array[String]
 
@@ -56,11 +70,21 @@ pub fn question_path() -> String
 
 pub fn question_text(String, String) -> String
 
+pub fn raw_bootstrap_artifact_bullets(String) -> Array[String]
+
 pub fn raw_bootstrap_artifact_paths() -> Array[String]
+
+pub fn raw_bootstrap_artifacts_sentence() -> String
 
 pub fn reference_line_buffer() -> String
 
 pub fn reference_line_ratio() -> String
+
+pub fn reference_output_context_page() -> String
+
+pub fn reference_source_hints_context_page() -> String
+
+pub fn reference_style_context_page() -> String
 
 pub fn reference_urls(String) -> Array[String]
 
@@ -74,11 +98,15 @@ pub fn repo_source_materialize_skill_path() -> String
 
 pub fn research_report_skill_path() -> String
 
+pub fn research_request_context_page() -> String
+
 pub fn risk_query(String, String) -> String
 
 pub fn search_log_path() -> String
 
 pub fn source_diarize_skill_path() -> String
+
+pub fn source_hints_context_page() -> String
 
 pub fn source_screen_path() -> String
 

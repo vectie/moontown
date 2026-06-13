@@ -1,11 +1,11 @@
 ///|
 test "research raw bootstrap artifact paths centralize full handoff contract" {
   assert_eq(
-    research_raw_bootstrap_artifact_paths().join("|"),
+    @research_policy.raw_bootstrap_artifact_paths().join("|"),
     "raw/bootstrap/research-question.md|raw/bootstrap/search-log.md|raw/bootstrap/source-screen.md|raw/bootstrap/evidence-matrix.md|raw/bootstrap/local-sources.md|raw/bootstrap/synthesis-brief.md|raw/bootstrap/deep-report.md|raw/bootstrap/marketing-brief.md",
   )
   assert_true(
-    research_raw_bootstrap_artifacts_sentence().contains(
+    @research_policy.raw_bootstrap_artifacts_sentence().contains(
       "`raw/bootstrap/deep-report.md`",
     ),
   )

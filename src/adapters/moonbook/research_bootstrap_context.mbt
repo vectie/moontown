@@ -4,10 +4,7 @@ fn research_bootstrap_worker_context_bundle(
   bundle : WorkerContextBundle,
 ) -> WorkerContextBundle {
   let skill_paths = @research_policy.bootstrap_worker_skill_paths()
-  let context_pages = [
-    "raw/bootstrap/RESEARCH_REQUEST.md", "raw/bootstrap/SOURCE_HINTS.md", "raw/bootstrap/REFERENCE_STYLE.md",
-    "raw/bootstrap/REFERENCE_OUTPUT.md", "raw/bootstrap/REFERENCE_SOURCE_HINTS.md",
-  ]
+  let context_pages = @research_policy.bootstrap_context_pages()
   {
     book_id: bundle.book_id,
     workspace_root: bundle.workspace_root,
@@ -70,19 +67,5 @@ fn research_bootstrap_context_reference_source_policy() -> String {
 
 ///|
 fn research_bootstrap_output_contract_lines() -> Array[String] {
-  [
-    "For direct Moontown research bootstrap worker steps, return plain Markdown summaries unless a step prompt explicitly asks for JSON.",
-    "Do not return adaptive-planning JSON such as `needs_subplan` or `suggested_substeps`.",
-    "Raw artifacts must be workspace-relative paths under `raw/bootstrap/`.",
-    research_bootstrap_required_artifacts_contract(),
-    "If any artifact cannot be produced, write a blocker artifact and explain the missing tool or source.",
-  ]
-}
-
-///|
-fn research_bootstrap_required_artifacts_contract() -> String {
-  [
-    "Required raw artifacts before the handoff is complete:",
-    "\{research_raw_bootstrap_artifacts_sentence()}.",
-  ].join(" ")
+  @research_policy.bootstrap_output_contract_lines()
 }

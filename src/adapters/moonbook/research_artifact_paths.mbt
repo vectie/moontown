@@ -1,9 +1,4 @@
 ///|
-fn research_raw_bootstrap_artifact_paths() -> Array[String] {
-  @research_policy.raw_bootstrap_artifact_paths()
-}
-
-///|
 fn research_question_path() -> String {
   @research_policy.question_path()
 }
@@ -62,43 +57,15 @@ fn research_ingest_required_raw_artifact_paths() -> Array[String] {
 }
 
 ///|
-fn research_artifact_bullets(
-  paths : Array[String],
-  indent : String,
-) -> Array[String] {
-  let lines : Array[String] = []
-  for path in paths {
-    lines.push("\{indent}- `\{path}`")
-  }
-  lines
-}
-
-///|
 fn research_raw_bootstrap_artifact_bullets(indent : String) -> Array[String] {
-  research_artifact_bullets(research_raw_bootstrap_artifact_paths(), indent)
+  @research_policy.raw_bootstrap_artifact_bullets(indent)
 }
 
 ///|
 fn research_ingest_required_raw_artifact_bullets(
   indent : String,
 ) -> Array[String] {
-  research_artifact_bullets(
-    research_ingest_required_raw_artifact_paths(),
-    indent,
-  )
-}
-
-///|
-fn research_raw_bootstrap_artifacts_sentence() -> String {
-  let quoted : Array[String] = []
-  for path in research_raw_bootstrap_artifact_paths() {
-    quoted.push("`\{path}`")
-  }
-  match quoted {
-    [] => ""
-    [only] => only
-    [.. rest, last] => "\{rest.join(", ")}, and \{last}"
-  }
+  @research_policy.ingest_required_raw_artifact_bullets(indent)
 }
 
 ///|

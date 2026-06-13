@@ -22,12 +22,7 @@ fn enrich_worker_context_bundle(
     [..bundle.skill_paths, ..@research_policy.enrichment_skill_paths()],
   )
   let context_pages = unique_paths(
-    [
-      ..bundle.context_pages,
-      "raw/bootstrap/RESEARCH_REQUEST.md",
-      "raw/bootstrap/SOURCE_HINTS.md",
-      "wiki/history/journey.md",
-    ],
+    [..bundle.context_pages, ..@research_policy.enrichment_context_pages()],
   )
   {
     book_id: bundle.book_id,
