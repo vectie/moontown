@@ -1,6 +1,4 @@
 import {
-  "moonbitlang/async/fs",
-  "moonbitlang/core/json",
   "vectie/moontown/adapters/moonbook",
   "vectie/moontown/core",
   "vectie/moontown/policy",

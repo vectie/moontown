@@ -250,11 +250,17 @@ book owns. The implementation now has a first-class `policy` package:
   Generated-site quality checks consume `policy.default_generated_site_projection_path()`
   for the default projection path instead of redefining it locally.
 - [course_book/](/Users/kq/Workspace/moontown/src/course_book)
-  owns the Wenyu game-design course book: catalog entry construction,
-  workspace materialization, course contract/outline/exercises/rubric text,
-  course-builder skill text, generated course UI state, and generated course
-  site HTML. Root Moontown may keep CLI-compatible wrappers, but course content
-  and projection semantics should not live in the root package.
+  owns the Wenyu game-design course book identity, catalog-entry shape, course
+  contract/outline/exercises/rubric text, course-builder skill text, generated
+  course UI state, generated course site HTML, and route-detection policy.
+  It must stay deterministic: no catalog mutation, filesystem status checks,
+  source-workspace reads, or workspace writes.
+- [course_book_runtime/](/Users/kq/Workspace/moontown/src/course_book_runtime)
+  owns course-book runtime materialization: MoonBook catalog load/save, merging
+  the course entry into the catalog, reading source course/research artifacts,
+  writing the course workspace, and rendering readiness status from filesystem
+  observations. CLI and bootstrap callers should depend on this runtime package
+  rather than putting MoonBook catalog/file IO back into `course_book/`.
 - [moonclaw_policy/](/Users/kq/Workspace/moontown/src/moonclaw_policy)
   owns reusable MoonClaw packet metadata semantics: no-input/best-effort
   wait policy, execution metadata maps, and step metadata maps. Adapters,

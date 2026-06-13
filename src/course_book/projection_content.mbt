@@ -1,5 +1,5 @@
 ///|
-fn wenyu_course_ui_state_json(entry : @moonbook.BookCatalogEntry) -> String {
+pub fn wenyu_course_ui_state_json(entry : @moonbook.BookCatalogEntry) -> String {
   [
     "{",
     "  \"book_id\": \{@support.json_string(entry.id)},",
@@ -32,7 +32,7 @@ fn wenyu_course_ui_state_json(entry : @moonbook.BookCatalogEntry) -> String {
 }
 
 ///|
-fn wenyu_course_generated_site_html(
+pub fn wenyu_course_generated_site_html(
   entry : @moonbook.BookCatalogEntry,
 ) -> String {
   [

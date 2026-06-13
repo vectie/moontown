@@ -59,5 +59,5 @@ async fn missing_planbook_workspace_required_paths(
 async fn render_wenyu_game_design_course_status(
   workspace_root? : String = @course_book.default_wenyu_course_workspace_root(),
 ) -> String {
-  @course_book.render_wenyu_game_design_course_status(workspace_root~)
+  @course_book_runtime.render_wenyu_game_design_course_status(workspace_root~)
 }

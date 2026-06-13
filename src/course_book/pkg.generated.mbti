@@ -6,7 +6,7 @@ import {
 }
 
 // Values
-pub async fn bootstrap_wenyu_game_design_course_book(book_catalog_path? : String, workspace_root? : String, source_workspace_root? : String) -> String
+pub fn course_body_from_sources(String, String) -> String
 
 pub fn course_book_task(@moonbook.BookTask) -> Bool
 
@@ -16,11 +16,35 @@ pub fn course_route_text(String) -> Bool
 
 pub fn default_wenyu_course_book_id() -> String
 
+pub fn default_wenyu_course_source_workspace_root() -> String
+
 pub fn default_wenyu_course_workspace_root() -> String
 
 pub fn positive_course_prompt_signal(String) -> Bool
 
-pub async fn render_wenyu_game_design_course_status(workspace_root? : String) -> String
+pub fn wenyu_course_catalog_entry(String) -> @moonbook.BookCatalogEntry
+
+pub fn wenyu_course_contract_markdown() -> String
+
+pub fn wenyu_course_exercises_markdown() -> String
+
+pub fn wenyu_course_generated_site_html(@moonbook.BookCatalogEntry) -> String
+
+pub fn wenyu_course_generated_site_path() -> String
+
+pub fn wenyu_course_generated_site_workspace_path(String) -> String
+
+pub fn wenyu_course_index_markdown(@moonbook.BookCatalogEntry) -> String
+
+pub fn wenyu_course_outline_markdown() -> String
+
+pub fn wenyu_course_rubric_markdown() -> String
+
+pub fn wenyu_course_source_material_markdown(String, String, String) -> String
+
+pub fn wenyu_course_status_required_paths() -> Array[String]
+
+pub fn wenyu_course_ui_state_json(@moonbook.BookCatalogEntry) -> String
 
 // Errors
 

@@ -1,5 +1,7 @@
 ///|
-fn wenyu_course_index_markdown(entry : @moonbook.BookCatalogEntry) -> String {
+pub fn wenyu_course_index_markdown(
+  entry : @moonbook.BookCatalogEntry,
+) -> String {
   [
     "# Wenyu Valley Game Design Course",
     "",
@@ -29,7 +31,7 @@ fn wenyu_course_index_markdown(entry : @moonbook.BookCatalogEntry) -> String {
 }
 
 ///|
-fn wenyu_course_contract_markdown() -> String {
+pub fn wenyu_course_contract_markdown() -> String {
   [
     "# Course Contract", "", "This book teaches. It does not primarily research, operate civic services, or track code plans.",
     "", "## Rules", "", "- Write for a beginner who can learn by doing.", "- Prefer lessons, exercises, checkpoints, diagrams, and expected artifacts.",
@@ -41,7 +43,7 @@ fn wenyu_course_contract_markdown() -> String {
 }
 
 ///|
-fn wenyu_course_outline_markdown() -> String {
+pub fn wenyu_course_outline_markdown() -> String {
   [
     "# Course Outline", "", "This is a beginner curriculum. Each module should teach one design judgment and produce one artifact.",
     "", "1. Read the Wenyu Valley map as product space.", "2. Understand orthographic versus isometric tile-map views.",
@@ -96,7 +98,7 @@ pub fn course_builder_skill_markdown() -> String {
 }
 
 ///|
-fn wenyu_course_exercises_markdown() -> String {
+pub fn wenyu_course_exercises_markdown() -> String {
   [
     "# Course Exercises", "", "| Exercise | Artifact | Pass Condition |", "| --- | --- | --- |",
     "| Trace the reference map | labeled terrain sketch | river, lake, road, district, and farm zones are separated |",
@@ -107,7 +109,7 @@ fn wenyu_course_exercises_markdown() -> String {
 }
 
 ///|
-fn wenyu_course_rubric_markdown() -> String {
+pub fn wenyu_course_rubric_markdown() -> String {
   [
     "# Beginner Course Rubric", "", "| Score | Meaning |", "| ---: | --- |", "| 5 | learner can explain, build, and critique a Wenyu tile-map feature |",
     "| 4 | learner can implement the feature with minor guidance |", "| 3 | learner understands the concept but needs execution help |",
@@ -134,7 +136,7 @@ fn default_wenyu_course_body() -> String {
 }
 
 ///|
-fn course_body_from_sources(
+pub fn course_body_from_sources(
   source_course : String,
   source_report : String,
 ) -> String {
@@ -165,7 +167,7 @@ fn looks_research_shaped(text : String) -> Bool {
 }
 
 ///|
-fn wenyu_course_source_material_markdown(
+pub fn wenyu_course_source_material_markdown(
   source_workspace_root : String,
   source_course : String,
   source_report : String,

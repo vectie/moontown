@@ -43,9 +43,9 @@ async fn render_editor_pipeline_command(args : Array[String]) -> String {
 async fn render_course_command(args : Array[String]) -> String {
   match args {
     ["wenyu-game-design", "bootstrap"] =>
-      @course_book.bootstrap_wenyu_game_design_course_book()
+      @course_book_runtime.bootstrap_wenyu_game_design_course_book()
     ["wenyu-game-design", "status"] =>
-      @course_book.render_wenyu_game_design_course_status()
+      @course_book_runtime.render_wenyu_game_design_course_status()
     _ => @moontown.load_or_create_saved_dashboard()
   }
 }

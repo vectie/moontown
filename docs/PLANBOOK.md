@@ -107,6 +107,13 @@ scoring, cookbook audit-link scoring, and generated-skill exploration quality
 contracts. Skill templates should call `@book_quality.skill_quality_*` helpers
 for depth, breadth, curiosity, judgment, long-horizon memory, and auditable
 progress requirements instead of defining root-local MoonBook skill predicates.
+Course-book implementation follows the same domain/runtime split:
+`course_book/` owns course identity, catalog-entry shape, teaching contracts,
+route policy, generated UI state, and generated HTML, while
+`course_book_runtime/` owns MoonBook catalog mutation, source artifact reads,
+workspace writes, and readiness status from filesystem observations. Future
+plans must not add file IO, catalog load/save, or source-workspace harvesting
+back into `course_book/`; those are runtime duties.
 Root may pass observed facts, but it
 should not own thresholds, point values, or note wording. Root may adapt MoonBook catalog entries into those classifier
 inputs, but it should not redefine the labels. It also owns the public

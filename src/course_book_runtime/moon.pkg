@@ -1,0 +1,10 @@
+import {
+  "moonbitlang/async/fs",
+  "vectie/moontown/adapters/moonbook",
+  "vectie/moontown/course_book",
+  "vectie/moontown/support",
+}
+
+import {
+  "moonbitlang/async",
+} for "wbtest"
