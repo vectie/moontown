@@ -61,7 +61,7 @@ pub fn entry_for_explicit_research_book(
           let stable_storage_topic = strip_research_attempt_suffix(
             storage_topic,
           )
-          let goal_topic = research_topic_from_goal(goal)
+          let goal_topic = @policy.research_topic_from_goal(goal)
           let goal_topic_id = match goal_topic {
             Some(topic) => normalize_topic_id(topic)
             None => ""
@@ -122,7 +122,7 @@ fn research_storage_topic_for_explicit_book(
   match research_book_topic_from_id(book_id) {
     Some(topic) => Some(topic)
     None =>
-      match research_topic_from_goal(goal) {
+      match @policy.research_topic_from_goal(goal) {
         Some(topic) => {
           let normalized = normalize_topic_id(topic)
           if normalized.is_empty() {

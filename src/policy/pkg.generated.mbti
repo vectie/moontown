@@ -111,6 +111,8 @@ pub fn research_goal_text(String) -> Bool
 
 pub fn research_request_goal_text(String) -> Bool
 
+pub fn research_topic_from_goal(String) -> String?
+
 pub fn research_type() -> String
 
 pub fn reviewable_types() -> Array[String]

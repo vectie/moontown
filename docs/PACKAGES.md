@@ -561,7 +561,7 @@ Boundary:
 - `src/policy` owns lane normalization and lane-based skill selection.
 - `src/policy` owns pure goal-text vocabulary. Dispatch, roles, runtime, and
   adapters may consume it, but should not redefine research/Wenyu trigger
-  words locally.
+  words or research-topic extraction locally.
 - `src/policy` owns the internal-distance growth-vector view; downstream
   packages may render it but should not redefine how execute/tend/quality
   map to information, recognition, and decisiveness.

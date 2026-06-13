@@ -292,4 +292,17 @@ test "policy owns reusable goal text vocabulary" {
   assert_true(!research_goal_text("Create a bookkeeping workspace"))
   assert_true(!research_request_goal_text("Create a bookkeeping workspace"))
   assert_true(!wenyu_valley_goal_text("Create a bookkeeping workspace"))
+  match research_topic_from_goal("research OPC companies") {
+    Some(topic) => assert_eq(topic, "OPC companies")
+    None => fail("expected research topic")
+  }
+  match research_topic_from_goal("survey robotics world models") {
+    Some(topic) => assert_eq(topic, "robotics world models")
+    None => fail("expected survey topic")
+  }
+  match research_topic_from_goal("compare the hardware ecosystem") {
+    Some(topic) => assert_eq(topic, "hardware ecosystem")
+    None => fail("expected comparison topic")
+  }
+  assert_true(research_topic_from_goal("   ") is None)
 }
