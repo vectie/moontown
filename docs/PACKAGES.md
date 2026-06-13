@@ -561,6 +561,10 @@ Purpose:
 
 Boundary:
 
+- App ToolBook is a template/capability package, not a separate policy book
+  type. Generated-tool books should use a composed policy type such as
+  `policy.general_type()` plus tags/specialization such as `generated-tool`,
+  `web-tool-surface`, and `template:app-tool-book`.
 - App ToolBook owns the generated tool page path and generated-tool workspace
   contract because those are tool-specific.
 - default generated-site index path semantics belong to `src/policy`; App

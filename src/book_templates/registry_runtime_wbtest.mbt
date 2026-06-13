@@ -8,7 +8,7 @@ async test "book template registry exposes pdf evidence watch template" {
   for template in registry.templates {
     if template.template_id == "pdf-evidence-watch" {
       found = true
-      assert_eq(template.book_type, "research-book")
+      assert_eq(template.book_type, @policy.research_type())
       assert_true(template.install_command.contains("books template install"))
       assert_true(
         template.editable_files.contains("wiki/methods/analysis-method.md"),
@@ -16,7 +16,7 @@ async test "book template registry exposes pdf evidence watch template" {
     }
     if template.template_id == "app-tool-book" {
       found_app_tool = true
-      assert_eq(template.book_type, "toolbook")
+      assert_eq(template.book_type, @policy.general_type())
       assert_true(template.install_command.contains("books template install"))
       assert_true(template.status_command.contains("books app-tool status"))
       assert_true(template.editable_files.contains("wiki/tools/tool-spec.md"))

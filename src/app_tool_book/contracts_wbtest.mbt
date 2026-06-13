@@ -14,8 +14,9 @@ test "app tool book contract exposes stable defaults" {
 test "app tool book catalog identity owns name tags and skills" {
   assert_eq(catalog_name("OPC Tool"), "MoonBook / App ToolBook / OPC Tool")
   let tags = catalog_tags()
-  assert_true(tags.contains("toolbook"))
+  assert_true(!tags.contains("toolbook"))
   assert_true(tags.contains("generated-tool"))
+  assert_true(tags.contains("web-tool-surface"))
   assert_true(tags.contains("template:app-tool-book"))
   let skills = catalog_skills()
   assert_true(skills.contains("tool-watch"))
@@ -34,7 +35,8 @@ test "app tool book config constructor composes catalog identity" {
     "opc-lab",
     31,
   )
-  assert_true(config.tags.contains("toolbook"))
+  assert_eq(config.book_type, @policy.general_type())
+  assert_true(!config.tags.contains("toolbook"))
   assert_true(config.tags.contains("template:app-tool-book"))
   assert_true(config.skills.contains("tool-watch"))
   assert_true(config.skills.contains("notification-digest"))

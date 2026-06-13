@@ -15,4 +15,5 @@ import {
 import {
   "moonbitlang/async",
   "vectie/moontown/integration",
+  "vectie/moontown/policy",
 } for "wbtest"

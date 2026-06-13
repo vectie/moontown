@@ -65,7 +65,9 @@ test "registry policy renders registry markdown" {
   assert_true(text.contains("# Book Template Registry"))
   assert_true(text.contains("- Ready: `false`"))
   assert_true(text.contains("- Templates: `1`"))
-  assert_true(text.contains("| `pdf-evidence-watch` | `research-book` |"))
+  assert_true(
+    text.contains("| `pdf-evidence-watch` | `\{@policy.research_type()}` |"),
+  )
   assert_true(
     text.contains("- assets/templates/books/pdf-evidence-watch/SKILL.md"),
   )
@@ -74,7 +76,7 @@ test "registry policy renders registry markdown" {
 ///|
 test "registry file schema decodes template descriptors" {
   let parsed = @json.parse(
-    "{\"templates\":[{\"template_id\":\"pdf-evidence-watch\",\"book_type\":\"research-book\",\"specialization\":\"pdf-watch\",\"title\":\"PDF Evidence Watch\",\"purpose\":\"Watch PDFs.\",\"root\":\"assets/templates/books/pdf-evidence-watch\",\"install_example\":\"examples/pdf.json\",\"install_command\":\"books template install\",\"status_command\":\"books template status\",\"required_paths\":[\"SKILL.md\"],\"editable_files\":[\"wiki/methods/analysis-method.md\"]}]}",
+    "{\"templates\":[{\"template_id\":\"pdf-evidence-watch\",\"book_type\":\"\{@policy.research_type()}\",\"specialization\":\"pdf-watch\",\"title\":\"PDF Evidence Watch\",\"purpose\":\"Watch PDFs.\",\"root\":\"assets/templates/books/pdf-evidence-watch\",\"install_example\":\"examples/pdf.json\",\"install_command\":\"books template install\",\"status_command\":\"books template status\",\"required_paths\":[\"SKILL.md\"],\"editable_files\":[\"wiki/methods/analysis-method.md\"]}]}",
   ) catch {
     _ => fail("registry file json should parse")
   }
@@ -90,7 +92,7 @@ test "registry file schema decodes template descriptors" {
 fn descriptor(template_id : String) -> BookTemplateDescriptor {
   {
     template_id,
-    book_type: "research-book",
+    book_type: @policy.research_type(),
     specialization: "pdf-watch",
     title: "PDF Evidence Watch",
     purpose: "Watch PDFs.",

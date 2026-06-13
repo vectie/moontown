@@ -1,7 +1,7 @@
 {
   "template_id": "app-tool-book",
   "template_version": "1",
-  "book_type": "app-tool-book",
+  "book_type": "general-book",
   "title": "App ToolBook",
   "purpose": "Watch data, produce analysis, and expose a durable generated web tool.",
   "required_outputs": [

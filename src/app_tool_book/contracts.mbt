@@ -49,7 +49,7 @@ pub fn config(
     template_id: "app-tool-book",
     template_version: "1",
     book_id,
-    book_type: "app-tool-book",
+    book_type: @policy.general_type(),
     title,
     purpose,
     workspace_root,

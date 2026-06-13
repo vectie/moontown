@@ -6,7 +6,7 @@ fn catalog_name(title : String) -> String {
 ///|
 fn catalog_tags() -> Array[String] {
   [
-    "toolbook", "appbook", "standing-watch", "generated-tool", "civic-building",
+    "appbook", "standing-watch", "generated-tool", "web-tool-surface", "civic-building",
     "template:app-tool-book",
   ]
 }

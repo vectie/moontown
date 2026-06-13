@@ -32,7 +32,7 @@
     },
     {
       "template_id": "app-tool-book",
-      "book_type": "toolbook",
+      "book_type": "general-book",
       "specialization": "app-tool-book",
       "title": "App ToolBook",
       "purpose": "Watch configured websites or data sources, maintain analysis reports, and publish a durable generated web tool that Moontown can expose from a civic building.",
