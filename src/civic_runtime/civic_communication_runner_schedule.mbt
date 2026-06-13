@@ -1,13 +1,13 @@
 ///|
-async fn persist_civic_salon_schedule(
+async fn persist_civic_communication_schedule(
   schedule_path : String,
   schedule_id : String,
   replacement : CivicCommunicationSchedule,
 ) -> Unit {
-  save_civic_salon_schedules(
+  save_civic_communication_schedules(
     schedule_path,
-    replace_civic_salon_schedule(
-      load_or_create_civic_salon_schedules(path=schedule_path),
+    replace_civic_communication_schedule(
+      load_or_create_civic_communication_schedules(path=schedule_path),
       schedule_id,
       replacement,
     ),
@@ -15,7 +15,7 @@ async fn persist_civic_salon_schedule(
 }
 
 ///|
-fn civic_salon_due_run_summary(
+fn civic_communication_due_run_summary(
   summaries : Array[String],
   refreshes : Array[String],
   now_ms : UInt64,
@@ -32,7 +32,7 @@ fn civic_salon_due_run_summary(
 }
 
 ///|
-fn claim_civic_salon_schedule(
+fn claim_civic_communication_schedule(
   schedule : CivicCommunicationSchedule,
   now_ms : UInt64,
 ) -> CivicCommunicationSchedule {
@@ -45,7 +45,7 @@ fn claim_civic_salon_schedule(
 }
 
 ///|
-fn replace_civic_salon_schedule(
+fn replace_civic_communication_schedule(
   schedules : Array[CivicCommunicationSchedule],
   target_id : String,
   replacement : CivicCommunicationSchedule,
@@ -60,7 +60,7 @@ fn replace_civic_salon_schedule(
 }
 
 ///|
-fn run_unsupported_civic_salon_round(
+fn run_unsupported_civic_communication_round(
   schedule : CivicCommunicationSchedule,
   now_ms : UInt64,
 ) -> (CivicCommunicationSchedule, String) {
@@ -78,7 +78,7 @@ fn run_unsupported_civic_salon_round(
 }
 
 ///|
-fn retry_civic_salon_schedule(
+fn retry_civic_communication_schedule(
   schedule : CivicCommunicationSchedule,
   now_ms : UInt64,
   round_id : String,
@@ -93,7 +93,7 @@ fn retry_civic_salon_schedule(
 }
 
 ///|
-fn civic_salon_summary_is_active(summary : String) -> Bool {
+fn civic_communication_summary_is_active(summary : String) -> Bool {
   summary.has_prefix("Running ") ||
   summary.contains("MoonClaw reducer is still active")
 }

@@ -59,21 +59,21 @@ test "civic salon round record captures exchange effectiveness" {
 ///|
 test "civic salon due run summary keeps idle run and refresh states distinct" {
   assert_eq(
-    civic_salon_due_run_summary([], [], 42UL),
+    civic_communication_due_run_summary([], [], 42UL),
     "No civic communication-pattern schedules due at now_ms=42.",
   )
   assert_true(
-    civic_salon_due_run_summary(["round-a"], [], 42UL).has_prefix(
+    civic_communication_due_run_summary(["round-a"], [], 42UL).has_prefix(
       "Ran 1 civic communication-pattern schedule(s): round-a",
     ),
   )
   assert_true(
-    civic_salon_due_run_summary([], ["refresh-a"], 42UL).has_prefix(
+    civic_communication_due_run_summary([], ["refresh-a"], 42UL).has_prefix(
       "Refreshed 1 civic communication-pattern projection(s): refresh-a",
     ),
   )
   assert_true(
-    civic_salon_due_run_summary(["round-a"], ["refresh-a"], 42UL).contains(
+    civic_communication_due_run_summary(["round-a"], ["refresh-a"], 42UL).contains(
       "refreshed 1 stale projection(s): refresh-a",
     ),
   )
@@ -91,7 +91,7 @@ async test "persist civic salon schedule replaces only matching schedule" {
     title: "Future Energy Policy Hall",
   }
   save_civic_communication_schedules(path, [first, second])
-  persist_civic_salon_schedule(path, first.id, {
+  persist_civic_communication_schedule(path, first.id, {
     ..first,
     latest_summary: "claimed",
     next_due_ms: 300UL,

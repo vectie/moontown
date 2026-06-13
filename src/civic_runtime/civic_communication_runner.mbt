@@ -7,21 +7,23 @@ async fn run_due_civic_salons(
   reducer_mode? : CivicCommunicationReductionMode = MoonClawReducer,
   run_inline? : Bool = moontown_moonclaw_inline_enabled(),
 ) -> String {
-  let schedule_path = default_civic_salon_schedule_path(snapshot_path~)
-  let schedules = load_or_create_civic_salon_schedules(path=schedule_path)
+  let schedule_path = default_civic_communication_schedule_path(snapshot_path~)
+  let schedules = load_or_create_civic_communication_schedules(
+    path=schedule_path,
+  )
   let summaries : Array[String] = []
   let refreshes : Array[String] = []
   for schedule in schedules {
     if civic_communication_is_due(schedule, now_ms) {
-      persist_civic_salon_schedule(
+      persist_civic_communication_schedule(
         schedule_path,
         schedule.id,
-        claim_civic_salon_schedule(schedule, now_ms),
+        claim_civic_communication_schedule(schedule, now_ms),
       )
       let (next, summary) = run_due_civic_salon_round(
         schedule, snapshot_path, book_catalog_path, tick, now_ms, reducer_mode, run_inline,
       )
-      persist_civic_salon_schedule(schedule_path, schedule.id, next)
+      persist_civic_communication_schedule(schedule_path, schedule.id, next)
       summaries.push(summary)
     } else {
       match
@@ -33,5 +35,5 @@ async fn run_due_civic_salons(
       }
     }
   }
-  civic_salon_due_run_summary(summaries, refreshes, now_ms)
+  civic_communication_due_run_summary(summaries, refreshes, now_ms)
 }

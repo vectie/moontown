@@ -9,15 +9,17 @@ async test "civic pattern manifest installs staggered schedules without running 
     snapshot_path~,
   )
   assert_true(summary.contains("Installed 11 civic communication pattern"))
-  let schedule_path = default_civic_salon_schedule_path(snapshot_path~)
-  let schedules = load_or_create_civic_salon_schedules(path=schedule_path)
+  let schedule_path = default_civic_communication_schedule_path(snapshot_path~)
+  let schedules = load_or_create_civic_communication_schedules(
+    path=schedule_path,
+  )
   assert_eq(schedules.length(), 11)
   for index in 1..<schedules.length() {
     assert_true(schedules[index].next_due_ms > schedules[index - 1].next_due_ms)
   }
   for schedule in schedules {
     assert_true(
-      @fs.exists(civic_salon_scenario_path(schedule.id, snapshot_path~)),
+      @fs.exists(civic_communication_scenario_path(schedule.id, snapshot_path~)),
     )
   }
   assert_true(

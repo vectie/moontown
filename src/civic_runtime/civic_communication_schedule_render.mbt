@@ -2,8 +2,8 @@
 async fn render_civic_salon_schedule_status(
   snapshot_path? : String = @storage.default_snapshot_path(),
 ) -> String {
-  let schedules = load_or_create_civic_salon_schedules(
-    path=default_civic_salon_schedule_path(snapshot_path~),
+  let schedules = load_or_create_civic_communication_schedules(
+    path=default_civic_communication_schedule_path(snapshot_path~),
   )
   let now_ms = @env.now()
   let builder = StringBuilder::new()

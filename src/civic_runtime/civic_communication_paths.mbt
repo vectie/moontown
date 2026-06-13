@@ -2,7 +2,7 @@
 pub fn default_civic_communication_schedule_path(
   snapshot_path? : String = @storage.default_snapshot_path(),
 ) -> String {
-  "\{civic_salon_base_dir(snapshot_path)}/pattern-schedules.json"
+  "\{civic_communication_base_dir(snapshot_path)}/pattern-schedules.json"
 }
 
 ///|
@@ -10,7 +10,7 @@ pub fn default_civic_communication_run_ledger_path(
   scenario_id : String,
   snapshot_path? : String = @storage.default_snapshot_path(),
 ) -> String {
-  "\{civic_salon_base_dir(snapshot_path)}/pattern-runs/\{safe_scenario_id(scenario_id)}.jsonl"
+  "\{civic_communication_base_dir(snapshot_path)}/pattern-runs/\{safe_scenario_id(scenario_id)}.jsonl"
 }
 
 ///|
@@ -18,34 +18,11 @@ pub fn civic_communication_scenario_path(
   scenario_id : String,
   snapshot_path? : String = @storage.default_snapshot_path(),
 ) -> String {
-  "\{civic_salon_base_dir(snapshot_path)}/pattern-scenarios/\{safe_scenario_id(scenario_id)}.json"
+  "\{civic_communication_base_dir(snapshot_path)}/pattern-scenarios/\{safe_scenario_id(scenario_id)}.json"
 }
 
 ///|
-fn default_civic_salon_schedule_path(
-  snapshot_path? : String = @storage.default_snapshot_path(),
-) -> String {
-  default_civic_communication_schedule_path(snapshot_path~)
-}
-
-///|
-fn default_civic_salon_run_ledger_path(
-  scenario_id : String,
-  snapshot_path? : String = @storage.default_snapshot_path(),
-) -> String {
-  default_civic_communication_run_ledger_path(scenario_id, snapshot_path~)
-}
-
-///|
-fn civic_salon_scenario_path(
-  scenario_id : String,
-  snapshot_path? : String = @storage.default_snapshot_path(),
-) -> String {
-  civic_communication_scenario_path(scenario_id, snapshot_path~)
-}
-
-///|
-fn civic_salon_base_dir(snapshot_path : String) -> String {
+fn civic_communication_base_dir(snapshot_path : String) -> String {
   let base = @path.Path::dirname(snapshot_path).to_string()
   if base == "." || base == "" {
     ".moontown/civic"
@@ -72,7 +49,7 @@ fn safe_scenario_id(id : String) -> String {
 }
 
 ///|
-fn civic_salon_protocol_ledger_path(
+fn civic_communication_protocol_ledger_path(
   building_id : String,
   ledger : String,
 ) -> String {
@@ -80,15 +57,15 @@ fn civic_salon_protocol_ledger_path(
 }
 
 ///|
-fn civic_salon_projection_path_for_scenario(
+fn civic_communication_projection_path_for_scenario(
   scenario : CivicCommunicationScenario,
   snapshot_path : String,
 ) -> String {
-  "\{civic_salon_workspace_base(snapshot_path)}/books/\{scenario.building_book_id}/book/moonbook-ui-state.json"
+  "\{civic_communication_workspace_base(snapshot_path)}/books/\{scenario.building_book_id}/book/moonbook-ui-state.json"
 }
 
 ///|
-fn civic_salon_workspace_base(snapshot_path : String) -> String {
+fn civic_communication_workspace_base(snapshot_path : String) -> String {
   let base = @path.Path::dirname(snapshot_path).to_string()
   if base == "." || base == "" {
     ".moontown"

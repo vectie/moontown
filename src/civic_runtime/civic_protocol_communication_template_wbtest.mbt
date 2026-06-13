@@ -40,10 +40,10 @@ async test "civic salon scenario template can seed a non-hardcoded domain" {
   assert_true(participant_projection.contains("\"participant-workspace\""))
   let snapshot_path = "\{root}/town.json"
   assert_true(
-    @fs.exists(civic_salon_scenario_path(scenario.id, snapshot_path~)),
+    @fs.exists(civic_communication_scenario_path(scenario.id, snapshot_path~)),
   )
-  let schedules = load_or_create_civic_salon_schedules(
-    path=default_civic_salon_schedule_path(snapshot_path~),
+  let schedules = load_or_create_civic_communication_schedules(
+    path=default_civic_communication_schedule_path(snapshot_path~),
   )
   assert_eq(schedules.length(), 1)
   let schedule = schedules[0]
@@ -66,8 +66,10 @@ async test "civic pattern template uses scenario round id by default" {
     reducer_mode=FixtureReducer,
   )
   assert_true(summary.contains("future-energy-social-square-round-1"))
-  let schedules = load_or_create_civic_salon_schedules(
-    path=default_civic_salon_schedule_path(snapshot_path="\{root}/town.json"),
+  let schedules = load_or_create_civic_communication_schedules(
+    path=default_civic_communication_schedule_path(
+      snapshot_path="\{root}/town.json",
+    ),
   )
   assert_eq(schedules.length(), 1)
   assert_eq(schedules[0].latest_round_id, "future-energy-social-square-round-1")

@@ -6,12 +6,12 @@ async test "invalid civic scenario blocks instead of crashing protocol seeding" 
   let book_catalog_path = "\{root}/books/catalog.json"
   let schedule = daemon_civic_salon_schedule()
   let scenario = { ..daemon_civic_salon_scenario(), participants: [] }
-  save_civic_salon_schedules(
-    default_civic_salon_schedule_path(snapshot_path~),
+  save_civic_communication_schedules(
+    default_civic_communication_schedule_path(snapshot_path~),
     [schedule],
   )
   @support.write_text_file(
-    civic_salon_scenario_path(schedule.id, snapshot_path~),
+    civic_communication_scenario_path(schedule.id, snapshot_path~),
     scenario.to_json().stringify(indent=2),
   )
   let summary = run_due_civic_salons(
@@ -23,8 +23,8 @@ async test "invalid civic scenario blocks instead of crashing protocol seeding" 
   )
   assert_true(summary.contains("invalid civic communication-pattern output"))
   assert_true(summary.contains("scenario has no participant workspaces"))
-  let schedules = load_or_create_civic_salon_schedules(
-    path=default_civic_salon_schedule_path(snapshot_path~),
+  let schedules = load_or_create_civic_communication_schedules(
+    path=default_civic_communication_schedule_path(snapshot_path~),
   )
   match schedules {
     [persisted, ..] => {
@@ -48,12 +48,12 @@ async test "invalid civic idea participant reference is reviewable blocker" {
     participating_books: ["future-energy-storage", "missing-book"],
   }
   let scenario = { ..base, ideas: [bad_idea] }
-  save_civic_salon_schedules(
-    default_civic_salon_schedule_path(snapshot_path~),
+  save_civic_communication_schedules(
+    default_civic_communication_schedule_path(snapshot_path~),
     [schedule],
   )
   @support.write_text_file(
-    civic_salon_scenario_path(schedule.id, snapshot_path~),
+    civic_communication_scenario_path(schedule.id, snapshot_path~),
     scenario.to_json().stringify(indent=2),
   )
   let summary = run_due_civic_salons(

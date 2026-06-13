@@ -14,7 +14,7 @@ async fn run_due_civic_salon_round(
         scenario, schedule, snapshot_path, book_catalog_path, tick, now_ms, reducer_mode,
         run_inline,
       )
-    None => run_unsupported_civic_salon_round(schedule, now_ms)
+    None => run_unsupported_civic_communication_round(schedule, now_ms)
   }
 }
 
@@ -30,7 +30,7 @@ async fn run_civic_salon_scenario_round(
   run_inline : Bool,
 ) -> (CivicCommunicationSchedule, String) {
   let round_id = civic_communication_round_id(schedule)
-  let workspace_base = civic_salon_workspace_base(snapshot_path)
+  let workspace_base = civic_communication_workspace_base(snapshot_path)
   let reduction = reduce_civic_communication_outputs(
     scenario,
     round_id~,
@@ -49,7 +49,7 @@ async fn run_civic_salon_scenario_round(
     scenario, schedule, book_catalog_path, workspace_base, round_id, reduction, ideas,
   )
   append_civic_salon_round_record(
-    default_civic_salon_run_ledger_path(schedule.id, snapshot_path~),
+    default_civic_communication_run_ledger_path(schedule.id, snapshot_path~),
     civic_communication_round_record(
       schedule,
       round_id,
@@ -68,7 +68,7 @@ async fn run_civic_salon_scenario_round(
     )
   } else {
     (
-      retry_civic_salon_schedule(schedule, now_ms, round_id, summary),
+      retry_civic_communication_schedule(schedule, now_ms, round_id, summary),
       "\{round_id}: \{summary}",
     )
   }

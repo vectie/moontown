@@ -11,7 +11,7 @@ async fn refresh_civic_salon_projection_if_stale(
   }
   match load_civic_salon_scenario_for_schedule(schedule, snapshot_path) {
     Some(scenario) => {
-      let projection_path = civic_salon_projection_path_for_scenario(
+      let projection_path = civic_communication_projection_path_for_scenario(
         scenario, snapshot_path,
       )
       let text = @support.read_text_or_empty(projection_path)
@@ -23,7 +23,7 @@ async fn refresh_civic_salon_projection_if_stale(
       if projection_current && protocol_ledgers_current {
         None
       } else {
-        let workspace_base = civic_salon_workspace_base(snapshot_path)
+        let workspace_base = civic_communication_workspace_base(snapshot_path)
         let reduction = reduce_civic_communication_outputs(
           scenario,
           round_id=schedule.latest_round_id,
@@ -65,7 +65,7 @@ async fn civic_salon_protocol_ledgers_current(
       "inbox", "contributions", "reductions", "outbox", "home_returns", "reviews",
     ] {
     let text = @support.read_text_or_empty(
-      civic_salon_protocol_ledger_path(schedule.building_id, ledger),
+      civic_communication_protocol_ledger_path(schedule.building_id, ledger),
     )
     if text.trim().is_empty() || !text.contains(schedule.latest_round_id) {
       return false

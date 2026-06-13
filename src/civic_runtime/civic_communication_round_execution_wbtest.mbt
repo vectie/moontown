@@ -5,12 +5,12 @@ async test "due civic salon rounds persist schedule and run ledger" {
   let snapshot_path = "\{root}/town.json"
   let book_catalog_path = "\{root}/books/catalog.json"
   let schedule = daemon_civic_salon_schedule()
-  save_civic_salon_schedules(
-    default_civic_salon_schedule_path(snapshot_path~),
+  save_civic_communication_schedules(
+    default_civic_communication_schedule_path(snapshot_path~),
     [schedule],
   )
   @support.write_text_file(
-    civic_salon_scenario_path(schedule.id, snapshot_path~),
+    civic_communication_scenario_path(schedule.id, snapshot_path~),
     daemon_civic_salon_scenario().to_json().stringify(indent=2),
   )
   let summary = run_due_civic_salons(
@@ -21,14 +21,16 @@ async test "due civic salon rounds persist schedule and run ledger" {
     reducer_mode=FixtureReducer,
   )
   assert_true(summary.has_prefix("Ran 1 civic communication-pattern"))
-  let schedule_path = default_civic_salon_schedule_path(snapshot_path~)
-  let ledger_path = default_civic_salon_run_ledger_path(
+  let schedule_path = default_civic_communication_schedule_path(snapshot_path~)
+  let ledger_path = default_civic_communication_run_ledger_path(
     "future-energy-social-square",
     snapshot_path~,
   )
   assert_true(@fs.exists(schedule_path))
   assert_true(@fs.exists(ledger_path))
-  let schedules = load_or_create_civic_salon_schedules(path=schedule_path)
+  let schedules = load_or_create_civic_communication_schedules(
+    path=schedule_path,
+  )
   let persisted = schedules.get(0).unwrap()
   assert_eq(persisted.round_count, 1)
   assert_eq(persisted.next_due_ms, 1_801_000UL)
@@ -57,17 +59,17 @@ async test "stale civic salon projection refreshes without forcing another round
     latest_round_id: "future-energy-social-square-round-2",
     latest_summary: "round two finished",
   }
-  save_civic_salon_schedules(
-    default_civic_salon_schedule_path(snapshot_path~),
+  save_civic_communication_schedules(
+    default_civic_communication_schedule_path(snapshot_path~),
     [schedule],
   )
   let scenario = daemon_civic_salon_scenario()
   @support.write_text_file(
-    civic_salon_scenario_path(schedule.id, snapshot_path~),
+    civic_communication_scenario_path(schedule.id, snapshot_path~),
     scenario.to_json().stringify(indent=2),
   )
   @support.write_text_file(
-    civic_salon_projection_path_for_scenario(scenario, snapshot_path),
+    civic_communication_projection_path_for_scenario(scenario, snapshot_path),
     "{\"book_id\":\"wenyu-social-square\",\"status_chips\":[{\"label\":\"round 1\",\"tone\":\"info\"}]}",
   )
   @support.write_text_file(
@@ -90,8 +92,8 @@ async test "stale civic salon projection refreshes without forcing another round
   ).text()
   assert_true(refreshed.contains("future-energy-social-square-round-2"))
   assert_true(refreshed.contains("round 2"))
-  let schedules = load_or_create_civic_salon_schedules(
-    path=default_civic_salon_schedule_path(snapshot_path~),
+  let schedules = load_or_create_civic_communication_schedules(
+    path=default_civic_communication_schedule_path(snapshot_path~),
   )
   let persisted = schedules.get(0).unwrap()
   assert_eq(persisted.round_count, 2)
@@ -139,12 +141,12 @@ async test "active civic schedule reconciles completed persisted reducer output"
     latest_summary: "Running Future Energy Social Square Salon future-energy-social-square-round-1: MoonClaw reducer is still active.",
   }
   let scenario = daemon_civic_salon_scenario()
-  save_civic_salon_schedules(
-    default_civic_salon_schedule_path(snapshot_path~),
+  save_civic_communication_schedules(
+    default_civic_communication_schedule_path(snapshot_path~),
     [schedule],
   )
   @support.write_text_file(
-    civic_salon_scenario_path(schedule.id, snapshot_path~),
+    civic_communication_scenario_path(schedule.id, snapshot_path~),
     scenario.to_json().stringify(indent=2),
   )
   @support.write_text_file(
@@ -158,8 +160,8 @@ async test "active civic schedule reconciles completed persisted reducer output"
     now_ms=2_000UL,
   )
   assert_true(summary.contains("completed active reducer round"))
-  let schedules = load_or_create_civic_salon_schedules(
-    path=default_civic_salon_schedule_path(snapshot_path~),
+  let schedules = load_or_create_civic_communication_schedules(
+    path=default_civic_communication_schedule_path(snapshot_path~),
   )
   let persisted = schedules.get(0).unwrap()
   assert_eq(persisted.round_count, 1)

@@ -69,12 +69,12 @@ async fn install_civic_pattern_scenario(
   first_due_ms : UInt64,
 ) -> CivicCommunicationSchedule {
   @support.write_text_file(
-    civic_salon_scenario_path(scenario.id, snapshot_path~),
+    civic_communication_scenario_path(scenario.id, snapshot_path~),
     scenario.to_json().stringify(indent=2),
   )
   upsert_civic_salon_schedule_for_scenario(
     scenario,
-    path=default_civic_salon_schedule_path(snapshot_path~),
+    path=default_civic_communication_schedule_path(snapshot_path~),
     now_ms=first_due_ms,
   )
 }
@@ -91,19 +91,21 @@ async fn install_civic_salon_scenario_for_daemon(
     workspace_base,
   )
   let now_ms = @env.now()
-  let schedule_path = default_civic_salon_schedule_path(snapshot_path~)
+  let schedule_path = default_civic_communication_schedule_path(snapshot_path~)
   let installed = install_civic_pattern_scenario(
     scenario, snapshot_path, now_ms,
   )
   let next = if summary.has_prefix("Blocked ") {
-    retry_civic_salon_schedule(installed, now_ms, round_id, summary)
+    retry_civic_communication_schedule(installed, now_ms, round_id, summary)
   } else {
     mark_civic_salon_schedule_after_template_round(
       installed, now_ms, round_id, round_number, summary,
     )
   }
-  let schedules = load_or_create_civic_salon_schedules(path=schedule_path)
-  save_civic_salon_schedules(
+  let schedules = load_or_create_civic_communication_schedules(
+    path=schedule_path,
+  )
+  save_civic_communication_schedules(
     schedule_path,
     schedules.map(fn(schedule) {
       if schedule.id == scenario.id {
@@ -171,6 +173,9 @@ async fn load_civic_salon_scenario_for_schedule(
   schedule : CivicCommunicationSchedule,
   snapshot_path : String,
 ) -> CivicCommunicationScenario? {
-  let template_path = civic_salon_scenario_path(schedule.id, snapshot_path~)
+  let template_path = civic_communication_scenario_path(
+    schedule.id,
+    snapshot_path~,
+  )
   load_civic_salon_scenario_file(template_path)
 }

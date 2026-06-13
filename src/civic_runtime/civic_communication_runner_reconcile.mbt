@@ -12,7 +12,7 @@ async fn refresh_or_reconcile_civic_salon_schedule(
       schedule, snapshot_path, book_catalog_path, tick, now_ms,
     ) {
     Some((next, summary)) => {
-      persist_civic_salon_schedule(schedule_path, schedule.id, next)
+      persist_civic_communication_schedule(schedule_path, schedule.id, next)
       Some(summary)
     }
     None =>
@@ -48,7 +48,7 @@ fn civic_salon_schedule_has_active_round(
 ) -> Bool {
   schedule.enabled &&
   !schedule.latest_round_id.is_empty() &&
-  civic_salon_summary_is_active(schedule.latest_summary)
+  civic_communication_summary_is_active(schedule.latest_summary)
 }
 
 ///|
@@ -60,7 +60,7 @@ async fn reconcile_civic_salon_scenario_round(
   tick : Int,
   now_ms : UInt64,
 ) -> (CivicCommunicationSchedule, String)? {
-  let workspace_base = civic_salon_workspace_base(snapshot_path)
+  let workspace_base = civic_communication_workspace_base(snapshot_path)
   let reduction = reduce_civic_communication_outputs(
     scenario,
     round_id=schedule.latest_round_id,
@@ -87,7 +87,7 @@ async fn reconcile_civic_salon_scenario_round(
     reduction.ideas,
   )
   append_civic_salon_round_record(
-    default_civic_salon_run_ledger_path(schedule.id, snapshot_path~),
+    default_civic_communication_run_ledger_path(schedule.id, snapshot_path~),
     civic_communication_round_record(
       schedule,
       schedule.latest_round_id,
