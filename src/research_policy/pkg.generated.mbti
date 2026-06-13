@@ -6,13 +6,37 @@ pub fn command_fetch_pattern() -> String
 
 pub fn deep_dossier_word_target() -> String
 
+pub fn deep_report_path() -> String
+
 pub fn discovery_attempt_limit() -> String
 
+pub fn display_topic_name(String) -> String
+
+pub fn evidence_matrix_path() -> String
+
+pub fn followup_query(String, String) -> String
+
 pub fn harvest_candidate_fetch_count() -> String
+
+pub fn ingest_required_raw_artifact_paths() -> Array[String]
+
+pub fn is_external_domain_topic(String) -> Bool
+
+pub fn is_local_project_topic(String) -> Bool
+
+pub fn local_paths(String) -> Array[String]
+
+pub fn local_sources_path() -> String
+
+pub fn marketing_brief_path() -> String
 
 pub fn min_included_sources() -> String
 
 pub fn min_included_sources_sentence_start() -> String
+
+pub fn mode_text(String) -> String
+
+pub fn normalize_topic_id(String) -> String
 
 pub fn preferred_included_source_range() -> String
 
@@ -22,15 +46,49 @@ pub fn quality_floor_count() -> String
 
 pub fn quality_floor_words() -> String
 
+pub fn question_path() -> String
+
+pub fn question_text(String, String) -> String
+
+pub fn raw_bootstrap_artifact_paths() -> Array[String]
+
 pub fn reference_line_buffer() -> String
 
 pub fn reference_line_ratio() -> String
+
+pub fn reference_urls(String) -> Array[String]
 
 pub fn repair_acceptance_floor() -> String
 
 pub fn repair_dossier_word_target() -> String
 
 pub fn repair_expansion_threshold() -> String
+
+pub fn risk_query(String, String) -> String
+
+pub fn search_log_path() -> String
+
+pub fn source_screen_path() -> String
+
+pub fn strip_research_attempt_suffix(String) -> String
+
+pub fn synthesis_brief_path() -> String
+
+pub fn tool_blockers_path() -> String
+
+pub fn topic_concept_page(String) -> String
+
+pub fn topic_entity_page(String) -> String
+
+pub fn topic_source_page(String) -> String
+
+pub fn topic_synthesis_page(String) -> String
+
+pub fn topic_wiki_page_examples(String) -> Array[String]
+
+pub fn web_queries(String) -> Array[String]
+
+pub fn workspace_artifact_path(String, String) -> String
 
 // Errors
 

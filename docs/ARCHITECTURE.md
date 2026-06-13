@@ -1724,6 +1724,29 @@ supervision, but it should call `core` for lifecycle translation. Runtime code
 should not redefine which execution states count as planned, assigned, running,
 blocked, done, failed, terminal, live, pollable, retry-pending, or stale.
 
+## Research Policy Ownership
+
+Research policy is intentionally separate from the MoonBook adapter. The
+adapter may build MoonBook requests, seed generated skills, and persist
+book-local results, but it should not be the source of truth for research
+topic routing or artifact layout.
+
+- `research_policy/`
+  - owns deep-research thresholds and source-screening constants
+  - owns topic normalization, attempt-suffix stripping, display names, and
+    local-project versus external-domain route hints
+  - owns query/reference/local-source hint tables for known research topics
+  - owns canonical `raw/bootstrap/*` artifact paths and topic-specific
+    `wiki/sources`, `wiki/entities`, `wiki/concepts`, and `wiki/synthesis`
+    paths
+- `adapters/moonbook/`
+  - may delegate through thin compatibility helpers while migration continues
+  - must not add new topic/path/threshold tables that compete with
+    `research_policy/`
+- `research_quality/`
+  - owns observation-driven quality semantics and readiness gaps, not adapter
+    prompt construction
+
 ## Refactor Boundaries
 
 The root package is now split so bootstrap planning is not buried inside the

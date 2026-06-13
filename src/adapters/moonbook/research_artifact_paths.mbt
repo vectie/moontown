@@ -1,60 +1,51 @@
 ///|
 fn research_raw_bootstrap_artifact_paths() -> Array[String] {
-  [
-    research_question_path(),
-    research_search_log_path(),
-    research_source_screen_path(),
-    research_evidence_matrix_path(),
-    research_local_sources_path(),
-    research_synthesis_brief_path(),
-    research_deep_report_path(),
-    research_marketing_brief_path(),
-  ]
+  @research_policy.raw_bootstrap_artifact_paths()
 }
 
 ///|
 fn research_question_path() -> String {
-  "raw/bootstrap/research-question.md"
+  @research_policy.question_path()
 }
 
 ///|
 fn research_search_log_path() -> String {
-  "raw/bootstrap/search-log.md"
+  @research_policy.search_log_path()
 }
 
 ///|
 fn research_source_screen_path() -> String {
-  "raw/bootstrap/source-screen.md"
+  @research_policy.source_screen_path()
 }
 
 ///|
 fn research_evidence_matrix_path() -> String {
-  "raw/bootstrap/evidence-matrix.md"
+  @research_policy.evidence_matrix_path()
 }
 
 ///|
 fn research_local_sources_path() -> String {
-  "raw/bootstrap/local-sources.md"
+  @research_policy.local_sources_path()
 }
 
 ///|
 fn research_synthesis_brief_path() -> String {
-  "raw/bootstrap/synthesis-brief.md"
+  @research_policy.synthesis_brief_path()
 }
 
 ///|
 fn research_deep_report_path() -> String {
-  "raw/bootstrap/deep-report.md"
+  @research_policy.deep_report_path()
 }
 
 ///|
 fn research_marketing_brief_path() -> String {
-  "raw/bootstrap/marketing-brief.md"
+  @research_policy.marketing_brief_path()
 }
 
 ///|
 fn research_tool_blockers_path() -> String {
-  "raw/bootstrap/tool-blockers.md"
+  @research_policy.tool_blockers_path()
 }
 
 ///|
@@ -62,22 +53,12 @@ fn research_workspace_artifact_path(
   root : String,
   relative_path : String,
 ) -> String {
-  if root.has_suffix("/") {
-    "\{root}\{relative_path}"
-  } else {
-    "\{root}/\{relative_path}"
-  }
+  @research_policy.workspace_artifact_path(root, relative_path)
 }
 
 ///|
 fn research_ingest_required_raw_artifact_paths() -> Array[String] {
-  let paths : Array[String] = []
-  for path in research_raw_bootstrap_artifact_paths() {
-    if path != research_deep_report_path() {
-      paths.push(path)
-    }
-  }
-  paths
+  @research_policy.ingest_required_raw_artifact_paths()
 }
 
 ///|
@@ -122,30 +103,25 @@ fn research_raw_bootstrap_artifacts_sentence() -> String {
 
 ///|
 fn research_topic_source_page(topic : String) -> String {
-  "wiki/sources/\{topic}-web-and-local.md"
+  @research_policy.topic_source_page(topic)
 }
 
 ///|
 fn research_topic_entity_page(topic : String) -> String {
-  "wiki/entities/\{topic}.md"
+  @research_policy.topic_entity_page(topic)
 }
 
 ///|
 fn research_topic_concept_page(topic : String) -> String {
-  "wiki/concepts/\{topic}-architecture.md"
+  @research_policy.topic_concept_page(topic)
 }
 
 ///|
 fn research_topic_synthesis_page(topic : String) -> String {
-  "wiki/synthesis/\{topic}-research-brief.md"
+  @research_policy.topic_synthesis_page(topic)
 }
 
 ///|
 fn research_topic_wiki_page_examples(topic : String) -> Array[String] {
-  [
-    research_topic_source_page(topic),
-    research_topic_entity_page(topic),
-    research_topic_concept_page(topic),
-    research_topic_synthesis_page(topic),
-  ]
+  @research_policy.topic_wiki_page_examples(topic)
 }

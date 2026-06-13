@@ -239,6 +239,9 @@ Boundary:
 Purpose:
 
 - shared research-depth targets and source-screening thresholds
+- canonical research topic normalization, display naming, and
+  local-vs-external routing hints
+- canonical raw/bootstrap artifact paths and topic-specific wiki page paths
 - reusable vocabulary for MoonBook research skill prompts and future quality
   gates without introducing adapter/runtime dependency cycles
 
@@ -247,9 +250,17 @@ Boundary:
 - `src/research_policy` owns static research policy constants such as dossier
   word targets, included-source thresholds, discovery attempt limits, and
   bounded fetch command wording.
+- `src/research_policy` owns topic policy such as attempt-suffix stripping,
+  display-name derivation, web-query/reference/local-source hints, and whether a
+  topic should begin as local-project or external-domain research.
+- `src/research_policy` owns canonical research artifact paths such as
+  `raw/bootstrap/research-question.md`, `raw/bootstrap/search-log.md`,
+  `raw/bootstrap/deep-report.md`, and topic-specific `wiki/sources`,
+  `wiki/entities`, `wiki/concepts`, and `wiki/synthesis` pages.
 - `src/adapters/moonbook` may consume those constants while building provider
   requests and generated `SKILL.md` guidance, but should not define its own
-  competing research-depth thresholds.
+  competing research-depth thresholds, topic routing rules, query hint tables,
+  or research artifact path tables.
 - `src/research_quality` owns research quality semantics from explicit
   observations: readiness DTOs, required research paths, quality gates,
   repair/review trigger contracts, and persistence wording contracts.
