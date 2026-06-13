@@ -7,6 +7,25 @@ pub fn required_path(
 }
 
 ///|
+pub fn required_paths_for_book_type(
+  book_type : String,
+) -> Array[BookQualityRequiredPath] {
+  match book_type {
+    type_ if type_ == @policy.research_type() => research_required_paths()
+    type_ if type_ == @policy.course_type() => course_required_paths()
+    type_ if type_ == @policy.planbook_type() => planbook_required_paths()
+    type_ if type_ == @policy.cookbook_type() => cookbook_required_paths()
+    type_ if type_ == @policy.civic_type() => civic_base_required_paths()
+    type_ if type_ == @policy.operational_type() => operational_required_paths()
+    _ =>
+      [
+        required_path(wiki_index_path(), 20),
+        required_path(projection_state_path(), 15),
+      ]
+  }
+}
+
+///|
 fn required_path_present(
   paths : Array[BookQualityRequiredPath],
   relative : String,

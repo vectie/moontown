@@ -111,6 +111,27 @@ test "book quality structural paths include policy required files without duplic
 }
 
 ///|
+test "book quality required path profile lookup is centralized by book type" {
+  assert_eq(
+    required_paths_for_book_type(@policy.research_type()).length(),
+    research_required_paths().length(),
+  )
+  assert_eq(
+    required_paths_for_book_type(@policy.planbook_type()).length(),
+    planbook_required_paths().length(),
+  )
+  assert_eq(
+    required_paths_for_book_type(@policy.civic_type()).length(),
+    civic_base_required_paths().length(),
+  )
+  assert_true(
+    required_paths_for_book_type("unknown-book").any(fn(path) {
+      path.relative == wiki_index_path()
+    }),
+  )
+}
+
+///|
 test "book quality structural observation requirements include civic service pages" {
   let entry = @moonbook.BookCatalogEntry::new(
     id="wenyu-policy-hall",

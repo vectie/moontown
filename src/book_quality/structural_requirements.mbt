@@ -4,7 +4,7 @@ pub fn structural_required_relative_paths(
 ) -> Array[String] {
   let kind = score_book_type(entry)
   let paths : Array[String] = [wiki_index_path(), projection_state_path()]
-  for path in structural_required_paths_for_type(kind) {
+  for path in required_paths_for_book_type(kind) {
     push_unique_path(paths, path.relative)
   }
   for file in @policy.required_file_specs(@policy.policy_for_type(kind)) {
@@ -32,25 +32,6 @@ pub fn structural_required_relative_paths(
     }
   }
   paths
-}
-
-///|
-fn structural_required_paths_for_type(
-  book_type : String,
-) -> Array[BookQualityRequiredPath] {
-  match book_type {
-    type_ if type_ == @policy.research_type() => research_required_paths()
-    type_ if type_ == @policy.course_type() => course_required_paths()
-    type_ if type_ == @policy.planbook_type() => planbook_required_paths()
-    type_ if type_ == @policy.cookbook_type() => cookbook_required_paths()
-    type_ if type_ == @policy.civic_type() => civic_base_required_paths()
-    type_ if type_ == @policy.operational_type() => operational_required_paths()
-    _ =>
-      [
-        required_path(wiki_index_path(), 20),
-        required_path(projection_state_path(), 15),
-      ]
-  }
 }
 
 ///|

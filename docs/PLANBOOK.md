@@ -141,6 +141,8 @@ packet construction, and packet-pack README rendering.
 Static profile scoring rules such as research/course/PlanBook/Cookbook/civic
 required-path lists are also package-owned data. Root scoring may check whether
 those paths exist in a workspace, but it should not define the profile lists.
+Structural observers should consume `@book_quality.required_paths_for_book_type`
+instead of rebuilding type-to-required-path switches.
 Root book-quality files may still orchestrate audits, write files, dispatch
 MoonClaw, and run repair bridges, but they should operate on
 `@book_quality.*` contracts instead of defining their own domain records or

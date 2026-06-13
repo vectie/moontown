@@ -608,6 +608,9 @@ Purpose:
 - check required output surfaces from the effective `BookPolicy`
 - include `BookPolicy.required_files` in structural path scoring without
   double-counting paths that also have package-specific weights
+- expose the canonical required-path profile lookup for a policy book type, so
+  structural observers and runtime code do not rebuild research/course/
+  PlanBook/Cookbook/civic/operational switches
 - include `BookPolicy.required_files` in semantic review context pages so AI
   review sees the same artifacts used by health gates
 - attach structured `BookPolicy` loop and internal-distance plans to semantic
@@ -625,6 +628,9 @@ Boundary:
 - `src/book_quality` owns how quality is assessed and repaired, but it must
   read book output paths from `src/policy.BookPolicy` instead of maintaining a
   parallel generated-site path per book kind.
+- `src/book_quality/scoring_profiles.mbt` owns required-path profile selection
+  for book types. Other `book_quality` files should call that helper instead
+  of duplicating type-to-path switches.
 - `src/book_quality` must remain observation-fed: it may accept semantic review
   text and structural facts, but it must not derive snapshot-relative storage
   paths or read review-result files.

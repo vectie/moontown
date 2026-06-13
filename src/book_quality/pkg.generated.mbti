@@ -166,6 +166,8 @@ pub fn repair_standing_goal(BookQualityRepairBridgeItem, next_due_tick~ : Int, l
 
 pub fn required_path(String, Int) -> BookQualityRequiredPath
 
+pub fn required_paths_for_book_type(String) -> Array[BookQualityRequiredPath]
+
 pub fn research_deep_report_word_assessment(Int) -> BookQualitySignalAssessment
 
 pub fn research_required_paths() -> Array[BookQualityRequiredPath]
