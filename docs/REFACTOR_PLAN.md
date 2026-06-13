@@ -381,6 +381,9 @@ Goals:
 - keep book-quality pending-review selection policy in `book_quality/` as a
   pure audit-plus-completed-ids decision; keep completed-result-file discovery
   in `book_quality_runtime/`
+- keep book-quality per-run reconciliation transitions in `book_quality/`;
+  keep review-run ledger loading, result harvesting/writes, count aggregation,
+  changed-state folding, and ledger persistence in `book_quality_runtime/`
 - keep Wenyu course-book bootstrap, generated course content, course-builder
   skill text, UI-state JSON, and generated course site projection in
   `course_book/`; root should expose only command-compatible wrappers

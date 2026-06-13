@@ -570,6 +570,10 @@ Boundary:
 - `src/book_quality_runtime` owns semantic-review completion observation:
   result-file existence checks are converted into completed book ids before
   calling `src/book_quality` candidate-selection policy.
+- `src/book_quality_runtime` owns review-run ledger reconciliation IO and
+  aggregation: load the ledger, observe filesystem/process/MoonClaw output,
+  call package-owned per-run transitions, write accepted results, fold counts,
+  and persist changed ledgers.
 - `src/book_quality/scoring_engine.mbt` owns book-type scoring orchestration.
   Reusable draft/finalization/path-scoring internals belong in
   `scoring_primitives.mbt`; civic-service scoring details belong in

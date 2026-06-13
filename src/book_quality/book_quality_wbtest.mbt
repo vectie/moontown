@@ -999,47 +999,6 @@ async test "book quality package owns review ledger empty fallback" {
 }
 
 ///|
-test "book quality package owns review ledger reconciliation aggregation" {
-  let first = BookQualityReviewRun::{
-    book_id: "book-first",
-    packet_path: "/tmp/packet-first.json",
-    result_path: "/tmp/result-first.md",
-    proposal_id: Some("proposal-first"),
-    run_id: Some("run-first"),
-    status: review_run_dispatched_status(),
-    summary: "first",
-    generated_at_ms: 1UL,
-  }
-  let second = BookQualityReviewRun::{
-    book_id: "book-second",
-    packet_path: "/tmp/packet-second.json",
-    result_path: "/tmp/result-second.md",
-    proposal_id: Some("proposal-second"),
-    run_id: Some("run-second"),
-    status: review_run_written_status(),
-    summary: "second",
-    generated_at_ms: 2UL,
-  }
-  let result = book_quality_review_ledger_reconcile_result_from_runs([
-    BookQualityReviewRunReconcileResult::{
-      run: first,
-      written: false,
-      changed: true,
-    },
-    BookQualityReviewRunReconcileResult::{
-      run: second,
-      written: true,
-      changed: false,
-    },
-  ])
-  assert_eq(result.ledger.runs.length(), 2)
-  assert_eq(result.ledger.runs[0].book_id, "book-first")
-  assert_eq(result.ledger.runs[1].book_id, "book-second")
-  assert_eq(result.written, 1)
-  assert_true(result.changed)
-}
-
-///|
 test "book quality package owns repair goal retirement policy" {
   let score = review_candidate_score_for_test("book-a", 40)
   assert_true(score_exists([score], "book-a"))
@@ -1391,45 +1350,45 @@ async test "book quality package owns public active boundary through internal ch
 
 ///|
 async test "book quality package preserves terminal failed attempt status" {
-  let root = "/tmp/moontown-book-quality-package-terminal-result-wbtest-\{@async.now().to_int()}"
-  let result_dir = "\{root}/results"
-  write_text_file("\{result_dir}/book-a.md", "previous orphaned result")
-  let orphaned_result = reconcile_review_run(
+  let orphaned_result = reconcile_review_run_from_observation(
     BookQualityReviewRun::{
       book_id: "book-a",
       packet_path: "packet.json",
-      result_path: "\{result_dir}/book-a.md",
+      result_path: "book-a.md",
       proposal_id: None,
       run_id: Some("run-a"),
       status: review_run_written_status(),
       summary: "Marked orphaned by Book Quality reconciliation because no result artifact was produced.",
       generated_at_ms: 1UL,
     },
-    result_dir,
-    root,
-    ".moonclaw",
+    result_exists=true,
+    process_alive=false,
+    poll_summary="",
+    now_ms=2UL,
   )
   assert_eq(orphaned_result.run.status, review_run_orphaned_status())
-  let blocked_result = reconcile_review_run(
+  let blocked_result = reconcile_review_run_from_observation(
     {
       ..orphaned_result.run,
       status: review_run_written_status(),
       summary: "MoonClaw AI review dispatch failed: permission denied",
     },
-    result_dir,
-    root,
-    ".moonclaw",
+    result_exists=true,
+    process_alive=false,
+    poll_summary="",
+    now_ms=3UL,
   )
   assert_eq(blocked_result.run.status, review_run_blocked_status())
-  let active_result = reconcile_review_run(
+  let active_result = reconcile_review_run_from_observation(
     {
       ..orphaned_result.run,
       status: review_run_dispatched_status(),
       summary: "imported and completed",
     },
-    result_dir,
-    root,
-    ".moonclaw",
+    result_exists=true,
+    process_alive=false,
+    poll_summary="",
+    now_ms=4UL,
   )
   assert_eq(active_result.run.status, review_run_written_status())
 }
@@ -1447,11 +1406,12 @@ async test "book quality package owns per-run reconciliation transitions" {
     summary: "waiting for dispatch",
     generated_at_ms: 1UL,
   }
-  let unchanged = reconcile_review_run(
+  let unchanged = reconcile_review_run_from_observation(
     queued,
-    "\{root}/results",
-    root,
-    ".moonclaw",
+    result_exists=false,
+    process_alive=false,
+    poll_summary="",
+    now_ms=2UL,
   )
   assert_eq(unchanged.run.status, review_run_queued_status())
   assert_eq(unchanged.run.summary, "waiting for dispatch")
@@ -1484,20 +1444,23 @@ async test "book quality package owns per-run reconciliation transitions" {
 
 ///|
 async test "book quality package existing result transition is internal" {
-  let root = "/tmp/moontown-book-quality-package-existing-result-wbtest-\{@async.now().to_int()}"
-  let result_dir = "\{root}/results"
   let run = BookQualityReviewRun::{
     book_id: "book-existing",
     packet_path: "packet.json",
-    result_path: "\{result_dir}/book-existing.md",
+    result_path: "book-existing.md",
     proposal_id: None,
     run_id: Some("run-existing"),
     status: review_run_dispatched_status(),
     summary: "imported and completed",
     generated_at_ms: 1UL,
   }
-  write_text_file("\{result_dir}/book-existing.md", "accepted result exists")
-  let result = reconcile_review_run(run, result_dir, root, ".moonclaw")
+  let result = reconcile_review_run_from_observation(
+    run,
+    result_exists=true,
+    process_alive=false,
+    poll_summary="",
+    now_ms=2UL,
+  )
   assert_false(result.written)
   assert_true(result.changed)
   assert_eq(result.run.status, review_run_written_status())

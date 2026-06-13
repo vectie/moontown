@@ -630,10 +630,10 @@ belong to `book_quality/`.
 Accepted-result reconciliation records are package-owned too. Root may harvest
 MoonClaw content and write the accepted result file, but the transition to
 `written`, harvested summary text, written-count flag, and changed flag belong
-to `book_quality/`. Ledger-level reconciliation aggregation is package-owned
-as well: root may reconcile each run after filesystem/process observation, but
-run order preservation, written-count accumulation, and changed-state folding
-belong to the review domain package.
+to `book_quality/`. Ledger-level reconciliation aggregation is runtime-owned:
+`book_quality_runtime/` loads the ledger, observes each run, writes accepted
+results, preserves run order, accumulates written counts, folds changed state,
+and persists the updated ledger after calling the pure per-run transition.
 Book-quality repair-goal retirement policy is package-owned as well. Root may
 observe whether a standing goal is enabled, which book it targets, whether a
 score/result file exists, and whether a result score is semantically ready; the
@@ -670,7 +670,7 @@ review-status summary policy, active-review counting/status policy,
 stale/orphan review reconciliation policy, review result-state wording,
 semantic-review profile policy, active-review lifecycle policy,
 repair-goal prompt/cadence policy, review dispatch message policy, review-run
-accepted-result storage, reconciliation record construction, ledger reconciliation aggregation,
+reconciliation record construction,
 repair-goal identity/prompt/cadence policy,
 repair-goal retirement policy, repair bridge summary policy, or repair bridge
 candidate/item construction, repair review page Markdown contracts, or book-quality data

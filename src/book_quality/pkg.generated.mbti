@@ -124,8 +124,6 @@ pub async fn read_review_result_text(String, String) -> String
 
 pub fn reconcile_review_run_from_observation(BookQualityReviewRun, result_exists~ : Bool, result_content? : String, process_alive~ : Bool, poll_summary~ : String, now_ms~ : UInt64) -> BookQualityReviewRunReconcileResult
 
-pub async fn reconcile_review_run_ledger_file(result_dir? : String, run_path? : String) -> Int
-
 pub fn refreshed_repair_standing_goal(@core.StandingGoal, BookQualityRepairBridgeItem) -> @core.StandingGoal
 
 pub fn render_audit_markdown(BookQualityAudit) -> String
