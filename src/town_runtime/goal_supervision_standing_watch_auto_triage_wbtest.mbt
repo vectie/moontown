@@ -1,4 +1,18 @@
 ///|
+test "standing watch book result paths use storage snapshot base" {
+  assert_eq(
+    standing_watch_book_result_path("town.json", "standing-watch-a"),
+    ".moontown/book-results/standing-watch-a.json",
+  )
+  assert_eq(
+    standing_watch_book_result_path(
+      "/tmp/moontown/town.json", "standing-watch-b",
+    ),
+    "/tmp/moontown/book-results/standing-watch-b.json",
+  )
+}
+
+///|
 async test "standing watch review queue auto-closes no-change keeper markers" {
   let root = "/tmp/moontown-standing-watch-auto-triage-no-change"
   let snapshot_path = "\{root}/town.json"

@@ -30,7 +30,6 @@ import {
   "moonbitlang/core/env",
   "moonbitlang/core/json",
   "moonbitlang/x/sys",
-  "moonbitlang/x/path",
 }
 
 import {

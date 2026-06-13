@@ -221,6 +221,9 @@ Boundary:
   shape, live snapshot stale windows, transient dispatch classification, or
   empty-completion `no_change` marker text, empty review completion summary
   text, legacy retry-accounting predicates, or review-triage predicates.
+- `src/town_runtime` should use `src/storage` for generic snapshot-root/base
+  path derivation before appending runtime-owned subdirectories such as
+  `book-results`.
 
 ## Research Policy
 

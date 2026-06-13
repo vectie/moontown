@@ -1,4 +1,16 @@
 ///|
+test "persisted book result paths use storage snapshot base" {
+  assert_eq(
+    book_result_path_for_snapshot("town.json", "task-a"),
+    ".moontown/book-results/task-a.json",
+  )
+  assert_eq(
+    book_result_path_for_snapshot("/tmp/moontown/town.json", "task-b"),
+    "/tmp/moontown/book-results/task-b.json",
+  )
+}
+
+///|
 async test "review queue closes when MoonBook already persisted non-review result" {
   let root = "/tmp/moontown-persisted-non-review-close"
   let snapshot_path = "\{root}/town.json"

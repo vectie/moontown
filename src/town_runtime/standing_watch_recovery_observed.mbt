@@ -58,7 +58,5 @@ fn standing_watch_book_result_path(
   snapshot_path : String,
   task_id : String,
 ) -> String {
-  let base = @path.Path::dirname(snapshot_path).to_string()
-  let root = if base == "." || base == "" { ".moontown" } else { base }
-  "\{root}/book-results/\{task_id}.json"
+  "\{@storage.snapshot_base_dir(snapshot_path)}/book-results/\{task_id}.json"
 }
