@@ -1,7 +1,7 @@
 ///|
 async fn load_final_integration_manifest(
   manifest_path : String,
-) -> FinalIntegrationManifest? {
+) -> @final_integration.FinalIntegrationManifest? {
   let parsed = match @support.read_optional_json_file(manifest_path) {
     Some(json) => json
     None => return None

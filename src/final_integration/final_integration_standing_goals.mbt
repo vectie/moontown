@@ -1,5 +1,5 @@
 ///|
-fn merge_final_integration_standing_goals(
+pub fn merge_final_integration_standing_goals(
   existing : Array[@core.StandingGoal],
   specs : Array[FinalIntegrationWatchSpec],
   current_tick : Int,
@@ -32,7 +32,7 @@ fn merge_final_integration_standing_goals(
 }
 
 ///|
-fn find_standing_goal_by_id(
+pub fn find_standing_goal_by_id(
   goals : Array[@core.StandingGoal],
   id : String,
 ) -> @core.StandingGoal? {
@@ -40,7 +40,7 @@ fn find_standing_goal_by_id(
 }
 
 ///|
-fn final_integration_watch_coverage(
+pub fn final_integration_watch_coverage(
   manifest : FinalIntegrationManifest,
   goals : Array[@core.StandingGoal],
 ) -> String {
@@ -55,7 +55,9 @@ fn final_integration_watch_coverage(
 }
 
 ///|
-fn final_integration_source_policy(spec : FinalIntegrationWatchSpec) -> String {
+pub fn final_integration_source_policy(
+  spec : FinalIntegrationWatchSpec,
+) -> String {
   @policy.source_policy_or_default(
     spec.source_policy,
     @policy.web_first_policy(),

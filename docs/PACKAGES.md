@@ -283,12 +283,37 @@ Boundary:
   base, but should call `storage.snapshot_base_dir(...)` instead of
   reimplementing `dirname(snapshot_path)` fallback logic.
 - Feature packages such as `book_templates`, `book_quality`,
-  `final_integration`, `visual_projection`, and `town_runtime` should append
-  their local filenames to this storage-owned base rather than owning a second
-  relative-snapshot fallback.
+  `final_integration_runtime`, `visual_projection_runtime`, and `town_runtime`
+  should append their local filenames to this storage-owned base rather than
+  owning a second relative-snapshot fallback.
 - `scripts/audit-source-layout.sh` enforces that direct
   `Path::dirname(snapshot_path)` snapshot-base derivation appears only inside
   `src/storage`.
+
+## Final Integration
+
+- [src/final_integration](/Users/kq/Workspace/moontown/src/final_integration)
+- [src/final_integration_runtime](/Users/kq/Workspace/moontown/src/final_integration_runtime)
+
+Purpose:
+
+- final-integration manifest schema
+- pure standing-goal merge and coverage policy
+- status JSON shaping
+- runtime portfolio install/status command execution
+- civic workspace/protocol/scenario installation wiring
+
+Boundary:
+
+- `src/final_integration` owns only policy and DTOs. It must not read files,
+  inspect daemon runtime state, save standing goals, call civic runtime
+  bootstrap, or write integration status artifacts.
+- `src/final_integration_runtime` owns the IO path: manifest loading,
+  daemon-tick inspection, standing-goal persistence, civic bootstrap and
+  scenario installation, and durable status JSON writes.
+- CLI commands should call `final_integration_runtime`; tests for pure merge
+  policy stay in `final_integration`, while filesystem/runtime tests stay in
+  `final_integration_runtime`.
 
 ## Roles
 

@@ -243,6 +243,16 @@ book owns. The implementation now has a first-class `policy` package:
   standing-goal persistence, request-event journaling, status inspection, and
   the CLI archive entrypoint. Root commands should call this runtime package
   instead of carrying cross-store archive lifecycle code.
+- [final_integration/](/Users/kq/Workspace/moontown/src/final_integration)
+  owns pure final-integration portfolio policy: manifest DTOs, standing-goal
+  merge rules, source-policy normalization, watch coverage, and status JSON
+  shaping. It should not read manifests, inspect daemon files, mutate standing
+  goals, bootstrap civic workspaces, or write status files.
+- [final_integration_runtime/](/Users/kq/Workspace/moontown/src/final_integration_runtime)
+  owns final-integration runtime orchestration: manifest loading, daemon-tick
+  inspection, standing-goal persistence, civic workspace/protocol bootstrap,
+  civic scenario installation, status-file persistence, and CLI command
+  entrypoints.
 - [visual_projection/](/Users/kq/Workspace/moontown/src/visual_projection)
   owns town-state-to-visual-projection DTOs and derivation: agent phases,
   routing, behavior/effect labels, building activity summaries, module

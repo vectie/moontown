@@ -4,21 +4,51 @@ package "vectie/moontown/final_integration"
 import {
   "moonbitlang/core/debug",
   "moonbitlang/core/json",
+  "vectie/moontown/core",
 }
 
 // Values
-pub async fn install_wenyu_final_integration(manifest_path? : String, snapshot_path? : String, standing_goal_path? : String) -> String
+pub fn final_integration_source_policy(FinalIntegrationWatchSpec) -> String
 
-pub async fn render_wenyu_final_integration_status(manifest_path? : String, snapshot_path? : String, standing_goal_path? : String) -> String
+pub fn final_integration_status_json(FinalIntegrationManifest, Array[@core.StandingGoal], Int, String, String, Array[String]) -> Json
+
+pub fn final_integration_watch_coverage(FinalIntegrationManifest, Array[@core.StandingGoal]) -> String
+
+pub fn find_standing_goal_by_id(Array[@core.StandingGoal], String) -> @core.StandingGoal?
+
+pub fn merge_final_integration_standing_goals(Array[@core.StandingGoal], Array[FinalIntegrationWatchSpec], Int) -> Array[@core.StandingGoal]
 
 // Errors
 
 // Types and methods
-type FinalIntegrationManifest derive(Eq, ToJson, @debug.Debug, @json.FromJson)
+pub(all) struct FinalIntegrationManifest {
+  id : String
+  title : String
+  domain_watches : Array[FinalIntegrationWatchSpec]
+  civic_pattern_manifests : Array[FinalIntegrationTemplateSpec]
+  civic_scenarios : Array[FinalIntegrationTemplateSpec]
+} derive(Eq, ToJson, @debug.Debug, @json.FromJson)
 
-type FinalIntegrationTemplateSpec derive(Eq, ToJson, @debug.Debug, @json.FromJson)
+pub(all) struct FinalIntegrationTemplateSpec {
+  order : Int
+  form : String
+  path : String
+  note : String
+} derive(Eq, ToJson, @debug.Debug, @json.FromJson)
 
-type FinalIntegrationWatchSpec derive(Eq, ToJson, @debug.Debug, @json.FromJson)
+pub(all) struct FinalIntegrationWatchSpec {
+  order : Int
+  domain : String
+  form : String
+  id : String
+  title : String
+  prompt : String
+  target_book_id : String
+  cadence_ticks : Int
+  quality_threshold : Int
+  source_policy : String
+  initial_stagger_ticks : Int
+} derive(Eq, ToJson, @debug.Debug, @json.FromJson)
 
 // Type aliases
 

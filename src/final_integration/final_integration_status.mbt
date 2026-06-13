@@ -1,5 +1,5 @@
 ///|
-fn final_integration_status_json(
+pub fn final_integration_status_json(
   manifest : FinalIntegrationManifest,
   goals : Array[@core.StandingGoal],
   current_tick : Int,

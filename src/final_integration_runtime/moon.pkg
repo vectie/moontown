@@ -1,0 +1,13 @@
+import {
+  "moonbitlang/async/fs",
+  "moonbitlang/core/json",
+  "vectie/moontown/civic_runtime",
+  "vectie/moontown/final_integration",
+  "vectie/moontown/scheduler",
+  "vectie/moontown/storage",
+  "vectie/moontown/support",
+}
+
+import {
+  "moonbitlang/async",
+} for "wbtest"
