@@ -70,6 +70,25 @@ test "module ids and canonical book ids resolve to Wenyu services" {
 }
 
 ///|
+test "civic package owns Wenyu build book eligibility" {
+  assert_true(
+    is_wenyu_build_book_entry("wenyu-custom-builder", "Custom Wenyu Builder", [
+      "civic-service",
+    ]),
+  )
+  assert_true(
+    !is_wenyu_build_book_entry("wenyu-policy-hall", "Policy Hall", [
+      "civic-service",
+    ]),
+  )
+  assert_true(
+    !is_wenyu_build_book_entry("custom-builder", "Custom Wenyu Builder", [
+      "civic-service",
+    ]),
+  )
+}
+
+///|
 test "civic task carries role skill and output contract prompt" {
   let service = wenyu_civic_service_for_book_id("wenyu-talent-avenue").unwrap()
   let task = wenyu_civic_service_task(service, "Build Wenyu civic town")

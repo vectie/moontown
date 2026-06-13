@@ -29,3 +29,14 @@ pub fn wenyu_civic_service_for_book_id(
 pub fn is_wenyu_civic_book_id(book_id : String) -> Bool {
   wenyu_civic_service_for_book_id(book_id) != None
 }
+
+///|
+pub fn is_wenyu_build_book_entry(
+  id : String,
+  name : String,
+  tags : Array[String],
+) -> Bool {
+  @policy.catalog_entry_type(id, name, tags) == @policy.civic_type() &&
+  id.has_prefix("wenyu-") &&
+  wenyu_civic_service_for_book_id(id) == None
+}

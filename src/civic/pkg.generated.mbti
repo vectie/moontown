@@ -147,6 +147,8 @@ pub fn exchange_ledger_text(CivicServiceDefinition) -> String
 
 pub fn incident_bridge_pattern() -> CivicCommunicationPattern
 
+pub fn is_wenyu_build_book_entry(String, String, Array[String]) -> Bool
+
 pub fn is_wenyu_civic_book_id(String) -> Bool
 
 pub fn learning_cohort_pattern() -> CivicCommunicationPattern

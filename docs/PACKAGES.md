@@ -714,6 +714,9 @@ Boundary:
 - `src/town_runtime` may decide when a Wenyu book is ready for bootstrap/build,
   supply the current repo root, and ask `src/build_pipeline_runtime` to
   preseed or build a Wenyu workspace.
+- `src/town_runtime` should ask `src/civic` whether an entry is a Wenyu build
+  book instead of inspecting `wenyu-*` storage slugs directly; civic owns Wenyu
+  module identity and registered-service exclusion rules.
 - `src/build_pipeline` owns the Wenyu bootstrap/build task contracts and may
   compose target pages through `src/policy`, `src/research_quality`, and civic
   service definitions.
@@ -1016,6 +1019,9 @@ Purpose:
 - `src/civic` owns service definitions, target page contracts, skill paths,
   protocol vocabulary, civic helper paths, and civic service result-path
   derivation.
+- `src/civic` owns Wenyu module/book identity helpers, including the difference
+  between configured civic-service books and Wenyu build books. Runtime
+  packages should call those helpers instead of branching on `wenyu-*` slugs.
 - `src/civic` owns civic communication reducer contract helpers: reducer input,
   participant, output, blocker, step-kind, output-contract id/type, and
   MoonClaw profile-family names.

@@ -13,7 +13,7 @@ async fn preseed_goal_bootstrap_inputs(
     }
     None => ()
   }
-  if !entry.id.has_prefix("wenyu-") {
+  if !@civic.is_wenyu_build_book_entry(entry.id, entry.name, entry.tags) {
     return
   }
   @build_pipeline_runtime.preseed_wenyu_goal_inputs(
