@@ -1,8 +1,22 @@
 // Generated using `moon info`, DON'T EDIT IT
 package "vectie/moontown/pdf_archive"
 
+import {
+  "vectie/moontown/adapters/moonbook",
+  "vectie/moontown/core",
+  "vectie/moontown/pdf_evidence_watch",
+}
+
 // Values
-pub async fn archive_pdf_evidence_watch_book(book_id? : String, reason? : String, book_catalog_path? : String, standing_goal_path? : String, request_event_path? : String) -> String
+pub fn archive_pdf_evidence_watch_catalog_entry(Array[@moonbook.BookCatalogEntry], String, String) -> Array[@moonbook.BookCatalogEntry]
+
+pub fn count_disabled_pdf_evidence_watch_book_standing_goals(Array[@core.StandingGoal], Array[@core.StandingGoal], String) -> Int
+
+pub fn disable_pdf_evidence_watch_book_standing_goals(Array[@core.StandingGoal], String) -> Array[@core.StandingGoal]
+
+pub fn pdf_evidence_watch_goal_id(String) -> String
+
+pub fn render_pdf_evidence_watch_archive_summary(String, String, String, String, Int, String, @pdf_evidence_watch.PdfEvidenceWatchBookStatus) -> String
 
 // Errors
 

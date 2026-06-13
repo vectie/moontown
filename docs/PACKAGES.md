@@ -755,6 +755,8 @@ Key files:
 - [src/pdf_evidence_watch/workspace.mbt](/Users/kq/Workspace/moontown/src/pdf_evidence_watch/workspace.mbt)
 - [src/pdf_evidence_watch/standing_goal.mbt](/Users/kq/Workspace/moontown/src/pdf_evidence_watch/standing_goal.mbt)
 - [src/pdf_evidence_watch/status.mbt](/Users/kq/Workspace/moontown/src/pdf_evidence_watch/status.mbt)
+- [src/pdf_archive/archive.mbt](/Users/kq/Workspace/moontown/src/pdf_archive/archive.mbt)
+- [src/pdf_archive_runtime/archive_command.mbt](/Users/kq/Workspace/moontown/src/pdf_archive_runtime/archive_command.mbt)
 
 Purpose:
 
@@ -770,6 +772,12 @@ Boundary:
   watch contracts.
 - PDF source discovery, extraction, analysis-method, and notification contract
   semantics belong here.
+- PDF archive policy belongs in `src/pdf_archive`: archived/hidden/internal
+  catalog tagging, standing-goal disable rules, disabled-goal counting, and
+  archive summary wording.
+- PDF archive runtime mutation belongs in `src/pdf_archive_runtime`: catalog
+  persistence, standing-goal persistence, request-event journaling, status
+  inspection, and the command entrypoint.
 - default generated-site path semantics belong to `src/policy`; PDF Evidence
   Watch consumes `policy.default_generated_site_projection_path()` rather than
   redefining the projection path.

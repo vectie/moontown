@@ -1,76 +1,86 @@
 ///|
-async test "archive pdf evidence watch book disables standing watch and hides catalog entry" {
-  let base = "/tmp/moontown-pdf-evidence-watch-wbtest/archive"
-  @support.ignore_checked_command("rm", ["-rf", base])
-  let workspace_root = "\{base}/workspace"
-  let catalog_path = "\{base}/catalog.json"
-  let goals_path = "\{base}/standing-goals.json"
-  let event_path = "\{base}/book-template-request-events.jsonl"
-  ignore(
-    @pdf_evidence_watch.bootstrap_pdf_evidence_watch_book(
-      book_id="research-archive-pdfs",
-      title="Archive PDF Watch",
-      purpose="Temporary smoke book.",
-      websites=["https://example.org/reports"],
-      book_catalog_path=catalog_path,
-      standing_goal_path=goals_path,
-      workspace_root~,
+test "archive catalog policy adds hidden archival tags once" {
+  let catalog = [
+    @moonbook.BookCatalogEntry::new(
+      id="research-pdfs",
+      name="PDF Watch",
+      purpose="Watch external PDFs.",
+      workspace_root="/tmp/research-pdfs",
+      tags=["research", "archived"],
+      skills=["pdf-evidence-watch"],
     ),
-  )
-  let goals_before = @storage.load_or_create_standing_goals(path=goals_path)
-  goals_before.push(
-    @core.StandingGoal::new(
-      id="book-quality-repair-research-archive-pdfs",
-      title="Repair archived PDF watch",
-      prompt="This repair goal should be retired with the archived book.",
-      target_book_id=Some("research-archive-pdfs"),
-      cadence_ticks=60,
-      next_due_tick=1,
-      enabled=true,
-      source_policy="book-first",
+    @moonbook.BookCatalogEntry::new(
+      id="other-book",
+      name="Other Book",
+      purpose="Unrelated.",
+      workspace_root="/tmp/other-book",
     ),
+  ]
+  let archived = archive_pdf_evidence_watch_catalog_entry(
+    catalog, "research-pdfs", "No longer needed.",
   )
-  @storage.save_standing_goals_file(goals_path, goals_before)
-  let summary = archive_pdf_evidence_watch_book(
-    book_id="research-archive-pdfs",
-    reason="Smoke proof complete.",
-    book_catalog_path=catalog_path,
-    standing_goal_path=goals_path,
-    request_event_path=event_path,
-  )
-  assert_true(summary.contains("Archived PDF Evidence Watch book"))
-  let status = @pdf_evidence_watch.inspect_pdf_evidence_watch_book(
-    book_id="research-archive-pdfs",
-    workspace_root~,
-    book_catalog_path=catalog_path,
-    standing_goal_path=goals_path,
-  )
-  assert_true(status.has_catalog_entry)
-  assert_true(status.has_standing_goal)
-  assert_false(status.standing_goal_enabled)
-  assert_false(status.ready)
-  assert_true(
-    summary.contains("Disabled standing goals targeting this book: `2`"),
-  )
-  let goals = @storage.load_or_create_standing_goals(path=goals_path)
-  for goal in goals {
-    if goal.id == "watch-research-archive-pdfs-pdfs" {
-      assert_false(goal.enabled)
-    }
-    if goal.id == "book-quality-repair-research-archive-pdfs" {
-      assert_false(goal.enabled)
-    }
-  }
-  let catalog = @moonbook.load_or_create_catalog(path=catalog_path)
-  match @moonbook.entry_for_book_id(catalog, "research-archive-pdfs") {
+  match @moonbook.entry_for_book_id(archived, "research-pdfs") {
     Some(entry) => {
+      assert_true(entry.purpose.contains("Archived: No longer needed."))
       assert_true(entry.tags.contains("archived"))
       assert_true(entry.tags.contains("hidden"))
       assert_true(entry.tags.contains("internal"))
+      assert_eq(entry.tags.length(), 4)
     }
     None => fail("expected archived catalog entry")
   }
-  let event_text = @support.read_text_or_empty(event_path)
-  assert_true(event_text.contains("\"status\":\"archived\""))
-  assert_true(event_text.contains("archive-research-archive-pdfs"))
+  match @moonbook.entry_for_book_id(archived, "other-book") {
+    Some(entry) => assert_false(entry.tags.contains("archived"))
+    None => fail("expected unrelated catalog entry")
+  }
+}
+
+///|
+test "archive standing goal policy disables watch and book quality goals" {
+  let goals = [
+    @core.StandingGoal::new(
+      id=pdf_evidence_watch_goal_id("research-pdfs"),
+      title="Watch PDFs",
+      prompt="Watch PDFs.",
+      target_book_id=Some("research-pdfs"),
+      cadence_ticks=30,
+      next_due_tick=1,
+      enabled=true,
+    ),
+    @core.StandingGoal::new(
+      id=@book_quality.repair_goal_id("research-pdfs"),
+      title="Repair quality",
+      prompt="Repair quality.",
+      target_book_id=Some("research-pdfs"),
+      cadence_ticks=30,
+      next_due_tick=1,
+      enabled=true,
+    ),
+    @core.StandingGoal::new(
+      id="watch-other",
+      title="Other",
+      prompt="Other.",
+      target_book_id=Some("other-book"),
+      cadence_ticks=30,
+      next_due_tick=1,
+      enabled=true,
+    ),
+  ]
+  let disabled = disable_pdf_evidence_watch_book_standing_goals(
+    goals, "research-pdfs",
+  )
+  assert_eq(
+    count_disabled_pdf_evidence_watch_book_standing_goals(
+      goals, disabled, "research-pdfs",
+    ),
+    2,
+  )
+  for goal in disabled {
+    if goal.target_book_id == Some("research-pdfs") {
+      assert_false(goal.enabled)
+    }
+    if goal.id == "watch-other" {
+      assert_true(goal.enabled)
+    }
+  }
 }

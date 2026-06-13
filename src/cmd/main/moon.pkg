@@ -14,7 +14,7 @@ import {
   "vectie/moontown/live_autonomy_runtime",
   "vectie/moontown/moonclaw_runtime",
   "vectie/moontown/planbook_runtime",
-  "vectie/moontown/pdf_archive",
+  "vectie/moontown/pdf_archive_runtime",
   "vectie/moontown/pdf_evidence_watch",
   "vectie/moontown/runtime_status",
 }

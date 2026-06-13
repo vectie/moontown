@@ -36,7 +36,7 @@ async fn render_pdf_watch_command(args : Array[String]) -> String {
     ["install", config_path] =>
       @pdf_evidence_watch.install_pdf_evidence_watch_book_config(config_path)
     ["archive", book_id] =>
-      @pdf_archive.archive_pdf_evidence_watch_book(book_id~)
+      @pdf_archive_runtime.archive_pdf_evidence_watch_book(book_id~)
     ["status"] => @pdf_evidence_watch.render_pdf_evidence_watch_book_status()
     ["status", book_id] =>
       @pdf_evidence_watch.render_pdf_evidence_watch_book_status(book_id~)

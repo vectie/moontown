@@ -223,8 +223,15 @@ book owns. The implementation now has a first-class `policy` package:
 - [pdf_evidence_watch/](/Users/kq/Workspace/moontown/src/pdf_evidence_watch)
   owns PDF Evidence Watch bootstrap, config installation, workspace
   materialization, standing-watch goal construction, and status inspection.
-  Root Moontown may coordinate archive lifecycle events because archiving spans
-  catalog state, standing-goal state, and book-template request-event logs.
+- [pdf_archive/](/Users/kq/Workspace/moontown/src/pdf_archive)
+  owns deterministic PDF Evidence Watch archive policy: archived catalog-entry
+  tags, archive goal-id derivation, standing-goal disable rules, disabled-goal
+  accounting, and archive summary wording.
+- [pdf_archive_runtime/](/Users/kq/Workspace/moontown/src/pdf_archive_runtime)
+  owns PDF Evidence Watch archive runtime mutation: MoonBook catalog load/save,
+  standing-goal persistence, request-event journaling, status inspection, and
+  the CLI archive entrypoint. Root commands should call this runtime package
+  instead of carrying cross-store archive lifecycle code.
 - [visual_projection/](/Users/kq/Workspace/moontown/src/visual_projection)
   owns town-state-to-visual-projection DTOs and derivation: agent phases,
   routing, behavior/effect labels, building activity summaries, module

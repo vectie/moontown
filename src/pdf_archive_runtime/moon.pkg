@@ -1,0 +1,17 @@
+import {
+  "moonbitlang/core/env",
+  "vectie/moontown/adapters/moonbook",
+  "vectie/moontown/book_templates",
+  "vectie/moontown/pdf_archive",
+  "vectie/moontown/pdf_evidence_watch",
+  "vectie/moontown/storage",
+}
+
+import {
+  "moonbitlang/async",
+  "vectie/moontown/adapters/moonbook",
+  "vectie/moontown/core",
+  "vectie/moontown/pdf_evidence_watch",
+  "vectie/moontown/storage",
+  "vectie/moontown/support",
+} for "wbtest"

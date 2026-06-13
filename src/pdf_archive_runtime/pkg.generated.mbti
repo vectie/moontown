@@ -1,0 +1,14 @@
+// Generated using `moon info`, DON'T EDIT IT
+package "vectie/moontown/pdf_archive_runtime"
+
+// Values
+pub async fn archive_pdf_evidence_watch_book(book_id? : String, reason? : String, book_catalog_path? : String, standing_goal_path? : String, request_event_path? : String) -> String
+
+// Errors
+
+// Types and methods
+
+// Type aliases
+
+// Traits
+

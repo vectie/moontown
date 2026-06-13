@@ -1,15 +1,12 @@
 import {
-  "moonbitlang/core/env",
-  "moonbitlang/core/json",
   "vectie/moontown/adapters/moonbook",
   "vectie/moontown/book_quality",
-  "vectie/moontown/book_templates",
   "vectie/moontown/core",
   "vectie/moontown/pdf_evidence_watch",
-  "vectie/moontown/storage",
 }
 
 import {
-  "moonbitlang/async",
-  "vectie/moontown/support",
+  "vectie/moontown/adapters/moonbook",
+  "vectie/moontown/book_quality",
+  "vectie/moontown/core",
 } for "wbtest"
