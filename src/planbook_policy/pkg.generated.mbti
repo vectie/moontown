@@ -65,6 +65,8 @@ pub fn repair_diff_hygiene_task_rule() -> String
 
 pub fn repair_exact_targets_task_rule() -> String
 
+pub fn repair_git_policy_json() -> Json
+
 pub fn repair_job_index_path(String) -> String
 
 pub fn repair_job_proposals_path(String) -> String
@@ -85,6 +87,8 @@ pub fn repair_patch_receipt_from_payload(Json) -> Json?
 
 pub fn repair_patch_receipt_from_text(String) -> Json?
 
+pub fn repair_patch_receipt_required_fields() -> Array[String]
+
 pub fn repair_patch_receipt_satisfies_contract(Json, String, String, run_id? : String?) -> Bool
 
 pub fn repair_patch_receipt_text(Json) -> String
@@ -104,6 +108,8 @@ pub fn repair_read_context_task_rule() -> String
 pub fn repair_request_task_rules() -> Array[String]
 
 pub fn repair_required_commands() -> Array[String]
+
+pub fn repair_required_engineering_steps() -> Array[String]
 
 pub fn repair_result_contract() -> String
 

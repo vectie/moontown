@@ -41,25 +41,29 @@ test "planbook repair packet helpers expose stable worker policy" {
     "planbook-repair,code-plan,code-review",
   )
   assert_true(
-    planbook_repair_required_engineering_steps().contains("run-validation"),
+    @planbook_policy.repair_required_engineering_steps().contains(
+      "run-validation",
+    ),
   )
   assert_true(
-    planbook_repair_required_engineering_steps().contains(
+    @planbook_policy.repair_required_engineering_steps().contains(
       "commit-repair-owned-files-only",
     ),
   )
   assert_true(
-    planbook_repair_patch_receipt_required_fields().contains("contract"),
+    @planbook_policy.repair_patch_receipt_required_fields().contains("contract"),
   )
   assert_true(
-    planbook_repair_patch_receipt_required_fields().contains("commit_sha"),
+    @planbook_policy.repair_patch_receipt_required_fields().contains(
+      "commit_sha",
+    ),
   )
   let wait_policy = planbook_repair_wait_policy_json().stringify()
   assert_true(wait_policy.contains("\"disable_waiting_for_input\":true"))
   assert_true(wait_policy.contains("\"best_effort_on_missing_input\":true"))
   assert_true(wait_policy.contains("\"best_effort_on_timeout\":false"))
   assert_true(wait_policy.contains("\"timeout_ms\":600000"))
-  let git_policy = planbook_repair_git_policy_json().stringify()
+  let git_policy = @planbook_policy.repair_git_policy_json().stringify()
   assert_true(git_policy.contains("\"commit_after_validation\":true"))
   assert_true(git_policy.contains("\"commit_only_repair_owned_files\":true"))
   assert_true(

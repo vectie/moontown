@@ -603,6 +603,7 @@ Key files:
 
 - [src/planbook_policy/run_status.mbt](/Users/kq/Workspace/moontown/src/planbook_policy/run_status.mbt)
 - [src/planbook_policy/repair_commands.mbt](/Users/kq/Workspace/moontown/src/planbook_policy/repair_commands.mbt)
+- [src/planbook_policy/repair_metadata.mbt](/Users/kq/Workspace/moontown/src/planbook_policy/repair_metadata.mbt)
 - [src/planbook_policy/validation_evidence.mbt](/Users/kq/Workspace/moontown/src/planbook_policy/validation_evidence.mbt)
 - [src/planbook_policy/backlog_types.mbt](/Users/kq/Workspace/moontown/src/planbook_policy/backlog_types.mbt)
 - [src/planbook_policy/backlog_defaults.mbt](/Users/kq/Workspace/moontown/src/planbook_policy/backlog_defaults.mbt)
@@ -616,6 +617,8 @@ Purpose:
 - `src/planbook_policy` owns pure PlanBook contracts, repair command policy,
   PlanBook validation-evidence contract/readiness/required-command policy, and
   raw MoonClaw run-status normalization.
+- `src/planbook_policy` owns repair metadata policy such as required
+  engineering steps, patch-receipt required fields, and git policy JSON.
 - `src/planbook_policy` also owns PlanBook backlog DTOs, canonical backlog
   paths, default seed items, projection Markdown, cadence/stop-policy text,
   backlog criterion ids/evidence/next-action wording, and target-file hints.
@@ -634,6 +637,9 @@ Boundary:
 - PlanBook runtime may write `planbook/latest-validation.md`, but the
   `planbook.validation.v1` contract, required validation commands, and
   readiness predicate belong in `src/planbook_policy`.
+- PlanBook runtime may assemble MoonClaw packet metadata, but repair
+  contract vocabulary, required engineering steps, patch-receipt required
+  fields, and git policy belong in `src/planbook_policy`.
 - PlanBook runtime may load/write `raw/backlog/...`, progress pages, completion
   evidence, and the live change log, but backlog schema/path/default/cadence/
   rendering/criterion wording belongs in `src/planbook_policy`.

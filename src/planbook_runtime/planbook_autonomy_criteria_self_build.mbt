@@ -164,13 +164,18 @@ async fn planbook_engineering_loop_criterion(
   let metadata_file = "src/planbook_runtime/planbook_repair_packet_metadata.mbt"
   let policy_file = "src/planbook_runtime/planbook_repair_policy.mbt"
   let policy_package_file = "src/planbook_policy/repair_commands.mbt"
+  let metadata_policy_file = "src/planbook_policy/repair_metadata.mbt"
   let skill_file = "src/planbook_policy/skill_text.mbt"
   let metadata_ready = text_file_contains(
       metadata_file, "required_engineering_steps",
     ) &&
     text_file_contains(metadata_file, "git_policy") &&
-    text_file_contains(metadata_file, "commit_after_validation") &&
-    text_file_contains(metadata_file, "push_after_commit")
+    text_file_contains(
+      metadata_file, "@planbook_policy.repair_required_engineering_steps",
+    ) &&
+    text_file_contains(metadata_file, "@planbook_policy.repair_git_policy_json") &&
+    text_file_contains(metadata_policy_file, "commit_after_validation") &&
+    text_file_contains(metadata_policy_file, "push_after_commit")
   let skill_ready = text_file_contains(skill_file, "diff_summary") &&
     text_file_contains(skill_file, "commit_status") &&
     text_file_contains(skill_file, "git diff --check") &&

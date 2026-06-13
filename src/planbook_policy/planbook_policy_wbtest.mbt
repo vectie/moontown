@@ -52,6 +52,26 @@ test "planbook repair contracts and commands are stable" {
 }
 
 ///|
+test "planbook repair metadata policy owns engineering and git contract" {
+  assert_true(repair_required_engineering_steps().contains("run-validation"))
+  assert_true(
+    repair_required_engineering_steps().contains(
+      "commit-repair-owned-files-only",
+    ),
+  )
+  assert_true(repair_patch_receipt_required_fields().contains("contract"))
+  assert_true(repair_patch_receipt_required_fields().contains("commit_sha"))
+  let git_policy = repair_git_policy_json().stringify()
+  assert_true(git_policy.contains("\"commit_after_validation\":true"))
+  assert_true(git_policy.contains("\"commit_only_repair_owned_files\":true"))
+  assert_true(
+    git_policy.contains("\"preserve_preexisting_unrelated_dirty_files\":true"),
+  )
+  assert_true(git_policy.contains("\"push_after_commit\":false"))
+  assert_true(git_policy.contains("\"commit_message_required\":true"))
+}
+
+///|
 test "planbook validation evidence contract is package-owned policy" {
   let text = validation_evidence_markdown("validated", 42UL)
   assert_true(text.contains("contract: planbook.validation.v1"))
