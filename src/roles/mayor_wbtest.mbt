@@ -88,6 +88,6 @@ test "mayor launches queued packet-ready execution when retry tick is due" {
   )
   let packet = Mayor::new().supervise(state, 10)
   assert_eq(packet.directives.length(), 1)
-  assert_eq(packet.directives[0].kind, "retry-execution")
+  assert_eq(packet.directives[0].kind, retry_execution_directive_kind())
   assert_eq(packet.directives[0].task_id, "queued-task")
 }

@@ -200,6 +200,6 @@ test "mayor supervision retries review queued research quality gaps in place" {
   )
   let packet = mayor.supervise(state, 43)
   assert_eq(packet.directives.length(), 1)
-  assert_eq(packet.directives[0].kind, "retry-execution")
+  assert_eq(packet.directives[0].kind, @roles.retry_execution_directive_kind())
   assert_true(packet.directives[0].detail.contains("in-place repair retry"))
 }

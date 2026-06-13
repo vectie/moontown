@@ -32,7 +32,7 @@ async fn apply_supervision_directive(
           }
         None => ()
       }
-    "mark-stale-retry" | "mark-stale-failed" => {
+    kind if @roles.supervision_directive_marks_stale(kind) => {
       let updated = copy_execution_with(
         execution,
         status=directive.execution_status,
@@ -43,7 +43,7 @@ async fn apply_supervision_directive(
       state.replace_task(task_for_supervision(state, updated))
       sync_worker_from_execution(state, updated)
     }
-    "retry-execution" =>
+    kind if @roles.supervision_directive_retries_execution(kind) =>
       retry_execution(
         state, mayor, catalog, execution, directive, snapshot_path, standing_goals,
       )

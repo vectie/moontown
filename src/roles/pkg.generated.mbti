@@ -15,6 +15,16 @@ pub fn keeper_packet_id(String, String) -> String
 
 pub fn keeper_runtime(@core.BookRef) -> @moonclaw.EmbeddedMoonclawRuntime
 
+pub fn mark_stale_failed_directive_kind() -> String
+
+pub fn mark_stale_retry_directive_kind() -> String
+
+pub fn retry_execution_directive_kind() -> String
+
+pub fn supervision_directive_marks_stale(String) -> Bool
+
+pub fn supervision_directive_retries_execution(String) -> Bool
+
 // Errors
 
 // Types and methods

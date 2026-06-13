@@ -38,9 +38,9 @@ fn stale_supervision_directive(
   }
   Some({
     kind: if execution.attempt < 3 {
-      "mark-stale-retry"
+      mark_stale_retry_directive_kind()
     } else {
-      "mark-stale-failed"
+      mark_stale_failed_directive_kind()
     },
     task_id: execution.task_id,
     execution_status: @core.TaskExecutionStatus::Stale,
@@ -62,7 +62,7 @@ fn packet_ready_supervision_directive(
     Some(next_tick) if next_tick > tick => None
     _ =>
       Some({
-        kind: "retry-execution",
+        kind: retry_execution_directive_kind(),
         task_id: execution.task_id,
         execution_status: execution.status,
         detail: "Execution \{execution.task_id} is queued as packet-ready and should launch when live worker capacity is available.",
@@ -92,7 +92,7 @@ fn review_queued_supervision_directive(
   match execution.next_retry_tick {
     Some(next_tick) if execution.attempt < 3 && next_tick <= tick =>
       Some({
-        kind: "retry-execution",
+        kind: retry_execution_directive_kind(),
         task_id: execution.task_id,
         execution_status: execution.status,
         detail: "Execution \{execution.task_id} is review-queued with fixable quality gaps and is eligible for an in-place repair retry.",
@@ -122,7 +122,7 @@ fn failed_or_stale_supervision_directive(
     _ if recoverable_profile_dispatch_failure(execution) &&
       execution.attempt < 5 =>
       Some({
-        kind: "retry-execution",
+        kind: retry_execution_directive_kind(),
         task_id: execution.task_id,
         execution_status: execution.status,
         detail: "Execution \{execution.task_id} failed during profile dispatch and is eligible for a bounded self-heal retry after profile routing/provisioning changes.",
@@ -130,7 +130,7 @@ fn failed_or_stale_supervision_directive(
       })
     Some(next_tick) if execution.attempt < 3 && next_tick <= tick =>
       Some({
-        kind: "retry-execution",
+        kind: retry_execution_directive_kind(),
         task_id: execution.task_id,
         execution_status: execution.status,
         detail: "Execution \{execution.task_id} is eligible for a supervised retry.",
@@ -138,7 +138,7 @@ fn failed_or_stale_supervision_directive(
       })
     None if execution.attempt < 3 =>
       Some({
-        kind: "retry-execution",
+        kind: retry_execution_directive_kind(),
         task_id: execution.task_id,
         execution_status: execution.status,
         detail: "Execution \{execution.task_id} has no scheduled retry but is still within the bounded recovery budget.",

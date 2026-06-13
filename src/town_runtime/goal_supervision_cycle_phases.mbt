@@ -131,7 +131,7 @@ async fn apply_mayor_supervision_directive_with_cap(
   snapshot_path : String,
   standing_goals : Array[@core.StandingGoal],
 ) -> Unit {
-  if directive.kind == "retry-execution" &&
+  if @roles.supervision_directive_retries_execution(directive.kind) &&
     @core.live_external_execution_count(state) >=
     @core.max_live_external_executions() {
     state.record_event(
