@@ -84,6 +84,9 @@ Boundary:
 - `src/core` owns generic task identity parsing such as extracting daemon ticks
   from execution task ids. Runtime packages should consume this helper instead
   of keeping duplicate parsers.
+- `StandingGoal.source_policy` is an uninterpreted string in `src/core`.
+  `src/core` must not choose defaults such as `web-first` or `book-first`;
+  policy-aware packages must supply values from `src/policy`.
 - `src/town_runtime` may apply those pure helpers while polling and
   supervising runs, but it should not maintain a second execution-to-task
   status table, live-run cap, stale-window table, or task-id tick parser.

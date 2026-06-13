@@ -8,7 +8,7 @@ pub fn StandingGoal::new(
   next_due_tick? : Int = 0,
   last_run_tick? : Int? = None,
   enabled? : Bool = true,
-  source_policy? : String = "web-first",
+  source_policy? : String = "",
   quality_threshold? : Int = 80,
 ) -> StandingGoal {
   StandingGoal::{
