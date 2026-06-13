@@ -1,74 +1,74 @@
 ///|
 fn research_policy_deep_dossier_word_target() -> String {
-  "12k-15k English words"
+  @research_policy.deep_dossier_word_target()
 }
 
 ///|
 fn research_policy_quality_floor_words() -> String {
-  "12k English words"
+  @research_policy.quality_floor_words()
 }
 
 ///|
 fn research_policy_quality_floor_count() -> String {
-  "12k"
+  @research_policy.quality_floor_count()
 }
 
 ///|
 fn research_policy_repair_dossier_word_target() -> String {
-  "13k-15k English-word"
+  @research_policy.repair_dossier_word_target()
 }
 
 ///|
 fn research_policy_repair_expansion_threshold() -> String {
-  "13k"
+  @research_policy.repair_expansion_threshold()
 }
 
 ///|
 fn research_policy_repair_acceptance_floor() -> String {
-  "12k words"
+  @research_policy.repair_acceptance_floor()
 }
 
 ///|
 fn research_policy_min_included_sources() -> String {
-  "six"
+  @research_policy.min_included_sources()
 }
 
 ///|
 fn research_policy_min_included_sources_sentence_start() -> String {
-  "Six"
+  @research_policy.min_included_sources_sentence_start()
 }
 
 ///|
 fn research_policy_preferred_included_sources() -> String {
-  "ten"
+  @research_policy.preferred_included_sources()
 }
 
 ///|
 fn research_policy_preferred_included_source_range() -> String {
-  "ten to fourteen"
+  @research_policy.preferred_included_source_range()
 }
 
 ///|
 fn research_policy_harvest_candidate_fetch_count() -> String {
-  "eight"
+  @research_policy.harvest_candidate_fetch_count()
 }
 
 ///|
 fn research_policy_discovery_attempt_limit() -> String {
-  "twenty-four"
+  @research_policy.discovery_attempt_limit()
 }
 
 ///|
 fn research_policy_reference_line_ratio() -> String {
-  "60%"
+  @research_policy.reference_line_ratio()
 }
 
 ///|
 fn research_policy_reference_line_buffer() -> String {
-  "30-line safety buffer"
+  @research_policy.reference_line_buffer()
 }
 
 ///|
 fn research_policy_command_fetch_pattern() -> String {
-  "curl -L --max-time 12"
+  @research_policy.command_fetch_pattern()
 }

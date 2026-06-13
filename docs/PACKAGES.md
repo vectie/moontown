@@ -204,6 +204,29 @@ Boundary:
   empty-completion `no_change` marker text, empty review completion summary
   text, legacy retry-accounting predicates, or review-triage predicates.
 
+## Research Policy
+
+- [src/research_policy](/Users/kq/Workspace/moontown/src/research_policy)
+
+Purpose:
+
+- shared research-depth targets and source-screening thresholds
+- reusable vocabulary for MoonBook research skill prompts and future quality
+  gates without introducing adapter/runtime dependency cycles
+
+Boundary:
+
+- `src/research_policy` owns static research policy constants such as dossier
+  word targets, included-source thresholds, discovery attempt limits, and
+  bounded fetch command wording.
+- `src/adapters/moonbook` may consume those constants while building provider
+  requests and generated `SKILL.md` guidance, but should not define its own
+  competing research-depth thresholds.
+- `src/research_quality` owns runtime quality gates, readiness checks,
+  repair/review triggers, and persisted research artifacts. It should consume
+  policy vocabulary when thresholds must be shared, but should not become an
+  adapter dependency.
+
 ## Storage
 
 - [src/storage/store.mbt](/Users/kq/Workspace/moontown/src/storage/store.mbt)
