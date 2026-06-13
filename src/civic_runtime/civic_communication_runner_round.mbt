@@ -29,7 +29,7 @@ async fn run_civic_salon_scenario_round(
   reducer_mode : CivicCommunicationReductionMode,
   run_inline : Bool,
 ) -> (CivicCommunicationSchedule, String) {
-  let round_id = civic_salon_round_id(schedule)
+  let round_id = civic_communication_round_id(schedule)
   let workspace_base = civic_salon_workspace_base(snapshot_path)
   let reduction = reduce_civic_salon_ideas(
     scenario,
@@ -40,13 +40,17 @@ async fn run_civic_salon_scenario_round(
     run_inline~,
   )
   let ideas = reduction.ideas
-  let metrics = civic_salon_metrics(scenario, scenario.participants, ideas)
+  let metrics = civic_communication_metrics(
+    scenario,
+    scenario.participants,
+    ideas,
+  )
   let (decision, summary) = civic_salon_round_decision_summary(
     scenario, schedule, book_catalog_path, workspace_base, round_id, reduction, ideas,
   )
   append_civic_salon_round_record(
     default_civic_salon_run_ledger_path(schedule.id, snapshot_path~),
-    civic_salon_round_record(
+    civic_communication_round_record(
       schedule,
       round_id,
       tick,
@@ -59,7 +63,7 @@ async fn run_civic_salon_scenario_round(
   )
   if decision == "review" {
     (
-      complete_civic_salon_schedule(schedule, now_ms, round_id, summary),
+      complete_civic_communication_schedule(schedule, now_ms, round_id, summary),
       "\{round_id}: \{summary}",
     )
   } else {

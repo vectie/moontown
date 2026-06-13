@@ -6,9 +6,9 @@ test "default civic communication-pattern schedules are explicit opt-in" {
 ///|
 test "civic communication-pattern schedule uses real wall-clock due checks" {
   let schedule = daemon_civic_salon_schedule(next_due_ms=10UL)
-  assert_true(!civic_salon_is_due(schedule, 9UL))
-  assert_true(civic_salon_is_due(schedule, 10UL))
-  let next = complete_civic_salon_schedule(
+  assert_true(!civic_communication_is_due(schedule, 9UL))
+  assert_true(civic_communication_is_due(schedule, 10UL))
+  let next = complete_civic_communication_schedule(
     schedule, 10UL, "future-energy-social-square-round-1", "done",
   )
   assert_eq(next.round_count, 1)
@@ -40,9 +40,9 @@ test "civic salon round record captures exchange effectiveness" {
   let scenario = daemon_civic_salon_scenario()
   let participants = scenario.participants
   let ideas = scenario.ideas
-  let metrics = civic_salon_metrics(scenario, participants, ideas)
+  let metrics = civic_communication_metrics(scenario, participants, ideas)
   let schedule = daemon_civic_salon_schedule()
-  let record = civic_salon_round_record(
+  let record = civic_communication_round_record(
     schedule, "future-energy-social-square-round-1", 7, 100UL, 200UL, metrics, "review",
     "round complete",
   )

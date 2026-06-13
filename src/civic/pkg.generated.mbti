@@ -69,18 +69,6 @@ pub fn civic_reducer_profile_family() -> String
 
 pub fn civic_reducer_step_kind() -> String
 
-pub fn civic_salon_is_due(CivicCommunicationSchedule, UInt64) -> Bool
-
-pub fn civic_salon_metric_counts(Array[CivicCommunicationParticipantBook], Array[CivicCommunicationIdea]) -> CivicCommunicationMetricCounts
-
-pub fn civic_salon_metrics(CivicCommunicationScenario, Array[CivicCommunicationParticipantBook], Array[CivicCommunicationIdea]) -> CivicCommunicationMetric
-
-pub fn civic_salon_returned_ideas_for_book(String, Array[CivicCommunicationIdea]) -> Array[CivicCommunicationIdea]
-
-pub fn civic_salon_round_id(CivicCommunicationSchedule) -> String
-
-pub fn civic_salon_round_record(CivicCommunicationSchedule, String, Int, UInt64, UInt64, CivicCommunicationMetric, String, String) -> CivicCommunicationRoundRecord
-
 pub fn civic_service_has_reconcilable_protocol_work(protocol_ready~ : Bool, protocol_reduction_count~ : Int, protocol_outbox_count~ : Int) -> Bool
 
 pub fn civic_service_reconcile_plan(CivicServiceDefinition, protocol_reduction_count~ : Int, protocol_outbox_count~ : Int, protocol_review_count~ : Int) -> CivicServiceReconcilePlan
@@ -138,8 +126,6 @@ pub fn communication_pattern_label_for_scenario(CivicCommunicationScenario) -> S
 pub fn communication_protocol_for_scenario(CivicCommunicationScenario) -> BuildingProtocolDefinition
 
 pub fn complete_civic_communication_schedule(CivicCommunicationSchedule, UInt64, String, String) -> CivicCommunicationSchedule
-
-pub fn complete_civic_salon_schedule(CivicCommunicationSchedule, UInt64, String, String) -> CivicCommunicationSchedule
 
 pub fn exchange_ledger_text(CivicServiceDefinition) -> String
 

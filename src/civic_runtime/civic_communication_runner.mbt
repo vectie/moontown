@@ -12,7 +12,7 @@ pub async fn run_due_civic_salons(
   let summaries : Array[String] = []
   let refreshes : Array[String] = []
   for schedule in schedules {
-    if civic_salon_is_due(schedule, now_ms) {
+    if civic_communication_is_due(schedule, now_ms) {
       persist_civic_salon_schedule(
         schedule_path,
         schedule.id,

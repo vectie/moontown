@@ -14,7 +14,7 @@ pub async fn render_civic_salon_schedule_status(
   builder.write_string("| --- | --- | ---:| ---:| ---:| ---:| --- |\n")
   for schedule in schedules {
     builder.write_string(
-      "|\{schedule.title}|\{schedule.building_id}|\{schedule.enabled}|\{civic_salon_is_due(schedule, now_ms)}|\{schedule.interval_ms / 60_000UL}|\{schedule.round_count}|\{schedule.latest_round_id}|\n",
+      "|\{schedule.title}|\{schedule.building_id}|\{schedule.enabled}|\{civic_communication_is_due(schedule, now_ms)}|\{schedule.interval_ms / 60_000UL}|\{schedule.round_count}|\{schedule.latest_round_id}|\n",
     )
   }
   builder.to_string()

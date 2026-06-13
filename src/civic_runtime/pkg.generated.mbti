@@ -21,6 +21,8 @@ pub async fn bootstrap_wenyu_building_protocols(registry_path? : String, status_
 
 pub async fn bootstrap_wenyu_civic_workspaces(book_catalog_path? : String) -> String
 
+pub fn civic_communication_is_due(@civic.CivicCommunicationSchedule, UInt64) -> Bool
+
 pub fn civic_marker_int(String, String, fallback~ : Int) -> Int
 
 pub fn civic_marker_value(String, String, fallback~ : String) -> String
@@ -30,8 +32,6 @@ pub fn civic_persist_artifacts(@civic.CivicServiceDefinition, @core.TaskExecutio
 pub fn civic_persist_memory_candidates(@civic.CivicServiceDefinition, @core.TaskExecutionRecord) -> Array[@moonbook.MemoryCandidate]
 
 pub fn civic_persist_summary(@civic.CivicServiceDefinition, @core.TaskExecutionRecord) -> String
-
-pub fn civic_salon_is_due(@civic.CivicCommunicationSchedule, UInt64) -> Bool
 
 pub fn civic_salon_scenario_path(String, snapshot_path? : String) -> String
 

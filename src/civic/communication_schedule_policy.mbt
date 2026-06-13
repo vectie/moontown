@@ -1,5 +1,6 @@
 ///|
-pub fn civic_salon_is_due(
+/// Returns whether a civic communication schedule is due at `now_ms`.
+pub fn civic_communication_is_due(
   schedule : CivicCommunicationSchedule,
   now_ms : UInt64,
 ) -> Bool {
@@ -7,7 +8,8 @@ pub fn civic_salon_is_due(
 }
 
 ///|
-pub fn complete_civic_salon_schedule(
+/// Marks a civic communication schedule complete and advances its cadence.
+pub fn complete_civic_communication_schedule(
   schedule : CivicCommunicationSchedule,
   now_ms : UInt64,
   round_id : String,
@@ -29,12 +31,16 @@ pub fn complete_civic_salon_schedule(
 }
 
 ///|
-pub fn civic_salon_round_id(schedule : CivicCommunicationSchedule) -> String {
+/// Builds the next round id for a civic communication schedule.
+pub fn civic_communication_round_id(
+  schedule : CivicCommunicationSchedule,
+) -> String {
   "\{schedule.id}-round-\{schedule.round_count + 1}"
 }
 
 ///|
-pub fn civic_salon_round_record(
+/// Builds an append-only round record for a civic communication session.
+pub fn civic_communication_round_record(
   schedule : CivicCommunicationSchedule,
   round_id : String,
   tick : Int,

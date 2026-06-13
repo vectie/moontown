@@ -1,5 +1,5 @@
 ///|
-fn civic_salon_round_record(
+fn civic_communication_round_record(
   schedule : CivicCommunicationSchedule,
   round_id : String,
   tick : Int,
@@ -9,7 +9,7 @@ fn civic_salon_round_record(
   decision : String,
   summary : String,
 ) -> CivicCommunicationRoundRecord {
-  @civic.civic_salon_round_record(
+  @civic.civic_communication_round_record(
     schedule, round_id, tick, started_ms, finished_ms, metrics, decision, summary,
   )
 }

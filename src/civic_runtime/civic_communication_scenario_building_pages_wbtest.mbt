@@ -4,7 +4,7 @@ test "civic salon building synthesis separates protocol structure from truth cla
   let protocol = @civic.communication_protocol_for_scenario(scenario)
   let participants = scenario.participants
   let ideas = scenario.ideas
-  let metrics = civic_salon_metrics(scenario, participants, ideas)
+  let metrics = civic_communication_metrics(scenario, participants, ideas)
   let markdown = civic_salon_building_synthesis(
     scenario, protocol, participants, ideas, metrics, "robotics-round-1", 1,
   )
@@ -21,7 +21,7 @@ test "civic salon building synthesis separates protocol structure from truth cla
 ///|
 test "civic salon metrics markdown explains protocol effectiveness and return home" {
   let scenario = building_pages_test_scenario()
-  let metrics = civic_salon_metrics(
+  let metrics = civic_communication_metrics(
     scenario,
     scenario.participants,
     scenario.ideas,
@@ -49,7 +49,7 @@ test "civic salon metrics markdown explains protocol effectiveness and return ho
 ///|
 test "civic salon metric tables keep participant output edges visible" {
   let scenario = building_pages_test_scenario()
-  let metrics = civic_salon_metrics(
+  let metrics = civic_communication_metrics(
     scenario,
     scenario.participants,
     scenario.ideas,

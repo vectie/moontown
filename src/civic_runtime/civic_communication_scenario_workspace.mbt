@@ -38,7 +38,7 @@ async fn write_civic_salon_participant_workspace(
   round_number : Int,
   root : String,
 ) -> Unit {
-  let returned_ideas = civic_salon_returned_ideas_for_book(
+  let returned_ideas = civic_communication_returned_ideas_for_book(
     participant.book_id,
     ideas,
   )

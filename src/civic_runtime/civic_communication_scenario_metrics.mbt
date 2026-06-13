@@ -1,16 +1,16 @@
 ///|
-fn civic_salon_metrics(
+fn civic_communication_metrics(
   scenario : CivicCommunicationScenario,
   participants : Array[CivicCommunicationParticipantBook],
   ideas : Array[CivicCommunicationIdea],
 ) -> CivicCommunicationMetric {
-  @civic.civic_salon_metrics(scenario, participants, ideas)
+  @civic.civic_communication_metrics(scenario, participants, ideas)
 }
 
 ///|
-fn civic_salon_returned_ideas_for_book(
+fn civic_communication_returned_ideas_for_book(
   book_id : String,
   ideas : Array[CivicCommunicationIdea],
 ) -> Array[CivicCommunicationIdea] {
-  @civic.civic_salon_returned_ideas_for_book(book_id, ideas)
+  @civic.civic_communication_returned_ideas_for_book(book_id, ideas)
 }

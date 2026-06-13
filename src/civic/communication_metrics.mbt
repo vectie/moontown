@@ -9,12 +9,13 @@ pub(all) struct CivicCommunicationMetricCounts {
 } derive(Debug, Eq)
 
 ///|
-pub fn civic_salon_metrics(
+/// Computes structural exchange/reduction/distribution metrics.
+pub fn civic_communication_metrics(
   scenario : CivicCommunicationScenario,
   participants : Array[CivicCommunicationParticipantBook],
   ideas : Array[CivicCommunicationIdea],
 ) -> CivicCommunicationMetric {
-  let counts = civic_salon_metric_counts(participants, ideas)
+  let counts = civic_communication_metric_counts(participants, ideas)
   let structural_effectiveness_score = civic_salon_structural_score(
     participant_count=counts.participant_count,
     idea_count=counts.idea_count,
@@ -37,7 +38,8 @@ pub fn civic_salon_metrics(
 }
 
 ///|
-pub fn civic_salon_metric_counts(
+/// Counts the raw signals that feed civic communication metrics.
+pub fn civic_communication_metric_counts(
   participants : Array[CivicCommunicationParticipantBook],
   ideas : Array[CivicCommunicationIdea],
 ) -> CivicCommunicationMetricCounts {
@@ -53,7 +55,8 @@ pub fn civic_salon_metric_counts(
 }
 
 ///|
-pub fn civic_salon_returned_ideas_for_book(
+/// Returns reduced outputs routed back to a participant's home book.
+pub fn civic_communication_returned_ideas_for_book(
   book_id : String,
   ideas : Array[CivicCommunicationIdea],
 ) -> Array[CivicCommunicationIdea] {

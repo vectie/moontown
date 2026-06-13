@@ -26,8 +26,8 @@ test "civic salon metrics count idea yield and home returns" {
   let scenario = test_civic_salon_scenario()
   let participants = scenario.participants
   let ideas = scenario.ideas
-  let metrics = civic_salon_metrics(scenario, participants, ideas)
-  let counts = @civic.civic_salon_metric_counts(participants, ideas)
+  let metrics = civic_communication_metrics(scenario, participants, ideas)
+  let counts = @civic.civic_communication_metric_counts(participants, ideas)
   assert_eq(counts.participant_count, 2)
   assert_eq(counts.idea_count, 1)
   assert_eq(counts.research_question_count, 2)
@@ -50,7 +50,7 @@ test "civic salon metrics count idea yield and home returns" {
   )
   assert_true(metrics.structural_effectiveness_score > 0)
   for participant in participants {
-    let returned = civic_salon_returned_ideas_for_book(
+    let returned = civic_communication_returned_ideas_for_book(
       participant.book_id,
       ideas,
     )
@@ -77,7 +77,7 @@ test "civic salon runtime summaries keep blocked and seeded states explicit" {
   let scenario = test_civic_salon_scenario()
   let participants = scenario.participants
   let ideas = scenario.ideas
-  let metrics = civic_salon_metrics(scenario, participants, ideas)
+  let metrics = civic_communication_metrics(scenario, participants, ideas)
   assert_eq(
     civic_salon_blocked_summary(
       scenario, "round-1", "reducer produced no outputs.",

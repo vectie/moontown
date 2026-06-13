@@ -81,14 +81,14 @@ async fn reconcile_civic_salon_scenario_round(
     workspace_base~,
     reducer_summary=Some(reduction.summary),
   )
-  let metrics = civic_salon_metrics(
+  let metrics = civic_communication_metrics(
     scenario,
     scenario.participants,
     reduction.ideas,
   )
   append_civic_salon_round_record(
     default_civic_salon_run_ledger_path(schedule.id, snapshot_path~),
-    civic_salon_round_record(
+    civic_communication_round_record(
       schedule,
       schedule.latest_round_id,
       tick,
@@ -101,7 +101,7 @@ async fn reconcile_civic_salon_scenario_round(
   )
   Some(
     (
-      complete_civic_salon_schedule(
+      complete_civic_communication_schedule(
         schedule,
         now_ms,
         schedule.latest_round_id,

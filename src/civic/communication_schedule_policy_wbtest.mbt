@@ -7,9 +7,9 @@ test "salon schedule uses wall-clock due checks and completion cadence" {
     topic="embodied AI",
     next_due_ms=10UL,
   )
-  assert_true(!civic_salon_is_due(schedule, 9UL))
-  assert_true(civic_salon_is_due(schedule, 10UL))
-  let next = complete_civic_salon_schedule(
+  assert_true(!civic_communication_is_due(schedule, 9UL))
+  assert_true(civic_communication_is_due(schedule, 10UL))
+  let next = complete_civic_communication_schedule(
     schedule, 10UL, "robotics-salon-round-1", "done",
   )
   assert_eq(next.round_count, 1)
@@ -27,7 +27,7 @@ test "salon round id and record derive from schedule and metrics" {
     topic="embodied AI",
     round_count=2,
   )
-  assert_eq(civic_salon_round_id(schedule), "robotics-salon-round-3")
+  assert_eq(civic_communication_round_id(schedule), "robotics-salon-round-3")
   let metrics = CivicCommunicationMetric::{
     participant_count: 2,
     idea_count: 1,
@@ -39,7 +39,7 @@ test "salon round id and record derive from schedule and metrics" {
     structural_effectiveness_score: 72,
     summary: "metric summary",
   }
-  let record = civic_salon_round_record(
+  let record = civic_communication_round_record(
     schedule, "robotics-salon-round-3", 9, 100UL, 200UL, metrics, "review", "round complete",
   )
   assert_eq(record.round_number, 3)

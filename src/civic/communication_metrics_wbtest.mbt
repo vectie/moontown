@@ -18,8 +18,8 @@ test "salon metrics count exchange yield and returned-home links" {
     },
   ]
   let scenario = salon_metric_test_scenario(participants, ideas)
-  let counts = civic_salon_metric_counts(participants, ideas)
-  let metrics = civic_salon_metrics(scenario, participants, ideas)
+  let counts = civic_communication_metric_counts(participants, ideas)
+  let metrics = civic_communication_metrics(scenario, participants, ideas)
   assert_eq(counts.participant_count, 2)
   assert_eq(counts.idea_count, 1)
   assert_eq(counts.research_question_count, 2)
@@ -44,9 +44,12 @@ test "returned ideas filter by home book" {
       next_experiment: "",
     },
   ]
-  assert_eq(civic_salon_returned_ideas_for_book("vla", ideas).length(), 1)
   assert_eq(
-    civic_salon_returned_ideas_for_book("locomotion", ideas).length(),
+    civic_communication_returned_ideas_for_book("vla", ideas).length(),
+    1,
+  )
+  assert_eq(
+    civic_communication_returned_ideas_for_book("locomotion", ideas).length(),
     0,
   )
 }

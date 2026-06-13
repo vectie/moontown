@@ -58,7 +58,7 @@ async fn materialize_civic_salon_scenario(
     )
   }
   let participants = scenario.participants
-  let metrics = civic_salon_metrics(scenario, participants, ideas)
+  let metrics = civic_communication_metrics(scenario, participants, ideas)
   let catalog = @moonbook.load_or_create_catalog(path=book_catalog_path)
   let merged_catalog = merge_civic_salon_catalog(
     scenario, catalog, participants, workspace_base,

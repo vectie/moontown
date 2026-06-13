@@ -38,7 +38,7 @@ fn claim_civic_salon_schedule(
 ) -> CivicCommunicationSchedule {
   {
     ..schedule,
-    latest_round_id: civic_salon_round_id(schedule),
+    latest_round_id: civic_communication_round_id(schedule),
     latest_summary: "Running civic communication-pattern round; schedule claimed before worker launch.",
     next_due_ms: now_ms + 300_000UL,
   }
@@ -65,7 +65,7 @@ fn run_unsupported_civic_salon_round(
   now_ms : UInt64,
 ) -> (CivicCommunicationSchedule, String) {
   let summary = "Unsupported civic communication-pattern schedule `\{schedule.id}`; no round executed."
-  let round_id = civic_salon_round_id(schedule)
+  let round_id = civic_communication_round_id(schedule)
   (
     {
       ..schedule,
