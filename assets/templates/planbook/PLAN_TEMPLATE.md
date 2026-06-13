@@ -49,17 +49,20 @@ Use only high-signal inputs.
 - Review gate:
 - Projection/UI surface:
 
-## ToolBook Fit, If Applicable
+## Generated-Tool Capability Fit, If Applicable
 
-- Requires App ToolBook: yes | no
-- Template request id:
-- ToolBook id:
+- Requires generated-tool capability: yes | no
+- Base BookPolicy:
+- Capability constructors:
+- App ToolBook template request id, if used:
+- Book id:
 - Civic building id:
 - Tool manifest:
 - App source path:
 - Generated tool page:
 - Latest analysis page:
 - Moondesk editable files:
+- Reason this is a capability instead of a new book type:
 
 ## Design Decision
 

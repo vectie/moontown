@@ -1,11 +1,18 @@
 # Moontown Planbook
 
-The planbook is the third durable MoonBook book type in Moontown.
+The planbook is one of Moontown's durable MoonBook archetypes.
 
 Research books answer "what is true or changing?"
 Course books teach "how should a beginner learn this?"
-ToolBooks expose "what usable tool should this book power?"
 Planbooks decide "what should we build, change, verify, and ship?"
+Cookbooks preserve "what is the accepted stable state?"
+
+Generated tools are not a separate top-level book taxonomy. An App ToolBook is
+a composed capability: a MoonBook policy plus a generated-tool surface,
+standing-watch inputs, `tool-manifest.json`, app source, and a civic route.
+This distinction matters because autonomous implementation should add policy
+capabilities instead of inventing a new hardcoded book type every time a book
+needs another surface.
 
 The goal is to make planning a persisted artifact, not a chat side effect.
 For non-trivial code or product work, Moontown should create or update a
@@ -371,11 +378,11 @@ A `BookPolicy` contains:
 - `quality_criteria`: what good means for this book
 - `output`: the contract and projection surface the book owns
 
-Research, course, PlanBook, Cookbook, ToolBook, civic-support, and operational
-books are policy presets, not permanent runtime categories. They are useful
-names for common combinations of skills and evidence, but future autonomous
-implementation should prefer composing policies over adding more `if book_type`
-branches.
+Research, course, PlanBook, Cookbook, civic-support, and operational books are
+policy presets, not permanent runtime categories. Generated web tools, PDF
+watches, standing watches, and civic routes are capabilities attached to those
+policies. Future autonomous implementation should prefer composing policies
+over adding more `if book_type` branches.
 
 Use capability composition for features that can attach to more than one book
 shape:
@@ -419,12 +426,12 @@ Do not blur these roles:
 
 Plans must say how output returns home. For research, this means source/wiki/
 synthesis/review pages. For course work, this means lessons, exercises, and
-checkpoints. For ToolBooks, this means accepted data, analysis reports, app
-source, tool manifest, generated web tool, review queue, and civic building
-route. For civic work, this means inbox/contribution/reduction/outbox/review/
-return-home ledgers. For implementation work, this means code changes, tests,
-validation evidence, commit readiness, and cookbook impact when stable
-definitions change.
+checkpoints. For a generated-tool capability, this means accepted data,
+analysis reports, app source, tool manifest, generated web tool, review queue,
+and civic building route. For civic work, this means
+inbox/contribution/reduction/outbox/review/return-home ledgers. For
+implementation work, this means code changes, tests, validation evidence,
+commit readiness, and cookbook impact when stable definitions change.
 
 ## Book Types
 
@@ -432,19 +439,24 @@ definitions change.
 | --- | --- | --- | --- |
 | Research book | What is true, new, or uncertain? | sources, evidence, synthesis, reports | MoonBook |
 | Course book | How should someone learn this? | lessons, exercises, checkpoints | MoonBook |
-| ToolBook / AppBook | What usable tool should this knowledge power? | reports, data, `tool-manifest.json`, app source, generated tool page | MoonBook + Moondesk |
 | Planbook | What should be built and how will we know it worked? | `plan.md`, acceptance criteria, execution log, review notes | MoonBook + Mayor |
 | Cookbook | What is the stable state of the town? | canonical docs, definitions, runtime index | MoonBook |
 
 The cookbook is the stable control book. A planbook is a working decision book.
 Plans may update the cookbook after they are accepted.
 
-## ToolBook / AppBook Roadmap
+Generated tools are modeled as policy capabilities, not a row in this table.
+For example, a general book with `with_web_tool_surface(...)` and a
+standing-watch capability can become an App ToolBook without introducing a new
+runtime category.
 
-A ToolBook is a MoonBook whose durable output includes an interactive web tool,
-not only markdown pages. The book still follows document protocol philosophy:
-the source of truth is files in the book, and active agents are temporary
-workers that update those files through protocols.
+## Generated Tool Capability Roadmap
+
+An App ToolBook is a MoonBook whose durable output includes an interactive web
+tool, not only markdown pages. It is a reusable capability package over a
+composed BookPolicy, not a separate runtime type. The book still follows
+document protocol philosophy: the source of truth is files in the book, and
+active agents are temporary workers that update those files through protocols.
 
 Canonical flow:
 
