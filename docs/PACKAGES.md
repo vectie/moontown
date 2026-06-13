@@ -172,6 +172,17 @@ Current status:
 - plans normal execution lifecycle actions
 - plans standing-goal due actions for the daemon
 - records active standing goal ids in daemon state
+- owns current daemon scheduled-job vocabulary such as `civic-pattern`,
+  `civic-service`, `book-quality`, and `book-template-request`
+- drops retired persisted civic-salon jobs during daemon job merge without
+  exposing legacy salon ids or kinds as public API
+
+Boundary:
+
+- runtime packages may ask whether a job is a current civic communication,
+  book-quality, template-request, projection, or health job.
+- runtime packages should not branch on retired `run-civic-salons` or
+  `civic-salon` identifiers; those are private scheduler cleanup details.
 
 ## Standing Watch Policy
 

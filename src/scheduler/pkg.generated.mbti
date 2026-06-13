@@ -41,10 +41,6 @@ pub fn health_job_id() -> String
 
 pub fn health_job_kind() -> String
 
-pub fn legacy_civic_salon_job_id() -> String
-
-pub fn legacy_civic_salon_job_kind() -> String
-
 pub fn merge_default_daemon_jobs(Array[ScheduledJob]) -> Array[ScheduledJob]
 
 pub fn next_tick(Int, Array[SchedulerAction]) -> SchedulerTick
@@ -88,8 +84,6 @@ pub fn scheduled_job_is_civic_pattern(ScheduledJob) -> Bool
 pub fn scheduled_job_is_civic_service(ScheduledJob) -> Bool
 
 pub fn scheduled_job_is_health(ScheduledJob) -> Bool
-
-pub fn scheduled_job_is_legacy_civic_salon(ScheduledJob) -> Bool
 
 pub fn scheduled_job_is_projection(ScheduledJob) -> Bool
 

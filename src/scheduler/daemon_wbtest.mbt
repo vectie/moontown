@@ -78,46 +78,36 @@ test "daemon tick migrates persisted job list to current defaults" {
 }
 
 ///|
-test "daemon tick drops deprecated civic salon job during migration" {
+test "daemon tick drops retired civic salon job during migration" {
   let town = @core.empty_state(
     @core.TownConfig::new(id="town", name="Moontown"),
   )
   let report = @health.inspect_town(town)
   let old_jobs = [
-    {
-      id: legacy_civic_salon_job_id(),
-      kind: legacy_civic_salon_job_kind(),
-      interval_seconds: 30,
-    },
+    { id: "run-civic-salons", kind: "civic-salon", interval_seconds: 30 },
     { id: health_job_id(), kind: health_job_kind(), interval_seconds: 60 },
   ]
   let old_daemon = DaemonState::new(jobs=old_jobs)
   let (daemon, _, _) = plan_daemon_tick(old_daemon, town, report)
-  assert_true(
-    !daemon.jobs.any(fn(job) { job.id == legacy_civic_salon_job_id() }),
-  )
-  assert_true(
-    !daemon.jobs.any(fn(job) { job.kind == legacy_civic_salon_job_kind() }),
-  )
+  assert_true(!daemon.jobs.any(fn(job) { job.id == "run-civic-salons" }))
+  assert_true(!daemon.jobs.any(fn(job) { job.kind == "civic-salon" }))
   assert_true(daemon.jobs.any(fn(job) { job.id == civic_pattern_job_id() }))
   assert_eq(daemon.jobs.length(), default_daemon_jobs().length())
 }
 
 ///|
-test "scheduler classifies current and legacy civic communication jobs" {
+test "scheduler classifies only current civic communication jobs" {
   let current = {
     id: civic_pattern_job_id(),
     kind: civic_pattern_job_kind(),
     interval_seconds: 30,
   }
   let legacy = {
-    id: legacy_civic_salon_job_id(),
-    kind: legacy_civic_salon_job_kind(),
+    id: "run-civic-salons",
+    kind: "civic-salon",
     interval_seconds: 30,
   }
   assert_true(scheduled_job_is_civic_pattern(current))
-  assert_true(!scheduled_job_is_legacy_civic_salon(current))
-  assert_true(scheduled_job_is_legacy_civic_salon(legacy))
   assert_true(scheduled_job_runs_civic_communication(current))
-  assert_true(scheduled_job_runs_civic_communication(legacy))
+  assert_true(!scheduled_job_runs_civic_communication(legacy))
 }

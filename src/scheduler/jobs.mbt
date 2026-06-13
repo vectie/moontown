@@ -89,16 +89,6 @@ pub fn book_template_request_job_kind() -> String {
 }
 
 ///|
-pub fn legacy_civic_salon_job_id() -> String {
-  "run-civic-salons"
-}
-
-///|
-pub fn legacy_civic_salon_job_kind() -> String {
-  "civic-salon"
-}
-
-///|
 pub fn default_daemon_jobs() -> Array[ScheduledJob] {
   [
     {
@@ -166,7 +156,12 @@ pub fn merge_default_daemon_jobs(
 
 ///|
 fn daemon_job_deprecated(job : ScheduledJob) -> Bool {
-  scheduled_job_is_legacy_civic_salon(job)
+  retired_civic_salon_job(job)
+}
+
+///|
+fn retired_civic_salon_job(job : ScheduledJob) -> Bool {
+  job.id == "run-civic-salons" || job.kind == "civic-salon"
 }
 
 ///|
@@ -215,13 +210,6 @@ pub fn scheduled_job_is_book_template_request(job : ScheduledJob) -> Bool {
 }
 
 ///|
-pub fn scheduled_job_is_legacy_civic_salon(job : ScheduledJob) -> Bool {
-  job.id == legacy_civic_salon_job_id() ||
-  job.kind == legacy_civic_salon_job_kind()
-}
-
-///|
 pub fn scheduled_job_runs_civic_communication(job : ScheduledJob) -> Bool {
-  scheduled_job_is_civic_pattern(job) ||
-  scheduled_job_is_legacy_civic_salon(job)
+  scheduled_job_is_civic_pattern(job)
 }
