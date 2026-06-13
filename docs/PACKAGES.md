@@ -601,9 +601,17 @@ Boundary:
 - `src/book_quality` owns first-pending semantic-review candidate selection
   from an audit plus an observed completed-review book-id list; it should not
   inspect result files to decide which candidates are completed.
+- `src/book_quality` owns path-explicit semantic-review proposal contracts:
+  request text, notes, tags, metadata, result-path contract, context-page
+  shaping, and skill-path attachment. It should not call current-working-
+  directory helpers or resolve process-local paths itself.
 - `src/book_quality_runtime` owns review status observation: loading the run
   ledger file, checking result-file existence, observing current time, and
   passing those facts into `src/book_quality`.
+- `src/book_quality_runtime` owns process-local semantic-review proposal
+  adaptation: resolving workspace roots and review skill paths against the
+  current working directory, then feeding explicit paths into
+  `src/book_quality`.
 - `src/book_quality_runtime` owns semantic-review completion observation:
   result-file existence checks are converted into completed book ids before
   calling `src/book_quality` candidate-selection policy.

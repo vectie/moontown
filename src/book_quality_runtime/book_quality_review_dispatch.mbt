@@ -66,11 +66,7 @@ async fn dispatch_book_quality_ai_review_for_score(
   write_book_quality_review_moonclaw_profile(review_dir)
   let packet = @book_quality.review_packet(score, review_dir)
   let external = book_quality_review_external_packet(
-    @book_quality.review_external_proposal_spec(
-      packet,
-      result_dir,
-      @codex.codex_main_target_id(),
-    ),
+    review_external_proposal_spec(packet, result_dir),
   )
   let packet_path = @book_quality.external_packet_path(
     review_dir,

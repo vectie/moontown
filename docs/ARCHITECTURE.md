@@ -462,10 +462,10 @@ while `book_quality_runtime/` owns result-file existence checks, ledger file
 loading, and current-time observation. Semantic review profile policy is
 package-owned too: review profile id, execution-target metadata contract,
 preferred skills, role-runtime envelope, target-parameterized MoonClaw jobs
-profile JSON, packet step metadata, neutral review proposal spec, request text,
-notes, tags, and review metadata belong to `book_quality/`, while root only
-materializes those values into MoonClaw profile files and resolves paths for
-external packets.
+profile JSON, packet step metadata, path-explicit neutral review proposal spec,
+request text, notes, tags, and review metadata belong to `book_quality/`, while
+runtime code materializes those values into MoonClaw profile files and resolves
+process-local workspace/skill paths for external packets.
 `book_quality_runtime/` owns the concrete `.moonclaw` ACP config for review
 work by combining book-quality reviewer semantics with adapter-owned Codex
 target JSON. It also adapts the neutral review proposal spec into a MoonClaw

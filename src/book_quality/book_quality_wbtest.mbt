@@ -679,8 +679,8 @@ test "book quality package owns external review packet contract" {
     prompt: "Review the book.",
     output_contract: review_output_contract(),
   }
-  let external = review_external_proposal_spec(
-    packet, "/tmp/results", "codex-main",
+  let external = review_external_proposal_spec_with_paths(
+    packet, "/tmp/results", "codex-main", "/tmp/coding", "/tmp/review/BOOK_QUALITY_REVIEW_SKILL.md",
   )
   assert_true(
     external.notes.contains(
@@ -730,8 +730,8 @@ test "book quality package builds external MoonClaw review packet" {
     prompt: "Review the book.",
     output_contract: review_output_contract(),
   }
-  let external = review_external_proposal_spec(
-    packet, "/tmp/results", "codex-main",
+  let external = review_external_proposal_spec_with_paths(
+    packet, "/tmp/results", "codex-main", "/tmp/coding", "/tmp/review/BOOK_QUALITY_REVIEW_SKILL.md",
   )
   assert_eq(external.packet_id, "book-quality-ai-review-coding")
   assert_eq(external.profile, review_profile_id())

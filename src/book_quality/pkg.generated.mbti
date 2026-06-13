@@ -170,7 +170,7 @@ pub fn research_deep_report_word_assessment(Int) -> BookQualitySignalAssessment
 
 pub fn research_required_paths() -> Array[BookQualityRequiredPath]
 
-pub fn review_external_proposal_spec(BookQualityReviewPacket, String, String) -> BookQualityReviewProposalSpec
+pub fn review_external_proposal_spec_with_paths(BookQualityReviewPacket, String, String, String, String) -> BookQualityReviewProposalSpec
 
 pub fn review_moonclaw_jobs_json(String) -> Json
 
