@@ -719,7 +719,8 @@ Boundary:
   module identity and registered-service exclusion rules.
 - `src/build_pipeline` owns the Wenyu bootstrap/build task contracts and may
   compose target pages through `src/policy`, `src/research_quality`, and civic
-  service definitions.
+  service definitions. It should consume `src/civic` Wenyu identity helpers
+  rather than branching on Wenyu storage prefixes itself.
 - `src/build_pipeline_runtime` consumes those contracts and performs the
   workspace/profile/source/artifact side effects.
 - `src/town_runtime` should not own Wenyu build output-contract ids, MoonClaw
@@ -1021,7 +1022,8 @@ Purpose:
   derivation.
 - `src/civic` owns Wenyu module/book identity helpers, including the difference
   between configured civic-service books and Wenyu build books. Runtime
-  packages should call those helpers instead of branching on `wenyu-*` slugs.
+  packages, build-pipeline packages, and quality packages should call those
+  helpers instead of branching on `wenyu-*` slugs.
 - `src/civic` owns civic communication reducer contract helpers: reducer input,
   participant, output, blocker, step-kind, output-contract id/type, and
   MoonClaw profile-family names.

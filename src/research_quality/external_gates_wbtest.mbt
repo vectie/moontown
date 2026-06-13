@@ -136,3 +136,15 @@ test "quality topic prefers explicit research topic tag over storage id" {
     "euv-lithography-machine-new-advantages-and-supplements",
   )
 }
+
+///|
+test "quality topic uses civic-owned Wenyu identity" {
+  let entry = @moonbook.BookCatalogEntry::new(
+    id="wenyu-town-shell",
+    name="Wenyu Valley / Town Shell",
+    purpose="Build the town shell.",
+    workspace_root="/tmp/wenyu-town-shell",
+    tags=["civic-service"],
+  )
+  assert_eq(quality_topic_for_entry(entry), "town shell")
+}

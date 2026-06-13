@@ -72,6 +72,14 @@ test "module ids and canonical book ids resolve to Wenyu services" {
 ///|
 test "civic package owns Wenyu build book eligibility" {
   assert_true(
+    is_wenyu_book_entry("wenyu-policy-hall", "Policy Hall", ["civic-service"]),
+  )
+  assert_true(
+    !is_wenyu_book_entry("custom-builder", "Custom Wenyu Builder", [
+      "civic-service",
+    ]),
+  )
+  assert_true(
     is_wenyu_build_book_entry("wenyu-custom-builder", "Custom Wenyu Builder", [
       "civic-service",
     ]),

@@ -14,5 +14,5 @@ pub fn research_quality_entry_is_research(
 fn research_quality_entry_is_wenyu_support(
   entry : @moonbook.BookCatalogEntry,
 ) -> Bool {
-  entry.id.has_prefix("wenyu-")
+  @civic.is_wenyu_book_entry(entry.id, entry.name, entry.tags)
 }

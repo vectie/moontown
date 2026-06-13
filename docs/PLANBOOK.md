@@ -113,7 +113,9 @@ They must not require the requested id itself to start with `research-`; the
 stable `research-*` slug is a storage target, not an eligibility rule.
 Wenyu/civic plans must keep module identity predicates in `civic/`; town
 runtime may ask whether an entry is a Wenyu build book, but it must not branch
-directly on `wenyu-*` slugs.
+directly on `wenyu-*` slugs. Build-pipeline and quality plans should follow the
+same rule: call civic identity helpers, then compose their own task contracts or
+quality gates from that result.
 Course-book implementation follows the same domain/runtime split:
 `course_book/` owns course identity, catalog-entry shape, teaching contracts,
 route policy, generated UI state, and generated HTML, while

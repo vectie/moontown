@@ -7,6 +7,7 @@ test "build pipeline owns Wenyu build task contract" {
     workspace_root="/tmp/wenyu-town-shell",
   )
   let tasks = wenyu_build_tasks(entry, "Build Wenyu Valley", "/repo")
+  assert_true(is_wenyu_book(entry))
   assert_eq(tasks.length(), 4)
   assert_true(tasks.any(fn(task) { task.kind == "civic-service-workflow" }))
   assert_true(tasks.any(fn(task) { task.kind == "implementation-backlog" }))
@@ -18,6 +19,18 @@ test "build pipeline owns Wenyu build task contract" {
       @policy.default_generated_site_projection_path(),
     ),
   )
+}
+
+///|
+test "build pipeline delegates Wenyu identity to civic policy" {
+  let tagged_without_slug = @moonbook.BookCatalogEntry::new(
+    id="town-shell",
+    name="Wenyu Valley / Town Shell",
+    purpose="Build the town shell.",
+    workspace_root="/tmp/town-shell",
+    tags=["civic-service"],
+  )
+  assert_true(!is_wenyu_book(tagged_without_slug))
 }
 
 ///|

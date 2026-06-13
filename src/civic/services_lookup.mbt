@@ -31,12 +31,21 @@ pub fn is_wenyu_civic_book_id(book_id : String) -> Bool {
 }
 
 ///|
-pub fn is_wenyu_build_book_entry(
+pub fn is_wenyu_book_entry(
   id : String,
   name : String,
   tags : Array[String],
 ) -> Bool {
   @policy.catalog_entry_type(id, name, tags) == @policy.civic_type() &&
-  id.has_prefix("wenyu-") &&
+  id.has_prefix("wenyu-")
+}
+
+///|
+pub fn is_wenyu_build_book_entry(
+  id : String,
+  name : String,
+  tags : Array[String],
+) -> Bool {
+  is_wenyu_book_entry(id, name, tags) &&
   wenyu_civic_service_for_book_id(id) == None
 }
