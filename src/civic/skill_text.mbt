@@ -98,7 +98,7 @@ pub fn communication_reducer_skill_text(
     "",
     "# \{scenario.title} Reducer Skill",
     "",
-    civic_salon_reducer_role_description(pattern),
+    communication_reducer_role_description(pattern),
     "",
     "Pattern summary: \{pattern.summary}",
     "",
@@ -114,19 +114,19 @@ pub fn communication_reducer_skill_text(
     "",
     "## Reduction Rules",
     "",
-    markdown_bullets(civic_salon_reducer_reduction_rules()),
+    markdown_bullets(communication_reducer_reduction_rules()),
     "",
     "## Output Contract",
     "",
-    civic_salon_reducer_output_contract_summary(),
+    communication_reducer_output_contract_summary(),
     "",
     "Write `\{civic_reducer_output_relative_path()}` exactly as JSON:",
     "",
-    civic_salon_reducer_output_contract_json_example(),
+    communication_reducer_output_contract_json_example(),
     "",
     "## Concrete Example",
     "",
-    civic_salon_reducer_concrete_examples(),
+    communication_reducer_concrete_examples(),
   ].join("\n")
 }
 
@@ -161,7 +161,7 @@ pub fn communication_reducer_contract_markdown(
   [
     "# Civic Communication Pattern Output Contract",
     "",
-    "Emit a non-empty set of `\{civic_reducer_output_contract_type_name()}` records to `\{civic_reducer_output_relative_path()}`. The record is the generic civic communication output shape while the runtime continues to migrate away from salon-specific names.",
+    "Emit a non-empty set of `\{civic_reducer_output_contract_type_name()}` records to `\{civic_reducer_output_relative_path()}` using contract `\{civic_reducer_output_contract_id()}`. The record is the generic civic communication output shape.",
     "",
     "Each idea must include:",
     "",
@@ -395,7 +395,7 @@ fn civic_skill_example_summary(
 }
 
 ///|
-fn civic_salon_reducer_role_description(
+fn communication_reducer_role_description(
   pattern : CivicCommunicationPattern,
 ) -> String {
   [
@@ -405,7 +405,7 @@ fn civic_salon_reducer_role_description(
 }
 
 ///|
-fn civic_salon_reducer_reduction_rules() -> Array[String] {
+fn communication_reducer_reduction_rules() -> Array[String] {
   [
     "Read every participant in `\{civic_reducer_participants_relative_path()}`.",
     "Use at least two participant workspaces for each idea unless the participant set itself has only one workspace.",
@@ -421,15 +421,15 @@ fn civic_salon_reducer_reduction_rules() -> Array[String] {
 }
 
 ///|
-fn civic_salon_reducer_output_contract_summary() -> String {
+fn communication_reducer_output_contract_summary() -> String {
   [
-    "Emit the same `CivicCommunicationIdea` contract that Moontown materializes into building ledgers, internal participant workspaces, review queues, and projections.",
+    "Emit `\{civic_reducer_output_contract_id()}` records using the `\{civic_reducer_output_contract_type_name()}` JSON shape that Moontown materializes into building ledgers, internal participant workspaces, review queues, and projections.",
     "For non-research patterns, treat `research_questions` as testable follow-up or review questions and `next_experiment` as the smallest useful next artifact/action.",
   ].join(" ")
 }
 
 ///|
-fn civic_salon_reducer_output_contract_json_example() -> String {
+fn communication_reducer_output_contract_json_example() -> String {
   [
     "```json", "{", "  \"ideas\": [", "    {", "      \"id\": \"lowercase-stable-id\",",
     "      \"title\": \"Short pattern output title\",", "      \"summary\": \"One or two precise sentences explaining the cross-area dependency, routing decision, match, lesson plan, story angle, or recovery action.\",",
@@ -442,25 +442,25 @@ fn civic_salon_reducer_output_contract_json_example() -> String {
 }
 
 ///|
-fn civic_salon_reducer_concrete_examples() -> String {
+fn communication_reducer_concrete_examples() -> String {
   [
-    civic_salon_reducer_good_research_example(),
-    civic_salon_reducer_good_service_example(),
-    civic_salon_reducer_poor_output_example(),
+    communication_reducer_good_research_example(),
+    communication_reducer_good_service_example(),
+    communication_reducer_poor_output_example(),
   ].join(" ")
 }
 
 ///|
-fn civic_salon_reducer_good_research_example() -> String {
+fn communication_reducer_good_research_example() -> String {
   "For a robotics research salon with VLA, world-model, manipulation, and safety workspaces, a good idea links perception-action policy limits to world-model uncertainty and proposes a concrete benchmark."
 }
 
 ///|
-fn civic_salon_reducer_good_service_example() -> String {
+fn communication_reducer_good_service_example() -> String {
   "For a policy triage desk, a good output routes a resident question to official-source extraction plus review instead of inventing eligibility advice."
 }
 
 ///|
-fn civic_salon_reducer_poor_output_example() -> String {
+fn communication_reducer_poor_output_example() -> String {
   "A poor output merely says \"combine sources\" or \"help the resident\" without owner workspaces, a checkable follow-up question, or a review gate."
 }

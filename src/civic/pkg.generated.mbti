@@ -59,6 +59,8 @@ pub fn civic_reducer_contract_relative_path() -> String
 
 pub fn civic_reducer_input_relative_path() -> String
 
+pub fn civic_reducer_output_contract_id() -> String
+
 pub fn civic_reducer_output_contract_type_name() -> String
 
 pub fn civic_reducer_output_relative_path() -> String

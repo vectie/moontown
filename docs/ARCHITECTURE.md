@@ -928,9 +928,12 @@ DTOs such as `CivicCommunicationScenario`, `CivicCommunicationIdea`,
 `CivicCommunicationMetric`, and `CivicCommunicationHomeReturn`, plus the structural effectiveness calculation that
 turns participant and idea packets into metrics. It also owns
 generic reducer contract helpers: reducer input path, participant path, output
-path, blocker path, step kind, output contract name, and MoonClaw profile
-family. Runtime packages must consume those helpers instead of embedding
-reducer filenames or profile ids.
+path, blocker path, step kind, output contract id/type, and MoonClaw profile
+family. The current shared reducer contract id is
+`civic.communication.output.v1`; `research-salon` uses that generic contract
+rather than owning a salon-specific reducer contract. Runtime packages must
+consume those helpers instead of embedding reducer filenames, contract ids, or
+profile ids.
 It also owns
 `CivicCommunicationSchedule`, `CivicCommunicationRoundRecord`, and pure schedule transition
 semantics. Scenario pattern resolution, pattern-label fallback, generic

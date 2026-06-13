@@ -76,6 +76,10 @@ Reducer filesystem/profile names are not owned by `civic_runtime`. They are
 owned by `src/civic/communication_reducer_contract.mbt` so every building
 pattern uses the same policy helpers for reducer input, participant records,
 output records, blocker files, step kind, and MoonClaw profile family.
+The shared reducer contract id is `civic.communication.output.v1`; individual
+patterns such as `research-salon`, `match-market`, or `review-council` should
+specialize behavior through scenario skills and quality rules, not by creating
+one-off reducer contract ids in runtime code.
 
 Default Wenyu civic pattern scenarios live under
 [assets/templates/civic-patterns](/Users/kq/Workspace/moontown/assets/templates/civic-patterns)

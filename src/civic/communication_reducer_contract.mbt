@@ -34,6 +34,11 @@ pub fn civic_reducer_step_kind() -> String {
 }
 
 ///|
+pub fn civic_reducer_output_contract_id() -> String {
+  "civic.communication.output.v1"
+}
+
+///|
 pub fn civic_reducer_output_contract_type_name() -> String {
   "CivicCommunicationIdea"
 }

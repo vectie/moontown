@@ -768,7 +768,8 @@ Purpose:
 - `src/civic` owns service definitions, target page contracts, skill paths,
   protocol vocabulary, and civic helper paths.
 - `src/civic` owns civic communication reducer contract helpers: reducer input,
-  participant, output, blocker, step-kind, and MoonClaw profile-family names.
+  participant, output, blocker, step-kind, output-contract id/type, and
+  MoonClaw profile-family names.
 - `src/civic` exposes generic civic communication skill text and protocol note
   helpers. Public helper names should use communication-pattern vocabulary;
   `research-salon` remains one pattern constructor, not the skill API.

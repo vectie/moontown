@@ -6,7 +6,7 @@ test "communication patterns describe reusable building protocols" {
     Some(pattern) => {
       assert_eq(pattern.title, "Research Salon")
       assert_eq(pattern.protocol_mode, "exchange-reduce-distribute")
-      assert_eq(pattern.output_contract, "civic.salon.idea_reduction.v1")
+      assert_eq(pattern.output_contract, civic_reducer_output_contract_id())
     }
     None => fail("expected research salon pattern")
   }

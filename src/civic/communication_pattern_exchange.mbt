@@ -8,7 +8,7 @@ pub fn research_salon_pattern() -> CivicCommunicationPattern {
     protocol_mode: "exchange-reduce-distribute",
     input_contract: "perspective packet",
     reduction_contract: "cross-area idea reduction",
-    output_contract: "civic.salon.idea_reduction.v1",
+    output_contract: civic_reducer_output_contract_id(),
     review_contract: "novelty, feasibility, evidence gap, owner workspace",
     cadence_hint: "30m to weekly, depending on research velocity",
     good_for: [
