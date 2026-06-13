@@ -1,5 +1,5 @@
 ///|
-fn register_town_synthesis_execution(
+pub fn register_town_synthesis_execution(
   state : @core.TownState,
   goal : String,
   plan : @roles.MayorGoalPlan,

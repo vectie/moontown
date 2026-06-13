@@ -1,0 +1,11 @@
+import {
+  "vectie/moontown/adapters/moonbook",
+  "vectie/moontown/core",
+  "vectie/moontown/roles",
+  "vectie/moontown/support",
+  "vectie/moontown/town_synthesis",
+}
+
+import {
+  "moonbitlang/async",
+} for "wbtest"

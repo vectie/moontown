@@ -1,0 +1,18 @@
+// Generated using `moon info`, DON'T EDIT IT
+package "vectie/moontown/town_synthesis_runtime"
+
+import {
+  "vectie/moontown/core",
+  "vectie/moontown/roles",
+}
+
+// Values
+pub async fn write_town_goal_synthesis(@core.TownState, String, @roles.MayorGoalPlan, String) -> Unit
+
+// Errors
+
+// Types and methods
+
+// Type aliases
+
+// Traits

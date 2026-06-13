@@ -1,4 +1,5 @@
 import {
+  "moonbitlang/core/json",
   "vectie/moontown/core",
   "vectie/moontown/adapters/moonbook",
   "vectie/moontown/roles",

@@ -61,6 +61,7 @@ pub struct MayorGoalLane {
   objective : String
   rationale : String
 } derive(Eq)
+pub fn MayorGoalLane::new(entry~ : @moonbook.BookCatalogEntry, objective~ : String, rationale~ : String) -> Self
 pub impl Show for MayorGoalLane
 
 pub struct MayorGoalPlan {
@@ -70,6 +71,7 @@ pub struct MayorGoalPlan {
   summary : String
   lanes : Array[MayorGoalLane]
 } derive(Eq)
+pub fn MayorGoalPlan::new(output_contract~ : String, prompt~ : String, parallelizable~ : Bool, summary~ : String, lanes~ : Array[MayorGoalLane]) -> Self
 pub impl Show for MayorGoalPlan
 
 pub struct MayorKeeperPacket {

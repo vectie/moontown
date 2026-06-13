@@ -66,7 +66,9 @@ async fn run_goal_into_state(
     persist_town_checkpoint(state, snapshot_path)
   }
   wait_for_goal_settle(state, mayor, catalog, snapshot_path)
-  @town_synthesis.write_town_goal_synthesis(state, goal, plan, snapshot_path)
+  @town_synthesis_runtime.write_town_goal_synthesis(
+    state, goal, plan, snapshot_path,
+  )
   persist_town_checkpoint(state, snapshot_path)
   @storage.save_snapshot_file(snapshot_path, @storage.snapshot_of(state))
   state

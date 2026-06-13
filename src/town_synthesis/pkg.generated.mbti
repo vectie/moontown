@@ -2,6 +2,8 @@
 package "vectie/moontown/town_synthesis"
 
 import {
+  "moonbitlang/core/debug",
+  "moonbitlang/core/json",
   "vectie/moontown/core",
   "vectie/moontown/roles",
 }
@@ -9,13 +11,27 @@ import {
 // Values
 pub fn lane_research_status(@core.TownState, String) -> String
 
+pub fn register_town_synthesis_execution(@core.TownState, String, @roles.MayorGoalPlan, String) -> Unit
+
+pub async fn render_town_goal_synthesis(@core.TownState, String, @roles.MayorGoalPlan, Array[TownSynthesisLaneReport]) -> String
+
 pub fn town_goal_slug(String) -> String
 
-pub async fn write_town_goal_synthesis(@core.TownState, String, @roles.MayorGoalPlan, String) -> Unit
+pub fn town_synthesis_dir(String) -> String
+
+pub fn town_synthesis_latest_path(String) -> String
+
+pub fn town_synthesis_path(String, String) -> String
+
+pub fn town_synthesis_task_id(String) -> String
 
 // Errors
 
 // Types and methods
+pub(all) struct TownSynthesisLaneReport {
+  book_id : String
+  report_text : String
+} derive(Eq, ToJson, @debug.Debug, @json.FromJson)
 
 // Type aliases
 

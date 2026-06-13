@@ -1,10 +1,13 @@
 ///|
-async fn render_wenyu_lane_briefs(plan : @roles.MayorGoalPlan) -> String {
+fn render_wenyu_lane_briefs(
+  plan : @roles.MayorGoalPlan,
+  lane_reports : Array[TownSynthesisLaneReport],
+) -> String {
   let builder = StringBuilder::new()
   for lane in plan.lanes {
     builder.write_string("### \{lane.entry.name}\n\n")
     builder.write_string("Objective: \{lane.objective}\n\n")
-    let report = read_lane_deep_report(lane.entry)
+    let report = lane_report_text(lane_reports, lane.entry.id)
     let summary = @support.section_body(report, "## Executive Summary")
     let compact = @support.first_non_heading_paragraph(summary)
     if compact.is_blank() {

@@ -1,10 +1,20 @@
 ///|
-fn town_synthesis_dir(snapshot_path : String) -> String {
+pub fn town_synthesis_dir(snapshot_path : String) -> String {
   "\{@storage.snapshot_base_dir(snapshot_path)}/town-synthesis"
 }
 
 ///|
-fn town_synthesis_task_id(goal : String) -> String {
+pub fn town_synthesis_path(snapshot_path : String, goal : String) -> String {
+  "\{town_synthesis_dir(snapshot_path)}/\{town_goal_slug(goal)}.md"
+}
+
+///|
+pub fn town_synthesis_latest_path(snapshot_path : String) -> String {
+  "\{town_synthesis_dir(snapshot_path)}/latest.md"
+}
+
+///|
+pub fn town_synthesis_task_id(goal : String) -> String {
   "town-synthesis-\{town_goal_slug(goal)}"
 }
 

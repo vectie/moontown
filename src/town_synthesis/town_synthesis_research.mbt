@@ -1,6 +1,7 @@
 ///|
-async fn render_town_report_executive_summary(
+fn render_town_report_executive_summary(
   plan : @roles.MayorGoalPlan,
+  lane_reports : Array[TownSynthesisLaneReport],
 ) -> String {
   let builder = StringBuilder::new()
   builder.write_string(town_report_stack_thesis())
@@ -8,7 +9,7 @@ async fn render_town_report_executive_summary(
   builder.write_string(town_report_ecosystem_conclusion())
   for topic in town_research_topics() {
     builder.write_string(town_report_executive_topic_prefix(topic))
-    builder.write_string(first_deep_report_summary(plan, topic))
+    builder.write_string(first_deep_report_summary(plan, topic, lane_reports))
     builder.write_string("\n")
   }
   builder.to_string()

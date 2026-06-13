@@ -6,6 +6,15 @@ pub struct MayorGoalLane {
 } derive(Eq)
 
 ///|
+pub fn MayorGoalLane::new(
+  entry~ : @moonbook.BookCatalogEntry,
+  objective~ : String,
+  rationale~ : String,
+) -> MayorGoalLane {
+  { entry, objective, rationale }
+}
+
+///|
 pub impl Show for MayorGoalLane with fn output(
   self : MayorGoalLane,
   logger : &Logger,
@@ -23,6 +32,17 @@ pub struct MayorGoalPlan {
   summary : String
   lanes : Array[MayorGoalLane]
 } derive(Eq)
+
+///|
+pub fn MayorGoalPlan::new(
+  output_contract~ : String,
+  prompt~ : String,
+  parallelizable~ : Bool,
+  summary~ : String,
+  lanes~ : Array[MayorGoalLane],
+) -> MayorGoalPlan {
+  { output_contract, prompt, parallelizable, summary, lanes }
+}
 
 ///|
 pub impl Show for MayorGoalPlan with fn output(

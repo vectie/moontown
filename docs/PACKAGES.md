@@ -315,6 +315,31 @@ Boundary:
   policy stay in `final_integration`, while filesystem/runtime tests stay in
   `final_integration_runtime`.
 
+## Town Synthesis
+
+- [src/town_synthesis](/Users/kq/Workspace/moontown/src/town_synthesis)
+- [src/town_synthesis_runtime](/Users/kq/Workspace/moontown/src/town_synthesis_runtime)
+
+Purpose:
+
+- mayor-owned cross-book synthesis rendering
+- synthesis slug/path/task-id policy
+- synthesis task/execution registration policy
+- lane-report observation DTOs
+- runtime lane-report file loading and synthesis artifact persistence
+
+Boundary:
+
+- `src/town_synthesis` owns rendering and town-state mutation policy from
+  explicit observations. It must not read `raw/bootstrap/deep-report.md` files
+  or write `.moontown/town-synthesis/*` artifacts.
+- `src/town_synthesis_runtime` owns synthesis IO: reading each lane's deep
+  report, writing the goal-specific and `latest.md` synthesis artifacts, and
+  calling the package-owned registration/event policy.
+- Remaining MoonBook summary and research-quality observations inside
+  `town_synthesis` are an explicit next seam: they should eventually follow
+  the same observation-fed pattern used for lane report text.
+
 ## Roles
 
 - [src/roles/mayor.mbt](/Users/kq/Workspace/moontown/src/roles/mayor.mbt)

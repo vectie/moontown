@@ -2,7 +2,7 @@ import {
   "vectie/moontown/core",
   "vectie/moontown/build_pipeline",
   "vectie/moontown/planbook_runtime",
-  "vectie/moontown/town_synthesis",
+  "vectie/moontown/town_synthesis_runtime",
   "vectie/moontown/visual_projection_runtime",
   "vectie/moontown/support",
   "vectie/moontown/research_quality",
@@ -34,5 +34,6 @@ import {
 }
 
 import {
+  "vectie/moontown/town_synthesis",
   "vectie/moontown/test_fixtures",
 } for "wbtest"

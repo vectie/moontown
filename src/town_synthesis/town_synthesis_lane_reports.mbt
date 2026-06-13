@@ -1,11 +1,18 @@
 ///|
-async fn first_deep_report_summary(
+pub(all) struct TownSynthesisLaneReport {
+  book_id : String
+  report_text : String
+} derive(Debug, Eq, ToJson, FromJson)
+
+///|
+fn first_deep_report_summary(
   plan : @roles.MayorGoalPlan,
   topic : String,
+  lane_reports : Array[TownSynthesisLaneReport],
 ) -> String {
   match lane_entry_for_topic(plan, topic) {
     Some(entry) => {
-      let report = read_lane_deep_report(entry)
+      let report = lane_report_text(lane_reports, entry.id)
       if report.is_blank() {
         return "No deep report was available for this lane."
       }
@@ -22,13 +29,14 @@ async fn first_deep_report_summary(
 }
 
 ///|
-async fn render_lane_deep_report_for_topic(
+fn render_lane_deep_report_for_topic(
   plan : @roles.MayorGoalPlan,
   topic : String,
+  lane_reports : Array[TownSynthesisLaneReport],
 ) -> String {
   match lane_entry_for_topic(plan, topic) {
     Some(entry) => {
-      let report = read_lane_deep_report(entry)
+      let report = lane_report_text(lane_reports, entry.id)
       if report.is_blank() {
         return render_missing_deep_report_block(entry)
       }
@@ -41,6 +49,19 @@ async fn render_lane_deep_report_for_topic(
     }
     None => "- No lane report found for `\{topic}`."
   }
+}
+
+///|
+fn lane_report_text(
+  lane_reports : Array[TownSynthesisLaneReport],
+  book_id : String,
+) -> String {
+  for report in lane_reports {
+    if report.book_id == book_id {
+      return report.report_text
+    }
+  }
+  ""
 }
 
 ///|

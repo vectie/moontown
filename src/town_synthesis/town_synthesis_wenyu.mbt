@@ -25,6 +25,7 @@ async fn render_wenyu_town_goal_synthesis(
   state : @core.TownState,
   goal : String,
   plan : @roles.MayorGoalPlan,
+  lane_reports : Array[TownSynthesisLaneReport],
 ) -> String {
   let builder = StringBuilder::new()
   builder.write_string("# Wenyu Valley AI Innovation Town: Build Synthesis\n\n")
@@ -36,7 +37,7 @@ async fn render_wenyu_town_goal_synthesis(
   builder.write_string("\n\n## Product Architecture\n\n")
   builder.write_string(render_wenyu_product_architecture(plan))
   builder.write_string("\n\n## Module Lanes\n\n")
-  builder.write_string(render_wenyu_lane_briefs(plan))
+  builder.write_string(render_wenyu_lane_briefs(plan, lane_reports))
   builder.write_string("\n\n## Evidence and Artifacts\n\n")
   builder.write_string(render_wenyu_artifact_matrix(state, plan))
   builder.write_string("\n\n## Implementation Readiness\n\n")

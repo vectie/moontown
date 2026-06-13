@@ -1010,6 +1010,14 @@ findings, and maturity/gap section. The evidence trail points back to each
 book's `raw/bootstrap/` research artifacts, including W-source and L-source
 rows.
 
+Synthesis file IO is runtime-owned. `town_synthesis/` owns the mayor-level
+rendering vocabulary, task/execution registration policy, slug/path policy,
+and lane-report observation DTOs. `town_synthesis_runtime/` owns reading lane
+`raw/bootstrap/deep-report.md` files and writing `.moontown/town-synthesis/*`
+artifacts. This keeps town synthesis aligned with the broader
+observation-fed loop: runtime gathers facts, policy/rendering code receives
+explicit observations, and the mayor records the result.
+
 ### Wenyu Civic Service Bootstrap
 
 Wenyu civic modules use the same ownership rule as research lanes, but they are
