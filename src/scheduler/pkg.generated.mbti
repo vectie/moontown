@@ -9,15 +9,35 @@ import {
 }
 
 // Values
+pub fn book_quality_job_id() -> String
+
+pub fn book_quality_job_kind() -> String
+
+pub fn book_quality_review_job_id() -> String
+
+pub fn book_quality_review_job_kind() -> String
+
+pub fn book_template_request_job_id() -> String
+
+pub fn book_template_request_job_kind() -> String
+
 pub fn civic_pattern_job_id() -> String
 
 pub fn civic_pattern_job_kind() -> String
+
+pub fn civic_service_job_id() -> String
+
+pub fn civic_service_job_kind() -> String
 
 pub fn collect_due_tasks(@core.TownState) -> Array[@core.TownTask]
 
 pub fn default_daemon_jobs() -> Array[ScheduledJob]
 
 pub fn due_standing_goals(Array[@core.StandingGoal], Int) -> Array[@core.StandingGoal]
+
+pub fn health_job_id() -> String
+
+pub fn health_job_kind() -> String
 
 pub fn legacy_civic_salon_job_id() -> String
 
@@ -33,11 +53,39 @@ pub fn plan_standing_goal_actions(Array[@core.StandingGoal], Int) -> Array[Sched
 
 pub fn plan_tick(@core.TownState, @health.HealthReport) -> Array[SchedulerAction]
 
+pub fn projection_job_id() -> String
+
+pub fn projection_job_kind() -> String
+
+pub fn scheduled_job_is_book_quality(ScheduledJob) -> Bool
+
+pub fn scheduled_job_is_book_quality_review(ScheduledJob) -> Bool
+
+pub fn scheduled_job_is_book_template_request(ScheduledJob) -> Bool
+
 pub fn scheduled_job_is_civic_pattern(ScheduledJob) -> Bool
+
+pub fn scheduled_job_is_civic_service(ScheduledJob) -> Bool
+
+pub fn scheduled_job_is_health(ScheduledJob) -> Bool
 
 pub fn scheduled_job_is_legacy_civic_salon(ScheduledJob) -> Bool
 
+pub fn scheduled_job_is_projection(ScheduledJob) -> Bool
+
+pub fn scheduled_job_is_standing_goal(ScheduledJob) -> Bool
+
+pub fn scheduled_job_is_supervision(ScheduledJob) -> Bool
+
 pub fn scheduled_job_runs_civic_communication(ScheduledJob) -> Bool
+
+pub fn standing_goal_job_id() -> String
+
+pub fn standing_goal_job_kind() -> String
+
+pub fn supervision_job_id() -> String
+
+pub fn supervision_job_kind() -> String
 
 // Errors
 

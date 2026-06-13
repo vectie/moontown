@@ -7,7 +7,7 @@ test "daemon scheduled job event records only completed civic pattern runs" {
     ) {
     Some(event) => {
       assert_eq(event.id, "event-run-civic-patterns-7")
-      assert_eq(event.kind, "civic-pattern")
+      assert_eq(event.kind, @scheduler.civic_pattern_job_kind())
       assert_true(event.detail.contains("Ran 1 civic communication-pattern"))
     }
     None => fail("expected civic pattern event")
@@ -55,7 +55,7 @@ test "daemon scheduled job records book quality refresh activity" {
     ) {
     Some(event) => {
       assert_eq(event.id, "event-refresh-book-quality-11")
-      assert_eq(event.kind, "book-quality")
+      assert_eq(event.kind, @scheduler.book_quality_job_kind())
     }
     None => fail("expected book quality refresh event")
   }
@@ -70,7 +70,7 @@ test "daemon scheduled job records dispatched book quality ai review" {
     ) {
     Some(event) => {
       assert_eq(event.id, "event-review-book-quality-12")
-      assert_eq(event.kind, "book-quality-review")
+      assert_eq(event.kind, @scheduler.book_quality_review_job_kind())
     }
     None => fail("expected book quality AI review event")
   }
@@ -92,7 +92,7 @@ test "daemon scheduled job records civic service reconciliation activity" {
     ) {
     Some(event) => {
       assert_eq(event.id, "event-reconcile-civic-services-9")
-      assert_eq(event.kind, "civic-service")
+      assert_eq(event.kind, @scheduler.civic_service_job_kind())
     }
     None => fail("expected civic service reconciliation event")
   }
@@ -114,7 +114,7 @@ test "daemon scheduled job records processed book template request activity" {
     ) {
     Some(event) => {
       assert_eq(event.id, "event-process-book-template-requests-14")
-      assert_eq(event.kind, "book-template-request")
+      assert_eq(event.kind, @scheduler.book_template_request_job_kind())
     }
     None => fail("expected book template request activity event")
   }
@@ -131,7 +131,7 @@ test "daemon scheduled job records processed book template request activity" {
 fn book_template_request_job_for_test() -> @scheduler.ScheduledJob {
   let jobs = @scheduler.default_daemon_jobs()
   for job in jobs {
-    if job.kind == "book-template-request" {
+    if @scheduler.scheduled_job_is_book_template_request(job) {
       return job
     }
   }

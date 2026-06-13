@@ -9,6 +9,86 @@ pub fn civic_pattern_job_kind() -> String {
 }
 
 ///|
+pub fn supervision_job_id() -> String {
+  "supervise-live-runs"
+}
+
+///|
+pub fn supervision_job_kind() -> String {
+  "supervision"
+}
+
+///|
+pub fn standing_goal_job_id() -> String {
+  "dispatch-standing-goals"
+}
+
+///|
+pub fn standing_goal_job_kind() -> String {
+  "standing-goal"
+}
+
+///|
+pub fn civic_service_job_id() -> String {
+  "reconcile-civic-services"
+}
+
+///|
+pub fn civic_service_job_kind() -> String {
+  "civic-service"
+}
+
+///|
+pub fn book_quality_job_id() -> String {
+  "refresh-book-quality"
+}
+
+///|
+pub fn book_quality_job_kind() -> String {
+  "book-quality"
+}
+
+///|
+pub fn book_quality_review_job_id() -> String {
+  "review-book-quality"
+}
+
+///|
+pub fn book_quality_review_job_kind() -> String {
+  "book-quality-review"
+}
+
+///|
+pub fn health_job_id() -> String {
+  "refresh-health"
+}
+
+///|
+pub fn health_job_kind() -> String {
+  "health"
+}
+
+///|
+pub fn projection_job_id() -> String {
+  "project-ui-state"
+}
+
+///|
+pub fn projection_job_kind() -> String {
+  "projection"
+}
+
+///|
+pub fn book_template_request_job_id() -> String {
+  "process-book-template-requests"
+}
+
+///|
+pub fn book_template_request_job_kind() -> String {
+  "book-template-request"
+}
+
+///|
 pub fn legacy_civic_salon_job_id() -> String {
   "run-civic-salons"
 }
@@ -21,10 +101,14 @@ pub fn legacy_civic_salon_job_kind() -> String {
 ///|
 pub fn default_daemon_jobs() -> Array[ScheduledJob] {
   [
-    { id: "supervise-live-runs", kind: "supervision", interval_seconds: 30 },
     {
-      id: "dispatch-standing-goals",
-      kind: "standing-goal",
+      id: supervision_job_id(),
+      kind: supervision_job_kind(),
+      interval_seconds: 30,
+    },
+    {
+      id: standing_goal_job_id(),
+      kind: standing_goal_job_kind(),
       interval_seconds: 30,
     },
     {
@@ -33,21 +117,29 @@ pub fn default_daemon_jobs() -> Array[ScheduledJob] {
       interval_seconds: 30,
     },
     {
-      id: "reconcile-civic-services",
-      kind: "civic-service",
+      id: civic_service_job_id(),
+      kind: civic_service_job_kind(),
       interval_seconds: 60,
     },
-    { id: "refresh-book-quality", kind: "book-quality", interval_seconds: 300 },
     {
-      id: "review-book-quality",
-      kind: "book-quality-review",
+      id: book_quality_job_id(),
+      kind: book_quality_job_kind(),
+      interval_seconds: 300,
+    },
+    {
+      id: book_quality_review_job_id(),
+      kind: book_quality_review_job_kind(),
       interval_seconds: 1800,
     },
-    { id: "refresh-health", kind: "health", interval_seconds: 60 },
-    { id: "project-ui-state", kind: "projection", interval_seconds: 60 },
+    { id: health_job_id(), kind: health_job_kind(), interval_seconds: 60 },
     {
-      id: "process-book-template-requests",
-      kind: "book-template-request",
+      id: projection_job_id(),
+      kind: projection_job_kind(),
+      interval_seconds: 60,
+    },
+    {
+      id: book_template_request_job_id(),
+      kind: book_template_request_job_kind(),
       interval_seconds: 30,
     },
   ]
@@ -80,6 +172,46 @@ fn daemon_job_deprecated(job : ScheduledJob) -> Bool {
 ///|
 pub fn scheduled_job_is_civic_pattern(job : ScheduledJob) -> Bool {
   job.kind == civic_pattern_job_kind()
+}
+
+///|
+pub fn scheduled_job_is_supervision(job : ScheduledJob) -> Bool {
+  job.kind == supervision_job_kind()
+}
+
+///|
+pub fn scheduled_job_is_standing_goal(job : ScheduledJob) -> Bool {
+  job.kind == standing_goal_job_kind()
+}
+
+///|
+pub fn scheduled_job_is_civic_service(job : ScheduledJob) -> Bool {
+  job.kind == civic_service_job_kind()
+}
+
+///|
+pub fn scheduled_job_is_book_quality(job : ScheduledJob) -> Bool {
+  job.kind == book_quality_job_kind()
+}
+
+///|
+pub fn scheduled_job_is_book_quality_review(job : ScheduledJob) -> Bool {
+  job.kind == book_quality_review_job_kind()
+}
+
+///|
+pub fn scheduled_job_is_health(job : ScheduledJob) -> Bool {
+  job.kind == health_job_kind()
+}
+
+///|
+pub fn scheduled_job_is_projection(job : ScheduledJob) -> Bool {
+  job.kind == projection_job_kind()
+}
+
+///|
+pub fn scheduled_job_is_book_template_request(job : ScheduledJob) -> Bool {
+  job.kind == book_template_request_job_kind()
 }
 
 ///|
