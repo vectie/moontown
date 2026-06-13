@@ -984,6 +984,10 @@ review-candidate routing, execution detection, and civic target-page trimming
 belong there. Root may ask for those payloads when a service execution is
 persisted, but it must not reconstruct civic persistence summaries or memory
 candidate targets locally.
+Civic service result-path derivation is package-owned in
+`civic/services_result_paths.mbt`. Book-quality scoring and civic-runtime
+evidence inspection must consume `@civic.civic_service_result_path(...)`
+instead of keeping separate town-root fallback rules.
 Building-protocol portfolio semantics are package-owned too: ready/active/
 review/blocked bucket predicates, portfolio count construction, and compact
 Markdown row rendering live in `civic/protocol_portfolio.mbt`. Root may write

@@ -15,7 +15,7 @@ async fn inspect_civic_service_latest_result(
   service : @civic.CivicServiceDefinition,
   root : String,
 ) -> CivicServiceLatestResultEvidence {
-  let path = civic_service_result_path(service, root~)
+  let path = @civic.civic_service_result_path(service, root~)
   let latest_result = read_civic_book_result(path)
   let summary = match latest_result {
     Some(result) => result.summary
@@ -65,23 +65,4 @@ async fn read_civic_book_result(path : String) -> @moonbook.BookResult? {
   }
   let parsed = @json.parse(text) catch { _ => return None }
   Some(@json.from_json(parsed) catch { _ => return None })
-}
-
-///|
-fn civic_service_result_path(
-  service : @civic.CivicServiceDefinition,
-  root? : String = "",
-) -> String {
-  if civic_service_uses_town_result_root(root) {
-    ".moontown/book-results/goal-\{service.book_id}-civic-service.json"
-  } else {
-    "\{root}/book-results/goal-\{service.book_id}-civic-service.json"
-  }
-}
-
-///|
-fn civic_service_uses_town_result_root(root : String) -> Bool {
-  root.trim().is_empty() ||
-  root.has_prefix(".moontown/books/") ||
-  root.contains("/.moontown/books/")
 }

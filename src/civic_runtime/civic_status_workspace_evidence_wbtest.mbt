@@ -68,7 +68,7 @@ async test "civic latest result evidence parses contract markers" {
   let missing = inspect_civic_service_latest_result(service, root)
   assert_true(!missing.found)
   assert_eq(missing.decision, "none")
-  let path = civic_service_result_path(service, root~)
+  let path = @civic.civic_service_result_path(service, root~)
   @support.write_text_file(
     path,
     @moonbook.BookResult::new(

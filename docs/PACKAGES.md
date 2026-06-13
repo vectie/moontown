@@ -820,6 +820,7 @@ Key files:
 
 - [src/civic/services.mbt](/Users/kq/Workspace/moontown/src/civic/services.mbt)
 - [src/civic/services_paths.mbt](/Users/kq/Workspace/moontown/src/civic/services_paths.mbt)
+- [src/civic/services_result_paths.mbt](/Users/kq/Workspace/moontown/src/civic/services_result_paths.mbt)
 - [src/civic_runtime/civic_service_persist.mbt](/Users/kq/Workspace/moontown/src/civic_runtime/civic_service_persist.mbt)
 - [src/civic_runtime/civic_workspace_projection.mbt](/Users/kq/Workspace/moontown/src/civic_runtime/civic_workspace_projection.mbt)
 - [src/civic_runtime/civic_communication_scenario_workspace.mbt](/Users/kq/Workspace/moontown/src/civic_runtime/civic_communication_scenario_workspace.mbt)
@@ -827,7 +828,8 @@ Key files:
 Purpose:
 
 - `src/civic` owns service definitions, target page contracts, skill paths,
-  protocol vocabulary, and civic helper paths.
+  protocol vocabulary, civic helper paths, and civic service result-path
+  derivation.
 - `src/civic` owns civic communication reducer contract helpers: reducer input,
   participant, output, blocker, step-kind, output-contract id/type, and
   MoonClaw profile-family names.
@@ -869,6 +871,9 @@ Boundary:
 - `src/town_runtime` may choose when a civic service result should be persisted,
   but should not assemble civic persistence summaries, artifact lists, or memory
   candidates.
+- `src/book_quality` and `src/civic_runtime` must consume
+  `@civic.civic_service_result_path(...)` instead of keeping separate result
+  path derivation rules.
 - `src/civic` delegates default generated-site semantics to `src/policy`;
   civic modules should not redefine the generated-site path locally.
 

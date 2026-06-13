@@ -95,6 +95,8 @@ pub fn civic_service_reconciled_summary(CivicServiceDefinition, latest_protocol_
 
 pub fn civic_service_result_is_proven(String) -> Bool
 
+pub fn civic_service_result_path(CivicServiceDefinition, root? : String) -> String
+
 pub fn civic_service_status_bucket(String) -> String
 
 pub fn civic_service_status_is_blocked(String) -> Bool
