@@ -1,11 +1,6 @@
 ///|
 fn town_synthesis_dir(snapshot_path : String) -> String {
-  let base = @path.Path::dirname(snapshot_path).to_string()
-  if base == "." || base == "" {
-    ".moontown/town-synthesis"
-  } else {
-    "\{base}/town-synthesis"
-  }
+  "\{@storage.snapshot_base_dir(snapshot_path)}/town-synthesis"
 }
 
 ///|

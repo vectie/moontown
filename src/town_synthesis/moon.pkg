@@ -4,6 +4,6 @@ import {
   "vectie/moontown/roles",
   "vectie/moontown/policy",
   "vectie/moontown/research_quality",
+  "vectie/moontown/storage",
   "vectie/moontown/support",
-  "moonbitlang/x/path",
 }
