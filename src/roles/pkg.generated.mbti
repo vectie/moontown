@@ -11,6 +11,12 @@ import {
 }
 
 // Values
+pub fn book_lane_workers(@core.BookRef) -> Array[@core.WorkerRef]
+
+pub fn book_watch_worker(@core.BookRef) -> @core.WorkerRef
+
+pub fn default_town_workers() -> Array[@core.WorkerRef]
+
 pub fn keeper_packet_id(String, String) -> String
 
 pub fn keeper_runtime(@core.BookRef) -> @moonclaw.EmbeddedMoonclawRuntime
@@ -24,6 +30,8 @@ pub fn retry_execution_directive_kind() -> String
 pub fn supervision_directive_marks_stale(String) -> Bool
 
 pub fn supervision_directive_retries_execution(String) -> Bool
+
+pub fn town_workers_for_books(Array[@core.BookRef]) -> Array[@core.WorkerRef]
 
 // Errors
 

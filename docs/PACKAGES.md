@@ -54,6 +54,9 @@ Purpose:
   and supervision internals.
 - `src/town_runtime` may schedule package-provided task contracts, but
   feature-specific task contracts should live in the owning feature package.
+- `src/town_runtime` registers books and applies role-provided worker refs, but
+  must not own worker persona names, role/capability tables, or civic
+  service-worker projection policy.
 - `src/integration_tests` owns cross-package API and skill-quality tests.
 - No implementation package should be added directly at repository root.
 
@@ -296,6 +299,8 @@ Purpose:
 - standing-goal target book routing
 - keeper handoff packets
 - keeper proposal packet preparation
+- worker provisioning policy for built-in town workers, book-local watcher
+  lanes, generic book execution lanes, and civic service worker lanes
 
 This package is where town code stops talking to raw agent runtime metadata and
 starts talking to a role-specific API.
@@ -304,9 +309,13 @@ Boundary:
 
 - `src/roles` may compose Mayor prompts, lane plans, dispatch packets, and
   keeper handoffs.
+- `src/roles` owns worker personas and capability envelopes. Runtime code
+  should ask it for `WorkerRef` values and then only dedupe/register them.
 - `src/roles` should consume `src/policy` goal-text vocabulary and
   `src/dispatch` routing helpers instead of redefining research/Wenyu trigger
   words or task-domain tables.
+- `src/town_runtime` must not construct production worker personas directly;
+  `scripts/audit-source-layout.sh` enforces this for non-test runtime files.
 
 ## Moonbook Adapter
 

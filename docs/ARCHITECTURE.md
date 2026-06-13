@@ -836,6 +836,14 @@ The Mayor therefore provisions `claw-<book-id>-watcher` for each registered
 book so a standing goal does not become an endless deferred retry just because
 the target book lacks a watcher slot.
 
+Worker provisioning policy belongs to `roles`, not to `town_runtime`.
+`roles/worker_provisioning.mbt` defines built-in worker personas, book-local
+watcher lanes, generic book harness/specialist/reviewer lanes, and civic
+service worker envelopes. `town_runtime` only consumes the returned
+`WorkerRef` values and registers missing workers. This keeps runtime
+orchestration separate from role/persona design, and prevents civic capability
+tables from leaking into daemon or goal-run code.
+
 ## Data Ownership
 
 The clean ownership rule is:

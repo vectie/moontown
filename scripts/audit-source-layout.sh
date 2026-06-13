@@ -145,6 +145,20 @@ if (( ${#snapshot_dirname_files[@]} > 0 )); then
   failures+=("snapshot base derivation must use src/storage.snapshot_base_dir outside storage: ${snapshot_dirname_files[*]}")
 fi
 
+town_runtime_worker_ref_files=()
+while IFS= read -r file; do
+  town_runtime_worker_ref_files+=("${file#./}")
+done < <(
+  find src/town_runtime -maxdepth 1 -type f -name "*.mbt" \
+    -not -name "*_test.mbt" \
+    -not -name "*_wbtest.mbt" \
+    -exec grep -l 'WorkerRef::new' {} + 2>/dev/null || true
+)
+
+if (( ${#town_runtime_worker_ref_files[@]} > 0 )); then
+  failures+=("town_runtime must consume role-owned worker provisioning instead of constructing WorkerRef personas directly: ${town_runtime_worker_ref_files[*]}")
+fi
+
 if (( ${#failures[@]} > 0 )); then
   print "source layout audit failed:"
   for failure in "${failures[@]}"; do
