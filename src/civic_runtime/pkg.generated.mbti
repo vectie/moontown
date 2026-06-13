@@ -9,6 +9,10 @@ import {
 }
 
 // Values
+pub async fn bootstrap_civic_communication_scenario(@civic.CivicSalonScenario, book_catalog_path? : String, round_id? : String, round_number? : Int, workspace_base? : String, reducer_mode? : @civic.CivicSalonReductionMode) -> String
+
+pub async fn bootstrap_civic_communication_scenario_file(String, book_catalog_path? : String, round_id? : String, round_number? : Int, workspace_base? : String, reducer_mode? : @civic.CivicSalonReductionMode) -> String
+
 pub async fn bootstrap_civic_salon_scenario(@civic.CivicSalonScenario, book_catalog_path? : String, round_id? : String, round_number? : Int, workspace_base? : String, reducer_mode? : @civic.CivicSalonReductionMode) -> String
 
 pub async fn bootstrap_civic_salon_scenario_file(String, book_catalog_path? : String, round_id? : String, round_number? : Int, workspace_base? : String, reducer_mode? : @civic.CivicSalonReductionMode) -> String
@@ -77,11 +81,15 @@ pub async fn reconcile_wenyu_civic_service_results(book_catalog_path? : String, 
 
 pub fn render_civic_communication_patterns() -> String
 
+pub async fn render_civic_communication_schedule_status(snapshot_path? : String) -> String
+
 pub async fn render_civic_salon_schedule_status(snapshot_path? : String) -> String
 
 pub async fn render_wenyu_building_protocol_status(status_path? : String, registry_path? : String) -> String
 
 pub async fn render_wenyu_civic_status(book_catalog_path? : String) -> String
+
+pub async fn run_due_civic_communication_patterns(snapshot_path? : String, book_catalog_path? : String, tick? : Int, now_ms? : UInt64, reducer_mode? : @civic.CivicSalonReductionMode, run_inline? : Bool) -> String
 
 pub async fn run_due_civic_salons(snapshot_path? : String, book_catalog_path? : String, tick? : Int, now_ms? : UInt64, reducer_mode? : @civic.CivicSalonReductionMode, run_inline? : Bool) -> String
 

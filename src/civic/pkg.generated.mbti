@@ -27,11 +27,23 @@ pub fn building_protocol_portfolio(Array[BuildingProtocolSnapshot], String, Stri
 
 pub fn building_protocol_snapshot(BuildingProtocolDefinition, inbox_count~ : Int, contribution_count~ : Int, reduction_count~ : Int, outbox_count~ : Int, review_count~ : Int, latest_reduction_summary~ : String, latest_distribution_summary~ : String) -> BuildingProtocolSnapshot
 
+pub fn civic_communication_is_due(CivicSalonSchedule, UInt64) -> Bool
+
+pub fn civic_communication_metric_counts(Array[CivicSalonParticipantBook], Array[CivicSalonIdea]) -> CivicSalonMetricCounts
+
+pub fn civic_communication_metrics(CivicSalonScenario, Array[CivicSalonParticipantBook], Array[CivicSalonIdea]) -> CivicSalonMetric
+
 pub fn civic_communication_pattern_for_id(String) -> CivicCommunicationPattern?
 
 pub fn civic_communication_pattern_id_for_service(CivicServiceDefinition) -> String
 
 pub fn civic_communication_patterns() -> Array[CivicCommunicationPattern]
+
+pub fn civic_communication_returned_ideas_for_book(String, Array[CivicSalonIdea]) -> Array[CivicSalonIdea]
+
+pub fn civic_communication_round_id(CivicSalonSchedule) -> String
+
+pub fn civic_communication_round_record(CivicSalonSchedule, String, Int, UInt64, UInt64, CivicSalonMetric, String, String) -> CivicSalonRoundRecord
 
 pub fn civic_generated_site_path() -> String
 
@@ -124,6 +136,8 @@ pub fn communication_pattern_id_for_scenario(CivicSalonScenario) -> String
 pub fn communication_pattern_label_for_scenario(CivicSalonScenario) -> String
 
 pub fn communication_protocol_for_scenario(CivicSalonScenario) -> BuildingProtocolDefinition
+
+pub fn complete_civic_communication_schedule(CivicSalonSchedule, UInt64, String, String) -> CivicSalonSchedule
 
 pub fn complete_civic_salon_schedule(CivicSalonSchedule, UInt64, String, String) -> CivicSalonSchedule
 
@@ -372,6 +386,7 @@ pub(all) struct CivicSalonMetric {
   summary : String
 } derive(Eq, ToJson, @debug.Debug, @json.FromJson)
 
+#alias(CivicCommunicationMetricCounts)
 pub(all) struct CivicSalonMetricCounts {
   participant_count : Int
   idea_count : Int

@@ -17,6 +17,9 @@ pub type CivicCommunicationIdea = CivicSalonIdea
 pub type CivicCommunicationMetric = CivicSalonMetric
 
 ///|
+pub type CivicCommunicationMetricCounts = CivicSalonMetricCounts
+
+///|
 pub type CivicCommunicationHomeReturn = CivicSalonHomeReturn
 
 ///|
