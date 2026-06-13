@@ -551,6 +551,11 @@ Boundary:
   catalog metadata instead of treating storage prefixes such as `research-` or
   `wenyu-` as architectural book-type gates. Prefixes may remain artifact naming
   conventions, but they are not the product boundary.
+- MoonBook adapter routing follows the same rule: existing catalog metadata is
+  authoritative first; when an explicit research request names a non-canonical
+  book id, the research topic should be derived from the goal/request text and
+  stored under the stable research slug. Do not reject such requests solely
+  because the requested id lacks a `research-` prefix.
 - `src/policy` owns default output path and surface constants for composed
   policies.
 - `src/policy` owns lane normalization and lane-based skill selection.

@@ -56,7 +56,7 @@ pub fn entry_for_explicit_research_book(
   match find_catalog_entry(catalog, book_id) {
     Some(entry) => Some(entry)
     None =>
-      match research_book_topic_from_id(book_id) {
+      match research_storage_topic_for_explicit_book(book_id, goal) {
         Some(storage_topic) => {
           let stable_storage_topic = strip_research_attempt_suffix(
             storage_topic,
@@ -115,11 +115,37 @@ pub fn entry_for_explicit_research_book(
 }
 
 ///|
+fn research_storage_topic_for_explicit_book(
+  book_id : String,
+  goal : String,
+) -> String? {
+  match research_book_topic_from_id(book_id) {
+    Some(topic) => Some(topic)
+    None =>
+      match research_topic_from_goal(goal) {
+        Some(topic) => {
+          let normalized = normalize_topic_id(topic)
+          if normalized.is_empty() {
+            None
+          } else {
+            Some(normalized)
+          }
+        }
+        None => None
+      }
+  }
+}
+
+///|
 fn research_book_topic_from_id(book_id : String) -> String? {
-  if !catalog_book_id_is_research(book_id) || !book_id.has_prefix("research-") {
+  if !catalog_book_id_is_research(book_id) {
     return None
   }
-  let topic = book_id[9:].trim().to_owned()
+  let topic = if book_id.has_prefix("research-") {
+    book_id[9:].trim().to_owned()
+  } else {
+    normalize_topic_id(book_id)
+  }
   if topic.is_empty() {
     None
   } else {

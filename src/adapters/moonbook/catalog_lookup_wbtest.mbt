@@ -40,6 +40,18 @@ test "explicit research lookup honors existing catalog entries first" {
 }
 
 ///|
+test "explicit research lookup uses goal topic without storage prefix gate" {
+  match entry_for_explicit_research_book([], "opc-lab", "research OPC") {
+    Some(entry) => {
+      assert_eq(entry.id, "research-opc")
+      assert_true(entry.tags.contains("topic:opc"))
+      assert_true(entry.tags.contains("requested-book:opc-lab"))
+    }
+    None => fail("expected goal-derived research entry")
+  }
+}
+
+///|
 test "book id lookup honors tagged catalog research entries without prefix" {
   let entry = BookCatalogEntry::new(
     id="opc-lab",

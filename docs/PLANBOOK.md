@@ -107,6 +107,10 @@ scoring, cookbook audit-link scoring, and generated-skill exploration quality
 contracts. Skill templates should call `@book_quality.skill_quality_*` helpers
 for depth, breadth, curiosity, judgment, long-horizon memory, and auditable
 progress requirements instead of defining root-local MoonBook skill predicates.
+MoonBook adapter plans must preserve catalog-first lookup, then use goal-derived
+topic policy for explicit research requests that name a non-canonical book id.
+They must not require the requested id itself to start with `research-`; the
+stable `research-*` slug is a storage target, not an eligibility rule.
 Course-book implementation follows the same domain/runtime split:
 `course_book/` owns course identity, catalog-entry shape, teaching contracts,
 route policy, generated UI state, and generated HTML, while
