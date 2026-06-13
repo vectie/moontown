@@ -76,7 +76,7 @@ fn awaiting_persistence_supervision_directive(
   execution : @core.TaskExecutionRecord,
 ) -> MayorSupervisionDirective? {
   Some({
-    kind: "persist-result",
+    kind: @scheduler.persist_result_action_kind(),
     task_id: execution.task_id,
     execution_status: execution.status,
     detail: "Execution \{execution.task_id} should be persisted into MoonBook.",
@@ -101,7 +101,7 @@ fn review_queued_supervision_directive(
     _ =>
       if execution.heartbeat_tick == 0 {
         Some({
-          kind: "review-sync",
+          kind: @scheduler.review_sync_action_kind(),
           task_id: execution.task_id,
           execution_status: execution.status,
           detail: "Execution \{execution.task_id} is waiting for keeper review sync.",

@@ -10,7 +10,7 @@ test "scheduler plans due standing goals" {
   )
   let actions = plan_standing_goal_actions([goal], 1)
   assert_eq(actions.length(), 1)
-  assert_eq(actions[0].kind, "standing-goal-due")
+  assert_eq(actions[0].kind, standing_goal_due_action_kind())
   assert_true(actions[0].detail.contains("research-opc"))
 }
 
@@ -35,7 +35,9 @@ test "daemon tick records active due goal ids" {
   )
   assert_eq(tick.sequence, 1)
   assert_true(daemon.active_goal_ids == ["watch-opc-news"])
-  assert_true(actions.any(fn(action) { action.kind == "standing-goal-due" }))
+  assert_true(
+    actions.any(fn(action) { action.kind == standing_goal_due_action_kind() }),
+  )
 }
 
 ///|

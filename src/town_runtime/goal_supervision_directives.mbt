@@ -12,7 +12,7 @@ async fn apply_supervision_directive(
     None => return
   }
   match directive.kind {
-    "persist-result" =>
+    kind if kind == @scheduler.persist_result_action_kind() =>
       match @moonbook.entry_for_book_id(catalog, execution.book_id) {
         Some(entry) =>
           match persist_execution_into_book(state, entry, execution) {
@@ -47,7 +47,7 @@ async fn apply_supervision_directive(
       retry_execution(
         state, mayor, catalog, execution, directive, snapshot_path, standing_goals,
       )
-    "review-sync" => {
+    kind if kind == @scheduler.review_sync_action_kind() => {
       let updated = copy_execution_with(
         execution,
         heartbeat_tick=supervision_tick(state),

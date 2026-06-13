@@ -9,6 +9,8 @@ import {
 }
 
 // Values
+pub fn archive_action_kind() -> String
+
 pub fn book_quality_job_id() -> String
 
 pub fn book_quality_job_kind() -> String
@@ -47,15 +49,33 @@ pub fn merge_default_daemon_jobs(Array[ScheduledJob]) -> Array[ScheduledJob]
 
 pub fn next_tick(Int, Array[SchedulerAction]) -> SchedulerTick
 
+pub fn persist_result_action_kind() -> String
+
 pub fn plan_daemon_tick(DaemonState, @core.TownState, @health.HealthReport, standing_goals? : Array[@core.StandingGoal]) -> (DaemonState, SchedulerTick, Array[SchedulerAction])
 
 pub fn plan_standing_goal_actions(Array[@core.StandingGoal], Int) -> Array[SchedulerAction]
 
 pub fn plan_tick(@core.TownState, @health.HealthReport) -> Array[SchedulerAction]
 
+pub fn poll_run_action_kind() -> String
+
+pub fn prepare_packet_action_kind() -> String
+
 pub fn projection_job_id() -> String
 
 pub fn projection_job_kind() -> String
+
+pub fn proposal_import_action_kind() -> String
+
+pub fn recover_stale_action_kind() -> String
+
+pub fn recovery_action_kind() -> String
+
+pub fn review_sync_action_kind() -> String
+
+pub fn run_confirm_action_kind() -> String
+
+pub fn run_start_action_kind() -> String
 
 pub fn scheduled_job_is_book_quality(ScheduledJob) -> Bool
 
@@ -78,6 +98,8 @@ pub fn scheduled_job_is_standing_goal(ScheduledJob) -> Bool
 pub fn scheduled_job_is_supervision(ScheduledJob) -> Bool
 
 pub fn scheduled_job_runs_civic_communication(ScheduledJob) -> Bool
+
+pub fn standing_goal_due_action_kind() -> String
 
 pub fn standing_goal_job_id() -> String
 

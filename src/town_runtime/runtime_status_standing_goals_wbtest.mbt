@@ -17,7 +17,9 @@ test "runtime status includes due standing goal actions" {
   assert_eq(status.standing_goal_count, 1)
   assert_eq(status.due_standing_goal_count, 1)
   assert_true(
-    status.daemon_actions.any(fn(action) { action.kind == "standing-goal-due" }),
+    status.daemon_actions.any(fn(action) {
+      action.kind == @scheduler.standing_goal_due_action_kind()
+    }),
   )
 }
 

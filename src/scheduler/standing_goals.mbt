@@ -21,7 +21,7 @@ pub fn plan_standing_goal_actions(
   for goal in due_standing_goals(goals, tick) {
     let target = goal.target_book_id.unwrap_or("mayor-selected-book")
     actions.push({
-      kind: "standing-goal-due",
+      kind: standing_goal_due_action_kind(),
       detail: "\{goal.id} -> \{target}: \{goal.title}",
     })
   }

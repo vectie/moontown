@@ -12,15 +12,16 @@ pub fn collect_due_tasks(town : @core.TownState) -> Array[@core.TownTask] {
 ///|
 fn execution_action_kind(execution : @core.TaskExecutionRecord) -> String {
   match execution.status {
-    @core.TaskExecutionStatus::PacketReady => "proposal-import"
-    @core.TaskExecutionStatus::ProposalImported => "run-confirm"
-    @core.TaskExecutionStatus::RunConfirmed => "run-start"
-    @core.TaskExecutionStatus::Running => "poll-run"
-    @core.TaskExecutionStatus::AwaitingPersistence => "persist-result"
-    @core.TaskExecutionStatus::ReviewQueued => "review-sync"
-    @core.TaskExecutionStatus::Completed => "archive"
-    @core.TaskExecutionStatus::Stale => "recover-stale"
-    @core.TaskExecutionStatus::Failed => "recovery"
+    @core.TaskExecutionStatus::PacketReady => proposal_import_action_kind()
+    @core.TaskExecutionStatus::ProposalImported => run_confirm_action_kind()
+    @core.TaskExecutionStatus::RunConfirmed => run_start_action_kind()
+    @core.TaskExecutionStatus::Running => poll_run_action_kind()
+    @core.TaskExecutionStatus::AwaitingPersistence =>
+      persist_result_action_kind()
+    @core.TaskExecutionStatus::ReviewQueued => review_sync_action_kind()
+    @core.TaskExecutionStatus::Completed => archive_action_kind()
+    @core.TaskExecutionStatus::Stale => recover_stale_action_kind()
+    @core.TaskExecutionStatus::Failed => recovery_action_kind()
   }
 }
 
@@ -39,7 +40,7 @@ pub fn plan_tick(
         })
       None =>
         actions.push({
-          kind: "prepare-packet",
+          kind: prepare_packet_action_kind(),
           detail: "\{task.id} for \{task.book_id}",
         })
     }
