@@ -16,7 +16,7 @@ pub fn civic_communication_metrics(
   ideas : Array[CivicCommunicationIdea],
 ) -> CivicCommunicationMetric {
   let counts = civic_communication_metric_counts(participants, ideas)
-  let structural_effectiveness_score = civic_salon_structural_score(
+  let structural_effectiveness_score = civic_communication_structural_score(
     participant_count=counts.participant_count,
     idea_count=counts.idea_count,
     research_question_count=counts.research_question_count,
@@ -31,9 +31,11 @@ pub fn civic_communication_metrics(
     participant_idea_links: counts.participant_idea_links,
     participating_book_coverage_count: counts.participating_book_coverage_count,
     idea_return_home_count: counts.idea_return_home_count,
-    average_books_per_idea: civic_salon_average_books_per_idea_label(ideas),
+    average_books_per_idea: civic_communication_average_books_per_output_label(
+      ideas,
+    ),
     structural_effectiveness_score,
-    summary: civic_salon_metric_summary(scenario, counts),
+    summary: civic_communication_metric_summary(scenario, counts),
   }
 }
 
@@ -43,13 +45,17 @@ pub fn civic_communication_metric_counts(
   participants : Array[CivicCommunicationParticipantBook],
   ideas : Array[CivicCommunicationIdea],
 ) -> CivicCommunicationMetricCounts {
-  let participant_idea_links = civic_salon_participant_idea_link_count(ideas)
+  let participant_idea_links = civic_communication_participant_output_link_count(
+    ideas,
+  )
   {
     participant_count: participants.length(),
     idea_count: ideas.length(),
-    research_question_count: civic_salon_research_question_count(ideas),
+    research_question_count: civic_communication_follow_up_question_count(ideas),
     participant_idea_links,
-    participating_book_coverage_count: civic_salon_covered_book_count(ideas),
+    participating_book_coverage_count: civic_communication_covered_book_count(
+      ideas,
+    ),
     idea_return_home_count: participant_idea_links,
   }
 }
@@ -64,7 +70,7 @@ pub fn civic_communication_returned_ideas_for_book(
 }
 
 ///|
-fn civic_salon_metric_summary(
+fn civic_communication_metric_summary(
   scenario : CivicCommunicationScenario,
   counts : CivicCommunicationMetricCounts,
 ) -> String {
@@ -77,20 +83,20 @@ fn civic_salon_metric_summary(
 }
 
 ///|
-fn civic_salon_average_books_per_idea_label(
+fn civic_communication_average_books_per_output_label(
   ideas : Array[CivicCommunicationIdea],
 ) -> String {
   if ideas.length() == 0 {
     "0"
   } else {
-    let links = civic_salon_participant_idea_link_count(ideas)
+    let links = civic_communication_participant_output_link_count(ideas)
     let scaled = links * 10 / ideas.length()
     "\{links}/\{ideas.length()} = \{scaled / 10}.\{scaled % 10}"
   }
 }
 
 ///|
-fn civic_salon_structural_score(
+fn civic_communication_structural_score(
   participant_count~ : Int,
   idea_count~ : Int,
   research_question_count~ : Int,
@@ -98,19 +104,23 @@ fn civic_salon_structural_score(
   idea_return_home_count~ : Int,
   participant_idea_links~ : Int,
 ) -> Int {
-  civic_salon_score_component(participant_count, 10, 20) +
-  civic_salon_score_component(idea_count, 5, 20) +
-  civic_salon_score_component(research_question_count, 15, 20) +
-  civic_salon_score_component(
+  civic_communication_score_component(participant_count, 10, 20) +
+  civic_communication_score_component(idea_count, 5, 20) +
+  civic_communication_score_component(research_question_count, 15, 20) +
+  civic_communication_score_component(
     participating_book_coverage_count, participant_count, 20,
   ) +
-  civic_salon_score_component(
+  civic_communication_score_component(
     idea_return_home_count, participant_idea_links, 20,
   )
 }
 
 ///|
-fn civic_salon_score_component(value : Int, target : Int, max : Int) -> Int {
+fn civic_communication_score_component(
+  value : Int,
+  target : Int,
+  max : Int,
+) -> Int {
   if target <= 0 {
     0
   } else if value >= target {
@@ -121,7 +131,7 @@ fn civic_salon_score_component(value : Int, target : Int, max : Int) -> Int {
 }
 
 ///|
-fn civic_salon_research_question_count(
+fn civic_communication_follow_up_question_count(
   ideas : Array[CivicCommunicationIdea],
 ) -> Int {
   let mut count = 0
@@ -132,7 +142,7 @@ fn civic_salon_research_question_count(
 }
 
 ///|
-fn civic_salon_participant_idea_link_count(
+fn civic_communication_participant_output_link_count(
   ideas : Array[CivicCommunicationIdea],
 ) -> Int {
   let mut count = 0
@@ -143,7 +153,9 @@ fn civic_salon_participant_idea_link_count(
 }
 
 ///|
-fn civic_salon_covered_book_count(ideas : Array[CivicCommunicationIdea]) -> Int {
+fn civic_communication_covered_book_count(
+  ideas : Array[CivicCommunicationIdea],
+) -> Int {
   let covered : Array[String] = []
   for idea in ideas {
     for book_id in idea.participating_books {

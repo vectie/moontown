@@ -1,8 +1,8 @@
 ///|
-test "salon metrics count exchange yield and returned-home links" {
+test "communication metrics count exchange yield and returned-home links" {
   let participants = [
-    salon_metric_test_participant("vla"),
-    salon_metric_test_participant("world-model"),
+    communication_metric_test_participant("vla"),
+    communication_metric_test_participant("world-model"),
   ]
   let ideas = [
     {
@@ -17,7 +17,7 @@ test "salon metrics count exchange yield and returned-home links" {
       next_experiment: "Draft a benchmark card.",
     },
   ]
-  let scenario = salon_metric_test_scenario(participants, ideas)
+  let scenario = communication_metric_test_scenario(participants, ideas)
   let counts = civic_communication_metric_counts(participants, ideas)
   let metrics = civic_communication_metrics(scenario, participants, ideas)
   assert_eq(counts.participant_count, 2)
@@ -55,7 +55,7 @@ test "returned ideas filter by home book" {
 }
 
 ///|
-fn salon_metric_test_participant(
+fn communication_metric_test_participant(
   book_id : String,
 ) -> CivicCommunicationParticipantBook {
   {
@@ -71,7 +71,7 @@ fn salon_metric_test_participant(
 }
 
 ///|
-fn salon_metric_test_scenario(
+fn communication_metric_test_scenario(
   participants : Array[CivicCommunicationParticipantBook],
   ideas : Array[CivicCommunicationIdea],
 ) -> CivicCommunicationScenario {
