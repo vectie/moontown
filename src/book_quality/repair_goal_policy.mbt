@@ -31,7 +31,7 @@ pub fn repair_goal_ids(goals : Array[@core.StandingGoal]) -> Array[String] {
 
 ///|
 pub fn repair_goal_source_policy(book_type : String) -> String {
-  source_policy_for_type(book_type)
+  @policy.source_policy_for_type(book_type)
 }
 
 ///|

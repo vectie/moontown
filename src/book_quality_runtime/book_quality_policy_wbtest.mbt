@@ -92,12 +92,12 @@ test "book quality policy specs keep repair actions and source policy together" 
   }
   assert_true(@book_quality.policy_spec_for_type("unknown-book") is None)
   assert_eq(
-    @book_quality.source_policy_for_type("unknown-book"),
+    @policy.source_policy_for_type("unknown-book"),
     @policy.book_first_policy(),
   )
   assert_true(
     @policy.has_skill(
-      @book_quality.policy_for_type("unknown-book"),
+      @policy.policy_for_type("unknown-book"),
       "workspace-bootstrap",
     ),
   )
@@ -113,7 +113,7 @@ test "book quality type classification preserves role precedence" {
     tags=["research"],
   )
   assert_eq(
-    @book_quality.catalog_entry_type(course.id, course.name, course.tags),
+    @policy.catalog_entry_type(course.id, course.name, course.tags),
     @policy.course_type(),
   )
   let plan = book_quality_catalog_entry(
@@ -124,7 +124,7 @@ test "book quality type classification preserves role precedence" {
     tags=["research"],
   )
   assert_eq(
-    @book_quality.catalog_entry_type(plan.id, plan.name, plan.tags),
+    @policy.catalog_entry_type(plan.id, plan.name, plan.tags),
     @policy.planbook_type(),
   )
   let civic = book_quality_catalog_entry(
@@ -135,7 +135,7 @@ test "book quality type classification preserves role precedence" {
     tags=[],
   )
   assert_eq(
-    @book_quality.catalog_entry_type(civic.id, civic.name, civic.tags),
+    @policy.catalog_entry_type(civic.id, civic.name, civic.tags),
     @policy.civic_type(),
   )
   let operational = book_quality_catalog_entry(
@@ -146,7 +146,7 @@ test "book quality type classification preserves role precedence" {
     tags=[],
   )
   assert_eq(
-    @book_quality.catalog_entry_type(
+    @policy.catalog_entry_type(
       operational.id,
       operational.name,
       operational.tags,
@@ -165,7 +165,7 @@ test "book quality active catalog filter excludes only archive and smoke artifac
     tags=["civic-service"],
   )
   assert_true(
-    @book_quality.catalog_entry_active(
+    @policy.catalog_entry_active(
       contest.id,
       contest.name,
       contest.purpose,
@@ -180,7 +180,7 @@ test "book quality active catalog filter excludes only archive and smoke artifac
     tags=["research"],
   )
   assert_false(
-    @book_quality.catalog_entry_active(
+    @policy.catalog_entry_active(
       smoke.id,
       smoke.name,
       smoke.purpose,
@@ -195,7 +195,7 @@ test "book quality active catalog filter excludes only archive and smoke artifac
     tags=["research", "archived"],
   )
   assert_false(
-    @book_quality.catalog_entry_active(
+    @policy.catalog_entry_active(
       archived.id,
       archived.name,
       archived.purpose,

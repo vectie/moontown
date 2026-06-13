@@ -6,9 +6,9 @@ test "book quality consumes policy-owned taxonomy" {
 }
 
 ///|
-test "book quality delegates catalog classification to policy package" {
+test "policy package owns catalog classification" {
   assert_false(
-    catalog_entry_active(
+    @policy.catalog_entry_active(
       "research-smoke",
       "Smoke Test",
       "temporary smoke test",
@@ -16,28 +16,31 @@ test "book quality delegates catalog classification to policy package" {
     ),
   )
   assert_true(
-    catalog_entry_active("research-opc", "One Person Company", "domain watch", [
-      "research",
-    ]),
+    @policy.catalog_entry_active(
+      "research-opc",
+      "One Person Company",
+      "domain watch",
+      ["research"],
+    ),
   )
   assert_eq(
-    catalog_entry_type("plan-moontown-quality", "Moontown Quality", []),
+    @policy.catalog_entry_type("plan-moontown-quality", "Moontown Quality", []),
     @policy.planbook_type(),
   )
   assert_eq(
-    catalog_entry_type("course-wenyu-game-design", "Game Design", []),
+    @policy.catalog_entry_type("course-wenyu-game-design", "Game Design", []),
     @policy.course_type(),
   )
   assert_eq(
-    catalog_entry_type("wenyu-policy-hall", "Policy Hall", []),
+    @policy.catalog_entry_type("wenyu-policy-hall", "Policy Hall", []),
     @policy.civic_type(),
   )
   assert_eq(
-    catalog_entry_type("coding", "Coding", []),
+    @policy.catalog_entry_type("coding", "Coding", []),
     @policy.operational_type(),
   )
   assert_eq(
-    catalog_entry_type("unknown", "Unknown", []),
+    @policy.catalog_entry_type("unknown", "Unknown", []),
     @policy.general_type(),
   )
 }
@@ -327,9 +330,15 @@ test "book quality package maps legacy labels to composed policies" {
     None => fail("expected civic policy spec")
   }
   assert_true(policy_spec_for_type("unknown-book") is None)
-  assert_eq(source_policy_for_type("unknown-book"), @policy.book_first_policy())
+  assert_eq(
+    @policy.source_policy_for_type("unknown-book"),
+    @policy.book_first_policy(),
+  )
   assert_true(
-    @policy.has_skill(policy_for_type("unknown-book"), "workspace-bootstrap"),
+    @policy.has_skill(
+      @policy.policy_for_type("unknown-book"),
+      "workspace-bootstrap",
+    ),
   )
 }
 

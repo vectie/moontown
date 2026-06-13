@@ -61,16 +61,6 @@ pub fn policy_spec_for_type(book_type : String) -> PolicySpec? {
 }
 
 ///|
-pub fn source_policy_for_type(book_type : String) -> String {
-  @policy.source_policy_for_type(book_type)
-}
-
-///|
-pub fn policy_for_type(book_type : String) -> @policy.BookPolicy {
-  @policy.policy_for_type(book_type)
-}
-
-///|
 pub fn repair_action_for_type(book_type : String) -> String {
   match policy_spec_for_type(book_type) {
     Some(spec) => spec.repair_action

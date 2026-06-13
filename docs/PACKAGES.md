@@ -423,6 +423,9 @@ Boundary:
   `research_type`, `civic_type`, `web_first_policy`, or `book_first_policy`;
   downstream packages should import `src/policy` directly when they need those
   values.
+- `src/book_quality` must also not expose pass-through policy lookup or catalog
+  classification APIs; runtime packages should call `src/policy` for
+  `policy_for_type`, `source_policy_for_type`, and catalog classification.
 - operational-book bootstrap and projection templates may live here because
   they support quality/operating-memory workflows, but their type labels still
   come from `src/policy`.

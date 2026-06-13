@@ -33,7 +33,7 @@ pub async fn score_book(
 
 ///|
 fn score_book_type(entry : @moonbook.BookCatalogEntry) -> String {
-  catalog_entry_type(entry.id, entry.name, entry.tags)
+  @policy.catalog_entry_type(entry.id, entry.name, entry.tags)
 }
 
 ///|
@@ -323,7 +323,7 @@ async fn finalize_score(
   gaps : Array[String],
   review_result_dir : String,
 ) -> BookQualityScore {
-  let policy = policy_for_type(book_type)
+  let policy = @policy.policy_for_type(book_type)
   let present_required_files = policy_present_required_files(
     root, policy, strengths, gaps,
   )

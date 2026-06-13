@@ -13,6 +13,7 @@ import {
   "vectie/moontown/cookbook",
   "vectie/moontown/core",
   "vectie/moontown/course_book",
+  "vectie/moontown/policy",
   "vectie/moontown/planbook",
   "vectie/moontown/skill_quality",
   "vectie/moontown/storage",
@@ -21,5 +22,4 @@ import {
 
 import {
   "moonbitlang/async",
-  "vectie/moontown/policy",
 } for "wbtest"

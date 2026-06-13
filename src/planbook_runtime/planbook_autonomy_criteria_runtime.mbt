@@ -40,7 +40,7 @@ async fn planbook_runtime_book_quality_coverage_criterion(
         let entry = @book_quality_runtime.book_quality_catalog_entry_from_runtime_book(
           book,
         )
-        if @book_quality.catalog_entry_active(
+        if @policy.catalog_entry_active(
             entry.id,
             entry.name,
             entry.purpose,

@@ -82,10 +82,5 @@ fn book_quality_repairable_book_ids(
 fn book_quality_repairable_catalog_entry(
   entry : @moonbook.BookCatalogEntry,
 ) -> Bool {
-  @book_quality.catalog_entry_active(
-    entry.id,
-    entry.name,
-    entry.purpose,
-    entry.tags,
-  )
+  @policy.catalog_entry_active(entry.id, entry.name, entry.purpose, entry.tags)
 }

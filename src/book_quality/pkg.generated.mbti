@@ -27,10 +27,6 @@ pub fn base_workspace_assessment(Bool, Bool, Bool) -> BookQualityWorkspaceAssess
 
 pub fn blocked_review_run(String, String, String, String, UInt64) -> BookQualityReviewRun
 
-pub fn catalog_entry_active(String, String, String, Array[String]) -> Bool
-
-pub fn catalog_entry_type(String, String, Array[String]) -> String
-
 pub fn civic_base_required_paths() -> Array[BookQualityRequiredPath]
 
 pub fn civic_latest_result_assessment(Bool) -> BookQualitySignalAssessment
@@ -106,8 +102,6 @@ pub fn path_presence_assessment(String, Int, Bool) -> BookQualityPathAssessment
 pub fn path_set_assessment(Array[String], Array[String], Int) -> BookQualityPathSetAssessment
 
 pub fn planbook_required_paths() -> Array[BookQualityRequiredPath]
-
-pub fn policy_for_type(String) -> @policy.BookPolicy
 
 pub fn policy_spec_for_type(String) -> PolicySpec?
 
@@ -230,8 +224,6 @@ pub fn semantic_repair_action(semantic_repair_task? : String?) -> String
 pub fn semantic_repair_task_from_review_text(String) -> String?
 
 pub fn semantic_review_requires_repair(Int?) -> Bool
-
-pub fn source_policy_for_type(String) -> String
 
 pub fn stable_action() -> String
 

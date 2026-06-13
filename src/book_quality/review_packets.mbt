@@ -11,7 +11,7 @@ pub fn review_packet(
   {
     book_id: score.book_id,
     book_type: score.book_type,
-    policy: policy_for_type(score.book_type),
+    policy: @policy.policy_for_type(score.book_type),
     workspace_root: score.workspace_root,
     structural_score: score.structural_score,
     review_skill_path: review_skill_path(review_dir),
@@ -99,7 +99,7 @@ fn review_prompt(score : BookQualityScore) -> String {
     "",
     "Use this composed policy as the source of truth for what the book should do:",
     "",
-    @policy.markdown(policy_for_type(score.book_type)),
+    @policy.markdown(@policy.policy_for_type(score.book_type)),
     "",
     "Structural readiness score is `\{score.structural_score}`. Do not blindly accept it as quality. Structural readiness only proves that expected files exist. Use the book's own contracts and skills to judge real quality.",
     "",

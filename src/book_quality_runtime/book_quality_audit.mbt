@@ -25,7 +25,7 @@ async fn quality_catalog_with_runtime_books(
   let merged : Array[@moonbook.BookCatalogEntry] = []
   let ignored_ids : Array[String] = []
   for entry in catalog {
-    if @book_quality.catalog_entry_active(
+    if @policy.catalog_entry_active(
         entry.id,
         entry.name,
         entry.purpose,
@@ -43,7 +43,7 @@ async fn quality_catalog_with_runtime_books(
           continue
         }
         let entry = book_quality_catalog_entry_from_runtime_book(book)
-        if @book_quality.catalog_entry_active(
+        if @policy.catalog_entry_active(
             entry.id,
             entry.name,
             entry.purpose,
