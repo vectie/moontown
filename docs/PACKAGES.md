@@ -340,6 +340,9 @@ Boundary:
 - `src/town_synthesis_runtime` owns synthesis IO: reading each lane's deep
   report, writing the goal-specific and `latest.md` synthesis artifacts, and
   calling the package-owned registration/event policy.
+- `src/town_synthesis` should consume `src/policy` goal vocabulary for choosing
+  synthesis surfaces such as Wenyu output. It should not maintain local
+  `wenyu`/research trigger-word checks.
 - Remaining MoonBook summary and research-quality observations inside
   `town_synthesis` are an explicit next seam: they should eventually follow
   the same observation-fed pattern used for lane report text.

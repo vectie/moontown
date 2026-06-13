@@ -16,6 +16,19 @@ test "Wenyu executive summary fragments preserve lane ownership story" {
 }
 
 ///|
+test "Wenyu synthesis routing consumes policy goal vocabulary" {
+  let mayor = @roles.Mayor::new()
+  let plan = mayor.plan_goal(@moonbook.default_catalog(), "ordinary town work")
+  assert_true(
+    is_wenyu_town_synthesis_plan(
+      "Build Wenyu Valley AI Innovation Town according to docs/WENYU_VALLEY_PRD.md",
+      plan,
+    ),
+  )
+  assert_true(!is_wenyu_town_synthesis_plan("ordinary town work", plan))
+}
+
+///|
 test "Wenyu architecture graph renders mayor to lane to operator path" {
   let mayor = @roles.Mayor::new()
   let plan = mayor.plan_goal(

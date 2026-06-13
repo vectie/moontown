@@ -3,8 +3,7 @@ fn is_wenyu_town_synthesis_plan(
   goal : String,
   plan : @roles.MayorGoalPlan,
 ) -> Bool {
-  let notes = goal.to_lower()
-  if notes.contains("wenyu") || notes.contains("wenyu valley") {
+  if @policy.wenyu_valley_goal_text(goal) {
     return true
   }
   for lane in plan.lanes {
