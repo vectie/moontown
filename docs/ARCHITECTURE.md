@@ -152,10 +152,14 @@ book owns. The implementation now has a first-class `policy` package:
   owns book-template registry, registry-file manifest, request, request-ledger,
   event, status, process-result, and processing-outcome DTOs.
 - [book_templates/registry_policy.mbt](/Users/kq/Workspace/moontown/src/book_templates/registry_policy.mbt)
-  owns registry readiness construction, descriptor filesystem check-path
-  expansion, and registry Markdown rendering. Root may observe missing files,
-  but it should not decide what a ready registry means, which descriptor paths
-  prove a template exists, or assemble the operator-facing registry page.
+  owns pure registry readiness construction, descriptor check-path expansion,
+  and registry Markdown rendering. It should not load files directly.
+- [book_templates/registry_storage.mbt](/Users/kq/Workspace/moontown/src/book_templates/registry_storage.mbt)
+  owns filesystem-backed registry inspection: loading the registry manifest and
+  observing which descriptor paths are missing before passing those observations
+  into `registry_policy`. Root may call `inspect_registry(...)`, but it should
+  not decide what a ready registry means, which descriptor paths prove a
+  template exists, or assemble the operator-facing registry page.
 - [book_templates/installer_policy.mbt](/Users/kq/Workspace/moontown/src/book_templates/installer_policy.mbt)
   owns unsupported/unknown template installer outcome wording. Root may dispatch
   concrete installers, but it should not phrase installer availability failures.

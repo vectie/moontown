@@ -95,6 +95,13 @@ Important packages:
 
 `src/ui/rabbita-town` is its own nested module for the browser frontend.
 
+Within a package, keep policy and IO distinct. Files named `*_policy.mbt`
+should derive decisions, labels, readiness, summaries, and contracts from
+already-observed inputs. Files named `*_storage.mbt`, `*_runtime.mbt`, or
+adapter files may read/write the filesystem, inspect processes, or call
+external tools. This keeps the town architecture testable and prevents hidden
+runtime behavior from leaking back into policy packages.
+
 ## Plan-First Rule
 
 For any change larger than a trivial one-line fix, create or update a durable
