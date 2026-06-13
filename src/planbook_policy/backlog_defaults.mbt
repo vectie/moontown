@@ -1,5 +1,7 @@
 ///|
-fn default_planbook_backlog_items() -> Array[PlanbookImplementationBacklogItem] {
+pub fn default_backlog_items(
+  created_at_ms : UInt64,
+) -> Array[PlanbookImplementationBacklogItem] {
   [
     {
       id: "live-change-log-projection",
@@ -22,7 +24,7 @@ fn default_planbook_backlog_items() -> Array[PlanbookImplementationBacklogItem] 
         "moon check --no-render", "moon test planbook_autonomy_wbtest.mbt live_autonomy_wbtest.mbt --no-render",
         "git diff --check",
       ],
-      created_at_ms: @env.now(),
+      created_at_ms,
     },
     {
       id: "validated-auto-commit-policy",
@@ -44,7 +46,7 @@ fn default_planbook_backlog_items() -> Array[PlanbookImplementationBacklogItem] 
         "moon check --no-render", "moon test planbook_autonomy_wbtest.mbt --no-render",
         "git diff --check",
       ],
-      created_at_ms: @env.now(),
+      created_at_ms,
     },
     {
       id: "daily-engineering-digest",
@@ -66,7 +68,7 @@ fn default_planbook_backlog_items() -> Array[PlanbookImplementationBacklogItem] 
         "moon check --no-render", "moon test planbook_autonomy_wbtest.mbt live_autonomy_wbtest.mbt --no-render",
         "git diff --check",
       ],
-      created_at_ms: @env.now(),
+      created_at_ms,
     },
   ]
 }

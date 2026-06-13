@@ -429,12 +429,15 @@ editor-feature repair instructions, validation/diff/commit gates, stale-plan
 handling, backlog completion, result writing, and satisfaction gating. It also
 owns the generated `planbook-repair` skill text because that text defines the
 worker contract, concrete example, accepted patch-receipt requirements, and
-no-churn rules. Root
+no-churn rules. The same package owns implementation-backlog policy: backlog
+item schema, canonical backlog/progress/stop/completion/change-log paths,
+default seed items, projection Markdown, cadence calculation, stop-policy text,
+criterion id/evidence/next-action wording, and target-file hints. Root
 Moontown may resolve source roots, write PlanBook files, read MoonClaw run
 indexes, dispatch ACP packets, and reconcile filesystem evidence, but it should
 not redefine repair paths, repair request rules, repair decisions, validation
-gates, receipt fields, generated repair skill text, or status bucket semantics
-locally.
+gates, receipt fields, generated repair skill text, status bucket semantics, or
+backlog schema/rendering/cadence semantics locally.
 PlanBook generated-site writes follow the global output rule as well:
 `planbook_runtime/` consumes `policy.default_generated_site_projection_path()`
 for the default projection path instead of redefining it locally.

@@ -578,6 +578,9 @@ Key files:
 - [src/planbook_policy/run_status.mbt](/Users/kq/Workspace/moontown/src/planbook_policy/run_status.mbt)
 - [src/planbook_policy/repair_commands.mbt](/Users/kq/Workspace/moontown/src/planbook_policy/repair_commands.mbt)
 - [src/planbook_policy/validation_evidence.mbt](/Users/kq/Workspace/moontown/src/planbook_policy/validation_evidence.mbt)
+- [src/planbook_policy/backlog_types.mbt](/Users/kq/Workspace/moontown/src/planbook_policy/backlog_types.mbt)
+- [src/planbook_policy/backlog_defaults.mbt](/Users/kq/Workspace/moontown/src/planbook_policy/backlog_defaults.mbt)
+- [src/planbook_policy/backlog_rendering.mbt](/Users/kq/Workspace/moontown/src/planbook_policy/backlog_rendering.mbt)
 - [src/planbook_runtime/planbook_repair_run_status.mbt](/Users/kq/Workspace/moontown/src/planbook_runtime/planbook_repair_run_status.mbt)
 - [src/planbook_runtime/planbook_repair_result.mbt](/Users/kq/Workspace/moontown/src/planbook_runtime/planbook_repair_result.mbt)
 - [src/planbook_runtime/planbook_daemon_phase.mbt](/Users/kq/Workspace/moontown/src/planbook_runtime/planbook_daemon_phase.mbt)
@@ -587,6 +590,9 @@ Purpose:
 - `src/planbook_policy` owns pure PlanBook contracts, repair command policy,
   PlanBook validation-evidence contract/readiness/required-command policy, and
   raw MoonClaw run-status normalization.
+- `src/planbook_policy` also owns PlanBook backlog DTOs, canonical backlog
+  paths, default seed items, projection Markdown, cadence/stop-policy text,
+  backlog criterion ids/evidence/next-action wording, and target-file hints.
 - `src/planbook_runtime` owns workspace IO, run reconciliation, and
   evidence-aware repair lifecycle decisions.
 - `src/planbook_runtime` owns the daemon-facing PlanBook phase: write autonomy
@@ -602,6 +608,9 @@ Boundary:
 - PlanBook runtime may write `planbook/latest-validation.md`, but the
   `planbook.validation.v1` contract, required validation commands, and
   readiness predicate belong in `src/planbook_policy`.
+- PlanBook runtime may load/write `raw/backlog/...`, progress pages, completion
+  evidence, and the live change log, but backlog schema/path/default/cadence/
+  rendering/criterion wording belongs in `src/planbook_policy`.
 - default generated-site path semantics belong to `src/policy`; PlanBook
   runtime consumes `policy.default_generated_site_projection_path()` rather
   than redefining the projection path.

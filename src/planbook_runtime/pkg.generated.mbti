@@ -2,8 +2,6 @@
 package "vectie/moontown/planbook_runtime"
 
 import {
-  "moonbitlang/core/debug",
-  "moonbitlang/core/json",
   "vectie/moontown/planbook_policy",
 }
 
@@ -51,8 +49,6 @@ pub struct PlanbookDaemonPhaseResult {
   planbook_summary : String
   repair_summary : String
 }
-
-type PlanbookImplementationBacklogItem derive(Eq, ToJson, @debug.Debug, @json.FromJson)
 
 // Type aliases
 pub using @planbook_policy {type PlanbookAutonomyStatus}

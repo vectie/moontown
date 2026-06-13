@@ -67,6 +67,60 @@ test "planbook validation evidence contract is package-owned policy" {
 }
 
 ///|
+test "planbook backlog policy owns paths cadence and projection text" {
+  let root = "/tmp/moontown-planbook-policy-backlog"
+  assert_eq(
+    implementation_backlog_path(root),
+    "\{root}/raw/backlog/implementation-backlog.json",
+  )
+  assert_eq(
+    backlog_markdown_path(root),
+    "\{root}/wiki/planning/implementation-backlog.md",
+  )
+  assert_eq(change_log_path(root), "\{root}/wiki/history/change-log.md")
+  assert_eq(
+    backlog_progress_path(root),
+    "\{root}/wiki/planning/backlog-progress.md",
+  )
+  assert_eq(
+    backlog_stop_policy_path(root),
+    "\{root}/wiki/planning/stop-policy.md",
+  )
+  assert_eq(
+    backlog_completion_path(root, "item-1"),
+    "\{root}/raw/backlog/completed/item-1.md",
+  )
+  assert_eq(backlog_next_check_interval_ms(1, 0, 1), 0)
+  assert_eq(backlog_next_check_interval_ms(0, 1, 1), 1800000)
+  assert_eq(backlog_next_check_interval_ms(0, 0, 1), 300000)
+  let items = default_backlog_items(42UL)
+  assert_eq(items.length(), 3)
+  assert_eq(items[0].created_at_ms, 42UL)
+  assert_true(backlog_markdown(items).contains("live-change-log-projection"))
+  assert_true(backlog_readme_markdown().contains("PlanBook Backlog Contract"))
+  assert_true(
+    backlog_progress_markdown(3, 1, 1, 1, 0).contains("next_check_interval_ms"),
+  )
+  assert_true(
+    backlog_stop_policy_markdown().contains("raw/backlog/completed/<id>.md"),
+  )
+  assert_eq(backlog_criterion_id("abc"), "backlog-abc")
+  assert_true(
+    backlog_criterion_next_action(items[0]).contains(
+      "raw/backlog/completed/live-change-log-projection.md",
+    ),
+  )
+  assert_true(
+    backlog_target_files_for_criterion(
+      "backlog-live-change-log-projection", "/repo",
+    ).contains("/repo/docs/PLANBOOK.md"),
+  )
+  assert_true(
+    backlog_target_files_for_criterion("live-runtime-recovery", "/repo").is_empty(),
+  )
+}
+
+///|
 test "planbook repair workspace layout is package-owned policy" {
   let workspace_root = "/tmp/moontown-planbook-repair-paths"
   assert_eq(

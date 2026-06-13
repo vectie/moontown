@@ -7,6 +7,38 @@ import {
 }
 
 // Values
+pub fn backlog_completion_path(String, String) -> String
+
+pub fn backlog_criterion_evidence(PlanbookImplementationBacklogItem) -> String
+
+pub fn backlog_criterion_id(String) -> String
+
+pub fn backlog_criterion_next_action(PlanbookImplementationBacklogItem) -> String
+
+pub fn backlog_markdown(Array[PlanbookImplementationBacklogItem]) -> String
+
+pub fn backlog_markdown_path(String) -> String
+
+pub fn backlog_next_check_interval_ms(Int, Int, Int) -> Int
+
+pub fn backlog_progress_markdown(Int, Int, Int, Int, Int) -> String
+
+pub fn backlog_progress_path(String) -> String
+
+pub fn backlog_readme_markdown() -> String
+
+pub fn backlog_stop_policy_markdown() -> String
+
+pub fn backlog_stop_policy_path(String) -> String
+
+pub fn backlog_target_files_for_criterion(String, String) -> Array[String]
+
+pub fn change_log_path(String) -> String
+
+pub fn default_backlog_items(UInt64) -> Array[PlanbookImplementationBacklogItem]
+
+pub fn implementation_backlog_path(String) -> String
+
 pub fn moonclaw_status_bucket(String?) -> String
 
 pub fn moonclaw_status_is_failed_terminal(String) -> Bool
@@ -180,6 +212,20 @@ pub(all) struct PlanbookCriterionStatus {
   satisfied : Bool
   evidence : String
   next_action : String
+} derive(Eq, ToJson, @debug.Debug, @json.FromJson)
+
+pub struct PlanbookImplementationBacklogItem {
+  id : String
+  title : String
+  owner : String
+  priority : Int
+  status : String
+  source_plan : String
+  rationale : String
+  target_files : Array[String]
+  acceptance : Array[String]
+  validation : Array[String]
+  created_at_ms : UInt64
 } derive(Eq, ToJson, @debug.Debug, @json.FromJson)
 
 pub(all) struct PlanbookRepairTask {

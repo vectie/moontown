@@ -195,11 +195,15 @@ selected editor features, validate, inspect diffs, commit, avoid churn, update
 stale plans, complete backlog items, write results, and satisfy gates. It also
 owns the generated `planbook-repair` skill text because that text defines the
 worker contract, concrete example, accepted patch-receipt requirements, and
-no-churn rules. Root
+no-churn rules. It also owns implementation-backlog policy: backlog item schema,
+canonical backlog/progress/stop/completion/change-log paths, default seed
+items, generated backlog/progress/stop Markdown, cadence calculation, criterion
+id/evidence/next-action wording, and target-file hints. Root
 PlanBook code may still inspect workspaces, materialize repair files, dispatch
 MoonClaw packets, and read run outputs, but future plans should not add
 root-local copies of repair receipt fields, validation commands, repair paths,
-repair request rules, generated repair skill text, or run-status predicates.
+repair request rules, generated repair skill text, run-status predicates, or
+backlog schema/rendering/cadence semantics.
 Live-autonomy policy lives in the dedicated
 [live_autonomy_policy](/Users/kq/Workspace/moontown/src/live_autonomy_policy)
 package. It owns the live spine DTO, journal/probe DTOs, active worker and

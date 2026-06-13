@@ -1,5 +1,20 @@
 ///|
-fn render_planbook_backlog_progress_markdown(
+pub fn backlog_next_check_interval_ms(
+  open : Int,
+  completed : Int,
+  total : Int,
+) -> Int {
+  if open > 0 {
+    0
+  } else if total == 0 || completed >= total {
+    1800000
+  } else {
+    300000
+  }
+}
+
+///|
+pub fn backlog_progress_markdown(
   total : Int,
   open : Int,
   completed : Int,
@@ -24,7 +39,7 @@ fn render_planbook_backlog_progress_markdown(
 }
 
 ///|
-fn planbook_backlog_stop_policy_markdown() -> String {
+pub fn backlog_stop_policy_markdown() -> String {
   [
     "# Stop Policy", "", "The town should stop implementing when one of these conditions is true:",
     "", "- The selected backlog item has completion evidence under `raw/backlog/completed/<id>.md`.",
@@ -38,13 +53,11 @@ fn planbook_backlog_stop_policy_markdown() -> String {
 }
 
 ///|
-fn render_planbook_backlog_markdown(
-  workspace_root : String,
+pub fn backlog_markdown(
   items : Array[PlanbookImplementationBacklogItem],
 ) -> String {
   let rows : Array[String] = []
   for item in items {
-    ignore(workspace_root)
     rows.push(
       "|\{item.id}|\{item.priority}|\{item.status}|\{item.owner}|\{item.title}|",
     )
@@ -65,7 +78,7 @@ fn render_planbook_backlog_markdown(
 }
 
 ///|
-fn planbook_backlog_readme_markdown() -> String {
+pub fn backlog_readme_markdown() -> String {
   [
     "# PlanBook Backlog Contract", "", "The PlanBook backlog lets the live town continue improving itself without waiting for a hardcoded doctor criterion.",
     "", "Each item is still bounded:", "", "- `id`: stable identifier used as the repair criterion id",
@@ -76,4 +89,43 @@ fn planbook_backlog_readme_markdown() -> String {
     "", "Completion evidence belongs under `raw/backlog/completed/<id>.md` and should be produced by the repair worker after validation.",
     "", "Progress and cadence are projected to `wiki/planning/backlog-progress.md`. Stop rules are projected to `wiki/planning/stop-policy.md`.",
   ].join("\n")
+}
+
+///|
+pub fn backlog_criterion_id(item_id : String) -> String {
+  "backlog-\{item_id}"
+}
+
+///|
+pub fn backlog_criterion_evidence(
+  item : PlanbookImplementationBacklogItem,
+) -> String {
+  "\{item.rationale} Priority: \{item.priority}. Target files: \{item.target_files.join(", ")}"
+}
+
+///|
+pub fn backlog_criterion_next_action(
+  item : PlanbookImplementationBacklogItem,
+) -> String {
+  "implement backlog item `\{item.id}` using its acceptance criteria: \{item.acceptance.join("; ")}. Validate with: \{item.validation.join("; ")}. Write completion evidence to `raw/backlog/completed/\{item.id}.md` after validation."
+}
+
+///|
+pub fn backlog_target_files_for_criterion(
+  criterion_id : String,
+  source_root : String,
+) -> Array[String] {
+  if !criterion_id.contains("backlog-") {
+    return []
+  }
+  [
+    "\{source_root}/src/planbook_runtime/planbook_backlog.mbt",
+    "\{source_root}/src/planbook_runtime/planbook_autonomy.mbt",
+    "\{source_root}/src/planbook_runtime/planbook_repair.mbt",
+    "\{source_root}/src/planbook_runtime/planbook.mbt",
+    "\{source_root}/src/runtime_status/runtime_status_snapshot.mbt",
+    "\{source_root}/docs/PLANBOOK.md",
+    "\{source_root}/docs/USAGE.md",
+    "\{source_root}/.moontown/books/plan-moontown-quality/raw/backlog/implementation-backlog.json",
+  ]
 }

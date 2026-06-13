@@ -2,11 +2,11 @@
 async fn ensure_planbook_backlog(
   workspace_root : String,
 ) -> Array[PlanbookImplementationBacklogItem] {
-  let path = default_planbook_backlog_path(workspace_root~)
+  let path = @planbook_policy.implementation_backlog_path(workspace_root)
   let items = if @fs.exists(path) {
     load_planbook_backlog_items(workspace_root)
   } else {
-    default_planbook_backlog_items()
+    @planbook_policy.default_backlog_items(@env.now())
   }
   if !@fs.exists(path) {
     @support.write_text_file(path, items.to_json().stringify(indent=2))
@@ -21,16 +21,16 @@ async fn ensure_planbook_backlog(
 async fn load_planbook_backlog_items(
   workspace_root : String,
 ) -> Array[PlanbookImplementationBacklogItem] {
-  let path = default_planbook_backlog_path(workspace_root~)
+  let path = @planbook_policy.implementation_backlog_path(workspace_root)
   let text = @support.read_text_or_empty(path)
   if text.trim().is_empty() {
-    return default_planbook_backlog_items()
+    return @planbook_policy.default_backlog_items(@env.now())
   }
   let parsed = @json.parse(text) catch {
-    _ => return default_planbook_backlog_items()
+    _ => return @planbook_policy.default_backlog_items(@env.now())
   }
   @json.from_json(parsed) catch {
-    _ => default_planbook_backlog_items()
+    _ => @planbook_policy.default_backlog_items(@env.now())
   }
 }
 
@@ -42,7 +42,9 @@ async fn first_open_planbook_backlog_item(
   let mut best : PlanbookImplementationBacklogItem? = None
   for item in items {
     if item.status == "open" &&
-      !@fs.exists(planbook_backlog_completion_path(workspace_root, item.id)) {
+      !@fs.exists(
+        @planbook_policy.backlog_completion_path(workspace_root, item.id),
+      ) {
       match best {
         None => best = Some(item)
         Some(current) =>
@@ -62,11 +64,11 @@ async fn write_planbook_backlog_projection(
 ) -> Unit {
   @support.write_text_file(
     "\{workspace_root}/raw/backlog/README.md",
-    planbook_backlog_readme_markdown(),
+    @planbook_policy.backlog_readme_markdown(),
   )
   @support.write_text_file(
-    planbook_backlog_markdown_path(workspace_root),
-    render_planbook_backlog_markdown(workspace_root, items),
+    @planbook_policy.backlog_markdown_path(workspace_root),
+    @planbook_policy.backlog_markdown(items),
   )
 }
 
@@ -80,7 +82,9 @@ async fn write_planbook_backlog_progress(
   let mut completed = 0
   let mut blocked = 0
   for item in items {
-    if @fs.exists(planbook_backlog_completion_path(workspace_root, item.id)) ||
+    if @fs.exists(
+        @planbook_policy.backlog_completion_path(workspace_root, item.id),
+      ) ||
       item.status == "done" {
       completed += 1
     } else if item.status == "blocked" || item.status == "paused" {
@@ -89,7 +93,7 @@ async fn write_planbook_backlog_progress(
       open += 1
     }
   }
-  let interval_ms = planbook_backlog_next_check_interval_ms(
+  let interval_ms = @planbook_policy.backlog_next_check_interval_ms(
     open, completed, total,
   )
   @support.write_text_file(
@@ -97,33 +101,18 @@ async fn write_planbook_backlog_progress(
     "{\n  \"generated_at_ms\": \{@env.now()},\n  \"total\": \{total},\n  \"open\": \{open},\n  \"completed\": \{completed},\n  \"blocked_or_paused\": \{blocked},\n  \"next_check_interval_ms\": \{interval_ms},\n  \"policy\": \"immediate while open, 30 minutes when clear\"\n}\n",
   )
   @support.write_text_file(
-    planbook_backlog_progress_path(workspace_root),
-    render_planbook_backlog_progress_markdown(
+    @planbook_policy.backlog_progress_path(workspace_root),
+    @planbook_policy.backlog_progress_markdown(
       total, open, completed, blocked, interval_ms,
     ),
   )
 }
 
 ///|
-fn planbook_backlog_next_check_interval_ms(
-  open : Int,
-  completed : Int,
-  total : Int,
-) -> Int {
-  if open > 0 {
-    0
-  } else if total == 0 || completed >= total {
-    1800000
-  } else {
-    300000
-  }
-}
-
-///|
 async fn write_planbook_backlog_stop_policy(workspace_root : String) -> Unit {
   @support.write_text_file(
-    planbook_backlog_stop_policy_path(workspace_root),
-    planbook_backlog_stop_policy_markdown(),
+    @planbook_policy.backlog_stop_policy_path(workspace_root),
+    @planbook_policy.backlog_stop_policy_markdown(),
   )
 }
 
@@ -133,7 +122,7 @@ async fn append_planbook_change_log(
   event : String,
   detail : String,
 ) -> Unit {
-  let path = planbook_change_log_path(workspace_root)
+  let path = @planbook_policy.change_log_path(workspace_root)
   let previous = @support.read_text_or_empty(path)
   let header = if previous.trim().is_empty() {
     "# PlanBook Change Log\n\nThis log records live changes in the PlanBook-managed self-build system.\n\n"
