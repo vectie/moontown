@@ -16,6 +16,7 @@ pub fn proposal_packet_from_bundle(
   profile : String,
   packet_id? : String? = None,
   task? : @moonbook.BookTask? = None,
+  entry? : @moonbook.BookCatalogEntry? = None,
   notes? : Array[String] = [],
   tags? : Array[String] = [],
 ) -> ExternalProposalPacket {
@@ -31,7 +32,7 @@ pub fn proposal_packet_from_bundle(
     skill_paths: bundle.skill_paths,
     notes,
     tags,
-    metadata: packet_bundle_metadata(bundle, task),
+    metadata: packet_bundle_metadata(bundle, task, entry),
   }
 }
 
@@ -39,6 +40,7 @@ pub fn proposal_packet_from_bundle(
 fn packet_bundle_metadata(
   bundle : @moonbook.WorkerContextBundle,
   task : @moonbook.BookTask?,
+  entry : @moonbook.BookCatalogEntry?,
 ) -> Json {
   let fields = packet_no_input_policy_fields()
   fields["producer"] = "moontown".to_json()
@@ -48,7 +50,32 @@ fn packet_bundle_metadata(
   fields["memory_summary"] = bundle.memory_summary.to_json()
   fields["profile_metadata"] = packet_no_input_policy_json()
   fields["step_metadata"] = packet_step_metadata(task)
+  set_policy_metadata(fields, entry)
   Json::object(fields)
+}
+
+///|
+fn set_policy_metadata(
+  fields : Map[String, Json],
+  entry : @moonbook.BookCatalogEntry?,
+) -> Unit {
+  match entry {
+    Some(entry) => {
+      let book_type = @policy.catalog_entry_type(
+        entry.id,
+        entry.name,
+        entry.tags,
+      )
+      let book_policy = @policy.policy_for_type(book_type)
+      fields["book_type"] = book_type.to_json()
+      fields["book_policy"] = book_policy.to_json()
+      fields["book_loop_plan"] = @policy.loop_plan(book_policy).to_json()
+      fields["book_internal_distance_plan"] = @policy.internal_distance_plan(
+        book_policy,
+      ).to_json()
+    }
+    None => ()
+  }
 }
 
 ///|

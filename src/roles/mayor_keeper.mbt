@@ -32,6 +32,7 @@ pub async fn Mayor::prepare_keeper_packet(
     profile,
     packet_id=Some(packet_id),
     task=Some(task),
+    entry=Some(entry),
     notes=["produced by mayor runtime", "book task kind=\{task.kind}"],
     tags=[entry.id, task.kind, "keeper"],
   )

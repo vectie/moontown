@@ -4,6 +4,7 @@ import {
   "vectie/moontown/course_book",
   "vectie/moontown/dispatch",
   "vectie/moontown/integration",
+  "vectie/moontown/policy",
   "moonbitlang/async/fs",
   "moonbitlang/core/encoding/utf8" @encoding/utf8,
   "moonbitlang/core/env",

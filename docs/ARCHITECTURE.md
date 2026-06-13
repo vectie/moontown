@@ -1555,10 +1555,13 @@ The packet lifecycle is intentionally split across package boundaries:
   - refreshes generated workspace sites
 - `roles/mayor`
   - decides whether work should be routed, deferred, or escalated
-  - prepares keeper-facing packets from book tasks and worker context
+  - prepares keeper-facing packets from catalog entries, book tasks, and worker
+    context
   - performs town-level quality gating for cross-book research goals
 - `adapters/moonclaw`
   - shapes `ExternalProposalPacket`
+  - attaches policy-owned `book_type`, `book_policy`, `book_loop_plan`, and
+    `book_internal_distance_plan` metadata for catalog-backed keeper packets
   - models `ProposalImportReceipt`
   - confirms and runs imported proposals
   - polls terminal run state

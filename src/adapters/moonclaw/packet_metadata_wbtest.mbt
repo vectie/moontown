@@ -38,6 +38,49 @@ test "proposal packet applies no-input policy consistently" {
 }
 
 ///|
+test "proposal packet carries catalog policy loop metadata" {
+  let bundle : @moonbook.WorkerContextBundle = @json.from_json({
+    "book_id": "research-opc",
+    "workspace_root": "/tmp/research-opc",
+    "task_id": "task-opc",
+    "prompt": "Research OPC.",
+    "policy": [],
+    "routines": [],
+    "skill_paths": [],
+    "context_pages": [],
+    "active_memory": [],
+    "user_memory": [],
+    "working_memory": [],
+    "memory_summary": "No prior memory.",
+    "output_contract": ["Return Markdown."],
+  }) catch {
+    _ => fail("expected worker context bundle")
+  }
+  let entry = @moonbook.BookCatalogEntry::new(
+    id="research-opc",
+    name="OPC Research",
+    purpose="Watch one-person company research.",
+    workspace_root="/tmp/research-opc",
+    tags=["research"],
+  )
+  let packet = proposal_packet_from_bundle(
+    bundle,
+    "Research OPC",
+    "Run research task",
+    "research-worker",
+    entry=Some(entry),
+  )
+  let metadata = packet.metadata.stringify()
+  assert_true(metadata.contains("\"book_type\":\"research-book\""))
+  assert_true(metadata.contains("\"book_policy\":{"))
+  assert_true(metadata.contains("\"book_loop_plan\":{"))
+  assert_true(metadata.contains("\"book_internal_distance_plan\":["))
+  assert_true(metadata.contains("\"phase\":\"read-policy\""))
+  assert_true(metadata.contains("\"layer\":\"information\""))
+  assert_true(metadata.contains("\"layer\":\"decisiveness\""))
+}
+
+///|
 test "proposal packet mirrors extension and bookapi task specs" {
   let task = moonclaw_adapter_book_task(
     id="task-mirror",
