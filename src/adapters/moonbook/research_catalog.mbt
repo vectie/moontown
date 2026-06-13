@@ -116,7 +116,7 @@ pub fn entry_for_explicit_research_book(
 
 ///|
 fn research_book_topic_from_id(book_id : String) -> String? {
-  if !book_id.has_prefix("research-") {
+  if !catalog_book_id_is_research(book_id) || !book_id.has_prefix("research-") {
     return None
   }
   let topic = book_id[9:].trim().to_owned()

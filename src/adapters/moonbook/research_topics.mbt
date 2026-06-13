@@ -8,7 +8,7 @@ fn research_topic_id(entry : BookCatalogEntry) -> String {
       }
     }
   }
-  if entry.id.has_prefix("research-") {
+  if catalog_entry_is_research(entry) && entry.id.has_prefix("research-") {
     entry.id[9:].to_owned()
   } else {
     normalize_topic_id(entry.id)

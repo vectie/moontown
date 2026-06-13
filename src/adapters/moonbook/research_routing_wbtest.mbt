@@ -71,6 +71,20 @@ test "generic external research topics are web-first and reference-aware" {
 }
 
 ///|
+test "tagged research topic does not require research prefix" {
+  let entry = BookCatalogEntry::new(
+    id="opc-lab",
+    name="OPC Lab",
+    purpose="Research OPC.",
+    workspace_root="/tmp/opc-lab",
+    tags=["research", "topic:opc"],
+  )
+  assert_eq(research_topic_id(entry), "opc")
+  let request = research_request_text(entry).to_lower()
+  assert_true(request.contains("one person company model"))
+}
+
+///|
 test "versioned explicit research book id canonicalizes to stable topic book" {
   let entry = entry_for_explicit_research_book(
     default_catalog(),

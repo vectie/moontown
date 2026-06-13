@@ -38,3 +38,21 @@ test "explicit research lookup honors existing catalog entries first" {
     None => fail("expected existing catalog entry")
   }
 }
+
+///|
+test "book id lookup honors tagged catalog research entries without prefix" {
+  let entry = BookCatalogEntry::new(
+    id="opc-lab",
+    name="OPC Lab",
+    purpose="Research OPC.",
+    workspace_root="/tmp/opc-lab",
+    tags=["research", "topic:opc"],
+  )
+  match entry_for_book_id([entry], "opc-lab") {
+    Some(found) => {
+      assert_eq(found.id, "opc-lab")
+      assert_true(found.tags.contains("topic:opc"))
+    }
+    None => fail("expected tagged catalog research entry")
+  }
+}
