@@ -941,6 +941,29 @@ Boundary:
 - reusable projection policy belongs in `src/ui` or `src/visual_projection`,
   not in the browser main package.
 
+## Support
+
+- [src/support](/Users/kq/Workspace/moontown/src/support)
+
+Purpose:
+
+- generic file I/O and parent-directory helpers
+- workspace-relative path readiness helpers
+- JSON helper functions
+- Markdown, HTML, and text-label helpers
+- shared text metrics such as English word-token counting
+
+Boundary:
+
+- `src/support` may own product-agnostic utility behavior used by multiple
+  packages.
+- Feature packages such as `src/book_quality` and `src/research_quality`
+  should consume `src/support` helpers instead of keeping local copies of file,
+  path, or text-metric logic.
+- `src/support` must not own domain policy. If a helper needs to know what
+  "good research" or "good civic service" means, it belongs in the feature
+  package, not here.
+
 ## Scripts
 
 - [scripts/build-rabbita-ui.sh](/Users/kq/Workspace/moontown/scripts/build-rabbita-ui.sh)

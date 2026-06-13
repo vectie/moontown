@@ -221,10 +221,11 @@ book owns. The implementation now has a first-class `policy` package:
   should not live in the root package.
 - [support/](/Users/kq/Workspace/moontown/src/support)
   owns generic support helpers for file I/O, JSON string/object extraction,
-  Markdown shaping, HTML escaping, text-label formatting, and nested runtime
-  config JSON upserts. Root Moontown may keep private compatibility wrappers,
-  but generic utility implementation should not be scattered across the root
-  package.
+  workspace-relative path readiness, Markdown shaping, HTML escaping,
+  text-label formatting, text metrics such as English word-token counting, and
+  nested runtime config JSON upserts. Root Moontown and domain quality packages
+  may consume these helpers, but generic utility implementation should not be
+  scattered across runtime or quality packages.
 - [research_quality/](/Users/kq/Workspace/moontown/src/research_quality)
   owns research-readiness DTOs and quality-gate semantics: required research
   artifacts, source-depth checks, topic matching, deep-report structure/length
@@ -1632,7 +1633,9 @@ goal runner:
 - [town_synthesis.mbt](/Users/kq/Workspace/moontown/src/town_synthesis/town_synthesis.mbt)
   - mayor-owned cross-book synthesis rendering and synthesis execution registration
 - [file_io.mbt](/Users/kq/Workspace/moontown/src/support/file_io.mbt)
-  - root-package local text/file helpers used by synthesis, status, and quality checks
+  - shared text/file helpers used by synthesis, status, and quality checks
+- [text_metrics.mbt](/Users/kq/Workspace/moontown/src/support/text_metrics.mbt)
+  - shared text metrics such as English word-token counting
 - [research_readiness.mbt](/Users/kq/Workspace/moontown/src/research_quality/readiness.mbt)
   - typed research readiness model
 - [runtime_status.mbt](/Users/kq/Workspace/moontown/src/runtime_status/runtime_status_snapshot.mbt)

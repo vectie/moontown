@@ -10,7 +10,7 @@ fn deep_report_word_count_gaps(
     source_depth.included_sources < source_depth.minimum_sources {
     return gaps
   }
-  let word_count = count_english_word_tokens(report)
+  let word_count = @support.count_english_word_tokens(report)
   if word_count < 12000 {
     gaps.push(
       "deep report has \{word_count} English word tokens with \{source_depth.included_sources} included screened sources; complex external research should target 12k-15k English words or record a source-depth blocker",

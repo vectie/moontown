@@ -2,6 +2,8 @@
 package "vectie/moontown/support"
 
 // Values
+pub fn count_english_word_tokens(String) -> Int
+
 pub fn demote_markdown_headings(String) -> String
 
 pub async fn ensure_parent_directory(String) -> Unit

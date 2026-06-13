@@ -65,8 +65,8 @@ async fn score_research_book(
     draft.strengths,
     draft.gaps,
   )
-  let words = count_english_word_tokens(
-    read_text_or_empty(
+  let words = @support.count_english_word_tokens(
+    @support.read_text_or_empty(
       workspace_path(draft.root, "raw/bootstrap/deep-report.md"),
     ),
   )
@@ -97,7 +97,9 @@ async fn score_course_book(
     draft.strengths,
     draft.gaps,
   )
-  let index = read_text_or_empty(workspace_path(draft.root, wiki_index_path()))
+  let index = @support.read_text_or_empty(
+    workspace_path(draft.root, wiki_index_path()),
+  )
   score += apply_score_signal(
     course_identity_assessment(entry.id, index),
     draft.strengths,
@@ -470,7 +472,7 @@ async fn paths_score(
   if relatives.is_empty() {
     return path_set_assessment(relatives, [], points).score
   }
-  let missing = workspace_missing_relative_paths(root, relatives)
+  let missing = @support.workspace_missing_relative_paths(root, relatives)
   let assessment = path_set_assessment(relatives, missing, points)
   match assessment.strength {
     Some(note) => strengths.push(note)
@@ -481,30 +483,6 @@ async fn paths_score(
     None => ()
   }
   assessment.score
-}
-
-///|
-async fn workspace_missing_relative_paths(
-  root : String,
-  paths : Array[String],
-) -> Array[String] {
-  let missing : Array[String] = []
-  for path in paths {
-    if !@fs.exists("\{root}/\{path}") {
-      missing.push(path)
-    }
-  }
-  missing
-}
-
-///|
-async fn read_text_or_empty(path : String) -> String {
-  if !@fs.exists(path) {
-    return ""
-  }
-  @fs.read_file(path).text() catch {
-    _ => ""
-  }
 }
 
 ///|
@@ -524,28 +502,4 @@ fn civic_service_uses_town_result_root(root : String) -> Bool {
   root.trim().is_empty() ||
   root.has_prefix(".moontown/books/") ||
   root.contains("/.moontown/books/")
-}
-
-///|
-fn count_english_word_tokens(text : String) -> Int {
-  let mut count = 0
-  let mut in_word = false
-  for char in text {
-    if is_english_alnum(char) {
-      if !in_word {
-        count += 1
-      }
-      in_word = true
-    } else {
-      in_word = false
-    }
-  }
-  count
-}
-
-///|
-fn is_english_alnum(char : Char) -> Bool {
-  (char >= 'a' && char <= 'z') ||
-  (char >= 'A' && char <= 'Z') ||
-  (char >= '0' && char <= '9')
 }

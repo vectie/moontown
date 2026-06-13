@@ -29,7 +29,7 @@ pub async fn research_quality_gaps(
     ]
   }
   let gaps : Array[String] = []
-  for relative in workspace_missing_relative_paths(root, required) {
+  for relative in @support.workspace_missing_relative_paths(root, required) {
     gaps.push("missing `\{relative}`")
   }
   if !has_research_source_marker(root) {
