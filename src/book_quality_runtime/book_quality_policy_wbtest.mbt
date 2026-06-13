@@ -3,14 +3,14 @@ test "semantic quality gates readiness and next action" {
   assert_true(@book_quality.semantic_quality_allows_ready(Some(82)))
   assert_true(!@book_quality.semantic_quality_allows_ready(Some(64)))
   let action = @book_quality.next_action(
-    @book_quality.research_type(),
+    @policy.research_type(),
     [],
     100,
     Some(64),
   )
   assert_true(action.contains("AI semantic review"))
   let specific_action = @book_quality.next_action(
-    @book_quality.research_type(),
+    @policy.research_type(),
     [],
     100,
     Some(64),
@@ -33,30 +33,30 @@ test "book quality policy separates semantic structural and type actions" {
     !@book_quality.structural_quality_is_stable(["missing wiki/index.md"], 100),
   )
   assert_eq(
-    @book_quality.next_action(@book_quality.research_type(), [], 95, None),
+    @book_quality.next_action(@policy.research_type(), [], 95, None),
     @book_quality.stable_action(),
   )
   assert_eq(
-    @book_quality.repair_action_for_type(@book_quality.course_type()),
+    @book_quality.repair_action_for_type(@policy.course_type()),
     "Run course projection repair: enforce course identity, lesson progression, exercises, checkpoints, and beginner usability.",
   )
   assert_true(
-    @book_quality.repair_action_for_type(@book_quality.planbook_type()).contains(
+    @book_quality.repair_action_for_type(@policy.planbook_type()).contains(
       "code-plan skill",
     ),
   )
   assert_true(
-    @book_quality.repair_action_for_type(@book_quality.cookbook_type()).contains(
+    @book_quality.repair_action_for_type(@policy.cookbook_type()).contains(
       "book-quality audit",
     ),
   )
   assert_true(
-    @book_quality.repair_action_for_type(@book_quality.civic_type()).contains(
+    @book_quality.repair_action_for_type(@policy.civic_type()).contains(
       "protocol-native loop",
     ),
   )
   assert_true(
-    @book_quality.repair_action_for_type(@book_quality.operational_type()).contains(
+    @book_quality.repair_action_for_type(@policy.operational_type()).contains(
       "keeper review",
     ),
   )
@@ -69,18 +69,18 @@ test "book quality policy separates semantic structural and type actions" {
 
 ///|
 test "book quality policy specs keep repair actions and source policy together" {
-  match @book_quality.policy_spec_for_type(@book_quality.research_type()) {
+  match @book_quality.policy_spec_for_type(@policy.research_type()) {
     Some(spec) => {
-      assert_eq(spec.profile.source_policy, @book_quality.web_first_policy())
+      assert_eq(spec.profile.source_policy, @policy.web_first_policy())
       assert_true(spec.repair_action.contains("research quality review"))
       assert_true(@policy.has_skill(spec.profile.policy, "source-diarize"))
       assert_true(@policy.tend_skills(spec.profile.policy).length() > 0)
     }
     None => fail("expected research policy spec")
   }
-  match @book_quality.policy_spec_for_type(@book_quality.civic_type()) {
+  match @book_quality.policy_spec_for_type(@policy.civic_type()) {
     Some(spec) => {
-      assert_eq(spec.profile.source_policy, @book_quality.book_first_policy())
+      assert_eq(spec.profile.source_policy, @policy.book_first_policy())
       assert_true(spec.repair_action.contains("protocol-native loop"))
       assert_true(@policy.has_skill(spec.profile.policy, "protocol-round"))
       assert_eq(
@@ -93,7 +93,7 @@ test "book quality policy specs keep repair actions and source policy together" 
   assert_true(@book_quality.policy_spec_for_type("unknown-book") is None)
   assert_eq(
     @book_quality.source_policy_for_type("unknown-book"),
-    @book_quality.book_first_policy(),
+    @policy.book_first_policy(),
   )
   assert_true(
     @policy.has_skill(
@@ -114,7 +114,7 @@ test "book quality type classification preserves role precedence" {
   )
   assert_eq(
     @book_quality.catalog_entry_type(course.id, course.name, course.tags),
-    @book_quality.course_type(),
+    @policy.course_type(),
   )
   let plan = book_quality_catalog_entry(
     id="plan-moontown-quality",
@@ -125,7 +125,7 @@ test "book quality type classification preserves role precedence" {
   )
   assert_eq(
     @book_quality.catalog_entry_type(plan.id, plan.name, plan.tags),
-    @book_quality.planbook_type(),
+    @policy.planbook_type(),
   )
   let civic = book_quality_catalog_entry(
     id="wenyu-policy-hall",
@@ -136,7 +136,7 @@ test "book quality type classification preserves role precedence" {
   )
   assert_eq(
     @book_quality.catalog_entry_type(civic.id, civic.name, civic.tags),
-    @book_quality.civic_type(),
+    @policy.civic_type(),
   )
   let operational = book_quality_catalog_entry(
     id="finance",
@@ -151,7 +151,7 @@ test "book quality type classification preserves role precedence" {
       operational.name,
       operational.tags,
     ),
-    @book_quality.operational_type(),
+    @policy.operational_type(),
   )
 }
 
@@ -207,24 +207,22 @@ test "book quality active catalog filter excludes only archive and smoke artifac
 ///|
 test "book quality review context specs provide typed pages and safe fallback" {
   assert_eq(
-    @book_quality.reviewable_types().join("|"),
+    @policy.reviewable_types().join("|"),
     [
-      @book_quality.research_type(),
-      @book_quality.course_type(),
-      @book_quality.planbook_type(),
-      @book_quality.cookbook_type(),
-      @book_quality.civic_type(),
-      @book_quality.operational_type(),
+      @policy.research_type(),
+      @policy.course_type(),
+      @policy.planbook_type(),
+      @policy.cookbook_type(),
+      @policy.civic_type(),
+      @policy.operational_type(),
     ].join("|"),
   )
   let research_pages = @book_quality.context_pages_for_type(
-    @book_quality.research_type(),
+    @policy.research_type(),
   )
   assert_true(research_pages.contains("raw/bootstrap/deep-report.md"))
   assert_true(research_pages.contains("raw/bootstrap/evidence-matrix.md"))
-  let civic_pages = @book_quality.context_pages_for_type(
-    @book_quality.civic_type(),
-  )
+  let civic_pages = @book_quality.context_pages_for_type(@policy.civic_type())
   assert_true(
     civic_pages.contains("raw/bootstrap/BUILDING_PROTOCOL_CONTRACT.md"),
   )

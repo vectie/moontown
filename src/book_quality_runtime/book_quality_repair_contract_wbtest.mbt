@@ -2,7 +2,7 @@
 test "book quality repair review contract parses AI fields and defaults safely" {
   let score = book_quality_score_fixture(
     "research-robotics",
-    @book_quality.research_type(),
+    @policy.research_type(),
     "/tmp/research-robotics",
   )
   let parsed = @book_quality.repair_review_contract(
@@ -27,7 +27,7 @@ test "book quality repair review contract parses AI fields and defaults safely" 
 test "book quality repair bridge item uses parsed contract fields" {
   let score = book_quality_score_fixture(
     "research-robotics",
-    @book_quality.research_type(),
+    @policy.research_type(),
     "/tmp/research-robotics",
   )
   let item = @book_quality.repair_bridge_item(

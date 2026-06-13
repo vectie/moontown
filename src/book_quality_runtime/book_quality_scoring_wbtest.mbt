@@ -95,7 +95,7 @@ async test "book quality package scorer reports general strengths and gaps" {
     entry,
     @book_quality.default_review_result_dir(),
   )
-  assert_eq(score.book_type, @book_quality.general_type())
+  assert_eq(score.book_type, @policy.general_type())
   assert_eq(score.structural_score, 63)
   assert_true(score.strengths.contains("workspace exists"))
   assert_true(score.strengths.contains("wiki index exists"))
@@ -129,7 +129,7 @@ async test "book quality package scorer reports missing general projection" {
     entry,
     @book_quality.default_review_result_dir(),
   )
-  assert_eq(score.book_type, @book_quality.general_type())
+  assert_eq(score.book_type, @policy.general_type())
   assert_true(score.gaps.contains("missing `book/moonbook-ui-state.json`"))
   assert_true(score.gaps.contains("missing book/moonbook-ui-state.json"))
   assert_false(score.ready)
@@ -206,7 +206,7 @@ async test "book quality package scorer rewards complete civic service workspace
     entry,
     @book_quality.default_review_result_dir(),
   )
-  assert_eq(score.book_type, @book_quality.civic_type())
+  assert_eq(score.book_type, @policy.civic_type())
   assert_true(score.strengths.contains("latest civic service result exists"))
   assert_false(
     score.gaps.contains("no civic service definition matched this book"),

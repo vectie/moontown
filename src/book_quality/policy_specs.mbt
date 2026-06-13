@@ -24,27 +24,27 @@ fn policy_profile_spec(
 fn policy_specs() -> Array[PolicySpec] {
   [
     policy_profile_spec(
-      @policy.policy_profile_for_type(research_type()).unwrap(),
+      @policy.policy_profile_for_type(@policy.research_type()).unwrap(),
       research_repair_action(),
     ),
     policy_profile_spec(
-      @policy.policy_profile_for_type(course_type()).unwrap(),
+      @policy.policy_profile_for_type(@policy.course_type()).unwrap(),
       course_repair_action(),
     ),
     policy_profile_spec(
-      @policy.policy_profile_for_type(planbook_type()).unwrap(),
+      @policy.policy_profile_for_type(@policy.planbook_type()).unwrap(),
       planbook_repair_action(),
     ),
     policy_profile_spec(
-      @policy.policy_profile_for_type(cookbook_type()).unwrap(),
+      @policy.policy_profile_for_type(@policy.cookbook_type()).unwrap(),
       cookbook_repair_action(),
     ),
     policy_profile_spec(
-      @policy.policy_profile_for_type(civic_type()).unwrap(),
+      @policy.policy_profile_for_type(@policy.civic_type()).unwrap(),
       civic_repair_action(),
     ),
     policy_profile_spec(
-      @policy.policy_profile_for_type(operational_type()).unwrap(),
+      @policy.policy_profile_for_type(@policy.operational_type()).unwrap(),
       operational_repair_action(),
     ),
   ]

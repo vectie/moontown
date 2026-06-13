@@ -7,7 +7,7 @@ async test "book quality review candidate selection favors the weakest pending s
   let weaker = {
     ..book_quality_score_fixture(
       "weak-book",
-      @book_quality.research_type(),
+      @policy.research_type(),
       "/tmp/weak-book",
     ),
     structural_score: 41,
@@ -15,7 +15,7 @@ async test "book quality review candidate selection favors the weakest pending s
   let stronger = {
     ..book_quality_score_fixture(
       "strong-book",
-      @book_quality.research_type(),
+      @policy.research_type(),
       "/tmp/strong-book",
     ),
     structural_score: 88,
@@ -40,7 +40,7 @@ async test "book quality review candidate selection favors the weakest pending s
 test "book quality external review packet carries shared MoonClaw policy" {
   let packet = @book_quality.BookQualityReviewPacket::{
     book_id: "coding",
-    book_type: @book_quality.operational_type(),
+    book_type: @policy.operational_type(),
     policy: @policy.operational(),
     workspace_root: "/tmp/coding",
     structural_score: 100,

@@ -62,7 +62,10 @@ fn review_profile_json() -> Json {
     "role": "reviewer",
     "priority": 170,
     "tags": ["book-quality", "ai-review", "semantic-review"],
-    "match": { "all": ["book-quality", "ai-review"], "any": reviewable_types() },
+    "match": {
+      "all": ["book-quality", "ai-review"],
+      "any": @policy.reviewable_types(),
+    },
     "steps": [review_step_json()],
   }
 }

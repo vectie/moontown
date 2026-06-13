@@ -56,7 +56,7 @@ async test "book quality repair bridge context loads and persists bridge state" 
   let repaired = [
     book_quality_repair_bridge_item_fixture(
       "research-robotics",
-      @book_quality.research_type(),
+      @policy.research_type(),
       "\{root}/books/research-robotics",
     ),
   ]

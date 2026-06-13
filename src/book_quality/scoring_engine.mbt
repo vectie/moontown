@@ -15,16 +15,17 @@ pub async fn score_book(
 ) -> BookQualityScore {
   let kind = score_book_type(entry)
   match kind {
-    type_ if type_ == research_type() =>
+    type_ if type_ == @policy.research_type() =>
       score_research_book(entry, review_result_dir)
-    type_ if type_ == course_type() =>
+    type_ if type_ == @policy.course_type() =>
       score_course_book(entry, review_result_dir)
-    type_ if type_ == planbook_type() =>
+    type_ if type_ == @policy.planbook_type() =>
       score_planbook(entry, review_result_dir)
-    type_ if type_ == cookbook_type() =>
+    type_ if type_ == @policy.cookbook_type() =>
       score_cookbook(entry, review_result_dir)
-    type_ if type_ == civic_type() => score_civic_book(entry, review_result_dir)
-    type_ if type_ == operational_type() =>
+    type_ if type_ == @policy.civic_type() =>
+      score_civic_book(entry, review_result_dir)
+    type_ if type_ == @policy.operational_type() =>
       score_operational_book(entry, review_result_dir)
     _ => score_general_book(entry, review_result_dir)
   }
@@ -79,7 +80,13 @@ async fn score_research_book(
     draft.strengths,
     draft.gaps,
   )
-  finalize_score_draft(entry, research_type(), draft, score, review_result_dir)
+  finalize_score_draft(
+    entry,
+    @policy.research_type(),
+    draft,
+    score,
+    review_result_dir,
+  )
 }
 
 ///|
@@ -101,7 +108,13 @@ async fn score_course_book(
     draft.strengths,
     draft.gaps,
   )
-  finalize_score_draft(entry, course_type(), draft, score, review_result_dir)
+  finalize_score_draft(
+    entry,
+    @policy.course_type(),
+    draft,
+    score,
+    review_result_dir,
+  )
 }
 
 ///|
@@ -117,7 +130,13 @@ async fn score_planbook(
     draft.strengths,
     draft.gaps,
   )
-  finalize_score_draft(entry, planbook_type(), draft, score, review_result_dir)
+  finalize_score_draft(
+    entry,
+    @policy.planbook_type(),
+    draft,
+    score,
+    review_result_dir,
+  )
 }
 
 ///|
@@ -140,7 +159,13 @@ async fn score_cookbook(
     draft.strengths,
     draft.gaps,
   )
-  finalize_score_draft(entry, cookbook_type(), draft, score, review_result_dir)
+  finalize_score_draft(
+    entry,
+    @policy.cookbook_type(),
+    draft,
+    score,
+    review_result_dir,
+  )
 }
 
 ///|
@@ -158,7 +183,7 @@ async fn score_operational_book(
   )
   finalize_score_draft(
     entry,
-    operational_type(),
+    @policy.operational_type(),
     draft,
     score,
     review_result_dir,
@@ -188,7 +213,13 @@ async fn score_civic_book(
       )
     None => draft.gaps.push("no civic service definition matched this book")
   }
-  finalize_score_draft(entry, civic_type(), draft, score, review_result_dir)
+  finalize_score_draft(
+    entry,
+    @policy.civic_type(),
+    draft,
+    score,
+    review_result_dir,
+  )
 }
 
 ///|
@@ -206,7 +237,13 @@ async fn score_general_book(
       draft.strengths,
       draft.gaps,
     )
-  finalize_score_draft(entry, general_type(), draft, score, review_result_dir)
+  finalize_score_draft(
+    entry,
+    @policy.general_type(),
+    draft,
+    score,
+    review_result_dir,
+  )
 }
 
 ///|

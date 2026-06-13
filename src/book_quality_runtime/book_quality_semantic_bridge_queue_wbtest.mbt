@@ -63,7 +63,7 @@ async test "semantic review bridge queues repair page and standing goal" {
   assert_eq(goals.length(), 1)
   assert_eq(goals[0].id, "book-quality-repair-research-robotics")
   assert_eq(goals[0].next_due_tick, 42)
-  assert_eq(goals[0].source_policy, @book_quality.web_first_policy())
+  assert_eq(goals[0].source_policy, @policy.web_first_policy())
   assert_true(@fs.exists(bridge_path))
   let second_summary = reconcile_book_quality_repair_bridge(
     book_catalog_path=catalog_path,

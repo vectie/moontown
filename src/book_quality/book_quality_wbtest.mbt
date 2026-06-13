@@ -1,8 +1,8 @@
 ///|
-test "book quality taxonomy is a package boundary" {
-  assert_eq(research_type(), "research-book")
-  assert_eq(course_type(), "course-book")
-  assert_true(reviewable_types().contains(civic_type()))
+test "book quality consumes policy-owned taxonomy" {
+  assert_eq(@policy.research_type(), "research-book")
+  assert_eq(@policy.course_type(), "course-book")
+  assert_true(@policy.reviewable_types().contains(@policy.civic_type()))
 }
 
 ///|
@@ -22,18 +22,24 @@ test "book quality delegates catalog classification to policy package" {
   )
   assert_eq(
     catalog_entry_type("plan-moontown-quality", "Moontown Quality", []),
-    planbook_type(),
+    @policy.planbook_type(),
   )
   assert_eq(
     catalog_entry_type("course-wenyu-game-design", "Game Design", []),
-    course_type(),
+    @policy.course_type(),
   )
   assert_eq(
     catalog_entry_type("wenyu-policy-hall", "Policy Hall", []),
-    civic_type(),
+    @policy.civic_type(),
   )
-  assert_eq(catalog_entry_type("coding", "Coding", []), operational_type())
-  assert_eq(catalog_entry_type("unknown", "Unknown", []), general_type())
+  assert_eq(
+    catalog_entry_type("coding", "Coding", []),
+    @policy.operational_type(),
+  )
+  assert_eq(
+    catalog_entry_type("unknown", "Unknown", []),
+    @policy.general_type(),
+  )
 }
 
 ///|
@@ -95,7 +101,7 @@ fn review_candidate_score_for_test(
   BookQualityScore::{
     book_id,
     title: book_id,
-    book_type: research_type(),
+    book_type: @policy.research_type(),
     workspace_root: "/tmp/\{book_id}",
     structural_score,
     structural_grade: quality_grade(structural_score),
@@ -206,7 +212,7 @@ fn repair_bridge_item_for_goal_test(
 ) -> BookQualityRepairBridgeItem {
   BookQualityRepairBridgeItem::{
     book_id,
-    book_type: research_type(),
+    book_type: @policy.research_type(),
     workspace_root: "/tmp/\{book_id}",
     semantic_score: 42,
     semantic_grade: "weak",
@@ -231,7 +237,7 @@ test "book quality package owns repair standing goal construction and refresh" {
   assert_true(created.last_run_tick is None)
   assert_true(created.enabled)
   assert_eq(created.cadence_ticks, repair_goal_cadence_ticks())
-  assert_eq(created.source_policy, web_first_policy())
+  assert_eq(created.source_policy, @policy.web_first_policy())
   assert_eq(created.quality_threshold, semantic_ready_threshold())
   assert_true(created.prompt.contains("Repair the book."))
   let existing = @core.StandingGoal::new(
@@ -293,18 +299,18 @@ test "book quality package owns repair standing goal upsert" {
 
 ///|
 test "book quality package maps legacy labels to composed policies" {
-  match policy_spec_for_type(research_type()) {
+  match policy_spec_for_type(@policy.research_type()) {
     Some(spec) => {
-      assert_eq(spec.profile.source_policy, web_first_policy())
+      assert_eq(spec.profile.source_policy, @policy.web_first_policy())
       assert_true(spec.repair_action.contains("research quality review"))
       assert_true(@policy.has_skill(spec.profile.policy, "source-diarize"))
       assert_true(@policy.tend_skills(spec.profile.policy).length() > 0)
     }
     None => fail("expected research policy spec")
   }
-  match policy_spec_for_type(civic_type()) {
+  match policy_spec_for_type(@policy.civic_type()) {
     Some(spec) => {
-      assert_eq(spec.profile.source_policy, book_first_policy())
+      assert_eq(spec.profile.source_policy, @policy.book_first_policy())
       assert_true(spec.repair_action.contains("protocol-native loop"))
       assert_true(@policy.has_skill(spec.profile.policy, "protocol-round"))
       assert_eq(
@@ -315,7 +321,7 @@ test "book quality package maps legacy labels to composed policies" {
     None => fail("expected civic policy spec")
   }
   assert_true(policy_spec_for_type("unknown-book") is None)
-  assert_eq(source_policy_for_type("unknown-book"), book_first_policy())
+  assert_eq(source_policy_for_type("unknown-book"), @policy.book_first_policy())
   assert_true(
     @policy.has_skill(policy_for_type("unknown-book"), "workspace-bootstrap"),
   )
@@ -391,14 +397,14 @@ test "book quality package owns scoring thresholds and next action" {
   assert_false(semantic_review_requires_repair(Some(80)))
   assert_true(structural_quality_is_stable([], 90))
   assert_false(structural_quality_is_stable(["missing wiki/index.md"], 100))
-  assert_eq(next_action(research_type(), [], 95, None), stable_action())
+  assert_eq(next_action(@policy.research_type(), [], 95, None), stable_action())
   assert_true(
-    next_action(research_type(), [], 100, Some(64)).contains(
+    next_action(@policy.research_type(), [], 100, Some(64)).contains(
       "AI semantic review",
     ),
   )
   assert_true(
-    next_action(course_type(), ["missing course"], 70, None).contains(
+    next_action(@policy.course_type(), ["missing course"], 70, None).contains(
       "course projection",
     ),
   )
@@ -408,7 +414,7 @@ test "book quality package owns scoring thresholds and next action" {
 test "book quality package owns repair standing-goal policy text" {
   let item = BookQualityRepairBridgeItem::{
     book_id: "course-ui",
-    book_type: course_type(),
+    book_type: @policy.course_type(),
     workspace_root: "/tmp/course-ui",
     semantic_score: 52,
     semantic_grade: "weak",
@@ -425,7 +431,10 @@ test "book quality package owns repair standing-goal policy text" {
   assert_eq(repair_goal_id("course-ui"), "book-quality-repair-course-ui")
   assert_true(is_repair_goal_id(repair_goal_id("course-ui")))
   assert_false(is_repair_goal_id("standing-watch-course-ui"))
-  assert_eq(repair_goal_source_policy(course_type()), book_first_policy())
+  assert_eq(
+    repair_goal_source_policy(@policy.course_type()),
+    @policy.book_first_policy(),
+  )
   let prompt = repair_goal_prompt(item)
   assert_true(prompt.contains("Book id: `course-ui`"))
   assert_true(prompt.contains("Replace research framing with lessons."))
@@ -456,7 +465,7 @@ test "book quality package owns repair bridge item construction" {
   let score = BookQualityScore::{
     book_id: "research-robotics",
     title: "Robotics",
-    book_type: research_type(),
+    book_type: @policy.research_type(),
     workspace_root: "/tmp/research-robotics",
     structural_score: 72,
     structural_grade: "usable",
@@ -498,7 +507,7 @@ test "book quality package owns repair bridge review-text candidate policy" {
   let score = BookQualityScore::{
     book_id: "research-robotics",
     title: "Robotics",
-    book_type: research_type(),
+    book_type: @policy.research_type(),
     workspace_root: "/tmp/research-robotics",
     structural_score: 72,
     structural_grade: "usable",
@@ -589,7 +598,7 @@ test "book quality package owns semantic review profile policy" {
 test "book quality package owns external review packet contract" {
   let packet = BookQualityReviewPacket::{
     book_id: "coding",
-    book_type: operational_type(),
+    book_type: @policy.operational_type(),
     policy: @policy.operational(),
     workspace_root: "/tmp/coding",
     structural_score: 100,
@@ -604,7 +613,7 @@ test "book quality package owns external review packet contract" {
       "Do not inflate score for operational logs or scaffolding.",
     ),
   )
-  assert_true(external.tags.contains(operational_type()))
+  assert_true(external.tags.contains(@policy.operational_type()))
   assert_true(external.request_text.contains("Workspace root: `/tmp/coding`"))
   assert_true(
     external.request_text.contains(
@@ -631,7 +640,7 @@ test "book quality package owns external review packet contract" {
 test "book quality package builds external MoonClaw review packet" {
   let packet = BookQualityReviewPacket::{
     book_id: "coding",
-    book_type: operational_type(),
+    book_type: @policy.operational_type(),
     policy: @policy.operational(),
     workspace_root: "/tmp/coding",
     structural_score: 100,
@@ -1042,7 +1051,7 @@ test "book quality package owns repair goal retirement policy" {
 test "book quality package owns repair bridge summary wording" {
   let item = BookQualityRepairBridgeItem::{
     book_id: "research-robotics",
-    book_type: research_type(),
+    book_type: @policy.research_type(),
     workspace_root: "/tmp/research-robotics",
     semantic_score: 44,
     semantic_grade: "weak",
@@ -1079,7 +1088,7 @@ test "book quality package owns repair bridge summary wording" {
 test "book quality package owns repair review page markdown" {
   let item = BookQualityRepairBridgeItem::{
     book_id: "research-robotics",
-    book_type: research_type(),
+    book_type: @policy.research_type(),
     workspace_root: "/tmp/research-robotics",
     semantic_score: 41,
     semantic_grade: "weak",

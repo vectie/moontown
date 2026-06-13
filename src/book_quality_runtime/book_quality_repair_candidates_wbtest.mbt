@@ -7,7 +7,7 @@ async test "book quality repair bridge candidate only accepts weak semantic revi
   let score = @book_quality.BookQualityScore::{
     book_id: "research-robotics",
     title: "Robotics",
-    book_type: @book_quality.research_type(),
+    book_type: @policy.research_type(),
     workspace_root: "\{root}/books/research-robotics",
     structural_score: 77,
     structural_grade: "usable",
@@ -59,12 +59,12 @@ async test "book quality repair bridge applies only repairable weak candidates" 
   let result_dir = "\{root}/results"
   let repairable = book_quality_score_fixture(
     "research-robotics",
-    @book_quality.research_type(),
+    @policy.research_type(),
     "\{root}/books/research-robotics",
   )
   let archived = book_quality_score_fixture(
     "archived-research",
-    @book_quality.research_type(),
+    @policy.research_type(),
     "\{root}/books/archived-research",
   )
   for book_id in ["research-robotics", "archived-research"] {

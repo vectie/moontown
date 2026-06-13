@@ -386,6 +386,33 @@ Boundary:
   map to information, recognition, and decisiveness.
 - downstream packages may read lane text but should not redefine lane semantics.
 
+## Book Quality
+
+Key files:
+
+- [src/book_quality/policy_specs.mbt](/Users/kq/Workspace/moontown/src/book_quality/policy_specs.mbt)
+- [src/book_quality/scoring_engine.mbt](/Users/kq/Workspace/moontown/src/book_quality/scoring_engine.mbt)
+- [src/book_quality/review_context.mbt](/Users/kq/Workspace/moontown/src/book_quality/review_context.mbt)
+- [src/book_quality/repair_goal_policy.mbt](/Users/kq/Workspace/moontown/src/book_quality/repair_goal_policy.mbt)
+
+Purpose:
+
+- evaluate book quality using policy profiles, structural evidence, semantic
+  review results, and repair context
+- translate policy profiles into quality-review and repair actions
+- build quality-review context pages and repair standing-goal policy
+
+Boundary:
+
+- `src/book_quality` consumes book labels, source-policy labels, composed
+  policies, and catalog classification from `src/policy`.
+- `src/book_quality` must not re-export policy vocabulary such as
+  `research_type`, `civic_type`, `web_first_policy`, or `book_first_policy`;
+  downstream packages should import `src/policy` directly when they need those
+  values.
+- `src/book_quality` owns quality scoring and repair-action wording, not the
+  policy taxonomy itself.
+
 ## Build Pipeline
 
 Key files:

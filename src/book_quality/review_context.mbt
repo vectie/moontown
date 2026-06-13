@@ -15,27 +15,27 @@ fn context_spec(
 ///|
 fn context_specs() -> Array[BookQualityContextSpec] {
   [
-    context_spec(research_type(), [
+    context_spec(@policy.research_type(), [
       "raw/bootstrap/research-question.md", "raw/bootstrap/source-screen.md", "raw/bootstrap/evidence-matrix.md",
       "raw/bootstrap/deep-report.md",
     ]),
-    context_spec(course_type(), [
+    context_spec(@policy.course_type(), [
       "raw/bootstrap/COURSE_CONTRACT.md", "wiki/course/beginner-course.md", "wiki/course/exercises.md",
       "skills/course-builder/SKILL.md",
     ]),
-    context_spec(planbook_type(), [
+    context_spec(@policy.planbook_type(), [
       "raw/bootstrap/PLANBOOK_CONTRACT.md", "plans/2026-05-29-book-quality-upgrade/plan.md",
       "skills/code-plan/SKILL.md",
     ]),
-    context_spec(cookbook_type(), [
+    context_spec(@policy.cookbook_type(), [
       "raw/bootstrap/COOKBOOK_CONTRACT.md", "wiki/definitions/stable-state.md", "wiki/definitions/ownership.md",
     ]),
-    context_spec(civic_type(), [
+    context_spec(@policy.civic_type(), [
       "raw/bootstrap/CIVIC_SERVICE_CONTRACT.md", "raw/bootstrap/BUILDING_PROTOCOL_CONTRACT.md",
       "skills/wenyu-civic-service/SKILL.md", "wiki/ledgers/service-ledger.md", "wiki/ledgers/exchange-ledger.md",
       "wiki/history/service-history.md",
     ]),
-    context_spec(operational_type(), [
+    context_spec(@policy.operational_type(), [
       "raw/bootstrap/OPERATIONAL_BOOK_CONTRACT.md", "wiki/operations/review-policy.md",
       "wiki/history/journey.md", "skills/operational-keeper/SKILL.md",
     ]),

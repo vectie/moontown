@@ -2,7 +2,7 @@
 test "book quality repair standing goal constructors preserve scheduling rules" {
   let item = book_quality_repair_bridge_item_fixture(
     "research-robotics",
-    @book_quality.research_type(),
+    @policy.research_type(),
     "/tmp/research-robotics",
   )
   let created = @book_quality.new_repair_standing_goal(item, 41)
@@ -13,7 +13,7 @@ test "book quality repair standing goal constructors preserve scheduling rules" 
   assert_eq(created.next_due_tick, 42)
   assert_true(created.last_run_tick is None)
   assert_true(created.enabled)
-  assert_eq(created.source_policy, @book_quality.web_first_policy())
+  assert_eq(created.source_policy, @policy.web_first_policy())
   assert_eq(created.quality_threshold, @book_quality.semantic_ready_threshold())
   assert_true(created.prompt.contains("Repair the book."))
   let existing = @core.StandingGoal::new(
@@ -25,7 +25,7 @@ test "book quality repair standing goal constructors preserve scheduling rules" 
     next_due_tick=99,
     last_run_tick=Some(88),
     enabled=false,
-    source_policy=@book_quality.book_first_policy(),
+    source_policy=@policy.book_first_policy(),
     quality_threshold=12,
   )
   let refreshed = @book_quality.refreshed_repair_standing_goal(existing, item)
@@ -59,7 +59,7 @@ async fn book_quality_repair_retirement_label_for_test(
 test "book quality repair standing goal upsert appends or refreshes in place" {
   let item = book_quality_repair_bridge_item_fixture(
     "research-robotics",
-    @book_quality.research_type(),
+    @policy.research_type(),
     "/tmp/research-robotics",
   )
   let goals : Array[@core.StandingGoal] = []
@@ -100,7 +100,7 @@ async test "book quality repair goal retirement decision names each policy reaso
   let book_id = "research-robotics"
   let score = book_quality_score_fixture(
     book_id,
-    @book_quality.research_type(),
+    @policy.research_type(),
     "\{root}/books/\{book_id}",
   )
   let repair_goal = @core.StandingGoal::new(

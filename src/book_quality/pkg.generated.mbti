@@ -27,8 +27,6 @@ pub fn base_workspace_assessment(Bool, Bool, Bool) -> BookQualityWorkspaceAssess
 
 pub fn blocked_review_run(String, String, String, String, UInt64) -> BookQualityReviewRun
 
-pub fn book_first_policy() -> String
-
 pub fn catalog_entry_active(String, String, String, Array[String]) -> Bool
 
 pub fn catalog_entry_type(String, String, Array[String]) -> String
@@ -36,8 +34,6 @@ pub fn catalog_entry_type(String, String, Array[String]) -> String
 pub fn civic_base_required_paths() -> Array[BookQualityRequiredPath]
 
 pub fn civic_latest_result_assessment(Bool) -> BookQualitySignalAssessment
-
-pub fn civic_type() -> String
 
 pub fn clamp_score(Int) -> Int
 
@@ -47,13 +43,9 @@ pub fn cookbook_audit_link_assessment(Bool) -> BookQualitySignalAssessment
 
 pub fn cookbook_required_paths() -> Array[BookQualityRequiredPath]
 
-pub fn cookbook_type() -> String
-
 pub fn course_identity_assessment(String, String) -> BookQualitySignalAssessment
 
 pub fn course_required_paths() -> Array[BookQualityRequiredPath]
-
-pub fn course_type() -> String
 
 pub fn default_audit_path() -> String
 
@@ -74,8 +66,6 @@ pub fn disabled_repair_standing_goal(@core.StandingGoal) -> @core.StandingGoal
 pub fn external_packet_path(String, String) -> String
 
 pub async fn first_pending_review_score(BookQualityAudit, String) -> BookQualityScore?
-
-pub fn general_type() -> String
 
 pub fn generated_site_path() -> String
 
@@ -107,8 +97,6 @@ pub fn operational_site(String, String, String) -> String
 
 pub fn operational_skill(String, String) -> String
 
-pub fn operational_type() -> String
-
 pub fn operational_ui_state(String, String, String) -> String
 
 pub fn parse_ai_quality_score(String) -> Int?
@@ -118,8 +106,6 @@ pub fn path_presence_assessment(String, Int, Bool) -> BookQualityPathAssessment
 pub fn path_set_assessment(Array[String], Array[String], Int) -> BookQualityPathSetAssessment
 
 pub fn planbook_required_paths() -> Array[BookQualityRequiredPath]
-
-pub fn planbook_type() -> String
 
 pub fn policy_for_type(String) -> @policy.BookPolicy
 
@@ -181,8 +167,6 @@ pub fn research_deep_report_word_assessment(Int) -> BookQualitySignalAssessment
 
 pub fn research_required_paths() -> Array[BookQualityRequiredPath]
 
-pub fn research_type() -> String
-
 pub fn review_acp_config_json(String, String, Array[String], String) -> Json
 
 pub fn review_execution_target() -> String
@@ -231,8 +215,6 @@ pub fn review_skill_path(String) -> String
 
 pub async fn review_status_markdown_from_files(String, String, active_book_ids~ : Array[String]) -> String
 
-pub fn reviewable_types() -> Array[String]
-
 pub async fn score_book(@moonbook.BookCatalogEntry, String) -> BookQualityScore
 
 pub fn score_exists(Array[BookQualityScore], String) -> Bool
@@ -258,8 +240,6 @@ pub fn structural_quality_is_stable(Array[String], Int) -> Bool
 pub fn upsert_repair_standing_goal(Array[@core.StandingGoal], BookQualityRepairBridgeItem, Int) -> Unit
 
 pub fn weakest_score(Array[BookQualityScore]) -> BookQualityScore?
-
-pub fn web_first_policy() -> String
 
 pub fn wiki_index_path() -> String
 
