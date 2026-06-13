@@ -29,7 +29,7 @@ async test "bootstrap pdf evidence watch book installs workspace catalog and sta
     @fs.exists(pdf_evidence_watch_generated_site_workspace_path(root)),
   )
   let config = read_text_or_empty("\{root}/book.json")
-  assert_true(config.contains("\"book_type\": \"pdf-evidence-watch\""))
+  assert_true(config.contains("\"book_type\": \"\{@policy.research_type()}\""))
   assert_true(config.contains("https://example.org/reports"))
   let method_text = read_text_or_empty(
     "\{root}/wiki/methods/analysis-method.md",

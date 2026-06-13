@@ -587,6 +587,10 @@ Purpose:
 
 Boundary:
 
+- PDF Evidence Watch is a research-book capability package, not a separate
+  policy book type. Runtime-generated `book.json` should use
+  `policy.research_type()` plus PDF-specific template id, tags, skills, and
+  watch contracts.
 - PDF source discovery, extraction, analysis-method, and notification contract
   semantics belong here.
 - default generated-site path semantics belong to `src/policy`; PDF Evidence

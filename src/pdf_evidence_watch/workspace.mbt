@@ -93,7 +93,7 @@ fn pdf_evidence_watch_config(
     template_id: "pdf-evidence-watch",
     template_version: "1",
     book_id: entry.id,
-    book_type: "pdf-evidence-watch",
+    book_type: @policy.research_type(),
     title,
     purpose,
     workspace_root: entry.workspace_root,
