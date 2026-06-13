@@ -7,6 +7,32 @@ pub fn required_path(
 }
 
 ///|
+fn required_path_present(
+  paths : Array[BookQualityRequiredPath],
+  relative : String,
+) -> Bool {
+  paths.any(path => path.relative == relative)
+}
+
+///|
+fn include_policy_required_paths(
+  book_type : String,
+  paths : Array[BookQualityRequiredPath],
+  points : Int,
+) -> Array[BookQualityRequiredPath] {
+  let result : Array[BookQualityRequiredPath] = []
+  for path in paths {
+    result.push(path)
+  }
+  for file in @policy.required_file_specs(@policy.policy_for_type(book_type)) {
+    if file.required && !required_path_present(result, file.path) {
+      result.push(required_path(file.path, points))
+    }
+  }
+  result
+}
+
+///|
 pub fn path_set_assessment(
   relatives : Array[String],
   missing : Array[String],
@@ -154,84 +180,108 @@ pub fn cookbook_audit_link_assessment(
 
 ///|
 pub fn research_required_paths() -> Array[BookQualityRequiredPath] {
-  [
-    required_path("raw/bootstrap/research-question.md", 6),
-    required_path("raw/bootstrap/search-log.md", 8),
-    required_path("raw/bootstrap/source-screen.md", 8),
-    required_path("raw/bootstrap/evidence-matrix.md", 10),
-    required_path("raw/bootstrap/deep-report.md", 12),
-    required_path("raw/bootstrap/marketing-brief.md", 5),
-    required_path(wiki_index_path(), 7),
-    policy_type_output_required_path(@policy.research_type(), 6),
-  ]
+  include_policy_required_paths(
+    @policy.research_type(),
+    [
+      required_path("raw/bootstrap/research-question.md", 6),
+      required_path("raw/bootstrap/search-log.md", 8),
+      required_path("raw/bootstrap/source-screen.md", 8),
+      required_path("raw/bootstrap/evidence-matrix.md", 10),
+      required_path("raw/bootstrap/deep-report.md", 12),
+      required_path("raw/bootstrap/marketing-brief.md", 5),
+      required_path(wiki_index_path(), 7),
+      policy_type_output_required_path(@policy.research_type(), 6),
+    ],
+    5,
+  )
 }
 
 ///|
 pub fn course_required_paths() -> Array[BookQualityRequiredPath] {
-  [
-    required_path("raw/bootstrap/COURSE_CONTRACT.md", 12),
-    required_path("raw/bootstrap/course-outline.md", 10),
-    required_path("raw/bootstrap/source-material.md", 4),
-    required_path("wiki/course/beginner-course.md", 16),
-    required_path("wiki/course/exercises.md", 10),
-    required_path("wiki/course/progress-rubric.md", 8),
-    required_path("skills/course-builder/SKILL.md", 12),
-    policy_type_output_required_path(@policy.course_type(), 6),
-  ]
+  include_policy_required_paths(
+    @policy.course_type(),
+    [
+      required_path("raw/bootstrap/COURSE_CONTRACT.md", 12),
+      required_path("raw/bootstrap/course-outline.md", 10),
+      required_path("raw/bootstrap/source-material.md", 4),
+      required_path("wiki/course/beginner-course.md", 16),
+      required_path("wiki/course/exercises.md", 10),
+      required_path("wiki/course/progress-rubric.md", 8),
+      required_path("skills/course-builder/SKILL.md", 12),
+      policy_type_output_required_path(@policy.course_type(), 6),
+    ],
+    5,
+  )
 }
 
 ///|
 pub fn planbook_required_paths() -> Array[BookQualityRequiredPath] {
-  [
-    required_path("raw/bootstrap/PLANBOOK_CONTRACT.md", 14),
-    required_path("plans/2026-05-29-book-quality-upgrade/plan.md", 16),
-    required_path("plans/index.md", 8),
-    required_path("wiki/planning/quality-gates.md", 12),
-    required_path("wiki/planning/execution-evidence.md", 10),
-    required_path("wiki/reviews/active-plan-review.md", 10),
-    required_path("wiki/history/decision-log.md", 8),
-    required_path("schemas/plan-record.schema.md", 6),
-    required_path("skills/code-plan/SKILL.md", 12),
-    required_path("skills/code-review/SKILL.md", 10),
-    required_path("skills/doc-sync/SKILL.md", 8),
-    policy_type_output_required_path(@policy.planbook_type(), 6),
-  ]
+  include_policy_required_paths(
+    @policy.planbook_type(),
+    [
+      required_path("raw/bootstrap/PLANBOOK_CONTRACT.md", 14),
+      required_path("plans/2026-05-29-book-quality-upgrade/plan.md", 16),
+      required_path("plans/index.md", 8),
+      required_path("wiki/planning/quality-gates.md", 12),
+      required_path("wiki/planning/execution-evidence.md", 10),
+      required_path("wiki/reviews/active-plan-review.md", 10),
+      required_path("wiki/history/decision-log.md", 8),
+      required_path("schemas/plan-record.schema.md", 6),
+      required_path("skills/code-plan/SKILL.md", 12),
+      required_path("skills/code-review/SKILL.md", 10),
+      required_path("skills/doc-sync/SKILL.md", 8),
+      policy_type_output_required_path(@policy.planbook_type(), 6),
+    ],
+    5,
+  )
 }
 
 ///|
 pub fn cookbook_required_paths() -> Array[BookQualityRequiredPath] {
-  [
-    required_path("raw/bootstrap/COOKBOOK_CONTRACT.md", 14),
-    required_path("wiki/definitions/stable-state.md", 16),
-    required_path("wiki/definitions/ownership.md", 12),
-    required_path("wiki/definitions/book-types.md", 6),
-    required_path("wiki/definitions/runtime-boundaries.md", 6),
-    required_path("wiki/operating-procedures/doctor.md", 10),
-    required_path("wiki/operating-procedures/book-governance.md", 6),
-    required_path("wiki/history/stable-state-ledger.md", 6),
-    required_path("schemas/stable-state-manifest.schema.md", 8),
-    policy_type_output_required_path(@policy.cookbook_type(), 6),
-  ]
+  include_policy_required_paths(
+    @policy.cookbook_type(),
+    [
+      required_path("raw/bootstrap/COOKBOOK_CONTRACT.md", 14),
+      required_path("wiki/definitions/stable-state.md", 16),
+      required_path("wiki/definitions/ownership.md", 12),
+      required_path("wiki/definitions/book-types.md", 6),
+      required_path("wiki/definitions/runtime-boundaries.md", 6),
+      required_path("wiki/operating-procedures/doctor.md", 10),
+      required_path("wiki/operating-procedures/book-governance.md", 6),
+      required_path("wiki/history/stable-state-ledger.md", 6),
+      required_path("schemas/stable-state-manifest.schema.md", 8),
+      policy_type_output_required_path(@policy.cookbook_type(), 6),
+    ],
+    5,
+  )
 }
 
 ///|
 pub fn operational_required_paths() -> Array[BookQualityRequiredPath] {
-  [
-    required_path("raw/bootstrap/OPERATIONAL_BOOK_CONTRACT.md", 18),
-    required_path("wiki/operations/review-policy.md", 16),
-    required_path("wiki/history/journey.md", 12),
-    required_path("skills/operational-keeper/SKILL.md", 16),
-    policy_type_output_required_path(@policy.operational_type(), 10),
-  ]
+  include_policy_required_paths(
+    @policy.operational_type(),
+    [
+      required_path("raw/bootstrap/OPERATIONAL_BOOK_CONTRACT.md", 18),
+      required_path("wiki/operations/review-policy.md", 16),
+      required_path("wiki/history/journey.md", 12),
+      required_path("skills/operational-keeper/SKILL.md", 16),
+      policy_type_output_required_path(@policy.operational_type(), 10),
+    ],
+    5,
+  )
 }
 
 ///|
 pub fn civic_base_required_paths() -> Array[BookQualityRequiredPath] {
-  [
-    required_path("raw/bootstrap/CIVIC_SERVICE_CONTRACT.md", 12),
-    required_path("raw/bootstrap/BUILDING_PROTOCOL_CONTRACT.md", 12),
-    required_path("skills/wenyu-civic-service/SKILL.md", 10),
-    required_path("moonclaw.jobs.json", 10),
-    policy_type_output_required_path(@policy.civic_type(), 6),
-  ]
+  include_policy_required_paths(
+    @policy.civic_type(),
+    [
+      required_path("raw/bootstrap/CIVIC_SERVICE_CONTRACT.md", 12),
+      required_path("raw/bootstrap/BUILDING_PROTOCOL_CONTRACT.md", 12),
+      required_path("skills/wenyu-civic-service/SKILL.md", 10),
+      required_path("moonclaw.jobs.json", 10),
+      policy_type_output_required_path(@policy.civic_type(), 6),
+    ],
+    5,
+  )
 }

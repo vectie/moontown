@@ -438,6 +438,8 @@ Purpose:
 - translate policy profiles into quality-review and repair actions
 - build quality-review context pages and repair standing-goal policy
 - check required output surfaces from the effective `BookPolicy`
+- include `BookPolicy.required_files` in structural path scoring without
+  double-counting paths that also have package-specific weights
 
 Boundary:
 

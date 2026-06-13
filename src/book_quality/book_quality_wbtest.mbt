@@ -68,6 +68,49 @@ test "book quality generated site path follows policy projection default" {
 }
 
 ///|
+fn required_path_count_for_test(
+  paths : Array[BookQualityRequiredPath],
+  relative : String,
+) -> Int {
+  let mut count = 0
+  for path in paths {
+    if path.relative == relative {
+      count += 1
+    }
+  }
+  count
+}
+
+///|
+test "book quality structural paths include policy required files without duplicates" {
+  let research_paths = research_required_paths()
+  assert_eq(
+    required_path_count_for_test(
+      research_paths, "raw/bootstrap/evidence-matrix.md",
+    ),
+    1,
+  )
+  assert_eq(
+    required_path_count_for_test(research_paths, "wiki/synthesis/overview.md"),
+    1,
+  )
+  assert_eq(required_path_count_for_test(research_paths, "wiki/sources/"), 1)
+  let course_paths = course_required_paths()
+  assert_eq(
+    required_path_count_for_test(course_paths, "wiki/course/exercises.md"),
+    1,
+  )
+  assert_eq(
+    required_path_count_for_test(course_paths, "wiki/course/outline.md"),
+    1,
+  )
+  assert_eq(
+    required_path_count_for_test(course_paths, "wiki/course/lessons.md"),
+    1,
+  )
+}
+
+///|
 test "book quality package owns operational book templates" {
   let index = operational_index(
     "ops-book",
