@@ -34,6 +34,16 @@ pub fn general_type() -> String {
 }
 
 ///|
+pub fn book_type_marker(book_type : String) -> String {
+  "type: `\{book_type}`"
+}
+
+///|
+pub fn book_type_line(book_type : String) -> String {
+  "Book type: `\{book_type}`"
+}
+
+///|
 pub fn reviewable_types() -> Array[String] {
   [
     research_type(),

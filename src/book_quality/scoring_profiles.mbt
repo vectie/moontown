@@ -109,7 +109,7 @@ pub fn course_identity_assessment(
   if index.contains("## research report") || book_id.has_prefix("research-") {
     gaps.push("course still looks research-shaped in id or index")
   } else if index.contains("course book") ||
-    index.contains("type: `course-book`") {
+    index.contains(@policy.book_type_marker(@policy.course_type())) {
     score += 8
     strengths.push("course identity is explicit")
   }
