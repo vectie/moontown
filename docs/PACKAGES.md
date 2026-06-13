@@ -246,6 +246,29 @@ Boundary:
   path derivation before appending runtime-owned subdirectories such as
   `book-results`.
 
+## Course Worker Contracts
+
+Key files:
+
+- [src/course_contracts/worker_contracts.mbt](/Users/kq/Workspace/moontown/src/course_contracts/worker_contracts.mbt)
+
+Purpose:
+
+- `src/course_contracts` owns adapter-safe beginner-course worker contracts:
+  Wenyu beginner-course and wiki-course skill paths, course context page sets,
+  required artifact paths, course policy and routine lines, prompt wording,
+  memory summary, and output-contract lines.
+
+Boundary:
+
+- `src/adapters/moonbook` may detect course context, derive a book display
+  name, and append `src/course_contracts` values into a worker bundle.
+- `src/adapters/moonbook` must not hardcode course skill paths, course context
+  pages, required course artifact paths, course prompt wording, or course
+  output-contract lines.
+- `src/course_contracts` may consume `src/research_policy` for shared research
+  support paths, but it should own course-specific artifact and quality wording.
+
 ## Research Policy
 
 - [src/research_policy](/Users/kq/Workspace/moontown/src/research_policy)

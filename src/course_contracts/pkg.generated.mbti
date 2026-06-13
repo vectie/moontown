@@ -1,0 +1,44 @@
+// Generated using `moon info`, DON'T EDIT IT
+package "vectie/moontown/course_contracts"
+
+// Values
+pub fn course_context_pages() -> Array[String]
+
+pub fn course_journey_page_path() -> String
+
+pub fn course_outline_path() -> String
+
+pub fn course_output_contract_lines() -> Array[String]
+
+pub fn course_quality_repair_path() -> String
+
+pub fn course_required_artifact_paths() -> Array[String]
+
+pub fn course_required_artifact_sentence() -> String
+
+pub fn course_skill_paths() -> Array[String]
+
+pub fn course_synthesis_page_path() -> String
+
+pub fn course_workbook_path() -> String
+
+pub fn course_worker_memory_summary(String) -> String
+
+pub fn course_worker_policy_lines() -> Array[String]
+
+pub fn course_worker_prompt(String, String) -> String
+
+pub fn course_worker_routine_lines() -> Array[String]
+
+pub fn wenyu_beginner_course_skill_path() -> String
+
+pub fn wiki_course_skill_path() -> String
+
+// Errors
+
+// Types and methods
+
+// Type aliases
+
+// Traits
+

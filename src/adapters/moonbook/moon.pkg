@@ -1,5 +1,6 @@
 import {
   "vectie/moontown/core",
+  "vectie/moontown/course_contracts",
   "vectie/moontown/civic_contracts",
   "vectie/moontown/integration",
   "vectie/moontown/moonclaw_policy",

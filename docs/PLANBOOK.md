@@ -625,6 +625,14 @@ package first. `adapters/moonbook` may detect civic context and append those
 contracts to a worker bundle, but it must not become the owner of Wenyu
 skill/context/output tables.
 
+Adapter-safe course worker contracts live in
+[course_contracts](/Users/kq/Workspace/moontown/src/course_contracts). Future
+plans that change beginner-course skill paths, context pages, required course
+artifacts, course prompt wording, course policy/routine lines, or course output
+contracts must update that package first. `adapters/moonbook` may detect course
+context and pass display/request context into those helpers, but it must not
+own course skill/context/prompt/output tables.
+
 Civic workspace seed text is civic-owned too. Workspace index pages, service
 contracts, building protocol contracts, schema pages, wiki seed pages, review
 queue pages, service ledgers, exchange ledgers, and service history pages

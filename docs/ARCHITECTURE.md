@@ -346,6 +346,13 @@ book owns. The implementation now has a first-class `policy` package:
   lines. MoonBook adapters may consume these contracts when shaping worker
   context, but they should not define Wenyu skill tables, context-page tables,
   or civic service output contracts locally.
+- [course_contracts/](/Users/kq/Workspace/moontown/src/course_contracts)
+  owns the adapter-safe course worker contract: beginner-course skill paths,
+  context page sets, required course artifact paths, course policy/routine
+  lines, prompt wording, memory summary, and output-contract lines. MoonBook
+  adapters may provide book display/original request context, but they should
+  not define course skill tables, course page tables, or course quality wording
+  locally.
 - [standing_watch_policy/](/Users/kq/Workspace/moontown/src/standing_watch_policy)
   owns the generic standing-watch policy: task kind, task id derivation,
   compact id segment formatting, target page set, prompt text, strict accounting
@@ -1778,6 +1785,24 @@ book, but the reusable contract tables belong to `civic_contracts/`.
   - may append `civic_contracts/` skill/context/output contracts to a worker
     bundle
   - must not reintroduce adapter-local Wenyu skill/path/output-contract tables
+
+## Course Worker Contract Ownership
+
+Course worker context is also separate from the MoonBook adapter. The adapter
+may detect course context and pass a display name plus original request into
+the course contract, but the reusable course worker shape belongs to
+`course_contracts/`.
+
+- `course_contracts/`
+  - owns Wenyu beginner-course and wiki-course skill paths
+  - owns course context pages, required artifact paths, course policy/routine
+    lines, prompt wording, memory summary, and output contract lines
+  - may delegate shared research support paths to `research_policy/`
+- `adapters/moonbook/`
+  - may enrich a course worker bundle with `course_contracts/`
+  - may derive book display text from MoonBook catalog state
+  - must not define adapter-local course skill/path/prompt/output-contract
+    tables
 
 ## Refactor Boundaries
 

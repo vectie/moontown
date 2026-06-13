@@ -19,12 +19,33 @@ fn course_test_bundle() -> WorkerContextBundle {
 
 ///|
 test "course context helpers define course-specific artifacts" {
-  assert_eq(course_outline_path(), "raw/bootstrap/course-outline.md")
-  assert_eq(course_workbook_path(), "raw/bootstrap/deep-report.md")
-  assert_eq(course_synthesis_page_path(), "wiki/synthesis/beginner-course.md")
-  assert_true(course_context_pages().contains(course_outline_path()))
-  assert_true(course_context_pages().contains(course_workbook_path()))
-  assert_true(course_context_pages().contains(course_synthesis_page_path()))
+  assert_eq(
+    @course_contracts.course_outline_path(),
+    "raw/bootstrap/course-outline.md",
+  )
+  assert_eq(
+    @course_contracts.course_workbook_path(),
+    "raw/bootstrap/deep-report.md",
+  )
+  assert_eq(
+    @course_contracts.course_synthesis_page_path(),
+    "wiki/synthesis/beginner-course.md",
+  )
+  assert_true(
+    @course_contracts.course_context_pages().contains(
+      @course_contracts.course_outline_path(),
+    ),
+  )
+  assert_true(
+    @course_contracts.course_context_pages().contains(
+      @course_contracts.course_workbook_path(),
+    ),
+  )
+  assert_true(
+    @course_contracts.course_context_pages().contains(
+      @course_contracts.course_synthesis_page_path(),
+    ),
+  )
 }
 
 ///|
@@ -37,12 +58,24 @@ test "course worker context adds course skills and pages once" {
   )
   let enriched = course_worker_context_bundle(entry, course_test_bundle())
   assert_true(
-    enriched.skill_paths.contains("skills/wenyu-beginner-course/SKILL.md"),
+    enriched.skill_paths.contains(
+      @course_contracts.wenyu_beginner_course_skill_path(),
+    ),
   )
-  assert_true(enriched.skill_paths.contains("skills/wiki-course/SKILL.md"))
-  assert_true(enriched.context_pages.contains(course_outline_path()))
-  assert_true(enriched.context_pages.contains(course_workbook_path()))
-  assert_true(enriched.context_pages.contains(course_synthesis_page_path()))
+  assert_true(
+    enriched.skill_paths.contains(@course_contracts.wiki_course_skill_path()),
+  )
+  assert_true(
+    enriched.context_pages.contains(@course_contracts.course_outline_path()),
+  )
+  assert_true(
+    enriched.context_pages.contains(@course_contracts.course_workbook_path()),
+  )
+  assert_true(
+    enriched.context_pages.contains(
+      @course_contracts.course_synthesis_page_path(),
+    ),
+  )
 }
 
 ///|
@@ -54,8 +87,8 @@ test "course prompt and output contract use course artifact helpers" {
     workspace_root="/tmp/course",
   )
   let prompt = course_worker_prompt(entry, course_test_bundle())
-  let contract = course_output_contract_lines().join("\n")
-  for path in course_required_artifact_paths() {
+  let contract = @course_contracts.course_output_contract_lines().join("\n")
+  for path in @course_contracts.course_required_artifact_paths() {
     assert_true(prompt.contains(path))
     assert_true(contract.contains(path))
   }
