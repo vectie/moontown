@@ -43,48 +43,44 @@ async fn run_daemon_scheduled_job(
   book_catalog_path : String,
   tick : Int,
 ) -> String? {
-  match job.kind {
-    "civic-pattern" =>
-      Some(
-        @civic_runtime.run_due_civic_communication_patterns(
-          snapshot_path~,
-          book_catalog_path~,
-          tick~,
-          run_inline=false,
-        ),
-      )
-    // Legacy schedule kind kept so older daemon state files continue to run.
-    "civic-salon" =>
-      Some(
-        @civic_runtime.run_due_civic_communication_patterns(
-          snapshot_path~,
-          book_catalog_path~,
-          tick~,
-          run_inline=false,
-        ),
-      )
-    "civic-service" =>
-      Some(
-        @civic_runtime.reconcile_wenyu_civic_service_results(book_catalog_path~),
-      )
-    "book-quality" =>
-      Some(
-        @book_quality_runtime.write_book_quality_audit(
-          book_catalog_path~,
-          snapshot_path~,
-        ),
-      )
-    "book-quality-review" =>
-      Some(run_book_quality_review_cycle(book_catalog_path, snapshot_path))
-    "book-template-request" =>
-      Some(
-        @book_templates.process_book_template_requests(
-          request_path=@book_templates.request_path_for_snapshot(snapshot_path),
-          book_catalog_path~,
-          tick~,
-        ),
-      )
-    _ => None
+  if @scheduler.scheduled_job_runs_civic_communication(job) {
+    Some(
+      @civic_runtime.run_due_civic_communication_patterns(
+        snapshot_path~,
+        book_catalog_path~,
+        tick~,
+        run_inline=false,
+      ),
+    )
+  } else {
+    match job.kind {
+      "civic-service" =>
+        Some(
+          @civic_runtime.reconcile_wenyu_civic_service_results(
+            book_catalog_path~,
+          ),
+        )
+      "book-quality" =>
+        Some(
+          @book_quality_runtime.write_book_quality_audit(
+            book_catalog_path~,
+            snapshot_path~,
+          ),
+        )
+      "book-quality-review" =>
+        Some(run_book_quality_review_cycle(book_catalog_path, snapshot_path))
+      "book-template-request" =>
+        Some(
+          @book_templates.process_book_template_requests(
+            request_path=@book_templates.request_path_for_snapshot(
+              snapshot_path,
+            ),
+            book_catalog_path~,
+            tick~,
+          ),
+        )
+      _ => None
+    }
   }
 }
 

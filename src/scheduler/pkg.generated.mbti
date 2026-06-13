@@ -9,11 +9,19 @@ import {
 }
 
 // Values
+pub fn civic_pattern_job_id() -> String
+
+pub fn civic_pattern_job_kind() -> String
+
 pub fn collect_due_tasks(@core.TownState) -> Array[@core.TownTask]
 
 pub fn default_daemon_jobs() -> Array[ScheduledJob]
 
 pub fn due_standing_goals(Array[@core.StandingGoal], Int) -> Array[@core.StandingGoal]
+
+pub fn legacy_civic_salon_job_id() -> String
+
+pub fn legacy_civic_salon_job_kind() -> String
 
 pub fn merge_default_daemon_jobs(Array[ScheduledJob]) -> Array[ScheduledJob]
 
@@ -24,6 +32,12 @@ pub fn plan_daemon_tick(DaemonState, @core.TownState, @health.HealthReport, stan
 pub fn plan_standing_goal_actions(Array[@core.StandingGoal], Int) -> Array[SchedulerAction]
 
 pub fn plan_tick(@core.TownState, @health.HealthReport) -> Array[SchedulerAction]
+
+pub fn scheduled_job_is_civic_pattern(ScheduledJob) -> Bool
+
+pub fn scheduled_job_is_legacy_civic_salon(ScheduledJob) -> Bool
+
+pub fn scheduled_job_runs_civic_communication(ScheduledJob) -> Bool
 
 // Errors
 

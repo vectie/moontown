@@ -82,3 +82,22 @@ test "daemon tick drops deprecated civic salon job during migration" {
   assert_true(daemon.jobs.any(fn(job) { job.id == "run-civic-patterns" }))
   assert_eq(daemon.jobs.length(), default_daemon_jobs().length())
 }
+
+///|
+test "scheduler classifies current and legacy civic communication jobs" {
+  let current = {
+    id: civic_pattern_job_id(),
+    kind: civic_pattern_job_kind(),
+    interval_seconds: 30,
+  }
+  let legacy = {
+    id: legacy_civic_salon_job_id(),
+    kind: legacy_civic_salon_job_kind(),
+    interval_seconds: 30,
+  }
+  assert_true(scheduled_job_is_civic_pattern(current))
+  assert_true(!scheduled_job_is_legacy_civic_salon(current))
+  assert_true(scheduled_job_is_legacy_civic_salon(legacy))
+  assert_true(scheduled_job_runs_civic_communication(current))
+  assert_true(scheduled_job_runs_civic_communication(legacy))
+}

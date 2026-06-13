@@ -1,4 +1,24 @@
 ///|
+pub fn civic_pattern_job_id() -> String {
+  "run-civic-patterns"
+}
+
+///|
+pub fn civic_pattern_job_kind() -> String {
+  "civic-pattern"
+}
+
+///|
+pub fn legacy_civic_salon_job_id() -> String {
+  "run-civic-salons"
+}
+
+///|
+pub fn legacy_civic_salon_job_kind() -> String {
+  "civic-salon"
+}
+
+///|
 pub fn default_daemon_jobs() -> Array[ScheduledJob] {
   [
     { id: "supervise-live-runs", kind: "supervision", interval_seconds: 30 },
@@ -7,7 +27,11 @@ pub fn default_daemon_jobs() -> Array[ScheduledJob] {
       kind: "standing-goal",
       interval_seconds: 30,
     },
-    { id: "run-civic-patterns", kind: "civic-pattern", interval_seconds: 30 },
+    {
+      id: civic_pattern_job_id(),
+      kind: civic_pattern_job_kind(),
+      interval_seconds: 30,
+    },
     {
       id: "reconcile-civic-services",
       kind: "civic-service",
@@ -50,5 +74,22 @@ pub fn merge_default_daemon_jobs(
 
 ///|
 fn daemon_job_deprecated(job : ScheduledJob) -> Bool {
-  job.id == "run-civic-salons" || job.kind == "civic-salon"
+  scheduled_job_is_legacy_civic_salon(job)
+}
+
+///|
+pub fn scheduled_job_is_civic_pattern(job : ScheduledJob) -> Bool {
+  job.kind == civic_pattern_job_kind()
+}
+
+///|
+pub fn scheduled_job_is_legacy_civic_salon(job : ScheduledJob) -> Bool {
+  job.id == legacy_civic_salon_job_id() ||
+  job.kind == legacy_civic_salon_job_kind()
+}
+
+///|
+pub fn scheduled_job_runs_civic_communication(job : ScheduledJob) -> Bool {
+  scheduled_job_is_civic_pattern(job) ||
+  scheduled_job_is_legacy_civic_salon(job)
 }

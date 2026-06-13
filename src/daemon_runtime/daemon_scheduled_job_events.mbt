@@ -4,7 +4,7 @@ fn daemon_scheduled_job_event_for_summary(
   tick : Int,
   summary : String,
 ) -> @core.TownEvent? {
-  if (job.kind == "civic-pattern" || job.kind == "civic-salon") &&
+  if @scheduler.scheduled_job_runs_civic_communication(job) &&
     summary.has_prefix("Ran ") {
     Some(daemon_scheduled_job_event(job, tick, summary))
   } else if job.kind == "civic-service" &&
