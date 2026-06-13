@@ -1,5 +1,5 @@
 ///|
-pub(all) struct CivicSalonMetricCounts {
+pub(all) struct CivicCommunicationMetricCounts {
   participant_count : Int
   idea_count : Int
   research_question_count : Int
@@ -10,10 +10,10 @@ pub(all) struct CivicSalonMetricCounts {
 
 ///|
 pub fn civic_salon_metrics(
-  scenario : CivicSalonScenario,
-  participants : Array[CivicSalonParticipantBook],
-  ideas : Array[CivicSalonIdea],
-) -> CivicSalonMetric {
+  scenario : CivicCommunicationScenario,
+  participants : Array[CivicCommunicationParticipantBook],
+  ideas : Array[CivicCommunicationIdea],
+) -> CivicCommunicationMetric {
   let counts = civic_salon_metric_counts(participants, ideas)
   let structural_effectiveness_score = civic_salon_structural_score(
     participant_count=counts.participant_count,
@@ -38,9 +38,9 @@ pub fn civic_salon_metrics(
 
 ///|
 pub fn civic_salon_metric_counts(
-  participants : Array[CivicSalonParticipantBook],
-  ideas : Array[CivicSalonIdea],
-) -> CivicSalonMetricCounts {
+  participants : Array[CivicCommunicationParticipantBook],
+  ideas : Array[CivicCommunicationIdea],
+) -> CivicCommunicationMetricCounts {
   let participant_idea_links = civic_salon_participant_idea_link_count(ideas)
   {
     participant_count: participants.length(),
@@ -55,15 +55,15 @@ pub fn civic_salon_metric_counts(
 ///|
 pub fn civic_salon_returned_ideas_for_book(
   book_id : String,
-  ideas : Array[CivicSalonIdea],
-) -> Array[CivicSalonIdea] {
+  ideas : Array[CivicCommunicationIdea],
+) -> Array[CivicCommunicationIdea] {
   ideas.filter(fn(idea) { idea.participating_books.contains(book_id) })
 }
 
 ///|
 fn civic_salon_metric_summary(
-  scenario : CivicSalonScenario,
-  counts : CivicSalonMetricCounts,
+  scenario : CivicCommunicationScenario,
+  counts : CivicCommunicationMetricCounts,
 ) -> String {
   [
     "The pattern round converted \{counts.participant_count} \{scenario.domain_label} participant perspectives",
@@ -75,7 +75,7 @@ fn civic_salon_metric_summary(
 
 ///|
 fn civic_salon_average_books_per_idea_label(
-  ideas : Array[CivicSalonIdea],
+  ideas : Array[CivicCommunicationIdea],
 ) -> String {
   if ideas.length() == 0 {
     "0"
@@ -118,7 +118,9 @@ fn civic_salon_score_component(value : Int, target : Int, max : Int) -> Int {
 }
 
 ///|
-fn civic_salon_research_question_count(ideas : Array[CivicSalonIdea]) -> Int {
+fn civic_salon_research_question_count(
+  ideas : Array[CivicCommunicationIdea],
+) -> Int {
   let mut count = 0
   for idea in ideas {
     count += idea.research_questions.length()
@@ -128,7 +130,7 @@ fn civic_salon_research_question_count(ideas : Array[CivicSalonIdea]) -> Int {
 
 ///|
 fn civic_salon_participant_idea_link_count(
-  ideas : Array[CivicSalonIdea],
+  ideas : Array[CivicCommunicationIdea],
 ) -> Int {
   let mut count = 0
   for idea in ideas {
@@ -138,7 +140,7 @@ fn civic_salon_participant_idea_link_count(
 }
 
 ///|
-fn civic_salon_covered_book_count(ideas : Array[CivicSalonIdea]) -> Int {
+fn civic_salon_covered_book_count(ideas : Array[CivicCommunicationIdea]) -> Int {
   let covered : Array[String] = []
   for idea in ideas {
     for book_id in idea.participating_books {

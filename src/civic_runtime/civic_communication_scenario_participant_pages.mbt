@@ -1,8 +1,8 @@
 ///|
 fn civic_salon_participant_index(
-  scenario : CivicSalonScenario,
-  participant : CivicSalonParticipantBook,
-  returned_ideas : Array[CivicSalonIdea],
+  scenario : CivicCommunicationScenario,
+  participant : CivicCommunicationParticipantBook,
+  returned_ideas : Array[CivicCommunicationIdea],
 ) -> String {
   let pattern = @civic.communication_pattern_for_scenario(scenario)
   [
@@ -36,8 +36,8 @@ fn civic_salon_participant_index(
 
 ///|
 fn civic_salon_participant_contract(
-  scenario : CivicSalonScenario,
-  participant : CivicSalonParticipantBook,
+  scenario : CivicCommunicationScenario,
+  participant : CivicCommunicationParticipantBook,
 ) -> String {
   let pattern = @civic.communication_pattern_for_scenario(scenario)
   [
@@ -58,7 +58,7 @@ fn civic_salon_participant_contract(
 
 ///|
 fn civic_salon_participant_perspective(
-  participant : CivicSalonParticipantBook,
+  participant : CivicCommunicationParticipantBook,
 ) -> String {
   [
     "# Current Perspective",
@@ -83,8 +83,8 @@ fn civic_salon_participant_perspective(
 
 ///|
 fn civic_salon_participant_question_page(
-  scenario : CivicSalonScenario,
-  participant : CivicSalonParticipantBook,
+  scenario : CivicCommunicationScenario,
+  participant : CivicCommunicationParticipantBook,
 ) -> String {
   [
     "# Open Questions",
@@ -103,9 +103,9 @@ fn civic_salon_participant_question_page(
 
 ///|
 fn civic_salon_returned_ideas_page(
-  scenario : CivicSalonScenario,
-  participant : CivicSalonParticipantBook,
-  returned_ideas : Array[CivicSalonIdea],
+  scenario : CivicCommunicationScenario,
+  participant : CivicCommunicationParticipantBook,
+  returned_ideas : Array[CivicCommunicationIdea],
   round_id : String,
   round_number : Int,
 ) -> String {

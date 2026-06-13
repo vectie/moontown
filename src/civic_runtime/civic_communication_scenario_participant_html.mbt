@@ -1,8 +1,8 @@
 ///|
 fn civic_salon_participant_html(
-  scenario : CivicSalonScenario,
-  participant : CivicSalonParticipantBook,
-  returned_ideas : Array[CivicSalonIdea],
+  scenario : CivicCommunicationScenario,
+  participant : CivicCommunicationParticipantBook,
+  returned_ideas : Array[CivicCommunicationIdea],
   round_id : String,
   round_number : Int,
 ) -> String {
@@ -21,7 +21,7 @@ fn civic_salon_participant_html(
 
 ///|
 fn civic_salon_returned_idea_cards(
-  returned_ideas : Array[CivicSalonIdea],
+  returned_ideas : Array[CivicCommunicationIdea],
 ) -> String {
   if returned_ideas.length() == 0 {
     "<p>No returned outputs yet.</p>"
@@ -36,7 +36,7 @@ fn civic_salon_returned_idea_cards(
 
 ///|
 fn civic_salon_participant_html_head(
-  participant : CivicSalonParticipantBook,
+  participant : CivicCommunicationParticipantBook,
 ) -> String {
   "<html><head><meta charset=\"utf-8\"><title>\{participant.title}</title>\n\{civic_salon_participant_html_style()}"
 }
@@ -62,8 +62,8 @@ fn civic_salon_participant_html_body_close() -> String {
 
 ///|
 fn civic_salon_participant_round_meta(
-  scenario : CivicSalonScenario,
-  participant : CivicSalonParticipantBook,
+  scenario : CivicCommunicationScenario,
+  participant : CivicCommunicationParticipantBook,
   round_number : Int,
 ) -> String {
   "<p><code>\{scenario.title}</code> <code>\{participant.cadence}</code> <code>round \{round_number}</code></p>"
@@ -71,7 +71,7 @@ fn civic_salon_participant_round_meta(
 
 ///|
 fn civic_salon_participant_intro(
-  participant : CivicSalonParticipantBook,
+  participant : CivicCommunicationParticipantBook,
   round_id : String,
 ) -> String {
   [
@@ -83,7 +83,7 @@ fn civic_salon_participant_intro(
 
 ///|
 fn civic_salon_participant_work_sections(
-  participant : CivicSalonParticipantBook,
+  participant : CivicCommunicationParticipantBook,
 ) -> String {
   [
     "<h2>Contribution</h2><p>\{participant.contribution}</p>",
@@ -97,7 +97,7 @@ fn civic_salon_participant_returned_outputs_heading() -> String {
 }
 
 ///|
-fn civic_salon_returned_idea_card(idea : CivicSalonIdea) -> String {
+fn civic_salon_returned_idea_card(idea : CivicCommunicationIdea) -> String {
   [
     "<article>",
     "<h3>\{idea.title}</h3>",

@@ -1,9 +1,9 @@
 ///|
 async fn fixture_civic_salon_reduction(
-  scenario : CivicSalonScenario,
+  scenario : CivicCommunicationScenario,
   round_id : String,
   workspace_base : String,
-) -> CivicSalonReductionResult {
+) -> CivicCommunicationReductionResult {
   let ideas = scenario.ideas
   persist_civic_salon_reducer_output(scenario, ideas, workspace_base)
   {

@@ -1,6 +1,6 @@
 ///|
 test "generic civic communication schedule facade delegates schedule policy" {
-  let schedule = CivicSalonSchedule::new(
+  let schedule = CivicCommunicationSchedule::new(
     id="robotics-salon",
     title="Robotics Communication Pattern",
     building_id="social-square",

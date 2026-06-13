@@ -66,7 +66,7 @@ fn civic_protocol_catalog_entry(
 }
 
 ///|
-fn test_civic_salon_scenario() -> CivicSalonScenario {
+fn test_civic_salon_scenario() -> CivicCommunicationScenario {
   {
     id: "future-energy-social-square",
     title: "Future Energy Social Square Salon",

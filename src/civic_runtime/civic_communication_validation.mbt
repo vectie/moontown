@@ -1,7 +1,7 @@
 ///|
 fn civic_salon_round_validation_errors(
-  scenario : CivicSalonScenario,
-  ideas : Array[CivicSalonIdea],
+  scenario : CivicCommunicationScenario,
+  ideas : Array[CivicCommunicationIdea],
 ) -> Array[String] {
   let errors : Array[String] = []
   if scenario.participants.length() == 0 {
@@ -40,8 +40,8 @@ fn civic_salon_round_validation_errors(
 
 ///|
 fn civic_salon_first_packet_id(
-  scenario : CivicSalonScenario,
-  participants : Array[CivicSalonParticipantBook],
+  scenario : CivicCommunicationScenario,
+  participants : Array[CivicCommunicationParticipantBook],
   round_id : String,
 ) -> String {
   match participants {
@@ -52,7 +52,7 @@ fn civic_salon_first_packet_id(
 
 ///|
 fn civic_salon_first_reduction_id(
-  ideas : Array[CivicSalonIdea],
+  ideas : Array[CivicCommunicationIdea],
   round_id : String,
 ) -> String {
   match ideas {
@@ -63,7 +63,7 @@ fn civic_salon_first_reduction_id(
 
 ///|
 fn civic_salon_participant_book_ids(
-  participants : Array[CivicSalonParticipantBook],
+  participants : Array[CivicCommunicationParticipantBook],
 ) -> Array[String] {
   participants.map(fn(item) { item.book_id })
 }

@@ -1,12 +1,14 @@
 ///|
 pub async fn load_or_create_civic_salon_schedules(
   path? : String = default_civic_salon_schedule_path(),
-) -> Array[CivicSalonSchedule] {
+) -> Array[CivicCommunicationSchedule] {
   if @fs.exists(path) {
     let text = @fs.read_file(path).text() catch { _ => "" }
     if !text.trim().is_empty() {
       let parsed = @json.parse(text) catch { _ => Json::array([]) }
-      let schedules : Array[CivicSalonSchedule] = @json.from_json(parsed) catch {
+      let schedules : Array[CivicCommunicationSchedule] = @json.from_json(
+        parsed,
+      ) catch {
         _ => []
       }
       if schedules.length() > 0 {
@@ -25,8 +27,8 @@ pub async fn load_or_create_civic_salon_schedules(
 
 ///|
 fn normalize_civic_salon_schedule(
-  schedule : CivicSalonSchedule,
-) -> CivicSalonSchedule {
+  schedule : CivicCommunicationSchedule,
+) -> CivicCommunicationSchedule {
   {
     ..schedule,
     latest_summary: normalize_civic_pending_summary(schedule.latest_summary),
@@ -47,7 +49,7 @@ pub fn normalize_civic_pending_summary(summary : String) -> String {
 ///|
 pub async fn save_civic_salon_schedules(
   path : String,
-  schedules : Array[CivicSalonSchedule],
+  schedules : Array[CivicCommunicationSchedule],
 ) -> Unit {
   @support.write_text_file(path, schedules.to_json().stringify(indent=2))
 }

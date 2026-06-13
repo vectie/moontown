@@ -5,7 +5,7 @@ pub async fn bootstrap_civic_salon_scenario_file(
   round_id? : String = "",
   round_number? : Int = 1,
   workspace_base? : String = "",
-  reducer_mode? : CivicSalonReductionMode = MoonClawReducer,
+  reducer_mode? : CivicCommunicationReductionMode = MoonClawReducer,
 ) -> String {
   match load_civic_salon_scenario_file(template_path) {
     Some(scenario) => {
@@ -51,7 +51,7 @@ pub async fn install_civic_pattern_scenario_file(
 
 ///|
 fn civic_pattern_round_id_for_scenario(
-  scenario : CivicSalonScenario,
+  scenario : CivicCommunicationScenario,
   round_id : String,
   round_number : Int,
 ) -> String {
@@ -64,10 +64,10 @@ fn civic_pattern_round_id_for_scenario(
 
 ///|
 async fn install_civic_pattern_scenario(
-  scenario : CivicSalonScenario,
+  scenario : CivicCommunicationScenario,
   snapshot_path : String,
   first_due_ms : UInt64,
-) -> CivicSalonSchedule {
+) -> CivicCommunicationSchedule {
   @support.write_text_file(
     civic_salon_scenario_path(scenario.id, snapshot_path~),
     scenario.to_json().stringify(indent=2),
@@ -81,7 +81,7 @@ async fn install_civic_pattern_scenario(
 
 ///|
 async fn install_civic_salon_scenario_for_daemon(
-  scenario : CivicSalonScenario,
+  scenario : CivicCommunicationScenario,
   workspace_base : String,
   round_id : String,
   round_number : Int,
@@ -117,12 +117,12 @@ async fn install_civic_salon_scenario_for_daemon(
 
 ///|
 fn mark_civic_salon_schedule_after_template_round(
-  schedule : CivicSalonSchedule,
+  schedule : CivicCommunicationSchedule,
   now_ms : UInt64,
   round_id : String,
   round_number : Int,
   summary : String,
-) -> CivicSalonSchedule {
+) -> CivicCommunicationSchedule {
   let interval = if schedule.interval_ms < 1UL {
     1_800_000UL
   } else {
@@ -154,7 +154,9 @@ fn civic_salon_snapshot_path_for_workspace_base(
 }
 
 ///|
-async fn load_civic_salon_scenario_file(path : String) -> CivicSalonScenario? {
+async fn load_civic_salon_scenario_file(
+  path : String,
+) -> CivicCommunicationScenario? {
   let parsed = match @support.read_optional_json_file(path) {
     Some(json) => json
     None => return None
@@ -166,9 +168,9 @@ async fn load_civic_salon_scenario_file(path : String) -> CivicSalonScenario? {
 
 ///|
 async fn load_civic_salon_scenario_for_schedule(
-  schedule : CivicSalonSchedule,
+  schedule : CivicCommunicationSchedule,
   snapshot_path : String,
-) -> CivicSalonScenario? {
+) -> CivicCommunicationScenario? {
   let template_path = civic_salon_scenario_path(schedule.id, snapshot_path~)
   load_civic_salon_scenario_file(template_path)
 }

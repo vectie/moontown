@@ -1,8 +1,8 @@
 ///|
 fn daemon_civic_salon_schedule(
   next_due_ms? : UInt64 = 0UL,
-) -> CivicSalonSchedule {
-  CivicSalonSchedule::new(
+) -> CivicCommunicationSchedule {
+  CivicCommunicationSchedule::new(
     id="future-energy-social-square",
     title="Future Energy Social Square Salon",
     building_id="social-square",
@@ -14,7 +14,7 @@ fn daemon_civic_salon_schedule(
 }
 
 ///|
-fn daemon_civic_salon_scenario() -> CivicSalonScenario {
+fn daemon_civic_salon_scenario() -> CivicCommunicationScenario {
   {
     id: "future-energy-social-square",
     title: "Future Energy Social Square Salon",

@@ -1,10 +1,10 @@
 ///|
 fn civic_salon_building_html(
-  scenario : CivicSalonScenario,
+  scenario : CivicCommunicationScenario,
   protocol : @civic.BuildingProtocolDefinition,
-  participants : Array[CivicSalonParticipantBook],
-  ideas : Array[CivicSalonIdea],
-  metrics : CivicSalonMetric,
+  participants : Array[CivicCommunicationParticipantBook],
+  ideas : Array[CivicCommunicationIdea],
+  metrics : CivicCommunicationMetric,
   round_id : String,
   round_number : Int,
 ) -> String {
@@ -57,7 +57,7 @@ fn civic_salon_building_html(
 
 ///|
 fn civic_salon_participant_cards(
-  participants : Array[CivicSalonParticipantBook],
+  participants : Array[CivicCommunicationParticipantBook],
 ) -> String {
   let builder = StringBuilder::new()
   for participant in participants {
@@ -69,7 +69,7 @@ fn civic_salon_participant_cards(
 }
 
 ///|
-fn civic_salon_idea_cards(ideas : Array[CivicSalonIdea]) -> String {
+fn civic_salon_idea_cards(ideas : Array[CivicCommunicationIdea]) -> String {
   let builder = StringBuilder::new()
   for idea in ideas {
     builder.write_string(

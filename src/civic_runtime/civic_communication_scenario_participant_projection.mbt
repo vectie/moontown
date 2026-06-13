@@ -1,8 +1,8 @@
 ///|
 fn civic_salon_participant_projection(
-  scenario : CivicSalonScenario,
-  participant : CivicSalonParticipantBook,
-  returned_ideas : Array[CivicSalonIdea],
+  scenario : CivicCommunicationScenario,
+  participant : CivicCommunicationParticipantBook,
+  returned_ideas : Array[CivicCommunicationIdea],
   round_id : String,
   round_number : Int,
 ) -> Json {
@@ -34,7 +34,7 @@ fn civic_salon_participant_projection(
 
 ///|
 fn civic_salon_participant_projection_tags(
-  scenario : CivicSalonScenario,
+  scenario : CivicCommunicationScenario,
 ) -> Json {
   [
     "civic-communication-pattern",
@@ -47,8 +47,8 @@ fn civic_salon_participant_projection_tags(
 
 ///|
 fn civic_salon_participant_projection_status_chips(
-  scenario : CivicSalonScenario,
-  returned_ideas : Array[CivicSalonIdea],
+  scenario : CivicCommunicationScenario,
+  returned_ideas : Array[CivicCommunicationIdea],
   round_number : Int,
 ) -> Json {
   [
@@ -67,9 +67,9 @@ fn civic_salon_participant_projection_status_chips(
 
 ///|
 fn civic_salon_participant_projection_metrics(
-  scenario : CivicSalonScenario,
-  participant : CivicSalonParticipantBook,
-  returned_ideas : Array[CivicSalonIdea],
+  scenario : CivicCommunicationScenario,
+  participant : CivicCommunicationParticipantBook,
+  returned_ideas : Array[CivicCommunicationIdea],
 ) -> Json {
   [
     participant_projection_metric(
@@ -89,7 +89,7 @@ fn civic_salon_participant_projection_metrics(
 
 ///|
 fn civic_salon_participant_projection_readiness(
-  scenario : CivicSalonScenario,
+  scenario : CivicCommunicationScenario,
 ) -> Json {
   [
     participant_projection_entry(
@@ -102,7 +102,7 @@ fn civic_salon_participant_projection_readiness(
 
 ///|
 fn civic_salon_participant_projection_review_queue(
-  scenario : CivicSalonScenario,
+  scenario : CivicCommunicationScenario,
 ) -> Json {
   [
     participant_projection_entry(
@@ -115,8 +115,8 @@ fn civic_salon_participant_projection_review_queue(
 
 ///|
 fn civic_salon_participant_projection_journey(
-  scenario : CivicSalonScenario,
-  returned_ideas : Array[CivicSalonIdea],
+  scenario : CivicCommunicationScenario,
+  returned_ideas : Array[CivicCommunicationIdea],
   round_id : String,
   round_number : Int,
 ) -> Json {
@@ -166,7 +166,7 @@ fn participant_projection_entry(
 
 ///|
 fn participant_returned_idea_page_families_json(
-  returned_ideas : Array[CivicSalonIdea],
+  returned_ideas : Array[CivicCommunicationIdea],
 ) -> Json {
   let items : Array[Json] = [
     participant_projection_entry(

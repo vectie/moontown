@@ -1,10 +1,10 @@
 ///|
 fn civic_salon_building_projection_json(
-  scenario : CivicSalonScenario,
+  scenario : CivicCommunicationScenario,
   protocol : @civic.BuildingProtocolDefinition,
-  participants : Array[CivicSalonParticipantBook],
-  ideas : Array[CivicSalonIdea],
-  metrics : CivicSalonMetric,
+  participants : Array[CivicCommunicationParticipantBook],
+  ideas : Array[CivicCommunicationIdea],
+  metrics : CivicCommunicationMetric,
   round_id : String,
   round_number : Int,
 ) -> String {
@@ -68,8 +68,8 @@ fn civic_salon_building_projection_json(
 
 ///|
 fn projection_page_families_json(
-  participants : Array[CivicSalonParticipantBook],
-  ideas : Array[CivicSalonIdea],
+  participants : Array[CivicCommunicationParticipantBook],
+  ideas : Array[CivicCommunicationIdea],
 ) -> String {
   let items : Array[String] = []
   for participant in participants {

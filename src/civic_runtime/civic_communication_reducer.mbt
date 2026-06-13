@@ -1,12 +1,12 @@
 ///|
 async fn reduce_civic_salon_ideas(
-  scenario : CivicSalonScenario,
+  scenario : CivicCommunicationScenario,
   round_id? : String = "civic-salon-round-001",
   round_number? : Int = 1,
   workspace_base? : String = "",
-  mode? : CivicSalonReductionMode = MoonClawReducer,
+  mode? : CivicCommunicationReductionMode = MoonClawReducer,
   run_inline? : Bool = moontown_moonclaw_inline_enabled(),
-) -> CivicSalonReductionResult {
+) -> CivicCommunicationReductionResult {
   if mode == FixtureReducer {
     fixture_civic_salon_reduction(scenario, round_id, workspace_base)
   } else if mode == PersistedReducer {

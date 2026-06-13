@@ -1,8 +1,8 @@
 ///|
 fn civic_salon_participant_protocol_records(
-  scenario : CivicSalonScenario,
+  scenario : CivicCommunicationScenario,
   protocol : @civic.BuildingProtocolDefinition,
-  participants : Array[CivicSalonParticipantBook],
+  participants : Array[CivicCommunicationParticipantBook],
   round_id : String,
   round_number : Int,
 ) -> (Array[Json], Array[Json]) {
@@ -26,8 +26,8 @@ fn civic_salon_participant_protocol_records(
 
 ///|
 fn civic_salon_input_packet_id(
-  scenario : CivicSalonScenario,
-  participant : CivicSalonParticipantBook,
+  scenario : CivicCommunicationScenario,
+  participant : CivicCommunicationParticipantBook,
   round_id : String,
 ) -> String {
   "pkt-\{scenario.id}-\{round_id}-\{participant.book_id}"
@@ -35,9 +35,9 @@ fn civic_salon_input_packet_id(
 
 ///|
 fn civic_salon_input_packet_json(
-  scenario : CivicSalonScenario,
+  scenario : CivicCommunicationScenario,
   protocol : @civic.BuildingProtocolDefinition,
-  participant : CivicSalonParticipantBook,
+  participant : CivicCommunicationParticipantBook,
   input_id : String,
   round_id : String,
   round_number : Int,
@@ -61,9 +61,9 @@ fn civic_salon_input_packet_json(
 
 ///|
 fn civic_salon_contribution_json(
-  scenario : CivicSalonScenario,
+  scenario : CivicCommunicationScenario,
   protocol : @civic.BuildingProtocolDefinition,
-  participant : CivicSalonParticipantBook,
+  participant : CivicCommunicationParticipantBook,
   input_id : String,
   round_id : String,
   round_number : Int,

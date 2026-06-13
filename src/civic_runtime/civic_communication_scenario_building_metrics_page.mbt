@@ -1,9 +1,9 @@
 ///|
 fn civic_salon_metrics_markdown(
-  scenario : CivicSalonScenario,
-  metrics : CivicSalonMetric,
-  participants : Array[CivicSalonParticipantBook],
-  ideas : Array[CivicSalonIdea],
+  scenario : CivicCommunicationScenario,
+  metrics : CivicCommunicationMetric,
+  participants : Array[CivicCommunicationParticipantBook],
+  ideas : Array[CivicCommunicationIdea],
   round_id : String,
   round_number : Int,
 ) -> String {

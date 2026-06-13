@@ -1,6 +1,6 @@
 ///|
 async fn write_civic_salon_reducer_workspace(
-  scenario : CivicSalonScenario,
+  scenario : CivicCommunicationScenario,
   root : String,
   round_id : String,
   round_number : Int,
@@ -30,7 +30,7 @@ async fn write_civic_salon_reducer_workspace(
 ///|
 async fn merged_civic_salon_reducer_profile_json(
   root : String,
-  scenario : CivicSalonScenario,
+  scenario : CivicCommunicationScenario,
 ) -> String {
   let path = "\{root}/moonclaw.jobs.json"
   let existing = @support.read_json_file_or_empty_object(path)
@@ -43,7 +43,9 @@ async fn merged_civic_salon_reducer_profile_json(
 }
 
 ///|
-fn civic_salon_reducer_profile_json(scenario : CivicSalonScenario) -> Json {
+fn civic_salon_reducer_profile_json(
+  scenario : CivicCommunicationScenario,
+) -> Json {
   let pattern = @civic.communication_pattern_for_scenario(scenario)
   {
     "family": @civic.civic_reducer_profile_family(),
@@ -79,7 +81,7 @@ fn civic_salon_reducer_prompt_template() -> String {
 
 ///|
 fn civic_salon_reducer_step_metadata(
-  scenario : CivicSalonScenario,
+  scenario : CivicCommunicationScenario,
   pattern : @civic.CivicCommunicationPattern,
 ) -> Json {
   let fields = @moonclaw_runtime.moonclaw_step_metadata_fields(

@@ -1,8 +1,8 @@
 ///|
 fn merge_civic_salon_catalog(
-  scenario : CivicSalonScenario,
+  scenario : CivicCommunicationScenario,
   catalog : Array[@moonbook.BookCatalogEntry],
-  participants : Array[CivicSalonParticipantBook],
+  participants : Array[CivicCommunicationParticipantBook],
   workspace_base : String,
 ) -> Array[@moonbook.BookCatalogEntry] {
   ignore(scenario)
@@ -31,9 +31,9 @@ fn civic_salon_workspace_root(
 
 ///|
 async fn write_civic_salon_participant_workspace(
-  scenario : CivicSalonScenario,
-  participant : CivicSalonParticipantBook,
-  ideas : Array[CivicSalonIdea],
+  scenario : CivicCommunicationScenario,
+  participant : CivicCommunicationParticipantBook,
+  ideas : Array[CivicCommunicationIdea],
   round_id : String,
   round_number : Int,
   root : String,
@@ -84,11 +84,11 @@ async fn write_civic_salon_participant_workspace(
 
 ///|
 async fn write_civic_salon_building_pages(
-  scenario : CivicSalonScenario,
+  scenario : CivicCommunicationScenario,
   protocol : @civic.BuildingProtocolDefinition,
-  participants : Array[CivicSalonParticipantBook],
-  ideas : Array[CivicSalonIdea],
-  metrics : CivicSalonMetric,
+  participants : Array[CivicCommunicationParticipantBook],
+  ideas : Array[CivicCommunicationIdea],
+  metrics : CivicCommunicationMetric,
   round_id : String,
   round_number : Int,
   root : String,

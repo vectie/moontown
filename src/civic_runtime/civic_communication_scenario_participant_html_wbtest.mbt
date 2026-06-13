@@ -25,7 +25,7 @@ test "civic salon participant HTML renders page shell and participant work" {
 
 ///|
 test "civic salon returned idea cards render count and next experiment" {
-  let idea : CivicSalonIdea = {
+  let idea : CivicCommunicationIdea = {
     id: "idea-1",
     title: "Embodied Memory Contract",
     summary: "Connect robot memory, world models, and task planning.",
@@ -44,7 +44,7 @@ test "civic salon returned idea cards render count and next experiment" {
 }
 
 ///|
-fn test_participant_html_scenario() -> CivicSalonScenario {
+fn test_participant_html_scenario() -> CivicCommunicationScenario {
   {
     id: "embodied-robotics-salon",
     title: "Embodied Robotics Salon",
@@ -78,7 +78,7 @@ fn test_participant_html_scenario() -> CivicSalonScenario {
 }
 
 ///|
-fn test_participant_html_book() -> CivicSalonParticipantBook {
+fn test_participant_html_book() -> CivicCommunicationParticipantBook {
   {
     book_id: "robotics-brain",
     title: "Robotics Brain Desk",

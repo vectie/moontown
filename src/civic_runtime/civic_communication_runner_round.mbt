@@ -1,13 +1,13 @@
 ///|
 async fn run_due_civic_salon_round(
-  schedule : CivicSalonSchedule,
+  schedule : CivicCommunicationSchedule,
   snapshot_path : String,
   book_catalog_path : String,
   tick : Int,
   now_ms : UInt64,
-  reducer_mode : CivicSalonReductionMode,
+  reducer_mode : CivicCommunicationReductionMode,
   run_inline : Bool,
-) -> (CivicSalonSchedule, String) {
+) -> (CivicCommunicationSchedule, String) {
   match load_civic_salon_scenario_for_schedule(schedule, snapshot_path) {
     Some(scenario) =>
       run_civic_salon_scenario_round(
@@ -20,15 +20,15 @@ async fn run_due_civic_salon_round(
 
 ///|
 async fn run_civic_salon_scenario_round(
-  scenario : CivicSalonScenario,
-  schedule : CivicSalonSchedule,
+  scenario : CivicCommunicationScenario,
+  schedule : CivicCommunicationSchedule,
   snapshot_path : String,
   book_catalog_path : String,
   tick : Int,
   now_ms : UInt64,
-  reducer_mode : CivicSalonReductionMode,
+  reducer_mode : CivicCommunicationReductionMode,
   run_inline : Bool,
-) -> (CivicSalonSchedule, String) {
+) -> (CivicCommunicationSchedule, String) {
   let round_id = civic_salon_round_id(schedule)
   let workspace_base = civic_salon_workspace_base(snapshot_path)
   let reduction = reduce_civic_salon_ideas(
@@ -72,13 +72,13 @@ async fn run_civic_salon_scenario_round(
 
 ///|
 async fn civic_salon_round_decision_summary(
-  scenario : CivicSalonScenario,
-  schedule : CivicSalonSchedule,
+  scenario : CivicCommunicationScenario,
+  schedule : CivicCommunicationSchedule,
   book_catalog_path : String,
   workspace_base : String,
   round_id : String,
-  reduction : CivicSalonReductionResult,
-  ideas : Array[CivicSalonIdea],
+  reduction : CivicCommunicationReductionResult,
+  ideas : Array[CivicCommunicationIdea],
 ) -> (String, String) {
   let validation_errors = if reduction.status
     is @core.TaskExecutionStatus::Completed {

@@ -1,5 +1,5 @@
 ///|
-fn civic_salon_metrics_table(metrics : CivicSalonMetric) -> String {
+fn civic_salon_metrics_table(metrics : CivicCommunicationMetric) -> String {
   [
     "| Metric | Value | Meaning |",
     "| --- | ---: | --- |",
@@ -15,7 +15,9 @@ fn civic_salon_metrics_table(metrics : CivicSalonMetric) -> String {
 }
 
 ///|
-fn civic_salon_idea_metric_table(ideas : Array[CivicSalonIdea]) -> String {
+fn civic_salon_idea_metric_table(
+  ideas : Array[CivicCommunicationIdea],
+) -> String {
   let builder = StringBuilder::new()
   builder.write_string(
     "| Output | Workspaces | Questions | Home workspaces |\n",
@@ -31,7 +33,7 @@ fn civic_salon_idea_metric_table(ideas : Array[CivicSalonIdea]) -> String {
 
 ///|
 fn civic_salon_participant_table(
-  participants : Array[CivicSalonParticipantBook],
+  participants : Array[CivicCommunicationParticipantBook],
 ) -> String {
   let builder = StringBuilder::new()
   builder.write_string("| Workspace | Focus | Current Question |\n")

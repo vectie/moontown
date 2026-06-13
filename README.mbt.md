@@ -211,7 +211,7 @@ moon run src/cmd/main -- civic doctor
 ```
 
 The communication-pattern runtime is template-driven. New domains and civic
-services should provide a `CivicSalonScenario` JSON file with participant
+services should provide a `CivicCommunicationScenario` JSON file with participant
 books, pattern id, skill rules, quality rules, output paths, and review gates.
 `civic protocols pattern-template <path>` runs a scenario directly, persists
 the scenario into `.moontown/civic/pattern-scenarios/<session-id>.json`, and

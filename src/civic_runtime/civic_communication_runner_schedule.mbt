@@ -2,7 +2,7 @@
 async fn persist_civic_salon_schedule(
   schedule_path : String,
   schedule_id : String,
-  replacement : CivicSalonSchedule,
+  replacement : CivicCommunicationSchedule,
 ) -> Unit {
   save_civic_salon_schedules(
     schedule_path,
@@ -33,9 +33,9 @@ fn civic_salon_due_run_summary(
 
 ///|
 fn claim_civic_salon_schedule(
-  schedule : CivicSalonSchedule,
+  schedule : CivicCommunicationSchedule,
   now_ms : UInt64,
-) -> CivicSalonSchedule {
+) -> CivicCommunicationSchedule {
   {
     ..schedule,
     latest_round_id: civic_salon_round_id(schedule),
@@ -46,10 +46,10 @@ fn claim_civic_salon_schedule(
 
 ///|
 fn replace_civic_salon_schedule(
-  schedules : Array[CivicSalonSchedule],
+  schedules : Array[CivicCommunicationSchedule],
   target_id : String,
-  replacement : CivicSalonSchedule,
-) -> Array[CivicSalonSchedule] {
+  replacement : CivicCommunicationSchedule,
+) -> Array[CivicCommunicationSchedule] {
   schedules.map(fn(schedule) {
     if schedule.id == target_id {
       replacement
@@ -61,9 +61,9 @@ fn replace_civic_salon_schedule(
 
 ///|
 fn run_unsupported_civic_salon_round(
-  schedule : CivicSalonSchedule,
+  schedule : CivicCommunicationSchedule,
   now_ms : UInt64,
-) -> (CivicSalonSchedule, String) {
+) -> (CivicCommunicationSchedule, String) {
   let summary = "Unsupported civic communication-pattern schedule `\{schedule.id}`; no round executed."
   let round_id = civic_salon_round_id(schedule)
   (
@@ -79,11 +79,11 @@ fn run_unsupported_civic_salon_round(
 
 ///|
 fn retry_civic_salon_schedule(
-  schedule : CivicSalonSchedule,
+  schedule : CivicCommunicationSchedule,
   now_ms : UInt64,
   round_id : String,
   summary : String,
-) -> CivicSalonSchedule {
+) -> CivicCommunicationSchedule {
   {
     ..schedule,
     latest_round_id: round_id,

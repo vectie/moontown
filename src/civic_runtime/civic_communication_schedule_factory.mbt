@@ -1,9 +1,9 @@
 ///|
 fn civic_salon_schedule_for_scenario(
-  scenario : CivicSalonScenario,
-  existing? : CivicSalonSchedule? = None,
+  scenario : CivicCommunicationScenario,
+  existing? : CivicCommunicationSchedule? = None,
   now_ms? : UInt64 = @env.now(),
-) -> CivicSalonSchedule {
+) -> CivicCommunicationSchedule {
   match existing {
     Some(schedule) =>
       {
@@ -16,7 +16,7 @@ fn civic_salon_schedule_for_scenario(
         }),
       }
     None =>
-      CivicSalonSchedule::new(
+      CivicCommunicationSchedule::new(
         id=scenario.id,
         title=scenario.title,
         building_id=scenario.building_id,
@@ -29,7 +29,9 @@ fn civic_salon_schedule_for_scenario(
 }
 
 ///|
-fn civic_salon_scenario_interval_ms(scenario : CivicSalonScenario) -> UInt64 {
+fn civic_salon_scenario_interval_ms(
+  scenario : CivicCommunicationScenario,
+) -> UInt64 {
   match scenario.interval_ms {
     Some(value) if value > 0UL => value
     _ => 1_800_000UL
@@ -38,12 +40,12 @@ fn civic_salon_scenario_interval_ms(scenario : CivicSalonScenario) -> UInt64 {
 
 ///|
 pub async fn upsert_civic_salon_schedule_for_scenario(
-  scenario : CivicSalonScenario,
+  scenario : CivicCommunicationScenario,
   path? : String = default_civic_salon_schedule_path(),
   now_ms? : UInt64 = @env.now(),
-) -> CivicSalonSchedule {
+) -> CivicCommunicationSchedule {
   let schedules = load_or_create_civic_salon_schedules(path~)
-  let updated : Array[CivicSalonSchedule] = []
+  let updated : Array[CivicCommunicationSchedule] = []
   let mut installed = false
   let mut installed_schedule = civic_salon_schedule_for_scenario(
     scenario,

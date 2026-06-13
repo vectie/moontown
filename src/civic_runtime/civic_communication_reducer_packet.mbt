@@ -1,6 +1,6 @@
 ///|
 fn civic_salon_reducer_packet(
-  scenario : CivicSalonScenario,
+  scenario : CivicCommunicationScenario,
   packet_id : String,
   round_id : String,
   round_number : Int,
@@ -39,7 +39,7 @@ fn civic_salon_reducer_packet(
 
 ///|
 fn civic_salon_reducer_packet_metadata(
-  scenario : CivicSalonScenario,
+  scenario : CivicCommunicationScenario,
   pattern : @civic.CivicCommunicationPattern,
   round_id : String,
   round_number : Int,
@@ -62,7 +62,7 @@ fn civic_salon_reducer_packet_metadata(
 
 ///|
 fn civic_salon_reducer_packet_step_metadata(
-  scenario : CivicSalonScenario,
+  scenario : CivicCommunicationScenario,
   pattern : @civic.CivicCommunicationPattern,
 ) -> Json {
   let fields : Map[String, Json] = {}
@@ -76,7 +76,7 @@ fn civic_salon_reducer_packet_step_metadata(
 
 ///|
 fn civic_salon_reducer_request(
-  scenario : CivicSalonScenario,
+  scenario : CivicCommunicationScenario,
   round_id : String,
   round_number : Int,
 ) -> String {

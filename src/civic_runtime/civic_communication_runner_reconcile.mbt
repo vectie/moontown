@@ -1,6 +1,6 @@
 ///|
 async fn refresh_or_reconcile_civic_salon_schedule(
-  schedule : CivicSalonSchedule,
+  schedule : CivicCommunicationSchedule,
   schedule_path : String,
   snapshot_path : String,
   book_catalog_path : String,
@@ -24,12 +24,12 @@ async fn refresh_or_reconcile_civic_salon_schedule(
 
 ///|
 async fn reconcile_civic_salon_schedule_if_completed(
-  schedule : CivicSalonSchedule,
+  schedule : CivicCommunicationSchedule,
   snapshot_path : String,
   book_catalog_path : String,
   tick : Int,
   now_ms : UInt64,
-) -> (CivicSalonSchedule, String)? {
+) -> (CivicCommunicationSchedule, String)? {
   if !civic_salon_schedule_has_active_round(schedule) {
     return None
   }
@@ -43,7 +43,9 @@ async fn reconcile_civic_salon_schedule_if_completed(
 }
 
 ///|
-fn civic_salon_schedule_has_active_round(schedule : CivicSalonSchedule) -> Bool {
+fn civic_salon_schedule_has_active_round(
+  schedule : CivicCommunicationSchedule,
+) -> Bool {
   schedule.enabled &&
   !schedule.latest_round_id.is_empty() &&
   civic_salon_summary_is_active(schedule.latest_summary)
@@ -51,13 +53,13 @@ fn civic_salon_schedule_has_active_round(schedule : CivicSalonSchedule) -> Bool 
 
 ///|
 async fn reconcile_civic_salon_scenario_round(
-  scenario : CivicSalonScenario,
-  schedule : CivicSalonSchedule,
+  scenario : CivicCommunicationScenario,
+  schedule : CivicCommunicationSchedule,
   snapshot_path : String,
   book_catalog_path : String,
   tick : Int,
   now_ms : UInt64,
-) -> (CivicSalonSchedule, String)? {
+) -> (CivicCommunicationSchedule, String)? {
   let workspace_base = civic_salon_workspace_base(snapshot_path)
   let reduction = reduce_civic_salon_ideas(
     scenario,

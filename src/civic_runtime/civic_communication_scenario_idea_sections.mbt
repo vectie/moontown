@@ -1,5 +1,5 @@
 ///|
-fn civic_salon_idea_sections(ideas : Array[CivicSalonIdea]) -> String {
+fn civic_salon_idea_sections(ideas : Array[CivicCommunicationIdea]) -> String {
   let builder = StringBuilder::new()
   for idea in ideas {
     builder.write_string("### ")

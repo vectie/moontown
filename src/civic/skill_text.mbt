@@ -50,7 +50,9 @@ pub fn civic_module_skill_text(service : CivicServiceDefinition) -> String {
 }
 
 ///|
-pub fn salon_participant_skill_text(scenario : CivicSalonScenario) -> String {
+pub fn salon_participant_skill_text(
+  scenario : CivicCommunicationScenario,
+) -> String {
   let pattern = communication_pattern_for_scenario(scenario)
   [
     "---",
@@ -84,7 +86,9 @@ pub fn salon_participant_skill_text(scenario : CivicSalonScenario) -> String {
 }
 
 ///|
-pub fn salon_reducer_skill_text(scenario : CivicSalonScenario) -> String {
+pub fn salon_reducer_skill_text(
+  scenario : CivicCommunicationScenario,
+) -> String {
   let pattern = communication_pattern_for_scenario(scenario)
   [
     "---",
@@ -128,7 +132,7 @@ pub fn salon_reducer_skill_text(scenario : CivicSalonScenario) -> String {
 
 ///|
 pub fn salon_reducer_input_markdown(
-  scenario : CivicSalonScenario,
+  scenario : CivicCommunicationScenario,
   round_id : String,
   round_number : Int,
 ) -> String {
@@ -151,7 +155,9 @@ pub fn salon_reducer_input_markdown(
 }
 
 ///|
-pub fn salon_reducer_contract_markdown(scenario : CivicSalonScenario) -> String {
+pub fn salon_reducer_contract_markdown(
+  scenario : CivicCommunicationScenario,
+) -> String {
   [
     "# Civic Communication Pattern Output Contract",
     "",

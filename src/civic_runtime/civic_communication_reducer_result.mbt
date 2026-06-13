@@ -13,7 +13,7 @@ fn failed_civic_salon_reduction(
   summary : String,
   proposal_id? : String? = None,
   run_id? : String? = None,
-) -> CivicSalonReductionResult {
+) -> CivicCommunicationReductionResult {
   {
     ideas: [],
     status: @core.TaskExecutionStatus::Failed,

@@ -27,11 +27,11 @@ pub fn building_protocol_portfolio(Array[BuildingProtocolSnapshot], String, Stri
 
 pub fn building_protocol_snapshot(BuildingProtocolDefinition, inbox_count~ : Int, contribution_count~ : Int, reduction_count~ : Int, outbox_count~ : Int, review_count~ : Int, latest_reduction_summary~ : String, latest_distribution_summary~ : String) -> BuildingProtocolSnapshot
 
-pub fn civic_communication_is_due(CivicSalonSchedule, UInt64) -> Bool
+pub fn civic_communication_is_due(CivicCommunicationSchedule, UInt64) -> Bool
 
-pub fn civic_communication_metric_counts(Array[CivicSalonParticipantBook], Array[CivicSalonIdea]) -> CivicSalonMetricCounts
+pub fn civic_communication_metric_counts(Array[CivicCommunicationParticipantBook], Array[CivicCommunicationIdea]) -> CivicCommunicationMetricCounts
 
-pub fn civic_communication_metrics(CivicSalonScenario, Array[CivicSalonParticipantBook], Array[CivicSalonIdea]) -> CivicSalonMetric
+pub fn civic_communication_metrics(CivicCommunicationScenario, Array[CivicCommunicationParticipantBook], Array[CivicCommunicationIdea]) -> CivicCommunicationMetric
 
 pub fn civic_communication_pattern_for_id(String) -> CivicCommunicationPattern?
 
@@ -39,11 +39,11 @@ pub fn civic_communication_pattern_id_for_service(CivicServiceDefinition) -> Str
 
 pub fn civic_communication_patterns() -> Array[CivicCommunicationPattern]
 
-pub fn civic_communication_returned_ideas_for_book(String, Array[CivicSalonIdea]) -> Array[CivicSalonIdea]
+pub fn civic_communication_returned_ideas_for_book(String, Array[CivicCommunicationIdea]) -> Array[CivicCommunicationIdea]
 
-pub fn civic_communication_round_id(CivicSalonSchedule) -> String
+pub fn civic_communication_round_id(CivicCommunicationSchedule) -> String
 
-pub fn civic_communication_round_record(CivicSalonSchedule, String, Int, UInt64, UInt64, CivicSalonMetric, String, String) -> CivicSalonRoundRecord
+pub fn civic_communication_round_record(CivicCommunicationSchedule, String, Int, UInt64, UInt64, CivicCommunicationMetric, String, String) -> CivicCommunicationRoundRecord
 
 pub fn civic_generated_site_path() -> String
 
@@ -69,17 +69,17 @@ pub fn civic_reducer_profile_family() -> String
 
 pub fn civic_reducer_step_kind() -> String
 
-pub fn civic_salon_is_due(CivicSalonSchedule, UInt64) -> Bool
+pub fn civic_salon_is_due(CivicCommunicationSchedule, UInt64) -> Bool
 
-pub fn civic_salon_metric_counts(Array[CivicSalonParticipantBook], Array[CivicSalonIdea]) -> CivicSalonMetricCounts
+pub fn civic_salon_metric_counts(Array[CivicCommunicationParticipantBook], Array[CivicCommunicationIdea]) -> CivicCommunicationMetricCounts
 
-pub fn civic_salon_metrics(CivicSalonScenario, Array[CivicSalonParticipantBook], Array[CivicSalonIdea]) -> CivicSalonMetric
+pub fn civic_salon_metrics(CivicCommunicationScenario, Array[CivicCommunicationParticipantBook], Array[CivicCommunicationIdea]) -> CivicCommunicationMetric
 
-pub fn civic_salon_returned_ideas_for_book(String, Array[CivicSalonIdea]) -> Array[CivicSalonIdea]
+pub fn civic_salon_returned_ideas_for_book(String, Array[CivicCommunicationIdea]) -> Array[CivicCommunicationIdea]
 
-pub fn civic_salon_round_id(CivicSalonSchedule) -> String
+pub fn civic_salon_round_id(CivicCommunicationSchedule) -> String
 
-pub fn civic_salon_round_record(CivicSalonSchedule, String, Int, UInt64, UInt64, CivicSalonMetric, String, String) -> CivicSalonRoundRecord
+pub fn civic_salon_round_record(CivicCommunicationSchedule, String, Int, UInt64, UInt64, CivicCommunicationMetric, String, String) -> CivicCommunicationRoundRecord
 
 pub fn civic_service_has_reconcilable_protocol_work(protocol_ready~ : Bool, protocol_reduction_count~ : Int, protocol_outbox_count~ : Int) -> Bool
 
@@ -129,17 +129,17 @@ pub fn communication_building_intro(CivicCommunicationPattern, BuildingProtocolD
 
 pub fn communication_metrics_certification_note() -> String
 
-pub fn communication_pattern_for_scenario(CivicSalonScenario) -> CivicCommunicationPattern
+pub fn communication_pattern_for_scenario(CivicCommunicationScenario) -> CivicCommunicationPattern
 
-pub fn communication_pattern_id_for_scenario(CivicSalonScenario) -> String
+pub fn communication_pattern_id_for_scenario(CivicCommunicationScenario) -> String
 
-pub fn communication_pattern_label_for_scenario(CivicSalonScenario) -> String
+pub fn communication_pattern_label_for_scenario(CivicCommunicationScenario) -> String
 
-pub fn communication_protocol_for_scenario(CivicSalonScenario) -> BuildingProtocolDefinition
+pub fn communication_protocol_for_scenario(CivicCommunicationScenario) -> BuildingProtocolDefinition
 
-pub fn complete_civic_communication_schedule(CivicSalonSchedule, UInt64, String, String) -> CivicSalonSchedule
+pub fn complete_civic_communication_schedule(CivicCommunicationSchedule, UInt64, String, String) -> CivicCommunicationSchedule
 
-pub fn complete_civic_salon_schedule(CivicSalonSchedule, UInt64, String, String) -> CivicSalonSchedule
+pub fn complete_civic_salon_schedule(CivicCommunicationSchedule, UInt64, String, String) -> CivicCommunicationSchedule
 
 pub fn exchange_ledger_text(CivicServiceDefinition) -> String
 
@@ -161,15 +161,15 @@ pub fn review_council_pattern() -> CivicCommunicationPattern
 
 pub fn review_queue_text(CivicServiceDefinition, String) -> String
 
-pub fn salon_participant_skill_text(CivicSalonScenario) -> String
+pub fn salon_participant_skill_text(CivicCommunicationScenario) -> String
 
-pub fn salon_reducer_contract_markdown(CivicSalonScenario) -> String
+pub fn salon_reducer_contract_markdown(CivicCommunicationScenario) -> String
 
-pub fn salon_reducer_input_markdown(CivicSalonScenario, String, Int) -> String
+pub fn salon_reducer_input_markdown(CivicCommunicationScenario, String, Int) -> String
 
-pub fn salon_reducer_skill_text(CivicSalonScenario) -> String
+pub fn salon_reducer_skill_text(CivicCommunicationScenario) -> String
 
-pub fn salon_return_home_contract_note(CivicSalonScenario) -> String
+pub fn salon_return_home_contract_note(CivicCommunicationScenario) -> String
 
 pub fn salon_structural_metric_note() -> String
 
@@ -336,6 +336,58 @@ pub(all) struct BuildingReviewGateRecord {
   owner : String
 } derive(Eq, ToJson, @debug.Debug, @json.FromJson)
 
+pub(all) struct CivicCommunicationHomeReturn {
+  id : String
+  building_id : String
+  idea_id : String
+  target_book_id : String
+  target_path : String
+  summary : String
+  review_status : String
+} derive(Eq, ToJson, @debug.Debug, @json.FromJson)
+
+pub(all) struct CivicCommunicationIdea {
+  id : String
+  title : String
+  summary : String
+  participating_books : Array[String]
+  research_questions : Array[String]
+  why_it_matters : String
+  next_experiment : String
+} derive(Eq, ToJson, @debug.Debug, @json.FromJson)
+
+pub(all) struct CivicCommunicationMetric {
+  participant_count : Int
+  idea_count : Int
+  research_question_count : Int
+  participant_idea_links : Int
+  participating_book_coverage_count : Int
+  idea_return_home_count : Int
+  average_books_per_idea : String
+  structural_effectiveness_score : Int
+  summary : String
+} derive(Eq, ToJson, @debug.Debug, @json.FromJson)
+
+pub(all) struct CivicCommunicationMetricCounts {
+  participant_count : Int
+  idea_count : Int
+  research_question_count : Int
+  participant_idea_links : Int
+  participating_book_coverage_count : Int
+  idea_return_home_count : Int
+} derive(Eq, @debug.Debug)
+
+pub(all) struct CivicCommunicationParticipantBook {
+  book_id : String
+  title : String
+  focus_area : String
+  perspective : String
+  cadence : String
+  current_question : String
+  contribution : String
+  next_artifact : String
+} derive(Eq, ToJson, @debug.Debug, @json.FromJson)
+
 pub(all) struct CivicCommunicationPattern {
   id : String
   title : String
@@ -351,72 +403,13 @@ pub(all) struct CivicCommunicationPattern {
   civic_examples : Array[String]
 } derive(Eq, ToJson, @debug.Debug, @json.FromJson)
 
-#alias(CivicCommunicationHomeReturn)
-pub(all) struct CivicSalonHomeReturn {
-  id : String
-  building_id : String
-  idea_id : String
-  target_book_id : String
-  target_path : String
-  summary : String
-  review_status : String
-} derive(Eq, ToJson, @debug.Debug, @json.FromJson)
-
-#alias(CivicCommunicationIdea)
-pub(all) struct CivicSalonIdea {
-  id : String
-  title : String
-  summary : String
-  participating_books : Array[String]
-  research_questions : Array[String]
-  why_it_matters : String
-  next_experiment : String
-} derive(Eq, ToJson, @debug.Debug, @json.FromJson)
-
-#alias(CivicCommunicationMetric)
-pub(all) struct CivicSalonMetric {
-  participant_count : Int
-  idea_count : Int
-  research_question_count : Int
-  participant_idea_links : Int
-  participating_book_coverage_count : Int
-  idea_return_home_count : Int
-  average_books_per_idea : String
-  structural_effectiveness_score : Int
-  summary : String
-} derive(Eq, ToJson, @debug.Debug, @json.FromJson)
-
-#alias(CivicCommunicationMetricCounts)
-pub(all) struct CivicSalonMetricCounts {
-  participant_count : Int
-  idea_count : Int
-  research_question_count : Int
-  participant_idea_links : Int
-  participating_book_coverage_count : Int
-  idea_return_home_count : Int
-} derive(Eq, @debug.Debug)
-
-#alias(CivicCommunicationParticipantBook)
-pub(all) struct CivicSalonParticipantBook {
-  book_id : String
-  title : String
-  focus_area : String
-  perspective : String
-  cadence : String
-  current_question : String
-  contribution : String
-  next_artifact : String
-} derive(Eq, ToJson, @debug.Debug, @json.FromJson)
-
-#alias(CivicCommunicationReductionMode)
-pub(all) enum CivicSalonReductionMode {
+pub(all) enum CivicCommunicationReductionMode {
   MoonClawReducer
   PersistedReducer
   FixtureReducer
 } derive(Eq, @debug.Debug)
 
-#alias(CivicCommunicationRoundRecord)
-pub(all) struct CivicSalonRoundRecord {
+pub(all) struct CivicCommunicationRoundRecord {
   id : String
   salon_id : String
   building_id : String
@@ -434,8 +427,7 @@ pub(all) struct CivicSalonRoundRecord {
   summary : String
 } derive(Eq, ToJson, @debug.Debug, @json.FromJson)
 
-#alias(CivicCommunicationScenario)
-pub(all) struct CivicSalonScenario {
+pub(all) struct CivicCommunicationScenario {
   id : String
   title : String
   communication_pattern_id : String?
@@ -462,12 +454,11 @@ pub(all) struct CivicSalonScenario {
   participant_contract_path : String
   quality_rules : Array[String]
   skill_rules : Array[String]
-  participants : Array[CivicSalonParticipantBook]
-  ideas : Array[CivicSalonIdea]
+  participants : Array[CivicCommunicationParticipantBook]
+  ideas : Array[CivicCommunicationIdea]
 } derive(Eq, ToJson, @debug.Debug, @json.FromJson)
 
-#alias(CivicCommunicationSchedule)
-pub(all) struct CivicSalonSchedule {
+pub(all) struct CivicCommunicationSchedule {
   id : String
   title : String
   building_id : String
@@ -481,7 +472,7 @@ pub(all) struct CivicSalonSchedule {
   latest_round_id : String
   latest_summary : String
 } derive(Eq, ToJson, @debug.Debug, @json.FromJson)
-pub fn CivicSalonSchedule::new(id~ : String, title~ : String, building_id~ : String, topic~ : String, interval_ms? : UInt64, participant_book_ids? : Array[String], enabled? : Bool, last_run_ms? : UInt64, next_due_ms? : UInt64, round_count? : Int, latest_round_id? : String, latest_summary? : String) -> Self
+pub fn CivicCommunicationSchedule::new(id~ : String, title~ : String, building_id~ : String, topic~ : String, interval_ms? : UInt64, participant_book_ids? : Array[String], enabled? : Bool, last_run_ms? : UInt64, next_due_ms? : UInt64, round_count? : Int, latest_round_id? : String, latest_summary? : String) -> Self
 
 pub struct CivicServiceDefinition {
   id : String

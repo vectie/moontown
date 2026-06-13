@@ -3,7 +3,7 @@ async fn persisted_civic_salon_reduction(
   scenario : CivicCommunicationScenario,
   round_id : String,
   workspace_base : String,
-) -> CivicSalonReductionResult {
+) -> CivicCommunicationReductionResult {
   let root = civic_salon_workspace_root(
     scenario.building_book_id,
     workspace_base,
@@ -11,7 +11,7 @@ async fn persisted_civic_salon_reduction(
   match load_persisted_civic_salon_reducer_output(scenario, workspace_base) {
     Some(loaded) => {
       let ideas = loaded
-      CivicSalonReductionResult::{
+      CivicCommunicationReductionResult::{
         ideas,
         status: if ideas.length() > 0 {
           @core.TaskExecutionStatus::Completed

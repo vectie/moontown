@@ -1,11 +1,11 @@
 ///|
 fn civic_salon_home_return_records(
-  scenario : CivicSalonScenario,
+  scenario : CivicCommunicationScenario,
   building_id : String,
-  ideas : Array[CivicSalonIdea],
+  ideas : Array[CivicCommunicationIdea],
   round_id? : String = "civic-salon-round-001",
-) -> Array[CivicSalonHomeReturn] {
-  let records : Array[CivicSalonHomeReturn] = []
+) -> Array[CivicCommunicationHomeReturn] {
+  let records : Array[CivicCommunicationHomeReturn] = []
   for idea in ideas {
     for book_id in idea.participating_books {
       records.push({

@@ -1,10 +1,10 @@
 ///|
 async fn load_civic_salon_reducer_output_after_run(
-  scenario : CivicSalonScenario,
+  scenario : CivicCommunicationScenario,
   workspace_base : String,
   root : String,
   run_id : String?,
-) -> Array[CivicSalonIdea] {
+) -> Array[CivicCommunicationIdea] {
   let run_ideas = match run_id {
     Some(run_id) =>
       load_civic_salon_reducer_run_output(run_id, root).unwrap_or([])
@@ -24,7 +24,7 @@ async fn load_civic_salon_reducer_output_after_run(
 async fn load_civic_salon_reducer_run_output(
   run_id : String,
   root : String,
-) -> Array[CivicSalonIdea]? {
+) -> Array[CivicCommunicationIdea]? {
   let workspace_dir = match @moonclaw.run_workspace_dir(run_id, cwd=root) {
     Some(workspace_dir) => workspace_dir
     None => return None
@@ -36,9 +36,9 @@ async fn load_civic_salon_reducer_run_output(
 
 ///|
 async fn load_persisted_civic_salon_reducer_output(
-  scenario : CivicSalonScenario,
+  scenario : CivicCommunicationScenario,
   workspace_base : String,
-) -> Array[CivicSalonIdea]? {
+) -> Array[CivicCommunicationIdea]? {
   match
     load_civic_salon_ideas_file(
       civic_salon_scenario_output_path(scenario, workspace_base),
@@ -52,14 +52,16 @@ async fn load_persisted_civic_salon_reducer_output(
 }
 
 ///|
-async fn load_civic_salon_ideas_file(path : String) -> Array[CivicSalonIdea]? {
+async fn load_civic_salon_ideas_file(
+  path : String,
+) -> Array[CivicCommunicationIdea]? {
   let parsed = match @support.read_optional_json_file(path) {
     Some(json) => json
     None => return None
   }
   let ideas = match parsed {
     Array(_) => {
-      let values : Array[CivicSalonIdea] = @json.from_json(parsed) catch {
+      let values : Array[CivicCommunicationIdea] = @json.from_json(parsed) catch {
         _ => return None
       }
       values
@@ -67,7 +69,7 @@ async fn load_civic_salon_ideas_file(path : String) -> Array[CivicSalonIdea]? {
     Object(object) =>
       match object.get("ideas") {
         Some(value) => {
-          let values : Array[CivicSalonIdea] = @json.from_json(value) catch {
+          let values : Array[CivicCommunicationIdea] = @json.from_json(value) catch {
             _ => return None
           }
           values
@@ -81,8 +83,8 @@ async fn load_civic_salon_ideas_file(path : String) -> Array[CivicSalonIdea]? {
 
 ///|
 async fn persist_civic_salon_reducer_output(
-  scenario : CivicSalonScenario,
-  ideas : Array[CivicSalonIdea],
+  scenario : CivicCommunicationScenario,
+  ideas : Array[CivicCommunicationIdea],
   workspace_base : String,
 ) -> Unit {
   @support.write_text_file(
@@ -97,7 +99,7 @@ async fn persist_civic_salon_reducer_output(
 
 ///|
 fn civic_salon_scenario_output_path(
-  scenario : CivicSalonScenario,
+  scenario : CivicCommunicationScenario,
   workspace_base : String,
 ) -> String {
   "\{civic_salon_workspace_root(scenario.building_book_id, workspace_base)}/raw/bootstrap/\{scenario.id}-ideas.json"
@@ -105,8 +107,8 @@ fn civic_salon_scenario_output_path(
 
 ///|
 async fn write_civic_salon_reducer_blocker(
-  scenario : CivicSalonScenario,
-  reduction : CivicSalonReductionResult,
+  scenario : CivicCommunicationScenario,
+  reduction : CivicCommunicationReductionResult,
   round_id : String,
 ) -> Unit {
   @support.write_text_file(

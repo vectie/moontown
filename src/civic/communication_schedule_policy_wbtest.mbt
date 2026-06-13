@@ -1,6 +1,6 @@
 ///|
 test "salon schedule uses wall-clock due checks and completion cadence" {
-  let schedule = CivicSalonSchedule::new(
+  let schedule = CivicCommunicationSchedule::new(
     id="robotics-salon",
     title="Robotics Salon",
     building_id="social-square",
@@ -20,7 +20,7 @@ test "salon schedule uses wall-clock due checks and completion cadence" {
 
 ///|
 test "salon round id and record derive from schedule and metrics" {
-  let schedule = CivicSalonSchedule::new(
+  let schedule = CivicCommunicationSchedule::new(
     id="robotics-salon",
     title="Robotics Salon",
     building_id="social-square",
@@ -28,7 +28,7 @@ test "salon round id and record derive from schedule and metrics" {
     round_count=2,
   )
   assert_eq(civic_salon_round_id(schedule), "robotics-salon-round-3")
-  let metrics = CivicSalonMetric::{
+  let metrics = CivicCommunicationMetric::{
     participant_count: 2,
     idea_count: 1,
     research_question_count: 3,

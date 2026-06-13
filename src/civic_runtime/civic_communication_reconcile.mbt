@@ -1,6 +1,6 @@
 ///|
 async fn refresh_civic_salon_projection_if_stale(
-  schedule : CivicSalonSchedule,
+  schedule : CivicCommunicationSchedule,
   snapshot_path : String,
   book_catalog_path : String,
 ) -> String? {
@@ -58,7 +58,7 @@ async fn refresh_civic_salon_projection_if_stale(
 
 ///|
 async fn civic_salon_protocol_ledgers_current(
-  schedule : CivicSalonSchedule,
+  schedule : CivicCommunicationSchedule,
 ) -> Bool {
   for
     ledger in [

@@ -52,7 +52,9 @@ test "returned ideas filter by home book" {
 }
 
 ///|
-fn salon_metric_test_participant(book_id : String) -> CivicSalonParticipantBook {
+fn salon_metric_test_participant(
+  book_id : String,
+) -> CivicCommunicationParticipantBook {
   {
     book_id,
     title: book_id,
@@ -67,9 +69,9 @@ fn salon_metric_test_participant(book_id : String) -> CivicSalonParticipantBook 
 
 ///|
 fn salon_metric_test_scenario(
-  participants : Array[CivicSalonParticipantBook],
-  ideas : Array[CivicSalonIdea],
-) -> CivicSalonScenario {
+  participants : Array[CivicCommunicationParticipantBook],
+  ideas : Array[CivicCommunicationIdea],
+) -> CivicCommunicationScenario {
   {
     id: "robotics-salon",
     title: "Robotics Salon",

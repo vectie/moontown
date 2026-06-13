@@ -1,12 +1,12 @@
 ///|
-pub(all) enum CivicSalonReductionMode {
+pub(all) enum CivicCommunicationReductionMode {
   MoonClawReducer
   PersistedReducer
   FixtureReducer
 } derive(Debug, Eq)
 
 ///|
-pub(all) struct CivicSalonParticipantBook {
+pub(all) struct CivicCommunicationParticipantBook {
   book_id : String
   title : String
   focus_area : String
@@ -18,7 +18,7 @@ pub(all) struct CivicSalonParticipantBook {
 } derive(Debug, Eq, ToJson, FromJson)
 
 ///|
-pub(all) struct CivicSalonIdea {
+pub(all) struct CivicCommunicationIdea {
   id : String
   title : String
   summary : String
@@ -29,7 +29,7 @@ pub(all) struct CivicSalonIdea {
 } derive(Debug, Eq, ToJson, FromJson)
 
 ///|
-pub(all) struct CivicSalonMetric {
+pub(all) struct CivicCommunicationMetric {
   participant_count : Int
   idea_count : Int
   research_question_count : Int
@@ -42,7 +42,7 @@ pub(all) struct CivicSalonMetric {
 } derive(Debug, Eq, ToJson, FromJson)
 
 ///|
-pub(all) struct CivicSalonHomeReturn {
+pub(all) struct CivicCommunicationHomeReturn {
   id : String
   building_id : String
   idea_id : String
@@ -53,7 +53,7 @@ pub(all) struct CivicSalonHomeReturn {
 } derive(Debug, Eq, ToJson, FromJson)
 
 ///|
-pub(all) struct CivicSalonScenario {
+pub(all) struct CivicCommunicationScenario {
   id : String
   title : String
   communication_pattern_id : String?
@@ -80,6 +80,6 @@ pub(all) struct CivicSalonScenario {
   participant_contract_path : String
   quality_rules : Array[String]
   skill_rules : Array[String]
-  participants : Array[CivicSalonParticipantBook]
-  ideas : Array[CivicSalonIdea]
+  participants : Array[CivicCommunicationParticipantBook]
+  ideas : Array[CivicCommunicationIdea]
 } derive(Debug, Eq, ToJson, FromJson)

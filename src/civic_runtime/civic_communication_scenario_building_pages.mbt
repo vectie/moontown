@@ -1,10 +1,10 @@
 ///|
 fn civic_salon_building_synthesis(
-  scenario : CivicSalonScenario,
+  scenario : CivicCommunicationScenario,
   protocol : @civic.BuildingProtocolDefinition,
-  participants : Array[CivicSalonParticipantBook],
-  ideas : Array[CivicSalonIdea],
-  metrics : CivicSalonMetric,
+  participants : Array[CivicCommunicationParticipantBook],
+  ideas : Array[CivicCommunicationIdea],
+  metrics : CivicCommunicationMetric,
   round_id : String,
   round_number : Int,
 ) -> String {
@@ -43,8 +43,8 @@ fn civic_salon_round_metadata(round_id : String, round_number : Int) -> String {
 
 ///|
 fn civic_salon_idea_backlog(
-  scenario : CivicSalonScenario,
-  ideas : Array[CivicSalonIdea],
+  scenario : CivicCommunicationScenario,
+  ideas : Array[CivicCommunicationIdea],
 ) -> String {
   [
     "# \{scenario.title} Follow-up Backlog",
@@ -57,8 +57,8 @@ fn civic_salon_idea_backlog(
 
 ///|
 fn civic_salon_review_queue(
-  scenario : CivicSalonScenario,
-  ideas : Array[CivicSalonIdea],
+  scenario : CivicCommunicationScenario,
+  ideas : Array[CivicCommunicationIdea],
 ) -> String {
   let builder = StringBuilder::new()
   builder.write_string("# \{scenario.title} Review\n\n")

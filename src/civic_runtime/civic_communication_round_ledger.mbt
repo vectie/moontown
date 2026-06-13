@@ -1,14 +1,14 @@
 ///|
 fn civic_salon_round_record(
-  schedule : CivicSalonSchedule,
+  schedule : CivicCommunicationSchedule,
   round_id : String,
   tick : Int,
   started_ms : UInt64,
   finished_ms : UInt64,
-  metrics : CivicSalonMetric,
+  metrics : CivicCommunicationMetric,
   decision : String,
   summary : String,
-) -> CivicSalonRoundRecord {
+) -> CivicCommunicationRoundRecord {
   @civic.civic_salon_round_record(
     schedule, round_id, tick, started_ms, finished_ms, metrics, decision, summary,
   )
@@ -17,7 +17,7 @@ fn civic_salon_round_record(
 ///|
 async fn append_civic_salon_round_record(
   path : String,
-  record : CivicSalonRoundRecord,
+  record : CivicCommunicationRoundRecord,
 ) -> Unit {
   let previous = if @fs.exists(path) {
     @fs.read_file(path).text() catch {

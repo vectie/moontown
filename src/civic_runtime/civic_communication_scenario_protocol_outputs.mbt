@@ -1,8 +1,8 @@
 ///|
 fn civic_salon_idea_protocol_records(
-  scenario : CivicSalonScenario,
+  scenario : CivicCommunicationScenario,
   protocol : @civic.BuildingProtocolDefinition,
-  ideas : Array[CivicSalonIdea],
+  ideas : Array[CivicCommunicationIdea],
   round_id : String,
   round_number : Int,
 ) -> (Array[Json], Array[Json]) {
@@ -23,9 +23,9 @@ fn civic_salon_idea_protocol_records(
 
 ///|
 fn civic_salon_reduction_json(
-  scenario : CivicSalonScenario,
+  scenario : CivicCommunicationScenario,
   protocol : @civic.BuildingProtocolDefinition,
-  idea : CivicSalonIdea,
+  idea : CivicCommunicationIdea,
   round_id : String,
   round_number : Int,
 ) -> Json {
@@ -51,8 +51,8 @@ fn civic_salon_reduction_json(
 
 ///|
 fn civic_salon_distribution_targets(
-  scenario : CivicSalonScenario,
-  idea : CivicSalonIdea,
+  scenario : CivicCommunicationScenario,
+  idea : CivicCommunicationIdea,
 ) -> Array[String] {
   [
     "moonbook:\{scenario.building_book_id}/\{scenario.backlog_path}",
@@ -65,9 +65,9 @@ fn civic_salon_distribution_targets(
 
 ///|
 fn civic_salon_outbox_json(
-  scenario : CivicSalonScenario,
+  scenario : CivicCommunicationScenario,
   protocol : @civic.BuildingProtocolDefinition,
-  idea : CivicSalonIdea,
+  idea : CivicCommunicationIdea,
   round_id : String,
   round_number : Int,
 ) -> Json {
@@ -85,10 +85,10 @@ fn civic_salon_outbox_json(
 
 ///|
 fn civic_salon_review_gate_json(
-  scenario : CivicSalonScenario,
+  scenario : CivicCommunicationScenario,
   protocol : @civic.BuildingProtocolDefinition,
-  participants : Array[CivicSalonParticipantBook],
-  ideas : Array[CivicSalonIdea],
+  participants : Array[CivicCommunicationParticipantBook],
+  ideas : Array[CivicCommunicationIdea],
   round_id : String,
 ) -> Json {
   @civic.BuildingReviewGateRecord::{

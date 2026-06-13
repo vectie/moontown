@@ -63,7 +63,7 @@ test "civic salon metric tables keep participant output edges visible" {
 }
 
 ///|
-fn building_pages_test_scenario() -> CivicSalonScenario {
+fn building_pages_test_scenario() -> CivicCommunicationScenario {
   {
     id: "embodied-robotics-salon",
     title: "Embodied Robotics Salon",

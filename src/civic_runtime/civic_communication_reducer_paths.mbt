@@ -1,6 +1,6 @@
 ///|
 fn civic_salon_reducer_output_path(
-  scenario : CivicSalonScenario,
+  scenario : CivicCommunicationScenario,
   workspace_base : String,
 ) -> String {
   civic_salon_reducer_output_path_in_workspace(
@@ -17,7 +17,7 @@ fn civic_salon_reducer_output_path_in_workspace(
 
 ///|
 fn civic_salon_reducer_packet_path(
-  scenario : CivicSalonScenario,
+  scenario : CivicCommunicationScenario,
   round_id : String,
   workspace_base : String,
 ) -> String {

@@ -1,9 +1,9 @@
 ///|
 async fn seed_civic_salon_protocol_slice(
-  scenario : CivicSalonScenario,
+  scenario : CivicCommunicationScenario,
   protocol : @civic.BuildingProtocolDefinition,
-  participants : Array[CivicSalonParticipantBook],
-  ideas : Array[CivicSalonIdea],
+  participants : Array[CivicCommunicationParticipantBook],
+  ideas : Array[CivicCommunicationIdea],
   round_id : String,
   round_number : Int,
 ) -> Unit {

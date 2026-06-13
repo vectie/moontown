@@ -58,7 +58,7 @@ fn civic_salon_protocol_ledger_path(
 
 ///|
 fn civic_salon_projection_path_for_scenario(
-  scenario : CivicSalonScenario,
+  scenario : CivicCommunicationScenario,
   snapshot_path : String,
 ) -> String {
   "\{civic_salon_workspace_base(snapshot_path)}/books/\{scenario.building_book_id}/book/moonbook-ui-state.json"

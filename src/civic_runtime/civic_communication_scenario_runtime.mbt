@@ -1,11 +1,11 @@
 ///|
 pub async fn bootstrap_civic_salon_scenario(
-  scenario : CivicSalonScenario,
+  scenario : CivicCommunicationScenario,
   book_catalog_path? : String = @moonbook.default_catalog_path(),
   round_id? : String = "",
   round_number? : Int = 1,
   workspace_base? : String = "",
-  reducer_mode? : CivicSalonReductionMode = MoonClawReducer,
+  reducer_mode? : CivicCommunicationReductionMode = MoonClawReducer,
 ) -> String {
   let resolved_round_id = civic_pattern_round_id_for_scenario(
     scenario, round_id, round_number,
@@ -36,8 +36,8 @@ pub async fn bootstrap_civic_salon_scenario(
 
 ///|
 async fn materialize_civic_salon_scenario(
-  scenario : CivicSalonScenario,
-  ideas : Array[CivicSalonIdea],
+  scenario : CivicCommunicationScenario,
+  ideas : Array[CivicCommunicationIdea],
   book_catalog_path? : String = @moonbook.default_catalog_path(),
   round_id? : String = "civic-salon-round-001",
   round_number? : Int = 1,
@@ -97,7 +97,7 @@ async fn materialize_civic_salon_scenario(
 
 ///|
 fn civic_salon_blocked_summary(
-  scenario : CivicSalonScenario,
+  scenario : CivicCommunicationScenario,
   round_id : String,
   reason : String,
 ) -> String {
@@ -106,11 +106,11 @@ fn civic_salon_blocked_summary(
 
 ///|
 fn civic_salon_seeded_summary(
-  scenario : CivicSalonScenario,
+  scenario : CivicCommunicationScenario,
   round_id : String,
-  participants : Array[CivicSalonParticipantBook],
-  ideas : Array[CivicSalonIdea],
-  metrics : CivicSalonMetric,
+  participants : Array[CivicCommunicationParticipantBook],
+  ideas : Array[CivicCommunicationIdea],
+  metrics : CivicCommunicationMetric,
   reducer_summary : String?,
 ) -> String {
   [
@@ -123,11 +123,11 @@ fn civic_salon_seeded_summary(
 
 ///|
 fn civic_salon_seeded_summary_core(
-  scenario : CivicSalonScenario,
+  scenario : CivicCommunicationScenario,
   round_id : String,
-  participants : Array[CivicSalonParticipantBook],
-  ideas : Array[CivicSalonIdea],
-  metrics : CivicSalonMetric,
+  participants : Array[CivicCommunicationParticipantBook],
+  ideas : Array[CivicCommunicationIdea],
+  metrics : CivicCommunicationMetric,
 ) -> String {
   [
     "Seeded \{scenario.title} \{round_id}:",
@@ -148,7 +148,7 @@ fn civic_salon_seeded_reducer_suffix(reducer_summary : String?) -> String {
 
 ///|
 fn civic_communication_protocol_for_scenario(
-  scenario : CivicSalonScenario,
+  scenario : CivicCommunicationScenario,
 ) -> @civic.BuildingProtocolDefinition {
   match @civic.wenyu_building_protocol_for_building_id(scenario.building_id) {
     Some(protocol) => protocol

@@ -1,6 +1,6 @@
 ///|
 test "salon scenario DTOs round-trip as civic package data" {
-  let scenario : CivicSalonScenario = {
+  let scenario : CivicCommunicationScenario = {
     id: "robotics-salon",
     title: "Robotics Research Salon",
     communication_pattern_id: Some("research-salon"),
@@ -51,7 +51,7 @@ test "salon scenario DTOs round-trip as civic package data" {
       },
     ],
   }
-  let parsed : CivicSalonScenario = @json.from_json(scenario.to_json()) catch {
+  let parsed : CivicCommunicationScenario = @json.from_json(scenario.to_json()) catch {
     _ => fail("expected scenario JSON to decode")
   }
   assert_eq(parsed.id, "robotics-salon")
@@ -61,8 +61,8 @@ test "salon scenario DTOs round-trip as civic package data" {
 
 ///|
 test "salon reduction modes expose constructors across package boundary" {
-  let mode = CivicSalonReductionMode::FixtureReducer
-  assert_true(mode is CivicSalonReductionMode::FixtureReducer)
+  let mode = CivicCommunicationReductionMode::FixtureReducer
+  assert_true(mode is CivicCommunicationReductionMode::FixtureReducer)
 }
 
 ///|

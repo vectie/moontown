@@ -1,5 +1,5 @@
 ///|
-pub(all) struct CivicSalonSchedule {
+pub(all) struct CivicCommunicationSchedule {
   id : String
   title : String
   building_id : String
@@ -15,7 +15,7 @@ pub(all) struct CivicSalonSchedule {
 } derive(Debug, Eq, ToJson, FromJson)
 
 ///|
-pub(all) struct CivicSalonRoundRecord {
+pub(all) struct CivicCommunicationRoundRecord {
   id : String
   salon_id : String
   building_id : String
@@ -34,7 +34,7 @@ pub(all) struct CivicSalonRoundRecord {
 } derive(Debug, Eq, ToJson, FromJson)
 
 ///|
-pub fn CivicSalonSchedule::new(
+pub fn CivicCommunicationSchedule::new(
   id~ : String,
   title~ : String,
   building_id~ : String,
@@ -47,7 +47,7 @@ pub fn CivicSalonSchedule::new(
   round_count? : Int = 0,
   latest_round_id? : String = "",
   latest_summary? : String = "",
-) -> CivicSalonSchedule {
+) -> CivicCommunicationSchedule {
   {
     id,
     title,

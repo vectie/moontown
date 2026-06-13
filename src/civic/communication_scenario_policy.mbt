@@ -1,6 +1,6 @@
 ///|
 pub fn communication_pattern_id_for_scenario(
-  scenario : CivicSalonScenario,
+  scenario : CivicCommunicationScenario,
 ) -> String {
   match scenario.communication_pattern_id {
     Some(id) => if id.trim().is_empty() { "research-salon" } else { id }
@@ -10,7 +10,7 @@ pub fn communication_pattern_id_for_scenario(
 
 ///|
 pub fn communication_pattern_for_scenario(
-  scenario : CivicSalonScenario,
+  scenario : CivicCommunicationScenario,
 ) -> CivicCommunicationPattern {
   match
     civic_communication_pattern_for_id(
@@ -23,7 +23,7 @@ pub fn communication_pattern_for_scenario(
 
 ///|
 pub fn communication_pattern_label_for_scenario(
-  scenario : CivicSalonScenario,
+  scenario : CivicCommunicationScenario,
 ) -> String {
   match scenario.communication_pattern_label {
     Some(label) =>
@@ -38,7 +38,7 @@ pub fn communication_pattern_label_for_scenario(
 
 ///|
 pub fn communication_protocol_for_scenario(
-  scenario : CivicSalonScenario,
+  scenario : CivicCommunicationScenario,
 ) -> BuildingProtocolDefinition {
   let pattern = communication_pattern_for_scenario(scenario)
   {
@@ -97,7 +97,9 @@ pub fn communication_metrics_certification_note() -> String {
 }
 
 ///|
-pub fn salon_return_home_contract_note(scenario : CivicSalonScenario) -> String {
+pub fn salon_return_home_contract_note(
+  scenario : CivicCommunicationScenario,
+) -> String {
   [
     "Each participating workspace receives `\{scenario.returned_ideas_path}` with the reduced outputs relevant to its perspective.",
     "That page is the next place for each home workspace to review, accept, refine, or reject the pattern output.",

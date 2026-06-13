@@ -1,6 +1,6 @@
 ///|
 pub fn civic_salon_is_due(
-  schedule : CivicSalonSchedule,
+  schedule : CivicCommunicationSchedule,
   now_ms : UInt64,
 ) -> Bool {
   schedule.enabled && now_ms >= schedule.next_due_ms
@@ -8,11 +8,11 @@ pub fn civic_salon_is_due(
 
 ///|
 pub fn complete_civic_salon_schedule(
-  schedule : CivicSalonSchedule,
+  schedule : CivicCommunicationSchedule,
   now_ms : UInt64,
   round_id : String,
   summary : String,
-) -> CivicSalonSchedule {
+) -> CivicCommunicationSchedule {
   let interval = if schedule.interval_ms < 1UL {
     1_800_000UL
   } else {
@@ -29,21 +29,21 @@ pub fn complete_civic_salon_schedule(
 }
 
 ///|
-pub fn civic_salon_round_id(schedule : CivicSalonSchedule) -> String {
+pub fn civic_salon_round_id(schedule : CivicCommunicationSchedule) -> String {
   "\{schedule.id}-round-\{schedule.round_count + 1}"
 }
 
 ///|
 pub fn civic_salon_round_record(
-  schedule : CivicSalonSchedule,
+  schedule : CivicCommunicationSchedule,
   round_id : String,
   tick : Int,
   started_ms : UInt64,
   finished_ms : UInt64,
-  metrics : CivicSalonMetric,
+  metrics : CivicCommunicationMetric,
   decision : String,
   summary : String,
-) -> CivicSalonRoundRecord {
+) -> CivicCommunicationRoundRecord {
   {
     id: round_id,
     salon_id: schedule.id,
