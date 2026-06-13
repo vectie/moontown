@@ -1,11 +1,6 @@
 ///|
 pub fn live_autonomy_base_dir_for_snapshot(snapshot_path : String) -> String {
-  let base = @path.Path::dirname(snapshot_path).to_string()
-  if base == "." || base == "" {
-    ".moontown"
-  } else {
-    base
-  }
+  @storage.snapshot_base_dir(snapshot_path)
 }
 
 ///|

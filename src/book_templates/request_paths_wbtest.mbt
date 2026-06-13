@@ -8,6 +8,10 @@ test "request paths derive canonical inbox and event files" {
     "/tmp/moontown/book-template-requests.json",
   )
   assert_eq(
+    request_path_for_snapshot("snapshot.json"),
+    ".moontown/book-template-requests.json",
+  )
+  assert_eq(
     request_event_path_for_request("/tmp/moontown/book-template-requests.json"),
     "/tmp/moontown/book-template-request-events.jsonl",
   )

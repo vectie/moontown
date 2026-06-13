@@ -5,6 +5,10 @@ test "live autonomy policy derives spine paths from snapshot directory" {
     "/tmp/moontown/live-autonomy.json",
   )
   assert_eq(
+    live_autonomy_path_for_snapshot("town.json"),
+    ".moontown/live-autonomy.json",
+  )
+  assert_eq(
     town_journal_path_for_snapshot(".moontown/town.json"),
     ".moontown/town-journal.jsonl",
   )

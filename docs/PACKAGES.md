@@ -276,6 +276,10 @@ Boundary:
 - Runtime packages may derive their own feature-specific filenames under that
   base, but should call `storage.snapshot_base_dir(...)` instead of
   reimplementing `dirname(snapshot_path)` fallback logic.
+- Feature packages such as `book_templates`, `book_quality`,
+  `final_integration`, `visual_projection`, and `town_runtime` should append
+  their local filenames to this storage-owned base rather than owning a second
+  relative-snapshot fallback.
 
 ## Roles
 

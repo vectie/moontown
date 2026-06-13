@@ -1,11 +1,6 @@
 ///|
 pub fn review_result_dir_for_snapshot(snapshot_path : String) -> String {
-  let base = @path.Path::dirname(snapshot_path).to_string()
-  if base == "." || base == "" {
-    default_review_result_dir()
-  } else {
-    "\{base}/book-quality/ai-review-results"
-  }
+  "\{@storage.snapshot_base_dir(snapshot_path)}/book-quality/ai-review-results"
 }
 
 ///|

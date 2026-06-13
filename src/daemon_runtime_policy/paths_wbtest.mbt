@@ -5,6 +5,10 @@ test "daemon runtime policy derives paths from snapshot directory" {
     "/tmp/moontown/daemon-runtime.json",
   )
   assert_eq(
+    daemon_runtime_path_for_snapshot("town.json"),
+    ".moontown/daemon-runtime.json",
+  )
+  assert_eq(
     daemon_pid_path_for_snapshot(".moontown/town.json"),
     ".moontown/daemon.pid",
   )

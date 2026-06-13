@@ -4,6 +4,7 @@ import {
   "moonbitlang/core/json",
   "moonbitlang/x/path",
   "vectie/moontown/core",
+  "vectie/moontown/storage",
 }
 
 import {

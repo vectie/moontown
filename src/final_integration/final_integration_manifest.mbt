@@ -13,12 +13,7 @@ async fn load_final_integration_manifest(
 
 ///|
 async fn load_integration_daemon_tick(snapshot_path : String) -> Int {
-  let base = @path.Path::dirname(snapshot_path).to_string()
-  let path = if base == "." || base == "" {
-    ".moontown/daemon.json"
-  } else {
-    "\{base}/daemon.json"
-  }
+  let path = "\{@storage.snapshot_base_dir(snapshot_path)}/daemon.json"
   if !@fs.exists(path) {
     return 0
   }

@@ -15,7 +15,7 @@ pub fn request_event_file_name() -> String {
 
 ///|
 pub fn request_path_for_snapshot(snapshot_path : String) -> String {
-  "\{@path.Path::dirname(snapshot_path).to_string()}/\{request_file_name()}"
+  "\{@storage.snapshot_base_dir(snapshot_path)}/\{request_file_name()}"
 }
 
 ///|

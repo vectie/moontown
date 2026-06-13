@@ -91,12 +91,7 @@ pub fn build_visual_projection(
 
 ///|
 pub fn default_visual_projection_path(snapshot_path : String) -> String {
-  let base = @path.Path::dirname(snapshot_path).to_string()
-  if base == "." || base == "" {
-    ".moontown/visual-projection.json"
-  } else {
-    "\{base}/visual-projection.json"
-  }
+  "\{@storage.snapshot_base_dir(snapshot_path)}/visual-projection.json"
 }
 
 ///|

@@ -51,6 +51,18 @@ fn visual_projection_test_state(
 }
 
 ///|
+test "visual projection path uses storage snapshot base" {
+  assert_eq(
+    default_visual_projection_path("town.json"),
+    ".moontown/visual-projection.json",
+  )
+  assert_eq(
+    default_visual_projection_path("/tmp/moontown/town.json"),
+    "/tmp/moontown/visual-projection.json",
+  )
+}
+
+///|
 test "visual projection connects active worker to execution task" {
   let projection = build_visual_projection(visual_projection_test_state())
   assert_eq(projection.tick, 42)
