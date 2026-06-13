@@ -138,18 +138,16 @@ fn research_storage_topic_for_explicit_book(
 
 ///|
 fn research_book_topic_from_id(book_id : String) -> String? {
-  if !catalog_book_id_is_research(book_id) {
-    return None
-  }
-  let topic = if book_id.has_prefix("research-") {
-    book_id[9:].trim().to_owned()
-  } else {
-    normalize_topic_id(book_id)
-  }
-  if topic.is_empty() {
-    None
-  } else {
-    Some(topic)
+  match @policy.catalog_research_topic_hint(book_id, "", []) {
+    Some(topic) => {
+      let normalized = normalize_topic_id(topic)
+      if normalized.is_empty() {
+        None
+      } else {
+        Some(normalized)
+      }
+    }
+    None => None
   }
 }
 

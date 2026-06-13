@@ -568,6 +568,9 @@ Boundary:
 - `src/policy` owns catalog research-topic hints from `topic:` tags and
   canonical `research-*` storage slugs. Adapters and quality packages should
   consume that helper instead of parsing research tags or slugs themselves.
+  Dynamic MoonBook research-book lookup is included in this rule: it asks
+  policy for a topic hint, then only normalizes the returned topic before
+  creating the stable storage entry.
 - `src/policy` owns the internal-distance growth-vector view; downstream
   packages may render it but should not redefine how execute/tend/quality
   map to information, recognition, and decisiveness.
