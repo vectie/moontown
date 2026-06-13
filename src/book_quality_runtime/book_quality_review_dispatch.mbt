@@ -92,7 +92,7 @@ async fn dispatch_book_quality_ai_review_for_score(
         error.to_string(),
         @env.now(),
       )
-      @book_quality.append_review_run(run_path, run)
+      append_review_run(run_path, run)
       return run.summary
     }
   }
@@ -105,6 +105,6 @@ async fn dispatch_book_quality_ai_review_for_score(
     run_inline,
     @env.now(),
   )
-  @book_quality.append_review_run(run_path, run)
+  append_review_run(run_path, run)
   "Dispatched AI semantic book-quality review for `\{score.book_id}`. \{run.summary}"
 }

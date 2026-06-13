@@ -198,6 +198,6 @@ async fn write_book_quality_review_run_ledger(
   runs : Array[@book_quality.BookQualityReviewRun],
 ) -> Unit {
   for run in runs {
-    @book_quality.append_review_run(path, run)
+    append_review_run(path, run)
   }
 }

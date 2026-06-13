@@ -55,16 +55,6 @@ pub fn default_moonclaw_home() -> String {
 }
 
 ///|
-pub async fn append_review_run(
-  run_path : String,
-  run : BookQualityReviewRun,
-) -> Unit {
-  let ledger = load_review_run_ledger_file(run_path)
-  let updated = review_run_ledger_with_appended_run(ledger, run)
-  write_review_run_ledger_file(run_path, updated)
-}
-
-///|
 pub async fn write_accepted_review_result(
   result_dir : String,
   run : BookQualityReviewRun,
@@ -85,7 +75,7 @@ pub async fn read_review_result_text(
 }
 
 ///|
-fn review_run_ledger_with_appended_run(
+pub fn review_run_ledger_with_appended_run(
   ledger : BookQualityReviewRunLedger,
   run : BookQualityReviewRun,
 ) -> BookQualityReviewRunLedger {
@@ -108,17 +98,7 @@ fn review_run_same_ledger_slot(
 }
 
 ///|
-pub async fn load_review_run_ledger_file(
-  run_path : String,
-) -> BookQualityReviewRunLedger {
-  if !@fs.exists(run_path) {
-    return empty_review_run_ledger()
-  }
-  review_run_ledger_from_text(@fs.read_file(run_path).text())
-}
-
-///|
-fn review_run_ledger_from_text(text : String) -> BookQualityReviewRunLedger {
+pub fn review_run_ledger_from_text(text : String) -> BookQualityReviewRunLedger {
   let parsed = @json.parse(text) catch { _ => return empty_review_run_ledger() }
   @json.from_json(parsed) catch {
     _ => empty_review_run_ledger()
@@ -126,20 +106,12 @@ fn review_run_ledger_from_text(text : String) -> BookQualityReviewRunLedger {
 }
 
 ///|
-pub async fn write_review_run_ledger_file(
-  run_path : String,
-  ledger : BookQualityReviewRunLedger,
-) -> Unit {
-  write_text_file(run_path, review_run_ledger_to_text(ledger))
-}
-
-///|
-fn review_run_ledger_to_text(ledger : BookQualityReviewRunLedger) -> String {
+pub fn review_run_ledger_to_text(ledger : BookQualityReviewRunLedger) -> String {
   ledger.to_json().stringify(indent=2)
 }
 
 ///|
-fn empty_review_run_ledger() -> BookQualityReviewRunLedger {
+pub fn empty_review_run_ledger() -> BookQualityReviewRunLedger {
   BookQualityReviewRunLedger::{ runs: [] }
 }
 

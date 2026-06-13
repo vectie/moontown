@@ -11,7 +11,7 @@ pub async fn reconcile_book_quality_ai_review_results(
   result_dir? : String = @book_quality.default_review_result_dir(),
   run_path? : String = @book_quality.default_review_run_path(),
 ) -> Int {
-  let ledger = @book_quality.load_review_run_ledger_file(run_path)
+  let ledger = load_review_run_ledger_file(run_path)
   let root = @book_quality.review_root_from_run_path(run_path)
   let home = @book_quality.moonclaw_home_from_run_path(run_path)
   let runs : Array[@book_quality.BookQualityReviewRun] = []
@@ -39,7 +39,7 @@ pub async fn reconcile_book_quality_ai_review_results(
     runs.push(result.run)
   }
   if changed {
-    @book_quality.write_review_run_ledger_file(run_path, @book_quality.BookQualityReviewRunLedger::{
+    write_review_run_ledger_file(run_path, @book_quality.BookQualityReviewRunLedger::{
       runs,
     })
   }
@@ -51,7 +51,7 @@ async fn active_book_quality_review_count(
   result_dir : String,
   run_path : String,
 ) -> Int {
-  let ledger = @book_quality.load_review_run_ledger_file(run_path)
+  let ledger = load_review_run_ledger_file(run_path)
   let mut active = 0
   for run in ledger.runs {
     let result_exists = @fs.exists(

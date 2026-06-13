@@ -9,7 +9,7 @@ pub async fn render_book_quality_ai_review_status(
   let active_book_ids = book_quality_ai_review_active_book_ids(
     book_catalog_path, snapshot_path,
   )
-  let ledger = @book_quality.load_review_run_ledger_file(run_path)
+  let ledger = load_review_run_ledger_file(run_path)
   @book_quality.review_status_markdown_from_observations(
     run_path,
     result_dir,

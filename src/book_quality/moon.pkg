@@ -1,7 +1,6 @@
 import {
   "moonbitlang/async/fs",
   "moonbitlang/core/encoding/utf8" @encoding/utf8,
-  "moonbitlang/core/env",
   "moonbitlang/core/json",
   "moonbitlang/x/path",
   "vectie/moontown/adapters/moonbook",

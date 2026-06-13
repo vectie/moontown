@@ -8,6 +8,8 @@ import {
 }
 
 // Values
+pub async fn append_review_run(String, @book_quality.BookQualityReviewRun) -> Unit
+
 pub fn book_quality_catalog_entry_from_runtime_book(@core.BookRef) -> @moonbook.BookCatalogEntry
 
 pub async fn bootstrap_registered_book_workspaces(book_catalog_path? : String) -> String
@@ -17,6 +19,8 @@ pub async fn dispatch_next_book_quality_ai_review(book_catalog_path? : String, s
 pub async fn first_pending_review_score(@book_quality.BookQualityAudit, String) -> @book_quality.BookQualityScore?
 
 pub async fn inspect_book_quality(book_catalog_path? : String, snapshot_path? : String) -> @book_quality.BookQualityAudit
+
+pub async fn load_review_run_ledger_file(String) -> @book_quality.BookQualityReviewRunLedger
 
 pub async fn reconcile_book_quality_ai_review_results(result_dir? : String, run_path? : String) -> Int
 
@@ -29,6 +33,8 @@ pub async fn render_book_quality_ai_review_status(result_dir? : String, run_path
 pub async fn write_book_quality_audit(book_catalog_path? : String, snapshot_path? : String, audit_path? : String) -> String
 
 pub async fn write_book_quality_review_packets(book_catalog_path? : String, snapshot_path? : String, review_dir? : String) -> String
+
+pub async fn write_review_run_ledger_file(String, @book_quality.BookQualityReviewRunLedger) -> Unit
 
 // Errors
 

@@ -14,8 +14,6 @@ pub fn active_review_count_for_observations(Array[BookQualityReviewRunObservatio
 
 pub fn active_review_dispatch_message(Int) -> String
 
-pub async fn append_review_run(String, BookQualityReviewRun) -> Unit
-
 pub fn assess_structural_quality(Int, Array[String]) -> BookQualityStructuralAssessment
 
 pub fn audit_from_scores(String, Array[BookQualityScore]) -> BookQualityAudit
@@ -58,6 +56,8 @@ pub fn default_review_run_path() -> String
 
 pub fn disabled_repair_standing_goal(@core.StandingGoal) -> @core.StandingGoal
 
+pub fn empty_review_run_ledger() -> BookQualityReviewRunLedger
+
 pub fn external_packet_path(String, String) -> String
 
 pub fn first_pending_review_score_for_completed(BookQualityAudit, Array[String]) -> BookQualityScore?
@@ -67,8 +67,6 @@ pub fn generated_site_path() -> String
 pub fn imported_review_run_from_observation(String, String, String, String, String?, String, String?, UInt64) -> BookQualityReviewRun
 
 pub fn is_repair_goal_id(String) -> Bool
-
-pub async fn load_review_run_ledger_file(String) -> BookQualityReviewRunLedger
 
 pub fn moonclaw_home(String) -> String
 
@@ -202,6 +200,12 @@ pub fn review_run_blocked_status() -> String
 
 pub fn review_run_dispatched_status() -> String
 
+pub fn review_run_ledger_from_text(String) -> BookQualityReviewRunLedger
+
+pub fn review_run_ledger_to_text(BookQualityReviewRunLedger) -> String
+
+pub fn review_run_ledger_with_appended_run(BookQualityReviewRunLedger, BookQualityReviewRun) -> BookQualityReviewRunLedger
+
 pub fn review_run_orphaned_status() -> String
 
 pub fn review_run_queued_status() -> String
@@ -245,8 +249,6 @@ pub fn wiki_index_path() -> String
 pub fn workspace_path(String, String) -> String
 
 pub async fn write_accepted_review_result(String, BookQualityReviewRun, String) -> Unit
-
-pub async fn write_review_run_ledger_file(String, BookQualityReviewRunLedger) -> Unit
 
 // Errors
 

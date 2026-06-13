@@ -419,7 +419,7 @@ scoring, per-path scoring, typed path-set scoring/wording, scoring/action primit
 audit/review DTOs, context-page selection, static scoring profile required-path
 lists, research/course/civic/cookbook scoring signal thresholds and wording,
 review packet/readme construction, review output contract, review skill
-text, review-run ledger storage/lifecycle contracts, review result paths,
+text, review-run ledger schema/text/update contracts, review result paths,
 review-run construction, review reconciliation result contracts, review ledger
 view/rendering contracts, repair bridge ledger/item schemas, and
 structural/semantic assessment rules have moved to `book_quality/`. Root may
@@ -448,8 +448,11 @@ target JSON. It also adapts the neutral review proposal spec into a MoonClaw
 external proposal packet at dispatch time. Runtime observation belongs there
 too: process liveness checks, MoonClaw run workspace lookup, polling summaries,
 harvesting `result.json`, and checking which semantic-review result files
-already exist are runtime duties. `book_quality/` owns the ledger schema,
-result path contract, accepted/orphaned/blocked interpretation, and pure
+already exist are runtime duties. Review-run ledger file storage is also a
+runtime duty: `book_quality_runtime/` loads, parses, appends, serializes, and
+persists the run ledger through package-owned pure ledger helpers.
+`book_quality/` owns the ledger schema, result path contract,
+accepted/orphaned/blocked interpretation, and pure
 transition from observed facts to review-run state. Root may supply observed
 directories, process facts, completed-review book ids, and audits into the
 package, but it should not define the `codex-main` target schema or reviewer

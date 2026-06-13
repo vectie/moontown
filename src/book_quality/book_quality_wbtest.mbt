@@ -920,10 +920,14 @@ async test "book quality package owns review ledger append storage" {
     run_id: Some("run-b"),
     summary: "other",
   }
-  append_review_run(run_path, original)
-  append_review_run(run_path, other)
-  append_review_run(run_path, replacement)
-  let ledger = load_review_run_ledger_file(run_path)
+  ignore(run_path)
+  let ledger = review_run_ledger_with_appended_run(
+    review_run_ledger_with_appended_run(
+      review_run_ledger_with_appended_run(empty_review_run_ledger(), original),
+      other,
+    ),
+    replacement,
+  )
   assert_eq(ledger.runs.length(), 2)
   assert_eq(ledger.runs[0].book_id, "book-b")
   assert_eq(ledger.runs[1].book_id, "book-a")
@@ -931,9 +935,7 @@ async test "book quality package owns review ledger append storage" {
 }
 
 ///|
-async test "book quality package owns review ledger text loading" {
-  let root = "/tmp/moontown-book-quality-package-serialized-loader-wbtest"
-  let run_path = "\{root}/book-quality/ai-review-runs.json"
+test "book quality package owns review ledger text parsing" {
   let run = BookQualityReviewRun::{
     book_id: "book-a",
     packet_path: "/tmp/packet.json",
@@ -944,20 +946,16 @@ async test "book quality package owns review ledger text loading" {
     summary: "summary",
     generated_at_ms: 1UL,
   }
-  write_text_file(
-    run_path,
+  let parsed = review_run_ledger_from_text(
     review_run_ledger_to_text(BookQualityReviewRunLedger::{ runs: [run] }),
   )
-  let parsed = load_review_run_ledger_file(run_path)
   assert_eq(parsed.runs.length(), 1)
   assert_eq(parsed.runs[0].book_id, "book-a")
   assert_eq(parsed.runs[0].summary, "summary")
 }
 
 ///|
-async test "book quality package owns review ledger serializer roundtrip" {
-  let root = "/tmp/moontown-book-quality-package-roundtrip-loader-wbtest"
-  let run_path = "\{root}/book-quality/ai-review-runs.json"
+test "book quality package owns review ledger serializer roundtrip" {
   let run = BookQualityReviewRun::{
     book_id: "book-roundtrip",
     packet_path: "/tmp/packet.json",
@@ -973,28 +971,18 @@ async test "book quality package owns review ledger serializer roundtrip" {
   })
   assert_true(text.contains("\"runs\""))
   assert_true(text.contains("\"book_id\": \"book-roundtrip\""))
-  write_text_file(run_path, text)
-  let parsed = load_review_run_ledger_file(run_path)
+  let parsed = review_run_ledger_from_text(text)
   assert_eq(parsed.runs.length(), 1)
   assert_eq(parsed.runs[0].book_id, "book-roundtrip")
   assert_eq(parsed.runs[0].summary, "roundtrip summary")
 }
 
 ///|
-async test "book quality package owns review ledger empty fallback" {
-  let root = "/tmp/moontown-book-quality-package-load-ledger-wbtest"
-  let missing_path = "\{root}/book-quality/missing-runs.json"
-  let missing = load_review_run_ledger_file(missing_path)
-  assert_eq(missing.runs.length(), 0)
-
-  let malformed_path = "\{root}/book-quality/malformed-runs.json"
-  write_text_file(malformed_path, "{not valid json")
-  let malformed = load_review_run_ledger_file(malformed_path)
+test "book quality package owns review ledger parse fallback" {
+  let malformed = review_run_ledger_from_text("{not valid json")
   assert_eq(malformed.runs.length(), 0)
 
-  let wrong_schema_path = "\{root}/book-quality/wrong-schema-runs.json"
-  write_text_file(wrong_schema_path, "{\"runs\":\"not an array\"}")
-  let wrong_schema = load_review_run_ledger_file(wrong_schema_path)
+  let wrong_schema = review_run_ledger_from_text("{\"runs\":\"not an array\"}")
   assert_eq(wrong_schema.runs.length(), 0)
 }
 

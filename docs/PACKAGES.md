@@ -561,6 +561,9 @@ Boundary:
 - `src/book_quality` owns review-run ledger/status vocabulary, display row
   construction, active-review counting, and status Markdown rendering from
   explicit runtime observations.
+- `src/book_quality` owns pure review-run ledger helpers: empty ledger,
+  text parse/serialize, and append/update semantics. It should not load or
+  write the ledger file.
 - `src/book_quality` owns first-pending semantic-review candidate selection
   from an audit plus an observed completed-review book-id list; it should not
   inspect result files to decide which candidates are completed.
@@ -574,6 +577,8 @@ Boundary:
   aggregation: load the ledger, observe filesystem/process/MoonClaw output,
   call package-owned per-run transitions, write accepted results, fold counts,
   and persist changed ledgers.
+- `src/book_quality_runtime` owns review-run ledger storage APIs used by
+  dispatch, reconciliation, and status rendering: load, append, and write.
 - `src/book_quality/scoring_engine.mbt` owns book-type scoring orchestration.
   Reusable draft/finalization/path-scoring internals belong in
   `scoring_primitives.mbt`; civic-service scoring details belong in
