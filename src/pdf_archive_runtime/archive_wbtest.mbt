@@ -7,7 +7,7 @@ async test "archive pdf evidence watch book disables standing watch and hides ca
   let goals_path = "\{base}/standing-goals.json"
   let event_path = "\{base}/book-template-request-events.jsonl"
   ignore(
-    @pdf_evidence_watch.bootstrap_pdf_evidence_watch_book(
+    @pdf_evidence_watch_runtime.bootstrap_pdf_evidence_watch_book(
       book_id="research-archive-pdfs",
       title="Archive PDF Watch",
       purpose="Temporary smoke book.",
@@ -39,7 +39,7 @@ async test "archive pdf evidence watch book disables standing watch and hides ca
     request_event_path=event_path,
   )
   assert_true(summary.contains("Archived PDF Evidence Watch book"))
-  let status = @pdf_evidence_watch.inspect_pdf_evidence_watch_book(
+  let status = @pdf_evidence_watch_runtime.inspect_pdf_evidence_watch_book(
     book_id="research-archive-pdfs",
     workspace_root~,
     book_catalog_path=catalog_path,

@@ -351,12 +351,16 @@ Goals:
 - keep App ToolBook bootstrap/install/status/workspace behavior in
   `app_tool_book/`; root may expose wrappers for existing commands, but should
   not carry generated-tool book runtime implementation
-- keep PDF Evidence Watch bootstrap/install/status/workspace behavior in
-  `pdf_evidence_watch/`; keep archive catalog/standing-goal policy and summary
-  wording in `pdf_archive/`; keep archive catalog writes, standing-goal writes,
-  request-event journaling, status inspection, and command entrypoint in
-  `pdf_archive_runtime/`; root must not coordinate cross-store archive
-  lifecycle code
+- keep PDF Evidence Watch identity, config/schema/rendering, required-path,
+  standing-goal, and status Markdown policy in `pdf_evidence_watch/`; keep
+  config loading, relative path resolution, template copying, workspace writes,
+  catalog writes, standing-goal writes, status inspection, and
+  bootstrap/install/status command entrypoints in `pdf_evidence_watch_runtime/`;
+  keep archive catalog/standing-goal policy and summary wording in
+  `pdf_archive/`; keep archive catalog writes, standing-goal writes,
+  request-event journaling, archive status inspection, and archive command
+  entrypoint in `pdf_archive_runtime/`; root must not coordinate cross-store
+  PDF-watch lifecycle code
 - keep visual projection DTOs, phase semantics, routing labels, building/module
   activity summaries, grid placement, and persistence in `visual_projection/`;
   root may expose compatibility wrappers, but it should not carry visual

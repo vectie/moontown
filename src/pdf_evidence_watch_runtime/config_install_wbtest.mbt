@@ -9,7 +9,7 @@ async test "install pdf evidence watch book from moondesk config file" {
   write_text_file(
     method_path, "# Method From File\n\nAnalyze tables, claims, provenance, and operator deltas.",
   )
-  let spec = PdfEvidenceWatchInstallSpec::{
+  let spec = @pdf_evidence_watch.PdfEvidenceWatchInstallSpec::{
     book_id: "research-configured-pdfs",
     title: "Configured PDF Watch",
     purpose: "Configured by Moondesk-style JSON.",

@@ -27,7 +27,7 @@ async fn BookTemplateInstaller::install_config(
 ) -> String {
   match self.template_id {
     "pdf-evidence-watch" =>
-      @pdf_evidence_watch.install_pdf_evidence_watch_book_config(
+      @pdf_evidence_watch_runtime.install_pdf_evidence_watch_book_config(
         config_path,
         book_catalog_path~,
         standing_goal_path~,

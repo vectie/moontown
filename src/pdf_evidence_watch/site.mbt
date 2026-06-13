@@ -1,5 +1,5 @@
 ///|
-fn pdf_evidence_watch_generated_site_html(
+pub fn pdf_evidence_watch_generated_site_html(
   entry : @moonbook.BookCatalogEntry,
   title : String,
   purpose : String,

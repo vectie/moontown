@@ -221,8 +221,17 @@ book owns. The implementation now has a first-class `policy` package:
   installers should call this runtime package instead of putting ToolBook IO
   into `app_tool_book/`.
 - [pdf_evidence_watch/](/Users/kq/Workspace/moontown/src/pdf_evidence_watch)
-  owns PDF Evidence Watch bootstrap, config installation, workspace
-  materialization, standing-watch goal construction, and status inspection.
+  owns deterministic PDF Evidence Watch policy and presentation contracts:
+  catalog identity, config JSON shape, template-copy path policy, required
+  paths, generated-site path/rendering, standing-goal construction/list
+  semantics, install spec DTOs, and status Markdown.
+- [pdf_evidence_watch_runtime/](/Users/kq/Workspace/moontown/src/pdf_evidence_watch_runtime)
+  owns PDF Evidence Watch runtime materialization: config file loading,
+  template copying, workspace writes, catalog persistence, standing-goal
+  persistence, filesystem/catalog/goal status inspection, and
+  bootstrap/install/status command entrypoints. Root commands and template
+  installers should call this runtime package instead of putting PDF-watch IO
+  into `pdf_evidence_watch/`.
 - [pdf_archive/](/Users/kq/Workspace/moontown/src/pdf_archive)
   owns deterministic PDF Evidence Watch archive policy: archived catalog-entry
   tags, archive goal-id derivation, standing-goal disable rules, disabled-goal

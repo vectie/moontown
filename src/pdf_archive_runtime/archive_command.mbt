@@ -22,7 +22,7 @@ pub async fn archive_pdf_evidence_watch_book(
     goals, disabled_goals, book_id,
   )
   @storage.save_standing_goals_file(standing_goal_path, disabled_goals)
-  let status = @pdf_evidence_watch.inspect_pdf_evidence_watch_book(
+  let status = @pdf_evidence_watch_runtime.inspect_pdf_evidence_watch_book(
     book_id~,
     book_catalog_path~,
     standing_goal_path~,

@@ -759,14 +759,19 @@ Key files:
 - [src/pdf_evidence_watch/workspace.mbt](/Users/kq/Workspace/moontown/src/pdf_evidence_watch/workspace.mbt)
 - [src/pdf_evidence_watch/standing_goal.mbt](/Users/kq/Workspace/moontown/src/pdf_evidence_watch/standing_goal.mbt)
 - [src/pdf_evidence_watch/status.mbt](/Users/kq/Workspace/moontown/src/pdf_evidence_watch/status.mbt)
+- [src/pdf_evidence_watch_runtime/book.mbt](/Users/kq/Workspace/moontown/src/pdf_evidence_watch_runtime/book.mbt)
+- [src/pdf_evidence_watch_runtime/install.mbt](/Users/kq/Workspace/moontown/src/pdf_evidence_watch_runtime/install.mbt)
+- [src/pdf_evidence_watch_runtime/status.mbt](/Users/kq/Workspace/moontown/src/pdf_evidence_watch_runtime/status.mbt)
 - [src/pdf_archive/archive.mbt](/Users/kq/Workspace/moontown/src/pdf_archive/archive.mbt)
 - [src/pdf_archive_runtime/archive_command.mbt](/Users/kq/Workspace/moontown/src/pdf_archive_runtime/archive_command.mbt)
 
 Purpose:
 
-- bootstrap domain-specific PDF watcher MoonBook workspaces
-- install source-first analysis contracts, skills, schemas, and watcher state
-- write the initial generated evidence-watch projection
+- define domain-specific PDF watcher MoonBook identity, config schema,
+  standing-watch instructions, required workspace paths, skill/page contracts,
+  and generated evidence-watch projection shape
+- let the runtime package install those contracts into real MoonBook
+  workspaces, catalog entries, standing goals, and status reports
 
 Boundary:
 
@@ -776,6 +781,10 @@ Boundary:
   watch contracts.
 - PDF source discovery, extraction, analysis-method, and notification contract
   semantics belong here.
+- PDF runtime behavior belongs in `src/pdf_evidence_watch_runtime`: config file
+  loading, relative path resolution, template copying, workspace writes,
+  catalog writes, standing-goal writes, status inspection, and command
+  entrypoints.
 - PDF archive policy belongs in `src/pdf_archive`: archived/hidden/internal
   catalog tagging, standing-goal disable rules, disabled-goal counting, and
   archive summary wording.

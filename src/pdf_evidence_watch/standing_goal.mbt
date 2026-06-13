@@ -1,5 +1,5 @@
 ///|
-fn pdf_evidence_watch_standing_goal(
+pub fn pdf_evidence_watch_standing_goal(
   book_id : String,
   title : String,
   purpose : String,
@@ -19,7 +19,7 @@ fn pdf_evidence_watch_standing_goal(
 }
 
 ///|
-fn upsert_pdf_evidence_watch_standing_goal(
+pub fn upsert_pdf_evidence_watch_standing_goal(
   goals : Array[@core.StandingGoal],
   goal : @core.StandingGoal,
 ) -> Array[@core.StandingGoal] {
@@ -27,7 +27,7 @@ fn upsert_pdf_evidence_watch_standing_goal(
 }
 
 ///|
-fn pdf_evidence_watch_goal_in(
+pub fn pdf_evidence_watch_goal_in(
   goals : Array[@core.StandingGoal],
   goal_id : String,
 ) -> Bool {
@@ -35,7 +35,7 @@ fn pdf_evidence_watch_goal_in(
 }
 
 ///|
-fn pdf_evidence_watch_goal_enabled_in(
+pub fn pdf_evidence_watch_goal_enabled_in(
   goals : Array[@core.StandingGoal],
   goal_id : String,
 ) -> Bool {
@@ -43,7 +43,7 @@ fn pdf_evidence_watch_goal_enabled_in(
 }
 
 ///|
-fn pdf_evidence_watch_goal_id(book_id : String) -> String {
+pub fn pdf_evidence_watch_goal_id(book_id : String) -> String {
   "watch-\{book_id}-pdfs"
 }
 

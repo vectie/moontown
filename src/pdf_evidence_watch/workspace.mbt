@@ -1,5 +1,5 @@
 ///|
-fn pdf_evidence_watch_catalog_entry(
+pub fn pdf_evidence_watch_catalog_entry(
   book_id : String,
   title : String,
   purpose : String,
@@ -21,64 +21,15 @@ fn pdf_evidence_watch_catalog_entry(
 }
 
 ///|
-async fn write_pdf_evidence_watch_workspace(
-  entry : @moonbook.BookCatalogEntry,
-  title : String,
-  purpose : String,
-  websites : Array[String],
-  analysis_method : String,
-  cadence_ticks : Int,
-  template_root : String,
-) -> Unit {
-  let root = entry.workspace_root
-  for path in pdf_evidence_watch_template_copy_paths() {
-    copy_pdf_evidence_watch_template_file(template_root, root, path)
-  }
-  write_text_file(
-    "\{root}/book.json",
-    pdf_evidence_watch_config(entry, title, purpose, websites, cadence_ticks)
-    .to_json()
-    .stringify(indent=2),
-  )
-  write_text_file_if_missing("\{root}/raw/pdfs/.keep", "")
-  write_text_file_if_missing("\{root}/raw/extracted/.keep", "")
-  write_text_file_if_missing("\{root}/raw/analysis-runs/.keep", "")
-  write_text_file_if_missing(
-    "\{root}/wiki/history/standing-watch.md",
-    pdf_evidence_watch_history_markdown(entry, title),
-  )
-  if !analysis_method.trim().is_empty() {
-    write_text_file("\{root}/wiki/methods/analysis-method.md", analysis_method)
-  }
-  let html = pdf_evidence_watch_generated_site_html(
-    entry, title, purpose, websites,
-  )
-  write_text_file("\{root}/book/Home.html", html)
-  write_text_file(pdf_evidence_watch_generated_site_workspace_path(root), html)
-}
-
-///|
-fn pdf_evidence_watch_generated_site_path() -> String {
+pub fn pdf_evidence_watch_generated_site_path() -> String {
   @policy.default_generated_site_projection_path()
 }
 
 ///|
-fn pdf_evidence_watch_generated_site_workspace_path(root : String) -> String {
+pub fn pdf_evidence_watch_generated_site_workspace_path(
+  root : String,
+) -> String {
   "\{root}/\{pdf_evidence_watch_generated_site_path()}"
-}
-
-///|
-async fn copy_pdf_evidence_watch_template_file(
-  template_root : String,
-  workspace_root : String,
-  relative_path : String,
-) -> Unit {
-  let source = "\{template_root}/\{relative_path}"
-  let content = read_text_or_empty(source)
-  if content.trim().is_empty() {
-    return
-  }
-  write_text_file("\{workspace_root}/\{relative_path}", content)
 }
 
 ///|
@@ -138,7 +89,20 @@ fn pdf_evidence_watch_config(
 }
 
 ///|
-fn pdf_evidence_watch_template_copy_paths() -> Array[String] {
+pub fn pdf_evidence_watch_config_json(
+  entry : @moonbook.BookCatalogEntry,
+  title : String,
+  purpose : String,
+  websites : Array[String],
+  cadence_ticks : Int,
+) -> String {
+  pdf_evidence_watch_config(entry, title, purpose, websites, cadence_ticks)
+  .to_json()
+  .stringify(indent=2)
+}
+
+///|
+pub fn pdf_evidence_watch_template_copy_paths() -> Array[String] {
   [
     "raw/bootstrap/PDF_WATCH_CONTRACT.md", "wiki/index.md", "wiki/methods/analysis-method.md",
     "wiki/sources/README.md", "wiki/findings/README.md", "wiki/reviews/pdf-watch-review.md",
@@ -148,7 +112,7 @@ fn pdf_evidence_watch_template_copy_paths() -> Array[String] {
 }
 
 ///|
-fn pdf_evidence_watch_required_paths() -> Array[String] {
+pub fn pdf_evidence_watch_required_paths() -> Array[String] {
   [
     "book.json",
     "raw/bootstrap/PDF_WATCH_CONTRACT.md",
@@ -171,7 +135,7 @@ fn pdf_evidence_watch_required_paths() -> Array[String] {
 }
 
 ///|
-fn pdf_evidence_watch_history_markdown(
+pub fn pdf_evidence_watch_history_markdown(
   entry : @moonbook.BookCatalogEntry,
   title : String,
 ) -> String {

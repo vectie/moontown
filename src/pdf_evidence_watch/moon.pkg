@@ -1,16 +1,14 @@
 import {
-  "moonbitlang/async/fs",
-  "moonbitlang/core/env",
-  "moonbitlang/core/encoding/utf8" @encoding/utf8,
   "moonbitlang/core/json",
-  "moonbitlang/x/path",
   "vectie/moontown/adapters/moonbook",
   "vectie/moontown/core",
   "vectie/moontown/policy",
-  "vectie/moontown/storage",
 }
 
 import {
   "moonbitlang/async",
+  "moonbitlang/async/fs",
+  "moonbitlang/core/encoding/utf8" @encoding/utf8,
   "vectie/moontown/integration",
+  "vectie/moontown/storage",
 } for "wbtest"

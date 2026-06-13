@@ -4,6 +4,7 @@ import {
   "vectie/moontown/book_templates",
   "vectie/moontown/pdf_archive",
   "vectie/moontown/pdf_evidence_watch",
+  "vectie/moontown/pdf_evidence_watch_runtime",
   "vectie/moontown/storage",
 }
 
@@ -12,6 +13,7 @@ import {
   "vectie/moontown/adapters/moonbook",
   "vectie/moontown/core",
   "vectie/moontown/pdf_evidence_watch",
+  "vectie/moontown/pdf_evidence_watch_runtime",
   "vectie/moontown/storage",
   "vectie/moontown/support",
 } for "wbtest"
