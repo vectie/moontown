@@ -42,6 +42,8 @@ pub fn course_required_paths() -> Array[BookQualityRequiredPath]
 
 pub fn default_audit_path() -> String
 
+pub fn default_content_observation(String) -> BookQualityContentObservation
+
 pub fn default_moonclaw_home() -> String
 
 pub fn default_repair_bridge_path() -> String
@@ -218,6 +220,8 @@ pub fn review_skill_path(String) -> String
 
 pub fn review_status_markdown_from_observations(String, String, active_book_ids~ : Array[String], BookQualityReviewRunLedger, Array[BookQualityReviewRunObservation], UInt64) -> String
 
+pub async fn score_book_with_observation(@moonbook.BookCatalogEntry, BookQualityContentObservation) -> BookQualityScore
+
 pub async fn score_book_with_review_text(@moonbook.BookCatalogEntry, String) -> BookQualityScore
 
 pub fn score_exists(Array[BookQualityScore], String) -> Bool
@@ -258,6 +262,13 @@ pub(all) struct BookQualityAudit {
   weakest_book_id : String
   weakest_score : Int
   scores : Array[BookQualityScore]
+} derive(Eq, ToJson, @json.FromJson)
+
+pub(all) struct BookQualityContentObservation {
+  semantic_review_text : String
+  research_deep_report_word_count : Int
+  course_index_text : String
+  cookbook_audit_exists : Bool
 } derive(Eq, ToJson, @json.FromJson)
 
 type BookQualityContextSpec derive(Eq, @debug.Debug)

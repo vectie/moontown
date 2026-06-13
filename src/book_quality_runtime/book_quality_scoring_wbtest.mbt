@@ -130,6 +130,33 @@ async test "book quality package scorer reports missing general projection" {
 }
 
 ///|
+async test "book quality runtime scorer observes research report word count" {
+  let root = cleaned_book_quality_test_root(
+    "/tmp/moontown-book-quality-runtime-content-observation",
+  )
+  let words : Array[String] = []
+  for _ in 0..<2100 {
+    words.push("word")
+  }
+  @support.write_text_file(
+    @book_quality.workspace_path(root, "raw/bootstrap/deep-report.md"),
+    words.join(" "),
+  )
+  let entry = book_quality_catalog_entry(
+    id="research-runtime-observation",
+    name="Research Runtime Observation",
+    purpose="validate runtime content observation",
+    workspace_root=root,
+    tags=["research"],
+  )
+  let score = score_book(entry, @book_quality.default_review_result_dir())
+  assert_true(
+    score.gaps.contains("deep report is useful but too short for deep research"),
+  )
+  assert_false(score.gaps.contains("deep report is missing or shallow"))
+}
+
+///|
 test "research book required paths expose scoring contract as data" {
   assert_required_path_contract(@book_quality.research_required_paths(), 11, [
     { relative: "raw/bootstrap/deep-report.md", points: 12 },

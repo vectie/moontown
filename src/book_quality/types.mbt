@@ -122,6 +122,14 @@ pub(all) struct BookQualitySignalAssessment {
 } derive(Eq, ToJson, FromJson)
 
 ///|
+pub(all) struct BookQualityContentObservation {
+  semantic_review_text : String
+  research_deep_report_word_count : Int
+  course_index_text : String
+  cookbook_audit_exists : Bool
+} derive(Eq, ToJson, FromJson)
+
+///|
 pub(all) struct BookQualityRepairBridgeItem {
   book_id : String
   book_type : String

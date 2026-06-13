@@ -636,9 +636,13 @@ a display row, but headings, historical-attempt explanation, table headers, and
 row formatting belong to `book_quality/`.
 Book-quality scoring follows the same boundary: `book_quality/` owns
 book-type scoring, structural scoring, semantic score parsing, next-action
-wording, and readiness decisions from supplied semantic review text.
-`book_quality_runtime/` owns reading semantic-review result files and exposing
-the runtime scorer that combines file observation with package-owned scoring.
+wording, and readiness decisions from supplied content observations. Runtime
+observations include semantic review text, research deep-report word count,
+course index text, and cookbook audit presence; those facts are passed through
+`BookQualityContentObservation` rather than read inside policy scoring.
+`book_quality_runtime/` owns reading semantic-review result files, deep-report
+content, course index content, cookbook audit state, and exposing the runtime
+scorer that combines file observation with package-owned scoring.
 Book-quality stale-run reconciliation vocabulary is package-owned too. Root may
 check process liveness and poll MoonClaw for a run summary, but the transition
 to `orphaned`, retry-facing summary text, and timestamped review-run record
