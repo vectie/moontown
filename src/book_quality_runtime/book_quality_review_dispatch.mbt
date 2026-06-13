@@ -37,7 +37,7 @@ async fn book_quality_ai_review_dispatch_preflight(
   run_path : String,
 ) -> BookQualityReviewDispatchPreflight {
   ignore(reconcile_book_quality_ai_review_results(result_dir~, run_path~))
-  let active = @book_quality.active_review_count(result_dir~, run_path~)
+  let active = active_book_quality_review_count(result_dir, run_path)
   if active > 0 {
     return ActiveReview(active)
   }

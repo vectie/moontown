@@ -59,9 +59,9 @@ pub async fn append_review_run(
   run_path : String,
   run : BookQualityReviewRun,
 ) -> Unit {
-  let ledger = load_review_run_ledger(run_path)
+  let ledger = load_review_run_ledger_file(run_path)
   let updated = review_run_ledger_with_appended_run(ledger, run)
-  write_text_file(run_path, review_run_ledger_to_text(updated))
+  write_review_run_ledger_file(run_path, updated)
 }
 
 ///|
@@ -108,7 +108,7 @@ fn review_run_same_ledger_slot(
 }
 
 ///|
-async fn load_review_run_ledger(
+pub async fn load_review_run_ledger_file(
   run_path : String,
 ) -> BookQualityReviewRunLedger {
   if !@fs.exists(run_path) {
@@ -123,6 +123,14 @@ fn review_run_ledger_from_text(text : String) -> BookQualityReviewRunLedger {
   @json.from_json(parsed) catch {
     _ => empty_review_run_ledger()
   }
+}
+
+///|
+pub async fn write_review_run_ledger_file(
+  run_path : String,
+  ledger : BookQualityReviewRunLedger,
+) -> Unit {
+  write_text_file(run_path, review_run_ledger_to_text(ledger))
 }
 
 ///|

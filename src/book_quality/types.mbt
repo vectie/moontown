@@ -70,7 +70,7 @@ pub(all) struct BookQualityReviewRun {
 } derive(Eq, ToJson, FromJson)
 
 ///|
-priv struct BookQualityReviewRunLedger {
+pub(all) struct BookQualityReviewRunLedger {
   runs : Array[BookQualityReviewRun]
 } derive(ToJson, FromJson)
 

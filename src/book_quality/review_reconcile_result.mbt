@@ -6,7 +6,7 @@ priv struct BookQualityReviewLedgerReconcileResult {
 }
 
 ///|
-priv struct BookQualityReviewRunReconcileResult {
+pub(all) struct BookQualityReviewRunReconcileResult {
   run : BookQualityReviewRun
   written : Bool
   changed : Bool
@@ -43,12 +43,12 @@ pub async fn reconcile_review_run_ledger_file(
   result_dir? : String = default_review_result_dir(),
   run_path? : String = default_review_run_path(),
 ) -> Int {
-  let ledger = load_review_run_ledger(run_path)
+  let ledger = load_review_run_ledger_file(run_path)
   let root = review_root_from_run_path(run_path)
   let home = moonclaw_home_from_run_path(run_path)
   let result = reconcile_review_run_ledger(ledger, result_dir, root, home)
   if result.changed {
-    write_text_file(run_path, review_run_ledger_to_text(result.ledger))
+    write_review_run_ledger_file(run_path, result.ledger)
   }
   result.written
 }
@@ -108,34 +108,27 @@ async fn reconcile_review_run(
   now_ms? : UInt64 = @env.now(),
 ) -> BookQualityReviewRunReconcileResult {
   let result_exists = @fs.exists(run.result_path)
-  let mut result_content = ""
-  match run.run_id {
-    Some(run_id) =>
-      if !result_exists {
-        result_content = review_result_content_from_run(run_id, root, home)
-      }
-    None => ()
-  }
-  reconcile_review_run_with_observed_content(
+  ignore(result_dir)
+  ignore(root)
+  ignore(home)
+  reconcile_review_run_from_observation(
     run,
-    result_dir,
-    root,
-    home,
     result_exists~,
-    result_content~,
+    result_content="",
+    process_alive=false,
+    poll_summary="",
     now_ms~,
   )
 }
 
 ///|
-async fn reconcile_review_run_with_observed_content(
+pub fn reconcile_review_run_from_observation(
   run : BookQualityReviewRun,
-  result_dir : String,
-  root : String,
-  home : String,
   result_exists~ : Bool,
   result_content? : String = "",
-  now_ms? : UInt64 = @env.now(),
+  process_alive~ : Bool,
+  poll_summary~ : String,
+  now_ms~ : UInt64,
 ) -> BookQualityReviewRunReconcileResult {
   if result_exists {
     return existing_result_review_run_reconcile_result(run)
@@ -143,46 +136,16 @@ async fn reconcile_review_run_with_observed_content(
   match run.run_id {
     Some(run_id) =>
       if review_result_satisfies_contract(result_content) {
-        write_accepted_review_result(result_dir, run, result_content)
         accepted_review_run_reconcile_result(run, run_id, now_ms~)
       } else {
-        stale_review_run_reconcile_result(run, root, home, now_ms~)
+        stale_review_run_reconcile_result_from_observation(
+          run,
+          process_alive~,
+          poll_summary~,
+          now_ms~,
+        )
       }
     None => unchanged_review_run_reconcile_result(run)
-  }
-}
-
-///|
-async fn review_result_content_from_run(
-  run_id : String,
-  cwd : String,
-  home : String,
-) -> String {
-  let workspace_dir = match @moonclaw.run_workspace_dir(run_id, cwd~, home~) {
-    Some(workspace_dir) => workspace_dir
-    None => return ""
-  }
-  let result_path = "\{workspace_dir}/result.json"
-  if !@fs.exists(result_path) {
-    return ""
-  }
-  let parsed = @json.parse(@fs.read_file(result_path).text()) catch {
-    _ => return ""
-  }
-  json_string_field(parsed, "content").unwrap_or(
-    json_string_field(parsed, "summary").unwrap_or(""),
-  )
-}
-
-///|
-fn json_string_field(value : Json, key : String) -> String? {
-  match value {
-    Object(object) =>
-      match object.get(key) {
-        Some(String(value)) => Some(value)
-        _ => None
-      }
-    _ => None
   }
 }
 

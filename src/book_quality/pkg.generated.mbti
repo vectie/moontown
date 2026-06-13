@@ -68,6 +68,8 @@ pub fn imported_review_run_from_observation(String, String, String, String, Stri
 
 pub fn is_repair_goal_id(String) -> Bool
 
+pub async fn load_review_run_ledger_file(String) -> BookQualityReviewRunLedger
+
 pub fn moonclaw_home(String) -> String
 
 pub fn moonclaw_home_from_run_path(String) -> String
@@ -119,6 +121,8 @@ pub fn push_unique_note(Array[String], String) -> Unit
 pub fn quality_grade(Int) -> String
 
 pub async fn read_review_result_text(String, String) -> String
+
+pub fn reconcile_review_run_from_observation(BookQualityReviewRun, result_exists~ : Bool, result_content? : String, process_alive~ : Bool, poll_summary~ : String, now_ms~ : UInt64) -> BookQualityReviewRunReconcileResult
 
 pub async fn reconcile_review_run_ledger_file(result_dir? : String, run_path? : String) -> Int
 
@@ -194,6 +198,8 @@ pub fn review_root(String) -> String
 
 pub fn review_root_from_run_path(String) -> String
 
+pub fn review_run_active_by_observation(BookQualityReviewRun, has_result~ : Bool, process_alive~ : Bool, now_ms~ : UInt64) -> Bool
+
 pub fn review_run_blocked_status() -> String
 
 pub fn review_run_dispatched_status() -> String
@@ -241,6 +247,8 @@ pub fn wiki_index_path() -> String
 pub fn workspace_path(String, String) -> String
 
 pub async fn write_accepted_review_result(String, BookQualityReviewRun, String) -> Unit
+
+pub async fn write_review_run_ledger_file(String, BookQualityReviewRunLedger) -> Unit
 
 // Errors
 
@@ -345,6 +353,16 @@ pub(all) struct BookQualityReviewRun {
   summary : String
   generated_at_ms : UInt64
 } derive(Eq, ToJson, @json.FromJson)
+
+pub(all) struct BookQualityReviewRunLedger {
+  runs : Array[BookQualityReviewRun]
+} derive(ToJson, @json.FromJson)
+
+pub(all) struct BookQualityReviewRunReconcileResult {
+  run : BookQualityReviewRun
+  written : Bool
+  changed : Bool
+}
 
 pub(all) struct BookQualityScore {
   book_id : String

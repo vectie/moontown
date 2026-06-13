@@ -142,7 +142,7 @@ fn review_run_within_stale_window(
 }
 
 ///|
-fn review_run_active_by_observation(
+pub fn review_run_active_by_observation(
   run : BookQualityReviewRun,
   has_result~ : Bool,
   process_alive~ : Bool,

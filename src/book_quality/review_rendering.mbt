@@ -53,7 +53,7 @@ pub async fn review_status_markdown_from_files(
   result_dir : String,
   active_book_ids~ : Array[String],
 ) -> String {
-  let ledger = load_review_run_ledger(run_path)
+  let ledger = load_review_run_ledger_file(run_path)
   let active = active_review_count(result_dir~, run_path~)
   let view = book_quality_review_ledger_view(ledger, active_book_ids~)
   review_status_markdown(

@@ -131,8 +131,9 @@ transformations, review result paths, review-run construction, review
 reconciliation result DTOs, review ledger views, and Markdown rendering
 contracts belong to `book_quality/`, not root orchestration. Reconciliation
 record construction for unchanged runs and existing result files also belongs
-there; root code should observe files, fetch MoonClaw content, and ask the
-package to build the durable reconcile result. Repair bridge ledger/item schemas
+there; `book_quality_runtime/` should observe files, fetch MoonClaw content,
+poll process state, and ask the package to build the durable reconcile result.
+Repair bridge ledger/item schemas
 also belong to `book_quality/`; root code may translate those items into Mayor
 standing goals, but the durable book-quality repair record format should have
 one package owner. Structural and semantic
@@ -164,6 +165,11 @@ the `codex-main` target schema, reviewer label, packet ids, context page paths,
 skill paths, tags, notes, request text, or metadata itself.
 Book-quality run-record semantics are package-owned, but MoonClaw import
 receipts and detached runner command lookup belong to `book_quality_runtime/`.
+MoonClaw run observation belongs there too: the runtime package owns process
+liveness checks, workspace-result harvesting, poll summaries, accepted-result
+writes, and ledger persistence around those observed facts. `book_quality/`
+owns the ledger schema and pure state transition from observed facts to durable
+review-run status.
 Future plans should pass observed proposal/run fields into `book_quality/`
 instead of adding MoonClaw receipt types to the domain package.
 The same rule applies to ordinary catalog-backed keeper packets: caller code

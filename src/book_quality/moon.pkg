@@ -5,7 +5,6 @@ import {
   "moonbitlang/core/json",
   "moonbitlang/x/path",
   "vectie/moontown/adapters/moonbook",
-  "vectie/moontown/adapters/moonclaw",
   "vectie/moontown/civic",
   "vectie/moontown/core",
   "vectie/moontown/moonclaw_policy",

@@ -402,10 +402,14 @@ paths for external packets.
 `book_quality_runtime/` owns the concrete `.moonclaw` ACP config for review
 work by combining book-quality reviewer semantics with adapter-owned Codex
 target JSON. It also adapts the neutral review proposal spec into a MoonClaw
-external proposal packet at dispatch time. Root may supply observed directories,
-process facts, and audits into the package, but it should not define the
-`codex-main` target schema or reviewer label or rebuild package policy from
-those observations. The
+external proposal packet at dispatch time. Runtime observation belongs there
+too: process liveness checks, MoonClaw run workspace lookup, polling summaries,
+and harvesting `result.json` are runtime duties. `book_quality/` owns the
+ledger schema, result path contract, accepted/orphaned/blocked interpretation,
+and pure transition from observed facts to review-run state. Root may supply
+observed directories, process facts, and audits into the package, but it should
+not define the `codex-main` target schema or reviewer label or rebuild package
+policy from those observations. The
 selection of the first pending semantic review, result-file filtering, the
 meaning of "weaker candidate should be reviewed first", the summary shape of the
 review ledger, and the active-run lifecycle decision from observed state belong

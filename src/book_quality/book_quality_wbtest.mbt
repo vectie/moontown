@@ -935,7 +935,7 @@ async test "book quality package owns review ledger append storage" {
   append_review_run(run_path, original)
   append_review_run(run_path, other)
   append_review_run(run_path, replacement)
-  let ledger = load_review_run_ledger(run_path)
+  let ledger = load_review_run_ledger_file(run_path)
   assert_eq(ledger.runs.length(), 2)
   assert_eq(ledger.runs[0].book_id, "book-b")
   assert_eq(ledger.runs[1].book_id, "book-a")
@@ -960,7 +960,7 @@ async test "book quality package owns review ledger text loading" {
     run_path,
     review_run_ledger_to_text(BookQualityReviewRunLedger::{ runs: [run] }),
   )
-  let parsed = load_review_run_ledger(run_path)
+  let parsed = load_review_run_ledger_file(run_path)
   assert_eq(parsed.runs.length(), 1)
   assert_eq(parsed.runs[0].book_id, "book-a")
   assert_eq(parsed.runs[0].summary, "summary")
@@ -986,7 +986,7 @@ async test "book quality package owns review ledger serializer roundtrip" {
   assert_true(text.contains("\"runs\""))
   assert_true(text.contains("\"book_id\": \"book-roundtrip\""))
   write_text_file(run_path, text)
-  let parsed = load_review_run_ledger(run_path)
+  let parsed = load_review_run_ledger_file(run_path)
   assert_eq(parsed.runs.length(), 1)
   assert_eq(parsed.runs[0].book_id, "book-roundtrip")
   assert_eq(parsed.runs[0].summary, "roundtrip summary")
@@ -996,17 +996,17 @@ async test "book quality package owns review ledger serializer roundtrip" {
 async test "book quality package owns review ledger empty fallback" {
   let root = "/tmp/moontown-book-quality-package-load-ledger-wbtest"
   let missing_path = "\{root}/book-quality/missing-runs.json"
-  let missing = load_review_run_ledger(missing_path)
+  let missing = load_review_run_ledger_file(missing_path)
   assert_eq(missing.runs.length(), 0)
 
   let malformed_path = "\{root}/book-quality/malformed-runs.json"
   write_text_file(malformed_path, "{not valid json")
-  let malformed = load_review_run_ledger(malformed_path)
+  let malformed = load_review_run_ledger_file(malformed_path)
   assert_eq(malformed.runs.length(), 0)
 
   let wrong_schema_path = "\{root}/book-quality/wrong-schema-runs.json"
   write_text_file(wrong_schema_path, "{\"runs\":\"not an array\"}")
-  let wrong_schema = load_review_run_ledger(wrong_schema_path)
+  let wrong_schema = load_review_run_ledger_file(wrong_schema_path)
   assert_eq(wrong_schema.runs.length(), 0)
 }
 
@@ -1343,16 +1343,16 @@ async test "book quality package marks stale review runs orphaned" {
     summary: "started",
     generated_at_ms: 1UL,
   }
-  let result = stale_review_run_reconcile_result(
+  let result = stale_review_run_reconcile_result_from_observation(
     run,
-    "/tmp/moontown-book-quality-stale-package-test",
-    ".moonclaw",
+    process_alive=false,
+    poll_summary="",
     now_ms=review_stale_after_ms() + 2UL,
   )
   assert_false(result.written)
   assert_true(result.changed)
   assert_eq(result.run.status, review_run_orphaned_status())
-  assert_true(result.run.summary.contains("Marked orphaned"))
+  assert_true(result.run.summary.contains("marked orphaned"))
 }
 
 ///|
@@ -1442,35 +1442,21 @@ async test "book quality package owns per-run reconciliation transitions" {
   assert_false(unchanged.written)
   assert_false(unchanged.changed)
 
-  let result_dir = "\{root}/accepted-results"
-  let moonclaw_home = "\{root}/.moonclaw"
-  let workspace = "\{root}/moonclaw-workspace"
-  write_text_file(
-    "\{moonclaw_home}/jobs/index/runs.json",
-    "{ \"runs\": [{ \"id\": \"run-accepted\", \"workspace_dir\": \"\{workspace}\", \"status\": \"Succeeded\", \"summary\": \"done\" }] }",
-  )
-  write_text_file(
-    "\{moonclaw_home}/jobs/runs/run-accepted/meta.json",
-    "{ \"id\": \"run-accepted\", \"workspace_dir\": \"\{workspace}\", \"status\": \"Succeeded\", \"summary\": \"done\" }",
-  )
-  write_text_file(
-    "\{workspace}/result.json",
-    "{\"content\":\"ai_quality_score: 88\\nbook_role_fit: strong\\n\"}",
-  )
-  let accepted = reconcile_review_run(
+  let accepted = reconcile_review_run_from_observation(
     BookQualityReviewRun::{
       book_id: "book-accepted",
       packet_path: "packet.json",
-      result_path: "\{result_dir}/book-accepted.md",
+      result_path: "\{root}/accepted-results/book-accepted.md",
       proposal_id: Some("proposal-accepted"),
       run_id: Some("run-accepted"),
       status: review_run_dispatched_status(),
       summary: "dispatch summary",
       generated_at_ms: 1UL,
     },
-    result_dir,
-    root,
-    moonclaw_home,
+    result_exists=false,
+    result_content="ai_quality_score: 88\nbook_role_fit: strong\n",
+    process_alive=false,
+    poll_summary="done",
     now_ms=42UL,
   )
   assert_eq(accepted.run.status, review_run_written_status())
