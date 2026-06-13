@@ -743,6 +743,11 @@ Boundary:
 
 - `src/ui/rabbita-town/main` owns browser bridges, event handlers, concrete
   HTML/CSS view composition, and app-specific fallback wording.
+- Vite request handlers may translate browser forms into durable document
+  records, but defaults such as standing-goal source policy must come from
+  document contracts such as
+  [assets/templates/operator-request-policy.json](/Users/kq/Workspace/moontown/assets/templates/operator-request-policy.json),
+  not raw JavaScript literals.
 - reusable projection policy belongs in `src/ui` or `src/visual_projection`,
   not in the browser main package.
 

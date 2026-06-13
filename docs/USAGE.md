@@ -1561,6 +1561,12 @@ real runtime files: `.moontown/town.json`, `.moontown/daemon.json`,
 `.moontown/standing-goals.json`, `.moontown/watchers/*.jsonl`, and
 `.moontown/operator-requests/requests.jsonl`.
 
+Browser-submitted standing goals use
+[assets/templates/operator-request-policy.json](/Users/kq/Workspace/moontown/assets/templates/operator-request-policy.json)
+for their default `source_policy`. Change that document when the default Mayor
+queue policy should change; do not patch the Vite request handler for ordinary
+policy changes.
+
 ## 14. Validate Changes
 
 For normal repo validation:

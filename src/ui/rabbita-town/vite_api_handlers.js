@@ -4,6 +4,7 @@ import {
   bookTemplateRequestPath,
   operatorRequestDir,
   operatorRequestLedgerPath,
+  operatorRequestPolicyPath,
   standingGoalsPath,
 } from './vite_server_paths.js'
 import {
@@ -23,6 +24,17 @@ const DEFAULT_BOOK_TEMPLATE_ID = 'pdf-evidence-watch'
 const DEFAULT_PDF_WATCH_BOOK_ID = 'research-pdf-evidence-watch'
 const DEFAULT_PDF_WATCH_PURPOSE =
   'Watch approved websites for relevant PDFs, extract full text, analyze with the book-owned method, and notify only when accepted knowledge changes.'
+
+async function readOperatorRequestPolicy() {
+  const policy = await readJsonFile(operatorRequestPolicyPath, null)
+  const sourcePolicy = String(policy?.standing_goal_source_policy || '').trim()
+  if (!sourcePolicy) {
+    throw new Error(
+      `missing standing_goal_source_policy in ${operatorRequestPolicyPath}`,
+    )
+  }
+  return { sourcePolicy }
+}
 
 async function readBookTemplateRequestLedger() {
   const parsed = await readJsonFile(bookTemplateRequestPath, { requests: [] })
@@ -61,7 +73,7 @@ function normalizeOperatorPayload(payload) {
   }
 }
 
-function buildOperatorRequestRecords(input) {
+function buildOperatorRequestRecords(input, policy) {
   const now = new Date().toISOString()
   const requestId = `operator-${Date.now()}-${safeSegment(input.title)}`
   return {
@@ -73,7 +85,7 @@ function buildOperatorRequestRecords(input) {
       prompt: input.prompt,
       target_book_id: input.targetBookId,
       cadence_ticks: input.cadenceTicks,
-      source_policy: 'web-first',
+      source_policy: policy.sourcePolicy,
       quality_threshold: input.qualityThreshold,
       standing_goal_id: input.standingGoalId,
     },
@@ -86,7 +98,7 @@ function buildOperatorRequestRecords(input) {
       next_due_tick: 0,
       last_run_tick: null,
       enabled: true,
-      source_policy: 'web-first',
+      source_policy: policy.sourcePolicy,
       quality_threshold: input.qualityThreshold,
     },
   }
@@ -169,13 +181,14 @@ async function upsertBookTemplateRequest(request) {
 export async function handleOperatorRequest(req, res) {
   try {
     const input = normalizeOperatorPayload(await readJsonBody(req))
+    const policy = await readOperatorRequestPolicy()
 
     if (!input.title || !input.prompt) {
       sendJson(res, { ok: false, error: 'title and prompt are required' }, 400)
       return
     }
 
-    const { request, goal } = buildOperatorRequestRecords(input)
+    const { request, goal } = buildOperatorRequestRecords(input, policy)
 
     await upsertStandingGoal(goal)
     await writeJsonFile(path.join(operatorRequestDir, `${request.id}.json`), request, 2)

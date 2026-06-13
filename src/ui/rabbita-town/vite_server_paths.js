@@ -1,6 +1,9 @@
 import path from 'node:path'
+import { fileURLToPath } from 'node:url'
 
 const moontownRootPath = path.resolve(process.cwd(), '../../.moontown')
+const rabbitaTownDir = path.dirname(fileURLToPath(import.meta.url))
+const repoRootPath = path.resolve(rabbitaTownDir, '../../..')
 
 export const townSnapshotPath = path.join(moontownRootPath, 'town.json')
 export const visualProjectionPath = path.join(moontownRootPath, 'visual-projection.json')
@@ -22,6 +25,10 @@ export const booksRootPath = path.join(moontownRootPath, 'books')
 export const bookProjectionPolicyPath = path.join(
   moontownRootPath,
   'book-projection-policy.json',
+)
+export const operatorRequestPolicyPath = path.resolve(
+  repoRootPath,
+  'assets/templates/operator-request-policy.json',
 )
 export const bookResultDir = path.join(moontownRootPath, 'book-results')
 export const moondeskDispatchDir = path.join(moontownRootPath, 'moondesk-dispatches')

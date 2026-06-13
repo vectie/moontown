@@ -50,6 +50,11 @@ and creates or replaces a standing goal in `.moontown/standing-goals.json`.
 The daemon then picks that goal up during its normal standing-goal dispatch
 cycle.
 
+The request composer reads its default standing-goal source policy from
+`../../../assets/templates/operator-request-policy.json`. The browser/Vite
+layer must not own source-policy vocabulary; it only applies the document
+contract when turning a user request into a durable Mayor queue item.
+
 The dashboard intentionally does not embed a second scaled copy of the Wenyu
 map. It links to `viewport.html?assets=generated&v=wenyu`, which is the
 canonical generated-tilemap viewport used for visual inspection.

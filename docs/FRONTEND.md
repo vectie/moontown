@@ -193,6 +193,12 @@ record and creates or replaces the matching standing goal in
 `.moontown/standing-goals.json`. The daemon is still the executor; the UI only
 adds durable work to the Mayor queue.
 
+The default source policy for browser-submitted standing goals comes from
+[assets/templates/operator-request-policy.json](/Users/kq/Workspace/moontown/assets/templates/operator-request-policy.json).
+The Vite endpoint reads that document before writing records; it should not
+hard-code `web-first` in JavaScript. This keeps the browser as a request
+surface and leaves policy vocabulary in document/policy-owned contracts.
+
 The book-template composer writes through the Vite dev endpoint
 `POST /api/book-template-requests`. The first supported template is
 `pdf-evidence-watch`: the operator provides a title, book id, websites,
