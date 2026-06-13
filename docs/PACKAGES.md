@@ -437,11 +437,18 @@ Purpose:
   review results, and repair context
 - translate policy profiles into quality-review and repair actions
 - build quality-review context pages and repair standing-goal policy
+- check required output surfaces from the effective `BookPolicy`
 
 Boundary:
 
 - `src/book_quality` consumes book labels, source-policy labels, composed
   policies, and catalog classification from `src/policy`.
+- `src/book_quality` owns how quality is assessed and repaired, but it must
+  read book output paths from `src/policy.BookPolicy` instead of maintaining a
+  parallel generated-site path per book kind.
+- Legacy book-type labels may be accepted at this boundary while migration
+  continues, but scoring and review context should resolve them through
+  policy profiles before deciding required output surfaces.
 - `src/book_quality` must not re-export policy vocabulary such as
   `research_type`, `civic_type`, `web_first_policy`, or `book_first_policy`;
   downstream packages should import `src/policy` directly when they need those

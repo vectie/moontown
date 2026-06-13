@@ -103,7 +103,15 @@ pub fn path_set_assessment(Array[String], Array[String], Int) -> BookQualityPath
 
 pub fn planbook_required_paths() -> Array[BookQualityRequiredPath]
 
+pub fn policy_output_path(@policy.BookPolicy) -> String
+
+pub fn policy_output_required_path(@policy.BookPolicy, Int) -> BookQualityRequiredPath
+
 pub fn policy_spec_for_type(String) -> PolicySpec?
+
+pub fn policy_type_output_path(String) -> String
+
+pub fn policy_type_output_required_path(String, Int) -> BookQualityRequiredPath
 
 pub fn projection_state_path() -> String
 

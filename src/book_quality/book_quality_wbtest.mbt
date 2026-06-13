@@ -51,6 +51,20 @@ test "book quality generated site path follows policy projection default" {
     generated_site_path(),
     @policy.default_generated_site_projection_path(),
   )
+  assert_eq(
+    policy_type_output_path(@policy.research_type()),
+    @policy.output_projection_path(@policy.research()),
+  )
+  let tool_policy = @policy.general()
+    |> @policy.with_web_tool_surface(
+      contract="tool.contract.v1",
+      projection_path="book/site/generated/tool.html",
+    )
+  assert_eq(policy_output_path(tool_policy), "book/site/generated/tool.html")
+  assert_eq(
+    policy_output_required_path(tool_policy, 9).relative,
+    "book/site/generated/tool.html",
+  )
 }
 
 ///|
@@ -354,6 +368,15 @@ test "book quality package owns scoring thresholds and next action" {
   let required = required_path(generated_site_path(), 6)
   assert_eq(required.relative, generated_site_path())
   assert_eq(required.points, 6)
+  let policy_required = policy_type_output_required_path(
+    @policy.civic_type(),
+    7,
+  )
+  assert_eq(
+    policy_required.relative,
+    @policy.output_projection_path(@policy.civic_protocol()),
+  )
+  assert_eq(policy_required.points, 7)
   let existing_path = path_presence_assessment("wiki/index.md", 7, true)
   assert_eq(existing_path.score, 7)
   assert_true(existing_path.strength is Some(_))

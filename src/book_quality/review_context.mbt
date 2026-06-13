@@ -9,7 +9,10 @@ fn context_spec(
   book_type : String,
   pages : Array[String],
 ) -> BookQualityContextSpec {
-  { book_type, pages: [wiki_index_path(), ..pages, generated_site_path()] }
+  {
+    book_type,
+    pages: [wiki_index_path(), ..pages, policy_type_output_path(book_type)],
+  }
 }
 
 ///|

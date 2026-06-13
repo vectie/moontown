@@ -162,7 +162,7 @@ pub fn research_required_paths() -> Array[BookQualityRequiredPath] {
     required_path("raw/bootstrap/deep-report.md", 12),
     required_path("raw/bootstrap/marketing-brief.md", 5),
     required_path(wiki_index_path(), 7),
-    required_path(generated_site_path(), 6),
+    policy_type_output_required_path(@policy.research_type(), 6),
   ]
 }
 
@@ -176,7 +176,7 @@ pub fn course_required_paths() -> Array[BookQualityRequiredPath] {
     required_path("wiki/course/exercises.md", 10),
     required_path("wiki/course/progress-rubric.md", 8),
     required_path("skills/course-builder/SKILL.md", 12),
-    required_path(generated_site_path(), 6),
+    policy_type_output_required_path(@policy.course_type(), 6),
   ]
 }
 
@@ -194,7 +194,7 @@ pub fn planbook_required_paths() -> Array[BookQualityRequiredPath] {
     required_path("skills/code-plan/SKILL.md", 12),
     required_path("skills/code-review/SKILL.md", 10),
     required_path("skills/doc-sync/SKILL.md", 8),
-    required_path(generated_site_path(), 6),
+    policy_type_output_required_path(@policy.planbook_type(), 6),
   ]
 }
 
@@ -210,7 +210,7 @@ pub fn cookbook_required_paths() -> Array[BookQualityRequiredPath] {
     required_path("wiki/operating-procedures/book-governance.md", 6),
     required_path("wiki/history/stable-state-ledger.md", 6),
     required_path("schemas/stable-state-manifest.schema.md", 8),
-    required_path(generated_site_path(), 6),
+    policy_type_output_required_path(@policy.cookbook_type(), 6),
   ]
 }
 
@@ -221,7 +221,7 @@ pub fn operational_required_paths() -> Array[BookQualityRequiredPath] {
     required_path("wiki/operations/review-policy.md", 16),
     required_path("wiki/history/journey.md", 12),
     required_path("skills/operational-keeper/SKILL.md", 16),
-    required_path(generated_site_path(), 10),
+    policy_type_output_required_path(@policy.operational_type(), 10),
   ]
 }
 
@@ -232,6 +232,6 @@ pub fn civic_base_required_paths() -> Array[BookQualityRequiredPath] {
     required_path("raw/bootstrap/BUILDING_PROTOCOL_CONTRACT.md", 12),
     required_path("skills/wenyu-civic-service/SKILL.md", 10),
     required_path("moonclaw.jobs.json", 10),
-    required_path(generated_site_path(), 6),
+    policy_type_output_required_path(@policy.civic_type(), 6),
   ]
 }

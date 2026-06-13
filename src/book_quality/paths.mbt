@@ -47,3 +47,29 @@ pub fn projection_state_path() -> String {
 pub fn generated_site_path() -> String {
   @policy.default_generated_site_projection_path()
 }
+
+///|
+pub fn policy_output_path(policy : @policy.BookPolicy) -> String {
+  @policy.output_projection_path(policy)
+}
+
+///|
+pub fn policy_type_output_path(book_type : String) -> String {
+  policy_output_path(@policy.policy_for_type(book_type))
+}
+
+///|
+pub fn policy_output_required_path(
+  policy : @policy.BookPolicy,
+  points : Int,
+) -> BookQualityRequiredPath {
+  required_path(policy_output_path(policy), points)
+}
+
+///|
+pub fn policy_type_output_required_path(
+  book_type : String,
+  points : Int,
+) -> BookQualityRequiredPath {
+  policy_output_required_path(@policy.policy_for_type(book_type), points)
+}
