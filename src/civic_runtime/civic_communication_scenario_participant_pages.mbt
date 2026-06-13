@@ -1,5 +1,5 @@
 ///|
-fn civic_salon_participant_index(
+fn civic_communication_participant_index(
   scenario : CivicCommunicationScenario,
   participant : CivicCommunicationParticipantBook,
   returned_ideas : Array[CivicCommunicationIdea],
@@ -35,7 +35,7 @@ fn civic_salon_participant_index(
 }
 
 ///|
-fn civic_salon_participant_contract(
+fn civic_communication_participant_contract(
   scenario : CivicCommunicationScenario,
   participant : CivicCommunicationParticipantBook,
 ) -> String {
@@ -57,7 +57,7 @@ fn civic_salon_participant_contract(
 }
 
 ///|
-fn civic_salon_participant_perspective(
+fn civic_communication_participant_perspective(
   participant : CivicCommunicationParticipantBook,
 ) -> String {
   [
@@ -82,7 +82,7 @@ fn civic_salon_participant_perspective(
 }
 
 ///|
-fn civic_salon_participant_question_page(
+fn civic_communication_participant_question_page(
   scenario : CivicCommunicationScenario,
   participant : CivicCommunicationParticipantBook,
 ) -> String {
@@ -102,7 +102,7 @@ fn civic_salon_participant_question_page(
 }
 
 ///|
-fn civic_salon_returned_ideas_page(
+fn civic_communication_returned_outputs_page(
   scenario : CivicCommunicationScenario,
   participant : CivicCommunicationParticipantBook,
   returned_ideas : Array[CivicCommunicationIdea],

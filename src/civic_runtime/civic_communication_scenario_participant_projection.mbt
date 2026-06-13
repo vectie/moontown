@@ -1,5 +1,5 @@
 ///|
-fn civic_salon_participant_projection(
+fn civic_communication_participant_projection(
   scenario : CivicCommunicationScenario,
   participant : CivicCommunicationParticipantBook,
   returned_ideas : Array[CivicCommunicationIdea],
@@ -10,30 +10,32 @@ fn civic_salon_participant_projection(
   fields["book_id"] = participant.book_id.to_json()
   fields["visibility"] = "internal".to_json()
   fields["projection_scope"] = "internal".to_json()
-  fields["tags"] = civic_salon_participant_projection_tags(scenario)
+  fields["tags"] = civic_communication_participant_projection_tags(scenario)
   fields["title"] = "\{scenario.domain_label} / \{participant.title}".to_json()
   fields["summary"] = participant.contribution.to_json()
-  fields["status_chips"] = civic_salon_participant_projection_status_chips(
+  fields["status_chips"] = civic_communication_participant_projection_status_chips(
     scenario, returned_ideas, round_number,
   )
-  fields["metrics"] = civic_salon_participant_projection_metrics(
+  fields["metrics"] = civic_communication_participant_projection_metrics(
     scenario, participant, returned_ideas,
   )
-  fields["readiness"] = civic_salon_participant_projection_readiness(scenario)
-  fields["review_queue"] = civic_salon_participant_projection_review_queue(
+  fields["readiness"] = civic_communication_participant_projection_readiness(
+    scenario,
+  )
+  fields["review_queue"] = civic_communication_participant_projection_review_queue(
     scenario,
   )
   fields["page_families"] = participant_returned_idea_page_families_json(
     returned_ideas,
   )
-  fields["journey"] = civic_salon_participant_projection_journey(
+  fields["journey"] = civic_communication_participant_projection_journey(
     scenario, returned_ideas, round_id, round_number,
   )
   Json::object(fields)
 }
 
 ///|
-fn civic_salon_participant_projection_tags(
+fn civic_communication_participant_projection_tags(
   scenario : CivicCommunicationScenario,
 ) -> Json {
   [
@@ -46,7 +48,7 @@ fn civic_salon_participant_projection_tags(
 }
 
 ///|
-fn civic_salon_participant_projection_status_chips(
+fn civic_communication_participant_projection_status_chips(
   scenario : CivicCommunicationScenario,
   returned_ideas : Array[CivicCommunicationIdea],
   round_number : Int,
@@ -66,7 +68,7 @@ fn civic_salon_participant_projection_status_chips(
 }
 
 ///|
-fn civic_salon_participant_projection_metrics(
+fn civic_communication_participant_projection_metrics(
   scenario : CivicCommunicationScenario,
   participant : CivicCommunicationParticipantBook,
   returned_ideas : Array[CivicCommunicationIdea],
@@ -88,7 +90,7 @@ fn civic_salon_participant_projection_metrics(
 }
 
 ///|
-fn civic_salon_participant_projection_readiness(
+fn civic_communication_participant_projection_readiness(
   scenario : CivicCommunicationScenario,
 ) -> Json {
   [
@@ -101,7 +103,7 @@ fn civic_salon_participant_projection_readiness(
 }
 
 ///|
-fn civic_salon_participant_projection_review_queue(
+fn civic_communication_participant_projection_review_queue(
   scenario : CivicCommunicationScenario,
 ) -> Json {
   [
@@ -114,7 +116,7 @@ fn civic_salon_participant_projection_review_queue(
 }
 
 ///|
-fn civic_salon_participant_projection_journey(
+fn civic_communication_participant_projection_journey(
   scenario : CivicCommunicationScenario,
   returned_ideas : Array[CivicCommunicationIdea],
   round_id : String,

@@ -18,7 +18,7 @@ async fn fixture_civic_communication_reduction(
     packet_path: None,
     proposal_id: None,
     run_id: None,
-    workspace_root: civic_salon_workspace_root(
+    workspace_root: civic_communication_workspace_root(
       scenario.building_book_id,
       workspace_base,
     ),

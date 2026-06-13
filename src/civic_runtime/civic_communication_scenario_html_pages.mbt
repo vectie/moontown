@@ -1,5 +1,5 @@
 ///|
-fn civic_salon_building_html(
+fn civic_communication_building_html(
   scenario : CivicCommunicationScenario,
   protocol : @civic.BuildingProtocolDefinition,
   participants : Array[CivicCommunicationParticipantBook],
@@ -48,15 +48,15 @@ fn civic_salon_building_html(
     "    </div>",
     "  </section>",
     "  <h2>Internal Perspectives</h2>",
-    "  <section class=\"grid\">\{civic_salon_participant_cards(participants)}</section>",
+    "  <section class=\"grid\">\{civic_communication_participant_cards(participants)}</section>",
     "  <h2>Reduced Pattern Outputs</h2>",
-    "  <section class=\"grid\">\{civic_salon_idea_cards(ideas)}</section>",
+    "  <section class=\"grid\">\{civic_communication_output_cards(ideas)}</section>",
     "</main></body></html>",
   ].join("\n")
 }
 
 ///|
-fn civic_salon_participant_cards(
+fn civic_communication_participant_cards(
   participants : Array[CivicCommunicationParticipantBook],
 ) -> String {
   let builder = StringBuilder::new()
@@ -69,7 +69,9 @@ fn civic_salon_participant_cards(
 }
 
 ///|
-fn civic_salon_idea_cards(ideas : Array[CivicCommunicationIdea]) -> String {
+fn civic_communication_output_cards(
+  ideas : Array[CivicCommunicationIdea],
+) -> String {
   let builder = StringBuilder::new()
   for idea in ideas {
     builder.write_string(

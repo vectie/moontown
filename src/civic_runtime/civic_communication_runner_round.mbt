@@ -1,5 +1,5 @@
 ///|
-async fn run_due_civic_salon_round(
+async fn run_due_civic_communication_round(
   schedule : CivicCommunicationSchedule,
   snapshot_path : String,
   book_catalog_path : String,
@@ -45,10 +45,10 @@ async fn run_civic_salon_scenario_round(
     scenario.participants,
     ideas,
   )
-  let (decision, summary) = civic_salon_round_decision_summary(
+  let (decision, summary) = civic_communication_round_decision_summary(
     scenario, schedule, book_catalog_path, workspace_base, round_id, reduction, ideas,
   )
-  append_civic_salon_round_record(
+  append_civic_communication_round_record(
     default_civic_communication_run_ledger_path(schedule.id, snapshot_path~),
     civic_communication_round_record(
       schedule,
@@ -75,7 +75,7 @@ async fn run_civic_salon_scenario_round(
 }
 
 ///|
-async fn civic_salon_round_decision_summary(
+async fn civic_communication_round_decision_summary(
   scenario : CivicCommunicationScenario,
   schedule : CivicCommunicationSchedule,
   book_catalog_path : String,
@@ -86,7 +86,7 @@ async fn civic_salon_round_decision_summary(
 ) -> (String, String) {
   let validation_errors = if reduction.status
     is @core.TaskExecutionStatus::Completed {
-    civic_salon_round_validation_errors(scenario, ideas)
+    civic_communication_round_validation_errors(scenario, ideas)
   } else {
     []
   }

@@ -51,7 +51,9 @@ async fn materialize_civic_salon_scenario(
       scenario, round_id, "reducer produced no civic communication-pattern outputs.",
     )
   }
-  let validation_errors = civic_salon_round_validation_errors(scenario, ideas)
+  let validation_errors = civic_communication_round_validation_errors(
+    scenario, ideas,
+  )
   if validation_errors.length() > 0 {
     return civic_salon_blocked_summary(
       scenario,
@@ -62,25 +64,25 @@ async fn materialize_civic_salon_scenario(
   let participants = scenario.participants
   let metrics = civic_communication_metrics(scenario, participants, ideas)
   let catalog = @moonbook.load_or_create_catalog(path=book_catalog_path)
-  let merged_catalog = merge_civic_salon_catalog(
+  let merged_catalog = merge_civic_communication_catalog(
     scenario, catalog, participants, workspace_base,
   )
   @moonbook.save_catalog_file(book_catalog_path, merged_catalog)
   for participant in participants {
-    write_civic_salon_participant_workspace(
+    write_civic_communication_participant_workspace(
       scenario,
       participant,
       ideas,
       round_id,
       round_number,
-      civic_salon_workspace_root(participant.book_id, workspace_base),
+      civic_communication_workspace_root(participant.book_id, workspace_base),
     )
   }
   let protocol = civic_communication_protocol_for_scenario(scenario)
-  seed_civic_salon_protocol_slice(
+  seed_civic_communication_protocol_slice(
     scenario, protocol, participants, ideas, round_id, round_number,
   )
-  write_civic_salon_building_pages(
+  write_civic_communication_building_pages(
     scenario,
     protocol,
     participants,
@@ -88,7 +90,7 @@ async fn materialize_civic_salon_scenario(
     metrics,
     round_id,
     round_number,
-    civic_salon_workspace_root(protocol.book_id, workspace_base),
+    civic_communication_workspace_root(protocol.book_id, workspace_base),
   )
   ignore(write_wenyu_building_protocol_status())
   ignore(write_wenyu_civic_status())

@@ -62,7 +62,7 @@ test "civic salon metrics count idea yield and home returns" {
 test "civic salon home return records map every idea to home books" {
   let scenario = test_civic_salon_scenario()
   let ideas = scenario.ideas
-  let records = civic_salon_home_return_records(
+  let records = civic_communication_home_return_records(
     scenario, "social-square", ideas,
   )
   assert_eq(records.length(), 2)
@@ -119,7 +119,7 @@ test "civic salon participant workspaces do not pollute the public catalog" {
     purpose="public salon aggregate",
     workspace_base~,
   )
-  let merged = merge_civic_salon_catalog(
+  let merged = merge_civic_communication_catalog(
     scenario,
     [durable_book, stale_participant],
     scenario.participants,

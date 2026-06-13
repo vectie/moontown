@@ -5,11 +5,11 @@ test "civic salon building synthesis separates protocol structure from truth cla
   let participants = scenario.participants
   let ideas = scenario.ideas
   let metrics = civic_communication_metrics(scenario, participants, ideas)
-  let markdown = civic_salon_building_synthesis(
+  let markdown = civic_communication_building_synthesis(
     scenario, protocol, participants, ideas, metrics, "robotics-round-1", 1,
   )
   assert_true(
-    markdown.contains(civic_salon_round_metadata("robotics-round-1", 1)),
+    markdown.contains(civic_communication_round_metadata("robotics-round-1", 1)),
   )
   assert_true(markdown.contains("## Participants"))
   assert_true(markdown.contains("## Reduced Pattern Outputs"))
@@ -26,7 +26,7 @@ test "civic salon metrics markdown explains protocol effectiveness and return ho
     scenario.participants,
     scenario.ideas,
   )
-  let markdown = civic_salon_metrics_markdown(
+  let markdown = civic_communication_metrics_markdown(
     scenario,
     metrics,
     scenario.participants,
@@ -54,10 +54,10 @@ test "civic salon metric tables keep participant output edges visible" {
     scenario.participants,
     scenario.ideas,
   )
-  let table = civic_salon_metrics_table(metrics)
+  let table = civic_communication_metrics_table(metrics)
   assert_true(table.contains("| Participant-output links | 2 |"))
   assert_true(table.contains("| Return-home records | 2 |"))
-  let idea_table = civic_salon_idea_metric_table(scenario.ideas)
+  let idea_table = civic_communication_output_metric_table(scenario.ideas)
   assert_true(idea_table.contains("|Embodied Memory Contract|2|2|"))
   assert_true(idea_table.contains("`robot-brain`, `world-model`"))
 }

@@ -4,7 +4,7 @@ async fn persisted_civic_communication_reduction(
   round_id : String,
   workspace_base : String,
 ) -> CivicCommunicationReductionResult {
-  let root = civic_salon_workspace_root(
+  let root = civic_communication_workspace_root(
     scenario.building_book_id,
     workspace_base,
   )

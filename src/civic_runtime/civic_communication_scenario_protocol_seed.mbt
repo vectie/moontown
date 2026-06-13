@@ -1,5 +1,5 @@
 ///|
-async fn seed_civic_salon_protocol_slice(
+async fn seed_civic_communication_protocol_slice(
   scenario : CivicCommunicationScenario,
   protocol : @civic.BuildingProtocolDefinition,
   participants : Array[CivicCommunicationParticipantBook],
@@ -7,10 +7,10 @@ async fn seed_civic_salon_protocol_slice(
   round_id : String,
   round_number : Int,
 ) -> Unit {
-  let (inputs, contributions) = civic_salon_participant_protocol_records(
+  let (inputs, contributions) = civic_communication_participant_protocol_records(
     scenario, protocol, participants, round_id, round_number,
   )
-  let (reductions, outbox) = civic_salon_idea_protocol_records(
+  let (reductions, outbox) = civic_communication_output_protocol_records(
     scenario, protocol, ideas, round_id, round_number,
   )
   write_protocol_jsonl_records(
@@ -34,7 +34,7 @@ async fn seed_civic_salon_protocol_slice(
   write_protocol_jsonl_records(
     protocol.building_id,
     "home_returns",
-    civic_salon_home_return_records(
+    civic_communication_home_return_records(
       scenario,
       protocol.building_id,
       ideas,
@@ -42,7 +42,7 @@ async fn seed_civic_salon_protocol_slice(
     ).map(fn(item) { item.to_json() }),
   )
   write_protocol_jsonl_records(protocol.building_id, "reviews", [
-    civic_salon_review_gate_json(
+    civic_communication_review_gate_json(
       scenario, protocol, participants, ideas, round_id,
     ),
   ])

@@ -1,5 +1,5 @@
 ///|
-fn civic_salon_home_return_records(
+fn civic_communication_home_return_records(
   scenario : CivicCommunicationScenario,
   building_id : String,
   ideas : Array[CivicCommunicationIdea],

@@ -1,5 +1,5 @@
 ///|
-fn civic_salon_participant_protocol_records(
+fn civic_communication_participant_protocol_records(
   scenario : CivicCommunicationScenario,
   protocol : @civic.BuildingProtocolDefinition,
   participants : Array[CivicCommunicationParticipantBook],
@@ -9,14 +9,16 @@ fn civic_salon_participant_protocol_records(
   let inputs : Array[Json] = []
   let contributions : Array[Json] = []
   for participant in participants {
-    let input_id = civic_salon_input_packet_id(scenario, participant, round_id)
+    let input_id = civic_communication_input_packet_id(
+      scenario, participant, round_id,
+    )
     inputs.push(
-      civic_salon_input_packet_json(
+      civic_communication_input_packet_json(
         scenario, protocol, participant, input_id, round_id, round_number,
       ),
     )
     contributions.push(
-      civic_salon_contribution_json(
+      civic_communication_contribution_json(
         scenario, protocol, participant, input_id, round_id, round_number,
       ),
     )
@@ -25,7 +27,7 @@ fn civic_salon_participant_protocol_records(
 }
 
 ///|
-fn civic_salon_input_packet_id(
+fn civic_communication_input_packet_id(
   scenario : CivicCommunicationScenario,
   participant : CivicCommunicationParticipantBook,
   round_id : String,
@@ -34,7 +36,7 @@ fn civic_salon_input_packet_id(
 }
 
 ///|
-fn civic_salon_input_packet_json(
+fn civic_communication_input_packet_json(
   scenario : CivicCommunicationScenario,
   protocol : @civic.BuildingProtocolDefinition,
   participant : CivicCommunicationParticipantBook,
@@ -60,7 +62,7 @@ fn civic_salon_input_packet_json(
 }
 
 ///|
-fn civic_salon_contribution_json(
+fn civic_communication_contribution_json(
   scenario : CivicCommunicationScenario,
   protocol : @civic.BuildingProtocolDefinition,
   participant : CivicCommunicationParticipantBook,

@@ -1,5 +1,5 @@
 ///|
-fn merge_civic_salon_catalog(
+fn merge_civic_communication_catalog(
   scenario : CivicCommunicationScenario,
   catalog : Array[@moonbook.BookCatalogEntry],
   participants : Array[CivicCommunicationParticipantBook],
@@ -8,7 +8,7 @@ fn merge_civic_salon_catalog(
   ignore(scenario)
   ignore(workspace_base)
   let merged : Array[@moonbook.BookCatalogEntry] = []
-  let participant_ids = civic_salon_participant_book_ids(participants)
+  let participant_ids = civic_communication_participant_book_ids(participants)
   for entry in catalog {
     if !participant_ids.contains(entry.id) {
       merged.push(entry)
@@ -18,7 +18,7 @@ fn merge_civic_salon_catalog(
 }
 
 ///|
-fn civic_salon_workspace_root(
+fn civic_communication_workspace_root(
   book_id : String,
   workspace_base : String,
 ) -> String {
@@ -30,7 +30,7 @@ fn civic_salon_workspace_root(
 }
 
 ///|
-async fn write_civic_salon_participant_workspace(
+async fn write_civic_communication_participant_workspace(
   scenario : CivicCommunicationScenario,
   participant : CivicCommunicationParticipantBook,
   ideas : Array[CivicCommunicationIdea],
@@ -44,11 +44,11 @@ async fn write_civic_salon_participant_workspace(
   )
   @support.write_text_file(
     "\{root}/wiki/index.md",
-    civic_salon_participant_index(scenario, participant, returned_ideas),
+    civic_communication_participant_index(scenario, participant, returned_ideas),
   )
   @support.write_text_file(
     "\{root}/\{scenario.participant_contract_path}",
-    civic_salon_participant_contract(scenario, participant),
+    civic_communication_participant_contract(scenario, participant),
   )
   @support.write_text_file(
     "\{root}/skills/\{scenario.skill_name}/SKILL.md",
@@ -56,34 +56,34 @@ async fn write_civic_salon_participant_workspace(
   )
   @support.write_text_file(
     "\{root}/wiki/contributions/current-perspective.md",
-    civic_salon_participant_perspective(participant),
+    civic_communication_participant_perspective(participant),
   )
   @support.write_text_file(
     "\{root}/\{participant.next_artifact}",
-    civic_salon_participant_question_page(scenario, participant),
+    civic_communication_participant_question_page(scenario, participant),
   )
   @support.write_text_file(
     "\{root}/\{scenario.returned_ideas_path}",
-    civic_salon_returned_ideas_page(
+    civic_communication_returned_outputs_page(
       scenario, participant, returned_ideas, round_id, round_number,
     ),
   )
   @support.write_text_file(
     "\{root}/book/moonbook-ui-state.json",
-    civic_salon_participant_projection(
+    civic_communication_participant_projection(
       scenario, participant, returned_ideas, round_id, round_number,
     ).stringify(indent=2),
   )
   @support.write_text_file(
     @civic.civic_generated_site_workspace_path(root),
-    civic_salon_participant_html(
+    civic_communication_participant_html(
       scenario, participant, returned_ideas, round_id, round_number,
     ),
   )
 }
 
 ///|
-async fn write_civic_salon_building_pages(
+async fn write_civic_communication_building_pages(
   scenario : CivicCommunicationScenario,
   protocol : @civic.BuildingProtocolDefinition,
   participants : Array[CivicCommunicationParticipantBook],
@@ -95,21 +95,21 @@ async fn write_civic_salon_building_pages(
 ) -> Unit {
   @support.write_text_file(
     "\{root}/\{scenario.synthesis_path}",
-    civic_salon_building_synthesis(
+    civic_communication_building_synthesis(
       scenario, protocol, participants, ideas, metrics, round_id, round_number,
     ),
   )
   @support.write_text_file(
     "\{root}/\{scenario.backlog_path}",
-    civic_salon_idea_backlog(scenario, ideas),
+    civic_communication_output_backlog(scenario, ideas),
   )
   @support.write_text_file(
     "\{root}/\{scenario.review_path}",
-    civic_salon_review_queue(scenario, ideas),
+    civic_communication_review_queue(scenario, ideas),
   )
   @support.write_text_file(
     "\{root}/\{scenario.metrics_path}",
-    civic_salon_metrics_markdown(
+    civic_communication_metrics_markdown(
       scenario, metrics, participants, ideas, round_id, round_number,
     ),
   )
@@ -121,12 +121,12 @@ async fn write_civic_salon_building_pages(
     "\{protocol_ledger_dir(protocol.building_id)}/metrics.json",
     metrics.to_json().stringify(indent=2),
   )
-  let html = civic_salon_building_html(
+  let html = civic_communication_building_html(
     scenario, protocol, participants, ideas, metrics, round_id, round_number,
   )
   @support.write_text_file(
     "\{root}/book/moonbook-ui-state.json",
-    civic_salon_building_projection_json(
+    civic_communication_building_projection_json(
       scenario, protocol, participants, ideas, metrics, round_id, round_number,
     ),
   )

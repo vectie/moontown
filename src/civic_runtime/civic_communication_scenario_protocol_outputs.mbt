@@ -1,5 +1,5 @@
 ///|
-fn civic_salon_idea_protocol_records(
+fn civic_communication_output_protocol_records(
   scenario : CivicCommunicationScenario,
   protocol : @civic.BuildingProtocolDefinition,
   ideas : Array[CivicCommunicationIdea],
@@ -10,19 +10,21 @@ fn civic_salon_idea_protocol_records(
   let outbox : Array[Json] = []
   for idea in ideas {
     reductions.push(
-      civic_salon_reduction_json(
+      civic_communication_reduction_json(
         scenario, protocol, idea, round_id, round_number,
       ),
     )
     outbox.push(
-      civic_salon_outbox_json(scenario, protocol, idea, round_id, round_number),
+      civic_communication_outbox_json(
+        scenario, protocol, idea, round_id, round_number,
+      ),
     )
   }
   (reductions, outbox)
 }
 
 ///|
-fn civic_salon_reduction_json(
+fn civic_communication_reduction_json(
   scenario : CivicCommunicationScenario,
   protocol : @civic.BuildingProtocolDefinition,
   idea : CivicCommunicationIdea,
@@ -39,7 +41,9 @@ fn civic_salon_reduction_json(
       "ctr-\{scenario.id}-\{round_id}-\{book_id}"
     }),
     output_channel: scenario.output_channel,
-    distribution_targets: civic_salon_distribution_targets(scenario, idea),
+    distribution_targets: civic_communication_distribution_targets(
+      scenario, idea,
+    ),
     changed_pages: [scenario.backlog_path, scenario.synthesis_path],
     accepted_records: [idea.summary, "Next experiment: \{idea.next_experiment}"],
     review_items: [scenario.review_reason],
@@ -50,7 +54,7 @@ fn civic_salon_reduction_json(
 }
 
 ///|
-fn civic_salon_distribution_targets(
+fn civic_communication_distribution_targets(
   scenario : CivicCommunicationScenario,
   idea : CivicCommunicationIdea,
 ) -> Array[String] {
@@ -64,7 +68,7 @@ fn civic_salon_distribution_targets(
 }
 
 ///|
-fn civic_salon_outbox_json(
+fn civic_communication_outbox_json(
   scenario : CivicCommunicationScenario,
   protocol : @civic.BuildingProtocolDefinition,
   idea : CivicCommunicationIdea,
@@ -84,7 +88,7 @@ fn civic_salon_outbox_json(
 }
 
 ///|
-fn civic_salon_review_gate_json(
+fn civic_communication_review_gate_json(
   scenario : CivicCommunicationScenario,
   protocol : @civic.BuildingProtocolDefinition,
   participants : Array[CivicCommunicationParticipantBook],
@@ -97,10 +101,12 @@ fn civic_salon_review_gate_json(
     gate: scenario.review_gate,
     status: "pending",
     reason: scenario.review_reason,
-    related_packet_id: civic_salon_first_packet_id(
+    related_packet_id: civic_communication_first_packet_id(
       scenario, participants, round_id,
     ),
-    related_reduction_id: civic_salon_first_reduction_id(ideas, round_id),
+    related_reduction_id: civic_communication_first_reduction_id(
+      ideas, round_id,
+    ),
     owner: scenario.review_owner,
   }.to_json()
 }

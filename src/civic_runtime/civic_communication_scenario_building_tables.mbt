@@ -1,5 +1,7 @@
 ///|
-fn civic_salon_metrics_table(metrics : CivicCommunicationMetric) -> String {
+fn civic_communication_metrics_table(
+  metrics : CivicCommunicationMetric,
+) -> String {
   [
     "| Metric | Value | Meaning |",
     "| --- | ---: | --- |",
@@ -15,7 +17,7 @@ fn civic_salon_metrics_table(metrics : CivicCommunicationMetric) -> String {
 }
 
 ///|
-fn civic_salon_idea_metric_table(
+fn civic_communication_output_metric_table(
   ideas : Array[CivicCommunicationIdea],
 ) -> String {
   let builder = StringBuilder::new()
@@ -32,7 +34,7 @@ fn civic_salon_idea_metric_table(
 }
 
 ///|
-fn civic_salon_participant_table(
+fn civic_communication_participant_table(
   participants : Array[CivicCommunicationParticipantBook],
 ) -> String {
   let builder = StringBuilder::new()

@@ -86,7 +86,7 @@ async fn reconcile_civic_salon_scenario_round(
     scenario.participants,
     reduction.ideas,
   )
-  append_civic_salon_round_record(
+  append_civic_communication_round_record(
     default_civic_communication_run_ledger_path(schedule.id, snapshot_path~),
     civic_communication_round_record(
       schedule,

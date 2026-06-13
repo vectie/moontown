@@ -1,5 +1,5 @@
 ///|
-fn civic_salon_participant_html(
+fn civic_communication_participant_html(
   scenario : CivicCommunicationScenario,
   participant : CivicCommunicationParticipantBook,
   returned_ideas : Array[CivicCommunicationIdea],
@@ -8,19 +8,21 @@ fn civic_salon_participant_html(
 ) -> String {
   [
     "<!doctype html>",
-    civic_salon_participant_html_head(participant),
-    civic_salon_participant_html_body_open(),
-    civic_salon_participant_round_meta(scenario, participant, round_number),
-    civic_salon_participant_intro(participant, round_id),
-    civic_salon_participant_work_sections(participant),
-    civic_salon_participant_returned_outputs_heading(),
-    civic_salon_returned_idea_cards(returned_ideas),
-    civic_salon_participant_html_body_close(),
+    civic_communication_participant_html_head(participant),
+    civic_communication_participant_html_body_open(),
+    civic_communication_participant_round_meta(
+      scenario, participant, round_number,
+    ),
+    civic_communication_participant_intro(participant, round_id),
+    civic_communication_participant_work_sections(participant),
+    civic_communication_participant_returned_outputs_heading(),
+    civic_communication_returned_output_cards(returned_ideas),
+    civic_communication_participant_html_body_close(),
   ].join("\n")
 }
 
 ///|
-fn civic_salon_returned_idea_cards(
+fn civic_communication_returned_output_cards(
   returned_ideas : Array[CivicCommunicationIdea],
 ) -> String {
   if returned_ideas.length() == 0 {
@@ -28,21 +30,21 @@ fn civic_salon_returned_idea_cards(
   } else {
     let builder = StringBuilder::new()
     for idea in returned_ideas {
-      builder.write_string(civic_salon_returned_idea_card(idea))
+      builder.write_string(civic_communication_returned_output_card(idea))
     }
     builder.to_string()
   }
 }
 
 ///|
-fn civic_salon_participant_html_head(
+fn civic_communication_participant_html_head(
   participant : CivicCommunicationParticipantBook,
 ) -> String {
-  "<html><head><meta charset=\"utf-8\"><title>\{participant.title}</title>\n\{civic_salon_participant_html_style()}"
+  "<html><head><meta charset=\"utf-8\"><title>\{participant.title}</title>\n\{civic_communication_participant_html_style()}"
 }
 
 ///|
-fn civic_salon_participant_html_style() -> String {
+fn civic_communication_participant_html_style() -> String {
   [
     "<style>", "body{font-family:Georgia,serif;background:#f4f0df;color:#1f2d22;margin:0}",
     "main{max-width:920px;margin:auto;padding:48px 24px}", ".card{background:#fff;border:1px solid #d9d0ad;border-radius:22px;padding:28px;box-shadow:0 18px 50px rgba(58,73,44,.12)}",
@@ -51,17 +53,17 @@ fn civic_salon_participant_html_style() -> String {
 }
 
 ///|
-fn civic_salon_participant_html_body_open() -> String {
+fn civic_communication_participant_html_body_open() -> String {
   "</head><body><main><section class=\"card\">"
 }
 
 ///|
-fn civic_salon_participant_html_body_close() -> String {
+fn civic_communication_participant_html_body_close() -> String {
   "</section></main></body></html>"
 }
 
 ///|
-fn civic_salon_participant_round_meta(
+fn civic_communication_participant_round_meta(
   scenario : CivicCommunicationScenario,
   participant : CivicCommunicationParticipantBook,
   round_number : Int,
@@ -70,7 +72,7 @@ fn civic_salon_participant_round_meta(
 }
 
 ///|
-fn civic_salon_participant_intro(
+fn civic_communication_participant_intro(
   participant : CivicCommunicationParticipantBook,
   round_id : String,
 ) -> String {
@@ -82,7 +84,7 @@ fn civic_salon_participant_intro(
 }
 
 ///|
-fn civic_salon_participant_work_sections(
+fn civic_communication_participant_work_sections(
   participant : CivicCommunicationParticipantBook,
 ) -> String {
   [
@@ -92,12 +94,14 @@ fn civic_salon_participant_work_sections(
 }
 
 ///|
-fn civic_salon_participant_returned_outputs_heading() -> String {
+fn civic_communication_participant_returned_outputs_heading() -> String {
   "<h2>Returned Outputs</h2>"
 }
 
 ///|
-fn civic_salon_returned_idea_card(idea : CivicCommunicationIdea) -> String {
+fn civic_communication_returned_output_card(
+  idea : CivicCommunicationIdea,
+) -> String {
   [
     "<article>",
     "<h3>\{idea.title}</h3>",

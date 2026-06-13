@@ -1,5 +1,5 @@
 ///|
-fn civic_salon_building_projection_json(
+fn civic_communication_building_projection_json(
   scenario : CivicCommunicationScenario,
   protocol : @civic.BuildingProtocolDefinition,
   participants : Array[CivicCommunicationParticipantBook],

@@ -105,7 +105,7 @@ fn civic_salon_scenario_output_path(
   scenario : CivicCommunicationScenario,
   workspace_base : String,
 ) -> String {
-  "\{civic_salon_workspace_root(scenario.building_book_id, workspace_base)}/raw/bootstrap/\{scenario.id}-ideas.json"
+  "\{civic_communication_workspace_root(scenario.building_book_id, workspace_base)}/raw/bootstrap/\{scenario.id}-ideas.json"
 }
 
 ///|

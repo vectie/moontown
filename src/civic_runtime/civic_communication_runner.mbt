@@ -20,7 +20,7 @@ async fn run_due_civic_salons(
         schedule.id,
         claim_civic_communication_schedule(schedule, now_ms),
       )
-      let (next, summary) = run_due_civic_salon_round(
+      let (next, summary) = run_due_civic_communication_round(
         schedule, snapshot_path, book_catalog_path, tick, now_ms, reducer_mode, run_inline,
       )
       persist_civic_communication_schedule(schedule_path, schedule.id, next)

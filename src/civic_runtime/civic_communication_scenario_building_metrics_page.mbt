@@ -1,5 +1,5 @@
 ///|
-fn civic_salon_metrics_markdown(
+fn civic_communication_metrics_markdown(
   scenario : CivicCommunicationScenario,
   metrics : CivicCommunicationMetric,
   participants : Array[CivicCommunicationParticipantBook],
@@ -34,7 +34,7 @@ fn civic_salon_metrics_markdown(
     "",
     "## Outputs",
     "",
-    civic_salon_idea_metric_table(ideas),
+    civic_communication_output_metric_table(ideas),
     "",
     "## Return Home Contract",
     "",

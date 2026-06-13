@@ -1,5 +1,5 @@
 ///|
-fn civic_salon_round_validation_errors(
+fn civic_communication_round_validation_errors(
   scenario : CivicCommunicationScenario,
   ideas : Array[CivicCommunicationIdea],
 ) -> Array[String] {
@@ -7,7 +7,9 @@ fn civic_salon_round_validation_errors(
   if scenario.participants.length() == 0 {
     errors.push("scenario has no participant workspaces")
   }
-  let participant_ids = civic_salon_participant_book_ids(scenario.participants)
+  let participant_ids = civic_communication_participant_book_ids(
+    scenario.participants,
+  )
   for idea in ideas {
     if idea.id.trim().is_empty() {
       errors.push("idea has empty id")
@@ -39,7 +41,7 @@ fn civic_salon_round_validation_errors(
 }
 
 ///|
-fn civic_salon_first_packet_id(
+fn civic_communication_first_packet_id(
   scenario : CivicCommunicationScenario,
   participants : Array[CivicCommunicationParticipantBook],
   round_id : String,
@@ -51,7 +53,7 @@ fn civic_salon_first_packet_id(
 }
 
 ///|
-fn civic_salon_first_reduction_id(
+fn civic_communication_first_reduction_id(
   ideas : Array[CivicCommunicationIdea],
   round_id : String,
 ) -> String {
@@ -62,7 +64,7 @@ fn civic_salon_first_reduction_id(
 }
 
 ///|
-fn civic_salon_participant_book_ids(
+fn civic_communication_participant_book_ids(
   participants : Array[CivicCommunicationParticipantBook],
 ) -> Array[String] {
   participants.map(fn(item) { item.book_id })

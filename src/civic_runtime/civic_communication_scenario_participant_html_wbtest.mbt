@@ -2,7 +2,7 @@
 test "civic salon participant HTML renders page shell and participant work" {
   let scenario = test_participant_html_scenario()
   let participant = test_participant_html_book()
-  let html = civic_salon_participant_html(
+  let html = civic_communication_participant_html(
     scenario,
     participant,
     [],
@@ -36,7 +36,7 @@ test "civic salon returned idea cards render count and next experiment" {
     why_it_matters: "It turns salon discussion into a testable interface.",
     next_experiment: "Prototype a memory packet shared across two robot tasks.",
   }
-  let cards = civic_salon_returned_idea_cards([idea])
+  let cards = civic_communication_returned_output_cards([idea])
   assert_true(cards.contains("<article>"))
   assert_true(cards.contains("<h3>Embodied Memory Contract</h3>"))
   assert_true(cards.contains("Follow-up questions:</strong> 2"))

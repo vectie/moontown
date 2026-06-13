@@ -6,7 +6,7 @@ async fn moonclaw_civic_communication_reduction(
   workspace_base : String,
   run_inline : Bool,
 ) -> CivicCommunicationReductionResult {
-  let root = civic_salon_workspace_root(
+  let root = civic_communication_workspace_root(
     scenario.building_book_id,
     workspace_base,
   )

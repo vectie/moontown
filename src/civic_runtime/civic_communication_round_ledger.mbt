@@ -15,7 +15,7 @@ fn civic_communication_round_record(
 }
 
 ///|
-async fn append_civic_salon_round_record(
+async fn append_civic_communication_round_record(
   path : String,
   record : CivicCommunicationRoundRecord,
 ) -> Unit {
