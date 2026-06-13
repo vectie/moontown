@@ -444,6 +444,8 @@ Purpose:
   review sees the same artifacts used by health gates
 - attach structured `BookPolicy` loop and internal-distance plans to semantic
   review metadata for downstream agent/tool consumers
+- preserve those structured policy metadata fields through the runtime review
+  dispatch boundary into MoonClaw external proposal packets
 
 Boundary:
 
