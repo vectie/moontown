@@ -814,14 +814,14 @@ Install one from a Moondesk/exported config:
 
 ```bash
 moon run src/cmd/main -- books app-tool install assets/templates/books/app-tool-book/install.example.json
-moon run src/cmd/main -- books app-tool status toolbook-market-signal-lab
+moon run src/cmd/main -- books app-tool status app-tool-market-signal-lab
 ```
 
 The config file shape is:
 
 ```json
 {
-  "book_id": "toolbook-market-signal-lab",
+  "book_id": "app-tool-market-signal-lab",
   "title": "Market Signal Lab",
   "purpose": "Watch approved data sources, analyze useful changes, and expose an interactive dashboard through a civic building.",
   "websites": ["https://example.org/data"],

@@ -5,7 +5,7 @@ pub fn template_root() -> String {
 
 ///|
 pub fn default_book_id() -> String {
-  "toolbook-data-watch-dashboard"
+  "app-tool-data-watch-dashboard"
 }
 
 ///|

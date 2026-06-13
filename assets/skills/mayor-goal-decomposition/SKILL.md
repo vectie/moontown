@@ -148,7 +148,7 @@ Output:
   "summary": "Mayor routes the request to an App ToolBook because the durable output includes both analysis and a usable web tool.",
   "lanes": [
     {
-      "book_id": "toolbook-market-data-dashboard",
+      "book_id": "app-tool-market-data-dashboard",
       "objective": "Create an app-tool-book request that watches configured data sources, maintains accepted analysis, generates or repairs the dashboard tool, and binds it to the appropriate civic building.",
       "rationale": "ToolBook lane for durable watched data plus generated app"
     }

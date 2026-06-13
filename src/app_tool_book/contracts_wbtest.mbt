@@ -1,7 +1,8 @@
 ///|
 test "app tool book contract exposes stable defaults" {
   assert_eq(template_root(), "assets/templates/books/app-tool-book")
-  assert_eq(default_book_id(), "toolbook-data-watch-dashboard")
+  assert_eq(default_book_id(), "app-tool-data-watch-dashboard")
+  assert_true(!default_book_id().contains("toolbook"))
   assert_true(default_purpose().contains("usable generated web tool"))
   assert_eq(generated_tool_path(), "book/site/generated/tool.html")
   assert_eq(
@@ -27,10 +28,10 @@ test "app tool book catalog identity owns name tags and skills" {
 ///|
 test "app tool book config constructor composes catalog identity" {
   let config = config_with_catalog_identity(
-    "toolbook-opc",
+    "app-tool-opc",
     "OPC Tool",
     "Watch OPC signals.",
-    "/tmp/toolbook-opc",
+    "/tmp/app-tool-opc",
     ["https://example.org/opc"],
     "opc-lab",
     31,
@@ -61,8 +62,8 @@ test "app tool book required paths include generated tool and editable app" {
 ///|
 test "app tool book status readiness requires all gates" {
   let ready = status(
-    "toolbook",
-    "/tmp/toolbook",
+    "app-tool",
+    "/tmp/app-tool",
     [],
     has_catalog_entry=true,
     has_standing_goal=true,
@@ -71,8 +72,8 @@ test "app tool book status readiness requires all gates" {
   )
   assert_true(ready.ready)
   let missing_manifest = status(
-    "toolbook",
-    "/tmp/toolbook",
+    "app-tool",
+    "/tmp/app-tool",
     [],
     has_catalog_entry=true,
     has_standing_goal=true,
@@ -81,8 +82,8 @@ test "app tool book status readiness requires all gates" {
   )
   assert_false(missing_manifest.ready)
   let missing_path = status(
-    "toolbook",
-    "/tmp/toolbook",
+    "app-tool",
+    "/tmp/app-tool",
     ["tool-manifest.json"],
     has_catalog_entry=true,
     has_standing_goal=true,
@@ -96,8 +97,8 @@ test "app tool book status readiness requires all gates" {
 test "app tool book status markdown renders readiness and missing paths" {
   let view = status_markdown(
     status(
-      "toolbook",
-      "/tmp/toolbook",
+      "app-tool",
+      "/tmp/app-tool",
       ["wiki/index.md", "app/index.html"],
       has_catalog_entry=true,
       has_standing_goal=true,
@@ -106,15 +107,15 @@ test "app tool book status markdown renders readiness and missing paths" {
     ),
   )
   assert_true(view.contains("# App ToolBook Status"))
-  assert_true(view.contains("- Book: `toolbook`"))
+  assert_true(view.contains("- Book: `app-tool`"))
   assert_true(view.contains("- Ready: `false`"))
   assert_true(view.contains("- Standing goal enabled: `false`"))
   assert_true(view.contains("- wiki/index.md"))
   assert_true(view.contains("- app/index.html"))
   let ready = status_markdown(
     status(
-      "toolbook",
-      "/tmp/toolbook",
+      "app-tool",
+      "/tmp/app-tool",
       [],
       has_catalog_entry=true,
       has_standing_goal=true,
@@ -128,16 +129,16 @@ test "app tool book status markdown renders readiness and missing paths" {
 ///|
 test "app tool book bootstrap and install summaries are package-owned" {
   let summary = bootstrap_summary(
-    "toolbook-opc",
-    "/tmp/toolbook-opc",
+    "app-tool-opc",
+    "/tmp/app-tool-opc",
     "/tmp/catalog.json",
-    "watch-toolbook-opc-tool",
+    "watch-app-tool-opc-tool",
     "/tmp/standing-goals.json",
     "opc-lab",
     2,
     status(
-      "toolbook-opc",
-      "/tmp/toolbook-opc",
+      "app-tool-opc",
+      "/tmp/app-tool-opc",
       [],
       has_catalog_entry=true,
       has_standing_goal=true,
@@ -145,27 +146,27 @@ test "app tool book bootstrap and install summaries are package-owned" {
       has_tool_manifest=true,
     ),
   )
-  assert_true(summary.contains("Bootstrapped App ToolBook `toolbook-opc`"))
-  assert_true(summary.contains("- Standing goal: `watch-toolbook-opc-tool`"))
+  assert_true(summary.contains("Bootstrapped App ToolBook `app-tool-opc`"))
+  assert_true(summary.contains("- Standing goal: `watch-app-tool-opc-tool`"))
   assert_true(summary.contains("- Websites: `2`"))
   assert_true(summary.contains("- Ready: `true`"))
   let installed = install_config_summary("/tmp/app-tool.json", summary)
   assert_true(
     installed.contains("Installed App ToolBook config `/tmp/app-tool.json`"),
   )
-  assert_true(installed.contains("Bootstrapped App ToolBook `toolbook-opc`"))
+  assert_true(installed.contains("Bootstrapped App ToolBook `app-tool-opc`"))
 }
 
 ///|
 test "app tool book generated html keeps tool and report affordances" {
   let index = site_index_html(
-    "toolbook-html", "HTML ToolBook", "Expose a generated app.", "html-lab",
+    "app-tool-html", "HTML ToolBook", "Expose a generated app.", "html-lab",
   )
   assert_true(index.contains("href=\"tool.html\""))
   assert_true(index.contains("href=\"../../wiki/reports/latest-analysis.md\""))
   assert_true(index.contains("civic building html-lab"))
   let app = app_html(
-    "toolbook-html", "HTML ToolBook", "Expose a generated app.", "html-lab",
+    "app-tool-html", "HTML ToolBook", "Expose a generated app.", "html-lab",
   )
   assert_true(app.contains("<script src=\"tool.js\"></script>"))
   assert_true(app.contains("id=\"refresh-tool\""))
@@ -174,8 +175,8 @@ test "app tool book generated html keeps tool and report affordances" {
 
 ///|
 test "app tool book history renderer records book and generation time" {
-  let text = history_markdown("toolbook-history", "History ToolBook", 1234)
-  assert_true(text.contains("- book: `toolbook-history`"))
+  let text = history_markdown("app-tool-history", "History ToolBook", 1234)
+  assert_true(text.contains("- book: `app-tool-history`"))
   assert_true(text.contains("- title: History ToolBook"))
   assert_true(text.contains("- generated_at_ms: `1234`"))
 }

@@ -3,9 +3,9 @@ async test "app tool book bootstraps durable app and civic manifest" {
   let base = "/tmp/moontown-app-tool-book-wbtest"
   let catalog_path = "\{base}/catalog.json"
   let goals_path = "\{base}/standing-goals.json"
-  let workspace_root = "\{base}/toolbook"
+  let workspace_root = "\{base}/app-tool"
   let summary = bootstrap_app_tool_book(
-    book_id="toolbook-opc-dashboard",
+    book_id="app-tool-opc-dashboard",
     title="OPC Dashboard",
     purpose="Watch OPC sources and expose a usable dashboard.",
     websites=["https://example.org/opc"],
@@ -20,7 +20,7 @@ async test "app tool book bootstraps durable app and civic manifest" {
   assert_true(summary.contains("book_template_install_status: installed"))
   assert_true(summary.contains("Bootstrapped App ToolBook"))
   let status = inspect_app_tool_book(
-    book_id="toolbook-opc-dashboard",
+    book_id="app-tool-opc-dashboard",
     workspace_root~,
     book_catalog_path=catalog_path,
     standing_goal_path=goals_path,
@@ -48,7 +48,7 @@ async test "app tool book config installer resolves method and spec files" {
   write_text_file(method_path, "# File Method\n\nUse file method.")
   write_text_file(spec_path, "# File Tool Spec\n\nUse file tool spec.")
   let spec = AppToolBookInstallSpec::{
-    book_id: "toolbook-file-config",
+    book_id: "app-tool-file-config",
     title: "File Config ToolBook",
     purpose: "Installed from a Moondesk-style config.",
     websites: ["https://example.org/data"],

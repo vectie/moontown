@@ -54,7 +54,7 @@ async fn planbook_app_tool_book_template_criterion() -> PlanbookCriterionStatus 
     runtime_ready
   planbook_criterion(
     "app-tool-book-template",
-    "2026-06-02-app-toolbook-roadmap",
+    "2026-06-02-app-tool-book-roadmap",
     "Moontown can generate durable App ToolBooks through the template request pipeline",
     "moontown+moonbook+moondesk+moonclaw",
     ready,
