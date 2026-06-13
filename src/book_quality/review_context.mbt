@@ -9,10 +9,34 @@ fn context_spec(
   book_type : String,
   pages : Array[String],
 ) -> BookQualityContextSpec {
-  {
-    book_type,
-    pages: [wiki_index_path(), ..pages, policy_type_output_path(book_type)],
+  let context_pages = [
+    wiki_index_path(),
+    ..pages,
+    policy_type_output_path(book_type),
+  ]
+  { book_type, pages: include_policy_context_pages(book_type, context_pages) }
+}
+
+///|
+fn page_present(pages : Array[String], page : String) -> Bool {
+  pages.any(existing => existing == page)
+}
+
+///|
+fn include_policy_context_pages(
+  book_type : String,
+  pages : Array[String],
+) -> Array[String] {
+  let result : Array[String] = []
+  for page in pages {
+    result.push(page)
   }
+  for file in @policy.required_file_specs(@policy.policy_for_type(book_type)) {
+    if file.required && !page_present(result, file.path) {
+      result.push(file.path)
+    }
+  }
+  result
 }
 
 ///|

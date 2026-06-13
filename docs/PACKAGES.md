@@ -440,6 +440,8 @@ Purpose:
 - check required output surfaces from the effective `BookPolicy`
 - include `BookPolicy.required_files` in structural path scoring without
   double-counting paths that also have package-specific weights
+- include `BookPolicy.required_files` in semantic review context pages so AI
+  review sees the same artifacts used by health gates
 
 Boundary:
 

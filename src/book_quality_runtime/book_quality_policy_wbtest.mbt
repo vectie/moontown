@@ -222,11 +222,14 @@ test "book quality review context specs provide typed pages and safe fallback" {
   )
   assert_true(research_pages.contains("raw/bootstrap/deep-report.md"))
   assert_true(research_pages.contains("raw/bootstrap/evidence-matrix.md"))
+  assert_true(research_pages.contains("wiki/synthesis/overview.md"))
+  assert_true(research_pages.contains("wiki/sources/"))
   let civic_pages = @book_quality.context_pages_for_type(@policy.civic_type())
   assert_true(
     civic_pages.contains("raw/bootstrap/BUILDING_PROTOCOL_CONTRACT.md"),
   )
   assert_true(civic_pages.contains("wiki/ledgers/exchange-ledger.md"))
+  assert_true(civic_pages.contains("wiki/reviews/pending.md"))
   assert_eq(
     @book_quality.context_pages_for_type("unknown-book").join("|"),
     [@book_quality.wiki_index_path(), @book_quality.projection_state_path()].join(
