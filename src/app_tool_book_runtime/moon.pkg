@@ -5,16 +5,11 @@ import {
   "moonbitlang/core/json",
   "moonbitlang/x/path",
   "vectie/moontown/adapters/moonbook",
-  "vectie/moontown/app_tool_book_runtime",
-  "vectie/moontown/pdf_evidence_watch",
-  "vectie/moontown/skill_quality",
+  "vectie/moontown/app_tool_book",
   "vectie/moontown/storage",
-  "vectie/moontown/support",
 }
 
 import {
   "moonbitlang/async",
-  "vectie/moontown/app_tool_book",
   "vectie/moontown/integration",
-  "vectie/moontown/policy",
 } for "wbtest"

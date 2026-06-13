@@ -14,22 +14,22 @@ pub fn default_purpose() -> String {
 }
 
 ///|
-fn generated_site_path() -> String {
+pub fn generated_site_path() -> String {
   @policy.default_generated_site_projection_path()
 }
 
 ///|
-fn generated_site_workspace_path(root : String) -> String {
+pub fn generated_site_workspace_path(root : String) -> String {
   "\{root}/\{generated_site_path()}"
 }
 
 ///|
-fn generated_tool_path() -> String {
+pub fn generated_tool_path() -> String {
   "book/site/generated/tool.html"
 }
 
 ///|
-fn generated_tool_workspace_path(root : String) -> String {
+pub fn generated_tool_workspace_path(root : String) -> String {
   "\{root}/\{generated_tool_path()}"
 }
 
@@ -196,17 +196,6 @@ pub fn resolved_workspace_root(
   } else {
     workspace_root
   }
-}
-
-///|
-pub async fn missing_required_paths(workspace_root : String) -> Array[String] {
-  let missing : Array[String] = []
-  for path in required_paths() {
-    if !@fs.exists("\{workspace_root}/\{path}") {
-      missing.push(path)
-    }
-  }
-  missing
 }
 
 ///|

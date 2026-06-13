@@ -208,10 +208,18 @@ book owns. The implementation now has a first-class `policy` package:
   persist those goals, but it must not fork the loop instructions or goal
   semantics.
 - [app_tool_book/](/Users/kq/Workspace/moontown/src/app_tool_book)
-  owns App ToolBook bootstrap, config installation, workspace materialization,
-  status inspection, and status rendering. Root Moontown may keep wrapper
-  functions for existing commands, but generated-tool book behavior belongs in
-  this package.
+  owns deterministic App ToolBook policy and presentation contracts only:
+  install/status DTOs, stable template root, default book id/purpose, required
+  paths, copied-template path policy, config/manifest schemas, catalog identity,
+  generated history/site/tool HTML shape, status Markdown, standing-goal
+  construction/list semantics, and readiness-rule composition.
+- [app_tool_book_runtime/](/Users/kq/Workspace/moontown/src/app_tool_book_runtime)
+  owns App ToolBook runtime materialization: MoonBook catalog load/save, config
+  JSON loading, relative config path resolution, template copying, workspace
+  writes, standing-goal persistence, filesystem/catalog/goal status inspection,
+  and bootstrap/install/status command entrypoints. Root commands and template
+  installers should call this runtime package instead of putting ToolBook IO
+  into `app_tool_book/`.
 - [pdf_evidence_watch/](/Users/kq/Workspace/moontown/src/pdf_evidence_watch)
   owns PDF Evidence Watch bootstrap, config installation, workspace
   materialization, standing-watch goal construction, and status inspection.
@@ -684,7 +692,10 @@ ToolBook install/status DTOs, stable template root, default book id and purpose,
 required paths, copied-template paths, config/manifest schemas,
 catalog-identity-aware config construction, generated history/site/tool HTML
 shape, status Markdown, catalog identity, standing-goal construction/list
-semantics, and readiness rule, plus bootstrap/install summary wording. Generic
+semantics, readiness rule, and bootstrap/install summary wording.
+`app_tool_book_runtime/` owns config JSON loading, MoonBook catalog mutation,
+template copying, workspace file writes, standing-goal persistence, and
+filesystem/catalog/goal status observation. Generic
 standing-watch task kind, prompt/id contract, target pages, accounting markers,
 marker parsing, effective watcher-record decision selection, execution-summary
 classification, ledger preference ordering, keeper closure policy, and
@@ -692,17 +703,16 @@ auto-triage/recovery summary wording belong to
 `standing_watch_policy/`. Reusable transient external dependency vocabulary
 belongs to `runtime_error_policy/`; standing-watch and recovery code may
 consume that package, but root should not fork its own provider-infrastructure
-classifier. Root may still load config JSON, copy template files, inspect
-filesystem/catalog/goal state, write package-rendered pages, return
-package-rendered summaries, adapt package identity into MoonBook catalog
-entries, persist standing goals, and append watcher ledgers, but it should not
+classifier. Root may still call runtime entrypoints and append watcher ledgers,
+but it should not
 redefine what makes a ToolBook workspace real, how it appears in the catalog,
 what its generated/status pages look like, how its watch loop is described, how
 no-change/update/deferred/review decisions are inferred from MoonBook/MoonClaw
 output, or which terminal watcher record is preferred. Root should also avoid
 default/config/manifest compatibility shims; callers should use
-`app_tool_book/`, `standing_watch_policy/`, and `runtime_error_policy/`
-directly for those pure policy values.
+`app_tool_book/` for pure policy values, `app_tool_book_runtime/` for runtime
+materialization, and `standing_watch_policy/`/`runtime_error_policy/` for shared
+watch-loop semantics.
 
 ## Layer Responsibilities
 

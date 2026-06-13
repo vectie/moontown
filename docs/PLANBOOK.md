@@ -313,14 +313,16 @@ the stable template root, default book identity, default purpose, install/status
 DTOs, required workspace path set, template-copy path set, config/manifest
 schemas, catalog-identity-aware config construction, catalog identity,
 generated history/site/tool page shape, status Markdown, standing-goal
-construction/list policy, and readiness gate. Root code may execute the
-bootstrap workflow, inspect files/catalog/goals, copy files, write
-package-rendered pages, return package-rendered bootstrap/install summaries,
-adapt package identity into the MoonBook catalog, and persist standing goals,
-but future plans should not add new root-local ToolBook path lists, catalog tags
-or skills, generated-page renderers, status renderers, bootstrap/install summary
-wording, ToolBook standing-goal semantics, config/manifest schemas, default
-identity wrappers, or readiness rules.
+construction/list policy, and readiness gate. Runtime App ToolBook work lives in
+[app_tool_book_runtime](/Users/kq/Workspace/moontown/src/app_tool_book_runtime):
+config JSON loading, config-relative path resolution, template copying,
+MoonBook catalog mutation, workspace writes, standing-goal persistence, and
+filesystem/catalog/goal status observation. Root code and template installers
+should call the runtime package. Future plans should not add new root-local
+ToolBook path lists, catalog tags or skills, generated-page renderers, status
+renderers, bootstrap/install summary wording, ToolBook standing-goal semantics,
+config/manifest schemas, default identity wrappers, readiness rules, or
+ToolBook file/catalog IO in `app_tool_book/`.
 Generic standing-watch policy lives in
 [standing_watch_policy](/Users/kq/Workspace/moontown/src/standing_watch_policy).
 It owns the standing-watch `BookTask` kind, id format, compact id segment

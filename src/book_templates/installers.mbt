@@ -33,7 +33,7 @@ async fn BookTemplateInstaller::install_config(
         standing_goal_path~,
       )
     "app-tool-book" =>
-      @app_tool_book.install_app_tool_book_config(
+      @app_tool_book_runtime.install_app_tool_book_config(
         config_path,
         book_catalog_path~,
         standing_goal_path~,

@@ -39,15 +39,18 @@ async fn planbook_app_tool_book_template_criterion() -> PlanbookCriterionStatus 
     @fs.exists(
       "assets/templates/books/app-tool-book/schemas/tool-manifest.schema.md",
     )
-  let runtime_ready = @fs.exists("src/app_tool_book/runtime.mbt") &&
+  let runtime_ready = @fs.exists("src/app_tool_book_runtime/bootstrap.mbt") &&
+    @fs.exists("src/app_tool_book_runtime/workspace.mbt") &&
     text_file_contains("src/app_tool_book/contracts.mbt", "tool-manifest.json") &&
     text_file_contains(
       "src/app_tool_book/contracts.mbt", "book/site/generated/tool.html",
     ) &&
     text_file_contains(
-      "src/app_tool_book/workspace_runtime.mbt", "book/site/generated/tool.html",
+      "src/app_tool_book_runtime/workspace.mbt", "book/site/generated/tool.html",
     ) &&
-    text_file_contains("src/app_tool_book/runtime.mbt", "civic_building_id")
+    text_file_contains(
+      "src/app_tool_book_runtime/bootstrap.mbt", "civic_building_id",
+    )
   let ready = registry_ready &&
     installer_ready &&
     template_ready &&

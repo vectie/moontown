@@ -11,8 +11,6 @@ import {
 // Values
 pub fn app_html(String, String, String, String) -> String
 
-pub async fn bootstrap_app_tool_book(book_id? : String, title? : String, purpose? : String, websites? : Array[String], analysis_method? : String, tool_spec? : String, civic_building_id? : String, cadence_ticks? : Int, book_catalog_path? : String, standing_goal_path? : String, workspace_root? : String, template_root? : String) -> String
-
 pub fn bootstrap_summary(String, String, String, String, String, String, Int, AppToolBookStatus) -> String
 
 pub fn catalog_entry(String, String, String, String) -> @moonbook.BookCatalogEntry
@@ -25,19 +23,19 @@ pub fn default_book_id() -> String
 
 pub fn default_purpose() -> String
 
+pub fn generated_site_path() -> String
+
+pub fn generated_site_workspace_path(String) -> String
+
+pub fn generated_tool_path() -> String
+
+pub fn generated_tool_workspace_path(String) -> String
+
 pub fn history_markdown(String, String, UInt64) -> String
-
-pub async fn inspect_app_tool_book(book_id? : String, workspace_root? : String, book_catalog_path? : String, standing_goal_path? : String) -> AppToolBookStatus
-
-pub async fn install_app_tool_book_config(String, book_catalog_path? : String, standing_goal_path? : String, template_root? : String) -> String
 
 pub fn install_config_summary(String, String) -> String
 
 pub fn manifest(String, String, String, String, UInt64?) -> AppToolManifest
-
-pub async fn missing_required_paths(String) -> Array[String]
-
-pub async fn render_app_tool_book_status(book_id? : String, workspace_root? : String, book_catalog_path? : String, standing_goal_path? : String) -> String
 
 pub fn required_paths() -> Array[String]
 

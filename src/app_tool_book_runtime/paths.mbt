@@ -1,7 +1,7 @@
 ///|
 async fn load_app_tool_book_install_spec(
   config_path : String,
-) -> AppToolBookInstallSpec? {
+) -> @app_tool_book.AppToolBookInstallSpec? {
   let parsed = match read_optional_json_file(config_path) {
     Some(json) => json
     None => return None

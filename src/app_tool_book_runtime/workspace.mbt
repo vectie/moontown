@@ -11,12 +11,12 @@ async fn write_app_tool_book_workspace(
   template_root : String,
 ) -> Unit {
   let root = entry.workspace_root
-  for path in template_copy_paths() {
+  for path in @app_tool_book.template_copy_paths() {
     copy_app_tool_book_template_file(template_root, root, path)
   }
   write_text_file(
     "\{root}/book.json",
-    config_with_catalog_identity(
+    @app_tool_book.config_with_catalog_identity(
       entry.id,
       title,
       purpose,
@@ -30,7 +30,13 @@ async fn write_app_tool_book_workspace(
   )
   write_text_file(
     "\{root}/tool-manifest.json",
-    manifest(entry.id, title, purpose, civic_building_id, Some(@env.now()))
+    @app_tool_book.manifest(
+      entry.id,
+      title,
+      purpose,
+      civic_building_id,
+      Some(@env.now()),
+    )
     .to_json()
     .stringify(indent=2),
   )
@@ -38,7 +44,7 @@ async fn write_app_tool_book_workspace(
   write_text_file_if_missing("\{root}/raw/analysis-runs/.keep", "")
   write_text_file_if_missing(
     "\{root}/wiki/history/standing-watch.md",
-    history_markdown(entry.id, title, @env.now()),
+    @app_tool_book.history_markdown(entry.id, title, @env.now()),
   )
   if !analysis_method.trim().is_empty() {
     write_text_file("\{root}/wiki/methods/analysis-method.md", analysis_method)
@@ -46,16 +52,21 @@ async fn write_app_tool_book_workspace(
   if !tool_spec.trim().is_empty() {
     write_text_file("\{root}/wiki/tools/tool-spec.md", tool_spec)
   }
-  let app_html = app_html(entry.id, title, purpose, civic_building_id)
+  let app_html = @app_tool_book.app_html(
+    entry.id,
+    title,
+    purpose,
+    civic_building_id,
+  )
   write_text_file("\{root}/app/index.html", app_html)
-  write_text_file(generated_tool_workspace_path(root), app_html)
+  write_text_file(@app_tool_book.generated_tool_workspace_path(root), app_html)
   write_text_file(
-    generated_site_workspace_path(root),
-    site_index_html(entry.id, title, purpose, civic_building_id),
+    @app_tool_book.generated_site_workspace_path(root),
+    @app_tool_book.site_index_html(entry.id, title, purpose, civic_building_id),
   )
   write_text_file(
     "\{root}/book/Home.html",
-    site_index_html(entry.id, title, purpose, civic_building_id),
+    @app_tool_book.site_index_html(entry.id, title, purpose, civic_building_id),
   )
 }
 

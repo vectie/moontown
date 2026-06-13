@@ -47,12 +47,14 @@ async fn render_pdf_watch_command(args : Array[String]) -> String {
 ///|
 async fn render_app_tool_command(args : Array[String]) -> String {
   match args {
-    ["bootstrap"] => @app_tool_book.bootstrap_app_tool_book()
-    ["bootstrap", book_id] => @app_tool_book.bootstrap_app_tool_book(book_id~)
+    ["bootstrap"] => @app_tool_book_runtime.bootstrap_app_tool_book()
+    ["bootstrap", book_id] =>
+      @app_tool_book_runtime.bootstrap_app_tool_book(book_id~)
     ["install", config_path] =>
-      @app_tool_book.install_app_tool_book_config(config_path)
-    ["status"] => @app_tool_book.render_app_tool_book_status()
-    ["status", book_id] => @app_tool_book.render_app_tool_book_status(book_id~)
+      @app_tool_book_runtime.install_app_tool_book_config(config_path)
+    ["status"] => @app_tool_book_runtime.render_app_tool_book_status()
+    ["status", book_id] =>
+      @app_tool_book_runtime.render_app_tool_book_status(book_id~)
     _ => @moontown.load_or_create_saved_dashboard()
   }
 }

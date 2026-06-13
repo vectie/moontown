@@ -1,0 +1,24 @@
+// Generated using `moon info`, DON'T EDIT IT
+package "vectie/moontown/app_tool_book_runtime"
+
+import {
+  "vectie/moontown/app_tool_book",
+}
+
+// Values
+pub async fn bootstrap_app_tool_book(book_id? : String, title? : String, purpose? : String, websites? : Array[String], analysis_method? : String, tool_spec? : String, civic_building_id? : String, cadence_ticks? : Int, book_catalog_path? : String, standing_goal_path? : String, workspace_root? : String, template_root? : String) -> String
+
+pub async fn inspect_app_tool_book(book_id? : String, workspace_root? : String, book_catalog_path? : String, standing_goal_path? : String) -> @app_tool_book.AppToolBookStatus
+
+pub async fn install_app_tool_book_config(String, book_catalog_path? : String, standing_goal_path? : String, template_root? : String) -> String
+
+pub async fn render_app_tool_book_status(book_id? : String, workspace_root? : String, book_catalog_path? : String, standing_goal_path? : String) -> String
+
+// Errors
+
+// Types and methods
+
+// Type aliases
+
+// Traits
+

@@ -1,6 +1,6 @@
 ///|
-async test "app tool book bootstraps durable app and civic manifest" {
-  let base = "/tmp/moontown-app-tool-book-wbtest"
+async test "app tool book runtime bootstraps durable app and civic manifest" {
+  let base = "/tmp/moontown-app-tool-book-runtime-wbtest"
   let catalog_path = "\{base}/catalog.json"
   let goals_path = "\{base}/standing-goals.json"
   let workspace_root = "\{base}/app-tool"
@@ -29,16 +29,20 @@ async test "app tool book bootstraps durable app and civic manifest" {
   assert_eq(status.missing_count, 0)
   assert_true(@fs.exists("\{workspace_root}/tool-manifest.json"))
   assert_true(@fs.exists("\{workspace_root}/app/index.html"))
-  assert_true(@fs.exists(generated_tool_workspace_path(workspace_root)))
-  assert_true(@fs.exists(generated_site_workspace_path(workspace_root)))
+  assert_true(
+    @fs.exists(@app_tool_book.generated_tool_workspace_path(workspace_root)),
+  )
+  assert_true(
+    @fs.exists(@app_tool_book.generated_site_workspace_path(workspace_root)),
+  )
   let manifest = read_text_or_empty("\{workspace_root}/tool-manifest.json")
   assert_true(manifest.contains("moontown.app_tool_book.manifest.v1"))
   assert_true(manifest.contains("opc-lab"))
 }
 
 ///|
-async test "app tool book config installer resolves method and spec files" {
-  let base = "/tmp/moontown-app-tool-book-install-wbtest"
+async test "app tool book runtime config installer resolves method and spec files" {
+  let base = "/tmp/moontown-app-tool-book-runtime-install-wbtest"
   let config_path = "\{base}/app-tool.json"
   let method_path = "\{base}/method.md"
   let spec_path = "\{base}/tool.md"
@@ -47,7 +51,7 @@ async test "app tool book config installer resolves method and spec files" {
   let workspace_root = "\{base}/workspace"
   write_text_file(method_path, "# File Method\n\nUse file method.")
   write_text_file(spec_path, "# File Tool Spec\n\nUse file tool spec.")
-  let spec = AppToolBookInstallSpec::{
+  let spec = @app_tool_book.AppToolBookInstallSpec::{
     book_id: "app-tool-file-config",
     title: "File Config ToolBook",
     purpose: "Installed from a Moondesk-style config.",
@@ -81,11 +85,11 @@ async test "app tool book config installer resolves method and spec files" {
 }
 
 ///|
-async test "app tool book status helper reports required path gaps" {
-  let root = "/tmp/moontown-app-tool-book-status-helper-wbtest"
-  ignore_checked_command("rm", ["-rf", root])
+async test "app tool book runtime status helper reports required path gaps" {
+  let root = "/tmp/moontown-app-tool-book-runtime-status-helper-wbtest"
+  ignore(@integration.run_checked("rm", ["-rf", root]) catch { _ => return })
   let missing_before = missing_required_paths(root)
-  assert_eq(missing_before.length(), required_paths().length())
+  assert_eq(missing_before.length(), @app_tool_book.required_paths().length())
   write_text_file("\{root}/book.json", "{}")
   write_text_file("\{root}/tool-manifest.json", "{}")
   let missing_after = missing_required_paths(root)

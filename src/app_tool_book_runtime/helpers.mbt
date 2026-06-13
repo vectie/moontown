@@ -116,3 +116,14 @@ fn resolve_book_template_config_workspace_root(
     )
   }
 }
+
+///|
+async fn missing_required_paths(workspace_root : String) -> Array[String] {
+  let missing : Array[String] = []
+  for path in @app_tool_book.required_paths() {
+    if !@fs.exists("\{workspace_root}/\{path}") {
+      missing.push(path)
+    }
+  }
+  missing
+}
