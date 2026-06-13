@@ -31,10 +31,11 @@ async fn render_civic_protocols_command(args : Array[String]) -> String {
     ["pattern-manifest", manifest_path] =>
       @civic_runtime.install_civic_pattern_scenario_manifest(manifest_path)
     ["pattern-template", template_path] =>
-      @civic_runtime.bootstrap_civic_salon_scenario_file(template_path)
-    ["schedules", "tick"] => @civic_runtime.run_due_civic_salons()
+      @civic_runtime.bootstrap_civic_communication_scenario_file(template_path)
+    ["schedules", "tick"] =>
+      @civic_runtime.run_due_civic_communication_patterns()
     ["schedules", "status"] =>
-      @civic_runtime.render_civic_salon_schedule_status()
+      @civic_runtime.render_civic_communication_schedule_status()
     _ => @moontown.load_or_create_saved_dashboard()
   }
 }

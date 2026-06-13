@@ -46,16 +46,17 @@ async fn run_daemon_scheduled_job(
   match job.kind {
     "civic-pattern" =>
       Some(
-        @civic_runtime.run_due_civic_salons(
+        @civic_runtime.run_due_civic_communication_patterns(
           snapshot_path~,
           book_catalog_path~,
           tick~,
           run_inline=false,
         ),
       )
+    // Legacy schedule kind kept so older daemon state files continue to run.
     "civic-salon" =>
       Some(
-        @civic_runtime.run_due_civic_salons(
+        @civic_runtime.run_due_civic_communication_patterns(
           snapshot_path~,
           book_catalog_path~,
           tick~,
