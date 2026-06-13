@@ -93,16 +93,3 @@ pub fn build_visual_projection(
 pub fn default_visual_projection_path(snapshot_path : String) -> String {
   "\{@storage.snapshot_base_dir(snapshot_path)}/visual-projection.json"
 }
-
-///|
-pub async fn persist_visual_projection(
-  state : @core.TownState,
-  snapshot_path : String,
-  tick? : Int = visual_projection_tick(state),
-) -> Unit {
-  let projection = build_visual_projection(state, tick~)
-  write_text_file(
-    default_visual_projection_path(snapshot_path),
-    projection.to_json().stringify(),
-  )
-}

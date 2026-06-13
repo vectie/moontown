@@ -246,9 +246,14 @@ book owns. The implementation now has a first-class `policy` package:
 - [visual_projection/](/Users/kq/Workspace/moontown/src/visual_projection)
   owns town-state-to-visual-projection DTOs and derivation: agent phases,
   routing, behavior/effect labels, building activity summaries, module
-  projection rows, grid placement, and projection persistence. Root Moontown may
+  projection rows, grid placement, and projection path policy. Root Moontown may
   expose compatibility wrappers and provide test fixtures, but visual semantics
   should not live in the root package.
+- [visual_projection_runtime/](/Users/kq/Workspace/moontown/src/visual_projection_runtime)
+  owns visual projection persistence: creating parent directories and writing
+  projection JSON beside town snapshots. Runtime packages should call this
+  package when they need durable UI state instead of putting filesystem writes
+  into visual projection policy.
 - [support/](/Users/kq/Workspace/moontown/src/support)
   owns generic support helpers for file I/O, JSON string/object extraction,
   workspace-relative path readiness, Markdown shaping, HTML escaping,

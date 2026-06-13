@@ -12,8 +12,6 @@ pub fn build_visual_projection(@core.TownState, tick? : Int) -> VisualProjection
 
 pub fn default_visual_projection_path(String) -> String
 
-pub async fn persist_visual_projection(@core.TownState, String, tick? : Int) -> Unit
-
 pub fn visual_projection_tick(@core.TownState) -> Int
 
 // Errors

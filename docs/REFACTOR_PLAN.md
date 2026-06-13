@@ -363,9 +363,10 @@ Goals:
   entrypoint in `pdf_archive_runtime/`; root must not coordinate cross-store
   PDF-watch lifecycle code
 - keep visual projection DTOs, phase semantics, routing labels, building/module
-  activity summaries, grid placement, and persistence in `visual_projection/`;
-  root may expose compatibility wrappers, but it should not carry visual
-  semantics
+  activity summaries, grid placement, and path policy in `visual_projection/`;
+  keep projection file writes and parent-directory creation in
+  `visual_projection_runtime/`; root may expose compatibility wrappers, but it
+  should not carry visual semantics or projection filesystem IO
 - keep generic file, JSON, Markdown, HTML, text-label, and runtime-config JSON
   helper implementation in `support/`; root may expose private compatibility
   wrappers, but support code should not remain as many unrelated root files

@@ -1057,6 +1057,7 @@ Boundary:
   [assets/templates/operator-request-policy.json](/Users/kq/Workspace/moontown/assets/templates/operator-request-policy.json),
   not raw JavaScript literals.
 - reusable projection policy belongs in `src/ui` or `src/visual_projection`,
+  while durable projection writes belong in `src/visual_projection_runtime`,
   not in the browser main package.
 
 ## Support
