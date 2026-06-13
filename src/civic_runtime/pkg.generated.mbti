@@ -171,6 +171,22 @@ pub struct ProtocolHistoryEntry {
 } derive(Eq, ToJson, @json.FromJson)
 
 // Type aliases
+pub using @civic {type CivicSalonHomeReturn as CivicCommunicationHomeReturn}
+
+pub using @civic {type CivicSalonIdea as CivicCommunicationIdea}
+
+pub using @civic {type CivicSalonMetric as CivicCommunicationMetric}
+
+pub using @civic {type CivicSalonParticipantBook as CivicCommunicationParticipantBook}
+
+pub using @civic {type CivicSalonReductionMode as CivicCommunicationReductionMode}
+
+pub using @civic {type CivicSalonRoundRecord as CivicCommunicationRoundRecord}
+
+pub using @civic {type CivicSalonScenario as CivicCommunicationScenario}
+
+pub using @civic {type CivicSalonSchedule as CivicCommunicationSchedule}
+
 pub using @civic {type CivicSalonHomeReturn}
 
 pub using @civic {type CivicSalonIdea}

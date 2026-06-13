@@ -267,7 +267,7 @@ The protocol bootstrap writes the town-level protocol registry under
 `.moontown/civic/protocols.json` and per-building protocol ledgers under
 `.moontown/civic/protocols/<building-id>/`. Social Square has a protocol proof
 slice and can run additional `research-salon` communication-pattern scenarios
-from `CivicSalonScenario` JSON templates. A research salon creates the
+from `CivicCommunicationScenario` JSON templates. A research salon creates the
 internal participant workspaces declared by the template,
 receives perspective packets, reduces them into cross-area research ideas, and
 projects the result through the same module interior counters. It also writes
@@ -275,7 +275,7 @@ template-defined metrics in the Social Square book and returns relevant ideas
 to each participant home book at
 `wiki/queries/salon-returned-ideas.md`.
 
-The research-salon projection is now fed by generic `CivicSalonScenario`
+The research-salon projection is now fed by generic `CivicCommunicationScenario`
 templates.
 There is no domain-specific default proof scenario in MoonBit; new domains
 arrive as template JSON and generated skill rules instead of frontend or

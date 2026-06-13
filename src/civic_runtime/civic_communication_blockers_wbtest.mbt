@@ -90,7 +90,7 @@ test "live civic reducer statuses remain running rather than blocked" {
 
 ///|
 test "legacy pending civic blocker summaries normalize to running" {
-  let summary = "Blocked Social Square Match Market round-3: MoonClaw reducer did not produce a valid non-empty CivicSalonIdea contract. status=RunConfirmed; MoonClaw run run-1 is Pending."
+  let summary = "Blocked Social Square Match Market round-3: MoonClaw reducer did not produce a valid non-empty CivicCommunicationIdea contract. status=RunConfirmed; MoonClaw run run-1 is Pending."
   let normalized = normalize_civic_pending_summary(summary)
   assert_true(normalized.has_prefix("Running Social Square Match Market"))
   assert_true(!normalized.has_prefix("Blocked "))

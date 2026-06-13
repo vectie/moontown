@@ -185,7 +185,7 @@ Implemented and validated:
   patterns: `research-salon`, `signal-watch`, `triage-desk`, `review-council`,
   `match-market`, `learning-cohort`, `story-forge`, and `incident-bridge`.
 - `moon run src/cmd/main -- civic protocols pattern-template <path>` now runs the
-  same communication-pattern envelope from a `CivicSalonScenario` JSON file, so
+  same communication-pattern envelope from a `CivicCommunicationScenario` JSON file, so
   future domains can be added by template and schedule instead of editing
   MoonBit runner code.
 - `moon run src/cmd/main -- civic protocols pattern-install <path>` installs one

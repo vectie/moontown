@@ -1,6 +1,6 @@
 ///|
 async fn persisted_civic_salon_reduction(
-  scenario : CivicSalonScenario,
+  scenario : CivicCommunicationScenario,
   round_id : String,
   workspace_base : String,
 ) -> CivicSalonReductionResult {
@@ -21,7 +21,7 @@ async fn persisted_civic_salon_reduction(
         summary: if ideas.length() > 0 {
           "Persisted reducer replayed \{ideas.length()} prior MoonClaw idea(s) for projection refresh of `\{round_id}`."
         } else {
-          "Persisted reducer output exists but contains no valid CivicSalonIdea records for `\{round_id}`."
+          "Persisted reducer output exists but contains no valid CivicCommunicationIdea records for `\{round_id}`."
         },
         packet_id: None,
         packet_path: None,

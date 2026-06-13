@@ -41,7 +41,7 @@ The scenario owns the domain:
 
 The production reducer reads the generated `SKILL.md`, participant context,
 and reducer contract, then asks MoonClaw to emit
-`raw/bootstrap/civic-salon-ideas.json` using the same `CivicSalonIdea`
+`raw/bootstrap/civic-communication-results.json` using the same `CivicCommunicationIdea`
 contract that Moontown materializes into MoonBook pages, protocol ledgers,
 reviews, and UI projections. Template ideas are no longer production reducer
 input.
@@ -49,8 +49,8 @@ input.
 ## Runtime Files
 
 - [civic_communication_scenario_types.mbt](/Users/kq/Workspace/moontown/src/civic_runtime/civic_communication_scenario_types.mbt)
-  defines `CivicSalonScenario`, participant workspaces, ideas, metrics, and
-  home-return records.
+  defines the `CivicCommunicationScenario` runtime surface, participant
+  workspaces, ideas, metrics, and home-return records.
 - [civic_communication_scenario_runtime.mbt](/Users/kq/Workspace/moontown/src/civic_runtime/civic_communication_scenario_runtime.mbt)
   loads scenario templates, materializes MoonClaw reducer output into
   intermediate participant workspaces, runs the protocol ledger slice, and
@@ -125,7 +125,7 @@ Required high-level fields:
 - `participants`: internal participant workspaces and their current
   perspectives.
 - `ideas`: fixture examples only. Production rounds must use MoonClaw output
-  from `raw/bootstrap/civic-salon-ideas.json`; stale projection refreshes use
+  from `raw/bootstrap/civic-communication-results.json`; stale projection refreshes use
   the last persisted reducer output.
 
 The key extensibility rule is that future domains and civic services should
@@ -180,9 +180,9 @@ reasoning and reducer quality.
 - `MoonClawReducer` is the default production path. It writes a reducer
   workspace, generated `SKILL.md`, participant JSON, reducer contract, and
   `moonclaw.jobs.json`; imports a MoonClaw proposal; then requires a valid,
-  non-empty `CivicSalonIdea` JSON output before materialization.
+  non-empty `CivicCommunicationIdea` JSON output before materialization.
 - `PersistedReducer` is used only for stale projection refresh. It replays the
-  latest persisted `raw/bootstrap/civic-salon-ideas.json` and never falls back
+  latest persisted `raw/bootstrap/civic-communication-results.json` and never falls back
   to template ideas.
 - `FixtureReducer` is reserved for tests and explicit smoke demos. It is the
   only mode allowed to consume template `ideas`.

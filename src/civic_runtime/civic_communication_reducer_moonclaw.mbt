@@ -1,6 +1,6 @@
 ///|
 async fn moonclaw_civic_salon_reduction(
-  scenario : CivicSalonScenario,
+  scenario : CivicCommunicationScenario,
   round_id : String,
   round_number : Int,
   workspace_base : String,
@@ -79,7 +79,7 @@ async fn moonclaw_civic_salon_reduction(
       root,
       Some(packet_id),
       Some(packet_path),
-      "MoonClaw reducer did not produce a valid non-empty CivicSalonIdea contract. status=\{status}; \{worker_summary}",
+      "MoonClaw reducer did not produce a valid non-empty CivicCommunicationIdea contract. status=\{status}; \{worker_summary}",
       proposal_id=Some(imported.proposal_id),
       run_id=imported.run_id,
     )

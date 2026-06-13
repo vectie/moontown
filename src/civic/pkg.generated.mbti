@@ -337,6 +337,7 @@ pub(all) struct CivicCommunicationPattern {
   civic_examples : Array[String]
 } derive(Eq, ToJson, @debug.Debug, @json.FromJson)
 
+#alias(CivicCommunicationHomeReturn)
 pub(all) struct CivicSalonHomeReturn {
   id : String
   building_id : String
@@ -347,6 +348,7 @@ pub(all) struct CivicSalonHomeReturn {
   review_status : String
 } derive(Eq, ToJson, @debug.Debug, @json.FromJson)
 
+#alias(CivicCommunicationIdea)
 pub(all) struct CivicSalonIdea {
   id : String
   title : String
@@ -357,6 +359,7 @@ pub(all) struct CivicSalonIdea {
   next_experiment : String
 } derive(Eq, ToJson, @debug.Debug, @json.FromJson)
 
+#alias(CivicCommunicationMetric)
 pub(all) struct CivicSalonMetric {
   participant_count : Int
   idea_count : Int
@@ -378,6 +381,7 @@ pub(all) struct CivicSalonMetricCounts {
   idea_return_home_count : Int
 } derive(Eq, @debug.Debug)
 
+#alias(CivicCommunicationParticipantBook)
 pub(all) struct CivicSalonParticipantBook {
   book_id : String
   title : String
@@ -389,12 +393,14 @@ pub(all) struct CivicSalonParticipantBook {
   next_artifact : String
 } derive(Eq, ToJson, @debug.Debug, @json.FromJson)
 
+#alias(CivicCommunicationReductionMode)
 pub(all) enum CivicSalonReductionMode {
   MoonClawReducer
   PersistedReducer
   FixtureReducer
 } derive(Eq, @debug.Debug)
 
+#alias(CivicCommunicationRoundRecord)
 pub(all) struct CivicSalonRoundRecord {
   id : String
   salon_id : String
@@ -413,6 +419,7 @@ pub(all) struct CivicSalonRoundRecord {
   summary : String
 } derive(Eq, ToJson, @debug.Debug, @json.FromJson)
 
+#alias(CivicCommunicationScenario)
 pub(all) struct CivicSalonScenario {
   id : String
   title : String
@@ -444,6 +451,7 @@ pub(all) struct CivicSalonScenario {
   ideas : Array[CivicSalonIdea]
 } derive(Eq, ToJson, @debug.Debug, @json.FromJson)
 
+#alias(CivicCommunicationSchedule)
 pub(all) struct CivicSalonSchedule {
   id : String
   title : String

@@ -98,7 +98,7 @@ Implemented:
   tell MoonClaw to read the building protocol contract before acting.
 - Social Square has a deterministic proof slice with durable inbox,
   contribution, reduction, outbox, and review ledgers.
-- Social Square can run any `CivicSalonScenario` template as a `research-salon`
+- Social Square can run any `CivicCommunicationScenario` template as a `research-salon`
   communication-pattern proof slice: internal participant workspaces
   contribute domain perspectives, the building asks MoonClaw to reduce them
   into cross-area research ideas, and the output is distributed to a question
@@ -121,7 +121,7 @@ Implemented:
 - `moon run src/cmd/main -- civic protocols status` shows protocol state across
   all buildings.
 - `moon run src/cmd/main -- civic protocols pattern-template <path>` runs any valid
-  `CivicSalonScenario` template through the same Social Square/building
+  `CivicCommunicationScenario` template through the same Social Square/building
   protocol envelope. This is the extensibility seam for new domains.
 - `moon run src/cmd/main -- civic protocols schedules status` shows recurring
   communication-pattern schedules from `.moontown/civic/pattern-schedules.json`.
@@ -142,7 +142,7 @@ The first implementation was intentionally direct so the protocol loop could be
 validated end to end. The follow-up refactor is documented in
 [REFACTOR_PLAN.md](/Users/kq/Workspace/moontown/docs/REFACTOR_PLAN.md). The
 current refactor pass moved the salon runtime to a scenario-template boundary:
-domain behavior is described by `CivicSalonScenario` JSON, while Moontown keeps
+domain behavior is described by `CivicCommunicationScenario` JSON, while Moontown keeps
 the reusable schedule, ledger, MoonBook write, metrics, and projection
 envelope. See
 [CIVIC_COMMUNICATION_TEMPLATES.md](/Users/kq/Workspace/moontown/docs/CIVIC_COMMUNICATION_TEMPLATES.md).
@@ -241,9 +241,9 @@ ideas are reduced, and relevant outputs return to the home workspaces.
 The recurring runner now defaults to `MoonClawReducer`. A due round writes the
 building reducer workspace, generated `SKILL.md`, participant JSON, reducer
 contract, and `moonclaw.jobs.json`; imports a MoonClaw proposal; waits for a
-valid `raw/bootstrap/civic-salon-ideas.json`; then materializes those ideas
+valid `raw/bootstrap/civic-communication-results.json`; then materializes those ideas
 into ledgers, participant workspaces, review queues, and projections. If MoonClaw
-does not produce a valid non-empty `CivicSalonIdea` contract, the round is
+does not produce a valid non-empty `CivicCommunicationIdea` contract, the round is
 recorded as blocked and retried later instead of silently falling back to
 template examples.
 

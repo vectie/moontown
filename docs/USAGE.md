@@ -242,7 +242,7 @@ review queues, and page-family summaries.
 
 ## 1.5 Run A Building Communication Pattern Template
 
-Social Square can run a research-salon `CivicSalonScenario` JSON template
+Social Square can run a research-salon `CivicCommunicationScenario` JSON template
 through the generic building communication-pattern model:
 
 ```bash
@@ -255,7 +255,7 @@ That command creates the internal participant workspaces declared by the
 template, sends their domain perspectives through Social Square, runs a
 MoonClaw reducer guided by the generated `SKILL.md`, and writes relevant ideas
 back to each home workspace after the reducer emits
-`raw/bootstrap/civic-salon-ideas.json`. Participant workspaces are treated as
+`raw/bootstrap/civic-communication-results.json`. Participant workspaces are treated as
 intermediate pattern state. The public UI and main MoonBook catalog surface the
 building book, such as `wenyu-social-square`, rather than every temporary
 participant workspace.
@@ -274,7 +274,7 @@ building performed exchange-reduce-distribute; it does not bypass the review
 queue or claim the ideas are already correct.
 
 The pattern path is not robotics-hardcoded. `civic protocols pattern-template
-<path>` loads a `CivicSalonScenario` JSON file and runs the same protocol
+<path>` loads a `CivicCommunicationScenario` JSON file and runs the same protocol
 envelope for that domain. Use
 [CIVIC_COMMUNICATION_TEMPLATES.md](/Users/kq/Workspace/moontown/docs/CIVIC_COMMUNICATION_TEMPLATES.md)
 and [robotics-mini-salon.json](/Users/kq/Workspace/moontown/assets/templates/civic-salons/robotics-mini-salon.json)
@@ -456,8 +456,8 @@ building protocol table. `civic protocols doctor` refreshes
 `match-market`, `learning-cohort`, `story-forge`, and `incident-bridge`.
 
 `civic protocols pattern-template <path>` runs a communication-pattern scenario
-from JSON. The current concrete runtime is the `research-salon` pattern, which
-still uses the `CivicSalonIdea` output contract. The template defines
+from JSON. The runtime materializes the generic `CivicCommunicationIdea` output
+contract; `research-salon` is one pattern example. The template defines
 participants, pattern id, skill rules, quality rules, output paths, and review
 gate. Template `ideas` are fixture examples only; production runs use the
 MoonClaw reducer output contract. If the `building_id` is not already in the

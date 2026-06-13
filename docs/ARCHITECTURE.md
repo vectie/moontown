@@ -910,16 +910,16 @@ building skill rules, behind a civic protocol runtime boundary.
 
 Reusable communication-pattern semantics are owned by the `civic/` package.
 That package defines the `CivicCommunicationPattern` model, the pattern
-registry, civic service-kind to pattern mapping, and reusable salon/scenario
-DTOs such as `CivicSalonScenario`, `CivicSalonIdea`, `CivicSalonMetric`, and
-`CivicSalonHomeReturn`, plus the structural effectiveness calculation that
+registry, civic service-kind to pattern mapping, and reusable communication
+DTOs such as `CivicCommunicationScenario`, `CivicCommunicationIdea`,
+`CivicCommunicationMetric`, and `CivicCommunicationHomeReturn`, plus the structural effectiveness calculation that
 turns participant and idea packets into metrics. It also owns
 generic reducer contract helpers: reducer input path, participant path, output
 path, blocker path, step kind, output contract name, and MoonClaw profile
 family. Runtime packages must consume those helpers instead of embedding
 reducer filenames or profile ids.
 It also owns
-`CivicSalonSchedule`, `CivicSalonRoundRecord`, and pure schedule transition
+`CivicCommunicationSchedule`, `CivicCommunicationRoundRecord`, and pure schedule transition
 semantics. Scenario pattern resolution, pattern-label fallback, generic
 building-protocol derivation, and reusable salon protocol notes live in
 `civic/communication_scenario_policy.mbt`; root may pass scenario templates into those
@@ -1010,11 +1010,11 @@ Implemented protocol pieces:
 - append-only protocol ledgers under `.moontown/civic/protocols/<building-id>/`
 - civic workspace `BUILDING_PROTOCOL_CONTRACT.md` seed files
 - Social Square proof ledgers with one consent-gated review slice
-- Social Square salon slices loaded from `CivicSalonScenario` templates, with
+- Social Square communication slices loaded from `CivicCommunicationScenario` templates, with
   intermediate participant workspaces, perspective packets, cross-area idea
   reductions, and a reviewable question backlog surfaced through the building
   book
-- generic `CivicSalonScenario` loading so a new domain can be added by JSON
+- generic `CivicCommunicationScenario` loading so a new domain can be added by JSON
   template and schedule entry rather than a new MoonBit branch
 - salon effectiveness metrics for idea yield, research-question yield,
   cross-book links, home-book coverage, and returned idea-home records

@@ -63,7 +63,7 @@ by Moontown and MoonBook.
   files, but some policy/view clusters still need extraction so UI code remains
   a projection layer instead of becoming a civic-policy layer.
 - The salon reducer boundary now exists. Production rounds use MoonClaw to
-  emit `CivicSalonIdea` JSON from generated skills and participant context;
+  emit `CivicCommunicationIdea` JSON from generated skills and participant context;
   deterministic template ideas are isolated behind explicit fixture mode.
 
 ## Refactor Stages

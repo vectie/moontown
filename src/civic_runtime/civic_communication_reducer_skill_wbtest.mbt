@@ -9,7 +9,7 @@ test "civic reducer skill names map-reduce role reduction rules and contract" {
   assert_true(text.contains("Use at least two participant workspaces"))
   assert_true(text.contains("Do not copy or consume template seed ideas"))
   assert_true(text.contains("Every output must name the home books"))
-  assert_true(text.contains("CivicSalonIdea"))
+  assert_true(text.contains("CivicCommunicationIdea"))
   assert_true(text.contains(@civic.civic_reducer_output_relative_path()))
 }
 
@@ -27,7 +27,7 @@ test "civic reducer skill examples distinguish good research service and poor ou
 }
 
 ///|
-fn civic_reducer_skill_test_scenario() -> CivicSalonScenario {
+fn civic_reducer_skill_test_scenario() -> CivicCommunicationScenario {
   {
     id: "test-research-salon",
     title: "Test Research Salon",

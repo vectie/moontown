@@ -520,8 +520,8 @@ building should compose or add a `civic/` pattern/service definition first,
 then bind it through configuration; it should not encode a new building's
 social logic directly in the daemon or viewport.
 
-The same rule applies to scenario data. `CivicSalonScenario`,
-`CivicSalonIdea`, `CivicSalonMetric`, participant records, home-return records,
+The same rule applies to scenario data. `CivicCommunicationScenario`,
+`CivicCommunicationIdea`, `CivicCommunicationMetric`, participant records, home-return records,
 and reduction-mode vocabulary are civic protocol DTOs. Root code may keep thin
 facade aliases for compatibility, but new durable data fields should be added
 inside `civic/` first.
@@ -550,8 +550,8 @@ measures exchange yield, returned-home coverage, or structural effectiveness,
 the implementation belongs in `civic/communication_metrics.mbt`; root may only
 display or persist those metrics.
 
-Schedule vocabulary is civic-owned too. `CivicSalonSchedule`,
-`CivicSalonRoundRecord`, due checks, round ids, completion cadence, and round
+Schedule vocabulary is civic-owned too. `CivicCommunicationSchedule`,
+`CivicCommunicationRoundRecord`, due checks, round ids, completion cadence, and round
 record construction belong in `civic/`. Root owns wall-clock IO, schedule files,
 daemon claiming/retry policy, and append-only persistence.
 

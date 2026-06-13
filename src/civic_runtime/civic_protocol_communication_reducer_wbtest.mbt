@@ -16,7 +16,7 @@ async test "MoonClaw reducer workspace excludes template seed ideas" {
   let skill = @fs.read_file("\{root}/skills/future-energy-salon/SKILL.md").text()
   assert_true(!input.contains("storage-grid-control-contract"))
   assert_true(!participants.contains("storage-grid-control-contract"))
-  assert_true(skill.contains("CivicSalonIdea"))
+  assert_true(skill.contains("CivicCommunicationIdea"))
   assert_true(@fs.exists("\{root}/moonclaw.jobs.json"))
 }
 

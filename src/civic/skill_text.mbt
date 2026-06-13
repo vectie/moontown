@@ -417,7 +417,7 @@ fn civic_salon_reducer_reduction_rules() -> Array[String] {
 ///|
 fn civic_salon_reducer_output_contract_summary() -> String {
   [
-    "Emit the same `CivicSalonIdea` contract that Moontown materializes into building ledgers, internal participant workspaces, review queues, and projections.",
+    "Emit the same `CivicCommunicationIdea` contract that Moontown materializes into building ledgers, internal participant workspaces, review queues, and projections.",
     "For non-research patterns, treat `research_questions` as testable follow-up or review questions and `next_experiment` as the smallest useful next artifact/action.",
   ].join(" ")
 }
