@@ -339,7 +339,10 @@ Boundary:
 Key files:
 
 - [src/policy/book_policy.mbt](/Users/kq/Workspace/moontown/src/policy/book_policy.mbt)
+- [src/policy/book_policy_labels.mbt](/Users/kq/Workspace/moontown/src/policy/book_policy_labels.mbt)
 - [src/policy/book_policy_paths.mbt](/Users/kq/Workspace/moontown/src/policy/book_policy_paths.mbt)
+- [src/policy/book_policy_source.mbt](/Users/kq/Workspace/moontown/src/policy/book_policy_source.mbt)
+- [src/policy/book_policy_catalog.mbt](/Users/kq/Workspace/moontown/src/policy/book_policy_catalog.mbt)
 - [src/policy/book_policy_lanes.mbt](/Users/kq/Workspace/moontown/src/policy/book_policy_lanes.mbt)
 - [src/policy/book_policy_loop.mbt](/Users/kq/Workspace/moontown/src/policy/book_policy_loop.mbt)
 - [src/policy/book_policy_distance.mbt](/Users/kq/Workspace/moontown/src/policy/book_policy_distance.mbt)
@@ -348,6 +351,10 @@ Key files:
 Purpose:
 
 - typed `BookPolicy` model
+- canonical legacy book labels used only as compatibility/profile keys
+- canonical source-policy labels such as web-first and book-first
+- catalog-entry classification helpers that map observed book metadata into
+  composed policy profiles
 - policy-owned default projection paths and surface names
 - canonical `control`, `execute`, and `tend` lane parsing
 - policy-composed loop plans and health gates
@@ -359,6 +366,12 @@ Purpose:
 Boundary:
 
 - `BookPolicy` keeps serialized skill lanes as strings for stable JSON.
+- `src/policy` owns legacy book label strings and source-policy strings.
+  Downstream packages may consume these constants, but should not duplicate
+  literal labels such as `research-book`, `civic-protocol-support`,
+  `web-first`, or `book-first`.
+- `src/policy/book_policy_catalog.mbt` owns only catalog classification; it
+  should not accumulate output, lane, label, or source-policy definitions.
 - `src/policy` owns default output path and surface constants for composed
   policies.
 - `src/policy` owns lane normalization and lane-based skill selection.
