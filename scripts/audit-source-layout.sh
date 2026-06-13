@@ -7,6 +7,64 @@ cd "$repo_root"
 
 failures=()
 
+allowed_root_files=(
+  ".gitignore"
+  "AGENTS.md"
+  "LICENSE"
+  "README.md"
+  "README.mbt.md"
+  "moon.mod"
+)
+
+root_files=()
+while IFS= read -r file; do
+  root_files+=("${file#./}")
+done < <(find . -maxdepth 1 \( -type f -o -type l \) | sort)
+
+for file in "${root_files[@]}"; do
+  allowed=false
+  for allowed_file in "${allowed_root_files[@]}"; do
+    if [[ "$file" == "$allowed_file" ]]; then
+      allowed=true
+      break
+    fi
+  done
+  if [[ "$allowed" == false ]]; then
+    failures+=("repo root contains unexpected file: $file")
+  fi
+done
+
+allowed_root_dirs=(
+  ".git"
+  ".github"
+  ".mooncakes"
+  ".moonclaw"
+  ".moontown"
+  "_build"
+  "assets"
+  "docs"
+  "scripts"
+  "src"
+)
+
+root_dirs=()
+while IFS= read -r dir; do
+  root_dirs+=("${dir#./}")
+done < <(find . -maxdepth 1 -type d -not -path . | sort)
+
+for dir in "${root_dirs[@]}"; do
+  allowed=false
+  for allowed_dir in "${allowed_root_dirs[@]}"; do
+    if [[ "$dir" == "$allowed_dir" ]]; then
+      allowed=true
+      break
+    fi
+  done
+  if [[ "$allowed" == false ]]; then
+    failures+=("repo root contains unexpected directory: $dir")
+  fi
+done
+
 if [[ -f "moon.pkg" ]]; then
   failures+=("repo root must not contain moon.pkg; keep implementation packages under src/")
 fi
