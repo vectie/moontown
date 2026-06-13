@@ -17,25 +17,18 @@ fn fallback_worker_context_bundle(
     workspace_root: resolved_workspace_root(entry.workspace_root),
     task_id: task.id,
     prompt: task.prompt,
-    policy: [
-      "Keep all memory and durable artifacts inside this book unless the task explicitly names a repository patch.",
-      "Return explicit blockers instead of fake completion when required tools or sources are missing.",
-      "Preserve Moontown, MoonBook, and MoonClaw responsibility boundaries.",
-    ],
-    routines: [
-      "Read task context pages first.", "Create or update target pages listed in the task when applicable.",
-      "Report changed files, artifacts, blockers, and validation results.",
-    ],
-    skill_paths: ["skills/wiki-maintainer/SKILL.md"],
+    policy: @moonbook_contracts.fallback_keeper_policy_lines(),
+    routines: @moonbook_contracts.fallback_keeper_routine_lines(),
+    skill_paths: @moonbook_contracts.default_keeper_skill_paths(),
     context_pages: default_keeper_context_pages(task),
     active_memory: [],
     user_memory: [],
     working_memory: [],
-    memory_summary: "Fallback MoonBook context for externally planned task `\{task.id}` in book `\{entry.id}`.",
-    output_contract: [
-      "task_id", "summary", "artifacts", "memory_candidates", "requires_review",
-      "notify_town",
-    ],
+    memory_summary: @moonbook_contracts.fallback_keeper_memory_summary(
+      entry.id,
+      task.id,
+    ),
+    output_contract: @moonbook_contracts.fallback_keeper_output_contract_lines(),
   }
 }
 
@@ -65,7 +58,7 @@ fn finalize_worker_context_bundle(
     policy: bundle.policy,
     routines: bundle.routines,
     skill_paths: if skill_paths.length() == 0 {
-      ["skills/wiki-maintainer/SKILL.md"]
+      @moonbook_contracts.default_keeper_skill_paths()
     } else {
       skill_paths
     },
@@ -86,7 +79,7 @@ fn finalize_worker_context_bundle(
 fn default_keeper_skill_paths(entry : BookCatalogEntry) -> Array[String] {
   let skill_paths = unique_nonblank_paths(entry.skills)
   if skill_paths.length() == 0 {
-    ["skills/wiki-maintainer/SKILL.md"]
+    @moonbook_contracts.default_keeper_skill_paths()
   } else {
     skill_paths
   }
@@ -96,7 +89,7 @@ fn default_keeper_skill_paths(entry : BookCatalogEntry) -> Array[String] {
 fn default_keeper_context_pages(task : BookTask) -> Array[String] {
   let context_pages = unique_nonblank_paths(task.target_pages)
   if context_pages.length() == 0 {
-    ["wiki/index.md", "wiki/log.md"]
+    @moonbook_contracts.default_keeper_context_pages()
   } else {
     context_pages
   }

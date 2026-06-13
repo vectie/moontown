@@ -337,6 +337,10 @@ book owns. The implementation now has a first-class `policy` package:
   skill templates. Root Moontown may bootstrap/update the workspace and dispatch
   PlanBook repair/autonomy runtime work, but it should not keep root-local
   copies of durable PlanBook prose, generated-site markup, or skill text.
+- [moonbook_contracts/](/Users/kq/Workspace/moontown/src/moonbook_contracts)
+  owns adapter-safe generic MoonBook worker contracts: default keeper skill
+  paths, default keeper context pages, fallback policy/routine lines, fallback
+  memory summary, and fallback output-contract fields.
 - [standing_watch_contracts/](/Users/kq/Workspace/moontown/src/standing_watch_contracts)
   owns the adapter-safe standing-watch worker contract: skill path set, context
   page set, and output-contract lines.

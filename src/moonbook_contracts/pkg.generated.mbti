@@ -1,0 +1,26 @@
+// Generated using `moon info`, DON'T EDIT IT
+package "vectie/moontown/moonbook_contracts"
+
+// Values
+pub fn default_keeper_context_pages() -> Array[String]
+
+pub fn default_keeper_skill_paths() -> Array[String]
+
+pub fn fallback_keeper_memory_summary(String, String) -> String
+
+pub fn fallback_keeper_output_contract_lines() -> Array[String]
+
+pub fn fallback_keeper_policy_lines() -> Array[String]
+
+pub fn fallback_keeper_routine_lines() -> Array[String]
+
+pub fn wiki_maintainer_skill_path() -> String
+
+// Errors
+
+// Types and methods
+
+// Type aliases
+
+// Traits
+

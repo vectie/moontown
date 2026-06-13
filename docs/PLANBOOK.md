@@ -367,6 +367,13 @@ add root-local or adapter-local standing-watch context tables, output-contract
 tables, prompt copies, id-format helpers, marker vocabulary forks, history
 parser clones, material-delta accounting clones, no-change/update/deferred/review
 inference, or terminal-record selection.
+Adapter-safe generic MoonBook worker contracts live in
+[moonbook_contracts](/Users/kq/Workspace/moontown/src/moonbook_contracts).
+Future plans that change default keeper skills, fallback context pages,
+fallback policy/routine wording, memory-summary wording, or fallback output
+fields must update that package first. `adapters/moonbook` may construct
+MoonBook transport bundles and apply these defaults, but it must not own the
+generic keeper contract itself.
 Reusable transient external dependency classification lives in
 [runtime_error_policy](/Users/kq/Workspace/moontown/src/runtime_error_policy).
 Future plans should route provider infrastructure, temporary resource, storage

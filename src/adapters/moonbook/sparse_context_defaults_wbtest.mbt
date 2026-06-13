@@ -30,8 +30,12 @@ test "sparse worker context gets keeper-safe defaults before MoonClaw import" {
     output_contract: [],
   }
   let clean = finalize_worker_context_bundle(entry, task, bundle)
-  assert_true(clean.context_pages == ["wiki/index.md", "wiki/log.md"])
-  assert_true(clean.skill_paths == ["skills/wiki-maintainer/SKILL.md"])
+  assert_true(
+    clean.context_pages == @moonbook_contracts.default_keeper_context_pages(),
+  )
+  assert_true(
+    clean.skill_paths == @moonbook_contracts.default_keeper_skill_paths(),
+  )
 }
 
 ///|

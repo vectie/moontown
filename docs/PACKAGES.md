@@ -246,6 +246,28 @@ Boundary:
   path derivation before appending runtime-owned subdirectories such as
   `book-results`.
 
+## MoonBook Worker Contracts
+
+Key files:
+
+- [src/moonbook_contracts/worker_contracts.mbt](/Users/kq/Workspace/moontown/src/moonbook_contracts/worker_contracts.mbt)
+
+Purpose:
+
+- `src/moonbook_contracts` owns adapter-safe generic MoonBook worker contracts:
+  default keeper skill paths, default keeper context pages, fallback policy and
+  routine lines, fallback memory summary, and fallback output-contract fields.
+
+Boundary:
+
+- `src/adapters/moonbook` may construct `WorkerContextBundle` records and
+  apply `src/moonbook_contracts` defaults when book/task context is sparse.
+- `src/adapters/moonbook` must not hardcode generic keeper skill paths, default
+  context pages, fallback policy/routine wording, fallback memory-summary
+  wording, or fallback output-contract field lists.
+- Specialized contracts such as standing-watch, course, and Wenyu civic work
+  remain in their own adapter-safe contract packages.
+
 ## Course Worker Contracts
 
 Key files:
