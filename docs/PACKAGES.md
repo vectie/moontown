@@ -665,50 +665,50 @@ Boundary:
 Key files:
 
 - [src/build_pipeline/bootstrap_task.mbt](/Users/kq/Workspace/moontown/src/build_pipeline/bootstrap_task.mbt)
-- [src/build_pipeline/moonclaw_profile.mbt](/Users/kq/Workspace/moontown/src/build_pipeline/moonclaw_profile.mbt)
+- [src/build_pipeline/contract.mbt](/Users/kq/Workspace/moontown/src/build_pipeline/contract.mbt)
 - [src/build_pipeline/moonclaw_profile_prompts.mbt](/Users/kq/Workspace/moontown/src/build_pipeline/moonclaw_profile_prompts.mbt)
 - [src/build_pipeline/build_pipeline_tasks.mbt](/Users/kq/Workspace/moontown/src/build_pipeline/build_pipeline_tasks.mbt)
 - [src/build_pipeline/build_pipeline_prompts.mbt](/Users/kq/Workspace/moontown/src/build_pipeline/build_pipeline_prompts.mbt)
-- [src/build_pipeline/build_pipeline_artifacts.mbt](/Users/kq/Workspace/moontown/src/build_pipeline/build_pipeline_artifacts.mbt)
-- [src/build_pipeline/preseed_workspace.mbt](/Users/kq/Workspace/moontown/src/build_pipeline/preseed_workspace.mbt)
-- [src/build_pipeline/source_bundle.mbt](/Users/kq/Workspace/moontown/src/build_pipeline/source_bundle.mbt)
-- [src/build_pipeline/codex_acp_target.mbt](/Users/kq/Workspace/moontown/src/build_pipeline/codex_acp_target.mbt)
 - [src/build_pipeline/local_execution.mbt](/Users/kq/Workspace/moontown/src/build_pipeline/local_execution.mbt)
+- [src/build_pipeline_runtime/moonclaw_profile.mbt](/Users/kq/Workspace/moontown/src/build_pipeline_runtime/moonclaw_profile.mbt)
+- [src/build_pipeline_runtime/preseed_workspace.mbt](/Users/kq/Workspace/moontown/src/build_pipeline_runtime/preseed_workspace.mbt)
+- [src/build_pipeline_runtime/source_bundle.mbt](/Users/kq/Workspace/moontown/src/build_pipeline_runtime/source_bundle.mbt)
+- [src/build_pipeline_runtime/codex_acp_target.mbt](/Users/kq/Workspace/moontown/src/build_pipeline_runtime/codex_acp_target.mbt)
+- [src/build_pipeline_runtime/build_pipeline_artifacts.mbt](/Users/kq/Workspace/moontown/src/build_pipeline_runtime/build_pipeline_artifacts.mbt)
 
 Purpose:
 
 - own Wenyu bootstrap and build task contracts for bootstrap ingest,
   implementation backlog, code patch, and asset/projection work
-- own the Wenyu MoonClaw build-controller profile, output contract, ACP step
-  metadata, preferred skills, no-input policy, and execute/review prompts
-- own Wenyu build prompts and fallback artifact materialization
-- own Wenyu bootstrap workspace preseed: PRD/vision copies, research request,
-  source hints, mounted source snapshots, generated Wenyu skills, civic seed,
-  MoonClaw build profile, and Codex ACP target registration
-- own Wenyu build/civic task-plan helpers: Wenyu detection, build-readiness
-  paths, local fallback-task predicates, build task limit, positive task-limit
+- own pure Wenyu build prompts, output-contract id, execute/review prompt
+  templates, task target pages, worker roles, priorities, and review flags
+- own Wenyu build/civic task-plan helpers: Wenyu detection, local
+  fallback-task predicates, build task limit, positive task-limit
   normalization, and civic-service task merge that removes bootstrap duplicates
 - own local Wenyu build fallback execution-record construction, including
   packet ids, local packet paths, materializer proposal id, skill paths, review
   requirement, stale window, and output contract
-- keep build-stage target pages, worker roles, priorities, and review flags
-  close to the build feature instead of the town scheduler
+- let `src/build_pipeline_runtime` own all filesystem/provider side effects:
+  build-readiness path checks, PRD/vision copies, research request/source-hint
+  writes, mounted source snapshots, generated Wenyu skill files, civic seed
+  dispatch, MoonClaw profile installation, Codex ACP target registration, and
+  fallback artifact materialization
 
 Boundary:
 
 - `src/town_runtime` may decide when a Wenyu book is ready for bootstrap/build,
-  supply the current repo root, and ask this package to preseed or build a
-  Wenyu workspace.
+  supply the current repo root, and ask `src/build_pipeline_runtime` to
+  preseed or build a Wenyu workspace.
 - `src/build_pipeline` owns the Wenyu bootstrap/build task contracts and may
   compose target pages through `src/policy`, `src/research_quality`, and civic
   service definitions.
+- `src/build_pipeline_runtime` consumes those contracts and performs the
+  workspace/profile/source/artifact side effects.
 - `src/town_runtime` should not own Wenyu build output-contract ids, MoonClaw
   profile JSON, ACP step metadata, source-bundle manifests, source-hint pages,
   generated build-skill installation, Codex ACP target JSON, or build/review
   prompt templates. It also should not own Wenyu build/civic task merge policy
-  beyond adapting package-owned tasks into the generic goal-book plan shape, or
-  local build fallback execution-record semantics beyond dispatching to this
-  package.
+  beyond adapting package-owned tasks into the generic goal-book plan shape.
 
 ## PlanBook Policy And Runtime
 
@@ -830,7 +830,7 @@ Boundary:
 - Higher-level runtime packages and CLI code should call
   `src/book_templates_runtime` for side effects and `src/book_templates` for
   pure path/status/policy helpers.
-- Wenyu build skill file materialization belongs to `src/build_pipeline`;
+- Wenyu build skill file materialization belongs to `src/build_pipeline_runtime`;
   `src/book_templates` only owns the reusable skill text.
 
 ## Cookbook

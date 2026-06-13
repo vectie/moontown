@@ -4,7 +4,7 @@ async fn write_wenyu_implementation_backlog(
   task : @moonbook.BookTask,
 ) -> Unit {
   let root = @moonbook.workspace_root(entry)
-  let module_name = wenyu_module_name(entry)
+  let module_name = @build_pipeline.wenyu_module_name(entry)
   write_wenyu_implementation_backlog_page(root, entry, task, module_name)
   write_wenyu_acceptance_tests_page(root, module_name)
   write_wenyu_build_plan_page(root, entry, module_name)

@@ -38,7 +38,7 @@ async fn write_wenyu_research_request(
   entry : @moonbook.BookCatalogEntry,
   objective : String,
 ) -> Unit {
-  let module_name = wenyu_module_name(entry)
+  let module_name = @build_pipeline.wenyu_module_name(entry)
   @support.write_text_file(
     "\{root}/raw/bootstrap/RESEARCH_REQUEST.md",
     [

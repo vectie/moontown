@@ -56,7 +56,7 @@ async fn launch_goal_book_task(
         assigned_worker_id=worker_id,
       )
   }
-  let completed_execution = @build_pipeline.complete_wenyu_build_artifacts_if_needed(
+  let completed_execution = @build_pipeline_runtime.complete_wenyu_build_artifacts_if_needed(
     entry, task, execution,
   )
   record_goal_execution(state, entry, task, completed_execution)

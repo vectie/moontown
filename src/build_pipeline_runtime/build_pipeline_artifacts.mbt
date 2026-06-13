@@ -4,7 +4,7 @@ pub async fn complete_wenyu_build_artifacts_if_needed(
   task : @moonbook.BookTask,
   execution : @core.TaskExecutionRecord,
 ) -> @core.TaskExecutionRecord {
-  if !is_wenyu_book(entry) {
+  if !@build_pipeline.is_wenyu_book(entry) {
     return execution
   }
   match task.kind {

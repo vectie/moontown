@@ -45,7 +45,7 @@ async fn execute_dispatched_standing_watch_task(
         "Mayor could not dispatch standing watch task for \{entry.id}: \{route.rationale}",
       )
   }
-  @build_pipeline.complete_wenyu_build_artifacts_if_needed(
+  @build_pipeline_runtime.complete_wenyu_build_artifacts_if_needed(
     entry, task, execution,
   )
 }

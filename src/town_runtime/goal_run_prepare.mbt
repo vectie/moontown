@@ -138,7 +138,7 @@ async fn goal_book_research_or_build_plan(
     entry, objective, initial_summary, batch_tasks, task_limit,
   )
   if @build_pipeline.is_wenyu_book(entry) &&
-    @build_pipeline.wenyu_book_ready_for_build(entry) {
+    @build_pipeline_runtime.wenyu_book_ready_for_build(entry) {
     state.record_event(
       @core.TownEvent::new(
         id="event-build-plan-\{entry.id}",

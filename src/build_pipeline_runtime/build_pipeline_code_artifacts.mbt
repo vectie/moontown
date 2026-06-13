@@ -5,7 +5,7 @@ async fn write_wenyu_code_patch_record(
   execution : @core.TaskExecutionRecord,
 ) -> Unit {
   let root = @moonbook.workspace_root(entry)
-  let module_name = wenyu_module_name(entry)
+  let module_name = @build_pipeline.wenyu_module_name(entry)
   write_wenyu_code_patch_handoff(root, task, module_name)
   write_wenyu_code_blockers(root, module_name, execution)
   write_wenyu_code_test_results(root, module_name)

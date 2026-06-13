@@ -7,7 +7,9 @@ test "wenyu build profile uses shared MoonClaw runtime policy" {
   assert_true(profile.contains("\"best_effort_on_missing_input\":true"))
   assert_true(profile.contains("\"role_runtime\":{"))
   assert_true(
-    profile.contains("\"output_contract\":\"\{wenyu_build_packet_contract()}\""),
+    profile.contains(
+      "\"output_contract\":\"\{@build_pipeline.wenyu_build_packet_contract()}\"",
+    ),
   )
 }
 
@@ -35,13 +37,13 @@ test "wenyu build step metadata keeps builder controls" {
 
 ///|
 test "wenyu build prompts preserve execution and review contracts" {
-  let execute = wenyu_build_execute_prompt_template()
+  let execute = @build_pipeline.wenyu_build_execute_prompt_template()
   assert_true(execute.contains("This is not a wiki query."))
   assert_true(execute.contains("external_packet"))
   assert_true(execute.contains("code patch"))
   assert_true(execute.contains("asset pack"))
   assert_true(execute.contains("validation results"))
-  let review = wenyu_build_review_prompt_template()
+  let review = @build_pipeline.wenyu_build_review_prompt_template()
   assert_true(review.contains("source_workspace"))
   assert_true(review.contains("build/CODE_PATCH.md"))
   assert_true(review.contains("build/CODE_BLOCKERS.md"))

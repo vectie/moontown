@@ -7,10 +7,6 @@ import {
 }
 
 // Values
-pub async fn complete_wenyu_build_artifacts_if_needed(@moonbook.BookCatalogEntry, @moonbook.BookTask, @core.TaskExecutionRecord) -> @core.TaskExecutionRecord
-
-pub async fn ensure_wenyu_build_moonclaw_profile(String) -> Unit
-
 pub fn is_local_wenyu_build_fallback_task(String) -> Bool
 
 pub fn is_wenyu_book(@moonbook.BookCatalogEntry) -> Bool
@@ -21,15 +17,15 @@ pub fn local_wenyu_execution_stale_window_ticks() -> Int
 
 pub fn positive_wenyu_task_limit(Int) -> Int
 
-pub async fn preseed_wenyu_goal_inputs(@moonbook.BookCatalogEntry, String, String) -> Unit
-
 pub fn wenyu_asset_pack_prompt(@moonbook.BookCatalogEntry, String, String) -> String
-
-pub async fn wenyu_book_ready_for_build(@moonbook.BookCatalogEntry) -> Bool
 
 pub fn wenyu_bootstrap_ingest_task(@moonbook.BookCatalogEntry, String) -> @moonbook.BookTask
 
+pub fn wenyu_build_execute_prompt_template() -> String
+
 pub fn wenyu_build_packet_contract() -> String
+
+pub fn wenyu_build_review_prompt_template() -> String
 
 pub fn wenyu_build_task_limit(Int) -> Int
 

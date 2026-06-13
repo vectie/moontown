@@ -1,9 +1,4 @@
 ///|
-pub fn wenyu_build_packet_contract() -> String {
-  "wenyu.build.packet.v1"
-}
-
-///|
 pub async fn ensure_wenyu_build_moonclaw_profile(root : String) -> Unit {
   let path = "\{root}/moonclaw.jobs.json"
   let profile = wenyu_build_moonclaw_profile_json()
@@ -76,7 +71,7 @@ fn wenyu_build_execute_step_json() -> Json {
     "kind": "job.analysis",
     "execution_mode": "acp",
     "execution_target": "wenyu-codex-moontown",
-    "prompt_template": wenyu_build_execute_prompt_template(),
+    "prompt_template": @build_pipeline.wenyu_build_execute_prompt_template(),
     "metadata": wenyu_build_step_metadata(
       preferred_skills=["wenyu-build", "wenyu-code-patch", "wenyu-asset-pack"],
       board_lane="Build",
@@ -93,7 +88,7 @@ fn wenyu_build_review_step_json() -> Json {
     "kind": "job.analysis",
     "execution_mode": "acp",
     "execution_target": "wenyu-codex-moontown",
-    "prompt_template": wenyu_build_review_prompt_template(),
+    "prompt_template": @build_pipeline.wenyu_build_review_prompt_template(),
     "metadata": wenyu_build_step_metadata(
       preferred_skills=["wenyu-build"],
       board_lane="Review",
@@ -130,6 +125,6 @@ fn wenyu_build_role_runtime_json() -> Json {
     "allow_delegate": false,
     "allow_workspace_write": true,
     "allow_execution_tools": true,
-    "output_contract": wenyu_build_packet_contract(),
+    "output_contract": @build_pipeline.wenyu_build_packet_contract(),
   }
 }

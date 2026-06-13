@@ -544,26 +544,17 @@ or duplicate-repair policy locally.
 Wenyu build-pipeline task contracts belong to `build_pipeline/`. The package
 owns Wenyu bootstrap ingest, implementation-backlog, code-patch, and asset-pack
 task construction, including prompts, target pages, priorities, review flags,
-worker roles, and fallback artifact materialization. It also owns the Wenyu
-MoonClaw build-controller profile: output contract id, ACP execution/review
-steps, preferred skills, no-input metadata, model metadata, and execute/review
-prompt templates. Wenyu workspace preseed also belongs there: PRD/vision copies,
-research requests, source hints, mounted source snapshots, generated Wenyu
-skills, civic seed dispatch, build profile installation, and Codex ACP target
-registration. `town_runtime/` may decide that a Wenyu book is ready for
-bootstrap/build, pass the current repository root, and ask `build_pipeline/` to
-preseed or build the workspace, but it should not reconstruct those build tasks,
-Wenyu bootstrap tasks, source bundles, Codex target JSON, generated build-skill
-installation, or MoonClaw profile contracts locally. Wenyu build/civic task
-merge policy belongs there too: Wenyu detection, build-readiness paths, local
-fallback-task predicates, build task limits, positive task-limit normalization,
-and service-first task merging should be package-owned. `town_runtime/` may
-adapt those package-owned tasks into the generic goal-book plan shape, but it
-should not keep a parallel Wenyu planning layer. Local Wenyu build fallback
-execution-record construction also belongs in `build_pipeline/`: packet ids,
-local packet paths, materializer proposal id, skill paths, review requirement,
-stale window, and output contract are Wenyu build semantics, not generic town
-runtime semantics.
+worker roles, output contract id, execute/review prompt templates, and local
+fallback execution-record construction. Wenyu runtime materialization belongs
+to `build_pipeline_runtime/`: build-readiness filesystem checks, PRD/vision
+copies, research requests, source hints, mounted source snapshots, generated
+Wenyu skill files, civic seed dispatch, MoonClaw build-profile installation,
+Codex ACP target registration, and fallback artifact writes. `town_runtime/`
+may decide that a Wenyu book is ready for bootstrap/build, pass the current
+repository root, and call those packages, but it should not reconstruct build
+tasks, Wenyu bootstrap tasks, source bundles, Codex target JSON, generated
+build-skill installation, MoonClaw profile contracts, or fallback artifact
+semantics locally.
 
 Live-autonomy policy belongs to the `live_autonomy_policy/` package. That
 package owns the `LiveAutonomySpine` JSON contract, journal/probe DTOs, live

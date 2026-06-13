@@ -1,6 +1,7 @@
 import {
   "vectie/moontown/core",
   "vectie/moontown/build_pipeline",
+  "vectie/moontown/build_pipeline_runtime",
   "vectie/moontown/planbook_runtime",
   "vectie/moontown/town_synthesis_runtime",
   "vectie/moontown/visual_projection_runtime",

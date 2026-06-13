@@ -1,0 +1,25 @@
+// Generated using `moon info`, DON'T EDIT IT
+package "vectie/moontown/build_pipeline_runtime"
+
+import {
+  "vectie/moontown/adapters/moonbook",
+  "vectie/moontown/core",
+}
+
+// Values
+pub async fn complete_wenyu_build_artifacts_if_needed(@moonbook.BookCatalogEntry, @moonbook.BookTask, @core.TaskExecutionRecord) -> @core.TaskExecutionRecord
+
+pub async fn ensure_wenyu_build_moonclaw_profile(String) -> Unit
+
+pub async fn preseed_wenyu_goal_inputs(@moonbook.BookCatalogEntry, String, String) -> Unit
+
+pub async fn wenyu_book_ready_for_build(@moonbook.BookCatalogEntry) -> Bool
+
+// Errors
+
+// Types and methods
+
+// Type aliases
+
+// Traits
+

@@ -1,5 +1,5 @@
 ///|
-fn wenyu_build_execute_prompt_template() -> String {
+pub fn wenyu_build_execute_prompt_template() -> String {
   [
     "Execute the imported Wenyu Valley build packet for ${proposal.title}.",
     "This is not a wiki query.",
@@ -12,7 +12,7 @@ fn wenyu_build_execute_prompt_template() -> String {
 }
 
 ///|
-fn wenyu_build_review_prompt_template() -> String {
+pub fn wenyu_build_review_prompt_template() -> String {
   [
     "Review the build output for ${proposal.title}.",
     wenyu_build_review_workspace_rule(),

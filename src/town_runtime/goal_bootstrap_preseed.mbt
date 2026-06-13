@@ -16,7 +16,7 @@ async fn preseed_goal_bootstrap_inputs(
   if !entry.id.has_prefix("wenyu-") {
     return
   }
-  @build_pipeline.preseed_wenyu_goal_inputs(
+  @build_pipeline_runtime.preseed_wenyu_goal_inputs(
     entry,
     objective,
     current_repo_root(),

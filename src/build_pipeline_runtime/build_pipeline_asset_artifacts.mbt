@@ -4,7 +4,7 @@ async fn write_wenyu_asset_pack_record(
   task : @moonbook.BookTask,
 ) -> Unit {
   let root = @moonbook.workspace_root(entry)
-  let module_name = wenyu_module_name(entry)
+  let module_name = @build_pipeline.wenyu_module_name(entry)
   write_wenyu_asset_prompts(root, task, module_name)
   write_wenyu_asset_manifest(root, entry, module_name)
 }
