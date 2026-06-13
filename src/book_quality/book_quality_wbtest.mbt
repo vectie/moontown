@@ -671,7 +671,9 @@ test "book quality package owns external review packet contract" {
     prompt: "Review the book.",
     output_contract: review_output_contract(),
   }
-  let external = review_external_packet(packet, "/tmp/results", "codex-main")
+  let external = review_external_proposal_spec(
+    packet, "/tmp/results", "codex-main",
+  )
   assert_true(
     external.notes.contains(
       "Do not inflate score for operational logs or scaffolding.",
@@ -720,7 +722,9 @@ test "book quality package builds external MoonClaw review packet" {
     prompt: "Review the book.",
     output_contract: review_output_contract(),
   }
-  let external = review_external_packet(packet, "/tmp/results", "codex-main")
+  let external = review_external_proposal_spec(
+    packet, "/tmp/results", "codex-main",
+  )
   assert_eq(external.packet_id, "book-quality-ai-review-coding")
   assert_eq(external.profile, review_profile_id())
   assert_eq(external.output_contract, review_output_contract())

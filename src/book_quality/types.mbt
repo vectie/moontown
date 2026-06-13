@@ -43,6 +43,21 @@ pub(all) struct BookQualityReviewPacket {
 } derive(Eq, ToJson, FromJson)
 
 ///|
+pub(all) struct BookQualityReviewProposalSpec {
+  packet_id : String
+  title : String
+  summary : String
+  request_text : String
+  profile : String
+  output_contract : String
+  context_pages : Array[String]
+  skill_paths : Array[String]
+  notes : Array[String]
+  tags : Array[String]
+  metadata : Json
+} derive(ToJson, FromJson)
+
+///|
 pub(all) struct BookQualityReviewRun {
   book_id : String
   packet_path : String

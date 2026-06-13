@@ -395,15 +395,17 @@ health checks, semantic-review candidate ordering is package-owned too, and
 book-quality review-status summary rendering is package-owned. Semantic review
 profile policy is package-owned too: review profile id, execution-target
 metadata contract, preferred skills, role-runtime envelope, target-parameterized
-MoonClaw jobs profile JSON, packet step metadata, external packet request text,
-notes, tags, and review metadata belong to `book_quality/`, while root only
-materializes those values into MoonClaw profile files and resolves paths for
-external packets.
+MoonClaw jobs profile JSON, packet step metadata, neutral review proposal spec,
+request text, notes, tags, and review metadata belong to `book_quality/`, while
+root only materializes those values into MoonClaw profile files and resolves
+paths for external packets.
 `book_quality_runtime/` owns the concrete `.moonclaw` ACP config for review
 work by combining book-quality reviewer semantics with adapter-owned Codex
-target JSON. Root may supply observed directories, process facts, and audits
-into the package, but it should not define the `codex-main` target schema or
-reviewer label or rebuild package policy from those observations. The
+target JSON. It also adapts the neutral review proposal spec into a MoonClaw
+external proposal packet at dispatch time. Root may supply observed directories,
+process facts, and audits into the package, but it should not define the
+`codex-main` target schema or reviewer label or rebuild package policy from
+those observations. The
 selection of the first pending semantic review, result-file filtering, the
 meaning of "weaker candidate should be reviewed first", the summary shape of the
 review ledger, and the active-run lifecycle decision from observed state belong

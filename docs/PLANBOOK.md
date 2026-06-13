@@ -154,15 +154,14 @@ ledger summary language, duplicate-dispatch active count, orphaning rules, or
 the pending/written display decision. Semantic review profile policy
 also belongs there: profile id, execution-target metadata contract, preferred
 skills, role-runtime envelope, target-parameterized MoonClaw jobs profile JSON,
-and packet step metadata are package-owned. The semantic-review ACP config belongs to
+packet step metadata, and neutral review proposal spec are package-owned. The
+semantic-review ACP config belongs to
 `book_quality_runtime/`, which combines those review semantics with the
-adapter-owned Codex target JSON. Root may pass the observed source root,
-resolved Codex command, args, and model, but it should not define the
-`codex-main` target schema or reviewer label.
-The transformation from a `BookQualityReviewPacket` into a MoonClaw external
-proposal packet is also package-owned; root should dispatch the returned packet
-instead of constructing packet ids, context page paths, skill paths, tags,
-notes, request text, or metadata itself.
+adapter-owned Codex target JSON and adapts the neutral review proposal spec to a
+MoonClaw external proposal packet at dispatch time. Root may pass the observed
+source root, resolved Codex command, args, and model, but it should not define
+the `codex-main` target schema, reviewer label, packet ids, context page paths,
+skill paths, tags, notes, request text, or metadata itself.
 The same rule applies to ordinary catalog-backed keeper packets: caller code
 passes the catalog entry, task, and hydrated context, while
 `adapters/moonclaw` attaches the policy-owned context metadata and MoonClaw

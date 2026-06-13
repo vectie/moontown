@@ -169,7 +169,7 @@ pub fn research_deep_report_word_assessment(Int) -> BookQualitySignalAssessment
 
 pub fn research_required_paths() -> Array[BookQualityRequiredPath]
 
-pub fn review_external_packet(BookQualityReviewPacket, String, String) -> @moonclaw.ExternalProposalPacket
+pub fn review_external_proposal_spec(BookQualityReviewPacket, String, String) -> BookQualityReviewProposalSpec
 
 pub fn review_moonclaw_jobs_json(String) -> Json
 
@@ -321,6 +321,20 @@ pub(all) struct BookQualityReviewPacket {
   prompt : String
   output_contract : String
 } derive(Eq, ToJson, @json.FromJson)
+
+pub(all) struct BookQualityReviewProposalSpec {
+  packet_id : String
+  title : String
+  summary : String
+  request_text : String
+  profile : String
+  output_contract : String
+  context_pages : Array[String]
+  skill_paths : Array[String]
+  notes : Array[String]
+  tags : Array[String]
+  metadata : Json
+} derive(ToJson, @json.FromJson)
 
 pub(all) struct BookQualityReviewRun {
   book_id : String
