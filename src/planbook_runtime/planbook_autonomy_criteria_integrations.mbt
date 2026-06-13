@@ -24,10 +24,10 @@ async fn planbook_app_tool_book_template_criterion() -> PlanbookCriterionStatus 
     "\"template_id\": \"app-tool-book\"",
   )
   let installer_ready = text_file_contains(
-      "src/book_templates/installers.mbt", "\"app-tool-book\"",
+      "src/book_templates_runtime/installers.mbt", "\"app-tool-book\"",
     ) &&
     text_file_contains(
-      "src/book_templates/installers.mbt", "install_app_tool_book_config",
+      "src/book_templates_runtime/installers.mbt", "install_app_tool_book_config",
     )
   let template_ready = @fs.exists(
       "assets/templates/books/app-tool-book/book.json",

@@ -58,7 +58,7 @@ async fn live_autonomy_write_metadata(
     planbook_change_log_path: planbook.planbook_change_log_path,
     planbook_engineering_digest_path: planbook.planbook_engineering_digest_path,
     latest_change_summary: planbook.latest_change_summary,
-    book_template_request_status: @book_templates.inspect_book_template_request_status(
+    book_template_request_status: @book_templates_runtime.inspect_book_template_request_status(
       request_path=@book_templates.request_path_for_snapshot(snapshot_path),
     ),
     prior_stable_waiting_observation_streak: prior_live_autonomy_stable_waiting_observation_streak(

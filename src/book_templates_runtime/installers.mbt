@@ -1,7 +1,7 @@
 ///|
-struct BookTemplateInstaller {
+priv struct BookTemplateInstaller {
   template_id : String
-} derive(Debug, Eq)
+}
 
 ///|
 fn book_template_installers() -> Array[BookTemplateInstaller] {
@@ -38,6 +38,6 @@ async fn BookTemplateInstaller::install_config(
         book_catalog_path~,
         standing_goal_path~,
       )
-    id => registered_without_installer_summary(id)
+    id => @book_templates.registered_without_installer_summary(id)
   }
 }

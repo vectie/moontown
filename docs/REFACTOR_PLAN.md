@@ -339,14 +339,15 @@ Goals:
   extraction, post-install request-state transitions, terminal-event reconcile
   gates, process-result records, processed/reconciled outcome aggregation,
   empty request-status construction, canonical request/event filenames, path
-  derivation, and summary wording are package-owned, with root event files and
-  concrete request execution remaining IO/orchestration only; root must not
-  keep default path shim functions for book-template registry, request inbox, or
-  request-event paths;
+  derivation, and summary wording are package-owned, with request ledger/event
+  file IO, registry file observation, concrete request execution, status
+  rendering entrypoints, and installer dispatch in `book_templates_runtime/`;
+  root must not keep default path shim functions for book-template registry,
+  request inbox, or request-event paths;
   unknown-template and registered-without-installer outcome wording is
   package-owned; concrete template runtime dispatch, request processing,
   request reconciliation, request status rendering, registry rendering, and
-  installer dispatch are now package-owned too, while root keeps only
+  installer dispatch are runtime-package-owned, while root keeps only
   CLI-compatible wrapper functions
 - keep App ToolBook bootstrap/install/status/workspace behavior in
   `app_tool_book/`; root may expose wrappers for existing commands, but should

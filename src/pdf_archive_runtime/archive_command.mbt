@@ -46,7 +46,7 @@ async fn append_pdf_evidence_watch_archive_event(
   request_event_path : String,
 ) -> Unit {
   let summary = "Archived PDF Evidence Watch book `\{book_id}`; standing goal `\{goal_id}` enabled=`\{status.standing_goal_enabled}`; disabled_goals=\{disabled_count}. Reason: \{reason}"
-  @book_templates.append_request_event(request_event_path, {
+  @book_templates_runtime.append_request_event(request_event_path, {
     id: "archive-\{book_id}-\{@env.now()}",
     request_id: "archive-\{book_id}",
     template_id: "pdf-evidence-watch",

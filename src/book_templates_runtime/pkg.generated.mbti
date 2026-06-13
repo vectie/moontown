@@ -1,0 +1,39 @@
+// Generated using `moon info`, DON'T EDIT IT
+package "vectie/moontown/book_templates_runtime"
+
+import {
+  "vectie/moontown/book_templates",
+}
+
+// Values
+pub async fn append_request_event(String, @book_templates.BookTemplateRequestEvent) -> Unit
+
+pub async fn inspect_book_template_request_status(request_path? : String) -> @book_templates.BookTemplateRequestStatus
+
+pub async fn inspect_registry(registry_path? : String) -> @book_templates.BookTemplateRegistry
+
+pub async fn install_book_template_config(String, String, registry_path? : String, book_catalog_path? : String, standing_goal_path? : String) -> String
+
+pub async fn latest_request_event_summary(String) -> String
+
+pub async fn load_request_event_lines(String) -> Array[String]
+
+pub async fn load_request_event_request_ids(String) -> Array[String]
+
+pub async fn load_request_ledger(String) -> @book_templates.BookTemplateRequestLedger
+
+pub async fn process_book_template_requests(request_path? : String, registry_path? : String, book_catalog_path? : String, standing_goal_path? : String, tick? : Int) -> String
+
+pub async fn render_book_template_registry(registry_path? : String) -> String
+
+pub async fn render_book_template_request_status(request_path? : String) -> String
+
+pub async fn save_request_ledger(String, @book_templates.BookTemplateRequestLedger) -> Unit
+
+// Errors
+
+// Types and methods
+
+// Type aliases
+
+// Traits

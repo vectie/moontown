@@ -1,7 +1,7 @@
 ///|
 pub async fn save_request_ledger(
   request_path : String,
-  ledger : BookTemplateRequestLedger,
+  ledger : @book_templates.BookTemplateRequestLedger,
 ) -> Unit {
   write_text_file(request_path, ledger.to_json().stringify(indent=2))
 }
@@ -9,7 +9,7 @@ pub async fn save_request_ledger(
 ///|
 pub async fn load_request_ledger(
   request_path : String,
-) -> BookTemplateRequestLedger {
+) -> @book_templates.BookTemplateRequestLedger {
   if !@fs.exists(request_path) {
     return { requests: [] }
   }
@@ -24,17 +24,22 @@ pub async fn load_request_ledger(
 
 ///|
 pub async fn latest_request_event_summary(event_path : String) -> String {
-  latest_request_event_summary_from_lines(load_request_event_lines(event_path))
+  @book_templates.latest_request_event_summary_from_lines(
+    load_request_event_lines(event_path),
+  )
 }
 
 ///|
 pub async fn append_request_event(
   event_path : String,
-  event : BookTemplateRequestEvent,
+  event : @book_templates.BookTemplateRequestEvent,
 ) -> Unit {
   write_text_file(
     event_path,
-    append_request_event_text(read_text_or_empty(event_path), event),
+    @book_templates.append_request_event_text(
+      read_text_or_empty(event_path),
+      event,
+    ),
   )
 }
 
@@ -42,7 +47,9 @@ pub async fn append_request_event(
 pub async fn load_request_event_request_ids(
   event_path : String,
 ) -> Array[String] {
-  request_event_request_ids_from_lines(load_request_event_lines(event_path))
+  @book_templates.request_event_request_ids_from_lines(
+    load_request_event_lines(event_path),
+  )
 }
 
 ///|
@@ -52,7 +59,7 @@ pub async fn load_request_event_lines(event_path : String) -> Array[String] {
     return lines
   }
   let text = @fs.read_file(event_path).text() catch { _ => return lines }
-  request_event_lines_from_text(text)
+  @book_templates.request_event_lines_from_text(text)
 }
 
 ///|

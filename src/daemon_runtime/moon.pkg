@@ -8,6 +8,7 @@ import {
   "moonbitlang/x/sys",
   "vectie/moontown/book_quality_runtime",
   "vectie/moontown/book_templates",
+  "vectie/moontown/book_templates_runtime",
   "vectie/moontown/civic_runtime",
   "vectie/moontown/core",
   "vectie/moontown/daemon_runtime_policy",

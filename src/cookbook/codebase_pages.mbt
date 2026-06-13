@@ -49,7 +49,7 @@ pub fn cookbook_algorithms_markdown() -> String {
     "  -> validate non-empty typed outputs", "  -> merge participant books into catalog",
     "  -> write participant workspaces", "  -> seed protocol ledgers", "  -> write building pages",
     "  -> refresh protocol and civic status projections", "```", "", "The important guard is that invalid or empty reducer output blocks the round. The runtime writes a blocker instead of pretending template examples are real civic intelligence.",
-    "", "## 6. Book Template Request Processing", "", "Core files: `book_templates_request_processing.mbt`, `book_templates_request_ledger.mbt`, `app_tool_book_workspace.mbt`.",
+    "", "## 6. Book Template Request Processing", "", "Core files: `book_templates_runtime/request_processing.mbt`, `book_templates_runtime/request_storage.mbt`, `book_templates/request_policy.mbt`, `app_tool_book_runtime/workspace.mbt`.",
     "", "Book templates are installed through a request ledger. Pending or retry requests call `install_book_template_config`; other requests reconcile existing work. Every processed request appends an event with request id, template id, status, summary, tick, and generation timestamp.",
     "", "This lets Moondesk, Mayor, or future AI plans ask for new durable books without hardcoding one-off copy steps into the daemon.",
     "", "## 7. Live Autonomy Derivation", "", "Core files: `live_autonomy_builder.mbt`, `live_autonomy_derived_state.mbt`, `live_autonomy_metric_counts.mbt`.",

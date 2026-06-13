@@ -3,6 +3,7 @@ import {
   "moonbitlang/core/env",
   "moonbitlang/core/json",
   "vectie/moontown/book_templates",
+  "vectie/moontown/book_templates_runtime",
   "vectie/moontown/civic_runtime",
   "vectie/moontown/core",
   "vectie/moontown/daemon_runtime_policy",

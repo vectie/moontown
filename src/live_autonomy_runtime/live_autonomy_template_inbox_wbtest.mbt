@@ -5,7 +5,7 @@ async test "live autonomy surfaces book template request inbox" {
   )
   let snapshot_path = workspace.snapshot_path
   ignore(
-    @book_templates.save_request_ledger(
+    @book_templates_runtime.save_request_ledger(
       @book_templates.request_path_for_snapshot(snapshot_path),
       {
         requests: [

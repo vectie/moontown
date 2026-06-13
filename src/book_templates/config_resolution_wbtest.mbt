@@ -26,6 +26,16 @@ async fn resolve_book_template_config_text_override(
 }
 
 ///|
+async fn read_text_or_empty(path : String) -> String {
+  @support.read_text_or_empty(path)
+}
+
+///|
+async fn write_text_file(path : String, content : String) -> Unit {
+  @support.write_text_file(path, content)
+}
+
+///|
 fn resolve_book_template_config_workspace_root(
   base_dir : String,
   configured_workspace_root : String,

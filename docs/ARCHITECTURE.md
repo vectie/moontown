@@ -154,7 +154,7 @@ book owns. The implementation now has a first-class `policy` package:
 - [book_templates/registry_policy.mbt](/Users/kq/Workspace/moontown/src/book_templates/registry_policy.mbt)
   owns pure registry readiness construction, descriptor check-path expansion,
   and registry Markdown rendering. It should not load files directly.
-- [book_templates/registry_storage.mbt](/Users/kq/Workspace/moontown/src/book_templates/registry_storage.mbt)
+- [book_templates_runtime/registry_storage.mbt](/Users/kq/Workspace/moontown/src/book_templates_runtime/registry_storage.mbt)
   owns filesystem-backed registry inspection: loading the registry manifest and
   observing which descriptor paths are missing before passing those observations
   into `registry_policy`. Root may call `inspect_registry(...)`, but it should
@@ -179,11 +179,13 @@ book owns. The implementation now has a first-class `policy` package:
   names plus path derivation from observed snapshot/request paths. Root may
   supply the current snapshot path, but it should not duplicate those filenames
   or keep root-local default path shim functions.
-- [book_templates/](/Users/kq/Workspace/moontown/src/book_templates)
-  also owns concrete template runtime dispatch, request processing, request
-  reconciliation, request status rendering, registry rendering, and installer
-  dispatch. Root Moontown may expose CLI-compatible wrapper functions, but it
-  should not keep template lifecycle code in the root package.
+- [book_templates_runtime/](/Users/kq/Workspace/moontown/src/book_templates_runtime)
+  owns concrete template runtime dispatch, request ledger/event file IO,
+  request processing, request reconciliation, request status rendering,
+  registry rendering, registry file observation, and installer dispatch. Root
+  Moontown may expose CLI-compatible wrapper functions, but it should not keep
+  template lifecycle code in the root package or call runtime side effects
+  through `book_templates/`.
 - [app_tool_book/contracts.mbt](/Users/kq/Workspace/moontown/src/app_tool_book/contracts.mbt)
   owns App ToolBook defaults, required workspace paths, template-copy path
   policy, config/manifest schema construction, catalog-identity-aware config
@@ -710,12 +712,13 @@ For book-type-specific scoring, root may pass observations such as deep-report
 word count, course index text, latest civic result existence, or audit-file
 existence, but the thresholds, points, and strength/gap wording belong to
 `book_quality/`.
-Book-template request semantics follow the same rule. Root may read and write
-the request ledger, inspect the template registry file, invoke PDF/AppTool
-installers, and append event logs, but it should not define the durable request
-DTOs, registry readiness/output wording, descriptor check-path policy,
-descriptor lookup semantics, count status buckets, decide that retry is pending
-runtime work, or own
+Book-template request semantics follow the same rule. `book_templates_runtime/`
+may read and write the request ledger, inspect the template registry file,
+invoke PDF/AppTool installers, and append event logs, but root should call that
+runtime package rather than owning those side effects. `book_templates/` owns
+the durable request DTOs, registry readiness/output wording, descriptor
+check-path policy, descriptor lookup semantics, count status buckets, whether
+retry is pending runtime work, and
 operator-facing process summary or request-inbox rendering language. It also
 should not hard-code request status terms such as pending, retry, installed,
 and failed when package predicates can express the decision, or format request
@@ -731,7 +734,8 @@ registered-without-installer failures locally.
 Installers must emit the
 `book_templates/` success marker for installed state; request processing must
 not infer success from human-readable installer prose. Those lifecycle
-contracts belong to `book_templates/`.
+contracts belong to `book_templates/`; installer execution belongs to
+`book_templates_runtime/`.
 App ToolBook semantics also follow this split. `app_tool_book/` owns the
 ToolBook install/status DTOs, stable template root, default book id and purpose,
 required paths, copied-template paths, config/manifest schemas,

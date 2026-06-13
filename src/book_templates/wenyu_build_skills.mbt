@@ -1,23 +1,4 @@
 ///|
-pub async fn write_wenyu_build_skills(
-  root : String,
-  entry : @moonbook.BookCatalogEntry,
-) -> Unit {
-  @support.write_text_file(
-    "\{root}/skills/wenyu-build/SKILL.md",
-    wenyu_build_skill_text(entry),
-  )
-  @support.write_text_file(
-    "\{root}/skills/wenyu-code-patch/SKILL.md",
-    wenyu_code_patch_skill_text(entry),
-  )
-  @support.write_text_file(
-    "\{root}/skills/wenyu-asset-pack/SKILL.md",
-    wenyu_asset_pack_skill_text(entry),
-  )
-}
-
-///|
 pub fn wenyu_build_skill_text(entry : @moonbook.BookCatalogEntry) -> String {
   let module_name = wenyu_module_name(entry)
   [

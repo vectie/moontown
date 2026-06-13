@@ -8,9 +8,9 @@ import {
 }
 
 // Values
-pub async fn append_request_event(String, BookTemplateRequestEvent) -> Unit
-
 pub fn append_request_event_text(String, BookTemplateRequestEvent) -> String
+
+pub fn book_template_request_process_context(String, String, String, String, String, Int) -> BookTemplateRequestProcessContext
 
 pub fn decode_request_event_line(String) -> BookTemplateRequestEvent?
 
@@ -22,39 +22,19 @@ pub fn empty_request_status(request_path~ : String, event_path~ : String) -> Boo
 
 pub fn find_registry_descriptor(Array[BookTemplateDescriptor], String) -> BookTemplateDescriptor?
 
-pub async fn inspect_book_template_request_status(request_path? : String) -> BookTemplateRequestStatus
-
-pub async fn inspect_registry(registry_path? : String) -> BookTemplateRegistry
-
-pub async fn install_book_template_config(String, String, registry_path? : String, book_catalog_path? : String, standing_goal_path? : String) -> String
-
 pub fn install_status_for_summary(String) -> String
 
 pub fn install_success_marker() -> String
 
 pub fn install_summary_success(String) -> Bool
 
-pub async fn latest_request_event_summary(String) -> String
-
 pub fn latest_request_event_summary_from_lines(Array[String]) -> String
-
-pub async fn load_request_event_lines(String) -> Array[String]
-
-pub async fn load_request_event_request_ids(String) -> Array[String]
-
-pub async fn load_request_ledger(String) -> BookTemplateRequestLedger
-
-pub async fn process_book_template_requests(request_path? : String, registry_path? : String, book_catalog_path? : String, standing_goal_path? : String, tick? : Int) -> String
 
 pub fn registered_without_installer_summary(String) -> String
 
 pub fn registry_from_observed(registry_path~ : String, templates~ : Array[BookTemplateDescriptor], missing_paths~ : Array[String]) -> BookTemplateRegistry
 
 pub fn registry_ready(Array[BookTemplateDescriptor], Array[String]) -> Bool
-
-pub async fn render_book_template_registry(registry_path? : String) -> String
-
-pub async fn render_book_template_request_status(request_path? : String) -> String
 
 pub fn render_registry_markdown(BookTemplateRegistry) -> String
 
@@ -116,8 +96,6 @@ pub fn request_status_summary(BookTemplateRequestStatusCounts) -> String
 
 pub fn resolve_request_path(String, String) -> String
 
-pub async fn save_request_ledger(String, BookTemplateRequestLedger) -> Unit
-
 pub fn unknown_template_summary(String) -> String
 
 pub fn wenyu_asset_pack_skill_text(@moonbook.BookCatalogEntry) -> String
@@ -125,8 +103,6 @@ pub fn wenyu_asset_pack_skill_text(@moonbook.BookCatalogEntry) -> String
 pub fn wenyu_build_skill_text(@moonbook.BookCatalogEntry) -> String
 
 pub fn wenyu_code_patch_skill_text(@moonbook.BookCatalogEntry) -> String
-
-pub async fn write_wenyu_build_skills(String, @moonbook.BookCatalogEntry) -> Unit
 
 // Errors
 
@@ -144,8 +120,6 @@ pub(all) struct BookTemplateDescriptor {
   required_paths : Array[String]
   editable_files : Array[String]
 } derive(Eq, ToJson, @debug.Debug, @json.FromJson)
-
-type BookTemplateInstaller derive(Eq, @debug.Debug)
 
 pub(all) struct BookTemplateRegistry {
   registry_path : String
@@ -182,6 +156,15 @@ pub(all) struct BookTemplateRequestEvent {
 pub(all) struct BookTemplateRequestLedger {
   requests : Array[BookTemplateRequest]
 } derive(Eq, ToJson, @debug.Debug, @json.FromJson)
+
+pub(all) struct BookTemplateRequestProcessContext {
+  request_base_dir : String
+  event_path : String
+  registry_path : String
+  book_catalog_path : String
+  standing_goal_path : String
+  tick : Int
+}
 
 pub(all) struct BookTemplateRequestProcessResult {
   request : BookTemplateRequest

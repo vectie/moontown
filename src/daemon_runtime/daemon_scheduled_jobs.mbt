@@ -67,7 +67,7 @@ async fn run_daemon_scheduled_job(
     Some(run_book_quality_review_cycle(book_catalog_path, snapshot_path))
   } else if @scheduler.scheduled_job_is_book_template_request(job) {
     Some(
-      @book_templates.process_book_template_requests(
+      @book_templates_runtime.process_book_template_requests(
         request_path=@book_templates.request_path_for_snapshot(snapshot_path),
         book_catalog_path~,
         tick~,

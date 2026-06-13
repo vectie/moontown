@@ -4,7 +4,7 @@ import {
   "vectie/moontown",
   "vectie/moontown/app_tool_book_runtime",
   "vectie/moontown/book_quality_runtime",
-  "vectie/moontown/book_templates",
+  "vectie/moontown/book_templates_runtime",
   "vectie/moontown/civic_runtime",
   "vectie/moontown/cookbook_runtime",
   "vectie/moontown/course_book_runtime",

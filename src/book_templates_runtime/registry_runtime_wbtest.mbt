@@ -8,7 +8,7 @@ async test "book template registry exposes pdf evidence watch template" {
   for template in registry.templates {
     if template.template_id == "pdf-evidence-watch" {
       found = true
-      assert_eq(template.book_type, @policy.research_type())
+      assert_eq(template.book_type, "research-book")
       assert_true(template.install_command.contains("books template install"))
       assert_true(
         template.editable_files.contains("wiki/methods/analysis-method.md"),
@@ -44,7 +44,7 @@ async test "generic book template installer dispatches pdf evidence watch" {
   let goals_path = "\{base}/standing-goals.json"
   let method_path = "\{base}/method.md"
   let workspace_root = "\{base}/workspace"
-  write_text_file(
+  @support.write_text_file(
     method_path, "# Registry Method\n\nPromote only durable deltas.",
   )
   let spec = @pdf_evidence_watch.PdfEvidenceWatchInstallSpec::{
@@ -57,17 +57,17 @@ async test "generic book template installer dispatches pdf evidence watch" {
     cadence_ticks: 19,
     workspace_root,
   }
-  write_text_file(config_path, spec.to_json().stringify(indent=2))
+  @support.write_text_file(config_path, spec.to_json().stringify(indent=2))
   let summary = install_book_template_config(
     "pdf-evidence-watch",
     config_path,
     book_catalog_path=catalog_path,
     standing_goal_path=goals_path,
   )
-  assert_true(summary.contains(install_success_marker()))
+  assert_true(summary.contains(@book_templates.install_success_marker()))
   assert_true(summary.contains("Installed PDF Evidence Watch config"))
   assert_true(@fs.exists("\{workspace_root}/book.json"))
-  let method_text = read_text_or_empty(
+  let method_text = @support.read_text_or_empty(
     "\{workspace_root}/wiki/methods/analysis-method.md",
   )
   assert_true(method_text.contains("Registry Method"))
@@ -82,8 +82,8 @@ async test "generic book template installer dispatches app tool book" {
   let method_path = "\{base}/method.md"
   let tool_path = "\{base}/tool.md"
   let workspace_root = "\{base}/workspace"
-  write_text_file(method_path, "# Tool Method\n\nUse current sources.")
-  write_text_file(tool_path, "# Tool Spec\n\nRender an explorer.")
+  @support.write_text_file(method_path, "# Tool Method\n\nUse current sources.")
+  @support.write_text_file(tool_path, "# Tool Spec\n\nRender an explorer.")
   let spec = @app_tool_book.AppToolBookInstallSpec::{
     book_id: "app-tool-registry-app",
     title: "Registry App Tool",
@@ -97,14 +97,14 @@ async test "generic book template installer dispatches app tool book" {
     cadence_ticks: 29,
     workspace_root,
   }
-  write_text_file(config_path, spec.to_json().stringify(indent=2))
+  @support.write_text_file(config_path, spec.to_json().stringify(indent=2))
   let summary = install_book_template_config(
     "app-tool-book",
     config_path,
     book_catalog_path=catalog_path,
     standing_goal_path=goals_path,
   )
-  assert_true(summary.contains(install_success_marker()))
+  assert_true(summary.contains(@book_templates.install_success_marker()))
   assert_true(summary.contains("Installed App ToolBook config"))
   assert_true(!summary.contains("toolbook-registry-app"))
   assert_true(summary.contains("app-tool-registry-app"))
@@ -124,11 +124,11 @@ async test "generic book template installer reports registered templates without
   let base = "/tmp/moontown-book-template-no-installer-wbtest"
   let registry_path = "\{base}/templates.json"
   let config_path = "\{base}/config.json"
-  write_text_file(
+  @support.write_text_file(
     registry_path,
     "{\"templates\":[{\"template_id\":\"experimental-only\",\"book_type\":\"experimental\",\"specialization\":\"test\",\"title\":\"Experimental Only\",\"purpose\":\"Registered without an installer.\",\"root\":\"\{base}\",\"install_example\":\"\",\"install_command\":\"\",\"status_command\":\"\",\"required_paths\":[],\"editable_files\":[]}]}",
   )
-  write_text_file(config_path, "{}")
+  @support.write_text_file(config_path, "{}")
   let summary = install_book_template_config(
     "experimental-only",
     config_path,
@@ -136,5 +136,8 @@ async test "generic book template installer reports registered templates without
     book_catalog_path="\{base}/catalog.json",
     standing_goal_path="\{base}/standing-goals.json",
   )
-  assert_eq(summary, registered_without_installer_summary("experimental-only"))
+  assert_eq(
+    summary,
+    @book_templates.registered_without_installer_summary("experimental-only"),
+  )
 }

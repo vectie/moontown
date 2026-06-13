@@ -727,6 +727,44 @@ Boundary:
   consumes `policy.default_generated_site_projection_path()` rather than
   redefining the projection path.
 
+## Book Templates
+
+Key files:
+
+- [src/book_templates/types.mbt](/Users/kq/Workspace/moontown/src/book_templates/types.mbt)
+- [src/book_templates/registry_policy.mbt](/Users/kq/Workspace/moontown/src/book_templates/registry_policy.mbt)
+- [src/book_templates/request_policy.mbt](/Users/kq/Workspace/moontown/src/book_templates/request_policy.mbt)
+- [src/book_templates/request_paths.mbt](/Users/kq/Workspace/moontown/src/book_templates/request_paths.mbt)
+- [src/book_templates_runtime/runtime.mbt](/Users/kq/Workspace/moontown/src/book_templates_runtime/runtime.mbt)
+- [src/book_templates_runtime/requests.mbt](/Users/kq/Workspace/moontown/src/book_templates_runtime/requests.mbt)
+- [src/book_templates_runtime/request_storage.mbt](/Users/kq/Workspace/moontown/src/book_templates_runtime/request_storage.mbt)
+- [src/book_templates_runtime/registry_storage.mbt](/Users/kq/Workspace/moontown/src/book_templates_runtime/registry_storage.mbt)
+
+Purpose:
+
+- define reusable book-template descriptors, request ledgers, request events,
+  request status vocabulary, registry readiness, and installer outcome wording
+- derive canonical template registry, request inbox, and request-event paths
+- let a runtime package process template requests, observe registry files, call
+  concrete installers, and render operator-facing template status pages
+
+Boundary:
+
+- `src/book_templates` owns pure contracts: DTOs, path derivation,
+  registry-policy construction/rendering, request lifecycle/status/event
+  semantics, install-success marker interpretation, and Wenyu build skill text.
+- `src/book_templates` must not load registry/request files, write request
+  ledgers, append event JSONL files, call PDF/AppTool installers, or mutate
+  workspaces.
+- `src/book_templates_runtime` owns those side effects: registry file
+  observation, request ledger/event storage, request processing, event
+  reconciliation, installer dispatch, and runtime status rendering entrypoints.
+- Higher-level runtime packages and CLI code should call
+  `src/book_templates_runtime` for side effects and `src/book_templates` for
+  pure path/status/policy helpers.
+- Wenyu build skill file materialization belongs to `src/build_pipeline`;
+  `src/book_templates` only owns the reusable skill text.
+
 ## Cookbook
 
 Key files:
