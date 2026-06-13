@@ -1,6 +1,6 @@
 ///|
 test "default civic communication-pattern schedules are explicit opt-in" {
-  assert_eq(default_civic_salon_schedules().length(), 0)
+  assert_eq(default_civic_communication_schedules().length(), 0)
 }
 
 ///|
@@ -26,9 +26,9 @@ async test "scenario interval config controls generated schedule cadence" {
     ..daemon_civic_salon_scenario(),
     interval_ms: Some(900_000UL),
   }
-  let schedule = upsert_civic_salon_schedule_for_scenario(
+  let schedule = upsert_civic_communication_schedule_for_scenario(
     scenario,
-    path=default_civic_salon_schedule_path(snapshot_path~),
+    path=default_civic_communication_schedule_path(snapshot_path~),
     now_ms=123UL,
   )
   assert_eq(schedule.interval_ms, 900_000UL)
@@ -89,13 +89,13 @@ async test "persist civic salon schedule replaces only matching schedule" {
     id: "future-energy-policy-hall",
     title: "Future Energy Policy Hall",
   }
-  save_civic_salon_schedules(path, [first, second])
+  save_civic_communication_schedules(path, [first, second])
   persist_civic_salon_schedule(path, first.id, {
     ..first,
     latest_summary: "claimed",
     next_due_ms: 300UL,
   })
-  let schedules = load_or_create_civic_salon_schedules(path~)
+  let schedules = load_or_create_civic_communication_schedules(path~)
   assert_eq(schedules.length(), 2)
   assert_eq(schedules[0].id, first.id)
   assert_eq(schedules[0].latest_summary, "claimed")

@@ -1,5 +1,5 @@
 ///|
-pub async fn bootstrap_civic_salon_scenario(
+async fn bootstrap_civic_salon_scenario(
   scenario : CivicCommunicationScenario,
   book_catalog_path? : String = @moonbook.default_catalog_path(),
   round_id? : String = "",

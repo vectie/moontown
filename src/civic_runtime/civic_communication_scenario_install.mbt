@@ -1,5 +1,5 @@
 ///|
-pub async fn bootstrap_civic_salon_scenario_file(
+async fn bootstrap_civic_salon_scenario_file(
   template_path : String,
   book_catalog_path? : String = @moonbook.default_catalog_path(),
   round_id? : String = "",

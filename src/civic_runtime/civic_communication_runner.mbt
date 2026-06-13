@@ -1,5 +1,5 @@
 ///|
-pub async fn run_due_civic_salons(
+async fn run_due_civic_salons(
   snapshot_path? : String = @storage.default_snapshot_path(),
   book_catalog_path? : String = @moonbook.default_catalog_path(),
   tick? : Int = 0,

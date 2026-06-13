@@ -771,6 +771,9 @@ Purpose:
   participant, output, blocker, step-kind, and MoonClaw profile-family names.
 - `src/civic_runtime` owns workspace writes, ledgers, generated pages, and
   scenario execution persistence.
+- `src/civic_runtime` exposes generic civic communication-pattern runtime APIs
+  for schedule paths, scenario paths, schedule load/save/upsert, due execution,
+  scenario bootstrap, and schedule status rendering.
 - `src/civic_runtime` owns civic-service MoonBook persistence payloads:
   execution detection, summary text, artifact lists, memory candidates, review
   candidate routing, and civic target-page trimming.
@@ -778,6 +781,9 @@ Purpose:
 Boundary:
 
 - civic runtime writes generated pages through `@civic` path helpers.
+- civic runtime public APIs should use communication-pattern vocabulary.
+  `research-salon` is one configured pattern; old `civic_salon_*` helper names
+  are package-private implementation details while migration continues.
 - civic runtime writes reducer workspaces through `@civic` reducer-contract
   helpers; it should not hardcode reducer filenames or profile family ids.
 - `src/town_runtime` may choose when a civic service result should be persisted,

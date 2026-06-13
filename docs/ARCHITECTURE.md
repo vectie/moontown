@@ -1029,7 +1029,7 @@ Implemented protocol pieces:
   book
 - generic `CivicCommunicationScenario` loading so a new domain can be added by JSON
   template and schedule entry rather than a new MoonBit branch
-- salon effectiveness metrics for idea yield, research-question yield,
+- communication-pattern effectiveness metrics for idea yield, research-question yield,
   cross-book links, home-book coverage, and returned idea-home records
 - return-home pages in each participating internal workspace so reduced ideas
   leave the building and become local reviewable work
@@ -1037,8 +1037,8 @@ Implemented protocol pieces:
   retry attempts do not crowd the operator book list
 - wall-clock communication-pattern schedules under `.moontown/civic/pattern-schedules.json`
 - append-only communication-pattern round records under `.moontown/civic/pattern-runs/`
-- daemon-tick integration that runs due salons without hard-coding them into
-  the frontend
+- daemon-tick integration that runs due communication-pattern schedules without
+  hard-coding them into the frontend
 
 Still planned:
 
@@ -1061,9 +1061,9 @@ moon run src/cmd/main -- civic protocols schedules tick
 moon run src/cmd/main -- civic doctor
 ```
 
-The recurring-salon path is intentionally schedule-driven and
+The recurring communication-pattern path is intentionally schedule-driven and
 template-driven. Operators can edit `.moontown/civic/pattern-schedules.json` to
-enable/disable salons or adjust `interval_ms`, and can edit
+enable/disable scenarios or adjust `interval_ms`, and can edit
 `.moontown/civic/pattern-scenarios/<session-id>.json` to change the domain,
 participants, skill rules, output paths, and review gate without changing
 MoonBit. The daemon tick calls the same due-check as

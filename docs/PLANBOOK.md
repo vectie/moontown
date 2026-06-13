@@ -553,10 +553,11 @@ files may materialize scenario pages and packets, but they should call the
 package policy instead of reconstructing protocol contracts.
 
 Civic skill contracts are civic-owned too. Generic Wenyu civic service skills,
-module-specific skills, salon participant skills, and salon reducer skill/
-input/contract text belong in `civic/skill_text.mbt`. Root may write generated
-`SKILL.md` and reducer contract files to workspaces, but future plans should
-not add root-local skill text helpers for civic service behavior.
+module-specific skills, research-salon participant skills, and
+communication-pattern reducer skill/input/contract text belong in
+`civic/skill_text.mbt`. Root may write generated `SKILL.md` and reducer
+contract files to workspaces, but future plans should not add root-local skill
+text helpers for civic service behavior.
 
 Civic workspace seed text is civic-owned too. Workspace index pages, service
 contracts, building protocol contracts, schema pages, wiki seed pages, review

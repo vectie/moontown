@@ -13,15 +13,13 @@ pub async fn bootstrap_civic_communication_scenario(@civic.CivicCommunicationSce
 
 pub async fn bootstrap_civic_communication_scenario_file(String, book_catalog_path? : String, round_id? : String, round_number? : Int, workspace_base? : String, reducer_mode? : @civic.CivicCommunicationReductionMode) -> String
 
-pub async fn bootstrap_civic_salon_scenario(@civic.CivicCommunicationScenario, book_catalog_path? : String, round_id? : String, round_number? : Int, workspace_base? : String, reducer_mode? : @civic.CivicCommunicationReductionMode) -> String
-
-pub async fn bootstrap_civic_salon_scenario_file(String, book_catalog_path? : String, round_id? : String, round_number? : Int, workspace_base? : String, reducer_mode? : @civic.CivicCommunicationReductionMode) -> String
-
 pub async fn bootstrap_wenyu_building_protocols(registry_path? : String, status_path? : String) -> String
 
 pub async fn bootstrap_wenyu_civic_workspaces(book_catalog_path? : String) -> String
 
 pub fn civic_communication_is_due(@civic.CivicCommunicationSchedule, UInt64) -> Bool
+
+pub fn civic_communication_scenario_path(String, snapshot_path? : String) -> String
 
 pub fn civic_marker_int(String, String, fallback~ : Int) -> Int
 
@@ -33,15 +31,13 @@ pub fn civic_persist_memory_candidates(@civic.CivicServiceDefinition, @core.Task
 
 pub fn civic_persist_summary(@civic.CivicServiceDefinition, @core.TaskExecutionRecord) -> String
 
-pub fn civic_salon_scenario_path(String, snapshot_path? : String) -> String
-
 pub async fn count_protocol_jsonl_records(String, String, ledger_base_dir? : String) -> Int
 
-pub fn default_civic_salon_run_ledger_path(String, snapshot_path? : String) -> String
+pub fn default_civic_communication_run_ledger_path(String, snapshot_path? : String) -> String
 
-pub fn default_civic_salon_schedule_path(snapshot_path? : String) -> String
+pub fn default_civic_communication_schedule_path(snapshot_path? : String) -> String
 
-pub fn default_civic_salon_schedules() -> Array[@civic.CivicCommunicationSchedule]
+pub fn default_civic_communication_schedules() -> Array[@civic.CivicCommunicationSchedule]
 
 pub fn default_protocol_ledger_base_dir() -> String
 
@@ -63,7 +59,7 @@ pub fn is_civic_service_execution(@core.TaskExecutionRecord) -> Bool
 
 pub async fn latest_protocol_json_line(String, String, ledger_base_dir? : String) -> String?
 
-pub async fn load_or_create_civic_salon_schedules(path? : String) -> Array[@civic.CivicCommunicationSchedule]
+pub async fn load_or_create_civic_communication_schedules(path? : String) -> Array[@civic.CivicCommunicationSchedule]
 
 pub fn normalize_civic_pending_summary(String) -> String
 
@@ -83,19 +79,15 @@ pub fn render_civic_communication_patterns() -> String
 
 pub async fn render_civic_communication_schedule_status(snapshot_path? : String) -> String
 
-pub async fn render_civic_salon_schedule_status(snapshot_path? : String) -> String
-
 pub async fn render_wenyu_building_protocol_status(status_path? : String, registry_path? : String) -> String
 
 pub async fn render_wenyu_civic_status(book_catalog_path? : String) -> String
 
 pub async fn run_due_civic_communication_patterns(snapshot_path? : String, book_catalog_path? : String, tick? : Int, now_ms? : UInt64, reducer_mode? : @civic.CivicCommunicationReductionMode, run_inline? : Bool) -> String
 
-pub async fn run_due_civic_salons(snapshot_path? : String, book_catalog_path? : String, tick? : Int, now_ms? : UInt64, reducer_mode? : @civic.CivicCommunicationReductionMode, run_inline? : Bool) -> String
+pub async fn save_civic_communication_schedules(String, Array[@civic.CivicCommunicationSchedule]) -> Unit
 
-pub async fn save_civic_salon_schedules(String, Array[@civic.CivicCommunicationSchedule]) -> Unit
-
-pub async fn upsert_civic_salon_schedule_for_scenario(@civic.CivicCommunicationScenario, path? : String, now_ms? : UInt64) -> @civic.CivicCommunicationSchedule
+pub async fn upsert_civic_communication_schedule_for_scenario(@civic.CivicCommunicationScenario, path? : String, now_ms? : UInt64) -> @civic.CivicCommunicationSchedule
 
 pub async fn write_protocol_jsonl_record(String, String, Json, ledger_base_dir? : String) -> Unit
 

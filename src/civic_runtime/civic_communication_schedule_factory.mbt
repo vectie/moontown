@@ -39,9 +39,9 @@ fn civic_salon_scenario_interval_ms(
 }
 
 ///|
-pub async fn upsert_civic_salon_schedule_for_scenario(
+pub async fn upsert_civic_communication_schedule_for_scenario(
   scenario : CivicCommunicationScenario,
-  path? : String = default_civic_salon_schedule_path(),
+  path? : String = default_civic_communication_schedule_path(),
   now_ms? : UInt64 = @env.now(),
 ) -> CivicCommunicationSchedule {
   let schedules = load_or_create_civic_salon_schedules(path~)
@@ -69,4 +69,13 @@ pub async fn upsert_civic_salon_schedule_for_scenario(
   }
   save_civic_salon_schedules(path, updated)
   installed_schedule
+}
+
+///|
+async fn upsert_civic_salon_schedule_for_scenario(
+  scenario : CivicCommunicationScenario,
+  path? : String = default_civic_salon_schedule_path(),
+  now_ms? : UInt64 = @env.now(),
+) -> CivicCommunicationSchedule {
+  upsert_civic_communication_schedule_for_scenario(scenario, path~, now_ms~)
 }

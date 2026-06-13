@@ -1,24 +1,47 @@
 ///|
-pub fn default_civic_salon_schedule_path(
+pub fn default_civic_communication_schedule_path(
   snapshot_path? : String = @storage.default_snapshot_path(),
 ) -> String {
   "\{civic_salon_base_dir(snapshot_path)}/pattern-schedules.json"
 }
 
 ///|
-pub fn default_civic_salon_run_ledger_path(
-  salon_id : String,
+pub fn default_civic_communication_run_ledger_path(
+  scenario_id : String,
   snapshot_path? : String = @storage.default_snapshot_path(),
 ) -> String {
-  "\{civic_salon_base_dir(snapshot_path)}/pattern-runs/\{safe_salon_id(salon_id)}.jsonl"
+  "\{civic_salon_base_dir(snapshot_path)}/pattern-runs/\{safe_salon_id(scenario_id)}.jsonl"
 }
 
 ///|
-pub fn civic_salon_scenario_path(
+pub fn civic_communication_scenario_path(
+  scenario_id : String,
+  snapshot_path? : String = @storage.default_snapshot_path(),
+) -> String {
+  "\{civic_salon_base_dir(snapshot_path)}/pattern-scenarios/\{safe_salon_id(scenario_id)}.json"
+}
+
+///|
+fn default_civic_salon_schedule_path(
+  snapshot_path? : String = @storage.default_snapshot_path(),
+) -> String {
+  default_civic_communication_schedule_path(snapshot_path~)
+}
+
+///|
+fn default_civic_salon_run_ledger_path(
   salon_id : String,
   snapshot_path? : String = @storage.default_snapshot_path(),
 ) -> String {
-  "\{civic_salon_base_dir(snapshot_path)}/pattern-scenarios/\{safe_salon_id(salon_id)}.json"
+  default_civic_communication_run_ledger_path(salon_id, snapshot_path~)
+}
+
+///|
+fn civic_salon_scenario_path(
+  salon_id : String,
+  snapshot_path? : String = @storage.default_snapshot_path(),
+) -> String {
+  civic_communication_scenario_path(salon_id, snapshot_path~)
 }
 
 ///|
