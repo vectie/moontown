@@ -6,7 +6,9 @@ async fn ensure_wenyu_civic_moonclaw_profile(root : String) -> Unit {
   @support.write_text_file(
     path,
     @support.upsert_moonclaw_job_profile_json(
-      existing, "wenyu_civic_service_worker", profile,
+      existing,
+      @moonclaw_policy.civic_keeper_profile(),
+      profile,
     ).stringify(indent=2),
   )
 }
@@ -14,7 +16,7 @@ async fn ensure_wenyu_civic_moonclaw_profile(root : String) -> Unit {
 ///|
 fn wenyu_civic_moonclaw_profile_json() -> Json {
   {
-    "family": "wenyu_civic_service_worker",
+    "family": @moonclaw_policy.civic_keeper_profile(),
     "role": "worker",
     "priority": 145,
     "tags": ["wenyu", "civic", "service", "review", "projection"],

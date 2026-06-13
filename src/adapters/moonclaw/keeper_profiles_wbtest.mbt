@@ -33,7 +33,7 @@ test "civic book routes generic maintenance task to civic worker by policy type"
   )
   assert_eq(
     keeper_profile_for_entry_task(entry, task),
-    "wenyu_civic_service_worker",
+    @moonclaw_policy.civic_keeper_profile(),
   )
 }
 
@@ -58,6 +58,6 @@ test "planbook maintenance routes to planbook repair worker by policy type" {
   )
   assert_eq(
     keeper_profile_for_entry_task(entry, task),
-    "planbook_repair_worker",
+    @moonclaw_policy.planbook_keeper_profile(),
   )
 }

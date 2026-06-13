@@ -8,7 +8,7 @@ fn planbook_repair_packet(
     title="Repair PlanBook gap: \{criterion.title}",
     summary="Bounded self-repair task for PlanBook criterion `\{criterion.id}`.",
     request_text=planbook_repair_request_text(criterion),
-    profile="planbook_repair_worker",
+    profile=@moonclaw_policy.planbook_keeper_profile(),
     output_contract=planbook_repair_result_contract(),
     context_pages=planbook_repair_context_pages(),
     skill_paths=planbook_repair_skill_paths(),

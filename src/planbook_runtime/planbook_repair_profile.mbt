@@ -32,7 +32,7 @@ fn planbook_repair_worker_profile_json() -> Json {
 
 ///|
 fn planbook_repair_worker_profile_id() -> String {
-  "planbook_repair_worker"
+  @moonclaw_policy.planbook_keeper_profile()
 }
 
 ///|

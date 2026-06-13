@@ -1,3 +1,4 @@
 import {
+  "vectie/moontown/policy",
   "moonbitlang/core/json",
 }

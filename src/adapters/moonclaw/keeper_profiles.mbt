@@ -22,12 +22,13 @@ pub fn keeper_profile_for_entry_task(
   entry : @moonbook.BookCatalogEntry,
   task : @moonbook.BookTask,
 ) -> String {
-  let book_type = @policy.catalog_entry_type(entry.id, entry.name, entry.tags)
-  if book_type == @policy.planbook_type() {
-    return "planbook_repair_worker"
+  match
+    @moonclaw_policy.keeper_profile_override_for_catalog_entry(
+      entry.id,
+      entry.name,
+      entry.tags,
+    ) {
+    Some(profile) => profile
+    None => keeper_profile_for_task(task)
   }
-  if book_type == @policy.civic_type() {
-    return "wenyu_civic_service_worker"
-  }
-  keeper_profile_for_task(task)
 }

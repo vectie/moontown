@@ -431,8 +431,9 @@ Purpose:
 Boundary:
 
 - `src/adapters/moonclaw` owns packet construction, command wiring, receipts,
-  MoonClaw worker-profile selection, and MoonClaw-specific prompt/target-page
-  adaptation.
+  task-kind worker-profile selection, and MoonClaw-specific prompt/target-page
+  adaptation. Catalog policy-type profile overrides belong in
+  `src/moonclaw_policy`, not in the adapter.
 - Catalog-backed keeper packets preserve the composed book architecture by
   attaching `book_type`, `book_policy`, `book_loop_plan`, and
   `book_internal_distance_plan` to packet metadata. Mayor code may decide when
@@ -446,6 +447,10 @@ Boundary:
   The adapter may merge those fields into external proposal packets, but it
   should not redefine `disable_waiting_for_input` or
   `best_effort_on_missing_input` locally.
+- shared MoonClaw keeper-profile override policy belongs in
+  `src/moonclaw_policy`. The adapter may ask for an override from catalog
+  metadata, but it should not branch on PlanBook/civic policy labels or
+  duplicate dedicated worker-profile strings.
 
 Current real pieces:
 
@@ -474,6 +479,9 @@ Boundary:
 
 - `src/moonclaw_policy` owns cross-package MoonClaw metadata semantics such as
   no-input/best-effort behavior and standard execution/step metadata fields.
+- `src/moonclaw_policy` owns catalog policy-type to MoonClaw keeper-profile
+  overrides. Adapters consume those helpers instead of duplicating
+  `planbook_repair_worker` or `wenyu_civic_service_worker` routing rules.
 - `src/moonclaw_runtime`, `src/adapters/moonclaw`, `src/adapters/moonbook`,
   and `src/book_quality` may consume these helpers when building packets or
   profile metadata.

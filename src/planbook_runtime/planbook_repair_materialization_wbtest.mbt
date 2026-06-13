@@ -71,7 +71,7 @@ async test "planbook repair queues bounded packet without marking it active befo
   assert_true(skill_text.contains("pre-existing unrelated dirty files"))
   assert_true(skill_text.contains("git diff --check"))
   assert_true(skill_text.contains("git status --short"))
-  assert_true(profile_text.contains("planbook_repair_worker"))
+  assert_true(profile_text.contains(@moonclaw_policy.planbook_keeper_profile()))
   assert_true(profile_text.contains("repair_planbook_gap"))
   assert_true(profile_text.contains("\"execution_mode\": \"acp\""))
   assert_true(profile_text.contains("\"execution_target\": \"codex-main\""))
