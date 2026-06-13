@@ -461,6 +461,15 @@ test "book quality package owns scoring thresholds and next action" {
       "course still looks research-shaped in id or index",
     ),
   )
+  let course_bad_id = course_identity_assessment(
+    "research-town-design", "# Course\n\ntype: `course-book`\n",
+  )
+  assert_eq(course_bad_id.score, 0)
+  assert_true(
+    course_bad_id.gaps.contains(
+      "course still looks research-shaped in id or index",
+    ),
+  )
   assert_eq(civic_latest_result_assessment(true).score, 10)
   assert_false(civic_latest_result_assessment(false).gaps.is_empty())
   assert_eq(cookbook_audit_link_assessment(true).score, 6)

@@ -132,7 +132,9 @@ pub fn course_identity_assessment(
   let gaps : Array[String] = []
   let mut score = 0
   let index = index_text.to_lower()
-  if index.contains("## research report") || book_id.has_prefix("research-") {
+  let book_type = @policy.catalog_entry_type(book_id, "", [])
+  if index.contains("## research report") ||
+    book_type == @policy.research_type() {
     gaps.push("course still looks research-shaped in id or index")
   } else if index.contains("course book") ||
     index.contains(@policy.book_type_marker(@policy.course_type())) {

@@ -608,6 +608,9 @@ Boundary:
 
 - `src/book_quality` consumes book labels, source-policy labels, composed
   policies, and catalog classification from `src/policy`.
+- `src/book_quality` may judge observed content shape such as a course page
+  looking like a research report, but book-id/type interpretation must come
+  from `src/policy.catalog_entry_type(...)`, not direct storage-prefix checks.
 - `src/book_quality` owns how quality is assessed and repaired, but it must
   read book output paths from `src/policy.BookPolicy` instead of maintaining a
   parallel generated-site path per book kind.
