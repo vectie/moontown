@@ -6,7 +6,7 @@ fn wenyu_course_ui_state_json(entry : @moonbook.BookCatalogEntry) -> String {
     "  \"title\": \"Wenyu Valley Game Design Course\",",
     "  \"summary\": \"Beginner course for learning tile-map UI, modular building placement, agent movement, and editor/view/output modes.\",",
     "  \"status_chips\": [",
-    "    {\"label\":\"course-book\",\"tone\":\"healthy\"},",
+    "    {\"label\":\{@support.json_string(@policy.course_type())},\"tone\":\"healthy\"},",
     "    {\"label\":\"beginner-friendly\",\"tone\":\"info\"},",
     "    {\"label\":\"not research-shaped\",\"tone\":\"healthy\"}",
     "  ],",

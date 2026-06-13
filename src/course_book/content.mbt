@@ -15,7 +15,7 @@ fn wenyu_course_index_markdown(entry : @moonbook.BookCatalogEntry) -> String {
     "",
     "- Book id: `\{entry.id}`",
     "- Workspace: `\{entry.workspace_root}`",
-    "- Type: `course-book`",
+    "- Type: `\{@policy.course_type()}`",
     "",
     "## Start Here",
     "",

@@ -16,6 +16,22 @@ test "course generated site keeps course identity and beginner sections" {
 }
 
 ///|
+test "course projection labels come from policy package" {
+  let entry = @moonbook.BookCatalogEntry::new(
+    id="course-wenyu-game-design",
+    name="Wenyu Game Design Course",
+    purpose="course",
+    workspace_root="/tmp/course",
+  )
+  let state = wenyu_course_ui_state_json(entry)
+  assert_true(
+    state.contains(
+      "{\"label\":\{@support.json_string(@policy.course_type())},\"tone\":\"healthy\"}",
+    ),
+  )
+}
+
+///|
 test "course generated site escapes workspace root in hero" {
   let entry = @moonbook.BookCatalogEntry::new(
     id="course-wenyu-game-design",

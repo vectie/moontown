@@ -423,6 +423,9 @@ Boundary:
   `research_type`, `civic_type`, `web_first_policy`, or `book_first_policy`;
   downstream packages should import `src/policy` directly when they need those
   values.
+- operational-book bootstrap and projection templates may live here because
+  they support quality/operating-memory workflows, but their type labels still
+  come from `src/policy`.
 - `src/book_quality` owns quality scoring and repair-action wording, not the
   policy taxonomy itself.
 
@@ -529,6 +532,8 @@ Boundary:
 - course-book identity and positive course prompt signals belong here; adapters
   may consume the classifier but should keep only adapter-specific packet
   prompts and target-page lists locally.
+- course projection content may render the course type, but the label itself
+  comes from `src/policy`; CourseBook should not redefine `course-book`.
 - default generated-site path semantics belong to `src/policy`; CourseBook
   consumes `policy.default_generated_site_projection_path()` rather than
   redefining the projection path.

@@ -61,6 +61,7 @@ test "book quality package owns operational book templates" {
   )
   assert_true(index.contains("- Book id: `ops-book`"))
   assert_true(index.contains("- Workspace: `/tmp/ops-book`"))
+  assert_true(index.contains("- Type: `\{@policy.operational_type()}`"))
   assert_true(index.contains("- review queue"))
   assert_true(index.contains("skills/operational-keeper/SKILL.md"))
   let skill = operational_skill(
@@ -80,6 +81,11 @@ test "book quality package owns operational projection templates" {
   assert_true(state.contains("\"book_id\": \"ops-book\""))
   assert_true(state.contains("\"title\": \"Ops <Book>\""))
   assert_true(state.contains("\"status_chips\""))
+  assert_true(
+    state.contains(
+      "\"label\":\{operational_json_string(@policy.operational_type())}",
+    ),
+  )
   assert_true(state.contains("\"page_families\""))
   let parsed = @json.parse(state) catch {
     _ => fail("operational UI state should parse")

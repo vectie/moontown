@@ -15,7 +15,7 @@ pub fn operational_index(
     "",
     "- Book id: `\{book_id}`",
     "- Workspace: `\{workspace_root}`",
-    "- Type: `operational-book`",
+    "- Type: `\{@policy.operational_type()}`",
     "",
     "## Focus",
     "",
@@ -167,8 +167,10 @@ fn operational_html_escape(text : String) -> String {
 ///|
 fn operational_ui_status_chips() -> String {
   [
-    "  \"status_chips\": [", "    {\"label\":\"operational-book\",\"tone\":\"healthy\"},",
-    "    {\"label\":\"review-gated\",\"tone\":\"review\"}", "  ],",
+    "  \"status_chips\": [",
+    "    {\"label\":\{operational_json_string(@policy.operational_type())},\"tone\":\"healthy\"},",
+    "    {\"label\":\"review-gated\",\"tone\":\"review\"}",
+    "  ],",
   ].join("\n")
 }
 
