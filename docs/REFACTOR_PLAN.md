@@ -39,6 +39,7 @@ The dependency direction should stay acyclic:
 cmd/main -> moontown root facade
 moontown root -> scheduler, civic, storage, moonbook, moonclaw adapters
 civic protocol/runtime -> civic definitions + MoonBook storage APIs
+town_runtime daemon tick orchestration -> daemon_runtime tick/process/log infrastructure
 src/ui/rabbita-town -> projection JSON only
 ```
 

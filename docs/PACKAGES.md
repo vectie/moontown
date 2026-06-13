@@ -814,6 +814,7 @@ Key files:
 - [src/daemon_runtime_policy/health.mbt](/Users/kq/Workspace/moontown/src/daemon_runtime_policy/health.mbt)
 - [src/daemon_runtime_policy/transitions.mbt](/Users/kq/Workspace/moontown/src/daemon_runtime_policy/transitions.mbt)
 - [src/daemon_runtime/daemon_runtime_inspection.mbt](/Users/kq/Workspace/moontown/src/daemon_runtime/daemon_runtime_inspection.mbt)
+- [src/daemon_runtime/daemon_runtime_tick_infra.mbt](/Users/kq/Workspace/moontown/src/daemon_runtime/daemon_runtime_tick_infra.mbt)
 - [src/daemon_runtime/daemon_scheduled_jobs.mbt](/Users/kq/Workspace/moontown/src/daemon_runtime/daemon_scheduled_jobs.mbt)
 - [src/town_runtime/daemon_runtime_supervise.mbt](/Users/kq/Workspace/moontown/src/town_runtime/daemon_runtime_supervise.mbt)
 
@@ -824,8 +825,12 @@ Purpose:
   `daemon_runtime_should_spawn_worker(...)` supervision predicate.
 - `src/daemon_runtime` owns filesystem/process inspection, PID files, logs,
   launchd integration, request files, runtime state persistence, scheduled-job
-  execution, and scheduled-job activity/noise filtering.
+  execution, scheduled-job activity/noise filtering, tick path construction,
+  tick phase log formatting/appending, and live tick-lock inspection.
 - `src/town_runtime` owns the town-level supervisor loop and worker spawning.
+- `src/town_runtime` owns mayor-specific daemon tick orchestration: loading the
+  town state, running supervision, dispatching standing goals, invoking
+  scheduled jobs, invoking PlanBook, and writing projections/checkpoints.
 
 Boundary:
 
@@ -835,6 +840,9 @@ Boundary:
 - town runtime may call the scheduled-job phase during a tick, but should not
   own scheduled-job interval math, scheduled-job dispatch, or the decision that
   a summary is meaningful enough to become a town event.
+- town runtime may orchestrate tick phases, but daemon tick paths, phase log
+  line format, phase-log append behavior, and runtime-lock checks belong in
+  `src/daemon_runtime`.
 
 ## Rabbita Frontend
 

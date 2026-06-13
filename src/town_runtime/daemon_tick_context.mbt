@@ -1,14 +1,7 @@
 ///|
-priv struct DaemonTickPaths {
-  daemon_path : String
-  log_path : String
-  goal_path : String
-}
-
-///|
 priv struct DaemonTickContext {
   catalog : Array[@moonbook.BookCatalogEntry]
-  paths : DaemonTickPaths
+  paths : @daemon_runtime.DaemonTickPaths
   standing_goals : Array[@core.StandingGoal]
   state : @core.TownState
   daemon : @scheduler.DaemonState
@@ -22,7 +15,7 @@ async fn prepare_daemon_tick_context(
   book_catalog_path : String,
 ) -> DaemonTickContext {
   let catalog = @moonbook.load_or_create_catalog(path=book_catalog_path)
-  let paths = daemon_tick_paths(snapshot_path)
+  let paths = @daemon_runtime.daemon_tick_paths(snapshot_path)
   let standing_goals = @storage.load_or_create_standing_goals(
     path=paths.goal_path,
   )
@@ -53,14 +46,5 @@ async fn prepare_daemon_tick_context(
     daemon,
     mayor: default_mayor(),
     next_tick_sequence: daemon.tick_sequence + 1,
-  }
-}
-
-///|
-fn daemon_tick_paths(snapshot_path : String) -> DaemonTickPaths {
-  {
-    daemon_path: @daemon_runtime.default_daemon_state_path(snapshot_path),
-    log_path: @daemon_runtime.default_daemon_log_path(snapshot_path~),
-    goal_path: @daemon_runtime.default_standing_goal_state_path(snapshot_path),
   }
 }

@@ -4,7 +4,8 @@ pub async fn daemon_tick_saved_town(
   book_catalog_path? : String = @moonbook.default_catalog_path(),
   respect_runtime_lock? : Bool = true,
 ) -> String {
-  if respect_runtime_lock && daemon_tick_runtime_lock_active(snapshot_path) {
+  if respect_runtime_lock &&
+    @daemon_runtime.daemon_tick_runtime_lock_active(snapshot_path) {
     return "Moontown daemon tick skipped because another live daemon worker is already ticking. Use the existing daemon loop instead of overlapping manual ticks."
   }
   let context = prepare_daemon_tick_context(snapshot_path, book_catalog_path)

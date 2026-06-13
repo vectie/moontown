@@ -1,14 +1,16 @@
 ///|
 test "daemon tick phase log line has stable searchable shape" {
   assert_eq(
-    daemon_tick_log_line("standing-goals", 42),
+    @daemon_runtime.daemon_tick_log_line("standing-goals", 42),
     "tick phase=standing-goals sequence=42",
   )
 }
 
 ///|
 test "daemon tick paths keep runtime files beside snapshot" {
-  let paths = daemon_tick_paths("/tmp/moontown-daemon-tick-paths/town.json")
+  let paths = @daemon_runtime.daemon_tick_paths(
+    "/tmp/moontown-daemon-tick-paths/town.json",
+  )
   assert_eq(paths.daemon_path, "/tmp/moontown-daemon-tick-paths/daemon.json")
   assert_eq(paths.log_path, "/tmp/moontown-daemon-tick-paths/daemon.log")
   assert_eq(
@@ -49,7 +51,10 @@ async test "daemon context phase logger uses context sequence" {
   append_daemon_context_phase_log(context, "custom-phase")
   assert_true(
     @support.read_text_or_empty(context.paths.log_path).contains(
-      daemon_tick_log_line("custom-phase", context.next_tick_sequence),
+      @daemon_runtime.daemon_tick_log_line(
+        "custom-phase",
+        context.next_tick_sequence,
+      ),
     ),
   )
 }

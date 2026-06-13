@@ -3,7 +3,7 @@ async fn run_daemon_standing_goal_phase(
   state : @core.TownState,
   mayor : @roles.Mayor,
   catalog : Array[@moonbook.BookCatalogEntry],
-  paths : DaemonTickPaths,
+  paths : @daemon_runtime.DaemonTickPaths,
   snapshot_path : String,
   tick : Int,
 ) -> Array[@core.StandingGoal] {

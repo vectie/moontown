@@ -2,7 +2,7 @@
 async fn run_daemon_projection_phase(
   state : @core.TownState,
   daemon : @scheduler.DaemonState,
-  paths : DaemonTickPaths,
+  paths : @daemon_runtime.DaemonTickPaths,
   snapshot_path : String,
   tick_sequence : Int,
   standing_goals : Array[@core.StandingGoal],
@@ -11,7 +11,11 @@ async fn run_daemon_projection_phase(
   let watcher_records = load_watcher_records_for_goals(
     snapshot_path, standing_goals,
   )
-  append_daemon_tick_phase_log(paths.log_path, "projection", tick_sequence)
+  @daemon_runtime.append_daemon_tick_phase_log(
+    paths.log_path,
+    "projection",
+    tick_sequence,
+  )
   @visual_projection.persist_visual_projection(state, snapshot_path)
   persist_town_checkpoint(state, snapshot_path)
   let report = @health.inspect_town(state)
@@ -22,7 +26,11 @@ async fn run_daemon_projection_phase(
     standing_goals~,
   )
   @daemon_runtime.save_daemon_state(paths.daemon_path, next_daemon)
-  append_daemon_tick_phase_log(paths.log_path, "done", tick_sequence)
+  @daemon_runtime.append_daemon_tick_phase_log(
+    paths.log_path,
+    "done",
+    tick_sequence,
+  )
   record_daemon_tick_events(
     state,
     tick,

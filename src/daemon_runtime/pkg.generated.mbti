@@ -10,6 +10,8 @@ import {
 // Values
 pub async fn append_daemon_log(String, String) -> Unit
 
+pub async fn append_daemon_tick_phase_log(String, String, Int) -> Unit
+
 pub fn daemon_command_or_current(String) -> String
 
 pub async fn daemon_current_process_pid(String) -> Int
@@ -27,6 +29,12 @@ pub async fn daemon_stop_requested(String) -> Bool
 pub async fn daemon_stop_saved_town(snapshot_path? : String) -> String
 
 pub fn daemon_supervisor_should_run_inline_worker() -> Bool
+
+pub fn daemon_tick_log_line(String, Int) -> String
+
+pub fn daemon_tick_paths(String) -> DaemonTickPaths
+
+pub async fn daemon_tick_runtime_lock_active(String) -> Bool
 
 pub fn default_daemon_log_path(snapshot_path? : String) -> String
 
@@ -77,6 +85,11 @@ pub async fn write_daemon_restart_request(snapshot_path? : String, reason? : Str
 // Errors
 
 // Types and methods
+pub struct DaemonTickPaths {
+  daemon_path : String
+  log_path : String
+  goal_path : String
+}
 
 // Type aliases
 pub using @daemon_runtime_policy {type DaemonRuntimeHealth}
