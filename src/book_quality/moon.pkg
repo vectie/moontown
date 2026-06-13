@@ -1,5 +1,4 @@
 import {
-  "moonbitlang/async/fs",
   "moonbitlang/core/json",
   "moonbitlang/x/path",
   "vectie/moontown/adapters/moonbook",
@@ -8,7 +7,6 @@ import {
   "vectie/moontown/moonclaw_policy",
   "vectie/moontown/policy",
   "vectie/moontown/storage",
-  "vectie/moontown/support",
 }
 
 import {

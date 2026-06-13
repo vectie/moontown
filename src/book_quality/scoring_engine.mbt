@@ -4,7 +4,7 @@ pub fn review_result_dir_for_snapshot(snapshot_path : String) -> String {
 }
 
 ///|
-pub async fn score_book_with_review_text(
+pub fn score_book_with_review_text(
   entry : @moonbook.BookCatalogEntry,
   semantic_review_text : String,
 ) -> BookQualityScore {
@@ -15,25 +15,38 @@ pub async fn score_book_with_review_text(
 }
 
 ///|
-pub async fn score_book_with_observation(
+pub fn score_book_with_observation(
   entry : @moonbook.BookCatalogEntry,
   observation : BookQualityContentObservation,
+) -> BookQualityScore {
+  score_book_with_observations(
+    entry,
+    content=observation,
+    structural=default_structural_observation(),
+  )
+}
+
+///|
+pub fn score_book_with_observations(
+  entry : @moonbook.BookCatalogEntry,
+  content~ : BookQualityContentObservation,
+  structural~ : BookQualityStructuralObservation,
 ) -> BookQualityScore {
   let kind = score_book_type(entry)
   match kind {
     type_ if type_ == @policy.research_type() =>
-      score_research_book(entry, observation)
+      score_research_book(entry, content, structural)
     type_ if type_ == @policy.course_type() =>
-      score_course_book(entry, observation)
+      score_course_book(entry, content, structural)
     type_ if type_ == @policy.planbook_type() =>
-      score_planbook(entry, observation)
+      score_planbook(entry, content, structural)
     type_ if type_ == @policy.cookbook_type() =>
-      score_cookbook(entry, observation)
+      score_cookbook(entry, content, structural)
     type_ if type_ == @policy.civic_type() =>
-      score_civic_book(entry, observation)
+      score_civic_book(entry, content, structural)
     type_ if type_ == @policy.operational_type() =>
-      score_operational_book(entry, observation)
-    _ => score_general_book(entry, observation)
+      score_operational_book(entry, content, structural)
+    _ => score_general_book(entry, content, structural)
   }
 }
 
@@ -50,26 +63,38 @@ pub fn default_content_observation(
 }
 
 ///|
+pub fn default_structural_observation() -> BookQualityStructuralObservation {
+  {
+    workspace_exists: false,
+    wiki_index_exists: false,
+    projection_state_exists: false,
+    existing_relative_paths: [],
+    civic_latest_result_exists: false,
+  }
+}
+
+///|
 fn score_book_type(entry : @moonbook.BookCatalogEntry) -> String {
   @policy.catalog_entry_type(entry.id, entry.name, entry.tags)
 }
 
 ///|
-async fn score_research_book(
+fn score_research_book(
   entry : @moonbook.BookCatalogEntry,
-  observation : BookQualityContentObservation,
+  content : BookQualityContentObservation,
+  structural : BookQualityStructuralObservation,
 ) -> BookQualityScore {
-  let draft = new_score_draft(entry)
+  let draft = new_score_draft(entry, structural)
   let mut score = draft.base_score
   score += required_paths_score(
-    draft.root,
+    structural,
     research_required_paths(),
     draft.strengths,
     draft.gaps,
   )
   score += apply_score_signal(
     research_deep_report_word_assessment(
-      observation.research_deep_report_word_count,
+      content.research_deep_report_word_count,
     ),
     draft.strengths,
     draft.gaps,
@@ -78,26 +103,28 @@ async fn score_research_book(
     entry,
     @policy.research_type(),
     draft,
+    structural,
     score,
-    observation.semantic_review_text,
+    content.semantic_review_text,
   )
 }
 
 ///|
-async fn score_course_book(
+fn score_course_book(
   entry : @moonbook.BookCatalogEntry,
-  observation : BookQualityContentObservation,
+  content : BookQualityContentObservation,
+  structural : BookQualityStructuralObservation,
 ) -> BookQualityScore {
-  let draft = new_score_draft(entry)
+  let draft = new_score_draft(entry, structural)
   let mut score = draft.base_score
   score += required_paths_score(
-    draft.root,
+    structural,
     course_required_paths(),
     draft.strengths,
     draft.gaps,
   )
   score += apply_score_signal(
-    course_identity_assessment(entry.id, observation.course_index_text),
+    course_identity_assessment(entry.id, content.course_index_text),
     draft.strengths,
     draft.gaps,
   )
@@ -105,20 +132,22 @@ async fn score_course_book(
     entry,
     @policy.course_type(),
     draft,
+    structural,
     score,
-    observation.semantic_review_text,
+    content.semantic_review_text,
   )
 }
 
 ///|
-async fn score_planbook(
+fn score_planbook(
   entry : @moonbook.BookCatalogEntry,
-  observation : BookQualityContentObservation,
+  content : BookQualityContentObservation,
+  structural : BookQualityStructuralObservation,
 ) -> BookQualityScore {
-  let draft = new_score_draft(entry)
+  let draft = new_score_draft(entry, structural)
   let mut score = draft.base_score
   score += required_paths_score(
-    draft.root,
+    structural,
     planbook_required_paths(),
     draft.strengths,
     draft.gaps,
@@ -127,26 +156,28 @@ async fn score_planbook(
     entry,
     @policy.planbook_type(),
     draft,
+    structural,
     score,
-    observation.semantic_review_text,
+    content.semantic_review_text,
   )
 }
 
 ///|
-async fn score_cookbook(
+fn score_cookbook(
   entry : @moonbook.BookCatalogEntry,
-  observation : BookQualityContentObservation,
+  content : BookQualityContentObservation,
+  structural : BookQualityStructuralObservation,
 ) -> BookQualityScore {
-  let draft = new_score_draft(entry)
+  let draft = new_score_draft(entry, structural)
   let mut score = draft.base_score
   score += required_paths_score(
-    draft.root,
+    structural,
     cookbook_required_paths(),
     draft.strengths,
     draft.gaps,
   )
   score += apply_score_signal(
-    cookbook_audit_link_assessment(observation.cookbook_audit_exists),
+    cookbook_audit_link_assessment(content.cookbook_audit_exists),
     draft.strengths,
     draft.gaps,
   )
@@ -154,20 +185,22 @@ async fn score_cookbook(
     entry,
     @policy.cookbook_type(),
     draft,
+    structural,
     score,
-    observation.semantic_review_text,
+    content.semantic_review_text,
   )
 }
 
 ///|
-async fn score_operational_book(
+fn score_operational_book(
   entry : @moonbook.BookCatalogEntry,
-  observation : BookQualityContentObservation,
+  content : BookQualityContentObservation,
+  structural : BookQualityStructuralObservation,
 ) -> BookQualityScore {
-  let draft = new_score_draft(entry)
+  let draft = new_score_draft(entry, structural)
   let mut score = draft.base_score
   score += required_paths_score(
-    draft.root,
+    structural,
     operational_required_paths(),
     draft.strengths,
     draft.gaps,
@@ -176,20 +209,22 @@ async fn score_operational_book(
     entry,
     @policy.operational_type(),
     draft,
+    structural,
     score,
-    observation.semantic_review_text,
+    content.semantic_review_text,
   )
 }
 
 ///|
-async fn score_civic_book(
+fn score_civic_book(
   entry : @moonbook.BookCatalogEntry,
-  observation : BookQualityContentObservation,
+  content : BookQualityContentObservation,
+  structural : BookQualityStructuralObservation,
 ) -> BookQualityScore {
-  let draft = new_score_draft(entry)
+  let draft = new_score_draft(entry, structural)
   let mut score = draft.base_score
   score += required_paths_score(
-    draft.root,
+    structural,
     civic_base_required_paths(),
     draft.strengths,
     draft.gaps,
@@ -197,7 +232,7 @@ async fn score_civic_book(
   match @civic.wenyu_civic_service_for_book_id(entry.id) {
     Some(service) =>
       score += score_civic_service_definition(
-        draft.root,
+        structural,
         service,
         draft.strengths,
         draft.gaps,
@@ -208,21 +243,23 @@ async fn score_civic_book(
     entry,
     @policy.civic_type(),
     draft,
+    structural,
     score,
-    observation.semantic_review_text,
+    content.semantic_review_text,
   )
 }
 
 ///|
-async fn score_general_book(
+fn score_general_book(
   entry : @moonbook.BookCatalogEntry,
-  observation : BookQualityContentObservation,
+  content : BookQualityContentObservation,
+  structural : BookQualityStructuralObservation,
 ) -> BookQualityScore {
-  let draft = new_score_draft(entry)
+  let draft = new_score_draft(entry, structural)
   let score = draft.base_score +
-    path_score(draft.root, wiki_index_path(), 20, draft.strengths, draft.gaps) +
+    path_score(structural, wiki_index_path(), 20, draft.strengths, draft.gaps) +
     path_score(
-      draft.root,
+      structural,
       projection_state_path(),
       15,
       draft.strengths,
@@ -232,7 +269,8 @@ async fn score_general_book(
     entry,
     @policy.general_type(),
     draft,
+    structural,
     score,
-    observation.semantic_review_text,
+    content.semantic_review_text,
   )
 }

@@ -561,11 +561,12 @@ Boundary:
   come from `src/policy`.
 - `src/book_quality` owns quality scoring and repair-action wording, not the
   policy taxonomy itself.
-- `src/book_quality` owns score computation from catalog/workspace facts and
-  supplied `BookQualityContentObservation` values. It should parse
-  `ai_quality_score` and `next_repair_task`, but it must not read
-  semantic-review result files, deep-report content, course index content, or
-  cookbook audit files directly.
+- `src/book_quality` owns score computation from supplied
+  `BookQualityStructuralObservation` and `BookQualityContentObservation`
+  values. It owns required-relative-path derivation for runtime observers and
+  parses `ai_quality_score` / `next_repair_task`, but it must not read
+  workspaces, semantic-review result files, deep-report content, course index
+  content, civic result files, or cookbook audit files directly.
 - `src/book_quality` owns review-run ledger/status vocabulary, display row
   construction, active-review counting, and status Markdown rendering from
   explicit runtime observations.
@@ -587,7 +588,9 @@ Boundary:
   and persist changed ledgers.
 - `src/book_quality_runtime` owns accepted semantic-review result file writes;
   `src/book_quality` owns the result path contract and review-result parsing.
-- `src/book_quality_runtime` owns content observation for scoring:
+- `src/book_quality_runtime` owns structural and content observation for scoring:
+  workspace existence checks, required-relative-path existence checks, civic
+  latest-result checks,
   semantic-review result file reads, research deep-report word counts, course
   index text reads, cookbook audit existence checks, and the runtime
   `score_book(entry, result_dir)` adapter that feeds those observations into

@@ -123,6 +123,26 @@ test "book quality structural paths include policy required files without duplic
 }
 
 ///|
+test "book quality structural observation requirements include civic service pages" {
+  let entry = @moonbook.BookCatalogEntry::new(
+    id="wenyu-policy-hall",
+    name="Wenyu Policy Hall",
+    purpose="Policy support module",
+    workspace_root="/tmp/wenyu-policy-hall",
+  )
+  let paths = structural_required_relative_paths(entry)
+  assert_true(paths.contains(wiki_index_path()))
+  assert_true(paths.contains(projection_state_path()))
+  assert_true(paths.contains("wiki/ledgers/service-ledger.md"))
+  assert_true(paths.contains("wiki/ledgers/exchange-ledger.md"))
+  let service = @civic.wenyu_civic_service_for_book_id("wenyu-policy-hall").unwrap()
+  assert_true(paths.contains(service.skill_path))
+  assert_true(paths.any(fn(path) { service.schema_pages.contains(path) }))
+  assert_true(paths.any(fn(path) { service.wiki_pages.contains(path) }))
+  assert_true(paths.any(fn(path) { service.review_queues.contains(path) }))
+}
+
+///|
 test "book quality package owns operational book templates" {
   let index = operational_index(
     "ops-book",

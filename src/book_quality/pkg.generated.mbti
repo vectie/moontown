@@ -56,6 +56,8 @@ pub fn default_review_root() -> String
 
 pub fn default_review_run_path() -> String
 
+pub fn default_structural_observation() -> BookQualityStructuralObservation
+
 pub fn disabled_repair_standing_goal(@core.StandingGoal) -> @core.StandingGoal
 
 pub fn empty_review_run_ledger() -> BookQualityReviewRunLedger
@@ -220,9 +222,11 @@ pub fn review_skill_path(String) -> String
 
 pub fn review_status_markdown_from_observations(String, String, active_book_ids~ : Array[String], BookQualityReviewRunLedger, Array[BookQualityReviewRunObservation], UInt64) -> String
 
-pub async fn score_book_with_observation(@moonbook.BookCatalogEntry, BookQualityContentObservation) -> BookQualityScore
+pub fn score_book_with_observation(@moonbook.BookCatalogEntry, BookQualityContentObservation) -> BookQualityScore
 
-pub async fn score_book_with_review_text(@moonbook.BookCatalogEntry, String) -> BookQualityScore
+pub fn score_book_with_observations(@moonbook.BookCatalogEntry, content~ : BookQualityContentObservation, structural~ : BookQualityStructuralObservation) -> BookQualityScore
+
+pub fn score_book_with_review_text(@moonbook.BookCatalogEntry, String) -> BookQualityScore
 
 pub fn score_exists(Array[BookQualityScore], String) -> Bool
 
@@ -241,6 +245,8 @@ pub fn semantic_review_requires_repair(Int?) -> Bool
 pub fn stable_action() -> String
 
 pub fn structural_quality_is_stable(Array[String], Int) -> Bool
+
+pub fn structural_required_relative_paths(@moonbook.BookCatalogEntry) -> Array[String]
 
 pub fn upsert_repair_standing_goal(Array[@core.StandingGoal], BookQualityRepairBridgeItem, Int) -> Unit
 
@@ -412,6 +418,14 @@ pub(all) struct BookQualityStructuralAssessment {
   score : Int
   grade : String
   ready_without_semantic : Bool
+} derive(Eq, ToJson, @json.FromJson)
+
+pub(all) struct BookQualityStructuralObservation {
+  workspace_exists : Bool
+  wiki_index_exists : Bool
+  projection_state_exists : Bool
+  existing_relative_paths : Array[String]
+  civic_latest_result_exists : Bool
 } derive(Eq, ToJson, @json.FromJson)
 
 pub(all) struct BookQualityWorkspaceAssessment {

@@ -130,6 +130,15 @@ pub(all) struct BookQualityContentObservation {
 } derive(Eq, ToJson, FromJson)
 
 ///|
+pub(all) struct BookQualityStructuralObservation {
+  workspace_exists : Bool
+  wiki_index_exists : Bool
+  projection_state_exists : Bool
+  existing_relative_paths : Array[String]
+  civic_latest_result_exists : Bool
+} derive(Eq, ToJson, FromJson)
+
+///|
 pub(all) struct BookQualityRepairBridgeItem {
   book_id : String
   book_type : String

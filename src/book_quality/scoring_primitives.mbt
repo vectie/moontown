@@ -7,7 +7,10 @@ priv struct ScoreDraft {
 }
 
 ///|
-async fn new_score_draft(entry : @moonbook.BookCatalogEntry) -> ScoreDraft {
+fn new_score_draft(
+  entry : @moonbook.BookCatalogEntry,
+  structural : BookQualityStructuralObservation,
+) -> ScoreDraft {
   let root = @moonbook.workspace_root(entry)
   let strengths : Array[String] = []
   let gaps : Array[String] = []
@@ -15,15 +18,16 @@ async fn new_score_draft(entry : @moonbook.BookCatalogEntry) -> ScoreDraft {
     root,
     strengths,
     gaps,
-    base_score: base_workspace_score(root, strengths, gaps),
+    base_score: base_workspace_score(structural, strengths, gaps),
   }
 }
 
 ///|
-async fn finalize_score_draft(
+fn finalize_score_draft(
   entry : @moonbook.BookCatalogEntry,
   book_type : String,
   draft : ScoreDraft,
+  structural : BookQualityStructuralObservation,
   raw_score : Int,
   semantic_review_text : String,
 ) -> BookQualityScore {
@@ -31,6 +35,7 @@ async fn finalize_score_draft(
     entry,
     book_type,
     draft.root,
+    structural,
     raw_score,
     draft.strengths,
     draft.gaps,
@@ -39,10 +44,11 @@ async fn finalize_score_draft(
 }
 
 ///|
-async fn finalize_score(
+fn finalize_score(
   entry : @moonbook.BookCatalogEntry,
   book_type : String,
   root : String,
+  structural : BookQualityStructuralObservation,
   raw_score : Int,
   strengths : Array[String],
   gaps : Array[String],
@@ -50,14 +56,14 @@ async fn finalize_score(
 ) -> BookQualityScore {
   let policy = @policy.policy_for_type(book_type)
   let present_required_files = policy_present_required_files(
-    root, policy, strengths, gaps,
+    policy, structural, strengths, gaps,
   )
-  let structural = assess_structural_quality(raw_score, gaps)
+  let structural_assessment = assess_structural_quality(raw_score, gaps)
   let semantic_score = parse_ai_quality_score(semantic_review_text)
   let semantic = semantic_quality_assessment(semantic_score)
   let policy_health = @policy.evaluate_health(
     policy,
-    structural.score,
+    structural_assessment.score,
     semantic.score,
     present_required_files,
   )
@@ -66,14 +72,14 @@ async fn finalize_score(
     title: entry.name,
     book_type,
     workspace_root: root,
-    structural_score: structural.score,
-    structural_grade: structural.grade,
+    structural_score: structural_assessment.score,
+    structural_grade: structural_assessment.grade,
     semantic_score: semantic.score,
     semantic_grade: semantic.grade,
     quality_status: semantic.status,
-    score: structural.score,
-    grade: structural.grade,
-    ready: structural.ready_without_semantic &&
+    score: structural_assessment.score,
+    grade: structural_assessment.grade,
+    ready: structural_assessment.ready_without_semantic &&
     policy_health.ready &&
     semantic.allows_ready,
     strengths,
@@ -81,7 +87,7 @@ async fn finalize_score(
     next_action: next_action(
       book_type,
       gaps,
-      structural.score,
+      structural_assessment.score,
       semantic.score,
       semantic_repair_task=semantic_repair_task_from_review_text(
         semantic_review_text,
@@ -91,9 +97,9 @@ async fn finalize_score(
 }
 
 ///|
-async fn policy_present_required_files(
-  root : String,
+fn policy_present_required_files(
   policy : @policy.BookPolicy,
+  structural : BookQualityStructuralObservation,
   strengths : Array[String],
   gaps : Array[String],
 ) -> Array[String] {
@@ -102,7 +108,7 @@ async fn policy_present_required_files(
     if !file.required {
       continue
     }
-    if @fs.exists(workspace_path(root, file.path)) {
+    if structural_path_exists(structural, file.path) {
       present.push(file.path)
       push_unique_note(strengths, "policy required file exists `\{file.path}`")
     } else {
@@ -128,15 +134,15 @@ fn apply_score_signal(
 }
 
 ///|
-async fn base_workspace_score(
-  root : String,
+fn base_workspace_score(
+  structural : BookQualityStructuralObservation,
   strengths : Array[String],
   gaps : Array[String],
 ) -> Int {
   let assessment = base_workspace_assessment(
-    @fs.exists(root),
-    @fs.exists(workspace_path(root, wiki_index_path())),
-    @fs.exists(workspace_path(root, projection_state_path())),
+    structural.workspace_exists,
+    structural.wiki_index_exists,
+    structural.projection_state_exists,
   )
   for strength in assessment.strengths {
     strengths.push(strength)
@@ -148,8 +154,8 @@ async fn base_workspace_score(
 }
 
 ///|
-async fn path_score(
-  root : String,
+fn path_score(
+  structural : BookQualityStructuralObservation,
   relative : String,
   points : Int,
   strengths : Array[String],
@@ -158,7 +164,7 @@ async fn path_score(
   let assessment = path_presence_assessment(
     relative,
     points,
-    @fs.exists(workspace_path(root, relative)),
+    structural_path_exists(structural, relative),
   )
   match assessment.strength {
     Some(note) => strengths.push(note)
@@ -172,22 +178,22 @@ async fn path_score(
 }
 
 ///|
-async fn required_paths_score(
-  root : String,
+fn required_paths_score(
+  structural : BookQualityStructuralObservation,
   paths : Array[BookQualityRequiredPath],
   strengths : Array[String],
   gaps : Array[String],
 ) -> Int {
   let mut score = 0
   for path in paths {
-    score += path_score(root, path.relative, path.points, strengths, gaps)
+    score += path_score(structural, path.relative, path.points, strengths, gaps)
   }
   score
 }
 
 ///|
-async fn paths_score(
-  root : String,
+fn paths_score(
+  structural : BookQualityStructuralObservation,
   relatives : Array[String],
   points : Int,
   strengths : Array[String],
@@ -196,7 +202,9 @@ async fn paths_score(
   if relatives.is_empty() {
     return path_set_assessment(relatives, [], points).score
   }
-  let missing = @support.workspace_missing_relative_paths(root, relatives)
+  let missing = relatives.filter(fn(relative) {
+    !structural_path_exists(structural, relative)
+  })
   let assessment = path_set_assessment(relatives, missing, points)
   match assessment.strength {
     Some(note) => strengths.push(note)
@@ -207,4 +215,12 @@ async fn paths_score(
     None => ()
   }
   assessment.score
+}
+
+///|
+fn structural_path_exists(
+  structural : BookQualityStructuralObservation,
+  relative : String,
+) -> Bool {
+  structural.existing_relative_paths.contains(relative)
 }

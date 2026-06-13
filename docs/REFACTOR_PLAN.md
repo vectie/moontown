@@ -392,11 +392,12 @@ Goals:
   keep accepted-result file writes in `book_quality_runtime/`
 - keep book-quality ledger parse/serialize/append semantics in `book_quality/`;
   keep ledger file load/write/append APIs in `book_quality_runtime/`
-- keep book-quality score computation and semantic-review parsing in
-  `book_quality/` from supplied content observations; keep semantic-review
-  result file reads, research report word-count observation, course index text
-  observation, cookbook audit observation, and runtime score adapters in
-  `book_quality_runtime/`
+- keep book-quality score computation, required-relative-path derivation,
+  semantic-review parsing, and structural/content observation DTOs in
+  `book_quality/`; keep workspace/path existence observation, civic-result
+  observation, semantic-review result file reads, research report word-count
+  observation, course index text observation, cookbook audit observation, and
+  runtime score adapters in `book_quality_runtime/`
 - keep Wenyu course-book bootstrap, generated course content, course-builder
   skill text, UI-state JSON, and generated course site projection in
   `course_book/`; root should expose only command-compatible wrappers
