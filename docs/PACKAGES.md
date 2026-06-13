@@ -442,6 +442,8 @@ Purpose:
   double-counting paths that also have package-specific weights
 - include `BookPolicy.required_files` in semantic review context pages so AI
   review sees the same artifacts used by health gates
+- attach structured `BookPolicy` loop and internal-distance plans to semantic
+  review metadata for downstream agent/tool consumers
 
 Boundary:
 

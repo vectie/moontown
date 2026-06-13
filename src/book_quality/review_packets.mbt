@@ -139,6 +139,10 @@ fn review_external_metadata(
   fields["book_id"] = packet.book_id.to_json()
   fields["book_type"] = packet.book_type.to_json()
   fields["book_policy"] = packet.policy.to_json()
+  fields["book_loop_plan"] = @policy.loop_plan(packet.policy).to_json()
+  fields["book_internal_distance_plan"] = @policy.internal_distance_plan(
+    packet.policy,
+  ).to_json()
   fields["result_path"] = result_path.to_json()
   fields["profile_metadata"] = review_no_input_policy_json()
   fields["step_metadata"] = review_packet_step_metadata_json(
