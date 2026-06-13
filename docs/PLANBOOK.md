@@ -119,10 +119,11 @@ Catalog-level research topic hints from `topic:` tags or canonical
 mechanics belong in `research_policy/`. Adapters and quality packages should
 consume policy hints, then call `research_policy` for attempt-suffix stripping,
 topic normalization/display, local-vs-external routing, query/reference/local
-source hints, and canonical raw/wiki artifact paths. Dynamic MoonBook
-research-entry creation must call the catalog hint, then use `research_policy`
-before constructing a stable storage entry. Future plans must not add another
-adapter-local research topic table or artifact-path table.
+source hints, canonical raw/wiki artifact paths, and canonical research skill
+path sets. Dynamic MoonBook research-entry creation must call the catalog hint,
+then use `research_policy` before constructing a stable storage entry. Future
+plans must not add another adapter-local research topic table, artifact-path
+table, or research skill-path table.
 Wenyu/civic plans must keep module identity predicates in `civic/`; town
 runtime may ask whether an entry is a Wenyu build book, but it must not branch
 directly on `wenyu-*` slugs. Build-pipeline and quality plans should follow the

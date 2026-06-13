@@ -6,9 +6,7 @@ fn standing_watch_worker_context_bundle(
     [
       ..bundle.skill_paths,
       "skills/standing-watch/SKILL.md",
-      "skills/web-first-research/SKILL.md",
-      "skills/source-diarize/SKILL.md",
-      "skills/research-evidence-synthesis/SKILL.md",
+      ..@research_policy.standing_watch_research_skill_paths(),
     ],
   )
   let context_pages = unique_paths(

@@ -59,5 +59,5 @@ fn research_ingest_local_after_web_step() -> String {
 
 ///|
 fn research_ingest_marketing_brief_step() -> String {
-  "8. Write `\{research_marketing_brief_path()}` from screened evidence using `skills/wiki-marketing/SKILL.md`; make it buyer-facing, specific, and proof-backed."
+  "8. Write `\{research_marketing_brief_path()}` from screened evidence using `\{@research_policy.wiki_marketing_skill_path()}`; make it buyer-facing, specific, and proof-backed."
 }

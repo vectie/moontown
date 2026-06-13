@@ -19,13 +19,7 @@ fn enrich_worker_context_bundle(
     return research_bootstrap_worker_context_bundle(entry, bundle)
   }
   let skill_paths = unique_paths(
-    [
-      ..bundle.skill_paths,
-      "skills/web-first-research/SKILL.md",
-      "skills/research-evidence-synthesis/SKILL.md",
-      "skills/repo-source-materialize/SKILL.md",
-      "skills/wiki-marketing/SKILL.md",
-    ],
+    [..bundle.skill_paths, ..@research_policy.enrichment_skill_paths()],
   )
   let context_pages = unique_paths(
     [

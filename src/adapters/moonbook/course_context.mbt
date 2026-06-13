@@ -35,8 +35,10 @@ fn course_worker_context_bundle(
 ///|
 fn course_skill_paths() -> Array[String] {
   [
-    "skills/wenyu-beginner-course/SKILL.md", "skills/wiki-course/SKILL.md", "skills/web-first-research/SKILL.md",
-    "skills/source-diarize/SKILL.md",
+    "skills/wenyu-beginner-course/SKILL.md",
+    "skills/wiki-course/SKILL.md",
+    @research_policy.web_first_research_skill_path(),
+    @research_policy.source_diarize_skill_path(),
   ]
 }
 

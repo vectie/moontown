@@ -1736,6 +1736,8 @@ topic routing or artifact layout.
   - owns topic normalization, attempt-suffix stripping, display names, and
     local-project versus external-domain route hints
   - owns query/reference/local-source hint tables for known research topics
+  - owns canonical research skill path contracts and grouped skill-path sets
+    for bootstrap, enrichment, and standing-watch research support
   - owns canonical `raw/bootstrap/*` artifact paths and topic-specific
     `wiki/sources`, `wiki/entities`, `wiki/concepts`, and `wiki/synthesis`
     paths
@@ -1743,6 +1745,8 @@ topic routing or artifact layout.
   - may delegate through thin compatibility helpers while migration continues
   - must not add new topic/path/threshold tables that compete with
     `research_policy/`
+  - must not hardcode research skill path tables; it should ask
+    `research_policy/` which research skills a generated context should expose
 - `research_quality/`
   - owns observation-driven quality semantics and readiness gaps, not adapter
     prompt construction

@@ -83,6 +83,6 @@ fn research_bootstrap_source_expansion_harvest_policy_prompt() -> String {
 fn research_bootstrap_source_expansion_inputs_prompt() -> String {
   research_bootstrap_prompt([
     "Start by reading raw/bootstrap/RESEARCH_REQUEST.md, \{research_search_log_path()}, \{research_source_screen_path()}, and \{research_tool_blockers_path()}.",
-    "Also read raw/bootstrap/SOURCE_HINTS.md and skills/web-first-research/SKILL.md.",
+    "Also read raw/bootstrap/SOURCE_HINTS.md and \{@research_policy.web_first_research_skill_path()}.",
   ])
 }

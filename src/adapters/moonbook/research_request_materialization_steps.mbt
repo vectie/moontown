@@ -22,7 +22,7 @@ fn research_synthesis_brief_step() -> String {
 ///|
 fn research_deep_report_step() -> String {
   research_numbered_step(10, [
-    "Write `\{research_deep_report_path()}` using `skills/research-report/SKILL.md`.",
+    "Write `\{research_deep_report_path()}` using `\{@research_policy.research_report_skill_path()}`.",
     "Prefer a \{research_policy_deep_dossier_word_target()} deep dossier for complex external/technology-route research with enough screened sources.",
     "If a reference report exists, also match its reader-facing ambition and approximate length class without copying unsupported claims.",
   ])
@@ -30,7 +30,7 @@ fn research_deep_report_step() -> String {
 
 ///|
 fn research_marketing_brief_step() -> String {
-  "11. Write `\{research_marketing_brief_path()}` using `skills/wiki-marketing/SKILL.md`: buyer pain, promise, differentiation, proof, objections, and next action."
+  "11. Write `\{research_marketing_brief_path()}` using `\{@research_policy.wiki_marketing_skill_path()}`: buyer pain, promise, differentiation, proof, objections, and next action."
 }
 
 ///|

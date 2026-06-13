@@ -28,7 +28,7 @@ fn research_bootstrap_quality_repair_expansion_axes_prompt() -> String {
 fn research_bootstrap_quality_repair_inputs_prompt() -> String {
   research_bootstrap_prompt([
     "Read \{research_bootstrap_quality_repair_input_artifacts().join(", ")}.",
-    "Also read optional raw/bootstrap/QUALITY_REPAIR.md, skills/research-report/SKILL.md, and optional raw/bootstrap/REFERENCE_STYLE.md.",
+    "Also read optional raw/bootstrap/QUALITY_REPAIR.md, \{@research_policy.research_report_skill_path()}, and optional raw/bootstrap/REFERENCE_STYLE.md.",
   ])
 }
 

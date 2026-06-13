@@ -5,27 +5,45 @@ async fn ensure_moontown_research_pack(
 ) -> Unit {
   guard catalog_entry_is_research(entry) else { return }
   write_workspace_text(
-    "\{root}/skills/web-first-research/SKILL.md",
+    @research_policy.workspace_artifact_path(
+      root,
+      @research_policy.web_first_research_skill_path(),
+    ),
     web_first_research_skill_text(entry),
   )
   write_workspace_text(
-    "\{root}/skills/wiki-ingest/SKILL.md",
+    @research_policy.workspace_artifact_path(
+      root,
+      @research_policy.wiki_ingest_skill_path(),
+    ),
     research_wiki_ingest_skill_text(entry),
   )
   write_workspace_text(
-    "\{root}/skills/source-diarize/SKILL.md",
+    @research_policy.workspace_artifact_path(
+      root,
+      @research_policy.source_diarize_skill_path(),
+    ),
     research_source_diarize_skill_text(entry),
   )
   write_workspace_text(
-    "\{root}/skills/research-evidence-synthesis/SKILL.md",
+    @research_policy.workspace_artifact_path(
+      root,
+      @research_policy.evidence_synthesis_skill_path(),
+    ),
     research_evidence_synthesis_skill_text(entry),
   )
   write_workspace_text(
-    "\{root}/skills/research-report/SKILL.md",
+    @research_policy.workspace_artifact_path(
+      root,
+      @research_policy.research_report_skill_path(),
+    ),
     research_report_skill_text(entry),
   )
   write_workspace_text(
-    "\{root}/skills/repo-source-materialize/SKILL.md",
+    @research_policy.workspace_artifact_path(
+      root,
+      @research_policy.repo_source_materialize_skill_path(),
+    ),
     repo_source_materialize_skill_text(entry),
   )
   write_workspace_text(

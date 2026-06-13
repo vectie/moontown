@@ -2,6 +2,8 @@
 package "vectie/moontown/research_policy"
 
 // Values
+pub fn bootstrap_worker_skill_paths() -> Array[String]
+
 pub fn command_fetch_pattern() -> String
 
 pub fn deep_dossier_word_target() -> String
@@ -12,7 +14,11 @@ pub fn discovery_attempt_limit() -> String
 
 pub fn display_topic_name(String) -> String
 
+pub fn enrichment_skill_paths() -> Array[String]
+
 pub fn evidence_matrix_path() -> String
+
+pub fn evidence_synthesis_skill_path() -> String
 
 pub fn followup_query(String, String) -> String
 
@@ -64,11 +70,19 @@ pub fn repair_dossier_word_target() -> String
 
 pub fn repair_expansion_threshold() -> String
 
+pub fn repo_source_materialize_skill_path() -> String
+
+pub fn research_report_skill_path() -> String
+
 pub fn risk_query(String, String) -> String
 
 pub fn search_log_path() -> String
 
+pub fn source_diarize_skill_path() -> String
+
 pub fn source_screen_path() -> String
+
+pub fn standing_watch_research_skill_paths() -> Array[String]
 
 pub fn strip_research_attempt_suffix(String) -> String
 
@@ -86,7 +100,13 @@ pub fn topic_synthesis_page(String) -> String
 
 pub fn topic_wiki_page_examples(String) -> Array[String]
 
+pub fn web_first_research_skill_path() -> String
+
 pub fn web_queries(String) -> Array[String]
+
+pub fn wiki_ingest_skill_path() -> String
+
+pub fn wiki_marketing_skill_path() -> String
 
 pub fn workspace_artifact_path(String, String) -> String
 

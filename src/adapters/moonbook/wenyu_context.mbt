@@ -59,9 +59,13 @@ fn enrich_wenyu_worker_context_bundle(
 ///|
 fn wenyu_base_skill_paths() -> Array[String] {
   [
-    "skills/wenyu-build/SKILL.md", "skills/wenyu-code-patch/SKILL.md", "skills/wenyu-asset-pack/SKILL.md",
-    "skills/web-first-research/SKILL.md", "skills/research-evidence-synthesis/SKILL.md",
-    "skills/repo-source-materialize/SKILL.md", "skills/wiki-marketing/SKILL.md",
+    "skills/wenyu-build/SKILL.md",
+    "skills/wenyu-code-patch/SKILL.md",
+    "skills/wenyu-asset-pack/SKILL.md",
+    @research_policy.web_first_research_skill_path(),
+    @research_policy.evidence_synthesis_skill_path(),
+    @research_policy.repo_source_materialize_skill_path(),
+    @research_policy.wiki_marketing_skill_path(),
   ]
 }
 

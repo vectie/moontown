@@ -3,10 +3,7 @@ fn research_bootstrap_worker_context_bundle(
   entry : BookCatalogEntry,
   bundle : WorkerContextBundle,
 ) -> WorkerContextBundle {
-  let skill_paths = [
-    "skills/web-first-research/SKILL.md", "skills/source-diarize/SKILL.md", "skills/research-evidence-synthesis/SKILL.md",
-    "skills/research-report/SKILL.md", "skills/wiki-marketing/SKILL.md",
-  ]
+  let skill_paths = @research_policy.bootstrap_worker_skill_paths()
   let context_pages = [
     "raw/bootstrap/RESEARCH_REQUEST.md", "raw/bootstrap/SOURCE_HINTS.md", "raw/bootstrap/REFERENCE_STYLE.md",
     "raw/bootstrap/REFERENCE_OUTPUT.md", "raw/bootstrap/REFERENCE_SOURCE_HINTS.md",
