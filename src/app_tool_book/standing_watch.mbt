@@ -50,7 +50,7 @@ pub fn standing_goal(
     target_book_id=Some(book_id),
     cadence_ticks~,
     next_due_tick=0,
-    source_policy="web-first",
+    source_policy=@policy.web_first_policy(),
     quality_threshold=92,
   )
 }

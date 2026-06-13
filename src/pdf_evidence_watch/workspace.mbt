@@ -102,7 +102,7 @@ fn pdf_evidence_watch_config(
     watch: {
       websites,
       cadence_ticks,
-      source_policy: "web-first",
+      source_policy: @policy.web_first_policy(),
       notify_when: [
         "new_pdf_found", "new_pdf_downloaded", "new_text_extracted", "new_claim_accepted",
         "important_revision_detected",

@@ -58,7 +58,7 @@ pub fn config(
     watch: {
       websites,
       cadence_ticks,
-      source_policy: "web-first",
+      source_policy: @policy.web_first_policy(),
       notify_when: [
         "new_data_found", "analysis_changed", "tool_updated", "tool_build_failed",
         "review_required",

@@ -1,5 +1,6 @@
 import {
   "vectie/moontown/core",
+  "vectie/moontown/policy",
   "moonbitlang/async/fs",
   "moonbitlang/core/encoding/utf8" @encoding/utf8,
   "moonbitlang/core/json",

@@ -9,7 +9,7 @@ test "final integration merges domain watches without dropping existing history"
       cadence_ticks=30,
       next_due_tick=42,
       last_run_tick=Some(21),
-      source_policy="web-first",
+      source_policy=@policy.web_first_policy(),
       quality_threshold=70,
     ),
   ]
@@ -24,7 +24,7 @@ test "final integration merges domain watches without dropping existing history"
       target_book_id: "research-opc",
       cadence_ticks: 60,
       quality_threshold: 88,
-      source_policy: "web-first",
+      source_policy: @policy.web_first_policy(),
       initial_stagger_ticks: 3,
     },
     {
@@ -37,7 +37,7 @@ test "final integration merges domain watches without dropping existing history"
       target_book_id: "research-ai-agents",
       cadence_ticks: 60,
       quality_threshold: 90,
-      source_policy: "web-first",
+      source_policy: @policy.web_first_policy(),
       initial_stagger_ticks: 9,
     },
   ]

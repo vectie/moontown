@@ -49,7 +49,7 @@ async test "bootstrap pdf evidence watch book installs workspace catalog and sta
         None => fail("expected target book id")
       }
       assert_eq(goal.cadence_ticks, 42)
-      assert_eq(goal.source_policy, "web-first")
+      assert_eq(goal.source_policy, @policy.web_first_policy())
       assert_true(goal.prompt.contains("https://example.com/briefs"))
     }
   }

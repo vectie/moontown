@@ -207,7 +207,7 @@ test "app tool book owns standing goal construction and list policy" {
   assert_true(goal.target_book_id == Some("opc-dashboard"))
   assert_eq(goal.cadence_ticks, 31)
   assert_eq(goal.quality_threshold, 92)
-  assert_eq(goal.source_policy, "web-first")
+  assert_eq(goal.source_policy, @policy.web_first_policy())
   assert_true(goal.prompt.contains("opc-lab"))
   let disabled = @core.StandingGoal::new(
     id=goal.id,
