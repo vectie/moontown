@@ -87,7 +87,7 @@ async fn planbook_validation_criterion(
   let base = planbook_autonomy_base_dir(snapshot_path)
   let path = "\{base}/planbook/latest-validation.md"
   let text = @support.read_text_or_empty(path)
-  let ready = planbook_validation_evidence_ready(text)
+  let ready = @planbook_policy.validation_evidence_ready(text)
   planbook_criterion(
     "validation-evidence",
     "2026-05-29-book-quality-upgrade",

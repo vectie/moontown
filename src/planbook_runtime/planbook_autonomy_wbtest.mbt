@@ -74,7 +74,7 @@ async test "planbook autonomy doctor writes self-healing evidence" {
 ///|
 async test "planbook validation evidence requires explicit validation contract" {
   assert_true(
-    !planbook_validation_evidence_ready(
+    !@planbook_policy.validation_evidence_ready(
       "# Latest PlanBook Validation\n\n- moon check passed\n",
     ),
   )
@@ -86,9 +86,17 @@ async test "planbook validation evidence requires explicit validation contract" 
     note="test validation record",
   )
   let text = @support.read_text_or_empty(path)
-  assert_true(planbook_validation_evidence_ready(text))
-  assert_true(text.contains("contract: planbook.validation.v1"))
-  assert_true(text.contains("validation_status: passed"))
+  assert_true(@planbook_policy.validation_evidence_ready(text))
+  assert_true(
+    text.contains(
+      "contract: \{@planbook_policy.validation_evidence_contract()}",
+    ),
+  )
+  assert_true(
+    text.contains(
+      "validation_status: \{@planbook_policy.validation_evidence_passed_status()}",
+    ),
+  )
 }
 
 ///|

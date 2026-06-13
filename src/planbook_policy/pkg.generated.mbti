@@ -149,6 +149,16 @@ pub fn repair_workspace_status_page_path(String) -> String
 
 pub fn task_status_from_run_status(String?) -> String
 
+pub fn validation_evidence_contract() -> String
+
+pub fn validation_evidence_markdown(String, UInt64) -> String
+
+pub fn validation_evidence_passed_status() -> String
+
+pub fn validation_evidence_ready(String) -> Bool
+
+pub fn validation_required_commands() -> Array[String]
+
 // Errors
 
 // Types and methods

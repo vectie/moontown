@@ -184,9 +184,10 @@ command/args/model target JSON in root files.
 PlanBook source-repair policy lives in the dedicated
 [planbook_policy](/Users/kq/Workspace/moontown/src/planbook_policy) package. It
 owns the autonomy/repair DTOs, validation command list, repair result contract,
-repair decision vocabulary, engineering-evidence markers, ACP patch-receipt
-contract, MoonClaw status bucket mapping, and the pure repair workspace layout
-paths. That includes repair context/result filenames, packet path derivation,
+PlanBook validation-evidence contract/readiness, repair decision vocabulary,
+engineering-evidence markers, ACP patch-receipt contract, MoonClaw status bucket
+mapping, and the pure repair workspace layout paths. That includes repair
+context/result filenames, packet path derivation,
 skill/plan page paths, target pages, and MoonClaw repair index paths. It also
 owns the repair request task-rule wording that tells workers how to load
 context, respect ownership boundaries, edit exact target files first, handle

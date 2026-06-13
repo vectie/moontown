@@ -417,9 +417,10 @@ Metadata-only model fields are not executable proof.
 
 PlanBook self-repair policy belongs to the `planbook_policy/` package. That
 package owns PlanBook autonomy DTOs, repair-task DTOs, required validation
-commands, repair result contract ids, accepted/blocked/no-change decision
-semantics, `planbook.repair.patch_receipt.v1` validation, and MoonClaw run
-status bucket classification. It also owns the pure durable repair workspace
+commands, PlanBook validation-evidence contract/readiness, repair result
+contract ids, accepted/blocked/no-change decision semantics,
+`planbook.repair.patch_receipt.v1` validation, and MoonClaw run status bucket
+classification. It also owns the pure durable repair workspace
 layout: `raw/repair/PLANBOOK_REPAIR_CONTEXT.md`, `raw/repair/repair-result.md`,
 repair packet filenames, skill/plan page paths, result target pages, and
 MoonClaw repair index paths. It owns the pure repair request task-rule wording

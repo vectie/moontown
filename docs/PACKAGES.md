@@ -577,6 +577,7 @@ Key files:
 
 - [src/planbook_policy/run_status.mbt](/Users/kq/Workspace/moontown/src/planbook_policy/run_status.mbt)
 - [src/planbook_policy/repair_commands.mbt](/Users/kq/Workspace/moontown/src/planbook_policy/repair_commands.mbt)
+- [src/planbook_policy/validation_evidence.mbt](/Users/kq/Workspace/moontown/src/planbook_policy/validation_evidence.mbt)
 - [src/planbook_runtime/planbook_repair_run_status.mbt](/Users/kq/Workspace/moontown/src/planbook_runtime/planbook_repair_run_status.mbt)
 - [src/planbook_runtime/planbook_repair_result.mbt](/Users/kq/Workspace/moontown/src/planbook_runtime/planbook_repair_result.mbt)
 - [src/planbook_runtime/planbook_daemon_phase.mbt](/Users/kq/Workspace/moontown/src/planbook_runtime/planbook_daemon_phase.mbt)
@@ -584,7 +585,8 @@ Key files:
 Purpose:
 
 - `src/planbook_policy` owns pure PlanBook contracts, repair command policy,
-  and raw MoonClaw run-status normalization.
+  PlanBook validation-evidence contract/readiness/required-command policy, and
+  raw MoonClaw run-status normalization.
 - `src/planbook_runtime` owns workspace IO, run reconciliation, and
   evidence-aware repair lifecycle decisions.
 - `src/planbook_runtime` owns the daemon-facing PlanBook phase: write autonomy
@@ -597,6 +599,9 @@ Boundary:
 - `planbook_runtime` may still mark a repair task failed when a completed run
   lacks required PlanBook repair evidence.
 - do not encode missing-evidence decisions in raw status normalization.
+- PlanBook runtime may write `planbook/latest-validation.md`, but the
+  `planbook.validation.v1` contract, required validation commands, and
+  readiness predicate belong in `src/planbook_policy`.
 - default generated-site path semantics belong to `src/policy`; PlanBook
   runtime consumes `policy.default_generated_site_projection_path()` rather
   than redefining the projection path.

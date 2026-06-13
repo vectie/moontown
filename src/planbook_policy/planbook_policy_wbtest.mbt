@@ -52,6 +52,21 @@ test "planbook repair contracts and commands are stable" {
 }
 
 ///|
+test "planbook validation evidence contract is package-owned policy" {
+  let text = validation_evidence_markdown("validated", 42UL)
+  assert_true(text.contains("contract: planbook.validation.v1"))
+  assert_true(text.contains("validation_status: passed"))
+  assert_true(text.contains("generated_at_ms: 42"))
+  assert_true(validation_evidence_ready(text))
+  assert_false(validation_evidence_ready("# Latest PlanBook Validation"))
+  assert_true(
+    validation_required_commands().any(fn(command) {
+      command.contains("moon check --no-render")
+    }),
+  )
+}
+
+///|
 test "planbook repair workspace layout is package-owned policy" {
   let workspace_root = "/tmp/moontown-planbook-repair-paths"
   assert_eq(
