@@ -32,6 +32,8 @@ pub async fn render_book_quality(book_catalog_path? : String, snapshot_path? : S
 
 pub async fn render_book_quality_ai_review_status(result_dir? : String, run_path? : String, book_catalog_path? : String, snapshot_path? : String) -> String
 
+pub fn review_result_dir_for_snapshot(String) -> String
+
 pub async fn score_book(@moonbook.BookCatalogEntry, String) -> @book_quality.BookQualityScore
 
 pub async fn write_accepted_review_result(String, @book_quality.BookQualityReviewRun, String) -> Unit

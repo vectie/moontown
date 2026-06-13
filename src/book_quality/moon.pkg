@@ -6,7 +6,6 @@ import {
   "vectie/moontown/core",
   "vectie/moontown/moonclaw_policy",
   "vectie/moontown/policy",
-  "vectie/moontown/storage",
 }
 
 import {

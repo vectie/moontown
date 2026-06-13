@@ -8,9 +8,7 @@ async fn build_book_quality_audit(
     snapshot_path,
   )
   let scores : Array[@book_quality.BookQualityScore] = []
-  let review_result_dir = @book_quality.review_result_dir_for_snapshot(
-    snapshot_path,
-  )
+  let review_result_dir = review_result_dir_for_snapshot(snapshot_path)
   for entry in catalog {
     scores.push(score_book(entry, review_result_dir))
   }

@@ -459,7 +459,8 @@ book-quality review-status summary rendering is package-owned. That rendering
 must be fed by explicit observations instead of loading files or clocks itself:
 `book_quality/` owns the ledger/status vocabulary and active-run decision,
 while `book_quality_runtime/` owns result-file existence checks, ledger file
-loading, and current-time observation. Semantic review profile policy is
+loading, snapshot-relative review-result directory derivation, and current-time
+observation. Semantic review profile policy is
 package-owned too: review profile id, execution-target metadata contract,
 preferred skills, role-runtime envelope, target-parameterized MoonClaw jobs
 profile JSON, packet step metadata, path-explicit neutral review proposal spec,

@@ -1,4 +1,16 @@
 ///|
+test "book quality runtime review result dir uses storage snapshot base" {
+  assert_eq(
+    review_result_dir_for_snapshot("town.json"),
+    ".moontown/book-quality/ai-review-results",
+  )
+  assert_eq(
+    review_result_dir_for_snapshot("/tmp/moontown/town.json"),
+    "/tmp/moontown/book-quality/ai-review-results",
+  )
+}
+
+///|
 async test "book doctor writes structural audit and AI review packets" {
   let root = cleaned_book_quality_test_root("/tmp/moontown-book-quality-wbtest")
   let catalog_path = "\{root}/moonbooks.json"

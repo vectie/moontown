@@ -1,4 +1,9 @@
 ///|
+pub fn review_result_dir_for_snapshot(snapshot_path : String) -> String {
+  "\{@storage.snapshot_base_dir(snapshot_path)}/book-quality/ai-review-results"
+}
+
+///|
 pub async fn read_review_result_text(
   result_dir : String,
   book_id : String,

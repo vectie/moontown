@@ -596,6 +596,9 @@ Boundary:
 - `src/book_quality` owns how quality is assessed and repaired, but it must
   read book output paths from `src/policy.BookPolicy` instead of maintaining a
   parallel generated-site path per book kind.
+- `src/book_quality` must remain observation-fed: it may accept semantic review
+  text and structural facts, but it must not derive snapshot-relative storage
+  paths or read review-result files.
 - Legacy book-type labels may be accepted at this boundary while migration
   continues, but scoring and review context should resolve them through
   policy profiles before deciding required output surfaces.
@@ -606,6 +609,9 @@ Boundary:
 - `src/book_quality` must also not expose pass-through policy lookup or catalog
   classification APIs; runtime packages should call `src/policy` for
   `policy_for_type`, `source_policy_for_type`, and catalog classification.
+- `src/book_quality_runtime` owns snapshot-relative review-result directory
+  derivation, semantic-review file reads, required-path existence checks, and
+  filesystem observations passed into pure scoring.
 - operational-book bootstrap and projection templates may live here because
   they support quality/operating-memory workflows, but their type labels still
   come from `src/policy`.

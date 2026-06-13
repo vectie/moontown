@@ -184,8 +184,6 @@ pub fn review_profile_id() -> String
 
 pub fn review_readme(BookQualityAudit, Array[BookQualityReviewPacket]) -> String
 
-pub fn review_result_dir_for_snapshot(String) -> String
-
 pub fn review_result_path(String, String) -> String
 
 pub fn review_result_satisfies_contract(String) -> Bool

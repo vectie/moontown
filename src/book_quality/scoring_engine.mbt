@@ -1,9 +1,4 @@
 ///|
-pub fn review_result_dir_for_snapshot(snapshot_path : String) -> String {
-  "\{@storage.snapshot_base_dir(snapshot_path)}/book-quality/ai-review-results"
-}
-
-///|
 pub fn score_book_with_review_text(
   entry : @moonbook.BookCatalogEntry,
   semantic_review_text : String,
