@@ -85,7 +85,7 @@ async test "generic book template installer dispatches app tool book" {
   write_text_file(method_path, "# Tool Method\n\nUse current sources.")
   write_text_file(tool_path, "# Tool Spec\n\nRender an explorer.")
   let spec = @app_tool_book.AppToolBookInstallSpec::{
-    book_id: "toolbook-registry-app",
+    book_id: "app-tool-registry-app",
     title: "Registry App Tool",
     purpose: "Installed through generic template registry.",
     websites: ["https://example.org/tool-data"],
@@ -106,6 +106,8 @@ async test "generic book template installer dispatches app tool book" {
   )
   assert_true(summary.contains(install_success_marker()))
   assert_true(summary.contains("Installed App ToolBook config"))
+  assert_true(!summary.contains("toolbook-registry-app"))
+  assert_true(summary.contains("app-tool-registry-app"))
   assert_true(@fs.exists("\{workspace_root}/tool-manifest.json"))
   assert_true(@fs.exists("\{workspace_root}/book/site/generated/tool.html"))
 }

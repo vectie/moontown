@@ -72,7 +72,7 @@ async test "book template request inbox processes app tool book requests" {
   let config_path = "\{base}/app-tool.json"
   let workspace_root = "\{base}/workspace"
   let spec = @app_tool_book.AppToolBookInstallSpec::{
-    book_id: "toolbook-request-app",
+    book_id: "app-tool-request-app",
     title: "Request App Tool",
     purpose: "Installed from the template request inbox.",
     websites: ["https://example.org/request-tool-data"],
@@ -104,6 +104,7 @@ async test "book template request inbox processes app tool book requests" {
     tick=77,
   )
   assert_true(summary.contains("Processed 1 book template request"))
+  assert_true(!summary.contains("toolbook-request-app"))
   let status = render_book_template_request_status(request_path~)
   assert_true(status.contains("installed: `request-app-tool` tick=77"))
   assert_true(@fs.exists("\{workspace_root}/tool-manifest.json"))
