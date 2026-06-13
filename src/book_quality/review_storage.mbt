@@ -55,17 +55,6 @@ pub fn default_moonclaw_home() -> String {
 }
 
 ///|
-pub async fn read_review_result_text(
-  result_dir : String,
-  book_id : String,
-) -> String {
-  if !@fs.exists(review_result_path(result_dir, book_id)) {
-    return ""
-  }
-  @fs.read_file(review_result_path(result_dir, book_id)).text()
-}
-
-///|
 pub fn review_run_ledger_with_appended_run(
   ledger : BookQualityReviewRunLedger,
   run : BookQualityReviewRun,

@@ -558,6 +558,9 @@ Boundary:
   come from `src/policy`.
 - `src/book_quality` owns quality scoring and repair-action wording, not the
   policy taxonomy itself.
+- `src/book_quality` owns score computation from catalog/workspace facts and
+  supplied semantic review text. It should parse `ai_quality_score` and
+  `next_repair_task`, but it must not read semantic-review result files.
 - `src/book_quality` owns review-run ledger/status vocabulary, display row
   construction, active-review counting, and status Markdown rendering from
   explicit runtime observations.
@@ -579,6 +582,9 @@ Boundary:
   and persist changed ledgers.
 - `src/book_quality_runtime` owns accepted semantic-review result file writes;
   `src/book_quality` owns the result path contract and review-result parsing.
+- `src/book_quality_runtime` owns semantic-review result file reads and the
+  runtime `score_book(entry, result_dir)` adapter that feeds observed review
+  text into `src/book_quality` scoring.
 - `src/book_quality_runtime` owns review-run ledger storage APIs used by
   dispatch, reconciliation, and status rendering: load, append, and write.
 - `src/book_quality/scoring_engine.mbt` owns book-type scoring orchestration.

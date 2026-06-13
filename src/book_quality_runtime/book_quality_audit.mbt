@@ -12,7 +12,7 @@ async fn build_book_quality_audit(
     snapshot_path,
   )
   for entry in catalog {
-    scores.push(@book_quality.score_book(entry, review_result_dir))
+    scores.push(score_book(entry, review_result_dir))
   }
   @book_quality.audit_from_scores(book_catalog_path, scores)
 }

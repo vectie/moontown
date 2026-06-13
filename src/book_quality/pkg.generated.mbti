@@ -118,8 +118,6 @@ pub fn push_unique_note(Array[String], String) -> Unit
 
 pub fn quality_grade(Int) -> String
 
-pub async fn read_review_result_text(String, String) -> String
-
 pub fn reconcile_review_run_from_observation(BookQualityReviewRun, result_exists~ : Bool, result_content? : String, process_alive~ : Bool, poll_summary~ : String, now_ms~ : UInt64) -> BookQualityReviewRunReconcileResult
 
 pub fn refreshed_repair_standing_goal(@core.StandingGoal, BookQualityRepairBridgeItem) -> @core.StandingGoal
@@ -220,7 +218,7 @@ pub fn review_skill_path(String) -> String
 
 pub fn review_status_markdown_from_observations(String, String, active_book_ids~ : Array[String], BookQualityReviewRunLedger, Array[BookQualityReviewRunObservation], UInt64) -> String
 
-pub async fn score_book(@moonbook.BookCatalogEntry, String) -> BookQualityScore
+pub async fn score_book_with_review_text(@moonbook.BookCatalogEntry, String) -> BookQualityScore
 
 pub fn score_exists(Array[BookQualityScore], String) -> Bool
 

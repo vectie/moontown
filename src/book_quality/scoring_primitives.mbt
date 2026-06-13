@@ -25,7 +25,7 @@ async fn finalize_score_draft(
   book_type : String,
   draft : ScoreDraft,
   raw_score : Int,
-  review_result_dir : String,
+  semantic_review_text : String,
 ) -> BookQualityScore {
   finalize_score(
     entry,
@@ -34,7 +34,7 @@ async fn finalize_score_draft(
     raw_score,
     draft.strengths,
     draft.gaps,
-    review_result_dir,
+    semantic_review_text,
   )
 }
 
@@ -46,18 +46,14 @@ async fn finalize_score(
   raw_score : Int,
   strengths : Array[String],
   gaps : Array[String],
-  review_result_dir : String,
+  semantic_review_text : String,
 ) -> BookQualityScore {
   let policy = @policy.policy_for_type(book_type)
   let present_required_files = policy_present_required_files(
     root, policy, strengths, gaps,
   )
   let structural = assess_structural_quality(raw_score, gaps)
-  let semantic_result_text = read_review_result_text(
-    review_result_dir,
-    entry.id,
-  )
-  let semantic_score = parse_ai_quality_score(semantic_result_text)
+  let semantic_score = parse_ai_quality_score(semantic_review_text)
   let semantic = semantic_quality_assessment(semantic_score)
   let policy_health = @policy.evaluate_health(
     policy,
@@ -88,7 +84,7 @@ async fn finalize_score(
       structural.score,
       semantic.score,
       semantic_repair_task=semantic_repair_task_from_review_text(
-        semantic_result_text,
+        semantic_review_text,
       ),
     ),
   }

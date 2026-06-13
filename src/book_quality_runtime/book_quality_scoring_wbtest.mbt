@@ -91,10 +91,7 @@ async test "book quality package scorer reports general strengths and gaps" {
     workspace_root=root,
     tags=[],
   )
-  let score = @book_quality.score_book(
-    entry,
-    @book_quality.default_review_result_dir(),
-  )
+  let score = score_book(entry, @book_quality.default_review_result_dir())
   assert_eq(score.book_type, @policy.general_type())
   assert_eq(score.structural_score, 63)
   assert_true(score.strengths.contains("workspace exists"))
@@ -125,10 +122,7 @@ async test "book quality package scorer reports missing general projection" {
     workspace_root=root,
     tags=[],
   )
-  let score = @book_quality.score_book(
-    entry,
-    @book_quality.default_review_result_dir(),
-  )
+  let score = score_book(entry, @book_quality.default_review_result_dir())
   assert_eq(score.book_type, @policy.general_type())
   assert_true(score.gaps.contains("missing `book/moonbook-ui-state.json`"))
   assert_true(score.gaps.contains("missing book/moonbook-ui-state.json"))
@@ -213,10 +207,7 @@ async test "book quality package scorer rewards complete civic service workspace
     workspace_root=root,
     tags=[],
   )
-  let score = @book_quality.score_book(
-    entry,
-    @book_quality.default_review_result_dir(),
-  )
+  let score = score_book(entry, @book_quality.default_review_result_dir())
   assert_eq(score.book_type, @policy.civic_type())
   assert_true(score.strengths.contains("latest civic service result exists"))
   assert_false(

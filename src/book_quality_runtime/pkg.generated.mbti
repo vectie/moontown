@@ -22,6 +22,8 @@ pub async fn inspect_book_quality(book_catalog_path? : String, snapshot_path? : 
 
 pub async fn load_review_run_ledger_file(String) -> @book_quality.BookQualityReviewRunLedger
 
+pub async fn read_review_result_text(String, String) -> String
+
 pub async fn reconcile_book_quality_ai_review_results(result_dir? : String, run_path? : String) -> Int
 
 pub async fn reconcile_book_quality_repair_bridge(book_catalog_path? : String, snapshot_path? : String, result_dir? : String, bridge_path? : String) -> String
@@ -29,6 +31,8 @@ pub async fn reconcile_book_quality_repair_bridge(book_catalog_path? : String, s
 pub async fn render_book_quality(book_catalog_path? : String, snapshot_path? : String) -> String
 
 pub async fn render_book_quality_ai_review_status(result_dir? : String, run_path? : String, book_catalog_path? : String, snapshot_path? : String) -> String
+
+pub async fn score_book(@moonbook.BookCatalogEntry, String) -> @book_quality.BookQualityScore
 
 pub async fn write_accepted_review_result(String, @book_quality.BookQualityReviewRun, String) -> Unit
 

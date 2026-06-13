@@ -429,6 +429,12 @@ civic/operational classification. AI review result parsing and repair-contract
 interpretation also live there, so the meaning of fields such as `ai_quality_score`,
 `repair_owner`, and `next_repair_task` is not duplicated in root orchestration.
 Audit summary aggregation and audit Markdown rendering are package-owned too.
+Quality scoring is policy-owned but observation-fed: `book_quality/` scores a
+book from catalog/workspace facts plus the semantic review text supplied by a
+runtime caller. It must not load semantic review result files itself. Reading
+`book-quality/ai-review-results/<book-id>.md`, translating absence into empty
+semantic-review text, and passing that text into scoring belongs to
+`book_quality_runtime/`.
 Review packets attach the composed `BookPolicy`, readiness uses policy-owned
 health checks, semantic-review candidate ordering is package-owned too, and
 book-quality review-status summary rendering is package-owned. That rendering
@@ -626,6 +632,11 @@ Book-quality review status section and table rendering are package-owned as
 well. Root may observe whether a result file exists and pass that state through
 a display row, but headings, historical-attempt explanation, table headers, and
 row formatting belong to `book_quality/`.
+Book-quality scoring follows the same boundary: `book_quality/` owns
+book-type scoring, structural scoring, semantic score parsing, next-action
+wording, and readiness decisions from supplied semantic review text.
+`book_quality_runtime/` owns reading semantic-review result files and exposing
+the runtime scorer that combines file observation with package-owned scoring.
 Book-quality stale-run reconciliation vocabulary is package-owned too. Root may
 check process liveness and poll MoonClaw for a run summary, but the transition
 to `orphaned`, retry-facing summary text, and timestamped review-run record
