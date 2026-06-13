@@ -81,7 +81,7 @@ pub fn communication_building_intro(
 }
 
 ///|
-pub fn salon_structural_metric_note() -> String {
+pub fn communication_structural_metric_note() -> String {
   [
     "This metric is structural: it proves the building moved from exchange to reduction to distribution.",
     "It does not claim the outputs are correct;", "the review queue still decides which become accepted service work.",
@@ -97,7 +97,7 @@ pub fn communication_metrics_certification_note() -> String {
 }
 
 ///|
-pub fn salon_return_home_contract_note(
+pub fn communication_return_home_contract_note(
   scenario : CivicCommunicationScenario,
 ) -> String {
   [

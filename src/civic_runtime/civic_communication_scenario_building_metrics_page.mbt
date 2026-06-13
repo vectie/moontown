@@ -38,6 +38,6 @@ fn civic_salon_metrics_markdown(
     "",
     "## Return Home Contract",
     "",
-    @civic.salon_return_home_contract_note(scenario),
+    @civic.communication_return_home_contract_note(scenario),
   ].join("\n")
 }

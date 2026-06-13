@@ -117,6 +117,8 @@ pub fn communication_building_intro(CivicCommunicationPattern, BuildingProtocolD
 
 pub fn communication_metrics_certification_note() -> String
 
+pub fn communication_participant_skill_text(CivicCommunicationScenario) -> String
+
 pub fn communication_pattern_for_scenario(CivicCommunicationScenario) -> CivicCommunicationPattern
 
 pub fn communication_pattern_id_for_scenario(CivicCommunicationScenario) -> String
@@ -124,6 +126,16 @@ pub fn communication_pattern_id_for_scenario(CivicCommunicationScenario) -> Stri
 pub fn communication_pattern_label_for_scenario(CivicCommunicationScenario) -> String
 
 pub fn communication_protocol_for_scenario(CivicCommunicationScenario) -> BuildingProtocolDefinition
+
+pub fn communication_reducer_contract_markdown(CivicCommunicationScenario) -> String
+
+pub fn communication_reducer_input_markdown(CivicCommunicationScenario, String, Int) -> String
+
+pub fn communication_reducer_skill_text(CivicCommunicationScenario) -> String
+
+pub fn communication_return_home_contract_note(CivicCommunicationScenario) -> String
+
+pub fn communication_structural_metric_note() -> String
 
 pub fn complete_civic_communication_schedule(CivicCommunicationSchedule, UInt64, String, String) -> CivicCommunicationSchedule
 
@@ -146,18 +158,6 @@ pub fn research_salon_pattern() -> CivicCommunicationPattern
 pub fn review_council_pattern() -> CivicCommunicationPattern
 
 pub fn review_queue_text(CivicServiceDefinition, String) -> String
-
-pub fn salon_participant_skill_text(CivicCommunicationScenario) -> String
-
-pub fn salon_reducer_contract_markdown(CivicCommunicationScenario) -> String
-
-pub fn salon_reducer_input_markdown(CivicCommunicationScenario, String, Int) -> String
-
-pub fn salon_reducer_skill_text(CivicCommunicationScenario) -> String
-
-pub fn salon_return_home_contract_note(CivicCommunicationScenario) -> String
-
-pub fn salon_structural_metric_note() -> String
 
 pub fn schema_page_text(CivicServiceDefinition, String) -> String
 

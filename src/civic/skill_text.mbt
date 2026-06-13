@@ -50,7 +50,7 @@ pub fn civic_module_skill_text(service : CivicServiceDefinition) -> String {
 }
 
 ///|
-pub fn salon_participant_skill_text(
+pub fn communication_participant_skill_text(
   scenario : CivicCommunicationScenario,
 ) -> String {
   let pattern = communication_pattern_for_scenario(scenario)
@@ -86,7 +86,7 @@ pub fn salon_participant_skill_text(
 }
 
 ///|
-pub fn salon_reducer_skill_text(
+pub fn communication_reducer_skill_text(
   scenario : CivicCommunicationScenario,
 ) -> String {
   let pattern = communication_pattern_for_scenario(scenario)
@@ -131,7 +131,7 @@ pub fn salon_reducer_skill_text(
 }
 
 ///|
-pub fn salon_reducer_input_markdown(
+pub fn communication_reducer_input_markdown(
   scenario : CivicCommunicationScenario,
   round_id : String,
   round_number : Int,
@@ -155,7 +155,7 @@ pub fn salon_reducer_input_markdown(
 }
 
 ///|
-pub fn salon_reducer_contract_markdown(
+pub fn communication_reducer_contract_markdown(
   scenario : CivicCommunicationScenario,
 ) -> String {
   [

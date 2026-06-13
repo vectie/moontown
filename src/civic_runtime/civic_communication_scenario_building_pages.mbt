@@ -28,7 +28,7 @@ fn civic_salon_building_synthesis(
     "",
     civic_salon_metrics_table(metrics),
     "",
-    @civic.salon_structural_metric_note(),
+    @civic.communication_structural_metric_note(),
     "",
     "## Quality Standard",
     "",

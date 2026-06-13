@@ -1,6 +1,6 @@
 ///|
 test "civic reducer skill names map-reduce role reduction rules and contract" {
-  let text = @civic.salon_reducer_skill_text(
+  let text = @civic.communication_reducer_skill_text(
     civic_reducer_skill_test_scenario(),
   )
   assert_true(text.contains("agentic map-reduce place"))
@@ -15,7 +15,7 @@ test "civic reducer skill names map-reduce role reduction rules and contract" {
 
 ///|
 test "civic reducer skill examples distinguish good research service and poor output" {
-  let text = @civic.salon_reducer_skill_text(
+  let text = @civic.communication_reducer_skill_text(
     civic_reducer_skill_test_scenario(),
   )
   assert_true(text.contains("robotics research salon"))

@@ -52,7 +52,7 @@ async fn write_civic_salon_participant_workspace(
   )
   @support.write_text_file(
     "\{root}/skills/\{scenario.skill_name}/SKILL.md",
-    @civic.salon_participant_skill_text(scenario),
+    @civic.communication_participant_skill_text(scenario),
   )
   @support.write_text_file(
     "\{root}/wiki/contributions/current-perspective.md",

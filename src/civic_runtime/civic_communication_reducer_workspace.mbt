@@ -7,7 +7,7 @@ async fn write_civic_salon_reducer_workspace(
 ) -> Unit {
   @support.write_text_file(
     "\{root}/skills/\{scenario.skill_name}/SKILL.md",
-    @civic.salon_reducer_skill_text(scenario),
+    @civic.communication_reducer_skill_text(scenario),
   )
   @support.write_text_file(
     "\{root}/\{@civic.civic_reducer_participants_relative_path()}",
@@ -15,11 +15,13 @@ async fn write_civic_salon_reducer_workspace(
   )
   @support.write_text_file(
     "\{root}/\{@civic.civic_reducer_input_relative_path()}",
-    @civic.salon_reducer_input_markdown(scenario, round_id, round_number),
+    @civic.communication_reducer_input_markdown(
+      scenario, round_id, round_number,
+    ),
   )
   @support.write_text_file(
     "\{root}/\{@civic.civic_reducer_contract_relative_path()}",
-    @civic.salon_reducer_contract_markdown(scenario),
+    @civic.communication_reducer_contract_markdown(scenario),
   )
   @support.write_text_file(
     "\{root}/moonclaw.jobs.json",
