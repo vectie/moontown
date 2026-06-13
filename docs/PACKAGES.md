@@ -622,6 +622,9 @@ Purpose:
 - `src/planbook_policy` also owns PlanBook backlog DTOs, canonical backlog
   paths, default seed items, projection Markdown, cadence/stop-policy text,
   backlog criterion ids/evidence/next-action wording, and target-file hints.
+- `src/planbook_policy` owns repair target-file selection for known criteria.
+  Runtime may provide resolved source/workspace paths, but should not own the
+  criterion-to-target-file map.
 - `src/planbook_runtime` owns workspace IO, run reconciliation, and
   evidence-aware repair lifecycle decisions.
 - `src/planbook_runtime` owns the daemon-facing PlanBook phase: write autonomy
@@ -640,6 +643,9 @@ Boundary:
 - PlanBook runtime may assemble MoonClaw packet metadata, but repair
   contract vocabulary, required engineering steps, patch-receipt required
   fields, and git policy belong in `src/planbook_policy`.
+- PlanBook runtime may resolve dynamic roots such as the current source root,
+  PlanBook workspace root, or course workspace root before calling policy
+  target-file helpers.
 - PlanBook runtime may load/write `raw/backlog/...`, progress pages, completion
   evidence, and the live change log, but backlog schema/path/default/cadence/
   rendering/criterion wording belongs in `src/planbook_policy`.

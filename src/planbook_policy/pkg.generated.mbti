@@ -175,6 +175,8 @@ pub fn repair_superseded_result_path(String) -> String
 
 pub fn repair_superseded_result_relative_path() -> String
 
+pub fn repair_target_files_for_criterion(String, String, String, String, String) -> Array[String]
+
 pub fn repair_task_id(String) -> String
 
 pub fn repair_text_has_valid_patch_receipt(String, String, String) -> Bool

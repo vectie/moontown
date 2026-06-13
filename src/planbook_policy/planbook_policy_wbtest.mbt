@@ -72,6 +72,47 @@ test "planbook repair metadata policy owns engineering and git contract" {
 }
 
 ///|
+test "planbook repair target policy owns known criterion targets" {
+  let source_root = "/repo"
+  let targets = repair_target_files_for_criterion(
+    "planbook-source-patch-loop", source_root, "/repo/.moontown/books/course-wenyu-game-design",
+    "/repo/.moontown/books/plan-moontown-quality/wiki/planning/editor.md", "/repo/.moontown/books/plan-moontown-quality/raw/editor-pipeline/next-feature.json",
+  ).join("\n")
+  assert_true(
+    targets.contains("/repo/src/planbook_runtime/planbook_repair.mbt"),
+  )
+  assert_true(targets.contains("/repo/src/planbook_policy/request_rules.mbt"))
+  assert_true(targets.contains("/repo/../moonclaw/acp/runner.mbt"))
+}
+
+///|
+test "planbook repair target policy resolves editor and backlog targets" {
+  let editor_targets = repair_target_files_for_criterion(
+    "editor-mode-real-pipeline", "/repo", "/repo/.moontown/books/course-wenyu-game-design",
+    "/repo/.moontown/books/plan-moontown-quality/wiki/planning/editor.md", "/repo/.moontown/books/plan-moontown-quality/raw/editor-pipeline/next-feature.json",
+  ).join("\n")
+  assert_true(editor_targets.contains("/repo/src/course_book/core.mbt"))
+  assert_true(
+    editor_targets.contains(
+      "/repo/.moontown/books/course-wenyu-game-design/wiki/course/beginner-course.md",
+    ),
+  )
+  assert_true(editor_targets.contains("wiki/planning/editor.md"))
+  let backlog_targets = repair_target_files_for_criterion(
+    "backlog-live-change-log-projection", "/repo", "/repo/.moontown/books/course-wenyu-game-design",
+    "/repo/.moontown/books/plan-moontown-quality/wiki/planning/editor.md", "/repo/.moontown/books/plan-moontown-quality/raw/editor-pipeline/next-feature.json",
+  ).join("\n")
+  assert_true(
+    backlog_targets.contains("/repo/src/planbook_runtime/planbook_backlog.mbt"),
+  )
+  assert_true(
+    backlog_targets.contains(
+      "/repo/.moontown/books/plan-moontown-quality/raw/backlog/implementation-backlog.json",
+    ),
+  )
+}
+
+///|
 test "planbook validation evidence contract is package-owned policy" {
   let text = validation_evidence_markdown("validated", 42UL)
   assert_true(text.contains("contract: planbook.validation.v1"))
