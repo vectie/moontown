@@ -69,16 +69,10 @@ fn first_review_candidate_without_results(
 }
 
 ///|
-pub async fn first_pending_review_score(
+pub fn first_pending_review_score_for_completed(
   audit : BookQualityAudit,
-  result_dir : String,
+  completed_book_ids : Array[String],
 ) -> BookQualityScore? {
-  let completed_book_ids : Array[String] = []
-  for score in audit.scores {
-    if @fs.exists(review_result_path(result_dir, score.book_id)) {
-      completed_book_ids.push(score.book_id)
-    }
-  }
   first_review_candidate_without_results(audit.scores, completed_book_ids)
 }
 

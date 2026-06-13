@@ -49,7 +49,7 @@ async fn book_quality_ai_review_dispatch_preflight(
     ),
   )
   let audit = inspect_book_quality(book_catalog_path~, snapshot_path~)
-  match @book_quality.first_pending_review_score(audit, result_dir) {
+  match first_pending_review_score(audit, result_dir) {
     Some(score) => PendingReview(score)
     None => NoPendingReview
   }

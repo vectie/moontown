@@ -24,14 +24,14 @@ async test "book quality review candidate selection favors the weakest pending s
   let audit = @book_quality.audit_from_scores("/tmp/catalog.json", [
     stronger, weaker, equal,
   ])
-  let candidate = @book_quality.first_pending_review_score(audit, result_dir)
+  let candidate = first_pending_review_score(audit, result_dir)
   assert_true(candidate is Some(_))
   assert_eq(candidate.unwrap().book_id, "weak-book")
   @support.write_text_file(
     @book_quality.review_result_path(result_dir, "weak-book"),
     "ai_quality_score: 82\n",
   )
-  let next = @book_quality.first_pending_review_score(audit, result_dir)
+  let next = first_pending_review_score(audit, result_dir)
   assert_true(next is Some(_))
   assert_eq(next.unwrap().book_id, "strong-book")
 }

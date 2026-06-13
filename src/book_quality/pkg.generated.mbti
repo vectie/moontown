@@ -60,7 +60,7 @@ pub fn disabled_repair_standing_goal(@core.StandingGoal) -> @core.StandingGoal
 
 pub fn external_packet_path(String, String) -> String
 
-pub async fn first_pending_review_score(BookQualityAudit, String) -> BookQualityScore?
+pub fn first_pending_review_score_for_completed(BookQualityAudit, Array[String]) -> BookQualityScore?
 
 pub fn generated_site_path() -> String
 

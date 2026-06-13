@@ -228,21 +228,9 @@ async test "book quality package owns pending review selection from result files
   let audit = audit_from_scores("/tmp/catalog.json", [
     strongest, weakest, middle,
   ])
-  let result_dir = "/tmp/moontown-book-quality-pending-\{@async.now().to_int()}"
-  let run = review_run(
+  let candidate = first_pending_review_score_for_completed(audit, [
     "weakest-file",
-    "/tmp/weakest-file.json",
-    result_dir,
-    None,
-    Some("run-weakest"),
-    review_run_written_status(),
-    "existing semantic result",
-    1,
-  )
-  write_accepted_review_result(
-    result_dir, run, "ai_quality_score: 80\nai_quality_grade: strong\n",
-  )
-  let candidate = first_pending_review_score(audit, result_dir)
+  ])
   assert_true(candidate is Some(_))
   assert_eq(candidate.unwrap().book_id, "middle-file")
 }

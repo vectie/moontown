@@ -561,9 +561,15 @@ Boundary:
 - `src/book_quality` owns review-run ledger/status vocabulary, display row
   construction, active-review counting, and status Markdown rendering from
   explicit runtime observations.
+- `src/book_quality` owns first-pending semantic-review candidate selection
+  from an audit plus an observed completed-review book-id list; it should not
+  inspect result files to decide which candidates are completed.
 - `src/book_quality_runtime` owns review status observation: loading the run
   ledger file, checking result-file existence, observing current time, and
   passing those facts into `src/book_quality`.
+- `src/book_quality_runtime` owns semantic-review completion observation:
+  result-file existence checks are converted into completed book ids before
+  calling `src/book_quality` candidate-selection policy.
 - `src/book_quality/scoring_engine.mbt` owns book-type scoring orchestration.
   Reusable draft/finalization/path-scoring internals belong in
   `scoring_primitives.mbt`; civic-service scoring details belong in

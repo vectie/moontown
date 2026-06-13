@@ -447,20 +447,21 @@ work by combining book-quality reviewer semantics with adapter-owned Codex
 target JSON. It also adapts the neutral review proposal spec into a MoonClaw
 external proposal packet at dispatch time. Runtime observation belongs there
 too: process liveness checks, MoonClaw run workspace lookup, polling summaries,
-and harvesting `result.json` are runtime duties. `book_quality/` owns the
-ledger schema, result path contract, accepted/orphaned/blocked interpretation,
-and pure transition from observed facts to review-run state. Root may supply
-observed directories, process facts, and audits into the package, but it should
-not define the `codex-main` target schema or reviewer label or rebuild package
-policy from those observations. The
-selection of the first pending semantic review, result-file filtering, the
+harvesting `result.json`, and checking which semantic-review result files
+already exist are runtime duties. `book_quality/` owns the ledger schema,
+result path contract, accepted/orphaned/blocked interpretation, and pure
+transition from observed facts to review-run state. Root may supply observed
+directories, process facts, completed-review book ids, and audits into the
+package, but it should not define the `codex-main` target schema or reviewer
+label or rebuild package policy from those observations. The selection of the
+first pending semantic review from an audit plus observed completed ids, the
 meaning of "weaker candidate should be reviewed first", the summary shape of the
 review ledger, and the active-run lifecycle decision from observed state belong
 to `book_quality/`. Book-quality run records are also package-owned, but they
 are constructed from observed proposal id, run id, summary, optional launch
 command, and timestamp. `book_quality_runtime/` owns the MoonClaw import receipt
-adaptation and detached runner command lookup before calling that pure run-record
-constructor.
+adaptation and detached runner command lookup before calling that pure
+run-record constructor.
 
 Codex ACP defaults belong to the `adapters/codex` package. PlanBook repair,
 book-quality semantic review, and Wenyu source-build workers should not each
