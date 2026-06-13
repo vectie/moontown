@@ -1,5 +1,5 @@
 ///|
-async fn load_civic_salon_reducer_output_after_run(
+async fn load_civic_communication_reducer_output_after_run(
   scenario : CivicCommunicationScenario,
   workspace_base : String,
   root : String,
@@ -7,21 +7,24 @@ async fn load_civic_salon_reducer_output_after_run(
 ) -> Array[CivicCommunicationIdea] {
   let run_ideas = match run_id {
     Some(run_id) =>
-      load_civic_salon_reducer_run_output(run_id, root).unwrap_or([])
+      load_civic_communication_reducer_run_output(run_id, root).unwrap_or([])
     None => []
   }
   if run_ideas.length() > 0 {
-    persist_civic_salon_reducer_output(scenario, run_ideas, workspace_base)
+    persist_civic_communication_reducer_output(
+      scenario, run_ideas, workspace_base,
+    )
     return run_ideas
   }
-  match load_persisted_civic_salon_reducer_output(scenario, workspace_base) {
+  match
+    load_persisted_civic_communication_reducer_output(scenario, workspace_base) {
     Some(ideas) => ideas
     None => []
   }
 }
 
 ///|
-async fn load_civic_salon_reducer_run_output(
+async fn load_civic_communication_reducer_run_output(
   run_id : String,
   root : String,
 ) -> Array[CivicCommunicationIdea]? {
@@ -29,30 +32,30 @@ async fn load_civic_salon_reducer_run_output(
     Some(workspace_dir) => workspace_dir
     None => return None
   }
-  load_civic_salon_ideas_file(
-    civic_salon_reducer_output_path_in_workspace(workspace_dir),
+  load_civic_communication_outputs_file(
+    civic_communication_reducer_output_path_in_workspace(workspace_dir),
   )
 }
 
 ///|
-async fn load_persisted_civic_salon_reducer_output(
+async fn load_persisted_civic_communication_reducer_output(
   scenario : CivicCommunicationScenario,
   workspace_base : String,
 ) -> Array[CivicCommunicationIdea]? {
   match
-    load_civic_salon_ideas_file(
+    load_civic_communication_outputs_file(
       civic_salon_scenario_output_path(scenario, workspace_base),
     ) {
     Some(ideas) => return Some(ideas)
     None => ()
   }
-  load_civic_salon_ideas_file(
-    civic_salon_reducer_output_path(scenario, workspace_base),
+  load_civic_communication_outputs_file(
+    civic_communication_reducer_output_path(scenario, workspace_base),
   )
 }
 
 ///|
-async fn load_civic_salon_ideas_file(
+async fn load_civic_communication_outputs_file(
   path : String,
 ) -> Array[CivicCommunicationIdea]? {
   let parsed = match @support.read_optional_json_file(path) {
@@ -82,13 +85,13 @@ async fn load_civic_salon_ideas_file(
 }
 
 ///|
-async fn persist_civic_salon_reducer_output(
+async fn persist_civic_communication_reducer_output(
   scenario : CivicCommunicationScenario,
   ideas : Array[CivicCommunicationIdea],
   workspace_base : String,
 ) -> Unit {
   @support.write_text_file(
-    civic_salon_reducer_output_path(scenario, workspace_base),
+    civic_communication_reducer_output_path(scenario, workspace_base),
     Json::object({ "ideas": ideas.to_json() }).stringify(indent=2),
   )
   @support.write_text_file(
@@ -106,7 +109,7 @@ fn civic_salon_scenario_output_path(
 }
 
 ///|
-async fn write_civic_salon_reducer_blocker(
+async fn write_civic_communication_reducer_blocker(
   scenario : CivicCommunicationScenario,
   reduction : CivicCommunicationReductionResult,
   round_id : String,

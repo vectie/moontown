@@ -4,7 +4,7 @@ async test "MoonClaw reducer workspace excludes template seed ideas" {
     "/tmp/moontown-civic-salon-reducer-input",
   )
   let scenario = test_civic_salon_scenario()
-  write_civic_salon_reducer_workspace(
+  write_civic_communication_reducer_workspace(
     scenario, root, "future-energy-round-2", 2,
   )
   let input = @fs.read_file(
@@ -29,7 +29,7 @@ async test "civic salon reducer profile preserves existing civic service worker 
     "\{root}/moonclaw.jobs.json",
     "{ \"jobs\": { \"profiles\": { \"wenyu_civic_service_worker\": { \"family\": \"wenyu_civic_service_worker\", \"steps\": [{\"id\":\"execute_civic_service\"},{\"id\":\"review_civic_service\"}] } } } }",
   )
-  write_civic_salon_reducer_workspace(
+  write_civic_communication_reducer_workspace(
     test_civic_salon_scenario(),
     root,
     "future-energy-round-3",
@@ -49,12 +49,12 @@ async test "civic salon reducer parses object ideas contract" {
     "/tmp/moontown-civic-salon-reducer-contract",
   )
   let scenario = test_civic_salon_scenario()
-  let path = civic_salon_reducer_output_path_in_workspace(root)
+  let path = civic_communication_reducer_output_path_in_workspace(root)
   @support.write_text_file(
     path,
     Json::object({ "ideas": scenario.ideas.to_json() }).stringify(indent=2),
   )
-  match load_civic_salon_ideas_file(path) {
+  match load_civic_communication_outputs_file(path) {
     Some(ideas) => {
       assert_eq(ideas.length(), 1)
       assert_eq(ideas.get(0).unwrap().id, "storage-grid-control-contract")
@@ -62,7 +62,7 @@ async test "civic salon reducer parses object ideas contract" {
     None => fail("expected reducer ideas JSON")
   }
   assert_eq(
-    civic_salon_reducer_output_path(scenario, "/tmp/moontown"),
+    civic_communication_reducer_output_path(scenario, "/tmp/moontown"),
     "/tmp/moontown/books/wenyu-social-square/\{@civic.civic_reducer_output_relative_path()}",
   )
 }

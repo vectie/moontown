@@ -31,7 +31,7 @@ async fn run_civic_salon_scenario_round(
 ) -> (CivicCommunicationSchedule, String) {
   let round_id = civic_communication_round_id(schedule)
   let workspace_base = civic_salon_workspace_base(snapshot_path)
-  let reduction = reduce_civic_salon_ideas(
+  let reduction = reduce_civic_communication_outputs(
     scenario,
     round_id~,
     round_number=schedule.round_count + 1,
@@ -112,12 +112,12 @@ async fn civic_salon_round_decision_summary(
       "Blocked \{scenario.title} \{round_id}: invalid civic communication-pattern output: \{validation_errors.join("; ")}",
     )
   }
-  if civic_salon_reduction_status_live(reduction.status) {
+  if civic_communication_reduction_status_live(reduction.status) {
     return (
       "running",
       "Running \{scenario.title} \{round_id}: \{reduction.summary}",
     )
   }
-  write_civic_salon_reducer_blocker(scenario, reduction, round_id)
+  write_civic_communication_reducer_blocker(scenario, reduction, round_id)
   ("blocked", "Blocked \{scenario.title} \{round_id}: \{reduction.summary}")
 }

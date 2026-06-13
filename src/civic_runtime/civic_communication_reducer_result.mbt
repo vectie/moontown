@@ -1,12 +1,12 @@
 ///|
-fn civic_salon_reduction_status_live(
+fn civic_communication_reduction_status_live(
   status : @core.TaskExecutionStatus,
 ) -> Bool {
   @core.active_work_execution_status(status)
 }
 
 ///|
-fn failed_civic_salon_reduction(
+fn failed_civic_communication_reduction(
   root : String,
   packet_id : String?,
   packet_path : String?,

@@ -10,7 +10,7 @@ async fn bootstrap_civic_salon_scenario(
   let resolved_round_id = civic_pattern_round_id_for_scenario(
     scenario, round_id, round_number,
   )
-  let reduction = reduce_civic_salon_ideas(
+  let reduction = reduce_civic_communication_outputs(
     scenario,
     round_id=resolved_round_id,
     round_number~,
@@ -29,7 +29,9 @@ async fn bootstrap_civic_salon_scenario(
       reducer_summary=Some(reduction.summary),
     )
   } else {
-    write_civic_salon_reducer_blocker(scenario, reduction, resolved_round_id)
+    write_civic_communication_reducer_blocker(
+      scenario, reduction, resolved_round_id,
+    )
     civic_salon_blocked_summary(scenario, resolved_round_id, reduction.summary)
   }
 }

@@ -793,6 +793,10 @@ Boundary:
   are package-private implementation details while migration continues.
 - civic runtime writes reducer workspaces through `@civic` reducer-contract
   helpers; it should not hardcode reducer filenames or profile family ids.
+- civic runtime reducer helpers use `civic_communication_reducer_*` names.
+  Remaining `civic_salon_*` runtime helpers are legacy schedule/projection/page
+  vocabulary and should be migrated in later focused passes without changing
+  persisted paths.
 - `src/town_runtime` may choose when a civic service result should be persisted,
   but should not assemble civic persistence summaries, artifact lists, or memory
   candidates.

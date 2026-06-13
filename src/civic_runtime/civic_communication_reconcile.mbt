@@ -24,7 +24,7 @@ async fn refresh_civic_salon_projection_if_stale(
         None
       } else {
         let workspace_base = civic_salon_workspace_base(snapshot_path)
-        let reduction = reduce_civic_salon_ideas(
+        let reduction = reduce_civic_communication_outputs(
           scenario,
           round_id=schedule.latest_round_id,
           round_number=schedule.round_count,

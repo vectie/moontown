@@ -1,5 +1,5 @@
 ///|
-async fn write_civic_salon_reducer_workspace(
+async fn write_civic_communication_reducer_workspace(
   scenario : CivicCommunicationScenario,
   root : String,
   round_id : String,
@@ -25,18 +25,18 @@ async fn write_civic_salon_reducer_workspace(
   )
   @support.write_text_file(
     "\{root}/moonclaw.jobs.json",
-    merged_civic_salon_reducer_profile_json(root, scenario),
+    merged_civic_communication_reducer_profile_json(root, scenario),
   )
 }
 
 ///|
-async fn merged_civic_salon_reducer_profile_json(
+async fn merged_civic_communication_reducer_profile_json(
   root : String,
   scenario : CivicCommunicationScenario,
 ) -> String {
   let path = "\{root}/moonclaw.jobs.json"
   let existing = @support.read_json_file_or_empty_object(path)
-  let reducer_profile = civic_salon_reducer_profile_json(scenario)
+  let reducer_profile = civic_communication_reducer_profile_json(scenario)
   @support.upsert_moonclaw_job_profile_json(
     existing,
     @civic.civic_reducer_profile_family(),
@@ -45,7 +45,7 @@ async fn merged_civic_salon_reducer_profile_json(
 }
 
 ///|
-fn civic_salon_reducer_profile_json(
+fn civic_communication_reducer_profile_json(
   scenario : CivicCommunicationScenario,
 ) -> Json {
   let pattern = @civic.communication_pattern_for_scenario(scenario)
@@ -69,20 +69,20 @@ fn civic_salon_reducer_profile_json(
         "id": "reduce_civic_pattern_outputs",
         "title": "Reduce communication-pattern participant packets into reviewable outputs",
         "kind": "job.analysis",
-        "prompt_template": civic_salon_reducer_prompt_template(),
-        "metadata": civic_salon_reducer_step_metadata(scenario, pattern),
+        "prompt_template": civic_communication_reducer_prompt_template(),
+        "metadata": civic_communication_reducer_step_metadata(scenario, pattern),
       },
     ],
   }
 }
 
 ///|
-fn civic_salon_reducer_prompt_template() -> String {
+fn civic_communication_reducer_prompt_template() -> String {
   "Read ${proposal.request_text}. Then read the listed context pages and skill_paths. Write \{@civic.civic_reducer_output_relative_path()} only after validating the \{@civic.civic_reducer_output_contract_type_name()} contract. Do not wait for input and do not use template seed ideas."
 }
 
 ///|
-fn civic_salon_reducer_step_metadata(
+fn civic_communication_reducer_step_metadata(
   scenario : CivicCommunicationScenario,
   pattern : @civic.CivicCommunicationPattern,
 ) -> Json {
@@ -95,12 +95,12 @@ fn civic_salon_reducer_step_metadata(
     board_order=0,
   )
   fields["communication_pattern_id"] = pattern.id.to_json()
-  fields["role_runtime"] = civic_salon_reducer_role_runtime(pattern)
+  fields["role_runtime"] = civic_communication_reducer_role_runtime(pattern)
   Json::object(fields)
 }
 
 ///|
-fn civic_salon_reducer_role_runtime(
+fn civic_communication_reducer_role_runtime(
   pattern : @civic.CivicCommunicationPattern,
 ) -> Json {
   {

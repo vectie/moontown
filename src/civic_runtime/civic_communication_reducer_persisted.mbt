@@ -1,5 +1,5 @@
 ///|
-async fn persisted_civic_salon_reduction(
+async fn persisted_civic_communication_reduction(
   scenario : CivicCommunicationScenario,
   round_id : String,
   workspace_base : String,
@@ -8,7 +8,8 @@ async fn persisted_civic_salon_reduction(
     scenario.building_book_id,
     workspace_base,
   )
-  match load_persisted_civic_salon_reducer_output(scenario, workspace_base) {
+  match
+    load_persisted_civic_communication_reducer_output(scenario, workspace_base) {
     Some(loaded) => {
       let ideas = loaded
       CivicCommunicationReductionResult::{

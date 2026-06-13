@@ -70,21 +70,29 @@ async test "invalid civic idea participant reference is reviewable blocker" {
 ///|
 test "live civic reducer statuses remain running rather than blocked" {
   assert_true(
-    civic_salon_reduction_status_live(
+    civic_communication_reduction_status_live(
       @core.TaskExecutionStatus::ProposalImported,
     ),
   )
   assert_true(
-    civic_salon_reduction_status_live(@core.TaskExecutionStatus::RunConfirmed),
+    civic_communication_reduction_status_live(
+      @core.TaskExecutionStatus::RunConfirmed,
+    ),
   )
   assert_true(
-    civic_salon_reduction_status_live(@core.TaskExecutionStatus::Running),
+    civic_communication_reduction_status_live(
+      @core.TaskExecutionStatus::Running,
+    ),
   )
   assert_true(
-    !civic_salon_reduction_status_live(@core.TaskExecutionStatus::Failed),
+    !civic_communication_reduction_status_live(
+      @core.TaskExecutionStatus::Failed,
+    ),
   )
   assert_true(
-    !civic_salon_reduction_status_live(@core.TaskExecutionStatus::Completed),
+    !civic_communication_reduction_status_live(
+      @core.TaskExecutionStatus::Completed,
+    ),
   )
 }
 

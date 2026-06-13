@@ -1,5 +1,5 @@
 ///|
-fn civic_salon_reducer_packet(
+fn civic_communication_reducer_packet(
   scenario : CivicCommunicationScenario,
   packet_id : String,
   round_id : String,
@@ -10,7 +10,9 @@ fn civic_salon_reducer_packet(
     packet_id~,
     title="Reduce \{scenario.title} round \{round_number}",
     summary="Run the \{scenario.domain_label} \{pattern.title} reducer and emit \{@civic.civic_reducer_output_contract_type_name()} JSON for \{scenario.title}.",
-    request_text=civic_salon_reducer_request(scenario, round_id, round_number),
+    request_text=civic_communication_reducer_request(
+      scenario, round_id, round_number,
+    ),
     profile=@civic.civic_reducer_profile_family(),
     output_contract=pattern.output_contract,
     context_pages=[
@@ -31,14 +33,14 @@ fn civic_salon_reducer_packet(
       scenario.id,
       scenario.building_id,
     ],
-    metadata=civic_salon_reducer_packet_metadata(
+    metadata=civic_communication_reducer_packet_metadata(
       scenario, pattern, round_id, round_number,
     ),
   )
 }
 
 ///|
-fn civic_salon_reducer_packet_metadata(
+fn civic_communication_reducer_packet_metadata(
   scenario : CivicCommunicationScenario,
   pattern : @civic.CivicCommunicationPattern,
   round_id : String,
@@ -54,14 +56,14 @@ fn civic_salon_reducer_packet_metadata(
   fields["communication_pattern_title"] = pattern.title.to_json()
   @moonclaw_runtime.add_moonclaw_no_input_policy(fields)
   fields["profile_metadata"] = @moonclaw_runtime.moonclaw_no_input_policy_json()
-  fields["step_metadata"] = civic_salon_reducer_packet_step_metadata(
+  fields["step_metadata"] = civic_communication_reducer_packet_step_metadata(
     scenario, pattern,
   )
   Json::object(fields)
 }
 
 ///|
-fn civic_salon_reducer_packet_step_metadata(
+fn civic_communication_reducer_packet_step_metadata(
   scenario : CivicCommunicationScenario,
   pattern : @civic.CivicCommunicationPattern,
 ) -> Json {
@@ -75,7 +77,7 @@ fn civic_salon_reducer_packet_step_metadata(
 }
 
 ///|
-fn civic_salon_reducer_request(
+fn civic_communication_reducer_request(
   scenario : CivicCommunicationScenario,
   round_id : String,
   round_number : Int,

@@ -1,5 +1,5 @@
 ///|
-async fn moonclaw_civic_salon_reduction(
+async fn moonclaw_civic_communication_reduction(
   scenario : CivicCommunicationScenario,
   round_id : String,
   round_number : Int,
@@ -10,12 +10,14 @@ async fn moonclaw_civic_salon_reduction(
     scenario.building_book_id,
     workspace_base,
   )
-  write_civic_salon_reducer_workspace(scenario, root, round_id, round_number)
+  write_civic_communication_reducer_workspace(
+    scenario, root, round_id, round_number,
+  )
   let packet_id = "civic-communication-reducer-\{scenario.id}-\{round_id}"
-  let packet_path = civic_salon_reducer_packet_path(
+  let packet_path = civic_communication_reducer_packet_path(
     scenario, round_id, workspace_base,
   )
-  let packet = civic_salon_reducer_packet(
+  let packet = civic_communication_reducer_packet(
     scenario, packet_id, round_id, round_number,
   )
   let imported = @moonclaw.import_packet(
@@ -26,7 +28,7 @@ async fn moonclaw_civic_salon_reduction(
     run_inline~,
   ) catch {
     error =>
-      return failed_civic_salon_reduction(
+      return failed_civic_communication_reduction(
         root,
         Some(packet_id),
         Some(packet_path),
@@ -43,14 +45,14 @@ async fn moonclaw_civic_salon_reduction(
   let worker_summary = execution
     .map(fn(result) { result.0.summary })
     .unwrap_or(imported.summary)
-  let ideas = load_civic_salon_reducer_output_after_run(
+  let ideas = load_civic_communication_reducer_output_after_run(
     scenario,
     workspace_base,
     root,
     imported.run_id,
   )
   if status is @core.TaskExecutionStatus::Completed && ideas.length() > 0 {
-    persist_civic_salon_reducer_output(scenario, ideas, workspace_base)
+    persist_civic_communication_reducer_output(scenario, ideas, workspace_base)
     {
       ideas,
       status,
@@ -62,7 +64,7 @@ async fn moonclaw_civic_salon_reduction(
       workspace_root: root,
       reducer_kind: "moonclaw",
     }
-  } else if civic_salon_reduction_status_live(status) {
+  } else if civic_communication_reduction_status_live(status) {
     {
       ideas: [],
       status,
@@ -75,7 +77,7 @@ async fn moonclaw_civic_salon_reduction(
       reducer_kind: "moonclaw",
     }
   } else {
-    failed_civic_salon_reduction(
+    failed_civic_communication_reduction(
       root,
       Some(packet_id),
       Some(packet_path),

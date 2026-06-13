@@ -115,7 +115,7 @@ async test "persisted civic reducer prefers scenario-specific output over shared
     "\{raw_root}/future-energy-social-square-ideas.json",
     Json::object({ "ideas": scenario.ideas.to_json() }).stringify(indent=2),
   )
-  let reduction = reduce_civic_salon_ideas(
+  let reduction = reduce_civic_communication_outputs(
     scenario,
     round_id="future-energy-social-square-round-1",
     round_number=1,
