@@ -716,7 +716,9 @@ Purpose:
 - policy-owned serialized context metadata that combines book type,
   `BookPolicy`, loop plan, and internal-distance plan for packet producers
 - policy-owned capability introspection over composed policy choices such as
-  `standing-watch`, `pdf-watch`, `web-tool-surface`, and `generated-site`
+  `standing-watch`, `research-evidence`, `course-curriculum`,
+  `stable-cookbook`, `pdf-watch`, `web-tool-surface`, `civic-protocol`, and
+  `generated-site`
 - reusable goal-text vocabulary for research, research-request, and Wenyu
   routing signals
 

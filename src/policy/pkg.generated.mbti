@@ -51,6 +51,8 @@ pub fn cookbook_type() -> String
 
 pub fn course() -> BookPolicy
 
+pub fn course_curriculum_capability() -> String
+
 pub fn course_type() -> String
 
 pub fn default_generated_site_projection_path() -> String
@@ -148,6 +150,8 @@ pub fn skill_specs(BookPolicy) -> Array[SkillSpec]
 pub fn source_policy_for_type(String) -> String
 
 pub fn source_policy_or_default(String, String) -> String
+
+pub fn stable_cookbook_capability() -> String
 
 pub fn standing_watch_capability() -> String
 

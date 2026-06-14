@@ -9,6 +9,16 @@ pub fn research_evidence_capability() -> String {
 }
 
 ///|
+pub fn course_curriculum_capability() -> String {
+  "course-curriculum"
+}
+
+///|
+pub fn stable_cookbook_capability() -> String {
+  "stable-cookbook"
+}
+
+///|
 pub fn pdf_watch_capability() -> String {
   "pdf-watch"
 }
@@ -40,6 +50,16 @@ pub fn capability_ids(policy : BookPolicy) -> Array[String] {
     has_skill(policy, "synthesis-revise") &&
     required_file_paths(policy).contains("wiki/sources/") {
     ids.push(research_evidence_capability())
+  }
+  if has_skill(policy, "course-project") &&
+    has_skill(policy, "course-review") &&
+    required_file_paths(policy).contains("wiki/course/lessons.md") {
+    ids.push(course_curriculum_capability())
+  }
+  if has_skill(policy, "stable-state-refresh") &&
+    has_skill(policy, "drift-review") &&
+    required_file_paths(policy).contains("wiki/cookbook/definitions.md") {
+    ids.push(stable_cookbook_capability())
   }
   if has_skill(policy, "pdf-watch") &&
     has_skill(policy, "pdf-analysis") &&

@@ -17,14 +17,14 @@ fn book_type_signal_score(
       gaps,
     )
   }
-  if book_type == @policy.course_type() {
+  if @policy.has_capability(policy, @policy.course_curriculum_capability()) {
     return apply_score_signal(
       course_identity_assessment(entry.id, content.course_index_text),
       strengths,
       gaps,
     )
   }
-  if book_type == @policy.cookbook_type() {
+  if @policy.has_capability(policy, @policy.stable_cookbook_capability()) {
     return apply_score_signal(
       cookbook_audit_link_assessment(content.cookbook_audit_exists),
       strengths,

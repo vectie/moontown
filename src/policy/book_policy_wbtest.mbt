@@ -213,6 +213,16 @@ test "generated-site capability remains derived from output surface" {
 }
 
 ///|
+test "book-purpose capabilities are derived from skill and file policy shape" {
+  assert_true(has_capability(research(), research_evidence_capability()))
+  assert_true(has_capability(course(), course_curriculum_capability()))
+  assert_true(has_capability(cookbook(), stable_cookbook_capability()))
+  assert_true(has_capability(civic_protocol(), civic_protocol_capability()))
+  assert_false(has_capability(general(), course_curriculum_capability()))
+  assert_false(has_capability(general(), stable_cookbook_capability()))
+}
+
+///|
 test "catalog entry policy exposes capabilities without downstream type checks" {
   assert_true(
     catalog_entry_runs_standing_watch("research-opc", "OPC", ["research"]),
