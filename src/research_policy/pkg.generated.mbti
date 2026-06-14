@@ -204,13 +204,25 @@ pub fn report_title_requirement(String) -> String
 
 pub fn report_word_target_requirement() -> String
 
+pub fn request_candidate_page_fetch_policy() -> String
+
+pub fn request_command_fallback_log_policy() -> String
+
 pub fn request_discovery_artifact_exclusion() -> String
 
+pub fn request_front_door_discovery_policy() -> String
+
 pub fn request_included_source_depth_target() -> String
+
+pub fn request_native_search_or_command_fallback_policy() -> String
+
+pub fn request_source_class_exhaustion_policy() -> String
 
 pub fn request_source_depth_blocker_requirement() -> String
 
 pub fn request_source_screen_row_fields() -> String
+
+pub fn request_web_search_result_fallback_policy() -> String
 
 pub fn research_report_skill_path() -> String
 

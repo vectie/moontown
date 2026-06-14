@@ -360,6 +360,13 @@ Boundary:
 - `src/adapters/moonbook` should call those request policy helpers directly
   while assembling generated request pages; it should not keep adapter-local
   request policy helpers that duplicate policy-owned wording.
+- `src/research_policy` owns reusable generated-request discovery/fallback
+  policy text such as native-search fallback, search-result fetch,
+  front-door discovery, command-fallback logging, candidate-page fetch, and
+  source-class exhaustion wording.
+- `src/adapters/moonbook` should call those discovery policy helpers directly
+  while assembling generated request pages; it should not keep adapter-local
+  discovery policy helpers that duplicate policy-owned wording.
 - `src/research_policy` owns research skill path contracts such as
   `skills/web-first-research/SKILL.md`,
   `skills/research-evidence-synthesis/SKILL.md`,

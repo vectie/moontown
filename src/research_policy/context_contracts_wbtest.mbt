@@ -61,3 +61,31 @@ test "research policy owns request source-screen policy wording" {
   )
   assert_true(request_source_screen_row_fields().contains("authority"))
 }
+
+///|
+test "research policy owns request discovery fallback policy wording" {
+  assert_true(
+    request_native_search_or_command_fallback_policy().contains(
+      command_fetch_pattern(),
+    ),
+  )
+  assert_true(
+    request_native_search_or_command_fallback_policy().contains(
+      min_included_sources(),
+    ),
+  )
+  assert_true(
+    request_web_search_result_fallback_policy().contains(
+      "extract result URLs and titles",
+    ),
+  )
+  assert_true(request_command_fallback_log_policy().contains(search_log_path()))
+  assert_true(
+    request_candidate_page_fetch_policy().contains(
+      harvest_candidate_fetch_count(),
+    ),
+  )
+  assert_true(
+    request_source_class_exhaustion_policy().contains("one guessed 404"),
+  )
+}
