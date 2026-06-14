@@ -25,19 +25,8 @@ fn research_bootstrap_report_prompt() -> String {
 fn research_bootstrap_report_artifact_targets_prompt() -> String {
   research_bootstrap_prompt([
     "Write or revise these raw/bootstrap artifacts:",
-    research_bootstrap_report_artifact_targets().join(", ") + ".",
+    @research_policy.bootstrap_report_artifact_targets().join(", ") + ".",
   ])
-}
-
-///|
-fn research_bootstrap_report_artifact_targets() -> Array[String] {
-  [
-    @research_policy.local_sources_path(),
-    @research_policy.evidence_matrix_path(),
-    @research_policy.synthesis_brief_path(),
-    @research_policy.deep_report_path(),
-    @research_policy.marketing_brief_path(),
-  ]
 }
 
 ///|
@@ -51,20 +40,10 @@ fn research_bootstrap_report_return_prompt() -> String {
 ///|
 fn research_bootstrap_report_inputs_prompt() -> String {
   research_bootstrap_prompt([
-    "Start by reading \{research_bootstrap_report_input_artifacts().join(", ")}.",
+    "Start by reading \{@research_policy.bootstrap_report_input_artifacts().join(", ")}.",
     "Also read raw/bootstrap/RESEARCH_REQUEST.md and raw/bootstrap/SOURCE_HINTS.md.",
     "Also read optional raw/bootstrap/REFERENCE_SOURCE_HINTS.md, optional raw/bootstrap/REFERENCE_STYLE.md, and optional raw/bootstrap/QUALITY_REPAIR.md.",
   ])
-}
-
-///|
-fn research_bootstrap_report_input_artifacts() -> Array[String] {
-  [
-    @research_policy.source_screen_path(),
-    @research_policy.search_log_path(),
-    @research_policy.tool_blockers_path(),
-    @research_policy.question_path(),
-  ]
 }
 
 ///|

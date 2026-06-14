@@ -131,9 +131,10 @@ constants, command-fallback vocabulary, source-class vocabulary, or
 reference-report length rules; prompt builders should call `@research_policy`
 directly for those values.
 Bootstrap reference/native-web/command-fallback/harvest/source-depth prompt
-policy text also belongs in `research_policy`; `adapters/moonbook` may assemble
-profile-specific prompts around it, but must not own those reusable research
-policy paragraphs.
+policy text and bootstrap stage artifact groups also belong in
+`research_policy`; `adapters/moonbook` may assemble profile-specific prompts
+around them, but must not own those reusable research policy paragraphs or
+artifact-group lists.
 Research-report reference input lists, reference-length rules, no-reference
 deep-research rules, non-negotiable output requirements, required-input
 sections, and report threshold aliases belong in `research_policy`, not in

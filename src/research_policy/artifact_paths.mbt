@@ -78,6 +78,38 @@ pub fn ingest_required_raw_artifact_paths() -> Array[String] {
 }
 
 ///|
+pub fn bootstrap_report_input_artifacts() -> Array[String] {
+  [
+    source_screen_path(),
+    search_log_path(),
+    tool_blockers_path(),
+    question_path(),
+  ]
+}
+
+///|
+pub fn bootstrap_report_artifact_targets() -> Array[String] {
+  [
+    local_sources_path(),
+    evidence_matrix_path(),
+    synthesis_brief_path(),
+    deep_report_path(),
+    marketing_brief_path(),
+  ]
+}
+
+///|
+pub fn bootstrap_quality_repair_input_artifacts() -> Array[String] {
+  [
+    source_screen_path(),
+    evidence_matrix_path(),
+    synthesis_brief_path(),
+    deep_report_path(),
+    marketing_brief_path(),
+  ]
+}
+
+///|
 pub fn artifact_bullets(
   paths : Array[String],
   indent : String,

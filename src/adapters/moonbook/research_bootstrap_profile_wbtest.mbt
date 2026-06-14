@@ -38,7 +38,7 @@ test "research bootstrap repair policy separates review from churn" {
 ///|
 test "research bootstrap report prompts use shared artifact lists" {
   assert_eq(
-    research_bootstrap_report_input_artifacts().join("|"),
+    @research_policy.bootstrap_report_input_artifacts().join("|"),
     [
       @research_policy.source_screen_path(),
       @research_policy.search_log_path(),
@@ -47,7 +47,7 @@ test "research bootstrap report prompts use shared artifact lists" {
     ].join("|"),
   )
   assert_eq(
-    research_bootstrap_report_artifact_targets().join("|"),
+    @research_policy.bootstrap_report_artifact_targets().join("|"),
     [
       @research_policy.local_sources_path(),
       @research_policy.evidence_matrix_path(),
@@ -64,7 +64,7 @@ test "research bootstrap report prompts use shared artifact lists" {
 
 ///|
 test "research bootstrap quality repair inputs use shared artifacts" {
-  let inputs = research_bootstrap_quality_repair_input_artifacts()
+  let inputs = @research_policy.bootstrap_quality_repair_input_artifacts()
   assert_true(inputs.contains(@research_policy.source_screen_path()))
   assert_true(inputs.contains(@research_policy.evidence_matrix_path()))
   assert_true(inputs.contains(@research_policy.synthesis_brief_path()))

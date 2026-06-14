@@ -331,6 +331,9 @@ Boundary:
   `raw/bootstrap/research-question.md`, `raw/bootstrap/search-log.md`,
   `raw/bootstrap/deep-report.md`, and topic-specific `wiki/sources`,
   `wiki/entities`, `wiki/concepts`, and `wiki/synthesis` pages.
+- `src/research_policy` owns canonical bootstrap stage artifact groups such as
+  report-stage input artifacts, report-stage output targets, and quality-repair
+  input artifacts.
 - `src/adapters/moonbook` should call those path helpers directly; it should
   not keep adapter-local `research_*_path` facade helpers or duplicate
   artifact-path mirror tests.

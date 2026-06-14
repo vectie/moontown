@@ -27,20 +27,9 @@ fn research_bootstrap_quality_repair_expansion_axes_prompt() -> String {
 ///|
 fn research_bootstrap_quality_repair_inputs_prompt() -> String {
   research_bootstrap_prompt([
-    "Read \{research_bootstrap_quality_repair_input_artifacts().join(", ")}.",
+    "Read \{@research_policy.bootstrap_quality_repair_input_artifacts().join(", ")}.",
     "Also read optional raw/bootstrap/QUALITY_REPAIR.md, \{@research_policy.research_report_skill_path()}, and optional raw/bootstrap/REFERENCE_STYLE.md.",
   ])
-}
-
-///|
-fn research_bootstrap_quality_repair_input_artifacts() -> Array[String] {
-  [
-    @research_policy.source_screen_path(),
-    @research_policy.evidence_matrix_path(),
-    @research_policy.synthesis_brief_path(),
-    @research_policy.deep_report_path(),
-    @research_policy.marketing_brief_path(),
-  ]
 }
 
 ///|

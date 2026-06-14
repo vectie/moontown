@@ -26,9 +26,15 @@ pub fn bootstrap_plain_markdown_no_json_fields_prompt() -> String
 
 pub fn bootstrap_preferred_source_mix_prompt() -> String
 
+pub fn bootstrap_quality_repair_input_artifacts() -> Array[String]
+
 pub fn bootstrap_reference_policy_prompt() -> String
 
 pub fn bootstrap_reference_route_policy_prompt() -> String
+
+pub fn bootstrap_report_artifact_targets() -> Array[String]
+
+pub fn bootstrap_report_input_artifacts() -> Array[String]
 
 pub fn bootstrap_required_artifacts_contract() -> String
 

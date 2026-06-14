@@ -1767,6 +1767,8 @@ topic routing or artifact layout.
   - owns canonical `raw/bootstrap/*` artifact paths and topic-specific
     `wiki/sources`, `wiki/entities`, `wiki/concepts`, and `wiki/synthesis`
     paths
+  - owns canonical bootstrap stage artifact groups such as report inputs,
+    report targets, and quality-repair inputs
 - `adapters/moonbook/`
   - must not add new topic/path/threshold tables that compete with
     `research_policy/`
