@@ -166,6 +166,8 @@ pub fn repair_expansion_threshold() -> String
 
 pub fn repo_source_materialize_skill_path() -> String
 
+pub fn report_article_shape_section() -> String
+
 pub fn report_diagram_requirement() -> String
 
 pub fn report_limits_requirement() -> String
@@ -181,6 +183,8 @@ pub fn report_preferred_included_sources() -> String
 pub fn report_process_caveat_requirement() -> String
 
 pub fn report_quality_floor_words() -> String
+
+pub fn report_quality_rubric_section() -> String
 
 pub fn report_reference_inputs() -> Array[String]
 

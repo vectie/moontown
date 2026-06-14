@@ -1049,11 +1049,12 @@ is policy-owned too: reference style/output files are craft guidance, and
 reference source hints are candidate leads, not evidence. Generated request
 source-screen row/depth/blocker wording and generated-request
 discovery/fallback wording are policy-owned as well. Generated-request output
-quality/depth/reference bullets are policy-owned too. `adapters/moonbook/` may
-assemble MoonBook provider packets and generated request pages, but future
-plans must not reintroduce adapter-local source, report, context,
-quality-repair, request, discovery, or output policy helpers that compete with
-`research_policy/`.
+quality/depth/reference bullets are policy-owned too. Research-report article
+shape and quality rubric are policy-owned too. `adapters/moonbook/` may
+assemble MoonBook provider packets, generated request pages, and generated
+`SKILL.md` files, but future plans must not reintroduce adapter-local source,
+report, context, quality-repair, request, discovery, output, or report-shape
+policy helpers that compete with `research_policy/`.
 
 This still must stay bounded. The town should not run an unconstrained generic
 agent loop with arbitrary authority. A self-patch must name target files,

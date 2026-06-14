@@ -395,11 +395,15 @@ Boundary:
   title/section/table/diagram/source-id/evidence-limit requirements and the
   required-input section. MoonBook prompt builders should call those helpers
   directly instead of keeping adapter-local report-requirement helpers.
+- `src/research_policy` owns research-report article-shape and quality-rubric
+  sections. MoonBook prompt builders should call those helpers directly instead
+  of keeping adapter-local report-shape helpers.
 - `src/adapters/moonbook` may consume those constants while building provider
   requests and generated `SKILL.md` guidance, but should not define its own
   competing research-depth thresholds, topic routing rules, query hint tables,
   research skill path tables, research context-page sets, output-contract
-  lines, research artifact path tables, or path facade helpers.
+  lines, research artifact path tables, report-shape sections, or path facade
+  helpers.
 - `src/research_quality` owns research quality semantics from explicit
   observations: readiness DTOs, required research paths, quality gates,
   repair/review trigger contracts, and persistence wording contracts.

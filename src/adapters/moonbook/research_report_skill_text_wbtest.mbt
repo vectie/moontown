@@ -73,3 +73,27 @@ test "research report required inputs use shared artifact paths" {
   assert_true(required.contains("- `wiki/sources/*.md`"))
   assert_true(required.contains("- `wiki/synthesis/*.md`"))
 }
+
+///|
+test "research report article shape and rubric come from research policy" {
+  assert_true(
+    @research_policy.report_article_shape_section().contains(
+      "Do not fill length with repeated definitions",
+    ),
+  )
+  assert_true(
+    @research_policy.report_article_shape_section().contains(
+      "10. Evidence and Limits",
+    ),
+  )
+  assert_true(
+    @research_policy.report_quality_rubric_section().contains(
+      "| Dimension | Strong output | Weak output |",
+    ),
+  )
+  assert_true(
+    @research_policy.report_quality_rubric_section().contains(
+      "Treats every idea as equally viable",
+    ),
+  )
+}

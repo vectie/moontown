@@ -1,5 +1,5 @@
 ///|
-fn research_report_article_shape_section() -> String {
+pub fn report_article_shape_section() -> String {
   [
     "", "## Article Shape", "", "Use this shape unless the evidence clearly calls for a better structure:",
     "", "1. Executive Summary", "2. Research Question and Scope", "3. Ecosystem Context",
@@ -11,7 +11,7 @@ fn research_report_article_shape_section() -> String {
 }
 
 ///|
-fn research_report_quality_rubric_section() -> String {
+pub fn report_quality_rubric_section() -> String {
   [
     "", "## Quality Rubric", "", "| Dimension | Strong output | Weak output |", "| --- | --- | --- |",
     "| Thesis | Opens with a clear interpretation and why it matters now | Opens with workspace/process notes |",
