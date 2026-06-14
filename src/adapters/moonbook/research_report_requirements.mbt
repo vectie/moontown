@@ -58,7 +58,7 @@ fn research_report_process_caveat_requirement() -> String {
 
 ///|
 fn research_report_word_target_requirement() -> String {
-  "- for complex external, comparative, route-map, or technology research with enough screened sources: target \{research_report_target_words()}; \{research_report_quality_floor_words()} is the quality floor unless explicit source-depth blockers make that dishonest"
+  "- for complex external, comparative, route-map, or technology research with enough screened sources: target \{@research_policy.report_target_words()}; \{@research_policy.report_quality_floor_words()} is the quality floor unless explicit source-depth blockers make that dishonest"
 }
 
 ///|

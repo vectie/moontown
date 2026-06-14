@@ -1757,6 +1757,8 @@ topic routing or artifact layout.
   - owns canonical research skill path contracts and grouped skill-path sets
     for bootstrap, enrichment, and standing-watch research support
   - owns canonical research context pages and bootstrap output-contract lines
+  - owns research-report reference input, reference-length, and no-reference
+    deep-research rules
   - owns canonical `raw/bootstrap/*` artifact paths and topic-specific
     `wiki/sources`, `wiki/entities`, `wiki/concepts`, and `wiki/synthesis`
     paths

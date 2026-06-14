@@ -7,7 +7,7 @@ fn research_report_skill_text(entry : BookCatalogEntry) -> String {
     research_report_skill_intro(display),
     research_report_non_negotiable_output_section(display),
     research_report_reference_output_rule_section(display),
-    research_report_no_reference_rule_section(),
+    @research_policy.report_no_reference_rule_section(),
     research_report_temperament_section(),
     research_report_required_inputs_section(),
     research_report_article_shape_section(),

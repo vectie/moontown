@@ -303,6 +303,8 @@ Purpose:
 - canonical raw/bootstrap artifact paths and topic-specific wiki page paths
 - canonical research skill path contracts and reusable skill-path sets
 - canonical research context-page sets and bootstrap output-contract lines
+- canonical research-report reference input, reference-length, and no-reference
+  deep-research rules
 - reusable vocabulary for MoonBook research skill prompts and future quality
   gates without introducing adapter/runtime dependency cycles
 
@@ -329,6 +331,10 @@ Boundary:
 - `src/research_policy` owns the context pages and raw-artifact output contract
   that define a research bootstrap handoff, including the `REFERENCE_*` context
   pages and the required raw artifact sentence.
+- `src/research_policy` owns research-report policy helpers such as reference
+  input lists, reference-length rules, no-reference deep-research rules, and
+  report threshold aliases. MoonBook prompt builders should call those helpers
+  directly instead of keeping adapter-local report-policy aliases.
 - `src/adapters/moonbook` may consume those constants while building provider
   requests and generated `SKILL.md` guidance, but should not define its own
   competing research-depth thresholds, topic routing rules, query hint tables,

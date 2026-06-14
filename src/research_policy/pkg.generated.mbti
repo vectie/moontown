@@ -96,6 +96,24 @@ pub fn repair_expansion_threshold() -> String
 
 pub fn repo_source_materialize_skill_path() -> String
 
+pub fn report_min_included_sources() -> String
+
+pub fn report_no_reference_rule_section() -> String
+
+pub fn report_preferred_included_sources() -> String
+
+pub fn report_quality_floor_words() -> String
+
+pub fn report_reference_inputs() -> Array[String]
+
+pub fn report_reference_length_rule() -> String
+
+pub fn report_reference_line_buffer() -> String
+
+pub fn report_reference_line_ratio() -> String
+
+pub fn report_target_words() -> String
+
 pub fn research_report_skill_path() -> String
 
 pub fn research_request_context_page() -> String

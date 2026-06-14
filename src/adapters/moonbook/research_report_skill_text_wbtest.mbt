@@ -41,15 +41,20 @@ test "research report skill keeps reference and no-reference depth policies expl
 }
 
 ///|
-test "research report policy helpers centralize length and source thresholds" {
-  assert_eq(research_report_target_words(), "12k-15k English words")
-  assert_eq(research_report_quality_floor_words(), "12k English words")
-  assert_eq(research_report_min_included_sources(), "six")
-  assert_eq(research_report_preferred_included_sources(), "ten")
-  assert_eq(research_report_reference_line_ratio(), "60%")
-  assert_eq(research_report_reference_line_buffer(), "30-line safety buffer")
+test "research report policy helpers come from research policy" {
+  assert_eq(@research_policy.report_target_words(), "12k-15k English words")
+  assert_eq(@research_policy.report_quality_floor_words(), "12k English words")
+  assert_eq(@research_policy.report_min_included_sources(), "six")
+  assert_eq(@research_policy.report_preferred_included_sources(), "ten")
+  assert_eq(@research_policy.report_reference_line_ratio(), "60%")
+  assert_eq(
+    @research_policy.report_reference_line_buffer(),
+    "30-line safety buffer",
+  )
   assert_true(
-    research_report_reference_length_rule().contains("REFERENCE_STYLE.md"),
+    @research_policy.report_reference_length_rule().contains(
+      "REFERENCE_STYLE.md",
+    ),
   )
   assert_true(
     research_report_word_target_requirement().contains("quality floor"),
