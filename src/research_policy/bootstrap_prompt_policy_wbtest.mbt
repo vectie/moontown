@@ -91,3 +91,28 @@ test "research policy owns bootstrap source-stage prompt policy" {
     ),
   )
 }
+
+///|
+test "research policy owns bootstrap quality-repair prompt policy" {
+  assert_true(
+    bootstrap_quality_repair_length_policy_prompt().contains(deep_report_path()),
+  )
+  assert_true(
+    bootstrap_quality_repair_length_policy_prompt().contains(
+      repair_acceptance_floor(),
+    ),
+  )
+  assert_true(
+    bootstrap_quality_repair_depth_prompt().contains(
+      repair_expansion_threshold(),
+    ),
+  )
+  assert_true(
+    bootstrap_quality_repair_depth_prompt().contains(quality_floor_count()),
+  )
+  assert_true(
+    bootstrap_quality_repair_expansion_axes_prompt().contains(
+      "second-order implications",
+    ),
+  )
+}

@@ -1774,6 +1774,9 @@ topic routing or artifact layout.
     targets, and self-review
   - owns reusable bootstrap source-stage policy text for missing-source
     handling and source-expansion harvested-candidate fetching
+  - owns reusable bootstrap quality-repair policy text for depth targets,
+    length floors, evidence-bounded expansion axes, and no-churn repair
+    standards
 - `adapters/moonbook/`
   - must not add new topic/path/threshold tables that compete with
     `research_policy/`
@@ -1788,6 +1791,9 @@ topic routing or artifact layout.
   - must call `@research_policy.*` directly for bootstrap source-stage
     missing-source and source-expansion harvest policy text instead of keeping
     adapter-local source policy prompt helpers
+  - must call `@research_policy.*` directly for bootstrap quality-repair
+    depth/length/expansion policy text instead of keeping adapter-local quality
+    policy prompt helpers
   - must call `@research_policy.*` directly for research source-class
     vocabulary instead of keeping adapter-local mirror helpers
   - must call `@research_policy.*` directly for research-report output
