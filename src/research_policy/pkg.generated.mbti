@@ -12,7 +12,11 @@ pub fn bootstrap_required_artifacts_contract() -> String
 
 pub fn bootstrap_worker_skill_paths() -> Array[String]
 
+pub fn candidate_source_classes() -> String
+
 pub fn command_fetch_pattern() -> String
+
+pub fn core_source_classes() -> String
 
 pub fn deep_dossier_word_target() -> String
 
@@ -30,7 +34,11 @@ pub fn evidence_matrix_path() -> String
 
 pub fn evidence_synthesis_skill_path() -> String
 
+pub fn extended_source_classes() -> String
+
 pub fn followup_query(String, String) -> String
+
+pub fn front_door_source_classes() -> String
 
 pub fn harvest_candidate_fetch_count() -> String
 

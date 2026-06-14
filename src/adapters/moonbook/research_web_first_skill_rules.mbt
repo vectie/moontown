@@ -29,7 +29,7 @@ fn web_first_native_search_rule() -> String {
   web_first_text([
     "- If native `web_search` or `web_fetch` is disabled, unavailable, stalls,",
     "returns only search-engine/redirect pages, or leaves the source base below",
-    "\{web_first_minimum_included_sources_text()} included inspected sources, use bounded `execute_command` discovery",
+    "\{@research_policy.min_included_sources()} included inspected sources, use bounded `execute_command` discovery",
     "such as `curl -L --max-time 12` against LLM-chosen search-result pages",
     "and candidate URLs before local file discovery.",
   ])
@@ -49,9 +49,9 @@ fn web_first_command_discovery_rule() -> String {
 fn web_first_source_depth_rule() -> String {
   web_first_text([
     "- For comparative or technology-route research, try to cover at least",
-    "\{web_first_minimum_included_sources_text()} high-signal sources across",
-    "\{web_first_core_source_classes()} classes before",
-    "synthesis. \{web_first_preferred_included_sources_short_text()} or more included sources is preferred for a 12k-15k",
+    "\{@research_policy.min_included_sources()} high-signal sources across",
+    "\{@research_policy.core_source_classes()} classes before",
+    "synthesis. \{@research_policy.preferred_included_sources()} or more included sources is preferred for a 12k-15k",
     "dossier.",
   ])
 }
@@ -68,7 +68,7 @@ fn web_first_discovery_artifact_rule() -> String {
 ///|
 fn web_first_front_door_rule() -> String {
   web_first_text([
-    "- Keep discovery bounded but serious. Do not stop below \{web_first_minimum_included_sources_text()} included",
+    "- Keep discovery bounded but serious. Do not stop below \{@research_policy.min_included_sources()} included",
     "inspected sources merely because generic search-result pages are blocked.",
     "First try source-class front-door discovery, domain sitemaps, on-site",
     "search/index pages, and link harvesting.",
@@ -79,16 +79,16 @@ fn web_first_front_door_rule() -> String {
 fn web_first_harvest_rule() -> String {
   web_first_text([
     "- When sitemap/front-door harvesting yields candidate content URLs:",
-    "convert the harvest into inspected sources, fetch at least \{web_first_harvest_candidate_fetch_text()}",
+    "convert the harvest into inspected sources, fetch at least \{@research_policy.harvest_candidate_fetch_count()}",
     "high-signal candidates, or every harvested candidate when fewer than",
-    "\{web_first_harvest_candidate_fetch_text()}, before declaring the source base thin.",
+    "\{@research_policy.harvest_candidate_fetch_count()}, before declaring the source base thin.",
   ])
 }
 
 ///|
 fn web_first_source_depth_blocker_rule() -> String {
   web_first_text([
-    "- Stop below \{web_first_minimum_included_sources_text()} included sources only after \{web_first_discovery_attempt_limit_text()} web/discovery",
+    "- Stop below \{@research_policy.min_included_sources()} included sources only after \{@research_policy.discovery_attempt_limit()} web/discovery",
     "attempts and an explicit source-depth blocker. In that case write",
     "`ready_for_12k_dossier: false` into `\{@research_policy.source_screen_path()}`.",
   ])

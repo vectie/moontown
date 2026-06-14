@@ -26,7 +26,7 @@ fn web_first_search_result_fetch_step() -> String {
   web_first_text([
     "1. Fetch the search-result page itself with a bounded command such as",
     "`curl -L --max-time 12`; this command fallback is mandatory before",
-    "closing below \{web_first_minimum_included_sources_text()} included inspected sources when native search was weak.",
+    "closing below \{@research_policy.min_included_sources()} included inspected sources when native search was weak.",
   ])
 }
 
@@ -34,7 +34,7 @@ fn web_first_search_result_fetch_step() -> String {
 fn web_first_search_candidate_class_step() -> String {
   web_first_text([
     "3. Choose candidates across source classes:",
-    "\{web_first_candidate_source_classes()}.",
+    "\{@research_policy.candidate_source_classes()}.",
   ])
 }
 

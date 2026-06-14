@@ -37,7 +37,7 @@ fn web_first_front_door_fallback_intent() -> String {
 fn web_first_source_class_derivation_step() -> String {
   web_first_text([
     "1. Derive source classes for the topic:",
-    "\{web_first_front_door_source_classes()}.",
+    "\{@research_policy.front_door_source_classes()}.",
   ])
 }
 
@@ -68,8 +68,8 @@ fn web_first_candidate_harvest_step() -> String {
 ///|
 fn web_first_harvested_candidate_fetch_step() -> String {
   web_first_text([
-    "5. Fetch at least \{web_first_harvest_candidate_fetch_text()} high-signal harvested candidate pages, or all",
-    "harvested candidates when fewer than \{web_first_harvest_candidate_fetch_text()}, and screen them. A 404 on one",
+    "5. Fetch at least \{@research_policy.harvest_candidate_fetch_count()} high-signal harvested candidate pages, or all",
+    "harvested candidates when fewer than \{@research_policy.harvest_candidate_fetch_count()}, and screen them. A 404 on one",
     "guessed URL is a rejected candidate, not a rejected source class.",
   ])
 }
@@ -77,8 +77,8 @@ fn web_first_harvested_candidate_fetch_step() -> String {
 ///|
 fn web_first_front_door_stop_rule() -> String {
   web_first_text([
-    "6. Continue until the source screen has at least \{web_first_minimum_included_sources_text()} included inspected",
-    "sources, \{web_first_preferred_included_sources_short_text()} preferred, or until \{web_first_discovery_attempt_limit_text()} bounded attempts plus a",
+    "6. Continue until the source screen has at least \{@research_policy.min_included_sources()} included inspected",
+    "sources, \{@research_policy.preferred_included_sources()} preferred, or until \{@research_policy.discovery_attempt_limit()} bounded attempts plus a",
     "source-depth blocker make more discovery dishonest.",
   ])
 }

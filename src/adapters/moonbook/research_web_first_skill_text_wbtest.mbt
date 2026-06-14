@@ -43,16 +43,16 @@ test "web first skill preserves source depth and command fallback contract" {
 }
 
 ///|
-test "web first research depth policy is centralized" {
-  assert_eq(web_first_minimum_included_sources_text(), "six")
-  assert_eq(web_first_preferred_included_sources_text(), "ten to fourteen")
-  assert_eq(web_first_preferred_included_sources_short_text(), "ten")
-  assert_eq(web_first_harvest_candidate_fetch_text(), "eight")
-  assert_eq(web_first_discovery_attempt_limit_text(), "twenty-four")
-  assert_true(web_first_core_source_classes().contains("research-institution"))
-  assert_true(web_first_extended_source_classes().contains("primary-paper"))
-  assert_true(web_first_candidate_source_classes().contains("source-data"))
-  assert_true(web_first_front_door_source_classes().contains("standards"))
+test "web first skill consumes centralized source-depth policy" {
+  let skill = web_first_research_skill_text(
+    moonbook_adapter_opc_research_entry(),
+  )
+  assert_true(skill.contains(@research_policy.min_included_sources()))
+  assert_true(skill.contains(@research_policy.preferred_included_sources()))
+  assert_true(skill.contains(@research_policy.harvest_candidate_fetch_count()))
+  assert_true(skill.contains(@research_policy.discovery_attempt_limit()))
+  assert_true(skill.contains(@research_policy.core_source_classes()))
+  assert_true(skill.contains(@research_policy.front_door_source_classes()))
 }
 
 ///|

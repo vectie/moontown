@@ -107,15 +107,15 @@ fn web_first_deep_dossier_intent() -> String {
 ///|
 fn web_first_preferred_source_base_rule() -> String {
   web_first_text([
-    "- preferred source base: \{web_first_preferred_included_sources_text()} included, inspected sources",
-    "across \{web_first_extended_source_classes()} classes",
+    "- preferred source base: \{@research_policy.preferred_included_source_range()} included, inspected sources",
+    "across \{@research_policy.extended_source_classes()} classes",
   ])
 }
 
 ///|
 fn web_first_minimum_source_base_rule() -> String {
   web_first_text([
-    "- minimum source base for a cautious dossier: \{web_first_minimum_included_sources_text()} included, inspected",
+    "- minimum source base for a cautious dossier: \{@research_policy.min_included_sources()} included, inspected",
     "sources plus explicit blockers for missing classes",
   ])
 }
