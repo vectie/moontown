@@ -861,10 +861,12 @@ Boundary:
   `src/book_quality` scoring.
 - `src/book_quality_runtime` owns review-run ledger storage APIs used by
   dispatch, reconciliation, and status rendering: load, append, and write.
-- `src/book_quality/scoring_engine.mbt` owns book-type scoring orchestration.
-  Reusable draft/finalization/path-scoring internals belong in
-  `scoring_primitives.mbt`; civic-service scoring details belong in
-  `civic_service_scoring.mbt`.
+- `src/book_quality/scoring_engine.mbt` owns the generic policy-type scoring
+  flow. It should not branch into one full scorer per book archetype; it should
+  classify through `src/policy`, score `required_paths_for_book_type(...)`,
+  apply `scoring_signals.mbt`, and finalize through policy health. Reusable
+  draft/finalization/path-scoring internals belong in `scoring_primitives.mbt`;
+  civic-service scoring details belong in `civic_service_scoring.mbt`.
 
 ## Build Pipeline
 

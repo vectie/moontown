@@ -666,9 +666,12 @@ well. Root may observe whether a result file exists and pass that state through
 a display row, but headings, historical-attempt explanation, table headers, and
 row formatting belong to `book_quality/`.
 Book-quality scoring follows the same boundary: `book_quality/` owns
-book-type scoring, structural scoring, semantic score parsing, next-action
+policy-type scoring, structural scoring, semantic score parsing, next-action
 wording, required-relative-path derivation, and readiness decisions from
-supplied observations. Runtime observations include structural facts
+supplied observations. The scoring engine should run one generic policy-type
+flow: classify the catalog entry through `policy`, score required paths from
+the profile helper, apply isolated signal extensions for content-specific
+checks, then finalize through `BookPolicy` health. Runtime observations include structural facts
 (`BookQualityStructuralObservation`) such as workspace/path/result existence and
 content facts (`BookQualityContentObservation`) such as semantic review text,
 research deep-report word count, course index text, and cookbook audit presence.
