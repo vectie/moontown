@@ -89,3 +89,19 @@ test "research policy owns request discovery fallback policy wording" {
     request_source_class_exhaustion_policy().contains("one guessed 404"),
   )
 }
+
+///|
+test "research policy owns request output policy bullets" {
+  assert_true(request_quality_bar_bullet().contains("every major claim"))
+  assert_true(request_depth_target_bullet().contains(deep_report_path()))
+  assert_true(
+    request_depth_target_bullet().contains(deep_dossier_word_target()),
+  )
+  assert_true(
+    request_depth_target_bullet().contains("exact source-class blocker"),
+  )
+  let reference = request_reference_style_bullet("EUV")
+  assert_true(reference.contains(reference_style_context_page()))
+  assert_true(reference.contains(reference_output_context_page()))
+  assert_true(reference.contains("not evidence for EUV"))
+}

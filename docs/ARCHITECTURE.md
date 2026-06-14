@@ -1787,6 +1787,8 @@ topic routing or artifact layout.
     native-search fallback, search-result fetch, front-door discovery,
     command-fallback logging, candidate-page fetch, and source-class exhaustion
     wording
+  - owns reusable generated-request output policy text such as claim traceability
+    quality bars, deep-report depth targets, and reference-style use bullets
 - `adapters/moonbook/`
   - must not add new topic/path/threshold tables that compete with
     `research_policy/`
@@ -1812,6 +1814,9 @@ topic routing or artifact layout.
   - must call `@research_policy.*` directly for generated-request
     discovery/fallback policy text instead of keeping adapter-local discovery
     policy helpers
+  - must call `@research_policy.*` directly for generated-request output
+    quality/depth/reference bullets instead of keeping adapter-local request
+    output policy helpers
   - must call `@research_policy.*` directly for research source-class
     vocabulary instead of keeping adapter-local mirror helpers
   - must call `@research_policy.*` directly for research-report output

@@ -59,11 +59,11 @@ test "project research request prefers repository sources after web discovery" {
 
 ///|
 test "research request helper bullets preserve quality and reference contracts" {
-  let depth = research_depth_target_bullet()
+  let depth = @research_policy.request_depth_target_bullet()
   assert_true(depth.contains(@research_policy.deep_dossier_word_target()))
   assert_true(depth.contains("screened source base"))
   assert_true(depth.contains("exact source-class blocker"))
-  let reference = research_reference_style_bullet("EUV")
+  let reference = @research_policy.request_reference_style_bullet("EUV")
   assert_true(reference.contains("REFERENCE_STYLE.md"))
   assert_true(reference.contains("visualization standard"))
   assert_true(reference.contains("not evidence for EUV"))

@@ -1048,10 +1048,11 @@ depth/length/expansion standards are also policy-owned. Reference context use
 is policy-owned too: reference style/output files are craft guidance, and
 reference source hints are candidate leads, not evidence. Generated request
 source-screen row/depth/blocker wording and generated-request
-discovery/fallback wording are policy-owned as well. `adapters/moonbook/` may
+discovery/fallback wording are policy-owned as well. Generated-request output
+quality/depth/reference bullets are policy-owned too. `adapters/moonbook/` may
 assemble MoonBook provider packets and generated request pages, but future
 plans must not reintroduce adapter-local source, report, context,
-quality-repair, request, or discovery policy helpers that compete with
+quality-repair, request, discovery, or output policy helpers that compete with
 `research_policy/`.
 
 This still must stay bounded. The town should not run an unconstrained generic
