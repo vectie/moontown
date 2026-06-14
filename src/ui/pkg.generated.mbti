@@ -20,6 +20,8 @@ pub fn render_dashboard(DashboardModel) -> String
 
 pub fn render_scene_html(SceneRenderModel) -> String
 
+pub fn runtime_task_priority_for_id(String) -> Int
+
 // Errors
 
 // Types and methods

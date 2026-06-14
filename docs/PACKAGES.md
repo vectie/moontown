@@ -672,6 +672,8 @@ Purpose:
 - dashboard state projection
 - renderer-facing scene model
 - reusable UI view-policy helpers such as execution-status stage grouping
+- reusable runtime visual priority helpers for choosing which task/execution a
+  civic module should surface first
 - HTML bridge
 
 Boundary:
@@ -679,8 +681,9 @@ Boundary:
 - `src/ui` owns product-agnostic dashboard, scene layout, and view-policy
   helpers that can be consumed by multiple frontends.
 - UI applications should consume shared helpers such as
-  `execution_view_stage_for_status(...)` instead of duplicating town execution
-  status taxonomies locally.
+  `execution_view_stage_for_status(...)` and
+  `runtime_task_priority_for_id(...)` instead of duplicating town execution
+  status or runtime-priority taxonomies locally.
 
 ## Loop Policy
 
@@ -1345,6 +1348,9 @@ Boundary:
 - reusable projection policy belongs in `src/ui` or `src/visual_projection`,
   while durable projection writes belong in `src/visual_projection_runtime`,
   not in the browser main package.
+- `src/ui/rabbita-town/main` should not maintain app-local task-priority
+  substring tables; it should call `src/ui` view-policy helpers when selecting
+  which runtime task or execution to show first.
 
 ## Support
 

@@ -4,19 +4,6 @@ fn no_runtime_candidate_priority() -> Int {
 }
 
 ///|
-fn priority_for_task_id(task_id : String) -> Int {
-  if task_id.contains("code-patch") {
-    0
-  } else if task_id.contains("implementation-backlog") {
-    1
-  } else if task_id.contains("image-asset") || task_id.contains("asset-pack") {
-    2
-  } else {
-    3
-  }
-}
-
-///|
 fn priority_beats(candidate : Int, current : Int) -> Bool {
   candidate < current
 }
@@ -66,7 +53,7 @@ fn find_priority_book_task(
     if task.book_id != book_id {
       continue
     }
-    let priority = priority_for_task_id(task.id)
+    let priority = @ui.runtime_task_priority_for_id(task.id)
     if priority_beats(priority, best_priority) {
       best_priority = priority
       best = Some(task)
@@ -86,7 +73,7 @@ fn find_priority_book_execution(
     if execution.book_id != book_id {
       continue
     }
-    let priority = priority_for_task_id(execution.task_id)
+    let priority = @ui.runtime_task_priority_for_id(execution.task_id)
     if priority_beats(priority, best_priority) {
       best_priority = priority
       best = Some(execution)
@@ -120,7 +107,7 @@ fn find_priority_book_task_by_ids(
     if !task_matches_any_book_id(task, book_ids) {
       continue
     }
-    let priority = priority_for_task_id(task.id)
+    let priority = @ui.runtime_task_priority_for_id(task.id)
     if priority_beats(priority, best_priority) {
       best_priority = priority
       best = Some(task)
@@ -140,7 +127,7 @@ fn find_priority_book_execution_by_ids(
     if !execution_matches_any_book_id(execution, book_ids) {
       continue
     }
-    let priority = priority_for_task_id(execution.task_id)
+    let priority = @ui.runtime_task_priority_for_id(execution.task_id)
     if priority_beats(priority, best_priority) {
       best_priority = priority
       best = Some(execution)
