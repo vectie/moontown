@@ -362,6 +362,12 @@ Boundary:
 - `src/research_policy` owns the context pages and raw-artifact output contract
   that define a research bootstrap handoff, including the `REFERENCE_*` context
   pages and the required raw artifact sentence.
+- `src/research_policy` owns bootstrap reference-context use policy: reference
+  style/output files are craft guidance, and reference source hints are
+  candidate leads, not evidence.
+- `src/adapters/moonbook` should call those reference-context policy helpers
+  directly while assembling worker prompts; it should not keep adapter-local
+  context policy prompt helpers that duplicate policy-owned wording.
 - `src/research_policy` owns research-report policy helpers such as reference
   input lists, reference-length rules, no-reference deep-research rules, and
   report threshold aliases. MoonBook prompt builders should call those helpers

@@ -1760,6 +1760,9 @@ topic routing or artifact layout.
   - owns canonical research skill path contracts and grouped skill-path sets
     for bootstrap, enrichment, and standing-watch research support
   - owns canonical research context pages and bootstrap output-contract lines
+  - owns bootstrap reference-context use policy, including the rule that
+    reference style/source hint files are craft guidance or candidate leads,
+    not evidence
   - owns research-report reference input, reference-length, and no-reference
     deep-research rules
   - owns research-report non-negotiable output requirements and required-input
@@ -1785,6 +1788,8 @@ topic routing or artifact layout.
     `research_policy_*` wrapper layers
   - must call `@research_policy.*` directly for bootstrap web/fallback/source
     policy text instead of keeping adapter-local bootstrap policy prompt helpers
+  - must call `@research_policy.*` directly for bootstrap reference-context
+    use policy instead of keeping adapter-local context policy prompt helpers
   - must call `@research_policy.*` directly for bootstrap report-stage
     repair/evidence/quality/self-review policy text instead of keeping
     adapter-local report policy prompt helpers

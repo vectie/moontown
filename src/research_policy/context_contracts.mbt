@@ -49,6 +49,23 @@ pub fn enrichment_context_pages() -> Array[String] {
 }
 
 ///|
+pub fn bootstrap_context_reference_style_policy() -> String {
+  [
+    "If `\{reference_style_context_page()}` or `\{reference_output_context_page()}` exists, use it only as a style, length, language, and quality target.",
+    "Do not import its claims as evidence for this topic.",
+  ].join(" ")
+}
+
+///|
+pub fn bootstrap_context_reference_source_policy() -> String {
+  [
+    "If `\{reference_source_hints_context_page()}` exists, treat it as a candidate lead sheet only.",
+    "Fetch, screen, accept, reject, or mark blocked.",
+    "Never cite it as evidence by itself.",
+  ].join(" ")
+}
+
+///|
 pub fn bootstrap_output_contract_lines() -> Array[String] {
   [
     "For direct Moontown research bootstrap worker steps, return plain Markdown summaries unless a step prompt explicitly asks for JSON.",

@@ -44,25 +44,9 @@ fn research_bootstrap_worker_prompt(entry : BookCatalogEntry) -> String {
     "Do not materialize durable `wiki/*` pages in the worker stage. MoonBook will materialize wiki pages from the raw evidence envelope.",
     "Do not treat \{display} as a local repository unless screened sources prove that interpretation.",
     "Do not hard-code final research claims. Let the LLM choose sources and claims from screened evidence.",
-    research_bootstrap_context_reference_style_policy(),
-    research_bootstrap_context_reference_source_policy(),
+    @research_policy.bootstrap_context_reference_style_policy(),
+    @research_policy.bootstrap_context_reference_source_policy(),
   ].join("\n")
-}
-
-///|
-fn research_bootstrap_context_reference_style_policy() -> String {
-  [
-    "If `raw/bootstrap/REFERENCE_STYLE.md` or `raw/bootstrap/REFERENCE_OUTPUT.md` exists, use it only as a style, length, language, and quality target.",
-    "Do not import its claims as evidence for this topic.",
-  ].join(" ")
-}
-
-///|
-fn research_bootstrap_context_reference_source_policy() -> String {
-  [
-    "If `raw/bootstrap/REFERENCE_SOURCE_HINTS.md` exists, treat it as a candidate lead sheet only.",
-    "Fetch, screen, accept, reject, or mark blocked.", "Never cite it as evidence by itself.",
-  ].join(" ")
 }
 
 ///|

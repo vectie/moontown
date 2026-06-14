@@ -12,6 +12,10 @@ pub fn bootstrap_command_fallback_policy_prompt() -> String
 
 pub fn bootstrap_context_pages() -> Array[String]
 
+pub fn bootstrap_context_reference_source_policy() -> String
+
+pub fn bootstrap_context_reference_style_policy() -> String
+
 pub fn bootstrap_curl_target_prompt() -> String
 
 pub fn bootstrap_discovery_artifact_policy_prompt() -> String

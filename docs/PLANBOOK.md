@@ -1044,9 +1044,11 @@ research policy text belongs in `research_policy/`, including web/fallback
 discovery, source-depth rules, bootstrap artifact groups, and report-stage
 repair/evidence/quality/self-review policy. Missing-source handling,
 source-expansion harvested-candidate fetching, and quality-repair
-depth/length/expansion standards are also policy-owned. `adapters/moonbook/`
+depth/length/expansion standards are also policy-owned. Reference context use
+is policy-owned too: reference style/output files are craft guidance, and
+reference source hints are candidate leads, not evidence. `adapters/moonbook/`
 may assemble MoonBook provider packets and add stage-specific handoff text, but
-future plans must not reintroduce adapter-local source, report, or
+future plans must not reintroduce adapter-local source, report, context, or
 quality-repair policy prompt helpers that compete with `research_policy/`.
 
 This still must stay bounded. The town should not run an unconstrained generic
