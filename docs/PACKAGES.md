@@ -643,9 +643,11 @@ Boundary:
   direct worker profiles such as research bootstrap. MoonBook adapters should
   call this helper rather than defining `disable_adaptive` or no-input flags
   locally.
-- `src/moonclaw_policy` owns catalog policy-type to MoonClaw keeper-profile
-  overrides. Adapters consume those helpers instead of duplicating
-  `planbook_repair_worker` or `wenyu_civic_service_worker` routing rules.
+- `src/moonclaw_policy` owns BookPolicy-shape to MoonClaw keeper-profile
+  overrides. The compatibility book-type/catalog-entry helpers delegate to
+  policy composition and capability introspection first. Adapters consume those
+  helpers instead of duplicating `planbook_repair_worker` or
+  `wenyu_civic_service_worker` routing rules.
 - `src/moonclaw_runtime`, `src/adapters/moonclaw`, `src/adapters/moonbook`,
   and `src/book_quality` may consume these helpers when building packets or
   profile metadata.
