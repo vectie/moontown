@@ -45,3 +45,19 @@ test "research policy owns bootstrap reference context policy wording" {
     ),
   )
 }
+
+///|
+test "research policy owns request source-screen policy wording" {
+  assert_true(
+    request_included_source_depth_target().contains(min_included_sources()),
+  )
+  assert_true(
+    request_discovery_artifact_exclusion().contains("discovery artifacts"),
+  )
+  assert_true(
+    request_source_depth_blocker_requirement().contains(
+      "ready_for_12k_dossier: false",
+    ),
+  )
+  assert_true(request_source_screen_row_fields().contains("authority"))
+}

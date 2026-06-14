@@ -204,6 +204,14 @@ pub fn report_title_requirement(String) -> String
 
 pub fn report_word_target_requirement() -> String
 
+pub fn request_discovery_artifact_exclusion() -> String
+
+pub fn request_included_source_depth_target() -> String
+
+pub fn request_source_depth_blocker_requirement() -> String
+
+pub fn request_source_screen_row_fields() -> String
+
 pub fn research_report_skill_path() -> String
 
 pub fn research_request_context_page() -> String

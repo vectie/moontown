@@ -101,7 +101,7 @@ test "research request execution helpers use shared quality policy" {
     ),
   )
   assert_true(
-    research_included_source_depth_target().contains(
+    @research_policy.request_included_source_depth_target().contains(
       @research_policy.min_included_sources(),
     ),
   )

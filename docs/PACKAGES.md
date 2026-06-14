@@ -354,6 +354,12 @@ Boundary:
 - `src/adapters/moonbook` should call those quality-repair policy helpers
   directly while assembling provider prompts; it should not keep adapter-local
   quality policy prompt helpers that duplicate policy-owned wording.
+- `src/research_policy` owns reusable generated-request source-screen policy
+  text such as screened-source row fields, included-source depth targets,
+  discovery-artifact exclusion, and source-depth blocker wording.
+- `src/adapters/moonbook` should call those request policy helpers directly
+  while assembling generated request pages; it should not keep adapter-local
+  request policy helpers that duplicate policy-owned wording.
 - `src/research_policy` owns research skill path contracts such as
   `skills/web-first-research/SKILL.md`,
   `skills/research-evidence-synthesis/SKILL.md`,

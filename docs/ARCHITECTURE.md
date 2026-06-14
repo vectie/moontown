@@ -1780,6 +1780,9 @@ topic routing or artifact layout.
   - owns reusable bootstrap quality-repair policy text for depth targets,
     length floors, evidence-bounded expansion axes, and no-churn repair
     standards
+  - owns reusable generated-request source-screen policy text such as screened
+    source row fields, included-source depth targets, discovery-artifact
+    exclusion, and source-depth blocker wording
 - `adapters/moonbook/`
   - must not add new topic/path/threshold tables that compete with
     `research_policy/`
@@ -1799,6 +1802,9 @@ topic routing or artifact layout.
   - must call `@research_policy.*` directly for bootstrap quality-repair
     depth/length/expansion policy text instead of keeping adapter-local quality
     policy prompt helpers
+  - must call `@research_policy.*` directly for generated-request
+    source-screen policy text instead of keeping adapter-local request policy
+    helpers
   - must call `@research_policy.*` directly for research source-class
     vocabulary instead of keeping adapter-local mirror helpers
   - must call `@research_policy.*` directly for research-report output
