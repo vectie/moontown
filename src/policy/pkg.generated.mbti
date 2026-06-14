@@ -15,6 +15,8 @@ pub fn book_type_line(String) -> String
 
 pub fn book_type_marker(String) -> String
 
+pub fn capability_ids(BookPolicy) -> Array[String]
+
 pub fn catalog_entry_active(String, String, String, Array[String]) -> Bool
 
 pub fn catalog_entry_archived(Array[String]) -> Bool
@@ -52,6 +54,8 @@ pub fn file(String, Bool, String) -> FileSpec
 pub fn general() -> BookPolicy
 
 pub fn general_type() -> String
+
+pub fn has_capability(BookPolicy, String) -> Bool
 
 pub fn has_skill(BookPolicy, String) -> Bool
 

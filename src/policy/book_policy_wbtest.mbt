@@ -188,6 +188,30 @@ test "web tool surface is a policy capability not a separate book type" {
 }
 
 ///|
+test "policy capability ids are derived from composed policy choices" {
+  let policy = general()
+    |> with_standing_watch()
+    |> with_pdf_watch()
+    |> with_web_tool_surface(
+      contract="moontown.book.tool.v1",
+      projection_path="book/site/generated/tool.html",
+    )
+  let capabilities = capability_ids(policy)
+  assert_true(capabilities.contains("standing-watch"))
+  assert_true(capabilities.contains("pdf-watch"))
+  assert_true(capabilities.contains("web-tool-surface"))
+  assert_true(!capabilities.contains("generated-site"))
+  assert_true(has_capability(policy, "pdf-watch"))
+  assert_false(has_capability(policy, "missing"))
+}
+
+///|
+test "generated-site capability remains derived from output surface" {
+  assert_true(has_capability(research(), "generated-site"))
+  assert_false(has_capability(research(), "web-tool-surface"))
+}
+
+///|
 test "policy owns default generated site projection path" {
   assert_eq(
     default_generated_site_projection_path(),

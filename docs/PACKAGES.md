@@ -705,6 +705,8 @@ Purpose:
   decisiveness
 - policy-owned serialized context metadata that combines book type,
   `BookPolicy`, loop plan, and internal-distance plan for packet producers
+- policy-owned capability introspection over composed policy choices such as
+  `standing-watch`, `pdf-watch`, `web-tool-surface`, and `generated-site`
 - reusable goal-text vocabulary for research, research-request, and Wenyu
   routing signals
 
@@ -721,6 +723,10 @@ Boundary:
   catalog metadata instead of treating storage prefixes such as `research-` or
   `wenyu-` as architectural book-type gates. Prefixes may remain artifact naming
   conventions, but they are not the product boundary.
+- Downstream packages should call `capability_ids(policy)` or
+  `has_capability(policy, ...)` when they need to inspect composed
+  capabilities. They should not duplicate capability detection from skill ids,
+  tags, or path names outside `src/policy`.
 - MoonBook adapter routing follows the same rule: existing catalog metadata is
   authoritative first; when an explicit research request names a non-canonical
   book id, the research topic should be derived from the goal/request text and

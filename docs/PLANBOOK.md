@@ -478,7 +478,16 @@ shape:
 - generated web tool: `with_web_tool_surface(base_policy, ...)`
 - recurring watch: `with_standing_watch(base_policy)`
 
+Use policy-owned capability introspection when downstream code needs to decide
+what a composed policy can do:
+
+- `capability_ids(policy)`
+- `has_capability(policy, "pdf-watch")`
+- `has_capability(policy, "web-tool-surface")`
+
 Do not create a new hardcoded category when a policy capability is enough.
+Do not re-infer capabilities from tags, prefixes, storage paths, or duplicated
+skill-name tables outside `policy/`.
 
 Every implementation plan should say which policy it changes or creates. If
 the work cannot name a policy, it is probably still a loose task rather than a

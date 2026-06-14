@@ -415,6 +415,10 @@ These functions are intentionally not separate book types. They are policy
 composition tools, so a future book can be a course with a tool surface, a
 research book with PDF watch, or a civic support book with standing watch
 without adding more runtime categories.
+Callers that need to inspect those choices should use policy-owned capability
+introspection such as `capability_ids(policy)` and
+`has_capability(policy, ...)`. They should not infer capabilities from book
+ids, tags, storage paths, or duplicated skill-name checks outside `policy/`.
 
 Default output paths are also policy-owned. Packages such as `book_quality/`
 may expose compatibility helpers like `generated_site_path()`, but those should
