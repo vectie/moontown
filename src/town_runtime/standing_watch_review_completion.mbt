@@ -22,13 +22,11 @@ fn complete_review_queued_standing_watch(
   state.replace_task(task_for_supervision(state, completed))
   sync_worker_from_execution(state, completed)
   state.record_event(
-    @core.TownEvent::new(
-      id="\{event_kind}-\{state.events.length()}-\{completed.task_id}",
-      kind="standing-watch",
-      detail=event_detail,
-      related_task_id=Some(completed.task_id),
-      related_book_id=Some(completed.book_id),
-      related_run_id=completed.run_id,
+    @standing_watch_policy.standing_watch_execution_event(
+      event_kind,
+      state.events.length(),
+      completed,
+      event_detail,
     ),
   )
 }
@@ -54,13 +52,11 @@ fn complete_empty_standing_watch_as_no_change(
   state.replace_task(task_for_supervision(state, completed))
   sync_worker_from_execution(state, completed)
   state.record_event(
-    @core.TownEvent::new(
-      id="event-watch-empty-no-change-\{state.events.length()}-\{completed.task_id}",
-      kind="standing-watch",
-      detail="Mayor closed empty standing-watch completion `\{completed.task_id}` as no_change rather than human review debt.",
-      related_task_id=Some(completed.task_id),
-      related_book_id=Some(completed.book_id),
-      related_run_id=completed.run_id,
+    @standing_watch_policy.standing_watch_execution_event(
+      "event-watch-empty-no-change",
+      state.events.length(),
+      completed,
+      "Mayor closed empty standing-watch completion `\{completed.task_id}` as no_change rather than human review debt.",
     ),
   )
 }

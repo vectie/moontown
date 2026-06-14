@@ -364,7 +364,7 @@ book owns. The implementation now has a first-class `policy` package:
   history block parsing, provider-decision collapse policy, material-delta
   metrics, and book-quality repair appendix composition. It also owns watcher-record matching against
   execution records, terminal watcher-decision to execution-status mapping,
-  standing-watch event shape, live snapshot stale-window policy,
+  standing-watch event kind/id/related-field shape, live snapshot stale-window policy,
   transient dispatch-error classification, empty-completion `no_change` marker
   text, keeper auto-triage, and recovery closure policy. Root may construct the
   concrete MoonBook `BookTask`, decide when a standing goal is due, route it

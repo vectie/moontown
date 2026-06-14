@@ -42,6 +42,10 @@ pub fn standing_watch_empty_review_completion_summary(@core.TaskExecutionRecord)
 
 pub fn standing_watch_event_for_record(@core.WatcherRunRecord) -> @core.TownEvent
 
+pub fn standing_watch_event_kind() -> String
+
+pub fn standing_watch_execution_event(String, Int, @core.TaskExecutionRecord, String) -> @core.TownEvent
+
 pub fn standing_watch_execution_has_zero_material_delta(@core.TaskExecutionRecord) -> Bool
 
 pub fn standing_watch_history_decision_summary_for_task(String, String) -> String?

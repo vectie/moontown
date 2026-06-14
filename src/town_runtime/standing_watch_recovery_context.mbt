@@ -55,13 +55,11 @@ async fn recover_observed_standing_watch_output(
   )
   replace_standing_watch_recovery_execution(state, completed)
   state.record_event(
-    @core.TownEvent::new(
-      id="event-watch-auto-recovery-\{state.events.length()}-\{completed.task_id}",
-      kind="standing-watch",
-      detail="Mayor recovered failed standing watch `\{completed.task_id}` as \{decision.to_string()} because MoonBook persisted a terminal keeper marker.",
-      related_task_id=Some(completed.task_id),
-      related_book_id=Some(completed.book_id),
-      related_run_id=completed.run_id,
+    @standing_watch_policy.standing_watch_execution_event(
+      "event-watch-auto-recovery",
+      state.events.length(),
+      completed,
+      "Mayor recovered failed standing watch `\{completed.task_id}` as \{decision.to_string()} because MoonBook persisted a terminal keeper marker.",
     ),
   )
   let finalized = finalize_standing_watch_supervision_record(

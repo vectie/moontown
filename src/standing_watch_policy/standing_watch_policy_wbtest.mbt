@@ -172,6 +172,31 @@ test "standing watch event shape comes from policy" {
   assert_true(event.related_book_id == Some("research-opc"))
   assert_true(event.related_task_id == Some("standing-watch-opc-tick-7"))
   assert_true(event.related_run_id == Some("run-7"))
+  let execution_event = standing_watch_execution_event(
+    "event-watch-auto-triage",
+    3,
+    @core.TaskExecutionRecord::new(
+      task_id="standing-watch-opc-tick-8",
+      book_id="research-opc",
+      packet_id="packet-8",
+      packet_path="packet-8.json",
+      status=@core.TaskExecutionStatus::Completed,
+      summary="done",
+      output_contract="standing-watch-live-snapshot",
+      run_id=Some("run-8"),
+    ),
+    "Mayor auto-triaged standing watch.",
+  )
+  assert_eq(
+    execution_event.id,
+    "event-watch-auto-triage-3-standing-watch-opc-tick-8",
+  )
+  assert_eq(execution_event.kind, standing_watch_event_kind())
+  assert_true(
+    execution_event.related_task_id == Some("standing-watch-opc-tick-8"),
+  )
+  assert_true(execution_event.related_book_id == Some("research-opc"))
+  assert_true(execution_event.related_run_id == Some("run-8"))
 }
 
 ///|

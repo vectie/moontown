@@ -18,13 +18,11 @@ fn recover_legacy_tick_domain_standing_watch(
   )
   replace_standing_watch_recovery_execution(state, completed)
   state.record_event(
-    @core.TownEvent::new(
-      id="event-watch-legacy-tick-reconcile-\{state.events.length()}-\{completed.task_id}",
-      kind="standing-watch",
-      detail="Mayor closed legacy tick-domain standing watch `\{completed.task_id}` as deferred retry accounting.",
-      related_task_id=Some(completed.task_id),
-      related_book_id=Some(completed.book_id),
-      related_run_id=completed.run_id,
+    @standing_watch_policy.standing_watch_execution_event(
+      "event-watch-legacy-tick-reconcile",
+      state.events.length(),
+      completed,
+      "Mayor closed legacy tick-domain standing watch `\{completed.task_id}` as deferred retry accounting.",
     ),
   )
   true

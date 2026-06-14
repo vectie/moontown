@@ -232,14 +232,14 @@ Boundary:
   without importing the full standing-watch policy package.
 - `src/standing_watch_policy` owns standing-watch prompts, ids, marker
   vocabulary/parser, history semantics, material-delta accounting, keeper
-  closure policy, event shape, stale windows, transient dispatch
+  closure policy, event kind/id/related-field shape, stale windows, transient dispatch
   classification, and recovery/review predicates.
 - `src/town_runtime` may schedule standing-watch work, apply package-owned
   decisions to `TownState`, persist snapshots, append watcher ledgers, and
   construct the concrete MoonBook `BookTask` from standing-watch policy values.
 - `src/town_runtime` should not own standing-watch marker vocabulary, closure
   thresholds, watcher-record matching/status mapping, standing-watch event
-  shape, live snapshot stale windows, transient dispatch classification, or
+  shape/id/related-field construction, live snapshot stale windows, transient dispatch classification, or
   empty-completion `no_change` marker text, empty review completion summary
   text, legacy retry-accounting predicates, or review-triage predicates.
 - `src/adapters/moonbook` may enrich standing-watch worker context using

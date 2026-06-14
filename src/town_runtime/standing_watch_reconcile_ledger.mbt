@@ -42,13 +42,11 @@ async fn reconcile_persisted_standing_watch_records(
         state.replace_task(task_for_supervision(state, reconciled))
         sync_worker_from_execution(state, reconciled)
         state.record_event(
-          @core.TownEvent::new(
-            id="event-watch-ledger-reconcile-\{state.events.length()}-\{reconciled.task_id}",
-            kind="standing-watch",
-            detail="Mayor reconciled `\{reconciled.task_id}` from the persisted watcher ledger as \{record.decision.to_string()}.",
-            related_task_id=Some(reconciled.task_id),
-            related_book_id=Some(reconciled.book_id),
-            related_run_id=reconciled.run_id,
+          @standing_watch_policy.standing_watch_execution_event(
+            "event-watch-ledger-reconcile",
+            state.events.length(),
+            reconciled,
+            "Mayor reconciled `\{reconciled.task_id}` from the persisted watcher ledger as \{record.decision.to_string()}.",
           ),
         )
       }
