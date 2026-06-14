@@ -141,6 +141,9 @@ Boundary:
   helpers that apply `src/policy` goal-text vocabulary.
 - `src/dispatch` owns shared MoonBook task route classifiers that are consumed
   by Mayor role planning and MoonClaw packet/profile routing.
+- `src/dispatch` also owns route-facing task-id predicates such as research
+  bootstrap task identity. Runtime recovery code may consume those predicates,
+  but it should not duplicate task-id substring checks.
 - `src/town_runtime` may construct `TownTask` records from MoonBook tasks, but
   should not maintain its own mapping from book ids or task kinds to
   `WorkDomain`.

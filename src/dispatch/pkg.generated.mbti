@@ -22,6 +22,8 @@ pub fn prioritized_book_tasks(Array[@moonbook.BookTask], String) -> Array[@moonb
 
 pub fn research_bootstrap_book_task(@moonbook.BookTask) -> Bool
 
+pub fn research_bootstrap_task_id(String) -> Bool
+
 pub fn research_goal_text(String) -> Bool
 
 pub fn route_task(@core.TownState, RouteRequest) -> RouteDecision

@@ -56,6 +56,10 @@ test "dispatch gives review and planning higher weight for non-research goals" {
 
 ///|
 test "dispatch classifies research bootstrap book tasks for route consumers" {
+  assert_true(
+    research_bootstrap_task_id("goal-research-opc-research-bootstrap-ingest"),
+  )
+  assert_false(research_bootstrap_task_id("goal-research-opc-ingest"))
   let task = @moonbook.BookTask::new(
     id="goal-research-opc-research-bootstrap-ingest",
     title="Bootstrap verified research coverage",

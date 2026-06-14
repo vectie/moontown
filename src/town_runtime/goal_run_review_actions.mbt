@@ -87,7 +87,7 @@ fn complete_recovered_research_bootstrap_if_clean(
   }
   let mut recovered = 0
   for task_id in task_ids {
-    if !task_id.contains("research-bootstrap-ingest") {
+    if !@dispatch.research_bootstrap_task_id(task_id) {
       continue
     }
     match @core.find_execution(state, task_id) {
