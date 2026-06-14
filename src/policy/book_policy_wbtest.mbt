@@ -197,18 +197,43 @@ test "policy capability ids are derived from composed policy choices" {
       projection_path="book/site/generated/tool.html",
     )
   let capabilities = capability_ids(policy)
-  assert_true(capabilities.contains("standing-watch"))
-  assert_true(capabilities.contains("pdf-watch"))
-  assert_true(capabilities.contains("web-tool-surface"))
-  assert_true(!capabilities.contains("generated-site"))
-  assert_true(has_capability(policy, "pdf-watch"))
+  assert_true(capabilities.contains(standing_watch_capability()))
+  assert_false(capabilities.contains(research_evidence_capability()))
+  assert_true(capabilities.contains(pdf_watch_capability()))
+  assert_true(capabilities.contains(web_tool_surface_capability()))
+  assert_true(!capabilities.contains(generated_site_capability()))
+  assert_true(has_capability(policy, pdf_watch_capability()))
   assert_false(has_capability(policy, "missing"))
 }
 
 ///|
 test "generated-site capability remains derived from output surface" {
-  assert_true(has_capability(research(), "generated-site"))
-  assert_false(has_capability(research(), "web-tool-surface"))
+  assert_true(has_capability(research(), generated_site_capability()))
+  assert_false(has_capability(research(), web_tool_surface_capability()))
+}
+
+///|
+test "catalog entry policy exposes capabilities without downstream type checks" {
+  assert_true(
+    catalog_entry_runs_standing_watch("research-opc", "OPC", ["research"]),
+  )
+  assert_true(
+    catalog_entry_runs_research_evidence("research-opc", "OPC", ["research"]),
+  )
+  assert_false(
+    catalog_entry_runs_standing_watch("course-game", "Game", ["course"]),
+  )
+  assert_false(
+    catalog_entry_runs_research_evidence("course-game", "Game", ["course"]),
+  )
+  assert_true(
+    catalog_entry_runs_civic_protocol("wenyu-policy-hall", "Policy Hall", []),
+  )
+  assert_false(
+    catalog_entry_runs_civic_protocol("research-opc", "OPC", ["research"]),
+  )
+  let policy = catalog_entry_policy("wenyu-policy-hall", "Policy Hall", [])
+  assert_true(has_capability(policy, civic_protocol_capability()))
 }
 
 ///|

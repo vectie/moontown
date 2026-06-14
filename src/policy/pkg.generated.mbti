@@ -21,6 +21,16 @@ pub fn catalog_entry_active(String, String, String, Array[String]) -> Bool
 
 pub fn catalog_entry_archived(Array[String]) -> Bool
 
+pub fn catalog_entry_has_capability(String, String, Array[String], String) -> Bool
+
+pub fn catalog_entry_policy(String, String, Array[String]) -> BookPolicy
+
+pub fn catalog_entry_runs_civic_protocol(String, String, Array[String]) -> Bool
+
+pub fn catalog_entry_runs_research_evidence(String, String, Array[String]) -> Bool
+
+pub fn catalog_entry_runs_standing_watch(String, String, Array[String]) -> Bool
+
 pub fn catalog_entry_transient(String, String, String) -> Bool
 
 pub fn catalog_entry_type(String, String, Array[String]) -> String
@@ -30,6 +40,8 @@ pub fn catalog_policy_context_metadata(String, String, Array[String]) -> Json
 pub fn catalog_research_topic_hint(String, String, Array[String]) -> String?
 
 pub fn civic_protocol() -> BookPolicy
+
+pub fn civic_protocol_capability() -> String
 
 pub fn civic_type() -> String
 
@@ -54,6 +66,8 @@ pub fn file(String, Bool, String) -> FileSpec
 pub fn general() -> BookPolicy
 
 pub fn general_type() -> String
+
+pub fn generated_site_capability() -> String
 
 pub fn has_capability(BookPolicy, String) -> Bool
 
@@ -91,6 +105,8 @@ pub fn output_projection_path(BookPolicy) -> String
 
 pub fn output_surface(BookPolicy) -> String
 
+pub fn pdf_watch_capability() -> String
+
 pub fn planbook() -> BookPolicy
 
 pub fn planbook_type() -> String
@@ -113,6 +129,8 @@ pub fn required_file_specs(BookPolicy) -> Array[FileSpec]
 
 pub fn research() -> BookPolicy
 
+pub fn research_evidence_capability() -> String
+
 pub fn research_goal_text(String) -> Bool
 
 pub fn research_request_goal_text(String) -> Bool
@@ -131,9 +149,13 @@ pub fn source_policy_for_type(String) -> String
 
 pub fn source_policy_or_default(String, String) -> String
 
+pub fn standing_watch_capability() -> String
+
 pub fn tend_skills(BookPolicy) -> Array[SkillSpec]
 
 pub fn web_first_policy() -> String
+
+pub fn web_tool_surface_capability() -> String
 
 pub fn wenyu_valley_goal_text(String) -> Bool
 

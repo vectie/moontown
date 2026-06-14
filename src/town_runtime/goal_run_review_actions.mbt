@@ -127,11 +127,14 @@ fn complete_recovered_research_bootstrap_if_clean(
 fn state_book_is_research(state : @core.TownState, book_id : String) -> Bool {
   for book in state.books {
     if book.id == book_id {
-      return @policy.catalog_entry_type(book.id, book.name, book.tags) ==
-        @policy.research_type()
+      return @policy.catalog_entry_runs_research_evidence(
+        book.id,
+        book.name,
+        book.tags,
+      )
     }
   }
-  @policy.catalog_entry_type(book_id, "", []) == @policy.research_type()
+  @policy.catalog_entry_runs_research_evidence(book_id, "", [])
 }
 
 ///|

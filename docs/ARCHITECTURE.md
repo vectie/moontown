@@ -419,6 +419,11 @@ Callers that need to inspect those choices should use policy-owned capability
 introspection such as `capability_ids(policy)` and
 `has_capability(policy, ...)`. They should not infer capabilities from book
 ids, tags, storage paths, or duplicated skill-name checks outside `policy/`.
+When the caller only has MoonBook catalog metadata, it should use policy-owned
+catalog capability adapters such as `catalog_entry_runs_standing_watch(...)`,
+`catalog_entry_runs_research_evidence(...)`, and
+`catalog_entry_runs_civic_protocol(...)` instead of reclassifying the entry and
+comparing legacy book-type labels locally.
 
 Default output paths are also policy-owned. Packages such as `book_quality/`
 may expose compatibility helpers like `generated_site_path()`, but those should

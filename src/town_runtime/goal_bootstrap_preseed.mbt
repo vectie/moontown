@@ -25,6 +25,5 @@ async fn preseed_goal_bootstrap_inputs(
 
 ///|
 fn town_runtime_entry_is_research(entry : @moonbook.BookCatalogEntry) -> Bool {
-  @policy.catalog_entry_type(entry.id, entry.name, entry.tags) ==
-  @policy.research_type()
+  @policy.catalog_entry_runs_research_evidence(entry.id, entry.name, entry.tags)
 }

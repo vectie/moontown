@@ -735,6 +735,12 @@ Boundary:
   `has_capability(policy, ...)` when they need to inspect composed
   capabilities. They should not duplicate capability detection from skill ids,
   tags, or path names outside `src/policy`.
+- If a downstream package only has MoonBook catalog metadata, it should call
+  policy-owned catalog capability helpers such as
+  `catalog_entry_runs_standing_watch(...)` and
+  `catalog_entry_runs_research_evidence(...)`, and
+  `catalog_entry_runs_civic_protocol(...)`. It should not re-run catalog
+  classification and compare legacy book-type labels locally.
 - MoonBook adapter routing follows the same rule: existing catalog metadata is
   authoritative first; when an explicit research request names a non-canonical
   book id, the research topic should be derived from the goal/request text and

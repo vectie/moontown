@@ -36,7 +36,7 @@ pub fn is_wenyu_book_entry(
   name : String,
   tags : Array[String],
 ) -> Bool {
-  @policy.catalog_entry_type(id, name, tags) == @policy.civic_type() &&
+  @policy.catalog_entry_runs_civic_protocol(id, name, tags) &&
   id.has_prefix("wenyu-")
 }
 
