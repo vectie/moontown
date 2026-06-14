@@ -69,3 +69,25 @@ test "research policy owns bootstrap report-stage prompt policy" {
     bootstrap_report_self_review_prompt().contains("process-log leakage"),
   )
 }
+
+///|
+test "research policy owns bootstrap source-stage prompt policy" {
+  assert_true(
+    bootstrap_missing_source_policy_prompt().contains(tool_blockers_path()),
+  )
+  assert_true(
+    bootstrap_missing_source_policy_prompt().contains(
+      "Never return a missing-input/adaptive-planning response",
+    ),
+  )
+  assert_true(
+    bootstrap_source_expansion_harvest_policy_prompt().contains(
+      harvest_candidate_fetch_count(),
+    ),
+  )
+  assert_true(
+    bootstrap_source_expansion_harvest_policy_prompt().contains(
+      "domain blocks access",
+    ),
+  )
+}

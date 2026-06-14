@@ -343,6 +343,11 @@ Boundary:
 - `src/adapters/moonbook` should call those report-stage policy helpers
   directly while assembling provider prompts; it should not keep adapter-local
   report policy prompt helpers that duplicate policy-owned wording.
+- `src/research_policy` owns reusable bootstrap source-stage policy text such
+  as missing-source handling and source-expansion harvested-candidate fetching.
+- `src/adapters/moonbook` should call those source-stage policy helpers
+  directly while assembling provider prompts; it should not keep adapter-local
+  source policy prompt helpers that duplicate policy-owned wording.
 - `src/research_policy` owns research skill path contracts such as
   `skills/web-first-research/SKILL.md`,
   `skills/research-evidence-synthesis/SKILL.md`,

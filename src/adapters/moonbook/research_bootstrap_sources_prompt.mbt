@@ -13,18 +13,9 @@ fn research_bootstrap_sources_prompt() -> String {
     "Do not inspect local implementation files unless SOURCE_HINTS.md explicitly permits it.",
     research_bootstrap_source_screening_write_targets_prompt(),
     "Do not ask for more input; weak coverage is a blocker to record, not a reason to stall.",
-    research_bootstrap_missing_source_policy_prompt(),
+    @research_policy.bootstrap_missing_source_policy_prompt(),
     @research_policy.bootstrap_plain_markdown_no_json_fields_prompt(),
     research_bootstrap_source_screening_return_prompt(),
-  ])
-}
-
-///|
-fn research_bootstrap_missing_source_policy_prompt() -> String {
-  research_bootstrap_prompt([
-    "If something feels missing, write the missing source class into \{@research_policy.tool_blockers_path()}.",
-    "Complete the best research pass from available screened leads.",
-    "Never return a missing-input/adaptive-planning response.",
   ])
 }
 
@@ -60,7 +51,7 @@ fn research_bootstrap_source_expansion_prompt() -> String {
     "Otherwise, perform command-line fallback and source-domain front-door discovery now.",
     "You must call execute_command with bounded curl commands before returning when native search was weak.",
     "Fetch search-result pages when useful; if search pages block extraction, fetch source-domain front doors, robots.txt, sitemaps, and selected candidate content URLs.",
-    research_bootstrap_source_expansion_harvest_policy_prompt(),
+    @research_policy.bootstrap_source_expansion_harvest_policy_prompt(),
     "Convert fetched content pages into \{@research_policy.source_screen_path()} rows with include, exclude, discovery_only, or blocked decisions.",
     "Search/index/hub pages and sitemaps are not evidence unless they contain substantive inspected claims.",
     "Revise \{@research_policy.search_log_path()} with Command Fallback Attempts and harvested/fetched counts.",
@@ -68,14 +59,6 @@ fn research_bootstrap_source_expansion_prompt() -> String {
     "Revise \{@research_policy.tool_blockers_path()} with exact blocked source classes.",
     "If you still cannot reach \{@research_policy.min_included_sources()} included sources after command fallback and candidate conversion, record why; do not invent claims and do not ask for input.",
     "Return plain Markdown with included source count, command fallback count, fetched candidate count, blockers, and whether the next report step may target \{@research_policy.deep_dossier_word_target()}.",
-  ])
-}
-
-///|
-fn research_bootstrap_source_expansion_harvest_policy_prompt() -> String {
-  research_bootstrap_prompt([
-    "When sitemaps or front doors harvest candidate content URLs, fetch at least \{@research_policy.harvest_candidate_fetch_count()} high-signal candidate pages.",
-    "If fewer than \{@research_policy.harvest_candidate_fetch_count()} candidates are harvested, fetch all of them unless the domain blocks access.",
   ])
 }
 

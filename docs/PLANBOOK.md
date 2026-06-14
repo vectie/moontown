@@ -1042,10 +1042,12 @@ precise ownership blocker instead of moving that responsibility into Moontown.
 Research bootstrap prompt refactors follow the same boundary rule. Reusable
 research policy text belongs in `research_policy/`, including web/fallback
 discovery, source-depth rules, bootstrap artifact groups, and report-stage
-repair/evidence/quality/self-review policy. `adapters/moonbook/` may assemble
-MoonBook provider packets and add stage-specific handoff text, but future
-plans must not reintroduce adapter-local report policy prompt helpers that
-compete with `research_policy/`.
+repair/evidence/quality/self-review policy. Missing-source handling and
+source-expansion harvested-candidate fetching are also policy-owned.
+`adapters/moonbook/` may assemble MoonBook provider packets and add
+stage-specific handoff text, but future plans must not reintroduce
+adapter-local source or report policy prompt helpers that compete with
+`research_policy/`.
 
 This still must stay bounded. The town should not run an unconstrained generic
 agent loop with arbitrary authority. A self-patch must name target files,

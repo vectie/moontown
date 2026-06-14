@@ -20,6 +20,8 @@ pub fn bootstrap_front_door_discovery_prompt() -> String
 
 pub fn bootstrap_harvest_to_inspection_prompt() -> String
 
+pub fn bootstrap_missing_source_policy_prompt() -> String
+
 pub fn bootstrap_native_web_policy_prompt() -> String
 
 pub fn bootstrap_no_reference_quality_authority_prompt() -> String
@@ -55,6 +57,8 @@ pub fn bootstrap_required_artifacts_contract() -> String
 pub fn bootstrap_search_result_fetch_prompt() -> String
 
 pub fn bootstrap_source_depth_policy_prompt() -> String
+
+pub fn bootstrap_source_expansion_harvest_policy_prompt() -> String
 
 pub fn bootstrap_weak_native_search_definition_prompt() -> String
 
