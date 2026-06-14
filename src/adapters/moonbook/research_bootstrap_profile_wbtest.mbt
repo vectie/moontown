@@ -6,9 +6,9 @@ test "research bootstrap source screening policy keeps web-first fallback explic
   assert_true(prompt.contains(@research_policy.command_fetch_pattern()))
   assert_true(prompt.contains("ready_for_12k_dossier"))
   assert_true(prompt.contains("Never return a missing-input"))
-  assert_true(prompt.contains(research_search_log_path()))
-  assert_true(prompt.contains(research_source_screen_path()))
-  assert_true(prompt.contains(research_tool_blockers_path()))
+  assert_true(prompt.contains(@research_policy.search_log_path()))
+  assert_true(prompt.contains(@research_policy.source_screen_path()))
+  assert_true(prompt.contains(@research_policy.tool_blockers_path()))
   assert_true(
     prompt.contains(
       "fewer than \{@research_policy.min_included_sources()} included inspected sources",
@@ -22,8 +22,8 @@ test "research bootstrap repair policy separates review from churn" {
   assert_true(prompt.contains("First judge whether the report already passes"))
   assert_true(prompt.contains("record a no-op review"))
   assert_true(prompt.contains("repair in-place"))
-  assert_true(prompt.contains(research_deep_report_path()))
-  assert_true(prompt.contains(research_marketing_brief_path()))
+  assert_true(prompt.contains(@research_policy.deep_report_path()))
+  assert_true(prompt.contains(@research_policy.marketing_brief_path()))
   assert_true(
     prompt.contains("\{@research_policy.repair_dossier_word_target()} dossier"),
   )
@@ -40,39 +40,39 @@ test "research bootstrap report prompts use shared artifact lists" {
   assert_eq(
     research_bootstrap_report_input_artifacts().join("|"),
     [
-      research_source_screen_path(),
-      research_search_log_path(),
-      research_tool_blockers_path(),
-      research_question_path(),
+      @research_policy.source_screen_path(),
+      @research_policy.search_log_path(),
+      @research_policy.tool_blockers_path(),
+      @research_policy.question_path(),
     ].join("|"),
   )
   assert_eq(
     research_bootstrap_report_artifact_targets().join("|"),
     [
-      research_local_sources_path(),
-      research_evidence_matrix_path(),
-      research_synthesis_brief_path(),
-      research_deep_report_path(),
-      research_marketing_brief_path(),
+      @research_policy.local_sources_path(),
+      @research_policy.evidence_matrix_path(),
+      @research_policy.synthesis_brief_path(),
+      @research_policy.deep_report_path(),
+      @research_policy.marketing_brief_path(),
     ].join("|"),
   )
   let prompt = research_bootstrap_report_prompt()
-  assert_true(prompt.contains(research_question_path()))
-  assert_true(prompt.contains(research_deep_report_path()))
-  assert_true(prompt.contains(research_marketing_brief_path()))
+  assert_true(prompt.contains(@research_policy.question_path()))
+  assert_true(prompt.contains(@research_policy.deep_report_path()))
+  assert_true(prompt.contains(@research_policy.marketing_brief_path()))
 }
 
 ///|
 test "research bootstrap quality repair inputs use shared artifacts" {
   let inputs = research_bootstrap_quality_repair_input_artifacts()
-  assert_true(inputs.contains(research_source_screen_path()))
-  assert_true(inputs.contains(research_evidence_matrix_path()))
-  assert_true(inputs.contains(research_synthesis_brief_path()))
-  assert_true(inputs.contains(research_deep_report_path()))
-  assert_true(inputs.contains(research_marketing_brief_path()))
+  assert_true(inputs.contains(@research_policy.source_screen_path()))
+  assert_true(inputs.contains(@research_policy.evidence_matrix_path()))
+  assert_true(inputs.contains(@research_policy.synthesis_brief_path()))
+  assert_true(inputs.contains(@research_policy.deep_report_path()))
+  assert_true(inputs.contains(@research_policy.marketing_brief_path()))
   let prompt = research_bootstrap_quality_repair_inputs_prompt()
-  assert_true(prompt.contains(research_source_screen_path()))
-  assert_true(prompt.contains(research_deep_report_path()))
+  assert_true(prompt.contains(@research_policy.source_screen_path()))
+  assert_true(prompt.contains(@research_policy.deep_report_path()))
 }
 
 ///|
@@ -99,12 +99,12 @@ test "research bootstrap profile uses shared source-depth and harvest policy" {
   )
   assert_true(
     research_bootstrap_source_expansion_inputs_prompt().contains(
-      research_search_log_path(),
+      @research_policy.search_log_path(),
     ),
   )
   assert_true(
     research_bootstrap_source_expansion_prompt().contains(
-      research_source_screen_path(),
+      @research_policy.source_screen_path(),
     ),
   )
 }
@@ -112,9 +112,9 @@ test "research bootstrap profile uses shared source-depth and harvest policy" {
 ///|
 test "research bootstrap source-screening target prompt uses shared artifacts" {
   let prompt = research_bootstrap_source_screening_write_targets_prompt()
-  assert_true(prompt.contains(research_search_log_path()))
-  assert_true(prompt.contains(research_source_screen_path()))
-  assert_true(prompt.contains(research_tool_blockers_path()))
+  assert_true(prompt.contains(@research_policy.search_log_path()))
+  assert_true(prompt.contains(@research_policy.source_screen_path()))
+  assert_true(prompt.contains(@research_policy.tool_blockers_path()))
 }
 
 ///|

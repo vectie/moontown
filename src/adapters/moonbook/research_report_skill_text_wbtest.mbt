@@ -10,7 +10,9 @@ test "research report skill preserves long-form quality contract" {
   assert_true(skill.contains("name: research-report"))
   assert_true(skill.contains("# llm training detail: Deep Research Analysis"))
   assert_true(
-    skill.contains("Always produce or revise `\{research_deep_report_path()}`"),
+    skill.contains(
+      "Always produce or revise `\{@research_policy.deep_report_path()}`",
+    ),
   )
   assert_true(skill.contains("at least 8 `##` sections"))
   assert_true(skill.contains("## Executive Summary"))
@@ -64,10 +66,10 @@ test "research report policy helpers come from research policy" {
 ///|
 test "research report required inputs use shared artifact paths" {
   let required = research_report_required_inputs_section()
-  for path in research_ingest_required_raw_artifact_paths() {
+  for path in @research_policy.ingest_required_raw_artifact_paths() {
     assert_true(required.contains("- `\{path}`"))
   }
-  assert_true(!required.contains("- `\{research_deep_report_path()}`"))
+  assert_true(!required.contains("- `\{@research_policy.deep_report_path()}`"))
   assert_true(required.contains("- `wiki/sources/*.md`"))
   assert_true(required.contains("- `wiki/synthesis/*.md`"))
 }

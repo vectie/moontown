@@ -61,11 +61,17 @@ async fn ensure_moontown_research_pack(
     research_source_hints_text(entry),
   )
   write_workspace_text_if_missing(
-    research_workspace_artifact_path(root, research_question_path()),
+    @research_policy.workspace_artifact_path(
+      root,
+      @research_policy.question_path(),
+    ),
     research_question_seed_text(entry),
   )
   write_workspace_text_if_missing(
-    research_workspace_artifact_path(root, research_search_log_path()),
+    @research_policy.workspace_artifact_path(
+      root,
+      @research_policy.search_log_path(),
+    ),
     research_search_log_seed_text(entry),
   )
   ensure_moontown_research_moonclaw_profile(root)

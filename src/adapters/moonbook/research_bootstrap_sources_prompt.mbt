@@ -22,7 +22,7 @@ fn research_bootstrap_sources_prompt() -> String {
 ///|
 fn research_bootstrap_missing_source_policy_prompt() -> String {
   research_bootstrap_prompt([
-    "If something feels missing, write the missing source class into \{research_tool_blockers_path()}.",
+    "If something feels missing, write the missing source class into \{@research_policy.tool_blockers_path()}.",
     "Complete the best research pass from available screened leads.",
     "Never return a missing-input/adaptive-planning response.",
   ])
@@ -39,7 +39,7 @@ fn research_bootstrap_source_screening_return_prompt() -> String {
 ///|
 fn research_bootstrap_source_screening_inputs_prompt() -> String {
   research_bootstrap_prompt([
-    "Read raw/bootstrap/RESEARCH_REQUEST.md, raw/bootstrap/SOURCE_HINTS.md, \{research_question_path()}, and \{research_search_log_path()}.",
+    "Read raw/bootstrap/RESEARCH_REQUEST.md, raw/bootstrap/SOURCE_HINTS.md, \{@research_policy.question_path()}, and \{@research_policy.search_log_path()}.",
     "Also read optional raw/bootstrap/REFERENCE_STYLE.md and optional raw/bootstrap/REFERENCE_SOURCE_HINTS.md.",
     "Only read the relevant source-screening SKILL.md files.",
   ])
@@ -47,7 +47,7 @@ fn research_bootstrap_source_screening_inputs_prompt() -> String {
 
 ///|
 fn research_bootstrap_source_screening_write_targets_prompt() -> String {
-  "Write or revise \{research_search_log_path()}, \{research_source_screen_path()}, and \{research_tool_blockers_path()}."
+  "Write or revise \{@research_policy.search_log_path()}, \{@research_policy.source_screen_path()}, and \{@research_policy.tool_blockers_path()}."
 }
 
 ///|
@@ -56,16 +56,16 @@ fn research_bootstrap_source_expansion_prompt() -> String {
     "Execute the focused source-expansion stage of the imported Moontown research bootstrap packet for ${proposal.title}.",
     research_bootstrap_source_expansion_inputs_prompt(),
     "This step exists only to fix thin or weak source screens; do not write the final report.",
-    "If \{research_source_screen_path()} already has \{@research_policy.min_included_sources()} or more included inspected evidence sources, verify the count, add a short no-op note to \{research_search_log_path()}, and finish.",
+    "If \{@research_policy.source_screen_path()} already has \{@research_policy.min_included_sources()} or more included inspected evidence sources, verify the count, add a short no-op note to \{@research_policy.search_log_path()}, and finish.",
     "Otherwise, perform command-line fallback and source-domain front-door discovery now.",
     "You must call execute_command with bounded curl commands before returning when native search was weak.",
     "Fetch search-result pages when useful; if search pages block extraction, fetch source-domain front doors, robots.txt, sitemaps, and selected candidate content URLs.",
     research_bootstrap_source_expansion_harvest_policy_prompt(),
-    "Convert fetched content pages into \{research_source_screen_path()} rows with include, exclude, discovery_only, or blocked decisions.",
+    "Convert fetched content pages into \{@research_policy.source_screen_path()} rows with include, exclude, discovery_only, or blocked decisions.",
     "Search/index/hub pages and sitemaps are not evidence unless they contain substantive inspected claims.",
-    "Revise \{research_search_log_path()} with Command Fallback Attempts and harvested/fetched counts.",
-    "Revise \{research_source_screen_path()} with accurate included_source_count and ready_for_12k_dossier.",
-    "Revise \{research_tool_blockers_path()} with exact blocked source classes.",
+    "Revise \{@research_policy.search_log_path()} with Command Fallback Attempts and harvested/fetched counts.",
+    "Revise \{@research_policy.source_screen_path()} with accurate included_source_count and ready_for_12k_dossier.",
+    "Revise \{@research_policy.tool_blockers_path()} with exact blocked source classes.",
     "If you still cannot reach \{@research_policy.min_included_sources()} included sources after command fallback and candidate conversion, record why; do not invent claims and do not ask for input.",
     "Return plain Markdown with included source count, command fallback count, fetched candidate count, blockers, and whether the next report step may target \{@research_policy.deep_dossier_word_target()}.",
   ])
@@ -82,7 +82,7 @@ fn research_bootstrap_source_expansion_harvest_policy_prompt() -> String {
 ///|
 fn research_bootstrap_source_expansion_inputs_prompt() -> String {
   research_bootstrap_prompt([
-    "Start by reading raw/bootstrap/RESEARCH_REQUEST.md, \{research_search_log_path()}, \{research_source_screen_path()}, and \{research_tool_blockers_path()}.",
+    "Start by reading raw/bootstrap/RESEARCH_REQUEST.md, \{@research_policy.search_log_path()}, \{@research_policy.source_screen_path()}, and \{@research_policy.tool_blockers_path()}.",
     "Also read raw/bootstrap/SOURCE_HINTS.md and \{@research_policy.web_first_research_skill_path()}.",
   ])
 }

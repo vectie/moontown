@@ -15,9 +15,9 @@ fn web_first_rules_section(topic : String) -> Array[String] {
     web_first_authority_rule(topic),
     "- After search, inspect at least two highest-signal pages before writing conclusions. Use native `web_fetch` if available; otherwise use bounded command-line fetches.",
     web_first_result_page_rule(),
-    "- Write durable notes into `\{research_search_log_path()}` and `\{research_source_screen_path()}` before inspecting the local repo.",
+    "- Write durable notes into `\{@research_policy.search_log_path()}` and `\{@research_policy.source_screen_path()}` before inspecting the local repo.",
     web_first_local_rule(topic),
-    "- If all web access paths are unavailable, write `\{research_tool_blockers_path()}` and continue only with clearly provisional evidence instead of silently skipping the phase.",
+    "- If all web access paths are unavailable, write `\{@research_policy.tool_blockers_path()}` and continue only with clearly provisional evidence instead of silently skipping the phase.",
     "- Do not cite search snippets as verified evidence unless fetch is blocked and the source is clearly labeled provisional.",
     "- Do not mark a source page verified unless it contains inspected source content, extracted claims, and provenance.",
     "",
@@ -39,7 +39,7 @@ fn web_first_native_search_rule() -> String {
 fn web_first_command_discovery_rule() -> String {
   web_first_text([
     "- In command-line discovery mode, first write the planned",
-    "query/source-screening strategy to `\{research_search_log_path()}`, then",
+    "query/source-screening strategy to `\{@research_policy.search_log_path()}`, then",
     "run a small bounded command batch. Do not spend a long model turn",
     "planning before the first durable write or command.",
   ])
@@ -90,7 +90,7 @@ fn web_first_source_depth_blocker_rule() -> String {
   web_first_text([
     "- Stop below \{web_first_minimum_included_sources_text()} included sources only after \{web_first_discovery_attempt_limit_text()} web/discovery",
     "attempts and an explicit source-depth blocker. In that case write",
-    "`ready_for_12k_dossier: false` into `\{research_source_screen_path()}`.",
+    "`ready_for_12k_dossier: false` into `\{@research_policy.source_screen_path()}`.",
   ])
 }
 

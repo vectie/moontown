@@ -6,7 +6,7 @@ fn web_first_search_result_fallback_section() -> Array[String] {
     web_first_search_result_fallback_intent(),
     "",
     web_first_search_result_fetch_step(),
-    "2. Extract candidate result URLs, titles, snippets, and domains into `\{research_search_log_path()}`.",
+    "2. Extract candidate result URLs, titles, snippets, and domains into `\{@research_policy.search_log_path()}`.",
     web_first_search_candidate_class_step(),
     web_first_search_candidate_fetch_step(),
     web_first_search_blocker_step(),
@@ -42,7 +42,7 @@ fn web_first_search_candidate_class_step() -> String {
 fn web_first_search_candidate_fetch_step() -> String {
   web_first_text([
     "4. Fetch selected result URLs and only then include, reject, or block",
-    "them in `\{research_source_screen_path()}`.",
+    "them in `\{@research_policy.source_screen_path()}`.",
   ])
 }
 
@@ -50,6 +50,6 @@ fn web_first_search_candidate_fetch_step() -> String {
 fn web_first_search_blocker_step() -> String {
   web_first_text([
     "5. If search-result extraction is blocked, record the exact blocked page,",
-    "command target, and source class in `\{research_tool_blockers_path()}`.",
+    "command target, and source class in `\{@research_policy.tool_blockers_path()}`.",
   ])
 }

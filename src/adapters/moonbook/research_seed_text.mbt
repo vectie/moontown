@@ -64,7 +64,7 @@ fn research_search_log_seed_text(entry : BookCatalogEntry) -> String {
     "- Retry `{bad request}` once with a simpler query or URL before recording a blocker.",
     "- Use search pages only for discovery; do not cite them as evidence.",
     "- Prefer inspected source content, clear provenance, and claim-level extraction.",
-    "- Keep blocked or weak sources visible in `\{research_source_screen_path()}` or `\{research_tool_blockers_path()}`.",
+    "- Keep blocked or weak sources visible in `\{@research_policy.source_screen_path()}` or `\{@research_policy.tool_blockers_path()}`.",
   ].join("\n")
 }
 
@@ -150,7 +150,7 @@ fn research_source_hints_text(entry : BookCatalogEntry) -> String {
     lines.push("## Local Follow-Up")
     lines.push("")
     lines.push(
-      "- No local repository is implied for this lane. Record `\{research_local_sources_path()}` as intentionally empty unless web evidence points to a concrete local artifact.",
+      "- No local repository is implied for this lane. Record `\{@research_policy.local_sources_path()}` as intentionally empty unless web evidence points to a concrete local artifact.",
     )
   }
   lines.push("")

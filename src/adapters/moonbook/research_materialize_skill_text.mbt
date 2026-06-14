@@ -2,7 +2,7 @@
 fn repo_source_materialize_skill_text(entry : BookCatalogEntry) -> String {
   let topic = research_topic_id(entry)
   let display = display_topic_name(topic)
-  let pages = research_topic_wiki_page_examples(topic)
+  let pages = @research_policy.topic_wiki_page_examples(topic)
   let source_page = pages[0]
   let entity_page = pages[1]
   let concept_page = pages[2]
@@ -21,7 +21,7 @@ fn repo_source_materialize_skill_text(entry : BookCatalogEntry) -> String {
     "",
     "- Convert evidence into durable markdown pages, not chat-style summaries.",
     "- Preserve provenance from both web and local sources.",
-    "- Use the evidence matrix as the only source of claims. If a claim is not in `\{research_evidence_matrix_path()}`, extract it there first.",
+    "- Use the evidence matrix as the only source of claims. If a claim is not in `\{@research_policy.evidence_matrix_path()}`, extract it there first.",
     "- Mark source pages as `Source type: verified source digest` only when fetched or inspected content exists.",
     "- Candidate inventories and provisional blockers belong in `raw/bootstrap/` or clearly labeled provisional pages, not as the final source coverage.",
     "- Update `wiki/index.md` and `wiki/log.md` whenever new substantive pages are created or revised.",

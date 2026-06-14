@@ -19,7 +19,7 @@ fn web_first_front_door_fallback_section() -> Array[String] {
     "- fetch the domain home page and one visible topic/search/index page",
     "- extract candidate links containing topic terms, route names, or source-class terms",
     "- fetch candidate article/report/product/paper pages; only these fetched content pages normally count as included evidence",
-    "- write a `Front-Door Attempts` table in `\{research_search_log_path()}` with domain, command target, harvested candidates, fetched candidates, and result",
+    "- write a `Front-Door Attempts` table in `\{@research_policy.search_log_path()}` with domain, command target, harvested candidates, fetched candidates, and result",
     "- write a `Command Fallback Attempts` table whenever native search was weak and command-line fetching was used",
     "",
   ]
@@ -60,7 +60,7 @@ fn web_first_domain_front_door_step() -> String {
 fn web_first_candidate_harvest_step() -> String {
   web_first_text([
     "4. Harvest candidate links whose titles, paths, or snippets match the",
-    "topic keywords; write them into `\{research_search_log_path()}` before",
+    "topic keywords; write them into `\{@research_policy.search_log_path()}` before",
     "fetching.",
   ])
 }

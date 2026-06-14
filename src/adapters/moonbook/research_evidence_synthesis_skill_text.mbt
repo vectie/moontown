@@ -78,7 +78,7 @@ fn research_evidence_synthesis_protocol_section(display : String) -> String {
     "4. Extract: convert source observations into claim rows before writing prose.",
     "5. Triangulate: compare multiple independent web sources, and compare with local repository evidence only when local evidence is explicitly relevant.",
     "6. Synthesize: combine claims into a short argument about what \{display} is, how it works, and why it matters.",
-    "7. Position: use the marketing skill to convert supported claims into `\{research_marketing_brief_path()}` without inventing unsupported product claims.",
+    "7. Position: use the marketing skill to convert supported claims into `\{@research_policy.marketing_brief_path()}` without inventing unsupported product claims.",
     "8. Gap map: list missing evidence, contradictions, and next searches.",
   ].join("\n")
 }
@@ -89,7 +89,7 @@ fn research_evidence_matrix_schema_section(display : String) -> String {
     "",
     "## Evidence Matrix Schema",
     "",
-    "Write `\{research_evidence_matrix_path()}` with this table:",
+    "Write `\{@research_policy.evidence_matrix_path()}` with this table:",
     "",
     "```md",
     "| Claim ID | Claim | Source IDs | Evidence detail | Confidence | Gap or contradiction |",
@@ -105,11 +105,11 @@ fn research_evidence_wiki_materialization_section(topic : String) -> String {
     "",
     "## Wiki Materialization Rules",
     "",
-    "- A source page such as `\{research_topic_source_page(topic)}` must identify source IDs, source type, inspected content, extracted claims, and risk.",
-    "- An entity page such as `\{research_topic_entity_page(topic)}` must describe the concrete project, actor, institution, domain model, or market participant that the evidence actually supports.",
-    "- A concept page such as `\{research_topic_concept_page(topic)}` must explain one architecture, workflow, business, legal, or market concept grounded in claims.",
-    "- A synthesis page such as `\{research_topic_synthesis_page(topic)}` must connect claims across sources and name unresolved gaps.",
-    "- `\{research_marketing_brief_path()}` must translate the evidence into product and seller perspective: buyer, pain, promise, strengths, proof, objections, and next action.",
+    "- A source page such as `\{@research_policy.topic_source_page(topic)}` must identify source IDs, source type, inspected content, extracted claims, and risk.",
+    "- An entity page such as `\{@research_policy.topic_entity_page(topic)}` must describe the concrete project, actor, institution, domain model, or market participant that the evidence actually supports.",
+    "- A concept page such as `\{@research_policy.topic_concept_page(topic)}` must explain one architecture, workflow, business, legal, or market concept grounded in claims.",
+    "- A synthesis page such as `\{@research_policy.topic_synthesis_page(topic)}` must connect claims across sources and name unresolved gaps.",
+    "- `\{@research_policy.marketing_brief_path()}` must translate the evidence into product and seller perspective: buyer, pain, promise, strengths, proof, objections, and next action.",
     "- Every durable page must include provenance. Use claim IDs and source IDs from the evidence matrix.",
   ].join("\n")
 }

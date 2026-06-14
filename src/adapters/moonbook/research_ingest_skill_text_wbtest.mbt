@@ -9,7 +9,7 @@ test "wiki ingest skill for external topics keeps domain guard and web first" {
   assert_true(skill.contains("Do not reinterpret"))
   assert_true(skill.contains("web-first discovery"))
   assert_true(skill.contains("curl -L --max-time 12"))
-  assert_true(skill.contains(research_tool_blockers_path()))
+  assert_true(skill.contains(@research_policy.tool_blockers_path()))
 }
 
 ///|
@@ -39,9 +39,9 @@ test "wiki ingest skill preserves durable raw and wiki artifact contract" {
       workspace_root="/tmp/research-euv",
     ),
   )
-  assert_true(skill.contains(research_question_path()))
-  assert_true(skill.contains(research_source_screen_path()))
-  assert_true(skill.contains(research_evidence_matrix_path()))
+  assert_true(skill.contains(@research_policy.question_path()))
+  assert_true(skill.contains(@research_policy.source_screen_path()))
+  assert_true(skill.contains(@research_policy.evidence_matrix_path()))
   assert_true(
     !research_ingest_required_raw_files_section()
     .join("\n")
@@ -56,20 +56,20 @@ test "wiki ingest skill preserves durable raw and wiki artifact contract" {
 ///|
 test "research bootstrap context uses full raw handoff artifact contract" {
   let contract = @research_policy.bootstrap_required_artifacts_contract()
-  assert_true(contract.contains(research_question_path()))
-  assert_true(contract.contains(research_deep_report_path()))
-  assert_true(contract.contains(research_marketing_brief_path()))
+  assert_true(contract.contains(@research_policy.question_path()))
+  assert_true(contract.contains(@research_policy.deep_report_path()))
+  assert_true(contract.contains(@research_policy.marketing_brief_path()))
 }
 
 ///|
 test "research ingest mandatory steps use shared raw artifact paths" {
   let method_text = research_ingest_mandatory_method_section().join("\n")
-  assert_true(method_text.contains(research_question_path()))
-  assert_true(method_text.contains(research_search_log_path()))
-  assert_true(method_text.contains(research_source_screen_path()))
-  assert_true(method_text.contains(research_evidence_matrix_path()))
-  assert_true(method_text.contains(research_marketing_brief_path()))
-  assert_true(method_text.contains(research_tool_blockers_path()))
+  assert_true(method_text.contains(@research_policy.question_path()))
+  assert_true(method_text.contains(@research_policy.search_log_path()))
+  assert_true(method_text.contains(@research_policy.source_screen_path()))
+  assert_true(method_text.contains(@research_policy.evidence_matrix_path()))
+  assert_true(method_text.contains(@research_policy.marketing_brief_path()))
+  assert_true(method_text.contains(@research_policy.tool_blockers_path()))
 }
 
 ///|

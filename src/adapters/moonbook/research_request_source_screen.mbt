@@ -1,7 +1,7 @@
 ///|
 fn research_source_screen_step() -> String {
   [
-    "5. Write `\{research_source_screen_path()}` with one row per inspected source:",
+    "5. Write `\{@research_policy.source_screen_path()}` with one row per inspected source:",
     research_source_screen_row_fields(),
     research_included_source_depth_target(),
     research_discovery_artifact_exclusion(),

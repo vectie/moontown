@@ -20,14 +20,14 @@ test "research evidence synthesis skill preserves policy-backed depth contract" 
 test "research evidence synthesis skill uses shared artifact paths" {
   let topic = "moonclaw"
   let section = research_evidence_wiki_materialization_section(topic)
-  assert_true(section.contains(research_topic_source_page(topic)))
-  assert_true(section.contains(research_topic_entity_page(topic)))
-  assert_true(section.contains(research_topic_concept_page(topic)))
-  assert_true(section.contains(research_topic_synthesis_page(topic)))
-  assert_true(section.contains(research_marketing_brief_path()))
+  assert_true(section.contains(@research_policy.topic_source_page(topic)))
+  assert_true(section.contains(@research_policy.topic_entity_page(topic)))
+  assert_true(section.contains(@research_policy.topic_concept_page(topic)))
+  assert_true(section.contains(@research_policy.topic_synthesis_page(topic)))
+  assert_true(section.contains(@research_policy.marketing_brief_path()))
   assert_true(
     research_evidence_matrix_schema_section("MoonClaw").contains(
-      research_evidence_matrix_path(),
+      @research_policy.evidence_matrix_path(),
     ),
   )
 }

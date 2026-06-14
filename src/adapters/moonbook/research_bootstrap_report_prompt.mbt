@@ -32,11 +32,11 @@ fn research_bootstrap_report_artifact_targets_prompt() -> String {
 ///|
 fn research_bootstrap_report_artifact_targets() -> Array[String] {
   [
-    research_local_sources_path(),
-    research_evidence_matrix_path(),
-    research_synthesis_brief_path(),
-    research_deep_report_path(),
-    research_marketing_brief_path(),
+    @research_policy.local_sources_path(),
+    @research_policy.evidence_matrix_path(),
+    @research_policy.synthesis_brief_path(),
+    @research_policy.deep_report_path(),
+    @research_policy.marketing_brief_path(),
   ]
 }
 
@@ -60,10 +60,10 @@ fn research_bootstrap_report_inputs_prompt() -> String {
 ///|
 fn research_bootstrap_report_input_artifacts() -> Array[String] {
   [
-    research_source_screen_path(),
-    research_search_log_path(),
-    research_tool_blockers_path(),
-    research_question_path(),
+    @research_policy.source_screen_path(),
+    @research_policy.search_log_path(),
+    @research_policy.tool_blockers_path(),
+    @research_policy.question_path(),
   ]
 }
 
@@ -78,7 +78,7 @@ fn research_bootstrap_report_repair_policy_prompt() -> String {
 ///|
 fn research_bootstrap_active_repair_policy_prompt() -> String {
   research_bootstrap_prompt([
-    "If raw/bootstrap/QUALITY_REPAIR.md exists with active gaps and \{research_deep_report_path()} already exists, treat this as repair mode.",
+    "If raw/bootstrap/QUALITY_REPAIR.md exists with active gaps and \{@research_policy.deep_report_path()} already exists, treat this as repair mode.",
     "Do not rewrite deep-report.md from scratch in this report stage.",
     "preserve the existing report structure and claims.",
     "Refresh only obviously stale companion artifacts.",

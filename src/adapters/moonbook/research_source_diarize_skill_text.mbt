@@ -96,6 +96,6 @@ fn research_source_do_not_section() -> Array[String] {
     "- Do not create a verified source page from a candidate URL list alone.",
     "- Do not write only `moon.mod.json` metadata unless that is the actual research question.",
     "- Do not use the same generic product text across Moontown, MoonBook, and MoonClaw lanes.",
-    "- Do not omit `\{research_search_log_path()}` just because web tools are missing.",
+    "- Do not omit `\{@research_policy.search_log_path()}` just because web tools are missing.",
   ]
 }

@@ -68,24 +68,34 @@ test "web first required output uses shared bootstrap artifact paths" {
 test "web first json contract uses shared artifact and wiki page paths" {
   let topic = "moonclaw"
   let lines = web_first_output_contract_artifact_lines(topic).join("\n")
-  assert_true(lines.contains("\"\{research_search_log_path()}\""))
-  assert_true(lines.contains("\"\{research_evidence_matrix_path()}\""))
-  assert_true(lines.contains("\"\{research_topic_source_page(topic)}\""))
-  assert_true(lines.contains("\"\{research_topic_entity_page(topic)}\""))
-  assert_true(lines.contains("\"\{research_topic_concept_page(topic)}\""))
-  assert_true(lines.contains("\"\{research_topic_synthesis_page(topic)}\""))
+  assert_true(lines.contains("\"\{@research_policy.search_log_path()}\""))
+  assert_true(lines.contains("\"\{@research_policy.evidence_matrix_path()}\""))
+  assert_true(
+    lines.contains("\"\{@research_policy.topic_source_page(topic)}\""),
+  )
+  assert_true(
+    lines.contains("\"\{@research_policy.topic_entity_page(topic)}\""),
+  )
+  assert_true(
+    lines.contains("\"\{@research_policy.topic_concept_page(topic)}\""),
+  )
+  assert_true(
+    lines.contains("\"\{@research_policy.topic_synthesis_page(topic)}\""),
+  )
 }
 
 ///|
 test "web first helper rules keep durable artifact boundaries visible" {
   assert_true(
-    web_first_command_discovery_rule().contains(research_search_log_path()),
+    web_first_command_discovery_rule().contains(
+      @research_policy.search_log_path(),
+    ),
   )
   assert_true(web_first_discovery_artifact_rule().contains("discovery_only"))
   assert_true(web_first_source_depth_blocker_rule().contains("source-depth"))
   assert_true(
     web_first_source_depth_blocker_rule().contains(
-      research_source_screen_path(),
+      @research_policy.source_screen_path(),
     ),
   )
   assert_true(
@@ -94,7 +104,9 @@ test "web first helper rules keep durable artifact boundaries visible" {
     ),
   )
   assert_true(
-    web_first_search_blocker_step().contains(research_tool_blockers_path()),
+    web_first_search_blocker_step().contains(
+      @research_policy.tool_blockers_path(),
+    ),
   )
   assert_true(web_first_source_depth_rule().contains("ten or more included"))
   assert_true(web_first_front_door_stop_rule().contains("twenty-four"))

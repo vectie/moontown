@@ -91,7 +91,9 @@ test "research request execution helpers use shared quality policy" {
     ),
   )
   assert_true(
-    research_command_fallback_log_step().contains(research_search_log_path()),
+    research_command_fallback_log_step().contains(
+      @research_policy.search_log_path(),
+    ),
   )
   assert_true(
     research_candidate_page_fetch_step().contains(
@@ -108,13 +110,15 @@ test "research request execution helpers use shared quality policy" {
       @research_policy.deep_dossier_word_target(),
     ),
   )
-  assert_true(research_deep_report_step().contains(research_deep_report_path()))
+  assert_true(
+    research_deep_report_step().contains(@research_policy.deep_report_path()),
+  )
 }
 
 ///|
 test "research request blocking helpers keep evidence accounting strict" {
   let rules = research_blocking_rules().join("\n")
-  assert_true(rules.contains(research_tool_blockers_path()))
+  assert_true(rules.contains(@research_policy.tool_blockers_path()))
   assert_true(rules.contains("search-engine result page"))
   assert_true(rules.contains("Retry `{bad request}` once"))
   assert_true(rules.contains("do not pretend web evidence exists"))
@@ -124,12 +128,12 @@ test "research request blocking helpers keep evidence accounting strict" {
 ///|
 test "research request execution order uses shared artifact paths" {
   let order = research_execution_order(true).join("\n")
-  assert_true(order.contains(research_question_path()))
-  assert_true(order.contains(research_search_log_path()))
-  assert_true(order.contains(research_source_screen_path()))
-  assert_true(order.contains(research_evidence_matrix_path()))
-  assert_true(order.contains(research_local_sources_path()))
-  assert_true(order.contains(research_synthesis_brief_path()))
-  assert_true(order.contains(research_deep_report_path()))
-  assert_true(order.contains(research_marketing_brief_path()))
+  assert_true(order.contains(@research_policy.question_path()))
+  assert_true(order.contains(@research_policy.search_log_path()))
+  assert_true(order.contains(@research_policy.source_screen_path()))
+  assert_true(order.contains(@research_policy.evidence_matrix_path()))
+  assert_true(order.contains(@research_policy.local_sources_path()))
+  assert_true(order.contains(@research_policy.synthesis_brief_path()))
+  assert_true(order.contains(@research_policy.deep_report_path()))
+  assert_true(order.contains(@research_policy.marketing_brief_path()))
 }

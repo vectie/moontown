@@ -25,12 +25,12 @@ fn web_first_output_contract_example_section() -> Array[String] {
 ///|
 fn web_first_output_contract_artifact_lines(topic : String) -> Array[String] {
   let paths : Array[String] = [
-    research_search_log_path(),
-    research_evidence_matrix_path(),
-    research_topic_source_page(topic),
-    research_topic_entity_page(topic),
-    research_topic_concept_page(topic),
-    research_topic_synthesis_page(topic),
+    @research_policy.search_log_path(),
+    @research_policy.evidence_matrix_path(),
+    @research_policy.topic_source_page(topic),
+    @research_policy.topic_entity_page(topic),
+    @research_policy.topic_concept_page(topic),
+    @research_policy.topic_synthesis_page(topic),
   ]
   let lines : Array[String] = []
   for path in paths {

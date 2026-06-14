@@ -18,7 +18,7 @@ fn research_front_door_discovery_step() -> String {
 ///|
 fn research_command_fallback_log_step() -> String {
   research_substep([
-    "Record a `Command Fallback Attempts` table in `\{research_search_log_path()}` whenever native search is weak.",
+    "Record a `Command Fallback Attempts` table in `\{@research_policy.search_log_path()}` whenever native search is weak.",
     "Use it when the source screen remains below \{@research_policy.min_included_sources()} included inspected sources.",
   ])
 }

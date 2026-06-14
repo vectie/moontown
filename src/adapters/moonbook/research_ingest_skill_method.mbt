@@ -24,28 +24,28 @@ fn research_ingest_web_first_step() -> String {
     "Use native `web_search` and `web_fetch` when available.",
     "If they are unavailable, use bounded command-line discovery such as",
     "`curl -L --max-time 12`; if all web access is blocked, write",
-    "`\{research_tool_blockers_path()}` and mark web evidence as blocked.",
+    "`\{@research_policy.tool_blockers_path()}` and mark web evidence as blocked.",
   ])
 }
 
 ///|
 fn research_ingest_question_step() -> String {
-  "3. Create `\{research_question_path()}` with question, scope, inclusion criteria, exclusion criteria, keywords, and source classes."
+  "3. Create `\{@research_policy.question_path()}` with question, scope, inclusion criteria, exclusion criteria, keywords, and source classes."
 }
 
 ///|
 fn research_ingest_search_log_step() -> String {
-  "4. Create `\{research_search_log_path()}` even when web tools are blocked. Include attempted queries, selected or blocked URLs, rejected sources, and decisions."
+  "4. Create `\{@research_policy.search_log_path()}` even when web tools are blocked. Include attempted queries, selected or blocked URLs, rejected sources, and decisions."
 }
 
 ///|
 fn research_ingest_source_screen_step() -> String {
-  "5. Create `\{research_source_screen_path()}` with source ID, include/exclude decision, authority, relevance, recency, and risk."
+  "5. Create `\{@research_policy.source_screen_path()}` with source ID, include/exclude decision, authority, relevance, recency, and risk."
 }
 
 ///|
 fn research_ingest_evidence_matrix_step() -> String {
-  "6. Create `\{research_evidence_matrix_path()}` before writing wiki prose. Claims must be falsifiable and cite source IDs."
+  "6. Create `\{@research_policy.evidence_matrix_path()}` before writing wiki prose. Claims must be falsifiable and cite source IDs."
 }
 
 ///|
@@ -59,5 +59,5 @@ fn research_ingest_local_after_web_step() -> String {
 
 ///|
 fn research_ingest_marketing_brief_step() -> String {
-  "8. Write `\{research_marketing_brief_path()}` from screened evidence using `\{@research_policy.wiki_marketing_skill_path()}`; make it buyer-facing, specific, and proof-backed."
+  "8. Write `\{@research_policy.marketing_brief_path()}` from screened evidence using `\{@research_policy.wiki_marketing_skill_path()}`; make it buyer-facing, specific, and proof-backed."
 }

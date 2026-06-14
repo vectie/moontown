@@ -54,7 +54,7 @@ fn research_bootstrap_command_fallback_policy_prompt() -> String {
     "In fallback/front-door mode, write a Command Fallback Attempts table with each command target, source class, harvested candidate count, fetched candidate count, and result.",
     "Do not treat the first guessed 404 URL as exhausting a source class.",
     research_bootstrap_curl_target_prompt(),
-    "First update \{research_search_log_path()} with a source-screening plan, then immediately run the web-discovery tool path; do not spend a long model turn planning.",
+    "First update \{@research_policy.search_log_path()} with a source-screening plan, then immediately run the web-discovery tool path; do not spend a long model turn planning.",
   ])
 }
 

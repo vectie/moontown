@@ -23,7 +23,7 @@ fn research_execution_order(external_domain : Bool) -> Array[String] {
 
 ///|
 fn research_scope_step() -> String {
-  "1. Write `\{research_question_path()}` with scope, inclusion criteria, exclusion criteria, keywords, and known source classes."
+  "1. Write `\{@research_policy.question_path()}` with scope, inclusion criteria, exclusion criteria, keywords, and known source classes."
 }
 
 ///|
@@ -51,12 +51,12 @@ fn research_web_priority_step(external_domain : Bool) -> String {
 
 ///|
 fn research_search_log_step() -> String {
-  "4. Write `\{research_search_log_path()}` with query strings, result counts if available, selected URLs, rejected URLs, and the reason for each decision."
+  "4. Write `\{@research_policy.search_log_path()}` with query strings, result counts if available, selected URLs, rejected URLs, and the reason for each decision."
 }
 
 ///|
 fn research_evidence_matrix_step() -> String {
-  "6. Extract claims into `\{research_evidence_matrix_path()}` before synthesis. Use claim IDs like `C1`, `C2`, and cite source IDs like `W1` or `L1`."
+  "6. Extract claims into `\{@research_policy.evidence_matrix_path()}` before synthesis. Use claim IDs like `C1`, `C2`, and cite source IDs like `W1` or `L1`."
 }
 
 ///|

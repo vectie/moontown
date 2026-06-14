@@ -11,7 +11,7 @@ fn research_blocking_rules() -> Array[String] {
 ///|
 fn research_tool_blocker_rule() -> String {
   [
-    "If a tool is unavailable, record the exact blocker in `\{research_tool_blockers_path()}`.",
+    "If a tool is unavailable, record the exact blocker in `\{@research_policy.tool_blockers_path()}`.",
     "Continue with the remaining permitted path and still create the durable bootstrap notes that explain what happened.",
   ].join(" ")
 }

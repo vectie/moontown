@@ -323,6 +323,9 @@ Boundary:
   `raw/bootstrap/research-question.md`, `raw/bootstrap/search-log.md`,
   `raw/bootstrap/deep-report.md`, and topic-specific `wiki/sources`,
   `wiki/entities`, `wiki/concepts`, and `wiki/synthesis` pages.
+- `src/adapters/moonbook` should call those path helpers directly; it should
+  not keep adapter-local `research_*_path` facade helpers or duplicate
+  artifact-path mirror tests.
 - `src/research_policy` owns research skill path contracts such as
   `skills/web-first-research/SKILL.md`,
   `skills/research-evidence-synthesis/SKILL.md`,
@@ -339,7 +342,7 @@ Boundary:
   requests and generated `SKILL.md` guidance, but should not define its own
   competing research-depth thresholds, topic routing rules, query hint tables,
   research skill path tables, research context-page sets, output-contract
-  lines, or research artifact path tables.
+  lines, research artifact path tables, or path facade helpers.
 - `src/research_quality` owns research quality semantics from explicit
   observations: readiness DTOs, required research paths, quality gates,
   repair/review trigger contracts, and persistence wording contracts.

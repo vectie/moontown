@@ -11,18 +11,18 @@ fn research_local_inspection_step(external_domain : Bool) -> String {
 
 ///|
 fn research_local_sources_step() -> String {
-  "8. Write `\{research_local_sources_path()}` with exact paths, symbols or sections inspected, and evidence bullets."
+  "8. Write `\{@research_policy.local_sources_path()}` with exact paths, symbols or sections inspected, and evidence bullets."
 }
 
 ///|
 fn research_synthesis_brief_step() -> String {
-  "9. Write `\{research_synthesis_brief_path()}` that separates findings, contradictions, gaps, and next research."
+  "9. Write `\{@research_policy.synthesis_brief_path()}` that separates findings, contradictions, gaps, and next research."
 }
 
 ///|
 fn research_deep_report_step() -> String {
   research_numbered_step(10, [
-    "Write `\{research_deep_report_path()}` using `\{@research_policy.research_report_skill_path()}`.",
+    "Write `\{@research_policy.deep_report_path()}` using `\{@research_policy.research_report_skill_path()}`.",
     "Prefer a \{@research_policy.deep_dossier_word_target()} deep dossier for complex external/technology-route research with enough screened sources.",
     "If a reference report exists, also match its reader-facing ambition and approximate length class without copying unsupported claims.",
   ])
@@ -30,7 +30,7 @@ fn research_deep_report_step() -> String {
 
 ///|
 fn research_marketing_brief_step() -> String {
-  "11. Write `\{research_marketing_brief_path()}` using `\{@research_policy.wiki_marketing_skill_path()}`: buyer pain, promise, differentiation, proof, objections, and next action."
+  "11. Write `\{@research_policy.marketing_brief_path()}` using `\{@research_policy.wiki_marketing_skill_path()}`: buyer pain, promise, differentiation, proof, objections, and next action."
 }
 
 ///|

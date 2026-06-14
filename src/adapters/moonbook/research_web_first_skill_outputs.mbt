@@ -18,23 +18,23 @@ fn web_first_required_output_section(display : String) -> Array[String] {
 
 ///|
 fn web_first_research_question_output() -> String {
-  "- `\{research_question_path()}` with scope and criteria."
+  "- `\{@research_policy.question_path()}` with scope and criteria."
 }
 
 ///|
 fn web_first_search_log_output() -> String {
-  "- `\{research_search_log_path()}` with queries, selected URLs, rejected URLs, and reasons."
+  "- `\{@research_policy.search_log_path()}` with queries, selected URLs, rejected URLs, and reasons."
 }
 
 ///|
 fn web_first_source_screen_output() -> String {
-  "- `\{research_source_screen_path()}` with authority, relevance, recency, and risk notes."
+  "- `\{@research_policy.source_screen_path()}` with authority, relevance, recency, and risk notes."
 }
 
 ///|
 fn web_first_evidence_matrix_output() -> String {
   web_first_text([
-    "- `\{research_evidence_matrix_path()}` with claim IDs, source IDs,",
+    "- `\{@research_policy.evidence_matrix_path()}` with claim IDs, source IDs,",
     "evidence, confidence, and gaps.",
   ])
 }
@@ -42,7 +42,7 @@ fn web_first_evidence_matrix_output() -> String {
 ///|
 fn web_first_local_sources_output() -> String {
   web_first_text([
-    "- `\{research_local_sources_path()}` with exact file paths, symbols or",
+    "- `\{@research_policy.local_sources_path()}` with exact file paths, symbols or",
     "sections, and evidence bullets.",
   ])
 }
@@ -50,7 +50,7 @@ fn web_first_local_sources_output() -> String {
 ///|
 fn web_first_synthesis_brief_output() -> String {
   web_first_text([
-    "- `\{research_synthesis_brief_path()}` with findings, contradictions,",
+    "- `\{@research_policy.synthesis_brief_path()}` with findings, contradictions,",
     "gaps, and next research.",
   ])
 }
@@ -58,7 +58,7 @@ fn web_first_synthesis_brief_output() -> String {
 ///|
 fn web_first_deep_report_output() -> String {
   web_first_text([
-    "- `\{research_deep_report_path()}` with thesis-first research analysis,",
+    "- `\{@research_policy.deep_report_path()}` with thesis-first research analysis,",
     "tables, Mermaid relationship diagram, maturity assessment, and evidence",
     "limits.",
   ])
@@ -67,7 +67,7 @@ fn web_first_deep_report_output() -> String {
 ///|
 fn web_first_marketing_brief_output() -> String {
   web_first_text([
-    "- `\{research_marketing_brief_path()}` with buyer-facing positioning,",
+    "- `\{@research_policy.marketing_brief_path()}` with buyer-facing positioning,",
     "product strengths, proof points, objections, and next action.",
   ])
 }

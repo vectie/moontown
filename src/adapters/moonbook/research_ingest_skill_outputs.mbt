@@ -1,7 +1,7 @@
 ///|
 fn research_ingest_required_raw_files_section() -> Array[String] {
   let lines = ["## Required Raw Files", ""]
-  for bullet in research_ingest_required_raw_artifact_bullets("") {
+  for bullet in @research_policy.ingest_required_raw_artifact_bullets("") {
     lines.push(bullet)
   }
   lines.push("")
@@ -16,10 +16,10 @@ fn research_ingest_required_wiki_files_section(
   [
     "## Required Wiki Files",
     "",
-    "- `\{research_topic_source_page(topic)}` or another topic-specific verified source digest.",
-    "- `\{research_topic_entity_page(topic)}` or another concrete entity page for \{display}.",
-    "- `\{research_topic_concept_page(topic)}` or another concept page grounded in claims.",
-    "- `\{research_topic_synthesis_page(topic)}` or another synthesis page connecting claims across sources.",
+    "- `\{@research_policy.topic_source_page(topic)}` or another topic-specific verified source digest.",
+    "- `\{@research_policy.topic_entity_page(topic)}` or another concrete entity page for \{display}.",
+    "- `\{@research_policy.topic_concept_page(topic)}` or another concept page grounded in claims.",
+    "- `\{@research_policy.topic_synthesis_page(topic)}` or another synthesis page connecting claims across sources.",
     "",
   ]
 }

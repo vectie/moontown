@@ -4,7 +4,7 @@ fn research_report_non_negotiable_output_section(display : String) -> String {
     "",
     "## Non-Negotiable Output",
     "",
-    "Always produce or revise `\{research_deep_report_path()}` when `\{research_evidence_matrix_path()}` exists.",
+    "Always produce or revise `\{@research_policy.deep_report_path()}` when `\{@research_policy.evidence_matrix_path()}` exists.",
     "",
     "Hard requirements:",
     "",
@@ -64,7 +64,7 @@ fn research_report_word_target_requirement() -> String {
 ///|
 fn research_report_required_inputs_section() -> String {
   let lines : Array[String] = ["", "## Required Inputs", ""]
-  for path in research_ingest_required_raw_artifact_paths() {
+  for path in @research_policy.ingest_required_raw_artifact_paths() {
     lines.push("- `\{path}`")
   }
   lines.push("- `wiki/sources/*.md`")
