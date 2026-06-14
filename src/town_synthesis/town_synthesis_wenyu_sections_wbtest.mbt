@@ -26,6 +26,26 @@ test "Wenyu synthesis routing consumes policy goal vocabulary" {
     ),
   )
   assert_true(!is_wenyu_town_synthesis_plan("ordinary town work", plan))
+  let civic_entry = @moonbook.BookCatalogEntry::new(
+    id="wenyu-policy-hall",
+    name="Policy Hall",
+    purpose="civic protocol exchange",
+    workspace_root="/tmp/wenyu-policy-hall",
+  )
+  let civic_plan = @roles.MayorGoalPlan::new(
+    output_contract="mayor.goal.decomposition.v1",
+    prompt="ordinary town work",
+    parallelizable=true,
+    summary="contains civic protocol lane",
+    lanes=[
+      @roles.MayorGoalLane::new(
+        entry=civic_entry,
+        objective="ordinary town work",
+        rationale="policy-owned civic protocol capability",
+      ),
+    ],
+  )
+  assert_true(is_wenyu_town_synthesis_plan("ordinary town work", civic_plan))
 }
 
 ///|

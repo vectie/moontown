@@ -7,12 +7,11 @@ fn is_wenyu_town_synthesis_plan(
     return true
   }
   for lane in plan.lanes {
-    if @policy.catalog_entry_type(
+    if @policy.catalog_entry_runs_civic_protocol(
         lane.entry.id,
         lane.entry.name,
         lane.entry.tags,
-      ) ==
-      @policy.civic_type() {
+      ) {
       return true
     }
   }
