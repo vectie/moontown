@@ -4,11 +4,39 @@ package "vectie/moontown/research_policy"
 // Values
 pub fn artifact_bullets(Array[String], String) -> Array[String]
 
+pub fn bootstrap_below_minimum_source_policy_prompt() -> String
+
+pub fn bootstrap_command_fallback_policy_prompt() -> String
+
 pub fn bootstrap_context_pages() -> Array[String]
+
+pub fn bootstrap_curl_target_prompt() -> String
+
+pub fn bootstrap_discovery_artifact_policy_prompt() -> String
+
+pub fn bootstrap_front_door_discovery_prompt() -> String
+
+pub fn bootstrap_harvest_to_inspection_prompt() -> String
+
+pub fn bootstrap_native_web_policy_prompt() -> String
 
 pub fn bootstrap_output_contract_lines() -> Array[String]
 
+pub fn bootstrap_plain_markdown_no_json_fields_prompt() -> String
+
+pub fn bootstrap_preferred_source_mix_prompt() -> String
+
+pub fn bootstrap_reference_policy_prompt() -> String
+
+pub fn bootstrap_reference_route_policy_prompt() -> String
+
 pub fn bootstrap_required_artifacts_contract() -> String
+
+pub fn bootstrap_search_result_fetch_prompt() -> String
+
+pub fn bootstrap_source_depth_policy_prompt() -> String
+
+pub fn bootstrap_weak_native_search_definition_prompt() -> String
 
 pub fn bootstrap_worker_skill_paths() -> Array[String]
 

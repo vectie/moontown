@@ -316,10 +316,14 @@ Boundary:
 - `src/research_policy` owns source-class vocabulary used by web-first and
   source-depth prompts, such as primary/official, independent, research
   institution, market/adoption, critique/risk, source-data, and paper classes.
+- `src/research_policy` owns bootstrap prompt policy text for reference leads,
+  native web search, command fallback, search-result fetch, front-door
+  discovery, harvest-to-inspection, source-depth, and plain-Markdown/no-JSON
+  worker behavior.
 - `src/adapters/moonbook` should call those `src/research_policy` constants
   directly when assembling research prompts; it should not keep adapter-local
-  `research_policy_*` wrapper functions, source-class mirror helpers, or
-  threshold mirror tests.
+  `research_policy_*` wrapper functions, source-class mirror helpers,
+  bootstrap policy prompt helpers, or threshold mirror tests.
 - `src/research_policy` owns topic policy such as attempt-suffix stripping,
   display-name derivation, web-query/reference/local-source hints, and whether a
   topic should begin as local-project or external-domain research.

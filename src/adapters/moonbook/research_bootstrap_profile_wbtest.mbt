@@ -78,17 +78,17 @@ test "research bootstrap quality repair inputs use shared artifacts" {
 ///|
 test "research bootstrap profile uses shared source-depth and harvest policy" {
   assert_true(
-    research_bootstrap_harvest_to_inspection_prompt().contains(
+    @research_policy.bootstrap_harvest_to_inspection_prompt().contains(
       "at least \{@research_policy.harvest_candidate_fetch_count()}",
     ),
   )
   assert_true(
-    research_bootstrap_source_depth_policy_prompt().contains(
+    @research_policy.bootstrap_source_depth_policy_prompt().contains(
       @research_policy.preferred_included_source_range(),
     ),
   )
   assert_true(
-    research_bootstrap_below_minimum_source_policy_prompt().contains(
+    @research_policy.bootstrap_below_minimum_source_policy_prompt().contains(
       @research_policy.discovery_attempt_limit(),
     ),
   )

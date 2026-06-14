@@ -16,7 +16,7 @@ fn research_bootstrap_report_prompt() -> String {
     research_bootstrap_report_self_review_prompt(),
     "Do not reinterpret external domain topics as local repositories unless screened sources prove that meaning.",
     "Do not update wiki pages in this worker stage; raw artifacts are the handoff for MoonBook materialization.",
-    research_bootstrap_plain_markdown_no_json_fields_prompt(),
+    @research_policy.bootstrap_plain_markdown_no_json_fields_prompt(),
     research_bootstrap_report_return_prompt(),
   ])
 }

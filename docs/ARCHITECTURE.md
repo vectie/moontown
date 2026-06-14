@@ -1752,6 +1752,8 @@ topic routing or artifact layout.
 - `research_policy/`
   - owns deep-research thresholds and source-screening constants
   - owns source-class vocabulary for serious web-first/source-depth research
+  - owns bootstrap reference, native-web, command-fallback, harvest, and
+    source-depth prompt policy text
   - owns topic normalization, attempt-suffix stripping, display names, and
     local-project versus external-domain route hints
   - owns query/reference/local-source hint tables for known research topics
@@ -1771,6 +1773,8 @@ topic routing or artifact layout.
   - must call `@research_policy.*` directly for research thresholds and
     source-depth constants instead of creating adapter-local
     `research_policy_*` wrapper layers
+  - must call `@research_policy.*` directly for bootstrap web/fallback/source
+    policy text instead of keeping adapter-local bootstrap policy prompt helpers
   - must call `@research_policy.*` directly for research source-class
     vocabulary instead of keeping adapter-local mirror helpers
   - must call `@research_policy.*` directly for research-report output
