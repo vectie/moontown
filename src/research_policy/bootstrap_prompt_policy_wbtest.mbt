@@ -41,3 +41,31 @@ test "research policy owns bootstrap reference and source-depth prompt policy" {
     bootstrap_plain_markdown_no_json_fields_prompt().contains("not JSON"),
   )
 }
+
+///|
+test "research policy owns bootstrap report-stage prompt policy" {
+  assert_true(
+    bootstrap_report_repair_policy_prompt().contains("historical audit context"),
+  )
+  assert_true(
+    bootstrap_active_repair_policy_prompt().contains(deep_report_path()),
+  )
+  assert_true(
+    bootstrap_report_evidence_policy_prompt().contains(
+      "screened sources and blockers",
+    ),
+  )
+  assert_true(
+    bootstrap_no_reference_quality_authority_prompt().contains(
+      research_report_skill_path(),
+    ),
+  )
+  assert_true(
+    bootstrap_report_quality_target_prompt().contains(
+      repair_dossier_word_target(),
+    ),
+  )
+  assert_true(
+    bootstrap_report_self_review_prompt().contains("process-log leakage"),
+  )
+}

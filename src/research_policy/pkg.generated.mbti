@@ -4,6 +4,8 @@ package "vectie/moontown/research_policy"
 // Values
 pub fn artifact_bullets(Array[String], String) -> Array[String]
 
+pub fn bootstrap_active_repair_policy_prompt() -> String
+
 pub fn bootstrap_below_minimum_source_policy_prompt() -> String
 
 pub fn bootstrap_command_fallback_policy_prompt() -> String
@@ -20,6 +22,8 @@ pub fn bootstrap_harvest_to_inspection_prompt() -> String
 
 pub fn bootstrap_native_web_policy_prompt() -> String
 
+pub fn bootstrap_no_reference_quality_authority_prompt() -> String
+
 pub fn bootstrap_output_contract_lines() -> Array[String]
 
 pub fn bootstrap_plain_markdown_no_json_fields_prompt() -> String
@@ -28,13 +32,23 @@ pub fn bootstrap_preferred_source_mix_prompt() -> String
 
 pub fn bootstrap_quality_repair_input_artifacts() -> Array[String]
 
+pub fn bootstrap_reference_evidence_boundary_prompt() -> String
+
 pub fn bootstrap_reference_policy_prompt() -> String
 
 pub fn bootstrap_reference_route_policy_prompt() -> String
 
 pub fn bootstrap_report_artifact_targets() -> Array[String]
 
+pub fn bootstrap_report_evidence_policy_prompt() -> String
+
 pub fn bootstrap_report_input_artifacts() -> Array[String]
+
+pub fn bootstrap_report_quality_target_prompt() -> String
+
+pub fn bootstrap_report_repair_policy_prompt() -> String
+
+pub fn bootstrap_report_self_review_prompt() -> String
 
 pub fn bootstrap_required_artifacts_contract() -> String
 

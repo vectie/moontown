@@ -337,6 +337,12 @@ Boundary:
 - `src/adapters/moonbook` should call those path helpers directly; it should
   not keep adapter-local `research_*_path` facade helpers or duplicate
   artifact-path mirror tests.
+- `src/research_policy` owns reusable bootstrap report-stage policy text such
+  as repair-mode handling, evidence boundaries, no-reference quality authority,
+  quality targets, and self-review expectations.
+- `src/adapters/moonbook` should call those report-stage policy helpers
+  directly while assembling provider prompts; it should not keep adapter-local
+  report policy prompt helpers that duplicate policy-owned wording.
 - `src/research_policy` owns research skill path contracts such as
   `skills/web-first-research/SKILL.md`,
   `skills/research-evidence-synthesis/SKILL.md`,

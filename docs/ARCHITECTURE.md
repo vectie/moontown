@@ -1769,6 +1769,9 @@ topic routing or artifact layout.
     paths
   - owns canonical bootstrap stage artifact groups such as report inputs,
     report targets, and quality-repair inputs
+  - owns reusable bootstrap report-stage policy text for repair mode,
+    evidence boundaries, no-reference quality authority, report quality
+    targets, and self-review
 - `adapters/moonbook/`
   - must not add new topic/path/threshold tables that compete with
     `research_policy/`
@@ -1777,6 +1780,9 @@ topic routing or artifact layout.
     `research_policy_*` wrapper layers
   - must call `@research_policy.*` directly for bootstrap web/fallback/source
     policy text instead of keeping adapter-local bootstrap policy prompt helpers
+  - must call `@research_policy.*` directly for bootstrap report-stage
+    repair/evidence/quality/self-review policy text instead of keeping
+    adapter-local report policy prompt helpers
   - must call `@research_policy.*` directly for research source-class
     vocabulary instead of keeping adapter-local mirror helpers
   - must call `@research_policy.*` directly for research-report output

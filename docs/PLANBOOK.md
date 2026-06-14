@@ -1039,6 +1039,14 @@ that do not carry this evidence.
 If the gap belongs in MoonBook or MoonClaw, the repair worker must return a
 precise ownership blocker instead of moving that responsibility into Moontown.
 
+Research bootstrap prompt refactors follow the same boundary rule. Reusable
+research policy text belongs in `research_policy/`, including web/fallback
+discovery, source-depth rules, bootstrap artifact groups, and report-stage
+repair/evidence/quality/self-review policy. `adapters/moonbook/` may assemble
+MoonBook provider packets and add stage-specific handoff text, but future
+plans must not reintroduce adapter-local report policy prompt helpers that
+compete with `research_policy/`.
+
 This still must stay bounded. The town should not run an unconstrained generic
 agent loop with arbitrary authority. A self-patch must name target files,
 acceptance criteria, validation commands, and the durable PlanBook evidence it
