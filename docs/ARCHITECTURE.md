@@ -342,8 +342,8 @@ book owns. The implementation now has a first-class `policy` package:
   paths, default keeper context pages, fallback policy/routine lines, fallback
   memory summary, and fallback output-contract fields.
 - [standing_watch_contracts/](/Users/kq/Workspace/moontown/src/standing_watch_contracts)
-  owns the adapter-safe standing-watch worker contract: skill path set, context
-  page set, and output-contract lines.
+  owns the adapter-safe standing-watch worker contract: task kind, skill path
+  set, context page set, and output-contract lines.
 - [civic_contracts/](/Users/kq/Workspace/moontown/src/civic_contracts)
   owns the adapter-safe Wenyu worker contract: Wenyu build/civic skill path
   sets, context page sets, bootstrap artifact paths, and civic output-contract
@@ -358,11 +358,11 @@ book owns. The implementation now has a first-class `policy` package:
   not define course skill tables, course page tables, or course quality wording
   locally.
 - [standing_watch_policy/](/Users/kq/Workspace/moontown/src/standing_watch_policy)
-  owns the generic standing-watch policy: task kind, task id derivation,
-  compact id segment formatting, target page set, prompt text, strict accounting
-  markers, marker parsing, MoonBook standing-watch history block parsing,
-  provider-decision collapse policy, material-delta metrics, and book-quality
-  repair appendix composition. It also owns watcher-record matching against
+  owns the generic standing-watch policy built on the adapter-safe contract:
+  task id derivation, compact id segment formatting, target page set, prompt
+  text, strict accounting markers, marker parsing, MoonBook standing-watch
+  history block parsing, provider-decision collapse policy, material-delta
+  metrics, and book-quality repair appendix composition. It also owns watcher-record matching against
   execution records, terminal watcher-decision to execution-status mapping,
   standing-watch event shape, live snapshot stale-window policy,
   transient dispatch-error classification, empty-completion `no_change` marker

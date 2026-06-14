@@ -88,6 +88,8 @@ pub fn standing_watch_task_id(String, Int) -> String
 
 pub fn standing_watch_task_kind() -> String
 
+pub fn standing_watch_task_kind_matches(String) -> Bool
+
 pub fn standing_watch_task_prefix(String) -> String
 
 pub fn standing_watch_task_tick_prefix(String) -> String

@@ -1,4 +1,14 @@
 ///|
+pub fn standing_watch_task_kind() -> String {
+  "standing-watch"
+}
+
+///|
+pub fn standing_watch_task_kind_matches(kind : String) -> Bool {
+  kind == standing_watch_task_kind()
+}
+
+///|
 pub fn standing_watch_skill_path() -> String {
   "skills/standing-watch/SKILL.md"
 }

@@ -1,6 +1,6 @@
 ///|
 fn context_goal_for_task(task : BookTask) -> String {
-  if task.kind == "standing-watch" {
+  if @standing_watch_contracts.standing_watch_task_kind_matches(task.kind) {
     task.prompt
   } else {
     task.goal.unwrap_or(task.prompt)

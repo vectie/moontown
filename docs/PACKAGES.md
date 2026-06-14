@@ -227,7 +227,7 @@ Purpose:
 Boundary:
 
 - `src/standing_watch_contracts` owns the adapter-safe standing-watch worker
-  contract: skill path set, context page set, and result output-contract lines.
+  contract: task kind, skill path set, context page set, and result output-contract lines.
   It is intentionally dependency-light so MoonBook adapters can consume it
   without importing the full standing-watch policy package.
 - `src/standing_watch_policy` owns standing-watch prompts, ids, marker
@@ -244,7 +244,9 @@ Boundary:
   text, legacy retry-accounting predicates, or review-triage predicates.
 - `src/adapters/moonbook` may enrich standing-watch worker context using
   `src/standing_watch_contracts`, but should not hardcode standing-watch skill
-  path tables, context-page tables, or output-contract lines.
+  path tables, context-page tables, output-contract lines, or task-kind checks.
+  If the adapter needs to recognize a standing-watch task, it should call the
+  adapter-safe contract package.
 - `src/town_runtime` should use `src/storage` for generic snapshot-root/base
   path derivation before appending runtime-owned subdirectories such as
   `book-results`.

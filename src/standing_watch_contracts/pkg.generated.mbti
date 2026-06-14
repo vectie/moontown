@@ -10,6 +10,10 @@ pub fn standing_watch_skill_path() -> String
 
 pub fn standing_watch_skill_paths() -> Array[String]
 
+pub fn standing_watch_task_kind() -> String
+
+pub fn standing_watch_task_kind_matches(String) -> Bool
+
 // Errors
 
 // Types and methods

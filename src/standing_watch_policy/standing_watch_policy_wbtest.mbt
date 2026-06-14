@@ -38,6 +38,9 @@ test "book quality repair prompt requires active gap closure" {
 
 ///|
 test "standing watch ids are compact and stable" {
+  assert_eq(standing_watch_task_kind(), "standing-watch")
+  assert_true(standing_watch_task_kind_matches(standing_watch_task_kind()))
+  assert_false(standing_watch_task_kind_matches("watch"))
   assert_eq(
     standing_watch_task_id("Book Quality Repair: Research OPC", 42),
     "standing-book-quality-repair-research-opc-tick-42",

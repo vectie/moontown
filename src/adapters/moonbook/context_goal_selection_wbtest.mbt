@@ -4,7 +4,7 @@ test "standing watch context hydration uses task prompt over bare goal" {
     id="standing-watch-opc-news-tick-1",
     goal=Some("Research latest One Person Company news."),
     title="Standing watch",
-    kind="standing-watch",
+    kind=@standing_watch_contracts.standing_watch_task_kind(),
     prompt="This is a MoonBook-owned 24/7 standing-watch cycle.\nstanding_goal_decision: update | no_change | needs_review | failed",
     priority=95,
     requires_review=false,

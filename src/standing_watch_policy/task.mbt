@@ -1,6 +1,11 @@
 ///|
 pub fn standing_watch_task_kind() -> String {
-  "standing-watch"
+  @standing_watch_contracts.standing_watch_task_kind()
+}
+
+///|
+pub fn standing_watch_task_kind_matches(kind : String) -> Bool {
+  @standing_watch_contracts.standing_watch_task_kind_matches(kind)
 }
 
 ///|

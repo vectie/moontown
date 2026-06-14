@@ -1,5 +1,8 @@
 ///|
 test "standing watch contracts own context and worker contract" {
+  assert_eq(standing_watch_task_kind(), "standing-watch")
+  assert_true(standing_watch_task_kind_matches(standing_watch_task_kind()))
+  assert_false(standing_watch_task_kind_matches("watch"))
   assert_eq(standing_watch_skill_path(), "skills/standing-watch/SKILL.md")
   assert_true(
     standing_watch_skill_paths().contains(
