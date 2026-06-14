@@ -6,7 +6,7 @@ fn research_quality_bar_bullet() -> String {
 ///|
 fn research_depth_target_bullet() -> String {
   research_bullet("Depth target", [
-    "For complex external, comparative, route-map, or technology research, `\{research_deep_report_path()}` should target \{research_policy_deep_dossier_word_target()}.",
+    "For complex external, comparative, route-map, or technology research, `\{research_deep_report_path()}` should target \{@research_policy.deep_dossier_word_target()}.",
     "This applies when the screened source base has enough evidence.",
     "If the source base cannot support that depth, write the exact source-class blocker rather than padding.",
   ])

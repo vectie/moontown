@@ -10,9 +10,9 @@ test "research evidence synthesis skill preserves policy-backed depth contract" 
   )
   assert_true(skill.contains("name: research-evidence-synthesis"))
   assert_true(skill.contains("## Reference-Aware Synthesis"))
-  assert_true(skill.contains(research_policy_deep_dossier_word_target()))
-  assert_true(skill.contains(research_policy_min_included_sources()))
-  assert_true(skill.contains(research_policy_preferred_included_sources()))
+  assert_true(skill.contains(@research_policy.deep_dossier_word_target()))
+  assert_true(skill.contains(@research_policy.min_included_sources()))
+  assert_true(skill.contains(@research_policy.preferred_included_sources()))
   assert_true(skill.contains("do not pad with repeated definitions"))
 }
 

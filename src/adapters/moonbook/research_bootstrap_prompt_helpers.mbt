@@ -39,14 +39,14 @@ fn research_bootstrap_native_web_policy_prompt() -> String {
 fn research_bootstrap_weak_native_search_definition_prompt() -> String {
   research_bootstrap_prompt([
     "Weak native search means search-engine result URLs, redirect shells, snippets without source URLs, generic index pages, or thin inspected-source coverage.",
-    "Coverage is thin when native discovery yields fewer than \{research_policy_min_included_sources()} included inspected sources.",
+    "Coverage is thin when native discovery yields fewer than \{@research_policy.min_included_sources()} included inspected sources.",
   ])
 }
 
 ///|
 fn research_bootstrap_command_fallback_policy_prompt() -> String {
   research_bootstrap_prompt([
-    "In fallback mode, you must call execute_command with bounded curl/front-door commands before closing source screening below \{research_policy_min_included_sources()} included sources.",
+    "In fallback mode, you must call execute_command with bounded curl/front-door commands before closing source screening below \{@research_policy.min_included_sources()} included sources.",
     research_bootstrap_search_result_fetch_prompt(),
     research_bootstrap_front_door_discovery_prompt(),
     research_bootstrap_harvest_to_inspection_prompt(),
@@ -79,15 +79,15 @@ fn research_bootstrap_front_door_discovery_prompt() -> String {
 fn research_bootstrap_harvest_to_inspection_prompt() -> String {
   research_bootstrap_prompt([
     "When any front-door or sitemap step harvests candidate content URLs, convert the harvest into inspection.",
-    "Fetch at least \{research_policy_harvest_candidate_fetch_count()} high-signal candidate pages.",
-    "If fewer than \{research_policy_harvest_candidate_fetch_count()} candidate pages are harvested, fetch all of them unless each unfetched class is explicitly blocked.",
+    "Fetch at least \{@research_policy.harvest_candidate_fetch_count()} high-signal candidate pages.",
+    "If fewer than \{@research_policy.harvest_candidate_fetch_count()} candidate pages are harvested, fetch all of them unless each unfetched class is explicitly blocked.",
   ])
 }
 
 ///|
 fn research_bootstrap_curl_target_prompt() -> String {
   research_bootstrap_prompt([
-    "Use commands such as \{research_policy_command_fetch_pattern()} against LLM-chosen search-result pages, source-domain front doors, robots.txt, sitemaps, index pages, and selected source URLs.",
+    "Use commands such as \{@research_policy.command_fetch_pattern()} against LLM-chosen search-result pages, source-domain front doors, robots.txt, sitemaps, index pages, and selected source URLs.",
   ])
 }
 
@@ -95,7 +95,7 @@ fn research_bootstrap_curl_target_prompt() -> String {
 fn research_bootstrap_source_depth_policy_prompt() -> String {
   research_bootstrap_prompt([
     research_bootstrap_preferred_source_mix_prompt(),
-    "\{research_policy_min_included_sources_sentence_start()} included sources is the minimum for a cautious report; \{research_policy_preferred_included_sources()} or more is the preferred source base for a \{research_policy_deep_dossier_word_target()} dossier.",
+    "\{@research_policy.min_included_sources_sentence_start()} included sources is the minimum for a cautious report; \{@research_policy.preferred_included_sources()} or more is the preferred source base for a \{@research_policy.deep_dossier_word_target()} dossier.",
     research_bootstrap_discovery_artifact_policy_prompt(),
     research_bootstrap_below_minimum_source_policy_prompt(),
   ])
@@ -105,7 +105,7 @@ fn research_bootstrap_source_depth_policy_prompt() -> String {
 fn research_bootstrap_preferred_source_mix_prompt() -> String {
   research_bootstrap_prompt([
     "Keep this pass bounded but serious.",
-    "For comparative, route-map, or technology research, try to screen \{research_policy_preferred_included_source_range()} accessible high-signal sources before synthesis.",
+    "For comparative, route-map, or technology research, try to screen \{@research_policy.preferred_included_source_range()} accessible high-signal sources before synthesis.",
     "Cover primary, independent, research-institution, market/adoption, critique/risk, and primary-paper/source-data classes.",
   ])
 }
@@ -122,9 +122,9 @@ fn research_bootstrap_discovery_artifact_policy_prompt() -> String {
 ///|
 fn research_bootstrap_below_minimum_source_policy_prompt() -> String {
   research_bootstrap_prompt([
-    "Do not stop below \{research_policy_min_included_sources()} included inspected evidence sources merely because generic search pages are blocked.",
+    "Do not stop below \{@research_policy.min_included_sources()} included inspected evidence sources merely because generic search pages are blocked.",
     "Exhaust source-class front-door discovery and direct source-domain link harvesting first.",
-    "Only proceed below \{research_policy_min_included_sources()} after \{research_policy_discovery_attempt_limit()} web/discovery attempts.",
+    "Only proceed below \{@research_policy.min_included_sources()} after \{@research_policy.discovery_attempt_limit()} web/discovery attempts.",
     "Also require recorded command fallback attempts, candidate-harvest conversion attempts, and an explicit source-depth blocker with ready_for_12k_dossier=false.",
   ])
 }

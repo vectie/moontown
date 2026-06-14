@@ -60,7 +60,7 @@ test "project research request prefers repository sources after web discovery" {
 ///|
 test "research request helper bullets preserve quality and reference contracts" {
   let depth = research_depth_target_bullet()
-  assert_true(depth.contains(research_policy_deep_dossier_word_target()))
+  assert_true(depth.contains(@research_policy.deep_dossier_word_target()))
   assert_true(depth.contains("screened source base"))
   assert_true(depth.contains("exact source-class blocker"))
   let reference = research_reference_style_bullet("EUV")
@@ -77,7 +77,7 @@ test "research request fallback helpers preserve web-first execution contract" {
   )
   assert_true(web_step.contains("Use native `web_search` when available"))
   assert_true(web_step.contains("bounded command-line discovery"))
-  assert_true(web_step.contains(research_policy_command_fetch_pattern()))
+  assert_true(web_step.contains(@research_policy.command_fetch_pattern()))
   let fallback = research_web_search_result_fallback_step()
   assert_true(fallback.contains("extract result URLs and titles"))
   assert_true(fallback.contains("before guessing direct source URLs"))
@@ -87,7 +87,7 @@ test "research request fallback helpers preserve web-first execution contract" {
 test "research request execution helpers use shared quality policy" {
   assert_true(
     research_command_fallback_log_step().contains(
-      research_policy_min_included_sources(),
+      @research_policy.min_included_sources(),
     ),
   )
   assert_true(
@@ -95,17 +95,17 @@ test "research request execution helpers use shared quality policy" {
   )
   assert_true(
     research_candidate_page_fetch_step().contains(
-      research_policy_harvest_candidate_fetch_count(),
+      @research_policy.harvest_candidate_fetch_count(),
     ),
   )
   assert_true(
     research_included_source_depth_target().contains(
-      research_policy_min_included_sources(),
+      @research_policy.min_included_sources(),
     ),
   )
   assert_true(
     research_deep_report_step().contains(
-      research_policy_deep_dossier_word_target(),
+      @research_policy.deep_dossier_word_target(),
     ),
   )
   assert_true(research_deep_report_step().contains(research_deep_report_path()))

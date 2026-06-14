@@ -16,7 +16,7 @@ fn research_source_screen_row_fields() -> String {
 
 ///|
 fn research_included_source_depth_target() -> String {
-  "For complex external research, aim for at least \{research_policy_min_included_sources()} included inspected evidence sources before synthesis;"
+  "For complex external research, aim for at least \{@research_policy.min_included_sources()} included inspected evidence sources before synthesis;"
 }
 
 ///|

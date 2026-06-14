@@ -72,7 +72,7 @@ fn research_substep(clauses : Array[String]) -> String {
 ///|
 fn research_native_search_or_command_fallback_clause() -> String {
   let native_first = "Use native `web_search` when available."
-  let weak_native_gate = "If it returns only weak search pages, redirect shells, or fewer than \{research_policy_min_included_sources()} included inspected sources, use bounded command-line discovery."
-  let command_fallback = "Use commands such as `\{research_policy_command_fetch_pattern()}` against LLM-chosen search pages and candidate URLs before closing the source-screening stage."
+  let weak_native_gate = "If it returns only weak search pages, redirect shells, or fewer than \{@research_policy.min_included_sources()} included inspected sources, use bounded command-line discovery."
+  let command_fallback = "Use commands such as `\{@research_policy.command_fetch_pattern()}` against LLM-chosen search pages and candidate URLs before closing the source-screening stage."
   [native_first, weak_native_gate, command_fallback].join(" ")
 }

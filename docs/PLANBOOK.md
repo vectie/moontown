@@ -125,7 +125,10 @@ MoonBook research-entry creation must call the catalog hint, then use
 `research_policy` before constructing a stable storage entry. Future plans must
 not add another adapter-local research topic table, artifact-path table,
 research context table, bootstrap output-contract table, or research skill-path
-table.
+table. They also must not add adapter-local `research_policy_*` wrapper layers
+for thresholds, source-depth constants, command-fallback vocabulary, or
+reference-report length rules; prompt builders should call `@research_policy`
+directly for those values.
 Wenyu/civic plans must keep module identity predicates in `civic/`; town
 runtime may ask whether an entry is a Wenyu build book, but it must not branch
 directly on `wenyu-*` slugs. Build-pipeline and quality plans should follow the

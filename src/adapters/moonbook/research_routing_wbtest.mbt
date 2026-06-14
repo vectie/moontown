@@ -53,7 +53,7 @@ test "generic external research topics are web-first and reference-aware" {
   assert_true(hints.contains("technology roadmap 2026"))
   assert_true(hints.contains("optional reference style inputs"))
   assert_true(
-    request.contains(research_policy_deep_dossier_word_target().to_lower()),
+    request.contains(@research_policy.deep_dossier_word_target().to_lower()),
   )
   assert_true(request.contains("source-class blocker"))
   assert_true(request.contains("source-domain front-door discovery"))
@@ -61,7 +61,7 @@ test "generic external research topics are web-first and reference-aware" {
   assert_true(request.contains("execute_command"))
   assert_true(
     request.contains(
-      "fetch at least \{research_policy_harvest_candidate_fetch_count()} high-signal candidate pages",
+      "fetch at least \{@research_policy.harvest_candidate_fetch_count()} high-signal candidate pages",
     ),
   )
   assert_true(research_reference_urls(topic).is_empty())

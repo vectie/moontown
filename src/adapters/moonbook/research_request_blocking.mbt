@@ -28,7 +28,7 @@ fn research_native_result_page_rule() -> String {
 fn research_native_disabled_rule() -> String {
   [
     "If native `web_search` is disabled, stalls, or only returns weak search pages, use bounded command-line web discovery.",
-    "Use commands such as `\{research_policy_command_fetch_pattern()}` against LLM-chosen search-result pages and candidate URLs.",
+    "Use commands such as `\{@research_policy.command_fetch_pattern()}` against LLM-chosen search-result pages and candidate URLs.",
     "Retry `{bad request}` once with a simpler query or URL before recording a blocker.",
   ].join(" ")
 }

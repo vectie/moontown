@@ -115,9 +115,9 @@ fn research_bootstrap_report_quality_target_prompt() -> String {
 fn research_bootstrap_no_reference_quality_authority_prompt() -> String {
   research_bootstrap_prompt([
     "If no reference report exists, use `\{@research_policy.research_report_skill_path()}` as the quality authority.",
-    "For complex external, comparative, route-map, or technology research with \{research_policy_min_included_sources()} or more included sources, the draft should aim for a \{research_policy_repair_dossier_word_target()} deep dossier.",
+    "For complex external, comparative, route-map, or technology research with \{@research_policy.min_included_sources()} or more included sources, the draft should aim for a \{@research_policy.repair_dossier_word_target()} deep dossier.",
     "Do not collapse that case into a short executive article.",
-    "\{research_policy_quality_floor_words()} is only the acceptance floor, so aim above it to avoid near-miss drafts.",
+    "\{@research_policy.quality_floor_words()} is only the acceptance floor, so aim above it to avoid near-miss drafts.",
   ])
 }
 

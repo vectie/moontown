@@ -19,15 +19,15 @@ fn research_front_door_discovery_step() -> String {
 fn research_command_fallback_log_step() -> String {
   research_substep([
     "Record a `Command Fallback Attempts` table in `\{research_search_log_path()}` whenever native search is weak.",
-    "Use it when the source screen remains below \{research_policy_min_included_sources()} included inspected sources.",
+    "Use it when the source screen remains below \{@research_policy.min_included_sources()} included inspected sources.",
   ])
 }
 
 ///|
 fn research_candidate_page_fetch_step() -> String {
   research_substep([
-    "If sitemaps or front-door pages harvest candidate content URLs, fetch at least \{research_policy_harvest_candidate_fetch_count()} high-signal candidate pages.",
-    "Fetch all harvested candidate pages when fewer than \{research_policy_harvest_candidate_fetch_count()} before declaring source depth blocked.",
+    "If sitemaps or front-door pages harvest candidate content URLs, fetch at least \{@research_policy.harvest_candidate_fetch_count()} high-signal candidate pages.",
+    "Fetch all harvested candidate pages when fewer than \{@research_policy.harvest_candidate_fetch_count()} before declaring source depth blocked.",
   ])
 }
 

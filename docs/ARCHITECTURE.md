@@ -1764,6 +1764,9 @@ topic routing or artifact layout.
   - may delegate through thin compatibility helpers while migration continues
   - must not add new topic/path/threshold tables that compete with
     `research_policy/`
+  - must call `@research_policy.*` directly for research thresholds and
+    source-depth constants instead of creating adapter-local
+    `research_policy_*` wrapper layers
   - must not hardcode research skill path tables; it should ask
     `research_policy/` which research skills a generated context should expose
   - must not hardcode research bootstrap context-page sets or raw-artifact

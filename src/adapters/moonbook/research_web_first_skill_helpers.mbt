@@ -12,27 +12,27 @@ fn web_first_text(parts : Array[String]) -> String {
 
 ///|
 fn web_first_minimum_included_sources_text() -> String {
-  research_policy_min_included_sources()
+  @research_policy.min_included_sources()
 }
 
 ///|
 fn web_first_preferred_included_sources_text() -> String {
-  research_policy_preferred_included_source_range()
+  @research_policy.preferred_included_source_range()
 }
 
 ///|
 fn web_first_preferred_included_sources_short_text() -> String {
-  research_policy_preferred_included_sources()
+  @research_policy.preferred_included_sources()
 }
 
 ///|
 fn web_first_harvest_candidate_fetch_text() -> String {
-  research_policy_harvest_candidate_fetch_count()
+  @research_policy.harvest_candidate_fetch_count()
 }
 
 ///|
 fn web_first_discovery_attempt_limit_text() -> String {
-  research_policy_discovery_attempt_limit()
+  @research_policy.discovery_attempt_limit()
 }
 
 ///|

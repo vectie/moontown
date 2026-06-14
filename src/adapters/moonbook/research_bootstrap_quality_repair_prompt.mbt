@@ -47,7 +47,7 @@ fn research_bootstrap_quality_repair_input_artifacts() -> Array[String] {
 fn research_bootstrap_quality_repair_depth_prompt() -> String {
   research_bootstrap_prompt([
     research_bootstrap_quality_repair_length_policy_prompt(),
-    "Use the tool-counted word count, not visual length; if the count is below \{research_policy_repair_expansion_threshold()} and evidence exists, keep expanding from screened evidence until it is safely above \{research_policy_quality_floor_count()}.",
+    "Use the tool-counted word count, not visual length; if the count is below \{@research_policy.repair_expansion_threshold()} and evidence exists, keep expanding from screened evidence until it is safely above \{@research_policy.quality_floor_count()}.",
     "If a long reference exists, also satisfy the reference line-count target.",
   ])
 }
@@ -55,8 +55,8 @@ fn research_bootstrap_quality_repair_depth_prompt() -> String {
 ///|
 fn research_bootstrap_quality_repair_length_policy_prompt() -> String {
   research_bootstrap_prompt([
-    "For complex external, comparative, route-map, or technology research with \{research_policy_min_included_sources()} or more included sources, revise \{research_deep_report_path()}.",
-    "The target is a \{research_policy_repair_dossier_word_target()} dossier.",
-    "Keep a hard acceptance floor of \{research_policy_repair_acceptance_floor()} unless the source-screen explicitly records a source-depth blocker.",
+    "For complex external, comparative, route-map, or technology research with \{@research_policy.min_included_sources()} or more included sources, revise \{research_deep_report_path()}.",
+    "The target is a \{@research_policy.repair_dossier_word_target()} dossier.",
+    "Keep a hard acceptance floor of \{@research_policy.repair_acceptance_floor()} unless the source-screen explicitly records a source-depth blocker.",
   ])
 }

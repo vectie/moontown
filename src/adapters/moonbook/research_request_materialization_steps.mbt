@@ -23,7 +23,7 @@ fn research_synthesis_brief_step() -> String {
 fn research_deep_report_step() -> String {
   research_numbered_step(10, [
     "Write `\{research_deep_report_path()}` using `\{@research_policy.research_report_skill_path()}`.",
-    "Prefer a \{research_policy_deep_dossier_word_target()} deep dossier for complex external/technology-route research with enough screened sources.",
+    "Prefer a \{@research_policy.deep_dossier_word_target()} deep dossier for complex external/technology-route research with enough screened sources.",
     "If a reference report exists, also match its reader-facing ambition and approximate length class without copying unsupported claims.",
   ])
 }

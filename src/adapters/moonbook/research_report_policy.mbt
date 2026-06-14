@@ -1,31 +1,31 @@
 ///|
 fn research_report_target_words() -> String {
-  research_policy_deep_dossier_word_target()
+  @research_policy.deep_dossier_word_target()
 }
 
 ///|
 fn research_report_quality_floor_words() -> String {
-  research_policy_quality_floor_words()
+  @research_policy.quality_floor_words()
 }
 
 ///|
 fn research_report_min_included_sources() -> String {
-  research_policy_min_included_sources()
+  @research_policy.min_included_sources()
 }
 
 ///|
 fn research_report_preferred_included_sources() -> String {
-  research_policy_preferred_included_sources()
+  @research_policy.preferred_included_sources()
 }
 
 ///|
 fn research_report_reference_line_ratio() -> String {
-  research_policy_reference_line_ratio()
+  @research_policy.reference_line_ratio()
 }
 
 ///|
 fn research_report_reference_line_buffer() -> String {
-  research_policy_reference_line_buffer()
+  @research_policy.reference_line_buffer()
 }
 
 ///|
