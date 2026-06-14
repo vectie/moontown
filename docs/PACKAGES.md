@@ -809,15 +809,16 @@ Boundary:
 - `src/book_quality` owns how quality is assessed and repaired, but it must
   read book output paths from `src/policy.BookPolicy` instead of maintaining a
   parallel generated-site path per book kind.
-- `src/book_quality/scoring_profiles.mbt` owns required-path profile selection
-  for book types. Other `book_quality` files should call that helper instead
-  of duplicating type-to-path switches.
+- `src/book_quality/scoring_profiles.mbt` owns table-driven required-path
+  profile selection for book types. Other `book_quality` files should call
+  that helper instead of duplicating type-to-path switches.
 - `src/book_quality` must remain observation-fed: it may accept semantic review
   text and structural facts, but it must not derive snapshot-relative storage
   paths or read review-result files.
 - Legacy book-type labels may be accepted at this boundary while migration
   continues, but scoring and review context should resolve them through
-  policy profiles before deciding required output surfaces.
+  policy profiles/capabilities before deciding required output surfaces or
+  content-specific signal gates.
 - `src/book_quality` must not re-export policy vocabulary such as
   `research_type`, `civic_type`, `web_first_policy`, or `book_first_policy`;
   downstream packages should import `src/policy` directly when they need those

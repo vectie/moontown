@@ -12,7 +12,10 @@ pub fn structural_required_relative_paths(
       push_unique_path(paths, file.path)
     }
   }
-  if kind == @policy.civic_type() {
+  if @policy.has_capability(
+      @policy.policy_for_type(kind),
+      @policy.civic_protocol_capability(),
+    ) {
     match @civic.wenyu_civic_service_for_book_id(entry.id) {
       Some(service) => {
         for relative in service.schema_pages {

@@ -676,7 +676,8 @@ wording, required-relative-path derivation, and readiness decisions from
 supplied observations. The scoring engine should run one generic policy-type
 flow: classify the catalog entry through `policy`, score required paths from
 the profile helper, apply isolated signal extensions for content-specific
-checks, then finalize through `BookPolicy` health. Runtime observations include structural facts
+checks behind policy capabilities where possible, then finalize through
+`BookPolicy` health. Runtime observations include structural facts
 (`BookQualityStructuralObservation`) such as workspace/path/result existence and
 content facts (`BookQualityContentObservation`) such as semantic review text,
 research deep-report word count, course index text, and cookbook audit presence.

@@ -7,7 +7,8 @@ fn book_type_signal_score(
   strengths : Array[String],
   gaps : Array[String],
 ) -> Int {
-  if book_type == @policy.research_type() {
+  let policy = @policy.policy_for_type(book_type)
+  if @policy.has_capability(policy, @policy.research_evidence_capability()) {
     return apply_score_signal(
       research_deep_report_word_assessment(
         content.research_deep_report_word_count,
@@ -30,7 +31,7 @@ fn book_type_signal_score(
       gaps,
     )
   }
-  if book_type == @policy.civic_type() {
+  if @policy.has_capability(policy, @policy.civic_protocol_capability()) {
     return civic_book_signal_score(entry, structural, strengths, gaps)
   }
   0

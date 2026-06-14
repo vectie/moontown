@@ -7,22 +7,47 @@ pub fn required_path(
 }
 
 ///|
+priv struct BookQualityRequiredPathProfile {
+  book_type : String
+  paths : Array[BookQualityRequiredPath]
+}
+
+///|
+fn required_path_profile(
+  book_type : String,
+  paths : Array[BookQualityRequiredPath],
+) -> BookQualityRequiredPathProfile {
+  { book_type, paths }
+}
+
+///|
+fn required_path_profiles() -> Array[BookQualityRequiredPathProfile] {
+  [
+    required_path_profile(@policy.research_type(), research_required_paths()),
+    required_path_profile(@policy.course_type(), course_required_paths()),
+    required_path_profile(@policy.planbook_type(), planbook_required_paths()),
+    required_path_profile(@policy.cookbook_type(), cookbook_required_paths()),
+    required_path_profile(@policy.civic_type(), civic_base_required_paths()),
+    required_path_profile(
+      @policy.operational_type(),
+      operational_required_paths(),
+    ),
+  ]
+}
+
+///|
 pub fn required_paths_for_book_type(
   book_type : String,
 ) -> Array[BookQualityRequiredPath] {
-  match book_type {
-    type_ if type_ == @policy.research_type() => research_required_paths()
-    type_ if type_ == @policy.course_type() => course_required_paths()
-    type_ if type_ == @policy.planbook_type() => planbook_required_paths()
-    type_ if type_ == @policy.cookbook_type() => cookbook_required_paths()
-    type_ if type_ == @policy.civic_type() => civic_base_required_paths()
-    type_ if type_ == @policy.operational_type() => operational_required_paths()
-    _ =>
-      [
-        required_path(wiki_index_path(), 20),
-        required_path(projection_state_path(), 15),
-      ]
+  for profile in required_path_profiles() {
+    if profile.book_type == book_type {
+      return profile.paths
+    }
   }
+  [
+    required_path(wiki_index_path(), 20),
+    required_path(projection_state_path(), 15),
+  ]
 }
 
 ///|
@@ -151,9 +176,8 @@ pub fn course_identity_assessment(
   let gaps : Array[String] = []
   let mut score = 0
   let index = index_text.to_lower()
-  let book_type = @policy.catalog_entry_type(book_id, "", [])
   if index.contains("## research report") ||
-    book_type == @policy.research_type() {
+    @policy.catalog_entry_runs_research_evidence(book_id, "", []) {
     gaps.push("course still looks research-shaped in id or index")
   } else if index.contains("course book") ||
     index.contains(@policy.book_type_marker(@policy.course_type())) {
