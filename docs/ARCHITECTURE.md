@@ -1760,6 +1760,8 @@ topic routing or artifact layout.
   - owns canonical research context pages and bootstrap output-contract lines
   - owns research-report reference input, reference-length, and no-reference
     deep-research rules
+  - owns research-report non-negotiable output requirements and required-input
+    sections
   - owns canonical `raw/bootstrap/*` artifact paths and topic-specific
     `wiki/sources`, `wiki/entities`, `wiki/concepts`, and `wiki/synthesis`
     paths
@@ -1771,6 +1773,8 @@ topic routing or artifact layout.
     `research_policy_*` wrapper layers
   - must call `@research_policy.*` directly for research source-class
     vocabulary instead of keeping adapter-local mirror helpers
+  - must call `@research_policy.*` directly for research-report output
+    requirements instead of keeping adapter-local requirement helpers
   - must call `@research_policy.*` directly for canonical research artifact
     paths instead of preserving adapter-local `research_*_path` facade helpers
   - must not hardcode research skill path tables; it should ask

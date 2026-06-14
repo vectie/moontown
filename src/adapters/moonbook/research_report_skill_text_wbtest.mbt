@@ -59,13 +59,13 @@ test "research report policy helpers come from research policy" {
     ),
   )
   assert_true(
-    research_report_word_target_requirement().contains("quality floor"),
+    @research_policy.report_word_target_requirement().contains("quality floor"),
   )
 }
 
 ///|
 test "research report required inputs use shared artifact paths" {
-  let required = research_report_required_inputs_section()
+  let required = @research_policy.report_required_inputs_section()
   for path in @research_policy.ingest_required_raw_artifact_paths() {
     assert_true(required.contains("- `\{path}`"))
   }

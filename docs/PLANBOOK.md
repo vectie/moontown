@@ -131,8 +131,9 @@ constants, command-fallback vocabulary, source-class vocabulary, or
 reference-report length rules; prompt builders should call `@research_policy`
 directly for those values.
 Research-report reference input lists, reference-length rules, no-reference
-deep-research rules, and report threshold aliases belong in `research_policy`,
-not in `adapters/moonbook`.
+deep-research rules, non-negotiable output requirements, required-input
+sections, and report threshold aliases belong in `research_policy`, not in
+`adapters/moonbook`.
 Wenyu/civic plans must keep module identity predicates in `civic/`; town
 runtime may ask whether an entry is a Wenyu build book, but it must not branch
 directly on `wenyu-*` slugs. Build-pipeline and quality plans should follow the

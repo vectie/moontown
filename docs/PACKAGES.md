@@ -342,6 +342,10 @@ Boundary:
   input lists, reference-length rules, no-reference deep-research rules, and
   report threshold aliases. MoonBook prompt builders should call those helpers
   directly instead of keeping adapter-local report-policy aliases.
+- `src/research_policy` owns research-report output requirements such as
+  title/section/table/diagram/source-id/evidence-limit requirements and the
+  required-input section. MoonBook prompt builders should call those helpers
+  directly instead of keeping adapter-local report-requirement helpers.
 - `src/adapters/moonbook` may consume those constants while building provider
   requests and generated `SKILL.md` guidance, but should not define its own
   competing research-depth thresholds, topic routing rules, query hint tables,

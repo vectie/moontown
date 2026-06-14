@@ -104,11 +104,19 @@ pub fn repair_expansion_threshold() -> String
 
 pub fn repo_source_materialize_skill_path() -> String
 
+pub fn report_diagram_requirement() -> String
+
+pub fn report_limits_requirement() -> String
+
 pub fn report_min_included_sources() -> String
 
 pub fn report_no_reference_rule_section() -> String
 
+pub fn report_non_negotiable_output_section(String) -> String
+
 pub fn report_preferred_included_sources() -> String
+
+pub fn report_process_caveat_requirement() -> String
 
 pub fn report_quality_floor_words() -> String
 
@@ -120,7 +128,19 @@ pub fn report_reference_line_buffer() -> String
 
 pub fn report_reference_line_ratio() -> String
 
+pub fn report_required_inputs_section() -> String
+
+pub fn report_source_id_requirement() -> String
+
+pub fn report_structure_requirement() -> String
+
+pub fn report_table_requirement() -> String
+
 pub fn report_target_words() -> String
+
+pub fn report_title_requirement(String) -> String
+
+pub fn report_word_target_requirement() -> String
 
 pub fn research_report_skill_path() -> String
 
