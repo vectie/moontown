@@ -218,6 +218,9 @@ passes the catalog entry, task, and hydrated context, while
 `adapters/moonclaw` attaches the policy-owned context metadata and consumes
 `moonclaw_policy` keeper-profile overrides. PlanBook tasks should not copy
 policy context fields or profile ids into root orchestration.
+MoonClaw runtime metadata flags such as no-input/best-effort and non-adaptive
+execution controls also belong in `moonclaw_policy`; MoonBook adapters may
+attach them to profiles, but must not redefine the flag map.
 Root must resolve Codex ACP defaults through the `adapters/codex` boundary:
 `model()`, `command()`, `args()`, `moontown_args()`, reusable `codex-main`
 target JSON/upsert helpers, and target JSON builders.

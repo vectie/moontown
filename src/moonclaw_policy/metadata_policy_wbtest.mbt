@@ -12,6 +12,21 @@ test "no-input policy helper emits both nonblocking flags" {
 }
 
 ///|
+test "non-adaptive no-input policy helper emits adaptive and missing-input controls" {
+  let text = non_adaptive_no_input_policy_json().stringify()
+  assert_true(text.contains("\"disable_adaptive\":true"))
+  assert_true(text.contains("\"disable_waiting_for_input\":true"))
+  assert_true(text.contains("\"best_effort_on_missing_input\":true"))
+  let fields : Map[String, Json] = { "profile": "research".to_json() }
+  add_non_adaptive_no_input_policy(fields)
+  let merged = Json::object(fields).stringify()
+  assert_true(merged.contains("\"profile\":\"research\""))
+  assert_true(merged.contains("\"disable_adaptive\":true"))
+  assert_true(merged.contains("\"disable_waiting_for_input\":true"))
+  assert_true(merged.contains("\"best_effort_on_missing_input\":true"))
+}
+
+///|
 test "execution metadata fields include optional target and no-input policy" {
   let fields = execution_metadata_fields(
     preferred_skills=["planbook-repair", "code-review"],

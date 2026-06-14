@@ -573,6 +573,7 @@ Current real pieces:
 Purpose:
 
 - reusable MoonClaw packet wait policy
+- reusable non-adaptive/no-input profile metadata
 - reusable execution metadata maps
 - reusable step metadata maps
 
@@ -580,6 +581,10 @@ Boundary:
 
 - `src/moonclaw_policy` owns cross-package MoonClaw metadata semantics such as
   no-input/best-effort behavior and standard execution/step metadata fields.
+- `src/moonclaw_policy` owns non-adaptive/no-input profile metadata used by
+  direct worker profiles such as research bootstrap. MoonBook adapters should
+  call this helper rather than defining `disable_adaptive` or no-input flags
+  locally.
 - `src/moonclaw_policy` owns catalog policy-type to MoonClaw keeper-profile
   overrides. Adapters consume those helpers instead of duplicating
   `planbook_repair_worker` or `wenyu_civic_service_worker` routing rules.

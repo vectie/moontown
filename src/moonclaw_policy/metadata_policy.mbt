@@ -12,6 +12,24 @@ pub fn add_no_input_policy(fields : Map[String, Json]) -> Unit {
 }
 
 ///|
+pub fn non_adaptive_no_input_policy_fields() -> Map[String, Json] {
+  let fields : Map[String, Json] = {}
+  add_non_adaptive_no_input_policy(fields)
+  fields
+}
+
+///|
+pub fn non_adaptive_no_input_policy_json() -> Json {
+  Json::object(non_adaptive_no_input_policy_fields())
+}
+
+///|
+pub fn add_non_adaptive_no_input_policy(fields : Map[String, Json]) -> Unit {
+  fields["disable_adaptive"] = true.to_json()
+  add_no_input_policy(fields)
+}
+
+///|
 pub fn execution_metadata_fields(
   preferred_skills~ : Array[String],
   execution_mode~ : String,

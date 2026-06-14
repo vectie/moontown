@@ -88,7 +88,7 @@ fn research_bootstrap_step_metadata(
   retry_max_attempts~ : Int,
   web_search~ : Bool,
 ) -> Json {
-  let fields = research_bootstrap_runtime_policy_fields()
+  let fields = @moonclaw_policy.non_adaptive_no_input_policy_fields()
   fields["preferred_skills"] = preferred_skills.to_json()
   fields["enable_tools"] = true.to_json()
   fields["web_search"] = web_search.to_json()

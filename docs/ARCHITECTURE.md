@@ -312,9 +312,9 @@ book owns. The implementation now has a first-class `policy` package:
   rather than putting MoonBook catalog/file IO back into `course_book/`.
 - [moonclaw_policy/](/Users/kq/Workspace/moontown/src/moonclaw_policy)
   owns reusable MoonClaw packet metadata semantics: no-input/best-effort
-  wait policy, execution metadata maps, and step metadata maps. Adapters,
-  runtime packages, and semantic review packets consume this package instead
-  of redefining those fields.
+  wait policy, non-adaptive/no-input profile metadata, execution metadata maps,
+  and step metadata maps. Adapters, runtime packages, and semantic review
+  packets consume this package instead of redefining those fields.
 - [moonclaw_runtime/](/Users/kq/Workspace/moontown/src/moonclaw_runtime)
   owns Moontown-side MoonClaw runtime helpers: compatibility wrappers for
   packet metadata policy, run result payload lookup, and MoonClaw job store

@@ -16,7 +16,7 @@ fn moontown_research_bootstrap_profile_json() -> Json {
       research_bootstrap_quality_repair_step_json(),
     ],
     "metadata": {
-      "profile_metadata": research_bootstrap_runtime_policy_json(),
+      "profile_metadata": @moonclaw_policy.non_adaptive_no_input_policy_json(),
       "worker_role": "research_bootstrap",
     },
   }
