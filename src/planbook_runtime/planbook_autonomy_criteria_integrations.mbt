@@ -1,5 +1,5 @@
 ///|
-async fn planbook_moonbook_provider_criterion() -> PlanbookCriterionStatus {
+fn planbook_moonbook_provider_criterion() -> PlanbookCriterionStatus {
   let ready = @fs.exists("../moonbook/seed/wiki/skills/code-plan/SKILL.md") ||
     @fs.exists("../moonbook/seed/wiki/skills/planbook/SKILL.md")
   planbook_criterion(
