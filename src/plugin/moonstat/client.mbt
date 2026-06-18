@@ -134,7 +134,7 @@ pub async fn Client::usage_provider_limits(
 pub async fn Client::stream_check_all_providers(
   self : Client,
 ) -> Result[Json, String] {
-  self.get("/stream_check_all_providers")
+  self.get("/proxy/stream-check/all")
 }
 
 ///|
