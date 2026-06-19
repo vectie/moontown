@@ -6,7 +6,7 @@ test "lane status prefers review queued over complete" {
       task_id="task-a",
       book_id="research-moonbook",
       packet_id="packet-a",
-      status=@core.TaskExecutionStatus::Completed,
+      status=Completed,
       summary="completed",
     ),
   )
@@ -15,7 +15,7 @@ test "lane status prefers review queued over complete" {
       task_id="task-b",
       book_id="research-moonbook",
       packet_id="packet-b",
-      status=@core.TaskExecutionStatus::ReviewQueued,
+      status=ReviewQueued,
       summary="quality gate",
     ),
   )

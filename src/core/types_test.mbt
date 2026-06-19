@@ -14,7 +14,7 @@ test "core state registers books workers and tasks" {
       id="worker-1",
       name="Harness",
       book_id="coding",
-      role=@core.WorkerRole::Harness,
+      role=Harness,
     ),
   )
   state.enqueue_task(
@@ -23,7 +23,7 @@ test "core state registers books workers and tasks" {
       book_id="coding",
       title="Implement",
       prompt="Build the router.",
-      domain=@core.WorkDomain::Coding,
+      domain=Coding,
     ),
   )
   assert_eq(state.books.length(), 1)
@@ -40,7 +40,7 @@ test "core state replaces all duplicate execution records for same task" {
       book_id="coding",
       packet_id="packet-1",
       packet_path="packet-1.json",
-      status=TaskExecutionStatus::Running,
+      status=Running,
       summary="old running",
       output_contract="test",
     ),
@@ -51,7 +51,7 @@ test "core state replaces all duplicate execution records for same task" {
       book_id="coding",
       packet_id="packet-1b",
       packet_path="packet-1b.json",
-      status=TaskExecutionStatus::Running,
+      status=Running,
       summary="duplicate running",
       output_contract="test",
     ),
@@ -62,16 +62,14 @@ test "core state replaces all duplicate execution records for same task" {
       book_id="coding",
       packet_id="packet-1-final",
       packet_path="packet-1-final.json",
-      status=TaskExecutionStatus::ReviewQueued,
+      status=ReviewQueued,
       summary="final",
       output_contract="test",
     ),
   )
   assert_eq(state.executions.length(), 2)
   assert_true(
-    state.executions.all(fn(execution) {
-      execution.status == TaskExecutionStatus::ReviewQueued
-    }),
+    state.executions.all(fn(execution) { execution.status == ReviewQueued }),
   )
 }
 
@@ -103,16 +101,12 @@ test "standing goal watcher decisions keep normal half-hour cadence on no-change
     cadence_ticks=8,
     next_due_tick=2,
   )
-  let updated = goal.mark_watcher_decision(10, WatcherDecisionKind::Update)
+  let updated = goal.mark_watcher_decision(10, Update)
   assert_eq(updated.next_due_tick, 18)
-  let no_change = goal.mark_watcher_decision(
-    10,
-    WatcherDecisionKind::NoChange,
-    no_change_streak=2,
-  )
+  let no_change = goal.mark_watcher_decision(10, NoChange, no_change_streak=2)
   assert_eq(no_change.next_due_tick, 18)
-  let failed = goal.mark_watcher_decision(10, WatcherDecisionKind::Failed)
+  let failed = goal.mark_watcher_decision(10, Failed)
   assert_eq(failed.next_due_tick, 12)
-  let deferred = goal.mark_watcher_decision(10, WatcherDecisionKind::Deferred)
+  let deferred = goal.mark_watcher_decision(10, Deferred)
   assert_eq(deferred.next_due_tick, 18)
 }

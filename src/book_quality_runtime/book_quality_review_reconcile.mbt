@@ -35,9 +35,7 @@ pub async fn reconcile_book_quality_ai_review_results(
     runs.push(result.run)
   }
   if changed {
-    write_review_run_ledger_file(run_path, @book_quality.BookQualityReviewRunLedger::{
-      runs,
-    })
+    write_review_run_ledger_file(run_path, { runs, })
   }
   written
 }

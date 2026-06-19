@@ -22,7 +22,7 @@ pub async fn bootstrap_wenyu_building_protocols(
 ) -> String {
   let protocols = @civic.wenyu_building_protocols()
   let ledger_base_dir = protocol_ledger_base_dir_for_status_path(status_path)
-  let registry_document = BuildingProtocolRegistryDocument::{
+  let registry_document = {
     generated_at: "bootstrap",
     description: "Wenyu building protocol registry. Buildings are protocol places for aggregation, exchange, AI-guided reduction, review, and distribution.",
     protocols,

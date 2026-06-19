@@ -12,7 +12,7 @@ async test "detached import receipt promotes proposal imported execution to run 
   let execution = standing_watch_execution_fixture(
     task_id="standing-watch-opc-news-tick-10",
     packet_path~,
-    status=@core.TaskExecutionStatus::ProposalImported,
+    status=ProposalImported,
     summary="waiting for detached import",
     heartbeat_tick=10,
     stale_after_tick=40,
@@ -24,7 +24,7 @@ async test "detached import receipt promotes proposal imported execution to run 
     11,
     launch_confirmed_run=false,
   )
-  assert_eq(state.executions[0].status, @core.TaskExecutionStatus::RunConfirmed)
+  assert_eq(state.executions[0].status, RunConfirmed)
   assert_true(state.executions[0].run_id == Some("run-detached"))
   assert_true(state.executions[0].proposal_id == Some("proposal-detached"))
   assert_false(state.executions[0].summary.contains("Detached runner:"))
@@ -45,7 +45,7 @@ async test "detached import receipt can launch confirmed run command" {
   let execution = standing_watch_execution_fixture(
     task_id="standing-watch-opc-news-tick-10",
     packet_path~,
-    status=@core.TaskExecutionStatus::ProposalImported,
+    status=ProposalImported,
     summary="waiting for detached import",
     heartbeat_tick=10,
     stale_after_tick=40,
@@ -56,10 +56,10 @@ async test "detached import receipt can launch confirmed run command" {
     execution,
     11,
     launch_command_override=Some(
-      "moon -C ../moonclaw run cmd/main -- proposal run run-detached",
+      "moon -C /workspace/external/moonclaw run cmd/main -- proposal run run-detached",
     ),
   )
-  assert_eq(state.executions[0].status, @core.TaskExecutionStatus::RunConfirmed)
+  assert_eq(state.executions[0].status, RunConfirmed)
   assert_true(state.executions[0].summary.contains("Detached runner:"))
   assert_true(state.executions[0].summary.contains("proposal run run-detached"))
 }

@@ -9,6 +9,8 @@ import {
   "vectie/moontown/civic",
 }
 
+supported_targets = "native"
+
 import {
   "vectie/moontown",
 } for "test"

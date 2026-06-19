@@ -8,8 +8,8 @@ test "live autonomy build tick prefers daemon override then state tick" {
     99,
   )
   let event_state = @test_fixtures.visual_projection_test_state(
-    worker_status=@core.WorkerStatus::Idle,
-    execution_status=@core.TaskExecutionStatus::Completed,
+    worker_status=Idle,
+    execution_status=Completed,
   )
   assert_eq(
     live_autonomy_build_tick(
@@ -40,14 +40,14 @@ test "live autonomy metric counts compose runtime watcher and goal signals" {
     goal_id="watch-due",
     tick=10,
     book_id="research-due",
-    decision=@core.WatcherDecisionKind::Update,
+    decision=Update,
     next_due_tick=70,
   )
   let no_change_record = live_autonomy_watcher_record(
     goal_id="watch-due",
     tick=11,
     book_id="research-due",
-    decision=@core.WatcherDecisionKind::NoChange,
+    decision=NoChange,
     next_due_tick=71,
   )
   let metrics = live_autonomy_metric_counts(

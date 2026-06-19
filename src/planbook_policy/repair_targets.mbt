@@ -59,14 +59,11 @@ pub fn repair_target_files_for_criterion(
         "\{source_root}/src/planbook_runtime/planbook_repair_worker_policy_wbtest.mbt",
         "\{source_root}/src/adapters/moonclaw/run_polling.mbt",
         "\{source_root}/src/adapters/moonclaw/run_polling_wbtest.mbt",
+        "\{source_root}/src/adapters/moonclaw/import.mbt",
+        "\{source_root}/src/adapters/moonclaw/commands.mbt",
         "\{source_root}/src/live_autonomy_runtime/live_autonomy_wbtest.mbt",
         "\{source_root}/src/planbook_runtime/planbook.mbt",
         "\{source_root}/src/cmd/main/main.mbt",
-        "\{source_root}/../moonclaw/acp/runner.mbt",
-        "\{source_root}/../moonclaw/acp/runner_wbtest.mbt",
-        "\{source_root}/../moonclaw/job/analysis_acp_runner.mbt",
-        "\{source_root}/../moonclaw/job/analysis_contracts.mbt",
-        "\{source_root}/../moonclaw/job/analysis_wbtest.mbt",
       ]
     "live-runtime-recovery" =>
       [
@@ -85,7 +82,6 @@ pub fn repair_target_files_for_criterion(
         "\{source_root}/src/town_runtime/goal_supervision_transient_infra_wbtest.mbt",
         "\{source_root}/src/town_runtime/goal_supervision_standing_watch_ledger_wbtest.mbt",
         "\{source_root}/src/town_runtime/standing_watch_recovery_policy.mbt",
-        "\{source_root}/src/town_runtime/standing_watch_recovery_legacy.mbt",
         "\{source_root}/src/town_runtime/standing_watch_recovery_context.mbt",
         "\{source_root}/src/town_runtime/standing_watch_recovery_policy_wbtest.mbt",
         "\{source_root}/src/town_runtime/standing_watch_recovery_observed_wbtest.mbt",
@@ -94,8 +90,8 @@ pub fn repair_target_files_for_criterion(
         "\{source_root}/src/town_runtime/daemon_tick_planbook_phase.mbt",
         "\{source_root}/src/adapters/moonclaw/run_polling.mbt",
         "\{source_root}/src/adapters/moonclaw/run_polling_wbtest.mbt",
-        "\{source_root}/../moonclaw/job/analysis_acp_runner.mbt",
-        "\{source_root}/../moonclaw/job/analysis_contracts.mbt",
+        "\{source_root}/src/adapters/moonclaw/import.mbt",
+        "\{source_root}/src/adapters/moonclaw/commands.mbt",
       ]
     _ =>
       [
@@ -107,8 +103,6 @@ pub fn repair_target_files_for_criterion(
         "\{source_root}/src/planbook_runtime/planbook_repair_patch_receipt.mbt",
         "\{source_root}/src/planbook_runtime/planbook.mbt",
         "\{source_root}/src/cmd/main/main.mbt",
-        "\{source_root}/../moonclaw/acp/runner.mbt",
-        "\{source_root}/../moonclaw/acp/runner_wbtest.mbt",
       ]
   }
 }

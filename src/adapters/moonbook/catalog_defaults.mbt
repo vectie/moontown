@@ -6,7 +6,7 @@ pub fn default_catalog() -> Array[BookCatalogEntry] {
       name="Moonbook / Coding",
       purpose="Harness engineering for source work, repo memory, and execution policy.",
       workspace_root=default_workspace_root("coding"),
-      memory_scope=@core.MemoryScope::BookPrivate,
+      memory_scope=BookPrivate,
       tags=["moonbit", "git", "review"],
       skills=["analysis", "memory", "review"],
     ),
@@ -15,7 +15,7 @@ pub fn default_catalog() -> Array[BookCatalogEntry] {
       name="Moonbook / Finance",
       purpose="Private daily finance operations with isolated memory and task artifacts.",
       workspace_root=default_workspace_root("finance"),
-      memory_scope=@core.MemoryScope::TaskEphemeral,
+      memory_scope=TaskEphemeral,
       tags=["ledger", "planning", "ops"],
       skills=["planning", "memory", "reporting"],
     ),
@@ -34,5 +34,12 @@ pub fn default_catalog_path() -> String {
 
 ///|
 pub fn default_moonbook_root() -> String {
-  "../moonbook"
+  match @sys.get_env_var("MOONTOWN_MOONBOOK_ROOT") {
+    Some(root) if !root.is_empty() => root
+    _ =>
+      match @sys.get_env_var("MOONBOOK_ROOT") {
+        Some(root) if !root.is_empty() => root
+        _ => ".moontown/moonbook"
+      }
+  }
 }

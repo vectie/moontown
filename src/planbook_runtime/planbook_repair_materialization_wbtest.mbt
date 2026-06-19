@@ -90,8 +90,8 @@ test "planbook source patch loop target list covers self patch plumbing" {
   assert_true(targets.contains("planbook_policy/skill_text.mbt"))
   assert_true(targets.contains("adapters/moonclaw/run_polling.mbt"))
   assert_true(targets.contains("live_autonomy_wbtest.mbt"))
-  assert_true(targets.contains("../moonclaw/acp/runner.mbt"))
-  assert_true(targets.contains("../moonclaw/job/analysis_contracts.mbt"))
+  assert_true(targets.contains("adapters/moonclaw/import.mbt"))
+  assert_true(targets.contains("adapters/moonclaw/commands.mbt"))
 }
 
 ///|
@@ -102,10 +102,9 @@ test "planbook live runtime recovery target list covers reconciliation plumbing"
   assert_true(targets.contains("goal_supervision_recovery.mbt"))
   assert_true(targets.contains("goal_supervision_transient_infra_wbtest.mbt"))
   assert_true(targets.contains("standing_watch_recovery_policy.mbt"))
-  assert_true(targets.contains("standing_watch_recovery_legacy.mbt"))
   assert_true(targets.contains("live_autonomy_wbtest.mbt"))
   assert_true(targets.contains("adapters/moonclaw/run_polling.mbt"))
-  assert_true(targets.contains("../moonclaw/job/analysis_acp_runner.mbt"))
+  assert_true(targets.contains("adapters/moonclaw/import.mbt"))
 }
 
 ///|

@@ -16,7 +16,7 @@ async test "superseded standing watch review is not reopened from ledger" {
       goal_id=goal.id,
       tick=10,
       target_book_id="wenyu-physical-bridge",
-      decision=@core.WatcherDecisionKind::NeedsReview,
+      decision=NeedsReview,
       detail="Detached MoonClaw import completed; inline run finished.",
       task_id=Some("standing-book-quality-repair-wenyu-physical-bridge-tick-10"),
       run_id=Some("run-old"),
@@ -32,7 +32,7 @@ async test "superseded standing watch review is not reopened from ledger" {
       packet_id="packet-old",
       packet_path="old.json",
       run_id=Some("run-old"),
-      status=@core.TaskExecutionStatus::Completed,
+      status=Completed,
       summary="older review\nkeeper_auto_triage: superseded_review",
       result_decision="superseded-review",
       requires_review=false,
@@ -51,7 +51,7 @@ async test "superseded standing watch review is not reopened from ledger" {
   let old = @core.find_execution(
     state, "standing-book-quality-repair-wenyu-physical-bridge-tick-10",
   ).unwrap()
-  assert_eq(old.status, @core.TaskExecutionStatus::Completed)
+  assert_eq(old.status, Completed)
   assert_eq(old.result_decision, "superseded-review")
   assert_true(!old.requires_review)
   assert_true(old.summary.contains("superseded_review"))

@@ -10,14 +10,10 @@ fn supervision_directive_for(
     None => ()
   }
   match execution.status {
-    @core.TaskExecutionStatus::PacketReady =>
-      packet_ready_supervision_directive(execution, tick)
-    @core.TaskExecutionStatus::AwaitingPersistence =>
-      awaiting_persistence_supervision_directive(execution)
-    @core.TaskExecutionStatus::ReviewQueued =>
-      review_queued_supervision_directive(execution, tick)
-    @core.TaskExecutionStatus::Stale | @core.TaskExecutionStatus::Failed =>
-      failed_or_stale_supervision_directive(execution, tick)
+    PacketReady => packet_ready_supervision_directive(execution, tick)
+    AwaitingPersistence => awaiting_persistence_supervision_directive(execution)
+    ReviewQueued => review_queued_supervision_directive(execution, tick)
+    Stale | Failed => failed_or_stale_supervision_directive(execution, tick)
     _ => None
   }
 }
@@ -27,8 +23,7 @@ fn stale_supervision_directive(
   execution : @core.TaskExecutionRecord,
   tick : Int,
 ) -> MayorSupervisionDirective? {
-  let stale = if execution.status == @core.TaskExecutionStatus::Running ||
-    execution.status == @core.TaskExecutionStatus::RunConfirmed {
+  let stale = if execution.status == Running || execution.status == RunConfirmed {
     execution.stale_after_tick <= tick
   } else {
     false
@@ -43,7 +38,7 @@ fn stale_supervision_directive(
       mark_stale_failed_directive_kind()
     },
     task_id: execution.task_id,
-    execution_status: @core.TaskExecutionStatus::Stale,
+    execution_status: Stale,
     detail: "Execution \{execution.task_id} missed its heartbeat window and needs mayor recovery.",
     next_retry_tick: if execution.attempt < 3 {
       Some(tick + retry_backoff_ticks(execution.attempt))

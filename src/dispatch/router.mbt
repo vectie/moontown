@@ -5,7 +5,7 @@ pub struct RouteRequest {
 
 ///|
 pub fn RouteRequest::new(task~ : @core.TownTask) -> RouteRequest {
-  RouteRequest::{ task, }
+  { task, }
 }
 
 ///|
@@ -22,7 +22,7 @@ pub fn escalate(reason : String) -> RouteDecision {
 
 ///|
 fn worker_matches(task : @core.TownTask, worker : @core.WorkerRef) -> Bool {
-  if worker.status != @core.WorkerStatus::Idle {
+  if worker.status != Idle {
     return false
   }
   if worker.book_id != task.book_id {
@@ -42,14 +42,14 @@ pub fn choose_isolation(
 ) -> @core.IsolationMode {
   ignore(worker)
   match task.domain {
-    @core.WorkDomain::Finance => @core.IsolationMode::Sandboxed
-    @core.WorkDomain::SocialExperiment =>
+    Finance => Sandboxed
+    SocialExperiment =>
       match book.memory_scope {
-        @core.MemoryScope::SharedTown => @core.IsolationMode::BookWorkspace
-        _ => @core.IsolationMode::Worktree
+        SharedTown => BookWorkspace
+        _ => Worktree
       }
-    @core.WorkDomain::Coding => @core.IsolationMode::Worktree
-    _ => @core.IsolationMode::BookWorkspace
+    Coding => Worktree
+    _ => BookWorkspace
   }
 }
 

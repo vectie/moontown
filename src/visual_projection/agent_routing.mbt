@@ -4,13 +4,13 @@ fn visual_zone_key(
   phase : String,
   status : @core.WorkerStatus,
 ) -> String {
-  if visual_phase_is_recovery(phase) || status == @core.WorkerStatus::Blocked {
+  if visual_phase_is_recovery(phase) || status == Blocked {
     "anomaly-corner"
   } else if visual_phase_is_handoff(phase) {
     "city-hall"
   } else if phase == "waiting" {
     "worker-yard"
-  } else if status == @core.WorkerStatus::Offline {
+  } else if status == Offline {
     "gate"
   } else {
     "book-\{book_id}"

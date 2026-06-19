@@ -117,7 +117,7 @@ async fn reconcile_no_run_id_live_execution(
   launch_confirmed_run? : Bool = true,
   launch_command_override? : String? = None,
 ) -> Unit {
-  if execution.status == @core.TaskExecutionStatus::ProposalImported {
+  if execution.status == ProposalImported {
     if reconcile_detached_import_receipt_if_available(
         state,
         execution,
@@ -144,7 +144,7 @@ async fn fail_stale_no_run_id_execution(
   )
   let updated = copy_execution_with(
     execution,
-    status=@core.TaskExecutionStatus::Failed,
+    status=Failed,
     summary="Standing watch execution failed for \{execution.book_id} / \{execution.task_id}: timed out while importing MoonClaw proposal; no run id or detached import receipt became available before the heartbeat window.\{stderr_summary}",
     heartbeat_tick=tick,
     next_retry_tick=None,

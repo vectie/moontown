@@ -1,15 +1,15 @@
 ///|
 fn visual_execution_is_live(status : @core.TaskExecutionStatus) -> Bool {
   match status {
-    @core.TaskExecutionStatus::PacketReady
-    | @core.TaskExecutionStatus::ProposalImported
-    | @core.TaskExecutionStatus::RunConfirmed
-    | @core.TaskExecutionStatus::Running
-    | @core.TaskExecutionStatus::AwaitingPersistence
-    | @core.TaskExecutionStatus::ReviewQueued
-    | @core.TaskExecutionStatus::Stale
-    | @core.TaskExecutionStatus::Failed => true
-    @core.TaskExecutionStatus::Completed => false
+    PacketReady
+    | ProposalImported
+    | RunConfirmed
+    | Running
+    | AwaitingPersistence
+    | ReviewQueued
+    | Stale
+    | Failed => true
+    Completed => false
   }
 }
 
@@ -22,11 +22,11 @@ fn visual_agent_phase(
     Some(record) => visual_phase_for_execution(record.status)
     None =>
       match worker.status {
-        @core.WorkerStatus::Running => "running"
-        @core.WorkerStatus::Waiting => "waiting"
-        @core.WorkerStatus::Idle => "idle"
-        @core.WorkerStatus::Blocked => "blocked"
-        @core.WorkerStatus::Offline => "offline"
+        Running => "running"
+        Waiting => "waiting"
+        Idle => "idle"
+        Blocked => "blocked"
+        Offline => "offline"
       }
   }
 }
@@ -34,26 +34,26 @@ fn visual_agent_phase(
 ///|
 fn visual_phase_for_execution(status : @core.TaskExecutionStatus) -> String {
   match status {
-    @core.TaskExecutionStatus::PacketReady => "packet"
-    @core.TaskExecutionStatus::ProposalImported => "importing"
-    @core.TaskExecutionStatus::RunConfirmed => "running"
-    @core.TaskExecutionStatus::Running => "running"
-    @core.TaskExecutionStatus::AwaitingPersistence => "persisting"
-    @core.TaskExecutionStatus::ReviewQueued => "review"
-    @core.TaskExecutionStatus::Completed => "completed"
-    @core.TaskExecutionStatus::Stale => "stale"
-    @core.TaskExecutionStatus::Failed => "failed"
+    PacketReady => "packet"
+    ProposalImported => "importing"
+    RunConfirmed => "running"
+    Running => "running"
+    AwaitingPersistence => "persisting"
+    ReviewQueued => "review"
+    Completed => "completed"
+    Stale => "stale"
+    Failed => "failed"
   }
 }
 
 ///|
 fn visual_worker_status(status : @core.WorkerStatus) -> String {
   match status {
-    @core.WorkerStatus::Idle => "idle"
-    @core.WorkerStatus::Running => "running"
-    @core.WorkerStatus::Waiting => "waiting"
-    @core.WorkerStatus::Blocked => "blocked"
-    @core.WorkerStatus::Offline => "offline"
+    Idle => "idle"
+    Running => "running"
+    Waiting => "waiting"
+    Blocked => "blocked"
+    Offline => "offline"
   }
 }
 

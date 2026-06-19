@@ -12,16 +12,15 @@ pub fn collect_due_tasks(town : @core.TownState) -> Array[@core.TownTask] {
 ///|
 fn execution_action_kind(execution : @core.TaskExecutionRecord) -> String {
   match execution.status {
-    @core.TaskExecutionStatus::PacketReady => proposal_import_action_kind()
-    @core.TaskExecutionStatus::ProposalImported => run_confirm_action_kind()
-    @core.TaskExecutionStatus::RunConfirmed => run_start_action_kind()
-    @core.TaskExecutionStatus::Running => poll_run_action_kind()
-    @core.TaskExecutionStatus::AwaitingPersistence =>
-      persist_result_action_kind()
-    @core.TaskExecutionStatus::ReviewQueued => review_sync_action_kind()
-    @core.TaskExecutionStatus::Completed => archive_action_kind()
-    @core.TaskExecutionStatus::Stale => recover_stale_action_kind()
-    @core.TaskExecutionStatus::Failed => recovery_action_kind()
+    PacketReady => proposal_import_action_kind()
+    ProposalImported => run_confirm_action_kind()
+    RunConfirmed => run_start_action_kind()
+    Running => poll_run_action_kind()
+    AwaitingPersistence => persist_result_action_kind()
+    ReviewQueued => review_sync_action_kind()
+    Completed => archive_action_kind()
+    Stale => recover_stale_action_kind()
+    Failed => recovery_action_kind()
   }
 }
 

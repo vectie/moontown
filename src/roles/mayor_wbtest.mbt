@@ -18,7 +18,7 @@ test "mayor launches queued packet-ready execution when retry tick is due" {
       book_id="book",
       packet_id="queued",
       packet_path="",
-      status=@core.TaskExecutionStatus::PacketReady,
+      status=PacketReady,
       summary="queued by concurrency cap",
       output_contract="moontown.queued.execution.v1",
       next_retry_tick=Some(10),

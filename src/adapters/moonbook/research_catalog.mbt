@@ -164,7 +164,7 @@ fn research_catalog_entry(
     name="Moonbook / Research / \{display}",
     purpose~,
     workspace_root=default_workspace_root(canonical_book_id),
-    memory_scope=@core.MemoryScope::BookPrivate,
+    memory_scope=BookPrivate,
     tags~,
     skills=["analysis", "synthesis", "memory", "review"],
   )

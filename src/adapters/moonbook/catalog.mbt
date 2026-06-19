@@ -15,19 +15,11 @@ pub fn BookCatalogEntry::new(
   name~ : String,
   purpose~ : String,
   workspace_root~ : String,
-  memory_scope? : @core.MemoryScope = @core.MemoryScope::BookPrivate,
+  memory_scope? : @core.MemoryScope = BookPrivate,
   tags? : Array[String] = [],
   skills? : Array[String] = [],
 ) -> BookCatalogEntry {
-  BookCatalogEntry::{
-    id,
-    name,
-    purpose,
-    workspace_root,
-    memory_scope,
-    tags,
-    skills,
-  }
+  { id, name, purpose, workspace_root, memory_scope, tags, skills }
 }
 
 ///|

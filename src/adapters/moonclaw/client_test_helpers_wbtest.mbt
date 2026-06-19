@@ -1,5 +1,5 @@
 ///|
-fn moonclaw_adapter_book_task(
+fn moonclaw_runtime_book_task(
   id~ : String,
   title~ : String,
   kind~ : String,
@@ -20,10 +20,10 @@ fn moonclaw_adapter_book_task(
 }
 
 ///|
-fn moonclaw_adapter_bootstrap_ingest_task(
+fn moonclaw_runtime_bootstrap_ingest_task(
   id? : String = "task-bootstrap",
 ) -> @moonbook.BookTask {
-  moonclaw_adapter_book_task(
+  moonclaw_runtime_book_task(
     id~,
     title="Bootstrap verified research coverage",
     kind="ingest",
@@ -33,14 +33,14 @@ fn moonclaw_adapter_bootstrap_ingest_task(
 }
 
 ///|
-fn moonclaw_adapter_standing_watch_task(
+fn moonclaw_runtime_standing_watch_task(
   id~ : String,
   title~ : String,
   prompt~ : String,
   target_pages? : Array[String] = [],
   priority? : Int = 95,
 ) -> @moonbook.BookTask {
-  moonclaw_adapter_book_task(
+  moonclaw_runtime_book_task(
     id~,
     title~,
     kind="standing-watch",

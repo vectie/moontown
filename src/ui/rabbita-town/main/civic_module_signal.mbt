@@ -42,16 +42,16 @@ fn civic_module_signal_class_for_status(
   running_is_live~ : Bool,
 ) -> String {
   match status {
-    @core.TaskExecutionStatus::ReviewQueued
-    | @core.TaskExecutionStatus::Failed
-    | @core.TaskExecutionStatus::Stale => "module-signal-alert"
-    @core.TaskExecutionStatus::AwaitingPersistence => "module-signal-review"
-    @core.TaskExecutionStatus::Completed => "module-signal-live"
-    @core.TaskExecutionStatus::Running
-    | @core.TaskExecutionStatus::RunConfirmed =>
+    ReviewQueued
+    | Failed
+    | Stale => "module-signal-alert"
+    AwaitingPersistence => "module-signal-review"
+    Completed => "module-signal-live"
+    Running
+    | RunConfirmed =>
       civic_module_active_run_signal_class(running_is_live)
-    @core.TaskExecutionStatus::PacketReady
-    | @core.TaskExecutionStatus::ProposalImported => "module-signal-book"
+    PacketReady
+    | ProposalImported => "module-signal-book"
   }
 }
 

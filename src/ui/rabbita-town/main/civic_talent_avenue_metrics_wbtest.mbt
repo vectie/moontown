@@ -32,21 +32,21 @@ test "talent avenue signal uses shared execution phrase groups" {
   assert_eq(
     talent_avenue_signal(
       model,
-      Some(civic_metric_test_execution(@core.TaskExecutionStatus::PacketReady)),
+      Some(civic_metric_test_execution(PacketReady)),
     ),
     "Dispatching",
   )
   assert_eq(
     talent_avenue_signal(
       model,
-      Some(civic_metric_test_execution(@core.TaskExecutionStatus::Running)),
+      Some(civic_metric_test_execution(Running)),
     ),
     "Heatmap refreshing",
   )
   assert_eq(
     talent_avenue_signal(
       { ..model, state_source: StateSourceKind::SnapshotFile },
-      Some(civic_metric_test_execution(@core.TaskExecutionStatus::Completed)),
+      Some(civic_metric_test_execution(Completed)),
     ),
     "Projection bridge",
   )
@@ -61,7 +61,7 @@ test "talent avenue next action uses shared execution action groups" {
       None,
       Some(
         civic_metric_test_execution(
-          @core.TaskExecutionStatus::AwaitingPersistence,
+          AwaitingPersistence,
         ),
       ),
     ),
@@ -71,7 +71,7 @@ test "talent avenue next action uses shared execution action groups" {
     talent_avenue_next_action(
       model,
       None,
-      Some(civic_metric_test_execution(@core.TaskExecutionStatus::Stale)),
+      Some(civic_metric_test_execution(Stale)),
     ),
     "Recover the stalled talent graph before the reception route goes stale.",
   )
@@ -83,21 +83,21 @@ test "talent avenue stage uses shared execution phrase groups" {
   assert_eq(
     talent_avenue_stage(
       model,
-      Some(civic_metric_test_execution(@core.TaskExecutionStatus::PacketReady)),
+      Some(civic_metric_test_execution(PacketReady)),
     ),
     "Showcase packet prepared",
   )
   assert_eq(
     talent_avenue_stage(
       model,
-      Some(civic_metric_test_execution(@core.TaskExecutionStatus::Running)),
+      Some(civic_metric_test_execution(Running)),
     ),
     "Talent heatmap refresh",
   )
   assert_eq(
     talent_avenue_stage(
       model,
-      Some(civic_metric_test_execution(@core.TaskExecutionStatus::Completed)),
+      Some(civic_metric_test_execution(Completed)),
     ),
     "Tour cards ready",
   )

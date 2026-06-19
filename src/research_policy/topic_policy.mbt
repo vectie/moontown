@@ -204,33 +204,13 @@ pub fn local_paths(topic : String) -> Array[String] {
   match topic {
     "moontown" =>
       [
-        "/Users/kq/Workspace/moontown/README.md", "/Users/kq/Workspace/moontown/README.mbt.md",
-        "/Users/kq/Workspace/moontown/AGENTS.md", "/Users/kq/Workspace/moontown/moon.mod",
-        "/Users/kq/Workspace/moontown/src/cmd/main/main.mbt", "/Users/kq/Workspace/moontown/src/town_runtime/goal_run.mbt",
-        "/Users/kq/Workspace/moontown/src/adapters/moonbook/client.mbt", "/Users/kq/Workspace/moontown/src/adapters/moonclaw/import.mbt",
-        "/Users/kq/Workspace/moontown/src/roles/mayor.mbt",
+        "README.md", "README.mbt.md", "AGENTS.md", "moon.mod", "src/cmd/main/main.mbt",
+        "src/town_runtime/goal_run.mbt", "src/adapters/moonbook/client.mbt", "src/adapters/moonclaw/import.mbt",
+        "src/roles/mayor.mbt",
       ]
-    "moonbook" =>
-      [
-        "/Users/kq/Workspace/moonbook/README.md", "/Users/kq/Workspace/moonbook/README.mbt.md",
-        "/Users/kq/Workspace/moonbook/AGENTS.md", "/Users/kq/Workspace/moonbook/moon.mod.json",
-        "/Users/kq/Workspace/moonbook/docs/SYSTEM_ARCHITECTURE.md", "/Users/kq/Workspace/moonbook/wiki/bookapi.mbt",
-        "/Users/kq/Workspace/moonbook/wiki/init.mbt", "/Users/kq/Workspace/moonbook/wiki/ui_state.mbt",
-      ]
-    "moonclaw" =>
-      [
-        "/Users/kq/Workspace/moonclaw/README.mbt.md", "/Users/kq/Workspace/moonclaw/Agents.md",
-        "/Users/kq/Workspace/moonclaw/moon.mod.json", "/Users/kq/Workspace/moonclaw/docs/research_controller_architecture.md",
-        "/Users/kq/Workspace/moonclaw/job/provider_task.mbt", "/Users/kq/Workspace/moonclaw/job/analysis_contracts.mbt",
-        "/Users/kq/Workspace/moonclaw/tools/web_search/tool.mbt", "/Users/kq/Workspace/moonclaw/tools/web_fetch/tool.mbt",
-        "/Users/kq/Workspace/moonclaw/tools/search_files/tool.mbt",
-      ]
+    "moonbook" | "moonclaw" | "moondesk" => []
     "opc" => []
     _ if is_external_domain_topic(topic) => []
-    _ =>
-      [
-        "/Users/kq/Workspace/\{topic}/README.md",
-        "/Users/kq/Workspace/\{topic}/moon.mod.json",
-      ]
+    _ => []
   }
 }

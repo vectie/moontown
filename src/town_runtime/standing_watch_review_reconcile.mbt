@@ -7,7 +7,7 @@ async fn reconcile_review_queued_standing_watch_outputs(
 ) -> Unit {
   let snapshot = state.executions.copy()
   for execution in snapshot {
-    if execution.status != @core.TaskExecutionStatus::ReviewQueued {
+    if execution.status != ReviewQueued {
       continue
     }
     let goal = match
@@ -35,20 +35,6 @@ async fn reconcile_review_queued_standing_watch_outputs(
     let entry = match @moonbook.entry_for_book_id(catalog, execution.book_id) {
       Some(entry) => entry
       None => continue
-    }
-    if @standing_watch_policy.legacy_review_queued_retry_accounting_standing_watch(
-        execution,
-      ) {
-      complete_review_queued_standing_watch(
-        state,
-        execution,
-        "deferred",
-        "legacy review-queued standing-watch record was transient infrastructure retry accounting, not durable keeper review debt.",
-        result_decision="deferred",
-        event_kind="event-watch-legacy-review-reconcile",
-        event_detail="Mayor closed legacy review-queued standing watch `\{execution.task_id}` as deferred retry accounting.",
-      )
-      continue
     }
     reconcile_observed_review_queued_standing_watch(
       state, entry, execution, goal, standing_goals, snapshot_path,
@@ -91,7 +77,7 @@ async fn reconcile_observed_review_queued_standing_watch(
     complete_empty_standing_watch_as_no_change(state, observed)
     return
   }
-  if decision == @core.WatcherDecisionKind::Deferred {
+  if decision == Deferred {
     complete_review_queued_standing_watch(
       state,
       observed,
@@ -113,7 +99,7 @@ async fn reconcile_observed_review_queued_standing_watch(
   }
   let completed = copy_execution_with(
     observed,
-    status=@core.TaskExecutionStatus::Completed,
+    status=Completed,
     summary=@standing_watch_policy.standing_watch_auto_triage_summary(
       goal, observed, decision,
     ),

@@ -16,7 +16,7 @@ fn failed_civic_communication_reduction(
 ) -> CivicCommunicationReductionResult {
   {
     ideas: [],
-    status: @core.TaskExecutionStatus::Failed,
+    status: Failed,
     summary,
     packet_id,
     packet_path,

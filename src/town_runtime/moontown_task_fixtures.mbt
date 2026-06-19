@@ -26,7 +26,7 @@ fn fixture_book_tasks(
           priority=100,
           requires_review=false,
           target_pages=["wiki/reviews/pending.md", "wiki/reviews/approved.md"],
-          required_role=Some(@core.WorkerRole::Reviewer),
+          required_role=Some(Reviewer),
         ),
         @moonbook.BookTask::new(
           id="goal-plan-next-coding-planning",
@@ -39,7 +39,7 @@ fn fixture_book_tasks(
           target_pages=[
             "wiki/synthesis/maintenance-plan.md", "wiki/synthesis/map.md",
           ],
-          required_role=Some(@core.WorkerRole::Planner),
+          required_role=Some(Planner),
         ),
       ]
     "finance" =>
@@ -53,7 +53,7 @@ fn fixture_book_tasks(
           priority=100,
           requires_review=false,
           target_pages=["wiki/reviews/pending.md", "wiki/reviews/approved.md"],
-          required_role=Some(@core.WorkerRole::Reviewer),
+          required_role=Some(Reviewer),
         ),
         @moonbook.BookTask::new(
           id="goal-refresh-finance-memory-analysis",
@@ -64,7 +64,7 @@ fn fixture_book_tasks(
           priority=85,
           requires_review=true,
           target_pages=["wiki/index.md", "wiki/log.md", "keeper/INSIGHTS.md"],
-          required_role=Some(@core.WorkerRole::MemoryKeeper),
+          required_role=Some(MemoryKeeper),
         ),
       ]
     _ =>
@@ -78,7 +78,7 @@ fn fixture_book_tasks(
           priority=80,
           requires_review=true,
           target_pages=["wiki/index.md", "wiki/log.md"],
-          required_role=Some(@core.WorkerRole::Harness),
+          required_role=Some(Harness),
         ),
       ]
   }

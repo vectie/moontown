@@ -28,23 +28,19 @@ test "daemon runtime status helpers define active worker and supervisor modes" {
 ///|
 test "daemon runtime mode centralizes status classification" {
   assert_true(
-    @daemon_runtime_policy.daemon_runtime_mode("running")
-    is @daemon_runtime_policy.DaemonRuntimeMode::WorkerRuntime,
+    @daemon_runtime_policy.daemon_runtime_mode("running") is WorkerRuntime,
   )
   assert_true(
-    @daemon_runtime_policy.daemon_runtime_mode("ticking")
-    is @daemon_runtime_policy.DaemonRuntimeMode::WorkerRuntime,
+    @daemon_runtime_policy.daemon_runtime_mode("ticking") is WorkerRuntime,
   )
   assert_true(
     @daemon_runtime_policy.daemon_runtime_mode("supervising")
-    is @daemon_runtime_policy.DaemonRuntimeMode::SupervisorRuntime,
+    is SupervisorRuntime,
   )
   assert_true(
-    @daemon_runtime_policy.daemon_runtime_mode("stopped")
-    is @daemon_runtime_policy.DaemonRuntimeMode::InactiveRuntime,
+    @daemon_runtime_policy.daemon_runtime_mode("stopped") is InactiveRuntime,
   )
   assert_true(
-    @daemon_runtime_policy.daemon_runtime_mode("missing")
-    is @daemon_runtime_policy.DaemonRuntimeMode::InactiveRuntime,
+    @daemon_runtime_policy.daemon_runtime_mode("missing") is InactiveRuntime,
   )
 }

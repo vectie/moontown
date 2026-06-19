@@ -6,8 +6,8 @@ fn task_specs(model : Model) -> Array[@core.TownTask] {
       book_id="wenyu-town-shell",
       title="Materialize Town Shell implementation backlog",
       prompt="Turn the Wenyu Valley PRD and evidence lane into codex-ready files, acceptance checks, and projection tasks.",
-      domain=@core.WorkDomain::Coding,
-      required_role=Some(@core.WorkerRole::Planner),
+      domain=Coding,
+      required_role=Some(Planner),
       required_capabilities=["planning", "projection"],
       status=task_status_for(model, 0),
     ),
@@ -16,8 +16,8 @@ fn task_specs(model : Model) -> Array[@core.TownTask] {
       book_id="wenyu-town-shell",
       title="Patch Town Shell live district slice",
       prompt="Replace hardcoded module framing with live Town Shell projection signals and reviewable district status.",
-      domain=@core.WorkDomain::Coding,
-      required_role=Some(@core.WorkerRole::Harness),
+      domain=Coding,
+      required_role=Some(Harness),
       required_capabilities=["projection", "ui-state", "testing"],
       status=task_status_for(model, 1),
     ),
@@ -26,8 +26,8 @@ fn task_specs(model : Model) -> Array[@core.TownTask] {
       book_id="wenyu-town-shell",
       title="Generate Town Shell asset pack",
       prompt="Produce tile, icon, worker sprite, and vignette prompts that fit the warm civic Wenyu district style.",
-      domain=@core.WorkDomain::Coding,
-      required_role=Some(@core.WorkerRole::Reviewer),
+      domain=Coding,
+      required_role=Some(Reviewer),
       required_capabilities=["asset-generation", "design", "projection"],
       status=task_status_for(model, 2),
     ),
@@ -36,8 +36,8 @@ fn task_specs(model : Model) -> Array[@core.TownTask] {
       book_id="wenyu-resident-twins",
       title="Project Resident Twins live district state",
       prompt="Replace generic Resident Twins framing with live worker, queue, health, and next-action status while keeping memory projection-safe.",
-      domain=@core.WorkDomain::Coding,
-      required_role=Some(@core.WorkerRole::MemoryKeeper),
+      domain=Coding,
+      required_role=Some(MemoryKeeper),
       required_capabilities=["resident-memory", "reflection", "projection"],
       status=task_status_for(model, 3),
     ),
@@ -46,8 +46,8 @@ fn task_specs(model : Model) -> Array[@core.TownTask] {
       book_id="policy-hall",
       title="Explain rental subsidy quest",
       prompt="Convert a policy into a scenario quest, checklist, and resident-facing reward path.",
-      domain=@core.WorkDomain::Operations,
-      required_role=Some(@core.WorkerRole::Specialist),
+      domain=Operations,
+      required_role=Some(Specialist),
       required_capabilities=["policy", "checklist"],
       status=task_status_for(model, 4),
     ),
@@ -56,8 +56,8 @@ fn task_specs(model : Model) -> Array[@core.TownTask] {
       book_id="wenyu-contest-express",
       title="Coach resident contest readiness",
       prompt="Analyze contest rules, review the deck intro, score readiness gaps, and stage the next mock roadshow action.",
-      domain=@core.WorkDomain::Operations,
-      required_role=Some(@core.WorkerRole::Planner),
+      domain=Operations,
+      required_role=Some(Planner),
       required_capabilities=["contest", "mock-judge", "readiness"],
       status=task_status_for(model, 5),
     ),
@@ -66,8 +66,8 @@ fn task_specs(model : Model) -> Array[@core.TownTask] {
       book_id="social-square",
       title="Match two complementary OPCs",
       prompt="Detect business complementarity and stage a low-pressure cafe introduction.",
-      domain=@core.WorkDomain::SocialExperiment,
-      required_role=Some(@core.WorkerRole::Operator),
+      domain=SocialExperiment,
+      required_role=Some(Operator),
       required_capabilities=["matching", "community"],
       status=task_status_for(model, 6),
     ),
@@ -76,8 +76,8 @@ fn task_specs(model : Model) -> Array[@core.TownTask] {
       book_id="talent-avenue",
       title="Refresh talent heatmap",
       prompt="Update resident skills, achievements, and tour-ready showcase cards.",
-      domain=@core.WorkDomain::Research,
-      required_role=Some(@core.WorkerRole::MemoryKeeper),
+      domain=Research,
+      required_role=Some(MemoryKeeper),
       required_capabilities=["talent-graph", "projection"],
       status=task_status_for(model, 7),
     ),
@@ -86,8 +86,8 @@ fn task_specs(model : Model) -> Array[@core.TownTask] {
       book_id="ai-garden",
       title="Publish daily AI tool trial",
       prompt="Turn one practical AI workflow into a five-minute resident tutorial.",
-      domain=@core.WorkDomain::Research,
-      required_role=Some(@core.WorkerRole::Planner),
+      domain=Research,
+      required_role=Some(Planner),
       required_capabilities=["tutorial", "tool-trial"],
       status=task_status_for(model, 8),
     ),
@@ -96,8 +96,8 @@ fn task_specs(model : Model) -> Array[@core.TownTask] {
       book_id="wenyu-physical-bridge",
       title="Project Physical Bridge live district state",
       prompt="Bridge virtual requests into room availability, robot confirmation, proxy attendance, and live district telemetry.",
-      domain=@core.WorkDomain::Operations,
-      required_role=Some(@core.WorkerRole::Watcher),
+      domain=Operations,
+      required_role=Some(Watcher),
       required_capabilities=["robot", "venue", "digital-twin"],
       status=task_status_for(model, 9),
     ),
@@ -109,27 +109,27 @@ fn task_status_for(model : Model, offset : Int) -> @core.TownTaskStatus {
   let cycle = (model.tick + offset) % 8
   if mayor_recovery_active(model) {
     match cycle {
-      0 => @core.TownTaskStatus::Assigned
-      1 => @core.TownTaskStatus::Running
-      2 => @core.TownTaskStatus::Running
-      3 => @core.TownTaskStatus::Planned
-      4 => @core.TownTaskStatus::Assigned
-      5 => @core.TownTaskStatus::Running
-      6 => @core.TownTaskStatus::Pending
-      _ => @core.TownTaskStatus::Running
+      0 => Assigned
+      1 => Running
+      2 => Running
+      3 => Planned
+      4 => Assigned
+      5 => Running
+      6 => Pending
+      _ => Running
     }
   } else if model.pressure > 80 && (cycle == 3 || cycle == 6) {
-    @core.TownTaskStatus::Assigned
+    Assigned
   } else {
     match cycle {
-      0 => @core.TownTaskStatus::Pending
-      1 => @core.TownTaskStatus::Assigned
-      2 => @core.TownTaskStatus::Running
-      3 => @core.TownTaskStatus::Running
-      4 => @core.TownTaskStatus::Assigned
-      5 => @core.TownTaskStatus::Planned
-      6 => @core.TownTaskStatus::Pending
-      _ => @core.TownTaskStatus::Running
+      0 => Pending
+      1 => Assigned
+      2 => Running
+      3 => Running
+      4 => Assigned
+      5 => Planned
+      6 => Pending
+      _ => Running
     }
   }
 }

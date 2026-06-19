@@ -11,9 +11,9 @@ pub fn count_live_workers(state : @core.TownState) -> Int {
 
 ///|
 pub fn worker_is_live(worker : @core.WorkerRef) -> Bool {
-  worker.status == @core.WorkerStatus::Running ||
-  worker.status == @core.WorkerStatus::Waiting ||
-  worker.status == @core.WorkerStatus::Blocked
+  worker.status == Running ||
+  worker.status == Waiting ||
+  worker.status == Blocked
 }
 
 ///|

@@ -8,7 +8,7 @@ async fn standing_watch_observed_for_auto_triage(
   let decision = @standing_watch_policy.standing_watch_decision_from_execution(
     observed,
   )
-  if decision != @core.WatcherDecisionKind::NeedsReview {
+  if decision != NeedsReview {
     return observed
   }
   match

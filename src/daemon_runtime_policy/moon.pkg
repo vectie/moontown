@@ -2,3 +2,5 @@ import {
   "moonbitlang/core/json",
   "vectie/moontown/storage",
 }
+
+supported_targets = "native"

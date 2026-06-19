@@ -2,7 +2,7 @@
 fn standing_watch_review_predicate_execution(
   task_id? : String = "standing-watch-opc-news-tick-1",
   summary? : String = "standing_goal_decision: needs_review\ndelta_score: 0\nnew_source_count: 0",
-  status? : @core.TaskExecutionStatus = @core.TaskExecutionStatus::ReviewQueued,
+  status? : @core.TaskExecutionStatus = ReviewQueued,
 ) -> @core.TaskExecutionRecord {
   @core.TaskExecutionRecord::new(
     task_id~,
@@ -19,25 +19,16 @@ fn standing_watch_review_predicate_execution(
 test "standing watch review predicate detects zero material review" {
   let execution = standing_watch_review_predicate_execution()
   assert_true(
-    standing_watch_needs_review_with_zero_material_delta(
-      execution,
-      @core.WatcherDecisionKind::NeedsReview,
-    ),
+    standing_watch_needs_review_with_zero_material_delta(execution, NeedsReview),
   )
   assert_true(
-    !standing_watch_needs_review_with_zero_material_delta(
-      execution,
-      @core.WatcherDecisionKind::Update,
-    ),
+    !standing_watch_needs_review_with_zero_material_delta(execution, Update),
   )
   let changed = standing_watch_review_predicate_execution(
     summary="standing_goal_decision: needs_review\ndelta_score: 2\nnew_source_count: 0",
   )
   assert_true(
-    !standing_watch_needs_review_with_zero_material_delta(
-      changed,
-      @core.WatcherDecisionKind::NeedsReview,
-    ),
+    !standing_watch_needs_review_with_zero_material_delta(changed, NeedsReview),
   )
 }
 
@@ -60,14 +51,14 @@ test "standing watch repair predicate keeps generic repair completions open" {
     standing_watch_autonomous_repair_still_open(
       repair_goal,
       execution,
-      @core.WatcherDecisionKind::NeedsReview,
+      NeedsReview,
     ),
   )
   assert_true(
     standing_watch_empty_completion_is_no_change(
       ordinary_goal,
       execution,
-      @core.WatcherDecisionKind::NeedsReview,
+      NeedsReview,
     ),
   )
 }
@@ -81,12 +72,12 @@ test "standing watch review predicate detects newer terminal cycles" {
   )
   let old_review = standing_watch_review_predicate_execution(
     task_id="standing-watch-opc-news-tick-1",
-    status=@core.TaskExecutionStatus::ReviewQueued,
+    status=ReviewQueued,
   )
   let newer_no_change = standing_watch_review_predicate_execution(
     task_id="standing-watch-opc-news-tick-2",
     summary="standing_goal_decision: no_change\ndelta_score: 0\nnew_source_count: 0",
-    status=@core.TaskExecutionStatus::Completed,
+    status=Completed,
   )
   assert_true(
     standing_watch_review_superseded_by_newer_review(

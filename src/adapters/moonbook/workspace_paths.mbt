@@ -34,8 +34,8 @@ fn canonical_generated_site_relative_path() -> String {
 
 ///|
 fn canonical_generated_site_path(root : String) -> String {
-  @path.Path(root)
-  .join(@path.Path(canonical_generated_site_relative_path()))
+  moonbook_adapter_path(root)
+  .join(moonbook_adapter_path(canonical_generated_site_relative_path()))
   .to_string()
 }
 

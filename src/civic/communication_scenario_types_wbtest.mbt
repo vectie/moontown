@@ -61,8 +61,8 @@ test "salon scenario DTOs round-trip as civic package data" {
 
 ///|
 test "salon reduction modes expose constructors across package boundary" {
-  let mode = CivicCommunicationReductionMode::FixtureReducer
-  assert_true(mode is CivicCommunicationReductionMode::FixtureReducer)
+  let mode = FixtureReducer
+  assert_true(mode is FixtureReducer)
 }
 
 ///|

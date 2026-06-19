@@ -42,7 +42,7 @@ fn latest_watcher_metric_view(
   match latest {
     Some(record) => {
       let metrics = watcher_record_metric_labels(record)
-      LatestWatcherMetricView::{
+      {
         decision: record.decision,
         sources: metrics.sources,
         checked: metrics.checked,
@@ -53,7 +53,7 @@ fn latest_watcher_metric_view(
       }
     }
     None =>
-      LatestWatcherMetricView::{
+      {
         decision: "Waiting",
         sources: "0",
         checked: "n/a",

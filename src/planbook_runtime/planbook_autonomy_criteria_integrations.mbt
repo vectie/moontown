@@ -1,19 +1,19 @@
 ///|
 fn planbook_moonbook_provider_criterion() -> PlanbookCriterionStatus {
-  let ready = @fs.exists("../moonbook/seed/wiki/skills/code-plan/SKILL.md") ||
-    @fs.exists("../moonbook/seed/wiki/skills/planbook/SKILL.md")
+  let configured = optional_env_text("MOONTOWN_MOONBOOK_ROOT") is Some(_) ||
+    optional_env_text("MOONBOOK_ROOT") is Some(_)
   planbook_criterion(
     "moonbook-native-planbook-provider",
     "2026-05-29-book-quality-upgrade",
-    "MoonBook has a native planbook provider/profile",
+    "MoonBook provider integration is configured explicitly",
     "moonbook",
-    ready,
-    if ready {
-      "MoonBook exposes a native planbook/code-plan seed skill"
+    configured,
+    if configured {
+      "MoonBook integration uses an explicit configured root"
     } else {
-      "MoonBook still needs the native planbook provider/profile"
+      "MoonBook integration is not configured; standalone Moontown should not inspect a sibling checkout"
     },
-    "implement this in MoonBook, not by copying MoonBook projection internals into Moontown",
+    "set MOONTOWN_MOONBOOK_ROOT or provide a package/registry integration instead of assuming a sibling checkout",
   )
 }
 

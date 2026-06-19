@@ -5,7 +5,7 @@ pub fn confirm_imported_run(
   {
     ..receipt,
     run_id: Some(receipt.run_id.unwrap_or("run-\{receipt.packet_id}")),
-    status: @core.TaskExecutionStatus::RunConfirmed,
+    status: RunConfirmed,
     summary: "Confirmed proposal \{receipt.proposal_id} into a live run.",
   }
 }
@@ -13,7 +13,7 @@ pub fn confirm_imported_run(
 ///|
 pub async fn run_confirmed_run(
   run_id : String,
-  moonclaw_root? : String = "../moonclaw",
+  moonclaw_root? : String = default_moonclaw_root(),
   home? : String = default_moonclaw_home(),
   cwd? : String = ".",
 ) -> String {

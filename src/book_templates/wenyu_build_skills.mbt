@@ -35,7 +35,7 @@ pub fn wenyu_build_skill_text(entry : @moonbook.BookCatalogEntry) -> String {
     "## Story: Show \{module_name} as a live district",
     "",
     "- Evidence: `raw/bootstrap/evidence-matrix.md#C3`, `mounted-sources/moontown/ui-rabbita-town-main.mbt`",
-    "- Files: `/Users/kq/Workspace/moontown/src/ui/rabbita-town/main/main.mbt`, `/Users/kq/Workspace/moontown/src/ui/rabbita-town/styles.css`",
+    "- Files: `src/ui/rabbita-town/main/main.mbt`, `src/ui/rabbita-town/styles.css`",
     "- Behavior: district tile displays current agent activity, health, and next action",
     "- Acceptance: UI build passes and the tile is visible in the town dashboard",
     "- codex-ready: yes",
@@ -51,7 +51,7 @@ pub fn wenyu_code_patch_skill_text(
   [
     "---",
     "name: wenyu-code-patch",
-    "description: Execute focused code changes for one Wenyu Valley module through Codex/OpenClaw while preserving Moontown/MoonBook/MoonClaw boundaries.",
+    "description: Execute focused code changes for one Wenyu Valley module through MoonCode and MoonClaw while preserving Moontown/MoonBook/MoonClaw boundaries.",
     "---",
     "",
     "# Wenyu Code Patch Skill: \{module_name}",

@@ -19,7 +19,7 @@ async fn reconcile_persisted_standing_watch_records(
       terminal_watcher_record_for_execution(goal.id, ledger_dir, execution) {
       Some(record) => {
         if @standing_watch_policy.watcher_record_effective_decision(record) ==
-          @core.WatcherDecisionKind::NeedsReview &&
+          NeedsReview &&
           @standing_watch_policy.standing_watch_review_superseded_by_newer_review(
             snapshot, standing_goals, goal, execution,
           ) {
@@ -35,8 +35,7 @@ async fn reconcile_persisted_standing_watch_records(
           heartbeat_tick=supervision_tick(state),
           next_retry_tick=None,
           result_decision=record.decision.to_string(),
-          requires_review=record.decision ==
-            @core.WatcherDecisionKind::NeedsReview,
+          requires_review=record.decision == NeedsReview,
         )
         state.replace_execution(reconciled)
         state.replace_task(task_for_supervision(state, reconciled))

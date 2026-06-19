@@ -10,8 +10,8 @@ async fn evidence_accounting_for_workspace(
   root : String,
   fallback_total~ : Int,
 ) -> EvidenceAccounting {
-  let evidence_path = @path.Path(root)
-    .join(@path.Path("wiki/synthesis/evidence.md"))
+  let evidence_path = moonbook_adapter_path(root)
+    .join(moonbook_adapter_path("wiki/synthesis/evidence.md"))
     .to_string()
   if !(@fs.exists(evidence_path) catch { _ => false }) {
     return {

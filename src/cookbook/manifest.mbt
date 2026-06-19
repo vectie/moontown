@@ -22,7 +22,7 @@ pub fn book_entry(workspace_root : String) -> @moonbook.BookCatalogEntry {
     name="MoonBook / Moontown Cookbook",
     purpose="Canonical generated operating cookbook for Moontown docs, definitions, stable state, and runtime contracts. Moondesk can curate it as the human desktop surface; Moontown consumes it as a stable-state index.",
     workspace_root~,
-    memory_scope=@core.MemoryScope::BookPrivate,
+    memory_scope=BookPrivate,
     tags=["cookbook", "stable-state", "definitions", "moondesk", "operator"],
     skills=["cookbook-generation", "definition-index", "stable-state-review"],
   )

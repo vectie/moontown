@@ -57,18 +57,18 @@ fn execution_status_for(
   offset : Int,
 ) -> @core.TaskExecutionStatus {
   if mayor_recovery_active(model) && offset == 4 {
-    @core.TaskExecutionStatus::RunConfirmed
+    RunConfirmed
   } else if model.stability < 26 && offset == 3 {
-    @core.TaskExecutionStatus::ReviewQueued
+    ReviewQueued
   } else {
     match (model.tick + offset) % 7 {
-      0 => @core.TaskExecutionStatus::PacketReady
-      1 => @core.TaskExecutionStatus::ProposalImported
-      2 => @core.TaskExecutionStatus::RunConfirmed
-      3 => @core.TaskExecutionStatus::Running
-      4 => @core.TaskExecutionStatus::AwaitingPersistence
-      5 => @core.TaskExecutionStatus::ReviewQueued
-      _ => @core.TaskExecutionStatus::Completed
+      0 => PacketReady
+      1 => ProposalImported
+      2 => RunConfirmed
+      3 => Running
+      4 => AwaitingPersistence
+      5 => ReviewQueued
+      _ => Completed
     }
   }
 }
@@ -79,23 +79,23 @@ fn execution_summary(
   task_id : String,
 ) -> String {
   match status {
-    @core.TaskExecutionStatus::PacketReady =>
+    PacketReady =>
       "Keeper packet prepared for \{task_id}."
-    @core.TaskExecutionStatus::ProposalImported =>
+    ProposalImported =>
       "Proposal imported and waiting for mayor confirmation."
-    @core.TaskExecutionStatus::RunConfirmed =>
+    RunConfirmed =>
       "Mayor confirmed a live MoonClaw run."
-    @core.TaskExecutionStatus::Running =>
+    Running =>
       "MoonClaw run is executing book-local work."
-    @core.TaskExecutionStatus::AwaitingPersistence =>
+    AwaitingPersistence =>
       "MoonBook persistence is waiting to absorb the result."
-    @core.TaskExecutionStatus::ReviewQueued =>
+    ReviewQueued =>
       "Keeper review queued after persistence."
-    @core.TaskExecutionStatus::Completed =>
+    Completed =>
       "Packet, run, and review loop completed."
-    @core.TaskExecutionStatus::Stale =>
+    Stale =>
       "Mayor marked the execution stale and queued a recovery decision."
-    @core.TaskExecutionStatus::Failed =>
+    Failed =>
       "Execution failed and the town should recover or retry."
   }
 }

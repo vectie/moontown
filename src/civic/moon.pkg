@@ -5,3 +5,5 @@ import {
   "vectie/moontown/skill_quality",
   "vectie/moontown/adapters/moonbook",
 }
+
+supported_targets = "native"

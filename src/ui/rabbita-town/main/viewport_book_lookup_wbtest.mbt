@@ -5,7 +5,7 @@ fn lookup_test_task(id : String, book_id : String) -> @core.TownTask {
     book_id~,
     title=id,
     prompt="test",
-    domain=@core.WorkDomain::SocialExperiment,
+    domain=SocialExperiment,
   )
 }
 

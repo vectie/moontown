@@ -12,7 +12,7 @@ test "planbook repair treats temporary dispatch contention as retryable" {
   )
   assert_true(
     planbook_repair_transient_dispatch_error(
-      "Error: Failed to resolve the module dependency graph\nUnable to lock folder `/Users/kq/Workspace/moonclaw/.mooncakes` for downloading dependencies\nOperation not permitted (os error 1)",
+      "Error: Failed to resolve the module dependency graph\nUnable to lock folder `/workspace/external/moonclaw/.mooncakes` for downloading dependencies\nOperation not permitted (os error 1)",
     ),
   )
   assert_true(

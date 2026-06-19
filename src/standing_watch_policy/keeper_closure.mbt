@@ -68,9 +68,8 @@ fn standing_watch_keeper_closure_allowed(
   decision : @core.WatcherDecisionKind,
 ) -> Bool {
   match decision {
-    @core.WatcherDecisionKind::NoChange => true
-    @core.WatcherDecisionKind::Update =>
-      standing_watch_delta_score(execution) >= goal.quality_threshold
+    NoChange => true
+    Update => standing_watch_delta_score(execution) >= goal.quality_threshold
     _ => false
   }
 }

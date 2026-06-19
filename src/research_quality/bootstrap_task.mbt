@@ -13,7 +13,7 @@ pub fn research_bootstrap_ingest_task(
     priority=100,
     requires_review=true,
     target_pages=research_bootstrap_ingest_target_pages(),
-    required_role=Some(@core.WorkerRole::Harness),
+    required_role=Some(Harness),
   )
 }
 

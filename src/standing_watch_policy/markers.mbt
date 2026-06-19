@@ -57,11 +57,11 @@ fn standing_watch_marker_decision_rules() -> Array[
   StandingWatchMarkerDecisionRule,
 ] {
   [
-    { marker: "failed", decision: @core.WatcherDecisionKind::Failed },
-    { marker: "deferred", decision: @core.WatcherDecisionKind::Deferred },
-    { marker: "no_change", decision: @core.WatcherDecisionKind::NoChange },
-    { marker: "needs_review", decision: @core.WatcherDecisionKind::NeedsReview },
-    { marker: "update", decision: @core.WatcherDecisionKind::Update },
+    { marker: "failed", decision: Failed },
+    { marker: "deferred", decision: Deferred },
+    { marker: "no_change", decision: NoChange },
+    { marker: "needs_review", decision: NeedsReview },
+    { marker: "update", decision: Update },
   ]
 }
 
@@ -96,7 +96,7 @@ pub fn standing_watch_delta_score(execution : @core.TaskExecutionRecord) -> Int 
     execution.summary,
     "delta_score",
     fallback=if standing_watch_marker_decision(execution.summary.to_lower()) ==
-      Some(@core.WatcherDecisionKind::Update) {
+      Some(Update) {
       100
     } else {
       0

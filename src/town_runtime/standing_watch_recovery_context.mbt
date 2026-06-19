@@ -8,8 +8,7 @@ priv struct StandingWatchRecoveryContext {
 fn standing_watch_failed_or_stale(
   execution : @core.TaskExecutionRecord,
 ) -> Bool {
-  execution.status == @core.TaskExecutionStatus::Failed ||
-  execution.status == @core.TaskExecutionStatus::Stale
+  execution.status == Failed || execution.status == Stale
 }
 
 ///|
@@ -44,7 +43,7 @@ async fn recover_observed_standing_watch_output(
 ) -> Unit {
   let completed = copy_execution_with(
     observed,
-    status=@core.TaskExecutionStatus::Completed,
+    status=Completed,
     summary=@standing_watch_policy.standing_watch_recovery_summary(
       context.goal,
       observed,

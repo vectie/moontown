@@ -5,6 +5,8 @@ import {
   "vectie/moontown/pdf_evidence_watch",
 }
 
+supported_targets = "native"
+
 import {
   "vectie/moontown/adapters/moonbook",
   "vectie/moontown/book_quality",

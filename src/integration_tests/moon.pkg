@@ -5,6 +5,8 @@ import {
   "moonbitlang/async",
 } for "test"
 
+supported_targets = "native"
+
 import {
   "vectie/moontown/adapters/codex",
   "vectie/moontown/adapters/moonbook",
@@ -22,4 +24,5 @@ import {
   "moonbitlang/async",
   "moonbitlang/async/fs",
   "moonbitlang/core/json",
+  "moonbitlang/x/sys",
 } for "wbtest"

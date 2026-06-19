@@ -12,8 +12,8 @@ test "dispatch owns book and task domain policy" {
     purpose="Track finance.",
     workspace_root="/tmp/finance",
   )
-  assert_eq(domain_for_book(coding), @core.WorkDomain::Coding)
-  assert_eq(domain_for_book(finance), @core.WorkDomain::Finance)
+  assert_eq(domain_for_book(coding), Coding)
+  assert_eq(domain_for_book(finance), Finance)
   let patch = @moonbook.BookTask::new(
     id="patch",
     title="Patch code",
@@ -38,12 +38,9 @@ test "dispatch owns book and task domain policy" {
     priority=1,
     requires_review=false,
   )
-  assert_eq(domain_for_book_task(finance, patch), @core.WorkDomain::Coding)
-  assert_eq(
-    domain_for_book_task(coding, civic),
-    @core.WorkDomain::SocialExperiment,
-  )
-  assert_eq(domain_for_book_task(coding, watch), @core.WorkDomain::Research)
+  assert_eq(domain_for_book_task(finance, patch), Coding)
+  assert_eq(domain_for_book_task(coding, civic), SocialExperiment)
+  assert_eq(domain_for_book_task(coding, watch), Research)
   assert_eq(
     domain_for_provider_overview(
       @core.BookRef::new(
@@ -53,6 +50,6 @@ test "dispatch owns book and task domain policy" {
         workspace_root="/tmp/finance",
       ),
     ),
-    @core.WorkDomain::Finance,
+    Finance,
   )
 }

@@ -45,8 +45,7 @@ async fn reconcile_detached_import_receipt_if_available(
   }
   match @moonclaw.detached_import_receipt(packet_id, packet_path) {
     Some(receipt) => {
-      let should_launch = launch_confirmed_run &&
-        receipt.status == @core.TaskExecutionStatus::RunConfirmed
+      let should_launch = launch_confirmed_run && receipt.status == RunConfirmed
       let launch_command = match receipt.run_id {
         Some(run_id) if should_launch =>
           match launch_command_override {
@@ -76,14 +75,12 @@ async fn reconcile_detached_import_receipt_if_available(
         heartbeat_tick=tick,
         stale_after_tick=tick +
           @core.polled_execution_stale_window_ticks(execution),
-        result_decision=if receipt.status ==
-          @core.TaskExecutionStatus::Completed {
+        result_decision=if receipt.status == Completed {
           "completed"
         } else {
           execution.result_decision
         },
-        requires_review=if receipt.status ==
-          @core.TaskExecutionStatus::Completed {
+        requires_review=if receipt.status == Completed {
           false
         } else {
           execution.requires_review

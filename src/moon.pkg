@@ -5,3 +5,5 @@ import {
   "vectie/moontown/storage",
   "vectie/moontown/town_runtime",
 }
+
+supported_targets = "native"

@@ -32,8 +32,7 @@ async fn refresh_civic_communication_projection_if_stale(
           workspace_base~,
           mode=PersistedReducer,
         )
-        if reduction.status is @core.TaskExecutionStatus::Completed &&
-          reduction.ideas.length() > 0 {
+        if reduction.status is Completed && reduction.ideas.length() > 0 {
           let summary = materialize_civic_communication_scenario(
             scenario,
             reduction.ideas,

@@ -42,8 +42,8 @@ fn standing_watch_issue_superseded(
     match standing_watch_task_prefix(execution.task_id) {
       Some(other_prefix) =>
         if other_prefix == prefix &&
-          execution.status != @core.TaskExecutionStatus::Failed &&
-          execution.status != @core.TaskExecutionStatus::Stale {
+          execution.status != Failed &&
+          execution.status != Stale {
           return true
         }
       None => ()
@@ -86,8 +86,7 @@ fn standing_watch_neighbor_completed(
 fn standing_watch_successful_terminal(
   status : @core.TaskExecutionStatus,
 ) -> Bool {
-  status == @core.TaskExecutionStatus::Completed ||
-  status == @core.TaskExecutionStatus::ReviewQueued
+  status == Completed || status == ReviewQueued
 }
 
 ///|

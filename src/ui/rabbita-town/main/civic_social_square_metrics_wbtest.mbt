@@ -34,21 +34,21 @@ test "social square signal uses shared execution phrase groups" {
   assert_eq(
     social_square_signal(
       model,
-      Some(civic_metric_test_execution(@core.TaskExecutionStatus::PacketReady)),
+      Some(civic_metric_test_execution(PacketReady)),
     ),
     "Match queued",
   )
   assert_eq(
     social_square_signal(
       model,
-      Some(civic_metric_test_execution(@core.TaskExecutionStatus::Running)),
+      Some(civic_metric_test_execution(Running)),
     ),
     "Match live",
   )
   assert_eq(
     social_square_signal(
       { ..model, state_source: StateSourceKind::SnapshotFile },
-      Some(civic_metric_test_execution(@core.TaskExecutionStatus::Completed)),
+      Some(civic_metric_test_execution(Completed)),
     ),
     "Projection bridge",
   )
@@ -63,7 +63,7 @@ test "social square next action uses shared execution action groups" {
       None,
       Some(
         civic_metric_test_execution(
-          @core.TaskExecutionStatus::AwaitingPersistence,
+          AwaitingPersistence,
         ),
       ),
     ),
@@ -73,7 +73,7 @@ test "social square next action uses shared execution action groups" {
     social_square_next_action(
       model,
       None,
-      Some(civic_metric_test_execution(@core.TaskExecutionStatus::Stale)),
+      Some(civic_metric_test_execution(Stale)),
     ),
     "Recover the stalled introduction run before the context for this weak tie goes cold.",
   )
@@ -85,21 +85,21 @@ test "social square stage uses shared execution phrase groups" {
   assert_eq(
     social_square_stage(
       model,
-      Some(civic_metric_test_execution(@core.TaskExecutionStatus::PacketReady)),
+      Some(civic_metric_test_execution(PacketReady)),
     ),
     "Match dispatch",
   )
   assert_eq(
     social_square_stage(
       model,
-      Some(civic_metric_test_execution(@core.TaskExecutionStatus::Running)),
+      Some(civic_metric_test_execution(Running)),
     ),
     "RSVP plan in flight",
   )
   assert_eq(
     social_square_stage(
       { ..model, state_source: StateSourceKind::SnapshotFile },
-      Some(civic_metric_test_execution(@core.TaskExecutionStatus::Completed)),
+      Some(civic_metric_test_execution(Completed)),
     ),
     "Projection bridge pending",
   )

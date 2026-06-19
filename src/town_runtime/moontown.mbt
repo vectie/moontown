@@ -12,11 +12,7 @@ async fn build_live_state_from_catalog(
     let batch = @moonbook.produce_task_batch(entry, goal_for_book(entry)) catch {
       error => {
         let task = fixture_book_tasks(entry)[0]
-        let failed_task = to_town_task(
-          entry,
-          task,
-          @core.TaskExecutionStatus::Failed,
-        )
+        let failed_task = to_town_task(entry, task, Failed)
         state.enqueue_task(failed_task)
         state.register_execution(
           failed_execution_record(
@@ -43,9 +39,7 @@ async fn build_live_state_from_catalog(
           supervision_tick(state),
           "Mayor queued \{task.id} during catalog bootstrap because live external execution count reached \{@core.max_live_external_executions()}; the supervision loop will launch it when capacity is available.",
         )
-        state.enqueue_task(
-          to_town_task(entry, task, @core.TaskExecutionStatus::PacketReady),
-        )
+        state.enqueue_task(to_town_task(entry, task, PacketReady))
         state.register_execution(queued_execution)
         emitted += 1
         continue

@@ -19,6 +19,8 @@ import {
   "vectie/moontown/visual_projection_runtime",
 }
 
+supported_targets = "native"
+
 import {
   "moonbitlang/async",
   "vectie/moontown/test_fixtures",

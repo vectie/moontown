@@ -18,11 +18,11 @@ fn book_level(town : @core.TownState, book_id : String) -> HealthLevel {
       continue
     }
     match execution.status {
-      @core.TaskExecutionStatus::Failed =>
+      Failed =>
         if !execution_issue_superseded(town.executions, execution) {
           return Critical
         }
-      @core.TaskExecutionStatus::Stale =>
+      Stale =>
         if !execution_issue_superseded(town.executions, execution) {
           return Critical
         }

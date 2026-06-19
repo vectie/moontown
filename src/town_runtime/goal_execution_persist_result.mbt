@@ -16,8 +16,7 @@ async fn persist_execution_into_book(
     summary=result_summary,
     artifacts=result_artifacts,
     memory_candidates~,
-    requires_review=execution.requires_review ||
-      execution.status is @core.TaskExecutionStatus::Running,
+    requires_review=execution.requires_review || execution.status is Running,
     notify_town=execution.notify_town,
   )
   let outcome = @moonbook.persist_result(entry, result) catch {
@@ -56,14 +55,12 @@ fn execution_after_successful_book_persist(
   outcome : @moonbook.PersistResultOutcome,
   tick : Int,
 ) -> @core.TaskExecutionRecord {
-  let status = match execution.status {
-    @core.TaskExecutionStatus::Failed
-    | @core.TaskExecutionStatus::Stale
-    | @core.TaskExecutionStatus::AwaitingPersistence =>
+  let status : @core.TaskExecutionStatus = match execution.status {
+    Failed | Stale | AwaitingPersistence =>
       if outcome.review_queued {
-        @core.TaskExecutionStatus::ReviewQueued
+        ReviewQueued
       } else {
-        @core.TaskExecutionStatus::Completed
+        Completed
       }
     _ => execution.status
   }

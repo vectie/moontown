@@ -74,7 +74,7 @@ pub fn timed_out_poll_response(
   {
     task_id,
     run_id,
-    status: @core.TaskExecutionStatus::Failed,
+    status: Failed,
     summary,
     memory_candidates: [],
     result_decision: "blocked",

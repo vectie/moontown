@@ -5,14 +5,14 @@ async test "live autonomy distinguishes historical watcher failures from current
   )
   let snapshot_path = workspace.snapshot_path
   let state = @test_fixtures.visual_projection_test_state(
-    worker_status=@core.WorkerStatus::Idle,
-    execution_status=@core.TaskExecutionStatus::Completed,
+    worker_status=Idle,
+    execution_status=Completed,
   )
   let record = live_autonomy_watcher_record(
     goal_id="watch-opc",
     tick=41,
     book_id="research-opc",
-    decision=@core.WatcherDecisionKind::Failed,
+    decision=Failed,
     detail="historical network issue already recovered",
     next_due_tick=101,
   )

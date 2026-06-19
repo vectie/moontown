@@ -68,7 +68,7 @@ fn latest_watcher_record_card_view(
   match latest {
     Some(record) => {
       let metrics = watcher_record_metric_labels(record)
-      LatestWatcherRecordCardView::{
+      {
         decision: record.decision,
         detail: one_line(record.detail),
         latest_tick: "latest tick \{record.tick}",
@@ -81,7 +81,7 @@ fn latest_watcher_record_card_view(
       }
     }
     None =>
-      LatestWatcherRecordCardView::{
+      {
         decision: "Waiting",
         detail: "No ledger row has been recorded for this standing watch yet.",
         latest_tick: "no completed tick",

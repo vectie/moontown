@@ -6,8 +6,8 @@ test "clean research projection recovers late failed bootstrap execution" {
       id="worker-research-opc",
       name="Research Worker",
       book_id="research-opc",
-      role=@core.WorkerRole::Harness,
-      status=@core.WorkerStatus::Blocked,
+      role=Harness,
+      status=Blocked,
     ),
   )
   let task_id = "goal-research-opc-research-bootstrap-ingest"
@@ -17,8 +17,8 @@ test "clean research projection recovers late failed bootstrap execution" {
       book_id="research-opc",
       title="Bootstrap verified research coverage",
       prompt="research",
-      domain=@core.WorkDomain::Research,
-      status=@core.TownTaskStatus::Failed,
+      domain=Research,
+      status=Failed,
     ),
   )
   state.register_execution(
@@ -27,7 +27,7 @@ test "clean research projection recovers late failed bootstrap execution" {
       book_id="research-opc",
       packet_id="packet",
       packet_path="packet.json",
-      status=@core.TaskExecutionStatus::Failed,
+      status=Failed,
       summary="worker timeout",
       output_contract="research",
       assigned_worker_id=Some("worker-research-opc"),
@@ -36,15 +36,9 @@ test "clean research projection recovers late failed bootstrap execution" {
   complete_recovered_research_bootstrap_if_clean(state, "research-opc", [
     task_id,
   ])
-  assert_eq(
-    @core.find_execution(state, task_id).unwrap().status,
-    @core.TaskExecutionStatus::Completed,
-  )
-  assert_eq(
-    @core.find_task(state, task_id).unwrap().status,
-    @core.TownTaskStatus::Done,
-  )
-  assert_eq(state.workers[0].status, @core.WorkerStatus::Idle)
+  assert_eq(@core.find_execution(state, task_id).unwrap().status, Completed)
+  assert_eq(@core.find_task(state, task_id).unwrap().status, Done)
+  assert_eq(state.workers[0].status, Idle)
   assert_true(state.events.any(fn(event) { event.kind == "recovery" }))
 }
 
@@ -66,15 +60,15 @@ async test "research quality gate schedules in-place repair retry" {
       book_id="research-how-llm-are-trained-in-very-detail",
       title="Bootstrap verified research coverage",
       prompt="research",
-      domain=@core.WorkDomain::Research,
-      status=@core.TownTaskStatus::Done,
+      domain=Research,
+      status=Done,
     ),
   )
   state.register_execution(
     @test_fixtures.research_quality_execution(
       task_id,
       "research-how-llm-are-trained-in-very-detail",
-      @core.TaskExecutionStatus::Completed,
+      Completed,
       "completed",
     ),
   )
@@ -82,13 +76,10 @@ async test "research quality gate schedules in-place repair retry" {
     "deep-report.md has fewer than 12k English words",
   ])
   let execution = @core.find_execution(state, task_id).unwrap()
-  assert_eq(execution.status, @core.TaskExecutionStatus::ReviewQueued)
+  assert_eq(execution.status, ReviewQueued)
   assert_true(execution.next_retry_tick != None)
   assert_true(execution.summary.contains("auto_retry=true"))
-  assert_eq(
-    @core.find_task(state, task_id).unwrap().status,
-    @core.TownTaskStatus::Blocked,
-  )
+  assert_eq(@core.find_task(state, task_id).unwrap().status, Blocked)
   let trigger = @fs.read_file(root + "/raw/bootstrap/QUALITY_REPAIR.md").text()
   assert_true(trigger.contains("in-place review/repair"))
   assert_true(trigger.contains("do not create a new v1/v2/v3/v4 book"))
@@ -121,15 +112,15 @@ async test "research quality gate retries failed bootstrap before version forkin
       book_id="research-how-llms-are-trained-in-very-detail",
       title="Bootstrap verified research coverage",
       prompt="research",
-      domain=@core.WorkDomain::Research,
-      status=@core.TownTaskStatus::Failed,
+      domain=Research,
+      status=Failed,
     ),
   )
   state.register_execution(
     @test_fixtures.research_quality_execution(
       task_id,
       "research-how-llms-are-trained-in-very-detail",
-      @core.TaskExecutionStatus::Failed,
+      Failed,
       "MoonClaw run did not settle before deep-report.md existed.",
     ),
   )
@@ -137,12 +128,9 @@ async test "research quality gate retries failed bootstrap before version forkin
     "missing `raw/bootstrap/deep-report.md`",
   ])
   let execution = @core.find_execution(state, task_id).unwrap()
-  assert_eq(execution.status, @core.TaskExecutionStatus::ReviewQueued)
+  assert_eq(execution.status, ReviewQueued)
   assert_true(execution.next_retry_tick != None)
-  assert_eq(
-    @core.find_task(state, task_id).unwrap().status,
-    @core.TownTaskStatus::Blocked,
-  )
+  assert_eq(@core.find_task(state, task_id).unwrap().status, Blocked)
   let trigger = @fs.read_file(root + "/raw/bootstrap/QUALITY_REPAIR.md").text()
   assert_true(trigger.contains("missing `raw/bootstrap/deep-report.md`"))
 }

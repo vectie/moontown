@@ -8,7 +8,7 @@ async fn execute_dispatched_standing_watch_task(
   tick : Int,
 ) -> @core.TaskExecutionRecord {
   let execution = match route.decision {
-    @dispatch.RouteDecision::Assigned(_) =>
+    Assigned(_) =>
       execute_goal_book_task(
         mayor,
         entry,

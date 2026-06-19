@@ -38,7 +38,7 @@ fn planbook_catalog_entry(
     name="MoonBook / Moontown Quality Planbook",
     purpose="Durable planbook for implementation plans, acceptance criteria, execution evidence, review notes, and stable-state handoffs for Moontown quality work.",
     workspace_root~,
-    memory_scope=@core.MemoryScope::BookPrivate,
+    memory_scope=BookPrivate,
     tags=["planbook", "code-plan", "quality-gates", "implementation", "review"],
     skills=["code-plan", "code-review", "doc-sync", "acceptance-gates"],
   )

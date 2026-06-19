@@ -5,14 +5,14 @@ async test "live autonomy latest watcher prefers parsed terminal duplicate" {
   )
   let snapshot_path = workspace.snapshot_path
   let state = @test_fixtures.visual_projection_test_state(
-    worker_status=@core.WorkerStatus::Idle,
-    execution_status=@core.TaskExecutionStatus::Completed,
+    worker_status=Idle,
+    execution_status=Completed,
   )
   let parsed = live_autonomy_watcher_record(
     goal_id="watch-opc-news",
     tick=17972,
     book_id="research-opc",
-    decision=@core.WatcherDecisionKind::NoChange,
+    decision=NoChange,
     delta_score=8,
     detail="standing_goal_decision: no_change\ndelta_score: 8\nnew_source_count: 0\nbook_changed: no",
     task_id=Some("standing-watch-opc-news-tick-17972"),
@@ -23,7 +23,7 @@ async test "live autonomy latest watcher prefers parsed terminal duplicate" {
     goal_id="watch-opc-news",
     tick=17972,
     book_id="research-opc",
-    decision=@core.WatcherDecisionKind::NeedsReview,
+    decision=NeedsReview,
     detail="MoonClaw run run-opc completed: Workflow completed",
     task_id=Some("standing-watch-opc-news-tick-17972"),
     run_id=Some("run-opc"),

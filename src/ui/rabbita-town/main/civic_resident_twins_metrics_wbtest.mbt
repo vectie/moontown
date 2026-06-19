@@ -35,21 +35,21 @@ test "resident twins signal uses shared execution phrase groups" {
   assert_eq(
     resident_twins_signal(
       model,
-      Some(civic_metric_test_execution(@core.TaskExecutionStatus::PacketReady)),
+      Some(civic_metric_test_execution(PacketReady)),
     ),
     "Twin dispatch",
   )
   assert_eq(
     resident_twins_signal(
       model,
-      Some(civic_metric_test_execution(@core.TaskExecutionStatus::Running)),
+      Some(civic_metric_test_execution(Running)),
     ),
     "Reflection running",
   )
   assert_eq(
     resident_twins_signal(
       { ..model, state_source: StateSourceKind::SnapshotFile },
-      Some(civic_metric_test_execution(@core.TaskExecutionStatus::Completed)),
+      Some(civic_metric_test_execution(Completed)),
     ),
     "Projection bridge",
   )
@@ -64,7 +64,7 @@ test "resident twins next action uses shared execution action groups" {
       None,
       Some(
         civic_metric_test_execution(
-          @core.TaskExecutionStatus::AwaitingPersistence,
+          AwaitingPersistence,
         ),
       ),
     ),
@@ -74,7 +74,7 @@ test "resident twins next action uses shared execution action groups" {
     resident_twins_next_action(
       model,
       None,
-      Some(civic_metric_test_execution(@core.TaskExecutionStatus::Stale)),
+      Some(civic_metric_test_execution(Stale)),
     ),
     "Recover the stalled resident lane before memory and plan cards drift.",
   )
@@ -86,21 +86,21 @@ test "resident twins build stage uses shared execution phrase groups" {
   assert_eq(
     resident_twins_build_stage(
       model,
-      Some(civic_metric_test_execution(@core.TaskExecutionStatus::PacketReady)),
+      Some(civic_metric_test_execution(PacketReady)),
     ),
     "Patch packet prepared",
   )
   assert_eq(
     resident_twins_build_stage(
       model,
-      Some(civic_metric_test_execution(@core.TaskExecutionStatus::Running)),
+      Some(civic_metric_test_execution(Running)),
     ),
     "Reflection loop running",
   )
   assert_eq(
     resident_twins_build_stage(
       model,
-      Some(civic_metric_test_execution(@core.TaskExecutionStatus::Completed)),
+      Some(civic_metric_test_execution(Completed)),
     ),
     "Projection updated",
   )

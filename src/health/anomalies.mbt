@@ -14,14 +14,14 @@ fn detect_anomalies(
   }
   for execution in executions {
     match execution.status {
-      @core.TaskExecutionStatus::Failed =>
+      Failed =>
         if !execution_issue_superseded(executions, execution) {
           anomalies.push({
             title: "execution-failed",
             detail: "\{execution.task_id} failed after packet \{execution.packet_id}",
           })
         }
-      @core.TaskExecutionStatus::Stale =>
+      Stale =>
         if !execution_issue_superseded(executions, execution) {
           anomalies.push({
             title: "execution-stale",

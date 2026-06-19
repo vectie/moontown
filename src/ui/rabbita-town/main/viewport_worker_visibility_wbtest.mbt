@@ -1,6 +1,6 @@
 ///|
 fn worker_visibility_test_worker(
-  status? : @core.WorkerStatus = @core.WorkerStatus::Idle,
+  status? : @core.WorkerStatus = Idle,
   role? : String = "worker",
   book_id? : String = "research",
   zone_key? : String = "book-research",
@@ -22,17 +22,17 @@ fn worker_visibility_test_worker(
 test "worker visibility separates working workers from idle workers" {
   assert_true(
     is_working_worker(
-      worker_visibility_test_worker(status=@core.WorkerStatus::Running),
+      worker_visibility_test_worker(status=Running),
     ),
   )
   assert_true(
     is_working_worker(
-      worker_visibility_test_worker(status=@core.WorkerStatus::Blocked),
+      worker_visibility_test_worker(status=Blocked),
     ),
   )
   assert_true(
     !is_working_worker(
-      worker_visibility_test_worker(status=@core.WorkerStatus::Idle),
+      worker_visibility_test_worker(status=Idle),
     ),
   )
 }
@@ -40,16 +40,16 @@ test "worker visibility separates working workers from idle workers" {
 ///|
 test "visible overworld workers keeps active workers and on-duty watchers" {
   let workers = [
-    worker_visibility_test_worker(status=@core.WorkerStatus::Running),
-    worker_visibility_test_worker(status=@core.WorkerStatus::Idle),
+    worker_visibility_test_worker(status=Running),
+    worker_visibility_test_worker(status=Idle),
     worker_visibility_test_worker(
-      status=@core.WorkerStatus::Idle,
+      status=Idle,
       role="Standing Watcher",
     ),
   ]
   let visible = visible_overworld_workers(workers)
   assert_eq(visible.length(), 2)
-  assert_eq(visible[0].status, @core.WorkerStatus::Running)
+  assert_eq(visible[0].status, Running)
   assert_eq(visible[1].role, "Standing Watcher")
 }
 
@@ -72,7 +72,7 @@ test "worker node ownership explains every ownership route" {
     worker_node_ownership_for_key("worker-yard", book) is WorkerYardIdle,
   )
   let running = worker_visibility_test_worker(
-    status=@core.WorkerStatus::Running,
+    status=Running,
     book_id="research",
     zone_key="elsewhere",
   )

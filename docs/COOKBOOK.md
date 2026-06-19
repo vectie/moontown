@@ -108,7 +108,7 @@ for town definitions:
 
 - browse generated wiki pages and stable-state artifacts
 - edit proposed cookbook pages before promotion
-- package portable definitions into Moontown-compatible bundles
+- package portable definitions into Moontown bundles
 - compare cookbook state against live Moontown state
 - show drift without making operational logs look like research progress
 

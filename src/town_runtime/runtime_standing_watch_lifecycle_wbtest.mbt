@@ -22,74 +22,32 @@ test "standing watch running snapshot uses daemon tick heartbeat window" {
 }
 
 ///|
-test "legacy standing watch stale record detects mixed tick domains" {
-  let execution = @core.TaskExecutionRecord::new(
-    task_id="standing-watch-opc-news-tick-16134",
-    book_id="research-opc",
-    packet_id="pending-research-opc-standing-watch-opc-news-tick-16134",
-    packet_path="",
-    status=@core.TaskExecutionStatus::Stale,
-    summary="Execution standing-watch-opc-news-tick-16134 missed its heartbeat window and needs mayor recovery.",
-    output_contract="standing-watch-live-snapshot",
-    heartbeat_tick=2155,
-    stale_after_tick=2185,
-  )
-  assert_eq(
-    @standing_watch_policy.legacy_tick_domain_stale_standing_watch(execution),
-    true,
-  )
-}
-
-///|
-test "legacy review queued standing watch infrastructure failure is retry accounting" {
-  let execution = @core.TaskExecutionRecord::new(
-    task_id="standing-watch-llm-training-tick-16265",
-    book_id="research-llm",
-    packet_id="packet",
-    packet_path="packet.json",
-    status=@core.TaskExecutionStatus::ReviewQueued,
-    summary="Mayor retry failed. Standing watch execution failed for research-llm. RUNTIME ERROR: abort() called. StringBuilder::grow_if_necessary. SystemStore::save_job_proposals.\nkeeper_auto_triage: persisted_terminal_result\npersisted_result_review: false",
-    output_contract="keeper.plan.packet.v1",
-    heartbeat_tick=3346,
-    stale_after_tick=3,
-    requires_review=false,
-    notify_town=true,
-  )
-  assert_eq(
-    @standing_watch_policy.legacy_review_queued_retry_accounting_standing_watch(
-      execution,
-    ),
-    true,
-  )
-}
-
-///|
 test "standing watch infrastructure failure with stale review marker is not review" {
   let execution = @core.TaskExecutionRecord::new(
     task_id="standing-watch-llm-training-tick-15819",
     book_id="research-llm",
     packet_id="packet",
     packet_path="packet.json",
-    status=@core.TaskExecutionStatus::ReviewQueued,
+    status=ReviewQueued,
     summary="Standing watch execution failed for research-llm. RUNTIME ERROR: abort() called. StringBuilder::grow_if_necessary. SystemStore::save_job_proposals. standing_goal_decision: needs_review\ndelta_score: 0\nnew_source_count: 0",
     output_contract="test",
   )
   assert_eq(
     @standing_watch_policy.standing_watch_decision_from_execution(execution),
-    @core.WatcherDecisionKind::Failed,
+    Failed,
   )
   let record = @core.WatcherRunRecord::new(
     goal_id="watch-llm-training",
     tick=15819,
     target_book_id="research-llm",
-    decision=@core.WatcherDecisionKind::NeedsReview,
+    decision=NeedsReview,
     delta_score=0,
     new_source_count=0,
     detail=execution.summary,
   )
   assert_eq(
     @standing_watch_policy.watcher_record_effective_decision(record),
-    @core.WatcherDecisionKind::Failed,
+    Failed,
   )
 }
 
@@ -99,7 +57,7 @@ test "standing watch transient failed record stays deferred accounting" {
     goal_id="book-quality-repair-research-opc",
     tick=18032,
     target_book_id="research-opc",
-    decision=@core.WatcherDecisionKind::Failed,
+    decision=Failed,
     delta_score=0,
     new_source_count=0,
     detail="Standing watch execution failed for research-opc / standing-book-quality-repair-research-opc-tick-18032: timed out while importing MoonClaw proposal; no run id or detached import receipt became available before the heartbeat window.",
@@ -108,7 +66,7 @@ test "standing watch transient failed record stays deferred accounting" {
   )
   assert_eq(
     @standing_watch_policy.watcher_record_effective_decision(record),
-    @core.WatcherDecisionKind::Deferred,
+    Deferred,
   )
 }
 
@@ -118,7 +76,7 @@ test "standing watch detached startup-log failure record stays deferred accounti
     goal_id="watch-opc-news",
     tick=18122,
     target_book_id="research-opc",
-    decision=@core.WatcherDecisionKind::Failed,
+    decision=Failed,
     delta_score=0,
     new_source_count=0,
     detail=(
@@ -129,7 +87,7 @@ test "standing watch detached startup-log failure record stays deferred accounti
   )
   assert_eq(
     @standing_watch_policy.watcher_record_effective_decision(record),
-    @core.WatcherDecisionKind::Deferred,
+    Deferred,
   )
   let summary = @runtime_status.watcher_status_summary([record], [])
   assert_true(summary.contains("latest=watch-opc-news/Deferred"))
@@ -144,27 +102,27 @@ test "standing watch persisted orphaned running recovery stays deferred" {
     book_id="research-robotics",
     packet_id="packet",
     packet_path="packet.json",
-    status=@core.TaskExecutionStatus::Completed,
+    status=Completed,
     summary~,
     output_contract="standing-watch-live-snapshot",
     requires_review=true,
   )
   assert_eq(
     @standing_watch_policy.standing_watch_decision_from_execution(execution),
-    @core.WatcherDecisionKind::Deferred,
+    Deferred,
   )
   let record = @core.WatcherRunRecord::new(
     goal_id="watch-robotics",
     tick=10,
     target_book_id="research-robotics",
-    decision=@core.WatcherDecisionKind::NeedsReview,
+    decision=NeedsReview,
     delta_score=0,
     new_source_count=0,
     detail=summary,
   )
   assert_eq(
     @standing_watch_policy.watcher_record_effective_decision(record),
-    @core.WatcherDecisionKind::Deferred,
+    Deferred,
   )
 }
 

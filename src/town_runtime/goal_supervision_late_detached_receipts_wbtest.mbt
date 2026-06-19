@@ -18,7 +18,7 @@ async test "late inline detached receipt reconciles deferred no-run execution" {
   let execution = standing_watch_execution_fixture(
     task_id="standing-watch-opc-news-tick-10",
     packet_path~,
-    status=@core.TaskExecutionStatus::Completed,
+    status=Completed,
     summary="closed as deferred before receipt arrived",
     heartbeat_tick=10,
     stale_after_tick=12,
@@ -29,7 +29,7 @@ async test "late inline detached receipt reconciles deferred no-run execution" {
   )
   state.register_execution(execution)
   reconcile_late_detached_import_receipts(state, 13)
-  assert_eq(state.executions[0].status, @core.TaskExecutionStatus::Completed)
+  assert_eq(state.executions[0].status, Completed)
   assert_true(state.executions[0].run_id == Some("run-detached"))
   assert_true(state.executions[0].proposal_id == Some("proposal-detached"))
   assert_true(state.executions[0].summary.contains("inline run finished"))
@@ -43,7 +43,7 @@ test "pending standing watch placeholder reconstructs keeper packet path" {
     task_id="standing-book-quality-repair-research-opc-tick-17902",
     packet_id="pending-research-opc-standing-book-quality-repair-research-opc-tick-17902",
     packet_path="",
-    status=@core.TaskExecutionStatus::Completed,
+    status=Completed,
     summary="closed as deferred before receipt arrived",
     heartbeat_tick=10,
     stale_after_tick=12,
@@ -64,7 +64,7 @@ async test "late detached reconciliation hydrates missing packet handle without 
     task_id="standing-book-quality-repair-research-opc-tick-17902",
     packet_id="pending-research-opc-standing-book-quality-repair-research-opc-tick-17902",
     packet_path="",
-    status=@core.TaskExecutionStatus::Completed,
+    status=Completed,
     summary="closed as deferred before receipt arrived",
     heartbeat_tick=10,
     stale_after_tick=12,

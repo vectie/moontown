@@ -24,16 +24,7 @@ test "Wenyu service code and asset tasks route to the expected domains" {
   let service = tasks[0]
   let code = tasks[2]
   let asset = tasks[3]
-  assert_eq(
-    @dispatch.domain_for_book_task(entry, service),
-    @core.WorkDomain::SocialExperiment,
-  )
-  assert_eq(
-    @dispatch.domain_for_book_task(entry, code),
-    @core.WorkDomain::Coding,
-  )
-  assert_eq(
-    @dispatch.domain_for_book_task(entry, asset),
-    @core.WorkDomain::Coding,
-  )
+  assert_eq(@dispatch.domain_for_book_task(entry, service), SocialExperiment)
+  assert_eq(@dispatch.domain_for_book_task(entry, code), Coding)
+  assert_eq(@dispatch.domain_for_book_task(entry, asset), Coding)
 }

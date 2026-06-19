@@ -24,16 +24,16 @@ async fn rehydrate_orphaned_deferred_watcher_records(
               book_id~,
               title="Standing watch recovery: \{goal.title}",
               prompt=goal.prompt,
-              domain=@core.WorkDomain::Research,
-              required_role=Some(@core.WorkerRole::Watcher),
-              status=@core.TownTaskStatus::Assigned,
+              domain=Research,
+              required_role=Some(Watcher),
+              status=Assigned,
             )
             let execution = @core.TaskExecutionRecord::new(
               task_id~,
               book_id~,
               packet_id~,
               packet_path~,
-              status=@core.TaskExecutionStatus::ProposalImported,
+              status=ProposalImported,
               summary="Mayor rehydrated orphaned deferred watcher record for `\{goal.id}` from persisted ledger receipt path. Original detail: \{record.detail}",
               output_contract="standing-watch",
               heartbeat_tick=tick,
@@ -90,7 +90,7 @@ fn orphaned_deferred_watcher_record_candidate(
   records : Array[@core.WatcherRunRecord],
   record : @core.WatcherRunRecord,
 ) -> Bool {
-  if record.decision != @core.WatcherDecisionKind::Deferred {
+  if record.decision != Deferred {
     return false
   }
   let task_id = match record.task_id {
@@ -114,7 +114,7 @@ fn deferred_watcher_record_has_terminal_successor(
   for other in records {
     if other.task_id == record.task_id &&
       other.tick >= record.tick &&
-      other.decision != @core.WatcherDecisionKind::Deferred {
+      other.decision != Deferred {
       return true
     }
   }

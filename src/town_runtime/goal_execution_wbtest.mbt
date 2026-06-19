@@ -25,7 +25,7 @@ test "successful book persistence reconciles failed execution into review queue"
     book_id="coding",
     packet_id="packet",
     packet_path="packet.json",
-    status=@core.TaskExecutionStatus::Failed,
+    status=Failed,
     summary="ExternalProposalPacket: context_pages must not be empty",
     output_contract="wiki.update",
     requires_review=true,
@@ -38,7 +38,7 @@ test "successful book persistence reconciles failed execution into review queue"
   let reconciled = execution_after_successful_book_persist(
     execution, outcome, 42,
   )
-  assert_eq(reconciled.status, @core.TaskExecutionStatus::ReviewQueued)
+  assert_eq(reconciled.status, ReviewQueued)
   assert_true(reconciled.next_retry_tick == None)
   assert_eq(reconciled.result_decision, "persisted-review")
   assert_true(
@@ -53,7 +53,7 @@ test "successful non-review book persistence closes stale execution" {
     book_id="course",
     packet_id="packet",
     packet_path="packet.json",
-    status=@core.TaskExecutionStatus::Stale,
+    status=Stale,
     summary="missed heartbeat",
     output_contract="course.update",
   )
@@ -65,7 +65,7 @@ test "successful non-review book persistence closes stale execution" {
   let reconciled = execution_after_successful_book_persist(
     execution, outcome, 43,
   )
-  assert_eq(reconciled.status, @core.TaskExecutionStatus::Completed)
+  assert_eq(reconciled.status, Completed)
   assert_eq(reconciled.result_decision, "persisted")
   assert_true(reconciled.summary.contains("persisted_evidence_id"))
 }

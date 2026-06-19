@@ -5,6 +5,8 @@ import {
   "vectie/moontown/policy",
 }
 
+supported_targets = "native"
+
 import {
   "moonbitlang/async",
   "moonbitlang/async/fs",

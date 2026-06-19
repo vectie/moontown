@@ -6,11 +6,7 @@ async fn launch_goal_book(
 ) -> Unit {
   for task in launch.tasks {
     let tick = supervision_tick(state)
-    let planned_task = to_town_task(
-      launch.entry,
-      task,
-      @core.TaskExecutionStatus::PacketReady,
-    )
+    let planned_task = to_town_task(launch.entry, task, PacketReady)
     if @core.live_external_execution_count(state) >=
       @core.max_live_external_executions() {
       queue_goal_book_task(state, launch.entry, task, planned_task, tick)
@@ -132,7 +128,7 @@ fn queued_goal_execution_record(
     packet_path="",
     proposal_id=None,
     run_id=None,
-    status=@core.TaskExecutionStatus::PacketReady,
+    status=PacketReady,
     summary~,
     output_contract="moontown.queued.execution.v1",
     context_pages=task.target_pages,

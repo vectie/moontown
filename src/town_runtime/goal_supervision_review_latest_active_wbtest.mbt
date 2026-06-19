@@ -31,9 +31,9 @@ async test "review queued standing watch keeps only latest review per goal activ
   let current = @core.find_execution(
     state, "standing-book-quality-repair-wenyu-resident-twins-tick-20",
   ).unwrap()
-  assert_eq(old.status, @core.TaskExecutionStatus::Completed)
+  assert_eq(old.status, Completed)
   assert_eq(old.result_decision, "superseded-review")
   assert_true(!old.requires_review)
-  assert_eq(current.status, @core.TaskExecutionStatus::ReviewQueued)
+  assert_eq(current.status, ReviewQueued)
   assert_true(current.requires_review)
 }

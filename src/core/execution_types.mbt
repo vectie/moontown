@@ -28,7 +28,7 @@ pub fn AssignmentPlan::new(
   isolation~ : IsolationMode,
   reason~ : String,
 ) -> AssignmentPlan {
-  AssignmentPlan::{ task_id, worker_id, book_id, isolation, reason }
+  { task_id, worker_id, book_id, isolation, reason }
 }
 
 ///|
@@ -78,7 +78,7 @@ pub fn TaskExecutionRecord::new(
   requires_review? : Bool = false,
   notify_town? : Bool = false,
 ) -> TaskExecutionRecord {
-  TaskExecutionRecord::{
+  {
     task_id,
     book_id,
     packet_id,

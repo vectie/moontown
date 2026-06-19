@@ -150,7 +150,7 @@ async fn moonclaw_store_reset_reason(
   if text.trim().is_empty() {
     Some("empty")
   } else if !text.contains("\"workflows\"") {
-    Some("legacy-schema")
+    Some("invalid-schema")
   } else {
     None
   }

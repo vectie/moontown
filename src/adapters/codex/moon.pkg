@@ -1,5 +1,8 @@
 import {
   "vectie/moontown/core",
   "moonbitlang/core/json",
+  "moonbitlang/core/env",
   "moonbitlang/x/sys",
 }
+
+supported_targets = "native"

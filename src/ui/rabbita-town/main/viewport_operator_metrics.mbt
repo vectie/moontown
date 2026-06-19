@@ -79,7 +79,7 @@ fn operator_console_metrics(
     model,
     fallback_active_workers=workers_summary.running,
   )
-  OperatorConsoleMetrics::{
+  {
     latest_decision: latest.decision,
     latest_sources: latest.sources,
     latest_checked: latest.checked,

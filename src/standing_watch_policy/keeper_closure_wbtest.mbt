@@ -12,7 +12,7 @@ fn standing_watch_policy_goal(threshold : Int) -> @core.StandingGoal {
 ///|
 fn standing_watch_policy_execution(
   summary : String,
-  status? : @core.TaskExecutionStatus = @core.TaskExecutionStatus::Completed,
+  status? : @core.TaskExecutionStatus = Completed,
 ) -> @core.TaskExecutionRecord {
   @core.TaskExecutionRecord::new(
     task_id="watch-policy-task",
@@ -31,20 +31,8 @@ test "standing watch keeper closure accepts no-change regardless of threshold" {
   let execution = standing_watch_policy_execution(
     "standing_goal_decision: no_change\ndelta_score: 0\nnew_source_count: 0",
   )
-  assert_true(
-    standing_watch_auto_triage_allowed(
-      goal,
-      execution,
-      @core.WatcherDecisionKind::NoChange,
-    ),
-  )
-  assert_true(
-    standing_watch_recovery_allowed(
-      goal,
-      execution,
-      @core.WatcherDecisionKind::NoChange,
-    ),
-  )
+  assert_true(standing_watch_auto_triage_allowed(goal, execution, NoChange))
+  assert_true(standing_watch_recovery_allowed(goal, execution, NoChange))
 }
 
 ///|
@@ -56,34 +44,10 @@ test "standing watch keeper closure accepts updates only above threshold" {
   let strong_update = standing_watch_policy_execution(
     "standing_goal_decision: update\ndelta_score: 80\nnew_source_count: 1",
   )
-  assert_true(
-    !standing_watch_auto_triage_allowed(
-      goal,
-      weak_update,
-      @core.WatcherDecisionKind::Update,
-    ),
-  )
-  assert_true(
-    standing_watch_auto_triage_allowed(
-      goal,
-      strong_update,
-      @core.WatcherDecisionKind::Update,
-    ),
-  )
-  assert_true(
-    !standing_watch_recovery_allowed(
-      goal,
-      weak_update,
-      @core.WatcherDecisionKind::Update,
-    ),
-  )
-  assert_true(
-    standing_watch_recovery_allowed(
-      goal,
-      strong_update,
-      @core.WatcherDecisionKind::Update,
-    ),
-  )
+  assert_true(!standing_watch_auto_triage_allowed(goal, weak_update, Update))
+  assert_true(standing_watch_auto_triage_allowed(goal, strong_update, Update))
+  assert_true(!standing_watch_recovery_allowed(goal, weak_update, Update))
+  assert_true(standing_watch_recovery_allowed(goal, strong_update, Update))
 }
 
 ///|
@@ -92,20 +56,8 @@ test "standing watch keeper closure rejects non-terminal decisions" {
   let execution = standing_watch_policy_execution(
     "standing_goal_decision: needs_review\ndelta_score: 100\nnew_source_count: 2",
   )
-  assert_true(
-    !standing_watch_auto_triage_allowed(
-      goal,
-      execution,
-      @core.WatcherDecisionKind::NeedsReview,
-    ),
-  )
-  assert_true(
-    !standing_watch_recovery_allowed(
-      goal,
-      execution,
-      @core.WatcherDecisionKind::Failed,
-    ),
-  )
+  assert_true(!standing_watch_auto_triage_allowed(goal, execution, NeedsReview))
+  assert_true(!standing_watch_recovery_allowed(goal, execution, Failed))
 }
 
 ///|
@@ -117,12 +69,12 @@ test "standing watch policy summaries use explicit keeper metadata" {
   let triage_summary = standing_watch_auto_triage_summary(
     goal,
     execution,
-    @core.WatcherDecisionKind::NoChange,
+    NoChange,
   )
   let recovery_summary = standing_watch_recovery_summary(
     goal,
     execution,
-    @core.WatcherDecisionKind::NoChange,
+    NoChange,
   )
   assert_true(triage_summary.contains("keeper_auto_triage: accepted"))
   assert_true(triage_summary.contains("auto_triage_threshold: 75"))
@@ -138,14 +90,11 @@ test "standing watch policy summaries use explicit keeper metadata" {
 test "standing watch recovery decision trusts terminal marker over failed status" {
   let execution = standing_watch_policy_execution(
     "MoonClaw transport failed\nstanding_goal_decision: no_change\ndelta_score: 0",
-    status=@core.TaskExecutionStatus::Failed,
+    status=Failed,
   )
-  assert_eq(
-    standing_watch_decision_from_execution(execution),
-    @core.WatcherDecisionKind::Failed,
-  )
+  assert_eq(standing_watch_decision_from_execution(execution), Failed)
   assert_eq(
     standing_watch_recovery_decision_from_execution(execution),
-    @core.WatcherDecisionKind::NoChange,
+    NoChange,
   )
 }

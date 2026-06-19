@@ -14,13 +14,13 @@ struct StoredRun {
 
 ///|
 fn run_store_root(home : String) -> String {
-  @path.Path(home).join(@path.Path("jobs")).to_string()
+  moonclaw_runtime_path(home).join(moonclaw_runtime_path("jobs")).to_string()
 }
 
 ///|
 async fn load_run(run_id : String, home : String) -> StoredRun? {
-  let path = @path.Path(run_store_root(home))
-    .join(@path.Path("index/runs.json"))
+  let path = moonclaw_runtime_path(run_store_root(home))
+    .join(moonclaw_runtime_path("index/runs.json"))
     .to_string()
   let indexed = match moonclaw_read_optional_json_file(path) {
     Some(parsed) => {
@@ -39,10 +39,10 @@ async fn load_run(run_id : String, home : String) -> StoredRun? {
 
 ///|
 async fn load_run_meta(run_id : String, home : String) -> StoredRun? {
-  let path = @path.Path(run_store_root(home))
-    .join(@path.Path("runs"))
-    .join(@path.Path(run_id))
-    .join(@path.Path("meta.json"))
+  let path = moonclaw_runtime_path(run_store_root(home))
+    .join(moonclaw_runtime_path("runs"))
+    .join(moonclaw_runtime_path(run_id))
+    .join(moonclaw_runtime_path("meta.json"))
     .to_string()
   let parsed = match moonclaw_read_optional_json_file(path) {
     Some(json) => json
@@ -58,8 +58,8 @@ async fn load_run_meta(run_id : String, home : String) -> StoredRun? {
 
 ///|
 async fn load_run_result_payload(workspace_dir : String) -> Json {
-  let path = @path.Path(workspace_dir)
-    .join(@path.Path("result.json"))
+  let path = moonclaw_runtime_path(workspace_dir)
+    .join(moonclaw_runtime_path("result.json"))
     .to_string()
   match moonclaw_read_optional_json_file(path) {
     Some(json) => json
@@ -70,13 +70,13 @@ async fn load_run_result_payload(workspace_dir : String) -> Json {
 ///|
 fn town_status_for_run_status(status : String) -> @core.TaskExecutionStatus {
   match status {
-    "Pending" => @core.TaskExecutionStatus::RunConfirmed
-    "Running" => @core.TaskExecutionStatus::Running
-    "WaitingForInput" => @core.TaskExecutionStatus::Running
-    "Succeeded" => @core.TaskExecutionStatus::Completed
-    "Failed" => @core.TaskExecutionStatus::Failed
-    "Cancelled" => @core.TaskExecutionStatus::Failed
-    _ => @core.TaskExecutionStatus::Running
+    "Pending" => RunConfirmed
+    "Running" => Running
+    "WaitingForInput" => Running
+    "Succeeded" => Completed
+    "Failed" => Failed
+    "Cancelled" => Failed
+    _ => Running
   }
 }
 

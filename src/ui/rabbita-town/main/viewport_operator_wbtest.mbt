@@ -117,7 +117,7 @@ test "operator console metrics uses worker fallback when live spine is missing" 
       civic_metric_test_worker(
         energy=70,
         load=20,
-        status=@core.WorkerStatus::Waiting,
+        status=Waiting,
       ),
     ],
   )

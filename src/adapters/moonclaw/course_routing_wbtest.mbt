@@ -1,6 +1,6 @@
 ///|
 test "civic repair prompt mentioning course negatively is not rewritten as course task" {
-  let task = moonclaw_adapter_standing_watch_task(
+  let task = moonclaw_runtime_standing_watch_task(
     id="standing-book-quality-repair-wenyu-resident-twins-tick-17941",
     title="Standing watch: Repair book quality: wenyu-resident-twins",
     prompt="Follow the book's own contract and SKILL.md; do not force a research genre onto civic, course, planbook, cookbook, or operational books. Resolve the import-authority blocker, then run one module-native resident-memory packet.",
@@ -16,7 +16,7 @@ test "civic repair prompt mentioning course negatively is not rewritten as cours
 
 ///|
 test "explicit course task still receives course artifact routing" {
-  let task = moonclaw_adapter_standing_watch_task(
+  let task = moonclaw_runtime_standing_watch_task(
     id="standing-book-quality-repair-course-wenyu-game-design-tick-17941",
     title="Standing watch: Repair book quality: course-wenyu-game-design",
     prompt="Run course projection repair: enforce course identity, lesson progression, exercises, checkpoints, and beginner usability.",

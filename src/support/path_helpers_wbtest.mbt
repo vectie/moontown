@@ -6,7 +6,7 @@ test "support absolute path from cwd preserves absolute and resolves relative pa
   )
   let expected = match @env.current_dir() {
     Some(dir) =>
-      @path.Path(dir).join(@path.Path("relative/file.md")).to_string()
+      support_path(dir).join(support_path("relative/file.md")).to_string()
     None => "./relative/file.md"
   }
   assert_eq(absolute_path_from_cwd("relative/file.md"), expected)

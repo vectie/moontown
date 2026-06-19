@@ -1,9 +1,8 @@
 ///|
 test "proposal packet pins provider task spec for bootstrap ingest" {
-  let task = moonclaw_adapter_bootstrap_ingest_task()
+  let task = moonclaw_runtime_bootstrap_ingest_task()
   let metadata = packet_step_metadata(Some(task)).stringify()
   assert_true(metadata.contains("\"extension_task_id\":\"task-bootstrap\""))
-  assert_true(metadata.contains("\"bookapi_task_id\":\"task-bootstrap\""))
   assert_true(metadata.contains("\"kind\":\"bootstrap_gather\""))
   assert_true(metadata.contains("\"extension_task_kind\":\"bootstrap_gather\""))
 }
@@ -81,8 +80,8 @@ test "proposal packet carries catalog policy loop metadata" {
 }
 
 ///|
-test "proposal packet mirrors extension and bookapi task specs" {
-  let task = moonclaw_adapter_book_task(
+test "proposal packet uses extension task specs" {
+  let task = moonclaw_runtime_book_task(
     id="task-mirror",
     title="Mirror task metadata",
     kind="standing-watch",
@@ -96,22 +95,19 @@ test "proposal packet mirrors extension and bookapi task specs" {
     _ => fail("expected metadata object")
   }
   assert_eq(
-    metadata.get("extension_task_spec").unwrap().stringify(),
-    metadata.get("bookapi_task_spec").unwrap().stringify(),
-  )
-  assert_eq(
-    metadata.get("extension_target_pages").unwrap().stringify(),
-    metadata.get("bookapi_target_pages").unwrap().stringify(),
-  )
-  assert_eq(
     metadata.get("extension_task_kind").unwrap().stringify(),
     "\"standing-watch\"",
   )
+  assert_eq(
+    metadata.get("extension_target_pages").unwrap().stringify(),
+    "[\"wiki\/synthesis\/overview.md\"]",
+  )
+  assert_true(metadata.contains("extension_task_id"))
 }
 
 ///|
 test "research bootstrap packet leaves web tools to the selected profile" {
-  let task = moonclaw_adapter_bootstrap_ingest_task(
+  let task = moonclaw_runtime_bootstrap_ingest_task(
     id="goal-research-opc-research-bootstrap-ingest",
   )
   let metadata = packet_step_metadata(Some(task)).stringify()

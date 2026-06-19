@@ -11,7 +11,7 @@ test "live autonomy derived state gathers builder intermediates" {
     goal_id="watch-opc",
     tick=9,
     book_id="research-opc",
-    decision=@core.WatcherDecisionKind::Update,
+    decision=Update,
     delta_score=3,
     new_source_count=2,
     detail="accepted useful source",

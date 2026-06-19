@@ -124,7 +124,7 @@ async test "persisted civic reducer prefers scenario-specific output over shared
     workspace_base~,
     mode=PersistedReducer,
   )
-  assert_true(reduction.status is @core.TaskExecutionStatus::Completed)
+  assert_true(reduction.status is Completed)
   assert_eq(reduction.ideas.length(), 1)
   assert_eq(reduction.ideas[0].id, "storage-grid-control-contract")
 }

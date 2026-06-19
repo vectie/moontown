@@ -19,7 +19,7 @@ async fn finalize_standing_watch_supervision_record(
   let decision = @standing_watch_policy.standing_watch_decision_from_execution(
     observed,
   )
-  if decision == @core.WatcherDecisionKind::Deferred {
+  if decision == Deferred {
     return observed
   }
   let tick = @standing_watch_policy.standing_watch_tick_for_goal_task(
@@ -48,7 +48,7 @@ async fn finalize_standing_watch_supervision_record(
     return observed
   }
   let no_change_streak = @storage.consecutive_no_change_count(previous_records)
-  let next_no_change_streak = if decision == @core.WatcherDecisionKind::NoChange {
+  let next_no_change_streak = if decision == NoChange {
     no_change_streak + 1
   } else {
     0

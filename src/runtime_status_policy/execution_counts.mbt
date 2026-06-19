@@ -65,7 +65,7 @@ fn effective_execution_record(state : @core.TownState, index : Int) -> Bool {
 fn runtime_status_review_execution_statuses() -> Array[
   @core.TaskExecutionStatus,
 ] {
-  [@core.TaskExecutionStatus::ReviewQueued]
+  [ReviewQueued]
 }
 
 ///|
@@ -82,11 +82,9 @@ pub fn runtime_status_execution_counts(
       runtime_status_review_execution_statuses(),
     ),
     failed: @health.count_health_anomalies_by_title(report, "execution-failed"),
-    stale: count_runtime_executions_in_indexes(state, effective_indexes, [
-      @core.TaskExecutionStatus::Stale,
-    ]),
+    stale: count_runtime_executions_in_indexes(state, effective_indexes, [Stale]),
     completed: count_runtime_executions_in_indexes(state, effective_indexes, [
-      @core.TaskExecutionStatus::Completed,
+      Completed,
     ]),
   }
 }

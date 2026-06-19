@@ -28,8 +28,8 @@ fn running_standing_watch_task(
     book_id~,
     title="Standing watch",
     prompt="watch",
-    domain=@core.WorkDomain::Research,
-    status=@core.TownTaskStatus::Running,
+    domain=Research,
+    status=Running,
   )
 }
 
@@ -47,7 +47,7 @@ fn running_snapshot_execution_without_run_id(
     packet_id="pending",
     packet_path="",
     run_id=None,
-    status=@core.TaskExecutionStatus::Running,
+    status=Running,
     summary~,
     output_contract="standing-watch-live-snapshot",
     assigned_worker_id=Some("watcher"),
@@ -159,7 +159,7 @@ fn review_queued_standing_watch_execution(
     packet_id~,
     packet_path~,
     run_id=Some(run_id),
-    status=@core.TaskExecutionStatus::ReviewQueued,
+    status=ReviewQueued,
     summary~,
     output_contract="standing-watch",
     result_decision="NeedsReview",
@@ -181,7 +181,7 @@ fn completed_no_change_standing_watch_execution(
     packet_id~,
     packet_path~,
     run_id=Some(run_id),
-    status=@core.TaskExecutionStatus::Completed,
+    status=Completed,
     summary="standing_goal_decision: no_change\ndelta_score: 0\nnew_source_count: 0\nkeeper_auto_triage: accepted",
     output_contract="standing-watch",
     result_decision="NoChange",

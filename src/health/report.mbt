@@ -3,8 +3,8 @@ pub fn inspect_town(town : @core.TownState) -> HealthReport {
   let worker_health : Array[WorkerHealth] = []
   for worker in town.workers {
     let level = match worker.status {
-      @core.WorkerStatus::Offline => Critical
-      @core.WorkerStatus::Blocked => Degraded
+      Offline => Critical
+      Blocked => Degraded
       _ => Healthy
     }
     worker_health.push({

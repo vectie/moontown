@@ -246,19 +246,19 @@ fn live_autonomy_watcher_decision_actions(
   match latest_decision {
     Some(decision) =>
       match decision {
-        @core.WatcherDecisionKind::Update =>
+        Update =>
           actions.push(
             "Promote the latest watcher update into accepted book/projection state if review passes.",
           )
-        @core.WatcherDecisionKind::NeedsReview =>
+        NeedsReview =>
           actions.push(
             "Review the latest watcher finding before counting it as progress.",
           )
-        @core.WatcherDecisionKind::Failed =>
+        Failed =>
           actions.push(
             "Retry the latest watcher failure with backoff and preserve the blocker.",
           )
-        @core.WatcherDecisionKind::Deferred =>
+        Deferred =>
           actions.push(
             "Latest watcher is deferred; keep it as infrastructure retry/accounting debt until a real MoonBook terminal marker arrives.",
           )
@@ -278,7 +278,7 @@ fn live_autonomy_idle_actions(
   let blockers = context.blockers
   if blockers.active_workers == 0 &&
     blockers.due_goals == 0 &&
-    latest_decision != Some(@core.WatcherDecisionKind::Deferred) {
+    latest_decision != Some(Deferred) {
     if context.transient_infrastructure_debt > 0 {
       actions.push(
         "Historical transient infrastructure debt is visible and inspectable; keep watching unless the count grows or the latest watcher becomes deferred.",

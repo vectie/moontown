@@ -49,12 +49,12 @@ fn civic_execution_stage_label_for_status(
   phrases : CivicExecutionStagePhrases,
 ) -> String {
   match civic_execution_stage(status) {
-    @ui.ExecutionViewStage::Packet => phrases.packet
-    @ui.ExecutionViewStage::Running => phrases.running
-    @ui.ExecutionViewStage::Persisting => phrases.persisting
-    @ui.ExecutionViewStage::Review => phrases.review
-    @ui.ExecutionViewStage::Completed => phrases.completed
-    @ui.ExecutionViewStage::Recovery => phrases.recovery
+    @ui.Packet => phrases.packet
+    @ui.Running => phrases.running
+    @ui.Persisting => phrases.persisting
+    @ui.Review => phrases.review
+    @ui.Completed => phrases.completed
+    @ui.Recovery => phrases.recovery
   }
 }
 
@@ -165,11 +165,11 @@ fn civic_execution_score_for_status(
   policy : CivicExecutionScorePolicy,
 ) -> Int {
   match civic_execution_stage(status) {
-    @ui.ExecutionViewStage::Packet => policy.packet
-    @ui.ExecutionViewStage::Running => policy.running
-    @ui.ExecutionViewStage::Persisting => policy.persisting
-    @ui.ExecutionViewStage::Review => policy.review
-    @ui.ExecutionViewStage::Completed => policy.completed
-    @ui.ExecutionViewStage::Recovery => policy.recovery
+    @ui.Packet => policy.packet
+    @ui.Running => policy.running
+    @ui.Persisting => policy.persisting
+    @ui.Review => policy.review
+    @ui.Completed => policy.completed
+    @ui.Recovery => policy.recovery
   }
 }

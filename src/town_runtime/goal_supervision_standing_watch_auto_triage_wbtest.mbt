@@ -33,14 +33,14 @@ async test "standing watch review queue auto-closes no-change keeper markers" {
       task_id="standing-watch-auto-triage-tick-12",
       packet_path="packet.json",
       run_id=Some("run-auto"),
-      status=@core.TaskExecutionStatus::ReviewQueued,
+      status=ReviewQueued,
       summary="Workflow completed",
     ),
   )
   run_supervision_cycle(state, @roles.Mayor::new(), [entry], snapshot_path~, standing_goals=[
     goal,
   ])
-  assert_eq(state.executions[0].status, @core.TaskExecutionStatus::Completed)
+  assert_eq(state.executions[0].status, Completed)
   assert_true(
     state.executions[0].summary.contains("keeper_auto_triage: accepted"),
   )
@@ -54,7 +54,7 @@ async test "standing watch review queue auto-closes no-change keeper markers" {
   assert_true(
     records.any(fn(record) {
       record.task_id == Some("standing-watch-auto-triage-tick-12") &&
-      record.decision == @core.WatcherDecisionKind::NoChange
+      record.decision == NoChange
     }),
   )
 }
@@ -76,7 +76,7 @@ async test "standing watch review queue closes deferred infrastructure markers" 
     standing_watch_execution_fixture(
       task_id="standing-watch-deferred-tick-88",
       packet_path="packet.json",
-      status=@core.TaskExecutionStatus::ReviewQueued,
+      status=ReviewQueued,
       summary="Standing watch execution failed.\nRUNTIME ERROR: abort() called\nStringBuilder::grow_if_necessary\nSystemStore::save_job_proposals\nstanding_goal_decision: deferred\nstanding_watch_transient_retry: true\nnext_check_hint: immediate",
       requires_review=true,
     ),
@@ -84,7 +84,7 @@ async test "standing watch review queue closes deferred infrastructure markers" 
   run_supervision_cycle(state, @roles.Mayor::new(), [entry], snapshot_path~, standing_goals=[
     goal,
   ])
-  assert_eq(state.executions[0].status, @core.TaskExecutionStatus::Completed)
+  assert_eq(state.executions[0].status, Completed)
   assert_eq(state.executions[0].requires_review, false)
   assert_true(
     state.executions[0].summary.contains("keeper_auto_triage: deferred"),
@@ -120,14 +120,14 @@ async test "standing watch auto triage keeps weak updates in review" {
       task_id="standing-watch-weak-update-tick-12",
       packet_path="packet.json",
       run_id=Some("run-weak"),
-      status=@core.TaskExecutionStatus::ReviewQueued,
+      status=ReviewQueued,
       summary="Workflow completed",
     ),
   )
   run_supervision_cycle(state, @roles.Mayor::new(), [entry], snapshot_path~, standing_goals=[
     goal,
   ])
-  assert_eq(state.executions[0].status, @core.TaskExecutionStatus::ReviewQueued)
+  assert_eq(state.executions[0].status, ReviewQueued)
   assert_true(
     state.executions[0].summary.contains("standing_goal_decision: update"),
   )
@@ -166,14 +166,14 @@ async test "standing watch auto triage closes empty persisted book result" {
       task_id="standing-watch-empty-result-tick-12",
       packet_path="packet.json",
       run_id=Some("run-empty"),
-      status=@core.TaskExecutionStatus::ReviewQueued,
+      status=ReviewQueued,
       summary="Workflow completed",
     ),
   )
   run_supervision_cycle(state, @roles.Mayor::new(), [entry], snapshot_path~, standing_goals=[
     goal,
   ])
-  assert_eq(state.executions[0].status, @core.TaskExecutionStatus::Completed)
+  assert_eq(state.executions[0].status, Completed)
   assert_true(
     state.executions[0].summary.contains("standing_goal_decision: no_change"),
   )

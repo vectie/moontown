@@ -1,7 +1,7 @@
 ///|
 pub fn build_import_command(
   packet_path : String,
-  moonclaw_root? : String = "../moonclaw",
+  moonclaw_root? : String = default_moonclaw_root(),
   home? : String = default_moonclaw_home(),
   cwd? : String = ".",
   confirm? : Bool = false,
@@ -15,7 +15,7 @@ pub fn build_import_command(
 ///|
 pub fn build_run_command(
   run_id : String,
-  moonclaw_root? : String = "../moonclaw",
+  moonclaw_root? : String = default_moonclaw_root(),
   home? : String = default_moonclaw_home(),
   cwd? : String = ".",
 ) -> String {

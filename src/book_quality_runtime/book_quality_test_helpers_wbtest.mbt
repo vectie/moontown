@@ -15,7 +15,7 @@ fn book_quality_review_run_fixture(
   summary : String,
   generated_at_ms : UInt64,
 ) -> @book_quality.BookQualityReviewRun {
-  @book_quality.BookQualityReviewRun::{
+  {
     book_id,
     packet_path,
     result_path,
@@ -39,7 +39,7 @@ fn book_quality_review_run_update(
   summary? : String? = None,
   generated_at_ms? : UInt64? = None,
 ) -> @book_quality.BookQualityReviewRun {
-  @book_quality.BookQualityReviewRun::{
+  {
     book_id: book_id.unwrap_or(base.book_id),
     packet_path: packet_path.unwrap_or(base.packet_path),
     result_path: result_path.unwrap_or(base.result_path),
@@ -74,7 +74,7 @@ fn book_quality_score_fixture(
   book_type : String,
   workspace_root : String,
 ) -> @book_quality.BookQualityScore {
-  @book_quality.BookQualityScore::{
+  {
     book_id,
     title: book_id,
     book_type,
@@ -99,7 +99,7 @@ fn book_quality_repair_bridge_item_fixture(
   book_type : String,
   workspace_root : String,
 ) -> @book_quality.BookQualityRepairBridgeItem {
-  @book_quality.BookQualityRepairBridgeItem::{
+  {
     book_id,
     book_type,
     workspace_root,

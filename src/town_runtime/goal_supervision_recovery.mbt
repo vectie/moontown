@@ -15,7 +15,7 @@ async fn reconcile_transient_dependency_failures(
     }
     let completed = copy_execution_with(
       execution,
-      status=@core.TaskExecutionStatus::Completed,
+      status=Completed,
       summary="\{execution.summary}\nkeeper_auto_triage: transient_infrastructure_contention\nreconciled_detail: MoonBook/MoonClaw dependency-lock or transport contention was classified as operational retry noise, not durable domain/task failure.",
       heartbeat_tick=supervision_tick(state),
       next_retry_tick=None,
@@ -57,9 +57,7 @@ fn transient_dependency_reconcilable_status(
   status : @core.TaskExecutionStatus,
 ) -> Bool {
   match status {
-    @core.TaskExecutionStatus::Failed
-    | @core.TaskExecutionStatus::Stale
-    | @core.TaskExecutionStatus::ReviewQueued => true
+    Failed | Stale | ReviewQueued => true
     _ => false
   }
 }
@@ -70,7 +68,7 @@ async fn reconcile_repaired_context_import_failures(
 ) -> Unit {
   let snapshot = state.executions.copy()
   for execution in snapshot {
-    if execution.status != @core.TaskExecutionStatus::Failed ||
+    if execution.status != Failed ||
       !execution.summary.contains("context_pages must not be empty") {
       continue
     }
@@ -78,7 +76,7 @@ async fn reconcile_repaired_context_import_failures(
       Some(packet) if packet.context_pages.length() > 0 => {
         let completed = copy_execution_with(
           execution,
-          status=@core.TaskExecutionStatus::Completed,
+          status=Completed,
           summary="\{execution.summary}\nkeeper_auto_triage: superseded_context_import_failure\nreconciled_detail: referenced packet now has \{packet.context_pages.length()} context page(s), so the stale import-validation failure no longer represents active work.",
           context_pages=packet.context_pages,
           skill_paths=packet.skill_paths,

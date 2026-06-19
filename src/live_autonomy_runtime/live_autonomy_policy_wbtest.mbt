@@ -56,13 +56,13 @@ test "live autonomy action helpers keep subsystem precedence explicit" {
 test "live autonomy watcher and idle action helpers isolate terminal decisions" {
   let update_actions = @live_autonomy_policy.live_autonomy_next_actions_for({
     blockers: live_autonomy_blocker_context_fixture(),
-    latest_watcher_decision: Some(@core.WatcherDecisionKind::Update),
+    latest_watcher_decision: Some(Update),
     transient_infrastructure_debt: 0,
   })
   assert_true(update_actions[0].contains("Promote the latest watcher update"))
   let deferred_actions = @live_autonomy_policy.live_autonomy_next_actions_for({
     blockers: live_autonomy_blocker_context_fixture(),
-    latest_watcher_decision: Some(@core.WatcherDecisionKind::Deferred),
+    latest_watcher_decision: Some(Deferred),
     transient_infrastructure_debt: 0,
   })
   assert_true(deferred_actions[0].contains("Latest watcher is deferred"))
@@ -73,7 +73,7 @@ test "live autonomy watcher and idle action helpers isolate terminal decisions" 
   assert_true(idle_actions[0].contains("Historical transient infrastructure"))
   let deferred_idle = @live_autonomy_policy.live_autonomy_next_actions_for({
     blockers: live_autonomy_blocker_context_fixture(),
-    latest_watcher_decision: Some(@core.WatcherDecisionKind::Deferred),
+    latest_watcher_decision: Some(Deferred),
     transient_infrastructure_debt: 2,
   })
   assert_eq(deferred_idle.length(), 1)

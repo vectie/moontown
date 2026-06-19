@@ -1,7 +1,7 @@
 ///|
 fn is_working_worker(worker : WorkerSim) -> Bool {
   match worker.status {
-    @core.WorkerStatus::Running | @core.WorkerStatus::Blocked => true
+    Running | Blocked => true
     _ => false
   }
 }

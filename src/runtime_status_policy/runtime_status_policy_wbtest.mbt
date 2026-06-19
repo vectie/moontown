@@ -1,38 +1,22 @@
 ///|
 test "runtime status policy ranks terminal records above live snapshots" {
   assert_true(
-    @core.execution_status_rank(@core.TaskExecutionStatus::Completed) >
-    @core.execution_status_rank(@core.TaskExecutionStatus::Running),
+    @core.execution_status_rank(Completed) >
+    @core.execution_status_rank(Running),
   )
   assert_eq(
-    @core.execution_status_rank(@core.TaskExecutionStatus::AwaitingPersistence),
-    @core.execution_status_rank(@core.TaskExecutionStatus::Running),
+    @core.execution_status_rank(AwaitingPersistence),
+    @core.execution_status_rank(Running),
   )
 }
 
 ///|
 test "runtime status policy owns active and review execution sets" {
-  assert_true(
-    runtime_status_active_execution_status(@core.TaskExecutionStatus::Running),
-  )
-  assert_true(
-    runtime_status_active_execution_status(
-      @core.TaskExecutionStatus::AwaitingPersistence,
-    ),
-  )
-  assert_false(
-    runtime_status_active_execution_status(
-      @core.TaskExecutionStatus::ReviewQueued,
-    ),
-  )
-  assert_true(
-    runtime_status_review_execution_status(
-      @core.TaskExecutionStatus::ReviewQueued,
-    ),
-  )
-  assert_false(
-    runtime_status_review_execution_status(@core.TaskExecutionStatus::Completed),
-  )
+  assert_true(runtime_status_active_execution_status(Running))
+  assert_true(runtime_status_active_execution_status(AwaitingPersistence))
+  assert_false(runtime_status_active_execution_status(ReviewQueued))
+  assert_true(runtime_status_review_execution_status(ReviewQueued))
+  assert_false(runtime_status_review_execution_status(Completed))
 }
 
 ///|
@@ -69,14 +53,14 @@ test "runtime status policy owns effective execution dedupe" {
   state.register_execution(
     runtime_status_policy_test_execution(
       "task-dup",
-      @core.TaskExecutionStatus::Running,
+      Running,
       packet_id="packet-running",
     ),
   )
   state.register_execution(
     runtime_status_policy_test_execution(
       "task-dup",
-      @core.TaskExecutionStatus::AwaitingPersistence,
+      AwaitingPersistence,
       packet_id="packet-awaiting",
     ),
   )
@@ -91,16 +75,10 @@ test "runtime status policy owns effective execution dedupe" {
 test "runtime status policy counts only effective executions" {
   let state = runtime_status_policy_test_state()
   state.register_execution(
-    runtime_status_policy_test_execution(
-      "task-live",
-      @core.TaskExecutionStatus::Running,
-    ),
+    runtime_status_policy_test_execution("task-live", Running),
   )
   state.register_execution(
-    runtime_status_policy_test_execution(
-      "task-done",
-      @core.TaskExecutionStatus::Completed,
-    ),
+    runtime_status_policy_test_execution("task-done", Completed),
   )
   assert_eq(
     count_active_work_executions_in_indexes(

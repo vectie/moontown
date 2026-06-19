@@ -28,7 +28,7 @@ fn wenyu_town_shell_service() -> CivicServiceDefinition {
     review_queues=["wiki/reviews/town-operations.md"],
     skill_pack="civic-town-supervisor",
     output_contract="wenyu.civic.town_supervision.v1",
-    worker_role=@core.WorkerRole::Operator,
+    worker_role=Operator,
     acceptance=[
       "detects module/workspace/projection gaps", "writes a mayor digest", "updates the visible town projection without exposing private book memory",
     ],
@@ -67,7 +67,7 @@ fn wenyu_resident_twins_service() -> CivicServiceDefinition {
     review_queues=["wiki/reviews/resident-memory.md"],
     skill_pack="civic-resident-keeper",
     output_contract="wenyu.civic.resident_memory.v1",
-    worker_role=@core.WorkerRole::MemoryKeeper,
+    worker_role=MemoryKeeper,
     acceptance=[
       "keeps private and projection-safe fields separate", "records resident next-action candidates",
       "queues review for sensitive profile changes",
@@ -106,7 +106,7 @@ fn wenyu_vitality_dashboard_service() -> CivicServiceDefinition {
     review_queues=["wiki/reviews/service-alerts.md"],
     skill_pack="civic-vitality-analyst",
     output_contract="wenyu.civic.vitality_analytics.v1",
-    worker_role=@core.WorkerRole::Watcher,
+    worker_role=Watcher,
     acceptance=[
       "does not count operational retries as domain progress", "publishes stale-worker and stale-book alerts",
       "summarizes what changed and what did not change",
@@ -145,7 +145,7 @@ fn wenyu_physical_bridge_service() -> CivicServiceDefinition {
     review_queues=["wiki/reviews/physical-handoffs.md"],
     skill_pack="civic-bridge-operator",
     output_contract="wenyu.civic.physical_bridge.v1",
-    worker_role=@core.WorkerRole::Operator,
+    worker_role=Operator,
     acceptance=[
       "never finalizes bookings or robot actions without approval", "records offline constraints and confirmation status",
       "publishes only projection-safe telemetry",

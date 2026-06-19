@@ -32,7 +32,7 @@ fn fallback_snapshot_worker_sims() -> Array[WorkerSim] {
       title: "Snapshot Bridge",
       role: "Watcher",
       book_id: "snapshot",
-      status: @core.WorkerStatus::Waiting,
+      status: Waiting,
       zone_key: "worker-yard",
       energy: 100,
       load: 12,
@@ -52,11 +52,11 @@ fn snapshot_worker_profile(
   status : @core.WorkerStatus,
 ) -> SnapshotWorkerProfile {
   match status {
-    @core.WorkerStatus::Running => { load: 74, energy: 64 }
-    @core.WorkerStatus::Waiting => { load: 28, energy: 79 }
-    @core.WorkerStatus::Idle => { load: 16, energy: 88 }
-    @core.WorkerStatus::Blocked => { load: 91, energy: 38 }
-    @core.WorkerStatus::Offline => { load: 0, energy: 0 }
+    Running => { load: 74, energy: 64 }
+    Waiting => { load: 28, energy: 79 }
+    Idle => { load: 16, energy: 88 }
+    Blocked => { load: 91, energy: 38 }
+    Offline => { load: 0, energy: 0 }
   }
 }
 
@@ -71,7 +71,7 @@ fn snapshot_worker_summary(worker : @core.WorkerRef) -> String {
     "\{capability_count} declared capabilities"
   }
   if worker.role.to_string() == "Watcher" &&
-    worker.status == @core.WorkerStatus::Idle {
+    worker.status == Idle {
     return "\{worker.name} is on duty for the 30-minute standing-watch loop. Idle means waiting between checks, not offline; the mayor message feed shows the latest check result."
   }
   "\{worker.name} is projected from persisted town state with status \{worker.status}, role \{worker.role}, and \{capability_text}."

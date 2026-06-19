@@ -55,7 +55,7 @@ async test "load or create modeled state accepts injected book provider" {
       name="Town Lab",
       purpose="Isolated social experiment lab book.",
       workspace_root="/workspace/lab",
-      memory_scope=@core.MemoryScope::BookPrivate,
+      memory_scope=BookPrivate,
       tags=["experiments", "observation"],
     ),
   ])

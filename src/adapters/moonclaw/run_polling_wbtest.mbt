@@ -35,7 +35,7 @@ async test "poll run prefers terminal meta over stale running index" {
     cwd=root,
     detect_orphan=false,
   )
-  assert_eq(response.status, @core.TaskExecutionStatus::Completed)
+  assert_eq(response.status, Completed)
   assert_true(response.summary.contains("Workflow completed"))
 }
 
@@ -71,7 +71,7 @@ async test "poll run forces review when succeeded result text says fail" {
     cwd=root,
     detect_orphan=false,
   )
-  assert_eq(response.status, @core.TaskExecutionStatus::Completed)
+  assert_eq(response.status, Completed)
   assert_eq(response.result_decision, "needs_review")
   assert_true(response.requires_review)
 }
@@ -94,7 +94,7 @@ test "moonclaw review text detector does not flag pass labels" {
 test "moonclaw process liveness only accepts proposal run argv sequence" {
   assert_true(
     moonclaw_process_line_is_proposal_run(
-      "501 123 1 0 ?? moon -C ../moonclaw run cmd/main -- proposal run run-1 --cwd /tmp",
+      "501 123 1 0 ?? moon -C /opt/moonclaw run cmd/main -- proposal run run-1 --cwd /tmp",
       "run-1",
     ),
   )
@@ -105,7 +105,8 @@ test "moonclaw process liveness only accepts proposal run argv sequence" {
   )
   assert_false(
     moonclaw_process_line_is_proposal_run(
-      "501 123 1 0 ?? moon -C ../moonclaw run cmd/main -- proposal run run-1,", "run-1",
+      "501 123 1 0 ?? moon -C /opt/moonclaw run cmd/main -- proposal run run-1,",
+      "run-1",
     ),
   )
 }

@@ -85,13 +85,12 @@ async fn civic_communication_round_decision_summary(
   reduction : CivicCommunicationReductionResult,
   ideas : Array[CivicCommunicationIdea],
 ) -> (String, String) {
-  let validation_errors = if reduction.status
-    is @core.TaskExecutionStatus::Completed {
+  let validation_errors = if reduction.status is Completed {
     civic_communication_round_validation_errors(scenario, ideas)
   } else {
     []
   }
-  if reduction.status is @core.TaskExecutionStatus::Completed &&
+  if reduction.status is Completed &&
     ideas.length() > 0 &&
     validation_errors.length() == 0 {
     return (

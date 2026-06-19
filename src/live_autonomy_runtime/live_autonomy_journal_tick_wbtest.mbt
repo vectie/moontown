@@ -5,8 +5,8 @@ async test "live autonomy journal tick floor is monotonic" {
   )
   let snapshot_path = workspace.snapshot_path
   let state = @test_fixtures.visual_projection_test_state(
-    worker_status=@core.WorkerStatus::Idle,
-    execution_status=@core.TaskExecutionStatus::Completed,
+    worker_status=Idle,
+    execution_status=Completed,
   )
   ignore(
     write_live_autonomy_spine(

@@ -10,7 +10,7 @@ pub fn pdf_evidence_watch_catalog_entry(
     name="MoonBook / PDF Evidence Watch / \{title}",
     purpose~,
     workspace_root~,
-    memory_scope=@core.MemoryScope::BookPrivate,
+    memory_scope=BookPrivate,
     tags=[
       "research", "standing-watch", "pdf-evidence", "source-first", "template:pdf-evidence-watch",
     ],

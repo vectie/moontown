@@ -32,14 +32,14 @@ async test "failed standing watch closes when MoonBook has terminal no-change ma
       task_id="standing-watch-failed-marker-tick-12",
       packet_path="packet.json",
       run_id=Some("run-recovered"),
-      status=@core.TaskExecutionStatus::Failed,
+      status=Failed,
       summary="MoonClaw run was indexed as Running, but no live process was found.",
     ),
   )
   run_supervision_cycle(state, @roles.Mayor::new(), [entry], snapshot_path~, standing_goals=[
     goal,
   ])
-  assert_eq(state.executions[0].status, @core.TaskExecutionStatus::Completed)
+  assert_eq(state.executions[0].status, Completed)
   assert_true(
     state.executions[0].summary.contains("keeper_auto_recovery: accepted"),
   )
@@ -53,7 +53,7 @@ async test "failed standing watch closes when MoonBook has terminal no-change ma
   assert_true(
     records.any(fn(record) {
       record.task_id == Some("standing-watch-failed-marker-tick-12") &&
-      record.decision == @core.WatcherDecisionKind::NoChange
+      record.decision == NoChange
     }),
   )
 }

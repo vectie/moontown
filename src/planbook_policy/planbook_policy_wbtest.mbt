@@ -82,7 +82,7 @@ test "planbook repair target policy owns known criterion targets" {
     targets.contains("/repo/src/planbook_runtime/planbook_repair.mbt"),
   )
   assert_true(targets.contains("/repo/src/planbook_policy/request_rules.mbt"))
-  assert_true(targets.contains("/repo/../moonclaw/acp/runner.mbt"))
+  assert_true(targets.contains("/repo/src/adapters/moonclaw/import.mbt"))
 }
 
 ///|

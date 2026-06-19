@@ -1,7 +1,7 @@
 ///|
 fn visual_projection_test_state(
-  worker_status? : @core.WorkerStatus = @core.WorkerStatus::Running,
-  execution_status? : @core.TaskExecutionStatus = @core.TaskExecutionStatus::Running,
+  worker_status? : @core.WorkerStatus = Running,
+  execution_status? : @core.TaskExecutionStatus = Running,
 ) -> @core.TownState {
   let state = @core.empty_state(
     @core.TownConfig::new(id="visual-test-town", name="Visual Test Town"),
@@ -19,7 +19,7 @@ fn visual_projection_test_state(
       id="worker-opc-researcher",
       name="OPC Researcher",
       book_id="research-opc",
-      role=@core.WorkerRole::Watcher,
+      role=Watcher,
       status=worker_status,
     ),
   )
@@ -29,8 +29,8 @@ fn visual_projection_test_state(
       book_id="research-opc",
       title="Check OPC updates",
       prompt="Find new OPC sources.",
-      domain=@core.WorkDomain::Research,
-      status=@core.TownTaskStatus::Running,
+      domain=Research,
+      status=Running,
     ),
   )
   state.register_execution(
@@ -110,8 +110,8 @@ test "visual phase taxonomy drives routing visibility and effects" {
 test "visual projection hides completed and idle workers inside buildings" {
   let agent = build_visual_projection(
       visual_projection_test_state(
-        worker_status=@core.WorkerStatus::Idle,
-        execution_status=@core.TaskExecutionStatus::Completed,
+        worker_status=Idle,
+        execution_status=Completed,
       ),
     ).agents[0]
   assert_eq(agent.phase, "completed")
@@ -123,9 +123,7 @@ test "visual projection hides completed and idle workers inside buildings" {
 ///|
 test "visual projection routes failed workers to anomaly recovery" {
   let agent = build_visual_projection(
-      visual_projection_test_state(
-        execution_status=@core.TaskExecutionStatus::Failed,
-      ),
+      visual_projection_test_state(execution_status=Failed),
     ).agents[0]
   assert_eq(agent.phase, "failed")
   assert_eq(agent.effect, "alert-pulse")
@@ -137,8 +135,8 @@ test "visual projection routes failed workers to anomaly recovery" {
 test "visual projection keeps review work visible on the overworld" {
   let agent = build_visual_projection(
       visual_projection_test_state(
-        worker_status=@core.WorkerStatus::Idle,
-        execution_status=@core.TaskExecutionStatus::ReviewQueued,
+        worker_status=Idle,
+        execution_status=ReviewQueued,
       ),
     ).agents[0]
   assert_eq(agent.phase, "review")

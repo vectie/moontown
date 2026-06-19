@@ -21,10 +21,15 @@ pub fn args() -> Array[String] {
 
 ///|
 pub fn moontown_args() -> Array[String] {
-  args_with_tail([
-    "--cd", "/Users/kq/Workspace/moontown", "--add-dir", "/Users/kq/Workspace/moonbook",
-    "--add-dir", "/Users/kq/Workspace/moonclaw",
-  ])
+  args_with_tail(["--cd", moontown_workspace_root()])
+}
+
+///|
+pub fn moontown_workspace_root() -> String {
+  match optional_env_text("MOONTOWN_WORKSPACE_ROOT") {
+    Some(root) => root
+    None => @env.current_dir().unwrap_or(".")
+  }
 }
 
 ///|

@@ -19,6 +19,8 @@ import {
   "vectie/moontown/runtime_status",
 }
 
+supported_targets = "native"
+
 options(
   "is-main": true,
 )

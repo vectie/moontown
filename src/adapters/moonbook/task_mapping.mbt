@@ -1,9 +1,9 @@
 ///|
 fn default_role_for_book(entry : BookCatalogEntry) -> @core.WorkerRole {
   if entry.id == "finance" {
-    @core.WorkerRole::MemoryKeeper
+    MemoryKeeper
   } else {
-    @core.WorkerRole::Harness
+    Harness
   }
 }
 
@@ -41,15 +41,15 @@ fn infer_role_for_kind(
   kind : String,
 ) -> @core.WorkerRole {
   match kind {
-    "review" => @core.WorkerRole::Reviewer
-    "planning" => @core.WorkerRole::Planner
-    "ingest" => @core.WorkerRole::Harness
-    "ingest-followup" => @core.WorkerRole::Harness
-    "implementation-backlog" => @core.WorkerRole::Planner
-    "code-patch" => @core.WorkerRole::Harness
-    "test-fix" => @core.WorkerRole::Harness
-    "projection-schema" => @core.WorkerRole::Harness
-    "image-asset" => @core.WorkerRole::Specialist
+    "review" => Reviewer
+    "planning" => Planner
+    "ingest" => Harness
+    "ingest-followup" => Harness
+    "implementation-backlog" => Planner
+    "code-patch" => Harness
+    "test-fix" => Harness
+    "projection-schema" => Harness
+    "image-asset" => Specialist
     _ => default_role_for_book(entry)
   }
 }

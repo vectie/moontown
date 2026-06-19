@@ -2,7 +2,7 @@
 pub async fn import_packet(
   packet : ExternalProposalPacket,
   packet_path : String,
-  moonclaw_root? : String = "../moonclaw",
+  moonclaw_root? : String = default_moonclaw_root(),
   home? : String = default_moonclaw_home(),
   cwd? : String = ".",
   confirm? : Bool = false,
@@ -28,9 +28,9 @@ pub async fn import_packet(
     proposal_id,
     run_id,
     status: if run_id is Some(_) {
-      @core.TaskExecutionStatus::RunConfirmed
+      RunConfirmed
     } else {
-      @core.TaskExecutionStatus::ProposalImported
+      ProposalImported
     },
     command,
     summary: if run_id is Some(run_id) {

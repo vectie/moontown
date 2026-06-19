@@ -6,8 +6,8 @@ async test "live status recomputes watcher summary from current ledger" {
   let root = workspace.root
   let snapshot_path = workspace.snapshot_path
   let state = @test_fixtures.visual_projection_test_state(
-    worker_status=@core.WorkerStatus::Idle,
-    execution_status=@core.TaskExecutionStatus::Completed,
+    worker_status=Idle,
+    execution_status=Completed,
   )
   @storage.save_snapshot_file(snapshot_path, @storage.snapshot_of(state))
   let goal = live_autonomy_watch_goal(
@@ -22,7 +22,7 @@ async test "live status recomputes watcher summary from current ledger" {
     goal_id="watch-opc-news",
     tick=15877,
     book_id="research-opc",
-    decision=@core.WatcherDecisionKind::NeedsReview,
+    decision=NeedsReview,
     detail="Standing watch execution failed for research-opc. RUNTIME ERROR: abort() called. StringBuilder::grow_if_necessary. SystemStore::save_job_proposals.",
     next_due_tick=15907,
   )

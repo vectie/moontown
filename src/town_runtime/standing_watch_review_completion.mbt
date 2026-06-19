@@ -10,7 +10,7 @@ fn complete_review_queued_standing_watch(
 ) -> Unit {
   let completed = copy_execution_with(
     execution,
-    status=@core.TaskExecutionStatus::Completed,
+    status=Completed,
     summary="\{execution.summary}\nkeeper_auto_triage: \{marker}\nkeeper_auto_triage_reason: \{reason}",
     heartbeat_tick=supervision_tick(state),
     next_retry_tick=None,
@@ -38,7 +38,7 @@ fn complete_empty_standing_watch_as_no_change(
 ) -> Unit {
   let completed = copy_execution_with(
     observed,
-    status=@core.TaskExecutionStatus::Completed,
+    status=Completed,
     summary=@standing_watch_policy.standing_watch_empty_review_completion_summary(
       observed,
     ),

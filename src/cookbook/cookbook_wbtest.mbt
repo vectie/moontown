@@ -86,7 +86,7 @@ test "cookbook describer pages explain codebase algorithms and data flow" {
 
 ///|
 test "cookbook renders markdown pages as clickable HTML" {
-  let html = generated_site_html(book_entry("/tmp/clickable-cookbook"), MoontownCookbookManifest::{
+  let html = generated_site_html(book_entry("/tmp/clickable-cookbook"), {
     book_id: "moontown-cookbook",
     title: "Moontown Stable-State Cookbook",
     generated_by: "MoonBook",

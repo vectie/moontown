@@ -166,8 +166,7 @@ async fn planbook_unresolved_runtime_failures(
       let samples : Array[String] = []
       let mut count = 0
       for execution in snapshot.town.executions {
-        if execution.status == @core.TaskExecutionStatus::Failed ||
-          execution.status == @core.TaskExecutionStatus::Stale {
+        if execution.status == Failed || execution.status == Stale {
           count += 1
           if samples.length() < 3 {
             samples.push("\{execution.book_id}/\{execution.task_id}")

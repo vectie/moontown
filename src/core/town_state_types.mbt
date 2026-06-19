@@ -19,7 +19,7 @@ pub fn TownEvent::new(
   related_proposal_id? : String? = None,
   related_run_id? : String? = None,
 ) -> TownEvent {
-  TownEvent::{
+  {
     id,
     kind,
     detail,
@@ -150,7 +150,7 @@ pub struct StaticBookProvider {
 
 ///|
 pub fn StaticBookProvider::new(entries : Array[BookRef]) -> StaticBookProvider {
-  StaticBookProvider::{ entries, }
+  { entries, }
 }
 
 ///|

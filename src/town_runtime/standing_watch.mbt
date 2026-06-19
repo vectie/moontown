@@ -21,7 +21,7 @@ async fn run_standing_goal_watch_cycle(
       tick,
       target_book_id,
       ledger_dir,
-      @core.WatcherDecisionKind::Deferred,
+      Deferred,
       "Mayor deferred standing goal because a previous watcher execution is still active.",
     )
   }
@@ -34,30 +34,26 @@ async fn run_standing_goal_watch_cycle(
         tick,
         target_book_id,
         ledger_dir,
-        @core.WatcherDecisionKind::Failed,
+        Failed,
         "Mayor could not resolve target MoonBook `\{target_book_id}` for standing goal.",
       )
   }
   register_town_books(state, [entry.to_book_ref()])
   register_town_workers(state)
   let task = standing_watch_task(goal, target_book_id, tick, no_change_streak)
-  let planned_task = to_town_task(
-    entry,
-    task,
-    @core.TaskExecutionStatus::PacketReady,
-  )
+  let planned_task = to_town_task(entry, task, PacketReady)
   let route = mayor.decide_dispatch(state, planned_task)
   state.record_event(route_event(route.decision, state.events.length()))
   let worker_id = assigned_worker_id(route.decision)
   match route.decision {
-    @dispatch.RouteDecision::Deferred(reason) =>
+    Deferred(reason) =>
       return record_standing_watch_cycle_decision(
         state,
         goal,
         tick,
         target_book_id,
         ledger_dir,
-        @core.WatcherDecisionKind::Deferred,
+        Deferred,
         "Mayor deferred standing goal because no watcher was currently eligible: \{reason}",
         task_id=Some(task.id),
       )

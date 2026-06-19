@@ -4,13 +4,7 @@ fn live_autonomy_worker_fixture(
   name~ : String,
   status~ : @core.WorkerStatus,
 ) -> @core.WorkerRef {
-  @core.WorkerRef::new(
-    id~,
-    name~,
-    book_id="book",
-    role=@core.WorkerRole::Specialist,
-    status~,
-  )
+  @core.WorkerRef::new(id~, name~, book_id="book", role=Specialist, status~)
 }
 
 ///|

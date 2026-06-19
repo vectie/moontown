@@ -18,21 +18,21 @@ test "contest express stage uses shared execution phrase groups" {
   assert_eq(
     contest_express_stage(
       model,
-      Some(civic_metric_test_execution(@core.TaskExecutionStatus::PacketReady)),
+      Some(civic_metric_test_execution(PacketReady)),
     ),
     "Readiness packet prepared",
   )
   assert_eq(
     contest_express_stage(
       model,
-      Some(civic_metric_test_execution(@core.TaskExecutionStatus::Running)),
+      Some(civic_metric_test_execution(Running)),
     ),
     "Mock judge scoring",
   )
   assert_eq(
     contest_express_stage(
       model,
-      Some(civic_metric_test_execution(@core.TaskExecutionStatus::Completed)),
+      Some(civic_metric_test_execution(Completed)),
     ),
     "Champion-wall ready",
   )
@@ -45,7 +45,7 @@ test "contest express next action uses shared execution action groups" {
     contest_express_next_action(
       model,
       None,
-      Some(civic_metric_test_execution(@core.TaskExecutionStatus::Running)),
+      Some(civic_metric_test_execution(Running)),
     ),
     "Finish mock judging and turn weak sections into a revision packet.",
   )
@@ -53,7 +53,7 @@ test "contest express next action uses shared execution action groups" {
     contest_express_next_action(
       model,
       None,
-      Some(civic_metric_test_execution(@core.TaskExecutionStatus::Completed)),
+      Some(civic_metric_test_execution(Completed)),
     ),
     "Publish the champion-wall summary, then schedule the next countdown checkpoint.",
   )
@@ -65,14 +65,14 @@ test "contest express signal uses shared execution signal groups" {
   assert_eq(
     contest_express_signal(
       model,
-      Some(civic_metric_test_execution(@core.TaskExecutionStatus::Completed)),
+      Some(civic_metric_test_execution(Completed)),
     ),
     "Roadshow ready",
   )
   assert_eq(
     contest_express_signal(
       { ..model, state_source: StateSourceKind::SnapshotFile },
-      Some(civic_metric_test_execution(@core.TaskExecutionStatus::Completed)),
+      Some(civic_metric_test_execution(Completed)),
     ),
     "Projection bridge",
   )
@@ -84,21 +84,21 @@ test "contest express champion label uses shared execution phrase groups" {
   assert_eq(
     contest_express_champion_label(
       model,
-      Some(civic_metric_test_execution(@core.TaskExecutionStatus::PacketReady)),
+      Some(civic_metric_test_execution(PacketReady)),
     ),
     "Champion wall draft",
   )
   assert_eq(
     contest_express_champion_label(
       model,
-      Some(civic_metric_test_execution(@core.TaskExecutionStatus::Running)),
+      Some(civic_metric_test_execution(Running)),
     ),
     "Waiting on judge notes",
   )
   assert_eq(
     contest_express_champion_label(
       model,
-      Some(civic_metric_test_execution(@core.TaskExecutionStatus::Completed)),
+      Some(civic_metric_test_execution(Completed)),
     ),
     "Replay queued",
   )
@@ -117,14 +117,14 @@ test "contest express readiness label uses shared execution score policy" {
   assert_eq(
     contest_express_readiness_label(
       model,
-      Some(civic_metric_test_execution(@core.TaskExecutionStatus::PacketReady)),
+      Some(civic_metric_test_execution(PacketReady)),
     ),
     "67% ready",
   )
   assert_eq(
     contest_express_readiness_label(
       model,
-      Some(civic_metric_test_execution(@core.TaskExecutionStatus::Completed)),
+      Some(civic_metric_test_execution(Completed)),
     ),
     "96% ready",
   )

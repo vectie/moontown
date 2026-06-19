@@ -51,7 +51,7 @@ async fn moonclaw_civic_communication_reduction(
     root,
     imported.run_id,
   )
-  if status is @core.TaskExecutionStatus::Completed && ideas.length() > 0 {
+  if status is Completed && ideas.length() > 0 {
     persist_civic_communication_reducer_output(scenario, ideas, workspace_base)
     {
       ideas,

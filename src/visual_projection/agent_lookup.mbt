@@ -13,8 +13,7 @@ fn visual_latest_execution_for_worker(
   match matched {
     Some(record) => Some(record)
     None =>
-      if worker.status == @core.WorkerStatus::Running ||
-        worker.status == @core.WorkerStatus::Waiting {
+      if worker.status == Running || worker.status == Waiting {
         visual_latest_book_execution_without_worker(state, worker.book_id)
       } else {
         None

@@ -48,28 +48,28 @@ test "vitality dashboard signal uses shared phrases with recovery override" {
   assert_eq(
     vitality_dashboard_signal(
       model,
-      Some(civic_metric_test_execution(@core.TaskExecutionStatus::PacketReady)),
+      Some(civic_metric_test_execution(PacketReady)),
     ),
     "Sync queued",
   )
   assert_eq(
     vitality_dashboard_signal(
       model,
-      Some(civic_metric_test_execution(@core.TaskExecutionStatus::Running)),
+      Some(civic_metric_test_execution(Running)),
     ),
     "Pulse syncing",
   )
   assert_eq(
     vitality_dashboard_signal(
       { ..model, state_source: StateSourceKind::SnapshotFile },
-      Some(civic_metric_test_execution(@core.TaskExecutionStatus::Completed)),
+      Some(civic_metric_test_execution(Completed)),
     ),
     "Projection bridge",
   )
   assert_eq(
     vitality_dashboard_signal(
       { ..model, pressure: 90 },
-      Some(civic_metric_test_execution(@core.TaskExecutionStatus::Completed)),
+      Some(civic_metric_test_execution(Completed)),
     ),
     "Recovery loop",
   )
@@ -84,7 +84,7 @@ test "vitality dashboard next action uses shared execution action groups" {
       None,
       Some(
         civic_metric_test_execution(
-          @core.TaskExecutionStatus::AwaitingPersistence,
+          AwaitingPersistence,
         ),
       ),
     ),
@@ -94,7 +94,7 @@ test "vitality dashboard next action uses shared execution action groups" {
     vitality_dashboard_next_action(
       model,
       None,
-      Some(civic_metric_test_execution(@core.TaskExecutionStatus::Stale)),
+      Some(civic_metric_test_execution(Stale)),
     ),
     "Recover the stalled vitality run before the district pulse drifts out of sync.",
   )

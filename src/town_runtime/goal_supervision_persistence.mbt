@@ -5,14 +5,14 @@ async fn reconcile_persisted_non_review_outputs(
 ) -> Unit {
   let snapshot = state.executions.copy()
   for execution in snapshot {
-    if execution.status != @core.TaskExecutionStatus::ReviewQueued {
+    if execution.status != ReviewQueued {
       continue
     }
     match persisted_non_review_book_result(snapshot_path, execution.task_id) {
       Some(result) => {
         let completed = copy_execution_with(
           execution,
-          status=@core.TaskExecutionStatus::Completed,
+          status=Completed,
           summary="\{execution.summary}\nkeeper_auto_triage: persisted_non_review_result\npersisted_result_summary: \{result.summary}",
           heartbeat_tick=supervision_tick(state),
           next_retry_tick=None,
@@ -43,9 +43,9 @@ async fn reconcile_persisted_terminal_outputs(
 ) -> Unit {
   let snapshot = state.executions.copy()
   for execution in snapshot {
-    if execution.status != @core.TaskExecutionStatus::Failed &&
-      execution.status != @core.TaskExecutionStatus::Stale &&
-      execution.status != @core.TaskExecutionStatus::AwaitingPersistence {
+    if execution.status != Failed &&
+      execution.status != Stale &&
+      execution.status != AwaitingPersistence {
       continue
     }
     match persisted_book_result(snapshot_path, execution.task_id) {

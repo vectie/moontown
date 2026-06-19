@@ -24,8 +24,8 @@ test "worker count summary empty has stable derived counts" {
 ///|
 test "worker count summary add increments exactly one status bucket" {
   let summary = worker_count_summary_empty()
-    .add(worker_count_test_worker(@core.WorkerStatus::Waiting))
-    .add(worker_count_test_worker(@core.WorkerStatus::Blocked))
+    .add(worker_count_test_worker(Waiting))
+    .add(worker_count_test_worker(Blocked))
   assert_eq(summary.total, 2)
   assert_eq(summary.waiting, 1)
   assert_eq(summary.blocked, 1)
@@ -37,12 +37,12 @@ test "worker count summary add increments exactly one status bucket" {
 ///|
 test "worker count summary covers every worker status" {
   let summary = worker_count_summary([
-    worker_count_test_worker(@core.WorkerStatus::Running),
-    worker_count_test_worker(@core.WorkerStatus::Running),
-    worker_count_test_worker(@core.WorkerStatus::Waiting),
-    worker_count_test_worker(@core.WorkerStatus::Idle),
-    worker_count_test_worker(@core.WorkerStatus::Blocked),
-    worker_count_test_worker(@core.WorkerStatus::Offline),
+    worker_count_test_worker(Running),
+    worker_count_test_worker(Running),
+    worker_count_test_worker(Waiting),
+    worker_count_test_worker(Idle),
+    worker_count_test_worker(Blocked),
+    worker_count_test_worker(Offline),
   ])
   assert_eq(summary.total, 6)
   assert_eq(summary.running, 2)

@@ -3,15 +3,15 @@ pub fn town_task_status_for_execution(
   status : TaskExecutionStatus,
 ) -> TownTaskStatus {
   match status {
-    TaskExecutionStatus::PacketReady => TownTaskStatus::Planned
-    TaskExecutionStatus::ProposalImported => TownTaskStatus::Assigned
-    TaskExecutionStatus::RunConfirmed => TownTaskStatus::Assigned
-    TaskExecutionStatus::Running => TownTaskStatus::Running
-    TaskExecutionStatus::AwaitingPersistence => TownTaskStatus::Running
-    TaskExecutionStatus::ReviewQueued => TownTaskStatus::Blocked
-    TaskExecutionStatus::Completed => TownTaskStatus::Done
-    TaskExecutionStatus::Stale => TownTaskStatus::Blocked
-    TaskExecutionStatus::Failed => TownTaskStatus::Failed
+    PacketReady => Planned
+    ProposalImported => Assigned
+    RunConfirmed => Assigned
+    Running => Running
+    AwaitingPersistence => Running
+    ReviewQueued => Blocked
+    Completed => Done
+    Stale => Blocked
+    Failed => Failed
   }
 }
 
@@ -35,22 +35,22 @@ pub fn copy_task_with_status(
 ///|
 pub fn schedulable_task_status(status : TownTaskStatus) -> Bool {
   match status {
-    TownTaskStatus::Pending => true
-    TownTaskStatus::Planned => true
-    TownTaskStatus::Assigned => true
-    TownTaskStatus::Running => true
-    TownTaskStatus::Blocked => false
-    TownTaskStatus::Done => false
-    TownTaskStatus::Failed => false
+    Pending => true
+    Planned => true
+    Assigned => true
+    Running => true
+    Blocked => false
+    Done => false
+    Failed => false
   }
 }
 
 ///|
 pub fn terminal_execution_status(status : TaskExecutionStatus) -> Bool {
   match status {
-    TaskExecutionStatus::Completed => true
-    TaskExecutionStatus::Stale => true
-    TaskExecutionStatus::Failed => true
+    Completed => true
+    Stale => true
+    Failed => true
     _ => false
   }
 }
@@ -58,37 +58,31 @@ pub fn terminal_execution_status(status : TaskExecutionStatus) -> Bool {
 ///|
 pub fn live_execution_status(status : TaskExecutionStatus) -> Bool {
   match status {
-    TaskExecutionStatus::ProposalImported => true
-    TaskExecutionStatus::RunConfirmed => true
-    TaskExecutionStatus::Running => true
+    ProposalImported => true
+    RunConfirmed => true
+    Running => true
     _ => false
   }
 }
 
 ///|
 pub fn active_work_execution_status(status : TaskExecutionStatus) -> Bool {
-  live_execution_status(status) ||
-  status is TaskExecutionStatus::AwaitingPersistence
+  live_execution_status(status) || status is AwaitingPersistence
 }
 
 ///|
 pub fn execution_status_rank(status : TaskExecutionStatus) -> Int {
   match status {
-    TaskExecutionStatus::PacketReady => 1
-    TaskExecutionStatus::ProposalImported => 2
-    TaskExecutionStatus::RunConfirmed
-    | TaskExecutionStatus::Running
-    | TaskExecutionStatus::AwaitingPersistence => 3
-    TaskExecutionStatus::ReviewQueued
-    | TaskExecutionStatus::Completed
-    | TaskExecutionStatus::Stale
-    | TaskExecutionStatus::Failed => 4
+    PacketReady => 1
+    ProposalImported => 2
+    RunConfirmed | Running | AwaitingPersistence => 3
+    ReviewQueued | Completed | Stale | Failed => 4
   }
 }
 
 ///|
 pub fn pollable_execution_status(status : TaskExecutionStatus) -> Bool {
-  live_execution_status(status) || status is TaskExecutionStatus::Stale
+  live_execution_status(status) || status is Stale
 }
 
 ///|
@@ -127,9 +121,7 @@ pub fn live_external_execution_count(state : TownState) -> Int {
   let mut count = 0
   for execution in state.executions {
     match execution.status {
-      TaskExecutionStatus::ProposalImported
-      | TaskExecutionStatus::RunConfirmed
-      | TaskExecutionStatus::Running =>
+      ProposalImported | RunConfirmed | Running =>
         if execution.run_id is Some(_) {
           count += 1
         }
@@ -169,9 +161,7 @@ pub fn has_retry_pending_executions(state : TownState, tick : Int) -> Bool {
   ignore(tick)
   for execution in state.executions {
     match execution.status {
-      TaskExecutionStatus::Stale
-      | TaskExecutionStatus::Failed
-      | TaskExecutionStatus::ReviewQueued =>
+      Stale | Failed | ReviewQueued =>
         match execution.next_retry_tick {
           Some(_) if execution.attempt < 3 => return true
           _ => ()

@@ -8,7 +8,7 @@ async test "civic status marks bootstrapped service operable but unproven" {
     name="Wenyu Valley / \{service.title}",
     purpose=service.purpose,
     workspace_root=root,
-    memory_scope=@core.MemoryScope::BookPrivate,
+    memory_scope=BookPrivate,
     tags=["wenyu-valley", "civic-service", service.id],
     skills=["civic-service", service.skill_pack],
   )
@@ -38,7 +38,7 @@ async test "civic workspace readiness separates structural gates" {
     name="Wenyu Valley / \{service.title}",
     purpose=service.purpose,
     workspace_root=root,
-    memory_scope=@core.MemoryScope::BookPrivate,
+    memory_scope=BookPrivate,
     tags=["wenyu-valley", "civic-service", service.id],
     skills=["civic-service", service.skill_pack],
   )

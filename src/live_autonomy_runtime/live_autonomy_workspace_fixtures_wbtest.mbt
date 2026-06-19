@@ -9,7 +9,7 @@ async fn live_autonomy_test_workspace(
   root : String,
 ) -> LiveAutonomyTestWorkspace {
   @support.ignore_checked_command("rm", ["-rf", root])
-  LiveAutonomyTestWorkspace::{ root, snapshot_path: "\{root}/town.json" }
+  { root, snapshot_path: "\{root}/town.json" }
 }
 
 ///|

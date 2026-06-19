@@ -1,7 +1,7 @@
 ///|
 test "standing watch context is not mistaken for research bootstrap" {
   let entry = moonbook_adapter_opc_research_entry()
-  let bundle = WorkerContextBundle::{
+  let bundle = {
     book_id: "research-opc",
     workspace_root: "/tmp/research-opc",
     task_id: "standing-watch-opc-news-tick-3",

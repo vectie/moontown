@@ -26,16 +26,15 @@ fn worker_status_for_execution(
   status : @core.TaskExecutionStatus,
 ) -> @core.WorkerStatus {
   match status {
-    @core.TaskExecutionStatus::PacketReady => @core.WorkerStatus::Waiting
-    @core.TaskExecutionStatus::ProposalImported => @core.WorkerStatus::Waiting
-    @core.TaskExecutionStatus::RunConfirmed => @core.WorkerStatus::Running
-    @core.TaskExecutionStatus::Running => @core.WorkerStatus::Running
-    @core.TaskExecutionStatus::AwaitingPersistence =>
-      @core.WorkerStatus::Waiting
-    @core.TaskExecutionStatus::ReviewQueued => @core.WorkerStatus::Idle
-    @core.TaskExecutionStatus::Completed => @core.WorkerStatus::Idle
-    @core.TaskExecutionStatus::Stale => @core.WorkerStatus::Blocked
-    @core.TaskExecutionStatus::Failed => @core.WorkerStatus::Idle
+    PacketReady => Waiting
+    ProposalImported => Waiting
+    RunConfirmed => Running
+    Running => Running
+    AwaitingPersistence => Waiting
+    ReviewQueued => Idle
+    Completed => Idle
+    Stale => Blocked
+    Failed => Idle
   }
 }
 
@@ -43,13 +42,12 @@ fn worker_status_for_execution(
 fn release_orphaned_blocked_workers(state : @core.TownState) -> Unit {
   let workers = state.workers.copy()
   for worker in workers {
-    if worker.status == @core.WorkerStatus::Idle ||
-      worker.status == @core.WorkerStatus::Offline {
+    if worker.status == Idle || worker.status == Offline {
       continue
     }
     match latest_execution_for_worker(state, worker.id) {
       Some(execution) if worker_should_be_released(execution) => {
-        state.set_worker_status(worker.id, @core.WorkerStatus::Idle)
+        state.set_worker_status(worker.id, Idle)
         state.record_event(
           @core.TownEvent::new(
             id="event-worker-release-\{state.events.length()}-\{worker.id}",
@@ -62,7 +60,7 @@ fn release_orphaned_blocked_workers(state : @core.TownState) -> Unit {
         )
       }
       None => {
-        state.set_worker_status(worker.id, @core.WorkerStatus::Idle)
+        state.set_worker_status(worker.id, Idle)
         state.record_event(
           @core.TownEvent::new(
             id="event-worker-release-\{state.events.length()}-\{worker.id}",
@@ -94,10 +92,10 @@ fn latest_execution_for_worker(
 ///|
 fn worker_should_be_released(execution : @core.TaskExecutionRecord) -> Bool {
   match execution.status {
-    @core.TaskExecutionStatus::Completed => true
-    @core.TaskExecutionStatus::ReviewQueued => true
-    @core.TaskExecutionStatus::Failed => true
-    @core.TaskExecutionStatus::Stale => true
+    Completed => true
+    ReviewQueued => true
+    Failed => true
+    Stale => true
     _ => false
   }
 }

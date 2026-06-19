@@ -16,42 +16,42 @@ fn count_execution_status(
 fn execution_status_is_dispatch_phase(
   status : @core.TaskExecutionStatus,
 ) -> Bool {
-  status == @core.TaskExecutionStatus::PacketReady ||
-  status == @core.TaskExecutionStatus::ProposalImported ||
-  status == @core.TaskExecutionStatus::RunConfirmed
+  status == PacketReady ||
+  status == ProposalImported ||
+  status == RunConfirmed
 }
 
 ///|
 fn execution_status_needs_attention(status : @core.TaskExecutionStatus) -> Bool {
-  status == @core.TaskExecutionStatus::Failed ||
-  status == @core.TaskExecutionStatus::Stale ||
-  status == @core.TaskExecutionStatus::ReviewQueued
+  status == Failed ||
+  status == Stale ||
+  status == ReviewQueued
 }
 
 ///|
 fn execution_status_is_persistence_or_done(
   status : @core.TaskExecutionStatus,
 ) -> Bool {
-  status == @core.TaskExecutionStatus::AwaitingPersistence ||
-  status == @core.TaskExecutionStatus::Completed
+  status == AwaitingPersistence ||
+  status == Completed
 }
 
 ///|
 fn execution_status_is_active_run(status : @core.TaskExecutionStatus) -> Bool {
-  status == @core.TaskExecutionStatus::Running ||
-  status == @core.TaskExecutionStatus::RunConfirmed
+  status == Running ||
+  status == RunConfirmed
 }
 
 ///|
 fn execution_status_has_run_id(status : @core.TaskExecutionStatus) -> Bool {
-  !(status == @core.TaskExecutionStatus::PacketReady ||
-  status == @core.TaskExecutionStatus::ProposalImported)
+  !(status == PacketReady ||
+  status == ProposalImported)
 }
 
 ///|
 fn execution_status_requires_review(status : @core.TaskExecutionStatus) -> Bool {
-  status == @core.TaskExecutionStatus::AwaitingPersistence ||
-  status == @core.TaskExecutionStatus::ReviewQueued
+  status == AwaitingPersistence ||
+  status == ReviewQueued
 }
 
 ///|
@@ -72,40 +72,40 @@ priv struct ExecutionCountSummary {
 fn execution_count_summary(
   executions : Array[@core.TaskExecutionRecord],
 ) -> ExecutionCountSummary {
-  ExecutionCountSummary::{
+  {
     total: executions.length(),
     packet_ready: count_execution_status(
       executions,
-      @core.TaskExecutionStatus::PacketReady,
+      PacketReady,
     ),
     proposal_imported: count_execution_status(
       executions,
-      @core.TaskExecutionStatus::ProposalImported,
+      ProposalImported,
     ),
     run_confirmed: count_execution_status(
       executions,
-      @core.TaskExecutionStatus::RunConfirmed,
+      RunConfirmed,
     ),
     running: count_execution_status(
       executions,
-      @core.TaskExecutionStatus::Running,
+      Running,
     ),
     awaiting_persistence: count_execution_status(
       executions,
-      @core.TaskExecutionStatus::AwaitingPersistence,
+      AwaitingPersistence,
     ),
     review_queued: count_execution_status(
       executions,
-      @core.TaskExecutionStatus::ReviewQueued,
+      ReviewQueued,
     ),
     completed: count_execution_status(
       executions,
-      @core.TaskExecutionStatus::Completed,
+      Completed,
     ),
-    stale: count_execution_status(executions, @core.TaskExecutionStatus::Stale),
+    stale: count_execution_status(executions, Stale),
     failed: count_execution_status(
       executions,
-      @core.TaskExecutionStatus::Failed,
+      Failed,
     ),
   }
 }

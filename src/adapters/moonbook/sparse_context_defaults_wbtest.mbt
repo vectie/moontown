@@ -14,7 +14,7 @@ test "sparse worker context gets keeper-safe defaults before MoonClaw import" {
     priority=80,
     requires_review=true,
   )
-  let bundle = WorkerContextBundle::{
+  let bundle = {
     book_id: "coding",
     workspace_root: "/tmp/coding",
     task_id: "coding-synthesis",
@@ -56,7 +56,7 @@ test "sparse worker context prefers book skills and task target pages" {
     requires_review=true,
     target_pages=["wiki/synthesis/overview.md"],
   )
-  let bundle = WorkerContextBundle::{
+  let bundle = {
     book_id: "finance",
     workspace_root: "/tmp/finance",
     task_id: "finance-synthesis",

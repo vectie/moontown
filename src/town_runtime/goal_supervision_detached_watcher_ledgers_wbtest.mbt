@@ -31,7 +31,7 @@ async test "late detached receipt appends terminal watcher ledger record" {
       goal_id=goal.id,
       tick=10,
       target_book_id="research-opc",
-      decision=@core.WatcherDecisionKind::Deferred,
+      decision=Deferred,
       detail="Mayor deferred while detached import was pending.",
       task_id=Some(task_id),
       next_due_tick=70,
@@ -43,7 +43,7 @@ async test "late detached receipt appends terminal watcher ledger record" {
   let execution = standing_watch_execution_fixture(
     task_id~,
     packet_path~,
-    status=@core.TaskExecutionStatus::Completed,
+    status=Completed,
     summary="closed as deferred before receipt arrived",
     heartbeat_tick=10,
     stale_after_tick=12,
@@ -68,7 +68,7 @@ async test "late detached receipt appends terminal watcher ledger record" {
     records.any(fn(record) {
       record.task_id == Some(task_id) &&
       record.run_id == Some("run-detached") &&
-      record.decision == @core.WatcherDecisionKind::NoChange
+      record.decision == NoChange
     }),
   )
   assert_true(
@@ -104,7 +104,7 @@ async test "terminal detached watcher ledger reconciliation handles already comp
       goal_id=goal.id,
       tick=10,
       target_book_id="research-opc",
-      decision=@core.WatcherDecisionKind::Deferred,
+      decision=Deferred,
       detail="Mayor deferred while detached import was pending.",
       task_id=Some(task_id),
       next_due_tick=70,
@@ -118,7 +118,7 @@ async test "terminal detached watcher ledger reconciliation handles already comp
       task_id~,
       packet_path~,
       run_id=Some("run-detached"),
-      status=@core.TaskExecutionStatus::Completed,
+      status=Completed,
       summary="Detached MoonClaw import completed; inline run finished.",
       result_decision="completed",
     ),
@@ -134,7 +134,7 @@ async test "terminal detached watcher ledger reconciliation handles already comp
     records.any(fn(record) {
       record.task_id == Some(task_id) &&
       record.run_id == Some("run-detached") &&
-      record.decision == @core.WatcherDecisionKind::NoChange
+      record.decision == NoChange
     }),
   )
   state.replace_execution(
@@ -155,9 +155,9 @@ async test "terminal detached watcher ledger reconciliation handles already comp
   for record in after_duplicate_attempt {
     if record.task_id == Some(task_id) &&
       record.run_id == Some("run-detached") &&
-      record.decision != @core.WatcherDecisionKind::Deferred {
+      record.decision != Deferred {
       terminal_count += 1
-      assert_eq(record.decision, @core.WatcherDecisionKind::NoChange)
+      assert_eq(record.decision, NoChange)
     }
   }
   assert_eq(terminal_count, 1)

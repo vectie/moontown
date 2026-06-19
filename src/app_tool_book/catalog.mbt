@@ -30,7 +30,7 @@ pub fn catalog_entry(
     name=catalog_name(title),
     purpose~,
     workspace_root~,
-    memory_scope=@core.MemoryScope::BookPrivate,
+    memory_scope=BookPrivate,
     tags=catalog_tags(),
     skills=catalog_skills(),
   )

@@ -37,11 +37,12 @@ pub fn codex_acp_target_json(
 
 ///|
 pub fn moontown_target_json() -> Json {
+  let root = moontown_workspace_root()
   {
     "backend": "codex",
     "label": "Codex Moontown Builder",
-    "cwd": "/Users/kq/Workspace/moontown",
-    "workspace": "/Users/kq/Workspace/moontown",
+    "cwd": root,
+    "workspace": root,
     "command": command(),
     "args": moontown_args(),
     "model": model(),

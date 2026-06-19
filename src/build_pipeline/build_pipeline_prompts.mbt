@@ -42,7 +42,7 @@ pub fn wenyu_code_patch_prompt(
   [
     "Implement a real code slice for Wenyu Valley `\{module_name}`.",
     "",
-    "Use MoonClaw/OpenClaw Codex ACP if available. Do not satisfy this task by writing only markdown. The expected result is a code patch in `\{repo_root}` plus a concise book record.",
+    "Use MoonCode-backed MoonClaw execution if available. Do not satisfy this task by writing only markdown. The expected result is a code patch in `\{repo_root}` plus a concise book record.",
     "",
     "Read first:",
     "- `build/IMPLEMENTATION_BACKLOG.md` if present",
@@ -54,7 +54,7 @@ pub fn wenyu_code_patch_prompt(
     "",
     "Implementation scope:",
     "- Prefer focused, reviewable changes under `src/ui/rabbita-town`, runtime projection, or Wenyu-specific state models.",
-    "- Preserve Moontown/MoonBook/MoonClaw boundaries. Moontown owns orchestration and UI projection; MoonBook owns book memory and generated pages; MoonClaw/OpenClaw owns execution.",
+    "- Preserve Moontown/MoonBook/MoonClaw boundaries. Moontown owns orchestration and UI projection; MoonBook owns book memory and generated pages; MoonClaw owns execution.",
     "- If the task cannot safely patch code, write `build/CODE_BLOCKERS.md` with exact missing input/tooling and create no fake completion.",
     "",
     "Required outputs:",

@@ -14,7 +14,7 @@ fn simulation_state(model : Model) -> @core.TownState {
       name="Town Shell",
       purpose="Owns the live district shell, runtime projection contract, and operator-facing Wenyu map.",
       workspace_root="/town/wenyu-town-shell",
-      memory_scope=@core.MemoryScope::SharedTown,
+      memory_scope=SharedTown,
       tags=["projection", "ui", "shell"],
     ),
   )
@@ -24,7 +24,7 @@ fn simulation_state(model : Model) -> @core.TownState {
       name="Resident Twins",
       purpose="Projects resident identity, memory summaries, reflection loops, privacy scope, and next actions into the town view.",
       workspace_root="/town/wenyu-resident-twins",
-      memory_scope=@core.MemoryScope::BookPrivate,
+      memory_scope=BookPrivate,
       tags=["resident-twins", "memory", "projection"],
     ),
   )
@@ -34,7 +34,7 @@ fn simulation_state(model : Model) -> @core.TownState {
       name="Policy Release Hall",
       purpose="Turns policy documents into quest lines, advisor answers, and application checklists.",
       workspace_root="/town/policy-hall",
-      memory_scope=@core.MemoryScope::BookPrivate,
+      memory_scope=BookPrivate,
       tags=["policy", "quest", "advisor"],
     ),
   )
@@ -44,7 +44,7 @@ fn simulation_state(model : Model) -> @core.TownState {
       name="Contest Express",
       purpose="Turns contest participation into a nurturing lane with countdowns, readiness reviews, mock judging, and champion replay hooks.",
       workspace_root="/town/wenyu-contest-express",
-      memory_scope=@core.MemoryScope::SharedTown,
+      memory_scope=SharedTown,
       tags=["contest", "roadshow", "readiness"],
     ),
   )
@@ -54,7 +54,7 @@ fn simulation_state(model : Model) -> @core.TownState {
       name="Social Square",
       purpose="Maintains weak-tie matching, activity initiation, and collaboration loops.",
       workspace_root="/town/social-square",
-      memory_scope=@core.MemoryScope::BookPrivate,
+      memory_scope=BookPrivate,
       tags=["matching", "events", "community"],
     ),
   )
@@ -64,7 +64,7 @@ fn simulation_state(model : Model) -> @core.TownState {
       name="Talent Star Avenue",
       purpose="Projects resident talent cards, skills heatmaps, and reception tours.",
       workspace_root="/town/talent-avenue",
-      memory_scope=@core.MemoryScope::SharedTown,
+      memory_scope=SharedTown,
       tags=["talent", "graph", "showcase"],
     ),
   )
@@ -74,7 +74,7 @@ fn simulation_state(model : Model) -> @core.TownState {
       name="AI Science Garden",
       purpose="Runs AI learning tips, tool trials, creator workshops, and tutorial quests.",
       workspace_root="/town/ai-garden",
-      memory_scope=@core.MemoryScope::BookPrivate,
+      memory_scope=BookPrivate,
       tags=["learning", "tools", "workshop"],
     ),
   )
@@ -84,7 +84,7 @@ fn simulation_state(model : Model) -> @core.TownState {
       name="Physical Bridge",
       purpose="Bridges virtual requests into venue booking, proxy attendance, robot dispatch, and live district telemetry.",
       workspace_root="/town/wenyu-physical-bridge",
-      memory_scope=@core.MemoryScope::SharedTown,
+      memory_scope=SharedTown,
       tags=["physical-bridge", "robot", "telemetry"],
     ),
   )
@@ -120,7 +120,7 @@ fn snapshot_placeholder_state(model : Model) -> @core.TownState {
       name="Town Shell",
       purpose="Town Shell stays visible here while the browser bridge waits for a persisted projection feed.",
       workspace_root="/town/wenyu-town-shell",
-      memory_scope=@core.MemoryScope::SharedTown,
+      memory_scope=SharedTown,
       tags=["projection", "ui", "shell"],
     ),
   )
@@ -130,7 +130,7 @@ fn snapshot_placeholder_state(model : Model) -> @core.TownState {
       name="Persisted Town Snapshot",
       purpose="Browser snapshot bridge placeholder for `.moontown/town.json`.",
       workspace_root=".moontown",
-      memory_scope=@core.MemoryScope::SharedTown,
+      memory_scope=SharedTown,
       tags=["snapshot", "pending-bridge"],
     ),
   )
@@ -139,9 +139,9 @@ fn snapshot_placeholder_state(model : Model) -> @core.TownState {
       id="snapshot-bridge",
       name="Snapshot Bridge",
       book_id="snapshot",
-      role=@core.WorkerRole::Watcher,
+      role=Watcher,
       capabilities=["state-source", "projection"],
-      status=@core.WorkerStatus::Waiting,
+      status=Waiting,
     ),
   )
   state.enqueue_task(
@@ -150,10 +150,10 @@ fn snapshot_placeholder_state(model : Model) -> @core.TownState {
       book_id="snapshot",
       title="Connect persisted town state",
       prompt="Load `.moontown/town.json` through a local endpoint or generated static JSON artifact.",
-      domain=@core.WorkDomain::Operations,
-      required_role=Some(@core.WorkerRole::Watcher),
+      domain=Operations,
+      required_role=Some(Watcher),
       required_capabilities=["state-source"],
-      status=@core.TownTaskStatus::Planned,
+      status=Planned,
     ),
   )
   state.record_event(

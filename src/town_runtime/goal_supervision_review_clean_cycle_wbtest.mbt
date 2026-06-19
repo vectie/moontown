@@ -34,10 +34,10 @@ async test "review queued standing watch closes when newer cycle is clean" {
   let current = @core.find_execution(
     state, "standing-book-quality-repair-wenyu-physical-bridge-tick-20",
   ).unwrap()
-  assert_eq(old.status, @core.TaskExecutionStatus::Completed)
+  assert_eq(old.status, Completed)
   assert_eq(old.result_decision, "superseded-review")
   assert_true(!old.requires_review)
-  assert_eq(current.status, @core.TaskExecutionStatus::Completed)
+  assert_eq(current.status, Completed)
   assert_eq(current.result_decision, "NoChange")
   assert_true(!current.requires_review)
 }

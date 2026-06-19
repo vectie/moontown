@@ -29,7 +29,7 @@ fn wenyu_policy_hall_service() -> CivicServiceDefinition {
     review_queues=["wiki/reviews/policy-citations.md"],
     skill_pack="civic-policy-researcher",
     output_contract="wenyu.civic.policy_service.v1",
-    worker_role=@core.WorkerRole::Specialist,
+    worker_role=Specialist,
     acceptance=[
       "uses official or clearly labeled secondary sources", "separates cited facts from interpretation",
       "requires review before user-facing application advice",
@@ -66,7 +66,7 @@ fn wenyu_contest_express_service() -> CivicServiceDefinition {
     review_queues=["wiki/reviews/contest-submissions.md"],
     skill_pack="civic-contest-coach",
     output_contract="wenyu.civic.contest_service.v1",
-    worker_role=@core.WorkerRole::Planner,
+    worker_role=Planner,
     acceptance=[
       "tracks deadline and submission state", "produces actionable readiness gaps",
       "does not submit externally without operator confirmation",
@@ -104,7 +104,7 @@ fn wenyu_ai_garden_service() -> CivicServiceDefinition {
     review_queues=["wiki/reviews/education-content.md"],
     skill_pack="civic-ai-tutor",
     output_contract="wenyu.civic.education_service.v1",
-    worker_role=@core.WorkerRole::Specialist,
+    worker_role=Specialist,
     acceptance=[
       "writes novice-safe tutorials", "shows concrete before/after examples", "queues unsafe or uncertain advice for review",
     ],

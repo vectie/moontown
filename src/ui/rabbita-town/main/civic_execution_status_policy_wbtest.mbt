@@ -1,40 +1,40 @@
 ///|
 test "civic execution stage centralizes task execution status groups" {
   assert_true(
-    civic_execution_stage(@core.TaskExecutionStatus::PacketReady)
-    is @ui.ExecutionViewStage::Packet,
+    civic_execution_stage(PacketReady)
+    is @ui.Packet,
   )
   assert_true(
-    civic_execution_stage(@core.TaskExecutionStatus::ProposalImported)
-    is @ui.ExecutionViewStage::Packet,
+    civic_execution_stage(ProposalImported)
+    is @ui.Packet,
   )
   assert_true(
-    civic_execution_stage(@core.TaskExecutionStatus::RunConfirmed)
-    is @ui.ExecutionViewStage::Running,
+    civic_execution_stage(RunConfirmed)
+    is @ui.Running,
   )
   assert_true(
-    civic_execution_stage(@core.TaskExecutionStatus::Running)
-    is @ui.ExecutionViewStage::Running,
+    civic_execution_stage(Running)
+    is @ui.Running,
   )
   assert_true(
-    civic_execution_stage(@core.TaskExecutionStatus::AwaitingPersistence)
-    is @ui.ExecutionViewStage::Persisting,
+    civic_execution_stage(AwaitingPersistence)
+    is @ui.Persisting,
   )
   assert_true(
-    civic_execution_stage(@core.TaskExecutionStatus::ReviewQueued)
-    is @ui.ExecutionViewStage::Review,
+    civic_execution_stage(ReviewQueued)
+    is @ui.Review,
   )
   assert_true(
-    civic_execution_stage(@core.TaskExecutionStatus::Completed)
-    is @ui.ExecutionViewStage::Completed,
+    civic_execution_stage(Completed)
+    is @ui.Completed,
   )
   assert_true(
-    civic_execution_stage(@core.TaskExecutionStatus::Failed)
-    is @ui.ExecutionViewStage::Recovery,
+    civic_execution_stage(Failed)
+    is @ui.Recovery,
   )
   assert_true(
-    civic_execution_stage(@core.TaskExecutionStatus::Stale)
-    is @ui.ExecutionViewStage::Recovery,
+    civic_execution_stage(Stale)
+    is @ui.Recovery,
   )
 }
 
@@ -60,7 +60,7 @@ fn civic_execution_policy_test_task(prompt : String) -> @core.TownTask {
     book_id="book",
     title="Test task",
     prompt~,
-    domain=@core.WorkDomain::SocialExperiment,
+    domain=SocialExperiment,
   )
 }
 
@@ -81,63 +81,63 @@ test "civic execution stage label centralizes status groups" {
   let phrases = civic_execution_policy_test_phrases()
   assert_eq(
     civic_execution_stage_label_for_status(
-      @core.TaskExecutionStatus::PacketReady,
+      PacketReady,
       phrases,
     ),
     "packet",
   )
   assert_eq(
     civic_execution_stage_label_for_status(
-      @core.TaskExecutionStatus::ProposalImported,
+      ProposalImported,
       phrases,
     ),
     "packet",
   )
   assert_eq(
     civic_execution_stage_label_for_status(
-      @core.TaskExecutionStatus::RunConfirmed,
+      RunConfirmed,
       phrases,
     ),
     "running",
   )
   assert_eq(
     civic_execution_stage_label_for_status(
-      @core.TaskExecutionStatus::Running,
+      Running,
       phrases,
     ),
     "running",
   )
   assert_eq(
     civic_execution_stage_label_for_status(
-      @core.TaskExecutionStatus::AwaitingPersistence,
+      AwaitingPersistence,
       phrases,
     ),
     "persisting",
   )
   assert_eq(
     civic_execution_stage_label_for_status(
-      @core.TaskExecutionStatus::ReviewQueued,
+      ReviewQueued,
       phrases,
     ),
     "review",
   )
   assert_eq(
     civic_execution_stage_label_for_status(
-      @core.TaskExecutionStatus::Completed,
+      Completed,
       phrases,
     ),
     "completed",
   )
   assert_eq(
     civic_execution_stage_label_for_status(
-      @core.TaskExecutionStatus::Failed,
+      Failed,
       phrases,
     ),
     "recovery",
   )
   assert_eq(
     civic_execution_stage_label_for_status(
-      @core.TaskExecutionStatus::Stale,
+      Stale,
       phrases,
     ),
     "recovery",
@@ -161,7 +161,7 @@ test "civic projected execution stage label centralizes snapshot fallback" {
       StateSourceKind::SnapshotFile,
       Some(
         civic_execution_policy_test_execution(
-          @core.TaskExecutionStatus::Running,
+          Running,
         ),
       ),
       phrases,
@@ -175,7 +175,7 @@ test "civic projected execution stage label centralizes snapshot fallback" {
       StateSourceKind::DemoSimulation,
       Some(
         civic_execution_policy_test_execution(
-          @core.TaskExecutionStatus::Running,
+          Running,
         ),
       ),
       phrases,
@@ -210,7 +210,7 @@ test "civic execution action label reuses execution status grouping" {
     civic_execution_action_label(
       Some(
         civic_execution_policy_test_execution(
-          @core.TaskExecutionStatus::ProposalImported,
+          ProposalImported,
         ),
       ),
       phrases,
@@ -222,7 +222,7 @@ test "civic execution action label reuses execution status grouping" {
     civic_execution_action_label(
       Some(
         civic_execution_policy_test_execution(
-          @core.TaskExecutionStatus::ReviewQueued,
+          ReviewQueued,
         ),
       ),
       phrases,
@@ -250,7 +250,7 @@ test "civic execution signal label reuses execution status grouping" {
     civic_execution_signal_label(
       Some(
         civic_execution_policy_test_execution(
-          @core.TaskExecutionStatus::PacketReady,
+          PacketReady,
         ),
       ),
       phrases,
@@ -261,7 +261,7 @@ test "civic execution signal label reuses execution status grouping" {
   assert_eq(
     civic_execution_signal_label(
       Some(
-        civic_execution_policy_test_execution(@core.TaskExecutionStatus::Failed),
+        civic_execution_policy_test_execution(Failed),
       ),
       phrases,
       fallback="fallback",
@@ -284,14 +284,14 @@ test "civic signal phrases centralizes common module defaults" {
   )
   assert_eq(
     civic_execution_stage_label_for_status(
-      @core.TaskExecutionStatus::PacketReady,
+      PacketReady,
       phrases,
     ),
     "Dispatching",
   )
   assert_eq(
     civic_execution_stage_label_for_status(
-      @core.TaskExecutionStatus::Failed,
+      Failed,
       phrases,
     ),
     "Needs recovery",
@@ -309,7 +309,7 @@ test "civic signal phrases allows module-specific dispatch labels" {
   )
   assert_eq(
     civic_execution_stage_label_for_status(
-      @core.TaskExecutionStatus::ProposalImported,
+      ProposalImported,
       phrases,
     ),
     "Build dispatch",
@@ -331,7 +331,7 @@ test "civic projected execution signal label centralizes snapshot bridge fallbac
       StateSourceKind::SnapshotFile,
       Some(
         civic_execution_policy_test_execution(
-          @core.TaskExecutionStatus::Running,
+          Running,
         ),
       ),
       phrases,
@@ -344,7 +344,7 @@ test "civic projected execution signal label centralizes snapshot bridge fallbac
       StateSourceKind::DemoSimulation,
       Some(
         civic_execution_policy_test_execution(
-          @core.TaskExecutionStatus::Running,
+          Running,
         ),
       ),
       phrases,
@@ -423,7 +423,7 @@ test "civic execution score reuses execution status grouping" {
     civic_execution_score(
       Some(
         civic_execution_policy_test_execution(
-          @core.TaskExecutionStatus::ProposalImported,
+          ProposalImported,
         ),
       ),
       policy,
@@ -435,7 +435,7 @@ test "civic execution score reuses execution status grouping" {
     civic_execution_score(
       Some(
         civic_execution_policy_test_execution(
-          @core.TaskExecutionStatus::Running,
+          Running,
         ),
       ),
       policy,
@@ -446,7 +446,7 @@ test "civic execution score reuses execution status grouping" {
   assert_eq(
     civic_execution_score(
       Some(
-        civic_execution_policy_test_execution(@core.TaskExecutionStatus::Stale),
+        civic_execution_policy_test_execution(Stale),
       ),
       policy,
       fallback=0,

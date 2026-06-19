@@ -16,6 +16,6 @@ fn standing_watch_task(
     priority=95,
     requires_review=false,
     target_pages=@standing_watch_policy.standing_watch_target_pages(),
-    required_role=Some(@core.WorkerRole::Watcher),
+    required_role=Some(Watcher),
   )
 }

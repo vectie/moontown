@@ -14,6 +14,8 @@ import {
   "vectie/moontown/support",
 }
 
+supported_targets = "native"
+
 import {
   "moonbitlang/async",
   "vectie/moontown/adapters/moonbook",

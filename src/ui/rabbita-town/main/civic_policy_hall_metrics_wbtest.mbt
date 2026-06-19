@@ -14,7 +14,7 @@ test "policy hall health keeps existing worker energy policy" {
       Some(worker),
       Some(
         civic_metric_test_execution(
-          @core.TaskExecutionStatus::AwaitingPersistence,
+          AwaitingPersistence,
         ),
       ),
     ),
@@ -23,7 +23,7 @@ test "policy hall health keeps existing worker energy policy" {
   assert_eq(
     policy_hall_health(
       Some(worker),
-      Some(civic_metric_test_execution(@core.TaskExecutionStatus::Completed)),
+      Some(civic_metric_test_execution(Completed)),
     ),
     75,
   )
@@ -36,21 +36,21 @@ test "policy hall quest stage uses shared execution phrase groups" {
   assert_eq(
     policy_hall_quest_stage(
       model,
-      Some(civic_metric_test_execution(@core.TaskExecutionStatus::PacketReady)),
+      Some(civic_metric_test_execution(PacketReady)),
     ),
     "Packet prepared",
   )
   assert_eq(
     policy_hall_quest_stage(
       model,
-      Some(civic_metric_test_execution(@core.TaskExecutionStatus::Running)),
+      Some(civic_metric_test_execution(Running)),
     ),
     "Advisor interpreting",
   )
   assert_eq(
     policy_hall_quest_stage(
       model,
-      Some(civic_metric_test_execution(@core.TaskExecutionStatus::Completed)),
+      Some(civic_metric_test_execution(Completed)),
     ),
     "Checklist ready",
   )
@@ -63,7 +63,7 @@ test "policy hall next action uses shared execution action groups" {
     policy_hall_next_action(
       model,
       None,
-      Some(civic_metric_test_execution(@core.TaskExecutionStatus::PacketReady)),
+      Some(civic_metric_test_execution(PacketReady)),
     ),
     "Confirm dispatch and open the first policy quest step.",
   )
@@ -71,7 +71,7 @@ test "policy hall next action uses shared execution action groups" {
     policy_hall_next_action(
       model,
       None,
-      Some(civic_metric_test_execution(@core.TaskExecutionStatus::ReviewQueued)),
+      Some(civic_metric_test_execution(ReviewQueued)),
     ),
     "Escalate the low-confidence answer for keeper review before publishing.",
   )
@@ -83,14 +83,14 @@ test "policy hall signal uses shared execution signal groups" {
   assert_eq(
     policy_hall_signal(
       model,
-      Some(civic_metric_test_execution(@core.TaskExecutionStatus::Running)),
+      Some(civic_metric_test_execution(Running)),
     ),
     "Quest live",
   )
   assert_eq(
     policy_hall_signal(
       model,
-      Some(civic_metric_test_execution(@core.TaskExecutionStatus::ReviewQueued)),
+      Some(civic_metric_test_execution(ReviewQueued)),
     ),
     "Escalated",
   )
@@ -102,28 +102,28 @@ test "policy hall secondary labels use shared execution phrase groups" {
   assert_eq(
     policy_hall_checklist_label(
       model,
-      Some(civic_metric_test_execution(@core.TaskExecutionStatus::PacketReady)),
+      Some(civic_metric_test_execution(PacketReady)),
     ),
     "Packet staged",
   )
   assert_eq(
     policy_hall_checklist_label(
       model,
-      Some(civic_metric_test_execution(@core.TaskExecutionStatus::Completed)),
+      Some(civic_metric_test_execution(Completed)),
     ),
     "Ready for resident handoff",
   )
   assert_eq(
     policy_hall_evidence_label(
       model,
-      Some(civic_metric_test_execution(@core.TaskExecutionStatus::Running)),
+      Some(civic_metric_test_execution(Running)),
     ),
     "Clause scan in flight",
   )
   assert_eq(
     policy_hall_evidence_label(
       model,
-      Some(civic_metric_test_execution(@core.TaskExecutionStatus::Failed)),
+      Some(civic_metric_test_execution(Failed)),
     ),
     "Evidence needs recovery",
   )
@@ -135,21 +135,21 @@ test "policy hall confidence uses shared execution score policy" {
   assert_eq(
     policy_hall_confidence(
       model,
-      Some(civic_metric_test_execution(@core.TaskExecutionStatus::PacketReady)),
+      Some(civic_metric_test_execution(PacketReady)),
     ),
     69,
   )
   assert_eq(
     policy_hall_confidence(
       model,
-      Some(civic_metric_test_execution(@core.TaskExecutionStatus::Completed)),
+      Some(civic_metric_test_execution(Completed)),
     ),
     94,
   )
   assert_eq(
     policy_hall_confidence(
       model,
-      Some(civic_metric_test_execution(@core.TaskExecutionStatus::Failed)),
+      Some(civic_metric_test_execution(Failed)),
     ),
     28,
   )

@@ -10,14 +10,14 @@ test "superseded standing watch failure does not keep town degraded" {
     health_report_execution(
       task_id="standing-watch-opc-news-tick-2",
       book_id="research-opc",
-      status=@core.TaskExecutionStatus::Failed,
+      status=Failed,
       summary="no eligible worker",
       output_contract="test",
     ),
     health_report_execution(
       task_id="standing-watch-opc-news-tick-5",
       book_id="research-opc",
-      status=@core.TaskExecutionStatus::ReviewQueued,
+      status=ReviewQueued,
       summary="standing_goal_decision: no_change",
       output_contract="test",
     ),
@@ -28,7 +28,7 @@ test "superseded standing watch failure does not keep town degraded" {
       anomaly.detail.contains("standing-watch-opc-news-tick-2")
     }),
   )
-  assert_eq(report.book_health[0].level, HealthLevel::Healthy)
+  assert_eq(report.book_health[0].level, Healthy)
 }
 
 ///|
@@ -43,13 +43,13 @@ test "standing watch no-eligible collision is superseded by neighboring active r
     health_report_execution(
       task_id="standing-watch-llm-training-tick-8802",
       book_id="research-llm",
-      status=@core.TaskExecutionStatus::Completed,
+      status=Completed,
       summary="standing_goal_decision: no_change",
     ),
     health_report_execution(
       task_id="standing-watch-llm-training-tick-8803",
       book_id="research-llm",
-      status=@core.TaskExecutionStatus::Failed,
+      status=Failed,
       summary="Mayor could not dispatch: no eligible worker in the target book",
     ),
   ])
@@ -59,7 +59,7 @@ test "standing watch no-eligible collision is superseded by neighboring active r
       anomaly.detail.contains("standing-watch-llm-training-tick-8803")
     }),
   )
-  assert_eq(report.book_health[0].level, HealthLevel::Healthy)
+  assert_eq(report.book_health[0].level, Healthy)
 }
 
 ///|
@@ -74,19 +74,19 @@ test "standing watch stale execution is superseded by active retry" {
     health_report_execution(
       task_id="standing-watch-ai-agents-tick-12994",
       book_id="research-agents",
-      status=@core.TaskExecutionStatus::Stale,
+      status=Stale,
       summary="missed heartbeat before retry",
     ),
     health_report_execution(
       task_id="standing-watch-ai-agents-tick-12995",
       book_id="research-agents",
-      status=@core.TaskExecutionStatus::RunConfirmed,
+      status=RunConfirmed,
       summary="retry is active",
     ),
   ])
   let report = inspect_town(state)
   assert_true(report.anomalies.is_empty())
-  assert_eq(report.book_health[0].level, HealthLevel::Healthy)
+  assert_eq(report.book_health[0].level, Healthy)
 }
 
 ///|
@@ -103,7 +103,7 @@ test "repaired context packet import failure does not keep town degraded when ex
       book_id="coding",
       packet_id="keeper-coding-synthesis",
       packet_path="packet.json",
-      status=@core.TaskExecutionStatus::Failed,
+      status=Failed,
       summary="MoonClaw proposal import failed: ExternalProposalPacket: context_pages must not be empty",
       output_contract="keeper.plan.packet.v1",
       context_pages=["wiki/index.md"],
@@ -111,7 +111,7 @@ test "repaired context packet import failure does not keep town degraded when ex
   ])
   let report = inspect_town(state)
   assert_true(report.anomalies.is_empty())
-  assert_eq(report.book_health[0].level, HealthLevel::Healthy)
+  assert_eq(report.book_health[0].level, Healthy)
 }
 
 ///|
@@ -127,14 +127,14 @@ test "health anomaly counter matches exact anomaly titles" {
       task_id="research-opc-failed-a",
       book_id="research-opc",
       packet_id="packet-a",
-      status=@core.TaskExecutionStatus::Failed,
+      status=Failed,
       summary="first failure",
     ),
     health_report_execution(
       task_id="research-opc-failed-b",
       book_id="research-opc",
       packet_id="packet-b",
-      status=@core.TaskExecutionStatus::Failed,
+      status=Failed,
       summary="second failure",
     ),
   ])

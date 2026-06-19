@@ -5,8 +5,8 @@ async test "live status counts active executions when worker state is idle" {
   )
   let snapshot_path = workspace.snapshot_path
   let state = @test_fixtures.visual_projection_test_state(
-    worker_status=@core.WorkerStatus::Idle,
-    execution_status=@core.TaskExecutionStatus::Running,
+    worker_status=Idle,
+    execution_status=Running,
   )
   @storage.save_snapshot_file(snapshot_path, @storage.snapshot_of(state))
   ignore(
@@ -30,7 +30,7 @@ async test "live status uses effective tick from active execution task id" {
   state.register_execution(
     live_autonomy_standing_watch_execution(
       "standing-watch-opc-news-tick-16012",
-      @core.TaskExecutionStatus::Running,
+      Running,
       "running",
     ),
   )

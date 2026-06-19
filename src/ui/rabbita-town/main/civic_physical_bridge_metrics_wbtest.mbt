@@ -36,21 +36,21 @@ test "physical bridge signal uses shared execution phrase groups" {
   assert_eq(
     physical_bridge_signal(
       model,
-      Some(civic_metric_test_execution(@core.TaskExecutionStatus::PacketReady)),
+      Some(civic_metric_test_execution(PacketReady)),
     ),
     "Sync dispatch",
   )
   assert_eq(
     physical_bridge_signal(
       model,
-      Some(civic_metric_test_execution(@core.TaskExecutionStatus::Running)),
+      Some(civic_metric_test_execution(Running)),
     ),
     "Bridge sync live",
   )
   assert_eq(
     physical_bridge_signal(
       { ..model, state_source: StateSourceKind::SnapshotFile },
-      Some(civic_metric_test_execution(@core.TaskExecutionStatus::Completed)),
+      Some(civic_metric_test_execution(Completed)),
     ),
     "Projection bridge",
   )
@@ -65,7 +65,7 @@ test "physical bridge next action uses shared execution action groups" {
       None,
       Some(
         civic_metric_test_execution(
-          @core.TaskExecutionStatus::AwaitingPersistence,
+          AwaitingPersistence,
         ),
       ),
     ),
@@ -75,7 +75,7 @@ test "physical bridge next action uses shared execution action groups" {
     physical_bridge_next_action(
       model,
       None,
-      Some(civic_metric_test_execution(@core.TaskExecutionStatus::Stale)),
+      Some(civic_metric_test_execution(Stale)),
     ),
     "Recover the stalled bridge run before offline status drifts away from the visible town.",
   )
@@ -87,21 +87,21 @@ test "physical bridge stage uses shared execution phrase groups" {
   assert_eq(
     physical_bridge_stage(
       model,
-      Some(civic_metric_test_execution(@core.TaskExecutionStatus::PacketReady)),
+      Some(civic_metric_test_execution(PacketReady)),
     ),
     "Bridge packet prepared",
   )
   assert_eq(
     physical_bridge_stage(
       model,
-      Some(civic_metric_test_execution(@core.TaskExecutionStatus::Running)),
+      Some(civic_metric_test_execution(Running)),
     ),
     "Room and robot sync running",
   )
   assert_eq(
     physical_bridge_stage(
       { ..model, state_source: StateSourceKind::SnapshotFile },
-      Some(civic_metric_test_execution(@core.TaskExecutionStatus::Completed)),
+      Some(civic_metric_test_execution(Completed)),
     ),
     "Projection bridge pending",
   )
@@ -113,21 +113,21 @@ test "physical bridge handoff label uses shared execution phrase groups" {
   assert_eq(
     physical_bridge_handoff_label(
       model,
-      Some(civic_metric_test_execution(@core.TaskExecutionStatus::PacketReady)),
+      Some(civic_metric_test_execution(PacketReady)),
     ),
     "Mayor dispatch opened for bridge run",
   )
   assert_eq(
     physical_bridge_handoff_label(
       model,
-      Some(civic_metric_test_execution(@core.TaskExecutionStatus::Completed)),
+      Some(civic_metric_test_execution(Completed)),
     ),
     "Room, robot, and proxy counters ready",
   )
   assert_eq(
     physical_bridge_handoff_label(
       { ..model, state_source: StateSourceKind::SnapshotFile },
-      Some(civic_metric_test_execution(@core.TaskExecutionStatus::Failed)),
+      Some(civic_metric_test_execution(Failed)),
     ),
     "Projection-safe room and robot feed",
   )

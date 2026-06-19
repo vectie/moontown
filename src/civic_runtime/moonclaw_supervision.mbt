@@ -10,8 +10,7 @@ async fn ensure_run_execution(
     cwd=workspace_root,
     detect_orphan=false,
   )
-  let launch_command = if initial.status
-    is @core.TaskExecutionStatus::RunConfirmed {
+  let launch_command = if initial.status is RunConfirmed {
     Some(@moonclaw.run_confirmed_run(run_id, cwd=workspace_root))
   } else {
     None

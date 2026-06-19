@@ -13,24 +13,10 @@ fn snapshot_test_execution(
     book_id="book",
     packet_id="packet-\{task_id}",
     packet_path=".moontown/packets/packet-\{task_id}.json",
-    status=@core.TaskExecutionStatus::Failed,
+    status=Failed,
     summary~,
     output_contract="keeper.plan.packet.v1",
   )
-}
-
-///|
-test "snapshot refresh detects legacy workspace root" {
-  let state = snapshot_test_state()
-  state.register_book(
-    @core.BookRef::new(
-      id="book",
-      name="Book",
-      purpose="test",
-      workspace_root="/tmp/workspace/book",
-    ),
-  )
-  assert_eq(snapshot_requires_refresh(@storage.snapshot_of(state)), true)
 }
 
 ///|

@@ -6,7 +6,9 @@ async fn resolved_generated_site_index_after_build(root : String) -> String {
     "site/index.html",
   ]
   for relative in candidates {
-    let path = @path.Path(root).join(@path.Path(relative)).to_string()
+    let path = moonbook_adapter_path(root)
+      .join(moonbook_adapter_path(relative))
+      .to_string()
     let exists = @fs.exists(path) catch { _ => false }
     if exists {
       return path

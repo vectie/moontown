@@ -13,8 +13,8 @@ fn resident_private_scope_count(model : Model) -> Int {
 fn resident_review_queue_count(model : Model) -> Int {
   let mut count = 0
   for execution in executions_for_model(model) {
-    if execution.status == @core.TaskExecutionStatus::AwaitingPersistence ||
-      execution.status == @core.TaskExecutionStatus::ReviewQueued {
+    if execution.status == AwaitingPersistence ||
+      execution.status == ReviewQueued {
       count += 1
     }
   }

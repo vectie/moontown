@@ -20,7 +20,7 @@ async fn live_execution_record_for_book_task(
         cwd=entry.workspace_root,
         detect_orphan=false,
       )
-      if initial.status is @core.TaskExecutionStatus::RunConfirmed {
+      if initial.status is RunConfirmed {
         Some(@moonclaw.run_confirmed_run(run_id, cwd=entry.workspace_root))
       } else {
         None
@@ -68,7 +68,7 @@ fn failed_execution_record(
     book_id=entry.id,
     packet_id~,
     packet_path~,
-    status=@core.TaskExecutionStatus::Failed,
+    status=Failed,
     summary=detail,
     output_contract="keeper.plan.packet.v1",
     assigned_worker_id~,

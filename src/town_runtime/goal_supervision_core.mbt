@@ -82,8 +82,8 @@ fn task_for_supervision(
         book_id=execution.book_id,
         title=execution.task_id,
         prompt=execution.summary,
-        domain=@core.WorkDomain::Research,
-        status=@core.TownTaskStatus::Blocked,
+        domain=Research,
+        status=Blocked,
       )
   }
 }

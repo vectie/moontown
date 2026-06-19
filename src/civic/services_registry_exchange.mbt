@@ -27,7 +27,7 @@ fn wenyu_social_square_service() -> CivicServiceDefinition {
     review_queues=["wiki/reviews/social-introductions.md"],
     skill_pack="civic-social-matchmaker",
     output_contract="wenyu.civic.social_matching.v1",
-    worker_role=@core.WorkerRole::Specialist,
+    worker_role=Specialist,
     acceptance=[
       "requires consent before external introductions", "explains match rationale and uncertainty",
       "records follow-up outcomes in MoonBook",
@@ -65,7 +65,7 @@ fn wenyu_talent_avenue_service() -> CivicServiceDefinition {
     review_queues=["wiki/reviews/talent-claims.md"],
     skill_pack="civic-talent-curator",
     output_contract="wenyu.civic.talent_graph.v1",
-    worker_role=@core.WorkerRole::Specialist,
+    worker_role=Specialist,
     acceptance=[
       "distinguishes verified achievements from self-claims", "links every match to evidence",
       "keeps reception notes projection-safe",
@@ -104,7 +104,7 @@ fn wenyu_valley_market_service() -> CivicServiceDefinition {
     review_queues=["wiki/reviews/market-ledger.md"],
     skill_pack="civic-market-keeper",
     output_contract="wenyu.civic.market_service.v1",
-    worker_role=@core.WorkerRole::MemoryKeeper,
+    worker_role=MemoryKeeper,
     acceptance=[
       "keeps a reviewable points ledger", "marks anti-abuse and budget risks", "does not execute financial or redemption actions automatically",
     ],
@@ -142,7 +142,7 @@ fn wenyu_broadcast_tower_service() -> CivicServiceDefinition {
     review_queues=["wiki/reviews/broadcast-drafts.md"],
     skill_pack="civic-story-editor",
     output_contract="wenyu.civic.story_service.v1",
-    worker_role=@core.WorkerRole::Reviewer,
+    worker_role=Reviewer,
     acceptance=[
       "redacts private or unverified information", "links every public claim to reviewed evidence",
       "requires operator approval before publication",

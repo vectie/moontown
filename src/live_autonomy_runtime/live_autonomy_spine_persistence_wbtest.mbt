@@ -5,8 +5,8 @@ async test "live autonomy spine persists current state and journal" {
   )
   let snapshot_path = workspace.snapshot_path
   let state = @test_fixtures.visual_projection_test_state(
-    worker_status=@core.WorkerStatus::Idle,
-    execution_status=@core.TaskExecutionStatus::ReviewQueued,
+    worker_status=Idle,
+    execution_status=ReviewQueued,
   )
   let goal = live_autonomy_watch_goal(
     id="watch-opc",
@@ -18,7 +18,7 @@ async test "live autonomy spine persists current state and journal" {
     goal_id="watch-opc",
     tick=42,
     book_id="research-opc",
-    decision=@core.WatcherDecisionKind::Update,
+    decision=Update,
     delta_score=7,
     new_source_count=2,
     detail="accepted two useful sources",

@@ -69,35 +69,15 @@ async test "invalid civic idea participant reference is reviewable blocker" {
 
 ///|
 test "live civic reducer statuses remain running rather than blocked" {
-  assert_true(
-    civic_communication_reduction_status_live(
-      @core.TaskExecutionStatus::ProposalImported,
-    ),
-  )
-  assert_true(
-    civic_communication_reduction_status_live(
-      @core.TaskExecutionStatus::RunConfirmed,
-    ),
-  )
-  assert_true(
-    civic_communication_reduction_status_live(
-      @core.TaskExecutionStatus::Running,
-    ),
-  )
-  assert_true(
-    !civic_communication_reduction_status_live(
-      @core.TaskExecutionStatus::Failed,
-    ),
-  )
-  assert_true(
-    !civic_communication_reduction_status_live(
-      @core.TaskExecutionStatus::Completed,
-    ),
-  )
+  assert_true(civic_communication_reduction_status_live(ProposalImported))
+  assert_true(civic_communication_reduction_status_live(RunConfirmed))
+  assert_true(civic_communication_reduction_status_live(Running))
+  assert_true(!civic_communication_reduction_status_live(Failed))
+  assert_true(!civic_communication_reduction_status_live(Completed))
 }
 
 ///|
-test "legacy pending civic blocker summaries normalize to running" {
+test "pending civic blocker summaries normalize to running" {
   let summary = "Blocked Social Square Match Market round-3: MoonClaw reducer did not produce a valid non-empty CivicCommunicationIdea contract. status=RunConfirmed; MoonClaw run run-1 is Pending."
   let normalized = normalize_civic_pending_summary(summary)
   assert_true(normalized.has_prefix("Running Social Square Match Market"))

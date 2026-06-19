@@ -3,3 +3,5 @@ import {
   "vectie/moontown/support",
   "vectie/moontown/adapters/moonbook",
 }
+
+supported_targets = "native"

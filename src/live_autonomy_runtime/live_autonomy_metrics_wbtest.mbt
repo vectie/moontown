@@ -2,54 +2,34 @@
 test "live autonomy metric predicates name active worker and execution rules" {
   assert_true(
     worker_is_live(
-      live_autonomy_worker_fixture(
-        id="running",
-        name="Running",
-        status=@core.WorkerStatus::Running,
-      ),
+      live_autonomy_worker_fixture(id="running", name="Running", status=Running),
     ),
   )
   assert_true(
     worker_is_live(
-      live_autonomy_worker_fixture(
-        id="waiting",
-        name="Waiting",
-        status=@core.WorkerStatus::Waiting,
-      ),
+      live_autonomy_worker_fixture(id="waiting", name="Waiting", status=Waiting),
     ),
   )
   assert_true(
     worker_is_live(
-      live_autonomy_worker_fixture(
-        id="blocked",
-        name="Blocked",
-        status=@core.WorkerStatus::Blocked,
-      ),
+      live_autonomy_worker_fixture(id="blocked", name="Blocked", status=Blocked),
     ),
   )
   assert_false(
     worker_is_live(
-      live_autonomy_worker_fixture(
-        id="idle",
-        name="Idle",
-        status=@core.WorkerStatus::Idle,
-      ),
+      live_autonomy_worker_fixture(id="idle", name="Idle", status=Idle),
     ),
   )
   assert_true(
     @runtime_status_policy.runtime_status_active_execution_status(
-      @core.TaskExecutionStatus::AwaitingPersistence,
+      AwaitingPersistence,
     ),
   )
   assert_false(
-    @runtime_status_policy.runtime_status_active_execution_status(
-      @core.TaskExecutionStatus::ReviewQueued,
-    ),
+    @runtime_status_policy.runtime_status_active_execution_status(ReviewQueued),
   )
   assert_true(
-    @runtime_status_policy.runtime_status_review_execution_status(
-      @core.TaskExecutionStatus::ReviewQueued,
-    ),
+    @runtime_status_policy.runtime_status_review_execution_status(ReviewQueued),
   )
 }
 
@@ -57,13 +37,13 @@ test "live autonomy metric predicates name active worker and execution rules" {
 test "live autonomy transient infrastructure debt predicate is explicit" {
   let deferred = live_autonomy_execution_fixture(
     task_id="task-deferred",
-    status=@core.TaskExecutionStatus::Failed,
+    status=Failed,
     summary="transient issue",
     result_decision="deferred-transient-infrastructure",
   )
   let failed = live_autonomy_execution_fixture(
     task_id="task-failed",
-    status=@core.TaskExecutionStatus::Failed,
+    status=Failed,
     summary="hard failure",
     result_decision="failed",
   )
@@ -109,8 +89,8 @@ test "shared standing goal counts include enabled disabled and due goals" {
 ///|
 test "shared health anomaly counter matches exact anomaly titles" {
   let state = @test_fixtures.visual_projection_test_state(
-    worker_status=@core.WorkerStatus::Idle,
-    execution_status=@core.TaskExecutionStatus::Failed,
+    worker_status=Idle,
+    execution_status=Failed,
   )
   state.register_execution(
     live_autonomy_execution_fixture(
@@ -118,7 +98,7 @@ test "shared health anomaly counter matches exact anomaly titles" {
       book_id="research-opc",
       packet_id="packet-second-failure",
       packet_path="/tmp/packet-second-failure.json",
-      status=@core.TaskExecutionStatus::Failed,
+      status=Failed,
       summary="Second failed execution.",
     ),
   )

@@ -30,7 +30,7 @@ async test "research persistence handoff uses topic artifacts instead of runtime
     packet_id="packet-opc",
     packet_path="packet-opc.json",
     run_id=Some("run-opc"),
-    status=@core.TaskExecutionStatus::Completed,
+    status=Completed,
     summary="MoonClaw run run-opc completed: Workflow completed",
     output_contract="moontown.research.raw.v1",
   )
@@ -74,7 +74,7 @@ async test "research persistence handoff accepts tagged research book" {
     book_id="opc-lab",
     packet_id="packet-opc",
     packet_path="packet-opc.json",
-    status=@core.TaskExecutionStatus::Completed,
+    status=Completed,
     summary="completed",
     output_contract="moontown.research.raw.v1",
   )

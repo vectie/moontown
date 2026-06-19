@@ -5,28 +5,28 @@ pub fn default_town_workers() -> Array[@core.WorkerRef] {
       id="claw-harness",
       name="Harness Hound",
       book_id="coding",
-      role=@core.WorkerRole::Harness,
+      role=Harness,
       capabilities=["moonbit", "git", "testing"],
     ),
     @core.WorkerRef::new(
       id="claw-review",
       name="Review Owl",
       book_id="coding",
-      role=@core.WorkerRole::Reviewer,
+      role=Reviewer,
       capabilities=["review", "moonbit"],
     ),
     @core.WorkerRef::new(
       id="claw-ledger",
       name="Ledger Fox",
       book_id="finance",
-      role=@core.WorkerRole::Specialist,
+      role=Specialist,
       capabilities=["ledgers", "reporting"],
     ),
     @core.WorkerRef::new(
       id="claw-memory",
       name="Archive Cat",
       book_id="finance",
-      role=@core.WorkerRole::MemoryKeeper,
+      role=MemoryKeeper,
       capabilities=["reporting", "planning"],
     ),
   ]
@@ -38,7 +38,7 @@ pub fn book_watch_worker(book : @core.BookRef) -> @core.WorkerRef {
     id="claw-\{book.id}-watcher",
     name="\{book.name} Watcher",
     book_id=book.id,
-    role=@core.WorkerRole::Watcher,
+    role=Watcher,
     capabilities=[
       "standing-watch", "web-search", "source-screening", "delta-detection", "digest",
       "memory", "review",
@@ -74,7 +74,7 @@ pub fn book_lane_workers(book : @core.BookRef) -> Array[@core.WorkerRef] {
       id="claw-\{book.id}-harness",
       name="\{book.name} Harness",
       book_id=book.id,
-      role=@core.WorkerRole::Harness,
+      role=Harness,
       capabilities=[
         "research", "analysis", "implementation-planning", "coding", "code-patch",
         "asset-generation", "projection", "testing", "memory", "review",
@@ -86,7 +86,7 @@ pub fn book_lane_workers(book : @core.BookRef) -> Array[@core.WorkerRef] {
       id="claw-\{book.id}-specialist",
       name="\{book.name} Specialist",
       book_id=book.id,
-      role=@core.WorkerRole::Specialist,
+      role=Specialist,
       capabilities=["asset-generation", "projection", "design", "research"],
     ),
   )
@@ -95,7 +95,7 @@ pub fn book_lane_workers(book : @core.BookRef) -> Array[@core.WorkerRef] {
       id="claw-\{book.id}-review",
       name="\{book.name} Reviewer",
       book_id=book.id,
-      role=@core.WorkerRole::Reviewer,
+      role=Reviewer,
       capabilities=["review", "quality", "evidence"],
     ),
   )

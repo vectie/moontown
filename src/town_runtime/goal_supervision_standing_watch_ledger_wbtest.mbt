@@ -26,7 +26,7 @@ async test "standing watch retry completion appends corrected watcher record" {
     task_id="standing-watch-retry-ledger-tick-12",
     packet_path="packet.json",
     run_id=Some("run-retry"),
-    status=@core.TaskExecutionStatus::Completed,
+    status=Completed,
     summary="Workflow completed",
   )
   let observed = finalize_standing_watch_supervision_record(
@@ -45,7 +45,7 @@ async test "standing watch retry completion appends corrected watcher record" {
     records.any(fn(record) {
       record.task_id == Some("standing-watch-retry-ledger-tick-12") &&
       record.run_id == Some("run-retry") &&
-      record.decision == @core.WatcherDecisionKind::NoChange
+      record.decision == NoChange
     }),
   )
   let goals = @storage.load_or_create_standing_goals(
@@ -68,7 +68,7 @@ async test "persisted watcher ledger closes stale snapshot execution" {
     goal_id="watch-ledger-reconcile",
     tick=42,
     target_book_id="research-opc",
-    decision=@core.WatcherDecisionKind::NoChange,
+    decision=NoChange,
     detail="standing_goal_decision: no_change\ndelta_score: 0\nnew_source_count: 0\nnext_check_hint: slower",
     task_id=Some("standing-watch-ledger-reconcile-tick-42"),
     run_id=Some("run-ledger"),
@@ -84,8 +84,8 @@ async test "persisted watcher ledger closes stale snapshot execution" {
       id="watcher",
       name="Watcher",
       book_id="research-opc",
-      role=@core.WorkerRole::Watcher,
-      status=@core.WorkerStatus::Blocked,
+      role=Watcher,
+      status=Blocked,
     ),
   )
   state.register_execution(
@@ -93,7 +93,7 @@ async test "persisted watcher ledger closes stale snapshot execution" {
       task_id="standing-watch-ledger-reconcile-tick-42",
       packet_path="packet.json",
       run_id=Some("run-ledger"),
-      status=@core.TaskExecutionStatus::Stale,
+      status=Stale,
       summary="missed heartbeat",
       assigned_worker_id=Some("watcher"),
       next_retry_tick=Some(48),
@@ -102,11 +102,11 @@ async test "persisted watcher ledger closes stale snapshot execution" {
   run_supervision_cycle(state, @roles.Mayor::new(), [], snapshot_path~, standing_goals=[
     goal,
   ])
-  assert_eq(state.executions[0].status, @core.TaskExecutionStatus::Completed)
+  assert_eq(state.executions[0].status, Completed)
   assert_true(
     state.executions[0].summary.contains("reconciled_from_watcher_ledger"),
   )
-  assert_eq(state.workers[0].status, @core.WorkerStatus::Idle)
+  assert_eq(state.workers[0].status, Idle)
 }
 
 ///|
@@ -128,7 +128,7 @@ async test "standing watch auto triage appends corrected ledger after review obs
       goal_id="watch-auto-correct",
       tick=12,
       target_book_id="research-opc",
-      decision=@core.WatcherDecisionKind::NeedsReview,
+      decision=NeedsReview,
       delta_score=0,
       new_source_count=0,
       detail="MoonClaw run \{run_id} completed: Workflow completed workspace=/tmp/run",
@@ -147,7 +147,7 @@ async test "standing watch auto triage appends corrected ledger after review obs
       task_id~,
       packet_path="packet.json",
       run_id=Some(run_id),
-      status=@core.TaskExecutionStatus::ReviewQueued,
+      status=ReviewQueued,
       summary="Workflow completed",
     ),
   )
@@ -162,7 +162,7 @@ async test "standing watch auto triage appends corrected ledger after review obs
     records.any(fn(record) {
       record.task_id == Some(task_id) &&
       record.run_id == Some(run_id) &&
-      record.decision == @core.WatcherDecisionKind::NoChange
+      record.decision == NoChange
     }),
   )
 }

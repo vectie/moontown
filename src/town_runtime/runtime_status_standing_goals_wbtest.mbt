@@ -132,7 +132,7 @@ async test "cap deferred standing goals stay due and are not marked run" {
         "live-external-\{index}",
         "research-opc",
         "packet-\{index}",
-        @core.TaskExecutionStatus::Running,
+        Running,
         "running",
         run_id=Some("run-\{index}"),
       ),
@@ -209,10 +209,7 @@ test "standing goal dispatch budget is intentionally bounded" {
     book_id="research-opc",
     next_due_tick=10,
   )
-  let deferred = goal.mark_watcher_decision(
-    100,
-    @core.WatcherDecisionKind::Deferred,
-  )
+  let deferred = goal.mark_watcher_decision(100, Deferred)
   assert_true(deferred.next_due_tick > 100)
   assert_eq(deferred.next_due_tick, 160)
 }

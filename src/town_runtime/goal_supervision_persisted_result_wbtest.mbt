@@ -42,13 +42,13 @@ async test "review queue closes when MoonBook already persisted non-review resul
       packet_id="packet",
       packet_path="packet.json",
       run_id=Some("run-course"),
-      status=@core.TaskExecutionStatus::ReviewQueued,
+      status=ReviewQueued,
       summary="pending_review=1",
       output_contract="course",
     ),
   )
   run_supervision_cycle(state, @roles.Mayor::new(), [], snapshot_path~)
-  assert_eq(state.executions[0].status, @core.TaskExecutionStatus::Completed)
+  assert_eq(state.executions[0].status, Completed)
   assert_true(
     state.executions[0].summary.contains(
       "keeper_auto_triage: persisted_non_review_result",
@@ -79,13 +79,13 @@ async test "failed execution closes into review when MoonBook already persisted 
       book_id="coding",
       packet_id="packet",
       packet_path="packet.json",
-      status=@core.TaskExecutionStatus::Failed,
+      status=Failed,
       summary="ExternalProposalPacket: context_pages must not be empty",
       output_contract="wiki.update",
     ),
   )
   run_supervision_cycle(state, @roles.Mayor::new(), [], snapshot_path~)
-  assert_eq(state.executions[0].status, @core.TaskExecutionStatus::ReviewQueued)
+  assert_eq(state.executions[0].status, ReviewQueued)
   assert_true(
     state.executions[0].summary.contains(
       "keeper_auto_triage: persisted_terminal_result",

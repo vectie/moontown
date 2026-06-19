@@ -16,8 +16,8 @@ fn visual_projection_runtime_test_state() -> @core.TownState {
       id="worker-opc-researcher",
       name="OPC Researcher",
       book_id="research-opc",
-      role=@core.WorkerRole::Watcher,
-      status=@core.WorkerStatus::Running,
+      role=Watcher,
+      status=Running,
     ),
   )
   state.enqueue_task(
@@ -26,8 +26,8 @@ fn visual_projection_runtime_test_state() -> @core.TownState {
       book_id="research-opc",
       title="Check OPC updates",
       prompt="Find new OPC sources.",
-      domain=@core.WorkDomain::Research,
-      status=@core.TownTaskStatus::Running,
+      domain=Research,
+      status=Running,
     ),
   )
   state.register_execution(
@@ -37,7 +37,7 @@ fn visual_projection_runtime_test_state() -> @core.TownState {
       packet_id="packet-opc-watch",
       packet_path="/tmp/packet-opc-watch.json",
       run_id=Some("run-opc-watch"),
-      status=@core.TaskExecutionStatus::Running,
+      status=Running,
       summary="Running OPC watch.",
       output_contract="moontown.watch.v1",
       assigned_worker_id=Some("worker-opc-researcher"),

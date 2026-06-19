@@ -10,7 +10,9 @@ pub fn review_external_proposal_spec_with_paths(
   let context_pages : Array[String] = []
   for page in packet.context_pages {
     context_pages.push(
-      @path.Path(absolute_workspace_root).join(@path.Path(page)).to_string(),
+      book_quality_path(absolute_workspace_root)
+      .join(book_quality_path(page))
+      .to_string(),
     )
   }
   {

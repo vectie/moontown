@@ -50,7 +50,7 @@ fn provider_overview_task(book : @core.BookRef, index : Int) -> @core.TownTask {
     title="Book overview for \{book.name}",
     prompt="Summarize the current state for \{book.name}.",
     domain=@dispatch.domain_for_provider_overview(book),
-    required_role=Some(@core.WorkerRole::Planner),
+    required_role=Some(Planner),
     required_capabilities=book.tags,
     status=@core.town_task_status_for_execution(execution_status),
   )

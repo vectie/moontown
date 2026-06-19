@@ -2,7 +2,7 @@
 
 > MoonBit-native town control plane + embedded strategic roles + scene dashboard + Rabbita operator UI
 
-`MoonBit` `Town Orchestration` `MoonBook Harness` `MoonClaw Proposal Packets` `Mayor` `Keeper` `Routing` `Health` `Storage` `Scene UI` `Rabbita`
+`MoonBit` `Town Orchestration` `MoonBook Extension API` `MoonClaw Proposal Packets` `Mayor` `Keeper` `Routing` `Health` `Storage` `Scene UI` `Rabbita`
 
 Moontown is the town-level orchestration layer above multiple `moonbook`
 domains and multiple `moonclaw` runtimes.
@@ -50,7 +50,7 @@ Implemented today:
 - persisted standing goal registry in `.moontown/standing-goals.json`
 - persisted moonbook catalog in `.moontown/moonbooks.json`
 - `BookProvider` abstraction for town bootstrap
-- book-harness-shaped moonbook adapter
+- extension-API-shaped moonbook adapter
 - external proposal packet and proposal/run receipt lifecycle
 - run polling, result persistence, and review-queue surfacing for goal runs
 - mayor-level cross-book research synthesis under `.moontown/town-synthesis/`
@@ -429,6 +429,8 @@ failure remains auditable without making the town look degraded.
 ## Standing Goal Model
 
 The long-standing runtime split is:
+See [Executable Book Coordination](docs/EXECUTABLE_BOOK_COORDINATION.md) for the current boundary: Moontown coordinates books, not only schedules them.
+
 
 ```text
 Mayor -> Book Keeper -> Worker Claws
@@ -578,7 +580,7 @@ activity and judgement, not pretend that the book improved.
 - `roles`
   strategic mayor role adapter
 - `adapters/moonbook`
-  moonbook catalog and book-harness boundary
+  moonbook catalog and extension API boundary
 - `adapters/moonclaw`
   embedded runtime profiles plus real MoonClaw proposal import, run, and polling boundary
 - `ui`

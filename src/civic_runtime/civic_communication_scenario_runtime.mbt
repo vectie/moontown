@@ -17,8 +17,7 @@ pub async fn bootstrap_civic_communication_scenario(
     workspace_base~,
     mode=reducer_mode,
   )
-  if reduction.status is @core.TaskExecutionStatus::Completed &&
-    reduction.ideas.length() > 0 {
+  if reduction.status is Completed && reduction.ideas.length() > 0 {
     materialize_civic_communication_scenario(
       scenario,
       reduction.ideas,

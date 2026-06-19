@@ -35,6 +35,8 @@ import {
   "moonbitlang/x/sys",
 }
 
+supported_targets = "native"
+
 import {
   "vectie/moontown/town_synthesis",
   "vectie/moontown/test_fixtures",

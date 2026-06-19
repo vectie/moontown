@@ -30,7 +30,7 @@ test "build pipeline owns local Wenyu build execution record" {
     "local://wenyu-build/wenyu-town-shell/goal-wenyu-town-shell-implementation-backlog",
   )
   assert_eq(execution.output_contract, wenyu_build_packet_contract())
-  assert_eq(execution.status, @core.TaskExecutionStatus::Completed)
+  assert_eq(execution.status, Completed)
   assert_eq(execution.heartbeat_tick, 8)
   assert_eq(execution.stale_after_tick, 11)
   assert_true(execution.skill_paths.contains("skills/wenyu-build/SKILL.md"))

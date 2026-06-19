@@ -5,14 +5,14 @@ async test "live autonomy does not count orphaned worker loss as no-change" {
   )
   let snapshot_path = workspace.snapshot_path
   let state = @test_fixtures.visual_projection_test_state(
-    worker_status=@core.WorkerStatus::Idle,
-    execution_status=@core.TaskExecutionStatus::Completed,
+    worker_status=Idle,
+    execution_status=Completed,
   )
   let record = live_autonomy_watcher_record(
     goal_id="book-quality-repair-research-ai-agents",
     tick=17782,
     book_id="research-ai-agents",
-    decision=@core.WatcherDecisionKind::NoChange,
+    decision=NoChange,
     detail="MoonClaw run run-1 is indexed as Running, but no live proposal process was found; treating it as failed for mayor recovery.\nkeeper_auto_triage: persisted_terminal_result\npersisted_result_review: false",
     next_due_tick=17842,
   )

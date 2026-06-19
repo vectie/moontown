@@ -15,7 +15,7 @@ test "live autonomy summary metrics are grouped by subsystem" {
   let context = LiveAutonomySummaryContext::{
     tick: 42,
     metrics,
-    waiting: LiveAutonomyWaitingState::{
+    waiting: {
       stable_waiting: true,
       stable_waiting_observation_streak: 11,
       stable_waiting_blockers: [],

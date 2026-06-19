@@ -17,7 +17,7 @@ fn civic_metric_test_execution(
 fn civic_metric_test_worker(
   energy~ : Int,
   load~ : Int,
-  status? : @core.WorkerStatus = @core.WorkerStatus::Running,
+  status? : @core.WorkerStatus = Running,
 ) -> WorkerSim {
   {
     id: "worker",
@@ -112,16 +112,16 @@ test "civic queue pressure policy guards invalid divisors" {
 
 ///|
 test "civic health execution adjustment centralizes status deltas" {
-  let running = civic_metric_test_execution(@core.TaskExecutionStatus::Running)
+  let running = civic_metric_test_execution(Running)
   let awaiting = civic_metric_test_execution(
-    @core.TaskExecutionStatus::AwaitingPersistence,
+    AwaitingPersistence,
   )
   let review = civic_metric_test_execution(
-    @core.TaskExecutionStatus::ReviewQueued,
+    ReviewQueued,
   )
-  let failed = civic_metric_test_execution(@core.TaskExecutionStatus::Failed)
+  let failed = civic_metric_test_execution(Failed)
   let completed = civic_metric_test_execution(
-    @core.TaskExecutionStatus::Completed,
+    Completed,
   )
   let policy : CivicHealthExecutionPolicy = {
     awaiting_delta: -5,
@@ -148,7 +148,7 @@ test "civic health execution adjustment uses shared execution stage policy" {
   assert_eq(
     civic_health_after_execution_stage(
       50,
-      @ui.ExecutionViewStage::Packet,
+      @ui.Packet,
       policy,
     ),
     50,
@@ -156,7 +156,7 @@ test "civic health execution adjustment uses shared execution stage policy" {
   assert_eq(
     civic_health_after_execution_stage(
       50,
-      @ui.ExecutionViewStage::Running,
+      @ui.Running,
       policy,
     ),
     50,
@@ -164,7 +164,7 @@ test "civic health execution adjustment uses shared execution stage policy" {
   assert_eq(
     civic_health_after_execution_stage(
       50,
-      @ui.ExecutionViewStage::Persisting,
+      @ui.Persisting,
       policy,
     ),
     45,
@@ -172,7 +172,7 @@ test "civic health execution adjustment uses shared execution stage policy" {
   assert_eq(
     civic_health_after_execution_stage(
       50,
-      @ui.ExecutionViewStage::Review,
+      @ui.Review,
       policy,
     ),
     40,
@@ -180,7 +180,7 @@ test "civic health execution adjustment uses shared execution stage policy" {
   assert_eq(
     civic_health_after_execution_stage(
       50,
-      @ui.ExecutionViewStage::Recovery,
+      @ui.Recovery,
       policy,
     ),
     30,
@@ -188,7 +188,7 @@ test "civic health execution adjustment uses shared execution stage policy" {
   assert_eq(
     civic_health_after_execution_stage(
       98,
-      @ui.ExecutionViewStage::Completed,
+      @ui.Completed,
       policy,
     ),
     100,
@@ -201,7 +201,7 @@ test "civic module signal class separates snapshot wrapper from status mapping" 
   assert_eq(
     civic_module_signal_class(
       { ..model, state_source: StateSourceKind::SnapshotFile },
-      Some(civic_metric_test_execution(@core.TaskExecutionStatus::Completed)),
+      Some(civic_metric_test_execution(Completed)),
       running_is_live=true,
     ),
     "module-signal-neutral",
@@ -228,28 +228,28 @@ test "civic module signal class separates snapshot wrapper from status mapping" 
   )
   assert_eq(
     civic_module_signal_class_for_status(
-      @core.TaskExecutionStatus::ReviewQueued,
+      ReviewQueued,
       running_is_live=true,
     ),
     "module-signal-alert",
   )
   assert_eq(
     civic_module_signal_class_for_status(
-      @core.TaskExecutionStatus::AwaitingPersistence,
+      AwaitingPersistence,
       running_is_live=true,
     ),
     "module-signal-review",
   )
   assert_eq(
     civic_module_signal_class_for_status(
-      @core.TaskExecutionStatus::Running,
+      Running,
       running_is_live=true,
     ),
     "module-signal-live",
   )
   assert_eq(
     civic_module_signal_class_for_status(
-      @core.TaskExecutionStatus::Running,
+      Running,
       running_is_live=false,
     ),
     "module-signal-book",
@@ -258,7 +258,7 @@ test "civic module signal class separates snapshot wrapper from status mapping" 
   assert_eq(civic_module_active_run_signal_class(false), "module-signal-book")
   assert_eq(
     civic_module_signal_class_for_status(
-      @core.TaskExecutionStatus::Completed,
+      Completed,
       running_is_live=false,
     ),
     "module-signal-live",

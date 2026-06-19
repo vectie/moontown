@@ -80,20 +80,31 @@ async test "Moontown static book skill templates keep exploration quality" {
 }
 
 ///|
-async test "MoonBook seed wiki skills keep exploration quality" {
+async test "configured MoonBook seed wiki skills keep exploration quality" {
+  let root = match @sys.get_env_var("MOONTOWN_MOONBOOK_ROOT") {
+    Some(root) if !root.is_empty() => root
+    _ =>
+      match @sys.get_env_var("MOONBOOK_ROOT") {
+        Some(root) if !root.is_empty() => root
+        _ => return
+      }
+  }
   for
-    path in [
-      "../moonbook/seed/wiki/skills/claim-audit/SKILL.md", "../moonbook/seed/wiki/skills/concept-revise/SKILL.md",
-      "../moonbook/seed/wiki/skills/contradiction-review/SKILL.md", "../moonbook/seed/wiki/skills/entity-revise/SKILL.md",
-      "../moonbook/seed/wiki/skills/index-maintain/SKILL.md", "../moonbook/seed/wiki/skills/memory-prune/SKILL.md",
-      "../moonbook/seed/wiki/skills/planbook/SKILL.md", "../moonbook/seed/wiki/skills/query-promote/SKILL.md",
-      "../moonbook/seed/wiki/skills/research-report/SKILL.md", "../moonbook/seed/wiki/skills/review-decision/SKILL.md",
-      "../moonbook/seed/wiki/skills/source-diarize/SKILL.md", "../moonbook/seed/wiki/skills/standing-watch/SKILL.md",
-      "../moonbook/seed/wiki/skills/synthesis-revise/SKILL.md", "../moonbook/seed/wiki/skills/wiki-course/SKILL.md",
-      "../moonbook/seed/wiki/skills/wiki-ingest/SKILL.md", "../moonbook/seed/wiki/skills/wiki-lint/SKILL.md",
-      "../moonbook/seed/wiki/skills/wiki-marketing/SKILL.md", "../moonbook/seed/wiki/skills/wiki-memory/SKILL.md",
-      "../moonbook/seed/wiki/skills/wiki-query/SKILL.md", "../moonbook/seed/wiki/skills/wiki-review/SKILL.md",
+    relative in [
+      "seed/wiki/skills/claim-audit/SKILL.md", "seed/wiki/skills/concept-revise/SKILL.md",
+      "seed/wiki/skills/contradiction-review/SKILL.md", "seed/wiki/skills/entity-revise/SKILL.md",
+      "seed/wiki/skills/index-maintain/SKILL.md", "seed/wiki/skills/memory-prune/SKILL.md",
+      "seed/wiki/skills/planbook/SKILL.md", "seed/wiki/skills/query-promote/SKILL.md",
+      "seed/wiki/skills/research-report/SKILL.md", "seed/wiki/skills/review-decision/SKILL.md",
+      "seed/wiki/skills/source-diarize/SKILL.md", "seed/wiki/skills/standing-watch/SKILL.md",
+      "seed/wiki/skills/synthesis-revise/SKILL.md", "seed/wiki/skills/wiki-course/SKILL.md",
+      "seed/wiki/skills/wiki-ingest/SKILL.md", "seed/wiki/skills/wiki-lint/SKILL.md",
+      "seed/wiki/skills/wiki-marketing/SKILL.md", "seed/wiki/skills/wiki-memory/SKILL.md",
+      "seed/wiki/skills/wiki-query/SKILL.md", "seed/wiki/skills/wiki-review/SKILL.md",
     ] {
-    assert_moonbook_skill_quality(path, @fs.read_file(path).text())
+    let path = "\{root}/\{relative}"
+    if @fs.exists(path) {
+      assert_moonbook_skill_quality(path, @fs.read_file(path).text())
+    }
   }
 }

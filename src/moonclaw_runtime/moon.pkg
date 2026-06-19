@@ -9,6 +9,8 @@ import {
   "vectie/moontown/support",
 }
 
+supported_targets = "native"
+
 import {
   "moonbitlang/async",
 } for "wbtest"

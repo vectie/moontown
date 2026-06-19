@@ -12,11 +12,11 @@ test "book policy separates execute and tend lanes" {
 
 ///|
 test "book policy lanes are parsed through explicit lane model" {
-  assert_eq(lane_from_text("execute"), BookLane::Execute)
-  assert_eq(lane_from_text("TEND"), BookLane::Tend)
-  assert_eq(lane_text(BookLane::Control), "control")
+  assert_eq(lane_from_text("execute"), Execute)
+  assert_eq(lane_from_text("TEND"), Tend)
+  assert_eq(lane_text(Control), "control")
   let custom = lane_from_text("experimental")
-  assert_true(custom is BookLane::Unknown("experimental"))
+  assert_true(custom is Unknown("experimental"))
   let policy = new(
     [
       skill("run", " EXECUTE ", "now", "run fast loop"),
@@ -55,7 +55,7 @@ test "policy archetypes are composable presets not runtime categories" {
 }
 
 ///|
-test "policy owns catalog classification and legacy type labels" {
+test "policy owns catalog classification and canonical book labels" {
   assert_eq(research_type(), "research-book")
   assert_eq(course_type(), "course-book")
   assert_eq(book_type_marker(course_type()), "type: `course-book`")
@@ -111,7 +111,7 @@ test "policy owns catalog classification and legacy type labels" {
 }
 
 ///|
-test "policy profiles map legacy labels into composed policies" {
+test "policy profiles map canonical labels into composed policies" {
   match policy_profile_for_type(research_type()) {
     Some(profile) => {
       assert_eq(profile.source_policy, web_first_policy())
@@ -318,14 +318,8 @@ test "policy loop markdown names dual lanes and health gate" {
 
 ///|
 test "policy internal distance plan maps execute tend and quality gates" {
-  assert_eq(
-    internal_distance_layer_from_text("Information"),
-    InternalDistanceLayer::Information,
-  )
-  assert_eq(
-    internal_distance_layer_text(InternalDistanceLayer::Decisiveness),
-    "decisiveness",
-  )
+  assert_eq(internal_distance_layer_from_text("Information"), Information)
+  assert_eq(internal_distance_layer_text(Decisiveness), "decisiveness")
   let steps = internal_distance_plan(research())
   assert_eq(steps.length(), 3)
   assert_eq(steps[0].layer, "information")

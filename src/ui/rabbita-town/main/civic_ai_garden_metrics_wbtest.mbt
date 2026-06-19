@@ -36,21 +36,21 @@ test "ai garden signal uses shared execution phrase groups" {
   assert_eq(
     ai_garden_signal(
       model,
-      Some(civic_metric_test_execution(@core.TaskExecutionStatus::PacketReady)),
+      Some(civic_metric_test_execution(PacketReady)),
     ),
     "Dispatching",
   )
   assert_eq(
     ai_garden_signal(
       model,
-      Some(civic_metric_test_execution(@core.TaskExecutionStatus::Running)),
+      Some(civic_metric_test_execution(Running)),
     ),
     "Tool trial live",
   )
   assert_eq(
     ai_garden_signal(
       { ..model, state_source: StateSourceKind::SnapshotFile },
-      Some(civic_metric_test_execution(@core.TaskExecutionStatus::Completed)),
+      Some(civic_metric_test_execution(Completed)),
     ),
     "Projection bridge",
   )
@@ -65,7 +65,7 @@ test "ai garden next action uses shared execution action groups" {
       None,
       Some(
         civic_metric_test_execution(
-          @core.TaskExecutionStatus::AwaitingPersistence,
+          AwaitingPersistence,
         ),
       ),
     ),
@@ -75,7 +75,7 @@ test "ai garden next action uses shared execution action groups" {
     ai_garden_next_action(
       model,
       None,
-      Some(civic_metric_test_execution(@core.TaskExecutionStatus::Stale)),
+      Some(civic_metric_test_execution(Stale)),
     ),
     "Recover the stalled tutorial run before the daily learning loop drifts.",
   )
@@ -87,21 +87,21 @@ test "ai garden stage uses shared execution phrase groups" {
   assert_eq(
     ai_garden_stage(
       model,
-      Some(civic_metric_test_execution(@core.TaskExecutionStatus::PacketReady)),
+      Some(civic_metric_test_execution(PacketReady)),
     ),
     "Tool trial packet prepared",
   )
   assert_eq(
     ai_garden_stage(
       model,
-      Some(civic_metric_test_execution(@core.TaskExecutionStatus::Running)),
+      Some(civic_metric_test_execution(Running)),
     ),
     "Tutorial quest running",
   )
   assert_eq(
     ai_garden_stage(
       model,
-      Some(civic_metric_test_execution(@core.TaskExecutionStatus::Completed)),
+      Some(civic_metric_test_execution(Completed)),
     ),
     "Daily lesson published",
   )
@@ -113,14 +113,14 @@ test "ai garden tool trial label uses shared execution phrase groups" {
   assert_eq(
     ai_garden_tool_trial_label(
       model,
-      Some(civic_metric_test_execution(@core.TaskExecutionStatus::PacketReady)),
+      Some(civic_metric_test_execution(PacketReady)),
     ),
     "Scenario packet staged",
   )
   assert_eq(
     ai_garden_tool_trial_label(
       model,
-      Some(civic_metric_test_execution(@core.TaskExecutionStatus::Running)),
+      Some(civic_metric_test_execution(Running)),
     ),
     "Email draft comparison live",
   )
@@ -139,14 +139,14 @@ test "ai garden comparison label uses shared execution phrase groups" {
   assert_eq(
     ai_garden_comparison_label(
       model,
-      Some(civic_metric_test_execution(@core.TaskExecutionStatus::PacketReady)),
+      Some(civic_metric_test_execution(PacketReady)),
     ),
     "Comparison prompt staged",
   )
   assert_eq(
     ai_garden_comparison_label(
       model,
-      Some(civic_metric_test_execution(@core.TaskExecutionStatus::Completed)),
+      Some(civic_metric_test_execution(Completed)),
     ),
     "Comparison proof published",
   )

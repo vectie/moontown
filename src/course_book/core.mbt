@@ -45,7 +45,7 @@ pub fn wenyu_course_catalog_entry(
     name="MoonBook / Course / Wenyu Valley Game Design",
     purpose="Beginner course workspace for learning 2.5D/isometric tile-map design, asset pipelines, map planning, editor/view modes, and Wenyu Valley UI implementation.",
     workspace_root~,
-    memory_scope=@core.MemoryScope::BookPrivate,
+    memory_scope=BookPrivate,
     tags=["course", "beginner", "game-design", "tile-map", "wenyu-valley"],
     skills=[
       "course-builder", "lesson-designer", "exercise-review", "beginner-teaching",

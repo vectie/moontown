@@ -60,19 +60,19 @@ fn render_module_protocol_card(civic : WenyuTownModule) -> @rabbita.Html {
     ]),
     p(class="module-book-summary", civic.use_case),
     div(class="module-book-metric-grid", [
-      render_projection_metric(ProjectionMetricSnapshot::{
+      render_projection_metric({
         label: "Footprint",
         value: "\{civic.footprint_w}x\{civic.footprint_h}",
         note: "tile occupancy",
         tone: "info",
       }),
-      render_projection_metric(ProjectionMetricSnapshot::{
+      render_projection_metric({
         label: "Entrance",
         value: "\{civic.entrance_x},\{civic.entrance_y}",
         note: "road-facing tile",
         tone: "info",
       }),
-      render_projection_metric(ProjectionMetricSnapshot::{
+      render_projection_metric({
         label: "Style",
         value: civic.style_family,
         note: civic.asset_base,

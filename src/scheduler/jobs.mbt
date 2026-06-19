@@ -141,8 +141,7 @@ pub fn merge_default_daemon_jobs(
 ) -> Array[ScheduledJob] {
   let merged : Array[ScheduledJob] = []
   for job in jobs {
-    if !daemon_job_deprecated(job) &&
-      !merged.any(fn(existing) { existing.id == job.id }) {
+    if !merged.any(fn(existing) { existing.id == job.id }) {
       merged.push(job)
     }
   }
@@ -152,16 +151,6 @@ pub fn merge_default_daemon_jobs(
     }
   }
   merged
-}
-
-///|
-fn daemon_job_deprecated(job : ScheduledJob) -> Bool {
-  retired_legacy_civic_communication_job(job)
-}
-
-///|
-fn retired_legacy_civic_communication_job(job : ScheduledJob) -> Bool {
-  job.id == "run-civic-salons" || job.kind == "civic-salon"
 }
 
 ///|

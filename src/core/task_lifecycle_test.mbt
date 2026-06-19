@@ -1,41 +1,14 @@
 ///|
 test "execution status maps to town task lifecycle status" {
-  assert_eq(
-    town_task_status_for_execution(TaskExecutionStatus::PacketReady),
-    TownTaskStatus::Planned,
-  )
-  assert_eq(
-    town_task_status_for_execution(TaskExecutionStatus::ProposalImported),
-    TownTaskStatus::Assigned,
-  )
-  assert_eq(
-    town_task_status_for_execution(TaskExecutionStatus::RunConfirmed),
-    TownTaskStatus::Assigned,
-  )
-  assert_eq(
-    town_task_status_for_execution(TaskExecutionStatus::Running),
-    TownTaskStatus::Running,
-  )
-  assert_eq(
-    town_task_status_for_execution(TaskExecutionStatus::AwaitingPersistence),
-    TownTaskStatus::Running,
-  )
-  assert_eq(
-    town_task_status_for_execution(TaskExecutionStatus::ReviewQueued),
-    TownTaskStatus::Blocked,
-  )
-  assert_eq(
-    town_task_status_for_execution(TaskExecutionStatus::Completed),
-    TownTaskStatus::Done,
-  )
-  assert_eq(
-    town_task_status_for_execution(TaskExecutionStatus::Stale),
-    TownTaskStatus::Blocked,
-  )
-  assert_eq(
-    town_task_status_for_execution(TaskExecutionStatus::Failed),
-    TownTaskStatus::Failed,
-  )
+  assert_eq(town_task_status_for_execution(PacketReady), Planned)
+  assert_eq(town_task_status_for_execution(ProposalImported), Assigned)
+  assert_eq(town_task_status_for_execution(RunConfirmed), Assigned)
+  assert_eq(town_task_status_for_execution(Running), Running)
+  assert_eq(town_task_status_for_execution(AwaitingPersistence), Running)
+  assert_eq(town_task_status_for_execution(ReviewQueued), Blocked)
+  assert_eq(town_task_status_for_execution(Completed), Done)
+  assert_eq(town_task_status_for_execution(Stale), Blocked)
+  assert_eq(town_task_status_for_execution(Failed), Failed)
 }
 
 ///|
@@ -45,66 +18,61 @@ test "copy task with status preserves task identity and routing fields" {
     book_id="book",
     title="Do work",
     prompt="Work",
-    domain=WorkDomain::Coding,
-    required_role=Some(WorkerRole::Harness),
+    domain=Coding,
+    required_role=Some(Harness),
     required_capabilities=["codex"],
-    status=TownTaskStatus::Running,
+    status=Running,
   )
-  let copied = copy_task_with_status(task, TownTaskStatus::Done)
+  let copied = copy_task_with_status(task, Done)
   assert_eq(copied.id, task.id)
   assert_eq(copied.book_id, task.book_id)
   assert_eq(copied.domain, task.domain)
-  assert_true(copied.required_role is Some(WorkerRole::Harness))
+  assert_true(copied.required_role is Some(Harness))
   assert_eq(copied.required_capabilities.length(), 1)
   assert_eq(copied.required_capabilities[0], "codex")
-  assert_eq(copied.status, TownTaskStatus::Done)
+  assert_eq(copied.status, Done)
 }
 
 ///|
 test "schedulable task status keeps only open work in the daemon loop" {
-  assert_true(schedulable_task_status(TownTaskStatus::Pending))
-  assert_true(schedulable_task_status(TownTaskStatus::Planned))
-  assert_true(schedulable_task_status(TownTaskStatus::Assigned))
-  assert_true(schedulable_task_status(TownTaskStatus::Running))
-  assert_true(!schedulable_task_status(TownTaskStatus::Blocked))
-  assert_true(!schedulable_task_status(TownTaskStatus::Done))
-  assert_true(!schedulable_task_status(TownTaskStatus::Failed))
+  assert_true(schedulable_task_status(Pending))
+  assert_true(schedulable_task_status(Planned))
+  assert_true(schedulable_task_status(Assigned))
+  assert_true(schedulable_task_status(Running))
+  assert_true(!schedulable_task_status(Blocked))
+  assert_true(!schedulable_task_status(Done))
+  assert_true(!schedulable_task_status(Failed))
 }
 
 ///|
 test "execution lifecycle predicates classify terminal live and pollable states" {
-  assert_true(terminal_execution_status(TaskExecutionStatus::Completed))
-  assert_true(terminal_execution_status(TaskExecutionStatus::Failed))
-  assert_true(terminal_execution_status(TaskExecutionStatus::Stale))
-  assert_true(!terminal_execution_status(TaskExecutionStatus::Running))
-  assert_true(live_execution_status(TaskExecutionStatus::ProposalImported))
-  assert_true(live_execution_status(TaskExecutionStatus::RunConfirmed))
-  assert_true(live_execution_status(TaskExecutionStatus::Running))
-  assert_true(!live_execution_status(TaskExecutionStatus::ReviewQueued))
-  assert_true(!live_execution_status(TaskExecutionStatus::AwaitingPersistence))
-  assert_true(active_work_execution_status(TaskExecutionStatus::Running))
-  assert_true(
-    active_work_execution_status(TaskExecutionStatus::AwaitingPersistence),
-  )
-  assert_true(!active_work_execution_status(TaskExecutionStatus::ReviewQueued))
-  assert_true(pollable_execution_status(TaskExecutionStatus::Running))
-  assert_true(pollable_execution_status(TaskExecutionStatus::Stale))
-  assert_true(!pollable_execution_status(TaskExecutionStatus::Completed))
+  assert_true(terminal_execution_status(Completed))
+  assert_true(terminal_execution_status(Failed))
+  assert_true(terminal_execution_status(Stale))
+  assert_true(!terminal_execution_status(Running))
+  assert_true(live_execution_status(ProposalImported))
+  assert_true(live_execution_status(RunConfirmed))
+  assert_true(live_execution_status(Running))
+  assert_true(!live_execution_status(ReviewQueued))
+  assert_true(!live_execution_status(AwaitingPersistence))
+  assert_true(active_work_execution_status(Running))
+  assert_true(active_work_execution_status(AwaitingPersistence))
+  assert_true(!active_work_execution_status(ReviewQueued))
+  assert_true(pollable_execution_status(Running))
+  assert_true(pollable_execution_status(Stale))
+  assert_true(!pollable_execution_status(Completed))
 }
 
 ///|
 test "execution status rank preserves lifecycle precedence" {
-  assert_true(
-    execution_status_rank(TaskExecutionStatus::Completed) >
-    execution_status_rank(TaskExecutionStatus::Running),
-  )
+  assert_true(execution_status_rank(Completed) > execution_status_rank(Running))
   assert_eq(
-    execution_status_rank(TaskExecutionStatus::AwaitingPersistence),
-    execution_status_rank(TaskExecutionStatus::Running),
+    execution_status_rank(AwaitingPersistence),
+    execution_status_rank(Running),
   )
   assert_true(
-    execution_status_rank(TaskExecutionStatus::ProposalImported) <
-    execution_status_rank(TaskExecutionStatus::RunConfirmed),
+    execution_status_rank(ProposalImported) <
+    execution_status_rank(RunConfirmed),
   )
 }
 
@@ -115,7 +83,7 @@ test "execution stale windows distinguish imported runs from no-run snapshots" {
     book_id="book",
     packet_id="packet",
     packet_path="packet.json",
-    status=TaskExecutionStatus::Running,
+    status=Running,
     summary="running",
     output_contract="test",
     run_id=Some("run-1"),
@@ -127,7 +95,7 @@ test "execution stale windows distinguish imported runs from no-run snapshots" {
     book_id="book",
     packet_id="packet",
     packet_path="packet.json",
-    status=TaskExecutionStatus::Running,
+    status=Running,
     summary="running",
     output_contract="test",
     heartbeat_tick=10,
@@ -149,7 +117,7 @@ test "town execution aggregation counts only live external runs" {
     book_id="book",
     packet_id="packet",
     packet_path="packet.json",
-    status=TaskExecutionStatus::Running,
+    status=Running,
     summary="running",
     output_contract="test",
     run_id=Some("run-1"),
@@ -159,7 +127,7 @@ test "town execution aggregation counts only live external runs" {
     book_id="book",
     packet_id="packet",
     packet_path="packet.json",
-    status=TaskExecutionStatus::Running,
+    status=Running,
     summary="running",
     output_contract="test",
   )
@@ -168,7 +136,7 @@ test "town execution aggregation counts only live external runs" {
     book_id="book",
     packet_id="packet",
     packet_path="packet.json",
-    status=TaskExecutionStatus::Failed,
+    status=Failed,
     summary="failed",
     output_contract="test",
     attempt=1,

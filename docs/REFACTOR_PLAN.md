@@ -164,8 +164,8 @@ Current files:
   predicates, count aggregation, and compact Markdown row rendering.
 - `civic/protocol_snapshot.mbt`: reusable snapshot construction from protocol
   definition plus observed ledger counts/summaries.
-- `civic_communication_patterns.mbt`: root compatibility facade for rendering
-  and existing CLI/tests; it must stay thin.
+- `civic_communication_patterns.mbt`: root command adapter for rendering and
+  existing CLI/tests; it must stay thin and must not own civic semantics.
 
 Current extension rule:
 
@@ -185,7 +185,7 @@ Goals:
 
 - move civic runtime files into focused packages once file split is stable:
   `civic/workspace`, `civic/protocol_runtime`, and `civic/communication`
-- leave root-package wrapper functions for CLI compatibility
+- keep root command entrypoints thin while moving implementation into packages
 - reduce root `pkg.generated.mbti` to high-level public facade APIs
 - keep reusable civic communication patterns in `civic/`; root may only adapt
   them into runtime scenario artifacts
@@ -206,8 +206,8 @@ Goals:
   packages may read serialized lane strings, but `policy/` owns parsing,
   normalization, and lane-based skill selection
 - keep default policy output surface/path constants in `policy/`; downstream
-  packages may expose compatibility helpers, but they should delegate to policy
-  defaults instead of redefining generated-site paths locally
+  packages should consume policy defaults directly instead of keeping local path
+  shims or redefining generated-site paths
 - keep internal-distance semantics in `policy/`; downstream packages may render
   information/recognition/decisiveness plans, but `policy/` owns the mapping
   from execute skills, tend skills, quality gates, and output contracts into
@@ -245,8 +245,8 @@ Goals:
   text, stage readiness decisions, status Markdown sections,
   selected-style policy, selected-feature readiness gates,
   module-placement policy, terrain-labeling policy, or reusable style metadata
-  locally, and should not keep root-local compatibility shims over those
-  package APIs
+  locally. Callers should use the package APIs directly instead of root-local
+  shims.
 - keep PlanBook self-repair DTOs, validation command policy, repair result
   contracts, ACP patch-receipt validation, repair-decision semantics, and
   MoonClaw run-status bucket policy in `planbook_policy/`; the same package
@@ -347,11 +347,11 @@ Goals:
   unknown-template and registered-without-installer outcome wording is
   package-owned; concrete template runtime dispatch, request processing,
   request reconciliation, request status rendering, registry rendering, and
-  installer dispatch are runtime-package-owned, while root keeps only
-  CLI-compatible wrapper functions
+  installer dispatch are runtime-package-owned, while root keeps only thin
+  command entrypoints
 - keep App ToolBook bootstrap/install/status/workspace behavior in
-  `app_tool_book/`; root may expose wrappers for existing commands, but should
-  not carry generated-tool book runtime implementation
+  `app_tool_book/`; root may expose thin command entrypoints, but should not
+  carry generated-tool book runtime implementation
 - keep PDF Evidence Watch identity, config/schema/rendering, required-path,
   standing-goal, and status Markdown policy in `pdf_evidence_watch/`; keep
   config loading, relative path resolution, template copying, workspace writes,
@@ -365,11 +365,11 @@ Goals:
 - keep visual projection DTOs, phase semantics, routing labels, building/module
   activity summaries, grid placement, and path policy in `visual_projection/`;
   keep projection file writes and parent-directory creation in
-  `visual_projection_runtime/`; root may expose compatibility wrappers, but it
-  should not carry visual semantics or projection filesystem IO
+  `visual_projection_runtime/`; root may expose thin command entrypoints, but
+  it should not carry visual semantics or projection filesystem IO
 - keep generic file, JSON, Markdown, HTML, text-label, and runtime-config JSON
-  helper implementation in `support/`; root may expose private compatibility
-  wrappers, but support code should not remain as many unrelated root files
+  helper implementation in `support/`; root files should call support helpers
+  directly instead of retaining private shim layers
 - keep research readiness, observation DTOs, and quality-gate semantics in
   `research_quality/`; root may still own mayor/execution mutation for failed
   gates, but it should not own source-depth, report-length, wiki-materialization,
@@ -404,7 +404,7 @@ Goals:
   runtime score adapters in `book_quality_runtime/`
 - keep Wenyu course-book bootstrap, generated course content, course-builder
   skill text, UI-state JSON, and generated course site projection in
-  `course_book/`; root should expose only command-compatible wrappers
+  `course_book/`; root should expose only thin command entrypoints
 - keep Moontown-side MoonClaw metadata, run-result lookup, and job-store
   compaction helpers in `moonclaw_runtime/`; root should keep only wrappers
   needed by existing commands and runtime callers

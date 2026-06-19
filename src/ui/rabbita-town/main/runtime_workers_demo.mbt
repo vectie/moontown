@@ -80,7 +80,7 @@ fn build_worker_sim(
   let status = worker_status_for(model, offset)
   let zone_key = worker_zone_key(book_id, status)
   let load = worker_load(model, offset, status)
-  let idle_bonus = if status == @core.WorkerStatus::Idle { 8 } else { 0 }
+  let idle_bonus = if status == Idle { 8 } else { 0 }
   let energy = clamp_metric(model.energy - offset * 5 + idle_bonus)
   {
     id,

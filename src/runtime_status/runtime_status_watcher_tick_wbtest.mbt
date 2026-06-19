@@ -5,7 +5,7 @@ test "runtime status includes watcher ledger summary" {
     goal_id="watch-opc-news",
     tick=3,
     book_id="research-opc",
-    decision=@core.WatcherDecisionKind::NoChange,
+    decision=NoChange,
     detail="no useful delta",
     next_due_tick=15,
   )
@@ -56,7 +56,7 @@ test "runtime status distinguishes historical and current watcher due ticks" {
     goal_id="watch-opc-news",
     tick=3,
     book_id="research-opc",
-    decision=@core.WatcherDecisionKind::Deferred,
+    decision=Deferred,
     detail="previous run active",
     next_due_tick=4,
   )
@@ -84,7 +84,7 @@ test "daemon tick floor uses observed watcher and standing goal time" {
       goal_id="watch-opc-news",
       tick=15877,
       book_id="research-opc",
-      decision=@core.WatcherDecisionKind::Deferred,
+      decision=Deferred,
       next_due_tick=15907,
     ),
   ]
@@ -115,7 +115,7 @@ test "watcher status prefers parsed terminal record over generic duplicate" {
     goal_id="watch-opc-news",
     tick=17972,
     book_id="research-opc",
-    decision=@core.WatcherDecisionKind::NoChange,
+    decision=NoChange,
     delta_score=8,
     detail="standing_goal_decision: no_change\ndelta_score: 8\nnew_source_count: 0\nbook_changed: no",
     task_id=Some("standing-watch-opc-news-tick-17972"),
@@ -126,7 +126,7 @@ test "watcher status prefers parsed terminal record over generic duplicate" {
     goal_id="watch-opc-news",
     tick=17972,
     book_id="research-opc",
-    decision=@core.WatcherDecisionKind::NeedsReview,
+    decision=NeedsReview,
     detail="MoonClaw run run-opc completed: Workflow completed",
     task_id=Some("standing-watch-opc-news-tick-17972"),
     run_id=Some("run-opc"),
@@ -143,7 +143,7 @@ test "daemon tick floor includes execution task tick" {
   state.register_execution(
     runtime_status_standing_watch_execution(
       "standing-watch-opc-news-tick-15949",
-      @core.TaskExecutionStatus::Running,
+      Running,
       "running",
     ),
   )
@@ -172,7 +172,7 @@ async test "runtime status effective tick includes active execution task tick" {
   state.register_execution(
     runtime_status_standing_watch_execution(
       "standing-watch-opc-news-tick-15951",
-      @core.TaskExecutionStatus::Running,
+      Running,
       "running",
     ),
   )

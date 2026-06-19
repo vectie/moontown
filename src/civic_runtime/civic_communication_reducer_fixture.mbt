@@ -9,9 +9,9 @@ async fn fixture_civic_communication_reduction(
   {
     ideas,
     status: if ideas.length() > 0 {
-      @core.TaskExecutionStatus::Completed
+      Completed
     } else {
-      @core.TaskExecutionStatus::Failed
+      Failed
     },
     summary: "Fixture reducer loaded \{ideas.length()} template idea(s) for explicit deterministic smoke execution of `\{round_id}`.",
     packet_id: None,

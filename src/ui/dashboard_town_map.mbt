@@ -69,8 +69,8 @@ fn build_city_hall(
       "role: mayor / planner-only / limited tools",
       "memory: town-global strategic scope",
       health_line,
-      "packets: \{count_execution_status(town, @core.TaskExecutionStatus::PacketReady)} ready",
-      "imports: \{count_execution_status(town, @core.TaskExecutionStatus::ProposalImported)} imported",
+      "packets: \{count_execution_status(town, PacketReady)} ready",
+      "imports: \{count_execution_status(town, ProposalImported)} imported",
       "runs: \{running_like_count(town)} active lifecycle records",
     ],
   )

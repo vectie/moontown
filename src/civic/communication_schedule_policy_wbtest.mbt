@@ -28,7 +28,7 @@ test "salon round id and record derive from schedule and metrics" {
     round_count=2,
   )
   assert_eq(civic_communication_round_id(schedule), "robotics-salon-round-3")
-  let metrics = CivicCommunicationMetric::{
+  let metrics = {
     participant_count: 2,
     idea_count: 1,
     research_question_count: 3,

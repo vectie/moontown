@@ -28,7 +28,7 @@ pub fn wenyu_build_tasks(
         "build/ACCEPTANCE_TESTS.md",
         "wiki/synthesis/\{entry.id}-build-plan.md",
       ],
-      required_role=Some(@core.WorkerRole::Planner),
+      required_role=Some(Planner),
     ),
     @moonbook.BookTask::new(
       id="goal-\{entry.id}-code-patch",
@@ -39,9 +39,9 @@ pub fn wenyu_build_tasks(
       priority=115,
       requires_review=true,
       target_pages=[
-        "build/CODE_PATCH.md", "build/TEST_RESULTS.md", "repo:/Users/kq/Workspace/moontown",
+        "build/CODE_PATCH.md", "build/TEST_RESULTS.md", "repo:this-moontown-checkout",
       ],
-      required_role=Some(@core.WorkerRole::Harness),
+      required_role=Some(Harness),
     ),
     @moonbook.BookTask::new(
       id="goal-\{entry.id}-asset-pack",
@@ -56,7 +56,7 @@ pub fn wenyu_build_tasks(
         "build/ASSET_MANIFEST.md",
         @policy.default_generated_site_projection_path(),
       ],
-      required_role=Some(@core.WorkerRole::Specialist),
+      required_role=Some(Specialist),
     ),
   ]
   match @civic.wenyu_civic_service_for_book_id(entry.id) {

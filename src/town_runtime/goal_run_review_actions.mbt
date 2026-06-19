@@ -12,9 +12,9 @@ async fn queue_research_quality_gate(
   for task_id in task_ids {
     match @core.find_execution(state, task_id) {
       Some(execution) =>
-        if execution.status is @core.TaskExecutionStatus::Completed ||
-          execution.status is @core.TaskExecutionStatus::Failed ||
-          execution.status is @core.TaskExecutionStatus::Stale {
+        if execution.status is Completed ||
+          execution.status is Failed ||
+          execution.status is Stale {
           let retry_tick = if execution.attempt < 3 {
             Some(supervision_tick(state))
           } else {
@@ -22,7 +22,7 @@ async fn queue_research_quality_gate(
           }
           let updated = copy_execution_with(
             execution,
-            status=@core.TaskExecutionStatus::ReviewQueued,
+            status=ReviewQueued,
             summary=@research_quality.research_quality_gate_execution_summary(
               execution.summary,
               gaps.length(),
@@ -92,11 +92,10 @@ fn complete_recovered_research_bootstrap_if_clean(
     }
     match @core.find_execution(state, task_id) {
       Some(execution) =>
-        if execution.status is @core.TaskExecutionStatus::Failed ||
-          execution.status is @core.TaskExecutionStatus::Stale {
+        if execution.status is Failed || execution.status is Stale {
           let updated = copy_execution_with(
             execution,
-            status=@core.TaskExecutionStatus::Completed,
+            status=Completed,
             summary=@research_quality.recovered_research_bootstrap_execution_summary(
               execution.summary,
             ),
@@ -148,10 +147,10 @@ fn queue_book_review_backlog(
   for task_id in task_ids {
     match @core.find_execution(state, task_id) {
       Some(execution) =>
-        if execution.status is @core.TaskExecutionStatus::Completed {
+        if execution.status is Completed {
           let updated = copy_execution_with(
             execution,
-            status=@core.TaskExecutionStatus::ReviewQueued,
+            status=ReviewQueued,
             summary="\{execution.summary} / pending_review=\{pending_review_count}",
           )
           state.replace_execution(updated)

@@ -6,6 +6,8 @@ import {
   "vectie/moontown/skill_quality",
 }
 
+supported_targets = "native"
+
 import {
   "vectie/moontown/support",
 } for "wbtest"

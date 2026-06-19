@@ -1,18 +1,7 @@
 ///|
 fn snapshot_requires_refresh(snapshot : @storage.TownSnapshot) -> Bool {
-  snapshot_has_legacy_workspace_root(snapshot) ||
   snapshot_has_duplicate_execution_task_ids(snapshot) ||
   snapshot_has_refreshable_execution_failure(snapshot)
-}
-
-///|
-fn snapshot_has_legacy_workspace_root(snapshot : @storage.TownSnapshot) -> Bool {
-  snapshot.town.books.any(book_workspace_root_requires_refresh)
-}
-
-///|
-fn book_workspace_root_requires_refresh(book : @core.BookRef) -> Bool {
-  book.workspace_root.contains("/workspace/")
 }
 
 ///|

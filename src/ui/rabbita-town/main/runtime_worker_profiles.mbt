@@ -1,15 +1,15 @@
 ///|
 fn worker_role_from_id(worker_id : String) -> @core.WorkerRole {
   match worker_id {
-    "agent-town-shell" => @core.WorkerRole::Harness
-    "agent-resident" => @core.WorkerRole::MemoryKeeper
-    "agent-policy" => @core.WorkerRole::Specialist
-    "agent-contest" => @core.WorkerRole::Planner
-    "agent-social" => @core.WorkerRole::Operator
-    "agent-talent" => @core.WorkerRole::MemoryKeeper
-    "agent-garden" => @core.WorkerRole::Planner
-    "agent-robot" => @core.WorkerRole::Watcher
-    _ => @core.WorkerRole::MemoryKeeper
+    "agent-town-shell" => Harness
+    "agent-resident" => MemoryKeeper
+    "agent-policy" => Specialist
+    "agent-contest" => Planner
+    "agent-social" => Operator
+    "agent-talent" => MemoryKeeper
+    "agent-garden" => Planner
+    "agent-robot" => Watcher
+    _ => MemoryKeeper
   }
 }
 

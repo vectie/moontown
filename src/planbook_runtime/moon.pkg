@@ -23,6 +23,8 @@ import {
   "vectie/moontown/support",
 }
 
+supported_targets = "native"
+
 import {
   "moonbitlang/async",
   "vectie/moontown/live_autonomy_runtime",

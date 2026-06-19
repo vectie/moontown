@@ -7,7 +7,7 @@ pub struct MoonbookCatalogProvider {
 pub fn MoonbookCatalogProvider::new(
   catalog : Array[BookCatalogEntry],
 ) -> MoonbookCatalogProvider {
-  MoonbookCatalogProvider::{ catalog, }
+  { catalog, }
 }
 
 ///|

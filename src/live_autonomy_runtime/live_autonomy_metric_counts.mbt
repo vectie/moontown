@@ -57,13 +57,7 @@ fn live_autonomy_watcher_decision_counts(
   watcher_records : Array[@core.WatcherRunRecord],
 ) -> LiveAutonomyWatcherDecisionCounts {
   {
-    accepted_updates: count_watcher_decisions(
-      watcher_records,
-      @core.WatcherDecisionKind::Update,
-    ),
-    no_change: count_watcher_decisions(
-      watcher_records,
-      @core.WatcherDecisionKind::NoChange,
-    ),
+    accepted_updates: count_watcher_decisions(watcher_records, Update),
+    no_change: count_watcher_decisions(watcher_records, NoChange),
   }
 }

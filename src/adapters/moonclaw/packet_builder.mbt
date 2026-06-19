@@ -85,16 +85,16 @@ fn packet_step_metadata(task : @moonbook.BookTask?) -> Json {
     Some(task) => {
       let route = packet_task_route(task)
       let task_spec = packet_task_spec_json(task, route)
-      set_mirrored_step_metadata(fields, "task_id", task.id.to_json())
-      set_mirrored_step_metadata(fields, "task_spec", task_spec)
-      set_mirrored_step_metadata(fields, "task_kind", route.kind.to_json())
-      set_mirrored_step_metadata(fields, "priority", task.priority.to_json())
-      set_mirrored_step_metadata(
+      set_extension_step_metadata(fields, "task_id", task.id.to_json())
+      set_extension_step_metadata(fields, "task_spec", task_spec)
+      set_extension_step_metadata(fields, "task_kind", route.kind.to_json())
+      set_extension_step_metadata(fields, "priority", task.priority.to_json())
+      set_extension_step_metadata(
         fields,
         "requires_review",
         task.requires_review.to_json(),
       )
-      set_mirrored_step_metadata(
+      set_extension_step_metadata(
         fields,
         "target_pages",
         route.target_pages.to_json(),
@@ -122,13 +122,12 @@ fn packet_task_spec_json(
 }
 
 ///|
-fn set_mirrored_step_metadata(
+fn set_extension_step_metadata(
   fields : Map[String, Json],
   suffix : String,
   value : Json,
 ) -> Unit {
   fields.set("extension_\{suffix}", value)
-  fields.set("bookapi_\{suffix}", value)
 }
 
 ///|

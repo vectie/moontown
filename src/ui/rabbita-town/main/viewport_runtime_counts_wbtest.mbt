@@ -49,26 +49,26 @@ fn runtime_count_test_execution(
 ///|
 test "worker feed kind classifies blocked watcher and quiet workers" {
   assert_true(
-    worker_feed_kind(runtime_count_test_worker(@core.WorkerStatus::Blocked))
+    worker_feed_kind(runtime_count_test_worker(Blocked))
     is BlockedWorker,
   )
   assert_true(
     worker_feed_kind(
       runtime_count_test_worker_with_role(
-        @core.WorkerStatus::Idle,
+        Idle,
         "Standing Watcher",
       ),
     )
     is OnDutyWatcher,
   )
   assert_true(
-    worker_feed_kind(runtime_count_test_worker(@core.WorkerStatus::Idle))
+    worker_feed_kind(runtime_count_test_worker(Idle))
     is QuietWorker,
   )
   assert_true(
     worker_feed_kind(
       runtime_count_test_worker_with_role(
-        @core.WorkerStatus::Running,
+        Running,
         "Standing Watcher",
       ),
     )
@@ -79,7 +79,7 @@ test "worker feed kind classifies blocked watcher and quiet workers" {
 ///|
 test "worker feed item centralizes worker alert and watcher mapping" {
   let blocked = worker_feed_item(
-    runtime_count_test_worker(@core.WorkerStatus::Blocked),
+    runtime_count_test_worker(Blocked),
     "watcher idle",
   )
   assert_eq(blocked.unwrap().tone, "alert")
@@ -87,7 +87,7 @@ test "worker feed item centralizes worker alert and watcher mapping" {
   assert_true(blocked.unwrap().detail.contains("Mayor should recover"))
   let watcher = worker_feed_item(
     runtime_count_test_worker_with_role(
-      @core.WorkerStatus::Idle,
+      Idle,
       "Standing Watcher",
     ),
     "next check waits for real time",
@@ -97,7 +97,7 @@ test "worker feed item centralizes worker alert and watcher mapping" {
   assert_eq(watcher.unwrap().detail, "next check waits for real time")
   assert_true(
     worker_feed_item(
-      runtime_count_test_worker(@core.WorkerStatus::Idle),
+      runtime_count_test_worker(Idle),
       "watcher idle",
     )
     is None,
@@ -105,7 +105,7 @@ test "worker feed item centralizes worker alert and watcher mapping" {
   assert_true(
     worker_feed_item(
       runtime_count_test_worker_with_role(
-        @core.WorkerStatus::Running,
+        Running,
         "Standing Watcher",
       ),
       "watcher idle",
@@ -120,12 +120,12 @@ test "push worker alert messages delegates item projection" {
   push_worker_alert_messages(
     feed,
     [
-      runtime_count_test_worker(@core.WorkerStatus::Blocked),
+      runtime_count_test_worker(Blocked),
       runtime_count_test_worker_with_role(
-        @core.WorkerStatus::Idle,
+        Idle,
         "Standing Watcher",
       ),
-      runtime_count_test_worker(@core.WorkerStatus::Running),
+      runtime_count_test_worker(Running),
     ],
     "watcher waiting for next real-world tick",
   )
@@ -139,12 +139,12 @@ test "push worker alert messages delegates item projection" {
 test "worker feed items projects visible worker messages only" {
   let items = worker_feed_items(
     [
-      runtime_count_test_worker(@core.WorkerStatus::Blocked),
+      runtime_count_test_worker(Blocked),
       runtime_count_test_worker_with_role(
-        @core.WorkerStatus::Idle,
+        Idle,
         "Standing Watcher",
       ),
-      runtime_count_test_worker(@core.WorkerStatus::Running),
+      runtime_count_test_worker(Running),
     ],
     "watcher waiting for next real-world tick",
   )
@@ -158,15 +158,15 @@ test "worker feed items projects visible worker messages only" {
 ///|
 test "execution count summary centralizes stage counts" {
   let summary = execution_count_summary([
-    runtime_count_test_execution(@core.TaskExecutionStatus::PacketReady),
-    runtime_count_test_execution(@core.TaskExecutionStatus::ProposalImported),
-    runtime_count_test_execution(@core.TaskExecutionStatus::RunConfirmed),
-    runtime_count_test_execution(@core.TaskExecutionStatus::Running),
-    runtime_count_test_execution(@core.TaskExecutionStatus::AwaitingPersistence),
-    runtime_count_test_execution(@core.TaskExecutionStatus::ReviewQueued),
-    runtime_count_test_execution(@core.TaskExecutionStatus::Completed),
-    runtime_count_test_execution(@core.TaskExecutionStatus::Stale),
-    runtime_count_test_execution(@core.TaskExecutionStatus::Failed),
+    runtime_count_test_execution(PacketReady),
+    runtime_count_test_execution(ProposalImported),
+    runtime_count_test_execution(RunConfirmed),
+    runtime_count_test_execution(Running),
+    runtime_count_test_execution(AwaitingPersistence),
+    runtime_count_test_execution(ReviewQueued),
+    runtime_count_test_execution(Completed),
+    runtime_count_test_execution(Stale),
+    runtime_count_test_execution(Failed),
   ])
   assert_eq(summary.total, 9)
   assert_eq(summary.packet_ready, 1)
@@ -183,14 +183,14 @@ test "execution count summary centralizes stage counts" {
 ///|
 test "execution summary owns active runtime policy" {
   let executions = [
-    runtime_count_test_execution(@core.TaskExecutionStatus::PacketReady),
-    runtime_count_test_execution(@core.TaskExecutionStatus::RunConfirmed),
-    runtime_count_test_execution(@core.TaskExecutionStatus::Running),
-    runtime_count_test_execution(@core.TaskExecutionStatus::AwaitingPersistence),
-    runtime_count_test_execution(@core.TaskExecutionStatus::ReviewQueued),
-    runtime_count_test_execution(@core.TaskExecutionStatus::Completed),
-    runtime_count_test_execution(@core.TaskExecutionStatus::Stale),
-    runtime_count_test_execution(@core.TaskExecutionStatus::Failed),
+    runtime_count_test_execution(PacketReady),
+    runtime_count_test_execution(RunConfirmed),
+    runtime_count_test_execution(Running),
+    runtime_count_test_execution(AwaitingPersistence),
+    runtime_count_test_execution(ReviewQueued),
+    runtime_count_test_execution(Completed),
+    runtime_count_test_execution(Stale),
+    runtime_count_test_execution(Failed),
   ]
   let summary = execution_count_summary(executions)
   assert_eq(summary.active_run_flow(), 2)
@@ -201,58 +201,58 @@ test "execution summary owns active runtime policy" {
 ///|
 test "execution lifecycle predicates centralize status groups" {
   assert_true(
-    execution_status_is_dispatch_phase(@core.TaskExecutionStatus::PacketReady),
+    execution_status_is_dispatch_phase(PacketReady),
   )
   assert_true(
     execution_status_is_dispatch_phase(
-      @core.TaskExecutionStatus::ProposalImported,
+      ProposalImported,
     ),
   )
   assert_true(
-    execution_status_is_dispatch_phase(@core.TaskExecutionStatus::RunConfirmed),
+    execution_status_is_dispatch_phase(RunConfirmed),
   )
   assert_true(
-    !execution_status_is_dispatch_phase(@core.TaskExecutionStatus::Running),
+    !execution_status_is_dispatch_phase(Running),
   )
   assert_true(
-    execution_status_needs_attention(@core.TaskExecutionStatus::ReviewQueued),
+    execution_status_needs_attention(ReviewQueued),
   )
   assert_true(
-    execution_status_needs_attention(@core.TaskExecutionStatus::Stale),
+    execution_status_needs_attention(Stale),
   )
   assert_true(
     execution_status_is_persistence_or_done(
-      @core.TaskExecutionStatus::AwaitingPersistence,
+      AwaitingPersistence,
     ),
   )
   assert_true(
     execution_status_is_persistence_or_done(
-      @core.TaskExecutionStatus::Completed,
+      Completed,
     ),
   )
   assert_true(
-    execution_status_is_active_run(@core.TaskExecutionStatus::Running),
+    execution_status_is_active_run(Running),
   )
   assert_true(
-    execution_status_is_active_run(@core.TaskExecutionStatus::RunConfirmed),
+    execution_status_is_active_run(RunConfirmed),
   )
   assert_true(
-    !execution_status_has_run_id(@core.TaskExecutionStatus::PacketReady),
+    !execution_status_has_run_id(PacketReady),
   )
   assert_true(
-    !execution_status_has_run_id(@core.TaskExecutionStatus::ProposalImported),
+    !execution_status_has_run_id(ProposalImported),
   )
-  assert_true(execution_status_has_run_id(@core.TaskExecutionStatus::Running))
+  assert_true(execution_status_has_run_id(Running))
   assert_true(
     execution_status_requires_review(
-      @core.TaskExecutionStatus::AwaitingPersistence,
+      AwaitingPersistence,
     ),
   )
   assert_true(
-    execution_status_requires_review(@core.TaskExecutionStatus::ReviewQueued),
+    execution_status_requires_review(ReviewQueued),
   )
   assert_true(
-    !execution_status_requires_review(@core.TaskExecutionStatus::Completed),
+    !execution_status_requires_review(Completed),
   )
 }
 
@@ -262,35 +262,35 @@ test "execution node matching uses lifecycle predicates" {
     node_matches_execution(
       "city-hall",
       "book",
-      @core.TaskExecutionStatus::PacketReady,
+      PacketReady,
     ),
   )
   assert_true(
     node_matches_execution(
       "anomaly-corner",
       "book",
-      @core.TaskExecutionStatus::Failed,
+      Failed,
     ),
   )
   assert_true(
     node_matches_execution(
       "worker-yard",
       "book",
-      @core.TaskExecutionStatus::AwaitingPersistence,
+      AwaitingPersistence,
     ),
   )
   assert_true(
     node_matches_execution(
       "book-research",
       "research",
-      @core.TaskExecutionStatus::Running,
+      Running,
     ),
   )
   assert_true(
     !node_matches_execution(
       "city-hall",
       "book",
-      @core.TaskExecutionStatus::Completed,
+      Completed,
     ),
   )
 }
@@ -298,26 +298,26 @@ test "execution node matching uses lifecycle predicates" {
 ///|
 test "module execution status class uses lifecycle predicates" {
   assert_true(
-    module_execution_status_kind(@core.TaskExecutionStatus::Running) is Running,
+    module_execution_status_kind(Running) is Running,
   )
   assert_true(
-    module_execution_status_kind(@core.TaskExecutionStatus::AwaitingPersistence)
+    module_execution_status_kind(AwaitingPersistence)
     is Review,
   )
   assert_true(
-    module_execution_status_kind(@core.TaskExecutionStatus::Failed) is Alert,
+    module_execution_status_kind(Failed) is Alert,
   )
   assert_true(
-    module_execution_status_kind(@core.TaskExecutionStatus::Completed)
+    module_execution_status_kind(Completed)
     is Complete,
   )
   assert_true(
-    module_execution_status_kind(@core.TaskExecutionStatus::PacketReady)
+    module_execution_status_kind(PacketReady)
     is Waiting,
   )
   assert_eq(
     module_runtime_status_class(
-      module_execution_status_kind(@core.TaskExecutionStatus::Running),
+      module_execution_status_kind(Running),
     ),
     "module-status-running",
   )
@@ -326,27 +326,27 @@ test "module execution status class uses lifecycle predicates" {
 ///|
 test "execution feed kind classifies visible and quiet lifecycle states" {
   assert_true(
-    execution_feed_kind(@core.TaskExecutionStatus::Running) is RunningExecution,
+    execution_feed_kind(Running) is RunningExecution,
   )
   assert_true(
-    execution_feed_kind(@core.TaskExecutionStatus::RunConfirmed)
+    execution_feed_kind(RunConfirmed)
     is RunningExecution,
   )
   assert_true(
-    execution_feed_kind(@core.TaskExecutionStatus::AwaitingPersistence)
+    execution_feed_kind(AwaitingPersistence)
     is AwaitingPersistenceExecution,
   )
   assert_true(
-    execution_feed_kind(@core.TaskExecutionStatus::Stale) is StaleExecution,
+    execution_feed_kind(Stale) is StaleExecution,
   )
   assert_true(
-    execution_feed_kind(@core.TaskExecutionStatus::Failed) is FailedExecution,
+    execution_feed_kind(Failed) is FailedExecution,
   )
   assert_true(
-    execution_feed_kind(@core.TaskExecutionStatus::Completed) is QuietExecution,
+    execution_feed_kind(Completed) is QuietExecution,
   )
   assert_true(
-    execution_feed_kind(@core.TaskExecutionStatus::ReviewQueued)
+    execution_feed_kind(ReviewQueued)
     is QuietExecution,
   )
 }
@@ -354,26 +354,26 @@ test "execution feed kind classifies visible and quiet lifecycle states" {
 ///|
 test "execution feed item centralizes runtime event mapping" {
   let running = execution_feed_item(
-    runtime_count_test_execution(@core.TaskExecutionStatus::Running),
+    runtime_count_test_execution(Running),
   )
   assert_eq(running.unwrap().tone, "neutral")
   assert_true(running.unwrap().title.contains("is running"))
   let persisting = execution_feed_item(
-    runtime_count_test_execution(@core.TaskExecutionStatus::AwaitingPersistence),
+    runtime_count_test_execution(AwaitingPersistence),
   )
   assert_eq(persisting.unwrap().tone, "hot")
   assert_true(persisting.unwrap().title.contains("awaits MoonBook persistence"))
   let stale = execution_feed_item(
-    runtime_count_test_execution(@core.TaskExecutionStatus::Stale),
+    runtime_count_test_execution(Stale),
   )
   assert_eq(stale.unwrap().tone, "alert")
   let failed = execution_feed_item(
-    runtime_count_test_execution(@core.TaskExecutionStatus::Failed),
+    runtime_count_test_execution(Failed),
   )
   assert_true(failed.unwrap().title.contains("failed"))
   assert_true(
     execution_feed_item(
-      runtime_count_test_execution(@core.TaskExecutionStatus::Completed),
+      runtime_count_test_execution(Completed),
     )
     is None,
   )
@@ -382,11 +382,11 @@ test "execution feed item centralizes runtime event mapping" {
 ///|
 test "execution feed items projects visible execution messages only" {
   let items = execution_feed_items([
-    runtime_count_test_execution(@core.TaskExecutionStatus::Running),
-    runtime_count_test_execution(@core.TaskExecutionStatus::AwaitingPersistence),
-    runtime_count_test_execution(@core.TaskExecutionStatus::Stale),
-    runtime_count_test_execution(@core.TaskExecutionStatus::Failed),
-    runtime_count_test_execution(@core.TaskExecutionStatus::Completed),
+    runtime_count_test_execution(Running),
+    runtime_count_test_execution(AwaitingPersistence),
+    runtime_count_test_execution(Stale),
+    runtime_count_test_execution(Failed),
+    runtime_count_test_execution(Completed),
   ])
   assert_eq(items.length(), 4)
   assert_true(items[0].title.contains("is running"))

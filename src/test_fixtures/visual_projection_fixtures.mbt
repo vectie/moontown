@@ -1,7 +1,7 @@
 ///|
 pub fn visual_projection_test_state(
-  worker_status? : @core.WorkerStatus = @core.WorkerStatus::Running,
-  execution_status? : @core.TaskExecutionStatus = @core.TaskExecutionStatus::Running,
+  worker_status? : @core.WorkerStatus = Running,
+  execution_status? : @core.TaskExecutionStatus = Running,
 ) -> @core.TownState {
   let state = @core.empty_state(
     @core.TownConfig::new(id="visual-test-town", name="Visual Test Town"),
@@ -19,7 +19,7 @@ pub fn visual_projection_test_state(
       id="worker-opc-researcher",
       name="OPC Researcher",
       book_id="research-opc",
-      role=@core.WorkerRole::Watcher,
+      role=Watcher,
       status=worker_status,
     ),
   )
@@ -29,8 +29,8 @@ pub fn visual_projection_test_state(
       book_id="research-opc",
       title="Check OPC updates",
       prompt="Find new OPC sources.",
-      domain=@core.WorkDomain::Research,
-      status=@core.TownTaskStatus::Running,
+      domain=Research,
+      status=Running,
     ),
   )
   state.register_execution(

@@ -13,7 +13,7 @@ async test "supervision does not keep unpolled running snapshot alive forever" {
     ),
   )
   run_supervision_cycle(state, @roles.Mayor::new(), [])
-  assert_eq(state.executions[0].status, @core.TaskExecutionStatus::Completed)
+  assert_eq(state.executions[0].status, Completed)
   assert_true(state.executions[0].summary.contains("no run id"))
   assert_eq(
     state.executions[0].result_decision,
@@ -36,7 +36,7 @@ async test "supervision uses short no-run-id window for restart residue" {
     ),
   )
   run_supervision_cycle(state, @roles.Mayor::new(), [], tick=Some(115))
-  assert_eq(state.executions[0].status, @core.TaskExecutionStatus::Completed)
+  assert_eq(state.executions[0].status, Completed)
   assert_true(state.executions[0].summary.contains("no run id"))
   assert_eq(
     state.executions[0].result_decision,
@@ -51,14 +51,14 @@ async test "no run id live execution closes after stale window" {
     task_id="standing-watch-llm-training-tick-10",
     book_id="research-llm",
     packet_path="/tmp/missing-packet.json",
-    status=@core.TaskExecutionStatus::Running,
+    status=Running,
     summary="old live snapshot",
     heartbeat_tick=10,
     stale_after_tick=12,
   )
   state.register_execution(execution)
   reconcile_no_run_id_live_execution(state, execution, 13)
-  assert_eq(state.executions[0].status, @core.TaskExecutionStatus::Failed)
+  assert_eq(state.executions[0].status, Failed)
   assert_true(state.executions[0].summary.contains("no run id"))
   assert_eq(state.executions[0].result_decision, "deferred")
   assert_eq(state.executions[0].requires_review, false)
@@ -73,7 +73,7 @@ async test "stale detached import failure keeps MoonClaw stderr evidence" {
   let stderr =
     $|RUNTIME ERROR: abort() called
     $|deprecated.mbt:62 at @moonbitlang/core/builtin.StringBuilder::grow_if_necessary
-    $|/Users/kq/Workspace/moonclaw/job/system_storage.mbt:886 by @vectie/moonclaw/job.SystemStore::save_job_proposals
+    $|/workspace/external/moonclaw/job/system_storage.mbt:886 by @vectie/moonclaw/job.SystemStore::save_job_proposals
 
   @support.write_text_file(packet_path + ".import.json.err", stderr)
   let state = goal_supervision_test_state()
@@ -81,14 +81,14 @@ async test "stale detached import failure keeps MoonClaw stderr evidence" {
     task_id="standing-watch-llm-training-tick-10",
     book_id="research-llm",
     packet_path~,
-    status=@core.TaskExecutionStatus::ProposalImported,
+    status=ProposalImported,
     summary="old live snapshot",
     heartbeat_tick=10,
     stale_after_tick=12,
   )
   state.register_execution(execution)
   reconcile_no_run_id_live_execution(state, execution, 13)
-  assert_eq(state.executions[0].status, @core.TaskExecutionStatus::Failed)
+  assert_eq(state.executions[0].status, Failed)
   assert_true(state.executions[0].summary.contains("Detached import stderr:"))
   assert_true(
     state.executions[0].summary.contains("StringBuilder::grow_if_necessary"),

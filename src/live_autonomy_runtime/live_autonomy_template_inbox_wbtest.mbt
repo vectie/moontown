@@ -30,8 +30,8 @@ async test "live autonomy surfaces book template request inbox" {
     ),
   )
   let state = @test_fixtures.visual_projection_test_state(
-    worker_status=@core.WorkerStatus::Idle,
-    execution_status=@core.TaskExecutionStatus::Completed,
+    worker_status=Idle,
+    execution_status=Completed,
   )
   let spine = write_live_autonomy_spine(
     state,

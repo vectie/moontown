@@ -33,21 +33,21 @@ test "town shell build stage uses shared execution phrase groups" {
   assert_eq(
     town_shell_build_stage(
       model,
-      Some(civic_metric_test_execution(@core.TaskExecutionStatus::PacketReady)),
+      Some(civic_metric_test_execution(PacketReady)),
     ),
     "Patch packet prepared",
   )
   assert_eq(
     town_shell_build_stage(
       model,
-      Some(civic_metric_test_execution(@core.TaskExecutionStatus::Running)),
+      Some(civic_metric_test_execution(Running)),
     ),
     "Code patch running",
   )
   assert_eq(
     town_shell_build_stage(
       model,
-      Some(civic_metric_test_execution(@core.TaskExecutionStatus::Completed)),
+      Some(civic_metric_test_execution(Completed)),
     ),
     "District card updated",
   )
@@ -62,7 +62,7 @@ test "town shell next action uses shared execution action groups" {
       None,
       Some(
         civic_metric_test_execution(
-          @core.TaskExecutionStatus::AwaitingPersistence,
+          AwaitingPersistence,
         ),
       ),
     ),
@@ -72,7 +72,7 @@ test "town shell next action uses shared execution action groups" {
     town_shell_next_action(
       model,
       None,
-      Some(civic_metric_test_execution(@core.TaskExecutionStatus::Stale)),
+      Some(civic_metric_test_execution(Stale)),
     ),
     "Recover the stalled build run before the shell drifts back to placeholder state.",
   )
@@ -84,14 +84,14 @@ test "town shell signal uses shared execution signal groups" {
   assert_eq(
     town_shell_signal(
       model,
-      Some(civic_metric_test_execution(@core.TaskExecutionStatus::PacketReady)),
+      Some(civic_metric_test_execution(PacketReady)),
     ),
     "Build dispatch",
   )
   assert_eq(
     town_shell_signal(
       { ..model, state_source: StateSourceKind::SnapshotFile },
-      Some(civic_metric_test_execution(@core.TaskExecutionStatus::PacketReady)),
+      Some(civic_metric_test_execution(PacketReady)),
     ),
     "Projection bridge",
   )

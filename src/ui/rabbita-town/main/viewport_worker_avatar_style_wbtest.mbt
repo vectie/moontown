@@ -44,7 +44,7 @@ test "worker avatar placement shares default slot table" {
 test "worker avatar helpers keep initials status class and roster asset policy" {
   assert_eq(worker_avatar_initials("Mayor Keeper"), "MK")
   assert_eq(worker_avatar_initials("   "), "??")
-  assert_eq(worker_status_class(@core.WorkerStatus::Blocked), "worker-blocked")
+  assert_eq(worker_status_class(Blocked), "worker-blocked")
   assert_eq(
     worker_roster_asset(65),
     "tilemap/actors/roster/resident_1_walk_strip.png",

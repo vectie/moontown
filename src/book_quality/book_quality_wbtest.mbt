@@ -205,7 +205,7 @@ fn review_candidate_score_for_test(
   book_id : String,
   structural_score : Int,
 ) -> BookQualityScore {
-  BookQualityScore::{
+  {
     book_id,
     title: book_id,
     book_type: @policy.research_type(),
@@ -305,7 +305,7 @@ test "book quality package owns imported review run status and launch summary" {
 fn repair_bridge_item_for_goal_test(
   book_id : String,
 ) -> BookQualityRepairBridgeItem {
-  BookQualityRepairBridgeItem::{
+  {
     book_id,
     book_type: @policy.research_type(),
     workspace_root: "/tmp/\{book_id}",
@@ -393,7 +393,7 @@ test "book quality package owns repair standing goal upsert" {
 }
 
 ///|
-test "book quality package maps legacy labels to composed policies" {
+test "book quality package maps canonical labels to composed policies" {
   match policy_spec_for_type(@policy.research_type()) {
     Some(spec) => {
       assert_eq(spec.profile.source_policy, @policy.web_first_policy())
@@ -531,7 +531,7 @@ test "book quality package owns scoring thresholds and next action" {
 
 ///|
 test "book quality package owns repair standing-goal policy text" {
-  let item = BookQualityRepairBridgeItem::{
+  let item = {
     book_id: "course-ui",
     book_type: @policy.course_type(),
     workspace_root: "/tmp/course-ui",
@@ -581,7 +581,7 @@ test "book quality package owns repair standing-goal policy text" {
 
 ///|
 test "book quality package owns repair bridge item construction" {
-  let score = BookQualityScore::{
+  let score = {
     book_id: "research-robotics",
     title: "Robotics",
     book_type: @policy.research_type(),
@@ -623,7 +623,7 @@ test "book quality package owns repair bridge item construction" {
 
 ///|
 test "book quality package owns repair bridge review-text candidate policy" {
-  let score = BookQualityScore::{
+  let score = {
     book_id: "research-robotics",
     title: "Robotics",
     book_type: @policy.research_type(),
@@ -686,7 +686,7 @@ test "book quality package owns semantic review profile policy" {
 
 ///|
 test "book quality package owns external review packet contract" {
-  let packet = BookQualityReviewPacket::{
+  let packet = {
     book_id: "coding",
     book_type: @policy.operational_type(),
     policy: @policy.operational(),
@@ -737,7 +737,7 @@ test "book quality package owns external review packet contract" {
 
 ///|
 test "book quality package builds external MoonClaw review packet" {
-  let packet = BookQualityReviewPacket::{
+  let packet = {
     book_id: "coding",
     book_type: @policy.operational_type(),
     policy: @policy.operational(),
@@ -768,7 +768,7 @@ test "book quality package builds external MoonClaw review packet" {
 
 ///|
 test "book quality package owns review status section rendering" {
-  let run = BookQualityReviewRun::{
+  let run = {
     book_id: "book-table",
     packet_path: "packet.json",
     result_path: "result.md",
@@ -806,7 +806,7 @@ test "book quality package owns review status section rendering" {
 
 ///|
 test "book quality package owns review ledger view current replacement" {
-  let first_a = BookQualityReviewRun::{
+  let first_a = {
     book_id: "book-a",
     packet_path: "a-1.json",
     result_path: "book-a.md",
@@ -833,7 +833,7 @@ test "book quality package owns review ledger view current replacement" {
     summary: "latest a",
     generated_at_ms: 3UL,
   }
-  let view = book_quality_review_ledger_view(BookQualityReviewRunLedger::{
+  let view = book_quality_review_ledger_view({
     runs: [first_a, first_b, latest_a],
   })
   assert_eq(view.current_runs.length(), 2)
@@ -845,7 +845,7 @@ test "book quality package owns review ledger view current replacement" {
 
 ///|
 test "book quality package owns review run identity for view replacement" {
-  let first = BookQualityReviewRun::{
+  let first = {
     book_id: "book-a",
     packet_path: "packet-a.json",
     result_path: "book-a.md",
@@ -858,7 +858,7 @@ test "book quality package owns review run identity for view replacement" {
   let moved_packet = { ..first, packet_path: "packet-moved.json" }
   let changed_summary = { ..first, summary: "changed" }
   let changed_generation = { ..first, generated_at_ms: 4UL }
-  let packet_only_view = book_quality_review_ledger_view(BookQualityReviewRunLedger::{
+  let packet_only_view = book_quality_review_ledger_view({
     runs: [first, moved_packet],
   })
   assert_eq(packet_only_view.current_runs.length(), 1)
@@ -866,7 +866,7 @@ test "book quality package owns review run identity for view replacement" {
     packet_only_view.current_runs[0].packet_path == "packet-moved.json",
   )
   assert_true(packet_only_view.historical_runs.is_empty())
-  let view = book_quality_review_ledger_view(BookQualityReviewRunLedger::{
+  let view = book_quality_review_ledger_view({
     runs: [first, moved_packet, changed_summary, changed_generation],
   })
   assert_eq(view.current_runs.length(), 1)
@@ -878,7 +878,7 @@ test "book quality package owns review run identity for view replacement" {
 
 ///|
 test "book quality package owns review ledger view history accounting" {
-  let old_a = BookQualityReviewRun::{
+  let old_a = {
     book_id: "book-a",
     packet_path: "a-old.json",
     result_path: "book-a.md",
@@ -888,7 +888,7 @@ test "book quality package owns review ledger view history accounting" {
     summary: "old failure",
     generated_at_ms: 1UL,
   }
-  let current_b = BookQualityReviewRun::{
+  let current_b = {
     book_id: "book-b",
     packet_path: "b.json",
     result_path: "book-b.md",
@@ -907,9 +907,7 @@ test "book quality package owns review ledger view history accounting" {
     summary: "current a",
     generated_at_ms: 3UL,
   }
-  let ledger = BookQualityReviewRunLedger::{
-    runs: [old_a, current_b, current_a],
-  }
+  let ledger = { runs: [old_a, current_b, current_a] }
   let view = book_quality_review_ledger_view(ledger)
   assert_eq(view.current_runs.length(), 2)
   assert_eq(view.current_runs[0].book_id, "book-a")
@@ -933,7 +931,7 @@ test "book quality package owns review ledger view history accounting" {
 async test "book quality package owns review ledger append storage" {
   let root = "/tmp/moontown-book-quality-package-append-ledger-wbtest"
   let run_path = "\{root}/book-quality/ai-review-runs.json"
-  let original = BookQualityReviewRun::{
+  let original = {
     book_id: "book-a",
     packet_path: "\{root}/packet-old.json",
     result_path: "\{root}/result-old.md",
@@ -974,7 +972,7 @@ async test "book quality package owns review ledger append storage" {
 
 ///|
 test "book quality package owns review ledger text parsing" {
-  let run = BookQualityReviewRun::{
+  let run = {
     book_id: "book-a",
     packet_path: "/tmp/packet.json",
     result_path: "/tmp/result.md",
@@ -985,7 +983,7 @@ test "book quality package owns review ledger text parsing" {
     generated_at_ms: 1UL,
   }
   let parsed = review_run_ledger_from_text(
-    review_run_ledger_to_text(BookQualityReviewRunLedger::{ runs: [run] }),
+    review_run_ledger_to_text({ runs: [run] }),
   )
   assert_eq(parsed.runs.length(), 1)
   assert_eq(parsed.runs[0].book_id, "book-a")
@@ -994,7 +992,7 @@ test "book quality package owns review ledger text parsing" {
 
 ///|
 test "book quality package owns review ledger serializer roundtrip" {
-  let run = BookQualityReviewRun::{
+  let run = {
     book_id: "book-roundtrip",
     packet_path: "/tmp/packet.json",
     result_path: "/tmp/result.md",
@@ -1004,9 +1002,7 @@ test "book quality package owns review ledger serializer roundtrip" {
     summary: "roundtrip summary",
     generated_at_ms: 7UL,
   }
-  let text = review_run_ledger_to_text(BookQualityReviewRunLedger::{
-    runs: [run],
-  })
+  let text = review_run_ledger_to_text({ runs: [run] })
   assert_true(text.contains("\"runs\""))
   assert_true(text.contains("\"book_id\": \"book-roundtrip\""))
   let parsed = review_run_ledger_from_text(text)
@@ -1097,7 +1093,7 @@ test "book quality package owns repair goal retirement policy" {
 
 ///|
 test "book quality package owns repair bridge summary wording" {
-  let item = BookQualityRepairBridgeItem::{
+  let item = {
     book_id: "research-robotics",
     book_type: @policy.research_type(),
     workspace_root: "/tmp/research-robotics",
@@ -1134,7 +1130,7 @@ test "book quality package owns repair bridge summary wording" {
 
 ///|
 test "book quality package owns repair review page markdown" {
-  let item = BookQualityRepairBridgeItem::{
+  let item = {
     book_id: "research-robotics",
     book_type: @policy.research_type(),
     workspace_root: "/tmp/research-robotics",
@@ -1180,7 +1176,7 @@ test "book quality package owns review lifecycle contract" {
   assert_false(
     review_result_satisfies_contract("book_role_fit: missing score\n"),
   )
-  let run = BookQualityReviewRun::{
+  let run = {
     book_id: "book-a",
     packet_path: "packet.json",
     result_path: "result.md",
@@ -1268,7 +1264,7 @@ test "book quality package owns review lifecycle contract" {
 ///|
 async test "book quality package counts active review runs" {
   let result_dir = "/tmp/moontown-book-quality-package-active-count-wbtest/results"
-  let recent = BookQualityReviewRun::{
+  let recent = {
     book_id: "recent",
     packet_path: "packet-recent.json",
     result_path: "\{result_dir}/recent.md",
@@ -1291,21 +1287,9 @@ async test "book quality package counts active review runs" {
     status: review_run_written_status(),
   }
   let observations = [
-    BookQualityReviewRunObservation::{
-      run: recent,
-      has_result: false,
-      process_alive: false,
-    },
-    BookQualityReviewRunObservation::{
-      run: stale,
-      has_result: false,
-      process_alive: false,
-    },
-    BookQualityReviewRunObservation::{
-      run: written,
-      has_result: true,
-      process_alive: false,
-    },
+    { run: recent, has_result: false, process_alive: false },
+    { run: stale, has_result: false, process_alive: false },
+    { run: written, has_result: true, process_alive: false },
   ]
   assert_eq(active_review_count_for_observations(observations, 200UL), 2)
   assert_eq(
@@ -1319,7 +1303,7 @@ async test "book quality package counts active review runs" {
 
 ///|
 async test "book quality package marks stale review runs orphaned" {
-  let run = BookQualityReviewRun::{
+  let run = {
     book_id: "stale-review",
     packet_path: "packet.json",
     result_path: "result.md",
@@ -1345,7 +1329,7 @@ async test "book quality package marks stale review runs orphaned" {
 async test "book quality package owns public active boundary through internal check" {
   let root = "/tmp/moontown-book-quality-package-active-boundary-wbtest-\{@async.now().to_int()}"
   let result_dir = "\{root}/book-quality/ai-review-results"
-  let run = BookQualityReviewRun::{
+  let run = {
     book_id: "book-stale-window",
     packet_path: "packet.json",
     result_path: "result.md",
@@ -1377,7 +1361,7 @@ async test "book quality package owns public active boundary through internal ch
 ///|
 async test "book quality package preserves terminal failed attempt status" {
   let orphaned_result = reconcile_review_run_from_observation(
-    BookQualityReviewRun::{
+    {
       book_id: "book-a",
       packet_path: "packet.json",
       result_path: "book-a.md",
@@ -1422,7 +1406,7 @@ async test "book quality package preserves terminal failed attempt status" {
 ///|
 async test "book quality package owns per-run reconciliation transitions" {
   let root = "/tmp/moontown-book-quality-package-reconcile-single-wbtest-\{@async.now().to_int()}"
-  let queued = BookQualityReviewRun::{
+  let queued = {
     book_id: "book-stable",
     packet_path: "\{root}/packet.json",
     result_path: "\{root}/result.md",
@@ -1445,7 +1429,7 @@ async test "book quality package owns per-run reconciliation transitions" {
   assert_false(unchanged.changed)
 
   let accepted = reconcile_review_run_from_observation(
-    BookQualityReviewRun::{
+    {
       book_id: "book-accepted",
       packet_path: "packet.json",
       result_path: "\{root}/accepted-results/book-accepted.md",
@@ -1470,7 +1454,7 @@ async test "book quality package owns per-run reconciliation transitions" {
 
 ///|
 async test "book quality package existing result transition is internal" {
-  let run = BookQualityReviewRun::{
+  let run = {
     book_id: "book-existing",
     packet_path: "packet.json",
     result_path: "book-existing.md",
@@ -1494,7 +1478,7 @@ async test "book quality package existing result transition is internal" {
 
 ///|
 test "book quality package owns review markdown row formatting" {
-  let run = BookQualityReviewRun::{
+  let run = {
     book_id: "book-row",
     packet_path: "packet.json",
     result_path: "result.md",
@@ -1517,11 +1501,8 @@ test "book quality package owns review markdown row formatting" {
     ),
     "|book-row|queued|pending|`run-row`|row \\| summary next|",
   )
-  let ledger = BookQualityReviewRunLedger::{ runs: [run] }
-  let view = BookQualityReviewLedgerView::{
-    current_runs: [run],
-    historical_runs: [run],
-  }
+  let ledger = { runs: [run] }
+  let view = { current_runs: [run], historical_runs: [run] }
   let summary = review_status_summary_lines(
     "/tmp/runs.json", "/tmp/results", 1, ledger, view,
   ).join("\n")

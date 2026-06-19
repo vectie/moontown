@@ -4,3 +4,5 @@ import {
   "vectie/moontown/runtime_error_policy",
   "vectie/moontown/standing_watch_contracts",
 }
+
+supported_targets = "native"

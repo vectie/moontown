@@ -10,8 +10,8 @@ async test "live status reconciles stale planbook counts from authoritative stat
     "{\n  \"open_count\": 0,\n  \"status\": \"stable\"\n}",
   )
   let state = @test_fixtures.visual_projection_test_state(
-    worker_status=@core.WorkerStatus::Idle,
-    execution_status=@core.TaskExecutionStatus::Completed,
+    worker_status=Idle,
+    execution_status=Completed,
   )
   let spine = write_live_autonomy_spine(
     state,
@@ -35,7 +35,7 @@ async test "live status reconciles stale planbook counts from authoritative stat
     goal_id="watch-sync-deferred",
     tick=15877,
     book_id="research-sync",
-    decision=@core.WatcherDecisionKind::Deferred,
+    decision=Deferred,
     detail="Mayor deferred standing goal because no watcher was currently eligible.",
     next_due_tick=16000,
   )

@@ -12,7 +12,7 @@ fn scene_render_register_book(
   name? : String = "Moonbook / Coding",
   purpose? : String = "Harness engineering for source work.",
   workspace_root? : String = "/workspace/coding",
-  memory_scope? : @core.MemoryScope = @core.MemoryScope::BookPrivate,
+  memory_scope? : @core.MemoryScope = BookPrivate,
 ) -> Unit {
   state.register_book(
     @core.BookRef::new(id~, name~, purpose~, workspace_root~, memory_scope~),
@@ -29,7 +29,7 @@ fn scene_render_register_harness_worker(
       id="claw-harness",
       name="Harness Hound",
       book_id~,
-      role=@core.WorkerRole::Harness,
+      role=Harness,
     ),
   )
 }
@@ -40,7 +40,7 @@ fn scene_render_enqueue_task(
   id~ : String,
   title~ : String,
   prompt~ : String,
-  domain? : @core.WorkDomain = @core.WorkDomain::Coding,
+  domain? : @core.WorkDomain = Coding,
   book_id? : String = "coding",
   required_role? : @core.WorkerRole? = None,
 ) -> Unit {

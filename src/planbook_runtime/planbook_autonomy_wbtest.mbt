@@ -139,8 +139,8 @@ async test "live autonomy includes planbook repair action" {
     ),
   )
   let state = @test_fixtures.visual_projection_test_state(
-    worker_status=@core.WorkerStatus::Idle,
-    execution_status=@core.TaskExecutionStatus::Completed,
+    worker_status=Idle,
+    execution_status=Completed,
   )
   let spine = @live_autonomy_runtime.write_live_autonomy_spine(
     state,

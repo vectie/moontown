@@ -11,7 +11,7 @@ pub fn StandingGoal::new(
   source_policy? : String = "",
   quality_threshold? : Int = 80,
 ) -> StandingGoal {
-  StandingGoal::{
+  {
     id,
     title,
     prompt,
@@ -66,7 +66,7 @@ pub fn WatcherRunRecord::new(
   run_id? : String? = None,
   next_due_tick? : Int = tick,
 ) -> WatcherRunRecord {
-  WatcherRunRecord::{
+  {
     goal_id,
     tick,
     target_book_id,
@@ -90,11 +90,11 @@ pub fn StandingGoal::next_due_after_watcher_decision(
   let cadence = if self.cadence_ticks < 1 { 1 } else { self.cadence_ticks }
   let _ = no_change_streak
   match decision {
-    WatcherDecisionKind::Update => tick + cadence
-    WatcherDecisionKind::NoChange => tick + cadence
-    WatcherDecisionKind::NeedsReview => tick + max_int(1, cadence / 2)
-    WatcherDecisionKind::Failed => tick + max_int(1, cadence / 4)
-    WatcherDecisionKind::Deferred => tick + cadence
+    Update => tick + cadence
+    NoChange => tick + cadence
+    NeedsReview => tick + max_int(1, cadence / 2)
+    Failed => tick + max_int(1, cadence / 4)
+    Deferred => tick + cadence
   }
 }
 

@@ -62,10 +62,10 @@ fn selection_body(
           "Select a zone or worker to inspect live state. Use town actions to redirect the simulation.",
         ),
         p(
-          "Packet-ready: \{count_execution_status(executions, @core.TaskExecutionStatus::PacketReady)}",
+          "Packet-ready: \{count_execution_status(executions, PacketReady)}",
         ),
         p(
-          "Imported proposals: \{count_execution_status(executions, @core.TaskExecutionStatus::ProposalImported)}",
+          "Imported proposals: \{count_execution_status(executions, ProposalImported)}",
         ),
         p("Active runs: \{running_execution_count(executions)}"),
         render_worker_roster(dispatch, workers),

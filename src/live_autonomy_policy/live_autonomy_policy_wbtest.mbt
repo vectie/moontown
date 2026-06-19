@@ -4,22 +4,22 @@ test "live autonomy policy counts active workers and transient debt" {
     id="worker-running",
     name="Running",
     book_id="book",
-    role=@core.WorkerRole::Watcher,
-    status=@core.WorkerStatus::Running,
+    role=Watcher,
+    status=Running,
   )
   let idle_worker = @core.WorkerRef::new(
     id="worker-idle",
     name="Idle",
     book_id="book",
-    role=@core.WorkerRole::Watcher,
-    status=@core.WorkerStatus::Idle,
+    role=Watcher,
+    status=Idle,
   )
   let debt_execution = @core.TaskExecutionRecord::new(
     task_id="task-1",
     book_id="book",
     packet_id="packet-1",
     packet_path="packet.json",
-    status=@core.TaskExecutionStatus::Completed,
+    status=Completed,
     summary="deferred",
     output_contract="watch.result.v1",
     assigned_worker_id=Some("worker-running"),

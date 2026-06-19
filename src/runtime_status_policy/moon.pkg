@@ -5,3 +5,5 @@ import {
   "vectie/moontown/scheduler",
   "moonbitlang/core/json",
 }
+
+supported_targets = "native"

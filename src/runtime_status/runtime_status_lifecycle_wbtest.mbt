@@ -6,7 +6,7 @@ test "runtime status summarizes execution lifecycle counts" {
       "task-running",
       "research-moontown",
       "packet-running",
-      @core.TaskExecutionStatus::Running,
+      Running,
       "running",
     ),
   )
@@ -15,7 +15,7 @@ test "runtime status summarizes execution lifecycle counts" {
       "task-review",
       "research-moonbook",
       "packet-review",
-      @core.TaskExecutionStatus::ReviewQueued,
+      ReviewQueued,
       "review",
     ),
   )
@@ -60,7 +60,7 @@ test "runtime status ignores stale duplicate running record for terminal task" {
       "task-dup",
       "research-opc",
       "packet-final",
-      @core.TaskExecutionStatus::ReviewQueued,
+      ReviewQueued,
       "terminal",
     ),
   )
@@ -69,7 +69,7 @@ test "runtime status ignores stale duplicate running record for terminal task" {
       "task-dup",
       "research-opc",
       "packet-running",
-      @core.TaskExecutionStatus::Running,
+      Running,
       "old live snapshot",
     ),
   )
@@ -86,7 +86,7 @@ test "runtime status keeps later duplicate when lifecycle rank ties" {
       "task-dup",
       "research-opc",
       "packet-first",
-      @core.TaskExecutionStatus::Running,
+      Running,
       "first live snapshot",
     ),
   )
@@ -95,7 +95,7 @@ test "runtime status keeps later duplicate when lifecycle rank ties" {
       "task-dup",
       "research-opc",
       "packet-second",
-      @core.TaskExecutionStatus::AwaitingPersistence,
+      AwaitingPersistence,
       "later live snapshot with the same lifecycle rank",
     ),
   )
@@ -112,7 +112,7 @@ test "runtime execution counts use effective execution indexes" {
       "task-one",
       "research-opc",
       "packet-one",
-      @core.TaskExecutionStatus::Running,
+      Running,
       "running",
     ),
   )
@@ -121,7 +121,7 @@ test "runtime execution counts use effective execution indexes" {
       "task-two",
       "research-opc",
       "packet-two",
-      @core.TaskExecutionStatus::Completed,
+      Completed,
       "completed",
     ),
   )
@@ -146,7 +146,7 @@ test "runtime status suppresses superseded standing watch failures" {
       "standing-watch-opc-news-tick-2",
       "research-opc",
       "packet-2",
-      @core.TaskExecutionStatus::Failed,
+      Failed,
       "no eligible worker",
     ),
   )
@@ -155,7 +155,7 @@ test "runtime status suppresses superseded standing watch failures" {
       "standing-watch-opc-news-tick-5",
       "research-opc",
       "packet-5",
-      @core.TaskExecutionStatus::ReviewQueued,
+      ReviewQueued,
       "standing_goal_decision: no_change",
     ),
   )

@@ -6,6 +6,8 @@ import {
   "vectie/moontown/town_synthesis",
 }
 
+supported_targets = "native"
+
 import {
   "moonbitlang/async",
 } for "wbtest"

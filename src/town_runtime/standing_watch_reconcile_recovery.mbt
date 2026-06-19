@@ -15,9 +15,6 @@ async fn reconcile_failed_standing_watch_outputs(
       Some(context) => context
       None => continue
     }
-    if recover_legacy_tick_domain_standing_watch(state, execution) {
-      continue
-    }
     let observed = standing_watch_observed_for_auto_triage(
       context.entry,
       execution,

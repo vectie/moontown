@@ -1,4 +1,16 @@
 ///|
+fn default_moonclaw_root() -> String {
+  match @sys.get_env_var("MOONTOWN_MOONCLAW_ROOT") {
+    Some(root) if !root.is_empty() => root
+    _ =>
+      match @sys.get_env_var("MOONCLAW_ROOT") {
+        Some(root) if !root.is_empty() => root
+        _ => ".moontown/external/moonclaw"
+      }
+  }
+}
+
+///|
 fn moon_command() -> String {
   match @sys.get_env_var("MOON_BIN") {
     Some(value) if !value.is_empty() => value

@@ -72,7 +72,7 @@ fn review_run(
   summary : String,
   generated_at_ms : UInt64,
 ) -> BookQualityReviewRun {
-  BookQualityReviewRun::{
+  {
     book_id,
     packet_path,
     result_path: review_result_path(result_dir, book_id),

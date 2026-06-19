@@ -115,7 +115,7 @@ pub fn EmbeddedMoonclawRuntime::new(
   output_contract? : String? = None,
   authority_scope~ : String,
 ) -> EmbeddedMoonclawRuntime {
-  EmbeddedMoonclawRuntime::{
+  {
     runtime_id,
     display_name,
     role_id,
@@ -152,7 +152,7 @@ pub fn EmbeddedRuntimeHandoff::new(
   output_contract? : String? = None,
   target_role_id~ : String,
 ) -> EmbeddedRuntimeHandoff {
-  EmbeddedRuntimeHandoff::{
+  {
     kind,
     objective,
     scope_summary,

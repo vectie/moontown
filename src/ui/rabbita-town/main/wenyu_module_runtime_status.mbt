@@ -217,7 +217,7 @@ fn module_execution_status_kind(
     Review
   } else if execution_status_needs_attention(status) {
     Alert
-  } else if status == @core.TaskExecutionStatus::Completed {
+  } else if status == Completed {
     Complete
   } else {
     Waiting

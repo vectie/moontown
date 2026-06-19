@@ -13,5 +13,5 @@ test "book-local moonclaw provider manifest entry is stable" {
   assert_true(provider.metadata.args == ["run", "cmd/main", "--"])
   assert_eq(provider.metadata.cwd, moonbook_root)
   assert_eq(provider.metadata.workspace_root, root)
-  assert_true(provider.capabilities.contains("moonbook.bookapi"))
+  assert_true(provider.capabilities.contains("extension.task"))
 }

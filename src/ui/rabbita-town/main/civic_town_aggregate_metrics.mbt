@@ -23,8 +23,8 @@ fn resident_joins_today(model : Model) -> Int {
 fn active_quest_count(model : Model) -> Int {
   let mut count = 0
   for task in tasks_for_model(model) {
-    if task.status == @core.TownTaskStatus::Assigned ||
-      task.status == @core.TownTaskStatus::Running {
+    if task.status == Assigned ||
+      task.status == Running {
       count += 1
     }
   }

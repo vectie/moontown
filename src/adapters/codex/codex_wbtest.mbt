@@ -9,15 +9,12 @@ test "codex acp defaults use one model across target builders" {
 }
 
 ///|
-test "codex moontown args add workspace boundaries after shared model" {
+test "codex moontown args stay inside configured workspace" {
   let args = moontown_args()
   assert_true(args.contains("--model"))
   assert_true(args.contains("gpt-5.5"))
   assert_true(args.contains("--cd"))
-  assert_true(args.contains("/Users/kq/Workspace/moontown"))
-  assert_true(args.contains("--add-dir"))
-  assert_true(args.contains("/Users/kq/Workspace/moonbook"))
-  assert_true(args.contains("/Users/kq/Workspace/moonclaw"))
+  assert_false(args.contains("--add-dir"))
 }
 
 ///|
@@ -26,7 +23,7 @@ test "codex package owns moontown target json" {
   assert_true(target.contains("\"label\":\"Codex Moontown Builder\""))
   assert_true(target.contains("\"model\":\"gpt-5.5\""))
   assert_true(target.contains("\"--model\""))
-  assert_true(target.contains("\"/Users/kq/Workspace/moontown\""))
+  assert_true(target.contains("\"workspace\""))
 }
 
 ///|

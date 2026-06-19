@@ -6,10 +6,10 @@ pub fn local_wenyu_build_execution_record(
   tick? : Int = 0,
 ) -> @core.TaskExecutionRecord {
   let packet_id = "local-\{entry.id}-\{task.id}"
-  let status = if task.kind == "code-patch" {
-    @core.TaskExecutionStatus::ReviewQueued
+  let status : @core.TaskExecutionStatus = if task.kind == "code-patch" {
+    ReviewQueued
   } else {
-    @core.TaskExecutionStatus::Completed
+    Completed
   }
   @core.TaskExecutionRecord::new(
     task_id=task.id,

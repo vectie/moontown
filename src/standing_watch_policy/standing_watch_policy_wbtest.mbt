@@ -103,7 +103,7 @@ test "watcher record execution matching uses concrete run id when present" {
     book_id="research-opc",
     packet_id="packet",
     packet_path="packet.json",
-    status=@core.TaskExecutionStatus::Completed,
+    status=Completed,
     summary="standing_goal_decision: update",
     output_contract="standing-watch-live-snapshot",
     run_id=Some("run-1"),
@@ -112,7 +112,7 @@ test "watcher record execution matching uses concrete run id when present" {
     goal_id="watch-opc",
     tick=1,
     target_book_id="research-opc",
-    decision=@core.WatcherDecisionKind::Update,
+    decision=Update,
     task_id=Some("standing-watch-opc-tick-1"),
     run_id=Some("run-1"),
   )
@@ -120,7 +120,7 @@ test "watcher record execution matching uses concrete run id when present" {
     goal_id="watch-opc",
     tick=1,
     target_book_id="research-opc",
-    decision=@core.WatcherDecisionKind::Update,
+    decision=Update,
     task_id=Some("standing-watch-opc-tick-1"),
     run_id=Some("run-old"),
   )
@@ -131,25 +131,12 @@ test "watcher record execution matching uses concrete run id when present" {
 ///|
 test "terminal watcher decision maps to execution status" {
   assert_eq(
-    task_status_for_terminal_watcher_decision(
-      @core.WatcherDecisionKind::NeedsReview,
-    ),
-    @core.TaskExecutionStatus::ReviewQueued,
+    task_status_for_terminal_watcher_decision(NeedsReview),
+    ReviewQueued,
   )
-  assert_eq(
-    task_status_for_terminal_watcher_decision(@core.WatcherDecisionKind::Failed),
-    @core.TaskExecutionStatus::Failed,
-  )
-  assert_eq(
-    task_status_for_terminal_watcher_decision(@core.WatcherDecisionKind::Update),
-    @core.TaskExecutionStatus::Completed,
-  )
-  assert_eq(
-    task_status_for_terminal_watcher_decision(
-      @core.WatcherDecisionKind::NoChange,
-    ),
-    @core.TaskExecutionStatus::Completed,
-  )
+  assert_eq(task_status_for_terminal_watcher_decision(Failed), Failed)
+  assert_eq(task_status_for_terminal_watcher_decision(Update), Completed)
+  assert_eq(task_status_for_terminal_watcher_decision(NoChange), Completed)
 }
 
 ///|
@@ -159,7 +146,7 @@ test "standing watch event shape comes from policy" {
       goal_id="watch-opc",
       tick=7,
       target_book_id="research-opc",
-      decision=@core.WatcherDecisionKind::Update,
+      decision=Update,
       detail="standing_goal_decision: update",
       task_id=Some("standing-watch-opc-tick-7"),
       run_id=Some("run-7"),
@@ -180,7 +167,7 @@ test "standing watch event shape comes from policy" {
       book_id="research-opc",
       packet_id="packet-8",
       packet_path="packet-8.json",
-      status=@core.TaskExecutionStatus::Completed,
+      status=Completed,
       summary="done",
       output_contract="standing-watch-live-snapshot",
       run_id=Some("run-8"),
@@ -225,7 +212,7 @@ test "empty review completion summary reuses strict no-change accounting" {
     book_id="research-opc",
     packet_id="packet",
     packet_path="packet.json",
-    status=@core.TaskExecutionStatus::ReviewQueued,
+    status=ReviewQueued,
     summary="Workflow completed without a decision marker.",
     output_contract="standing-watch-live-snapshot",
     requires_review=true,

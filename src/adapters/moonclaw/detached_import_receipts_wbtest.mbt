@@ -1,12 +1,8 @@
 ///|
 test "pending and running MoonClaw runs are orphan detectable" {
-  assert_true(
-    orphan_detectable_run_status(@core.TaskExecutionStatus::RunConfirmed),
-  )
-  assert_true(orphan_detectable_run_status(@core.TaskExecutionStatus::Running))
-  assert_true(
-    !orphan_detectable_run_status(@core.TaskExecutionStatus::Completed),
-  )
+  assert_true(orphan_detectable_run_status(RunConfirmed))
+  assert_true(orphan_detectable_run_status(Running))
+  assert_true(!orphan_detectable_run_status(Completed))
 }
 
 ///|
@@ -44,7 +40,7 @@ async test "detached import oversized receipt is failed without parsing" {
   let receipt = detached_import_receipt("packet", packet_path)
   assert_true(receipt is Some(_))
   let loaded = receipt.unwrap()
-  assert_eq(loaded.status, @core.TaskExecutionStatus::Failed)
+  assert_eq(loaded.status, Failed)
   assert_true(loaded.summary.contains("oversized receipt"))
 }
 
@@ -81,7 +77,7 @@ test "detached import startup stream ignores nested failed prompt and lock line"
     "packet",
     "/tmp/packet.json",
     (
-      $|Blocking waiting for file lock /Users/kq/Workspace/moontown/_build/.moon-lock ...
+      $|Blocking waiting for file lock /workspace/moontown/_build/.moon-lock ...
       $|{"level":"Info","pid":10357,"msg":"No model specified, auto-detecting...","tag":"Model"}
       $|{"level":"Info","pid":10357,"msg":"Received event","tag":"job-analysis","event":{"desc":{"msg":"SystemPromptSet","prompt":"If the step failed: explain missing inputs without inventing facts."}}}
       $|{"level":"Info","pid":10357,"msg":"Received event","tag":"job-analysis","event":{"desc":{"msg":"PostToolCall","result":{"status":127,"stderr":"sh: rg: command not found"}}}}
@@ -92,14 +88,8 @@ test "detached import startup stream ignores nested failed prompt and lock line"
 
 ///|
 test "inline detached import receipt status maps succeeded to completed" {
-  assert_eq(
-    import_receipt_status(Some("run-1"), Some("Succeeded")),
-    @core.TaskExecutionStatus::Completed,
-  )
-  assert_eq(
-    import_receipt_status(Some("run-1"), Some("Pending")),
-    @core.TaskExecutionStatus::RunConfirmed,
-  )
+  assert_eq(import_receipt_status(Some("run-1"), Some("Succeeded")), Completed)
+  assert_eq(import_receipt_status(Some("run-1"), Some("Pending")), RunConfirmed)
 }
 
 ///|
@@ -109,6 +99,6 @@ test "detached import receipt surfaces plain text moonclaw failure" {
   )
   assert_true(receipt is Some(_))
   let loaded = receipt.unwrap()
-  assert_eq(loaded.status, @core.TaskExecutionStatus::Failed)
+  assert_eq(loaded.status, Failed)
   assert_true(loaded.summary.contains("Missing field workflows"))
 }

@@ -46,7 +46,7 @@ async fn record_completed_standing_watch_cycle(
   let decision = @standing_watch_policy.standing_watch_decision_from_execution(
     execution,
   )
-  let next_no_change_streak = if decision == @core.WatcherDecisionKind::NoChange {
+  let next_no_change_streak = if decision == NoChange {
     previous_no_change_streak + 1
   } else {
     0

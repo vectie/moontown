@@ -29,7 +29,7 @@ async test "generic book-quality repair review stays in autonomous retry loop" {
   let current = @core.find_execution(
     state, "standing-book-quality-repair-wenyu-resident-twins-tick-20",
   ).unwrap()
-  assert_eq(current.status, @core.TaskExecutionStatus::Completed)
+  assert_eq(current.status, Completed)
   assert_eq(current.result_decision, "repair-still-open")
   assert_false(current.requires_review)
   assert_true(current.summary.contains("keeper_auto_triage: repair_still_open"))

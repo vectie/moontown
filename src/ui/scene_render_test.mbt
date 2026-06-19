@@ -8,7 +8,7 @@ fn sample_dashboard_model() -> @ui.DashboardModel {
     id="task-town-layer",
     title="Implement town orchestration layer",
     prompt="Route coding work to the right claw worker.",
-    required_role=Some(@core.WorkerRole::Harness),
+    required_role=Some(Harness),
   )
   scene_render_dashboard(state)
 }
@@ -80,13 +80,13 @@ test "dashboard book house activity summarizes counts and highest priority stage
     id="task-research",
     title="Research pipeline",
     prompt="Research and analyze the result.",
-    domain=@core.WorkDomain::Research,
+    domain=Research,
   )
   scene_render_register_execution(
     state,
     task_id="task-research",
     packet_id="packet-research",
-    status=@core.TaskExecutionStatus::Running,
+    status=Running,
     summary="running synthesis",
     output_contract="report",
   )
@@ -106,7 +106,7 @@ test "dashboard stage rules classify watch tasks but preserve bootstrap priority
     id="standing-watch-opc",
     title="Standing watch OPC",
     prompt="Check watcher sources.",
-    domain=@core.WorkDomain::Research,
+    domain=Research,
   )
   scene_render_enqueue_task(
     state,
@@ -128,7 +128,7 @@ test "dashboard city hall summarizes execution lifecycle buckets" {
     state,
     task_id="task-packet",
     packet_id="packet-ready",
-    status=@core.TaskExecutionStatus::PacketReady,
+    status=PacketReady,
     summary="packet ready",
     output_contract="packet",
   )
@@ -136,7 +136,7 @@ test "dashboard city hall summarizes execution lifecycle buckets" {
     state,
     task_id="task-imported",
     packet_id="packet-imported",
-    status=@core.TaskExecutionStatus::ProposalImported,
+    status=ProposalImported,
     summary="proposal imported",
     output_contract="proposal",
   )
@@ -144,7 +144,7 @@ test "dashboard city hall summarizes execution lifecycle buckets" {
     state,
     task_id="task-running",
     packet_id="packet-running",
-    status=@core.TaskExecutionStatus::Running,
+    status=Running,
     summary="running work",
     output_contract="run",
   )
@@ -152,7 +152,7 @@ test "dashboard city hall summarizes execution lifecycle buckets" {
     state,
     task_id="task-review",
     packet_id="packet-review",
-    status=@core.TaskExecutionStatus::ReviewQueued,
+    status=ReviewQueued,
     summary="review queued",
     output_contract="review",
   )
@@ -160,7 +160,7 @@ test "dashboard city hall summarizes execution lifecycle buckets" {
     state,
     task_id="task-complete",
     packet_id="packet-complete",
-    status=@core.TaskExecutionStatus::Completed,
+    status=Completed,
     summary="done",
     output_contract="done",
   )

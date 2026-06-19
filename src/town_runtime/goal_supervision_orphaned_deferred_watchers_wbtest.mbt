@@ -22,7 +22,7 @@ async test "orphaned deferred watcher record rehydrates detached import supervis
       goal_id=goal.id,
       tick=50,
       target_book_id="research-opc",
-      decision=@core.WatcherDecisionKind::Deferred,
+      decision=Deferred,
       detail="Launched detached MoonClaw import for keeper-research-opc-standing-watch-opc-news-tick-50-abc; waiting for receipt \{receipt_path}.",
       task_id=Some("standing-watch-opc-news-tick-50"),
       next_due_tick=110,
@@ -33,7 +33,7 @@ async test "orphaned deferred watcher record rehydrates detached import supervis
   state.register_book(research_opc_book_ref(root, purpose="watch opc"))
   rehydrate_orphaned_deferred_watcher_records(state, snapshot_path, [goal], 51)
   let execution = @core.find_execution(state, "standing-watch-opc-news-tick-50").unwrap()
-  assert_eq(execution.status, @core.TaskExecutionStatus::RunConfirmed)
+  assert_eq(execution.status, RunConfirmed)
   assert_eq(
     execution.packet_id,
     "keeper-research-opc-standing-watch-opc-news-tick-50-abc",
@@ -70,7 +70,7 @@ async test "orphaned deferred watcher record ignores already superseded terminal
       goal_id=goal.id,
       tick=50,
       target_book_id="research-opc",
-      decision=@core.WatcherDecisionKind::Deferred,
+      decision=Deferred,
       detail="Launched detached MoonClaw import; waiting for receipt \{receipt_path}.",
       task_id=Some("standing-watch-opc-news-tick-50"),
       next_due_tick=110,
@@ -83,7 +83,7 @@ async test "orphaned deferred watcher record ignores already superseded terminal
       goal_id=goal.id,
       tick=50,
       target_book_id="research-opc",
-      decision=@core.WatcherDecisionKind::NoChange,
+      decision=NoChange,
       detail="standing_goal_decision: no_change",
       task_id=Some("standing-watch-opc-news-tick-50"),
       run_id=Some("run-detached"),

@@ -18,7 +18,7 @@ fn render_module_civic_health(
           p(class="module-book-summary", civic_health_detail(health)),
           render_protocol_history_group(health),
           div(class="module-book-metric-grid", [
-            render_projection_metric(ProjectionMetricSnapshot::{
+            render_projection_metric({
               label: "Operable",
               value: if health.operable {
                 "yes"
@@ -32,7 +32,7 @@ fn render_module_civic_health(
                 "alert"
               },
             }),
-            render_projection_metric(ProjectionMetricSnapshot::{
+            render_projection_metric({
               label: "Result Proof",
               value: if health.proven_by_result {
                 "present"
@@ -46,13 +46,13 @@ fn render_module_civic_health(
                 "review"
               },
             }),
-            render_projection_metric(ProjectionMetricSnapshot::{
+            render_projection_metric({
               label: "Mode",
               value: health.module_mode,
               note: health.skill_mode,
               tone: "info",
             }),
-            render_projection_metric(ProjectionMetricSnapshot::{
+            render_projection_metric({
               label: "Protocol",
               value: health.protocol_status,
               note: "in \{health.protocol_inbox_count} / red \{health.protocol_reduction_count} / out \{health.protocol_outbox_count}",
@@ -62,7 +62,7 @@ fn render_module_civic_health(
                 "review"
               },
             }),
-            render_projection_metric(ProjectionMetricSnapshot::{
+            render_projection_metric({
               label: "Review",
               value: "\{health.latest_review_items}",
               note: "items",

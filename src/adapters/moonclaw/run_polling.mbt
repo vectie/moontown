@@ -16,17 +16,17 @@ pub async fn poll_run(
       let orphaned = detect_orphan &&
         orphan_detectable_run_status(indexed_status) &&
         !moonclaw_run_process_alive(run.id)
-      let status = if orphaned {
-        @core.TaskExecutionStatus::Failed
+      let status : @core.TaskExecutionStatus = if orphaned {
+        Failed
       } else {
         indexed_status
       }
       let result_text = moonclaw_result_payload_text(result_payload)
       let result_decision = guarded_moonclaw_result_decision(
         parse_json_string(result_payload, "result_decision").unwrap_or(
-          if status == @core.TaskExecutionStatus::Failed {
+          if status == Failed {
             "blocked"
-          } else if status == @core.TaskExecutionStatus::Completed {
+          } else if status == Completed {
             "accepted"
           } else {
             "pending"
@@ -51,7 +51,7 @@ pub async fn poll_run(
         result_decision,
         requires_review,
         notify_town: parse_json_bool(result_payload, "notify_town").unwrap_or(
-          status == @core.TaskExecutionStatus::Completed,
+          status == Completed,
         ),
       }
     }
@@ -59,7 +59,7 @@ pub async fn poll_run(
       {
         task_id,
         run_id,
-        status: @core.TaskExecutionStatus::Running,
+        status: Running,
         summary: "Run \{run_id} has not been indexed in MoonClaw yet.",
         memory_candidates: [],
         result_decision: "pending",
@@ -112,8 +112,7 @@ fn moonclaw_result_text_requires_review(result_text : String) -> Bool {
 
 ///|
 fn orphan_detectable_run_status(status : @core.TaskExecutionStatus) -> Bool {
-  status == @core.TaskExecutionStatus::RunConfirmed ||
-  status == @core.TaskExecutionStatus::Running
+  status == RunConfirmed || status == Running
 }
 
 ///|

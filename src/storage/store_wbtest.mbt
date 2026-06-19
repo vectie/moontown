@@ -8,7 +8,7 @@ async test "watcher ledger appends and reads jsonl records" {
       goal_id="watch-opc-news",
       tick=1,
       target_book_id="research-opc",
-      decision=@core.WatcherDecisionKind::NoChange,
+      decision=NoChange,
       detail="no useful delta",
       next_due_tick=9,
     ),
@@ -19,15 +19,15 @@ async test "watcher ledger appends and reads jsonl records" {
       goal_id="watch-opc-news",
       tick=9,
       target_book_id="research-opc",
-      decision=@core.WatcherDecisionKind::Update,
+      decision=Update,
       detail="new source persisted",
       next_due_tick=17,
     ),
   )
   let records = load_watcher_run_records_file(path)
   assert_eq(records.length(), 2)
-  assert_eq(records[0].decision, @core.WatcherDecisionKind::NoChange)
-  assert_eq(records[1].decision, @core.WatcherDecisionKind::Update)
+  assert_eq(records[0].decision, NoChange)
+  assert_eq(records[1].decision, Update)
   assert_eq(consecutive_no_change_count(records), 0)
   assert_eq(consecutive_no_change_count([records[0]]), 1)
 }
@@ -56,7 +56,7 @@ async test "watcher ledger derives snapshot-relative directory and appends by go
       goal_id~,
       tick=3,
       target_book_id="research-opc",
-      decision=@core.WatcherDecisionKind::NoChange,
+      decision=NoChange,
       detail="no useful delta",
       next_due_tick=63,
     ),

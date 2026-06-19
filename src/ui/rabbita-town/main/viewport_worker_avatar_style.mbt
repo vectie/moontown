@@ -123,11 +123,11 @@ fn worker_avatar_initial_from_token(
 ///|
 fn worker_status_class(status : @core.WorkerStatus) -> String {
   match status {
-    @core.WorkerStatus::Running => "worker-running"
-    @core.WorkerStatus::Waiting => "worker-waiting"
-    @core.WorkerStatus::Idle => "worker-idle"
-    @core.WorkerStatus::Blocked => "worker-blocked"
-    @core.WorkerStatus::Offline => "worker-offline"
+    Running => "worker-running"
+    Waiting => "worker-waiting"
+    Idle => "worker-idle"
+    Blocked => "worker-blocked"
+    Offline => "worker-offline"
   }
 }
 

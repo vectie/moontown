@@ -16,7 +16,7 @@ pub fn wenyu_build_review_prompt_template() -> String {
   [
     "Review the build output for ${proposal.title}.",
     wenyu_build_review_workspace_rule(),
-    "Verify artifacts in that source book workspace and verify repository paths under `/Users/kq/Workspace/moontown`.",
+    "Verify artifacts in that source book workspace and verify repository paths under the configured source checkout.",
     wenyu_build_review_task_rules().join(" "),
     "Classify the outcome as implemented, prompt-ready, or blocked with exact reasons.",
     "Do not report missing artifacts until you checked the source book workspace and repository absolute paths.",

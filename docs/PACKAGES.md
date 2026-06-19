@@ -191,15 +191,15 @@ Current status:
 - records active standing goal ids in daemon state
 - owns current daemon scheduled-job vocabulary such as `civic-pattern`,
   `civic-service`, `book-quality`, and `book-template-request`
-- drops retired persisted civic-salon jobs during daemon job merge without
-  exposing legacy salon ids or kinds as public API
+- preserves configured jobs during daemon job merge without exposing
+  scenario-specific ids or kinds as public API
 
 Boundary:
 
 - runtime packages may ask whether a job is a current civic communication,
   book-quality, template-request, projection, or health job.
-- runtime packages should not branch on retired `run-civic-salons` or
-  `civic-salon` identifiers; those are private scheduler cleanup details.
+- runtime packages should not branch on scenario-specific ids or kinds outside
+  the scheduler vocabulary.
 
 ## Standing Watch Policy
 
@@ -220,7 +220,7 @@ Purpose:
 - empty completion `no_change` marker summary contract
 - empty review completion keeper-triage summary contract
 - keeper auto-triage/recovery closure policy, thresholds, and summary wording
-- legacy standing-watch retry-accounting classification rules
+- standing-watch retry-accounting classification rules
 - review-triage predicates for empty completions, repair-goal still-open
   cycles, and superseded review debt
 
@@ -241,7 +241,7 @@ Boundary:
   thresholds, watcher-record matching/status mapping, standing-watch event
   shape/id/related-field construction, live snapshot stale windows, transient dispatch classification, or
   empty-completion `no_change` marker text, empty review completion summary
-  text, legacy retry-accounting predicates, or review-triage predicates.
+  text, retry-accounting predicates, or review-triage predicates.
 - `src/adapters/moonbook` may enrich standing-watch worker context using
   `src/standing_watch_contracts`, but should not hardcode standing-watch skill
   path tables, context-page tables, output-contract lines, or task-kind checks.
@@ -544,7 +544,7 @@ Purpose:
 
 - persisted moonbook catalog
 - book provider implementation
-- book-harness request/result types
+- extension API request/result types
 
 Current persisted file:
 
@@ -644,10 +644,9 @@ Boundary:
   call this helper rather than defining `disable_adaptive` or no-input flags
   locally.
 - `src/moonclaw_policy` owns BookPolicy-shape to MoonClaw keeper-profile
-  overrides. The compatibility book-type/catalog-entry helpers delegate to
-  policy composition and capability introspection first. Adapters consume those
-  helpers instead of duplicating `planbook_repair_worker` or
-  `wenyu_civic_service_worker` routing rules.
+  overrides. Book-type/catalog-entry adapters delegate to policy composition
+  and capability introspection first instead of duplicating
+  `planbook_repair_worker` or `wenyu_civic_service_worker` routing rules.
 - `src/moonclaw_runtime`, `src/adapters/moonclaw`, `src/adapters/moonbook`,
   and `src/book_quality` may consume these helpers when building packets or
   profile metadata.
@@ -704,7 +703,7 @@ Key files:
 Purpose:
 
 - typed `BookPolicy` model
-- canonical legacy book labels used only as compatibility/profile keys
+- canonical book labels used as profile keys
 - canonical source-policy labels such as web-first and book-first
 - catalog-entry classification helpers that map observed book metadata into
   composed policy profiles
@@ -725,7 +724,7 @@ Purpose:
 Boundary:
 
 - `BookPolicy` keeps serialized skill lanes as strings for stable JSON.
-- `src/policy` owns legacy book label strings and source-policy strings.
+- `src/policy` owns canonical book label strings and source-policy strings.
   Downstream packages may consume these constants, but should not duplicate
   literal labels such as `research-book`, `civic-protocol-support`,
   `web-first`, or `book-first`.
@@ -744,7 +743,7 @@ Boundary:
   `catalog_entry_runs_standing_watch(...)` and
   `catalog_entry_runs_research_evidence(...)`, and
   `catalog_entry_runs_civic_protocol(...)`. It should not re-run catalog
-  classification and compare legacy book-type labels locally.
+  classification and compare book-type labels locally.
 - MoonBook adapter routing follows the same rule: existing catalog metadata is
   authoritative first; when an explicit research request names a non-canonical
   book id, the research topic should be derived from the goal/request text and
@@ -817,9 +816,8 @@ Boundary:
 - `src/book_quality` must remain observation-fed: it may accept semantic review
   text and structural facts, but it must not derive snapshot-relative storage
   paths or read review-result files.
-- Legacy book-type labels may be accepted at this boundary while migration
-  continues, but scoring and review context should resolve them through
-  policy profiles/capabilities before deciding required output surfaces or
+- Book-type labels accepted at this boundary must resolve through policy
+  profiles/capabilities before deciding required output surfaces or
   content-specific signal gates.
 - `src/book_quality` must not re-export policy vocabulary such as
   `research_type`, `civic_type`, `web_first_policy`, or `book_first_policy`;

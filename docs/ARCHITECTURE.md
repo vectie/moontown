@@ -6,6 +6,8 @@
 moontown -> moonbook -> moonclaw
 ```
 
+Moontown is more than a scheduler in this stack: it is the coordination layer where MoonBooks communicate, standing goals run, new ideas are surfaced, and reviewable results are routed. See [EXECUTABLE_BOOK_COORDINATION.md](EXECUTABLE_BOOK_COORDINATION.md).
+
 The Wenyu Valley product plan is tracked separately in
 [WENYU_VALLEY_PRD.md](/Users/kq/Workspace/moontown/docs/WENYU_VALLEY_PRD.md).
 That document defines the programmable roadmap for turning the current town
@@ -129,17 +131,17 @@ book owns. The implementation now has a first-class `policy` package:
   decisiveness. It derives the growth-vector view from the composed policy
   without changing the persisted `BookPolicy` JSON schema.
 - [policy/book_policy_catalog.mbt](/Users/kq/Workspace/moontown/src/policy/book_policy_catalog.mbt)
-  owns legacy type labels and catalog classification inputs such as
+  owns canonical book labels and catalog classification inputs such as
   archived/transient and cookbook/planbook/course/research/civic/operational
-  mapping. These labels are migration handles for composed policies, not a
-  second runtime type system.
+  mapping. These labels are stable handles for composed policies, not a second
+  runtime type system.
 - [policy/book_policy_profiles.mbt](/Users/kq/Workspace/moontown/src/policy/book_policy_profiles.mbt)
-  owns the mapping from those migration labels into composed `BookPolicy`
+  owns the mapping from those canonical labels into composed `BookPolicy`
   values and source-policy mode. Book-quality can attach repair actions, but it
   must not rebuild the policy profile map.
 - [book_quality/taxonomy.mbt](/Users/kq/Workspace/moontown/src/book_quality/taxonomy.mbt)
-  exposes the policy-owned legacy labels to book-quality scoring and review
-  callers while the migration away from runtime categories continues.
+  exposes the policy-owned canonical labels to book-quality scoring and review
+  callers.
 - [book_quality/policy_specs.mbt](/Users/kq/Workspace/moontown/src/book_quality/policy_specs.mbt)
   attaches book-quality repair actions to policy-owned profiles for review and
   repair workflows. Its `PolicySpec` wraps `@policy.PolicyProfile` rather than
@@ -183,9 +185,9 @@ book owns. The implementation now has a first-class `policy` package:
   owns concrete template runtime dispatch, request ledger/event file IO,
   request processing, request reconciliation, request status rendering,
   registry rendering, registry file observation, and installer dispatch. Root
-  Moontown may expose CLI-compatible wrapper functions, but it should not keep
-  template lifecycle code in the root package or call runtime side effects
-  through `book_templates/`.
+  Moontown may expose thin command adapters, but it should not keep template
+  lifecycle code in the root package or call runtime side effects through
+  `book_templates/`.
 - [app_tool_book/contracts.mbt](/Users/kq/Workspace/moontown/src/app_tool_book/contracts.mbt)
   owns App ToolBook defaults, required workspace paths, template-copy path
   policy, config/manifest schema construction, catalog-identity-aware config
@@ -257,8 +259,8 @@ book owns. The implementation now has a first-class `policy` package:
   owns town-state-to-visual-projection DTOs and derivation: agent phases,
   routing, behavior/effect labels, building activity summaries, module
   projection rows, grid placement, and projection path policy. Root Moontown may
-  expose compatibility wrappers and provide test fixtures, but visual semantics
-  should not live in the root package.
+  provide command adapters and test fixtures, but visual semantics should not
+  live in the root package.
 - [visual_projection_runtime/](/Users/kq/Workspace/moontown/src/visual_projection_runtime)
   owns visual projection persistence: creating parent directories and writing
   projection JSON beside town snapshots. Runtime packages should call this
@@ -316,10 +318,10 @@ book owns. The implementation now has a first-class `policy` package:
   and step metadata maps. Adapters, runtime packages, and semantic review
   packets consume this package instead of redefining those fields.
 - [moonclaw_runtime/](/Users/kq/Workspace/moontown/src/moonclaw_runtime)
-  owns Moontown-side MoonClaw runtime helpers: compatibility wrappers for
-  packet metadata policy, run result payload lookup, and MoonClaw job store
-  compaction. Root Moontown may expose command-compatible wrappers, but
-  MoonClaw runtime maintenance details should not live as loose root files.
+  owns Moontown-side MoonClaw runtime helpers: packet metadata policy adapters,
+  run result payload lookup, and MoonClaw job store compaction. Root Moontown
+  may expose thin command adapters, but MoonClaw runtime maintenance details
+  should not live as loose root files.
 - [cookbook/](/Users/kq/Workspace/moontown/src/cookbook)
   owns deterministic Cookbook DTOs, manifest/page content, stable-state
   artifact summary accounting, generated-site path policy, and
@@ -388,8 +390,8 @@ pipeline may append their feature-specific filenames under that base, but they
 should not reimplement the fallback rule locally.
 
 The root package must not re-export every policy constructor. Root systems may
-map legacy book labels into a `BookPolicy` while migration continues, but new
-code should import `vectie/moontown/policy` directly.
+map canonical book labels into a `BookPolicy`, but new code should import
+`vectie/moontown/policy` directly.
 
 Book types such as research, course, PlanBook, Cookbook, civic support, and
 operational memory are no longer the intended runtime foundation. They are
@@ -398,8 +400,8 @@ files, quality criteria, and output contracts. Future work should compose or
 override policies instead of adding more hardcoded type branches.
 When code has catalog metadata, it should ask `src/policy` for the book type
 instead of checking storage prefixes such as `research-` or `wenyu-`.
-Prefixes are allowed as legacy naming fallbacks inside `policy/` or as artifact
-slug conventions, but they should not become scattered runtime gates.
+Prefixes are allowed as catalog hints inside `policy/` or as artifact slug
+conventions, but they should not become scattered runtime gates.
 
 Policy extension should use pure capability constructors. For example:
 
@@ -423,16 +425,14 @@ When the caller only has MoonBook catalog metadata, it should use policy-owned
 catalog capability adapters such as `catalog_entry_runs_standing_watch(...)`,
 `catalog_entry_runs_research_evidence(...)`, and
 `catalog_entry_runs_civic_protocol(...)` instead of reclassifying the entry and
-comparing legacy book-type labels locally.
+comparing book-type labels locally.
 
 Default output paths are also policy-owned. Packages such as `book_quality/`
-may expose compatibility helpers like `generated_site_path()`, but those should
+may expose facade helpers like `generated_site_path()`, but those should
 delegate to `policy.default_generated_site_projection_path()` rather than
 redefining the path locally.
-Adapters may still detect legacy external layouts for compatibility. For
-example, the MoonBook adapter can discover older site output locations after a
-build, but its canonical Moontown generated-site path must delegate to the
-policy default.
+Adapters may inspect external layouts, but their canonical Moontown generated
+site path must delegate to the policy default.
 Policy packet metadata is policy-owned too. Producers such as book-quality
 semantic review packets and MoonClaw keeper packets should merge the
 policy-provided context object instead of manually rebuilding `book_type`,
@@ -459,7 +459,7 @@ execute-lane skills bridge information, tend-lane skills bridge recognition,
 and the quality/output contract bridges decisiveness.
 
 This is the current refactor direction. Existing book-quality orchestration
-still lives mostly in the root package, but the legacy label-to-policy map,
+still lives mostly in the root package, but the canonical label-to-policy map,
 catalog string/tag classification policy, path contract helpers, base workspace
 scoring, per-path scoring, typed path-set scoring/wording, scoring/action primitives, public
 audit/review DTOs, context-page selection, static scoring profile required-path
@@ -649,8 +649,7 @@ JSON config entries into package DTOs, but it should not redefine editor
 pipeline record shapes, contract ids, rubric text, stage readiness decisions,
 status Markdown sections, style selection policy, selected-feature readiness
 gates, module placement policy, terrain labeling policy, or style catalog naming
-locally. Root should also avoid compatibility shims over those package APIs;
-callers should use `editor_pipeline/` directly.
+locally. Callers should use `editor_pipeline/` directly.
 
 Book-quality repair standing-goal semantics also belong there: repair goal id
 prefix, id construction, id recognition, cadence, source policy, base prompt
@@ -723,7 +722,7 @@ contract, review-policy, journey, operational-keeper skill,
 summary, focus, and workspace-root inputs and then write the resulting files,
 but it must not redefine the template text or projection schema.
 New systems should start from `BookPolicy` and
-`@book_quality.*` contracts; legacy book-type checks should become package
+`@book_quality.*` contracts; book-type checks should become package
 adapters rather than root APIs. The root package may still perform filesystem
 audits, evaluate file existence through runtime facades, dispatch MoonClaw
 jobs, and bind repair bridge items to Mayor standing goals, but it must not own
@@ -803,8 +802,7 @@ but it should not
 redefine what makes a ToolBook workspace real, how it appears in the catalog,
 what its generated/status pages look like, how its watch loop is described, how
 no-change/update/deferred/review decisions are inferred from MoonBook/MoonClaw
-output, or which terminal watcher record is preferred. Root should also avoid
-default/config/manifest compatibility shims; callers should use
+output, or which terminal watcher record is preferred. Callers should use
 `app_tool_book/` for pure policy values, `app_tool_book_runtime/` for runtime
 materialization, and `standing_watch_policy/`/`runtime_error_policy/` for shared
 watch-loop semantics.
@@ -933,7 +931,7 @@ It should not hold town-global authority and should not run arbitrary
 tool-heavy execution directly.
 
 In the current repo, `moontown` now prepares real keeper proposal packets using
-book-harness-shaped context from the moonbook adapter. The actual keeper
+extension-API-shaped context from the moonbook adapter. The actual keeper
 implementation still belongs on the `moonbook` side. MoonBook now provides a
 native PlanBook skill plus `wiki_planbook_controller` and
 `wiki_planbook_worker` extension profiles so code-planning books do not fall
@@ -965,7 +963,7 @@ the target book lacks a watcher slot.
 
 Worker provisioning policy belongs to `roles`, not to `town_runtime`.
 `roles/worker_provisioning.mbt` defines built-in worker personas, book-local
-watcher lanes, generic book harness/specialist/reviewer lanes, and civic
+watcher lanes, generic extension API/specialist/reviewer lanes, and civic
 service worker envelopes. `town_runtime` only consumes the returned
 `WorkerRef` values and registers missing workers. This keeps runtime
 orchestration separate from role/persona design, and prevents civic capability

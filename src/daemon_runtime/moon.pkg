@@ -16,3 +16,5 @@ import {
   "vectie/moontown/storage",
   "vectie/moontown/support",
 }
+
+supported_targets = "native"

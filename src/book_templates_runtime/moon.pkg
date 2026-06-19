@@ -11,6 +11,8 @@ import {
   "vectie/moontown/storage",
 }
 
+supported_targets = "native"
+
 import {
   "moonbitlang/async",
   "vectie/moontown/app_tool_book",

@@ -66,7 +66,7 @@ pub fn review_run_ledger_with_appended_run(
     }
   }
   runs.push(run)
-  BookQualityReviewRunLedger::{ runs, }
+  { runs, }
 }
 
 ///|
@@ -92,5 +92,5 @@ pub fn review_run_ledger_to_text(ledger : BookQualityReviewRunLedger) -> String 
 
 ///|
 pub fn empty_review_run_ledger() -> BookQualityReviewRunLedger {
-  BookQualityReviewRunLedger::{ runs: [] }
+  { runs: [] }
 }

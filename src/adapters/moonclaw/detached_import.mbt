@@ -2,7 +2,7 @@
 pub async fn import_packet_detached(
   packet : ExternalProposalPacket,
   packet_path : String,
-  moonclaw_root? : String = "../moonclaw",
+  moonclaw_root? : String = default_moonclaw_root(),
   home? : String = default_moonclaw_home(),
   cwd? : String = ".",
   confirm? : Bool = false,
@@ -29,7 +29,7 @@ pub async fn import_packet_detached(
     packet_path: resolved_packet_path,
     proposal_id: "detached-\{packet.packet_id}",
     run_id: None,
-    status: @core.TaskExecutionStatus::ProposalImported,
+    status: ProposalImported,
     command: "\{command} > \{receipt_path} 2> \{stderr_path}",
     summary: "Launched detached MoonClaw import for \{packet.packet_id}; waiting for receipt \{receipt_path}.",
   }
@@ -49,7 +49,7 @@ pub async fn detached_import_receipt(
         packet_path: resolved_packet_path,
         proposal_id: "proposal-\{packet_id}",
         run_id: None,
-        status: @core.TaskExecutionStatus::Failed,
+        status: Failed,
         command: "detached MoonClaw import oversized receipt \{receipt_path}",
         summary: "Detached MoonClaw import produced an oversized receipt for \{packet_id} (\{size} bytes); treating it as failed operational output instead of parsing daemon stdout as JSON.",
       })
@@ -80,7 +80,7 @@ pub async fn detached_import_receipt(
     run_id,
     status: receipt_status,
     command: "detached MoonClaw import receipt \{receipt_path}",
-    summary: if receipt_status == @core.TaskExecutionStatus::Completed {
+    summary: if receipt_status == Completed {
       "Detached MoonClaw import completed for \{packet_id}; inline run finished."
     } else if run_id is Some(run_id) {
       "Detached MoonClaw import completed for \{packet_id}; run \{run_id} is ready for supervision."

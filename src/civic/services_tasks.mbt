@@ -7,7 +7,7 @@ pub fn wenyu_civic_book_entry(
     name="Wenyu Valley / \{service.title}",
     purpose=service.purpose,
     workspace_root=@moonbook.default_workspace_root(service.book_id),
-    memory_scope=@core.MemoryScope::BookPrivate,
+    memory_scope=BookPrivate,
     tags=[
       "wenyu-valley",
       "civic-service",

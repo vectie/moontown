@@ -9,7 +9,7 @@ async fn terminal_watcher_record_for_execution(
   for record in records {
     if record.task_id == Some(execution.task_id) &&
       @standing_watch_policy.watcher_record_matches_execution(record, execution) &&
-      record.decision != @core.WatcherDecisionKind::Deferred {
+      record.decision != Deferred {
       found = Some(record)
     }
   }

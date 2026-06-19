@@ -4,3 +4,5 @@ import {
   "vectie/moontown/policy",
   "vectie/moontown/support",
 }
+
+supported_targets = "native"

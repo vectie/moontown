@@ -94,7 +94,7 @@ pub fn consecutive_no_change_count(
 ) -> Int {
   let mut count = 0
   for index = records.length(); index > 0; index = index - 1 {
-    if records[index - 1].decision == @core.WatcherDecisionKind::NoChange {
+    if records[index - 1].decision == NoChange {
       count += 1
     } else {
       break

@@ -25,7 +25,7 @@ pub fn standing_watch_needs_review_with_zero_material_delta(
   execution : @core.TaskExecutionRecord,
   decision : @core.WatcherDecisionKind,
 ) -> Bool {
-  decision == @core.WatcherDecisionKind::NeedsReview &&
+  decision == NeedsReview &&
   standing_watch_execution_has_zero_material_delta(execution)
 }
 
@@ -65,12 +65,10 @@ pub fn standing_watch_cycle_supersedes_review(
   execution : @core.TaskExecutionRecord,
 ) -> Bool {
   match execution.status {
-    @core.TaskExecutionStatus::ReviewQueued => true
-    @core.TaskExecutionStatus::Completed => {
+    ReviewQueued => true
+    Completed => {
       let decision = standing_watch_decision_from_execution(execution)
-      decision == @core.WatcherDecisionKind::NoChange ||
-      decision == @core.WatcherDecisionKind::Update ||
-      decision == @core.WatcherDecisionKind::Deferred
+      decision == NoChange || decision == Update || decision == Deferred
     }
     _ => false
   }

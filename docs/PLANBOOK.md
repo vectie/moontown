@@ -73,7 +73,7 @@ as a new hardcoded book type.
 The policy model lives in the dedicated
 [policy](/Users/kq/Workspace/moontown/src/policy) package. New plans should import
 and compose that package directly. Root-level code may contain adapters from
-legacy labels to policy values, but it should not grow a parallel policy API.
+canonical labels to policy values, but it should not grow a parallel policy API.
 The same package owns the executable loop description through
 `loop_plan(policy)` and `loop_markdown(policy)`: read the policy, execute
 execute-lane skills, record results under the output contract, run tend-lane
@@ -81,7 +81,7 @@ skills, and evaluate health. Future repair plans should reference that API
 instead of writing their own loop sequence into prompt text, review criteria, or
 status pages.
 
-The mapping from policy-owned legacy labels such as `research-book`,
+The mapping from policy-owned canonical labels such as `research-book`,
 `course-book`, and `civic-protocol-support` into composed `BookPolicy` values
 belongs in `policy/book_policy_profiles.mbt`. The book-quality migration
 adapter lives in the dedicated
@@ -95,7 +95,7 @@ Book-quality may expose facade helpers for its scoring callers, but future
 plans should change classification in `policy/` first. When catalog metadata is
 available, plans should require code to call policy classification instead of
 branching directly on storage prefixes like `research-` or `wenyu-`; those
-prefixes are compatibility and slug conventions, not the architecture. It also owns
+prefixes are catalog hints and slug conventions, not the architecture. It also owns
 book-quality path contract helpers such as
 workspace path composition, wiki index path, projection state path, generated
 site path, and review result path. It owns base workspace, per-path, and typed
@@ -631,7 +631,7 @@ social logic directly in the daemon or viewport.
 The same rule applies to scenario data. `CivicCommunicationScenario`,
 `CivicCommunicationIdea`, `CivicCommunicationMetric`, participant records, home-return records,
 and reduction-mode vocabulary are civic protocol DTOs. Root code may keep thin
-facade aliases for compatibility, but new durable data fields should be added
+command-facing aliases, but new durable data fields should be added
 inside `civic/` first.
 
 Scenario policy is civic-owned too. Pattern id fallback, pattern-label
@@ -1034,9 +1034,8 @@ files, compute evidence paths, load module JSON, convert config entries into
 package DTOs, and dispatch workers, but future plans must not add a second
 root-local editor record shape, stage readiness policy, status renderer, rubric,
 selected-style policy, selected-feature readiness gates, module-placement
-policy, terrain-labeling policy, or style catalog. Root should also avoid
-compatibility wrappers over those package APIs; PlanBook/editor callers should
-use `editor_pipeline/` directly.
+policy, terrain-labeling policy, or style catalog. PlanBook/editor callers
+should use `editor_pipeline/` directly.
 
 For a source patch, accepted reconciliation also requires a
 `planbook.repair.patch_receipt.v1` receipt. The receipt is the durable boundary

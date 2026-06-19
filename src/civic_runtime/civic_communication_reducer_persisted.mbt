@@ -12,12 +12,12 @@ async fn persisted_civic_communication_reduction(
     load_persisted_civic_communication_reducer_output(scenario, workspace_base) {
     Some(loaded) => {
       let ideas = loaded
-      CivicCommunicationReductionResult::{
+      {
         ideas,
         status: if ideas.length() > 0 {
-          @core.TaskExecutionStatus::Completed
+          Completed
         } else {
-          @core.TaskExecutionStatus::Failed
+          Failed
         },
         summary: if ideas.length() > 0 {
           "Persisted reducer replayed \{ideas.length()} prior MoonClaw idea(s) for projection refresh of `\{round_id}`."
@@ -35,7 +35,7 @@ async fn persisted_civic_communication_reduction(
     None =>
       {
         ideas: [],
-        status: @core.TaskExecutionStatus::Failed,
+        status: Failed,
         summary: "No persisted civic communication reducer output found at `\{@civic.civic_reducer_output_relative_path()}`; refresh skipped instead of falling back to template seed ideas.",
         packet_id: None,
         packet_path: None,

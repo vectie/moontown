@@ -30,11 +30,7 @@ fn dashboard_execution_status_running_like(
   status : @core.TaskExecutionStatus,
 ) -> Bool {
   match status {
-    @core.TaskExecutionStatus::RunConfirmed
-    | @core.TaskExecutionStatus::Running
-    | @core.TaskExecutionStatus::AwaitingPersistence
-    | @core.TaskExecutionStatus::ReviewQueued
-    | @core.TaskExecutionStatus::Stale => true
+    RunConfirmed | Running | AwaitingPersistence | ReviewQueued | Stale => true
     _ => false
   }
 }

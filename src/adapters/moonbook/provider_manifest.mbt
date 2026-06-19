@@ -20,12 +20,10 @@ fn moonbook_task_provider_manifest_entry(
 ) -> BookTaskProviderManifestEntry {
   {
     name: "moonbook",
-    title: "MoonBook Book Harness",
-    description: "MoonBook provider-task bridge for domain-local workspace logic.",
+    title: "MoonBook Extension API",
+    description: "MoonBook provider runtime boundary for domain-local book logic.",
     kind: "task-provider",
-    capabilities: [
-      "provider", "extension", "provider.task", "extension.task", "bookapi", "moonbook.bookapi",
-    ],
+    capabilities: ["provider", "extension", "provider.task", "extension.task"],
     metadata: {
       command: "moon",
       args: ["run", "cmd/main", "--"],

@@ -5,13 +5,12 @@ pub fn standing_watch_decision_from_execution(
   let summary = execution.summary.to_lower()
   let marker_decision = standing_watch_marker_decision(summary)
   match execution.status {
-    @core.TaskExecutionStatus::Failed | @core.TaskExecutionStatus::Stale =>
-      @core.WatcherDecisionKind::Failed
-    @core.TaskExecutionStatus::ReviewQueued =>
+    Failed | Stale => Failed
+    ReviewQueued =>
       standing_watch_review_or_marker_decision(execution, marker_decision)
-    @core.TaskExecutionStatus::Completed =>
+    Completed =>
       standing_watch_review_or_marker_decision(execution, marker_decision)
-    _ => @core.WatcherDecisionKind::Deferred
+    _ => Deferred
   }
 }
 
@@ -22,20 +21,20 @@ fn standing_watch_review_or_marker_decision(
 ) -> @core.WatcherDecisionKind {
   if marker_decision is None &&
     standing_watch_orphaned_running_failure_summary(execution.summary) {
-    return @core.WatcherDecisionKind::Deferred
+    return Deferred
   }
   if standing_watch_operational_no_change_summary(execution.summary) {
-    return @core.WatcherDecisionKind::NoChange
+    return NoChange
   }
   match marker_decision {
-    Some(@core.WatcherDecisionKind::NeedsReview) =>
+    Some(NeedsReview) =>
       if standing_watch_infrastructure_failure_summary(execution.summary) &&
         standing_watch_summary_has_zero_material_delta(execution.summary) {
-        @core.WatcherDecisionKind::Failed
+        Failed
       } else {
-        @core.WatcherDecisionKind::NeedsReview
+        NeedsReview
       }
     Some(decision) => decision
-    None => @core.WatcherDecisionKind::NeedsReview
+    None => NeedsReview
   }
 }

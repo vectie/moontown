@@ -29,7 +29,7 @@ async test "generic standing watch review closes as no change" {
   let current = @core.find_execution(
     state, "standing-watch-embodied-robotics-tick-18142",
   ).unwrap()
-  assert_eq(current.status, @core.TaskExecutionStatus::Completed)
+  assert_eq(current.status, Completed)
   assert_eq(current.result_decision, "NoChange")
   assert_false(current.requires_review)
   assert_true(

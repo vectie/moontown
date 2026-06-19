@@ -5,8 +5,8 @@ async test "live autonomy surfaces transient infrastructure debt separately" {
   )
   let snapshot_path = workspace.snapshot_path
   let state = @test_fixtures.visual_projection_test_state(
-    worker_status=@core.WorkerStatus::Idle,
-    execution_status=@core.TaskExecutionStatus::Completed,
+    worker_status=Idle,
+    execution_status=Completed,
   )
   state.register_execution(
     live_autonomy_execution_fixture(
@@ -14,7 +14,7 @@ async test "live autonomy surfaces transient infrastructure debt separately" {
       book_id="research-opc",
       packet_id="packet-transient",
       packet_path="/tmp/packet-transient.json",
-      status=@core.TaskExecutionStatus::Completed,
+      status=Completed,
       summary="import timed out",
       output_contract="standing-watch",
       result_decision="deferred-transient-infrastructure",

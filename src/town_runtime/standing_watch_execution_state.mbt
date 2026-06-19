@@ -6,13 +6,13 @@ fn stabilize_deferred_standing_watch_execution(
   let decision = @standing_watch_policy.standing_watch_recovery_decision_from_execution(
     execution,
   )
-  if decision == @core.WatcherDecisionKind::Deferred &&
+  if decision == Deferred &&
     @standing_watch_policy.standing_watch_infrastructure_failure_summary(
       execution.summary,
     ) {
     copy_execution_with(
       execution,
-      status=@core.TaskExecutionStatus::Completed,
+      status=Completed,
       summary="\{execution.summary}\nkeeper_auto_triage: deferred\nkeeper_auto_triage_reason: transient standing-watch infrastructure failure is retry accounting, not durable review debt.",
       heartbeat_tick=tick,
       next_retry_tick=None,
@@ -44,7 +44,7 @@ fn running_standing_watch_execution(
     packet_path~,
     proposal_id=None,
     run_id=None,
-    status=@core.TaskExecutionStatus::Running,
+    status=Running,
     summary="Mayor assigned \{task.id} for `\{task.title}`; MoonClaw watcher is searching and MoonBook will persist only useful deltas for `\{entry.id}`.",
     output_contract="standing-watch-live-snapshot",
     context_pages=task.target_pages,
@@ -79,7 +79,7 @@ fn transient_deferred_standing_watch_execution_record(
     book_id=entry.id,
     packet_id~,
     packet_path~,
-    status=@core.TaskExecutionStatus::Completed,
+    status=Completed,
     summary="\{detail}\nstanding_goal_decision: deferred\nstanding_watch_transient_retry: true\nnext_check_hint: immediate",
     output_contract="standing-watch-live-snapshot",
     assigned_worker_id~,
@@ -101,7 +101,7 @@ async fn publish_running_standing_watch_snapshot(
   snapshot_path : String,
 ) -> Unit {
   match (decision, worker_id) {
-    (@dispatch.RouteDecision::Assigned(_), Some(worker_id)) => {
+    (Assigned(_), Some(worker_id)) => {
       let live_execution = running_standing_watch_execution(
         entry, task, worker_id, tick,
       )

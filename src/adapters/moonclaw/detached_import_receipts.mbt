@@ -16,7 +16,7 @@ fn detached_import_failure_receipt(
       packet_path,
       proposal_id: "proposal-\{packet_id}",
       run_id: None,
-      status: @core.TaskExecutionStatus::Failed,
+      status: Failed,
       command: "detached MoonClaw import failure receipt \{detached_import_receipt_path(packet_path)}",
       summary: "Detached MoonClaw import failed for \{packet_id}: \{detail}",
     })

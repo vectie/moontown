@@ -33,7 +33,7 @@ fn research_quality_observation_fixture(
   root? : String = "/tmp/research-quality-observation",
   missing_required_paths? : Array[String] = [],
   has_research_source_marker? : Bool = true,
-  readiness? : ResearchReadiness? = Some(ResearchReadiness::{
+  readiness? : ResearchReadiness? = Some({
     book_id: "research-opc",
     root,
     source_page_count: 1,
@@ -62,7 +62,7 @@ fn research_quality_observation_fixture(
   site_entry? : String? = None,
   site_entry_read_error? : Bool = false,
 ) -> ResearchQualityObservation {
-  ResearchQualityObservation::{
+  {
     root,
     missing_required_paths,
     has_research_source_marker,

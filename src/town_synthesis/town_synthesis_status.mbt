@@ -4,9 +4,9 @@ fn town_synthesis_execution_status(
   plan : @roles.MayorGoalPlan,
 ) -> @core.TaskExecutionStatus {
   if town_synthesis_ready(state, plan) {
-    @core.TaskExecutionStatus::Completed
+    Completed
   } else {
-    @core.TaskExecutionStatus::ReviewQueued
+    ReviewQueued
   }
 }
 
@@ -16,9 +16,9 @@ fn town_synthesis_task_status(
   plan : @roles.MayorGoalPlan,
 ) -> @core.TownTaskStatus {
   if town_synthesis_ready(state, plan) {
-    @core.TownTaskStatus::Done
+    Done
   } else {
-    @core.TownTaskStatus::Blocked
+    Blocked
   }
 }
 
@@ -94,10 +94,9 @@ pub fn lane_research_status(
       continue
     }
     match execution.status {
-      @core.TaskExecutionStatus::Completed => saw_completed = true
-      @core.TaskExecutionStatus::ReviewQueued => saw_review = true
-      @core.TaskExecutionStatus::Failed | @core.TaskExecutionStatus::Stale =>
-        saw_failed = true
+      Completed => saw_completed = true
+      ReviewQueued => saw_review = true
+      Failed | Stale => saw_failed = true
       _ =>
         if @core.active_work_execution_status(execution.status) {
           saw_running = true

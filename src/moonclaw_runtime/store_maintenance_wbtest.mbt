@@ -37,8 +37,8 @@ async test "moonclaw store compaction rotates oversized job store files" {
 }
 
 ///|
-async test "moonclaw store compaction repairs legacy definitions schema" {
-  let root = "/tmp/moontown-moonclaw-store-legacy-definitions-wbtest"
+async test "moonclaw store compaction resets invalid definitions schema" {
+  let root = "/tmp/moontown-moonclaw-store-invalid-definitions-wbtest"
   ignore(@integration.run_checked("rm", ["-rf", root]))
   let jobs_root = "\{root}/.moonclaw/jobs"
   @support.write_text_file(
@@ -50,7 +50,7 @@ async test "moonclaw store compaction repairs legacy definitions schema" {
     44,
     max_store_bytes=1000,
   )
-  assert_true(summary.contains("definitions.json=legacy-schema"))
+  assert_true(summary.contains("definitions.json=invalid-schema"))
   assert_eq(
     @support.read_text_or_empty("\{jobs_root}/definitions.json"),
     "{\"definitions\":[],\"workflows\":[]}",

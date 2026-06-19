@@ -5,7 +5,7 @@ test "default town workers include coding and finance personas" {
     workers.any(fn(worker) {
       worker.id == "claw-harness" &&
       worker.book_id == "coding" &&
-      worker.role == @core.WorkerRole::Harness &&
+      worker.role == Harness &&
       worker.capabilities.contains("moonbit")
     }),
   )
@@ -13,7 +13,7 @@ test "default town workers include coding and finance personas" {
     workers.any(fn(worker) {
       worker.id == "claw-memory" &&
       worker.book_id == "finance" &&
-      worker.role == @core.WorkerRole::MemoryKeeper &&
+      worker.role == MemoryKeeper &&
       worker.capabilities.contains("planning")
     }),
   )
@@ -30,7 +30,7 @@ test "every book gets a standing watch worker" {
   let worker = book_watch_worker(book)
   assert_eq(worker.id, "claw-research-opc-watcher")
   assert_eq(worker.book_id, "research-opc")
-  assert_eq(worker.role, @core.WorkerRole::Watcher)
+  assert_eq(worker.role, Watcher)
   assert_true(worker.capabilities.contains("standing-watch"))
   assert_true(worker.capabilities.contains("delta-detection"))
 }
@@ -54,8 +54,7 @@ test "civic books receive service-specific worker lane" {
   )
   assert_true(
     workers.any(fn(worker) {
-      worker.id == "claw-wenyu-policy-hall-review" &&
-      worker.role == @core.WorkerRole::Reviewer
+      worker.id == "claw-wenyu-policy-hall-review" && worker.role == Reviewer
     }),
   )
 }

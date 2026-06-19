@@ -30,13 +30,13 @@ fn civic_health_after_execution_stage(
   policy : CivicHealthExecutionPolicy,
 ) -> Int {
   match stage {
-    @ui.ExecutionViewStage::Persisting =>
+    @ui.Persisting =>
       clamp_metric(base + policy.awaiting_delta)
-    @ui.ExecutionViewStage::Review => clamp_metric(base + policy.review_delta)
-    @ui.ExecutionViewStage::Recovery => clamp_metric(base + policy.failed_delta)
-    @ui.ExecutionViewStage::Completed =>
+    @ui.Review => clamp_metric(base + policy.review_delta)
+    @ui.Recovery => clamp_metric(base + policy.failed_delta)
+    @ui.Completed =>
       clamp_metric(base + policy.completed_delta)
-    @ui.ExecutionViewStage::Packet | @ui.ExecutionViewStage::Running => base
+    @ui.Packet | @ui.Running => base
   }
 }
 

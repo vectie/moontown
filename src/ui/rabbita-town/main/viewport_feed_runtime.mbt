@@ -34,8 +34,8 @@ priv enum WorkerFeedKind {
 ///|
 fn worker_feed_kind(worker : WorkerSim) -> WorkerFeedKind {
   match worker.status {
-    @core.WorkerStatus::Blocked => BlockedWorker
-    @core.WorkerStatus::Idle if is_on_duty_watcher(worker) => OnDutyWatcher
+    Blocked => BlockedWorker
+    Idle if is_on_duty_watcher(worker) => OnDutyWatcher
     _ => QuietWorker
   }
 }
@@ -96,16 +96,16 @@ fn execution_feed_kind(status : @core.TaskExecutionStatus) -> ExecutionFeedKind 
     RunningExecution
   } else {
     match status {
-      @core.TaskExecutionStatus::AwaitingPersistence =>
+      AwaitingPersistence =>
         AwaitingPersistenceExecution
-      @core.TaskExecutionStatus::Stale => StaleExecution
-      @core.TaskExecutionStatus::Failed => FailedExecution
-      @core.TaskExecutionStatus::PacketReady
-      | @core.TaskExecutionStatus::ProposalImported
-      | @core.TaskExecutionStatus::ReviewQueued
-      | @core.TaskExecutionStatus::Completed => QuietExecution
-      @core.TaskExecutionStatus::RunConfirmed
-      | @core.TaskExecutionStatus::Running => QuietExecution
+      Stale => StaleExecution
+      Failed => FailedExecution
+      PacketReady
+      | ProposalImported
+      | ReviewQueued
+      | Completed => QuietExecution
+      RunConfirmed
+      | Running => QuietExecution
     }
   }
 }

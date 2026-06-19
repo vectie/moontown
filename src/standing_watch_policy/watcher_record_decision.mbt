@@ -4,29 +4,29 @@ pub fn watcher_record_effective_decision(
 ) -> @core.WatcherDecisionKind {
   if standing_watch_orphaned_running_failure_summary(record.detail) &&
     watcher_record_has_zero_material_delta(record) {
-    return @core.WatcherDecisionKind::Deferred
+    return Deferred
   }
-  if record.decision == @core.WatcherDecisionKind::Failed &&
+  if record.decision == Failed &&
     watcher_record_has_zero_material_delta(record) &&
     standing_watch_detached_import_log_noise_summary(record.detail) {
-    return @core.WatcherDecisionKind::Deferred
+    return Deferred
   }
-  if record.decision == @core.WatcherDecisionKind::Failed &&
+  if record.decision == Failed &&
     watcher_record_has_zero_material_delta(record) &&
     standing_watch_infrastructure_failure_summary(record.detail) &&
     @runtime_error_policy.transient_external_dependency_error(record.detail) {
-    return @core.WatcherDecisionKind::Deferred
+    return Deferred
   }
-  if record.decision != @core.WatcherDecisionKind::NeedsReview {
+  if record.decision != NeedsReview {
     return record.decision
   }
   if watcher_record_has_zero_material_delta(record) &&
     standing_watch_operational_no_change_summary(record.detail) {
-    return @core.WatcherDecisionKind::NoChange
+    return NoChange
   }
   if watcher_record_has_zero_material_delta(record) &&
     standing_watch_infrastructure_failure_summary(record.detail) {
-    return @core.WatcherDecisionKind::Failed
+    return Failed
   }
   record.decision
 }
@@ -54,10 +54,9 @@ pub fn task_status_for_terminal_watcher_decision(
   decision : @core.WatcherDecisionKind,
 ) -> @core.TaskExecutionStatus {
   match decision {
-    @core.WatcherDecisionKind::NeedsReview =>
-      @core.TaskExecutionStatus::ReviewQueued
-    @core.WatcherDecisionKind::Failed => @core.TaskExecutionStatus::Failed
-    _ => @core.TaskExecutionStatus::Completed
+    NeedsReview => ReviewQueued
+    Failed => Failed
+    _ => Completed
   }
 }
 
@@ -74,7 +73,7 @@ fn watcher_record_same_terminal_identity(
 
 ///|
 fn watcher_record_observation_quality(record : @core.WatcherRunRecord) -> Int {
-  if record.decision == @core.WatcherDecisionKind::Deferred {
+  if record.decision == Deferred {
     return 0
   }
   if record.detail.contains("standing_goal_decision:") ||
@@ -82,7 +81,7 @@ fn watcher_record_observation_quality(record : @core.WatcherRunRecord) -> Int {
     record.detail.contains("book_watch_record_id:") {
     return 4
   }
-  if record.decision == @core.WatcherDecisionKind::NeedsReview &&
+  if record.decision == NeedsReview &&
     record.delta_score == 0 &&
     record.new_source_count == 0 &&
     record.detail.contains("Workflow completed") {

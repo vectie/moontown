@@ -69,8 +69,7 @@ async fn reconcile_civic_communication_scenario_round(
     workspace_base~,
     mode=PersistedReducer,
   )
-  if !(reduction.status is @core.TaskExecutionStatus::Completed) ||
-    reduction.ideas.length() == 0 {
+  if !(reduction.status is Completed) || reduction.ideas.length() == 0 {
     return None
   }
   let summary = materialize_civic_communication_scenario(

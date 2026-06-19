@@ -27,7 +27,7 @@ async fn book_quality_review_run_observations(
 ) -> Array[@book_quality.BookQualityReviewRunObservation] {
   let observations : Array[@book_quality.BookQualityReviewRunObservation] = []
   for run in runs {
-    observations.push(@book_quality.BookQualityReviewRunObservation::{
+    observations.push({
       run,
       has_result: @fs.exists(
         @book_quality.review_result_path(result_dir, run.book_id),
