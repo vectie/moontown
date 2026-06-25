@@ -146,6 +146,18 @@ Required fields:
 - `asset_roof`: optional separate roof layer for later depth sorting
 - `summary`: short inspection copy
 
+Runtime placement boundary:
+
+- The module registry is the source of truth for Wenyu building placement,
+  entrance tiles, visible assets, and decorator style.
+- `src/visual_projection` consumes only a generic decorator placement contract.
+  It must not embed Wenyu-specific book ids or building coordinates.
+- `src/visual_projection_runtime` may load this registry and translate enabled
+  modules into the generic placement contract before persisting
+  `.moontown/visual-projection.json`.
+- If a module is absent from the registry, the projection may use deterministic
+  generic fallback placement, but that fallback is not a Wenyu design surface.
+
 ## Feature-To-Building Map
 
 | Proposal Feature | Module Building | Owner Split |

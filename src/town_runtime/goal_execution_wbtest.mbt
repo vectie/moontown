@@ -30,10 +30,15 @@ test "successful book persistence reconciles failed execution into review queue"
     output_contract="wiki.update",
     requires_review=true,
   )
-  let outcome : @moonbook.PersistResultOutcome = @json.from_json(
-    @json.parse(
-      "{\"log_path\":\"/tmp/book/result.json\",\"updated_pages\":[\"wiki/index.md\"],\"review_queued\":true,\"notify_town\":false,\"evidence_id\":\"EV-goal-synthesis\"}",
+  let outcome = recovered_persist_result_outcome(
+    "coding",
+    @moonbook.BookResult::new(
+      result_id="goal-synthesis",
+      summary="Synthesis persisted but requires keeper review.",
+      artifacts=["wiki/index.md"],
+      requires_review=true,
     ),
+    evidence_id="EV-goal-synthesis",
   )
   let reconciled = execution_after_successful_book_persist(
     execution, outcome, 42,
@@ -57,10 +62,15 @@ test "successful non-review book persistence closes stale execution" {
     summary="missed heartbeat",
     output_contract="course.update",
   )
-  let outcome : @moonbook.PersistResultOutcome = @json.from_json(
-    @json.parse(
-      "{\"log_path\":\"/tmp/book/result.json\",\"updated_pages\":[\"wiki/index.md\"],\"review_queued\":false,\"notify_town\":false,\"evidence_id\":\"EV-goal-course\"}",
+  let outcome = recovered_persist_result_outcome(
+    "course",
+    @moonbook.BookResult::new(
+      result_id="goal-course",
+      summary="Course bootstrap persisted with durable artifacts.",
+      artifacts=["wiki/index.md"],
+      requires_review=false,
     ),
+    evidence_id="EV-goal-course",
   )
   let reconciled = execution_after_successful_book_persist(
     execution, outcome, 43,

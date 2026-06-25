@@ -1,10 +1,22 @@
 // Generated using `moon info`, DON'T EDIT IT
 package "vectie/moontown/moonbook_contracts"
 
+import {
+  "moonbitlang/core/debug",
+  "moonbitlang/core/json",
+  "vectie/moontown/core",
+}
+
 // Values
 pub fn default_keeper_context_pages() -> Array[String]
 
 pub fn default_keeper_skill_paths() -> Array[String]
+
+pub fn executable_book_event_core_fields() -> Array[String]
+
+pub fn executable_book_event_optional_fields() -> Array[String]
+
+pub fn executable_book_event_protocol() -> String
 
 pub fn fallback_keeper_memory_summary(String, String) -> String
 
@@ -19,6 +31,57 @@ pub fn wiki_maintainer_skill_path() -> String
 // Errors
 
 // Types and methods
+pub struct ExecutableBookEvent {
+  protocol : String
+  id : String
+  source : String
+  book_id : String
+  result_id : String
+  run_id : String?
+  event_type : String
+  accepted : Bool
+  requires_review : Bool
+  notify_town : Bool
+  summary : String
+  artifacts : Array[String]
+  evidence_id : String?
+  review_path : String?
+  lifecycle_proof : ExecutableBookLifecycleProof?
+} derive(Eq, ToJson, @debug.Debug, @json.FromJson)
+pub fn ExecutableBookEvent::first_lifecycle_blocker_id(Self) -> String
+pub fn ExecutableBookEvent::has_lifecycle_blocker(Self) -> Bool
+pub fn ExecutableBookEvent::lifecycle_ready(Self) -> Bool
+pub fn ExecutableBookEvent::lifecycle_status(Self) -> String
+pub fn ExecutableBookEvent::new(id~ : String, book_id~ : String, result_id~ : String, summary~ : String, artifacts? : Array[String], run_id? : String?, event_type? : String, accepted? : Bool, requires_review? : Bool, notify_town? : Bool, evidence_id? : String?, review_path? : String?, lifecycle_proof? : ExecutableBookLifecycleProof?) -> Self
+pub fn ExecutableBookEvent::route_reason(Self) -> String
+pub fn ExecutableBookEvent::route_to_town(Self, Int, proposal_id? : String?) -> ExecutableBookEventRoute
+pub fn ExecutableBookEvent::should_notify_town(Self) -> Bool
+pub fn ExecutableBookEvent::to_town_event(Self, Int, proposal_id? : String?) -> @core.TownEvent
+pub fn ExecutableBookEvent::town_event_kind(Self) -> String
+
+pub struct ExecutableBookEventRoute {
+  town_event : @core.TownEvent
+  notify_operator : Bool
+  lifecycle_status : String
+  lifecycle_ready : Bool
+  first_blocker_id : String
+  route_reason : String
+} derive(Eq, ToJson, @debug.Debug, @json.FromJson)
+
+pub struct ExecutableBookLifecycleProof {
+  contract_id : String
+  owner : String
+  session_id : String
+  book_root : String
+  ready : Bool
+  status : String
+  completed_step_count : Int
+  step_count : Int
+  blocked_step_count : Int
+  first_blocker_id : String
+  first_blocker_label : String
+  first_blocker_evidence : String
+} derive(Eq, ToJson, @debug.Debug, @json.FromJson)
 
 // Type aliases
 

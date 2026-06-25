@@ -148,7 +148,7 @@ async test "standing watch auto triage closes empty persisted book result" {
     book_id="research-opc",
   )
   let result = @moonbook.BookResult::new(
-    task_id="standing-watch-empty-result-tick-12",
+    result_id="standing-watch-empty-result-tick-12",
     summary="MoonClaw run completed: Workflow completed workspace=/tmp/run",
     artifacts=["run-empty"],
     memory_candidates=[],

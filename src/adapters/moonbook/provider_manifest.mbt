@@ -25,7 +25,7 @@ fn moonbook_task_provider_manifest_entry(
     kind: "task-provider",
     capabilities: ["provider", "extension", "provider.task", "extension.task"],
     metadata: {
-      command: "moon",
+      command: moonbook_moon_command(),
       args: ["run", "cmd/main", "--"],
       cwd: moonbook_root,
       workspace_root: root,

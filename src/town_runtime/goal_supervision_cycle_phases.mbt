@@ -93,6 +93,7 @@ async fn reconcile_book_persistence_outputs(
     snapshot_path~,
     standing_goals~,
   )
+  reconcile_mooncode_book_result_sidecar_imports(state, catalog)
   reconcile_persisted_non_review_outputs(state, snapshot_path)
 }
 

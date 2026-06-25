@@ -2,6 +2,7 @@
 fn visual_agent_projection(
   state : @core.TownState,
   worker : @core.WorkerRef,
+  decorator : VisualDecoratorConfig,
 ) -> VisualAgentProjection {
   let execution = visual_latest_execution_for_worker(state, worker)
   let phase = visual_agent_phase(worker, execution)
@@ -13,7 +14,7 @@ fn visual_agent_projection(
     Some(record) => record.run_id
     None => None
   }
-  let grid = visual_agent_grid(worker.book_id, worker.id, phase)
+  let grid = visual_agent_grid(worker.book_id, worker.id, phase, decorator)
   {
     worker_id: worker.id,
     worker_name: worker.name,

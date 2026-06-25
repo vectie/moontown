@@ -15,7 +15,7 @@ async test "review queue closes when MoonBook already persisted non-review resul
   let root = "/tmp/moontown-persisted-non-review-close"
   let snapshot_path = "\{root}/town.json"
   let result = @moonbook.BookResult::new(
-    task_id="goal-course-bootstrap",
+    result_id="goal-course-bootstrap",
     summary="Course bootstrap persisted with durable artifacts.",
     artifacts=["raw/bootstrap/course-outline.md"],
     memory_candidates=[
@@ -61,7 +61,7 @@ async test "failed execution closes into review when MoonBook already persisted 
   let root = "/tmp/moontown-persisted-review-failed-close"
   let snapshot_path = "\{root}/town.json"
   let result = @moonbook.BookResult::new(
-    task_id="goal-synthesis",
+    result_id="goal-synthesis",
     summary="Synthesis persisted but requires keeper review.",
     artifacts=["run-synthesis"],
     memory_candidates=[],

@@ -8,7 +8,7 @@ fn civic_service_reconciled_result(
     service, health, plan,
   )
   @moonbook.BookResult::new(
-    task_id="goal-\{service.book_id}-civic-service",
+    result_id="goal-\{service.book_id}-civic-service",
     summary~,
     artifacts=[
       "building-protocol:\{service.id}",

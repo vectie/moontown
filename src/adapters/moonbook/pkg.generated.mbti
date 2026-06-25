@@ -5,14 +5,19 @@ import {
   "moonbitlang/core/debug",
   "moonbitlang/core/json",
   "vectie/moontown/core",
+  "vectie/moontown/moonbook_contracts",
 }
 
 // Values
 pub async fn accept_goal(BookCatalogEntry, String, goal_id? : String?) -> BookGoalAcceptance
 
+pub async fn book_state_snapshot(BookCatalogEntry, moonbook_root? : String) -> BookStateSnapshot
+
 pub async fn build_workspace(BookCatalogEntry, moonbook_root? : String) -> String
 
 pub fn catalog_to_book_refs(Array[BookCatalogEntry]) -> Array[@core.BookRef]
+
+pub fn decode_book_result_payload(Json) -> BookResult?
 
 pub fn default_catalog() -> Array[BookCatalogEntry]
 
@@ -40,9 +45,13 @@ pub async fn load_or_create_provider(path? : String) -> MoonbookCatalogProvider
 
 pub fn parallel_research_entry(String) -> BookCatalogEntry
 
-pub async fn persist_result(BookCatalogEntry, BookResult) -> PersistResultOutcome
+pub async fn persist_result(BookCatalogEntry, BookResult, moonbook_root? : String) -> PersistResultOutcome
+
+pub async fn persist_result_payload(BookCatalogEntry, Json, moonbook_root? : String) -> PersistResultOutcome
 
 pub async fn produce_task_batch(BookCatalogEntry, String, goal_id? : String?) -> BookTaskBatch
+
+pub async fn reconcile_mooncode_book_result_sidecars(BookCatalogEntry, moonbook_root? : String) -> Array[MoonCodeBookResultImport]
 
 pub async fn report_health(BookCatalogEntry) -> BookHealthReport
 
@@ -71,6 +80,16 @@ pub struct BookCatalogEntry {
 pub fn BookCatalogEntry::new(id~ : String, name~ : String, purpose~ : String, workspace_root~ : String, memory_scope? : @core.MemoryScope, tags? : Array[String], skills? : Array[String]) -> Self
 pub fn BookCatalogEntry::to_book_ref(Self) -> @core.BookRef
 
+pub struct BookCatalogRecord {
+  id : String
+  name : String
+  purpose : String
+  workspace_root : String
+  memory_scope : String
+  tags : Array[String]
+  skills : Array[String]
+} derive(Eq, ToJson, @debug.Debug, @json.FromJson)
+
 pub struct BookGoalAcceptance {
   goal_id : String
   accepted : Bool
@@ -91,14 +110,36 @@ pub struct BookHealthReport {
 } derive(Eq, ToJson, @debug.Debug, @json.FromJson)
 
 pub struct BookResult {
-  task_id : String
+  result_id : String
   summary : String
   artifacts : Array[String]
   memory_candidates : Array[MemoryCandidate]
   requires_review : Bool
   notify_town : Bool
 } derive(Eq, ToJson, @debug.Debug, @json.FromJson)
-pub fn BookResult::new(task_id~ : String, summary~ : String, artifacts? : Array[String], memory_candidates? : Array[MemoryCandidate], requires_review? : Bool, notify_town? : Bool) -> Self
+pub fn BookResult::new(result_id~ : String, summary~ : String, artifacts? : Array[String], memory_candidates? : Array[MemoryCandidate], requires_review? : Bool, notify_town? : Bool) -> Self
+pub fn BookResult::to_executable_book_event(Self, book_id~ : String, evidence_id? : String?, run_id? : String?, review_path? : String?) -> @moonbook_contracts.ExecutableBookEvent
+
+pub struct BookStatePaths {
+  knowledge_manifest : String
+  generated_knowledge_bundle : String
+  generated_graph : String
+  latest_event : String
+  review_queue : String
+} derive(Eq, ToJson, @debug.Debug, @json.FromJson)
+
+pub struct BookStateSnapshot {
+  contract : String
+  book_id : String
+  root : String
+  generated_at : Int
+  catalog : BookCatalogRecord
+  summary : BookStateSummary
+  health : BookHealthReport
+  knowledge : KnowledgeBundle
+  latest_event : @moonbook_contracts.ExecutableBookEvent?
+  paths : BookStatePaths
+} derive(Eq, ToJson, @debug.Debug, @json.FromJson)
 
 pub struct BookStateSummary {
   book_id : String
@@ -151,11 +192,44 @@ type BookTaskProviderMetadata derive(Eq, ToJson, @debug.Debug, @json.FromJson)
 
 type EvidenceAccounting derive(Eq, @debug.Debug)
 
-type ExternalBookStateSummary derive(Eq, ToJson, @debug.Debug, @json.FromJson)
-
 type ExternalBookTask derive(Eq, ToJson, @debug.Debug, @json.FromJson)
 
 type ExternalBookTaskBatch derive(Eq, ToJson, @debug.Debug, @json.FromJson)
+
+pub struct KnowledgeBundle {
+  contract : String
+  book_id : String
+  root : String
+  generated_at : Int
+  summary : BookStateSummary
+  health : BookHealthReport
+  pages : Array[KnowledgePageRecord]
+  graph : KnowledgeGraph
+  review_queue_path : String
+  event_protocol : String
+} derive(Eq, ToJson, @debug.Debug, @json.FromJson)
+
+pub struct KnowledgeGraph {
+  nodes : Array[KnowledgePageRecord]
+  edges : Array[KnowledgeGraphEdge]
+} derive(Eq, ToJson, @debug.Debug, @json.FromJson)
+
+pub struct KnowledgeGraphEdge {
+  from : String
+  to : String
+  label : String
+} derive(Eq, ToJson, @debug.Debug, @json.FromJson)
+
+pub struct KnowledgePageRecord {
+  path : String
+  moonbook_type : String
+  title : String
+  summary : String
+  review_status : String
+  source_quality : String
+  tags : Array[String]
+  outbound_links : Array[String]
+} derive(Eq, ToJson, @debug.Debug, @json.FromJson)
 
 pub struct MemoryCandidate {
   kind : String
@@ -165,6 +239,22 @@ pub struct MemoryCandidate {
   target_page : String?
 } derive(Eq, ToJson, @debug.Debug, @json.FromJson)
 pub fn MemoryCandidate::new(kind~ : String, title~ : String, detail~ : String, durable? : Bool, target_page? : String?) -> Self
+
+pub struct MoonCodeBookResultImport {
+  key : String
+  session_id : String
+  command_id : String
+  result_id : String
+  summary : String
+  artifacts : Array[String]
+  review_queued : Bool
+  notify_town : Bool
+  evidence_id : String
+  updated_pages : Array[String]
+  executable_event_path : String
+  latest_executable_event_path : String
+  executable_event : @moonbook_contracts.ExecutableBookEvent
+} derive(Eq, ToJson, @debug.Debug, @json.FromJson)
 
 pub struct MoonbookCatalogProvider {
   catalog : Array[BookCatalogEntry]
@@ -179,7 +269,11 @@ pub struct PersistResultOutcome {
   review_queued : Bool
   notify_town : Bool
   evidence_id : String
+  executable_event_path : String
+  latest_executable_event_path : String
+  executable_event : @moonbook_contracts.ExecutableBookEvent
 } derive(Eq, ToJson, @debug.Debug, @json.FromJson)
+pub fn PersistResultOutcome::new(log_path~ : String, updated_pages~ : Array[String], review_queued~ : Bool, notify_town~ : Bool, evidence_id~ : String, executable_event_path~ : String, latest_executable_event_path~ : String, executable_event~ : @moonbook_contracts.ExecutableBookEvent) -> Self
 
 pub struct WorkerContextBundle {
   book_id : String

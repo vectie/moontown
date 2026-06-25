@@ -72,7 +72,7 @@ async test "civic latest result evidence parses contract markers" {
   @support.write_text_file(
     path,
     @moonbook.BookResult::new(
-      task_id="policy-service",
+      result_id="policy-service",
       summary=[
         "civic_service_decision: update", "book_changed: yes", "wiki_pages_changed_count: 3",
         "accepted_facts_count: 5", "review_items_created_count: 2", "next_check_hint: follow_up",

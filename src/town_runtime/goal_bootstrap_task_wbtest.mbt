@@ -1,10 +1,10 @@
 ///|
 test "town runtime delegates bootstrap task contract to owner package" {
   let entry = @moonbook.BookCatalogEntry::new(
-    id="research-runtime-dispatch",
-    name="Runtime Dispatch",
-    purpose="Test runtime dispatch.",
-    workspace_root="/tmp/research-runtime-dispatch",
+    id="research-runtime-receipt",
+    name="Runtime Receipt",
+    purpose="Test runtime receipt.",
+    workspace_root="/tmp/research-runtime-receipt",
   )
   let research = bootstrap_ingest_task(
     entry, "Research how LLMs are trained in very detail",

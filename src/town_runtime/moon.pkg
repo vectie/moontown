@@ -9,6 +9,7 @@ import {
   "vectie/moontown/research_quality",
   "vectie/moontown/research_quality_runtime",
   "vectie/moontown/moonclaw_runtime",
+  "vectie/moontown/moonbook_contracts",
   "vectie/moontown/standing_watch_policy",
   "vectie/moontown/live_autonomy_runtime",
   "vectie/moontown/runtime_status",

@@ -64,22 +64,51 @@ pub async fn hydrate_worker_context(
 pub async fn persist_result(
   entry : BookCatalogEntry,
   result : BookResult,
+  moonbook_root? : String = default_moonbook_root(),
 ) -> PersistResultOutcome {
-  let path = result_temp_path(result.task_id)
-  save_result_file(path, result)
-  let json = run_book_json_command(entry, [
-    "persist",
-    entry.workspace_root,
-    path,
-  ])
+  persist_result_payload(entry, result.to_json(), moonbook_root~)
+}
+
+///|
+pub async fn persist_result_payload(
+  entry : BookCatalogEntry,
+  payload : Json,
+  moonbook_root? : String = default_moonbook_root(),
+) -> PersistResultOutcome {
+  let result = match decode_book_result_payload(payload) {
+    Some(result) => result
+    None =>
+      fail(
+        "MoonBook persist payload must be a BookResult or mooncode-book-result envelope",
+      )
+  }
+  let path = result_temp_path(result.result_id)
+  save_result_payload_file(path, payload)
+  let json = run_book_json_command(
+    entry,
+    ["persist", entry.workspace_root, path],
+    moonbook_root~,
+  )
   @json.from_json(json)
 }
 
 ///|
 pub async fn summarize_state(entry : BookCatalogEntry) -> BookStateSummary {
-  let json = run_book_json_command(entry, ["summary", entry.workspace_root])
-  let external : ExternalBookStateSummary = @json.from_json(json)
-  normalize_book_state_summary(entry, external)
+  let snapshot = book_state_snapshot(entry)
+  normalize_book_state_summary(entry, snapshot.summary)
+}
+
+///|
+pub async fn book_state_snapshot(
+  entry : BookCatalogEntry,
+  moonbook_root? : String = default_moonbook_root(),
+) -> BookStateSnapshot {
+  let json = run_book_json_command(
+    entry,
+    ["state", entry.workspace_root],
+    moonbook_root~,
+  )
+  @json.from_json(json)
 }
 
 ///|

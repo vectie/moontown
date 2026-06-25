@@ -7,7 +7,7 @@ fn web_first_output_contract_example_section() -> Array[String] {
     "",
     "```json",
     "{",
-    "  \"task_id\": \"goal-research-moonclaw-research-bootstrap-ingest\",",
+    "  \"result_id\": \"goal-research-moonclaw-research-bootstrap-ingest\",",
     "  \"summary\": \"Created a web-first research dossier and verified wiki pages for MoonClaw.\",",
     "  \"artifacts\": [",
     web_first_output_contract_artifact_lines("moonclaw").join(",\n"),

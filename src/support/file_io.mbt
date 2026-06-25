@@ -32,6 +32,19 @@ pub async fn read_text_or_empty(path : String) -> String {
 }
 
 ///|
+pub async fn list_directory_paths(path : String) -> Array[String] {
+  let dir : @fs.Directory = @fs.opendir(path)
+  defer dir.close()
+  let entries : Array[String] = []
+  let prefix = if path.has_suffix("/") { path } else { path + "/" }
+  for name in dir.read_all() {
+    entries.push(prefix + name)
+  }
+  entries.sort()
+  entries
+}
+
+///|
 pub async fn write_text_file(path : String, content : String) -> Unit {
   ensure_parent_directory(path)
   @fs.write_file(

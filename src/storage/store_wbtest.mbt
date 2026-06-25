@@ -44,6 +44,12 @@ async test "watcher ledger derives snapshot-relative directory and appends by go
     default_watcher_ledger_dir(),
   )
   let goal_id = "Watch OPC News!"
+  @fs.mkdir(root, permission=0o755) catch {
+    _ => ()
+  }
+  @fs.mkdir(ledger_dir, permission=0o755) catch {
+    _ => ()
+  }
   @fs.write_file(
     watcher_ledger_path(goal_id, dir=ledger_dir),
     @encoding/utf8.encode(""),

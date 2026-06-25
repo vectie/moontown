@@ -12,7 +12,7 @@ async fn persist_execution_into_book(
   let result_artifacts = book_persist_artifacts(entry, execution)
   let memory_candidates = book_persist_memory_candidates(entry, execution)
   let result = @moonbook.BookResult::new(
-    task_id=execution.task_id,
+    result_id=execution.task_id,
     summary=result_summary,
     artifacts=result_artifacts,
     memory_candidates~,
@@ -39,13 +39,21 @@ async fn persist_execution_into_book(
     @core.TownEvent::new(
       id="event-persist-\{entry.id}-\{execution.task_id}",
       kind="persist",
-      detail="MoonBook persisted \{execution.task_id}: pages=\{outcome.updated_pages.length()} review=\{outcome.review_queued} evidence=\{outcome.evidence_id}",
+      detail="MoonBook persisted \{execution.task_id}: pages=\{outcome.updated_pages.length()} review=\{outcome.review_queued} evidence=\{outcome.evidence_id} event=\{outcome.executable_event_path}",
       related_book_id=Some(entry.id),
       related_task_id=Some(execution.task_id),
       related_proposal_id=execution.proposal_id,
       related_run_id=execution.run_id,
     ),
   )
+  if outcome.executable_event.should_notify_town() {
+    state.record_event(
+      outcome.executable_event.to_town_event(
+        state.events.length(),
+        proposal_id=execution.proposal_id,
+      ),
+    )
+  }
   Some(outcome)
 }
 

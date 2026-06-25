@@ -8,7 +8,7 @@ pub async fn build_workspace(
   let resolved_moonbook_root = resolved_root_path(moonbook_root)
   ignore(
     @integration.run_checked(
-      "moon",
+      moonbook_moon_command(),
       ["run", "cmd/main", "--", "build", root],
       cwd=Some(resolved_moonbook_root),
     ),

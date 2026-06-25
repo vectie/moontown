@@ -10,7 +10,11 @@ import {
 // Values
 pub fn build_visual_projection(@core.TownState, tick? : Int) -> VisualProjection
 
+pub fn build_visual_projection_with_decorator(@core.TownState, VisualDecoratorConfig, tick? : Int) -> VisualProjection
+
 pub fn default_visual_projection_path(String) -> String
+
+pub fn visual_decorator_config_from_module_manifest(Json) -> VisualDecoratorConfig raise
 
 pub fn visual_projection_tick(@core.TownState) -> Int
 
@@ -54,6 +58,22 @@ pub(all) struct VisualBuildingProjection {
   completed_count : Int
   effect : String
   message : String
+} derive(Eq, ToJson, @debug.Debug, @json.FromJson)
+
+pub(all) struct VisualDecoratorConfig {
+  placements : Array[VisualDecoratorPlacement]
+} derive(Eq, ToJson, @debug.Debug, @json.FromJson)
+pub fn VisualDecoratorConfig::empty() -> Self
+pub fn VisualDecoratorConfig::placement_for(Self, String) -> VisualDecoratorPlacement?
+
+type VisualDecoratorModuleEntry derive(Eq, ToJson, @debug.Debug, @json.FromJson)
+
+type VisualDecoratorModuleManifest derive(Eq, ToJson, @debug.Debug, @json.FromJson)
+
+pub(all) struct VisualDecoratorPlacement {
+  book_id : String
+  grid_x : Int
+  grid_y : Int
 } derive(Eq, ToJson, @debug.Debug, @json.FromJson)
 
 pub(all) struct VisualModuleProjection {

@@ -68,9 +68,22 @@ pub fn build_visual_projection(
   state : @core.TownState,
   tick? : Int = visual_projection_tick(state),
 ) -> VisualProjection {
+  build_visual_projection_with_decorator(
+    state,
+    VisualDecoratorConfig::empty(),
+    tick~,
+  )
+}
+
+///|
+pub fn build_visual_projection_with_decorator(
+  state : @core.TownState,
+  decorator : VisualDecoratorConfig,
+  tick? : Int = visual_projection_tick(state),
+) -> VisualProjection {
   let agents : Array[VisualAgentProjection] = []
   for worker in state.workers {
-    agents.push(visual_agent_projection(state, worker))
+    agents.push(visual_agent_projection(state, worker, decorator))
   }
   let buildings : Array[VisualBuildingProjection] = []
   for book in state.books {

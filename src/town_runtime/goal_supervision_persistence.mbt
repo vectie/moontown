@@ -50,10 +50,10 @@ async fn reconcile_persisted_terminal_outputs(
     }
     match persisted_book_result(snapshot_path, execution.task_id) {
       Some(result) => {
-        let outcome : @moonbook.PersistResultOutcome = @json.from_json(
-          @json.parse(
-            "{\"log_path\":\"\",\"updated_pages\":[],\"review_queued\":\{result.requires_review},\"notify_town\":\{result.notify_town},\"evidence_id\":\"persisted-book-result\"}",
-          ),
+        let outcome = recovered_persist_result_outcome(
+          execution.book_id,
+          result,
+          evidence_id="persisted-book-result",
         )
         let reconciled = execution_after_successful_book_persist(
           execution,
@@ -116,4 +116,32 @@ fn book_result_path_for_snapshot(
   task_id : String,
 ) -> String {
   "\{@storage.snapshot_base_dir(snapshot_path)}/book-results/\{task_id}.json"
+}
+
+///|
+fn recovered_persist_result_outcome(
+  book_id : String,
+  result : @moonbook.BookResult,
+  evidence_id~ : String,
+) -> @moonbook.PersistResultOutcome {
+  let review_path = if result.requires_review {
+    Some("wiki/reviews/pending.md")
+  } else {
+    None
+  }
+  let event = result.to_executable_book_event(
+    book_id~,
+    evidence_id=Some(evidence_id),
+    review_path~,
+  )
+  @moonbook.PersistResultOutcome::new(
+    log_path="",
+    updated_pages=[],
+    review_queued=result.requires_review,
+    notify_town=result.notify_town,
+    evidence_id~,
+    executable_event_path="",
+    latest_executable_event_path="",
+    executable_event=event,
+  )
 }

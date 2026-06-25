@@ -264,6 +264,19 @@ This separation is intentional:
 The mode switch uses the same runtime data in all cases. It does not invent
 book content or duplicate the Wenyu map.
 
+Decorator/runtime boundary:
+
+- Wenyu building placement and style live in
+  `src/ui/assets/tilemap/modules/wenyu-town-modules.json`.
+- The Rabbita viewport renders the module registry directly for building
+  sprites, labels, interiors, and editor metadata.
+- The persisted runtime projection also reads the same registry through a
+  generic visual decorator placement contract, so active agents route toward
+  configured building entrances instead of hardcoded Wenyu coordinates.
+- Core projection code may keep deterministic fallback placement for unknown
+  books, but Wenyu customization must remain in data/assets/templates rather
+  than MoonBit core lookup tables.
+
 Latest validated UI behavior:
 
 - main console shows the five-domain standing-watch portfolio

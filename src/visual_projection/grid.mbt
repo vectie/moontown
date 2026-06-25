@@ -3,6 +3,7 @@ fn visual_agent_grid(
   book_id : String,
   worker_id : String,
   phase : String,
+  decorator : VisualDecoratorConfig,
 ) -> (Int, Int) {
   if visual_phase_is_recovery(phase) {
     return (142, 72)
@@ -14,7 +15,7 @@ fn visual_agent_grid(
     return (104, 84)
   }
   let seed = visual_hash("\{book_id}/\{worker_id}")
-  let base = visual_book_grid(book_id, seed)
+  let base = visual_book_grid(book_id, seed, decorator)
   let wiggle_x = seed % 7 - 3
   let wiggle_y = seed / 7 % 7 - 3
   (
@@ -24,25 +25,14 @@ fn visual_agent_grid(
 }
 
 ///|
-fn visual_book_grid(book_id : String, seed : Int) -> (Int, Int) {
-  match book_id {
-    "research-opc" => (104, 78)
-    "research-llm-training-detail" => (112, 72)
-    "research-euv-lithography-machine-new-advantages-and-supplements" =>
-      (124, 64)
-    "research-moontown" => (112, 76)
-    "research-moonbook" => (120, 70)
-    "research-moonclaw" => (128, 76)
-    "wenyu-town-shell" => (116, 78)
-    "wenyu-resident-twins" => (96, 86)
-    "wenyu-policy-hall" => (136, 64)
-    "wenyu-contest-express" => (150, 82)
-    "wenyu-social-square" => (104, 68)
-    "wenyu-talent-avenue" => (92, 76)
-    "wenyu-vitality-dashboard" => (132, 86)
-    "wenyu-ai-garden" => (118, 92)
-    "wenyu-physical-bridge" => (154, 92)
-    _ => (72 + seed % 104, 42 + seed / 11 % 58)
+fn visual_book_grid(
+  book_id : String,
+  seed : Int,
+  decorator : VisualDecoratorConfig,
+) -> (Int, Int) {
+  match decorator.placement_for(book_id) {
+    Some(placement) => (placement.grid_x, placement.grid_y)
+    None => (72 + seed % 104, 42 + seed / 11 % 58)
   }
 }
 

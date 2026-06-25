@@ -196,3 +196,45 @@ test "visual projection strips wenyu prefix for module ids" {
   assert_eq(visual_module_id_from_book_id("wenyu-policy-hall"), "policy-hall")
   assert_eq(visual_module_id_from_book_id("research-opc"), "research-opc")
 }
+
+///|
+test "visual projection uses decorator placement instead of embedded Wenyu coordinates" {
+  let state = visual_projection_test_state()
+  let projection = build_visual_projection_with_decorator(state, {
+    placements: [{ book_id: "research-opc", grid_x: 31, grid_y: 47 }],
+  })
+  let agent = projection.agents[0]
+  assert_true(agent.grid_x >= 28 && agent.grid_x <= 34)
+  assert_true(agent.grid_y >= 44 && agent.grid_y <= 50)
+}
+
+///|
+test "visual decorator config loads enabled module entrances from manifest JSON" {
+  let text =
+    #|{
+    #|  "modules": [
+    #|    {
+    #|      "enabled": true,
+    #|      "book_id": "wenyu-policy-hall",
+    #|      "grid_x": 114,
+    #|      "grid_y": 66,
+    #|      "entrance_x": 116,
+    #|      "entrance_y": 72,
+    #|      "extra": "ignored"
+    #|    },
+    #|    {
+    #|      "enabled": false,
+    #|      "book_id": "wenyu-hidden",
+    #|      "grid_x": 1,
+    #|      "grid_y": 2,
+    #|      "entrance_x": 3,
+    #|      "entrance_y": 4
+    #|    }
+    #|  ]
+    #|}
+  let manifest = @json.parse(text)
+  let decorator = visual_decorator_config_from_module_manifest(manifest)
+  assert_eq(decorator.placements.length(), 1)
+  assert_true(decorator.placement_for("wenyu-policy-hall") is Some(_))
+  assert_true(decorator.placement_for("wenyu-hidden") is None)
+}

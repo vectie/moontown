@@ -71,3 +71,35 @@ async test "town checkpoint persists visual projection beside snapshot" {
   assert_true(text.contains("\"modules\""))
   assert_true(text.contains("\"module_id\":\"research-opc\""))
 }
+
+///|
+async test "town checkpoint can use decorator manifest placement" {
+  let root = "/tmp/moontown-visual-decorator-check"
+  ignore_checked_command("rm", ["-rf", root])
+  let snapshot_path = "\{root}/town.json"
+  let manifest_path = "\{root}/modules.json"
+  let manifest =
+    #|{
+    #|  "modules": [
+    #|    {
+    #|      "enabled": true,
+    #|      "book_id": "research-opc",
+    #|      "grid_x": 10,
+    #|      "grid_y": 20,
+    #|      "entrance_x": 33,
+    #|      "entrance_y": 44
+    #|    }
+    #|  ]
+    #|}
+  write_text_file(manifest_path, manifest)
+  persist_visual_projection(
+    visual_projection_runtime_test_state(),
+    snapshot_path,
+    decorator_manifest_path=manifest_path,
+  )
+  let text = @fs.read_file(
+    @visual_projection.default_visual_projection_path(snapshot_path),
+  ).text()
+  assert_true(text.contains("\"grid_x\":"))
+  assert_true(text.contains("\"grid_y\":"))
+}

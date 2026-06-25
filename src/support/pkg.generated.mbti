@@ -32,6 +32,8 @@ pub fn json_string_field(Json, String) -> String?
 
 pub fn label_from_slug(String) -> String
 
+pub async fn list_directory_paths(String) -> Array[String]
+
 pub fn markdown_bullets(Array[String]) -> String
 
 pub fn markdown_excerpt(String, Int) -> String

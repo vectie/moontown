@@ -18,13 +18,34 @@ async fn resolved_generated_site_index_after_build(root : String) -> String {
 }
 
 ///|
-fn result_temp_path(task_id : String) -> String {
-  resolved_root_path(".moontown/book-results/\{task_id}.json")
+fn moonbook_moon_command() -> String {
+  let configured = @sys.get_env_var("MOON").unwrap_or("")
+  if configured.trim().is_empty() {
+    "moon"
+  } else {
+    configured
+  }
 }
 
 ///|
-async fn save_result_file(path : String, result : BookResult) -> Unit {
-  write_workspace_text(path, result.to_json().stringify())
+fn result_temp_path(task_id : String) -> String {
+  resolved_root_path(
+    ".moontown/book-results/\{safe_result_temp_name(task_id)}.json",
+  )
+}
+
+///|
+fn safe_result_temp_name(task_id : String) -> String {
+  task_id
+  .replace(old="/", new="-")
+  .replace(old="\\", new="-")
+  .replace(old=":", new="-")
+  .replace(old=" ", new="-")
+}
+
+///|
+async fn save_result_payload_file(path : String, payload : Json) -> Unit {
+  write_workspace_text(path, payload.stringify())
 }
 
 ///|
@@ -46,7 +67,7 @@ async fn ensure_workspace(
   } else {
     ignore(
       @integration.run_checked(
-        "moon",
+        moonbook_moon_command(),
         ["run", "cmd/main", "--", "wiki", "init", root],
         cwd=Some(resolved_moonbook_root),
       ),
@@ -55,7 +76,7 @@ async fn ensure_workspace(
   }
   ignore(
     @integration.run_checked(
-      "moon",
+      moonbook_moon_command(),
       ["run", "cmd/main", "--", "wiki", "enable", "moonclaw", root],
       cwd=Some(resolved_moonbook_root),
     ),
@@ -74,13 +95,13 @@ async fn run_book_json_command(
   let root = resolved_workspace_root(entry.workspace_root)
   let resolved_moonbook_root = resolved_root_path(moonbook_root)
   @integration.run_json(
-    "moon",
+    moonbook_moon_command(),
     [
       "run",
       "cmd/main",
       "--",
       "wiki",
-      "book",
+      "extension",
       ..rewrite_workspace_args(args, root),
     ],
     cwd=Some(resolved_moonbook_root),
