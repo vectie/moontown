@@ -39,7 +39,7 @@
       "status": "ready",
       "scope": "visual add-on assets",
       "source_path": "../moondesk exports/assets/<pack-id>",
-      "target_path": "ui/assets/tilemap/districts or ui/assets/tilemap/actors",
+      "target_path": "src/ui/assets/tilemap/buildings or src/ui/assets/tilemap/actors",
       "summary": "Transparent building, roof, actor, and prop sprites produced or curated in Moondesk and referenced by module config.",
       "import_contract": [
         "sprites use transparent backgrounds",

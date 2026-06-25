@@ -36,7 +36,7 @@ fn dynamic_book_area(book : @core.BookRef, index : Int) -> SceneArea {
     y,
     width,
     height,
-    asset_keys: dynamic_book_asset_keys(book.id, index),
+    asset_keys: dynamic_book_asset_keys(index),
   }
 }
 
@@ -59,32 +59,11 @@ fn dynamic_book_slot_position(slot : Int) -> (Int, Int) {
 }
 
 ///|
-fn dynamic_book_asset_keys(book_id : String, index : Int) -> Array[String] {
-  let district = dynamic_district_asset_key(book_id)
-  if district != "" {
-    [district]
+fn dynamic_book_asset_keys(index : Int) -> Array[String] {
+  let (building, roof) = if index % 2 == 0 {
+    ("book-house-coding", "book-house-coding-roof")
   } else {
-    let (building, roof) = if index % 2 == 0 {
-      ("book-house-coding", "book-house-coding-roof")
-    } else {
-      ("book-house-finance", "book-house-finance-roof")
-    }
-    [building, roof, "keeper-claw"]
+    ("book-house-finance", "book-house-finance-roof")
   }
-}
-
-///|
-fn dynamic_district_asset_key(book_id : String) -> String {
-  match book_id {
-    "wenyu-town-shell" => "district-town-shell"
-    "wenyu-resident-twins" => "district-resident-twins"
-    "wenyu-policy-hall" => "district-policy-hall"
-    "wenyu-contest-express" => "district-contest-express"
-    "wenyu-social-square" => "district-social-square"
-    "wenyu-talent-avenue" => "district-talent-avenue"
-    "wenyu-vitality-dashboard" => "district-vitality-dashboard"
-    "wenyu-ai-garden" => "district-ai-garden"
-    "wenyu-physical-bridge" => "district-physical-bridge"
-    _ => ""
-  }
+  [building, roof, "keeper-claw"]
 }

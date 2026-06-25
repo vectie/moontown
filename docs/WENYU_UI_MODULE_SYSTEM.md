@@ -104,7 +104,7 @@ and single-agent work that would otherwise overload the town map.
 The first config file lives at:
 
 ```text
-ui/assets/tilemap/modules/wenyu-town-modules.json
+src/ui/assets/tilemap/modules/wenyu-town-modules.json
 ```
 
 Each module entry is a town add-on:
@@ -115,16 +115,19 @@ Each module entry is a town add-on:
   "enabled": true,
   "title": "Policy Hall",
   "book_id": "wenyu-policy-hall",
-  "district": "central-innovation",
+  "district": "civic-core",
   "building_kind": "policy-hall",
-  "grid_x": 108,
-  "grid_y": 63,
-  "footprint_w": 8,
-  "footprint_h": 6,
-  "entrance_x": 111,
-  "entrance_y": 69,
+  "grid_x": 114,
+  "grid_y": 66,
+  "footprint_w": 7,
+  "footprint_h": 5,
+  "display_w": 214,
+  "display_h": 154,
+  "entrance_x": 116,
+  "entrance_y": 72,
   "interior_kind": "policy",
-  "asset_base": "tilemap/districts/policy_hall.png",
+  "style_family": "white-tech-pavilion",
+  "asset_base": "tilemap/buildings/white-tech-pavilion/alpha/policy-hall.png",
   "asset_roof": "",
   "summary": "Policy quests, eligibility checks, and cited application packets."
 }
@@ -140,8 +143,10 @@ Required fields:
 - `building_kind`: CSS/art variant
 - `grid_x`, `grid_y`: isometric tile anchor
 - `footprint_w`, `footprint_h`: approximate placement footprint
+- `display_w`, `display_h`: rendered sprite size
 - `entrance_x`, `entrance_y`: actor routing target
 - `interior_kind`: furniture/interior variant
+- `style_family`: decorator/style family
 - `asset_base`: visible building sprite
 - `asset_roof`: optional separate roof layer for later depth sorting
 - `summary`: short inspection copy

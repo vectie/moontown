@@ -52,51 +52,6 @@ fn default_scene_assets(background : SceneAsset) -> Array[SceneAsset] {
       purpose: "Generated Worker Yard roof sprite.",
     },
     {
-      key: "district-town-shell",
-      path: "tilemap/districts/town_shell.png",
-      purpose: "Generated Wenyu Town Shell observatory district.",
-    },
-    {
-      key: "district-resident-twins",
-      path: "tilemap/districts/resident_twins.png",
-      purpose: "Generated Wenyu Resident Twins district.",
-    },
-    {
-      key: "district-policy-hall",
-      path: "tilemap/districts/policy_hall.png",
-      purpose: "Generated Wenyu Policy Hall district.",
-    },
-    {
-      key: "district-contest-express",
-      path: "tilemap/districts/contest_express.png",
-      purpose: "Generated Wenyu Contest Express district.",
-    },
-    {
-      key: "district-social-square",
-      path: "tilemap/districts/social_square.png",
-      purpose: "Generated Wenyu Social Square district.",
-    },
-    {
-      key: "district-talent-avenue",
-      path: "tilemap/districts/talent_avenue.png",
-      purpose: "Generated Wenyu Talent Avenue district.",
-    },
-    {
-      key: "district-vitality-dashboard",
-      path: "tilemap/districts/vitality_dashboard.png",
-      purpose: "Generated Wenyu Vitality Dashboard district.",
-    },
-    {
-      key: "district-ai-garden",
-      path: "tilemap/districts/ai_garden.png",
-      purpose: "Generated Wenyu AI Garden district.",
-    },
-    {
-      key: "district-physical-bridge",
-      path: "tilemap/districts/physical_bridge.png",
-      purpose: "Generated Wenyu Physical Bridge district.",
-    },
-    {
       key: "mayor-claw",
       path: "tilemap/actors/mayor_walk_1.png",
       purpose: "Generated strategic mayor runtime avatar.",

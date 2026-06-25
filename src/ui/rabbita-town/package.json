@@ -1,11 +1,10 @@
 {
   "scripts": {
     "dev": "vite",
-    "build": "vite build"
+    "build": "node scripts/prepare-rabbita-build.mjs && vite build"
   },
   "type": "module",
   "dependencies": {
     "@rabbita/vite": "^0.1.0"
   }
 }
-
