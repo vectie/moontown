@@ -129,7 +129,7 @@ Runtime state is stored under:
 - `.moontown/town.json`
 - `.moontown/standing-goals.json`
 - `.moontown/daemon.json`
-- `.moontown/packets/` when exported packet files are written
+- `.moonsuite/products/moontown/packets/` when exported packet files are written
 
 These are runtime artifacts, not source-of-truth project files.
 

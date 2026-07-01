@@ -1,6 +1,6 @@
 ///|
 pub fn default_packet_directory() -> String {
-  ".moontown/packets"
+  "\{@storage.moontown_product_state_dir()}/packets"
 }
 
 ///|

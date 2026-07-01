@@ -19,7 +19,10 @@ fn modeled_lifecycle_execution_record(
     task_id=task.id,
     book_id=task.book_id,
     packet_id="packet-\{task.id}",
-    packet_path=".moontown/packets/packet-\{task.id}.json",
+    packet_path=@moonclaw.packet_file_path(
+      @moonclaw.default_packet_directory(),
+      "packet-\{task.id}",
+    ),
     proposal_id=Some("proposal-packet-\{task.id}"),
     run_id=if status == ProposalImported {
       None

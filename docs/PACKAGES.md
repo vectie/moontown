@@ -436,7 +436,7 @@ Current persisted files:
 - `.moontown/town.json`
 - `.moontown/standing-goals.json`
 - `.moontown/watchers/*.jsonl`
-- `.moontown/packets/` when keeper packets are exported
+- `.moonsuite/products/moontown/packets/` when keeper packets are exported
 
 Boundary:
 

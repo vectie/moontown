@@ -12,7 +12,10 @@ fn snapshot_test_execution(
     task_id~,
     book_id="book",
     packet_id="packet-\{task_id}",
-    packet_path=".moontown/packets/packet-\{task_id}.json",
+    packet_path=@moonclaw.packet_file_path(
+      @moonclaw.default_packet_directory(),
+      "packet-\{task_id}",
+    ),
     status=Failed,
     summary~,
     output_contract="keeper.plan.packet.v1",

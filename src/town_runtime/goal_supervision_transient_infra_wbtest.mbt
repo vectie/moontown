@@ -57,7 +57,10 @@ async test "supervision clears stale selfpatch transient dependency lock proof" 
       task_id="selfpatch-runtime-transient-stale-proof-tick-999999",
       book_id="coding",
       packet_id="selfpatch-runtime-transient-stale-proof",
-      packet_path=".moontown/packets/selfpatch-runtime-transient-stale-proof.json",
+      packet_path=@moonclaw.packet_file_path(
+        @moonclaw.default_packet_directory(),
+        "selfpatch-runtime-transient-stale-proof",
+      ),
       run_id=Some("run-selfpatch-runtime-transient-stale-proof"),
       status=Stale,
       summary="Error: Failed to resolve the module dependency graph\nUnable to lock folder `/workspace/external/moonclaw/.mooncakes` for downloading dependencies\nOperation not permitted (os error 1)\nselfpatch_runtime_autonomy_probe: stale transient infrastructure failure should be reconciled by autonomous repair path",

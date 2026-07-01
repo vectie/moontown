@@ -1936,7 +1936,7 @@ Current persisted files:
   - persisted Mayor-owned standing goal registry
 - `.moontown/town-synthesis/*.md`
   - mayor-owned cross-book synthesis and readiness artifacts
-- `.moontown/packets/`
+- `.moonsuite/products/moontown/packets/`
   - optional exported keeper packet files
 - `.moontown/books/<book>/raw/bootstrap/`
   - book-lane research question, search log, source screen, evidence matrix, local source digest, and synthesis brief

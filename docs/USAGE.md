@@ -865,7 +865,7 @@ The demo town persists runtime bootstrap files under:
 - `.moontown/moonbooks.json`
 - `.moontown/town.json`
 - `.moontown/daemon.json`
-- `.moontown/packets/` when packet files are exported
+- `.moonsuite/products/moontown/packets/` when packet files are exported
 - `.moontown/daemon-runtime.json`
 - `.moontown/daemon.log`
 - `.moontown/daemon.pid`

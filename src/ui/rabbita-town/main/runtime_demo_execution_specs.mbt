@@ -34,7 +34,7 @@ fn execution_spec(
     task_id~,
     book_id~,
     packet_id="packet-\{task_id}",
-    packet_path=".moontown/packets/packet-\{task_id}.json",
+    packet_path=".moonsuite/products/moontown/packets/packet-\{task_id}.json",
     proposal_id=Some("proposal-packet-\{task_id}"),
     run_id=if execution_status_has_run_id(status) {
       Some("run-packet-\{task_id}")
