@@ -143,12 +143,12 @@ The daemon loop repeats the restart-safe tick. Each tick:
 - loads `.moontown/town.json`
 - bootstraps a saved town if the snapshot is missing
 - loads `.moontown/daemon.json`
-- loads `.moontown/standing-goals.json`
+- loads `.moonsuite/products/moontown/standing-goals.json`
 - lets the Mayor dispatch due standing goals
 - routes the target book to a book-local `standing-watch` task
 - lets MoonBook decide whether the check produced useful new information
 - persists checkpoint and standing-goal next due state
-- appends `.moontown/watchers/<goal-id>.jsonl`
+- appends `.moonsuite/products/moontown/watchers/<goal-id>.jsonl`
 - sleeps before the next tick
 
 Daemon-triggered standing-watch handoffs are detached from the tick loop. The
@@ -294,8 +294,9 @@ Useful bridge artifacts:
 - `http://127.0.0.1:5173/tilemap/modules/moondesk-handoff.json`
   opens the portable Moondesk-to-Moontown artifact contract.
 - `http://127.0.0.1:5173/moondesk-bridge.json`
-  opens the live bridge ledger built from `.moontown/moondesk-*` and
-  `.moontown/book-results`.
+  opens the live bridge ledger built from
+  `.moonsuite/products/moontown/moondesk-*` and
+  `.moonsuite/products/moontown/book-results`.
 
 ## 1.6 Generate The Stable-State Cookbook
 
@@ -424,7 +425,9 @@ moon run src/cmd/main -- civic doctor
 
 `civic status` prints a Markdown table covering all civic modules. `civic
 reconcile` bridges protocol ledgers back into MoonBook service-result records
-under `.moontown/book-results/goal-<book-id>-civic-service.json`. Review-gated
+under
+`.moonsuite/products/moontown/book-results/goal-<book-id>-civic-service.json`.
+Review-gated
 outputs reconcile as `needs_review` with `accepted_facts_count: 0`, so
 operational/protocol activity does not inflate accepted domain evidence.
 `civic doctor` writes `.moontown/civic/status.json` and
@@ -551,10 +554,10 @@ The expected 24/7 loop is:
 7. Participant/home workspaces receive returned follow-up work.
 8. The Rabbita UI shows standing-watch cards, civic protocol summaries,
    worker state, the phone-like mayor message thread, and final output links.
-- `.moontown/watchers/watch-opc-news.jsonl` should contain a new record after
-  the OPC standing goal reaches `next_due_tick`.
-- `.moontown/watchers/watch-llm-training.jsonl` should contain a new record
-  after the LLM watcher reaches `next_due_tick`.
+- `.moonsuite/products/moontown/watchers/watch-opc-news.jsonl` should contain
+  a new record after the OPC standing goal reaches `next_due_tick`.
+- `.moonsuite/products/moontown/watchers/watch-llm-training.jsonl` should
+  contain a new record after the LLM watcher reaches `next_due_tick`.
 - A real no-change cycle is still progress only if it reports nonzero checked
   sources and clear accepted/rejected accounting.
 - A retry is healthy only when the latest row for that task/run is
@@ -569,8 +572,8 @@ The expected 24/7 loop is:
   is still deferred or the count keeps growing.
 
 Standing goals are data-driven. To add another long-horizon watcher, edit
-`.moontown/standing-goals.json`; no MoonBit code change is required as long as
-the entry follows the same shape:
+`.moonsuite/products/moontown/standing-goals.json`; no MoonBit code change is
+required as long as the entry follows the same shape:
 
 ```json
 {
@@ -652,12 +655,13 @@ Archiving disables every standing goal targeting the book, including the PDF
 watcher and any `book-quality-repair-<book-id>` repair goal. It also tags the
 catalog entry as `archived`/`hidden`/`internal`, preserves the workspace for
 audit, and appends an `archived` lifecycle event to
-`.moontown/book-template-request-events.jsonl`. Use this for smoke proofs and
-retired watches so they do not keep consuming autonomous daemon cycles.
-Archived watches remain in `.moontown/standing-goals.json` as disabled audit
-records. `status`, `live status`, and the operator console now separate active
-enabled watches from disabled archived watches, so preserved history does not
-look like live autonomous workload.
+`.moonsuite/products/moontown/book-template-request-events.jsonl`. Use this for
+smoke proofs and retired watches so they do not keep consuming autonomous
+daemon cycles. Archived watches remain in
+`.moonsuite/products/moontown/standing-goals.json` as disabled audit records.
+`status`, `live status`, and the operator console now separate active enabled
+watches from disabled archived watches, so preserved history does not look like
+live autonomous workload.
 
 Install a fully configured PDF-watch book from a Moondesk/exported JSON file:
 
@@ -695,7 +699,7 @@ The command writes:
 - `.moontown/books/<book-id>/skills/pdf-analysis/SKILL.md`
 - `.moontown/books/<book-id>/book/site/generated/index.html`
 - a registered MoonBook catalog entry in `.moontown/moonbooks.json`
-- a standing goal in `.moontown/standing-goals.json`
+- a standing goal in `.moonsuite/products/moontown/standing-goals.json`
 
 Example standing goal:
 
@@ -870,8 +874,8 @@ The demo town persists runtime bootstrap files under:
 - `.moontown/daemon.log`
 - `.moontown/daemon.pid`
 - `.moontown/daemon-supervisor.pid`
-- `.moontown/standing-goals.json`
-- `.moontown/watchers/*.jsonl`
+- `.moonsuite/products/moontown/standing-goals.json`
+- `.moonsuite/products/moontown/watchers/*.jsonl`
 - `.moontown/books/<book>/` for MoonBook lane workspaces
 - `.moontown/books/wenyu-*/` for civic MoonBook workspaces created by
   `moon run src/cmd/main -- civic bootstrap`
@@ -918,13 +922,14 @@ curl -X POST http://127.0.0.1:5173/api/book-template-requests \
 ```
 
 The browser endpoint is a development bridge, not a separate product contract:
-it writes the same config document under `.moontown/book-template-configs/`
-and the same request document under `.moontown/book-template-requests.json`.
+it writes the same config document under
+`.moonsuite/products/moontown/book-template-configs/` and the same request
+document under `.moonsuite/products/moontown/book-template-requests.json`.
 Moondesk should use this document shape directly when it becomes the stable
 human desktop surface.
 
-The request inbox lives at `.moontown/book-template-requests.json` and has this
-shape:
+The request inbox lives at
+`.moonsuite/products/moontown/book-template-requests.json` and has this shape:
 
 ```json
 {
@@ -943,12 +948,12 @@ shape:
 
 `config_path` is resolved relative to the request inbox unless it is absolute.
 Processing also appends lifecycle events to
-`.moontown/book-template-request-events.jsonl`. That JSONL file is the durable
-audit trail for unattended book creation: each processed request records the
-request id, template id, resolved config path, status, tick, timestamp, and
-installer summary. The status command prints the event log path and latest
-event so an operator can distinguish “request exists” from “request was
-actually installed or failed”.
+`.moonsuite/products/moontown/book-template-request-events.jsonl`. That JSONL
+file is the durable audit trail for unattended book creation: each processed
+request records the request id, template id, resolved config path, status, tick,
+timestamp, and installer summary. The status command prints the event log path
+and latest event so an operator can distinguish “request exists” from “request
+was actually installed or failed”.
 
 The daemon includes a `book-template-request` scheduled job, so pending
 requests can be processed as part of the live loop. This is the preferred
@@ -1183,9 +1188,9 @@ What they do:
   - stores the current daemon worker process id
 - `.moontown/daemon-supervisor.pid`
   - stores the current daemon supervisor process id
-- `.moontown/standing-goals.json`
+- `.moonsuite/products/moontown/standing-goals.json`
   - stores Mayor-owned standing goals, target book, cadence, source policy, last run tick, and next due tick
-- `.moontown/watchers/*.jsonl`
+- `.moonsuite/products/moontown/watchers/*.jsonl`
   - stores standing-watch decisions, target book, task/run ids, strict research accounting, detail, and next due tick
 - `.moontown/books/<book>/raw/bootstrap/`
   - stores research questions, search logs, source screens, evidence matrices,
@@ -1559,8 +1564,9 @@ town layout.
 
 The UI can still run demo simulation state, but the dev server now also bridges
 real runtime files: `.moontown/town.json`, `.moontown/daemon.json`,
-`.moontown/standing-goals.json`, `.moontown/watchers/*.jsonl`, and
-`.moontown/operator-requests/requests.jsonl`.
+`.moonsuite/products/moontown/standing-goals.json`,
+`.moonsuite/products/moontown/watchers/*.jsonl`, and
+`.moonsuite/products/moontown/operator-requests/requests.jsonl`.
 
 Browser-submitted standing goals use
 [assets/templates/operator-request-policy.json](/Users/kq/Workspace/moontown/assets/templates/operator-request-policy.json)

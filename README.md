@@ -47,7 +47,8 @@ Moontown is strongest when you want one system to hold together:
 Implemented today:
 
 - persisted town bootstrap in `.moontown/town.json`
-- persisted standing goal registry in `.moontown/standing-goals.json`
+- persisted standing goal registry in
+  `.moonsuite/products/moontown/standing-goals.json`
 - persisted moonbook catalog in `.moontown/moonbooks.json`
 - `BookProvider` abstraction for town bootstrap
 - extension-API-shaped moonbook adapter
@@ -234,7 +235,8 @@ schedule before launching MoonClaw, and appends round records under
 JSON schedule/template files.
 
 `civic reconcile` is the service-result bridge. It reads protocol-active
-buildings, writes `.moontown/book-results/goal-<book-id>-civic-service.json`
+buildings, writes
+`.moonsuite/products/moontown/book-results/goal-<book-id>-civic-service.json`
 through MoonBook, and marks review-gated civic outputs as `needs_review`
 instead of accepted facts. The daemon runs this reconciliation as a generic
 scheduled job after pattern rounds.
@@ -263,10 +265,10 @@ Book templates are listed in
 [assets/templates/books/templates.json](/Users/kq/Workspace/moontown/assets/templates/books/templates.json)
 and can be inspected with `moon run src/cmd/main -- books templates`. Moondesk
 should use that registry as its creation palette. Runtime book creation requests
-can be written to `.moontown/book-template-requests.json`; the daemon’s
-`book-template-request` job processes pending requests. `status` reports
-pending and failed request counts so autonomous book creation is visible in the
-same runtime spine as standing watchers.
+can be written to `.moonsuite/products/moontown/book-template-requests.json`;
+the daemon’s `book-template-request` job processes pending requests. `status`
+reports pending and failed request counts so autonomous book creation is visible
+in the same runtime spine as standing watchers.
 `live status` and `.moonsuite/products/moontown/live-autonomy.json` also surface the same request
 counts, so a Moondesk-created book request is visible before and after the
 daemon turns it into a MoonBook workspace.
@@ -275,8 +277,8 @@ The Rabbita operator console also exposes this path during development through
 template. That endpoint writes the same config and request documents; it does
 not bypass the daemon or create a browser-only workflow.
 Processed requests are also appended to
-`.moontown/book-template-request-events.jsonl`, which is the durable install
-and failure audit trail for autonomous book creation.
+`.moonsuite/products/moontown/book-template-request-events.jsonl`, which is the
+durable install and failure audit trail for autonomous book creation.
 
 - `research-book`
   discovers and maintains domain knowledge.
@@ -459,8 +461,8 @@ standing-watch updates, stale projections, review queue changes, or explicit
 operator requests.
 
 Standing goals are data-driven. Add long-horizon watchers by editing
-`.moontown/standing-goals.json`; the daemon reads the registry on each tick, so
-new topics do not require MoonBit code changes.
+`.moonsuite/products/moontown/standing-goals.json`; the daemon reads the
+registry on each tick, so new topics do not require MoonBit code changes.
 
 Example:
 
@@ -480,7 +482,7 @@ Example:
 
 The registry is persisted at:
 
-- `.moontown/standing-goals.json`
+- `.moonsuite/products/moontown/standing-goals.json`
 
 The daemon does not put topic memory in Moontown. Moontown only decides that a
 standing goal is due and dispatches it to its `target_book_id` MoonBook lane.
@@ -497,7 +499,7 @@ daemon tick
   -> MoonBook compares the topic against its own baseline
   -> MoonClaw performs bounded web/source discovery
   -> MoonBook emits standing_goal_decision
-  -> Moontown records .moontown/watchers/<goal-id>.jsonl
+  -> Moontown records .moonsuite/products/moontown/watchers/<goal-id>.jsonl
   -> next_due_tick advances with update/no-change/review/failure backoff
 ```
 
@@ -774,7 +776,7 @@ user goal naming multiple subjects
 Current standing-goal path:
 
 ```text
-.moontown/standing-goals.json
+.moonsuite/products/moontown/standing-goals.json
   -> daemon tick
   -> Mayor dispatches due standing goal
   -> explicit MoonBook keeper lane, e.g. research-opc

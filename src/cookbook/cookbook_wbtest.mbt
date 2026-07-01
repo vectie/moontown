@@ -75,6 +75,10 @@ test "cookbook describer pages explain codebase algorithms and data flow" {
   let flow = cookbook_data_flow_markdown()
   assert_true(flow.contains("Goal Execution Flow"))
   assert_true(flow.contains("Civic Building Flow"))
+  assert_true(
+    flow.contains(".moonsuite/products/moontown/book-template-requests.json"),
+  )
+  assert_false(flow.contains(".moontown/book-template-requests.json"))
   let features = cookbook_core_features_markdown()
   assert_true(features.contains("## MoonBook/MoonClaw Execution Bridge"))
   assert_true(features.contains("## Civic Building Protocols"))

@@ -73,10 +73,11 @@ moon run src/cmd/main -- books template requests process
 Moondesk should use this registry as its book-creation palette. The Mayor can
 also use it later when a task says “create a specialized book” and the system
 needs to choose a reusable template rather than inventing a one-off workspace.
-The file `.moontown/book-template-requests.json` is the document-first inbox
-for that handoff: Moondesk or Mayor writes pending template requests, and the
-daemon’s `book-template-request` scheduled job installs them.
-The sibling `.moontown/book-template-request-events.jsonl` file is the
+The file `.moonsuite/products/moontown/book-template-requests.json` is the
+document-first inbox for that handoff: Moondesk or Mayor writes pending template
+requests, and the daemon’s `book-template-request` scheduled job installs them.
+The sibling
+`.moonsuite/products/moontown/book-template-request-events.jsonl` file is the
 append-only proof trail for those installs and failures.
 
 | Book | Purpose | Typical docs generated or updated |

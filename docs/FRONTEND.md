@@ -108,7 +108,7 @@ endpoint or generated static JSON artifact.
 
 The runtime state that should drive the next browser bridge now includes:
 
-- standing goals from `.moontown/standing-goals.json`
+- standing goals from `.moonsuite/products/moontown/standing-goals.json`
 - daemon tick and active goal ids from `.moontown/daemon.json`
 - book/task/execution state from `.moontown/town.json`
 
@@ -155,13 +155,15 @@ It reads:
 - `.moontown/town.json` for books, workers, tasks, executions, and events.
 - `.moontown/daemon.json` for real daemon tick, lease owner, cadence, and due
   standing goals.
-- `.moontown/standing-goals.json` for enabled standing-watch requests and next
-  due tick.
-- `.moontown/watchers/*.jsonl` through `watchers/index.json` for the durable
-  multi-topic watcher ledger.
-- `.moontown/operator-requests/requests.jsonl` for browser-submitted requests.
-- `.moontown/live-autonomy.json` for the live spine, including PlanBook
-  self-build status and the Moondesk/Major book-template request inbox.
+- `.moonsuite/products/moontown/standing-goals.json` for enabled standing-watch
+  requests and next due tick.
+- `.moonsuite/products/moontown/watchers/*.jsonl` through `watchers/index.json`
+  for the durable multi-topic watcher ledger.
+- `.moonsuite/products/moontown/operator-requests/requests.jsonl` for
+  browser-submitted requests.
+- `.moonsuite/products/moontown/live-autonomy.json` for the live spine,
+  including PlanBook self-build status and the Moondesk/Major book-template
+  request inbox.
 
 The progress surface shows:
 
@@ -190,8 +192,8 @@ wiki pages, or `book_changed: yes`.
 The request composer writes through the Vite dev endpoint
 `POST /api/operator-requests`. A successful submit appends an operator request
 record and creates or replaces the matching standing goal in
-`.moontown/standing-goals.json`. The daemon is still the executor; the UI only
-adds durable work to the Mayor queue.
+`.moonsuite/products/moontown/standing-goals.json`. The daemon is still the
+executor; the UI only adds durable work to the Mayor queue.
 
 The default source policy for browser-submitted standing goals comes from
 [assets/templates/operator-request-policy.json](/Users/kq/Workspace/moontown/assets/templates/operator-request-policy.json).
@@ -203,11 +205,11 @@ The book-template composer writes through the Vite dev endpoint
 `POST /api/book-template-requests`. The first supported template is
 `pdf-evidence-watch`: the operator provides a title, book id, websites,
 cadence, purpose, and optional method override; the endpoint writes a config
-file under `.moontown/book-template-configs/` and queues a durable request in
-`.moontown/book-template-requests.json`. The daemon or
-`books template requests process` installs the actual MoonBook workspace and
-standing goal. This keeps browser UI, Moondesk, and Mayor automation on the
-same document-first creation path.
+file under `.moonsuite/products/moontown/book-template-configs/` and queues a
+durable request in `.moonsuite/products/moontown/book-template-requests.json`.
+The daemon or `books template requests process` installs the actual MoonBook
+workspace and standing goal. This keeps browser UI, Moondesk, and Mayor
+automation on the same document-first creation path.
 
 The operator dashboard does not render the Wenyu map inline. It shows a portal
 card that links to `viewport.html?assets=generated&v=wenyu`, the canonical
@@ -225,8 +227,9 @@ Current operator-console expectations:
   directly in the browser
 - expose pending and failed book-template requests so Moondesk-created books
   are visible before the daemon installs them as MoonBook workspaces
-- show active and archived standing-watch counts from `.moontown/live-autonomy.json`
-  before drilling into individual watch cards
+- show active and archived standing-watch counts from
+  `.moonsuite/products/moontown/live-autonomy.json` before drilling into
+  individual watch cards
 
 ## Standalone Viewport Modes
 
@@ -253,7 +256,8 @@ selected from the viewport HUD and can also be opened directly by URL:
   - lists generated MoonBook projection fragments, metrics, review queues,
     page families, journey entries, and links to generated HTML/report outputs
   - also shows the Moondesk handoff contract and recent portable bridge
-    records from `.moontown/moondesk-*` and `.moontown/book-results`
+    records from `.moonsuite/products/moontown/moondesk-*` and
+    `.moonsuite/products/moontown/book-results`
 
 This separation is intentional:
 
@@ -307,8 +311,10 @@ Implemented handoff surfaces:
     packs, asset packs, simple agent profiles, skill-pack references, operator
     request packs, and generated output bundles
 - `moondesk-bridge.json`
-  - Vite bridge output that scans real `.moontown/moondesk-dispatches`,
-    `.moontown/moondesk-requests`, and `.moontown/book-results` records
+  - Vite bridge output that scans real
+    `.moonsuite/products/moontown/moondesk-dispatches`,
+    `.moonsuite/products/moontown/moondesk-requests`, and
+    `.moonsuite/products/moontown/book-results` records
 - editor mode
   - shows the boundary panel, handoff manifest, and bridge ledger beside module
     validation

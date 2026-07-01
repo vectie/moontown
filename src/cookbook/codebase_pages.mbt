@@ -116,7 +116,7 @@ pub fn cookbook_data_flow_markdown() -> String {
     "- `.moonsuite/products/moontown/civic/status.json`: civic service status projection.",
     "- `books/<book-id>/wiki/...`: accepted or review-gated support pages.", "",
     "## Book Template Flow", "", "```text", "Moondesk / Mayor / PlanBook request",
-    "  -> .moontown/book-template-requests.json", "  -> process pending or retry request",
+    "  -> .moonsuite/products/moontown/book-template-requests.json", "  -> process pending or retry request",
     "  -> install template config", "  -> write book workspace", "  -> append request event",
     "  -> register standing goal when needed", "```", "", "This flow is the extensibility path for new books and tools. It avoids hardcoding every future book inside Moontown source.",
     "", "## Projection Flow", "", "```text", "TownState + civic protocol status + daemon state + MoonBook outputs",
