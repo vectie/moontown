@@ -12,7 +12,7 @@ test "daemon runtime health summary marks healthy worker" {
     tick_success_count: 3,
     tick_failure_count: 0,
     last_error: "",
-    log_path: ".moontown/daemon.log",
+    log_path: ".moonsuite/products/moontown/daemon.log",
   }
   assert_true(health.healthy())
   let summary = @daemon_runtime_policy.daemon_runtime_health_summary(health)
@@ -35,7 +35,7 @@ test "daemon runtime health summary marks active supervisor" {
     tick_success_count: 0,
     tick_failure_count: 0,
     last_error: "",
-    log_path: ".moontown/daemon.log",
+    log_path: ".moonsuite/products/moontown/daemon.log",
   }
   assert_true(!health.healthy())
   assert_true(health.supervisor_active())
@@ -58,7 +58,7 @@ test "daemon runtime health summary marks stale worker" {
     tick_success_count: 3,
     tick_failure_count: 1,
     last_error: "timeout",
-    log_path: ".moontown/daemon.log",
+    log_path: ".moonsuite/products/moontown/daemon.log",
   }
   assert_true(!health.healthy())
   let summary = @daemon_runtime_policy.daemon_runtime_health_summary(health)
@@ -80,7 +80,7 @@ test "daemon runtime health label precedence is explicit" {
     tick_success_count: 3,
     tick_failure_count: 0,
     last_error: "",
-    log_path: ".moontown/daemon.log",
+    log_path: ".moonsuite/products/moontown/daemon.log",
   }
   assert_eq(
     @daemon_runtime_policy.daemon_runtime_health_label(running),
@@ -124,7 +124,7 @@ test "daemon runtime health summary fields keep stable operator order" {
     tick_success_count: 3,
     tick_failure_count: 1,
     last_error: "",
-    log_path: ".moontown/daemon.log",
+    log_path: ".moonsuite/products/moontown/daemon.log",
   }
   let fields = @daemon_runtime_policy.daemon_runtime_health_summary_fields(
     "healthy", health,
@@ -134,5 +134,5 @@ test "daemon runtime health summary fields keep stable operator order" {
   assert_eq(fields[2], "supervisor_pid=10")
   assert_eq(fields[5], "worker_alive=true")
   assert_eq(fields[9], "failures=1")
-  assert_eq(fields[10], "log=.moontown/daemon.log")
+  assert_eq(fields[10], "log=.moonsuite/products/moontown/daemon.log")
 }

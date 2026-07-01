@@ -73,7 +73,7 @@ pub fn pipeline_stages(
       "Building Protocol History",
       required_stage_status(inputs.feature_history_ready),
       "At least one module interior shows durable inbox/reduction/review/accepted-result/outbox history with building-specific evidence refs.",
-      "src/ui/rabbita-town/main/main.mbt + .moontown/civic/protocols/<building-id>/*.jsonl",
+      "src/ui/rabbita-town/main/main.mbt + .moonsuite/products/moontown/civic/protocols/<building-id>/*.jsonl",
     ),
     pipeline_stage(
       "movement-loop-evidence",

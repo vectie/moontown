@@ -12,7 +12,7 @@ test "daemon start requires supervisor for durable worker" {
     tick_success_count: 3,
     tick_failure_count: 0,
     last_error: "",
-    log_path: ".moontown/daemon.log",
+    log_path: ".moonsuite/products/moontown/daemon.log",
   }
   assert_true(lone_worker.healthy())
   assert_true(!lone_worker.durable_worker_active())

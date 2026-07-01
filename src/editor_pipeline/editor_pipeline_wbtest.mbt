@@ -147,6 +147,14 @@ test "stage policy marks ready only when required editor proof is complete" {
       stage.evidence == "modules.json"
     }),
   )
+  assert_true(
+    stages.any(fn(stage) {
+      stage.id == "building-protocol-history" &&
+      stage.evidence.contains(
+        ".moonsuite/products/moontown/civic/protocols/<building-id>/*.jsonl",
+      )
+    }),
+  )
 }
 
 ///|
