@@ -37,14 +37,34 @@ async test "watcher ledger derives snapshot-relative directory and appends by go
   let root = "/tmp/moontown-watcher-ledger-dir-test"
   assert_eq(snapshot_base_dir("\{root}/town.json"), root)
   assert_eq(snapshot_base_dir("town.json"), moontown_product_state_dir())
-  assert_eq(default_snapshot_path(), ".moonsuite/products/moontown/town.json")
+  assert_eq(moonsuite_product_id(), "moontown")
+  assert_eq(
+    moontown_product_state_dir(),
+    @moonsuite.product_dir("", moonsuite_product_id()),
+  )
+  assert_eq(
+    moontown_product_service_path(),
+    @moonsuite.product_service_path("", moonsuite_product_id()),
+  )
+  assert_eq(
+    moontown_product_tmp_dir(),
+    @moonsuite.product_tmp_dir("", moonsuite_product_id()),
+  )
+  assert_eq(
+    default_snapshot_path(),
+    @moonsuite.product_artifact("", moonsuite_product_id(), "town.json"),
+  )
   assert_eq(
     default_standing_goal_path(),
-    ".moonsuite/products/moontown/standing-goals.json",
+    @moonsuite.product_artifact(
+      "",
+      moonsuite_product_id(),
+      "standing-goals.json",
+    ),
   )
   assert_eq(
     default_watcher_ledger_dir(),
-    ".moonsuite/products/moontown/watchers",
+    @moonsuite.product_artifact("", moonsuite_product_id(), "watchers"),
   )
   let ledger_dir = watcher_ledger_dir_for_snapshot("\{root}/town.json")
   assert_eq(ledger_dir, "\{root}/watchers")

@@ -27,17 +27,17 @@ pub fn moonsuite_product_id() -> String {
 
 ///|
 pub fn moontown_product_state_dir() -> String {
-  ".moonsuite/products/moontown"
+  @moonsuite.product_dir("", moonsuite_product_id())
 }
 
 ///|
 pub fn moontown_product_service_path() -> String {
-  "\{moontown_product_state_dir()}/service.json"
+  @moonsuite.product_service_path("", moonsuite_product_id())
 }
 
 ///|
 pub fn moontown_product_tmp_dir() -> String {
-  ".tmp/products/moontown"
+  @moonsuite.product_tmp_dir("", moonsuite_product_id())
 }
 
 ///|

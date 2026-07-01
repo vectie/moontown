@@ -21,6 +21,33 @@ test "town synthesis paths use storage-owned snapshot base" {
 }
 
 ///|
+test "town synthesis execution registers mayor book in product home" {
+  let state = @core.empty_state(
+    @core.TownConfig::new(id="town-synthesis-product-home", name="Town"),
+  )
+  let mayor = @roles.Mayor::new()
+  let plan = mayor.plan_goal(
+    @moonbook.default_catalog(),
+    "research moontown, moonbook, and moonclaw",
+  )
+  register_town_synthesis_execution(
+    state,
+    "research moontown, moonbook, and moonclaw",
+    plan,
+    town_synthesis_path(
+      "town.json", "research moontown, moonbook, and moonclaw",
+    ),
+  )
+  guard state.books.length() == 1 else { fail("expected town book") }
+  assert_eq(state.books[0].id, "town")
+  assert_eq(
+    state.books[0].workspace_root,
+    @storage.moontown_product_state_dir(),
+  )
+  assert_false(state.books[0].workspace_root == ".moontown")
+}
+
+///|
 test "town synthesis overview renders lane count and relationship diagram" {
   let mayor = @roles.Mayor::new()
   let plan = mayor.plan_goal(

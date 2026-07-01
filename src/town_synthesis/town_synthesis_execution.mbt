@@ -51,7 +51,7 @@ fn register_town_book_if_missing(state : @core.TownState) -> Unit {
       id="town",
       name="Moontown / Mayor",
       purpose="Shared town-level synthesis, supervision, and cross-book readiness.",
-      workspace_root=".moontown",
+      workspace_root=@storage.moontown_product_state_dir(),
       memory_scope=SharedTown,
       tags=["town", "mayor", "synthesis"],
     ),

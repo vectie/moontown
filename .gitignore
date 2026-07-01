@@ -1,6 +1,8 @@
 .DS_Store
 _build/
 .mooncakes/
+.repos/
+.moonsuite/
 .moonagent/
 .moontown/
 .moonclaw/

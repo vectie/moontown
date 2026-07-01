@@ -46,7 +46,7 @@ Moontown is strongest when you want one system to hold together:
 
 Implemented today:
 
-- persisted town bootstrap in `.moontown/town.json`
+- persisted town bootstrap in `.moonsuite/products/moontown/town.json`
 - persisted standing goal registry in
   `.moonsuite/products/moontown/standing-goals.json`
 - persisted moonbook catalog in `.moonsuite/products/moontown/moonbooks.json`
@@ -54,7 +54,8 @@ Implemented today:
 - extension-API-shaped moonbook adapter
 - external proposal packet and proposal/run receipt lifecycle
 - run polling, result persistence, and review-queue surfacing for goal runs
-- mayor-level cross-book research synthesis under `.moontown/town-synthesis/`
+- mayor-level cross-book research synthesis under
+  `.moonsuite/products/moontown/town-synthesis/`
 - town quality gates for provisional or non-lane-specific research output
 - one-shot, foreground, and supervised background daemon commands for mayor supervision
 - daemon runtime health, heartbeat, PID, log, stale-worker detection, and restart policy
@@ -770,7 +771,7 @@ user goal naming multiple subjects
   -> MoonClaw gathers web/local evidence into raw/bootstrap/*
   -> MoonBook materializes durable wiki coverage and generated sites
   -> Moontown applies quality gates
-  -> mayor writes .moontown/town-synthesis/*.md
+  -> mayor writes .moonsuite/products/moontown/town-synthesis/*.md
 ```
 
 Current standing-goal path:
