@@ -371,8 +371,9 @@ moon run src/cmd/main -- books doctor
 moon run src/cmd/main -- books quality
 ```
 
-This writes `.moontown/book-quality/audit.json` and
-`.moontown/book-quality/audit.md`. The structural readiness column is
+This writes `.moonsuite/products/moontown/book-quality/audit.json` and
+`.moonsuite/products/moontown/book-quality/audit.md`. The structural readiness
+column is
 deliberately deterministic: it checks required workspaces, contracts, skills,
 projections, and whether a civic service has at least one real service-loop
 result. It is not a quality score.
@@ -400,10 +401,13 @@ moon run src/cmd/main -- books ai-review-packets
 moon run src/cmd/main -- books ai-review bridge
 ```
 
-Those packets live under `.moontown/book-quality/ai-review-packets/` and should
+Those packets live under
+`.moonsuite/products/moontown/book-quality/ai-review-packets/` and should
 be reviewed by MoonClaw/MoonBook using `BOOK_QUALITY_REVIEW_SKILL.md` plus each
 book's own contract and `SKILL.md`. The resulting `ai_quality_score` should be
-written to `.moontown/book-quality/ai-review-results/<book-id>.md`. World-class
+written to
+`.moonsuite/products/moontown/book-quality/ai-review-results/<book-id>.md`.
+World-class
 quality should be decided by that AI review layer, not by hard-coded
 file-existence checks.
 
@@ -414,7 +418,8 @@ keeps supervising other work.
 Before dispatching another review, the same cadence reconciles completed weak
 AI reviews into durable repair work: it writes
 `wiki/reviews/book-quality-repair.md` inside the affected MoonBook workspace,
-updates `.moontown/book-quality/repair-bridge.json`, and creates or refreshes a
+updates `.moonsuite/products/moontown/book-quality/repair-bridge.json`, and
+creates or refreshes a
 `book-quality-repair-<book-id>` standing goal. That makes quality findings part
 of the live growth loop instead of a dead-end report. Archived, hidden, or
 internal books are excluded from this repair bridge, so retired smoke proofs

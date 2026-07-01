@@ -225,7 +225,7 @@ pub fn review_readme(
   [
     "# AI Book Quality Review Packets",
     "",
-    "These packets are the semantic quality layer above `.moontown/book-quality/audit.json`.",
+    "These packets are the semantic quality layer above `.moonsuite/products/moontown/book-quality/audit.json`.",
     "",
     "The structural doctor is deliberately deterministic. It checks existence, contracts, and routing shape. These packets should be sent to MoonClaw/MoonBook so an AI reviewer can judge whether each book is actually useful, insightful, correct, and genre-appropriate.",
     "",

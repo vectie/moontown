@@ -1522,3 +1522,32 @@ test "book quality package owns review dispatch message policy" {
     "No pending AI semantic book-quality review remains. Results are stored under /tmp/results.",
   )
 }
+
+///|
+test "book quality default runtime paths use moontown product home" {
+  assert_eq(
+    default_book_quality_dir(),
+    ".moonsuite/products/moontown/book-quality",
+  )
+  assert_eq(
+    default_audit_path(),
+    ".moonsuite/products/moontown/book-quality/audit.json",
+  )
+  assert_eq(
+    default_review_dir(),
+    ".moonsuite/products/moontown/book-quality/ai-review-packets",
+  )
+  assert_eq(
+    default_review_result_dir(),
+    ".moonsuite/products/moontown/book-quality/ai-review-results",
+  )
+  assert_eq(
+    default_review_run_path(),
+    ".moonsuite/products/moontown/book-quality/ai-review-runs.json",
+  )
+  assert_eq(
+    default_repair_bridge_path(),
+    ".moonsuite/products/moontown/book-quality/repair-bridge.json",
+  )
+  assert_eq(default_review_root(), default_book_quality_dir())
+}

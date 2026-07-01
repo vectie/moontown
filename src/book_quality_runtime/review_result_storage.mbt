@@ -43,7 +43,7 @@ async fn score_book_content_observation(
     course_index_text: @support.read_text_or_empty(
       @book_quality.workspace_path(root, @book_quality.wiki_index_path()),
     ),
-    cookbook_audit_exists: @fs.exists(".moontown/book-quality/audit.json"),
+    cookbook_audit_exists: @fs.exists(@book_quality.default_audit_path()),
   }
 }
 

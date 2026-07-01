@@ -24,7 +24,7 @@ fn root_from_suffixed_path(path : String, suffix : String) -> String {
 
 ///|
 pub fn default_review_root() -> String {
-  ".moontown/book-quality"
+  default_book_quality_dir()
 }
 
 ///|

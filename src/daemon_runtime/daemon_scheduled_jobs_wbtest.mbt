@@ -51,7 +51,7 @@ test "daemon scheduled job records book quality refresh activity" {
   let job = @scheduler.default_daemon_jobs().get(4).unwrap()
   match
     daemon_scheduled_job_event_for_summary(
-      job, 11, "Wrote book management audit for 21 registered book(s) to .moontown/book-quality/audit.json and .moontown/book-quality/audit.md; weakest_structural=research-embodied-robotics(55). Semantic quality scores require AI review results.",
+      job, 11, "Wrote book management audit for 21 registered book(s) to .moonsuite/products/moontown/book-quality/audit.json and .moonsuite/products/moontown/book-quality/audit.md; weakest_structural=research-embodied-robotics(55). Semantic quality scores require AI review results.",
     ) {
     Some(event) => {
       assert_eq(event.id, "event-refresh-book-quality-11")

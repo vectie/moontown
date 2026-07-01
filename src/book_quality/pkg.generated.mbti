@@ -42,6 +42,8 @@ pub fn course_required_paths() -> Array[BookQualityRequiredPath]
 
 pub fn default_audit_path() -> String
 
+pub fn default_book_quality_dir() -> String
+
 pub fn default_content_observation(String) -> BookQualityContentObservation
 
 pub fn default_moonclaw_home() -> String

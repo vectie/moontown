@@ -1,16 +1,21 @@
 ///|
+pub fn default_book_quality_dir() -> String {
+  "\{@storage.moontown_product_state_dir()}/book-quality"
+}
+
+///|
 pub fn default_audit_path() -> String {
-  ".moontown/book-quality/audit.json"
+  "\{default_book_quality_dir()}/audit.json"
 }
 
 ///|
 pub fn default_review_dir() -> String {
-  ".moontown/book-quality/ai-review-packets"
+  "\{default_book_quality_dir()}/ai-review-packets"
 }
 
 ///|
 pub fn default_review_result_dir() -> String {
-  ".moontown/book-quality/ai-review-results"
+  "\{default_book_quality_dir()}/ai-review-results"
 }
 
 ///|
@@ -25,12 +30,12 @@ pub fn workspace_path(root : String, relative : String) -> String {
 
 ///|
 pub fn default_review_run_path() -> String {
-  ".moontown/book-quality/ai-review-runs.json"
+  "\{default_book_quality_dir()}/ai-review-runs.json"
 }
 
 ///|
 pub fn default_repair_bridge_path() -> String {
-  ".moontown/book-quality/repair-bridge.json"
+  "\{default_book_quality_dir()}/repair-bridge.json"
 }
 
 ///|
