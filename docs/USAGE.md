@@ -311,7 +311,7 @@ workspace under `.moontown/books/moontown-cookbook/`, and emits the
 stable-state manifest at:
 
 ```text
-.moontown/cookbook/stable-state.json
+.moonsuite/products/moontown/cookbook/stable-state.json
 ```
 
 The cookbook tracks canonical docs, machine-readable definitions, and optional

@@ -1529,9 +1529,9 @@ moon run src/cmd/main -- cookbook doctor
 
 `cookbook bootstrap` creates `.moontown/books/moontown-cookbook/`, registers it
 in `.moontown/moonbooks.json`, and writes
-`.moontown/cookbook/stable-state.json`. The cookbook does not reinterpret
-domain knowledge. It names the canonical artifacts and records whether the
-stable state is complete enough to operate.
+`.moonsuite/products/moontown/cookbook/stable-state.json`. The cookbook does
+not reinterpret domain knowledge. It names the canonical artifacts and records
+whether the stable state is complete enough to operate.
 
 Book governance now has two inputs: the curated MoonBook catalog and the saved
 town snapshot. The catalog defines canonical books; the snapshot proves which

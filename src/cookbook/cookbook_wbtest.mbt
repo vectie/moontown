@@ -1,5 +1,9 @@
 ///|
 test "cookbook artifact summary owns artifact kind counts and required drift" {
+  assert_eq(
+    default_manifest_path(),
+    ".moonsuite/products/moontown/cookbook/stable-state.json",
+  )
   let summary = CookbookArtifactSummary::from_artifacts([
     test_cookbook_artifact("docs/A.md", "doc", required=true, exists=true),
     test_cookbook_artifact("docs/B.md", "doc", required=true, exists=false),

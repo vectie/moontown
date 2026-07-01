@@ -22,7 +22,7 @@ the town.
 The cookbook command writes:
 
 ```text
-.moontown/cookbook/stable-state.json
+.moonsuite/products/moontown/cookbook/stable-state.json
 .moontown/books/moontown-cookbook/wiki/index.md
 .moontown/books/moontown-cookbook/wiki/definitions/stable-state.md
 .moontown/books/moontown-cookbook/wiki/definitions/ownership.md

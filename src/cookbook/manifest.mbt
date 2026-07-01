@@ -12,7 +12,7 @@ pub fn default_workspace_root() -> String {
 
 ///|
 pub fn default_manifest_path() -> String {
-  ".moontown/cookbook/stable-state.json"
+  "\{@storage.moontown_product_state_dir()}/cookbook/stable-state.json"
 }
 
 ///|

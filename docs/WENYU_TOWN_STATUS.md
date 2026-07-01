@@ -59,7 +59,7 @@ module.
 | Runtime architecture | Medium-near | Civic protocol behavior now has a documented refactor path, the communication-pattern scheduler is split away from generic daemon code, daemon scheduled jobs use a dispatcher, and protocol registry/store/status/fixtures are separated; package-level civic runtime splits and stronger contract validation are still pending |
 | Self-patching evidence | Not yet proven | PlanBook can route bounded repairs to MoonClaw/Codex ACP, but route wiring is not enough. Accepted source repairs now require `planbook.repair.patch_receipt.v1`; without that receipt, ACP runs remain diagnostics or blockers, not proof that the town patched its own source. |
 | Designer/operator tooling | Medium | JSON config works, the standalone viewport has view/editor/output modes, editor mode shows town-level Moondesk handoff lanes, and detailed single-agent/workspace editing remains in Moondesk |
-| Cookbook/control book | Medium-far | `cookbook bootstrap` creates a MoonBook-backed stable-state cookbook, generated wiki pages, generated site, and `.moontown/cookbook/stable-state.json`; needs Moondesk-native browsing/editing, drift review UI, import/export, and MoonBook-native templates upstream |
+| Cookbook/control book | Medium-far | `cookbook bootstrap` creates a MoonBook-backed stable-state cookbook, generated wiki pages, generated site, and `.moonsuite/products/moontown/cookbook/stable-state.json`; needs Moondesk-native browsing/editing, drift review UI, import/export, and MoonBook-native templates upstream |
 | Production deployment | Far | Auth, backups, permissions, packaged supervisor, and recovery playbooks are not complete |
 
 ## Definition Of Fully Functioning

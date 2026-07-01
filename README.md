@@ -250,9 +250,10 @@ moon run src/cmd/main -- cookbook status
 
 This creates `.moontown/books/moontown-cookbook/`, registers it in
 `.moontown/moonbooks.json`, and writes
-`.moontown/cookbook/stable-state.json`. MoonBook generates and stores the
-cookbook, Moondesk should become the human desktop surface for managing it, and
-Moontown consumes the manifest for drift checks and operator guidance.
+`.moonsuite/products/moontown/cookbook/stable-state.json`. MoonBook generates
+and stores the cookbook, Moondesk should become the human desktop surface for
+managing it, and Moontown consumes the manifest for drift checks and operator
+guidance.
 
 ## Planbook Workflow
 
