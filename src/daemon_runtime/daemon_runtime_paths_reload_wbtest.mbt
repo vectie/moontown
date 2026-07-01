@@ -5,16 +5,22 @@ test "daemon runtime paths follow snapshot directory" {
     "/tmp/moontown/daemon-runtime.json",
   )
   assert_eq(
-    default_daemon_pid_path(snapshot_path=".moontown/town.json"),
-    ".moontown/daemon.pid",
+    default_daemon_pid_path(
+      snapshot_path=".moonsuite/products/moontown/town.json",
+    ),
+    ".moonsuite/products/moontown/daemon.pid",
   )
   assert_eq(
-    default_daemon_supervisor_pid_path(snapshot_path=".moontown/town.json"),
-    ".moontown/daemon-supervisor.pid",
+    default_daemon_supervisor_pid_path(
+      snapshot_path=".moonsuite/products/moontown/town.json",
+    ),
+    ".moonsuite/products/moontown/daemon-supervisor.pid",
   )
   assert_eq(
-    default_daemon_restart_path(snapshot_path=".moontown/town.json"),
-    ".moontown/daemon.restart",
+    default_daemon_restart_path(
+      snapshot_path=".moonsuite/products/moontown/town.json",
+    ),
+    ".moonsuite/products/moontown/daemon.restart",
   )
 }
 

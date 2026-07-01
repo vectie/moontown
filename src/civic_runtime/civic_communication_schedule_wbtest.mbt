@@ -7,7 +7,7 @@ test "default civic communication-pattern schedules are explicit opt-in" {
 test "civic communication paths use storage-owned snapshot base" {
   assert_eq(
     default_civic_communication_schedule_path(snapshot_path="town.json"),
-    ".moontown/civic/pattern-schedules.json",
+    ".moonsuite/products/moontown/civic/pattern-schedules.json",
   )
   assert_eq(
     default_civic_communication_run_ledger_path(

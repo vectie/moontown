@@ -1,6 +1,6 @@
 ///|
 pub fn default_watcher_ledger_dir() -> String {
-  ".moontown/watchers"
+  "\{moontown_product_state_dir()}/watchers"
 }
 
 ///|
@@ -14,7 +14,7 @@ pub fn watcher_ledger_path(
 ///|
 pub fn watcher_ledger_dir_for_snapshot(snapshot_path : String) -> String {
   let base = snapshot_base_dir(snapshot_path)
-  if base == ".moontown" {
+  if base == moontown_product_state_dir() {
     default_watcher_ledger_dir()
   } else {
     "\{base}/watchers"

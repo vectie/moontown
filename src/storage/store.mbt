@@ -48,7 +48,7 @@ pub fn describe_snapshot(snapshot : TownSnapshot) -> String {
 
 ///|
 pub fn default_snapshot_path() -> String {
-  ".moontown/town.json"
+  "\{moontown_product_state_dir()}/town.json"
 }
 
 ///|

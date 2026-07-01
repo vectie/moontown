@@ -2,7 +2,7 @@
 test "book quality runtime review result dir uses storage snapshot base" {
   assert_eq(
     review_result_dir_for_snapshot("town.json"),
-    ".moontown/book-quality/ai-review-results",
+    ".moonsuite/products/moontown/book-quality/ai-review-results",
   )
   assert_eq(
     review_result_dir_for_snapshot("/tmp/moontown/town.json"),

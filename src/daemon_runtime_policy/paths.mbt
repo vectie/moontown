@@ -46,7 +46,7 @@ pub fn daemon_standing_goal_path_for_snapshot(
   default_standing_goal_path : String,
 ) -> String {
   let base = daemon_base_dir_for_snapshot(snapshot_path)
-  if base == ".moontown" {
+  if base == @storage.moontown_product_state_dir() {
     default_standing_goal_path
   } else {
     "\{base}/standing-goals.json"

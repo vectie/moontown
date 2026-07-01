@@ -9,7 +9,7 @@ test "request paths derive canonical inbox and event files" {
   )
   assert_eq(
     request_path_for_snapshot("snapshot.json"),
-    ".moontown/book-template-requests.json",
+    ".moonsuite/products/moontown/book-template-requests.json",
   )
   assert_eq(
     request_event_path_for_request("/tmp/moontown/book-template-requests.json"),

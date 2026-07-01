@@ -6,15 +6,15 @@ test "live autonomy policy derives spine paths from snapshot directory" {
   )
   assert_eq(
     live_autonomy_path_for_snapshot("town.json"),
-    ".moontown/live-autonomy.json",
+    ".moonsuite/products/moontown/live-autonomy.json",
   )
   assert_eq(
-    town_journal_path_for_snapshot(".moontown/town.json"),
-    ".moontown/town-journal.jsonl",
+    town_journal_path_for_snapshot(".moonsuite/products/moontown/town.json"),
+    ".moonsuite/products/moontown/town-journal.jsonl",
   )
   assert_eq(
-    live_digest_path_for_snapshot(".moontown/town.json"),
-    ".moontown/live-digest.md",
+    live_digest_path_for_snapshot(".moonsuite/products/moontown/town.json"),
+    ".moonsuite/products/moontown/live-digest.md",
   )
   assert_eq(
     live_autonomy_standing_goal_path_for_snapshot("/tmp/moontown/town.json"),

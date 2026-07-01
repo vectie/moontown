@@ -2,7 +2,7 @@
 test "standing watch book result paths use storage snapshot base" {
   assert_eq(
     standing_watch_book_result_path("town.json", "standing-watch-a"),
-    ".moontown/book-results/standing-watch-a.json",
+    ".moonsuite/products/moontown/book-results/standing-watch-a.json",
   )
   assert_eq(
     standing_watch_book_result_path(

@@ -38,6 +38,14 @@ pub async fn load_watcher_run_records(String, dir? : String) -> Array[@core.Watc
 
 pub async fn load_watcher_run_records_file(String) -> Array[@core.WatcherRunRecord]
 
+pub fn moonsuite_product_id() -> String
+
+pub fn moontown_product_service_path() -> String
+
+pub fn moontown_product_state_dir() -> String
+
+pub fn moontown_product_tmp_dir() -> String
+
 pub async fn save_snapshot_file(String, TownSnapshot) -> Unit
 
 pub async fn save_standing_goals_file(String, Array[@core.StandingGoal]) -> Unit

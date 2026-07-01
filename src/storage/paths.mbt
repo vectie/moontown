@@ -14,10 +14,30 @@ async fn ensure_parent_directory(path : String) -> Unit {
 pub fn snapshot_base_dir(snapshot_path : String) -> String {
   let base = @path.Path::dirname(snapshot_path).to_string()
   if base == "." || base == "" {
-    ".moontown"
+    moontown_product_state_dir()
   } else {
     base
   }
+}
+
+///|
+pub fn moonsuite_product_id() -> String {
+  "moontown"
+}
+
+///|
+pub fn moontown_product_state_dir() -> String {
+  ".moonsuite/products/moontown"
+}
+
+///|
+pub fn moontown_product_service_path() -> String {
+  "\{moontown_product_state_dir()}/service.json"
+}
+
+///|
+pub fn moontown_product_tmp_dir() -> String {
+  ".tmp/products/moontown"
 }
 
 ///|

@@ -36,7 +36,16 @@ async test "watcher ledger appends and reads jsonl records" {
 async test "watcher ledger derives snapshot-relative directory and appends by goal" {
   let root = "/tmp/moontown-watcher-ledger-dir-test"
   assert_eq(snapshot_base_dir("\{root}/town.json"), root)
-  assert_eq(snapshot_base_dir("town.json"), ".moontown")
+  assert_eq(snapshot_base_dir("town.json"), moontown_product_state_dir())
+  assert_eq(default_snapshot_path(), ".moonsuite/products/moontown/town.json")
+  assert_eq(
+    default_standing_goal_path(),
+    ".moonsuite/products/moontown/standing-goals.json",
+  )
+  assert_eq(
+    default_watcher_ledger_dir(),
+    ".moonsuite/products/moontown/watchers",
+  )
   let ledger_dir = watcher_ledger_dir_for_snapshot("\{root}/town.json")
   assert_eq(ledger_dir, "\{root}/watchers")
   assert_eq(
