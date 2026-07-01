@@ -69,11 +69,11 @@ fn state_source_detail(model : Model) -> String {
     StateSourceKind::SnapshotFile =>
       match model.projection_snapshot {
         Some(snapshot) if projection_snapshot_ready(snapshot) =>
-          "Projection snapshot mode is loaded from `.moontown/town.json` with \{snapshot.town.books.length()} books, \{snapshot.town.workers.length()} workers, \{snapshot.town.tasks.length()} queued tasks, and \{snapshot.event_count} events."
+          "Projection snapshot mode is loaded from `.moonsuite/products/moontown/town.json` with \{snapshot.town.books.length()} books, \{snapshot.town.workers.length()} workers, \{snapshot.town.tasks.length()} queued tasks, and \{snapshot.event_count} events."
         Some(_) =>
           "Projection snapshot file was found but does not yet contain a usable town runtime projection, so the shell stays on demo supervision until the bridge publishes real books, workers, or tasks."
         None =>
-          "Projection snapshot mode shows the MoonBook-to-browser bridge placeholder until the bundle can load `.moontown/town.json` or a generated runtime projection."
+          "Projection snapshot mode shows the MoonBook-to-browser bridge placeholder until the bundle can load `.moonsuite/products/moontown/town.json` or a generated runtime projection."
       }
   }
 }

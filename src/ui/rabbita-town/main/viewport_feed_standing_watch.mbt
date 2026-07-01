@@ -29,7 +29,7 @@ fn standing_watch_connected_detail(model : Model) -> String {
       "\{prefix} Next configured watch: `\{goal.id}` -> `\{target}` every \{goal.cadence_ticks} ticks."
     }
     None =>
-      "Add a standing goal in `.moontown/standing-goals.json` or submit one from the operator panel to start durable topic monitoring."
+      "Add a standing goal in `.moonsuite/products/moontown/standing-goals.json` or submit one from the operator panel to start durable topic monitoring."
   }
 }
 

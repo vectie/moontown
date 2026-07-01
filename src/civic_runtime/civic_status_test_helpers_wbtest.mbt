@@ -46,7 +46,7 @@ fn test_civic_service_health(
     projection_ready: true,
     skill_ready: true,
     moonclaw_profile_ready: true,
-    latest_result_path: ".moontown/book-results/goal-wenyu-policy-hall-civic-service.json",
+    latest_result_path: ".moonsuite/products/moontown/book-results/goal-wenyu-policy-hall-civic-service.json",
     latest_result_found: latest_decision != "none",
     latest_decision,
     latest_book_changed: "unknown",

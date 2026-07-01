@@ -11,7 +11,7 @@ fn push_live_autonomy_messages(feed : Array[FeedItem], model : Model) -> Unit {
 fn live_autonomy_disconnected_feed_item() -> FeedItem {
   {
     title: "Live spine not connected",
-    detail: "Run `moon run src/cmd/main -- live refresh` or one daemon tick to publish `.moontown/live-autonomy.json` for the operator console.",
+    detail: "Run `moon run src/cmd/main -- live refresh` or one daemon tick to publish `.moonsuite/products/moontown/live-autonomy.json` for the operator console.",
     tone: "alert",
   }
 }

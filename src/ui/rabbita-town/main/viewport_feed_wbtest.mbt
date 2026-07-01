@@ -10,7 +10,11 @@ fn test_visual_projection_snapshot(
 test "standing watch feed item centralizes base feed message" {
   let item = standing_watch_feed_item(init_model())
   assert_eq(item.title, "No standing watcher connected")
-  assert_true(item.detail.contains(".moontown/standing-goals.json"))
+  assert_true(
+    item.detail.contains(
+      ".moonsuite/products/moontown/standing-goals.json",
+    ),
+  )
   assert_eq(item.tone, "calm")
 }
 

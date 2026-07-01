@@ -101,9 +101,9 @@ pub fn cookbook_runtime_boundaries_markdown() -> String {
 pub fn cookbook_live_autonomy_spine_markdown() -> String {
   [
     "# Live Autonomy Spine", "", "The live autonomy spine is the current control-plane contract that makes the town feel alive instead of merely configured.",
-    "", "## Runtime Artifacts", "", "- `.moontown/live-autonomy.json`: current status, accepted updates, no-change cycles, blocked work, due goals, visual projection path, and next actions.",
-    "- `.moontown/town-journal.jsonl`: append-only journal of live spine refreshes and daemon ticks.",
-    "- `.moontown/visual-projection.json`: task-to-agent and task-to-building visual projection consumed by the town UI.",
+    "", "## Runtime Artifacts", "", "- `.moonsuite/products/moontown/live-autonomy.json`: current status, accepted updates, no-change cycles, blocked work, due goals, visual projection path, and next actions.",
+    "- `.moonsuite/products/moontown/town-journal.jsonl`: append-only journal of live spine refreshes and daemon ticks.",
+    "- `.moonsuite/products/moontown/visual-projection.json`: task-to-agent and task-to-building visual projection consumed by the town UI.",
     "", "## Lifecycle", "", "```text", "Mayor daemon tick", "-> standing goals and civic schedules",
     "-> MoonClaw/MoonBook work", "-> accepted/no-change/review/blocked accounting",
     "-> visual projection", "-> live autonomy spine", "-> town journal", "-> operator UI",
@@ -218,7 +218,7 @@ pub fn cookbook_feature_guide_markdown() -> String {
       "The always-on town supervisor that turns goals, schedules, and failures into bounded work or explicit no-change decisions.",
       "Moontown owns cadence, dispatch budget, daemon health, standing-goal routing, stale execution reconciliation, and restart-readable state under `.moontown`.",
       [
-        "A tick loads `.moontown/town.json`, `.moontown/daemon.json`, and standing-goal registries.",
+        "A tick loads `.moonsuite/products/moontown/town.json`, `.moonsuite/products/moontown/service.json`, and standing-goal registries.",
         "The Mayor dispatches due goals to book-local watcher lanes and records running executions without blocking the tick on long MoonClaw work.",
         "Later ticks reconcile receipts, MoonBook watcher markers, run results, failures, and next due times.",
         "Supervisor state, heartbeat, restart markers, and logs make recovery inspectable after process failure.",
@@ -252,7 +252,7 @@ pub fn cookbook_feature_guide_markdown() -> String {
     cookbook_feature_section(
       "Live Autonomy Spine",
       "The compact live-state spine that tells the operator whether the town is active, waiting, blocked, or drifting.",
-      "Moontown writes `.moontown/live-autonomy.json`, `.moontown/town-journal.jsonl`, and `.moontown/visual-projection.json` from daemon and civic runtime facts.",
+      "Moontown writes `.moonsuite/products/moontown/live-autonomy.json`, `.moonsuite/products/moontown/town-journal.jsonl`, and `.moonsuite/products/moontown/visual-projection.json` from daemon and civic runtime facts.",
       [
         "Collect recent daemon ticks, active workers, accepted updates, no-change cycles, due goals, blockers, and projection paths.",
         "Separate stable waiting from unresolved failures, transient debt, and review queues.",

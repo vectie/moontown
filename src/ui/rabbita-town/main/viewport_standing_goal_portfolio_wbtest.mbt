@@ -209,6 +209,6 @@ test "standing goal next check view explains missing active watcher" {
   assert_eq(view.portal_label, "not scheduled")
   assert_eq(
     view.idle_detail,
-    "Waiting for a configured standing watch. Add one to `.moontown/standing-goals.json` to activate this worker.",
+    "Waiting for a configured standing watch. Add one to `.moonsuite/products/moontown/standing-goals.json` to activate this worker.",
   )
 }

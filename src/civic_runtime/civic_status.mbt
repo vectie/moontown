@@ -67,7 +67,7 @@ pub struct CivicServicePortfolio {
 
 ///|
 pub fn default_wenyu_civic_status_path() -> String {
-  ".moontown/civic/status.json"
+  "\{@storage.moontown_product_state_dir()}/civic/status.json"
 }
 
 ///|

@@ -34,7 +34,7 @@ fn render_bridge_contract(model : Model) -> @rabbita.Html {
     ]),
     div(class="contract-list", [
       p(
-        "Persisted town state: `.moontown/town.json` should publish the same objects shown here.",
+        "Persisted town state: `.moonsuite/products/moontown/town.json` should publish the same objects shown here.",
       ),
       p(
         "MoonBook state: each civic module owns durable wiki/memory pages for its domain.",

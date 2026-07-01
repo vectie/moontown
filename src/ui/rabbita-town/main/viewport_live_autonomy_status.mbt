@@ -61,7 +61,7 @@ fn live_autonomy_disconnected_operator_view(
 ) -> LiveAutonomyOperatorView {
   {
     status_label: "not-connected",
-    summary_label: "No `.moontown/live-autonomy.json` loaded yet. The daemon can still run, but the operator console is missing the single live spine.",
+    summary_label: "No `.moonsuite/products/moontown/live-autonomy.json` loaded yet. The daemon can still run, but the operator console is missing the single live spine.",
     detail_label: "Run a live refresh or daemon tick to connect the spine.",
     tone: "alert",
     active_worker_label: fallback_active_workers.to_string(),

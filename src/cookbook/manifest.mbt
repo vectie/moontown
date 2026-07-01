@@ -96,44 +96,44 @@ pub fn cookbook_artifacts() -> Array[CookbookArtifact] {
       true,
     ),
     cookbook_artifact(
-      ".moontown/moonbooks.json", "definition", "moonbook", "book catalog and workspace registry",
+      "books/", "definition", "moonbook", "book catalog and workspace registry",
       true,
     ),
     cookbook_artifact(
-      ".moontown/civic/protocols.json", "definition", "moontown", "building protocol registry",
-      true,
+      ".moonsuite/products/moontown/civic/protocols.json", "definition", "moontown",
+      "building protocol registry", true,
     ),
     cookbook_artifact(
-      ".moontown/civic/pattern-schedules.json", "definition", "moontown", "recurring communication-pattern schedule registry",
+      ".moonsuite/products/moontown/civic/pattern-schedules.json", "definition",
+      "moontown", "recurring communication-pattern schedule registry", false,
+    ),
+    cookbook_artifact(
+      ".moonsuite/products/moontown/standing-goals.json", "definition", "moontown",
+      "long-horizon watcher registry", false,
+    ),
+    cookbook_artifact(
+      ".moonsuite/products/moontown/civic/protocol-status.json", "runtime-state",
+      "moontown", "latest civic protocol status projection", false,
+    ),
+    cookbook_artifact(
+      ".moonsuite/products/moontown/civic/status.json", "runtime-state", "moontown",
+      "latest civic workspace status projection", false,
+    ),
+    cookbook_artifact(
+      ".moonsuite/products/moontown/service.json", "runtime-state", "moontown", "daemon tick and heartbeat state",
       false,
     ),
     cookbook_artifact(
-      ".moontown/standing-goals.json", "definition", "moontown", "long-horizon watcher registry",
-      false,
+      ".moonsuite/products/moontown/daemon-runtime.json", "runtime-state", "moontown",
+      "daemon supervisor and worker process state", false,
     ),
     cookbook_artifact(
-      ".moontown/civic/protocol-status.json", "runtime-state", "moontown", "latest civic protocol status projection",
-      false,
+      ".moonsuite/products/moontown/live-autonomy.json", "runtime-state", "moontown",
+      "current live autonomy spine for UI/operator decisions", false,
     ),
     cookbook_artifact(
-      ".moontown/civic/status.json", "runtime-state", "moontown", "latest civic workspace status projection",
-      false,
-    ),
-    cookbook_artifact(
-      ".moontown/daemon.json", "runtime-state", "moontown", "daemon tick and heartbeat state",
-      false,
-    ),
-    cookbook_artifact(
-      ".moontown/daemon-runtime.json", "runtime-state", "moontown", "daemon supervisor and worker process state",
-      false,
-    ),
-    cookbook_artifact(
-      ".moontown/live-autonomy.json", "runtime-state", "moontown", "current live autonomy spine for UI/operator decisions",
-      false,
-    ),
-    cookbook_artifact(
-      ".moontown/town-journal.jsonl", "runtime-state", "moontown", "append-only town journal for daemon ticks and live-state transitions",
-      false,
+      ".moonsuite/products/moontown/town-journal.jsonl", "runtime-state", "moontown",
+      "append-only town journal for daemon ticks and live-state transitions", false,
     ),
   ]
 }

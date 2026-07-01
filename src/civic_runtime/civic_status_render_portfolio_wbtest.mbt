@@ -56,7 +56,7 @@ test "civic portfolio markdown starts with summary and service table" {
     ),
   ]
   let portfolio = civic_service_portfolio(
-    services, ".moontown/civic/status.json",
+    services, ".moonsuite/products/moontown/civic/status.json",
   )
   let markdown = render_wenyu_civic_portfolio(portfolio)
   assert_true(markdown.has_prefix("# Wenyu Civic Service Status\n\n"))
@@ -104,14 +104,17 @@ test "civic portfolio counts operable and review services" {
     ),
   ]
   let portfolio = civic_service_portfolio(
-    services, ".moontown/civic/status.json",
+    services, ".moonsuite/products/moontown/civic/status.json",
   )
   assert_eq(portfolio.total, 2)
   assert_eq(portfolio.operable_count, 1)
   assert_eq(portfolio.proven_count, 1)
   assert_eq(portfolio.review_count, 1)
   assert_eq(portfolio.missing_count, 1)
-  assert_eq(portfolio.markdown_path, ".moontown/civic/status.md")
+  assert_eq(
+    portfolio.markdown_path,
+    ".moonsuite/products/moontown/civic/status.md",
+  )
   let json_text = portfolio.to_json().stringify()
   assert_true(json_text.contains("protocol_history"))
   assert_true(json_text.contains("protocol_history_state"))

@@ -48,7 +48,7 @@ fn civic_communication_protocol_ledger_path(
   building_id : String,
   ledger : String,
 ) -> String {
-  ".moontown/civic/protocols/\{building_id}/\{ledger}.jsonl"
+  "\{@storage.moontown_product_state_dir()}/civic/protocols/\{building_id}/\{ledger}.jsonl"
 }
 
 ///|

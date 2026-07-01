@@ -25,7 +25,7 @@ pub fn protocol_ledger_dir(
 
 ///|
 pub fn default_protocol_ledger_base_dir() -> String {
-  ".moontown/civic/protocols"
+  "\{@storage.moontown_product_state_dir()}/civic/protocols"
 }
 
 ///|

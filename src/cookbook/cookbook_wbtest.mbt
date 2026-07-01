@@ -10,7 +10,7 @@ test "cookbook artifact summary owns artifact kind counts and required drift" {
       exists=true,
     ),
     test_cookbook_artifact(
-      ".moontown/daemon.json",
+      ".moonsuite/products/moontown/service.json",
       "runtime-state",
       required=false,
       exists=false,
