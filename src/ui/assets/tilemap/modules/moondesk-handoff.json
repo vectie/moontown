@@ -54,7 +54,7 @@
       "status": "simple-only",
       "scope": "simple worker lane controls in Moontown, detailed authoring in Moondesk",
       "source_path": "../moondesk exports/agent-profiles/*.json",
-      "target_path": ".moontown/agent-profiles/<profile-id>.json",
+      "target_path": ".moonsuite/products/moontown/agent-profiles/<profile-id>.json",
       "summary": "Role, capacity, cadence, permission envelope, visible home building, and book/module assignment. Detailed prompts and memory rules remain in Moondesk/MoonBook skill files.",
       "import_contract": [
         "profile declares role, capacity, and permission envelope",
@@ -83,8 +83,8 @@
       "kind": "operator-request",
       "status": "ready",
       "scope": "human request staged in Moondesk, dispatched by Moontown mayor",
-      "source_path": ".moontown/moondesk-requests/*.json",
-      "target_path": ".moontown/standing-goals.json or .moontown/operator-requests",
+      "source_path": ".moonsuite/products/moontown/moondesk-requests/*.json",
+      "target_path": ".moonsuite/products/moontown/standing-goals.json or .moonsuite/products/moontown/operator-requests",
       "summary": "Context-rich request drafted in Moondesk and submitted to Moontown as a standing watch or one-shot mayor goal.",
       "import_contract": [
         "request declares target_book_id",

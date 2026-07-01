@@ -49,8 +49,8 @@ fn test_live_autonomy_snapshot(
     visual_projection_path: ".moonsuite/products/moontown/visual-projection.json",
     journal_path: ".moonsuite/products/moontown/town-journal.jsonl",
     digest_path: ".moonsuite/products/moontown/live-autonomy.md",
-    planbook_change_log_path: ".moontown/planbook/change-log.md",
-    planbook_engineering_digest_path: ".moontown/planbook/engineering.md",
+    planbook_change_log_path: "books/planbook/wiki/history/change-log.md",
+    planbook_engineering_digest_path: "books/planbook/wiki/history/daily-engineering-digest.md",
     latest_change_summary: "latest change\nsummary",
     next_actions,
   }

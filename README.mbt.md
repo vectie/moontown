@@ -519,9 +519,10 @@ captured `.import.json.err` excerpt so ownership is visible instead of being
 reported as a generic missing-receipt timeout.
 The Mayor also compacts oversized book-local MoonClaw hot-store JSON files
 before standing-watch imports by archiving them under
-`.moonclaw/jobs/archive/tick-<tick>/` and replacing the active files with valid
-empty indexes. This keeps long-lived books from stalling on proposal-store
-serialization growth while preserving historical audit material.
+`.moonsuite/products/moonclaw/jobs/archive/tick-<tick>/` and replacing the
+active files with valid empty indexes. This keeps long-lived books from
+stalling on proposal-store serialization growth while preserving historical
+audit material.
 Transient dispatch failures such as temporary file/resource contention are
 classified as `deferred` with immediate retry cadence, not as domain research
 findings or durable review progress.
