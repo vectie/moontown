@@ -39,7 +39,12 @@ pub fn default_moonbook_root() -> String {
     _ =>
       match @sys.get_env_var("MOONBOOK_ROOT") {
         Some(root) if !root.is_empty() => root
-        _ => ".moontown/moonbook"
+        _ => default_moonbook_external_root()
       }
   }
+}
+
+///|
+fn default_moonbook_external_root() -> String {
+  @storage.moontown_product_artifact("external/moonbook")
 }

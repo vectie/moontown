@@ -47,6 +47,22 @@ test "mooncode sidecar processed key falls back to session command task" {
 }
 
 ///|
+test "mooncode sidecar processed ledger uses moontown product home" {
+  let entry = BookCatalogEntry::new(
+    id="book/with spaces",
+    name="Book",
+    purpose="Verify product-owned ledger path",
+    workspace_root="/tmp/book",
+  )
+  assert_eq(
+    mooncode_book_results_processed_ledger(entry),
+    @storage.moontown_product_artifact(
+      "mooncode-book-results/book-with-spaces/processed.jsonl",
+    ),
+  )
+}
+
+///|
 async test "mooncode sidecar processed ledger dedupes keys" {
   let path = "/tmp/moontown-mooncode-sidecar-ledger/processed.jsonl"
   @support.write_text_file(path, "a\nb\na\n\n")

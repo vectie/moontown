@@ -16,3 +16,11 @@ test "default book workspaces use moonsuite book root" {
   assert_eq(catalog[0].workspace_root, @moonsuite.book_root("", "coding"))
   assert_eq(catalog[1].workspace_root, @moonsuite.book_root("", "finance"))
 }
+
+///|
+test "default moonbook checkout root uses moontown product home" {
+  assert_eq(
+    default_moonbook_external_root(),
+    @storage.moontown_product_artifact("external/moonbook"),
+  )
+}

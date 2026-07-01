@@ -21,8 +21,32 @@ fn mooncode_book_results_sessions_root(book_root : String) -> String {
 }
 
 ///|
-fn mooncode_book_results_processed_ledger(book_root : String) -> String {
-  "\{book_root}/.moontown/mooncode-book-results/processed.jsonl"
+fn mooncode_book_results_processed_ledger(entry : BookCatalogEntry) -> String {
+  @storage.moontown_product_artifact(
+    "mooncode-book-results/\{safe_mooncode_book_result_id(entry.id)}/processed.jsonl",
+  )
+}
+
+///|
+fn safe_mooncode_book_result_id(book_id : String) -> String {
+  let builder = StringBuilder::new()
+  for ch in book_id {
+    if (ch >= 'a' && ch <= 'z') ||
+      (ch >= 'A' && ch <= 'Z') ||
+      (ch >= '0' && ch <= '9') ||
+      ch == '-' ||
+      ch == '_' {
+      builder.write_char(ch)
+    } else {
+      builder.write_char('-')
+    }
+  }
+  let safe = builder.to_string().trim(chars="-").to_owned()
+  if safe.is_empty() {
+    "book"
+  } else {
+    safe
+  }
 }
 
 ///|
@@ -35,7 +59,7 @@ pub async fn reconcile_mooncode_book_result_sidecars(
   if !@fs.exists(sessions_root) {
     return []
   }
-  let ledger_path = mooncode_book_results_processed_ledger(root)
+  let ledger_path = mooncode_book_results_processed_ledger(entry)
   let processed = read_mooncode_book_result_processed_keys(ledger_path)
   let imports : Array[MoonCodeBookResultImport] = []
   for session_dir in @support.list_directory_paths(sessions_root) {
