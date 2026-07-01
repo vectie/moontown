@@ -95,7 +95,6 @@ fn render_tilemap_raster_layer() -> @rabbita.Html {
     src="tilemap/wenyu_reference_tilemap_iso.png",
     alt="Wenyu Valley rendered tilemap",
     loading="eager",
-    no_children(),
   )
 }
 

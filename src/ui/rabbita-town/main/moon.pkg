@@ -7,6 +7,8 @@ import {
   "vectie/moontown/ui",
 }
 
+supported_targets = "js"
+
 options(
   "is-main": true,
 )

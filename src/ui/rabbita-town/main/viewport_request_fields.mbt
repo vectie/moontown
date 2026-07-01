@@ -13,13 +13,9 @@ fn render_request_input_field(
   }
   div(class=field_class, [
     p(class="request-label", label),
-    input(
-      class="request-input",
-      placeholder~,
-      value~,
-      on_input=value => on_value(value),
-      "",
-    ),
+    input(class="request-input", placeholder~, value~, on_input=value => {
+      on_value(value)
+    }),
   ])
 }
 

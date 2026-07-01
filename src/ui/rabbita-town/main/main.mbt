@@ -10,7 +10,7 @@ fn render_scene(dispatch : Dispatch[Msg], model : Model) -> @rabbita.Html {
 
 ///|
 fn main {
-  let (dispatch, app) = @rabbita.cell_with_dispatch(
+  let (dispatch, app) = @rabbita.cell_with_emit(
     model=init_model(),
     update~,
     view=(dispatch, model) => render_scene(dispatch, model),

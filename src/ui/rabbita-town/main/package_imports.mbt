@@ -19,4 +19,7 @@ using @html {
 }
 
 ///|
-using @rabbita {type Cmd, type Dispatch}
+using @rabbita {type Cmd, type Emit}
+
+///|
+type Dispatch[A] = Emit[A]

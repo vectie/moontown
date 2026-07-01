@@ -1,13 +1,7 @@
 ///|
 fn render_asset(asset_path : String, title : String) -> @rabbita.Html {
   let asset_class = "scene-asset " + scene_asset_class(asset_path)
-  img(
-    class=asset_class,
-    src=asset_path,
-    alt="\{title} asset",
-    loading="lazy",
-    no_children(),
-  )
+  img(class=asset_class, src=asset_path, alt="\{title} asset", loading="lazy")
 }
 
 ///|

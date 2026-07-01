@@ -39,7 +39,6 @@ fn render_town_viewport(
           src=scene.background_path,
           alt="\{scene.title} background",
           loading="eager",
-          no_children(),
         ),
         render_tilemap_layer(),
         render_water_effect_layer(),

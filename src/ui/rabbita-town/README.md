@@ -2,6 +2,17 @@
 
 This package is the browser-facing Rabbita frontend for `moontown`.
 
+It uses the published Rabbita frontend stack:
+
+- `moon.mod` imports `moonbit-community/rabbita@0.12.4`.
+- `moon.work` only binds this nested frontend and the local Moontown source tree.
+- `package.json` imports the published `@rabbita/vite` package instead of a
+  local `../rba` checkout.
+
+Lepusa is intentionally not imported here yet. If Moontown gains a native
+desktop shell, that target should import the published `vectie/lepusa` package
+from its own MoonBit module instead of wiring to a local `../lepusa` checkout.
+
 It consumes the renderer-agnostic scene contracts from the root module:
 
 - `vectie/moontown/ui/scene_layout`
