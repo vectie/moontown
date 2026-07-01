@@ -3,10 +3,11 @@ import { fileURLToPath } from 'node:url'
 
 const rabbitaTownDir = path.dirname(fileURLToPath(import.meta.url))
 const repoRootPath = path.resolve(rabbitaTownDir, '../../..')
-const legacyMoontownRootPath = path.join(repoRootPath, '.moontown')
-export const moontownProductStatePath = path.join(
-  repoRootPath,
-  '.moonsuite/products/moontown',
+const suiteRootPath = path.resolve(process.env.MOONTOWN_SUITE_ROOT || repoRootPath)
+
+export const moontownProductStatePath = path.resolve(
+  process.env.MOONTOWN_PRODUCT_STATE_ROOT ||
+    path.join(suiteRootPath, '.moonsuite/products/moontown'),
 )
 
 export const townSnapshotPath = path.join(moontownProductStatePath, 'town.json')
@@ -34,7 +35,9 @@ export const civicStatusPath = path.join(moontownProductStatePath, 'civic/status
 export const watcherDir = path.join(moontownProductStatePath, 'watchers')
 export const operatorRequestDir = path.join(moontownProductStatePath, 'operator-requests')
 export const operatorRequestLedgerPath = path.join(operatorRequestDir, 'requests.jsonl')
-export const booksRootPath = path.join(legacyMoontownRootPath, 'books')
+export const booksRootPath = path.resolve(
+  process.env.MOONTOWN_BOOKS_ROOT || path.join(suiteRootPath, 'books'),
+)
 export const bookProjectionPolicyPath = path.join(
   moontownProductStatePath,
   'book-projection-policy.json',

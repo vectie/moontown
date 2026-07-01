@@ -1,7 +1,8 @@
 {
   "scripts": {
     "dev": "vite",
-    "build": "node scripts/prepare-rabbita-build.mjs && vite build"
+    "build": "node scripts/prepare-rabbita-build.mjs && vite build",
+    "smoke:book-projections": "node scripts/smoke-book-projections.mjs"
   },
   "type": "module",
   "dependencies": {

@@ -337,7 +337,9 @@ The short version:
 - each building binds to a MoonBook through `book_id`
 - clicking a building opens a module-specific interior
 - the Vite bridge scans `books/*/book/moonbook-ui-state.json` and
-  publishes `module-projections.json`
+  publishes `module-projections.json`; smoke and fresh-root runs may override
+  the defaults with `MOONTOWN_SUITE_ROOT`, `MOONTOWN_BOOKS_ROOT`, and
+  `MOONTOWN_PRODUCT_STATE_ROOT`
 - projection visibility is metadata-driven: generated fragments can set
   `projection_scope` or `visibility`, and operators can override visibility
   through `.moonsuite/products/moontown/book-projection-policy.json` using the
@@ -444,6 +446,13 @@ For frontend-only iteration, at minimum run:
 
 ```bash
 ./scripts/build-rabbita-ui.sh
+```
+
+The fresh-suite book projection smoke can be run from the frontend directory:
+
+```bash
+cd src/ui/rabbita-town
+npm run smoke:book-projections
 ```
 
 ## UI Ownership Boundary
