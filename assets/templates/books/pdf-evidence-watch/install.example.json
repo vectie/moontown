@@ -1,7 +1,7 @@
 {
   "book_id": "research-my-domain-pdf-watch",
   "title": "My Domain PDF Watch",
-  "purpose": "Watch approved websites for relevant PDFs, extract full text, analyze with the book-owned method, and notify only when accepted knowledge changes.",
+  "purpose": "Watch approved websites for relevant PDFs, extract full text through MoonClaw's registered OCR tool, analyze with the book-owned method, and notify only when accepted knowledge changes.",
   "websites": [
     "https://example.org/reports",
     "https://example.com/publications"

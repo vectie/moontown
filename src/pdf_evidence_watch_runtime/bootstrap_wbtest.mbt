@@ -33,6 +33,7 @@ async test "bootstrap pdf evidence watch book installs workspace catalog and sta
   let config = read_text_or_empty("\{root}/book.json")
   assert_true(config.contains("\"book_type\": \"\{@policy.research_type()}\""))
   assert_true(config.contains("https://example.org/reports"))
+  assert_true(config.contains("\"ocr_engine\": \"unlimited-ocr\""))
   let method_text = read_text_or_empty(
     "\{root}/wiki/methods/analysis-method.md",
   )
@@ -53,6 +54,8 @@ async test "bootstrap pdf evidence watch book installs workspace catalog and sta
       assert_eq(goal.cadence_ticks, 42)
       assert_eq(goal.source_policy, @policy.web_first_policy())
       assert_true(goal.prompt.contains("https://example.com/briefs"))
+      assert_true(goal.prompt.contains("registered `unlimited_ocr` tool"))
+      assert_true(goal.prompt.contains("OCR engine/version"))
     }
   }
   assert_true(found_goal)

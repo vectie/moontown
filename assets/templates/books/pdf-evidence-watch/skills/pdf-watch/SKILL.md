@@ -12,8 +12,10 @@ Use this skill when a MoonClaw worker or MoonBook keeper is running a
 
 Find relevant PDFs from configured websites, preserve source metadata, extract
 the full text when possible, and hand off analysis to the book's analysis
-method. The goal is not to produce noise. The goal is to identify whether new
-knowledge entered the domain.
+method. Use MoonClaw's registered `unlimited_ocr` MoonTool as the default OCR
+capability when scanned or image-heavy PDFs need OCR. The goal is not to
+produce noise. The goal is to identify whether new knowledge entered the
+domain.
 
 ## Inputs
 
@@ -33,8 +35,10 @@ knowledge entered the domain.
    and relevance reason.
 4. Dedupe by URL, title, and checksum when a PDF is fetched.
 5. Download only relevant PDFs.
-6. Extract full text into `raw/extracted/<sha256>.txt`.
-7. If extraction is partial, record the limitation.
+6. Extract full text into `raw/extracted/<sha256>.txt`, using the registered
+   `unlimited_ocr` MoonTool by default for PDF OCR.
+7. If the OCR MoonTool is unavailable or extraction is partial, record the
+   engine, fallback, and limitation.
 8. Analyze extracted text using `skills/pdf-analysis/SKILL.md`.
 9. Write a per-run note under `raw/analysis-runs/`.
 10. End with the strict standing-watch marker.
@@ -56,6 +60,7 @@ wiki_pages_changed_count: <integer>
 book_changed: yes | no
 pdfs_downloaded_count: <integer>
 pdfs_extracted_count: <integer>
+ocr_engine: unlimited-ocr | other | none
 notification_required: yes | no
 ```
 
@@ -73,6 +78,8 @@ notification_required: yes | no
 - Do not notify for duplicate PDFs.
 - Do not count downloads as accepted knowledge.
 - Do not hide extraction failure.
+- Do not silently replace the registered OCR MoonTool with another extractor;
+  write the reason.
 - Do not rewrite the whole book when one source changes.
 - Prefer precise source pages and small finding updates over broad generic
   summaries.

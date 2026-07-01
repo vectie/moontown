@@ -8,7 +8,9 @@ book family unless many non-PDF source types need incompatible lifecycle rules.
 The book watches configured websites for relevant PDFs, downloads and extracts
 the PDFs, analyzes extracted text with the method owned by this book, and
 updates durable wiki pages only when the analysis produces accepted new
-knowledge.
+knowledge. MoonClaw owns OCR execution through registered tools; the current
+default OCR capability is the `unlimited_ocr` MoonTool, and fallbacks must be
+recorded as such.
 
 ## Ownership
 
@@ -27,7 +29,7 @@ knowledge.
 configured websites
   -> discover candidate PDFs
   -> download new PDFs
-  -> extract full text
+  -> extract full text through MoonClaw's registered OCR tool
   -> normalize source metadata
   -> analyze with wiki/methods/analysis-method.md
   -> compare against existing baseline
@@ -62,6 +64,7 @@ extracted. A source becomes accepted evidence only when the bookkeeper records:
 - source identity
 - why it is relevant
 - extracted text location
+- OCR engine and fallback reason, when relevant
 - analysis result
 - accepted facts or accepted uncertainty
 - changed wiki pages, if any
@@ -84,6 +87,7 @@ wiki_pages_changed_count: <integer>
 book_changed: yes | no
 pdfs_downloaded_count: <integer>
 pdfs_extracted_count: <integer>
+ocr_engine: unlimited-ocr | other | none
 notification_required: yes | no
 ```
 

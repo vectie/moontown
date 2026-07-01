@@ -18,6 +18,8 @@ What new knowledge should this watcher detect?
 
 - Confirm title, publication date, author or organization, URL, and checksum.
 - Confirm whether the PDF text was extracted fully or partially.
+- Confirm the registered `unlimited_ocr` MoonTool was used for OCR, or record
+  the fallback.
 - Record extraction limitations such as scanned pages, missing tables, or bad
   OCR.
 
@@ -43,6 +45,7 @@ source_title: 2026 Annual Domain Report
 source_url: https://example.org/report.pdf
 source_sha256: abc123
 extraction_status: full_text
+ocr_engine: unlimited-ocr
 analysis_decision: update
 accepted_facts_count: 3
 rejected_facts_count: 1

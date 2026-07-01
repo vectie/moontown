@@ -42,6 +42,7 @@
   },
   "analysis": {
     "method_page": "wiki/methods/analysis-method.md",
+    "ocr_engine": "unlimited-ocr",
     "source_schema": "schemas/pdf-source.schema.md",
     "result_schema": "schemas/analysis-result.schema.md",
     "output_contract": "moontown.pdf_evidence_watch.result.v1"

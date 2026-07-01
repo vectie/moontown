@@ -17,6 +17,7 @@ uncertainty.
 
 - extracted text file path
 - source metadata
+- OCR engine and extraction notes
 - `wiki/methods/analysis-method.md`
 - existing source pages and findings
 - current synthesis or index pages
@@ -39,6 +40,7 @@ source_title: <title>
 source_url: <url>
 source_sha256: <sha256>
 extraction_status: full_text | partial_text | failed
+ocr_engine: unlimited-ocr | other | none
 analysis_decision: update | no_change | needs_review | failed
 accepted_facts_count: <integer>
 rejected_facts_count: <integer>

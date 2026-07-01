@@ -29,6 +29,7 @@ async test "install pdf evidence watch book from moondesk config file" {
   assert_true(summary.contains("Installed PDF Evidence Watch config"))
   let config = read_text_or_empty("\{workspace_root}/book.json")
   assert_true(config.contains("https://example.net/papers"))
+  assert_true(config.contains("\"ocr_engine\": \"unlimited-ocr\""))
   let method_text = read_text_or_empty(
     "\{workspace_root}/wiki/methods/analysis-method.md",
   )

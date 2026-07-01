@@ -5,6 +5,8 @@ Use this file as the operator-owned method for a PDF Evidence Watch book.
 ## Extract
 
 - Bibliographic metadata: title, authors, organization, date, URL, PDF hash.
+- OCR status: registered `unlimited_ocr` MoonTool by default, plus engine
+  version or fallback reason.
 - Core claims and the exact page/section where each claim appears.
 - Numeric tables, assumptions, units, and caveats.
 - Definitions, changed terminology, and new concepts.

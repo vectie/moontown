@@ -26,6 +26,7 @@ struct PdfEvidenceWatchSettings {
 ///|
 struct PdfEvidenceWatchAnalysisSettings {
   method_path : String
+  ocr_engine : String
   source_registry_path : String
   findings_path : String
   review_path : String

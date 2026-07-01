@@ -67,6 +67,7 @@ fn pdf_evidence_watch_config(
     },
     analysis: {
       method_path: "wiki/methods/analysis-method.md",
+      ocr_engine: "unlimited-ocr",
       source_registry_path: "wiki/sources/README.md",
       findings_path: "wiki/findings/README.md",
       review_path: "wiki/reviews/pdf-watch-review.md",

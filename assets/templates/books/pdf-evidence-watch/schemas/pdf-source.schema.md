@@ -13,6 +13,8 @@ download_path: raw/pdfs/<sha256>.pdf
 extracted_text_path: raw/extracted/<sha256>.txt
 sha256: <string>
 extraction_status: full_text | partial_text | failed
+ocr_engine: unlimited-ocr | other | none
+ocr_notes: <engine/version, fallback reason, or limitation>
 relevance: <why this PDF matters>
 acceptance_status: accepted | rejected | needs_review | duplicate
 accepted_facts_count: <integer>

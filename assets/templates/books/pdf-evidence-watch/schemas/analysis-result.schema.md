@@ -10,6 +10,7 @@ source_title: <string>
 source_url: <string>
 source_sha256: <string>
 extraction_status: full_text | partial_text | failed
+ocr_engine: unlimited-ocr | other | none
 analysis_decision: update | no_change | needs_review | failed
 delta_score: 0-100
 accepted_facts_count: <integer>
