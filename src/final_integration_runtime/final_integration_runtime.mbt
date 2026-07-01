@@ -1,4 +1,9 @@
 ///|
+fn final_integration_status_path(manifest_id : String) -> String {
+  "\{@storage.moontown_product_state_dir()}/integration/\{manifest_id}-status.json"
+}
+
+///|
 pub async fn install_wenyu_final_integration(
   manifest_path? : String = "assets/templates/integration/wenyu-final-integration.json",
   snapshot_path? : String = @storage.default_snapshot_path(),
@@ -36,10 +41,8 @@ pub async fn install_wenyu_final_integration(
   let status = @final_integration.final_integration_status_json(
     manifest, merged, current_tick, civic_workspace_summary, protocol_summary, install_summaries,
   )
-  @support.write_text_file(
-    ".moontown/integration/\{manifest.id}-status.json",
-    status.stringify(indent=2),
-  )
+  let status_path = final_integration_status_path(manifest.id)
+  @support.write_text_file(status_path, status.stringify(indent=2))
   [
     "# \{manifest.title}",
     "",
@@ -50,7 +53,7 @@ pub async fn install_wenyu_final_integration(
     "- Civic workspaces: \{civic_workspace_summary}",
     "- Building protocols: \{protocol_summary}",
     "- Pattern install: \{install_summaries.join(" / ")}",
-    "- Status: `.moontown/integration/\{manifest.id}-status.json`",
+    "- Status: `\{status_path}`",
   ].join("\n")
 }
 

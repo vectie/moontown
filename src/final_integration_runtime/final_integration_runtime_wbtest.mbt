@@ -1,4 +1,12 @@
 ///|
+test "final integration status path uses moontown product home" {
+  assert_eq(
+    final_integration_status_path("wenyu-final-integration"),
+    ".moonsuite/products/moontown/integration/wenyu-final-integration-status.json",
+  )
+}
+
+///|
 async test "final integration daemon tick loads beside snapshot" {
   let root = "/tmp/moontown-final-integration-daemon-tick"
   @support.ignore_checked_command("rm", ["-rf", root])

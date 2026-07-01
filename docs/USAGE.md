@@ -517,12 +517,12 @@ It maps the current domain interests to the least surprising operating form:
   `assets/templates/civic-patterns/wenyu-civic-patterns.json`
 
 The installer does not hardcode a domain workflow into MoonBit. It reads the
-manifest, upserts `.moontown/standing-goals.json`, refreshes Wenyu civic
-protocol support workspaces, refreshes building protocol definitions, installs the
-recurring civic pattern schedules, and writes:
+manifest, upserts `.moonsuite/products/moontown/standing-goals.json`, refreshes
+Wenyu civic protocol support workspaces, refreshes building protocol
+definitions, installs the recurring civic pattern schedules, and writes:
 
 ```text
-.moontown/integration/wenyu-final-integration-status.json
+.moonsuite/products/moontown/integration/wenyu-final-integration-status.json
 ```
 
 After installing, run or keep alive the daemon:
