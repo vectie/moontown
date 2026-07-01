@@ -249,7 +249,7 @@ Bootstrap the civic workspaces with:
 moon run src/cmd/main -- civic bootstrap
 ```
 
-That command updates `.moontown/moonbooks.json` and creates a seeded support
+That command updates `.moonsuite/products/moontown/moonbooks.json` and creates a seeded support
 workspace for each civic module that needs durable state. Each workspace
 receives:
 
@@ -405,7 +405,7 @@ Current status:
   active worker roster slots
 - `visual-projection.json` now includes first-class `modules[]` status objects
   keyed by normalized module id
-- the Vite bridge now scans `.moontown/books/*/book/moonbook-ui-state.json`
+- the Vite bridge now scans `books/*/book/moonbook-ui-state.json`
   and publishes `module-projections.json`
 - book projection visibility is explicit: public building books use
   `projection_scope: public`, internal salon workspaces use

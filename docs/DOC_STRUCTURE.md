@@ -119,7 +119,7 @@ moon run src/cmd/main -- books pdf-watch install <config.json>
 moon run src/cmd/main -- books pdf-watch status <book-id>
 ```
 
-That bridge installs the template into `.moontown/books/<book-id>/`, registers
+That bridge installs the template into `books/<book-id>/`, registers
 the MoonBook catalog entry, and upserts a standing goal. Moondesk should wrap
 this behavior with a file-manager-style wizard rather than duplicating the
 template logic. The config-driven route is the preferred Moondesk contract

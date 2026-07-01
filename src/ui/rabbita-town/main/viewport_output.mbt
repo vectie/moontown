@@ -43,7 +43,7 @@ fn render_final_output_empty_state() -> @rabbita.Html {
       "The final-output mode is working, but the browser bridge did not load any `moonbook-ui-state.json` fragments yet.",
     ),
     p(
-      "Run a book projection or publish generated MoonBook UI state under `.moontown/books/<book>/book/` to populate this page.",
+      "Run a book projection or publish generated MoonBook UI state under `books/<book>/book/` to populate this page.",
     ),
   ])
 }

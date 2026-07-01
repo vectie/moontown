@@ -44,7 +44,7 @@ PlanBook must preserve the town's baseline architecture rule:
 This rule is documented in
 [docs/DOCUMENT_PROTOCOL_PHILOSOPHY.md](/Users/kq/Workspace/moontown/docs/DOCUMENT_PROTOCOL_PHILOSOPHY.md)
 and in the PlanBook workspace at
-[wiki/planning/document-protocol-philosophy.md](/Users/kq/Workspace/moontown/.moontown/books/plan-moontown-quality/wiki/planning/document-protocol-philosophy.md).
+[wiki/planning/document-protocol-philosophy.md](/Users/kq/Workspace/moontown/books/plan-moontown-quality/wiki/planning/document-protocol-philosophy.md).
 
 For future self-build work, the planbook should model durable state as files,
 books, ledgers, schemas, and review queues. It should model active behavior as
@@ -781,7 +781,7 @@ idea / bug / operator voice note / town anomaly
 ## Planbook Workspace Layout
 
 ```text
-.moontown/books/plan-<area>/
+books/plan-<area>/
   raw/
     inbox/
       <timestamp>-operator-note.md

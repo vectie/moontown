@@ -1,5 +1,6 @@
 import {
   "vectie/moontown/editor_pipeline",
   "vectie/moontown/skill_quality",
+  "vectie/moonlib/moonsuite",
   "moonbitlang/core/json",
 }

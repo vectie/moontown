@@ -6,14 +6,7 @@ test "civic service result path uses town root for town-managed workspaces" {
     ".moonsuite/products/moontown/book-results/goal-wenyu-policy-hall-civic-service.json",
   )
   assert_eq(
-    civic_service_result_path(service, root=".moontown/books/wenyu-policy-hall"),
-    ".moonsuite/products/moontown/book-results/goal-wenyu-policy-hall-civic-service.json",
-  )
-  assert_eq(
-    civic_service_result_path(
-      service,
-      root="/tmp/town/.moontown/books/wenyu-policy-hall",
-    ),
+    civic_service_result_path(service, root="books/wenyu-policy-hall"),
     ".moonsuite/products/moontown/book-results/goal-wenyu-policy-hall-civic-service.json",
   )
   assert_eq(

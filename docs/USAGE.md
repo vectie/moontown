@@ -264,9 +264,9 @@ Important outputs:
 
 - `.moonsuite/products/moontown/civic/protocols/social-square/metrics.json`
 - `.moonsuite/products/moontown/civic/protocols/social-square/home_returns.jsonl`
-- `.moontown/books/wenyu-social-square/wiki/metrics/<salon>.md`
-- `.moontown/books/wenyu-social-square/book/site/generated/index.html`
-- `.moontown/books/<participant-book>/wiki/queries/salon-returned-ideas.md`
+- `books/wenyu-social-square/wiki/metrics/<salon>.md`
+- `books/wenyu-social-square/book/site/generated/index.html`
+- `books/<participant-book>/wiki/queries/salon-returned-ideas.md`
 
 The metric is structural: it counts idea yield, research-question yield,
 cross-book links, home-book coverage, and return-home records. It proves the
@@ -308,7 +308,7 @@ moon run src/cmd/main -- cookbook status
 ```
 
 This registers the `moontown-cookbook` MoonBook, writes the generated
-workspace under `.moontown/books/moontown-cookbook/`, and emits the
+workspace under `books/moontown-cookbook/`, and emits the
 stable-state manifest at:
 
 ```text
@@ -364,7 +364,7 @@ Create or refresh the Wenyu civic service workspaces:
 moon run src/cmd/main -- civic bootstrap
 ```
 
-This command updates `.moontown/moonbooks.json` and creates 11 canonical civic
+This command updates `.moonsuite/products/moontown/moonbooks.json` and creates 11 canonical civic
 support workspaces:
 
 - `wenyu-town-shell`
@@ -691,19 +691,19 @@ The config file shape is:
 
 If `analysis_method` is empty, Moontown reads `analysis_method_path` relative
 to the config file. If `workspace_root` is empty, Moontown uses the standard
-`.moontown/books/<book-id>` workspace. This is the intended Moondesk contract:
+`books/<book-id>` workspace. This is the intended Moondesk contract:
 Moondesk edits a JSON file plus a method Markdown file; Moontown installs the
 book and standing goal; MoonBook/MoonClaw handle the watch loop.
 
 The command writes:
 
-- `.moontown/books/<book-id>/book.json`
-- `.moontown/books/<book-id>/raw/bootstrap/PDF_WATCH_CONTRACT.md`
-- `.moontown/books/<book-id>/wiki/methods/analysis-method.md`
-- `.moontown/books/<book-id>/skills/pdf-watch/SKILL.md`
-- `.moontown/books/<book-id>/skills/pdf-analysis/SKILL.md`
-- `.moontown/books/<book-id>/book/site/generated/index.html`
-- a registered MoonBook catalog entry in `.moontown/moonbooks.json`
+- `books/<book-id>/book.json`
+- `books/<book-id>/raw/bootstrap/PDF_WATCH_CONTRACT.md`
+- `books/<book-id>/wiki/methods/analysis-method.md`
+- `books/<book-id>/skills/pdf-watch/SKILL.md`
+- `books/<book-id>/skills/pdf-analysis/SKILL.md`
+- `books/<book-id>/book/site/generated/index.html`
+- a registered MoonBook catalog entry in `.moonsuite/products/moontown/moonbooks.json`
 - a standing goal in `.moonsuite/products/moontown/standing-goals.json`
 
 Example standing goal:
@@ -871,7 +871,7 @@ book's accepted knowledge or tool behavior changes.
 
 The demo town persists runtime bootstrap files under:
 
-- `.moontown/moonbooks.json`
+- `.moonsuite/products/moontown/moonbooks.json`
 - `.moontown/town.json`
 - `.moontown/daemon.json`
 - `.moonsuite/products/moontown/packets/` when packet files are exported
@@ -881,8 +881,8 @@ The demo town persists runtime bootstrap files under:
 - `.moontown/daemon-supervisor.pid`
 - `.moonsuite/products/moontown/standing-goals.json`
 - `.moonsuite/products/moontown/watchers/*.jsonl`
-- `.moontown/books/<book>/` for MoonBook lane workspaces
-- `.moontown/books/wenyu-*/` for civic MoonBook workspaces created by
+- `books/<book>/` for MoonBook lane workspaces
+- `books/wenyu-*/` for civic MoonBook workspaces created by
   `moon run src/cmd/main -- civic bootstrap`
 - `.moontown/town-synthesis/` for mayor-level cross-book reports
 
@@ -1179,7 +1179,7 @@ views:
 
 What they do:
 
-- `.moontown/moonbooks.json`
+- `.moonsuite/products/moontown/moonbooks.json`
   - stores the available books loaded into town bootstrap
 - `.moontown/town.json`
   - stores the seeded town snapshot
@@ -1197,7 +1197,7 @@ What they do:
   - stores Mayor-owned standing goals, target book, cadence, source policy, last run tick, and next due tick
 - `.moonsuite/products/moontown/watchers/*.jsonl`
   - stores standing-watch decisions, target book, task/run ids, strict research accounting, detail, and next due tick
-- `.moontown/books/<book>/raw/bootstrap/`
+- `books/<book>/raw/bootstrap/`
   - stores research questions, search logs, source screens, evidence matrices,
     local source digests, and synthesis briefs
 - `.moontown/town-synthesis/*.md`
@@ -1218,7 +1218,7 @@ The simplest real customization point is the moonbook catalog.
 
 Edit:
 
-- `.moontown/moonbooks.json`
+- `.moonsuite/products/moontown/moonbooks.json`
 
 Each catalog entry describes one book:
 
@@ -1439,9 +1439,9 @@ For that goal, the mayor currently creates one book lane per named subject:
 
 Each lane gets its own MoonBook workspace under:
 
-- `.moontown/books/research-moontown`
-- `.moontown/books/research-moonbook`
-- `.moontown/books/research-moonclaw`
+- `books/research-moontown`
+- `books/research-moonbook`
+- `books/research-moonclaw`
 
 The mayor then imports keeper packets into MoonClaw, polls run status, persists
 terminal results back into the lane's MoonBook workspace, and asks MoonBook to
@@ -1626,7 +1626,7 @@ Stubbed now:
 Separate ownership note:
 
 - the Rabbita town dashboard belongs to `moontown`
-- the generated workspace website under `.moontown/books/*/site/` belongs to
+- the generated workspace website under `books/*/site/` belongs to
   `moonbook`
 
 So the correct expectation is:

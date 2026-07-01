@@ -8,7 +8,7 @@ test "cookbook artifact summary owns artifact kind counts and required drift" {
     test_cookbook_artifact("docs/A.md", "doc", required=true, exists=true),
     test_cookbook_artifact("docs/B.md", "doc", required=true, exists=false),
     test_cookbook_artifact(
-      ".moontown/books.json",
+      ".moonsuite/products/moontown/moonbooks.json",
       "definition",
       required=true,
       exists=true,

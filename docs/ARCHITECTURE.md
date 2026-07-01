@@ -1531,8 +1531,8 @@ moon run src/cmd/main -- cookbook status
 moon run src/cmd/main -- cookbook doctor
 ```
 
-`cookbook bootstrap` creates `.moontown/books/moontown-cookbook/`, registers it
-in `.moontown/moonbooks.json`, and writes
+`cookbook bootstrap` creates `books/moontown-cookbook/`, registers it
+in `.moonsuite/products/moontown/moonbooks.json`, and writes
 `.moonsuite/products/moontown/cookbook/stable-state.json`. The cookbook does
 not reinterpret domain knowledge. It names the canonical artifacts and records
 whether the stable state is complete enough to operate.
@@ -1930,7 +1930,7 @@ TownState
 
 Current persisted files:
 
-- `.moontown/moonbooks.json`
+- `.moonsuite/products/moontown/moonbooks.json`
   - persisted moonbook catalog entries
 - `.moontown/town.json`
   - persisted town snapshot
@@ -1942,9 +1942,9 @@ Current persisted files:
   - mayor-owned cross-book synthesis and readiness artifacts
 - `.moonsuite/products/moontown/packets/`
   - optional exported keeper packet files
-- `.moontown/books/<book>/raw/bootstrap/`
+- `books/<book>/raw/bootstrap/`
   - book-lane research question, search log, source screen, evidence matrix, local source digest, and synthesis brief
-- `.moontown/books/<book>/book/site/generated/index.html`
+- `books/<book>/book/site/generated/index.html`
   - MoonBook-generated site projection for the lane
 
 Current implementation:

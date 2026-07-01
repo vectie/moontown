@@ -74,9 +74,12 @@ test "planbook repair metadata policy owns engineering and git contract" {
 ///|
 test "planbook repair target policy owns known criterion targets" {
   let source_root = "/repo"
+  let course_root = "/repo/books/course-wenyu-game-design"
+  let planbook_editor_path = "/repo/books/plan-moontown-quality/wiki/planning/editor.md"
+  let planbook_next_feature_path = "/repo/books/plan-moontown-quality/raw/editor-pipeline/next-feature.json"
   let targets = repair_target_files_for_criterion(
-    "planbook-source-patch-loop", source_root, "/repo/.moontown/books/course-wenyu-game-design",
-    "/repo/.moontown/books/plan-moontown-quality/wiki/planning/editor.md", "/repo/.moontown/books/plan-moontown-quality/raw/editor-pipeline/next-feature.json",
+    "planbook-source-patch-loop", source_root, course_root, planbook_editor_path,
+    planbook_next_feature_path,
   ).join("\n")
   assert_true(
     targets.contains("/repo/src/planbook_runtime/planbook_repair.mbt"),
@@ -87,27 +90,29 @@ test "planbook repair target policy owns known criterion targets" {
 
 ///|
 test "planbook repair target policy resolves editor and backlog targets" {
+  let course_root = "/repo/books/course-wenyu-game-design"
+  let planbook_editor_path = "/repo/books/plan-moontown-quality/wiki/planning/editor.md"
+  let planbook_next_feature_path = "/repo/books/plan-moontown-quality/raw/editor-pipeline/next-feature.json"
   let editor_targets = repair_target_files_for_criterion(
-    "editor-mode-real-pipeline", "/repo", "/repo/.moontown/books/course-wenyu-game-design",
-    "/repo/.moontown/books/plan-moontown-quality/wiki/planning/editor.md", "/repo/.moontown/books/plan-moontown-quality/raw/editor-pipeline/next-feature.json",
+    "editor-mode-real-pipeline", "/repo", course_root, planbook_editor_path, planbook_next_feature_path,
   ).join("\n")
   assert_true(editor_targets.contains("/repo/src/course_book/core.mbt"))
   assert_true(
     editor_targets.contains(
-      "/repo/.moontown/books/course-wenyu-game-design/wiki/course/beginner-course.md",
+      "/repo/books/course-wenyu-game-design/wiki/course/beginner-course.md",
     ),
   )
   assert_true(editor_targets.contains("wiki/planning/editor.md"))
   let backlog_targets = repair_target_files_for_criterion(
-    "backlog-live-change-log-projection", "/repo", "/repo/.moontown/books/course-wenyu-game-design",
-    "/repo/.moontown/books/plan-moontown-quality/wiki/planning/editor.md", "/repo/.moontown/books/plan-moontown-quality/raw/editor-pipeline/next-feature.json",
+    "backlog-live-change-log-projection", "/repo", course_root, planbook_editor_path,
+    planbook_next_feature_path,
   ).join("\n")
   assert_true(
     backlog_targets.contains("/repo/src/planbook_runtime/planbook_backlog.mbt"),
   )
   assert_true(
     backlog_targets.contains(
-      "/repo/.moontown/books/plan-moontown-quality/raw/backlog/implementation-backlog.json",
+      "/repo/books/plan-moontown-quality/raw/backlog/implementation-backlog.json",
     ),
   )
 }

@@ -68,14 +68,14 @@ pub fn editor_pipeline_plan_path(
 
 ///|
 pub fn planbook_workspace_root_for_source_root(source_root : String) -> String {
-  "\{source_root}/.moontown/books/\{default_planbook_book_id()}"
+  @moonsuite.book_root(source_root, default_planbook_book_id())
 }
 
 ///|
 pub fn wenyu_course_workspace_root_for_source_root(
   source_root : String,
 ) -> String {
-  "\{source_root}/.moontown/books/\{default_wenyu_course_book_id()}"
+  @moonsuite.book_root(source_root, default_wenyu_course_book_id())
 }
 
 ///|

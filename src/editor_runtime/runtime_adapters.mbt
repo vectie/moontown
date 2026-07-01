@@ -8,7 +8,7 @@ fn default_planbook_book_id() -> String {
 
 ///|
 fn default_planbook_workspace_root() -> String {
-  ".moontown/books/\{default_planbook_book_id()}"
+  @moonsuite.book_root("", default_planbook_book_id())
 }
 
 ///|

@@ -73,7 +73,7 @@ canonical generated-tilemap viewport used for visual inspection.
 
 This package owns the Moontown operator dashboard only. It does not own the
 generated MoonBook site that appears under live workspace directories such as
-`.moontown/books/coding/site/`.
+`books/coding/site/`.
 
 Run locally from this directory:
 

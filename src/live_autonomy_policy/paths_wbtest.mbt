@@ -25,11 +25,11 @@ test "live autonomy policy derives spine paths from snapshot directory" {
 ///|
 test "live autonomy policy derives planbook history paths from workspace" {
   assert_eq(
-    planbook_change_log_path_for_workspace(".moontown/books/planbook"),
-    ".moontown/books/planbook/wiki/history/change-log.md",
+    planbook_change_log_path_for_workspace("books/planbook"),
+    "books/planbook/wiki/history/change-log.md",
   )
   assert_eq(
-    planbook_engineering_digest_path_for_workspace(".moontown/books/planbook"),
-    ".moontown/books/planbook/wiki/history/daily-engineering-digest.md",
+    planbook_engineering_digest_path_for_workspace("books/planbook"),
+    "books/planbook/wiki/history/daily-engineering-digest.md",
   )
 }

@@ -94,8 +94,8 @@ test "live autonomy markdown renderer includes operational spine sections" {
     visual_projection_path: ".moontown/visual-projection.json",
     journal_path: ".moontown/town-journal.jsonl",
     digest_path: ".moontown/live-autonomy.md",
-    planbook_change_log_path: ".moontown/books/plan/wiki/log.md",
-    planbook_engineering_digest_path: ".moontown/books/plan/wiki/digest.md",
+    planbook_change_log_path: "books/plan/wiki/log.md",
+    planbook_engineering_digest_path: "books/plan/wiki/digest.md",
     latest_change_summary: "validated",
     next_actions: ["wait for cadence"],
   }

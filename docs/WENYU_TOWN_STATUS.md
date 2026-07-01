@@ -133,7 +133,7 @@ Implemented and validated:
 - Module interiors show runtime source, status counters, current detail,
   validation state, and active worker roster slots.
 - The Vite bridge exposes `module-projections.json` by scanning
-  `.moontown/books/*/book/moonbook-ui-state.json`.
+  `books/*/book/moonbook-ui-state.json`.
 - The build copies important MoonBook generated HTML outputs under
   `dist/book-output/<book-id>/...`.
 - Module interiors show MoonBook summary, status chips, metrics, readiness,
@@ -171,7 +171,7 @@ Implemented and validated:
 - Editor mode and final output mode both show Moondesk handoff lanes and recent
   bridge records.
 - `moon run src/cmd/main -- civic bootstrap` bootstraps 11 Wenyu civic support
-  workspaces and updates `.moontown/moonbooks.json`.
+  workspaces and updates `.moonsuite/products/moontown/moonbooks.json`.
 - `moon run src/cmd/main -- civic status` reports module operability, latest civic
   service decision, review load, missing files, and accepted-change proof.
 - `moon run src/cmd/main -- civic doctor` writes

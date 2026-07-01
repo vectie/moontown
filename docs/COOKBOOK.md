@@ -23,14 +23,14 @@ The cookbook command writes:
 
 ```text
 .moonsuite/products/moontown/cookbook/stable-state.json
-.moontown/books/moontown-cookbook/wiki/index.md
-.moontown/books/moontown-cookbook/wiki/definitions/stable-state.md
-.moontown/books/moontown-cookbook/wiki/definitions/ownership.md
-.moontown/books/moontown-cookbook/wiki/operating-procedures/doctor.md
-.moontown/books/moontown-cookbook/raw/bootstrap/COOKBOOK_CONTRACT.md
-.moontown/books/moontown-cookbook/schemas/stable-state-manifest.schema.md
-.moontown/books/moontown-cookbook/book/moonbook-ui-state.json
-.moontown/books/moontown-cookbook/book/site/generated/index.html
+books/moontown-cookbook/wiki/index.md
+books/moontown-cookbook/wiki/definitions/stable-state.md
+books/moontown-cookbook/wiki/definitions/ownership.md
+books/moontown-cookbook/wiki/operating-procedures/doctor.md
+books/moontown-cookbook/raw/bootstrap/COOKBOOK_CONTRACT.md
+books/moontown-cookbook/schemas/stable-state-manifest.schema.md
+books/moontown-cookbook/book/moonbook-ui-state.json
+books/moontown-cookbook/book/site/generated/index.html
 ```
 
 The stable-state manifest tracks three artifact classes:

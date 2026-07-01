@@ -336,7 +336,7 @@ The short version:
 - buildings are loaded from `src/ui/assets/tilemap/modules/wenyu-town-modules.json`
 - each building binds to a MoonBook through `book_id`
 - clicking a building opens a module-specific interior
-- the Vite bridge scans `.moontown/books/*/book/moonbook-ui-state.json` and
+- the Vite bridge scans `books/*/book/moonbook-ui-state.json` and
   publishes `module-projections.json`
 - projection visibility is metadata-driven: generated fragments can set
   `projection_scope` or `visibility`, and operators can override visibility
@@ -455,7 +455,7 @@ This repo owns:
 - Rabbita interaction and styling
 
 This repo does not own the generated MoonBook workspace site under live runtime
-directories such as `.moontown/books/coding/site/`.
+directories such as `books/coding/site/`.
 
 If that generated site shows generic branding or broken projection links, the
 fix belongs in `moonbook`'s site generator/templates, not in the Moontown

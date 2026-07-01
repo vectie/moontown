@@ -254,8 +254,7 @@ pub fn cookbook_core_features_markdown() -> String {
       ],
       "AI can propose repairs and cookbook updates, but accepted descriptions must cite code paths, data structures, flows, and validation evidence.",
       [
-        ".moontown/books/plan-moontown-quality/", ".moontown/books/moontown-cookbook/",
-        ".moonsuite/products/moontown/cookbook/stable-state.json",
+        "books/plan-moontown-quality/", "books/moontown-cookbook/", ".moonsuite/products/moontown/cookbook/stable-state.json",
       ],
     ),
   ].join("\n")

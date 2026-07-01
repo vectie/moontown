@@ -126,6 +126,8 @@ pub fn backlog_target_files_for_criterion(
     "\{source_root}/src/runtime_status/runtime_status_snapshot.mbt",
     "\{source_root}/docs/PLANBOOK.md",
     "\{source_root}/docs/USAGE.md",
-    "\{source_root}/.moontown/books/plan-moontown-quality/raw/backlog/implementation-backlog.json",
+    @moonsuite.book_artifact(
+      source_root, "plan-moontown-quality", "raw/backlog/implementation-backlog.json",
+    ),
   ]
 }

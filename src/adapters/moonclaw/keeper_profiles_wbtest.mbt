@@ -19,7 +19,7 @@ test "civic book routes generic maintenance task to civic worker by policy type"
     id="wenyu-policy-hall",
     name="Wenyu Policy Hall",
     purpose="Civic protocol place.",
-    workspace_root=".moontown/books/wenyu-policy-hall",
+    workspace_root="books/wenyu-policy-hall",
     tags=["civic-service"],
   )
   let task = @moonbook.BookTask::new(
@@ -43,7 +43,7 @@ test "planbook maintenance routes to planbook repair worker by policy type" {
     id="plan-moontown-quality",
     name="Moontown PlanBook",
     purpose="Plan and repair Moontown quality gaps.",
-    workspace_root=".moontown/books/plan-moontown-quality",
+    workspace_root="books/plan-moontown-quality",
     tags=["planning"],
     skills=["code-plan"],
   )

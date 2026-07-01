@@ -52,11 +52,6 @@ async test "editor feature selection packet asks ai to choose from course eviden
       "Write JSON to `\{workspace_root}/raw/editor-pipeline/next-feature.json`",
     ),
   )
-  assert_true(
-    !packet_text.contains(
-      "Write JSON to `.moontown/books/plan-moontown-quality/raw/editor-pipeline/next-feature.json`",
-    ),
-  )
   assert_true(!editor_feature_selection_ready(workspace_root~))
   @support.write_text_file(
     selection_path,
