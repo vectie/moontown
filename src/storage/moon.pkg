@@ -5,6 +5,7 @@ import {
   "moonbitlang/core/encoding/utf8" @encoding/utf8,
   "moonbitlang/core/json",
   "moonbitlang/x/path",
+  "vectie/moonlib/os",
   "vectie/moonlib/moonsuite",
 }
 

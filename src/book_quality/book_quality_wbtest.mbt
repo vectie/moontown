@@ -1527,37 +1527,41 @@ test "book quality package owns review dispatch message policy" {
 test "book quality default runtime paths use moontown product home" {
   assert_eq(
     default_book_quality_dir(),
-    ".moonsuite/products/moontown/book-quality",
+    @storage.moontown_product_artifact("book-quality"),
   )
   assert_eq(
     default_audit_path(),
-    ".moonsuite/products/moontown/book-quality/audit.json",
+    @storage.moontown_product_artifact("book-quality/audit.json"),
   )
   assert_eq(
     default_review_dir(),
-    ".moonsuite/products/moontown/book-quality/ai-review-packets",
+    @storage.moontown_product_artifact("book-quality/ai-review-packets"),
   )
   assert_eq(
     default_review_result_dir(),
-    ".moonsuite/products/moontown/book-quality/ai-review-results",
+    @storage.moontown_product_artifact("book-quality/ai-review-results"),
   )
   assert_eq(
     default_review_run_path(),
-    ".moonsuite/products/moontown/book-quality/ai-review-runs.json",
+    @storage.moontown_product_artifact("book-quality/ai-review-runs.json"),
   )
   assert_eq(
     default_repair_bridge_path(),
-    ".moonsuite/products/moontown/book-quality/repair-bridge.json",
+    @storage.moontown_product_artifact("book-quality/repair-bridge.json"),
   )
   assert_eq(default_review_root(), default_book_quality_dir())
   assert_eq(
     default_moonclaw_home(),
-    ".moonsuite/products/moontown/book-quality/.moonsuite/products/moonclaw",
+    @moonsuite.product_dir(default_book_quality_dir(), "moonclaw"),
   )
   assert_eq(moonclaw_home(default_review_dir()), default_moonclaw_home())
   assert_eq(
     moonclaw_config_path(default_review_dir()),
-    ".moonsuite/products/moontown/book-quality/.moonsuite/products/moonclaw/moonclaw.json",
+    @moonsuite.product_artifact(
+      default_book_quality_dir(),
+      "moonclaw",
+      "moonclaw.json",
+    ),
   )
   assert_false(moonclaw_config_path(default_review_dir()).contains(".moonclaw"))
 }

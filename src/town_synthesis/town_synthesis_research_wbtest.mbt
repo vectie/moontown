@@ -12,7 +12,7 @@ test "town synthesis comparative analysis preserves ecosystem boundary thesis" {
 test "town synthesis paths use storage-owned snapshot base" {
   assert_eq(
     town_synthesis_dir("town.json"),
-    ".moonsuite/products/moontown/town-synthesis",
+    @storage.moontown_product_artifact("town-synthesis"),
   )
   assert_eq(
     town_synthesis_dir("/tmp/moontown/town.json"),

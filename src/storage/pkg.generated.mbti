@@ -42,9 +42,13 @@ pub fn moonsuite_product_id() -> String
 
 pub fn moontown_product_artifact(String) -> String
 
+pub fn moontown_product_artifact_for_workspace_root(String, String) -> String
+
 pub fn moontown_product_service_path() -> String
 
 pub fn moontown_product_state_dir() -> String
+
+pub fn moontown_product_state_dir_for_workspace_root(String) -> String
 
 pub fn moontown_product_tmp_dir() -> String
 

@@ -2,7 +2,9 @@
 test "final integration status path uses moontown product home" {
   assert_eq(
     final_integration_status_path("wenyu-final-integration"),
-    ".moonsuite/products/moontown/integration/wenyu-final-integration-status.json",
+    @storage.moontown_product_artifact(
+      "integration/wenyu-final-integration-status.json",
+    ),
   )
 }
 

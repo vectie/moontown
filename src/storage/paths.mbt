@@ -26,23 +26,58 @@ pub fn moonsuite_product_id() -> String {
 }
 
 ///|
+fn active_workspace_root() -> String {
+  @os.cwd() catch {
+    _ => "."
+  }
+}
+
+///|
+pub fn moontown_product_state_dir_for_workspace_root(
+  workspace_root : String,
+) -> String {
+  @moonsuite.product_dir(
+    @moonsuite.suite_root_for_workspace_root(workspace_root),
+    moonsuite_product_id(),
+  )
+}
+
+///|
 pub fn moontown_product_state_dir() -> String {
-  @moonsuite.product_dir("", moonsuite_product_id())
+  moontown_product_state_dir_for_workspace_root(active_workspace_root())
+}
+
+///|
+pub fn moontown_product_artifact_for_workspace_root(
+  workspace_root : String,
+  relative : String,
+) -> String {
+  @moonsuite.product_artifact_for_workspace_root(
+    workspace_root,
+    moonsuite_product_id(),
+    relative,
+  )
 }
 
 ///|
 pub fn moontown_product_artifact(relative : String) -> String {
-  @moonsuite.product_artifact("", moonsuite_product_id(), relative)
+  moontown_product_artifact_for_workspace_root(
+    active_workspace_root(),
+    relative,
+  )
 }
 
 ///|
 pub fn moontown_product_service_path() -> String {
-  @moonsuite.product_service_path("", moonsuite_product_id())
+  moontown_product_artifact("service.json")
 }
 
 ///|
 pub fn moontown_product_tmp_dir() -> String {
-  @moonsuite.product_tmp_dir("", moonsuite_product_id())
+  @moonsuite.product_tmp_dir(
+    @moonsuite.suite_root_for_workspace_root(active_workspace_root()),
+    moonsuite_product_id(),
+  )
 }
 
 ///|

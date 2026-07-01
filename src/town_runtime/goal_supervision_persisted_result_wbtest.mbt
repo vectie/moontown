@@ -2,7 +2,7 @@
 test "persisted book result paths use storage snapshot base" {
   assert_eq(
     book_result_path_for_snapshot("town.json", "task-a"),
-    ".moonsuite/products/moontown/book-results/task-a.json",
+    @storage.moontown_product_artifact("book-results/task-a.json"),
   )
   assert_eq(
     book_result_path_for_snapshot("/tmp/moontown/town.json", "task-b"),

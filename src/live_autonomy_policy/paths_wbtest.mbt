@@ -6,7 +6,7 @@ test "live autonomy policy derives spine paths from snapshot directory" {
   )
   assert_eq(
     live_autonomy_path_for_snapshot("town.json"),
-    ".moonsuite/products/moontown/live-autonomy.json",
+    @storage.moontown_product_artifact("live-autonomy.json"),
   )
   assert_eq(
     town_journal_path_for_snapshot(".moonsuite/products/moontown/town.json"),

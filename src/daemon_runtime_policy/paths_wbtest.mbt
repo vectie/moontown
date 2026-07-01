@@ -6,7 +6,7 @@ test "daemon runtime policy derives paths from snapshot directory" {
   )
   assert_eq(
     daemon_runtime_path_for_snapshot("town.json"),
-    ".moonsuite/products/moontown/daemon-runtime.json",
+    @storage.moontown_product_artifact("daemon-runtime.json"),
   )
   assert_eq(
     daemon_pid_path_for_snapshot(".moonsuite/products/moontown/town.json"),

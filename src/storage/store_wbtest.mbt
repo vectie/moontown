@@ -38,21 +38,31 @@ async test "watcher ledger derives snapshot-relative directory and appends by go
   assert_eq(snapshot_base_dir("\{root}/town.json"), root)
   assert_eq(snapshot_base_dir("town.json"), moontown_product_state_dir())
   assert_eq(moonsuite_product_id(), "moontown")
+  let suite_root = "/tmp/moontown-suite"
+  let book_root = suite_root + "/books/research-demo"
   assert_eq(
-    moontown_product_state_dir(),
-    @moonsuite.product_dir("", moonsuite_product_id()),
+    moontown_product_state_dir_for_workspace_root(book_root),
+    "/tmp/moontown-suite/.moonsuite/products/moontown",
   )
   assert_eq(
-    moontown_product_artifact("civic/status.json"),
-    @moonsuite.product_artifact("", moonsuite_product_id(), "civic/status.json"),
+    moontown_product_artifact_for_workspace_root(book_root, "civic/status.json"),
+    "/tmp/moontown-suite/.moonsuite/products/moontown/civic/status.json",
+  )
+  assert_false(
+    moontown_product_artifact_for_workspace_root(book_root, "civic/status.json").contains(
+      "/books/research-demo/.moonsuite",
+    ),
   )
   assert_eq(
     moontown_product_service_path(),
-    @moonsuite.product_service_path("", moonsuite_product_id()),
+    moontown_product_artifact("service.json"),
   )
   assert_eq(
     moontown_product_tmp_dir(),
-    @moonsuite.product_tmp_dir("", moonsuite_product_id()),
+    @moonsuite.product_tmp_dir(
+      @moonsuite.suite_root_for_workspace_root(@os.cwd() catch { _ => "." }),
+      moonsuite_product_id(),
+    ),
   )
   assert_eq(default_snapshot_path(), moontown_product_artifact("town.json"))
   assert_eq(
