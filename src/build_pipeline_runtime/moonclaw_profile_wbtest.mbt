@@ -44,6 +44,8 @@ test "wenyu build prompts preserve execution and review contracts" {
   assert_true(execute.contains("asset pack"))
   assert_true(execute.contains("validation results"))
   let review = @build_pipeline.wenyu_build_review_prompt_template()
+  assert_false(review.contains(".moonclaw/run.json"))
+  assert_true(review.contains("`run.json`"))
   assert_true(review.contains("source_workspace"))
   assert_true(review.contains("build/CODE_PATCH.md"))
   assert_true(review.contains("build/CODE_BLOCKERS.md"))

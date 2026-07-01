@@ -46,7 +46,7 @@ fn wenyu_build_execute_result_fields() -> Array[String] {
 
 ///|
 fn wenyu_build_review_workspace_rule() -> String {
-  "First read `.moonclaw/run.json` if present and use its `source_workspace` as the book workspace; do not assume the isolated run workspace is the source book."
+  "First read `run.json` in the isolated run workspace if present and use its `source_workspace` as the book workspace; do not assume the isolated run workspace is the source book."
 }
 
 ///|

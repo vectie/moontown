@@ -2,8 +2,9 @@
 async test "poll run prefers terminal meta over stale running index" {
   let root = "/tmp/moontown-moonclaw-poll-meta-wbtest-\{@async.now().to_int()}"
   test_ignore_checked_command("rm", ["-rf", root])
+  let home = root
   test_write_text_file(
-    "\{root}/.moonclaw/jobs/index/runs.json",
+    @moonsuite.product_artifact(home, "moonclaw", "jobs/index/runs.json"),
     (
       $|{
       $|  "runs": [
@@ -18,7 +19,9 @@ async test "poll run prefers terminal meta over stale running index" {
     ),
   )
   test_write_text_file(
-    "\{root}/.moonclaw/jobs/runs/run-meta-wins/meta.json",
+    @moonsuite.product_artifact(
+      home, "moonclaw", "jobs/runs/run-meta-wins/meta.json",
+    ),
     (
       $|{
       $|  "id": "run-meta-wins",
@@ -31,7 +34,7 @@ async test "poll run prefers terminal meta over stale running index" {
   let response = poll_run(
     "task-meta-wins",
     "run-meta-wins",
-    home=".moonclaw",
+    home~,
     cwd=root,
     detect_orphan=false,
   )
@@ -43,8 +46,11 @@ async test "poll run prefers terminal meta over stale running index" {
 async test "poll run forces review when succeeded result text says fail" {
   let root = "/tmp/moontown-moonclaw-poll-review-fail-wbtest-\{@async.now().to_int()}"
   test_ignore_checked_command("rm", ["-rf", root])
+  let home = root
   test_write_text_file(
-    "\{root}/.moonclaw/jobs/runs/run-review-fail/meta.json",
+    @moonsuite.product_artifact(
+      home, "moonclaw", "jobs/runs/run-review-fail/meta.json",
+    ),
     (
       $|{
       $|  "id": "run-review-fail",
@@ -67,7 +73,7 @@ async test "poll run forces review when succeeded result text says fail" {
   let response = poll_run(
     "task-review-fail",
     "run-review-fail",
-    home=".moonclaw",
+    home~,
     cwd=root,
     detect_orphan=false,
   )

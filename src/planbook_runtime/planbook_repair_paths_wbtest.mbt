@@ -42,9 +42,13 @@ test "planbook repair paths centralize durable workspace layout" {
   )
   assert_eq(
     @moonclaw_runtime.moonclaw_run_result_path(
-      "\{workspace_root}/.moonclaw/run-1",
+      @moonsuite.product_artifact_for_book_root(
+        workspace_root, "moonclaw", "jobs/run-1",
+      ),
     ),
-    "\{workspace_root}/.moonclaw/run-1/result.json",
+    @moonsuite.product_artifact_for_book_root(
+      workspace_root, "moonclaw", "jobs/run-1/result.json",
+    ),
   )
   assert_eq(
     planbook_repair_context_path(workspace_root),

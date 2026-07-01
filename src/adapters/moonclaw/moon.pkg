@@ -8,6 +8,7 @@ import {
   "vectie/moontown/policy",
   "vectie/moontown/storage",
   "vectie/moontown/support",
+  "vectie/moonlib/moonsuite",
   "moonbitlang/async/fs",
   "moonbitlang/core/encoding/utf8" @encoding/utf8,
   "moonbitlang/core/env",
