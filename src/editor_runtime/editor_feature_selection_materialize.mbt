@@ -21,7 +21,7 @@ async fn materialize_editor_feature_selection_task(
     let imported = @moonclaw.import_packet(
       packet,
       packet_path,
-      home="\{workspace_root}/.moonclaw",
+      home=workspace_root,
       cwd=workspace_root,
       confirm=true,
       run_inline=moontown_moonclaw_inline_enabled(),
@@ -46,7 +46,7 @@ async fn materialize_editor_feature_selection_task(
         Some(
           @moonclaw.run_confirmed_run(
             run_id,
-            home="\{workspace_root}/.moonclaw",
+            home=workspace_root,
             cwd=workspace_root,
           ),
         )

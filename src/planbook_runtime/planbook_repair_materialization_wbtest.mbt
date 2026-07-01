@@ -309,10 +309,12 @@ async test "planbook repair acp target uses resolved codex command" {
       false,
     ),
   )
-  let target = @support.read_text_or_empty(
-    "\{workspace_root}/.moonclaw/moonclaw.json",
+  let target_path = @moonsuite.product_artifact_for_workspace_root(
+    workspace_root, "moonclaw", "moonclaw.json",
   )
+  let target = @support.read_text_or_empty(target_path)
   let source_root = planbook_repair_source_root()
+  assert_false(@fs.exists("\{workspace_root}/.moonclaw/moonclaw.json"))
   assert_true(
     target.contains(
       "\"command\": \"/Users/kq/.nvm/versions/node/v22.22.1/bin/node\"",
