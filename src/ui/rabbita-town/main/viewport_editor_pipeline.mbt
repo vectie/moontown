@@ -127,7 +127,7 @@ fn render_editor_pipeline_panel(model : Model) -> @rabbita.Html {
           p(class="eyebrow", "Editor Pipeline"),
           h2("Pipeline State Missing"),
           p(
-            "Run `moon run src/cmd/main -- editor-pipeline refresh` to publish `.moontown/editor-pipeline.json` for editor mode.",
+            "Run `moon run src/cmd/main -- editor-pipeline refresh` to publish `.moonsuite/products/moontown/editor-pipeline.json` for editor mode.",
           ),
         ]),
       ])

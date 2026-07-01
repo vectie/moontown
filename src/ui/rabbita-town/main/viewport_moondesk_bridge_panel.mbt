@@ -32,7 +32,7 @@ fn render_moondesk_bridge_panel(model : Model) -> @rabbita.Html {
       p(class="eyebrow", "Moondesk Bridge"),
       h2("Recent Portable Records"),
       p(
-        "Real bridge records from `.moontown/moondesk-*` and `.moontown/book-results`. This is the evidence trail for work moving between Moondesk, MoonBook, MoonClaw, and Moontown.",
+        "Real bridge records from `.moonsuite/products/moontown/moondesk-*` and `.moonsuite/products/moontown/book-results`. This is the evidence trail for work moving between Moondesk, MoonBook, MoonClaw, and Moontown.",
       ),
     ]),
     div(class="viewport-editor-stats", [

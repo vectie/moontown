@@ -39,7 +39,7 @@ It currently includes:
 - budget/energy/pressure/stability metrics
 - activity feed and anomaly surfacing
 - Mayor command center with real standing-goal progress
-- watcher decision timeline from `.moontown/watchers/*.jsonl`
+- watcher decision timeline from `.moonsuite/products/moontown/watchers/*.jsonl`
 - local standing-watch request composer
 - dashboard portal to the canonical standalone Wenyu viewport
 - generated Wenyu Valley tilemap viewport with animated resident overlay
@@ -48,16 +48,17 @@ It currently includes:
 The current frontend can run in demo mode, but the dev server also bridges real
 runtime files:
 
-- `.moontown/town.json`
-- `.moontown/daemon.json`
-- `.moontown/standing-goals.json`
-- `.moontown/watchers/watch-opc-news.jsonl`
-- `.moontown/operator-requests/requests.jsonl`
+- `.moonsuite/products/moontown/town.json`
+- `.moonsuite/products/moontown/daemon.json`
+- `.moonsuite/products/moontown/standing-goals.json`
+- `.moonsuite/products/moontown/watchers/watch-opc-news.jsonl`
+- `.moonsuite/products/moontown/operator-requests/requests.jsonl`
 
 The Mayor command center uses those files to show progress, next due tick,
 latest watcher decision, source delta count, and decision mix. The request
 composer posts to `/api/operator-requests`, writes an operator request record,
-and creates or replaces a standing goal in `.moontown/standing-goals.json`.
+and creates or replaces a standing goal in
+`.moonsuite/products/moontown/standing-goals.json`.
 The daemon then picks that goal up during its normal standing-goal dispatch
 cycle.
 
