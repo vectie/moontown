@@ -18,11 +18,11 @@ pub fn moonclaw_no_input_policy_json() -> Json
 
 pub fn moonclaw_run_result_path(String) -> String
 
-pub async fn moonclaw_run_result_payload_from_run(String, String) -> Json?
+pub async fn moonclaw_run_result_payload_from_run(String, String, home? : String) -> Json?
 
 pub async fn moonclaw_run_result_payload_from_workspace(String) -> Json?
 
-pub async fn moonclaw_run_result_text_from_run(String, String, fallback_summary? : Bool) -> String
+pub async fn moonclaw_run_result_text_from_run(String, String, fallback_summary? : Bool, home? : String) -> String
 
 pub async fn moonclaw_run_result_text_from_workspace(String, fallback_summary? : Bool) -> String
 

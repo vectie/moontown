@@ -1,8 +1,11 @@
 ///|
 async test "moonclaw store compaction rotates oversized job store files" {
-  let root = "/tmp/moontown-moonclaw-store-compaction-wbtest"
-  ignore(@integration.run_checked("rm", ["-rf", root]))
-  let jobs_root = "\{root}/.moonclaw/jobs"
+  let root = "/tmp/moontown-moonclaw-store-compaction-wbtest/books/repair"
+  let suite_root = @moonsuite.suite_root_for_book_root(root)
+  ignore(@integration.run_checked("rm", ["-rf", suite_root]))
+  let jobs_root = @moonsuite.product_artifact_for_book_root(
+    root, "moonclaw", "jobs",
+  )
   @support.write_text_file(
     "\{jobs_root}/job_proposals.json",
     "{\"proposals\":[{\"id\":\"old-proposal\",\"payload\":\"01234567890123456789\"}]}",
@@ -38,9 +41,12 @@ async test "moonclaw store compaction rotates oversized job store files" {
 
 ///|
 async test "moonclaw store compaction resets invalid definitions schema" {
-  let root = "/tmp/moontown-moonclaw-store-invalid-definitions-wbtest"
-  ignore(@integration.run_checked("rm", ["-rf", root]))
-  let jobs_root = "\{root}/.moonclaw/jobs"
+  let root = "/tmp/moontown-moonclaw-store-invalid-definitions-wbtest/books/repair"
+  let suite_root = @moonsuite.suite_root_for_book_root(root)
+  ignore(@integration.run_checked("rm", ["-rf", suite_root]))
+  let jobs_root = @moonsuite.product_artifact_for_book_root(
+    root, "moonclaw", "jobs",
+  )
   @support.write_text_file(
     "\{jobs_root}/definitions.json",
     "{\"definitions\":[]}",
@@ -60,9 +66,12 @@ async test "moonclaw store compaction resets invalid definitions schema" {
 
 ///|
 async test "moonclaw store compaction is quiet when files are under threshold" {
-  let root = "/tmp/moontown-moonclaw-store-quiet-wbtest"
-  ignore(@integration.run_checked("rm", ["-rf", root]))
-  let jobs_root = "\{root}/.moonclaw/jobs"
+  let root = "/tmp/moontown-moonclaw-store-quiet-wbtest/books/repair"
+  let suite_root = @moonsuite.suite_root_for_book_root(root)
+  ignore(@integration.run_checked("rm", ["-rf", suite_root]))
+  let jobs_root = @moonsuite.product_artifact_for_book_root(
+    root, "moonclaw", "jobs",
+  )
   @support.write_text_file(
     "\{jobs_root}/job_proposals.json",
     "{\"proposals\":[]}",

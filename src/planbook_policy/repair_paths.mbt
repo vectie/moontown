@@ -113,12 +113,16 @@ pub fn repair_plan_path(workspace_root : String) -> String {
 
 ///|
 pub fn repair_job_index_path(workspace_root : String) -> String {
-  "\{workspace_root}/.moonclaw/jobs/index/runs.json"
+  @moonsuite.product_artifact_for_book_root(
+    workspace_root, "moonclaw", "jobs/index/runs.json",
+  )
 }
 
 ///|
 pub fn repair_job_proposals_path(workspace_root : String) -> String {
-  "\{workspace_root}/.moonclaw/jobs/job_proposals.json"
+  @moonsuite.product_artifact_for_book_root(
+    workspace_root, "moonclaw", "jobs/job_proposals.json",
+  )
 }
 
 ///|

@@ -228,11 +228,15 @@ test "planbook repair workspace layout is package-owned policy" {
   )
   assert_eq(
     repair_job_index_path(workspace_root),
-    "\{workspace_root}/.moonclaw/jobs/index/runs.json",
+    @moonsuite.product_artifact_for_book_root(
+      workspace_root, "moonclaw", "jobs/index/runs.json",
+    ),
   )
   assert_eq(
     repair_job_proposals_path(workspace_root),
-    "\{workspace_root}/.moonclaw/jobs/job_proposals.json",
+    @moonsuite.product_artifact_for_book_root(
+      workspace_root, "moonclaw", "jobs/job_proposals.json",
+    ),
   )
   assert_eq(
     repair_workspace_status_page_path(workspace_root),

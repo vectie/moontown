@@ -4,7 +4,9 @@ pub async fn compact_moonclaw_job_store_if_needed(
   tick : Int,
   max_store_bytes? : Int64 = 50_000_000,
 ) -> String {
-  let jobs_root = "\{workspace_root}/.moonclaw/jobs"
+  let jobs_root = @moonsuite.product_artifact_for_book_root(
+    workspace_root, "moonclaw", "jobs",
+  )
   let rotated = []
   for item in moonclaw_store_compaction_targets(jobs_root) {
     let reset_reason = moonclaw_store_reset_reason(item)

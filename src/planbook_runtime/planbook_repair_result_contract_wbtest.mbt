@@ -184,9 +184,14 @@ test "planbook repair run result keeps blocked acp output from completing" {
 
 ///|
 async test "planbook source patch receipt survives repair result supersession through run index" {
-  let workspace_root = "/tmp/moontown-planbook-source-patch-receipt-index-wbtest"
+  let workspace_root = "/tmp/moontown-planbook-source-patch-receipt-index-wbtest/books/planbook"
   let criterion_id = "planbook-source-patch-loop"
   let run_id = "run-source-patch-receipt-index"
+  let run_dir = @moonsuite.product_artifact_for_book_root(
+    workspace_root,
+    "moonclaw",
+    "jobs/runs/\{run_id}",
+  )
   let content = [
     "repair_decision: accepted",
     "criterion_id: \{criterion_id}",
@@ -213,10 +218,10 @@ async test "planbook source patch receipt survives repair result supersession th
     .stringify(),
   )
   @support.write_text_file(
-    "\{workspace_root}/.moonclaw/jobs/runs/\{run_id}/meta.json",
+    "\{run_dir}/meta.json",
     {
       "id": run_id,
-      "workspace_dir": "\{workspace_root}/moonclaw-jobs/\{run_id}",
+      "workspace_dir": run_dir,
       "status": "Succeeded",
       "summary": "accepted source patch",
     }
@@ -224,7 +229,7 @@ async test "planbook source patch receipt survives repair result supersession th
     .stringify(),
   )
   @support.write_text_file(
-    "\{workspace_root}/moonclaw-jobs/\{run_id}/result.json",
+    "\{run_dir}/result.json",
     Json::object({
       "content": content.to_json(),
       "patch_receipt": planbook_test_valid_patch_receipt(criterion_id, run_id~),
@@ -235,10 +240,15 @@ async test "planbook source patch receipt survives repair result supersession th
 
 ///|
 async test "planbook repair recovers accepted run from proposal job id when last run id is absent" {
-  let workspace_root = "/tmp/moontown-planbook-repair-run-index-fallback-wbtest"
+  let workspace_root = "/tmp/moontown-planbook-repair-run-index-fallback-wbtest/books/planbook"
   let criterion_id = "live-runtime-recovery"
   let proposal_id = "proposal-live-runtime"
   let run_id = "run-live-runtime-receipt-index"
+  let run_dir = @moonsuite.product_artifact_for_book_root(
+    workspace_root,
+    "moonclaw",
+    "jobs/runs/\{run_id}",
+  )
   let content = [
     "repair_decision: accepted",
     "criterion_id: \{criterion_id}",
@@ -278,11 +288,11 @@ async test "planbook repair recovers accepted run from proposal job id when last
     .stringify(),
   )
   @support.write_text_file(
-    "\{workspace_root}/.moonclaw/jobs/runs/\{run_id}/meta.json",
+    "\{run_dir}/meta.json",
     {
       "id": run_id,
       "job_id": "job.proposal.\{proposal_id}",
-      "workspace_dir": "\{workspace_root}/moonclaw-jobs/\{run_id}",
+      "workspace_dir": run_dir,
       "status": "Succeeded",
       "summary": "accepted source patch",
     }
@@ -290,7 +300,7 @@ async test "planbook repair recovers accepted run from proposal job id when last
     .stringify(),
   )
   @support.write_text_file(
-    "\{workspace_root}/moonclaw-jobs/\{run_id}/result.json",
+    "\{run_dir}/result.json",
     Json::object({
       "content": content.to_json(),
       "metadata": Json::object({

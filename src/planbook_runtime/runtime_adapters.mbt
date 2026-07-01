@@ -38,5 +38,17 @@ async fn moonclaw_run_result_payload_from_run(
   run_id : String,
   workspace_root : String,
 ) -> Json? {
-  @moonclaw_runtime.moonclaw_run_result_payload_from_run(run_id, workspace_root)
+  @moonclaw_runtime.moonclaw_run_result_payload_from_run(
+    run_id,
+    workspace_root,
+    home=moonclaw_product_home_for_workspace(workspace_root),
+  )
+}
+
+///|
+fn moonclaw_product_home_for_workspace(workspace_root : String) -> String {
+  @moonsuite.product_dir(
+    @moonsuite.suite_root_for_book_root(workspace_root),
+    "moonclaw",
+  )
 }

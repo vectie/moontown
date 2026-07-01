@@ -21,6 +21,7 @@ import {
   "vectie/moontown/runtime_error_policy",
   "vectie/moontown/storage",
   "vectie/moontown/support",
+  "vectie/moonlib/moonsuite",
 }
 
 supported_targets = "native"
@@ -29,4 +30,5 @@ import {
   "moonbitlang/async",
   "vectie/moontown/live_autonomy_runtime",
   "vectie/moontown/test_fixtures",
+  "vectie/moonlib/moonsuite",
 } for "wbtest"

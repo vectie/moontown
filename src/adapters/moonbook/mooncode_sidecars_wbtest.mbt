@@ -82,6 +82,10 @@ async test "mooncode sidecar reconciler imports through moonbook cli and dedupes
   }
   let root = "/tmp/moontown-mooncode-sidecar-e2e"
   @support.ignore_checked_command("rm", ["-rf", root])
+  @support.ignore_checked_command("rm", [
+    "-rf",
+    @storage.moontown_product_artifact("mooncode-book-results/sidecar-e2e"),
+  ])
   let entry = BookCatalogEntry::new(
     id="sidecar-e2e",
     name="Sidecar E2E",

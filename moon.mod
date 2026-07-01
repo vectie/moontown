@@ -5,7 +5,7 @@ version = "0.1.0"
 import {
   "moonbitlang/async@0.16.6",
   "moonbitlang/x@0.4.40",
-  "vectie/moonlib@0.1.1",
+  "vectie/moonlib@0.1.2",
 }
 
 readme = "README.mbt.md"
