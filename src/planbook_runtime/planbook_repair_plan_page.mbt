@@ -36,7 +36,7 @@ fn planbook_repair_plan_acceptance_criteria() -> String {
     "- [ ] Required validation commands are run or explicitly blocked.",
     "- [ ] `git diff --check`, `git status --short`, and focused diff hygiene are recorded.",
     "- [ ] Local commit readiness is recorded; if files changed and validation passed, the worker prepares a commit according to policy.",
-    "- [ ] PlanBook autonomy doctor reruns and updates `.moontown/planbook/autonomy.json`.",
+    "- [ ] PlanBook autonomy doctor reruns and updates `.moonsuite/products/moontown/planbook/autonomy.json`.",
     "- [ ] If ownership is outside Moontown, the result names the correct repository and does not fake completion.",
   ].join("\n")
 }

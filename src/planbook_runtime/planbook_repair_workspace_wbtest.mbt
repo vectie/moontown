@@ -46,7 +46,10 @@ test "planbook repair plan requires validation and ownership evidence" {
   assert_true(plan.contains(planbook_repair_result_relative_path()))
   assert_true(plan.contains("Required validation commands"))
   assert_true(plan.contains("git diff --check"))
-  assert_true(plan.contains(".moontown/planbook/autonomy.json"))
+  assert_true(
+    plan.contains(".moonsuite/products/moontown/planbook/autonomy.json"),
+  )
+  assert_true(!plan.contains(".moontown/planbook/autonomy.json"))
   assert_true(plan.contains("does not fake completion"))
 }
 

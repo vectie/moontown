@@ -267,7 +267,7 @@ can be written to `.moontown/book-template-requests.json`; the daemon’s
 `book-template-request` job processes pending requests. `status` reports
 pending and failed request counts so autonomous book creation is visible in the
 same runtime spine as standing watchers.
-`live status` and `.moontown/live-autonomy.json` also surface the same request
+`live status` and `.moonsuite/products/moontown/live-autonomy.json` also surface the same request
 counts, so a Moondesk-created book request is visible before and after the
 daemon turns it into a MoonBook workspace.
 The Rabbita operator console also exposes this path during development through
@@ -321,8 +321,8 @@ moon run src/cmd/main -- planbook repair
 moon run src/cmd/main -- planbook repair status
 ```
 
-`planbook doctor` writes `.moontown/planbook/autonomy.json` and
-`.moontown/planbook/autonomy.md`, updates the PlanBook workspace evidence and
+`planbook doctor` writes `.moonsuite/products/moontown/planbook/autonomy.json`
+and `.moonsuite/products/moontown/planbook/autonomy.md`, updates the PlanBook workspace evidence and
 review pages, and is also run during daemon ticks. This makes self-build gaps
 visible in the live autonomy spine instead of leaving them as static docs.
 The PlanBook workspace also owns `raw/backlog/implementation-backlog.json`,
@@ -335,8 +335,9 @@ when the backlog is clear, the code-building check decays to 30 minutes.
 
 `planbook repair` turns the first open self-build gap into a bounded repair
 packet under the PlanBook workspace. It writes repair context, a repair
-`SKILL.md`, a restartable repair plan, `.moontown/planbook/repair-task.json`,
-and `.moontown/planbook/repair-task.md`. When the daemon sees an open gap and no
+`SKILL.md`, a restartable repair plan,
+`.moonsuite/products/moontown/planbook/repair-task.json`, and
+`.moonsuite/products/moontown/planbook/repair-task.md`. When the daemon sees an open gap and no
 active repair, it dispatches one bounded repair packet through MoonClaw with
 `execution_mode: acp` and `execution_target: codex-main`, so Codex ACP can patch
 the Moontown source root and return software-engineering evidence. Daemon

@@ -50,7 +50,7 @@ fn editor_pipeline_plan_ownership_section() -> String {
 ///|
 fn editor_pipeline_plan_implementation_section() -> String {
   [
-    "", "## Implementation Shape", "", "1. Add a restartable editor-pipeline state contract under `.moontown/editor-pipeline.json` or equivalent.",
+    "", "## Implementation Shape", "", "1. Add a restartable editor-pipeline state contract under `.moonsuite/products/moontown/editor-pipeline.json` or equivalent.",
     "2. Add a Moontown command that refreshes/renders that state and references the PlanBook plan.",
     "3. Connect editor-mode UI to the contract so it shows source course, current plan, dispatch status, validation status, and output readiness.",
     "4. Ensure a bounded PlanBook repair packet can dispatch the missing implementation work through MoonClaw.",

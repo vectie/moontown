@@ -18,8 +18,8 @@ fn live_autonomy_problem_section() -> String {
 ///|
 fn live_autonomy_goal_section() -> String {
   [
-    "", "## Goal", "", "- Maintain `.moontown/live-autonomy.json` as the current town spine.",
-    "- Append `.moontown/town-journal.jsonl` on each daemon tick or manual refresh.",
+    "", "## Goal", "", "- Maintain `.moonsuite/products/moontown/live-autonomy.json` as the current town spine.",
+    "- Append `.moonsuite/products/moontown/town-journal.jsonl` on each daemon tick or manual refresh.",
     "- Refresh `visual-projection.json` from real task/worker/protocol state during daemon ticks.",
     "- Classify town activity into working, watching, or needs-recovery; keep review queues visible without letting routine review block the watch loop.",
     "- Separate accepted updates, no-change cycles, failed cycles, and review-gated outputs.",
@@ -39,7 +39,7 @@ fn live_autonomy_ownership_section() -> String {
 ///|
 fn live_autonomy_acceptance_section() -> String {
   [
-    "", "## Acceptance Criteria", "", "- [x] `moon run src/cmd/main -- live refresh` writes `.moontown/live-autonomy.json`.",
+    "", "## Acceptance Criteria", "", "- [x] `moon run src/cmd/main -- live refresh` writes `.moonsuite/products/moontown/live-autonomy.json`.",
     "- [x] `moon run src/cmd/main -- live status` renders the current spine.", "- [x] Daemon tick refreshes `visual-projection.json` and live autonomy state.",
     "- [x] The spine records active workers, reviews, blocked work, accepted updates, no-change cycles, due goals, and next actions.",
     "- [x] Cookbook tracks the live spine and journal as runtime-state artifacts.",

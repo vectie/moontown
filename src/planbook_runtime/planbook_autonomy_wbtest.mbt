@@ -45,12 +45,24 @@ async test "planbook autonomy doctor writes self-healing evidence" {
   assert_true(status_text.contains("planbook-software-engineering-loop"))
   assert_true(status_text.contains("backlog-live-change-log-projection"))
   assert_true(status_text.contains("moonbook-native-planbook-provider"))
+  assert_true(
+    status_text.contains(".moonsuite/products/moontown/live-autonomy.json"),
+  )
+  assert_true(!status_text.contains(".moontown/live-autonomy.json"))
   assert_true(evidence.contains("PlanBook autonomy doctor"))
   assert_true(review.contains("needs-fix"))
   assert_true(backlog.contains("live-change-log-projection"))
   assert_true(change_log.contains("autonomy doctor"))
   assert_true(engineering_digest.contains("Daily Engineering Digest"))
   assert_true(engineering_digest.contains("Source-Control Policy"))
+  assert_true(
+    engineering_digest.contains(
+      ".moonsuite/products/moontown/planbook/latest-validation.md",
+    ),
+  )
+  assert_true(
+    !engineering_digest.contains(".moontown/planbook/latest-validation.md"),
+  )
   assert_true(progress.contains("next_check_interval_ms"))
   assert_true(progress.contains("take the next bounded task immediately"))
   assert_true(stop_policy.contains("The town should stop implementing"))

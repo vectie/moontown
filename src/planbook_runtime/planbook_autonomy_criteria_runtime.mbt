@@ -99,7 +99,7 @@ async fn planbook_validation_criterion(
     } else {
       "latest validation evidence is missing or does not satisfy planbook.validation.v1"
     },
-    "run validation, then write `.moontown/planbook/latest-validation.md` with `moon run src/cmd/main -- planbook validation`",
+    "run validation, then write `.moonsuite/products/moontown/planbook/latest-validation.md` with `moon run src/cmd/main -- planbook validation`",
   )
 }
 

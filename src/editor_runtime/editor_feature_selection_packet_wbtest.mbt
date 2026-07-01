@@ -78,11 +78,20 @@ async test "editor feature selection packet asks ai to choose from course eviden
   let repeat_context = @support.read_text_or_empty(
     editor_feature_selection_context_path(workspace_root),
   )
+  let repeat_evidence = @support.read_text_or_empty(
+    editor_feature_selection_current_evidence_path(workspace_root),
+  )
   let ledger = @support.read_text_or_empty(
     editor_implemented_features_ledger_path(workspace_root),
   )
   assert_true(repeat_packet_text.contains("Already Implemented Features"))
   assert_true(repeat_packet_text.contains("exclude every feature"))
+  assert_true(
+    repeat_evidence.contains(
+      ".moonsuite/products/moontown/editor-pipeline.json",
+    ),
+  )
+  assert_true(!repeat_evidence.contains(".moontown/editor-pipeline.json"))
   assert_true(repeat_context.contains("## Already Implemented Features"))
   assert_true(repeat_context.contains("- `x`"))
   assert_true(ledger.contains("- `x`"))

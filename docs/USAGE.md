@@ -1012,7 +1012,8 @@ moon run src/cmd/main -- planbook repair status
 ```
 
 `planbook doctor` is the self-build check. It writes
-`.moontown/planbook/autonomy.json`, `.moontown/planbook/autonomy.md`, and the
+`.moonsuite/products/moontown/planbook/autonomy.json`,
+`.moonsuite/products/moontown/planbook/autonomy.md`, and the
 PlanBook workspace pages `wiki/planning/execution-evidence.md`,
 `wiki/planning/self-healing.md`, and `wiki/reviews/active-plan-review.md`.
 Daemon ticks run the same check and the live spine exposes
@@ -1037,7 +1038,7 @@ or backlog instead of producing unnecessary code.
 
 `planbook repair` queues the first open self-build gap as a bounded PlanBook
 repair packet. It writes repair context, repair skill instructions, a restartable
-repair plan, and `.moontown/planbook/repair-task.json`. During live operation,
+repair plan, and `.moonsuite/products/moontown/planbook/repair-task.json`. During live operation,
 daemon ticks run the same path automatically: if a gap is open and no repair is
 active, the town dispatches one repair through MoonClaw using `execution_mode:
 acp` and `execution_target: codex-main`, so Codex ACP can patch the Moontown

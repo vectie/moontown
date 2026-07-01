@@ -943,11 +943,11 @@ self-build governance:
 ```text
 daemon tick / manual doctor
   -> inspect PlanBook criteria
-  -> write .moontown/planbook/autonomy.json
-  -> write .moontown/planbook/autonomy.md
+  -> write .moonsuite/products/moontown/planbook/autonomy.json
+  -> write .moonsuite/products/moontown/planbook/autonomy.md
   -> update PlanBook execution evidence and active review pages
   -> update PlanBook backlog projection, progress, stop policy, and live change log
-  -> expose open gap count in .moontown/live-autonomy.json
+  -> expose open gap count in .moonsuite/products/moontown/live-autonomy.json
   -> queue one bounded repair packet for the first open gap
   -> Mayor sees active repair work as live next action
 ```
@@ -992,8 +992,8 @@ output is a plan/progress update plus completion evidence, not more code.
 The repair bridge is intentionally bounded. It does not let the town run an
 unconstrained generic agent loop. Instead, it writes:
 
-- `.moontown/planbook/repair-task.json`
-- `.moontown/planbook/repair-task.md`
+- `.moonsuite/products/moontown/planbook/repair-task.json`
+- `.moonsuite/products/moontown/planbook/repair-task.md`
 - `raw/repair/PLANBOOK_REPAIR_CONTEXT.md`
 - `skills/planbook-repair/SKILL.md`
 - `plans/self-healing-repair/plan.md`

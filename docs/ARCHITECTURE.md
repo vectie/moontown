@@ -1578,14 +1578,14 @@ Moontown can now register and bootstrap a first-class planbook workspace with
 plan index, implementation backlog, backlog progress, stop policy, execution
 evidence, active review, decision log, live change log, schema, generated site,
 and code-plan/code-review/doc-sync skills. It also runs a PlanBook autonomy doctor during daemon ticks. That doctor writes
-`.moontown/planbook/autonomy.json`, updates the PlanBook evidence/review pages,
+`.moonsuite/products/moontown/planbook/autonomy.json`, updates the PlanBook evidence/review pages,
 updates the backlog projection/progress/stop policy and change log, and adds
 `planbook_open_count` plus repair actions to the live autonomy spine.
 
 When the doctor finds open gaps, the daemon queues exactly one bounded repair
 packet through the PlanBook repair bridge. The bridge materializes a repair
 context, repair `SKILL.md`, repair plan, and MoonClaw packet under the PlanBook
-workspace, then records `.moontown/planbook/repair-task.json`. The packet uses
+workspace, then records `.moonsuite/products/moontown/planbook/repair-task.json`. The packet uses
 the `planbook.repair.result.v1` contract and, during daemon ticks, is dispatched
 through MoonClaw with `execution_mode: acp` and `execution_target: codex-main`.
 The Codex ACP target is rooted at the Moontown source tree, so the town can patch
