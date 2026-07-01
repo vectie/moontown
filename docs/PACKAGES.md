@@ -433,9 +433,9 @@ Purpose:
 
 Current persisted files:
 
-- `.moontown/town.json`
-- `.moontown/standing-goals.json`
-- `.moontown/watchers/*.jsonl`
+- `.moonsuite/products/moontown/town.json`
+- `.moonsuite/products/moontown/standing-goals.json`
+- `.moonsuite/products/moontown/watchers/*.jsonl`
 - `.moonsuite/products/moontown/packets/` when keeper packets are exported
 
 Boundary:
@@ -548,7 +548,7 @@ Purpose:
 
 Current persisted file:
 
-- `.moontown/moonbooks.json`
+- `.moonsuite/products/moontown/moonbooks.json`
 
 Current real pieces:
 

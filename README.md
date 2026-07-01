@@ -49,7 +49,7 @@ Implemented today:
 - persisted town bootstrap in `.moontown/town.json`
 - persisted standing goal registry in
   `.moonsuite/products/moontown/standing-goals.json`
-- persisted moonbook catalog in `.moontown/moonbooks.json`
+- persisted moonbook catalog in `.moonsuite/products/moontown/moonbooks.json`
 - `BookProvider` abstraction for town bootstrap
 - extension-API-shaped moonbook adapter
 - external proposal packet and proposal/run receipt lifecycle
@@ -251,7 +251,7 @@ moon run src/cmd/main -- cookbook status
 ```
 
 This creates `.moontown/books/moontown-cookbook/`, registers it in
-`.moontown/moonbooks.json`, and writes
+`.moonsuite/products/moontown/moonbooks.json`, and writes
 `.moonsuite/products/moontown/cookbook/stable-state.json`. MoonBook generates
 and stores the cookbook, Moondesk should become the human desktop surface for
 managing it, and Moontown consumes the manifest for drift checks and operator

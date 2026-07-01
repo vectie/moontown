@@ -125,10 +125,10 @@ Use the right MoonBook type:
 
 Runtime state is stored under:
 
-- `.moontown/moonbooks.json`
-- `.moontown/town.json`
-- `.moontown/standing-goals.json`
-- `.moontown/daemon.json`
+- `.moonsuite/products/moontown/moonbooks.json`
+- `.moonsuite/products/moontown/town.json`
+- `.moonsuite/products/moontown/standing-goals.json`
+- `.moonsuite/products/moontown/daemon.json`
 - `.moonsuite/products/moontown/packets/` when exported packet files are written
 
 These are runtime artifacts, not source-of-truth project files.

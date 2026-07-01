@@ -5,6 +5,7 @@ async test "book quality status separates current success from historical failed
   )
   let result_dir = "\{root}/book-quality/ai-review-results"
   let run_path = "\{root}/book-quality/ai-review-runs.json"
+  let catalog_path = "\{root}/moonbooks.json"
   let old_run = book_quality_review_run_fixture(
     "wenyu-contest-express",
     "\{root}/book-quality/moonclaw-packets/contest.json",
@@ -29,8 +30,21 @@ async test "book quality status separates current success from historical failed
     "\{result_dir}/wenyu-contest-express.md",
     "ai_quality_score: 82\nbook_role_fit: strong\n",
   )
+  @moonbook.save_catalog_file(catalog_path, [
+    book_quality_catalog_entry(
+      id="wenyu-contest-express",
+      name="Wenyu Contest Express",
+      purpose="Contest service workspace.",
+      workspace_root="\{root}/books/wenyu-contest-express",
+      tags=["wenyu-valley", "civic-service"],
+    ),
+  ])
   write_book_quality_review_run_ledger(run_path, [old_run, current_run])
-  let status = render_book_quality_ai_review_status(result_dir~, run_path~)
+  let status = render_book_quality_ai_review_status(
+    result_dir~,
+    run_path~,
+    book_catalog_path=catalog_path,
+  )
   assert_true(status.contains("- current books: `1`"))
   assert_true(status.contains("- historical attempts: `1`"))
   assert_true(status.contains("- historical problem attempts: `1`"))

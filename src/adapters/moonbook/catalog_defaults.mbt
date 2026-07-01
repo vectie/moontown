@@ -29,7 +29,7 @@ pub fn default_workspace_root(book_id : String) -> String {
 
 ///|
 pub fn default_catalog_path() -> String {
-  ".moontown/moonbooks.json"
+  "\{@storage.moontown_product_state_dir()}/moonbooks.json"
 }
 
 ///|
