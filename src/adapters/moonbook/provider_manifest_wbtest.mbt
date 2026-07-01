@@ -1,11 +1,11 @@
 ///|
-test "book-local moonclaw provider manifest entry is stable" {
-  let root = "/tmp/moontown-provider-manifest-book"
+test "moonclaw provider manifest entry uses product home" {
+  let root = "/tmp/moontown-provider-manifest-suite/books/provider-book"
   let moonbook_root = "/tmp/moontown-provider-manifest-moonbook"
   let path = moonclaw_provider_manifest_path(root)
   let provider = moonbook_task_provider_manifest_entry(root, moonbook_root)
   assert_eq(
-    path, "/tmp/moontown-provider-manifest-book/.moonclaw/providers.json",
+    path, "/tmp/moontown-provider-manifest-suite/.moonsuite/products/moonclaw/providers.json",
   )
   assert_eq(provider.name, "moonbook")
   assert_eq(provider.kind, "task-provider")

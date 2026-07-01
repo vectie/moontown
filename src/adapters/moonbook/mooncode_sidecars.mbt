@@ -17,7 +17,7 @@ pub struct MoonCodeBookResultImport {
 
 ///|
 fn mooncode_book_results_sessions_root(book_root : String) -> String {
-  "\{book_root}/.moonclaw/mooncode/sessions"
+  @moonsuite.product_artifact_for_book_root(book_root, "mooncode", "sessions")
 }
 
 ///|

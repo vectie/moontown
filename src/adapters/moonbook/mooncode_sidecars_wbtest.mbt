@@ -63,6 +63,15 @@ test "mooncode sidecar processed ledger uses moontown product home" {
 }
 
 ///|
+test "mooncode sidecar sessions use mooncode product home" {
+  let root = "/tmp/moontown-mooncode-sidecar-suite/books/book-a"
+  assert_eq(
+    mooncode_book_results_sessions_root(root),
+    "/tmp/moontown-mooncode-sidecar-suite/.moonsuite/products/mooncode/sessions",
+  )
+}
+
+///|
 async test "mooncode sidecar processed ledger dedupes keys" {
   let path = "/tmp/moontown-mooncode-sidecar-ledger/processed.jsonl"
   @support.write_text_file(path, "a\nb\na\n\n")
@@ -80,8 +89,9 @@ async test "mooncode sidecar reconciler imports through moonbook cli and dedupes
   if !@fs.exists("\{moonbook_root}/moon.mod") {
     return
   }
-  let root = "/tmp/moontown-mooncode-sidecar-e2e"
-  @support.ignore_checked_command("rm", ["-rf", root])
+  let suite_root = "/tmp/moontown-mooncode-sidecar-e2e-suite"
+  let root = "\{suite_root}/books/sidecar-e2e"
+  @support.ignore_checked_command("rm", ["-rf", suite_root])
   @support.ignore_checked_command("rm", [
     "-rf",
     @storage.moontown_product_artifact("mooncode-book-results/sidecar-e2e"),
@@ -92,7 +102,7 @@ async test "mooncode sidecar reconciler imports through moonbook cli and dedupes
     purpose="Verify MoonCode sidecar import",
     workspace_root=root,
   )
-  let session_dir = "\{root}/.moonclaw/mooncode/sessions/session-1"
+  let session_dir = "\{mooncode_book_results_sessions_root(root)}/session-1"
   let sidecar_text =
     #|{"kind":"mooncode-book-result","session_id":"session-1","command_id":"cmd-1","result_id":"result-cmd-1","result_path":"/tmp/moontown-mooncode-sidecar-e2e-result.json","book_result":{"result_id":"result-cmd-1","summary":"package created from mooncode sidecar","artifacts":["portable/app-tool/mooncode/session-1/book-result-cmd-1.json"],"memory_candidates":[],"requires_review":true,"notify_town":true}}
   @support.write_text_file(

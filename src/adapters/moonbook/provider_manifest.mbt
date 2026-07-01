@@ -10,7 +10,7 @@ async fn ensure_book_provider_manifest(
 
 ///|
 fn moonclaw_provider_manifest_path(root : String) -> String {
-  "\{root}/.moonclaw/providers.json"
+  @moonsuite.product_artifact_for_book_root(root, "moonclaw", "providers.json")
 }
 
 ///|
