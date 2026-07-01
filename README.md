@@ -251,7 +251,7 @@ moon run src/cmd/main -- cookbook bootstrap
 moon run src/cmd/main -- cookbook status
 ```
 
-This creates `.moontown/books/moontown-cookbook/`, registers it in
+This creates `books/moontown-cookbook/`, registers it in
 `.moonsuite/products/moontown/moonbooks.json`, and writes
 `.moonsuite/products/moontown/cookbook/stable-state.json`. MoonBook generates
 and stores the cookbook, Moondesk should become the human desktop surface for
@@ -843,7 +843,7 @@ town model.
 
 The generated MoonBook workspace site is a separate surface. If a live run
 still shows generic branding or dead projection links under
-`.moontown/books/*/site/`, that bug belongs to the MoonBook site generator, not
+`books/*/site/`, that bug belongs to the MoonBook site generator, not
 to the Moontown Rabbita dashboard.
 
 ## Docs

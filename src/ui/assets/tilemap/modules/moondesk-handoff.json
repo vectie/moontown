@@ -8,8 +8,8 @@
       "kind": "book-workspace",
       "status": "ready",
       "scope": "single book authored in Moondesk, supervised in Moontown",
-      "source_path": "../moondesk workspace export or .moontown/books/<book-id>/book",
-      "target_path": ".moontown/books/<book-id>/book",
+      "source_path": "../moondesk workspace export or books/<book-id>/book",
+      "target_path": "books/<book-id>/book",
       "summary": "Durable wiki, generated pages, evidence folders, and review queues prepared in Moondesk and bound to a Moontown civic module through book_id.",
       "import_contract": [
         "book folder contains moonbook-ui-state.json or can regenerate it",
@@ -98,7 +98,7 @@
       "kind": "output-bundle",
       "status": "ready",
       "scope": "finished work retrieval",
-      "source_path": ".moontown/books/<book-id>/book/site/generated or book/synthesis",
+      "source_path": "books/<book-id>/book/site/generated or book/synthesis",
       "target_path": "Moontown final output mode and Moondesk file browser",
       "summary": "Published sites, reports, evidence pages, and pending reviews. Moontown shows the high-level output surface; Moondesk remains the detailed file browser.",
       "import_contract": [
