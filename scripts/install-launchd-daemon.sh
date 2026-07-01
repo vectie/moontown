@@ -4,11 +4,14 @@ set -euo pipefail
 root="$(cd "$(dirname "$0")/.." && pwd)"
 label="${MOONTOWN_LAUNCHD_LABEL:-com.vectie.moontown.daemon}"
 moon_bin="${MOON_BIN:-$HOME/.moon/bin/moon}"
-plist_dir="$root/.moontown/launchd"
+product_home="$root/.moonsuite/products/moontown"
+plist_dir="$product_home/launchd"
 plist="$plist_dir/$label.plist"
+stdout_log="$product_home/launchd.out.log"
+stderr_log="$product_home/launchd.err.log"
 domain="gui/$(id -u)"
 
-mkdir -p "$plist_dir" "$root/.moontown"
+mkdir -p "$plist_dir"
 
 cat > "$plist" <<PLIST
 <?xml version="1.0" encoding="UTF-8"?>
@@ -37,9 +40,9 @@ cat > "$plist" <<PLIST
   <key>ThrottleInterval</key>
   <integer>30</integer>
   <key>StandardOutPath</key>
-  <string>$root/.moontown/launchd.out.log</string>
+  <string>$stdout_log</string>
   <key>StandardErrorPath</key>
-  <string>$root/.moontown/launchd.err.log</string>
+  <string>$stderr_log</string>
   <key>EnvironmentVariables</key>
   <dict>
     <key>HOME</key>
@@ -64,4 +67,4 @@ launchctl kickstart -k "$domain/$label"
 launchctl print "$domain/$label" | sed -n '1,80p'
 
 echo "launchd plist: $plist"
-echo "logs: $root/.moontown/launchd.out.log $root/.moontown/launchd.err.log"
+echo "logs: $stdout_log $stderr_log"

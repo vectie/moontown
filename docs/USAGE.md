@@ -337,14 +337,15 @@ the OS instead of relying on a detached child process:
 ```bash
 ./scripts/install-launchd-daemon.sh
 moon run src/cmd/main -- daemon doctor
-tail -f .moontown/daemon.log
+tail -f .moonsuite/products/moontown/daemon.log
 ```
 
-The installer writes `.moontown/launchd/com.vectie.moontown.daemon.plist`,
-loads it into the current user launchd domain, and points stdout/stderr at:
+The installer writes
+`.moonsuite/products/moontown/launchd/com.vectie.moontown.daemon.plist`, loads
+it into the current user launchd domain, and points stdout/stderr at:
 
-- `.moontown/launchd.out.log`
-- `.moontown/launchd.err.log`
+- `.moonsuite/products/moontown/launchd.out.log`
+- `.moonsuite/products/moontown/launchd.err.log`
 
 The launchd profile also sets `MOONTOWN_MOONCLAW_INLINE=1`, so bounded
 MoonClaw handoffs such as PlanBook repairs and book semantic reviews can run
