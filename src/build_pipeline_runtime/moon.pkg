@@ -9,6 +9,7 @@ import {
   "vectie/moontown/core",
   "vectie/moontown/moonclaw_runtime",
   "vectie/moontown/support",
+  "vectie/moonlib/moonsuite",
 }
 
 supported_targets = "native"

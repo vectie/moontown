@@ -74,6 +74,8 @@ pub fn imported_review_run_from_observation(String, String, String, String, Stri
 
 pub fn is_repair_goal_id(String) -> Bool
 
+pub fn moonclaw_config_path(String) -> String
+
 pub fn moonclaw_home(String) -> String
 
 pub fn moonclaw_home_from_run_path(String) -> String

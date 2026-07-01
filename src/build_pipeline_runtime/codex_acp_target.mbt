@@ -1,7 +1,11 @@
 ///|
 async fn ensure_wenyu_codex_acp_target(root : String) -> Unit {
-  write_wenyu_codex_acp_target_config("\{root}/moonclaw.json", root)
-  write_wenyu_codex_acp_target_config("\{root}/.moonclaw/moonclaw.json", root)
+  write_wenyu_codex_acp_target_config(
+    @moonsuite.product_artifact_for_workspace_root(
+      root, "moonclaw", "moonclaw.json",
+    ),
+    root,
+  )
 }
 
 ///|

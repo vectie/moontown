@@ -9,8 +9,7 @@ async fn write_book_quality_review_moonclaw_profile(
       indent=2,
     ),
   )
-  let home = "\{root}/.moonclaw"
-  let config_path = "\{home}/moonclaw.json"
+  let config_path = @book_quality.moonclaw_config_path(review_dir)
   let source_root = @support.absolute_path_from_cwd(".")
   @support.write_text_file(
     config_path,

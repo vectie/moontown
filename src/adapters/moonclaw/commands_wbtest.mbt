@@ -4,5 +4,7 @@ test "default MoonClaw command root uses Moontown product home" {
   assert_true(
     command.contains("-C .moonsuite/products/moontown/external/moonclaw"),
   )
+  assert_true(command.contains("--home ."))
   assert_false(command.contains("-C .moontown/external/moonclaw"))
+  assert_false(command.contains("--home .moonclaw"))
 }

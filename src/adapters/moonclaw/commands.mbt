@@ -24,5 +24,5 @@ pub fn build_run_command(
 
 ///|
 pub fn default_moonclaw_home() -> String {
-  ".moonclaw"
+  "."
 }

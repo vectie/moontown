@@ -1550,4 +1550,14 @@ test "book quality default runtime paths use moontown product home" {
     ".moonsuite/products/moontown/book-quality/repair-bridge.json",
   )
   assert_eq(default_review_root(), default_book_quality_dir())
+  assert_eq(
+    default_moonclaw_home(),
+    ".moonsuite/products/moontown/book-quality/.moonsuite/products/moonclaw",
+  )
+  assert_eq(moonclaw_home(default_review_dir()), default_moonclaw_home())
+  assert_eq(
+    moonclaw_config_path(default_review_dir()),
+    ".moonsuite/products/moontown/book-quality/.moonsuite/products/moonclaw/moonclaw.json",
+  )
+  assert_false(moonclaw_config_path(default_review_dir()).contains(".moonclaw"))
 }

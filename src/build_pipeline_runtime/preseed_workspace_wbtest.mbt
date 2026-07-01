@@ -48,8 +48,15 @@ async test "Wenyu preseed materializes build workspace inputs in build pipeline"
     copied.contains("source: \{repo}/src/ui/rabbita-town/main/main.mbt"),
   )
   assert_true(@fs.exists("\{root}/skills/wenyu-build/SKILL.md"))
-  assert_true(@fs.exists("\{root}/moonclaw.json"))
-  assert_true(@fs.exists("\{root}/.moonclaw/moonclaw.json"))
+  assert_true(
+    @fs.exists(
+      @moonsuite.product_artifact_for_workspace_root(
+        root, "moonclaw", "moonclaw.json",
+      ),
+    ),
+  )
+  assert_false(@fs.exists("\{root}/moonclaw.json"))
+  assert_false(@fs.exists("\{root}/.moonclaw/moonclaw.json"))
   @support.ignore_checked_command("rm", ["-rf", root])
   @support.ignore_checked_command("rm", ["-rf", repo])
 }

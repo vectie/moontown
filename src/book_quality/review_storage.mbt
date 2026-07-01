@@ -39,19 +39,38 @@ fn review_run_ledger_suffix() -> String {
 
 ///|
 pub fn moonclaw_home(review_dir : String) -> String {
-  ignore(review_dir)
-  default_moonclaw_home()
+  @moonsuite.product_artifact_for_workspace_root(
+    review_root(review_dir),
+    "moonclaw",
+    "",
+  )
 }
 
 ///|
 pub fn moonclaw_home_from_run_path(run_path : String) -> String {
-  ignore(run_path)
-  default_moonclaw_home()
+  @moonsuite.product_artifact_for_workspace_root(
+    review_root_from_run_path(run_path),
+    "moonclaw",
+    "",
+  )
 }
 
 ///|
 pub fn default_moonclaw_home() -> String {
-  ".moonclaw"
+  @moonsuite.product_artifact_for_workspace_root(
+    default_review_root(),
+    "moonclaw",
+    "",
+  )
+}
+
+///|
+pub fn moonclaw_config_path(review_dir : String) -> String {
+  @moonsuite.product_artifact_for_workspace_root(
+    review_root(review_dir),
+    "moonclaw",
+    "moonclaw.json",
+  )
 }
 
 ///|

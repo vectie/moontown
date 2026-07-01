@@ -7,6 +7,7 @@ import {
   "vectie/moontown/moonclaw_policy",
   "vectie/moontown/policy",
   "vectie/moontown/storage",
+  "vectie/moonlib/moonsuite",
 }
 
 supported_targets = "native"

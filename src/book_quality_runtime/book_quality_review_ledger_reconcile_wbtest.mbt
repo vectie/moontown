@@ -42,7 +42,7 @@ async test "book quality runtime harvests MoonClaw result into review ledger" {
   )
   let result_dir = "\{root}/results"
   let run_path = "\{root}/book-quality/ai-review-runs.json"
-  let home = "\{root}/book-quality/.moonclaw"
+  let home = @book_quality.moonclaw_home_from_run_path(run_path)
   let workspace = "\{root}/moonclaw-workspace"
   let run = book_quality_review_run_fixture(
     "course-accepted",
@@ -69,6 +69,7 @@ async test "book quality runtime harvests MoonClaw result into review ledger" {
   )
   let written = reconcile_book_quality_ai_review_results(result_dir~, run_path~)
   assert_eq(written, 1)
+  assert_false(@fs.exists("\{root}/book-quality/.moonclaw"))
   let result_text = @fs.read_file("\{result_dir}/course-accepted.md").text()
   assert_true(result_text.contains("ai_quality_score: 92"))
   let ledger_text = @fs.read_file(run_path).text()
