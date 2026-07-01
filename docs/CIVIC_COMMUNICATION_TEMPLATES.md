@@ -73,17 +73,19 @@ input.
 Recurring schedules load templates from:
 
 ```text
-.moontown/civic/pattern-scenarios/<session-id>.json
+.moonsuite/products/moontown/civic/pattern-scenarios/<session-id>.json
 ```
 
 No scenario is auto-seeded by domain-specific MoonBit code. Recurring
 communication sessions are explicit data: create a schedule in
-`.moontown/civic/pattern-schedules.json` and create a matching template at this
-path. New domains should arrive as data and skills, not new MoonBit branches.
+`.moonsuite/products/moontown/civic/pattern-schedules.json` and create a
+matching template at this path. New domains should arrive as data and skills,
+not new MoonBit branches.
 
 One-off runs can use any template path. A successful `pattern-template` run also
-copies the scenario into `.moontown/civic/pattern-scenarios/` and upserts a
-30-minute recurring schedule, so the same pattern can continue under the daemon:
+copies the scenario into
+`.moonsuite/products/moontown/civic/pattern-scenarios/` and upserts a 30-minute
+recurring schedule, so the same pattern can continue under the daemon:
 
 ```bash
 moon run src/cmd/main -- civic protocols pattern-template assets/templates/civic-salons/robotics-mini-salon.json
@@ -97,9 +99,10 @@ MoonClaw reducer, use the manifest installer:
 moon run src/cmd/main -- civic protocols pattern-manifest assets/templates/civic-patterns/wenyu-civic-patterns.json
 ```
 
-The manifest copies each scenario into `.moontown/civic/pattern-scenarios/` and
-creates staggered 30-minute schedules. It does not materialize MoonBook outputs
-until the daemon or `civic protocols schedules tick` reaches a due session.
+The manifest copies each scenario into
+`.moonsuite/products/moontown/civic/pattern-scenarios/` and creates staggered
+30-minute schedules. It does not materialize MoonBook outputs until the daemon
+or `civic protocols schedules tick` reaches a due session.
 
 ## Template Contract
 
@@ -141,7 +144,8 @@ Generated projections make that boundary explicit. Building books emit
 `projection_scope: public`; participant workspaces emit
 `projection_scope: internal` plus tags such as `participant-workspace`. The
 Rabbita bridge filters by those metadata fields and by
-`.moontown/book-projection-policy.json`, not by domain-specific MoonBit code.
+`.moonsuite/products/moontown/book-projection-policy.json`, not by
+domain-specific MoonBit code.
 
 ## Building Protocol Resolution
 
@@ -170,7 +174,8 @@ reasoning and reducer quality.
 5. Add `ideas` only if you need deterministic fixture/smoke data. Do not rely
    on them for production reduction; the generated skill should guide
    MoonClaw to produce round-specific ideas.
-6. For recurring use, add or edit `.moontown/civic/pattern-schedules.json` so the schedule
+6. For recurring use, add or edit
+   `.moonsuite/products/moontown/civic/pattern-schedules.json` so the schedule
    id matches the template file name.
 7. Run `moon run src/cmd/main -- civic protocols schedules tick` or wait for the
    daemon.

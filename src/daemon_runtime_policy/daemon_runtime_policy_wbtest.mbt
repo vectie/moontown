@@ -16,7 +16,7 @@ test "daemon runtime policy detects heartbeat staleness" {
     worker_pid=42,
     last_heartbeat_ms=1_000UL,
   )
-  assert_eq(state.log_path, ".moonsuite/products/moontown/daemon.log")
+  assert_eq(state.log_path, @storage.moontown_product_artifact("daemon.log"))
   assert_eq(state.heartbeat_age_ms(1_500UL), 500UL)
   assert_true(!state.is_stale(1_500UL, 600UL))
   assert_true(state.is_stale(1_700UL, 600UL))
@@ -24,6 +24,7 @@ test "daemon runtime policy detects heartbeat staleness" {
 
 ///|
 test "daemon runtime policy requires supervisor for durable worker" {
+  let log_path = @storage.moontown_product_artifact("daemon.log")
   let lone_worker = {
     status: "running",
     supervisor_pid: 0,
@@ -36,7 +37,7 @@ test "daemon runtime policy requires supervisor for durable worker" {
     tick_success_count: 3,
     tick_failure_count: 0,
     last_error: "",
-    log_path: ".moonsuite/products/moontown/daemon.log",
+    log_path,
   }
   assert_true(lone_worker.healthy())
   assert_true(!lone_worker.durable_worker_active())
@@ -53,6 +54,7 @@ test "daemon runtime policy requires supervisor for durable worker" {
 
 ///|
 test "daemon runtime policy owns supervisor worker spawn decisions" {
+  let log_path = @storage.moontown_product_artifact("daemon.log")
   let running_worker = {
     status: "running",
     supervisor_pid: 10,
@@ -65,7 +67,7 @@ test "daemon runtime policy owns supervisor worker spawn decisions" {
     tick_success_count: 3,
     tick_failure_count: 0,
     last_error: "",
-    log_path: ".moonsuite/products/moontown/daemon.log",
+    log_path,
   }
   assert_false(daemon_runtime_should_spawn_worker(running_worker))
   assert_true(
@@ -91,6 +93,7 @@ test "daemon runtime policy owns supervisor worker spawn decisions" {
 
 ///|
 test "daemon runtime policy renders health summary in stable order" {
+  let log_path = @storage.moontown_product_artifact("daemon.log")
   let health = {
     status: "running",
     supervisor_pid: 10,
@@ -103,7 +106,7 @@ test "daemon runtime policy renders health summary in stable order" {
     tick_success_count: 3,
     tick_failure_count: 1,
     last_error: "",
-    log_path: ".moonsuite/products/moontown/daemon.log",
+    log_path,
   }
   let summary = daemon_runtime_health_summary(health)
   assert_true(summary.contains("runtime=healthy"))
@@ -113,7 +116,7 @@ test "daemon runtime policy renders health summary in stable order" {
   assert_eq(fields[2], "supervisor_pid=10")
   assert_eq(fields[5], "worker_alive=true")
   assert_eq(fields[9], "failures=1")
-  assert_eq(fields[10], "log=.moonsuite/products/moontown/daemon.log")
+  assert_eq(fields[10], "log=\{log_path}")
 }
 
 ///|

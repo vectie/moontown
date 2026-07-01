@@ -23,7 +23,12 @@ pub fn civic_communication_scenario_path(
 
 ///|
 fn civic_communication_base_dir(snapshot_path : String) -> String {
-  "\{@storage.snapshot_base_dir(snapshot_path)}/civic"
+  let base = @storage.snapshot_base_dir(snapshot_path)
+  if base == @storage.moontown_product_state_dir() {
+    @storage.moontown_product_artifact("civic")
+  } else {
+    "\{base}/civic"
+  }
 }
 
 ///|
@@ -48,7 +53,9 @@ fn civic_communication_protocol_ledger_path(
   building_id : String,
   ledger : String,
 ) -> String {
-  "\{@storage.moontown_product_state_dir()}/civic/protocols/\{building_id}/\{ledger}.jsonl"
+  @storage.moontown_product_artifact(
+    "civic/protocols/\{building_id}/\{ledger}.jsonl",
+  )
 }
 
 ///|

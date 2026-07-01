@@ -54,7 +54,7 @@ fn visual_projection_test_state(
 test "visual projection path uses storage snapshot base" {
   assert_eq(
     default_visual_projection_path("town.json"),
-    ".moonsuite/products/moontown/visual-projection.json",
+    @storage.moontown_product_artifact("visual-projection.json"),
   )
   assert_eq(
     default_visual_projection_path("/tmp/moontown/town.json"),

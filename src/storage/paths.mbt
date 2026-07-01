@@ -31,6 +31,11 @@ pub fn moontown_product_state_dir() -> String {
 }
 
 ///|
+pub fn moontown_product_artifact(relative : String) -> String {
+  @moonsuite.product_artifact("", moonsuite_product_id(), relative)
+}
+
+///|
 pub fn moontown_product_service_path() -> String {
   @moonsuite.product_service_path("", moonsuite_product_id())
 }

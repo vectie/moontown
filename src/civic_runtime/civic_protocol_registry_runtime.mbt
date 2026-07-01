@@ -7,12 +7,12 @@ priv struct BuildingProtocolRegistryDocument {
 
 ///|
 pub fn default_wenyu_protocol_registry_path() -> String {
-  "\{@storage.moontown_product_state_dir()}/civic/protocols.json"
+  @storage.moontown_product_artifact("civic/protocols.json")
 }
 
 ///|
 pub fn default_wenyu_protocol_status_path() -> String {
-  "\{@storage.moontown_product_state_dir()}/civic/protocol-status.json"
+  @storage.moontown_product_artifact("civic/protocol-status.json")
 }
 
 ///|

@@ -111,7 +111,7 @@ document protocol.
 ## Building Protocol Example
 
 ```text
-.moontown/civic/protocols/social-square/
+.moonsuite/products/moontown/civic/protocols/social-square/
   charter.md
   protocol.md
   agenda/current.md

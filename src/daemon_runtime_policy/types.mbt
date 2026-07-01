@@ -37,7 +37,7 @@ pub fn DaemonRuntimeState::new(
   tick_failure_count? : Int = 0,
   stop_requested? : Bool = false,
   last_error? : String = "",
-  log_path? : String = "\{@storage.moontown_product_state_dir()}/daemon.log",
+  log_path? : String = @storage.moontown_product_artifact("daemon.log"),
 ) -> DaemonRuntimeState {
   {
     daemon_id,

@@ -30,7 +30,9 @@ fn moonbook_moon_command() -> String {
 ///|
 fn result_temp_path(task_id : String) -> String {
   resolved_root_path(
-    "\{@storage.moontown_product_state_dir()}/book-results/\{safe_result_temp_name(task_id)}.json",
+    @storage.moontown_product_artifact(
+      "book-results/\{safe_result_temp_name(task_id)}.json",
+    ),
   )
 }
 

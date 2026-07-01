@@ -1,6 +1,6 @@
 ///|
 pub fn default_book_quality_dir() -> String {
-  "\{@storage.moontown_product_state_dir()}/book-quality"
+  @storage.moontown_product_artifact("book-quality")
 }
 
 ///|

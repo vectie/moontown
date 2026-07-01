@@ -104,5 +104,10 @@ pub fn build_visual_projection_with_decorator(
 
 ///|
 pub fn default_visual_projection_path(snapshot_path : String) -> String {
-  "\{@storage.snapshot_base_dir(snapshot_path)}/visual-projection.json"
+  let base = @storage.snapshot_base_dir(snapshot_path)
+  if base == @storage.moontown_product_state_dir() {
+    @storage.moontown_product_artifact("visual-projection.json")
+  } else {
+    "\{base}/visual-projection.json"
+  }
 }

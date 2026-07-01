@@ -1182,7 +1182,8 @@ Implemented protocol pieces:
 
 - building protocol definitions for inbox, contribution, reduction,
   distribution, and review channels
-- append-only protocol ledgers under `.moontown/civic/protocols/<building-id>/`
+- append-only protocol ledgers under
+  `.moonsuite/products/moontown/civic/protocols/<building-id>/`
 - civic workspace `BUILDING_PROTOCOL_CONTRACT.md` seed files
 - Social Square proof ledgers with one consent-gated review slice
 - Social Square communication slices loaded from `CivicCommunicationScenario` templates, with
@@ -1197,8 +1198,10 @@ Implemented protocol pieces:
   leave the building and become local reviewable work
 - public projection filtering so intermediate salon participant workspaces and stale
   retry attempts do not crowd the operator book list
-- wall-clock communication-pattern schedules under `.moontown/civic/pattern-schedules.json`
-- append-only communication-pattern round records under `.moontown/civic/pattern-runs/`
+- wall-clock communication-pattern schedules under
+  `.moonsuite/products/moontown/civic/pattern-schedules.json`
+- append-only communication-pattern round records under
+  `.moonsuite/products/moontown/civic/pattern-runs/`
 - daemon-tick integration that runs due communication-pattern schedules without
   hard-coding them into the frontend
 
@@ -1224,10 +1227,11 @@ moon run src/cmd/main -- civic doctor
 ```
 
 The recurring communication-pattern path is intentionally schedule-driven and
-template-driven. Operators can edit `.moontown/civic/pattern-schedules.json` to
-enable/disable scenarios or adjust `interval_ms`, and can edit
-`.moontown/civic/pattern-scenarios/<session-id>.json` to change the domain,
-participants, skill rules, output paths, and review gate without changing
+template-driven. Operators can edit
+`.moonsuite/products/moontown/civic/pattern-schedules.json` to enable/disable
+scenarios or adjust `interval_ms`, and can edit
+`.moonsuite/products/moontown/civic/pattern-scenarios/<session-id>.json` to
+change the domain, participants, skill rules, output paths, and review gate without changing
 MoonBit. The daemon tick calls the same due-check as
 `civic protocols schedules tick`, then records completion in JSONL for restart
 inspection.

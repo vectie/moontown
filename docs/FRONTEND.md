@@ -340,15 +340,17 @@ The short version:
   publishes `module-projections.json`
 - projection visibility is metadata-driven: generated fragments can set
   `projection_scope` or `visibility`, and operators can override visibility
-  through `.moontown/book-projection-policy.json` using the template at
-  `assets/templates/book-projection-policy.json`
+  through `.moonsuite/products/moontown/book-projection-policy.json` using the
+  template at `assets/templates/book-projection-policy.json`
 - `moon run src/cmd/main -- civic bootstrap` can create the canonical Wenyu civic
   MoonBook projection fragments consumed by the module interiors
 - `moon run src/cmd/main -- civic status` prints the civic-service portfolio without
   changing files
-- `moon run src/cmd/main -- civic doctor` writes `.moontown/civic/status.json` and
-  `.moontown/civic/status.md` so the viewport can show seeded, changed,
-  blocked, review, and misconfigured civic modules from real workspace state
+- `moon run src/cmd/main -- civic doctor` writes
+  `.moonsuite/products/moontown/civic/status.json` and
+  `.moonsuite/products/moontown/civic/status.md` so the viewport can show
+  seeded, changed, blocked, review, and misconfigured civic modules from real
+  workspace state
 - generated MoonBook HTML outputs are served and copied under
   `book-output/<book-id>/...` for module interior links
 - hover/focus reveals module details without cluttering the first screen

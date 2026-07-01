@@ -262,8 +262,8 @@ participant workspace.
 
 Important outputs:
 
-- `.moontown/civic/protocols/social-square/metrics.json`
-- `.moontown/civic/protocols/social-square/home_returns.jsonl`
+- `.moonsuite/products/moontown/civic/protocols/social-square/metrics.json`
+- `.moonsuite/products/moontown/civic/protocols/social-square/home_returns.jsonl`
 - `.moontown/books/wenyu-social-square/wiki/metrics/<salon>.md`
 - `.moontown/books/wenyu-social-square/book/site/generated/index.html`
 - `.moontown/books/<participant-book>/wiki/queries/salon-returned-ideas.md`
@@ -430,8 +430,8 @@ under
 Review-gated
 outputs reconcile as `needs_review` with `accepted_facts_count: 0`, so
 operational/protocol activity does not inflate accepted domain evidence.
-`civic doctor` writes `.moontown/civic/status.json` and
-`.moontown/civic/status.md`. The Rabbita viewport serves that JSON as
+`civic doctor` writes `.moonsuite/products/moontown/civic/status.json` and
+`.moonsuite/products/moontown/civic/status.md`. The Rabbita viewport serves that JSON as
 `civic-status.json`, so each module interior can show whether its MoonBook
 workspace is only seeded, fully operable, blocked, review-needed, changed, or
 still missing files.
@@ -448,11 +448,12 @@ moon run src/cmd/main -- civic protocols schedules status
 moon run src/cmd/main -- civic protocols schedules tick
 ```
 
-`civic protocols bootstrap` writes `.moontown/civic/protocols.json`, per-building
+`civic protocols bootstrap` writes `.moonsuite/products/moontown/civic/protocols.json`, per-building
 `PROTOCOL.md` files, and the current Social Square proof ledgers under
-`.moontown/civic/protocols/social-square/`. `civic protocols status` prints the
+`.moonsuite/products/moontown/civic/protocols/social-square/`. `civic protocols status` prints the
 building protocol table. `civic protocols doctor` refreshes
-`.moontown/civic/protocol-status.json` and `.moontown/civic/protocol-status.md`.
+`.moonsuite/products/moontown/civic/protocol-status.json` and
+`.moonsuite/products/moontown/civic/protocol-status.md`.
 
 `civic protocols patterns` lists reusable communication patterns such as
 `research-salon`, `signal-watch`, `triage-desk`, `review-council`,
@@ -466,15 +467,18 @@ gate. Template `ideas` are fixture examples only; production runs use the
 MoonClaw reducer output contract. If the `building_id` is not already in the
 Wenyu registry, Moontown synthesizes a generic exchange-reduce-distribute
 protocol from the scenario fields. For recurring daemon use, place the file at
-`.moontown/civic/pattern-scenarios/<session-id>.json` and make sure
-`.moontown/civic/pattern-schedules.json` has a schedule with the same `id`.
+`.moonsuite/products/moontown/civic/pattern-scenarios/<session-id>.json` and
+make sure `.moonsuite/products/moontown/civic/pattern-schedules.json` has a
+schedule with the same `id`.
 
 `civic protocols schedules status` reports the persisted recurring
-communication-pattern schedule from `.moontown/civic/pattern-schedules.json`.
+communication-pattern schedule from
+`.moonsuite/products/moontown/civic/pattern-schedules.json`.
 `civic protocols schedules tick` performs the
 same due-check used by the daemon: it compares real wall-clock time against
 `next_due_ms`, runs only due sessions, advances the schedule, and appends a
-round record to `.moontown/civic/pattern-runs/<session-id>.jsonl`. There is no
+round record to
+`.moonsuite/products/moontown/civic/pattern-runs/<session-id>.jsonl`. There is no
 built-in recurring pattern session; operators add schedules and matching templates
 explicitly while the system is experimental.
 
@@ -488,9 +492,10 @@ Overnight validation checklist:
 - `moon run src/cmd/main -- daemon doctor` should report a fresh heartbeat and a
   non-stale runtime.
 - `.moontown/daemon.json` should show `tick_sequence` increasing.
-- `.moontown/civic/pattern-schedules.json` should show `round_count` increasing
+- `.moonsuite/products/moontown/civic/pattern-schedules.json` should show
+  `round_count` increasing
   roughly every 30 minutes for enabled due sessions.
-- `.moontown/civic/pattern-runs/<session-id>.jsonl` should
+- `.moonsuite/products/moontown/civic/pattern-runs/<session-id>.jsonl` should
   contain one JSON line per completed communication-pattern round.
 
 ## 1.8 Install The Final Wenyu Integration Portfolio

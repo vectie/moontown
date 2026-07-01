@@ -159,7 +159,7 @@ Runtime placement boundary:
   It must not embed Wenyu-specific book ids or building coordinates.
 - `src/visual_projection_runtime` may load this registry and translate enabled
   modules into the generic placement contract before persisting
-  `.moontown/visual-projection.json`.
+  `.moonsuite/products/moontown/visual-projection.json`.
 - If a module is absent from the registry, the projection may use deterministic
   generic fallback placement, but that fallback is not a Wenyu design surface.
 
@@ -281,8 +281,9 @@ moon run src/cmd/main -- civic doctor
 ```
 
 The protocol bootstrap writes the town-level protocol registry under
-`.moontown/civic/protocols.json` and per-building protocol ledgers under
-`.moontown/civic/protocols/<building-id>/`. Social Square has a protocol proof
+`.moonsuite/products/moontown/civic/protocols.json` and per-building protocol
+ledgers under `.moonsuite/products/moontown/civic/protocols/<building-id>/`.
+Social Square has a protocol proof
 slice and can run additional `research-salon` communication-pattern scenarios
 from `CivicCommunicationScenario` JSON templates. A research salon creates the
 internal participant workspaces declared by the template,
@@ -409,7 +410,8 @@ Current status:
 - book projection visibility is explicit: public building books use
   `projection_scope: public`, internal salon workspaces use
   `projection_scope: internal`, and operators can adjust policy in
-  `.moontown/book-projection-policy.json` without frontend code changes
+  `.moonsuite/products/moontown/book-projection-policy.json` without frontend
+  code changes
 - module interiors now show MoonBook summary, chips, metrics, readiness,
   review queue, page families, output links, and latest journey when a bound
   book fragment exists
@@ -446,8 +448,9 @@ Current status:
   recent bridge records next to module validation
 - `tilemap/modules/moondesk-handoff.json` defines the portable artifact lanes
   that can be imported without changing viewport code
-- `moondesk-bridge.json` scans real `.moontown/moondesk-*` and
-  `.moontown/book-results` files for recent portable records
+- `moondesk-bridge.json` scans real `.moonsuite/products/moontown/moondesk-*`
+  and `.moonsuite/products/moontown/book-results` files for recent portable
+  records
 - standalone write-back editing, schema validation, and richer designer preview
   tooling are still pending
 

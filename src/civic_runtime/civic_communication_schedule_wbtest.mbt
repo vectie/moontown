@@ -7,7 +7,16 @@ test "default civic communication-pattern schedules are explicit opt-in" {
 test "civic communication paths use storage-owned snapshot base" {
   assert_eq(
     default_civic_communication_schedule_path(snapshot_path="town.json"),
-    ".moonsuite/products/moontown/civic/pattern-schedules.json",
+    @storage.moontown_product_artifact("civic/pattern-schedules.json"),
+  )
+  assert_eq(
+    civic_communication_scenario_path(
+      "future energy/social square",
+      snapshot_path="town.json",
+    ),
+    @storage.moontown_product_artifact(
+      "civic/pattern-scenarios/future-energy-social-square.json",
+    ),
   )
   assert_eq(
     default_civic_communication_run_ledger_path(

@@ -1,6 +1,6 @@
 ///|
 fn final_integration_status_path(manifest_id : String) -> String {
-  "\{@storage.moontown_product_state_dir()}/integration/\{manifest_id}-status.json"
+  @storage.moontown_product_artifact("integration/\{manifest_id}-status.json")
 }
 
 ///|

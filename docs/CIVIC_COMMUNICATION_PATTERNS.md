@@ -150,7 +150,8 @@ Protocol rounds and civic service results are separate layers.
 The daemon runs a generic `civic-service` scheduled job after protocol rounds.
 That job calls `reconcile_wenyu_civic_service_results`, reads the service
 registry and protocol ledgers, and writes
-`.moontown/book-results/goal-<book-id>-civic-service.json` through MoonBook.
+`.moonsuite/products/moontown/book-results/goal-<book-id>-civic-service.json`
+through MoonBook.
 This is intentionally registry-driven: adding a future building should require
 a service definition and pattern scenario, not a new MoonBit branch.
 

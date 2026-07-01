@@ -88,8 +88,9 @@ Implemented:
 - `civic/protocols.mbt` defines one `BuildingProtocolDefinition` per enabled
   Wenyu civic building.
 - `civic_protocol_registry_runtime.mbt` bootstraps
-  `.moontown/civic/protocols.json`; `civic_protocol_status_runtime.mbt`
-  projects `.moontown/civic/protocol-status.json`.
+  `.moonsuite/products/moontown/civic/protocols.json`;
+  `civic_protocol_status_runtime.mbt` projects
+  `.moonsuite/products/moontown/civic/protocol-status.json`.
 - `civic_protocol_store.mbt` owns protocol ledger paths, writes, counts, and
   latest-record reads.
 - each civic MoonBook seed now receives
@@ -109,8 +110,8 @@ Implemented:
   `incident-bridge` instead of copying salon logic.
 - all 11 Wenyu civic buildings now have default communication-pattern scenario
   templates under `assets/templates/civic-patterns/`, plus a manifest installer that
-  copies them into `.moontown/civic/pattern-scenarios/` and staggers recurring
-  schedules.
+  copies them into `.moonsuite/products/moontown/civic/pattern-scenarios/` and
+  staggers recurring schedules.
 - Research-salon templates publish structural effectiveness metrics: participant count,
   idea reductions, testable research questions, participant-idea links,
   covered home books, and returned idea-home records.
@@ -124,9 +125,11 @@ Implemented:
   `CivicCommunicationScenario` template through the same Social Square/building
   protocol envelope. This is the extensibility seam for new domains.
 - `moon run src/cmd/main -- civic protocols schedules status` shows recurring
-  communication-pattern schedules from `.moontown/civic/pattern-schedules.json`.
+  communication-pattern schedules from
+  `.moonsuite/products/moontown/civic/pattern-schedules.json`.
 - `moon run src/cmd/main -- civic protocols schedules tick` runs only wall-clock-due
-  sessions and appends round records to `.moontown/civic/pattern-runs/`.
+  sessions and appends round records to
+  `.moonsuite/products/moontown/civic/pattern-runs/`.
 - `moon run src/cmd/main -- civic doctor` projects protocol status into the civic
   service status consumed by the viewport.
 - the viewport interior can show Social Square protocol state: `review`, one
@@ -192,7 +195,7 @@ and return ideas home.
 Recurring salon schedules load scenario files from:
 
 ```text
-.moontown/civic/pattern-scenarios/<session-id>.json
+.moonsuite/products/moontown/civic/pattern-scenarios/<session-id>.json
 ```
 
 One-off salon runs can load any template file:
@@ -230,11 +233,14 @@ domain. Operators create schedules explicitly:
 }
 ```
 
-The schedule is stored in `.moontown/civic/pattern-schedules.json`, and a matching
-template must exist at `.moontown/civic/pattern-scenarios/<session-id>.json`. Each
+The schedule is stored in
+`.moonsuite/products/moontown/civic/pattern-schedules.json`, and a matching
+template must exist at
+`.moonsuite/products/moontown/civic/pattern-scenarios/<session-id>.json`. Each
 daemon tick calls the civic salon due-check, compares real wall-clock time with
 `next_due_ms`, runs due salons, advances `round_count`, sets the next due time,
-and appends a round record under `.moontown/civic/pattern-runs/`. This makes the
+and appends a round record under
+`.moonsuite/products/moontown/civic/pattern-runs/`. This makes the
 Social Square pattern long-running: participant workspaces periodically meet,
 ideas are reduced, and relevant outputs return to the home workspaces.
 
@@ -487,7 +493,7 @@ Expected code locations:
 - `civic/protocols.mbt`
 - `civic/protocols_wbtest.mbt`
 - `src/ui/assets/tilemap/modules/wenyu-town-modules.json`
-- `.moontown/civic/protocols.json`
+- `.moonsuite/products/moontown/civic/protocols.json`
 
 ### Phase 2: Building Packet Envelope
 
@@ -520,11 +526,11 @@ Persist protocol state so the town can run for days and recover.
 Suggested files:
 
 ```text
-.moontown/civic/protocols/<building-id>/inbox.jsonl
-.moontown/civic/protocols/<building-id>/contributions.jsonl
-.moontown/civic/protocols/<building-id>/reductions.jsonl
-.moontown/civic/protocols/<building-id>/outbox.jsonl
-.moontown/civic/protocols/<building-id>/reviews.jsonl
+.moonsuite/products/moontown/civic/protocols/<building-id>/inbox.jsonl
+.moonsuite/products/moontown/civic/protocols/<building-id>/contributions.jsonl
+.moonsuite/products/moontown/civic/protocols/<building-id>/reductions.jsonl
+.moonsuite/products/moontown/civic/protocols/<building-id>/outbox.jsonl
+.moonsuite/products/moontown/civic/protocols/<building-id>/reviews.jsonl
 ```
 
 Rules:

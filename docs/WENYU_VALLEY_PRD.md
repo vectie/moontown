@@ -809,7 +809,8 @@ Rules:
 - Add a building protocol registry so each civic building is a protocol place
   with inbox, aggregation, exchange, reduction, distribution, review gates, and
   projection status.
-- Add append-only building protocol ledgers under `.moontown/civic/protocols/`
+- Add append-only building protocol ledgers under
+  `.moonsuite/products/moontown/civic/protocols/`
   for inbox, contributions, reductions, outbox, and reviews.
 - Route resident/operator/mayor/book/worker signals into building inboxes
   before dispatching MoonClaw reducers.

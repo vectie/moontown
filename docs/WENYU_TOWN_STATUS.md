@@ -165,20 +165,22 @@ Implemented and validated:
   book workspaces, module packs, asset packs, simple agent profiles, skill-pack
   references, operator request packs, and generated output bundles.
 - The Vite bridge exposes `moondesk-bridge.json` by scanning real
-  `.moontown/moondesk-dispatches`, `.moontown/moondesk-requests`, and
-  `.moontown/book-results` files.
+  `.moonsuite/products/moontown/moondesk-dispatches`,
+  `.moonsuite/products/moontown/moondesk-requests`, and
+  `.moonsuite/products/moontown/book-results` files.
 - Editor mode and final output mode both show Moondesk handoff lanes and recent
   bridge records.
 - `moon run src/cmd/main -- civic bootstrap` bootstraps 11 Wenyu civic support
   workspaces and updates `.moontown/moonbooks.json`.
 - `moon run src/cmd/main -- civic status` reports module operability, latest civic
   service decision, review load, missing files, and accepted-change proof.
-- `moon run src/cmd/main -- civic doctor` writes `.moontown/civic/status.json` and
-  `.moontown/civic/status.md`; the viewport bridge exposes that file as
-  `civic-status.json`.
+- `moon run src/cmd/main -- civic doctor` writes
+  `.moonsuite/products/moontown/civic/status.json` and
+  `.moonsuite/products/moontown/civic/status.md`; the viewport bridge exposes
+  that file as `civic-status.json`.
 - `moon run src/cmd/main -- civic protocols bootstrap` writes
-  `.moontown/civic/protocols.json`, per-building `PROTOCOL.md` files, and the
-  initial Social Square protocol ledgers.
+  `.moonsuite/products/moontown/civic/protocols.json`, per-building
+  `PROTOCOL.md` files, and the initial Social Square protocol ledgers.
 - `moon run src/cmd/main -- civic protocols status` reports protocol state across
   all Wenyu civic buildings.
 - `moon run src/cmd/main -- civic protocols patterns` lists reusable communication
@@ -198,13 +200,13 @@ Implemented and validated:
   communication-pattern scheduler. The daemon now checks the same schedule on
   every tick and runs enabled sessions when real wall-clock `next_due_ms` has arrived.
 - Research-salon templates write template-defined metrics pages,
-  `.moontown/civic/protocols/social-square/metrics.json`, and a
-  `home_returns.jsonl` ledger. The structural effectiveness metric tracks
+  `.moonsuite/products/moontown/civic/protocols/social-square/metrics.json`,
+  and a `home_returns.jsonl` ledger. The structural effectiveness metric tracks
   participant workspaces, reduced ideas, research questions, participant-idea links,
   covered books, and returned idea-home records.
 - Recurring salon rounds write an additional
-  `.moontown/civic/pattern-runs/<session-id>.jsonl` ledger for long-horizon audit
-  and restart inspection.
+  `.moonsuite/products/moontown/civic/pattern-runs/<session-id>.jsonl` ledger
+  for long-horizon audit and restart inspection.
 - Each research-salon participant workspace receives
   `wiki/queries/salon-returned-ideas.md`, so the Social Square building output
   returns to the relevant home workspaces instead of staying as a central

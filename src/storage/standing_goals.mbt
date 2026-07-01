@@ -1,6 +1,6 @@
 ///|
 pub fn default_standing_goal_path() -> String {
-  "\{moontown_product_state_dir()}/standing-goals.json"
+  moontown_product_artifact("standing-goals.json")
 }
 
 ///|

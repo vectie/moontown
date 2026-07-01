@@ -1,6 +1,6 @@
 ///|
 pub fn default_watcher_ledger_dir() -> String {
-  "\{moontown_product_state_dir()}/watchers"
+  moontown_product_artifact("watchers")
 }
 
 ///|
