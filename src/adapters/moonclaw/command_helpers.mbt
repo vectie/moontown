@@ -5,7 +5,7 @@ fn default_moonclaw_root() -> String {
     _ =>
       match @sys.get_env_var("MOONCLAW_ROOT") {
         Some(root) if !root.is_empty() => root
-        _ => ".moontown/external/moonclaw"
+        _ => "\{@storage.moontown_product_state_dir()}/external/moonclaw"
       }
   }
 }

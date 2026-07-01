@@ -284,6 +284,7 @@ pub fn exchange_ledger_text(service : CivicServiceDefinition) -> String {
 
 ///|
 pub fn service_history_text(service : CivicServiceDefinition) -> String {
+  let result_path = civic_service_result_path(service)
   [
     "# Service History",
     "",
@@ -292,7 +293,7 @@ pub fn service_history_text(service : CivicServiceDefinition) -> String {
     "## Bootstrap",
     "",
     "- Workspace seeded with schemas, wiki pages, review queues, service skill pack, MoonClaw profile, and projection state.",
-    "- No completed civic service result has been accepted yet unless `.moontown/book-results/goal-\{service.book_id}-civic-service.json` exists.",
+    "- No completed civic service result has been accepted yet unless `\{result_path}` exists.",
     "- Next meaningful work should be module-native: `\{service.skill_mode}`.",
   ].join("\n")
 }

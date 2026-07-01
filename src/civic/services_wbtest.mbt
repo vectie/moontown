@@ -107,3 +107,15 @@ test "civic task carries role skill and output contract prompt" {
   assert_true(task.target_pages.contains(service.skill_path))
   assert_true(task.required_role == Some(service.worker_role))
 }
+
+///|
+test "civic service history points at product-home result ledger" {
+  let service = wenyu_civic_service_for_book_id("wenyu-policy-hall").unwrap()
+  let text = service_history_text(service)
+  assert_true(
+    text.contains(
+      ".moonsuite/products/moontown/book-results/goal-wenyu-policy-hall-civic-service.json",
+    ),
+  )
+  assert_false(text.contains(".moontown/book-results"))
+}
