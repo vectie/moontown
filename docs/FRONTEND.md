@@ -101,7 +101,9 @@ between two modes:
 - `Demo Simulation`
   - synthetic traffic for frontend/gameplay tuning
 - `Snapshot File`
-  - a non-simulated placeholder that shows the pending `.moontown/town.json` browser bridge task instead of fake worker traffic
+  - a non-simulated placeholder that shows the pending
+    `.moonsuite/products/moontown/town.json` browser bridge task instead of
+    fake worker traffic
 
 The next frontend integration is to replace that placeholder with a local state
 endpoint or generated static JSON artifact.
@@ -109,8 +111,8 @@ endpoint or generated static JSON artifact.
 The runtime state that should drive the next browser bridge now includes:
 
 - standing goals from `.moonsuite/products/moontown/standing-goals.json`
-- daemon tick and active goal ids from `.moontown/daemon.json`
-- book/task/execution state from `.moontown/town.json`
+- daemon tick and active goal ids from `.moonsuite/products/moontown/daemon.json`
+- book/task/execution state from `.moonsuite/products/moontown/town.json`
 
 For example, the `watch-opc-news` standing goal should make the OPC researcher
 avatar visibly busy only when the daemon has dispatched the `research-opc` book
@@ -152,9 +154,10 @@ the first place to check whether progress is actually being made.
 
 It reads:
 
-- `.moontown/town.json` for books, workers, tasks, executions, and events.
-- `.moontown/daemon.json` for real daemon tick, lease owner, cadence, and due
-  standing goals.
+- `.moonsuite/products/moontown/town.json` for books, workers, tasks,
+  executions, and events.
+- `.moonsuite/products/moontown/daemon.json` for real daemon tick, lease owner,
+  cadence, and due standing goals.
 - `.moonsuite/products/moontown/standing-goals.json` for enabled standing-watch
   requests and next due tick.
 - `.moonsuite/products/moontown/watchers/*.jsonl` through `watchers/index.json`

@@ -76,7 +76,8 @@ The root demo/bootstrap surface is:
 
 ## 1.1 Inspect Runtime Status
 
-After a run has created `.moontown/town.json`, inspect the persisted town:
+After a run has created `.moonsuite/products/moontown/town.json`, inspect the
+persisted town:
 
 ```bash
 moon run src/cmd/main -- status
@@ -103,8 +104,8 @@ moon run src/cmd/main -- daemon tick
 
 This is not a permanent background process yet. It is the restart-safe unit the
 future daemon should repeat: load snapshot, reconcile live executions, apply
-mayor directives, persist checkpoint, update `.moontown/daemon.json`, and
-report planned next actions.
+mayor directives, persist checkpoint, update
+`.moonsuite/products/moontown/daemon.json`, and report planned next actions.
 
 ## 1.3 Run The Standing-Goal Daemon Loop
 
@@ -140,9 +141,9 @@ moon run src/cmd/main -- daemon run --once
 
 The daemon loop repeats the restart-safe tick. Each tick:
 
-- loads `.moontown/town.json`
+- loads `.moonsuite/products/moontown/town.json`
 - bootstraps a saved town if the snapshot is missing
-- loads `.moontown/daemon.json`
+- loads `.moonsuite/products/moontown/daemon.json`
 - loads `.moonsuite/products/moontown/standing-goals.json`
 - lets the Mayor dispatch due standing goals
 - routes the target book to a book-local `standing-watch` task
@@ -160,11 +161,12 @@ tick nonblocking while letting the child run the confirmed proposal instead of
 leaving an unstarted run for a later shell. If the receipt never appears, the
 stale execution summary includes the captured detached-import stderr excerpt
 from `.import.json.err`.
-Before each standing-watch import, Moontown also compacts oversized book-local
-MoonClaw hot-store files by moving them into
-`.moonclaw/jobs/archive/tick-<tick>/` and replacing the active index with valid
-empty JSON. This prevents long-lived books from repeatedly failing proposal
-imports because old job proposal indexes have grown too large.
+Before each standing-watch import, Moontown also compacts oversized MoonClaw
+hot-store files by moving them into the MoonClaw product-home archive at
+`.moonsuite/products/moonclaw/jobs/archive/tick-<tick>/` and replacing the
+active index with valid empty JSON. This prevents long-lived books from
+repeatedly failing proposal imports because old job proposal indexes have grown
+too large.
 You can run the same maintenance explicitly:
 
 ```bash
@@ -185,9 +187,9 @@ truth.
 `daemon start` runs a background supervisor process, and that supervisor runs a
 worker loop. The supervisor watches PID liveness and heartbeat age. If the
 worker exits or its heartbeat becomes stale, the supervisor records the event in
-`.moontown/daemon.log` and starts a fresh worker. The worker records every tick
-start, tick success, and tick failure so a bad watcher cycle does not silently
-kill the long-lived daemon.
+`.moonsuite/products/moontown/daemon.log` and starts a fresh worker. The worker
+records every tick start, tick success, and tick failure so a bad watcher cycle
+does not silently kill the long-lived daemon.
 
 When a self-patch changes Moontown source code while the daemon is already
 running, request a clean reload instead of trusting the old process to pick up
@@ -197,9 +199,10 @@ new logic:
 moon run src/cmd/main -- daemon restart "validated source patch"
 ```
 
-This writes `.moontown/daemon.restart`. The worker consumes that marker between
-ticks, preserves supervisor state, exits cleanly, and lets the supervisor or
-launchd start a fresh worker with the newly compiled code. Use this after a
+This writes `.moonsuite/products/moontown/daemon.restart`. The worker consumes
+that marker between ticks, preserves supervisor state, exits cleanly, and lets
+the supervisor or launchd start a fresh worker with the newly compiled code. Use
+this after a
 PlanBook/MoonClaw code repair has passed validation and before treating the
 next live packet as proof of the new behavior.
 
@@ -492,7 +495,8 @@ Overnight validation checklist:
 
 - `moon run src/cmd/main -- daemon doctor` should report a fresh heartbeat and a
   non-stale runtime.
-- `.moontown/daemon.json` should show `tick_sequence` increasing.
+- `.moonsuite/products/moontown/daemon.json` should show `tick_sequence`
+  increasing.
 - `.moonsuite/products/moontown/civic/pattern-schedules.json` should show
   `round_count` increasing
   roughly every 30 minutes for enabled due sessions.
@@ -873,19 +877,20 @@ book's accepted knowledge or tool behavior changes.
 The demo town persists runtime bootstrap files under:
 
 - `.moonsuite/products/moontown/moonbooks.json`
-- `.moontown/town.json`
-- `.moontown/daemon.json`
+- `.moonsuite/products/moontown/town.json`
+- `.moonsuite/products/moontown/daemon.json`
 - `.moonsuite/products/moontown/packets/` when packet files are exported
-- `.moontown/daemon-runtime.json`
-- `.moontown/daemon.log`
-- `.moontown/daemon.pid`
-- `.moontown/daemon-supervisor.pid`
+- `.moonsuite/products/moontown/daemon-runtime.json`
+- `.moonsuite/products/moontown/daemon.log`
+- `.moonsuite/products/moontown/daemon.pid`
+- `.moonsuite/products/moontown/daemon-supervisor.pid`
 - `.moonsuite/products/moontown/standing-goals.json`
 - `.moonsuite/products/moontown/watchers/*.jsonl`
 - `books/<book>/` for MoonBook lane workspaces
 - `books/wenyu-*/` for civic MoonBook workspaces created by
   `moon run src/cmd/main -- civic bootstrap`
-- `.moontown/town-synthesis/` for mayor-level cross-book reports
+- `.moonsuite/products/moontown/town-synthesis/` for mayor-level cross-book
+  reports
 
 ## 2.1 Manage Book Types And Quality
 
@@ -1133,15 +1138,16 @@ generated projections, and MoonClaw skill contracts. The civic building itself
 remains the protocol place.
 
 `books quality` is broader than the curated catalog. It merges live books from
-`.moontown/town.json` before scoring, so standing-watch books created by the
-runtime, such as OPC, LLM training, robotics, agents, and hardware, are visible
-to quality checks even before an operator curates them into the catalog.
+`.moonsuite/products/moontown/town.json` before scoring, so standing-watch books
+created by the runtime, such as OPC, LLM training, robotics, agents, and
+hardware, are visible to quality checks even before an operator curates them
+into the catalog.
 
 The AI review packets are the semantic layer. They ask MoonClaw/MoonBook to read
 the book's own contract and `SKILL.md`, then judge role fit, correctness,
 usefulness, curiosity, originality, evidence accounting, and next repairs. That
 is where “world-class” quality should be decided. Write those review results to
-`.moontown/book-quality/ai-review-results/<book-id>.md`.
+`.moonsuite/products/moontown/book-quality/ai-review-results/<book-id>.md`.
 
 The live daemon includes a `review-book-quality` scheduled job. It dispatches at
 most one semantic review at a time and skips duplicate dispatch while an active
@@ -1155,8 +1161,9 @@ otherwise a long AI review would monopolize the Mayor supervision loop.
 On every `review-book-quality` tick, Moontown first reconciles existing AI
 review results. Weak results are not counted as progress. They are bridged into
 the affected MoonBook as `wiki/reviews/book-quality-repair.md`, recorded in
-`.moontown/book-quality/repair-bridge.json`, and converted into a bounded
-standing goal named `book-quality-repair-<book-id>`. Research-book repairs use
+`.moonsuite/products/moontown/book-quality/repair-bridge.json`, and converted
+into a bounded standing goal named `book-quality-repair-<book-id>`.
+Research-book repairs use
 `web-first`; course, civic, cookbook, planbook, and operational book repairs use
 `book-first` so the target book's own contract and skill decide the work shape.
 If a later semantic review reaches the quality threshold, or the target book is
@@ -1182,17 +1189,17 @@ What they do:
 
 - `.moonsuite/products/moontown/moonbooks.json`
   - stores the available books loaded into town bootstrap
-- `.moontown/town.json`
+- `.moonsuite/products/moontown/town.json`
   - stores the seeded town snapshot
-- `.moontown/daemon.json`
+- `.moonsuite/products/moontown/daemon.json`
   - stores daemon state, tick sequence, lease owner, heartbeat event count, active goal ids, and scheduled job metadata
-- `.moontown/daemon-runtime.json`
+- `.moonsuite/products/moontown/daemon-runtime.json`
   - stores supervised daemon process state, heartbeat times, tick counters, last error, and stop-request status
-- `.moontown/daemon.log`
+- `.moonsuite/products/moontown/daemon.log`
   - stores supervisor and worker lifecycle records for restart/debug accounting
-- `.moontown/daemon.pid`
+- `.moonsuite/products/moontown/daemon.pid`
   - stores the current daemon worker process id
-- `.moontown/daemon-supervisor.pid`
+- `.moonsuite/products/moontown/daemon-supervisor.pid`
   - stores the current daemon supervisor process id
 - `.moonsuite/products/moontown/standing-goals.json`
   - stores Mayor-owned standing goals, target book, cadence, source policy, last run tick, and next due tick
@@ -1201,7 +1208,7 @@ What they do:
 - `books/<book>/raw/bootstrap/`
   - stores research questions, search logs, source screens, evidence matrices,
     local source digests, and synthesis briefs
-- `.moontown/town-synthesis/*.md`
+- `.moonsuite/products/moontown/town-synthesis/*.md`
   - stores cross-book mayor synthesis reports
 
 Current persistence code:
@@ -1453,8 +1460,8 @@ refresh the generated site.
 After a parallel research goal settles or times out, Moontown writes a
 town-level synthesis artifact under:
 
-- `.moontown/town-synthesis/<goal-slug>.md`
-- `.moontown/town-synthesis/latest.md`
+- `.moonsuite/products/moontown/town-synthesis/<goal-slug>.md`
+- `.moonsuite/products/moontown/town-synthesis/latest.md`
 
 The synthesis is a mayor-owned control-plane projection. It summarizes:
 
@@ -1569,7 +1576,8 @@ On narrower screens, the scene now scrolls internally instead of clipping the
 town layout.
 
 The UI can still run demo simulation state, but the dev server now also bridges
-real runtime files: `.moontown/town.json`, `.moontown/daemon.json`,
+real runtime files: `.moonsuite/products/moontown/town.json`,
+`.moonsuite/products/moontown/daemon.json`,
 `.moonsuite/products/moontown/standing-goals.json`,
 `.moonsuite/products/moontown/watchers/*.jsonl`, and
 `.moonsuite/products/moontown/operator-requests/requests.jsonl`.
