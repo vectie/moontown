@@ -40,6 +40,8 @@ pub async fn load_watcher_run_records_file(String) -> Array[@core.WatcherRunReco
 
 pub fn moonsuite_product_id() -> String
 
+pub fn moontown_active_workspace_root() -> String
+
 pub fn moontown_product_artifact(String) -> String
 
 pub fn moontown_product_artifact_for_workspace_root(String, String) -> String

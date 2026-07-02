@@ -24,7 +24,7 @@ pub fn default_catalog() -> Array[BookCatalogEntry] {
 
 ///|
 pub fn default_workspace_root(book_id : String) -> String {
-  @moonsuite.book_root("", book_id)
+  @moonsuite.book_root(@storage.moontown_active_workspace_root(), book_id)
 }
 
 ///|

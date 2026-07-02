@@ -26,7 +26,16 @@ pub fn moonsuite_product_id() -> String {
 }
 
 ///|
-fn active_workspace_root() -> String {
+pub fn moontown_active_workspace_root() -> String {
+  match @env.get_env_var("MOONTOWN_SUITE_ROOT") {
+    Some(root) => {
+      let trimmed = root.trim().to_owned()
+      if !trimmed.is_empty() {
+        return trimmed
+      }
+    }
+    None => ()
+  }
   @os.cwd() catch {
     _ => "."
   }
@@ -44,7 +53,9 @@ pub fn moontown_product_state_dir_for_workspace_root(
 
 ///|
 pub fn moontown_product_state_dir() -> String {
-  moontown_product_state_dir_for_workspace_root(active_workspace_root())
+  moontown_product_state_dir_for_workspace_root(
+    moontown_active_workspace_root(),
+  )
 }
 
 ///|
@@ -62,7 +73,7 @@ pub fn moontown_product_artifact_for_workspace_root(
 ///|
 pub fn moontown_product_artifact(relative : String) -> String {
   moontown_product_artifact_for_workspace_root(
-    active_workspace_root(),
+    moontown_active_workspace_root(),
     relative,
   )
 }
@@ -80,7 +91,7 @@ pub fn moontown_product_display_artifact(relative : String) -> String {
 ///|
 pub fn moontown_product_service_path() -> String {
   @moonsuite.product_home_for_workspace_root(
-    active_workspace_root(),
+    moontown_active_workspace_root(),
     moonsuite_product_id(),
   ).service_path
 }
@@ -88,7 +99,7 @@ pub fn moontown_product_service_path() -> String {
 ///|
 pub fn moontown_product_tmp_dir() -> String {
   @moonsuite.product_home_for_workspace_root(
-    active_workspace_root(),
+    moontown_active_workspace_root(),
     moonsuite_product_id(),
   ).tmp_path
 }

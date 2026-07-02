@@ -66,6 +66,21 @@ async test "watcher ledger derives snapshot-relative directory and appends by go
       moonsuite_product_id(),
     ).tmp_path,
   )
+  let previous_suite_root = @env.get_env_var("MOONTOWN_SUITE_ROOT")
+  @env.set_env_var("MOONTOWN_SUITE_ROOT", "/tmp/moontown-env-suite")
+  assert_eq(moontown_active_workspace_root(), "/tmp/moontown-env-suite")
+  assert_eq(
+    moontown_product_state_dir(),
+    "/tmp/moontown-env-suite/.moonsuite/products/moontown",
+  )
+  assert_eq(
+    moontown_product_artifact("town.json"),
+    "/tmp/moontown-env-suite/.moonsuite/products/moontown/town.json",
+  )
+  match previous_suite_root {
+    Some(root) => @env.set_env_var("MOONTOWN_SUITE_ROOT", root)
+    None => @env.unset_env_var("MOONTOWN_SUITE_ROOT")
+  }
   assert_eq(default_snapshot_path(), moontown_product_artifact("town.json"))
   assert_eq(
     default_standing_goal_path(),
