@@ -15,7 +15,7 @@ struct StoredRun {
 ///|
 fn run_store_root(home : String) -> String {
   let normalized = @path.Path(home).normalize().to_string()
-  if normalized.has_suffix(".moonsuite/products/moonclaw") {
+  if normalized.has_suffix(@moonsuite.product_display_dir("moonclaw")) {
     @path.Path(normalized).join(moonclaw_runtime_path("jobs")).to_string()
   } else {
     @moonsuite.product_artifact(home, "moonclaw", "jobs")

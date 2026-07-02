@@ -262,7 +262,8 @@ pub fn cookbook_core_features_markdown() -> String {
       ],
       "MoonClaw may execute tools and synthesize results. The bridge guards review status, result decision, and stale retry semantics.",
       [
-        "workspace-local `moonclaw.jobs.json`", ".moonsuite/products/moonclaw/jobs/...",
+        "workspace-local `moonclaw.jobs.json`",
+        @moonsuite.product_display_artifact("moonclaw", "jobs/..."),
         "TaskExecutionRecord",
       ],
     ),

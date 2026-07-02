@@ -71,7 +71,7 @@ fn evidence_block_is_operational(block : String) -> Bool {
   let lower = block.to_lower()
   let has_completed_workflow = lower.contains("workflow completed workspace=")
   let has_product_home_run = lower.contains(
-    "/.moonsuite/products/moonclaw/jobs/run-",
+    "/\{@moonsuite.product_display_artifact("moonclaw", "jobs/run-")}",
   )
   if evidence_block_is_standing_watch(lower) {
     if has_completed_workflow {

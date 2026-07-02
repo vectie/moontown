@@ -69,12 +69,12 @@ pub fn moontown_product_artifact(relative : String) -> String {
 
 ///|
 pub fn moontown_product_display_state_dir() -> String {
-  @moonsuite.product_home(".", moonsuite_product_id()).state_path
+  @moonsuite.product_display_dir(moonsuite_product_id())
 }
 
 ///|
 pub fn moontown_product_display_artifact(relative : String) -> String {
-  @moonsuite.product_artifact(".", moonsuite_product_id(), relative)
+  @moonsuite.product_display_artifact(moonsuite_product_id(), relative)
 }
 
 ///|

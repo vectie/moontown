@@ -1,15 +1,11 @@
 ///|
 fn moontown_product_display_state_dir() -> String {
-  ".moonsuite/products/moontown"
+  @moonsuite.product_display_dir("moontown")
 }
 
 ///|
 fn moontown_product_display_artifact(relative : String) -> String {
-  if relative == "" {
-    moontown_product_display_state_dir()
-  } else {
-    "\{moontown_product_display_state_dir()}/\{relative}"
-  }
+  @moonsuite.product_display_artifact("moontown", relative)
 }
 
 ///|
