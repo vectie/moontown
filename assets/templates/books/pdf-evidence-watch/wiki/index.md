@@ -31,6 +31,6 @@ useful telemetry, but they are not accepted domain evidence by themselves.
 
 - Add source websites in `book.json`.
 - Write the analysis method in `wiki/methods/analysis-method.md`.
-- Register a standing goal in `.moontown/standing-goals.json`.
+- Register a standing goal in `.moonsuite/products/moontown/standing-goals.json`.
 - Run one manual watch cycle before enabling long-horizon operation.
 - Check that notifications happen only for accepted knowledge changes.

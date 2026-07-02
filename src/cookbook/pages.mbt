@@ -169,7 +169,7 @@ pub fn cookbook_contract_markdown() -> String {
 ///|
 pub fn cookbook_schema_markdown() -> String {
   [
-    "# Stable-State Manifest Schema", "", "Each artifact row contains:", "", "- `path`: repo or `.moontown` path.",
+    "# Stable-State Manifest Schema", "", "Each artifact row contains:", "", "- `path`: repo or `.moonsuite/products/moontown` path.",
     "- `kind`: `doc`, `definition`, or `runtime-state`.", "- `owner`: project responsible for changing the artifact.",
     "- `stable_role`: why the artifact belongs in the cookbook.", "- `required`: whether missing path blocks a clean cookbook.",
     "- `exists`: generated existence check at bootstrap time.",
@@ -216,7 +216,7 @@ pub fn cookbook_feature_guide_markdown() -> String {
     cookbook_feature_section(
       "Mayor And Daemon",
       "The always-on town supervisor that turns goals, schedules, and failures into bounded work or explicit no-change decisions.",
-      "Moontown owns cadence, dispatch budget, daemon health, standing-goal routing, stale execution reconciliation, and restart-readable state under `.moontown`.",
+      "Moontown owns cadence, dispatch budget, daemon health, standing-goal routing, stale execution reconciliation, and restart-readable state under `.moonsuite/products/moontown`.",
       [
         "A tick loads `.moonsuite/products/moontown/town.json`, `.moonsuite/products/moontown/service.json`, and standing-goal registries.",
         "The Mayor dispatches due goals to book-local watcher lanes and records running executions without blocking the tick on long MoonClaw work.",

@@ -53,7 +53,7 @@ tool_build_status: passed | failed | skipped
 Moontown records that marker as `WatcherRunRecord` under:
 
 ```text
-.moontown/watchers/<goal-id>.jsonl
+.moonsuite/products/moontown/watchers/<goal-id>.jsonl
 ```
 
 Accounting rules:
@@ -97,7 +97,7 @@ Mayor behavior:
 ```json
 {
   "decision": "NoChange",
-  "ledger": ".moontown/watchers/watch-opc-news.jsonl",
+  "ledger": ".moonsuite/products/moontown/watchers/watch-opc-news.jsonl",
   "next_due_policy": "increase no-change backoff, capped at 4x cadence"
 }
 ```
@@ -130,7 +130,7 @@ Mayor behavior:
 ```json
 {
   "decision": "Update",
-  "ledger": ".moontown/watchers/watch-opc-news.jsonl",
+  "ledger": ".moonsuite/products/moontown/watchers/watch-opc-news.jsonl",
   "next_due_policy": "normal cadence"
 }
 ```

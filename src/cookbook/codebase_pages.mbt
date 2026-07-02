@@ -174,7 +174,8 @@ pub fn cookbook_core_features_markdown() -> String {
       ],
       "MoonClaw may execute tools and synthesize results. The bridge guards review status, result decision, and stale retry semantics.",
       [
-        "book-local `moonclaw.jobs.json`", "book-local `.moonclaw/jobs/...`", "TaskExecutionRecord",
+        "workspace-local `moonclaw.jobs.json`", ".moonsuite/products/moonclaw/jobs/...",
+        "TaskExecutionRecord",
       ],
     ),
     cookbook_core_feature(
@@ -315,7 +316,7 @@ pub fn cookbook_skill_markdown() -> String {
     "",
     "1. Inspect current MoonBit source before editing generated cookbook text.",
     "2. Prefer code-path evidence over vague product language.",
-    "3. Update generator functions in the repo, not only generated `.moontown` files.",
+    "3. Update generator functions in the repo, not only generated `.moonsuite/products/moontown` files.",
     "4. Keep generated wiki pages linked from `wiki/index.md`, `book/moonbook-ui-state.json`, and generated HTML.",
     "5. Run `moon check`, focused cookbook tests, `moon info`, and `moon fmt`.",
     "6. Regenerate the book with `moon run src/cmd/main -- cookbook bootstrap`.",
@@ -326,7 +327,7 @@ pub fn cookbook_skill_markdown() -> String {
     "",
     "- A new engineer can identify the main records that carry Moontown state.",
     "- The daemon, standing-watch, civic protocol, and projection algorithms are described as step-by-step flows.",
-    "- Data files under `.moontown` are tied to the records and phases that read/write them.",
+    "- Data files under `.moonsuite/products/moontown` are tied to the records and phases that read/write them.",
     "- Every AI description includes its durable owner and review/persistence boundary.",
     "- The cookbook skill remains present at `skills/cookbook-generation/SKILL.md`.",
   ].join("\n")
