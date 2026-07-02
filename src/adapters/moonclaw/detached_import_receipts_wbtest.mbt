@@ -51,8 +51,8 @@ test "detached import startup logs are not terminal failure receipts" {
     "/tmp/packet.json",
     (
       $|{"level":"Info","pid":12722,"msg":"No model specified, auto-detecting...","tag":"Model"}
-      $|{"level":"Warn","pid":12722,"msg":"Directory '/Users/kq/.moonclaw/rules' does not exist, skipping.","tag":"job-analysis"}
-      $|{"level":"Info","pid":12722,"msg":"Loading skills from directory '/Users/kq/.moonclaw/skills/.system'...","tag":"job-analysis"}
+      $|{"level":"Warn","pid":12722,"msg":"Directory '/Users/kq/.moonsuite/products/moonclaw/rules' does not exist, skipping.","tag":"job-analysis"}
+      $|{"level":"Info","pid":12722,"msg":"Loading skills from directory '/Users/kq/.moonsuite/products/moonclaw/skills/.system'...","tag":"job-analysis"}
     ),
   )
   assert_true(receipt is None)

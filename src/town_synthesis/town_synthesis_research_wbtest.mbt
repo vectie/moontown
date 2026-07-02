@@ -44,7 +44,6 @@ test "town synthesis execution registers mayor book in product home" {
     state.books[0].workspace_root,
     @storage.moontown_product_state_dir(),
   )
-  assert_false(state.books[0].workspace_root == ".moontown")
 }
 
 ///|

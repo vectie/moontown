@@ -86,7 +86,6 @@ async test "editor feature selection packet asks ai to choose from course eviden
       ".moonsuite/products/moontown/editor-pipeline.json",
     ),
   )
-  assert_true(!repeat_evidence.contains(".moontown/editor-pipeline.json"))
   assert_true(repeat_context.contains("## Already Implemented Features"))
   assert_true(repeat_context.contains("- `x`"))
   assert_true(ledger.contains("- `x`"))

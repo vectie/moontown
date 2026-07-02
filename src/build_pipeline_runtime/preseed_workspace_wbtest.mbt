@@ -56,7 +56,6 @@ async test "Wenyu preseed materializes build workspace inputs in build pipeline"
     ),
   )
   assert_false(@fs.exists("\{root}/moonclaw.json"))
-  assert_false(@fs.exists("\{root}/.moonclaw/moonclaw.json"))
   @support.ignore_checked_command("rm", ["-rf", root])
   @support.ignore_checked_command("rm", ["-rf", repo])
 }

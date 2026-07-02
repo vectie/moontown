@@ -10,6 +10,7 @@ failures=()
 allowed_root_files=(
   ".gitignore"
   "AGENTS.md"
+  "FUTURE.md"
   "LICENSE"
   "README.md"
   "README.mbt.md"
@@ -38,8 +39,6 @@ allowed_root_dirs=(
   ".git"
   ".github"
   ".mooncakes"
-  ".moonclaw"
-  ".moontown"
   "_build"
   "assets"
   "docs"
@@ -160,11 +159,11 @@ if (( ${#town_runtime_worker_ref_files[@]} > 0 )); then
 fi
 
 if (( ${#failures[@]} > 0 )); then
-  print "source layout audit failed:"
+  print -r -- "source layout audit failed:"
   for failure in "${failures[@]}"; do
-    print "- $failure"
+    print -r -- "- $failure"
   done
   exit 1
 fi
 
-print "source layout audit passed"
+print -r -- "source layout audit passed"

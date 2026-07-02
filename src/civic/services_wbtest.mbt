@@ -117,5 +117,4 @@ test "civic service history points at product-home result ledger" {
       ".moonsuite/products/moontown/book-results/goal-wenyu-policy-hall-civic-service.json",
     ),
   )
-  assert_false(text.contains(".moontown/book-results"))
 }

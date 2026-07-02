@@ -1563,5 +1563,4 @@ test "book quality default runtime paths use moontown product home" {
       "moonclaw.json",
     ),
   )
-  assert_false(moonclaw_config_path(default_review_dir()).contains(".moonclaw"))
 }

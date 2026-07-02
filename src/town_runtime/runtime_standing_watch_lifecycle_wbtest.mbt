@@ -80,7 +80,7 @@ test "standing watch detached startup-log failure record stays deferred accounti
     delta_score=0,
     new_source_count=0,
     detail=(
-      $|Detached MoonClaw import failed for keeper-research-opc-standing-watch-opc-news-tick-18122-422348240: {"level":"Info","pid":69142,"msg":"No model specified, auto-detecting...","tag":"Model"} | {"level":"Warn","pid":69142,"msg":"Directory '/Users/kq/.moonclaw/rules' does not exist, skipping.","tag":"job-analysis"} | {"level":"Info","pid":69142,"msg":"Loading skills from directory '/Users/kq/.moonclaw/skills/.system'...","tag":"job-analysis"}
+      $|Detached MoonClaw import failed for keeper-research-opc-standing-watch-opc-news-tick-18122-422348240: {"level":"Info","pid":69142,"msg":"No model specified, auto-detecting...","tag":"Model"} | {"level":"Warn","pid":69142,"msg":"Directory '/Users/kq/.moonsuite/products/moonclaw/rules' does not exist, skipping.","tag":"job-analysis"} | {"level":"Info","pid":69142,"msg":"Loading skills from directory '/Users/kq/.moonsuite/products/moonclaw/skills/.system'...","tag":"job-analysis"}
     ),
     task_id=Some("standing-watch-opc-news-tick-18122"),
     next_due_tick=18137,

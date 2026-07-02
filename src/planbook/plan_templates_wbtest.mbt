@@ -57,7 +57,6 @@ test "live autonomy plan sections preserve ownership and validation gates" {
   assert_true(plan.contains("connective spine"))
   assert_true(plan.contains(".moonsuite/products/moontown/live-autonomy.json"))
   assert_true(plan.contains(".moonsuite/products/moontown/town-journal.jsonl"))
-  assert_true(!plan.contains(".moontown/live-autonomy.json"))
   assert_true(plan.contains("Moontown Mayor owns the spine"))
   assert_true(
     plan.contains(

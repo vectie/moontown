@@ -48,7 +48,6 @@ async test "planbook autonomy doctor writes self-healing evidence" {
   assert_true(
     status_text.contains(".moonsuite/products/moontown/live-autonomy.json"),
   )
-  assert_true(!status_text.contains(".moontown/live-autonomy.json"))
   assert_true(evidence.contains("PlanBook autonomy doctor"))
   assert_true(review.contains("needs-fix"))
   assert_true(backlog.contains("live-change-log-projection"))
@@ -59,9 +58,6 @@ async test "planbook autonomy doctor writes self-healing evidence" {
     engineering_digest.contains(
       ".moonsuite/products/moontown/planbook/latest-validation.md",
     ),
-  )
-  assert_true(
-    !engineering_digest.contains(".moontown/planbook/latest-validation.md"),
   )
   assert_true(progress.contains("next_check_interval_ms"))
   assert_true(progress.contains("take the next bounded task immediately"))

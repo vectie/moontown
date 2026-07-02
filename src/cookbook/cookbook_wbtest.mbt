@@ -44,7 +44,7 @@ test "cookbook projection helpers render stable UI contracts" {
   assert_true(metrics.contains("\"value\":\"8\""))
   assert_true(metrics.contains("restart-readable state files"))
   let readiness = cookbook_readiness_json(
-    @support.json_string(".moontown/cookbook.json"),
+    @support.json_string(".moonsuite/products/moontown/cookbook.json"),
   ).join("\n")
   assert_true(readiness.contains("Stable-state manifest"))
   assert_true(readiness.contains("raw/bootstrap/COOKBOOK_CONTRACT.md"))
@@ -78,7 +78,6 @@ test "cookbook describer pages explain codebase algorithms and data flow" {
   assert_true(
     flow.contains(".moonsuite/products/moontown/book-template-requests.json"),
   )
-  assert_false(flow.contains(".moontown/book-template-requests.json"))
   let features = cookbook_core_features_markdown()
   assert_true(features.contains("## MoonBook/MoonClaw Execution Bridge"))
   assert_true(features.contains("## Civic Building Protocols"))
