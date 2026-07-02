@@ -79,6 +79,17 @@ pub fn moontown_product_artifact(relative : String) -> String {
 }
 
 ///|
+pub fn moontown_workspace_root_is_suite_book(workspace_root : String) -> Bool {
+  let trimmed = workspace_root.trim().to_owned()
+  if trimmed.is_empty() {
+    false
+  } else {
+    @moonsuite.suite_root_for_workspace_root(trimmed) !=
+    @pathx.normalize(trimmed)
+  }
+}
+
+///|
 pub fn moontown_product_display_state_dir() -> String {
   @moonsuite.product_display_dir(moonsuite_product_id())
 }

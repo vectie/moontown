@@ -48,6 +48,10 @@ async test "watcher ledger derives snapshot-relative directory and appends by go
     moontown_product_artifact_for_workspace_root(book_root, "civic/status.json"),
     "/tmp/moontown-suite/.moonsuite/products/moontown/civic/status.json",
   )
+  assert_true(moontown_workspace_root_is_suite_book(book_root))
+  assert_true(moontown_workspace_root_is_suite_book("books/research-demo"))
+  assert_false(moontown_workspace_root_is_suite_book("/tmp/moontown-suite"))
+  assert_false(moontown_workspace_root_is_suite_book(""))
   assert_false(
     moontown_product_artifact_for_workspace_root(book_root, "civic/status.json").contains(
       "/books/research-demo/.moonsuite",

@@ -14,7 +14,5 @@ pub fn civic_service_result_path(
 
 ///|
 fn civic_service_uses_town_result_root(root : String) -> Bool {
-  root.trim().is_empty() ||
-  root.has_prefix("books/") ||
-  root.contains("/books/")
+  root.trim().is_empty() || @storage.moontown_workspace_root_is_suite_book(root)
 }

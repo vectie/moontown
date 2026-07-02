@@ -58,6 +58,8 @@ pub fn moontown_product_state_dir_for_workspace_root(String) -> String
 
 pub fn moontown_product_tmp_dir() -> String
 
+pub fn moontown_workspace_root_is_suite_book(String) -> Bool
+
 pub async fn save_snapshot_file(String, TownSnapshot) -> Unit
 
 pub async fn save_standing_goals_file(String, Array[@core.StandingGoal]) -> Unit
