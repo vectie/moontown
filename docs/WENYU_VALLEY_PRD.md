@@ -536,7 +536,7 @@ Moontown should publish a browser-consumable projection:
 
 Initial implementation options:
 
-- Generated static file: `.moontown/town-runtime.json`.
+- Generated static file: `.moonsuite/products/moontown/town-runtime.json`.
 - Local endpoint: `GET /api/town-runtime`.
 - MoonBook projection merge: one JSON fragment per civic book.
 
@@ -621,9 +621,11 @@ Acceptance criteria:
 - Restarting the daemon does not duplicate active jobs.
 - Failed jobs produce visible recovery actions.
 - Normal review queues do not become degraded health.
-- `.moontown/daemon.json` records lease, tick, heartbeat, and last action.
-- `.moontown/watchers/*.jsonl` records topic watcher decisions, including
-  update/no-change/review/failure outcomes and next due tick.
+- `.moonsuite/products/moontown/daemon.json` records lease, tick, heartbeat,
+  and last action.
+- `.moonsuite/products/moontown/watchers/*.jsonl` records topic watcher
+  decisions, including update/no-change/review/failure outcomes and next due
+  tick.
 
 ## 6. Implementation Milestones
 

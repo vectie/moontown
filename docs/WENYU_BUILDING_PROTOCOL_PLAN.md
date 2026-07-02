@@ -386,7 +386,7 @@ Moontown owns:
 - building protocol registry
 - routing into building inboxes
 - mayor-level scheduling and supervision
-- protocol ledgers under `.moontown`
+- protocol ledgers under `.moonsuite/products/moontown`
 - idempotency and retry accounting
 - UI projection of building activity
 - operator approval gates

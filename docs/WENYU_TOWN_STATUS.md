@@ -342,7 +342,8 @@ Implemented:
 
 - module state now uses visual projection first, direct execution records
   second, and config-only fallback last
-- the operator command center aggregates all `.moontown/watchers/*.jsonl`
+- the operator command center aggregates all
+  `.moonsuite/products/moontown/watchers/*.jsonl`
   records and shows every enabled standing watch as a portfolio card
 - status lights distinguish running, waiting, review, alert, complete,
   projected, unbound, and calm states
@@ -479,7 +480,8 @@ Remaining:
 - Multi-day soak evidence with restart/recovery logs.
 - Daily digest generation.
 - No-progress alerts.
-- Backup and recovery of `.moontown`, MoonBook workspaces, and watcher ledgers.
+- Backup and recovery of `.moonsuite/products/moontown`, MoonBook workspaces,
+  and watcher ledgers.
 - Production service packaging beyond the current local launchd development
   seam.
 
