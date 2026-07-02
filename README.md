@@ -219,8 +219,10 @@ The communication-pattern runtime is template-driven. New domains and civic
 services should provide a `CivicCommunicationScenario` JSON file with participant
 books, pattern id, skill rules, quality rules, output paths, and review gates.
 `civic protocols pattern-template <path>` runs a scenario directly, persists
-the scenario into `.moontown/civic/pattern-scenarios/<session-id>.json`, and
-upserts the recurring schedule in `.moontown/civic/pattern-schedules.json`.
+the scenario into
+`.moonsuite/products/moontown/civic/pattern-scenarios/<session-id>.json`, and
+upserts the recurring schedule in
+`.moonsuite/products/moontown/civic/pattern-schedules.json`.
 `pattern-install <path>` installs one recurring scenario without running it;
 `pattern-manifest <path>` installs a set of scenarios with staggered due times.
 The default Wenyu manifest covers all 11 civic buildings in
@@ -229,11 +231,12 @@ domain or civic service. See
 [docs/CIVIC_COMMUNICATION_TEMPLATES.md](/Users/kq/Workspace/moontown/docs/CIVIC_COMMUNICATION_TEMPLATES.md).
 
 The pattern scheduler is also wired into the 24/7 daemon path. `civic protocols
-schedules status` shows `.moontown/civic/pattern-schedules.json`; `civic
-protocols schedules tick` runs only wall-clock-due sessions, claims a due
-schedule before launching MoonClaw, and appends round records under
-`.moontown/civic/pattern-runs/`. Add or remove pattern sessions by editing the
-JSON schedule/template files.
+schedules status` shows
+`.moonsuite/products/moontown/civic/pattern-schedules.json`; `civic protocols
+schedules tick` runs only wall-clock-due sessions, claims a due schedule before
+launching MoonClaw, and appends round records under
+`.moonsuite/products/moontown/civic/pattern-runs/`. Add or remove pattern
+sessions by editing the JSON schedule/template files.
 
 `civic reconcile` is the service-result bridge. It reads protocol-active
 buildings, writes
