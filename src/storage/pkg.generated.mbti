@@ -46,6 +46,8 @@ pub fn moontown_product_artifact_for_workspace_root(String, String) -> String
 
 pub fn moontown_product_display_artifact(String) -> String
 
+pub fn moontown_product_display_state_dir() -> String
+
 pub fn moontown_product_service_path() -> String
 
 pub fn moontown_product_state_dir() -> String
