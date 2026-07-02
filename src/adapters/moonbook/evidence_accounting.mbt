@@ -69,11 +69,18 @@ fn evidence_record_blocks(content : String) -> Array[String] {
 ///|
 fn evidence_block_is_operational(block : String) -> Bool {
   let lower = block.to_lower()
+  let has_completed_workflow = lower.contains("workflow completed workspace=")
+  let has_product_home_run = lower.contains(
+    "/.moonsuite/products/moonclaw/jobs/run-",
+  )
   if evidence_block_is_standing_watch(lower) {
+    if has_completed_workflow {
+      return has_product_home_run
+    }
     return !standing_watch_block_has_domain_delta(block)
   }
-  lower.contains("workflow completed workspace=") &&
-  lower.contains("/moonclaw-jobs/run-") &&
+  has_completed_workflow &&
+  has_product_home_run &&
   !lower.contains("accepted_facts_count:") &&
   !lower.contains("wiki_pages_changed_count:")
 }

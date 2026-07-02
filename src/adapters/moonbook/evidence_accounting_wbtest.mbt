@@ -59,13 +59,33 @@ test "standing watcher run without marker block is operational evidence" {
     #|
     #|- Task ID: `standing-watch-llm-training-tick-5502`
     #|- Status: `accepted`
-    #|- Summary: MoonClaw run run-20260526-124123-usersk completed: Workflow completed workspace=/tmp/book/moonclaw-jobs/run-20260526-124123-usersk
+    #|- Summary: MoonClaw run run-20260526-124123-usersk completed: Workflow completed workspace=/tmp/suite/.moonsuite/products/moonclaw/jobs/run-20260526-124123-usersk
     #|
 
   let accounting = evidence_accounting_from_text(content)
   assert_eq(accounting.total_count, 1)
   assert_eq(accounting.operational_count, 1)
   assert_eq(accounting.domain_count, 0)
+}
+
+///|
+test "retired moonclaw jobs root is domain evidence" {
+  let content =
+    #|# Evidence
+    #|
+    #|## Records
+    #|
+    #|### EV-stale-standing-watch-root
+    #|
+    #|- Task ID: `standing-watch-stale-root`
+    #|- Status: `accepted`
+    #|- Summary: MoonClaw run run-20260526-124123-usersk completed: Workflow completed workspace=/tmp/book/moonclaw-jobs/run-20260526-124123-usersk
+    #|
+
+  let accounting = evidence_accounting_from_text(content)
+  assert_eq(accounting.total_count, 1)
+  assert_eq(accounting.operational_count, 0)
+  assert_eq(accounting.domain_count, 1)
 }
 
 ///|
