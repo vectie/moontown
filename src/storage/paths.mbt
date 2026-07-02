@@ -36,10 +36,10 @@ fn active_workspace_root() -> String {
 pub fn moontown_product_state_dir_for_workspace_root(
   workspace_root : String,
 ) -> String {
-  @moonsuite.product_dir(
-    @moonsuite.suite_root_for_workspace_root(workspace_root),
+  @moonsuite.product_home_for_workspace_root(
+    workspace_root,
     moonsuite_product_id(),
-  )
+  ).state_path
 }
 
 ///|
@@ -69,15 +69,18 @@ pub fn moontown_product_artifact(relative : String) -> String {
 
 ///|
 pub fn moontown_product_service_path() -> String {
-  moontown_product_artifact("service.json")
+  @moonsuite.product_home_for_workspace_root(
+    active_workspace_root(),
+    moonsuite_product_id(),
+  ).service_path
 }
 
 ///|
 pub fn moontown_product_tmp_dir() -> String {
-  @moonsuite.product_tmp_dir(
-    @moonsuite.suite_root_for_workspace_root(active_workspace_root()),
+  @moonsuite.product_home_for_workspace_root(
+    active_workspace_root(),
     moonsuite_product_id(),
-  )
+  ).tmp_path
 }
 
 ///|
