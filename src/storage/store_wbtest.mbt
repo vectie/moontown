@@ -72,6 +72,10 @@ async test "watcher ledger derives snapshot-relative directory and appends by go
     moontown_product_artifact("standing-goals.json"),
   )
   assert_eq(default_watcher_ledger_dir(), moontown_product_artifact("watchers"))
+  assert_eq(
+    moontown_product_display_artifact("planbook/latest-validation.md"),
+    ".moonsuite/products/moontown/planbook/latest-validation.md",
+  )
   let ledger_dir = watcher_ledger_dir_for_snapshot("\{root}/town.json")
   assert_eq(ledger_dir, "\{root}/watchers")
   assert_eq(

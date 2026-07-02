@@ -24,7 +24,7 @@ fn planbook_daily_engineering_digest_markdown(
     "- active_review: `wiki/reviews/active-plan-review.md`",
     "- change_log: `wiki/history/change-log.md`",
     "- backlog_progress: `wiki/planning/backlog-progress.md`",
-    "- latest_validation: `.moonsuite/products/moontown/planbook/latest-validation.md`",
+    "- latest_validation: `\{@storage.moontown_product_display_artifact("planbook/latest-validation.md")}`",
     "",
     "## Current Open Work",
     "",

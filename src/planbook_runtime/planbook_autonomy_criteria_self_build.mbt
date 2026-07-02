@@ -74,7 +74,7 @@ async fn planbook_ui_operator_criterion() -> PlanbookCriterionStatus {
     } else {
       "UI does not yet reference live-autonomy state"
     },
-    "bind the operator message panel to `.moonsuite/products/moontown/live-autonomy.json`",
+    "bind the operator message panel to `\{@storage.moontown_product_display_artifact("live-autonomy.json")}`",
   )
 }
 
