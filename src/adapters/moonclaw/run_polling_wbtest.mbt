@@ -2,9 +2,11 @@
 async test "poll run prefers terminal meta over stale running index" {
   let root = "/tmp/moontown-moonclaw-poll-meta-wbtest-\{@async.now().to_int()}"
   test_ignore_checked_command("rm", ["-rf", root])
-  let home = root
+  let home = root + "/books/research-town"
   test_write_text_file(
-    @moonsuite.product_artifact(home, "moonclaw", "jobs/index/runs.json"),
+    @moonsuite.product_artifact_for_workspace_root(
+      home, "moonclaw", "jobs/index/runs.json",
+    ),
     (
       $|{
       $|  "runs": [
@@ -19,7 +21,7 @@ async test "poll run prefers terminal meta over stale running index" {
     ),
   )
   test_write_text_file(
-    @moonsuite.product_artifact(
+    @moonsuite.product_artifact_for_workspace_root(
       home, "moonclaw", "jobs/runs/run-meta-wins/meta.json",
     ),
     (
@@ -31,6 +33,7 @@ async test "poll run prefers terminal meta over stale running index" {
       $|}
     ),
   )
+  assert_false(run_store_root(home).contains("/books/research-town/.moonsuite"))
   let response = poll_run(
     "task-meta-wins",
     "run-meta-wins",

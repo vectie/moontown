@@ -18,7 +18,7 @@ fn run_store_root(home : String) -> String {
   if normalized.has_suffix(@moonsuite.product_display_dir("moonclaw")) {
     @path.Path(normalized).join(moonclaw_runtime_path("jobs")).to_string()
   } else {
-    @moonsuite.product_artifact(home, "moonclaw", "jobs")
+    @moonsuite.product_artifact_for_workspace_root(home, "moonclaw", "jobs")
   }
 }
 
