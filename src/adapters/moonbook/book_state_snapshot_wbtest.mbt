@@ -32,14 +32,14 @@ test "book state snapshot contract decodes MoonBook read model" {
       "knowledge_manifest": "book/knowledge/manifest.json",
       "generated_knowledge_bundle": "book/site/generated/knowledge-bundle.json",
       "generated_graph": "book/site/generated/graph.json",
-      "latest_event": ".moonbook/events/latest.json",
+      "latest_event": "events/latest.json",
       "review_queue": "wiki/reviews/pending.md",
     },
   })
   assert_eq(snapshot.contract, "moonbook.book_state.v1")
   assert_eq(snapshot.summary.total_evidence_count, 2)
   assert_eq(snapshot.knowledge.event_protocol, "moonbook.executable_event.v1")
-  assert_eq(snapshot.paths.latest_event, ".moonbook/events/latest.json")
+  assert_eq(snapshot.paths.latest_event, "events/latest.json")
   assert_true(snapshot.latest_event is None)
 }
 
