@@ -47,7 +47,7 @@ fn standing_goal_next_check_view(model : Model) -> StandingGoalNextCheckView {
       {
         operator_detail: "No enabled standing goal found.",
         portal_label: "not scheduled",
-        idle_detail: "Waiting for a configured standing watch. Add one to `.moonsuite/products/moontown/standing-goals.json` to activate this worker.",
+        idle_detail: "Waiting for a configured standing watch. Add one to \{moontown_product_display_artifact_code("standing-goals.json")} to activate this worker.",
       }
   }
 }

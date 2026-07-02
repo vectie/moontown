@@ -4,3 +4,5 @@ import {
   "vectie/moonlib/moonsuite",
   "moonbitlang/core/json",
 }
+
+supported_targets = "native"

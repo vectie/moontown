@@ -69,7 +69,7 @@ fn idle_feed_fallback_item(feed : Array[FeedItem]) -> FeedItem? {
 fn no_new_town_messages_feed_item() -> FeedItem {
   {
     title: "No new town messages",
-    detail: "The daemon is between checks. Leave this page open and the thread refreshes from `.moonsuite/products/moontown/town.json` every few seconds.",
+    detail: "The daemon is between checks. Leave this page open and the thread refreshes from \{moontown_product_display_artifact_code("town.json")} every few seconds.",
     tone: "neutral",
   }
 }

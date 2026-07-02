@@ -103,7 +103,7 @@ async fn editor_feature_selection_current_evidence_markdown(
     "## Implemented Runtime Surfaces",
     "",
     "- command contract: `moon run src/cmd/main -- editor-pipeline refresh|status|feature-select`",
-    "- state contract file: `.moonsuite/products/moontown/editor-pipeline.json`",
+    "- state contract file: `\{@storage.moontown_product_display_artifact("editor-pipeline.json")}`",
     "- accepted lifecycle proof: `selected-feature-implementation.md`",
     "- implemented-feature ledger: `implemented-features.md`",
     "",

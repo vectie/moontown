@@ -1,4 +1,7 @@
 import {
   "vectie/moontown/skill_quality",
+  "vectie/moontown/storage",
   "moonbitlang/core/json",
 }
+
+supported_targets = "native"

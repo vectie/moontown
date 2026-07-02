@@ -83,7 +83,7 @@ fn render_module_civic_health(
         ]),
         p(
           class="module-book-summary",
-          "No civic status file was loaded. Run `moon run src/cmd/main -- civic doctor` to publish `.moonsuite/products/moontown/civic/status.json`.",
+          "No civic status file was loaded. Run `moon run src/cmd/main -- civic doctor` to publish \{moontown_product_display_artifact_code("civic/status.json")}.",
         ),
       ])
   }

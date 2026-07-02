@@ -36,7 +36,7 @@ fn fallback_snapshot_worker_sims() -> Array[WorkerSim] {
       zone_key: "worker-yard",
       energy: 100,
       load: 12,
-      summary: "Waiting for a static or local endpoint bridge into `.moonsuite/products/moontown/town.json`.",
+      summary: "Waiting for a static or local endpoint bridge into \{moontown_product_display_artifact_code("town.json")}.",
     },
   ]
 }
