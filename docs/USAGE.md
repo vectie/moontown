@@ -994,9 +994,9 @@ spine as `Book template requests`, `Pending template requests`, and
 `Failed template requests`, plus `Enabled standing goals`,
 `Disabled standing goals`, and the latest book-template lifecycle event. The
 generated digest at
-`.moontown/live-digest.md` includes the same fields, which makes Moondesk
-book-creation handoffs visible in the 24/7 operator surface instead of hiding
-them in the daemon log.
+`.moonsuite/products/moontown/live-digest.md` includes the same fields, which
+makes Moondesk book-creation handoffs visible in the 24/7 operator surface
+instead of hiding them in the daemon log.
 
 That line is part of the stable autonomy spine: if the town is alive but
 waiting, pending and failed template requests should be zero; if Moondesk or

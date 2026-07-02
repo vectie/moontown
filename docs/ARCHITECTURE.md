@@ -386,13 +386,14 @@ book owns. The implementation now has a first-class `policy` package:
 
 Watcher ledger path derivation and append/load mechanics belong to `storage/`.
 Runtime packages may pass snapshot paths and goal ids, but they should not
-duplicate `.moontown/watchers` path rules or construct watcher JSONL paths
-locally.
+duplicate `.moonsuite/products/moontown/watchers` path rules or construct
+watcher JSONL paths locally.
 Generic snapshot-base derivation also belongs to `storage/`: `town.json` in the
-current directory resolves to `.moontown`, while `/path/to/town.json` resolves
-to `/path/to`. Runtime packages such as PlanBook, live-autonomy, and editor
-pipeline may append their feature-specific filenames under that base, but they
-should not reimplement the fallback rule locally.
+current workspace resolves through the MoonSuite Moontown product home, while
+explicit snapshot paths keep their explicit parent directory. Runtime packages
+such as PlanBook, live-autonomy, and editor pipeline may append their
+feature-specific filenames under that base, but they should not reimplement the
+derivation rule locally.
 
 The root package must not re-export every policy constructor. Root systems may
 map canonical book labels into a `BookPolicy`, but new code should import
@@ -500,13 +501,13 @@ profile JSON, packet step metadata, path-explicit neutral review proposal spec,
 request text, notes, tags, and review metadata belong to `book_quality/`, while
 runtime code materializes those values into MoonClaw profile files and resolves
 process-local workspace/skill paths for external packets.
-`book_quality_runtime/` owns the concrete `.moonclaw` ACP config for review
-work by combining book-quality reviewer semantics with adapter-owned Codex
-target JSON. It also adapts the neutral review proposal spec into a MoonClaw
-external proposal packet at dispatch time. Runtime observation belongs there
-too: process liveness checks, MoonClaw run workspace lookup, polling summaries,
-harvesting `result.json`, and checking which semantic-review result files
-already exist are runtime duties. Review-run ledger file storage is also a
+`book_quality_runtime/` owns the MoonLib-backed MoonClaw product-home ACP config
+for review work by combining book-quality reviewer semantics with adapter-owned
+Codex target JSON. It also adapts the neutral review proposal spec into a
+MoonClaw external proposal packet at dispatch time. Runtime observation belongs
+there too: process liveness checks, MoonClaw run workspace lookup, polling
+summaries, harvesting `result.json`, and checking which semantic-review result
+files already exist are runtime duties. Review-run ledger file storage is also a
 runtime duty: `book_quality_runtime/` loads, parses, appends, serializes, and
 persists the run ledger through package-owned pure ledger helpers.
 `book_quality/` owns the ledger schema, result path contract,
@@ -1021,7 +1022,7 @@ user goal
   -> MoonClaw import/run/poll lifecycle
   -> MoonBook persist/build/summary APIs
   -> mayor research quality gate
-  -> town-level synthesis under .moontown/town-synthesis/
+  -> town-level synthesis under .moonsuite/products/moontown/town-synthesis/
   -> persisted TownSnapshot
 ```
 
@@ -1040,8 +1041,9 @@ rows.
 Synthesis file IO is runtime-owned. `town_synthesis/` owns the mayor-level
 rendering vocabulary, task/execution registration policy, slug/path policy,
 and lane-report observation DTOs. `town_synthesis_runtime/` owns reading lane
-`raw/bootstrap/deep-report.md` files and writing `.moontown/town-synthesis/*`
-artifacts. This keeps town synthesis aligned with the broader
+`raw/bootstrap/deep-report.md` files and writing
+`.moonsuite/products/moontown/town-synthesis/*` artifacts. This keeps town
+synthesis aligned with the broader
 observation-fed loop: runtime gathers facts, policy/rendering code receives
 explicit observations, and the mayor records the result.
 
@@ -1269,7 +1271,7 @@ Standing goals are durable town-level obligations. They are not book memory and
 not worker sessions.
 
 ```text
-.moontown/standing-goals.json
+.moonsuite/products/moontown/standing-goals.json
   -> daemon tick
   -> Mayor checks due standing goals
   -> Mayor dispatches a target-book standing-watch task
@@ -1310,7 +1312,7 @@ Worker Claws decide how to execute bounded tasks.
 Moontown persists the control-plane side of each watcher cycle under:
 
 ```text
-.moontown/watchers/<standing-goal-id>.jsonl
+.moonsuite/products/moontown/watchers/<standing-goal-id>.jsonl
 ```
 
 Each line is a `WatcherRunRecord` containing the daemon tick, target book,
@@ -1404,33 +1406,33 @@ turning the mayor into an unbounded launcher.
 
 The daemon persists:
 
-- `.moontown/daemon.json`
+- `.moonsuite/products/moontown/daemon.json`
   daemon tick, lease owner, heartbeat event count, active standing goal ids, and
   scheduled job metadata
-- `.moontown/daemon-runtime.json`
+- `.moonsuite/products/moontown/daemon-runtime.json`
   supervisor/worker process ids, run ids, heartbeat and tick timestamps,
   success/failure counters, stop-request state, and last error
-- `.moontown/daemon.log`
+- `.moonsuite/products/moontown/daemon.log`
   append-only supervisor/worker lifecycle and guarded tick records
-- `.moontown/daemon.restart`
+- `.moonsuite/products/moontown/daemon.restart`
   reload request marker written after validated self-patches. The worker
   consumes it between ticks, preserves supervisor state, exits cleanly, and lets
   the supervisor or launchd start a fresh worker with current source.
-- `.moontown/daemon.pid`
+- `.moonsuite/products/moontown/daemon.pid`
   current daemon worker process id
-- `.moontown/daemon-supervisor.pid`
+- `.moonsuite/products/moontown/daemon-supervisor.pid`
   current daemon supervisor process id
-- `.moontown/standing-goals.json`
+- `.moonsuite/products/moontown/standing-goals.json`
   standing goal registry, cadence, target book, source policy, and next due tick
-- `.moontown/watchers/*.jsonl`
+- `.moonsuite/products/moontown/watchers/*.jsonl`
   standing-watch decisions, no-change/update/review/failure records, and next
   due ticks
-- `.moontown/book-template-requests.json`
+- `.moonsuite/products/moontown/book-template-requests.json`
   document-first book creation inbox used by Moondesk, Mayor, or other
   operators. The scheduled `book-template-request` job installs pending
   template requests, and the runtime/live-autonomy status exposes request,
   pending, and failed counts.
-- `.moontown/book-template-request-events.jsonl`
+- `.moonsuite/products/moontown/book-template-request-events.jsonl`
   append-only lifecycle journal for processed book-template requests. Each
   event records the request id, template id, resolved config, status, tick,
   timestamp, and installer summary, so unattended book creation is auditable
@@ -1495,9 +1497,10 @@ Before launching a standing-watch import, Moontown also checks the target
 book-local MoonClaw job store for oversized active JSON indexes. When
 `job_proposals.json`, `definitions.json`, or `index/artifacts.json` exceeds the
 runtime safety threshold, the Mayor archives the file under
-`.moonclaw/jobs/archive/tick-<tick>/` and replaces the active file with a valid
-empty index. Historical files remain available for audit, while the hot store
-stays small enough for MoonClaw proposal import/save operations.
+`.moonsuite/products/moonclaw/jobs/archive/tick-<tick>/` and replaces the
+active file with a valid empty index. Historical files remain available for
+audit, while the hot store stays small enough for MoonClaw proposal import/save
+operations.
 
 The daemon launcher resolves the command from `MOONTOWN_DAEMON_COMMAND`,
 `MOON_BIN`, then `$HOME/.moon/bin/moon`. The default dev path launches
@@ -1676,12 +1679,12 @@ Current structural readiness expectations are book-type specific:
 
 The semantic review packet layer writes:
 
-- `.moontown/book-quality/ai-review-packets/BOOK_QUALITY_REVIEW_SKILL.md`
-- `.moontown/book-quality/ai-review-packets/<book-id>.json`
+- `.moonsuite/products/moontown/book-quality/ai-review-packets/BOOK_QUALITY_REVIEW_SKILL.md`
+- `.moonsuite/products/moontown/book-quality/ai-review-packets/<book-id>.json`
 
 The semantic review result layer reads:
 
-- `.moontown/book-quality/ai-review-results/<book-id>.md`
+- `.moonsuite/products/moontown/book-quality/ai-review-results/<book-id>.md`
 
 Those packets are the handoff to AI judgment. The Mayor should use structural
 failures for routing and use semantic review findings for quality repair.
@@ -1932,13 +1935,13 @@ Current persisted files:
 
 - `.moonsuite/products/moontown/moonbooks.json`
   - persisted moonbook catalog entries
-- `.moontown/town.json`
+- `.moonsuite/products/moontown/town.json`
   - persisted town snapshot
-- `.moontown/daemon.json`
+- `.moonsuite/products/moontown/daemon.json`
   - persisted daemon tick state, lease owner, heartbeat event count, active standing goals, and scheduled job metadata
-- `.moontown/standing-goals.json`
+- `.moonsuite/products/moontown/standing-goals.json`
   - persisted Mayor-owned standing goal registry
-- `.moontown/town-synthesis/*.md`
+- `.moonsuite/products/moontown/town-synthesis/*.md`
   - mayor-owned cross-book synthesis and readiness artifacts
 - `.moonsuite/products/moontown/packets/`
   - optional exported keeper packet files
@@ -1968,7 +1971,7 @@ Real now:
 - mayor-level research quality gates
 - generic civic service reconciliation from building protocol ledgers into
   MoonBook service-result records
-- town synthesis artifacts under `.moontown/town-synthesis/`
+- town synthesis artifacts under `.moonsuite/products/moontown/town-synthesis/`
 - integrated research narrative with W-source and L-source evidence references
 - proposal/run lifecycle tracking
 - strategic mayor role adapter

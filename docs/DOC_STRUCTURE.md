@@ -145,7 +145,8 @@ Moontown keeps book quality checks split into two responsibilities:
 
 - `books doctor`
   runs deterministic structural checks and writes
-  `.moontown/book-quality/audit.json` plus `.moontown/book-quality/audit.md`.
+  `.moonsuite/products/moontown/book-quality/audit.json` plus
+  `.moonsuite/products/moontown/book-quality/audit.md`.
 - `books ai-review-packets`
   writes review packets that an AI reviewer should judge with
   `BOOK_QUALITY_REVIEW_SKILL.md` and the book's own contract/skill files.
@@ -155,14 +156,15 @@ workspace exists, contract exists, projection exists, and service books have
 real service-loop output. They must be presented as readiness only. Actual
 quality should not be hard-coded. Depth, insight, usefulness, originality,
 correctness, and genre fit belong to the AI semantic review pass, with results
-written to `.moontown/book-quality/ai-review-results/<book-id>.md`.
+written to
+`.moonsuite/products/moontown/book-quality/ai-review-results/<book-id>.md`.
 
 Weak AI semantic reviews are actionable repair records, not accepted knowledge.
 The daemon bridges them into `wiki/reviews/book-quality-repair.md` inside the
 owning MoonBook workspace, records the bridge in
-`.moontown/book-quality/repair-bridge.json`, and queues a bounded standing
-repair goal. This keeps book growth live while preserving the rule that
-operational review evidence is separate from domain/service evidence.
+`.moonsuite/products/moontown/book-quality/repair-bridge.json`, and queues a
+bounded standing repair goal. This keeps book growth live while preserving the
+rule that operational review evidence is separate from domain/service evidence.
 
 `books bootstrap` should stay genre-aware. It should repair canonical
 registered book workspaces without turning course, civic, planbook, cookbook,

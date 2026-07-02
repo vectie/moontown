@@ -68,11 +68,11 @@ book-to-book work from those events, but topic truth and artifact ownership stay
 in MoonBook.
 
 MoonBook persist responses now include the exact event object plus its
-book-local paths:
+book-local visible paths:
 
 ```text
-<book>/.moonbook/events/<event-id>.json
-<book>/.moonbook/events/latest.json
+<book>/events/<event-id>.json
+<book>/events/latest.json
 ```
 
 Moontown should consume `PersistResultOutcome.executable_event` from the
@@ -98,10 +98,11 @@ files as separate truth sources.
 ## MoonCode Sidecar Reconciliation
 
 MoonCode results are imported through the same runtime boundary. MoonClaw writes
-portable `mooncode-book-result` JSONL sidecars under a book workspace:
+portable `mooncode-book-result` JSONL sidecars under the suite's MoonClaw
+product home for the owning book workspace:
 
 ```text
-<book>/.moonclaw/mooncode/sessions/<session>/book-results.jsonl
+<suite>/.moonsuite/products/moonclaw/mooncode/sessions/<session>/book-results.jsonl
 ```
 
 Moontown supervision scans those sidecars, validates that each payload contains
@@ -113,7 +114,7 @@ except for the portable JSON sidecar log.
 Imported sidecars are deduped in:
 
 ```text
-<book>/.moontown/mooncode-book-results/processed.jsonl
+<suite>/.moonsuite/products/moontown/mooncode-book-results/<sidecar-id>/processed.jsonl
 ```
 
 After a successful persist, Moontown records `book.mooncode_sidecar_persisted`

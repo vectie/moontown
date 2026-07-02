@@ -26,9 +26,9 @@ Source tree hygiene:
   [src/facade.mbt](/Users/kq/Workspace/moontown/src/facade.mbt); if a change
   needs real behavior, create or use a cohesive package under `src/` instead
   of adding more root-package implementation files
-- local root directories such as `.moontown`, `.moonclaw`, `_build`, and
-  `.mooncakes` are runtime/cache state, not package homes; source ownership is
-  still decided by the `src/` package tree
+- local runtime/cache directories such as `.moonsuite`, `.tmp`, `_build`, and
+  `.mooncakes` are not package homes; source ownership is still decided by the
+  `src/` package tree
 - ignored generated/dependency directories such as `node_modules`, `_build`,
   `.mooncakes`, and `dist` must not be left under `src/` during architecture
   review; run `git clean -fdX src/ui/rabbita-town` after frontend builds if
@@ -441,7 +441,8 @@ Current persisted files:
 Boundary:
 
 - `src/storage` owns the generic rule that `town.json` in the current
-  directory maps to `.moontown`, while `/path/to/town.json` maps to `/path/to`.
+  workspace maps to the MoonSuite Moontown product home, while explicit
+  snapshot paths keep their explicit parent directory.
 - Runtime packages may derive their own feature-specific filenames under that
   base, but should call `storage.snapshot_base_dir(...)` instead of
   reimplementing `dirname(snapshot_path)` fallback logic.
@@ -495,7 +496,7 @@ Boundary:
 
 - `src/town_synthesis` owns rendering and town-state mutation policy from
   explicit observations. It must not read `raw/bootstrap/deep-report.md` files
-  or write `.moontown/town-synthesis/*` artifacts.
+  or write `.moonsuite/products/moontown/town-synthesis/*` artifacts.
 - `src/town_synthesis_runtime` owns synthesis IO: reading each lane's deep
   report, writing the goal-specific and `latest.md` synthesis artifacts, and
   calling the package-owned registration/event policy.

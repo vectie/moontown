@@ -584,7 +584,7 @@ Moondesk, or future planning agent can create one without Codex manually
 copying files:
 
 ```text
-.moontown/book-template-requests.json
+.moonsuite/products/moontown/book-template-requests.json
   request.template_id = "app-tool-book"
   request.config_path = "<config>.json"
 ```
@@ -809,7 +809,7 @@ books/plan-<area>/
     code-plan/SKILL.md
     code-review/SKILL.md
     doc-sync/SKILL.md
-.moontown/
+.moonsuite/products/moontown/
   planbook/
     autonomy.json
     autonomy.md

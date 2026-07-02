@@ -185,8 +185,9 @@ liveness:
   the same durable PID may appear as both supervisor and worker.
 - `moon run src/cmd/main -- daemon restart "validated source patch"`
   should be requested after autonomous code repair changes Moontown source and
-  validation passes. The request writes `.moontown/daemon.restart`; the worker
-  consumes it between ticks and the supervisor/launchd starts a fresh worker.
+  validation passes. The request writes
+  `.moonsuite/products/moontown/daemon.restart`; the worker consumes it between
+  ticks and the supervisor/launchd starts a fresh worker.
   If new packets still show pre-patch prompts or old routing after source files
   changed, inspect this reload seam before blaming MoonBook skills.
 - PlanBook source-repair success requires a
@@ -209,9 +210,10 @@ liveness:
   should update PlanBook autonomy evidence and either close gaps, queue one
   bounded repair, or record a clear blocker.
 - `moon run src/cmd/main -- books quality`
-  should include live books from `.moontown/town.json`, not only catalog books.
-  Weak live books are legitimate growth gaps; they should remain visible until
-  standing watches, bookkeepers, or AI semantic review improve them.
+  should include live books from `.moonsuite/products/moontown/town.json`, not
+  only catalog books. Weak live books are legitimate growth gaps; they should
+  remain visible until standing watches, bookkeepers, or AI semantic review
+  improve them.
 - `moon run src/cmd/main -- books ai-review status`
   should show no duplicate active semantic reviews. The daemon's
   `review-book-quality` job dispatches one pending review at a time and waits
