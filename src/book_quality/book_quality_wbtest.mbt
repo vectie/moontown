@@ -1552,7 +1552,10 @@ test "book quality default runtime paths use moontown product home" {
   assert_eq(default_review_root(), default_book_quality_dir())
   assert_eq(
     default_moonclaw_home(),
-    @moonsuite.product_dir(default_book_quality_dir(), "moonclaw"),
+    @moonsuite.product_home_for_workspace_root(
+      default_book_quality_dir(),
+      "moonclaw",
+    ).state_path,
   )
   assert_eq(moonclaw_home(default_review_dir()), default_moonclaw_home())
   assert_eq(

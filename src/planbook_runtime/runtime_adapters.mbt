@@ -47,8 +47,5 @@ async fn moonclaw_run_result_payload_from_run(
 
 ///|
 fn moonclaw_product_home_for_workspace(workspace_root : String) -> String {
-  @moonsuite.product_dir(
-    @moonsuite.suite_root_for_book_root(workspace_root),
-    "moonclaw",
-  )
+  @moonsuite.product_home_for_workspace_root(workspace_root, "moonclaw").state_path
 }

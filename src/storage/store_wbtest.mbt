@@ -59,10 +59,12 @@ async test "watcher ledger derives snapshot-relative directory and appends by go
   )
   assert_eq(
     moontown_product_tmp_dir(),
-    @moonsuite.product_tmp_dir(
-      @moonsuite.suite_root_for_workspace_root(@os.cwd() catch { _ => "." }),
+    @moonsuite.product_home_for_workspace_root(
+      @os.cwd() catch {
+        _ => "."
+      },
       moonsuite_product_id(),
-    ),
+    ).tmp_path,
   )
   assert_eq(default_snapshot_path(), moontown_product_artifact("town.json"))
   assert_eq(
