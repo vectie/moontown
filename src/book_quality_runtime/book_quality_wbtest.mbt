@@ -13,7 +13,9 @@ test "book quality runtime review result dir uses storage snapshot base" {
 ///|
 async test "book doctor writes structural audit and AI review packets" {
   let root = cleaned_book_quality_test_root("/tmp/moontown-book-quality-wbtest")
-  let catalog_path = "\{root}/moonbooks.json"
+  let catalog_path = @storage.moontown_product_artifact_for_workspace_root(
+    root, "moonbooks.json",
+  )
   let snapshot_path = "\{root}/town.json"
   let coding_root = "\{root}/books/coding"
   let civic_root = "\{root}/books/wenyu-policy-hall"
@@ -85,7 +87,9 @@ async test "book quality includes live runtime books outside catalog" {
   let root = cleaned_book_quality_test_root(
     "/tmp/moontown-book-quality-runtime-wbtest",
   )
-  let catalog_path = "\{root}/moonbooks.json"
+  let catalog_path = @storage.moontown_product_artifact_for_workspace_root(
+    root, "moonbooks.json",
+  )
   let snapshot_path = "\{root}/town.json"
   let catalog = [
     book_quality_catalog_entry(
@@ -128,7 +132,9 @@ async test "book quality excludes archived and smoke books from active audit" {
   let root = cleaned_book_quality_test_root(
     "/tmp/moontown-book-quality-active-filter-wbtest",
   )
-  let catalog_path = "\{root}/moonbooks.json"
+  let catalog_path = @storage.moontown_product_artifact_for_workspace_root(
+    root, "moonbooks.json",
+  )
   let snapshot_path = "\{root}/town.json"
   @moonbook.save_catalog_file(catalog_path, [
     book_quality_catalog_entry(

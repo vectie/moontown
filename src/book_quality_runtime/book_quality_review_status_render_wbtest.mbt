@@ -5,7 +5,9 @@ async test "book quality status separates current success from historical failed
   )
   let result_dir = "\{root}/book-quality/ai-review-results"
   let run_path = "\{root}/book-quality/ai-review-runs.json"
-  let catalog_path = "\{root}/moonbooks.json"
+  let catalog_path = @storage.moontown_product_artifact_for_workspace_root(
+    root, "moonbooks.json",
+  )
   let old_run = book_quality_review_run_fixture(
     "wenyu-contest-express",
     "\{root}/book-quality/moonclaw-packets/contest.json",
@@ -69,7 +71,9 @@ async test "book quality status treats inactive smoke current rows as historical
   )
   let result_dir = "\{root}/book-quality/ai-review-results"
   let run_path = "\{root}/book-quality/ai-review-runs.json"
-  let catalog_path = "\{root}/moonbooks.json"
+  let catalog_path = @storage.moontown_product_artifact_for_workspace_root(
+    root, "moonbooks.json",
+  )
   let snapshot_path = "\{root}/town.json"
   @moonbook.save_catalog_file(catalog_path, [
     book_quality_catalog_entry(

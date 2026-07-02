@@ -3,7 +3,9 @@ async test "semantic review bridge retires satisfied repair goals" {
   let root = cleaned_book_quality_test_root(
     "/tmp/moontown-book-quality-bridge-retire-wbtest",
   )
-  let catalog_path = "\{root}/moonbooks.json"
+  let catalog_path = @storage.moontown_product_artifact_for_workspace_root(
+    root, "moonbooks.json",
+  )
   let snapshot_path = "\{root}/town.json"
   let result_dir = "\{root}/book-quality/ai-review-results"
   let bridge_path = "\{root}/book-quality/repair-bridge.json"

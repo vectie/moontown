@@ -1,7 +1,9 @@
 ///|
 async test "planbook bootstrap creates durable plan workspace and status" {
   let root = cleaned_book_quality_test_root("/tmp/moontown-planbook-wbtest")
-  let catalog_path = "\{root}/moonbooks.json"
+  let catalog_path = @storage.moontown_product_artifact_for_workspace_root(
+    root, "moonbooks.json",
+  )
   let workspace_root = "\{root}/books/plan-moontown-quality"
   let message = bootstrap_moontown_planbook(
     book_catalog_path=catalog_path,
@@ -39,7 +41,9 @@ async test "planbook bootstrap creates durable plan workspace and status" {
 ///|
 async test "course bootstrap creates course-shaped MoonBook workspace" {
   let root = cleaned_book_quality_test_root("/tmp/moontown-course-book-wbtest")
-  let catalog_path = "\{root}/moonbooks.json"
+  let catalog_path = @storage.moontown_product_artifact_for_workspace_root(
+    root, "moonbooks.json",
+  )
   let workspace_root = "\{root}/books/course-wenyu-game-design"
   let source_workspace_root = "\{root}/source"
   @support.write_text_file(

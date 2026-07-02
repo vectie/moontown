@@ -3,7 +3,9 @@ async test "book quality repair bridge context loads and persists bridge state" 
   let root = cleaned_book_quality_test_root(
     "/tmp/moontown-book-quality-bridge-context-wbtest",
   )
-  let catalog_path = "\{root}/moonbooks.json"
+  let catalog_path = @storage.moontown_product_artifact_for_workspace_root(
+    root, "moonbooks.json",
+  )
   let snapshot_path = "\{root}/town.json"
   let bridge_path = "\{root}/book-quality/repair-bridge.json"
   @support.write_text_file(

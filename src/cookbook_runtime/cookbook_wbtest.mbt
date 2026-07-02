@@ -2,7 +2,9 @@
 async test "cookbook bootstrap writes manifest and MoonBook workspace" {
   let root = "/tmp/moontown-cookbook-wbtest"
   @support.ignore_checked_command("rm", ["-rf", root])
-  let catalog_path = "\{root}/moonbooks.json"
+  let catalog_path = @storage.moontown_product_artifact_for_workspace_root(
+    root, "moonbooks.json",
+  )
   let workspace_root = "\{root}/books/moontown-cookbook"
   let manifest_path = "\{root}/stable-state.json"
   let message = bootstrap_moontown_cookbook(
@@ -58,7 +60,9 @@ async test "cookbook bootstrap writes manifest and MoonBook workspace" {
 async test "cookbook status reports stable state control book" {
   let root = "/tmp/moontown-cookbook-status-wbtest"
   @support.ignore_checked_command("rm", ["-rf", root])
-  let catalog_path = "\{root}/moonbooks.json"
+  let catalog_path = @storage.moontown_product_artifact_for_workspace_root(
+    root, "moonbooks.json",
+  )
   let workspace_root = "\{root}/books/moontown-cookbook"
   let manifest_path = "\{root}/stable-state.json"
   ignore(
