@@ -11,9 +11,9 @@ pub fn validation_evidence_passed_status() -> String {
 ///|
 pub fn validation_required_commands() -> Array[String] {
   [
-    "/Users/kq/.moon/bin/moon check --no-render", "/Users/kq/.moon/bin/moon test planbook_autonomy_wbtest.mbt planbook_repair_runtime_wbtest.mbt live_autonomy_wbtest.mbt",
-    "/Users/kq/.moon/bin/moon test goal_execution_wbtest.mbt goal_supervision_detached_import_wbtest.mbt goal_supervision_persisted_result_wbtest.mbt goal_supervision_review_queue_wbtest.mbt goal_supervision_standing_watch_triage_wbtest.mbt goal_supervision_worker_release_wbtest.mbt planbook_autonomy_wbtest.mbt planbook_repair_runtime_wbtest.mbt live_autonomy_wbtest.mbt health/report_wbtest.mbt",
-    "/Users/kq/.moon/bin/moon fmt", "/Users/kq/.moon/bin/moon info", "/Users/kq/.moon/bin/moon run src/cmd/main -- status",
+    "moon check --no-render", "moon test planbook_autonomy_wbtest.mbt planbook_repair_runtime_wbtest.mbt live_autonomy_wbtest.mbt",
+    "moon test goal_execution_wbtest.mbt goal_supervision_detached_import_wbtest.mbt goal_supervision_persisted_result_wbtest.mbt goal_supervision_review_queue_wbtest.mbt goal_supervision_standing_watch_triage_wbtest.mbt goal_supervision_worker_release_wbtest.mbt planbook_autonomy_wbtest.mbt planbook_repair_runtime_wbtest.mbt live_autonomy_wbtest.mbt health/report_wbtest.mbt",
+    "moon fmt", "moon info", "moon run src/cmd/main -- status",
   ]
 }
 

@@ -10,7 +10,7 @@ pub fn model() -> String {
 pub fn command() -> String {
   match optional_env_text("CODEX_BIN") {
     Some(command) => command
-    None => "/Users/kq/.nvm/versions/node/v22.22.1/bin/node"
+    None => "codex"
   }
 }
 
@@ -37,11 +37,7 @@ fn args_with_tail(tail : Array[String]) -> Array[String] {
   let model = model()
   let args = match optional_env_text("CODEX_BIN") {
     Some(_) => ["exec", "--model", model, "--sandbox", "workspace-write"]
-    None =>
-      [
-        "/Users/kq/.nvm/versions/node/v22.22.1/lib/node_modules/@openai/codex/bin/codex.js",
-        "exec", "--model", model, "--sandbox", "workspace-write",
-      ]
+    None => ["exec", "--model", model, "--sandbox", "workspace-write"]
   }
   for arg in tail {
     args.push(arg)

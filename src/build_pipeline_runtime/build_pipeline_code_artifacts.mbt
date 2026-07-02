@@ -34,8 +34,8 @@ async fn write_wenyu_code_patch_handoff(
       "",
       "## Validation To Run After Patch",
       "",
-      "- `/Users/kq/.moon/bin/moon test`",
-      "- `/Users/kq/.moon/bin/moon check`",
+      "- `moon test`",
+      "- `moon check`",
       "- UI build command for `src/ui/rabbita-town` if UI files change.",
     ].join("\n"),
   )

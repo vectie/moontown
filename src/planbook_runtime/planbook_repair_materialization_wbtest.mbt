@@ -314,21 +314,13 @@ async test "planbook repair acp target uses resolved codex command" {
   )
   let target = @support.read_text_or_empty(target_path)
   let source_root = planbook_repair_source_root()
-  assert_true(
-    target.contains(
-      "\"command\": \"/Users/kq/.nvm/versions/node/v22.22.1/bin/node\"",
-    ),
-  )
-  assert_true(
-    target.contains(
-      "/Users/kq/.nvm/versions/node/v22.22.1/lib/node_modules/@openai/codex/bin/codex.js",
-    ),
-  )
+  assert_true(target.contains("\"command\": \"codex\""))
+  assert_true(!target.contains(".nvm/versions/node"))
+  assert_true(!target.contains("node_modules/@openai/codex"))
   assert_true(target.contains("\"--sandbox\""))
   assert_true(target.contains("\"workspace-write\""))
   assert_true(target.contains("\"--model\""))
   assert_true(target.contains("\"gpt-5.5\""))
-  assert_true(!target.contains("\"command\": \"codex\""))
   assert_true(target.contains("\"cwd\": \"\{source_root}\""))
   assert_true(target.contains("\"workspace\": \"\{source_root}\""))
   assert_true(!target.contains("\"cwd\": \"\{workspace_root}\""))
