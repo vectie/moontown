@@ -3,6 +3,65 @@
 This repository has outgrown a single README. The docs should be organized by
 operational purpose, not by the order features were added.
 
+## Product Scope And Boundary
+
+Moontown is the town-level control plane. It owns scheduling, standing goals,
+Mayor supervision, book-to-book coordination, civic protocol routing, live town
+state, daemon records, and operator visibility.
+
+Moontown does not own durable book truth, bounded agent execution, desktop file
+management, suite metrics, or low-level filesystem contracts. MoonBook owns
+accepted book content, MoonClaw owns execution, Moondesk owns the desktop
+projection, MoonStat observes health/usage, and MoonLib owns shared layout
+contracts.
+
+## Implementation And Testing Guide
+
+Implementation docs should point readers to the package that owns a behavior:
+
+- `src/core`, `src/storage`, `src/scheduler`, `src/dispatch`, and `src/health`
+  for town state and daemon mechanics.
+- `src/adapters/moonbook` and `src/adapters/moonclaw` for cross-product
+  handoffs.
+- PlanBook packages and docs for plan-first source repair and validation.
+- `src/ui` and `src/ui/rabbita-town` for renderer-neutral and Rabbita UI
+  projections.
+- civic packages and Wenyu docs for building protocols and service ledgers.
+
+Baseline validation for product changes:
+
+```sh
+moon check
+moon test
+moon info
+moon fmt
+```
+
+For daemon, PlanBook, or civic protocol changes, add integration evidence that
+shows the scheduled event, ledger write, status projection, and durable
+MoonBook handoff. Do not accept a feature as complete only because a worker ran
+once.
+
+## Worth Noticing
+
+- Moontown is document-first. Agent runs are process evidence, not durable
+  truth.
+- Buildings are protocol places. MoonBooks are durable support surfaces.
+- PlanBook source repair needs validation evidence and an accepted patch
+  receipt; diagnostics alone are not proof of self-patching.
+- Runtime state belongs under `.moonsuite/products/moontown`, not in source
+  packages.
+
+## Future Plan
+
+- Prove multi-day daemon and recovery behavior under packaged supervision.
+- Complete repeated Wenyu civic workflow executions with accepted MoonBook
+  outputs.
+- Keep book-template and PlanBook protocols data-driven instead of hardcoded
+  one-off routes.
+- Tighten UI and status projections around actionable town state, not raw run
+  noise.
+
 ## Top-Level Reading Order
 
 1. [README.md](/Users/kq/Workspace/moontown/README.md)
