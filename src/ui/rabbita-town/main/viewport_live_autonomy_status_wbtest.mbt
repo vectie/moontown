@@ -11,6 +11,24 @@ test "compact single-line normalizes whitespace and truncates" {
 }
 
 ///|
+test "live autonomy latest change exposes doubled character amount" {
+  assert_eq(latest_change_summary_character_limit, 360)
+  let long_summary = [
+    "abcdefghijklmnopqrstuvwxyzabcdefghijklmnopqrstuvwxyzabcdefghijklmnopqrstuvwxyzabcdefghijklmnopqrstuvwxyz",
+    "abcdefghijklmnopqrstuvwxyzabcdefghijklmnopqrstuvwxyzabcdefghijklmnopqrstuvwxyzabcdefghijklmnopqrstuvwxyz",
+    "abcdefghijklmnopqrstuvwxyzabcdefghijklmnopqrstuvwxyzabcdefghijklmnopqrstuvwxyzabcdefghijklmnopqrstuvwxyz",
+    "abcdefghijklmnopqrstuvwxyzabcdefghijklmnopqrstuvwxyzabcdefghijklmnopqrstuvwxyzabcdefghijklmnopqrstuvwxyz",
+  ].join("")
+  let spine = {
+    ..test_live_autonomy_snapshot(),
+    latest_change_summary: long_summary,
+  }
+  let view = live_autonomy_status_view(spine)
+  assert_true(view.latest_change_label.length() > 180)
+  assert_true(view.latest_change_label.length() <= 360 + "Latest: ".length() + "...".length())
+}
+
+///|
 fn test_live_autonomy_snapshot(
   status? : String = "working",
   active_workers? : Int = 4,

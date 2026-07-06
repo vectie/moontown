@@ -1,4 +1,7 @@
 ///|
+let latest_change_summary_character_limit = 360
+
+///|
 priv struct LiveAutonomyStatusView {
   tick_label : String
   outcome_label : String
@@ -22,7 +25,7 @@ fn live_autonomy_status_view(
     latest_watcher_label: "Latest watcher: \{spine.latest_watcher_summary}",
     latest_book_event_label: "Latest book event: \{spine.book_template_latest_event_summary}",
     artifact_label: "Digest: \{spine.digest_path}. Visual: \{spine.visual_projection_path}. Journal: \{spine.journal_path}. Engineering: \{spine.planbook_engineering_digest_path}. Change log: \{spine.planbook_change_log_path}",
-    latest_change_label: "Latest: \{compact_single_line(spine.latest_change_summary, limit=180)}",
+    latest_change_label: "Latest: \{compact_single_line(spine.latest_change_summary, limit=latest_change_summary_character_limit)}",
   }
 }
 
