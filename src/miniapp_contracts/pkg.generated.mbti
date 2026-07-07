@@ -1,0 +1,283 @@
+// Generated using `moon info`, DON'T EDIT IT
+package "vectie/moontown/miniapp_contracts"
+
+import {
+  "moonbitlang/core/debug",
+  "moonbitlang/core/json",
+}
+
+// Values
+pub fn miniapp_building_kind_id(MiniappBuildingKind) -> String
+
+pub fn miniapp_contract_endpoints() -> Array[MiniappEndpoint]
+
+pub fn miniapp_endpoint(id~ : String, http_method~ : String, path~ : String, writes? : Bool, auth_required? : Bool, summary~ : String) -> MiniappEndpoint
+
+pub fn miniapp_endpoint_by_id(String) -> MiniappEndpoint?
+
+pub fn miniapp_fixture_agent(building_id? : String) -> MiniappAgent
+
+pub fn miniapp_fixture_book(id? : String) -> MiniappBookSummary
+
+pub fn miniapp_fixture_building(id? : String, owner_id? : String, owner_kind? : MiniappOwnerKind, visibility? : MiniappVisibilityState, scope? : MiniappScope) -> MiniappBuilding
+
+pub fn miniapp_fixture_layer(user_id? : String) -> MiniappTownLayer
+
+pub fn miniapp_fixture_placement(building_id? : String, layer_id? : String) -> MiniappBuildingPlacement
+
+pub fn miniapp_fixture_publication(state? : MiniappVisibilityState) -> MiniappBuildingPublication
+
+pub fn miniapp_fixture_run() -> MiniappRun
+
+pub fn miniapp_fixture_snapshot() -> MiniappTownSnapshot
+
+pub fn miniapp_fixture_thread(building_id? : String) -> MiniappThread
+
+pub fn miniapp_fixture_user(id? : String) -> MiniappUser
+
+pub fn miniapp_fixture_workspace(user_id? : String) -> MiniappWorkspace
+
+pub fn miniapp_owner_kind_id(MiniappOwnerKind) -> String
+
+pub fn miniapp_permission_role_id(MiniappPermissionRole) -> String
+
+pub fn miniapp_run_status_id(MiniappRunStatus) -> String
+
+pub fn miniapp_scope_id(MiniappScope) -> String
+
+pub fn miniapp_visibility_state_id(MiniappVisibilityState) -> String
+
+// Errors
+
+// Types and methods
+pub(all) struct MiniappAgent {
+  id : String
+  display_name : String
+  owner_kind : MiniappOwnerKind
+  owner_id : String
+  building_id : String?
+  capabilities : Array[String]
+  version : Int
+} derive(Eq, ToJson, @debug.Debug, @json.FromJson)
+
+pub(all) struct MiniappAuditEvent {
+  id : String
+  actor_user_id : String
+  object_kind : String
+  object_id : String
+  action : String
+  summary : String
+  created_at_ms : UInt64
+} derive(Eq, ToJson, @debug.Debug, @json.FromJson)
+
+pub(all) struct MiniappBookSummary {
+  id : String
+  title : String
+  summary : String
+  visibility : MiniappVisibilityState
+  accepted_memory_count : Int
+  pending_review_count : Int
+  version : Int
+} derive(Eq, ToJson, @debug.Debug, @json.FromJson)
+
+pub(all) struct MiniappBuilding {
+  id : String
+  kind : MiniappBuildingKind
+  title : String
+  summary : String
+  owner_kind : MiniappOwnerKind
+  owner_id : String
+  workspace_id : String
+  visibility : MiniappVisibilityState
+  scope : MiniappScope
+  tags : Array[String]
+  capabilities : Array[String]
+  primary_book_id : String
+  publication : MiniappBuildingPublication
+  version : Int
+  updated_at_ms : UInt64
+} derive(Eq, ToJson, @debug.Debug, @json.FromJson)
+
+pub(all) enum MiniappBuildingKind {
+  AgentLab
+  PolicyHall
+  KnowledgeHouse
+  ProjectStudio
+  MarketSquare
+  ReviewCouncil
+  SystemGateway
+  CustomBuilding(String)
+} derive(Eq, ToJson, @debug.Debug, @json.FromJson)
+
+pub(all) struct MiniappBuildingPlacement {
+  id : String
+  building_id : String
+  layer_id : String
+  x : Int
+  y : Int
+  region_id : String
+  pinned : Bool
+  version : Int
+} derive(Eq, ToJson, @debug.Debug, @json.FromJson)
+
+pub(all) struct MiniappBuildingPublication {
+  state : MiniappVisibilityState
+  submitted_at_ms : UInt64?
+  published_at_ms : UInt64?
+  review_summary : String
+} derive(Eq, ToJson, @debug.Debug, @json.FromJson)
+
+pub(all) struct MiniappEndpoint {
+  id : String
+  http_method : String
+  path : String
+  writes : Bool
+  auth_required : Bool
+  summary : String
+} derive(Eq, ToJson, @debug.Debug, @json.FromJson)
+
+pub(all) struct MiniappMessage {
+  id : String
+  thread_id : String
+  actor_id : String
+  actor_label : String
+  body : String
+  created_at_ms : UInt64
+  version : Int
+} derive(Eq, ToJson, @debug.Debug, @json.FromJson)
+
+pub(all) struct MiniappOrganization {
+  id : String
+  name : String
+  owner_user_id : String
+  version : Int
+} derive(Eq, ToJson, @debug.Debug, @json.FromJson)
+
+pub(all) enum MiniappOwnerKind {
+  UserOwner
+  OrganizationOwner
+  SystemOwner
+} derive(Eq, ToJson, @debug.Debug, @json.FromJson)
+
+pub(all) struct MiniappPermission {
+  subject_kind : String
+  subject_id : String
+  role : MiniappPermissionRole
+} derive(Eq, ToJson, @debug.Debug, @json.FromJson)
+
+pub(all) enum MiniappPermissionRole {
+  OwnerRole
+  EditorRole
+  ViewerRole
+  PublisherRole
+  AdminRole
+} derive(Eq, ToJson, @debug.Debug, @json.FromJson)
+
+pub(all) struct MiniappRun {
+  id : String
+  user_id : String
+  building_id : String
+  book_id : String
+  agent_id : String?
+  thread_id : String
+  status : MiniappRunStatus
+  summary : String
+  created_at_ms : UInt64
+  updated_at_ms : UInt64
+  version : Int
+} derive(Eq, ToJson, @debug.Debug, @json.FromJson)
+
+pub(all) enum MiniappRunStatus {
+  RunPending
+  RunRunning
+  RunWaitingReview
+  RunDone
+  RunFailed
+  RunCancelled
+} derive(Eq, ToJson, @debug.Debug, @json.FromJson)
+
+pub(all) enum MiniappScope {
+  PersonalScope
+  TeamScope
+  TownPublicScope
+  SystemPublicScope
+} derive(Eq, ToJson, @debug.Debug, @json.FromJson)
+
+pub(all) struct MiniappSearchResult {
+  building : MiniappBuilding
+  placement : MiniappBuildingPlacement?
+  book : MiniappBookSummary
+  score : Int
+  reason : String
+} derive(Eq, ToJson, @debug.Debug, @json.FromJson)
+
+pub(all) struct MiniappSession {
+  id : String
+  user_id : String
+  token_label : String
+  expires_at_ms : UInt64
+  version : Int
+} derive(Eq, ToJson, @debug.Debug, @json.FromJson)
+
+pub(all) struct MiniappThread {
+  id : String
+  building_id : String
+  title : String
+  message_count : Int
+  unread_count : Int
+  version : Int
+} derive(Eq, ToJson, @debug.Debug, @json.FromJson)
+
+pub(all) struct MiniappTownLayer {
+  id : String
+  title : String
+  scope : MiniappScope
+  owner_kind : MiniappOwnerKind
+  owner_id : String
+  version : Int
+} derive(Eq, ToJson, @debug.Debug, @json.FromJson)
+
+pub(all) struct MiniappTownSnapshot {
+  id : String
+  user : MiniappUser
+  workspace : MiniappWorkspace
+  layers : Array[MiniappTownLayer]
+  buildings : Array[MiniappBuilding]
+  placements : Array[MiniappBuildingPlacement]
+  books : Array[MiniappBookSummary]
+  agents : Array[MiniappAgent]
+  threads : Array[MiniappThread]
+  runs : Array[MiniappRun]
+  permissions : Array[MiniappPermission]
+  generated_at_ms : UInt64
+  version : Int
+} derive(Eq, ToJson, @debug.Debug, @json.FromJson)
+
+pub(all) struct MiniappUser {
+  id : String
+  display_name : String
+  avatar_url : String?
+  version : Int
+} derive(Eq, ToJson, @debug.Debug, @json.FromJson)
+
+pub(all) enum MiniappVisibilityState {
+  PrivateDraft
+  SharedPrivate
+  SubmittedForPublish
+  Published
+  Archived
+} derive(Eq, ToJson, @debug.Debug, @json.FromJson)
+
+pub(all) struct MiniappWorkspace {
+  id : String
+  owner_kind : MiniappOwnerKind
+  owner_id : String
+  name : String
+  scope : MiniappScope
+  version : Int
+} derive(Eq, ToJson, @debug.Debug, @json.FromJson)
+
+// Type aliases
+
+// Traits
+
