@@ -2,6 +2,7 @@
 fn render_miniapp_command(args : Array[String]) -> String {
   match args {
     ["routes"] => render_miniapp_routes()
+    ["serve"] => render_miniapp_serve_help()
     ["dev-login", user_id] =>
       @miniapp_local_backend.miniapp_local_backend_dev_login(
         @miniapp_local_backend.miniapp_local_backend_fixture_state(),
@@ -27,7 +28,12 @@ fn render_miniapp_command(args : Array[String]) -> String {
 
 ///|
 fn render_miniapp_help() -> String {
-  "Moontown miniapp local backend\ncommands=routes dev-login <user> snapshot <user> buildings search <user> <query> buildings create <user> buildings place <user> agents create <user> chat send <user> runs cancel|retry <user> <run> reviews accept <user> <run>"
+  "Moontown miniapp local backend\ncommands=routes serve dev-login <user> snapshot <user> buildings search <user> <query> buildings create <user> buildings place <user> agents create <user> chat send <user> runs cancel|retry <user> <run> reviews accept <user> <run>"
+}
+
+///|
+fn render_miniapp_serve_help() -> String {
+  "kind=miniapp-serve command=node scripts/miniapp-local-backend.mjs --port 18191 backendBaseUrl=http://127.0.0.1:18191 smoke=node scripts/miniapp-local-backend.mjs --smoke --port 18191"
 }
 
 ///|

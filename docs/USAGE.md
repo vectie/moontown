@@ -31,6 +31,7 @@ Right now, `moontown` is usable as:
 - typed runtime status and one-shot daemon tick commands
 - persisted standing goals, a continuous daemon-loop command, and a supervised background daemon
 - a MoonBook-generated cookbook for docs, definitions, and stable-state control
+- a local mini-app backend fixture for WeChat DevTools testing
 - a scene-based dashboard
 - a Rabbita simulation frontend
 - a starter asset pipeline
@@ -38,7 +39,7 @@ Right now, `moontown` is usable as:
 It is not yet usable as:
 
 - a packaged cross-platform systemd/container service
-- a backend-synced browser UI
+- a production backend-synced browser UI
 
 So the right way to use the repo today is as a real goal-run control plane plus
 a live architectural and frontend prototype. It can launch and observe bounded
@@ -1587,6 +1588,42 @@ Browser-submitted standing goals use
 for their default `source_policy`. Change that document when the default Mayor
 queue policy should change; do not patch the Vite request handler for ordinary
 policy changes.
+
+## 14. Validate Changes
+
+## 13.4 Run The Mini-App Local Backend
+
+The mini-app backend surface is intentionally separate from the Rabbita browser
+UI. It is a local fixture for the WeChat mini-app path.
+
+Inspect the route catalog:
+
+```bash
+moon run src/cmd/main -- miniapp routes
+```
+
+Run the localhost HTTP wrapper for WeChat DevTools:
+
+```bash
+node scripts/miniapp-local-backend.mjs --port 18191
+```
+
+Set the generated mini-app `backendBaseUrl` to:
+
+```text
+http://127.0.0.1:18191
+```
+
+Smoke-test the wrapper without leaving a server running:
+
+```bash
+node scripts/miniapp-local-backend.mjs --smoke --port 18191
+```
+
+The wrapper serves dev login, snapshot, building search/create/place, agent
+create, building chat/query, cancel, retry, and review-accept routes. Durable
+product policy remains in the MoonBit `miniapp_*` packages; this Node wrapper
+is only the local HTTP bridge.
 
 ## 14. Validate Changes
 
