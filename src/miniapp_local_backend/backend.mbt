@@ -161,6 +161,67 @@ pub fn miniapp_local_backend_place_building(
 }
 
 ///|
+pub fn miniapp_local_backend_publish_building(
+  state : MiniappLocalBackendState,
+  session_id : String,
+  building_id : String,
+  now_ms~ : UInt64,
+) -> MiniappLocalBackendResponse {
+  match miniapp_local_backend_context(state, session_id, now_ms) {
+    Some(context) =>
+      if !@miniapp_projection.miniapp_viewer_can_publish(context.viewer) {
+        miniapp_local_backend_change_response(
+          state, session_id, "publish-building", false, "viewer cannot publish building",
+          building_id,
+        )
+      } else {
+        let submitted = @miniapp_buildings.miniapp_publish_building(
+          state.snapshot,
+          context.viewer,
+          building_id,
+          @miniapp_buildings.SubmitForPublish,
+          now_ms~,
+        )
+        if !submitted.ok {
+          miniapp_local_backend_change_response(
+            state,
+            session_id,
+            "publish-building",
+            false,
+            submitted.message,
+            building_id,
+          )
+        } else {
+          let approved = @miniapp_buildings.miniapp_publish_building(
+            submitted.snapshot,
+            context.viewer,
+            building_id,
+            @miniapp_buildings.ApprovePublish,
+            now_ms=now_ms + 1UL,
+          )
+          let next = if approved.ok {
+            miniapp_local_backend_with_snapshot(state, approved.snapshot)
+          } else {
+            state
+          }
+          miniapp_local_backend_change_response(
+            next,
+            session_id,
+            "publish-building",
+            approved.ok,
+            approved.message,
+            building_id,
+          )
+        }
+      }
+    None =>
+      miniapp_local_backend_reject(
+        state, 401, "kind=publish-building ok=false reason=session-invalid",
+      )
+  }
+}
+
+///|
 pub fn miniapp_local_backend_create_agent(
   state : MiniappLocalBackendState,
   session_id : String,

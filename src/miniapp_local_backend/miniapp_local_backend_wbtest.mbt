@@ -1,9 +1,10 @@
 ///|
 test "local backend exposes route catalog for miniapp wrappers" {
   let routes = miniapp_local_backend_routes()
-  assert_eq(routes.length(), 10)
+  assert_eq(routes.length(), 11)
   assert_true(miniapp_local_backend_test_has_route(routes, "dev-login"))
   assert_true(miniapp_local_backend_test_has_route(routes, "snapshot"))
+  assert_true(miniapp_local_backend_test_has_route(routes, "publish-building"))
   assert_true(miniapp_local_backend_test_has_route(routes, "chat-send"))
   assert_true(miniapp_local_backend_test_has_route(routes, "accept-run"))
 }
@@ -102,6 +103,66 @@ test "local backend can create agent chat and update run lifecycle" {
     login.state.snapshot.runs.length() + 1,
   )
   assert_true(accepted.state.snapshot.audit_events.length() >= 5)
+}
+
+///|
+test "local backend can publish a private draft into public search" {
+  let login = miniapp_local_backend_dev_login(
+    miniapp_local_backend_fixture_state(),
+    "user-a",
+    now_ms=6600UL,
+  )
+  let session = login.session_id.unwrap()
+  let created = miniapp_local_backend_create_building(
+    login.state,
+    session,
+    {
+      id: "published-cli-lab",
+      kind: @miniapp_contracts.AgentLab,
+      title: "Published CLI Lab",
+      summary: "Draft that should become public.",
+      workspace_id: "workspace-user-a",
+      tags: ["published-cli"],
+      capabilities: ["query"],
+      primary_book_id: "book-published-cli-lab",
+    },
+    now_ms=6610UL,
+  )
+  assert_eq(created.ok, true)
+  let user_b_before = miniapp_local_backend_dev_login(
+    created.state,
+    "user-b",
+    now_ms=6620UL,
+  )
+  let before = miniapp_local_backend_search_buildings(
+    user_b_before.state,
+    user_b_before.session_id.unwrap(),
+    "published-cli",
+    now_ms=6625UL,
+  )
+  assert_true(before.body.contains("results=0"))
+  let published = miniapp_local_backend_publish_building(
+    created.state,
+    session,
+    "published-cli-lab",
+    now_ms=6630UL,
+  )
+  assert_eq(published.ok, true)
+  assert_true(published.body.contains("kind=publish-building ok=true"))
+  let user_b = miniapp_local_backend_dev_login(
+    published.state,
+    "user-b",
+    now_ms=6640UL,
+  )
+  let search = miniapp_local_backend_search_buildings(
+    user_b.state,
+    user_b.session_id.unwrap(),
+    "published-cli",
+    now_ms=6650UL,
+  )
+  assert_eq(search.ok, true)
+  assert_true(search.body.contains("results=1"))
+  assert_true(search.body.contains("first=published-cli-lab"))
 }
 
 ///|

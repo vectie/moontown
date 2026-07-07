@@ -27,6 +27,8 @@ pub fn miniapp_local_backend_fixture_state() -> MiniappLocalBackendState
 
 pub fn miniapp_local_backend_place_building(MiniappLocalBackendState, String, @miniapp_buildings.MiniappPlacementDraft, now_ms~ : UInt64) -> MiniappLocalBackendResponse
 
+pub fn miniapp_local_backend_publish_building(MiniappLocalBackendState, String, String, now_ms~ : UInt64) -> MiniappLocalBackendResponse
+
 pub fn miniapp_local_backend_retry_run(MiniappLocalBackendState, String, @miniapp_agents.MiniappRunActionDraft, now_ms~ : UInt64) -> MiniappLocalBackendResponse
 
 pub fn miniapp_local_backend_routes() -> Array[MiniappLocalBackendRoute]

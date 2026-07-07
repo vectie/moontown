@@ -137,6 +137,9 @@ function routeRequest(state, method, url, body, headers) {
   if (method === "POST" && path === "/miniapp/buildings/place") {
     return placeBuilding(state, session.userId, body);
   }
+  if (method === "POST" && path === "/miniapp/buildings/publish") {
+    return publishBuilding(state, session.userId, body);
+  }
   if (method === "POST" && path === "/miniapp/agents") {
     return createAgent(state, session.userId, body);
   }
@@ -229,6 +232,21 @@ function placeBuilding(state, userId, body) {
   state.placements.push(next);
   audit(state, userId, "building", buildingId, "building.placed", "Building placed locally.");
   return ok({ ok: true, kind: "place-building", placement: next });
+}
+
+function publishBuilding(state, userId, body) {
+  const buildingId = body.buildingId || body.id;
+  const target = state.buildings.find((item) => item.id === buildingId);
+  if (!target || !canEdit(target, userId)) return json(403, { ok: false, kind: "publish-building", reason: "building-not-editable", buildingId });
+  if (target.visibility !== "private_draft" && target.visibility !== "shared_private") {
+    return json(409, { ok: false, kind: "publish-building", reason: "building-not-publishable", buildingId, visibility: target.visibility });
+  }
+  target.visibility = "published";
+  target.ownerId = target.ownerId || userId;
+  target.updatedAtMs = now();
+  target.version += 1;
+  audit(state, userId, "building", buildingId, "building.published", "Building published to local town.");
+  return ok({ ok: true, kind: "publish-building", building: target });
 }
 
 function createAgent(state, userId, body) {
@@ -373,6 +391,12 @@ async function smoke(port, statePath = "") {
       title: "Smoke Persisted Building",
       tags: ["smoke", "local"],
     });
+    const published = await post(`${base}/miniapp/buildings/publish`, {
+      sessionId,
+      buildingId: smokeBuildingId,
+    });
+    const userBLogin = await post(`${base}/miniapp/auth/dev-login`, { userId: "user-b" });
+    const userBSearch = await get(`${base}/miniapp/buildings/search?query=smoke`, { "x-miniapp-session": userBLogin.session.id });
     const chat = await post(`${base}/miniapp/buildings/query`, {
       sessionId,
       buildingId: "private-lab",
@@ -383,10 +407,11 @@ async function smoke(port, statePath = "") {
     });
     const reloaded = loadState(effectiveStatePath);
     const persisted = reloaded.buildings.some((item) => item.id === smokeBuildingId);
-    if (!login.ok || !snapshotResponse.ok || !created.ok || !chat.ok || !persisted) {
+    const discoverable = userBSearch.results.some((item) => item.id === smokeBuildingId);
+    if (!login.ok || !snapshotResponse.ok || !created.ok || !published.ok || !userBLogin.ok || !discoverable || !chat.ok || !persisted) {
       throw new Error("miniapp local backend smoke failed");
     }
-    console.log(`miniapp-local-backend-smoke=ok port=${port} buildings=${snapshotResponse.buildings.length} created=${created.building.id} persisted=${persisted} run=${chat.run.id}`);
+    console.log(`miniapp-local-backend-smoke=ok port=${port} buildings=${snapshotResponse.buildings.length} created=${created.building.id} published=${published.building.id} discoverable=${discoverable} persisted=${persisted} run=${chat.run.id}`);
   } finally {
     await new Promise((resolve) => server.close(resolve));
     if (!statePath && fs.existsSync(effectiveStatePath)) {

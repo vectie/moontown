@@ -14,6 +14,8 @@ fn render_miniapp_command(args : Array[String]) -> String {
       render_miniapp_search(user_id, query)
     ["buildings", "create", user_id] => render_miniapp_create_building(user_id)
     ["buildings", "place", user_id] => render_miniapp_place_building(user_id)
+    ["buildings", "publish", user_id] =>
+      render_miniapp_publish_building(user_id)
     ["agents", "create", user_id] => render_miniapp_create_agent(user_id)
     ["chat", "send", user_id] => render_miniapp_chat_send(user_id)
     ["runs", "cancel", user_id, run_id] =>
@@ -28,7 +30,7 @@ fn render_miniapp_command(args : Array[String]) -> String {
 
 ///|
 fn render_miniapp_help() -> String {
-  "Moontown miniapp local backend\ncommands=routes serve dev-login <user> snapshot <user> buildings search <user> <query> buildings create <user> buildings place <user> agents create <user> chat send <user> runs cancel|retry <user> <run> reviews accept <user> <run>"
+  "Moontown miniapp local backend\ncommands=routes serve dev-login <user> snapshot <user> buildings search <user> <query> buildings create <user> buildings place <user> buildings publish <user> agents create <user> chat send <user> runs cancel|retry <user> <run> reviews accept <user> <run>"
 }
 
 ///|
@@ -117,6 +119,40 @@ fn render_miniapp_place_building(user_id : String) -> String {
         now_ms=7400UL,
       ).body
     None => "kind=place-building ok=false reason=login-failed"
+  }
+}
+
+///|
+fn render_miniapp_publish_building(user_id : String) -> String {
+  match miniapp_cli_logged_in_state(user_id) {
+    Some((state, session_id)) => {
+      let created = @miniapp_local_backend.miniapp_local_backend_create_building(
+        state,
+        session_id,
+        {
+          id: "cli-published-lab",
+          kind: @miniapp_contracts.AgentLab,
+          title: "CLI Published Lab",
+          summary: "Local backend building published from CLI.",
+          workspace_id: "workspace-\{user_id}",
+          tags: ["agent", "published", "local"],
+          capabilities: ["query", "create-agent"],
+          primary_book_id: "book-cli-published-lab",
+        },
+        now_ms=7450UL,
+      )
+      if created.ok {
+        @miniapp_local_backend.miniapp_local_backend_publish_building(
+          created.state,
+          session_id,
+          "cli-published-lab",
+          now_ms=7460UL,
+        ).body
+      } else {
+        created.body
+      }
+    }
+    None => "kind=publish-building ok=false reason=login-failed"
   }
 }
 

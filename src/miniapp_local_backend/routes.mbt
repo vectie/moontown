@@ -16,6 +16,9 @@ pub fn miniapp_local_backend_routes() -> Array[MiniappLocalBackendRoute] {
     miniapp_local_backend_route(
       "POST", "/miniapp/buildings/place", "place-building", true,
     ),
+    miniapp_local_backend_route(
+      "POST", "/miniapp/buildings/publish", "publish-building", true,
+    ),
     miniapp_local_backend_route("POST", "/miniapp/agents", "create-agent", true),
     miniapp_local_backend_route(
       "POST", "/miniapp/buildings/query", "chat-send", true,
