@@ -1,11 +1,12 @@
 ///|
 test "local backend exposes route catalog for miniapp wrappers" {
   let routes = miniapp_local_backend_routes()
-  assert_eq(routes.length(), 12)
+  assert_eq(routes.length(), 13)
   assert_true(miniapp_local_backend_test_has_route(routes, "dev-login"))
   assert_true(miniapp_local_backend_test_has_route(routes, "snapshot"))
   assert_true(miniapp_local_backend_test_has_route(routes, "share-building"))
   assert_true(miniapp_local_backend_test_has_route(routes, "publish-building"))
+  assert_true(miniapp_local_backend_test_has_route(routes, "archive-building"))
   assert_true(miniapp_local_backend_test_has_route(routes, "chat-send"))
   assert_true(miniapp_local_backend_test_has_route(routes, "accept-run"))
 }
@@ -224,6 +225,72 @@ test "local backend can share a private draft with another local user" {
   )
   assert_true(visible.body.contains("results=1"))
   assert_true(visible.body.contains("first=shared-cli-lab"))
+}
+
+///|
+test "local backend can archive a private draft out of normal discovery" {
+  let login = miniapp_local_backend_dev_login(
+    miniapp_local_backend_fixture_state(),
+    "user-a",
+    now_ms=6730UL,
+  )
+  let session = login.session_id.unwrap()
+  let created = miniapp_local_backend_create_building(
+    login.state,
+    session,
+    {
+      id: "archived-cli-lab",
+      kind: @miniapp_contracts.AgentLab,
+      title: "Archived CLI Lab",
+      summary: "Draft that should become hidden.",
+      workspace_id: "workspace-user-a",
+      tags: ["archived-cli"],
+      capabilities: ["query"],
+      primary_book_id: "book-archived-cli-lab",
+    },
+    now_ms=6740UL,
+  )
+  assert_eq(created.ok, true)
+  let archived = miniapp_local_backend_archive_building(
+    created.state,
+    session,
+    "archived-cli-lab",
+    now_ms=6760UL,
+  )
+  assert_eq(archived.ok, true)
+  assert_true(archived.body.contains("kind=archive-building ok=true"))
+  assert_true(
+    miniapp_local_backend_test_building_visibility(
+      archived.state,
+      "archived-cli-lab",
+    ) ==
+    @miniapp_contracts.Archived,
+  )
+  let user_b = miniapp_local_backend_dev_login(
+    archived.state,
+    "user-b",
+    now_ms=6780UL,
+  )
+  let hidden = miniapp_local_backend_search_buildings(
+    user_b.state,
+    user_b.session_id.unwrap(),
+    "archived-cli",
+    now_ms=6790UL,
+  )
+  assert_true(hidden.body.contains("results=0"))
+}
+
+///|
+fn miniapp_local_backend_test_building_visibility(
+  state : MiniappLocalBackendState,
+  building_id : String,
+) -> @miniapp_contracts.MiniappVisibilityState {
+  for building in state.snapshot.buildings {
+    if building.id == building_id {
+      return building.visibility
+    }
+  }
+  @miniapp_contracts.Archived
 }
 
 ///|

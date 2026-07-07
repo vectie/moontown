@@ -1630,9 +1630,10 @@ node scripts/miniapp-local-backend.mjs --smoke --port 18191
 ```
 
 The smoke path writes to a temporary state file, creates a private building,
-shares it, verifies another user can see it, publishes it, verifies another user
-can discover it, reloads the file, and verifies the building persisted. The
-wrapper serves dev login, snapshot, building search/create/place/share/publish,
+archives a second private building, verifies the archive is hidden, shares the
+first building, verifies another user can see it, publishes it, verifies another
+user can discover it, reloads the file, and verifies the building persisted. The
+wrapper serves dev login, snapshot, building search/create/place/share/publish/archive,
 agent create, building chat/query, cancel, retry, and review-accept routes.
 Durable product policy remains in the MoonBit `miniapp_*` packages; this Node
 wrapper is only the local HTTP bridge and dev state store.

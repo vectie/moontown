@@ -284,6 +284,43 @@ pub fn miniapp_local_backend_publish_building(
 }
 
 ///|
+pub fn miniapp_local_backend_archive_building(
+  state : MiniappLocalBackendState,
+  session_id : String,
+  building_id : String,
+  now_ms~ : UInt64,
+) -> MiniappLocalBackendResponse {
+  match miniapp_local_backend_context(state, session_id, now_ms) {
+    Some(context) => {
+      let change = @miniapp_buildings.miniapp_publish_building(
+        state.snapshot,
+        context.viewer,
+        building_id,
+        @miniapp_buildings.ArchiveBuilding,
+        now_ms~,
+      )
+      let next = if change.ok {
+        miniapp_local_backend_with_snapshot(state, change.snapshot)
+      } else {
+        state
+      }
+      miniapp_local_backend_change_response(
+        next,
+        session_id,
+        "archive-building",
+        change.ok,
+        change.message,
+        building_id,
+      )
+    }
+    None =>
+      miniapp_local_backend_reject(
+        state, 401, "kind=archive-building ok=false reason=session-invalid",
+      )
+  }
+}
+
+///|
 pub fn miniapp_local_backend_create_agent(
   state : MiniappLocalBackendState,
   session_id : String,

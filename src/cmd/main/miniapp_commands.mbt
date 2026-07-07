@@ -17,6 +17,8 @@ fn render_miniapp_command(args : Array[String]) -> String {
     ["buildings", "share", user_id] => render_miniapp_share_building(user_id)
     ["buildings", "publish", user_id] =>
       render_miniapp_publish_building(user_id)
+    ["buildings", "archive", user_id] =>
+      render_miniapp_archive_building(user_id)
     ["agents", "create", user_id] => render_miniapp_create_agent(user_id)
     ["chat", "send", user_id] => render_miniapp_chat_send(user_id)
     ["runs", "cancel", user_id, run_id] =>
@@ -31,7 +33,7 @@ fn render_miniapp_command(args : Array[String]) -> String {
 
 ///|
 fn render_miniapp_help() -> String {
-  "Moontown miniapp local backend\ncommands=routes serve dev-login <user> snapshot <user> buildings search <user> <query> buildings create <user> buildings place <user> buildings share <user> buildings publish <user> agents create <user> chat send <user> runs cancel|retry <user> <run> reviews accept <user> <run>"
+  "Moontown miniapp local backend\ncommands=routes serve dev-login <user> snapshot <user> buildings search <user> <query> buildings create <user> buildings place <user> buildings share <user> buildings publish <user> buildings archive <user> agents create <user> chat send <user> runs cancel|retry <user> <run> reviews accept <user> <run>"
 }
 
 ///|
@@ -189,6 +191,40 @@ fn render_miniapp_publish_building(user_id : String) -> String {
       }
     }
     None => "kind=publish-building ok=false reason=login-failed"
+  }
+}
+
+///|
+fn render_miniapp_archive_building(user_id : String) -> String {
+  match miniapp_cli_logged_in_state(user_id) {
+    Some((state, session_id)) => {
+      let created = @miniapp_local_backend.miniapp_local_backend_create_building(
+        state,
+        session_id,
+        {
+          id: "cli-archived-lab",
+          kind: @miniapp_contracts.AgentLab,
+          title: "CLI Archived Lab",
+          summary: "Local backend building archived from CLI.",
+          workspace_id: "workspace-\{user_id}",
+          tags: ["agent", "archived", "local"],
+          capabilities: ["query", "create-agent"],
+          primary_book_id: "book-cli-archived-lab",
+        },
+        now_ms=7465UL,
+      )
+      if created.ok {
+        @miniapp_local_backend.miniapp_local_backend_archive_building(
+          created.state,
+          session_id,
+          "cli-archived-lab",
+          now_ms=7470UL,
+        ).body
+      } else {
+        created.body
+      }
+    }
+    None => "kind=archive-building ok=false reason=login-failed"
   }
 }
 

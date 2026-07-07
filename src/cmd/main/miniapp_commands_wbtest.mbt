@@ -5,6 +5,7 @@ async test "miniapp routes command exposes local backend catalog" {
   assert_true(output.contains("route=dev-login"))
   assert_true(output.contains("route=share-building"))
   assert_true(output.contains("route=publish-building"))
+  assert_true(output.contains("route=archive-building"))
   assert_true(output.contains("route=chat-send"))
   assert_true(output.contains("route=accept-run"))
 }
@@ -61,4 +62,11 @@ async test "miniapp share command renders local sharing response" {
   let output = render_cli_command(["miniapp", "buildings", "share", "user-a"])
   assert_true(output.contains("kind=share-building ok=true"))
   assert_true(output.contains("object=cli-shared-lab"))
+}
+
+///|
+async test "miniapp archive command renders local archive response" {
+  let output = render_cli_command(["miniapp", "buildings", "archive", "user-a"])
+  assert_true(output.contains("kind=archive-building ok=true"))
+  assert_true(output.contains("object=cli-archived-lab"))
 }

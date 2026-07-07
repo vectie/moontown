@@ -143,6 +143,9 @@ function routeRequest(state, method, url, body, headers) {
   if (method === "POST" && path === "/miniapp/buildings/publish") {
     return publishBuilding(state, session.userId, body);
   }
+  if (method === "POST" && path === "/miniapp/buildings/archive") {
+    return archiveBuilding(state, session.userId, body);
+  }
   if (method === "POST" && path === "/miniapp/agents") {
     return createAgent(state, session.userId, body);
   }
@@ -266,6 +269,17 @@ function publishBuilding(state, userId, body) {
   return ok({ ok: true, kind: "publish-building", building: target });
 }
 
+function archiveBuilding(state, userId, body) {
+  const buildingId = body.buildingId || body.id;
+  const target = state.buildings.find((item) => item.id === buildingId);
+  if (!target || !canEdit(target, userId)) return json(403, { ok: false, kind: "archive-building", reason: "building-not-editable", buildingId });
+  target.visibility = "archived";
+  target.updatedAtMs = now();
+  target.version += 1;
+  audit(state, userId, "building", buildingId, "building.archived", "Building archived locally.");
+  return ok({ ok: true, kind: "archive-building", building: target });
+}
+
 function createAgent(state, userId, body) {
   const id = body.id || body.agentId || `agent-${state.agents.length + 1}`;
   if (state.agents.some((item) => item.id === id)) return json(409, { ok: false, kind: "create-agent", reason: "agent-exists", id });
@@ -319,6 +333,7 @@ function visibleBuildings(state, userId) {
 }
 
 function canView(building, userId) {
+  if (building.visibility === "archived") return false;
   return building.visibility === "published" || building.ownerId === userId || building.ownerId === "org-a" || building.ownerId === "system";
 }
 
@@ -395,6 +410,7 @@ function serializeState(state) {
 async function smoke(port, statePath = "") {
   const effectiveStatePath = statePath || path.join(os.tmpdir(), `moontown-miniapp-local-backend-smoke-${process.pid}-${now()}.json`);
   const smokeBuildingId = `smoke-persisted-building-${process.pid}-${now()}`;
+  const archiveBuildingId = `${smokeBuildingId}-archive`;
   const server = createServer(loadState(effectiveStatePath, !statePath), (state) => saveState(effectiveStatePath, state));
   await new Promise((resolve) => server.listen(port, "127.0.0.1", resolve));
   const base = `http://127.0.0.1:${port}`;
@@ -408,6 +424,18 @@ async function smoke(port, statePath = "") {
       title: "Smoke Persisted Building",
       tags: ["smoke", "local"],
     });
+    const archiveCreated = await post(`${base}/miniapp/buildings`, {
+      sessionId,
+      id: archiveBuildingId,
+      title: "Smoke Archived Building",
+      tags: ["smoke", "archive"],
+    });
+    const archived = await post(`${base}/miniapp/buildings/archive`, {
+      sessionId,
+      buildingId: archiveBuildingId,
+    });
+    const userAArchivedSnapshot = await get(`${base}/miniapp/town/snapshot`, { "x-miniapp-session": sessionId });
+    const archivedHidden = !userAArchivedSnapshot.buildings.some((item) => item.id === archiveBuildingId);
     const shared = await post(`${base}/miniapp/buildings/share`, {
       sessionId,
       buildingId: smokeBuildingId,
@@ -432,10 +460,10 @@ async function smoke(port, statePath = "") {
     const reloaded = loadState(effectiveStatePath);
     const persisted = reloaded.buildings.some((item) => item.id === smokeBuildingId);
     const discoverable = userBSearch.results.some((item) => item.id === smokeBuildingId);
-    if (!login.ok || !snapshotResponse.ok || !created.ok || !shared.ok || !sharedVisible || !published.ok || !userBLogin.ok || !discoverable || !chat.ok || !persisted) {
+    if (!login.ok || !snapshotResponse.ok || !created.ok || !archiveCreated.ok || !archived.ok || !archivedHidden || !shared.ok || !sharedVisible || !published.ok || !userBLogin.ok || !discoverable || !chat.ok || !persisted) {
       throw new Error("miniapp local backend smoke failed");
     }
-    console.log(`miniapp-local-backend-smoke=ok port=${port} buildings=${snapshotResponse.buildings.length} created=${created.building.id} shared=${shared.building.id} sharedVisible=${sharedVisible} published=${published.building.id} discoverable=${discoverable} persisted=${persisted} run=${chat.run.id}`);
+    console.log(`miniapp-local-backend-smoke=ok port=${port} buildings=${snapshotResponse.buildings.length} created=${created.building.id} archived=${archived.building.id} archivedHidden=${archivedHidden} shared=${shared.building.id} sharedVisible=${sharedVisible} published=${published.building.id} discoverable=${discoverable} persisted=${persisted} run=${chat.run.id}`);
   } finally {
     await new Promise((resolve) => server.close(resolve));
     if (!statePath && fs.existsSync(effectiveStatePath)) {

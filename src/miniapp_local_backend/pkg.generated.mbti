@@ -13,6 +13,8 @@ import {
 // Values
 pub fn miniapp_local_backend_accept_run(MiniappLocalBackendState, String, @miniapp_agents.MiniappRunActionDraft, now_ms~ : UInt64) -> MiniappLocalBackendResponse
 
+pub fn miniapp_local_backend_archive_building(MiniappLocalBackendState, String, String, now_ms~ : UInt64) -> MiniappLocalBackendResponse
+
 pub fn miniapp_local_backend_cancel_run(MiniappLocalBackendState, String, @miniapp_agents.MiniappRunActionDraft, now_ms~ : UInt64) -> MiniappLocalBackendResponse
 
 pub fn miniapp_local_backend_chat_send(MiniappLocalBackendState, String, @miniapp_agents.MiniappChatSendDraft, now_ms~ : UInt64) -> MiniappLocalBackendResponse
