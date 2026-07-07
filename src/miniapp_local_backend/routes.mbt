@@ -17,6 +17,9 @@ pub fn miniapp_local_backend_routes() -> Array[MiniappLocalBackendRoute] {
       "POST", "/miniapp/buildings/place", "place-building", true,
     ),
     miniapp_local_backend_route(
+      "POST", "/miniapp/buildings/share", "share-building", true,
+    ),
+    miniapp_local_backend_route(
       "POST", "/miniapp/buildings/publish", "publish-building", true,
     ),
     miniapp_local_backend_route("POST", "/miniapp/agents", "create-agent", true),

@@ -1,9 +1,10 @@
 ///|
 test "local backend exposes route catalog for miniapp wrappers" {
   let routes = miniapp_local_backend_routes()
-  assert_eq(routes.length(), 11)
+  assert_eq(routes.length(), 12)
   assert_true(miniapp_local_backend_test_has_route(routes, "dev-login"))
   assert_true(miniapp_local_backend_test_has_route(routes, "snapshot"))
+  assert_true(miniapp_local_backend_test_has_route(routes, "share-building"))
   assert_true(miniapp_local_backend_test_has_route(routes, "publish-building"))
   assert_true(miniapp_local_backend_test_has_route(routes, "chat-send"))
   assert_true(miniapp_local_backend_test_has_route(routes, "accept-run"))
@@ -163,6 +164,66 @@ test "local backend can publish a private draft into public search" {
   assert_eq(search.ok, true)
   assert_true(search.body.contains("results=1"))
   assert_true(search.body.contains("first=published-cli-lab"))
+}
+
+///|
+test "local backend can share a private draft with another local user" {
+  let login = miniapp_local_backend_dev_login(
+    miniapp_local_backend_fixture_state(),
+    "user-a",
+    now_ms=6660UL,
+  )
+  let session = login.session_id.unwrap()
+  let created = miniapp_local_backend_create_building(
+    login.state,
+    session,
+    {
+      id: "shared-cli-lab",
+      kind: @miniapp_contracts.AgentLab,
+      title: "Shared CLI Lab",
+      summary: "Draft that should become shared private.",
+      workspace_id: "workspace-user-a",
+      tags: ["shared-cli"],
+      capabilities: ["query"],
+      primary_book_id: "book-shared-cli-lab",
+    },
+    now_ms=6670UL,
+  )
+  assert_eq(created.ok, true)
+  let user_b_before = miniapp_local_backend_dev_login(
+    created.state,
+    "user-b",
+    now_ms=6680UL,
+  )
+  let hidden = miniapp_local_backend_search_buildings(
+    user_b_before.state,
+    user_b_before.session_id.unwrap(),
+    "shared-cli",
+    now_ms=6690UL,
+  )
+  assert_true(hidden.body.contains("results=0"))
+  let shared = miniapp_local_backend_share_building(
+    created.state,
+    session,
+    "shared-cli-lab",
+    "user-b",
+    now_ms=6700UL,
+  )
+  assert_eq(shared.ok, true)
+  assert_true(shared.body.contains("kind=share-building ok=true"))
+  let user_b_after = miniapp_local_backend_dev_login(
+    shared.state,
+    "user-b",
+    now_ms=6710UL,
+  )
+  let visible = miniapp_local_backend_search_buildings(
+    user_b_after.state,
+    user_b_after.session_id.unwrap(),
+    "shared-cli",
+    now_ms=6720UL,
+  )
+  assert_true(visible.body.contains("results=1"))
+  assert_true(visible.body.contains("first=shared-cli-lab"))
 }
 
 ///|

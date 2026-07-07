@@ -161,6 +161,68 @@ pub fn miniapp_local_backend_place_building(
 }
 
 ///|
+pub fn miniapp_local_backend_share_building(
+  state : MiniappLocalBackendState,
+  session_id : String,
+  building_id : String,
+  target_user_id : String,
+  now_ms~ : UInt64,
+) -> MiniappLocalBackendResponse {
+  match miniapp_local_backend_context(state, session_id, now_ms) {
+    Some(context) => {
+      let change = @miniapp_buildings.miniapp_share_building(
+        state.snapshot,
+        context.viewer,
+        building_id,
+        [
+          {
+            subject_kind: "user",
+            subject_id: target_user_id,
+            role: @miniapp_contracts.ViewerRole,
+          },
+          {
+            subject_kind: "organization",
+            subject_id: "org-a",
+            role: @miniapp_contracts.ViewerRole,
+          },
+        ],
+        now_ms~,
+      )
+      if !change.ok {
+        miniapp_local_backend_change_response(
+          state,
+          session_id,
+          "share-building",
+          false,
+          change.message,
+          building_id,
+        )
+      } else {
+        let shared_snapshot = miniapp_local_backend_transfer_building_to_team(
+          change.snapshot,
+          building_id,
+          now_ms,
+        )
+        let next = {
+          ..miniapp_local_backend_with_snapshot(state, shared_snapshot),
+          identity: miniapp_local_backend_grant_team_access(
+            state.identity,
+            target_user_id,
+          ),
+        }
+        miniapp_local_backend_change_response(
+          next, session_id, "share-building", true, "building shared", building_id,
+        )
+      }
+    }
+    None =>
+      miniapp_local_backend_reject(
+        state, 401, "kind=share-building ok=false reason=session-invalid",
+      )
+  }
+}
+
+///|
 pub fn miniapp_local_backend_publish_building(
   state : MiniappLocalBackendState,
   session_id : String,
@@ -406,4 +468,91 @@ fn miniapp_local_backend_first_result(
   } else {
     results[0].building.id
   }
+}
+
+///|
+fn miniapp_local_backend_transfer_building_to_team(
+  snapshot : @miniapp_contracts.MiniappTownSnapshot,
+  building_id : String,
+  now_ms : UInt64,
+) -> @miniapp_contracts.MiniappTownSnapshot {
+  let buildings : Array[@miniapp_contracts.MiniappBuilding] = []
+  for building in snapshot.buildings {
+    if building.id == building_id {
+      buildings.push({
+        ..building,
+        owner_kind: @miniapp_contracts.OrganizationOwner,
+        owner_id: "org-a",
+        workspace_id: "workspace-org-a",
+        visibility: @miniapp_contracts.SharedPrivate,
+        scope: @miniapp_contracts.TeamScope,
+        updated_at_ms: now_ms,
+        version: building.version + 1,
+      })
+    } else {
+      buildings.push(building)
+    }
+  }
+  { ..snapshot, buildings, version: snapshot.version + 1 }
+}
+
+///|
+fn miniapp_local_backend_grant_team_access(
+  identity : @miniapp_identity.MiniappIdentityState,
+  user_id : String,
+) -> @miniapp_identity.MiniappIdentityState {
+  {
+    ..identity,
+    memberships: miniapp_local_backend_grant_membership(
+      identity.memberships,
+      user_id,
+    ),
+    workspace_access: miniapp_local_backend_grant_workspace_access(
+      identity.workspace_access,
+      user_id,
+    ),
+    version: identity.version + 1,
+  }
+}
+
+///|
+fn miniapp_local_backend_grant_membership(
+  memberships : Array[@miniapp_identity.MiniappMembership],
+  user_id : String,
+) -> Array[@miniapp_identity.MiniappMembership] {
+  let next = memberships.copy()
+  for membership in next {
+    if membership.user_id == user_id && membership.organization_id == "org-a" {
+      return next
+    }
+  }
+  next.push({
+    user_id,
+    organization_id: "org-a",
+    roles: [@miniapp_contracts.ViewerRole],
+    active: true,
+    version: 1,
+  })
+  next
+}
+
+///|
+fn miniapp_local_backend_grant_workspace_access(
+  access : Array[@miniapp_identity.MiniappWorkspaceAccess],
+  user_id : String,
+) -> Array[@miniapp_identity.MiniappWorkspaceAccess] {
+  let next = access.copy()
+  for item in next {
+    if item.user_id == user_id && item.workspace_id == "workspace-org-a" {
+      return next
+    }
+  }
+  next.push({
+    user_id,
+    workspace_id: "workspace-org-a",
+    roles: [@miniapp_contracts.ViewerRole],
+    active: true,
+    version: 1,
+  })
+  next
 }

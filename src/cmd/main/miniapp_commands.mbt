@@ -14,6 +14,7 @@ fn render_miniapp_command(args : Array[String]) -> String {
       render_miniapp_search(user_id, query)
     ["buildings", "create", user_id] => render_miniapp_create_building(user_id)
     ["buildings", "place", user_id] => render_miniapp_place_building(user_id)
+    ["buildings", "share", user_id] => render_miniapp_share_building(user_id)
     ["buildings", "publish", user_id] =>
       render_miniapp_publish_building(user_id)
     ["agents", "create", user_id] => render_miniapp_create_agent(user_id)
@@ -30,7 +31,7 @@ fn render_miniapp_command(args : Array[String]) -> String {
 
 ///|
 fn render_miniapp_help() -> String {
-  "Moontown miniapp local backend\ncommands=routes serve dev-login <user> snapshot <user> buildings search <user> <query> buildings create <user> buildings place <user> buildings publish <user> agents create <user> chat send <user> runs cancel|retry <user> <run> reviews accept <user> <run>"
+  "Moontown miniapp local backend\ncommands=routes serve dev-login <user> snapshot <user> buildings search <user> <query> buildings create <user> buildings place <user> buildings share <user> buildings publish <user> agents create <user> chat send <user> runs cancel|retry <user> <run> reviews accept <user> <run>"
 }
 
 ///|
@@ -119,6 +120,41 @@ fn render_miniapp_place_building(user_id : String) -> String {
         now_ms=7400UL,
       ).body
     None => "kind=place-building ok=false reason=login-failed"
+  }
+}
+
+///|
+fn render_miniapp_share_building(user_id : String) -> String {
+  match miniapp_cli_logged_in_state(user_id) {
+    Some((state, session_id)) => {
+      let created = @miniapp_local_backend.miniapp_local_backend_create_building(
+        state,
+        session_id,
+        {
+          id: "cli-shared-lab",
+          kind: @miniapp_contracts.AgentLab,
+          title: "CLI Shared Lab",
+          summary: "Local backend building shared from CLI.",
+          workspace_id: "workspace-\{user_id}",
+          tags: ["agent", "shared", "local"],
+          capabilities: ["query", "create-agent"],
+          primary_book_id: "book-cli-shared-lab",
+        },
+        now_ms=7440UL,
+      )
+      if created.ok {
+        @miniapp_local_backend.miniapp_local_backend_share_building(
+          created.state,
+          session_id,
+          "cli-shared-lab",
+          "user-b",
+          now_ms=7445UL,
+        ).body
+      } else {
+        created.body
+      }
+    }
+    None => "kind=share-building ok=false reason=login-failed"
   }
 }
 

@@ -35,6 +35,8 @@ pub fn miniapp_local_backend_routes() -> Array[MiniappLocalBackendRoute]
 
 pub fn miniapp_local_backend_search_buildings(MiniappLocalBackendState, String, String, now_ms~ : UInt64) -> MiniappLocalBackendResponse
 
+pub fn miniapp_local_backend_share_building(MiniappLocalBackendState, String, String, String, now_ms~ : UInt64) -> MiniappLocalBackendResponse
+
 pub fn miniapp_local_backend_snapshot(MiniappLocalBackendState, String, now_ms~ : UInt64) -> MiniappLocalBackendResponse
 
 // Errors

@@ -3,6 +3,7 @@ async test "miniapp routes command exposes local backend catalog" {
   let output = render_cli_command(["miniapp", "routes"])
   assert_true(output.contains("Moontown miniapp local backend routes"))
   assert_true(output.contains("route=dev-login"))
+  assert_true(output.contains("route=share-building"))
   assert_true(output.contains("route=publish-building"))
   assert_true(output.contains("route=chat-send"))
   assert_true(output.contains("route=accept-run"))
@@ -53,4 +54,11 @@ async test "miniapp publish command renders local publication response" {
   let output = render_cli_command(["miniapp", "buildings", "publish", "user-a"])
   assert_true(output.contains("kind=publish-building ok=true"))
   assert_true(output.contains("object=cli-published-lab"))
+}
+
+///|
+async test "miniapp share command renders local sharing response" {
+  let output = render_cli_command(["miniapp", "buildings", "share", "user-a"])
+  assert_true(output.contains("kind=share-building ok=true"))
+  assert_true(output.contains("object=cli-shared-lab"))
 }
