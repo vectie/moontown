@@ -1589,8 +1589,6 @@ for their default `source_policy`. Change that document when the default Mayor
 queue policy should change; do not patch the Vite request handler for ordinary
 policy changes.
 
-## 14. Validate Changes
-
 ## 13.4 Run The Mini-App Local Backend
 
 The mini-app backend surface is intentionally separate from the Rabbita browser
@@ -1605,13 +1603,24 @@ moon run src/cmd/main -- miniapp routes
 Run the localhost HTTP wrapper for WeChat DevTools:
 
 ```bash
-node scripts/miniapp-local-backend.mjs --port 18191
+node scripts/miniapp-local-backend.mjs --port 18191 --state .moontown/miniapp-local-backend-state.json
 ```
+
+If `--state` is omitted, the wrapper uses the same
+`.moontown/miniapp-local-backend-state.json` path. Sessions stay ephemeral, but
+users, buildings, placements, agents, threads, messages, runs, and audit events
+are saved after successful mutating requests.
 
 Set the generated mini-app `backendBaseUrl` to:
 
 ```text
 http://127.0.0.1:18191
+```
+
+Reset local mini-app data when you want a fresh fixture:
+
+```bash
+node scripts/miniapp-local-backend.mjs --port 18191 --reset-state
 ```
 
 Smoke-test the wrapper without leaving a server running:
@@ -1620,10 +1629,12 @@ Smoke-test the wrapper without leaving a server running:
 node scripts/miniapp-local-backend.mjs --smoke --port 18191
 ```
 
-The wrapper serves dev login, snapshot, building search/create/place, agent
-create, building chat/query, cancel, retry, and review-accept routes. Durable
-product policy remains in the MoonBit `miniapp_*` packages; this Node wrapper
-is only the local HTTP bridge.
+The smoke path writes to a temporary state file, creates a private building,
+reloads the file, and verifies the building persisted. The wrapper serves dev
+login, snapshot, building search/create/place, agent create, building
+chat/query, cancel, retry, and review-accept routes. Durable product policy
+remains in the MoonBit `miniapp_*` packages; this Node wrapper is only the
+local HTTP bridge and dev state store.
 
 ## 14. Validate Changes
 

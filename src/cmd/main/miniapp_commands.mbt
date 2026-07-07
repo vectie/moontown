@@ -33,7 +33,7 @@ fn render_miniapp_help() -> String {
 
 ///|
 fn render_miniapp_serve_help() -> String {
-  "kind=miniapp-serve command=node scripts/miniapp-local-backend.mjs --port 18191 backendBaseUrl=http://127.0.0.1:18191 smoke=node scripts/miniapp-local-backend.mjs --smoke --port 18191"
+  "kind=miniapp-serve command=node scripts/miniapp-local-backend.mjs --port 18191 --state .moontown/miniapp-local-backend-state.json backendBaseUrl=http://127.0.0.1:18191 smoke=node scripts/miniapp-local-backend.mjs --smoke --port 18191 reset=node scripts/miniapp-local-backend.mjs --port 18191 --reset-state"
 }
 
 ///|

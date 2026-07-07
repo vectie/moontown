@@ -12,6 +12,10 @@ async test "miniapp serve command points to local HTTP wrapper" {
   let output = render_cli_command(["miniapp", "serve"])
   assert_true(output.contains("scripts/miniapp-local-backend.mjs"))
   assert_true(output.contains("backendBaseUrl=http://127.0.0.1:18191"))
+  assert_true(
+    output.contains("--state .moontown/miniapp-local-backend-state.json"),
+  )
+  assert_true(output.contains("--reset-state"))
 }
 
 ///|

@@ -1,8 +1,12 @@
 #!/usr/bin/env node
+import fs from "node:fs";
 import http from "node:http";
+import os from "node:os";
+import path from "node:path";
 import { URL } from "node:url";
 
 const defaultPort = 18191;
+const durableKeys = ["users", "buildings", "placements", "agents", "threads", "messages", "runs", "auditEvents"];
 const now = () => Date.now();
 
 function initialState() {
@@ -62,11 +66,23 @@ function placement(id, buildingId, layerId, x, y) {
 }
 
 function parseArgs(argv) {
-  const result = { port: Number(process.env.PORT || defaultPort), smoke: false };
+  const result = {
+    port: Number(process.env.PORT || defaultPort),
+    smoke: false,
+    resetState: false,
+    statePath: process.env.MOONTOWN_MINIAPP_STATE || path.join(".moontown", "miniapp-local-backend-state.json"),
+    statePathExplicit: Boolean(process.env.MOONTOWN_MINIAPP_STATE),
+  };
   for (let i = 0; i < argv.length; i += 1) {
     if (argv[i] === "--port" && argv[i + 1]) {
       result.port = Number(argv[i + 1]);
       i += 1;
+    } else if (argv[i] === "--state" && argv[i + 1]) {
+      result.statePath = argv[i + 1];
+      result.statePathExplicit = true;
+      i += 1;
+    } else if (argv[i] === "--reset-state") {
+      result.resetState = true;
     } else if (argv[i] === "--smoke") {
       result.smoke = true;
     }
@@ -74,7 +90,7 @@ function parseArgs(argv) {
   return result;
 }
 
-function createServer(state = initialState()) {
+function createServer(state = initialState(), persistState = null) {
   return http.createServer(async (req, res) => {
     const url = new URL(req.url || "/", "http://127.0.0.1");
     setCors(res);
@@ -84,11 +100,19 @@ function createServer(state = initialState()) {
     try {
       const body = await readJson(req);
       const response = routeRequest(state, req.method || "GET", url, body, req.headers);
+      if (persistState && shouldPersist(req.method || "GET", url.pathname, response)) {
+        persistState(state);
+      }
       return sendJson(res, response.status, response.body);
     } catch (error) {
       return sendJson(res, 500, { ok: false, kind: "server-error", error: String(error && error.message ? error.message : error) });
     }
   });
+}
+
+function shouldPersist(method, pathName, response) {
+  if (method !== "POST" || response.status < 200 || response.status >= 300) return false;
+  return pathName !== "/miniapp/auth/dev-login";
 }
 
 function routeRequest(state, method, url, body, headers) {
@@ -303,14 +327,52 @@ function json(status, body) {
   return { status, body };
 }
 
-async function smoke(port) {
-  const server = createServer();
+function loadState(statePath, resetState = false) {
+  const resolved = path.resolve(statePath);
+  if (resetState && fs.existsSync(resolved)) {
+    fs.unlinkSync(resolved);
+  }
+  if (!fs.existsSync(resolved)) return initialState();
+  const loaded = JSON.parse(fs.readFileSync(resolved, "utf8"));
+  const state = initialState();
+  for (const key of durableKeys) {
+    if (Array.isArray(loaded[key])) state[key] = loaded[key];
+  }
+  return state;
+}
+
+function saveState(statePath, state) {
+  const resolved = path.resolve(statePath);
+  fs.mkdirSync(path.dirname(resolved), { recursive: true });
+  const tmpPath = `${resolved}.${process.pid}.tmp`;
+  fs.writeFileSync(tmpPath, JSON.stringify(serializeState(state), null, 2) + "\n");
+  fs.renameSync(tmpPath, resolved);
+}
+
+function serializeState(state) {
+  const output = { version: 1, savedAtMs: now() };
+  for (const key of durableKeys) {
+    output[key] = state[key];
+  }
+  return output;
+}
+
+async function smoke(port, statePath = "") {
+  const effectiveStatePath = statePath || path.join(os.tmpdir(), `moontown-miniapp-local-backend-smoke-${process.pid}-${now()}.json`);
+  const smokeBuildingId = `smoke-persisted-building-${process.pid}-${now()}`;
+  const server = createServer(loadState(effectiveStatePath, !statePath), (state) => saveState(effectiveStatePath, state));
   await new Promise((resolve) => server.listen(port, "127.0.0.1", resolve));
   const base = `http://127.0.0.1:${port}`;
   try {
     const login = await post(`${base}/miniapp/auth/dev-login`, { userId: "user-a" });
     const sessionId = login.session.id;
     const snapshotResponse = await get(`${base}/miniapp/town/snapshot`, { "x-miniapp-session": sessionId });
+    const created = await post(`${base}/miniapp/buildings`, {
+      sessionId,
+      id: smokeBuildingId,
+      title: "Smoke Persisted Building",
+      tags: ["smoke", "local"],
+    });
     const chat = await post(`${base}/miniapp/buildings/query`, {
       sessionId,
       buildingId: "private-lab",
@@ -319,12 +381,17 @@ async function smoke(port) {
       messageId: "msg-smoke-chat",
       body: "Smoke test chat.",
     });
-    if (!login.ok || !snapshotResponse.ok || !chat.ok) {
+    const reloaded = loadState(effectiveStatePath);
+    const persisted = reloaded.buildings.some((item) => item.id === smokeBuildingId);
+    if (!login.ok || !snapshotResponse.ok || !created.ok || !chat.ok || !persisted) {
       throw new Error("miniapp local backend smoke failed");
     }
-    console.log(`miniapp-local-backend-smoke=ok port=${port} buildings=${snapshotResponse.buildings.length} run=${chat.run.id}`);
+    console.log(`miniapp-local-backend-smoke=ok port=${port} buildings=${snapshotResponse.buildings.length} created=${created.building.id} persisted=${persisted} run=${chat.run.id}`);
   } finally {
     await new Promise((resolve) => server.close(resolve));
+    if (!statePath && fs.existsSync(effectiveStatePath)) {
+      fs.unlinkSync(effectiveStatePath);
+    }
   }
 }
 
@@ -344,10 +411,13 @@ async function post(url, body) {
 
 const args = parseArgs(process.argv.slice(2));
 if (args.smoke) {
-  await smoke(args.port);
+  await smoke(args.port, args.statePathExplicit ? args.statePath : "");
 } else {
-  createServer().listen(args.port, "127.0.0.1", () => {
+  const statePath = path.resolve(args.statePath);
+  const state = loadState(statePath, args.resetState);
+  createServer(state, (nextState) => saveState(statePath, nextState)).listen(args.port, "127.0.0.1", () => {
     console.log(`moontown-miniapp-local-backend=http://127.0.0.1:${args.port}`);
     console.log("wechat-devtools-backendBaseUrl=http://127.0.0.1:" + args.port);
+    console.log("moontown-miniapp-local-state=" + statePath);
   });
 }
