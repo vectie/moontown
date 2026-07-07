@@ -1,0 +1,68 @@
+// Generated using `moon info`, DON'T EDIT IT
+package "vectie/moontown/miniapp_projection"
+
+import {
+  "moonbitlang/core/debug",
+  "vectie/moontown/miniapp_contracts",
+}
+
+// Values
+pub fn miniapp_building_is_public(@miniapp_contracts.MiniappBuilding) -> Bool
+
+pub fn miniapp_building_is_system(@miniapp_contracts.MiniappBuilding) -> Bool
+
+pub fn miniapp_building_owned_by_viewer(MiniappViewerContext, @miniapp_contracts.MiniappBuilding) -> Bool
+
+pub fn miniapp_can_approve_building_publication(MiniappViewerContext, @miniapp_contracts.MiniappBuilding) -> Bool
+
+pub fn miniapp_can_edit_building(MiniappViewerContext, @miniapp_contracts.MiniappBuilding) -> Bool
+
+pub fn miniapp_can_place_building(MiniappViewerContext, @miniapp_contracts.MiniappBuilding) -> Bool
+
+pub fn miniapp_can_submit_building_for_publish(MiniappViewerContext, @miniapp_contracts.MiniappBuilding) -> Bool
+
+pub fn miniapp_can_view_building(MiniappViewerContext, @miniapp_contracts.MiniappBuilding) -> Bool
+
+pub fn miniapp_filter_snapshot_for_viewer(@miniapp_contracts.MiniappTownSnapshot, MiniappViewerContext) -> @miniapp_contracts.MiniappTownSnapshot
+
+pub fn miniapp_projection_fixture_mixed_snapshot() -> @miniapp_contracts.MiniappTownSnapshot
+
+pub fn miniapp_projection_summary(@miniapp_contracts.MiniappTownSnapshot, @miniapp_contracts.MiniappTownSnapshot) -> MiniappProjectionSummary
+
+pub fn miniapp_search_buildings(@miniapp_contracts.MiniappTownSnapshot, MiniappViewerContext, String) -> Array[@miniapp_contracts.MiniappSearchResult]
+
+pub fn miniapp_viewer_can_publish(MiniappViewerContext) -> Bool
+
+pub fn miniapp_viewer_context(user_id~ : String, organization_ids? : Array[String], workspace_ids? : Array[String], roles? : Array[@miniapp_contracts.MiniappPermissionRole], include_public? : Bool, include_system? : Bool) -> MiniappViewerContext
+
+pub fn miniapp_viewer_is_admin(MiniappViewerContext) -> Bool
+
+pub fn miniapp_viewer_owns_owner(MiniappViewerContext, @miniapp_contracts.MiniappOwnerKind, String) -> Bool
+
+// Errors
+
+// Types and methods
+pub(all) struct MiniappProjectionSummary {
+  user_id : String
+  visible_buildings : Int
+  visible_placements : Int
+  visible_books : Int
+  visible_agents : Int
+  visible_threads : Int
+  visible_runs : Int
+  hidden_buildings : Int
+  hidden_placements : Int
+} derive(Eq, @debug.Debug)
+
+pub(all) struct MiniappViewerContext {
+  user_id : String
+  organization_ids : Array[String]
+  workspace_ids : Array[String]
+  roles : Array[@miniapp_contracts.MiniappPermissionRole]
+  include_public : Bool
+  include_system : Bool
+} derive(Eq, @debug.Debug)
+
+// Type aliases
+
+// Traits
