@@ -1,0 +1,91 @@
+// Generated using `moon info`, DON'T EDIT IT
+package "vectie/moontown/miniapp_publishing"
+
+import {
+  "moonbitlang/core/debug",
+  "moonbitlang/core/json",
+  "vectie/moontown/miniapp_contracts",
+  "vectie/moontown/miniapp_projection",
+}
+
+// Values
+pub fn miniapp_default_publication_policy() -> MiniappPublicationPolicy
+
+pub fn miniapp_public_building_preview(@miniapp_contracts.MiniappTownSnapshot, @miniapp_projection.MiniappViewerContext, String) -> MiniappPublicBuildingPreview?
+
+pub fn miniapp_public_discovery(@miniapp_contracts.MiniappTownSnapshot, @miniapp_projection.MiniappViewerContext, MiniappDiscoveryFilter) -> Array[MiniappPublicBuildingPreview]
+
+pub fn miniapp_review_publication_request(@miniapp_contracts.MiniappTownSnapshot, @miniapp_projection.MiniappViewerContext, MiniappPublicationRequest, MiniappModerationDecision, now_ms~ : UInt64, policy? : MiniappPublicationPolicy) -> MiniappModerationChange
+
+pub fn miniapp_submit_publication_request(@miniapp_contracts.MiniappTownSnapshot, @miniapp_projection.MiniappViewerContext, MiniappPublicationRequest, now_ms~ : UInt64, policy? : MiniappPublicationPolicy) -> MiniappModerationChange
+
+pub fn miniapp_validate_publication(@miniapp_contracts.MiniappTownSnapshot, @miniapp_projection.MiniappViewerContext, MiniappPublicationRequest, policy? : MiniappPublicationPolicy) -> MiniappPublicationValidation
+
+// Errors
+
+// Types and methods
+pub(all) struct MiniappDiscoveryFilter {
+  query : String
+  tag : String?
+  category_id : String?
+  owner_id : String?
+  capability : String?
+  min_updated_at_ms : UInt64?
+} derive(Eq, ToJson, @debug.Debug, @json.FromJson)
+
+pub(all) struct MiniappModerationChange {
+  ok : Bool
+  snapshot : @miniapp_contracts.MiniappTownSnapshot
+  building_id : String
+  message : String
+  validation : MiniappPublicationValidation
+} derive(Eq, ToJson, @debug.Debug, @json.FromJson)
+
+pub(all) enum MiniappModerationDecision {
+  ApprovePublication
+  RejectPublication(String)
+  HidePublished(String)
+} derive(Eq, ToJson, @debug.Debug, @json.FromJson)
+
+pub(all) struct MiniappPublicBuildingPreview {
+  building_id : String
+  title : String
+  owner_id : String
+  owner_label : String
+  category_id : String
+  summary : String
+  tags : Array[String]
+  capabilities : Array[String]
+  book_summary : String
+  score : Int
+  reason : String
+  can_place : Bool
+} derive(Eq, ToJson, @debug.Debug, @json.FromJson)
+
+pub(all) struct MiniappPublicationPolicy {
+  required_capabilities : Array[String]
+  allowed_category_ids : Array[String]
+  allowed_asset_refs : Array[String]
+  banned_terms : Array[String]
+  max_tags : Int
+  max_summary_chars : Int
+  min_summary_chars : Int
+} derive(Eq, ToJson, @debug.Debug, @json.FromJson)
+
+pub(all) struct MiniappPublicationRequest {
+  building_id : String
+  public_summary : String
+  category_id : String
+  asset_refs : Array[String]
+} derive(Eq, ToJson, @debug.Debug, @json.FromJson)
+
+pub(all) struct MiniappPublicationValidation {
+  ok : Bool
+  building_id : String
+  issues : Array[String]
+  warnings : Array[String]
+} derive(Eq, ToJson, @debug.Debug, @json.FromJson)
+
+// Type aliases
+
+// Traits

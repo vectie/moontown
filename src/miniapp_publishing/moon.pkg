@@ -1,0 +1,12 @@
+import {
+  "moonbitlang/core/json",
+  "vectie/moontown/miniapp_buildings",
+  "vectie/moontown/miniapp_contracts",
+  "vectie/moontown/miniapp_projection",
+}
+
+import {
+  "vectie/moontown/miniapp_identity",
+} for "wbtest"
+
+supported_targets = "native"
