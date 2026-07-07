@@ -1,0 +1,66 @@
+// Generated using `moon info`, DON'T EDIT IT
+package "vectie/moontown/miniapp_local_backend"
+
+import {
+  "moonbitlang/core/debug",
+  "moonbitlang/core/json",
+  "vectie/moontown/miniapp_agents",
+  "vectie/moontown/miniapp_buildings",
+  "vectie/moontown/miniapp_contracts",
+  "vectie/moontown/miniapp_identity",
+}
+
+// Values
+pub fn miniapp_local_backend_accept_run(MiniappLocalBackendState, String, @miniapp_agents.MiniappRunActionDraft, now_ms~ : UInt64) -> MiniappLocalBackendResponse
+
+pub fn miniapp_local_backend_cancel_run(MiniappLocalBackendState, String, @miniapp_agents.MiniappRunActionDraft, now_ms~ : UInt64) -> MiniappLocalBackendResponse
+
+pub fn miniapp_local_backend_chat_send(MiniappLocalBackendState, String, @miniapp_agents.MiniappChatSendDraft, now_ms~ : UInt64) -> MiniappLocalBackendResponse
+
+pub fn miniapp_local_backend_create_agent(MiniappLocalBackendState, String, @miniapp_agents.MiniappAgentDraft, now_ms~ : UInt64) -> MiniappLocalBackendResponse
+
+pub fn miniapp_local_backend_create_building(MiniappLocalBackendState, String, @miniapp_buildings.MiniappBuildingDraft, now_ms~ : UInt64) -> MiniappLocalBackendResponse
+
+pub fn miniapp_local_backend_dev_login(MiniappLocalBackendState, String, now_ms~ : UInt64, ttl_ms? : UInt64) -> MiniappLocalBackendResponse
+
+pub fn miniapp_local_backend_fixture_state() -> MiniappLocalBackendState
+
+pub fn miniapp_local_backend_place_building(MiniappLocalBackendState, String, @miniapp_buildings.MiniappPlacementDraft, now_ms~ : UInt64) -> MiniappLocalBackendResponse
+
+pub fn miniapp_local_backend_retry_run(MiniappLocalBackendState, String, @miniapp_agents.MiniappRunActionDraft, now_ms~ : UInt64) -> MiniappLocalBackendResponse
+
+pub fn miniapp_local_backend_routes() -> Array[MiniappLocalBackendRoute]
+
+pub fn miniapp_local_backend_search_buildings(MiniappLocalBackendState, String, String, now_ms~ : UInt64) -> MiniappLocalBackendResponse
+
+pub fn miniapp_local_backend_snapshot(MiniappLocalBackendState, String, now_ms~ : UInt64) -> MiniappLocalBackendResponse
+
+// Errors
+
+// Types and methods
+pub(all) struct MiniappLocalBackendResponse {
+  ok : Bool
+  status : Int
+  body : String
+  state : MiniappLocalBackendState
+  session_id : String?
+} derive(Eq, ToJson, @debug.Debug, @json.FromJson)
+
+pub(all) struct MiniappLocalBackendRoute {
+  http_method : String
+  path : String
+  name : String
+  auth_required : Bool
+} derive(Eq, ToJson, @debug.Debug, @json.FromJson)
+
+pub(all) struct MiniappLocalBackendState {
+  identity : @miniapp_identity.MiniappIdentityState
+  snapshot : @miniapp_contracts.MiniappTownSnapshot
+  active_session_id : String?
+  version : Int
+} derive(Eq, ToJson, @debug.Debug, @json.FromJson)
+
+// Type aliases
+
+// Traits
+

@@ -138,6 +138,21 @@ pub fn miniapp_fixture_thread(
 }
 
 ///|
+pub fn miniapp_fixture_message(
+  thread_id? : String = "thread-policy-hall",
+) -> MiniappMessage {
+  {
+    id: "msg-policy-hall-1",
+    thread_id,
+    actor_id: "agent-policy-guide",
+    actor_label: "Policy Guide",
+    body: "Policy Hall can answer with reviewable book-backed output.",
+    created_at_ms: 2100UL,
+    version: 1,
+  }
+}
+
+///|
 pub fn miniapp_fixture_run() -> MiniappRun {
   {
     id: "run-policy-hall-1",
@@ -151,6 +166,19 @@ pub fn miniapp_fixture_run() -> MiniappRun {
     created_at_ms: 2000UL,
     updated_at_ms: 2500UL,
     version: 1,
+  }
+}
+
+///|
+pub fn miniapp_fixture_audit_event() -> MiniappAuditEvent {
+  {
+    id: "audit-policy-hall-1",
+    actor_user_id: "user-a",
+    object_kind: "run",
+    object_id: "run-policy-hall-1",
+    action: "query.waiting_review",
+    summary: "Policy Hall answer is waiting for review.",
+    created_at_ms: 2500UL,
   }
 }
 
@@ -177,10 +205,12 @@ pub fn miniapp_fixture_snapshot() -> MiniappTownSnapshot {
     books: [book],
     agents: [agent],
     threads: [thread],
+    messages: [miniapp_fixture_message(thread_id=thread.id)],
     runs: [miniapp_fixture_run()],
     permissions: [
       { subject_kind: "user", subject_id: user.id, role: OwnerRole },
     ],
+    audit_events: [miniapp_fixture_audit_event()],
     generated_at_ms: 3000UL,
     version: 1,
   }

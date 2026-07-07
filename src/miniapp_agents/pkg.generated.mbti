@@ -1,0 +1,68 @@
+// Generated using `moon info`, DON'T EDIT IT
+package "vectie/moontown/miniapp_agents"
+
+import {
+  "moonbitlang/core/debug",
+  "moonbitlang/core/json",
+  "vectie/moontown/miniapp_contracts",
+  "vectie/moontown/miniapp_projection",
+}
+
+// Values
+pub fn miniapp_accept_run_for_review(@miniapp_contracts.MiniappTownSnapshot, @miniapp_projection.MiniappViewerContext, MiniappRunActionDraft, now_ms~ : UInt64) -> MiniappAgentRuntimeChange
+
+pub fn miniapp_attach_agent_to_building(@miniapp_contracts.MiniappTownSnapshot, @miniapp_projection.MiniappViewerContext, MiniappAgentAttachDraft, now_ms~ : UInt64) -> MiniappAgentRuntimeChange
+
+pub fn miniapp_cancel_run(@miniapp_contracts.MiniappTownSnapshot, @miniapp_projection.MiniappViewerContext, MiniappRunActionDraft, now_ms~ : UInt64) -> MiniappAgentRuntimeChange
+
+pub fn miniapp_create_agent(@miniapp_contracts.MiniappTownSnapshot, @miniapp_projection.MiniappViewerContext, MiniappAgentDraft, now_ms~ : UInt64) -> MiniappAgentRuntimeChange
+
+pub fn miniapp_retry_run(@miniapp_contracts.MiniappTownSnapshot, @miniapp_projection.MiniappViewerContext, MiniappRunActionDraft, now_ms~ : UInt64) -> MiniappAgentRuntimeChange
+
+pub fn miniapp_send_agent_message(@miniapp_contracts.MiniappTownSnapshot, @miniapp_projection.MiniappViewerContext, MiniappChatSendDraft, now_ms~ : UInt64) -> MiniappAgentRuntimeChange
+
+// Errors
+
+// Types and methods
+pub(all) struct MiniappAgentAttachDraft {
+  agent_id : String
+  building_id : String
+} derive(Eq, ToJson, @debug.Debug, @json.FromJson)
+
+pub(all) struct MiniappAgentDraft {
+  id : String
+  display_name : String
+  owner_kind : @miniapp_contracts.MiniappOwnerKind
+  owner_id : String
+  building_id : String?
+  capabilities : Array[String]
+} derive(Eq, ToJson, @debug.Debug, @json.FromJson)
+
+pub(all) struct MiniappAgentRuntimeChange {
+  ok : Bool
+  snapshot : @miniapp_contracts.MiniappTownSnapshot
+  message : String
+  agent_id : String?
+  thread_id : String?
+  run_id : String?
+} derive(Eq, ToJson, @debug.Debug, @json.FromJson)
+
+pub(all) struct MiniappChatSendDraft {
+  message_id : String
+  run_id : String
+  thread_id : String
+  building_id : String
+  agent_id : String?
+  body : String
+  answer_summary : String
+} derive(Eq, ToJson, @debug.Debug, @json.FromJson)
+
+pub(all) struct MiniappRunActionDraft {
+  run_id : String
+  summary : String
+} derive(Eq, ToJson, @debug.Debug, @json.FromJson)
+
+// Type aliases
+
+// Traits
+

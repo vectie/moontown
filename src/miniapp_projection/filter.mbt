@@ -23,11 +23,28 @@ pub fn miniapp_filter_snapshot_for_viewer(
   let threads = snapshot.threads.filter(thread => {
     miniapp_projection_has_building(buildings, thread.building_id)
   })
+  let messages = snapshot.messages.filter(message => {
+    miniapp_projection_has_thread(threads, message.thread_id)
+  })
   let runs = snapshot.runs.filter(run => {
     run.user_id == viewer.user_id ||
     miniapp_projection_has_building(buildings, run.building_id)
   })
-  { ..snapshot, buildings, placements, books, agents, threads, runs }
+  let audit_events = snapshot.audit_events.filter(event => {
+    event.actor_user_id == viewer.user_id ||
+    miniapp_projection_audit_object_visible(buildings, threads, runs, event)
+  })
+  {
+    ..snapshot,
+    buildings,
+    placements,
+    books,
+    agents,
+    threads,
+    messages,
+    runs,
+    audit_events,
+  }
 }
 
 ///|
@@ -42,7 +59,9 @@ pub fn miniapp_projection_summary(
     visible_books: projected.books.length(),
     visible_agents: projected.agents.length(),
     visible_threads: projected.threads.length(),
+    visible_messages: projected.messages.length(),
     visible_runs: projected.runs.length(),
+    visible_audit_events: projected.audit_events.length(),
     hidden_buildings: source.buildings.length() - projected.buildings.length(),
     hidden_placements: source.placements.length() -
     projected.placements.length(),
@@ -60,6 +79,50 @@ fn miniapp_projection_has_building(
     }
   }
   false
+}
+
+///|
+fn miniapp_projection_has_thread(
+  threads : Array[@miniapp_contracts.MiniappThread],
+  thread_id : String,
+) -> Bool {
+  for thread in threads {
+    if thread.id == thread_id {
+      return true
+    }
+  }
+  false
+}
+
+///|
+fn miniapp_projection_has_run(
+  runs : Array[@miniapp_contracts.MiniappRun],
+  run_id : String,
+) -> Bool {
+  for run in runs {
+    if run.id == run_id {
+      return true
+    }
+  }
+  false
+}
+
+///|
+fn miniapp_projection_audit_object_visible(
+  buildings : Array[@miniapp_contracts.MiniappBuilding],
+  threads : Array[@miniapp_contracts.MiniappThread],
+  runs : Array[@miniapp_contracts.MiniappRun],
+  event : @miniapp_contracts.MiniappAuditEvent,
+) -> Bool {
+  if event.object_kind == "building" {
+    miniapp_projection_has_building(buildings, event.object_id)
+  } else if event.object_kind == "thread" {
+    miniapp_projection_has_thread(threads, event.object_id)
+  } else if event.object_kind == "run" {
+    miniapp_projection_has_run(runs, event.object_id)
+  } else {
+    false
+  }
 }
 
 ///|

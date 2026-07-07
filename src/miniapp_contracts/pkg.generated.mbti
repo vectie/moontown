@@ -17,11 +17,15 @@ pub fn miniapp_endpoint_by_id(String) -> MiniappEndpoint?
 
 pub fn miniapp_fixture_agent(building_id? : String) -> MiniappAgent
 
+pub fn miniapp_fixture_audit_event() -> MiniappAuditEvent
+
 pub fn miniapp_fixture_book(id? : String) -> MiniappBookSummary
 
 pub fn miniapp_fixture_building(id? : String, owner_id? : String, owner_kind? : MiniappOwnerKind, visibility? : MiniappVisibilityState, scope? : MiniappScope) -> MiniappBuilding
 
 pub fn miniapp_fixture_layer(user_id? : String) -> MiniappTownLayer
+
+pub fn miniapp_fixture_message(thread_id? : String) -> MiniappMessage
 
 pub fn miniapp_fixture_placement(building_id? : String, layer_id? : String) -> MiniappBuildingPlacement
 
@@ -247,8 +251,10 @@ pub(all) struct MiniappTownSnapshot {
   books : Array[MiniappBookSummary]
   agents : Array[MiniappAgent]
   threads : Array[MiniappThread]
+  messages : Array[MiniappMessage]
   runs : Array[MiniappRun]
   permissions : Array[MiniappPermission]
+  audit_events : Array[MiniappAuditEvent]
   generated_at_ms : UInt64
   version : Int
 } derive(Eq, ToJson, @debug.Debug, @json.FromJson)

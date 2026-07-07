@@ -16,7 +16,9 @@ pub(all) struct MiniappProjectionSummary {
   visible_books : Int
   visible_agents : Int
   visible_threads : Int
+  visible_messages : Int
   visible_runs : Int
+  visible_audit_events : Int
   hidden_buildings : Int
   hidden_placements : Int
 } derive(Debug, Eq)

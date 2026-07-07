@@ -22,6 +22,7 @@ async fn render_cli_command(args : Array[String]) -> String {
     ["books", .. rest] => render_books_command(rest.to_owned())
     ["moonclaw", .. rest] => render_moonclaw_command(rest.to_owned())
     ["civic", .. rest] => render_civic_command(rest.to_owned())
+    ["miniapp", .. rest] => render_miniapp_command(rest.to_owned())
     ["integration", .. rest] => render_integration_command(rest.to_owned())
     _ => @moontown.load_or_create_saved_dashboard()
   }

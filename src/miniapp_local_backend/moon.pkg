@@ -1,0 +1,10 @@
+import {
+  "moonbitlang/core/json",
+  "vectie/moontown/miniapp_agents",
+  "vectie/moontown/miniapp_buildings",
+  "vectie/moontown/miniapp_contracts",
+  "vectie/moontown/miniapp_identity",
+  "vectie/moontown/miniapp_projection",
+}
+
+supported_targets = "native"

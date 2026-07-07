@@ -224,8 +224,10 @@ pub(all) struct MiniappTownSnapshot {
   books : Array[MiniappBookSummary]
   agents : Array[MiniappAgent]
   threads : Array[MiniappThread]
+  messages : Array[MiniappMessage]
   runs : Array[MiniappRun]
   permissions : Array[MiniappPermission]
+  audit_events : Array[MiniappAuditEvent]
   generated_at_ms : UInt64
   version : Int
 } derive(Debug, Eq, ToJson, FromJson)
