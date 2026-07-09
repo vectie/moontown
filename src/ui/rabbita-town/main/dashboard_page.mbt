@@ -5,11 +5,12 @@ fn render_dashboard_page(
   context : RenderSceneContext,
 ) -> @rabbita.Html {
   section(class="town-shell", [
-    render_operator_masthead(context.scene, context.alerts),
     render_town_launchpad(
       model,
       context.workers,
       context.executions,
+      context.scene,
+      context.alerts,
     ),
     render_request_desk(dispatch, model),
     render_attention_workbench(

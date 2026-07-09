@@ -174,6 +174,29 @@ Default state should remove:
 - the explanatory civic-watch summary sentence
 - old `operator-masthead-*` hero classes
 
+### Phase 9: Unified Launchpad Chrome
+
+The compact masthead still duplicates the launchpad because it creates a
+separate first-screen band for identity and alert state immediately before the
+operating pulse. Professional users need the same information, but not as an
+extra section.
+
+Default state should fold into the Town Launchpad header:
+
+- `Moontown` as the product label
+- the current scene title
+- alert chips
+- worker and attention chips
+- one direct `Open Wenyu Map` command
+- the four compact signal cells
+
+Default state should remove:
+
+- the standalone `town-status-bar`
+- the separate operator masthead source file
+- the tutorial-like `Town Launchpad` / `Current town pulse` heading pair
+- the launchpad summary sentence
+
 ## Done Criteria
 
 - A professional user can operate watches, reviews, book requests, and the map
@@ -274,3 +297,6 @@ Default state should remove:
 - The next masthead cleanup should collapse the remaining hero-style masthead
   into a compact town status bar that keeps scene identity and alerts without
   delaying the launchpad/request path.
+- The status bar and launchpad chrome are now unified. The default dashboard
+  starts with one Town Launchpad surface containing product identity, scene
+  title, alerts, worker/attention chips, map entry, and the compact signal rail.

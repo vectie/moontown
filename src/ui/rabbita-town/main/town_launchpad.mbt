@@ -3,6 +3,8 @@ fn render_town_launchpad(
   model : Model,
   workers : Array[WorkerSim],
   executions : Array[@core.TaskExecutionRecord],
+  scene : @ui.SceneRenderModel,
+  alerts : Array[String],
 ) -> @rabbita.Html {
   let workers_summary = worker_count_summary(workers)
   let watch_summary = standing_goal_summary(model)
@@ -11,14 +13,11 @@ fn render_town_launchpad(
     div(class="town-launchpad-status", [
       div(class="town-launchpad-head", [
         div(class="town-launchpad-copy", [
-          p(class="eyebrow", "Town Launchpad"),
-          h2("Current town pulse"),
-          p(
-            class="summary",
-            "Health, watches, review needs, book queue, and map entry stay close to the request path.",
-          ),
+          p(class="eyebrow", "Moontown"),
+          h1(scene.title),
         ]),
         div(class="town-launchpad-actions", [
+          render_alerts(alerts),
           status_chip(
             "Workers online: \{workers_summary.online()}",
             "chip-neutral",
