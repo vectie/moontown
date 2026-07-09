@@ -19,15 +19,6 @@ fn dashboard_section_label(target : DashboardSection) -> String {
 }
 
 ///|
-fn dashboard_section_kicker(target : DashboardSection) -> String {
-  match target {
-    DistrictSystems => "Live civic modules"
-    ResidentAgentsSection => "Projection-safe twins"
-    CivicQuestsSection => "Service workflows"
-    SocialCapitalSection => "Matches and reception"
-  }
-}
-
 fn dashboard_section_button_class(
   active : DashboardSection?,
   target : DashboardSection,
@@ -52,10 +43,7 @@ fn render_dashboard_section_tab(
   button(
     class=dashboard_section_button_class(active, target),
     on_click=dispatch(SetDashboardSection(target)),
-    [
-      span(class="dashboard-section-label", dashboard_section_label(target)),
-      span(class="dashboard-section-kicker", dashboard_section_kicker(target)),
-    ],
+    [span(class="dashboard-section-label", dashboard_section_label(target))],
   )
 }
 
@@ -78,10 +66,11 @@ fn render_dashboard_section_panel(
   model : Model,
 ) -> @rabbita.Html {
   match target {
-    DistrictSystems => div(class="dashboard-section-panel-stack", [
-      render_civic_context(model),
-      render_civic_modules(model),
-    ])
+    DistrictSystems =>
+      div(class="dashboard-section-panel-stack", [
+        render_civic_context(model),
+        render_civic_modules(model),
+      ])
     ResidentAgentsSection => render_resident_agents(model)
     CivicQuestsSection => render_civic_quests(model)
     SocialCapitalSection => render_social_talent(model)
@@ -95,19 +84,16 @@ fn render_dashboard_ecosystem_workspace(
 ) -> @rabbita.Html {
   let children = [
     div(class="town-areas-head", [
-      div([
+      div(class="town-areas-title", [
         p(class="eyebrow", "Town Areas"),
-        h2("Open detail only when needed"),
-        p(
-          class="summary",
-          "Keep routine work centered on watches, reviews, requests, and the map. Open a town area when a specific civic surface needs inspection.",
-        ),
+        h2("Civic surfaces"),
       ]),
       render_dashboard_section_tabs(dispatch, model.dashboard_section),
     ]),
   ]
   match model.dashboard_section {
-    Some(section) => children.push(render_dashboard_section_panel(section, model))
+    Some(section) =>
+      children.push(render_dashboard_section_panel(section, model))
     None => ()
   }
   section(class="town-areas-launcher", children)

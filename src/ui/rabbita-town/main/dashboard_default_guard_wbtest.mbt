@@ -48,6 +48,8 @@ fn default_dashboard_forbidden_copy() -> Array[String] {
     "Activity Ledger", "activity-ledger-panel", "feed-panel", "feed-item", "Closed by default",
     "Default closed", "town-area-closed-panel", "town-launchpad-grid", "town-launchpad-card",
     "launchpad-card-", "attention-workbench-grid", "attention-next-card", "attention-signal-card",
+    "Open detail only when needed", "dashboard-section-kicker", "Live civic modules",
+    "Projection-safe twins", "Service workflows", "Matches and reception",
   ]
 }
 
@@ -81,7 +83,7 @@ test "default dashboard keeps professional operating actions visible" {
   assert_true(html.contains("attention-review-strip"))
   assert_true(html.contains("Recent signal"))
   assert_true(html.contains("Town Areas"))
-  assert_true(html.contains("Open detail only when needed"))
+  assert_true(html.contains("Civic surfaces"))
   assert_true(html.contains("Districts"))
   assert_true(html.contains("Residents"))
   assert_true(html.contains("Quests"))

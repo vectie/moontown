@@ -211,3 +211,6 @@ Allow these only in advanced/developer surfaces.
 - The Attention Workbench is now a compact review strip instead of a separate
   card grid. It keeps the current action, next opening, and recent signal in
   one row, reducing repeated attention surface area after the Request Desk.
+- The Town Areas launcher is now a compact civic surface dock. It no longer
+  renders instructional heading copy or per-area kicker text in the default
+  dashboard, and phone layout keeps the four area choices in a 2x2 dock.
