@@ -115,26 +115,26 @@ fn execution_feed_item(execution : @core.TaskExecutionRecord) -> FeedItem? {
   match execution_feed_kind(execution.status) {
     RunningExecution =>
       Some({
-        title: "\{execution.task_id} is running",
-        detail: execution.summary,
+        title: execution_display_title(execution),
+        detail: execution_display_detail(execution),
         tone: "neutral",
       })
     AwaitingPersistenceExecution =>
       Some({
-        title: "\{execution.task_id} awaits MoonBook persistence",
-        detail: "The run is done; the next town action is keeper persistence and evidence capture.",
+        title: execution_display_title(execution),
+        detail: execution_display_detail(execution),
         tone: "hot",
       })
     StaleExecution =>
       Some({
-        title: "\{execution.task_id} went stale",
-        detail: "Mayor supervision should recover the missed heartbeat or retry the lane.",
+        title: execution_display_title(execution),
+        detail: execution_display_detail(execution),
         tone: "alert",
       })
     FailedExecution =>
       Some({
-        title: "\{execution.task_id} failed",
-        detail: "A proposal/run failure surfaced in the packet lifecycle.",
+        title: execution_display_title(execution),
+        detail: execution_display_detail(execution),
         tone: "alert",
       })
     QuietExecution => None

@@ -109,6 +109,10 @@ copy. Candidate forbidden default strings:
 - `book-template-requests.json`
 - `request-`
 - `goal-`
+- `task-`
+- `packet-`
+- `run-`
+- `proposal-`
 - `Live spine`
 - `Snapshot bridge`
 - `Switch Source`
@@ -128,3 +132,14 @@ Allow these only in advanced/developer surfaces.
   debugger.
 - Backend contracts remain stable; most changes are display-label and hierarchy
   changes.
+
+## Progress Notes
+
+- Default Rabbita town now hides rare runtime source switching, simulation
+  stepping, strategy tuning, and inspector drill controls from the professional
+  dashboard.
+- Mayor Messages now translate execution task records into professional labels
+  and details, such as `Town shell code patch is running`, rather than exposing
+  raw task, packet, run, or proposal ids.
+- Default dashboard tests now guard against raw runtime ids and developer copy
+  leaking back into the professional first screen.

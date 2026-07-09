@@ -20,10 +20,10 @@ fn render_default_dashboard_test_html(model : Model) -> String {
 fn default_dashboard_forbidden_copy() -> Array[String] {
   [
     ".json", "daemon.json", "standing-goals.json", "book-template-requests.json",
-    "Live spine", "Snapshot bridge", "Switch Source", "State sources", "endpoint",
-    "payload", "dispatch tick", "Inspector Inject Budget", "Inspector Relieve Queue",
-    "Inspector Stability Drill", ">Pause<", ">Step<", ">Inject Budget<", ">Relieve Queue<",
-    ">Stability Drill<",
+    "task-", "packet-", "run-", "proposal-", "Live spine", "Snapshot bridge",
+    "Switch Source", "State sources", "endpoint", "payload", "dispatch tick",
+    "Inspector Inject Budget", "Inspector Relieve Queue", "Inspector Stability Drill",
+    ">Pause<", ">Step<", ">Inject Budget<", ">Relieve Queue<", ">Stability Drill<",
   ]
 }
 

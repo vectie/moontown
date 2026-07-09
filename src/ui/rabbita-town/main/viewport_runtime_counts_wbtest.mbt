@@ -36,8 +36,8 @@ fn runtime_count_test_execution(
   status : @core.TaskExecutionStatus,
 ) -> @core.TaskExecutionRecord {
   @core.TaskExecutionRecord::new(
-    task_id="task-\{status.to_string()}",
-    book_id="book",
+    task_id="task-town-shell-code-patch",
+    book_id="wenyu-town-shell",
     packet_id="packet-\{status.to_string()}",
     packet_path="packet.json",
     status~,
@@ -317,20 +317,26 @@ test "execution feed item centralizes runtime event mapping" {
     runtime_count_test_execution(Running),
   )
   assert_eq(running.unwrap().tone, "neutral")
-  assert_true(running.unwrap().title.contains("is running"))
+  assert_eq(running.unwrap().title, "Town shell code patch is running")
+  assert_true(!running.unwrap().title.contains("task-"))
+  assert_true(!running.unwrap().detail.contains("task-"))
   let persisting = execution_feed_item(
     runtime_count_test_execution(AwaitingPersistence),
   )
   assert_eq(persisting.unwrap().tone, "hot")
-  assert_true(persisting.unwrap().title.contains("awaits MoonBook persistence"))
+  assert_eq(
+    persisting.unwrap().title,
+    "Town shell code patch is waiting for MoonBook save",
+  )
   let stale = execution_feed_item(
     runtime_count_test_execution(Stale),
   )
   assert_eq(stale.unwrap().tone, "alert")
+  assert_eq(stale.unwrap().title, "Town shell code patch needs recovery")
   let failed = execution_feed_item(
     runtime_count_test_execution(Failed),
   )
-  assert_true(failed.unwrap().title.contains("failed"))
+  assert_eq(failed.unwrap().title, "Town shell code patch failed")
   assert_true(
     execution_feed_item(
       runtime_count_test_execution(Completed),
@@ -349,8 +355,28 @@ test "execution feed items projects visible execution messages only" {
     runtime_count_test_execution(Completed),
   ])
   assert_eq(items.length(), 4)
-  assert_true(items[0].title.contains("is running"))
-  assert_true(items[1].title.contains("awaits MoonBook persistence"))
-  assert_true(items[2].title.contains("went stale"))
-  assert_true(items[3].title.contains("failed"))
+  assert_eq(items[0].title, "Town shell code patch is running")
+  assert_eq(
+    items[1].title,
+    "Town shell code patch is waiting for MoonBook save",
+  )
+  assert_eq(items[2].title, "Town shell code patch needs recovery")
+  assert_eq(items[3].title, "Town shell code patch failed")
+}
+
+///|
+test "execution display labels hide raw task ids from default feed" {
+  let execution = @core.TaskExecutionRecord::new(
+    task_id="task-unknown-runtime-id",
+    book_id="ai-garden",
+    packet_id="packet-task-unknown-runtime-id",
+    packet_path="packet.json",
+    status=Running,
+    summary="Running task-unknown-runtime-id.",
+    output_contract="contract",
+  )
+  let item = execution_feed_item(execution).unwrap()
+  assert_eq(item.title, "AI Garden work is running")
+  assert_true(!item.title.contains("task-"))
+  assert_true(!item.detail.contains("task-"))
 }
