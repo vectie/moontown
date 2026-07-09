@@ -426,6 +426,27 @@ Default state should remove:
 - unnecessary desktop vertical scroll before operators can compare actions
 - any new duplicate desktop-specific component variants
 
+### Phase 22: Guard Operations Deck Contract
+
+The default dashboard tests guard against developer/runtime copy, but they
+should also guard the new structural contract: the professional dashboard is a
+launchpad followed by one operations deck containing request intake, attention,
+and town-area navigation. Without this, a future cleanup can accidentally
+return to a full-width row stack while still passing copy checks.
+
+Default state should keep:
+
+- `town-operations-deck` around secondary operating surfaces
+- Request Desk, Attention, and Town Areas visible inside the default dashboard
+- the no-detail default behavior for ecosystem panels
+- the default-copy forbidden string guard
+
+Default state should remove:
+
+- unguarded structural regressions back to separate full-width rows
+- stale request-intake progress notes that describe already-finished work
+- any compatibility allowance for the old explanatory request cards
+
 ## Done Criteria
 
 - A professional user can operate watches, reviews, book requests, and the map
@@ -449,12 +470,9 @@ Default state should remove:
 - Ecosystem detail now sits behind focused dashboard tabs, so district,
   resident, quest, and social-capital surfaces do not all render in the default
   scroll.
-- Request creation now starts from two shortcuts, `Save Watch` and `Queue PDF
-  Watch Book`, and shows the detailed watch or book form only after the
-  operator chooses that path.
-- The next request-intake cleanup should replace the large explanatory
-  shortcut cards with a compact command dock, keeping the same two actions but
-  dropping default card titles and descriptions.
+- Request creation now starts from two compact commands, `Save` and `Queue`,
+  and shows the detailed watch or book form only after the operator chooses
+  that path.
 - Advanced runtime counters no longer render inside the professional dashboard;
   the dashboard keeps a single `Open Advanced Viewport` portal for deliberate
   runtime inspection.

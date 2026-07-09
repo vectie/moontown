@@ -97,6 +97,7 @@ test "default dashboard keeps professional operating actions visible" {
   assert_true(html.contains("town-launchpad-signal-rail"))
   assert_true(html.contains("town-launchpad-gateway"))
   assert_true(html.contains(">Map<"))
+  assert_true(html.contains("town-operations-deck"))
   assert_true(html.contains("Save"))
   assert_true(html.contains("Queue"))
   assert_true(html.contains("Request Desk"))
@@ -113,6 +114,17 @@ test "default dashboard keeps professional operating actions visible" {
   assert_true(html.contains("Residents"))
   assert_true(html.contains("Quests"))
   assert_true(html.contains(">Social<"))
+}
+
+///|
+test "default dashboard groups secondary operating surfaces in one deck" {
+  let html = render_default_dashboard_test_html(init_model())
+  assert_true(html.contains("town-operations-deck"))
+  assert_true(html.contains("request-desk"))
+  assert_true(html.contains("attention-dock"))
+  assert_true(html.contains("town-areas-launcher"))
+  assert_true(html.contains("request-action-dock"))
+  assert_true(html.contains("dashboard-section-tabs"))
 }
 
 ///|
