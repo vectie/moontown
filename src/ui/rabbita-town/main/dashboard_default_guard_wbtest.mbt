@@ -60,6 +60,9 @@ fn default_dashboard_forbidden_copy() -> Array[String] {
     "town-launchpad-map-button", "Open Wenyu Valley workspace",
     "Inspect districts, residents, standing watches, and active work in place.",
     "Latest:", "New sources:", "Next check:", "Active work:",
+    "operator-masthead", "operator-masthead-title", "operator-masthead-alerts",
+    "operator-masthead-brand", "Wenyu Valley workspace",
+    "Civic watches, resident agents, district services, and review-ready feedback loops.",
   ]
 }
 
@@ -78,8 +81,8 @@ test "default dashboard keeps professional operating actions visible" {
   let html = render_default_dashboard_test_html(init_model())
   assert_true(html.contains("Signal"))
   assert_true(html.contains("Next opening"))
-  assert_true(html.contains("operator-masthead"))
-  assert_true(html.contains("Wenyu Valley workspace"))
+  assert_true(html.contains("town-status-bar"))
+  assert_true(html.contains("Wenyu Valley / AI Innovation Town"))
   assert_true(html.contains("Town Launchpad"))
   assert_true(html.contains("Current town pulse"))
   assert_true(html.contains("town-launchpad-signal-rail"))

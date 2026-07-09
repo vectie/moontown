@@ -156,6 +156,24 @@ default launchpad should keep:
 Default UI should remove the lower map-card copy and map stat chips. Advanced
 or map-specific runtime state can live inside the Wenyu workspace itself.
 
+### Phase 8: Compact Town Status Bar
+
+The remaining masthead should behave like product chrome, not an intro hero.
+Moontown already has an operating launchpad immediately below it, so the top
+bar should only preserve identity and alert state.
+
+Default state should show:
+
+- `Moontown` as the product label
+- the current scene title
+- the current alert chips
+
+Default state should remove:
+
+- the `Wenyu Valley workspace` chip
+- the explanatory civic-watch summary sentence
+- old `operator-masthead-*` hero classes
+
 ## Done Criteria
 
 - A professional user can operate watches, reviews, book requests, and the map
@@ -253,3 +271,6 @@ or map-specific runtime state can live inside the Wenyu workspace itself.
 - The next launchpad cleanup should keep a single Wenyu map gateway in the
   launchpad header and remove the duplicated lower map card plus its runtime
   stat helper.
+- The next masthead cleanup should collapse the remaining hero-style masthead
+  into a compact town status bar that keeps scene identity and alerts without
+  delaying the launchpad/request path.
