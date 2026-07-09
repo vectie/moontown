@@ -37,6 +37,8 @@ fn default_dashboard_forbidden_copy() -> Array[String] {
     "Moonbook houses hold keeper-owned domain planning",
     "Worker avatars now move between yard, hall, books",
     "Open the Wenyu viewport when you need the full map",
+    "Canonical Wenyu Viewport", "Open the real Wenyu Valley tile map",
+    "second scaled-down town map", "Executions:", "Executions ",
     "deeper runtime tools", "Open the advanced viewport",
     "Open Advanced Viewport", "Advanced tools open separately",
     "runtime intervention",
@@ -64,7 +66,8 @@ test "default dashboard keeps professional operating actions visible" {
   assert_true(html.contains("Professional workspace"))
   assert_true(html.contains("No active watch"))
   assert_true(html.contains("Current town pulse"))
-  assert_true(html.contains("Open Wenyu Viewport"))
+  assert_true(html.contains("Open Wenyu Map"))
+  assert_true(html.contains("Open Wenyu Valley workspace"))
   assert_true(html.contains("Save Watch"))
   assert_true(html.contains("Queue PDF Watch Book"))
   assert_true(html.contains("Operating Brief"))

@@ -61,7 +61,7 @@ request ids, source switching, simulation step controls, and bridge status.
 The first screen should prioritize:
 
 1. Town pulse and attention summary.
-2. Canonical Wenyu viewport/map entry.
+2. Wenyu Valley map workspace entry.
 3. Review, failure, stale, and active-watch attention cards.
 4. Request shortcuts.
 5. Advanced operator console, collapsed or lower on the page.
@@ -164,3 +164,7 @@ Allow these only in advanced/developer surfaces.
 - The first-viewport status strip no longer exposes preview/source state or
   daemon check cadence. It now summarizes the professional workspace, active
   watches, and attention state.
+- The Wenyu entry now reads as a map workspace instead of exposing viewport,
+  tile-map, scaled-copy, or execution-count implementation language. The same
+  cleanup also renames the default command-center execution chip to
+  `Active work`.

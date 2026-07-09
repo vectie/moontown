@@ -55,7 +55,7 @@ test "wenyu viewport portal view uses fallback without watch state" {
   assert_eq(view.latest_decision, "Waiting")
   assert_eq(view.latest_sources, "0")
   assert_eq(view.next_check, "not scheduled")
-  assert_eq(view.execution_count, 0)
+  assert_eq(view.active_work, 0)
 }
 
 ///|

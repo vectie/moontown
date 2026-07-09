@@ -26,7 +26,7 @@ fn render_operator_console_header(
         "Book queue \{metrics.pending_template_requests}/\{metrics.failed_template_requests}",
         operator_template_request_chip_class(metrics),
       ),
-      status_chip("Executions \{executions.length()}", "chip-neutral"),
+      status_chip("Active work \{executions.length()}", "chip-neutral"),
     ]),
   ])
 }

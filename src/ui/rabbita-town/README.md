@@ -41,8 +41,8 @@ It currently includes:
 - Mayor command center with real standing-goal progress
 - watcher decision timeline from `.moonsuite/products/moontown/watchers/*.jsonl`
 - local standing-watch request composer
-- dashboard portal to the canonical standalone Wenyu viewport
-- generated Wenyu Valley tilemap viewport with animated resident overlay
+- dashboard entry to the Wenyu Valley map workspace
+- generated Wenyu Valley map with animated resident overlay
 - stronger keyboard focus visibility
 
 The current frontend can run in demo mode, but the dev server also bridges real
@@ -67,9 +67,9 @@ The request composer reads its default standing-goal source policy from
 layer must not own source-policy vocabulary; it only applies the document
 contract when turning a user request into a durable Mayor queue item.
 
-The dashboard intentionally does not embed a second scaled copy of the Wenyu
-map. It links to `viewport.html?assets=generated&v=wenyu`, which is the
-canonical generated-tilemap viewport used for visual inspection.
+The dashboard links to `viewport.html?assets=generated&v=wenyu` for the Wenyu
+Valley map workspace, where districts, residents, standing watches, and active
+work can be inspected in place.
 
 This package owns the Moontown operator dashboard only. It does not own the
 generated MoonBook site that appears under live workspace directories such as

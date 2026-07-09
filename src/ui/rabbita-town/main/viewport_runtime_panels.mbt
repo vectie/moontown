@@ -23,7 +23,7 @@ priv struct WenyuViewportPortalView {
   latest_decision : String
   latest_sources : String
   next_check : String
-  execution_count : Int
+  active_work : Int
 }
 
 ///|
@@ -38,7 +38,7 @@ fn wenyu_viewport_portal_view(
     latest_decision: latest.decision,
     latest_sources: latest.sources,
     next_check: next_check.portal_label,
-    execution_count: executions_summary.total,
+    active_work: executions_summary.total,
   }
 }
 
@@ -51,24 +51,24 @@ fn render_wenyu_viewport_portal(
   let portal = wenyu_viewport_portal_view(model, executions)
   section(class="viewport-portal-card", [
     div(class="viewport-portal-copy", [
-      p(class="eyebrow", "Canonical Wenyu Viewport"),
-      h2("Open the real Wenyu Valley tile map"),
+      p(class="eyebrow", "Wenyu Map"),
+      h2("Open Wenyu Valley workspace"),
       p(
         class="summary",
-        "The dashboard no longer renders a second scaled-down town map. Click through to the standalone viewport so the operator view and the Wenyu Valley map stay consistent.",
+        "Use the map workspace to inspect districts, residents, standing watches, and active work in place.",
       ),
       div(class="viewport-portal-stats", [
         status_chip("Scene: \{scene.title}", "chip-book"),
         status_chip("Latest: \{portal.latest_decision}", "chip-neutral"),
         status_chip("New sources: \{portal.latest_sources}", "chip-neutral"),
         status_chip("Next check: \{portal.next_check}", "chip-clock"),
-        status_chip("Executions: \{portal.execution_count}", "chip-neutral"),
+        status_chip("Active work: \{portal.active_work}", "chip-neutral"),
       ]),
     ]),
     a(
       href="./viewport.html?assets=generated&v=wenyu",
       class="viewport-portal-button",
-      "Open Wenyu Viewport",
+      "Open Wenyu Map",
     ),
   ])
 }
