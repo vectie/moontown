@@ -7,7 +7,7 @@ fn render_request_desk(
     div(class="request-desk-head", [
       div(class="request-desk-title", [
         p(class="eyebrow", "Request Desk"),
-        h2("Request intake"),
+        h2("Requests"),
       ]),
       render_request_shortcuts(dispatch, model),
     ]),

@@ -217,6 +217,26 @@ Default state should remove:
 - the workbench summary sentence
 - old `attention-review-*` and `attention-strip-*` classes
 
+### Phase 11: Compact Request Command Dock
+
+Default request creation should read as two professional commands, not a small
+form chooser. The full submit labels still belong inside the expanded
+composers, but the default dashboard should keep the request surface short
+enough that attention and town-area navigation remain visible on phones.
+
+Default state should keep:
+
+- `Request Desk` as the section label
+- `Standing watch` and `Evidence book` as the command targets
+- short `Save` and `Queue` actions
+- a two-column command dock on phone and desktop
+
+Default state should remove:
+
+- the `Request intake` heading
+- long shortcut commands such as `Save Watch`
+- long shortcut commands such as `Queue PDF Watch Book`
+
 ## Done Criteria
 
 - A professional user can operate watches, reviews, book requests, and the map
@@ -323,3 +343,7 @@ Default state should remove:
 - The Attention Workbench has been replaced by a compact Attention dock. The
   launchpad owns the attention signal, while the dock keeps only the current
   action, next opening, and latest signal.
+- Request Desk shortcuts now behave as a compact two-command dock on phone and
+  desktop. The default dashboard shows `Standing watch / Save` and
+  `Evidence book / Queue`, while longer submit wording stays inside the
+  expanded composers.

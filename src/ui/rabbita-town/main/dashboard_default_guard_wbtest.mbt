@@ -68,6 +68,7 @@ fn default_dashboard_forbidden_copy() -> Array[String] {
     "Health, watches, review needs, book queue, and map entry stay close to the request path.",
     "Attention Workbench", "attention-review-strip", "attention-review-copy",
     "attention-strip-chips", "attention-strip-chip",
+    "Request intake", "Save Watch", "Queue PDF Watch Book",
   ]
 }
 
@@ -91,10 +92,10 @@ test "default dashboard keeps professional operating actions visible" {
   assert_true(html.contains("town-launchpad-signal-rail"))
   assert_true(html.contains("town-launchpad-gateway"))
   assert_true(html.contains("Open Wenyu Map"))
-  assert_true(html.contains("Save Watch"))
-  assert_true(html.contains("Queue PDF Watch Book"))
+  assert_true(html.contains("Save"))
+  assert_true(html.contains("Queue"))
   assert_true(html.contains("Request Desk"))
-  assert_true(html.contains("Request intake"))
+  assert_true(html.contains("Requests"))
   assert_true(html.contains("request-action-dock"))
   assert_true(html.contains("Standing watch"))
   assert_true(html.contains("Evidence book"))

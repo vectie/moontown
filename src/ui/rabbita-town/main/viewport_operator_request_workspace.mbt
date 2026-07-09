@@ -39,14 +39,14 @@ fn render_request_shortcuts(
       model,
       RequestComposerFocus::StandingWatchComposer,
       "Standing watch",
-      operator_request_submit_label(false),
+      "Save",
     ),
     render_request_action_button(
       dispatch,
       model,
       RequestComposerFocus::EvidenceBookComposer,
       "Evidence book",
-      book_template_request_submit_label(false),
+      "Queue",
     ),
   ])
 }
