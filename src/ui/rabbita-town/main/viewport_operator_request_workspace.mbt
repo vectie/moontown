@@ -44,7 +44,7 @@ fn render_request_shortcuts(
       RequestComposerFocus::StandingWatchComposer,
       "Standing watch",
       "Keep watching a topic",
-      "Use this when an existing MoonBook should keep tracking useful evidence changes.",
+      "Track useful evidence changes in an existing MoonBook.",
       operator_request_submit_label(false),
     ),
     render_request_shortcut_card(
@@ -53,32 +53,8 @@ fn render_request_shortcuts(
       RequestComposerFocus::EvidenceBookComposer,
       "Evidence book",
       "Create a PDF evidence watch",
-      "Use this less often, when the town needs a new durable book and approved PDF sources.",
+      "Use when a new durable book needs approved PDF sources.",
       book_template_request_submit_label(false),
-    ),
-  ])
-}
-
-///|
-fn render_request_focus_panel(
-  dispatch : Dispatch[Msg],
-  model : Model,
-) -> @rabbita.Html {
-  match model.request_composer {
-    RequestShortcuts => render_request_idle_panel()
-    StandingWatchComposer => render_request_composer(dispatch, model)
-    EvidenceBookComposer => render_book_template_composer(dispatch, model)
-  }
-}
-
-///|
-fn render_request_idle_panel() -> @rabbita.Html {
-  article(class="request-idle-panel", [
-    p(class="metric-label", "New work"),
-    h3("Choose the next safe request"),
-    p(
-      class="metric-detail",
-      "Most operators only need one request path at a time. Pick a watch or a book request when there is a concrete evidence job to create.",
     ),
   ])
 }
@@ -88,8 +64,11 @@ fn render_request_desk_workspace(
   dispatch : Dispatch[Msg],
   model : Model,
 ) -> @rabbita.Html {
-  div(class="request-desk-stack", [
-    render_request_shortcuts(dispatch, model),
-    render_request_focus_panel(dispatch, model),
-  ])
+  let children = [render_request_shortcuts(dispatch, model)]
+  match model.request_composer {
+    RequestShortcuts => ()
+    StandingWatchComposer => children.push(render_request_composer(dispatch, model))
+    EvidenceBookComposer => children.push(render_book_template_composer(dispatch, model))
+  }
+  div(class="request-desk-stack", children)
 }

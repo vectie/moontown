@@ -192,3 +192,7 @@ Allow these only in advanced/developer surfaces.
   grid by default. It is now a compact `Town Areas` launcher; detailed district,
   resident, quest, and social-capital panels render only after the operator
   explicitly opens that area.
+- The Request Desk no longer renders a separate idle explanation panel by
+  default. The professional dashboard now shows the two request choices as a
+  compact intake control, and opens the full watch or book composer only after
+  the operator chooses that path.

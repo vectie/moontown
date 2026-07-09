@@ -1,7 +1,7 @@
 .request-desk {
   display: grid;
-  gap: 16px;
-  padding: 18px;
+  gap: 14px;
+  padding: 16px;
   border: var(--pixel-border);
   border-radius: 0;
   background:
@@ -25,7 +25,7 @@
 
 .request-desk-stack {
   display: grid;
-  gap: 16px;
+  gap: 12px;
   align-content: start;
 }
 
@@ -36,7 +36,6 @@
 }
 
 .request-shortcut-card,
-.request-idle-panel,
 .request-composer {
   border: 3px solid var(--line);
   background: rgba(255, 252, 244, 0.82);
@@ -45,12 +44,12 @@
 
 .request-shortcut-card {
   appearance: none;
-  min-height: 156px;
+  min-height: 118px;
   display: grid;
   align-content: start;
-  gap: 10px;
+  gap: 8px;
   width: 100%;
-  padding: 14px;
+  padding: 12px;
   color: var(--ink);
   text-align: left;
   cursor: pointer;
@@ -75,8 +74,7 @@
     var(--paper);
 }
 
-.request-shortcut-card h3,
-.request-idle-panel h3 {
+.request-shortcut-card h3 {
   margin: 0;
 }
 
@@ -94,17 +92,10 @@
   line-height: 1.15;
 }
 
-.request-idle-panel,
 .request-composer {
   display: grid;
   gap: 14px;
   padding: 16px;
-}
-
-.request-idle-panel {
-  background:
-    linear-gradient(135deg, rgba(255, 252, 244, 0.82), rgba(233, 247, 224, 0.72)),
-    var(--paper);
 }
 
 .book-template-composer {
@@ -208,4 +199,14 @@
   border: 1px solid rgba(32, 21, 10, 0.12);
   background: rgba(255, 250, 239, 0.68);
   font-size: 12px;
+}
+
+@media (max-width: 820px) {
+  .request-shortcut-grid {
+    grid-template-columns: 1fr;
+  }
+
+  .request-shortcut-card {
+    min-height: 108px;
+  }
 }

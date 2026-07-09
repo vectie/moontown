@@ -44,7 +44,8 @@ fn default_dashboard_forbidden_copy() -> Array[String] {
     "Professional view", "Town data connected", "Town Overview", "professional-overview",
     "viewport-portal", "town-main", "scene-column", "town-header", "title-block",
     "Professional town workspace", "Focused town surfaces",
-    "dashboard-overview-card", "dashboard-overview-grid",
+    "dashboard-overview-card", "dashboard-overview-grid", "request-idle-panel",
+    "Choose the next safe request",
   ]
 }
 
@@ -81,7 +82,8 @@ test "default dashboard keeps professional operating actions visible" {
   assert_true(html.contains("Residents"))
   assert_true(html.contains("Quests"))
   assert_true(html.contains("Social capital"))
-  assert_true(html.contains("Choose the next safe request"))
+  assert_true(html.contains("Keep watching a topic"))
+  assert_true(html.contains("Create a PDF evidence watch"))
 }
 
 ///|
