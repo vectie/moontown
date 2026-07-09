@@ -42,7 +42,7 @@ test "town launchpad attention summary includes execution review state" {
   assert_eq(summary.review_count, 1)
   assert_eq(professional_attention_label(summary), "Review")
   assert_eq(professional_attention_chip_text(summary), "Review: 1")
-  assert_true(professional_attention_detail(summary).contains("town work"))
+  assert_eq(professional_attention_detail(summary), "1 review")
 }
 
 ///|
@@ -53,7 +53,7 @@ test "town launchpad watch detail hides implementation ids" {
       disabled_count: 0,
       active_goal: None,
     }),
-    "Save a standing watch to start durable topic monitoring.",
+    "Ready to save",
   )
   assert_eq(
     professional_watch_detail({
@@ -61,6 +61,6 @@ test "town launchpad watch detail hides implementation ids" {
       disabled_count: 1,
       active_goal: None,
     }),
-    "1 saved watch is currently paused.",
+    "1 paused",
   )
 }

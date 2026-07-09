@@ -43,11 +43,11 @@ fn default_dashboard_forbidden_copy() -> Array[String] {
     "deeper town tools", "Preview live", "Preview paused", "Town check waiting",
     "Professional view", "Town data connected", "Town Overview", "professional-overview",
     "viewport-portal", "town-main", "scene-column", "town-header", "title-block",
-    "Professional town workspace", "Focused town surfaces",
-    "dashboard-overview-card", "dashboard-overview-grid", "request-idle-panel",
-    "Choose the next safe request", "Activity Ledger", "activity-ledger-panel",
-    "feed-panel", "feed-item", "Closed by default", "Default closed",
-    "town-area-closed-panel",
+    "Professional town workspace", "Focused town surfaces", "dashboard-overview-card",
+    "dashboard-overview-grid", "request-idle-panel", "Choose the next safe request",
+    "Activity Ledger", "activity-ledger-panel", "feed-panel", "feed-item", "Closed by default",
+    "Default closed", "town-area-closed-panel", "town-launchpad-grid", "town-launchpad-card",
+    "launchpad-card-",
   ]
 }
 
@@ -70,6 +70,7 @@ test "default dashboard keeps professional operating actions visible" {
   assert_true(html.contains("Wenyu Valley workspace"))
   assert_true(html.contains("Town Launchpad"))
   assert_true(html.contains("Current town pulse"))
+  assert_true(html.contains("town-launchpad-signal-rail"))
   assert_true(html.contains("Open Wenyu Map"))
   assert_true(html.contains("Open Wenyu Valley workspace"))
   assert_true(html.contains("Save Watch"))
@@ -109,9 +110,7 @@ test "dashboard ecosystem sections stay closed by default" {
   let html = render_default_dashboard_test_html(init_model())
   assert_true(!html.contains("Town shell plus live civic systems"))
   assert_true(!html.contains("Digital twins with memory"))
-  assert_true(
-    !html.contains("Policy, contest, social, and offline workflows"),
-  )
+  assert_true(!html.contains("Policy, contest, social, and offline workflows"))
   assert_true(!html.contains("Weak ties, talent graph"))
 }
 

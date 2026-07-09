@@ -18,7 +18,7 @@ fn render_town_launchpad(
             h2("Current town pulse"),
             p(
               class="summary",
-              "Health, watches, review needs, book work, and Wenyu map entry stay in one first-screen operating surface.",
+              "Health, watches, review needs, book queue, and map entry stay close to the request path.",
             ),
           ]),
           div(class="town-launchpad-actions", [
@@ -32,30 +32,30 @@ fn render_town_launchpad(
             ),
           ]),
         ]),
-        div(class="town-launchpad-grid", [
-          render_town_launchpad_card(
+        div(class="town-launchpad-signal-rail", [
+          render_town_launchpad_signal(
             "Town health",
             professional_town_health_label(model),
             professional_town_health_detail(model),
             professional_town_health_tone(model),
           ),
-          render_town_launchpad_card(
+          render_town_launchpad_signal(
             "Standing watches",
             watch_summary.enabled_count.to_string(),
             professional_watch_detail(watch_summary),
-            "launchpad-card-book",
+            "launchpad-signal-book",
           ),
-          render_town_launchpad_card(
+          render_town_launchpad_signal(
             "Attention",
             professional_attention_label(attention),
             professional_attention_detail(attention),
             professional_attention_tone(attention),
           ),
-          render_town_launchpad_card(
+          render_town_launchpad_signal(
             "Book queue",
             model.operator_requests.length().to_string(),
             professional_book_queue_detail(model),
-            "launchpad-card-neutral",
+            "launchpad-signal-neutral",
           ),
         ]),
       ]),
@@ -86,16 +86,18 @@ fn render_town_launchpad(
 }
 
 ///|
-fn render_town_launchpad_card(
+fn render_town_launchpad_signal(
   label : String,
   value : String,
   detail : String,
   tone : String,
 ) -> @rabbita.Html {
-  article(class="town-launchpad-card \{tone}", [
+  article(class="town-launchpad-signal \{tone}", [
     p(class="metric-label", label),
-    p(class="town-launchpad-value", value),
-    p(class="metric-detail", detail),
+    div(class="town-launchpad-signal-main", [
+      p(class="town-launchpad-value", value),
+      p(class="town-launchpad-signal-note", detail),
+    ]),
   ])
 }
 
@@ -138,31 +140,31 @@ fn professional_town_health_label(model : Model) -> String {
 ///|
 fn professional_town_health_tone(model : Model) -> String {
   if mayor_recovery_active(model) || model.paused {
-    "launchpad-card-alert"
+    "launchpad-signal-alert"
   } else {
-    "launchpad-card-calm"
+    "launchpad-signal-calm"
   }
 }
 
 ///|
 fn professional_town_health_detail(model : Model) -> String {
   if mayor_recovery_active(model) {
-    "Review pressure, stability, energy, or budget before adding more work."
+    "Review load first"
   } else if model.paused {
-    "Town updates are paused; active work remains visible for review."
+    "Updates paused"
   } else {
-    "Town loop is stable enough for standing checks and resident activity."
+    "Loop stable"
   }
 }
 
 ///|
 fn professional_watch_detail(summary : StandingGoalSummary) -> String {
   if summary.enabled_count == 0 {
-    "Save a standing watch to start durable topic monitoring."
+    "Ready to save"
   } else if summary.disabled_count > 0 {
-    "\{summary.disabled_count} saved watch is currently paused."
+    "\{summary.disabled_count} paused"
   } else {
-    "Enabled watches continue on the town check cadence."
+    "Cadence active"
   }
 }
 
@@ -184,11 +186,11 @@ fn professional_attention_tone(
   summary : ProfessionalAttentionSummary,
 ) -> String {
   if professional_attention_has_failed(summary) {
-    "launchpad-card-alert"
+    "launchpad-signal-alert"
   } else if professional_attention_has_review(summary) {
-    "launchpad-card-review"
+    "launchpad-signal-review"
   } else {
-    "launchpad-card-calm"
+    "launchpad-signal-calm"
   }
 }
 
@@ -197,11 +199,11 @@ fn professional_attention_detail(
   summary : ProfessionalAttentionSummary,
 ) -> String {
   if professional_attention_has_failed(summary) {
-    "\{summary.failed_count} watch, book, or town work item needs recovery."
+    "\{summary.failed_count} recover"
   } else if professional_attention_has_review(summary) {
-    "\{summary.review_count} watch or town work item is waiting for review."
+    "\{summary.review_count} review"
   } else {
-    "No failed or review-blocked work is waiting."
+    "No blockers"
   }
 }
 
@@ -212,8 +214,8 @@ fn professional_book_queue_detail(model : Model) -> String {
       fallback_active_workers=0,
     ).template_request_count
   if template_requests > 0 {
-    "\{template_requests} book setup request is visible in the town queue."
+    "\{template_requests} setup"
   } else {
-    "Create a book request only when a new durable knowledge area is needed."
+    "No setup pending"
   }
 }

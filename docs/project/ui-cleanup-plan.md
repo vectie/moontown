@@ -204,3 +204,7 @@ Allow these only in advanced/developer surfaces.
   explanation panel. The default dashboard now shows four real area choices and
   keeps every civic detail panel unrendered until the operator selects that
   area; selecting the active area closes it again.
+- The Town Launchpad no longer uses four tall explanatory status cards. Its
+  default state is a compact signal rail for health, watches, attention, and
+  book queue, keeping the Wenyu map action visible while leaving more first
+  screen room for the Request Desk.
