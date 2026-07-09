@@ -652,3 +652,8 @@ Advanced state should remove:
   handoff artifacts, book projections, and interior cards. Its mobile shell can
   scroll to the map, and the module status chip now uses compact count/version
   copy instead of a long diagnostic sentence.
+- The professional default dashboard now has a real ecosystem visual without
+  reopening advanced controls. The launchpad remains the only `Map` gateway,
+  while a compact, non-interactive Wenyu map preview follows the
+  request/attention/town-area deck so the product reads as Moontown instead of
+  an empty operating form.

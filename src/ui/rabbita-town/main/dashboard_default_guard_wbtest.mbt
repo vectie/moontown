@@ -98,6 +98,8 @@ test "default dashboard keeps professional operating actions visible" {
   assert_true(html.contains("town-launchpad-gateway"))
   assert_true(html.contains(">Map<"))
   assert_true(html.contains("town-operations-deck"))
+  assert_true(html.contains("town-ecosystem-preview"))
+  assert_true(html.contains("tilemap/wenyu_reference_tilemap_iso.png"))
   assert_true(html.contains("Save"))
   assert_true(html.contains("Queue"))
   assert_true(html.contains("Request Desk"))
@@ -123,6 +125,7 @@ test "default dashboard groups secondary operating surfaces in one deck" {
   assert_true(html.contains("request-desk"))
   assert_true(html.contains("attention-dock"))
   assert_true(html.contains("town-areas-launcher"))
+  assert_true(html.contains("town-ecosystem-preview-visual"))
   assert_true(html.contains("request-action-dock"))
   assert_true(html.contains("dashboard-section-tabs"))
 }
