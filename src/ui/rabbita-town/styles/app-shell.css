@@ -1,20 +1,20 @@
 :root {
-  --bg: #c6d574;
-  --bg-deep: #8fa64f;
-  --paper: #fff0bd;
-  --paper-strong: #fff7d6;
-  --ink: #23170d;
-  --muted: #684f2b;
-  --line: #6f4f2a;
-  --hall: #b45237;
-  --book: #2f6b58;
-  --yard: #4e7d91;
-  --alert: #a33228;
-  --calm: #4f8a45;
-  --clock: #31576a;
-  --gold: #c99534;
-  --shadow: 6px 6px 0 rgba(56, 35, 16, 0.28);
-  --pixel-border: 4px solid #5a3b20;
+  --bg: #eef7ff;
+  --bg-deep: #c7dff7;
+  --paper: #ffffff;
+  --paper-strong: #f7fbff;
+  --ink: #102033;
+  --muted: #5e6b7d;
+  --line: rgba(28, 73, 122, 0.16);
+  --hall: #e56a50;
+  --book: #1476ff;
+  --yard: #26b7d3;
+  --alert: #c93434;
+  --calm: #178a5a;
+  --clock: #315fd6;
+  --gold: #f0a92e;
+  --shadow: 0 18px 42px rgba(35, 82, 125, 0.13);
+  --pixel-border: 1px solid var(--line);
 }
 
 * {
@@ -29,10 +29,9 @@ body {
   color: var(--ink);
   overflow-x: hidden;
   background:
-    linear-gradient(45deg, rgba(255, 255, 255, 0.08) 25%, transparent 25%) 0 0 / 32px 32px,
-    linear-gradient(45deg, transparent 75%, rgba(88, 111, 45, 0.13) 75%) 0 0 / 32px 32px,
-    linear-gradient(180deg, #c6d574 0%, #a2b65b 100%);
-  image-rendering: pixelated;
+    radial-gradient(circle at 14% 0%, rgba(77, 190, 255, 0.2), transparent 32%),
+    radial-gradient(circle at 92% 8%, rgba(20, 118, 255, 0.13), transparent 34%),
+    linear-gradient(180deg, #eef7ff 0%, #f8fbff 54%, #e8f2ff 100%);
 }
 
 body,
@@ -50,7 +49,7 @@ body,
 .boot-panel {
   max-width: 560px;
   padding: 30px 34px;
-  border-radius: 24px;
+  border-radius: 8px;
   border: 1px solid var(--line);
   background: var(--paper);
   box-shadow: var(--shadow);
@@ -170,7 +169,7 @@ body,
   align-items: center;
   padding: 10px 12px;
   border: var(--pixel-border);
-  border-radius: 0;
+  border-radius: 8px;
   background: #ffe7a6;
   box-shadow: var(--shadow);
 }

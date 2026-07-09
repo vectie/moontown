@@ -84,11 +84,11 @@
   align-content: center;
   gap: 4px;
   padding: 7px 9px;
-  border: 3px solid rgba(90, 59, 32, 0.48);
-  border-left: 6px solid var(--accent);
-  border-radius: 0;
-  background: rgba(255, 250, 239, 0.76);
-  box-shadow: 3px 3px 0 rgba(56, 35, 16, 0.12);
+  border: 1px solid rgba(28, 73, 122, 0.16);
+  border-left: 4px solid var(--accent);
+  border-radius: 8px;
+  background: rgba(255, 255, 255, 0.78);
+  box-shadow: 0 8px 18px rgba(35, 82, 125, 0.08);
 }
 
 .attention-dock-chip h3 {
@@ -122,7 +122,7 @@
 .attention-dock-value {
   margin: 0;
   color: var(--ink);
-  font-family: "Courier New", "Menlo", monospace;
+  font-family: inherit;
   font-size: 14px;
   font-weight: 900;
   line-height: 1.15;

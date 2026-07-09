@@ -3,11 +3,11 @@
   gap: 10px;
   padding: 12px;
   border: var(--pixel-border);
-  border-radius: 0;
+  border-radius: 8px;
   background:
-    linear-gradient(135deg, rgba(255, 246, 221, 0.96), rgba(222, 242, 231, 0.9)),
-    radial-gradient(circle at 0% 0%, rgba(185, 138, 41, 0.18), transparent 36%),
-    radial-gradient(circle at 100% 0%, rgba(46, 111, 96, 0.14), transparent 40%);
+    linear-gradient(135deg, rgba(255, 255, 255, 0.96), rgba(238, 248, 255, 0.9)),
+    radial-gradient(circle at 0% 0%, rgba(38, 183, 211, 0.12), transparent 36%),
+    radial-gradient(circle at 100% 0%, rgba(20, 118, 255, 0.11), transparent 40%);
   box-shadow: var(--shadow);
 }
 
@@ -51,9 +51,10 @@
 }
 
 .request-composer {
-  border: 3px solid var(--line);
-  background: rgba(255, 252, 244, 0.82);
-  box-shadow: 3px 3px 0 rgba(56, 35, 16, 0.16);
+  border: 1px solid rgba(28, 73, 122, 0.16);
+  border-radius: 8px;
+  background: rgba(255, 255, 255, 0.84);
+  box-shadow: 0 10px 24px rgba(35, 82, 125, 0.08);
 }
 
 .request-action-button {
@@ -65,19 +66,20 @@
   gap: 10px;
   width: 100%;
   padding: 9px 10px;
-  border: 3px solid var(--line);
-  background: rgba(255, 252, 244, 0.82);
-  box-shadow: 3px 3px 0 rgba(56, 35, 16, 0.14);
+  border: 1px solid rgba(28, 73, 122, 0.16);
+  border-radius: 8px;
+  background: rgba(255, 255, 255, 0.82);
+  box-shadow: 0 8px 18px rgba(35, 82, 125, 0.08);
   color: var(--ink);
   text-align: left;
   cursor: pointer;
-  transition: transform 80ms steps(1), box-shadow 80ms steps(1), background 80ms steps(1);
+  transition: transform 160ms ease, box-shadow 160ms ease, background 160ms ease;
 }
 
 .request-action-button:hover,
 .request-action-button:focus-visible {
-  transform: translate(-2px, -2px);
-  box-shadow: 5px 5px 0 rgba(56, 35, 16, 0.22);
+  transform: translateY(-1px);
+  box-shadow: 0 12px 24px rgba(35, 82, 125, 0.12);
 }
 
 .request-action-button:focus-visible {
@@ -88,7 +90,7 @@
 .request-action-button.is-active {
   border-color: rgba(35, 23, 13, 0.86);
   background:
-    linear-gradient(135deg, rgba(207, 232, 223, 0.88), rgba(255, 247, 210, 0.96)),
+    linear-gradient(135deg, rgba(230, 247, 255, 0.96), rgba(255, 255, 255, 0.96)),
     var(--paper);
 }
 
@@ -100,7 +102,7 @@
 
 .request-action-label {
   color: var(--muted);
-  font-family: "Courier New", "Menlo", monospace;
+  font-family: inherit;
   font-size: 10px;
   font-weight: 900;
   letter-spacing: 0.08em;
@@ -110,7 +112,7 @@
 
 .request-action-command {
   color: var(--book);
-  font-family: "Courier New", "Menlo", monospace;
+  font-family: inherit;
   font-size: 12px;
   font-weight: 900;
   line-height: 1.1;
@@ -126,7 +128,7 @@
 
 .book-template-composer {
   background:
-    linear-gradient(135deg, rgba(207, 232, 223, 0.78), rgba(255, 247, 210, 0.92)),
+    linear-gradient(135deg, rgba(230, 247, 255, 0.88), rgba(255, 255, 255, 0.94)),
     var(--paper);
 }
 
@@ -185,12 +187,12 @@
 .request-input,
 .request-textarea {
   width: 100%;
-  border: 3px solid rgba(90, 59, 32, 0.8);
-  border-radius: 0;
-  background: rgba(255, 250, 239, 0.96);
+  border: 1px solid rgba(28, 73, 122, 0.2);
+  border-radius: 8px;
+  background: rgba(255, 255, 255, 0.96);
   color: var(--ink);
-  font: 13px/1.45 "Courier New", "Menlo", monospace;
-  box-shadow: inset 3px 3px 0 rgba(56, 35, 16, 0.08);
+  font: 13px/1.45 "Fira Sans", "Avenir Next", "Segoe UI", sans-serif;
+  box-shadow: inset 0 1px 2px rgba(35, 82, 125, 0.06);
 }
 
 .request-input {

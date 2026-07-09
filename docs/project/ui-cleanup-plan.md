@@ -467,6 +467,29 @@ Default state should remove:
 - compatibility styling for the removed standalone masthead band
 - any assumption that old hero chrome may return to the default dashboard
 
+### Phase 24: Professional Standalone Visual System
+
+The compact default dashboard now has the right information hierarchy, but its
+visual system still reads like a retro game shell: striped green page
+background, chunky brown borders, stepped shadows, and monospace control
+chrome. Moontown should borrow the reference designs' clear blue-white
+optimism without copying the phone mini-app style or keeping old pixel
+compatibility as the default product identity.
+
+Default state should keep:
+
+- the compact launchpad, request, attention, and town-area deck
+- visible alert, worker, review, map, request, and area actions
+- professional status density and 44px mobile action targets
+
+Default state should remove:
+
+- pixelated page rendering from the default shell
+- green striped wallpaper behind the operating dashboard
+- heavy brown borders, square cards, and stepped shadows on default surfaces
+- monospace button/chip typography where it reads as game chrome rather than
+  operational UI
+
 ## Done Criteria
 
 - A professional user can operate watches, reviews, book requests, and the map
@@ -593,3 +616,7 @@ Default state should remove:
 - Shared responsive CSS no longer carries retired `operator-masthead` layout
   selectors. The default dashboard guard still forbids those old masthead
   classes in rendered HTML, matching the unified launchpad contract.
+- The default dashboard now uses a cleaner blue-white standalone visual system:
+  soft page depth, restrained 8px operating surfaces, lighter borders,
+  smoother shadows, and product typography for chips, buttons, signals, request
+  actions, attention chips, and town-area tabs.
