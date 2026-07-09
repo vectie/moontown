@@ -319,7 +319,7 @@
 }
 
 .inspector-panel,
-.attention-workbench {
+.attention-dock {
   border: var(--pixel-border);
   border-radius: 0;
   background: var(--paper);

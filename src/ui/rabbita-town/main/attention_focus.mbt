@@ -1,8 +1,6 @@
 ///|
 priv struct AttentionFocusView {
   title : String
-  signal : String
-  detail : String
   next_label : String
   next_detail : String
   tone : String
@@ -26,12 +24,6 @@ fn attention_focus_view(
   if professional_attention_has_failed(attention) {
     {
       title: "Recover failed work",
-      signal: attention_focus_count_fragment(
-        attention.failed_count,
-        "failed item",
-        "failed items",
-      ),
-      detail: "Resolve failed watch or book work before starting new operating load.",
       next_label: "Next opening",
       next_detail: attention_focus_recovery_opening(
         execution_summary,
@@ -43,12 +35,6 @@ fn attention_focus_view(
   } else if professional_attention_has_review(attention) {
     {
       title: "Review queued work",
-      signal: attention_focus_count_fragment(
-        attention.review_count,
-        "review",
-        "reviews",
-      ),
-      detail: "Clear review work before the next handoff window.",
       next_label: "Next opening",
       next_detail: attention_focus_review_opening(execution_summary, decisions),
       tone: "review",
@@ -56,8 +42,6 @@ fn attention_focus_view(
   } else if watch_summary.enabled_count == 0 {
     {
       title: "Start standing watch",
-      signal: "No watch active",
-      detail: "Create one durable watch before relying on unattended town monitoring.",
       next_label: "Town capacity",
       next_detail: attention_focus_count_fragment(
         workers_summary.online(),
@@ -69,12 +53,6 @@ fn attention_focus_view(
   } else if live.pending_template_request_count > 0 {
     {
       title: "Prepare book request",
-      signal: attention_focus_count_fragment(
-        live.pending_template_request_count,
-        "book pending",
-        "books pending",
-      ),
-      detail: "Move pending evidence book work to the next review-ready state.",
       next_label: "Watch state",
       next_detail: attention_focus_count_fragment(
         watch_summary.enabled_count,
@@ -86,12 +64,6 @@ fn attention_focus_view(
   } else if execution_summary.active_or_unresolved() > 0 {
     {
       title: "Track active work",
-      signal: attention_focus_count_fragment(
-        execution_summary.active_or_unresolved(),
-        "item moving",
-        "items moving",
-      ),
-      detail: "Keep active town work visible until it reaches review or completion.",
       next_label: "Town capacity",
       next_detail: attention_focus_count_fragment(
         workers_summary.online(),
@@ -103,12 +75,6 @@ fn attention_focus_view(
   } else {
     {
       title: "Monitor live pulse",
-      signal: attention_focus_count_fragment(
-        watch_summary.enabled_count,
-        "watch active",
-        "watches active",
-      ),
-      detail: "No review-blocked or failed work is visible right now.",
       next_label: "Town capacity",
       next_detail: attention_focus_count_fragment(
         workers_summary.online(),

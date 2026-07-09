@@ -197,6 +197,26 @@ Default state should remove:
 - the tutorial-like `Town Launchpad` / `Current town pulse` heading pair
 - the launchpad summary sentence
 
+### Phase 10: Compact Attention Dock
+
+The launchpad already shows the professional attention state, so the separate
+Attention Workbench should not restate the same signal in a second large panel.
+Default users still need the next opening and latest signal, but those should
+behave like an operating dock rather than another dashboard section.
+
+Default state should keep:
+
+- the current attention action
+- the next opening
+- the latest signal
+
+Default state should remove:
+
+- the `Attention Workbench` heading
+- the duplicated `Signal` chip
+- the workbench summary sentence
+- old `attention-review-*` and `attention-strip-*` classes
+
 ## Done Criteria
 
 - A professional user can operate watches, reviews, book requests, and the map
@@ -300,3 +320,6 @@ Default state should remove:
 - The status bar and launchpad chrome are now unified. The default dashboard
   starts with one Town Launchpad surface containing product identity, scene
   title, alerts, worker/attention chips, map entry, and the compact signal rail.
+- The Attention Workbench has been replaced by a compact Attention dock. The
+  launchpad owns the attention signal, while the dock keeps only the current
+  action, next opening, and latest signal.

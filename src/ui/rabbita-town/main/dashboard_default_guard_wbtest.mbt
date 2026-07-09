@@ -66,6 +66,8 @@ fn default_dashboard_forbidden_copy() -> Array[String] {
     "town-status-bar", "town-status-title", "town-status-alerts",
     "Town Launchpad", "Current town pulse",
     "Health, watches, review needs, book queue, and map entry stay close to the request path.",
+    "Attention Workbench", "attention-review-strip", "attention-review-copy",
+    "attention-strip-chips", "attention-strip-chip",
   ]
 }
 
@@ -82,7 +84,6 @@ test "default dashboard hides developer and rare runtime controls" {
 ///|
 test "default dashboard keeps professional operating actions visible" {
   let html = render_default_dashboard_test_html(init_model())
-  assert_true(html.contains("Signal"))
   assert_true(html.contains("Next opening"))
   assert_true(html.contains("Moontown"))
   assert_true(html.contains("Wenyu Valley / AI Innovation Town"))
@@ -97,9 +98,9 @@ test "default dashboard keeps professional operating actions visible" {
   assert_true(html.contains("request-action-dock"))
   assert_true(html.contains("Standing watch"))
   assert_true(html.contains("Evidence book"))
-  assert_true(html.contains("Attention Workbench"))
-  assert_true(html.contains("attention-review-strip"))
-  assert_true(html.contains("Recent signal"))
+  assert_true(html.contains("Attention"))
+  assert_true(html.contains("attention-dock"))
+  assert_true(html.contains("Latest signal"))
   assert_true(html.contains("Town Areas"))
   assert_true(html.contains("Civic surfaces"))
   assert_true(html.contains("Districts"))

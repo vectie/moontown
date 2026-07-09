@@ -122,6 +122,6 @@ test "attention recent chip class centralizes tone styling" {
       detail: "Needs action",
       tone: "alert",
     }),
-    "attention-strip-chip attention-strip-recent attention-strip-alert",
+    "attention-dock-chip attention-dock-recent attention-dock-alert",
   )
 }
