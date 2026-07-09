@@ -8,6 +8,7 @@ import {
 import { installViewportDragPan } from './viewport_drag_pan.js'
 
 const app = document.getElementById('app')
+const BOOT_RUNTIME_WARMUP_MS = 700
 
 if (app) {
   app.innerHTML = `
@@ -21,11 +22,19 @@ if (app) {
   `
 }
 
+function delay(ms) {
+  return new Promise(resolve => setTimeout(resolve, ms))
+}
+
 async function boot() {
-  await refreshRuntimeSnapshots()
+  const runtimeWarmup = Promise.allSettled([
+    refreshRuntimeSnapshots(),
+    loadWenyuReferenceLabels(),
+    loadWenyuTownModules(),
+  ])
+
   startRuntimeSnapshotRefresh()
-  await loadWenyuReferenceLabels()
-  await loadWenyuTownModules()
+  await Promise.race([runtimeWarmup, delay(BOOT_RUNTIME_WARMUP_MS)])
 
   await import('/main.js')
   installViewportDragPan()
