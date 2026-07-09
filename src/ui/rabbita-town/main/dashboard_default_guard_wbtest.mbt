@@ -33,6 +33,10 @@ fn default_dashboard_forbidden_copy() -> Array[String] {
     "Advanced Operations", "Town work health", "Available:",
     "Town work is stable enough for normal watch",
     "Review work is waiting. Resolve review items",
+    "Legend", "City Hall is the mayor runtime",
+    "Moonbook houses hold keeper-owned domain planning",
+    "Worker avatars now move between yard, hall, books",
+    "Open the Wenyu viewport when you need the full map",
   ]
 }
 
@@ -54,6 +58,7 @@ test "default dashboard keeps professional operating actions visible" {
   assert_true(html.contains("Save Watch"))
   assert_true(html.contains("Queue PDF Watch Book"))
   assert_true(html.contains("Operating Brief"))
+  assert_true(html.contains("Current focus"))
   assert_true(html.contains("Focused town surfaces"))
   assert_true(html.contains("Districts"))
   assert_true(html.contains("Residents"))

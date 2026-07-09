@@ -32,17 +32,7 @@ fn render_dashboard_page(
             context.state.events,
           ),
         ),
-        aside(class="scene-legend", [
-          h2("Legend"),
-          p("City Hall is the mayor runtime and policy anchor."),
-          p("Moonbook houses hold keeper-owned domain planning."),
-          p(
-            "Worker avatars now move between yard, hall, books, and anomaly response.",
-          ),
-          p(
-            "Open the Wenyu viewport when you need the full map and deeper runtime tools.",
-          ),
-        ]),
+        render_operator_focus_panel(model, context.workers, context.executions),
       ]),
     ]),
     section(class="metric-grid", render_vitality_metric_grid(model)),

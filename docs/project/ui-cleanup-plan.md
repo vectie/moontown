@@ -152,3 +152,6 @@ Allow these only in advanced/developer surfaces.
 - Advanced runtime counters no longer render inside the professional dashboard;
   the dashboard keeps a single `Open Advanced Viewport` portal for deliberate
   runtime inspection.
+- The default sidebar no longer carries the old map legend. A compact
+  `Current focus` panel now points operators at recovery, review, standing
+  watch setup, pending book requests, or steady monitoring based on live state.

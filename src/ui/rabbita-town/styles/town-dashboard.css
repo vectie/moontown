@@ -310,7 +310,7 @@
 .metric-card,
 .inspector-panel,
 .feed-panel,
-.scene-legend {
+.operator-focus-panel {
   border: var(--pixel-border);
   border-radius: 0;
   background: var(--paper);
