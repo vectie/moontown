@@ -385,7 +385,6 @@
 }
 
 .inspector-panel,
-.feed-panel,
 .attention-workbench {
   border: var(--pixel-border);
   border-radius: 0;

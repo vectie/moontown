@@ -138,9 +138,9 @@ Allow these only in advanced/developer surfaces.
 - Default Rabbita town now hides rare runtime source switching, simulation
   stepping, strategy tuning, and inspector drill controls from the professional
   dashboard.
-- Activity Ledger now translates execution task records into professional labels
-  and details, such as `Town shell code patch is running`, rather than exposing
-  raw task, packet, run, or proposal ids.
+- Recent activity signals translate execution task records into professional
+  labels and details, such as `Town shell code patch is running`, rather than
+  exposing raw task, packet, run, or proposal ids.
 - Default dashboard tests now guard against raw runtime ids and developer copy
   leaking back into the professional first screen.
 - Ecosystem detail now sits behind focused dashboard tabs, so district,
@@ -158,9 +158,9 @@ Allow these only in advanced/developer surfaces.
 - The duplicate lower `Advanced Viewport` block was removed from the default
   dashboard. Professional users now use the primary Wenyu map entry instead of
   reading advanced/runtime intervention copy on the first screen.
-- Activity Ledger now renders as a professional activity ledger instead of a
-  phone-style chat thread, and standing-watch feed copy no longer exposes daemon
-  wording or raw watch/book identifiers on the default dashboard.
+- Activity copy now reads as professional town signals instead of phone-style
+  chat bubbles, and standing-watch feed copy no longer exposes daemon wording or
+  raw watch/book identifiers on the default dashboard.
 - The first-viewport status strip no longer exposes preview/source state or
   daemon check cadence. It now summarizes the professional workspace, active
   watches, and attention state.
@@ -196,3 +196,7 @@ Allow these only in advanced/developer surfaces.
   default. The professional dashboard now shows the two request choices as a
   compact intake control, and opens the full watch or book composer only after
   the operator chooses that path.
+- The Attention Workbench no longer embeds the full scrollable Activity Ledger
+  in the professional dashboard. It now shows the current decision signal, next
+  opening, and one compact recent signal; the stale ledger renderer and related
+  CSS were removed from the default UI code path.

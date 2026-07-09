@@ -45,7 +45,8 @@ fn default_dashboard_forbidden_copy() -> Array[String] {
     "viewport-portal", "town-main", "scene-column", "town-header", "title-block",
     "Professional town workspace", "Focused town surfaces",
     "dashboard-overview-card", "dashboard-overview-grid", "request-idle-panel",
-    "Choose the next safe request",
+    "Choose the next safe request", "Activity Ledger", "activity-ledger-panel",
+    "feed-panel", "feed-item",
   ]
 }
 
@@ -75,7 +76,7 @@ test "default dashboard keeps professional operating actions visible" {
   assert_true(html.contains("Request Desk"))
   assert_true(html.contains("Start the next safe job"))
   assert_true(html.contains("Attention Workbench"))
-  assert_true(html.contains("Activity Ledger"))
+  assert_true(html.contains("Recent signal"))
   assert_true(html.contains("Town Areas"))
   assert_true(html.contains("Open detail only when needed"))
   assert_true(html.contains("Districts"))

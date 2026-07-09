@@ -115,9 +115,13 @@ test "visual projection feed item centralizes title detail and tone" {
 }
 
 ///|
-test "feed item class centralizes tone styling" {
+test "attention signal class centralizes tone styling" {
   assert_eq(
-    feed_item_class({ title: "Alert", detail: "Needs action", tone: "alert" }),
-    "feed-item activity-ledger-item tone-alert",
+    attention_signal_card_class({
+      title: "Alert",
+      detail: "Needs action",
+      tone: "alert",
+    }),
+    "attention-signal-card attention-signal-alert",
   )
 }

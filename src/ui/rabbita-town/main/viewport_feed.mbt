@@ -110,33 +110,3 @@ fn visual_projection_feed_summary(
     projection.messages.join(" ")
   }
 }
-
-///|
-fn render_feed(feed : Array[FeedItem]) -> @rabbita.Html {
-  section(class="feed-panel activity-ledger-panel", [
-    div(class="activity-ledger-head", [
-      span(class="activity-ledger-status", ""),
-      div([
-        h2("Activity Ledger"),
-        p("Recent watch, review, and town work signals"),
-      ]),
-    ]),
-    div(
-      class="feed-list activity-ledger-list",
-      feed.map(item => render_feed_item(item)),
-    ),
-  ])
-}
-
-///|
-fn render_feed_item(item : FeedItem) -> @rabbita.Html {
-  article(class=feed_item_class(item), [
-    span(class="feed-item-rail", ""),
-    div(class="feed-item-copy", [h3(item.title), p(item.detail)]),
-  ])
-}
-
-///|
-fn feed_item_class(item : FeedItem) -> String {
-  "feed-item activity-ledger-item tone-\{item.tone}"
-}
