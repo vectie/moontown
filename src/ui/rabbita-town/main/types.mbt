@@ -28,6 +28,13 @@ priv enum DashboardSection {
 } derive(Eq)
 
 ///|
+priv enum RequestComposerFocus {
+  RequestShortcuts
+  StandingWatchComposer
+  EvidenceBookComposer
+} derive(Eq)
+
+///|
 priv struct Model {
   tick : Int
   paused : Bool
@@ -35,6 +42,7 @@ priv struct Model {
   state_source : StateSourceKind
   viewport_mode : ViewportMode
   dashboard_section : DashboardSection
+  request_composer : RequestComposerFocus
   projection_snapshot : ProjectionSnapshot?
   snapshot_version : Int
   visual_projection : VisualProjectionSnapshot?
@@ -91,6 +99,7 @@ priv enum Msg {
   SelectOverview
   SetViewportMode(ViewportMode)
   SetDashboardSection(DashboardSection)
+  SetRequestComposer(RequestComposerFocus)
   SetRequestTitle(String)
   SetRequestPrompt(String)
   SetRequestBookId(String)

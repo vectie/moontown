@@ -143,3 +143,9 @@ Allow these only in advanced/developer surfaces.
   raw task, packet, run, or proposal ids.
 - Default dashboard tests now guard against raw runtime ids and developer copy
   leaking back into the professional first screen.
+- Ecosystem detail now sits behind focused dashboard tabs, so district,
+  resident, quest, and social-capital surfaces do not all render in the default
+  scroll.
+- Request creation now starts from two shortcuts, `Save Watch` and `Queue PDF
+  Watch Book`, and shows the detailed watch or book form only after the
+  operator chooses that path.

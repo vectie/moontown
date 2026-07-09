@@ -31,6 +31,8 @@ fn update_non_form_message(
       model_only_update(set_viewport_mode_model(model, viewport_mode))
     SetDashboardSection(section) =>
       model_only_update(set_dashboard_section_model(model, section))
+    SetRequestComposer(focus) =>
+      model_only_update(set_request_composer_model(model, focus))
     SubmitOperatorRequest => submit_operator_request_update(dispatch, model)
     SubmitBookTemplateRequest =>
       submit_book_template_request_update(dispatch, model)

@@ -289,6 +289,79 @@
   align-content: start;
 }
 
+.request-shortcut-grid {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 12px;
+}
+
+.request-shortcut-card,
+.request-idle-panel {
+  border: 3px solid var(--line);
+  background: rgba(255, 252, 244, 0.82);
+  box-shadow: 3px 3px 0 rgba(56, 35, 16, 0.16);
+}
+
+.request-shortcut-card {
+  appearance: none;
+  min-height: 156px;
+  display: grid;
+  align-content: start;
+  gap: 10px;
+  width: 100%;
+  padding: 14px;
+  color: var(--ink);
+  text-align: left;
+  cursor: pointer;
+  transition: transform 80ms steps(1), box-shadow 80ms steps(1), background 80ms steps(1);
+}
+
+.request-shortcut-card:hover,
+.request-shortcut-card:focus-visible {
+  transform: translate(-2px, -2px);
+  box-shadow: 5px 5px 0 rgba(56, 35, 16, 0.22);
+}
+
+.request-shortcut-card:focus-visible {
+  outline: 3px solid rgba(15, 118, 110, 0.28);
+  outline-offset: 2px;
+}
+
+.request-shortcut-card.is-active {
+  border-color: rgba(35, 23, 13, 0.86);
+  background:
+    linear-gradient(135deg, rgba(207, 232, 223, 0.88), rgba(255, 247, 210, 0.96)),
+    var(--paper);
+}
+
+.request-shortcut-card h3,
+.request-idle-panel h3 {
+  margin: 0;
+}
+
+.request-shortcut-action {
+  align-self: end;
+  width: max-content;
+  max-width: 100%;
+  padding: 8px 10px;
+  border: 3px solid rgba(90, 59, 32, 0.72);
+  background: var(--book);
+  color: #fffaf0;
+  font-family: "Courier New", "Menlo", monospace;
+  font-size: 11px;
+  font-weight: 900;
+  line-height: 1.15;
+}
+
+.request-idle-panel {
+  display: grid;
+  gap: 10px;
+  padding: 16px;
+  background:
+    linear-gradient(135deg, rgba(255, 252, 244, 0.82), rgba(233, 247, 224, 0.72)),
+    var(--paper);
+}
+
 .book-template-composer {
   background:
     linear-gradient(135deg, rgba(207, 232, 223, 0.78), rgba(255, 247, 210, 0.92)),

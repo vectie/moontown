@@ -10,10 +10,7 @@ fn render_operator_command_center(
     render_operator_console_header(model, executions, metrics),
     div(class="operator-console-grid", [
       render_operator_watch_column(model, metrics),
-      div(class="operator-request-stack", [
-        render_request_composer(dispatch, model),
-        render_book_template_composer(dispatch, model),
-      ]),
+      render_operator_request_workspace(dispatch, model),
     ]),
   ])
 }

@@ -27,6 +27,9 @@ fn default_dashboard_forbidden_copy() -> Array[String] {
     "Town shell plus live civic systems", "Digital twins with memory",
     "Policy, contest, social, and offline workflows as playable services",
     "Weak ties, talent graph, and reception-ready evidence",
+    ">Title<", ">Target book<", ">Check frequency<", ">Quality threshold<",
+    ">Book title<", ">Book id<", ">Websites<", ">Purpose<",
+    ">Special analysis rules<",
   ]
 }
 
@@ -53,6 +56,7 @@ test "default dashboard keeps professional operating actions visible" {
   assert_true(html.contains("Residents"))
   assert_true(html.contains("Quests"))
   assert_true(html.contains("Social capital"))
+  assert_true(html.contains("Choose the next safe request"))
 }
 
 ///|
@@ -69,4 +73,24 @@ test "dashboard ecosystem sections render only the selected detail surface" {
   })
   assert_true(residents.contains("Digital twins with memory"))
   assert_true(!residents.contains("Town shell plus live civic systems"))
+}
+
+///|
+test "dashboard request launcher renders one selected composer at a time" {
+  let watch = render_default_dashboard_test_html({
+    ..init_model(),
+    request_composer: RequestComposerFocus::StandingWatchComposer,
+  })
+  assert_true(watch.contains(">Title<"))
+  assert_true(watch.contains(">Target book<"))
+  assert_true(!watch.contains(">Book title<"))
+  assert_true(!watch.contains(">Websites<"))
+  let book = render_default_dashboard_test_html({
+    ..init_model(),
+    request_composer: RequestComposerFocus::EvidenceBookComposer,
+  })
+  assert_true(book.contains(">Book title<"))
+  assert_true(book.contains(">Websites<"))
+  assert_true(!book.contains(">Target book<"))
+  assert_true(!book.contains(">Quality threshold<"))
 }

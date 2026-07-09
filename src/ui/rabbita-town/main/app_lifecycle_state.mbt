@@ -23,3 +23,11 @@ fn set_dashboard_section_model(
 ) -> Model {
   { ..model, dashboard_section }
 }
+
+///|
+fn set_request_composer_model(
+  model : Model,
+  request_composer : RequestComposerFocus,
+) -> Model {
+  { ..model, request_composer }
+}

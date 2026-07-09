@@ -16,3 +16,14 @@ test "dashboard section helper changes only the ecosystem focus" {
   assert_true(next.dashboard_section == DashboardSection::SocialCapitalSection)
   assert_true(next.selection is Selection::Node(_))
 }
+
+///|
+test "request composer helper changes only the request focus" {
+  let model = { ..init_model(), selection: Selection::Worker("worker-1") }
+  let next = set_request_composer_model(
+    model,
+    RequestComposerFocus::EvidenceBookComposer,
+  )
+  assert_true(next.request_composer == RequestComposerFocus::EvidenceBookComposer)
+  assert_true(next.selection is Selection::Worker(_))
+}
