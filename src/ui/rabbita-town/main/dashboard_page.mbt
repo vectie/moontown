@@ -12,13 +12,15 @@ fn render_dashboard_page(
       context.scene,
       context.alerts,
     ),
-    render_request_desk(dispatch, model),
-    render_attention_workbench(
-      model,
-      context.workers,
-      context.executions,
-      context.state.events,
-    ),
-    render_dashboard_ecosystem_workspace(dispatch, model),
+    div(class="town-operations-deck", [
+      render_request_desk(dispatch, model),
+      render_attention_workbench(
+        model,
+        context.workers,
+        context.executions,
+        context.state.events,
+      ),
+      render_dashboard_ecosystem_workspace(dispatch, model),
+    ]),
   ])
 }

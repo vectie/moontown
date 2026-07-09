@@ -406,6 +406,26 @@ Default state should remove:
 - excess title spacing before actionable status
 - any truncation of the primary scene title at 390px
 
+### Phase 21: Desktop Operations Deck
+
+The phone default stack is now compact, but desktop and tablet still render the
+Request Desk, Attention rail, and Town Areas rail as full-width rows. That
+preserves a mobile scroll pattern on professional workstations where users
+should be able to scan commands, review state, and navigation together.
+
+Default state should keep:
+
+- launchpad as the top operating pulse
+- Request Desk, Attention, and Town Areas in their existing order
+- the single-column phone stack
+- closed-by-default area details
+
+Default state should remove:
+
+- full-width desktop rows for the three secondary operating surfaces
+- unnecessary desktop vertical scroll before operators can compare actions
+- any new duplicate desktop-specific component variants
+
 ## Done Criteria
 
 - A professional user can operate watches, reviews, book requests, and the map

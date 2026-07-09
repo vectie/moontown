@@ -96,6 +96,60 @@ body,
   min-width: 0;
 }
 
+.town-operations-deck {
+  display: grid;
+  grid-template-columns: minmax(320px, 0.38fr) minmax(0, 0.62fr);
+  grid-template-areas:
+    "request attention"
+    "areas attention";
+  gap: 14px;
+  align-items: start;
+  min-width: 0;
+}
+
+.town-operations-deck > * {
+  min-width: 0;
+}
+
+.town-operations-deck .request-desk {
+  grid-area: request;
+}
+
+.town-operations-deck .attention-dock {
+  grid-area: attention;
+}
+
+.town-operations-deck .town-areas-launcher {
+  grid-area: areas;
+}
+
+@media (max-width: 1180px) {
+  .town-operations-deck {
+    grid-template-columns: minmax(0, 1fr) minmax(0, 1fr);
+    grid-template-areas:
+      "request attention"
+      "areas areas";
+  }
+
+  .town-operations-deck .town-areas-launcher {
+    grid-column: 1 / -1;
+  }
+}
+
+@media (max-width: 900px) {
+  .town-operations-deck {
+    grid-template-columns: 1fr;
+    grid-template-areas:
+      "request"
+      "attention"
+      "areas";
+  }
+
+  .town-operations-deck .town-areas-launcher {
+    grid-column: auto;
+  }
+}
+
 .viewport-page {
   height: 100vh;
   padding: 10px;
