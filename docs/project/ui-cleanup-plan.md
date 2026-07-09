@@ -1,0 +1,130 @@
+# Moontown Professional UI Cleanup Plan
+
+Moontown users should be treated as professional operators, researchers, and
+district builders. They can understand concepts such as Mayor, MoonBook,
+standing watch, review queue, worker, and evidence watch. They should not need
+to understand runtime filenames, daemon identity, request ids, source bridge
+state, or local development controls during normal use.
+
+This cleanup track keeps Moontown technically honest while reducing visible
+noise. The goal is not a consumer mini-app. The goal is a calm professional
+surface with advanced runtime detail available on purpose.
+
+## Audience Levels
+
+| Level | User | Default visibility |
+| --- | --- | --- |
+| Professional | normal Moontown operator or expert user | town status, watches, map entry, review needs, requests |
+| Advanced Operator | power user managing live operations | cadence, source health, exact watch ids, queue internals |
+| Developer Diagnostics | maintainer debugging the app/runtime bridge | JSON filenames, request ids, source switching, ticks, bridge placeholders |
+
+Default UI should serve the Professional level. Advanced Operator and Developer
+Diagnostics content should be available through explicit disclosure, not mixed
+into the first screen.
+
+## Product Principle
+
+Default screens answer:
+
+- What changed?
+- What needs attention?
+- Which town area should I open?
+- What work is running, blocked, or waiting for review?
+- What can I safely request next?
+
+Advanced screens answer:
+
+- Which daemon/source/runtime file is active?
+- Which exact request id, standing-goal id, or bridge path is involved?
+- Which diagnostic state explains a failure?
+
+## Cleanup Phases
+
+### Phase 1: Inventory And Classification
+
+Classify visible labels and controls as `default`, `advanced`, or `developer`.
+Start with:
+
+- `src/ui/rabbita-town/main/dashboard_page.mbt`
+- `src/ui/rabbita-town/main/viewport_operator_header.mbt`
+- `src/ui/rabbita-town/main/viewport_controls.mbt`
+- `src/ui/rabbita-town/main/viewport_runtime_bar.mbt`
+- `src/ui/rabbita-town/main/viewport_operator_requests.mbt`
+- `src/ui/rabbita-town/main/viewport_book_template_requests.mbt`
+- `src/ui/rabbita-town/main/app_request_update.mbt`
+
+Likely advanced/developer labels include JSON filenames, daemon identity, raw
+request ids, source switching, simulation step controls, and bridge status.
+
+### Phase 2: Reorder The Default Dashboard
+
+The first screen should prioritize:
+
+1. Town pulse and attention summary.
+2. Canonical Wenyu viewport/map entry.
+3. Review, failure, stale, and active-watch attention cards.
+4. Request shortcuts.
+5. Advanced operator console, collapsed or lower on the page.
+6. Developer diagnostics behind an explicit boundary.
+
+### Phase 3: Translate Visible Copy
+
+Keep internal contracts stable and add display labels.
+
+| Current visible copy | Default copy |
+| --- | --- |
+| `Writes standing-goals.json` | Saves a durable watch |
+| `Writes book-template-requests.json` | Queues a new book |
+| `Daemon ...` | Town loop active |
+| `Live spine ...` | Live status connected |
+| raw request/goal ids after submit | Watch accepted / Book request queued |
+| `Cadence ticks` | Check frequency |
+| `Target MoonBook` | Target book |
+| `Switch Source` / `Step` | Advanced runtime controls |
+
+Exact ids and files can remain in an expanded details surface.
+
+### Phase 4: Collapse Rare Controls
+
+Default-hide simulation and runtime-tuning controls:
+
+- source switching
+- single-step simulation
+- strategy mode strip
+- budget/queue/stability drills
+- daemon heartbeat chip
+- state source count
+
+These are valuable for development and live recovery, but not frequent
+professional workflow controls.
+
+### Phase 5: Guard Default Space
+
+Add tests or generated-output checks so default UI does not regress into runtime
+copy. Candidate forbidden default strings:
+
+- `.json`
+- `daemon.json`
+- `standing-goals.json`
+- `book-template-requests.json`
+- `request-`
+- `goal-`
+- `Live spine`
+- `Snapshot bridge`
+- `Switch Source`
+- `State sources`
+- `endpoint`
+- `payload`
+- `dispatch tick`
+
+Allow these only in advanced/developer surfaces.
+
+## Done Criteria
+
+- A professional user can operate watches, reviews, book requests, and the map
+  without reading runtime filenames or request ids.
+- Advanced users can still inspect exact runtime state deliberately.
+- The first screen reads as a Moontown operating surface, not a runtime
+  debugger.
+- Backend contracts remain stable; most changes are display-label and hierarchy
+  changes.

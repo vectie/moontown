@@ -51,7 +51,7 @@ fn feed_event_title(event : @core.TownEvent) -> String {
     Projection => "Website projection refreshed\{suffix}"
     Summary => "Book health summary\{suffix}"
     Review => "Keeper review needed\{suffix}"
-    Daemon => "Daemon heartbeat"
+    Daemon => "Town loop heartbeat"
     Supervision => "Mayor supervision"
     CivicPattern => "Civic pattern round"
     CivicSalon => "Civic pattern round"

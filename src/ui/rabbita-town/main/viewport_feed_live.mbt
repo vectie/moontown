@@ -10,8 +10,8 @@ fn push_live_autonomy_messages(feed : Array[FeedItem], model : Model) -> Unit {
 ///|
 fn live_autonomy_disconnected_feed_item() -> FeedItem {
   {
-    title: "Live spine not connected",
-    detail: "Run `moon run src/cmd/main -- live refresh` or one daemon tick to publish \{moontown_product_display_artifact_code("live-autonomy.json")} for the operator console.",
+    title: "Live status not connected",
+    detail: "Refresh the town status or run one check cycle to connect the operating view.",
     tone: "alert",
   }
 }
@@ -37,7 +37,7 @@ fn live_autonomy_spine_feed_items(
 ///|
 fn live_autonomy_status_feed_item(spine : LiveAutonomySnapshot) -> FeedItem {
   {
-    title: "Live spine is \{spine.status}",
+    title: "Live status is \{spine.status}",
     detail: spine.summary,
     tone: live_autonomy_spine_tone(spine),
   }
@@ -47,7 +47,7 @@ fn live_autonomy_status_feed_item(spine : LiveAutonomySnapshot) -> FeedItem {
 fn live_autonomy_digest_feed_item(spine : LiveAutonomySnapshot) -> FeedItem {
   {
     title: "Live digest updated",
-    detail: "Mayor wrote \{spine.digest_path} with current watch state, blockers, and next actions.",
+    detail: "Mayor refreshed the current watch state, blockers, and next actions.",
     tone: "calm",
   }
 }

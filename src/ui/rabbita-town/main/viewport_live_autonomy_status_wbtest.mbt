@@ -25,7 +25,10 @@ test "live autonomy latest change exposes doubled character amount" {
   }
   let view = live_autonomy_status_view(spine)
   assert_true(view.latest_change_label.length() > 180)
-  assert_true(view.latest_change_label.length() <= 360 + "Latest: ".length() + "...".length())
+  assert_true(
+    view.latest_change_label.length() <=
+    360 + "Latest: ".length() + "...".length(),
+  )
 }
 
 ///|
@@ -127,10 +130,10 @@ test "live autonomy feed items centralize connected spine projection" {
   ])
   let feed = live_autonomy_spine_feed_items(spine)
   assert_eq(feed.length(), 4)
-  assert_eq(feed[0].title, "Live spine is working")
+  assert_eq(feed[0].title, "Live status is working")
   assert_eq(feed[0].tone, "live")
   assert_eq(feed[1].title, "Live digest updated")
-  assert_true(feed[1].detail.contains(spine.digest_path))
+  assert_true(feed[1].detail.contains("watch state"))
   assert_eq(feed[2].detail, "first")
   assert_eq(feed[3].detail, "second")
 }
@@ -192,7 +195,7 @@ test "live autonomy disconnected feed item is explicit" {
   let item = live_autonomy_disconnected_feed_item()
   assert_eq(item.tone, "alert")
   assert_true(item.title.contains("not connected"))
-  assert_true(item.detail.contains("live refresh"))
+  assert_true(item.detail.contains("Refresh the town status"))
 }
 
 ///|

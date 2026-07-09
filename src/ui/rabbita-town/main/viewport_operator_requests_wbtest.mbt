@@ -1,6 +1,6 @@
 ///|
 test "operator request submit labels reflect pending state" {
-  assert_eq(operator_request_submit_label(false), "Submit Standing Watch")
+  assert_eq(operator_request_submit_label(false), "Save Watch")
   assert_eq(operator_request_submit_label(true), "Submitting...")
 }
 
@@ -11,11 +11,8 @@ test "book template request submit labels reflect pending state" {
 }
 
 ///|
-test "book template target label follows package-owned inbox filename" {
-  assert_eq(
-    book_template_request_target_label(),
-    "Writes book-template-requests.json",
-  )
+test "book template target label uses professional default copy" {
+  assert_eq(book_template_request_target_label(), "Queues a new book")
 }
 
 ///|
@@ -42,21 +39,22 @@ test "operator request summary includes accepted request details" {
     standing_goal_id: "watch-opc",
   }
   let summary = operator_request_last_summary_from_snapshot(request)
-  assert_true(summary.contains("`watch-opc` (`request-1`)"))
-  assert_true(summary.contains("for `research-opc`"))
+  assert_true(summary.contains("Last accepted watch: Track OPC news"))
+  assert_true(summary.contains("for research-opc"))
   assert_true(summary.contains("Status accepted"))
-  assert_true(summary.contains("title: Track OPC news"))
-  assert_true(summary.contains("cadence 60"))
-  assert_true(summary.contains("policy web-first"))
+  assert_true(summary.contains("check frequency 60"))
   assert_true(summary.contains("quality 85%"))
   assert_true(summary.contains("Request: Watch official sources."))
+  assert_true(!summary.contains("request-1"))
+  assert_true(!summary.contains("watch-opc"))
+  assert_true(!summary.contains("web-first"))
 }
 
 ///|
 test "operator request empty summary is explicit" {
   assert_true(
     operator_request_empty_last_summary().contains(
-      "No operator-submitted standing goals",
+      "No watches have been accepted",
     ),
   )
 }

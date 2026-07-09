@@ -171,11 +171,11 @@ test "standing goal next check view formats active future goal" {
     standing_goals: [goal],
   }
   let view = standing_goal_next_check_view(model)
-  assert_eq(view.operator_detail, "Next check in 2 ticks. Daemon tick 10.")
+  assert_eq(view.operator_detail, "Next check in 2 ticks. Town check 10.")
   assert_eq(view.portal_label, "2 ticks")
   assert_eq(
     view.idle_detail,
-    "Waiting until 2 daemon ticks for `opc`. The next due check will move a watcher into an active run.",
+    "Waiting until 2 town checks. The next due check will move a watcher into an active run.",
   )
 }
 
@@ -188,11 +188,11 @@ test "standing goal next check view clamps overdue goal to next tick" {
     standing_goals: [goal],
   }
   let view = standing_goal_next_check_view(model)
-  assert_eq(view.operator_detail, "Next check in 0 ticks. Daemon tick 15.")
+  assert_eq(view.operator_detail, "Next check in 0 ticks. Town check 15.")
   assert_eq(view.portal_label, "0 ticks")
   assert_eq(
     view.idle_detail,
-    "Waiting until the next daemon tick for `opc`. The next due check will move a watcher into an active run.",
+    "Waiting until the next town check. The next due check will move a watcher into an active run.",
   )
 }
 
@@ -209,6 +209,6 @@ test "standing goal next check view explains missing active watcher" {
   assert_eq(view.portal_label, "not scheduled")
   assert_eq(
     view.idle_detail,
-    "Waiting for a configured standing watch. Add one to `.moonsuite/products/moontown/standing-goals.json` to activate this worker.",
+    "Waiting for a configured standing watch. Save a watch to activate this worker.",
   )
 }

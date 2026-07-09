@@ -22,7 +22,7 @@ fn render_book_template_composer(
       compact=true,
     ),
     render_request_textarea_field(
-      "Analysis method override",
+      "Special analysis rules",
       "Optional. Leave blank to use the template method, or describe the exact analysis rules.",
       model.book_request_analysis_method,
       value => dispatch(SetBookRequestAnalysisMethod(value)),
@@ -48,7 +48,7 @@ fn book_template_request_intro() -> String {
 
 ///|
 fn book_template_request_target_label() -> String {
-  "Writes book-template-requests.json"
+  "Queues a new book"
 }
 
 ///|
@@ -89,7 +89,7 @@ fn render_book_template_request_field_grid(
       value => dispatch(SetBookRequestBookId(value)),
     ),
     render_request_input_field(
-      "Cadence ticks",
+      "Check frequency",
       "60",
       model.book_request_cadence,
       value => dispatch(SetBookRequestCadence(value)),

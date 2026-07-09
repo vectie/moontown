@@ -49,7 +49,7 @@ test "feed event title preserves suffix policy by event kind" {
   )
   assert_eq(
     feed_event_title(feed_event_test_event("daemon", "heartbeat")),
-    "Daemon heartbeat",
+    "Town loop heartbeat",
   )
   assert_eq(
     feed_event_title(feed_event_test_event("civic-pattern", "round")),
@@ -178,7 +178,7 @@ test "recent event feed items keeps newest visible events and dedupes daemon" {
   assert_eq(feed[1].title, "Bookkeeper saved memory / research-opc")
   assert_eq(feed[2].title, "Book health summary / research-opc")
   assert_eq(feed[3].title, "Keeper review needed / research-opc")
-  assert_eq(feed[4].title, "Daemon heartbeat")
+  assert_eq(feed[4].title, "Town loop heartbeat")
   assert_eq(feed[4].detail, "new daemon")
   assert_eq(feed[5].title, "Website projection refreshed / research-opc")
 }

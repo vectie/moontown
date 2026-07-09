@@ -38,7 +38,7 @@ fn standing_goal_next_check_view(model : Model) -> StandingGoalNextCheckView {
     Some(goal) => {
       let remaining = ticks_until_next_goal_check(model, goal)
       {
-        operator_detail: "Next check in \{remaining} ticks. Daemon tick \{daemon_tick_count(model)}.",
+        operator_detail: "Next check in \{remaining} ticks. Town check \{daemon_tick_count(model)}.",
         portal_label: "\{remaining} ticks",
         idle_detail: standing_goal_idle_wait_detail(goal, remaining),
       }
@@ -47,7 +47,7 @@ fn standing_goal_next_check_view(model : Model) -> StandingGoalNextCheckView {
       {
         operator_detail: "No enabled standing goal found.",
         portal_label: "not scheduled",
-        idle_detail: "Waiting for a configured standing watch. Add one to \{moontown_product_display_artifact_code("standing-goals.json")} to activate this worker.",
+        idle_detail: "Waiting for a configured standing watch. Save a watch to activate this worker.",
       }
   }
 }
@@ -58,11 +58,11 @@ fn standing_goal_idle_wait_detail(
   remaining_ticks : Int,
 ) -> String {
   let wait = if remaining_ticks > 0 {
-    "\{remaining_ticks} daemon ticks"
+    "\{remaining_ticks} town checks"
   } else {
-    "the next daemon tick"
+    "the next town check"
   }
-  "Waiting until \{wait} for `\{goal.id}`. The next due check will move a watcher into an active run."
+  "Waiting until \{wait}. The next due check will move a watcher into an active run."
 }
 
 ///|

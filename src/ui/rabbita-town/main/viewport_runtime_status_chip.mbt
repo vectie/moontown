@@ -15,12 +15,12 @@ fn runtime_status_chip_for_state(
   paused~ : Bool,
 ) -> RuntimeStatusChip {
   match source {
-    SnapshotFile => { text: "Snapshot bridge", class_name: "chip-neutral" }
+    SnapshotFile => { text: "Town data connected", class_name: "chip-neutral" }
     DemoSimulation =>
       if paused {
-        { text: "Simulation paused", class_name: "chip-alert" }
+        { text: "Preview paused", class_name: "chip-alert" }
       } else {
-        { text: "Simulation live", class_name: "chip-live" }
+        { text: "Preview live", class_name: "chip-live" }
       }
   }
 }

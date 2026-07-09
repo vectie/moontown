@@ -9,8 +9,8 @@ fn daemon_tick_count(model : Model) -> Int {
 ///|
 fn daemon_tick_label(model : Model) -> String {
   match model.daemon_snapshot {
-    Some(snapshot) => "Daemon tick \{snapshot.tick_sequence}"
-    None => "Daemon tick waiting"
+    Some(snapshot) => "Town check \{snapshot.tick_sequence}"
+    None => "Town check waiting"
   }
 }
 
@@ -34,8 +34,9 @@ fn daemon_cadence_label(model : Model) -> String {
           kind = job.kind
         }
       }
-      "Daemon \{kind} cadence \{cadence}s"
+      ignore(kind)
+      "Watch cadence \{cadence}s"
     }
-    None => "Daemon cadence waiting"
+    None => "Watch cadence waiting"
   }
 }

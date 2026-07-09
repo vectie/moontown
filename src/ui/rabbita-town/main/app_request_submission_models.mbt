@@ -18,7 +18,7 @@ fn operator_request_submitting_model(model : Model) -> Model {
   {
     ..model,
     request_submitting: true,
-    request_status: "Submitting request to the local Moontown standing-goal inbox...",
+    request_status: "Saving this watch for the town loop...",
   }
 }
 
@@ -35,7 +35,7 @@ fn book_template_request_submitting_model(model : Model) -> Model {
   {
     ..model,
     book_request_submitting: true,
-    book_request_status: "Queueing PDF Evidence Watch request in the book-template inbox...",
+    book_request_status: "Queueing this PDF Evidence Watch book...",
   }
 }
 

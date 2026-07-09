@@ -15,6 +15,13 @@
   gap: 12px;
 }
 
+.professional-status-strip {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 10px;
+  align-items: center;
+}
+
 .control-strip,
 .strategy-strip,
 .alert-strip,
@@ -125,6 +132,116 @@
   gap: 14px;
 }
 
+.professional-overview {
+  display: grid;
+  gap: 16px;
+  padding: 18px;
+  border: var(--pixel-border);
+  border-radius: 0;
+  background:
+    linear-gradient(135deg, rgba(255, 252, 244, 0.96), rgba(236, 246, 239, 0.9)),
+    radial-gradient(circle at 0% 0%, rgba(185, 138, 41, 0.16), transparent 34%),
+    radial-gradient(circle at 100% 0%, rgba(85, 123, 151, 0.14), transparent 36%);
+  box-shadow: var(--shadow);
+}
+
+.professional-overview-head {
+  display: flex;
+  justify-content: space-between;
+  gap: 16px;
+  align-items: start;
+}
+
+.professional-overview-copy,
+.advanced-operations-head {
+  display: grid;
+  gap: 8px;
+}
+
+.professional-overview-copy h2,
+.advanced-operations-head h2 {
+  margin: 0;
+}
+
+.professional-overview-actions {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: flex-end;
+  gap: 8px;
+}
+
+.professional-overview-grid {
+  display: grid;
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+  gap: 12px;
+}
+
+.professional-overview-card {
+  min-height: 142px;
+  display: grid;
+  align-content: start;
+  gap: 10px;
+  padding: 16px;
+  border: 3px solid var(--line);
+  background: rgba(255, 252, 244, 0.82);
+  box-shadow: 3px 3px 0 rgba(56, 35, 16, 0.16);
+}
+
+.professional-overview-value {
+  margin: 0;
+  font-family: "Courier New", "Menlo", monospace;
+  font-size: 24px;
+  font-weight: 900;
+  line-height: 1.1;
+}
+
+.overview-card-calm {
+  border-color: rgba(77, 128, 80, 0.42);
+}
+
+.overview-card-alert {
+  border-color: rgba(180, 49, 39, 0.5);
+}
+
+.overview-card-review {
+  border-color: rgba(185, 138, 41, 0.58);
+}
+
+.overview-card-book {
+  border-color: rgba(46, 111, 96, 0.42);
+}
+
+.overview-card-neutral {
+  border-color: rgba(85, 123, 151, 0.34);
+}
+
+@media (max-width: 1100px) {
+  .town-header,
+  .professional-overview-grid,
+  .metric-grid,
+  .sidebar-column {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+}
+
+@media (max-width: 720px) {
+  .town-header,
+  .professional-overview-grid,
+  .metric-grid,
+  .sidebar-column {
+    grid-template-columns: 1fr;
+  }
+
+  .professional-overview-head {
+    display: grid;
+    grid-template-columns: 1fr;
+  }
+
+  .professional-overview-actions {
+    justify-content: flex-start;
+  }
+}
+
 .metric-card,
 .inspector-panel,
 .feed-panel,
@@ -215,6 +332,7 @@
 }
 
 .runtime-bar,
+.advanced-operations,
 .civic-modules,
 .resident-panel,
 .quest-panel,
@@ -229,6 +347,7 @@
 }
 
 .runtime-bar,
+.advanced-operations,
 .civic-modules,
 .resident-panel,
 .quest-panel,
@@ -239,6 +358,7 @@
 }
 
 .runtime-bar,
+.advanced-operations,
 .civic-modules,
 .resident-panel,
 .quest-panel,
@@ -746,4 +866,3 @@
   min-width: 0;
   overflow: hidden;
 }
-

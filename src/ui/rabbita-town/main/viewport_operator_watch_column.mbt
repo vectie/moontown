@@ -20,7 +20,7 @@ fn render_operator_stat_grid(metrics : OperatorConsoleMetrics) -> @rabbita.Html 
       "live",
     ),
     render_operator_stat(
-      "Live spine",
+      "Live status",
       metrics.live_status,
       metrics.live_detail,
       metrics.live_tone,

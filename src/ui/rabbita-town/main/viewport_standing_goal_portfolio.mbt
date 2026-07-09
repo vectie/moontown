@@ -163,7 +163,7 @@ fn render_standing_goal_portfolio(model : Model) -> @rabbita.Html {
         ]),
         p(
           class="standing-progress-copy",
-          "Add a standing goal in \{moontown_product_display_artifact_code("standing-goals.json")} or submit one from the operator panel to start durable topic monitoring.",
+          "Save a standing watch from the request panel to start durable topic monitoring.",
         ),
       ]),
     )

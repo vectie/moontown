@@ -70,12 +70,15 @@ fn operator_request_success_status(
   request_id : String,
   status : String,
 ) -> String {
-  "Accepted as `\{goal_id}` via `\{request_id}` (`\{status}`). The daemon will pick it up on the next standing-goal dispatch tick."
+  ignore(goal_id)
+  ignore(request_id)
+  ignore(status)
+  "Watch accepted. Moontown will run it on the next check."
 }
 
 ///|
 fn operator_request_failure_status(error : String) -> String {
-  "Request failed: \{error}"
+  "Could not save the watch: \{error}"
 }
 
 ///|
@@ -83,10 +86,12 @@ fn book_template_request_success_status(
   request_id : String,
   status : String,
 ) -> String {
-  "Queued `\{request_id}` (`\{status}`). The daemon will install it through the book-template request job."
+  ignore(request_id)
+  ignore(status)
+  "Book request queued. Moontown will install it through the book workflow."
 }
 
 ///|
 fn book_template_request_failure_status(error : String) -> String {
-  "Book request failed: \{error}"
+  "Could not queue the book request: \{error}"
 }

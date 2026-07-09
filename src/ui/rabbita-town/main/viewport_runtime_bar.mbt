@@ -22,8 +22,8 @@ fn render_runtime_bar(
   section(class="runtime-bar", [
     div(class="runtime-head", [
       div(class="runtime-copy", [
-        p(class="eyebrow", "Operator Surface"),
-        h2("Town traffic, keeper queue, and review flow"),
+        p(class="eyebrow", "Runtime Detail"),
+        h2("Traffic, keeper queue, and review flow"),
         p(class="summary", state_source_detail(model)),
       ]),
       div(class="runtime-status", [

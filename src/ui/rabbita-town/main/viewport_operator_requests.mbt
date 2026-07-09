@@ -22,7 +22,7 @@ fn operator_request_submit_label(submitting : Bool) -> String {
   if submitting {
     "Submitting..."
   } else {
-    "Submit Standing Watch"
+    "Save Watch"
   }
 }
 
@@ -34,7 +34,7 @@ fn render_operator_request_header(
   div(class="request-composer-head", [
     div([p(class="eyebrow", "New Request"), h3("Ask the town to keep watching")]),
     div(class="request-composer-actions-top", [
-      status_chip("Writes standing-goals.json", "chip-book"),
+      status_chip("Saves a durable watch", "chip-book"),
       button(
         class="control-button request-submit",
         on_click=dispatch(SubmitOperatorRequest),
@@ -58,12 +58,12 @@ fn render_operator_request_field_grid(
       wide=true,
     ),
     render_request_input_field(
-      "Target MoonBook",
+      "Target book",
       "research-topic",
       model.request_book_id,
       value => dispatch(SetRequestBookId(value)),
     ),
-    render_request_input_field("Cadence ticks", "60", model.request_cadence, value => {
+    render_request_input_field("Check frequency", "60", model.request_cadence, value => {
       dispatch(SetRequestCadence(value))
     }),
     render_request_input_field(

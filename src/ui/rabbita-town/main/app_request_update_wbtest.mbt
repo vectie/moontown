@@ -10,15 +10,15 @@ test "request submission models expose clear ready and missing states" {
   let model = init_model()
   let operator_submitting = operator_request_submitting_model(model)
   assert_true(operator_submitting.request_submitting)
-  assert_true(
-    operator_submitting.request_status.contains("standing-goal inbox"),
-  )
+  assert_true(operator_submitting.request_status.contains("Saving this watch"))
   let operator_missing = operator_request_missing_required_fields_model(model)
   assert_true(operator_missing.request_status.contains("title and a request"))
   let book_submitting = book_template_request_submitting_model(model)
   assert_true(book_submitting.book_request_submitting)
   assert_true(
-    book_submitting.book_request_status.contains("book-template inbox"),
+    book_submitting.book_request_status.contains(
+      "Queueing this PDF Evidence Watch book",
+    ),
   )
   let book_missing = book_template_request_missing_required_fields_model(model)
   assert_true(book_missing.book_request_status.contains("title"))
@@ -42,19 +42,19 @@ test "request result parser handles invalid and mismatched json" {
 test "request status message helpers keep operator and book paths distinct" {
   assert_eq(
     operator_request_success_status("goal-opc", "request-1", "accepted"),
-    "Accepted as `goal-opc` via `request-1` (`accepted`). The daemon will pick it up on the next standing-goal dispatch tick.",
+    "Watch accepted. Moontown will run it on the next check.",
   )
   assert_eq(
     operator_request_failure_status("network error"),
-    "Request failed: network error",
+    "Could not save the watch: network error",
   )
   assert_eq(
     book_template_request_success_status("book-request-1", "pending"),
-    "Queued `book-request-1` (`pending`). The daemon will install it through the book-template request job.",
+    "Book request queued. Moontown will install it through the book workflow.",
   )
   assert_eq(
     book_template_request_failure_status("missing website"),
-    "Book request failed: missing website",
+    "Could not queue the book request: missing website",
   )
 }
 
@@ -65,8 +65,8 @@ test "operator request result model clears submit flag and refreshes ledgers" {
     model, "goal-opc", "request-1", "accepted",
   )
   assert_true(!next.request_submitting)
-  assert_true(next.request_status.contains("goal-opc"))
-  assert_true(next.request_status.contains("request-1"))
+  assert_true(next.request_status.contains("Watch accepted"))
+  assert_true(!next.request_status.contains("request-1"))
   assert_eq(next.standing_goals_version, standing_goals_version())
   assert_eq(next.operator_requests_version, operator_requests_version())
 }
@@ -78,6 +78,7 @@ test "book template result model clears submit flag and refreshes live autonomy"
     model, "book-request-1", "pending",
   )
   assert_true(!next.book_request_submitting)
-  assert_true(next.book_request_status.contains("book-request-1"))
+  assert_true(next.book_request_status.contains("Book request queued"))
+  assert_true(!next.book_request_status.contains("book-request-1"))
   assert_eq(next.live_autonomy_version, live_autonomy_version())
 }

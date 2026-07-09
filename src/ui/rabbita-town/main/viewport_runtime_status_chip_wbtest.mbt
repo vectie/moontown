@@ -4,7 +4,7 @@ test "runtime status chip labels live demo simulation" {
     StateSourceKind::DemoSimulation,
     paused=false,
   )
-  assert_eq(chip.text, "Simulation live")
+  assert_eq(chip.text, "Preview live")
   assert_eq(chip.class_name, "chip-live")
 }
 
@@ -14,7 +14,7 @@ test "runtime status chip labels paused demo simulation" {
     StateSourceKind::DemoSimulation,
     paused=true,
   )
-  assert_eq(chip.text, "Simulation paused")
+  assert_eq(chip.text, "Preview paused")
   assert_eq(chip.class_name, "chip-alert")
 }
 
@@ -24,6 +24,6 @@ test "runtime status chip labels snapshot source neutrally even when paused" {
     StateSourceKind::SnapshotFile,
     paused=true,
   )
-  assert_eq(chip.text, "Snapshot bridge")
+  assert_eq(chip.text, "Town data connected")
   assert_eq(chip.class_name, "chip-neutral")
 }
