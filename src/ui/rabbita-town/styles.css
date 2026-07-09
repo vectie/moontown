@@ -6,7 +6,7 @@
 @import url("./styles/sidebar-panels.css");
 
 @media (max-width: 1220px) {
-  .town-header,
+  .operator-masthead,
   .runtime-grid,
   .module-detail-grid,
   .resident-summary-grid,
@@ -95,7 +95,7 @@
     padding: 12px;
   }
 
-  .town-header {
+  .operator-masthead {
     grid-template-columns: 1fr;
   }
 

@@ -5,17 +5,7 @@ fn render_dashboard_page(
   context : RenderSceneContext,
 ) -> @rabbita.Html {
   section(class="town-shell", [
-    header(class="town-header", [
-      div(class="title-block", [
-        p(class="eyebrow", "Moontown"),
-        h1(context.scene.title),
-        p(
-          class="summary",
-          "Professional town workspace for civic watches, resident agents, district services, and review-ready feedback loops.",
-        ),
-      ]),
-      render_alerts(context.alerts),
-    ]),
+    render_operator_masthead(context.scene, context.alerts),
     render_town_launchpad(
       model,
       context.workers,

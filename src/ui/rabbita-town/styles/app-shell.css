@@ -67,8 +67,7 @@ body,
   color: var(--muted);
 }
 
-.boot-headline,
-.town-header h1 {
+.boot-headline {
   margin: 0;
   font-size: clamp(36px, 4.8vw, 64px);
   line-height: 0.94;

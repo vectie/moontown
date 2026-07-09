@@ -42,7 +42,8 @@ fn default_dashboard_forbidden_copy() -> Array[String] {
     "phone-topbar", "message-bubble", "No standing watcher connected", "through the daemon",
     "deeper town tools", "Preview live", "Preview paused", "Town check waiting",
     "Professional view", "Town data connected", "Town Overview", "professional-overview",
-    "viewport-portal", "town-main", "scene-column",
+    "viewport-portal", "town-main", "scene-column", "town-header", "title-block",
+    "Professional town workspace",
   ]
 }
 
@@ -61,6 +62,8 @@ test "default dashboard keeps professional operating actions visible" {
   let html = render_default_dashboard_test_html(init_model())
   assert_true(html.contains("Signal"))
   assert_true(html.contains("Next opening"))
+  assert_true(html.contains("operator-masthead"))
+  assert_true(html.contains("Wenyu Valley workspace"))
   assert_true(html.contains("Town Launchpad"))
   assert_true(html.contains("Current town pulse"))
   assert_true(html.contains("Open Wenyu Map"))

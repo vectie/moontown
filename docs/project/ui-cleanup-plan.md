@@ -184,3 +184,7 @@ Allow these only in advanced/developer surfaces.
   compact `Town Launchpad`. The first screen still exposes health, watches,
   attention, book queue, and the Wenyu map link, but it no longer spends a
   second hero-sized block before the professional request path.
+- The remaining marketing-scale dashboard hero has been replaced by a compact
+  operator masthead. The default first screen now starts as a professional
+  operating console instead of an intro page, while keeping scene identity and
+  alert state visible.
