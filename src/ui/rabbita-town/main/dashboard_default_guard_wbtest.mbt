@@ -69,6 +69,7 @@ fn default_dashboard_forbidden_copy() -> Array[String] {
     "Attention Workbench", "attention-review-strip", "attention-review-copy",
     "attention-strip-chips", "attention-strip-chip",
     "Request intake", "Save Watch", "Queue PDF Watch Book",
+    "Civic surfaces",
   ]
 }
 
@@ -103,7 +104,6 @@ test "default dashboard keeps professional operating actions visible" {
   assert_true(html.contains("attention-dock"))
   assert_true(html.contains("Latest signal"))
   assert_true(html.contains("Town Areas"))
-  assert_true(html.contains("Civic surfaces"))
   assert_true(html.contains("Districts"))
   assert_true(html.contains("Residents"))
   assert_true(html.contains("Quests"))

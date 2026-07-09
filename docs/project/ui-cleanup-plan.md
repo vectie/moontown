@@ -237,6 +237,23 @@ Default state should remove:
 - long shortcut commands such as `Save Watch`
 - long shortcut commands such as `Queue PDF Watch Book`
 
+### Phase 12: Direct Town Areas Dock
+
+The area launcher now contains only four concrete area commands, so the
+secondary `Civic surfaces` heading is redundant. The default dashboard should
+name the region once, then let the area controls carry the choices.
+
+Default state should keep:
+
+- `Town Areas` as the dock title
+- `Districts`, `Residents`, `Quests`, and `Social capital`
+- closed-by-default detail panels
+
+Default state should remove:
+
+- the `Civic surfaces` heading
+- duplicate title chrome before the four area commands
+
 ## Done Criteria
 
 - A professional user can operate watches, reviews, book requests, and the map
@@ -347,3 +364,6 @@ Default state should remove:
   desktop. The default dashboard shows `Standing watch / Save` and
   `Evidence book / Queue`, while longer submit wording stays inside the
   expanded composers.
+- Town Areas now renders as a direct area dock. It keeps the four professional
+  area commands but removes the redundant `Civic surfaces` heading from the
+  default dashboard.

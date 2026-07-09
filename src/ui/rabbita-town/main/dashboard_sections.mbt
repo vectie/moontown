@@ -84,10 +84,7 @@ fn render_dashboard_ecosystem_workspace(
 ) -> @rabbita.Html {
   let children = [
     div(class="town-areas-head", [
-      div(class="town-areas-title", [
-        p(class="eyebrow", "Town Areas"),
-        h2("Civic surfaces"),
-      ]),
+      h2(class="town-areas-title", "Town Areas"),
       render_dashboard_section_tabs(dispatch, model.dashboard_section),
     ]),
   ]

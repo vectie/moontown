@@ -422,15 +422,10 @@
 }
 
 .town-areas-title {
-  display: grid;
-  gap: 5px;
-  min-width: 0;
-}
-
-.town-areas-head h2 {
   margin: 0;
   font-size: 20px;
   line-height: 1.1;
+  min-width: 0;
 }
 
 .dashboard-section-tabs {
@@ -501,9 +496,17 @@
 }
 
 @media (max-width: 720px) {
+  .town-areas-launcher {
+    padding: 10px 12px;
+  }
+
   .dashboard-section-tabs {
     grid-template-columns: repeat(2, minmax(0, 1fr));
     gap: 6px;
+  }
+
+  .town-areas-title {
+    font-size: 18px;
   }
 
   .dashboard-section-tab {
