@@ -367,6 +367,26 @@ Default state should remove:
 - excess vertical gap between the request label and commands
 - tutorial-like request framing in the default scroll
 
+### Phase 19: Compact Town Areas Rail
+
+Town Areas is secondary navigation and should not spend more first-screen
+height than the request command rail. The phone layout still stacks the title
+above the four area commands, leaving the default scroll taller than its
+professional value.
+
+Default state should keep:
+
+- `Town Areas` as the section label
+- four direct area commands
+- 44px area targets on phones
+- closed-by-default area details
+
+Default state should remove:
+
+- the phone-only title row above the area commands
+- excess secondary-navigation height in the default scroll
+- any return to a 2x2 phone area grid
+
 ## Done Criteria
 
 - A professional user can operate watches, reviews, book requests, and the map

@@ -506,7 +506,14 @@
 
 @media (max-width: 720px) {
   .town-areas-launcher {
+    gap: 6px;
     padding: 10px 12px;
+  }
+
+  .town-areas-head {
+    grid-template-columns: minmax(88px, 0.28fr) minmax(0, 1fr);
+    gap: 6px;
+    align-items: stretch;
   }
 
   .dashboard-section-tabs {
@@ -515,19 +522,21 @@
   }
 
   .town-areas-title {
-    font-size: 18px;
+    align-self: center;
+    font-size: 16px;
   }
 
   .dashboard-section-tab {
     min-height: 44px;
-    padding: 7px 5px;
+    padding: 7px 2px;
     text-align: center;
   }
 
   .dashboard-section-label {
-    font-size: 10px;
+    font-size: 8px;
     line-height: 1.05;
-    overflow-wrap: anywhere;
+    overflow-wrap: normal;
+    white-space: nowrap;
   }
 }
 
