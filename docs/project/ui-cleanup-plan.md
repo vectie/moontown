@@ -348,6 +348,25 @@ Default state should remove:
 - secondary signal notes from the default phone launchpad
 - extra mobile card padding that makes status heavier than action commands
 
+### Phase 18: Compact Request Desk Rail
+
+The Request Desk is now a command surface, but the phone layout still stacks
+the section title above the two commands. This spends a full extra row on a
+surface whose default job is simply choosing `Save` or `Queue`.
+
+Default state should keep:
+
+- `Request Desk` as the professional section label
+- the `Requests` heading as compact orientation copy
+- the two visible request commands
+- 44px command targets on phones
+
+Default state should remove:
+
+- the phone-only title row above the command rail
+- excess vertical gap between the request label and commands
+- tutorial-like request framing in the default scroll
+
 ## Done Criteria
 
 - A professional user can operate watches, reviews, book requests, and the map

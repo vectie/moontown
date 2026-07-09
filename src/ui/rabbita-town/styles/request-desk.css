@@ -229,21 +229,28 @@
 
 @media (max-width: 820px) {
   .request-desk {
-    gap: 8px;
+    gap: 6px;
     padding: 10px 12px;
   }
 
   .request-desk-head {
-    grid-template-columns: 1fr;
-    gap: 8px;
+    grid-template-columns: minmax(96px, 0.3fr) minmax(0, 1fr);
+    gap: 6px;
+    align-items: stretch;
   }
 
   .request-desk-title {
+    align-content: center;
     gap: 2px;
   }
 
   .request-desk-title h2 {
-    font-size: 18px;
+    font-size: 15px;
+  }
+
+  .request-desk-title .eyebrow {
+    letter-spacing: 0.08em;
+    white-space: nowrap;
   }
 
   .request-action-dock {
@@ -252,7 +259,7 @@
   }
 
   .request-action-button {
-    min-height: 42px;
+    min-height: 44px;
     display: grid;
     align-content: center;
     justify-items: start;
