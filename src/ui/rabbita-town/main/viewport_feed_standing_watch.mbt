@@ -3,14 +3,14 @@ fn standing_watch_connected_title(model : Model) -> String {
   let summary = standing_goal_summary(model)
   let count = summary.enabled_count
   if count == 0 {
-    "No standing watcher connected"
+    "No standing watch active"
   } else if count == 1 {
     match summary.active_goal {
-      Some(goal) => "\{goal.title} watcher is connected"
-      None => "Standing watcher is connected"
+      Some(goal) => "\{goal.title} watch active"
+      None => "Standing watch active"
     }
   } else {
-    "\{count} standing watchers connected"
+    "\{count} standing watches active"
   }
 }
 
@@ -20,16 +20,23 @@ fn standing_watch_connected_detail(model : Model) -> String {
   let count = summary.enabled_count
   match summary.active_goal {
     Some(goal) => {
-      let target = goal.target_book_id.unwrap_or("mayor-selected-book")
       let prefix = if count > 1 {
-        "Mayor keeps \{count} standing watches alive through the daemon."
+        "Mayor keeps \{count} standing watches active."
       } else {
-        "Mayor keeps this standing watch alive through the daemon."
+        "Mayor keeps this standing watch active."
       }
-      "\{prefix} Next configured watch: `\{goal.id}` -> `\{target}` every \{goal.cadence_ticks} ticks."
+      "\{prefix} \{standing_watch_target_detail(goal)}"
     }
     None =>
       "Save a standing watch from the request panel to start durable topic monitoring."
+  }
+}
+
+///|
+fn standing_watch_target_detail(goal : StandingGoalSnapshot) -> String {
+  match goal.target_book_id {
+    Some(_) => "Target book and check frequency are saved."
+    None => "Target book can be selected when this watch is reviewed."
   }
 }
 

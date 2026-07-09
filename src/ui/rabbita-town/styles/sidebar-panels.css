@@ -13,59 +13,45 @@
   overflow: auto;
 }
 
-.phone-message-panel {
-  position: relative;
-  overflow: hidden;
-  border: 3px solid rgba(32, 21, 10, 0.88);
-  border-radius: 28px;
+.activity-ledger-panel {
+  display: grid;
+  gap: 14px;
   background:
-    linear-gradient(180deg, rgba(25, 42, 35, 0.94), rgba(32, 28, 21, 0.94)),
+    linear-gradient(135deg, rgba(255, 252, 244, 0.96), rgba(236, 246, 239, 0.9)),
     var(--paper);
-  color: rgba(255, 250, 239, 0.94);
-  box-shadow:
-    0 22px 42px rgba(32, 21, 10, 0.24),
-    inset 0 0 0 2px rgba(255, 250, 239, 0.08);
 }
 
-.phone-topbar {
-  position: sticky;
-  top: 0;
-  z-index: 2;
+.activity-ledger-head {
   display: flex;
   align-items: center;
   gap: 10px;
-  margin: -18px -18px 12px;
-  padding: 14px 16px 12px;
-  border-bottom: 1px solid rgba(255, 250, 239, 0.12);
-  background: rgba(21, 33, 28, 0.96);
+  margin: 0 0 14px;
+  padding-bottom: 12px;
+  border-bottom: 1px solid var(--line);
 }
 
-.phone-topbar h2 {
+.activity-ledger-head h2 {
   margin: 0;
   font-size: 17px;
-  color: rgba(255, 250, 239, 0.96);
+  color: var(--ink);
 }
 
-.phone-topbar p {
+.activity-ledger-head p {
   margin: 2px 0 0;
-  color: rgba(255, 250, 239, 0.62);
+  color: var(--muted);
   font-size: 12px;
 }
 
-.phone-status-dot {
-  width: 11px;
-  height: 11px;
-  border-radius: 999px;
-  background: #95d478;
-  box-shadow: 0 0 0 5px rgba(149, 212, 120, 0.14), 0 0 16px rgba(149, 212, 120, 0.7);
-}
-
-.phone-thread {
-  padding: 2px 2px 4px;
+.activity-ledger-status {
+  width: 12px;
+  height: 28px;
+  border: 1px solid rgba(46, 111, 96, 0.38);
+  background: linear-gradient(180deg, #5aa972, #2f8050);
+  box-shadow: 3px 3px 0 rgba(56, 35, 16, 0.14);
 }
 
 .inspector-panel h2,
-.feed-panel h2,
+.feed-panel > h2,
 .operator-focus-panel h2 {
   margin: 0 0 14px;
   font-size: 18px;
@@ -160,25 +146,45 @@
 
 .feed-item {
   display: grid;
-  gap: 6px;
-  padding: 14px;
-  border-radius: 18px;
+  grid-template-columns: 10px minmax(0, 1fr);
+  gap: 12px;
+  padding: 13px 14px;
+  border-radius: 0;
   border: 1px solid var(--line);
   background: rgba(255, 250, 239, 0.72);
 }
 
-.message-bubble {
-  width: min(100%, 94%);
-  border: 1px solid rgba(255, 250, 239, 0.18);
-  border-radius: 18px 18px 18px 6px;
-  background: rgba(255, 250, 239, 0.93);
-  box-shadow: 0 10px 22px rgba(0, 0, 0, 0.16);
+.activity-ledger-list {
+  gap: 8px;
 }
 
-.message-bubble:nth-child(2n) {
-  justify-self: end;
-  border-radius: 18px 18px 6px 18px;
-  background: rgba(226, 245, 218, 0.94);
+.feed-item-rail {
+  width: 100%;
+  min-height: 100%;
+  background: var(--accent);
+  box-shadow: 2px 2px 0 rgba(56, 35, 16, 0.12);
+}
+
+.tone-alert .feed-item-rail {
+  background: #b43127;
+}
+
+.tone-hot .feed-item-rail {
+  background: #b6811b;
+}
+
+.tone-calm .feed-item-rail {
+  background: #2f8050;
+}
+
+.tone-neutral .feed-item-rail {
+  background: #557b97;
+}
+
+.feed-item-copy {
+  display: grid;
+  gap: 6px;
+  min-width: 0;
 }
 
 .feed-item h3 {

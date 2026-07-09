@@ -12,7 +12,7 @@ fn render_professional_brief(
     h2("Operating Brief"),
     p(
       class="professional-brief-intro",
-      "Scan what needs attention before opening deeper town tools.",
+      "Review attention, watches, and book work before opening detailed surfaces.",
     ),
     div(class="professional-brief-grid", [
       professional_brief_item(

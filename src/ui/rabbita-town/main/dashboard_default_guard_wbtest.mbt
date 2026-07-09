@@ -40,6 +40,9 @@ fn default_dashboard_forbidden_copy() -> Array[String] {
     "deeper runtime tools", "Open the advanced viewport",
     "Open Advanced Viewport", "Advanced tools open separately",
     "runtime intervention",
+    "phone-message-panel", "phone-topbar", "message-bubble",
+    "No standing watcher connected", "through the daemon",
+    "deeper town tools",
   ]
 }
 

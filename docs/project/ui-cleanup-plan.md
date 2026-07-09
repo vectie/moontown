@@ -158,3 +158,6 @@ Allow these only in advanced/developer surfaces.
 - The duplicate lower `Advanced Viewport` block was removed from the default
   dashboard. Professional users now use the primary Wenyu map entry instead of
   reading advanced/runtime intervention copy on the first screen.
+- Mayor Messages now renders as a professional activity ledger instead of a
+  phone-style chat thread, and standing-watch feed copy no longer exposes daemon
+  wording or raw watch/book identifiers on the default dashboard.

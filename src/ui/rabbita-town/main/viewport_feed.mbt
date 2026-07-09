@@ -113,16 +113,16 @@ fn visual_projection_feed_summary(
 
 ///|
 fn render_feed(feed : Array[FeedItem]) -> @rabbita.Html {
-  section(class="feed-panel phone-message-panel", [
-    div(class="phone-topbar", [
-      span(class="phone-status-dot", ""),
+  section(class="feed-panel activity-ledger-panel", [
+    div(class="activity-ledger-head", [
+      span(class="activity-ledger-status", ""),
       div([
         h2("Mayor Messages"),
-        p("Live town thread for standing-watch updates"),
+        p("Recent watch, review, and town work signals"),
       ]),
     ]),
     div(
-      class="feed-list phone-thread",
+      class="feed-list activity-ledger-list",
       feed.map(item => render_feed_item(item)),
     ),
   ])
@@ -130,10 +130,13 @@ fn render_feed(feed : Array[FeedItem]) -> @rabbita.Html {
 
 ///|
 fn render_feed_item(item : FeedItem) -> @rabbita.Html {
-  article(class=feed_item_class(item), [h3(item.title), p(item.detail)])
+  article(class=feed_item_class(item), [
+    span(class="feed-item-rail", ""),
+    div(class="feed-item-copy", [h3(item.title), p(item.detail)]),
+  ])
 }
 
 ///|
 fn feed_item_class(item : FeedItem) -> String {
-  "feed-item message-bubble tone-\{item.tone}"
+  "feed-item activity-ledger-item tone-\{item.tone}"
 }

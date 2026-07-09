@@ -9,7 +9,7 @@ fn test_visual_projection_snapshot(
 ///|
 test "standing watch feed item centralizes base feed message" {
   let item = standing_watch_feed_item(init_model())
-  assert_eq(item.title, "No standing watcher connected")
+  assert_eq(item.title, "No standing watch active")
   assert_true(item.detail.contains("Save a standing watch"))
   assert_eq(item.tone, "calm")
 }
@@ -118,6 +118,6 @@ test "visual projection feed item centralizes title detail and tone" {
 test "feed item class centralizes tone styling" {
   assert_eq(
     feed_item_class({ title: "Alert", detail: "Needs action", tone: "alert" }),
-    "feed-item message-bubble tone-alert",
+    "feed-item activity-ledger-item tone-alert",
   )
 }
