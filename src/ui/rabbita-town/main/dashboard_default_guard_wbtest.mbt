@@ -47,7 +47,7 @@ fn default_dashboard_forbidden_copy() -> Array[String] {
     "dashboard-overview-grid", "request-idle-panel", "Choose the next safe request",
     "Activity Ledger", "activity-ledger-panel", "feed-panel", "feed-item", "Closed by default",
     "Default closed", "town-area-closed-panel", "town-launchpad-grid", "town-launchpad-card",
-    "launchpad-card-",
+    "launchpad-card-", "attention-workbench-grid", "attention-next-card", "attention-signal-card",
   ]
 }
 
@@ -78,6 +78,7 @@ test "default dashboard keeps professional operating actions visible" {
   assert_true(html.contains("Request Desk"))
   assert_true(html.contains("Start the next safe job"))
   assert_true(html.contains("Attention Workbench"))
+  assert_true(html.contains("attention-review-strip"))
   assert_true(html.contains("Recent signal"))
   assert_true(html.contains("Town Areas"))
   assert_true(html.contains("Open detail only when needed"))

@@ -208,3 +208,6 @@ Allow these only in advanced/developer surfaces.
   default state is a compact signal rail for health, watches, attention, and
   book queue, keeping the Wenyu map action visible while leaving more first
   screen room for the Request Desk.
+- The Attention Workbench is now a compact review strip instead of a separate
+  card grid. It keeps the current action, next opening, and recent signal in
+  one row, reducing repeated attention surface area after the Request Desk.

@@ -115,13 +115,13 @@ test "visual projection feed item centralizes title detail and tone" {
 }
 
 ///|
-test "attention signal class centralizes tone styling" {
+test "attention recent chip class centralizes tone styling" {
   assert_eq(
-    attention_signal_card_class({
+    attention_recent_chip_class({
       title: "Alert",
       detail: "Needs action",
       tone: "alert",
     }),
-    "attention-signal-card attention-signal-alert",
+    "attention-strip-chip attention-strip-recent attention-strip-alert",
   )
 }

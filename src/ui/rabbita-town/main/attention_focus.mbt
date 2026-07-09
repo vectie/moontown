@@ -26,10 +26,10 @@ fn attention_focus_view(
   if professional_attention_has_failed(attention) {
     {
       title: "Recover failed work",
-      signal: attention_focus_count_sentence(
+      signal: attention_focus_count_fragment(
         attention.failed_count,
-        "failed item needs attention",
-        "failed items need attention",
+        "failed item",
+        "failed items",
       ),
       detail: "Resolve failed watch or book work before starting new operating load.",
       next_label: "Next opening",
@@ -43,10 +43,10 @@ fn attention_focus_view(
   } else if professional_attention_has_review(attention) {
     {
       title: "Review queued work",
-      signal: attention_focus_count_sentence(
+      signal: attention_focus_count_fragment(
         attention.review_count,
-        "item is waiting for decision",
-        "items are waiting for decision",
+        "review",
+        "reviews",
       ),
       detail: "Clear review work before the next handoff window.",
       next_label: "Next opening",
@@ -56,7 +56,7 @@ fn attention_focus_view(
   } else if watch_summary.enabled_count == 0 {
     {
       title: "Start standing watch",
-      signal: "No standing watch is active.",
+      signal: "No watch active",
       detail: "Create one durable watch before relying on unattended town monitoring.",
       next_label: "Town capacity",
       next_detail: attention_focus_count_fragment(
@@ -69,10 +69,10 @@ fn attention_focus_view(
   } else if live.pending_template_request_count > 0 {
     {
       title: "Prepare book request",
-      signal: attention_focus_count_sentence(
+      signal: attention_focus_count_fragment(
         live.pending_template_request_count,
-        "book request is pending",
-        "book requests are pending",
+        "book pending",
+        "books pending",
       ),
       detail: "Move pending evidence book work to the next review-ready state.",
       next_label: "Watch state",
@@ -86,10 +86,10 @@ fn attention_focus_view(
   } else if execution_summary.active_or_unresolved() > 0 {
     {
       title: "Track active work",
-      signal: attention_focus_count_sentence(
+      signal: attention_focus_count_fragment(
         execution_summary.active_or_unresolved(),
-        "item is still moving",
-        "items are still moving",
+        "item moving",
+        "items moving",
       ),
       detail: "Keep active town work visible until it reaches review or completion.",
       next_label: "Town capacity",
@@ -103,10 +103,10 @@ fn attention_focus_view(
   } else {
     {
       title: "Monitor live pulse",
-      signal: attention_focus_count_sentence(
+      signal: attention_focus_count_fragment(
         watch_summary.enabled_count,
-        "standing watch active",
-        "standing watches active",
+        "watch active",
+        "watches active",
       ),
       detail: "No review-blocked or failed work is visible right now.",
       next_label: "Town capacity",
@@ -127,22 +127,22 @@ fn attention_focus_recovery_opening(
   live : LiveAutonomyOperatorView,
 ) -> String {
   if decisions.failed_count > 0 {
-    attention_focus_count_sentence(
+    attention_focus_count_fragment(
       decisions.failed_count,
-      "watch result needs recovery",
-      "watch results need recovery",
+      "watch recovery",
+      "watch recoveries",
     )
   } else if live.failed_template_request_count > 0 {
-    attention_focus_count_sentence(
+    attention_focus_count_fragment(
       live.failed_template_request_count,
-      "book request needs recovery",
-      "book requests need recovery",
+      "book recovery",
+      "book recoveries",
     )
   } else {
-    attention_focus_count_sentence(
+    attention_focus_count_fragment(
       executions.failed,
-      "town work item needs recovery",
-      "town work items need recovery",
+      "town recovery",
+      "town recoveries",
     )
   }
 }
@@ -153,27 +153,18 @@ fn attention_focus_review_opening(
   decisions : WatcherDecisionSummary,
 ) -> String {
   if decisions.review_count > 0 {
-    attention_focus_count_sentence(
+    attention_focus_count_fragment(
       decisions.review_count,
-      "watch result is ready for review",
-      "watch results are ready for review",
+      "watch review",
+      "watch reviews",
     )
   } else {
-    attention_focus_count_sentence(
+    attention_focus_count_fragment(
       executions.review_queued,
-      "town work item is ready for review",
-      "town work items are ready for review",
+      "town review",
+      "town reviews",
     )
   }
-}
-
-///|
-fn attention_focus_count_sentence(
-  count : Int,
-  singular : String,
-  plural : String,
-) -> String {
-  "\{attention_focus_count_fragment(count, singular, plural)}."
 }
 
 ///|
