@@ -84,11 +84,11 @@ fn render_request_idle_panel() -> @rabbita.Html {
 }
 
 ///|
-fn render_operator_request_workspace(
+fn render_request_desk_workspace(
   dispatch : Dispatch[Msg],
   model : Model,
 ) -> @rabbita.Html {
-  div(class="operator-request-stack", [
+  div(class="request-desk-stack", [
     render_request_shortcuts(dispatch, model),
     render_request_focus_panel(dispatch, model),
   ])

@@ -2,7 +2,7 @@
 fn all_alerts(scene : @ui.SceneRenderModel, model : Model) -> Array[String] {
   let alerts : Array[String] = []
   if mayor_recovery_active(model) {
-    alerts.push(mayor_recovery_alert_text)
+    alerts.push(town_recovery_alert_text)
     return alerts
   }
   for alert in scene.alerts {

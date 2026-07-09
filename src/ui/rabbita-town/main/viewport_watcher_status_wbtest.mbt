@@ -23,9 +23,5 @@ test "request status tone adapter preserves css tone strings" {
 
 ///|
 test "watcher small text helpers keep display fallbacks" {
-  assert_eq(watcher_metric_value(Some(7)), "7")
-  assert_eq(watcher_metric_value(None), "n/a")
-  assert_eq(watcher_book_changed_value(Some("yes")), "yes")
-  assert_eq(watcher_book_changed_value(None), "unknown")
   assert_eq(one_line("first line\nsecond line"), "first line")
 }

@@ -1,6 +1,6 @@
 @import url("./styles/app-shell.css");
 @import url("./styles/town-dashboard.css");
-@import url("./styles/operator-console.css");
+@import url("./styles/request-desk.css");
 @import url("./styles/viewport-map.css");
 @import url("./styles/scene-workers.css");
 @import url("./styles/sidebar-panels.css");
@@ -50,26 +50,17 @@
     grid-column: span 1;
   }
 
-  .operator-stat-grid {
-    grid-template-columns: repeat(2, minmax(0, 1fr));
-  }
-
   .runtime-head {
     display: grid;
   }
 
-  .operator-console-head,
-  .standing-progress-head,
+  .request-desk-head,
   .request-composer-head {
     display: grid;
   }
 
   .runtime-status {
     justify-items: start;
-  }
-
-  .operator-console-status {
-    justify-content: flex-start;
   }
 
   .town-main {
@@ -124,7 +115,7 @@
   }
 
   .runtime-bar,
-  .operator-console,
+  .request-desk,
   .scene-frame-shell,
   .metric-card,
   .inspector-panel,
@@ -154,11 +145,6 @@
   }
 
   .request-field-grid {
-    grid-template-columns: 1fr;
-  }
-
-  .operator-console-grid,
-  .operator-stat-grid {
     grid-template-columns: 1fr;
   }
 

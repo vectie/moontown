@@ -78,34 +78,14 @@ fn test_live_autonomy_snapshot(
 }
 
 ///|
-fn test_standing_goal(id : String, enabled : Bool) -> StandingGoalSnapshot {
-  {
-    id,
-    title: "Goal \{id}",
-    prompt: "watch \{id}",
-    target_book_id: None,
-    cadence_ticks: 30,
-    next_due_tick: 0,
-    last_run_tick: None,
-    enabled,
-    source_policy: "test",
-    quality_threshold: 80,
-  }
-}
-
-///|
 test "live autonomy operator view exposes disconnected fallback" {
   let model = { ..init_model(), live_autonomy: None, standing_goals: [] }
   let view = live_autonomy_operator_view(model, fallback_active_workers=7)
-  assert_eq(view.status_label, "not-connected")
-  assert_eq(view.tone, "alert")
-  assert_eq(view.active_worker_label, "7")
   assert_eq(view.template_request_count, 0)
-  assert_eq(view.enabled_standing_goal_count, 0)
 }
 
 ///|
-test "live autonomy operator view resolves connected counts and tone" {
+test "live autonomy operator view exposes connected request counts" {
   let spine = test_live_autonomy_snapshot(
     pending_templates=2,
     enabled_goals=3,
@@ -113,14 +93,9 @@ test "live autonomy operator view resolves connected counts and tone" {
   )
   let model = { ..init_model(), live_autonomy: Some(spine), standing_goals: [] }
   let view = live_autonomy_operator_view(model, fallback_active_workers=0)
-  assert_eq(view.status_label, "working")
-  assert_eq(view.tone, "book")
-  assert_eq(view.active_worker_label, "4")
   assert_eq(view.template_request_count, 2)
   assert_eq(view.pending_template_request_count, 2)
   assert_eq(view.failed_template_request_count, 0)
-  assert_eq(view.enabled_standing_goal_count, 3)
-  assert_eq(view.disabled_standing_goal_count, 1)
 }
 
 ///|
@@ -130,7 +105,7 @@ test "live autonomy feed items centralize connected spine projection" {
   ])
   let feed = live_autonomy_spine_feed_items(spine)
   assert_eq(feed.length(), 4)
-  assert_eq(feed[0].title, "Live status is working")
+  assert_eq(feed[0].title, "Town readiness is working")
   assert_eq(feed[0].tone, "live")
   assert_eq(feed[1].title, "Live digest updated")
   assert_true(feed[1].detail.contains("watch state"))
@@ -163,7 +138,7 @@ test "live autonomy feed items use recovery tone for next actions" {
   ])
   assert_eq(live_autonomy_next_action_tone(spine), "alert")
   let feed = live_autonomy_spine_feed_items(spine)
-  assert_eq(feed[2].title, "Mayor next action")
+  assert_eq(feed[2].title, "Next town action")
   assert_eq(feed[2].tone, "alert")
 }
 
@@ -185,7 +160,7 @@ test "live autonomy next action feed projection caps visible actions" {
 test "live autonomy next action feed item owns title and tone" {
   let spine = test_live_autonomy_snapshot(status="needs-recovery")
   let item = live_autonomy_next_action_feed_item(spine, "recover now")
-  assert_eq(item.title, "Mayor next action")
+  assert_eq(item.title, "Next town action")
   assert_eq(item.detail, "recover now")
   assert_eq(item.tone, "alert")
 }
@@ -194,26 +169,8 @@ test "live autonomy next action feed item owns title and tone" {
 test "live autonomy disconnected feed item is explicit" {
   let item = live_autonomy_disconnected_feed_item()
   assert_eq(item.tone, "alert")
-  assert_true(item.title.contains("not connected"))
-  assert_true(item.detail.contains("Refresh the town status"))
+  assert_eq(item.title, "Town readiness waiting")
+  assert_true(item.detail.contains("Refresh town status"))
 }
 
 ///|
-test "live autonomy operator view falls back to loaded standing goals" {
-  let spine = test_live_autonomy_snapshot(
-    standing_goals=2,
-    enabled_goals=0,
-    disabled_goals=0,
-  )
-  let model = {
-    ..init_model(),
-    live_autonomy: Some(spine),
-    standing_goals: [
-      test_standing_goal("enabled", true),
-      test_standing_goal("disabled", false),
-    ],
-  }
-  let view = live_autonomy_operator_view(model, fallback_active_workers=0)
-  assert_eq(view.enabled_standing_goal_count, 1)
-  assert_eq(view.disabled_standing_goal_count, 1)
-}

@@ -10,8 +10,8 @@ fn push_live_autonomy_messages(feed : Array[FeedItem], model : Model) -> Unit {
 ///|
 fn live_autonomy_disconnected_feed_item() -> FeedItem {
   {
-    title: "Live status not connected",
-    detail: "Refresh the town status or run one check cycle to connect the operating view.",
+    title: "Town readiness waiting",
+    detail: "Refresh town status or run one check cycle before relying on unattended monitoring.",
     tone: "alert",
   }
 }
@@ -22,7 +22,7 @@ fn live_autonomy_spine_feed_items(
 ) -> Array[FeedItem] {
   let feed : Array[FeedItem] = [
     live_autonomy_status_feed_item(spine),
-    live_autonomy_digest_feed_item(spine),
+    live_autonomy_digest_feed_item(),
   ]
   ignore(
     push_optional_feed_item(
@@ -37,17 +37,17 @@ fn live_autonomy_spine_feed_items(
 ///|
 fn live_autonomy_status_feed_item(spine : LiveAutonomySnapshot) -> FeedItem {
   {
-    title: "Live status is \{spine.status}",
+    title: "Town readiness is \{spine.status}",
     detail: spine.summary,
     tone: live_autonomy_spine_tone(spine),
   }
 }
 
 ///|
-fn live_autonomy_digest_feed_item(spine : LiveAutonomySnapshot) -> FeedItem {
+fn live_autonomy_digest_feed_item() -> FeedItem {
   {
     title: "Live digest updated",
-    detail: "Mayor refreshed the current watch state, blockers, and next actions.",
+    detail: "Town status refreshed the current watch state, blockers, and next actions.",
     tone: "calm",
   }
 }
@@ -86,7 +86,7 @@ fn live_autonomy_next_action_feed_item(
   action : String,
 ) -> FeedItem {
   {
-    title: "Mayor next action",
+    title: "Next town action",
     detail: action,
     tone: live_autonomy_next_action_tone(spine),
   }

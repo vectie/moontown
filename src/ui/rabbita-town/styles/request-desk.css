@@ -1,0 +1,211 @@
+.request-desk {
+  display: grid;
+  gap: 16px;
+  padding: 18px;
+  border: var(--pixel-border);
+  border-radius: 0;
+  background:
+    linear-gradient(135deg, rgba(255, 246, 221, 0.96), rgba(222, 242, 231, 0.9)),
+    radial-gradient(circle at 0% 0%, rgba(185, 138, 41, 0.18), transparent 36%),
+    radial-gradient(circle at 100% 0%, rgba(46, 111, 96, 0.14), transparent 40%);
+  box-shadow: var(--shadow);
+}
+
+.request-desk-head {
+  display: flex;
+  justify-content: space-between;
+  gap: 16px;
+  align-items: start;
+}
+
+.request-desk-head h2,
+.request-composer h3 {
+  margin: 0;
+}
+
+.request-desk-stack {
+  display: grid;
+  gap: 16px;
+  align-content: start;
+}
+
+.request-shortcut-grid {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 12px;
+}
+
+.request-shortcut-card,
+.request-idle-panel,
+.request-composer {
+  border: 3px solid var(--line);
+  background: rgba(255, 252, 244, 0.82);
+  box-shadow: 3px 3px 0 rgba(56, 35, 16, 0.16);
+}
+
+.request-shortcut-card {
+  appearance: none;
+  min-height: 156px;
+  display: grid;
+  align-content: start;
+  gap: 10px;
+  width: 100%;
+  padding: 14px;
+  color: var(--ink);
+  text-align: left;
+  cursor: pointer;
+  transition: transform 80ms steps(1), box-shadow 80ms steps(1), background 80ms steps(1);
+}
+
+.request-shortcut-card:hover,
+.request-shortcut-card:focus-visible {
+  transform: translate(-2px, -2px);
+  box-shadow: 5px 5px 0 rgba(56, 35, 16, 0.22);
+}
+
+.request-shortcut-card:focus-visible {
+  outline: 3px solid rgba(15, 118, 110, 0.28);
+  outline-offset: 2px;
+}
+
+.request-shortcut-card.is-active {
+  border-color: rgba(35, 23, 13, 0.86);
+  background:
+    linear-gradient(135deg, rgba(207, 232, 223, 0.88), rgba(255, 247, 210, 0.96)),
+    var(--paper);
+}
+
+.request-shortcut-card h3,
+.request-idle-panel h3 {
+  margin: 0;
+}
+
+.request-shortcut-action {
+  align-self: end;
+  width: max-content;
+  max-width: 100%;
+  padding: 8px 10px;
+  border: 3px solid rgba(90, 59, 32, 0.72);
+  background: var(--book);
+  color: #fffaf0;
+  font-family: "Courier New", "Menlo", monospace;
+  font-size: 11px;
+  font-weight: 900;
+  line-height: 1.15;
+}
+
+.request-idle-panel,
+.request-composer {
+  display: grid;
+  gap: 14px;
+  padding: 16px;
+}
+
+.request-idle-panel {
+  background:
+    linear-gradient(135deg, rgba(255, 252, 244, 0.82), rgba(233, 247, 224, 0.72)),
+    var(--paper);
+}
+
+.book-template-composer {
+  background:
+    linear-gradient(135deg, rgba(207, 232, 223, 0.78), rgba(255, 247, 210, 0.92)),
+    var(--paper);
+}
+
+.request-composer-head {
+  display: flex;
+  justify-content: space-between;
+  gap: 12px;
+  align-items: start;
+}
+
+.request-composer-actions-top {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: flex-end;
+  gap: 8px;
+}
+
+.request-last,
+.request-status {
+  margin: 0;
+  color: var(--muted);
+  line-height: 1.45;
+}
+
+.request-actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  align-items: center;
+}
+
+.request-field-grid {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 10px;
+}
+
+.request-field {
+  display: grid;
+  gap: 6px;
+}
+
+.request-field-wide {
+  grid-column: 1 / -1;
+}
+
+.request-label {
+  margin: 0;
+  text-transform: uppercase;
+  letter-spacing: 0.12em;
+  font-size: 10px;
+  color: var(--muted);
+  font-weight: 900;
+}
+
+.request-input,
+.request-textarea {
+  width: 100%;
+  border: 3px solid rgba(90, 59, 32, 0.8);
+  border-radius: 0;
+  background: rgba(255, 250, 239, 0.96);
+  color: var(--ink);
+  font: 13px/1.45 "Courier New", "Menlo", monospace;
+  box-shadow: inset 3px 3px 0 rgba(56, 35, 16, 0.08);
+}
+
+.request-input {
+  min-height: 42px;
+  padding: 10px 12px;
+}
+
+.request-textarea {
+  min-height: 132px;
+  resize: vertical;
+  padding: 12px;
+}
+
+.request-textarea-compact {
+  min-height: 82px;
+}
+
+.request-input:focus,
+.request-textarea:focus {
+  outline: 3px solid rgba(15, 118, 110, 0.26);
+  outline-offset: 2px;
+}
+
+.request-submit {
+  background: var(--book);
+  color: #fffaf0;
+}
+
+.request-status {
+  flex: 1 1 220px;
+  padding: 8px 10px;
+  border: 1px solid rgba(32, 21, 10, 0.12);
+  background: rgba(255, 250, 239, 0.68);
+  font-size: 12px;
+}

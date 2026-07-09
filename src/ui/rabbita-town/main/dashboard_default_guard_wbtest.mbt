@@ -42,6 +42,11 @@ fn default_dashboard_forbidden_copy() -> Array[String] {
     "deeper runtime tools", "Open the advanced viewport",
     "Open Advanced Viewport", "Advanced tools open separately",
     "runtime intervention",
+    "Progress And Requests", "Mayor command center", "Live status ",
+    "Town loop active", "Due checks ", "Requests ", "Decision mix",
+    "Watch Portfolio", "Long-horizon topics", "Standing Watch Portfolio",
+    "operator-console", "operator-stat", "operator-watch-column",
+    "watch-portfolio", "watch-timeline",
     "phone-message-panel", "phone-topbar", "message-bubble",
     "No standing watcher connected", "through the daemon",
     "deeper town tools",
@@ -70,6 +75,8 @@ test "default dashboard keeps professional operating actions visible" {
   assert_true(html.contains("Open Wenyu Valley workspace"))
   assert_true(html.contains("Save Watch"))
   assert_true(html.contains("Queue PDF Watch Book"))
+  assert_true(html.contains("Request Desk"))
+  assert_true(html.contains("Start the next safe job"))
   assert_true(html.contains("Operating Brief"))
   assert_true(html.contains("Current focus"))
   assert_true(html.contains("Focused town surfaces"))

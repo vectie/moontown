@@ -17,7 +17,7 @@ fn execution_display_detail(execution : @core.TaskExecutionRecord) -> String {
     AwaitingPersistenceExecution =>
       "The run is done; the next town action is keeper save and evidence capture."
     StaleExecution =>
-      "Mayor supervision should recover the missed handoff or retry this work lane."
+      "Town supervision should recover the missed handoff or retry this work lane."
     FailedExecution =>
       "A work failure surfaced in the book lifecycle and should be reviewed."
     QuietExecution => execution.summary
@@ -42,7 +42,7 @@ fn execution_running_detail(book_id : String) -> String {
       "AI Garden work is preparing learning and assistant guidance."
     "wenyu-physical-bridge" =>
       "Physical Bridge work is syncing venue and robot service signals."
-    _ => "A MoonBook work lane is running under mayor supervision."
+    _ => "A MoonBook work lane is running under town supervision."
   }
 }
 

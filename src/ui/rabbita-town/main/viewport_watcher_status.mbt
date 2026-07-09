@@ -8,20 +8,6 @@ fn latest_watcher_record(model : Model) -> WatcherRunRecordSnapshot? {
 }
 
 ///|
-fn latest_watcher_record_for_goal(
-  model : Model,
-  goal_id : String,
-) -> WatcherRunRecordSnapshot? {
-  let mut found : WatcherRunRecordSnapshot? = None
-  for record in model.watcher_records {
-    if record.goal_id == goal_id {
-      found = Some(record)
-    }
-  }
-  found
-}
-
-///|
 fn latest_operator_request(model : Model) -> OperatorRequestSnapshot? {
   if model.operator_requests.is_empty() {
     None
@@ -74,33 +60,6 @@ fn watcher_record_matches_goal(
   match goal_id {
     Some(id) => record.goal_id == id
     None => true
-  }
-}
-
-///|
-fn watcher_record_count_for_goal(model : Model, goal_id : String) -> Int {
-  let mut count = 0
-  for record in model.watcher_records {
-    if record.goal_id == goal_id {
-      count += 1
-    }
-  }
-  count
-}
-
-///|
-fn watcher_metric_value(value : Int?) -> String {
-  match value {
-    Some(count) => count.to_string()
-    None => "n/a"
-  }
-}
-
-///|
-fn watcher_book_changed_value(value : String?) -> String {
-  match value {
-    Some(flag) => flag
-    None => "unknown"
   }
 }
 

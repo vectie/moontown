@@ -38,9 +38,8 @@ It currently includes:
 - packet/proposal/run lifecycle visibility
 - budget/energy/pressure/stability metrics
 - activity feed and anomaly surfacing
-- Mayor command center with real standing-goal progress
-- watcher decision timeline from `.moonsuite/products/moontown/watchers/*.jsonl`
-- local standing-watch request composer
+- professional town pulse, operating brief, activity ledger, and current focus
+- request desk with standing-watch and PDF evidence-book creation paths
 - dashboard entry to the Wenyu Valley map workspace
 - generated Wenyu Valley map with animated resident overlay
 - stronger keyboard focus visibility
@@ -54,10 +53,10 @@ runtime files:
 - `.moonsuite/products/moontown/watchers/watch-opc-news.jsonl`
 - `.moonsuite/products/moontown/operator-requests/requests.jsonl`
 
-The Mayor command center uses those files to show progress, next due tick,
-latest watcher decision, source delta count, and decision mix. The request
-composer posts to `/api/operator-requests`, writes an operator request record,
-and creates or replaces a standing goal in
+The default dashboard summarizes progress, attention, active work, and request
+needs without rendering the old live-operations console. The request desk posts
+to `/api/operator-requests`, writes an operator request record, and creates or
+replaces a standing goal in
 `.moonsuite/products/moontown/standing-goals.json`.
 The daemon then picks that goal up during its normal standing-goal dispatch
 cycle.

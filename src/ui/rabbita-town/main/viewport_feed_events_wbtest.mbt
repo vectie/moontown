@@ -41,7 +41,7 @@ test "feed event kind helpers classify tone groups and daemon events" {
 test "feed event title preserves suffix policy by event kind" {
   assert_eq(
     feed_event_title(feed_event_test_event("standing-watch", "Update")),
-    "Mayor watch update / research-opc",
+    "Standing watch update / research-opc",
   )
   assert_eq(
     feed_event_title(feed_event_test_event("review", "NeedsReview")),
@@ -127,7 +127,7 @@ test "feed item for event projects visible events and skips hidden events" {
     item
     is Some(
       {
-        title: "Mayor watch update / research-opc",
+    title: "Standing watch update / research-opc",
         detail: "NoChange",
         tone: "calm",
       }

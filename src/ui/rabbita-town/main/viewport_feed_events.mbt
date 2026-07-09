@@ -44,7 +44,7 @@ fn feed_event_title(event : @core.TownEvent) -> String {
     None => ""
   }
   match feed_event_kind(event.kind) {
-    StandingWatch => "Mayor watch update\{suffix}"
+    StandingWatch => "Standing watch update\{suffix}"
     StandingGoal => "Watcher dispatched\{suffix}"
     Execution => "Worker run changed\{suffix}"
     Persist => "Bookkeeper saved memory\{suffix}"
@@ -52,7 +52,7 @@ fn feed_event_title(event : @core.TownEvent) -> String {
     Summary => "Book health summary\{suffix}"
     Review => "Keeper review needed\{suffix}"
     Daemon => "Town loop heartbeat"
-    Supervision => "Mayor supervision"
+    Supervision => "Town supervision"
     CivicPattern => "Civic pattern round"
     CivicSalon => "Civic pattern round"
     Other => "Town message\{suffix}"

@@ -46,7 +46,7 @@ Classify visible labels and controls as `default`, `advanced`, or `developer`.
 Start with:
 
 - `src/ui/rabbita-town/main/dashboard_page.mbt`
-- `src/ui/rabbita-town/main/viewport_operator_header.mbt`
+- `src/ui/rabbita-town/main/request_desk.mbt`
 - `src/ui/rabbita-town/main/viewport_controls.mbt`
 - `src/ui/rabbita-town/main/viewport_runtime_bar.mbt`
 - `src/ui/rabbita-town/main/viewport_operator_requests.mbt`
@@ -64,7 +64,7 @@ The first screen should prioritize:
 2. Wenyu Valley map workspace entry.
 3. Review, failure, stale, and active-watch attention cards.
 4. Request shortcuts.
-5. Advanced operator console, collapsed or lower on the page.
+5. Focused request desk for deliberate watch/book creation.
 6. Developer diagnostics behind an explicit boundary.
 
 ### Phase 3: Translate Visible Copy
@@ -75,8 +75,8 @@ Keep internal contracts stable and add display labels.
 | --- | --- |
 | `Writes standing-goals.json` | Saves a durable watch |
 | `Writes book-template-requests.json` | Queues a new book |
-| `Daemon ...` | Town loop active |
-| `Live spine ...` | Live status connected |
+| `Daemon ...` | Town status active |
+| `Live spine ...` | Town readiness connected |
 | raw request/goal ids after submit | Watch accepted / Book request queued |
 | `Cadence ticks` | Check frequency |
 | `Target MoonBook` | Target book |
@@ -138,7 +138,7 @@ Allow these only in advanced/developer surfaces.
 - Default Rabbita town now hides rare runtime source switching, simulation
   stepping, strategy tuning, and inspector drill controls from the professional
   dashboard.
-- Mayor Messages now translate execution task records into professional labels
+- Activity Ledger now translates execution task records into professional labels
   and details, such as `Town shell code patch is running`, rather than exposing
   raw task, packet, run, or proposal ids.
 - Default dashboard tests now guard against raw runtime ids and developer copy
@@ -158,7 +158,7 @@ Allow these only in advanced/developer surfaces.
 - The duplicate lower `Advanced Viewport` block was removed from the default
   dashboard. Professional users now use the primary Wenyu map entry instead of
   reading advanced/runtime intervention copy on the first screen.
-- Mayor Messages now renders as a professional activity ledger instead of a
+- Activity Ledger now renders as a professional activity ledger instead of a
   phone-style chat thread, and standing-watch feed copy no longer exposes daemon
   wording or raw watch/book identifiers on the default dashboard.
 - The first-viewport status strip no longer exposes preview/source state or
@@ -168,3 +168,7 @@ Allow these only in advanced/developer surfaces.
   tile-map, scaled-copy, or execution-count implementation language. The same
   cleanup also renames the default command-center execution chip to
   `Active work`.
+- The old always-open command center, standing-watch portfolio, watcher
+  timeline, and operator-stat grid have been removed from the default code path.
+  The remaining lower dashboard action is a focused `Request Desk` that only
+  opens a detailed watch or book composer after the operator chooses that job.

@@ -36,12 +36,7 @@ fn render_dashboard_page(
       ]),
     ]),
     section(class="metric-grid", render_vitality_metric_grid(model)),
-    render_operator_command_center(
-      dispatch,
-      model,
-      context.workers,
-      context.executions,
-    ),
+    render_request_desk(dispatch, model),
     render_dashboard_ecosystem_workspace(dispatch, model),
   ])
 }

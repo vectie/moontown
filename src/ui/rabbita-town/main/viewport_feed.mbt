@@ -117,7 +117,7 @@ fn render_feed(feed : Array[FeedItem]) -> @rabbita.Html {
     div(class="activity-ledger-head", [
       span(class="activity-ledger-status", ""),
       div([
-        h2("Mayor Messages"),
+        h2("Activity Ledger"),
         p("Recent watch, review, and town work signals"),
       ]),
     ]),

@@ -4,19 +4,6 @@ fn status_chip(text : String, class_name : String) -> @rabbita.Html {
 }
 
 ///|
-fn chip_class_for_tone(tone : String) -> String {
-  match tone {
-    "alert" => "chip-alert"
-    "book" => "chip-book"
-    "live" => "chip-live"
-    "calm" => "chip-calm"
-    "clock" => "chip-clock"
-    "recovery" => "chip-recovery"
-    _ => "chip-neutral"
-  }
-}
-
-///|
 fn class_suffix_when(enabled : Bool, suffix : String) -> String {
   if enabled {
     suffix
