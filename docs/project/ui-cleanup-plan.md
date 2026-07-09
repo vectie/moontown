@@ -291,6 +291,25 @@ Default state should remove:
 - the mobile 2x2 area grid that makes secondary navigation taller than the
   Request Desk
 
+### Phase 15: Compact Attention Rail
+
+The launchpad already owns the top-level attention state. The separate
+attention dock should behave like a short review rail, not another section with
+its own tall mobile heading.
+
+Default state should keep:
+
+- `Attention` as the dock label
+- the current attention action
+- `Next opening`
+- `Latest signal`
+
+Default state should remove:
+
+- verbose action titles such as `Review queued work`
+- the two-row phone layout that makes attention taller than secondary
+  navigation
+
 ## Done Criteria
 
 - A professional user can operate watches, reviews, book requests, and the map
@@ -410,3 +429,6 @@ Default state should remove:
 - Town Areas now behaves like a compact secondary navigation rail on phone. It
   keeps all four destinations visible, shortens the longest label to `Social`,
   and removes the tall 2x2 default area block.
+- Attention now renders as a compact rail on phone. It keeps the current
+  action, next opening, and latest signal, but shortens action titles and
+  removes the extra stacked heading row from the default mobile layout.

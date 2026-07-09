@@ -138,13 +138,13 @@
 
 @media (max-width: 900px) {
   .attention-dock {
-    grid-template-columns: 1fr;
-    gap: 8px;
-    padding: 10px 12px;
+    grid-template-columns: minmax(82px, 0.33fr) minmax(0, 0.67fr);
+    gap: 6px;
+    padding: 8px 10px;
   }
 
   .attention-dock-heading h2 {
-    font-size: 18px;
+    font-size: 15px;
   }
 
   .attention-dock-items {
@@ -153,8 +153,9 @@
   }
 
   .attention-dock-chip {
-    min-height: 50px;
-    padding: 7px;
+    min-height: 44px;
+    gap: 3px;
+    padding: 5px;
   }
 
   .attention-dock-detail {
@@ -162,11 +163,17 @@
   }
 
   .attention-dock-chip h3 {
-    font-size: 11px;
+    font-size: 10px;
     line-height: 1.15;
   }
 
   .attention-dock-value {
-    font-size: 12px;
+    font-size: 11px;
+  }
+
+  .attention-dock .metric-label {
+    font-size: 9px;
+    letter-spacing: 0.06em;
+    line-height: 1.05;
   }
 }

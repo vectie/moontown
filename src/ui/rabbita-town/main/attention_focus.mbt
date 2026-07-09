@@ -23,7 +23,7 @@ fn attention_focus_view(
   let attention = professional_attention_summary(model, executions)
   if professional_attention_has_failed(attention) {
     {
-      title: "Recover failed work",
+      title: "Recover work",
       next_label: "Next opening",
       next_detail: attention_focus_recovery_opening(
         execution_summary,
@@ -34,14 +34,14 @@ fn attention_focus_view(
     }
   } else if professional_attention_has_review(attention) {
     {
-      title: "Review queued work",
+      title: "Review work",
       next_label: "Next opening",
       next_detail: attention_focus_review_opening(execution_summary, decisions),
       tone: "review",
     }
   } else if watch_summary.enabled_count == 0 {
     {
-      title: "Start standing watch",
+      title: "Start watch",
       next_label: "Town capacity",
       next_detail: attention_focus_count_fragment(
         workers_summary.online(),
@@ -52,7 +52,7 @@ fn attention_focus_view(
     }
   } else if live.pending_template_request_count > 0 {
     {
-      title: "Prepare book request",
+      title: "Prepare book",
       next_label: "Watch state",
       next_detail: attention_focus_count_fragment(
         watch_summary.enabled_count,
@@ -63,7 +63,7 @@ fn attention_focus_view(
     }
   } else if execution_summary.active_or_unresolved() > 0 {
     {
-      title: "Track active work",
+      title: "Track work",
       next_label: "Town capacity",
       next_detail: attention_focus_count_fragment(
         workers_summary.online(),
@@ -74,7 +74,7 @@ fn attention_focus_view(
     }
   } else {
     {
-      title: "Monitor live pulse",
+      title: "Monitor pulse",
       next_label: "Town capacity",
       next_detail: attention_focus_count_fragment(
         workers_summary.online(),
