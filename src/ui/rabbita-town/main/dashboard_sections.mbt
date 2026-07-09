@@ -1,7 +1,6 @@
 ///|
 fn dashboard_sections() -> Array[DashboardSection] {
   [
-    EcosystemOverview,
     DistrictSystems,
     ResidentAgentsSection,
     CivicQuestsSection,
@@ -12,7 +11,6 @@ fn dashboard_sections() -> Array[DashboardSection] {
 ///|
 fn dashboard_section_label(target : DashboardSection) -> String {
   match target {
-    EcosystemOverview => "Areas"
     DistrictSystems => "Districts"
     ResidentAgentsSection => "Residents"
     CivicQuestsSection => "Quests"
@@ -23,7 +21,6 @@ fn dashboard_section_label(target : DashboardSection) -> String {
 ///|
 fn dashboard_section_kicker(target : DashboardSection) -> String {
   match target {
-    EcosystemOverview => "Closed by default"
     DistrictSystems => "Live civic modules"
     ResidentAgentsSection => "Projection-safe twins"
     CivicQuestsSection => "Service workflows"
@@ -31,38 +28,25 @@ fn dashboard_section_kicker(target : DashboardSection) -> String {
   }
 }
 
-///|
-fn dashboard_section_summary(target : DashboardSection, model : Model) -> String {
-  match target {
-    EcosystemOverview =>
-      "Open district, resident, quest, or social-capital detail only when that area needs work."
-    DistrictSystems =>
-      "\{wenyu_modules().length()} district modules with worker, queue, and health signals."
-    ResidentAgentsSection =>
-      "\{resident_count(model)} resident projections with private memory kept out of town view."
-    CivicQuestsSection =>
-      "\{civic_quests(model).length()} service quests across policy, contest, AI, social, and physical bridge work."
-    SocialCapitalSection =>
-      "\{social_matches().length()} active match lanes plus talent evidence and reception routing."
-  }
-}
-
-///|
 fn dashboard_section_button_class(
-  active : DashboardSection,
+  active : DashboardSection?,
   target : DashboardSection,
 ) -> String {
-  if active == target {
-    "dashboard-section-tab is-active"
-  } else {
-    "dashboard-section-tab"
+  match active {
+    Some(section) =>
+      if section == target {
+        "dashboard-section-tab is-active"
+      } else {
+        "dashboard-section-tab"
+      }
+    None => "dashboard-section-tab"
   }
 }
 
 ///|
 fn render_dashboard_section_tab(
   dispatch : Dispatch[Msg],
-  active : DashboardSection,
+  active : DashboardSection?,
   target : DashboardSection,
 ) -> @rabbita.Html {
   button(
@@ -78,7 +62,7 @@ fn render_dashboard_section_tab(
 ///|
 fn render_dashboard_section_tabs(
   dispatch : Dispatch[Msg],
-  active : DashboardSection,
+  active : DashboardSection?,
 ) -> @rabbita.Html {
   div(
     class="dashboard-section-tabs",
@@ -89,17 +73,11 @@ fn render_dashboard_section_tabs(
 }
 
 ///|
-fn render_town_area_closed_panel(model : Model) -> @rabbita.Html {
-  div(class="town-area-closed-panel", [
-    p(class="metric-label", "Default closed"),
-    p(class="metric-detail", dashboard_section_summary(EcosystemOverview, model)),
-  ])
-}
-
-///|
-fn render_dashboard_section_panel(model : Model) -> @rabbita.Html {
-  match model.dashboard_section {
-    EcosystemOverview => render_town_area_closed_panel(model)
+fn render_dashboard_section_panel(
+  target : DashboardSection,
+  model : Model,
+) -> @rabbita.Html {
+  match target {
     DistrictSystems => div(class="dashboard-section-panel-stack", [
       render_civic_context(model),
       render_civic_modules(model),
@@ -115,7 +93,7 @@ fn render_dashboard_ecosystem_workspace(
   dispatch : Dispatch[Msg],
   model : Model,
 ) -> @rabbita.Html {
-  section(class="town-areas-launcher", [
+  let children = [
     div(class="town-areas-head", [
       div([
         p(class="eyebrow", "Town Areas"),
@@ -127,6 +105,10 @@ fn render_dashboard_ecosystem_workspace(
       ]),
       render_dashboard_section_tabs(dispatch, model.dashboard_section),
     ]),
-    render_dashboard_section_panel(model),
-  ])
+  ]
+  match model.dashboard_section {
+    Some(section) => children.push(render_dashboard_section_panel(section, model))
+    None => ()
+  }
+  section(class="town-areas-launcher", children)
 }

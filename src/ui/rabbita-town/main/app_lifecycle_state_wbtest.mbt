@@ -13,8 +13,21 @@ test "dashboard section helper changes only the ecosystem focus" {
     model,
     DashboardSection::SocialCapitalSection,
   )
-  assert_true(next.dashboard_section == DashboardSection::SocialCapitalSection)
+  assert_true(next.dashboard_section is Some(SocialCapitalSection))
   assert_true(next.selection is Selection::Node(_))
+}
+
+///|
+test "dashboard section helper closes an active ecosystem focus" {
+  let model = {
+    ..init_model(),
+    dashboard_section: Some(DashboardSection::SocialCapitalSection),
+  }
+  let next = set_dashboard_section_model(
+    model,
+    DashboardSection::SocialCapitalSection,
+  )
+  assert_true(next.dashboard_section is None)
 }
 
 ///|

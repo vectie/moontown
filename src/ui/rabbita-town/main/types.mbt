@@ -20,7 +20,6 @@ priv enum ViewportMode {
 
 ///|
 priv enum DashboardSection {
-  EcosystemOverview
   DistrictSystems
   ResidentAgentsSection
   CivicQuestsSection
@@ -41,7 +40,7 @@ priv struct Model {
   selection : Selection
   state_source : StateSourceKind
   viewport_mode : ViewportMode
-  dashboard_section : DashboardSection
+  dashboard_section : DashboardSection?
   request_composer : RequestComposerFocus
   projection_snapshot : ProjectionSnapshot?
   snapshot_version : Int

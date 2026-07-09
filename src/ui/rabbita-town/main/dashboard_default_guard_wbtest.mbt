@@ -46,7 +46,8 @@ fn default_dashboard_forbidden_copy() -> Array[String] {
     "Professional town workspace", "Focused town surfaces",
     "dashboard-overview-card", "dashboard-overview-grid", "request-idle-panel",
     "Choose the next safe request", "Activity Ledger", "activity-ledger-panel",
-    "feed-panel", "feed-item",
+    "feed-panel", "feed-item", "Closed by default", "Default closed",
+    "town-area-closed-panel",
   ]
 }
 
@@ -91,16 +92,27 @@ test "default dashboard keeps professional operating actions visible" {
 test "dashboard ecosystem sections render only the selected detail surface" {
   let districts = render_default_dashboard_test_html({
     ..init_model(),
-    dashboard_section: DashboardSection::DistrictSystems,
+    dashboard_section: Some(DashboardSection::DistrictSystems),
   })
   assert_true(districts.contains("Town shell plus live civic systems"))
   assert_true(!districts.contains("Digital twins with memory"))
   let residents = render_default_dashboard_test_html({
     ..init_model(),
-    dashboard_section: DashboardSection::ResidentAgentsSection,
+    dashboard_section: Some(DashboardSection::ResidentAgentsSection),
   })
   assert_true(residents.contains("Digital twins with memory"))
   assert_true(!residents.contains("Town shell plus live civic systems"))
+}
+
+///|
+test "dashboard ecosystem sections stay closed by default" {
+  let html = render_default_dashboard_test_html(init_model())
+  assert_true(!html.contains("Town shell plus live civic systems"))
+  assert_true(!html.contains("Digital twins with memory"))
+  assert_true(
+    !html.contains("Policy, contest, social, and offline workflows"),
+  )
+  assert_true(!html.contains("Weak ties, talent graph"))
 }
 
 ///|

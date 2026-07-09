@@ -21,7 +21,15 @@ fn set_dashboard_section_model(
   model : Model,
   dashboard_section : DashboardSection,
 ) -> Model {
-  { ..model, dashboard_section }
+  let next = match model.dashboard_section {
+    Some(active) => if active == dashboard_section {
+      None
+    } else {
+      Some(dashboard_section)
+    }
+    None => Some(dashboard_section)
+  }
+  { ..model, dashboard_section: next }
 }
 
 ///|

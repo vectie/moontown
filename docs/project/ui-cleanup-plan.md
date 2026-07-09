@@ -200,3 +200,7 @@ Allow these only in advanced/developer surfaces.
   in the professional dashboard. It now shows the current decision signal, next
   opening, and one compact recent signal; the stale ledger renderer and related
   CSS were removed from the default UI code path.
+- The Town Areas launcher no longer uses a pseudo `Areas` tab or a closed-state
+  explanation panel. The default dashboard now shows four real area choices and
+  keeps every civic detail panel unrendered until the operator selects that
+  area; selecting the active area closes it again.

@@ -45,7 +45,7 @@ fn init_model() -> Model {
     selection: initial_selection(),
     state_source: initial_state_source(projection_snapshot),
     viewport_mode: initial_viewport_mode(),
-    dashboard_section: DashboardSection::EcosystemOverview,
+    dashboard_section: None,
     request_composer: RequestComposerFocus::RequestShortcuts,
     projection_snapshot,
     snapshot_version: town_snapshot_version(),
