@@ -43,6 +43,8 @@ fn default_dashboard_forbidden_copy() -> Array[String] {
     "phone-message-panel", "phone-topbar", "message-bubble",
     "No standing watcher connected", "through the daemon",
     "deeper town tools",
+    "Preview live", "Preview paused", "Town check waiting",
+    "Professional view", "Town data connected",
   ]
 }
 
@@ -59,6 +61,8 @@ test "default dashboard hides developer and rare runtime controls" {
 ///|
 test "default dashboard keeps professional operating actions visible" {
   let html = render_default_dashboard_test_html(init_model())
+  assert_true(html.contains("Professional workspace"))
+  assert_true(html.contains("No active watch"))
   assert_true(html.contains("Current town pulse"))
   assert_true(html.contains("Open Wenyu Viewport"))
   assert_true(html.contains("Save Watch"))

@@ -161,3 +161,6 @@ Allow these only in advanced/developer surfaces.
 - Mayor Messages now renders as a professional activity ledger instead of a
   phone-style chat thread, and standing-watch feed copy no longer exposes daemon
   wording or raw watch/book identifiers on the default dashboard.
+- The first-viewport status strip no longer exposes preview/source state or
+  daemon check cadence. It now summarizes the professional workspace, active
+  watches, and attention state.

@@ -1,11 +1,36 @@
 ///|
 fn render_professional_status_strip(model : Model) -> @rabbita.Html {
-  let runtime_status = runtime_status_chip_for_model(model)
+  let watch_summary = standing_goal_summary(model)
+  let decisions = watcher_decision_summary(model)
   div(class="professional-status-strip", [
-    status_chip(runtime_status.text, runtime_status.class_name),
-    status_chip(daemon_tick_label(model), "chip-neutral"),
-    status_chip("Professional view", "chip-book"),
+    status_chip("Professional workspace", "chip-book"),
+    professional_header_watch_chip(watch_summary),
+    professional_header_attention_chip(decisions),
   ])
+}
+
+///|
+fn professional_header_watch_chip(summary : StandingGoalSummary) -> @rabbita.Html {
+  if summary.enabled_count == 0 {
+    status_chip("No active watch", "chip-neutral")
+  } else if summary.enabled_count == 1 {
+    status_chip("1 active watch", "chip-live")
+  } else {
+    status_chip("\{summary.enabled_count} active watches", "chip-live")
+  }
+}
+
+///|
+fn professional_header_attention_chip(
+  summary : WatcherDecisionSummary,
+) -> @rabbita.Html {
+  if summary.failed_count > 0 {
+    status_chip("Recovery needed", "chip-alert")
+  } else if summary.review_count > 0 {
+    status_chip("Review waiting", "chip-alert")
+  } else {
+    status_chip("Attention clear", "chip-calm")
+  }
 }
 
 ///|
