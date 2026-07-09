@@ -43,7 +43,8 @@ fn default_dashboard_forbidden_copy() -> Array[String] {
     "deeper town tools", "Preview live", "Preview paused", "Town check waiting",
     "Professional view", "Town data connected", "Town Overview", "professional-overview",
     "viewport-portal", "town-main", "scene-column", "town-header", "title-block",
-    "Professional town workspace",
+    "Professional town workspace", "Focused town surfaces",
+    "dashboard-overview-card", "dashboard-overview-grid",
   ]
 }
 
@@ -74,7 +75,8 @@ test "default dashboard keeps professional operating actions visible" {
   assert_true(html.contains("Start the next safe job"))
   assert_true(html.contains("Attention Workbench"))
   assert_true(html.contains("Activity Ledger"))
-  assert_true(html.contains("Focused town surfaces"))
+  assert_true(html.contains("Town Areas"))
+  assert_true(html.contains("Open detail only when needed"))
   assert_true(html.contains("Districts"))
   assert_true(html.contains("Residents"))
   assert_true(html.contains("Quests"))

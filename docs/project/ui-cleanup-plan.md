@@ -188,3 +188,7 @@ Allow these only in advanced/developer surfaces.
   operator masthead. The default first screen now starts as a professional
   operating console instead of an intro page, while keeping scene identity and
   alert state visible.
+- The lower ecosystem workspace no longer renders an always-open overview-card
+  grid by default. It is now a compact `Town Areas` launcher; detailed district,
+  resident, quest, and social-capital panels render only after the operator
+  explicitly opens that area.

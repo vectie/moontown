@@ -430,7 +430,7 @@
 }
 
 .runtime-bar,
-.dashboard-ecosystem,
+.town-areas-launcher,
 .civic-modules,
 .resident-panel,
 .quest-panel,
@@ -445,7 +445,7 @@
 }
 
 .runtime-bar,
-.dashboard-ecosystem,
+.town-areas-launcher,
 .civic-modules,
 .resident-panel,
 .quest-panel,
@@ -456,7 +456,7 @@
 }
 
 .runtime-bar,
-.dashboard-ecosystem,
+.town-areas-launcher,
 .civic-modules,
 .resident-panel,
 .quest-panel,
@@ -472,21 +472,21 @@
     radial-gradient(circle at 88% 0%, rgba(85, 123, 151, 0.12), transparent 34%);
 }
 
-.dashboard-ecosystem {
+.town-areas-launcher {
   background:
     linear-gradient(135deg, rgba(255, 252, 244, 0.96), rgba(231, 242, 236, 0.9)),
     radial-gradient(circle at 0% 0%, rgba(85, 123, 151, 0.13), transparent 34%),
     radial-gradient(circle at 100% 0%, rgba(46, 111, 96, 0.13), transparent 38%);
 }
 
-.dashboard-ecosystem-head {
+.town-areas-head {
   display: grid;
   grid-template-columns: minmax(0, 0.9fr) minmax(420px, 1.1fr);
   gap: 16px;
   align-items: start;
 }
 
-.dashboard-ecosystem-head h2 {
+.town-areas-head h2 {
   margin: 0;
 }
 
@@ -496,8 +496,7 @@
   gap: 8px;
 }
 
-.dashboard-section-tab,
-.dashboard-overview-card {
+.dashboard-section-tab {
   appearance: none;
   width: 100%;
   min-width: 0;
@@ -520,15 +519,12 @@
 }
 
 .dashboard-section-tab:hover,
-.dashboard-section-tab:focus-visible,
-.dashboard-overview-card:hover,
-.dashboard-overview-card:focus-visible {
+.dashboard-section-tab:focus-visible {
   transform: translate(-2px, -2px);
   box-shadow: 5px 5px 0 rgba(56, 35, 16, 0.2);
 }
 
-.dashboard-section-tab:focus-visible,
-.dashboard-overview-card:focus-visible {
+.dashboard-section-tab:focus-visible {
   outline: 3px solid rgba(15, 118, 110, 0.28);
   outline-offset: 2px;
 }
@@ -556,42 +552,31 @@
   opacity: 0.78;
 }
 
-.dashboard-overview-grid {
-  display: grid;
-  grid-template-columns: repeat(4, minmax(0, 1fr));
-  gap: 12px;
-}
-
-.dashboard-overview-card {
-  min-height: 148px;
-  display: grid;
-  align-content: start;
-  gap: 10px;
-  padding: 16px;
-}
-
-.dashboard-overview-card h3 {
-  margin: 0;
-  font-size: 18px;
-}
-
 .dashboard-section-panel-stack {
   display: grid;
   gap: 14px;
 }
 
+.town-area-closed-panel {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px 12px;
+  align-items: center;
+  padding: 12px;
+  border: 3px solid rgba(90, 59, 32, 0.38);
+  background: rgba(255, 250, 239, 0.68);
+}
+
 @media (max-width: 1100px) {
-  .dashboard-ecosystem-head,
-  .dashboard-section-tabs,
-  .dashboard-overview-grid {
+  .town-areas-head,
+  .dashboard-section-tabs {
     grid-template-columns: repeat(2, minmax(0, 1fr));
   }
 }
 
 @media (max-width: 720px) {
-  .dashboard-ecosystem-head,
-  .dashboard-section-tabs,
-  .dashboard-overview-grid {
+  .town-areas-head,
+  .dashboard-section-tabs {
     grid-template-columns: 1fr;
   }
 }

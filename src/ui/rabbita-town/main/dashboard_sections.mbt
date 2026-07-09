@@ -12,7 +12,7 @@ fn dashboard_sections() -> Array[DashboardSection] {
 ///|
 fn dashboard_section_label(target : DashboardSection) -> String {
   match target {
-    EcosystemOverview => "Overview"
+    EcosystemOverview => "Areas"
     DistrictSystems => "Districts"
     ResidentAgentsSection => "Residents"
     CivicQuestsSection => "Quests"
@@ -23,7 +23,7 @@ fn dashboard_section_label(target : DashboardSection) -> String {
 ///|
 fn dashboard_section_kicker(target : DashboardSection) -> String {
   match target {
-    EcosystemOverview => "Choose a surface"
+    EcosystemOverview => "Closed by default"
     DistrictSystems => "Live civic modules"
     ResidentAgentsSection => "Projection-safe twins"
     CivicQuestsSection => "Service workflows"
@@ -35,7 +35,7 @@ fn dashboard_section_kicker(target : DashboardSection) -> String {
 fn dashboard_section_summary(target : DashboardSection, model : Model) -> String {
   match target {
     EcosystemOverview =>
-      "Keep the default cockpit clean; open a focused ecosystem surface only when you need it."
+      "Open district, resident, quest, or social-capital detail only when that area needs work."
     DistrictSystems =>
       "\{wenyu_modules().length()} district modules with worker, queue, and health signals."
     ResidentAgentsSection =>
@@ -89,42 +89,17 @@ fn render_dashboard_section_tabs(
 }
 
 ///|
-fn render_dashboard_overview_card(
-  dispatch : Dispatch[Msg],
-  model : Model,
-  target : DashboardSection,
-) -> @rabbita.Html {
-  button(
-    class="dashboard-overview-card",
-    on_click=dispatch(SetDashboardSection(target)),
-    [
-      p(class="metric-label", dashboard_section_kicker(target)),
-      h3(dashboard_section_label(target)),
-      p(class="metric-detail", dashboard_section_summary(target, model)),
-    ],
-  )
-}
-
-///|
-fn render_ecosystem_overview(
-  dispatch : Dispatch[Msg],
-  model : Model,
-) -> @rabbita.Html {
-  div(class="dashboard-overview-grid", [
-    render_dashboard_overview_card(dispatch, model, DistrictSystems),
-    render_dashboard_overview_card(dispatch, model, ResidentAgentsSection),
-    render_dashboard_overview_card(dispatch, model, CivicQuestsSection),
-    render_dashboard_overview_card(dispatch, model, SocialCapitalSection),
+fn render_town_area_closed_panel(model : Model) -> @rabbita.Html {
+  div(class="town-area-closed-panel", [
+    p(class="metric-label", "Default closed"),
+    p(class="metric-detail", dashboard_section_summary(EcosystemOverview, model)),
   ])
 }
 
 ///|
-fn render_dashboard_section_panel(
-  dispatch : Dispatch[Msg],
-  model : Model,
-) -> @rabbita.Html {
+fn render_dashboard_section_panel(model : Model) -> @rabbita.Html {
   match model.dashboard_section {
-    EcosystemOverview => render_ecosystem_overview(dispatch, model)
+    EcosystemOverview => render_town_area_closed_panel(model)
     DistrictSystems => div(class="dashboard-section-panel-stack", [
       render_civic_context(model),
       render_civic_modules(model),
@@ -140,18 +115,18 @@ fn render_dashboard_ecosystem_workspace(
   dispatch : Dispatch[Msg],
   model : Model,
 ) -> @rabbita.Html {
-  section(class="dashboard-ecosystem", [
-    div(class="dashboard-ecosystem-head", [
+  section(class="town-areas-launcher", [
+    div(class="town-areas-head", [
       div([
-        p(class="eyebrow", "Ecosystem"),
-        h2("Focused town surfaces"),
+        p(class="eyebrow", "Town Areas"),
+        h2("Open detail only when needed"),
         p(
           class="summary",
-          "District, resident, quest, and social-capital detail is available on purpose. The default cockpit stays centered on watches, reviews, requests, and map entry.",
+          "Keep routine work centered on watches, reviews, requests, and the map. Open a town area when a specific civic surface needs inspection.",
         ),
       ]),
       render_dashboard_section_tabs(dispatch, model.dashboard_section),
     ]),
-    render_dashboard_section_panel(dispatch, model),
+    render_dashboard_section_panel(model),
   ])
 }
