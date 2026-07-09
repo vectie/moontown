@@ -387,6 +387,25 @@ Default state should remove:
 - excess secondary-navigation height in the default scroll
 - any return to a 2x2 phone area grid
 
+### Phase 20: Compact Launchpad Title Rail
+
+The launchpad remains the largest phone surface after request, attention, and
+town-area rails have been compacted. Its title area still stacks `Moontown`
+above the scene title, spending a full row before the action and signal rails.
+
+Default state should keep:
+
+- `Moontown` as product identity
+- the current scene title
+- alert, worker, review, and map actions
+- the four operating signals
+
+Default state should remove:
+
+- the phone-only two-row launchpad identity block
+- excess title spacing before actionable status
+- any truncation of the primary scene title at 390px
+
 ## Done Criteria
 
 - A professional user can operate watches, reviews, book requests, and the map
