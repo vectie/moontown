@@ -17,27 +17,3 @@ fn execution_stage_cards(
     runtime_stat_chip("Issues", summary.issue_count(), "runtime-blocked"),
   ]
 }
-
-///|
-priv struct TownLaunchpadMapView {
-  latest_decision : String
-  latest_sources : String
-  next_check : String
-  active_work : Int
-}
-
-///|
-fn town_launchpad_map_view(
-  model : Model,
-  executions : Array[@core.TaskExecutionRecord],
-) -> TownLaunchpadMapView {
-  let latest = latest_watcher_metric_view(latest_watcher_record(model))
-  let executions_summary = execution_count_summary(executions)
-  let next_check = standing_goal_next_check_view(model)
-  {
-    latest_decision: latest.decision,
-    latest_sources: latest.sources,
-    next_check: next_check.portal_label,
-    active_work: executions_summary.total,
-  }
-}

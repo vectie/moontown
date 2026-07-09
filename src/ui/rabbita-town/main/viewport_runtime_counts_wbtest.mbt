@@ -168,7 +168,6 @@ test "execution count summary centralizes stage counts" {
     runtime_count_test_execution(Stale),
     runtime_count_test_execution(Failed),
   ])
-  assert_eq(summary.total, 9)
   assert_eq(summary.packet_ready, 1)
   assert_eq(summary.proposal_imported, 1)
   assert_eq(summary.run_confirmed, 1)
@@ -200,34 +199,10 @@ test "execution summary owns active runtime policy" {
 ///|
 test "execution lifecycle predicates centralize status groups" {
   assert_true(
-    execution_status_is_dispatch_phase(PacketReady),
-  )
-  assert_true(
-    execution_status_is_dispatch_phase(
-      ProposalImported,
-    ),
-  )
-  assert_true(
-    execution_status_is_dispatch_phase(RunConfirmed),
-  )
-  assert_true(
-    !execution_status_is_dispatch_phase(Running),
-  )
-  assert_true(
     execution_status_needs_attention(ReviewQueued),
   )
   assert_true(
     execution_status_needs_attention(Stale),
-  )
-  assert_true(
-    execution_status_is_persistence_or_done(
-      AwaitingPersistence,
-    ),
-  )
-  assert_true(
-    execution_status_is_persistence_or_done(
-      Completed,
-    ),
   )
   assert_true(
     execution_status_is_active_run(Running),

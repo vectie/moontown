@@ -56,6 +56,10 @@ fn default_dashboard_forbidden_copy() -> Array[String] {
     "Keep watching a topic", "Create a PDF evidence watch",
     "Track useful evidence changes in an existing MoonBook.",
     "Use when a new durable book needs approved PDF sources.",
+    "town-launchpad-map", "town-launchpad-map-copy", "town-launchpad-map-stats",
+    "town-launchpad-map-button", "Open Wenyu Valley workspace",
+    "Inspect districts, residents, standing watches, and active work in place.",
+    "Latest:", "New sources:", "Next check:", "Active work:",
   ]
 }
 
@@ -79,8 +83,8 @@ test "default dashboard keeps professional operating actions visible" {
   assert_true(html.contains("Town Launchpad"))
   assert_true(html.contains("Current town pulse"))
   assert_true(html.contains("town-launchpad-signal-rail"))
+  assert_true(html.contains("town-launchpad-gateway"))
   assert_true(html.contains("Open Wenyu Map"))
-  assert_true(html.contains("Open Wenyu Valley workspace"))
   assert_true(html.contains("Save Watch"))
   assert_true(html.contains("Queue PDF Watch Book"))
   assert_true(html.contains("Request Desk"))

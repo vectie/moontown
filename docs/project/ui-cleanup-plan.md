@@ -141,6 +141,21 @@ Expanded state should show only the selected composer. This keeps request
 creation deliberate while removing another large tutorial-like block from the
 normal operating scroll.
 
+### Phase 7: Single Launchpad Gateway
+
+The Town Launchpad should expose one Wenyu map gateway, not a separate map card
+with duplicated scene, latest, source, check, and active-work chips. Those
+runtime summaries already feed the health, attention, and work surfaces. The
+default launchpad should keep:
+
+- town pulse title and concise summary
+- worker and attention chips
+- the four compact signal cells
+- one direct `Open Wenyu Map` command
+
+Default UI should remove the lower map-card copy and map stat chips. Advanced
+or map-specific runtime state can live inside the Wenyu workspace itself.
+
 ## Done Criteria
 
 - A professional user can operate watches, reviews, book requests, and the map
@@ -235,3 +250,6 @@ normal operating scroll.
 - The Town Areas launcher is now a compact civic surface dock. It no longer
   renders instructional heading copy or per-area kicker text in the default
   dashboard, and phone layout keeps the four area choices in a 2x2 dock.
+- The next launchpad cleanup should keep a single Wenyu map gateway in the
+  launchpad header and remove the duplicated lower map card plus its runtime
+  stat helper.

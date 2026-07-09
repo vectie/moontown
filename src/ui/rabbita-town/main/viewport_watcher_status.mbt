@@ -1,13 +1,4 @@
 ///|
-fn latest_watcher_record(model : Model) -> WatcherRunRecordSnapshot? {
-  if model.watcher_records.is_empty() {
-    None
-  } else {
-    Some(model.watcher_records[model.watcher_records.length() - 1])
-  }
-}
-
-///|
 fn latest_operator_request(model : Model) -> OperatorRequestSnapshot? {
   if model.operator_requests.is_empty() {
     None
@@ -18,9 +9,7 @@ fn latest_operator_request(model : Model) -> OperatorRequestSnapshot? {
 
 ///|
 priv struct WatcherDecisionSummary {
-  update_count : Int
   review_count : Int
-  no_change_count : Int
   failed_count : Int
 }
 
@@ -34,22 +23,18 @@ fn watcher_decision_summary_for_goal(
   model : Model,
   goal_id : String?,
 ) -> WatcherDecisionSummary {
-  let mut update_count = 0
   let mut review_count = 0
-  let mut no_change_count = 0
   let mut failed_count = 0
   for record in model.watcher_records {
     if watcher_record_matches_goal(record, goal_id) {
       match watcher_decision_kind(record.decision) {
-        Update => update_count += 1
         NeedsReview => review_count += 1
-        NoChange => no_change_count += 1
         Failed => failed_count += 1
-        Deferred | Other => ()
+        Update | NoChange | Deferred | Other => ()
       }
     }
   }
-  { update_count, review_count, no_change_count, failed_count }
+  { review_count, failed_count }
 }
 
 ///|

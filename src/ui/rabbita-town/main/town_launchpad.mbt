@@ -3,82 +3,61 @@ fn render_town_launchpad(
   model : Model,
   workers : Array[WorkerSim],
   executions : Array[@core.TaskExecutionRecord],
-  scene : @ui.SceneRenderModel,
 ) -> @rabbita.Html {
   let workers_summary = worker_count_summary(workers)
   let watch_summary = standing_goal_summary(model)
   let attention = professional_attention_summary(model, executions)
-  let portal = town_launchpad_map_view(model, executions)
   section(class="town-launchpad", [
-    div(class="town-launchpad-primary", [
-      div(class="town-launchpad-status", [
-        div(class="town-launchpad-head", [
-          div(class="town-launchpad-copy", [
-            p(class="eyebrow", "Town Launchpad"),
-            h2("Current town pulse"),
-            p(
-              class="summary",
-              "Health, watches, review needs, book queue, and map entry stay close to the request path.",
-            ),
-          ]),
-          div(class="town-launchpad-actions", [
-            status_chip(
-              "Workers online: \{workers_summary.online()}",
-              "chip-neutral",
-            ),
-            status_chip(
-              professional_attention_chip_text(attention),
-              professional_attention_chip_class(attention),
-            ),
-          ]),
+    div(class="town-launchpad-status", [
+      div(class="town-launchpad-head", [
+        div(class="town-launchpad-copy", [
+          p(class="eyebrow", "Town Launchpad"),
+          h2("Current town pulse"),
+          p(
+            class="summary",
+            "Health, watches, review needs, book queue, and map entry stay close to the request path.",
+          ),
         ]),
-        div(class="town-launchpad-signal-rail", [
-          render_town_launchpad_signal(
-            "Town health",
-            professional_town_health_label(model),
-            professional_town_health_detail(model),
-            professional_town_health_tone(model),
+        div(class="town-launchpad-actions", [
+          status_chip(
+            "Workers online: \{workers_summary.online()}",
+            "chip-neutral",
           ),
-          render_town_launchpad_signal(
-            "Standing watches",
-            watch_summary.enabled_count.to_string(),
-            professional_watch_detail(watch_summary),
-            "launchpad-signal-book",
+          status_chip(
+            professional_attention_chip_text(attention),
+            professional_attention_chip_class(attention),
           ),
-          render_town_launchpad_signal(
-            "Attention",
-            professional_attention_label(attention),
-            professional_attention_detail(attention),
-            professional_attention_tone(attention),
-          ),
-          render_town_launchpad_signal(
-            "Book queue",
-            model.operator_requests.length().to_string(),
-            professional_book_queue_detail(model),
-            "launchpad-signal-neutral",
+          a(
+            href="./viewport.html?assets=generated&v=wenyu",
+            class="town-launchpad-gateway",
+            "Open Wenyu Map",
           ),
         ]),
       ]),
-      div(class="town-launchpad-map", [
-        div(class="town-launchpad-map-copy", [
-          p(class="eyebrow", "Wenyu Map"),
-          h3("Open Wenyu Valley workspace"),
-          p(
-            class="summary",
-            "Inspect districts, residents, standing watches, and active work in place.",
-          ),
-        ]),
-        div(class="town-launchpad-map-stats", [
-          status_chip("Scene: \{scene.title}", "chip-book"),
-          status_chip("Latest: \{portal.latest_decision}", "chip-neutral"),
-          status_chip("New sources: \{portal.latest_sources}", "chip-neutral"),
-          status_chip("Next check: \{portal.next_check}", "chip-clock"),
-          status_chip("Active work: \{portal.active_work}", "chip-neutral"),
-        ]),
-        a(
-          href="./viewport.html?assets=generated&v=wenyu",
-          class="town-launchpad-map-button",
-          "Open Wenyu Map",
+      div(class="town-launchpad-signal-rail", [
+        render_town_launchpad_signal(
+          "Town health",
+          professional_town_health_label(model),
+          professional_town_health_detail(model),
+          professional_town_health_tone(model),
+        ),
+        render_town_launchpad_signal(
+          "Standing watches",
+          watch_summary.enabled_count.to_string(),
+          professional_watch_detail(watch_summary),
+          "launchpad-signal-book",
+        ),
+        render_town_launchpad_signal(
+          "Attention",
+          professional_attention_label(attention),
+          professional_attention_detail(attention),
+          professional_attention_tone(attention),
+        ),
+        render_town_launchpad_signal(
+          "Book queue",
+          model.operator_requests.length().to_string(),
+          professional_book_queue_detail(model),
+          "launchpad-signal-neutral",
         ),
       ]),
     ]),

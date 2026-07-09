@@ -26,7 +26,6 @@ fn standing_goal_summary(model : Model) -> StandingGoalSummary {
 
 ///|
 priv struct StandingGoalNextCheckView {
-  portal_label : String
   idle_detail : String
 }
 
@@ -37,13 +36,11 @@ fn standing_goal_next_check_view(model : Model) -> StandingGoalNextCheckView {
     Some(goal) => {
       let remaining = ticks_until_next_goal_check(model, goal)
       {
-        portal_label: "\{remaining} ticks",
         idle_detail: standing_goal_idle_wait_detail(goal, remaining),
       }
     }
     None =>
       {
-        portal_label: "not scheduled",
         idle_detail: "Waiting for a configured standing watch. Save a watch to activate this worker.",
       }
   }

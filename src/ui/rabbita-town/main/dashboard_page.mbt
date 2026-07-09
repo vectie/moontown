@@ -10,7 +10,6 @@ fn render_dashboard_page(
       model,
       context.workers,
       context.executions,
-      context.scene,
     ),
     render_request_desk(dispatch, model),
     render_attention_workbench(

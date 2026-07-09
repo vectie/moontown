@@ -13,27 +13,10 @@ fn count_execution_status(
 }
 
 ///|
-fn execution_status_is_dispatch_phase(
-  status : @core.TaskExecutionStatus,
-) -> Bool {
-  status == PacketReady ||
-  status == ProposalImported ||
-  status == RunConfirmed
-}
-
-///|
 fn execution_status_needs_attention(status : @core.TaskExecutionStatus) -> Bool {
   status == Failed ||
   status == Stale ||
   status == ReviewQueued
-}
-
-///|
-fn execution_status_is_persistence_or_done(
-  status : @core.TaskExecutionStatus,
-) -> Bool {
-  status == AwaitingPersistence ||
-  status == Completed
 }
 
 ///|
@@ -56,7 +39,6 @@ fn execution_status_requires_review(status : @core.TaskExecutionStatus) -> Bool 
 
 ///|
 priv struct ExecutionCountSummary {
-  total : Int
   packet_ready : Int
   proposal_imported : Int
   run_confirmed : Int
@@ -73,7 +55,6 @@ fn execution_count_summary(
   executions : Array[@core.TaskExecutionRecord],
 ) -> ExecutionCountSummary {
   {
-    total: executions.length(),
     packet_ready: count_execution_status(
       executions,
       PacketReady,
