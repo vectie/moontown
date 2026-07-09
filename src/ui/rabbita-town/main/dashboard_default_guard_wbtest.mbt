@@ -70,6 +70,7 @@ fn default_dashboard_forbidden_copy() -> Array[String] {
     "attention-strip-chips", "attention-strip-chip",
     "Request intake", "Save Watch", "Queue PDF Watch Book",
     "Civic surfaces", "Town health", "Standing watches", "Book queue",
+    "Social capital",
   ]
 }
 
@@ -107,7 +108,7 @@ test "default dashboard keeps professional operating actions visible" {
   assert_true(html.contains("Districts"))
   assert_true(html.contains("Residents"))
   assert_true(html.contains("Quests"))
-  assert_true(html.contains("Social capital"))
+  assert_true(html.contains(">Social<"))
 }
 
 ///|

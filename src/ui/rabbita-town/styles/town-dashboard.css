@@ -507,7 +507,7 @@
   }
 
   .dashboard-section-tabs {
-    grid-template-columns: repeat(2, minmax(0, 1fr));
+    grid-template-columns: repeat(4, minmax(0, 1fr));
     gap: 6px;
   }
 
@@ -517,11 +517,14 @@
 
   .dashboard-section-tab {
     min-height: 44px;
-    padding: 7px 8px;
+    padding: 7px 5px;
+    text-align: center;
   }
 
   .dashboard-section-label {
-    font-size: 12px;
+    font-size: 10px;
+    line-height: 1.05;
+    overflow-wrap: anywhere;
   }
 }
 

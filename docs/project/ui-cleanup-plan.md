@@ -272,6 +272,25 @@ Default state should remove:
 - tall mobile signal cards that crowd the Request Desk below the fold
 - repeated signal explanation in the default phone rail
 
+### Phase 14: Compact Town Areas Rail
+
+Town Areas is secondary navigation, not a work surface. It should remain
+available, but its default phone footprint should match a compact rail rather
+than a large 2x2 block.
+
+Default state should keep:
+
+- `Town Areas` as the dock title
+- four direct destinations for districts, residents, quests, and social work
+- 44px minimum mobile targets
+- closed-by-default detail panels
+
+Default state should remove:
+
+- the verbose `Social capital` default tab label
+- the mobile 2x2 area grid that makes secondary navigation taller than the
+  Request Desk
+
 ## Done Criteria
 
 - A professional user can operate watches, reviews, book requests, and the map
@@ -388,3 +407,6 @@ Default state should remove:
 - The launchpad signal rail now uses shorter professional labels and denser
   phone cards, reducing the tallest remaining first-screen block after the
   request, attention, and town-area docks were compacted.
+- Town Areas now behaves like a compact secondary navigation rail on phone. It
+  keeps all four destinations visible, shortens the longest label to `Social`,
+  and removes the tall 2x2 default area block.

@@ -14,7 +14,7 @@ fn dashboard_section_label(target : DashboardSection) -> String {
     DistrictSystems => "Districts"
     ResidentAgentsSection => "Residents"
     CivicQuestsSection => "Quests"
-    SocialCapitalSection => "Social capital"
+    SocialCapitalSection => "Social"
   }
 }
 
