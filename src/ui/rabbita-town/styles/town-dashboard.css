@@ -279,16 +279,22 @@
 
   .town-launchpad-signal-rail {
     grid-template-columns: repeat(2, minmax(0, 1fr));
-    gap: 8px;
+    gap: 6px;
   }
 
   .town-launchpad-signal {
-    min-height: 58px;
-    padding: 8px;
+    min-height: 48px;
+    gap: 3px;
+    padding: 6px 7px;
   }
 
   .town-launchpad-value {
-    font-size: 19px;
+    font-size: 18px;
+  }
+
+  .town-launchpad-signal .metric-label {
+    font-size: 10px;
+    line-height: 1.05;
   }
 
   .town-launchpad-copy .summary,

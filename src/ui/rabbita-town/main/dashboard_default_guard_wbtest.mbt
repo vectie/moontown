@@ -69,7 +69,7 @@ fn default_dashboard_forbidden_copy() -> Array[String] {
     "Attention Workbench", "attention-review-strip", "attention-review-copy",
     "attention-strip-chips", "attention-strip-chip",
     "Request intake", "Save Watch", "Queue PDF Watch Book",
-    "Civic surfaces",
+    "Civic surfaces", "Town health", "Standing watches", "Book queue",
   ]
 }
 

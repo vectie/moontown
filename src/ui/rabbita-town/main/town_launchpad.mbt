@@ -35,13 +35,13 @@ fn render_town_launchpad(
       ]),
       div(class="town-launchpad-signal-rail", [
         render_town_launchpad_signal(
-          "Town health",
+          "Health",
           professional_town_health_label(model),
           professional_town_health_detail(model),
           professional_town_health_tone(model),
         ),
         render_town_launchpad_signal(
-          "Standing watches",
+          "Watches",
           watch_summary.enabled_count.to_string(),
           professional_watch_detail(watch_summary),
           "launchpad-signal-book",
@@ -53,7 +53,7 @@ fn render_town_launchpad(
           professional_attention_tone(attention),
         ),
         render_town_launchpad_signal(
-          "Book queue",
+          "Books",
           model.operator_requests.length().to_string(),
           professional_book_queue_detail(model),
           "launchpad-signal-neutral",

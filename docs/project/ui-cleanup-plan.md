@@ -254,6 +254,24 @@ Default state should remove:
 - the `Civic surfaces` heading
 - duplicate title chrome before the four area commands
 
+### Phase 13: Compact Launchpad Signal Rail
+
+The launchpad is now the largest remaining phone block. Professional users
+still need the four operating signals, but the labels should read like a dense
+status rail instead of explanatory card headings.
+
+Default state should keep:
+
+- four visible signals for health, watches, attention, and books
+- full values such as `Healthy`, `Review`, and queue counts
+- detail notes on larger screens
+
+Default state should remove:
+
+- verbose labels such as `Town health`, `Standing watches`, and `Book queue`
+- tall mobile signal cards that crowd the Request Desk below the fold
+- repeated signal explanation in the default phone rail
+
 ## Done Criteria
 
 - A professional user can operate watches, reviews, book requests, and the map
@@ -367,3 +385,6 @@ Default state should remove:
 - Town Areas now renders as a direct area dock. It keeps the four professional
   area commands but removes the redundant `Civic surfaces` heading from the
   default dashboard.
+- The launchpad signal rail now uses shorter professional labels and denser
+  phone cards, reducing the tallest remaining first-screen block after the
+  request, attention, and town-area docks were compacted.
