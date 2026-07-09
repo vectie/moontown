@@ -1,13 +1,4 @@
 ///|
-priv struct VitalityMetric {
-  label : String
-  value : String
-  fill : Int
-  tone : String
-  detail : String
-}
-
-///|
 priv struct WorkerSim {
   id : String
   title : String

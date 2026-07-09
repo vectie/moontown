@@ -29,18 +29,12 @@ This frontend is a live simulation dashboard, not a static renderer.
 It currently includes:
 
 - live tick loop
-- pause/resume/step controls
-- strategy switching
-- runtime summary bar
-- packet/import/run/persist/review stage rail
 - scene-based selection and inspector state
 - moving worker avatars
-- packet/proposal/run lifecycle visibility
-- budget/energy/pressure/stability metrics
-- activity feed and anomaly surfacing
-- professional town pulse, operating brief, activity ledger, and current focus
+- professional town pulse and attention summary
+- Wenyu Valley map workspace entry
 - request desk with standing-watch and PDF evidence-book creation paths
-- dashboard entry to the Wenyu Valley map workspace
+- attention workbench with priority guidance and activity ledger
 - generated Wenyu Valley map with animated resident overlay
 - stronger keyboard focus visibility
 
@@ -53,9 +47,10 @@ runtime files:
 - `.moonsuite/products/moontown/watchers/watch-opc-news.jsonl`
 - `.moonsuite/products/moontown/operator-requests/requests.jsonl`
 
-The default dashboard summarizes progress, attention, active work, and request
-needs without rendering the old live-operations console. The request desk posts
-to `/api/operator-requests`, writes an operator request record, and creates or
+The default dashboard summarizes town pulse, map entry, safe request creation,
+and attention work without rendering runtime drill controls, vitality metrics,
+or duplicate brief/focus side panels. The request desk posts to
+`/api/operator-requests`, writes an operator request record, and creates or
 replaces a standing goal in
 `.moonsuite/products/moontown/standing-goals.json`.
 The daemon then picks that goal up during its normal standing-goal dispatch

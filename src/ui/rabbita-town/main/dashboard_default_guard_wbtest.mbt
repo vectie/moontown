@@ -47,6 +47,8 @@ fn default_dashboard_forbidden_copy() -> Array[String] {
     "Watch Portfolio", "Long-horizon topics", "Standing Watch Portfolio",
     "operator-console", "operator-stat", "operator-watch-column",
     "watch-portfolio", "watch-timeline",
+    "Operating Brief", "Current focus", "metric-grid", "professional-brief",
+    "operator-focus", "professional-status-strip",
     "phone-message-panel", "phone-topbar", "message-bubble",
     "No standing watcher connected", "through the daemon",
     "deeper town tools",
@@ -68,8 +70,8 @@ test "default dashboard hides developer and rare runtime controls" {
 ///|
 test "default dashboard keeps professional operating actions visible" {
   let html = render_default_dashboard_test_html(init_model())
-  assert_true(html.contains("Professional workspace"))
-  assert_true(html.contains("No active watch"))
+  assert_true(html.contains("Signal"))
+  assert_true(html.contains("Next opening"))
   assert_true(html.contains("Current town pulse"))
   assert_true(html.contains("Open Wenyu Map"))
   assert_true(html.contains("Open Wenyu Valley workspace"))
@@ -77,8 +79,8 @@ test "default dashboard keeps professional operating actions visible" {
   assert_true(html.contains("Queue PDF Watch Book"))
   assert_true(html.contains("Request Desk"))
   assert_true(html.contains("Start the next safe job"))
-  assert_true(html.contains("Operating Brief"))
-  assert_true(html.contains("Current focus"))
+  assert_true(html.contains("Attention Workbench"))
+  assert_true(html.contains("Activity Ledger"))
   assert_true(html.contains("Focused town surfaces"))
   assert_true(html.contains("Districts"))
   assert_true(html.contains("Residents"))

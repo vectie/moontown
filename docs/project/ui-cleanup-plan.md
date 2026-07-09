@@ -152,9 +152,9 @@ Allow these only in advanced/developer surfaces.
 - Advanced runtime counters no longer render inside the professional dashboard;
   the dashboard keeps a single `Open Advanced Viewport` portal for deliberate
   runtime inspection.
-- The default sidebar no longer carries the old map legend. A compact
-  `Current focus` panel now points operators at recovery, review, standing
-  watch setup, pending book requests, or steady monitoring based on live state.
+- The default sidebar no longer carries the old map legend. Focus guidance now
+  points operators at recovery, review, standing watch setup, pending book
+  requests, or steady monitoring based on live state.
 - The duplicate lower `Advanced Viewport` block was removed from the default
   dashboard. Professional users now use the primary Wenyu map entry instead of
   reading advanced/runtime intervention copy on the first screen.
@@ -172,3 +172,7 @@ Allow these only in advanced/developer surfaces.
   timeline, and operator-stat grid have been removed from the default code path.
   The remaining lower dashboard action is a focused `Request Desk` that only
   opens a detailed watch or book composer after the operator chooses that job.
+- The separate header chip row, `Operating Brief`, `Current focus`, and
+  vitality metric strip have been collapsed into one `Attention Workbench`.
+  `Request Desk` now appears immediately after the Wenyu map workspace entry so
+  safe watch/book creation is reachable before lower ecosystem browsing.

@@ -5,31 +5,6 @@
 @import url("./styles/scene-workers.css");
 @import url("./styles/sidebar-panels.css");
 
-@media (min-width: 1480px) {
-  .town-main {
-    grid-template-columns: minmax(0, 1fr) minmax(300px, 360px);
-    min-height: min(760px, calc(100vh - 260px));
-  }
-
-  .sidebar-column {
-    grid-template-columns: 1fr;
-    position: sticky;
-    top: 14px;
-    max-height: calc(100vh - 28px);
-    overflow: auto;
-    padding-right: 2px;
-  }
-}
-
-@media (max-width: 1479px) {
-  .sidebar-column {
-    position: static;
-    max-height: none;
-    overflow: visible;
-    padding-right: 0;
-  }
-}
-
 @media (max-width: 1220px) {
   .town-header,
   .runtime-grid,
@@ -110,16 +85,12 @@
     max-height: 42vh;
   }
 
-  .metric-grid {
-    grid-template-columns: repeat(2, minmax(0, 1fr));
-  }
-
   .runtime-bar,
   .request-desk,
   .scene-frame-shell,
-  .metric-card,
   .inspector-panel,
   .feed-panel,
+  .attention-workbench,
   .scene-legend {
     border-radius: 22px;
   }
@@ -140,10 +111,6 @@
     grid-template-columns: 1fr;
   }
 
-  .sidebar-column {
-    grid-template-columns: 1fr;
-  }
-
   .request-field-grid {
     grid-template-columns: 1fr;
   }
@@ -160,10 +127,6 @@
 @media (max-width: 640px) {
   .town-shell {
     padding: 10px;
-  }
-
-  .metric-grid {
-    grid-template-columns: 1fr;
   }
 
   .scene-stage-rail {
