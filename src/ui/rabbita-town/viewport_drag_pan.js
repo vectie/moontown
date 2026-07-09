@@ -25,6 +25,8 @@ export function installViewportDragPan() {
   createViewportDragPanController(document, globalThis).install()
 }
 
+globalThis.__moontownInstallViewportDragPan = installViewportDragPan
+
 function viewportPathEnabled(location) {
   return location?.pathname?.includes(VIEWPORT_PATH_FRAGMENT) === true
 }

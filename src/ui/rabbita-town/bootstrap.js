@@ -5,10 +5,52 @@ import {
   refreshRuntimeSnapshots,
   startRuntimeSnapshotRefresh,
 } from './runtime_snapshots.js'
-import { installViewportDragPan } from './viewport_drag_pan.js'
+import './viewport_drag_pan.js'
 
 const app = document.getElementById('app')
-const BOOT_RUNTIME_WARMUP_MS = 700
+
+function installBrowserRequireShim() {
+  if (typeof globalThis.require === 'function') {
+    return
+  }
+
+  globalThis.require = specifier => {
+    if (specifier === 'process') {
+      return { platform: 'browser' }
+    }
+
+    throw new Error(`Unsupported browser require: ${specifier}`)
+  }
+}
+
+function showBootFailure(detail) {
+  if (!app) {
+    return
+  }
+
+  const message = detail || 'The browser entry failed before the town surface mounted.'
+
+  app.innerHTML = `
+    <div class="boot-shell">
+      <div class="boot-panel">
+        <p class="boot-eyebrow">Moontown</p>
+        <h1 class="boot-headline">Moontown could not start</h1>
+        <p class="boot-copy"></p>
+      </div>
+    </div>
+  `
+  app.querySelector('.boot-copy').textContent = message
+}
+
+installBrowserRequireShim()
+
+globalThis.addEventListener('error', event => {
+  showBootFailure(event.error?.message || event.message)
+})
+
+globalThis.addEventListener('unhandledrejection', event => {
+  showBootFailure(event.reason?.message || String(event.reason || 'Startup promise rejected.'))
+})
 
 if (app) {
   app.innerHTML = `
@@ -22,22 +64,13 @@ if (app) {
   `
 }
 
-function delay(ms) {
-  return new Promise(resolve => setTimeout(resolve, ms))
-}
-
-async function boot() {
-  const runtimeWarmup = Promise.allSettled([
+async function prepareRuntimeBridge() {
+  await Promise.allSettled([
     refreshRuntimeSnapshots(),
     loadWenyuReferenceLabels(),
     loadWenyuTownModules(),
   ])
-
-  startRuntimeSnapshotRefresh()
-  await Promise.race([runtimeWarmup, delay(BOOT_RUNTIME_WARMUP_MS)])
-
-  await import('/main.js')
-  installViewportDragPan()
 }
 
-boot()
+startRuntimeSnapshotRefresh()
+void prepareRuntimeBridge()
