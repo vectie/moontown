@@ -67,10 +67,11 @@ fn default_dashboard_forbidden_copy() -> Array[String] {
     "Town Launchpad", "Current town pulse",
     "Health, watches, review needs, book queue, and map entry stay close to the request path.",
     "Attention Workbench", "attention-review-strip", "attention-review-copy",
-    "attention-strip-chips", "attention-strip-chip",
+    "attention-strip-chips", "attention-strip-chip", "alert-strip",
     "Request intake", "Save Watch", "Queue PDF Watch Book",
     "Civic surfaces", "Town health", "Standing watches", "Book queue",
-    "Social capital", "Review queued work",
+    "Social capital", "Review queued work", "No active alerts",
+    "Workers online:", "Open Wenyu Map",
   ]
 }
 
@@ -90,10 +91,12 @@ test "default dashboard keeps professional operating actions visible" {
   assert_true(html.contains("Next opening"))
   assert_true(html.contains("Moontown"))
   assert_true(html.contains("Wenyu Valley / AI Innovation Town"))
-  assert_true(html.contains("No active alerts"))
+  assert_true(html.contains("Alerts clear"))
+  assert_true(html.contains("Workers 8"))
+  assert_true(html.contains("Review 1"))
   assert_true(html.contains("town-launchpad-signal-rail"))
   assert_true(html.contains("town-launchpad-gateway"))
-  assert_true(html.contains("Open Wenyu Map"))
+  assert_true(html.contains(">Map<"))
   assert_true(html.contains("Save"))
   assert_true(html.contains("Queue"))
   assert_true(html.contains("Request Desk"))

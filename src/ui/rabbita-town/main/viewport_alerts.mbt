@@ -22,12 +22,3 @@ fn all_alerts(scene : @ui.SceneRenderModel, model : Model) -> Array[String] {
   }
   alerts
 }
-
-///|
-fn render_alerts(alerts : Array[String]) -> @rabbita.Html {
-  let view = alert_strip_view(alerts)
-  div(
-    class="alert-strip",
-    view.alerts.map(alert => status_chip(alert, view.chip_class)),
-  )
-}

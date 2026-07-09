@@ -17,9 +17,9 @@ fn render_town_launchpad(
           h1(scene.title),
         ]),
         div(class="town-launchpad-actions", [
-          render_alerts(alerts),
+          render_town_launchpad_alert_chip(alerts),
           status_chip(
-            "Workers online: \{workers_summary.online()}",
+            "Workers \{workers_summary.online()}",
             "chip-neutral",
           ),
           status_chip(
@@ -29,7 +29,7 @@ fn render_town_launchpad(
           a(
             href="./viewport.html?assets=generated&v=wenyu",
             class="town-launchpad-gateway",
-            "Open Wenyu Map",
+            "Map",
           ),
         ]),
       ]),
@@ -64,6 +64,19 @@ fn render_town_launchpad(
 }
 
 ///|
+fn render_town_launchpad_alert_chip(alerts : Array[String]) -> @rabbita.Html {
+  status_chip(town_launchpad_alert_label(alerts), alert_strip_chip_class(alerts))
+}
+
+///|
+fn town_launchpad_alert_label(alerts : Array[String]) -> String {
+  match alerts {
+    [message] if message == no_active_alert_text => "Alerts clear"
+    _ => "Alerts \{alerts.length()}"
+  }
+}
+
+///|
 fn render_town_launchpad_signal(
   label : String,
   value : String,
@@ -84,11 +97,11 @@ fn professional_attention_chip_text(
   summary : ProfessionalAttentionSummary,
 ) -> String {
   if professional_attention_has_failed(summary) {
-    "Recovery: \{summary.failed_count}"
+    "Recover \{summary.failed_count}"
   } else if professional_attention_has_review(summary) {
-    "Review: \{summary.review_count}"
+    "Review \{summary.review_count}"
   } else {
-    "Attention clear"
+    "Review clear"
   }
 }
 

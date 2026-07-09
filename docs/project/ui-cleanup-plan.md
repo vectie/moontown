@@ -310,6 +310,26 @@ Default state should remove:
 - the two-row phone layout that makes attention taller than secondary
   navigation
 
+### Phase 16: Compact Launchpad Action Strip
+
+The launchpad action strip still uses sentence-length status chips. On phones,
+those chips wrap the map entry onto a separate row and keep the launchpad as
+the tallest first-screen surface.
+
+Default state should keep:
+
+- alert state
+- worker count
+- attention count
+- a direct map command
+
+Default state should remove:
+
+- `No active alerts` as full default chip copy
+- `Workers online:` as full default chip copy
+- `Open Wenyu Map` as full default command copy
+- long alert messages in the default launchpad action strip
+
 ## Done Criteria
 
 - A professional user can operate watches, reviews, book requests, and the map
@@ -432,3 +452,7 @@ Default state should remove:
 - Attention now renders as a compact rail on phone. It keeps the current
   action, next opening, and latest signal, but shortens action titles and
   removes the extra stacked heading row from the default mobile layout.
+- The launchpad action strip now uses compact operating chips: `Alerts clear`,
+  `Workers N`, `Review N`, and `Map`. The strip preserves default state while
+  avoiding sentence-length chips that push the map command onto a separate
+  phone row.
