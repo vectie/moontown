@@ -53,11 +53,6 @@ fn render_dashboard_page(
       context.executions,
     ),
     render_dashboard_ecosystem_workspace(dispatch, model),
-    render_advanced_operations(
-      dispatch,
-      model,
-      context.workers,
-      context.executions,
-    ),
+    render_advanced_operations(),
   ])
 }

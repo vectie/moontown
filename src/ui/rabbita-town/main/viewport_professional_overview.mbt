@@ -181,19 +181,14 @@ fn professional_book_queue_detail(model : Model) -> String {
 
 ///|
 fn render_advanced_operations(
-  dispatch : Dispatch[Msg],
-  model : Model,
-  workers : Array[WorkerSim],
-  executions : Array[@core.TaskExecutionRecord],
 ) -> @rabbita.Html {
-  ignore(dispatch)
   section(class="advanced-operations", [
     div(class="advanced-operations-head", [
       p(class="eyebrow", "Advanced"),
-      h2("Deeper runtime tools"),
+      h2("Open the advanced viewport"),
       p(
         class="summary",
-        "Open the standalone Wenyu viewport for map-level inspection and occasional runtime intervention. The dashboard stays focused on watches, reviews, and request work.",
+        "Use the standalone Wenyu viewport for map-level inspection and occasional runtime intervention. The dashboard stays focused on watches, reviews, requests, and ecosystem surfaces.",
       ),
     ]),
     div(class="advanced-tool-row", [
@@ -202,15 +197,7 @@ fn render_advanced_operations(
         class="viewport-portal-button advanced-tool-link",
         "Open Advanced Viewport",
       ),
-      status_chip(
-        "Workers \{worker_count_summary(workers).online()}",
-        "chip-neutral",
-      ),
-      status_chip(
-        "Open work \{execution_count_summary(executions).active_or_unresolved()}",
-        "chip-neutral",
-      ),
+      status_chip("Advanced tools open separately", "chip-neutral"),
     ]),
-    render_runtime_bar(model, workers, executions),
   ])
 }

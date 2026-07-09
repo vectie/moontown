@@ -30,6 +30,9 @@ fn default_dashboard_forbidden_copy() -> Array[String] {
     ">Title<", ">Target book<", ">Check frequency<", ">Quality threshold<",
     ">Book title<", ">Book id<", ">Websites<", ">Purpose<",
     ">Special analysis rules<",
+    "Advanced Operations", "Town work health", "Available:",
+    "Town work is stable enough for normal watch",
+    "Review work is waiting. Resolve review items",
   ]
 }
 
@@ -57,6 +60,9 @@ test "default dashboard keeps professional operating actions visible" {
   assert_true(html.contains("Quests"))
   assert_true(html.contains("Social capital"))
   assert_true(html.contains("Choose the next safe request"))
+  assert_true(html.contains("Open the advanced viewport"))
+  assert_true(html.contains("Open Advanced Viewport"))
+  assert_true(html.contains("Advanced tools open separately"))
 }
 
 ///|

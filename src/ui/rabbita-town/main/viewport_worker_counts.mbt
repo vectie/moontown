@@ -52,8 +52,3 @@ fn WorkerCountSummary::add(
 fn WorkerCountSummary::online(self : WorkerCountSummary) -> Int {
   self.total - self.offline
 }
-
-///|
-fn WorkerCountSummary::available(self : WorkerCountSummary) -> Int {
-  self.idle + self.waiting
-}

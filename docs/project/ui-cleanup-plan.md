@@ -149,3 +149,6 @@ Allow these only in advanced/developer surfaces.
 - Request creation now starts from two shortcuts, `Save Watch` and `Queue PDF
   Watch Book`, and shows the detailed watch or book form only after the
   operator chooses that path.
+- Advanced runtime counters no longer render inside the professional dashboard;
+  the dashboard keeps a single `Open Advanced Viewport` portal for deliberate
+  runtime inspection.
