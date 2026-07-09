@@ -330,6 +330,24 @@ Default state should remove:
 - `Open Wenyu Map` as full default command copy
 - long alert messages in the default launchpad action strip
 
+### Phase 17: Compact Launchpad Signal Row
+
+The launchpad signal rail still behaves like four separate cards on phones.
+After the action strip cleanup, the 2x2 signal block is the largest remaining
+source of first-screen vertical weight.
+
+Default state should keep:
+
+- the four launchpad signals for health, watches, attention, and books
+- readable signal labels and values
+- the existing desktop signal-card treatment
+
+Default state should remove:
+
+- the phone-only 2x2 signal block
+- secondary signal notes from the default phone launchpad
+- extra mobile card padding that makes status heavier than action commands
+
 ## Done Criteria
 
 - A professional user can operate watches, reviews, book requests, and the map
