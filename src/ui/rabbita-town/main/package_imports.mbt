@@ -11,7 +11,6 @@ using @html {
   header,
   img,
   input,
-  main_,
   p,
   section,
   span,

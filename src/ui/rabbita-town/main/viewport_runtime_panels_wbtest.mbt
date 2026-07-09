@@ -1,5 +1,5 @@
 ///|
-fn viewport_portal_test_goal() -> StandingGoalSnapshot {
+fn town_launchpad_map_test_goal() -> StandingGoalSnapshot {
   {
     id: "research-opc",
     title: "Research OPC",
@@ -15,7 +15,7 @@ fn viewport_portal_test_goal() -> StandingGoalSnapshot {
 }
 
 ///|
-fn viewport_portal_test_record() -> WatcherRunRecordSnapshot {
+fn town_launchpad_map_test_record() -> WatcherRunRecordSnapshot {
   {
     goal_id: "research-opc",
     tick: 8,
@@ -37,7 +37,7 @@ fn viewport_portal_test_record() -> WatcherRunRecordSnapshot {
 }
 
 ///|
-fn viewport_portal_test_daemon() -> DaemonSnapshot {
+fn town_launchpad_map_test_daemon() -> DaemonSnapshot {
   {
     daemon_id: "daemon-test",
     lease_owner: "test",
@@ -49,9 +49,9 @@ fn viewport_portal_test_daemon() -> DaemonSnapshot {
 }
 
 ///|
-test "wenyu viewport portal view uses fallback without watch state" {
+test "town launchpad map summary uses fallback without watch state" {
   let model = { ..init_model(), standing_goals: [], watcher_records: [] }
-  let view = wenyu_viewport_portal_view(model, [])
+  let view = town_launchpad_map_view(model, [])
   assert_eq(view.latest_decision, "Waiting")
   assert_eq(view.latest_sources, "0")
   assert_eq(view.next_check, "not scheduled")
@@ -59,14 +59,14 @@ test "wenyu viewport portal view uses fallback without watch state" {
 }
 
 ///|
-test "wenyu viewport portal view uses watcher and standing goal state" {
+test "town launchpad map summary uses watcher and standing goal state" {
   let model = {
     ..init_model(),
-    daemon_snapshot: Some(viewport_portal_test_daemon()),
-    standing_goals: [viewport_portal_test_goal()],
-    watcher_records: [viewport_portal_test_record()],
+    daemon_snapshot: Some(town_launchpad_map_test_daemon()),
+    standing_goals: [town_launchpad_map_test_goal()],
+    watcher_records: [town_launchpad_map_test_record()],
   }
-  let view = wenyu_viewport_portal_view(model, [])
+  let view = town_launchpad_map_view(model, [])
   assert_eq(view.latest_decision, "NoChange")
   assert_eq(view.latest_sources, "1")
   assert_eq(view.next_check, "5 ticks")

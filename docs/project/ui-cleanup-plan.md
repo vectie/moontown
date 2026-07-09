@@ -180,3 +180,7 @@ Allow these only in advanced/developer surfaces.
   summary, so execution reviews, watcher reviews, failed work, and failed book
   requests produce the same top-level review/recovery state instead of showing
   contradictory `Review` and `Clear` signals.
+- The separate town overview and Wenyu map portal have been merged into a
+  compact `Town Launchpad`. The first screen still exposes health, watches,
+  attention, book queue, and the Wenyu map link, but it no longer spends a
+  second hero-sized block before the professional request path.

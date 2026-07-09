@@ -19,7 +19,7 @@ fn execution_stage_cards(
 }
 
 ///|
-priv struct WenyuViewportPortalView {
+priv struct TownLaunchpadMapView {
   latest_decision : String
   latest_sources : String
   next_check : String
@@ -27,10 +27,10 @@ priv struct WenyuViewportPortalView {
 }
 
 ///|
-fn wenyu_viewport_portal_view(
+fn town_launchpad_map_view(
   model : Model,
   executions : Array[@core.TaskExecutionRecord],
-) -> WenyuViewportPortalView {
+) -> TownLaunchpadMapView {
   let latest = latest_watcher_metric_view(latest_watcher_record(model))
   let executions_summary = execution_count_summary(executions)
   let next_check = standing_goal_next_check_view(model)
@@ -40,35 +40,4 @@ fn wenyu_viewport_portal_view(
     next_check: next_check.portal_label,
     active_work: executions_summary.total,
   }
-}
-
-///|
-fn render_wenyu_viewport_portal(
-  model : Model,
-  scene : @ui.SceneRenderModel,
-  executions : Array[@core.TaskExecutionRecord],
-) -> @rabbita.Html {
-  let portal = wenyu_viewport_portal_view(model, executions)
-  section(class="viewport-portal-card", [
-    div(class="viewport-portal-copy", [
-      p(class="eyebrow", "Wenyu Map"),
-      h2("Open Wenyu Valley workspace"),
-      p(
-        class="summary",
-        "Use the map workspace to inspect districts, residents, standing watches, and active work in place.",
-      ),
-      div(class="viewport-portal-stats", [
-        status_chip("Scene: \{scene.title}", "chip-book"),
-        status_chip("Latest: \{portal.latest_decision}", "chip-neutral"),
-        status_chip("New sources: \{portal.latest_sources}", "chip-neutral"),
-        status_chip("Next check: \{portal.next_check}", "chip-clock"),
-        status_chip("Active work: \{portal.active_work}", "chip-neutral"),
-      ]),
-    ]),
-    a(
-      href="./viewport.html?assets=generated&v=wenyu",
-      class="viewport-portal-button",
-      "Open Wenyu Map",
-    ),
-  ])
 }

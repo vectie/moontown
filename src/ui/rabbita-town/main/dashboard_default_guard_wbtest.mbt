@@ -20,40 +20,29 @@ fn render_default_dashboard_test_html(model : Model) -> String {
 fn default_dashboard_forbidden_copy() -> Array[String] {
   [
     ".json", "daemon.json", "standing-goals.json", "book-template-requests.json",
-    "task-", "packet-", "run-", "proposal-", "Live spine", "Snapshot bridge",
-    "Switch Source", "State sources", "endpoint", "payload", "dispatch tick",
-    "Inspector Inject Budget", "Inspector Relieve Queue", "Inspector Stability Drill",
-    ">Pause<", ">Step<", ">Inject Budget<", ">Relieve Queue<", ">Stability Drill<",
-    "Town shell plus live civic systems", "Digital twins with memory",
-    "Policy, contest, social, and offline workflows as playable services",
-    "Weak ties, talent graph, and reception-ready evidence",
-    ">Title<", ">Target book<", ">Check frequency<", ">Quality threshold<",
-    ">Book title<", ">Book id<", ">Websites<", ">Purpose<",
-    ">Special analysis rules<",
-    "Advanced Operations", "Town work health", "Available:",
-    "Town work is stable enough for normal watch",
-    "Review work is waiting. Resolve review items",
-    "Legend", "City Hall is the mayor runtime",
-    "Moonbook houses hold keeper-owned domain planning",
-    "Worker avatars now move between yard, hall, books",
-    "Open the Wenyu viewport when you need the full map",
-    "Canonical Wenyu Viewport", "Open the real Wenyu Valley tile map",
-    "second scaled-down town map", "Executions:", "Executions ",
-    "deeper runtime tools", "Open the advanced viewport",
-    "Open Advanced Viewport", "Advanced tools open separately",
-    "runtime intervention",
-    "Progress And Requests", "Mayor command center", "Live status ",
-    "Town loop active", "Due checks ", "Requests ", "Decision mix",
-    "Watch Portfolio", "Long-horizon topics", "Standing Watch Portfolio",
-    "operator-console", "operator-stat", "operator-watch-column",
-    "watch-portfolio", "watch-timeline",
-    "Operating Brief", "Current focus", "metric-grid", "professional-brief",
-    "operator-focus", "professional-status-strip",
-    "phone-message-panel", "phone-topbar", "message-bubble",
-    "No standing watcher connected", "through the daemon",
-    "deeper town tools",
-    "Preview live", "Preview paused", "Town check waiting",
-    "Professional view", "Town data connected",
+    "task-", "packet-", "run-", "proposal-", "Live spine", "Snapshot bridge", "Switch Source",
+    "State sources", "endpoint", "payload", "dispatch tick", "Inspector Inject Budget",
+    "Inspector Relieve Queue", "Inspector Stability Drill", ">Pause<", ">Step<",
+    ">Inject Budget<", ">Relieve Queue<", ">Stability Drill<", "Town shell plus live civic systems",
+    "Digital twins with memory", "Policy, contest, social, and offline workflows as playable services",
+    "Weak ties, talent graph, and reception-ready evidence", ">Title<", ">Target book<",
+    ">Check frequency<", ">Quality threshold<", ">Book title<", ">Book id<", ">Websites<",
+    ">Purpose<", ">Special analysis rules<", "Advanced Operations", "Town work health",
+    "Available:", "Town work is stable enough for normal watch", "Review work is waiting. Resolve review items",
+    "Legend", "City Hall is the mayor runtime", "Moonbook houses hold keeper-owned domain planning",
+    "Worker avatars now move between yard, hall, books", "Open the Wenyu viewport when you need the full map",
+    "Canonical Wenyu Viewport", "Open the real Wenyu Valley tile map", "second scaled-down town map",
+    "Executions:", "Executions ", "deeper runtime tools", "Open the advanced viewport",
+    "Open Advanced Viewport", "Advanced tools open separately", "runtime intervention",
+    "Progress And Requests", "Mayor command center", "Live status ", "Town loop active",
+    "Due checks ", "Requests ", "Decision mix", "Watch Portfolio", "Long-horizon topics",
+    "Standing Watch Portfolio", "operator-console", "operator-stat", "operator-watch-column",
+    "watch-portfolio", "watch-timeline", "Operating Brief", "Current focus", "metric-grid",
+    "professional-brief", "operator-focus", "professional-status-strip", "phone-message-panel",
+    "phone-topbar", "message-bubble", "No standing watcher connected", "through the daemon",
+    "deeper town tools", "Preview live", "Preview paused", "Town check waiting",
+    "Professional view", "Town data connected", "Town Overview", "professional-overview",
+    "viewport-portal", "town-main", "scene-column",
   ]
 }
 
@@ -72,6 +61,7 @@ test "default dashboard keeps professional operating actions visible" {
   let html = render_default_dashboard_test_html(init_model())
   assert_true(html.contains("Signal"))
   assert_true(html.contains("Next opening"))
+  assert_true(html.contains("Town Launchpad"))
   assert_true(html.contains("Current town pulse"))
   assert_true(html.contains("Open Wenyu Map"))
   assert_true(html.contains("Open Wenyu Valley workspace"))

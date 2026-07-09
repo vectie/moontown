@@ -38,20 +38,8 @@
     justify-items: start;
   }
 
-  .town-main {
-    min-height: 0;
-  }
-
   .scene-frame {
     height: min(72vh, 680px);
-  }
-
-  .viewport-portal-card {
-    grid-template-columns: 1fr;
-  }
-
-  .viewport-portal-button {
-    width: 100%;
   }
 }
 

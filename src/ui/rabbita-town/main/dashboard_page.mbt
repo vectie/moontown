@@ -16,12 +16,12 @@ fn render_dashboard_page(
       ]),
       render_alerts(context.alerts),
     ]),
-    render_professional_overview(model, context.workers, context.executions),
-    main_(class="town-main town-main-single", [
-      div(class="scene-column", [
-        render_wenyu_viewport_portal(model, context.scene, context.executions),
-      ]),
-    ]),
+    render_town_launchpad(
+      model,
+      context.workers,
+      context.executions,
+      context.scene,
+    ),
     render_request_desk(dispatch, model),
     render_attention_workbench(
       model,

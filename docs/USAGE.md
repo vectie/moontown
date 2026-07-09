@@ -1562,7 +1562,7 @@ Current dashboard surfaces:
 - standing-watch portfolio with all enabled topics, per-goal decision mix, next
   due tick, and latest watcher decision
 - request composer that submits new standing goals through the local Vite endpoint
-- Wenyu viewport portal linking to the standalone tilemap page
+- a compact Rabbita Town Launchpad linking to the standalone Wenyu map page
 - inspector sidebar
 - activity feed
 
