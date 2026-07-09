@@ -24,6 +24,9 @@ fn default_dashboard_forbidden_copy() -> Array[String] {
     "Switch Source", "State sources", "endpoint", "payload", "dispatch tick",
     "Inspector Inject Budget", "Inspector Relieve Queue", "Inspector Stability Drill",
     ">Pause<", ">Step<", ">Inject Budget<", ">Relieve Queue<", ">Stability Drill<",
+    "Town shell plus live civic systems", "Digital twins with memory",
+    "Policy, contest, social, and offline workflows as playable services",
+    "Weak ties, talent graph, and reception-ready evidence",
   ]
 }
 
@@ -45,4 +48,25 @@ test "default dashboard keeps professional operating actions visible" {
   assert_true(html.contains("Save Watch"))
   assert_true(html.contains("Queue PDF Watch Book"))
   assert_true(html.contains("Operating Brief"))
+  assert_true(html.contains("Focused town surfaces"))
+  assert_true(html.contains("Districts"))
+  assert_true(html.contains("Residents"))
+  assert_true(html.contains("Quests"))
+  assert_true(html.contains("Social capital"))
+}
+
+///|
+test "dashboard ecosystem sections render only the selected detail surface" {
+  let districts = render_default_dashboard_test_html({
+    ..init_model(),
+    dashboard_section: DashboardSection::DistrictSystems,
+  })
+  assert_true(districts.contains("Town shell plus live civic systems"))
+  assert_true(!districts.contains("Digital twins with memory"))
+  let residents = render_default_dashboard_test_html({
+    ..init_model(),
+    dashboard_section: DashboardSection::ResidentAgentsSection,
+  })
+  assert_true(residents.contains("Digital twins with memory"))
+  assert_true(!residents.contains("Town shell plus live civic systems"))
 }

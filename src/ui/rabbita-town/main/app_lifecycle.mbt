@@ -29,6 +29,8 @@ fn update_non_form_message(
     SelectOverview => model_only_update({ ..model, selection: Overview })
     SetViewportMode(viewport_mode) =>
       model_only_update(set_viewport_mode_model(model, viewport_mode))
+    SetDashboardSection(section) =>
+      model_only_update(set_dashboard_section_model(model, section))
     SubmitOperatorRequest => submit_operator_request_update(dispatch, model)
     SubmitBookTemplateRequest =>
       submit_book_template_request_update(dispatch, model)

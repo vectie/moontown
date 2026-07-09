@@ -19,12 +19,22 @@ priv enum ViewportMode {
 } derive(Eq)
 
 ///|
+priv enum DashboardSection {
+  EcosystemOverview
+  DistrictSystems
+  ResidentAgentsSection
+  CivicQuestsSection
+  SocialCapitalSection
+} derive(Eq)
+
+///|
 priv struct Model {
   tick : Int
   paused : Bool
   selection : Selection
   state_source : StateSourceKind
   viewport_mode : ViewportMode
+  dashboard_section : DashboardSection
   projection_snapshot : ProjectionSnapshot?
   snapshot_version : Int
   visual_projection : VisualProjectionSnapshot?
@@ -80,6 +90,7 @@ priv enum Msg {
   SelectNode(String)
   SelectOverview
   SetViewportMode(ViewportMode)
+  SetDashboardSection(DashboardSection)
   SetRequestTitle(String)
   SetRequestPrompt(String)
   SetRequestBookId(String)

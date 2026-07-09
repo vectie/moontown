@@ -15,3 +15,11 @@ fn set_viewport_mode_model(
 ) -> Model {
   { ..model, viewport_mode, selection: Selection::Overview }
 }
+
+///|
+fn set_dashboard_section_model(
+  model : Model,
+  dashboard_section : DashboardSection,
+) -> Model {
+  { ..model, dashboard_section }
+}

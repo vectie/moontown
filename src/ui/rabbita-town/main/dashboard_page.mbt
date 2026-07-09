@@ -52,16 +52,12 @@ fn render_dashboard_page(
       context.workers,
       context.executions,
     ),
-    render_civic_context(model),
+    render_dashboard_ecosystem_workspace(dispatch, model),
     render_advanced_operations(
       dispatch,
       model,
       context.workers,
       context.executions,
     ),
-    render_civic_modules(model),
-    render_resident_agents(model),
-    render_civic_quests(model),
-    render_social_talent(model),
   ])
 }
