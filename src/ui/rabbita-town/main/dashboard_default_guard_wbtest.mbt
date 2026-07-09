@@ -50,6 +50,12 @@ fn default_dashboard_forbidden_copy() -> Array[String] {
     "launchpad-card-", "attention-workbench-grid", "attention-next-card", "attention-signal-card",
     "Open detail only when needed", "dashboard-section-kicker", "Live civic modules",
     "Projection-safe twins", "Service workflows", "Matches and reception",
+    "Start the next safe job",
+    "Create a standing watch or queue a PDF evidence book only when there is concrete work to add.",
+    "request-shortcut-grid", "request-shortcut-card", "request-shortcut-action",
+    "Keep watching a topic", "Create a PDF evidence watch",
+    "Track useful evidence changes in an existing MoonBook.",
+    "Use when a new durable book needs approved PDF sources.",
   ]
 }
 
@@ -78,7 +84,10 @@ test "default dashboard keeps professional operating actions visible" {
   assert_true(html.contains("Save Watch"))
   assert_true(html.contains("Queue PDF Watch Book"))
   assert_true(html.contains("Request Desk"))
-  assert_true(html.contains("Start the next safe job"))
+  assert_true(html.contains("Request intake"))
+  assert_true(html.contains("request-action-dock"))
+  assert_true(html.contains("Standing watch"))
+  assert_true(html.contains("Evidence book"))
   assert_true(html.contains("Attention Workbench"))
   assert_true(html.contains("attention-review-strip"))
   assert_true(html.contains("Recent signal"))
@@ -88,8 +97,6 @@ test "default dashboard keeps professional operating actions visible" {
   assert_true(html.contains("Residents"))
   assert_true(html.contains("Quests"))
   assert_true(html.contains("Social capital"))
-  assert_true(html.contains("Keep watching a topic"))
-  assert_true(html.contains("Create a PDF evidence watch"))
 }
 
 ///|

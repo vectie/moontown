@@ -5,14 +5,11 @@ fn render_request_desk(
 ) -> @rabbita.Html {
   section(class="request-desk", [
     div(class="request-desk-head", [
-      div([
+      div(class="request-desk-title", [
         p(class="eyebrow", "Request Desk"),
-        h2("Start the next safe job"),
-        p(
-          class="summary",
-          "Create a standing watch or queue a PDF evidence book only when there is concrete work to add.",
-        ),
+        h2("Request intake"),
       ]),
+      render_request_shortcuts(dispatch, model),
     ]),
     render_request_desk_workspace(dispatch, model),
   ])

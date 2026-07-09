@@ -123,6 +123,24 @@ copy. Candidate forbidden default strings:
 
 Allow these only in advanced/developer surfaces.
 
+### Phase 6: Compact Professional Request Intake
+
+The Request Desk is a frequent enough professional action to remain visible,
+but not important enough to spend default-screen height explaining the two
+paths. Professional users can recognize `Save Watch` and `Queue PDF Watch Book`
+without long card descriptions.
+
+Default state should show:
+
+- a short `Request Desk` / `Request intake` label pair
+- the two primary commands as compact controls
+- no form fields, explanatory request cards, or workflow copy until a command is
+  selected
+
+Expanded state should show only the selected composer. This keeps request
+creation deliberate while removing another large tutorial-like block from the
+normal operating scroll.
+
 ## Done Criteria
 
 - A professional user can operate watches, reviews, book requests, and the map
@@ -149,6 +167,9 @@ Allow these only in advanced/developer surfaces.
 - Request creation now starts from two shortcuts, `Save Watch` and `Queue PDF
   Watch Book`, and shows the detailed watch or book form only after the
   operator chooses that path.
+- The next request-intake cleanup should replace the large explanatory
+  shortcut cards with a compact command dock, keeping the same two actions but
+  dropping default card titles and descriptions.
 - Advanced runtime counters no longer render inside the professional dashboard;
   the dashboard keeps a single `Open Advanced Viewport` portal for deliberate
   runtime inspection.
