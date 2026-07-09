@@ -195,7 +195,6 @@ test "execution summary owns active runtime policy" {
   let summary = execution_count_summary(executions)
   assert_eq(summary.active_run_flow(), 2)
   assert_eq(summary.active_or_unresolved(), 5)
-  assert_eq(running_execution_count(executions), 5)
 }
 
 ///|
@@ -253,45 +252,6 @@ test "execution lifecycle predicates centralize status groups" {
   )
   assert_true(
     !execution_status_requires_review(Completed),
-  )
-}
-
-///|
-test "execution node matching uses lifecycle predicates" {
-  assert_true(
-    node_matches_execution(
-      "city-hall",
-      "book",
-      PacketReady,
-    ),
-  )
-  assert_true(
-    node_matches_execution(
-      "anomaly-corner",
-      "book",
-      Failed,
-    ),
-  )
-  assert_true(
-    node_matches_execution(
-      "worker-yard",
-      "book",
-      AwaitingPersistence,
-    ),
-  )
-  assert_true(
-    node_matches_execution(
-      "book-research",
-      "research",
-      Running,
-    ),
-  )
-  assert_true(
-    !node_matches_execution(
-      "city-hall",
-      "book",
-      Completed,
-    ),
   )
 }
 

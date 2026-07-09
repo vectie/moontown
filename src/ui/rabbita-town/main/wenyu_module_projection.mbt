@@ -103,7 +103,7 @@ fn render_module_book_projection(
         ]),
         p(
           class="module-book-summary",
-          "This building is configured, but the UI did not find a generated MoonBook fragment for `books/\{civic.book_id}/book/moonbook-ui-state.json`.",
+          "This building is configured, but its MoonBook projection is not connected yet.",
         ),
         p(
           class="module-book-empty",

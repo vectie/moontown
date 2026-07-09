@@ -7,39 +7,23 @@ priv struct TickMetricState {
 }
 
 ///|
-fn strategy_budget_delta(strategy : Strategy) -> Int {
-  match strategy {
-    Balanced => -2
-    Throughput => -4
-    Recovery => -1
-  }
+fn operating_budget_delta() -> Int {
+  -2
 }
 
 ///|
-fn strategy_energy_delta(strategy : Strategy) -> Int {
-  match strategy {
-    Balanced => -1
-    Throughput => -4
-    Recovery => 2
-  }
+fn operating_energy_delta() -> Int {
+  -1
 }
 
 ///|
-fn strategy_pressure_delta(strategy : Strategy) -> Int {
-  match strategy {
-    Balanced => 1
-    Throughput => 5
-    Recovery => -3
-  }
+fn operating_pressure_delta() -> Int {
+  1
 }
 
 ///|
-fn strategy_stability_delta(strategy : Strategy) -> Int {
-  match strategy {
-    Balanced => 0
-    Throughput => -3
-    Recovery => 3
-  }
+fn operating_stability_delta() -> Int {
+  0
 }
 
 ///|
@@ -69,20 +53,20 @@ fn tick_metric_state(model : Model) -> TickMetricState {
   let energy_penalty = if model.energy < 28 { 3 } else { 0 }
   let budget = clamp_metric(
     model.budget +
-    strategy_budget_delta(model.strategy) +
+    operating_budget_delta() +
     periodic_bonus(model.tick, 6, 2) +
     recovery_boost(recovery_active, 8),
   )
   let energy = clamp_metric(
     model.energy +
-    strategy_energy_delta(model.strategy) -
+    operating_energy_delta() -
     overload_penalty +
     periodic_bonus(model.tick, 5, 1) +
     recovery_boost(recovery_active, 10),
   )
   let pressure = clamp_metric(
     model.pressure +
-    strategy_pressure_delta(model.strategy) +
+    operating_pressure_delta() +
     brittle_penalty +
     energy_penalty -
     periodic_bonus(model.tick, 4, 1) -
@@ -90,7 +74,7 @@ fn tick_metric_state(model : Model) -> TickMetricState {
   )
   let stability = clamp_metric(
     model.stability +
-    strategy_stability_delta(model.strategy) -
+    operating_stability_delta() -
     overload_penalty -
     budget_penalty +
     periodic_bonus(model.tick, 5, 1) +

@@ -4,7 +4,7 @@ fn render_professional_status_strip(model : Model) -> @rabbita.Html {
   div(class="professional-status-strip", [
     status_chip(runtime_status.text, runtime_status.class_name),
     status_chip(daemon_tick_label(model), "chip-neutral"),
-    status_chip("Mode: \{strategy_label(model.strategy)}", "chip-book"),
+    status_chip("Professional view", "chip-book"),
   ])
 }
 
@@ -25,7 +25,7 @@ fn render_professional_overview(
         h2("Current town pulse"),
         p(
           class="summary",
-          "The default workspace keeps health, active watches, review needs, and book work visible before simulator controls.",
+          "The default workspace keeps health, active watches, review needs, and book work visible before deeper runtime tools.",
         ),
       ]),
       div(class="professional-overview-actions", [
@@ -186,16 +186,31 @@ fn render_advanced_operations(
   workers : Array[WorkerSim],
   executions : Array[@core.TaskExecutionRecord],
 ) -> @rabbita.Html {
+  ignore(dispatch)
   section(class="advanced-operations", [
     div(class="advanced-operations-head", [
       p(class="eyebrow", "Advanced"),
-      h2("Runtime controls"),
+      h2("Deeper runtime tools"),
       p(
         class="summary",
-        "Source switching, pause/step, strategy changes, and simulator drills are grouped here for occasional operator intervention.",
+        "Open the standalone Wenyu viewport for map-level inspection and occasional runtime intervention. The dashboard stays focused on watches, reviews, and request work.",
       ),
     ]),
-    render_controls(dispatch, model),
+    div(class="advanced-tool-row", [
+      a(
+        href="./viewport.html?assets=generated&v=wenyu",
+        class="viewport-portal-button advanced-tool-link",
+        "Open Advanced Viewport",
+      ),
+      status_chip(
+        "Workers \{worker_count_summary(workers).online()}",
+        "chip-neutral",
+      ),
+      status_chip(
+        "Open work \{execution_count_summary(executions).active_or_unresolved()}",
+        "chip-neutral",
+      ),
+    ]),
     render_runtime_bar(model, workers, executions),
   ])
 }

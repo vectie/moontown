@@ -5,13 +5,9 @@ fn resident_count(model : Model) -> Int {
 
 ///|
 fn resident_joins_today(model : Model) -> Int {
-  let strategy_lift = match model.strategy {
-    Strategy::Balanced => 1
-    Strategy::Throughput => 3
-    Strategy::Recovery => 0
-  }
+  let operating_lift = 1
   let recovery_drag = if mayor_recovery_active(model) { 2 } else { 0 }
-  let joins = 4 + model.tick % 6 + strategy_lift - recovery_drag
+  let joins = 4 + model.tick % 6 + operating_lift - recovery_drag
   if joins < 1 {
     1
   } else {
@@ -23,8 +19,7 @@ fn resident_joins_today(model : Model) -> Int {
 fn active_quest_count(model : Model) -> Int {
   let mut count = 0
   for task in tasks_for_model(model) {
-    if task.status == Assigned ||
-      task.status == Running {
+    if task.status == Assigned || task.status == Running {
       count += 1
     }
   }
@@ -76,13 +71,4 @@ fn retention_signal(model : Model) -> Int {
 ///|
 fn robot_service_count(model : Model) -> Int {
   8 + model.tick % 7
-}
-
-///|
-fn strategy_label(strategy : Strategy) -> String {
-  match strategy {
-    Strategy::Balanced => "Balanced"
-    Strategy::Throughput => "Throughput"
-    Strategy::Recovery => "Recovery"
-  }
 }

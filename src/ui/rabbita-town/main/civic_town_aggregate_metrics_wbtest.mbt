@@ -12,10 +12,3 @@ test "civic town aggregate metrics expose stable tick-driven counts" {
     events_today(model),
   )
 }
-
-///|
-test "strategy label keeps control labels centralized" {
-  assert_eq(strategy_label(Strategy::Balanced), "Balanced")
-  assert_eq(strategy_label(Strategy::Throughput), "Throughput")
-  assert_eq(strategy_label(Strategy::Recovery), "Recovery")
-}

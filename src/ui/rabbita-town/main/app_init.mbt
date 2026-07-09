@@ -42,7 +42,6 @@ fn init_model() -> Model {
   {
     tick: 0,
     paused: false,
-    strategy: Strategy::Balanced,
     selection: initial_selection(),
     state_source: initial_state_source(projection_snapshot),
     viewport_mode: initial_viewport_mode(),

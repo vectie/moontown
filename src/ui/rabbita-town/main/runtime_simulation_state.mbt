@@ -128,7 +128,7 @@ fn snapshot_placeholder_state(model : Model) -> @core.TownState {
     @core.BookRef::new(
       id="snapshot",
       name="Persisted Town Snapshot",
-      purpose="Browser snapshot bridge placeholder for \{moontown_product_display_artifact_code("town.json")}.",
+      purpose="Waiting for the persisted town projection to connect.",
       workspace_root=moontown_product_display_state_dir(),
       memory_scope=SharedTown,
       tags=["snapshot", "pending-bridge"],
@@ -149,7 +149,7 @@ fn snapshot_placeholder_state(model : Model) -> @core.TownState {
       id="connect-snapshot-source",
       book_id="snapshot",
       title="Connect persisted town state",
-      prompt="Load \{moontown_product_display_artifact_code("town.json")} through a local endpoint or generated static JSON artifact.",
+      prompt="Connect the persisted town projection so operators can use live books, workers, tasks, and events.",
       domain=Operations,
       required_role=Some(Watcher),
       required_capabilities=["state-source"],

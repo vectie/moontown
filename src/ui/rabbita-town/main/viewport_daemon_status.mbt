@@ -15,14 +15,6 @@ fn daemon_tick_label(model : Model) -> String {
 }
 
 ///|
-fn daemon_heartbeat_label(model : Model) -> String {
-  match model.daemon_snapshot {
-    Some(snapshot) => "Heartbeat events \{snapshot.last_heartbeat_event_count}"
-    None => "Heartbeat waiting"
-  }
-}
-
-///|
 fn daemon_cadence_label(model : Model) -> String {
   match model.daemon_snapshot {
     Some(snapshot) => {

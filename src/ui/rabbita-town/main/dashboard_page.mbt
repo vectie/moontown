@@ -23,13 +23,7 @@ fn render_dashboard_page(
         render_wenyu_viewport_portal(model, context.scene, context.executions),
       ]),
       div(class="sidebar-column", [
-        render_inspector(
-          dispatch,
-          model,
-          context.scene,
-          context.workers,
-          context.executions,
-        ),
+        render_professional_brief(model, context.workers, context.executions),
         render_feed(
           feed_items(
             model,
@@ -46,7 +40,7 @@ fn render_dashboard_page(
             "Worker avatars now move between yard, hall, books, and anomaly response.",
           ),
           p(
-            "Advanced operations below can adjust source, cadence, and simulator pressure when needed.",
+            "Open the Wenyu viewport when you need the full map and deeper runtime tools.",
           ),
         ]),
       ]),
@@ -69,6 +63,5 @@ fn render_dashboard_page(
     render_resident_agents(model),
     render_civic_quests(model),
     render_social_talent(model),
-    render_bridge_contract(model),
   ])
 }

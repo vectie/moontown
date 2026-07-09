@@ -27,13 +27,8 @@ fn update_non_form_message(
     SelectNode(node_key) =>
       model_only_update({ ..model, selection: Node(node_key) })
     SelectOverview => model_only_update({ ..model, selection: Overview })
-    SetStrategy(strategy) => model_only_update({ ..model, strategy, })
     SetViewportMode(viewport_mode) =>
       model_only_update(set_viewport_mode_model(model, viewport_mode))
-    ToggleStateSource => model_only_update(toggle_state_source_model(model))
-    InjectBudget => model_only_update(inject_budget_model(model))
-    RelieveQueue => model_only_update(relieve_queue_model(model))
-    StabilityDrill => model_only_update(stability_drill_model(model))
     SubmitOperatorRequest => submit_operator_request_update(dispatch, model)
     SubmitBookTemplateRequest =>
       submit_book_template_request_update(dispatch, model)

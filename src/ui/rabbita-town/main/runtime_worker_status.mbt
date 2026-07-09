@@ -2,50 +2,20 @@
 fn worker_status_for(model : Model, offset : Int) -> @core.WorkerStatus {
   let cycle = (model.tick + offset) % 9
   if mayor_recovery_active(model) {
-    worker_balanced_cycle_status(cycle)
+    worker_operating_cycle_status(cycle)
   } else if model.stability < 30 && (cycle == 2 || cycle == 6) {
     Waiting
   } else if model.pressure > 76 && (cycle == 1 || cycle == 4 || cycle == 7) {
     Waiting
   } else {
-    worker_strategy_cycle_status(model.strategy, cycle)
+    worker_operating_cycle_status(cycle)
   }
 }
 
 ///|
-fn worker_strategy_cycle_status(
-  strategy : Strategy,
-  cycle : Int,
-) -> @core.WorkerStatus {
-  match strategy {
-    Strategy::Balanced => worker_balanced_cycle_status(cycle)
-    Strategy::Throughput => worker_throughput_cycle_status(cycle)
-    Strategy::Recovery => worker_recovery_cycle_status(cycle)
-  }
-}
-
-///|
-fn worker_balanced_cycle_status(cycle : Int) -> @core.WorkerStatus {
+fn worker_operating_cycle_status(cycle : Int) -> @core.WorkerStatus {
   match cycle {
     0 | 3 | 6 => Running
-    1 | 4 | 7 => Waiting
-    _ => Idle
-  }
-}
-
-///|
-fn worker_throughput_cycle_status(cycle : Int) -> @core.WorkerStatus {
-  match cycle {
-    2 | 5 => Waiting
-    7 => Idle
-    _ => Running
-  }
-}
-
-///|
-fn worker_recovery_cycle_status(cycle : Int) -> @core.WorkerStatus {
-  match cycle {
-    2 | 5 => Running
     1 | 4 | 7 => Waiting
     _ => Idle
   }
@@ -77,14 +47,10 @@ fn worker_load(model : Model, offset : Int, status : @core.WorkerStatus) -> Int 
 ///|
 fn worker_summary(status : @core.WorkerStatus, load : Int) -> String {
   match status {
-    Running =>
-      "Serving residents and town quests at load \{load}%."
-    Waiting =>
-      "Waiting in the plaza for the mayor's next supervised handoff."
-    Idle =>
-      "Resting in the yard while memory and social signals settle."
-    Blocked =>
-      "Blocked by civic queue pressure or failed offline linkage."
+    Running => "Serving residents and town quests at load \{load}%."
+    Waiting => "Waiting in the plaza for the mayor's next supervised handoff."
+    Idle => "Resting in the yard while memory and social signals settle."
+    Blocked => "Blocked by civic queue pressure or failed offline linkage."
     Offline => "Offline and unavailable."
   }
 }

@@ -1,11 +1,4 @@
 ///|
-priv enum Strategy {
-  Balanced
-  Throughput
-  Recovery
-} derive(Eq)
-
-///|
 priv enum Selection {
   Overview
   Node(String)
@@ -29,7 +22,6 @@ priv enum ViewportMode {
 priv struct Model {
   tick : Int
   paused : Bool
-  strategy : Strategy
   selection : Selection
   state_source : StateSourceKind
   viewport_mode : ViewportMode
@@ -87,12 +79,7 @@ priv enum Msg {
   SelectWorker(String)
   SelectNode(String)
   SelectOverview
-  SetStrategy(Strategy)
   SetViewportMode(ViewportMode)
-  ToggleStateSource
-  InjectBudget
-  RelieveQueue
-  StabilityDrill
   SetRequestTitle(String)
   SetRequestPrompt(String)
   SetRequestBookId(String)

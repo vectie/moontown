@@ -83,7 +83,7 @@ fn render_module_civic_health(
         ]),
         p(
           class="module-book-summary",
-          "No civic status file was loaded. Run `moon run src/cmd/main -- civic doctor` to publish \{moontown_product_display_artifact_code("civic/status.json")}.",
+          "No civic status has been connected yet. Run the civic doctor before treating this service as operational.",
         ),
       ])
   }

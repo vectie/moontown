@@ -22,16 +22,15 @@ fn render_runtime_bar(
   section(class="runtime-bar", [
     div(class="runtime-head", [
       div(class="runtime-copy", [
-        p(class="eyebrow", "Runtime Detail"),
-        h2("Traffic, keeper queue, and review flow"),
-        p(class="summary", state_source_detail(model)),
+        p(class="eyebrow", "Advanced Operations"),
+        h2("Town work health"),
+        p(
+          class="summary",
+          runtime_health_detail(workers_summary, executions_summary),
+        ),
       ]),
       div(class="runtime-status", [
         status_chip(runtime_status.text, runtime_status.class_name),
-        status_chip(
-          "Source: \{state_source_label(model.state_source)}",
-          "chip-book",
-        ),
         status_chip(
           "Workers online: \{workers_summary.online()}",
           "chip-neutral",
@@ -43,7 +42,7 @@ fn render_runtime_bar(
       runtime_stat_chip("Running", workers_summary.running, "runtime-running"),
       runtime_stat_chip("Blocked", workers_summary.blocked, "runtime-blocked"),
       runtime_stat_chip(
-        "Persisting",
+        "Waiting",
         executions_summary.awaiting_persistence,
         "runtime-persisting",
       ),
@@ -59,4 +58,18 @@ fn render_runtime_bar(
       ),
     ]),
   ])
+}
+
+///|
+fn runtime_health_detail(
+  workers : WorkerCountSummary,
+  executions : ExecutionCountSummary,
+) -> String {
+  if workers.blocked > 0 || executions.issue_count() > 0 {
+    "The town has blocked workers or unresolved issues. Open the advanced viewport before changing runtime pressure."
+  } else if executions.review_queued > 0 {
+    "Review work is waiting. Resolve review items before adding more book or watch pressure."
+  } else {
+    "Town work is stable enough for normal watch, review, and book-request operations."
+  }
 }

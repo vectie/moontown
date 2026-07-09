@@ -36,7 +36,7 @@ fn fallback_snapshot_worker_sims() -> Array[WorkerSim] {
       zone_key: "worker-yard",
       energy: 100,
       load: 12,
-      summary: "Waiting for a static or local endpoint bridge into \{moontown_product_display_artifact_code("town.json")}.",
+      summary: "Waiting for the persisted town projection to connect.",
     },
   ]
 }
@@ -70,8 +70,7 @@ fn snapshot_worker_summary(worker : @core.WorkerRef) -> String {
   } else {
     "\{capability_count} declared capabilities"
   }
-  if worker.role.to_string() == "Watcher" &&
-    worker.status == Idle {
+  if worker.role.to_string() == "Watcher" && worker.status == Idle {
     return "\{worker.name} is on duty for the 30-minute standing-watch loop. Idle means waiting between checks, not offline; the mayor message feed shows the latest check result."
   }
   "\{worker.name} is projected from persisted town state with status \{worker.status}, role \{worker.role}, and \{capability_text}."

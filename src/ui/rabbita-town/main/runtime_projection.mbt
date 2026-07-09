@@ -46,44 +46,6 @@ fn projection_state(model : Model) -> @core.TownState {
 }
 
 ///|
-fn next_state_source(source : StateSourceKind) -> StateSourceKind {
-  match source {
-    StateSourceKind::DemoSimulation => StateSourceKind::SnapshotFile
-    StateSourceKind::SnapshotFile => StateSourceKind::DemoSimulation
-  }
-}
-
-///|
-fn state_source_label(source : StateSourceKind) -> String {
-  match source {
-    StateSourceKind::DemoSimulation => "Demo Simulation"
-    StateSourceKind::SnapshotFile => "Projection Snapshot"
-  }
-}
-
-///|
-fn state_source_detail(model : Model) -> String {
-  match model.state_source {
-    StateSourceKind::DemoSimulation =>
-      "Live civic simulation: mayor supervision keeps services, agents, quests, and town health cycling 24/7 while Resident Twins stay limited to projection-safe summaries."
-    StateSourceKind::SnapshotFile =>
-      match model.projection_snapshot {
-        Some(snapshot) if projection_snapshot_ready(snapshot) =>
-          "Projection snapshot mode is loaded from \{moontown_product_display_artifact_code("town.json")} with \{snapshot.town.books.length()} books, \{snapshot.town.workers.length()} workers, \{snapshot.town.tasks.length()} queued tasks, and \{snapshot.event_count} events."
-        Some(_) =>
-          "Projection snapshot file was found but does not yet contain a usable town runtime projection, so the shell stays on demo supervision until the bridge publishes real books, workers, or tasks."
-        None =>
-          "Projection snapshot mode shows the MoonBook-to-browser bridge placeholder until the bundle can load \{moontown_product_display_artifact_code("town.json")} or a generated runtime projection."
-      }
-  }
-}
-
-///|
-fn state_source_options() -> Array[StateSourceKind] {
-  [DemoSimulation, SnapshotFile]
-}
-
-///|
 fn tasks_for_model(model : Model) -> Array[@core.TownTask] {
   match model.state_source {
     StateSourceKind::SnapshotFile =>
