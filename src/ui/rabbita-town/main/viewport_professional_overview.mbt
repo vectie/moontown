@@ -25,7 +25,7 @@ fn render_professional_overview(
         h2("Current town pulse"),
         p(
           class="summary",
-          "The default workspace keeps health, active watches, review needs, and book work visible before deeper runtime tools.",
+          "The default workspace keeps health, active watches, review needs, book work, and Wenyu map entry visible.",
         ),
       ]),
       div(class="professional-overview-actions", [
@@ -177,27 +177,4 @@ fn professional_book_queue_detail(model : Model) -> String {
   } else {
     "Create a book request only when a new durable knowledge area is needed."
   }
-}
-
-///|
-fn render_advanced_operations(
-) -> @rabbita.Html {
-  section(class="advanced-operations", [
-    div(class="advanced-operations-head", [
-      p(class="eyebrow", "Advanced"),
-      h2("Open the advanced viewport"),
-      p(
-        class="summary",
-        "Use the standalone Wenyu viewport for map-level inspection and occasional runtime intervention. The dashboard stays focused on watches, reviews, requests, and ecosystem surfaces.",
-      ),
-    ]),
-    div(class="advanced-tool-row", [
-      a(
-        href="./viewport.html?assets=generated&v=wenyu",
-        class="viewport-portal-button advanced-tool-link",
-        "Open Advanced Viewport",
-      ),
-      status_chip("Advanced tools open separately", "chip-neutral"),
-    ]),
-  ])
 }

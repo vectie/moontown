@@ -155,3 +155,6 @@ Allow these only in advanced/developer surfaces.
 - The default sidebar no longer carries the old map legend. A compact
   `Current focus` panel now points operators at recovery, review, standing
   watch setup, pending book requests, or steady monitoring based on live state.
+- The duplicate lower `Advanced Viewport` block was removed from the default
+  dashboard. Professional users now use the primary Wenyu map entry instead of
+  reading advanced/runtime intervention copy on the first screen.

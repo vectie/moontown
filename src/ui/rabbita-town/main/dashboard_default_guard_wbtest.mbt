@@ -37,6 +37,9 @@ fn default_dashboard_forbidden_copy() -> Array[String] {
     "Moonbook houses hold keeper-owned domain planning",
     "Worker avatars now move between yard, hall, books",
     "Open the Wenyu viewport when you need the full map",
+    "deeper runtime tools", "Open the advanced viewport",
+    "Open Advanced Viewport", "Advanced tools open separately",
+    "runtime intervention",
   ]
 }
 
@@ -65,9 +68,6 @@ test "default dashboard keeps professional operating actions visible" {
   assert_true(html.contains("Quests"))
   assert_true(html.contains("Social capital"))
   assert_true(html.contains("Choose the next safe request"))
-  assert_true(html.contains("Open the advanced viewport"))
-  assert_true(html.contains("Open Advanced Viewport"))
-  assert_true(html.contains("Advanced tools open separately"))
 }
 
 ///|
