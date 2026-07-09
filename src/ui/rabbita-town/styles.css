@@ -6,7 +6,6 @@
 @import url("./styles/sidebar-panels.css");
 
 @media (max-width: 1220px) {
-  .operator-masthead,
   .runtime-grid,
   .module-detail-grid,
   .resident-summary-grid,
@@ -93,10 +92,6 @@
     right: 10px;
     bottom: 10px;
     padding: 12px;
-  }
-
-  .operator-masthead {
-    grid-template-columns: 1fr;
   }
 
   .request-field-grid {

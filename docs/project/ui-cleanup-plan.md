@@ -447,6 +447,26 @@ Default state should remove:
 - stale request-intake progress notes that describe already-finished work
 - any compatibility allowance for the old explanatory request cards
 
+### Phase 23: Purge Retired Masthead Compatibility CSS
+
+The standalone masthead was folded into the Town Launchpad, and rendered HTML
+already forbids the old `operator-masthead-*` classes. Shared CSS should carry
+the same contract so future dashboard work does not preserve retired layout
+hooks that no longer belong to the standalone product surface.
+
+Default state should keep:
+
+- the unified launchpad identity and alert chrome
+- the rendered-output guard that forbids old masthead classes
+- responsive rules for currently rendered runtime, request, map, and module
+  surfaces
+
+Default state should remove:
+
+- `operator-masthead` selectors from shared responsive CSS
+- compatibility styling for the removed standalone masthead band
+- any assumption that old hero chrome may return to the default dashboard
+
 ## Done Criteria
 
 - A professional user can operate watches, reviews, book requests, and the map
@@ -570,3 +590,6 @@ Default state should remove:
   `Workers N`, `Review N`, and `Map`. The strip preserves default state while
   avoiding sentence-length chips that push the map command onto a separate
   phone row.
+- Shared responsive CSS no longer carries retired `operator-masthead` layout
+  selectors. The default dashboard guard still forbids those old masthead
+  classes in rendered HTML, matching the unified launchpad contract.
