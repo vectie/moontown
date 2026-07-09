@@ -22,15 +22,12 @@ fn attention_focus_view(
     model,
     fallback_active_workers=workers_summary.online(),
   )
-  let failed = execution_summary.failed +
-    decisions.failed_count +
-    live.failed_template_request_count
-  let review = execution_summary.review_queued + decisions.review_count
-  if failed > 0 {
+  let attention = professional_attention_summary(model, executions)
+  if professional_attention_has_failed(attention) {
     {
       title: "Recover failed work",
       signal: attention_focus_count_sentence(
-        failed,
+        attention.failed_count,
         "failed item needs attention",
         "failed items need attention",
       ),
@@ -43,11 +40,11 @@ fn attention_focus_view(
       ),
       tone: "alert",
     }
-  } else if review > 0 {
+  } else if professional_attention_has_review(attention) {
     {
       title: "Review queued work",
       signal: attention_focus_count_sentence(
-        review,
+        attention.review_count,
         "item is waiting for decision",
         "items are waiting for decision",
       ),

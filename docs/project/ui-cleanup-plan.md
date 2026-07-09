@@ -176,3 +176,7 @@ Allow these only in advanced/developer surfaces.
   vitality metric strip have been collapsed into one `Attention Workbench`.
   `Request Desk` now appears immediately after the Wenyu map workspace entry so
   safe watch/book creation is reachable before lower ecosystem browsing.
+- Town pulse and Attention Workbench now share one professional attention
+  summary, so execution reviews, watcher reviews, failed work, and failed book
+  requests produce the same top-level review/recovery state instead of showing
+  contradictory `Review` and `Clear` signals.

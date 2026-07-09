@@ -5,9 +5,8 @@ fn render_professional_overview(
   executions : Array[@core.TaskExecutionRecord],
 ) -> @rabbita.Html {
   let workers_summary = worker_count_summary(workers)
-  let executions_summary = execution_count_summary(executions)
   let watch_summary = standing_goal_summary(model)
-  let decisions = watcher_decision_summary(model)
+  let attention = professional_attention_summary(model, executions)
   section(class="professional-overview", [
     div(class="professional-overview-head", [
       div(class="professional-overview-copy", [
@@ -24,8 +23,8 @@ fn render_professional_overview(
           "chip-neutral",
         ),
         status_chip(
-          "Review: \{executions_summary.review_queued}",
-          professional_review_chip_class(executions_summary.review_queued),
+          professional_attention_chip_text(attention),
+          professional_attention_chip_class(attention),
         ),
       ]),
     ]),
@@ -44,9 +43,9 @@ fn render_professional_overview(
       ),
       render_professional_overview_card(
         "Attention",
-        professional_attention_label(decisions),
-        professional_attention_detail(decisions),
-        professional_attention_tone(decisions),
+        professional_attention_label(attention),
+        professional_attention_detail(attention),
+        professional_attention_tone(attention),
       ),
       render_professional_overview_card(
         "Book queue",
@@ -73,8 +72,24 @@ fn render_professional_overview_card(
 }
 
 ///|
-fn professional_review_chip_class(review_count : Int) -> String {
-  if review_count > 0 {
+fn professional_attention_chip_text(
+  summary : ProfessionalAttentionSummary,
+) -> String {
+  if professional_attention_has_failed(summary) {
+    "Recovery: \{summary.failed_count}"
+  } else if professional_attention_has_review(summary) {
+    "Review: \{summary.review_count}"
+  } else {
+    "Attention clear"
+  }
+}
+
+///|
+fn professional_attention_chip_class(
+  summary : ProfessionalAttentionSummary,
+) -> String {
+  if professional_attention_has_failed(summary) ||
+    professional_attention_has_review(summary) {
     "chip-alert"
   } else {
     "chip-calm"
@@ -124,10 +139,12 @@ fn professional_watch_detail(summary : StandingGoalSummary) -> String {
 }
 
 ///|
-fn professional_attention_label(summary : WatcherDecisionSummary) -> String {
-  if summary.failed_count > 0 {
+fn professional_attention_label(
+  summary : ProfessionalAttentionSummary,
+) -> String {
+  if professional_attention_has_failed(summary) {
     "Failed"
-  } else if summary.review_count > 0 {
+  } else if professional_attention_has_review(summary) {
     "Review"
   } else {
     "Clear"
@@ -135,10 +152,12 @@ fn professional_attention_label(summary : WatcherDecisionSummary) -> String {
 }
 
 ///|
-fn professional_attention_tone(summary : WatcherDecisionSummary) -> String {
-  if summary.failed_count > 0 {
+fn professional_attention_tone(
+  summary : ProfessionalAttentionSummary,
+) -> String {
+  if professional_attention_has_failed(summary) {
     "overview-card-alert"
-  } else if summary.review_count > 0 {
+  } else if professional_attention_has_review(summary) {
     "overview-card-review"
   } else {
     "overview-card-calm"
@@ -146,13 +165,15 @@ fn professional_attention_tone(summary : WatcherDecisionSummary) -> String {
 }
 
 ///|
-fn professional_attention_detail(summary : WatcherDecisionSummary) -> String {
-  if summary.failed_count > 0 {
-    "\{summary.failed_count} watcher run needs recovery."
-  } else if summary.review_count > 0 {
-    "\{summary.review_count} watcher update is waiting for review."
+fn professional_attention_detail(
+  summary : ProfessionalAttentionSummary,
+) -> String {
+  if professional_attention_has_failed(summary) {
+    "\{summary.failed_count} watch, book, or town work item needs recovery."
+  } else if professional_attention_has_review(summary) {
+    "\{summary.review_count} watch or town work item is waiting for review."
   } else {
-    "No watcher failures or review-blocked updates are waiting."
+    "No failed or review-blocked work is waiting."
   }
 }
 
