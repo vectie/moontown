@@ -490,6 +490,32 @@ Default state should remove:
 - monospace button/chip typography where it reads as game chrome rather than
   operational UI
 
+### Phase 25: Advanced Viewport Product Chrome
+
+The advanced viewport is deliberately separate from the professional default
+dashboard, but it should not look like an old compatibility mode. Advanced
+operators still need map, module, runtime, interior, and handoff detail, while
+the surface itself should share the standalone Moontown visual system.
+
+Advanced state should keep:
+
+- map and module inspection as deliberate advanced workflows
+- runtime stats, module issues, handoff artifacts, book projections, and
+  interior agent detail
+- dense operator information where it helps diagnosis
+- mobile access to the advanced map without clipping the viewport behind a
+  wrapped diagnostics header
+
+Advanced state should remove:
+
+- green grid wallpaper and yellow/brown viewport chrome
+- old pixel borders, stepped shadows, and monospace typography on viewport
+  panels, runtime stats, module detail cards, and interior cards
+- separate visual treatment that implies the advanced viewport is a legacy
+  debug product instead of a first-class Moontown surface
+- paragraph-length status chips that push the mobile map below the visible
+  area
+
 ## Done Criteria
 
 - A professional user can operate watches, reviews, book requests, and the map
@@ -620,3 +646,9 @@ Default state should remove:
   soft page depth, restrained 8px operating surfaces, lighter borders,
   smoother shadows, and product typography for chips, buttons, signals, request
   actions, attention chips, and town-area tabs.
+- The advanced viewport now shares the standalone product chrome: blue-white
+  shell, lighter panel borders, restrained radii, smooth shadows, and product
+  typography for viewport controls, runtime stats, module detail cards,
+  handoff artifacts, book projections, and interior cards. Its mobile shell can
+  scroll to the map, and the module status chip now uses compact count/version
+  copy instead of a long diagnostic sentence.

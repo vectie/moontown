@@ -48,11 +48,15 @@
   }
 
   .viewport-page {
+    height: auto;
+    min-height: 100vh;
+    overflow: auto;
     padding: 8px;
   }
 
   .viewport-hud {
     display: grid;
+    gap: 10px;
     align-items: start;
   }
 
@@ -123,7 +127,7 @@
   .scene-frame {
     height: 62vh;
     padding: 10px;
-    border-radius: 22px;
+    border-radius: 8px;
   }
 }
 

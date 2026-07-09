@@ -926,14 +926,14 @@
   display: grid;
   gap: 8px;
   padding: 14px;
-  border-radius: 20px;
-  border: 1px dashed rgba(32, 21, 10, 0.18);
-  background: rgba(255, 250, 239, 0.62);
+  border-radius: 8px;
+  border: 1px dashed rgba(28, 73, 122, 0.18);
+  background: rgba(255, 255, 255, 0.62);
 }
 
 .resident-contract-list {
   background:
-    linear-gradient(135deg, rgba(255, 250, 239, 0.78), rgba(228, 241, 234, 0.72));
+    linear-gradient(135deg, rgba(255, 255, 255, 0.78), rgba(238, 248, 255, 0.72));
 }
 
 .runtime-head {
@@ -974,12 +974,12 @@
 
 .runtime-stat {
   padding: 14px;
-  border-radius: 0;
-  border: 3px solid var(--line);
-  background: #fff0bd;
+  border-radius: 8px;
+  border: 1px solid rgba(28, 73, 122, 0.16);
+  background: rgba(255, 255, 255, 0.84);
   display: grid;
   gap: 6px;
-  box-shadow: 3px 3px 0 rgba(56, 35, 16, 0.18);
+  box-shadow: 0 8px 18px rgba(35, 82, 125, 0.08);
 }
 
 .scene-stage-rail .runtime-stat {
@@ -989,7 +989,7 @@
 
 .runtime-stat-value {
   margin: 0;
-  font-family: "Courier New", "Menlo", monospace;
+  font-family: inherit;
   font-size: 24px;
   font-weight: 900;
 }
@@ -1032,7 +1032,7 @@
   max-width: 100%;
   height: clamp(540px, 68vh, 820px);
   background:
-    linear-gradient(180deg, rgba(255, 248, 228, 0.96), rgba(232, 207, 152, 0.94));
+    linear-gradient(180deg, rgba(255, 255, 255, 0.96), rgba(230, 247, 255, 0.9));
   scrollbar-gutter: stable both-edges;
   overscroll-behavior: contain;
 }

@@ -57,7 +57,7 @@ fn render_standalone_viewport_actions(
     status_chip("Local time \{real_time_label()}", "chip-clock"),
     status_chip(daemon_tick_label(model), "chip-neutral"),
     status_chip(
-      "Modules \{wenyu_module_count()} / clean \{wenyu_clean_module_count()} / civic \{civic_status_summary(model)} / v\{wenyu_modules_version()}",
+      "Modules \{wenyu_clean_module_count()}/\{wenyu_module_count()} · v\{wenyu_modules_version()}",
       "chip-book",
     ),
     button(

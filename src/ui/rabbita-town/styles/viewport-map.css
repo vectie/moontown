@@ -13,9 +13,9 @@
 .viewport-frame {
   height: 100%;
   --viewport-zoom: 1;
-  border-radius: 0;
+  border-radius: 8px;
   border: var(--pixel-border);
-  background: #c4d26d;
+  background: rgba(238, 248, 255, 0.92);
   cursor: grab;
   touch-action: none;
   user-select: none;
@@ -467,11 +467,12 @@
   min-width: 22px;
   height: 22px;
   place-items: center;
-  border: 3px solid var(--line);
-  background: #fff0bd;
-  box-shadow: 3px 3px 0 rgba(56, 35, 16, 0.22);
+  border: 1px solid rgba(28, 73, 122, 0.18);
+  border-radius: 999px;
+  background: rgba(255, 255, 255, 0.92);
+  box-shadow: 0 8px 18px rgba(35, 82, 125, 0.12);
   color: var(--ink);
-  font-family: "Courier New", "Menlo", monospace;
+  font-family: inherit;
   font-size: 11px;
   font-weight: 900;
   line-height: 1;
@@ -485,7 +486,7 @@
 .wenyu-module-issue-count {
   right: 10%;
   top: 32px;
-  background: #ffb070;
+  background: #ffe2d3;
 }
 
 .wenyu-module-agent-count.is-empty,
@@ -522,15 +523,16 @@
   display: grid;
   gap: 4px;
   padding: 8px 10px;
-  border: 3px solid var(--line);
-  background: rgba(255, 240, 189, 0.95);
-  box-shadow: 4px 4px 0 rgba(56, 35, 16, 0.22);
+  border: 1px solid rgba(28, 73, 122, 0.16);
+  border-radius: 8px;
+  background: rgba(255, 255, 255, 0.96);
+  box-shadow: 0 12px 24px rgba(35, 82, 125, 0.16);
   color: var(--ink);
-  font-family: "Courier New", "Menlo", monospace;
+  font-family: inherit;
   text-align: left;
   opacity: 0;
   transform: translate(-50%, 8px);
-  transition: opacity 120ms steps(2), transform 120ms steps(2);
+  transition: opacity 160ms ease, transform 160ms ease;
 }
 
 .wenyu-module-building:hover .wenyu-module-label,
@@ -918,7 +920,7 @@
 }
 
 .viewport-frame-shell .runtime-stat {
-  background: #fff0bd;
+  background: rgba(255, 255, 255, 0.88);
   backdrop-filter: none;
 }
 
@@ -932,7 +934,8 @@
   grid-template-rows: auto minmax(0, 1fr);
   gap: 10px;
   border: var(--pixel-border);
-  background: #9c7a43;
+  border-radius: 8px;
+  background: rgba(255, 255, 255, 0.88);
   box-shadow: var(--shadow);
   overflow: hidden;
 }
@@ -944,14 +947,12 @@
   align-items: start;
   padding: 12px;
   border-bottom: var(--pixel-border);
-  background: #ffe7a6;
+  background: rgba(255, 255, 255, 0.92);
 }
 
 .interior-header h2 {
   margin: 0;
-  font-family: "Courier New", "Menlo", monospace;
-  text-transform: uppercase;
-  text-shadow: 2px 2px 0 #d09a48;
+  font-family: inherit;
 }
 
 .interior-room {
@@ -959,18 +960,16 @@
   position: relative;
   overflow: auto;
   background:
-    linear-gradient(45deg, rgba(255, 255, 255, 0.08) 25%, transparent 25%) 0 0 / 48px 48px,
-    linear-gradient(45deg, transparent 75%, rgba(80, 52, 26, 0.18) 75%) 0 0 / 48px 48px,
-    #bd9352;
+    radial-gradient(circle at 18% 18%, rgba(38, 183, 211, 0.14), transparent 22%),
+    radial-gradient(circle at 78% 18%, rgba(20, 118, 255, 0.1), transparent 24%),
+    linear-gradient(180deg, rgba(238, 248, 255, 0.92), rgba(255, 255, 255, 0.96));
 }
 
 .module-interior-room {
   background:
-    radial-gradient(circle at 18% 18%, rgba(255, 229, 150, 0.28), transparent 22%),
-    radial-gradient(circle at 78% 18%, rgba(116, 180, 156, 0.2), transparent 24%),
-    linear-gradient(45deg, rgba(255, 255, 255, 0.08) 25%, transparent 25%) 0 0 / 48px 48px,
-    linear-gradient(45deg, transparent 75%, rgba(80, 52, 26, 0.18) 75%) 0 0 / 48px 48px,
-    #bd9352;
+    radial-gradient(circle at 18% 18%, rgba(38, 183, 211, 0.16), transparent 22%),
+    radial-gradient(circle at 78% 18%, rgba(20, 118, 255, 0.1), transparent 24%),
+    linear-gradient(180deg, rgba(238, 248, 255, 0.92), rgba(255, 255, 255, 0.96));
 }
 
 .module-interior-summary {
@@ -981,18 +980,19 @@
   grid-template-columns: repeat(5, minmax(0, 1fr));
   gap: 8px;
   padding: 10px;
-  background: rgba(255, 231, 166, 0.92);
-  border-bottom: 3px solid rgba(90, 59, 32, 0.56);
+  background: rgba(255, 255, 255, 0.92);
+  border-bottom: 1px solid rgba(28, 73, 122, 0.16);
 }
 
 .module-runtime-detail {
   max-width: 980px;
   margin: 14px 16px 0;
   padding: 10px 12px;
-  border: 3px solid rgba(90, 59, 32, 0.5);
-  background: rgba(255, 240, 189, 0.88);
+  border: 1px solid rgba(28, 73, 122, 0.16);
+  border-radius: 8px;
+  background: rgba(255, 255, 255, 0.88);
   color: var(--ink);
-  font-family: "Courier New", "Menlo", monospace;
+  font-family: inherit;
   font-size: 13px;
   font-weight: 800;
   line-height: 1.55;
@@ -1011,17 +1011,18 @@
   place-items: center;
   min-height: 30px;
   padding: 5px 9px;
-  border: 3px solid rgba(84, 56, 31, 0.58);
-  background: #ffca87;
-  box-shadow: 3px 3px 0 rgba(56, 35, 16, 0.18);
-  font-family: "Courier New", "Menlo", monospace;
+  border: 1px solid rgba(28, 73, 122, 0.16);
+  border-radius: 999px;
+  background: #ffe2d3;
+  box-shadow: 0 6px 14px rgba(35, 82, 125, 0.08);
+  font-family: inherit;
   font-size: 11px;
   font-weight: 900;
   text-transform: uppercase;
 }
 
 .module-issue-list-clean span {
-  background: #dbeea1;
+  background: #e6faf0;
 }
 
 .module-runtime-counters {
@@ -1034,10 +1035,11 @@
 .module-runtime-counters span {
   min-height: 28px;
   padding: 5px 8px;
-  border: 3px solid rgba(84, 56, 31, 0.52);
-  background: rgba(255, 247, 210, 0.9);
-  box-shadow: 3px 3px 0 rgba(56, 35, 16, 0.14);
-  font-family: "Courier New", "Menlo", monospace;
+  border: 1px solid rgba(28, 73, 122, 0.16);
+  border-radius: 999px;
+  background: rgba(255, 255, 255, 0.9);
+  box-shadow: 0 6px 14px rgba(35, 82, 125, 0.08);
+  font-family: inherit;
   font-size: 11px;
   font-weight: 900;
   text-transform: uppercase;
@@ -1046,15 +1048,16 @@
 .module-book-projection {
   margin: 14px 16px 0;
   padding: 12px;
-  border: 4px solid #54381f;
+  border: 1px solid rgba(28, 73, 122, 0.16);
+  border-radius: 8px;
   background:
-    linear-gradient(135deg, rgba(255, 247, 210, 0.96), rgba(230, 189, 104, 0.88));
-  box-shadow: 6px 6px 0 rgba(56, 35, 16, 0.18);
+    linear-gradient(135deg, rgba(255, 255, 255, 0.96), rgba(230, 247, 255, 0.9));
+  box-shadow: 0 12px 26px rgba(35, 82, 125, 0.1);
 }
 
 .module-book-projection-missing {
   background:
-    linear-gradient(135deg, rgba(255, 232, 166, 0.96), rgba(255, 202, 135, 0.86));
+    linear-gradient(135deg, rgba(255, 246, 230, 0.96), rgba(255, 226, 211, 0.86));
 }
 
 .module-book-heading {
@@ -1067,16 +1070,16 @@
 
 .module-book-heading h2 {
   margin: 0;
-  font-family: "Courier New", "Menlo", monospace;
+  font-family: inherit;
   font-size: 20px;
-  text-transform: uppercase;
 }
 
 .module-book-id {
   padding: 5px 8px;
-  border: 3px solid rgba(84, 56, 31, 0.5);
-  background: #fff0bd;
-  font-family: "Courier New", "Menlo", monospace;
+  border: 1px solid rgba(28, 73, 122, 0.16);
+  border-radius: 999px;
+  background: rgba(230, 247, 255, 0.9);
+  font-family: inherit;
   font-size: 11px;
   font-weight: 900;
   text-transform: uppercase;
@@ -1086,7 +1089,7 @@
 .module-book-summary {
   max-width: 1040px;
   margin: 8px 0 10px;
-  font-family: "Courier New", "Menlo", monospace;
+  font-family: inherit;
   font-size: 13px;
   font-weight: 800;
   line-height: 1.55;
@@ -1105,11 +1108,12 @@
   place-items: center;
   min-height: 28px;
   padding: 5px 9px;
-  border: 3px solid rgba(84, 56, 31, 0.54);
-  background: #fff7d2;
-  box-shadow: 3px 3px 0 rgba(56, 35, 16, 0.14);
+  border: 1px solid rgba(28, 73, 122, 0.16);
+  border-radius: 999px;
+  background: rgba(255, 255, 255, 0.9);
+  box-shadow: 0 6px 14px rgba(35, 82, 125, 0.08);
   color: var(--ink);
-  font-family: "Courier New", "Menlo", monospace;
+  font-family: inherit;
   font-size: 11px;
   font-weight: 900;
   text-decoration: none;
@@ -1141,10 +1145,11 @@
 .module-civic-health {
   margin: 12px 0;
   padding: 10px;
-  border: 3px solid rgba(84, 56, 31, 0.56);
+  border: 1px solid rgba(28, 73, 122, 0.16);
+  border-radius: 8px;
   background:
-    linear-gradient(135deg, rgba(218, 238, 177, 0.94), rgba(194, 226, 216, 0.86));
-  box-shadow: 4px 4px 0 rgba(56, 35, 16, 0.14);
+    linear-gradient(135deg, rgba(230, 250, 240, 0.94), rgba(230, 247, 255, 0.86));
+  box-shadow: 0 8px 18px rgba(35, 82, 125, 0.08);
 }
 
 .module-civic-health-head {
@@ -1156,9 +1161,10 @@
 
 .module-civic-status {
   padding: 5px 8px;
-  border: 3px solid rgba(84, 56, 31, 0.46);
-  background: #fff7d2;
-  font-family: "Courier New", "Menlo", monospace;
+  border: 1px solid rgba(28, 73, 122, 0.16);
+  border-radius: 999px;
+  background: rgba(255, 255, 255, 0.9);
+  font-family: inherit;
   font-size: 11px;
   font-weight: 900;
   text-transform: uppercase;
@@ -1174,15 +1180,17 @@
 .module-book-metric {
   min-height: 104px;
   padding: 10px;
-  border: 3px solid rgba(84, 56, 31, 0.5);
-  box-shadow: 4px 4px 0 rgba(56, 35, 16, 0.13);
+  border: 1px solid rgba(28, 73, 122, 0.16);
+  border-radius: 8px;
+  background: rgba(255, 255, 255, 0.82);
+  box-shadow: 0 8px 18px rgba(35, 82, 125, 0.08);
 }
 
 .module-book-metric-label,
 .module-book-metric-value,
 .module-book-journey-status {
   display: block;
-  font-family: "Courier New", "Menlo", monospace;
+  font-family: inherit;
   font-size: 10px;
   font-weight: 900;
   letter-spacing: 0.04em;
@@ -1199,7 +1207,7 @@
 .module-book-journey-item p,
 .module-book-empty {
   margin: 4px 0 0;
-  font-family: "Courier New", "Menlo", monospace;
+  font-family: inherit;
   font-size: 12px;
   font-weight: 800;
   line-height: 1.45;
@@ -1215,15 +1223,16 @@
 .module-book-group {
   min-width: 0;
   padding: 10px;
-  border: 3px solid rgba(84, 56, 31, 0.45);
-  background: rgba(255, 240, 189, 0.72);
+  border: 1px solid rgba(28, 73, 122, 0.16);
+  border-radius: 8px;
+  background: rgba(255, 255, 255, 0.82);
 }
 
 .module-book-group > h3,
 .module-book-item h3,
 .module-book-journey-item h3 {
   margin: 0;
-  font-family: "Courier New", "Menlo", monospace;
+  font-family: inherit;
   font-size: 13px;
   font-weight: 900;
   text-transform: uppercase;
@@ -1233,16 +1242,18 @@
 .module-book-journey-item {
   margin-top: 8px;
   padding: 8px;
-  border: 3px solid rgba(84, 56, 31, 0.38);
-  background: rgba(255, 247, 210, 0.82);
+  border: 1px solid rgba(28, 73, 122, 0.14);
+  border-radius: 8px;
+  background: rgba(255, 255, 255, 0.76);
 }
 
 .module-book-item span {
   display: inline-block;
   margin-top: 5px;
   padding: 3px 6px;
-  background: rgba(84, 56, 31, 0.12);
-  font-family: "Courier New", "Menlo", monospace;
+  border-radius: 999px;
+  background: rgba(20, 118, 255, 0.1);
+  font-family: inherit;
   font-size: 10px;
   font-weight: 900;
   text-transform: uppercase;
@@ -1263,10 +1274,11 @@
   display: grid;
   place-items: center;
   padding: 8px;
-  border: 4px solid #54381f;
-  background: #f3d889;
-  box-shadow: 5px 5px 0 rgba(50, 31, 14, 0.28);
-  font-family: "Courier New", "Menlo", monospace;
+  border: 1px solid rgba(28, 73, 122, 0.2);
+  border-radius: 8px;
+  background: rgba(255, 255, 255, 0.78);
+  box-shadow: 0 10px 24px rgba(35, 82, 125, 0.1);
+  font-family: inherit;
   font-size: 11px;
   font-weight: 900;
   text-align: center;
@@ -1289,8 +1301,8 @@
   top: 14%;
   width: 168px;
   height: 136px;
-  background: #8f6335;
-  color: #fff0bd;
+  background: #eaf4ff;
+  color: var(--ink);
 }
 
 .furniture-policy-board,
@@ -1301,8 +1313,8 @@
   top: 9%;
   width: 190px;
   height: 74px;
-  background: #6d4a2a;
-  color: #fff0bd;
+  background: #e7f7fb;
+  color: var(--ink);
 }
 
 .furniture-archive,
@@ -1314,7 +1326,7 @@
   bottom: 12%;
   width: 260px;
   height: 86px;
-  background: #e6bd68;
+  background: #fff8e8;
 }
 
 .furniture-stage,
@@ -1327,7 +1339,7 @@
   width: 230px;
   height: 118px;
   background:
-    linear-gradient(135deg, rgba(255, 240, 189, 0.9), rgba(168, 199, 129, 0.78));
+    linear-gradient(135deg, rgba(255, 255, 255, 0.9), rgba(230, 247, 255, 0.78));
 }
 
 .furniture-scoreboard,
@@ -1336,38 +1348,39 @@
   top: 14%;
   width: 180px;
   height: 136px;
-  background: #35596d;
-  color: #fff0bd;
+  background: #e7f0ff;
+  color: var(--ink);
 }
 
 .furniture-cafe-table {
   border-radius: 999px;
-  background: #9c6337;
+  background: #fff4e5;
 }
 
 .furniture-garden-bed {
   background:
-    linear-gradient(#6c984a, #6c984a) 24px 28px / 182px 58px no-repeat,
-    linear-gradient(#d49d5a, #d49d5a);
-  color: #fff8cf;
+    linear-gradient(rgba(23, 138, 90, 0.24), rgba(23, 138, 90, 0.24)) 24px 28px / 182px 58px no-repeat,
+    linear-gradient(#effaf4, #effaf4);
+  color: var(--ink);
 }
 
 .furniture-robot-bay {
   background:
-    linear-gradient(#dbe7e9, #dbe7e9) 32px 24px / 72px 64px no-repeat,
-    linear-gradient(#7393a6, #7393a6);
+    linear-gradient(#f8fbff, #f8fbff) 32px 24px / 72px 64px no-repeat,
+    linear-gradient(#dcecff, #dcecff);
 }
 
 .furniture-market-stall {
   background:
-    linear-gradient(#c24f3b, #c24f3b) 20px 20px / 196px 28px no-repeat,
-    linear-gradient(#f4d081, #f4d081);
+    linear-gradient(#4db8ff, #4db8ff) 20px 20px / 196px 28px no-repeat,
+    linear-gradient(#eef7ff, #eef7ff);
 }
 
 .visual-interior-agent {
-  border: 4px solid var(--line);
-  background: rgba(255, 240, 189, 0.96);
-  box-shadow: 5px 5px 0 rgba(56, 35, 16, 0.22);
+  border: 1px solid rgba(28, 73, 122, 0.18);
+  border-radius: 8px;
+  background: rgba(255, 255, 255, 0.94);
+  box-shadow: 0 10px 24px rgba(35, 82, 125, 0.12);
   cursor: pointer;
   text-align: left;
 }
@@ -1375,7 +1388,7 @@
 .visual-interior-agent:hover,
 .visual-interior-agent:focus-visible {
   transform: translateY(-2px);
-  background: #fff7d2;
+  background: #eef7ff;
 }
 
 .visual-interior-agent .interior-agent-summary {
@@ -1429,10 +1442,10 @@
   gap: 6px 8px;
   align-items: center;
   padding: 8px;
-  border: 3px solid #54381f;
-  border-radius: 0;
-  background: #fff0bd;
-  box-shadow: 4px 4px 0 rgba(50, 31, 14, 0.24);
+  border: 1px solid rgba(28, 73, 122, 0.18);
+  border-radius: 8px;
+  background: rgba(255, 255, 255, 0.9);
+  box-shadow: 0 8px 18px rgba(35, 82, 125, 0.1);
   cursor: pointer;
 }
 
@@ -1444,9 +1457,10 @@
 .interior-empty {
   margin: 0;
   padding: 12px;
-  border: 3px dashed #54381f;
-  background: rgba(255, 240, 189, 0.84);
-  font-family: "Courier New", "Menlo", monospace;
+  border: 1px dashed rgba(28, 73, 122, 0.24);
+  border-radius: 8px;
+  background: rgba(255, 255, 255, 0.84);
+  font-family: inherit;
   font-weight: 900;
 }
 
