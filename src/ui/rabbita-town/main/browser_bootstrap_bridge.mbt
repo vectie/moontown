@@ -95,6 +95,14 @@ extern "js" fn operator_requests_version() -> Int =
   #| () => globalThis.__moontownOperatorRequestsVersion || 0
 
 ///|
+extern "js" fn load_bootstrap_book_template_requests_json() -> String =
+  #| () => globalThis.__moontownBookTemplateRequestsJson || "{\"requests\":[]}"
+
+///|
+extern "js" fn book_template_requests_version() -> Int =
+  #| () => globalThis.__moontownBookTemplateRequestsVersion || 0
+
+///|
 extern "js" fn load_bootstrap_wenyu_modules_json() -> String =
   #| () => globalThis.__wenyuTownModulesJson || "{\"modules\":[]}"
 

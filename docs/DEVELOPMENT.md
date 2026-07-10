@@ -66,6 +66,22 @@ moon fmt
 ./scripts/build-rabbita-ui.sh
 ```
 
+The frontend submodule also has focused delivery checks:
+
+```bash
+cd src/ui/rabbita-town
+moon check --target js
+moon test --target js
+npm run test:server
+npm run smoke:user-workflows
+npm run smoke:book-projections
+npm run build
+```
+
+`smoke:user-workflows` starts an isolated localhost server, submits both user
+request types, verifies visible API success contracts and their durable ledger
+files, rejects a cross-origin write, then removes the temporary runtime state.
+
 Current UI work usually touches two different surfaces:
 
 - `src/ui/rabbita-town/`

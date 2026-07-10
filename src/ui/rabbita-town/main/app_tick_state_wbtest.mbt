@@ -15,6 +15,10 @@ test "tick refresh application preserves runtime metrics" {
   assert_eq(next.stability, 78)
   assert_eq(next.snapshot_version, refresh.snapshot_version)
   assert_eq(next.operator_requests_version, refresh.operator_requests_version)
+  assert_eq(
+    next.book_template_requests_version,
+    refresh.book_template_requests_version,
+  )
 }
 
 ///|
@@ -33,6 +37,10 @@ test "tick refresh state propagates all runtime versions" {
   assert_eq(refresh.standing_goals_version, versions.standing_goals)
   assert_eq(refresh.watcher_records_version, versions.watcher_records)
   assert_eq(refresh.operator_requests_version, versions.operator_requests)
+  assert_eq(
+    refresh.book_template_requests_version,
+    versions.book_template_requests,
+  )
 }
 
 ///|
@@ -57,6 +65,10 @@ test "tick refresh helpers preserve arrays when versions are unchanged" {
   assert_eq(
     refresh_operator_requests(model.operator_requests_version, model).length(),
     model.operator_requests.length(),
+  )
+  assert_eq(
+    refresh_book_template_requests(model.book_template_requests_version, model).length(),
+    model.book_template_requests.length(),
   )
 }
 

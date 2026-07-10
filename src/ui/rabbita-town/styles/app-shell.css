@@ -295,7 +295,7 @@ body,
   .viewport-mode-current,
   .viewport-mode-button,
   .viewport-actions .control-button {
-    min-height: 36px;
+    min-height: 44px;
     font-size: 10px;
   }
 

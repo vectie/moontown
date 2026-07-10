@@ -50,7 +50,9 @@ This gives the UI a “town scene” instead of a “nodes and edges” look.
 
 ## Current Rabbita Dashboard
 
-The Rabbita frontend already behaves like a live simulation dashboard.
+The Rabbita frontend is a compact professional operating dashboard. Its default
+browser state reads local runtime projections; simulation data is never used as
+an implicit fallback.
 
 The Wenyu Valley target and implementation roadmap are specified in
 [WENYU_VALLEY_PRD.md](/Users/kq/Workspace/moontown/docs/WENYU_VALLEY_PRD.md).
@@ -65,59 +67,32 @@ a Tiled-compatible map loader and depth-sorted actor layer.
 
 Implemented:
 
-- periodic ticks
-- pause/resume/step controls
-- runtime summary bar
-- execution stage rail
-- packet/proposal/run lifecycle visibility
-- execution status projection from `TownState.executions`
-- strategy modes
-  - balanced
-  - throughput
-  - recovery
-- resource metrics
-  - budget
-  - energy
-  - queue pressure
-  - stability
-- moving worker avatars
-- generated isometric tilemap viewport
-- generated PNG tiles, objects, flowers, trees, river, bridge, and building sprites
-- selection and inspection
-- activity feed
-- keyboard focus-visible affordances
-- responsive scene viewport with internal scroll
-- command actions
-  - inject budget
-  - relieve queue
-  - stability drill
+- a launchpad with runtime health, watch, review, book queue, and map entry
+- a focused request desk for standing watches and PDF evidence books
+- action-first attention states for recovery, review, request, and map work
+- collapsed Town Areas with one selected detail surface at a time
+- connecting, offline, live, and explicit demo runtime states
+- snapshot-backed workers, tasks, executions, events, goals, watcher records,
+  operator requests, and book-template requests
+- URL-addressable area, request, viewport mode, and module selection
+- labelled controls, selected-state semantics, live request status, keyboard
+  focus, and responsive mobile controls
+- a separate advanced Wenyu viewport for map, module, runtime, and output detail
 
-This makes the frontend closer to a management simulation than a static admin
-panel.
+Open `/?demo=1` only when synthetic traffic is deliberately needed for visual
+development. Normal browser startup uses snapshot mode and shows connecting or
+offline state until local projections are available. Missing data remains
+empty; it is not replaced with placeholder workers or work.
 
-The browser surface now labels its state source explicitly and can switch
-between two modes:
-
-- `Demo Simulation`
-  - synthetic traffic for frontend/gameplay tuning
-- `Snapshot File`
-  - a non-simulated placeholder that shows the pending
-    `.moonsuite/products/moontown/town.json` browser bridge task instead of
-    fake worker traffic
-
-The next frontend integration is to replace that placeholder with a local state
-endpoint or generated static JSON artifact.
-
-The runtime state that should drive the next browser bridge now includes:
+The browser bridge reads:
 
 - standing goals from `.moonsuite/products/moontown/standing-goals.json`
 - daemon tick and active goal ids from `.moonsuite/products/moontown/daemon.json`
 - book/task/execution state from `.moonsuite/products/moontown/town.json`
 
-For example, the `watch-opc-news` standing goal should make the OPC researcher
-avatar visibly busy only when the daemon has dispatched the `research-opc` book
-lane. The current resident animation is visual scaffolding; the next UI step is
-to bind it to real daemon state instead of synthetic ticks.
+Resident and area detail opens only when operational projection data exists.
+Books or events alone can establish that a snapshot is connected, but cannot
+unlock synthetic district or resident activity.
 
 ## Lifecycle Projection
 

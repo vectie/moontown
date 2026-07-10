@@ -516,6 +516,56 @@ Advanced state should remove:
 - paragraph-length status chips that push the mobile map below the visible
   area
 
+### Phase 26: Truthful Runtime States
+
+The browser must never convert missing live state into convincing sample work.
+The professional default connects to the local projection, while sample data
+is available only through the explicit `?demo=1` URL.
+
+Default state should keep:
+
+- distinct connecting, offline, live, and demo labels
+- a useful request desk and map entry while runtime data is unavailable
+- empty area details until workers, tasks, or executions provide operational
+  evidence
+
+Default state should remove:
+
+- automatic fallback from live mode to demo mode
+- placeholder workers, tasks, executions, books, and activity
+- simulated metric drift while a snapshot source is selected
+
+### Phase 27: Action-First Attention
+
+Attention should identify the next bounded action instead of describing the
+dashboard. Recovery, review, watch creation, pending requests, and map
+inspection each receive a direct destination.
+
+### Phase 28: Semantic Navigation And Deep Links
+
+Area tabs, request modes, and viewport modes should expose selected state to
+assistive technology and preserve that state in the URL. Form controls should
+have durable labels, ids, and live submission feedback.
+
+### Phase 29: Request Ledger Projection
+
+Book-template requests should refresh through the same browser snapshot path as
+the other runtime ledgers. The launchpad book count must report pending or retry
+work, not an unrelated operator-request count.
+
+### Phase 30: Local Write Security
+
+Development write routes should bind to localhost and accept only same-origin
+JSON POST requests. Invalid method, content type, and origin combinations must
+fail before any state file is changed.
+
+### Phase 31: End-To-End Delivery Gates
+
+CI and local validation should cover source boundaries, native and JavaScript
+MoonBit tests, server route tests, persistent user workflows, projection smoke
+tests, and the production build. Browser validation should click both request
+flows and verify their visible result and durable filesystem effect.
+
 ## Done Criteria
 
 - A professional user can operate watches, reviews, book requests, and the map
@@ -525,8 +575,25 @@ Advanced state should remove:
   debugger.
 - Backend contracts remain stable; most changes are display-label and hierarchy
   changes.
+- Missing or sparse runtime data never appears as sample operational activity.
+- Request success is verified from click feedback through persisted ledgers.
 
 ## Progress Notes
+
+- Phases 26-31 are implemented in the current major-upgrade pass: browser
+  startup is live-first, demo mode is explicit, unavailable town areas show an
+  honest state, and snapshot mode no longer injects synthetic work or metrics.
+- Attention states now carry direct actions; tabs and composers expose selected
+  state with ARIA and URL query parameters; request fields have semantic labels
+  and live status feedback.
+- The book-template ledger is part of bootstrap and periodic refresh state, so
+  queued work appears immediately in the launchpad and remains backed by the
+  durable request file.
+- Local write endpoints now enforce same-origin JSON POST requests and the Vite
+  server binds to `127.0.0.1` by default.
+- CI and local smoke coverage now verify MoonBit contracts, route security,
+  persisted standing-watch and evidence-book requests, projection generation,
+  and the production frontend build.
 
 - Default Rabbita town now hides rare runtime source switching, simulation
   stepping, strategy tuning, and inspector drill controls from the professional

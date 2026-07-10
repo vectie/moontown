@@ -49,29 +49,22 @@ fn default_dashboard_forbidden_copy() -> Array[String] {
     "Default closed", "town-area-closed-panel", "town-launchpad-grid", "town-launchpad-card",
     "launchpad-card-", "attention-workbench-grid", "attention-next-card", "attention-signal-card",
     "Open detail only when needed", "dashboard-section-kicker", "Live civic modules",
-    "Projection-safe twins", "Service workflows", "Matches and reception",
-    "Start the next safe job",
+    "Projection-safe twins", "Service workflows", "Matches and reception", "Start the next safe job",
     "Create a standing watch or queue a PDF evidence book only when there is concrete work to add.",
     "request-shortcut-grid", "request-shortcut-card", "request-shortcut-action",
-    "Keep watching a topic", "Create a PDF evidence watch",
-    "Track useful evidence changes in an existing MoonBook.",
-    "Use when a new durable book needs approved PDF sources.",
-    "town-launchpad-map", "town-launchpad-map-copy", "town-launchpad-map-stats",
-    "town-launchpad-map-button", "Open Wenyu Valley workspace",
-    "Inspect districts, residents, standing watches, and active work in place.",
-    "Latest:", "New sources:", "Next check:", "Active work:",
-    "operator-masthead", "operator-masthead-title", "operator-masthead-alerts",
-    "operator-masthead-brand", "Wenyu Valley workspace",
-    "Civic watches, resident agents, district services, and review-ready feedback loops.",
-    "town-status-bar", "town-status-title", "town-status-alerts",
-    "Town Launchpad", "Current town pulse",
-    "Health, watches, review needs, book queue, and map entry stay close to the request path.",
-    "Attention Workbench", "attention-review-strip", "attention-review-copy",
-    "attention-strip-chips", "attention-strip-chip", "alert-strip",
-    "Request intake", "Save Watch", "Queue PDF Watch Book",
-    "Civic surfaces", "Town health", "Standing watches", "Book queue",
-    "Social capital", "Review queued work", "No active alerts",
-    "Workers online:", "Open Wenyu Map",
+    "Keep watching a topic", "Create a PDF evidence watch", "Track useful evidence changes in an existing MoonBook.",
+    "Use when a new durable book needs approved PDF sources.", "town-launchpad-map",
+    "town-launchpad-map-copy", "town-launchpad-map-stats", "town-launchpad-map-button",
+    "Open Wenyu Valley workspace", "Inspect districts, residents, standing watches, and active work in place.",
+    "Latest:", "New sources:", "Next check:", "Active work:", "operator-masthead",
+    "operator-masthead-title", "operator-masthead-alerts", "operator-masthead-brand",
+    "Wenyu Valley workspace", "Civic watches, resident agents, district services, and review-ready feedback loops.",
+    "town-status-bar", "town-status-title", "town-status-alerts", "Town Launchpad",
+    "Current town pulse", "Health, watches, review needs, book queue, and map entry stay close to the request path.",
+    "Attention Workbench", "attention-review-strip", "attention-review-copy", "attention-strip-chips",
+    "attention-strip-chip", "alert-strip", "Request intake", "Save Watch", "Queue PDF Watch Book",
+    "Civic surfaces", "Town health", "Standing watches", "Book queue", "Social capital",
+    "Review queued work", "No active alerts", "Workers online:", "Open Wenyu Map",
   ]
 }
 
@@ -91,8 +84,8 @@ test "default dashboard keeps professional operating actions visible" {
   assert_true(html.contains("Next opening"))
   assert_true(html.contains("Moontown"))
   assert_true(html.contains("Wenyu Valley / AI Innovation Town"))
-  assert_true(html.contains("Alerts clear"))
-  assert_true(html.contains("Workers 8"))
+  assert_true(html.contains("Demo mode"))
+  assert_true(html.contains("Demo 8"))
   assert_true(html.contains("Review 1"))
   assert_true(html.contains("town-launchpad-signal-rail"))
   assert_true(html.contains("town-launchpad-gateway"))
@@ -126,10 +119,14 @@ test "default dashboard groups secondary operating surfaces in one deck" {
   assert_true(html.contains("attention-dock"))
   assert_true(html.contains("town-areas-launcher"))
   assert_true(html.contains("town-area-detail-empty"))
-  assert_true(!html.contains("town-area-detail\">"))
+  assert_true(!html.contains("town-area-detail-body"))
   assert_true(html.contains("town-ecosystem-preview-visual"))
   assert_true(html.contains("request-action-dock"))
   assert_true(html.contains("dashboard-section-tabs"))
+  assert_true(html.contains("aria-label=\"Request type\""))
+  assert_true(html.contains("aria-label=\"Town areas\""))
+  assert_true(html.contains("aria-controls=\"request-composer-panel\""))
+  assert_true(html.contains("aria-controls=\"town-area-detail\""))
 }
 
 ///|
@@ -140,6 +137,7 @@ test "dashboard ecosystem sections render only the selected detail surface" {
   })
   assert_true(districts.contains("District Systems"))
   assert_true(districts.contains("town-area-detail"))
+  assert_true(districts.contains("aria-pressed=\"true\""))
   assert_true(districts.contains("civic-module-card-visual"))
   assert_true(districts.contains("tilemap/districts/town_shell.png"))
   assert_true(!districts.contains("Resident Agents"))
@@ -204,6 +202,8 @@ test "dashboard request launcher renders one selected composer at a time" {
     request_composer: RequestComposerFocus::StandingWatchComposer,
   })
   assert_true(watch.contains(">Title<"))
+  assert_true(watch.contains("aria-expanded=\"true\""))
+  assert_true(watch.contains("aria-live=\"polite\""))
   assert_true(watch.contains(">Target book<"))
   assert_true(!watch.contains(">Book title<"))
   assert_true(!watch.contains(">Websites<"))

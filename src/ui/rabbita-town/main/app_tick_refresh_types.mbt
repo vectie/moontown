@@ -23,6 +23,8 @@ priv struct TickRefreshState {
   watcher_records_version : Int
   operator_requests : Array[OperatorRequestSnapshot]
   operator_requests_version : Int
+  book_template_requests : Array[BookTemplateRequestSnapshot]
+  book_template_requests_version : Int
 }
 
 ///|
@@ -38,4 +40,5 @@ priv struct TickRefreshVersions {
   standing_goals : Int
   watcher_records : Int
   operator_requests : Int
+  book_template_requests : Int
 }

@@ -4,6 +4,7 @@ import path from 'node:path'
 import { loadModuleProjectionIndex } from './vite_book_projections.js'
 import { loadMoondeskBridgeIndex } from './vite_moondesk_bridge.js'
 import {
+  bookTemplateRequestPath,
   booksRootPath,
   civicStatusPath,
   daemonSnapshotPath,
@@ -11,6 +12,7 @@ import {
   keyBookOutputFiles,
   liveAutonomyPath,
   liveDigestPath,
+  operatorRequestLedgerPath,
   standingGoalsPath,
   townSnapshotPath,
   visualProjectionPath,
@@ -88,5 +90,15 @@ export async function exportStaticRuntimeBundle() {
   await copyTextFileIfExists(editorPipelinePath, path.join(distDir, 'editor-pipeline.json'))
   await copyTextFileIfExists(liveDigestPath, path.join(distDir, 'live-digest.md'))
   await copyTextFileIfExists(standingGoalsPath, path.join(distDir, 'standing-goals.json'))
+  await copyTextFileIfExists(
+    bookTemplateRequestPath,
+    path.join(distDir, 'book-template-requests.json'),
+  )
+  if (existsSync(operatorRequestLedgerPath)) {
+    await writeJsonFile(
+      path.join(distDir, 'operator-requests.json'),
+      await readJsonlRows(operatorRequestLedgerPath),
+    )
+  }
   await exportWatcherLedgers(distDir)
 }

@@ -66,6 +66,8 @@ priv struct Model {
   watcher_records_version : Int
   operator_requests : Array[OperatorRequestSnapshot]
   operator_requests_version : Int
+  book_template_requests : Array[BookTemplateRequestSnapshot]
+  book_template_requests_version : Int
   request_title : String
   request_prompt : String
   request_book_id : String

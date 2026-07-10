@@ -34,6 +34,8 @@ fn apply_tick_refresh_state(model : Model, refresh : TickRefreshState) -> Model 
     watcher_records_version: refresh.watcher_records_version,
     operator_requests: refresh.operator_requests,
     operator_requests_version: refresh.operator_requests_version,
+    book_template_requests: refresh.book_template_requests,
+    book_template_requests_version: refresh.book_template_requests_version,
   }
 }
 

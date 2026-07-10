@@ -1,9 +1,18 @@
 ///|
 fn mayor_recovery_active(model : Model) -> Bool {
-  model.pressure > 76 ||
-  model.stability < 36 ||
-  model.energy < 28 ||
-  model.budget < 24
+  if model.state_source == StateSourceKind::SnapshotFile {
+    let executions = execution_count_summary(executions_for_model(model))
+    let live_failed = match model.live_autonomy {
+      Some(live) => live.failed_count + live.blocked_count
+      None => 0
+    }
+    executions.failed + live_failed > 0
+  } else {
+    model.pressure > 76 ||
+    model.stability < 36 ||
+    model.energy < 28 ||
+    model.budget < 24
+  }
 }
 
 ///|
@@ -39,9 +48,9 @@ fn projection_state(model : Model) -> @core.TownState {
       if projection_snapshot_ready(snapshot) {
         snapshot.town
       } else {
-        snapshot_placeholder_state(model)
+        snapshot_placeholder_state()
       }
-    None => snapshot_placeholder_state(model)
+    None => snapshot_placeholder_state()
   }
 }
 
@@ -55,9 +64,9 @@ fn tasks_for_model(model : Model) -> Array[@core.TownTask] {
             !snapshot.town.tasks.is_empty() {
             snapshot.town.tasks
           } else {
-            task_specs(model)
+            []
           }
-        _ => task_specs(model)
+        _ => []
       }
     StateSourceKind::DemoSimulation => task_specs(model)
   }
@@ -73,9 +82,9 @@ fn executions_for_model(model : Model) -> Array[@core.TaskExecutionRecord] {
             !snapshot.town.executions.is_empty() {
             snapshot.town.executions
           } else {
-            execution_specs(model)
+            []
           }
-        _ => execution_specs(model)
+        _ => []
       }
     StateSourceKind::DemoSimulation => execution_specs(model)
   }

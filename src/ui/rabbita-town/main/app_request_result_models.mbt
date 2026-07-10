@@ -39,6 +39,8 @@ fn book_template_request_success_model(
     ),
     live_autonomy: parse_bootstrap_live_autonomy(),
     live_autonomy_version: live_autonomy_version(),
+    book_template_requests: parse_bootstrap_book_template_requests(),
+    book_template_requests_version: book_template_requests_version(),
   }
 }
 

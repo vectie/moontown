@@ -1,0 +1,47 @@
+name: CI
+
+on:
+  push:
+  pull_request:
+
+jobs:
+  validate:
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+
+    steps:
+      - uses: actions/checkout@v5
+
+      - name: Set up MoonBit
+        run: |
+          curl -fsSL https://cli.moonbitlang.com/install/unix.sh | bash
+          echo "$HOME/.moon/bin" >> "$GITHUB_PATH"
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: npm
+          cache-dependency-path: src/ui/rabbita-town/package-lock.json
+
+      - name: Install frontend dependencies
+        working-directory: src/ui/rabbita-town
+        run: npm ci
+
+      - name: Audit source boundaries
+        run: scripts/audit-source-layout.sh
+
+      - name: Validate native runtime
+        run: |
+          moon check --target native
+          moon test --target native
+
+      - name: Validate Rabbita frontend
+        working-directory: src/ui/rabbita-town
+        run: |
+          moon check --target js main
+          moon test --target js
+          npm run test:server
+          npm run smoke:user-workflows
+          npm run smoke:book-projections
+          npm run build

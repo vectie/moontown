@@ -12,8 +12,8 @@ fn civic_module_runtime_context(
 ) -> CivicModuleRuntimeContext {
   {
     worker: find_book_worker(workers_for_model(model), book_id),
-    task: find_book_task(task_specs(model), book_id),
-    execution: find_book_execution(execution_specs(model), book_id),
+    task: find_book_task(tasks_for_model(model), book_id),
+    execution: find_book_execution(executions_for_model(model), book_id),
   }
 }
 

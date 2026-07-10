@@ -110,58 +110,13 @@ fn simulation_state(model : Model) -> @core.TownState {
 }
 
 ///|
-fn snapshot_placeholder_state(model : Model) -> @core.TownState {
-  let state = @core.empty_state(
-    @core.TownConfig::new(id="moonrise", name="Moontown / Moonrise"),
-  )
-  state.register_book(
-    @core.BookRef::new(
-      id="wenyu-town-shell",
-      name="Town Shell",
-      purpose="Town Shell stays visible here while the browser bridge waits for a persisted projection feed.",
-      workspace_root="/town/wenyu-town-shell",
-      memory_scope=SharedTown,
-      tags=["projection", "ui", "shell"],
+fn snapshot_placeholder_state() -> @core.TownState {
+  @core.empty_state(
+    @core.TownConfig::new(
+      id="wenyu-valley",
+      name="Wenyu Valley / AI Innovation Town",
+      heartbeat_seconds=30,
+      max_concurrent_tasks=24,
     ),
   )
-  state.register_book(
-    @core.BookRef::new(
-      id="snapshot",
-      name="Persisted Town Snapshot",
-      purpose="Waiting for the persisted town projection to connect.",
-      workspace_root=moontown_product_display_state_dir(),
-      memory_scope=SharedTown,
-      tags=["snapshot", "pending-bridge"],
-    ),
-  )
-  state.register_worker(
-    @core.WorkerRef::new(
-      id="snapshot-bridge",
-      name="Snapshot Bridge",
-      book_id="snapshot",
-      role=Watcher,
-      capabilities=["state-source", "projection"],
-      status=Waiting,
-    ),
-  )
-  state.enqueue_task(
-    @core.TownTask::new(
-      id="connect-snapshot-source",
-      book_id="snapshot",
-      title="Connect persisted town state",
-      prompt="Connect the persisted town projection so operators can use live books, workers, tasks, and events.",
-      domain=Operations,
-      required_role=Some(Watcher),
-      required_capabilities=["state-source"],
-      status=Planned,
-    ),
-  )
-  state.record_event(
-    @core.TownEvent::new(
-      id="snapshot-source-\{model.tick}",
-      kind="state-source",
-      detail="Snapshot source selected; Rabbita browser bundle needs a state bridge before this reflects live town data.",
-    ),
-  )
-  state
 }

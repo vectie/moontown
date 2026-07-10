@@ -72,7 +72,7 @@ test "operator request result model clears submit flag and refreshes ledgers" {
 }
 
 ///|
-test "book template result model clears submit flag and refreshes live autonomy" {
+test "book template result model clears submit flag and refreshes request state" {
   let model = { ..init_model(), book_request_submitting: true }
   let next = book_template_request_success_model(
     model, "book-request-1", "pending",
@@ -81,4 +81,8 @@ test "book template result model clears submit flag and refreshes live autonomy"
   assert_true(next.book_request_status.contains("Book request queued"))
   assert_true(!next.book_request_status.contains("book-request-1"))
   assert_eq(next.live_autonomy_version, live_autonomy_version())
+  assert_eq(
+    next.book_template_requests_version,
+    book_template_requests_version(),
+  )
 }

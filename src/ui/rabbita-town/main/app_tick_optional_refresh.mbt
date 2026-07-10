@@ -105,16 +105,6 @@ fn refreshed_state_source(
   model : Model,
   refreshed_snapshot : ProjectionSnapshot?,
 ) -> StateSourceKind {
-  if model.state_source == StateSourceKind::SnapshotFile {
-    if projection_snapshot_is_ready(refreshed_snapshot) {
-      StateSourceKind::SnapshotFile
-    } else {
-      model.state_source
-    }
-  } else if !projection_snapshot_is_ready(model.projection_snapshot) &&
-    projection_snapshot_is_ready(refreshed_snapshot) {
-    StateSourceKind::SnapshotFile
-  } else {
-    model.state_source
-  }
+  ignore(refreshed_snapshot)
+  model.state_source
 }

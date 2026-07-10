@@ -166,6 +166,16 @@ priv struct OperatorRequestSnapshot {
 } derive(FromJson)
 
 ///|
+priv struct BookTemplateRequestSnapshot {
+  status : String
+} derive(FromJson)
+
+///|
+priv struct BookTemplateRequestLedgerSnapshot {
+  requests : Array[BookTemplateRequestSnapshot]
+} derive(FromJson)
+
+///|
 priv struct RequestSubmitResult {
   ok : Bool
   request_id : String?

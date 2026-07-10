@@ -74,6 +74,12 @@ export const RUNTIME_TEXT_SNAPSHOTS = [
     versionGlobal: '__moontownOperatorRequestsVersion',
     fallback: '[]',
   },
+  {
+    url: './book-template-requests.json',
+    jsonGlobal: '__moontownBookTemplateRequestsJson',
+    versionGlobal: '__moontownBookTemplateRequestsVersion',
+    fallback: '{"requests":[]}',
+  },
 ]
 
 export const WENYU_REFERENCE_LABELS_SNAPSHOT = {

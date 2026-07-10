@@ -26,6 +26,26 @@ fn initial_selection() -> Selection {
 }
 
 ///|
+fn initial_dashboard_section() -> DashboardSection? {
+  match current_browser_query_param("area") {
+    "districts" => Some(DashboardSection::DistrictSystems)
+    "residents" => Some(DashboardSection::ResidentAgentsSection)
+    "quests" => Some(DashboardSection::CivicQuestsSection)
+    "social" => Some(DashboardSection::SocialCapitalSection)
+    _ => None
+  }
+}
+
+///|
+fn initial_request_composer() -> RequestComposerFocus {
+  match current_browser_query_param("request") {
+    "watch" => RequestComposerFocus::StandingWatchComposer
+    "book" => RequestComposerFocus::EvidenceBookComposer
+    _ => RequestComposerFocus::RequestShortcuts
+  }
+}
+
+///|
 fn init_model() -> Model {
   let projection_snapshot = parse_bootstrap_town_snapshot()
   let visual_projection = parse_bootstrap_visual_projection()
@@ -39,14 +59,15 @@ fn init_model() -> Model {
   let standing_goals = parse_bootstrap_standing_goals()
   let watcher_records = parse_bootstrap_watcher_records()
   let operator_requests = parse_bootstrap_operator_requests()
+  let book_template_requests = parse_bootstrap_book_template_requests()
   {
     tick: 0,
     paused: false,
     selection: initial_selection(),
-    state_source: initial_state_source(projection_snapshot),
+    state_source: initial_state_source(),
     viewport_mode: initial_viewport_mode(),
-    dashboard_section: None,
-    request_composer: RequestComposerFocus::RequestShortcuts,
+    dashboard_section: initial_dashboard_section(),
+    request_composer: initial_request_composer(),
     projection_snapshot,
     snapshot_version: town_snapshot_version(),
     visual_projection,
@@ -71,6 +92,8 @@ fn init_model() -> Model {
     watcher_records_version: watcher_records_version(),
     operator_requests,
     operator_requests_version: operator_requests_version(),
+    book_template_requests,
+    book_template_requests_version: book_template_requests_version(),
     request_title: "Track a new research topic",
     request_prompt: "Research the latest useful updates, screen sources carefully, and update the target MoonBook only when the evidence changes the baseline.",
     request_book_id: "research-topic",

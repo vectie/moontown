@@ -45,6 +45,10 @@ fn refresh_tick_state(model : Model) -> TickRefreshState {
     versions.operator_requests,
     model,
   )
+  let book_template_requests = refresh_book_template_requests(
+    versions.book_template_requests,
+    model,
+  )
   {
     state_source: refreshed_state_source(model, projection_snapshot),
     projection_snapshot,
@@ -69,6 +73,8 @@ fn refresh_tick_state(model : Model) -> TickRefreshState {
     watcher_records_version: versions.watcher_records,
     operator_requests,
     operator_requests_version: versions.operator_requests,
+    book_template_requests,
+    book_template_requests_version: versions.book_template_requests,
   }
 }
 
@@ -86,6 +92,7 @@ fn read_tick_refresh_versions() -> TickRefreshVersions {
     standing_goals: standing_goals_version(),
     watcher_records: watcher_records_version(),
     operator_requests: operator_requests_version(),
+    book_template_requests: book_template_requests_version(),
   }
 }
 
@@ -151,5 +158,18 @@ fn refresh_operator_requests(
     model.operator_requests_version,
     model.operator_requests,
     parse_bootstrap_operator_requests,
+  )
+}
+
+///|
+fn refresh_book_template_requests(
+  version : Int,
+  model : Model,
+) -> Array[BookTemplateRequestSnapshot] {
+  refresh_array_snapshot(
+    version,
+    model.book_template_requests_version,
+    model.book_template_requests,
+    parse_bootstrap_book_template_requests,
   )
 }

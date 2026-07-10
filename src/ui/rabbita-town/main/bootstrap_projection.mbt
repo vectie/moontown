@@ -43,6 +43,21 @@ fn parse_bootstrap_civic_status() -> CivicServicePortfolioSnapshot? {
 }
 
 ///|
+fn parse_bootstrap_book_template_requests() -> Array[
+  BookTemplateRequestSnapshot,
+] {
+  let text = load_bootstrap_book_template_requests_json()
+  if text == "" {
+    return []
+  }
+  let parsed = @json.parse(text) catch { _ => return [] }
+  let ledger : BookTemplateRequestLedgerSnapshot = @json.from_json(parsed) catch {
+    _ => return []
+  }
+  ledger.requests
+}
+
+///|
 fn parse_bootstrap_wenyu_modules() -> Array[WenyuTownModule] {
   let text = load_bootstrap_wenyu_modules_json()
   if text == "" {
@@ -58,15 +73,22 @@ fn parse_bootstrap_wenyu_modules() -> Array[WenyuTownModule] {
 }
 
 ///|
-fn initial_state_source(snapshot : ProjectionSnapshot?) -> StateSourceKind {
-  match snapshot {
-    Some(snapshot) =>
-      if projection_snapshot_ready(snapshot) {
-        StateSourceKind::SnapshotFile
-      } else {
-        StateSourceKind::DemoSimulation
-      }
-    None => StateSourceKind::DemoSimulation
+fn initial_state_source() -> StateSourceKind {
+  state_source_for_browser(
+    browser_location_available(),
+    current_browser_query_param("demo") == "1",
+  )
+}
+
+///|
+fn state_source_for_browser(
+  browser_available : Bool,
+  demo_requested : Bool,
+) -> StateSourceKind {
+  if !browser_available || demo_requested {
+    StateSourceKind::DemoSimulation
+  } else {
+    StateSourceKind::SnapshotFile
   }
 }
 
@@ -77,6 +99,15 @@ fn projection_snapshot_ready(snapshot : ProjectionSnapshot) -> Bool {
   !snapshot.town.tasks.is_empty() ||
   !snapshot.town.executions.is_empty() ||
   !snapshot.town.events.is_empty()
+}
+
+///|
+fn projection_snapshot_has_operational_data(
+  snapshot : ProjectionSnapshot,
+) -> Bool {
+  !snapshot.town.workers.is_empty() ||
+  !snapshot.town.tasks.is_empty() ||
+  !snapshot.town.executions.is_empty()
 }
 
 ///|
@@ -97,4 +128,17 @@ fn model_projection_snapshot_ready(model : Model) -> Bool {
 fn model_projection_snapshot_waiting(model : Model) -> Bool {
   model.state_source == StateSourceKind::SnapshotFile &&
   !projection_snapshot_is_ready(model.projection_snapshot)
+}
+
+///|
+fn model_operational_data_ready(model : Model) -> Bool {
+  if model.state_source == StateSourceKind::DemoSimulation {
+    return true
+  }
+  match model.projection_snapshot {
+    Some(snapshot) =>
+      model.state_source == StateSourceKind::SnapshotFile &&
+      projection_snapshot_has_operational_data(snapshot)
+    None => false
+  }
 }

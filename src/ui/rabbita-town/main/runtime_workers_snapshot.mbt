@@ -3,7 +3,7 @@ fn snapshot_worker_sims(model : Model) -> Array[WorkerSim] {
   match model.projection_snapshot {
     Some(snapshot) =>
       if snapshot.town.workers.is_empty() {
-        fallback_snapshot_worker_sims()
+        []
       } else {
         snapshot.town.workers.map(worker => {
           let profile = snapshot_worker_profile(worker.status)
@@ -20,25 +20,8 @@ fn snapshot_worker_sims(model : Model) -> Array[WorkerSim] {
           }
         })
       }
-    None => fallback_snapshot_worker_sims()
+    None => []
   }
-}
-
-///|
-fn fallback_snapshot_worker_sims() -> Array[WorkerSim] {
-  [
-    {
-      id: "snapshot-bridge",
-      title: "Snapshot Bridge",
-      role: "Watcher",
-      book_id: "snapshot",
-      status: Waiting,
-      zone_key: "worker-yard",
-      energy: 100,
-      load: 12,
-      summary: "Waiting for the persisted town projection to connect.",
-    },
-  ]
 }
 
 ///|

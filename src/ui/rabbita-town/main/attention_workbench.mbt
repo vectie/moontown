@@ -9,8 +9,12 @@ fn render_attention_workbench(
   let feed = feed_items(model, workers, executions, events)
   section(class="attention-dock attention-dock-\{focus.tone}", [
     div(class="attention-dock-heading", [
-      p(class="eyebrow", "Attention"),
-      h2(focus.title),
+      div([p(class="eyebrow", "Attention"), h2(focus.title)]),
+      a(
+        href=focus.action_href,
+        class="attention-dock-action",
+        focus.action_label,
+      ),
     ]),
     div(class="attention-dock-items", [
       render_attention_focus_chip(focus.next_label, focus.next_detail, "next"),

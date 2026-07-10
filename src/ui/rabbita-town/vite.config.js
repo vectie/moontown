@@ -9,6 +9,7 @@ import { serveBookOutput } from './vite_book_output.js'
 import { loadModuleProjectionIndex } from './vite_book_projections.js'
 import { loadMoondeskBridgeIndex } from './vite_moondesk_bridge.js'
 import {
+  bookTemplateRequestPath,
   civicStatusPath,
   daemonSnapshotPath,
   editorPipelinePath,
@@ -21,7 +22,7 @@ import {
   watcherDir,
 } from './vite_server_paths.js'
 import {
-  rejectNonPost,
+  rejectUnsafeWrite,
   safeSegment,
   sendJson,
   serveJsonFile,
@@ -89,15 +90,22 @@ function moontownSnapshotPlugin() {
       server.middlewares.use('/operator-requests.json', async (_req, res) => {
         await serveJsonlAsArray(res, operatorRequestLedgerPath)
       })
+      server.middlewares.use('/book-template-requests.json', async (_req, res) => {
+        await serveJsonFile(
+          res,
+          bookTemplateRequestPath,
+          'missing book template requests',
+        )
+      })
       server.middlewares.use('/api/operator-requests', async (req, res) => {
-        if (rejectNonPost(req, res)) {
+        if (rejectUnsafeWrite(req, res)) {
           return
         }
 
         await handleOperatorRequest(req, res)
       })
       server.middlewares.use('/api/book-template-requests', async (req, res) => {
-        if (rejectNonPost(req, res)) {
+        if (rejectUnsafeWrite(req, res)) {
           return
         }
 
@@ -127,7 +135,7 @@ export default defineConfig({
     },
   },
   server: {
-    host: true,
+    host: '127.0.0.1',
     fs: { allow: ['..', '../..', '../../..'] },
   },
 })

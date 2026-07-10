@@ -41,8 +41,38 @@ test "town launchpad attention summary includes execution review state" {
   ])
   assert_eq(summary.review_count, 1)
   assert_eq(professional_attention_label(summary), "Review")
-  assert_eq(professional_attention_chip_text(summary), "Review: 1")
+  assert_eq(professional_attention_chip_text(summary), "Review 1")
   assert_eq(professional_attention_detail(summary), "1 review")
+}
+
+///|
+test "town launchpad book queue counts only pending work" {
+  let model = {
+    ..init_model(),
+    book_template_requests: [
+      { status: "pending" },
+      { status: "retry" },
+      { status: "installed" },
+    ],
+  }
+  assert_eq(professional_book_queue_count(model), 2)
+  assert_eq(professional_book_queue_detail(model), "2 setup")
+}
+
+///|
+test "town launchpad reports disconnected runtime truthfully" {
+  let model = {
+    ..init_model(),
+    state_source: StateSourceKind::SnapshotFile,
+    projection_snapshot: None,
+    snapshot_version: 1,
+  }
+  assert_eq(professional_town_health_label(model), "Offline")
+  assert_eq(professional_town_health_detail(model), "No live snapshot")
+  assert_eq(
+    town_launchpad_alert_label([no_active_alert_text], model),
+    "Town offline",
+  )
 }
 
 ///|

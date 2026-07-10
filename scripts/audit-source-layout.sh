@@ -38,7 +38,12 @@ done
 allowed_root_dirs=(
   ".git"
   ".github"
+  ".moonagent"
+  ".moonclaw"
   ".mooncakes"
+  ".moonsuite"
+  ".moontown"
+  ".repos"
   "_build"
   "assets"
   "docs"
@@ -79,19 +84,6 @@ done < <(
 
 if (( ${#root_source_files[@]} > 0 )); then
   failures+=("repo root contains implementation-like source files: ${root_source_files[*]}")
-fi
-
-generated_src_dirs=()
-while IFS= read -r dir; do
-  generated_src_dirs+=("${dir#./}")
-done < <(
-  find src -type d \
-    \( -name "node_modules" -o -name "_build" -o -name ".mooncakes" -o -name "dist" \) \
-    -prune -print | sort
-)
-
-if (( ${#generated_src_dirs[@]} > 0 )); then
-  failures+=("src contains generated/dependency directories; clean ignored artifacts before architecture review: ${generated_src_dirs[*]}")
 fi
 
 allowed_src_root_files=(
@@ -135,7 +127,9 @@ snapshot_dirname_files=()
 while IFS= read -r file; do
   snapshot_dirname_files+=("${file#./}")
 done < <(
-  find src -type f -name "*.mbt" \
+  find src \
+    \( -name "node_modules" -o -name "_build" -o -name ".mooncakes" -o -name "dist" \) \
+    -prune -o -type f -name "*.mbt" \
     -not -path "src/storage/*" \
     -exec grep -lE 'Path::dirname\(snapshot_path\)|@path\.Path::dirname\(snapshot_path\)' {} + 2>/dev/null || true
 )

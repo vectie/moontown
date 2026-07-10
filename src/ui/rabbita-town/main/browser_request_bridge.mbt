@@ -5,7 +5,7 @@ extern "js" fn submit_operator_request_json(
   target_book_id : String,
   cadence_ticks : String,
   quality_threshold : String,
-) -> String =
+) -> @js.Promise =
   #| async (title, prompt, targetBookId, cadenceTicks, qualityThreshold) => {
   #|   try {
   #|     const response = await fetch("./api/operator-requests", {
@@ -45,7 +45,7 @@ extern "js" fn submit_book_template_request_json(
   websites : String,
   cadence_ticks : String,
   analysis_method : String,
-) -> String =
+) -> @js.Promise =
   #| async (title, bookId, purpose, websites, cadenceTicks, analysisMethod) => {
   #|   try {
   #|     const response = await fetch("./api/book-template-requests", {
@@ -78,3 +78,11 @@ extern "js" fn submit_book_template_request_json(
   #|     return JSON.stringify({ ok: false, error: String(error) });
   #|   }
   #| }
+
+///|
+async fn wait_request_response_json(promise : @js.Promise) -> String noraise {
+  promise.wait().cast() catch {
+    _ =>
+      "{\"ok\":false,\"error\":\"Request failed before a response was available.\"}"
+  }
+}

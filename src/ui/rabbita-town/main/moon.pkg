@@ -2,6 +2,7 @@ import {
   "moonbitlang/core/json",
   "moonbit-community/rabbita",
   "moonbit-community/rabbita/html",
+  "moonbit-community/rabbita/js",
   "vectie/moonlib/moonsuite",
   "vectie/moontown/core",
   "vectie/moontown/health",

@@ -4,6 +4,8 @@ priv struct AttentionFocusView {
   next_label : String
   next_detail : String
   tone : String
+  action_label : String
+  action_href : String
 }
 
 ///|
@@ -21,16 +23,25 @@ fn attention_focus_view(
     fallback_active_workers=workers_summary.online(),
   )
   let attention = professional_attention_summary(model, executions)
-  if professional_attention_has_failed(attention) {
+  if runtime_is_unavailable(model) {
+    {
+      title: "Connect town",
+      next_label: "Runtime state",
+      next_detail: "No live town snapshot",
+      tone: "alert",
+      action_label: "Open status",
+      action_href: "./viewport.html?mode=output&v=wenyu",
+    }
+  } else if professional_attention_has_failed(attention) {
     {
       title: "Recover work",
       next_label: "Next opening",
       next_detail: attention_focus_recovery_opening(
-        execution_summary,
-        decisions,
-        live,
+        execution_summary, decisions, live,
       ),
       tone: "alert",
+      action_label: "Recover",
+      action_href: "./viewport.html?mode=output&v=wenyu",
     }
   } else if professional_attention_has_review(attention) {
     {
@@ -38,6 +49,8 @@ fn attention_focus_view(
       next_label: "Next opening",
       next_detail: attention_focus_review_opening(execution_summary, decisions),
       tone: "review",
+      action_label: "Review",
+      action_href: "./viewport.html?mode=output&v=wenyu",
     }
   } else if watch_summary.enabled_count == 0 {
     {
@@ -49,6 +62,8 @@ fn attention_focus_view(
         "workers online",
       ),
       tone: "setup",
+      action_label: "Start watch",
+      action_href: "./?request=watch",
     }
   } else if live.pending_template_request_count > 0 {
     {
@@ -60,6 +75,8 @@ fn attention_focus_view(
         "standing watches active",
       ),
       tone: "review",
+      action_label: "Open requests",
+      action_href: "./?request=book",
     }
   } else if execution_summary.active_or_unresolved() > 0 {
     {
@@ -71,6 +88,8 @@ fn attention_focus_view(
         "workers online",
       ),
       tone: "active",
+      action_label: "Open map",
+      action_href: "./viewport.html?mode=view&v=wenyu",
     }
   } else {
     {
@@ -82,6 +101,8 @@ fn attention_focus_view(
         "workers online",
       ),
       tone: "steady",
+      action_label: "Open map",
+      action_href: "./viewport.html?mode=view&v=wenyu",
     }
   }
 }

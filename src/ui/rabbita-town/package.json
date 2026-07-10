@@ -2,7 +2,9 @@
   "scripts": {
     "dev": "vite",
     "build": "node scripts/prepare-rabbita-build.mjs && vite build",
-    "smoke:book-projections": "node scripts/smoke-book-projections.mjs"
+    "test:server": "node --test vite_server_io.test.js",
+    "smoke:book-projections": "node scripts/smoke-book-projections.mjs",
+    "smoke:user-workflows": "node scripts/run-user-workflow-smoke.mjs"
   },
   "type": "module",
   "dependencies": {

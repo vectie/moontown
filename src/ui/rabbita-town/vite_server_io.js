@@ -93,6 +93,34 @@ export function rejectNonPost(req, res) {
   return true
 }
 
+export function rejectUnsafeWrite(req, res) {
+  if (rejectNonPost(req, res)) {
+    return true
+  }
+
+  const contentType = String(req.headers?.['content-type'] || '')
+  if (!contentType.toLowerCase().startsWith('application/json')) {
+    sendJson(res, { ok: false, error: 'application/json required' }, 415)
+    return true
+  }
+
+  const origin = String(req.headers?.origin || '').trim()
+  const host = String(req.headers?.host || '').trim()
+  if (origin) {
+    try {
+      if (!host || new URL(origin).host !== host) {
+        sendJson(res, { ok: false, error: 'same-origin request required' }, 403)
+        return true
+      }
+    } catch {
+      sendJson(res, { ok: false, error: 'invalid request origin' }, 403)
+      return true
+    }
+  }
+
+  return false
+}
+
 export function safeSegment(value, fallback = 'request') {
   const cleaned = String(value || '')
     .toLowerCase()

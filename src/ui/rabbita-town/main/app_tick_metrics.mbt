@@ -46,6 +46,14 @@ fn recovery_boost(active : Bool, amount : Int) -> Int {
 
 ///|
 fn tick_metric_state(model : Model) -> TickMetricState {
+  if model.state_source == StateSourceKind::SnapshotFile {
+    return {
+      budget: model.budget,
+      energy: model.energy,
+      pressure: model.pressure,
+      stability: model.stability,
+    }
+  }
   let recovery_active = mayor_recovery_active(model)
   let overload_penalty = if model.pressure > 70 { 4 } else { 0 }
   let brittle_penalty = if model.stability < 35 { 3 } else { 0 }

@@ -18,9 +18,14 @@ fn render_request_action_button(
   label : String,
   action : String,
 ) -> @rabbita.Html {
+  let selected = model.request_composer == target
   button(
     class=request_action_button_class(model.request_composer, target),
     on_click=dispatch(SetRequestComposer(target)),
+    attrs=@html.Attrs::build()
+      .aria_pressed(if selected { "true" } else { "false" })
+      .aria_expanded(if selected { "true" } else { "false" })
+      .aria_controls("request-composer-panel"),
     [
       span(class="request-action-label", label),
       span(class="request-action-command", action),
@@ -33,22 +38,26 @@ fn render_request_shortcuts(
   dispatch : Dispatch[Msg],
   model : Model,
 ) -> @rabbita.Html {
-  div(class="request-action-dock", [
-    render_request_action_button(
-      dispatch,
-      model,
-      RequestComposerFocus::StandingWatchComposer,
-      "Standing watch",
-      "Save",
-    ),
-    render_request_action_button(
-      dispatch,
-      model,
-      RequestComposerFocus::EvidenceBookComposer,
-      "Evidence book",
-      "Queue",
-    ),
-  ])
+  div(
+    class="request-action-dock",
+    attrs=@html.Attrs::build().role("group").aria_label("Request type"),
+    [
+      render_request_action_button(
+        dispatch,
+        model,
+        RequestComposerFocus::StandingWatchComposer,
+        "Standing watch",
+        "Save",
+      ),
+      render_request_action_button(
+        dispatch,
+        model,
+        RequestComposerFocus::EvidenceBookComposer,
+        "Evidence book",
+        "Queue",
+      ),
+    ],
+  )
 }
 
 ///|
@@ -57,12 +66,19 @@ fn render_request_desk_workspace(
   model : Model,
 ) -> @rabbita.Html {
   match model.request_composer {
-    RequestShortcuts => div(class="request-desk-stack is-empty", no_children())
-    StandingWatchComposer => div(class="request-desk-stack", [
-      render_request_composer(dispatch, model),
-    ])
-    EvidenceBookComposer => div(class="request-desk-stack", [
-      render_book_template_composer(dispatch, model),
-    ])
+    RequestShortcuts =>
+      div(
+        id="request-composer-panel",
+        class="request-desk-stack is-empty",
+        no_children(),
+      )
+    StandingWatchComposer =>
+      div(id="request-composer-panel", class="request-desk-stack", [
+        render_request_composer(dispatch, model),
+      ])
+    EvidenceBookComposer =>
+      div(id="request-composer-panel", class="request-desk-stack", [
+        render_book_template_composer(dispatch, model),
+      ])
   }
 }
