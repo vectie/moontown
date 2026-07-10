@@ -66,7 +66,7 @@ fn runtime_state_from_execution(
   let status_kind = module_execution_status_kind(execution.status)
   wenyu_module_runtime_state_from_counts(
     module_runtime_status_class(status_kind),
-    execution.status.to_string(),
+    module_runtime_status_label(status_kind),
     "Execution",
     execution.summary,
     module_runtime_counts_from_status_kind(status_kind),

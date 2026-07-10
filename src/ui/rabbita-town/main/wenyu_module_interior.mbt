@@ -87,6 +87,27 @@ fn render_module_protocol_card(civic : WenyuTownModule) -> @rabbita.Html {
 }
 
 ///|
+fn render_module_interior_diagnostics(
+  model : Model,
+  civic : WenyuTownModule,
+  runtime : WenyuModuleRuntimeState,
+) -> @rabbita.Html {
+  @html.details(class="module-interior-diagnostics", [
+    @html.summary(class="module-interior-diagnostics-summary", [
+      span("Diagnostics"),
+      span("Runtime, configuration, protocol, and book output"),
+    ]),
+    div(class="module-interior-diagnostics-body", [
+      p(class="module-runtime-detail", runtime.detail),
+      render_module_runtime_counters(runtime),
+      render_module_issue_list(civic),
+      render_module_protocol_card(civic),
+      render_module_book_projection(model, civic),
+    ]),
+  ])
+}
+
+///|
 fn render_wenyu_module_interior(
   dispatch : Dispatch[Msg],
   model : Model,
@@ -97,12 +118,16 @@ fn render_wenyu_module_interior(
   let residents = module_workers(civic, workers)
   let visual_agents = module_active_visual_agents(model, civic)
   let runtime = wenyu_module_runtime_state(model, civic, executions)
+  let projection = find_module_book_projection(model, civic)
   section(class="interior-shell module-interior-shell", [
     header(class="interior-header", [
       div([
         p(class="eyebrow", "Module Interior"),
         h2(civic.title),
-        p(class="scene-node-key", "\{civic.id} / \{civic.book_id}"),
+        p(
+          class="module-interior-district",
+          module_interior_district_label(civic.district),
+        ),
       ]),
       a(
         href="./viewport.html?assets=generated&mode=view&v=wenyu-modules",
@@ -111,24 +136,7 @@ fn render_wenyu_module_interior(
       ),
     ]),
     div(class="interior-room module-interior-room", [
-      div(class="module-interior-summary", [
-        render_module_detail("District", civic.district),
-        render_module_detail("Runtime", runtime.status_label),
-        render_module_detail("Source", runtime.source_label),
-        render_module_detail(
-          "Workers",
-          "\{runtime.visible_agent_count} active / \{residents.length()} bound",
-        ),
-        render_module_detail(
-          "Entrance",
-          "\{civic.entrance_x},\{civic.entrance_y}",
-        ),
-      ]),
-      p(class="module-runtime-detail", runtime.detail),
-      render_module_runtime_counters(runtime),
-      render_module_issue_list(civic),
-      render_module_protocol_card(civic),
-      render_module_book_projection(model, civic),
+      render_module_interior_overview(civic, runtime, projection),
       div(class="interior-floor", module_interior_furniture(civic)),
       div(
         class="interior-agent-grid module-interior-agent-grid",
@@ -145,6 +153,7 @@ fn render_wenyu_module_interior(
           residents.map(worker => render_interior_agent(dispatch, worker))
         },
       ),
+      render_module_interior_diagnostics(model, civic, runtime),
     ]),
   ])
 }

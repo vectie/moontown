@@ -625,6 +625,31 @@ Acceptance requires:
 - the map receives materially more first-screen space on phone and desktop
 - no command, status, title, or map content overlaps at supported viewports
 
+### Phase 34: Operator-First Module Interiors
+
+View Mode module interiors should answer what a building does now and whether
+it needs attention. Placement coordinates, runtime source labels, protocol
+plumbing, asset paths, configuration checks, and full MoonBook projections are
+diagnostic material rather than default operating content.
+
+The default interior should keep:
+
+- the module name, human-readable district, purpose, and real building art
+- current operating state, active team state, book connection, and attention
+- one concise current signal and a contextual action when intervention exists
+- active worker or resident presence in the spatial interior
+- one collapsed diagnostics disclosure for advanced inspection
+
+Acceptance requires:
+
+- raw module ids, book ids, coordinates, style paths, and protocol counters do
+  not appear in the default first viewport
+- missing book or configuration state links to the relevant advanced mode
+- diagnostics remain keyboard-accessible without duplicating default content
+- module open, diagnostics toggle, contextual action, and return-to-town paths
+  work on desktop and phone
+- module content and worker states do not overlap at any tested viewport
+
 ## Done Criteria
 
 - A professional user can operate watches, reviews, book requests, and the map
@@ -640,6 +665,15 @@ Acceptance requires:
 
 ## Progress Notes
 
+- Phase 34 is implemented: View Mode module interiors now lead with real
+  building art, a human-readable district, purpose, operating state, team/book
+  readiness, current signal, and one contextual action. Raw ids, coordinates,
+  source labels, paths, protocol counters, and full book projections are no
+  longer default first-viewport content.
+- Runtime, configuration, protocol, civic-health, and MoonBook detail remain
+  available through one collapsed semantic `Diagnostics` disclosure. The same
+  pass moves module worker states into document flow and translates execution
+  enums such as `RunConfirmed` into the shared professional status vocabulary.
 - Phase 33 is implemented: the advanced viewport now distinguishes demo,
   connecting, offline, and live town state instead of deriving a misleading
   `Live` chip from the simulation pause flag. Pause and step remain available

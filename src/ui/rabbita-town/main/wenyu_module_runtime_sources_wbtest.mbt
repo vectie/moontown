@@ -66,3 +66,19 @@ test "civic health runtime issue count includes missing paths" {
   }
   assert_eq(civic_health_runtime_issue_count(3, health), 5)
 }
+
+///|
+test "execution runtime state uses professional status labels" {
+  let execution = @core.TaskExecutionRecord::new(
+    task_id="task",
+    book_id="book",
+    packet_id="packet",
+    packet_path="packet.json",
+    status=RunConfirmed,
+    summary="confirmed",
+    output_contract="contract",
+  )
+  let runtime = runtime_state_from_execution(execution, 0, 0)
+  assert_eq(runtime.status_label, "Running")
+  assert_true(!runtime.status_label.contains("RunConfirmed"))
+}
