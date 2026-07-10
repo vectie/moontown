@@ -131,7 +131,7 @@ fn render_wenyu_module_interior(
       render_module_book_projection(model, civic),
       div(class="interior-floor", module_interior_furniture(civic)),
       div(
-        class="interior-agent-grid",
+        class="interior-agent-grid module-interior-agent-grid",
         if !visual_agents.is_empty() {
           visual_agents.map(agent => render_module_visual_agent(dispatch, agent))
         } else if residents.is_empty() {

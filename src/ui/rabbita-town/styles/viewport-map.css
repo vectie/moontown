@@ -29,10 +29,6 @@
   cursor: grabbing;
 }
 
-.viewport-zoom-button {
-  min-width: 88px;
-}
-
 .viewport-frame .scene-stage {
   overflow: hidden;
   zoom: var(--viewport-zoom);
@@ -1342,6 +1338,14 @@
   grid-template-columns: repeat(auto-fit, minmax(126px, 1fr));
   gap: 10px;
   z-index: 2;
+}
+
+.module-interior-agent-grid {
+  position: relative;
+  left: auto;
+  right: auto;
+  bottom: auto;
+  margin: 0 8% 26px;
 }
 
 .interior-agent {

@@ -595,6 +595,36 @@ Acceptance requires:
 - dashboard, advanced map, module interiors, and resident animation assets load
   from the built artifact without browser errors
 
+### Phase 33: Truthful Compact Advanced Command Bar
+
+The advanced viewport should expose the controls needed to inspect the town,
+without presenting simulation state as live runtime state or repeating browser
+navigation that already exists in the mode selector and URL.
+
+The command bar should keep:
+
+- the three viewport modes with one clear selected state
+- truthful demo, connecting, offline, and live runtime status
+- module readiness and compact zoom controls
+- daemon tick state only when a live daemon snapshot exists
+- pause and step controls only in explicit demo mode
+
+The command bar should remove:
+
+- the duplicate current-mode badge
+- the redundant `Copyable Mode URL` link
+- local clock copy that does not change an operator decision
+- waiting daemon copy when no daemon snapshot exists
+- pause and step controls from live-snapshot workflows
+
+Acceptance requires:
+
+- missing live data never renders a `Live` status
+- demo controls remain usable in explicit demo mode
+- each mode remains keyboard-operable and URL-addressable
+- the map receives materially more first-screen space on phone and desktop
+- no command, status, title, or map content overlaps at supported viewports
+
 ## Done Criteria
 
 - A professional user can operate watches, reviews, book requests, and the map
@@ -610,6 +640,17 @@ Acceptance requires:
 
 ## Progress Notes
 
+- Phase 33 is implemented: the advanced viewport now distinguishes demo,
+  connecting, offline, and live town state instead of deriving a misleading
+  `Live` chip from the simulation pause flag. Pause and step remain available
+  only in explicit demo mode.
+- The advanced command bar no longer repeats the selected mode, local clock,
+  waiting daemon state, or copyable-URL link. Its three semantic mode buttons,
+  module readiness, runtime status, and accessible zoom symbols fit one desktop
+  row and two phone rows at 390 px without overlap.
+- Small phones keep the complete town name on two lines, and module-interior
+  worker or empty states now follow the room content in normal flow instead of
+  floating over book projections.
 - Phase 32 is implemented: production no longer copies the full UI authoring
   tree. A generated runtime manifest derives configured building art, resident
   strips, district previews, map contracts, tiles, and objects, then fails the

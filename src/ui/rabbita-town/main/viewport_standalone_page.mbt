@@ -51,34 +51,5 @@ fn render_standalone_viewport_actions(
   dispatch : Dispatch[Msg],
   model : Model,
 ) -> @rabbita.Html {
-  div(class="viewport-actions", [
-    render_viewport_mode_switch(dispatch, model),
-    status_chip(if model.paused { "Paused" } else { "Live" }, "chip-live"),
-    status_chip("Local time \{real_time_label()}", "chip-clock"),
-    status_chip(daemon_tick_label(model), "chip-neutral"),
-    status_chip(
-      "Modules \{wenyu_clean_module_count()}/\{wenyu_module_count()} · v\{wenyu_modules_version()}",
-      "chip-book",
-    ),
-    button(
-      class="control-button viewport-zoom-button viewport-zoom-out",
-      on_click=dispatch(ViewportControlNoop),
-      "Zoom Out",
-    ),
-    button(
-      class="control-button viewport-zoom-button viewport-zoom-in",
-      on_click=dispatch(ViewportControlNoop),
-      "Zoom In",
-    ),
-    button(
-      class="control-button",
-      on_click=dispatch(TogglePause),
-      if model.paused {
-        "Resume"
-      } else {
-        "Pause"
-      },
-    ),
-    button(class="control-button", on_click=dispatch(Step), "Step"),
-  ])
+  render_viewport_command_bar(dispatch, model)
 }
