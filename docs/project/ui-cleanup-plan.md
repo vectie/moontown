@@ -664,3 +664,7 @@ Advanced state should remove:
   replacement, and handoff plumbing are no longer rendered in those panels.
   The opened Districts context rail is also reduced to four operating signals
   so the actual district cards appear sooner, especially on phone layouts.
+- Opened Town Areas now render outside the launcher as a full-width ecosystem
+  detail surface. The compact area dock stays in the operating deck, while the
+  selected district/resident/quest/social panel appears below the deck before
+  the map preview instead of being squeezed into the left request column.

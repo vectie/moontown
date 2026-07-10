@@ -82,16 +82,21 @@ fn render_dashboard_ecosystem_workspace(
   dispatch : Dispatch[Msg],
   model : Model,
 ) -> @rabbita.Html {
-  let children = [
+  section(class="town-areas-launcher", [
     div(class="town-areas-head", [
       h2(class="town-areas-title", "Town Areas"),
       render_dashboard_section_tabs(dispatch, model.dashboard_section),
     ]),
-  ]
+  ])
+}
+
+///|
+fn render_dashboard_ecosystem_detail(model : Model) -> @rabbita.Html {
   match model.dashboard_section {
-    Some(section) =>
-      children.push(render_dashboard_section_panel(section, model))
-    None => ()
+    Some(selected) =>
+      section(class="town-area-detail", [
+        render_dashboard_section_panel(selected, model),
+      ])
+    None => div(class="town-area-detail-empty", no_children())
   }
-  section(class="town-areas-launcher", children)
 }

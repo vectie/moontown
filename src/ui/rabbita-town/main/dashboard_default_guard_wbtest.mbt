@@ -125,6 +125,8 @@ test "default dashboard groups secondary operating surfaces in one deck" {
   assert_true(html.contains("request-desk"))
   assert_true(html.contains("attention-dock"))
   assert_true(html.contains("town-areas-launcher"))
+  assert_true(html.contains("town-area-detail-empty"))
+  assert_true(!html.contains("town-area-detail\">"))
   assert_true(html.contains("town-ecosystem-preview-visual"))
   assert_true(html.contains("request-action-dock"))
   assert_true(html.contains("dashboard-section-tabs"))
@@ -137,6 +139,7 @@ test "dashboard ecosystem sections render only the selected detail surface" {
     dashboard_section: Some(DashboardSection::DistrictSystems),
   })
   assert_true(districts.contains("District Systems"))
+  assert_true(districts.contains("town-area-detail"))
   assert_true(!districts.contains("Resident Agents"))
   assert_true(!districts.contains("Points flow"))
   assert_true(!districts.contains("Robot calls"))

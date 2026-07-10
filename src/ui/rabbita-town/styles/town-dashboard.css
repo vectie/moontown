@@ -638,6 +638,16 @@
   gap: 14px;
 }
 
+.town-area-detail-empty {
+  display: none;
+}
+
+.town-area-detail {
+  min-width: 0;
+  display: grid;
+  gap: 14px;
+}
+
 @media (max-width: 1100px) {
   .dashboard-section-tabs {
     grid-template-columns: repeat(2, minmax(0, 1fr));
@@ -697,7 +707,7 @@
 
 .civic-module-grid {
   display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+  grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
   gap: 12px;
 }
 

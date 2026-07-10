@@ -22,6 +22,7 @@ fn render_dashboard_page(
       ),
       render_dashboard_ecosystem_workspace(dispatch, model),
     ]),
+    render_dashboard_ecosystem_detail(model),
     render_dashboard_ecosystem_preview(),
   ])
 }
