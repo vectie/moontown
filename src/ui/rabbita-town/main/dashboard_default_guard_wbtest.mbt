@@ -136,23 +136,53 @@ test "dashboard ecosystem sections render only the selected detail surface" {
     ..init_model(),
     dashboard_section: Some(DashboardSection::DistrictSystems),
   })
-  assert_true(districts.contains("Town shell plus live civic systems"))
-  assert_true(!districts.contains("Digital twins with memory"))
+  assert_true(districts.contains("District Systems"))
+  assert_true(!districts.contains("Resident Agents"))
+  assert_true(!districts.contains("Points flow"))
+  assert_true(!districts.contains("Robot calls"))
   let residents = render_default_dashboard_test_html({
     ..init_model(),
     dashboard_section: Some(DashboardSection::ResidentAgentsSection),
   })
-  assert_true(residents.contains("Digital twins with memory"))
-  assert_true(!residents.contains("Town shell plus live civic systems"))
+  assert_true(residents.contains("Resident Agents"))
+  assert_true(!residents.contains("District Systems"))
 }
 
 ///|
 test "dashboard ecosystem sections stay closed by default" {
   let html = render_default_dashboard_test_html(init_model())
+  assert_true(!html.contains("District Systems"))
+  assert_true(!html.contains("Resident Agents"))
+  assert_true(!html.contains("Civic Quests"))
+  assert_true(!html.contains("Social Capital"))
   assert_true(!html.contains("Town shell plus live civic systems"))
   assert_true(!html.contains("Digital twins with memory"))
   assert_true(!html.contains("Policy, contest, social, and offline workflows"))
   assert_true(!html.contains("Weak ties, talent graph"))
+}
+
+///|
+test "dashboard ecosystem detail surfaces hide implementation copy" {
+  let residents = render_default_dashboard_test_html({
+    ..init_model(),
+    dashboard_section: Some(DashboardSection::ResidentAgentsSection),
+  })
+  assert_true(!residents.contains("UI contract"))
+  assert_true(!residents.contains("Memory Stream"))
+  assert_true(!residents.contains("MoonClaw handoff"))
+  assert_true(!residents.contains("direct durable memory writes"))
+  let quests = render_default_dashboard_test_html({
+    ..init_model(),
+    dashboard_section: Some(DashboardSection::CivicQuestsSection),
+  })
+  assert_true(!quests.contains("static service text"))
+  assert_true(!quests.contains("mayor can supervise"))
+  let social = render_default_dashboard_test_html({
+    ..init_model(),
+    dashboard_section: Some(DashboardSection::SocialCapitalSection),
+  })
+  assert_true(!social.contains("The town should prove"))
+  assert_true(!social.contains("Guide visitors"))
 }
 
 ///|

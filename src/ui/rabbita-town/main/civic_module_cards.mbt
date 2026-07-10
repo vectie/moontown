@@ -37,13 +37,11 @@ fn render_civic_modules(model : Model) -> @rabbita.Html {
   section(class="civic-modules", [
     div(class="runtime-copy", [
       p(class="eyebrow", "Wenyu Valley Modules"),
-      h2("Town shell plus live civic systems"),
-      p(
-        class="summary",
+      h2(
         if mayor_recovery_active(model) {
-          "Recovery patrol is active: the mayor is throttling queues, restoring worker energy, and keeping services online."
+          "Recovery Patrol"
         } else {
-          "The town stays alive through policy quests, social matching, talent projection, AI learning, and virtual-physical service loops."
+          "District Systems"
         },
       ),
     ]),

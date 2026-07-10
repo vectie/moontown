@@ -88,11 +88,7 @@ fn render_civic_quests(model : Model) -> @rabbita.Html {
   section(class="quest-panel", [
     div(class="runtime-copy", [
       p(class="eyebrow", "Civic Quests"),
-      h2("Policy, contest, social, and offline workflows as playable services"),
-      p(
-        class="summary",
-        "This replaces static service text with quest-shaped state that agents can advance and the mayor can supervise.",
-      ),
+      h2("Civic Quests"),
     ]),
     div(
       class="quest-grid",

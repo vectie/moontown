@@ -657,3 +657,10 @@ Advanced state should remove:
   while a compact, non-interactive Wenyu map preview follows the
   request/attention/town-area deck so the product reads as Moontown instead of
   an empty operating form.
+- Opened ecosystem areas now use the same professional blue-white surface
+  language as the default dashboard. District, resident, quest, and social
+  detail cards have restrained 8px radii, lighter borders, and concise product
+  headings, while implementation phrases such as UI contract, static service
+  replacement, and handoff plumbing are no longer rendered in those panels.
+  The opened Districts context rail is also reduced to four operating signals
+  so the actual district cards appear sooner, especially on phone layouts.

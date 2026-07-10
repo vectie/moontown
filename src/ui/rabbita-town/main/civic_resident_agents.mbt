@@ -35,11 +35,7 @@ fn render_resident_agents(model : Model) -> @rabbita.Html {
   section(class="resident-panel", [
     div(class="runtime-copy", [
       p(class="eyebrow", "Resident Agents"),
-      h2("Digital twins with memory, reflection, and plans"),
-      p(
-        class="summary",
-        "Each resident now has visible need state, remembered context, reflection, privacy scope, and a next plan. This is the UI contract for real Memory Stream + Reflection + Planning integration.",
-      ),
+      h2("Resident Agents"),
     ]),
     div(class="resident-summary-grid", [
       runtime_stat_chip(
@@ -65,17 +61,6 @@ fn render_resident_agents(model : Model) -> @rabbita.Html {
           0
         },
         "runtime-imported",
-      ),
-    ]),
-    div(class="contract-list resident-contract-list", [
-      p(
-        "Resident memory stays durable in MoonBook; Moontown renders only projection-safe summaries and counters.",
-      ),
-      p(
-        "Projection scope in this slice: public-safe, shared town, and operator summary.",
-      ),
-      p(
-        "Recent actions show MoonClaw handoff results, not direct durable memory writes.",
       ),
     ]),
     div(

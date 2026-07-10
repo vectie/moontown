@@ -3,10 +3,6 @@ extern "js" fn real_time_label() -> String =
   #| () => new Date().toLocaleTimeString(undefined, { hour: "2-digit", minute: "2-digit", second: "2-digit" })
 
 ///|
-extern "js" fn real_calendar_label() -> String =
-  #| () => new Date().toLocaleDateString(undefined, { weekday: "short", month: "short", day: "numeric", year: "numeric" })
-
-///|
 extern "js" fn real_local_hour() -> Int =
   #| () => new Date().getHours()
 

@@ -58,11 +58,7 @@ fn render_social_talent(model : Model) -> @rabbita.Html {
   section(class="social-talent-panel", [
     div(class="runtime-copy", [
       p(class="eyebrow", "Social Capital"),
-      h2("Weak ties, talent graph, and reception-ready evidence"),
-      p(
-        class="summary",
-        "The town should prove community warmth through visible matches, skill density, and operator-friendly talent projections.",
-      ),
+      h2("Social Capital"),
     ]),
     div(class="social-talent-grid", [
       div(class="subpanel", [
@@ -81,9 +77,6 @@ fn render_social_talent(model : Model) -> @rabbita.Html {
       ]),
       div(class="subpanel", [
         h3("Reception Route"),
-        p(
-          "Guide visitors through a proof-first route, keep operator notes projection-safe, and close with a clear next action.",
-        ),
         div(
           class="route-stop-list",
           route_stops.map(stop => render_route_stop_card(stop)),

@@ -4,12 +4,23 @@
 }
 
 .control-strip,
-.strategy-strip,
-.civic-context {
+.strategy-strip {
   display: flex;
   flex-wrap: wrap;
   gap: 10px;
   align-items: center;
+}
+
+.civic-context {
+  display: grid;
+  grid-template-columns: repeat(4, minmax(0, max-content));
+  gap: 8px;
+  align-items: center;
+}
+
+.civic-context .chip {
+  min-height: 34px;
+  padding: 7px 10px;
 }
 
 .chip {
@@ -671,6 +682,17 @@
     overflow-wrap: normal;
     white-space: nowrap;
   }
+
+  .civic-context {
+    grid-template-columns: repeat(2, minmax(0, max-content));
+    gap: 6px;
+  }
+
+  .civic-context .chip {
+    min-height: 30px;
+    padding: 5px 9px;
+    font-size: 10px;
+  }
 }
 
 .civic-module-grid {
@@ -682,10 +704,10 @@
 .civic-module-card {
   min-height: 156px;
   padding: 14px;
-  border-radius: 22px;
-  border: 1px solid rgba(32, 21, 10, 0.12);
-  background: rgba(255, 252, 244, 0.78);
-  box-shadow: 0 10px 22px rgba(62, 40, 15, 0.08);
+  border-radius: 8px;
+  border: 1px solid rgba(28, 73, 122, 0.14);
+  background: rgba(255, 255, 255, 0.8);
+  box-shadow: 0 10px 22px rgba(35, 82, 125, 0.08);
   display: grid;
   align-content: start;
   gap: 8px;
@@ -694,29 +716,29 @@
 .civic-module-card-featured {
   grid-column: span 2;
   background:
-    linear-gradient(135deg, rgba(255, 247, 236, 0.94), rgba(255, 236, 226, 0.86)),
-    radial-gradient(circle at 100% 0%, rgba(178, 78, 52, 0.12), transparent 38%);
+    linear-gradient(135deg, rgba(255, 255, 255, 0.94), rgba(235, 247, 255, 0.88)),
+    radial-gradient(circle at 100% 0%, rgba(20, 118, 255, 0.12), transparent 38%);
 }
 
 .civic-module-card-vitality-dashboard {
   background:
-    linear-gradient(135deg, rgba(255, 248, 232, 0.96), rgba(255, 232, 212, 0.88)),
-    radial-gradient(circle at 0% 0%, rgba(185, 138, 41, 0.18), transparent 34%),
-    radial-gradient(circle at 100% 0%, rgba(178, 78, 52, 0.16), transparent 40%);
+    linear-gradient(135deg, rgba(255, 255, 255, 0.96), rgba(236, 248, 255, 0.88)),
+    radial-gradient(circle at 0% 0%, rgba(38, 183, 211, 0.14), transparent 34%),
+    radial-gradient(circle at 100% 0%, rgba(20, 118, 255, 0.12), transparent 40%);
 }
 
 .civic-module-card-social-square {
   background:
-    linear-gradient(135deg, rgba(255, 248, 239, 0.96), rgba(233, 244, 235, 0.9)),
-    radial-gradient(circle at 0% 0%, rgba(185, 138, 41, 0.14), transparent 36%),
-    radial-gradient(circle at 100% 0%, rgba(46, 111, 96, 0.14), transparent 42%);
+    linear-gradient(135deg, rgba(255, 255, 255, 0.96), rgba(236, 250, 247, 0.9)),
+    radial-gradient(circle at 0% 0%, rgba(38, 183, 211, 0.12), transparent 36%),
+    radial-gradient(circle at 100% 0%, rgba(23, 138, 90, 0.12), transparent 42%);
 }
 
 .civic-module-card-physical-bridge {
   background:
-    linear-gradient(135deg, rgba(255, 246, 236, 0.96), rgba(231, 240, 244, 0.9)),
-    radial-gradient(circle at 0% 0%, rgba(85, 123, 151, 0.18), transparent 34%),
-    radial-gradient(circle at 100% 0%, rgba(178, 78, 52, 0.14), transparent 40%);
+    linear-gradient(135deg, rgba(255, 255, 255, 0.96), rgba(238, 248, 255, 0.9)),
+    radial-gradient(circle at 0% 0%, rgba(85, 123, 151, 0.14), transparent 34%),
+    radial-gradient(circle at 100% 0%, rgba(38, 183, 211, 0.12), transparent 40%);
 }
 
 .civic-module-card h3 {
@@ -778,16 +800,16 @@
   display: grid;
   gap: 4px;
   padding: 10px;
-  border-radius: 16px;
-  border: 1px solid rgba(32, 21, 10, 0.08);
-  background: rgba(255, 252, 244, 0.84);
+  border-radius: 8px;
+  border: 1px solid rgba(28, 73, 122, 0.12);
+  background: rgba(255, 255, 255, 0.78);
 }
 
 .module-detail-card {
   display: grid;
   gap: 4px;
   padding: 9px 10px;
-  border-radius: 16px;
+  border-radius: 8px;
   border: 1px dashed rgba(53, 89, 109, 0.18);
   background: rgba(53, 89, 109, 0.06);
 }
@@ -861,10 +883,11 @@
   display: grid;
   gap: 10px;
   padding: 16px;
-  border-radius: 22px;
-  border: 1px solid var(--line);
-  background: rgba(255, 252, 244, 0.78);
-  box-shadow: 0 10px 22px rgba(62, 40, 15, 0.08);
+  border-radius: 8px;
+  border: 1px solid rgba(28, 73, 122, 0.14);
+  background:
+    linear-gradient(135deg, rgba(255, 255, 255, 0.9), rgba(238, 248, 255, 0.82));
+  box-shadow: 0 10px 22px rgba(35, 82, 125, 0.08);
 }
 
 .resident-head {
@@ -891,9 +914,9 @@
   height: 42px;
   display: grid;
   place-items: center;
-  border-radius: 14px;
-  color: #fffaf0;
-  background: linear-gradient(135deg, var(--book), var(--clock));
+  border-radius: 8px;
+  color: #ffffff;
+  background: linear-gradient(135deg, var(--book), var(--yard));
   font-weight: 800;
 }
 
@@ -915,8 +938,7 @@
 .quest-card p,
 .match-card p,
 .talent-card p,
-.subpanel p,
-.contract-list p {
+.subpanel p {
   margin: 0;
   color: var(--muted);
   line-height: 1.42;
@@ -962,8 +984,9 @@
   display: grid;
   gap: 5px;
   padding: 10px;
-  border-radius: 16px;
-  background: rgba(85, 123, 151, 0.1);
+  border-radius: 8px;
+  border: 1px solid rgba(28, 73, 122, 0.1);
+  background: rgba(255, 255, 255, 0.64);
 }
 
 .memory-strip span {
@@ -993,11 +1016,11 @@
   display: grid;
   gap: 10px;
   padding: 14px;
-  border-radius: 20px;
-  border: 1px solid rgba(32, 21, 10, 0.08);
+  border-radius: 8px;
+  border: 1px solid rgba(28, 73, 122, 0.12);
   background:
-    linear-gradient(135deg, rgba(255, 249, 236, 0.92), rgba(238, 245, 239, 0.84)),
-    radial-gradient(circle at 100% 0%, rgba(185, 138, 41, 0.12), transparent 42%);
+    linear-gradient(135deg, rgba(255, 255, 255, 0.92), rgba(238, 248, 255, 0.84)),
+    radial-gradient(circle at 100% 0%, rgba(20, 118, 255, 0.12), transparent 42%);
 }
 
 .route-stop-head {
@@ -1012,9 +1035,9 @@
   height: 30px;
   display: grid;
   place-items: center;
-  border-radius: 999px;
-  background: var(--hall);
-  color: #fffaf0;
+  border-radius: 8px;
+  background: var(--book);
+  color: #ffffff;
   font-size: 13px;
   font-weight: 800;
 }
@@ -1037,20 +1060,6 @@
 
 .route-stop-strip {
   background: rgba(185, 138, 41, 0.1);
-}
-
-.contract-list {
-  display: grid;
-  gap: 8px;
-  padding: 14px;
-  border-radius: 8px;
-  border: 1px dashed rgba(28, 73, 122, 0.18);
-  background: rgba(255, 255, 255, 0.62);
-}
-
-.resident-contract-list {
-  background:
-    linear-gradient(135deg, rgba(255, 255, 255, 0.78), rgba(238, 248, 255, 0.72));
 }
 
 .runtime-head {
