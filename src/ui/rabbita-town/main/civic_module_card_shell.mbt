@@ -54,7 +54,7 @@ fn civic_module_card_spec(
 
 ///|
 fn render_civic_module_card_shell(spec : CivicModuleCardSpec) -> @rabbita.Html {
-  let children : Array[@rabbita.Html] = [
+  let content : Array[@rabbita.Html] = [
     p(class="scene-node-key", spec.zone),
     h3(spec.title),
     p(spec.copy),
@@ -65,9 +65,38 @@ fn render_civic_module_card_shell(spec : CivicModuleCardSpec) -> @rabbita.Html {
     ),
   ]
   if spec.details.length() > 0 {
-    children.push(render_module_detail_grid(spec.details))
+    content.push(render_module_detail_grid(spec.details))
   }
-  children.push(render_module_next_action(spec.next_action))
-  children.push(render_module_signal(spec.signal_class, spec.signal))
-  article(class=spec.card_class, children)
+  content.push(render_module_next_action(spec.next_action))
+  content.push(render_module_signal(spec.signal_class, spec.signal))
+  article(class=spec.card_class, [
+    render_civic_module_card_visual(spec.title),
+    div(class="civic-module-card-content", content),
+  ])
+}
+
+///|
+fn render_civic_module_card_visual(title : String) -> @rabbita.Html {
+  img(
+    class="civic-module-card-visual",
+    src="tilemap/districts/\{civic_module_card_visual_slug(title)}.png",
+    alt="\{title} district building",
+    loading="lazy",
+  )
+}
+
+///|
+fn civic_module_card_visual_slug(title : String) -> String {
+  match title {
+    "Town Shell" => "town_shell"
+    "Vitality Dashboard" => "vitality_dashboard"
+    "Resident Twins" => "resident_twins"
+    "Policy Hall" => "policy_hall"
+    "Contest Express" => "contest_express"
+    "Social Square" => "social_square"
+    "Talent Avenue" => "talent_avenue"
+    "AI Garden" => "ai_garden"
+    "Physical Bridge" => "physical_bridge"
+    _ => "town_shell"
+  }
 }

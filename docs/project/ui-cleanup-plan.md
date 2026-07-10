@@ -668,3 +668,7 @@ Advanced state should remove:
   detail surface. The compact area dock stays in the operating deck, while the
   selected district/resident/quest/social panel appears below the deck before
   the map preview instead of being squeezed into the left request column.
+- District system cards now carry real district building art from the generated
+  Wenyu tilemap assets. The shared civic module card shell infers each
+  building image from the module title, so all nine district cards gain visual
+  identity without duplicating asset wiring in each renderer.

@@ -140,6 +140,8 @@ test "dashboard ecosystem sections render only the selected detail surface" {
   })
   assert_true(districts.contains("District Systems"))
   assert_true(districts.contains("town-area-detail"))
+  assert_true(districts.contains("civic-module-card-visual"))
+  assert_true(districts.contains("tilemap/districts/town_shell.png"))
   assert_true(!districts.contains("Resident Agents"))
   assert_true(!districts.contains("Points flow"))
   assert_true(!districts.contains("Robot calls"))
