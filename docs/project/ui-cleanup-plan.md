@@ -566,6 +566,35 @@ MoonBit tests, server route tests, persistent user workflows, projection smoke
 tests, and the production build. Browser validation should click both request
 flows and verify their visible result and durable filesystem effect.
 
+### Phase 32: Runtime Asset Boundary
+
+The production frontend should ship the town that users can operate, not the
+entire visual-authoring workspace. Vite may continue to serve the full asset
+tree during development, but production export must be driven by a checked
+runtime manifest.
+
+Production should keep:
+
+- the rendered Wenyu map, labels, module contracts, and compact district art
+- every configured alpha building asset
+- role animation strips, resident strips, and the resident portraits used by
+  professional area details
+- runtime tiles, objects, frontend bundles, and exported town ledgers
+
+Production should remove:
+
+- raw building source renders and style sheets
+- authoring prompts, maps, generated tilesets, and individual animation frames
+- unreferenced visual experiments copied only because they share `publicDir`
+
+Acceptance requires:
+
+- a missing runtime asset fails tests or the build
+- the production artifact contains no authoring-only directories
+- the complete artifact remains below 64 MiB
+- dashboard, advanced map, module interiors, and resident animation assets load
+  from the built artifact without browser errors
+
 ## Done Criteria
 
 - A professional user can operate watches, reviews, book requests, and the map
@@ -577,9 +606,23 @@ flows and verify their visible result and durable filesystem effect.
   changes.
 - Missing or sparse runtime data never appears as sample operational activity.
 - Request success is verified from click feedback through persisted ledgers.
+- Production output contains only runtime assets and remains below 64 MiB.
 
 ## Progress Notes
 
+- Phase 32 is implemented: production no longer copies the full UI authoring
+  tree. A generated runtime manifest derives configured building art, resident
+  strips, district previews, map contracts, tiles, and objects, then fails the
+  build if a required asset is absent.
+- The production artifact dropped from 155 MiB to 43.8 MiB by actual file
+  bytes. Raw building sources, style sheets, prompts, tilesets, and individual
+  animation frames stay in the authoring workspace and no longer ship.
+- Browser bootstrap now completes its initial runtime/module bridge before
+  importing the MoonBit application. This removes a production-only race that
+  previously mounted the advanced viewport with `Modules 0/0`.
+- Wenyu modules now render their configured high-fidelity building images
+  directly with lazy loading and asynchronous decoding. The retired CSS-drawn
+  pavilion compatibility layer and pixelated building rendering are removed.
 - Phases 26-31 are implemented in the current major-upgrade pass: browser
   startup is live-first, demo mode is explicit, unavailable town areas show an
   honest state, and snapshot mode no longer injects synthetic work or metrics.

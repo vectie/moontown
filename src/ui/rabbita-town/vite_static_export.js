@@ -1,6 +1,10 @@
 import { existsSync } from 'node:fs'
-import { mkdir, readdir, readFile, writeFile } from 'node:fs/promises'
+import { copyFile, mkdir, readdir, readFile, writeFile } from 'node:fs/promises'
 import path from 'node:path'
+import {
+  resolveRuntimeAssetPath,
+  runtimeAssetPaths,
+} from './runtime_asset_manifest.js'
 import { loadModuleProjectionIndex } from './vite_book_projections.js'
 import { loadMoondeskBridgeIndex } from './vite_moondesk_bridge.js'
 import {
@@ -13,6 +17,7 @@ import {
   liveAutonomyPath,
   liveDigestPath,
   operatorRequestLedgerPath,
+  publicAssetRootPath,
   standingGoalsPath,
   townSnapshotPath,
   visualProjectionPath,
@@ -23,6 +28,17 @@ import {
   readJsonlRows,
 } from './vite_watcher_ledgers.js'
 import { writeJsonFile } from './vite_server_io.js'
+
+async function exportRuntimeAssets(distDir) {
+  for (const relativePath of await runtimeAssetPaths(publicAssetRootPath)) {
+    const targetPath = path.join(distDir, relativePath)
+    await mkdir(path.dirname(targetPath), { recursive: true })
+    await copyFile(
+      resolveRuntimeAssetPath(publicAssetRootPath, relativePath),
+      targetPath,
+    )
+  }
+}
 
 async function copyTextFileIfExists(sourcePath, targetPath) {
   if (!existsSync(sourcePath)) {
@@ -72,6 +88,7 @@ async function exportWatcherLedgers(distDir) {
 export async function exportStaticRuntimeBundle() {
   const distDir = path.resolve(process.cwd(), 'dist')
   await mkdir(distDir, { recursive: true })
+  await exportRuntimeAssets(distDir)
 
   await copyTextFileIfExists(townSnapshotPath, path.join(distDir, 'town.json'))
   await copyTextFileIfExists(

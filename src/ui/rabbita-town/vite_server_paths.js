@@ -5,6 +5,8 @@ const rabbitaTownDir = path.dirname(fileURLToPath(import.meta.url))
 const repoRootPath = path.resolve(rabbitaTownDir, '../../..')
 const suiteRootPath = path.resolve(process.env.MOONTOWN_SUITE_ROOT || repoRootPath)
 
+export const publicAssetRootPath = path.resolve(rabbitaTownDir, '../assets')
+
 export const moontownProductStatePath = path.resolve(
   process.env.MOONTOWN_PRODUCT_STATE_ROOT ||
     path.join(suiteRootPath, '.moonsuite/products/moontown'),

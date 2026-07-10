@@ -401,6 +401,16 @@ From the repo root:
 ./scripts/build-rabbita-ui.sh
 ```
 
+Production builds use a checked runtime asset manifest rather than copying the
+entire `src/ui/assets` authoring tree. The build keeps the rendered Wenyu map,
+configured module art, runtime actor strips, district previews, tiles, objects,
+and runtime JSON contracts. Source renders, prompts, style sheets, generated
+tilesets, and individual animation frames remain development inputs.
+
+`npm run build` also verifies every manifest path, rejects authoring-only
+directories in `dist`, and enforces a 64 MiB artifact budget. The current
+artifact is 43.8 MiB by file bytes.
+
 Build output lands in:
 
 - `src/ui/rabbita-town/dist/`

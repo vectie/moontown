@@ -17,13 +17,17 @@ fn render_wenyu_module_building(
     "--module-height: \{height}px",
     "--module-footprint-w: \{civic.footprint_w}",
     "--module-footprint-h: \{civic.footprint_h}",
-    "--module-image: url('\{civic.asset_base}')",
-    "--module-roof-image: url('\{civic.asset_roof}')",
   ]
   let children : Array[@rabbita.Html] = [
     span(class="wenyu-module-footprint", no_children()),
     span(class="wenyu-module-shadow", no_children()),
-    span(class="wenyu-module-sprite", no_children()),
+    img(
+      class="wenyu-module-sprite",
+      src=civic.asset_base,
+      alt="",
+      loading="lazy",
+      decoding="async",
+    ),
     span(class="wenyu-module-light", no_children()),
   ]
   if runtime.visible_agent_count > 0 {

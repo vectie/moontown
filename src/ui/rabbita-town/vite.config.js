@@ -123,6 +123,7 @@ export default defineConfig({
   publicDir: '../assets',
   plugins: [rabbita(), moontownSnapshotPlugin()],
   build: {
+    copyPublicDir: false,
     rollupOptions: {
       output: {
         manualChunks(id) {

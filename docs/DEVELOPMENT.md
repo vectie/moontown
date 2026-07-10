@@ -81,6 +81,9 @@ npm run build
 `smoke:user-workflows` starts an isolated localhost server, submits both user
 request types, verifies visible API success contracts and their durable ledger
 files, rejects a cross-origin write, then removes the temporary runtime state.
+The production build performs an additional asset-manifest check and fails if
+runtime media is missing, authoring-only folders leak into `dist`, or the
+artifact exceeds 64 MiB.
 
 Current UI work usually touches two different surfaces:
 

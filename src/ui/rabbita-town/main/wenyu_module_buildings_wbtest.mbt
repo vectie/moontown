@@ -18,7 +18,6 @@ fn wenyu_module_building_test_module() -> WenyuTownModule {
     interior_kind: "hall",
     style_family: "white-tech",
     asset_base: "base.png",
-    asset_roof: "roof.png",
     protocol_pattern: "research-salon",
     use_case: "policy triage",
     agent_flow: "in / exchange / out",

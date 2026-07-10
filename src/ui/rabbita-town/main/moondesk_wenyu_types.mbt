@@ -63,7 +63,6 @@ priv struct WenyuTownModule {
   interior_kind : String
   style_family : String
   asset_base : String
-  asset_roof : String
   protocol_pattern : String
   use_case : String
   agent_flow : String

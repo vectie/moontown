@@ -1,8 +1,8 @@
 {
   "scripts": {
     "dev": "vite",
-    "build": "node scripts/prepare-rabbita-build.mjs && vite build",
-    "test:server": "node --test vite_server_io.test.js",
+    "build": "node scripts/prepare-rabbita-build.mjs && vite build && node scripts/verify-production-build.mjs",
+    "test:server": "node --test vite_server_io.test.js runtime_asset_manifest.test.js",
     "smoke:book-projections": "node scripts/smoke-book-projections.mjs",
     "smoke:user-workflows": "node scripts/run-user-workflow-smoke.mjs"
   },

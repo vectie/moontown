@@ -32,7 +32,6 @@ fn editor_module_row_test_module() -> WenyuTownModule {
     interior_kind: "office",
     style_family: "white-tech",
     asset_base: "test-base",
-    asset_roof: "test-roof",
     protocol_pattern: "research-salon",
     use_case: "Test use case",
     agent_flow: "Agents visit, exchange, and return.",
