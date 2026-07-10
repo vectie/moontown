@@ -5,8 +5,6 @@ priv struct ResidentSim {
   need : String
   mood : String
   agent_goal : String
-  memory : String
-  reflection : String
   plan : String
   recent_action : String
   privacy_scope : String

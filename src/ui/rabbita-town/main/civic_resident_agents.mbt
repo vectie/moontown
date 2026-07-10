@@ -2,7 +2,7 @@
 fn render_resident_card(resident : ResidentSim) -> @rabbita.Html {
   article(class="resident-card", [
     div(class="resident-head", [
-      span(class="resident-avatar", resident_initials(resident.name)),
+      render_resident_avatar(resident),
       div(class="resident-title", [h3(resident.name), p(resident.zone)]),
     ]),
     p(resident.venture),
@@ -10,24 +10,41 @@ fn render_resident_card(resident : ResidentSim) -> @rabbita.Html {
       span(class="resident-chip resident-chip-privacy", resident.privacy_scope),
       span(class="resident-chip resident-chip-action", "Recent action"),
     ]),
-    p("Need: \{resident.need}"),
-    p("Mood: \{resident.mood}"),
-    p("Agent goal: \{resident.agent_goal}"),
-    render_memory_strip("Memory", resident.memory),
-    render_memory_strip("Reflection", resident.reflection),
-    render_memory_strip("Plan", resident.plan),
-    render_memory_strip("Latest handoff", resident.recent_action),
+    div(class="resident-state-grid", [
+      render_resident_state("Need", resident.need),
+      render_resident_state("Mood", resident.mood),
+      render_resident_state("Goal", resident.agent_goal),
+    ]),
+    render_memory_strip("Current signal", resident.recent_action),
   ])
 }
 
 ///|
-fn resident_initials(name : String) -> String {
+fn render_resident_avatar(resident : ResidentSim) -> @rabbita.Html {
+  img(
+    class="resident-avatar",
+    src="tilemap/actors/roster/\{resident_avatar_slug(resident.name)}.png",
+    alt="\{resident.name} resident avatar",
+    loading="lazy",
+  )
+}
+
+///|
+fn resident_avatar_slug(name : String) -> String {
   match name {
-    "Li / Edge AI OPC" => "LI"
-    "Chen / Design Automation OPC" => "CH"
-    "Ma / Policy Ops Visitor" => "MA"
-    _ => "AI"
+    "Li / Edge AI OPC" => "resident_0"
+    "Chen / Design Automation OPC" => "resident_1"
+    "Ma / Policy Ops Visitor" => "resident_2"
+    _ => "resident_0"
   }
+}
+
+///|
+fn render_resident_state(label : String, value : String) -> @rabbita.Html {
+  div(class="resident-state", [
+    span(class="resident-state-label", label),
+    p(value),
+  ])
 }
 
 ///|

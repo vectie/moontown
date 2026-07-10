@@ -672,3 +672,9 @@ Advanced state should remove:
   Wenyu tilemap assets. The shared civic module card shell infers each
   building image from the module title, so all nine district cards gain visual
   identity without duplicating asset wiring in each renderer.
+- Resident Agent cards now use generated resident roster art instead of text
+  initials, and the default resident surface hides low-frequency memory,
+  reflection, plan, and handoff internals. The visible card keeps professional
+  context, compact need/mood/goal state, privacy scope, and one current signal,
+  while stale resident memory/reflection sample fields have been removed from
+  the UI data model.

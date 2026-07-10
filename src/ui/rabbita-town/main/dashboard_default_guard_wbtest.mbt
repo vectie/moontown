@@ -150,7 +150,14 @@ test "dashboard ecosystem sections render only the selected detail surface" {
     dashboard_section: Some(DashboardSection::ResidentAgentsSection),
   })
   assert_true(residents.contains("Resident Agents"))
+  assert_true(residents.contains("resident-avatar"))
+  assert_true(residents.contains("tilemap/actors/roster/resident_0.png"))
+  assert_true(residents.contains("Current signal"))
   assert_true(!residents.contains("District Systems"))
+  assert_true(!residents.contains(">Memory<"))
+  assert_true(!residents.contains(">Reflection<"))
+  assert_true(!residents.contains(">Plan<"))
+  assert_true(!residents.contains("Latest handoff"))
 }
 
 ///|
