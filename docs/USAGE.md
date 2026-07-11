@@ -273,9 +273,24 @@ Important outputs:
 - `books/<participant-book>/wiki/queries/salon-returned-ideas.md`
 
 The metric is structural: it counts idea yield, research-question yield,
-cross-book links, home-book coverage, and return-home records. It proves the
-building performed exchange-reduce-distribute; it does not bypass the review
-queue or claim the ideas are already correct.
+cross-book links, home-book coverage, and return-home records. Targets scale to
+the participants and reduced outputs declared by that round (with at least two
+participants required for a full exchange score and two questions required per
+output), so a deliberately small salon can reach structural completion without
+inventing extra books. It proves the building performed
+exchange-reduce-distribute; it does not bypass the review queue or claim the
+ideas are already correct.
+
+When Moontown and MoonClaw are separate source checkouts, set
+`MOONTOWN_MOONCLAW_ROOT` to the MoonClaw repository. Runtime artifacts still
+remain below `MOONTOWN_SUITE_ROOT`:
+
+```bash
+MOONTOWN_SUITE_ROOT="$HOME/moonsuite" \
+MOONTOWN_MOONCLAW_ROOT="$HOME/Workspace/moonclaw" \
+MOONTOWN_MOONCLAW_INLINE=1 \
+moon run src/cmd/main -- civic protocols pattern-template <scenario.json>
+```
 
 The pattern path is not robotics-hardcoded. `civic protocols pattern-template
 <path>` loads a `CivicCommunicationScenario` JSON file and runs the same protocol

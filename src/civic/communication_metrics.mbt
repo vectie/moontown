@@ -104,9 +104,19 @@ fn civic_communication_structural_score(
   idea_return_home_count~ : Int,
   participant_idea_links~ : Int,
 ) -> Int {
-  civic_communication_score_component(participant_count, 10, 20) +
-  civic_communication_score_component(idea_count, 5, 20) +
-  civic_communication_score_component(research_question_count, 15, 20) +
+  // Score completion against the declared round, not an unrelated large-town
+  // constant. A deliberately small cross-book salon can be structurally
+  // complete; one-person input still receives only half of the exchange score.
+  let participant_target = 2
+  let idea_target = if participant_count > 0 { participant_count } else { 1 }
+  let question_target = if idea_count > 0 { idea_count * 2 } else { 1 }
+  civic_communication_score_component(
+    participant_count, participant_target, 20,
+  ) +
+  civic_communication_score_component(idea_count, idea_target, 20) +
+  civic_communication_score_component(
+    research_question_count, question_target, 20,
+  ) +
   civic_communication_score_component(
     participating_book_coverage_count, participant_count, 20,
   ) +

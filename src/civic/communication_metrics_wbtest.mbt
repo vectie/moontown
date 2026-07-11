@@ -27,8 +27,25 @@ test "communication metrics count exchange yield and returned-home links" {
   assert_eq(counts.participating_book_coverage_count, 2)
   assert_eq(counts.idea_return_home_count, 2)
   assert_eq(metrics.average_books_per_idea, "2/1 = 2.0")
-  assert_true(metrics.structural_effectiveness_score > 0)
+  assert_eq(metrics.structural_effectiveness_score, 90)
   assert_true(metrics.summary.contains("robotics participant perspectives"))
+}
+
+///|
+test "declared three-book salon can reach structural completion" {
+  let participants = [
+    communication_metric_test_participant("environment"),
+    communication_metric_test_participant("mobility"),
+    communication_metric_test_participant("simulation"),
+  ]
+  let ideas = [
+    communication_metric_test_idea("gates", participants),
+    communication_metric_test_idea("blockers", participants),
+    communication_metric_test_idea("replay", participants),
+  ]
+  let scenario = communication_metric_test_scenario(participants, ideas)
+  let metrics = civic_communication_metrics(scenario, participants, ideas)
+  assert_eq(metrics.structural_effectiveness_score, 100)
 }
 
 ///|
@@ -104,5 +121,21 @@ fn communication_metric_test_scenario(
     skill_rules: [],
     participants,
     ideas,
+  }
+}
+
+///|
+fn communication_metric_test_idea(
+  id : String,
+  participants : Array[CivicCommunicationParticipantBook],
+) -> CivicCommunicationIdea {
+  {
+    id,
+    title: id,
+    summary: "Cross-book output",
+    participating_books: participants.map(participant => participant.book_id),
+    research_questions: ["What is the gate?", "How is it replayed?"],
+    why_it_matters: "It joins the declared desks.",
+    next_experiment: "Run the bounded check.",
   }
 }
