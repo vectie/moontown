@@ -33,6 +33,33 @@ test "dashboard renders town square and dispatch log" {
 }
 
 ///|
+test "MoonTown adapter preserves advice-only promotion boundary" {
+  guard @moontown.moonflow_adapter_capability_json() is Object(capability) else {
+    fail("expected MoonTown adapter capability")
+  }
+  assert_true(capability["protocol"] == Json::string("moonflow.adapter.v1"))
+  assert_true(capability["product_id"] == Json::string("moontown"))
+  assert_true(capability["supports_cancel"] == Json::boolean(true))
+  assert_true(capability["supports_reconcile"] == Json::boolean(true))
+  assert_true(capability["promotion_is_execution"] == Json::boolean(false))
+  assert_true(
+    capability["dissent_preservation_required"] == Json::boolean(true),
+  )
+  guard capability["operations"] is Array(operations) else {
+    fail("expected MoonTown operations")
+  }
+  assert_true(operations.contains(Json::string("commission-assembly")))
+  assert_true(operations.contains(Json::string("preserve-dissent")))
+  assert_false(operations.contains(Json::string("accept-book-truth")))
+  guard capability["authority_classes"] is Array(authorities) else {
+    fail("expected MoonTown authorities")
+  }
+  assert_false(authorities.contains(Json::string("workspace-mutation")))
+  assert_false(authorities.contains(Json::string("external-effect")))
+  assert_false(authorities.contains(Json::string("physical-effect")))
+}
+
+///|
 async test "load or create modeled state persists a snapshot" {
   let base = "/tmp/moontown-test-town-modeled-\{@async.now().to_int()}"
   let path = "\{base}.json"

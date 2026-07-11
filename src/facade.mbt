@@ -154,3 +154,29 @@ pub async fn daemon_run_saved_town(
     inline_under_supervisor~,
   )
 }
+
+///|
+/// Describe MoonTown's bounded deliberation interface to MoonFlow.
+/// Promotions remain candidates until MoonFlow performs an authority review.
+pub fn moonflow_adapter_capability_json() -> Json {
+  {
+    "adapter_id": "moontown-v1",
+    "product_id": "moontown",
+    "protocol": "moonflow.adapter.v1",
+    "operations": [
+      "commission-assembly", "inspect-deliberation", "cancel-agent-run", "collect-challenges",
+      "preserve-dissent", "prepare-promotion-candidate", "reconcile-deliberation",
+    ],
+    "authority_classes": [
+      "observe", "cognitive-maintenance", "sandbox-execution",
+    ],
+    "supports_cancel": true,
+    "supports_reconcile": true,
+    "receipt_contracts": [
+      "moontown.commission-receipt.v1", "moontown.deliberation-receipt.v1", "moontown.promotion-candidate.v1",
+    ],
+    "promotion_is_execution": false,
+    "dissent_preservation_required": true,
+    "external_effect_forbidden": true,
+  }
+}

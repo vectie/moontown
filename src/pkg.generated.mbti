@@ -32,6 +32,8 @@ pub fn modeled_state_from_catalog(Array[@moonbook.BookCatalogEntry]) -> @core.To
 
 pub fn[Provider : @core.BookProvider] modeled_state_with_provider(Provider) -> @core.TownState
 
+pub fn moonflow_adapter_capability_json() -> Json
+
 pub async fn render_goal_run(String, book_id? : String?, task_limit_per_book? : Int, snapshot_path? : String, book_catalog_path? : String) -> String
 
 pub fn render_state_dashboard(@core.TownState) -> String
