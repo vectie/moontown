@@ -24,7 +24,7 @@ test "policy package owns catalog classification" {
     ),
   )
   assert_eq(
-    @policy.catalog_entry_type("plan-moontown-quality", "Moontown Quality", []),
+    @policy.catalog_entry_type("plan-moontown-quality", "MoonTown Quality", []),
     @policy.planbook_type(),
   )
   assert_eq(

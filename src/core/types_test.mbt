@@ -1,6 +1,6 @@
 ///|
 test "core state registers books workers and tasks" {
-  let state = empty_state(TownConfig::new(id="town", name="Moontown"))
+  let state = empty_state(TownConfig::new(id="town", name="MoonTown"))
   state.register_book(
     BookRef::new(
       id="coding",
@@ -33,7 +33,7 @@ test "core state registers books workers and tasks" {
 
 ///|
 test "core state replaces all duplicate execution records for same task" {
-  let state = empty_state(TownConfig::new(id="town", name="Moontown"))
+  let state = empty_state(TownConfig::new(id="town", name="MoonTown"))
   state.register_execution(
     TaskExecutionRecord::new(
       task_id="task-1",

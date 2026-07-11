@@ -75,7 +75,7 @@ fn civic_projection_journey(
       title: "Civic workspace bootstrap",
       stage: "bootstrap",
       status: "projected",
-      summary: "Moontown created the MoonBook-facing workspace scaffold, module skill pack, review queue, and projection fragment for \{service.title}.",
+      summary: "MoonTown created the MoonBook-facing workspace scaffold, module skill pack, review queue, and projection fragment for \{service.title}.",
       highlights: [
         "Book id: \{service.book_id}",
         "Mode: \{service.module_mode}",

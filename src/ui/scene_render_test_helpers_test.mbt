@@ -1,7 +1,7 @@
 ///|
 fn scene_render_test_state() -> @core.TownState {
   @core.empty_state(
-    @core.TownConfig::new(id="moonrise", name="Moontown / Moonrise"),
+    @core.TownConfig::new(id="moonrise", name="MoonTown / Moonrise"),
   )
 }
 

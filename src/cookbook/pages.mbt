@@ -4,15 +4,15 @@ pub fn cookbook_index_markdown(
   manifest : MoontownCookbookManifest,
 ) -> String {
   [
-    "# Moontown Stable-State Cookbook",
+    "# MoonTown Stable-State Cookbook",
     "",
-    "This MoonBook is the generated operating cookbook for Moontown. It indexes canonical docs, machine-readable definitions, and restart-readable runtime state so the town has one stable control surface.",
+    "This MoonBook is the generated operating cookbook for MoonTown. It indexes canonical docs, machine-readable definitions, and restart-readable runtime state so the town has one stable control surface.",
     "",
     "## Ownership",
     "",
     "- MoonBook generates and stores the cookbook workspace.",
-    "- Moondesk manages the human editing, review, and packaging surface.",
-    "- Moontown consumes the cookbook manifest for stable-state checks and operator guidance.",
+    "- MoonDesk manages the human editing, review, and packaging surface.",
+    "- MoonTown consumes the cookbook manifest for stable-state checks and operator guidance.",
     "- MoonClaw can update sections only through bounded skills and review contracts.",
     "",
     "## Book",
@@ -57,7 +57,7 @@ pub fn cookbook_stable_state_markdown(
   [
     "# Stable-State Manifest",
     "",
-    "The cookbook does not replace source files. It names the canonical files and records whether they currently exist so the Mayor, Moondesk, and human operator can discuss the same stable state.",
+    "The cookbook does not replace source files. It names the canonical files and records whether they currently exist so the Mayor, MoonDesk, and human operator can discuss the same stable state.",
     "",
     rows.join("\n"),
   ].join("\n")
@@ -67,8 +67,8 @@ pub fn cookbook_stable_state_markdown(
 pub fn cookbook_ownership_markdown() -> String {
   [
     "# Cookbook Ownership", "", "## MoonBook", "", "MoonBook owns the durable cookbook workspace, generated site, wiki pages, definitions index, review queue, and stable-state projection.",
-    "", "## Moondesk", "", "Moondesk should present the cookbook as the human desktop for browsing, editing, reviewing, and exporting stable town definitions. It should not become the daemon, scheduler, or worker executor.",
-    "", "## Moontown", "", "Moontown owns the live control plane. It reads cookbook definitions, checks drift, routes work, supervises daemons, and renders operator-visible state.",
+    "", "## MoonDesk", "", "MoonDesk should present the cookbook as the human desktop for browsing, editing, reviewing, and exporting stable town definitions. It should not become the daemon, scheduler, or worker executor.",
+    "", "## MoonTown", "", "MoonTown owns the live control plane. It reads cookbook definitions, checks drift, routes work, supervises daemons, and renders operator-visible state.",
     "", "## MoonClaw", "", "MoonClaw performs bounded cookbook maintenance tasks such as summarizing drift, proposing doc updates, or checking whether a runtime state matches a declared contract.",
   ].join("\n")
 }
@@ -90,10 +90,10 @@ pub fn cookbook_book_types_markdown() -> String {
 ///|
 pub fn cookbook_runtime_boundaries_markdown() -> String {
   [
-    "# Runtime Boundaries", "", "## Moontown", "", "Moontown owns supervision, scheduling, routing, daemon heartbeats, civic protocol ledgers, and town UI projection. It should ask books for work and state, not store domain truth itself.",
+    "# Runtime Boundaries", "", "## MoonTown", "", "MoonTown owns supervision, scheduling, routing, daemon heartbeats, civic protocol ledgers, and town UI projection. It should ask books for work and state, not store domain truth itself.",
     "", "## MoonBook", "", "MoonBook owns each durable workspace: wiki pages, schemas, skills, review queues, generated site projections, and book-local memory rules.",
     "", "## MoonClaw", "", "MoonClaw executes bounded work and returns results, memory candidates, artifacts, blockers, and review requests. It should not own long-term book state.",
-    "", "## Moondesk", "", "Moondesk is the human desktop surface for browsing, editing, exporting, and curating MoonBook-controlled workspaces. It should not become the daemon or worker executor.",
+    "", "## MoonDesk", "", "MoonDesk is the human desktop surface for browsing, editing, exporting, and curating MoonBook-controlled workspaces. It should not become the daemon or worker executor.",
   ].join("\n")
 }
 
@@ -154,7 +154,7 @@ pub fn cookbook_stable_state_ledger_markdown(
 ///|
 pub fn cookbook_doctor_markdown() -> String {
   [
-    "# Cookbook Doctor Procedure", "", "Run the cookbook doctor whenever docs, civic protocols, daemon settings, or Moondesk handoff formats change.",
+    "# Cookbook Doctor Procedure", "", "Run the cookbook doctor whenever docs, civic protocols, daemon settings, or MoonDesk handoff formats change.",
     "", "```bash", "moon run src/cmd/main -- cookbook bootstrap", "moon run src/cmd/main -- cookbook status",
     "moon run src/cmd/main -- civic protocols doctor", "moon run src/cmd/main -- civic doctor",
     "```", "", "A clean cookbook means the control book exists, the stable-state manifest exists, and every required source doc or definition is present. Optional runtime files may be absent before the daemon or civic schedules have been started.",
@@ -176,10 +176,10 @@ pub fn cookbook_book_governance_markdown() -> String {
 ///|
 pub fn cookbook_contract_markdown() -> String {
   [
-    "# Cookbook Contract", "", "The cookbook is the stable-state control book for Moontown.",
+    "# Cookbook Contract", "", "The cookbook is the stable-state control book for MoonTown.",
     "", "## Rules", "", "- Do not hardcode domain research or civic behavior into the cookbook.",
     "- Treat docs, registries, schemas, and runtime state as separate artifact classes.",
-    "- Record missing required artifacts as drift, not as research progress.", "- Let MoonBook generate durable pages; let Moondesk manage human curation; let Moontown consume the manifest.",
+    "- Record missing required artifacts as drift, not as research progress.", "- Let MoonBook generate durable pages; let MoonDesk manage human curation; let MoonTown consume the manifest.",
     "- Any AI rewrite must preserve ownership boundaries and link back to the source artifact it summarizes.",
   ].join("\n")
 }
@@ -221,14 +221,14 @@ pub fn cookbook_content_rules_markdown() -> String {
 ///|
 pub fn cookbook_feature_guide_markdown() -> String {
   [
-    "# Moontown Feature Guide",
+    "# MoonTown Feature Guide",
     "",
-    "This page is the cookbook's feature-level description of Moontown. It explains the visible feature, the internal protocol, and how AI is allowed to help.",
+    "This page is the cookbook's feature-level description of MoonTown. It explains the visible feature, the internal protocol, and how AI is allowed to help.",
     "",
     cookbook_feature_section(
       "Town Shell",
       "A pixel-art civic gateway that makes Wenyu Valley inspectable as places, residents, workers, modules, alerts, and output surfaces.",
-      "Moontown owns the terrain/module registry, runtime projection, placement validation, town counters, and operator controls. MoonBook contributes per-book projection fragments; MoonClaw contributes activity packets that can become visible worker motion or review pressure.",
+      "MoonTown owns the terrain/module registry, runtime projection, placement validation, town counters, and operator controls. MoonBook contributes per-book projection fragments; MoonClaw contributes activity packets that can become visible worker motion or review pressure.",
       [
         "Load module config from `ui/assets/tilemap/modules/wenyu-town-modules.json`.",
         "Combine saved town state, civic status, protocol status, live autonomy, and visual projection.",
@@ -240,23 +240,23 @@ pub fn cookbook_feature_guide_markdown() -> String {
     cookbook_feature_section(
       "Mayor And Daemon",
       "The always-on town supervisor that turns goals, schedules, and failures into bounded work or explicit no-change decisions.",
-      "Moontown owns cadence, dispatch budget, daemon health, standing-goal routing, stale execution reconciliation, and restart-readable state under \{cookbook_product_home_code()}.",
+      "MoonTown owns cadence, dispatch budget, daemon health, standing-goal routing, stale execution reconciliation, and restart-readable state under \{cookbook_product_home_code()}.",
       [
         "A tick loads \{cookbook_product_path_code("town.json")}, \{cookbook_product_path_code("service.json")}, and standing-goal registries.",
         "The Mayor dispatches due goals to book-local watcher lanes and records running executions without blocking the tick on long MoonClaw work.",
         "Later ticks reconcile receipts, MoonBook watcher markers, run results, failures, and next due times.",
         "Supervisor state, heartbeat, restart markers, and logs make recovery inspectable after process failure.",
       ],
-      "AI appears through Mayor planning and worker proposals, but scheduling authority and final runtime accounting stay in Moontown state files.",
+      "AI appears through Mayor planning and worker proposals, but scheduling authority and final runtime accounting stay in MoonTown state files.",
     ),
     cookbook_feature_section(
       "MoonBook Workspace Layer",
       "The durable memory and publishing layer for research books, course books, PlanBooks, ToolBooks, civic support workspaces, and this cookbook.",
-      "MoonBook owns book folders, wiki pages, raw inputs, schemas, generated sites, review queues, memory rules, and projection JSON. Moontown registers and consumes these books.",
+      "MoonBook owns book folders, wiki pages, raw inputs, schemas, generated sites, review queues, memory rules, and projection JSON. MoonTown registers and consumes these books.",
       [
         "Catalog entries identify book id, workspace root, purpose, memory scope, tags, and skills.",
         "Bootstrap commands create required folder shapes and seed contracts.", "Bookkeepers review worker results and decide what is accepted, rejected, or queued.",
-        "Generated sites and UI-state JSON become safe surfaces for Moondesk and the town viewport.",
+        "Generated sites and UI-state JSON become safe surfaces for MoonDesk and the town viewport.",
       ],
       "AI can summarize, draft, research, or maintain book pages through bounded packets; MoonBook decides which outputs become durable book state.",
     ),
@@ -265,9 +265,9 @@ pub fn cookbook_feature_guide_markdown() -> String {
       "The temporary execution layer for tool-heavy research, synthesis, reduction, review, and repair work.",
       "MoonClaw owns role runtimes, skill execution, tool use, result packets, memory candidates, and execution journals. It does not own durable civic truth.",
       [
-        "Moontown or MoonBook creates a bounded task packet with context, skill rules, and output expectations.",
+        "MoonTown or MoonBook creates a bounded task packet with context, skill rules, and output expectations.",
         "MoonClaw imports or runs the proposal and writes structured outputs or blockers.",
-        "Moontown reconciles operational status; MoonBook reviews durable memory candidates and artifacts.",
+        "MoonTown reconciles operational status; MoonBook reviews durable memory candidates and artifacts.",
         "Failed or missing outputs become visible blockers rather than silent progress.",
       ],
       "AI behavior is strongest here: classify, compare, synthesize, reduce, draft, and inspect. The contract keeps it temporary and reviewable.",
@@ -276,7 +276,7 @@ pub fn cookbook_feature_guide_markdown() -> String {
     cookbook_feature_section(
       "Live Autonomy Spine",
       "The compact live-state spine that tells the operator whether the town is active, waiting, blocked, or drifting.",
-      "Moontown writes \{cookbook_product_path_code("live-autonomy.json")}, \{cookbook_product_path_code("town-journal.jsonl")}, and \{cookbook_product_path_code("visual-projection.json")} from daemon and civic runtime facts.",
+      "MoonTown writes \{cookbook_product_path_code("live-autonomy.json")}, \{cookbook_product_path_code("town-journal.jsonl")}, and \{cookbook_product_path_code("visual-projection.json")} from daemon and civic runtime facts.",
       [
         "Collect recent daemon ticks, active workers, accepted updates, no-change cycles, due goals, blockers, and projection paths.",
         "Separate stable waiting from unresolved failures, transient debt, and review queues.",
@@ -288,7 +288,7 @@ pub fn cookbook_feature_guide_markdown() -> String {
     cookbook_feature_section(
       "PlanBook And Cookbook",
       "PlanBook controls active implementation decisions; the cookbook records accepted stable state and explains how the system works.",
-      "MoonBook generates both book types. Moontown consumes their manifests, plans, audits, and review status. Moondesk is the intended human editing surface.",
+      "MoonBook generates both book types. MoonTown consumes their manifests, plans, audits, and review status. MoonDesk is the intended human editing surface.",
       [
         "PlanBook stores active plans, acceptance criteria, execution evidence, review notes, and document-protocol fit.",
         "Accepted implementation changes may update source, tests, docs, and then cookbook stable-state pages.",
@@ -401,6 +401,6 @@ fn cookbook_civic_feature_section(
     evidence_flow,
     "```",
     "",
-    "AI behavior: MoonClaw uses the building skill to reduce inputs into a module-native output, while Moontown enforces envelope, schedule, ledgers, privacy, review gates, and allowed destinations.",
+    "AI behavior: MoonClaw uses the building skill to reduce inputs into a module-native output, while MoonTown enforces envelope, schedule, ledgers, privacy, review gates, and allowed destinations.",
   ].join("\n")
 }

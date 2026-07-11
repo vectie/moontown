@@ -71,7 +71,7 @@ async fn existing_planbook_repair_handoff(
     ),
     proposal_id: None,
     run_id: None,
-    summary: "Existing repair result classifies this gap as an ownership handoff. Moontown will not dispatch duplicate repair packets until the owner boundary changes or the result is cleared.",
+    summary: "Existing repair result classifies this gap as an ownership handoff. MoonTown will not dispatch duplicate repair packets until the owner boundary changes or the result is cleared.",
     validation_command: planbook_repair_validation_command(),
     generated_at_ms: @env.now(),
   })

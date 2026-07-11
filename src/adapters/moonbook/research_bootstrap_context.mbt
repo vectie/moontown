@@ -25,7 +25,7 @@ fn research_bootstrap_worker_context_bundle(
     active_memory: [],
     user_memory: [],
     working_memory: [],
-    memory_summary: "Sanitized Moontown research bootstrap context for `\{entry.id}`.",
+    memory_summary: "Sanitized MoonTown research bootstrap context for `\{entry.id}`.",
     output_contract: research_bootstrap_output_contract_lines(),
   }
 }

@@ -8,7 +8,7 @@ pub async fn render_saved_town_status(
   )
   let runtime = @daemon_runtime.inspect_daemon_runtime(snapshot_path~)
   let builder = StringBuilder::new()
-  builder.write_string("Moontown status\n")
+  builder.write_string("MoonTown status\n")
   builder.write_string("\{status.summary}\n")
   if !status.has_snapshot {
     return builder.to_string()

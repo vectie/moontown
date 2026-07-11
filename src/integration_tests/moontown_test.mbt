@@ -13,7 +13,7 @@ test "modeled state seeds books workers tasks and dispatch events" {
 ///|
 test "dashboard renders town square and dispatch log" {
   let dashboard = @moontown.modeled_dashboard()
-  assert_true(dashboard.contains("Dashboard / Moontown / Moonrise"))
+  assert_true(dashboard.contains("Dashboard / MoonTown / Moonrise"))
   assert_true(dashboard.contains("## Town Map"))
   assert_true(dashboard.contains("scene: 1280x720"))
   assert_true(dashboard.contains("City Hall"))

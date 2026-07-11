@@ -15,7 +15,7 @@ test "Wenyu Valley PRD build goals trigger bootstrap coverage" {
 ///|
 test "town goal slug is stable and filesystem safe" {
   assert_eq(
-    @town_synthesis.town_goal_slug("Research Moontown, MoonBook, and MoonClaw!"),
+    @town_synthesis.town_goal_slug("Research MoonTown, MoonBook, and MoonClaw!"),
     "research-moontown-moonbook-and-moonclaw",
   )
 }

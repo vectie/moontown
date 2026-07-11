@@ -1,7 +1,7 @@
 ///|
 fn research_bootstrap_sources_prompt() -> String {
   research_bootstrap_prompt([
-    "Execute the source-screening stage of the imported Moontown research bootstrap packet for ${proposal.title}.",
+    "Execute the source-screening stage of the imported MoonTown research bootstrap packet for ${proposal.title}.",
     research_bootstrap_source_screening_inputs_prompt(),
     "Do not load the full reference report in this source-screening stage; REFERENCE_STYLE.md already contains the style target and line count.",
     @research_policy.bootstrap_reference_policy_prompt(),
@@ -44,7 +44,7 @@ fn research_bootstrap_source_screening_write_targets_prompt() -> String {
 ///|
 fn research_bootstrap_source_expansion_prompt() -> String {
   research_bootstrap_prompt([
-    "Execute the focused source-expansion stage of the imported Moontown research bootstrap packet for ${proposal.title}.",
+    "Execute the focused source-expansion stage of the imported MoonTown research bootstrap packet for ${proposal.title}.",
     research_bootstrap_source_expansion_inputs_prompt(),
     "This step exists only to fix thin or weak source screens; do not write the final report.",
     "If \{@research_policy.source_screen_path()} already has \{@research_policy.min_included_sources()} or more included inspected evidence sources, verify the count, add a short no-op note to \{@research_policy.search_log_path()}, and finish.",

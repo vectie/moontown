@@ -68,7 +68,7 @@ pub fn bootstrap_context_reference_source_policy() -> String {
 ///|
 pub fn bootstrap_output_contract_lines() -> Array[String] {
   [
-    "For direct Moontown research bootstrap worker steps, return plain Markdown summaries unless a step prompt explicitly asks for JSON.",
+    "For direct MoonTown research bootstrap worker steps, return plain Markdown summaries unless a step prompt explicitly asks for JSON.",
     "Do not return adaptive-planning JSON such as `needs_subplan` or `suggested_substeps`.",
     "Raw artifacts must be workspace-relative paths under `raw/bootstrap/`.",
     bootstrap_required_artifacts_contract(),

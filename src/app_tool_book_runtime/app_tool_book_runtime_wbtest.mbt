@@ -54,7 +54,7 @@ async test "app tool book runtime config installer resolves method and spec file
   let spec = @app_tool_book.AppToolBookInstallSpec::{
     book_id: "app-tool-file-config",
     title: "File Config ToolBook",
-    purpose: "Installed from a Moondesk-style config.",
+    purpose: "Installed from a MoonDesk-style config.",
     websites: ["https://example.org/data"],
     analysis_method: "",
     analysis_method_path: "method.md",

@@ -1,10 +1,10 @@
-# Moontown
+# MoonTown
 
 > MoonBit-native town control plane + embedded strategic roles + scene dashboard + Rabbita operator UI
 
 `MoonBit` `Town Orchestration` `MoonBook Extension API` `MoonClaw Proposal Packets` `Mayor` `Keeper` `Routing` `Health` `Storage` `Scene UI` `Rabbita`
 
-Moontown is the town-level orchestration layer above multiple `moonbook`
+MoonTown is the town-level orchestration layer above multiple `moonbook`
 domains and multiple `moonclaw` runtimes.
 
 It is designed for:
@@ -18,7 +18,7 @@ It is designed for:
 - stable docs/definition cookbook control
 - browser-facing simulation dashboards
 
-## What Moontown Feels Like
+## What MoonTown Feels Like
 
 ```text
  moonbook catalog / keeper packets / mayor
@@ -34,7 +34,7 @@ It is designed for:
   -> evolve toward a 24/7 social-experiment control plane
 ```
 
-Moontown is strongest when you want one system to hold together:
+MoonTown is strongest when you want one system to hold together:
 
 - global orchestration
 - per-book isolation
@@ -163,7 +163,7 @@ It is data-driven and currently installs:
 - the Wenyu civic pattern manifest for all 11 civic buildings
 
 The daemon reads those standing goals and pattern schedules during normal
-ticks. Domain-specific research state still belongs in each MoonBook; Moontown
+ticks. Domain-specific research state still belongs in each MoonBook; MoonTown
 only owns scheduling, dispatch, runtime accounting, and operator visibility.
 The book-quality audit also merges live books from the saved town snapshot, so
 standing-watch books are audited even before they are manually curated into the
@@ -226,7 +226,7 @@ upserts the recurring schedule in
 `pattern-install <path>` installs one recurring scenario without running it;
 `pattern-manifest <path>` installs a set of scenarios with staggered due times.
 The default Wenyu manifest covers all 11 civic buildings in
-`assets/templates/civic-patterns/`. Moontown should not grow one MoonBit branch per
+`assets/templates/civic-patterns/`. MoonTown should not grow one MoonBit branch per
 domain or civic service. See
 [docs/CIVIC_COMMUNICATION_TEMPLATES.md](/Users/kq/Workspace/moontown/docs/CIVIC_COMMUNICATION_TEMPLATES.md).
 
@@ -257,24 +257,24 @@ moon run src/cmd/main -- cookbook status
 This creates `books/moontown-cookbook/`, registers it in
 `.moonsuite/products/moontown/moonbooks.json`, and writes
 `.moonsuite/products/moontown/cookbook/stable-state.json`. MoonBook generates
-and stores the cookbook, Moondesk should become the human desktop surface for
-managing it, and Moontown consumes the manifest for drift checks and operator
+and stores the cookbook, MoonDesk should become the human desktop surface for
+managing it, and MoonTown consumes the manifest for drift checks and operator
 guidance.
 
 ## Planbook Workflow
 
-Moontown now distinguishes four active MoonBook work types:
+MoonTown now distinguishes four active MoonBook work types:
 
 Book templates are listed in
 [assets/templates/books/templates.json](/Users/kq/Workspace/moontown/assets/templates/books/templates.json)
-and can be inspected with `moon run src/cmd/main -- books templates`. Moondesk
+and can be inspected with `moon run src/cmd/main -- books templates`. MoonDesk
 should use that registry as its creation palette. Runtime book creation requests
 can be written to `.moonsuite/products/moontown/book-template-requests.json`;
 the daemon’s `book-template-request` job processes pending requests. `status`
 reports pending and failed request counts so autonomous book creation is visible
 in the same runtime spine as standing watchers.
 `live status` and `.moonsuite/products/moontown/live-autonomy.json` also surface the same request
-counts, so a Moondesk-created book request is visible before and after the
+counts, so a MoonDesk-created book request is visible before and after the
 daemon turns it into a MoonBook workspace.
 The Rabbita operator console also exposes this path during development through
 `POST /api/book-template-requests`, currently for the `pdf-evidence-watch`
@@ -293,8 +293,8 @@ durable install and failure audit trail for autonomous book creation.
   at [assets/templates/books/pdf-evidence-watch/](/Users/kq/Workspace/moontown/assets/templates/books/pdf-evidence-watch).
   Instantiate it with
   `moon run src/cmd/main -- books pdf-watch bootstrap <book-id>`; the command
-  registers the MoonBook catalog entry and standing goal that Moondesk should
-  later expose through a creation wizard. For a complete Moondesk-style handoff,
+  registers the MoonBook catalog entry and standing goal that MoonDesk should
+  later expose through a creation wizard. For a complete MoonDesk-style handoff,
   use `moon run src/cmd/main -- books pdf-watch install <config.json>` with
   [assets/templates/books/pdf-evidence-watch/install.example.json](/Users/kq/Workspace/moontown/assets/templates/books/pdf-evidence-watch/install.example.json).
 - `course-book`
@@ -346,7 +346,7 @@ packet under the PlanBook workspace. It writes repair context, a repair
 `.moonsuite/products/moontown/planbook/repair-task.md`. When the daemon sees an open gap and no
 active repair, it dispatches one bounded repair packet through MoonClaw with
 `execution_mode: acp` and `execution_target: codex-main`, so Codex ACP can patch
-the Moontown source root and return software-engineering evidence. Daemon
+the MoonTown source root and return software-engineering evidence. Daemon
 dispatch is detached by default; the live loop records the run id and keeps
 ticking instead of waiting for a long source-repair process inline. Accepted
 source repairs must do more than claim success: they must include a
@@ -442,7 +442,7 @@ failure remains auditable without making the town look degraded.
 ## Standing Goal Model
 
 The long-standing runtime split is:
-See [Executable Book Coordination](docs/EXECUTABLE_BOOK_COORDINATION.md) for the current boundary: Moontown coordinates books, not only schedules them.
+See [Executable Book Coordination](docs/EXECUTABLE_BOOK_COORDINATION.md) for the current boundary: MoonTown coordinates books, not only schedules them.
 
 
 ```text
@@ -488,7 +488,7 @@ The registry is persisted at:
 
 - `.moonsuite/products/moontown/standing-goals.json`
 
-The daemon does not put topic memory in Moontown. Moontown only decides that a
+The daemon does not put topic memory in MoonTown. MoonTown only decides that a
 standing goal is due and dispatches it to its `target_book_id` MoonBook lane.
 MoonBook owns the durable topic wiki, and MoonClaw owns bounded research
 execution.
@@ -503,7 +503,7 @@ daemon tick
   -> MoonBook compares the topic against its own baseline
   -> MoonClaw performs bounded web/source discovery
   -> MoonBook emits standing_goal_decision
-  -> Moontown records .moonsuite/products/moontown/watchers/<goal-id>.jsonl
+  -> MoonTown records .moonsuite/products/moontown/watchers/<goal-id>.jsonl
   -> next_due_tick advances with update/no-change/review/failure backoff
 ```
 
@@ -555,7 +555,7 @@ wiki_pages_changed_count: <integer>
 book_changed: yes | no
 ```
 
-Moontown only consumes this marker for scheduling and UI status. It does not
+MoonTown only consumes this marker for scheduling and UI status. It does not
 decide whether topic research is novel; that remains a MoonBook keeper decision.
 No-change and failed checks are operational activity, not evidence progress:
 accepted facts, changed pages, and `book_changed` must stay zero/no unless
@@ -604,7 +604,7 @@ activity and judgement, not pretend that the book improved.
 
 ## Embedded Role Model
 
-Moontown does not expose a raw generic worker brain directly to town code.
+MoonTown does not expose a raw generic worker brain directly to town code.
 
 The intended role split is:
 
@@ -774,7 +774,7 @@ user goal naming multiple subjects
   -> each lane bootstraps verified research coverage
   -> MoonClaw gathers web/local evidence into raw/bootstrap/*
   -> MoonBook materializes durable wiki coverage and generated sites
-  -> Moontown applies quality gates
+  -> MoonTown applies quality gates
   -> mayor writes .moonsuite/products/moontown/town-synthesis/*.md
 ```
 
@@ -848,7 +848,7 @@ town model.
 The generated MoonBook workspace site is a separate surface. If a live run
 still shows generic branding or dead projection links under
 `books/*/site/`, that bug belongs to the MoonBook site generator, not
-to the Moontown Rabbita dashboard.
+to the MoonTown Rabbita dashboard.
 
 ## Docs
 

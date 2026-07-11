@@ -47,7 +47,7 @@ In product terms:
 - the module add-on architecture has started
 - the daemon/watch seam exists locally
 - research workflows can persist through MoonBook/MoonClaw
-- Wenyu civic modules now have a Moontown-side service registry and bootstrap
+- Wenyu civic modules now have a MoonTown-side service registry and bootstrap
   command that creates seeded MoonBook workspaces, schemas, review queues,
   projections, and MoonClaw skill contracts
 - civic services still need repeated end-to-end module workflows before the
@@ -55,11 +55,11 @@ In product terms:
 
 ## 2. Responsibility Split
 
-### Moontown
+### MoonTown
 
-Moontown is the always-on town control plane.
+MoonTown is the always-on town control plane.
 
-Moontown owns:
+MoonTown owns:
 
 - Mayor supervision.
 - Town loop and daemon checkpoints.
@@ -71,7 +71,7 @@ Moontown owns:
 - The Wenyu civic protocol registry and temporary local bootstrap bridge for
   creating civic support workspaces until MoonBook owns native templates.
 
-Moontown must not own:
+MoonTown must not own:
 
 - Durable civic-domain wiki content.
 - Raw long-running execution tools.
@@ -101,7 +101,7 @@ MoonBook must expose:
 - Memory snapshots.
 - Generated site paths.
 - Review gaps.
-- Projection JSON for Moontown UI.
+- Projection JSON for MoonTown UI.
 
 ### MoonClaw
 
@@ -140,7 +140,7 @@ Required features:
 - Resident avatars and worker avatars.
 - Operator controls for pause, step, recovery, and inspection.
 
-Moontown implementation:
+MoonTown implementation:
 
 - Extend `TownState` projection with `TownRuntimeProjection`.
 - Add season, weather, day phase, and civic counters.
@@ -173,15 +173,15 @@ Implementation note:
   editing `src/ui/assets/tilemap/modules/wenyu-town-modules.json`.
 - The clean terrain layer should remain separate from service buildings,
   interiors, agents, and runtime effects.
-- The Moontown editor should stay at the multi-agent system level: module
+- The MoonTown editor should stay at the multi-agent system level: module
   composition, MoonBook binding, worker-lane assignment, placement validation,
   and output availability. It may expose simple per-agent controls, but deep
   single-agent prompts, skill authoring, file browsing, and book/workspace
   editing belong in `../moondesk`.
-- Moondesk should export portable artifacts back to Moontown: MoonBook folders,
+- MoonDesk should export portable artifacts back to MoonTown: MoonBook folders,
   projection fragments, skill packs, agent profiles, asset packs, and module
-  packs. Moontown should import those artifacts as data/config rather than
-  duplicating Moondesk's desktop/editor responsibilities.
+  packs. MoonTown should import those artifacts as data/config rather than
+  duplicating MoonDesk's desktop/editor responsibilities.
 
 ### 3.2 Resident Digital Twins
 
@@ -202,7 +202,7 @@ Required features:
 - Consent and privacy scope.
 - Agent goals and recent agent actions.
 
-Moontown implementation:
+MoonTown implementation:
 
 - Display resident cards and map avatars.
 - Track high-level town counters only.
@@ -244,7 +244,7 @@ Required features:
 - One-click packet preparation for later human confirmation.
 - Source citations and confidence labels.
 
-Moontown implementation:
+MoonTown implementation:
 
 - Route policy requests to Policy Hall book.
 - Show policy quest status in the town UI.
@@ -289,7 +289,7 @@ Required features:
 - Reminder schedule.
 - Champion wall and replay links.
 
-Moontown implementation:
+MoonTown implementation:
 
 - Schedule contest-related task batches.
 - Show contest progress and town broadcasts.
@@ -328,7 +328,7 @@ Required features:
 - RSVP and reminder plan.
 - Post-event reflection and follow-up.
 
-Moontown implementation:
+MoonTown implementation:
 
 - Show social matches and events.
 - Escalate match proposals that require human approval.
@@ -364,7 +364,7 @@ Required features:
 - VIP tour notes.
 - Talent graph export.
 
-Moontown implementation:
+MoonTown implementation:
 
 - Render public-safe talent cards and heatmap signals.
 - Show achievement broadcasts.
@@ -404,7 +404,7 @@ Required features:
 - Agent action count.
 - Retention and return signals.
 
-Moontown implementation:
+MoonTown implementation:
 
 - Own town-wide counters and health model.
 - Persist daemon ticks and summary events.
@@ -440,7 +440,7 @@ Required features:
 - Tutorial quests.
 - Before/after output comparisons.
 
-Moontown implementation:
+MoonTown implementation:
 
 - Schedule daily AI learning quests.
 - Show active tutorial and completion state.
@@ -477,7 +477,7 @@ Required features:
 - Physical space digital twin signals.
 - Human confirmation gate for risky actions.
 
-Moontown implementation:
+MoonTown implementation:
 
 - Route bridge requests.
 - Track request lifecycle.
@@ -505,7 +505,7 @@ Acceptance criteria:
 
 ### 4.1 Town Runtime Projection
 
-Moontown should publish a browser-consumable projection:
+MoonTown should publish a browser-consumable projection:
 
 ```json
 {
@@ -560,7 +560,7 @@ Initial implementation options:
 Owner:
 
 - MoonBook stores the full memory stream.
-- Moontown receives only the projected summary.
+- MoonTown receives only the projected summary.
 
 ### 4.3 Quest Projection
 
@@ -580,7 +580,7 @@ Owner:
 
 Owner:
 
-- Moontown routes and supervises.
+- MoonTown routes and supervises.
 - MoonBook persists.
 - MoonClaw executes stage work.
 
@@ -648,7 +648,7 @@ Exit criteria:
 
 Build:
 
-- `TownRuntimeProjection` type in Moontown.
+- `TownRuntimeProjection` type in MoonTown.
 - Static `town-runtime.json` exporter.
 - Rabbita source mode loads projection data.
 - Snapshot mode stops being a placeholder.
@@ -663,7 +663,7 @@ Acceptance criteria:
 
 Status:
 
-- Implemented on the Moontown side as a civic protocol/service registry and
+- Implemented on the MoonTown side as a civic protocol/service registry and
   bootstrap bridge.
 - The registry now distinguishes module mode, persistence mode, and MoonBook
   support role:
@@ -690,7 +690,7 @@ Acceptance criteria:
 - Each support workspace has the durable substrate required by its persistence
   mode: wiki root when needed, dedicated skill pack, ledgers, projection
   fragment, and readiness summary. Implemented for seeded workspaces.
-- Moontown can bootstrap all civic support workspaces. Implemented with
+- MoonTown can bootstrap all civic support workspaces. Implemented with
   `moon run src/cmd/main -- civic bootstrap`.
 - MoonBook generated site exposes module pages. Implemented as seeded
   `book/site/generated/index.html`; MoonBook-native templates are still the
@@ -700,7 +700,7 @@ Acceptance criteria:
 
 Status:
 
-- Implemented as generated MoonBook-local skill packs and Moontown worker
+- Implemented as generated MoonBook-local skill packs and MoonTown worker
   context contracts.
 
 Role-specialized packs:
@@ -754,7 +754,7 @@ Build:
 Acceptance criteria:
 
 - Each workflow produces persisted MoonBook artifacts.
-- Each workflow is visible in Moontown.
+- Each workflow is visible in MoonTown.
 - Each workflow can be re-run without corrupting prior state.
 
 ### Milestone 6: Durable 24/7 Service
@@ -781,7 +781,7 @@ Acceptance criteria:
 - No robot booking finalization without user/operator confirmation.
 - No sensitive personal data projection without explicit scope.
 - No attempt to make Rabbita a full game engine before the runtime is real.
-- No copying MoonBook or MoonClaw logic into Moontown.
+- No copying MoonBook or MoonClaw logic into MoonTown.
 
 ## 8. Safety and Compliance
 
@@ -798,13 +798,13 @@ Rules:
 
 - MoonClaw can draft and prepare.
 - MoonBook can persist reviewable records.
-- Moontown can route and escalate.
+- MoonTown can route and escalate.
 - User/operator confirmation is required before external submission,
   publication, booking, or sensitive data transmission.
 
 ## 9. Engineering Backlog
 
-### Moontown Backlog
+### MoonTown Backlog
 
 - Keep `TownRuntimeProjection` and visual module projections aligned with the
   civic service registry.
@@ -828,7 +828,7 @@ Rules:
 - Add mayor patrol decisions for Wenyu modules.
 - Add town-level editor import/export for module packs, asset packs, worker
   lane profiles, and MoonBook projection bindings.
-- Keep Moontown editor changes scoped to multi-agent/town composition, not
+- Keep MoonTown editor changes scoped to multi-agent/town composition, not
   detailed single-agent or file/workspace editing.
 
 ### MoonBook Backlog

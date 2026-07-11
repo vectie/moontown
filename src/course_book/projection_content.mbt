@@ -25,7 +25,7 @@ pub fn wenyu_course_ui_state_json(entry : @moonbook.BookCatalogEntry) -> String 
     "    {\"title\":\"Course\",\"detail\":\"wiki/course/beginner-course.md\",\"meta\":\"Lessons\"}",
     "  ],",
     "  \"journey\": [",
-    "    {\"title\":\"Course bootstrap\",\"stage\":\"generated\",\"status\":\"review\",\"summary\":\"Moontown registered a first-class course book for Wenyu Valley game-design learning.\",\"highlights\":[]}",
+    "    {\"title\":\"Course bootstrap\",\"stage\":\"generated\",\"status\":\"review\",\"summary\":\"MoonTown registered a first-class course book for Wenyu Valley game-design learning.\",\"highlights\":[]}",
     "  ]",
     "}",
   ].join("\n")

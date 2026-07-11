@@ -80,7 +80,7 @@ moon run src/cmd/main -- civic protocols schedules status
 
 ## Responsibility Split
 
-- Moontown installs the portfolio, schedules due checks, records civic pattern
+- MoonTown installs the portfolio, schedules due checks, records civic pattern
   rounds, and shows truthful runtime/UI status.
 - MoonBook owns durable domain/civic workspaces, wiki pages, review queues,
   generated projections, and accepted-change accounting.

@@ -17,7 +17,7 @@ fn dispatch_goal_policy_test_task(
 ///|
 test "dispatch classifies research and Wenyu goal text" {
   assert_true(research_goal_text("research OPC companies"))
-  assert_true(research_goal_text("Compare Moontown MoonBook and MoonClaw"))
+  assert_true(research_goal_text("Compare MoonTown MoonBook and MoonClaw"))
   assert_true(
     research_goal_text(
       "Build Wenyu Valley AI Innovation Town according to docs/WENYU_VALLEY_PRD.md",

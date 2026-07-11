@@ -37,6 +37,6 @@ fn planbook_repair_plan_acceptance_criteria() -> String {
     "- [ ] `git diff --check`, `git status --short`, and focused diff hygiene are recorded.",
     "- [ ] Local commit readiness is recorded; if files changed and validation passed, the worker prepares a commit according to policy.",
     "- [ ] PlanBook autonomy doctor reruns and updates `\{@storage.moontown_product_display_artifact("planbook/autonomy.json")}`.",
-    "- [ ] If ownership is outside Moontown, the result names the correct repository and does not fake completion.",
+    "- [ ] If ownership is outside MoonTown, the result names the correct repository and does not fake completion.",
   ].join("\n")
 }

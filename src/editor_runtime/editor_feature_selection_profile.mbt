@@ -48,7 +48,7 @@ fn editor_feature_rater_profile_json(workspace_root : String) -> Json {
     ],
     "metadata": {
       "owner": "moontown-planbook",
-      "purpose": "Let MoonClaw choose the next editor-mode feature from course evidence instead of hardcoding the choice in Moontown.",
+      "purpose": "Let MoonClaw choose the next editor-mode feature from course evidence instead of hardcoding the choice in MoonTown.",
     },
   }
 }

@@ -71,7 +71,7 @@ fn empty_live_autonomy_state() -> @core.TownState {
   @core.empty_state(
     @core.TownConfig::new(
       id="moontown-live-autonomy",
-      name="Moontown Live Autonomy",
+      name="MoonTown Live Autonomy",
     ),
   )
 }

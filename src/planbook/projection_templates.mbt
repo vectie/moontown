@@ -3,8 +3,8 @@ pub fn ui_state_json(entry : @moonbook.BookCatalogEntry) -> String {
   [
     "{",
     "  \"book_id\": \{json_string(entry.id)},",
-    "  \"title\": \"Moontown Quality Planbook\",",
-    "  \"summary\": \"Implementation plans, acceptance gates, execution evidence, and review notes for Moontown quality work.\",",
+    "  \"title\": \"MoonTown Quality Planbook\",",
+    "  \"summary\": \"Implementation plans, acceptance gates, execution evidence, and review notes for MoonTown quality work.\",",
     "  \"status_chips\": [",
     "    {\"label\":\"planbook\",\"tone\":\"healthy\"},",
     "    {\"label\":\"acceptance-gated\",\"tone\":\"review\"},",
@@ -27,7 +27,7 @@ pub fn ui_state_json(entry : @moonbook.BookCatalogEntry) -> String {
     "    {\"title\":\"Quality Gates\",\"detail\":\"wiki/planning/quality-gates.md\",\"meta\":\"Planning\"}",
     "  ],",
     "  \"journey\": [",
-    "    {\"title\":\"Planbook bootstrap\",\"stage\":\"generated\",\"status\":\"review\",\"summary\":\"Moontown registered a first-class planbook workspace for world-class book quality governance.\",\"highlights\":[]}",
+    "    {\"title\":\"Planbook bootstrap\",\"stage\":\"generated\",\"status\":\"review\",\"summary\":\"MoonTown registered a first-class planbook workspace for world-class book quality governance.\",\"highlights\":[]}",
     "  ]",
     "}",
   ].join("\n")
@@ -50,7 +50,7 @@ fn planbook_generated_site_head() -> String {
     "<!doctype html><html lang=\"en\"><head>",
     "<meta charset=\"utf-8\">",
     "<meta name=\"viewport\" content=\"width=device-width,initial-scale=1\">",
-    "<title>Moontown Quality Planbook</title>",
+    "<title>MoonTown Quality Planbook</title>",
     "<style>\{planbook_generated_site_css()}</style>",
     "</head>",
   ].join("")
@@ -96,7 +96,7 @@ fn planbook_generated_site_hero(entry : @moonbook.BookCatalogEntry) -> String {
   [
     "<section class=\"hero\">",
     "<p>MoonBook managed / Mayor routed / MoonClaw executed</p>",
-    "<h1>Moontown Quality Planbook</h1>",
+    "<h1>MoonTown Quality Planbook</h1>",
     "<p>Workspace <code>\{html_escape(entry.workspace_root)}</code>. Plans are the durable checkpoint before implementation and cookbook promotion.</p>",
     "</section>",
   ].join("")

@@ -9,4 +9,4 @@ Example contract:
 - Outputs: interactive UI under `app/` and `book/site/generated/tool.html`.
 - Required interactions: filters, sorting, comparisons, scenario inputs, or drill-down panels.
 - Validation: the tool must load without network-only assumptions and must show stale/missing data clearly.
-- Civic binding: the linked Moontown building should expose "Open Tool", "Open Report", and "Configure in Moondesk".
+- Civic binding: the linked MoonTown building should expose "Open Tool", "Open Report", and "Configure in MoonDesk".

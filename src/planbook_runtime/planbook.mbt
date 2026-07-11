@@ -1,7 +1,7 @@
 ///|
 fn planbook_index_markdown(entry : @moonbook.BookCatalogEntry) -> String {
   [
-    "# Moontown Quality Planbook",
+    "# MoonTown Quality Planbook",
     "",
     "This MoonBook manages implementation intent. It is not a research book and not a course. It stores plans, acceptance criteria, execution evidence, review notes, and stable-state handoffs.",
     "",

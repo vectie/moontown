@@ -17,7 +17,7 @@ fn display_topic_title(topic : String) -> String {
   match topic {
     "moonbook" => "MoonBook"
     "moonclaw" => "MoonClaw"
-    "moontown" => "Moontown"
+    "moontown" => "MoonTown"
     _ => topic
   }
 }

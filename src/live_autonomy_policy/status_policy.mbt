@@ -228,7 +228,7 @@ fn live_autonomy_template_request_actions(
   let blockers = context.blockers
   if blockers.failed_book_template_requests > 0 {
     actions.push(
-      "Inspect failed book-template request configs before retrying Moondesk book creation.",
+      "Inspect failed book-template request configs before retrying MoonDesk book creation.",
     )
   } else if blockers.pending_book_template_requests > 0 {
     actions.push(

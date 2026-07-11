@@ -11,7 +11,7 @@ fn planbook_moonbook_provider_criterion() -> PlanbookCriterionStatus {
     if configured {
       "MoonBook integration uses an explicit configured root"
     } else {
-      "MoonBook integration is not configured; standalone Moontown should not inspect a sibling checkout"
+      "MoonBook integration is not configured; standalone MoonTown should not inspect a sibling checkout"
     },
     "set MOONTOWN_MOONBOOK_ROOT or provide a package/registry integration instead of assuming a sibling checkout",
   )
@@ -58,7 +58,7 @@ async fn planbook_app_tool_book_template_criterion() -> PlanbookCriterionStatus 
   planbook_criterion(
     "app-tool-book-template",
     "2026-06-02-app-tool-book-roadmap",
-    "Moontown can generate durable App ToolBooks through the template request pipeline",
+    "MoonTown can generate durable App ToolBooks through the template request pipeline",
     "moontown+moonbook+moondesk+moonclaw",
     ready,
     if ready {
@@ -66,6 +66,6 @@ async fn planbook_app_tool_book_template_criterion() -> PlanbookCriterionStatus 
     } else {
       "App ToolBook support is incomplete; ToolBooks would still require Codex/manual workspace creation"
     },
-    "add an `app-tool-book` template with manifest, generated tool route, Moondesk-editable spec, MoonClaw skills, and generic template-request installer support",
+    "add an `app-tool-book` template with manifest, generated tool route, MoonDesk-editable spec, MoonClaw skills, and generic template-request installer support",
   )
 }

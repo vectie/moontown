@@ -3,7 +3,7 @@ async fn build_live_state_from_catalog(
   catalog : Array[@moonbook.BookCatalogEntry],
 ) -> @core.TownState {
   let state = @core.empty_state(
-    @core.TownConfig::new(id="moonrise", name="Moontown / Moonrise"),
+    @core.TownConfig::new(id="moonrise", name="MoonTown / Moonrise"),
   )
   let mayor = default_mayor()
   register_town_books(state, @moonbook.catalog_to_book_refs(catalog))
@@ -67,7 +67,7 @@ pub fn modeled_state_from_catalog(
   catalog : Array[@moonbook.BookCatalogEntry],
 ) -> @core.TownState {
   let state = @core.empty_state(
-    @core.TownConfig::new(id="moonrise", name="Moontown / Moonrise"),
+    @core.TownConfig::new(id="moonrise", name="MoonTown / Moonrise"),
   )
   register_town_books(state, @moonbook.catalog_to_book_refs(catalog))
   register_town_workers(state)
@@ -81,7 +81,7 @@ pub fn[Provider : @core.BookProvider] modeled_state_with_provider(
   provider : Provider,
 ) -> @core.TownState {
   let state = @core.empty_state(
-    @core.TownConfig::new(id="moonrise", name="Moontown / Moonrise"),
+    @core.TownConfig::new(id="moonrise", name="MoonTown / Moonrise"),
   )
   register_town_books(state, provider.books())
   register_town_workers(state)

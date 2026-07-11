@@ -1,7 +1,7 @@
 ///|
 async test "miniapp routes command exposes local backend catalog" {
   let output = render_cli_command(["miniapp", "routes"])
-  assert_true(output.contains("Moontown miniapp local backend routes"))
+  assert_true(output.contains("MoonTown miniapp local backend routes"))
   assert_true(output.contains("route=dev-login"))
   assert_true(output.contains("route=share-building"))
   assert_true(output.contains("route=publish-building"))

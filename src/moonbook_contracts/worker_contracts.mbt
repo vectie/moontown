@@ -18,7 +18,7 @@ pub fn fallback_keeper_policy_lines() -> Array[String] {
   [
     "Keep all memory and durable artifacts inside this book unless the task explicitly names a repository patch.",
     "Return explicit blockers instead of fake completion when required tools or sources are missing.",
-    "Preserve Moontown, MoonBook, and MoonClaw responsibility boundaries.",
+    "Preserve MoonTown, MoonBook, and MoonClaw responsibility boundaries.",
   ]
 }
 

@@ -1,7 +1,7 @@
 # Tiled Map Pipeline
 
 This document defines the repeatable procedure for generating and assembling a
-2.5D Wenyu Valley map for the Moontown UI.
+2.5D Wenyu Valley map for the MoonTown UI.
 
 The target style is a Stardew-like isometric valley:
 
@@ -35,7 +35,7 @@ asset prompt/spec
   -> generated tileset sprites
   -> tile manifest
   -> Tiled-compatible map JSON
-  -> Moontown map loader
+  -> MoonTown map loader
   -> Rabbita/Pixi/Canvas renderer
 ```
 
@@ -173,7 +173,7 @@ Naming rules:
 
 ### 4. Create The Manifest
 
-The manifest is the stable contract between generated art and the Moontown UI.
+The manifest is the stable contract between generated art and the MoonTown UI.
 
 ```json
 {
@@ -300,7 +300,7 @@ Required zone ids:
 - `book-wenyu-physical-bridge`
 - `anomaly-corner`
 
-Moontown owns the zone/runtime binding. MoonBook owns domain workspace content.
+MoonTown owns the zone/runtime binding. MoonBook owns domain workspace content.
 MoonClaw owns worker execution state.
 
 ## AI Generation Procedure
@@ -350,7 +350,7 @@ The procedural mode should start with simple rules:
 - trees and flowers fill non-walkable edges
 - paths connect every building to City Hall and Worker Yard
 
-## Moontown Integration Plan
+## MoonTown Integration Plan
 
 ### Phase 1: Keep Current CSS, Add Manifest
 

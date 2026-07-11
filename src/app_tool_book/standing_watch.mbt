@@ -17,7 +17,7 @@ pub fn standing_goal_prompt(
     "",
     "Use web-first source discovery for the configured websites:",
     if websites.is_empty() {
-      "- no websites configured yet; inspect the book config and request Moondesk/operator configuration before inventing sources"
+      "- no websites configured yet; inspect the book config and request MoonDesk/operator configuration before inventing sources"
     } else {
       websites.map(fn(site) { "- \{site}" }).join("\n")
     },

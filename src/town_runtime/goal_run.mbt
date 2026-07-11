@@ -7,7 +7,7 @@ pub async fn run_goal(
   book_catalog_path? : String = @moonbook.default_catalog_path(),
 ) -> @core.TownState {
   let state = @core.empty_state(
-    @core.TownConfig::new(id="moonrise", name="Moontown / Moonrise"),
+    @core.TownConfig::new(id="moonrise", name="MoonTown / Moonrise"),
   )
   run_goal_into_state(
     state,

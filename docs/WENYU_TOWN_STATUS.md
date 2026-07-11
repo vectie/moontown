@@ -58,8 +58,8 @@ module.
 | Building protocol layer | Medium-near | Buildings have modes, skills, protocol definitions, ledgers, default communication-pattern scenario templates, and recurring schedules; accepted MoonBook persistence and UI protocol history still need repeated live evidence |
 | Runtime architecture | Medium-near | Civic protocol behavior now has a documented refactor path, the communication-pattern scheduler is split away from generic daemon code, daemon scheduled jobs use a dispatcher, and protocol registry/store/status/fixtures are separated; package-level civic runtime splits and stronger contract validation are still pending |
 | Self-patching evidence | Not yet proven | PlanBook can route bounded repairs to MoonClaw/Codex ACP, but route wiring is not enough. Accepted source repairs now require `planbook.repair.patch_receipt.v1`; without that receipt, ACP runs remain diagnostics or blockers, not proof that the town patched its own source. |
-| Designer/operator tooling | Medium | JSON config works, the standalone viewport has view/editor/output modes, editor mode shows town-level Moondesk handoff lanes, and detailed single-agent/workspace editing remains in Moondesk |
-| Cookbook/control book | Medium-far | `cookbook bootstrap` creates a MoonBook-backed stable-state cookbook, generated wiki pages, generated site, and `.moonsuite/products/moontown/cookbook/stable-state.json`; needs Moondesk-native browsing/editing, drift review UI, import/export, and MoonBook-native templates upstream |
+| Designer/operator tooling | Medium | JSON config works, the standalone viewport has view/editor/output modes, editor mode shows town-level MoonDesk handoff lanes, and detailed single-agent/workspace editing remains in MoonDesk |
+| Cookbook/control book | Medium-far | `cookbook bootstrap` creates a MoonBook-backed stable-state cookbook, generated wiki pages, generated site, and `.moonsuite/products/moontown/cookbook/stable-state.json`; needs MoonDesk-native browsing/editing, drift review UI, import/export, and MoonBook-native templates upstream |
 | Production deployment | Far | Auth, backups, permissions, packaged supervisor, and recovery playbooks are not complete |
 
 ## Definition Of Fully Functioning
@@ -97,14 +97,14 @@ A fully functioning Wenyu town means:
 | Module interiors | Click opens module-specific interior furniture with runtime source, counters, validation state, worker roster slots, MoonBook fragments, and output links when available | 64% | Seeded civic protocol support workspaces exist; interiors still need accepted-change history and live service run evidence |
 | Water effects | Runtime overlay adds depth, reflection, and bridge shadow | 35% | Needs richer segmented river logic and seasonal/weather response |
 | Agents on map | Visual agent projection exists; active module workers route to module entrances and idle/completed workers stay hidden | 60% | Needs Wenyu-specific task projection coverage for every civic module |
-| Operator dashboard | Shows daemon/watch progress, a multi-topic watch portfolio, request composer, portal to canonical viewport, output mode, and Moondesk bridge visibility | 68% | Needs approval queues and richer per-book progress panels |
+| Operator dashboard | Shows daemon/watch progress, a multi-topic watch portfolio, request composer, portal to canonical viewport, output mode, and MoonDesk bridge visibility | 68% | Needs approval queues and richer per-book progress panels |
 | Mayor daemon | Local run/start/doctor/stop, heartbeat, stale detection, standing-goal dispatch, supervisor/worker runtime health, and nonblocking MoonClaw supervision | 68% | Needs multi-day soak evidence, deployment hardening, and recovery playbooks |
 | Standing watchers | Data-driven standing goals and watcher ledgers exist; the final portfolio installs OPC, LLM training, Robotics, Agents, and Hardware watches, and live books are now merged into book-quality auditing | 70% | Need stronger accepted-change views, repeated accepted deltas, and longer evidence that no-change cycles do not inflate progress |
-| MoonBook memory binding | Research books and generated projections work for research lanes; live research books from the town snapshot are included in quality audits; Wenyu civic protocol support workspaces can be bootstrapped with canonical schemas, wiki pages when needed, ledgers, review queues, and `moonbook-ui-state.json` fragments | 64% | MoonBook should eventually own native civic templates upstream instead of relying on Moontown-generated seeds |
+| MoonBook memory binding | Research books and generated projections work for research lanes; live research books from the town snapshot are included in quality audits; Wenyu civic protocol support workspaces can be bootstrapped with canonical schemas, wiki pages when needed, ledgers, review queues, and `moonbook-ui-state.json` fragments | 64% | MoonBook should eventually own native civic templates upstream instead of relying on MoonTown-generated seeds |
 | MoonClaw execution binding | Proposal/run boundary and worker execution path exist; every Wenyu civic module now has a role-specific skill pack path and output contract injected into worker context | 56% | Need repeated successful module-specific service executions and stricter result parsing per contract |
-| Real civic services | Moontown can create civic lanes, install recurring protocol schedules, and run building communication patterns | 40% | Policy, contest, social, talent, bridge, market, story, and education modules still need service-specific accepted output histories |
-| Designer workflow | Manual JSON config plus standalone editor mode and handoff/bridge visibility | 48% | Needs write-back import/export, asset manifest checks, richer collision preview, and automatic Moondesk artifact ingestion |
-| Stable-state cookbook | MoonBook cookbook workspace, stable-state manifest, ownership pages, generated site, and CLI status are in place | 38% | Needs Moondesk management UI, drift comparison, review workflow, and integration into operator dashboard |
+| Real civic services | MoonTown can create civic lanes, install recurring protocol schedules, and run building communication patterns | 40% | Policy, contest, social, talent, bridge, market, story, and education modules still need service-specific accepted output histories |
+| Designer workflow | Manual JSON config plus standalone editor mode and handoff/bridge visibility | 48% | Needs write-back import/export, asset manifest checks, richer collision preview, and automatic MoonDesk artifact ingestion |
+| Stable-state cookbook | MoonBook cookbook workspace, stable-state manifest, ownership pages, generated site, and CLI status are in place | 38% | Needs MoonDesk management UI, drift comparison, review workflow, and integration into operator dashboard |
 | Production readiness | Local development works; build/check pass | 25% | Needs packaged daemon, auth, permissions, backups, observability, and deployment model |
 
 ## What Is Real Today
@@ -158,7 +158,7 @@ Implemented and validated:
   validation issues, and whether a MoonBook output fragment is connected.
 - Final output mode lists generated MoonBook projection fragments and links to
   the book HTML/report outputs copied by the browser bridge.
-- The editor boundary is documented: Moontown edits town/module/multi-agent
+- The editor boundary is documented: MoonTown edits town/module/multi-agent
   composition, while `../moondesk` should own detailed file/workspace,
   single-book, and single-agent authoring.
 - `tilemap/modules/moondesk-handoff.json` declares portable artifact lanes for
@@ -168,7 +168,7 @@ Implemented and validated:
   `.moonsuite/products/moontown/moondesk-dispatches`,
   `.moonsuite/products/moontown/moondesk-requests`, and
   `.moonsuite/products/moontown/book-results` files.
-- Editor mode and final output mode both show Moondesk handoff lanes and recent
+- Editor mode and final output mode both show MoonDesk handoff lanes and recent
   bridge records.
 - `moon run src/cmd/main -- civic bootstrap` bootstraps 11 Wenyu civic support
   workspaces and updates `.moonsuite/products/moontown/moonbooks.json`.
@@ -318,15 +318,15 @@ The following items are visible but not fully real yet:
   civic protocol support workspaces still need module-specific task/run fragments.
 - The module registry is manually edited JSON; editor mode validates, inspects,
   and displays import contracts but does not yet write config changes back or
-  automatically merge Moondesk module packs.
+  automatically merge MoonDesk module packs.
 - The 24/7 loop is a local supervised seam, not a fully packaged service.
 - Civic service flows have schemas, review queues, skill contracts, and seeded
   projections. They are not yet proven reliable end-to-end services until each
   lane has repeated MoonClaw execution, MoonBook persistence, review, and UI
   projection updates.
 - Output retrieval exists in viewport output mode, but the full
-  desktop/file-manager experience belongs in Moondesk and still needs a clean
-  write-back/import handoff back into Moontown.
+  desktop/file-manager experience belongs in MoonDesk and still needs a clean
+  write-back/import handoff back into MoonTown.
 - Production safety boundaries, auth, operator approvals, and backups are not
   complete.
 
@@ -436,7 +436,7 @@ MoonClaw workers should know how to operate each module.
 
 Implemented:
 
-- Moontown now injects the generic Wenyu civic service skill, the
+- MoonTown now injects the generic Wenyu civic service skill, the
   module-specific skill, the service contract, projection state, and explicit
   civic result markers into civic worker context bundles.
 - The civic registry assigns a module mode, book role, skill mode, worker role,
@@ -454,7 +454,7 @@ Remaining:
 
 Acceptance:
 
-- A user request enters Moontown, routes to the right module book, runs through
+- A user request enters MoonTown, routes to the right module book, runs through
   MoonClaw, persists into MoonBook, and changes the visible module state.
 
 ### Gate 5: Long-Run Operation
@@ -502,7 +502,7 @@ Required work:
 - Module config validator.
 - Map collision/placement preview.
 - Asset manifest checker.
-- Request/output file browser or Moondesk integration.
+- Request/output file browser or MoonDesk integration.
 - Module enable/disable workflow.
 
 Acceptance:
@@ -527,9 +527,9 @@ Acceptance:
    shadow, and glow layers for stronger 2.5D depth.
 6. Add a standalone module config, placement, and asset validator with editor
    write-back.
-7. Move reusable civic workspace templates into MoonBook so Moontown only
+7. Move reusable civic workspace templates into MoonBook so MoonTown only
    requests service creation rather than generating all initial files itself.
-8. Add Moondesk-style output browsing for produced wiki pages, reports, assets,
+8. Add MoonDesk-style output browsing for produced wiki pages, reports, assets,
    and task artifacts.
 9. Package the daemon as a durable local service with backup/recovery checks.
 

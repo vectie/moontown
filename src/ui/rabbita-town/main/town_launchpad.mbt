@@ -13,7 +13,7 @@ fn render_town_launchpad(
     div(class="town-launchpad-status", [
       div(class="town-launchpad-head", [
         div(class="town-launchpad-copy", [
-          p(class="eyebrow", "Moontown"),
+          p(class="eyebrow", "MoonTown"),
           h1(scene.title),
         ]),
         div(class="town-launchpad-actions", [

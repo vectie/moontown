@@ -58,7 +58,7 @@ async test "live autonomy spine persists current state and journal" {
   assert_true(live_text.contains("\"planbook_engineering_digest_path\""))
   assert_true(live_text.contains("\"latest_change_summary\""))
   assert_true(journal_text.contains("\"accepted_update_count\":1"))
-  assert_true(digest_text.contains("# Moontown Live Digest"))
+  assert_true(digest_text.contains("# MoonTown Live Digest"))
   assert_true(digest_text.contains("stable_waiting: `false`"))
   assert_true(digest_text.contains("Stable Waiting Blockers"))
   assert_true(digest_text.contains("Latest PlanBook Change"))

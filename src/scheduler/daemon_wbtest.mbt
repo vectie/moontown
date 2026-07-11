@@ -17,7 +17,7 @@ test "scheduler plans due standing goals" {
 ///|
 test "daemon tick records active due goal ids" {
   let town = @core.empty_state(
-    @core.TownConfig::new(id="town", name="Moontown"),
+    @core.TownConfig::new(id="town", name="MoonTown"),
   )
   let report = @health.inspect_town(town)
   let goal = @core.StandingGoal::new(
@@ -43,7 +43,7 @@ test "daemon tick records active due goal ids" {
 ///|
 test "daemon tick migrates persisted job list to current defaults" {
   let town = @core.empty_state(
-    @core.TownConfig::new(id="town", name="Moontown"),
+    @core.TownConfig::new(id="town", name="MoonTown"),
   )
   let report = @health.inspect_town(town)
   let old_jobs = [
@@ -80,7 +80,7 @@ test "daemon tick migrates persisted job list to current defaults" {
 ///|
 test "daemon tick preserves configured jobs and adds missing defaults" {
   let town = @core.empty_state(
-    @core.TownConfig::new(id="town", name="Moontown"),
+    @core.TownConfig::new(id="town", name="MoonTown"),
   )
   let report = @health.inspect_town(town)
   let configured_jobs = [

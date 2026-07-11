@@ -13,8 +13,8 @@ as `watch-opc-news`.
 
 ## Hard Rules
 
-- Do not decide topic novelty inside Moontown.
-- Do not write durable research memory into Moontown.
+- Do not decide topic novelty inside MoonTown.
+- Do not write durable research memory into MoonTown.
 - Do not force a full research rewrite just because a standing goal is due.
 - The target MoonBook owns baseline comparison, source fingerprints, wiki
   updates, digest history, and generated projection.
@@ -22,7 +22,7 @@ as `watch-opc-news`.
   for review, or projected.
 - MoonClaw owns bounded search/fetch/read/summarize execution.
 - For App ToolBooks, MoonBook owns accepted data, latest report, app source,
-  `tool-manifest.json`, generated tool page, and tool review queue. Moontown
+  `tool-manifest.json`, generated tool page, and tool review queue. MoonTown
   should only schedule and expose the civic-building link.
 - If a previous watcher execution is still active, defer instead of dispatching
   a duplicate run.
@@ -33,7 +33,7 @@ as `watch-opc-news`.
 
 ## Output Contract
 
-Moontown consumes a MoonBook result marker shaped like this:
+MoonTown consumes a MoonBook result marker shaped like this:
 
 ```text
 standing_goal_decision: update | no_change | needs_review | failed
@@ -50,7 +50,7 @@ tool_changed: yes | no
 tool_build_status: passed | failed | skipped
 ```
 
-Moontown records that marker as `WatcherRunRecord` under:
+MoonTown records that marker as `WatcherRunRecord` under:
 
 ```text
 .moonsuite/products/moontown/watchers/<goal-id>.jsonl
@@ -63,7 +63,7 @@ Accounting rules:
   queued.
 - retries, failed runs, generated site rebuilds, journal maintenance, and
   operational events must not be treated as evidence progress.
-- Moontown can show operational activity, but it must not present no-change or
+- MoonTown can show operational activity, but it must not present no-change or
   failed checks as research knowledge gained.
 
 ## Examples

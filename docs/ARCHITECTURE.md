@@ -6,7 +6,7 @@
 moontown -> moonbook -> moonclaw
 ```
 
-Moontown is more than a scheduler in this stack: it is the coordination layer where MoonBooks communicate, standing goals run, new ideas are surfaced, and reviewable results are routed. See [EXECUTABLE_BOOK_COORDINATION.md](EXECUTABLE_BOOK_COORDINATION.md).
+MoonTown is more than a scheduler in this stack: it is the coordination layer where MoonBooks communicate, standing goals run, new ideas are surfaced, and reviewable results are routed. See [EXECUTABLE_BOOK_COORDINATION.md](EXECUTABLE_BOOK_COORDINATION.md).
 
 The Wenyu Valley product plan is tracked separately in
 [WENYU_VALLEY_PRD.md](/Users/kq/Workspace/moontown/docs/WENYU_VALLEY_PRD.md).
@@ -34,10 +34,10 @@ ledger-backed, projection-backed, handoff-ledger-backed, or mixed-memory-backed.
 
 For generated tools, the durable abstraction is an App ToolBook: a MoonBook
 that owns accepted data, analysis reports, tool source, tool manifest,
-generated web pages, and review state. Moontown may expose that tool from a
-civic building, but Moontown should not become the tool source owner. Moondesk
+generated web pages, and review state. MoonTown may expose that tool from a
+civic building, but MoonTown should not become the tool source owner. MoonDesk
 edits the book config/spec, MoonClaw performs bounded watch/analyze/build work,
-MoonBook persists the result, and Moontown links to it.
+MoonBook persists the result, and MoonTown links to it.
 
 The implementation refactor plan is tracked in
 [REFACTOR_PLAN.md](/Users/kq/Workspace/moontown/docs/REFACTOR_PLAN.md). That
@@ -47,8 +47,8 @@ into stable package boundaries without changing behavior first.
 The stable-state cookbook is tracked in
 [COOKBOOK.md](/Users/kq/Workspace/moontown/docs/COOKBOOK.md). The cookbook is a
 MoonBook-generated control book that indexes canonical docs, machine-readable
-definitions, and restart-readable runtime state. Moondesk should manage the
-human desktop surface for that cookbook; Moontown consumes its manifest for
+definitions, and restart-readable runtime state. MoonDesk should manage the
+human desktop surface for that cookbook; MoonTown consumes its manifest for
 stable-state checks and drift review.
 
 ## Canonical Operating Architecture
@@ -80,7 +80,7 @@ The non-negotiable boundaries are:
   gets projected.
 - MoonClaw workers are freelance bounded executors. They spawn for one packet,
   use tools, produce structured results/artifacts/memory candidates, and leave.
-- Moondesk is the future human desktop over books/files; it should not become
+- MoonDesk is the future human desktop over books/files; it should not become
   the town supervisor or worker runtime.
 
 Growth must be visible and accountable. A live town should grow through changed
@@ -185,7 +185,7 @@ book owns. The implementation now has a first-class `policy` package:
   owns concrete template runtime dispatch, request ledger/event file IO,
   request processing, request reconciliation, request status rendering,
   registry rendering, registry file observation, and installer dispatch. Root
-  Moontown may expose thin command adapters, but it should not keep template
+  MoonTown may expose thin command adapters, but it should not keep template
   lifecycle code in the root package or call runtime side effects through
   `book_templates/`.
 - [app_tool_book/contracts.mbt](/Users/kq/Workspace/moontown/src/app_tool_book/contracts.mbt)
@@ -259,7 +259,7 @@ book owns. The implementation now has a first-class `policy` package:
   owns town-state-to-visual-projection DTOs and derivation: agent phases,
   routing, behavior/effect labels, building activity summaries, module
   projection rows, generic decorator placement contracts, fallback grid
-  placement, and projection path policy. Root Moontown may provide command
+  placement, and projection path policy. Root MoonTown may provide command
   adapters and test fixtures, but visual semantics should not live in the root
   package. Wenyu-specific building coordinates, entrance tiles, style families,
   and sprite paths belong in the tilemap module registry, not in
@@ -275,7 +275,7 @@ book owns. The implementation now has a first-class `policy` package:
   owns generic support helpers for file I/O, JSON string/object extraction,
   cwd-aware path resolution, workspace-relative path readiness, Markdown
   shaping, HTML escaping, text-label formatting, text metrics such as English
-  word-token counting, and nested runtime config JSON upserts. Root Moontown
+  word-token counting, and nested runtime config JSON upserts. Root MoonTown
   and domain quality packages
   may consume these helpers, but generic utility implementation should not be
   scattered across runtime or quality packages.
@@ -290,7 +290,7 @@ book owns. The implementation now has a first-class `policy` package:
   It owns `ResearchQualityObservation`, the pure gap calculation from that
   observation, persistence-summary wording, artifact-list contract, memory
   candidate target-page contract, quality-gate summary suffixes, and
-  recovery/review event wording. Root Moontown may mutate town executions when a
+  recovery/review event wording. Root MoonTown may mutate town executions when a
   gate fails, decide when to schedule bootstrap or repair, dispatch persistence
   through the runtime package, and apply review/recovery state transitions, but
   it should call research-quality packages for the actual quality judgment,
@@ -323,8 +323,8 @@ book owns. The implementation now has a first-class `policy` package:
   and step metadata maps. Adapters, runtime packages, and semantic review
   packets consume this package instead of redefining those fields.
 - [moonclaw_runtime/](/Users/kq/Workspace/moontown/src/moonclaw_runtime)
-  owns Moontown-side MoonClaw runtime helpers: packet metadata policy adapters,
-  run result payload lookup, and MoonClaw job store compaction. Root Moontown
+  owns MoonTown-side MoonClaw runtime helpers: packet metadata policy adapters,
+  run result payload lookup, and MoonClaw job store compaction. Root MoonTown
   may expose thin command adapters, but MoonClaw runtime maintenance details
   should not live as loose root files.
 - [cookbook/](/Users/kq/Workspace/moontown/src/cookbook)
@@ -341,7 +341,7 @@ book owns. The implementation now has a first-class `policy` package:
 - [planbook/](/Users/kq/Workspace/moontown/src/planbook)
   owns PlanBook static content: contract pages, governance pages, role model,
   operating architecture, seed plans, generated-site templates, and PlanBook
-  skill templates. Root Moontown may bootstrap/update the workspace and dispatch
+  skill templates. Root MoonTown may bootstrap/update the workspace and dispatch
   PlanBook repair/autonomy runtime work, but it should not keep root-local
   copies of durable PlanBook prose, generated-site markup, or skill text.
 - [moonbook_contracts/](/Users/kq/Workspace/moontown/src/moonbook_contracts)
@@ -389,7 +389,7 @@ Runtime packages may pass snapshot paths and goal ids, but they should not
 duplicate `.moonsuite/products/moontown/watchers` path rules or construct
 watcher JSONL paths locally.
 Generic snapshot-base derivation also belongs to `storage/`: `town.json` in the
-current workspace resolves through the MoonSuite Moontown product home, while
+current workspace resolves through the MoonSuite MoonTown product home, while
 explicit snapshot paths keep their explicit parent directory. Runtime packages
 such as PlanBook, live-autonomy, and editor pipeline may append their
 feature-specific filenames under that base, but they should not reimplement the
@@ -437,7 +437,7 @@ Default output paths are also policy-owned. Packages such as `book_quality/`
 may expose facade helpers like `generated_site_path()`, but those should
 delegate to `policy.default_generated_site_projection_path()` rather than
 redefining the path locally.
-Adapters may inspect external layouts, but their canonical Moontown generated
+Adapters may inspect external layouts, but their canonical MoonTown generated
 site path must delegate to the policy default.
 Policy packet metadata is policy-owned too. Producers such as book-quality
 semantic review packets and MoonClaw keeper packets should merge the
@@ -529,7 +529,7 @@ Codex ACP defaults belong to the `adapters/codex` package. PlanBook repair,
 book-quality semantic review, and Wenyu source-build workers should not each
 hard-code their own Codex model string. The adapter owns `model()`,
 `command()`, `args()`, `moontown_args()`, reusable `codex-main` target JSON,
-ACP target upsert, and the Moontown ACP target JSON.
+ACP target upsert, and the MoonTown ACP target JSON.
 Those builders must include `--model <model>` because MoonClaw's ACP runner
 treats the `model` field as launch metadata/env, not as an automatic CLI
 argument. The default is `gpt-5.5`, with `MOONTOWN_CODEX_ACP_MODEL` as the
@@ -560,7 +560,7 @@ no-churn rules. The same package owns implementation-backlog policy: backlog
 item schema, canonical backlog/progress/stop/completion/change-log paths,
 default seed items, projection Markdown, cadence calculation, stop-policy text,
 criterion id/evidence/next-action wording, and target-file hints. Root
-Moontown may resolve source roots, write PlanBook files, read MoonClaw run
+MoonTown may resolve source roots, write PlanBook files, read MoonClaw run
 indexes, dispatch ACP packets, and reconcile filesystem evidence, but it should
 not redefine repair paths, repair request rules, repair decisions, validation
 gates, receipt fields, generated repair skill text, status bucket semantics, or
@@ -598,7 +598,7 @@ tick calculation, aggregate metric-count DTO/assembly, stable-waiting blocker
 policy, next-action wording, status classification, and the canonical operator
 Markdown renderer. It also owns canonical live-autonomy path derivation for the
 spine, journal, digest, standing-goal mirror, and PlanBook history/digest pages.
-Root Moontown may supply storage and PlanBook workspace defaults, read/write
+Root MoonTown may supply storage and PlanBook workspace defaults, read/write
 snapshots, journals, digests,
 watcher ledgers, and PlanBook counts, may inspect health reports, and may derive
 latest watcher decisions from raw records, but it should not redefine what
@@ -615,7 +615,7 @@ Runtime-status policy belongs to the `runtime_status_policy/` package. That
 package owns the `TownRuntimeStatus` DTO, effective execution de-duplication,
 execution lifecycle ranking, active/review execution-status set membership,
 standing-goal runtime counts, empty-status shape, stable summary metric
-language, and the reusable operator report renderer. Root Moontown and
+language, and the reusable operator report renderer. Root MoonTown and
 live-autonomy code may load snapshot files, daemon state, watcher ledgers,
 standing goals, and book-template request inboxes, may compute root-only daemon
 health summary strings, and may plan scheduler actions from observed state, but
@@ -628,14 +628,14 @@ package owns daemon runtime state/health DTOs, status-mode classification,
 heartbeat/staleness rules, durable-worker/supervisor activity predicates,
 doctor/start decision vocabulary, health labels, health summary field ordering,
 pure daemon path derivation from snapshot paths, and pure runtime
-transition-state builders. Root Moontown may supply storage defaults, inspect
+transition-state builders. Root MoonTown may supply storage defaults, inspect
 PID liveness, read/write runtime files, write/remove PID files, clear
 stop/restart request files, spawn or stop supervisor/worker processes, and
 install launchd services, but it should not redefine what "running",
 "supervising", "stale", "healthy", "already active", "worker started", "tick
 finished", "reload requested", or canonical daemon file naming means.
 Daemon-runtime also owns scheduled-job execution and scheduled-job activity
-filtering. Root Moontown may call the scheduled-job phase during a daemon tick,
+filtering. Root MoonTown may call the scheduled-job phase during a daemon tick,
 but it should not own interval math, job-kind dispatch, or the decision that a
 job summary is meaningful enough to become a town event.
 
@@ -648,7 +648,7 @@ lookup and selected-feature readiness gates for style comparison, movement-loop
 evidence, placement diff preview, and terrain label mapping. Module placement
 semantics also belong there: the package owns the `EditorPipelineModulePlacement`
 DTO plus movement-loop records, placement-diff records, terrain layers, and
-terrain-reason records. Root Moontown may inspect source/runtime state,
+terrain-reason records. Root MoonTown may inspect source/runtime state,
 materialize PlanBook workspace files, dispatch MoonClaw packets, read/write
 result files, compute evidence paths, choose output paths, and convert loaded
 JSON config entries into package DTOs, but it should not redefine editor
@@ -1026,9 +1026,9 @@ user goal
   -> persisted TownSnapshot
 ```
 
-The key design rule is that Moontown can decide whether a lane is acceptable,
+The key design rule is that MoonTown can decide whether a lane is acceptable,
 but it does not become the research engine. MoonBook owns the workspace and
-durable wiki state. MoonClaw owns execution and tool use. Moontown owns
+durable wiki state. MoonClaw owns execution and tool use. MoonTown owns
 cross-book readiness, supervision, and operator-visible acceptance.
 
 The town synthesis is intentionally cross-book rather than book-local. It
@@ -1111,7 +1111,7 @@ wording live in `civic/status_labels.mbt`. Civic service reconciliation policy
 is package-owned too: the decision vocabulary, page/review accounting,
 result-current checks, reconcilable-work gate, result-contract block, and
 reconciliation narrative live in `civic/service_reconcile_policy.mbt`. Root
-Moontown files may render the registry, materialize scenario workspaces,
+MoonTown files may render the registry, materialize scenario workspaces,
 dispatch runtime packets, inspect book files, turn health observations into
 package policy inputs, persist MoonBook results, and persist schedules/round
 ledgers, but they must not own the
@@ -1251,14 +1251,14 @@ code-patch, and asset-pack stages.
 
 This is intentionally a bootstrap bridge. Durable civic-domain memory still
 belongs in MoonBook, and tool execution still belongs in MoonClaw. Reusable
-civic workspace text now lives in the `civic/` package so root Moontown can act
+civic workspace text now lives in the `civic/` package so root MoonTown can act
 as a thin workspace materializer. A later MoonBook-side evolution may accept
-these package-owned contracts through an API so Moontown requests workspace
+these package-owned contracts through an API so MoonTown requests workspace
 creation instead of writing every seed file itself.
 
 Protocol ownership remains the same:
 
-- Moontown owns building routing, inbox/outbox ledgers, review gates, protocol
+- MoonTown owns building routing, inbox/outbox ledgers, review gates, protocol
   status, and mayor supervision.
 - MoonBook owns durable accepted civic records, schemas, review queues, and
   generated projections.
@@ -1279,13 +1279,13 @@ not worker sessions.
   -> MoonClaw executes bounded web/source discovery
   -> MoonBook decides update/no_change/needs_review/failed
   -> MoonBook persists wiki/source/timeline/synthesis updates when useful
-  -> Moontown records a watcher ledger entry
-  -> Moontown advances next_due_tick with backoff
+  -> MoonTown records a watcher ledger entry
+  -> MoonTown advances next_due_tick with backoff
 ```
 
-Retries use the same ownership boundary. Moontown may retry or poll the
+Retries use the same ownership boundary. MoonTown may retry or poll the
 execution, but it does not reinterpret the domain result. After a retry settles,
-Moontown asks the target MoonBook history for the final standing-watch decision,
+MoonTown asks the target MoonBook history for the final standing-watch decision,
 records a corrected watcher ledger row, and advances the standing goal from
 that MoonBook decision.
 
@@ -1309,7 +1309,7 @@ Book Keeper decides what belongs in durable memory.
 Worker Claws decide how to execute bounded tasks.
 ```
 
-Moontown persists the control-plane side of each watcher cycle under:
+MoonTown persists the control-plane side of each watcher cycle under:
 
 ```text
 .moonsuite/products/moontown/watchers/<standing-goal-id>.jsonl
@@ -1341,7 +1341,7 @@ make this distinction explicit:
 This prevents a long-running town from mistaking retries, site rebuilds,
 generated logs, or no-change patrols for research progress.
 The same rule applies to worker-loss recovery. If MoonClaw still indexes a run
-as `Running` but Moontown can no longer find the live proposal process, the
+as `Running` but MoonTown can no longer find the live proposal process, the
 Mayor treats that as deferred infrastructure recovery unless MoonBook has
 persisted a terminal standing-watch marker. Those orphaned-run records are not
 counted as effective no-change cycles in the live autonomy spine. If the latest
@@ -1364,7 +1364,7 @@ status line.
 
 ### Readiness and Quality Gates
 
-Moontown now keeps a typed readiness layer for research acceptance instead of
+MoonTown now keeps a typed readiness layer for research acceptance instead of
 only relying on Markdown string markers.
 
 Current town-side readiness model:
@@ -1373,15 +1373,15 @@ Current town-side readiness model:
 
 It consumes MoonBook-owned summary fields such as verified source count, entity
 page count, concept page count, query note count, and pending review count.
-Moontown normalizes evidence accounting before using the summary: domain
+MoonTown normalizes evidence accounting before using the summary: domain
 evidence remains in `evidence_count`, operational watcher/run records are
 reported as `operational_evidence_count`, and the raw audit total is preserved
 as `total_evidence_count`. MoonBook still owns the workspace semantics;
-Moontown only decides whether a lane is acceptable for town-level synthesis.
+MoonTown only decides whether a lane is acceptable for town-level synthesis.
 
 ### Runtime Status and Daemon Tick
 
-Moontown exposes an operator-readable runtime status seam:
+MoonTown exposes an operator-readable runtime status seam:
 
 - [runtime_status.mbt](/Users/kq/Workspace/moontown/src/runtime_status/runtime_status_snapshot.mbt)
 - [runtime_status_policy](/Users/kq/Workspace/moontown/src/runtime_status_policy)
@@ -1428,7 +1428,7 @@ The daemon persists:
   standing-watch decisions, no-change/update/review/failure records, and next
   due ticks
 - `.moonsuite/products/moontown/book-template-requests.json`
-  document-first book creation inbox used by Moondesk, Mayor, or other
+  document-first book creation inbox used by MoonDesk, Mayor, or other
   operators. The scheduled `book-template-request` job installs pending
   template requests, and the runtime/live-autonomy status exposes request,
   pending, and failed counts.
@@ -1490,10 +1490,10 @@ Standing-watch imports are still launched as detached child processes, but the
 child honors `MOONTOWN_MOONCLAW_INLINE=1` and passes `--inline` to MoonClaw
 after confirmation. That keeps the Mayor loop nonblocking while preventing
 confirmed runs from sitting in storage without a runner. If the detached import
-fails before producing a receipt, Moontown preserves the `.import.json.err`
+fails before producing a receipt, MoonTown preserves the `.import.json.err`
 excerpt in the stale execution summary so MoonClaw/runtime errors are visible
 to the supervision layer.
-Before launching a standing-watch import, Moontown also checks the target
+Before launching a standing-watch import, MoonTown also checks the target
 book-local MoonClaw job store for oversized active JSON indexes. When
 `job_proposals.json`, `definitions.json`, or `index/artifacts.json` exceeds the
 runtime safety threshold, the Mayor archives the file under
@@ -1517,8 +1517,8 @@ procedures:
 MoonBook cookbook workspace
   -> stable-state manifest
   -> docs / definitions / runtime-state index
-  -> Moondesk human editing surface
-  -> Moontown drift checks and operator guidance
+  -> MoonDesk human editing surface
+  -> MoonTown drift checks and operator guidance
 ```
 
 Current implementation lives in:
@@ -1581,7 +1581,7 @@ moon run src/cmd/main -- planbook repair
 moon run src/cmd/main -- planbook repair status
 ```
 
-Moontown can now register and bootstrap a first-class planbook workspace with
+MoonTown can now register and bootstrap a first-class planbook workspace with
 plan index, implementation backlog, backlog progress, stop policy, execution
 evidence, active review, decision log, live change log, schema, generated site,
 and code-plan/code-review/doc-sync skills. It also runs a PlanBook autonomy doctor during daemon ticks. That doctor writes
@@ -1595,9 +1595,9 @@ context, repair `SKILL.md`, repair plan, and MoonClaw packet under the PlanBook
 workspace, then records `.moonsuite/products/moontown/planbook/repair-task.json`. The packet uses
 the `planbook.repair.result.v1` contract and, during daemon ticks, is dispatched
 through MoonClaw with `execution_mode: acp` and `execution_target: codex-main`.
-The Codex ACP target is rooted at the Moontown source tree, so the town can patch
+The Codex ACP target is rooted at the MoonTown source tree, so the town can patch
 its own repository instead of stopping at plan-only output.
-Moontown's ACP adapter layer owns the Codex command, argument list, and model
+MoonTown's ACP adapter layer owns the Codex command, argument list, and model
 default for this route. The same default must be used by PlanBook source repair,
 book-quality semantic review, and Wenyu source-build workers so the system does
 not silently split into different Codex runtimes.
@@ -1606,7 +1606,7 @@ recorded model metadata, so repair/review profiles should pass adapter defaults
 and avoid post-processing generated ACP JSON.
 
 Current accounting separates route configuration from proof. ACP wiring alone is
-not accepted self-patching evidence. A Moontown-owned source repair is accepted
+not accepted self-patching evidence. A MoonTown-owned source repair is accepted
 only when the MoonClaw result carries a `planbook.repair.patch_receipt.v1`
 receipt proving source-root ACP execution, changed files, validation command
 results, `git diff --check`, `git status --short`, commit status/message, and
@@ -1637,7 +1637,7 @@ conditions through `daemon doctor`.
 
 The remaining MoonBook-side work is to make `planbook` a native
 provider/profile so future plan creation, plan repair, and review can run as
-normal MoonBook book work instead of only through Moontown bootstrap and
+normal MoonBook book work instead of only through MoonTown bootstrap and
 deterministic self-inspection.
 
 `books bootstrap` is the canonical bootstrap repair command for the currently

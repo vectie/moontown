@@ -34,7 +34,7 @@ async test "daemon restart request writes and clears reload marker" {
     snapshot_path~,
     reason="unit test reload",
   )
-  assert_true(message.contains("Moontown daemon restart requested"))
+  assert_true(message.contains("MoonTown daemon restart requested"))
   assert_true(message.contains("unit test reload"))
   assert_true(daemon_restart_requested(snapshot_path))
   clear_daemon_restart_request(snapshot_path)

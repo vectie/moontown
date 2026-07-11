@@ -15,7 +15,7 @@ fn planbook_contract_rules() -> Array[String] {
     "- Write one durable plan per coherent change area.",
     "- Preserve the decision trail instead of creating noisy `v1`, `v2`, `v3` plan copies.",
     "- Include problem, current state, decision, alternatives, affected files, steps, acceptance criteria, validation, rollback, and follow-up.",
-    "- If the task changes Moontown/MoonBook/MoonClaw/Moondesk ownership, state the boundary explicitly.",
+    "- If the task changes MoonTown/MoonBook/MoonClaw/MoonDesk ownership, state the boundary explicitly.",
     "- Execution must update evidence and review notes before claiming completion.",
     planbook_worker_residency_rule(),
     planbook_bookkeeper_residency_rule(),

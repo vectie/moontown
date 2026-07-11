@@ -113,12 +113,12 @@ pub async fn daemon_run_saved_town(
       "worker completed bounded run=\{worker_run_id}",
     )
   }
-  "Moontown daemon run completed ticks=\{ticks}\n\{moonstat_status}\n\{latest}"
+  "MoonTown daemon run completed ticks=\{ticks}\n\{moonstat_status}\n\{latest}"
 }
 
 ///|
 fn moonstat_daemon_ready_message(base_url : String) -> String {
-  "Moonstat available at \{base_url}; town usage/statistics bridge enabled"
+  "MoonGate available at \{base_url}; town usage/statistics bridge enabled"
 }
 
 ///|
@@ -126,7 +126,7 @@ fn moonstat_daemon_unavailable_message(
   base_url : String,
   error : String,
 ) -> String {
-  "Moonstat unavailable at \{base_url}; continuing as standalone Moontown: \{error}"
+  "MoonGate unavailable at \{base_url}; continuing as standalone MoonTown: \{error}"
 }
 
 ///|

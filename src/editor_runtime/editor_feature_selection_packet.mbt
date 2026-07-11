@@ -21,7 +21,7 @@ fn editor_feature_selection_packet(
     skill_paths=["\{workspace_root}/skills/editor-feature-rater/SKILL.md"],
     notes=[
       "Do not implement code in this step; only choose the next missing feature.",
-      "Do not use a pre-baked feature list from Moontown code. Extract candidates from the course and current UI evidence.",
+      "Do not use a pre-baked feature list from MoonTown code. Extract candidates from the course and current UI evidence.",
       "Pick the lowest score after weighing importance, missingness, and proof value.",
     ],
     tags=["editor-pipeline", "feature-selection", "course-driven"],

@@ -1,8 +1,8 @@
-# Moontown — A Futuristic Architecture Guide
+# MoonTown — A Futuristic Architecture Guide
 
 This document captures the design philosophy, architectural principles, and
-evolutionary path for Moontown and its sibling systems (MoonBook, MoonClaw,
-Moondesk). It is not a specification. It is a **compass** — a shared
+evolutionary path for MoonTown and its sibling systems (MoonBook, MoonClaw,
+MoonDesk). It is not a specification. It is a **compass** — a shared
 understanding of what we are building toward, so every small step moves in
 the same direction.
 
@@ -189,7 +189,7 @@ Bell Labs discovers the transistor (emergence)
 Each governance phase *consolidates* what emergence discovered. Each emergence
 phase *opens new possibilities* that governance could not have planned.
 
-The current Moontown has governance without emergence. The daemon tick is all
+The current MoonTown has governance without emergence. The daemon tick is all
 consolidation, no discovery. A healthy autonomous system needs both.
 
 ---
@@ -218,9 +218,9 @@ agents find each other through the traces they leave.
 ## 8. The System Boundaries
 
 ```
-Moondesk ──compose──→ MoonBook ──holds──→ Knowledge
+MoonDesk ──compose──→ MoonBook ──holds──→ Knowledge
                            ↑                    ↑
-                      Moontown orchestrates   MoonClaw works
+                      MoonTown orchestrates   MoonClaw works
 ```
 
 - **MoonClaw** is the worker. It executes tasks. It should have a specialized
@@ -230,14 +230,14 @@ Moondesk ──compose──→ MoonBook ──holds──→ Knowledge
 - **MoonBook** is the memory keeper and workspace holder. It should hold not
   just chapters but the book's policy, its skill definitions, its quality
   history, its keeper notes. Right now that data is scattered across
-  Moontown's JSON files.
+  MoonTown's JSON files.
 
-- **Moontown** is the orchestrator and communication bus. It should delegate
-  memory to MoonBook, execution to MoonClaw, and composition to Moondesk.
+- **MoonTown** is the orchestrator and communication bus. It should delegate
+  memory to MoonBook, execution to MoonClaw, and composition to MoonDesk.
   The daemon tick should shrink from "do everything" to "handle escalations
   and persist commons."
 
-- **Moondesk** is the human interface. It should be the place where you
+- **MoonDesk** is the human interface. It should be the place where you
   compose books from archetypes and capabilities, inspect policy, submit
   tasks, and see the system's health at a glance.
 
@@ -282,7 +282,7 @@ Moondesk ──compose──→ MoonBook ──holds──→ Knowledge
 Do not rewrite. The system is already alive. Tend it plant by plant.
 
 1. **Activate the keeper.** Give it an agent loop that runs on a slow cadence,
-   reads the keeper files, and writes observations back. No Moontown changes
+   reads the keeper files, and writes observations back. No MoonTown changes
    needed. Just a new skill that any book can opt into.
 
 2. **Extract BookPolicy.** Once the keeper needs to read the book's policy
@@ -297,7 +297,7 @@ Do not rewrite. The system is already alive. Tend it plant by plant.
    skill execution to the watcher. The daemon becomes an exception handler
    and state persister.
 
-5. **Build the Moondesk policy composer.** Let humans compose books from
+5. **Build the MoonDesk policy composer.** Let humans compose books from
    archetypes and capabilities through the UI. This is the last step, not
    the first.
 

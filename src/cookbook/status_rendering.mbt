@@ -1,7 +1,7 @@
 ///|
 pub fn status_markdown(status : MoontownCookbookStatus) -> String {
   [
-    "# Moontown Cookbook Status",
+    "# MoonTown Cookbook Status",
     "",
     "- Book: `\{status.book_id}`",
     "- Workspace: `\{status.workspace_root}`",

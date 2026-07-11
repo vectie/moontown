@@ -37,11 +37,11 @@ pub async fn write_daemon_restart_request(
     default_daemon_restart_path(snapshot_path~),
     "restart requested at \{@env.now()}\nreason: \{reason}\n",
   ) catch {
-    error => return "Moontown daemon restart request failed: \{error}"
+    error => return "MoonTown daemon restart request failed: \{error}"
   }
   append_daemon_log(
     default_daemon_log_path(snapshot_path~),
     "restart requested reason=\{reason}",
   )
-  "Moontown daemon restart requested\npath=\{default_daemon_restart_path(snapshot_path~)}\nreason=\{reason}"
+  "MoonTown daemon restart requested\npath=\{default_daemon_restart_path(snapshot_path~)}\nreason=\{reason}"
 }

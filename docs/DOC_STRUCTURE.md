@@ -1,18 +1,18 @@
-# Moontown Documentation Structure
+# MoonTown Documentation Structure
 
 This repository has outgrown a single README. The docs should be organized by
 operational purpose, not by the order features were added.
 
 ## Product Scope And Boundary
 
-Moontown is the town-level control plane. It owns scheduling, standing goals,
+MoonTown is the town-level control plane. It owns scheduling, standing goals,
 Mayor supervision, book-to-book coordination, civic protocol routing, live town
 state, daemon records, and operator visibility.
 
-Moontown does not own durable book truth, bounded agent execution, desktop file
+MoonTown does not own durable book truth, bounded agent execution, desktop file
 management, suite metrics, or low-level filesystem contracts. MoonBook owns
-accepted book content, MoonClaw owns execution, Moondesk owns the desktop
-projection, MoonStat observes health/usage, and MoonLib owns shared layout
+accepted book content, MoonClaw owns execution, MoonDesk owns the desktop
+projection, MoonGate observes health/usage, and MoonLib owns shared layout
 contracts.
 
 ## Implementation And Testing Guide
@@ -44,7 +44,7 @@ once.
 
 ## Worth Noticing
 
-- Moontown is document-first. Agent runs are process evidence, not durable
+- MoonTown is document-first. Agent runs are process evidence, not durable
   truth.
 - Buildings are protocol places. MoonBooks are durable support surfaces.
 - PlanBook source repair needs validation evidence and an accepted patch
@@ -129,11 +129,11 @@ moon run src/cmd/main -- books template install <template-id> <config.json>
 moon run src/cmd/main -- books template requests process
 ```
 
-Moondesk should use this registry as its book-creation palette. The Mayor can
+MoonDesk should use this registry as its book-creation palette. The Mayor can
 also use it later when a task says “create a specialized book” and the system
 needs to choose a reusable template rather than inventing a one-off workspace.
 The file `.moonsuite/products/moontown/book-template-requests.json` is the
-document-first inbox for that handoff: Moondesk or Mayor writes pending template
+document-first inbox for that handoff: MoonDesk or Mayor writes pending template
 requests, and the daemon’s `book-template-request` scheduled job installs them.
 The sibling
 `.moonsuite/products/moontown/book-template-request-events.jsonl` file is the
@@ -167,10 +167,10 @@ notify only when accepted knowledge changes. This is not a new top-level book
 family. It is a `research-book` plus template data, schemas, and dedicated
 `SKILL.md` files.
 
-Moondesk should be the human creation surface for this kind of book: edit
+MoonDesk should be the human creation surface for this kind of book: edit
 source websites, cadence, notification policy, and
 `wiki/methods/analysis-method.md`; then export a portable MoonBook folder and a
-standing-goal record for Moontown. The current Moontown CLI bridge is:
+standing-goal record for MoonTown. The current MoonTown CLI bridge is:
 
 ```bash
 moon run src/cmd/main -- books pdf-watch bootstrap <book-id>
@@ -179,19 +179,19 @@ moon run src/cmd/main -- books pdf-watch status <book-id>
 ```
 
 That bridge installs the template into `books/<book-id>/`, registers
-the MoonBook catalog entry, and upserts a standing goal. Moondesk should wrap
+the MoonBook catalog entry, and upserts a standing goal. MoonDesk should wrap
 this behavior with a file-manager-style wizard rather than duplicating the
-template logic. The config-driven route is the preferred Moondesk contract
+template logic. The config-driven route is the preferred MoonDesk contract
 because it carries websites, cadence, workspace override, and
-`analysis_method_path` without a Moontown code change.
+`analysis_method_path` without a MoonTown code change.
 
 ## Document-First Rule
 
 The stable interface of the town is documents and books, not agent runs.
 Agent runs are temporary process-like workers. Buildings are protocol places
 that exchange and reduce document packets. MoonBook owns durable book state.
-Moontown schedules and projects protocols. MoonClaw executes bounded roles.
-Moondesk should expose the durable document tree to humans.
+MoonTown schedules and projects protocols. MoonClaw executes bounded roles.
+MoonDesk should expose the durable document tree to humans.
 
 Use
 [docs/DOCUMENT_PROTOCOL_PHILOSOPHY.md](/Users/kq/Workspace/moontown/docs/DOCUMENT_PROTOCOL_PHILOSOPHY.md)
@@ -200,7 +200,7 @@ building protocol, a worker role, or a UI projection.
 
 ## Book Quality Checks
 
-Moontown keeps book quality checks split into two responsibilities:
+MoonTown keeps book quality checks split into two responsibilities:
 
 - `books doctor`
   runs deterministic structural checks and writes
@@ -258,6 +258,6 @@ stable definition / operating procedure -> cookbook
 civic exchange / meeting / marketplace / service -> building protocol over books
 ```
 
-This keeps Moontown from turning every task into research and keeps MoonBook
+This keeps MoonTown from turning every task into research and keeps MoonBook
 from mixing learning material, product strategy, and implementation control in
 one generic wiki.

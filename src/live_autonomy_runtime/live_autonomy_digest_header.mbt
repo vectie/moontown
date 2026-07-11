@@ -3,7 +3,7 @@ fn write_live_autonomy_digest_header(
   builder : StringBuilder,
   spine : LiveAutonomySpine,
 ) -> Unit {
-  builder.write_string("# Moontown Live Digest\n\n")
+  builder.write_string("# MoonTown Live Digest\n\n")
   builder.write_string("- status: `\{spine.status}`\n")
   builder.write_string("- tick: `\{spine.tick}`\n")
   builder.write_string("- stable_waiting: `\{spine.stable_waiting}`\n")

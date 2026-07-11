@@ -20,6 +20,4 @@ description = ""
 
 preferred_target = "native"
 
-options(
-  source: "src",
-)
+source = "src"

@@ -12,7 +12,7 @@ test "keeper profile override is policy-owned for planbook and civic books" {
   match
     keeper_profile_override_for_catalog_entry(
       "plan-moontown-quality",
-      "Moontown PlanBook",
+      "MoonTown PlanBook",
       ["planning"],
     ) {
     Some(profile) => assert_eq(profile, planbook_keeper_profile())

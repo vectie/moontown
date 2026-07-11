@@ -59,7 +59,7 @@ fn vitality_dashboard_next_action_phrases() -> CivicExecutionActionPhrases {
   {
     packet: "Confirm the code-patch dispatch and keep the vitality lane visible in the town square.",
     running: "Finish the UI slice while keeping queue pressure, health, and next action legible.",
-    persisting: "Persist the validated vitality slice so Moontown can project it beyond demo simulation.",
+    persisting: "Persist the validated vitality slice so MoonTown can project it beyond demo simulation.",
     review: "Clear keeper review and keep the district pulse visible while MoonBook absorbs the record.",
     completed: "Wire the next projection snapshot so joins, quests, and retention stop depending on local simulation.",
     recovery: "Recover the stalled vitality run before the district pulse drifts out of sync.",
@@ -75,6 +75,6 @@ fn vitality_dashboard_next_action_fallback(
     model.state_source,
     task,
     projection_fallback="Connect the projection bridge so the vitality lane reads persisted town state.",
-    fallback="Keep the district pulse aligned with Moontown projection, MoonBook counters, and MoonClaw events.",
+    fallback="Keep the district pulse aligned with MoonTown projection, MoonBook counters, and MoonClaw events.",
   )
 }

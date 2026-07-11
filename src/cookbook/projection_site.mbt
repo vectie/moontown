@@ -9,19 +9,19 @@ pub fn generated_site_html(
   }
   [
     "<!doctype html>",
-    "<html><head><meta charset=\"utf-8\"><title>Moontown Cookbook</title>",
+    "<html><head><meta charset=\"utf-8\"><title>MoonTown Cookbook</title>",
     cookbook_site_style_html(),
     "</head><body><main>",
-    "<p>MoonBook generated / Moondesk managed / Moontown consumed</p>",
-    "<h1>Moontown Stable-State Cookbook</h1>",
-    "<p>The cookbook is the Moontown codebase describer: it explains algorithms, data structures, data flow, core feature implementation, AI boundaries, and stable evidence files.</p>",
+    "<p>MoonBook generated / MoonDesk managed / MoonTown consumed</p>",
+    "<h1>MoonTown Stable-State Cookbook</h1>",
+    "<p>The cookbook is the MoonTown codebase describer: it explains algorithms, data structures, data flow, core feature implementation, AI boundaries, and stable evidence files.</p>",
     "<p>Workspace <code>\{html_escape(entry.workspace_root)}</code>; manifest <code>\{html_escape(manifest.manifest_path)}</code>.</p>",
     "<section>",
     "<h2>Codebase Describer Pages</h2>",
     "<div class=\"grid\">",
     cookbook_describer_card_html(
       "Overview", "../../describer/overview.html?v=codebase-rendered", "wiki/describer/overview.md",
-      "Engineer-facing mental model and reading order for Moontown as a typed, file-backed control plane.",
+      "Engineer-facing mental model and reading order for MoonTown as a typed, file-backed control plane.",
     ),
     cookbook_describer_card_html(
       "Algorithms", "../../describer/algorithms.html?v=codebase-rendered", "wiki/describer/algorithms.md",

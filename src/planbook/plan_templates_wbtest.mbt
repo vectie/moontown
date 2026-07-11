@@ -4,11 +4,11 @@ test "editor pipeline plan preserves course source and ownership boundaries" {
   assert_true(plan.contains("# Plan: Editor Mode Real Pipeline"))
   assert_true(plan.contains("Course book: `course-wenyu-game-design`"))
   assert_true(plan.contains("buildings as protocols"))
-  assert_true(plan.contains("Moontown owns the editor-pipeline contract"))
+  assert_true(plan.contains("MoonTown owns the editor-pipeline contract"))
   assert_true(plan.contains("PlanBook owns the durable plan"))
   assert_true(plan.contains("MoonBook owns the course book content"))
   assert_true(plan.contains("MoonClaw owns bounded implementation execution"))
-  assert_true(plan.contains("Moondesk later owns rich human editing"))
+  assert_true(plan.contains("MoonDesk later owns rich human editing"))
 }
 
 ///|
@@ -57,7 +57,7 @@ test "live autonomy plan sections preserve ownership and validation gates" {
   assert_true(plan.contains("connective spine"))
   assert_true(plan.contains(".moonsuite/products/moontown/live-autonomy.json"))
   assert_true(plan.contains(".moonsuite/products/moontown/town-journal.jsonl"))
-  assert_true(plan.contains("Moontown Mayor owns the spine"))
+  assert_true(plan.contains("MoonTown Mayor owns the spine"))
   assert_true(
     plan.contains(
       "Every MoonClaw result writes a strict accepted/no-change/review/blocked contract",

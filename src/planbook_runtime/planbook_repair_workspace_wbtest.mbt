@@ -23,10 +23,10 @@ test "planbook repair context keeps ownership and selection boundaries" {
   assert_true(context.contains("raw/editor-pipeline/next-feature.json"))
   assert_true(context.contains("selected-feature-implementation.md"))
   assert_true(context.contains("## Boundary Rule"))
-  assert_true(context.contains("Moontown may repair routing"))
+  assert_true(context.contains("MoonTown may repair routing"))
   assert_true(context.contains("MoonBook owns native book profiles"))
   assert_true(context.contains("MoonClaw owns execution runtime behavior"))
-  assert_true(context.contains("Do not copy another project into Moontown"))
+  assert_true(context.contains("Do not copy another project into MoonTown"))
   assert_true(context.contains("## AI-Selected Editor Feature"))
   assert_true(context.contains("must not silently choose a different feature"))
 }

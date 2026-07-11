@@ -1,8 +1,8 @@
 ///|
 pub fn cookbook_codebase_overview_markdown() -> String {
   [
-    "# Moontown Codebase Describer", "", "This cookbook should help an engineer understand how Moontown works as code. It is not a directory tour. It describes the algorithms, data records, state files, control loops, AI boundaries, and evidence paths that make the town run.",
-    "", "## Mental Model", "", "Moontown is a MoonBit control plane built around typed records and restart-readable files. Most behavior follows this pattern:",
+    "# MoonTown Codebase Describer", "", "This cookbook should help an engineer understand how MoonTown works as code. It is not a directory tour. It describes the algorithms, data records, state files, control loops, AI boundaries, and evidence paths that make the town run.",
+    "", "## Mental Model", "", "MoonTown is a MoonBit control plane built around typed records and restart-readable files. Most behavior follows this pattern:",
     "", "```text", "typed record in memory", "  -> deterministic phase function",
     "  -> JSON or Markdown file boundary", "  -> bounded MoonBook/MoonClaw work",
     "  -> reconcile result into typed record", "  -> projection for operator or UI",
@@ -18,9 +18,9 @@ pub fn cookbook_codebase_overview_markdown() -> String {
 ///|
 pub fn cookbook_algorithms_markdown() -> String {
   [
-    "# Algorithms Used In Moontown", "", "Moontown mostly uses explicit orchestration algorithms over typed records. The important algorithms are phase pipelines, reconciliation loops, map/reduce-style civic protocols, due-schedule checks, and projection derivations.",
+    "# Algorithms Used In MoonTown", "", "MoonTown mostly uses explicit orchestration algorithms over typed records. The important algorithms are phase pipelines, reconciliation loops, map/reduce-style civic protocols, due-schedule checks, and projection derivations.",
     "", "## 1. Town State Mutation Algorithm", "", "Core files: `core/town_state_types.mbt`, `core/types.mbt`, `core/execution_types.mbt`.",
-    "", "Moontown keeps a `TownState` record with arrays of books, workers, tasks, executions, and events. Updates are intentionally simple and inspectable:",
+    "", "MoonTown keeps a `TownState` record with arrays of books, workers, tasks, executions, and events. Updates are intentionally simple and inspectable:",
     "", "- `register_book`, `register_worker`, `enqueue_task`, and `record_event` append records.",
     "- `replace_task` scans by `task.id`; if found, it overwrites that array slot, otherwise it appends.",
     "- `replace_execution` scans by `task_id`; if found, it overwrites that execution, otherwise it appends.",
@@ -42,7 +42,7 @@ pub fn cookbook_algorithms_markdown() -> String {
     "", "Civic buildings use a map/reduce-like protocol envelope:", "", "```text",
     "BuildingInputPacket", "  -> BuildingContribution", "  -> BuildingReductionResult",
     "  -> BuildingDistributionRecord", "  -> BuildingReviewGateRecord", "  -> BuildingProtocolSnapshot",
-    "```", "", "Moontown hardcodes envelope, ledgers, idempotency keys, privacy labels, review status, and allowed destinations. MoonClaw supplies the AI-guided reduction inside the building skill. MoonBook owns accepted building pages, review queues, generated projections, and durable support workspaces.",
+    "```", "", "MoonTown hardcodes envelope, ledgers, idempotency keys, privacy labels, review status, and allowed destinations. MoonClaw supplies the AI-guided reduction inside the building skill. MoonBook owns accepted building pages, review queues, generated projections, and durable support workspaces.",
     "", "## 5. Civic Scenario Materialization", "", "Core files: `civic_communication_scenario_runtime.mbt`, `civic_communication_scenario_workspace.mbt`, `civic_communication_scenario_protocol_outputs.mbt`.",
     "", "A recurring or one-off civic scenario runs as:", "", "```text", "load scenario template",
     "  -> choose reducer mode", "  -> run MoonClaw reducer or persisted/fixture reducer",
@@ -51,7 +51,7 @@ pub fn cookbook_algorithms_markdown() -> String {
     "  -> refresh protocol and civic status projections", "```", "", "The important guard is that invalid or empty reducer output blocks the round. The runtime writes a blocker instead of pretending template examples are real civic intelligence.",
     "", "## 6. Book Template Request Processing", "", "Core files: `book_templates_runtime/request_processing.mbt`, `book_templates_runtime/request_storage.mbt`, `book_templates/request_policy.mbt`, `app_tool_book_runtime/workspace.mbt`.",
     "", "Book templates are installed through a request ledger. Pending or retry requests call `install_book_template_config`; other requests reconcile existing work. Every processed request appends an event with request id, template id, status, summary, tick, and generation timestamp.",
-    "", "This lets Moondesk, Mayor, or future AI plans ask for new durable books without hardcoding one-off copy steps into the daemon.",
+    "", "This lets MoonDesk, Mayor, or future AI plans ask for new durable books without hardcoding one-off copy steps into the daemon.",
     "", "## 7. Live Autonomy Derivation", "", "Core files: `live_autonomy_builder.mbt`, `live_autonomy_derived_state.mbt`, `live_autonomy_metric_counts.mbt`.",
     "", "The live autonomy spine is a derived-state algorithm. It gathers saved town state, standing goals, watcher records, daemon tick summary, PlanBook status, template request status, and prior stable-waiting streak. It computes metrics, waiting state, summary text, blockers, and next actions, then writes a compact JSON spine for operators and UI.",
     "", "## 8. Visual Projection Derivation", "", "Core files: `visual_projection_buildings.mbt`, `visual_projection_agents.mbt`, `visual_projection_grid.mbt`.",
@@ -62,9 +62,9 @@ pub fn cookbook_algorithms_markdown() -> String {
 ///|
 pub fn cookbook_data_structures_markdown() -> String {
   [
-    "# Moontown Data Structures",
+    "# MoonTown Data Structures",
     "",
-    "Moontown's main data model is a set of MoonBit records that can be serialized to JSON and reconciled after restart. The cookbook should teach these records before it teaches directories.",
+    "MoonTown's main data model is a set of MoonBit records that can be serialized to JSON and reconciled after restart. The cookbook should teach these records before it teaches directories.",
     "",
     "## Town Runtime Records",
     "",
@@ -119,9 +119,9 @@ pub fn cookbook_data_structures_markdown() -> String {
 ///|
 pub fn cookbook_data_flow_markdown() -> String {
   [
-    "# Moontown Data Flow",
+    "# MoonTown Data Flow",
     "",
-    "Moontown data flow is file-backed and phase-driven. The same facts usually appear in three forms: a MoonBit record while a command is running, a JSON/Markdown file for restart and review, and a projection for UI or operators.",
+    "MoonTown data flow is file-backed and phase-driven. The same facts usually appear in three forms: a MoonBit record while a command is running, a JSON/Markdown file for restart and review, and a projection for UI or operators.",
     "",
     "## Goal Execution Flow",
     "",
@@ -188,7 +188,7 @@ pub fn cookbook_data_flow_markdown() -> String {
     "## Book Template Flow",
     "",
     "```text",
-    "Moondesk / Mayor / PlanBook request",
+    "MoonDesk / Mayor / PlanBook request",
     "  -> \{cookbook_product_path("book-template-requests.json")}",
     "  -> process pending or retry request",
     "  -> install template config",
@@ -197,7 +197,7 @@ pub fn cookbook_data_flow_markdown() -> String {
     "  -> register standing goal when needed",
     "```",
     "",
-    "This flow is the extensibility path for new books and tools. It avoids hardcoding every future book inside Moontown source.",
+    "This flow is the extensibility path for new books and tools. It avoids hardcoding every future book inside MoonTown source.",
     "",
     "## Projection Flow",
     "",
@@ -206,7 +206,7 @@ pub fn cookbook_data_flow_markdown() -> String {
     "  -> visual agent/building projection",
     "  -> live autonomy spine",
     "  -> generated site/UI-state JSON",
-    "  -> Rabbita viewport / Moondesk / operator command output",
+    "  -> Rabbita viewport / MoonDesk / operator command output",
     "```",
     "",
     "Projection files are read models. They are allowed to summarize, count, and label, but not to become the source of truth for accepted civic facts or book memory.",
@@ -218,7 +218,7 @@ pub fn cookbook_core_features_markdown() -> String {
   [
     "# Core Features In Code",
     "",
-    "This page explains core Moontown features as implementation behavior: entry points, state records, algorithms, AI boundaries, and proof files.",
+    "This page explains core MoonTown features as implementation behavior: entry points, state records, algorithms, AI boundaries, and proof files.",
     "",
     cookbook_core_feature(
       "Saved Town Runtime",
@@ -242,7 +242,7 @@ pub fn cookbook_core_features_markdown() -> String {
         "Derive or receive a tick number.", "Inspect current executions and tasks.",
         "Route work into book-local or civic lanes.", "Classify stale, review, failed, and completed work.",
       ],
-      "Mayor planning can be AI-shaped, but Moontown code owns dispatch budget, stale windows, retry status, and operator-visible accounting.",
+      "Mayor planning can be AI-shaped, but MoonTown code owns dispatch budget, stale windows, retry status, and operator-visible accounting.",
       [
         cookbook_product_path("service.json"),
         cookbook_product_path("watchers/*.jsonl"),
@@ -251,7 +251,7 @@ pub fn cookbook_core_features_markdown() -> String {
     ),
     cookbook_core_feature(
       "MoonBook/MoonClaw Execution Bridge",
-      "Turns a book task into a keeper packet, imports it into MoonClaw, then records proposal/run status back into Moontown.",
+      "Turns a book task into a keeper packet, imports it into MoonClaw, then records proposal/run status back into MoonTown.",
       [
         "goal_execution.mbt", "adapters/moonclaw/import.mbt", "adapters/moonclaw/run_polling.mbt",
       ],
@@ -388,12 +388,12 @@ pub fn cookbook_skill_markdown() -> String {
   [
     "---",
     "name: cookbook-generation",
-    "description: Maintain the Moontown cookbook as a codebase describer that explains algorithms, data structures, data flow, core features, AI boundaries, and stable-state evidence rather than merely listing directories.",
+    "description: Maintain the MoonTown cookbook as a codebase describer that explains algorithms, data structures, data flow, core features, AI boundaries, and stable-state evidence rather than merely listing directories.",
     "---",
     "",
-    "# Moontown Cookbook Generation",
+    "# MoonTown Cookbook Generation",
     "",
-    "Use this skill when updating the `moontown-cookbook` MoonBook or asking an AI maintainer to describe Moontown.",
+    "Use this skill when updating the `moontown-cookbook` MoonBook or asking an AI maintainer to describe MoonTown.",
     "",
     "## Primary Rule",
     "",
@@ -403,7 +403,7 @@ pub fn cookbook_skill_markdown() -> String {
     "",
     "- Algorithms: daemon tick phases, standing-watch dispatch, task/execution reconciliation, civic map/reduce protocols, scenario materialization, template request processing, live autonomy derivation, and visual projection.",
     "- Data structures: `TownState`, `BookRef`, `WorkerRef`, `TownTask`, `TaskExecutionRecord`, `StandingGoal`, civic protocol packet/reduction/distribution/review records, and cookbook manifest records.",
-    "- Data flow: operator or schedule input, Mayor routing, MoonBook packet creation, MoonClaw execution, MoonBook persistence, Moontown reconciliation, runtime state files, and UI projections.",
+    "- Data flow: operator or schedule input, Mayor routing, MoonBook packet creation, MoonClaw execution, MoonBook persistence, MoonTown reconciliation, runtime state files, and UI projections.",
     "- Core features: saved town runtime, Mayor supervision, MoonBook/MoonClaw bridge, civic building protocols, communication patterns, live autonomy, visual projection, PlanBook, and cookbook.",
     "- AI boundaries: what AI may reduce, draft, review, or repair; what MoonBit records and MoonBook review gates must accept before it becomes durable truth.",
     "",
@@ -420,7 +420,7 @@ pub fn cookbook_skill_markdown() -> String {
     "",
     "## Acceptance Checklist",
     "",
-    "- A new engineer can identify the main records that carry Moontown state.",
+    "- A new engineer can identify the main records that carry MoonTown state.",
     "- The daemon, standing-watch, civic protocol, and projection algorithms are described as step-by-step flows.",
     "- Data files under \{cookbook_product_home_code()} are tied to the records and phases that read/write them.",
     "- Every AI description includes its durable owner and review/persistence boundary.",

@@ -27,7 +27,7 @@ pub fn active_review_markdown() -> String {
     "- Reviewer: keeper/operator or MoonClaw reviewer", "- Decision: pending semantic review",
     "", "## Findings To Check", "", "- Does the course book avoid research-report language?",
     "- Do civic books contain real service ledgers and review history, not just contracts?",
-    "- Does the cookbook explain stable-state boundaries clearly enough for Moondesk and Moontown?",
+    "- Does the cookbook explain stable-state boundaries clearly enough for MoonDesk and MoonTown?",
     "- Does the planbook provide execution evidence and review state, not just templates?",
   ].join("\n")
 }
@@ -45,7 +45,7 @@ pub fn decision_log_markdown() -> String {
 pub fn record_schema_markdown() -> String {
   [
     "# Plan Record Schema", "", "- `id`: stable plan id", "- `status`: proposed, active, blocked, active-review, accepted, superseded",
-    "- `problem`: why the plan exists", "- `owner_boundary`: Moontown, MoonBook, MoonClaw, Moondesk responsibility split",
+    "- `problem`: why the plan exists", "- `owner_boundary`: MoonTown, MoonBook, MoonClaw, MoonDesk responsibility split",
     "- `affected_files`: expected implementation/doc files", "- `acceptance_criteria`: checklist",
     "- `execution_evidence`: changed files, commands, result links", "- `review_decision`: accepted, needs-fix, blocked",
     "- `cookbook_impact`: none, update-needed, updated",
@@ -56,7 +56,7 @@ pub fn record_schema_markdown() -> String {
 pub fn open_questions_markdown() -> String {
   [
     "# Open Planning Questions", "", "- Which book has the weakest current quality score?",
-    "- Is the weakness a MoonBook skill/profile issue, a Moontown routing issue, or a MoonClaw execution issue?",
+    "- Is the weakness a MoonBook skill/profile issue, a MoonTown routing issue, or a MoonClaw execution issue?",
     "- Does fixing the weakness change the stable cookbook contract?",
   ].join("\n")
 }

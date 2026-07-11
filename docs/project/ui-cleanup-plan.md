@@ -1,12 +1,12 @@
-# Moontown Professional UI Cleanup Plan
+# MoonTown Professional UI Cleanup Plan
 
-Moontown users should be treated as professional operators, researchers, and
+MoonTown users should be treated as professional operators, researchers, and
 district builders. They can understand concepts such as Mayor, MoonBook,
 standing watch, review queue, worker, and evidence watch. They should not need
 to understand runtime filenames, daemon identity, request ids, source bridge
 state, or local development controls during normal use.
 
-This cleanup track keeps Moontown technically honest while reducing visible
+This cleanup track keeps MoonTown technically honest while reducing visible
 noise. The goal is not a consumer mini-app. The goal is a calm professional
 surface with advanced runtime detail available on purpose.
 
@@ -14,7 +14,7 @@ surface with advanced runtime detail available on purpose.
 
 | Level | User | Default visibility |
 | --- | --- | --- |
-| Professional | normal Moontown operator or expert user | town status, watches, map entry, review needs, requests |
+| Professional | normal MoonTown operator or expert user | town status, watches, map entry, review needs, requests |
 | Advanced Operator | power user managing live operations | cadence, source health, exact watch ids, queue internals |
 | Developer Diagnostics | maintainer debugging the app/runtime bridge | JSON filenames, request ids, source switching, ticks, bridge placeholders |
 
@@ -159,12 +159,12 @@ or map-specific runtime state can live inside the Wenyu workspace itself.
 ### Phase 8: Compact Town Status Bar
 
 The remaining masthead should behave like product chrome, not an intro hero.
-Moontown already has an operating launchpad immediately below it, so the top
+MoonTown already has an operating launchpad immediately below it, so the top
 bar should only preserve identity and alert state.
 
 Default state should show:
 
-- `Moontown` as the product label
+- `MoonTown` as the product label
 - the current scene title
 - the current alert chips
 
@@ -183,7 +183,7 @@ extra section.
 
 Default state should fold into the Town Launchpad header:
 
-- `Moontown` as the product label
+- `MoonTown` as the product label
 - the current scene title
 - alert chips
 - worker and attention chips
@@ -390,12 +390,12 @@ Default state should remove:
 ### Phase 20: Compact Launchpad Title Rail
 
 The launchpad remains the largest phone surface after request, attention, and
-town-area rails have been compacted. Its title area still stacks `Moontown`
+town-area rails have been compacted. Its title area still stacks `MoonTown`
 above the scene title, spending a full row before the action and signal rails.
 
 Default state should keep:
 
-- `Moontown` as product identity
+- `MoonTown` as product identity
 - the current scene title
 - alert, worker, review, and map actions
 - the four operating signals
@@ -472,7 +472,7 @@ Default state should remove:
 The compact default dashboard now has the right information hierarchy, but its
 visual system still reads like a retro game shell: striped green page
 background, chunky brown borders, stepped shadows, and monospace control
-chrome. Moontown should borrow the reference designs' clear blue-white
+chrome. MoonTown should borrow the reference designs' clear blue-white
 optimism without copying the phone mini-app style or keeping old pixel
 compatibility as the default product identity.
 
@@ -495,7 +495,7 @@ Default state should remove:
 The advanced viewport is deliberately separate from the professional default
 dashboard, but it should not look like an old compatibility mode. Advanced
 operators still need map, module, runtime, interior, and handoff detail, while
-the surface itself should share the standalone Moontown visual system.
+the surface itself should share the standalone MoonTown visual system.
 
 Advanced state should keep:
 
@@ -512,7 +512,7 @@ Advanced state should remove:
 - old pixel borders, stepped shadows, and monospace typography on viewport
   panels, runtime stats, module detail cards, and interior cards
 - separate visual treatment that implies the advanced viewport is a legacy
-  debug product instead of a first-class Moontown surface
+  debug product instead of a first-class MoonTown surface
 - paragraph-length status chips that push the mobile map below the visible
   area
 
@@ -655,7 +655,7 @@ Acceptance requires:
 - A professional user can operate watches, reviews, book requests, and the map
   without reading runtime filenames or request ids.
 - Advanced users can still inspect exact runtime state deliberately.
-- The first screen reads as a Moontown operating surface, not a runtime
+- The first screen reads as a MoonTown operating surface, not a runtime
   debugger.
 - Backend contracts remain stable; most changes are display-label and hierarchy
   changes.
@@ -840,7 +840,7 @@ Acceptance requires:
 - The professional default dashboard now has a real ecosystem visual without
   reopening advanced controls. The launchpad remains the only `Map` gateway,
   while a compact, non-interactive Wenyu map preview follows the
-  request/attention/town-area deck so the product reads as Moontown instead of
+  request/attention/town-area deck so the product reads as MoonTown instead of
   an empty operating form.
 - Opened ecosystem areas now use the same professional blue-white surface
   language as the default dashboard. District, resident, quest, and social

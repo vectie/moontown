@@ -92,5 +92,5 @@ pub async fn daemon_supervise_saved_town(
       "supervisor stopped",
     )
   }
-  "Moontown daemon supervisor completed checks=\{checks}\n\{latest}"
+  "MoonTown daemon supervisor completed checks=\{checks}\n\{latest}"
 }

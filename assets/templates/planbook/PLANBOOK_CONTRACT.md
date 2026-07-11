@@ -1,6 +1,6 @@
 # Planbook Contract
 
-This contract defines how a MoonBook planbook should behave when Moontown asks
+This contract defines how a MoonBook planbook should behave when MoonTown asks
 for code, product, UI, docs, daemon, or civic implementation planning.
 
 ## Inputs
@@ -32,7 +32,7 @@ assets/templates/planbook/PLAN_TEMPLATE.md
 - Do not modify production code while creating the plan unless explicitly asked.
 - Prefer concrete repository facts over generic advice.
 - Use checkboxes for acceptance criteria.
-- Name ownership boundaries between Moontown, MoonBook, MoonClaw, and Moondesk.
+- Name ownership boundaries between MoonTown, MoonBook, MoonClaw, and MoonDesk.
 - Preserve the operating architecture: durable truth lives in MoonBook
   documents/ledgers, active behavior is a protocol, civic buildings are
   protocol places, Mayor owns routing/cadence, Bookkeepers own memory, and
@@ -41,7 +41,7 @@ assets/templates/planbook/PLAN_TEMPLATE.md
   or cookbook stable-state entry changes after execution.
 - Say what should grow over time: book content, civic protocol ledgers,
   PlanBook evidence, code/tests, UI projections, or explicit no-change records.
-- If execution changes Moontown source used by the live daemon, include a
+- If execution changes MoonTown source used by the live daemon, include a
   post-validation reload step:
   `moon run cmd/main -- daemon restart "validated source patch"`.
   Fresh packets after that reload are the live proof; pre-reload daemon output
@@ -51,9 +51,9 @@ assets/templates/planbook/PLAN_TEMPLATE.md
 - If the request asks for a usable web tool backed by watched data, book
   knowledge, reports, dashboards, calculators, explorers, maps, simulations, or
   other interactive output, route it to an `app-tool-book` request. Do not
-  hand-author a one-off Moontown page. The ToolBook owns `tool-manifest.json`,
+  hand-author a one-off MoonTown page. The ToolBook owns `tool-manifest.json`,
   `wiki/reports/latest-analysis.md`, `wiki/tools/tool-spec.md`, `app/`, and
-  `book/site/generated/tool.html`; Moontown only schedules it and links it from
+  `book/site/generated/tool.html`; MoonTown only schedules it and links it from
   the civic building.
 - If the request changes stable operating definitions, mark cookbook impact.
 

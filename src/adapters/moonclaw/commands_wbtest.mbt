@@ -1,5 +1,5 @@
 ///|
-test "default MoonClaw command root uses Moontown product home" {
+test "default MoonClaw command root uses MoonTown product home" {
   let command = build_run_command("run-1")
   assert_true(
     command.contains(

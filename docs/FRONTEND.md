@@ -140,7 +140,7 @@ It reads:
 - `.moonsuite/products/moontown/operator-requests/requests.jsonl` for
   browser-submitted requests.
 - `.moonsuite/products/moontown/live-autonomy.json` for the live spine,
-  including PlanBook self-build status and the Moondesk/Major book-template
+  including PlanBook self-build status and the MoonDesk/Major book-template
   request inbox.
 
 The progress surface shows:
@@ -186,7 +186,7 @@ cadence, purpose, and optional method override; the endpoint writes a config
 file under `.moonsuite/products/moontown/book-template-configs/` and queues a
 durable request in `.moonsuite/products/moontown/book-template-requests.json`.
 The daemon or `books template requests process` installs the actual MoonBook
-workspace and standing goal. This keeps browser UI, Moondesk, and Mayor
+workspace and standing goal. This keeps browser UI, MoonDesk, and Mayor
 automation on the same document-first creation path.
 
 The operator dashboard does not render the Wenyu map inline. It shows a portal
@@ -203,7 +203,7 @@ Current operator-console expectations:
 - link to the standalone Wenyu viewport instead of rendering an inline map
 - expose request submission through the Mayor queue rather than executing work
   directly in the browser
-- expose pending and failed book-template requests so Moondesk-created books
+- expose pending and failed book-template requests so MoonDesk-created books
   are visible before the daemon installs them as MoonBook workspaces
 - show active and archived standing-watch counts from
   `.moonsuite/products/moontown/live-autonomy.json` before drilling into
@@ -233,7 +233,7 @@ selected from the viewport HUD and can also be opened directly by URL:
   - final retrieval surface
   - lists generated MoonBook projection fragments, metrics, review queues,
     page families, journey entries, and links to generated HTML/report outputs
-  - also shows the Moondesk handoff contract and recent portable bridge
+  - also shows the MoonDesk handoff contract and recent portable bridge
     records from `.moonsuite/products/moontown/moondesk-*` and
     `.moonsuite/products/moontown/book-results`
 
@@ -265,22 +265,22 @@ Latest validated UI behavior:
 - viewport loads 11 civic building links
 - clicking a building opens a module interior by URL
 - Back To Town returns to the map view without leaving a stale interior shell
-- output mode lists generated MoonBook outputs and Moondesk bridge context
+- output mode lists generated MoonBook outputs and MoonDesk bridge context
 - browser console validation reported no runtime errors for the checked paths
 
 Editor-mode boundary:
 
-- Moontown editor manages modules, books, worker lanes, runtime bindings,
+- MoonTown editor manages modules, books, worker lanes, runtime bindings,
   placement, and output availability.
-- Moontown can expose only simple per-agent controls such as role, capacity,
+- MoonTown can expose only simple per-agent controls such as role, capacity,
   cadence, home building, and permission envelope.
 - Complex single-agent or single-book editing belongs in `../moondesk`, where a
   human can browse files, edit wiki pages, author skills/prompts, inspect
   generated outputs, and package reusable artifacts.
-- Moondesk outputs should be portable back into Moontown as MoonBook folders,
+- MoonDesk outputs should be portable back into MoonTown as MoonBook folders,
   `moonbook-ui-state.json` projections, skill/profile manifests, asset packs,
-  or module-pack JSON. Moontown consumes those artifacts; it should not
-  duplicate Moondesk as an IDE.
+  or module-pack JSON. MoonTown consumes those artifacts; it should not
+  duplicate MoonDesk as an IDE.
 
 Implemented handoff surfaces:
 
@@ -297,7 +297,7 @@ Implemented handoff surfaces:
   - shows the boundary panel, handoff manifest, and bridge ledger beside module
     validation
 - final output mode
-  - shows MoonBook outputs plus the same Moondesk artifact lanes and recent
+  - shows MoonBook outputs plus the same MoonDesk artifact lanes and recent
     bridge records as retrieval context
 
 ## Wenyu Module UI
@@ -337,7 +337,7 @@ The short version:
 - water depth and reflection are rendered as cheap overlay layers, not baked
   into the base map
 
-This keeps Moontown in charge of the visual control plane while allowing
+This keeps MoonTown in charge of the visual control plane while allowing
 MoonBook and MoonClaw to provide the state and work behind each building.
 
 Current frontend maturity:
@@ -455,7 +455,7 @@ This repo does not own the generated MoonBook workspace site under live runtime
 directories such as `books/coding/site/`.
 
 If that generated site shows generic branding or broken projection links, the
-fix belongs in `moonbook`'s site generator/templates, not in the Moontown
+fix belongs in `moonbook`'s site generator/templates, not in the MoonTown
 frontend package.
 
 ## What Is Still Missing

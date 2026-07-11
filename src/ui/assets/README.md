@@ -1,4 +1,4 @@
-# Moontown Scene Assets
+# MoonTown Scene Assets
 
 This folder is the visual home for the town scene rendered by `moontown/ui`.
 

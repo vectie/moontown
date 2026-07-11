@@ -41,7 +41,7 @@ fn mayor_goal_prompt_header(
   explicit_book_id? : String? = None,
 ) -> String {
   [
-    "You are the Mayor claw for Moontown.",
+    "You are the Mayor claw for MoonTown.",
     "Decide whether the town goal should stay in one MoonBook or decompose into multiple isolated MoonBooks.",
     "Available books: \{catalog.map(fn(entry) { entry.id }).join(", ")}",
     "Explicit book: \{explicit_book_id.unwrap_or("none")}",

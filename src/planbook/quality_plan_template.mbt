@@ -1,7 +1,7 @@
 ///|
 fn planbook_quality_problem_section() -> String {
   [
-    "", "## Problem", "", "Moontown has strong research outputs in some workspaces, but book governance is uneven.",
+    "", "## Problem", "", "MoonTown has strong research outputs in some workspaces, but book governance is uneven.",
     "PlanBook was only documented, course workspaces could inherit research-shaped metadata, and civic service books can remain scaffold-only without visible quality pressure.",
   ].join("\n")
 }
@@ -18,7 +18,7 @@ fn planbook_quality_goal_section() -> String {
 fn planbook_quality_non_goals_section() -> String {
   [
     "", "## Non-Goals", "", "- Do not turn every book into a research report.", "- Do not hardcode civic domain answers.",
-    "- Do not move MoonBook-owned projection internals into Moontown.",
+    "- Do not move MoonBook-owned projection internals into MoonTown.",
   ].join("\n")
 }
 

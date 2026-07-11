@@ -33,8 +33,8 @@ function showBootFailure(detail) {
   app.innerHTML = `
     <div class="boot-shell">
       <div class="boot-panel">
-        <p class="boot-eyebrow">Moontown</p>
-        <h1 class="boot-headline">Moontown could not start</h1>
+        <p class="boot-eyebrow">MoonTown</p>
+        <h1 class="boot-headline">MoonTown could not start</h1>
         <p class="boot-copy"></p>
       </div>
     </div>
@@ -56,7 +56,7 @@ if (app) {
   app.innerHTML = `
     <div class="boot-shell">
       <div class="boot-panel">
-        <p class="boot-eyebrow">Moontown</p>
+        <p class="boot-eyebrow">MoonTown</p>
         <h1 class="boot-headline">Loading Rabbita Town</h1>
         <p class="boot-copy">Preparing city hall, moonbook houses, worker yard, and anomaly corner.</p>
       </div>

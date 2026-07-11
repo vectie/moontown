@@ -89,7 +89,7 @@ pub fn course_worker_routine_lines() -> Array[String] {
 
 ///|
 pub fn course_worker_memory_summary(book_id : String) -> String {
-  "Sanitized Moontown beginner-course context for `\{book_id}`."
+  "Sanitized MoonTown beginner-course context for `\{book_id}`."
 }
 
 ///|

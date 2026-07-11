@@ -154,7 +154,7 @@ fn review_external_request(
   result_path : String,
 ) -> String {
   [
-    "You are the MoonBook semantic quality reviewer for Moontown.",
+    "You are the MoonBook semantic quality reviewer for MoonTown.",
     "",
     "Book id: `\{packet.book_id}`",
     @policy.book_type_line(packet.book_type),
@@ -169,7 +169,7 @@ fn review_external_request(
     "2. Judge the book's real quality for its role, not file completeness.",
     "3. Separate domain/service evidence from operational logs and scaffolding.",
     "4. Return exactly the `\{review_output_contract()}` Markdown contract.",
-    "5. Do not write repository files directly; Moontown will reconcile your returned contract into the durable result path.",
+    "5. Do not write repository files directly; MoonTown will reconcile your returned contract into the durable result path.",
     "",
     packet.prompt,
   ].join("\n")
@@ -188,7 +188,7 @@ fn add_review_no_input_policy(fields : Map[String, Json]) -> Unit {
 ///|
 pub fn review_skill_markdown() -> String {
   [
-    "# Book Quality AI Review Skill", "", "This review is the semantic judge above Moontown's structural doctor.",
+    "# Book Quality AI Review Skill", "", "This review is the semantic judge above MoonTown's structural doctor.",
     "", "## Rule", "", "Do not score a book as world-class just because files exist. Read the book's own contract and skill files, then decide whether the book genuinely performs its role.",
     "", "## Genre-Specific Quality", "", "- Research: evidence quality, source diversity, synthesis depth, uncertainty handling, insight, and report/projection usefulness.",
     "- Course: beginner progression, exercises, checkpoints, examples, and ability to teach judgment.",

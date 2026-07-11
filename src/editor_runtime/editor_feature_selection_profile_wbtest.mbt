@@ -5,7 +5,7 @@ test "editor feature selection request centralizes AI rating policy" {
   )
   assert_true(
     text.contains(
-      "You are the AI feature rater for Moontown's Wenyu editor-mode pipeline.",
+      "You are the AI feature rater for MoonTown's Wenyu editor-mode pipeline.",
     ),
   )
   assert_true(

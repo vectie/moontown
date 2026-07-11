@@ -120,7 +120,7 @@ async fn planbook_runtime_recovery_criterion(
     } else {
       "\{unresolved.count} failed/stale executions remain: \{unresolved.sample}"
     },
-    "classify the failed executions, repair Moontown dispatch/reconciliation when local, or return a precise MoonClaw ownership blocker",
+    "classify the failed executions, repair MoonTown dispatch/reconciliation when local, or return a precise MoonClaw ownership blocker",
   )
 }
 

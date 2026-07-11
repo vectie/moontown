@@ -1,16 +1,16 @@
 {
   "version": 1,
-  "description": "Portable artifact lanes that Moondesk can export and Moontown can consume without turning the town viewport into a single-agent IDE.",
+  "description": "Portable artifact lanes that MoonDesk can export and MoonTown can consume without turning the town viewport into a single-agent IDE.",
   "artifacts": [
     {
       "id": "book-workspace-pack",
       "title": "MoonBook Workspace Pack",
       "kind": "book-workspace",
       "status": "ready",
-      "scope": "single book authored in Moondesk, supervised in Moontown",
+      "scope": "single book authored in MoonDesk, supervised in MoonTown",
       "source_path": "../moondesk workspace export or books/<book-id>/book",
       "target_path": "books/<book-id>/book",
-      "summary": "Durable wiki, generated pages, evidence folders, and review queues prepared in Moondesk and bound to a Moontown civic module through book_id.",
+      "summary": "Durable wiki, generated pages, evidence folders, and review queues prepared in MoonDesk and bound to a MoonTown civic module through book_id.",
       "import_contract": [
         "book folder contains moonbook-ui-state.json or can regenerate it",
         "book_id is stable and matches one configured town module",
@@ -25,7 +25,7 @@
       "scope": "multi-agent/town composition",
       "source_path": "../moondesk exports/module-packs/*.json",
       "target_path": "ui/assets/tilemap/modules/wenyu-town-modules.json",
-      "summary": "A portable set of civic buildings, coordinates, entrances, MoonBook bindings, and summaries that Moontown can merge into the module registry.",
+      "summary": "A portable set of civic buildings, coordinates, entrances, MoonBook bindings, and summaries that MoonTown can merge into the module registry.",
       "import_contract": [
         "modules have stable ids and book_id bindings",
         "coordinates pass terrain and collision validation",
@@ -40,7 +40,7 @@
       "scope": "visual add-on assets",
       "source_path": "../moondesk exports/assets/<pack-id>",
       "target_path": "src/ui/assets/tilemap/buildings or src/ui/assets/tilemap/actors",
-      "summary": "Transparent building, roof, actor, and prop sprites produced or curated in Moondesk and referenced by module config.",
+      "summary": "Transparent building, roof, actor, and prop sprites produced or curated in MoonDesk and referenced by module config.",
       "import_contract": [
         "sprites use transparent backgrounds",
         "asset paths are relative to the Rabbita public asset root",
@@ -52,10 +52,10 @@
       "title": "Agent Profile Pack",
       "kind": "agent-profile",
       "status": "simple-only",
-      "scope": "simple worker lane controls in Moontown, detailed authoring in Moondesk",
+      "scope": "simple worker lane controls in MoonTown, detailed authoring in MoonDesk",
       "source_path": "../moondesk exports/agent-profiles/*.json",
       "target_path": ".moonsuite/products/moontown/agent-profiles/<profile-id>.json",
-      "summary": "Role, capacity, cadence, permission envelope, visible home building, and book/module assignment. Detailed prompts and memory rules remain in Moondesk/MoonBook skill files.",
+      "summary": "Role, capacity, cadence, permission envelope, visible home building, and book/module assignment. Detailed prompts and memory rules remain in MoonDesk/MoonBook skill files.",
       "import_contract": [
         "profile declares role, capacity, and permission envelope",
         "profile binds to a module id or book_id",
@@ -70,10 +70,10 @@
       "scope": "MoonBook/MoonClaw execution quality",
       "source_path": "../moondesk exports/skills/<skill-id>",
       "target_path": "MoonBook or MoonClaw skill registry",
-      "summary": "Reusable prompts, output contracts, review rubrics, and examples. Moontown only references the pack when assigning work; it does not edit the skill body.",
+      "summary": "Reusable prompts, output contracts, review rubrics, and examples. MoonTown only references the pack when assigning work; it does not edit the skill body.",
       "import_contract": [
         "skill has SKILL.md with examples and output contracts",
-        "skill owner is MoonBook or MoonClaw, not Moontown",
+        "skill owner is MoonBook or MoonClaw, not MoonTown",
         "town module references the skill by id"
       ]
     },
@@ -82,14 +82,14 @@
       "title": "Operator Request Pack",
       "kind": "operator-request",
       "status": "ready",
-      "scope": "human request staged in Moondesk, dispatched by Moontown mayor",
+      "scope": "human request staged in MoonDesk, dispatched by MoonTown mayor",
       "source_path": ".moonsuite/products/moontown/moondesk-requests/*.json",
       "target_path": ".moonsuite/products/moontown/standing-goals.json or .moonsuite/products/moontown/operator-requests",
-      "summary": "Context-rich request drafted in Moondesk and submitted to Moontown as a standing watch or one-shot mayor goal.",
+      "summary": "Context-rich request drafted in MoonDesk and submitted to MoonTown as a standing watch or one-shot mayor goal.",
       "import_contract": [
         "request declares target_book_id",
         "request declares cadence and quality threshold",
-        "Moontown mayor performs scheduling and dispatch"
+        "MoonTown mayor performs scheduling and dispatch"
       ]
     },
     {
@@ -99,8 +99,8 @@
       "status": "ready",
       "scope": "finished work retrieval",
       "source_path": "books/<book-id>/book/site/generated or book/synthesis",
-      "target_path": "Moontown final output mode and Moondesk file browser",
-      "summary": "Published sites, reports, evidence pages, and pending reviews. Moontown shows the high-level output surface; Moondesk remains the detailed file browser.",
+      "target_path": "MoonTown final output mode and MoonDesk file browser",
+      "summary": "Published sites, reports, evidence pages, and pending reviews. MoonTown shows the high-level output surface; MoonDesk remains the detailed file browser.",
       "import_contract": [
         "bundle is under a MoonBook book folder",
         "moonbook-ui-state.json points to important outputs",

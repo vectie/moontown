@@ -24,7 +24,7 @@ Use this skill when the Mayor claw supervises persisted town executions and must
   outbox, review, or return-home records.
 - PlanBook progress requires plan/backlog/evidence updates, validation results,
   code/test changes, or an explicit no-change completion record.
-- If a validated source patch changed Moontown code used by the live daemon,
+- If a validated source patch changed MoonTown code used by the live daemon,
   require a daemon reload request before accepting live proof:
   `moon run cmd/main -- daemon restart "validated source patch"`.
   Treat packets emitted before that reload as stale-process evidence.

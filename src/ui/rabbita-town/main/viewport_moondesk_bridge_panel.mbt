@@ -29,10 +29,10 @@ fn render_moondesk_bridge_panel(model : Model) -> @rabbita.Html {
   }
   section(class="moondesk-bridge-panel", [
     div(class="viewport-panel-heading", [
-      p(class="eyebrow", "Moondesk Bridge"),
+      p(class="eyebrow", "MoonDesk Bridge"),
       h2("Recent Portable Records"),
       p(
-        "Real bridge records from \{moontown_product_display_artifact_code("moondesk-*")} and \{moontown_product_display_artifact_code("book-results")}. This is the evidence trail for work moving between Moondesk, MoonBook, MoonClaw, and Moontown.",
+        "Real bridge records from \{moontown_product_display_artifact_code("moondesk-*")} and \{moontown_product_display_artifact_code("book-results")}. This is the evidence trail for work moving between MoonDesk, MoonBook, MoonClaw, and MoonTown.",
       ),
     ]),
     div(class="viewport-editor-stats", [
@@ -47,7 +47,7 @@ fn render_moondesk_bridge_panel(model : Model) -> @rabbita.Html {
           article(class="viewport-output-empty", [
             h2("No Bridge Records"),
             p(
-              "No Moondesk dispatch, request, or book-result records were found yet.",
+              "No MoonDesk dispatch, request, or book-result records were found yet.",
             ),
           ]),
         ]

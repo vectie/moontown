@@ -33,7 +33,7 @@ fn render_miniapp_command(args : Array[String]) -> String {
 
 ///|
 fn render_miniapp_help() -> String {
-  "Moontown miniapp local backend\ncommands=routes serve dev-login <user> snapshot <user> buildings search <user> <query> buildings create <user> buildings place <user> buildings share <user> buildings publish <user> buildings archive <user> agents create <user> chat send <user> runs cancel|retry <user> <run> reviews accept <user> <run>"
+  "MoonTown miniapp local backend\ncommands=routes serve dev-login <user> snapshot <user> buildings search <user> <query> buildings create <user> buildings place <user> buildings share <user> buildings publish <user> buildings archive <user> agents create <user> chat send <user> runs cancel|retry <user> <run> reviews accept <user> <run>"
 }
 
 ///|
@@ -44,7 +44,7 @@ fn render_miniapp_serve_help() -> String {
 ///|
 fn render_miniapp_routes() -> String {
   let routes = @miniapp_local_backend.miniapp_local_backend_routes()
-  let lines : Array[String] = ["Moontown miniapp local backend routes"]
+  let lines : Array[String] = ["MoonTown miniapp local backend routes"]
   for route in routes {
     lines.push(
       "route=\{route.name} method=\{route.http_method} path=\{route.path} auth=\{route.auth_required}",

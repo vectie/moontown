@@ -12,7 +12,7 @@ test "moonclaw import timeout defaults to bounded daemon work" {
   assert_eq(moontown_moonclaw_import_timeout_ms(), 20_000)
   assert_eq(
     @runtime_error_policy.transient_external_dependency_error(
-      "Moontown external import timed out while importing MoonClaw proposal.",
+      "MoonTown external import timed out while importing MoonClaw proposal.",
     ),
     true,
   )

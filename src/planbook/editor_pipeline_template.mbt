@@ -20,7 +20,7 @@ fn editor_pipeline_plan_problem_section() -> String {
 ///|
 fn editor_pipeline_problem_missing_lifecycle_sentence() -> String {
   [
-    "A designer can inspect modules, runtime bindings, Moondesk handoff artifacts, and output coverage.",
+    "A designer can inspect modules, runtime bindings, MoonDesk handoff artifacts, and output coverage.",
     "The missing lifecycle is durable PlanBook goal creation, bounded MoonClaw implementation dispatch, repair evidence tracking, and final output readiness.",
   ].join(" ")
 }
@@ -32,18 +32,18 @@ fn editor_pipeline_plan_goal_section() -> String {
     "- Let PlanBook store the plan, acceptance criteria, evidence, and review state.",
     "- Let MoonClaw execute bounded code/docs changes from the PlanBook packet.",
     "- Let the UI show editor pipeline status from runtime state rather than static copy.",
-    "- Keep Moondesk focused on detailed human workspace/file editing and portable artifacts.",
+    "- Keep MoonDesk focused on detailed human workspace/file editing and portable artifacts.",
   ].join("\n")
 }
 
 ///|
 fn editor_pipeline_plan_ownership_section() -> String {
   [
-    "", "## Ownership", "", "- Moontown owns the editor-pipeline contract, command surface, runtime state, and operator UI binding.",
+    "", "## Ownership", "", "- MoonTown owns the editor-pipeline contract, command surface, runtime state, and operator UI binding.",
     "- PlanBook owns the durable plan, acceptance gates, repair packet, execution evidence, and review notes.",
     "- MoonBook owns the course book content and any generated course projection.",
     "- MoonClaw owns bounded implementation execution and structured result packaging.",
-    "- Moondesk later owns rich human editing of individual files, prompts, and single-agent workspaces.",
+    "- MoonDesk later owns rich human editing of individual files, prompts, and single-agent workspaces.",
   ].join("\n")
 }
 
@@ -54,7 +54,7 @@ fn editor_pipeline_plan_implementation_section() -> String {
     "## Implementation Shape",
     "",
     "1. Add a restartable editor-pipeline state contract under `\{@storage.moontown_product_display_artifact("editor-pipeline.json")}` or equivalent.",
-    "2. Add a Moontown command that refreshes/renders that state and references the PlanBook plan.",
+    "2. Add a MoonTown command that refreshes/renders that state and references the PlanBook plan.",
     "3. Connect editor-mode UI to the contract so it shows source course, current plan, dispatch status, validation status, and output readiness.",
     "4. Ensure a bounded PlanBook repair packet can dispatch the missing implementation work through MoonClaw.",
     "5. Record validation evidence before claiming the pipeline is accepted.",

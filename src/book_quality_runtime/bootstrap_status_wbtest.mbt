@@ -6,7 +6,7 @@ async fn render_moontown_planbook_status(
 ) -> String {
   let missing = missing_planbook_workspace_required_paths(workspace_root)
   [
-    "# Moontown Planbook Status",
+    "# MoonTown Planbook Status",
     "",
     "- Book: `\{default_planbook_book_id()}`",
     "- Workspace: `\{workspace_root}`",

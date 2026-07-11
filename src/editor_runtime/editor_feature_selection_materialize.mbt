@@ -16,7 +16,7 @@ async fn materialize_editor_feature_selection_task(
   let mut proposal_id : String? = None
   let mut run_id : String? = None
   let mut status = "queued"
-  let mut summary = "Queued bounded MoonClaw selection packet. The AI must read the course book and choose the lowest-scoring missing editor feature; Moontown does not choose the feature name."
+  let mut summary = "Queued bounded MoonClaw selection packet. The AI must read the course book and choose the lowest-scoring missing editor feature; MoonTown does not choose the feature name."
   if dispatch {
     let imported = @moonclaw.import_packet(
       packet,

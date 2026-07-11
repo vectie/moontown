@@ -12,7 +12,7 @@ pub fn ui_state_json(
   let builder = StringBuilder::new()
   builder.write_string("{\n")
   builder.write_string("  \"book_id\": \{json_string(entry.id)},\n")
-  builder.write_string("  \"title\": \"Moontown Stable-State Cookbook\",\n")
+  builder.write_string("  \"title\": \"MoonTown Stable-State Cookbook\",\n")
   builder.write_string(
     "  \"summary\": \"Generated control book for docs, definitions, runtime state, and ownership contracts.\",\n",
   )

@@ -46,7 +46,7 @@ fn render_town_runtime_notice(model : Model) -> @rabbita.Html {
           p(class="eyebrow", "Live town data"),
           h2("Connecting to the town runtime"),
         ]),
-        p("Moontown is checking the local town projection."),
+        p("MoonTown is checking the local town projection."),
         a(
           href="./viewport.html?mode=output&v=wenyu",
           class="town-runtime-notice-action",

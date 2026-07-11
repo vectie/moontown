@@ -29,7 +29,7 @@ pub fn building_protocol_markdown(
     "",
     "## AI Reducer Boundary",
     "",
-    "- Moontown owns the envelope, channels, ledgers, idempotency, and review gates.",
+    "- MoonTown owns the envelope, channels, ledgers, idempotency, and review gates.",
     "- MoonClaw chooses the building-native reduction strategy through the skill packs.",
     "- MoonBook persists accepted civic records and review queues.",
   ].join("\n")

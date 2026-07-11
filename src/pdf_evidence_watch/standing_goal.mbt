@@ -60,7 +60,7 @@ fn pdf_evidence_watch_goal_prompt(
     "",
     "Configured websites:",
     if websites.is_empty() {
-      "- none yet; ask Moondesk/user configuration for approved sites before fetching"
+      "- none yet; ask MoonDesk/user configuration for approved sites before fetching"
     } else {
       markdown_bullets(websites)
     },

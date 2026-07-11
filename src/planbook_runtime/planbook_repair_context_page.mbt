@@ -43,7 +43,7 @@ fn planbook_repair_context_boundary_section() -> String {
 
 ///|
 fn planbook_repair_boundary_rule() -> String {
-  "Moontown may repair routing, daemon, live-spine, UI projection, and PlanBook evidence plumbing. MoonBook owns native book profiles, templates, and projections. MoonClaw owns execution runtime behavior and provider retry stability. Do not copy another project into Moontown to fake ownership."
+  "MoonTown may repair routing, daemon, live-spine, UI projection, and PlanBook evidence plumbing. MoonBook owns native book profiles, templates, and projections. MoonClaw owns execution runtime behavior and provider retry stability. Do not copy another project into MoonTown to fake ownership."
 }
 
 ///|

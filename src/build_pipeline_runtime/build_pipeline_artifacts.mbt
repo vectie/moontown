@@ -13,7 +13,7 @@ pub async fn complete_wenyu_build_artifacts_if_needed(
       copy_execution_with(
         execution,
         status=Completed,
-        summary="Moontown materialized implementation backlog and acceptance tests for \{entry.id} after the Wenyu build controller returned no writable artifacts.",
+        summary="MoonTown materialized implementation backlog and acceptance tests for \{entry.id} after the Wenyu build controller returned no writable artifacts.",
       )
     }
     "code-patch" => {
@@ -24,7 +24,7 @@ pub async fn complete_wenyu_build_artifacts_if_needed(
       copy_execution_with(
         execution,
         status=ReviewQueued,
-        summary="Moontown materialized a code-patch handoff and blocker record for \{entry.id}; MoonCode/MoonClaw execution did not produce a repository patch in this run.",
+        summary="MoonTown materialized a code-patch handoff and blocker record for \{entry.id}; MoonCode/MoonClaw execution did not produce a repository patch in this run.",
       )
     }
     "image-asset" => {
@@ -32,7 +32,7 @@ pub async fn complete_wenyu_build_artifacts_if_needed(
       copy_execution_with(
         execution,
         status=Completed,
-        summary="Moontown materialized module-specific asset prompts and an asset manifest for \{entry.id} after the Wenyu build controller returned no writable artifacts.",
+        summary="MoonTown materialized module-specific asset prompts and an asset manifest for \{entry.id} after the Wenyu build controller returned no writable artifacts.",
       )
     }
     _ => execution

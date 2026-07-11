@@ -11,7 +11,7 @@
 
 ## Problem
 
-Moontown has research books and course books, but code/product planning is not
+MoonTown has research books and course books, but code/product planning is not
 yet represented as a first-class durable book type. Planning currently happens
 inside chat, docs, or ad hoc TODOs, which makes context recovery harder and can
 turn implementation work into vague research.
@@ -46,7 +46,7 @@ Add a durable documentation structure that distinguishes:
 
 - User-provided plan-first workflow description inspired by Compound
   Engineering and `plan.md` driven execution.
-- Existing Moontown cookbook, daemon, research, course, and Wenyu docs.
+- Existing MoonTown cookbook, daemon, research, course, and Wenyu docs.
 - Current MoonBook course-routing work, which clarified the need for distinct
   book types.
 
@@ -120,4 +120,4 @@ cookbook, and development doc references.
 
 The runtime implementation is intentionally deferred. Next technical step is a
 MoonBook-native `planbook` template and `code-plan/SKILL.md` route, then
-Moontown routing for build/fix/refactor requests.
+MoonTown routing for build/fix/refactor requests.
