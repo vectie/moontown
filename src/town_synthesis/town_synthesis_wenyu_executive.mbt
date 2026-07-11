@@ -24,7 +24,7 @@ fn wenyu_parallel_lane_summary(plan : @roles.MayorGoalPlan) -> String {
 
 ///|
 fn wenyu_lane_input_summary() -> String {
-  "Each lane received the Wenyu PRD, the Wenyu vision, and a mounted source snapshot of Moontown, MoonBook, MoonClaw, and Rabbita implementation files. "
+  "Each lane received the Wenyu PRD, the Wenyu vision, and a mounted source snapshot of MoonTown, MoonBook, MoonClaw, and Rabbita implementation files. "
 }
 
 ///|

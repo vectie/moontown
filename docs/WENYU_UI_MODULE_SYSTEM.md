@@ -27,7 +27,7 @@ base terrain
   + module-specific interiors
   + MoonBook projection fragments
   + MoonClaw worker activity
-  + Moontown mayor supervision
+  + MoonTown mayor supervision
 ```
 
 ## Design Principle
@@ -50,12 +50,12 @@ Keep three layers separate:
 The UI should never require code edits just to add, remove, or move one civic
 feature building.
 
-## Editor Boundary: Moontown vs Moondesk
+## Editor Boundary: MoonTown vs MoonDesk
 
 The Wenyu town editor is a multi-agent composition tool, not a detailed
 single-agent authoring tool.
 
-Moontown owns town-level editing:
+MoonTown owns town-level editing:
 
 - add, remove, enable, disable, and move civic modules
 - bind each module to a MoonBook through `book_id`
@@ -65,14 +65,14 @@ Moontown owns town-level editing:
 - show runtime state, active work, review pressure, and output availability
 - export/import module packs that can be shared across towns
 
-Moontown should only support simple agent edits:
+MoonTown should only support simple agent edits:
 
 - choose a worker role or lane
 - choose visible home/destination building
 - set basic capacity, cadence, and permission envelope
 - attach or detach the worker from a module/book
 
-Moondesk owns detailed human/workspace editing:
+MoonDesk owns detailed human/workspace editing:
 
 - browse and edit MoonBook files, wiki pages, reports, assets, and generated
   outputs through a desktop/file-manager-like workspace
@@ -83,20 +83,20 @@ Moondesk owns detailed human/workspace editing:
 - package the finished workspace, skill pack, asset pack, or agent profile for
   reuse
 
-Portable output from Moondesk should enter Moontown as data, not as hardcoded
+Portable output from MoonDesk should enter MoonTown as data, not as hardcoded
 UI:
 
 ```text
-Moondesk edited workspace
+MoonDesk edited workspace
   -> MoonBook book folder / projection fragment
   -> skill pack or agent profile manifest
   -> asset pack / module pack
-  -> Moontown module registry import
+  -> MoonTown module registry import
   -> mayor-visible multi-agent runtime
 ```
 
-This boundary keeps the town viewport legible. Moontown designs the civic
-system and supervises groups of agents; Moondesk handles the deep single-book
+This boundary keeps the town viewport legible. MoonTown designs the civic
+system and supervises groups of agents; MoonDesk handles the deep single-book
 and single-agent work that would otherwise overload the town map.
 
 ## Module Registry
@@ -167,16 +167,16 @@ Runtime placement boundary:
 
 | Proposal Feature | Module Building | Owner Split |
 |---|---|---|
-| 政策发布馆 | Policy Hall | Moontown routes, MoonBook stores policy wiki, MoonClaw researches and drafts |
-| 赛事直通车 | Contest Express | Moontown schedules, MoonBook stores readiness records, MoonClaw reviews decks |
-| 社交广场 | Social Square | Moontown shows matches, MoonBook stores social graph, MoonClaw drafts introductions |
-| 人才星光大道 | Talent Avenue | Moontown projects public cards, MoonBook owns talent graph, MoonClaw verifies evidence |
-| 街区活力看板 | Vitality Tower | Moontown owns counters, MoonBook exposes book counters, MoonClaw emits run packets |
-| AI 科普花园 | AI Garden | Moontown schedules learning quests, MoonBook stores tutorials, MoonClaw drafts examples |
-| 虚实连接器 | Physical Bridge | Moontown gates actions, MoonBook stores venue/robot knowledge, MoonClaw executes approved calls |
-| 数字分身 | Resident Twin Homes | Moontown displays projections, MoonBook owns memory, MoonClaw emits candidates |
-| 河谷积分 | Valley Market | Moontown projects point flow, MoonBook stores ledger records, MoonClaw drafts reward paths |
-| Agent 故事雷达 | Broadcast Tower | Moontown highlights stories, MoonBook stores reviewed stories, MoonClaw summarizes events |
+| 政策发布馆 | Policy Hall | MoonTown routes, MoonBook stores policy wiki, MoonClaw researches and drafts |
+| 赛事直通车 | Contest Express | MoonTown schedules, MoonBook stores readiness records, MoonClaw reviews decks |
+| 社交广场 | Social Square | MoonTown shows matches, MoonBook stores social graph, MoonClaw drafts introductions |
+| 人才星光大道 | Talent Avenue | MoonTown projects public cards, MoonBook owns talent graph, MoonClaw verifies evidence |
+| 街区活力看板 | Vitality Tower | MoonTown owns counters, MoonBook exposes book counters, MoonClaw emits run packets |
+| AI 科普花园 | AI Garden | MoonTown schedules learning quests, MoonBook stores tutorials, MoonClaw drafts examples |
+| 虚实连接器 | Physical Bridge | MoonTown gates actions, MoonBook stores venue/robot knowledge, MoonClaw executes approved calls |
+| 数字分身 | Resident Twin Homes | MoonTown displays projections, MoonBook owns memory, MoonClaw emits candidates |
+| 河谷积分 | Valley Market | MoonTown projects point flow, MoonBook stores ledger records, MoonClaw drafts reward paths |
+| Agent 故事雷达 | Broadcast Tower | MoonTown highlights stories, MoonBook stores reviewed stories, MoonClaw summarizes events |
 
 ## Civic Module Binding
 
@@ -206,7 +206,7 @@ building inbox
   -> distribution to MoonBook, UI, mayor, agents, or external handoff
 ```
 
-This is map/reduce-like, but the reducer is not hardcoded. Moontown should
+This is map/reduce-like, but the reducer is not hardcoded. MoonTown should
 hardcode the protocol envelope, channels, ledgers, permissions, idempotency, and
 review gates. The building-specific `SKILL.md` should guide MoonClaw to decide
 what the right reduction is.
@@ -299,8 +299,8 @@ There is no domain-specific default proof scenario in MoonBit; new domains
 arrive as template JSON and generated skill rules instead of frontend or
 MoonBit branches.
 
-This is a Moontown-side bootstrap bridge. Long term, MoonBook should own the
-native civic workspace templates, and Moontown should request them through a
+This is a MoonTown-side bootstrap bridge. Long term, MoonBook should own the
+native civic workspace templates, and MoonTown should request them through a
 book creation API instead of writing every seed file directly.
 
 Do not route all modules through a generic research skill. Policy Hall needs
@@ -338,7 +338,7 @@ Each module binds to a MoonBook through `book_id`.
 module.book_id
   -> MoonBook projection fragment
   -> module-projections.json bridge
-  -> Moontown runtime projection
+  -> MoonTown runtime projection
   -> viewport building status
   -> actor destination
   -> interior worker roster
@@ -391,7 +391,7 @@ Current status:
 
 ### Stage 4: Runtime Projection
 
-- Extend Moontown projection JSON with module status.
+- Extend MoonTown projection JSON with module status.
 - Merge MoonBook projection fragments by `book_id`.
 - Bind building lights, counters, badges, and messages to real data.
 
@@ -444,7 +444,7 @@ Current status:
 - viewport runtime validation catches missing `book_id`, missing assets, invalid
   footprints, building anchors on blocked terrain, and entrances on water
 - bridge/river/harbor modules can opt into water or bridge placement
-- editor mode now shows the town/Moondesk boundary, the handoff manifest, and
+- editor mode now shows the town/MoonDesk boundary, the handoff manifest, and
   recent bridge records next to module validation
 - `tilemap/modules/moondesk-handoff.json` defines the portable artifact lanes
   that can be imported without changing viewport code

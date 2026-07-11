@@ -1,6 +1,6 @@
-# Moontown Planbook
+# MoonTown Planbook
 
-The planbook is one of Moontown's durable MoonBook archetypes.
+The planbook is one of MoonTown's durable MoonBook archetypes.
 
 Research books answer "what is true or changing?"
 Course books teach "how should a beginner learn this?"
@@ -15,13 +15,13 @@ capabilities instead of inventing a new hardcoded book type every time a book
 needs another surface.
 
 The goal is to make planning a persisted artifact, not a chat side effect.
-For non-trivial code or product work, Moontown should create or update a
+For non-trivial code or product work, MoonTown should create or update a
 planbook before execution starts. MoonClaw can then execute against the plan,
 mark acceptance criteria, and leave reviewable evidence.
 
 ## Why This Exists
 
-The current Moontown repo already has strong execution paths:
+The current MoonTown repo already has strong execution paths:
 
 - MoonTown routes work and supervises the daemon.
 - MoonBook owns durable workspace memory and projection.
@@ -507,7 +507,7 @@ Mayor routes and supervises
   -> building protocol or target MoonBook hydrates durable context
   -> MoonClaw worker executes one bounded packet
   -> MoonBook bookkeeper reviews and persists memory/projection changes
-  -> Moontown records health, visual state, and next action
+  -> MoonTown records health, visual state, and next action
 ```
 
 Do not blur these roles:
@@ -557,13 +557,13 @@ active agents are temporary workers that update those files through protocols.
 Canonical flow:
 
 ```text
-Moondesk writes an App ToolBook config/request document
-  -> Moontown daemon processes the book-template request
+MoonDesk writes an App ToolBook config/request document
+  -> MoonTown daemon processes the book-template request
   -> MoonBook workspace is created with report, app, manifest, and review files
-  -> Moontown registers a standing goal for the book
+  -> MoonTown registers a standing goal for the book
   -> MoonClaw watches sources, analyzes data, updates app source, validates tool
   -> MoonBook bookkeeper accepts or reviews data/tool changes
-  -> Moontown civic building links to the live generated tool and latest report
+  -> MoonTown civic building links to the live generated tool and latest report
 ```
 
 Required durable files:
@@ -580,7 +580,7 @@ Required durable files:
 
 The template is `app-tool-book` in `assets/templates/books/app-tool-book/`. It is
 installed through the same request inbox as other book templates, so a Mayor,
-Moondesk, or future planning agent can create one without Codex manually
+MoonDesk, or future planning agent can create one without Codex manually
 copying files:
 
 ```text
@@ -591,9 +591,9 @@ copying files:
 
 PlanBook acceptance rule: if a plan asks for a book-backed usable tool, it must
 create or update an App ToolBook request rather than hardcoding a one-off page
-inside Moontown. Moontown presents the building and route; MoonBook owns the
+inside MoonTown. MoonTown presents the building and route; MoonBook owns the
 tool source and generated page; MoonClaw performs bounded watch/analyze/build
-work; Moondesk edits the method/spec and approves durable changes.
+work; MoonDesk edits the method/spec and approves durable changes.
 
 ## Mayor, Bookkeeper, And Worker Roles
 
@@ -622,7 +622,7 @@ Mayor.
 
 For civic work, PlanBook must also preserve the protocol boundary: the reusable
 communication-pattern taxonomy lives in the `civic/` package, while root
-Moontown only adapts those patterns into scenario files, ledgers, runtime
+MoonTown only adapts those patterns into scenario files, ledgers, runtime
 packets, CLI output, and UI projection. A future plan that adds a civic
 building should compose or add a `civic/` pattern/service definition first,
 then bind it through configuration; it should not encode a new building's
@@ -858,8 +858,8 @@ A plan is not ready for execution if:
 - it hides unresolved decisions
 - it has no acceptance criteria
 - it has no validation command
-- it changes ownership boundaries between Moontown, MoonBook, MoonClaw, and
-  Moondesk without saying so
+- it changes ownership boundaries between MoonTown, MoonBook, MoonClaw, and
+  MoonDesk without saying so
 - it reads like generic advice instead of this repository's situation
 
 ## Execution Rules
@@ -936,7 +936,7 @@ hardcoded workflow that bypasses those documents.
 
 ## Self-Build And Self-Healing Loop
 
-The current Moontown runtime now has a PlanBook autonomy doctor. It is not a
+The current MoonTown runtime now has a PlanBook autonomy doctor. It is not a
 replacement for MoonBook-native planning, but it is the first live spine for
 self-build governance:
 
@@ -979,7 +979,7 @@ The latest accounting is stricter than earlier versions: ACP route wiring is not
 the same as proven self-patching. A PlanBook source-repair criterion must remain
 open until an accepted MoonClaw result includes
 `planbook.repair.patch_receipt.v1` evidence from a Codex ACP run rooted at the
-Moontown source tree. Text-only claims, read-only sandbox attempts,
+MoonTown source tree. Text-only claims, read-only sandbox attempts,
 `files_changed: none`, or review-only ACP runs are useful diagnostics, but they
 do not prove that the town patched its own code.
 When all criteria are satisfied, the live autonomy spine reports
@@ -1007,13 +1007,13 @@ moon run src/cmd/main -- planbook repair status
 moon run src/cmd/main -- planbook repair --dispatch
 ```
 
-Without `--dispatch`, Moontown only queues the repair packet and records the
+Without `--dispatch`, MoonTown only queues the repair packet and records the
 active repair. With `--dispatch`, the packet is imported into MoonClaw using the
 PlanBook repair skill and the `planbook.repair.result.v1` output contract.
-For Moontown-owned source repairs, the repair profile uses
+For MoonTown-owned source repairs, the repair profile uses
 `execution_mode: acp` and `execution_target: codex-main`; the configured ACP
 target runs from the repository source root, not only the PlanBook workspace.
-The target model is not a book policy decision. It is a Moontown ACP adapter
+The target model is not a book policy decision. It is a MoonTown ACP adapter
 default, currently `gpt-5.5` unless `MOONTOWN_CODEX_ACP_MODEL` overrides it.
 Daemon-created repair dispatches are detached; operator `--dispatch` may still
 use inline execution when the environment explicitly enables it for debugging.
@@ -1029,7 +1029,7 @@ stage/status policy, selected-style lookup, selected-feature readiness gates,
 module-placement DTO and record policy, canonical status Markdown renderer, and
 style-catalog metadata. PlanBook may decide when to run feature selection,
 which course/book evidence to include, and how to reconcile the selected
-feature into a repair task. Root Moontown may inspect runtime state, create
+feature into a repair task. Root MoonTown may inspect runtime state, create
 files, compute evidence paths, load module JSON, convert config entries into
 package DTOs, and dispatch workers, but future plans must not add a second
 root-local editor record shape, stage readiness policy, status renderer, rubric,
@@ -1045,7 +1045,7 @@ execution mode/target, changed files, validation commands, diff hygiene, commit
 status/message, and push status. PlanBook rejects accepted source-repair claims
 that do not carry this evidence.
 If the gap belongs in MoonBook or MoonClaw, the repair worker must return a
-precise ownership blocker instead of moving that responsibility into Moontown.
+precise ownership blocker instead of moving that responsibility into MoonTown.
 
 Research bootstrap prompt refactors follow the same boundary rule. Reusable
 research policy text belongs in `research_policy/`, including web/fallback
@@ -1110,7 +1110,7 @@ Bad examples:
 
 ## Where This Should Be Implemented
 
-Moontown should implement:
+MoonTown should implement:
 
 - planbook registration and routing
 - mayor decision to create, resume, or execute a plan
@@ -1129,15 +1129,15 @@ MoonClaw should implement:
 - role-specific plan writer, implementer, reviewer, and doc-sync skills
 - output contracts for plan creation, execution evidence, and review findings
 
-Moondesk should implement:
+MoonDesk should implement:
 
 - human file-manager surface for browsing and editing planbooks
 - voice-note capture into `raw/inbox/`
 - plan diff/review UI
 
-## Immediate Moontown Rule
+## Immediate MoonTown Rule
 
-Moontown now has a first-class bootstrap for the current planbook workspace:
+MoonTown now has a first-class bootstrap for the current planbook workspace:
 
 ```bash
 moon run src/cmd/main -- planbook bootstrap
@@ -1156,5 +1156,5 @@ good enough for a new Codex/MoonClaw session to continue after context loss.
 
 The remaining upgrade belongs mostly in MoonBook: add a native `planbook`
 provider/profile so future plan creation, plan review, and plan repair run
-through MoonBook skills instead of only through Moontown bootstrap. Until that
-exists, Moontown's PlanBook doctor keeps the gap explicit in live runtime state.
+through MoonBook skills instead of only through MoonTown bootstrap. Until that
+exists, MoonTown's PlanBook doctor keeps the gap explicit in live runtime state.

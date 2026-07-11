@@ -14,8 +14,8 @@ recorded as such.
 
 ## Ownership
 
-- Moondesk owns human creation, source-list editing, method editing, and export.
-- Moontown owns standing-goal cadence, routing, live status, and notification.
+- MoonDesk owns human creation, source-list editing, method editing, and export.
+- MoonTown owns standing-goal cadence, routing, live status, and notification.
 - MoonBook owns the durable book, PDFs, extracted text, wiki, review queues,
   generated site, and acceptance decisions.
 - MoonClaw owns one bounded execution packet: discover, fetch, extract,

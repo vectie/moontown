@@ -50,7 +50,7 @@ fn research_search_log_seed_text(entry : BookCatalogEntry) -> String {
     "",
     "## Seed Status",
     "",
-    "Moontown created this starter log before MoonClaw source screening so the research trail is durable. It contains planned queries only; source screening must revise it with actual attempts, selected URLs, rejected URLs, blockers, and decisions.",
+    "MoonTown created this starter log before MoonClaw source screening so the research trail is durable. It contains planned queries only; source screening must revise it with actual attempts, selected URLs, rejected URLs, blockers, and decisions.",
     "",
     "## Planned Queries",
     "",
@@ -90,7 +90,7 @@ fn research_source_hints_text(entry : BookCatalogEntry) -> String {
   let lines : Array[String] = [
     "# Source Hints",
     "",
-    "These are Moontown-generated hints for the \{display} research lane.",
+    "These are MoonTown-generated hints for the \{display} research lane.",
     "",
   ]
   if is_external_domain_research_topic(topic) {

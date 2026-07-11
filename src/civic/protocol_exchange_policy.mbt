@@ -46,6 +46,6 @@ fn distribution_policy_for_service(service : CivicServiceDefinition) -> String {
     "physical-bridge" =>
       "Send blockers and handoff packets to operator review before any external/offline action."
     _ =>
-      "Send accepted records to MoonBook, review-gated records to review queues, and projection-safe summaries to Moontown UI."
+      "Send accepted records to MoonBook, review-gated records to review queues, and projection-safe summaries to MoonTown UI."
   }
 }

@@ -173,7 +173,7 @@ moon run src/cmd/main -- daemon stop
 ./scripts/uninstall-launchd-daemon.sh
 ```
 
-Do not put durable research memory in Moontown. Standing goals belong to the
+Do not put durable research memory in MoonTown. Standing goals belong to the
 Mayor, book-local memory belongs to MoonBook, and bounded execution belongs to
 MoonClaw.
 
@@ -203,7 +203,7 @@ liveness:
   launchd, the worker loop runs inline under the launchd-managed process, so
   the same durable PID may appear as both supervisor and worker.
 - `moon run src/cmd/main -- daemon restart "validated source patch"`
-  should be requested after autonomous code repair changes Moontown source and
+  should be requested after autonomous code repair changes MoonTown source and
   validation passes. The request writes
   `.moonsuite/products/moontown/daemon.restart`; the worker consumes it between
   ticks and the supervisor/launchd starts a fresh worker.

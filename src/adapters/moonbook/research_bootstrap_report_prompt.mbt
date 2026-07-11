@@ -1,7 +1,7 @@
 ///|
 fn research_bootstrap_report_prompt() -> String {
   research_bootstrap_prompt([
-    "Execute the synthesis stage of the imported Moontown research bootstrap packet for ${proposal.title}.",
+    "Execute the synthesis stage of the imported MoonTown research bootstrap packet for ${proposal.title}.",
     research_bootstrap_report_inputs_prompt(),
     @research_policy.bootstrap_report_repair_policy_prompt(),
     "Do not load the full raw/bootstrap/REFERENCE_OUTPUT.md in this draft stage; use REFERENCE_STYLE.md for language, length class, and visual/table expectations when it exists.",

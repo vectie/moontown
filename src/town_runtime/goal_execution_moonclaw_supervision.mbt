@@ -50,7 +50,7 @@ async fn wait_for_moonclaw_run(
   @moonclaw.timed_out_poll_response(
     task_id,
     run_id,
-    "MoonClaw run \{run_id} did not settle within the \{supervision_seconds} second Moontown supervision window; treating it as failed so the mayor can record blockers and continue recovery.",
+    "MoonClaw run \{run_id} did not settle within the \{supervision_seconds} second MoonTown supervision window; treating it as failed so the mayor can record blockers and continue recovery.",
   )
 }
 

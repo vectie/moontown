@@ -47,7 +47,7 @@
       "form": "signal-watch",
       "id": "watch-ai-agents",
       "title": "Track Agents / AI agent systems",
-      "prompt": "Maintain a 24/7 web-first research watch on AI agent systems. Look for durable changes in tool use, memory, planning, multi-agent orchestration, computer-use, ACP/MCP protocols, benchmarks, reliability, safety boundaries, product workflows, and agentic software engineering. Update the research-ai-agents MoonBook only when the watch finds a real new advantage, a stronger open question, or a solution pattern that should feed Moontown, MoonBook, MoonClaw, or Moondesk design.",
+      "prompt": "Maintain a 24/7 web-first research watch on AI agent systems. Look for durable changes in tool use, memory, planning, multi-agent orchestration, computer-use, ACP/MCP protocols, benchmarks, reliability, safety boundaries, product workflows, and agentic software engineering. Update the research-ai-agents MoonBook only when the watch finds a real new advantage, a stronger open question, or a solution pattern that should feed MoonTown, MoonBook, MoonClaw, or MoonDesk design.",
       "target_book_id": "research-ai-agents",
       "cadence_ticks": 60,
       "quality_threshold": 90,

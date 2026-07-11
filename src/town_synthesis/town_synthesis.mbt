@@ -12,7 +12,7 @@ pub async fn render_town_goal_synthesis(
   }
   let builder = StringBuilder::new()
   builder.write_string(
-    "# Moontown, MoonBook, and MoonClaw: Deep Research Analysis\n\n",
+    "# MoonTown, MoonBook, and MoonClaw: Deep Research Analysis\n\n",
   )
   builder.write_string("Goal: \{goal}\n\n")
   builder.write_string("Mayor plan: \{plan.summary}\n\n")
@@ -36,7 +36,7 @@ pub async fn render_town_goal_synthesis(
     render_lane_deep_report_for_topic(plan, "moonclaw", lane_reports),
   )
   builder.write_string(
-    "\n\n## Moontown: Orchestration Layer and Control Plane\n\n",
+    "\n\n## MoonTown: Orchestration Layer and Control Plane\n\n",
   )
   builder.write_string(
     render_lane_deep_report_for_topic(plan, "moontown", lane_reports),

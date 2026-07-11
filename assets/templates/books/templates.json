@@ -35,7 +35,7 @@
       "book_type": "general-book",
       "specialization": "app-tool-book",
       "title": "App ToolBook",
-      "purpose": "Watch configured websites or data sources, maintain analysis reports, and publish a durable generated web tool that Moontown can expose from a civic building.",
+      "purpose": "Watch configured websites or data sources, maintain analysis reports, and publish a durable generated web tool that MoonTown can expose from a civic building.",
       "root": "assets/templates/books/app-tool-book",
       "install_example": "assets/templates/books/app-tool-book/install.example.json",
       "install_command": "moon run cmd/main -- books template install app-tool-book <config.json>",

@@ -41,8 +41,8 @@ test "civic book routes generic maintenance task to civic worker by policy type"
 test "planbook maintenance routes to planbook repair worker by policy type" {
   let entry = @moonbook.BookCatalogEntry::new(
     id="plan-moontown-quality",
-    name="Moontown PlanBook",
-    purpose="Plan and repair Moontown quality gaps.",
+    name="MoonTown PlanBook",
+    purpose="Plan and repair MoonTown quality gaps.",
     workspace_root="books/plan-moontown-quality",
     tags=["planning"],
     skills=["code-plan"],

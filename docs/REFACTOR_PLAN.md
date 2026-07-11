@@ -1,9 +1,9 @@
-# Moontown Refactor Plan
+# MoonTown Refactor Plan
 
 Last updated: 2026-05-27
 
 This plan aligns the implementation with the intended product model:
-Moontown is the always-on mayor/control plane, MoonBook owns durable
+MoonTown is the always-on mayor/control plane, MoonBook owns durable
 workspaces, MoonClaw owns skill-driven execution, and Wenyu civic buildings are
 protocol places where agents and information aggregate, exchange, reduce,
 review, and distribute.
@@ -44,7 +44,7 @@ src/ui/rabbita-town -> projection JSON only
 ```
 
 The UI should not own civic truth. It should render runtime projections emitted
-by Moontown and MoonBook.
+by MoonTown and MoonBook.
 
 ## Current Structural Debt
 
@@ -173,7 +173,7 @@ Current extension rule:
 - A salon scenario may also define a new building with only
   `building_id`, `building_book_id`, channels, review gate, skill rules, and
   participants.
-- If no registry protocol exists, Moontown synthesizes a generic
+- If no registry protocol exists, MoonTown synthesizes a generic
   exchange-reduce-distribute building protocol from the scenario instead of
   skipping materialization or requiring a MoonBit branch.
 - Participant workspaces are internal by projection metadata, not by
@@ -405,7 +405,7 @@ Goals:
 - keep Wenyu course-book bootstrap, generated course content, course-builder
   skill text, UI-state JSON, and generated course site projection in
   `course_book/`; root should expose only thin command entrypoints
-- keep Moontown-side MoonClaw metadata, run-result lookup, and job-store
+- keep MoonTown-side MoonClaw metadata, run-result lookup, and job-store
   compaction helpers in `moonclaw_runtime/`; root should keep only wrappers
   needed by existing commands and runtime callers
 
@@ -431,7 +431,7 @@ Acceptance:
 - Social Square can run any valid communication scenario through a skill-driven
   MoonClaw reducer and produce reviewable outputs
 - a new communication-pattern building can be added by scenario template plus schedule entry
-  without changing Moontown MoonBit code
+  without changing MoonTown MoonBit code
 - deterministic fixture mode is retained only for tests and explicit smoke
   demos
 - stale projection refresh replays persisted reducer output and never consumes
@@ -462,9 +462,9 @@ Acceptance:
 
 ## Non-Goals
 
-- Do not move single-agent deep editing into Moontown. That belongs in
-  Moondesk.
+- Do not move single-agent deep editing into MoonTown. That belongs in
+  MoonDesk.
 - Do not turn every civic building into a generic research book.
-- Do not hardcode civic reasoning in Moontown. Moontown owns protocol
+- Do not hardcode civic reasoning in MoonTown. MoonTown owns protocol
   envelopes, routing, ledgers, review gates, and projection; MoonClaw chooses
   building-native reductions from skills.

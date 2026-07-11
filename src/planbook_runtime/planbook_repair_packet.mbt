@@ -14,7 +14,7 @@ fn planbook_repair_packet(
     skill_paths=planbook_repair_skill_paths(),
     notes=[
       "Make the smallest safe repair that satisfies the criterion.", "Do not modify unrelated book/domain content.",
-      "If the repair belongs in MoonBook or MoonClaw, produce a precise patch plan and blocker instead of leaking ownership into Moontown.",
+      "If the repair belongs in MoonBook or MoonClaw, produce a precise patch plan and blocker instead of leaking ownership into MoonTown.",
     ],
     tags=["planbook", "self-healing", "repair", criterion.id],
     metadata=planbook_repair_packet_metadata(criterion),

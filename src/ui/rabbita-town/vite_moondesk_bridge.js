@@ -37,9 +37,9 @@ function bridgeRecordFromJson(kind, filePath, fileStat, value) {
       kind: 'dispatch',
       status: ok ? 'ready' : 'review',
       path: relativePath,
-      title: `Moondesk dispatch: ${status}`,
+      title: `MoonDesk dispatch: ${status}`,
       summary: truncateText(firstUsefulLine(value?.stdout) || firstUsefulLine(value?.stderr) || status),
-      target: 'Moontown daemon / mayor tick',
+      target: 'MoonTown daemon / mayor tick',
       created_at: fileStat.mtime.toISOString(),
     }
   }
@@ -52,8 +52,8 @@ function bridgeRecordFromJson(kind, filePath, fileStat, value) {
       status: String(value?.status || 'staged'),
       path: relativePath,
       title,
-      summary: truncateText(value?.prompt || value?.summary || 'Moondesk staged an operator request for Moontown.'),
-      target: String(value?.target_book_id || value?.standing_goal_id || 'Moontown standing goal'),
+      summary: truncateText(value?.prompt || value?.summary || 'MoonDesk staged an operator request for MoonTown.'),
+      target: String(value?.target_book_id || value?.standing_goal_id || 'MoonTown standing goal'),
       created_at: String(value?.created_at || fileStat.mtime.toISOString()),
     }
   }

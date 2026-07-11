@@ -41,7 +41,7 @@ test "scene html includes positioned nodes and assets" {
 ///|
 test "dashboard text render keeps map and section output" {
   let text = @ui.render_dashboard(sample_dashboard_model())
-  assert_true(text.contains("Dashboard / Moontown / Moonrise"))
+  assert_true(text.contains("Dashboard / MoonTown / Moonrise"))
   assert_true(text.contains("## Town Map"))
   assert_true(
     text.contains(
@@ -202,8 +202,8 @@ test "scene render supports dynamic research books" {
   scene_render_register_book(
     state,
     id="research-moontown",
-    name="Moonbook / Research / Moontown",
-    purpose="Research lane for Moontown.",
+    name="Moonbook / Research / MoonTown",
+    purpose="Research lane for MoonTown.",
     workspace_root="/workspace/research-moontown",
   )
   scene_render_register_book(

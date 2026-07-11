@@ -423,7 +423,7 @@ fn communication_reducer_reduction_rules() -> Array[String] {
 ///|
 fn communication_reducer_output_contract_summary() -> String {
   [
-    "Emit `\{civic_reducer_output_contract_id()}` records using the `\{civic_reducer_output_contract_type_name()}` JSON shape that Moontown materializes into building ledgers, internal participant workspaces, review queues, and projections.",
+    "Emit `\{civic_reducer_output_contract_id()}` records using the `\{civic_reducer_output_contract_type_name()}` JSON shape that MoonTown materializes into building ledgers, internal participant workspaces, review queues, and projections.",
     "For non-research patterns, treat `research_questions` as testable follow-up or review questions and `next_experiment` as the smallest useful next artifact/action.",
   ].join(" ")
 }

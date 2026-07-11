@@ -31,7 +31,7 @@ async fn editor_feature_selection_context_markdown(
   [
     "# Editor Feature Selection Context",
     "",
-    "- Owner: Moontown PlanBook",
+    "- Owner: MoonTown PlanBook",
     "- Course book: `\{default_wenyu_course_book_id()}`",
     "- Course root: `\{default_wenyu_course_workspace_root()}`",
     "- PlanBook root: `\{workspace_root}`",
@@ -39,7 +39,7 @@ async fn editor_feature_selection_context_markdown(
     "",
     "## Intent",
     "",
-    "The town must prove that it can ask an AI worker to inspect existing course material, identify what editor-mode feature is most important and most missing, and produce a durable selection artifact. Moontown should not hardcode the feature choice.",
+    "The town must prove that it can ask an AI worker to inspect existing course material, identify what editor-mode feature is most important and most missing, and produce a durable selection artifact. MoonTown should not hardcode the feature choice.",
     "",
     "## Current Boundary",
     "",

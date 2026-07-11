@@ -13,7 +13,7 @@ fn render_wenyu_product_architecture(plan : @roles.MayorGoalPlan) -> String {
 fn wenyu_product_architecture_intro() -> String {
   [
     "Wenyu Valley should be built as a projection-driven civic simulation, not as a static website.",
-    "Moontown stays awake as the mayor/control plane.", "MoonBook owns durable module knowledge and generated projections.",
+    "MoonTown stays awake as the mayor/control plane.", "MoonBook owns durable module knowledge and generated projections.",
     "MoonClaw executes bounded research/build tasks inside each module book.",
   ].join(" ")
 }
@@ -37,7 +37,7 @@ fn render_wenyu_architecture_graph(plan : @roles.MayorGoalPlan) -> String {
 
 ///|
 fn wenyu_architecture_goal_edge() -> String {
-  "  Goal[\"Wenyu Valley PRD goal\"] --> Mayor[\"Mayor claw in Moontown\"]\n"
+  "  Goal[\"Wenyu Valley PRD goal\"] --> Mayor[\"Mayor claw in MoonTown\"]\n"
 }
 
 ///|
@@ -61,7 +61,7 @@ fn wenyu_architecture_operator_edge() -> String {
 ///|
 fn wenyu_product_architecture_boundary() -> String {
   [
-    "The important boundary is responsibility:", "Moontown decomposes, supervises, and visualizes.",
+    "The important boundary is responsibility:", "MoonTown decomposes, supervises, and visualizes.",
     "MoonBook turns each lane into durable wiki/projection state.", "MoonClaw performs the worker execution and emits artifacts back to the book.",
   ].join(" ")
 }

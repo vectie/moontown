@@ -60,7 +60,7 @@ fn render_town_comparative_analysis() -> String {
   [
     "Compared with a single generated marketing page, a town-level deep report must answer a different question:",
     "how do the projects work together, where do their boundaries sit, and what tradeoffs does the stack make?",
-    "MoonBook contributes durable memory and report projection, MoonClaw contributes bounded execution and tool-backed evidence collection, and Moontown contributes planning, parallel decomposition, supervision, and acceptance.",
+    "MoonBook contributes durable memory and report projection, MoonClaw contributes bounded execution and tool-backed evidence collection, and MoonTown contributes planning, parallel decomposition, supervision, and acceptance.",
     "This makes the ecosystem closer to a coordinated agent-infrastructure stack than to a loose collection of utilities.",
   ].join(" ")
 }

@@ -46,7 +46,7 @@ pub fn backlog_stop_policy_markdown() -> String {
     "- The selected backlog item status is `done`, `blocked`, or `paused` in `raw/backlog/implementation-backlog.json`.",
     "- The repair result is `needs_external_owner`, `blocked`, or `no_change` and explains why code should not change.",
     "- Required validation fails; the worker must record the blocker rather than continuing to patch blindly.",
-    "- The focused diff exceeds the target-file boundary or changes ownership between Moontown, MoonBook, MoonClaw, or Moondesk without an explicit plan update.",
+    "- The focused diff exceeds the target-file boundary or changes ownership between MoonTown, MoonBook, MoonClaw, or MoonDesk without an explicit plan update.",
     "", "If the worker discovers the feature is already complete, it should update the PlanBook progress/backlog documents and write completion evidence instead of generating unnecessary code.",
     "", "If the worker discovers the plan is stale, it should update the plan/backlog document with the new reality before attempting more code.",
   ].join("\n")

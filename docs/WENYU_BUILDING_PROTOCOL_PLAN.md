@@ -11,7 +11,7 @@ and it distributes that output to the right books, agents, UI surfaces, and
 review queues.
 
 The closest engineering analogy is map/reduce, but the reducer should not be a
-hardcoded algorithm. Moontown should hardcode the envelope, routing,
+hardcoded algorithm. MoonTown should hardcode the envelope, routing,
 permissions, ledgers, and safety gates. MoonClaw, guided by building-specific
 `SKILL.md` files, should decide how to aggregate, compare, judge, synthesize,
 and distribute for each building.
@@ -48,7 +48,7 @@ building/
   state.json
 ```
 
-This shape keeps future buildings inspectable by Moondesk, resumable by the
+This shape keeps future buildings inspectable by MoonDesk, resumable by the
 daemon, reviewable by MoonBook, and executable by MoonClaw without hidden
 agent-run state.
 
@@ -81,7 +81,7 @@ negotiate, transform, and leave with useful results.
 
 ## Implemented Slice
 
-As of 2026-05-27, Moontown has the first protocol runtime slice in place.
+As of 2026-05-27, MoonTown has the first protocol runtime slice in place.
 
 Implemented:
 
@@ -145,7 +145,7 @@ The first implementation was intentionally direct so the protocol loop could be
 validated end to end. The follow-up refactor is documented in
 [REFACTOR_PLAN.md](/Users/kq/Workspace/moontown/docs/REFACTOR_PLAN.md). The
 current refactor pass moved the salon runtime to a scenario-template boundary:
-domain behavior is described by `CivicCommunicationScenario` JSON, while Moontown keeps
+domain behavior is described by `CivicCommunicationScenario` JSON, while MoonTown keeps
 the reusable schedule, ledger, MoonBook write, metrics, and projection
 envelope. See
 [CIVIC_COMMUNICATION_TEMPLATES.md](/Users/kq/Workspace/moontown/docs/CIVIC_COMMUNICATION_TEMPLATES.md).
@@ -213,7 +213,7 @@ The template controls:
 - output paths for backlog, synthesis, metrics, reviews, and home returns
 - review gate, review owner, and review reason
 
-Moontown should not grow one MoonBit branch per domain or civic service. If a
+MoonTown should not grow one MoonBit branch per domain or civic service. If a
 robotics, education, policy, finance, healthcare, market, story, or bridge
 workflow needs different behavior, the first move is a new scenario template
 and stronger skill rules. MoonBit changes are reserved for new protocol
@@ -274,7 +274,7 @@ resident / operator / mayor / watcher / book / worker / external source
 The building is the social and protocol boundary. MoonBook is the optional
 durable support substrate for accepted records, review queues, private memory,
 ledgers, and projections. MoonClaw is the reasoning/execution substrate.
-Moontown is the mayor, router, runtime supervisor, and projection owner.
+MoonTown is the mayor, router, runtime supervisor, and projection owner.
 
 This distinction matters: some buildings are mostly information exchanges or
 projection surfaces, not “books.” They may still bind to a MoonBook support
@@ -379,9 +379,9 @@ What should be hardcoded:
 
 ## Ownership Split
 
-### Moontown
+### MoonTown
 
-Moontown owns:
+MoonTown owns:
 
 - building protocol registry
 - routing into building inboxes
@@ -391,7 +391,7 @@ Moontown owns:
 - UI projection of building activity
 - operator approval gates
 
-Moontown should not own:
+MoonTown should not own:
 
 - deep domain memory
 - detailed single-agent editing
@@ -430,16 +430,16 @@ MoonClaw should not own:
 - public projection policy
 - external action authority
 
-### Moondesk
+### MoonDesk
 
-Moondesk should later own:
+MoonDesk should later own:
 
 - detailed inspection and editing of building books
 - file-manager-like access to civic workspaces
 - authoring and packaging custom building protocol packs
 - detailed single-agent and skill editing
 
-Moontown should consume Moondesk outputs as portable building packs, not become
+MoonTown should consume MoonDesk outputs as portable building packs, not become
 the deep workspace editor.
 
 ## Civic Building Protocol Examples

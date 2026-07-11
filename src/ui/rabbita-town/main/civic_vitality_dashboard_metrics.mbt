@@ -51,7 +51,7 @@ fn vitality_dashboard_copy_from_snapshot(
   snapshot : VitalityDashboardSnapshot,
 ) -> String {
   [
-    "Moontown now projects a real Vitality Dashboard lane:",
+    "MoonTown now projects a real Vitality Dashboard lane:",
     "\{snapshot.worker_label} is keeping the district pulse visible,",
     "\{snapshot.joins_today} joins,",
     "\{snapshot.active_quests} active quests,",

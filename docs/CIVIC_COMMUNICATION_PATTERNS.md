@@ -2,7 +2,7 @@
 
 Last updated: 2026-05-28
 
-Moontown buildings should not be hardcoded as one-off workflows. A building is
+MoonTown buildings should not be hardcoded as one-off workflows. A building is
 a place that runs a communication protocol pattern: it receives packets from
 MoonBook workspaces, lets MoonClaw reduce or route them with a skill contract,
 writes ledgers, and distributes reviewable outputs back to the right homes.
@@ -18,7 +18,7 @@ different patterns and different `SKILL.md` contracts.
 
 ## Runtime Rule
 
-Moontown owns:
+MoonTown owns:
 
 - pattern registry and protocol envelope
 - schedule and wall-clock due checks

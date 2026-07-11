@@ -39,7 +39,7 @@ async fn prepare_goal_book_launch(
         @core.TownEvent::new(
           id="event-preseed-\{entry.id}",
           kind="error",
-          detail="Moontown failed to preseed bootstrap inputs for \{entry.id}: \{error}",
+          detail="MoonTown failed to preseed bootstrap inputs for \{entry.id}: \{error}",
           related_book_id=Some(entry.id),
         ),
       )

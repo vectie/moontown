@@ -1,7 +1,7 @@
 # Document Protocol Philosophy
 
-This is the baseline architecture rule for Moontown, MoonBook, MoonClaw,
-Moondesk, Wenyu buildings, and future self-build work.
+This is the baseline architecture rule for MoonTown, MoonBook, MoonClaw,
+MoonDesk, Wenyu buildings, and future self-build work.
 
 ## Canonical Summary
 
@@ -11,10 +11,10 @@ So the layers become:
 
 ```text
 MoonBook = durable filesystem/book/wiki/state
-Moontown = town-level protocol scheduler + visual map
+MoonTown = town-level protocol scheduler + visual map
 Building = named communication/exchange protocol over one or more books
 MoonClaw = temporary executor/participant/reviewer
-Moondesk = human-facing desktop/file manager for books and artifacts
+MoonDesk = human-facing desktop/file manager for books and artifacts
 ```
 
 For the building task specifically, model it as a document protocol, not a single job:
@@ -57,7 +57,7 @@ This matches the Linux philosophy baseline: files/books are the stable interface
 
 ## Core Idea
 
-Moontown should be designed like an operating system for long-running
+MoonTown should be designed like an operating system for long-running
 knowledge and civic work:
 
 - books are the filesystem
@@ -67,7 +67,7 @@ knowledge and civic work:
 - skills are executable role manuals
 - projections are views over persisted state
 - the mayor is the scheduler and supervisor
-- Moondesk is the human file manager
+- MoonDesk is the human file manager
 
 The durable truth must survive worker crashes, model changes, context loss,
 UI rebuilds, and daemon restarts. Therefore, the durable truth must live in
@@ -84,7 +84,7 @@ If a feature is modeled as a document protocol, the system gains:
 - resumability: a later agent can continue from the same files
 - auditability: every protocol round can be inspected
 - reviewability: accepted and rejected outputs remain distinct
-- portability: Moondesk can browse and edit the same state
+- portability: MoonDesk can browse and edit the same state
 - composability: multiple buildings can exchange document packets
 - autonomy: the mayor can schedule recurring rounds without inventing hidden state
 
@@ -172,10 +172,10 @@ review queues, but the product concept is the protocol place.
 | Layer | Stable responsibility | Active responsibility |
 | --- | --- | --- |
 | MoonBook | books, wiki, schemas, review queues, durable memory | bookkeeper decisions and projection generation |
-| Moontown | town registry, schedules, ledgers, visual map, live spine | mayor supervision, routing, recurring protocol ticks |
+| MoonTown | town registry, schedules, ledgers, visual map, live spine | mayor supervision, routing, recurring protocol ticks |
 | Building | charter, protocol, inbox, ledger, outbox, review state | exchange, reduction, distribution, social responsibility |
 | MoonClaw | skills and result contracts | temporary execution, critique, synthesis, tool use |
-| Moondesk | human-readable file and artifact surfaces | human edits, imports, exports, custom protocol packs |
+| MoonDesk | human-readable file and artifact surfaces | human edits, imports, exports, custom protocol packs |
 
 ## PlanBook Standard
 

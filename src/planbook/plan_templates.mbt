@@ -17,15 +17,15 @@ pub fn plans_index_markdown() -> String {
     "| Plan | Status | Owner | Stable-State Impact |",
     "| --- | --- | --- | --- |",
     planbook_plan_index_row(
-      "2026-05-29-live-autonomy-spine/plan.md", "top-priority", "Moontown Mayor + MoonBook + MoonClaw",
+      "2026-05-29-live-autonomy-spine/plan.md", "top-priority", "MoonTown Mayor + MoonBook + MoonClaw",
       "connects daemon, workers, accepted outputs, journal, projection, and operator UI",
     ),
     planbook_plan_index_row(
-      "2026-05-31-editor-mode-real-pipeline/plan.md", "self-build-test", "Moontown PlanBook + MoonClaw",
+      "2026-05-31-editor-mode-real-pipeline/plan.md", "self-build-test", "MoonTown PlanBook + MoonClaw",
       "turns Wenyu editor-mode guidance into a real plan-to-code pipeline",
     ),
     planbook_plan_index_row(
-      "2026-05-29-book-quality-upgrade/plan.md", "active-review", "Moontown + MoonBook",
+      "2026-05-29-book-quality-upgrade/plan.md", "active-review", "MoonTown + MoonBook",
       "separates structural readiness from semantic quality and formalizes planbook/cookbook/course/civic workspaces",
     ),
     "",

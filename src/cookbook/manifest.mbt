@@ -19,8 +19,8 @@ pub fn default_manifest_path() -> String {
 pub fn book_entry(workspace_root : String) -> @moonbook.BookCatalogEntry {
   @moonbook.BookCatalogEntry::new(
     id=default_book_id(),
-    name="MoonBook / Moontown Cookbook",
-    purpose="Canonical generated operating cookbook for Moontown docs, definitions, stable state, and runtime contracts. Moondesk can curate it as the human desktop surface; Moontown consumes it as a stable-state index.",
+    name="MoonBook / MoonTown Cookbook",
+    purpose="Canonical generated operating cookbook for MoonTown docs, definitions, stable state, and runtime contracts. MoonDesk can curate it as the human desktop surface; MoonTown consumes it as a stable-state index.",
     workspace_root~,
     memory_scope=BookPrivate,
     tags=["cookbook", "stable-state", "definitions", "moondesk", "operator"],
@@ -50,10 +50,10 @@ pub fn manifest(
 ) -> MoontownCookbookManifest {
   {
     book_id: default_book_id(),
-    title: "Moontown Stable-State Cookbook",
+    title: "MoonTown Stable-State Cookbook",
     generated_by: "MoonBook",
-    managed_by: "Moondesk",
-    consumed_by: "Moontown",
+    managed_by: "MoonDesk",
+    consumed_by: "MoonTown",
     workspace_root,
     manifest_path,
     artifacts: cookbook_artifacts(),

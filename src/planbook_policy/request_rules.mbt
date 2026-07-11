@@ -24,7 +24,7 @@ pub fn repair_read_context_task_rule() -> String {
 
 ///|
 pub fn repair_ownership_decision_task_rule() -> String {
-  "2. Decide whether this can be fixed inside Moontown or must be handed to MoonBook/MoonClaw."
+  "2. Decide whether this can be fixed inside MoonTown or must be handed to MoonBook/MoonClaw."
 }
 
 ///|

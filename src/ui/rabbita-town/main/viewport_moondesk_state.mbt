@@ -11,9 +11,9 @@ fn moondesk_root_status_label(model : Model) -> String {
   match model.moondesk_bridge {
     Some(bridge) =>
       if bridge.moondesk_root_available {
-        "Moondesk checkout found"
+        "MoonDesk checkout found"
       } else {
-        "Moondesk checkout missing"
+        "MoonDesk checkout missing"
       }
     None => "Bridge not loaded"
   }

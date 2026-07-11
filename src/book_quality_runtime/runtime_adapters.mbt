@@ -35,8 +35,8 @@ fn planbook_catalog_entry(
 ) -> @moonbook.BookCatalogEntry {
   @moonbook.BookCatalogEntry::new(
     id=default_planbook_book_id(),
-    name="MoonBook / Moontown Quality Planbook",
-    purpose="Durable planbook for implementation plans, acceptance criteria, execution evidence, review notes, and stable-state handoffs for Moontown quality work.",
+    name="MoonBook / MoonTown Quality Planbook",
+    purpose="Durable planbook for implementation plans, acceptance criteria, execution evidence, review notes, and stable-state handoffs for MoonTown quality work.",
     workspace_root~,
     memory_scope=BookPrivate,
     tags=["planbook", "code-plan", "quality-gates", "implementation", "review"],

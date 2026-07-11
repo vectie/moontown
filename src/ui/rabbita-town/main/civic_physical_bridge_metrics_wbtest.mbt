@@ -69,7 +69,7 @@ test "physical bridge next action uses shared execution action groups" {
         ),
       ),
     ),
-    "Persist the reviewed telemetry and booking slice so Moontown can project a trustworthy district state.",
+    "Persist the reviewed telemetry and booking slice so MoonTown can project a trustworthy district state.",
   )
   assert_eq(
     physical_bridge_next_action(

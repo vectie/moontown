@@ -141,7 +141,7 @@ Pursue 80% of other districts' quantifiable "hard metrics" while significantly s
 ## 4. Technical Architecture and Implementation Plan
 
 ### 4.1 Technology selection: standing on the shoulders of open-source giants
-- **Core framework**: Deeply customized based on Moontown open-source code, which provides Agent architecture (memory stream, reflection, planning) and basic 2D rendering engine. We extend with Wenyu Valley-specific terrain, seven functional modules, and commercial adaptations.
+- **Core framework**: Deeply customized based on MoonTown open-source code, which provides Agent architecture (memory stream, reflection, planning) and basic 2D rendering engine. We extend with Wenyu Valley-specific terrain, seven functional modules, and commercial adaptations.
 - **LLM layer**: Locally deployed open-source models for data autonomy and cost control. **Qwen 3.5 70B** as main model for complex reasoning; **Qwen 3.5 7B** lightweight for high-frequency simple queries. Fine-tunable for district scenarios.
 - **Backend**: Python FastAPI (high performance async), PostgreSQL (with JSON support), Redis (caching), Celery (async tasks), Docker (containerization).
 

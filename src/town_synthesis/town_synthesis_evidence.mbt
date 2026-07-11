@@ -20,7 +20,7 @@ async fn render_town_evidence_and_limits(
   }
   builder.write_string("\n")
   builder.write_string(
-    "Limit: this town report relies on the three lane reports produced by MoonBook. If a lane report is shallow, missing, or process-heavy, Moontown should mark the town synthesis as review-queued instead of masking the weakness with generic ecosystem prose.\n\n",
+    "Limit: this town report relies on the three lane reports produced by MoonBook. If a lane report is shallow, missing, or process-heavy, MoonTown should mark the town synthesis as review-queued instead of masking the weakness with generic ecosystem prose.\n\n",
   )
   builder.write_string("Mayor decision: ")
   builder.write_string(town_synthesis_decision(state, plan))

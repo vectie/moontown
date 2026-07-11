@@ -66,7 +66,7 @@ fn compact_topic_segment(text : String) -> String {
 ///|
 pub fn display_topic_name(topic : String) -> String {
   match topic {
-    "moontown" => "Moontown"
+    "moontown" => "MoonTown"
     "moonbook" => "MoonBook"
     "moonclaw" => "MoonClaw"
     "finance" => "Finance"

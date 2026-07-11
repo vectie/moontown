@@ -108,11 +108,11 @@ pub fn cookbook_journey_json(
       "Cookbook bootstrap",
       "generated",
       "review",
-      "MoonBook generated a stable-state cookbook workspace and manifest for Moontown.",
+      "MoonBook generated a stable-state cookbook workspace and manifest for MoonTown.",
       [
         "Manifest: \{manifest.manifest_path}",
         "Workspace: \{entry.workspace_root}",
-        "Moondesk can curate this book as the human desktop surface.",
+        "MoonDesk can curate this book as the human desktop surface.",
         "Algorithms: wiki/describer/algorithms.md",
         "Data flow: wiki/describer/data-flow.md",
         "Cookbook skill: skills/cookbook-generation/SKILL.md",
@@ -122,7 +122,7 @@ pub fn cookbook_journey_json(
       "Codebase describer upgrade",
       "generated",
       "ready",
-      "The cookbook now explains Moontown by algorithm, data structure, data flow, feature implementation, AI boundary, and evidence file instead of only listing artifacts.",
+      "The cookbook now explains MoonTown by algorithm, data structure, data flow, feature implementation, AI boundary, and evidence file instead of only listing artifacts.",
       [
         "Overview: wiki/describer/overview.md", "Algorithms: wiki/describer/algorithms.md",
         "Data structures: wiki/describer/data-structures.md", "Data flow: wiki/describer/data-flow.md",

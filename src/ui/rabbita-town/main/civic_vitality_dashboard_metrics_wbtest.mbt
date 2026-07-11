@@ -88,7 +88,7 @@ test "vitality dashboard next action uses shared execution action groups" {
         ),
       ),
     ),
-    "Persist the validated vitality slice so Moontown can project it beyond demo simulation.",
+    "Persist the validated vitality slice so MoonTown can project it beyond demo simulation.",
   )
   assert_eq(
     vitality_dashboard_next_action(

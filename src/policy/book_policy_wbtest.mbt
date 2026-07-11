@@ -83,7 +83,7 @@ test "policy owns catalog classification and canonical book labels" {
     ]),
   )
   assert_eq(
-    catalog_entry_type("plan-moontown-quality", "Moontown Quality", []),
+    catalog_entry_type("plan-moontown-quality", "MoonTown Quality", []),
     planbook_type(),
   )
   assert_eq(
@@ -344,7 +344,7 @@ test "policy markdown includes internal distance section" {
 ///|
 test "policy owns reusable goal text vocabulary" {
   assert_true(research_goal_text("research OPC companies"))
-  assert_true(research_goal_text("Compare Moontown MoonBook and MoonClaw"))
+  assert_true(research_goal_text("Compare MoonTown MoonBook and MoonClaw"))
   assert_true(
     research_goal_text(
       "Build Wenyu Valley AI Innovation Town according to docs/WENYU_VALLEY_PRD.md",

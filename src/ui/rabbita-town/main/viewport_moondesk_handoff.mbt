@@ -46,10 +46,10 @@ fn render_moondesk_handoff_panel(model : Model) -> @rabbita.Html {
   }
   section(class="moondesk-handoff-panel", [
     div(class="viewport-panel-heading", [
-      p(class="eyebrow", "Moondesk Import Contract"),
+      p(class="eyebrow", "MoonDesk Import Contract"),
       h2("Portable Artifact Lanes"),
       p(
-        "These are the data/config lanes Moondesk can export into Moontown. Adding new capability should add or update this manifest before changing viewport code.",
+        "These are the data/config lanes MoonDesk can export into MoonTown. Adding new capability should add or update this manifest before changing viewport code.",
       ),
     ]),
     div(

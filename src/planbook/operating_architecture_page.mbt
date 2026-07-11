@@ -2,7 +2,7 @@
 pub fn operating_architecture_markdown() -> String {
   planbook_markdown_page(
     [
-      "# Operating Architecture", "", "This page is the PlanBook-local contract for keeping Moontown coherent while it runs and changes itself.",
+      "# Operating Architecture", "", "This page is the PlanBook-local contract for keeping MoonTown coherent while it runs and changes itself.",
       "",
     ],
     [
@@ -35,7 +35,7 @@ fn planbook_runtime_spine_section() -> Array[String] {
     "## Runtime Spine", "", "```text", "operator goal / standing goal / civic schedule / planbook gap",
     "  -> Mayor routes and schedules", "  -> target MoonBook or building protocol hydrates durable context",
     "  -> MoonClaw worker executes one bounded packet", "  -> MoonBook bookkeeper reviews memory, wiki, ledgers, projections",
-    "  -> Moontown records town-level ledger, health, visual state, and next action",
+    "  -> MoonTown records town-level ledger, health, visual state, and next action",
     "```", "",
   ]
 }

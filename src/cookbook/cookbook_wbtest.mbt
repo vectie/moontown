@@ -62,7 +62,7 @@ test "cookbook projection helpers render stable UI contracts" {
 ///|
 test "cookbook describer pages explain codebase algorithms and data flow" {
   let overview = cookbook_describer_overview_markdown()
-  assert_true(overview.contains("# Moontown Codebase Describer"))
+  assert_true(overview.contains("# MoonTown Codebase Describer"))
   assert_true(overview.contains("typed records and restart-readable files"))
   let algorithms = cookbook_algorithms_markdown()
   assert_true(algorithms.contains("## 2. Daemon Tick Phase Pipeline"))
@@ -95,10 +95,10 @@ test "cookbook describer pages explain codebase algorithms and data flow" {
 test "cookbook renders markdown pages as clickable HTML" {
   let html = generated_site_html(book_entry("/tmp/clickable-cookbook"), {
     book_id: "moontown-cookbook",
-    title: "Moontown Stable-State Cookbook",
+    title: "MoonTown Stable-State Cookbook",
     generated_by: "MoonBook",
-    managed_by: "Moondesk",
-    consumed_by: "Moontown",
+    managed_by: "MoonDesk",
+    consumed_by: "MoonTown",
     workspace_root: "/tmp/clickable-cookbook",
     manifest_path: "/tmp/clickable-cookbook/stable-state.json",
     artifacts: [],
@@ -119,7 +119,7 @@ test "cookbook renders markdown pages as clickable HTML" {
     "wiki/describer/algorithms.md",
     cookbook_algorithms_markdown(),
   )
-  assert_true(rendered.contains("<h1>Algorithms Used In Moontown</h1>"))
+  assert_true(rendered.contains("<h1>Algorithms Used In MoonTown</h1>"))
   assert_true(rendered.contains("<h2>2. Daemon Tick Phase Pipeline</h2>"))
   assert_true(rendered.contains("<pre><code>"))
   assert_true(
@@ -147,11 +147,11 @@ test "cookbook generated site escapes artifact cards" {
   )
   let card = cookbook_artifact_card_html({
     ..artifact,
-    owner: "MoonBook & Moondesk",
+    owner: "MoonBook & MoonDesk",
     stable_role: "stable \"contract\"",
   })
   assert_true(card.contains("docs/&lt;A&gt;.md"))
-  assert_true(card.contains("MoonBook &amp; Moondesk"))
+  assert_true(card.contains("MoonBook &amp; MoonDesk"))
   assert_true(card.contains("stable &quot;contract&quot;"))
   assert_true(card.contains("required=true; exists=false"))
   assert_true(cookbook_site_style_html().contains("grid-template-columns"))

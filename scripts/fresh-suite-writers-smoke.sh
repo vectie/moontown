@@ -63,4 +63,4 @@ assert_dir_absent "$root/.moontown"
 assert_dir_absent "$root/.moonclaw"
 assert_dir_absent "$root/moonclaw-jobs"
 
-echo "Moontown fresh-suite writers smoke passed on $root"
+echo "MoonTown fresh-suite writers smoke passed on $root"

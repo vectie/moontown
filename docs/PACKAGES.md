@@ -441,7 +441,7 @@ Current persisted files:
 Boundary:
 
 - `src/storage` owns the generic rule that `town.json` in the current
-  workspace maps to the MoonSuite Moontown product home, while explicit
+  workspace maps to the MoonSuite MoonTown product home, while explicit
   snapshot paths keep their explicit parent directory.
 - Runtime packages may derive their own feature-specific filenames under that
   base, but should call `storage.snapshot_base_dir(...)` instead of
@@ -573,7 +573,7 @@ Boundary:
 
 - adapter fallback discovery may recognize MoonBook's historical generated-site
   layouts after a build.
-- Moontown's canonical generated-site index path is still policy-owned; adapter
+- MoonTown's canonical generated-site index path is still policy-owned; adapter
   canonical path helpers delegate to
   `policy.default_generated_site_projection_path()`.
 
@@ -1103,8 +1103,8 @@ Purpose:
 - bootstrap MoonBook workspaces that include a durable generated web tool
 - install tool specs, report paths, app manifests, generated tool pages, and
   standing-watch loops
-- expose civic-building actions that let Moontown open reports, tools, and
-  Moondesk configuration surfaces
+- expose civic-building actions that let MoonTown open reports, tools, and
+  MoonDesk configuration surfaces
 
 Boundary:
 

@@ -162,7 +162,7 @@ tick nonblocking while letting the child run the confirmed proposal instead of
 leaving an unstarted run for a later shell. If the receipt never appears, the
 stale execution summary includes the captured detached-import stderr excerpt
 from `.import.json.err`.
-Before each standing-watch import, Moontown also compacts oversized MoonClaw
+Before each standing-watch import, MoonTown also compacts oversized MoonClaw
 hot-store files by moving them into the MoonClaw product-home archive at
 `.moonsuite/products/moonclaw/jobs/archive/tick-<tick>/` and replacing the
 active index with valid empty JSON. This prevents long-lived books from
@@ -192,7 +192,7 @@ worker exits or its heartbeat becomes stale, the supervisor records the event in
 records every tick start, tick success, and tick failure so a bad watcher cycle
 does not silently kill the long-lived daemon.
 
-When a self-patch changes Moontown source code while the daemon is already
+When a self-patch changes MoonTown source code while the daemon is already
 running, request a clean reload instead of trusting the old process to pick up
 new logic:
 
@@ -281,7 +281,7 @@ inventing extra books. It proves the building performed
 exchange-reduce-distribute; it does not bypass the review queue or claim the
 ideas are already correct.
 
-When Moontown and MoonClaw are separate source checkouts, set
+When MoonTown and MoonClaw are separate source checkouts, set
 `MOONTOWN_MOONCLAW_ROOT` to the MoonClaw repository. Runtime artifacts still
 remain below `MOONTOWN_SUITE_ROOT`:
 
@@ -302,16 +302,16 @@ as the copyable contract.
 The viewport editor is intentionally town-level. Use it to compose modules,
 bind books, validate placement, inspect worker lanes, and check output
 availability. Do not use it as a detailed single-agent or single-book editor.
-That deeper workspace belongs in `../moondesk`; Moondesk-produced books, skill
+That deeper workspace belongs in `../moondesk`; MoonDesk-produced books, skill
 packs, agent profiles, assets, and module packs should be imported back into
-Moontown as data/config artifacts.
+MoonTown as data/config artifacts.
 
 Useful bridge artifacts:
 
 - `http://127.0.0.1:5173/tilemap/modules/wenyu-town-modules.json`
   opens the current module registry.
 - `http://127.0.0.1:5173/tilemap/modules/moondesk-handoff.json`
-  opens the portable Moondesk-to-Moontown artifact contract.
+  opens the portable MoonDesk-to-MoonTown artifact contract.
 - `http://127.0.0.1:5173/moondesk-bridge.json`
   opens the live bridge ledger built from
   `.moonsuite/products/moontown/moondesk-*` and
@@ -335,9 +335,9 @@ stable-state manifest at:
 ```
 
 The cookbook tracks canonical docs, machine-readable definitions, and optional
-runtime state files. It is the control surface for stable Moontown definitions:
-MoonBook generates it, Moondesk should manage the human editing/browsing
-surface, and Moontown consumes it for drift checks and operator guidance.
+runtime state files. It is the control surface for stable MoonTown definitions:
+MoonBook generates it, MoonDesk should manage the human editing/browsing
+surface, and MoonTown consumes it for drift checks and operator guidance.
 
 Use the cookbook when you want to answer:
 
@@ -413,7 +413,7 @@ Each workspace is seeded with:
 - generated HTML: `book/Home.html` and `book/site/generated/index.html`
 - MoonClaw profile: `moonclaw.jobs.json`
 
-Moontown uses these seeded books as civic module support bindings. A Wenyu
+MoonTown uses these seeded books as civic module support bindings. A Wenyu
 building is not automatically a MoonBook: some are agent workspaces, some are
 exchange places, some are projection surfaces, and some are gateways. MoonBook
 remains the long-term owner of durable wiki/memory/review semantics where the
@@ -421,7 +421,7 @@ module needs them, and MoonClaw remains the executor that turns service tasks
 into result packets. The bootstrap command is therefore a local workspace
 creation bridge, not a replacement for real civic service execution.
 
-When a Wenyu civic book is selected by the Mayor, Moontown now routes it
+When a Wenyu civic book is selected by the Mayor, MoonTown now routes it
 directly to the registry-defined `civic-service-workflow`. It does not send
 that book through the Wenyu product research/bootstrap quality gate first. That
 keeps service modules such as Policy Hall, Social Square, Talent Avenue, Valley
@@ -485,7 +485,7 @@ contract; `research-salon` is one pattern example. The template defines
 participants, pattern id, skill rules, quality rules, output paths, and review
 gate. Template `ideas` are fixture examples only; production runs use the
 MoonClaw reducer output contract. If the `building_id` is not already in the
-Wenyu registry, Moontown synthesizes a generic exchange-reduce-distribute
+Wenyu registry, MoonTown synthesizes a generic exchange-reduce-distribute
 protocol from the scenario fields. For recurring daemon use, place the file at
 `.moonsuite/products/moontown/civic/pattern-scenarios/<session-id>.json` and
 make sure `.moonsuite/products/moontown/civic/pattern-schedules.json` has a
@@ -562,11 +562,11 @@ moon run src/cmd/main -- daemon run
 
 or use the launchd installer described above for overnight checks.
 
-Standing-watch dispatch is nonblocking by default. Moontown starts or polls the
+Standing-watch dispatch is nonblocking by default. MoonTown starts or polls the
 MoonClaw run, records the current state, and returns to the mayor loop so other
 domain watches and civic schedules can keep advancing. Set
 `MOONTOWN_MOONCLAW_SUPERVISION_SECONDS` to a positive value only for debugging a
-single run where you explicitly want Moontown to wait inline.
+single run where you explicitly want MoonTown to wait inline.
 
 The expected 24/7 loop is:
 
@@ -591,7 +591,7 @@ The expected 24/7 loop is:
   historical evidence of the retry path.
 - Infrastructure failures such as MoonBook/MoonClaw dependency locks, transient
   transport errors, or MoonClaw proposal-store aborts are not domain review.
-  Moontown classifies them as deferred or transient infrastructure recovery so
+  MoonTown classifies them as deferred or transient infrastructure recovery so
   they do not inflate evidence counts or keeper review queues. The live spine
   reports them separately as `transient_infrastructure_debt`; this is historical
   operational accounting, not an unresolved failure, unless the latest watcher
@@ -615,7 +615,7 @@ required as long as the entry follows the same shape:
 }
 ```
 
-This creates or reuses the dynamic target MoonBook lane. Moontown owns the
+This creates or reuses the dynamic target MoonBook lane. MoonTown owns the
 schedule and dispatch event; MoonBook owns the topic wiki and generated site;
 MoonClaw owns bounded research execution.
 
@@ -632,12 +632,12 @@ assets/templates/books/pdf-evidence-watch/
 This template keeps the same ownership split:
 
 ```text
-Moondesk creates/edits the book config and method
-  -> Moontown registers a standing goal
+MoonDesk creates/edits the book config and method
+  -> MoonTown registers a standing goal
   -> MoonBook owns PDFs, extracted text, wiki, review queue, and projection
   -> MoonClaw discovers, downloads, extracts, analyzes, and packages results
   -> MoonBook accepts or rejects new knowledge
-  -> Moontown notifies only on accepted knowledge changes
+  -> MoonTown notifies only on accepted knowledge changes
 ```
 
 The important files are:
@@ -689,7 +689,7 @@ daemon cycles. Archived watches remain in
 watches from disabled archived watches, so preserved history does not look like
 live autonomous workload.
 
-Install a fully configured PDF-watch book from a Moondesk/exported JSON file:
+Install a fully configured PDF-watch book from a MoonDesk/exported JSON file:
 
 ```bash
 moon run src/cmd/main -- books pdf-watch install assets/templates/books/pdf-evidence-watch/install.example.json
@@ -710,10 +710,10 @@ The config file shape is:
 }
 ```
 
-If `analysis_method` is empty, Moontown reads `analysis_method_path` relative
-to the config file. If `workspace_root` is empty, Moontown uses the standard
-`books/<book-id>` workspace. This is the intended Moondesk contract:
-Moondesk edits a JSON file plus a method Markdown file; Moontown installs the
+If `analysis_method` is empty, MoonTown reads `analysis_method_path` relative
+to the config file. If `workspace_root` is empty, MoonTown uses the standard
+`books/<book-id>` workspace. This is the intended MoonDesk contract:
+MoonDesk edits a JSON file plus a method Markdown file; MoonTown installs the
 book and standing goal; MoonBook/MoonClaw handle the watch loop.
 
 The command writes:
@@ -743,10 +743,10 @@ Example standing goal:
 }
 ```
 
-Moondesk should call this installer rather than hand-copying directories. Its
+MoonDesk should call this installer rather than hand-copying directories. Its
 creation wizard should fill `book.json`, edit
 `wiki/methods/analysis-method.md`, and let the operator add websites,
-cadence, and notification policy. Moontown should not need a new MoonBit
+cadence, and notification policy. MoonTown should not need a new MoonBit
 branch for every PDF-watched domain.
 
 The expected MoonBook result marker for a standing watcher is:
@@ -764,7 +764,7 @@ wiki_pages_changed_count: <integer>
 book_changed: yes | no
 ```
 
-Moontown uses that marker only for control-plane scheduling:
+MoonTown uses that marker only for control-plane scheduling:
 
 - `update`: normal cadence
 - `no_change`: increasing no-change backoff, capped at 4x cadence
@@ -776,7 +776,7 @@ Accounting rule: retries, generated site rebuilds, journal maintenance, and
 failed/no-change checks are not research evidence. Only MoonBook-accepted facts,
 review items, and changed durable book pages count as book progress.
 
-Moontown also normalizes MoonBook summary accounting at the adapter boundary:
+MoonTown also normalizes MoonBook summary accounting at the adapter boundary:
 
 - `evidence_count` means domain evidence used for readiness.
 - `operational_evidence_count` means watcher audits, no-change patrol records,
@@ -826,11 +826,11 @@ This template creates a MoonBook workspace with:
 Ownership split:
 
 ```text
-Moondesk edits config, method, tool spec, and review decisions
-  -> Moontown installs the template and registers a standing goal
+MoonDesk edits config, method, tool spec, and review decisions
+  -> MoonTown installs the template and registers a standing goal
   -> MoonBook owns data, reports, app source, generated site, manifest, review
   -> MoonClaw watches sources, analyzes deltas, updates/repairs the tool
-  -> Moontown links the generated tool from a civic building
+  -> MoonTown links the generated tool from a civic building
 ```
 
 Create a default App ToolBook:
@@ -840,7 +840,7 @@ moon run src/cmd/main -- books app-tool bootstrap
 moon run src/cmd/main -- books app-tool status
 ```
 
-Install one from a Moondesk/exported config:
+Install one from a MoonDesk/exported config:
 
 ```bash
 moon run src/cmd/main -- books app-tool install assets/templates/books/app-tool-book/install.example.json
@@ -924,7 +924,7 @@ moon run src/cmd/main -- books template install pdf-evidence-watch assets/templa
 moon run src/cmd/main -- books template install app-tool-book assets/templates/books/app-tool-book/install.example.json
 ```
 
-Process Moondesk or Mayor-submitted book creation requests:
+Process MoonDesk or Mayor-submitted book creation requests:
 
 ```bash
 moon run src/cmd/main -- books template requests status
@@ -952,7 +952,7 @@ The browser endpoint is a development bridge, not a separate product contract:
 it writes the same config document under
 `.moonsuite/products/moontown/book-template-configs/` and the same request
 document under `.moonsuite/products/moontown/book-template-requests.json`.
-Moondesk should use this document shape directly when it becomes the stable
+MoonDesk should use this document shape directly when it becomes the stable
 human desktop surface.
 
 The request inbox lives at
@@ -984,8 +984,8 @@ was actually installed or failed”.
 
 The daemon includes a `book-template-request` scheduled job, so pending
 requests can be processed as part of the live loop. This is the preferred
-document-first handoff for Moondesk and future Mayor planning: create a request
-document, let Moontown install the appropriate template, then let MoonBook and
+document-first handoff for MoonDesk and future Mayor planning: create a request
+document, let MoonTown install the appropriate template, then let MoonBook and
 MoonClaw handle the running book.
 
 `moon run src/cmd/main -- status` reports the same inbox as:
@@ -1011,16 +1011,16 @@ spine as `Book template requests`, `Pending template requests`, and
 `Disabled standing goals`, and the latest book-template lifecycle event. The
 generated digest at
 `.moonsuite/products/moontown/live-digest.md` includes the same fields, which
-makes Moondesk book-creation handoffs visible in the 24/7 operator surface
+makes MoonDesk book-creation handoffs visible in the 24/7 operator surface
 instead of hiding them in the daemon log.
 
 That line is part of the stable autonomy spine: if the town is alive but
-waiting, pending and failed template requests should be zero; if Moondesk or
+waiting, pending and failed template requests should be zero; if MoonDesk or
 Mayor submits a new book request, this line should change before the daemon
 installs the book.
 
 The registry is data-driven by
-`assets/templates/books/templates.json`. Moondesk should read the same registry to
+`assets/templates/books/templates.json`. MoonDesk should read the same registry to
 show available book types, editable files, install examples, and required
 template assets. The generic installer dispatches to the template-specific
 installer but keeps the UI/Mayor contract stable.
@@ -1073,7 +1073,7 @@ repair packet. It writes repair context, repair skill instructions, a restartabl
 repair plan, and `.moonsuite/products/moontown/planbook/repair-task.json`. During live operation,
 daemon ticks run the same path automatically: if a gap is open and no repair is
 active, the town dispatches one repair through MoonClaw using `execution_mode:
-acp` and `execution_target: codex-main`, so Codex ACP can patch the Moontown
+acp` and `execution_target: codex-main`, so Codex ACP can patch the MoonTown
 source root and return software-engineering evidence. Daemon dispatch is
 detached, so long code-repair runs cannot stall real-world watcher cadence.
 Accepted source repairs must include `planbook.repair.patch_receipt.v1`
@@ -1174,7 +1174,7 @@ thirty-minute interval. Scheduled semantic reviews are launched detached from
 the daemon tick even when inline MoonClaw execution is enabled for other paths;
 otherwise a long AI review would monopolize the Mayor supervision loop.
 
-On every `review-book-quality` tick, Moontown first reconciles existing AI
+On every `review-book-quality` tick, MoonTown first reconciles existing AI
 review results. Weak results are not counted as progress. They are bridged into
 the affected MoonBook as `wiki/reviews/book-quality-repair.md`, recorded in
 `.moonsuite/products/moontown/book-quality/repair-bridge.json`, and converted
@@ -1473,7 +1473,7 @@ refresh the generated site.
 
 ## 10. Read The Town Synthesis
 
-After a parallel research goal settles or times out, Moontown writes a
+After a parallel research goal settles or times out, MoonTown writes a
 town-level synthesis artifact under:
 
 - `.moonsuite/products/moontown/town-synthesis/<goal-slug>.md`
@@ -1495,11 +1495,11 @@ The synthesis is a mayor-owned control-plane projection. It summarizes:
 - the mayor decision for whether the goal is complete or still blocked
 
 This is intentionally not a MoonBook page. MoonBook owns durable domain
-knowledge; Moontown owns cross-book supervision and acceptance.
+knowledge; MoonTown owns cross-book supervision and acceptance.
 
 ## 11. Understand The Research Quality Gate
 
-Moontown now blocks weak research instead of accepting file existence as
+MoonTown now blocks weak research instead of accepting file existence as
 success. For research lanes, the mayor checks for required bootstrap artifacts
 and rejects output that still contains provisional-only markers.
 
@@ -1512,7 +1512,7 @@ Examples of blockers:
 - search log says the web pass may be enriched later
 - wiki synthesis still says review is pending
 
-When those gaps exist, Moontown marks the lane as `ReviewQueued` and the town
+When those gaps exist, MoonTown marks the lane as `ReviewQueued` and the town
 synthesis remains blocked or interim.
 
 ## 12. Run The Rabbita Frontend

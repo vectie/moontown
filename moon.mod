@@ -5,7 +5,7 @@ version = "0.1.0"
 import {
   "moonbitlang/async@0.16.6",
   "moonbitlang/x@0.4.40",
-  "vectie/moonlib@0.1.8",
+  "vectie/moonlib@0.1.10",
 }
 
 readme = "README.mbt.md"
@@ -20,6 +20,4 @@ description = ""
 
 preferred_target = "native"
 
-options(
-  source: "src",
-)
+source = "src"

@@ -11,7 +11,7 @@ The runtime is template-driven. A domain or civic building should not require a
 new MoonBit runner. A building gets a scenario template, the template names its
 internal participant workspaces, communication pattern, skill rules, protocol
 channels, output paths, review gate, and optional fixture examples, and
-Moontown runs the same schedule, reducer, ledger, MoonBook, and projection
+MoonTown runs the same schedule, reducer, ledger, MoonBook, and projection
 envelope for every scenario.
 
 For the broader pattern taxonomy, see
@@ -19,7 +19,7 @@ For the broader pattern taxonomy, see
 
 ## Design Goal
 
-Moontown owns only the civic protocol envelope:
+MoonTown owns only the civic protocol envelope:
 
 - schedule and due checks
 - building lookup
@@ -42,7 +42,7 @@ The scenario owns the domain:
 The production reducer reads the generated `SKILL.md`, participant context,
 and reducer contract, then asks MoonClaw to emit
 `raw/bootstrap/civic-communication-results.json` using the same `CivicCommunicationIdea`
-contract that Moontown materializes into MoonBook pages, protocol ledgers,
+contract that MoonTown materializes into MoonBook pages, protocol ledgers,
 reviews, and UI projections. Template ideas are no longer production reducer
 input.
 
@@ -132,7 +132,7 @@ Required high-level fields:
   the last persisted reducer output.
 
 The key extensibility rule is that future domains and civic services should
-change these fields, not add `if domain == ...` branches to Moontown.
+change these fields, not add `if domain == ...` branches to MoonTown.
 
 Participant workspaces are internal salon workspaces by default. The durable
 surface book is the building book, such as `wenyu-social-square`; participant
@@ -151,9 +151,9 @@ domain-specific MoonBit code.
 
 Salon templates are extensible at the building level:
 
-- If `building_id` matches an existing Wenyu civic building, Moontown uses the
+- If `building_id` matches an existing Wenyu civic building, MoonTown uses the
   registered protocol definition.
-- If `building_id` is not registered, Moontown creates a generic
+- If `building_id` is not registered, MoonTown creates a generic
   exchange-reduce-distribute protocol from the scenario fields.
 - The fallback protocol uses `building_book_id` as the public MoonBook surface,
   `protocol_channel` as the inbox, `output_channel` as the outbox, and

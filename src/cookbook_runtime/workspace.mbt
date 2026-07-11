@@ -35,7 +35,7 @@ async fn write_moontown_cookbook_workspace(
   @support.write_text_file(
     "\{root}/book/describer/overview.html",
     @cookbook.cookbook_rendered_markdown_html(
-      "Moontown Codebase Describer",
+      "MoonTown Codebase Describer",
       "wiki/describer/overview.md",
       @cookbook.cookbook_describer_overview_markdown(),
     ),
@@ -47,7 +47,7 @@ async fn write_moontown_cookbook_workspace(
   @support.write_text_file(
     "\{root}/book/describer/algorithms.html",
     @cookbook.cookbook_rendered_markdown_html(
-      "Algorithms Used In Moontown",
+      "Algorithms Used In MoonTown",
       "wiki/describer/algorithms.md",
       @cookbook.cookbook_algorithms_markdown(),
     ),
@@ -59,7 +59,7 @@ async fn write_moontown_cookbook_workspace(
   @support.write_text_file(
     "\{root}/book/describer/data-structures.html",
     @cookbook.cookbook_rendered_markdown_html(
-      "Moontown Data Structures",
+      "MoonTown Data Structures",
       "wiki/describer/data-structures.md",
       @cookbook.cookbook_data_structures_markdown(),
     ),
@@ -71,7 +71,7 @@ async fn write_moontown_cookbook_workspace(
   @support.write_text_file(
     "\{root}/book/describer/data-flow.html",
     @cookbook.cookbook_rendered_markdown_html(
-      "Moontown Data Flow",
+      "MoonTown Data Flow",
       "wiki/describer/data-flow.md",
       @cookbook.cookbook_data_flow_markdown(),
     ),
@@ -95,7 +95,7 @@ async fn write_moontown_cookbook_workspace(
   @support.write_text_file(
     "\{root}/book/describer/feature-guide.html",
     @cookbook.cookbook_rendered_markdown_html(
-      "Moontown Feature Guide",
+      "MoonTown Feature Guide",
       "wiki/describer/feature-guide.md",
       @cookbook.cookbook_feature_guide_markdown(),
     ),
@@ -139,7 +139,7 @@ async fn write_moontown_cookbook_workspace(
   @support.write_text_file(
     "\{root}/book/skills/cookbook-generation.html",
     @cookbook.cookbook_rendered_skill_html(
-      "Moontown Cookbook Generation Skill",
+      "MoonTown Cookbook Generation Skill",
       "skills/cookbook-generation/SKILL.md",
       @cookbook.cookbook_skill_markdown(),
     ),

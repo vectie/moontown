@@ -44,7 +44,7 @@ Use only high-signal inputs.
 - MoonBook bookkeeper responsibility:
 - MoonClaw worker responsibility:
 - Civic building responsibility, if any:
-- Moondesk responsibility, if any:
+- MoonDesk responsibility, if any:
 - Return-home target:
 - Review gate:
 - Projection/UI surface:
@@ -61,7 +61,7 @@ Use only high-signal inputs.
 - App source path:
 - Generated tool page:
 - Latest analysis page:
-- Moondesk editable files:
+- MoonDesk editable files:
 - Reason this is a capability instead of a new book type:
 
 ## Design Decision

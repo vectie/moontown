@@ -55,8 +55,8 @@ pub async fn daemon_run_saved_town(
     log_path,
     "worker loop entered run=\{worker_run_id} pid=\{worker_pid} max_ticks=\{max_ticks} sleep_ms=\{sleep_ms}",
   )
-  let moonstat_status = moonstat_daemon_startup_status()
-  @daemon_runtime.append_daemon_log(log_path, moonstat_status)
+  let moongate_status = moongate_daemon_startup_status()
+  @daemon_runtime.append_daemon_log(log_path, moongate_status)
   let mut ticks = 0
   let mut latest = ""
   while max_ticks <= 0 || ticks < max_ticks {
@@ -113,28 +113,28 @@ pub async fn daemon_run_saved_town(
       "worker completed bounded run=\{worker_run_id}",
     )
   }
-  "Moontown daemon run completed ticks=\{ticks}\n\{moonstat_status}\n\{latest}"
+  "MoonTown daemon run completed ticks=\{ticks}\n\{moongate_status}\n\{latest}"
 }
 
 ///|
-fn moonstat_daemon_ready_message(base_url : String) -> String {
-  "Moonstat available at \{base_url}; town usage/statistics bridge enabled"
+fn moongate_daemon_ready_message(base_url : String) -> String {
+  "MoonGate available at \{base_url}; town usage/statistics bridge enabled"
 }
 
 ///|
-fn moonstat_daemon_unavailable_message(
+fn moongate_daemon_unavailable_message(
   base_url : String,
   error : String,
 ) -> String {
-  "Moonstat unavailable at \{base_url}; continuing as standalone Moontown: \{error}"
+  "MoonGate unavailable at \{base_url}; continuing as standalone MoonTown: \{error}"
 }
 
 ///|
-async fn moonstat_daemon_startup_status() -> String {
-  let client = @moonstat.discover()
+async fn moongate_daemon_startup_status() -> String {
+  let client = @moongate.discover()
   match client.health() {
-    Ok(_) => moonstat_daemon_ready_message(client.base_url())
-    Err(error) => moonstat_daemon_unavailable_message(client.base_url(), error)
+    Ok(_) => moongate_daemon_ready_message(client.base_url())
+    Err(error) => moongate_daemon_unavailable_message(client.base_url(), error)
   }
 }
 

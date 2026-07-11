@@ -13,7 +13,7 @@ pub fn repair_skill_markdown() -> String {
 ///|
 fn repair_skill_frontmatter() -> String {
   [
-    "---", "name: planbook-repair", "description: Repair one bounded PlanBook self-build gap while preserving Moontown/MoonBook/MoonClaw ownership boundaries.",
+    "---", "name: planbook-repair", "description: Repair one bounded PlanBook self-build gap while preserving MoonTown/MoonBook/MoonClaw ownership boundaries.",
     "---",
   ].join("\n")
 }
@@ -53,7 +53,7 @@ fn repair_skill_rules_section() -> String {
 ///|
 fn repair_skill_rules() -> Array[String] {
   [
-    "- Fix Moontown-owned routing/live-spine/UI/docs issues inside Moontown.",
+    "- Fix MoonTown-owned routing/live-spine/UI/docs issues inside MoonTown.",
     "- For `editor-selected-feature-implementation`, read `raw/editor-pipeline/next-feature.json` and implement the selected feature; do not choose a different feature in code.",
     "- For selected editor features, write `raw/editor-pipeline/selected-feature-implementation.md` with `contract: \{@editor_pipeline.selected_feature_implementation_contract()}`, `selected_feature: <id>`, and `implementation_status: accepted` only after validation.",
     "- For `backlog-*` criteria, write `raw/backlog/completed/<backlog-id>.md` only after validation and include the backlog id in `\{repair_result_relative_path()}`.",

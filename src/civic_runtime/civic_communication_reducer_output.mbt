@@ -126,7 +126,7 @@ async fn write_civic_communication_reducer_blocker(
       "",
       reduction.summary,
       "",
-      "Moontown did not fall back to template seed ideas. The next retry must run the MoonClaw reducer or use an explicit fixture mode in tests.",
+      "MoonTown did not fall back to template seed ideas. The next retry must run the MoonClaw reducer or use an explicit fixture mode in tests.",
     ].join("\n"),
   )
 }

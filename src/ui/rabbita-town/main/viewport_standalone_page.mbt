@@ -32,7 +32,7 @@ fn render_standalone_viewport_page(
     [
       header(class="viewport-hud", [
         div(class="viewport-title", [
-          p(class="eyebrow", "Moontown Viewport"),
+          p(class="eyebrow", "MoonTown Viewport"),
           h1(context.scene.title),
           p(
             class="viewport-mode-subtitle",

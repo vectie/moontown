@@ -41,7 +41,7 @@ Return `mayor.goal.decomposition.v1`:
   "lanes": [
     {
       "book_id": "research-moontown",
-      "objective": "Own only the Moontown research lane.",
+      "objective": "Own only the MoonTown research lane.",
       "rationale": "parallel research lane for moontown"
     }
   ]

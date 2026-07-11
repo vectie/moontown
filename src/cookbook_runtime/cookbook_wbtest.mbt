@@ -76,7 +76,7 @@ async test "cookbook status reports stable state control book" {
     workspace_root~,
     manifest_path~,
   )
-  assert_true(markdown.contains("# Moontown Cookbook Status"))
+  assert_true(markdown.contains("# MoonTown Cookbook Status"))
   assert_true(markdown.contains("moontown-cookbook"))
   assert_true(markdown.contains("Docs tracked: `8`"))
   assert_true(markdown.contains("Definitions tracked: `4`"))

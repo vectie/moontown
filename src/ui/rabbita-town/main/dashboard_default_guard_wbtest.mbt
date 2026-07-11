@@ -82,7 +82,7 @@ test "default dashboard hides developer and rare runtime controls" {
 test "default dashboard keeps professional operating actions visible" {
   let html = render_default_dashboard_test_html(init_model())
   assert_true(html.contains("Next opening"))
-  assert_true(html.contains("Moontown"))
+  assert_true(html.contains("MoonTown"))
   assert_true(html.contains("Wenyu Valley / AI Innovation Town"))
   assert_true(html.contains("Demo mode"))
   assert_true(html.contains("Demo 8"))

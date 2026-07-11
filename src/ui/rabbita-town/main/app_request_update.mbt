@@ -73,7 +73,7 @@ fn operator_request_success_status(
   ignore(goal_id)
   ignore(request_id)
   ignore(status)
-  "Watch accepted. Moontown will run it on the next check."
+  "Watch accepted. MoonTown will run it on the next check."
 }
 
 ///|
@@ -88,7 +88,7 @@ fn book_template_request_success_status(
 ) -> String {
   ignore(request_id)
   ignore(status)
-  "Book request queued. Moontown will install it through the book workflow."
+  "Book request queued. MoonTown will install it through the book workflow."
 }
 
 ///|

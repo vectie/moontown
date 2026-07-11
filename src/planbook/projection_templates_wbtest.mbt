@@ -2,12 +2,12 @@
 test "planbook generated site keeps plan execute review identity" {
   let entry = @moonbook.BookCatalogEntry::new(
     id="moontown-planbook",
-    name="Moontown Quality Planbook",
+    name="MoonTown Quality Planbook",
     purpose="planbook",
     workspace_root="/tmp/planbook",
   )
   let html = generated_site_html(entry)
-  assert_true(html.contains("<title>Moontown Quality Planbook</title>"))
+  assert_true(html.contains("<title>MoonTown Quality Planbook</title>"))
   assert_true(
     html.contains("MoonBook managed / Mayor routed / MoonClaw executed"),
   )
@@ -21,7 +21,7 @@ test "planbook generated site keeps plan execute review identity" {
 test "planbook generated site escapes workspace root in hero" {
   let entry = @moonbook.BookCatalogEntry::new(
     id="moontown-planbook",
-    name="Moontown Quality Planbook",
+    name="MoonTown Quality Planbook",
     purpose="planbook",
     workspace_root="/tmp/planbook/<unsafe>",
   )

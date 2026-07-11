@@ -37,7 +37,7 @@ fn planbook_repair_worker_profile_id() -> String {
 
 ///|
 fn planbook_repair_worker_profile_purpose() -> String {
-  "Repair one PlanBook self-build criterion without leaking MoonBook or MoonClaw ownership into Moontown."
+  "Repair one PlanBook self-build criterion without leaking MoonBook or MoonClaw ownership into MoonTown."
 }
 
 ///|

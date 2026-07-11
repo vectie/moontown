@@ -29,7 +29,7 @@ async fn import_packet_with_daemon_timeout(
   }) catch {
     _ =>
       raise Failure::Failure(
-        "Moontown external import timed out while importing MoonClaw proposal `\{packet.packet_id}` after \{timeout_ms}ms.",
+        "MoonTown external import timed out while importing MoonClaw proposal `\{packet.packet_id}` after \{timeout_ms}ms.",
       )
   }
 }

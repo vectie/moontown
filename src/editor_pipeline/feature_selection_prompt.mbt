@@ -29,7 +29,7 @@ pub fn feature_selection_request_text(
 
 ///|
 pub fn feature_selection_role_prompt() -> String {
-  "You are the AI feature rater for Moontown's Wenyu editor-mode pipeline."
+  "You are the AI feature rater for MoonTown's Wenyu editor-mode pipeline."
 }
 
 ///|
@@ -77,7 +77,7 @@ pub fn feature_selection_target_files_rule() -> String {
 
 ///|
 pub fn feature_selection_candidate_extraction_rule() -> String {
-  "Extract candidate features from the course, exercises, rubric, and current editor/output UI evidence. Do not rely on a hardcoded candidate list from Moontown."
+  "Extract candidate features from the course, exercises, rubric, and current editor/output UI evidence. Do not rely on a hardcoded candidate list from MoonTown."
 }
 
 ///|

@@ -33,9 +33,9 @@ fn live_autonomy_goal_section() -> String {
 ///|
 fn live_autonomy_ownership_section() -> String {
   [
-    "", "## Ownership", "", "- Moontown Mayor owns the spine, scheduling, retry, projection, and journal.",
+    "", "## Ownership", "", "- MoonTown Mayor owns the spine, scheduling, retry, projection, and journal.",
     "- MoonBook owns accepted durable records and support workspaces.", "- MoonClaw owns worker execution and structured result packets.",
-    "- Moondesk later owns human browsing/editing of the cookbook and workspace files.",
+    "- MoonDesk later owns human browsing/editing of the cookbook and workspace files.",
   ].join("\n")
 }
 

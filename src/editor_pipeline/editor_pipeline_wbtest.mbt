@@ -190,7 +190,7 @@ test "feature selection prompt policy is evidence-first and non-hardcoded" {
   let text = feature_selection_request_text("next-feature.json", target_files)
   assert_true(
     text.contains(
-      "You are the AI feature rater for Moontown's Wenyu editor-mode pipeline.",
+      "You are the AI feature rater for MoonTown's Wenyu editor-mode pipeline.",
     ),
   )
   assert_true(

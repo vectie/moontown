@@ -5,11 +5,11 @@ This package is the browser-facing Rabbita frontend for `moontown`.
 It uses the published Rabbita frontend stack:
 
 - `moon.mod` imports `moonbit-community/rabbita@0.12.4`.
-- `moon.work` only binds this nested frontend and the local Moontown source tree.
+- `moon.work` only binds this nested frontend and the local MoonTown source tree.
 - `package.json` imports the published `@rabbita/vite` package instead of a
   local `../rba` checkout.
 
-Lepusa is intentionally not imported here yet. If Moontown gains a native
+Lepusa is intentionally not imported here yet. If MoonTown gains a native
 desktop shell, that target should import the published `vectie/lepusa` package
 from its own MoonBit module instead of wiring to a local `../lepusa` checkout.
 
@@ -65,7 +65,7 @@ The dashboard links to `viewport.html?assets=generated&v=wenyu` for the Wenyu
 Valley map workspace, where districts, residents, standing watches, and active
 work can be inspected in place.
 
-This package owns the Moontown operator dashboard only. It does not own the
+This package owns the MoonTown operator dashboard only. It does not own the
 generated MoonBook site that appears under live workspace directories such as
 `books/coding/site/`.
 

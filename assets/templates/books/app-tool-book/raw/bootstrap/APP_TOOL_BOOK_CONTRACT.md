@@ -4,8 +4,8 @@ An App ToolBook is a MoonBook whose durable output includes both knowledge pages
 
 Ownership split:
 
-- Moondesk edits the book config, analysis method, tool spec, and review decisions.
-- Moontown installs the book, registers the standing goal, and exposes the civic building link.
+- MoonDesk edits the book config, analysis method, tool spec, and review decisions.
+- MoonTown installs the book, registers the standing goal, and exposes the civic building link.
 - MoonBook owns durable sources, data, reports, tool source, generated site, and review state.
 - MoonClaw watches sources, analyzes deltas, generates or repairs the tool, validates it, and returns strict result markers.
 

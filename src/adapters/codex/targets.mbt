@@ -40,7 +40,7 @@ pub fn moontown_target_json() -> Json {
   let root = moontown_workspace_root()
   {
     "backend": "codex",
-    "label": "Codex Moontown Builder",
+    "label": "Codex MoonTown Builder",
     "cwd": root,
     "workspace": root,
     "command": command(),

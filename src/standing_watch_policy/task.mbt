@@ -40,7 +40,7 @@ pub fn standing_watch_prompt(
     $|Keeper responsibility:
     $|- MoonBook owns the baseline, source fingerprints, wiki memory, update threshold, digest history, and generated projection.
     $|- MoonClaw only performs bounded search/fetch/read/summarize work and returns candidate evidence.
-    $|- Moontown only scheduled this check and will consume your final decision marker.
+    $|- MoonTown only scheduled this check and will consume your final decision marker.
     $|
     $|Research temperament:
     $|- Use imagination to form better hypotheses and search angles, not to invent facts.

@@ -10,7 +10,7 @@ pub fn wenyu_course_index_markdown(
     "## Ownership",
     "",
     "- MoonBook owns the course syllabus, lessons, exercises, checkpoints, and generated course site.",
-    "- Moontown consumes only course progress and visible outputs.",
+    "- MoonTown consumes only course progress and visible outputs.",
     "- MoonClaw can generate lesson revisions through the course-builder skill.",
     "",
     "## Book",

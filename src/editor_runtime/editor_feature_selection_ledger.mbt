@@ -12,7 +12,7 @@ async fn record_accepted_editor_feature_if_present(
   if !current_ledger.contains(entry) {
     let next_ledger = if current_ledger.trim().is_empty() {
       [
-        "# Implemented Editor Features", "", "This file is Moontown's durable exclusion ledger for iterative AI feature selection. Features listed here must not be selected again by `editor-feature-rater`.",
+        "# Implemented Editor Features", "", "This file is MoonTown's durable exclusion ledger for iterative AI feature selection. Features listed here must not be selected again by `editor-feature-rater`.",
         "", entry,
       ].join("\n")
     } else {

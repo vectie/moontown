@@ -12,7 +12,7 @@ fn planbook_repair_request_header(
   criterion : PlanbookCriterionStatus,
 ) -> String {
   [
-    "You are the PlanBook repair worker for Moontown.",
+    "You are the PlanBook repair worker for MoonTown.",
     "Open criterion: `\{criterion.id}`.",
     "Title: \{criterion.title}",
     "Owner boundary: \{criterion.owner}.",

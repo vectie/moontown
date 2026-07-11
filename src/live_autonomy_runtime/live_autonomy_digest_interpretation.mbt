@@ -3,9 +3,9 @@ fn live_autonomy_digest_interpretation(spine : LiveAutonomySpine) -> String {
   if spine.blocked_count > 0 || spine.failed_count > 0 {
     "Mayor should recover live blockers before dispatching more work. Historical watcher failures are not counted here unless they remain unresolved."
   } else if spine.failed_book_template_request_count > 0 {
-    "The town has failed book-template requests. Mayor should surface the request and config errors before accepting more Moondesk book creation work."
+    "The town has failed book-template requests. Mayor should surface the request and config errors before accepting more MoonDesk book creation work."
   } else if spine.pending_book_template_request_count > 0 {
-    "The town has pending book-template requests from Moondesk or operators. The next daemon tick should process them into real MoonBook workspaces."
+    "The town has pending book-template requests from MoonDesk or operators. The next daemon tick should process them into real MoonBook workspaces."
   } else if spine.review_count > 0 {
     "The town is healthy and watching with a visible review queue. Review-gated output is not counted as progress until promoted, but it no longer blocks the live loop."
   } else if spine.active_worker_count > 0 {

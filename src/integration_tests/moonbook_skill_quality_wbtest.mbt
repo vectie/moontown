@@ -5,7 +5,7 @@ fn assert_moonbook_skill_quality(label : String, text : String) -> Unit raise {
 }
 
 ///|
-test "Moontown generated skill templates keep exploration quality" {
+test "MoonTown generated skill templates keep exploration quality" {
   let entry = @moonbook.BookCatalogEntry::new(
     id="wenyu-policy-hall",
     name="Wenyu Policy Hall",
@@ -69,7 +69,7 @@ test "Moontown generated skill templates keep exploration quality" {
 }
 
 ///|
-async test "Moontown static book skill templates keep exploration quality" {
+async test "MoonTown static book skill templates keep exploration quality" {
   for
     path in [
       "assets/templates/books/app-tool-book/skills/tool-watch/SKILL.md", "assets/templates/books/app-tool-book/skills/tool-build/SKILL.md",

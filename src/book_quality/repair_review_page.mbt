@@ -6,7 +6,7 @@ pub fn repair_review_page_markdown(
   [
     "# Book Quality Repair Queue",
     "",
-    "This page is generated from Moontown's semantic book-quality review. It is a repair queue, not accepted domain evidence.",
+    "This page is generated from MoonTown's semantic book-quality review. It is a repair queue, not accepted domain evidence.",
     "",
     "## Current Repair",
     "",

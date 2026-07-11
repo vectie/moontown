@@ -42,7 +42,7 @@ test "request result parser handles invalid and mismatched json" {
 test "request status message helpers keep operator and book paths distinct" {
   assert_eq(
     operator_request_success_status("goal-opc", "request-1", "accepted"),
-    "Watch accepted. Moontown will run it on the next check.",
+    "Watch accepted. MoonTown will run it on the next check.",
   )
   assert_eq(
     operator_request_failure_status("network error"),
@@ -50,7 +50,7 @@ test "request status message helpers keep operator and book paths distinct" {
   )
   assert_eq(
     book_template_request_success_status("book-request-1", "pending"),
-    "Book request queued. Moontown will install it through the book workflow.",
+    "Book request queued. MoonTown will install it through the book workflow.",
   )
   assert_eq(
     book_template_request_failure_status("missing website"),

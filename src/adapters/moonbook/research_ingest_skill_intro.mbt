@@ -16,7 +16,7 @@ fn research_ingest_header_section(display : String) -> Array[String] {
 ///|
 fn research_ingest_description() -> String {
   research_ingest_text([
-    "description: Research-grade wiki ingest for a Moontown research book:", "search, screen, extract, materialize, and report blockers with provenance.",
+    "description: Research-grade wiki ingest for a MoonTown research book:", "search, screen, extract, materialize, and report blockers with provenance.",
   ])
 }
 

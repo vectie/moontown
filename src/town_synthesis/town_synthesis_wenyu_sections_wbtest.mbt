@@ -57,7 +57,7 @@ test "Wenyu architecture graph renders mayor to lane to operator path" {
   )
   let graph = render_wenyu_architecture_graph(plan)
   assert_true(graph.contains("```mermaid"))
-  assert_true(graph.contains("Mayor claw in Moontown"))
+  assert_true(graph.contains("Mayor claw in MoonTown"))
   assert_true(graph.contains("Wenyu Valley / Town Shell"))
   assert_true(graph.contains("Town-level build synthesis"))
   assert_true(graph.contains("Operator-visible Wenyu roadmap"))

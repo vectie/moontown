@@ -20,7 +20,7 @@ test "codex moontown args stay inside configured workspace" {
 ///|
 test "codex package owns moontown target json" {
   let target = moontown_target_json().stringify()
-  assert_true(target.contains("\"label\":\"Codex Moontown Builder\""))
+  assert_true(target.contains("\"label\":\"Codex MoonTown Builder\""))
   assert_true(target.contains("\"model\":\"gpt-5.5\""))
   assert_true(target.contains("\"--model\""))
   assert_true(target.contains("\"workspace\""))

@@ -48,7 +48,7 @@ fn physical_bridge_next_action_phrases() -> CivicExecutionActionPhrases {
   {
     packet: "Confirm dispatch and open the next virtual-to-physical handoff.",
     running: "Finish the room-and-robot sync and keep next action legible for the mayor loop.",
-    persisting: "Persist the reviewed telemetry and booking slice so Moontown can project a trustworthy district state.",
+    persisting: "Persist the reviewed telemetry and booking slice so MoonTown can project a trustworthy district state.",
     review: "Clear keeper review before exposing proxy attendance or room status beyond projection-safe summaries.",
     completed: "Refresh the town tile with the latest room, robot, and telemetry counters instead of the generic bridge placeholder.",
     recovery: "Recover the stalled bridge run before offline status drifts away from the visible town.",

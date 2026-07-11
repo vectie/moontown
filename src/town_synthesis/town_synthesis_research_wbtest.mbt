@@ -4,7 +4,7 @@ test "town synthesis comparative analysis preserves ecosystem boundary thesis" {
   assert_true(text.contains("town-level deep report"))
   assert_true(text.contains("MoonBook contributes durable memory"))
   assert_true(text.contains("MoonClaw contributes bounded execution"))
-  assert_true(text.contains("Moontown contributes planning"))
+  assert_true(text.contains("MoonTown contributes planning"))
   assert_true(text.contains("coordinated agent-infrastructure stack"))
 }
 
@@ -57,7 +57,7 @@ test "town synthesis overview renders lane count and relationship diagram" {
   assert_true(overview.contains("raw/bootstrap/deep-report.md"))
   assert_true(overview.contains("clean separation of concerns"))
   assert_true(overview.contains("```mermaid"))
-  assert_true(overview.contains("Moontown mayor"))
+  assert_true(overview.contains("MoonTown mayor"))
   assert_true(overview.contains("3 isolated research lanes"))
 }
 

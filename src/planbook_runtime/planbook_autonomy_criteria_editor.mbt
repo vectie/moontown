@@ -36,11 +36,11 @@ async fn planbook_editor_pipeline_criterion(
     "moontown+planbook+moonclaw",
     ready,
     if ready {
-      "PlanBook plan exists, Moontown exposes an editor-pipeline command/state contract, and editor mode references the pipeline"
+      "PlanBook plan exists, MoonTown exposes an editor-pipeline command/state contract, and editor mode references the pipeline"
     } else if plan_ready {
-      "PlanBook has the editor pipeline plan, but Moontown still lacks the command/state/UI integration"
+      "PlanBook has the editor pipeline plan, but MoonTown still lacks the command/state/UI integration"
     } else {
-      "PlanBook is missing the editor pipeline plan and Moontown still lacks the command/state/UI integration"
+      "PlanBook is missing the editor pipeline plan and MoonTown still lacks the command/state/UI integration"
     },
     "use the Wenyu course book as source context, then implement a restartable editor-pipeline contract, command surface, UI binding, and validation evidence through PlanBook repair",
   )

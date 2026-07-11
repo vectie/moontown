@@ -12,7 +12,7 @@ pub async fn daemon_stop_saved_town(
     default_daemon_log_path(snapshot_path~),
     "stop requested launchd_stopped=\{launchd_stopped} worker_pid=\{health.worker_pid} worker_killed=\{worker_killed} supervisor_pid=\{health.supervisor_pid} supervisor_killed=\{supervisor_killed}",
   )
-  "Moontown daemon stop requested\nlaunchd_stopped=\{launchd_stopped}\nworker_pid=\{health.worker_pid} worker_killed=\{worker_killed}\nsupervisor_pid=\{health.supervisor_pid} supervisor_killed=\{supervisor_killed}"
+  "MoonTown daemon stop requested\nlaunchd_stopped=\{launchd_stopped}\nworker_pid=\{health.worker_pid} worker_killed=\{worker_killed}\nsupervisor_pid=\{health.supervisor_pid} supervisor_killed=\{supervisor_killed}"
 }
 
 ///|
@@ -22,7 +22,7 @@ pub async fn daemon_doctor_saved_town(
 ) -> String {
   let health = inspect_daemon_runtime(snapshot_path~, stale_after_ms~)
   let builder = StringBuilder::new()
-  builder.write_string("Moontown daemon doctor\n")
+  builder.write_string("MoonTown daemon doctor\n")
   builder.write_string(
     "\{@daemon_runtime_policy.daemon_runtime_health_summary(health)}\n",
   )

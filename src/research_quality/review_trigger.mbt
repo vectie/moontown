@@ -13,7 +13,7 @@ pub fn research_quality_review_trigger_markdown(
   [
     "# Research Review Trigger",
     "",
-    "Moontown queued an in-place review/repair pass for this stable research book.",
+    "MoonTown queued an in-place review/repair pass for this stable research book.",
     "",
     "Reason: \{reason}",
     "",
@@ -36,7 +36,7 @@ pub fn research_quality_review_resolved_markdown(reason : String) -> String {
     "",
     "No active quality repair.",
     "",
-    "Moontown rechecked this stable research book and found no remaining framework-level quality gaps.",
+    "MoonTown rechecked this stable research book and found no remaining framework-level quality gaps.",
     "",
     "Reason: \{reason}",
     "",

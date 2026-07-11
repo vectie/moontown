@@ -53,7 +53,7 @@ pub fn repair_goal_prompt(item : BookQualityRepairBridgeItem) -> String {
     "- Follow the book's own contract and SKILL.md; do not force a research genre onto civic, course, planbook, cookbook, or operational books.",
     "- Separate operational logs from domain/service evidence.",
     "- If the repair needs web evidence and source policy allows it, search/fetch web sources before local fallback.",
-    "- Return a strict standing-goal decision marker so Moontown can account for real growth.",
+    "- Return a strict standing-goal decision marker so MoonTown can account for real growth.",
   ].join("\n")
 }
 
