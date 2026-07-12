@@ -24,6 +24,8 @@ async fn render_cli_command(args : Array[String]) -> String {
     ["civic", .. rest] => render_civic_command(rest.to_owned())
     ["commission", "evaluate", input_path, output_path] =>
       @commission_runtime.evaluate_file(input_path, output_path)
+    ["emergence", "evaluate", input_path, output_path] =>
+      @emergence_runtime.evaluate_file(input_path, output_path)
     ["miniapp", .. rest] => render_miniapp_command(rest.to_owned())
     ["integration", .. rest] => render_integration_command(rest.to_owned())
     _ => @moontown.load_or_create_saved_dashboard()

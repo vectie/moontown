@@ -79,6 +79,22 @@ Implemented today:
   definitions, runtime-state indexes, and stable-state drift checks
 - planbook operating model for durable `plan.md` driven code/product changes,
   separate from research books and course books
+- autonomous civic rounds with commissioned, emergent, dissenting, minority,
+  and synthesized contributions; coalition/ranking evidence; explicit review,
+  distribution, and home-return receipts; and digital-only promotion gates
+
+Autonomous idea emergence is evaluated with:
+
+```text
+moon run src/cmd/main -- emergence evaluate <round.json> <result.json>
+```
+
+The round qualifies only when at least one useful unseeded idea appears,
+minority/dissent records remain visible, every participant receives the result
+and returns home, and review evidence accepts a candidate within MoonTown's
+knowledge claim ceiling. The Mayor may schedule cognitive or workspace work;
+it cannot grant external or physical authority or accept another product's
+truth.
 
 Wenyu Valley product readiness is tracked in:
 

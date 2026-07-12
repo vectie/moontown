@@ -1,0 +1,111 @@
+// Generated using `moon info`, DON'T EDIT IT
+package "vectie/moontown/emergence"
+
+import {
+  "moonbitlang/core/debug",
+  "moonbitlang/core/json",
+}
+
+// Values
+pub fn evaluate_autonomous_civic_round(AutonomousCivicRound) -> Result[AutonomousCivicRoundResult, String]
+
+// Errors
+
+// Types and methods
+pub(all) struct AutonomousCivicRound {
+  contract_id : String
+  round_id : String
+  commission_id : String
+  question : String
+  commissioned_agenda_ids : Array[String]
+  contributions : Array[CivicContribution]
+  critiques : Array[CivicCritique]
+  rankings : Array[CivicRanking]
+  review : CivicReview
+  deliveries : Array[CivicDeliveryReceipt]
+  requested_authority : String
+  recorded_at : String
+} derive(Eq, ToJson, @debug.Debug, @json.FromJson)
+
+pub(all) struct AutonomousCivicRoundResult {
+  contract_id : String
+  round_id : String
+  commission_id : String
+  accepted : Bool
+  autonomous_round_qualified : Bool
+  winner_id : String
+  unseeded_idea_ids : Array[String]
+  dissent_ids : Array[String]
+  minority_ids : Array[String]
+  evaluations : Array[ContributionEvaluation]
+  coalition_graph : Array[CoalitionEdge]
+  stage_receipts : Array[String]
+  review : CivicReview
+  deliveries : Array[CivicDeliveryReceipt]
+  requested_authority : String
+  proposal : Json
+  recorded_at : String
+} derive(Eq, ToJson, @debug.Debug, @json.FromJson)
+
+pub(all) struct CivicContribution {
+  contribution_id : String
+  participant_id : String
+  source_book_id : String
+  origin : String
+  summary : String
+  evidence_refs : Array[String]
+  alternatives : Array[String]
+  blockers : Array[String]
+  implementation_criteria : Array[String]
+  claim_ceiling : String
+  supports : Array[String]
+  proposal : Json
+} derive(Eq, ToJson, @debug.Debug, @json.FromJson)
+
+pub(all) struct CivicCritique {
+  critique_id : String
+  participant_id : String
+  target_contribution_id : String
+  concern : String
+  evidence_refs : Array[String]
+  severity : String
+  resolved : Bool
+} derive(Eq, ToJson, @debug.Debug, @json.FromJson)
+
+pub(all) struct CivicDeliveryReceipt {
+  participant_id : String
+  received : Bool
+  returned_home : Bool
+  receipt_ref : String
+} derive(Eq, ToJson, @debug.Debug, @json.FromJson)
+
+pub(all) struct CivicRanking {
+  voter_id : String
+  ordered_contribution_ids : Array[String]
+  rationale : String
+} derive(Eq, ToJson, @debug.Debug, @json.FromJson)
+
+pub(all) struct CivicReview {
+  reviewer_id : String
+  decision : String
+  evidence_refs : Array[String]
+  note : String
+} derive(Eq, ToJson, @debug.Debug, @json.FromJson)
+
+pub(all) struct CoalitionEdge {
+  from_id : String
+  to_contribution_id : String
+  relation : String
+} derive(Eq, ToJson, @debug.Debug, @json.FromJson)
+
+pub(all) struct ContributionEvaluation {
+  contribution_id : String
+  qualified : Bool
+  ranking_score : Int
+  reasons : Array[String]
+} derive(Eq, ToJson, @debug.Debug, @json.FromJson)
+
+// Type aliases
+
+// Traits
+
