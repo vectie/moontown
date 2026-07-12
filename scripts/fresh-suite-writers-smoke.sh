@@ -3,9 +3,11 @@
 set -euo pipefail
 
 repo_root="$(cd "$(dirname "$0")/.." && pwd)"
-moon_bin="${MOON_BIN:-/Users/kq/.moon/bin/moon}"
-moonbook_root="${MOONTOWN_MOONBOOK_ROOT:-/Users/kq/Workspace/moonbook}"
-root="$(mktemp -d "${TMPDIR:-/tmp}/moontown-fresh-suite-writers.XXXXXX")"
+moon_bin="${MOON_BIN:-$(command -v moon)}"
+moonbook_root="${MOONTOWN_MOONBOOK_ROOT:-$(cd "$repo_root/../moonbook" && pwd)}"
+test_root_parent="${MOONTOWN_TEST_ROOT_PARENT:-${MOONSUITE_ROOT:-$repo_root}/.tmp}"
+mkdir -p "$test_root_parent"
+root="$(mktemp -d "$test_root_parent/moontown-fresh-suite-writers.XXXXXX")"
 
 cleanup() {
   rm -rf "$root"

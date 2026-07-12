@@ -1,8 +1,8 @@
 {
   "schema": "moontown.wenyu_reference_labels.v3",
   "source": {
-    "path": "/Users/kq/Workspace/moontown/ui/assets/tilemap/wenyu_topdown_semantic.png",
-    "generatedFrom": "/Users/kq/Downloads/wenyuvalley.jpg",
+    "path": "asset://tilemap/wenyu_topdown_semantic.png",
+    "generatedFrom": "external-source://wenyuvalley.jpg",
     "width": 1672,
     "height": 941,
     "method": "image-2 top-down semantic graph, HSV/color segmentation, water smoothing, and mixed water-road bridge recovery pass into a 256x144 tile grid"

@@ -1,7 +1,7 @@
 {
   "schema": "moontown.wenyu_reference_buildings.v4",
   "source": {
-    "path": "/Users/kq/Workspace/moontown/ui/assets/tilemap/wenyu_reference_buildings_source.png",
+    "path": "asset://tilemap/wenyu_reference_buildings_source.png",
     "width": 1672,
     "height": 941,
     "method": "Extract exact building footprint cells from reference.png using dark/varied neutral roof pixels, reject bright road/grid seams, constrain to urban/campus terrain labels, and rasterize exact labelRows outlines rather than random icon placements."

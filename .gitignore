@@ -2,6 +2,7 @@
 _build/
 .mooncakes/
 .repos/
+.tmp/
 .moonsuite/
 .moonagent/
 .moontown/
