@@ -30,6 +30,13 @@ fn qualified_round() -> AutonomousCivicRound {
     commission_id: "commission-robot-readiness",
     question: "Which robot idea should advance to digital implementation?",
     commissioned_agenda_ids: ["baseline"],
+    comparison_criteria: [
+      {
+        criterion_id: "evidence",
+        name: "evidence quality",
+        definition: "Prefers traceable evidence and bounded claims.",
+      },
+    ],
     contributions: [
       contribution("baseline", "mobility-book", "commissioned"),
       contribution("adaptive-cache", "operations-book", "emergent"),
@@ -111,6 +118,15 @@ test "autonomous round promotes an unseeded idea and preserves dissent" {
   assert_true(round.minority_ids.contains("reduced-mission"))
   assert_eq(round.stage_receipts.length(), 9)
   assert_true(round.coalition_graph.length() >= 2)
+}
+
+///|
+test "autonomous round requires explicit comparison criteria" {
+  let missing = { ..qualified_round(), comparison_criteria: [] }
+  assert_true(
+    evaluate_autonomous_civic_round(missing) ==
+    Err("round requires explicit comparison criteria"),
+  )
 }
 
 ///|

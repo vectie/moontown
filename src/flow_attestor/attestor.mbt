@@ -86,6 +86,7 @@ pub async fn attest(
     "operation": operation,
     "selected_contribution_id": evaluated.winner_id,
     "selected_outcome": evaluated.proposal,
+    "comparison_criteria": evaluated.comparison_criteria.to_json(),
     "unseeded_idea_ids": evaluated.unseeded_idea_ids.to_json(),
     "dissent_ids": evaluated.dissent_ids.to_json(),
     "minority_ids": evaluated.minority_ids.to_json(),

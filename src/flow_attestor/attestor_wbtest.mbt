@@ -18,6 +18,13 @@ async test "MoonTown attests plural emergence, dissent, review, and return" {
       "commission_id": "commission-lunar-robot",
       "question": "Which digital lunar robot concept best preserves safety and inspectability?",
       "commissioned_agenda_ids": [],
+      "comparison_criteria": [
+        {
+          "criterion_id": "safety",
+          "name": "bounded safe behavior",
+          "definition": "Preserves a safe hold under degraded localization.",
+        },
+      ],
       "contributions": [
         {
           "contribution_id": "polar-inspector",
@@ -100,6 +107,7 @@ async test "MoonTown attests plural emergence, dissent, review, and return" {
   let output = read_json(scoped_path(workspace, "outputs/concept.json"))
   let text = output.stringify()
   assert_true(text.contains("\"emergence_qualified\":true"))
+  assert_true(text.contains("\"comparison_criteria\""))
   assert_true(text.contains("\"polar-inspector\""))
   assert_true(text.contains("\"beacon-minority\""))
   assert_true(text.contains("\"physical_readiness\":false"))

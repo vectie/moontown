@@ -49,12 +49,20 @@ pub(all) struct CivicDeliveryReceipt {
 } derive(Debug, Eq, ToJson, FromJson)
 
 ///|
+pub(all) struct CivicComparisonCriterion {
+  criterion_id : String
+  name : String
+  definition : String
+} derive(Debug, Eq, ToJson, FromJson)
+
+///|
 pub(all) struct AutonomousCivicRound {
   contract_id : String
   round_id : String
   commission_id : String
   question : String
   commissioned_agenda_ids : Array[String]
+  comparison_criteria : Array[CivicComparisonCriterion]
   contributions : Array[CivicContribution]
   critiques : Array[CivicCritique]
   rankings : Array[CivicRanking]
@@ -86,6 +94,7 @@ pub(all) struct AutonomousCivicRoundResult {
   commission_id : String
   accepted : Bool
   autonomous_round_qualified : Bool
+  comparison_criteria : Array[CivicComparisonCriterion]
   winner_id : String
   unseeded_idea_ids : Array[String]
   dissent_ids : Array[String]
@@ -203,6 +212,14 @@ pub fn evaluate_autonomous_civic_round(
     round.rankings.is_empty() {
     return Err("round requires contributions, critique, and ranking stages")
   }
+  if round.comparison_criteria.is_empty() ||
+    round.comparison_criteria.any(criterion => {
+      criterion.criterion_id.trim().is_empty() ||
+      criterion.name.trim().is_empty() ||
+      criterion.definition.trim().is_empty()
+    }) {
+    return Err("round requires explicit comparison criteria")
+  }
   if round.review.decision != "accepted" && round.review.decision != "rejected" {
     return Err("round review decision must be accepted or rejected")
   }
@@ -308,6 +325,7 @@ pub fn evaluate_autonomous_civic_round(
     commission_id: round.commission_id,
     accepted,
     autonomous_round_qualified: autonomous_qualified,
+    comparison_criteria: round.comparison_criteria,
     winner_id: if accepted {
       winner_id
     } else {
