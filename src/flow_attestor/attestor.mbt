@@ -53,7 +53,10 @@ pub async fn attest(
 ) -> Unit {
   let request = read_json(scoped_path(workspace, request_ref))
   let request_fields = object(request, "request")
-  if string_field(request_fields, "operation") != "deliberate-concept" {
+  let operation = string_field(request_fields, "operation")
+  if ![
+      "deliberate-concept", "deliberate-evidence", "deliberate-design", "deliberate-outcome",
+    ].contains(operation) {
     fail("MoonTown does not own the requested Flow operation")
   }
   let result = read_json(scoped_path(workspace, result_ref))
@@ -80,9 +83,9 @@ pub async fn attest(
   let final_artifact : Json = {
     "contract_id": "moontown.deliberation.v1",
     "product_id": "moontown",
-    "operation": "deliberate-concept",
+    "operation": operation,
     "selected_contribution_id": evaluated.winner_id,
-    "selected_concept": evaluated.proposal,
+    "selected_outcome": evaluated.proposal,
     "unseeded_idea_ids": evaluated.unseeded_idea_ids.to_json(),
     "dissent_ids": evaluated.dissent_ids.to_json(),
     "minority_ids": evaluated.minority_ids.to_json(),
@@ -106,6 +109,6 @@ pub async fn attest(
     "output_digest": string_field(result_fields, "output_digest"),
     "accepted": true,
     "native_final_artifact": final_ref,
-    "operation": "deliberate-concept",
+    "operation": operation,
   })
 }
