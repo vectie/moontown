@@ -37,6 +37,9 @@ fn qualified_round() -> AutonomousCivicRound {
         definition: "Prefers traceable evidence and bounded claims.",
       },
     ],
+    unresolved_assumptions: [
+      "The digital tests do not establish physical feasibility.",
+    ],
     contributions: [
       contribution("baseline", "mobility-book", "commissioned"),
       contribution("adaptive-cache", "operations-book", "emergent"),
@@ -126,6 +129,15 @@ test "autonomous round requires explicit comparison criteria" {
   assert_true(
     evaluate_autonomous_civic_round(missing) ==
     Err("round requires explicit comparison criteria"),
+  )
+}
+
+///|
+test "autonomous round requires explicit unresolved assumptions" {
+  let missing = { ..qualified_round(), unresolved_assumptions: [] }
+  assert_true(
+    evaluate_autonomous_civic_round(missing) ==
+    Err("round requires explicit unresolved assumptions"),
   )
 }
 

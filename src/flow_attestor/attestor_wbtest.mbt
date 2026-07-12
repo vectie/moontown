@@ -25,6 +25,7 @@ async test "MoonTown attests plural emergence, dissent, review, and return" {
           "definition": "Preserves a safe hold under degraded localization.",
         },
       ],
+      "unresolved_assumptions": ["Thermal calibration remains unresolved."],
       "contributions": [
         {
           "contribution_id": "polar-inspector",
@@ -108,6 +109,7 @@ async test "MoonTown attests plural emergence, dissent, review, and return" {
   let text = output.stringify()
   assert_true(text.contains("\"emergence_qualified\":true"))
   assert_true(text.contains("\"comparison_criteria\""))
+  assert_true(text.contains("\"unresolved_assumptions\""))
   assert_true(text.contains("\"polar-inspector\""))
   assert_true(text.contains("\"beacon-minority\""))
   assert_true(text.contains("\"physical_readiness\":false"))

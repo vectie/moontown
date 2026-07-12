@@ -63,6 +63,7 @@ pub(all) struct AutonomousCivicRound {
   question : String
   commissioned_agenda_ids : Array[String]
   comparison_criteria : Array[CivicComparisonCriterion]
+  unresolved_assumptions : Array[String]
   contributions : Array[CivicContribution]
   critiques : Array[CivicCritique]
   rankings : Array[CivicRanking]
@@ -95,6 +96,7 @@ pub(all) struct AutonomousCivicRoundResult {
   accepted : Bool
   autonomous_round_qualified : Bool
   comparison_criteria : Array[CivicComparisonCriterion]
+  unresolved_assumptions : Array[String]
   winner_id : String
   unseeded_idea_ids : Array[String]
   dissent_ids : Array[String]
@@ -220,6 +222,10 @@ pub fn evaluate_autonomous_civic_round(
     }) {
     return Err("round requires explicit comparison criteria")
   }
+  if round.unresolved_assumptions.is_empty() ||
+    round.unresolved_assumptions.any(assumption => assumption.trim().is_empty()) {
+    return Err("round requires explicit unresolved assumptions")
+  }
   if round.review.decision != "accepted" && round.review.decision != "rejected" {
     return Err("round review decision must be accepted or rejected")
   }
@@ -326,6 +332,7 @@ pub fn evaluate_autonomous_civic_round(
     accepted,
     autonomous_round_qualified: autonomous_qualified,
     comparison_criteria: round.comparison_criteria,
+    unresolved_assumptions: round.unresolved_assumptions,
     winner_id: if accepted {
       winner_id
     } else {
