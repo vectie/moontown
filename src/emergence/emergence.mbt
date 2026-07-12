@@ -56,6 +56,15 @@ pub(all) struct CivicComparisonCriterion {
 } derive(Debug, Eq, ToJson, FromJson)
 
 ///|
+pub(all) struct CivicComparisonAssessment {
+  contribution_id : String
+  criterion_id : String
+  rating : String
+  rationale : String
+  evidence_refs : Array[String]
+} derive(Debug, Eq, ToJson, FromJson)
+
+///|
 pub(all) struct AutonomousCivicRound {
   contract_id : String
   round_id : String
@@ -63,6 +72,7 @@ pub(all) struct AutonomousCivicRound {
   question : String
   commissioned_agenda_ids : Array[String]
   comparison_criteria : Array[CivicComparisonCriterion]
+  comparison_assessments : Array[CivicComparisonAssessment]
   unresolved_assumptions : Array[String]
   contributions : Array[CivicContribution]
   critiques : Array[CivicCritique]
@@ -96,6 +106,7 @@ pub(all) struct AutonomousCivicRoundResult {
   accepted : Bool
   autonomous_round_qualified : Bool
   comparison_criteria : Array[CivicComparisonCriterion]
+  comparison_assessments : Array[CivicComparisonAssessment]
   unresolved_assumptions : Array[String]
   winner_id : String
   unseeded_idea_ids : Array[String]
@@ -226,13 +237,31 @@ pub fn evaluate_autonomous_civic_round(
     round.unresolved_assumptions.any(assumption => assumption.trim().is_empty()) {
     return Err("round requires explicit unresolved assumptions")
   }
+  let contribution_ids = round.contributions.map(item => item.contribution_id)
+  for contribution_id in contribution_ids {
+    for criterion in round.comparison_criteria {
+      if !round.comparison_assessments.any(assessment => {
+          assessment.contribution_id == contribution_id &&
+          assessment.criterion_id == criterion.criterion_id &&
+          !assessment.rating.trim().is_empty() &&
+          !assessment.rationale.trim().is_empty() &&
+          !assessment.evidence_refs.is_empty()
+        }) {
+        return Err(
+          "round requires criterion-by-concept assessment: " +
+          contribution_id +
+          "/" +
+          criterion.criterion_id,
+        )
+      }
+    }
+  }
   if round.review.decision != "accepted" && round.review.decision != "rejected" {
     return Err("round review decision must be accepted or rejected")
   }
   if round.review.evidence_refs.is_empty() {
     return Err("round review requires evidence")
   }
-  let contribution_ids = round.contributions.map(item => item.contribution_id)
   for ranking in round.rankings {
     if ranking.ordered_contribution_ids.is_empty() ||
       ranking.rationale.trim().is_empty() {
@@ -332,6 +361,7 @@ pub fn evaluate_autonomous_civic_round(
     accepted,
     autonomous_round_qualified: autonomous_qualified,
     comparison_criteria: round.comparison_criteria,
+    comparison_assessments: round.comparison_assessments,
     unresolved_assumptions: round.unresolved_assumptions,
     winner_id: if accepted {
       winner_id

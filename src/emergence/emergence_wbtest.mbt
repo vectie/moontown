@@ -37,6 +37,36 @@ fn qualified_round() -> AutonomousCivicRound {
         definition: "Prefers traceable evidence and bounded claims.",
       },
     ],
+    comparison_assessments: [
+      {
+        contribution_id: "baseline",
+        criterion_id: "evidence",
+        rating: "bounded",
+        rationale: "The baseline has traceable but commissioned evidence.",
+        evidence_refs: ["evidence/baseline.json"],
+      },
+      {
+        contribution_id: "adaptive-cache",
+        criterion_id: "evidence",
+        rating: "strong",
+        rationale: "The emergent idea has traceable evidence and a digital test.",
+        evidence_refs: ["evidence/adaptive-cache.json"],
+      },
+      {
+        contribution_id: "not-ready",
+        criterion_id: "evidence",
+        rating: "dissent",
+        rationale: "The dissent preserves unresolved readiness evidence.",
+        evidence_refs: ["evidence/not-ready.json"],
+      },
+      {
+        contribution_id: "reduced-mission",
+        criterion_id: "evidence",
+        rating: "moderate",
+        rationale: "The minority option retains a bounded fallback.",
+        evidence_refs: ["evidence/reduced-mission.json"],
+      },
+    ],
     unresolved_assumptions: [
       "The digital tests do not establish physical feasibility.",
     ],
@@ -138,6 +168,16 @@ test "autonomous round requires explicit unresolved assumptions" {
   assert_true(
     evaluate_autonomous_civic_round(missing) ==
     Err("round requires explicit unresolved assumptions"),
+  )
+}
+
+///|
+test "autonomous round requires criterion-by-concept assessments" {
+  let missing = { ..qualified_round(), comparison_assessments: [] }
+  let result = evaluate_autonomous_civic_round(missing)
+  assert_true(
+    result ==
+    Err("round requires criterion-by-concept assessment: baseline/evidence"),
   )
 }
 

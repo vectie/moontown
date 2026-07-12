@@ -25,6 +25,22 @@ async test "MoonTown attests plural emergence, dissent, review, and return" {
           "definition": "Preserves a safe hold under degraded localization.",
         },
       ],
+      "comparison_assessments": [
+        {
+          "contribution_id": "polar-inspector",
+          "criterion_id": "safety",
+          "rating": "strong",
+          "rationale": "The concept preserves safe hold under disagreement.",
+          "evidence_refs": ["outputs/research.json"],
+        },
+        {
+          "contribution_id": "beacon-minority",
+          "criterion_id": "safety",
+          "rating": "bounded",
+          "rationale": "The minority avoids mobility while retaining thermal risk.",
+          "evidence_refs": ["outputs/research.json"],
+        },
+      ],
       "unresolved_assumptions": ["Thermal calibration remains unresolved."],
       "contributions": [
         {
@@ -109,6 +125,7 @@ async test "MoonTown attests plural emergence, dissent, review, and return" {
   let text = output.stringify()
   assert_true(text.contains("\"emergence_qualified\":true"))
   assert_true(text.contains("\"comparison_criteria\""))
+  assert_true(text.contains("\"comparison_assessments\""))
   assert_true(text.contains("\"unresolved_assumptions\""))
   assert_true(text.contains("\"polar-inspector\""))
   assert_true(text.contains("\"beacon-minority\""))
