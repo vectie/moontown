@@ -1,0 +1,40 @@
+// Generated using `moon info`, DON'T EDIT IT
+package "vectie/moontown/spatial_assets"
+
+import {
+  "moonbitlang/core/debug",
+}
+
+// Values
+pub fn ingest_moonmold_presentation(String, building_id~ : String, placement_id~ : String, expected_engineering_digest~ : String) -> Result[TownPresentationAsset, SpatialAssetIssue]
+
+// Errors
+
+// Types and methods
+pub(all) struct SpatialAssetIssue {
+  code : String
+  message : String
+} derive(Eq, ToJson, @debug.Debug)
+
+pub(all) struct TownPresentationAsset {
+  building_id : String
+  placement_id : String
+  artifact_id : String
+  artifact_digest : String
+  engineering_parent_id : String
+  engineering_parent_digest : String
+  payload_ref : String
+  units : String
+  coordinate_system : String
+  up_axis : String
+  handedness : String
+  transform_id : String
+  declared_losses : Array[String]
+  assumptions : Array[String]
+  authority_envelope_id : String
+} derive(Eq, ToJson, @debug.Debug)
+
+// Type aliases
+
+// Traits
+

@@ -4,6 +4,7 @@ import {
   "vectie/moontown/roles",
   "vectie/moontown/storage",
   "vectie/moontown/town_runtime",
+  "vectie/moontown/spatial_assets",
 }
 
 supported_targets = "native"

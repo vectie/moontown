@@ -5,6 +5,7 @@ import {
   "vectie/moontown/adapters/moonbook",
   "vectie/moontown/core",
   "vectie/moontown/roles",
+  "vectie/moontown/spatial_assets",
 }
 
 // Values
@@ -15,6 +16,8 @@ pub async fn daemon_supervise_saved_town(snapshot_path? : String, command? : Str
 pub async fn daemon_tick_saved_town(snapshot_path? : String, book_catalog_path? : String, respect_runtime_lock? : Bool) -> String
 
 pub fn default_mayor() -> @roles.Mayor
+
+pub fn ingest_moonmold_presentation(String, building_id~ : String, placement_id~ : String, expected_engineering_digest~ : String) -> Result[@spatial_assets.TownPresentationAsset, @spatial_assets.SpatialAssetIssue]
 
 pub async fn load_or_create_modeled_state(path? : String, book_catalog_path? : String) -> @core.TownState
 
@@ -45,6 +48,9 @@ pub async fn supervise_saved_town(snapshot_path? : String, book_catalog_path? : 
 // Types and methods
 
 // Type aliases
+pub using @spatial_assets {type SpatialAssetIssue}
+
+pub using @spatial_assets {type TownPresentationAsset}
 
 // Traits
 

@@ -16,3 +16,4 @@ pub async fn write_town_goal_synthesis(@core.TownState, String, @roles.MayorGoal
 // Type aliases
 
 // Traits
+

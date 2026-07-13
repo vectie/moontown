@@ -1,4 +1,11 @@
 ///|
+pub using @spatial_assets {
+  type SpatialAssetIssue,
+  type TownPresentationAsset,
+  ingest_moonmold_presentation,
+}
+
+///|
 pub fn modeled_state_from_catalog(
   catalog : Array[@moonbook.BookCatalogEntry],
 ) -> @core.TownState {
