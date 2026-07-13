@@ -17,4 +17,3 @@ pub async fn persist_visual_projection(@core.TownState, String, tick? : Int, dec
 // Type aliases
 
 // Traits
-

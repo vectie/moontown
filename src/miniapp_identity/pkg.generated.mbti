@@ -83,4 +83,3 @@ pub(all) struct MiniappWorkspaceAccess {
 // Type aliases
 
 // Traits
-

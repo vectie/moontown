@@ -73,4 +73,3 @@ pub(all) struct MiniappBuildingQueryDraft {
 // Type aliases
 
 // Traits
-
