@@ -10,6 +10,12 @@ import {
 // Values
 pub fn bindings(@host.HostActivationProjection) -> Array[ScheduleBinding] raise
 
+pub fn empty_registry() -> ScheduleRegistry
+
+pub fn reconcile(ScheduleRegistry, @host.HostActivationProjection) -> ScheduleRegistry raise
+
+pub fn remove_pack(ScheduleRegistry, String) -> ScheduleRegistry
+
 pub fn resolve(Array[ScheduleBinding], String) -> ScheduleBinding?
 
 // Errors
@@ -18,10 +24,15 @@ pub fn resolve(Array[ScheduleBinding], String) -> ScheduleBinding?
 pub(all) struct ScheduleBinding {
   pack_id : String
   product_id : String
+  version : String
   schedule_id : String
   cadence : String
   timezone : String
   workflow_id : String
+} derive(Eq, ToJson, @debug.Debug, @json.FromJson)
+
+pub(all) struct ScheduleRegistry {
+  schedules : Array[ScheduleBinding]
 } derive(Eq, ToJson, @debug.Debug, @json.FromJson)
 
 // Type aliases

@@ -26,4 +26,8 @@ test "projection registers schedules without domain branching" {
   }
   assert_eq(binding.workflow_id, "fixture.workflow")
   assert_eq(binding.pack_id, "fixture")
+  let once = reconcile(empty_registry(), projection)
+  let twice = reconcile(once, projection)
+  assert_eq(twice.schedules.length(), 1)
+  assert_eq(remove_pack(twice, "fixture").schedules.length(), 0)
 }
