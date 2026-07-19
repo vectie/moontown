@@ -13,6 +13,7 @@ const assetRoot = path.resolve(import.meta.dirname, '../assets')
 test('runtime asset manifest covers modules, residents, and operating art', async () => {
   const paths = await runtimeAssetPaths(assetRoot)
   const pathSet = new Set(paths)
+  assert.ok(pathSet.has('moonsuite-i18n.js'))
   const moduleConfig = JSON.parse(
     await readFile(
       path.join(assetRoot, 'tilemap/modules/wenyu-town-modules.json'),
