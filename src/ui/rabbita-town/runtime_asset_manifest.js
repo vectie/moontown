@@ -3,6 +3,7 @@ import { readdir, readFile } from 'node:fs/promises'
 import path from 'node:path'
 
 const FIXED_RUNTIME_ASSETS = [
+  'moonsuite-i18n.js',
   'backgrounds/town-square.svg',
   'effects/anomaly-signal.svg',
   'props/gate-sign.svg',
