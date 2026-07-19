@@ -18,6 +18,9 @@ pub(all) struct AutonomousCivicRound {
   commission_id : String
   question : String
   commissioned_agenda_ids : Array[String]
+  comparison_criteria : Array[CivicComparisonCriterion]
+  comparison_assessments : Array[CivicComparisonAssessment]
+  unresolved_assumptions : Array[String]
   contributions : Array[CivicContribution]
   critiques : Array[CivicCritique]
   rankings : Array[CivicRanking]
@@ -33,6 +36,9 @@ pub(all) struct AutonomousCivicRoundResult {
   commission_id : String
   accepted : Bool
   autonomous_round_qualified : Bool
+  comparison_criteria : Array[CivicComparisonCriterion]
+  comparison_assessments : Array[CivicComparisonAssessment]
+  unresolved_assumptions : Array[String]
   winner_id : String
   unseeded_idea_ids : Array[String]
   dissent_ids : Array[String]
@@ -45,6 +51,20 @@ pub(all) struct AutonomousCivicRoundResult {
   requested_authority : String
   proposal : Json
   recorded_at : String
+} derive(Eq, ToJson, @debug.Debug, @json.FromJson)
+
+pub(all) struct CivicComparisonAssessment {
+  contribution_id : String
+  criterion_id : String
+  rating : String
+  rationale : String
+  evidence_refs : Array[String]
+} derive(Eq, ToJson, @debug.Debug, @json.FromJson)
+
+pub(all) struct CivicComparisonCriterion {
+  criterion_id : String
+  name : String
+  definition : String
 } derive(Eq, ToJson, @debug.Debug, @json.FromJson)
 
 pub(all) struct CivicContribution {

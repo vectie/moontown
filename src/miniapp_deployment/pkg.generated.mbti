@@ -112,3 +112,4 @@ pub(all) struct MiniappStorageConfig {
 // Type aliases
 
 // Traits
+
