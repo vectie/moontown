@@ -1,0 +1,68 @@
+// Generated using `moon info`, DON'T EDIT IT
+package "vectie/moontown/commission"
+
+import {
+  "moonbitlang/core/debug",
+  "moonbitlang/core/json",
+}
+
+// Values
+pub fn evaluate_commission(TownCommission) -> Result[TownPromotion, String]
+
+// Errors
+
+// Types and methods
+pub(all) struct CandidateEvaluation {
+  candidate_id : String
+  qualified : Bool
+  weighted_score : Double
+  evidence_count : Int
+  reasons : Array[String]
+} derive(Eq, ToJson, @debug.Debug, @json.FromJson)
+
+pub(all) struct CommissionCandidate {
+  candidate_id : String
+  summary : String
+  source_book_ids : Array[String]
+  artifact_refs : Array[String]
+  ratings : Array[CommissionRating]
+  proposal : Json
+} derive(Eq, ToJson, @debug.Debug, @json.FromJson)
+
+pub(all) struct CommissionCriterion {
+  criterion_id : String
+  weight : Double
+  minimum_score : Double
+} derive(Eq, ToJson, @debug.Debug, @json.FromJson)
+
+pub(all) struct CommissionRating {
+  criterion_id : String
+  score : Double
+  evidence_refs : Array[String]
+  rationale : String
+} derive(Eq, ToJson, @debug.Debug, @json.FromJson)
+
+pub(all) struct TownCommission {
+  contract_id : String
+  commission_id : String
+  question : String
+  criteria : Array[CommissionCriterion]
+  candidates : Array[CommissionCandidate]
+} derive(Eq, ToJson, @debug.Debug, @json.FromJson)
+
+pub(all) struct TownPromotion {
+  contract_id : String
+  commission_id : String
+  accepted : Bool
+  winner_id : String
+  winning_score : Double
+  evaluations : Array[CandidateEvaluation]
+  source_book_ids : Array[String]
+  artifact_refs : Array[String]
+  proposal : Json
+} derive(Eq, ToJson, @debug.Debug, @json.FromJson)
+
+// Type aliases
+
+// Traits
+
