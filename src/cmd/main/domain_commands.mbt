@@ -43,6 +43,23 @@ async fn render_civic_protocols_command(args : Array[String]) -> String {
         workspace_base~,
         reducer_mode=@civic.FixtureReducer,
       )
+    ["pattern-handoff", handoff_path, receipt_path] =>
+      @civic_runtime.bootstrap_civic_communication_handoff_file(
+        handoff_path, receipt_path,
+      )
+    ["pattern-handoff", handoff_path, receipt_path, workspace_base] =>
+      @civic_runtime.bootstrap_civic_communication_handoff_file(
+        handoff_path,
+        receipt_path,
+        workspace_base~,
+      )
+    ["pattern-handoff-fixture", handoff_path, receipt_path, workspace_base] =>
+      @civic_runtime.bootstrap_civic_communication_handoff_file(
+        handoff_path,
+        receipt_path,
+        workspace_base~,
+        reducer_mode=@civic.FixtureReducer,
+      )
     ["schedules", "tick"] =>
       @civic_runtime.run_due_civic_communication_patterns()
     ["schedules", "status"] =>

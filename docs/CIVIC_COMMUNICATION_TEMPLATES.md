@@ -46,6 +46,14 @@ contract that MoonTown materializes into MoonBook pages, protocol ledgers,
 reviews, and UI projections. Template ideas are no longer production reducer
 input.
 
+Cross-product callers should prefer the versioned handoff envelope over
+passing an unbound scenario directly. The envelope uses
+`moontown.civic.communication.handoff.v1` and binds producer, producer run,
+handoff id, and scenario. A completed run writes
+`moontown.civic.communication.receipt.v1`; this records the reducer kind,
+participant/output counts, durable artifact references, and a still-pending
+review state. A receipt is execution evidence, never synthesis approval.
+
 ## Runtime Files
 
 - [civic_communication_scenario_types.mbt](/Users/kq/Workspace/moontown/src/civic_runtime/civic_communication_scenario_types.mbt)
@@ -55,6 +63,11 @@ input.
   loads scenario templates, materializes MoonClaw reducer output into
   intermediate participant workspaces, runs the protocol ledger slice, and
   writes the public building projection.
+- [communication_handoff_types.mbt](/Users/kq/Workspace/moontown/src/civic/communication_handoff_types.mbt)
+  owns the generic versioned handoff and execution-receipt contracts.
+- [civic_communication_handoff.mbt](/Users/kq/Workspace/moontown/src/civic_runtime/civic_communication_handoff.mbt)
+  validates a cross-product handoff, reuses the ordinary reducer/materializer,
+  and persists the execution receipt.
 - [civic_communication_reducer.mbt](/Users/kq/Workspace/moontown/src/civic_runtime/civic_communication_reducer.mbt)
   owns the reducer modes: `MoonClawReducer` for production,
   `PersistedReducer` for stale projection refresh, and `FixtureReducer` for
@@ -91,6 +104,18 @@ recurring schedule, so the same pattern can continue under the daemon:
 moon run src/cmd/main -- civic protocols pattern-template assets/templates/civic-salons/robotics-mini-salon.json
 moon run src/cmd/main -- civic protocols pattern-template assets/templates/civic-salons/embodied-robotics-social-square.json
 ```
+
+For a cross-product handoff with a durable receipt:
+
+```bash
+moon run src/cmd/main -- civic protocols pattern-handoff \
+  /path/to/handoff.json /path/to/receipt.json /path/to/isolated-workspace
+```
+
+This uses `MoonClawReducer`. The corresponding
+`pattern-handoff-fixture` command is only for deterministic integration tests.
+Automatic submission from MoonDesk is intentionally outside this runtime
+contract and remains later operating-automation work.
 
 To install recurring Wenyu civic patterns without immediately running every
 MoonClaw reducer, use the manifest installer:

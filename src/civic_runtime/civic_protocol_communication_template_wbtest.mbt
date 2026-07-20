@@ -54,6 +54,44 @@ async test "civic communication scenario template can seed a non-hardcoded domai
 }
 
 ///|
+async test "versioned civic handoff writes a review-pending execution receipt" {
+  let root = cleaned_civic_protocol_test_root(
+    "/tmp/moontown-civic-versioned-handoff",
+  )
+  let scenario = test_civic_communication_scenario()
+  let handoff = @civic.CivicCommunicationScenarioHandoff::{
+    contract_version: @civic.civic_communication_handoff_contract_version(),
+    handoff_id: "handoff-future-energy-round-1",
+    producer: "test-research-pack",
+    producer_run_id: "future-energy-run-1",
+    scenario,
+  }
+  let handoff_path = "\{root}/handoff.json"
+  let receipt_path = "\{root}/receipt.json"
+  @support.write_text_file(handoff_path, handoff.to_json().stringify(indent=2))
+  let rendered = bootstrap_civic_communication_handoff_file(
+    handoff_path,
+    receipt_path,
+    book_catalog_path="\{root}/catalog.json",
+    workspace_base=root,
+    reducer_mode=FixtureReducer,
+  )
+  let receipt : @civic.CivicCommunicationExecutionReceipt = @json.from_json(
+    @json.parse(rendered),
+  )
+  assert_eq(receipt.status, "completed")
+  assert_eq(receipt.reducer_kind, "fixture")
+  assert_eq(receipt.participant_count, scenario.participants.length())
+  assert_eq(receipt.reviewable_output_count, scenario.ideas.length())
+  assert_eq(receipt.review_status, "pending")
+  assert_true(@fs.exists(receipt_path))
+  assert_true(receipt.artifact_refs.length() == 4)
+  assert_true(
+    receipt.artifact_refs.any(path => path.has_suffix(scenario.synthesis_path)),
+  )
+}
+
+///|
 async test "civic pattern template uses scenario round id by default" {
   let root = cleaned_civic_protocol_test_root(
     "/tmp/moontown-civic-pattern-template-default-round",

@@ -27,6 +27,8 @@ pub fn building_protocol_portfolio(Array[BuildingProtocolSnapshot], String, Stri
 
 pub fn building_protocol_snapshot(BuildingProtocolDefinition, inbox_count~ : Int, contribution_count~ : Int, reduction_count~ : Int, outbox_count~ : Int, review_count~ : Int, latest_reduction_summary~ : String, latest_distribution_summary~ : String) -> BuildingProtocolSnapshot
 
+pub fn civic_communication_handoff_contract_version() -> String
+
 pub fn civic_communication_is_due(CivicCommunicationSchedule, UInt64) -> Bool
 
 pub fn civic_communication_metric_counts(Array[CivicCommunicationParticipantBook], Array[CivicCommunicationIdea]) -> CivicCommunicationMetricCounts
@@ -38,6 +40,8 @@ pub fn civic_communication_pattern_for_id(String) -> CivicCommunicationPattern?
 pub fn civic_communication_pattern_id_for_service(CivicServiceDefinition) -> String
 
 pub fn civic_communication_patterns() -> Array[CivicCommunicationPattern]
+
+pub fn civic_communication_receipt_contract_version() -> String
 
 pub fn civic_communication_returned_ideas_for_book(String, Array[CivicCommunicationIdea]) -> Array[CivicCommunicationIdea]
 
@@ -182,6 +186,8 @@ pub fn signal_watch_pattern() -> CivicCommunicationPattern
 pub fn story_forge_pattern() -> CivicCommunicationPattern
 
 pub fn triage_desk_pattern() -> CivicCommunicationPattern
+
+pub fn validate_civic_communication_handoff(CivicCommunicationScenarioHandoff) -> Array[String]
 
 pub fn wenyu_building_protocol_for_book_id(String) -> BuildingProtocolDefinition?
 
@@ -330,6 +336,25 @@ pub(all) struct BuildingReviewGateRecord {
   owner : String
 } derive(Eq, ToJson, @debug.Debug, @json.FromJson)
 
+pub(all) struct CivicCommunicationExecutionReceipt {
+  contract_version : String
+  handoff_id : String
+  producer : String
+  producer_run_id : String
+  consumer : String
+  scenario_id : String
+  round_id : String
+  round_number : Int
+  status : String
+  reducer_kind : String
+  participant_count : Int
+  reviewable_output_count : Int
+  review_status : String
+  building_book_id : String
+  artifact_refs : Array[String]
+  summary : String
+} derive(Eq, ToJson, @debug.Debug, @json.FromJson)
+
 pub(all) struct CivicCommunicationHomeReturn {
   id : String
   building_id : String
@@ -450,6 +475,14 @@ pub(all) struct CivicCommunicationScenario {
   skill_rules : Array[String]
   participants : Array[CivicCommunicationParticipantBook]
   ideas : Array[CivicCommunicationIdea]
+} derive(Eq, ToJson, @debug.Debug, @json.FromJson)
+
+pub(all) struct CivicCommunicationScenarioHandoff {
+  contract_version : String
+  handoff_id : String
+  producer : String
+  producer_run_id : String
+  scenario : CivicCommunicationScenario
 } derive(Eq, ToJson, @debug.Debug, @json.FromJson)
 
 pub(all) struct CivicCommunicationSchedule {
