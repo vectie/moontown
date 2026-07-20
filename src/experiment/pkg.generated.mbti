@@ -3,18 +3,82 @@ package "vectie/moontown/experiment"
 
 import {
   "moonbitlang/core/debug",
+  "moonbitlang/core/json",
 }
 
 // Values
+pub fn assign_capability_experiment(CapabilityExperimentPlan, String) -> CapabilityExperimentAssignment raise
+
+pub fn capability_experiment_contract_version() -> String
+
+pub fn evaluate_capability_experiment(CapabilityExperimentPlan, ArrayView[CapabilityExperimentObservation], evaluated_at~ : Int64) -> CapabilityExperimentOutcome raise
+
 pub fn evaluate_run(ExperimentRun, ExperimentDefinition) -> ExperimentOutcome
 
 pub fn experiment_phases() -> Array[ExperimentPhase]
 
 pub fn start_experiment(ExperimentDefinition, Array[Cohort]) -> ExperimentRun
 
+pub fn validate_capability_experiment_plan(CapabilityExperimentPlan) -> Unit raise
+
 // Errors
 
 // Types and methods
+pub(all) struct CapabilityExperimentAssignment {
+  contract_version : String
+  experiment_id : String
+  scope_id : String
+  participant_id : String
+  assignment : String
+  capability : CapabilityExperimentRecordRef
+} derive(Eq, ToJson, @debug.Debug, @json.FromJson)
+
+pub(all) struct CapabilityExperimentObservation {
+  observation_id : String
+  experiment_id : String
+  scope_id : String
+  participant_id : String
+  assignment : String
+  capability : CapabilityExperimentRecordRef
+  outcome : CapabilityExperimentRecordRef
+  reward_evidence : CapabilityExperimentRecordRef
+  accepted : Bool
+  recorded_at : Int64
+} derive(Eq, ToJson, @debug.Debug, @json.FromJson)
+
+pub(all) struct CapabilityExperimentOutcome {
+  contract_version : String
+  experiment_id : String
+  scope_id : String
+  baseline_observations : Int
+  challenger_observations : Int
+  baseline_accepted_rate : Double
+  challenger_accepted_rate : Double
+  accepted_rate_delta : Double
+  recommendation : String
+  evidence_complete : Bool
+  evaluated_at : Int64
+} derive(Eq, ToJson, @debug.Debug, @json.FromJson)
+
+pub(all) struct CapabilityExperimentPlan {
+  contract_version : String
+  experiment_id : String
+  scope_id : String
+  baseline_capability : CapabilityExperimentRecordRef
+  challenger_capability : CapabilityExperimentRecordRef
+  baseline_participant_ids : Array[String]
+  challenger_participant_ids : Array[String]
+  minimum_observations_per_arm : Int
+  minimum_accepted_rate_delta : Double
+  maximum_challenger_rejection_rate : Double
+} derive(Eq, ToJson, @debug.Debug, @json.FromJson)
+
+pub(all) struct CapabilityExperimentRecordRef {
+  record_id : String
+  record_version : String
+  record_digest : String
+} derive(Eq, ToJson, @debug.Debug, @json.FromJson)
+
 pub struct Cohort {
   id : String
   name : String

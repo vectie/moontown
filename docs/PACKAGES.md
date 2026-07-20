@@ -160,8 +160,10 @@ Purpose:
 
 Current status:
 
-- structural package only
-- not yet running real experiment loops
+- deterministic baseline/challenger assignment and outcome evaluation are real
+- promotion, rollback, and hold remain recommendations requiring a separate
+  human-reviewed MoonFlow settlement
+- durable scheduling and repeated experiment persistence are still pending
 
 ## Health
 

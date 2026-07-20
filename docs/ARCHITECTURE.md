@@ -1981,7 +1981,7 @@ Real now:
 
 Stubbed now:
 
-- experiment runtime progression
+- durable scheduling and persistence for repeated experiment evaluations
 - backend-synced Rabbita frontend state
 - production-grade cross-platform service packaging
 - repeated externally accepted-output histories for every Wenyu civic service
@@ -1996,4 +1996,5 @@ The clean next order is:
 3. expose package-owned civic workspace contracts through a MoonBook workspace
    creation API
 4. add backend-synced Rabbita frontend state
-5. add real experiment runtime
+5. connect the capability experiment evaluator to durable scheduled runs and
+   MoonFlow settlement requests
