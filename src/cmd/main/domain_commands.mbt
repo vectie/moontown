@@ -32,6 +32,17 @@ async fn render_civic_protocols_command(args : Array[String]) -> String {
       @civic_runtime.install_civic_pattern_scenario_manifest(manifest_path)
     ["pattern-template", template_path] =>
       @civic_runtime.bootstrap_civic_communication_scenario_file(template_path)
+    ["pattern-template-fixture", template_path] =>
+      @civic_runtime.bootstrap_civic_communication_scenario_file(
+        template_path,
+        reducer_mode=@civic.FixtureReducer,
+      )
+    ["pattern-template-fixture", template_path, workspace_base] =>
+      @civic_runtime.bootstrap_civic_communication_scenario_file(
+        template_path,
+        workspace_base~,
+        reducer_mode=@civic.FixtureReducer,
+      )
     ["schedules", "tick"] =>
       @civic_runtime.run_due_civic_communication_patterns()
     ["schedules", "status"] =>
