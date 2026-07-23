@@ -57,8 +57,8 @@ pub async fn save_snapshot_file(path : String, snapshot : TownSnapshot) -> Unit 
   @fs.write_file(
     path,
     @encoding/utf8.encode(snapshot.to_json().stringify()),
-    create=0o644,
-    truncate=true,
+    create_mode=CreateOrTruncate,
+    permission=0o644,
   )
 }
 

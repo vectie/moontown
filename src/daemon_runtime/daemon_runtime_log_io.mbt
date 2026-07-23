@@ -4,7 +4,13 @@ pub async fn append_daemon_log(path : String, message : String) -> Unit {
     _ => ()
   }
   let line = "[\{@env.now()}] \{message}\n"
-  @fs.write_file(path, @encoding/utf8.encode(line), create=0o644, append=true) catch {
+  @fs.write_file(
+    path,
+    @encoding/utf8.encode(line),
+    create_mode=OpenOrCreate,
+    permission=0o644,
+    append=true,
+  ) catch {
     _ => ()
   }
 }

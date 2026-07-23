@@ -53,6 +53,13 @@ test "viewport command bar limits simulation controls to demo mode" {
 ///|
 test "viewport command bar removes duplicate and low-frequency chrome" {
   let html = render_viewport_command_bar_test_html(init_model())
+  assert_true(html.contains("aria-label=\"Town pulse\""))
+  assert_true(html.contains(">Agents<"))
+  assert_true(html.contains(">Energy<"))
+  assert_true(html.contains(">Budget<"))
+  assert_true(html.contains(">Pressure<"))
+  assert_true(html.contains("href=\"./operations.html\""))
+  assert_true(html.contains(">Operations<"))
   assert_true(html.contains("aria-label=\"Viewport mode\""))
   assert_true(html.contains("aria-pressed=\"true\""))
   assert_true(html.contains("aria-label=\"Zoom out\""))

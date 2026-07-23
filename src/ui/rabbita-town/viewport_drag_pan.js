@@ -1,4 +1,3 @@
-const VIEWPORT_PATH_FRAGMENT = 'viewport'
 const VIEWPORT_FRAME_SELECTOR = '.viewport-frame'
 const INITIAL_FOCUS_SELECTORS = [
   '.node-city-hall',
@@ -28,7 +27,11 @@ export function installViewportDragPan() {
 globalThis.__moontownInstallViewportDragPan = installViewportDragPan
 
 function viewportPathEnabled(location) {
-  return location?.pathname?.includes(VIEWPORT_PATH_FRAGMENT) === true
+  try {
+    return new URL(location?.href || 'http://local/').searchParams.get('surface') !== 'operations'
+  } catch (_) {
+    return false
+  }
 }
 
 function createViewportDragPanController(documentRef, windowRef) {
@@ -65,6 +68,9 @@ function createViewportDragPanController(documentRef, windowRef) {
   function findFrame() {
     state.frame = documentRef.querySelector(VIEWPORT_FRAME_SELECTOR)
     if (state.frame) {
+      if (!state.initialPanDone) {
+        state.zoom = initialCoverZoom(state.frame)
+      }
       applyZoom(state.zoom, { preserveCenter: false })
       centerInitialViewport()
     }
@@ -274,4 +280,12 @@ function clampZoom(value) {
 
 function clampScroll(value, maxValue) {
   return Math.min(maxValue, Math.max(0, value))
+}
+
+function initialCoverZoom(frame) {
+  const stage = frame.querySelector('.scene-stage')
+  const width = stage?.offsetWidth || 1280
+  const height = stage?.offsetHeight || 720
+  const cover = Math.max(frame.clientWidth / width, frame.clientHeight / height)
+  return clampZoom(cover)
 }

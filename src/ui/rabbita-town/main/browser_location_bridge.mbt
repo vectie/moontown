@@ -7,12 +7,12 @@ extern "js" fn real_local_hour() -> Int =
   #| () => new Date().getHours()
 
 ///|
-extern "js" fn current_browser_path() -> String =
-  #| () => `${globalThis.location?.pathname || ""}${globalThis.location?.hash || ""}`
-
-///|
 extern "js" fn browser_location_available() -> Bool =
   #| () => Boolean(globalThis.location?.href)
+
+///|
+extern "js" fn current_browser_pathname() -> String =
+  #| () => globalThis.location?.pathname || ""
 
 ///|
 extern "js" fn current_browser_query_param(name : String) -> String =

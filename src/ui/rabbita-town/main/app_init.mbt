@@ -1,7 +1,11 @@
 ///|
 fn standalone_viewport_requested() -> Bool {
-  let path = current_browser_path()
-  path.contains("viewport")
+  if !browser_location_available() {
+    false
+  } else {
+    !current_browser_pathname().contains("operations") &&
+    current_browser_query_param("surface") != "operations"
+  }
 }
 
 ///|

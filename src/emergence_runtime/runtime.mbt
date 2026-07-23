@@ -33,8 +33,8 @@ pub async fn evaluate_file(input_path : String, output_path : String) -> String 
         @fs.write_file(
           output_path,
           @encoding/utf8.encode(rendered),
-          create=0o644,
-          truncate=false,
+          create_mode=CreateNew,
+          permission=0o644,
         )
       }
       rendered

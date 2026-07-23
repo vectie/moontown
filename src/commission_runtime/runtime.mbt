@@ -23,8 +23,8 @@ pub async fn evaluate_file(input_path : String, output_path : String) -> String 
       @fs.write_file(
         output_path,
         @encoding/utf8.encode(rendered),
-        create=0o644,
-        truncate=true,
+        create_mode=CreateOrTruncate,
+        permission=0o644,
       ) catch {
         error =>
           return (

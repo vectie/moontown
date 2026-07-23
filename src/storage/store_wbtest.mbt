@@ -1,7 +1,12 @@
 ///|
 async test "watcher ledger appends and reads jsonl records" {
   let path = "/tmp/moontown-watcher-ledger-test.jsonl"
-  @fs.write_file(path, @encoding/utf8.encode(""), create=0o644, truncate=true)
+  @fs.write_file(
+    path,
+    @encoding/utf8.encode(""),
+    create_mode=CreateOrTruncate,
+    permission=0o644,
+  )
   append_watcher_run_record_file(
     path,
     @core.WatcherRunRecord::new(
@@ -115,8 +120,8 @@ async test "watcher ledger derives snapshot-relative directory and appends by go
   @fs.write_file(
     watcher_ledger_path(goal_id, dir=ledger_dir),
     @encoding/utf8.encode(""),
-    create=0o644,
-    truncate=true,
+    create_mode=CreateOrTruncate,
+    permission=0o644,
   )
   append_watcher_run_record(
     goal_id,

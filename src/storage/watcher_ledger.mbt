@@ -52,8 +52,8 @@ pub async fn append_watcher_run_record_file(
   @fs.write_file(
     path,
     @encoding/utf8.encode("\{prefix}\{line}\n"),
-    create=0o644,
-    truncate=true,
+    create_mode=CreateOrTruncate,
+    permission=0o644,
   )
 }
 

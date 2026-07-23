@@ -1,0 +1,26 @@
+{
+  "identifier": "dev.vectie.moontown",
+  "productName": "MoonTown",
+  "version": "0.1.0",
+  "icon": "assets/moontown.icns",
+  "signing": {
+    "identity": "-"
+  },
+  "runtime": {
+    "backend": "system-webview",
+    "assetProtocol": "lepusa",
+    "devtools": false
+  },
+  "window": {
+    "label": "main",
+    "title": "MoonTown · 能源谷",
+    "width": 1280,
+    "height": 800,
+    "resizable": true,
+    "source": {
+      "packaged": "src/ui/rabbita-town/dist"
+    }
+  },
+  "plugins": [],
+  "capabilities": []
+}

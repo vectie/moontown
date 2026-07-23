@@ -70,6 +70,7 @@ fn render_viewport_command_bar(
   model : Model,
 ) -> @rabbita.Html {
   let actions : Array[@rabbita.Html] = [
+    render_viewport_energy_metrics(model),
     render_viewport_mode_switch(dispatch, model),
     status_chip(
       viewport_runtime_status_label(model),
@@ -102,5 +103,6 @@ fn render_viewport_command_bar(
       ),
     )
   }
+  actions.push(render_viewport_operations_link())
   div(class="viewport-actions", actions)
 }

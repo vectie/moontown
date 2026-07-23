@@ -4,6 +4,7 @@
 @import url("./styles/viewport-map.css");
 @import url("./styles/scene-workers.css");
 @import url("./styles/sidebar-panels.css");
+@import url("./styles/energy-valley-shell.css");
 
 @media (max-width: 1220px) {
   .runtime-grid,

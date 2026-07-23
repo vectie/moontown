@@ -1,4 +1,5 @@
 import { defineConfig } from 'vite'
+import react from '@vitejs/plugin-react'
 import rabbita from '@rabbita/vite'
 import path from 'node:path'
 import {
@@ -28,7 +29,6 @@ import {
   serveJsonFile,
   serveTextFile,
 } from './vite_server_io.js'
-import { exportStaticRuntimeBundle } from './vite_static_export.js'
 import {
   loadWatcherLedgerIndex,
   serveJsonlAsArray,
@@ -112,19 +112,19 @@ function moontownSnapshotPlugin() {
         await handleBookTemplateRequest(req, res)
       })
     },
-    async closeBundle() {
-      await exportStaticRuntimeBundle()
-    },
   }
 }
 
 export default defineConfig({
   base: './',
   publicDir: '../assets',
-  plugins: [rabbita(), moontownSnapshotPlugin()],
+  plugins: [react(), rabbita(), moontownSnapshotPlugin()],
   build: {
     copyPublicDir: false,
     rollupOptions: {
+      input: {
+        town: path.resolve(import.meta.dirname, 'index.html'),
+      },
       output: {
         manualChunks(id) {
           if (id.includes('node_modules')) {

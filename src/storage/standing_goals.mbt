@@ -28,8 +28,8 @@ pub async fn save_standing_goals_file(
   @fs.write_file(
     path,
     @encoding/utf8.encode(goals.to_json().stringify()),
-    create=0o644,
-    truncate=true,
+    create_mode=CreateOrTruncate,
+    permission=0o644,
   )
 }
 

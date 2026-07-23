@@ -28,12 +28,18 @@ fn render_standalone_viewport_page(
     OutputMode => render_viewport_output_body(model)
   }
   section(
-    class="viewport-page viewport-mode-\{viewport_mode_slug(model.viewport_mode)}",
+    class="viewport-page viewport-mode-\{viewport_mode_slug(model.viewport_mode)}\{viewport_detail_class(model)}",
     [
       header(class="viewport-hud", [
         div(class="viewport-title", [
-          p(class="eyebrow", "MoonTown Viewport"),
-          h1(context.scene.title),
+          div(class="viewport-title-copy", [
+            h1("MoonTown · Energy Valley"),
+            p(class="eyebrow", "WENYU VALLEY · CHANGPING"),
+          ]),
+          div(class="viewport-title-time", [
+            span(class="viewport-title-clock", real_time_label()),
+            span(real_phase_label()),
+          ]),
           p(
             class="viewport-mode-subtitle",
             viewport_mode_summary(model.viewport_mode),
@@ -44,6 +50,14 @@ fn render_standalone_viewport_page(
       viewport_body,
     ],
   )
+}
+
+///|
+fn viewport_detail_class(model : Model) -> String {
+  match model.selection {
+    Overview => ""
+    _ => " viewport-detail-open"
+  }
 }
 
 ///|

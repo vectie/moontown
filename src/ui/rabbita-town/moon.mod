@@ -10,7 +10,7 @@ import {
 
 readme = "README.md"
 
-repository = ""
+repository = "https://github.com/vectie/moontown"
 
 license = "Apache-2.0"
 

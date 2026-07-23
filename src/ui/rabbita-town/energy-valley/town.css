@@ -1,0 +1,181 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+@layer base {
+  :root {
+    color: #f8fafc;
+    background: #020617;
+    font-family: Inter, ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+    font-synthesis: none;
+    text-rendering: optimizeLegibility;
+  }
+
+  * {
+    box-sizing: border-box;
+  }
+
+  html,
+  body,
+  #root {
+    width: 100%;
+    height: 100%;
+    margin: 0;
+    overflow: hidden;
+  }
+
+  button,
+  a {
+    -webkit-tap-highlight-color: transparent;
+  }
+}
+
+.town-actions {
+  position: absolute;
+  right: 1rem;
+  bottom: 1rem;
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+}
+
+.town-action {
+  border: 1px solid rgb(255 255 255 / 0.1);
+  border-radius: 0.75rem;
+  background: rgb(2 6 23 / 0.6);
+  padding: 0.5rem 0.75rem;
+  color: rgb(148 163 184);
+  font-size: 11px;
+  line-height: 1rem;
+  text-decoration: none;
+  backdrop-filter: blur(12px);
+}
+
+.town-action:hover,
+.town-action:focus-visible {
+  background: rgb(255 255 255 / 0.1);
+  color: rgb(226 232 240);
+  outline: none;
+}
+
+@media (max-width: 900px) {
+  .town-badge-wrap {
+    right: 1rem;
+  }
+
+  .town-metric-wrap {
+    top: 5.5rem;
+    left: 1rem;
+    align-items: stretch;
+  }
+
+  .town-metric-wrap > div:first-child {
+    flex-wrap: wrap;
+  }
+
+  .town-inspector-wrap {
+    top: 10.5rem;
+  }
+
+  .town-dashboard-chart,
+  .town-event-wrap {
+    display: none;
+  }
+}
+
+@media (max-width: 680px) {
+  .town-badge-wrap {
+    left: 0.5rem;
+    right: 0.5rem;
+    top: 0.5rem;
+  }
+
+  .town-badge-wrap > div {
+    width: 100%;
+    justify-content: space-between;
+    gap: 0.5rem;
+    padding-inline: 0.75rem;
+  }
+
+  .town-badge-wrap > div > div:first-child div:last-child,
+  .town-badge-wrap > div > div:nth-child(4),
+  .town-badge-wrap > div > div:last-child button:not(:last-child) {
+    display: none;
+  }
+
+  .town-metric-wrap {
+    top: 4.75rem;
+    right: 0.5rem;
+    left: 0.5rem;
+    align-items: stretch;
+  }
+
+  .town-metric-wrap > div:first-child {
+    width: 100%;
+    justify-content: space-between;
+  }
+
+  .town-metric-wrap > div:first-child > div:first-child {
+    flex: 1 1 100%;
+    justify-content: space-between;
+    padding: 0.5rem 0.75rem;
+  }
+
+  .town-metric-wrap > div:first-child > div:last-child {
+    margin-left: auto;
+  }
+
+  .town-dashboard {
+    width: min(20rem, calc(100vw - 1rem));
+    max-height: 62vh;
+  }
+
+  .town-inspector-wrap {
+    top: auto;
+    right: 0.5rem;
+    bottom: 7.4rem;
+  }
+
+  .town-inspector-wrap > div {
+    width: min(16rem, calc(100vw - 1rem));
+  }
+
+  .town-event-wrap {
+    left: 0.5rem;
+    bottom: 7.4rem;
+  }
+
+  .town-event-wrap > div {
+    width: min(18rem, calc(100vw - 1rem));
+  }
+
+  .town-tool-wrap {
+    right: 0.5rem;
+    bottom: 0.5rem;
+    left: 0.5rem;
+    transform: none;
+    overflow-x: auto;
+    scrollbar-width: none;
+  }
+
+  .town-tool-wrap::-webkit-scrollbar {
+    display: none;
+  }
+
+  .town-tool-wrap > div {
+    min-width: max-content;
+  }
+
+  .town-actions {
+    display: none;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    scroll-behavior: auto !important;
+    transition-duration: 0.01ms !important;
+  }
+}

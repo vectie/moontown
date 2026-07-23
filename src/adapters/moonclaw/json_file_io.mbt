@@ -34,7 +34,7 @@ async fn moonclaw_write_text_file(path : String, content : String) -> Unit {
   @fs.write_file(
     path,
     @encoding/utf8.encode(content),
-    create=0o644,
-    truncate=true,
+    create_mode=CreateOrTruncate,
+    permission=0o644,
   )
 }
