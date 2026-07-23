@@ -4,8 +4,9 @@ MoonTown 0.1.0 introduces the Energy Valley native desktop experience: a
 self-contained isometric town simulation packaged with Lepusa for Apple
 silicon Macs.
 
-This document prepares the release text but does not claim that `v0.1.0` has
-been published. The current candidate is ad-hoc signed and not notarized.
+This candidate is published as the
+[GitHub `v0.1.0` prerelease](https://github.com/vectie/moontown/releases/tag/v0.1.0).
+It is ad-hoc signed and not notarized.
 
 ## Highlights
 

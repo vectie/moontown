@@ -6,10 +6,11 @@ Surface under test: the packaged-static Energy Valley town
 
 ## Outcome
 
-The town interaction flow passes in a DMG-installed Lepusa app. It is ready as
-a local release candidate. Public publication is not yet complete because the
-artifact is ad-hoc signed, not notarized, and has not been attached to a GitHub
-tag/release.
+The town interaction flow passes in a DMG-installed Lepusa app. The candidate
+is published as the
+[GitHub `v0.1.0` prerelease](https://github.com/vectie/moontown/releases/tag/v0.1.0).
+Frictionless public distribution is not yet complete because the artifact is
+ad-hoc signed and not notarized.
 
 The release surface intentionally contains one product page plus its in-app
 Guide. The older operations and viewport projections were removed from the
@@ -132,6 +133,10 @@ Day 1 with custom construction removed.
 - Production frontend build: pass, 4 files, 0.3 MiB.
 - Generated Lepusa install-smoke script: pass.
 - Native close leaves no MoonTown launcher or Lepusa runtime process behind.
+- Product commit `8550a55ad4f9a1e07544d3b786022d2c14afcebd` is present on
+  GitHub `main`, and `v0.1.0` points to that exact commit.
+- GitHub reports both release assets uploaded; the published DMG digest matches
+  the local digest and a fresh release download passes the published checksum.
 - DMG SHA-256:
   `71d885b48558f12ba26cd0d3d803412bd1dc0da31317d5e769354b5eb3d342c2`.
 - High-confidence credential/private-key scan: no matches.
@@ -171,14 +176,14 @@ Publication-ready local files:
 | DMG/install smoke/post-launch integrity | Pass | Final DMG mounted read-only, copied out, launched through Lepusa, closed cleanly, and passed post-launch `codesign`; app resources remained unchanged |
 | Secret and private data exclusion | Pass | High-confidence scan passed and packaged resources contain only the four release web files |
 | Developer ID signing/notarization | Blocked externally | `security find-identity -v -p codesigning` reports zero valid identities; current artifact is explicitly ad-hoc signed |
-| Intended commit, tag, and GitHub assets | Not performed | Local and GitHub `main` both point to pre-change commit `3eb2d1a58c1fbb611297eb13f44c50628bed736b`; work remains uncommitted, `v0.1.0` does not exist, and publication was not authorized |
+| Intended commit, tag, and GitHub assets | Pass | Product commit `8550a55ad4f9a1e07544d3b786022d2c14afcebd` is on GitHub `main`; `v0.1.0` points to it; the prerelease contains the 2,182,907-byte DMG and checksum sidecar; GitHub and downloaded digests match |
 
 ## Remaining release work
 
 - Replace ad-hoc signing with a Developer ID Application identity, notarize,
   staple, and run `spctl`/Stapler verification.
-- Publish only after the intended branch/commit/tag are chosen; upload the DMG
-  and checksum to the matching GitHub release.
+- Replace the prerelease assets with a Developer ID-signed and notarized build
+  before promoting the release to stable.
 - Lepusa’s direct development command
   `run macos --launch --project lepusa.json` crashed with an invalid-memory
   error. The handover’s bundled-runtime/DMG path works; the framework dev-launch
