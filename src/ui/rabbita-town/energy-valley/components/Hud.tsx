@@ -5,13 +5,14 @@
 import { useState } from 'react'
 import type { Agent, Building, TownEvent, WeatherKind } from '../engine/types'
 import { roleIcon } from '../engine/sim'
-import { archetype } from '../engine/world'
+import { archetype, valleySeedLabel } from '../engine/world'
 import { COSTS } from '../engine/build'
 import type { ToolId } from '../engine/types'
 import moontownLogo from '../../../assets/moontown.svg'
 
 // ---------- 顶部左：镇名 + 时间 ----------
 export function TownBadge(props: {
+  seed: number
   day: number; hour: number; weather: WeatherKind; weatherAuto: boolean
   onToggleWeather: (w: WeatherKind) => void
   onToggleAuto: () => void
@@ -24,7 +25,9 @@ export function TownBadge(props: {
       <img src={moontownLogo} alt="" className="h-9 w-9 rounded-xl shadow-lg" />
       <div>
         <div className="text-[15px] font-bold tracking-wide text-amber-100">MoonTown · 能源谷</div>
-        <div className="text-[10px] text-slate-400 tracking-widest">WENYU VALLEY · CHANGPING</div>
+        <div className="text-[10px] text-slate-400 tracking-widest">
+          WENYU VALLEY · {valleySeedLabel(props.seed)}
+        </div>
       </div>
       <div className="h-8 w-px bg-white/10" />
       <div className="text-center">
@@ -444,7 +447,7 @@ export function Onboarding(props: { onClose: () => void; onGuide: () => void }) 
     <div className="pointer-events-auto w-[340px] rounded-2xl bg-slate-950/85 p-5 backdrop-blur-md border border-amber-200/20 shadow-2xl">
       <div className="mb-2 text-[16px] font-bold text-amber-100">欢迎来到能源谷 🌙</div>
       <div className="flex flex-col gap-2 text-[12.5px] leading-relaxed text-slate-300">
-        <p>这里是参考<b className="text-amber-100">昌平未来科学城 · 能源谷</b>的 AI 小镇实时看板：温榆河穿城，13 座市政协议建筑由 Agent 日夜值守。</p>
+        <p>这里是按<b className="text-amber-100">昌平未来科学城 · 能源谷</b>空间规则生成的 AI 小镇：河流、湿地、桥梁、农田与城区会随种子变化，13 座市政协议建筑由 Agent 日夜值守。</p>
         <p>🖐️ <b>视察</b>：点击建筑或小人查看详情，可跟随 Agent 视角<br/>🛣️ <b>搭建</b>：底部工具坞可铺路、造林、建造新楼宇<br/>🌦️ <b>环境</b>：左上角切换天气，右上角调节时间流速</p>
       </div>
       <button
@@ -487,7 +490,7 @@ export function Guide(props: { onClose: () => void }) {
           底部选择道路、造林或四类建筑，再点地图放置。红色预览表示冲突或预算不足；提示会说明原因。
         </GuideCard>
         <GuideCard title="4 · 拆除与恢复">
-          “拆除”可清理自建内容；建筑详情会显示返还比例。重置会先确认，并只清除本地小镇存档。
+          “拆除”可清理自建内容；建筑详情会显示返还比例。“重置本谷”保留地形，“生成新谷”会用新种子重建整张地图。
         </GuideCard>
       </div>
 
@@ -511,7 +514,11 @@ function GuideCard(props: { title: string; children: React.ReactNode }) {
   )
 }
 
-export function ResetDialog(props: { onCancel: () => void; onConfirm: () => void }) {
+export function ResetDialog(props: {
+  onCancel: () => void
+  onConfirm: () => void
+  onRegenerate: () => void
+}) {
   return (
     <section
       role="alertdialog"
@@ -519,16 +526,22 @@ export function ResetDialog(props: { onCancel: () => void; onConfirm: () => void
       aria-labelledby="reset-town-title"
       className="pointer-events-auto w-full max-w-sm rounded-2xl border border-rose-300/20 bg-slate-950/95 p-5 shadow-2xl backdrop-blur-md"
     >
-      <h2 id="reset-town-title" className="text-[16px] font-bold text-amber-100">重置能源谷？</h2>
+      <h2 id="reset-town-title" className="text-[16px] font-bold text-amber-100">重置或生成能源谷</h2>
       <p className="mt-2 text-[12px] leading-relaxed text-slate-300">
-        这会清除本机保存的自建建筑、道路、造林、预算和模拟时间。市政建筑不会删除。
+        「重置本谷」保留当前地形种子，只清除你的建设；「生成新谷」会按同一套能源谷规则创建新的河流、湿地、路网、城区与建筑布局。
       </p>
-      <div className="mt-4 flex gap-2">
-        <button onClick={props.onCancel} className="flex-1 rounded-xl bg-white/10 py-2 text-[12px] text-slate-200 hover:bg-white/15">
+      <div className="mt-4 grid grid-cols-2 gap-2">
+        <button autoFocus onClick={props.onCancel} className="flex-1 rounded-xl bg-white/10 py-2 text-[12px] text-slate-200 hover:bg-white/15">
           取消
         </button>
-        <button onClick={props.onConfirm} className="flex-1 rounded-xl bg-rose-500/80 py-2 text-[12px] font-semibold text-white hover:bg-rose-400">
-          确认重置
+        <button onClick={props.onConfirm} className="flex-1 rounded-xl bg-white/10 py-2 text-[12px] text-slate-100 hover:bg-white/15">
+          重置本谷
+        </button>
+        <button
+          onClick={props.onRegenerate}
+          className="col-span-2 rounded-xl bg-emerald-500/80 py-2 text-[12px] font-semibold text-white hover:bg-emerald-400"
+        >
+          ⟳ 生成新谷
         </button>
       </div>
     </section>

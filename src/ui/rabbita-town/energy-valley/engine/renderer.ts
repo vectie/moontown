@@ -93,14 +93,40 @@ function drawTerrain(
       diamond(ctx, p.x, p.y, z)
       switch (tile.terrain) {
         case 'grass': {
-          const v = ((x * 7 + y * 13) % 5) * 0.02
+          const v = tile.variation * 0.09
           ctx.fillStyle = shade('#5da25f', 1 + v)
           ctx.fill()
           break
         }
-        case 'forest': {
-          ctx.fillStyle = shade('#4d8a52', 1 + ((x * 3 + y) % 4) * 0.02)
+        case 'meadow': {
+          ctx.fillStyle = shade('#78b85c', 0.96 + tile.variation * 0.12)
           ctx.fill()
+          drawMeadow(ctx, p.x, p.y, z, tile.variation)
+          break
+        }
+        case 'field': {
+          ctx.fillStyle = shade('#a8bd48', 0.92 + tile.variation * 0.12)
+          ctx.fill()
+          drawFieldRows(ctx, p.x, p.y, z, x + y)
+          break
+        }
+        case 'wetland': {
+          ctx.fillStyle = shade('#70a957', 0.9 + tile.variation * 0.12)
+          ctx.fill()
+          drawWetland(ctx, p.x, p.y, z, tile.variation)
+          break
+        }
+        case 'forest': {
+          ctx.fillStyle = shade('#3f7f48', 0.98 + tile.variation * 0.08)
+          ctx.fill()
+          break
+        }
+        case 'urban': {
+          ctx.fillStyle = tile.district === 'civic-core' ? '#aeb6ad' : '#a9b19f'
+          ctx.fill()
+          ctx.strokeStyle = 'rgba(255,255,255,0.12)'
+          ctx.lineWidth = 1
+          ctx.stroke()
           break
         }
         case 'plaza': {
@@ -141,6 +167,61 @@ function diamond(ctx: Ctx2, sx: number, sy: number, z: number) {
   ctx.lineTo(sx, sy + HH * z)
   ctx.lineTo(sx - HW * z, sy)
   ctx.closePath()
+}
+
+function drawMeadow(ctx: Ctx2, sx: number, sy: number, z: number, variation: number) {
+  const hue = variation > 0.55 ? 'rgba(255,220,105,0.52)' : 'rgba(255,164,190,0.48)'
+  ctx.fillStyle = hue
+  for (let index = 0; index < 2; index++) {
+    const px = sx + (variation * 19 + index * 13) % (HW * z * 0.8) - HW * z * 0.4
+    const py = sy + ((variation * 31 + index * 9) % (HH * z * 0.9)) - HH * z * 0.45
+    ctx.beginPath()
+    ctx.arc(px, py, Math.max(0.8, 1.2 * z), 0, Math.PI * 2)
+    ctx.fill()
+  }
+}
+
+function drawFieldRows(ctx: Ctx2, sx: number, sy: number, z: number, phase: number) {
+  ctx.save()
+  diamond(ctx, sx, sy, z)
+  ctx.clip()
+  ctx.strokeStyle = phase % 2 === 0 ? 'rgba(236,219,91,0.45)' : 'rgba(100,128,42,0.38)'
+  ctx.lineWidth = Math.max(1, 1.4 * z)
+  for (let row = -2; row <= 2; row++) {
+    ctx.beginPath()
+    ctx.moveTo(sx - HW * z, sy + row * 5 * z)
+    ctx.lineTo(sx + HW * z, sy + row * 5 * z)
+    ctx.stroke()
+  }
+  ctx.restore()
+}
+
+function drawWetland(ctx: Ctx2, sx: number, sy: number, z: number, variation: number) {
+  ctx.save()
+  diamond(ctx, sx, sy, z)
+  ctx.clip()
+  ctx.fillStyle = 'rgba(37,126,133,0.36)'
+  ctx.beginPath()
+  ctx.ellipse(
+    sx + (variation - 0.5) * 16 * z,
+    sy + (variation - 0.5) * 5 * z,
+    12 * z,
+    3.2 * z,
+    0,
+    0,
+    Math.PI * 2,
+  )
+  ctx.fill()
+  ctx.strokeStyle = 'rgba(48,94,44,0.5)'
+  ctx.lineWidth = Math.max(1, z)
+  for (let reed = -1; reed <= 1; reed++) {
+    const rx = sx + (reed * 8 + variation * 4) * z
+    ctx.beginPath()
+    ctx.moveTo(rx, sy + 4 * z)
+    ctx.lineTo(rx + 1.5 * z, sy - 3 * z)
+    ctx.stroke()
+  }
+  ctx.restore()
 }
 
 function drawWater(ctx: Ctx2, sx: number, sy: number, z: number, phase: number, t: number) {
@@ -246,11 +327,22 @@ function drawObjects(
   // 树
   for (let y = 0; y < ROWS; y++)
     for (let x = 0; x < COLS; x++) {
-      if (sim.world.tiles[y][x].terrain !== 'forest') continue
+      const tile = sim.world.tiles[y][x]
+      if (tile.terrain !== 'forest' && !tile.structure) continue
       const p = toScreen(x + 0.5, y + 0.5)
       if (p.x < -m || p.x > vw + m || p.y < -m || p.y > vh + m) continue
-      const seed = hashStr(`tree-${x}-${y}`)
-      objs.push({ depth: x + y + 0.4, draw: () => drawTree(ctx, p.x, p.y, z, seed, t) })
+      if (tile.structure) {
+        const structure = tile.structure
+        const floors = tile.structureFloors ?? 2
+        const seed = hashStr(`fabric-${sim.world.seed}-${x}-${y}`)
+        objs.push({
+          depth: x + y + 0.48,
+          draw: () => drawAmbientBuilding(ctx, toScreen, x, y, structure, floors, seed, dl, z),
+        })
+      } else {
+        const seed = hashStr(`tree-${sim.world.seed}-${x}-${y}`)
+        objs.push({ depth: x + y + 0.4, draw: () => drawTree(ctx, p.x, p.y, z, seed, t) })
+      }
     }
 
   // 建筑
@@ -353,6 +445,47 @@ function isoBox(
     windowsOnFace(ctx, Et, St, S, E, opts.windows, rows, opts.litFrac ?? 0, (opts.seed ?? 0) + 7)
   }
   return { N: Nt, E: Et, S: St, W: Wt, center: lerp(lerp(Nt, St, 0.5), lerp(Et, Wt, 0.5), 0.5) }
+}
+
+function drawAmbientBuilding(
+  ctx: Ctx2,
+  toScreen: (x: number, y: number) => Pt,
+  tx: number,
+  ty: number,
+  structure: 'lowrise' | 'row' | 'tower' | 'campus' | 'courtyard',
+  floors: number,
+  seed: number,
+  dl: number,
+  z: number,
+) {
+  const palette =
+    structure === 'campus'
+      ? { top: '#d9ddd2', left: '#a9b9ad', right: '#bbc8bf' }
+      : structure === 'courtyard'
+        ? { top: '#e4dfcf', left: '#b8ad99', right: '#c9beaa' }
+        : structure === 'tower'
+          ? { top: '#d7e4e8', left: '#8fa7ae', right: '#a9bcc2' }
+          : { top: '#d8d9d2', left: '#9fa7a4', right: '#b6bcb7' }
+  const inset = structure === 'row' ? 0.08 : 0.13
+  const width = structure === 'row' ? 0.84 : 0.74
+  const depth = structure === 'row' ? 0.64 : 0.74
+  const height = Math.max(7, floors * 6.5) * z
+  isoBox(
+    ctx,
+    toScreen,
+    tx + inset,
+    ty + inset,
+    width,
+    depth,
+    height,
+    palette,
+    {
+      windows: structure === 'tower' ? 2 : 1,
+      litFrac: dl < 0.3 ? 0.42 : 0,
+      seed,
+      stroke: true,
+    },
+  )
 }
 
 /** 在竖直面上铺窗户网格；litFrac>0 时部分窗亮灯 */

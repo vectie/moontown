@@ -41,9 +41,12 @@ export function checkBuilding(sim: SimState, archId: string, tx: number, ty: num
       if (t.terrain === 'water' || t.terrain === 'bridge')
         return { valid: false, reason: '不能建在温榆河上', cost: a.cost }
       if (t.terrain === 'road') return { valid: false, reason: '不能压在道路上', cost: a.cost }
-      if (t.terrain === 'forest') return { valid: false, reason: '需先清理林地', cost: a.cost }
-      if (t.terrain !== 'grass' && t.terrain !== 'plaza')
-        return { valid: false, reason: '仅可建在草地或广场', cost: a.cost }
+      if (t.terrain === 'forest')
+        return { valid: false, reason: '需先清理林地', cost: a.cost }
+      if (t.terrain === 'field' || t.terrain === 'wetland' || t.terrain === 'urban')
+        return { valid: false, reason: '需先整理该地块', cost: a.cost }
+      if (t.terrain !== 'grass' && t.terrain !== 'meadow' && t.terrain !== 'plaza')
+        return { valid: false, reason: '仅可建在草地、草甸或广场', cost: a.cost }
     }
   }
   // 邻接道路
@@ -88,8 +91,16 @@ export function checkRoad(sim: SimState, tx: number, ty: number): CheckResult {
   if (!t) return { valid: false, reason: '超出边界', cost: COSTS.road }
   if (t.buildingId) return { valid: false, reason: '先拆除建筑', cost: COSTS.road }
   if (t.terrain === 'road' || t.terrain === 'bridge') return { valid: false, reason: '已是道路', cost: COSTS.road }
-  if (t.terrain !== 'grass' && t.terrain !== 'forest' && t.terrain !== 'water')
-    return { valid: false, reason: '道路仅可铺在草地、林地或河面', cost: COSTS.road }
+  if (
+    t.terrain !== 'grass' &&
+    t.terrain !== 'meadow' &&
+    t.terrain !== 'field' &&
+    t.terrain !== 'forest' &&
+    t.terrain !== 'wetland' &&
+    t.terrain !== 'water'
+  ) {
+    return { valid: false, reason: '道路仅可铺在自然地表或河面', cost: COSTS.road }
+  }
   const cost = t.terrain === 'water' ? COSTS.bridgeRoad : COSTS.road
   if (sim.metrics.budget < cost) return { valid: false, reason: '预算不足', cost }
   return { valid: true, cost }
@@ -110,7 +121,12 @@ export function placeRoad(sim: SimState, tx: number, ty: number): boolean {
 export function checkPark(sim: SimState, tx: number, ty: number): CheckResult {
   const t = tileOf(sim.world, tx, ty)
   if (!t) return { valid: false, reason: '超出边界', cost: COSTS.park }
-  if (t.buildingId || t.terrain !== 'grass') return { valid: false, reason: '仅可改造草地', cost: COSTS.park }
+  if (
+    t.buildingId ||
+    (t.terrain !== 'grass' && t.terrain !== 'meadow' && t.terrain !== 'field')
+  ) {
+    return { valid: false, reason: '仅可改造草地、草甸或农田', cost: COSTS.park }
+  }
   if (sim.metrics.budget < COSTS.park) return { valid: false, reason: '预算不足', cost: COSTS.park }
   return { valid: true, cost: COSTS.park }
 }
@@ -147,11 +163,14 @@ export function demolishAt(sim: SimState, tx: number, ty: number): boolean {
     return true
   }
   if (t.terrain === 'road' || t.terrain === 'bridge') {
-    t.terrain = t.terrain === 'bridge' ? 'water' : 'grass'
+    t.terrain = t.baseTerrain
     refreshRoadMask(sim.world, tx, ty)
     return true
   }
-  if (t.terrain === 'forest') { t.terrain = 'grass'; return true }
+  if (t.terrain === 'forest') {
+    t.terrain = t.baseTerrain === 'forest' ? 'grass' : t.baseTerrain
+    return true
+  }
   return false
 }
 

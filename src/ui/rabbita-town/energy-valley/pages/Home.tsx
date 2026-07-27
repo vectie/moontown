@@ -3,7 +3,12 @@
 // ============================================================
 
 import { useEffect, useRef, useState, useCallback } from 'react'
-import { createWorld, archetype } from '../engine/world'
+import {
+  DEFAULT_VALLEY_SEED,
+  archetype,
+  createWorld,
+  normalizeSeed,
+} from '../engine/world'
 import { createSim, updateSim, type SimState } from '../engine/sim'
 import { render, pickTile, buildingAt, agentNear, type ViewState } from '../engine/renderer'
 import { worldToScreen } from '../engine/iso'
@@ -11,17 +16,18 @@ import {
   checkBuilding, placeBuilding, checkRoad, placeRoad,
   checkPark, placePark, demolishAt, refreshAllRoadMasks,
 } from '../engine/build'
-import { isRiver } from '../engine/world'
-import type { Agent, Building, ToolId, WeatherKind } from '../engine/types'
+import type { Agent, Building, Terrain, ToolId, WeatherKind } from '../engine/types'
 import {
   TownBadge, MetricChips, ToolDock, EventFeed, Inspector, Dashboard,
   Onboarding, Guide, ResetDialog,
 } from '../components/Hud'
 
-const SAVE_KEY = 'moontown-energy-valley-v1'
+const SAVE_KEY = 'moontown-energy-valley-v2'
+const SEED_KEY = 'moontown-energy-valley-seed-v1'
 const INTRO_KEY = 'moontown-intro-seen-v1'
 
 interface Snapshot {
+  seed: number
   hour: number; day: number; weather: WeatherKind; weatherAuto: boolean
   population: number; vitality: number; budget: number; agentsOnline: number
   paused: boolean; timeScale: number
@@ -49,6 +55,7 @@ export default function Home() {
   const [resetOpen, setResetOpen] = useState(false)
   const [showIntro, setShowIntro] = useState(() => !localStorage.getItem(INTRO_KEY))
   const [toast, setToast] = useState<string | null>(null)
+  const [fatalError, setFatalError] = useState<string | null>(null)
 
   const toastTimer = useRef<ReturnType<typeof setTimeout> | null>(null)
   const showToast = useCallback((msg: string) => {
@@ -62,23 +69,26 @@ export default function Home() {
     const sim = simRef.current
     if (!sim) return
     const data = {
+      seed: sim.world.seed,
       custom: sim.world.buildings.filter(b => !b.builtin).map(b => ({ a: b.archetype, tx: b.tx, ty: b.ty, p: b.progress })),
-      roads: [] as [number, number, string][],
+      terrainDeltas: [] as [number, number, Terrain][],
       budget: sim.metrics.budget,
       day: sim.day, hour: sim.hour,
     }
     for (let y = 0; y < sim.world.tiles.length; y++)
       for (let x = 0; x < sim.world.tiles[0].length; x++) {
         const t = sim.world.tiles[y][x]
-        if (t.terrain === 'road' || t.terrain === 'bridge' || t.terrain === 'forest')
-          data.roads.push([x, y, t.terrain])
+        if (t.terrain !== t.generatedTerrain)
+          data.terrainDeltas.push([x, y, t.terrain])
       }
     try { localStorage.setItem(SAVE_KEY, JSON.stringify(data)) } catch { /* ignore */ }
   }, [])
 
   // ---------- 初始化 & 主循环 ----------
   useEffect(() => {
-    const world = createWorld()
+    const seed = normalizeSeed(Number(localStorage.getItem(SEED_KEY)) || DEFAULT_VALLEY_SEED)
+    localStorage.setItem(SEED_KEY, String(seed))
+    const world = createWorld(seed)
     const sim = createSim(world)
 
     // —— 存档恢复 ——
@@ -86,25 +96,17 @@ export default function Home() {
       const raw = localStorage.getItem(SAVE_KEY)
       if (raw) {
         const data = JSON.parse(raw) as {
+          seed?: number
           custom: { a: string; tx: number; ty: number; p: number }[]
-          roads: [number, number, string][]
+          terrainDeltas: [number, number, Terrain][]
           budget: number; day: number; hour: number
         }
-        // 先把人工地形复位为自然地貌
-        for (let y = 0; y < world.tiles.length; y++)
-          for (let x = 0; x < world.tiles[0].length; x++) {
-            const t = world.tiles[y][x]
-            if (t.terrain === 'road' || t.terrain === 'bridge' || t.terrain === 'forest') {
-              t.terrain = isRiver(x, y) ? 'water' : 'grass'
-              t.roadDir = undefined
-            }
-          }
-        // 应用存档地形
-        for (const [x, y, kind] of data.roads) {
+        if (data.seed !== undefined && normalizeSeed(data.seed) !== seed) {
+          throw new Error('saved valley seed does not match active seed')
+        }
+        for (const [x, y, kind] of data.terrainDeltas ?? []) {
           const t = world.tiles[y]?.[x]
-          if (t && (kind === 'road' || kind === 'bridge' || kind === 'forest')) {
-            t.terrain = kind
-          }
+          if (t) t.terrain = kind
         }
         refreshAllRoadMasks(world)
         // 自建建筑：恢复精确进度，避免刷新时丢失在建工程与已扣预算
@@ -131,7 +133,10 @@ export default function Home() {
     simRef.current = sim
 
     // 初始相机：对准市政厅一带
-    const c = worldToScreen(24, 27)
+    const c = worldToScreen(
+      world.landmarks.civicCore.x + 4,
+      world.landmarks.civicCore.y + 5,
+    )
     const view = viewRef.current
     view.camX = c.x
     view.camY = c.y
@@ -169,7 +174,14 @@ export default function Home() {
         }
       }
       const wrap = wrapRef.current!
-      render(ctx, sim, view, wrap.clientWidth, wrap.clientHeight, now)
+      try {
+        render(ctx, sim, view, wrap.clientWidth, wrap.clientHeight, now)
+      } catch (error) {
+        const message = error instanceof Error ? error.message : String(error)
+        console.error('Energy Valley renderer stopped', error)
+        setFatalError(message)
+        return
+      }
       raf = requestAnimationFrame(loop)
     }
     raf = requestAnimationFrame(loop)
@@ -178,6 +190,7 @@ export default function Home() {
     let savedBuildProgress = ''
     const iv = setInterval(() => {
       setSnap({
+        seed: sim.world.seed,
         hour: sim.hour, day: sim.day, weather: sim.weather, weatherAuto: sim.weatherAuto,
         population: sim.metrics.population, vitality: sim.metrics.vitality,
         budget: sim.metrics.budget, agentsOnline: sim.metrics.agentsOnline,
@@ -407,6 +420,13 @@ export default function Home() {
     localStorage.removeItem(SAVE_KEY)
     window.location.reload()
   }
+  const generateNewValley = () => {
+    const buffer = new Uint32Array(1)
+    crypto.getRandomValues(buffer)
+    localStorage.setItem(SEED_KEY, String(normalizeSeed(buffer[0])))
+    localStorage.removeItem(SAVE_KEY)
+    window.location.reload()
+  }
 
   return (
     <div ref={wrapRef} className="relative h-screen w-screen overflow-hidden bg-slate-950 select-none">
@@ -425,7 +445,7 @@ export default function Home() {
       <div className="town-badge-wrap pointer-events-none absolute left-4 top-4">
         {snap && (
           <TownBadge
-            day={snap.day} hour={snap.hour} weather={snap.weather} weatherAuto={snap.weatherAuto}
+            seed={snap.seed} day={snap.day} hour={snap.hour} weather={snap.weather} weatherAuto={snap.weatherAuto}
             onToggleWeather={handleWeather} onToggleAuto={handleAuto}
           />
         )}
@@ -492,8 +512,13 @@ export default function Home() {
 
       {/* Toast */}
       {toast && (
-        <div className="absolute left-1/2 top-20 -translate-x-1/2 rounded-xl bg-rose-500/85 px-4 py-2 text-[13px] text-white shadow-xl backdrop-blur-sm">
+        <div aria-live="polite" className="absolute left-1/2 top-20 -translate-x-1/2 rounded-xl bg-rose-500/85 px-4 py-2 text-[13px] text-white shadow-xl backdrop-blur-sm">
           {toast}
+        </div>
+      )}
+      {fatalError && (
+        <div role="alert" className="absolute left-1/2 top-24 max-w-lg -translate-x-1/2 rounded-xl bg-rose-950/95 px-4 py-3 text-[12px] text-rose-100 shadow-xl ring-1 ring-rose-400/40">
+          地图渲染已暂停：{fatalError}
         </div>
       )}
 
@@ -522,6 +547,7 @@ export default function Home() {
           <ResetDialog
             onCancel={() => setResetOpen(false)}
             onConfirm={resetWorld}
+            onRegenerate={generateNewValley}
           />
         </div>
       )}

@@ -3,7 +3,7 @@
     "dev": "vite",
     "build": "node scripts/prepare-rabbita-build.mjs && vite build && node scripts/verify-production-build.mjs",
     "typecheck:town": "tsc --noEmit -p tsconfig.energy-valley.json",
-    "test:town": "tsx --test energy-valley/engine/build.test.ts",
+    "test:town": "tsx --test energy-valley/engine/*.test.ts",
     "test:server": "node --test vite_server_io.test.js runtime_asset_manifest.test.js",
     "smoke:book-projections": "node scripts/smoke-book-projections.mjs",
     "smoke:user-workflows": "node scripts/run-user-workflow-smoke.mjs"

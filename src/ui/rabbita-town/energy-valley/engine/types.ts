@@ -2,7 +2,30 @@
 // MoonTown · 能源谷 —— 场景引擎类型定义
 // ============================================================
 
-export type Terrain = 'grass' | 'water' | 'road' | 'bridge' | 'plaza' | 'forest'
+export type Terrain =
+  | 'grass'
+  | 'meadow'
+  | 'field'
+  | 'wetland'
+  | 'water'
+  | 'road'
+  | 'bridge'
+  | 'plaza'
+  | 'forest'
+  | 'urban'
+
+export type ValleyDistrict =
+  | 'forest-buffer'
+  | 'river-corridor'
+  | 'north-innovation'
+  | 'civic-core'
+  | 'west-community'
+  | 'lake-learning'
+  | 'lake-exchange'
+  | 'south-showcase'
+  | 'farm-belt'
+
+export type AmbientStructure = 'lowrise' | 'row' | 'tower' | 'campus' | 'courtyard'
 
 export type WeatherKind = 'sunny' | 'cloudy' | 'rain' | 'snow'
 
@@ -55,9 +78,17 @@ export interface Building {
 
 export interface Tile {
   terrain: Terrain
+  /** Natural/generated surface restored after a player removes an intervention. */
+  baseTerrain: Terrain
+  /** Seeded baseline used to persist only player-authored terrain deltas. */
+  generatedTerrain: Terrain
+  district: ValleyDistrict
+  variation: number
   buildingId?: string    // 被建筑占用的 tile
   riverFlow?: number     // 河流相位（用于水流动画错相）
   roadDir?: number       // 道路连接位掩码 N=1 E=2 S=4 W=8
+  structure?: AmbientStructure
+  structureFloors?: number
 }
 
 export interface Agent {
