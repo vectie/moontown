@@ -37,6 +37,8 @@ test "request composer helper changes only the request focus" {
     model,
     RequestComposerFocus::EvidenceBookComposer,
   )
-  assert_true(next.request_composer == RequestComposerFocus::EvidenceBookComposer)
+  assert_true(
+    next.request_composer == RequestComposerFocus::EvidenceBookComposer,
+  )
   assert_true(next.selection is Selection::Worker(_))
 }

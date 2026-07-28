@@ -569,9 +569,8 @@ flows and verify their visible result and durable filesystem effect.
 ### Phase 32: Runtime Asset Boundary
 
 The production frontend should ship the town that users can operate, not the
-entire visual-authoring workspace. Vite may continue to serve the full asset
-tree during development, but production export must be driven by a checked
-runtime manifest.
+entire visual-authoring workspace. Static assembly must be driven by a checked
+runtime manifest, while the MoonBit desktop service owns local runtime routes.
 
 Production should keep:
 
@@ -707,8 +706,8 @@ Acceptance requires:
 - The book-template ledger is part of bootstrap and periodic refresh state, so
   queued work appears immediately in the launchpad and remains backed by the
   durable request file.
-- Local write endpoints now enforce same-origin JSON POST requests and the Vite
-  server binds to `127.0.0.1` by default.
+- Local write endpoints now enforce same-origin JSON POST requests and the
+  MoonBit desktop service binds to `127.0.0.1`.
 - CI and local smoke coverage now verify MoonBit contracts, route security,
   persisted standing-watch and evidence-book requests, projection generation,
   and the production frontend build.

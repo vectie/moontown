@@ -224,20 +224,21 @@ tests should use `daemon run --once`, `daemon supervise --once`, and
 
 ## 1.4 Open The Wenyu Viewport
 
-Run the Rabbita frontend, then open the canonical standalone Wenyu viewport:
+Build the Rabbita frontend, then launch it through Lepusa:
 
 ```bash
-cd src/ui/rabbita-town
-npm run dev
+./scripts/build-rabbita-ui.sh
+moon -C .mooncakes/vectie/lepusa run cmd/main --target native -- \
+  run macos --launch --project "$PWD/lepusa.json"
 ```
 
 Direct viewport modes:
 
-- `http://127.0.0.1:5173/viewport.html?assets=generated&mode=view&v=wenyu`
+- `http://127.0.0.1:17842/viewport.html?assets=generated&mode=view&v=wenyu`
   opens the clean town view.
-- `http://127.0.0.1:5173/viewport.html?assets=generated&mode=editor&v=wenyu`
+- `http://127.0.0.1:17842/viewport.html?assets=generated&mode=editor&v=wenyu`
   opens the module editor/validation view.
-- `http://127.0.0.1:5173/viewport.html?assets=generated&mode=output&v=wenyu`
+- `http://127.0.0.1:17842/viewport.html?assets=generated&mode=output&v=wenyu`
   opens the final generated-output browser.
 
 Use view mode to present the town, editor mode to check module placement and
@@ -308,11 +309,11 @@ MoonTown as data/config artifacts.
 
 Useful bridge artifacts:
 
-- `http://127.0.0.1:5173/tilemap/modules/wenyu-town-modules.json`
+- `http://127.0.0.1:17842/tilemap/modules/wenyu-town-modules.json`
   opens the current module registry.
-- `http://127.0.0.1:5173/tilemap/modules/moondesk-handoff.json`
+- `http://127.0.0.1:17842/tilemap/modules/moondesk-handoff.json`
   opens the portable MoonDesk-to-MoonTown artifact contract.
-- `http://127.0.0.1:5173/moondesk-bridge.json`
+- `http://127.0.0.1:17842/moondesk-bridge.json`
   opens the live bridge ledger built from
   `.moonsuite/products/moontown/moondesk-*` and
   `.moonsuite/products/moontown/book-results`.
@@ -940,7 +941,7 @@ During local UI development, the Rabbita operator console can queue the same
 request without hand-editing JSON:
 
 ```bash
-curl -X POST http://127.0.0.1:5173/api/book-template-requests \
+curl -X POST http://127.0.0.1:17842/api/book-template-requests \
   -H 'Content-Type: application/json' \
   -d '{
     "template_id": "pdf-evidence-watch",
@@ -1529,15 +1530,14 @@ The browser frontend lives in:
 From that directory:
 
 ```bash
-cd src/ui/rabbita-town
-npm install
-npm run dev
+./scripts/build-rabbita-ui.sh
 ```
 
-Or from the repo root:
+Launch the built product with the MoonBit desktop service through Lepusa:
 
 ```bash
-./scripts/build-rabbita-ui.sh
+moon -C .mooncakes/vectie/lepusa run cmd/main --target native -- \
+  run macos --launch --project "$PWD/lepusa.json"
 ```
 
 Important frontend files:
@@ -1546,7 +1546,8 @@ Important frontend files:
 - [src/ui/rabbita-town/styles.css](/Users/kq/Workspace/moontown/src/ui/rabbita-town/styles.css)
 - [src/ui/rabbita-town/index.html](/Users/kq/Workspace/moontown/src/ui/rabbita-town/index.html)
 - [src/ui/rabbita-town/bootstrap.js](/Users/kq/Workspace/moontown/src/ui/rabbita-town/bootstrap.js)
-- [src/ui/rabbita-town/vite.config.js](/Users/kq/Workspace/moontown/src/ui/rabbita-town/vite.config.js)
+- [src/ui/rabbita-town/scripts/assemble-production-build.mjs](/Users/kq/Workspace/moontown/src/ui/rabbita-town/scripts/assemble-production-build.mjs)
+- [src/ui/rabbita-town/scripts/verify-production-build.mjs](/Users/kq/Workspace/moontown/src/ui/rabbita-town/scripts/verify-production-build.mjs)
 
 ## 13. Use The Live Simulation Controls
 
@@ -1581,7 +1582,8 @@ Current dashboard surfaces:
 - Mayor command center
 - standing-watch portfolio with all enabled topics, per-goal decision mix, next
   due tick, and latest watcher decision
-- request composer that submits new standing goals through the local Vite endpoint
+- request composer that submits new standing goals through the local MoonBit
+  desktop-service endpoint
 - a compact Rabbita Town Launchpad linking to the standalone Wenyu map page
 - inspector sidebar
 - activity feed
@@ -1596,8 +1598,8 @@ Current visual behaviors:
 On narrower screens, the scene now scrolls internally instead of clipping the
 town layout.
 
-The UI can still run demo simulation state, but the dev server now also bridges
-real runtime files: `.moonsuite/products/moontown/town.json`,
+The UI can still run demo simulation state, but the MoonBit desktop service
+also bridges real runtime files: `.moonsuite/products/moontown/town.json`,
 `.moonsuite/products/moontown/daemon.json`,
 `.moonsuite/products/moontown/standing-goals.json`,
 `.moonsuite/products/moontown/watchers/*.jsonl`, and
@@ -1606,8 +1608,8 @@ real runtime files: `.moonsuite/products/moontown/town.json`,
 Browser-submitted standing goals use
 [assets/templates/operator-request-policy.json](/Users/kq/Workspace/moontown/assets/templates/operator-request-policy.json)
 for their default `source_policy`. Change that document when the default Mayor
-queue policy should change; do not patch the Vite request handler for ordinary
-policy changes.
+queue policy should change; do not patch browser glue or the desktop service
+for ordinary policy changes.
 
 ## 13.4 Run The Mini-App Local Backend
 

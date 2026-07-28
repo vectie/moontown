@@ -53,10 +53,7 @@ test "vitality dashboard signal uses shared phrases with recovery override" {
     "Sync queued",
   )
   assert_eq(
-    vitality_dashboard_signal(
-      model,
-      Some(civic_metric_test_execution(Running)),
-    ),
+    vitality_dashboard_signal(model, Some(civic_metric_test_execution(Running))),
     "Pulse syncing",
   )
   assert_eq(
@@ -82,11 +79,7 @@ test "vitality dashboard next action uses shared execution action groups" {
     vitality_dashboard_next_action(
       model,
       None,
-      Some(
-        civic_metric_test_execution(
-          AwaitingPersistence,
-        ),
-      ),
+      Some(civic_metric_test_execution(AwaitingPersistence)),
     ),
     "Persist the validated vitality slice so MoonTown can project it beyond demo simulation.",
   )

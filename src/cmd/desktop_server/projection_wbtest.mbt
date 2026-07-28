@@ -1,6 +1,14 @@
 ///|
 test "desktop projection resolves runtime books onto Energy Valley buildings" {
-  assert_eq(building_module_key("research-grid-storage"), "energy-lab")
+  assert_eq(building_module_key("research-opc"), "research-opc")
+  assert_eq(
+    building_module_key("research-how-llms-are-trained-in-very-detail"),
+    "research-llm-training",
+  )
+  assert_eq(
+    building_module_key("research-agent-work-projection"),
+    "research-ai-agents",
+  )
   assert_eq(building_module_key("coding"), "ai-garden")
   assert_eq(building_module_key("finance"), "valley-market")
   assert_eq(building_module_key("wenyu-policy-hall"), "policy-hall")
@@ -46,4 +54,29 @@ test "desktop collaboration does not mislabel pending work as running" {
   assert_eq(collaboration_participant_status("Pending"), "assigned")
   assert_eq(collaboration_participant_status("Succeeded"), "completed")
   assert_eq(collaboration_participant_status("unrecognized"), "unknown")
+}
+
+///|
+test "desktop server exposes every Rabbita runtime snapshot path" {
+  for
+    path in [
+      "/town.json", "/visual-projection.json", "/module-projections.json", "/moondesk-bridge.json",
+      "/civic-status.json", "/daemon.json", "/live-autonomy.json", "/editor-pipeline.json",
+      "/standing-goals.json", "/book-template-requests.json",
+    ] {
+    assert_true(runtime_snapshot_source(path) is Some(_), msg=path)
+  }
+  assert_true(runtime_snapshot_source("/not-a-runtime-file.json") is None)
+}
+
+///|
+test "desktop book-template request accepts newline and comma website lists" {
+  let newline : Map[String, Json] = {
+    "websites": "https://example.org/a\nhttps://example.org/b",
+  }
+  assert_eq(json_string_list_field(newline, "websites").length(), 2)
+  let comma : Map[String, Json] = {
+    "websites": "https://example.org/a, https://example.org/b",
+  }
+  assert_eq(json_string_list_field(comma, "websites").length(), 2)
 }

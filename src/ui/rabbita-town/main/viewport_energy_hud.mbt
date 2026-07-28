@@ -12,29 +12,32 @@ fn render_viewport_energy_metric(
 
 ///|
 fn render_viewport_energy_metrics(model : Model) -> @rabbita.Html {
+  let runtime = model.energy_valley_runtime
   div(
     class="viewport-energy-metrics",
     attrs=@html.Attrs::build().aria_label("Town pulse"),
     [
       render_viewport_energy_metric(
         "Agents",
-        workers_for_model(model).length().to_string(),
+        energy_valley_runtime_active_agents(runtime).length().to_string(),
         "agents",
       ),
       render_viewport_energy_metric(
-        "Energy",
-        model.energy.to_string(),
+        "Open work",
+        energy_valley_runtime_open_task_count(runtime).to_string(),
         "energy",
       ),
       render_viewport_energy_metric(
-        "Budget",
-        model.budget.to_string(),
+        "Review",
+        energy_valley_runtime_task_count(runtime, "waiting_review").to_string(),
         "budget",
       ),
       render_viewport_energy_metric(
-        "Pressure",
-        model.pressure.to_string(),
-        if model.pressure > 70 {
+        "Blocked",
+        (energy_valley_runtime_task_count(runtime, "blocked") +
+        energy_valley_runtime_task_count(runtime, "failed")).to_string(),
+        if energy_valley_runtime_task_count(runtime, "blocked") > 0 ||
+          energy_valley_runtime_task_count(runtime, "failed") > 0 {
           "alert"
         } else {
           "pressure"

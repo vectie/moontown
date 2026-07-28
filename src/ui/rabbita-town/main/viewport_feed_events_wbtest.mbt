@@ -127,7 +127,7 @@ test "feed item for event projects visible events and skips hidden events" {
     item
     is Some(
       {
-    title: "Standing watch update / research-opc",
+        title: "Standing watch update / research-opc",
         detail: "NoChange",
         tone: "calm",
       }

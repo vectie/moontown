@@ -386,7 +386,7 @@ semantic contract is stable.
 
 Before accepting a new map/assets batch:
 
-- `npm run build` passes in `src/ui/rabbita-town`
+- `./scripts/build-rabbita-ui.sh` passes from the repository root
 - `/Users/kq/.moon/bin/moon -C src/ui/rabbita-town check main` passes
 - viewport renders in Codex browser
 - viewport renders in Safari

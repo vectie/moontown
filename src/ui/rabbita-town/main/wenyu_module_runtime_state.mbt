@@ -5,6 +5,13 @@ fn wenyu_module_runtime_state(
   executions : Array[@core.TaskExecutionRecord],
 ) -> WenyuModuleRuntimeState {
   let issue_count = module_validation_issues(civic).length()
+  if model.energy_valley_runtime.phase != Loading {
+    return runtime_state_from_energy_valley(
+      model.energy_valley_runtime,
+      civic,
+      issue_count,
+    )
+  }
   let active_agent_count = module_active_visual_agents(model, civic).length()
   match find_module_visual_module(model, civic) {
     Some(module_status) =>

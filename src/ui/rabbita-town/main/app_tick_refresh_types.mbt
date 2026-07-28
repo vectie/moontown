@@ -3,6 +3,7 @@ priv struct TickRefreshState {
   state_source : StateSourceKind
   projection_snapshot : ProjectionSnapshot?
   snapshot_version : Int
+  energy_valley_runtime : EnergyValleyRuntimeState
   visual_projection : VisualProjectionSnapshot?
   visual_projection_version : Int
   module_projections : Array[BookProjectionFragment]
@@ -30,6 +31,7 @@ priv struct TickRefreshState {
 ///|
 priv struct TickRefreshVersions {
   snapshot : Int
+  energy_valley_runtime : Int
   visual_projection : Int
   module_projections : Int
   moondesk_handoff : Int

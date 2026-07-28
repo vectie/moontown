@@ -1,6 +1,12 @@
 ///|
+let active_wenyu_modules : Array[WenyuTownModule] = procedural_energy_valley_modules(
+  parse_bootstrap_wenyu_modules(),
+  active_energy_valley_seed(),
+)
+
+///|
 fn wenyu_modules() -> Array[WenyuTownModule] {
-  parse_bootstrap_wenyu_modules()
+  active_wenyu_modules
 }
 
 ///|

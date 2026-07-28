@@ -34,17 +34,11 @@ test "ai garden base health uses scenario bonus and queue pressure" {
 test "ai garden signal uses shared execution phrase groups" {
   let model = init_model()
   assert_eq(
-    ai_garden_signal(
-      model,
-      Some(civic_metric_test_execution(PacketReady)),
-    ),
+    ai_garden_signal(model, Some(civic_metric_test_execution(PacketReady))),
     "Dispatching",
   )
   assert_eq(
-    ai_garden_signal(
-      model,
-      Some(civic_metric_test_execution(Running)),
-    ),
+    ai_garden_signal(model, Some(civic_metric_test_execution(Running))),
     "Tool trial live",
   )
   assert_eq(
@@ -63,20 +57,12 @@ test "ai garden next action uses shared execution action groups" {
     ai_garden_next_action(
       model,
       None,
-      Some(
-        civic_metric_test_execution(
-          AwaitingPersistence,
-        ),
-      ),
+      Some(civic_metric_test_execution(AwaitingPersistence)),
     ),
     "Persist the reviewed tutorial page and refresh the district-facing learning snapshot.",
   )
   assert_eq(
-    ai_garden_next_action(
-      model,
-      None,
-      Some(civic_metric_test_execution(Stale)),
-    ),
+    ai_garden_next_action(model, None, Some(civic_metric_test_execution(Stale))),
     "Recover the stalled tutorial run before the daily learning loop drifts.",
   )
 }
@@ -85,24 +71,15 @@ test "ai garden next action uses shared execution action groups" {
 test "ai garden stage uses shared execution phrase groups" {
   let model = init_model()
   assert_eq(
-    ai_garden_stage(
-      model,
-      Some(civic_metric_test_execution(PacketReady)),
-    ),
+    ai_garden_stage(model, Some(civic_metric_test_execution(PacketReady))),
     "Tool trial packet prepared",
   )
   assert_eq(
-    ai_garden_stage(
-      model,
-      Some(civic_metric_test_execution(Running)),
-    ),
+    ai_garden_stage(model, Some(civic_metric_test_execution(Running))),
     "Tutorial quest running",
   )
   assert_eq(
-    ai_garden_stage(
-      model,
-      Some(civic_metric_test_execution(Completed)),
-    ),
+    ai_garden_stage(model, Some(civic_metric_test_execution(Completed))),
     "Daily lesson published",
   )
 }

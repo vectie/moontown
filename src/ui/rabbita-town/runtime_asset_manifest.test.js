@@ -22,6 +22,7 @@ test('runtime asset manifest covers modules, residents, and operating art', asyn
   )
 
   assert.ok(pathSet.has('tilemap/wenyu_reference_tilemap_iso.png'))
+  assert.ok(pathSet.has('moontown.svg'))
   assert.ok(pathSet.has('tilemap/districts/town_shell.png'))
   assert.ok(pathSet.has('tilemap/actors/roster/resident_0.png'))
   for (let index = 0; index < 64; index += 1) {

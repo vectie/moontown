@@ -20,21 +20,9 @@ fn worker_visibility_test_worker(
 
 ///|
 test "worker visibility separates working workers from idle workers" {
-  assert_true(
-    is_working_worker(
-      worker_visibility_test_worker(status=Running),
-    ),
-  )
-  assert_true(
-    is_working_worker(
-      worker_visibility_test_worker(status=Blocked),
-    ),
-  )
-  assert_true(
-    !is_working_worker(
-      worker_visibility_test_worker(status=Idle),
-    ),
-  )
+  assert_true(is_working_worker(worker_visibility_test_worker(status=Running)))
+  assert_true(is_working_worker(worker_visibility_test_worker(status=Blocked)))
+  assert_true(!is_working_worker(worker_visibility_test_worker(status=Idle)))
 }
 
 ///|
@@ -42,10 +30,7 @@ test "visible overworld workers keeps active workers and on-duty watchers" {
   let workers = [
     worker_visibility_test_worker(status=Running),
     worker_visibility_test_worker(status=Idle),
-    worker_visibility_test_worker(
-      status=Idle,
-      role="Standing Watcher",
-    ),
+    worker_visibility_test_worker(status=Idle, role="Standing Watcher"),
   ]
   let visible = visible_overworld_workers(workers)
   assert_eq(visible.length(), 2)

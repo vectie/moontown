@@ -1,16 +1,32 @@
 import assert from 'node:assert/strict'
+import { createHash } from 'node:crypto'
 import { readFile, readdir, stat } from 'node:fs/promises'
 import path from 'node:path'
+import {
+  AUTHORING_ONLY_ASSET_SEGMENTS,
+  runtimeAssetPaths,
+} from '../runtime_asset_manifest.js'
 
 const frontendRoot = path.resolve(import.meta.dirname, '..')
+const assetRoot = path.resolve(frontendRoot, '../assets')
 const distRoot = path.join(frontendRoot, 'dist')
-const MAX_DIST_BYTES = 2 * 1024 * 1024
+const MAX_DIST_BYTES = 64 * 1024 * 1024
+const REQUIRED_BROWSER_FILES = [
+  'index.html',
+  'viewport.html',
+  'operations.html',
+  'bootstrap.js',
+  'main.js',
+  'runtime_snapshot_fetch.js',
+  'runtime_snapshot_manifest.js',
+  'runtime_snapshot_parser.js',
+  'runtime_snapshots.js',
+  'styles.css',
+  'viewport_drag_pan.js',
+]
 const FORBIDDEN_RELEASE_SEGMENTS = [
-  '/backgrounds/',
   '/book-output/',
-  '/effects/',
-  '/props/',
-  '/tilemap/',
+  '/node_modules/',
   '/watchers/',
 ]
 const FORBIDDEN_RELEASE_FILES = new Set([
@@ -32,8 +48,9 @@ async function filesUnder(root, relativeDirectory = '') {
   const directory = path.join(root, relativeDirectory)
   const entries = await readdir(directory, { withFileTypes: true })
   const files = []
-  for (const entry of entries) {
-    const relativePath = path.join(relativeDirectory, entry.name)
+  for (const entry of entries.sort((left, right) =>
+    left.name.localeCompare(right.name))) {
+    const relativePath = path.posix.join(relativeDirectory, entry.name)
     if (entry.isDirectory()) {
       files.push(...await filesUnder(root, relativePath))
     } else if (entry.isFile()) {
@@ -44,29 +61,49 @@ async function filesUnder(root, relativeDirectory = '') {
 }
 
 const distFiles = await filesUnder(distRoot)
-const distPathSet = new Set(distFiles.map(file => file.split(path.sep).join('/')))
+const distPathSet = new Set(distFiles)
+const runtimePaths = await runtimeAssetPaths(assetRoot)
+const sourceStylePaths = (await readdir(path.join(frontendRoot, 'styles'), {
+  withFileTypes: true,
+}))
+  .filter(entry => entry.isFile() && entry.name.endsWith('.css'))
+  .map(entry => `styles/${entry.name}`)
+  .sort()
 let totalBytes = 0
 
 for (const relativePath of distFiles) {
   totalBytes += (await stat(path.join(distRoot, relativePath))).size
 }
-assert.ok(distPathSet.has('index.html'), 'missing packaged town entry point')
-assert.ok(
-  [...distPathSet].some(relativePath => /^assets\/town-.*\.js$/.test(relativePath)),
-  'missing packaged town JavaScript',
-)
-assert.ok(
-  [...distPathSet].some(relativePath => /^assets\/town-.*\.css$/.test(relativePath)),
-  'missing packaged town stylesheet',
-)
+for (const relativePath of REQUIRED_BROWSER_FILES) {
+  assert.ok(distPathSet.has(relativePath), `missing browser file: ${relativePath}`)
+}
+for (const relativePath of sourceStylePaths) {
+  assert.ok(distPathSet.has(relativePath), `missing stylesheet: ${relativePath}`)
+}
+for (const relativePath of runtimePaths) {
+  assert.ok(distPathSet.has(relativePath), `missing product asset: ${relativePath}`)
+}
 for (const relativePath of distPathSet) {
-  const searchable = `/${relativePath.split(path.sep).join('/')}`
+  const searchable = `/${relativePath}`
   assert.equal(
     FORBIDDEN_RELEASE_FILES.has(relativePath),
     false,
     `legacy runtime data leaked into release: ${relativePath}`,
   )
+  assert.doesNotMatch(
+    relativePath,
+    /\.(?:jsx|ts|tsx)$/i,
+    `typed frontend source leaked into release: ${relativePath}`,
+  )
+  assert.doesNotMatch(
+    searchable,
+    /(?:^|\/)(?:react|vite)(?:\/|$)/i,
+    `bundler dependency leaked into release: ${relativePath}`,
+  )
   for (const segment of FORBIDDEN_RELEASE_SEGMENTS) {
+    assert.equal(searchable.includes(segment), false, relativePath)
+  }
+  for (const segment of AUTHORING_ONLY_ASSET_SEGMENTS) {
     assert.equal(searchable.includes(segment), false, relativePath)
   }
 }
@@ -74,9 +111,61 @@ for (const relativePath of distPathSet) {
 const html = await readFile(path.join(distRoot, 'index.html'), 'utf8')
 assert.match(html, /MoonTown · 能源谷/)
 assert.doesNotMatch(html, /operations\.html|viewport\.html/)
+assert.doesNotMatch(html, /\.tsx|react|typescript/i)
+assert.match(html, /id="app"/)
+assert.match(html, /src="\/bootstrap\.js"/)
+assert.match(html, /href="\/styles\.css"/)
+
+const bootstrap = await readFile(path.join(distRoot, 'bootstrap.js'), 'utf8')
+assert.match(bootstrap, /import\('\/main\.js'\)/)
+assert.doesNotMatch(bootstrap, /vite|react|typescript|\.tsx/i)
+assert.doesNotMatch(
+  bootstrap,
+  /import\s+['"][^'"]+\.css['"]/,
+  'native browser bootstrap must load styles through HTML, not a bundler import',
+)
+
+const mainStat = await stat(path.join(distRoot, 'main.js'))
+assert.ok(mainStat.size > 100_000, 'compiled MoonBit entry is unexpectedly small')
+
+const styles = await readFile(path.join(distRoot, 'styles.css'), 'utf8')
+for (const match of styles.matchAll(/@import url\(["']?([^"')]+)["']?\)/g)) {
+  const importedPath = path.posix.normalize(match[1])
+  assert.ok(
+    distPathSet.has(importedPath.replace(/^\.\//, '')),
+    `missing imported stylesheet: ${match[1]}`,
+  )
+}
+
+const manifestPath = path.join(distRoot, 'asset-manifest.json')
+const manifest = JSON.parse(await readFile(manifestPath, 'utf8'))
+assert.equal(manifest.schema, 'moontown.static-product.v1')
+assert.ok(Array.isArray(manifest.files), 'asset manifest must list files')
+const manifestedPaths = manifest.files.map(file => file.path)
+assert.deepEqual(
+  manifestedPaths,
+  [...manifestedPaths].sort(),
+  'asset manifest paths must be deterministic',
+)
+assert.deepEqual(
+  new Set(manifestedPaths),
+  new Set(distFiles.filter(file => file !== 'asset-manifest.json')),
+  'asset manifest must describe the complete static product',
+)
+for (const file of manifest.files) {
+  const filePath = path.join(distRoot, file.path)
+  const content = await readFile(filePath)
+  assert.equal((await stat(filePath)).size, file.bytes, `${file.path} size drift`)
+  assert.equal(
+    createHash('sha256').update(content).digest('hex'),
+    file.sha256,
+    `${file.path} digest drift`,
+  )
+}
+
 assert.ok(
   totalBytes < MAX_DIST_BYTES,
-  `production artifact is ${(totalBytes / 1024 / 1024).toFixed(1)} MiB; budget is 2 MiB`,
+  `production artifact is ${(totalBytes / 1024 / 1024).toFixed(1)} MiB; budget is 64 MiB`,
 )
 
 console.log(

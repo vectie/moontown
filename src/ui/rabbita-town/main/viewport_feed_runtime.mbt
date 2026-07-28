@@ -96,16 +96,12 @@ fn execution_feed_kind(status : @core.TaskExecutionStatus) -> ExecutionFeedKind 
     RunningExecution
   } else {
     match status {
-      AwaitingPersistence =>
-        AwaitingPersistenceExecution
+      AwaitingPersistence => AwaitingPersistenceExecution
       Stale => StaleExecution
       Failed => FailedExecution
-      PacketReady
-      | ProposalImported
-      | ReviewQueued
-      | Completed => QuietExecution
-      RunConfirmed
-      | Running => QuietExecution
+      PacketReady | ProposalImported | ReviewQueued | Completed =>
+        QuietExecution
+      RunConfirmed | Running => QuietExecution
     }
   }
 }

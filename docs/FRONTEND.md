@@ -167,7 +167,7 @@ screened material and MoonBook judged that the book should not be inflated. The
 UI should reserve "progress" language for accepted facts, queued review, changed
 wiki pages, or `book_changed: yes`.
 
-The request composer writes through the Vite dev endpoint
+The request composer writes through the MoonBit desktop-service endpoint
 `POST /api/operator-requests`. A successful submit appends an operator request
 record and creates or replaces the matching standing goal in
 `.moonsuite/products/moontown/standing-goals.json`. The daemon is still the
@@ -175,11 +175,11 @@ executor; the UI only adds durable work to the Mayor queue.
 
 The default source policy for browser-submitted standing goals comes from
 [assets/templates/operator-request-policy.json](/Users/kq/Workspace/moontown/assets/templates/operator-request-policy.json).
-The Vite endpoint reads that document before writing records; it should not
-hard-code `web-first` in JavaScript. This keeps the browser as a request
+The desktop service reads that document before writing records; the browser
+glue should not hard-code `web-first`. This keeps the browser as a request
 surface and leaves policy vocabulary in document/policy-owned contracts.
 
-The book-template composer writes through the Vite dev endpoint
+The book-template composer writes through the MoonBit desktop-service endpoint
 `POST /api/book-template-requests`. The first supported template is
 `pdf-evidence-watch`: the operator provides a title, book id, websites,
 cadence, purpose, and optional method override; the endpoint writes a config
@@ -289,7 +289,7 @@ Implemented handoff surfaces:
     packs, asset packs, simple agent profiles, skill-pack references, operator
     request packs, and generated output bundles
 - `moondesk-bridge.json`
-  - Vite bridge output that scans real
+  - MoonBit desktop-service projection that scans real
     `.moonsuite/products/moontown/moondesk-dispatches`,
     `.moonsuite/products/moontown/moondesk-requests`, and
     `.moonsuite/products/moontown/book-results` records
@@ -314,7 +314,7 @@ The short version:
 - buildings are loaded from `src/ui/assets/tilemap/modules/wenyu-town-modules.json`
 - each building binds to a MoonBook through `book_id`
 - clicking a building opens a module-specific interior
-- the Vite bridge scans `books/*/book/moonbook-ui-state.json` and
+- the MoonBit desktop service scans `books/*/book/moonbook-ui-state.json` and
   publishes `module-projections.json`; smoke and fresh-root runs may override
   the defaults with `MOONTOWN_SUITE_ROOT`, `MOONTOWN_BOOKS_ROOT`, and
   `MOONTOWN_PRODUCT_STATE_ROOT`
@@ -386,15 +386,6 @@ tiled-map pipeline.
 
 ## Build and Dev
 
-From the frontend directory:
-
-```bash
-cd src/ui/rabbita-town
-npm install
-npm run dev
-npm run build
-```
-
 From the repo root:
 
 ```bash
@@ -407,16 +398,17 @@ configured module art, runtime actor strips, district previews, tiles, objects,
 and runtime JSON contracts. Source renders, prompts, style sheets, generated
 tilesets, and individual animation frames remain development inputs.
 
-`npm run build` also verifies every manifest path, rejects authoring-only
-directories in `dist`, and enforces a 64 MiB artifact budget. The current
-artifact is 43.8 MiB by file bytes.
+The build compiles the MoonBit browser entry and copies only checked browser
+glue, CSS, and product assets. It verifies every manifest path, rejects
+authoring-only directories in `dist`, and enforces a 64 MiB artifact budget.
 
 Build output lands in:
 
 - `src/ui/rabbita-town/dist/`
 
-The Vite build uses a relative base path, so the generated `dist/index.html`
-can be opened from `file://` as well as served through Vite preview.
+Serve the generated directory through the MoonBit desktop service described by
+`lepusa.json`; that service provides the live projections and safe write
+endpoints as well as static files.
 
 ## UI Change Rule
 
@@ -430,17 +422,18 @@ moon fmt
 ./scripts/build-rabbita-ui.sh
 ```
 
-For frontend-only iteration, at minimum run:
+For frontend-only iteration, run:
 
 ```bash
 ./scripts/build-rabbita-ui.sh
 ```
 
-The fresh-suite book projection smoke can be run from the frontend directory:
+To launch the packaged localhost service through Lepusa on macOS after building
+the UI and native desktop service:
 
 ```bash
-cd src/ui/rabbita-town
-npm run smoke:book-projections
+moon -C .mooncakes/vectie/lepusa run cmd/main --target native -- \
+  run macos --launch --project "$PWD/lepusa.json"
 ```
 
 ## UI Ownership Boundary

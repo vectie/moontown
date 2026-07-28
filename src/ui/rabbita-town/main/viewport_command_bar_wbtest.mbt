@@ -29,6 +29,16 @@ test "viewport command bar reports truthful runtime availability" {
   assert_eq(viewport_runtime_status_label(connecting), "Connecting")
   assert_eq(viewport_runtime_status_label(offline), "Town offline")
   assert_eq(viewport_runtime_status_label(live), "Live town")
+  assert_eq(
+    viewport_runtime_status_label({
+      ..live,
+      energy_valley_runtime: {
+        ..energy_valley_runtime_loading_state(),
+        phase: Stale,
+      },
+    }),
+    "Runtime stale",
+  )
   assert_true(
     !render_viewport_command_bar_test_html(offline).contains(">Live<"),
   )
@@ -55,9 +65,9 @@ test "viewport command bar removes duplicate and low-frequency chrome" {
   let html = render_viewport_command_bar_test_html(init_model())
   assert_true(html.contains("aria-label=\"Town pulse\""))
   assert_true(html.contains(">Agents<"))
-  assert_true(html.contains(">Energy<"))
-  assert_true(html.contains(">Budget<"))
-  assert_true(html.contains(">Pressure<"))
+  assert_true(html.contains(">Open work<"))
+  assert_true(html.contains(">Review<"))
+  assert_true(html.contains(">Blocked<"))
   assert_true(html.contains("href=\"./operations.html\""))
   assert_true(html.contains(">Operations<"))
   assert_true(html.contains("aria-label=\"Viewport mode\""))

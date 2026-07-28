@@ -1340,21 +1340,22 @@ Key files:
 - [src/ui/rabbita-town/styles.css](/Users/kq/Workspace/moontown/src/ui/rabbita-town/styles.css)
 - [src/ui/rabbita-town/index.html](/Users/kq/Workspace/moontown/src/ui/rabbita-town/index.html)
 - [src/ui/rabbita-town/package.json](/Users/kq/Workspace/moontown/src/ui/rabbita-town/package.json)
-- [src/ui/rabbita-town/vite.config.js](/Users/kq/Workspace/moontown/src/ui/rabbita-town/vite.config.js)
+- [src/ui/rabbita-town/scripts/assemble-production-build.mjs](/Users/kq/Workspace/moontown/src/ui/rabbita-town/scripts/assemble-production-build.mjs)
+- [src/ui/rabbita-town/scripts/verify-production-build.mjs](/Users/kq/Workspace/moontown/src/ui/rabbita-town/scripts/verify-production-build.mjs)
 
 Purpose:
 
 - browser implementation of the town dashboard
 - live simulation UI
-- Vite build/dev workflow
+- deterministic no-bundler production assembly
 
 Boundary:
 
 - `src/ui/rabbita-town/main` owns browser bridges, event handlers, concrete
   HTML/CSS view composition, and app-specific fallback wording.
-- Vite request handlers may translate browser forms into durable document
-  records, but defaults such as standing-goal source policy must come from
-  document contracts such as
+- the MoonBit desktop service may translate browser forms into durable document
+  records, but defaults such as standing-goal source policy come from document
+  contracts such as
   [assets/templates/operator-request-policy.json](/Users/kq/Workspace/moontown/assets/templates/operator-request-policy.json),
   not raw JavaScript literals.
 - reusable projection policy belongs in `src/ui` or `src/visual_projection`,

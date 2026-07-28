@@ -18,8 +18,5 @@ test "civic module card visual slugs match district assets" {
     "vitality_dashboard",
   )
   assert_eq(civic_module_card_visual_slug("Social Square"), "social_square")
-  assert_eq(
-    civic_module_card_visual_slug("Physical Bridge"),
-    "physical_bridge",
-  )
+  assert_eq(civic_module_card_visual_slug("Physical Bridge"), "physical_bridge")
 }

@@ -1,11 +1,78 @@
 // Generated using `moon info`, DON'T EDIT IT
 package "vectie/moontown-rabbita/main"
 
+import {
+  "moonbitlang/core/debug",
+}
+
 // Values
+pub fn exact_energy_valley_cols() -> Int
+
+pub fn exact_energy_valley_default_seed() -> UInt
+
+pub fn exact_energy_valley_generate(UInt) -> ExactEnergyValleyWorld
+
+pub fn exact_energy_valley_generate_default() -> ExactEnergyValleyWorld
+
+pub fn exact_energy_valley_generate_int(Int) -> ExactEnergyValleyWorld
+
+pub fn exact_energy_valley_rows() -> Int
 
 // Errors
 
 // Types and methods
+pub(all) struct ExactEnergyValleyBuilding {
+  id : String
+  archetype : String
+  module_key : String
+  name : String
+  glyph : String
+  style : String
+  x : Int
+  y : Int
+  width : Int
+  depth : Int
+  floors : Int
+  vitality : Double
+} derive(@debug.Debug)
+
+pub(all) struct ExactEnergyValleyLandmarks {
+  civic_core_x : Int
+  civic_core_y : Int
+  lake_x : Double
+  lake_y : Double
+  lake_radius_x : Double
+  lake_radius_y : Double
+  bridge_rows : Array[Int]
+  main_river_mean_x : Double
+} derive(@debug.Debug)
+
+pub(all) struct ExactEnergyValleyTile {
+  mut terrain : String
+  mut base_terrain : String
+  mut generated_terrain : String
+  mut district : String
+  variation : Double
+  mut building_id : String?
+  mut river_flow : Double?
+  mut road_mask : Int?
+  mut structure : String?
+  mut structure_floors : Int?
+} derive(@debug.Debug)
+
+pub(all) struct ExactEnergyValleyWorld {
+  seed : UInt
+  cols : Int
+  rows : Int
+  tiles : Array[Array[ExactEnergyValleyTile]]
+  buildings : Array[ExactEnergyValleyBuilding]
+  landmarks : ExactEnergyValleyLandmarks
+} derive(@debug.Debug)
+pub fn ExactEnergyValleyWorld::building_for_module(Self, String) -> ExactEnergyValleyBuilding?
+pub fn ExactEnergyValleyWorld::structure_at(Self, Int, Int) -> (String, Int)?
+pub fn ExactEnergyValleyWorld::terrain_at(Self, Int, Int) -> String?
+pub fn ExactEnergyValleyWorld::tile_at(Self, Int, Int) -> ExactEnergyValleyTile?
+pub fn ExactEnergyValleyWorld::variation_at(Self, Int, Int) -> Double?
 
 // Type aliases
 

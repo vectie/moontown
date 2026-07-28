@@ -21,12 +21,6 @@ jobs:
       - uses: actions/setup-node@v4
         with:
           node-version: 22
-          cache: npm
-          cache-dependency-path: src/ui/rabbita-town/package-lock.json
-
-      - name: Install frontend dependencies
-        working-directory: src/ui/rabbita-town
-        run: npm ci
 
       - name: Audit source boundaries
         run: scripts/audit-source-layout.sh
@@ -37,11 +31,7 @@ jobs:
           moon test --target native
 
       - name: Validate Rabbita frontend
-        working-directory: src/ui/rabbita-town
         run: |
-          moon check --target js main
-          moon test --target js
-          npm run test:server
-          npm run smoke:user-workflows
-          npm run smoke:book-projections
-          npm run build
+          moon -C src/ui/rabbita-town check --target js main
+          moon -C src/ui/rabbita-town test --target js
+          ./scripts/build-rabbita-ui.sh

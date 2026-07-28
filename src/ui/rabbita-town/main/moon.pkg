@@ -2,6 +2,8 @@ import {
   "moonbitlang/core/json",
   "moonbit-community/rabbita",
   "moonbit-community/rabbita/html",
+  "moonbit-community/rabbita/html/canvas",
+  "moonbit-community/rabbita/dom",
   "moonbit-community/rabbita/js",
   "vectie/moonlib/moonsuite",
   "vectie/moontown/core",
@@ -11,6 +13,4 @@ import {
 
 supported_targets = "js"
 
-options(
-  "is-main": true,
-)
+pkgtype(kind: "executable")

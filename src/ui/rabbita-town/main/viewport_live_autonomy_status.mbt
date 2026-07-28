@@ -12,9 +12,7 @@ fn live_autonomy_operator_view(
 ) -> LiveAutonomyOperatorView {
   match model.live_autonomy {
     Some(spine) =>
-      live_autonomy_connected_operator_view(
-        spine, fallback_active_workers,
-      )
+      live_autonomy_connected_operator_view(spine, fallback_active_workers)
     None => live_autonomy_disconnected_operator_view(fallback_active_workers)
   }
 }

@@ -14,7 +14,13 @@ moon -C "$ui_dir" check main
 echo "[rabbita] updating package interface"
 moon -C "$ui_dir" info main
 
-echo "[rabbita] building Vite bundle"
-npm --prefix "$ui_dir" run build
+echo "[rabbita] compiling MoonBit browser entry"
+moon -C "$ui_dir" build --target js --release
+
+echo "[rabbita] assembling deterministic static product"
+node "$ui_dir/scripts/assemble-production-build.mjs"
+
+echo "[rabbita] verifying static product"
+node "$ui_dir/scripts/verify-production-build.mjs"
 
 echo "[rabbita] build complete"

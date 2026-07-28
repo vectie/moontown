@@ -137,7 +137,7 @@ fn render_wenyu_module_interior(
     ]),
     div(class="interior-room module-interior-room", [
       render_module_interior_overview(civic, runtime, projection),
-      div(class="interior-floor", module_interior_furniture(civic)),
+      render_module_work_floor(civic, model.energy_valley_runtime),
       div(
         class="interior-agent-grid module-interior-agent-grid",
         if !visual_agents.is_empty() {

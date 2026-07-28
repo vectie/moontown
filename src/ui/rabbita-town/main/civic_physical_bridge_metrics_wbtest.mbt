@@ -41,10 +41,7 @@ test "physical bridge signal uses shared execution phrase groups" {
     "Sync dispatch",
   )
   assert_eq(
-    physical_bridge_signal(
-      model,
-      Some(civic_metric_test_execution(Running)),
-    ),
+    physical_bridge_signal(model, Some(civic_metric_test_execution(Running))),
     "Bridge sync live",
   )
   assert_eq(
@@ -63,11 +60,7 @@ test "physical bridge next action uses shared execution action groups" {
     physical_bridge_next_action(
       model,
       None,
-      Some(
-        civic_metric_test_execution(
-          AwaitingPersistence,
-        ),
-      ),
+      Some(civic_metric_test_execution(AwaitingPersistence)),
     ),
     "Persist the reviewed telemetry and booking slice so MoonTown can project a trustworthy district state.",
   )
@@ -85,17 +78,11 @@ test "physical bridge next action uses shared execution action groups" {
 test "physical bridge stage uses shared execution phrase groups" {
   let model = init_model()
   assert_eq(
-    physical_bridge_stage(
-      model,
-      Some(civic_metric_test_execution(PacketReady)),
-    ),
+    physical_bridge_stage(model, Some(civic_metric_test_execution(PacketReady))),
     "Bridge packet prepared",
   )
   assert_eq(
-    physical_bridge_stage(
-      model,
-      Some(civic_metric_test_execution(Running)),
-    ),
+    physical_bridge_stage(model, Some(civic_metric_test_execution(Running))),
     "Room and robot sync running",
   )
   assert_eq(

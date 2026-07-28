@@ -1,5 +1,15 @@
 ///|
 fn viewport_runtime_status_label(model : Model) -> String {
+  if model.state_source != DemoSimulation &&
+    model.energy_valley_runtime.phase != Loading {
+    return match model.energy_valley_runtime.phase {
+      Live => "Live town"
+      Stale => "Runtime stale"
+      Unavailable => "Town offline"
+      Error => "Runtime error"
+      Loading => "Connecting"
+    }
+  }
   match runtime_availability(model) {
     DemoRuntime => if model.paused { "Demo paused" } else { "Demo" }
     ConnectingRuntime => "Connecting"
@@ -10,6 +20,15 @@ fn viewport_runtime_status_label(model : Model) -> String {
 
 ///|
 fn viewport_runtime_status_tone(model : Model) -> String {
+  if model.state_source != DemoSimulation &&
+    model.energy_valley_runtime.phase != Loading {
+    return match model.energy_valley_runtime.phase {
+      Live => "chip-live"
+      Stale => "chip-clock"
+      Unavailable | Error => "chip-alert"
+      Loading => "chip-clock"
+    }
+  }
   match runtime_availability(model) {
     DemoRuntime => "chip-neutral"
     ConnectingRuntime => "chip-clock"

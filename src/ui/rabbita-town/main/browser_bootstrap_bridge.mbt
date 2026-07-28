@@ -7,6 +7,25 @@ extern "js" fn town_snapshot_version() -> Int =
   #| () => globalThis.__moontownTownSnapshotVersion || 0
 
 ///|
+extern "js" fn load_bootstrap_energy_valley_runtime_json() -> String =
+  #| () => globalThis.__moontownEnergyValleyRuntimeJson || ""
+
+///|
+extern "js" fn energy_valley_runtime_version() -> Int =
+  #| () => globalThis.__moontownEnergyValleyRuntimeVersion || 0
+
+///|
+extern "js" fn browser_now_ms() -> Double =
+  #| () => Date.now()
+
+///|
+extern "js" fn browser_timestamp_ms(value : String) -> Double =
+  #| value => {
+  #|   const parsed = Date.parse(value);
+  #|   return Number.isFinite(parsed) ? parsed : -1;
+  #| }
+
+///|
 extern "js" fn load_bootstrap_visual_projection_json() -> String =
   #| () => globalThis.__moontownVisualProjectionJson || ""
 

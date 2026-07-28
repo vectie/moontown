@@ -405,7 +405,7 @@ Current status:
   active worker roster slots
 - `visual-projection.json` now includes first-class `modules[]` status objects
   keyed by normalized module id
-- the Vite bridge now scans `books/*/book/moonbook-ui-state.json`
+- the MoonBit desktop service now scans `books/*/book/moonbook-ui-state.json`
   and publishes `module-projections.json`
 - book projection visibility is explicit: public building books use
   `projection_scope: public`, internal salon workspaces use
@@ -541,7 +541,7 @@ Remaining:
 - Hover/focus reveals building information; labels are hidden otherwise.
 - The base terrain remains visually calm.
 - River depth/reflection is visible but not noisy.
-- The UI builds with `npm run build`.
+- The UI builds with `./scripts/build-rabbita-ui.sh`.
 - MoonBit checks pass with `moon check`.
 - Runtime labels distinguish configured modules from real active work.
 - Worker avatars are not shown as busy unless a real task/run/watch record says

@@ -718,12 +718,11 @@ Build the Rabbita frontend:
 ./scripts/build-rabbita-ui.sh
 ```
 
-Or work directly in the frontend package:
+For a focused frontend check:
 
 ```bash
-cd src/ui/rabbita-town
-npm install
-npm run dev
+moon -C src/ui/rabbita-town check main
+./scripts/build-rabbita-ui.sh
 ```
 
 ## Runtime Flow

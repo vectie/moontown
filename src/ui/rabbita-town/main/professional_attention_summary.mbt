@@ -14,8 +14,8 @@ fn professional_attention_summary(
   let live = live_autonomy_operator_view(model, fallback_active_workers=0)
   {
     failed_count: execution_summary.failed +
-      decisions.failed_count +
-      live.failed_template_request_count,
+    decisions.failed_count +
+    live.failed_template_request_count,
     review_count: execution_summary.review_queued + decisions.review_count,
   }
 }

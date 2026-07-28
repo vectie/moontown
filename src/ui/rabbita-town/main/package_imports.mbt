@@ -4,6 +4,7 @@ using @html {
   article,
   aside,
   button,
+  canvas,
   div,
   h1,
   h2,

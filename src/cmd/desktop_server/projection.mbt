@@ -85,7 +85,19 @@ fn building_module_key(book_id : String) -> String {
   if book_id.is_empty() {
     "unlocated"
   } else if book_id.has_prefix("research-") {
-    "energy-lab"
+    match book_id {
+      "research-embodied-robotics" => "research-embodied-robotics"
+      "research-ai-agents" => "research-ai-agents"
+      "research-opc" => "research-opc"
+      "research-how-llms-are-trained-in-very-detail" => "research-llm-training"
+      "research-ai-hardware" => "research-ai-hardware"
+      id if id.contains("robot") => "research-embodied-robotics"
+      id if id.contains("opc") => "research-opc"
+      id if id.contains("hardware") => "research-ai-hardware"
+      id if id.contains("llm") || id.contains("training") =>
+        "research-llm-training"
+      _ => "research-ai-agents"
+    }
   } else {
     match book_id {
       "coding" | "wenyu-ai-garden" => "ai-garden"

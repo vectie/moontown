@@ -6,6 +6,11 @@ fn refresh_tick_state(model : Model) -> TickRefreshState {
     model.snapshot_version,
     model.projection_snapshot,
   )
+  let energy_valley_runtime = refresh_energy_valley_runtime_state(
+    versions.energy_valley_runtime,
+    model.energy_valley_runtime,
+    browser_now_ms(),
+  )
   let visual_projection = refresh_visual_projection(
     versions.visual_projection,
     model.visual_projection_version,
@@ -53,6 +58,7 @@ fn refresh_tick_state(model : Model) -> TickRefreshState {
     state_source: refreshed_state_source(model, projection_snapshot),
     projection_snapshot,
     snapshot_version: versions.snapshot,
+    energy_valley_runtime,
     visual_projection,
     visual_projection_version: versions.visual_projection,
     module_projections,
@@ -82,6 +88,7 @@ fn refresh_tick_state(model : Model) -> TickRefreshState {
 fn read_tick_refresh_versions() -> TickRefreshVersions {
   {
     snapshot: town_snapshot_version(),
+    energy_valley_runtime: energy_valley_runtime_version(),
     visual_projection: visual_projection_version(),
     module_projections: module_projections_version(),
     moondesk_handoff: moondesk_handoff_version(),

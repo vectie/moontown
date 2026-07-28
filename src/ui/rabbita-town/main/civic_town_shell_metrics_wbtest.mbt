@@ -38,17 +38,11 @@ test "town shell build stage uses shared execution phrase groups" {
     "Patch packet prepared",
   )
   assert_eq(
-    town_shell_build_stage(
-      model,
-      Some(civic_metric_test_execution(Running)),
-    ),
+    town_shell_build_stage(model, Some(civic_metric_test_execution(Running))),
     "Code patch running",
   )
   assert_eq(
-    town_shell_build_stage(
-      model,
-      Some(civic_metric_test_execution(Completed)),
-    ),
+    town_shell_build_stage(model, Some(civic_metric_test_execution(Completed))),
     "District card updated",
   )
 }
@@ -60,11 +54,7 @@ test "town shell next action uses shared execution action groups" {
     town_shell_next_action(
       model,
       None,
-      Some(
-        civic_metric_test_execution(
-          AwaitingPersistence,
-        ),
-      ),
+      Some(civic_metric_test_execution(AwaitingPersistence)),
     ),
     "Persist the validated patch and refresh the book's code-patch record.",
   )
@@ -82,10 +72,7 @@ test "town shell next action uses shared execution action groups" {
 test "town shell signal uses shared execution signal groups" {
   let model = init_model()
   assert_eq(
-    town_shell_signal(
-      model,
-      Some(civic_metric_test_execution(PacketReady)),
-    ),
+    town_shell_signal(model, Some(civic_metric_test_execution(PacketReady))),
     "Build dispatch",
   )
   assert_eq(

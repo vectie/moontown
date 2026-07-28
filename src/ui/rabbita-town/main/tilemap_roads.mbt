@@ -18,12 +18,12 @@ fn max_int(left : Int, right : Int) -> Int {
 
 ///|
 fn module_road_hub_x() -> Int {
-  128
+  energy_valley_grammar(active_energy_valley_seed()).civic_road_x
 }
 
 ///|
 fn module_road_hub_y() -> Int {
-  82
+  energy_valley_grammar(active_energy_valley_seed()).civic_road_y
 }
 
 ///|

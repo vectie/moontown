@@ -97,11 +97,13 @@ async fn send_text(
   body : String,
   kind? : String = "text/plain; charset=utf-8",
 ) -> Unit {
+  let encoded = @utf8.encode(body)
   conn.send_response(code, reason, extra_headers={
     "Content-Type": kind,
+    "Content-Length": encoded.length().to_string(),
     "Cache-Control": "no-store",
   })
-  conn.write(body)
+  conn.write(encoded)
   conn.end_response()
 }
 
@@ -272,10 +274,105 @@ async fn operator_requests_json() -> Json {
 }
 
 ///|
+async fn watcher_records_json() -> Json {
+  let rows : Array[Json] = []
+  let directory = state_root() + "/watchers"
+  guard @fs.exists(directory) && @fs.kind(directory) is Directory else {
+    return rows.to_json()
+  }
+  let dir = @fs.opendir(directory)
+  defer dir.close()
+  for name in dir.read_all() {
+    if !name.has_suffix(".jsonl") {
+      continue
+    }
+    let text = @support.read_text_or_empty(directory + "/" + name)
+    for raw in text.split("\n") {
+      let line = raw.trim().to_owned()
+      if line.is_empty() {
+        continue
+      }
+      let value = @json.parse(line) catch { _ => continue }
+      rows.push(value)
+    }
+  }
+  rows.to_json()
+}
+
+///|
+fn runtime_snapshot_source(path : String) -> (String, String)? {
+  let root = state_root()
+  match path {
+    "/town.json" => Some((root + "/town.json", ""))
+    "/visual-projection.json" => Some((root + "/visual-projection.json", ""))
+    "/module-projections.json" =>
+      Some(("", "{\"generated_at\":\"\",\"projections\":[]}"))
+    "/moondesk-bridge.json" =>
+      Some(
+        (
+          "", "{\"generated_at\":\"\",\"moondesk_root_available\":false,\"records\":[]}",
+        ),
+      )
+    "/civic-status.json" =>
+      Some((root + "/civic/status.json", "{\"services\":[]}"))
+    "/daemon.json" => Some((root + "/daemon.json", ""))
+    "/live-autonomy.json" => Some((root + "/live-autonomy.json", ""))
+    "/editor-pipeline.json" => Some((root + "/editor-pipeline.json", ""))
+    "/standing-goals.json" => Some((root + "/standing-goals.json", "[]"))
+    "/book-template-requests.json" =>
+      Some((root + "/book-template-requests.json", "{\"requests\":[]}"))
+    _ => None
+  }
+}
+
+///|
+async fn serve_runtime_snapshot(
+  conn : @http.ServerConnection,
+  path : String,
+) -> Bool {
+  guard runtime_snapshot_source(path) is Some((source, fallback)) else {
+    return false
+  }
+  if !source.is_empty() && serve_file(conn, source) {
+    return true
+  }
+  send_text(conn, 200, "OK", fallback, kind="application/json; charset=utf-8")
+  true
+}
+
+///|
 fn json_string_field(fields : Map[String, Json], key : String) -> String {
   match fields.get(key) {
     Some(String(value)) => value.trim().to_owned()
     _ => ""
+  }
+}
+
+///|
+fn json_string_list_field(
+  fields : Map[String, Json],
+  key : String,
+) -> Array[String] {
+  match fields.get(key) {
+    Some(Array(values)) =>
+      values.filter_map(value => {
+        match value {
+          String(text) if !text.trim().is_empty() =>
+            Some(text.trim().to_owned())
+          _ => None
+        }
+      })
+    Some(String(text)) => {
+      let values : Array[String] = []
+      for raw in text.replace(old=",", new="\n").split("\n") {
+        let value = raw.trim().to_owned()
+        if !value.is_empty() {
+          values.push(value)
+        }
+      }
+      values
+    }
+    _ => []
   }
 }
 
@@ -484,6 +581,96 @@ async fn persist_operator_request(body : String) -> Json {
 }
 
 ///|
+async fn persist_book_template_request(body : String) -> Json {
+  let parsed = @json.parse(body)
+  let fields = match parsed {
+    Object(fields) => fields
+    _ => fail("request body must be a JSON object")
+  }
+  let template_id = {
+    let value = json_string_field(fields, "template_id")
+    if value.is_empty() {
+      "pdf-evidence-watch"
+    } else {
+      value
+    }
+  }
+  if template_id != "pdf-evidence-watch" {
+    fail("unsupported template_id: \{template_id}")
+  }
+  let title = json_string_field(fields, "title")
+  let websites = json_string_list_field(fields, "websites")
+  if title.is_empty() || websites.is_empty() {
+    fail("title and at least one website are required")
+  }
+  let book_id = {
+    let value = json_string_field(fields, "book_id")
+    safe_slug(if value.is_empty() { title } else { value })
+  }
+  let purpose = {
+    let value = json_string_field(fields, "purpose")
+    if value.is_empty() {
+      "Watch approved websites for relevant PDFs, extract full text, analyze with the book-owned method, and notify only when accepted knowledge changes."
+    } else {
+      value
+    }
+  }
+  let cadence_ticks = json_int_field(fields, "cadence_ticks", 60, 1, 2147483647)
+  let analysis_method = json_string_field(fields, "analysis_method")
+  let timestamp = @env.now()
+  let request_id = "book-template-\{timestamp}-\{operator_nonce()}-\{safe_slug(title)}"
+  let config_relative_path = "book-template-configs/\{request_id}.json"
+  let config : Json = {
+    "book_id": book_id,
+    "title": title,
+    "purpose": purpose,
+    "websites": websites,
+    "analysis_method": analysis_method,
+    "analysis_method_path": "",
+    "cadence_ticks": cadence_ticks,
+    "workspace_root": "",
+  }
+  let request : Json = {
+    "id": request_id,
+    "template_id": template_id,
+    "config_path": config_relative_path,
+    "status": "pending",
+    "summary": "Queued \{title} for \{template_id}; \{websites.length()} website(s).",
+    "last_processed_tick": 0,
+  }
+  let ledger_path = state_root() + "/book-template-requests.json"
+  let ledger_text = @support.read_text_or_empty(ledger_path)
+  let requests : Array[Json] = if ledger_text.trim().is_empty() {
+    []
+  } else {
+    match @json.parse(ledger_text) {
+      Object(ledger) =>
+        match ledger.get("requests") {
+          Some(Array(items)) => items
+          _ => []
+        }
+      _ => []
+    }
+  }
+  requests.push(request)
+  @support.write_text_file(
+    state_root() + "/" + config_relative_path,
+    config.stringify(indent=2),
+  )
+  @support.write_text_file(
+    ledger_path,
+    ({ "requests": requests } : Json).stringify(indent=2),
+  )
+  {
+    "ok": true,
+    "request_id": request_id,
+    "status": "pending",
+    "template_id": template_id,
+    "config_path": config_relative_path,
+  }
+}
+
+///|
 async fn handle_request(
   request : @http.Request,
   body : &@io.Reader,
@@ -515,6 +702,30 @@ async fn handle_request(
     send_json(conn, 200, result)
     return
   }
+  if path == "/api/book-template-requests" {
+    if reject_unsafe_operator_write(request, conn) {
+      return
+    }
+    let result = persist_book_template_request(body.read_all().text()) catch {
+      error => {
+        send_json(conn, 400, { "ok": false, "error": "\{error}" })
+        return
+      }
+    }
+    send_json(conn, 200, result)
+    return
+  }
+  if request.meth is Get && path == "/operator-requests.json" {
+    send_json(conn, 200, operator_requests_json())
+    return
+  }
+  if request.meth is Get && path == "/watchers/index.json" {
+    send_json(conn, 200, watcher_records_json())
+    return
+  }
+  if request.meth is Get && serve_runtime_snapshot(conn, path) {
+    return
+  }
   if request.meth is Get && path.has_prefix("/book-output/") {
     let relative = path["/book-output/".length():].to_owned()
     if serve_book_output(conn, relative) {
@@ -529,9 +740,15 @@ async fn handle_request(
 
 ///|
 async fn main {
-  let server = @http.Server(@socket.Addr::parse("127.0.0.1:17842"))
+  let server = @http.Server(
+    @socket.Addr::parse("127.0.0.1:17842"),
+    reuse_addr=true,
+  )
   println(
     "MoonTown desktop service listening at http://127.0.0.1:17842; suite=\{@storage.moontown_active_workspace_root()}",
   )
-  server.run_forever(handle_request, max_connections=1)
+  // Browsers fetch the entry, MoonBit bundle, styles, sprites, and runtime
+  // snapshots concurrently. A single connection stalls bootstrap behind the
+  // first keep-alive request, so allow a small bounded local connection pool.
+  server.run_forever(handle_request, max_connections=32)
 }

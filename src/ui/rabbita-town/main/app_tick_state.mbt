@@ -2,7 +2,25 @@
 fn advance_model(model : Model) -> Model {
   let refresh = refresh_tick_state(model)
   let metrics = tick_metric_state(model)
-  let ticked = { ..model, tick: model.tick + 1 }
+  let next_tick = model.tick + 1
+  let weather = if model.energy_weather_auto && next_tick % 75 == 0 {
+    match
+      energy_valley_variation(
+        active_energy_valley_seed(),
+        next_tick / 75,
+        0,
+        349,
+        100,
+      ) {
+      value if value < 42 => Sunny
+      value if value < 68 => Cloudy
+      value if value < 88 => Rain
+      _ => Snow
+    }
+  } else {
+    model.energy_weather
+  }
+  let ticked = { ..model, tick: next_tick, energy_weather: weather }
   let refreshed = apply_tick_refresh_state(ticked, refresh)
   apply_tick_metric_state(refreshed, metrics)
 }
@@ -14,6 +32,7 @@ fn apply_tick_refresh_state(model : Model, refresh : TickRefreshState) -> Model 
     state_source: refresh.state_source,
     projection_snapshot: refresh.projection_snapshot,
     snapshot_version: refresh.snapshot_version,
+    energy_valley_runtime: refresh.energy_valley_runtime,
     visual_projection: refresh.visual_projection,
     visual_projection_version: refresh.visual_projection_version,
     module_projections: refresh.module_projections,

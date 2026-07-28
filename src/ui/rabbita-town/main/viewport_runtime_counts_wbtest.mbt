@@ -49,28 +49,18 @@ fn runtime_count_test_execution(
 ///|
 test "worker feed kind classifies blocked watcher and quiet workers" {
   assert_true(
-    worker_feed_kind(runtime_count_test_worker(Blocked))
-    is BlockedWorker,
+    worker_feed_kind(runtime_count_test_worker(Blocked)) is BlockedWorker,
   )
   assert_true(
     worker_feed_kind(
-      runtime_count_test_worker_with_role(
-        Idle,
-        "Standing Watcher",
-      ),
+      runtime_count_test_worker_with_role(Idle, "Standing Watcher"),
     )
     is OnDutyWatcher,
   )
-  assert_true(
-    worker_feed_kind(runtime_count_test_worker(Idle))
-    is QuietWorker,
-  )
+  assert_true(worker_feed_kind(runtime_count_test_worker(Idle)) is QuietWorker)
   assert_true(
     worker_feed_kind(
-      runtime_count_test_worker_with_role(
-        Running,
-        "Standing Watcher",
-      ),
+      runtime_count_test_worker_with_role(Running, "Standing Watcher"),
     )
     is QuietWorker,
   )
@@ -86,28 +76,18 @@ test "worker feed item centralizes worker alert and watcher mapping" {
   assert_true(blocked.unwrap().title.contains("stalled"))
   assert_true(blocked.unwrap().detail.contains("Mayor should recover"))
   let watcher = worker_feed_item(
-    runtime_count_test_worker_with_role(
-      Idle,
-      "Standing Watcher",
-    ),
+    runtime_count_test_worker_with_role(Idle, "Standing Watcher"),
     "next check waits for real time",
   )
   assert_eq(watcher.unwrap().tone, "calm")
   assert_true(watcher.unwrap().title.contains("is on duty"))
   assert_eq(watcher.unwrap().detail, "next check waits for real time")
   assert_true(
-    worker_feed_item(
-      runtime_count_test_worker(Idle),
-      "watcher idle",
-    )
-    is None,
+    worker_feed_item(runtime_count_test_worker(Idle), "watcher idle") is None,
   )
   assert_true(
     worker_feed_item(
-      runtime_count_test_worker_with_role(
-        Running,
-        "Standing Watcher",
-      ),
+      runtime_count_test_worker_with_role(Running, "Standing Watcher"),
       "watcher idle",
     )
     is None,
@@ -121,10 +101,7 @@ test "push worker alert messages delegates item projection" {
     feed,
     [
       runtime_count_test_worker(Blocked),
-      runtime_count_test_worker_with_role(
-        Idle,
-        "Standing Watcher",
-      ),
+      runtime_count_test_worker_with_role(Idle, "Standing Watcher"),
       runtime_count_test_worker(Running),
     ],
     "watcher waiting for next real-world tick",
@@ -140,10 +117,7 @@ test "worker feed items projects visible worker messages only" {
   let items = worker_feed_items(
     [
       runtime_count_test_worker(Blocked),
-      runtime_count_test_worker_with_role(
-        Idle,
-        "Standing Watcher",
-      ),
+      runtime_count_test_worker_with_role(Idle, "Standing Watcher"),
       runtime_count_test_worker(Running),
     ],
     "watcher waiting for next real-world tick",
@@ -198,99 +172,47 @@ test "execution summary owns active runtime policy" {
 
 ///|
 test "execution lifecycle predicates centralize status groups" {
-  assert_true(
-    execution_status_needs_attention(ReviewQueued),
-  )
-  assert_true(
-    execution_status_needs_attention(Stale),
-  )
-  assert_true(
-    execution_status_is_active_run(Running),
-  )
-  assert_true(
-    execution_status_is_active_run(RunConfirmed),
-  )
-  assert_true(
-    !execution_status_has_run_id(PacketReady),
-  )
-  assert_true(
-    !execution_status_has_run_id(ProposalImported),
-  )
+  assert_true(execution_status_needs_attention(ReviewQueued))
+  assert_true(execution_status_needs_attention(Stale))
+  assert_true(execution_status_is_active_run(Running))
+  assert_true(execution_status_is_active_run(RunConfirmed))
+  assert_true(!execution_status_has_run_id(PacketReady))
+  assert_true(!execution_status_has_run_id(ProposalImported))
   assert_true(execution_status_has_run_id(Running))
-  assert_true(
-    execution_status_requires_review(
-      AwaitingPersistence,
-    ),
-  )
-  assert_true(
-    execution_status_requires_review(ReviewQueued),
-  )
-  assert_true(
-    !execution_status_requires_review(Completed),
-  )
+  assert_true(execution_status_requires_review(AwaitingPersistence))
+  assert_true(execution_status_requires_review(ReviewQueued))
+  assert_true(!execution_status_requires_review(Completed))
 }
 
 ///|
 test "module execution status class uses lifecycle predicates" {
-  assert_true(
-    module_execution_status_kind(Running) is Running,
-  )
-  assert_true(
-    module_execution_status_kind(AwaitingPersistence)
-    is Review,
-  )
-  assert_true(
-    module_execution_status_kind(Failed) is Alert,
-  )
-  assert_true(
-    module_execution_status_kind(Completed)
-    is Complete,
-  )
-  assert_true(
-    module_execution_status_kind(PacketReady)
-    is Waiting,
-  )
+  assert_true(module_execution_status_kind(Running) is Running)
+  assert_true(module_execution_status_kind(AwaitingPersistence) is Review)
+  assert_true(module_execution_status_kind(Failed) is Alert)
+  assert_true(module_execution_status_kind(Completed) is Complete)
+  assert_true(module_execution_status_kind(PacketReady) is Waiting)
   assert_eq(
-    module_runtime_status_class(
-      module_execution_status_kind(Running),
-    ),
+    module_runtime_status_class(module_execution_status_kind(Running)),
     "module-status-running",
   )
 }
 
 ///|
 test "execution feed kind classifies visible and quiet lifecycle states" {
+  assert_true(execution_feed_kind(Running) is RunningExecution)
+  assert_true(execution_feed_kind(RunConfirmed) is RunningExecution)
   assert_true(
-    execution_feed_kind(Running) is RunningExecution,
+    execution_feed_kind(AwaitingPersistence) is AwaitingPersistenceExecution,
   )
-  assert_true(
-    execution_feed_kind(RunConfirmed)
-    is RunningExecution,
-  )
-  assert_true(
-    execution_feed_kind(AwaitingPersistence)
-    is AwaitingPersistenceExecution,
-  )
-  assert_true(
-    execution_feed_kind(Stale) is StaleExecution,
-  )
-  assert_true(
-    execution_feed_kind(Failed) is FailedExecution,
-  )
-  assert_true(
-    execution_feed_kind(Completed) is QuietExecution,
-  )
-  assert_true(
-    execution_feed_kind(ReviewQueued)
-    is QuietExecution,
-  )
+  assert_true(execution_feed_kind(Stale) is StaleExecution)
+  assert_true(execution_feed_kind(Failed) is FailedExecution)
+  assert_true(execution_feed_kind(Completed) is QuietExecution)
+  assert_true(execution_feed_kind(ReviewQueued) is QuietExecution)
 }
 
 ///|
 test "execution feed item centralizes runtime event mapping" {
-  let running = execution_feed_item(
-    runtime_count_test_execution(Running),
-  )
+  let running = execution_feed_item(runtime_count_test_execution(Running))
   assert_eq(running.unwrap().tone, "neutral")
   assert_eq(running.unwrap().title, "Town shell code patch is running")
   assert_true(!running.unwrap().title.contains("task-"))
@@ -303,20 +225,13 @@ test "execution feed item centralizes runtime event mapping" {
     persisting.unwrap().title,
     "Town shell code patch is waiting for MoonBook save",
   )
-  let stale = execution_feed_item(
-    runtime_count_test_execution(Stale),
-  )
+  let stale = execution_feed_item(runtime_count_test_execution(Stale))
   assert_eq(stale.unwrap().tone, "alert")
   assert_eq(stale.unwrap().title, "Town shell code patch needs recovery")
-  let failed = execution_feed_item(
-    runtime_count_test_execution(Failed),
-  )
+  let failed = execution_feed_item(runtime_count_test_execution(Failed))
   assert_eq(failed.unwrap().title, "Town shell code patch failed")
   assert_true(
-    execution_feed_item(
-      runtime_count_test_execution(Completed),
-    )
-    is None,
+    execution_feed_item(runtime_count_test_execution(Completed)) is None,
   )
 }
 

@@ -1,9 +1,10 @@
 # Energy Valley Procedural Map
 
-The runtime map is generated, not replayed from a fixed image. The original
-Wenyu Valley material remains the design evidence and visual regression
-reference; the React/Canvas runtime encodes its spatial relationships as a
-deterministic planning grammar.
+The town is generated from a stable seed while retaining the geography that
+makes Wenyu Energy Valley recognizable. The original Wenyu Valley material is
+both design evidence and a visual regression reference. The MoonBit runtime
+encodes its spatial relationships as a deterministic planning grammar instead
+of treating one set of building coordinates as the town.
 
 ## What must remain recognizably Energy Valley
 
@@ -20,7 +21,7 @@ Every seed preserves these relationships:
 7. Forest buffers protect the edges and riparian corridor.
 8. Community and showcase districts sit outside the civic center rather than
    forming one uniform building field.
-9. The 13 built-in civic services are placed by district intent, shifted by the
+9. The 16 built-in civic services are placed by district intent, shifted by the
    seed, checked for collisions, and required to touch the road network.
 10. Background urban fabric grows along roads with district-specific density
     and a mix of low-rise, row, courtyard, campus, and tower forms.
@@ -47,53 +48,80 @@ evidence from runtime implementation:
 5. `src/ui/assets/tilemap/modules/wenyu-town-modules.json` is the authored
    civic-module registry and district-placement evidence.
 
-The generated runtime deliberately does not ship these large authoring
-artifacts. They are inputs to design and review, not a static background.
+The raster remains a useful reference underlay in the standalone viewport.
+The semantic runtime does not infer gameplay from raster pixels: terrain,
+districts, roads, entrances, and module placement come from the grammar.
 
 ## Runtime generation pipeline
 
-`src/ui/rabbita-town/energy-valley/engine/world.ts` runs the following stages:
+The MoonBit implementation is split by responsibility:
+
+- `main/energy_valley_seed.mbt` normalizes and persists the seed.
+- `main/energy_valley_grammar.mbt` generates terrain, hydrology, districts,
+  road hierarchy, bridges, wetlands, farms, and forests.
+- `main/energy_valley_placement.mbt` turns the authored module registry into a
+  collision-free, road-connected procedural layout.
+- `main/energy_valley_canonical_world.mbt` records the exact 56×52 semantic
+  output of the accepted Energy Valley build for seed `20260727`: terrain,
+  roads, bridges, plazas, ambient structure kinds, and floor counts. It is a
+  regression fixture and canonical launch result, not a raster screenshot.
+- `main/energy_valley_canvas.mbt` renders that semantic world and alternate
+  procedural seeds through the MoonBit Canvas bindings with the accepted
+  isometric camera and depth order.
+- `main/tilemap_reference*.mbt` keeps the extracted Energy Valley geometry
+  available as guardrails for the grammar.
+- `main/tilemap_reference.mbt`, `main/tilemap_roads.mbt`, and
+  `main/wenyu_modules.mbt` connect the generated result to the existing
+  MoonBit/Rabbita view layer.
+
+Generation runs in these stages:
 
 1. Normalize the seed and derive all random streams from it.
-2. Create the main river, tributary, lake, and lake outlet from continuous
-   curves and noisy shore boundaries.
+2. Create the main river, tributaries, and lakes around the extracted
+   hydrology. Deep reference-water cells are kept as immutable geographical
+   guardrails while shorelines and secondary water features vary by seed.
 3. Classify every cell into a semantic district.
 4. Grow wetlands around water, fields in the farm belt, and forest/meadow
    cover from district-specific probabilities.
-5. Lay three bridge spines, a civic grid, campus connector, and stepped
-   wetland promenade.
+5. Lay seeded bridge spines, civic roads, research connectors, local lanes,
+   and retained portions of the reference road hierarchy.
 6. Place civic modules near district anchors by searching candidate parcels.
-   Candidate scoring prefers the intended district, road adjacency, low
-   displacement, and collision-free footprints.
-7. Add civic plazas.
-8. Grow ambient urban fabric only on buildable cells next to roads, using
-   district density to select form and height.
-9. Freeze the generated terrain baseline. Persistence records only the
-   player's delta from that baseline.
+   The search preserves district intent, rejects water/wetland/road cells,
+   keeps a two-cell separation between footprints, and requires a perimeter
+   entrance on the road network.
+7. Feed the generated semantic tile kinds, road overlays, module positions,
+   and entrances into the existing Rabbita renderer and runtime work views.
 
-The Canvas renderer then applies the visual vocabulary: animated water,
-wetland pools and reeds, crop rows, flower meadows, forest canopy, dense
-background blocks, procedural civic buildings, weather, lighting, and agents.
+The module JSON remains a semantic registry: identity, purpose, footprint,
+preferred district, building style, and work protocol are authored. Its
+coordinates are only search anchors. They are not final placement commands.
 
 ## Seed and persistence behavior
 
-- The default seed is stable, so first launch and automated screenshots are
-  reproducible.
-- The six-character seed label appears under the town name.
-- **Reset this valley** removes player construction but preserves the seed.
-- **Generate a new valley** creates a new seed and reruns the full pipeline.
-- Saves store terrain deltas and custom buildings, not the generated map.
+- The default seed (`20260727`) is stable, so launch and screenshots are
+  reproducible. It replays the exact accepted semantic world; this prevents
+  later generator tuning from silently moving its roads, water, plazas, or
+  urban fabric.
+- Add `?seed=<integer>` to the town URL to select a valley. The choice is
+  remembered in local storage for later navigation.
+- The six-character base-36 seed label appears under the town name.
+- The same seed always produces the same terrain and module placement; another
+  seed changes both while preserving the Energy Valley constraints.
 
 ## Regression gates
 
-`energy-valley/engine/world.test.ts` checks multiple seeds for:
+`main/energy_valley_grammar_wbtest.mbt` checks multiple seeds for:
 
 - deterministic replay and cross-seed variation;
-- minimum river/lake, wetland, field, forest, and urban coverage;
-- three bridge corridors;
-- 13 unique civic modules;
+- substantial water and road coverage plus working bridge crossings;
+- all authored civic modules retained;
+- in-bounds, collision-free, buildable footprints;
 - road access for every civic building;
-- a frozen generated baseline for delta persistence.
+- deterministic and seed-sensitive module placement.
+
+`main/energy_valley_exact_parity_wbtest.mbt` separately locks the canonical
+seed's grid dimensions, key river/bridge/civic anchors, build pricing, build
+constraints, demolition refund, and real-work request surface.
 
 Visual review should compare several seeds with the top-down semantic and
 isometric references. A valid variant may move details, but it should still
@@ -106,7 +134,8 @@ read immediately as river-led Energy Valley rather than a generic grid town.
 3. Re-extract building footprints and review the class coverage summary.
 4. Measure the topology: water corridors, district centers, density gradients,
    farm/forest ratios, road hierarchy, and bridge count.
-5. Change grammar parameters or rules, not one-off runtime coordinates.
+5. Change `energy_valley_grammar.mbt` parameters or rules, not one-off runtime
+   coordinates.
 6. Add or tighten invariants before accepting the new result.
 7. Render the default seed plus at least three alternate seeds at desktop and
    narrow window sizes.

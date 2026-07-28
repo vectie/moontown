@@ -40,6 +40,79 @@ fn runtime_state_from_visual_module(
 }
 
 ///|
+fn energy_valley_runtime_counts_for_module(
+  state : EnergyValleyRuntimeState,
+  civic : WenyuTownModule,
+) -> ModuleRuntimeCounts {
+  if !energy_valley_runtime_can_claim_active_work(state) {
+    return module_runtime_counts()
+  }
+  let mut counts = module_runtime_counts()
+  for task in energy_valley_runtime_tasks_for_module(state, civic) {
+    match task.status {
+      "running" => counts = { ..counts, running: counts.running + 1 }
+      "queued" | "assigned" =>
+        counts = { ..counts, waiting: counts.waiting + 1 }
+      "waiting_review" => counts = { ..counts, review: counts.review + 1 }
+      "blocked" | "failed" => counts = { ..counts, blocked: counts.blocked + 1 }
+      "completed" => counts = { ..counts, completed: counts.completed + 1 }
+      _ => ()
+    }
+  }
+  counts
+}
+
+///|
+fn runtime_state_from_energy_valley(
+  state : EnergyValleyRuntimeState,
+  civic : WenyuTownModule,
+  issue_count : Int,
+) -> WenyuModuleRuntimeState {
+  let counts = energy_valley_runtime_counts_for_module(state, civic)
+  let active_agent_count = energy_valley_runtime_active_agents_for_module(
+    state, civic,
+  ).length()
+  if state.phase == Live {
+    let kind = module_runtime_status_kind_from_counts(counts)
+    return wenyu_module_runtime_state_from_counts(
+      module_runtime_status_class(kind),
+      module_runtime_status_label(kind),
+      "Runtime",
+      energy_valley_runtime_phase_detail(state),
+      counts,
+      active_agent_count,
+      issue_count,
+    )
+  }
+  if energy_valley_runtime_tasks_for_module(state, civic).is_empty() {
+    return wenyu_module_runtime_state_from_counts(
+      "module-status-calm",
+      "Quiet",
+      "Runtime",
+      energy_valley_runtime_phase_detail(state),
+      counts,
+      0,
+      issue_count,
+    )
+  }
+  let status = match state.phase {
+    Stale => ("module-status-projected", "Stale")
+    Unavailable => ("module-status-projected", "Unavailable")
+    Error => ("module-status-alert", "Runtime error")
+    Loading | Live => ("module-status-projected", "Loading")
+  }
+  wenyu_module_runtime_state_from_counts(
+    status.0,
+    status.1,
+    "Runtime",
+    energy_valley_runtime_phase_detail(state),
+    counts,
+    0,
+    issue_count,
+  )
+}
+
+///|
 fn runtime_state_from_visual_building(
   building : VisualBuildingSnapshot,
   active_agent_count : Int,

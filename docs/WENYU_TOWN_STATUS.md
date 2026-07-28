@@ -132,7 +132,7 @@ Implemented and validated:
   overlay roads are hidden to avoid two competing map systems.
 - Module interiors show runtime source, status counters, current detail,
   validation state, and active worker roster slots.
-- The Vite bridge exposes `module-projections.json` by scanning
+- The MoonBit desktop service exposes `module-projections.json` by scanning
   `books/*/book/moonbook-ui-state.json`.
 - The build copies important MoonBook generated HTML outputs under
   `dist/book-output/<book-id>/...`.
@@ -164,7 +164,7 @@ Implemented and validated:
 - `tilemap/modules/moondesk-handoff.json` declares portable artifact lanes for
   book workspaces, module packs, asset packs, simple agent profiles, skill-pack
   references, operator request packs, and generated output bundles.
-- The Vite bridge exposes `moondesk-bridge.json` by scanning real
+- The MoonBit desktop service exposes `moondesk-bridge.json` by scanning real
   `.moonsuite/products/moontown/moondesk-dispatches`,
   `.moonsuite/products/moontown/moondesk-requests`, and
   `.moonsuite/products/moontown/book-results` files.
@@ -538,8 +538,7 @@ Acceptance:
 Use these checks after town UI or runtime changes:
 
 ```bash
-cd src/ui/rabbita-town
-npm run build
+./scripts/build-rabbita-ui.sh
 ```
 
 ```bash
@@ -557,5 +556,5 @@ moon run src/cmd/main -- status
 Browser validation target:
 
 ```text
-http://127.0.0.1:5173/viewport.html?assets=generated&v=wenyu-modules
+http://127.0.0.1:17842/viewport.html?assets=generated&v=wenyu-modules
 ```

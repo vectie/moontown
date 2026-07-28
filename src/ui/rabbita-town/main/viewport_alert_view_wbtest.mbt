@@ -1,10 +1,7 @@
 ///|
 test "alert strip chip class separates calm recovery and alert states" {
   assert_eq(alert_strip_chip_class([no_active_alert_text]), "chip-calm")
-  assert_eq(
-    alert_strip_chip_class([town_recovery_alert_text]),
-    "chip-recovery",
-  )
+  assert_eq(alert_strip_chip_class([town_recovery_alert_text]), "chip-recovery")
   assert_eq(alert_strip_chip_class(["Queue pressure is high"]), "chip-alert")
   assert_eq(
     alert_strip_chip_class(["Queue pressure is high", "Budget is thin"]),

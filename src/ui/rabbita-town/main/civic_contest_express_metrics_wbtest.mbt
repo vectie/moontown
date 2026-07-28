@@ -16,24 +16,15 @@ test "contest express health keeps existing worker energy policy" {
 test "contest express stage uses shared execution phrase groups" {
   let model = init_model()
   assert_eq(
-    contest_express_stage(
-      model,
-      Some(civic_metric_test_execution(PacketReady)),
-    ),
+    contest_express_stage(model, Some(civic_metric_test_execution(PacketReady))),
     "Readiness packet prepared",
   )
   assert_eq(
-    contest_express_stage(
-      model,
-      Some(civic_metric_test_execution(Running)),
-    ),
+    contest_express_stage(model, Some(civic_metric_test_execution(Running))),
     "Mock judge scoring",
   )
   assert_eq(
-    contest_express_stage(
-      model,
-      Some(civic_metric_test_execution(Completed)),
-    ),
+    contest_express_stage(model, Some(civic_metric_test_execution(Completed))),
     "Champion-wall ready",
   )
 }
@@ -63,10 +54,7 @@ test "contest express next action uses shared execution action groups" {
 test "contest express signal uses shared execution signal groups" {
   let model = init_model()
   assert_eq(
-    contest_express_signal(
-      model,
-      Some(civic_metric_test_execution(Completed)),
-    ),
+    contest_express_signal(model, Some(civic_metric_test_execution(Completed))),
     "Roadshow ready",
   )
   assert_eq(

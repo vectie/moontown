@@ -1,41 +1,14 @@
 ///|
 test "civic execution stage centralizes task execution status groups" {
-  assert_true(
-    civic_execution_stage(PacketReady)
-    is @ui.Packet,
-  )
-  assert_true(
-    civic_execution_stage(ProposalImported)
-    is @ui.Packet,
-  )
-  assert_true(
-    civic_execution_stage(RunConfirmed)
-    is @ui.Running,
-  )
-  assert_true(
-    civic_execution_stage(Running)
-    is @ui.Running,
-  )
-  assert_true(
-    civic_execution_stage(AwaitingPersistence)
-    is @ui.Persisting,
-  )
-  assert_true(
-    civic_execution_stage(ReviewQueued)
-    is @ui.Review,
-  )
-  assert_true(
-    civic_execution_stage(Completed)
-    is @ui.Completed,
-  )
-  assert_true(
-    civic_execution_stage(Failed)
-    is @ui.Recovery,
-  )
-  assert_true(
-    civic_execution_stage(Stale)
-    is @ui.Recovery,
-  )
+  assert_true(civic_execution_stage(PacketReady) is @ui.Packet)
+  assert_true(civic_execution_stage(ProposalImported) is @ui.Packet)
+  assert_true(civic_execution_stage(RunConfirmed) is @ui.Running)
+  assert_true(civic_execution_stage(Running) is @ui.Running)
+  assert_true(civic_execution_stage(AwaitingPersistence) is @ui.Persisting)
+  assert_true(civic_execution_stage(ReviewQueued) is @ui.Review)
+  assert_true(civic_execution_stage(Completed) is @ui.Completed)
+  assert_true(civic_execution_stage(Failed) is @ui.Recovery)
+  assert_true(civic_execution_stage(Stale) is @ui.Recovery)
 }
 
 ///|
@@ -80,68 +53,32 @@ fn civic_execution_policy_test_phrases() -> CivicExecutionStagePhrases {
 test "civic execution stage label centralizes status groups" {
   let phrases = civic_execution_policy_test_phrases()
   assert_eq(
-    civic_execution_stage_label_for_status(
-      PacketReady,
-      phrases,
-    ),
+    civic_execution_stage_label_for_status(PacketReady, phrases),
     "packet",
   )
   assert_eq(
-    civic_execution_stage_label_for_status(
-      ProposalImported,
-      phrases,
-    ),
+    civic_execution_stage_label_for_status(ProposalImported, phrases),
     "packet",
   )
   assert_eq(
-    civic_execution_stage_label_for_status(
-      RunConfirmed,
-      phrases,
-    ),
+    civic_execution_stage_label_for_status(RunConfirmed, phrases),
     "running",
   )
+  assert_eq(civic_execution_stage_label_for_status(Running, phrases), "running")
   assert_eq(
-    civic_execution_stage_label_for_status(
-      Running,
-      phrases,
-    ),
-    "running",
-  )
-  assert_eq(
-    civic_execution_stage_label_for_status(
-      AwaitingPersistence,
-      phrases,
-    ),
+    civic_execution_stage_label_for_status(AwaitingPersistence, phrases),
     "persisting",
   )
   assert_eq(
-    civic_execution_stage_label_for_status(
-      ReviewQueued,
-      phrases,
-    ),
+    civic_execution_stage_label_for_status(ReviewQueued, phrases),
     "review",
   )
   assert_eq(
-    civic_execution_stage_label_for_status(
-      Completed,
-      phrases,
-    ),
+    civic_execution_stage_label_for_status(Completed, phrases),
     "completed",
   )
-  assert_eq(
-    civic_execution_stage_label_for_status(
-      Failed,
-      phrases,
-    ),
-    "recovery",
-  )
-  assert_eq(
-    civic_execution_stage_label_for_status(
-      Stale,
-      phrases,
-    ),
-    "recovery",
-  )
+  assert_eq(civic_execution_stage_label_for_status(Failed, phrases), "recovery")
+  assert_eq(civic_execution_stage_label_for_status(Stale, phrases), "recovery")
 }
 
 ///|
@@ -159,11 +96,7 @@ test "civic projected execution stage label centralizes snapshot fallback" {
   assert_eq(
     civic_projected_execution_stage_label(
       StateSourceKind::SnapshotFile,
-      Some(
-        civic_execution_policy_test_execution(
-          Running,
-        ),
-      ),
+      Some(civic_execution_policy_test_execution(Running)),
       phrases,
       projection_fallback="projection fallback",
       fallback="live fallback",
@@ -173,11 +106,7 @@ test "civic projected execution stage label centralizes snapshot fallback" {
   assert_eq(
     civic_projected_execution_stage_label(
       StateSourceKind::DemoSimulation,
-      Some(
-        civic_execution_policy_test_execution(
-          Running,
-        ),
-      ),
+      Some(civic_execution_policy_test_execution(Running)),
       phrases,
       projection_fallback="projection fallback",
       fallback="live fallback",
@@ -208,11 +137,7 @@ test "civic execution action label reuses execution status grouping" {
   }
   assert_eq(
     civic_execution_action_label(
-      Some(
-        civic_execution_policy_test_execution(
-          ProposalImported,
-        ),
-      ),
+      Some(civic_execution_policy_test_execution(ProposalImported)),
       phrases,
       fallback="fallback",
     ),
@@ -220,11 +145,7 @@ test "civic execution action label reuses execution status grouping" {
   )
   assert_eq(
     civic_execution_action_label(
-      Some(
-        civic_execution_policy_test_execution(
-          ReviewQueued,
-        ),
-      ),
+      Some(civic_execution_policy_test_execution(ReviewQueued)),
       phrases,
       fallback="fallback",
     ),
@@ -248,11 +169,7 @@ test "civic execution signal label reuses execution status grouping" {
   }
   assert_eq(
     civic_execution_signal_label(
-      Some(
-        civic_execution_policy_test_execution(
-          PacketReady,
-        ),
-      ),
+      Some(civic_execution_policy_test_execution(PacketReady)),
       phrases,
       fallback="fallback",
     ),
@@ -260,9 +177,7 @@ test "civic execution signal label reuses execution status grouping" {
   )
   assert_eq(
     civic_execution_signal_label(
-      Some(
-        civic_execution_policy_test_execution(Failed),
-      ),
+      Some(civic_execution_policy_test_execution(Failed)),
       phrases,
       fallback="fallback",
     ),
@@ -283,17 +198,11 @@ test "civic signal phrases centralizes common module defaults" {
     completed="completed signal",
   )
   assert_eq(
-    civic_execution_stage_label_for_status(
-      PacketReady,
-      phrases,
-    ),
+    civic_execution_stage_label_for_status(PacketReady, phrases),
     "Dispatching",
   )
   assert_eq(
-    civic_execution_stage_label_for_status(
-      Failed,
-      phrases,
-    ),
+    civic_execution_stage_label_for_status(Failed, phrases),
     "Needs recovery",
   )
 }
@@ -308,10 +217,7 @@ test "civic signal phrases allows module-specific dispatch labels" {
     completed="Patch landed",
   )
   assert_eq(
-    civic_execution_stage_label_for_status(
-      ProposalImported,
-      phrases,
-    ),
+    civic_execution_stage_label_for_status(ProposalImported, phrases),
     "Build dispatch",
   )
 }
@@ -329,11 +235,7 @@ test "civic projected execution signal label centralizes snapshot bridge fallbac
   assert_eq(
     civic_projected_execution_signal_label(
       StateSourceKind::SnapshotFile,
-      Some(
-        civic_execution_policy_test_execution(
-          Running,
-        ),
-      ),
+      Some(civic_execution_policy_test_execution(Running)),
       phrases,
       fallback="fallback",
     ),
@@ -342,11 +244,7 @@ test "civic projected execution signal label centralizes snapshot bridge fallbac
   assert_eq(
     civic_projected_execution_signal_label(
       StateSourceKind::DemoSimulation,
-      Some(
-        civic_execution_policy_test_execution(
-          Running,
-        ),
-      ),
+      Some(civic_execution_policy_test_execution(Running)),
       phrases,
       fallback="fallback",
     ),
@@ -421,11 +319,7 @@ test "civic execution score reuses execution status grouping" {
   }
   assert_eq(
     civic_execution_score(
-      Some(
-        civic_execution_policy_test_execution(
-          ProposalImported,
-        ),
-      ),
+      Some(civic_execution_policy_test_execution(ProposalImported)),
       policy,
       fallback=0,
     ),
@@ -433,11 +327,7 @@ test "civic execution score reuses execution status grouping" {
   )
   assert_eq(
     civic_execution_score(
-      Some(
-        civic_execution_policy_test_execution(
-          Running,
-        ),
-      ),
+      Some(civic_execution_policy_test_execution(Running)),
       policy,
       fallback=0,
     ),
@@ -445,9 +335,7 @@ test "civic execution score reuses execution status grouping" {
   )
   assert_eq(
     civic_execution_score(
-      Some(
-        civic_execution_policy_test_execution(Stale),
-      ),
+      Some(civic_execution_policy_test_execution(Stale)),
       policy,
       fallback=0,
     ),

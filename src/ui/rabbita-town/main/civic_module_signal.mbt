@@ -42,16 +42,12 @@ fn civic_module_signal_class_for_status(
   running_is_live~ : Bool,
 ) -> String {
   match status {
-    ReviewQueued
-    | Failed
-    | Stale => "module-signal-alert"
+    ReviewQueued | Failed | Stale => "module-signal-alert"
     AwaitingPersistence => "module-signal-review"
     Completed => "module-signal-live"
-    Running
-    | RunConfirmed =>
+    Running | RunConfirmed =>
       civic_module_active_run_signal_class(running_is_live)
-    PacketReady
-    | ProposalImported => "module-signal-book"
+    PacketReady | ProposalImported => "module-signal-book"
   }
 }
 

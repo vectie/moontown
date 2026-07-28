@@ -30,17 +30,11 @@ test "talent avenue base health uses verified-card bonus and queue pressure" {
 test "talent avenue signal uses shared execution phrase groups" {
   let model = init_model()
   assert_eq(
-    talent_avenue_signal(
-      model,
-      Some(civic_metric_test_execution(PacketReady)),
-    ),
+    talent_avenue_signal(model, Some(civic_metric_test_execution(PacketReady))),
     "Dispatching",
   )
   assert_eq(
-    talent_avenue_signal(
-      model,
-      Some(civic_metric_test_execution(Running)),
-    ),
+    talent_avenue_signal(model, Some(civic_metric_test_execution(Running))),
     "Heatmap refreshing",
   )
   assert_eq(
@@ -59,11 +53,7 @@ test "talent avenue next action uses shared execution action groups" {
     talent_avenue_next_action(
       model,
       None,
-      Some(
-        civic_metric_test_execution(
-          AwaitingPersistence,
-        ),
-      ),
+      Some(civic_metric_test_execution(AwaitingPersistence)),
     ),
     "Keep the VIP route note visible while MoonBook persists the reviewed reception summary.",
   )
@@ -81,24 +71,15 @@ test "talent avenue next action uses shared execution action groups" {
 test "talent avenue stage uses shared execution phrase groups" {
   let model = init_model()
   assert_eq(
-    talent_avenue_stage(
-      model,
-      Some(civic_metric_test_execution(PacketReady)),
-    ),
+    talent_avenue_stage(model, Some(civic_metric_test_execution(PacketReady))),
     "Showcase packet prepared",
   )
   assert_eq(
-    talent_avenue_stage(
-      model,
-      Some(civic_metric_test_execution(Running)),
-    ),
+    talent_avenue_stage(model, Some(civic_metric_test_execution(Running))),
     "Talent heatmap refresh",
   )
   assert_eq(
-    talent_avenue_stage(
-      model,
-      Some(civic_metric_test_execution(Completed)),
-    ),
+    talent_avenue_stage(model, Some(civic_metric_test_execution(Completed))),
     "Tour cards ready",
   )
 }

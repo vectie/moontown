@@ -101,25 +101,14 @@ fn render_standalone_worker_avatars(
   model : Model,
   selected_worker_id : String?,
 ) -> Array[@rabbita.Html] {
-  match model.visual_projection {
-    Some(_) => {
-      let worker_avatars : Array[@rabbita.Html] = []
-      let visual_agents = visual_overworld_agents(model)
-      for i in 0..<visual_agents.length() {
-        let agent = visual_agents[i]
-        worker_avatars.push(
-          render_visual_agent_avatar(
-            dispatch,
-            agent,
-            i,
-            selected_worker_id == Some(agent.worker_id),
-          ),
-        )
-      }
-      worker_avatars
-    }
-    None => render_viewport_residents()
+  ignore(dispatch)
+  ignore(selected_worker_id)
+  let avatars : Array[@rabbita.Html] = []
+  let agents = energy_valley_runtime_active_agents(model.energy_valley_runtime)
+  for index in 0..<agents.length() {
+    avatars.push(render_energy_valley_agent_avatar(agents[index], index))
   }
+  avatars
 }
 
 ///|

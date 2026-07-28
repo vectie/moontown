@@ -69,21 +69,16 @@ moon fmt
 The frontend submodule also has focused delivery checks:
 
 ```bash
-cd src/ui/rabbita-town
-moon check --target js
-moon test --target js
-npm run test:server
-npm run smoke:user-workflows
-npm run smoke:book-projections
-npm run build
+moon -C src/ui/rabbita-town check --target js main
+moon -C src/ui/rabbita-town test --target js
+./scripts/build-rabbita-ui.sh
 ```
 
-`smoke:user-workflows` starts an isolated localhost server, submits both user
-request types, verifies visible API success contracts and their durable ledger
-files, rejects a cross-origin write, then removes the temporary runtime state.
-The production build performs an additional asset-manifest check and fails if
-runtime media is missing, authoring-only folders leak into `dist`, or the
-artifact exceeds 64 MiB.
+The production build compiles the MoonBit entry directly, assembles the static
+product without npm or a bundler, and verifies its content manifest. It fails
+if runtime media is missing, authoring-only folders leak into `dist`, or the
+artifact exceeds 64 MiB. Runtime routes and write security belong to the
+MoonBit desktop service and its MoonBit tests.
 
 Current UI work usually touches two different surfaces:
 

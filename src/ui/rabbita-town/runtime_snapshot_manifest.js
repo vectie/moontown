@@ -2,6 +2,13 @@ import { parseWatcherRecords } from './runtime_snapshot_parser.js'
 
 export const RUNTIME_TEXT_SNAPSHOTS = [
   {
+    url: './energy-valley-runtime.json',
+    jsonGlobal: '__moontownEnergyValleyRuntimeJson',
+    versionGlobal: '__moontownEnergyValleyRuntimeVersion',
+    fallback:
+      '{"schema":"moontown.energy-valley.runtime.v1","mode":"error","observedAt":"","tasks":[],"agents":[],"message":"Unable to read the MoonTown runtime."}',
+  },
+  {
     url: './town.json',
     jsonGlobal: '__moontownTownSnapshotJson',
     versionGlobal: '__moontownTownSnapshotVersion',

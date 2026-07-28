@@ -14,27 +14,22 @@ fn count_execution_status(
 
 ///|
 fn execution_status_needs_attention(status : @core.TaskExecutionStatus) -> Bool {
-  status == Failed ||
-  status == Stale ||
-  status == ReviewQueued
+  status == Failed || status == Stale || status == ReviewQueued
 }
 
 ///|
 fn execution_status_is_active_run(status : @core.TaskExecutionStatus) -> Bool {
-  status == Running ||
-  status == RunConfirmed
+  status == Running || status == RunConfirmed
 }
 
 ///|
 fn execution_status_has_run_id(status : @core.TaskExecutionStatus) -> Bool {
-  !(status == PacketReady ||
-  status == ProposalImported)
+  !(status == PacketReady || status == ProposalImported)
 }
 
 ///|
 fn execution_status_requires_review(status : @core.TaskExecutionStatus) -> Bool {
-  status == AwaitingPersistence ||
-  status == ReviewQueued
+  status == AwaitingPersistence || status == ReviewQueued
 }
 
 ///|
@@ -55,39 +50,18 @@ fn execution_count_summary(
   executions : Array[@core.TaskExecutionRecord],
 ) -> ExecutionCountSummary {
   {
-    packet_ready: count_execution_status(
-      executions,
-      PacketReady,
-    ),
-    proposal_imported: count_execution_status(
-      executions,
-      ProposalImported,
-    ),
-    run_confirmed: count_execution_status(
-      executions,
-      RunConfirmed,
-    ),
-    running: count_execution_status(
-      executions,
-      Running,
-    ),
+    packet_ready: count_execution_status(executions, PacketReady),
+    proposal_imported: count_execution_status(executions, ProposalImported),
+    run_confirmed: count_execution_status(executions, RunConfirmed),
+    running: count_execution_status(executions, Running),
     awaiting_persistence: count_execution_status(
       executions,
       AwaitingPersistence,
     ),
-    review_queued: count_execution_status(
-      executions,
-      ReviewQueued,
-    ),
-    completed: count_execution_status(
-      executions,
-      Completed,
-    ),
+    review_queued: count_execution_status(executions, ReviewQueued),
+    completed: count_execution_status(executions, Completed),
     stale: count_execution_status(executions, Stale),
-    failed: count_execution_status(
-      executions,
-      Failed,
-    ),
+    failed: count_execution_status(executions, Failed),
   }
 }
 

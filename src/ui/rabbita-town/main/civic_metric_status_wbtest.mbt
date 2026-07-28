@@ -113,16 +113,10 @@ test "civic queue pressure policy guards invalid divisors" {
 ///|
 test "civic health execution adjustment centralizes status deltas" {
   let running = civic_metric_test_execution(Running)
-  let awaiting = civic_metric_test_execution(
-    AwaitingPersistence,
-  )
-  let review = civic_metric_test_execution(
-    ReviewQueued,
-  )
+  let awaiting = civic_metric_test_execution(AwaitingPersistence)
+  let review = civic_metric_test_execution(ReviewQueued)
   let failed = civic_metric_test_execution(Failed)
-  let completed = civic_metric_test_execution(
-    Completed,
-  )
+  let completed = civic_metric_test_execution(Completed)
   let policy : CivicHealthExecutionPolicy = {
     awaiting_delta: -5,
     review_delta: -10,
@@ -145,54 +139,12 @@ test "civic health execution adjustment uses shared execution stage policy" {
     failed_delta: -20,
     completed_delta: 7,
   }
-  assert_eq(
-    civic_health_after_execution_stage(
-      50,
-      @ui.Packet,
-      policy,
-    ),
-    50,
-  )
-  assert_eq(
-    civic_health_after_execution_stage(
-      50,
-      @ui.Running,
-      policy,
-    ),
-    50,
-  )
-  assert_eq(
-    civic_health_after_execution_stage(
-      50,
-      @ui.Persisting,
-      policy,
-    ),
-    45,
-  )
-  assert_eq(
-    civic_health_after_execution_stage(
-      50,
-      @ui.Review,
-      policy,
-    ),
-    40,
-  )
-  assert_eq(
-    civic_health_after_execution_stage(
-      50,
-      @ui.Recovery,
-      policy,
-    ),
-    30,
-  )
-  assert_eq(
-    civic_health_after_execution_stage(
-      98,
-      @ui.Completed,
-      policy,
-    ),
-    100,
-  )
+  assert_eq(civic_health_after_execution_stage(50, @ui.Packet, policy), 50)
+  assert_eq(civic_health_after_execution_stage(50, @ui.Running, policy), 50)
+  assert_eq(civic_health_after_execution_stage(50, @ui.Persisting, policy), 45)
+  assert_eq(civic_health_after_execution_stage(50, @ui.Review, policy), 40)
+  assert_eq(civic_health_after_execution_stage(50, @ui.Recovery, policy), 30)
+  assert_eq(civic_health_after_execution_stage(98, @ui.Completed, policy), 100)
 }
 
 ///|
@@ -227,10 +179,7 @@ test "civic module signal class separates snapshot wrapper from status mapping" 
     "module-signal-book",
   )
   assert_eq(
-    civic_module_signal_class_for_status(
-      ReviewQueued,
-      running_is_live=true,
-    ),
+    civic_module_signal_class_for_status(ReviewQueued, running_is_live=true),
     "module-signal-alert",
   )
   assert_eq(
@@ -241,26 +190,17 @@ test "civic module signal class separates snapshot wrapper from status mapping" 
     "module-signal-review",
   )
   assert_eq(
-    civic_module_signal_class_for_status(
-      Running,
-      running_is_live=true,
-    ),
+    civic_module_signal_class_for_status(Running, running_is_live=true),
     "module-signal-live",
   )
   assert_eq(
-    civic_module_signal_class_for_status(
-      Running,
-      running_is_live=false,
-    ),
+    civic_module_signal_class_for_status(Running, running_is_live=false),
     "module-signal-book",
   )
   assert_eq(civic_module_active_run_signal_class(true), "module-signal-live")
   assert_eq(civic_module_active_run_signal_class(false), "module-signal-book")
   assert_eq(
-    civic_module_signal_class_for_status(
-      Completed,
-      running_is_live=false,
-    ),
+    civic_module_signal_class_for_status(Completed, running_is_live=false),
     "module-signal-live",
   )
 }

@@ -19,14 +19,7 @@ fn worker_count_summary(workers : Array[WorkerSim]) -> WorkerCountSummary {
 
 ///|
 fn worker_count_summary_empty() -> WorkerCountSummary {
-  {
-    total: 0,
-    idle: 0,
-    running: 0,
-    waiting: 0,
-    blocked: 0,
-    offline: 0,
-  }
+  { total: 0, idle: 0, running: 0, waiting: 0, blocked: 0, offline: 0 }
 }
 
 ///|
@@ -35,16 +28,11 @@ fn WorkerCountSummary::add(
   worker : WorkerSim,
 ) -> WorkerCountSummary {
   match worker.status {
-    Idle =>
-      { ..self, total: self.total + 1, idle: self.idle + 1 }
-    Running =>
-      { ..self, total: self.total + 1, running: self.running + 1 }
-    Waiting =>
-      { ..self, total: self.total + 1, waiting: self.waiting + 1 }
-    Blocked =>
-      { ..self, total: self.total + 1, blocked: self.blocked + 1 }
-    Offline =>
-      { ..self, total: self.total + 1, offline: self.offline + 1 }
+    Idle => { ..self, total: self.total + 1, idle: self.idle + 1 }
+    Running => { ..self, total: self.total + 1, running: self.running + 1 }
+    Waiting => { ..self, total: self.total + 1, waiting: self.waiting + 1 }
+    Blocked => { ..self, total: self.total + 1, blocked: self.blocked + 1 }
+    Offline => { ..self, total: self.total + 1, offline: self.offline + 1 }
   }
 }
 

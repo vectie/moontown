@@ -19,6 +19,26 @@ priv enum ViewportMode {
 } derive(Eq)
 
 ///|
+priv enum EnergyWeather {
+  Sunny
+  Cloudy
+  Rain
+  Snow
+} derive(Eq)
+
+///|
+priv enum EnergyTool {
+  InspectTool
+  RoadTool
+  ParkTool
+  DemolishTool
+  ResearchTowerTool
+  LaboratoryTool
+  WorkshopTool
+  TalentHomeTool
+} derive(Eq)
+
+///|
 priv enum DashboardSection {
   DistrictSystems
   ResidentAgentsSection
@@ -44,6 +64,7 @@ priv struct Model {
   request_composer : RequestComposerFocus
   projection_snapshot : ProjectionSnapshot?
   snapshot_version : Int
+  energy_valley_runtime : EnergyValleyRuntimeState
   visual_projection : VisualProjectionSnapshot?
   visual_projection_version : Int
   module_projections : Array[BookProjectionFragment]
@@ -87,7 +108,30 @@ priv struct Model {
   energy : Int
   pressure : Int
   stability : Int
+  energy_weather : EnergyWeather
+  energy_weather_auto : Bool
+  energy_time_scale : Int
+  energy_tool : EnergyTool
+  energy_board_open : Bool
+  energy_guide_open : Bool
+  energy_reset_open : Bool
+  energy_intro_open : Bool
+  energy_request_open : Bool
+  energy_build_budget : Int
+  energy_custom_buildings : Array[GoldenValleyBuilding]
+  energy_roads : Array[String]
+  energy_parks : Array[String]
+  energy_selected_building : GoldenValleyBuilding?
+  energy_toast : String
 }
+
+///|
+priv struct EnergyValleySave {
+  budget : Int
+  buildings : Array[GoldenValleyBuilding]
+  roads : Array[String]
+  parks : Array[String]
+} derive(ToJson, FromJson)
 
 ///|
 priv enum Msg {
@@ -99,6 +143,22 @@ priv enum Msg {
   SelectNode(String)
   SelectOverview
   SetViewportMode(ViewportMode)
+  SetEnergyWeather(EnergyWeather)
+  ToggleEnergyWeatherAuto
+  SetEnergyTimeScale(Int)
+  SetEnergyTool(EnergyTool)
+  ToggleEnergyBoard
+  OpenEnergyGuide
+  CloseEnergyGuide
+  OpenEnergyReset
+  CloseEnergyReset
+  CloseEnergyIntro
+  OpenEnergyRequest
+  CloseEnergyRequest
+  EnergyResetCurrent
+  EnergyGenerateNew
+  EnergyCanvasClick(Int, Int)
+  CloseEnergyInspector
   SetDashboardSection(DashboardSection)
   SetRequestComposer(RequestComposerFocus)
   SetRequestTitle(String)

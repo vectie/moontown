@@ -1,6 +1,0 @@
-export * from './client'
-export * from './normalize'
-export * from './presentation'
-export * from './requests'
-export * from './types'
-export * from './useRuntimeProjection'

@@ -34,7 +34,9 @@ fn execution_spec(
     task_id~,
     book_id~,
     packet_id="packet-\{task_id}",
-    packet_path=moontown_product_display_artifact("packets/packet-\{task_id}.json"),
+    packet_path=moontown_product_display_artifact(
+      "packets/packet-\{task_id}.json",
+    ),
     proposal_id=Some("proposal-packet-\{task_id}"),
     run_id=if execution_status_has_run_id(status) {
       Some("run-packet-\{task_id}")
@@ -79,23 +81,15 @@ fn execution_summary(
   task_id : String,
 ) -> String {
   match status {
-    PacketReady =>
-      "Keeper packet prepared for \{task_id}."
-    ProposalImported =>
-      "Proposal imported and waiting for mayor confirmation."
-    RunConfirmed =>
-      "Mayor confirmed a live MoonClaw run."
-    Running =>
-      "MoonClaw run is executing book-local work."
+    PacketReady => "Keeper packet prepared for \{task_id}."
+    ProposalImported => "Proposal imported and waiting for mayor confirmation."
+    RunConfirmed => "Mayor confirmed a live MoonClaw run."
+    Running => "MoonClaw run is executing book-local work."
     AwaitingPersistence =>
       "MoonBook persistence is waiting to absorb the result."
-    ReviewQueued =>
-      "Keeper review queued after persistence."
-    Completed =>
-      "Packet, run, and review loop completed."
-    Stale =>
-      "Mayor marked the execution stale and queued a recovery decision."
-    Failed =>
-      "Execution failed and the town should recover or retry."
+    ReviewQueued => "Keeper review queued after persistence."
+    Completed => "Packet, run, and review loop completed."
+    Stale => "Mayor marked the execution stale and queued a recovery decision."
+    Failed => "Execution failed and the town should recover or retry."
   }
 }

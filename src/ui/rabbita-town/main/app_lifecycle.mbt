@@ -29,6 +29,65 @@ fn update_non_form_message(
     SelectOverview => model_only_update({ ..model, selection: Overview })
     SetViewportMode(viewport_mode) =>
       model_only_update(set_viewport_mode_model(model, viewport_mode))
+    SetEnergyWeather(weather) =>
+      model_only_update({
+        ..model,
+        energy_weather: weather,
+        energy_weather_auto: false,
+      })
+    ToggleEnergyWeatherAuto =>
+      model_only_update({
+        ..model,
+        energy_weather_auto: !model.energy_weather_auto,
+      })
+    SetEnergyTimeScale(scale) =>
+      model_only_update({ ..model, energy_time_scale: scale })
+    SetEnergyTool(tool) => model_only_update({ ..model, energy_tool: tool })
+    ToggleEnergyBoard =>
+      model_only_update({ ..model, energy_board_open: !model.energy_board_open })
+    OpenEnergyGuide =>
+      model_only_update({
+        ..model,
+        energy_board_open: false,
+        energy_guide_open: true,
+        energy_intro_open: false,
+      })
+    CloseEnergyGuide => model_only_update({ ..model, energy_guide_open: false })
+    OpenEnergyReset =>
+      model_only_update({
+        ..model,
+        energy_board_open: false,
+        energy_reset_open: true,
+      })
+    CloseEnergyReset => model_only_update({ ..model, energy_reset_open: false })
+    CloseEnergyIntro => {
+      browser_mark_energy_valley_intro_seen()
+      model_only_update({ ..model, energy_intro_open: false })
+    }
+    OpenEnergyRequest =>
+      model_only_update({
+        ..model,
+        energy_board_open: false,
+        energy_request_open: true,
+        request_composer: StandingWatchComposer,
+      })
+    CloseEnergyRequest =>
+      model_only_update({ ..model, energy_request_open: false })
+    EnergyResetCurrent => {
+      browser_reset_energy_valley(false)
+      model_only_update(model)
+    }
+    EnergyGenerateNew => {
+      browser_reset_energy_valley(true)
+      model_only_update(model)
+    }
+    EnergyCanvasClick(screen_x, screen_y) => {
+      let next = energy_valley_canvas_click_model(model, screen_x, screen_y)
+      persist_energy_valley_model(next)
+      model_only_update(next)
+    }
+    CloseEnergyInspector =>
+      model_only_update({ ..model, energy_selected_building: None })
     SetDashboardSection(section) =>
       model_only_update(set_dashboard_section_model(model, section))
     SetRequestComposer(focus) =>

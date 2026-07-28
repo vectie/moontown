@@ -12,11 +12,7 @@ test "policy hall health keeps existing worker energy policy" {
   assert_eq(
     policy_hall_health(
       Some(worker),
-      Some(
-        civic_metric_test_execution(
-          AwaitingPersistence,
-        ),
-      ),
+      Some(civic_metric_test_execution(AwaitingPersistence)),
     ),
     55,
   )
@@ -41,17 +37,11 @@ test "policy hall quest stage uses shared execution phrase groups" {
     "Packet prepared",
   )
   assert_eq(
-    policy_hall_quest_stage(
-      model,
-      Some(civic_metric_test_execution(Running)),
-    ),
+    policy_hall_quest_stage(model, Some(civic_metric_test_execution(Running))),
     "Advisor interpreting",
   )
   assert_eq(
-    policy_hall_quest_stage(
-      model,
-      Some(civic_metric_test_execution(Completed)),
-    ),
+    policy_hall_quest_stage(model, Some(civic_metric_test_execution(Completed))),
     "Checklist ready",
   )
 }
@@ -81,17 +71,11 @@ test "policy hall next action uses shared execution action groups" {
 test "policy hall signal uses shared execution signal groups" {
   let model = init_model()
   assert_eq(
-    policy_hall_signal(
-      model,
-      Some(civic_metric_test_execution(Running)),
-    ),
+    policy_hall_signal(model, Some(civic_metric_test_execution(Running))),
     "Quest live",
   )
   assert_eq(
-    policy_hall_signal(
-      model,
-      Some(civic_metric_test_execution(ReviewQueued)),
-    ),
+    policy_hall_signal(model, Some(civic_metric_test_execution(ReviewQueued))),
     "Escalated",
   )
 }
@@ -121,10 +105,7 @@ test "policy hall secondary labels use shared execution phrase groups" {
     "Clause scan in flight",
   )
   assert_eq(
-    policy_hall_evidence_label(
-      model,
-      Some(civic_metric_test_execution(Failed)),
-    ),
+    policy_hall_evidence_label(model, Some(civic_metric_test_execution(Failed))),
     "Evidence needs recovery",
   )
 }
@@ -140,17 +121,11 @@ test "policy hall confidence uses shared execution score policy" {
     69,
   )
   assert_eq(
-    policy_hall_confidence(
-      model,
-      Some(civic_metric_test_execution(Completed)),
-    ),
+    policy_hall_confidence(model, Some(civic_metric_test_execution(Completed))),
     94,
   )
   assert_eq(
-    policy_hall_confidence(
-      model,
-      Some(civic_metric_test_execution(Failed)),
-    ),
+    policy_hall_confidence(model, Some(civic_metric_test_execution(Failed))),
     28,
   )
   assert_eq(

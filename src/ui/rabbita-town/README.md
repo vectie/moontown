@@ -2,16 +2,24 @@
 
 This package is the browser-facing Rabbita frontend for `moontown`.
 
-It uses the published Rabbita frontend stack:
+It uses the published Rabbita MoonBit stack:
 
 - `moon.mod` imports `moonbit-community/rabbita@0.12.4`.
 - `moon.work` only binds this nested frontend and the local MoonTown source tree.
-- `package.json` imports the published `@rabbita/vite` package instead of a
-  local `../rba` checkout.
+- `package.json` only declares Node's ES-module semantics for checked-in browser
+  and verification scripts; it has no package dependencies or lockfile.
+- the production build copies MoonBit's release `main.js` directly and does not
+  invoke npm, Vite, React, TypeScript, or another frontend bundler.
 
-Lepusa is intentionally not imported here yet. If MoonTown gains a native
-desktop shell, that target should import the published `vectie/lepusa` package
-from its own MoonBit module instead of wiring to a local `../lepusa` checkout.
+The product boundary is MoonBit-only:
+
+- this nested package authors the browser surface in MoonBit with Rabbita;
+- the root module imports the published `vectie/lepusa` package;
+- `lepusa.json` packages this compiled surface with the MoonBit desktop server.
+
+JavaScript in this directory is browser, local-server, and build verification
+glue. Product state, rendering, town generation, work projection, and
+interaction behavior remain in MoonBit source.
 
 It consumes the renderer-agnostic scene contracts from the root module:
 
@@ -35,11 +43,12 @@ It currently includes:
 - Wenyu Valley map workspace entry
 - request desk with standing-watch and PDF evidence-book creation paths
 - attention workbench with priority guidance and activity ledger
-- generated Wenyu Valley map with animated resident overlay
+- generated Wenyu Valley map with animated real-agent overlay
+- deterministic procedural building interiors with runtime work stations
 - stronger keyboard focus visibility
 
-The current frontend can run in demo mode, but the dev server also bridges real
-runtime files:
+The current frontend can run in demo mode, while the MoonBit desktop server
+bridges real runtime files:
 
 - `.moonsuite/products/moontown/town.json`
 - `.moonsuite/products/moontown/daemon.json`
@@ -57,34 +66,40 @@ The daemon then picks that goal up during its normal standing-goal dispatch
 cycle.
 
 The request composer reads its default standing-goal source policy from
-`../../../assets/templates/operator-request-policy.json`. The browser/Vite
-layer must not own source-policy vocabulary; it only applies the document
-contract when turning a user request into a durable Mayor queue item.
+`../../../assets/templates/operator-request-policy.json`. The browser layer
+must not own source-policy vocabulary; the MoonBit desktop server applies the
+document contract when turning a user request into a durable Mayor queue item.
 
-The dashboard links to `viewport.html?assets=generated&v=wenyu` for the Wenyu
-Valley map workspace, where districts, residents, standing watches, and active
-work can be inspected in place.
+The packaged entry opens the Wenyu Valley workspace directly. Districts,
+residents, standing watches, active work, procedural interiors, and evidence
+handoffs are inspected in place.
 
 This package owns the MoonTown operator dashboard only. It does not own the
 generated MoonBook site that appears under live workspace directories such as
 `books/coding/site/`.
 
-Run locally from this directory:
+Check the MoonBit frontend from this directory:
 
 ```bash
 moon check
 moon info
-npm install
-npm run dev
 ```
 
-Build the production bundle from the repo root:
+Build the deterministic static product from the repo root:
 
 ```bash
 ./scripts/build-rabbita-ui.sh
 ```
 
-Outputs land in `ui/rabbita-town/dist/`.
+The script formats and checks the MoonBit package, compiles its JS release
+entry, assembles the browser glue/CSS/product assets, writes a content-hashed
+`asset-manifest.json`, and verifies the result. Outputs land in
+`src/ui/rabbita-town/dist/`.
+
+For live runtime data, serve that directory through the MoonBit desktop service
+(the same localhost service started by Lepusa). A plain static file server can
+show the shell, but it cannot provide the town ledgers or safe request
+endpoints.
 
 ## Important Files
 
@@ -96,5 +111,7 @@ Outputs land in `ui/rabbita-town/dist/`.
   - page shell
 - `bootstrap.js`
   - browser entry
-- `vite.config.js`
-  - Vite integration
+- `scripts/assemble-production-build.mjs`
+  - deterministic no-bundler artifact assembly
+- `scripts/verify-production-build.mjs`
+  - release allowlist, integrity, and dependency-boundary checks

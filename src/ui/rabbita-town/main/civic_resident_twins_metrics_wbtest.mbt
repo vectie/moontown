@@ -33,17 +33,11 @@ test "resident twins base health centralizes worker energy policy" {
 test "resident twins signal uses shared execution phrase groups" {
   let model = init_model()
   assert_eq(
-    resident_twins_signal(
-      model,
-      Some(civic_metric_test_execution(PacketReady)),
-    ),
+    resident_twins_signal(model, Some(civic_metric_test_execution(PacketReady))),
     "Twin dispatch",
   )
   assert_eq(
-    resident_twins_signal(
-      model,
-      Some(civic_metric_test_execution(Running)),
-    ),
+    resident_twins_signal(model, Some(civic_metric_test_execution(Running))),
     "Reflection running",
   )
   assert_eq(
@@ -62,11 +56,7 @@ test "resident twins next action uses shared execution action groups" {
     resident_twins_next_action(
       model,
       None,
-      Some(
-        civic_metric_test_execution(
-          AwaitingPersistence,
-        ),
-      ),
+      Some(civic_metric_test_execution(AwaitingPersistence)),
     ),
     "Persist the reviewed resident summary and refresh the projection-safe handoff.",
   )

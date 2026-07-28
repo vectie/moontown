@@ -32,17 +32,11 @@ test "social square base health centralizes worker energy policy" {
 test "social square signal uses shared execution phrase groups" {
   let model = init_model()
   assert_eq(
-    social_square_signal(
-      model,
-      Some(civic_metric_test_execution(PacketReady)),
-    ),
+    social_square_signal(model, Some(civic_metric_test_execution(PacketReady))),
     "Match queued",
   )
   assert_eq(
-    social_square_signal(
-      model,
-      Some(civic_metric_test_execution(Running)),
-    ),
+    social_square_signal(model, Some(civic_metric_test_execution(Running))),
     "Match live",
   )
   assert_eq(
@@ -61,11 +55,7 @@ test "social square next action uses shared execution action groups" {
     social_square_next_action(
       model,
       None,
-      Some(
-        civic_metric_test_execution(
-          AwaitingPersistence,
-        ),
-      ),
+      Some(civic_metric_test_execution(AwaitingPersistence)),
     ),
     "Persist the reviewed intro outcome and follow-up note into MoonBook social records.",
   )
@@ -83,17 +73,11 @@ test "social square next action uses shared execution action groups" {
 test "social square stage uses shared execution phrase groups" {
   let model = init_model()
   assert_eq(
-    social_square_stage(
-      model,
-      Some(civic_metric_test_execution(PacketReady)),
-    ),
+    social_square_stage(model, Some(civic_metric_test_execution(PacketReady))),
     "Match dispatch",
   )
   assert_eq(
-    social_square_stage(
-      model,
-      Some(civic_metric_test_execution(Running)),
-    ),
+    social_square_stage(model, Some(civic_metric_test_execution(Running))),
     "RSVP plan in flight",
   )
   assert_eq(

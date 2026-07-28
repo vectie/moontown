@@ -52,6 +52,7 @@ fn initial_request_composer() -> RequestComposerFocus {
 ///|
 fn init_model() -> Model {
   let projection_snapshot = parse_bootstrap_town_snapshot()
+  let energy_valley_runtime = initial_energy_valley_runtime_state()
   let visual_projection = parse_bootstrap_visual_projection()
   let module_projections = parse_bootstrap_module_projections()
   let civic_status = parse_bootstrap_civic_status()
@@ -64,6 +65,7 @@ fn init_model() -> Model {
   let watcher_records = parse_bootstrap_watcher_records()
   let operator_requests = parse_bootstrap_operator_requests()
   let book_template_requests = parse_bootstrap_book_template_requests()
+  let energy_valley_save = initial_energy_valley_save()
   {
     tick: 0,
     paused: false,
@@ -74,6 +76,7 @@ fn init_model() -> Model {
     request_composer: initial_request_composer(),
     projection_snapshot,
     snapshot_version: town_snapshot_version(),
+    energy_valley_runtime,
     visual_projection,
     visual_projection_version: visual_projection_version(),
     module_projections,
@@ -114,8 +117,23 @@ fn init_model() -> Model {
     book_request_submitting: false,
     book_request_status: "Ready to queue a PDF Evidence Watch MoonBook request.",
     budget: 76,
-    energy: 68,
+    energy: 62,
     pressure: 34,
     stability: 78,
+    energy_weather: Sunny,
+    energy_weather_auto: true,
+    energy_time_scale: 60,
+    energy_tool: InspectTool,
+    energy_board_open: false,
+    energy_guide_open: false,
+    energy_reset_open: false,
+    energy_intro_open: !browser_energy_valley_intro_seen(),
+    energy_request_open: false,
+    energy_build_budget: energy_valley_save.budget,
+    energy_custom_buildings: energy_valley_save.buildings,
+    energy_roads: energy_valley_save.roads,
+    energy_parks: energy_valley_save.parks,
+    energy_selected_building: None,
+    energy_toast: "",
   }
 }
