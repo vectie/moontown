@@ -26,14 +26,32 @@ pub fn moonsuite_product_id() -> String {
 }
 
 ///|
-pub fn moontown_active_workspace_root() -> String {
-  match @env.get_env_var("MOONTOWN_SUITE_ROOT") {
-    Some(root) => {
-      let trimmed = root.trim().to_owned()
-      if !trimmed.is_empty() {
-        return trimmed
+fn non_empty_environment_value(name : String) -> String? {
+  match @env.get_env_var(name) {
+    Some(value) => {
+      let trimmed = value.trim().to_owned()
+      if trimmed.is_empty() {
+        None
+      } else {
+        Some(trimmed)
       }
     }
+    None => None
+  }
+}
+
+///|
+pub fn moontown_active_workspace_root() -> String {
+  match non_empty_environment_value("MOONTOWN_SUITE_ROOT") {
+    Some(root) => return root
+    None => ()
+  }
+  match non_empty_environment_value("MOONSUITE_ROOT") {
+    Some(root) => return root
+    None => ()
+  }
+  match non_empty_environment_value("HOME") {
+    Some(home) => return home + "/moonsuite"
     None => ()
   }
   @os.cwd() catch {

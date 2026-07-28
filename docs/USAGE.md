@@ -356,19 +356,24 @@ the OS instead of relying on a detached child process:
 ```bash
 ./scripts/install-launchd-daemon.sh
 moon run src/cmd/main -- daemon doctor
-tail -f .moonsuite/products/moontown/daemon.log
+tail -f "$HOME/moonsuite/.moonsuite/products/moontown/daemon.log"
 ```
 
 The installer writes
-`.moonsuite/products/moontown/launchd/com.vectie.moontown.daemon.plist`, loads
+`$HOME/moonsuite/.moonsuite/products/moontown/launchd/com.vectie.moontown.daemon.plist`,
+loads
 it into the current user launchd domain, and points stdout/stderr at:
 
-- `.moonsuite/products/moontown/launchd.out.log`
-- `.moonsuite/products/moontown/launchd.err.log`
+- `$HOME/moonsuite/.moonsuite/products/moontown/launchd.out.log`
+- `$HOME/moonsuite/.moonsuite/products/moontown/launchd.err.log`
 
 The launchd profile also sets `MOONTOWN_MOONCLAW_INLINE=1`, so bounded
 MoonClaw handoffs such as PlanBook repairs and book semantic reviews can run
 inside the supervised worker instead of stopping at a dispatch receipt.
+It keeps the MoonTown, MoonBook, and MoonClaw source checkouts as executable
+code roots while binding all runtime state and books to `MOONTOWN_SUITE_ROOT`.
+That root defaults to `$HOME/moonsuite`; set it explicitly to use another
+MoonSuite workspace.
 
 Stop it with:
 

@@ -1,10 +1,13 @@
 #!/usr/bin/env bash
 set -euo pipefail
 
-root="$(cd "$(dirname "$0")/.." && pwd)"
+repo_root="$(cd "$(dirname "$0")/.." && pwd)"
 label="${MOONTOWN_LAUNCHD_LABEL:-com.vectie.moontown.daemon}"
 moon_bin="${MOON_BIN:-$HOME/.moon/bin/moon}"
-product_home="$root/.moonsuite/products/moontown"
+suite_root="${MOONTOWN_SUITE_ROOT:-${MOONSUITE_ROOT:-$HOME/moonsuite}}"
+moonbook_root="${MOONTOWN_MOONBOOK_ROOT:-$repo_root/../moonbook}"
+moonclaw_root="${MOONTOWN_MOONCLAW_ROOT:-$repo_root/../moonclaw}"
+product_home="$suite_root/.moonsuite/products/moontown"
 plist_dir="$product_home/launchd"
 plist="$plist_dir/$label.plist"
 stdout_log="$product_home/launchd.out.log"
@@ -32,7 +35,7 @@ cat > "$plist" <<PLIST
     <string>--worker</string>
   </array>
   <key>WorkingDirectory</key>
-  <string>$root</string>
+  <string>$repo_root</string>
   <key>RunAtLoad</key>
   <true/>
   <key>KeepAlive</key>
@@ -50,7 +53,13 @@ cat > "$plist" <<PLIST
     <key>MOON_BIN</key>
     <string>$moon_bin</string>
     <key>MOONTOWN_ROOT</key>
-    <string>$root</string>
+    <string>$repo_root</string>
+    <key>MOONTOWN_SUITE_ROOT</key>
+    <string>$suite_root</string>
+    <key>MOONTOWN_MOONBOOK_ROOT</key>
+    <string>$moonbook_root</string>
+    <key>MOONTOWN_MOONCLAW_ROOT</key>
+    <string>$moonclaw_root</string>
     <key>MOONTOWN_MOONCLAW_INLINE</key>
     <string>1</string>
     <key>PATH</key>

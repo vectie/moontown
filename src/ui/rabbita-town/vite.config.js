@@ -6,6 +6,9 @@ import {
   handleBookTemplateRequest,
   handleOperatorRequest,
 } from './vite_api_handlers.js'
+import {
+  handleEnergyValleyRuntimeRequest,
+} from './vite_energy_valley_runtime.js'
 import { serveBookOutput } from './vite_book_output.js'
 import { loadModuleProjectionIndex } from './vite_book_projections.js'
 import { loadMoondeskBridgeIndex } from './vite_moondesk_bridge.js'
@@ -38,6 +41,10 @@ function moontownSnapshotPlugin() {
   return {
     name: 'moontown-town-snapshot',
     configureServer(server) {
+      server.middlewares.use(
+        '/energy-valley-runtime.json',
+        handleEnergyValleyRuntimeRequest,
+      )
       server.middlewares.use('/town.json', async (_req, res) => {
         await serveJsonFile(res, townSnapshotPath, 'missing town snapshot')
       })

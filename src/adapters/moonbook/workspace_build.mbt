@@ -6,12 +6,9 @@ pub async fn build_workspace(
   ensure_workspace(entry, moonbook_root~)
   let root = resolved_workspace_root(entry.workspace_root)
   let resolved_moonbook_root = resolved_root_path(moonbook_root)
+  let (command, args) = moonbook_runtime_invocation(["build", root])
   ignore(
-    @integration.run_checked(
-      moonbook_moon_command(),
-      ["run", "cmd/main", "--", "build", root],
-      cwd=Some(resolved_moonbook_root),
-    ),
+    @integration.run_checked(command, args, cwd=Some(resolved_moonbook_root)),
   )
   resolved_generated_site_index_after_build(root)
 }

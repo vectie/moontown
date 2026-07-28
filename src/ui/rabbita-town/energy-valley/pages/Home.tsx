@@ -21,6 +21,17 @@ import {
   TownBadge, MetricChips, ToolDock, EventFeed, Inspector, Dashboard,
   Onboarding, Guide, ResetDialog,
 } from '../components/Hud'
+import { RuntimeWorkPanel } from '../components/RuntimeWork'
+import { RuntimeTaskDetail } from '../components/RuntimeTaskDetail'
+import { WorkRequestDialog } from '../components/WorkRequestDialog'
+import {
+  applyRuntimeClientState,
+} from '../engine/runtime_projection'
+import { matchesAcceptedRequest, useRuntimeProjection } from '../runtime'
+import type {
+  AcceptedOperatorRequest,
+  RuntimeWorkItem,
+} from '../runtime'
 
 const SAVE_KEY = 'moontown-energy-valley-v2'
 const SEED_KEY = 'moontown-energy-valley-seed-v1'
@@ -37,12 +48,16 @@ interface Snapshot {
 }
 
 export default function Home() {
+  const runtime = useRuntimeProjection()
+  const runtimeRef = useRef(runtime)
+  runtimeRef.current = runtime
   const canvasRef = useRef<HTMLCanvasElement>(null)
   const wrapRef = useRef<HTMLDivElement>(null)
   const simRef = useRef<SimState | null>(null)
   const viewRef = useRef<ViewState>({ camX: 0, camY: 0, zoom: 1, hoverTile: null, ghost: null, selectedId: null })
   const dragRef = useRef<{ panning: boolean; painting: boolean; lastX: number; lastY: number; moved: boolean }>({ panning: false, painting: false, lastX: 0, lastY: 0, moved: false })
   const followRef = useRef<string | null>(null)
+  const openedAcceptedRef = useRef<string | null>(null)
 
   const [tool, setTool] = useState<ToolId>('inspect')
   const toolRef = useRef<ToolId>('inspect')
@@ -53,6 +68,11 @@ export default function Home() {
   const [boardOpen, setBoardOpen] = useState(false)
   const [guideOpen, setGuideOpen] = useState(false)
   const [resetOpen, setResetOpen] = useState(false)
+  const [requestOpen, setRequestOpen] = useState(false)
+  const [acceptedRequest, setAcceptedRequest] =
+    useState<AcceptedOperatorRequest>()
+  const [selectedRuntimeTask, setSelectedRuntimeTask] =
+    useState<RuntimeWorkItem>()
   const [showIntro, setShowIntro] = useState(() => !localStorage.getItem(INTRO_KEY))
   const [toast, setToast] = useState<string | null>(null)
   const [fatalError, setFatalError] = useState<string | null>(null)
@@ -131,6 +151,8 @@ export default function Home() {
     } catch { /* 损坏存档则忽略 */ }
 
     simRef.current = sim
+    const initialRuntime = runtimeRef.current
+    applyRuntimeClientState(sim, initialRuntime)
 
     // 初始相机：对准市政厅一带
     const c = worldToScreen(
@@ -206,6 +228,12 @@ export default function Home() {
             viewRef.current.selectedId = null
             return {}
           }
+          if (prev.agent && !sim.agents.find(agent => agent.id === prev.agent!.id)) {
+            viewRef.current.selectedId = null
+            followRef.current = null
+            setFollowing(false)
+            return {}
+          }
           return prev
         })
       }
@@ -224,14 +252,27 @@ export default function Home() {
     return () => { cancelAnimationFrame(raf); clearInterval(iv); clearInterval(saveIv); ro.disconnect() }
   }, [saveWorld])
 
+  useEffect(() => {
+    const sim = simRef.current
+    if (!sim) return
+    applyRuntimeClientState(sim, runtime)
+  }, [runtime.error, runtime.phase, runtime.projection])
+
   // ---------- 工具应用 ----------
   const applyToolAt = useCallback((tx: number, ty: number, click: boolean) => {
     const sim = simRef.current!
     const t = toolRef.current
     if (t === 'road') {
-      if (placeRoad(sim, tx, ty)) {
+      const placed = placeRoad(sim, tx, ty)
+      if (placed) {
         saveWorld()
-        if (click) showToast('道路已铺设（-30）')
+        if (click) {
+          showToast(
+            placed.kind === 'bridge'
+              ? `桥梁已架设（-${placed.cost}）`
+              : `道路已铺设（-${placed.cost}）`,
+          )
+        }
       }
       else if (click) {
         const chk = checkRoad(sim, tx, ty)
@@ -373,6 +414,16 @@ export default function Home() {
   useEffect(() => {
     const tools: ToolId[] = ['inspect', 'road', 'park', 'demolish', 'bld:c-tower', 'bld:c-lab', 'bld:c-hall', 'bld:c-home']
     const onKey = (e: KeyboardEvent) => {
+      const target = e.target
+      if (
+        target instanceof HTMLElement &&
+        (
+          target.matches('input, textarea, select') ||
+          target.isContentEditable
+        )
+      ) {
+        return
+      }
       if (e.key === 'Escape') {
         setTool('inspect')
         viewRef.current.selectedId = null
@@ -380,6 +431,8 @@ export default function Home() {
         setBoardOpen(false)
         setGuideOpen(false)
         setResetOpen(false)
+        setRequestOpen(false)
+        setSelectedRuntimeTask(undefined)
       }
       else if (e.key === ' ') { e.preventDefault(); simRef.current!.paused = !simRef.current!.paused }
       else if (e.key >= '1' && e.key <= '8') setTool(tools[Number(e.key) - 1])
@@ -416,6 +469,65 @@ export default function Home() {
     view.camX = c.x; view.camY = c.y
     if (view.zoom < 1) view.zoom = 1
   }
+  const handleSelectRuntimeTask = useCallback((task: RuntimeWorkItem) => {
+    setSelectedRuntimeTask(task)
+    const building = simRef.current?.world.buildings.find(
+      candidate => candidate.moduleKey === task.buildingModuleKey
+        && candidate.progress >= 1
+        && candidate.demolish <= 0,
+    )
+    if (!building) return
+    setBoardOpen(false)
+    const view = viewRef.current
+    view.selectedId = building.id
+    const a = archetype(building.archetype)
+    const center = worldToScreen(
+      building.tx + a.w / 2,
+      building.ty + a.h / 2,
+    )
+    view.camX = center.x
+    view.camY = center.y
+    if (view.zoom < 1) view.zoom = 1
+  }, [])
+  const handleAcceptedRequest = useCallback((
+    receipt: AcceptedOperatorRequest,
+  ) => {
+    openedAcceptedRef.current = null
+    setAcceptedRequest(receipt)
+    runtime.refresh()
+    showToast('Request accepted and queued by the Mayor')
+  }, [runtime, showToast])
+
+  useEffect(() => {
+    const tasks = runtime.projection?.tasks ?? []
+    if (selectedRuntimeTask) {
+      const updated = tasks.find(task => task.id === selectedRuntimeTask.id)
+      if (updated && updated !== selectedRuntimeTask) {
+        setSelectedRuntimeTask(updated)
+      }
+    }
+    if (!acceptedRequest) return
+    const matched = tasks.find(task =>
+      matchesAcceptedRequest(task, acceptedRequest),
+    )
+    if (!matched) return
+    if (
+      selectedRuntimeTask &&
+      matchesAcceptedRequest(selectedRuntimeTask, acceptedRequest) &&
+      selectedRuntimeTask.id !== matched.id
+    ) {
+      setSelectedRuntimeTask(matched)
+    }
+    if (openedAcceptedRef.current === acceptedRequest.requestId) return
+    openedAcceptedRef.current = acceptedRequest.requestId
+    setRequestOpen(false)
+    handleSelectRuntimeTask(matched)
+  }, [
+    acceptedRequest,
+    handleSelectRuntimeTask,
+    runtime.projection,
+    selectedRuntimeTask,
+  ])
   const resetWorld = () => {
     localStorage.removeItem(SAVE_KEY)
     window.location.reload()
@@ -456,6 +568,7 @@ export default function Home() {
         {snap && (
           <MetricChips
             population={snap.population} vitality={snap.vitality} budget={snap.budget} agentsOnline={snap.agentsOnline}
+            runtimePhase={runtime.phase}
             paused={snap.paused} timeScale={snap.timeScale}
             onPause={() => { simRef.current!.paused = !simRef.current!.paused }}
             onSpeed={s => { simRef.current!.timeScale = s }}
@@ -470,12 +583,27 @@ export default function Home() {
             history={snap.history}
             buildings={snap.buildings}
             events={snap.events}
+            runtimeTasks={runtime.projection?.tasks}
+            runtimePhase={runtime.phase}
             onClose={() => setBoardOpen(false)}
             onSelect={handleSelectBuilding}
+            onSelectTask={handleSelectRuntimeTask}
             onGuide={() => { setBoardOpen(false); setGuideOpen(true) }}
             onReset={() => { setBoardOpen(false); setResetOpen(true) }}
           />
         )}
+      </div>
+
+      <div className="town-runtime-wrap">
+        <RuntimeWorkPanel
+          phase={runtime.phase}
+          projection={runtime.projection}
+          error={runtime.error}
+          onRefresh={runtime.refresh}
+          onCreateRequest={() => setRequestOpen(true)}
+          onSelectTask={handleSelectRuntimeTask}
+          acceptedRequest={acceptedRequest}
+        />
       </div>
 
       {/* 事件流 */}
@@ -488,6 +616,9 @@ export default function Home() {
         <Inspector
           building={selected.building}
           agent={selected.agent}
+          runtimeTasks={runtime.projection?.tasks}
+          runtimePhase={runtime.phase}
+          hasRuntimeProjection={runtime.projection?.mode === 'live'}
           onClose={() => { viewRef.current.selectedId = null; setSelected({}); setFollowing(false); followRef.current = null }}
           onFollow={handleFollow}
           following={following}
@@ -548,6 +679,34 @@ export default function Home() {
             onCancel={() => setResetOpen(false)}
             onConfirm={resetWorld}
             onRegenerate={generateNewValley}
+          />
+        </div>
+      )}
+
+      {requestOpen && (
+        <div className="work-dialog-backdrop absolute inset-0 z-40 flex items-center justify-center bg-slate-950/70 p-4">
+          <WorkRequestDialog
+            onClose={() => setRequestOpen(false)}
+            onAccepted={handleAcceptedRequest}
+          />
+        </div>
+      )}
+
+      {selectedRuntimeTask && !requestOpen && (
+        <div className="work-dialog-backdrop absolute inset-0 z-40 flex items-center justify-center bg-slate-950/70 p-4">
+          <RuntimeTaskDetail
+            task={selectedRuntimeTask}
+            agents={runtime.projection?.agents ?? []}
+            phase={runtime.phase}
+            located={Boolean(
+              simRef.current?.world.buildings.some(
+                building =>
+                  building.moduleKey === selectedRuntimeTask.buildingModuleKey
+                  && building.progress >= 1
+                  && building.demolish <= 0,
+              ),
+            )}
+            onClose={() => setSelectedRuntimeTask(undefined)}
           />
         </div>
       )}

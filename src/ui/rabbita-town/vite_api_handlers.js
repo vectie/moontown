@@ -1,3 +1,4 @@
+import { randomUUID } from 'node:crypto'
 import path from 'node:path'
 import {
   bookTemplateConfigDir,
@@ -49,9 +50,10 @@ function clampInteger(value, fallback, min, max) {
   return Math.min(max, Math.max(min, number))
 }
 
-function normalizeOperatorPayload(payload) {
+export function normalizeOperatorPayload(payload) {
   const title = String(payload.title || '').trim()
   const prompt = String(payload.prompt || '').trim()
+  const explicitGoalId = String(payload.goal_id || '').trim()
   return {
     title,
     prompt,
@@ -69,13 +71,25 @@ function normalizeOperatorPayload(payload) {
       1,
       100,
     ),
-    standingGoalId: safeSegment(payload.goal_id || title, 'standing-goal'),
+    standingGoalId: explicitGoalId
+      ? safeSegment(explicitGoalId, 'standing-goal')
+      : undefined,
   }
 }
 
-function buildOperatorRequestRecords(input, policy) {
-  const now = new Date().toISOString()
-  const requestId = `operator-${Date.now()}-${safeSegment(input.title)}`
+export function buildOperatorRequestRecords(input, policy, options = {}) {
+  const nowMs = Number.isSafeInteger(options.nowMs)
+    ? options.nowMs
+    : Date.now()
+  const nonce = safeSegment(
+    options.nonce || randomUUID().slice(0, 8),
+    'request',
+  )
+  const slug = safeSegment(input.title)
+  const now = options.now || new Date(nowMs).toISOString()
+  const requestId = `operator-${nowMs}-${nonce}-${slug}`
+  const standingGoalId = input.standingGoalId
+    || `standing-goal-${nowMs}-${nonce}-${slug}`
   return {
     request: {
       id: requestId,
@@ -87,16 +101,15 @@ function buildOperatorRequestRecords(input, policy) {
       cadence_ticks: input.cadenceTicks,
       source_policy: policy.sourcePolicy,
       quality_threshold: input.qualityThreshold,
-      standing_goal_id: input.standingGoalId,
+      standing_goal_id: standingGoalId,
     },
     goal: {
-      id: input.standingGoalId,
+      id: standingGoalId,
       title: input.title,
       prompt: input.prompt,
       target_book_id: input.targetBookId,
       cadence_ticks: input.cadenceTicks,
       next_due_tick: 0,
-      last_run_tick: null,
       enabled: true,
       source_policy: policy.sourcePolicy,
       quality_threshold: input.qualityThreshold,
@@ -114,9 +127,70 @@ function upsertById(items, nextItem) {
   return items
 }
 
-async function upsertStandingGoal(goal) {
-  const goals = await readJsonArray(standingGoalsPath)
-  await writeJsonFile(standingGoalsPath, upsertById(goals, goal))
+let operatorMutationQueue = Promise.resolve()
+
+function serializeOperatorMutation(operation) {
+  const pending = operatorMutationQueue.then(operation, operation)
+  operatorMutationQueue = pending.catch(() => undefined)
+  return pending
+}
+
+function defaultOperatorStorage() {
+  return {
+    readGoals: () => readJsonArray(standingGoalsPath),
+    writeGoals: goals => writeJsonFile(standingGoalsPath, goals),
+    writeRequest: request => writeJsonFile(
+      path.join(operatorRequestDir, `${request.id}.json`),
+      request,
+      2,
+    ),
+    appendRequest: request => appendJsonLine(
+      operatorRequestLedgerPath,
+      request,
+    ),
+  }
+}
+
+export async function persistOperatorRequestRecords(
+  records,
+  storage = defaultOperatorStorage(),
+) {
+  const previousGoals = await storage.readGoals()
+  const pendingRequest = { ...records.request, status: 'preparing' }
+  await storage.writeRequest(pendingRequest)
+  let goalActivated = false
+  try {
+    await storage.writeGoals(
+      upsertById([...previousGoals], records.goal),
+    )
+    goalActivated = true
+    await storage.writeRequest(records.request)
+    await storage.appendRequest(records.request)
+  } catch (error) {
+    let rollbackError
+    if (goalActivated) {
+      try {
+        await storage.writeGoals(previousGoals)
+      } catch (caught) {
+        rollbackError = caught
+      }
+    }
+    try {
+      await storage.writeRequest({
+        ...records.request,
+        status: 'failed',
+        error: 'Operator request persistence did not complete.',
+      })
+    } catch {
+      // Preserve the original persistence failure for the handler response.
+    }
+    const suffix = rollbackError
+      ? ' Standing-goal rollback also failed; inspect durable state.'
+      : ''
+    throw new Error(
+      `Operator request was not accepted: ${String(error?.message || error)}.${suffix}`,
+    )
+  }
 }
 
 function normalizeWebsiteList(value) {
@@ -190,9 +264,8 @@ export async function handleOperatorRequest(req, res) {
 
     const { request, goal } = buildOperatorRequestRecords(input, policy)
 
-    await upsertStandingGoal(goal)
-    await writeJsonFile(path.join(operatorRequestDir, `${request.id}.json`), request, 2)
-    await appendJsonLine(operatorRequestLedgerPath, request)
+    await serializeOperatorMutation(() =>
+      persistOperatorRequestRecords({ request, goal }))
 
     sendJson(res, {
       ok: true,

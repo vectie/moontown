@@ -23,6 +23,41 @@ fn moon_command() -> String {
 }
 
 ///|
+async fn installed_moonclaw_command() -> String? {
+  match @sys.get_env_var("MOONTOWN_MOONCLAW_BIN") {
+    Some(value) if !value.trim().is_empty() =>
+      return Some(value.trim().to_owned())
+    _ => ()
+  }
+  match @sys.get_env_var("MOONCLAW_BIN") {
+    Some(value) if !value.trim().is_empty() =>
+      return Some(value.trim().to_owned())
+    _ => ()
+  }
+  let candidate = @storage.moontown_active_workspace_root() + "/bin/moonclaw"
+  if @fs.exists(candidate) {
+    Some(candidate)
+  } else {
+    None
+  }
+}
+
+///|
+async fn moonclaw_runtime_invocation(
+  moonclaw_root : String,
+  cli_args : Array[String],
+) -> (String, Array[String]) {
+  match installed_moonclaw_command() {
+    Some(command) => (command, cli_args)
+    None =>
+      (
+        moon_command(),
+        ["-C", moonclaw_root, "run", "cmd/main", "--", ..cli_args],
+      )
+  }
+}
+
+///|
 fn build_detached_shell_command(
   command : String,
   args : Array[String],

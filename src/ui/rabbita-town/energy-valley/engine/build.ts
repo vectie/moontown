@@ -24,6 +24,11 @@ export interface CheckResult {
   cost: number
 }
 
+export interface RoadPlacementResult {
+  kind: 'road' | 'bridge'
+  cost: number
+}
+
 function tileOf(w: World, x: number, y: number) {
   return w.tiles[y]?.[x]
 }
@@ -106,15 +111,20 @@ export function checkRoad(sim: SimState, tx: number, ty: number): CheckResult {
   return { valid: true, cost }
 }
 
-export function placeRoad(sim: SimState, tx: number, ty: number): boolean {
+export function placeRoad(
+  sim: SimState,
+  tx: number,
+  ty: number,
+): RoadPlacementResult | null {
   const chk = checkRoad(sim, tx, ty)
-  if (!chk.valid) return false
+  if (!chk.valid) return null
   const t = sim.world.tiles[ty][tx]
-  t.terrain = t.terrain === 'water' ? 'bridge' : 'road'
+  const kind = t.terrain === 'water' ? 'bridge' : 'road'
+  t.terrain = kind
   refreshRoadMask(sim.world, tx, ty)
   sim.metrics.budget -= chk.cost
-  if (t.terrain === 'bridge') pushEvent(sim, '🌉', `新桥贯通温榆河（-${chk.cost}）`, 'good')
-  return true
+  if (kind === 'bridge') pushEvent(sim, '🌉', `新桥贯通温榆河（-${chk.cost}）`, 'good')
+  return { kind, cost: chk.cost }
 }
 
 /** 公园（造林） */

@@ -15,13 +15,15 @@ pub async fn import_packet_detached(
   let stderr_path = receipt_path + ".err"
   save_packet_file(resolved_packet_path, packet)
   ensure_parent_directory(receipt_path)
-  let moon = moon_command()
-  let args = proposal_import_args(
-    moonclaw_root, resolved_packet_path, resolved_cwd, resolved_home, confirm, run_inline,
+  let cli_args = proposal_import_cli_args(
+    resolved_packet_path, resolved_cwd, resolved_home, confirm, run_inline,
   )
-  let command = @integration.render_command(moon, args)
+  let (command_name, args) = moonclaw_runtime_invocation(
+    moonclaw_root, cli_args,
+  )
+  let command = @integration.render_command(command_name, args)
   let shell_command = build_detached_shell_command_with_output(
-    moon, args, receipt_path, stderr_path,
+    command_name, args, receipt_path, stderr_path,
   )
   ignore(@integration.run_checked("/bin/zsh", ["-lc", shell_command]))
   {
@@ -59,10 +61,22 @@ pub async fn detached_import_receipt(
     Some(text) => text
     None => return None
   }
+  let stderr = moonclaw_read_optional_text(receipt_path + ".err").unwrap_or("")
+  if text.trim().is_empty() && !stderr.trim().is_empty() {
+    return detached_import_failure_receipt(
+      packet_id, resolved_packet_path, stderr,
+    )
+  }
   let parsed = parse_json_from_command_text(text) catch {
     _ =>
       return detached_import_failure_receipt(
-        packet_id, resolved_packet_path, text,
+        packet_id,
+        resolved_packet_path,
+        if stderr.trim().is_empty() {
+          text
+        } else {
+          "\{text}\n\{stderr}"
+        },
       )
   }
   let proposal_id = parse_json_string(parsed, "proposal_id").unwrap_or(
@@ -80,7 +94,14 @@ pub async fn detached_import_receipt(
     run_id,
     status: receipt_status,
     command: "detached MoonClaw import receipt \{receipt_path}",
-    summary: if receipt_status == Completed {
+    summary: if receipt_status == Failed {
+      match run_id {
+        Some(run_id) =>
+          "Detached MoonClaw import reported failure for \{packet_id}; run \{run_id} must be inspected before retrying."
+        None =>
+          "Detached MoonClaw import reported failure for \{packet_id}; no run id was returned."
+      }
+    } else if receipt_status == Completed {
       "Detached MoonClaw import completed for \{packet_id}; inline run finished."
     } else if run_id is Some(run_id) {
       "Detached MoonClaw import completed for \{packet_id}; run \{run_id} is ready for supervision."

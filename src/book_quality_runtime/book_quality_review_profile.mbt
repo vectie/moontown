@@ -11,13 +11,13 @@ async fn write_book_quality_review_moonclaw_profile(
   )
   let config_path = @book_quality.moonclaw_config_path(review_dir)
   let source_root = @support.absolute_path_from_cwd(".")
+  let base = @support.read_json_file_or_empty_object(config_path)
   @support.write_text_file(
     config_path,
-    book_quality_review_acp_config_json(
+    @codex.upsert_codex_main_target_json(
+      base,
       source_root,
-      @codex.command(),
-      @codex.args(),
-      @codex.model(),
+      label="Codex Book Quality Reviewer",
     ).stringify(indent=2),
   )
 }

@@ -29,6 +29,9 @@ async fn run_supervision_reconciliation_passes(
     snapshot_path~,
     standing_goals~,
   )
+  reopen_retriable_deferred_standing_watch_executions(
+    state, standing_goals, tick,
+  )
 }
 
 ///|

@@ -3,8 +3,8 @@
     "dev": "vite",
     "build": "node scripts/prepare-rabbita-build.mjs && vite build && node scripts/verify-production-build.mjs",
     "typecheck:town": "tsc --noEmit -p tsconfig.energy-valley.json",
-    "test:town": "tsx --test energy-valley/engine/*.test.ts",
-    "test:server": "node --test vite_server_io.test.js runtime_asset_manifest.test.js",
+    "test:town": "tsx --test energy-valley/engine/*.test.ts energy-valley/runtime/*.test.ts",
+    "test:server": "node --test vite_server_io.test.js vite_server_paths.test.js vite_api_handlers.test.js vite_book_output.test.js vite_energy_valley_runtime.test.js vite_energy_valley_collaboration.test.js runtime_asset_manifest.test.js",
     "smoke:book-projections": "node scripts/smoke-book-projections.mjs",
     "smoke:user-workflows": "node scripts/run-user-workflow-smoke.mjs"
   },

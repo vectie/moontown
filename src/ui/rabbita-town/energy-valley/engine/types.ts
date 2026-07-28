@@ -31,6 +31,31 @@ export type WeatherKind = 'sunny' | 'cloudy' | 'rain' | 'snow'
 
 export type AgentRole = 'mayor' | 'keeper' | 'worker' | 'resident'
 
+export type RuntimeDisplayMode = 'demo' | 'live' | 'unavailable'
+
+export type WorkStatus =
+  | 'queued'
+  | 'assigned'
+  | 'running'
+  | 'waiting_review'
+  | 'completed'
+  | 'failed'
+  | 'blocked'
+
+export type WorkProvenance =
+  | 'town-runtime'
+  | 'standing-goal'
+  | 'watcher'
+  | 'operator-request'
+
+export type RuntimeAgentStatus =
+  | 'idle'
+  | 'assigned'
+  | 'running'
+  | 'waiting'
+  | 'blocked'
+  | 'offline'
+
 /** 建筑原型 —— 决定外观、占地、造价 */
 export interface BuildingArchetype {
   id: string
@@ -74,6 +99,11 @@ export interface Building {
   occupants: number      // 在内 Agent 数
   vitality: number       // 活力值 0-100
   builtin: boolean       // 初始地图自带（不可拆）
+  /** Real runtime records currently projected onto this building. */
+  workItemIds?: string[]
+  runIds?: string[]
+  workStatuses?: WorkStatus[]
+  workSources?: WorkProvenance[]
 }
 
 export interface Tile {
@@ -108,6 +138,18 @@ export interface Agent {
   purpose: string        // 当前目的（巡检/通勤/送货…）
   hue: number            // 角色主色相
   bob: number            // 步行摆动相位
+  /** Ambient agents are local scenery; runtime agents project real records only. */
+  provenance: 'ambient' | 'runtime'
+  runtimeAgentId?: string
+  runtimeStatus?: RuntimeAgentStatus
+  workItemId?: string
+  runId?: string
+  workStatus?: WorkStatus
+  workSource?: WorkProvenance
+  workSummary?: string
+  /** Requested runtime module and the actual map module when one resolves exactly. */
+  buildingModuleKey?: string
+  resolvedBuildingModuleKey?: string
 }
 
 export interface Particle {

@@ -1,7 +1,7 @@
 {
   "identifier": "dev.vectie.moontown",
   "productName": "MoonTown",
-  "version": "0.1.1",
+  "version": "0.1.2",
   "icon": "assets/moontown.icns",
   "signing": {
     "identity": "-"
@@ -11,6 +11,21 @@
     "assetProtocol": "lepusa",
     "devtools": false
   },
+  "bundleResources": [
+    {
+      "source": "src/ui/rabbita-town/dist",
+      "path": "ui"
+    },
+    {
+      "source": "assets/templates/operator-request-policy.json",
+      "path": "operator-policy.json"
+    },
+    {
+      "source": "_build/native/release/build/cmd/desktop_server/desktop_server.exe",
+      "path": "moontown-desktop-server",
+      "executable": true
+    }
+  ],
   "window": {
     "label": "main",
     "title": "MoonTown · 能源谷",
@@ -18,9 +33,35 @@
     "height": 800,
     "resizable": true,
     "source": {
-      "packaged": "src/ui/rabbita-town/dist"
+      "localhost": {
+        "host": "127.0.0.1",
+        "port": 17842,
+        "path": "/",
+        "readinessPath": "/health",
+        "command": [
+          "moontown-desktop-server"
+        ]
+      }
     }
   },
-  "plugins": [],
-  "capabilities": []
+  "plugins": [
+    {
+      "name": "localhost"
+    },
+    {
+      "name": "serviceDiscovery"
+    }
+  ],
+  "capabilities": [
+    {
+      "name": "main",
+      "windows": [
+        "main"
+      ],
+      "permissions": [
+        "localhost",
+        "service-discovery"
+      ]
+    }
+  ]
 }

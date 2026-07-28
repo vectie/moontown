@@ -84,11 +84,10 @@ async test "standing watch review queue closes deferred infrastructure markers" 
   run_supervision_cycle(state, @roles.Mayor::new(), [entry], snapshot_path~, standing_goals=[
     goal,
   ])
-  assert_eq(state.executions[0].status, Completed)
+  assert_eq(state.executions[0].status, Failed)
   assert_eq(state.executions[0].requires_review, false)
-  assert_true(
-    state.executions[0].summary.contains("keeper_auto_triage: deferred"),
-  )
+  assert_true(state.executions[0].next_retry_tick is Some(_))
+  assert_true(state.executions[0].attempt > 1)
 }
 
 ///|

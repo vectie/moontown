@@ -22,6 +22,8 @@ pub fn default_planbook_workspace_root() -> String
 
 pub async fn inspect_moontown_planbook_autonomy(snapshot_path? : String, workspace_root? : String, book_catalog_path? : String) -> @planbook_policy.PlanbookAutonomyStatus
 
+pub fn planbook_daemon_repair_deferred_for_live_work_message() -> String
+
 pub fn planbook_daemon_repair_duplicate_message() -> String
 
 pub async fn planbook_open_gap_count(snapshot_path? : String) -> Int
@@ -34,7 +36,7 @@ pub async fn render_moontown_planbook_repair_status(snapshot_path? : String) -> 
 
 pub async fn render_moontown_planbook_status(workspace_root? : String) -> String
 
-pub async fn run_planbook_daemon_phase(String, String) -> PlanbookDaemonPhaseResult
+pub async fn run_planbook_daemon_phase(String, String, dispatch_repair? : Bool) -> PlanbookDaemonPhaseResult
 
 pub async fn write_moontown_planbook_autonomy(snapshot_path? : String, workspace_root? : String, book_catalog_path? : String) -> String
 

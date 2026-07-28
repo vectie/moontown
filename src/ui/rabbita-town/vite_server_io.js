@@ -1,5 +1,5 @@
 import { existsSync } from 'node:fs'
-import { mkdir, readFile, writeFile } from 'node:fs/promises'
+import { appendFile, mkdir, readFile, writeFile } from 'node:fs/promises'
 import path from 'node:path'
 
 export function serveJsonSnapshot(res, snapshotPath, missingMessage) {
@@ -161,12 +161,7 @@ export async function readJsonArray(filePath) {
 
 export async function appendJsonLine(filePath, value) {
   await mkdir(path.dirname(filePath), { recursive: true })
-  let previous = ''
-  if (existsSync(filePath)) {
-    previous = await readFile(filePath, 'utf8')
-  }
-  const prefix = previous && !previous.endsWith('\n') ? `${previous}\n` : previous
-  await writeFile(filePath, `${prefix}${JSON.stringify(value)}\n`, 'utf8')
+  await appendFile(filePath, `${JSON.stringify(value)}\n`, 'utf8')
 }
 
 export async function readJsonFile(filePath, fallback) {

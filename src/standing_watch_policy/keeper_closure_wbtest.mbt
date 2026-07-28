@@ -98,3 +98,11 @@ test "standing watch recovery decision trusts terminal marker over failed status
     NoChange,
   )
 }
+
+///|
+test "transient infrastructure is deferred rather than fabricated no-change" {
+  let execution = standing_watch_policy_execution(
+    "Compiler failed before research began.\nkeeper_auto_triage: transient_infrastructure_contention\nchecked_sources_count: 0\nbook_changed: no",
+  )
+  assert_eq(standing_watch_decision_from_execution(execution), Deferred)
+}

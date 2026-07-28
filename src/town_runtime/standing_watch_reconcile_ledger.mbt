@@ -7,6 +7,12 @@ async fn reconcile_persisted_standing_watch_records(
   let ledger_dir = @storage.watcher_ledger_dir_for_snapshot(snapshot_path)
   let snapshot = state.executions.copy()
   for execution in snapshot {
+    if execution.status == Failed &&
+      execution.summary.contains(
+        "keeper_auto_retry: reopened_deferred_execution",
+      ) {
+      continue
+    }
     let goal = match
       @standing_watch_policy.standing_goal_for_execution_task(
         standing_goals,

@@ -16,9 +16,15 @@ async fn prepare_daemon_tick_context(
 ) -> DaemonTickContext {
   let catalog = @moonbook.load_or_create_catalog(path=book_catalog_path)
   let paths = @daemon_runtime.daemon_tick_paths(snapshot_path)
-  let standing_goals = @storage.load_or_create_standing_goals(
+  let loaded_standing_goals = @storage.load_or_create_standing_goals(
     path=paths.goal_path,
   )
+  let standing_goals = @storage.merge_accepted_operator_request_goals(
+    loaded_standing_goals,
+  )
+  if standing_goals.length() != loaded_standing_goals.length() {
+    @storage.save_standing_goals_file(paths.goal_path, standing_goals)
+  }
   let watcher_records_for_floor = load_watcher_records_for_goals(
     snapshot_path, standing_goals,
   )

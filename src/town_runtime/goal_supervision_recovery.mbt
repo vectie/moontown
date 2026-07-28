@@ -63,6 +63,57 @@ fn transient_dependency_reconcilable_status(
 }
 
 ///|
+fn reopen_retriable_deferred_standing_watch_executions(
+  state : @core.TownState,
+  standing_goals : Array[@core.StandingGoal],
+  tick : Int,
+) -> Unit {
+  let snapshot = state.executions.copy()
+  for execution in snapshot {
+    if execution.status != Completed ||
+      execution.attempt >= 5 ||
+      (
+        !execution.result_decision.to_lower().has_prefix("deferred") &&
+        !execution.summary.contains("Cancelled by proposal recovery command") &&
+        !execution.summary.contains(
+          "keeper_auto_retry: reopened_deferred_execution",
+        )
+      ) {
+      continue
+    }
+    guard @standing_watch_policy.standing_goal_for_execution_task(
+        standing_goals,
+        execution.task_id,
+      )
+      is Some(_) else {
+      continue
+    }
+    let reopened = copy_execution_with(
+      execution,
+      status=Failed,
+      summary="\{execution.summary}\nkeeper_auto_retry: reopened_deferred_execution\nkeeper_auto_retry_reason: deferred work is not completed work and remains inside the bounded retry budget.",
+      heartbeat_tick=tick,
+      next_retry_tick=Some(tick),
+      requires_review=false,
+      notify_town=true,
+    )
+    state.replace_execution(reopened)
+    state.replace_task(task_for_supervision(state, reopened))
+    sync_worker_from_execution(state, reopened)
+    state.record_event(
+      @core.TownEvent::new(
+        id="event-reopen-deferred-\{state.events.length()}-\{reopened.task_id}",
+        kind="recovery",
+        detail="Mayor reopened deferred standing-watch execution `\{reopened.task_id}` for its remaining bounded retry.",
+        related_task_id=Some(reopened.task_id),
+        related_book_id=Some(reopened.book_id),
+        related_run_id=reopened.run_id,
+      ),
+    )
+  }
+}
+
+///|
 async fn reconcile_repaired_context_import_failures(
   state : @core.TownState,
 ) -> Unit {

@@ -38,6 +38,8 @@ pub async fn load_watcher_run_records(String, dir? : String) -> Array[@core.Watc
 
 pub async fn load_watcher_run_records_file(String) -> Array[@core.WatcherRunRecord]
 
+pub async fn merge_accepted_operator_request_goals(Array[@core.StandingGoal], path? : String) -> Array[@core.StandingGoal]
+
 pub fn moonsuite_product_id() -> String
 
 pub fn moontown_active_workspace_root() -> String

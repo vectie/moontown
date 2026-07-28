@@ -3,7 +3,14 @@ import { fileURLToPath } from 'node:url'
 
 const rabbitaTownDir = path.dirname(fileURLToPath(import.meta.url))
 const repoRootPath = path.resolve(rabbitaTownDir, '../../..')
-const suiteRootPath = path.resolve(process.env.MOONTOWN_SUITE_ROOT || repoRootPath)
+const defaultSuiteRootPath = process.env.HOME
+  ? path.join(process.env.HOME, 'moonsuite')
+  : repoRootPath
+export const suiteRootPath = path.resolve(
+  process.env.MOONTOWN_SUITE_ROOT ||
+    process.env.MOONSUITE_ROOT ||
+    defaultSuiteRootPath,
+)
 
 export const publicAssetRootPath = path.resolve(rabbitaTownDir, '../assets')
 
@@ -24,6 +31,10 @@ export const editorPipelinePath = path.join(
   'editor-pipeline.json',
 )
 export const daemonSnapshotPath = path.join(moontownProductStatePath, 'daemon.json')
+export const daemonRuntimePath = path.join(
+  moontownProductStatePath,
+  'daemon-runtime.json',
+)
 export const standingGoalsPath = path.join(moontownProductStatePath, 'standing-goals.json')
 export const bookTemplateRequestPath = path.join(
   moontownProductStatePath,

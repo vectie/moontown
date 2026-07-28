@@ -10,5 +10,7 @@ Root policy:
 - Keep project identity, memory, routine, user, and Wenyu vision notes here.
 - Keep the Energy Valley map process in
   [`ENERGY_VALLEY_PROCEDURAL_MAP.md`](ENERGY_VALLEY_PROCEDURAL_MAP.md).
+- Keep the Energy Valley runtime-work boundary in
+  [`ENERGY_VALLEY_REAL_WORK.md`](ENERGY_VALLEY_REAL_WORK.md).
 - Keep the root limited to module metadata, entry README files, license,
   `scripts/`, `assets/`, generated runtime directories, and repo tooling.

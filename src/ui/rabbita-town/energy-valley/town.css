@@ -39,6 +39,12 @@
   gap: 0.5rem;
 }
 
+.town-runtime-wrap {
+  position: absolute;
+  left: 1rem;
+  top: 5.4rem;
+}
+
 .town-action {
   border: 1px solid rgb(255 255 255 / 0.1);
   border-radius: 0.75rem;
@@ -56,6 +62,24 @@
   background: rgb(255 255 255 / 0.1);
   color: rgb(226 232 240);
   outline: none;
+}
+
+.work-dialog-backdrop {
+  overscroll-behavior: contain;
+}
+
+.work-request-dialog,
+.runtime-task-detail {
+  max-height: min(48rem, calc(100vh - 2rem));
+  overscroll-behavior: contain;
+  scrollbar-width: thin;
+}
+
+.work-request-dialog input,
+.work-request-dialog textarea,
+.work-request-dialog select,
+.runtime-task-detail .select-text {
+  user-select: text;
 }
 
 @media (max-width: 900px) {
@@ -77,6 +101,10 @@
     top: 10.5rem;
   }
 
+  .town-runtime-wrap {
+    top: 9.75rem;
+  }
+
   .town-dashboard-chart,
   .town-event-wrap {
     display: none;
@@ -84,6 +112,18 @@
 }
 
 @media (max-width: 680px) {
+  .work-dialog-backdrop {
+    align-items: flex-end;
+    padding: 0.5rem;
+  }
+
+  .work-request-dialog,
+  .runtime-task-detail {
+    max-height: calc(100vh - 1rem);
+    max-width: none;
+    border-radius: 1rem;
+  }
+
   .town-badge-wrap {
     left: 0.5rem;
     right: 0.5rem;
@@ -134,6 +174,16 @@
     top: auto;
     right: 0.5rem;
     bottom: 7.4rem;
+  }
+
+  .town-runtime-wrap {
+    top: 11rem;
+    left: 0.5rem;
+    right: 0.5rem;
+  }
+
+  .town-runtime-wrap .runtime-work {
+    width: min(20rem, calc(100vw - 1rem));
   }
 
   .town-inspector-wrap > div {

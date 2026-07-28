@@ -1,6 +1,12 @@
 import assert from 'node:assert/strict'
+import { mkdtemp, readFile } from 'node:fs/promises'
+import os from 'node:os'
+import path from 'node:path'
 import test from 'node:test'
-import { rejectUnsafeWrite } from './vite_server_io.js'
+import {
+  appendJsonLine,
+  rejectUnsafeWrite,
+} from './vite_server_io.js'
 
 function responseRecorder() {
   return {
@@ -56,4 +62,23 @@ test('write guard rejects non-JSON and non-POST requests', () => {
     headers: { 'content-type': 'text/plain' },
   }, wrongType), true)
   assert.equal(wrongType.statusCode, 415)
+})
+
+test('concurrent JSONL appends preserve every complete row', async () => {
+  const root = await mkdtemp(path.join(os.tmpdir(), 'moontown-jsonl-'))
+  const ledger = path.join(root, 'events/requests.jsonl')
+  const expected = Array.from({ length: 64 }, (_, index) => index)
+
+  await Promise.all(expected.map(index =>
+    appendJsonLine(ledger, { index, value: `request-${index}` })))
+
+  const rows = (await readFile(ledger, 'utf8'))
+    .trim()
+    .split('\n')
+    .map(line => JSON.parse(line))
+  assert.equal(rows.length, expected.length)
+  assert.deepEqual(
+    rows.map(row => row.index).sort((left, right) => left - right),
+    expected,
+  )
 })

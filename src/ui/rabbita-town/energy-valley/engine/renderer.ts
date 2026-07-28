@@ -7,7 +7,7 @@
 import { HH, HW, worldToScreen, FLOOR_H } from './iso'
 import { archetype, COLS, ROWS, riverCenter } from './world'
 import { daylight, type SimState } from './sim'
-import type { Agent, Building, WeatherKind } from './types'
+import type { Agent, Building, WeatherKind, WorkStatus } from './types'
 
 export interface ViewState {
   camX: number      // 世界像素中心
@@ -35,6 +35,32 @@ function shade(hex: string, f: number): string {
   const g = Math.min(255, Math.max(0, ((n >> 8) & 255) * f))
   const b = Math.min(255, Math.max(0, (n & 255) * f))
   return `rgb(${r | 0},${g | 0},${b | 0})`
+}
+
+const WORK_STATUS_PRIORITY: Record<WorkStatus, number> = {
+  running: 7,
+  waiting_review: 6,
+  blocked: 5,
+  assigned: 4,
+  queued: 3,
+  failed: 2,
+  completed: 1,
+}
+
+const WORK_STATUS_COLOR: Record<WorkStatus, string> = {
+  queued: '#94a3b8',
+  assigned: '#7dd3fc',
+  running: '#6ee7b7',
+  waiting_review: '#fcd34d',
+  completed: '#86efac',
+  failed: '#fda4af',
+  blocked: '#fdba74',
+}
+
+function primaryWorkStatus(statuses?: WorkStatus[]): WorkStatus | undefined {
+  return statuses?.slice().sort(
+    (left, right) => WORK_STATUS_PRIORITY[right] - WORK_STATUS_PRIORITY[left],
+  )[0]
 }
 
 // ---------- 主入口 ----------
@@ -815,6 +841,26 @@ function drawBuilding(
     ctx.fillRect(c.x - 14 * z, c.y - 90 * z, 28 * z, 90 * z)
   }
 
+  // 真实工作信标：只由 runtime projection 写入，不从本地活力推断。
+  const workStatus = primaryWorkStatus(b.workStatuses)
+  if (workStatus) {
+    const pulse = (Math.sin(t * 4.5 + seed * 8) + 1) / 2
+    const color = WORK_STATUS_COLOR[workStatus]
+    ctx.fillStyle = color
+    ctx.beginPath()
+    ctx.arc(topCenter.x, topCenter.y - 25 * z, 3.2 * z, 0, Math.PI * 2)
+    ctx.fill()
+    if (workStatus === 'running' || workStatus === 'waiting_review' || workStatus === 'blocked') {
+      ctx.strokeStyle = color
+      ctx.globalAlpha = 0.25 + pulse * 0.4
+      ctx.lineWidth = 1.3 * z
+      ctx.beginPath()
+      ctx.arc(topCenter.x, topCenter.y - 25 * z, (6 + pulse * 5) * z, 0, Math.PI * 2)
+      ctx.stroke()
+      ctx.globalAlpha = 1
+    }
+  }
+
   // 名牌（市政建筑，缩放足够时）
   if (b.isCivic && z > 0.75) {
     const label = b.name
@@ -939,6 +985,17 @@ function drawAgent(
   } else if (ag.role === 'keeper') {
     ctx.fillStyle = '#3a6ad4'
     ctx.fillRect(sx + 2.6 * z, y0 - 11 * z, 3 * z, 4 * z)
+  }
+
+  if (ag.provenance === 'runtime' && ag.workStatus) {
+    const color = WORK_STATUS_COLOR[ag.workStatus]
+    ctx.fillStyle = color
+    ctx.beginPath()
+    ctx.arc(sx + 6 * z, y0 - 20 * z, 2.4 * z, 0, Math.PI * 2)
+    ctx.fill()
+    ctx.strokeStyle = 'rgba(2,6,23,0.85)'
+    ctx.lineWidth = 1 * z
+    ctx.stroke()
   }
 
   if (selected) {

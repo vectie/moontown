@@ -34,6 +34,70 @@ async test "supervision clears transient dependency lock failures" {
 }
 
 ///|
+test "deferred completed watch reopens inside bounded retry budget" {
+  let state = @core.empty_state(@core.TownConfig::new(id="test", name="Test"))
+  let goal = standing_watch_goal_fixture(
+    id="watch-deferred-retry",
+    title="Deferred retry",
+    prompt="retry deferred work",
+    book_id="research-opc",
+  )
+  state.register_execution(
+    @core.TaskExecutionRecord::new(
+      task_id="standing-watch-deferred-retry-tick-12",
+      book_id="research-opc",
+      packet_id="packet",
+      packet_path="packet.json",
+      status=Completed,
+      summary="Transport ended before research completed.",
+      output_contract="standing-watch",
+      attempt=4,
+      result_decision="deferred",
+    ),
+  )
+
+  reopen_retriable_deferred_standing_watch_executions(state, [goal], 50)
+
+  let execution = state.executions[0]
+  assert_eq(execution.status, Failed)
+  assert_eq(execution.next_retry_tick, Some(50))
+  assert_eq(execution.attempt, 4)
+  assert_true(execution.summary.contains("reopened_deferred_execution"))
+}
+
+///|
+test "recovery-command cancellation reopens inside bounded retry budget" {
+  let state = @core.empty_state(@core.TownConfig::new(id="test", name="Test"))
+  let goal = standing_watch_goal_fixture(
+    id="watch-recovery-cancelled",
+    title="Recovery cancelled retry",
+    prompt="retry interrupted recovery work",
+    book_id="research-opc",
+  )
+  state.register_execution(
+    @core.TaskExecutionRecord::new(
+      task_id="standing-watch-recovery-cancelled-tick-12",
+      book_id="research-opc",
+      packet_id="packet",
+      packet_path="packet.json",
+      status=Completed,
+      summary="MoonClaw run run-1 failed: Cancelled by proposal recovery command\nkeeper_auto_triage: reconciled_from_watcher_ledger\nreconciled_watcher_decision: NoChange",
+      output_contract="standing-watch",
+      attempt=4,
+      result_decision="NoChange",
+    ),
+  )
+
+  reopen_retriable_deferred_standing_watch_executions(state, [goal], 50)
+
+  let execution = state.executions[0]
+  assert_eq(execution.status, Failed)
+  assert_eq(execution.next_retry_tick, Some(50))
+  assert_eq(execution.attempt, 4)
+  assert_true(execution.summary.contains("reopened_deferred_execution"))
+}
+
+///|
 async test "supervision clears stale selfpatch transient dependency lock proof" {
   let state = @core.empty_state(@core.TownConfig::new(id="test", name="Test"))
   let book = @core.BookRef::new(

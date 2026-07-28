@@ -6,8 +6,7 @@ pub fn standing_watch_operational_no_change_summary(summary : String) -> Bool {
   let lowered = summary.to_lower()
   (
     lowered.contains("persisted_result_review: false") ||
-    lowered.contains("keeper_auto_triage: persisted_non_review_result") ||
-    lowered.contains("keeper_auto_triage: transient_infrastructure_contention")
+    lowered.contains("keeper_auto_triage: persisted_non_review_result")
   ) &&
   standing_watch_summary_has_zero_material_delta(summary)
 }

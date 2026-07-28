@@ -7,12 +7,31 @@ test "moonclaw provider manifest entry uses product home" {
   assert_eq(
     path, "/tmp/moontown-provider-manifest-suite/.moonsuite/products/moonclaw/providers.json",
   )
+  assert_eq(
+    moonbook_resource_provider_manifest_path(root),
+    "/tmp/moontown-provider-manifest-suite/books/provider-book/.moonsuite/resource-providers.json",
+  )
   assert_eq(provider.name, "moonbook")
   assert_eq(provider.kind, "task-provider")
   assert_true(!provider.metadata.command.trim().is_empty())
   assert_true(provider.metadata.command.contains("moon"))
   assert_true(provider.metadata.args == ["run", "cmd/main", "--"])
+  assert_true(provider.metadata.task_args_prefix == ["wiki", "extension"])
   assert_eq(provider.metadata.cwd, moonbook_root)
   assert_eq(provider.metadata.workspace_root, root)
   assert_true(provider.capabilities.contains("extension.task"))
+}
+
+///|
+test "moonbook provider manifest supports a Lepusa-installed runtime" {
+  let provider = moonbook_task_provider_manifest_entry(
+    "/tmp/moonsuite/books/provider-book",
+    "/tmp/moonbook-source",
+    command="/tmp/moonsuite/bin/moonbook",
+    args=[],
+  )
+  assert_eq(provider.metadata.command, "/tmp/moonsuite/bin/moonbook")
+  assert_true(provider.metadata.args.is_empty())
+  assert_true(provider.metadata.task_args_prefix == ["wiki", "extension"])
+  assert_eq(provider.metadata.cwd, "/tmp/moonbook-source")
 }

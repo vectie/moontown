@@ -1,6 +1,10 @@
 ///|
 pub fn keeper_profile_for_task(task : @moonbook.BookTask) -> String {
-  if @dispatch.research_bootstrap_book_task(task) {
+  if @dispatch.research_bootstrap_book_task(task) ||
+    (
+      !@course_book.course_book_task(task) &&
+      provider_task_kind_for_book_task(task) == "bootstrap_gather"
+    ) {
     return "moontown_research_bootstrap_worker"
   }
   match task.kind {

@@ -149,7 +149,9 @@ fn recoverable_profile_dispatch_failure(
 ) -> Bool {
   execution.summary.contains("Unknown external proposal profile") ||
   execution.summary.contains("Proposal import failed") ||
-  execution.summary.contains("Resource temporarily unavailable")
+  execution.summary.contains("Resource temporarily unavailable") ||
+  execution.summary.contains("repair_planbook_gap") ||
+  execution.summary.contains("keeper_auto_retry: reopened_deferred_execution")
 }
 
 ///|

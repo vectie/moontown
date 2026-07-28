@@ -23,6 +23,11 @@ fn standing_watch_review_or_marker_decision(
     standing_watch_orphaned_running_failure_summary(execution.summary) {
     return Deferred
   }
+  if execution.summary
+    .to_lower()
+    .contains("keeper_auto_triage: transient_infrastructure_contention") {
+    return Deferred
+  }
   if standing_watch_operational_no_change_summary(execution.summary) {
     return NoChange
   }

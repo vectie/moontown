@@ -1,10 +1,12 @@
 import assert from 'node:assert/strict'
 import test from 'node:test'
 import {
+  COSTS,
   checkBuilding,
   checkRoad,
   demolishAt,
   placeBuilding,
+  placeRoad,
 } from './build'
 import { createSim, updateSim } from './sim'
 import { archetype, createWorld } from './world'
@@ -62,4 +64,29 @@ test('roads preserve civic plazas and price river crossings as bridges', () => {
     .find(cell => cell.tile.terrain === 'water' && !cell.tile.buildingId)
   assert.ok(water)
   assert.deepEqual(checkRoad(sim, water.x, water.y), { valid: true, cost: 120 })
+
+  const before = sim.metrics.budget
+  assert.deepEqual(placeRoad(sim, water.x, water.y), {
+    kind: 'bridge',
+    cost: COSTS.bridgeRoad,
+  })
+  assert.equal(sim.world.tiles[water.y][water.x].terrain, 'bridge')
+  assert.equal(sim.metrics.budget, before - COSTS.bridgeRoad)
+  assert.equal(
+    sim.events[0]?.text,
+    `新桥贯通温榆河（-${COSTS.bridgeRoad}）`,
+  )
+
+  const land = sim.world.tiles
+    .flatMap((row, y) => row.map((tile, x) => ({ tile, x, y })))
+    .find(
+      cell =>
+        cell.tile.terrain === 'grass' &&
+        !cell.tile.buildingId,
+    )
+  assert.ok(land)
+  assert.deepEqual(placeRoad(sim, land.x, land.y), {
+    kind: 'road',
+    cost: COSTS.road,
+  })
 })

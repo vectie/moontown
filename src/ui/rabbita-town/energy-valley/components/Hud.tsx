@@ -8,7 +8,29 @@ import { roleIcon } from '../engine/sim'
 import { archetype, valleySeedLabel } from '../engine/world'
 import { COSTS } from '../engine/build'
 import type { ToolId } from '../engine/types'
+import type { RuntimeWorkItem, RuntimeWorkStatus } from '../runtime/types'
+import { runtimeAgentMetricLabel } from '../runtime/presentation'
 import moontownLogo from '../../../assets/moontown.svg'
+
+const WORK_STATUS_LABEL: Record<RuntimeWorkStatus, string> = {
+  queued: '排队',
+  assigned: '已派工',
+  running: '执行中',
+  waiting_review: '待评审',
+  completed: '已完成',
+  failed: '失败',
+  blocked: '受阻',
+}
+
+const WORK_STATUS_TONE: Record<RuntimeWorkStatus, string> = {
+  queued: 'text-slate-300',
+  assigned: 'text-sky-200',
+  running: 'text-emerald-200',
+  waiting_review: 'text-amber-200',
+  completed: 'text-emerald-200',
+  failed: 'text-rose-200',
+  blocked: 'text-orange-200',
+}
 
 // ---------- 顶部左：镇名 + 时间 ----------
 export function TownBadge(props: {
@@ -64,6 +86,7 @@ export function TownBadge(props: {
 // ---------- 顶部右：指标 ----------
 export function MetricChips(props: {
   population: number; vitality: number; budget: number; agentsOnline: number
+  runtimePhase?: 'loading' | 'live' | 'unavailable' | 'error' | 'stale'
   paused: boolean; timeScale: number
   onPause: () => void; onSpeed: (s: number) => void
   onToggleBoard: () => void; boardOpen: boolean
@@ -74,7 +97,11 @@ export function MetricChips(props: {
         <Chip icon="👥" label="居民" value={String(props.population)} />
         <Chip icon="⚡" label="活力" value={String(Math.round(props.vitality))} tone={props.vitality > 60 ? 'good' : props.vitality > 35 ? 'mid' : 'bad'} />
         <Chip icon="💰" label="预算" value={fmtBudget(props.budget)} />
-        <Chip icon="🤖" label="Agent" value={String(props.agentsOnline)} />
+        <Chip
+          icon="🤖"
+          label={runtimeAgentMetricLabel(props.runtimePhase)}
+          value={String(props.agentsOnline)}
+        />
       </div>
       <div className="flex items-center gap-1 rounded-2xl bg-slate-950/60 px-2 py-2 backdrop-blur-md border border-white/10 shadow-xl">
         <button
@@ -132,9 +159,25 @@ const BUILD_TOOLS: { id: ToolId; glyph: string; name: string; cost: number }[] =
 ]
 
 export function ToolDock(props: { tool: ToolId; onTool: (t: ToolId) => void }) {
-  const base: { id: ToolId; icon: string; name: string; cost?: number; key: string }[] = [
+  const base: {
+    id: ToolId
+    icon: string
+    name: string
+    cost?: number
+    costLabel?: string
+    costDescription?: string
+    key: string
+  }[] = [
     { id: 'inspect', icon: '🖐️', name: '视察', key: '1' },
-    { id: 'road', icon: '🛣️', name: '铺路', cost: COSTS.road, key: '2' },
+    {
+      id: 'road',
+      icon: '🛣️',
+      name: '铺路',
+      cost: COSTS.road,
+      costLabel: `${COSTS.road} · 桥${COSTS.bridgeRoad}`,
+      costDescription: `陆地花费 ${COSTS.road}；跨河自动建桥，另加 ${COSTS.bridgeRoad - COSTS.road}，共花费 ${COSTS.bridgeRoad}`,
+      key: '2',
+    },
     { id: 'park', icon: '🌳', name: '造林', cost: COSTS.park, key: '3' },
     { id: 'demolish', icon: '🧹', name: '拆除', key: '4' },
   ]
@@ -148,6 +191,8 @@ export function ToolDock(props: { tool: ToolId; onTool: (t: ToolId) => void }) {
           hotkey={b.key}
           label={b.name}
           cost={b.cost}
+          costLabel={b.costLabel}
+          costDescription={b.costDescription}
         >
           <span className="text-lg">{b.icon}</span>
         </DockBtn>
@@ -172,20 +217,35 @@ export function ToolDock(props: { tool: ToolId; onTool: (t: ToolId) => void }) {
 }
 
 function DockBtn(props: {
-  active: boolean; onClick: () => void; label: string; cost?: number; hotkey: string; children: React.ReactNode
+  active: boolean
+  onClick: () => void
+  label: string
+  cost?: number
+  costLabel?: string
+  costDescription?: string
+  hotkey: string
+  children: React.ReactNode
 }) {
+  const costDescription =
+    props.costDescription ??
+    (props.cost !== undefined ? `花费 ${props.cost}` : undefined)
   return (
     <button
       onClick={props.onClick}
-      aria-label={`${props.label}${props.cost !== undefined ? `，花费 ${props.cost}` : ''}，快捷键 ${props.hotkey}`}
+      aria-label={`${props.label}${costDescription ? `，${costDescription}` : ''}，快捷键 ${props.hotkey}`}
       aria-pressed={props.active}
+      title={costDescription ? `${props.label} · ${costDescription}` : props.label}
       className={`group relative flex flex-col items-center gap-0.5 rounded-xl px-2.5 py-1.5 transition ${
         props.active ? 'bg-amber-300/25 ring-1 ring-amber-300/60' : 'hover:bg-white/10'
       }`}
     >
       {props.children}
       <span className="text-[10px] text-slate-300">{props.label}</span>
-      {props.cost !== undefined && <span className="text-[9px] font-mono text-amber-200/80">{props.cost}</span>}
+      {props.cost !== undefined && (
+        <span className="text-[9px] font-mono text-amber-200/80">
+          {props.costLabel ?? props.cost}
+        </span>
+      )}
       <span className="absolute -top-1.5 -right-1 rounded bg-white/10 px-1 text-[8px] text-slate-400 opacity-0 transition group-hover:opacity-100">
         {props.hotkey}
       </span>
@@ -215,6 +275,9 @@ export function EventFeed(props: { events: TownEvent[] }) {
 export function Inspector(props: {
   building?: Building | null
   agent?: Agent | null
+  runtimeTasks?: RuntimeWorkItem[]
+  runtimePhase?: 'loading' | 'live' | 'unavailable' | 'error' | 'stale'
+  hasRuntimeProjection?: boolean
   buildingName?: (b: Building) => string
   onClose: () => void
   onFollow?: (id: string | null) => void
@@ -223,6 +286,9 @@ export function Inspector(props: {
 }) {
   const b = props.building
   const ag = props.agent
+  const buildingWork = b?.moduleKey
+    ? (props.runtimeTasks ?? []).filter(task => task.buildingModuleKey === b.moduleKey)
+    : []
   if (!b && !ag) return null
   return (
     <div className="pointer-events-auto w-64 rounded-2xl bg-slate-950/70 p-4 backdrop-blur-md border border-white/10 shadow-2xl">
@@ -233,7 +299,7 @@ export function Inspector(props: {
               <div className="text-[15px] font-bold text-amber-100">{b.name}</div>
               <div className="text-[11px] text-slate-400">{archetype(b.archetype).desc}</div>
             </div>
-            <button onClick={props.onClose} className="rounded-lg px-2 py-0.5 text-slate-400 hover:bg-white/10">✕</button>
+            <button aria-label="关闭建筑详情" onClick={props.onClose} className="min-h-11 min-w-11 rounded-lg text-slate-400 hover:bg-white/10">✕</button>
           </div>
           {b.isCivic && (
             <div className="mb-2 rounded-lg bg-indigo-400/15 px-2 py-1 text-[10px] text-indigo-200 ring-1 ring-indigo-300/30">
@@ -246,6 +312,41 @@ export function Inspector(props: {
             <span>在内 Agent</span>
             <span className="font-mono text-slate-100">{b.occupants}</span>
           </div>
+          {b.isCivic && (
+            <div className="mt-3 border-t border-white/10 pt-2">
+              <div className="mb-1 flex items-center justify-between text-[10px] tracking-wider text-slate-400">
+                <span>真实工作</span>
+                <span>{buildingWork.length}</span>
+              </div>
+              {buildingWork.length > 0 ? (
+                <div className="flex max-h-40 flex-col gap-1 overflow-y-auto">
+                  {buildingWork.slice(0, 4).map(task => (
+                    <div key={task.id} className="rounded-lg bg-white/[0.04] px-2 py-1.5">
+                      <div className="flex items-center gap-2 text-[10px]">
+                        <span className={WORK_STATUS_TONE[task.status]}>{WORK_STATUS_LABEL[task.status]}</span>
+                        <span className="min-w-0 flex-1 truncate text-slate-200">{task.title}</span>
+                      </div>
+                      {(task.agentName || task.agentId || task.runId || task.artifacts.length > 0) && (
+                        <div className="mt-0.5 truncate font-mono text-[9px] text-slate-500">
+                          {task.agentName ?? task.agentId ?? '未分配 Agent'}
+                          {task.runId ? ` · ${task.runId}` : ''}
+                          {task.artifacts.length > 0 ? ` · ${task.artifacts.length} 个产物` : ''}
+                        </div>
+                      )}
+                    </div>
+                  ))}
+                </div>
+              ) : (
+                <p className="text-[10px] leading-relaxed text-slate-500">
+                  {props.runtimePhase === 'live'
+                    ? '当前没有运行时任务。'
+                    : props.hasRuntimeProjection
+                      ? '当前显示最后一次真实快照；连接状态并非实时。'
+                      : '运行时未连接；此处不显示模拟工作。'}
+                </p>
+              )}
+            </div>
+          )}
           {!b.builtin && (
             <button
               onClick={() => props.onDemolish?.(b)}
@@ -264,8 +365,11 @@ export function Inspector(props: {
               <div className="text-[11px] text-slate-400">
                 {ag.role === 'mayor' ? '镇长 · 战略巡检' : ag.role === 'keeper' ? '看护 · 书本记忆' : ag.role === 'worker' ? '工蜂 · 任务执行' : '谷民 · 数字分身'}
               </div>
+              <div className={`mt-1 text-[9px] tracking-wider ${ag.provenance === 'runtime' ? 'text-emerald-300' : 'text-slate-500'}`}>
+                {ag.provenance === 'runtime' ? '真实运行时 Agent' : '环境模拟角色'}
+              </div>
             </div>
-            <button onClick={props.onClose} className="rounded-lg px-2 py-0.5 text-slate-400 hover:bg-white/10">✕</button>
+            <button aria-label="关闭 Agent 详情" onClick={props.onClose} className="min-h-11 min-w-11 rounded-lg text-slate-400 hover:bg-white/10">✕</button>
           </div>
           <div className="mt-2 flex items-center justify-between text-[12px] text-slate-300">
             <span>当前目的</span>
@@ -273,8 +377,23 @@ export function Inspector(props: {
           </div>
           <div className="mt-1 flex items-center justify-between text-[12px] text-slate-300">
             <span>状态</span>
-            <span className="text-slate-100">{ag.state === 'walking' ? '通勤中' : '驻楼办公'}</span>
+            <span className="text-slate-100">
+              {ag.workStatus
+                ? WORK_STATUS_LABEL[ag.workStatus]
+                : ag.state === 'walking' ? '通勤中' : ag.state === 'inside' ? '驻楼办公' : '等待'}
+            </span>
           </div>
+          {ag.runId && (
+            <div className="mt-1 flex items-center justify-between gap-2 text-[11px] text-slate-400">
+              <span>Run ID</span>
+              <span className="min-w-0 truncate font-mono text-[9px] text-slate-300">{ag.runId}</span>
+            </div>
+          )}
+          {ag.workSummary && (
+            <p className="mt-2 rounded-lg bg-white/[0.04] px-2 py-1.5 text-[10px] leading-relaxed text-slate-300">
+              {ag.workSummary}
+            </p>
+          )}
           <button
             onClick={() => props.onFollow?.(props.following ? null : ag.id)}
             className={`mt-3 w-full rounded-lg py-1.5 text-[12px] ring-1 ${
@@ -312,15 +431,26 @@ export function Dashboard(props: {
   history: { vitality: number; population: number }[]
   buildings: Building[]
   events: TownEvent[]
+  runtimeTasks?: RuntimeWorkItem[]
+  runtimePhase?: 'loading' | 'live' | 'unavailable' | 'error' | 'stale'
   onClose: () => void
   onSelect: (b: Building) => void
+  onSelectTask?: (task: RuntimeWorkItem) => void
   onGuide: () => void
   onReset: () => void
 }) {
-  const [section, setSection] = useState<'services' | 'activity'>('services')
+  const [section, setSection] = useState<'work' | 'services' | 'activity'>('work')
   if (!props.open) return null
   const civic = props.buildings.filter(b => b.isCivic)
   const custom = props.buildings.filter(b => !b.isCivic)
+  const runtimeTasks = props.runtimeTasks ?? []
+  const activeRuntimeTasks = runtimeTasks.filter(task =>
+    task.status === 'queued' ||
+    task.status === 'assigned' ||
+    task.status === 'running' ||
+    task.status === 'waiting_review' ||
+    task.status === 'blocked',
+  )
   return (
     <div className="town-dashboard pointer-events-auto flex w-[38rem] flex-col gap-3 rounded-2xl bg-slate-950/75 p-4 backdrop-blur-md border border-white/10 shadow-2xl">
       <div className="flex items-center justify-between">
@@ -329,7 +459,7 @@ export function Dashboard(props: {
           <button onClick={props.onGuide} className="rounded-lg px-2 py-0.5 text-[11px] text-slate-400 hover:bg-white/10 hover:text-slate-200">
             指南
           </button>
-          <button onClick={props.onClose} className="rounded-lg px-2 py-0.5 text-slate-400 hover:bg-white/10">✕</button>
+          <button aria-label="关闭能源谷运行看板" onClick={props.onClose} className="min-h-11 min-w-11 rounded-lg text-slate-400 hover:bg-white/10">✕</button>
         </div>
       </div>
 
@@ -343,6 +473,13 @@ export function Dashboard(props: {
       </div>
 
       <div className="flex rounded-xl bg-white/5 p-1">
+        <button
+          onClick={() => setSection('work')}
+          aria-pressed={section === 'work'}
+          className={`flex-1 rounded-lg py-1.5 text-[11px] transition ${section === 'work' ? 'bg-amber-300/20 text-amber-100' : 'text-slate-400 hover:text-slate-200'}`}
+        >
+          真实工作 · {activeRuntimeTasks.length}
+        </button>
         <button
           onClick={() => setSection('services')}
           aria-pressed={section === 'services'}
@@ -358,6 +495,44 @@ export function Dashboard(props: {
           运行活动 · {Math.min(12, props.events.length)}
         </button>
       </div>
+
+      {section === 'work' && (
+        <div>
+          {runtimeTasks.length === 0 ? (
+            <div className="flex min-h-28 items-center justify-center rounded-xl bg-white/[0.03] px-6 text-center text-[11px] leading-relaxed text-slate-400">
+              {props.runtimePhase === 'live'
+                ? 'MoonTown 运行时在线，目前没有真实任务。'
+                : '运行时未连接。地图仍可浏览，但环境 Agent 不会被计作真实工作。'}
+            </div>
+          ) : (
+            <div className="flex max-h-64 flex-col gap-1 overflow-y-auto">
+              {runtimeTasks.slice(0, 16).map(task => (
+                <button
+                  key={task.id}
+                  type="button"
+                  onClick={() => {
+                    const building = civic.find(item => item.moduleKey === task.buildingModuleKey)
+                    if (building) props.onSelect(building)
+                    props.onSelectTask?.(task)
+                  }}
+                  className="grid min-h-10 grid-cols-[4.5rem_1fr_auto] items-center gap-2 rounded-lg px-2 text-left odd:bg-white/[0.03] hover:bg-white/[0.07]"
+                >
+                  <span className={`text-[10px] ${WORK_STATUS_TONE[task.status]}`}>
+                    {WORK_STATUS_LABEL[task.status]}
+                  </span>
+                  <span className="min-w-0">
+                    <span className="block truncate text-[11px] text-slate-200">{task.title}</span>
+                    <span className="block truncate font-mono text-[9px] text-slate-500">
+                      {task.agentName ?? task.agentId ?? '待分配'}{task.runId ? ` · ${task.runId}` : ''}
+                    </span>
+                  </span>
+                  <span className="max-w-24 truncate text-[9px] text-slate-500">{task.buildingModuleKey}</span>
+                </button>
+              ))}
+            </div>
+          )}
+        </div>
+      )}
 
       {section === 'services' && (
         <div>
@@ -417,7 +592,15 @@ export function Dashboard(props: {
       )}
 
       <div className="flex items-center justify-between border-t border-white/10 pt-2 text-[10px] text-slate-500">
-        <span>数据来自当前本地模拟 · 每 0.4 秒刷新</span>
+        <span>
+          {props.runtimePhase === 'live'
+            ? '工作数据来自 MoonTown 运行时 · 环境指标为本地模拟'
+            : props.runtimePhase === 'stale'
+              ? '保留最后一次真实快照 · 不推测新的工作状态'
+              : props.runtimePhase === 'error' && runtimeTasks.length > 0
+                ? '连接异常 · 当前工作是最后一次真实快照'
+                : '运行时未连接 · 当前仅显示环境模拟'}
+        </span>
         <button onClick={props.onReset} className="rounded-lg px-2 py-1 text-slate-400 hover:bg-white/10 hover:text-rose-200">
           重置小镇
         </button>
@@ -447,7 +630,7 @@ export function Onboarding(props: { onClose: () => void; onGuide: () => void }) 
     <div className="pointer-events-auto w-[340px] rounded-2xl bg-slate-950/85 p-5 backdrop-blur-md border border-amber-200/20 shadow-2xl">
       <div className="mb-2 text-[16px] font-bold text-amber-100">欢迎来到能源谷 🌙</div>
       <div className="flex flex-col gap-2 text-[12.5px] leading-relaxed text-slate-300">
-        <p>这里是按<b className="text-amber-100">昌平未来科学城 · 能源谷</b>空间规则生成的 AI 小镇：河流、湿地、桥梁、农田与城区会随种子变化，13 座市政协议建筑由 Agent 日夜值守。</p>
+        <p>这里是按<b className="text-amber-100">昌平未来科学城 · 能源谷</b>空间规则生成的 AI 小镇。连接 MoonTown 运行时后，真实任务会派遣 Agent 前往对应建筑；未连接时会明确标为环境模拟。</p>
         <p>🖐️ <b>视察</b>：点击建筑或小人查看详情，可跟随 Agent 视角<br/>🛣️ <b>搭建</b>：底部工具坞可铺路、造林、建造新楼宇<br/>🌦️ <b>环境</b>：左上角切换天气，右上角调节时间流速</p>
       </div>
       <button
@@ -474,17 +657,17 @@ export function Guide(props: { onClose: () => void }) {
       <div className="flex items-start justify-between gap-4">
         <div>
           <h2 id="town-guide-title" className="text-[17px] font-bold text-amber-100">能源谷操作指南</h2>
-          <p className="mt-1 text-[12px] text-slate-400">先看镇况，再视察或建设；所有变化都在本机模拟并自动保存。</p>
+          <p className="mt-1 text-[12px] text-slate-400">真实工作来自 MoonTown 运行时；地图建设和环境状态保存在本机。</p>
         </div>
         <button onClick={props.onClose} aria-label="关闭指南" className="rounded-lg px-2 py-1 text-slate-400 hover:bg-white/10">✕</button>
       </div>
 
       <div className="mt-4 grid gap-3 text-[12px] leading-relaxed text-slate-300 sm:grid-cols-2">
         <GuideCard title="1 · 看镇况">
-          居民是模拟人口；活力是 0–100 的全镇状态；预算用于建设；Agent 是正在执勤的镇长、看护与执行角色。看板把内置地标和活动分开呈现。
+          “真实运行”表示任务来自执行快照和台账；“演示模式”中的移动只营造环境，不计作工作。居民、活力与预算仍是地图模拟指标。
         </GuideCard>
         <GuideCard title="2 · 视察">
-          选择“视察”后点击建筑或居民。拖动画面平移，滚轮缩放；居民详情可开启或取消跟随。
+          点击建筑查看真实任务、Agent 和 Run ID；运行时 Agent 的目的地由任务决定。拖动画面平移，滚轮缩放，角色详情可开启跟随。
         </GuideCard>
         <GuideCard title="3 · 建设">
           底部选择道路、造林或四类建筑，再点地图放置。红色预览表示冲突或预算不足；提示会说明原因。

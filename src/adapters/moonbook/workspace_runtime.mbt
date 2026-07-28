@@ -28,6 +28,36 @@ fn moonbook_moon_command() -> String {
 }
 
 ///|
+async fn installed_moonbook_command() -> String? {
+  match @sys.get_env_var("MOONTOWN_MOONBOOK_BIN") {
+    Some(value) if !value.trim().is_empty() =>
+      return Some(value.trim().to_owned())
+    _ => ()
+  }
+  match @sys.get_env_var("MOONBOOK_BIN") {
+    Some(value) if !value.trim().is_empty() =>
+      return Some(value.trim().to_owned())
+    _ => ()
+  }
+  let candidate = @storage.moontown_active_workspace_root() + "/bin/moonbook"
+  if @fs.exists(candidate) {
+    Some(candidate)
+  } else {
+    None
+  }
+}
+
+///|
+async fn moonbook_runtime_invocation(
+  cli_args : Array[String],
+) -> (String, Array[String]) {
+  match installed_moonbook_command() {
+    Some(command) => (command, cli_args)
+    None => (moonbook_moon_command(), ["run", "cmd/main", "--", ..cli_args])
+  }
+}
+
+///|
 fn result_temp_path(task_id : String) -> String {
   resolved_root_path(
     @storage.moontown_product_artifact(
@@ -67,21 +97,17 @@ async fn ensure_workspace(
       return
     }
   } else {
+    let (command, args) = moonbook_runtime_invocation(["wiki", "init", root])
     ignore(
-      @integration.run_checked(
-        moonbook_moon_command(),
-        ["run", "cmd/main", "--", "wiki", "init", root],
-        cwd=Some(resolved_moonbook_root),
-      ),
+      @integration.run_checked(command, args, cwd=Some(resolved_moonbook_root)),
     )
     ensure_workspace_build_dirs(root)
   }
+  let (command, args) = moonbook_runtime_invocation([
+    "wiki", "enable", "moonclaw", root,
+  ])
   ignore(
-    @integration.run_checked(
-      moonbook_moon_command(),
-      ["run", "cmd/main", "--", "wiki", "enable", "moonclaw", root],
-      cwd=Some(resolved_moonbook_root),
-    ),
+    @integration.run_checked(command, args, cwd=Some(resolved_moonbook_root)),
   )
   ensure_book_provider_manifest(root, resolved_moonbook_root)
   ensure_moontown_research_pack(root, entry)
@@ -96,18 +122,10 @@ async fn run_book_json_command(
   ensure_workspace(entry, moonbook_root~)
   let root = resolved_workspace_root(entry.workspace_root)
   let resolved_moonbook_root = resolved_root_path(moonbook_root)
-  @integration.run_json(
-    moonbook_moon_command(),
-    [
-      "run",
-      "cmd/main",
-      "--",
-      "wiki",
-      "extension",
-      ..rewrite_workspace_args(args, root),
-    ],
-    cwd=Some(resolved_moonbook_root),
+  let (command, command_args) = moonbook_runtime_invocation(
+    ["wiki", "extension", ..rewrite_workspace_args(args, root)],
   )
+  @integration.run_json(command, command_args, cwd=Some(resolved_moonbook_root))
 }
 
 ///|

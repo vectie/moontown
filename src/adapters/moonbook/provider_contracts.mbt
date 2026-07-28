@@ -2,6 +2,7 @@
 struct BookTaskProviderMetadata {
   command : String
   args : Array[String]
+  task_args_prefix : Array[String]
   cwd : String
   workspace_root : String
 } derive(Debug, Eq, ToJson, FromJson)

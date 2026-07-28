@@ -7,7 +7,15 @@
 //   Resident(居民)→ 生活动线：家 ⇄ 广场/市集/公园，橙色
 // ============================================================
 
-import type { Agent, AgentRole, Building, TownEvent, TownMetrics, WeatherKind } from './types'
+import type {
+  Agent,
+  AgentRole,
+  Building,
+  RuntimeDisplayMode,
+  TownEvent,
+  TownMetrics,
+  WeatherKind,
+} from './types'
 import { findPath, nearestRoad } from './pathfind'
 import { archetype, type World } from './world'
 
@@ -27,6 +35,11 @@ export interface SimState {
   eventSeq: number
   weatherTimer: number
   buildFlash: { tx: number; ty: number; t: number }[]
+  runtimeMode: RuntimeDisplayMode
+  runtimeObservedAt?: string
+  runtimeTick?: number
+  runtimeMessage?: string
+  runtimeUnlocatedWorkItemIds: string[]
 }
 
 const NAMES: Record<AgentRole, string[]> = {
@@ -65,6 +78,7 @@ function makeAgent(role: AgentRole, name: string, home: Building, world: World):
     purpose: PURPOSES[role][0],
     hue: ROLE_HUE[role] + (Math.random() * 16 - 8),
     bob: Math.random() * Math.PI * 2,
+    provenance: 'ambient',
   }
 }
 
@@ -95,6 +109,8 @@ export function createSim(world: World): SimState {
     selectedId: null, followAgent: null,
     eventSeq: 0, weatherTimer: 90,
     buildFlash: [],
+    runtimeMode: 'demo',
+    runtimeUnlocatedWorkItemIds: [],
   }
   pushEvent(state, '☀️', '能源谷晨启，镇长明月开始今日巡检', 'info')
   pushEvent(state, '🏛️', `${civic.length} 座市政协议建筑在线`, 'good')
@@ -146,6 +162,54 @@ function dispatchAgent(s: SimState, agent: Agent, from: Building) {
   agent.purpose = PURPOSES[agent.role][(Math.random() * PURPOSES[agent.role].length) | 0]
 }
 
+function leaveBuilding(s: SimState, agent: Agent) {
+  if (agent.state !== 'inside') return
+  const current = s.world.buildings.find(building => building.id === agent.homeId)
+  if (current) current.occupants = Math.max(0, current.occupants - 1)
+}
+
+/** Route an agent without assigning any fictional purpose or runtime metadata. */
+export function routeAgentToBuilding(s: SimState, agent: Agent, dest: Building): boolean {
+  const from = agent.state === 'inside'
+    ? s.world.buildings.find(building => building.id === agent.homeId)
+    : undefined
+  const startRoad = from
+    ? nearestRoad(s.world, from.tx, from.ty, archetype(from.archetype).w, archetype(from.archetype).h)
+    : { x: Math.floor(agent.x), y: Math.floor(agent.y) }
+  const a1 = archetype(dest.archetype)
+  const endRoad = nearestRoad(s.world, dest.tx, dest.ty, a1.w, a1.h)
+  if (!startRoad || !endRoad) return false
+  const path = findPath(s.world, startRoad.x, startRoad.y, endRoad.x, endRoad.y)
+  if (!path) return false
+  leaveBuilding(s, agent)
+  agent.path = path
+  agent.pathIdx = 0
+  agent.x = path[0].x
+  agent.y = path[0].y
+  agent.targetId = dest.id
+  agent.state = path.length > 1 ? 'walking' : 'inside'
+  agent.homeId = path.length > 1 ? agent.homeId : dest.id
+  if (path.length === 1) dest.occupants++
+  return true
+}
+
+/** Keep a runtime agent visible and stationary without dispatching ambient work. */
+export function parkRuntimeAgent(s: SimState, agent: Agent, beside?: Building) {
+  leaveBuilding(s, agent)
+  if (beside) {
+    const a = archetype(beside.archetype)
+    const road = nearestRoad(s.world, beside.tx, beside.ty, a.w, a.h)
+    if (road) {
+      agent.x = road.x + 0.5
+      agent.y = road.y + 0.5
+    }
+  }
+  agent.path = []
+  agent.pathIdx = 0
+  agent.targetId = beside?.id
+  agent.state = 'waiting'
+}
+
 export function updateSim(s: SimState, dtReal: number) {
   if (s.paused) return
   const dt = dtReal * s.timeScale / 60          // 游戏分钟
@@ -174,6 +238,12 @@ export function updateSim(s: SimState, dtReal: number) {
   const wSpeed = s.weather === 'rain' ? 0.85 : s.weather === 'snow' ? 0.7 : 1
   for (const ag of s.agents) {
     ag.bob += dtReal * 9
+    if (ag.provenance === 'runtime') {
+      if (ag.state !== 'walking') continue
+      moveWalkingAgent(s, ag, dtReal, wSpeed, true)
+      continue
+    }
+    if (s.runtimeMode === 'live' && ag.role !== 'resident') continue
     if (ag.state === 'inside') {
       ag.dwell -= dtReal
       if (ag.dwell <= 0) {
@@ -202,37 +272,7 @@ export function updateSim(s: SimState, dtReal: number) {
       if (home) dispatchAgent(s, ag, home)
       continue
     }
-    let remain = ag.speed * wSpeed * dtReal
-    while (remain > 0 && ag.pathIdx < ag.path.length - 1) {
-      const next = ag.path[ag.pathIdx + 1]
-      const dx = next.x - ag.x
-      const dy = next.y - ag.y
-      const dist = Math.hypot(dx, dy)
-      if (dist <= remain) {
-        ag.x = next.x; ag.y = next.y
-        ag.pathIdx++
-        remain -= dist
-      } else {
-        ag.x += (dx / dist) * remain
-        ag.y += (dy / dist) * remain
-        remain = 0
-      }
-    }
-    if (ag.pathIdx >= ag.path.length - 1) {
-      // 到达
-      const dest = s.world.buildings.find(b => b.id === ag.targetId)
-      ag.state = 'inside'
-      ag.dwell = 4 + Math.random() * (ag.role === 'keeper' ? 26 : 12)
-      ag.homeId = ag.targetId
-      ag.path = []
-      if (dest) {
-        dest.occupants++
-        dest.vitality = Math.min(100, dest.vitality + 0.6)
-        if (Math.random() < 0.06) {
-          pushEvent(s, roleIcon(ag.role), `${ag.name} 抵达${dest.name} · ${ag.purpose}`, 'info')
-        }
-      }
-    }
+    moveWalkingAgent(s, ag, dtReal, wSpeed, false)
   }
 
   // 建造进度 & 拆除
@@ -262,6 +302,46 @@ export function updateSim(s: SimState, dtReal: number) {
   // 建造闪光衰减
   for (const f of s.buildFlash) f.t -= dtReal
   s.buildFlash = s.buildFlash.filter(f => f.t > 0)
+}
+
+function moveWalkingAgent(
+  s: SimState,
+  ag: Agent,
+  dtReal: number,
+  weatherSpeed: number,
+  runtimeBound: boolean,
+) {
+  let remain = ag.speed * weatherSpeed * dtReal
+  while (remain > 0 && ag.pathIdx < ag.path.length - 1) {
+    const next = ag.path[ag.pathIdx + 1]
+    const dx = next.x - ag.x
+    const dy = next.y - ag.y
+    const dist = Math.hypot(dx, dy)
+    if (dist <= remain) {
+      ag.x = next.x; ag.y = next.y
+      ag.pathIdx++
+      remain -= dist
+    } else {
+      ag.x += (dx / dist) * remain
+      ag.y += (dy / dist) * remain
+      remain = 0
+    }
+  }
+  if (ag.pathIdx >= ag.path.length - 1) {
+    // 到达
+    const dest = s.world.buildings.find(b => b.id === ag.targetId)
+    ag.state = 'inside'
+    ag.dwell = runtimeBound ? Number.POSITIVE_INFINITY : 4 + Math.random() * (ag.role === 'keeper' ? 26 : 12)
+    ag.homeId = ag.targetId
+    ag.path = []
+    if (dest) {
+      dest.occupants++
+      if (!runtimeBound) dest.vitality = Math.min(100, dest.vitality + 0.6)
+      if (!runtimeBound && Math.random() < 0.06) {
+        pushEvent(s, roleIcon(ag.role), `${ag.name} 抵达${dest.name} · ${ag.purpose}`, 'info')
+      }
+    }
+  }
 }
 
 export function roleIcon(r: AgentRole): string {

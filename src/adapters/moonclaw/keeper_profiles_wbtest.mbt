@@ -14,6 +14,35 @@ test "research bootstrap task uses direct research bootstrap profile" {
 }
 
 ///|
+test "MoonBook bootstrap reclassification selects the research bootstrap profile" {
+  let task = @moonbook.BookTask::new(
+    id="standing-standing-goal-audit-trust-tick-3",
+    goal=Some("Audit trustworthy agent-work projections"),
+    title="Standing watch: Audit trustworthy agent-work projections",
+    kind="ingest",
+    prompt="The empty book baseline must be created under raw/bootstrap before the standing watch can compare evidence.",
+    priority=80,
+    requires_review=false,
+  )
+  assert_eq(provider_task_kind_for_book_task(task), "bootstrap_gather")
+  assert_eq(keeper_profile_for_task(task), "moontown_research_bootstrap_worker")
+}
+
+///|
+test "course bootstrap tasks keep the course-compatible ingest profile" {
+  let task = @moonbook.BookTask::new(
+    id="course-beginner-workbook-bootstrap",
+    title="Bootstrap the beginner course",
+    kind="ingest",
+    prompt="Write a beginner workbook with lessons under raw/bootstrap.",
+    priority=80,
+    requires_review=true,
+  )
+  assert_true(@course_book.course_book_task(task))
+  assert_eq(keeper_profile_for_task(task), "wiki_ingest_controller")
+}
+
+///|
 test "civic book routes generic maintenance task to civic worker by policy type" {
   let entry = @moonbook.BookCatalogEntry::new(
     id="wenyu-policy-hall",

@@ -163,6 +163,7 @@ Mayor -> Book Keeper -> Worker Claws
 Use these commands while developing the loop:
 
 ```bash
+export MOONTOWN_SUITE_ROOT="${MOONSUITE_ROOT:-$HOME/moonsuite}"
 moon run src/cmd/main -- status
 moon run src/cmd/main -- daemon tick
 moon run src/cmd/main -- daemon run --once
@@ -172,6 +173,10 @@ moon run src/cmd/main -- daemon stop
 ./scripts/install-launchd-daemon.sh
 ./scripts/uninstall-launchd-daemon.sh
 ```
+
+The source checkout remains the process working directory. Runtime state and
+book workspaces default to `$HOME/moonsuite`, so daemon development does not
+write `.moonsuite` or generated books into the repository.
 
 Do not put durable research memory in MoonTown. Standing goals belong to the
 Mayor, book-local memory belongs to MoonBook, and bounded execution belongs to

@@ -45,6 +45,39 @@ async test "detached import oversized receipt is failed without parsing" {
 }
 
 ///|
+async test "detached import surfaces compiler failure written only to stderr" {
+  let root = "/tmp/moontown-detached-stderr-test"
+  let packet_path = "\{root}/packet.json"
+  let receipt_path = detached_import_receipt_path(packet_path)
+  moonclaw_write_text_file(receipt_path, "")
+  moonclaw_write_text_file(
+    receipt_path + ".err",
+    "Error: [4032]\nThe type IterResult is undefined.\n",
+  )
+  guard detached_import_receipt("packet", packet_path) is Some(receipt) else {
+    fail("compiler stderr should become a terminal import receipt")
+  }
+  assert_eq(receipt.status, Failed)
+  assert_true(receipt.summary.contains("IterResult"))
+}
+
+///|
+async test "detached import reports failed run receipts as failures" {
+  let root = "/tmp/moontown-detached-failed-run-test"
+  let packet_path = "\{root}/packet.json"
+  moonclaw_write_text_file(
+    detached_import_receipt_path(packet_path),
+    "{\"proposal_id\":\"proposal-1\",\"run_id\":\"run-1\",\"status\":\"Failed\"}",
+  )
+  guard detached_import_receipt("packet", packet_path) is Some(receipt) else {
+    fail("failed run receipt should be terminal")
+  }
+  assert_eq(receipt.status, Failed)
+  assert_true(receipt.summary.contains("reported failure"))
+  assert_true(receipt.summary.contains("run-1"))
+}
+
+///|
 test "detached import startup logs are not terminal failure receipts" {
   let receipt = detached_import_failure_receipt(
     "packet",

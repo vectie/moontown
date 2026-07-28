@@ -19,13 +19,11 @@ pub async fn run_confirmed_run(
 ) -> String {
   let resolved_cwd = resolve_root_path(cwd)
   let resolved_home = resolve_home_path(home, resolved_cwd)
-  let moon = moon_command()
-  let args = [
-    "-C", moonclaw_root, "run", "cmd/main", "--", "proposal", "run", run_id, "--cwd",
-    resolved_cwd, "--home", resolved_home,
-  ]
-  let command = @integration.render_command(moon, args)
-  let shell_command = build_detached_shell_command(moon, args)
+  let (command_name, args) = moonclaw_runtime_invocation(moonclaw_root, [
+    "proposal", "run", run_id, "--cwd", resolved_cwd, "--home", resolved_home,
+  ])
+  let command = @integration.render_command(command_name, args)
+  let shell_command = build_detached_shell_command(command_name, args)
   ignore(@integration.run_checked("/bin/zsh", ["-lc", shell_command]))
   command
 }
