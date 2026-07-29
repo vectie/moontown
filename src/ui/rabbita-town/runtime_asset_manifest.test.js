@@ -7,6 +7,7 @@ import {
   resolveRuntimeAssetPath,
   runtimeAssetPaths,
 } from './runtime_asset_manifest.js'
+import { indexWenyuReferenceBuildingComponents } from './runtime_snapshots.js'
 
 const assetRoot = path.resolve(import.meta.dirname, '../assets')
 
@@ -22,6 +23,7 @@ test('runtime asset manifest covers modules, residents, and operating art', asyn
   )
 
   assert.ok(pathSet.has('tilemap/wenyu_reference_tilemap_iso.png'))
+  assert.ok(pathSet.has('tilemap/wenyu_reference_buildings.json'))
   assert.ok(pathSet.has('moontown.svg'))
   assert.ok(pathSet.has('tilemap/districts/town_shell.png'))
   assert.ok(pathSet.has('tilemap/actors/roster/resident_0.png'))
@@ -35,6 +37,32 @@ test('runtime asset manifest covers modules, residents, and operating art', asyn
   for (const module of moduleConfig.modules) {
     assert.ok(pathSet.has(module.asset_base), module.asset_base)
   }
+})
+
+test('Wenyu component index preserves every typed building cell', async () => {
+  const snapshot = JSON.parse(
+    await readFile(
+      path.join(assetRoot, 'tilemap/wenyu_reference_buildings.json'),
+      'utf8',
+    ),
+  )
+  globalThis.__wenyuReferenceBuildings = snapshot
+  indexWenyuReferenceBuildingComponents()
+
+  const labelCells = snapshot.labelRows.reduce(
+    (total, row) =>
+      total + [...row].filter(code => code !== '.').length,
+    0,
+  )
+  const indexedCells = globalThis.__wenyuReferenceBuildingComponentRows.reduce(
+    (total, row) => total + row.filter(Boolean).length,
+    0,
+  )
+  assert.equal(labelCells, 3327)
+  assert.equal(indexedCells, labelCells)
+
+  delete globalThis.__wenyuReferenceBuildings
+  delete globalThis.__wenyuReferenceBuildingComponentRows
 })
 
 test('runtime asset resolution rejects traversal paths', () => {

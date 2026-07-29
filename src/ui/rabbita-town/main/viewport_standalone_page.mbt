@@ -4,7 +4,21 @@ fn render_standalone_viewport_page(
   model : Model,
   context : RenderSceneContext,
 ) -> @rabbita.Html {
-  ignore(context)
+  match model.selection {
+    Node(node_key) =>
+      match find_wenyu_module(node_key) {
+        Some(civic) =>
+          return render_wenyu_module_interior(
+            dispatch,
+            model,
+            civic,
+            context.workers,
+            context.executions,
+          )
+        None => ()
+      }
+    _ => ()
+  }
   let children : Array[@rabbita.Html] = [
     render_golden_valley_canvas(dispatch, model),
     div(

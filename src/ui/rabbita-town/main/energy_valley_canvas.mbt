@@ -1,11 +1,14 @@
 ///|
 priv struct GoldenValleyBuilding {
+  module_key : String?
   name : String
   style : String
   x : Int
   y : Int
   width : Int
   depth : Int
+  entrance_x : Int?
+  entrance_y : Int?
   floors : Int
 } derive(ToJson, FromJson)
 
@@ -47,7 +50,7 @@ extern "js" fn install_golden_valley_canvas_input(
   #|   const canvas = globalThis.document?.getElementById("energy-valley-canvas");
   #|   if (!canvas || canvas.dataset.goldenInput === "1") return;
   #|   canvas.dataset.goldenInput = "1";
-  #|   globalThis.__moontownGoldenValleyCamera ||= { x: -64, y: 832, z: 0.95 };
+  #|   globalThis.__moontownGoldenValleyCamera ||= { x: 1792, y: 3200, z: 0.1 };
   #|   const camera = globalThis.__moontownGoldenValleyCamera;
   #|   let cameraDragging = false;
   #|   let painting = false;
@@ -124,7 +127,7 @@ extern "js" fn install_golden_valley_canvas_input(
   #|     const mx = event.clientX - rect.left - rect.width / 2;
   #|     const my = event.clientY - rect.top - rect.height / 2;
   #|     const previous = camera.z;
-  #|     camera.z = Math.min(2.6, Math.max(0.35, previous * (
+  #|     camera.z = Math.min(1.8, Math.max(0.07, previous * (
   #|       event.deltaY < 0 ? 1.12 : 0.89
   #|     )));
   #|     camera.x += mx / previous - mx / camera.z;
@@ -175,15 +178,15 @@ extern "js" fn install_golden_valley_canvas_input(
 
 ///|
 extern "js" fn golden_valley_camera_x() -> Double =
-  #| () => globalThis.__moontownGoldenValleyCamera?.x ?? -64
+  #| () => globalThis.__moontownGoldenValleyCamera?.x ?? 1792
 
 ///|
 extern "js" fn golden_valley_camera_y() -> Double =
-  #| () => globalThis.__moontownGoldenValleyCamera?.y ?? 832
+  #| () => globalThis.__moontownGoldenValleyCamera?.y ?? 3200
 
 ///|
 extern "js" fn golden_valley_camera_zoom() -> Double =
-  #| () => globalThis.__moontownGoldenValleyCamera?.z ?? 0.95
+  #| () => globalThis.__moontownGoldenValleyCamera?.z ?? 0.1
 
 ///|
 extern "js" fn golden_focus_building_camera(
@@ -191,11 +194,11 @@ extern "js" fn golden_focus_building_camera(
   world_y : Double,
 ) -> Unit =
   #| (worldX, worldY) => {
-  #|   globalThis.__moontownGoldenValleyCamera ||= { x: -64, y: 832, z: 0.95 };
+  #|   globalThis.__moontownGoldenValleyCamera ||= { x: 1792, y: 3200, z: 0.1 };
   #|   const camera = globalThis.__moontownGoldenValleyCamera;
   #|   camera.x = (worldX - worldY) * 32;
   #|   camera.y = (worldX + worldY) * 16;
-  #|   if (camera.z < 1) camera.z = 1;
+  #|   if (camera.z < 0.55) camera.z = 0.55;
   #|   globalThis.__moontownGoldenValleyRender?.();
   #| }
 
@@ -338,30 +341,66 @@ extern "js" fn golden_draw_road_detail(
   sy : Double,
   zoom : Double,
   mask : Int,
+  major : Bool,
 ) -> Unit =
-  #| (context, sx, sy, zoom, mask) => {
-  #|   context.strokeStyle = "rgba(255,255,255,0.35)";
-  #|   context.lineWidth = Math.max(1, 1.2 * zoom);
-  #|   context.setLineDash([6 * zoom, 5 * zoom]);
-  #|   context.beginPath();
-  #|   if ((mask & 1) && (mask & 4)) {
-  #|     context.moveTo(sx - 16 * zoom, sy - 8 * zoom);
-  #|     context.lineTo(sx + 16 * zoom, sy + 8 * zoom);
-  #|   } else if ((mask & 2) && (mask & 8)) {
-  #|     context.moveTo(sx + 16 * zoom, sy - 8 * zoom);
-  #|     context.lineTo(sx - 16 * zoom, sy + 8 * zoom);
-  #|   }
-  #|   context.stroke();
+  #| (context, sx, sy, zoom, mask, major) => {
+  #|   const north = [sx + 16 * zoom, sy - 8 * zoom];
+  #|   const east = [sx + 16 * zoom, sy + 8 * zoom];
+  #|   const south = [sx - 16 * zoom, sy + 8 * zoom];
+  #|   const west = [sx - 16 * zoom, sy - 8 * zoom];
+  #|   const northFar = [sx + 32 * zoom, sy - 16 * zoom];
+  #|   const eastFar = [sx + 32 * zoom, sy + 16 * zoom];
+  #|   const southFar = [sx - 32 * zoom, sy + 16 * zoom];
+  #|   const westFar = [sx - 32 * zoom, sy - 16 * zoom];
+  #|   const connections = [
+  #|     [1, north, northFar],
+  #|     [2, east, eastFar],
+  #|     [4, south, southFar],
+  #|     [8, west, westFar],
+  #|   ];
+  #|   const active = connections.filter(([bit]) => mask & bit);
+  #|   const traceRoad = () => {
+  #|     context.beginPath();
+  #|     if (active.length === 2) {
+  #|       const turning = mask !== 5 && mask !== 10;
+  #|       const from = active[0][turning ? 2 : 1];
+  #|       const to = active[1][turning ? 2 : 1];
+  #|       context.moveTo(from[0], from[1]);
+  #|       context.quadraticCurveTo(sx, sy, to[0], to[1]);
+  #|       return;
+  #|     }
+  #|     for (const [, point] of active) {
+  #|       context.moveTo(sx, sy);
+  #|       context.lineTo(point[0], point[1]);
+  #|     }
+  #|   };
+  #|   context.save();
+  #|   context.lineCap = "round";
+  #|   context.lineJoin = "round";
+  #|   context.strokeStyle = "rgba(224,216,192,0.82)";
+  #|   context.lineWidth = Math.max(
+  #|     major ? 4.2 : 3.6,
+  #|     (major ? 23 : 18) * zoom,
+  #|   );
   #|   context.setLineDash([]);
-  #|   context.strokeStyle = "rgba(0,0,0,0.15)";
-  #|   context.lineWidth = 1;
-  #|   context.beginPath();
-  #|   context.moveTo(sx, sy - 16 * zoom);
-  #|   context.lineTo(sx + 32 * zoom, sy);
-  #|   context.lineTo(sx, sy + 16 * zoom);
-  #|   context.lineTo(sx - 32 * zoom, sy);
-  #|   context.closePath();
+  #|   traceRoad();
   #|   context.stroke();
+  #|   context.strokeStyle = major ? "#3b424a" : "#48515a";
+  #|   context.lineWidth = Math.max(
+  #|     major ? 3.2 : 2.7,
+  #|     (major ? 18 : 14) * zoom,
+  #|   );
+  #|   traceRoad();
+  #|   context.stroke();
+  #|   context.strokeStyle = major ? "#f2c94c" : "rgba(248,250,252,0.88)";
+  #|   context.lineWidth = Math.max(0.8, (major ? 1.45 : 1.15) * zoom);
+  #|   context.setLineDash(zoom >= 0.45 ? [
+  #|     Math.max(2.5, 5 * zoom),
+  #|     Math.max(2, 4 * zoom),
+  #|   ] : []);
+  #|   traceRoad();
+  #|   context.stroke();
+  #|   context.restore();
   #| }
 
 ///|
@@ -1105,189 +1144,12 @@ extern "js" fn golden_draw_reference_agent(
 
 ///|
 fn golden_valley_cols() -> Int {
-  56
+  exact_energy_valley_cols()
 }
 
 ///|
 fn golden_valley_rows() -> Int {
-  52
-}
-
-///|
-fn golden_valley_phase(seed : Int, salt : Int) -> Double {
-  if seed == 20260727 {
-    if salt == 1 {
-      1.6820522444332942
-    } else {
-      2.5750972304958477
-    }
-  } else {
-    energy_valley_variation(seed, salt, 7, 197, 6283).to_double() / 1000.0
-  }
-}
-
-///|
-fn golden_valley_main_river_x(seed : Int, y : Int) -> Double {
-  let phase = golden_valley_phase(seed, 1)
-  let phase2 = golden_valley_phase(seed, 2)
-  let river_mean = if seed == 20260727 {
-    43.9817156533245
-  } else {
-    43.0 +
-    energy_valley_signed_variation(seed, 1, 9, 199, 15).to_double() / 10.0
-  }
-  let amplitude = if seed == 20260727 { 4.980461496766656 } else { 4.4 }
-  river_mean +
-  amplitude * golden_math_sin(y.to_double() / 7.2 + phase) +
-  1.35 * golden_math_sin(y.to_double() / 2.9 + phase2)
-}
-
-///|
-fn golden_valley_lake_at(seed : Int, x : Int, y : Int) -> Bool {
-  let lake_x = if seed == 20260727 {
-    29.065508878976107
-  } else {
-    28.0 +
-    energy_valley_signed_variation(seed, 3, 7, 211, 18).to_double() / 10.0
-  }
-  let lake_y = if seed == 20260727 {
-    32.452520224032924
-  } else {
-    31.0 +
-    energy_valley_signed_variation(seed, 5, 3, 223, 15).to_double() / 10.0
-  }
-  let lake_rx = if seed == 20260727 { 6.3905793280340735 } else { 6.6 }
-  let lake_ry = if seed == 20260727 { 4.185174033045769 } else { 4.0 }
-  let dx = (x.to_double() - lake_x) / lake_rx
-  let dy = (y.to_double() - lake_y) / lake_ry
-  let noise = 0.08 *
-    golden_math_sin(
-      x.to_double() * 1.7 + y.to_double() * 0.8 + golden_valley_phase(seed, 1),
-    )
-  dx * dx + dy * dy <= (1.0 + noise) * (1.0 + noise)
-}
-
-///|
-fn golden_valley_tributary_at(seed : Int, x : Int, y : Int) -> Bool {
-  let base = if seed == 20260727 { 11.785662567941472 } else { 12.5 }
-  let end_x = if seed == 20260727 { 26 } else { 25 }
-  let center = base +
-    x.to_double() * 0.24 +
-    1.5 * golden_math_sin(x.to_double() / 5.1 + golden_valley_phase(seed, 2))
-  x <= end_x &&
-  (y.to_double() - center).abs() <=
-  1.05 + 0.2 * golden_math_sin(x.to_double() + golden_valley_phase(seed, 1))
-}
-
-///|
-fn golden_valley_outlet_at(seed : Int, x : Int, y : Int) -> Bool {
-  if x < 32 || x > 45 {
-    return false
-  }
-  let lake_x = if seed == 20260727 { 29.065508878976107 } else { 28.0 }
-  let lake_y = if seed == 20260727 {
-    32.452520224032924
-  } else {
-    31.0 +
-    energy_valley_signed_variation(seed, 5, 3, 223, 15).to_double() / 10.0
-  }
-  let river_mean = if seed == 20260727 { 43.9817156533245 } else { 43.0 }
-  let progress = (x.to_double() - lake_x) / (river_mean - lake_x)
-  let center = lake_y +
-    progress * 2.6 +
-    golden_math_sin(x.to_double() / 2.7 + golden_valley_phase(seed, 1)) * 0.55
-  (y.to_double() - center).abs() <= 1.1
-}
-
-///|
-fn golden_valley_water_at(seed : Int, x : Int, y : Int) -> Bool {
-  let river_width = 2.15 +
-    0.45 * golden_math_sin(y.to_double() / 4.2 + golden_valley_phase(seed, 1))
-  (x.to_double() - golden_valley_main_river_x(seed, y)).abs() <= river_width ||
-  golden_valley_lake_at(seed, x, y) ||
-  golden_valley_tributary_at(seed, x, y) ||
-  golden_valley_outlet_at(seed, x, y)
-}
-
-///|
-fn golden_valley_bridge_row(seed : Int, base : Int, salt : Int) -> Int {
-  if seed == 20260727 {
-    match base {
-      11 => 11
-      27 => 27
-      _ => 43
-    }
-  } else {
-    base + energy_valley_signed_variation(seed, salt, 1, 227, 2)
-  }
-}
-
-///|
-fn golden_valley_road_at(seed : Int, x : Int, y : Int) -> Bool {
-  let east_west = y == golden_valley_bridge_row(seed, 11, 1) ||
-    y == golden_valley_bridge_row(seed, 27, 2) ||
-    y == golden_valley_bridge_row(seed, 42, 3)
-  let vertical = x == 8 || x == 15 || x == 23 || x == 31 || x == 37
-  let local_road = (y == 17 || y == 22 || y == 34 || y == 38) &&
-    x >= 7 &&
-    x <= 39
-  let campus = (y == 7 && x >= 4 && x <= 12) ||
-    (x == 12 && y >= 7 && y <= 13) ||
-    (y == 13 && x >= 12 && x <= 20)
-  let promenade = (x == 18 && y >= 30 && y <= 35) ||
-    (y == 35 && x >= 18 && x <= 25) ||
-    (x == 25 && y >= 35 && y <= 39) ||
-    (y == 39 && x >= 25 && x <= 33)
-  east_west || vertical || local_road || campus || promenade
-}
-
-///|
-fn golden_valley_bridge_at(seed : Int, x : Int, y : Int) -> Bool {
-  golden_valley_water_at(seed, x, y) &&
-  (
-    y == golden_valley_bridge_row(seed, 11, 1) ||
-    y == golden_valley_bridge_row(seed, 27, 2) ||
-    y == golden_valley_bridge_row(seed, 42, 3)
-  )
-}
-
-///|
-fn golden_valley_near_water(seed : Int, x : Int, y : Int) -> Bool {
-  for yy in (y - 1)..<=(y + 1) {
-    for xx in (x - 1)..<=(x + 1) {
-      if golden_valley_water_at(seed, xx, yy) {
-        return true
-      }
-    }
-  }
-  false
-}
-
-///|
-fn golden_valley_near_road(seed : Int, x : Int, y : Int) -> Bool {
-  golden_valley_road_at(seed, x - 1, y) ||
-  golden_valley_road_at(seed, x + 1, y) ||
-  golden_valley_road_at(seed, x, y - 1) ||
-  golden_valley_road_at(seed, x, y + 1)
-}
-
-///|
-fn golden_valley_district(seed : Int, x : Int, y : Int) -> String {
-  if x >= 31 && x < 41 && y >= 9 && y <= 24 {
-    "farm"
-  } else if x < 12 && y > 26 {
-    "community"
-  } else if y < 15 && x >= 10 && x <= 34 {
-    "innovation"
-  } else if y > 37 && x >= 23 && x <= 40 {
-    "showcase"
-  } else if x >= 10 && x <= 33 && y >= 15 && y <= 37 {
-    "civic"
-  } else if (x.to_double() - golden_valley_main_river_x(seed, y)).abs() < 5.0 {
-    "river"
-  } else {
-    "forest"
-  }
+  exact_energy_valley_rows()
 }
 
 ///|
@@ -1331,6 +1193,7 @@ fn golden_valley_road_mask(model : Model, seed : Int, x : Int, y : Int) -> Int {
 ///|
 fn golden_valley_buildings(seed : Int) -> Array[GoldenValleyBuilding] {
   golden_valley_world(seed).buildings.map(building => {
+    module_key: Some(building.module_key),
     name: building.name,
     style: if building.style == "plaza-bld" {
       "plaza"
@@ -1341,6 +1204,8 @@ fn golden_valley_buildings(seed : Int) -> Array[GoldenValleyBuilding] {
     y: building.y,
     width: building.width,
     depth: building.depth,
+    entrance_x: Some(building.entrance_x),
+    entrance_y: Some(building.entrance_y),
     floors: building.floors,
   })
 }
@@ -1440,8 +1305,20 @@ fn golden_draw_tile(
       golden_animation_seconds(),
     )
   } else if terrain == "road" {
-    golden_ctx_fill_style(context, "#7a7f8a")
-    context.fill()
+    let world = golden_valley_world(seed)
+    let underlay = exact_energy_valley_canvas_terrain(
+      energy_valley_road_fill_kind(world.tiles, x, y),
+    )
+    golden_draw_ground_detail(
+      context,
+      underlay,
+      sx,
+      sy,
+      golden_valley_camera_zoom(),
+      world.tiles[y][x].variation,
+      x + y,
+      world.tiles[y][x].district == "civic-core",
+    )
   } else {
     let variation = golden_valley_world(seed).tiles[y][x].variation
     golden_draw_ground_detail(
@@ -1455,17 +1332,48 @@ fn golden_draw_tile(
       golden_valley_world(seed).tiles[y][x].district == "civic-core",
     )
   }
-  if terrain == "road" {
-    golden_draw_road_detail(
-      context,
-      sx,
-      sy,
-      golden_valley_camera_zoom(),
-      golden_valley_road_mask(model, seed, x, y),
-    )
-  } else if terrain == "bridge" {
+  if terrain == "bridge" {
     golden_draw_bridge_detail(context, sx, sy, golden_valley_camera_zoom())
   }
+}
+
+///|
+fn golden_draw_road_overlay_tile(
+  context : @dom.CanvasRenderingContext2D,
+  model : Model,
+  seed : Int,
+  x : Int,
+  y : Int,
+  viewport_width : Int,
+  viewport_height : Int,
+) -> Unit {
+  if golden_valley_terrain(model, seed, x, y) != "road" {
+    return
+  }
+  let sx = golden_screen_x(
+    x.to_double() + 0.5,
+    y.to_double() + 0.5,
+    viewport_width,
+  )
+  let sy = golden_screen_y(
+    x.to_double() + 0.5,
+    y.to_double() + 0.5,
+    viewport_height,
+  )
+  if sx < -120.0 ||
+    sx > viewport_width.to_double() + 120.0 ||
+    sy < -120.0 ||
+    sy > viewport_height.to_double() + 120.0 {
+    return
+  }
+  golden_draw_road_detail(
+    context,
+    sx,
+    sy,
+    golden_valley_camera_zoom(),
+    golden_valley_road_mask(model, seed, x, y),
+    golden_valley_world(seed).tiles[y][x].base_terrain == "road-major",
+  )
 }
 
 ///|
@@ -1862,18 +1770,33 @@ fn golden_draw_ambient(
   viewport_height : Int,
   hour : Double,
 ) -> Unit {
-  if golden_valley_terrain(model, seed, x, y) != "urban" {
+  let terrain = golden_valley_terrain(model, seed, x, y)
+  if terrain != "urban" && terrain != "plaza" {
     return
   }
-  let (structure, floors) = match golden_valley_world(seed).structure_at(x, y) {
+  let (structure, floors, footprint_width, footprint_depth) = match
+    golden_valley_world(seed).structure_footprint_at(x, y) {
     None => return
     Some(value) => value
   }
-  let inset = if structure == "row" { 0.08 } else { 0.13 }
-  let box_width = if structure == "row" { 0.84 } else { 0.74 }
-  let box_depth = if structure == "row" { 0.64 } else { 0.74 }
-  let center_x = x.to_double() + inset + box_width / 2.0
-  let center_y = y.to_double() + inset + box_depth / 2.0
+  let width_ratio = if structure == "row" || structure == "industrial" {
+    0.90
+  } else if structure == "block" || structure == "civic" {
+    0.86
+  } else {
+    0.80
+  }
+  let depth_ratio = if structure == "row" || structure == "industrial" {
+    0.72
+  } else if structure == "block" || structure == "civic" {
+    0.86
+  } else {
+    0.80
+  }
+  let box_width = footprint_width.to_double() * width_ratio
+  let box_depth = footprint_depth.to_double() * depth_ratio
+  let center_x = x.to_double() + footprint_width.to_double() / 2.0
+  let center_y = y.to_double() + footprint_depth.to_double() / 2.0
   let sx = golden_screen_x(center_x, center_y, viewport_width)
   let sy = golden_screen_y(center_x, center_y, viewport_height)
   if sx < -60.0 ||
@@ -1883,42 +1806,56 @@ fn golden_draw_ambient(
     return
   }
   let (roof, left, right) = if structure == "tower" {
-    ("#d7e4e8", "#8fa7ae", "#a9bcc2")
+    ("#d6e0e3", "#7e9298", "#9eafb4")
+  } else if structure == "block" {
+    ("#d7d9d3", "#969e9a", "#b0b6b1")
+  } else if structure == "lowrise" {
+    ("#e1e0d8", "#a8aaa3", "#bec0b8")
   } else if structure == "campus" {
     ("#d9ddd2", "#a9b9ad", "#bbc8bf")
+  } else if structure == "civic" {
+    ("#e4dccb", "#ad9d87", "#c4b6a0")
+  } else if structure == "industrial" {
+    ("#cbd3d4", "#899798", "#a2adae")
   } else if structure == "courtyard" {
     ("#e4dfcf", "#b8ad99", "#c9beaa")
   } else {
     ("#d8d9d2", "#9fa7a4", "#b6bcb7")
   }
-  let visual_height = if floors == 1 {
-    6.65
-  } else {
-    floors.to_double() * 6.175
-  }
-  golden_draw_iso_box(
-    context, sx, sy, box_width, box_depth, visual_height, roof, left, right,
-  )
-  golden_draw_iso_windows(
+  let visual_height = 10.0 + floors.to_double() * 18.0
+  golden_draw_reference_building_shadow(
     context,
     sx,
     sy,
     box_width,
     box_depth,
-    visual_height,
     golden_valley_camera_zoom(),
-    if structure == "tower" {
-      2
-    } else {
-      1
-    },
-    floors,
-    if hour < 6.0 || hour >= 19.0 {
-      0.42
-    } else {
-      0.0
-    },
   )
+  golden_draw_iso_box(
+    context, sx, sy, box_width, box_depth, visual_height, roof, left, right,
+  )
+  if golden_valley_camera_zoom() >= 0.18 {
+    golden_draw_iso_windows(
+      context,
+      sx,
+      sy,
+      box_width,
+      box_depth,
+      visual_height,
+      golden_valley_camera_zoom(),
+      if structure == "tower" {
+        footprint_width
+      } else {
+        (footprint_width + 1) / 2
+      },
+      floors,
+      if hour < 6.0 || hour >= 19.0 {
+        0.42
+      } else {
+        0.0
+      },
+    )
+  }
 }
 
 ///|
@@ -1960,23 +1897,16 @@ fn golden_valley_canvas_agents(
   seed : Int,
 ) -> Array[GoldenValleyCanvasAgent] {
   let result : Array[GoldenValleyCanvasAgent] = []
-  let ambient_start = match model.energy_valley_runtime.projection {
-    Some(projection) => if projection.mode == "live" { 14 } else { 0 }
-    None => 0
+  let buildings = golden_valley_buildings(seed)
+  for building in model.energy_custom_buildings {
+    buildings.push(building)
+  }
+  let ambient_start = if model.energy_valley_runtime.phase is Live {
+    14
+  } else {
+    0
   }
   for index in ambient_start..<20 {
-    let road_column = [8, 15, 23, 31, 37][index % 5]
-    let path_offset = (
-        model.tick * (if index >= 6 && index < 14 { 2 } else { 1 }) +
-        energy_valley_variation(seed, index, 3, 277, 360)
-      ) %
-      720
-    let path_step = if path_offset < 360 {
-      path_offset
-    } else {
-      720 - path_offset
-    }
-    let y = 7.0 + path_step.to_double() / 10.0
     let role = if index == 0 {
       "mayor"
     } else if index < 6 {
@@ -1992,18 +1922,57 @@ fn golden_valley_canvas_agents(
       "worker" => 130
       _ => 20
     }
-    result.push({
-      x: road_column.to_double() + 0.5,
-      y: y + 0.5,
-      hue: base_hue + energy_valley_variation(seed, index, 19, 317, 17) - 8,
-      role,
-      bob: golden_animation_seconds() * 9.0 + index.to_double(),
-      work_color: "",
-    })
-  }
-  let buildings = golden_valley_buildings(seed)
-  for building in model.energy_custom_buildings {
-    buildings.push(building)
+    if buildings.length() < 2 {
+      continue
+    }
+    let from_index = energy_valley_variation(
+      seed,
+      index,
+      17,
+      601,
+      buildings.length(),
+    )
+    let destination_index = (
+        from_index +
+        1 +
+        energy_valley_variation(seed, index, 19, 607, buildings.length() - 1)
+      ) %
+      buildings.length()
+    match
+      golden_valley_building_road_path(
+        model,
+        seed,
+        buildings[from_index],
+        buildings[destination_index],
+      ) {
+      None => ()
+      Some(path) =>
+        match
+          golden_valley_commute_point(
+            path,
+            golden_animation_seconds(),
+            if role == "worker" {
+              2.2
+            } else {
+              1.6
+            },
+            energy_valley_variation(seed, index, 23, 613, 240).to_double(),
+            5.0 + (index % 4).to_double(),
+          ) {
+          None => ()
+          Some(point) =>
+            result.push({
+              x: point.0,
+              y: point.1,
+              hue: base_hue +
+              energy_valley_variation(seed, index, 19, 317, 17) -
+              8,
+              role,
+              bob: golden_animation_seconds() * 9.0 + index.to_double(),
+              work_color: "",
+            })
+        }
+    }
   }
   let runtime_agents = energy_valley_runtime_active_agents(
     model.energy_valley_runtime,
@@ -2026,9 +1995,9 @@ fn golden_valley_canvas_agents(
               1.7
             }
             match
-              golden_valley_path_point(
+              golden_valley_commute_point(
                 path,
-                (if model.energy_valley_runtime.motion_started_at_ms < 0.0 {
+                if model.energy_valley_runtime.motion_started_at_ms < 0.0 {
                   0.0
                 } else {
                   (
@@ -2036,8 +2005,10 @@ fn golden_valley_canvas_agents(
                     model.energy_valley_runtime.motion_started_at_ms
                   ) /
                   1000.0
-                }) *
+                },
                 speed,
+                energy_valley_variation(seed, index, 29, 617, 24).to_double(),
+                9.0,
               ) {
               None => ()
               Some(point) => {
@@ -2087,7 +2058,11 @@ fn golden_draw_agents_at_depth(
       context,
       sx,
       sy,
-      golden_valley_camera_zoom(),
+      if golden_valley_camera_zoom() < 0.32 {
+        0.32
+      } else {
+        golden_valley_camera_zoom()
+      },
       agent.hue,
       agent.role,
       agent.bob,
@@ -2189,6 +2164,13 @@ fn draw_golden_valley_canvas(model : Model) -> Unit {
       for y in 0..<golden_valley_rows() {
         for x in 0..<golden_valley_cols() {
           golden_draw_tile(context, model, seed, x, y, width, height)
+        }
+      }
+      for y in 0..<golden_valley_rows() {
+        for x in 0..<golden_valley_cols() {
+          golden_draw_road_overlay_tile(
+            context, model, seed, x, y, width, height,
+          )
         }
       }
       let agents = golden_valley_canvas_agents(model, seed)

@@ -130,7 +130,7 @@ fn render_wenyu_module_interior(
         ),
       ]),
       a(
-        href="./viewport.html?assets=generated&mode=view&v=wenyu-modules",
+        href="./viewport.html?assets=generated&mode=view&seed=\{active_energy_valley_seed()}&v=wenyu-modules",
         class="control-button viewport-back-town",
         "Back To Town",
       ),
@@ -138,6 +138,10 @@ fn render_wenyu_module_interior(
     div(class="interior-room module-interior-room", [
       render_module_interior_overview(civic, runtime, projection),
       render_module_work_floor(civic, model.energy_valley_runtime),
+      render_energy_valley_module_agent_exchange(
+        model.energy_valley_runtime,
+        civic,
+      ),
       div(
         class="interior-agent-grid module-interior-agent-grid",
         if !visual_agents.is_empty() {

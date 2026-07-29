@@ -1,5 +1,7 @@
 import {
+  loadWenyuReferenceBuildings,
   loadWenyuReferenceLabels,
+  loadWenyuReferenceRoads,
   loadWenyuTownModules,
   refreshRuntimeSnapshots,
   startRuntimeSnapshotRefresh,
@@ -66,7 +68,9 @@ if (app) {
 async function prepareRuntimeBridge() {
   await Promise.allSettled([
     refreshRuntimeSnapshots(),
+    loadWenyuReferenceBuildings(),
     loadWenyuReferenceLabels(),
+    loadWenyuReferenceRoads(),
     loadWenyuTownModules(),
   ])
 }

@@ -1,5 +1,9 @@
 ///|
 fn golden_valley_building_module_key(building : GoldenValleyBuilding) -> String {
+  match building.module_key {
+    Some(key) => return key
+    None => ()
+  }
   match building.name {
     "市政厅" => "town-shell"
     "活力塔" => "vitality-tower"
@@ -14,6 +18,15 @@ fn golden_valley_building_module_key(building : GoldenValleyBuilding) -> String 
     "山谷市集" => "valley-market"
     "人才公寓" => "talent-flat"
     _ => ""
+  }
+}
+
+///|
+fn golden_valley_building_civic_id(building : GoldenValleyBuilding) -> String {
+  match golden_valley_building_module_key(building) {
+    "vitality-tower" => "vitality-dashboard"
+    "story-radar" => "broadcast-tower"
+    key => key
   }
 }
 
@@ -45,6 +58,24 @@ fn golden_valley_runtime_agents_for_building(
   energy_valley_runtime_active_agents(state).filter(agent => {
     agent.buildingModuleKey.unwrap_or("") == key
   })
+}
+
+///|
+fn golden_valley_runtime_known_agents_for_building(
+  state : EnergyValleyRuntimeState,
+  building : GoldenValleyBuilding,
+) -> Array[EnergyValleyRuntimeAgent] {
+  let key = golden_valley_building_module_key(building)
+  if key.is_empty() {
+    return []
+  }
+  match state.projection {
+    Some(projection) =>
+      projection.agents.filter(agent => {
+        agent.buildingModuleKey.unwrap_or("") == key
+      })
+    None => []
+  }
 }
 
 ///|

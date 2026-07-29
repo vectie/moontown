@@ -13,6 +13,13 @@ fn golden_valley_nearest_road(
   seed : Int,
   building : GoldenValleyBuilding,
 ) -> (Int, Int)? {
+  match (building.entrance_x, building.entrance_y) {
+    (Some(x), Some(y)) =>
+      if golden_valley_walkable(model, seed, x, y) {
+        return Some((x, y))
+      }
+    _ => ()
+  }
   let candidates : Array[(Int, Int)] = []
   for x in (building.x - 1)..<=(building.x + building.width) {
     candidates.push((x, building.y - 1))
@@ -45,7 +52,18 @@ fn golden_valley_road_path(
   let seen : Map[String, Bool] = {}
   seen[golden_valley_tile_key(start.0, start.1)] = true
   let previous : Map[String, Int] = {}
-  let directions = [(0, -1), (1, 0), (0, 1), (-1, 0)]
+  // The reference graph comes from down-sampled map imagery, so curves often
+  // advance diagonally between neighboring semantic cells.
+  let directions = [
+    (0, -1),
+    (1, -1),
+    (1, 0),
+    (1, 1),
+    (0, 1),
+    (-1, 1),
+    (-1, 0),
+    (-1, -1),
+  ]
   let mut head = 0
   let mut reached = -1
   while head < queue.length() {
@@ -130,4 +148,40 @@ fn golden_valley_path_point(
       current.1 + (next.1 - current.1) * fraction,
     ),
   )
+}
+
+///|
+fn golden_valley_commute_point(
+  path : Array[(Double, Double)],
+  elapsed_seconds : Double,
+  speed : Double,
+  phase_offset : Double,
+  dwell_seconds : Double,
+) -> (Double, Double)? {
+  if path.length() < 2 {
+    return None
+  }
+  let route_distance = (path.length() - 1).to_double()
+  let cycle_distance = route_distance * 2.0 + dwell_seconds * speed * 2.0
+  let travelled = elapsed_seconds * speed + phase_offset
+  let cycle_index = (travelled / cycle_distance).floor()
+  let phase = travelled - cycle_index * cycle_distance
+  let dwell_distance = dwell_seconds * speed
+  if phase < route_distance {
+    golden_valley_path_point(path, phase)
+  } else if phase < route_distance + dwell_distance {
+    None
+  } else if phase < route_distance * 2.0 + dwell_distance {
+    let inbound = route_distance - (phase - route_distance - dwell_distance)
+    golden_valley_path_point(
+      path,
+      if inbound >= route_distance {
+        route_distance - 0.001
+      } else {
+        inbound
+      },
+    )
+  } else {
+    None
+  }
 }

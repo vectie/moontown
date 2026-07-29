@@ -13,6 +13,12 @@ The Wenyu Valley product plan is tracked separately in
 That document defines the programmable roadmap for turning the current town
 prototype into a MoonBook/MoonClaw-backed civic AI town.
 
+The two-frontend backend boundary is defined in
+[project/FRONTEND_ADAPTER_ARCHITECTURE.md](/Users/kq/Workspace/moontown/docs/project/FRONTEND_ADAPTER_ARCHITECTURE.md).
+Rabbita/Lepusa and Bunnia use separate HTTP adapters because their trust and
+projection needs differ, but shared use cases and durable product state remain
+single-source.
+
 The civic-building protocol correction is tracked in
 [WENYU_BUILDING_PROTOCOL_PLAN.md](/Users/kq/Workspace/moontown/docs/WENYU_BUILDING_PROTOCOL_PLAN.md).
 That document defines the next architecture step: each Wenyu building should

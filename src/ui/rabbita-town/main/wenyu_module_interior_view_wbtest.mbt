@@ -30,7 +30,18 @@ fn render_module_interior_overview_test_html(
 ///|
 fn module_interior_test_civic() -> WenyuTownModule {
   procedural_energy_valley_modules(
-    [wenyu_module_building_test_module()],
+    [
+      {
+        ..wenyu_module_building_test_module(),
+        district: "civic-core",
+        grid_x: 114,
+        grid_y: 66,
+        footprint_w: 7,
+        footprint_h: 5,
+        entrance_x: 114,
+        entrance_y: 71,
+      },
+    ],
     default_energy_valley_seed,
   )[0]
 }
@@ -112,4 +123,30 @@ test "module diagnostics stay collapsed behind semantic disclosure" {
   assert_true(html.contains("<summary"))
   assert_true(html.contains("Diagnostics"))
   assert_true(!html.contains("<details open"))
+}
+
+///|
+test "full module interior keeps the town seed and repaired work systems" {
+  let runtime = energy_valley_runtime_state_from_text(
+    energy_valley_runtime_test_projection_text(
+      "1970-01-01T00:01:40.000Z", "live",
+    ),
+    1,
+    110000.0,
+  )
+  let html = @rabbita.render_to_string(
+    @rabbita.static_cell(
+      render_wenyu_module_interior(
+        dashboard_test_dispatch(),
+        { ..init_model(), energy_valley_runtime: runtime },
+        module_interior_test_civic(),
+        [],
+        [],
+      ),
+    ),
+  )
+  assert_true(html.contains("Procedural work floor"))
+  assert_true(html.contains("Agent exchange"))
+  assert_true(html.contains("Recorded building work"))
+  assert_true(html.contains("seed=20260727"))
 }

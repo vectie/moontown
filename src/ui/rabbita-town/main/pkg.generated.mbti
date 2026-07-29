@@ -32,6 +32,8 @@ pub(all) struct ExactEnergyValleyBuilding {
   y : Int
   width : Int
   depth : Int
+  entrance_x : Int
+  entrance_y : Int
   floors : Int
   vitality : Double
 } derive(@debug.Debug)
@@ -39,12 +41,10 @@ pub(all) struct ExactEnergyValleyBuilding {
 pub(all) struct ExactEnergyValleyLandmarks {
   civic_core_x : Int
   civic_core_y : Int
-  lake_x : Double
-  lake_y : Double
-  lake_radius_x : Double
-  lake_radius_y : Double
-  bridge_rows : Array[Int]
-  main_river_mean_x : Double
+  river_crossing_y : Int
+  feeder_head_x : Int
+  bridge_columns : Array[Int]
+  south_arterial_y : Int
 } derive(@debug.Debug)
 
 pub(all) struct ExactEnergyValleyTile {
@@ -58,6 +58,8 @@ pub(all) struct ExactEnergyValleyTile {
   mut road_mask : Int?
   mut structure : String?
   mut structure_floors : Int?
+  mut structure_width : Int?
+  mut structure_depth : Int?
 } derive(@debug.Debug)
 
 pub(all) struct ExactEnergyValleyWorld {

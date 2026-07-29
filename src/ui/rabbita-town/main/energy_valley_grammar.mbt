@@ -33,6 +33,116 @@ fn energy_valley_grammar(seed : Int) -> EnergyValleyGrammar {
 }
 
 ///|
+fn energy_valley_road_pattern_shift_x(seed : Int) -> Int {
+  let normalized = normalized_energy_valley_seed(seed)
+  if normalized == default_energy_valley_seed {
+    0
+  } else {
+    energy_valley_signed_variation(normalized, 17, 3, 503, 3)
+  }
+}
+
+///|
+fn energy_valley_road_pattern_shift_y(seed : Int) -> Int {
+  let normalized = normalized_energy_valley_seed(seed)
+  if normalized == default_energy_valley_seed {
+    0
+  } else {
+    energy_valley_signed_variation(normalized, 23, 5, 509, 3)
+  }
+}
+
+///|
+fn energy_valley_reference_road_kind_at(
+  seed : Int,
+  grid_x : Int,
+  grid_y : Int,
+) -> String? {
+  reference_tile_kind_at(
+    grid_x - energy_valley_road_pattern_shift_x(seed),
+    grid_y - energy_valley_road_pattern_shift_y(seed),
+  )
+}
+
+///|
+fn energy_valley_reference_road_like_at(
+  seed : Int,
+  grid_x : Int,
+  grid_y : Int,
+) -> Bool {
+  match energy_valley_reference_road_kind_at(seed, grid_x, grid_y) {
+    Some("road-major") | Some("road") | Some("bridge") => true
+    _ => false
+  }
+}
+
+///|
+fn energy_valley_reference_road_gap_at(
+  seed : Int,
+  grid_x : Int,
+  grid_y : Int,
+) -> Bool {
+  // The semantic JSON is a down-sampled image graph. A one-cell hole between
+  // opposite road samples is a sampling seam, not a new street. Repair only
+  // those seams so the authored curves, loops, and feeders stay recognizable.
+  energy_valley_road_gap_from_neighbors(
+    energy_valley_reference_road_like_at(seed, grid_x, grid_y),
+    energy_valley_reference_road_like_at(seed, grid_x - 1, grid_y),
+    energy_valley_reference_road_like_at(seed, grid_x + 1, grid_y),
+    energy_valley_reference_road_like_at(seed, grid_x, grid_y - 1),
+    energy_valley_reference_road_like_at(seed, grid_x, grid_y + 1),
+    energy_valley_reference_road_like_at(seed, grid_x - 1, grid_y - 1),
+    energy_valley_reference_road_like_at(seed, grid_x + 1, grid_y + 1),
+    energy_valley_reference_road_like_at(seed, grid_x + 1, grid_y - 1),
+    energy_valley_reference_road_like_at(seed, grid_x - 1, grid_y + 1),
+  )
+}
+
+///|
+fn energy_valley_road_gap_from_neighbors(
+  center : Bool,
+  west : Bool,
+  east : Bool,
+  north : Bool,
+  south : Bool,
+  northwest : Bool,
+  southeast : Bool,
+  northeast : Bool,
+  southwest : Bool,
+) -> Bool {
+  !center &&
+  (
+    (west && east) ||
+    (north && south) ||
+    (northwest && southeast) ||
+    (northeast && southwest)
+  )
+}
+
+///|
+fn energy_valley_preserved_reference_kind(
+  seed : Int,
+  grid_x : Int,
+  grid_y : Int,
+) -> String? {
+  match reference_tile_kind_at(grid_x, grid_y) {
+    None => None
+    Some(kind) =>
+      // Roads are compiled as a coherent layer below. Letting this generic
+      // preservation pass randomly retain road cells would break corridors.
+      if kind == "road-major" || kind == "road" || kind == "bridge" {
+        None
+      } else if normalized_energy_valley_seed(seed) ==
+        default_energy_valley_seed ||
+        energy_valley_variation(seed, grid_x, grid_y, 499, 100) < 86 {
+        Some(kind)
+      } else {
+        None
+      }
+  }
+}
+
+///|
 fn energy_valley_main_river_center_x(seed : Int, grid_y : Int) -> Int {
   let grammar = energy_valley_grammar(seed)
   let segment = grid_y / 9
@@ -76,6 +186,10 @@ fn energy_valley_tributary_at(seed : Int, grid_x : Int, grid_y : Int) -> Bool {
 
 ///|
 fn energy_valley_lake_at(seed : Int, grid_x : Int, grid_y : Int) -> Bool {
+  match energy_valley_preserved_reference_kind(seed, grid_x, grid_y) {
+    Some(kind) => return kind == "lake"
+    None => ()
+  }
   let normalized = normalized_energy_valley_seed(seed)
   let central_x = 48 + energy_valley_signed_variation(normalized, 3, 2, 67, 3)
   let central_y = 43 + energy_valley_signed_variation(normalized, 3, 3, 71, 2)
@@ -94,6 +208,10 @@ fn energy_valley_lake_at(seed : Int, grid_x : Int, grid_y : Int) -> Bool {
 
 ///|
 fn energy_valley_water_at(seed : Int, grid_x : Int, grid_y : Int) -> Bool {
+  match energy_valley_preserved_reference_kind(seed, grid_x, grid_y) {
+    Some(kind) => return kind == "river" || kind == "lake"
+    None => ()
+  }
   energy_valley_main_river_at(seed, grid_x, grid_y) ||
   energy_valley_tributary_at(seed, grid_x, grid_y) ||
   energy_valley_lake_at(seed, grid_x, grid_y) ||
@@ -123,6 +241,10 @@ fn energy_valley_near_water(
 
 ///|
 fn energy_valley_wetland_at(seed : Int, grid_x : Int, grid_y : Int) -> Bool {
+  match energy_valley_preserved_reference_kind(seed, grid_x, grid_y) {
+    Some(kind) => return kind == "wetland"
+    None => ()
+  }
   !energy_valley_water_at(seed, grid_x, grid_y) &&
   (
     energy_valley_near_water(seed, grid_x, grid_y, 3) ||
@@ -134,9 +256,12 @@ fn energy_valley_wetland_at(seed : Int, grid_x : Int, grid_y : Int) -> Bool {
 }
 
 ///|
-fn energy_valley_major_road_at(seed : Int, grid_x : Int, grid_y : Int) -> Bool {
+fn energy_valley_fallback_major_road_at(
+  seed : Int,
+  grid_x : Int,
+  grid_y : Int,
+) -> Bool {
   let grammar = energy_valley_grammar(seed)
-  (reference_major_road_at(grid_x, grid_y) && grid_x <= 128 && grid_y <= 66) ||
   (abs_int(grid_y - grammar.north_road_y) <= 1 && grid_x >= 78 && grid_x <= 190) ||
   (abs_int(grid_y - grammar.civic_road_y) <= 1 && grid_x >= 76 && grid_x <= 194) ||
   (abs_int(grid_y - grammar.lake_road_y) <= 1 && grid_x >= 88 && grid_x <= 174) ||
@@ -161,9 +286,11 @@ fn energy_valley_major_road_at(seed : Int, grid_x : Int, grid_y : Int) -> Bool {
 }
 
 ///|
-fn energy_valley_local_road_at(seed : Int, grid_x : Int, grid_y : Int) -> Bool {
-  let reference_lane = reference_local_road_at(grid_x, grid_y) &&
-    energy_valley_variation(seed, grid_x / 6, grid_y / 5, 101, 4) != 0
+fn energy_valley_fallback_local_road_at(
+  seed : Int,
+  grid_x : Int,
+  grid_y : Int,
+) -> Bool {
   let north_lane = grid_x >= 96 &&
     grid_x <= 162 &&
     grid_y >= 43 &&
@@ -182,17 +309,87 @@ fn energy_valley_local_road_at(seed : Int, grid_x : Int, grid_y : Int) -> Bool {
     grid_y <= 124 &&
     energy_valley_mod(grid_x - energy_valley_variation(seed, 8, 1, 109, 7), 12) ==
     0
-  reference_lane || north_lane || lake_lane || east_lane
+  north_lane || lake_lane || east_lane
+}
+
+///|
+fn energy_valley_framework_major_road_at(
+  seed : Int,
+  grid_x : Int,
+  grid_y : Int,
+) -> Bool {
+  if !reference_tile_snapshot_ready() {
+    return energy_valley_fallback_major_road_at(seed, grid_x, grid_y)
+  }
+  match energy_valley_reference_road_kind_at(seed, grid_x, grid_y) {
+    Some("road-major") => true
+    _ =>
+      if energy_valley_reference_road_gap_at(seed, grid_x, grid_y) {
+        let mut major_neighbors = 0
+        for y in (grid_y - 1)..<=(grid_y + 1) {
+          for x in (grid_x - 1)..<=(grid_x + 1) {
+            if energy_valley_reference_road_kind_at(seed, x, y) ==
+              Some("road-major") {
+              major_neighbors += 1
+            }
+          }
+        }
+        major_neighbors >= 2
+      } else {
+        false
+      }
+  }
+}
+
+///|
+fn energy_valley_framework_local_road_at(
+  seed : Int,
+  grid_x : Int,
+  grid_y : Int,
+) -> Bool {
+  if !reference_tile_snapshot_ready() {
+    return energy_valley_fallback_local_road_at(seed, grid_x, grid_y)
+  }
+  match energy_valley_reference_road_kind_at(seed, grid_x, grid_y) {
+    Some("road") | Some("bridge") => true
+    _ =>
+      energy_valley_reference_road_gap_at(seed, grid_x, grid_y) &&
+      !energy_valley_framework_major_road_at(seed, grid_x, grid_y)
+  }
+}
+
+///|
+fn energy_valley_framework_road_at(
+  seed : Int,
+  grid_x : Int,
+  grid_y : Int,
+) -> Bool {
+  energy_valley_framework_major_road_at(seed, grid_x, grid_y) ||
+  energy_valley_framework_local_road_at(seed, grid_x, grid_y)
+}
+
+///|
+fn energy_valley_major_road_at(seed : Int, grid_x : Int, grid_y : Int) -> Bool {
+  energy_valley_framework_major_road_at(seed, grid_x, grid_y)
+}
+
+///|
+fn energy_valley_local_road_at(seed : Int, grid_x : Int, grid_y : Int) -> Bool {
+  energy_valley_framework_local_road_at(seed, grid_x, grid_y)
 }
 
 ///|
 fn energy_valley_road_at(seed : Int, grid_x : Int, grid_y : Int) -> Bool {
-  energy_valley_major_road_at(seed, grid_x, grid_y) ||
-  energy_valley_local_road_at(seed, grid_x, grid_y)
+  energy_valley_framework_road_at(seed, grid_x, grid_y)
 }
 
 ///|
 fn energy_valley_bridge_at(seed : Int, grid_x : Int, grid_y : Int) -> Bool {
+  match energy_valley_reference_road_kind_at(seed, grid_x, grid_y) {
+    Some("bridge") => return true
+    None => ()
+    _ => ()
+  }
   energy_valley_water_at(seed, grid_x, grid_y) &&
   (
     energy_valley_road_at(seed, grid_x, grid_y) ||
@@ -232,12 +429,20 @@ fn energy_valley_district_at(seed : Int, grid_x : Int, grid_y : Int) -> String {
 
 ///|
 fn energy_valley_forest_at(seed : Int, grid_x : Int, grid_y : Int) -> Bool {
+  match energy_valley_preserved_reference_kind(seed, grid_x, grid_y) {
+    Some(kind) => return kind == "forest"
+    None => ()
+  }
   let reference_weight = if reference_forest_at(grid_x, grid_y) { 3 } else { 0 }
   energy_valley_variation(seed, grid_x, grid_y, 113, 7) + reference_weight >= 6
 }
 
 ///|
 fn energy_valley_farm_at(seed : Int, grid_x : Int, grid_y : Int) -> Bool {
+  match energy_valley_preserved_reference_kind(seed, grid_x, grid_y) {
+    Some(kind) => return kind == "farm" || kind == "field"
+    None => ()
+  }
   let reference_weight = if reference_farm_at(grid_x, grid_y) { 2 } else { 0 }
   let district = energy_valley_district_at(seed, grid_x, grid_y)
   (district == "west-community" || district == "north-innovation") &&
@@ -250,52 +455,64 @@ fn energy_valley_farm_at(seed : Int, grid_x : Int, grid_y : Int) -> Bool {
 fn energy_valley_tile_kind_at(seed : Int, grid_x : Int, grid_y : Int) -> String {
   if energy_valley_bridge_at(seed, grid_x, grid_y) {
     "bridge"
-  } else if energy_valley_water_at(seed, grid_x, grid_y) {
-    if energy_valley_lake_at(seed, grid_x, grid_y) {
-      "lake"
-    } else {
-      "river"
-    }
-  } else if energy_valley_road_at(seed, grid_x, grid_y) {
-    if energy_valley_major_road_at(seed, grid_x, grid_y) {
+  } else if energy_valley_framework_road_at(seed, grid_x, grid_y) {
+    if energy_valley_framework_major_road_at(seed, grid_x, grid_y) {
       "road-major"
     } else {
       "road"
     }
-  } else if energy_valley_wetland_at(seed, grid_x, grid_y) {
-    "wetland"
   } else {
-    let district = energy_valley_district_at(seed, grid_x, grid_y)
-    if district == "civic-core" {
-      if energy_valley_variation(seed, grid_x, grid_y, 131, 5) <= 1 {
-        "campus"
+    match energy_valley_preserved_reference_kind(seed, grid_x, grid_y) {
+      Some(kind) => return kind
+      None => ()
+    }
+    if energy_valley_water_at(seed, grid_x, grid_y) {
+      if energy_valley_lake_at(seed, grid_x, grid_y) {
+        "lake"
       } else {
-        "urban-dense"
+        "river"
       }
-    } else if district == "lake-exchange" ||
-      district == "south-showcase" ||
-      district == "east-research" {
-      if energy_valley_variation(seed, grid_x, grid_y, 137, 4) == 0 {
-        "campus"
+    } else if energy_valley_road_at(seed, grid_x, grid_y) {
+      if energy_valley_major_road_at(seed, grid_x, grid_y) {
+        "road-major"
       } else {
-        "urban"
+        "road"
       }
-    } else if energy_valley_farm_at(seed, grid_x, grid_y) {
-      if energy_valley_variation(seed, grid_x, grid_y, 139, 3) == 0 {
-        "field"
-      } else {
-        "farm"
-      }
-    } else if energy_valley_forest_at(seed, grid_x, grid_y) {
-      "forest"
-    } else if energy_valley_variation(seed, grid_x, grid_y, 149, 19) == 0 {
-      "grass-flower-pink"
-    } else if energy_valley_variation(seed, grid_x, grid_y, 151, 23) == 0 {
-      "grass-flower-yellow"
-    } else if energy_valley_variation(seed, grid_x, grid_y, 157, 4) == 0 {
-      "grass-light"
+    } else if energy_valley_wetland_at(seed, grid_x, grid_y) {
+      "wetland"
     } else {
-      "grass"
+      let district = energy_valley_district_at(seed, grid_x, grid_y)
+      if district == "civic-core" {
+        if energy_valley_variation(seed, grid_x, grid_y, 131, 5) <= 1 {
+          "campus"
+        } else {
+          "urban-dense"
+        }
+      } else if district == "lake-exchange" ||
+        district == "south-showcase" ||
+        district == "east-research" {
+        if energy_valley_variation(seed, grid_x, grid_y, 137, 4) == 0 {
+          "campus"
+        } else {
+          "urban"
+        }
+      } else if energy_valley_farm_at(seed, grid_x, grid_y) {
+        if energy_valley_variation(seed, grid_x, grid_y, 139, 3) == 0 {
+          "field"
+        } else {
+          "farm"
+        }
+      } else if energy_valley_forest_at(seed, grid_x, grid_y) {
+        "forest"
+      } else if energy_valley_variation(seed, grid_x, grid_y, 149, 19) == 0 {
+        "grass-flower-pink"
+      } else if energy_valley_variation(seed, grid_x, grid_y, 151, 23) == 0 {
+        "grass-flower-yellow"
+      } else if energy_valley_variation(seed, grid_x, grid_y, 157, 4) == 0 {
+        "grass-light"
+      } else {
+        "grass"
+      }
     }
   }
 }

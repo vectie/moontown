@@ -12,5 +12,7 @@ Root policy:
   [`ENERGY_VALLEY_PROCEDURAL_MAP.md`](ENERGY_VALLEY_PROCEDURAL_MAP.md).
 - Keep the Energy Valley runtime-work boundary in
   [`ENERGY_VALLEY_REAL_WORK.md`](ENERGY_VALLEY_REAL_WORK.md).
+- Keep release-specific installation and verification evidence in the
+  versioned `release-notes-v*.md` files.
 - Keep the root limited to module metadata, entry README files, license,
   `scripts/`, `assets/`, generated runtime directories, and repo tooling.

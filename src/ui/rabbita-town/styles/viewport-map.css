@@ -1098,6 +1098,84 @@
   box-shadow: 0 0 0 5px rgba(255, 125, 110, 0.16);
 }
 
+.station-stale {
+  border-color: rgba(100, 116, 139, 0.28);
+  background: rgba(248, 250, 252, 0.9);
+}
+
+.station-stale .module-work-station-mark {
+  background: #94a3b8;
+  box-shadow: 0 0 0 5px rgba(148, 163, 184, 0.14);
+}
+
+.module-agent-exchange {
+  margin: 18px 24px;
+  padding: 16px;
+  border: 1px solid rgba(36, 133, 114, 0.22);
+  border-radius: 12px;
+  background:
+    radial-gradient(circle at 8% 20%, rgba(98, 201, 141, 0.14), transparent 30%),
+    linear-gradient(135deg, rgba(242, 255, 249, 0.96), rgba(239, 249, 255, 0.94));
+  box-shadow: 0 14px 34px rgba(35, 82, 125, 0.08);
+}
+
+.module-agent-exchange-head h2 {
+  margin: 3px 0 0;
+  font-family: inherit;
+  font-size: 20px;
+}
+
+.module-runtime-agent-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(210px, 1fr));
+  gap: 10px;
+}
+
+.module-runtime-agent-card {
+  min-width: 0;
+  padding: 12px;
+  border: 1px solid rgba(36, 133, 114, 0.2);
+  border-radius: 10px;
+  background: rgba(255, 255, 255, 0.9);
+}
+
+.module-runtime-agent-head {
+  display: flex;
+  justify-content: space-between;
+  gap: 10px;
+  align-items: center;
+  font-size: 13px;
+}
+
+.module-runtime-agent-head span {
+  padding: 3px 7px;
+  border-radius: 999px;
+  background: rgba(98, 201, 141, 0.14);
+  color: #17664d;
+  font-size: 10px;
+  font-weight: 900;
+  text-transform: uppercase;
+}
+
+.module-runtime-agent-card p {
+  margin: 7px 0 0;
+  color: var(--muted);
+  font-size: 11px;
+  font-weight: 800;
+  line-height: 1.4;
+}
+
+.module-runtime-agent-work {
+  overflow-wrap: anywhere;
+}
+
+.module-agent-exchange-foot {
+  margin: 12px 0 0;
+  color: var(--muted);
+  font-size: 11px;
+  font-weight: 800;
+}
+
 .module-room-fixtures {
   margin-top: 12px;
   border-top: 1px solid rgba(28, 73, 122, 0.14);
@@ -1608,6 +1686,10 @@
   }
 
   .module-work-floor {
+    margin: 14px;
+  }
+
+  .module-agent-exchange {
     margin: 14px;
   }
 

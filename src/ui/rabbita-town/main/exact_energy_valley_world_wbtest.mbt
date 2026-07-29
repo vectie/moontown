@@ -15,228 +15,340 @@ fn exact_energy_valley_count_terrain(
 }
 
 ///|
-fn exact_energy_valley_count_structure(
+fn exact_energy_valley_is_water_or_bridge(
   world : ExactEnergyValleyWorld,
-  structure : String,
-) -> Int {
-  let mut count = 0
-  for row in world.tiles {
-    for tile in row {
-      if tile.structure == Some(structure) {
-        count += 1
-      }
-    }
+  x : Int,
+  y : Int,
+) -> Bool {
+  match world.terrain_at(x, y) {
+    Some("water") | Some("bridge") => true
+    _ => false
   }
-  count
 }
 
 ///|
-fn exact_energy_valley_structure_floor_sum(
+fn exact_energy_valley_has_water_near(
   world : ExactEnergyValleyWorld,
-) -> Int {
-  let mut floors = 0
-  for row in world.tiles {
-    for tile in row {
-      match tile.structure_floors {
-        Some(value) => floors += value
-        None => ()
+  x : Int,
+  y : Int,
+  radius : Int,
+) -> Bool {
+  for yy in (y - radius)..<=(y + radius) {
+    for xx in (x - radius)..<=(x + radius) {
+      if exact_energy_valley_is_water_or_bridge(world, xx, yy) {
+        return true
       }
     }
   }
-  floors
+  false
 }
 
 ///|
-fn exact_energy_valley_building_signature(
+fn exact_energy_valley_building_has_road(
+  world : ExactEnergyValleyWorld,
   building : ExactEnergyValleyBuilding,
-) -> String {
-  "\{building.module_key}:\{building.archetype}@\{building.x},\{building.y}/\{building.width}x\{building.depth}"
+) -> Bool {
+  for x in (building.x - 1)..<=(building.x + building.width) {
+    for y in (building.y - 1)..<=(building.y + building.depth) {
+      let edge = x == building.x - 1 ||
+        x == building.x + building.width ||
+        y == building.y - 1 ||
+        y == building.y + building.depth
+      if edge {
+        match world.terrain_at(x, y) {
+          Some("road") | Some("bridge") => return true
+          _ => ()
+        }
+      }
+    }
+  }
+  false
 }
 
 ///|
-test "exact Energy Valley Mulberry32 matches preserved JavaScript bits" {
-  let default_random : ExactEnergyValleyRandom = { state: 20260727U }
-  let default_expected : Array[UInt] = [
-    2577721268U, 1799220241U, 3008992074U, 1149792506U, 1760247048U, 3552962523U,
-    4225036269U, 3418685256U, 4226992601U, 1397937867U, 3141629168U, 1124798345U,
-    2382391260U, 64177641U, 3231606880U, 3411815218U,
+test "Wenyu building kinds bridge into new-system structure types" {
+  let source_profiles = [
+    (WenyuLowrise, "lowrise"),
+    (WenyuRow, "row"),
+    (WenyuBlock, "block"),
+    (WenyuTower, "tower"),
+    (WenyuCourtyard, "courtyard"),
+    (WenyuCampus, "campus"),
+    (WenyuCivic, "civic"),
+    (WenyuIndustrial, "industrial"),
   ]
-  for expected in default_expected {
-    assert_eq(default_random.next_u32(), expected)
+  for index in 0..<source_profiles.length() {
+    let (source_kind, expected) = source_profiles[index]
+    let cell : WenyuReferenceBuildingCell = {
+      source_kind,
+      component_index: index,
+      anchor_x: 120 + index,
+      anchor_y: 70,
+    }
+    match
+      wenyu_reference_structure_for_cell(
+        20260727,
+        if index < 5 {
+          "urban-dense"
+        } else {
+          "campus"
+        },
+        cell,
+      ) {
+      Some((kind, floors)) => {
+        assert_eq(kind, expected)
+        assert_true(floors >= 1)
+      }
+      None => fail("expected typed Wenyu structure bridge")
+    }
   }
-  let seed_one_random : ExactEnergyValleyRandom = { state: 1U }
-  let seed_one_expected : Array[UInt] = [
-    2693262067U, 11749833U, 2265367787U, 4213581821U, 4159151403U, 1207330352U, 2632122864U,
-    3095568220U, 1828783984U, 4272732017U, 1955374602U, 2099329838U, 596715197U,
-    1734070562U, 1063107040U, 663542962U,
+  let non_buildable : WenyuReferenceBuildingCell = {
+    source_kind: WenyuBlock,
+    component_index: 1,
+    anchor_x: 120,
+    anchor_y: 70,
+  }
+  assert_eq(
+    wenyu_reference_structure_for_cell(20260727, "road-major", non_buildable),
+    None,
+  )
+}
+
+///|
+test "procedural fallback remains available beyond the Wenyu reference seed" {
+  let profiles = [
+    ("urban-dense", ["tower", "block", "row", "courtyard"]),
+    ("urban", ["lowrise", "row", "courtyard"]),
+    ("campus", ["campus", "civic", "industrial"]),
   ]
-  for expected in seed_one_expected {
-    assert_eq(seed_one_random.next_u32(), expected)
+  for profile in profiles {
+    let mut generated = 0
+    for y in 0..<18 {
+      for x in 0..<18 {
+        match
+          exact_energy_valley_procedural_structure(20260727, x, y, profile.0) {
+          Some((kind, floors)) => {
+            assert_true(profile.1.contains(kind))
+            assert_true(floors >= 1)
+            generated += 1
+          }
+          None => ()
+        }
+      }
+    }
+    assert_true(generated > 0)
+  }
+  assert_eq(
+    exact_energy_valley_procedural_structure(20260727, 120, 70, "road-major"),
+    None,
+  )
+  assert_eq(
+    exact_energy_valley_procedural_structure(20260727, 121, 71, "urban-dense"),
+    exact_energy_valley_procedural_structure(20260727, 121, 71, "urban-dense"),
+  )
+}
+
+///|
+fn exact_energy_valley_assert_aligned_buildings(
+  world : ExactEnergyValleyWorld,
+) -> Unit raise {
+  let mut ambient_count = 0
+  for row in world.tiles {
+    for tile in row {
+      if tile.structure is Some(_) {
+        ambient_count += 1
+        assert_true(tile.terrain == "urban" || tile.terrain == "plaza")
+        assert_true(tile.building_id is Some(_))
+        assert_true(tile.structure_width.unwrap_or(0) >= 3)
+        assert_true(tile.structure_depth.unwrap_or(0) >= 3)
+      }
+    }
+  }
+  assert_true(ambient_count >= 20)
+  assert_true(ambient_count <= 300)
+  for building in world.buildings {
+    for y in building.y..<(building.y + building.depth) {
+      for x in building.x..<(building.x + building.width) {
+        let tile = world.tiles[y][x]
+        assert_eq(tile.terrain, "plaza")
+        assert_eq(tile.base_terrain, "campus")
+        assert_eq(tile.generated_terrain, "campus")
+        assert_eq(tile.building_id, Some(building.id))
+        assert_eq(tile.structure, None)
+        assert_eq(tile.structure_floors, None)
+        assert_eq(tile.structure_width, None)
+        assert_eq(tile.structure_depth, None)
+      }
+    }
   }
 }
 
 ///|
-test "exact Energy Valley default seed matches preserved world" {
+test "Wenyu semantic evidence compiles into readable gameplay parcels" {
+  let world = exact_energy_valley_generate_default()
+  let mut footprint_count = 0
+  for y in 0..<world.rows {
+    for x in 0..<world.cols {
+      match world.structure_footprint_at(x, y) {
+        None => ()
+        Some((kind, floors, width, depth)) => {
+          footprint_count += 1
+          assert_true(
+            [
+              "lowrise", "row", "block", "tower", "courtyard", "campus", "civic",
+              "industrial",
+            ].contains(kind),
+          )
+          assert_true(floors >= 1)
+          assert_true(width >= 3)
+          assert_true(depth >= 3)
+          let id = world.tiles[y][x].building_id
+          assert_true(id is Some(_))
+          for yy in y..<(y + depth) {
+            for xx in x..<(x + width) {
+              let tile = world.tiles[yy][xx]
+              assert_eq(tile.building_id, id)
+              assert_true(tile.terrain == "urban" || tile.terrain == "plaza")
+            }
+          }
+        }
+      }
+    }
+  }
+  assert_true(footprint_count >= 40)
+  assert_true(footprint_count <= 300)
+}
+
+///|
+test "editor buildings snap old two-cell lots onto the planning lattice" {
+  match golden_valley_custom_building(ResearchTowerTool, 17, 22, 1) {
+    Some(building) => {
+      assert_eq((building.x, building.y), (15, 21))
+      assert_eq((building.width, building.depth), (6, 6))
+    }
+    None => fail("expected custom building")
+  }
+}
+
+///|
+test "default canvas world preserves the large Wenyu reference topology" {
   let world = exact_energy_valley_generate_default()
   assert_eq(world.seed, 20260727U)
-  assert_eq(world.cols, 56)
-  assert_eq(world.rows, 52)
-  assert_eq(world.tiles.length(), 52)
-  assert_eq(world.tiles[0].length(), 56)
-  assert_eq(world.buildings.length(), 13)
-  assert_eq(world.landmarks.civic_core_x, 21)
-  assert_eq(world.landmarks.civic_core_y, 22)
-  assert_eq(world.landmarks.bridge_rows, [11, 27, 43])
+  assert_eq((world.cols, world.rows), (256, 144))
+  assert_eq(world.tiles.length(), 144)
+  assert_eq(world.tiles[0].length(), 256)
+  assert_eq(world.buildings.length(), 16)
   assert_true(
-    (world.landmarks.main_river_mean_x - 43.9817156533245).abs() <
-    0.000000000001,
+    world.landmarks.river_crossing_y >= 70 &&
+    world.landmarks.river_crossing_y <= 74,
   )
   assert_true(
-    (world.landmarks.lake_x - 29.065508878976107).abs() < 0.000000000001,
+    world.landmarks.feeder_head_x >= 0 &&
+    world.landmarks.feeder_head_x < world.cols,
   )
+  assert_true(world.landmarks.bridge_columns.length() > 0)
   assert_true(
-    (world.landmarks.lake_y - 32.452520224032924).abs() < 0.000000000001,
+    world.landmarks.south_arterial_y >= 104 &&
+    world.landmarks.south_arterial_y <= 108,
   )
-  let expected_buildings = [
-    "town-shell:town-shell@17,23/3x3", "vitality-tower:vitality@24,15/2x2", "policy-hall:policy@13,24/2x2",
-    "contest-express:contest@19,14/2x2", "story-radar:radar@10,9/2x2", "resident-twins:twins@9,30/2x2",
-    "resident-twins-b:twins@11,36/2x2", "ai-garden:ai-garden@20,28/3x3", "social-square:social@34,39/3x3",
-    "energy-lab:c-lab@33,28/2x2", "talent-avenue:talent@24,40/3x2", "valley-market:market@28,40/3x2",
-    "talent-flat:c-home@38,39/2x2",
-  ]
-  for index in 0..<expected_buildings.length() {
-    assert_eq(
-      exact_energy_valley_building_signature(world.buildings[index]),
-      expected_buildings[index],
-    )
+  for y in [12, 40, 72, 106, 136] {
+    let river_x = energy_valley_main_river_center_x(20260727, y)
+    assert_true(exact_energy_valley_has_water_near(world, river_x, y, 2))
   }
   assert_true(
-    (world.buildings[0].vitality - 71.34263656567782).abs() < 0.000000000001,
+    exact_energy_valley_has_water_near(
+      world,
+      world.landmarks.feeder_head_x,
+      7,
+      2,
+    ),
   )
+  let bridge_x = world.landmarks.bridge_columns[0]
   assert_true(
-    (world.buildings[7].vitality - 67.28747681248933).abs() < 0.000000000001,
+    world.terrain_at(bridge_x, world.landmarks.river_crossing_y) ==
+    Some("bridge"),
   )
-  assert_true(
-    (world.buildings[12].vitality - 84.40938349114731).abs() < 0.000000000001,
-  )
-  assert_eq(exact_energy_valley_count_terrain(world, "bridge"), 11)
-  assert_eq(exact_energy_valley_count_terrain(world, "field"), 70)
-  assert_eq(exact_energy_valley_count_terrain(world, "forest"), 671)
-  assert_eq(exact_energy_valley_count_terrain(world, "grass"), 773)
-  assert_eq(exact_energy_valley_count_terrain(world, "meadow"), 189)
-  assert_eq(exact_energy_valley_count_terrain(world, "plaza"), 95)
-  assert_eq(exact_energy_valley_count_terrain(world, "road"), 429)
-  assert_eq(exact_energy_valley_count_terrain(world, "urban"), 147)
-  assert_eq(exact_energy_valley_count_terrain(world, "water"), 371)
-  assert_eq(exact_energy_valley_count_terrain(world, "wetland"), 156)
-  assert_eq(exact_energy_valley_count_structure(world, "campus"), 12)
-  assert_eq(exact_energy_valley_count_structure(world, "courtyard"), 22)
-  assert_eq(exact_energy_valley_count_structure(world, "lowrise"), 69)
-  assert_eq(exact_energy_valley_count_structure(world, "row"), 33)
-  assert_eq(exact_energy_valley_count_structure(world, "tower"), 11)
-  assert_eq(exact_energy_valley_structure_floor_sum(world), 338)
-  assert_eq(world.tiles[0][0].terrain, "forest")
-  assert_true(
-    (world.tiles[0][0].variation - 0.8033072350081056).abs() < 0.000000000000001,
-  )
-  assert_eq(world.tiles[11][11].terrain, "road")
-  assert_eq(world.tiles[11][11].road_mask, Some(10))
-  assert_eq(world.tiles[32][29].terrain, "water")
-  assert_eq(world.tiles[23][17].building_id, Some("civic-town-shell"))
-  assert_eq(world.tiles[28][20].building_id, Some("civic-ai-garden"))
-  assert_eq(world.structure_at(15, 5), Some(("row", 3)))
-  assert_eq(world.tiles[11][43].terrain, "bridge")
-  assert_eq(world.tiles[11][43].road_mask, Some(10))
+  for x in [116, 140, 168, 190] {
+    assert_eq(
+      world.terrain_at(x, world.landmarks.south_arterial_y),
+      Some("road"),
+    )
+  }
+  assert_true(exact_energy_valley_count_terrain(world, "water") > 1000)
+  assert_true(exact_energy_valley_count_terrain(world, "forest") > 500)
+  for building in world.buildings {
+    assert_true(exact_energy_valley_building_has_road(world, building))
+  }
+  exact_energy_valley_assert_aligned_buildings(world)
 }
 
 ///|
-test "exact Energy Valley seed one preserves grammar and safe civic placement" {
-  let world = exact_energy_valley_generate(1U)
-  assert_eq(world.seed, 1U)
-  assert_eq(world.landmarks.civic_core_x, 20)
-  assert_eq(world.landmarks.civic_core_y, 23)
-  assert_eq(world.landmarks.bridge_rows, [12, 25, 42])
+test "Wenyu road compiler repairs only one-cell gaps in the source pattern" {
   assert_true(
-    (world.landmarks.main_river_mean_x - 42.34331050887704).abs() <
-    0.000000000001,
+    energy_valley_road_gap_from_neighbors(
+      false, true, true, false, false, false, false, false, false,
+    ),
   )
   assert_true(
-    (world.landmarks.lake_x - 28.794675308093428).abs() < 0.000000000001,
+    energy_valley_road_gap_from_neighbors(
+      false, false, false, false, false, true, true, false, false,
+    ),
   )
-  assert_true(
-    (world.landmarks.lake_y - 30.777390856295824).abs() < 0.000000000001,
+  assert_false(
+    energy_valley_road_gap_from_neighbors(
+      true, true, true, true, true, true, true, true, true,
+    ),
   )
-  let expected_buildings = [
-    "town-shell:town-shell@16,19/3x3", "vitality-tower:vitality@24,18/2x2", "policy-hall:policy@12,26/2x2",
-    "contest-express:contest@17,14/2x2", "story-radar:radar@10,10/2x2", "resident-twins:twins@9,31/2x2",
-    "resident-twins-b:twins@11,36/2x2", "ai-garden:ai-garden@19,29/3x3", "social-square:social@26,35/3x3",
-    "energy-lab:c-lab@32,26/2x2", "talent-avenue:talent@24,40/3x2", "valley-market:market@32,40/3x2",
-    "talent-flat:c-home@33,36/2x2",
-  ]
-  for index in 0..<expected_buildings.length() {
-    assert_eq(
-      exact_energy_valley_building_signature(world.buildings[index]),
-      expected_buildings[index],
-    )
-  }
-  assert_true(
-    (world.buildings[0].vitality - 78.4578698547557).abs() < 0.000000000001,
+  assert_false(
+    energy_valley_road_gap_from_neighbors(
+      false, true, false, true, false, false, false, false, false,
+    ),
   )
-  assert_true(
-    (world.buildings[7].vitality - 74.13718328345567).abs() < 0.000000000001,
-  )
-  assert_true(
-    (world.buildings[12].vitality - 70.20165189635009).abs() < 0.000000000001,
-  )
-  assert_eq(exact_energy_valley_count_terrain(world, "bridge"), 13)
-  assert_eq(exact_energy_valley_count_terrain(world, "field"), 92)
-  assert_eq(exact_energy_valley_count_terrain(world, "forest"), 643)
-  assert_eq(exact_energy_valley_count_terrain(world, "grass"), 823)
-  assert_eq(exact_energy_valley_count_terrain(world, "meadow"), 187)
-  assert_eq(exact_energy_valley_count_terrain(world, "plaza"), 83)
-  assert_eq(exact_energy_valley_count_terrain(world, "road"), 422)
-  assert_eq(exact_energy_valley_count_terrain(world, "urban"), 136)
-  assert_eq(exact_energy_valley_count_terrain(world, "water"), 358)
-  assert_eq(exact_energy_valley_count_terrain(world, "wetland"), 155)
-  assert_eq(exact_energy_valley_count_structure(world, "campus"), 13)
-  assert_eq(exact_energy_valley_count_structure(world, "courtyard"), 12)
-  assert_eq(exact_energy_valley_count_structure(world, "lowrise"), 79)
-  assert_eq(exact_energy_valley_count_structure(world, "row"), 26)
-  assert_eq(exact_energy_valley_count_structure(world, "tower"), 6)
-  assert_eq(exact_energy_valley_structure_floor_sum(world), 292)
-  assert_eq(world.tiles[0][0].terrain, "grass")
-  assert_true(
-    (world.tiles[0][0].variation - 0.763514569029212).abs() < 0.000000000000001,
-  )
-  assert_eq(world.tiles[12][12].terrain, "road")
-  assert_eq(world.tiles[12][12].road_mask, Some(15))
-  assert_eq(world.tiles[31][29].terrain, "water")
-  assert_eq(world.tiles[19][16].building_id, Some("civic-town-shell"))
-  assert_eq(world.tiles[29][19].building_id, Some("civic-ai-garden"))
-  assert_eq(world.structure_at(15, 5), Some(("row", 2)))
-  assert_eq(world.tiles[12][44].terrain, "bridge")
-  assert_eq(world.tiles[12][44].road_mask, Some(10))
 }
 
 ///|
-test "zero seed normalizes to canonical Energy Valley" {
+test "seeds vary the large plan without losing Wenyu spatial invariants" {
+  let canonical = exact_energy_valley_generate_default()
+  let variant = exact_energy_valley_generate(1U)
+  assert_eq(variant.buildings.length(), 16)
+  assert_true(
+    canonical.landmarks.river_crossing_y != variant.landmarks.river_crossing_y ||
+    canonical.landmarks.civic_core_x != variant.landmarks.civic_core_x ||
+    canonical.landmarks.south_arterial_y != variant.landmarks.south_arterial_y ||
+    canonical.buildings[0].x != variant.buildings[0].x ||
+    canonical.buildings[0].y != variant.buildings[0].y,
+  )
+  for y in [12, 40, 72, 106, 136] {
+    let river_x = energy_valley_main_river_center_x(1, y)
+    assert_true(exact_energy_valley_has_water_near(variant, river_x, y, 2))
+  }
+  for building in variant.buildings {
+    assert_true(exact_energy_valley_building_has_road(variant, building))
+  }
+  for seed in [2U, 7U, 42U, 2026U] {
+    let generated = exact_energy_valley_generate(seed)
+    assert_eq(generated.buildings.length(), 16)
+    for y in [12, 72, 136] {
+      let river_x = energy_valley_main_river_center_x(
+        seed.reinterpret_as_int(),
+        y,
+      )
+      assert_true(exact_energy_valley_has_water_near(generated, river_x, y, 2))
+    }
+    for building in generated.buildings {
+      assert_true(exact_energy_valley_building_has_road(generated, building))
+    }
+    exact_energy_valley_assert_aligned_buildings(generated)
+  }
+}
+
+///|
+test "zero and signed seeds retain normalization behavior" {
   let world = exact_energy_valley_generate(0U)
   assert_eq(world.seed, exact_energy_valley_default_seed())
-  assert_eq(
-    world
-    .building_for_module("ai-garden")
-    .map(fn(building) { (building.x, building.y) }),
-    Some((20, 28)),
-  )
   assert_eq(world.terrain_at(-1, 0), None)
-  assert_eq(world.variation_at(56, 0), None)
-  assert_eq(world.structure_at(0, 0), None)
+  assert_eq(world.variation_at(256, 0), None)
   let negative = exact_energy_valley_generate_int(-1)
   assert_eq(negative.seed, 1U)
-  assert_eq(
-    negative
-    .building_for_module("ai-garden")
-    .map(fn(building) { (building.x, building.y) }),
-    Some((19, 29)),
-  )
+  assert_eq(negative.buildings.length(), 16)
 }

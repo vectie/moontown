@@ -95,6 +95,18 @@ export const WENYU_REFERENCE_LABELS_SNAPSHOT = {
   fallback: null,
 }
 
+export const WENYU_REFERENCE_BUILDINGS_SNAPSHOT = {
+  url: './tilemap/wenyu_reference_buildings.json',
+  jsonGlobal: '__wenyuReferenceBuildings',
+  fallback: null,
+}
+
+export const WENYU_REFERENCE_ROADS_SNAPSHOT = {
+  url: './tilemap/wenyu_reference_roads.json',
+  jsonGlobal: '__wenyuReferenceRoadGraph',
+  fallback: null,
+}
+
 export const WENYU_TOWN_MODULES_SNAPSHOT = {
   url: './tilemap/modules/wenyu-town-modules.json',
   jsonGlobal: '__wenyuTownModulesJson',

@@ -34,14 +34,6 @@ fn operator_policy_path() -> String {
 }
 
 ///|
-let operator_nonce_rng : @random.Rand = @random.Rand::chacha8()
-
-///|
-fn operator_nonce() -> String {
-  operator_nonce_rng.uint64().to_string(radix=16)
-}
-
-///|
 fn iso_timestamp(timestamp_ms : UInt64) -> String {
   let seconds = (timestamp_ms / 1000UL).reinterpret_as_int64()
   let nanosecond = (timestamp_ms % 1000UL).to_int() * 1000000
@@ -349,49 +341,6 @@ fn json_string_field(fields : Map[String, Json], key : String) -> String {
 }
 
 ///|
-fn json_string_list_field(
-  fields : Map[String, Json],
-  key : String,
-) -> Array[String] {
-  match fields.get(key) {
-    Some(Array(values)) =>
-      values.filter_map(value => {
-        match value {
-          String(text) if !text.trim().is_empty() =>
-            Some(text.trim().to_owned())
-          _ => None
-        }
-      })
-    Some(String(text)) => {
-      let values : Array[String] = []
-      for raw in text.replace(old=",", new="\n").split("\n") {
-        let value = raw.trim().to_owned()
-        if !value.is_empty() {
-          values.push(value)
-        }
-      }
-      values
-    }
-    _ => []
-  }
-}
-
-///|
-async fn operator_source_policy() -> String {
-  let path = operator_policy_path()
-  let parsed = @json.parse(@support.read_text_or_empty(path))
-  let fields = match parsed {
-    Object(fields) => fields
-    _ => fail("operator policy must be a JSON object: \{path}")
-  }
-  let source_policy = json_string_field(fields, "standing_goal_source_policy")
-  if source_policy.is_empty() {
-    fail("operator policy is missing standing_goal_source_policy: \{path}")
-  }
-  source_policy
-}
-
-///|
 fn json_int_field(
   fields : Map[String, Json],
   key : String,
@@ -428,249 +377,6 @@ fn safe_slug(value : String) -> String {
 }
 
 ///|
-async fn append_operator_request(request : Json) -> Unit {
-  let path = state_root() + "/operator-requests/requests.jsonl"
-  @fs.write_file(
-    path,
-    request.stringify() + "\n",
-    create_mode=OpenOrCreate,
-    append=true,
-  )
-}
-
-///|
-async fn persist_operator_request(body : String) -> Json {
-  let parsed = @json.parse(body)
-  let fields = match parsed {
-    Object(fields) => fields
-    _ => fail("request body must be a JSON object")
-  }
-  let title = json_string_field(fields, "title")
-  let prompt = json_string_field(fields, "prompt")
-  if title.is_empty() || prompt.is_empty() {
-    fail("title and prompt are required")
-  }
-  let target_book_id = {
-    let value = json_string_field(fields, "target_book_id")
-    if value.is_empty() {
-      "research-opc"
-    } else {
-      safe_slug(value)
-    }
-  }
-  let cadence_ticks = json_int_field(fields, "cadence_ticks", 60, 1, 2147483647)
-  let quality_threshold = json_int_field(
-    fields, "quality_threshold", 85, 1, 100,
-  )
-  let source_policy = operator_source_policy()
-  let timestamp = @env.now()
-  let slug = safe_slug(title)
-  let nonce = operator_nonce()
-  let request_id = "operator-\{timestamp}-\{nonce}-\{slug}"
-  let explicit_goal_id = json_string_field(fields, "goal_id")
-  let goal_id = if explicit_goal_id.is_empty() {
-    "standing-goal-\{timestamp}-\{nonce}-\{slug}"
-  } else {
-    safe_slug(explicit_goal_id)
-  }
-  let request : Json = {
-    "id": request_id,
-    "status": "accepted",
-    "created_at": iso_timestamp(timestamp),
-    "title": title,
-    "prompt": prompt,
-    "target_book_id": target_book_id,
-    "cadence_ticks": cadence_ticks,
-    "source_policy": source_policy,
-    "quality_threshold": quality_threshold,
-    "standing_goal_id": goal_id,
-  }
-  let goal : Json = {
-    "id": goal_id,
-    "title": title,
-    "prompt": prompt,
-    "target_book_id": target_book_id,
-    "cadence_ticks": cadence_ticks,
-    "next_due_tick": 0,
-    "enabled": true,
-    "source_policy": source_policy,
-    "quality_threshold": quality_threshold,
-  }
-  let goals_path = state_root() + "/standing-goals.json"
-  let goals_text = @support.read_text_or_empty(goals_path)
-  let goals_json = if goals_text.trim().is_empty() {
-    ([] : Array[Json]).to_json()
-  } else {
-    @json.parse(goals_text)
-  }
-  let goals : Array[Json] = match goals_json {
-    Array(items) => items
-    _ => fail("standing-goals.json must contain a JSON array")
-  }
-  let mut replaced = false
-  for index, existing in goals {
-    guard existing is Object(existing_fields) else { continue }
-    if json_string_field(existing_fields, "id") == goal_id {
-      goals[index] = goal
-      replaced = true
-      break
-    }
-  }
-  if !replaced {
-    goals.push(goal)
-  }
-  let request_path = state_root() + "/operator-requests/" + request_id + ".json"
-  let preparing : Json = {
-    "id": request_id,
-    "status": "preparing",
-    "created_at": iso_timestamp(timestamp),
-    "title": title,
-    "prompt": prompt,
-    "target_book_id": target_book_id,
-    "cadence_ticks": cadence_ticks,
-    "source_policy": source_policy,
-    "quality_threshold": quality_threshold,
-    "standing_goal_id": goal_id,
-  }
-  @support.write_text_file(request_path, preparing.stringify(indent=2))
-  let mut goal_activated = false
-  try {
-    @support.write_text_file(goals_path, goals.to_json().stringify(indent=2))
-    goal_activated = true
-    @support.write_text_file(request_path, request.stringify(indent=2))
-    append_operator_request(request)
-  } catch {
-    error => {
-      if goal_activated {
-        @support.write_text_file(
-          goals_path,
-          if goals_text.trim().is_empty() {
-            "[]"
-          } else {
-            goals_text
-          },
-        ) catch {
-          _ => ()
-        }
-      }
-      let failed : Json = {
-        "id": request_id,
-        "status": "failed",
-        "created_at": iso_timestamp(timestamp),
-        "title": title,
-        "prompt": prompt,
-        "target_book_id": target_book_id,
-        "cadence_ticks": cadence_ticks,
-        "source_policy": source_policy,
-        "quality_threshold": quality_threshold,
-        "standing_goal_id": goal_id,
-        "error": "Operator request persistence did not complete.",
-      }
-      @support.write_text_file(request_path, failed.stringify(indent=2)) catch {
-        _ => ()
-      }
-      raise error
-    }
-  }
-  {
-    "ok": true,
-    "request_id": request_id,
-    "standing_goal_id": goal_id,
-    "status": "accepted",
-  }
-}
-
-///|
-async fn persist_book_template_request(body : String) -> Json {
-  let parsed = @json.parse(body)
-  let fields = match parsed {
-    Object(fields) => fields
-    _ => fail("request body must be a JSON object")
-  }
-  let template_id = {
-    let value = json_string_field(fields, "template_id")
-    if value.is_empty() {
-      "pdf-evidence-watch"
-    } else {
-      value
-    }
-  }
-  if template_id != "pdf-evidence-watch" {
-    fail("unsupported template_id: \{template_id}")
-  }
-  let title = json_string_field(fields, "title")
-  let websites = json_string_list_field(fields, "websites")
-  if title.is_empty() || websites.is_empty() {
-    fail("title and at least one website are required")
-  }
-  let book_id = {
-    let value = json_string_field(fields, "book_id")
-    safe_slug(if value.is_empty() { title } else { value })
-  }
-  let purpose = {
-    let value = json_string_field(fields, "purpose")
-    if value.is_empty() {
-      "Watch approved websites for relevant PDFs, extract full text, analyze with the book-owned method, and notify only when accepted knowledge changes."
-    } else {
-      value
-    }
-  }
-  let cadence_ticks = json_int_field(fields, "cadence_ticks", 60, 1, 2147483647)
-  let analysis_method = json_string_field(fields, "analysis_method")
-  let timestamp = @env.now()
-  let request_id = "book-template-\{timestamp}-\{operator_nonce()}-\{safe_slug(title)}"
-  let config_relative_path = "book-template-configs/\{request_id}.json"
-  let config : Json = {
-    "book_id": book_id,
-    "title": title,
-    "purpose": purpose,
-    "websites": websites,
-    "analysis_method": analysis_method,
-    "analysis_method_path": "",
-    "cadence_ticks": cadence_ticks,
-    "workspace_root": "",
-  }
-  let request : Json = {
-    "id": request_id,
-    "template_id": template_id,
-    "config_path": config_relative_path,
-    "status": "pending",
-    "summary": "Queued \{title} for \{template_id}; \{websites.length()} website(s).",
-    "last_processed_tick": 0,
-  }
-  let ledger_path = state_root() + "/book-template-requests.json"
-  let ledger_text = @support.read_text_or_empty(ledger_path)
-  let requests : Array[Json] = if ledger_text.trim().is_empty() {
-    []
-  } else {
-    match @json.parse(ledger_text) {
-      Object(ledger) =>
-        match ledger.get("requests") {
-          Some(Array(items)) => items
-          _ => []
-        }
-      _ => []
-    }
-  }
-  requests.push(request)
-  @support.write_text_file(
-    state_root() + "/" + config_relative_path,
-    config.stringify(indent=2),
-  )
-  @support.write_text_file(
-    ledger_path,
-    ({ "requests": requests } : Json).stringify(indent=2),
-  )
-  {
-    "ok": true,
-    "request_id": request_id,
-    "status": "pending",
-    "template_id": template_id,
-    "config_path": config_relative_path,
-  }
-}
-
-///|
 async fn handle_request(
   request : @http.Request,
   body : &@io.Reader,
@@ -681,6 +387,10 @@ async fn handle_request(
     send_json(conn, 200, { "ok": true, "service": "moontown-desktop" })
     return
   }
+  if request.meth is Get && path == @town_contract.desktop_contract_path() {
+    send_json(conn, 200, @town_contract.desktop_contract())
+    return
+  }
   if path == "/energy-valley-runtime.json" {
     if !(request.meth is Get) {
       send_json(conn, 405, { "ok": false, "error": "GET required" })
@@ -689,11 +399,14 @@ async fn handle_request(
     send_json(conn, 200, energy_valley_runtime_projection())
     return
   }
-  if path == "/api/operator-requests" {
+  if path == @town_contract.desktop_standing_watch_path() {
     if reject_unsafe_operator_write(request, conn) {
       return
     }
-    let result = persist_operator_request(body.read_all().text()) catch {
+    let application = @town_application.default_request_application(
+      operator_policy_path(),
+    )
+    let result = application.submit_standing_watch(body.read_all().text()) catch {
       error => {
         send_json(conn, 400, { "ok": false, "error": "\{error}" })
         return
@@ -702,11 +415,14 @@ async fn handle_request(
     send_json(conn, 200, result)
     return
   }
-  if path == "/api/book-template-requests" {
+  if path == @town_contract.desktop_evidence_book_path() {
     if reject_unsafe_operator_write(request, conn) {
       return
     }
-    let result = persist_book_template_request(body.read_all().text()) catch {
+    let application = @town_application.default_request_application(
+      operator_policy_path(),
+    )
+    let result = application.queue_evidence_book(body.read_all().text()) catch {
       error => {
         send_json(conn, 400, { "ok": false, "error": "\{error}" })
         return

@@ -50,15 +50,21 @@ test "each live runtime task activates exactly one work station" {
 }
 
 ///|
-test "stale runtime suppresses every active station claim" {
+test "stale runtime preserves the snapshot without active station claims" {
   let civic = wenyu_module_building_test_module()
   let stale = energy_valley_runtime_state_at(
     module_workstation_test_runtime(),
     175000.0,
   )
+  assert_true(stale.phase == Stale)
   let stations = module_work_stations(stale, civic)
-  assert_true(stations.all(station => station.state == "quiet"))
-  assert_true(stations.all(station => station.count == 0))
+  assert_true(stations.all(station => station.state == "stale"))
+  assert_true(stations.all(station => station.count == 1))
+  assert_true(
+    stations.all(station => {
+      module_work_station_state_label(station).has_prefix("Snapshot")
+    }),
+  )
 }
 
 ///|
@@ -78,4 +84,35 @@ test "work floor keeps fixtures and concrete tasks behind disclosure" {
   assert_true(html.contains("<details"))
   assert_true(html.contains("Room fixtures"))
   assert_true(!html.contains("<details open"))
+}
+
+///|
+test "agent exchange exposes real roster and collaboration evidence" {
+  let runtime = energy_valley_runtime_state_from_text(
+    energy_valley_runtime_test_projection_text(
+      "1970-01-01T00:01:40.000Z", "live",
+    ),
+    1,
+    110000.0,
+  )
+  let civic = wenyu_module_building_test_module()
+  let html = @rabbita.render_to_string(
+    @rabbita.static_cell(
+      render_energy_valley_module_agent_exchange(runtime, civic),
+    ),
+  )
+  assert_true(html.contains("Agent exchange"))
+  assert_true(html.contains("Exchange active"))
+  assert_true(html.contains("Scout"))
+  assert_true(html.contains("Recorded collaboration families"))
+  let stale_html = @rabbita.render_to_string(
+    @rabbita.static_cell(
+      render_energy_valley_module_agent_exchange(
+        energy_valley_runtime_state_at(runtime, 175000.0),
+        civic,
+      ),
+    ),
+  )
+  assert_true(stale_html.contains("Last recorded exchange team"))
+  assert_true(stale_html.contains("not presented as live activity"))
 }

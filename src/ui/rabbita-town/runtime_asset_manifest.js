@@ -26,7 +26,9 @@ const FIXED_RUNTIME_ASSETS = [
   'tilemap/buildings/worker_yard_roof.png',
   'tilemap/modules/moondesk-handoff.json',
   'tilemap/modules/wenyu-town-modules.json',
+  'tilemap/wenyu_reference_buildings.json',
   'tilemap/wenyu_reference_labels.json',
+  'tilemap/wenyu_reference_roads.json',
   'tilemap/wenyu_reference_tilemap_iso.png',
 ]
 

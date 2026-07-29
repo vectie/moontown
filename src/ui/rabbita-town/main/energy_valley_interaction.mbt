@@ -68,45 +68,61 @@ fn golden_valley_custom_building(
   y : Int,
   sequence : Int,
 ) -> GoldenValleyBuilding? {
+  let scale = energy_valley_semantic_cells_per_planning_cell()
+  let snapped_x = x / scale * scale
+  let snapped_y = y / scale * scale
+  let footprint = 2 * scale
   match tool {
     ResearchTowerTool =>
       Some({
+        module_key: None,
         name: "研发塔楼 \{sequence}",
         style: "custom-tower",
-        x,
-        y,
-        width: 2,
-        depth: 2,
+        x: snapped_x,
+        y: snapped_y,
+        width: footprint,
+        depth: footprint,
+        entrance_x: None,
+        entrance_y: None,
         floors: 5,
       })
     LaboratoryTool =>
       Some({
+        module_key: None,
         name: "实验室 \{sequence}",
         style: "custom-lab",
-        x,
-        y,
-        width: 2,
-        depth: 2,
+        x: snapped_x,
+        y: snapped_y,
+        width: footprint,
+        depth: footprint,
+        entrance_x: None,
+        entrance_y: None,
         floors: 2,
       })
     WorkshopTool =>
       Some({
+        module_key: None,
         name: "创新工坊 \{sequence}",
         style: "custom-hall",
-        x,
-        y,
-        width: 2,
-        depth: 2,
+        x: snapped_x,
+        y: snapped_y,
+        width: footprint,
+        depth: footprint,
+        entrance_x: None,
+        entrance_y: None,
         floors: 2,
       })
     TalentHomeTool =>
       Some({
+        module_key: None,
         name: "人才公寓 \{sequence}",
         style: "custom-home",
-        x,
-        y,
-        width: 2,
-        depth: 2,
+        x: snapped_x,
+        y: snapped_y,
+        width: footprint,
+        depth: footprint,
+        entrance_x: None,
+        entrance_y: None,
         floors: 3,
       })
     _ => None
@@ -132,7 +148,13 @@ fn golden_valley_custom_placement_clear(
         x,
         y,
       )
+      let generated_occupied = match
+        golden_valley_world(active_energy_valley_seed()).tile_at(x, y) {
+        Some(tile) => tile.building_id is Some(_)
+        None => true
+      }
       if (terrain != "grass" && terrain != "meadow" && terrain != "plaza") ||
+        generated_occupied ||
         golden_valley_building_at_model(model, x, y) is Some(_) {
         return false
       }

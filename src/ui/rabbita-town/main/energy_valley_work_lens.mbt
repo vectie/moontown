@@ -79,6 +79,22 @@ fn energy_valley_runtime_task_matches_module(
 }
 
 ///|
+fn energy_valley_runtime_task_civic_id(
+  task : EnergyValleyRuntimeWorkItem,
+) -> String {
+  match task.buildingModuleKey {
+    "vitality-tower" => "vitality-dashboard"
+    "story-radar" => "broadcast-tower"
+    "energy-lab" =>
+      match find_module_for_book(task.bookId.unwrap_or("")) {
+        Some(civic) => civic.id
+        None => energy_valley_runtime_legacy_research_module(task)
+      }
+    key => key
+  }
+}
+
+///|
 fn energy_valley_runtime_tasks_for_module(
   state : EnergyValleyRuntimeState,
   civic : WenyuTownModule,
@@ -157,6 +173,137 @@ fn energy_valley_runtime_active_agents_for_module(
       false
     }
   })
+}
+
+///|
+fn energy_valley_runtime_known_agents_for_module(
+  state : EnergyValleyRuntimeState,
+  civic : WenyuTownModule,
+) -> Array[EnergyValleyRuntimeAgent] {
+  match state.projection {
+    None => []
+    Some(projection) =>
+      projection.agents.filter(agent => {
+        let building_key = agent.buildingModuleKey.unwrap_or("")
+        if building_key == energy_valley_runtime_civic_key(civic) {
+          true
+        } else if building_key == "energy-lab" &&
+          civic.id.has_prefix("research-") {
+          match agent.workItemId {
+            Some(task_id) =>
+              energy_valley_runtime_tasks_for_module(state, civic).any(task => {
+                task.id == task_id
+              })
+            None => false
+          }
+        } else {
+          false
+        }
+      })
+  }
+}
+
+///|
+fn energy_valley_runtime_exchange_title(
+  state : EnergyValleyRuntimeState,
+  exchange_party_count : Int,
+) -> String {
+  if exchange_party_count >= 2 {
+    if state.phase is Live {
+      "Exchange active"
+    } else {
+      "Last recorded exchange team"
+    }
+  } else if exchange_party_count == 1 {
+    "Solo station"
+  } else {
+    "No runtime agents assigned"
+  }
+}
+
+///|
+fn render_energy_valley_module_agent_exchange(
+  state : EnergyValleyRuntimeState,
+  civic : WenyuTownModule,
+) -> @rabbita.Html {
+  let agents = energy_valley_runtime_known_agents_for_module(state, civic)
+  let tasks = energy_valley_runtime_tasks_for_module(state, civic)
+  let mut participant_count = 0
+  let participant_families : Array[String] = []
+  for task in tasks {
+    match task.collaboration {
+      Some(collaboration) =>
+        for participant in collaboration.participants {
+          participant_count += 1
+          if !participant_families.contains(participant.family) {
+            participant_families.push(participant.family)
+          }
+        }
+      None => ()
+    }
+  }
+  section(class="module-agent-exchange", [
+    header(class="module-work-floor-header module-agent-exchange-head", [
+      div([
+        p(class="eyebrow", "Agent exchange"),
+        h2(
+          energy_valley_runtime_exchange_title(
+            state,
+            agents.length() + participant_count,
+          ),
+        ),
+      ]),
+      span(
+        class="module-work-floor-seed",
+        "\{agents.length()} runtime · \{participant_count} collaborators",
+      ),
+    ]),
+    p(
+      class="module-work-floor-intro",
+      if state.phase is Live {
+        "Runtime agents enter through the shared road, work at assigned stations, and exchange recorded collaboration runs here."
+      } else {
+        "The roster below comes from the last genuine runtime snapshot; it remains inspectable but is not presented as live activity."
+      },
+    ),
+    if agents.is_empty() {
+      p(
+        class="interior-empty",
+        "No durable runtime agent currently resolves to this building.",
+      )
+    } else {
+      div(
+        class="module-runtime-agent-grid",
+        agents.map(agent => {
+          article(class="module-runtime-agent-card", [
+            div(class="module-runtime-agent-head", [
+              span(class="module-runtime-agent-name", agent.name),
+              span(agent.status),
+            ]),
+            p("\{agent.role} · \{agent.runId.unwrap_or("no run")}"),
+            p(
+              class="module-runtime-agent-work",
+              match agent.workItemId {
+                Some(work_item_id) => "Work item \{work_item_id}"
+                None => "No work item attached"
+              },
+            ),
+          ])
+        }),
+      )
+    },
+    if participant_families.is_empty() {
+      p(
+        class="module-agent-exchange-foot",
+        "No collaboration participants are recorded for this building snapshot.",
+      )
+    } else {
+      p(
+        class="module-agent-exchange-foot",
+        "Recorded collaboration families: \{participant_families.join(", ")}.",
+      )
+    },
+  ])
 }
 
 ///|

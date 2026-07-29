@@ -1,0 +1,16 @@
+import {
+  "moonbitlang/async/fs",
+  "moonbitlang/core/env",
+  "moonbitlang/core/json",
+  "moonbitlang/core/random",
+  "moonbitlang/core/strconv",
+  "moonbitlang/x/time",
+  "vectie/moontown/storage",
+  "vectie/moontown/support",
+}
+
+import {
+  "moonbitlang/async",
+} for "test"
+
+supported_targets = "native"

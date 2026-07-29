@@ -62,9 +62,9 @@ pub fn reconcile(
 ) -> ScheduleRegistry raise {
   let incoming = bindings(projection)
   let ids = incoming.map(binding => binding.schedule_id)
-  let retained = registry.schedules.filter(binding =>
+  let retained = registry.schedules.filter(binding => {
     binding.pack_id != projection.pack_id || !ids.contains(binding.schedule_id)
-  )
+  })
   { schedules: retained + incoming }
 }
 
@@ -73,5 +73,7 @@ pub fn remove_pack(
   registry : ScheduleRegistry,
   pack_id : String,
 ) -> ScheduleRegistry {
-  { schedules: registry.schedules.filter(binding => binding.pack_id != pack_id) }
+  {
+    schedules: registry.schedules.filter(binding => binding.pack_id != pack_id),
+  }
 }

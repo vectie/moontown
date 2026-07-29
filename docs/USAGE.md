@@ -1611,10 +1611,10 @@ for their default `source_policy`. Change that document when the default Mayor
 queue policy should change; do not patch browser glue or the desktop service
 for ordinary policy changes.
 
-## 13.4 Run The Mini-App Local Backend
+## 13.4 Run The Mini-App Backend Adapter
 
-The mini-app backend surface is intentionally separate from the Rabbita browser
-UI. It is a local fixture for the WeChat mini-app path.
+The mini-app backend is a separate HTTP adapter over the same MoonTown
+application and durable runtime state used by the Rabbita desktop UI.
 
 Inspect the route catalog:
 
@@ -1622,16 +1622,11 @@ Inspect the route catalog:
 moon run src/cmd/main -- miniapp routes
 ```
 
-Run the localhost HTTP wrapper for WeChat DevTools:
+Run the pure MoonBit adapter for WeChat DevTools:
 
 ```bash
-node scripts/miniapp-local-backend.mjs --port 18191 --state .moontown/miniapp-local-backend-state.json
+moon run src/cmd/miniapp_server
 ```
-
-If `--state` is omitted, the wrapper uses the same
-`.moontown/miniapp-local-backend-state.json` path. Sessions stay ephemeral, but
-users, buildings, placements, agents, threads, messages, runs, and audit events
-are saved after successful mutating requests.
 
 Set the generated mini-app `backendBaseUrl` to:
 
@@ -1639,26 +1634,30 @@ Set the generated mini-app `backendBaseUrl` to:
 http://127.0.0.1:18191
 ```
 
-Reset local mini-app data when you want a fresh fixture:
+The adapter reads the canonical MoonTown state below
+`$MOONSUITE_ROOT/.moonsuite/products/moontown`. It projects books as buildings,
+workers as agents, and real tasks/executions as runs without exposing local
+paths or raw prompts.
+
+For a non-loopback bind, configure an explicit session token:
 
 ```bash
-node scripts/miniapp-local-backend.mjs --port 18191 --reset-state
+export MOONTOWN_MINIAPP_BIND=0.0.0.0:18191
+export MOONTOWN_MINIAPP_SESSION_TOKEN='replace-with-a-secret'
+moon run src/cmd/miniapp_server
 ```
 
-Smoke-test the wrapper without leaving a server running:
+The legacy JavaScript local backend remains a UI fixture for Bunnia's unfinished
+social routes:
 
 ```bash
 node scripts/miniapp-local-backend.mjs --smoke --port 18191
 ```
 
-The smoke path writes to a temporary state file, creates a private building,
-archives a second private building, verifies the archive is hidden, shares the
-first building, verifies another user can see it, publishes it, verifies another
-user can discover it, reloads the file, and verifies the building persisted. The
-wrapper serves dev login, snapshot, building search/create/place/share/publish/archive,
-agent create, building chat/query, cancel, retry, and review-accept routes.
-Durable product policy remains in the MoonBit `miniapp_*` packages; this Node
-wrapper is only the local HTTP bridge and dev state store.
+That fixture can test visual flows, but its private state file is not MoonTown
+product truth and its animated runs are not evidence of real MoonClaw work.
+Promote a social route to the MoonBit adapter only after connecting it to a
+shared application use case and durable MoonTown/MoonBook ledger.
 
 ## 14. Validate Changes
 

@@ -1,0 +1,19 @@
+// Generated using `moon info`, DON'T EDIT IT
+package "vectie/moontown/town_projection"
+
+// Values
+pub fn default_town_projection() -> TownProjection
+
+pub fn town_projection(String) -> TownProjection
+
+// Errors
+
+// Types and methods
+pub struct TownProjection {
+  state_root : String
+}
+pub async fn TownProjection::miniapp_snapshot(Self) -> Json
+
+// Type aliases
+
+// Traits

@@ -5,6 +5,11 @@
 - renderer-agnostic scene modeling in the root module
 - Rabbita browser rendering in `src/ui/rabbita-town`
 
+It also supports two frontend delivery surfaces over one application core:
+Rabbita/Lepusa desktop and the Bunnia/WeChat mini-app. Their adapter boundary,
+trust model, and shared-state rules are documented in
+[project/FRONTEND_ADAPTER_ARCHITECTURE.md](/Users/kq/Workspace/moontown/docs/project/FRONTEND_ADAPTER_ARCHITECTURE.md).
+
 ## UI Stack
 
 The current UI flow is:

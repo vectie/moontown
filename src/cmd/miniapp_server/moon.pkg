@@ -1,0 +1,18 @@
+import {
+  "moonbitlang/async",
+  "moonbitlang/async/http",
+  "moonbitlang/async/io",
+  "moonbitlang/async/socket",
+  "moonbitlang/core/env",
+  "moonbitlang/core/encoding/utf8",
+  "moonbitlang/core/json",
+  "moonbitlang/core/string",
+  "vectie/moontown/storage",
+  "vectie/moontown/town_application",
+  "vectie/moontown/town_contract",
+  "vectie/moontown/town_projection",
+}
+
+supported_targets = "native"
+
+pkgtype(kind: "executable")

@@ -1,0 +1,33 @@
+// Generated using `moon info`, DON'T EDIT IT
+package "vectie/moontown/town_contract"
+
+// Values
+pub fn desktop_contract() -> Json
+
+pub fn desktop_contract_path() -> String
+
+pub fn desktop_evidence_book_path() -> String
+
+pub fn desktop_standing_watch_path() -> String
+
+pub fn miniapp_contract() -> Json
+
+pub fn miniapp_contract_path() -> String
+
+pub fn miniapp_evidence_book_path() -> String
+
+pub fn miniapp_health_path() -> String
+
+pub fn miniapp_snapshot_path() -> String
+
+pub fn miniapp_standing_watch_path() -> String
+
+pub fn schema_version() -> String
+
+// Errors
+
+// Types and methods
+
+// Type aliases
+
+// Traits

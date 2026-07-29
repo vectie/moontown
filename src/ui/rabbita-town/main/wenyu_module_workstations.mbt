@@ -93,53 +93,64 @@ fn module_work_tasks_for_stage(
 }
 
 ///|
+fn module_work_runtime_station_state(
+  runtime : EnergyValleyRuntimeState,
+  active_state : String,
+) -> String {
+  match runtime.phase {
+    Live => active_state
+    _ => "stale"
+  }
+}
+
+///|
 fn module_work_stations(
   runtime : EnergyValleyRuntimeState,
   civic : WenyuTownModule,
 ) -> Array[ModuleWorkStation] {
-  let tasks = energy_valley_runtime_live_tasks_for_module(runtime, civic)
+  let tasks = energy_valley_runtime_tasks_for_module(runtime, civic)
   [
     module_work_station(
       "intake",
       "Intake",
       "Durable requests and queued work enter here.",
       module_work_tasks_for_stage(tasks, Intake),
-      "waiting",
+      module_work_runtime_station_state(runtime, "waiting"),
     ),
     module_work_station(
       "discovery",
       "Discovery",
       "Agents gather sources, context, and tool results.",
       module_work_tasks_for_stage(tasks, Discovery),
-      "running",
+      module_work_runtime_station_state(runtime, "running"),
     ),
     module_work_station(
       "synthesis",
       "Synthesis",
       "Working evidence becomes a reviewable result.",
       module_work_tasks_for_stage(tasks, Synthesis),
-      "running",
+      module_work_runtime_station_state(runtime, "running"),
     ),
     module_work_station(
       "review",
       "Review",
       "Human or keeper decisions remain visible here.",
       module_work_tasks_for_stage(tasks, Review),
-      "review",
+      module_work_runtime_station_state(runtime, "review"),
     ),
     module_work_station(
       "delivery",
       "Delivery",
       "Recorded results and artifacts leave the building.",
       module_work_tasks_for_stage(tasks, Delivery),
-      "complete",
+      module_work_runtime_station_state(runtime, "complete"),
     ),
     module_work_station(
       "recovery",
       "Recovery",
       "Blocked or failed work receives explicit attention.",
       module_work_tasks_for_stage(tasks, Recovery),
-      "blocked",
+      module_work_runtime_station_state(runtime, "blocked"),
     ),
   ]
 }
@@ -173,6 +184,7 @@ fn module_work_station_state_label(station : ModuleWorkStation) -> String {
     "review" => "Review \{station.count}"
     "complete" => "Ready \{station.count}"
     "blocked" => "Blocked \{station.count}"
+    "stale" => "Snapshot \{station.count}"
     _ => "Quiet"
   }
 }

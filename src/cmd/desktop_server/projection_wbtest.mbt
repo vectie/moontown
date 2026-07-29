@@ -70,13 +70,8 @@ test "desktop server exposes every Rabbita runtime snapshot path" {
 }
 
 ///|
-test "desktop book-template request accepts newline and comma website lists" {
-  let newline : Map[String, Json] = {
-    "websites": "https://example.org/a\nhttps://example.org/b",
-  }
-  assert_eq(json_string_list_field(newline, "websites").length(), 2)
-  let comma : Map[String, Json] = {
-    "websites": "https://example.org/a, https://example.org/b",
-  }
-  assert_eq(json_string_list_field(comma, "websites").length(), 2)
+test "desktop server publishes its canonical adapter contract" {
+  let contract = @town_contract.desktop_contract().stringify()
+  assert_true(contract.contains(@town_contract.desktop_standing_watch_path()))
+  assert_true(contract.contains(@town_contract.desktop_evidence_book_path()))
 }

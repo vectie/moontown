@@ -1,0 +1,21 @@
+// Generated using `moon info`, DON'T EDIT IT
+package "vectie/moontown/town_application"
+
+// Values
+pub fn default_request_application(String) -> RequestApplication
+
+pub fn request_application(String, String) -> RequestApplication
+
+// Errors
+
+// Types and methods
+pub struct RequestApplication {
+  state_root : String
+  operator_policy_path : String
+}
+pub async fn RequestApplication::queue_evidence_book(Self, String) -> Json
+pub async fn RequestApplication::submit_standing_watch(Self, String) -> Json
+
+// Type aliases
+
+// Traits

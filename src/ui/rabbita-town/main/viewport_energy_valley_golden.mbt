@@ -515,15 +515,43 @@ fn render_energy_valley_event_feed(model : Model) -> @rabbita.Html {
 fn golden_valley_building_description(
   building : GoldenValleyBuilding,
 ) -> String {
-  match building.style {
-    "tower" | "custom-tower" => "Vitality Tower · 活力信号守望"
-    "lab" | "custom-lab" => "Energy Lab · 中试与实验空间"
-    "garden" => "AI Garden · 学习共同体"
-    "market" => "Valley Market · 资源撮合"
-    "home" | "custom-home" => "Resident Twins · 数字分身之家"
-    "radar" => "Story Radar · 叙事锻造"
-    "plaza" => "Talent Avenue · 人才撮合市集"
-    _ => "Town Shell · 全镇协议中枢"
+  match golden_valley_building_module_key(building) {
+    "town-shell" => "Town Shell · 全镇协议中枢"
+    "policy-hall" => "Policy Hall · 协议制定与治理"
+    "vitality-tower" => "Vitality Tower · 活力信号守望"
+    "contest-express" => "Contest Express · 众创任务集散"
+    "story-radar" => "Story Radar · 叙事锻造"
+    "resident-twins" => "Resident Twins · 数字分身之家"
+    "ai-garden" => "AI Garden · 学习共同体"
+    "social-square" => "Social Square · 协作与公共交流"
+    "research-embodied-robotics" => "Robotics Lab · 具身智能研究"
+    "research-ai-agents" => "AI Agents Lab · 多智能体研究"
+    "talent-avenue" => "Talent Avenue · 人才撮合市集"
+    "valley-market" => "Valley Market · 资源撮合"
+    "physical-bridge" => "Physical Bridge · 实体连接实验"
+    "research-opc" => "OPC Research · 一人公司研究"
+    "research-llm-training" => "LLM Training Lab · 模型训练研究"
+    "research-ai-hardware" => "AI Hardware Lab · 智能硬件研究"
+    _ =>
+      match building.style {
+        "custom-tower" => "研发塔楼 · 自定义研究空间"
+        "custom-lab" => "实验室 · 自定义实验空间"
+        "custom-home" => "人才公寓 · 自定义居住空间"
+        _ => "创新工坊 · 自定义生产空间"
+      }
+  }
+}
+
+///|
+fn golden_valley_building_kind_label(building : GoldenValleyBuilding) -> String {
+  match golden_valley_building_module_key(building) {
+    id if id.has_prefix("research-") => "研究模块"
+    "resident-twins" | "talent-avenue" => "社区模块"
+    "ai-garden" | "social-square" => "公共模块"
+    "valley-market" => "交换模块"
+    "physical-bridge" => "基础设施模块"
+    "" => "自定义建筑"
+    _ => "市政协议模块"
   }
 }
 
@@ -539,10 +567,20 @@ fn render_energy_valley_inspector(
         model.energy_valley_runtime,
         building,
       )
-      let building_agents = golden_valley_runtime_agents_for_building(
+      let building_agents = golden_valley_runtime_known_agents_for_building(
         model.energy_valley_runtime,
         building,
       )
+      let civic_id = golden_valley_building_civic_id(building)
+      let interior_link = if civic_id.is_empty() {
+        @html.nothing
+      } else {
+        a(
+          href="./viewport.html?assets=generated&mode=view&module=\{civic_id}&seed=\{active_energy_valley_seed()}&v=module-\{civic_id}",
+          class="mt-3 grid min-h-11 place-items-center rounded-xl bg-amber-300 px-3 text-center text-[12px] font-black text-slate-950 no-underline shadow-lg shadow-amber-950/20 hover:bg-amber-200 focus:outline-none focus:ring-2 focus:ring-amber-100",
+          "进入建筑 · 查看真实工作",
+        )
+      }
       div(
         class="pointer-events-auto w-64 rounded-2xl bg-slate-950/70 p-4 backdrop-blur-md border border-white/10 shadow-2xl",
         [
@@ -563,7 +601,7 @@ fn render_energy_valley_inspector(
           ]),
           div(
             class="mb-2 rounded-lg bg-indigo-400/15 px-2 py-1 text-[10px] text-indigo-200 ring-1 ring-indigo-300/30",
-            "市政协议模块 · \{building.style}",
+            "\{golden_valley_building_kind_label(building)} · \{building.style}",
           ),
           div(class="mt-2", [
             div(
@@ -581,7 +619,13 @@ fn render_energy_valley_inspector(
           div(
             class="mt-2 flex items-center justify-between text-[12px] text-slate-300",
             [
-              span("在内 Agent"),
+              span(
+                if model.energy_valley_runtime.phase is Live {
+                  "在内 Agent"
+                } else {
+                  "快照 Agent"
+                },
+              ),
               span(
                 class="font-mono text-slate-100",
                 building_agents.length().to_string(),
@@ -628,8 +672,83 @@ fn render_energy_valley_inspector(
               div(class="flex flex-col gap-1", task_cards)
             },
           ]),
+          interior_link,
         ],
       )
+    }
+  }
+}
+
+///|
+fn render_energy_valley_dashboard_work_list(model : Model) -> @rabbita.Html {
+  match model.energy_valley_runtime.projection {
+    None =>
+      div(
+        class="flex min-h-28 items-center justify-center rounded-xl bg-white/[0.03] px-6 text-center text-[11px] leading-relaxed text-slate-400",
+        "运行时未连接。地图仍可浏览，但环境 Agent 不会被计作真实工作。",
+      )
+    Some(projection) => {
+      if projection.tasks.is_empty() {
+        return div(
+          class="flex min-h-28 items-center justify-center rounded-xl bg-white/[0.03] px-6 text-center text-[11px] leading-relaxed text-slate-400",
+          "运行时已连接，但当前快照没有记录任务。",
+        )
+      }
+      let cards : Array[@rabbita.Html] = []
+      let shown = if projection.tasks.length() < 5 {
+        projection.tasks.length()
+      } else {
+        5
+      }
+      for index in 0..<shown {
+        let task = projection.tasks[index]
+        let civic_id = energy_valley_runtime_task_civic_id(task)
+        let agents = energy_valley_runtime_agents_for_task(
+          model.energy_valley_runtime,
+          task.id,
+        )
+        cards.push(
+          a(
+            href="./viewport.html?assets=generated&mode=view&module=\{civic_id}&seed=\{active_energy_valley_seed()}&v=work-\{task.id}",
+            class="block rounded-lg border border-white/10 bg-white/[0.04] px-2.5 py-2 no-underline hover:border-amber-200/30 hover:bg-white/[0.08] focus:outline-none focus:ring-2 focus:ring-amber-200/50",
+            [
+              div(class="flex items-start justify-between gap-3", [
+                span(
+                  class="truncate text-[11px] font-semibold text-slate-100",
+                  task.title,
+                ),
+                span(
+                  class="shrink-0 rounded-full bg-white/10 px-1.5 py-0.5 font-mono text-[9px] text-slate-300",
+                  task.status,
+                ),
+              ]),
+              div(
+                class="mt-1 flex items-center justify-between gap-3 font-mono text-[9px] text-slate-500",
+                [
+                  span(class="truncate", task.buildingModuleKey),
+                  span(
+                    "\{agents.length()} agent · \{task.runId.unwrap_or("no run")}",
+                  ),
+                ],
+              ),
+            ],
+          ),
+        )
+      }
+      div(class="flex flex-col gap-1.5 rounded-xl bg-white/[0.03] p-2", [
+        div(class="flex flex-col gap-1.5", cards),
+        if projection.tasks.length() > shown {
+          p(
+            class="px-1 text-[9px] text-slate-500",
+            "另有 \{projection.tasks.length() - shown} 项记录；进入对应建筑查看 Agent、协作参与者与产物。",
+          )
+        } else {
+          p(
+            class="px-1 text-[9px] text-slate-500",
+            "进入对应建筑查看 Agent、协作参与者与产物。",
+          )
+        },
+      ])
     }
   }
 }
@@ -675,27 +794,20 @@ fn render_energy_valley_dashboard(
         ),
       ]),
       div(class="flex rounded-xl bg-white/5 p-1", [
-        button(
+        span(
           class="flex-1 rounded-lg py-1.5 text-[11px] bg-amber-300/20 text-amber-100",
           "真实工作 · \{energy_valley_runtime_work_count(model)}",
         ),
-        button(
-          class="flex-1 rounded-lg py-1.5 text-[11px] text-slate-400 hover:text-slate-200",
+        span(
+          class="flex-1 rounded-lg py-1.5 text-center text-[11px] text-slate-400",
           "市政服务 · \{wenyu_module_count()}",
         ),
-        button(
-          class="flex-1 rounded-lg py-1.5 text-[11px] text-slate-400 hover:text-slate-200",
+        span(
+          class="flex-1 rounded-lg py-1.5 text-center text-[11px] text-slate-400",
           "运行活动 · 4",
         ),
       ]),
-      div(
-        class="flex min-h-28 items-center justify-center rounded-xl bg-white/[0.03] px-6 text-center text-[11px] leading-relaxed text-slate-400",
-        if energy_valley_runtime_work_count(model) == 0 {
-          "运行时未连接。地图仍可浏览，但环境 Agent 不会被计作真实工作。"
-        } else {
-          "真实任务来自 MoonTown 运行时；选择建筑可查看对应 Agent 与产物。"
-        },
-      ),
+      render_energy_valley_dashboard_work_list(model),
       div(
         class="flex items-center justify-between border-t border-white/10 pt-2 text-[10px] text-slate-500",
         [

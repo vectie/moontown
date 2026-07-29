@@ -136,19 +136,19 @@ fn energy_valley_perimeter_road_entrance(
 ) -> EnergyValleyPoint? {
   for offset in 0..<civic.footprint_w {
     let x = grid_x + energy_valley_mod(offset + phase, civic.footprint_w)
-    if energy_valley_road_at(seed, x, grid_y - 1) {
+    if energy_valley_framework_road_at(seed, x, grid_y - 1) {
       return Some({ x, y: grid_y - 1 })
     }
-    if energy_valley_road_at(seed, x, grid_y + civic.footprint_h) {
+    if energy_valley_framework_road_at(seed, x, grid_y + civic.footprint_h) {
       return Some({ x, y: grid_y + civic.footprint_h })
     }
   }
   for offset in 0..<civic.footprint_h {
     let y = grid_y + energy_valley_mod(offset + phase, civic.footprint_h)
-    if energy_valley_road_at(seed, grid_x - 1, y) {
+    if energy_valley_framework_road_at(seed, grid_x - 1, y) {
       return Some({ x: grid_x - 1, y })
     }
-    if energy_valley_road_at(seed, grid_x + civic.footprint_w, y) {
+    if energy_valley_framework_road_at(seed, grid_x + civic.footprint_w, y) {
       return Some({ x: grid_x + civic.footprint_w, y })
     }
   }
@@ -162,7 +162,7 @@ fn energy_valley_candidate_placement(
   placed : Array[EnergyValleyFootprint],
   grid_x : Int,
   grid_y : Int,
-  phase : Int,
+  entrance : EnergyValleyPoint,
   require_district : Bool,
 ) -> EnergyValleyPlacement? {
   if !energy_valley_footprint_in_bounds(
@@ -184,12 +184,75 @@ fn energy_valley_candidate_placement(
     ) {
     return None
   }
-  match
-    energy_valley_perimeter_road_entrance(seed, civic, grid_x, grid_y, phase) {
-    Some(entrance) =>
-      Some({ grid_x, grid_y, entrance_x: entrance.x, entrance_y: entrance.y })
-    None => None
+  Some({ grid_x, grid_y, entrance_x: entrance.x, entrance_y: entrance.y })
+}
+
+///|
+fn energy_valley_placements_for_road(
+  civic : WenyuTownModule,
+  road_x : Int,
+  road_y : Int,
+  phase : Int,
+) -> Array[(Int, Int, EnergyValleyPoint)] {
+  let width_offset = energy_valley_mod(phase, civic.footprint_w)
+  let height_offset = energy_valley_mod(phase, civic.footprint_h)
+  [
+    (road_x - width_offset, road_y + 1, { x: road_x, y: road_y }),
+    (
+      road_x - width_offset,
+      road_y - civic.footprint_h,
+      { x: road_x, y: road_y },
+    ),
+    (road_x + 1, road_y - height_offset, { x: road_x, y: road_y }),
+    (
+      road_x - civic.footprint_w,
+      road_y - height_offset,
+      { x: road_x, y: road_y },
+    ),
+  ]
+}
+
+///|
+fn find_energy_valley_fallback_placement_near_anchor(
+  seed : Int,
+  civic : WenyuTownModule,
+  placed : Array[EnergyValleyFootprint],
+  anchor_x : Int,
+  anchor_y : Int,
+  phase : Int,
+  flip_x : Bool,
+  flip_y : Bool,
+  require_district : Bool,
+) -> EnergyValleyPlacement? {
+  for radius in 0..<=42 {
+    let span = radius * 2 + 1
+    for y_index in 0..<span {
+      for x_index in 0..<span {
+        let raw_x = x_index - radius
+        let raw_y = y_index - radius
+        if radius > 0 && abs_int(raw_x) != radius && abs_int(raw_y) != radius {
+          continue
+        }
+        let grid_x = anchor_x + (if flip_x { -raw_x } else { raw_x })
+        let grid_y = anchor_y + (if flip_y { -raw_y } else { raw_y })
+        match
+          energy_valley_perimeter_road_entrance(
+            seed, civic, grid_x, grid_y, phase,
+          ) {
+          Some(entrance) =>
+            match
+              energy_valley_candidate_placement(
+                seed, civic, placed, grid_x, grid_y, entrance, require_district,
+              ) {
+              Some(placement) => return Some(placement)
+              None => ()
+            }
+          None => ()
+        }
+      }
+    }
   }
+  None
 }
 
 ///|
@@ -208,6 +271,14 @@ fn find_energy_valley_placement_near_anchor(
   let flip_x = hash % 2 == 0
   let flip_y = hash / 2 % 2 == 0
   let phase = hash % 11
+  if !reference_tile_snapshot_ready() {
+    return find_energy_valley_fallback_placement_near_anchor(
+      seed, civic, placed, anchor_x, anchor_y, phase, flip_x, flip_y, require_district,
+    )
+  }
+  // Search the reference graph first, then fit the building to a side of the
+  // discovered corridor. This keeps placement proportional to road distance
+  // instead of scanning every possible lot against a sparse authored network.
   for radius in 0..<=42 {
     let span = radius * 2 + 1
     for y_index in 0..<span {
@@ -219,18 +290,27 @@ fn find_energy_valley_placement_near_anchor(
         }
         let x_offset = if flip_x { -raw_x } else { raw_x }
         let y_offset = if flip_y { -raw_y } else { raw_y }
-        match
-          energy_valley_candidate_placement(
-            seed,
-            civic,
-            placed,
-            anchor_x + x_offset,
-            anchor_y + y_offset,
-            phase,
-            require_district,
-          ) {
-          Some(placement) => return Some(placement)
-          None => ()
+        let road_x = anchor_x + x_offset
+        let road_y = anchor_y + y_offset
+        if energy_valley_framework_road_at(seed, road_x, road_y) {
+          for
+            candidate in energy_valley_placements_for_road(
+              civic, road_x, road_y, phase,
+            ) {
+            match
+              energy_valley_candidate_placement(
+                seed,
+                civic,
+                placed,
+                candidate.0,
+                candidate.1,
+                candidate.2,
+                require_district,
+              ) {
+              Some(placement) => return Some(placement)
+              None => ()
+            }
+          }
         }
       }
     }

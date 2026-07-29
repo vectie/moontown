@@ -37,6 +37,17 @@ Build the frontend:
 ./scripts/build-rabbita-ui.sh
 ```
 
+Run the two backend adapters:
+
+```bash
+moon run src/cmd/desktop_server
+moon run src/cmd/miniapp_server
+```
+
+Both adapters use the same MoonTown runtime state. The mini-app server defaults
+to `127.0.0.1:18191`; a non-loopback bind requires
+`MOONTOWN_MINIAPP_SESSION_TOKEN`.
+
 Check source layout boundaries:
 
 ```bash

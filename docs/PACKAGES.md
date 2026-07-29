@@ -60,6 +60,23 @@ Purpose:
 - `src/integration_tests` owns cross-package API and skill-quality tests.
 - No implementation package should be added directly at repository root.
 
+## Frontend Adapter Boundary
+
+- [src/town_application](/Users/kq/Workspace/moontown/src/town_application)
+  owns durable use cases shared by frontend adapters.
+- [src/town_contract](/Users/kq/Workspace/moontown/src/town_contract) owns the
+  versioned desktop and mini-app capability manifests.
+- [src/town_projection](/Users/kq/Workspace/moontown/src/town_projection)
+  builds the Bunnia-shaped, phone-safe projection of live MoonTown state.
+- [src/cmd/desktop_server](/Users/kq/Workspace/moontown/src/cmd/desktop_server)
+  is the trusted localhost Rabbita/Lepusa adapter.
+- [src/cmd/miniapp_server](/Users/kq/Workspace/moontown/src/cmd/miniapp_server)
+  is the session-scoped mini-app adapter.
+
+The command packages may implement transport and audience-specific validation,
+but they must call `town_application` for shared writes and must not create a
+second product state root.
+
 ## Core
 
 - [src/core/types.mbt](/Users/kq/Workspace/moontown/src/core/types.mbt)
