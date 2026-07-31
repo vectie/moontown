@@ -79,14 +79,11 @@ fn module_interior_action(
   projection : BookProjectionFragment?,
 ) -> ModuleInteriorAction? {
   if !module_validation_issues(civic).is_empty() {
-    Some({
-      label: "Review setup",
-      href: "./viewport.html?assets=generated&mode=editor&v=wenyu",
-    })
+    Some({ label: "Review setup", href: legacy_viewport_editor_href() })
   } else if runtime.blocked_count > 0 || runtime.review_count > 0 {
     Some({
       label: "Review output",
-      href: "./viewport.html?assets=generated&mode=output&v=wenyu",
+      href: canonical_energy_valley_dashboard_href(),
     })
   } else {
     match projection {
@@ -94,7 +91,7 @@ fn module_interior_action(
       None =>
         Some({
           label: "Open output status",
-          href: "./viewport.html?assets=generated&mode=output&v=wenyu",
+          href: canonical_energy_valley_dashboard_href(),
         })
     }
   }

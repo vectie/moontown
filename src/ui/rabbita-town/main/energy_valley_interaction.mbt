@@ -4,6 +4,16 @@ fn golden_valley_tile_key(x : Int, y : Int) -> String {
 }
 
 ///|
+priv enum GoldenValleyPlacementBlock {
+  PlacementOutOfBounds
+  PlacementTransportOrWater
+  PlacementProtectedWetland
+  PlacementUserPark
+  PlacementOccupied
+  PlacementNeedsRoad
+} derive(Debug, Eq)
+
+///|
 fn golden_valley_building_contains(
   building : GoldenValleyBuilding,
   x : Int,
@@ -16,7 +26,7 @@ fn golden_valley_building_contains(
 }
 
 ///|
-fn golden_valley_building_at_model(
+fn golden_valley_custom_building_at_model(
   model : Model,
   x : Int,
   y : Int,
@@ -25,6 +35,19 @@ fn golden_valley_building_at_model(
     if golden_valley_building_contains(building, x, y) {
       return Some(building)
     }
+  }
+  None
+}
+
+///|
+fn golden_valley_building_at_model(
+  model : Model,
+  x : Int,
+  y : Int,
+) -> GoldenValleyBuilding? {
+  match golden_valley_custom_building_at_model(model, x, y) {
+    Some(building) => return Some(building)
+    None => ()
   }
   for building in golden_valley_buildings(active_energy_valley_seed()) {
     if golden_valley_building_contains(building, x, y) {
@@ -130,36 +153,42 @@ fn golden_valley_custom_building(
 }
 
 ///|
-fn golden_valley_custom_placement_clear(
+fn golden_valley_tile_placement_block(
+  model : Model,
+  x : Int,
+  y : Int,
+) -> GoldenValleyPlacementBlock? {
+  if x < 0 || x >= golden_valley_cols() || y < 0 || y >= golden_valley_rows() {
+    return Some(PlacementOutOfBounds)
+  }
+  let key = golden_valley_tile_key(x, y)
+  if model.energy_parks.contains(key) {
+    return Some(PlacementUserPark)
+  }
+  let terrain = golden_valley_terrain(model, active_energy_valley_seed(), x, y)
+  if terrain == "road" || terrain == "bridge" || terrain == "water" {
+    return Some(PlacementTransportOrWater)
+  }
+  if terrain == "wetland" {
+    return Some(PlacementProtectedWetland)
+  }
+  let generated_occupied = match
+    golden_valley_world(active_energy_valley_seed()).tile_at(x, y) {
+    Some(tile) => tile.building_id is Some(_)
+    None => true
+  }
+  if generated_occupied ||
+    golden_valley_custom_building_at_model(model, x, y) is Some(_) {
+    return Some(PlacementOccupied)
+  }
+  None
+}
+
+///|
+fn golden_valley_custom_building_has_road_access(
   model : Model,
   building : GoldenValleyBuilding,
 ) -> Bool {
-  if building.x < 1 ||
-    building.y < 1 ||
-    building.x + building.width >= golden_valley_cols() - 1 ||
-    building.y + building.depth >= golden_valley_rows() - 1 {
-    return false
-  }
-  for y in building.y..<(building.y + building.depth) {
-    for x in building.x..<(building.x + building.width) {
-      let terrain = golden_valley_terrain(
-        model,
-        active_energy_valley_seed(),
-        x,
-        y,
-      )
-      let generated_occupied = match
-        golden_valley_world(active_energy_valley_seed()).tile_at(x, y) {
-        Some(tile) => tile.building_id is Some(_)
-        None => true
-      }
-      if (terrain != "grass" && terrain != "meadow" && terrain != "plaza") ||
-        generated_occupied ||
-        golden_valley_building_at_model(model, x, y) is Some(_) {
-        return false
-      }
-    }
-  }
   for x in (building.x - 1)..<=(building.x + building.width) {
     for y in (building.y - 1)..<=(building.y + building.depth) {
       let on_edge = x == building.x - 1 ||
@@ -180,6 +209,151 @@ fn golden_valley_custom_placement_clear(
     }
   }
   false
+}
+
+///|
+fn golden_valley_custom_placement_block(
+  model : Model,
+  building : GoldenValleyBuilding,
+) -> GoldenValleyPlacementBlock? {
+  if building.x < 1 ||
+    building.y < 1 ||
+    building.x + building.width >= golden_valley_cols() - 1 ||
+    building.y + building.depth >= golden_valley_rows() - 1 {
+    return Some(PlacementOutOfBounds)
+  }
+  for y in building.y..<(building.y + building.depth) {
+    for x in building.x..<(building.x + building.width) {
+      match golden_valley_tile_placement_block(model, x, y) {
+        Some(block) => return Some(block)
+        None => ()
+      }
+    }
+  }
+  if !golden_valley_custom_building_has_road_access(model, building) {
+    return Some(PlacementNeedsRoad)
+  }
+  None
+}
+
+///|
+fn golden_valley_custom_placement_clear(
+  model : Model,
+  building : GoldenValleyBuilding,
+) -> Bool {
+  golden_valley_custom_placement_block(model, building) is None
+}
+
+///|
+fn golden_valley_reposition_custom_building(
+  building : GoldenValleyBuilding,
+  x : Int,
+  y : Int,
+) -> GoldenValleyBuilding {
+  { ..building, x, y }
+}
+
+///|
+fn golden_valley_resolve_custom_building(
+  model : Model,
+  requested : GoldenValleyBuilding,
+) -> GoldenValleyBuilding? {
+  let scale = energy_valley_semantic_cells_per_planning_cell()
+  let search_steps = 4
+  for distance in 0..<=search_steps {
+    for y_step in -distance..<=distance {
+      for x_step in -distance..<=distance {
+        if abs_int(x_step) + abs_int(y_step) != distance {
+          continue
+        }
+        let candidate = golden_valley_reposition_custom_building(
+          requested,
+          requested.x + x_step * scale,
+          requested.y + y_step * scale,
+        )
+        if golden_valley_custom_placement_clear(model, candidate) {
+          return Some(candidate)
+        }
+      }
+    }
+  }
+  None
+}
+
+///|
+fn golden_valley_placement_block_message(
+  block : GoldenValleyPlacementBlock,
+) -> String {
+  match block {
+    PlacementOutOfBounds => "建筑地块超出能源谷边界"
+    PlacementTransportOrWater =>
+      "建筑占地跨越道路或水域，请选择更开阔的临路空地"
+    PlacementProtectedWetland =>
+      "建筑占地包含湿地保护区，请换一处临路空地"
+    PlacementUserPark => "此处已有人工林地，请先拆除再建设"
+    PlacementOccupied => "此处已有建筑，请选择附近空地"
+    PlacementNeedsRoad =>
+      "附近没有可用的临路地块，请靠近道路选择或先铺路"
+  }
+}
+
+///|
+fn golden_valley_place_custom_building_model(
+  model : Model,
+  x : Int,
+  y : Int,
+) -> Model {
+  match
+    golden_valley_custom_building(
+      model.energy_tool,
+      x,
+      y,
+      model.energy_custom_buildings.length() + 1,
+    ) {
+    None => model
+    Some(requested) => {
+      let cost = golden_valley_tool_cost(model.energy_tool)
+      if model.energy_build_budget < cost {
+        { ..model, energy_toast: "预算不足" }
+      } else {
+        match golden_valley_tile_placement_block(model, x, y) {
+          Some(block) =>
+            {
+              ..model,
+              energy_toast: golden_valley_placement_block_message(block),
+            }
+          None =>
+            match golden_valley_resolve_custom_building(model, requested) {
+              None =>
+                {
+                  ..model,
+                  energy_toast: golden_valley_placement_block_message(
+                    golden_valley_custom_placement_block(model, requested).unwrap_or(
+                      PlacementNeedsRoad,
+                    ),
+                  ),
+                }
+              Some(building) => {
+                let adjusted = building.x != requested.x ||
+                  building.y != requested.y
+                {
+                  ..model,
+                  energy_custom_buildings: model.energy_custom_buildings +
+                  [building],
+                  energy_build_budget: model.energy_build_budget - cost,
+                  energy_selected_building: Some(building),
+                  energy_toast: if adjusted {
+                    "\{building.name} 已开工（-\{cost}，已吸附到最近临路空地）"
+                  } else {
+                    "\{building.name} 已开工（-\{cost}）"
+                  },
+                }
+              }
+            }
+        }
+      }
+    }
+  }
 }
 
 ///|
@@ -314,34 +488,6 @@ fn energy_valley_canvas_click_model(
       }
     }
     ResearchTowerTool | LaboratoryTool | WorkshopTool | TalentHomeTool =>
-      match
-        golden_valley_custom_building(
-          model.energy_tool,
-          x,
-          y,
-          model.energy_custom_buildings.length() + 1,
-        ) {
-        None => model
-        Some(building) => {
-          let cost = golden_valley_tool_cost(model.energy_tool)
-          if model.energy_build_budget < cost {
-            { ..model, energy_toast: "预算不足" }
-          } else if !golden_valley_custom_placement_clear(model, building) {
-            {
-              ..model,
-              energy_toast: "此处与道路、水域或既有建筑冲突",
-            }
-          } else {
-            {
-              ..model,
-              energy_custom_buildings: model.energy_custom_buildings +
-              [building],
-              energy_build_budget: model.energy_build_budget - cost,
-              energy_selected_building: Some(building),
-              energy_toast: "\{building.name} 已开工（-\{cost}）",
-            }
-          }
-        }
-      }
+      golden_valley_place_custom_building_model(model, x, y)
   }
 }

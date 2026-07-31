@@ -110,10 +110,11 @@ instead of embedding a second, divergent map.
 
 Canonical viewport URLs:
 
-- `viewport.html?assets=generated&mode=view&v=wenyu`
-- `viewport.html?assets=generated&mode=editor&v=wenyu`
-- `viewport.html?assets=generated&mode=output&v=wenyu`
-- `viewport.html?assets=generated&mode=view&module=town-shell&v=module-town-shell`
+- `index.html?seed=20260727`
+- `index.html?seed=20260727&handoff_contract=<contract>&handoff_id=<id>&handoff_url=<url>`
+- `viewport.html` (compatibility alias to the canonical canvas)
+- `viewport.html?surface=legacy-viewport&mode=output` (explicit legacy-only
+  inspection surface; not a qualification target)
 
 Building interiors are URL-addressable by `module=<module-id>`. The Back To
 Town control returns to the canonical map URL. Output mode is the retrieval

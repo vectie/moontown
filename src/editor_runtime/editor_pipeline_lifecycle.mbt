@@ -7,7 +7,7 @@ async fn inspect_editor_pipeline_lifecycle(
   let selected_feature = match editor_selected_feature_summary(workspace_root) {
     Some(feature) => feature
     None => {
-      let output_ref = "./viewport.html?assets=generated&mode=output&v=editor-pipeline"
+      let output_ref = "./index.html?seed=20260727&panel=dashboard"
       return {
         change_id: "editor-pipeline-change-not-started",
         selected_feature: "none",
@@ -25,7 +25,7 @@ async fn inspect_editor_pipeline_lifecycle(
   let implementation_path = editor_selected_feature_implementation_path(
     workspace_root,
   )
-  let output_ref = "./viewport.html?assets=generated&mode=output&v=editor-pipeline"
+  let output_ref = "./index.html?seed=20260727&panel=dashboard"
   let repair_text = @support.read_text_or_empty(repair_path)
   let implementation_text = @support.read_text_or_empty(implementation_path)
   let change_id = "editor-pipeline-\{selected_feature.selected_feature}"

@@ -60,7 +60,7 @@
   "app_entrypoints": [
     {
       "id": "energy-valley",
-      "path": "/viewport.html",
+      "path": "/index.html?seed=20260727",
       "audience": "civic-operator"
     }
   ],

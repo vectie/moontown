@@ -576,7 +576,7 @@ fn render_energy_valley_inspector(
         @html.nothing
       } else {
         a(
-          href="./viewport.html?assets=generated&mode=view&module=\{civic_id}&seed=\{active_energy_valley_seed()}&v=module-\{civic_id}",
+          href=legacy_viewport_module_href(civic_id),
           class="mt-3 grid min-h-11 place-items-center rounded-xl bg-amber-300 px-3 text-center text-[12px] font-black text-slate-950 no-underline shadow-lg shadow-amber-950/20 hover:bg-amber-200 focus:outline-none focus:ring-2 focus:ring-amber-100",
           "进入建筑 · 查看真实工作",
         )
@@ -709,7 +709,7 @@ fn render_energy_valley_dashboard_work_list(model : Model) -> @rabbita.Html {
         )
         cards.push(
           a(
-            href="./viewport.html?assets=generated&mode=view&module=\{civic_id}&seed=\{active_energy_valley_seed()}&v=work-\{task.id}",
+            href=legacy_viewport_module_href(civic_id),
             class="block rounded-lg border border-white/10 bg-white/[0.04] px-2.5 py-2 no-underline hover:border-amber-200/30 hover:bg-white/[0.08] focus:outline-none focus:ring-2 focus:ring-amber-200/50",
             [
               div(class="flex items-start justify-between gap-3", [

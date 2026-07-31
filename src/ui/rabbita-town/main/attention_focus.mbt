@@ -30,7 +30,7 @@ fn attention_focus_view(
       next_detail: "No live town snapshot",
       tone: "alert",
       action_label: "Open status",
-      action_href: "./viewport.html?mode=output&v=wenyu",
+      action_href: canonical_energy_valley_dashboard_href(),
     }
   } else if professional_attention_has_failed(attention) {
     {
@@ -41,7 +41,7 @@ fn attention_focus_view(
       ),
       tone: "alert",
       action_label: "Recover",
-      action_href: "./viewport.html?mode=output&v=wenyu",
+      action_href: canonical_energy_valley_dashboard_href(),
     }
   } else if professional_attention_has_review(attention) {
     {
@@ -50,7 +50,7 @@ fn attention_focus_view(
       next_detail: attention_focus_review_opening(execution_summary, decisions),
       tone: "review",
       action_label: "Review",
-      action_href: "./viewport.html?mode=output&v=wenyu",
+      action_href: canonical_energy_valley_dashboard_href(),
     }
   } else if watch_summary.enabled_count == 0 {
     {
@@ -89,7 +89,7 @@ fn attention_focus_view(
       ),
       tone: "active",
       action_label: "Open map",
-      action_href: "./viewport.html?mode=view&v=wenyu",
+      action_href: canonical_energy_valley_href(),
     }
   } else {
     {
@@ -102,7 +102,7 @@ fn attention_focus_view(
       ),
       tone: "steady",
       action_label: "Open map",
-      action_href: "./viewport.html?mode=view&v=wenyu",
+      action_href: canonical_energy_valley_href(),
     }
   }
 }

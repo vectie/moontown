@@ -111,8 +111,8 @@ A fully functioning Wenyu town means:
 
 Implemented and validated:
 
-- `viewport.html?assets=generated&v=wenyu-modules` renders the canonical Wenyu
-  tile viewport.
+- `index.html?seed=20260727` renders the canonical interactive Wenyu Energy
+  Valley canvas.
 - `src/ui/assets/tilemap/modules/wenyu-town-modules.json` defines 16 enabled Wenyu
   modules: 11 civic buildings and 5 long-horizon research-domain homes.
 - The Rabbita bootstrap loads the module registry at runtime.
@@ -556,5 +556,5 @@ moon run src/cmd/main -- status
 Browser validation target:
 
 ```text
-http://127.0.0.1:17842/viewport.html?assets=generated&v=wenyu-modules
+http://127.0.0.1:17842/index.html?seed=20260727
 ```

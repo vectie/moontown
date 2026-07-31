@@ -49,7 +49,7 @@ fn render_wenyu_module_building(
     ]),
   )
   a(
-    href="./viewport.html?assets=generated&mode=view&module=\{civic.id}&v=module-\{civic.id}",
+    href=legacy_viewport_module_href(civic.id),
     class=wenyu_module_building_class(civic, runtime, selected_node_key),
     style~,
     title="\{civic.title}: \{runtime.status_label}. \{runtime.detail}",

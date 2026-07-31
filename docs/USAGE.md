@@ -222,7 +222,7 @@ If a host process manager aggressively cleans up child processes, run
 tests should use `daemon run --once`, `daemon supervise --once`, and
 `daemon doctor`; a normal terminal or OS service wrapper can use `daemon start`.
 
-## 1.4 Open The Wenyu Viewport
+## 1.4 Open The Energy Valley Canvas
 
 Build the Rabbita frontend, then launch it through Lepusa:
 
@@ -232,18 +232,19 @@ moon -C .mooncakes/vectie/lepusa run cmd/main --target native -- \
   run macos --launch --project "$PWD/lepusa.json"
 ```
 
-Direct viewport modes:
+Open the canonical product surface:
 
-- `http://127.0.0.1:17842/viewport.html?assets=generated&mode=view&v=wenyu`
-  opens the clean town view.
-- `http://127.0.0.1:17842/viewport.html?assets=generated&mode=editor&v=wenyu`
-  opens the module editor/validation view.
-- `http://127.0.0.1:17842/viewport.html?assets=generated&mode=output&v=wenyu`
-  opens the final generated-output browser.
+- `http://127.0.0.1:17842/index.html?seed=20260727`
 
-Use view mode to present the town, editor mode to check module placement and
-bindings, and output mode to retrieve MoonBook-generated sites, reports,
-review queues, and page-family summaries.
+The deterministic seed selects the shared Wenyu reference baseline used by
+qualification. The same full-screen canvas presents the town, simulation and
+authoring tools, building/runtime inspection, dashboard access, and typed
+interproduct handoffs.
+
+`/viewport.html` is a compatibility alias for the same canonical canvas. The
+retired raster editor/output shell is available only when an operator
+explicitly requests `surface=legacy-viewport`; it is not a product entrypoint
+or test target.
 
 ## 1.5 Run A Building Communication Pattern Template
 

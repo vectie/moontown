@@ -9,11 +9,11 @@ import {
 }
 
 // Values
-pub async fn bootstrap_civic_communication_handoff_file(String, String, book_catalog_path? : String, round_id? : String, round_number? : Int, workspace_base? : String, reducer_mode? : @civic.CivicCommunicationReductionMode) -> String
+pub async fn bootstrap_civic_communication_handoff_file(String, String, book_catalog_path? : String, round_id? : String, round_number? : Int, workspace_base? : String, reducer_mode? : @civic.CivicCommunicationReductionMode, run_inline? : Bool) -> String
 
-pub async fn bootstrap_civic_communication_scenario(@civic.CivicCommunicationScenario, book_catalog_path? : String, round_id? : String, round_number? : Int, workspace_base? : String, reducer_mode? : @civic.CivicCommunicationReductionMode) -> String
+pub async fn bootstrap_civic_communication_scenario(@civic.CivicCommunicationScenario, book_catalog_path? : String, round_id? : String, round_number? : Int, workspace_base? : String, reducer_mode? : @civic.CivicCommunicationReductionMode, run_inline? : Bool) -> String
 
-pub async fn bootstrap_civic_communication_scenario_file(String, book_catalog_path? : String, round_id? : String, round_number? : Int, workspace_base? : String, reducer_mode? : @civic.CivicCommunicationReductionMode) -> String
+pub async fn bootstrap_civic_communication_scenario_file(String, book_catalog_path? : String, round_id? : String, round_number? : Int, workspace_base? : String, reducer_mode? : @civic.CivicCommunicationReductionMode, run_inline? : Bool) -> String
 
 pub async fn bootstrap_wenyu_building_protocols(registry_path? : String, status_path? : String) -> String
 

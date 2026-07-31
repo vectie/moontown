@@ -46,7 +46,7 @@ test "pipeline markdown renders canonical sections" {
     course_ref: "course.md",
     plan_ref: "plan.md",
     repair_ref: "repair.md",
-    output_ref: "viewport.html",
+    output_ref: "index.html?seed=20260727&panel=dashboard",
   }
   let selection : EditorPipelineStyleSelectionRecord = {
     target_module_id: "policy-hall",
@@ -65,8 +65,8 @@ test "pipeline markdown renders canonical sections" {
     planbook_id: "plan-moontown-quality",
     plan_id: "plan-1",
     repair_status: "accepted",
-    editor_mode_url: "editor.html",
-    output_mode_url: "output.html",
+    editor_mode_url: "index.html?seed=20260727",
+    output_mode_url: "index.html?seed=20260727&panel=dashboard",
     generated_at_ms: 1,
     stages: [
       {
@@ -114,7 +114,7 @@ test "stage policy marks ready only when required editor proof is complete" {
     course_ref: "course.md",
     plan_ref: "plan.md",
     repair_ref: "repair.md",
-    output_ref: "viewport.html",
+    output_ref: "index.html?seed=20260727&panel=dashboard",
   }
   let inputs : EditorPipelineStageInputs = {
     course_page: "course.md",
@@ -168,7 +168,7 @@ test "selected feature stage policy keeps unrelated missing work idle" {
     course_ref: "course.md",
     plan_ref: "plan.md",
     repair_ref: "repair.md",
-    output_ref: "viewport.html",
+    output_ref: "index.html?seed=20260727&panel=dashboard",
   }
   assert_eq(
     selected_feature_stage_status(false, lifecycle, "movement-loop-evidence"),
@@ -227,7 +227,7 @@ test "selection policy gates only the selected feature" {
     course_ref: "course.md",
     plan_ref: "plan.md",
     repair_ref: "repair.md",
-    output_ref: "viewport.html",
+    output_ref: "index.html?seed=20260727&panel=dashboard",
   }
   let selected : EditorPipelineStyleCandidateRecord = {
     style_id: "white-tech-pavilion",
@@ -282,7 +282,7 @@ test "selected feature readiness requires matching evidence" {
     course_ref: "course.md",
     plan_ref: "plan.md",
     repair_ref: "repair.md",
-    output_ref: "viewport.html",
+    output_ref: "index.html?seed=20260727&panel=dashboard",
   }
   let layer : EditorPipelineTerrainLayerRecord = {
     layer_id: "water",

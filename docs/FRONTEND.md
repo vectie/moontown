@@ -195,9 +195,9 @@ workspace and standing goal. This keeps browser UI, MoonDesk, and Mayor
 automation on the same document-first creation path.
 
 The operator dashboard does not render the Wenyu map inline. It shows a portal
-card that links to `viewport.html?assets=generated&v=wenyu`, the canonical
-standalone tilemap viewport. This avoids divergence between a small dashboard
-map and the actual Wenyu Valley viewport.
+card that links to `index.html?seed=20260727`, the canonical interactive Energy
+Valley canvas. This avoids divergence between a small dashboard preview and the
+actual Wenyu Valley product surface.
 
 Current operator-console expectations:
 
@@ -205,7 +205,7 @@ Current operator-console expectations:
 - distinguish watcher no-change, review, update, deferred, and failed states
 - reserve "progress" wording for accepted facts, queued review, changed wiki
   pages, or `book_changed: yes`
-- link to the standalone Wenyu viewport instead of rendering an inline map
+- link to the canonical Energy Valley canvas instead of rendering an inline map
 - expose request submission through the Mayor queue rather than executing work
   directly in the browser
 - expose pending and failed book-template requests so MoonDesk-created books
@@ -214,39 +214,30 @@ Current operator-console expectations:
   `.moonsuite/products/moontown/live-autonomy.json` before drilling into
   individual watch cards
 
-## Standalone Viewport Modes
+## Canonical Energy Valley Canvas
 
-The canonical Wenyu viewport now has three explicit modes. These modes are
-selected from the viewport HUD and can also be opened directly by URL:
+`index.html?seed=20260727` is the sole published and qualification-tested
+MoonTown surface. It combines the procedural Wenyu world, simulation and
+authoring tools, civic buildings, resident/worker projections, live runtime
+truth, dashboard access, and typed handoff panels on one full-screen canvas.
 
-- `viewport.html?assets=generated&mode=view&v=wenyu`
-  - clean public town presentation
-  - click buildings to inspect live module interiors
-  - no editor panel or output-browser chrome
-- `viewport.html?assets=generated&mode=view&module=town-shell&v=module-town-shell`
-  - direct deep link to a building interior
-  - `module=<module-id>` is the URL-addressable building contract
-  - Back To Town returns to the canonical map view
-- `viewport.html?assets=generated&mode=editor&v=wenyu`
-  - town-designer workspace
-  - shows module placement, entrance tile, runtime state, validation issues,
-    and whether each building has a connected MoonBook output fragment
-  - changing a module still happens in
-    `src/ui/assets/tilemap/modules/wenyu-town-modules.json`
-  - scope is multi-agent/town composition, not deep single-agent editing
-- `viewport.html?assets=generated&mode=output&v=wenyu`
-  - final retrieval surface
-  - lists generated MoonBook projection fragments, metrics, review queues,
-    page families, journey entries, and links to generated HTML/report outputs
-  - also shows the MoonDesk handoff contract and recent portable bridge
-    records from `.moonsuite/products/moontown/moondesk-*` and
-    `.moonsuite/products/moontown/book-results`
+The default `/`, `/index.html`, and compatibility `/viewport.html` paths all
+select this canvas. Interproduct handoffs append their typed query parameters
+to `index.html?seed=20260727`; they must not switch to another UI.
 
-This separation is intentional:
+The earlier three-mode raster viewport is retained only for compatibility and
+specialist inspection. It is never a default or qualification target and must
+be requested explicitly:
 
-- view mode is for presentation
-- editor mode is for map/module design validation
-- output mode is for retrieving produced work
+- `viewport.html?surface=legacy-viewport&mode=view`
+- `viewport.html?surface=legacy-viewport&mode=view&module=town-shell`
+- `viewport.html?surface=legacy-viewport&mode=editor`
+- `viewport.html?surface=legacy-viewport&mode=output`
+
+The legacy editor can inspect module bindings and the legacy output mode can
+inspect generated projections while those capabilities are absorbed into the
+canonical canvas. New product features and UI-to-UI tests belong on
+`index.html`, not on this compatibility shell.
 
 The mode switch uses the same runtime data in all cases. It does not invent
 book content or duplicate the Wenyu map.

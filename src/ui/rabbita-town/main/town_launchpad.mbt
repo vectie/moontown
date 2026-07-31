@@ -27,7 +27,7 @@ fn render_town_launchpad(
             professional_attention_chip_class(attention),
           ),
           a(
-            href="./viewport.html?assets=generated&v=wenyu",
+            href=canonical_energy_valley_href(),
             class="town-launchpad-gateway",
             "Map",
           ),

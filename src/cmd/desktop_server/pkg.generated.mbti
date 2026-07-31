@@ -1,11 +1,20 @@
 // Generated using `moon info`, DON'T EDIT IT
 package "vectie/moontown/cmd/desktop_server"
 
+import {
+  "moonbitlang/core/json",
+}
+
 // Values
 
 // Errors
 
 // Types and methods
+type MoonFlowResearchExecutionRequest derive(@json.FromJson)
+
+type ResearchHandoffExecutionRequest derive(@json.FromJson)
+
+type ResearchHandoffInspectionRequest derive(@json.FromJson)
 
 // Type aliases
 

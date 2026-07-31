@@ -48,7 +48,7 @@ fn render_town_runtime_notice(model : Model) -> @rabbita.Html {
         ]),
         p("MoonTown is checking the local town projection."),
         a(
-          href="./viewport.html?mode=output&v=wenyu",
+          href=canonical_energy_valley_dashboard_href(),
           class="town-runtime-notice-action",
           "Open status",
         ),
@@ -63,7 +63,7 @@ fn render_town_runtime_notice(model : Model) -> @rabbita.Html {
           "Requests remain available, but operating signals stay empty until a town snapshot is published.",
         ),
         a(
-          href="./viewport.html?mode=output&v=wenyu",
+          href=canonical_energy_valley_dashboard_href(),
           class="town-runtime-notice-action",
           "Open status",
         ),
@@ -84,7 +84,7 @@ fn render_town_area_unavailable(target : DashboardSection) -> @rabbita.Html {
       ),
     ]),
     a(
-      href="./viewport.html?mode=output&v=wenyu",
+      href=canonical_energy_valley_dashboard_href(),
       class="town-area-unavailable-action",
       "Open runtime status",
     ),

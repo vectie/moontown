@@ -14,6 +14,11 @@ fn normalized_energy_valley_seed(seed : Int) -> Int {
 }
 
 ///|
+fn canonical_energy_valley_seed(requested_seed : Int) -> Int {
+  normalized_energy_valley_seed(requested_seed)
+}
+
+///|
 fn energy_valley_seed_label(seed : Int) -> String {
   let raw = normalized_energy_valley_seed(seed).to_string(radix=36).to_upper()
   if raw.length() >= 6 {
@@ -85,13 +90,10 @@ extern "js" fn browser_energy_valley_seed_value() -> Int =
   #|     const url = new URL(globalThis.location?.href || "http://local/");
   #|     const querySeed = url.searchParams.get("seed");
   #|     if (querySeed) {
-  #|       globalThis.localStorage?.setItem("moontown-energy-valley-seed-v2", querySeed);
-  #|       return Number.parseInt(querySeed, 10) || fallback;
+  #|       const parsed = Number.parseInt(querySeed, 10);
+  #|       return Number.isFinite(parsed) ? parsed : fallback;
   #|     }
-  #|     return Number.parseInt(
-  #|       globalThis.localStorage?.getItem("moontown-energy-valley-seed-v2") || "",
-  #|       10,
-  #|     ) || fallback;
+  #|     return fallback;
   #|   } catch (_) {
   #|     return fallback;
   #|   }
@@ -99,7 +101,7 @@ extern "js" fn browser_energy_valley_seed_value() -> Int =
 
 ///|
 fn active_energy_valley_seed() -> Int {
-  normalized_energy_valley_seed(browser_energy_valley_seed_value())
+  canonical_energy_valley_seed(browser_energy_valley_seed_value())
 }
 
 ///|

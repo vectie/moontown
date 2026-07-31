@@ -130,7 +130,7 @@ fn render_wenyu_module_interior(
         ),
       ]),
       a(
-        href="./viewport.html?assets=generated&mode=view&seed=\{active_energy_valley_seed()}&v=wenyu-modules",
+        href=canonical_energy_valley_href(),
         class="control-button viewport-back-town",
         "Back To Town",
       ),

@@ -26,17 +26,16 @@ fn receiver_strict_fields(
   let fields = json_object(value, label)
   for key, _ in fields {
     if !allowed.contains(key) {
-      fail("MoonTown MoonFlow receiver rejects unsupported \{label} field: \{key}")
+      fail(
+        "MoonTown MoonFlow receiver rejects unsupported \{label} field: \{key}",
+      )
     }
   }
   fields
 }
 
 ///|
-fn receiver_bool_field(
-  fields : Map[String, Json],
-  name : String,
-) -> Bool raise {
+fn receiver_bool_field(fields : Map[String, Json], name : String) -> Bool raise {
   match fields.get(name) {
     Some(True) => true
     Some(False) => false
@@ -49,9 +48,7 @@ fn receiver_safe_token(token : String) -> Bool {
   if token.length() != 64 {
     return false
   }
-  token.all(ch => {
-    (ch >= '0' && ch <= '9') || (ch >= 'a' && ch <= 'f')
-  })
+  token.all(ch => (ch >= '0' && ch <= '9') || (ch >= 'a' && ch <= 'f'))
 }
 
 ///|
@@ -83,16 +80,10 @@ async fn decode_moonflow_research_receiver(
   intake : Json,
 ) -> MoonFlowResearchReceiver {
   let root = resolve_workspace(workspace)
-  let top = receiver_strict_fields(
-    intake,
-    "handoff",
-    [
-      "contract_id", "contract_version", "handoff_id", "handoff_ref", "binding",
-      "payload",
-    ],
-  )
-  guard json_string_field(top, "contract_id") ==
-    "moonflow.operator-handoff.v2" &&
+  let top = receiver_strict_fields(intake, "handoff", [
+    "contract_id", "contract_version", "handoff_id", "handoff_ref", "binding", "payload",
+  ])
+  guard json_string_field(top, "contract_id") == "moonflow.operator-handoff.v2" &&
     json_string_field(top, "contract_version") == "2.0.0" &&
     top.get("binding") is Some(binding_json) &&
     top.get("payload") is Some(payload_json) else {
@@ -105,23 +96,14 @@ async fn decode_moonflow_research_receiver(
     published_handoff_ref.has_prefix("operator-handoffs/") else {
     fail("MoonTown MoonFlow handoff publication identity is unsafe")
   }
-  let binding = receiver_strict_fields(
-    binding_json,
-    "binding",
-    [
-      "handoff_token", "handoff_digest", "request_id", "attempt_id",
-      "idempotency_key", "intake_path", "status_path", "receipt_path",
-      "return_path",
-    ],
-  )
-  let payload = receiver_strict_fields(
-    payload_json,
-    "payload",
-    [
-      "action_kind", "run", "authority", "contracts", "inputs", "evidence",
-      "review", "app_entrypoint",
-    ],
-  )
+  let binding = receiver_strict_fields(binding_json, "binding", [
+    "handoff_token", "handoff_digest", "request_id", "attempt_id", "idempotency_key",
+    "intake_path", "status_path", "receipt_path", "return_path",
+  ])
+  let payload = receiver_strict_fields(payload_json, "payload", [
+    "action_kind", "run", "authority", "contracts", "inputs", "evidence", "review",
+    "app_entrypoint",
+  ])
   guard json_string_field(payload, "action_kind") == "open-product" &&
     payload.get("run") is Some(run_json) &&
     payload.get("authority") is Some(authority_json) &&
@@ -132,15 +114,10 @@ async fn decode_moonflow_research_receiver(
     payload.get("app_entrypoint") is Some(entrypoint_json) else {
     fail("MoonTown MoonFlow payload is incomplete")
   }
-  let run = receiver_strict_fields(
-    run_json,
-    "run",
-    [
-      "run_id", "book_id", "work_item_id", "declaration_id", "product_id",
-      "operation", "issued_projection_sequence", "issued_work_item_status",
-      "issued_run_outcome",
-    ],
-  )
+  let run = receiver_strict_fields(run_json, "run", [
+    "run_id", "book_id", "work_item_id", "declaration_id", "product_id", "operation",
+    "issued_projection_sequence", "issued_work_item_status", "issued_run_outcome",
+  ])
   let run_id = json_string_field(run, "run_id")
   let work_item_id = json_string_field(run, "work_item_id")
   let declaration_id = json_string_field(run, "declaration_id")
@@ -150,7 +127,9 @@ async fn decode_moonflow_research_receiver(
     json_string_field(run, "product_id") == "moontown" &&
     json_string_field(run, "operation") == operation_ref() &&
     json_string_field(run, "issued_work_item_status") == "ready" else {
-    fail("MoonTown MoonFlow run identity or issued state does not match this pack")
+    fail(
+      "MoonTown MoonFlow run identity or issued state does not match this pack",
+    )
   }
   let token = json_string_field(binding, "handoff_token")
   let digest = json_string_field(binding, "handoff_digest")
@@ -169,43 +148,31 @@ async fn decode_moonflow_research_receiver(
     json_string_field(binding, "return_path") == "/?activity=flow" else {
     fail("MoonTown rejected a MoonFlow receiver binding whose identity drifted")
   }
-  let authority = receiver_strict_fields(
-    authority_json,
-    "authority",
-    ["requested_authority", "status", "granted"],
-  )
-  let requested_authority = json_string_field(
-    authority,
-    "requested_authority",
-  )
+  let authority = receiver_strict_fields(authority_json, "authority", [
+    "requested_authority", "status", "granted",
+  ])
+  let requested_authority = json_string_field(authority, "requested_authority")
   guard requested_authority == "workspace-mutation" &&
     json_string_field(authority, "status") == "requested" &&
     !receiver_bool_field(authority, "granted") else {
     fail("MoonTown requires an ungranted workspace-mutation authority request")
   }
-  let contracts = receiver_strict_fields(
-    contracts_json,
-    "contracts",
-    [
-      "capability_status", "input_contracts", "output_contracts",
-      "required_claim", "claim_ceiling",
-    ],
-  )
+  let contracts = receiver_strict_fields(contracts_json, "contracts", [
+    "capability_status", "input_contracts", "output_contracts", "required_claim",
+    "claim_ceiling",
+  ])
   let input_contracts = json_strings_field(contracts, "input_contracts")
   let output_contracts = json_strings_field(contracts, "output_contracts")
-  guard json_string_field(contracts, "capability_status") ==
-    "catalog-bound" &&
+  guard json_string_field(contracts, "capability_status") == "catalog-bound" &&
     input_contracts == [input_schema_ref()] &&
     output_contracts == [output_schema_ref()] &&
     json_string_field(contracts, "required_claim") == "execution-result" &&
     json_string_field(contracts, "claim_ceiling") == "execution-result" else {
     fail("MoonTown MoonFlow contracts exceed the civic synthesis capability")
   }
-  let inputs = receiver_strict_fields(
-    inputs_json,
-    "inputs",
-    ["digest", "artifacts"],
-  )
+  let inputs = receiver_strict_fields(inputs_json, "inputs", [
+    "digest", "artifacts",
+  ])
   let input_artifacts = json_strings_field(inputs, "artifacts")
   guard input_artifacts.length() == 1 &&
     input_artifacts.all(receiver_safe_ref) &&
@@ -213,11 +180,9 @@ async fn decode_moonflow_research_receiver(
     json_string_field(inputs, "digest") else {
     fail("MoonTown MoonFlow input evidence is missing, unsafe, or changed")
   }
-  let evidence = receiver_strict_fields(
-    evidence_json,
-    "evidence",
-    ["source_digest", "refs"],
-  )
+  let evidence = receiver_strict_fields(evidence_json, "evidence", [
+    "source_digest", "refs",
+  ])
   ignore(json_string_field(evidence, "source_digest"))
   guard evidence.get("refs") is Some(Array(evidence_refs)) &&
     !evidence_refs.is_empty() else {
@@ -225,11 +190,9 @@ async fn decode_moonflow_research_receiver(
   }
   let mut matched_input_evidence = false
   for evidence_ref in evidence_refs {
-    let fields = receiver_strict_fields(
-      evidence_ref,
-      "evidence reference",
-      ["kind", "reference", "digest"],
-    )
+    let fields = receiver_strict_fields(evidence_ref, "evidence reference", [
+      "kind", "reference", "digest",
+    ])
     let kind = json_string_field(fields, "kind")
     let reference = json_string_field(fields, "reference")
     let reference_digest = json_string_field(fields, "digest")
@@ -244,26 +207,21 @@ async fn decode_moonflow_research_receiver(
   guard matched_input_evidence else {
     fail("MoonTown MoonFlow handoff did not bind its input artifact evidence")
   }
-  let review = receiver_strict_fields(
-    review_json,
-    "review",
-    ["required", "status", "acceptance_criteria"],
-  )
-  let acceptance_criteria = json_strings_field(
-    review,
-    "acceptance_criteria",
-  )
+  let review = receiver_strict_fields(review_json, "review", [
+    "required", "status", "acceptance_criteria",
+  ])
+  let acceptance_criteria = json_strings_field(review, "acceptance_criteria")
   guard receiver_bool_field(review, "required") &&
     json_string_field(review, "status") == "required" &&
     !acceptance_criteria.is_empty() &&
     acceptance_criteria.all(receiver_supported_criterion) else {
-    fail("MoonTown cannot truthfully satisfy the declared MoonFlow review criteria")
+    fail(
+      "MoonTown cannot truthfully satisfy the declared MoonFlow review criteria",
+    )
   }
-  let entrypoint = receiver_strict_fields(
-    entrypoint_json,
-    "app entrypoint",
-    ["kind", "pack_id", "entrypoint_id", "path", "fallback_path"],
-  )
+  let entrypoint = receiver_strict_fields(entrypoint_json, "app entrypoint", [
+    "kind", "pack_id", "entrypoint_id", "path", "fallback_path",
+  ])
   guard json_string_field(entrypoint, "kind") == "pack-manifest" &&
     json_string_field(entrypoint, "pack_id") == "moontown" &&
     json_string_field(entrypoint, "path") == "/pack-apps/moontown/" else {
@@ -320,7 +278,9 @@ async fn receiver_result_refs(
     result_package is Object(package_fields) &&
     package_fields.get("receipt") is Some(Object(native_receipt)) &&
     package_fields.get("source") is Some(Object(source)) else {
-    fail("MoonTown receiver result package is not the persisted synthesis result")
+    fail(
+      "MoonTown receiver result package is not the persisted synthesis result",
+    )
   }
   let refs : Array[String] = []
   receiver_add_unique_ref(refs, plan.package_ref)
@@ -332,7 +292,9 @@ async fn receiver_result_refs(
   }
   for artifact in artifacts {
     guard artifact is String(reference) else {
-      fail("MoonTown receiver native receipt contains a malformed artifact reference")
+      fail(
+        "MoonTown receiver native receipt contains a malformed artifact reference",
+      )
     }
     receiver_add_unique_ref(
       refs,
@@ -350,17 +312,12 @@ async fn validate_existing_receiver_receipt(
   receiver : MoonFlowResearchReceiver,
   receipt : Json,
 ) -> Unit {
-  let fields = receiver_strict_fields(
-    receipt,
-    "receiver receipt",
-    [
-      "contract_id", "contract_version", "receipt_id", "handoff_token",
-      "handoff_digest", "run_id", "work_item_id", "declaration_id",
-      "product_id", "operation", "request_id", "attempt_id",
-      "idempotency_key", "decision", "output_contracts", "output_artifacts",
-      "output_digest", "authority", "review", "owner_id", "recorded_at",
-    ],
-  )
+  let fields = receiver_strict_fields(receipt, "receiver receipt", [
+    "contract_id", "contract_version", "receipt_id", "handoff_token", "handoff_digest",
+    "run_id", "work_item_id", "declaration_id", "product_id", "operation", "request_id",
+    "attempt_id", "idempotency_key", "decision", "output_contracts", "output_artifacts",
+    "output_digest", "authority", "review", "owner_id", "recorded_at",
+  ])
   let artifacts = json_strings_field(fields, "output_artifacts")
   guard json_string_field(fields, "contract_id") ==
     "moonflow.receiver-receipt.v1" &&
@@ -374,11 +331,9 @@ async fn validate_existing_receiver_receipt(
     json_string_field(fields, "operation") == operation_ref() &&
     json_string_field(fields, "request_id") == receiver.request_id &&
     json_string_field(fields, "attempt_id") == receiver.attempt_id &&
-    json_string_field(fields, "idempotency_key") ==
-    receiver.idempotency_key &&
+    json_string_field(fields, "idempotency_key") == receiver.idempotency_key &&
     json_string_field(fields, "decision") == "accepted" &&
-    json_strings_field(fields, "output_contracts") ==
-    receiver.output_contracts &&
+    json_strings_field(fields, "output_contracts") == receiver.output_contracts &&
     declared_input_digest(receiver.root, artifacts) ==
     json_string_field(fields, "output_digest") else {
     fail("MoonTown persisted receiver receipt no longer matches its handoff")
@@ -441,12 +396,10 @@ pub async fn prepare_moonflow_research_receipt(
   ignore(immutable_json_ref(receiver.root, authority_ref, authority))
   receiver_add_unique_ref(refs, authority_ref)
   let criteria_json : Array[Json] = receiver.acceptance_criteria.map(criterion => {
-    {
-      "criterion": criterion,
-      "satisfied": true,
-      "evidence_refs": refs.copy(),
-      "note": "MoonTown persisted independent participant artifacts and a completed synthesis that remains explicitly pending named-human review; no knowledge acceptance is claimed.",
-    }
+    "criterion": criterion,
+    "satisfied": true,
+    "evidence_refs": refs.copy(),
+    "note": "MoonTown persisted independent participant artifacts and a completed synthesis that remains explicitly pending named-human review; no knowledge acceptance is claimed.",
   })
   let review : Json = {
     "contract_id": "moontown.moonflow-output-review.v1",

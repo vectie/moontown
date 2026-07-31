@@ -3,10 +3,7 @@ async test "MoonFind handoff bridge reuses one Flow attempt and stays pending re
   let root = @fs.tmpdir(prefix="moontown-research-handoff-bridge")
   let fixture_scenario : @civic.CivicCommunicationScenario = @json.from_json(
     @json.parse(
-      @fs.read_file(
-        "assets/templates/civic-salons/robotics-mini-salon.json",
-      )
-      .text(),
+      @fs.read_file("assets/templates/civic-salons/robotics-mini-salon.json").text(),
     ),
   )
   let scenario = {

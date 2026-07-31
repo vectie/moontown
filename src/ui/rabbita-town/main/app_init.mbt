@@ -1,24 +1,11 @@
 ///|
 fn standalone_viewport_requested() -> Bool {
-  if !browser_location_available() {
-    false
-  } else {
-    current_browser_pathname().has_suffix("/viewport.html") ||
-    current_browser_query_param("surface") == "viewport" ||
-    !current_browser_query_param("moonflow_run").is_empty() ||
-    !current_browser_query_param("moonflow_handoff").is_empty() ||
-    !current_browser_query_param("handoff_url").is_empty()
-  }
+  current_town_surface_route() is LegacyStandaloneViewport
 }
 
 ///|
 fn operations_surface_requested() -> Bool {
-  if !browser_location_available() {
-    false
-  } else {
-    current_browser_pathname().has_suffix("/operations.html") ||
-    current_browser_query_param("surface") == "operations"
-  }
+  current_town_surface_route() is OperationsConsole
 }
 
 ///|
@@ -141,7 +128,10 @@ fn init_model() -> Model {
     energy_weather_auto: true,
     energy_time_scale: 60,
     energy_tool: InspectTool,
-    energy_board_open: false,
+    energy_board_open: energy_valley_dashboard_requested(
+      current_browser_query_param("panel"),
+      current_viewport_mode_param(),
+    ),
     energy_guide_open: false,
     energy_reset_open: false,
     energy_intro_open: !browser_energy_valley_intro_seen(),

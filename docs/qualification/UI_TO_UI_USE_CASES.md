@@ -2,12 +2,12 @@
 
 Last reviewed: 2026-07-31
 
-MoonTown's published operator application is the existing Rabbita Energy Valley
-viewport:
+MoonTown's published operator application is the interactive Rabbita Energy
+Valley canvas:
 
 ```text
 entrypoint id: energy-valley
-service path:  /viewport.html
+service path:  /index.html?seed=20260727
 default port:  17842
 ```
 
@@ -35,28 +35,38 @@ moon run src/cmd/desktop_server
 For MT-02, reuse the exact `MF_QUAL` exported by MoonFind rather than creating
 an empty standalone workspace.
 
-Only one process may own port `17842`. Open:
+Only one process may own port `17842`. Open the canonical canvas with the
+deterministic Wenyu reference seed:
 
 ```text
-http://127.0.0.1:17842/viewport.html?assets=generated&mode=view&v=wenyu
+http://127.0.0.1:17842/index.html?seed=20260727
 ```
 
-## MT-01 — operate the Energy Valley viewport
+Use `/index.html?seed=20260727` in every qualification record. The bare
+`/viewport.html` path is only a compatibility alias to the same canvas;
+`v=wenyu` and `v=wenyu-modules` are retired labels with no routing effect. The
+old raster shell is available only through `surface=legacy-viewport` and is not
+a qualification target.
+
+## MT-01 — operate the Energy Valley canvas
 
 1. Open the URL above.
-2. Confirm the heading is **MoonTown · Energy Valley**.
-3. Switch between **View**, **Editor**, and **Final Output**.
-4. In View, inspect civic buildings, current runtime state, and the attention
-   feed.
-5. In Editor, confirm layout controls are presented as editing controls rather
-   than runtime execution.
-6. In Final Output, confirm the projection is a readable delivery view and
-   still exposes stale/blocked runtime truth.
+2. Confirm the accessible map label is **能源谷可交互等距地图** and the town
+   badge identifies **MoonTown · 能源谷**.
+3. Confirm the canonical seed label is stable after reload.
+4. Change the simulation speed, weather mode, and selected tool; confirm each
+   control updates without creating a civic job.
+5. Select a civic building and inspect its live work/telemetry projection.
+6. Open **看板**, inspect current runtime state, then return to the same map.
+7. Confirm stale/blocked runtime truth remains visible without being converted
+   into inferred progress.
 
 Expected visible result:
 
-- all three modes use the current Rabbita visual system;
-- changing modes does not create a civic job;
+- the full-screen procedural Wenyu canvas is the primary surface;
+- roads, water, parcels, civic buildings, residents, and work projections share
+  one navigable map;
+- simulation and authoring controls do not create a civic job;
 - runtime staleness is shown as telemetry, not confused with UI version;
 - the page does not claim a successful MoonClaw run from map rendering.
 
@@ -66,17 +76,18 @@ Start MoonFind first and use **Open typed handoff in MoonTown**, or open the
 exact URL returned by MoonFind. It has this shape:
 
 ```text
-http://127.0.0.1:17842/viewport.html?assets=generated&mode=view&v=wenyu&handoff_contract=moontown.civic.communication.handoff.v1&handoff_id=<id>&handoff_url=http://127.0.0.1:4313/api/v1/moontown/handoff
+http://127.0.0.1:17842/index.html?seed=20260727&handoff_contract=moontown.civic.communication.handoff.v1&handoff_id=<id>&handoff_url=http://127.0.0.1:4313/api/v1/moontown/handoff
 ```
 
-1. Wait for the handoff panel to finish validation.
-2. Confirm status **PENDING · NOT EXECUTED**.
-3. Match the producer run, handoff id, participant books, topic, review gate,
+1. Confirm the Energy Valley canvas remains visible behind the handoff panel.
+2. Wait for the handoff panel to finish validation.
+3. Confirm status **PENDING · NOT EXECUTED**.
+4. Match the producer run, handoff id, participant books, topic, review gate,
    review owner, and output book to the MoonFind source.
-4. Click **Start governed salon** once.
-5. Keep the page open while the existing civic runtime delegates the reduction
+5. Click **Start governed salon** once.
+6. Keep the page open while the existing civic runtime delegates the reduction
    to MoonClaw.
-6. If the result is retained because the MoonFind callback was temporarily
+7. If the result is retained because the MoonFind callback was temporarily
    unavailable, restore MoonFind and click **Reconcile same attempt**.
 
 Expected positive result:
@@ -102,7 +113,7 @@ must reuse the original request, attempt, idempotency key, receipt, and output.
 Open:
 
 ```text
-http://127.0.0.1:17842/viewport.html?handoff_id=only-an-id
+http://127.0.0.1:17842/index.html?seed=20260727&handoff_id=only-an-id
 ```
 
 Expected visible result:
@@ -138,8 +149,9 @@ Expected visible result:
   run.
 - MoonClaw remains active: inspect the existing MoonClaw run and reconcile; do
   not switch to a template/fixture reducer in a production qualification.
-- Old UI remains visible: rebuild the Rabbita bundle, restart the service, and
-  reload the tab.
+- Old standalone viewport remains visible: remove
+  `surface=legacy-viewport`, open `/index.html?seed=20260727`, rebuild the
+  Rabbita bundle, restart the service, and reload the tab.
 
 ## Qualification record
 

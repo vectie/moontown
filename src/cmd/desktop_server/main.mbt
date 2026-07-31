@@ -203,12 +203,16 @@ fn safe_relative_path(path : String) -> Bool {
 }
 
 ///|
-async fn serve_static(conn : @http.ServerConnection, path : String) -> Bool {
-  let relative = if path == "/" {
-    "index.html"
-  } else {
-    path.trim(chars="/").to_owned()
+fn static_relative_path(path : String) -> String {
+  match path {
+    "/" | "/index.html" | "/viewport.html" => "index.html"
+    _ => path.trim(chars="/").to_owned()
   }
+}
+
+///|
+async fn serve_static(conn : @http.ServerConnection, path : String) -> Bool {
+  let relative = static_relative_path(path)
   guard safe_relative_path(relative) else { return false }
   serve_file(conn, static_root() + "/" + relative)
 }

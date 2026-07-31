@@ -43,16 +43,17 @@ extern "js" fn schedule_golden_valley_canvas(callback : () -> Unit) -> Unit =
 
 ///|
 extern "js" fn install_golden_valley_canvas_input(
-  callback : () -> Unit,
+  render_callback : () -> Unit,
 ) -> Unit =
-  #| (callback) => {
-  #|   globalThis.__moontownGoldenValleyRender = callback;
+  #| (renderCallback) => {
+  #|   globalThis.__moontownGoldenValleyRender = renderCallback;
   #|   const canvas = globalThis.document?.getElementById("energy-valley-canvas");
   #|   if (!canvas || canvas.dataset.goldenInput === "1") return;
   #|   canvas.dataset.goldenInput = "1";
   #|   globalThis.__moontownGoldenValleyCamera ||= { x: 1792, y: 3200, z: 0.1 };
   #|   const camera = globalThis.__moontownGoldenValleyCamera;
   #|   let cameraDragging = false;
+  #|   let inspectClick = false;
   #|   let painting = false;
   #|   let moved = false;
   #|   let lastX = 0;
@@ -67,36 +68,27 @@ extern "js" fn install_golden_valley_canvas_input(
   #|       'button[aria-label^="造林"][aria-pressed="true"]',
   #|     ));
   #|   const act = event => {
-  #|     canvas.dispatchEvent(new MouseEvent("mousedown", {
-  #|       bubbles: true,
-  #|       cancelable: true,
-  #|       button: 0,
-  #|       clientX: event.clientX,
-  #|       clientY: event.clientY,
-  #|     }));
+  #|     const rect = canvas.getBoundingClientRect();
+  #|     const x = Math.floor(event.clientX - rect.left);
+  #|     const y = Math.floor(event.clientY - rect.top);
+  #|     globalThis.__moontownGoldenValleyActionX = x;
+  #|     globalThis.__moontownGoldenValleyActionY = y;
+  #|     // Canvas elements never emit a native reset event. Reuse Rabbita's
+  #|     // managed reset-event bridge so the command enters its scheduler once.
+  #|     canvas.dispatchEvent(new Event("reset"));
   #|   };
-  #|   canvas.addEventListener("mousedown", event => {
-  #|     if (event.isTrusted && event.button !== 0) {
-  #|       event.preventDefault();
-  #|       event.stopImmediatePropagation();
-  #|     }
-  #|   }, true);
-  #|   canvas.addEventListener("mouseup", event => {
-  #|     if (event.isTrusted && inspectSelected() && moved) {
-  #|       event.preventDefault();
-  #|       event.stopImmediatePropagation();
-  #|     }
-  #|   }, true);
   #|   canvas.addEventListener("pointerdown", event => {
   #|     if (event.button === 1 || event.button === 2 ||
   #|         (event.button === 0 && inspectSelected())) {
   #|       cameraDragging = true;
+  #|       inspectClick = event.button === 0 && inspectSelected();
   #|       moved = false;
   #|       lastX = event.clientX;
   #|       lastY = event.clientY;
   #|       canvas.setPointerCapture?.(event.pointerId);
   #|     } else if (event.button === 0) {
   #|       painting = paintSelected();
+  #|       act(event);
   #|       if (painting) canvas.setPointerCapture?.(event.pointerId);
   #|     }
   #|   });
@@ -115,10 +107,14 @@ extern "js" fn install_golden_valley_canvas_input(
   #|   });
   #|   const stop = event => {
   #|     cameraDragging = false;
+  #|     inspectClick = false;
   #|     painting = false;
   #|     canvas.releasePointerCapture?.(event.pointerId);
   #|   };
-  #|   canvas.addEventListener("pointerup", stop);
+  #|   canvas.addEventListener("pointerup", event => {
+  #|     if (inspectClick && !moved) act(event);
+  #|     stop(event);
+  #|   });
   #|   canvas.addEventListener("pointercancel", stop);
   #|   canvas.addEventListener("contextmenu", event => event.preventDefault());
   #|   canvas.addEventListener("wheel", event => {
@@ -175,6 +171,14 @@ extern "js" fn install_golden_valley_canvas_input(
   #|     globalThis.requestAnimationFrame(frame);
   #|   }
   #| }
+
+///|
+extern "js" fn golden_valley_action_x() -> Int =
+  #| () => globalThis.__moontownGoldenValleyActionX ?? 0
+
+///|
+extern "js" fn golden_valley_action_y() -> Int =
+  #| () => globalThis.__moontownGoldenValleyActionY ?? 0
 
 ///|
 extern "js" fn golden_valley_camera_x() -> Double =
@@ -1186,7 +1190,12 @@ fn golden_valley_terrain(model : Model, seed : Int, x : Int, y : Int) -> String 
   }
   let key = golden_valley_tile_key(x, y)
   let generated = golden_valley_world(seed).tiles[y][x].terrain
-  if model.energy_roads.contains(key) {
+  if golden_valley_custom_building_at_model(model, x, y) is Some(_) {
+    // Player buildings clear their accepted footprint to a reversible plaza
+    // overlay. This keeps forests and field textures from drawing through the
+    // building without mutating the authored Wenyu terrain evidence.
+    "plaza"
+  } else if model.energy_roads.contains(key) {
     if generated == "water" || generated == "bridge" {
       "bridge"
     } else {
@@ -2243,23 +2252,13 @@ fn render_golden_valley_canvas(
   canvas(
     id="energy-valley-canvas",
     class="absolute inset-0 h-full w-full cursor-grab active:cursor-grabbing",
-    on_mousedown=dispatch.map(mouse => {
-      let point = mouse.offset_pos()
-      if model.energy_tool == InspectTool {
-        ViewportControlNoop
-      } else {
-        EnergyCanvasClick(point.x, point.y)
-      }
-    }),
-    on_mouseup=dispatch.map(mouse => {
-      let point = mouse.offset_pos()
-      if model.energy_tool == InspectTool {
-        EnergyCanvasClick(point.x, point.y)
-      } else {
-        ViewportControlNoop
-      }
-    }),
-    attrs=@html.Attrs::build().aria_label("能源谷可交互等距地图"),
+    attrs=@html.Attrs::build()
+      .aria_label("能源谷可交互等距地图")
+      .on_reset(_ => {
+        dispatch(
+          EnergyCanvasClick(golden_valley_action_x(), golden_valley_action_y()),
+        )
+      }),
     no_children(),
   )
 }

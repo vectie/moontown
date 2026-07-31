@@ -101,6 +101,7 @@ fn render_energy_valley_page(
         "↺ 重置",
       ),
     ]),
+    render_energy_valley_handoff_layer(dispatch, model),
     if model.energy_toast.is_empty() {
       @html.nothing
     } else {
@@ -118,6 +119,17 @@ fn render_energy_valley_page(
     class="energy-valley-golden relative h-screen w-screen overflow-hidden bg-slate-950 select-none",
     children,
   )
+}
+
+///|
+fn render_energy_valley_handoff_layer(
+  dispatch : Dispatch[Msg],
+  model : Model,
+) -> @rabbita.Html {
+  div(class="energy-valley-handoff-layer", [
+    render_research_handoff_panel(dispatch, model),
+    render_moonflow_receiver_panel(dispatch, model),
+  ])
 }
 
 ///|
