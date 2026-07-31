@@ -1,0 +1,44 @@
+// Generated using `moon info`, DON'T EDIT IT
+package "vectie/moontown/flow_adapter"
+
+import {
+  "moonbitlang/core/debug",
+}
+
+// Values
+pub fn adapter_id() -> String
+
+pub fn capability_json(healthy? : Bool) -> Json
+
+pub async fn execute(String, String, String) -> Json
+
+pub async fn execute_research_handoff(String, Json, String) -> Json
+
+pub fn input_schema_ref() -> String
+
+pub async fn moonflow_research_handoff(String, Json) -> Json
+
+pub fn operation_id() -> String
+
+pub fn operation_ref() -> String
+
+pub fn output_schema_ref() -> String
+
+pub fn pack_version() -> String
+
+pub async fn prepare_moonflow_research_receipt(String, Json, Json, Int, String) -> Json
+
+pub async fn publish_health(String, String, String, String, String) -> Json
+
+pub async fn reconcile(String, String, String) -> Json
+
+pub async fn reconcile_research_handoff(String, Json, String) -> Json
+
+// Errors
+
+// Types and methods
+type FlowRequest derive(Eq, @debug.Debug)
+
+// Type aliases
+
+// Traits

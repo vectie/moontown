@@ -78,7 +78,7 @@ async function prepareRuntimeBridge() {
 async function startMoontown() {
   startRuntimeSnapshotRefresh()
   await prepareRuntimeBridge()
-  await import('/main.js')
+  await import('./main.js')
 }
 
 void startMoontown().catch(error => {

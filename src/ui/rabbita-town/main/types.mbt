@@ -89,6 +89,8 @@ priv struct Model {
   operator_requests_version : Int
   book_template_requests : Array[BookTemplateRequestSnapshot]
   book_template_requests_version : Int
+  research_handoff : ResearchHandoffState
+  moonflow_receiver : MoonFlowReceiverState
   request_title : String
   request_prompt : String
   request_book_id : String
@@ -176,4 +178,12 @@ priv enum Msg {
   SetBookRequestAnalysisMethod(String)
   SubmitBookTemplateRequest
   BookTemplateRequestSubmitted(String)
+  ResearchHandoffInspected(String)
+  StartResearchHandoff
+  ReconcileResearchHandoff
+  ResearchHandoffExecuted(String)
+  MoonFlowReceiverInspected(String)
+  StartMoonFlowReceiver
+  ReconcileMoonFlowReceiver
+  MoonFlowReceiverSettled(String)
 }

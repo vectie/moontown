@@ -3,8 +3,21 @@ fn standalone_viewport_requested() -> Bool {
   if !browser_location_available() {
     false
   } else {
-    !current_browser_pathname().contains("operations") &&
-    current_browser_query_param("surface") != "operations"
+    current_browser_pathname().has_suffix("/viewport.html") ||
+    current_browser_query_param("surface") == "viewport" ||
+    !current_browser_query_param("moonflow_run").is_empty() ||
+    !current_browser_query_param("moonflow_handoff").is_empty() ||
+    !current_browser_query_param("handoff_url").is_empty()
+  }
+}
+
+///|
+fn operations_surface_requested() -> Bool {
+  if !browser_location_available() {
+    false
+  } else {
+    current_browser_pathname().has_suffix("/operations.html") ||
+    current_browser_query_param("surface") == "operations"
   }
 }
 
@@ -65,6 +78,8 @@ fn init_model() -> Model {
   let watcher_records = parse_bootstrap_watcher_records()
   let operator_requests = parse_bootstrap_operator_requests()
   let book_template_requests = parse_bootstrap_book_template_requests()
+  let research_handoff = initial_research_handoff_state()
+  let moonflow_receiver = initial_moonflow_receiver_state()
   let energy_valley_save = initial_energy_valley_save()
   {
     tick: 0,
@@ -101,6 +116,8 @@ fn init_model() -> Model {
     operator_requests_version: operator_requests_version(),
     book_template_requests,
     book_template_requests_version: book_template_requests_version(),
+    research_handoff,
+    moonflow_receiver,
     request_title: "Track a new research topic",
     request_prompt: "Research the latest useful updates, screen sources carefully, and update the target MoonBook only when the evidence changes the baseline.",
     request_book_id: "research-topic",

@@ -8,6 +8,16 @@ pub fn desktop_contract_path() -> String
 
 pub fn desktop_evidence_book_path() -> String
 
+pub fn desktop_moonflow_research_reconcile_path() -> String
+
+pub fn desktop_moonflow_research_start_path() -> String
+
+pub fn desktop_research_handoff_path() -> String
+
+pub fn desktop_research_handoff_reconcile_path() -> String
+
+pub fn desktop_research_handoff_start_path() -> String
+
 pub fn desktop_standing_watch_path() -> String
 
 pub fn miniapp_contract() -> Json

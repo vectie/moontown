@@ -4,21 +4,61 @@ fn render_standalone_viewport_page(
   model : Model,
   context : RenderSceneContext,
 ) -> @rabbita.Html {
-  match model.selection {
-    Node(node_key) =>
-      match find_wenyu_module(node_key) {
-        Some(civic) =>
-          return render_wenyu_module_interior(
-            dispatch,
-            model,
-            civic,
-            context.workers,
-            context.executions,
-          )
-        None => ()
-      }
-    _ => ()
+  let viewport_body = match model.viewport_mode {
+    ViewMode =>
+      render_viewport_view_body(
+        dispatch,
+        model,
+        context.scene,
+        context.workers,
+        context.executions,
+        context.selected_node_key,
+        context.selected_worker_id,
+      )
+    EditorMode =>
+      render_viewport_editor_body(
+        dispatch,
+        model,
+        context.scene,
+        context.workers,
+        context.executions,
+        context.selected_node_key,
+        context.selected_worker_id,
+      )
+    OutputMode => render_viewport_output_body(model)
   }
+  section(
+    class="viewport-page viewport-mode-\{viewport_mode_slug(model.viewport_mode)}\{viewport_detail_class(model)}",
+    [
+      header(class="viewport-hud", [
+        div(class="viewport-title", [
+          div(class="viewport-title-copy", [
+            h1("MoonTown · Energy Valley"),
+            p(class="eyebrow", "WENYU VALLEY · CHANGPING"),
+          ]),
+          div(class="viewport-title-time", [
+            span(class="viewport-title-clock", real_time_label()),
+            span(real_phase_label()),
+          ]),
+          p(
+            class="viewport-mode-subtitle",
+            viewport_mode_summary(model.viewport_mode),
+          ),
+        ]),
+        render_standalone_viewport_actions(dispatch, model),
+      ]),
+      viewport_body,
+      render_research_handoff_panel(dispatch, model),
+      render_moonflow_receiver_panel(dispatch, model),
+    ],
+  )
+}
+
+///|
+fn render_energy_valley_page(
+  dispatch : Dispatch[Msg],
+  model : Model,
+) -> @rabbita.Html {
   let children : Array[@rabbita.Html] = [
     render_golden_valley_canvas(dispatch, model),
     div(

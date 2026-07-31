@@ -1,0 +1,33 @@
+///|
+test "research handoff inspection permits only exact separate loopback endpoint" {
+  assert_true(
+    safe_loopback_research_handoff_url(
+      "http://127.0.0.1:4313/api/v1/moontown/handoff",
+    ),
+  )
+  assert_true(
+    safe_loopback_research_handoff_url(
+      "http://localhost:4313/api/v1/moontown/handoff",
+    ),
+  )
+  assert_true(
+    !safe_loopback_research_handoff_url(
+      "http://127.0.0.1:17842/api/v1/moontown/handoff",
+    ),
+  )
+  assert_true(
+    !safe_loopback_research_handoff_url(
+      "http://127.0.0.1:4313/api/v1/moontown/handoff?redirect=1",
+    ),
+  )
+  assert_true(
+    !safe_loopback_research_handoff_url(
+      "http://user@127.0.0.1:4313/api/v1/moontown/handoff",
+    ),
+  )
+  assert_true(
+    !safe_loopback_research_handoff_url(
+      "https://127.0.0.1:4313/api/v1/moontown/handoff",
+    ),
+  )
+}

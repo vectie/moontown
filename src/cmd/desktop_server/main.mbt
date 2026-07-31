@@ -431,6 +431,57 @@ async fn handle_request(
     send_json(conn, 200, result)
     return
   }
+  if path == @town_contract.desktop_research_handoff_path() {
+    if reject_unsafe_operator_write(request, conn) {
+      return
+    }
+    send_json(conn, 200, inspect_research_handoff(body.read_all().text()))
+    return
+  }
+  if path == @town_contract.desktop_research_handoff_start_path() {
+    if reject_unsafe_operator_write(request, conn) {
+      return
+    }
+    send_json(
+      conn,
+      200,
+      run_research_handoff_action(body.read_all().text(), "start"),
+    )
+    return
+  }
+  if path == @town_contract.desktop_research_handoff_reconcile_path() {
+    if reject_unsafe_operator_write(request, conn) {
+      return
+    }
+    send_json(
+      conn,
+      200,
+      run_research_handoff_action(body.read_all().text(), "reconcile"),
+    )
+    return
+  }
+  if path == @town_contract.desktop_moonflow_research_start_path() {
+    if reject_unsafe_operator_write(request, conn) {
+      return
+    }
+    send_json(
+      conn,
+      200,
+      run_moonflow_research_action(body.read_all().text(), "start"),
+    )
+    return
+  }
+  if path == @town_contract.desktop_moonflow_research_reconcile_path() {
+    if reject_unsafe_operator_write(request, conn) {
+      return
+    }
+    send_json(
+      conn,
+      200,
+      run_moonflow_research_action(body.read_all().text(), "reconcile"),
+    )
+    return
+  }
   if request.meth is Get && path == "/operator-requests.json" {
     send_json(conn, 200, operator_requests_json())
     return

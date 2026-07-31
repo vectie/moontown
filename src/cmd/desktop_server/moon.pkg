@@ -13,6 +13,7 @@ import {
   "vectie/moontown/support",
   "vectie/moontown/town_application",
   "vectie/moontown/town_contract",
+  "vectie/moontown/flow_adapter",
 }
 
 supported_targets = "native"

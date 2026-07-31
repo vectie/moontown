@@ -19,6 +19,31 @@ pub fn desktop_evidence_book_path() -> String {
 }
 
 ///|
+pub fn desktop_research_handoff_path() -> String {
+  "/api/research-handoffs/inspect"
+}
+
+///|
+pub fn desktop_research_handoff_start_path() -> String {
+  "/api/research-handoffs/start"
+}
+
+///|
+pub fn desktop_research_handoff_reconcile_path() -> String {
+  "/api/research-handoffs/reconcile"
+}
+
+///|
+pub fn desktop_moonflow_research_start_path() -> String {
+  "/api/research-handoffs/moonflow/start"
+}
+
+///|
+pub fn desktop_moonflow_research_reconcile_path() -> String {
+  "/api/research-handoffs/moonflow/reconcile"
+}
+
+///|
 pub fn miniapp_contract_path() -> String {
   "/miniapp/contract"
 }
@@ -72,6 +97,36 @@ pub fn desktop_contract() -> Json {
         "POST",
         desktop_evidence_book_path(),
         "research.evidence-book.queue",
+      ),
+      endpoint(
+        "inspect-research-handoff",
+        "POST",
+        desktop_research_handoff_path(),
+        "civic.communication.handoff.inspect",
+      ),
+      endpoint(
+        "start-research-handoff",
+        "POST",
+        desktop_research_handoff_start_path(),
+        "civic.communication.handoff.execute",
+      ),
+      endpoint(
+        "reconcile-research-handoff",
+        "POST",
+        desktop_research_handoff_reconcile_path(),
+        "civic.communication.handoff.reconcile",
+      ),
+      endpoint(
+        "start-moonflow-research-handoff",
+        "POST",
+        desktop_moonflow_research_start_path(),
+        "civic.communication.moonflow.execute",
+      ),
+      endpoint(
+        "reconcile-moonflow-research-handoff",
+        "POST",
+        desktop_moonflow_research_reconcile_path(),
+        "civic.communication.moonflow.reconcile",
       ),
     ],
   }

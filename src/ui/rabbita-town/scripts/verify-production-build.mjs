@@ -113,11 +113,11 @@ assert.match(html, /MoonTown · 能源谷/)
 assert.doesNotMatch(html, /operations\.html|viewport\.html/)
 assert.doesNotMatch(html, /\.tsx|react|typescript/i)
 assert.match(html, /id="app"/)
-assert.match(html, /src="\/bootstrap\.js"/)
-assert.match(html, /href="\/styles\.css"/)
+assert.match(html, /src="\.\/bootstrap\.js"/)
+assert.match(html, /href="\.\/styles\.css"/)
 
 const bootstrap = await readFile(path.join(distRoot, 'bootstrap.js'), 'utf8')
-assert.match(bootstrap, /import\('\/main\.js'\)/)
+assert.match(bootstrap, /import\('\.\/main\.js'\)/)
 assert.doesNotMatch(bootstrap, /vite|react|typescript|\.tsx/i)
 assert.doesNotMatch(
   bootstrap,

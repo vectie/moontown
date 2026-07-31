@@ -8,5 +8,8 @@
 - [Usage](USAGE.md) and [cookbook](COOKBOOK.md) — operator/developer paths.
 - [Wenyu status](WENYU_TOWN_STATUS.md) — dated integration status.
 - [Final integration](FINAL_INTEGRATION.md) — cross-product objectives.
+- [UI-to-UI use cases](qualification/UI_TO_UI_USE_CASES.md) — reproducible
+  Energy Valley and typed research-handoff qualification, including
+  fail-closed links and restart recovery.
 - [`project/README.md`](project/README.md) — project identity, memory and
   release notes.

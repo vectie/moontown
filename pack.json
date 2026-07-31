@@ -57,7 +57,13 @@
     }
   ],
   "schedules": [],
-  "app_entrypoints": [],
+  "app_entrypoints": [
+    {
+      "id": "energy-valley",
+      "path": "/viewport.html",
+      "audience": "civic-operator"
+    }
+  ],
   "migrations": [],
   "evaluations": [],
   "uninstall_contract": {

@@ -98,6 +98,114 @@ fn update_non_form_message(
     OperatorRequestSubmitted(raw) => operator_request_result_update(raw, model)
     BookTemplateRequestSubmitted(raw) =>
       book_template_request_result_update(raw, model)
+    ResearchHandoffInspected(raw) =>
+      match model.research_handoff {
+        LoadingResearchHandoff(request) =>
+          model_only_update({
+            ..model,
+            research_handoff: resolve_research_handoff_response(request, raw),
+          })
+        _ => model_only_update(model)
+      }
+    StartResearchHandoff =>
+      match model.research_handoff {
+        ReadyResearchHandoff(request, handoff) =>
+          (
+            execute_research_handoff_cmd(dispatch, request, "start"),
+            {
+              ..model,
+              research_handoff: ExecutingResearchHandoff(
+                request, handoff, "start",
+              ),
+            },
+          )
+        _ => model_only_update(model)
+      }
+    ReconcileResearchHandoff =>
+      match model.research_handoff {
+        SettledResearchHandoff(request, handoff, reply) =>
+          if reply.callback_status == "pending-reconcile" {
+            (
+              execute_research_handoff_cmd(dispatch, request, "reconcile"),
+              {
+                ..model,
+                research_handoff: ExecutingResearchHandoff(
+                  request, handoff, "reconcile",
+                ),
+              },
+            )
+          } else {
+            model_only_update(model)
+          }
+        _ => model_only_update(model)
+      }
+    ResearchHandoffExecuted(raw) =>
+      match model.research_handoff {
+        ExecutingResearchHandoff(request, handoff, action) =>
+          model_only_update({
+            ..model,
+            research_handoff: resolve_research_handoff_execution_response(
+              request, handoff, action, raw,
+            ),
+          })
+        _ => model_only_update(model)
+      }
+    MoonFlowReceiverInspected(raw) =>
+      match model.moonflow_receiver {
+        LoadingMoonFlowReceiver(request) =>
+          model_only_update({
+            ..model,
+            moonflow_receiver: resolve_moonflow_receiver_inspection(
+              request, raw,
+            ),
+          })
+        _ => model_only_update(model)
+      }
+    StartMoonFlowReceiver =>
+      match model.moonflow_receiver {
+        ReadyMoonFlowReceiver(request, intake, status) =>
+          (
+            execute_moonflow_receiver_cmd(dispatch, request, intake, "start"),
+            {
+              ..model,
+              moonflow_receiver: ExecutingMoonFlowReceiver(
+                request, intake, status, "start",
+              ),
+            },
+          )
+        _ => model_only_update(model)
+      }
+    ReconcileMoonFlowReceiver =>
+      match model.moonflow_receiver {
+        SettledMoonFlowReceiver(request, intake, status, Some(reply)) =>
+          if !reply.ok && status.status == "pending" {
+            (
+              execute_moonflow_receiver_cmd(
+                dispatch, request, intake, "reconcile",
+              ),
+              {
+                ..model,
+                moonflow_receiver: ExecutingMoonFlowReceiver(
+                  request, intake, status, "reconcile",
+                ),
+              },
+            )
+          } else {
+            model_only_update(model)
+          }
+        _ => model_only_update(model)
+      }
+    MoonFlowReceiverSettled(raw) =>
+      match model.moonflow_receiver {
+        ExecutingMoonFlowReceiver(request, intake, status, action) =>
+          model_only_update({
+            ..model,
+            moonflow_receiver: resolve_moonflow_receiver_settlement(
+              request, intake, status, action, raw,
+            ),
+          })
+        _ => model_only_update(model)
+      }
     _ => model_only_update(model)
   }
 }
