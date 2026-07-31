@@ -4,7 +4,7 @@ version = "0.1.0"
 
 import {
   "moonbit-community/rabbita@0.12.4",
-  "vectie/moonlib@0.1.8",
+  "vectie/moonlib@0.1.19",
   "vectie/moontown@0.1.0",
 }
 
