@@ -21,12 +21,12 @@ test "book quality runtime owns semantic review ACP config" {
     "/repo",
     "/bin/codex",
     ["exec", "--model", "gpt-4.1", "--sandbox", "workspace-write"],
-    "gpt-5.5",
+    "gpt-5.6-sol",
   ).stringify()
-  assert_true(corrected.contains("\"model\":\"gpt-5.5\""))
+  assert_true(corrected.contains("\"model\":\"gpt-5.6-sol\""))
   assert_true(
     corrected.contains(
-      "\"args\":[\"exec\",\"--model\",\"gpt-5.5\",\"--sandbox\",\"workspace-write\"]",
+      "\"args\":[\"exec\",\"--model\",\"gpt-5.6-sol\",\"--sandbox\",\"workspace-write\"]",
     ),
   )
 }

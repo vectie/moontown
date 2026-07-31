@@ -1,6 +1,7 @@
 import {
   "vectie/moontown/core",
   "vectie/moontown/adapters/moonbook",
+  "vectie/moontown/flow_adapter",
   "vectie/moontown/roles",
   "vectie/moontown/storage",
   "vectie/moontown/town_runtime",

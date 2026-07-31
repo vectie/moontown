@@ -1014,7 +1014,7 @@ For MoonTown-owned source repairs, the repair profile uses
 `execution_mode: acp` and `execution_target: codex-main`; the configured ACP
 target runs from the repository source root, not only the PlanBook workspace.
 The target model is not a book policy decision. It is a MoonTown ACP adapter
-default, currently `gpt-5.5` unless `MOONTOWN_CODEX_ACP_MODEL` overrides it.
+default, currently `gpt-5.6-sol` unless `MOONTOWN_CODEX_ACP_MODEL` overrides it.
 Daemon-created repair dispatches are detached; operator `--dispatch` may still
 use inline execution when the environment explicitly enables it for debugging.
 That is the intended self-patching path: Mayor/PlanBook choose and bound the

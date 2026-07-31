@@ -1,0 +1,68 @@
+{
+  "id": "moontown",
+  "version": "0.1.0",
+  "display_name": "MoonTown Civic Synthesis",
+  "product_id": "moontown",
+  "kind": "DomainPack",
+  "required_runtime_extensions": ["moonflow", "moonclaw", "moonbook"],
+  "book_templates": [],
+  "schemas": [
+    {
+      "id": "civic-communication-handoff",
+      "version": "1.0.0",
+      "path": "schemas/civic-communication-handoff.schema.json"
+    },
+    {
+      "id": "civic-synthesis-result",
+      "version": "1.0.0",
+      "path": "schemas/civic-synthesis-result.schema.json"
+    }
+  ],
+  "tools": [
+    {
+      "id": "civic.communication.synthesize",
+      "owner_product": "moontown",
+      "input_schema_id": "civic-communication-handoff",
+      "output_schema_id": "civic-synthesis-result",
+      "authority": "WorkspaceMutation",
+      "idempotent": true,
+      "evidence_outputs": [
+        "records/civic-synthesis",
+        "books/*/wiki/civic",
+        "books/*/wiki/reviews"
+      ],
+      "review_required": true
+    }
+  ],
+  "workflows": [
+    {
+      "id": "civic-communication-synthesis",
+      "version": "1.0.0",
+      "path": "workflows/civic-communication-synthesis.md"
+    }
+  ],
+  "skills": [],
+  "policies": [
+    {
+      "id": "civic-synthesis-authority",
+      "version": "1.0.0",
+      "path": "policies/civic-synthesis-authority.md"
+    }
+  ],
+  "provider_ports": [
+    {
+      "id": "moonclaw-civic-reducer",
+      "version": "1.0.0",
+      "path": "providers/moonclaw-civic-reducer.port.md"
+    }
+  ],
+  "schedules": [],
+  "app_entrypoints": [],
+  "migrations": [],
+  "evaluations": [],
+  "uninstall_contract": {
+    "id": "moontown-pack-uninstall",
+    "version": "1.0.0",
+    "path": "UNINSTALL.md"
+  }
+}

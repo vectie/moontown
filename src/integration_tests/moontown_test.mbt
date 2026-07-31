@@ -33,28 +33,30 @@ test "dashboard renders town square and dispatch log" {
 }
 
 ///|
-test "MoonTown adapter preserves advice-only promotion boundary" {
+test "MoonTown adapter publishes only its versioned civic synthesis operation" {
   guard @moontown.moonflow_adapter_capability_json() is Object(capability) else {
     fail("expected MoonTown adapter capability")
   }
-  assert_true(capability["protocol"] == Json::string("moonflow.adapter.v1"))
+  assert_true(capability["protocol"] == Json::string("moonflow.adapter.v2"))
   assert_true(capability["product_id"] == Json::string("moontown"))
-  assert_true(capability["supports_cancel"] == Json::boolean(true))
+  assert_true(capability["supports_cancel"] == Json::boolean(false))
   assert_true(capability["supports_reconcile"] == Json::boolean(true))
-  assert_true(capability["promotion_is_execution"] == Json::boolean(false))
-  assert_true(
-    capability["dissent_preservation_required"] == Json::boolean(true),
-  )
+  assert_true(capability["healthy"] == Json::boolean(false))
+  assert_true(capability["claim_ceiling"] == Json::string("execution-result"))
   guard capability["operations"] is Array(operations) else {
     fail("expected MoonTown operations")
   }
-  assert_true(operations.contains(Json::string("commission-assembly")))
-  assert_true(operations.contains(Json::string("preserve-dissent")))
-  assert_false(operations.contains(Json::string("accept-book-truth")))
+  assert_eq(operations.length(), 1)
+  assert_true(
+    operations.contains(
+      Json::string("moontown/civic.communication.synthesize@0.1.0"),
+    ),
+  )
+  assert_false(operations.contains(Json::string("civic.research-salon")))
   guard capability["authority_classes"] is Array(authorities) else {
     fail("expected MoonTown authorities")
   }
-  assert_false(authorities.contains(Json::string("workspace-mutation")))
+  assert_true(authorities.contains(Json::string("workspace-mutation")))
   assert_false(authorities.contains(Json::string("external-effect")))
   assert_false(authorities.contains(Json::string("physical-effect")))
 }

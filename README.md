@@ -1,5 +1,9 @@
 # MoonTown
 
+> **Domain platform · experimental local alpha.** Read the
+> [product contract](docs/PRODUCT_CONTRACT.md) for civic ownership, runtime
+> boundaries, capability status and release gates.
+
 > MoonBit-native town control plane + embedded strategic roles + scene dashboard + Rabbita operator UI
 
 `MoonBit` `Town Orchestration` `MoonBook Extension API` `MoonClaw Proposal Packets` `Mayor` `Keeper` `Routing` `Health` `Storage` `Scene UI` `Rabbita`

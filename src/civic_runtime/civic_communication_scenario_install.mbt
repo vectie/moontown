@@ -6,6 +6,7 @@ pub async fn bootstrap_civic_communication_scenario_file(
   round_number? : Int = 1,
   workspace_base? : String = "",
   reducer_mode? : CivicCommunicationReductionMode = MoonClawReducer,
+  run_inline? : Bool = moontown_moonclaw_inline_enabled(),
 ) -> String {
   match load_civic_communication_scenario_file(template_path) {
     Some(scenario) => {
@@ -19,6 +20,7 @@ pub async fn bootstrap_civic_communication_scenario_file(
         round_number~,
         workspace_base~,
         reducer_mode~,
+        run_inline~,
       )
       install_civic_communication_scenario_for_daemon(
         scenario, workspace_base, resolved_round_id, round_number, summary,

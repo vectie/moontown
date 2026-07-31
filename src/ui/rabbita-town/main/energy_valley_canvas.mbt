@@ -16,8 +16,8 @@ priv struct GoldenValleyBuilding {
 priv struct GoldenValleyCanvasAgent {
   x : Double
   y : Double
-  hue : Int
-  role : String
+  sprite_path : String
+  facing_left : Bool
   bob : Double
   work_color : String
 }
@@ -1067,79 +1067,106 @@ extern "js" fn golden_draw_reference_tree(
   #| }
 
 ///|
-extern "js" fn golden_runtime_agent_hue(id : String, role : String) -> Int =
-  #| (id, role) => {
-  #|   let hash = 2166136261;
-  #|   for (let index = 0; index < id.length; index += 1) {
-  #|     hash ^= id.charCodeAt(index);
-  #|     hash = Math.imul(hash, 16777619);
-  #|   }
-  #|   const base = role === "mayor" ? 45 : role === "keeper" ? 210 :
-  #|     role === "resident" ? 20 : 130;
-  #|   return base + ((hash >>> 0) % 17) - 8;
-  #| }
+fn golden_valley_agent_sprite_path(role : String, index : Int) -> String {
+  match role.to_lower() {
+    "mayor" => "/tilemap/actors/mayor_walk_strip.png"
+    "keeper" => "/tilemap/actors/keeper_walk_strip.png"
+    "worker" => "/tilemap/actors/worker_walk_strip.png"
+    "researcher" => "/tilemap/actors/researcher_walk_strip.png"
+    _ => "/tilemap/actors/roster/resident_\{index.abs() % 64}_walk_strip.png"
+  }
+}
 
 ///|
-extern "js" fn golden_draw_reference_agent(
+fn golden_valley_agent_faces_left(
+  path : Array[(Double, Double)],
+  elapsed_seconds : Double,
+  speed : Double,
+  phase_offset : Double,
+  dwell_seconds : Double,
+  point : (Double, Double),
+) -> Bool {
+  match
+    golden_valley_commute_point(
+      path,
+      elapsed_seconds + 0.12,
+      speed,
+      phase_offset,
+      dwell_seconds,
+    ) {
+    Some(next) => next.0 - next.1 < point.0 - point.1
+    None => false
+  }
+}
+
+///|
+extern "js" fn golden_draw_sprite_agent(
   context : @dom.CanvasRenderingContext2D,
   sx : Double,
   sy : Double,
   zoom : Double,
-  hue : Int,
-  role : String,
+  sprite_path : String,
+  facing_left : Bool,
   bob : Double,
   work_color : String,
 ) -> Unit =
-  #| (context, sx, sy, zoom0, hue, role, bob, workColor) => {
-  #|   const zoom = zoom0 * 1.5;
-  #|   const bobY = Math.abs(Math.sin(bob)) * 2.2 * zoom;
-  #|   const body = `hsl(${hue}, 60%, 55%)`;
-  #|   const bodyDark = `hsl(${hue}, 55%, 40%)`;
-  #|   context.fillStyle = "rgba(0,0,0,0.25)";
-  #|   context.beginPath();
-  #|   context.ellipse(sx, sy + zoom, 5 * zoom, 2.2 * zoom, 0, 0, Math.PI * 2);
-  #|   context.fill();
-  #|   const y0 = sy - bobY;
-  #|   const step = Math.sin(bob) * 3 * zoom;
-  #|   context.strokeStyle = bodyDark;
-  #|   context.lineWidth = 2 * zoom;
-  #|   context.beginPath();
-  #|   context.moveTo(sx, y0 - 5 * zoom);
-  #|   context.lineTo(sx - step * 0.6, y0);
-  #|   context.moveTo(sx, y0 - 5 * zoom);
-  #|   context.lineTo(sx + step * 0.6, y0);
-  #|   context.stroke();
-  #|   context.fillStyle = body;
-  #|   context.beginPath();
-  #|   context.ellipse(sx, y0 - 8.5 * zoom, 4 * zoom, 5 * zoom, 0, 0, Math.PI * 2);
-  #|   context.fill();
-  #|   context.fillStyle = "#f2d8b8";
-  #|   context.beginPath();
-  #|   context.arc(sx, y0 - 15 * zoom, 3.2 * zoom, 0, Math.PI * 2);
-  #|   context.fill();
-  #|   if (role === "mayor") {
-  #|     context.fillStyle = "#2c2c34";
-  #|     context.fillRect(sx - 3.4 * zoom, y0 - 21 * zoom, 6.8 * zoom, 4 * zoom);
-  #|     context.fillRect(sx - 4.6 * zoom, y0 - 17.6 * zoom, 9.2 * zoom, 1.6 * zoom);
-  #|   } else if (role === "worker") {
-  #|     context.fillStyle = "#f8c840";
-  #|     context.beginPath();
-  #|     context.arc(sx, y0 - 16.5 * zoom, 3.4 * zoom, Math.PI, 0);
-  #|     context.fill();
-  #|     context.fillRect(sx - 4 * zoom, y0 - 16.8 * zoom, 8 * zoom, 1.2 * zoom);
-  #|   } else if (role === "keeper") {
-  #|     context.fillStyle = "#3a6ad4";
-  #|     context.fillRect(sx + 2.6 * zoom, y0 - 11 * zoom, 3 * zoom, 4 * zoom);
+  #| (context, sx, sy, zoom, spritePath, facingLeft, bob, workColor) => {
+  #|   globalThis.__moontownGoldenAgentSprites ||= new Map();
+  #|   const cache = globalThis.__moontownGoldenAgentSprites;
+  #|   let sprite = cache.get(spritePath);
+  #|   if (!sprite) {
+  #|     const image = new Image();
+  #|     sprite = { image, ready: false, failed: false };
+  #|     cache.set(spritePath, sprite);
+  #|     image.decoding = "async";
+  #|     image.onload = () => {
+  #|       sprite.ready = true;
+  #|       globalThis.__moontownGoldenValleyRender?.();
+  #|     };
+  #|     image.onerror = () => {
+  #|       sprite.failed = true;
+  #|     };
+  #|     image.src = spritePath;
   #|   }
-  #|   if (workColor) {
-  #|     context.fillStyle = workColor;
-  #|     context.beginPath();
-  #|     context.arc(sx + 6 * zoom, y0 - 20 * zoom, 2.4 * zoom, 0, Math.PI * 2);
-  #|     context.fill();
-  #|     context.strokeStyle = "rgba(2,6,23,0.85)";
-  #|     context.lineWidth = zoom;
-  #|     context.stroke();
+  #|   const height = Math.min(82, Math.max(20, 64 * zoom));
+  #|   const shadowWidth = height * 0.27;
+  #|   context.save();
+  #|   context.fillStyle = "rgba(15,23,42,0.24)";
+  #|   context.beginPath();
+  #|   context.ellipse(
+  #|     sx, sy + Math.max(1, zoom * 2),
+  #|     shadowWidth, Math.max(2, height * 0.08),
+  #|     0, 0, Math.PI * 2,
+  #|   );
+  #|   context.fill();
+  #|   if (sprite.ready && sprite.image.naturalWidth > 0) {
+  #|     const image = sprite.image;
+  #|     const frameCount = 4;
+  #|     const frameWidth = image.naturalWidth / frameCount;
+  #|     const frame = ((Math.floor(bob * 0.72) % frameCount) + frameCount) %
+  #|       frameCount;
+  #|     const width = height * frameWidth / image.naturalHeight;
+  #|     const bobY = Math.abs(Math.sin(bob * 0.5)) * Math.max(0.5, zoom);
+  #|     context.translate(sx, sy - bobY);
+  #|     if (facingLeft) context.scale(-1, 1);
+  #|     context.imageSmoothingEnabled = false;
+  #|     context.drawImage(
+  #|       image,
+  #|       frame * frameWidth, 0, frameWidth, image.naturalHeight,
+  #|       -width / 2, -height, width, height,
+  #|     );
+  #|     if (workColor) {
+  #|       context.fillStyle = workColor;
+  #|       context.beginPath();
+  #|       context.arc(width * 0.42, -height * 0.9, Math.max(2, height * 0.08),
+  #|         0, Math.PI * 2);
+  #|       context.fill();
+  #|       context.strokeStyle = "rgba(2,6,23,0.82)";
+  #|       context.lineWidth = Math.max(1, zoom * 1.4);
+  #|       context.stroke();
+  #|     }
   #|   }
+  #|   context.restore();
   #| }
 
 ///|
@@ -1916,12 +1943,6 @@ fn golden_valley_canvas_agents(
     } else {
       "resident"
     }
-    let base_hue = match role {
-      "mayor" => 45
-      "keeper" => 210
-      "worker" => 130
-      _ => 20
-    }
     if buildings.length() < 2 {
       continue
     }
@@ -1946,32 +1967,29 @@ fn golden_valley_canvas_agents(
         buildings[destination_index],
       ) {
       None => ()
-      Some(path) =>
+      Some(path) => {
+        let elapsed_seconds = golden_animation_seconds()
+        let speed = if role == "worker" { 2.2 } else { 1.6 }
+        let phase_offset = energy_valley_variation(seed, index, 23, 613, 240).to_double()
+        let dwell_seconds = 5.0 + (index % 4).to_double()
         match
           golden_valley_commute_point(
-            path,
-            golden_animation_seconds(),
-            if role == "worker" {
-              2.2
-            } else {
-              1.6
-            },
-            energy_valley_variation(seed, index, 23, 613, 240).to_double(),
-            5.0 + (index % 4).to_double(),
+            path, elapsed_seconds, speed, phase_offset, dwell_seconds,
           ) {
           None => ()
           Some(point) =>
             result.push({
               x: point.0,
               y: point.1,
-              hue: base_hue +
-              energy_valley_variation(seed, index, 19, 317, 17) -
-              8,
-              role,
+              sprite_path: golden_valley_agent_sprite_path(role, index),
+              facing_left: golden_valley_agent_faces_left(
+                path, elapsed_seconds, speed, phase_offset, dwell_seconds, point,
+              ),
               bob: golden_animation_seconds() * 9.0 + index.to_double(),
               work_color: "",
             })
         }
+      }
     }
   }
   let runtime_agents = energy_valley_runtime_active_agents(
@@ -1994,21 +2012,21 @@ fn golden_valley_canvas_agents(
             } else {
               1.7
             }
+            let elapsed_seconds = if model.energy_valley_runtime.motion_started_at_ms <
+              0.0 {
+              0.0
+            } else {
+              (
+                browser_now_ms() -
+                model.energy_valley_runtime.motion_started_at_ms
+              ) /
+              1000.0
+            }
+            let phase_offset = energy_valley_variation(seed, index, 29, 617, 24).to_double()
+            let dwell_seconds = 9.0
             match
               golden_valley_commute_point(
-                path,
-                if model.energy_valley_runtime.motion_started_at_ms < 0.0 {
-                  0.0
-                } else {
-                  (
-                    browser_now_ms() -
-                    model.energy_valley_runtime.motion_started_at_ms
-                  ) /
-                  1000.0
-                },
-                speed,
-                energy_valley_variation(seed, index, 29, 617, 24).to_double(),
-                9.0,
+                path, elapsed_seconds, speed, phase_offset, dwell_seconds,
               ) {
               None => ()
               Some(point) => {
@@ -2019,8 +2037,13 @@ fn golden_valley_canvas_agents(
                 result.push({
                   x: point.0,
                   y: point.1,
-                  hue: golden_runtime_agent_hue(agent.id, agent.role),
-                  role: agent.role,
+                  sprite_path: golden_valley_agent_sprite_path(
+                    agent.role,
+                    index,
+                  ),
+                  facing_left: golden_valley_agent_faces_left(
+                    path, elapsed_seconds, speed, phase_offset, dwell_seconds, point,
+                  ),
                   bob: golden_animation_seconds() * 9.0 + index.to_double(),
                   work_color: golden_valley_work_status_color(status),
                 })
@@ -2054,7 +2077,7 @@ fn golden_draw_agents_at_depth(
       sy > viewport_height.to_double() + 30.0 {
       continue
     }
-    golden_draw_reference_agent(
+    golden_draw_sprite_agent(
       context,
       sx,
       sy,
@@ -2063,8 +2086,8 @@ fn golden_draw_agents_at_depth(
       } else {
         golden_valley_camera_zoom()
       },
-      agent.hue,
-      agent.role,
+      agent.sprite_path,
+      agent.facing_left,
       agent.bob,
       agent.work_color,
     )

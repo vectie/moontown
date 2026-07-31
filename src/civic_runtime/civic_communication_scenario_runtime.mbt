@@ -6,6 +6,7 @@ pub async fn bootstrap_civic_communication_scenario(
   round_number? : Int = 1,
   workspace_base? : String = "",
   reducer_mode? : CivicCommunicationReductionMode = MoonClawReducer,
+  run_inline? : Bool = moontown_moonclaw_inline_enabled(),
 ) -> String {
   let resolved_round_id = civic_pattern_round_id_for_scenario(
     scenario, round_id, round_number,
@@ -16,6 +17,7 @@ pub async fn bootstrap_civic_communication_scenario(
     round_number~,
     workspace_base~,
     mode=reducer_mode,
+    run_inline~,
   )
   if reduction.status is Completed && reduction.ideas.length() > 0 {
     materialize_civic_communication_scenario(

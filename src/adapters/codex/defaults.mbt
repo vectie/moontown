@@ -2,7 +2,7 @@
 pub fn model() -> String {
   match optional_env_text("MOONTOWN_CODEX_ACP_MODEL") {
     Some(model) => model
-    None => "gpt-5.5"
+    None => "gpt-5.6-sol"
   }
 }
 

@@ -7,6 +7,7 @@ pub async fn bootstrap_civic_communication_handoff_file(
   round_number? : Int = 1,
   workspace_base? : String = "",
   reducer_mode? : CivicCommunicationReductionMode = MoonClawReducer,
+  run_inline? : Bool = moontown_moonclaw_inline_enabled(),
 ) -> String {
   let handoff = match load_civic_communication_handoff_file(handoff_path) {
     Some(value) => value
@@ -39,6 +40,7 @@ pub async fn bootstrap_civic_communication_handoff_file(
     round_number~,
     workspace_base~,
     reducer_mode~,
+    run_inline~,
   )
   install_civic_communication_scenario_for_daemon(
     handoff.scenario,

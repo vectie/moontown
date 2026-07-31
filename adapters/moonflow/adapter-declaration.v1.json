@@ -1,0 +1,16 @@
+{
+  "contract_id": "moonflow.adapter-declaration.v1",
+  "adapter_id": "moontown-civic-synthesis-v1",
+  "product_id": "moontown",
+  "pack_id": "moontown",
+  "pack_version": "0.1.0",
+  "protocol": "moonflow.adapter.v2",
+  "operations": [
+    {
+      "operation_id": "civic.communication.synthesize",
+      "claim_ceiling": "execution-result",
+      "supports_cancel": false,
+      "supports_reconcile": true
+    }
+  ]
+}

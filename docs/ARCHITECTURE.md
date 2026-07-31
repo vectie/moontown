@@ -538,7 +538,7 @@ hard-code their own Codex model string. The adapter owns `model()`,
 ACP target upsert, and the MoonTown ACP target JSON.
 Those builders must include `--model <model>` because MoonClaw's ACP runner
 treats the `model` field as launch metadata/env, not as an automatic CLI
-argument. The default is `gpt-5.5`, with `MOONTOWN_CODEX_ACP_MODEL` as the
+argument. The default is `gpt-5.6-sol`, with `MOONTOWN_CODEX_ACP_MODEL` as the
 operator override.
 PlanBook source repair must use this adapter-owned `codex-main` target builder
 instead of hand-assembling backend/label/cwd/workspace/command/args/model JSON

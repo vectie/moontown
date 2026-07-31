@@ -25,7 +25,7 @@ test "wenyu build step metadata keeps builder controls" {
       "\"preferred_skills\":[\"wenyu-build\",\"wenyu-code-patch\"]",
     ),
   )
-  assert_true(metadata.contains("\"model\":\"gpt-5.5\""))
+  assert_true(metadata.contains("\"model\":\"gpt-5.6-sol\""))
   assert_true(metadata.contains("\"enable_tools\":true"))
   assert_true(metadata.contains("\"web_search\":false"))
   assert_true(metadata.contains("\"timeout_ms\":600000"))

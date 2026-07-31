@@ -320,7 +320,7 @@ async test "planbook repair acp target uses resolved codex command" {
   assert_true(target.contains("\"--sandbox\""))
   assert_true(target.contains("\"workspace-write\""))
   assert_true(target.contains("\"--model\""))
-  assert_true(target.contains("\"gpt-5.5\""))
+  assert_true(target.contains("\"gpt-5.6-sol\""))
   assert_true(target.contains("\"cwd\": \"\{source_root}\""))
   assert_true(target.contains("\"workspace\": \"\{source_root}\""))
   assert_true(!target.contains("\"cwd\": \"\{workspace_root}\""))
