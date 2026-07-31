@@ -1,5 +1,7 @@
 # MoonTown documentation
 
+- [Responsibility and testability](RESPONSIBILITY_AND_TESTABILITY.md)
+
 - [Product contract](PRODUCT_CONTRACT.md) — current maturity, runtime
   boundaries and release gates.
 - [Architecture](ARCHITECTURE.md) — product and package ownership.

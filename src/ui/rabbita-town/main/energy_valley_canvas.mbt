@@ -1841,24 +1841,6 @@ fn golden_draw_ambient(
     sy > viewport_height.to_double() + 80.0 {
     return
   }
-  let (roof, left, right) = if structure == "tower" {
-    ("#d6e0e3", "#7e9298", "#9eafb4")
-  } else if structure == "block" {
-    ("#d7d9d3", "#969e9a", "#b0b6b1")
-  } else if structure == "lowrise" {
-    ("#e1e0d8", "#a8aaa3", "#bec0b8")
-  } else if structure == "campus" {
-    ("#d9ddd2", "#a9b9ad", "#bbc8bf")
-  } else if structure == "civic" {
-    ("#e4dccb", "#ad9d87", "#c4b6a0")
-  } else if structure == "industrial" {
-    ("#cbd3d4", "#899798", "#a2adae")
-  } else if structure == "courtyard" {
-    ("#e4dfcf", "#b8ad99", "#c9beaa")
-  } else {
-    ("#d8d9d2", "#9fa7a4", "#b6bcb7")
-  }
-  let visual_height = 10.0 + floors.to_double() * 18.0
   golden_draw_reference_building_shadow(
     context,
     sx,
@@ -1867,31 +1849,17 @@ fn golden_draw_ambient(
     box_depth,
     golden_valley_camera_zoom(),
   )
-  golden_draw_iso_box(
-    context, sx, sy, box_width, box_depth, visual_height, roof, left, right,
+  golden_draw_architecture_plan(
+    context,
+    golden_architecture_plan(
+      structure, x, y, footprint_width, footprint_depth, floors,
+    ),
+    x.to_double(),
+    y.to_double(),
+    viewport_width,
+    viewport_height,
+    hour,
   )
-  if golden_valley_camera_zoom() >= 0.18 {
-    golden_draw_iso_windows(
-      context,
-      sx,
-      sy,
-      box_width,
-      box_depth,
-      visual_height,
-      golden_valley_camera_zoom(),
-      if structure == "tower" {
-        footprint_width
-      } else {
-        (footprint_width + 1) / 2
-      },
-      floors,
-      if hour < 6.0 || hour >= 19.0 {
-        0.42
-      } else {
-        0.0
-      },
-    )
-  }
 }
 
 ///|

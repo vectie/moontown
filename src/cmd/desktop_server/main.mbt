@@ -404,6 +404,10 @@ async fn handle_request(
     return
   }
   if path == @town_contract.desktop_standing_watch_path() {
+    if request.meth is Get {
+      send_json(conn, 200, operator_requests_json())
+      return
+    }
     if reject_unsafe_operator_write(request, conn) {
       return
     }
@@ -419,6 +423,15 @@ async fn handle_request(
     send_json(conn, 200, result)
     return
   }
+  if request.meth is Get &&
+    path == @town_contract.desktop_standing_goals_path() {
+    let goals = match read_optional_json(state_root() + "/standing-goals.json") {
+      Some(value) => value
+      None => ([] : Array[Json]).to_json()
+    }
+    send_json(conn, 200, goals)
+    return
+  }
   if path == @town_contract.desktop_evidence_book_path() {
     if reject_unsafe_operator_write(request, conn) {
       return
@@ -427,6 +440,30 @@ async fn handle_request(
       operator_policy_path(),
     )
     let result = application.queue_evidence_book(body.read_all().text()) catch {
+      error => {
+        send_json(conn, 400, { "ok": false, "error": "\{error}" })
+        return
+      }
+    }
+    send_json(conn, 200, result)
+    return
+  }
+  if path == @town_contract.desktop_book_registration_path() {
+    if request.meth is Get {
+      send_json(
+        conn,
+        200,
+        @moonbook.load_or_create_catalog(path=@moonbook.default_catalog_path()).to_json(),
+      )
+      return
+    }
+    if reject_unsafe_operator_write(request, conn) {
+      return
+    }
+    let application = @town_application.default_request_application(
+      operator_policy_path(),
+    )
+    let result = application.register_existing_book(body.read_all().text()) catch {
       error => {
         send_json(conn, 400, { "ok": false, "error": "\{error}" })
         return

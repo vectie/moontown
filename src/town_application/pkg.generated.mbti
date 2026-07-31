@@ -14,6 +14,7 @@ pub struct RequestApplication {
   operator_policy_path : String
 }
 pub async fn RequestApplication::queue_evidence_book(Self, String) -> Json
+pub async fn RequestApplication::register_existing_book(Self, String) -> Json
 pub async fn RequestApplication::submit_standing_watch(Self, String) -> Json
 
 // Type aliases

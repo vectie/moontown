@@ -14,8 +14,18 @@ pub fn desktop_standing_watch_path() -> String {
 }
 
 ///|
+pub fn desktop_standing_goals_path() -> String {
+  "/api/standing-goals"
+}
+
+///|
 pub fn desktop_evidence_book_path() -> String {
   "/api/book-template-requests"
+}
+
+///|
+pub fn desktop_book_registration_path() -> String {
+  "/api/book-registrations"
 }
 
 ///|
@@ -87,16 +97,40 @@ pub fn desktop_contract() -> Json {
     "endpoints": [
       endpoint("contract", "GET", desktop_contract_path(), "contract.read"),
       endpoint(
+        "list-standing-watches",
+        "GET",
+        desktop_standing_watch_path(),
+        "research.watch.read",
+      ),
+      endpoint(
         "submit-standing-watch",
         "POST",
         desktop_standing_watch_path(),
         "research.watch.submit",
       ),
       endpoint(
+        "list-standing-goals",
+        "GET",
+        desktop_standing_goals_path(),
+        "research.watch.read",
+      ),
+      endpoint(
         "queue-evidence-book",
         "POST",
         desktop_evidence_book_path(),
         "research.evidence-book.queue",
+      ),
+      endpoint(
+        "list-book-registrations",
+        "GET",
+        desktop_book_registration_path(),
+        "book.catalog.read",
+      ),
+      endpoint(
+        "register-existing-book",
+        "POST",
+        desktop_book_registration_path(),
+        "book.catalog.register",
       ),
       endpoint(
         "inspect-research-handoff",

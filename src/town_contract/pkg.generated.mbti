@@ -2,6 +2,8 @@
 package "vectie/moontown/town_contract"
 
 // Values
+pub fn desktop_book_registration_path() -> String
+
 pub fn desktop_contract() -> Json
 
 pub fn desktop_contract_path() -> String
@@ -17,6 +19,8 @@ pub fn desktop_research_handoff_path() -> String
 pub fn desktop_research_handoff_reconcile_path() -> String
 
 pub fn desktop_research_handoff_start_path() -> String
+
+pub fn desktop_standing_goals_path() -> String
 
 pub fn desktop_standing_watch_path() -> String
 

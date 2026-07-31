@@ -1,8 +1,9 @@
 # MoonTown product contract
 
-Class: domain platform
+Class: domain pack
+Visible surface: civic and spatial application
 Maturity: experimental local alpha
-Last reviewed: 2026-07-30
+Last reviewed: 2026-07-31
 
 ## Outcome
 

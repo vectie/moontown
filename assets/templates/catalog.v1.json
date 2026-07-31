@@ -1,0 +1,196 @@
+{
+  "contract_id": "moonsuite.template-catalog.v1",
+  "catalog_id": "moontown.civic-templates",
+  "owner_product": "moontown",
+  "version": "1.0.0",
+  "catalog_digest": "sha256:55a224e6dca810fcb35b48255fab7b29ce4d381e7d1f9624fcb6694f4f901594",
+  "templates": [
+    {
+      "contract_id": "moonsuite.template-envelope.v1",
+      "template_id": "wenyu-policy-hall-triage",
+      "owner_product": "moontown",
+      "version": "1.0.0",
+      "source_ref": "assets/templates/civic-patterns/policy-hall-triage-desk.json",
+      "source_digest": "sha256:2b3838b4651ddc070f382de90308a7e906dd0452da0f8be639ae7f296c593b35",
+      "template_class": "civic_scenario",
+      "maturity": "local-qualified",
+      "title": "Policy triage desk",
+      "summary": "Route a policy question through official-source research, eligibility checks, and named citation review.",
+      "primary_user": "civic service operator",
+      "primary_action": "Review the policy question and required resident context",
+      "completion_statement": "A cited checklist or precise missing-input request reaches keeper review; no unreviewed advice is published.",
+      "icon": "⚖️",
+      "migration_policy": {"strategy": "owner-reviewed", "compatible_from": [], "note": "MoonTown reviews civic pattern changes before selecting a new version."},
+      "preview_ref": "/index.html",
+      "qualification_evidence_refs": [{"kind": "qualification_report", "ref": "docs/project/ui-release-ux-test-report.md", "digest": "sha256:86038966011c3a25e1c1444895e8d87f0b5fa25b2b88cf8fe89032dbb81a9b28"}],
+      "requirements": {
+        "operations": [{"operation_ref": "moontown/civic.communication.synthesize@0.1.0", "input_schema_ref": "moontown/civic-communication-handoff@1.0.0", "output_schema_ref": "moontown/civic-synthesis-result@1.0.0", "required": true}],
+        "schemas": ["moontown/civic-communication-handoff@1.0.0", "moontown/civic-synthesis-result@1.0.0"]
+      },
+      "ceilings": {
+        "authorities": ["workspace-mutation"],
+        "external_effect": false,
+        "cost": {"status": "provider_dependent", "currency": "N/A", "max_minor": null, "note": "MoonClaw provider use is resolved by the host before execution."},
+        "licensing": {"status": "review_required", "classes": ["official policy sources", "operator-supplied context"], "note": "Source and reuse rights remain attached to evidence."},
+        "review": {"required": true, "authority": "keeper", "gates": ["policy_citation_review"]}
+      },
+      "recovery": {"blocked": false, "reason": "", "next_action": "Open MoonTown and review the question, evidence boundary, and human gate. Instance creation is not implemented yet."},
+      "owner_payload": {"pattern_id": "wenyu-policy-hall-triage", "building_id": "policy-hall"}
+    },
+    {
+      "contract_id": "moonsuite.template-envelope.v1",
+      "template_id": "wenyu-contest-express-review",
+      "owner_product": "moontown",
+      "version": "1.0.0",
+      "source_ref": "assets/templates/civic-patterns/contest-express-review-council.json",
+      "source_digest": "sha256:a59c9a3fcf28745b528e20b3bec964d0def9f7de33637f8627c45957a8d698ed",
+      "template_class": "civic_scenario",
+      "maturity": "local-qualified",
+      "title": "Contest review council",
+      "summary": "Compare a team and its artifacts with current contest criteria, deadlines, and mock-judge evidence.",
+      "primary_user": "competition program operator",
+      "primary_action": "Choose the submission and confirm its deadline",
+      "completion_statement": "A criteria-based readiness decision and concrete revision queue reaches keeper review.",
+      "icon": "🏆",
+      "migration_policy": {"strategy": "owner-reviewed", "compatible_from": [], "note": "MoonTown reviews civic pattern changes before selecting a new version."},
+      "preview_ref": "/index.html",
+      "qualification_evidence_refs": [{"kind": "qualification_report", "ref": "docs/project/ui-release-ux-test-report.md", "digest": "sha256:86038966011c3a25e1c1444895e8d87f0b5fa25b2b88cf8fe89032dbb81a9b28"}],
+      "requirements": {
+        "operations": [{"operation_ref": "moontown/civic.communication.synthesize@0.1.0", "input_schema_ref": "moontown/civic-communication-handoff@1.0.0", "output_schema_ref": "moontown/civic-synthesis-result@1.0.0", "required": true}],
+        "schemas": ["moontown/civic-communication-handoff@1.0.0", "moontown/civic-synthesis-result@1.0.0"]
+      },
+      "ceilings": {
+        "authorities": ["workspace-mutation"], "external_effect": false,
+        "cost": {"status": "provider_dependent", "currency": "N/A", "max_minor": null, "note": "MoonClaw provider use is resolved before execution."},
+        "licensing": {"status": "review_required", "classes": ["official contest calls", "team-supplied artifacts"], "note": "Eligibility and artifact reuse are checked during review."},
+        "review": {"required": true, "authority": "keeper", "gates": ["contest_submission_review"]}
+      },
+      "recovery": {"blocked": false, "reason": "", "next_action": "Open MoonTown and review the contest call plus current submission artifacts. Instance creation is not implemented yet."},
+      "owner_payload": {"pattern_id": "wenyu-contest-express-review", "building_id": "contest-express"}
+    },
+    {
+      "contract_id": "moonsuite.template-envelope.v1",
+      "template_id": "wenyu-social-square-match",
+      "owner_product": "moontown",
+      "version": "1.0.0",
+      "source_ref": "assets/templates/civic-patterns/social-square-match-market.json",
+      "source_digest": "sha256:e5df9c6266ed8195e59d891dfd26b17c5e864f58efe2c32e9e363cadeecd7c49",
+      "template_class": "civic_scenario",
+      "maturity": "local-qualified",
+      "title": "Consent-aware match market",
+      "summary": "Turn scoped community needs and offers into small, reversible match proposals with explicit consent.",
+      "primary_user": "community operator",
+      "primary_action": "Confirm the needs, offers, and disclosure limits",
+      "completion_statement": "A mutually useful next interaction is proposed for keeper review; no introduction occurs without consent.",
+      "icon": "🤝",
+      "migration_policy": {"strategy": "owner-reviewed", "compatible_from": [], "note": "MoonTown reviews civic pattern changes before selecting a new version."},
+      "preview_ref": "/index.html",
+      "qualification_evidence_refs": [{"kind": "qualification_report", "ref": "docs/project/ui-release-ux-test-report.md", "digest": "sha256:86038966011c3a25e1c1444895e8d87f0b5fa25b2b88cf8fe89032dbb81a9b28"}],
+      "requirements": {
+        "operations": [{"operation_ref": "moontown/civic.communication.synthesize@0.1.0", "input_schema_ref": "moontown/civic-communication-handoff@1.0.0", "output_schema_ref": "moontown/civic-synthesis-result@1.0.0", "required": true}],
+        "schemas": ["moontown/civic-communication-handoff@1.0.0", "moontown/civic-synthesis-result@1.0.0"]
+      },
+      "ceilings": {
+        "authorities": ["workspace-mutation"], "external_effect": false,
+        "cost": {"status": "provider_dependent", "currency": "N/A", "max_minor": null, "note": "MoonClaw provider use is resolved before execution."},
+        "licensing": {"status": "restricted", "classes": ["consented community data"], "note": "Private attributes stay scoped; any introduction requires explicit consent."},
+        "review": {"required": true, "authority": "keeper", "gates": ["social_introduction_review"]}
+      },
+      "recovery": {"blocked": false, "reason": "", "next_action": "Open MoonTown and review consent state before adding any participant. Instance creation is not implemented yet."},
+      "owner_payload": {"pattern_id": "wenyu-social-square-match", "building_id": "social-square"}
+    },
+    {
+      "contract_id": "moonsuite.template-envelope.v1",
+      "template_id": "wenyu-vitality-dashboard-watch",
+      "owner_product": "moontown",
+      "version": "1.0.0",
+      "source_ref": "assets/templates/civic-patterns/vitality-dashboard-signal-watch.json",
+      "source_digest": "sha256:88f9d8ae8b1b09640febdc408c562efd2e845a0ea2aede9c35b28f932f6f67dd",
+      "template_class": "civic_scenario",
+      "maturity": "local-qualified",
+      "title": "Town vitality signal watch",
+      "summary": "Separate real domain changes from retries and service churn, then create a concise recovery digest.",
+      "primary_user": "MoonTown mayor",
+      "primary_action": "Choose the runtime signals and freshness boundary",
+      "completion_statement": "A source-linked change/no-change digest and prioritized recovery queue reaches mayor review.",
+      "icon": "💓",
+      "migration_policy": {"strategy": "owner-reviewed", "compatible_from": [], "note": "MoonTown reviews civic pattern changes before selecting a new version."},
+      "preview_ref": "/index.html",
+      "qualification_evidence_refs": [{"kind": "qualification_report", "ref": "docs/project/ui-release-ux-test-report.md", "digest": "sha256:86038966011c3a25e1c1444895e8d87f0b5fa25b2b88cf8fe89032dbb81a9b28"}],
+      "requirements": {
+        "operations": [{"operation_ref": "moontown/civic.communication.synthesize@0.1.0", "input_schema_ref": "moontown/civic-communication-handoff@1.0.0", "output_schema_ref": "moontown/civic-synthesis-result@1.0.0", "required": true}],
+        "schemas": ["moontown/civic-communication-handoff@1.0.0", "moontown/civic-synthesis-result@1.0.0"]
+      },
+      "ceilings": {
+        "authorities": ["observe", "workspace-mutation"], "external_effect": false,
+        "cost": {"status": "provider_dependent", "currency": "N/A", "max_minor": null, "note": "Observation is local; synthesis cost depends on the approved provider."},
+        "licensing": {"status": "cleared", "classes": ["local runtime evidence"], "note": "The scenario does not publish operational evidence."},
+        "review": {"required": true, "authority": "mayor", "gates": ["service_health_review"]}
+      },
+      "recovery": {"blocked": false, "reason": "", "next_action": "Open MoonTown and review the services whose evidence should be reconciled. Instance creation is not implemented yet."},
+      "owner_payload": {"pattern_id": "wenyu-vitality-dashboard-watch", "building_id": "vitality-dashboard"}
+    },
+    {
+      "contract_id": "moonsuite.template-envelope.v1",
+      "template_id": "wenyu-ai-garden-learning",
+      "owner_product": "moontown",
+      "version": "1.0.0",
+      "source_ref": "assets/templates/civic-patterns/ai-garden-learning-cohort.json",
+      "source_digest": "sha256:e37b3ed7a5b542004731bb7c00c2c015ba8263540fbd9d03162ac26a01614531",
+      "template_class": "civic_scenario",
+      "maturity": "local-qualified",
+      "title": "AI learning cohort",
+      "summary": "Assess a learner’s current gap, build a small artifact-based lesson, and review measurable practice.",
+      "primary_user": "learning program operator",
+      "primary_action": "Describe the learner goal and current misconception",
+      "completion_statement": "A level-appropriate lesson, exercise, and measurable review plan reaches keeper approval.",
+      "icon": "🌱",
+      "migration_policy": {"strategy": "owner-reviewed", "compatible_from": [], "note": "MoonTown reviews civic pattern changes before selecting a new version."},
+      "preview_ref": "/index.html",
+      "qualification_evidence_refs": [{"kind": "qualification_report", "ref": "docs/project/ui-release-ux-test-report.md", "digest": "sha256:86038966011c3a25e1c1444895e8d87f0b5fa25b2b88cf8fe89032dbb81a9b28"}],
+      "requirements": {
+        "operations": [{"operation_ref": "moontown/civic.communication.synthesize@0.1.0", "input_schema_ref": "moontown/civic-communication-handoff@1.0.0", "output_schema_ref": "moontown/civic-synthesis-result@1.0.0", "required": true}],
+        "schemas": ["moontown/civic-communication-handoff@1.0.0", "moontown/civic-synthesis-result@1.0.0"]
+      },
+      "ceilings": {
+        "authorities": ["workspace-mutation"], "external_effect": false,
+        "cost": {"status": "provider_dependent", "currency": "N/A", "max_minor": null, "note": "MoonClaw provider use is resolved before execution."},
+        "licensing": {"status": "review_required", "classes": ["operator-supplied learning context", "approved teaching sources"], "note": "Age, safety, and source reuse require operator confirmation."},
+        "review": {"required": true, "authority": "keeper", "gates": ["lesson_quality_review"]}
+      },
+      "recovery": {"blocked": false, "reason": "", "next_action": "Open MoonTown and review the learner’s goal, level, and proof of progress. Instance creation is not implemented yet."},
+      "owner_payload": {"pattern_id": "wenyu-ai-garden-learning", "building_id": "ai-garden"}
+    },
+    {
+      "contract_id": "moonsuite.template-envelope.v1",
+      "template_id": "wenyu-broadcast-tower-story",
+      "owner_product": "moontown",
+      "version": "1.0.0",
+      "source_ref": "assets/templates/civic-patterns/broadcast-tower-story-forge.json",
+      "source_digest": "sha256:7b394f9a0cad402ef6ecfa170f15a5a055629521da0639c4c57e85aeca4f3ad9",
+      "template_class": "civic_scenario",
+      "maturity": "local-qualified",
+      "title": "Evidence-backed story forge",
+      "summary": "Turn verified outcomes and consented evidence into a public-safe story draft without publishing it.",
+      "primary_user": "civic communications operator",
+      "primary_action": "Select the verified outcome and its consented evidence",
+      "completion_statement": "A claim-linked, redacted story draft reaches keeper review; publication remains separately authorized.",
+      "icon": "📡",
+      "migration_policy": {"strategy": "owner-reviewed", "compatible_from": [], "note": "MoonTown reviews civic pattern changes before selecting a new version."},
+      "preview_ref": "/index.html",
+      "qualification_evidence_refs": [{"kind": "qualification_report", "ref": "docs/project/ui-release-ux-test-report.md", "digest": "sha256:86038966011c3a25e1c1444895e8d87f0b5fa25b2b88cf8fe89032dbb81a9b28"}],
+      "requirements": {
+        "operations": [{"operation_ref": "moontown/civic.communication.synthesize@0.1.0", "input_schema_ref": "moontown/civic-communication-handoff@1.0.0", "output_schema_ref": "moontown/civic-synthesis-result@1.0.0", "required": true}],
+        "schemas": ["moontown/civic-communication-handoff@1.0.0", "moontown/civic-synthesis-result@1.0.0"]
+      },
+      "ceilings": {
+        "authorities": ["workspace-mutation"], "external_effect": false,
+        "cost": {"status": "provider_dependent", "currency": "N/A", "max_minor": null, "note": "Drafting provider cost is resolved before execution; publishing is excluded."},
+        "licensing": {"status": "restricted", "classes": ["verified town evidence", "consented public material"], "note": "Consent, redaction, and claim support require review."},
+        "review": {"required": true, "authority": "keeper", "gates": ["public_story_review", "separate_publication_authority"]}
+      },
+      "recovery": {"blocked": false, "reason": "", "next_action": "Open MoonTown and review verified evidence plus consent state. Instance creation is not implemented yet."},
+      "owner_payload": {"pattern_id": "wenyu-broadcast-tower-story", "building_id": "broadcast-tower"}
+    }
+  ]
+}

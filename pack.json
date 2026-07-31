@@ -4,8 +4,29 @@
   "display_name": "MoonTown Civic Synthesis",
   "product_id": "moontown",
   "kind": "DomainPack",
+  "app_area": {
+    "id": "coordination.town",
+    "category": "coordination",
+    "label": "Town"
+  },
+  "app_presentation": {
+    "contract_id": "moonsuite.pack-presentation.v1",
+    "icon": "🏘️",
+    "surface": "infinite-canvas",
+    "primary_action_label": "Open town",
+    "launch_query": [
+      {"key": "seed", "value": "20260727"}
+    ]
+  },
   "required_runtime_extensions": ["moonflow", "moonclaw", "moonbook"],
   "book_templates": [],
+  "template_catalogs": [
+    {
+      "id": "moontown.civic-templates",
+      "version": "1.0.0",
+      "path": "assets/templates/catalog.v1.json"
+    }
+  ],
   "schemas": [
     {
       "id": "civic-communication-handoff",
@@ -60,7 +81,7 @@
   "app_entrypoints": [
     {
       "id": "energy-valley",
-      "path": "/index.html?seed=20260727",
+      "path": "/index.html",
       "audience": "civic-operator"
     }
   ],

@@ -22,10 +22,15 @@ fn initial_viewport_mode() -> ViewportMode {
 ///|
 fn initial_selection() -> Selection {
   let module_id = current_viewport_module_param()
-  if module_id.is_empty() {
-    Selection::Overview
-  } else {
+  if !module_id.is_empty() {
     Selection::Node(module_id)
+  } else {
+    let building_id = initial_template_launch().building_id
+    if building_id.is_empty() {
+      Selection::Overview
+    } else {
+      Selection::Node(building_id)
+    }
   }
 }
 
@@ -36,7 +41,7 @@ fn initial_dashboard_section() -> DashboardSection? {
     "residents" => Some(DashboardSection::ResidentAgentsSection)
     "quests" => Some(DashboardSection::CivicQuestsSection)
     "social" => Some(DashboardSection::SocialCapitalSection)
-    _ => None
+    _ => initial_template_launch().dashboard_section
   }
 }
 
@@ -131,7 +136,8 @@ fn init_model() -> Model {
     energy_board_open: energy_valley_dashboard_requested(
       current_browser_query_param("panel"),
       current_viewport_mode_param(),
-    ),
+    ) ||
+    template_launch_requested(),
     energy_guide_open: false,
     energy_reset_open: false,
     energy_intro_open: !browser_energy_valley_intro_seen(),
@@ -141,6 +147,6 @@ fn init_model() -> Model {
     energy_roads: energy_valley_save.roads,
     energy_parks: energy_valley_save.parks,
     energy_selected_building: None,
-    energy_toast: "",
+    energy_toast: initial_template_launch_status(),
   }
 }

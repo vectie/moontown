@@ -76,6 +76,10 @@ pub fn ExactEnergyValleyWorld::terrain_at(Self, Int, Int) -> String?
 pub fn ExactEnergyValleyWorld::tile_at(Self, Int, Int) -> ExactEnergyValleyTile?
 pub fn ExactEnergyValleyWorld::variation_at(Self, Int, Int) -> Double?
 
+type TemplateLaunchSelection
+
+type TemplateLaunchState derive(Eq)
+
 // Type aliases
 
 // Traits

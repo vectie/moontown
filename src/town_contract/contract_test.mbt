@@ -27,4 +27,6 @@ test "desktop and miniapp contracts share capabilities without sharing trust" {
   )
   assert_true(!desktop.contains("/miniapp/"))
   assert_true(!miniapp.contains("/api/operator-requests"))
+  assert_true(desktop.contains("/api/standing-goals"))
+  assert_true(desktop.contains("/api/book-registrations"))
 }
