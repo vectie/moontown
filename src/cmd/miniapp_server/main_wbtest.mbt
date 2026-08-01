@@ -87,3 +87,74 @@ test "marketplace query decoder preserves UTF-8 search terms" {
   )
   assert_eq(request_query_parameter("/search?q=C%2B%2B", "q"), "C++")
 }
+
+///|
+test "marketplace action request routes keep read decision and recovery separate" {
+  assert_eq(
+    marketplace_operation(
+      @town_contract.miniapp_marketplace_action_requests_path(),
+      true,
+      false,
+    ),
+    Some("action-requests"),
+  )
+  assert_eq(
+    marketplace_operation(
+      @town_contract.miniapp_marketplace_action_decision_path(),
+      false,
+      true,
+    ),
+    Some("decide-action-request"),
+  )
+  assert_eq(
+    marketplace_operation(
+      @town_contract.miniapp_marketplace_action_retry_path(),
+      false,
+      true,
+    ),
+    Some("prepare-action-handoff"),
+  )
+}
+
+///|
+test "marketplace bridge derives the existing bounded supervisor delegate payload" {
+  let request : Json = {
+    "request_id": "action:agent.robot-guide:reader-a:7",
+    "listing_id": "agent.robot-guide",
+    "action_id": "try",
+    "instruction": "Prepare a reviewable robotics reading plan.",
+    "execution_bounds": {
+      "claim_ceiling": "reviewable",
+      "max_cost_micro_usd": 2000000,
+      "max_runtime_ms": 300000,
+      "max_tokens": 12000,
+      "max_artifacts": 3,
+      "web_search": false,
+      "expires_at": "2026-08-01T00:05:00Z",
+    },
+  }
+  let snapshot : Json = {
+    "cursor": 9,
+    "readiness": { "ready": true },
+    "profile": {
+      "revision": 2,
+      "activeRunId": "supervisor-run-1",
+      "runtimeCursor": 18,
+      "bindings": {
+        "workspaceId": "robotics-book",
+        "buildingId": "robotics-book",
+        "bookIds": ["robotics-book"],
+      },
+    },
+  }
+  let payload = marketplace_delegate_payload(
+    bridge_object(request), snapshot,
+  ).stringify()
+  assert_true(payload.contains("marketplace-action:agent.robot-guide:reader-a:7"))
+  assert_true(payload.contains("\"model\":\"gpt-5.6-sol\""))
+  assert_true(payload.contains("\"webSearch\":false"))
+  assert_true(payload.contains("books/robotics-book/artifacts"))
+  assert_true(payload.contains("marketplace_request_id"))
+  assert_false(payload.contains("/Users/"))
+  assert_false(payload.contains("authority"))
+}

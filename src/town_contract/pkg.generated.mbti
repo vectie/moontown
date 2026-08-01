@@ -24,6 +24,18 @@ pub fn desktop_standing_goals_path() -> String
 
 pub fn desktop_standing_watch_path() -> String
 
+pub fn miniapp_book_registration_path() -> String
+
+pub fn miniapp_bookkeeper_outbox_claim_path() -> String
+
+pub fn miniapp_bookkeeper_outbox_path() -> String
+
+pub fn miniapp_bookkeeper_outbox_reconcile_path() -> String
+
+pub fn miniapp_bookkeeper_outbox_release_path() -> String
+
+pub fn miniapp_child_run_steer_path() -> String
+
 pub fn miniapp_contract() -> Json
 
 pub fn miniapp_contract_path() -> String
@@ -32,9 +44,87 @@ pub fn miniapp_evidence_book_path() -> String
 
 pub fn miniapp_health_path() -> String
 
+pub fn miniapp_marketplace_action_decision_path() -> String
+
+pub fn miniapp_marketplace_action_requests_path() -> String
+
+pub fn miniapp_marketplace_action_retry_path() -> String
+
+pub fn miniapp_marketplace_agent_listing_path() -> String
+
+pub fn miniapp_marketplace_building_listing_path() -> String
+
+pub fn miniapp_marketplace_channels_path() -> String
+
+pub fn miniapp_marketplace_feed_path() -> String
+
+pub fn miniapp_marketplace_listing_action_path() -> String
+
+pub fn miniapp_marketplace_listing_transition_path() -> String
+
+pub fn miniapp_marketplace_messages_path() -> String
+
+pub fn miniapp_marketplace_notifications_path() -> String
+
+pub fn miniapp_marketplace_notifications_read_path() -> String
+
+pub fn miniapp_marketplace_public_index_path() -> String
+
+pub fn miniapp_marketplace_recommendations_path() -> String
+
+pub fn miniapp_marketplace_search_path() -> String
+
+pub fn miniapp_marketplace_share_grants_path() -> String
+
+pub fn miniapp_marketplace_share_grants_revoke_path() -> String
+
+pub fn miniapp_marketplace_share_preview_path() -> String
+
+pub fn miniapp_marketplace_shared_listings_path() -> String
+
+pub fn miniapp_marketplace_sponsored_path() -> String
+
+pub fn miniapp_marketplace_subscriptions_path() -> String
+
+pub fn miniapp_message_path() -> String
+
+pub fn miniapp_review_decision_path() -> String
+
+pub fn miniapp_run_cancel_path() -> String
+
+pub fn miniapp_run_delegate_path() -> String
+
+pub fn miniapp_run_retry_path() -> String
+
+pub fn miniapp_run_steer_path() -> String
+
+pub fn miniapp_runtime_observation_reconcile_path() -> String
+
+pub fn miniapp_runtime_outbox_claim_path() -> String
+
+pub fn miniapp_runtime_outbox_path() -> String
+
+pub fn miniapp_runtime_outbox_reconcile_path() -> String
+
+pub fn miniapp_runtime_outbox_release_path() -> String
+
 pub fn miniapp_snapshot_path() -> String
 
 pub fn miniapp_standing_watch_path() -> String
+
+pub fn miniapp_supervisor_activation_path() -> String
+
+pub fn miniapp_supervisor_draft_path() -> String
+
+pub fn miniapp_supervisor_path() -> String
+
+pub fn miniapp_supervisor_readiness_path() -> String
+
+pub fn miniapp_supervisor_resume_path() -> String
+
+pub fn miniapp_supervisor_stop_path() -> String
+
+pub fn miniapp_supervisor_wake_path() -> String
 
 pub fn schema_version() -> String
 

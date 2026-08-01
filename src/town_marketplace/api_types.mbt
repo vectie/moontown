@@ -15,6 +15,44 @@ pub(all) struct ListingActionDraft {
 } derive(Debug, Eq, ToJson, FromJson)
 
 ///|
+pub(all) struct ActionRequestDecisionDraft {
+  request_id : String
+  expected_version : Int
+  decision : String
+  decision_summary : String
+  instruction : String
+  claim_ceiling : String
+  max_cost_micro_usd : Int64
+  max_runtime_ms : Int64
+  max_tokens : Int64
+  max_artifacts : Int
+  web_search : Bool
+  expires_at : String
+} derive(Debug, Eq, ToJson, FromJson)
+
+///|
+pub(all) struct ActionRequestHandoffDraft {
+  request_id : String
+  expected_version : Int
+  handoff_id : String
+} derive(Debug, Eq, ToJson, FromJson)
+
+///|
+pub(all) struct ActionRequestResumeDraft {
+  request_id : String
+  expected_version : Int
+} derive(Debug, Eq, ToJson, FromJson)
+
+///|
+pub(all) struct ActionRequestRuntimeDraft {
+  handoff_id : String
+  runtime_status : String
+  worker_run_id : String
+  result_summary : String
+  result_evidence_refs : Array[String]
+} derive(Debug, Eq, ToJson, FromJson)
+
+///|
 pub(all) struct ChannelDraft {
   channel_id : String
   title : String

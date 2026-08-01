@@ -40,6 +40,18 @@ pub(all) enum MessageAudience {
 } derive(Debug, Eq, ToJson, FromJson)
 
 ///|
+pub(all) enum MarketplaceActionRequestState {
+  ActionRequested
+  ActionRejected
+  ActionAcceptedPendingHandoff
+  ActionHandoffQueued
+  ActionRuntimeAcknowledged
+  ActionRunning
+  ActionSucceeded
+  ActionFailed
+} derive(Debug, Eq, ToJson, FromJson)
+
+///|
 pub(all) struct MarketplacePrincipal {
   principal_id : String
   tenant_id : String
@@ -226,6 +238,50 @@ pub(all) struct SponsoredPlacement {
   version : Int
 } derive(Debug, Eq, ToJson, FromJson)
 
+///| The publisher-approved ceiling for one marketplace-triggered worker.
+
+///| MoonTown stores the decision; the supervisor adapter derives workspace and
+
+///|
+/// book identity from the publisher's active profile before asking MoonClaw.
+pub(all) struct MarketplaceExecutionBounds {
+  claim_ceiling : String
+  max_cost_micro_usd : Int64
+  max_runtime_ms : Int64
+  max_tokens : Int64
+  max_artifacts : Int
+  web_search : Bool
+  expires_at : String
+} derive(Debug, Eq, ToJson, FromJson)
+
+///| A durable request/decision/receipt chain. It contains no runtime memory,
+
+///|
+/// credentials, host paths, or caller-provided authority envelope.
+pub(all) struct MarketplaceActionRequest {
+  request_id : String
+  listing_kind : ListingKind
+  listing_id : String
+  action_id : String
+  requester_principal_id : String
+  publisher_principal_id : String
+  request_message : String
+  state : MarketplaceActionRequestState
+  expected_version : Int
+  decision_summary : String
+  instruction : String
+  execution_bounds : MarketplaceExecutionBounds?
+  execution_handoff_id : String?
+  worker_run_id : String?
+  runtime_status : String
+  result_summary : String
+  result_evidence_refs : Array[String]
+  created_at_ms : UInt64
+  decided_at_ms : UInt64?
+  updated_at_ms : UInt64
+  version : Int
+} derive(Debug, Eq, ToJson, FromJson)
+
 ///|
 pub(all) struct MarketplaceState {
   schema : String
@@ -239,6 +295,7 @@ pub(all) struct MarketplaceState {
   subscriptions : Array[Subscription]
   notifications : Array[TownNotification]
   sponsored_placements : Array[SponsoredPlacement]
+  action_requests : Array[MarketplaceActionRequest]
   version : Int
 } derive(Debug, Eq, ToJson, FromJson)
 

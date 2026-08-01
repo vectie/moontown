@@ -125,6 +125,21 @@ test "miniapp fixture separates building identity from placement" {
 }
 
 ///|
+test "marketplace execution closure exposes request decision and retry routes" {
+  assert_eq(
+    miniapp_endpoint_by_id("marketplace-action-requests").unwrap().http_method,
+    "GET",
+  )
+  assert_eq(
+    miniapp_endpoint_by_id("marketplace-action-decision").unwrap().path,
+    "/miniapp/marketplace/action-requests/decision",
+  )
+  assert_true(
+    miniapp_endpoint_by_id("marketplace-action-retry").unwrap().writes,
+  )
+}
+
+///|
 test "miniapp fixture round-trips through json" {
   let snapshot = miniapp_fixture_snapshot()
   let text = snapshot.to_json().stringify()

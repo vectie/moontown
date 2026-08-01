@@ -223,21 +223,72 @@ pub fn marketplace_request_listing_action(
   if publisher_id == principal.principal_id {
     fail("publisher cannot request an action from their own listing")
   }
-  let summary = validate_public_text("listing action message", message, 1000)
+  let summary = validate_public_text(
+    "listing action message",
+    if message.trim().is_empty() {
+      "Please review my \"\{action_id}\" request."
+    } else {
+      message
+    },
+    1000,
+  )
+  let execution_request = marketplace_action_requires_publisher_decision(
+    action_id,
+  )
+  let request_id = "action:\{listing_id}:\{principal.principal_id}:\{state.version}"
+  let action_requests = if execution_request {
+    state.action_requests +
+    [
+      {
+        request_id,
+        listing_kind: kind,
+        listing_id,
+        action_id,
+        requester_principal_id: principal.principal_id,
+        publisher_principal_id: publisher_id,
+        request_message: summary,
+        state: ActionRequested,
+        expected_version: 1,
+        decision_summary: "",
+        instruction: "",
+        execution_bounds: None,
+        execution_handoff_id: None,
+        worker_run_id: None,
+        runtime_status: "not_started",
+        result_summary: "",
+        result_evidence_refs: [],
+        created_at_ms: now_ms,
+        decided_at_ms: None,
+        updated_at_ms: now_ms,
+        version: 1,
+      },
+    ]
+  } else {
+    state.action_requests
+  }
   let notification : TownNotification = {
     notification_id: "listing-action:\{listing_id}:\{principal.principal_id}:\{state.version}",
     principal_id: publisher_id,
     kind: "listing_action",
     title: "New \{action_id} request",
     summary,
-    object_kind: listing_kind_name(kind),
-    object_id: listing_id,
+    object_kind: if execution_request {
+      "marketplace_action_request"
+    } else {
+      listing_kind_name(kind)
+    },
+    object_id: if execution_request {
+      request_id
+    } else {
+      listing_id
+    },
     created_at_ms: now_ms,
     read_at_ms: None,
     version: 1,
   }
   {
     ..state,
+    action_requests,
     notifications: state.notifications + [notification],
     version: state.version + 1,
   }

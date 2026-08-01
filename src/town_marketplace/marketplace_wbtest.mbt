@@ -1116,3 +1116,145 @@ async test "application persists drafts across restart" {
   assert_true(stored.contains("agent.robot-guide"))
   assert_false(stored.contains("opaque-bootstrap-token"))
 }
+
+///|
+test "publisher decision binds one bounded MoonClaw handoff and returns status" {
+  let (published, owner, _, reader) = test_published_state()
+  let requested = marketplace_request_listing_action(
+    published,
+    reader,
+    AgentListing,
+    "agent.robot-guide",
+    "try",
+    "Prepare a source-backed robotics reading plan.",
+    now_ms=130UL,
+  )
+  assert_eq(requested.action_requests.length(), 1)
+  let request = requested.action_requests[0]
+  assert_eq(request.state, ActionRequested)
+  assert_eq(request.publisher_principal_id, owner.principal_id)
+  try
+    marketplace_decide_action_request(
+      requested,
+      reader,
+      {
+        request_id: request.request_id,
+        expected_version: 1,
+        decision: "accept",
+        decision_summary: "Reader tried to self-approve.",
+        instruction: "Prepare the plan.",
+        claim_ceiling: "reviewable",
+        max_cost_micro_usd: 2000000L,
+        max_runtime_ms: 300000L,
+        max_tokens: 12000L,
+        max_artifacts: 3,
+        web_search: false,
+        expires_at: "2026-08-01T00:05:00Z",
+      },
+      now_ms=140UL,
+    )
+  catch {
+    _ => ()
+  } noraise {
+    _ => fail("requester must not approve the publisher's action request")
+  }
+  let accepted = marketplace_decide_action_request(
+    requested,
+    owner,
+    {
+      request_id: request.request_id,
+      expected_version: 1,
+      decision: "accept",
+      decision_summary: "Approved within the visible default ceiling.",
+      instruction: "Prepare a reviewable, source-backed robotics reading plan.",
+      claim_ceiling: "reviewable",
+      max_cost_micro_usd: 2000000L,
+      max_runtime_ms: 300000L,
+      max_tokens: 12000L,
+      max_artifacts: 3,
+      web_search: false,
+      expires_at: "2026-08-01T00:05:00Z",
+    },
+    now_ms=141UL,
+  )
+  assert_eq(accepted.action_requests[0].state, ActionAcceptedPendingHandoff)
+  let queued = marketplace_bind_action_handoff(
+    accepted,
+    owner,
+    {
+      request_id: request.request_id,
+      expected_version: 2,
+      handoff_id: "supervisor-execution-marketplace-request-1",
+    },
+    now_ms=142UL,
+  )
+  assert_eq(queued.action_requests[0].state, ActionHandoffQueued)
+  let acknowledged = marketplace_reconcile_action_request_runtime(
+    queued,
+    {
+      handoff_id: "supervisor-execution-marketplace-request-1",
+      runtime_status: "pending_provider",
+      worker_run_id: "worker-run-1",
+      result_summary: "",
+      result_evidence_refs: [],
+    },
+    now_ms=143UL,
+  )
+  assert_eq(acknowledged.action_requests[0].state, ActionRuntimeAcknowledged)
+  let completed = marketplace_reconcile_action_request_runtime(
+    acknowledged,
+    {
+      handoff_id: "supervisor-execution-marketplace-request-1",
+      runtime_status: "succeeded",
+      worker_run_id: "worker-run-1",
+      result_summary: "The reviewable reading plan is ready.",
+      result_evidence_refs: ["artifact:robotics-reading-plan"],
+    },
+    now_ms=144UL,
+  )
+  assert_eq(completed.action_requests[0].state, ActionSucceeded)
+  assert_eq(completed.action_requests[0].result_evidence_refs.length(), 1)
+  let requester_view = marketplace_visible_action_requests(completed, reader)
+  assert_true(requester_view.stringify().contains("worker-run-1"))
+  assert_true(requester_view.stringify().contains("succeeded"))
+}
+
+///|
+test "marketplace execution ceiling is finite and cannot be expanded" {
+  let (published, owner, _, reader) = test_published_state()
+  let requested = marketplace_request_listing_action(
+    published,
+    reader,
+    AgentListing,
+    "agent.robot-guide",
+    "try",
+    "Prepare a bounded robotics note.",
+    now_ms=130UL,
+  )
+  try
+    marketplace_decide_action_request(
+      requested,
+      owner,
+      {
+        request_id: requested.action_requests[0].request_id,
+        expected_version: 1,
+        decision: "accept",
+        decision_summary: "Attempting an oversized worker.",
+        instruction: "Run without a finite ceiling.",
+        claim_ceiling: "reviewable",
+        max_cost_micro_usd: 2000001L,
+        max_runtime_ms: 300001L,
+        max_tokens: 12001L,
+        max_artifacts: 4,
+        web_search: true,
+        expires_at: "2026-08-01T00:05:00Z",
+      },
+      now_ms=140UL,
+    )
+  catch {
+    _ => ()
+  } noraise {
+    _ =>
+      fail("publisher cannot expand the marketplace worker above v1 ceilings")
+  }
+}

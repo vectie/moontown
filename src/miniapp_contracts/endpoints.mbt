@@ -332,6 +332,26 @@ pub fn miniapp_contract_endpoints() -> Array[MiniappEndpoint] {
       summary="Request one action explicitly offered by a published listing.",
     ),
     miniapp_endpoint(
+      id="marketplace-action-requests",
+      http_method="GET",
+      path="/miniapp/marketplace/action-requests",
+      summary="List the session principal's requester and publisher action queue.",
+    ),
+    miniapp_endpoint(
+      id="marketplace-action-decision",
+      http_method="POST",
+      path="/miniapp/marketplace/action-requests/decision",
+      writes=true,
+      summary="Approve or reject one request; approval queues the existing bounded MoonClaw handoff.",
+    ),
+    miniapp_endpoint(
+      id="marketplace-action-retry",
+      http_method="POST",
+      path="/miniapp/marketplace/action-requests/retry-handoff",
+      writes=true,
+      summary="Retry only the handoff step for a previously approved request.",
+    ),
+    miniapp_endpoint(
       id="marketplace-channels-read",
       http_method="GET",
       path="/miniapp/marketplace/channels",

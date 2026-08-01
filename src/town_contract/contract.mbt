@@ -239,6 +239,21 @@ pub fn miniapp_marketplace_listing_action_path() -> String {
 }
 
 ///|
+pub fn miniapp_marketplace_action_requests_path() -> String {
+  "/miniapp/marketplace/action-requests"
+}
+
+///|
+pub fn miniapp_marketplace_action_decision_path() -> String {
+  "/miniapp/marketplace/action-requests/decision"
+}
+
+///|
+pub fn miniapp_marketplace_action_retry_path() -> String {
+  "/miniapp/marketplace/action-requests/retry-handoff"
+}
+
+///|
 pub fn miniapp_marketplace_channels_path() -> String {
   "/miniapp/marketplace/channels"
 }
@@ -655,6 +670,24 @@ pub fn miniapp_contract() -> Json {
         "POST",
         miniapp_marketplace_listing_action_path(),
         "marketplace.listing.action",
+      ),
+      endpoint(
+        "marketplace-action-requests",
+        "GET",
+        miniapp_marketplace_action_requests_path(),
+        "marketplace.action-request.read",
+      ),
+      endpoint(
+        "marketplace-action-decision",
+        "POST",
+        miniapp_marketplace_action_decision_path(),
+        "marketplace.action-request.decide",
+      ),
+      endpoint(
+        "marketplace-action-retry",
+        "POST",
+        miniapp_marketplace_action_retry_path(),
+        "marketplace.action-request.retry-handoff",
       ),
       endpoint(
         "marketplace-channels-read",

@@ -14,8 +14,10 @@ private agent or building
   -> MoonFind organic index
   -> MoonTown search or explainable recommendation
   -> Bunnia detail, follow, contact, or bounded action request
-  -> permission-scoped channel or publisher notification
-  -> explicit acceptance/rejection before any runtime handoff
+  -> publisher request inbox and explicit acceptance/rejection
+  -> existing supervisor-execution-handoff.v2 outbox
+  -> MoonClaw receipt and runtime observation
+  -> requester status notification and reviewable result
 ```
 
 Sponsored placement is a parallel paid lane. It never changes organic search
@@ -52,6 +54,9 @@ town understandable and operable:
 - message bodies for authorized channel members;
 - explicit share grants, subscriptions, notifications, and sponsored-placement
   records.
+- marketplace action requests, publisher decisions, finite execution ceilings,
+  generic supervisor handoff identity, runtime status, and safe result evidence
+  references.
 
 The store is written atomically with owner-only file permissions. Credentials,
 raw memory, workspace paths, authority envelopes, private evidence, consent
@@ -121,11 +126,30 @@ unknown values, while Bunnia only renders actions declared by the reviewed
 listing.
 
 `follow` creates an idempotent subscription. `message` enters the authorized
-channel/contact flow. The remaining verbs are requests to the publisher, not
-commands sent to an agent runtime. A publisher must separately accept the work
-and bind it to an existing supervisor profile before MoonTown may create the
-existing receipt-backed MoonClaw handoff. Publication never grants execution
-authority, and neither Town nor Bunnia contains a second agent runtime.
+channel/contact flow. `try`, `install`, `invite`, and `request_access` create a
+durable request for the publisher, not a command sent to an agent runtime. The
+publisher may reject it or approve a visible finite scope: claim ceiling, cost,
+runtime, tokens, artifacts, web use, expiry, and exact instruction. Approval is
+bound to the publisher's receipt-backed active supervisor profile and queues
+the existing `moontown.supervisor-execution-handoff.v2` outbox. MoonDesk then
+transports that ordinary handoff to MoonClaw. Reconciled MoonClaw receipts and
+runtime observations advance the same request through:
+
+```text
+requested
+  -> rejected
+  -> accepted_pending_handoff
+  -> handoff_queued
+  -> runtime_acknowledged
+  -> running
+  -> succeeded | failed
+```
+
+If Town stops after approval but before binding, the publisher can retry only
+the handoff step. The adapter first recovers an already-created deterministic
+handoff before attempting another delegation, so restart recovery cannot create
+a second worker silently. Publication never grants execution authority, and
+neither Town nor Bunnia contains a second agent runtime.
 
 ## Discovery Lanes
 
@@ -156,6 +180,9 @@ host. Request bodies cannot select or impersonate the acting principal.
 | POST | `/miniapp/marketplace/listings/building` | Save a building listing draft |
 | POST | `/miniapp/marketplace/listings/transition` | Share, submit, publish, archive, or restore |
 | POST | `/miniapp/marketplace/listings/action` | Follow, message, invite, install, or visit when offered |
+| GET | `/miniapp/marketplace/action-requests` | Read the session principal's requester/publisher work queue |
+| POST | `/miniapp/marketplace/action-requests/decision` | Publisher accepts or rejects; acceptance queues bounded supervisor delegation |
+| POST | `/miniapp/marketplace/action-requests/retry-handoff` | Recover only an approved request whose runtime handoff was not bound |
 | GET | `/miniapp/marketplace/channels` | List authorized channels |
 | POST | `/miniapp/marketplace/channels` | Create one ACL-bound channel |
 | GET | `/miniapp/marketplace/messages?channel_id=...` | Read one authorized channel |
@@ -181,12 +208,17 @@ fields from `payload`; they must not render arbitrary provider or host objects.
 2. Filter to **Agents**, open a listing, and inspect capabilities, permissions,
    price, rights, and trust label.
 3. Choose an offered action. **Follow** creates an idempotent listing
-   subscription. **Message**, **Invite**, or **Install** creates a reviewable
-   request for the publisher; it does not execute silently.
-4. Continue in **Messages**. Only permitted participants see the channel and
-   its contents.
-5. MoonClaw may execute accepted bounded work; the Bookkeeper reviews any
-   durable learning before MoonBook accepts it.
+   subscription. **Message** opens contact. **Try**, **Invite**, **Install**, or
+   **Request access** creates a reviewable publisher request; it does not
+   execute silently.
+4. Continue in **Messages → Agent work → Requests**. The publisher sees the
+   request, exact instruction, and finite execution ceiling, then approves or
+   declines it.
+5. Approval uses the publisher's already-active supervisor. MoonDesk transports
+   the resulting ordinary handoff to MoonClaw; both parties see queued,
+   acknowledged, running, succeeded, or failed status from receipts.
+6. The Bookkeeper reviews any proposed durable learning before MoonBook accepts
+   it. Successful runtime execution does not itself rewrite a book.
 
 ### Publish a building
 
@@ -210,9 +242,10 @@ fields from `payload`; they must not render arbitrary provider or host objects.
 
 The pack-local MoonBit implementation supplies deterministic discovery,
 governed publication, durable recovery, ACL messaging, subscriptions,
-notification privacy, and separated sponsored placements. Bunnia supplies the
-touch-first interaction surface. MoonFind supplies an organic-only sanitized
-ranking boundary.
+notification privacy, separated sponsored placements, and the complete
+request/decision/MoonClaw-receipt loop. Bunnia supplies the touch-first request
+inbox and decision surface. MoonFind supplies an organic-only sanitized ranking
+boundary.
 
 Production deployment still needs the trusted host to supply real multi-user
 identity/session issuance, rate and abuse controls, moderation operations,

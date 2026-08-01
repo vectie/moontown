@@ -2,6 +2,19 @@
 let marketplace_store_mutex : @async.Mutex = Mutex()
 
 ///|
+fn migrate_marketplace_state_json(value : Json) -> Json {
+  guard value is Object(fields) else { return value }
+  let schema = api_string(fields, "schema")
+  if schema == "moontown.marketplace-store.v1" {
+    fields["schema"] = marketplace_schema().to_json()
+  }
+  if fields.get("action_requests") is None {
+    fields["action_requests"] = Json::array([])
+  }
+  Json::object(fields)
+}
+
+///|
 pub fn marketplace_application(
   state_path : String,
   bootstrap_principal : MarketplacePrincipal,
@@ -53,7 +66,9 @@ async fn MarketplaceApplication::load_state(
 ) -> MarketplaceState {
   let state = match @support.read_optional_json_file(self.state_path) {
     Some(value) => {
-      let decoded : MarketplaceState = @json.from_json(value) catch {
+      let decoded : MarketplaceState = @json.from_json(
+        migrate_marketplace_state_json(value),
+      ) catch {
         error => fail("marketplace state is invalid: \{error}")
       }
       if decoded.schema != marketplace_schema() {
@@ -154,6 +169,19 @@ pub async fn MarketplaceApplication::execute(
       })
     "notifications" =>
       application_ok(operation, marketplace_notifications_for(state, principal))
+    "action-requests" =>
+      application_ok(
+        operation,
+        marketplace_visible_action_requests(state, principal),
+      )
+    "prepare-action-handoff" => {
+      let draft : ActionRequestResumeDraft = @json.from_json(payload)
+      application_ok(operation, {
+        "action_request": marketplace_prepare_action_handoff(
+          state, principal, draft,
+        ),
+      })
+    }
     "shared-listings" =>
       application_ok(operation, {
         "contract_id": "moontown.shared-listings.v1",
@@ -232,6 +260,15 @@ pub async fn MarketplaceApplication::execute(
     }
     "listing-action" => {
       let draft : ListingActionDraft = @json.from_json(payload)
+      let action_request_id = if marketplace_action_requires_publisher_decision(
+          draft.action_id,
+        ) {
+        Some(
+          "action:\{draft.listing_id}:\{principal.principal_id}:\{state.version}",
+        )
+      } else {
+        None
+      }
       let next = marketplace_request_listing_action(
         state,
         principal,
@@ -242,7 +279,44 @@ pub async fn MarketplaceApplication::execute(
         now_ms~,
       )
       self.save_state(next)
-      application_ok(operation, { "requested": true })
+      application_ok(operation, {
+        "requested": true,
+        "action_request_id": optional_string_wire(action_request_id),
+      })
+    }
+    "decide-action-request" => {
+      let draft : ActionRequestDecisionDraft = @json.from_json(payload)
+      let next = marketplace_decide_action_request(
+        state,
+        principal,
+        draft,
+        now_ms~,
+      )
+      self.save_state(next)
+      application_ok(operation, {
+        "action_request": marketplace_action_request_projection(
+          next,
+          principal,
+          draft.request_id,
+        ),
+      })
+    }
+    "bind-action-handoff" => {
+      let draft : ActionRequestHandoffDraft = @json.from_json(payload)
+      let next = marketplace_bind_action_handoff(
+        state,
+        principal,
+        draft,
+        now_ms~,
+      )
+      self.save_state(next)
+      application_ok(operation, {
+        "action_request": marketplace_action_request_projection(
+          next,
+          principal,
+          draft.request_id,
+        ),
+      })
     }
     "create-channel" => {
       let draft = parse_channel_draft(payload)
@@ -403,4 +477,26 @@ pub async fn MarketplaceApplication::execute(
     }
     _ => fail("unknown marketplace operation")
   }
+}
+
+///| Reconcile a receipt already validated by the supervisor/MoonClaw bridge.
+
+///| This package-local application entrypoint is intentionally absent from the
+
+///|
+/// public marketplace HTTP operation table.
+pub async fn MarketplaceApplication::reconcile_runtime_handoff(
+  self : MarketplaceApplication,
+  draft : ActionRequestRuntimeDraft,
+  now_ms~ : UInt64,
+) -> Json {
+  marketplace_store_mutex.acquire()
+  defer marketplace_store_mutex.release()
+  let state = self.load_state()
+  let next = marketplace_reconcile_action_request_runtime(state, draft, now_ms~)
+  self.save_state(next)
+  application_ok("reconcile-action-runtime", {
+    "handoff_id": draft.handoff_id,
+    "runtime_status": draft.runtime_status,
+  })
 }

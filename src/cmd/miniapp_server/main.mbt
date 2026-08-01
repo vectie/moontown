@@ -334,6 +334,15 @@ fn marketplace_operation(
   } else if path == @town_contract.miniapp_marketplace_listing_action_path() &&
     is_post {
     Some("listing-action")
+  } else if path == @town_contract.miniapp_marketplace_action_requests_path() &&
+    is_get {
+    Some("action-requests")
+  } else if path == @town_contract.miniapp_marketplace_action_decision_path() &&
+    is_post {
+    Some("decide-action-request")
+  } else if path == @town_contract.miniapp_marketplace_action_retry_path() &&
+    is_post {
+    Some("prepare-action-handoff")
   } else if path == @town_contract.miniapp_marketplace_channels_path() {
     if is_get {
       Some("list-channels")
@@ -407,8 +416,9 @@ async fn handle_marketplace_request(
     request_query_parameter(request.path, "q")
   }
   let payload = if writes { body.read_all().text() } else { "" }
-  let result = marketplace_application().execute(
-    marketplace_opaque_session(request),
+  let opaque_session = marketplace_opaque_session(request)
+  let initial_result = marketplace_application().execute(
+    opaque_session,
     operation,
     payload,
     query,
@@ -423,6 +433,28 @@ async fn handle_marketplace_request(
       })
       return true
     }
+  }
+  let result = if operation == "decide-action-request" ||
+    operation == "prepare-action-handoff" {
+    complete_marketplace_action_operation(
+      operation,
+      opaque_session,
+      payload,
+      initial_result,
+      now_ms=@env.now(),
+    ) catch {
+      _ => {
+        send_json(conn, 409, {
+          "ok": false,
+          "error": "marketplace_handoff_not_ready",
+          "operation": operation,
+          "message": "The decision is saved, but the publisher must activate a delegation-enabled supervisor before retrying the handoff.",
+        })
+        return true
+      }
+    }
+  } else {
+    initial_result
   }
   send_json(conn, if writes { 202 } else { 200 }, result)
   true
@@ -777,6 +809,11 @@ async fn handle_request(
         return
       }
     }
+    ignore(
+      sync_marketplace_action_lineage(supervisor, now_ms=@env.now()) catch {
+        _ => Json::null()
+      },
+    )
     send_json(conn, 200, result)
     return
   }
@@ -812,6 +849,18 @@ async fn handle_request(
         send_json(conn, 409, { "ok": false, "error": "\{error}" })
         return
       }
+    }
+    if path == @town_contract.miniapp_runtime_outbox_reconcile_path() &&
+      kind == "execution" {
+      ignore(
+        sync_marketplace_execution_receipt(
+          request_body,
+          result,
+          now_ms=@env.now(),
+        ) catch {
+          _ => Json::null()
+        },
+      )
     }
     send_json(conn, 200, result)
     return
