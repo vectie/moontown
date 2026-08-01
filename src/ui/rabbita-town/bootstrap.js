@@ -3,6 +3,7 @@ import {
   loadWenyuReferenceLabels,
   loadWenyuReferenceRoads,
   loadWenyuTownModules,
+  loadKnowledgeDomainCatalog,
   refreshRuntimeSnapshots,
   startRuntimeSnapshotRefresh,
 } from './runtime_snapshots.js'
@@ -72,6 +73,7 @@ async function prepareRuntimeBridge() {
     loadWenyuReferenceLabels(),
     loadWenyuReferenceRoads(),
     loadWenyuTownModules(),
+    loadKnowledgeDomainCatalog(),
   ])
 }
 

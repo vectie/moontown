@@ -1,14 +1,29 @@
 ///|
 test "local backend exposes route catalog for miniapp wrappers" {
   let routes = miniapp_local_backend_routes()
-  assert_eq(routes.length(), 13)
+  assert_eq(routes.length(), 25)
   assert_true(miniapp_local_backend_test_has_route(routes, "dev-login"))
   assert_true(miniapp_local_backend_test_has_route(routes, "snapshot"))
   assert_true(miniapp_local_backend_test_has_route(routes, "share-building"))
   assert_true(miniapp_local_backend_test_has_route(routes, "publish-building"))
   assert_true(miniapp_local_backend_test_has_route(routes, "archive-building"))
   assert_true(miniapp_local_backend_test_has_route(routes, "chat-send"))
-  assert_true(miniapp_local_backend_test_has_route(routes, "accept-run"))
+  assert_true(
+    miniapp_local_backend_test_has_route(routes, "request-bookkeeper-review"),
+  )
+  assert_true(
+    miniapp_local_backend_test_has_route(routes, "supervisor-message"),
+  )
+  assert_true(miniapp_local_backend_test_has_route(routes, "run-delegate"))
+  assert_true(miniapp_local_backend_test_has_route(routes, "child-run-steer"))
+  assert_true(miniapp_local_backend_test_has_route(routes, "supervisor-wake"))
+  assert_true(miniapp_local_backend_test_has_route(routes, "supervisor-stop"))
+  assert_true(miniapp_local_backend_test_has_route(routes, "supervisor-resume"))
+  assert_true(
+    miniapp_local_backend_test_has_route(
+      routes, "runtime-observation-reconcile",
+    ),
+  )
 }
 
 ///|
@@ -99,7 +114,9 @@ test "local backend can create agent chat and update run lifecycle" {
     now_ms=6500UL,
   )
   assert_eq(accepted.ok, true)
-  assert_true(accepted.body.contains("kind=accept-run ok=true"))
+  assert_true(
+    accepted.body.contains("kind=request-bookkeeper-review ok=true"),
+  )
   assert_eq(
     accepted.state.snapshot.runs.length(),
     login.state.snapshot.runs.length() + 1,

@@ -60,6 +60,14 @@ fn init_model() -> Model {
   let energy_valley_runtime = initial_energy_valley_runtime_state()
   let visual_projection = parse_bootstrap_visual_projection()
   let module_projections = parse_bootstrap_module_projections()
+  let expected_knowledge_catalog_digest = match
+    energy_valley_runtime.projection {
+    Some(projection) => projection.knowledgeCatalogDigest
+    None => None
+  }
+  let knowledge_domain_catalog = parse_bootstrap_knowledge_domain_catalog(
+    expected_knowledge_catalog_digest,
+  )
   let civic_status = parse_bootstrap_civic_status()
   let moondesk_handoff_artifacts = parse_bootstrap_moondesk_handoff_artifacts()
   let moondesk_bridge = parse_bootstrap_moondesk_bridge()
@@ -88,6 +96,8 @@ fn init_model() -> Model {
     visual_projection_version: visual_projection_version(),
     module_projections,
     module_projections_version: module_projections_version(),
+    knowledge_domain_catalog,
+    knowledge_domain_catalog_version: knowledge_domain_catalog_version(),
     civic_status,
     civic_status_version: civic_status_version(),
     moondesk_handoff_artifacts,

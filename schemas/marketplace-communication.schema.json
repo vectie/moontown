@@ -1,0 +1,56 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://moonsuite.local/schemas/marketplace-communication.schema.json",
+  "title": "MoonTown Marketplace Communication v1",
+  "$defs": {
+    "channel": {
+      "type": "object",
+      "required": ["channel_id", "tenant_id", "owner_principal_id", "title", "visibility", "sensitivity", "members"],
+      "properties": {
+        "channel_id": { "type": "string" },
+        "tenant_id": { "type": "string" },
+        "owner_principal_id": { "type": "string" },
+        "title": { "type": "string", "minLength": 1, "maxLength": 120 },
+        "visibility": { "enum": ["direct", "private", "workspace", "building", "agent", "public_announcement"] },
+        "building_listing_id": { "type": ["string", "null"] },
+        "agent_listing_id": { "type": ["string", "null"] },
+        "sensitivity": { "enum": ["public", "internal", "confidential", "restricted"] },
+        "members": { "type": "array", "minItems": 1 }
+      }
+    },
+    "message": {
+      "type": "object",
+      "required": ["message_id", "channel_id", "sender_principal_id", "body", "audience", "created_at_ms"],
+      "properties": {
+        "message_id": { "type": "string" },
+        "channel_id": { "type": "string" },
+        "sender_principal_id": { "type": "string" },
+        "body": { "type": "string", "minLength": 1, "maxLength": 8000 },
+        "audience": { "enum": ["entire_channel", "named_principals", "public"] },
+        "created_at_ms": { "type": "string", "pattern": "^[0-9]+$" }
+      }
+    },
+    "share_grant": {
+      "type": "object",
+      "required": ["grant_id", "resource_kind", "resource_id", "grantor_principal_id", "grantee_principal_id", "permission"],
+      "properties": {
+        "grant_id": { "type": "string" },
+        "resource_kind": { "enum": ["agent", "building", "channel", "artifact"] },
+        "resource_id": { "type": "string" },
+        "grantor_principal_id": { "type": "string" },
+        "grantee_principal_id": { "type": "string" },
+        "permission": { "enum": ["view", "message", "collaborate"] },
+        "expires_at_ms": { "type": ["integer", "null"], "minimum": 1 },
+        "revoked_at_ms": { "type": ["integer", "null"], "minimum": 1 }
+      }
+    },
+    "share_grant_revoke": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["grant_id"],
+      "properties": {
+        "grant_id": { "type": "string", "minLength": 1 }
+      }
+    }
+  }
+}

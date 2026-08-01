@@ -1,0 +1,141 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "moontown/supervisor-execution-handoff@2.0.0",
+  "type": "object",
+  "required": [
+    "schema",
+    "handoff_id",
+    "command_id",
+    "request_digest",
+    "supervisor_profile_id",
+    "parent_run_id",
+    "action",
+    "command_kind",
+    "target_runtime",
+    "worker_bounds_source",
+    "status"
+  ],
+  "properties": {
+    "schema": {"const": "moontown.supervisor-execution-handoff.v2"},
+    "handoff_id": {"type": "string", "minLength": 1},
+    "command_id": {"type": "string", "minLength": 1},
+    "request_digest": {"type": "string", "pattern": "^sha256:[0-9a-f]{64}$"},
+    "supervisor_profile_id": {"type": "string", "minLength": 1},
+    "parent_run_id": {"type": "string", "minLength": 1},
+    "target_run_id": {"type": ["string", "null"]},
+    "action": {
+      "enum": [
+        "message",
+        "steer",
+        "delegate",
+        "wake",
+        "supervisor_stop",
+        "supervisor_resume",
+        "child_stop",
+        "child_steer",
+        "child_retry"
+      ]
+    },
+    "command_kind": {
+      "enum": [
+        "supervisor_message",
+        "supervisor_run_control",
+        "supervisor_lifecycle_control",
+        "bounded_worker_assignment",
+        "child_run_control"
+      ]
+    },
+    "target_runtime": {"const": "moonclaw"},
+    "worker_task": {
+      "type": ["object", "null"],
+      "properties": {
+        "task_id": {"type": "string", "minLength": 1},
+        "conversation_id": {"type": "string", "minLength": 1},
+        "title": {"type": "string", "minLength": 1},
+        "cwd": {"type": "string", "minLength": 1},
+        "model": {"const": "gpt-5.6-sol"},
+        "web_search": {"type": "boolean"},
+        "metadata": {"type": "object"}
+      },
+      "required": [
+        "task_id",
+        "conversation_id",
+        "title",
+        "cwd",
+        "model",
+        "web_search",
+        "metadata"
+      ]
+    },
+    "worker_bounds": {
+      "type": ["object", "null"],
+      "properties": {
+        "claim_ceiling": {"enum": ["evidence-only", "draft", "reviewable"]},
+        "budget": {
+          "type": "object",
+          "required": [
+            "max_cost_micro_usd",
+            "max_runtime_ms",
+            "max_tokens",
+            "max_artifacts"
+          ],
+          "properties": {
+            "max_cost_micro_usd": {"type": "string", "pattern": "^[1-9][0-9]*$"},
+            "max_runtime_ms": {"type": "string", "pattern": "^[1-9][0-9]*$"},
+            "max_tokens": {"type": "string", "pattern": "^[1-9][0-9]*$"},
+            "max_artifacts": {"type": "integer", "minimum": 1}
+          }
+        },
+        "artifact_prefixes": {
+          "type": "array",
+          "minItems": 1,
+          "items": {"type": "string", "minLength": 1}
+        },
+        "expires_at": {"type": "string", "minLength": 1}
+      },
+      "required": [
+        "claim_ceiling",
+        "budget",
+        "artifact_prefixes",
+        "expires_at"
+      ]
+    },
+    "worker_bounds_source": {
+      "enum": ["not_applicable", "user_supplied", "safe_default_visible"]
+    },
+    "transport_request_digest": {
+      "type": ["string", "null"],
+      "pattern": "^sha256:[0-9a-f]{64}$"
+    },
+    "transport_endpoint": {
+      "type": ["string", "null"],
+      "enum": [
+        null,
+        "message",
+        "steer",
+        "delegate",
+        "wake",
+        "stop",
+        "retry-resume",
+        "worker-stop",
+        "worker-steer",
+        "worker-retry-resume"
+      ]
+    },
+    "transport_request": {"type": ["object", "null"]},
+    "runtime_command": {"type": ["object", "null"]},
+    "status": {"type": "string"}
+  },
+  "allOf": [
+    {
+      "if": {"properties": {"action": {"const": "delegate"}}},
+      "then": {
+        "properties": {
+          "worker_task": {"type": "object"},
+          "worker_bounds": {"type": "object"},
+          "target_run_id": {"type": "null"}
+        }
+      }
+    }
+  ]
+}

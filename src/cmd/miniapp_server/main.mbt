@@ -57,6 +57,16 @@ fn request_header(request : @http.Request, name : String) -> String {
 }
 
 ///|
+fn http_method_is_get(request_method : @http.RequestMethod) -> Bool {
+  request_method is @http.Get
+}
+
+///|
+fn http_method_is_post(request_method : @http.RequestMethod) -> Bool {
+  request_method is @http.Post
+}
+
+///|
 async fn send_text(
   conn : @http.ServerConnection,
   code : Int,
@@ -102,10 +112,30 @@ async fn require_json_write(
   request : @http.Request,
   conn : @http.ServerConnection,
 ) -> Bool {
-  if !(request.meth is Post) {
+  if !http_method_is_post(request.meth) {
     send_json(conn, 405, { "ok": false, "error": "POST required" })
     return false
   }
+  require_bounded_json_body(request, conn)
+}
+
+///|
+async fn require_json_put(
+  request : @http.Request,
+  conn : @http.ServerConnection,
+) -> Bool {
+  if !(request.meth is @http.Put) {
+    send_json(conn, 405, { "ok": false, "error": "PUT required" })
+    return false
+  }
+  require_bounded_json_body(request, conn)
+}
+
+///|
+async fn require_bounded_json_body(
+  request : @http.Request,
+  conn : @http.ServerConnection,
+) -> Bool {
   let content_type = request_header(request, "content-type").to_lower()
   if !content_type.has_prefix("application/json") {
     send_json(conn, 415, { "ok": false, "error": "application/json required" })
@@ -134,13 +164,398 @@ async fn require_json_write(
 }
 
 ///|
+fn miniapp_actor_user_id(request : @http.Request) -> String {
+  let supplied = request_header(request, "x-miniapp-user-id")
+  if supplied.is_empty() {
+    "local-operator"
+  } else {
+    supplied
+  }
+}
+
+///|
+fn miniapp_transport_id(request : @http.Request) -> String {
+  let supplied = request_header(request, "x-moondesk-transport-id")
+  if supplied.is_empty() {
+    "moondesk-miniapp-adapter"
+  } else {
+    supplied
+  }
+}
+
+///| The bootstrap session is fixed by server configuration and never derived
+
+///|
+/// from request input.
+fn marketplace_bootstrap_opaque_session() -> String {
+  let configured = session_token()
+  if configured.is_empty() {
+    "moontown-local-development-session"
+  } else {
+    configured
+  }
+}
+
+///|
+fn select_marketplace_opaque_session(
+  supplied : String,
+  bootstrap : String,
+) -> String {
+  if supplied.is_empty() {
+    bootstrap
+  } else {
+    supplied
+  }
+}
+
+///| Marketplace identity comes only from an opaque pre-provisioned session.
+
+///|
+/// The legacy x-miniapp-user-id header is intentionally not consulted.
+fn marketplace_opaque_session(request : @http.Request) -> String {
+  select_marketplace_opaque_session(
+    request_header(request, "x-miniapp-session"),
+    marketplace_bootstrap_opaque_session(),
+  )
+}
+
+///|
+fn marketplace_application() -> @town_marketplace.MarketplaceApplication raise {
+  let principal_id = env_value("MOONTOWN_MINIAPP_PRINCIPAL_ID")
+    .unwrap_or("local-operator")
+    .to_lower()
+  let tenant_id = env_value("MOONTOWN_MINIAPP_TENANT_ID")
+    .unwrap_or("local-town")
+    .to_lower()
+  @town_marketplace.marketplace_application(
+    @storage.moontown_product_state_dir() + "/marketplace/state.json",
+    {
+      principal_id,
+      tenant_id,
+      display_name: env_value("MOONTOWN_MINIAPP_PRINCIPAL_NAME").unwrap_or(
+        "Local operator",
+      ),
+      workspace_ids: [],
+      roles: ["publisher", "advertiser"],
+      interest_tags: [],
+      active: true,
+      version: 1,
+    },
+    "bootstrap:\{principal_id}",
+    marketplace_bootstrap_opaque_session(),
+  )
+}
+
+///|
+fn query_hex_nibble(value : Byte) -> Int? {
+  if value >= b'0' && value <= b'9' {
+    Some(value.to_int() - b'0'.to_int())
+  } else if value >= b'a' && value <= b'f' {
+    Some(value.to_int() - b'a'.to_int() + 10)
+  } else if value >= b'A' && value <= b'F' {
+    Some(value.to_int() - b'A'.to_int() + 10)
+  } else {
+    None
+  }
+}
+
+///| Decode one application/x-www-form-urlencoded query component, including
+
+///| UTF-8 percent sequences. Malformed escapes remain literal instead of being
+
+///|
+/// silently dropped or reinterpreted.
+fn decode_query_component(value : String) -> String {
+  let input = @utf8.encode(value.replace(old="+", new=" "))
+  let output : Array[Byte] = []
+  let mut index = 0
+  while index < input.length() {
+    if input[index] == b'%' && index + 2 < input.length() {
+      match
+        (query_hex_nibble(input[index + 1]), query_hex_nibble(input[index + 2])) {
+        (Some(high), Some(low)) => {
+          output.push((high * 16 + low).to_byte())
+          index += 3
+        }
+        _ => {
+          output.push(input[index])
+          index += 1
+        }
+      }
+    } else {
+      output.push(input[index])
+      index += 1
+    }
+  }
+  @utf8.decode_lossy(Bytes::from_array(output))
+}
+
+///|
+fn request_query_parameter(raw_path : String, name : String) -> String {
+  guard raw_path.find("?") is Some(index) else { return "" }
+  for pair in raw_path[index + 1:].split("&") {
+    let pieces = pair.split("=").to_array()
+    if pieces.length() >= 1 && pieces[0] == name {
+      return if pieces.length() == 1 {
+        ""
+      } else {
+        decode_query_component(pieces[1:].join("="))
+      }
+    }
+  }
+  ""
+}
+
+///|
+fn marketplace_operation(
+  path : String,
+  is_get : Bool,
+  is_post : Bool,
+) -> String? {
+  if path == @town_contract.miniapp_marketplace_search_path() && is_get {
+    Some("search")
+  } else if path == @town_contract.miniapp_marketplace_recommendations_path() &&
+    is_get {
+    Some("recommendations")
+  } else if path == @town_contract.miniapp_marketplace_feed_path() && is_get {
+    Some("feed")
+  } else if path == @town_contract.miniapp_marketplace_public_index_path() &&
+    is_get {
+    Some("public-index")
+  } else if path == @town_contract.miniapp_marketplace_agent_listing_path() &&
+    is_post {
+    Some("upsert-agent")
+  } else if path == @town_contract.miniapp_marketplace_building_listing_path() &&
+    is_post {
+    Some("upsert-building")
+  } else if path == @town_contract.miniapp_marketplace_listing_transition_path() &&
+    is_post {
+    Some("transition-listing")
+  } else if path == @town_contract.miniapp_marketplace_listing_action_path() &&
+    is_post {
+    Some("listing-action")
+  } else if path == @town_contract.miniapp_marketplace_channels_path() {
+    if is_get {
+      Some("list-channels")
+    } else if is_post {
+      Some("create-channel")
+    } else {
+      None
+    }
+  } else if path == @town_contract.miniapp_marketplace_messages_path() {
+    if is_get {
+      Some("list-messages")
+    } else if is_post {
+      Some("send-message")
+    } else {
+      None
+    }
+  } else if path == @town_contract.miniapp_marketplace_notifications_path() &&
+    is_get {
+    Some("notifications")
+  } else if path == @town_contract.miniapp_marketplace_shared_listings_path() &&
+    is_get {
+    Some("shared-listings")
+  } else if path == @town_contract.miniapp_marketplace_notifications_read_path() &&
+    is_post {
+    Some("read-notification")
+  } else if path == @town_contract.miniapp_marketplace_subscriptions_path() &&
+    is_post {
+    Some("subscribe")
+  } else if path == @town_contract.miniapp_marketplace_share_grants_path() &&
+    is_post {
+    Some("share-grant")
+  } else if path ==
+    @town_contract.miniapp_marketplace_share_grants_revoke_path() &&
+    is_post {
+    Some("revoke-share-grant")
+  } else if path == @town_contract.miniapp_marketplace_share_preview_path() &&
+    is_post {
+    Some("share-preview")
+  } else if path == @town_contract.miniapp_marketplace_sponsored_path() &&
+    is_post {
+    Some("sponsor")
+  } else {
+    None
+  }
+}
+
+///|
+async fn handle_marketplace_request(
+  request : @http.Request,
+  body : &@io.Reader,
+  conn : @http.ServerConnection,
+  path : String,
+) -> Bool {
+  guard marketplace_operation(
+      path,
+      http_method_is_get(request.meth),
+      http_method_is_post(request.meth),
+    )
+    is Some(operation) else {
+    return false
+  }
+  let writes = http_method_is_post(request.meth)
+  if writes {
+    if !require_json_write(request, conn) {
+      return true
+    }
+  }
+  let query = if operation == "list-messages" {
+    request_query_parameter(request.path, "channel_id")
+  } else {
+    request_query_parameter(request.path, "q")
+  }
+  let payload = if writes { body.read_all().text() } else { "" }
+  let result = marketplace_application().execute(
+    marketplace_opaque_session(request),
+    operation,
+    payload,
+    query,
+    now_ms=@env.now(),
+  ) catch {
+    _ => {
+      send_json(conn, 403, {
+        "ok": false,
+        "error": "marketplace_request_denied",
+        "operation": operation,
+        "message": "The request failed marketplace policy or authorization checks.",
+      })
+      return true
+    }
+  }
+  send_json(conn, if writes { 202 } else { 200 }, result)
+  true
+}
+
+///|
+fn handoff_kind(body : String) -> String {
+  let parsed = @json.parse(body) catch { _ => Json::null() }
+  match parsed {
+    Object(fields) =>
+      match fields.get("kind") {
+        Some(String(value)) => value.trim().to_owned().to_lower()
+        _ => ""
+      }
+    _ => ""
+  }
+}
+
+///|
+fn review_decision_route(path : String) -> Bool {
+  path == @town_contract.miniapp_review_decision_path() ||
+  (path.has_prefix("/miniapp/reviews/") && path.has_suffix("/decision"))
+}
+
+///|
+fn catalog_string(fields : Map[String, Json], key : String) -> String {
+  match fields.get(key) {
+    Some(String(value)) => value.trim().to_owned()
+    _ => ""
+  }
+}
+
+///|
+fn canonical_catalog_book_id(value : String) -> Bool {
+  if value.is_empty() || value.has_prefix("-") || value.has_suffix("-") {
+    return false
+  }
+  for char in value {
+    if !((char >= 'a' && char <= 'z') ||
+      (char >= '0' && char <= '9') ||
+      char == '-') {
+      return false
+    }
+  }
+  true
+}
+
+///| The phone receives only symbolic catalog identity and display metadata.
+
+///|
+/// The trusted workspace root never crosses the MoonTown boundary.
+async fn miniapp_installed_book_catalog() -> Array[Json] {
+  let result : Array[Json] = []
+  let allowed_root = @fs.realpath(
+    @storage.moontown_active_workspace_root() + "/books",
+  ) catch {
+    _ => return result
+  }
+  for
+    entry in @moonbook.load_or_create_catalog(
+      path=@moonbook.default_catalog_path(),
+    ) {
+    guard entry.to_json() is Object(fields) else { continue }
+    let id = catalog_string(fields, "id")
+    let declared_root = catalog_string(fields, "workspace_root")
+    let workspace_root = @fs.realpath(declared_root) catch { _ => continue }
+    if canonical_catalog_book_id(id) &&
+      workspace_root == allowed_root + "/" + id &&
+      (
+        @fs.exists(workspace_root + "/book.json") ||
+        @fs.exists(workspace_root + "/book/book.json") ||
+        @fs.exists(workspace_root + "/book/moonbook-ui-state.json")
+      ) {
+      result.push({
+        "id": id,
+        "name": catalog_string(fields, "name"),
+        "purpose": catalog_string(fields, "purpose"),
+      })
+    }
+  }
+  result
+}
+
+///|
+fn catalog_contains_book(catalog : Array[Json], book_id : String) -> Bool {
+  catalog.any(entry => {
+    match entry {
+      Object(fields) => catalog_string(fields, "id") == book_id
+      _ => false
+    }
+  })
+}
+
+///| The miniapp chooses one installed book. MoonTown derives the symbolic
+
+///| workspace/building binding from that catalog identity rather than trusting
+
+///|
+/// client-supplied location metadata.
+fn bind_miniapp_supervisor_draft(
+  draft : @supervisor_setup.SupervisorProfileDraft,
+  catalog : Array[Json],
+) -> @supervisor_setup.SupervisorProfileDraft raise {
+  if draft.book_ids.length() != 1 ||
+    !catalog_contains_book(catalog, draft.book_ids[0]) ||
+    draft.max_active_workers != 3 {
+    fail("supervisor binding must select one currently installed MoonBook")
+  }
+  let book_id = draft.book_ids[0]
+  { ..draft, workspace_id: book_id, building_id: book_id }
+}
+
+///|
+fn profile_binding_is_installed(snapshot : Json, catalog : Array[Json]) -> Bool {
+  guard snapshot is Object(root) &&
+    root.get("profile") is Some(Object(profile)) &&
+    profile.get("bindings") is Some(Object(bindings)) &&
+    bindings.get("bookIds") is Some(Array(book_ids)) &&
+    book_ids.length() == 1 &&
+    book_ids[0] is String(book_id) else {
+    return false
+  }
+  catalog_contains_book(catalog, book_id)
+}
+
+///|
 async fn handle_request(
   request : @http.Request,
   body : &@io.Reader,
   conn : @http.ServerConnection,
 ) -> Unit {
   let path = request_path(request)
-  if request.meth is Get && path == @town_contract.miniapp_health_path() {
+  if request.meth is @http.Get && path == @town_contract.miniapp_health_path() {
     send_json(conn, 200, {
       "ok": true,
       "service": "moontown-miniapp",
@@ -148,15 +563,21 @@ async fn handle_request(
     })
     return
   }
-  if request.meth is Get && path == @town_contract.miniapp_contract_path() {
+  if request.meth is @http.Get && path == @town_contract.miniapp_contract_path() {
     send_json(conn, 200, @town_contract.miniapp_contract())
+    return
+  }
+  let marketplace_handled = handle_marketplace_request(
+    request, body, conn, path,
+  )
+  if marketplace_handled {
     return
   }
   if !require_session(request, conn) {
     return
   }
   if path == @town_contract.miniapp_snapshot_path() {
-    if !(request.meth is Get) {
+    if !(request.meth is @http.Get) {
       send_json(conn, 405, { "ok": false, "error": "GET required" })
       return
     }
@@ -165,6 +586,267 @@ async fn handle_request(
       200,
       @town_projection.default_town_projection().miniapp_snapshot(),
     )
+    return
+  }
+  if path == @town_contract.miniapp_book_registration_path() {
+    if !(request.meth is @http.Get) {
+      send_json(conn, 405, { "ok": false, "error": "GET required" })
+      return
+    }
+    send_json(conn, 200, {
+      "ok": true,
+      "schema": "moontown.miniapp.book-catalog.v1",
+      "books": miniapp_installed_book_catalog().to_json(),
+    })
+    return
+  }
+  let supervisor = @supervisor_setup.default_supervisor_setup_application()
+  let actor_user_id = miniapp_actor_user_id(request)
+  if path == @town_contract.miniapp_supervisor_path() ||
+    path == @town_contract.miniapp_supervisor_readiness_path() {
+    if !(request.meth is @http.Get) {
+      send_json(conn, 405, { "ok": false, "error": "GET required" })
+      return
+    }
+    send_json(conn, 200, supervisor.query_profile(actor_user_id))
+    return
+  }
+  if path == @town_contract.miniapp_supervisor_draft_path() {
+    if !require_json_put(request, conn) {
+      return
+    }
+    let result = supervisor.save_profile_draft(
+      actor_user_id,
+      bind_miniapp_supervisor_draft(
+        @supervisor_setup.parse_supervisor_profile_draft(body.read_all().text()),
+        miniapp_installed_book_catalog(),
+      ),
+      now_ms=@env.now(),
+    ) catch {
+      error => {
+        send_json(conn, 409, { "ok": false, "error": "\{error}" })
+        return
+      }
+    }
+    send_json(conn, 200, result)
+    return
+  }
+  if path == @town_contract.miniapp_supervisor_activation_path() {
+    if !require_json_write(request, conn) {
+      return
+    }
+    if !profile_binding_is_installed(
+        supervisor.query_profile(actor_user_id),
+        miniapp_installed_book_catalog(),
+      ) {
+      send_json(conn, 409, {
+        "ok": false,
+        "error": "the bound MoonBook is no longer installed",
+      })
+      return
+    }
+    let result = supervisor.activate_profile(
+      actor_user_id,
+      @supervisor_setup.parse_supervisor_activation_draft(
+        body.read_all().text(),
+      ),
+      now_ms=@env.now(),
+    ) catch {
+      error => {
+        send_json(conn, 409, { "ok": false, "error": "\{error}" })
+        return
+      }
+    }
+    send_json(conn, 202, result)
+    return
+  }
+  if path == @town_contract.miniapp_run_steer_path() ||
+    path == @town_contract.miniapp_run_delegate_path() ||
+    path == @town_contract.miniapp_child_run_steer_path() ||
+    path == @town_contract.miniapp_supervisor_wake_path() ||
+    path == @town_contract.miniapp_supervisor_stop_path() ||
+    path == @town_contract.miniapp_supervisor_resume_path() ||
+    path == @town_contract.miniapp_message_path() ||
+    path == @town_contract.miniapp_run_cancel_path() ||
+    path == @town_contract.miniapp_run_retry_path() {
+    if !require_json_write(request, conn) {
+      return
+    }
+    let request_body = body.read_all().text()
+    let result = try {
+      if path == @town_contract.miniapp_message_path() {
+        supervisor.request_message(
+          actor_user_id,
+          request_body,
+          now_ms=@env.now(),
+        )
+      } else if path == @town_contract.miniapp_run_delegate_path() {
+        supervisor.request_run_delegate(
+          actor_user_id,
+          request_body,
+          now_ms=@env.now(),
+        )
+      } else if path == @town_contract.miniapp_child_run_steer_path() {
+        supervisor.request_child_run_steer(
+          actor_user_id,
+          request_body,
+          now_ms=@env.now(),
+        )
+      } else if path == @town_contract.miniapp_supervisor_wake_path() {
+        supervisor.request_supervisor_wake(
+          actor_user_id,
+          request_body,
+          now_ms=@env.now(),
+        )
+      } else if path == @town_contract.miniapp_supervisor_stop_path() {
+        supervisor.request_supervisor_stop(
+          actor_user_id,
+          request_body,
+          now_ms=@env.now(),
+        )
+      } else if path == @town_contract.miniapp_supervisor_resume_path() {
+        supervisor.request_supervisor_resume(
+          actor_user_id,
+          request_body,
+          now_ms=@env.now(),
+        )
+      } else if path == @town_contract.miniapp_run_cancel_path() {
+        supervisor.request_run_cancel(
+          actor_user_id,
+          request_body,
+          now_ms=@env.now(),
+        )
+      } else if path == @town_contract.miniapp_run_retry_path() {
+        supervisor.request_run_retry(
+          actor_user_id,
+          request_body,
+          now_ms=@env.now(),
+        )
+      } else {
+        supervisor.request_run_steer(
+          actor_user_id,
+          request_body,
+          now_ms=@env.now(),
+        )
+      }
+    } catch {
+      error => {
+        send_json(conn, 409, { "ok": false, "error": "\{error}" })
+        return
+      }
+    }
+    send_json(conn, 202, result)
+    return
+  }
+  if review_decision_route(path) {
+    if !require_json_write(request, conn) {
+      return
+    }
+    let result = supervisor.request_bookkeeper_review(
+      actor_user_id,
+      body.read_all().text(),
+      now_ms=@env.now(),
+    ) catch {
+      error => {
+        send_json(conn, 409, { "ok": false, "error": "\{error}" })
+        return
+      }
+    }
+    send_json(conn, 202, result)
+    return
+  }
+  if path == @town_contract.miniapp_runtime_outbox_path() {
+    if !(request.meth is @http.Get) {
+      send_json(conn, 405, { "ok": false, "error": "GET required" })
+      return
+    }
+    send_json(conn, 200, supervisor.runtime_handoffs())
+    return
+  }
+  if path == @town_contract.miniapp_runtime_observation_reconcile_path() {
+    if !require_json_write(request, conn) {
+      return
+    }
+    let result = supervisor.reconcile_runtime_observation(
+      miniapp_transport_id(request),
+      body.read_all().text(),
+      now_ms=@env.now(),
+    ) catch {
+      error => {
+        send_json(conn, 409, { "ok": false, "error": "\{error}" })
+        return
+      }
+    }
+    send_json(conn, 200, result)
+    return
+  }
+  if path == @town_contract.miniapp_runtime_outbox_claim_path() ||
+    path == @town_contract.miniapp_runtime_outbox_reconcile_path() ||
+    path == @town_contract.miniapp_runtime_outbox_release_path() {
+    if !require_json_write(request, conn) {
+      return
+    }
+    let request_body = body.read_all().text()
+    let kind = handoff_kind(request_body)
+    let transport_id = miniapp_transport_id(request)
+    let result = try {
+      if path == @town_contract.miniapp_runtime_outbox_release_path() {
+        supervisor.release_runtime_handoff(transport_id, request_body)
+      } else if path == @town_contract.miniapp_runtime_outbox_claim_path() {
+        if kind == "activation" {
+          supervisor.claim_activation_handoff(transport_id, request_body)
+        } else if kind == "execution" {
+          supervisor.claim_execution_handoff(transport_id, request_body)
+        } else {
+          fail("runtime handoff kind must be activation or execution")
+        }
+      } else if kind == "activation" {
+        supervisor.reconcile_activation_handoff(transport_id, request_body)
+      } else if kind == "execution" {
+        supervisor.reconcile_execution_handoff(transport_id, request_body)
+      } else {
+        fail("runtime handoff kind must be activation or execution")
+      }
+    } catch {
+      error => {
+        send_json(conn, 409, { "ok": false, "error": "\{error}" })
+        return
+      }
+    }
+    send_json(conn, 200, result)
+    return
+  }
+  if path == @town_contract.miniapp_bookkeeper_outbox_path() {
+    if !(request.meth is @http.Get) {
+      send_json(conn, 405, { "ok": false, "error": "GET required" })
+      return
+    }
+    send_json(conn, 200, supervisor.bookkeeper_outbox())
+    return
+  }
+  if path == @town_contract.miniapp_bookkeeper_outbox_claim_path() ||
+    path == @town_contract.miniapp_bookkeeper_outbox_reconcile_path() ||
+    path == @town_contract.miniapp_bookkeeper_outbox_release_path() {
+    if !require_json_write(request, conn) {
+      return
+    }
+    let request_body = body.read_all().text()
+    let transport_id = miniapp_transport_id(request)
+    let result = try {
+      if path == @town_contract.miniapp_bookkeeper_outbox_release_path() {
+        supervisor.release_bookkeeper_review(transport_id, request_body)
+      } else if path == @town_contract.miniapp_bookkeeper_outbox_claim_path() {
+        supervisor.claim_bookkeeper_review(transport_id, request_body)
+      } else {
+        supervisor.reconcile_bookkeeper_review(transport_id, request_body)
+      }
+    } catch {
+      error => {
+        send_json(conn, 409, { "ok": false, "error": "\{error}" })
+        return
+      }
+    }
+    send_json(conn, 200, result)
     return
   }
   if path == @town_contract.miniapp_standing_watch_path() {

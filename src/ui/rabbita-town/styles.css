@@ -6,6 +6,7 @@
 @import url("./styles/sidebar-panels.css");
 @import url("./styles/energy-valley-shell.css");
 @import url("./styles/energy-valley-golden.css");
+@import url("./styles/knowledge-library.css");
 @import url("./styles/research-handoff.css");
 
 @media (max-width: 1220px) {

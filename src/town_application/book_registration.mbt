@@ -1,5 +1,7 @@
 ///| Register an existing MoonBook in MoonTown's catalog. The owner service
-///| validates the local book root and remains the only catalog writer.
+
+///|
+/// validates the local book root and remains the only catalog writer.
 pub async fn RequestApplication::register_existing_book(
   self : RequestApplication,
   body : String,
@@ -32,14 +34,15 @@ pub async fn RequestApplication::register_existing_book(
   let entry = @moonbook.BookCatalogEntry::new(
     id=book_id,
     name=title,
-    purpose=purpose,
-    workspace_root=workspace_root,
+    purpose~,
+    workspace_root~,
     tags=json_string_list_field(fields, "tags"),
     skills=json_string_list_field(fields, "skills"),
   )
   let catalog_path = @moonbook.default_catalog_path()
-  let catalog = @moonbook.load_or_create_catalog(path=catalog_path)
-    .filter(existing => existing.id != book_id)
+  let catalog = @moonbook.load_or_create_catalog(path=catalog_path).filter(existing => {
+    existing.id != book_id
+  })
   catalog.push(entry)
   @moonbook.save_catalog_file(catalog_path, catalog)
   {

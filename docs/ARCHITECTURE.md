@@ -25,6 +25,20 @@ That document defines the next architecture step: each Wenyu building should
 act as an AI-mediated protocol place for aggregation, exchange, reduction, and
 distribution, not merely as a research book or static UI card.
 
+The many-books-per-building knowledge district is specified in
+[KNOWLEDGE_TOWN_ARCHITECTURE.md](/Users/kq/Workspace/moontown/docs/KNOWLEDGE_TOWN_ARCHITECTURE.md).
+It keeps map geometry, semantic domain/book membership, and live runtime truth
+in separate contracts. MoonTown projects those contracts; MoonFlow still owns
+workflow state, MoonClaw still owns bounded execution, and MoonBook/bookkeeper
+still owns accepted knowledge and revision history.
+
+The safe agent/building publication, discovery, recommendation, advertising,
+notification, and communication loop is specified in
+[MARKETPLACE_DISCOVERY.md](/Users/kq/Workspace/moontown/docs/MARKETPLACE_DISCOVERY.md).
+MoonTown owns its durable policy and ACL state, Bunnia owns the phone
+projection, MoonFind owns sanitized organic indexing, and MoonClaw remains the
+single bounded worker runtime.
+
 The document/book-first doctrine is tracked in
 [DOCUMENT_PROTOCOL_PHILOSOPHY.md](/Users/kq/Workspace/moontown/docs/DOCUMENT_PROTOCOL_PHILOSOPHY.md).
 The core rule is: durable state lives in documents/books, active behavior is a

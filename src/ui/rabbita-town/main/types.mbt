@@ -69,6 +69,8 @@ priv struct Model {
   visual_projection_version : Int
   module_projections : Array[BookProjectionFragment]
   module_projections_version : Int
+  knowledge_domain_catalog : KnowledgeDomainCatalog?
+  knowledge_domain_catalog_version : Int
   civic_status : CivicServicePortfolioSnapshot?
   civic_status_version : Int
   moondesk_handoff_artifacts : Array[MoondeskHandoffArtifact]
@@ -160,6 +162,7 @@ priv enum Msg {
   EnergyResetCurrent
   EnergyGenerateNew
   EnergyCanvasClick(Int, Int)
+  OpenEnergyBuilding(String)
   CloseEnergyInspector
   SetDashboardSection(DashboardSection)
   SetRequestComposer(RequestComposerFocus)

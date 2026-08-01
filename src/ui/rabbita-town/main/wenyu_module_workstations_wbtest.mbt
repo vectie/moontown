@@ -6,6 +6,7 @@ fn module_workstation_test_runtime() -> EnergyValleyRuntimeState {
       #|  "schema": "moontown.energy-valley.runtime.v1",
       #|  "mode": "live",
       #|  "observedAt": "1970-01-01T00:01:40.000Z",
+      #|  "knowledgeCatalogDigest": "sha256:aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
       #|  "tasks": [
       #|    {"id":"intake","title":"Intake","status":"queued","buildingModuleKey":"policy-hall","artifacts":[],"source":"operator-request"},
       #|    {"id":"discover","title":"Discover","status":"running","buildingModuleKey":"policy-hall","artifacts":[],"source":"watcher"},

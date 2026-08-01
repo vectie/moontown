@@ -11,6 +11,8 @@ import {
 } from 'node:fs/promises'
 import path from 'node:path'
 import {
+  KNOWLEDGE_DOMAIN_CATALOG_SOURCE,
+  KNOWLEDGE_DOMAIN_CATALOG_TARGET,
   resolveRuntimeAssetPath,
   runtimeAssetPaths,
 } from '../runtime_asset_manifest.js'
@@ -117,6 +119,10 @@ async function assemble() {
       relativePath,
     )
   }
+  await copyRequiredFile(
+    path.resolve(frontendRoot, KNOWLEDGE_DOMAIN_CATALOG_SOURCE),
+    KNOWLEDGE_DOMAIN_CATALOG_TARGET,
+  )
 
   await writeAssetManifest()
   await rm(distRoot, { recursive: true, force: true })

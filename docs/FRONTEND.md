@@ -221,6 +221,20 @@ MoonTown surface. It combines the procedural Wenyu world, simulation and
 authoring tools, civic buildings, resident/worker projections, live runtime
 truth, dashboard access, and typed handoff panels on one full-screen canvas.
 
+Registered buildings also expose their knowledge-domain library in the same
+canvas inspector. The library joins the static, governed domain catalog to
+real MoonBook projection fragments by exact `book_id`; it must label unmatched
+catalog books as declared or planned rather than completed. Policy, cadence,
+review chain, and book state belong in this progressively disclosed inspector,
+not as permanent map labels.
+
+When no fresh runtime is connected, purposeful agent movement may be shown only
+as an explicitly labeled **Knowledge flow preview**. Preview agents demonstrate
+research, discussion, review, revision, and return motion but never count as
+real work. Live movement uses correlated runtime task/agent fields, real home
+and destination buildings, and stale-state rules. Canvas animation must honor
+the browser's reduced-motion preference.
+
 The default `/`, `/index.html`, and compatibility `/viewport.html` paths all
 select this canvas. Interproduct handoffs append their typed query parameters
 to `index.html?seed=20260727`; they must not switch to another UI.
@@ -347,6 +361,9 @@ Current frontend maturity:
   keyed by normalized module id
 - active workers route to matched module entrances; idle, completed, and absent
   workers do not create fake busy badges
+- ambient knowledge-flow residents may animate the full return journey, but a
+  live worker returns only after the runtime supplies a recent timestamped
+  completion or acceptance receipt; old completed tasks never create motion
 - interiors show runtime source, counters, validation state, and active worker
   roster slots
 - interiors show MoonBook summary, status chips, metrics, readiness, review

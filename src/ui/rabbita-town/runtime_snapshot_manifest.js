@@ -113,3 +113,13 @@ export const WENYU_TOWN_MODULES_SNAPSHOT = {
   versionGlobal: '__wenyuTownModulesVersion',
   fallback: '{"modules":[]}',
 }
+
+export const KNOWLEDGE_DOMAIN_CATALOG_SNAPSHOT = {
+  // The desktop service resolves this URL from the same source used for agent
+  // routing, including an explicit environment override. Static deployments
+  // serve the bundled file at the identical path.
+  url: './knowledge-domain-catalog.json',
+  jsonGlobal: '__moontownKnowledgeDomainCatalogJson',
+  versionGlobal: '__moontownKnowledgeDomainCatalogVersion',
+  fallback: '',
+}

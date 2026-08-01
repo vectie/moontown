@@ -1,0 +1,144 @@
+// Generated using `moon info`, DON'T EDIT IT
+package "vectie/moontown/domain_catalog"
+
+import {
+  "moonbitlang/core/debug",
+  "moonbitlang/core/json",
+}
+
+// Values
+pub fn active_book_count(KnowledgeDomainCatalog) -> Int
+
+pub fn all_books(KnowledgeDomainCatalog) -> Array[KnowledgeDomainBook]
+
+pub fn book_count(KnowledgeDomainCatalog) -> Int
+
+pub fn book_count_with_status(KnowledgeDomainCatalog, String) -> Int
+
+pub fn books_for_building(KnowledgeDomainCatalog, String) -> Array[KnowledgeDomainBook]
+
+pub fn building_count(KnowledgeDomainCatalog) -> Int
+
+pub fn communication_scenario_count(KnowledgeDomainCatalog) -> Int
+
+pub fn decode_knowledge_domain_catalog(Json) -> KnowledgeDomainCatalog raise
+
+pub fn domain_count(KnowledgeDomainCatalog) -> Int
+
+pub fn domains_of_kind(KnowledgeDomainCatalog, String) -> Array[KnowledgeDomain]
+
+pub fn find_book(KnowledgeDomainCatalog, String) -> KnowledgeDomainBook?
+
+pub fn find_domain(KnowledgeDomainCatalog, String) -> KnowledgeDomain?
+
+pub fn find_domain_by_building_id(KnowledgeDomainCatalog, String) -> KnowledgeDomain?
+
+pub fn find_domain_for_book(KnowledgeDomainCatalog, String) -> KnowledgeDomain?
+
+pub fn find_policy(KnowledgeDomainCatalog, String) -> KnowledgeDomainPolicy?
+
+pub fn knowledge_domain_catalog_schema() -> String
+
+pub fn knowledge_domain_catalog_version() -> Int
+
+pub fn knowledge_domain_catalog_vocabulary() -> KnowledgeDomainCatalogVocabulary
+
+pub fn knowledge_domain_portfolio(KnowledgeDomainCatalog) -> KnowledgeDomainPortfolio
+
+pub fn parse_knowledge_domain_catalog(String) -> KnowledgeDomainCatalog raise
+
+pub fn policy_count(KnowledgeDomainCatalog) -> Int
+
+pub fn primary_book_for_building(KnowledgeDomainCatalog, String) -> KnowledgeDomainBook?
+
+pub fn require_valid_knowledge_domain_catalog(KnowledgeDomainCatalog) -> Unit raise
+
+pub fn valid_catalog_identifier(String) -> Bool
+
+pub fn validate_knowledge_domain_catalog(KnowledgeDomainCatalog) -> Array[String]
+
+// Errors
+
+// Types and methods
+pub(all) struct KnowledgeDomain {
+  domain_id : String
+  title : String
+  icon : String
+  building_id : String
+  kind : String
+  primary_book_id : String
+  policy_id : String
+  communication_scenario_ids : Array[String]
+  summary : String
+  books : Array[KnowledgeDomainBook]
+} derive(Eq, ToJson, @debug.Debug, @json.FromJson)
+
+pub(all) struct KnowledgeDomainBook {
+  book_id : String
+  title : String
+  question : String
+  role : String
+  template_id : String
+  policy_id : String
+  schedule_tier : String
+  cadence_ticks : Int
+  tags : Array[String]
+  source_policy : String
+  status : String
+} derive(Eq, ToJson, @debug.Debug, @json.FromJson)
+
+pub(all) struct KnowledgeDomainCatalog {
+  schema : String
+  catalog_id : String
+  version : Int
+  seed : Int
+  description : String
+  policies : Array[KnowledgeDomainPolicy]
+  domains : Array[KnowledgeDomain]
+} derive(Eq, ToJson, @debug.Debug, @json.FromJson)
+
+pub(all) struct KnowledgeDomainCatalogVocabulary {
+  domain_kinds : Array[String]
+  template_ids : Array[String]
+  source_policies : Array[String]
+  evidence_policies : Array[String]
+  cadences : Array[String]
+  schedule_tiers : Array[String]
+  budget_classes : Array[String]
+  completion_claims : Array[String]
+  review_roles : Array[String]
+  book_roles : Array[String]
+  book_statuses : Array[String]
+} derive(Eq, ToJson, @debug.Debug, @json.FromJson)
+
+pub(all) struct KnowledgeDomainPolicy {
+  id : String
+  version : Int
+  template_id : String
+  source_policy : String
+  evidence_policy : String
+  cadence : String
+  cadence_ticks : Int
+  quality_threshold : Int
+  review_chain : Array[String]
+  max_revision_rounds : Int
+  schedule_tier : String
+  budget_class : String
+  completion_claim : String
+} derive(Eq, ToJson, @debug.Debug, @json.FromJson)
+
+pub(all) struct KnowledgeDomainPortfolio {
+  domain_count : Int
+  building_count : Int
+  policy_count : Int
+  book_count : Int
+  active_book_count : Int
+  incubating_book_count : Int
+  paused_book_count : Int
+  archived_book_count : Int
+  communication_scenario_count : Int
+} derive(Eq, ToJson, @debug.Debug, @json.FromJson)
+
+// Type aliases
+
+// Traits

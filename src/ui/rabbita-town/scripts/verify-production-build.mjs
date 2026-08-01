@@ -4,6 +4,7 @@ import { readFile, readdir, stat } from 'node:fs/promises'
 import path from 'node:path'
 import {
   AUTHORING_ONLY_ASSET_SEGMENTS,
+  KNOWLEDGE_DOMAIN_CATALOG_TARGET,
   runtimeAssetPaths,
 } from '../runtime_asset_manifest.js'
 
@@ -77,6 +78,10 @@ for (const relativePath of distFiles) {
 for (const relativePath of REQUIRED_BROWSER_FILES) {
   assert.ok(distPathSet.has(relativePath), `missing browser file: ${relativePath}`)
 }
+assert.ok(
+  distPathSet.has(KNOWLEDGE_DOMAIN_CATALOG_TARGET),
+  `missing knowledge catalog: ${KNOWLEDGE_DOMAIN_CATALOG_TARGET}`,
+)
 for (const relativePath of sourceStylePaths) {
   assert.ok(distPathSet.has(relativePath), `missing stylesheet: ${relativePath}`)
 }

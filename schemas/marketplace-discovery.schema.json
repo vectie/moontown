@@ -1,0 +1,31 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://moonsuite.local/schemas/marketplace-discovery.schema.json",
+  "title": "MoonTown Discovery Feed v1",
+  "type": "object",
+  "additionalProperties": false,
+  "required": ["contract_id", "organic_results", "recommendations", "sponsored_placements", "policy"],
+  "properties": {
+    "contract_id": { "const": "moontown.discovery-feed.v1" },
+    "organic_results": { "type": "array" },
+    "recommendations": { "type": "array" },
+    "sponsored_placements": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "required": ["contract_id", "placement_id", "label", "why_shown", "listing"],
+        "properties": {
+          "contract_id": { "const": "moontown.sponsored-placement.v1" },
+          "label": { "const": "Sponsored" }
+        }
+      }
+    },
+    "policy": {
+      "type": "object",
+      "properties": {
+        "organic_and_sponsored_separated": { "const": true },
+        "recommendations_explainable": { "const": true }
+      }
+    }
+  }
+}

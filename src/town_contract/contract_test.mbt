@@ -25,8 +25,16 @@ test "desktop and miniapp contracts share capabilities without sharing trust" {
   assert_true(
     desktop.contains("\"capability\":\"civic.communication.moonflow.execute\""),
   )
-  assert_true(!desktop.contains("/miniapp/"))
+  assert_true(desktop.contains("\"transportEndpointsOnOwnerService\":true"))
+  assert_true(desktop.contains("\"contractPath\":\"/miniapp/contract\""))
   assert_true(!miniapp.contains("/api/operator-requests"))
   assert_true(desktop.contains("/api/standing-goals"))
   assert_true(desktop.contains("/api/book-registrations"))
+  assert_false(miniapp.contains("GET|POST"))
+  assert_true(miniapp.contains("marketplace-channels-read"))
+  assert_true(miniapp.contains("marketplace-channels-create"))
+  assert_true(miniapp.contains("marketplace-messages-read"))
+  assert_true(miniapp.contains("marketplace-messages-send"))
+  assert_true(miniapp.contains("marketplace-shared-listings"))
+  assert_true(miniapp.contains("marketplace-share-grant-revoke"))
 }

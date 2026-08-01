@@ -1,0 +1,31 @@
+// Generated using `moon info`, DON'T EDIT IT
+package "vectie/moontown/domain_catalog_runtime"
+
+import {
+  "vectie/moontown/domain_catalog",
+}
+
+// Values
+pub fn default_knowledge_domain_catalog_path() -> String
+
+pub fn knowledge_catalog_book_config_path(@domain_catalog.KnowledgeDomainCatalog, @domain_catalog.KnowledgeDomainBook, snapshot_path? : String) -> String
+
+pub fn knowledge_catalog_book_request_id(@domain_catalog.KnowledgeDomainCatalog, @domain_catalog.KnowledgeDomainBook) -> String
+
+pub fn knowledge_catalog_config_root(@domain_catalog.KnowledgeDomainCatalog, snapshot_path? : String) -> String
+
+pub fn knowledge_catalog_request_path(snapshot_path? : String) -> String
+
+pub async fn render_knowledge_domain_catalog(catalog_path? : String) -> String
+
+pub async fn render_knowledge_domain_catalog_status(catalog_path? : String, snapshot_path? : String) -> String
+
+pub async fn seed_knowledge_domain_catalog(catalog_path? : String, snapshot_path? : String) -> String
+
+// Errors
+
+// Types and methods
+
+// Type aliases
+
+// Traits

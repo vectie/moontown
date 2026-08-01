@@ -1,0 +1,414 @@
+// Generated using `moon info`, DON'T EDIT IT
+package "vectie/moontown/town_marketplace"
+
+import {
+  "moonbitlang/core/debug",
+  "moonbitlang/core/json",
+}
+
+// Values
+pub fn empty_marketplace_state() -> MarketplaceState
+
+pub fn listing_kind_name(ListingKind) -> String
+
+pub fn marketplace_active_sponsored(MarketplaceState, MarketplacePrincipal, UInt64) -> Array[Json]
+
+pub fn marketplace_application(String, MarketplacePrincipal, String, String) -> MarketplaceApplication raise
+
+pub fn marketplace_can_read_channel(Channel, MarketplacePrincipal) -> Bool
+
+pub fn marketplace_can_send_channel(Channel, MarketplacePrincipal) -> Bool
+
+pub fn marketplace_create_channel(MarketplaceState, MarketplacePrincipal, Channel, now_ms~ : UInt64) -> MarketplaceState raise
+
+pub fn marketplace_create_share_grant(MarketplaceState, MarketplacePrincipal, ShareGrant, now_ms~ : UInt64) -> MarketplaceState raise
+
+pub fn marketplace_discovery_feed(MarketplaceState, MarketplacePrincipal, String, UInt64) -> Json
+
+pub fn marketplace_emit_publication_notifications(MarketplaceState, ListingKind, String, now_ms~ : UInt64) -> MarketplaceState
+
+pub fn marketplace_mark_notification_read(MarketplaceState, MarketplacePrincipal, String, now_ms~ : UInt64) -> MarketplaceState raise
+
+pub fn marketplace_notifications_for(MarketplaceState, MarketplacePrincipal) -> Json
+
+pub fn marketplace_organic_search(MarketplaceState, String) -> Array[Json]
+
+pub fn marketplace_principal_for_session(MarketplaceState, String, now_ms~ : UInt64) -> MarketplacePrincipal?
+
+pub fn marketplace_recommendations(MarketplaceState, MarketplacePrincipal) -> Array[Recommendation]
+
+pub fn marketplace_register_session(MarketplaceState, MarketplacePrincipal, String, String, UInt64) -> MarketplaceState raise
+
+pub fn marketplace_request_listing_action(MarketplaceState, MarketplacePrincipal, ListingKind, String, String, String, now_ms~ : UInt64) -> MarketplaceState raise
+
+pub fn marketplace_schema() -> String
+
+pub fn marketplace_send_message(MarketplaceState, MarketplacePrincipal, ChannelMessage, now_ms~ : UInt64) -> MarketplaceState raise
+
+pub fn marketplace_set_subscription(MarketplaceState, MarketplacePrincipal, Subscription, now_ms~ : UInt64) -> MarketplaceState raise
+
+pub fn marketplace_share_preview(MarketplaceState, MarketplacePrincipal, String, String, String) -> Json raise
+
+pub fn marketplace_token_digest(String) -> String
+
+pub fn marketplace_transition_listing(MarketplaceState, MarketplacePrincipal, ListingKind, String, PublicationState, review_summary~ : String, now_ms~ : UInt64) -> MarketplaceState raise
+
+pub fn marketplace_upsert_agent_draft(MarketplaceState, MarketplacePrincipal, AgentListingDraft, now_ms~ : UInt64) -> MarketplaceState raise
+
+pub fn marketplace_upsert_building_draft(MarketplaceState, MarketplacePrincipal, BuildingListingDraft, now_ms~ : UInt64) -> MarketplaceState raise
+
+pub fn marketplace_upsert_sponsored_placement(MarketplaceState, MarketplacePrincipal, SponsoredPlacement) -> MarketplaceState raise
+
+pub fn marketplace_visible_channels(MarketplaceState, MarketplacePrincipal) -> Array[Json]
+
+pub fn marketplace_visible_messages(MarketplaceState, MarketplacePrincipal, String) -> Array[Json] raise
+
+pub fn public_agent_listing_card(AgentListingRecord) -> Json
+
+pub fn public_building_listing_card(BuildingListingRecord) -> Json
+
+pub fn public_listing_cards(MarketplaceState) -> Array[Json]
+
+pub fn public_listing_index_export(MarketplaceState) -> Json
+
+pub fn publication_state_name(PublicationState) -> String
+
+// Errors
+
+// Types and methods
+pub(all) struct AgentListingDraft {
+  listing_id : String
+  title : String
+  summary : String
+  image_ref : String
+  capabilities : Array[String]
+  tags : Array[String]
+  action_ids : Array[String]
+  required_permissions : Array[String]
+  pricing_summary : String
+  authority_ceiling : String
+  license_class : String
+  rights_summary : String
+  version_label : String
+} derive(Eq, ToJson, @debug.Debug, @json.FromJson)
+
+pub(all) struct AgentListingRecord {
+  listing_id : String
+  publisher_id : String
+  tenant_id : String
+  title : String
+  summary : String
+  image_ref : String
+  capabilities : Array[String]
+  tags : Array[String]
+  action_ids : Array[String]
+  required_permissions : Array[String]
+  pricing_summary : String
+  authority_ceiling : String
+  license_class : String
+  rights_summary : String
+  version_label : String
+  quality_score : Int
+  reliability_score : Int
+  content_digest : String
+  lifecycle : PublicationLifecycle
+  updated_at_ms : UInt64
+  version : Int
+} derive(Eq, ToJson, @debug.Debug, @json.FromJson)
+
+pub(all) struct BuildingListingDraft {
+  listing_id : String
+  title : String
+  summary : String
+  image_ref : String
+  capabilities : Array[String]
+  tags : Array[String]
+  action_ids : Array[String]
+  pricing_summary : String
+  license_class : String
+  rights_summary : String
+  version_label : String
+} derive(Eq, ToJson, @debug.Debug, @json.FromJson)
+
+pub(all) struct BuildingListingRecord {
+  listing_id : String
+  publisher_id : String
+  tenant_id : String
+  title : String
+  summary : String
+  image_ref : String
+  capabilities : Array[String]
+  tags : Array[String]
+  action_ids : Array[String]
+  pricing_summary : String
+  license_class : String
+  rights_summary : String
+  version_label : String
+  quality_score : Int
+  reliability_score : Int
+  content_digest : String
+  lifecycle : PublicationLifecycle
+  updated_at_ms : UInt64
+  version : Int
+} derive(Eq, ToJson, @debug.Debug, @json.FromJson)
+
+pub(all) struct Channel {
+  channel_id : String
+  tenant_id : String
+  workspace_id : String?
+  building_listing_id : String?
+  agent_listing_id : String?
+  owner_principal_id : String
+  title : String
+  visibility : ChannelVisibility
+  sensitivity : String
+  members : Array[ChannelMember]
+  created_at_ms : UInt64
+  updated_at_ms : UInt64
+  version : Int
+} derive(Eq, ToJson, @debug.Debug, @json.FromJson)
+
+pub(all) struct ChannelDraft {
+  channel_id : String
+  title : String
+  visibility : String
+  sensitivity : String
+  workspace_id : String?
+  building_listing_id : String?
+  agent_listing_id : String?
+  member_principal_ids : Array[String]
+} derive(Eq, ToJson, @debug.Debug, @json.FromJson)
+
+pub(all) struct ChannelMember {
+  principal_id : String
+  role : ChannelMemberRole
+  joined_at_ms : UInt64
+  active : Bool
+  version : Int
+} derive(Eq, ToJson, @debug.Debug, @json.FromJson)
+
+pub(all) enum ChannelMemberRole {
+  ChannelOwner
+  ChannelModerator
+  ChannelParticipant
+  ChannelObserver
+  ChannelAgent
+} derive(Eq, ToJson, @debug.Debug, @json.FromJson)
+
+pub(all) struct ChannelMessage {
+  message_id : String
+  channel_id : String
+  sender_principal_id : String
+  body : String
+  attachment_refs : Array[String]
+  mentions : Array[String]
+  audience : MessageAudience
+  reply_to_message_id : String?
+  created_at_ms : UInt64
+  edited_at_ms : UInt64?
+  version : Int
+} derive(Eq, ToJson, @debug.Debug, @json.FromJson)
+
+pub(all) enum ChannelVisibility {
+  DirectChannel
+  PrivateChannel
+  WorkspaceChannel
+  BuildingChannel
+  AgentChannel
+  PublicAnnouncementChannel
+} derive(Eq, ToJson, @debug.Debug, @json.FromJson)
+
+pub(all) struct ListingActionDraft {
+  listing_id : String
+  listing_kind : String
+  action_id : String
+  message : String
+} derive(Eq, ToJson, @debug.Debug, @json.FromJson)
+
+pub(all) enum ListingKind {
+  AgentListing
+  BuildingListing
+} derive(Eq, ToJson, @debug.Debug, @json.FromJson)
+
+pub(all) struct ListingTransitionDraft {
+  listing_id : String
+  listing_kind : String
+  target_state : String
+  review_summary : String
+} derive(Eq, ToJson, @debug.Debug, @json.FromJson)
+
+pub(all) struct MarketplaceApplication {
+  state_path : String
+  bootstrap_principal : MarketplacePrincipal
+  bootstrap_session_id : String
+  bootstrap_token_digest : String
+} derive(Eq, @debug.Debug)
+pub async fn MarketplaceApplication::execute(Self, String, String, String, String, now_ms~ : UInt64) -> Json
+
+pub(all) struct MarketplacePrincipal {
+  principal_id : String
+  tenant_id : String
+  display_name : String
+  workspace_ids : Array[String]
+  roles : Array[String]
+  interest_tags : Array[String]
+  active : Bool
+  version : Int
+} derive(Eq, ToJson, @debug.Debug, @json.FromJson)
+
+pub(all) struct MarketplaceSession {
+  session_id : String
+  token_digest : String
+  principal_id : String
+  expires_at_ms : UInt64
+  revoked : Bool
+  version : Int
+} derive(Eq, ToJson, @debug.Debug, @json.FromJson)
+
+pub(all) struct MarketplaceState {
+  schema : String
+  principals : Array[MarketplacePrincipal]
+  sessions : Array[MarketplaceSession]
+  agent_listings : Array[AgentListingRecord]
+  building_listings : Array[BuildingListingRecord]
+  channels : Array[Channel]
+  messages : Array[ChannelMessage]
+  share_grants : Array[ShareGrant]
+  subscriptions : Array[Subscription]
+  notifications : Array[TownNotification]
+  sponsored_placements : Array[SponsoredPlacement]
+  version : Int
+} derive(Eq, ToJson, @debug.Debug, @json.FromJson)
+
+pub(all) enum MessageAudience {
+  EntireChannel
+  NamedPrincipals(Array[String])
+  PublicAudience
+} derive(Eq, ToJson, @debug.Debug, @json.FromJson)
+
+pub(all) struct MessageDraft {
+  message_id : String
+  channel_id : String
+  body : String
+  attachment_refs : Array[String]
+  mentions : Array[String]
+  audience_principal_ids : Array[String]
+  public_audience : Bool
+  reply_to_message_id : String?
+} derive(Eq, ToJson, @debug.Debug, @json.FromJson)
+
+pub(all) struct NotificationReadDraft {
+  notification_id : String
+} derive(Eq, ToJson, @debug.Debug, @json.FromJson)
+
+pub(all) struct PublicationLifecycle {
+  state : PublicationState
+  shared_at_ms : UInt64?
+  submitted_at_ms : UInt64?
+  published_at_ms : UInt64?
+  archived_at_ms : UInt64?
+  reviewed_by : String?
+  review_summary : String
+} derive(Eq, ToJson, @debug.Debug, @json.FromJson)
+
+pub(all) enum PublicationState {
+  PublicationDraft
+  PublicationShared
+  PublicationSubmitted
+  PublicationPublished
+  PublicationArchived
+} derive(Eq, ToJson, @debug.Debug, @json.FromJson)
+
+pub(all) struct Recommendation {
+  listing : Json
+  score : Int
+  reason : String
+} derive(Eq, ToJson, @debug.Debug, @json.FromJson)
+
+pub(all) struct ShareGrant {
+  grant_id : String
+  tenant_id : String
+  resource_kind : String
+  resource_id : String
+  grantor_principal_id : String
+  grantee_principal_id : String
+  permission : String
+  created_at_ms : UInt64
+  expires_at_ms : UInt64?
+  revoked_at_ms : UInt64?
+  version : Int
+} derive(Eq, ToJson, @debug.Debug, @json.FromJson)
+
+pub(all) struct ShareGrantDraft {
+  grant_id : String
+  resource_kind : String
+  resource_id : String
+  grantee_principal_id : String
+  permission : String
+  expires_at_ms : UInt64?
+} derive(Eq, ToJson, @debug.Debug, @json.FromJson)
+
+pub(all) struct SharePreviewDraft {
+  resource_kind : String
+  resource_id : String
+  grantee_principal_id : String
+} derive(Eq, ToJson, @debug.Debug, @json.FromJson)
+
+pub(all) struct SponsoredPlacement {
+  placement_id : String
+  sponsor_principal_id : String
+  listing_kind : ListingKind
+  listing_id : String
+  label : String
+  why_shown : String
+  interest_tags : Array[String]
+  starts_at_ms : UInt64
+  ends_at_ms : UInt64
+  active : Bool
+  version : Int
+} derive(Eq, ToJson, @debug.Debug, @json.FromJson)
+
+pub(all) struct SponsoredPlacementDraft {
+  placement_id : String
+  listing_kind : String
+  listing_id : String
+  why_shown : String
+  interest_tags : Array[String]
+  starts_at_ms : UInt64
+  ends_at_ms : UInt64
+  active : Bool
+} derive(Eq, ToJson, @debug.Debug, @json.FromJson)
+
+pub(all) struct Subscription {
+  subscription_id : String
+  principal_id : String
+  topic_kind : String
+  topic_id : String
+  enabled : Bool
+  created_at_ms : UInt64
+  version : Int
+} derive(Eq, ToJson, @debug.Debug, @json.FromJson)
+
+pub(all) struct SubscriptionDraft {
+  subscription_id : String
+  topic_kind : String
+  topic_id : String
+  enabled : Bool
+} derive(Eq, ToJson, @debug.Debug, @json.FromJson)
+
+pub(all) struct TownNotification {
+  notification_id : String
+  principal_id : String
+  kind : String
+  title : String
+  summary : String
+  object_kind : String
+  object_id : String
+  created_at_ms : UInt64
+  read_at_ms : UInt64?
+  version : Int
+} derive(Eq, ToJson, @debug.Debug, @json.FromJson)
+
+// Type aliases
+
+// Traits

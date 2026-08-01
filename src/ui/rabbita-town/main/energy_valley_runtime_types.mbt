@@ -50,6 +50,10 @@ priv struct EnergyValleyRuntimeWorkItem {
   resultLinks : Array[EnergyValleyRuntimeResultLink]?
   collaboration : EnergyValleyRuntimeCollaboration?
   progress : EnergyValleyRuntimeProgress?
+  activityKind : String?
+  activityLabel : String?
+  originBuildingModuleKey : String?
+  destinationBuildingModuleKey : String?
   source : String
 } derive(FromJson)
 
@@ -58,10 +62,16 @@ priv struct EnergyValleyRuntimeAgent {
   id : String
   name : String
   role : String
+  avatarRef : String?
   status : String
   buildingModuleKey : String?
   workItemId : String?
   runId : String?
+  bookId : String?
+  activityKind : String?
+  activityLabel : String?
+  originBuildingModuleKey : String?
+  destinationBuildingModuleKey : String?
 } derive(FromJson)
 
 ///|
@@ -69,6 +79,7 @@ priv struct EnergyValleyRuntimeProjection {
   schema : String
   mode : String
   observedAt : String
+  knowledgeCatalogDigest : String?
   tick : Int?
   tasks : Array[EnergyValleyRuntimeWorkItem]
   agents : Array[EnergyValleyRuntimeAgent]

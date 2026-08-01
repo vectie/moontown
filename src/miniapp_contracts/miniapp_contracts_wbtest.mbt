@@ -51,6 +51,59 @@ test "miniapp endpoint catalog covers identity building search and runs" {
     "/runs/:id/status",
   )
   assert_true(miniapp_endpoint_by_id("review-decision").unwrap().writes)
+  assert_eq(
+    miniapp_endpoint_by_id("supervisor-message").unwrap().path,
+    "/miniapp/messages",
+  )
+  assert_eq(
+    miniapp_endpoint_by_id("run-delegate").unwrap().path,
+    "/miniapp/runs/delegate",
+  )
+  assert_eq(
+    miniapp_endpoint_by_id("child-run-steer").unwrap().path,
+    "/miniapp/runs/child/steer",
+  )
+  assert_eq(
+    miniapp_endpoint_by_id("supervisor-wake").unwrap().path,
+    "/miniapp/runs/supervisor/wake",
+  )
+  assert_eq(
+    miniapp_endpoint_by_id("supervisor-stop").unwrap().path,
+    "/miniapp/runs/supervisor/stop",
+  )
+  assert_eq(
+    miniapp_endpoint_by_id("supervisor-resume").unwrap().path,
+    "/miniapp/runs/supervisor/resume",
+  )
+  assert_eq(
+    miniapp_endpoint_by_id("marketplace-channels-read").unwrap().http_method,
+    "GET",
+  )
+  assert_false(
+    miniapp_endpoint_by_id("marketplace-channels-read").unwrap().writes,
+  )
+  assert_eq(
+    miniapp_endpoint_by_id("marketplace-channels-create").unwrap().http_method,
+    "POST",
+  )
+  assert_true(
+    miniapp_endpoint_by_id("marketplace-channels-create").unwrap().writes,
+  )
+  assert_eq(
+    miniapp_endpoint_by_id("marketplace-messages-read").unwrap().http_method,
+    "GET",
+  )
+  assert_eq(
+    miniapp_endpoint_by_id("marketplace-messages-send").unwrap().http_method,
+    "POST",
+  )
+  assert_eq(
+    miniapp_endpoint_by_id("marketplace-shared-listings").unwrap().http_method,
+    "GET",
+  )
+  assert_true(
+    miniapp_endpoint_by_id("marketplace-share-grant-revoke").unwrap().writes,
+  )
 }
 
 ///|

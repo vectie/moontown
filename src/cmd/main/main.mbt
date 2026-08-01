@@ -20,6 +20,7 @@ async fn render_cli_command(args : Array[String]) -> String {
       render_editor_pipeline_command(rest.to_owned())
     ["course", .. rest] => render_course_command(rest.to_owned())
     ["books", .. rest] => render_books_command(rest.to_owned())
+    ["knowledge", .. rest] => render_knowledge_command(rest.to_owned())
     ["moonclaw", .. rest] => render_moonclaw_command(rest.to_owned())
     ["civic", .. rest] => render_civic_command(rest.to_owned())
     ["commission", "evaluate", input_path, output_path] =>

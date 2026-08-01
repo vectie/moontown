@@ -1,0 +1,15 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "moontown/supervisor-bookkeeper-review-request@1.0.0",
+  "type": "object",
+  "required": ["schema", "request_id", "run_id", "state", "product_outcome_submission", "source_outcome_digest", "review_intent"],
+  "properties": {
+    "schema": {"const": "moonbook/bookkeeper-product-outcome-submission@1.0.0"},
+    "request_id": {"type": "string", "minLength": 1},
+    "run_id": {"type": "string", "minLength": 1},
+    "state": {"type": "string"},
+    "product_outcome_submission": {"type": "object"},
+    "source_outcome_digest": {"type": "string", "pattern": "^sha256:[0-9a-f]{64}$"},
+    "review_intent": {"type": "object"}
+  }
+}

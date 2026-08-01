@@ -8,6 +8,7 @@ fn energy_valley_runtime_test_projection_text(
     #|  "schema": "moontown.energy-valley.runtime.v1",
     #|  "mode": "__MODE__",
     #|  "observedAt": "__OBSERVED_AT__",
+    #|  "knowledgeCatalogDigest": "sha256:aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
     #|  "tick": 42,
     #|  "tasks": [{
     #|    "id": "research-task",

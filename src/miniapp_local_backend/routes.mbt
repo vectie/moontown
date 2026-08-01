@@ -8,6 +8,9 @@ pub fn miniapp_local_backend_routes() -> Array[MiniappLocalBackendRoute] {
       "GET", "/miniapp/town/snapshot", "snapshot", true,
     ),
     miniapp_local_backend_route(
+      "GET", "/miniapp/book-registrations", "installed-books", true,
+    ),
+    miniapp_local_backend_route(
       "GET", "/miniapp/buildings/search", "search-buildings", true,
     ),
     miniapp_local_backend_route(
@@ -36,7 +39,41 @@ pub fn miniapp_local_backend_routes() -> Array[MiniappLocalBackendRoute] {
       "POST", "/miniapp/runs/retry", "retry-run", true,
     ),
     miniapp_local_backend_route(
-      "POST", "/miniapp/reviews/accept", "accept-run", true,
+      "POST", "/miniapp/reviews/accept", "request-bookkeeper-review", true,
+    ),
+    miniapp_local_backend_route(
+      "GET", "/miniapp/onboarding/supervisor", "supervisor-profile", true,
+    ),
+    miniapp_local_backend_route(
+      "PUT", "/miniapp/onboarding/supervisor/draft", "supervisor-draft", true,
+    ),
+    miniapp_local_backend_route(
+      "POST", "/miniapp/onboarding/supervisor/activate", "supervisor-activate", true,
+    ),
+    miniapp_local_backend_route(
+      "POST", "/miniapp/runs/steer", "run-steer", true,
+    ),
+    miniapp_local_backend_route(
+      "POST", "/miniapp/runs/delegate", "run-delegate", true,
+    ),
+    miniapp_local_backend_route(
+      "POST", "/miniapp/runs/child/steer", "child-run-steer", true,
+    ),
+    miniapp_local_backend_route(
+      "POST", "/miniapp/runs/supervisor/wake", "supervisor-wake", true,
+    ),
+    miniapp_local_backend_route(
+      "POST", "/miniapp/runs/supervisor/stop", "supervisor-stop", true,
+    ),
+    miniapp_local_backend_route(
+      "POST", "/miniapp/runs/supervisor/resume", "supervisor-resume", true,
+    ),
+    miniapp_local_backend_route(
+      "POST", "/miniapp/messages", "supervisor-message", true,
+    ),
+    miniapp_local_backend_route(
+      "POST", "/miniapp/runtime/observations/reconcile", "runtime-observation-reconcile",
+      true,
     ),
   ]
 }

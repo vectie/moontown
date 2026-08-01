@@ -11,6 +11,7 @@ fn module_interior_test_projection() -> BookProjectionFragment {
     page_families: [],
     journey: [],
     links: [],
+    acceptance_receipt: None,
   }
 }
 
@@ -76,7 +77,7 @@ test "module interior action routes setup and output intervention" {
     Some(module_interior_test_projection()),
   )
   assert_eq(blocked.unwrap().label, "Review output")
-  assert_true(blocked.unwrap().href.contains("mode=output"))
+  assert_eq(blocked.unwrap().href, canonical_energy_valley_dashboard_href())
   assert_true(
     module_interior_action(
       civic,

@@ -20,6 +20,9 @@ priv struct GoldenValleyCanvasAgent {
   facing_left : Bool
   bob : Double
   work_color : String
+  activity_glyph : String
+  activity_label : String
+  preview : Bool
 }
 
 ///|
@@ -53,7 +56,6 @@ extern "js" fn install_golden_valley_canvas_input(
   #|   globalThis.__moontownGoldenValleyCamera ||= { x: 1792, y: 3200, z: 0.1 };
   #|   const camera = globalThis.__moontownGoldenValleyCamera;
   #|   let cameraDragging = false;
-  #|   let inspectClick = false;
   #|   let painting = false;
   #|   let moved = false;
   #|   let lastX = 0;
@@ -67,28 +69,24 @@ extern "js" fn install_golden_valley_canvas_input(
   #|       'button[aria-label^="铺路"][aria-pressed="true"],' +
   #|       'button[aria-label^="造林"][aria-pressed="true"]',
   #|     ));
-  #|   const act = event => {
+  #|   const rememberAction = event => {
   #|     const rect = canvas.getBoundingClientRect();
   #|     const x = Math.floor(event.clientX - rect.left);
   #|     const y = Math.floor(event.clientY - rect.top);
   #|     globalThis.__moontownGoldenValleyActionX = x;
   #|     globalThis.__moontownGoldenValleyActionY = y;
-  #|     // Canvas elements never emit a native reset event. Reuse Rabbita's
-  #|     // managed reset-event bridge so the command enters its scheduler once.
-  #|     canvas.dispatchEvent(new Event("reset"));
   #|   };
   #|   canvas.addEventListener("pointerdown", event => {
+  #|     if (event.button === 0) rememberAction(event);
   #|     if (event.button === 1 || event.button === 2 ||
   #|         (event.button === 0 && inspectSelected())) {
   #|       cameraDragging = true;
-  #|       inspectClick = event.button === 0 && inspectSelected();
   #|       moved = false;
   #|       lastX = event.clientX;
   #|       lastY = event.clientY;
   #|       canvas.setPointerCapture?.(event.pointerId);
   #|     } else if (event.button === 0) {
   #|       painting = paintSelected();
-  #|       act(event);
   #|       if (painting) canvas.setPointerCapture?.(event.pointerId);
   #|     }
   #|   });
@@ -102,20 +100,28 @@ extern "js" fn install_golden_valley_canvas_input(
   #|       lastY = event.clientY;
   #|       globalThis.__moontownGoldenValleyRender?.();
   #|     } else if (painting) {
-  #|       act(event);
+  #|       rememberAction(event);
+  #|       canvas.dispatchEvent(new MouseEvent("click", {
+  #|         bubbles: true,
+  #|         button: 0,
+  #|         clientX: event.clientX,
+  #|         clientY: event.clientY,
+  #|       }));
   #|     }
   #|   });
   #|   const stop = event => {
   #|     cameraDragging = false;
-  #|     inspectClick = false;
   #|     painting = false;
   #|     canvas.releasePointerCapture?.(event.pointerId);
   #|   };
   #|   canvas.addEventListener("pointerup", event => {
-  #|     if (inspectClick && !moved) act(event);
   #|     stop(event);
   #|   });
   #|   canvas.addEventListener("pointercancel", stop);
+  #|   canvas.addEventListener("click", event => {
+  #|     if (moved) event.stopImmediatePropagation();
+  #|     moved = false;
+  #|   }, true);
   #|   canvas.addEventListener("contextmenu", event => event.preventDefault());
   #|   canvas.addEventListener("wheel", event => {
   #|     event.preventDefault();
@@ -164,10 +170,23 @@ extern "js" fn install_golden_valley_canvas_input(
   #|   }
   #|   if (!globalThis.__moontownGoldenValleyAnimation) {
   #|     globalThis.__moontownGoldenValleyAnimation = true;
-  #|     const frame = () => {
-  #|       globalThis.__moontownGoldenValleyRender?.();
+  #|     const motion = globalThis.matchMedia?.(
+  #|       "(prefers-reduced-motion: reduce)",
+  #|     );
+  #|     let lastPaint = 0;
+  #|     const frame = timestamp => {
+  #|       // The map remains interactive under reduced motion, but continuous
+  #|       // canvas animation is suppressed. Normal motion is capped at 30fps.
+  #|       if (!motion?.matches && !globalThis.document?.hidden &&
+  #|           timestamp - lastPaint >= 33) {
+  #|         lastPaint = timestamp;
+  #|         globalThis.__moontownGoldenValleyRender?.();
+  #|       }
   #|       globalThis.requestAnimationFrame(frame);
   #|     };
+  #|     motion?.addEventListener?.("change", () => {
+  #|       globalThis.__moontownGoldenValleyRender?.();
+  #|     });
   #|     globalThis.requestAnimationFrame(frame);
   #|   }
   #| }
@@ -724,7 +743,15 @@ extern "js" fn golden_math_sin(value : Double) -> Double =
 
 ///|
 extern "js" fn golden_animation_seconds() -> Double =
-  #| () => globalThis.performance.now() / 1000
+  #| () => globalThis.matchMedia?.("(prefers-reduced-motion: reduce)")?.matches
+  #|   ? 0
+  #|   : globalThis.performance.now() / 1000
+
+///|
+extern "js" fn golden_prefers_reduced_motion() -> Bool =
+  #| () => Boolean(
+  #|   globalThis.matchMedia?.("(prefers-reduced-motion: reduce)")?.matches,
+  #| )
 
 ///|
 extern "js" fn golden_draw_reference_building_shadow(
@@ -1113,8 +1140,14 @@ extern "js" fn golden_draw_sprite_agent(
   facing_left : Bool,
   bob : Double,
   work_color : String,
+  activity_glyph : String,
+  activity_label : String,
+  preview : Bool,
 ) -> Unit =
-  #| (context, sx, sy, zoom, spritePath, facingLeft, bob, workColor) => {
+  #| (
+  #|   context, sx, sy, zoom, spritePath, facingLeft, bob, workColor,
+  #|   activityGlyph, activityLabel, preview,
+  #| ) => {
   #|   globalThis.__moontownGoldenAgentSprites ||= new Map();
   #|   const cache = globalThis.__moontownGoldenAgentSprites;
   #|   let sprite = cache.get(spritePath);
@@ -1143,6 +1176,39 @@ extern "js" fn golden_draw_sprite_agent(
   #|     0, 0, Math.PI * 2,
   #|   );
   #|   context.fill();
+  #|   if (activityGlyph && zoom >= 0.38) {
+  #|     const text = zoom >= 0.9 && activityLabel
+  #|       ? activityLabel
+  #|       : activityGlyph;
+  #|     const fontSize = zoom >= 0.9 ? 10 : 12;
+  #|     context.font =
+  #|       "700 " + fontSize +
+  #|       "px \"PingFang SC\", \"Microsoft YaHei\", sans-serif";
+  #|     context.textAlign = "center";
+  #|     context.textBaseline = "middle";
+  #|     const width = Math.max(
+  #|       18,
+  #|       Math.min(92, context.measureText(text).width + 12),
+  #|     );
+  #|     const bubbleY = sy - height - Math.max(9, zoom * 12);
+  #|     context.fillStyle = preview
+  #|       ? "rgba(30,41,59,0.88)"
+  #|       : "rgba(2,6,23,0.92)";
+  #|     context.strokeStyle = workColor || (
+  #|       preview ? "rgba(196,181,253,0.9)" : "rgba(125,211,252,0.9)"
+  #|     );
+  #|     context.lineWidth = Math.max(1, zoom);
+  #|     context.setLineDash(preview ? [3, 2] : []);
+  #|     context.beginPath();
+  #|     context.roundRect(
+  #|       sx - width / 2, bubbleY - 9, width, 18, 8,
+  #|     );
+  #|     context.fill();
+  #|     context.stroke();
+  #|     context.setLineDash([]);
+  #|     context.fillStyle = preview ? "#ddd6fe" : "#e0f2fe";
+  #|     context.fillText(text, sx, bubbleY + 0.5);
+  #|   }
   #|   if (sprite.ready && sprite.image.naturalWidth > 0) {
   #|     const image = sprite.image;
   #|     const frameCount = 4;
@@ -1905,66 +1971,81 @@ fn golden_valley_canvas_agents(
   for building in model.energy_custom_buildings {
     buildings.push(building)
   }
-  let ambient_start = if model.energy_valley_runtime.phase is Live {
-    14
-  } else {
-    0
-  }
-  for index in ambient_start..<20 {
-    let role = if index == 0 {
-      "mayor"
-    } else if index < 6 {
-      "keeper"
-    } else if index < 14 {
-      "worker"
-    } else {
-      "resident"
-    }
-    if buildings.length() < 2 {
-      continue
-    }
-    let from_index = energy_valley_variation(
-      seed,
-      index,
-      17,
-      601,
-      buildings.length(),
+  if energy_valley_knowledge_preview_visible(model) && buildings.length() >= 2 {
+    // Preview residents are deterministic explanatory scenery. They are kept
+    // separate from runtime agents and never contribute to real-work counts.
+    let research_homes = buildings.filter(building => {
+      golden_valley_building_module_key(building).has_prefix("research-")
+    })
+    let social_square = golden_valley_building_for_identity(
+      buildings, "social-square",
     )
-    let destination_index = (
-        from_index +
-        1 +
-        energy_valley_variation(seed, index, 19, 607, buildings.length() - 1)
-      ) %
-      buildings.length()
-    match
-      golden_valley_building_road_path(
-        model,
+    for index in 0..<12 {
+      let role = if index == 0 {
+        "mayor"
+      } else if index < 4 {
+        "keeper"
+      } else if index < 9 {
+        "researcher"
+      } else {
+        "resident"
+      }
+      let random_from_index = energy_valley_variation(
         seed,
-        buildings[from_index],
-        buildings[destination_index],
-      ) {
-      None => ()
-      Some(path) => {
-        let elapsed_seconds = golden_animation_seconds()
-        let speed = if role == "worker" { 2.2 } else { 1.6 }
-        let phase_offset = energy_valley_variation(seed, index, 23, 613, 240).to_double()
-        let dwell_seconds = 5.0 + (index % 4).to_double()
-        match
-          golden_valley_commute_point(
-            path, elapsed_seconds, speed, phase_offset, dwell_seconds,
-          ) {
-          None => ()
-          Some(point) =>
-            result.push({
-              x: point.0,
-              y: point.1,
-              sprite_path: golden_valley_agent_sprite_path(role, index),
-              facing_left: golden_valley_agent_faces_left(
-                path, elapsed_seconds, speed, phase_offset, dwell_seconds, point,
-              ),
-              bob: golden_animation_seconds() * 9.0 + index.to_double(),
-              work_color: "",
-            })
+        index,
+        17,
+        601,
+        buildings.length(),
+      )
+      let random_destination_index = (
+          random_from_index +
+          1 +
+          energy_valley_variation(seed, index, 19, 607, buildings.length() - 1)
+        ) %
+        buildings.length()
+      let from = if role == "researcher" && !research_homes.is_empty() {
+        research_homes[index % research_homes.length()]
+      } else {
+        buildings[random_from_index]
+      }
+      let destination = match social_square {
+        Some(salon) if role == "researcher" => salon
+        _ => buildings[random_destination_index]
+      }
+      match golden_valley_building_road_path(model, seed, from, destination) {
+        None => ()
+        Some(path) => {
+          let elapsed_seconds = if model.paused ||
+            golden_prefers_reduced_motion() {
+            0.0
+          } else {
+            golden_animation_seconds()
+          }
+          let speed = if role == "researcher" { 2.0 } else { 1.55 }
+          let phase_offset = energy_valley_variation(seed, index, 23, 613, 72).to_double()
+          let dwell_seconds = 11.0 + (index % 4).to_double()
+          match
+            golden_valley_preview_motion(
+              path, elapsed_seconds, speed, phase_offset, dwell_seconds, index,
+            ) {
+            None => ()
+            Some(motion) =>
+              result.push({
+                x: motion.x,
+                y: motion.y,
+                sprite_path: golden_valley_agent_sprite_path(role, index),
+                facing_left: motion.facing_left,
+                bob: if golden_prefers_reduced_motion() {
+                  0.0
+                } else {
+                  golden_animation_seconds() * 9.0 + index.to_double()
+                },
+                work_color: motion.activity_color,
+                activity_glyph: motion.activity_glyph,
+                activity_label: motion.activity_label,
+                preview: true,
+              })
+          }
         }
       }
     }
@@ -1973,13 +2054,24 @@ fn golden_valley_canvas_agents(
     model.energy_valley_runtime,
   )
   for index, agent in runtime_agents {
-    let building_key = agent.buildingModuleKey.unwrap_or("")
-    match golden_valley_building_for_runtime_key(buildings, building_key) {
+    if index >= 24 {
+      continue
+    }
+    match
+      golden_valley_runtime_agent_destination(
+        model.energy_valley_runtime,
+        buildings,
+        agent,
+      ) {
       None => ()
-      Some(building) => {
-        let town_hall = buildings[0]
+      Some(destination) => {
+        let origin = golden_valley_runtime_agent_origin(
+          model.energy_valley_runtime,
+          buildings,
+          agent,
+        )
         match
-          golden_valley_building_road_path(model, seed, town_hall, building) {
+          golden_valley_building_road_path(model, seed, origin, destination) {
           None => ()
           Some(path) => {
             let speed = if agent.role == "worker" {
@@ -1989,25 +2081,18 @@ fn golden_valley_canvas_agents(
             } else {
               1.7
             }
-            let elapsed_seconds = if model.energy_valley_runtime.motion_started_at_ms <
-              0.0 {
-              0.0
-            } else {
-              (
-                browser_now_ms() -
-                model.energy_valley_runtime.motion_started_at_ms
-              ) /
-              1000.0
-            }
-            let phase_offset = energy_valley_variation(seed, index, 29, 617, 24).to_double()
-            let dwell_seconds = 9.0
-            match
-              golden_valley_commute_point(
-                path, elapsed_seconds, speed, phase_offset, dwell_seconds,
-              ) {
+            let elapsed_seconds = golden_valley_runtime_agent_motion_seconds(
+              model.energy_valley_runtime,
+              agent,
+            )
+            match golden_valley_assignment_point(path, elapsed_seconds, speed) {
               None => ()
               Some(point) => {
                 let status = golden_valley_runtime_agent_work_status(
+                  model.energy_valley_runtime,
+                  agent,
+                )
+                let activity = golden_valley_runtime_agent_activity(
                   model.energy_valley_runtime,
                   agent,
                 )
@@ -2018,11 +2103,18 @@ fn golden_valley_canvas_agents(
                     agent.role,
                     index,
                   ),
-                  facing_left: golden_valley_agent_faces_left(
-                    path, elapsed_seconds, speed, phase_offset, dwell_seconds, point,
+                  facing_left: golden_valley_assignment_faces_left(
+                    path, elapsed_seconds, speed, point,
                   ),
-                  bob: golden_animation_seconds() * 9.0 + index.to_double(),
+                  bob: if golden_prefers_reduced_motion() {
+                    0.0
+                  } else {
+                    golden_animation_seconds() * 9.0 + index.to_double()
+                  },
                   work_color: golden_valley_work_status_color(status),
+                  activity_glyph: activity.0,
+                  activity_label: activity.1,
+                  preview: false,
                 })
               }
             }
@@ -2067,6 +2159,9 @@ fn golden_draw_agents_at_depth(
       agent.facing_left,
       agent.bob,
       agent.work_color,
+      agent.activity_glyph,
+      agent.activity_label,
+      agent.preview,
     )
   }
 }
@@ -2222,7 +2317,7 @@ fn render_golden_valley_canvas(
     class="absolute inset-0 h-full w-full cursor-grab active:cursor-grabbing",
     attrs=@html.Attrs::build()
       .aria_label("能源谷可交互等距地图")
-      .on_reset(_ => {
+      .on_click(_ => {
         dispatch(
           EnergyCanvasClick(golden_valley_action_x(), golden_valley_action_y()),
         )

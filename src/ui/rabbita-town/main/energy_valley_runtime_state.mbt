@@ -70,6 +70,59 @@ fn energy_valley_runtime_source_is_valid(source : String) -> Bool {
 }
 
 ///|
+fn energy_valley_runtime_activity_kind_is_valid(kind : String) -> Bool {
+  match kind {
+    "walking"
+    | "researching"
+    | "synthesizing"
+    | "discussing"
+    | "reviewing"
+    | "revising"
+    | "recovering"
+    | "returning"
+    | "idle" => true
+    _ => false
+  }
+}
+
+///|
+fn energy_valley_runtime_optional_activity_label_is_valid(
+  label : String?,
+) -> Bool {
+  match label {
+    None => true
+    Some(value) =>
+      !value.is_empty() &&
+      value.trim() == value &&
+      value.length() <= 80 &&
+      !value.contains("\n") &&
+      !value.contains("\r") &&
+      !value.contains("\t")
+  }
+}
+
+///|
+fn energy_valley_runtime_activity_metadata_is_valid(
+  kind : String?,
+  label : String?,
+) -> Bool {
+  match kind {
+    None => label is None
+    Some(value) =>
+      energy_valley_runtime_activity_kind_is_valid(value) &&
+      energy_valley_runtime_optional_activity_label_is_valid(label)
+  }
+}
+
+///|
+fn energy_valley_runtime_optional_identity_is_valid(identity : String?) -> Bool {
+  match identity {
+    None => true
+    Some(value) => @domain_catalog.valid_catalog_identifier(value)
+  }
+}
+
+///|
 fn energy_valley_runtime_participant_status_is_valid(status : String) -> Bool {
   status == "unknown" || energy_valley_runtime_work_status_is_valid(status)
 }
@@ -96,6 +149,19 @@ fn energy_valley_runtime_result_url_is_safe(url : String) -> Bool {
     lower.contains("%5c") ||
     lower.contains("%25") {
     return false
+  }
+  true
+}
+
+///|
+fn energy_valley_runtime_sha256_digest_is_valid(value : String) -> Bool {
+  if !value.has_prefix("sha256:") || value.length() != 71 {
+    return false
+  }
+  for char in value[7:] {
+    if !((char >= '0' && char <= '9') || (char >= 'a' && char <= 'f')) {
+      return false
+    }
   }
   true
 }
@@ -165,25 +231,59 @@ fn energy_valley_runtime_work_item_is_valid(
     Some(value) => energy_valley_runtime_progress_is_valid(value)
     None => true
   }
+  let activity_is_valid = energy_valley_runtime_activity_metadata_is_valid(
+    task.activityKind,
+    task.activityLabel,
+  )
+  let identities_are_valid = @domain_catalog.valid_catalog_identifier(
+      task.buildingModuleKey,
+    ) &&
+    energy_valley_runtime_optional_identity_is_valid(task.bookId) &&
+    energy_valley_runtime_optional_identity_is_valid(
+      task.originBuildingModuleKey,
+    ) &&
+    energy_valley_runtime_optional_identity_is_valid(
+      task.destinationBuildingModuleKey,
+    )
   !task.id.trim().is_empty() &&
   !task.title.trim().is_empty() &&
-  !task.buildingModuleKey.trim().is_empty() &&
   energy_valley_runtime_work_status_is_valid(task.status) &&
   energy_valley_runtime_source_is_valid(task.source) &&
   role_is_valid &&
   links_are_valid &&
   collaboration_is_valid &&
-  progress_is_valid
+  progress_is_valid &&
+  activity_is_valid &&
+  identities_are_valid
 }
 
 ///|
 fn energy_valley_runtime_agent_is_valid(
   agent : EnergyValleyRuntimeAgent,
 ) -> Bool {
+  let activity_is_valid = energy_valley_runtime_activity_metadata_is_valid(
+    agent.activityKind,
+    agent.activityLabel,
+  )
+  let identities_are_valid = energy_valley_runtime_optional_identity_is_valid(
+      agent.buildingModuleKey,
+    ) &&
+    energy_valley_runtime_optional_identity_is_valid(agent.bookId) &&
+    energy_valley_runtime_optional_identity_is_valid(
+      agent.originBuildingModuleKey,
+    ) &&
+    energy_valley_runtime_optional_identity_is_valid(
+      agent.destinationBuildingModuleKey,
+    )
   !agent.id.trim().is_empty() &&
   !agent.name.trim().is_empty() &&
+  (agent.avatarRef is None ||
+    agent.avatarRef == Some("avatar://otter-steward") ||
+    agent.avatarRef == Some("avatar://moon-lantern")) &&
   energy_valley_runtime_role_is_valid(agent.role) &&
-  energy_valley_runtime_agent_status_is_valid(agent.status)
+  energy_valley_runtime_agent_status_is_valid(agent.status) &&
+  activity_is_valid &&
+  identities_are_valid
 }
 
 ///|
@@ -195,6 +295,12 @@ fn energy_valley_runtime_projection_validation_error(
   }
   if projection.mode != "live" && projection.mode != "unavailable" {
     return "Runtime projection mode is not supported."
+  }
+  if projection.mode == "live" &&
+    !energy_valley_runtime_sha256_digest_is_valid(
+      projection.knowledgeCatalogDigest.unwrap_or(""),
+    ) {
+    return "Runtime projection has no valid knowledge catalog digest."
   }
   if browser_timestamp_ms(projection.observedAt) < 0.0 {
     return "Runtime projection observedAt is not a valid timestamp."

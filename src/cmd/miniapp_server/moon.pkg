@@ -1,6 +1,7 @@
 import {
   "moonbitlang/async",
   "moonbitlang/async/http",
+  "moonbitlang/async/fs",
   "moonbitlang/async/io",
   "moonbitlang/async/socket",
   "moonbitlang/core/env",
@@ -8,9 +9,12 @@ import {
   "moonbitlang/core/json",
   "moonbitlang/core/string",
   "vectie/moontown/storage",
+  "vectie/moontown/supervisor_setup",
   "vectie/moontown/town_application",
   "vectie/moontown/town_contract",
   "vectie/moontown/town_projection",
+  "vectie/moontown/town_marketplace",
+  "vectie/moontown/adapters/moonbook",
 }
 
 supported_targets = "native"

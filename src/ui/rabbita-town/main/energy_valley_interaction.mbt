@@ -491,3 +491,34 @@ fn energy_valley_canvas_click_model(
       golden_valley_place_custom_building_model(model, x, y)
   }
 }
+
+///|
+fn energy_valley_open_registered_building_model(
+  model : Model,
+  building_id : String,
+) -> Model {
+  let buildings = golden_valley_buildings(active_energy_valley_seed())
+  for custom in model.energy_custom_buildings {
+    buildings.push(custom)
+  }
+  match golden_valley_building_for_identity(buildings, building_id) {
+    None =>
+      {
+        ..model,
+        energy_toast: "The selected runtime building is not on this map.",
+      }
+    Some(building) => {
+      golden_focus_building_camera(
+        building.x.to_double() + building.width.to_double() / 2.0,
+        building.y.to_double() + building.depth.to_double() / 2.0,
+      )
+      {
+        ..model,
+        energy_board_open: false,
+        energy_selected_building: Some(building),
+        energy_tool: InspectTool,
+        energy_toast: "",
+      }
+    }
+  }
+}

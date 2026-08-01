@@ -1,6 +1,6 @@
 # Wenyu Valley Town Status
 
-Last updated: 2026-05-28 12:49 CST
+Last updated: 2026-07-31 CST
 
 This document answers one question: how far is the current Wenyu Valley
 implementation from a fully functioning town?
@@ -33,6 +33,15 @@ healthy under a supervisor, but the remaining work is still integration depth:
 most civic buildings need repeated real MoonClaw reductions, MoonBook
 accept/reject persistence, and reviewable service histories before they can be
 called reliable civic services.
+
+The knowledge-district iteration adds a separate typed domain catalog for all
+16 registered buildings: 101 declared MoonBooks, 12 versioned policies, 32
+active priorities, and 69 incubating books. The canonical canvas now exposes
+that library and its policy from the selected building, joins exact book IDs to
+real MoonBook projections, and labels unmatched catalog entries as declared or
+planned. This is meaningful breadth, but it is not 101 completed books. Real
+content, accepted review histories, and live execution remain independently
+measured.
 The plan is tracked in
 [WENYU_BUILDING_PROTOCOL_PLAN.md](/Users/kq/Workspace/moontown/docs/WENYU_BUILDING_PROTOCOL_PLAN.md).
 The structural refactor plan is tracked in
@@ -56,6 +65,7 @@ module.
 | Research watchers | Medium-near | The final integration portfolio installs five standing watches: OPC, LLM training, Robotics, Agents, and Hardware. They are visible in the watch portfolio, run through real books/ledgers, and are now included in the MoonBook quality audit even when they come from the live runtime snapshot; overnight proof still depends on repeated accepted deltas rather than only operational records |
 | Civic modules | Medium | Policy, contest, social, talent, market, bridge, story, education, resident, vitality, and town-shell modules now have building protocols plus MoonBook support workspaces, schemas, review queues, projections, and skill contracts; accepted protocol-result histories are still missing |
 | Building protocol layer | Medium-near | Buildings have modes, skills, protocol definitions, ledgers, default communication-pattern scenario templates, and recurring schedules; accepted MoonBook persistence and UI protocol history still need repeated live evidence |
+| Knowledge domain catalog | Medium-near | A typed 16-domain catalog binds 101 book specifications and 12 governed generation policies to exact registered buildings; only 32 are active priorities, catalog declaration is visibly separated from real projection/acceptance, and active books still need providers, sources, installed workspaces, and accepted revision histories |
 | Runtime architecture | Medium-near | Civic protocol behavior now has a documented refactor path, the communication-pattern scheduler is split away from generic daemon code, daemon scheduled jobs use a dispatcher, and protocol registry/store/status/fixtures are separated; package-level civic runtime splits and stronger contract validation are still pending |
 | Self-patching evidence | Not yet proven | PlanBook can route bounded repairs to MoonClaw/Codex ACP, but route wiring is not enough. Accepted source repairs now require `planbook.repair.patch_receipt.v1`; without that receipt, ACP runs remain diagnostics or blockers, not proof that the town patched its own source. |
 | Designer/operator tooling | Medium | JSON config works, the standalone viewport has view/editor/output modes, editor mode shows town-level MoonDesk handoff lanes, and detailed single-agent/workspace editing remains in MoonDesk |
@@ -94,9 +104,9 @@ A fully functioning Wenyu town means:
 | Civic module registry | `wenyu-town-modules.json` can add, remove, move, size, style, and configure feature buildings; runtime validation now catches missing bindings, bad footprints, and bad placement | 70% | Needs standalone schema checks, asset checks, write-back editor, and designer preview |
 | Building protocol registry | Protocol definitions exist for every Wenyu civic building; Social Square has durable inbox/contribution/reduction/outbox/review/home-return proof slices plus effectiveness metrics; the UI can show protocol review pressure | 48% | Need real scenario packets, AI reducers, MoonBook accept/reject persistence, and UI protocol history for every building |
 | Module buildings | 16 configurable white-tech pavilion buildings render above terrain, including 11 civic modules and 5 research-domain homes; entrances bind to the existing map road/urban fabric | 62% | Needs base/roof/shadow/glow split layers and more precise collision/occlusion |
-| Module interiors | Click opens module-specific interior furniture with runtime source, counters, validation state, worker roster slots, MoonBook fragments, and output links when available | 64% | Seeded civic protocol support workspaces exist; interiors still need accepted-change history and live service run evidence |
+| Canonical building inspector | Click opens an in-canvas domain library with policy, cadence, primary/supporting books, real projection joins, and live runtime strip; custom/unregistered buildings retain a compact fallback inspector | 72% | Needs deeper accepted-change history, domain-level provisioning controls, and repeated live service evidence |
 | Water effects | Runtime overlay adds depth, reflection, and bridge shadow | 35% | Needs richer segmented river logic and seasonal/weather response |
-| Agents on map | Visual agent projection exists; active module workers route to module entrances and idle/completed workers stay hidden | 60% | Needs Wenyu-specific task projection coverage for every civic module |
+| Agents on map | Evidence-derived live activities route from home to destination; disconnected mode has an explicitly labeled, capped knowledge-flow preview for research, discussion, review, revision, and return | 68% | Needs durable journey timestamps/checkpoints for exact restart replay and broader live task coverage |
 | Operator dashboard | Shows daemon/watch progress, a multi-topic watch portfolio, request composer, portal to canonical viewport, output mode, and MoonDesk bridge visibility | 68% | Needs approval queues and richer per-book progress panels |
 | Mayor daemon | Local run/start/doctor/stop, heartbeat, stale detection, standing-goal dispatch, supervisor/worker runtime health, and nonblocking MoonClaw supervision | 68% | Needs multi-day soak evidence, deployment hardening, and recovery playbooks |
 | Standing watchers | Data-driven standing goals and watcher ledgers exist; the final portfolio installs OPC, LLM training, Robotics, Agents, and Hardware watches, and live books are now merged into book-quality auditing | 70% | Need stronger accepted-change views, repeated accepted deltas, and longer evidence that no-change cycles do not inflate progress |
@@ -119,7 +129,8 @@ Implemented and validated:
 - MoonBit parses enabled modules and renders them as a separate layer above the
   terrain.
 - Building labels stay hidden until hover/focus.
-- Clicking a module opens an interior scene.
+- Clicking a registered module opens the domain MoonBook library and policy in
+  the canonical canvas; it no longer sends the operator to the legacy viewport.
 - The HUD reports total modules, cleanly validated modules, loaded MoonBook
   fragments, and module-config load version.
 - Module placement validation reports missing bindings, missing assets, invalid
@@ -132,8 +143,9 @@ Implemented and validated:
   overlay roads are hidden to avoid two competing map systems.
 - Module interiors show runtime source, status counters, current detail,
   validation state, and active worker roster slots.
-- The MoonBit desktop service exposes `module-projections.json` by scanning
-  `books/*/book/moonbook-ui-state.json`.
+- The MoonBit desktop service exposes `module-projections.json` dynamically by
+  scanning `books/*/book/moonbook-ui-state.json`, attaching exact book IDs and
+  safe output links.
 - The build copies important MoonBook generated HTML outputs under
   `dist/book-output/<book-id>/...`.
 - Module interiors show MoonBook summary, status chips, metrics, readiness,
@@ -143,6 +155,17 @@ Implemented and validated:
   of being hidden behind decorative fallback copy.
 - Active module workers route to the configured `entrance_x`/`entrance_y`;
   idle, completed, and absent workers are not shown as fake busy avatars.
+- Live tasks expose activity, origin, and destination fields derived from
+  runtime evidence. Cross-book collaboration routes to Social Square.
+- Disconnected or currently idle movement is labeled `Knowledge flow preview`,
+  capped at 12 illustrative residents, excluded from real counts, and
+  reduced-motion aware.
+- The preview includes the complete research/discuss/review/revise/return loop.
+  Live completed workers remain inside buildings until a bounded timestamped
+  return receipt exists, so old completion records cannot masquerade as motion.
+- `knowledge catalog`, `knowledge status`, and opt-in idempotent `knowledge
+  seed` expose the catalog and queue active books through the existing durable
+  book-template request inbox.
 - Water depth, reflection, and bridge-shadow effects render as pointer-safe
   overlays.
 - The repo has daemon commands, standing goals, watcher ledgers, and runtime

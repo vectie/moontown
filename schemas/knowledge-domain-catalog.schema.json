@@ -1,0 +1,298 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://vectie.github.io/moontown/schemas/knowledge-domain-catalog.v1.json",
+  "title": "MoonTown Knowledge Domain Catalog",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "schema",
+    "catalog_id",
+    "version",
+    "seed",
+    "description",
+    "policies",
+    "domains"
+  ],
+  "properties": {
+    "schema": {
+      "const": "moontown.knowledge-domain-catalog.v1"
+    },
+    "catalog_id": {
+      "$ref": "#/$defs/id"
+    },
+    "version": {
+      "const": 1
+    },
+    "seed": {
+      "type": "integer",
+      "minimum": 1
+    },
+    "description": {
+      "type": "string",
+      "minLength": 1
+    },
+    "policies": {
+      "type": "array",
+      "minItems": 1,
+      "items": {
+        "$ref": "#/$defs/policy"
+      }
+    },
+    "domains": {
+      "type": "array",
+      "minItems": 1,
+      "items": {
+        "$ref": "#/$defs/domain"
+      }
+    }
+  },
+  "$defs": {
+    "id": {
+      "type": "string",
+      "pattern": "^[a-z0-9]+(?:-[a-z0-9]+)*$"
+    },
+    "domain_kind": {
+      "enum": [
+        "civic-core",
+        "civic-service",
+        "knowledge-domain",
+        "learning-domain",
+        "market-domain",
+        "physical-service"
+      ]
+    },
+    "template_id": {
+      "enum": [
+        "domain-research-book",
+        "civic-ledger-book",
+        "service-operations-book",
+        "learning-book",
+        "private-resident-book",
+        "market-intelligence-book",
+        "project-review-book",
+        "story-publication-book",
+        "physical-handoff-book"
+      ]
+    },
+    "source_policy": {
+      "enum": [
+        "owner-ledger",
+        "primary-sources",
+        "primary-plus-licensed",
+        "public-evidence",
+        "mixed-reviewed",
+        "privacy-scoped",
+        "protocol-derived",
+        "telemetry-first",
+        "contractual-record"
+      ]
+    },
+    "evidence_policy": {
+      "enum": [
+        "owner-ledger",
+        "source-linked",
+        "primary-source-required",
+        "licensed-provenance-required",
+        "privacy-scoped",
+        "protocol-receipt-required",
+        "telemetry-provenance-required",
+        "rights-and-claims-required"
+      ]
+    },
+    "cadence": {
+      "enum": [
+        "continuous",
+        "every-tick",
+        "hourly",
+        "daily",
+        "weekly",
+        "monthly",
+        "on-demand",
+        "event-driven"
+      ]
+    },
+    "schedule_tier": {
+      "enum": [
+        "realtime",
+        "frequent",
+        "daily",
+        "weekly",
+        "monthly",
+        "on-demand"
+      ]
+    },
+    "budget_class": {
+      "enum": ["minimal", "standard", "elevated", "controlled"]
+    },
+    "completion_claim": {
+      "enum": [
+        "operational-record",
+        "reviewed-synthesis",
+        "evidence-backed-research",
+        "advisory-only",
+        "publication-ready",
+        "human-accepted",
+        "private-memory"
+      ]
+    },
+    "review_role": {
+      "enum": [
+        "specialist",
+        "watcher",
+        "analyst",
+        "educator",
+        "engineer",
+        "facilitator",
+        "publisher",
+        "independent-reviewer",
+        "keeper",
+        "operator",
+        "owner",
+        "client",
+        "safety-reviewer",
+        "rights-reviewer",
+        "mayor"
+      ]
+    },
+    "book_role": {
+      "enum": [
+        "owner",
+        "orchestrator",
+        "watcher",
+        "researcher",
+        "analyst",
+        "reviewer",
+        "archivist",
+        "facilitator",
+        "operator",
+        "educator",
+        "publisher",
+        "liaison",
+        "evaluator",
+        "engineer",
+        "strategist"
+      ]
+    },
+    "book_status": {
+      "enum": ["active", "incubating", "paused", "archived"]
+    },
+    "policy": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "id",
+        "version",
+        "template_id",
+        "source_policy",
+        "evidence_policy",
+        "cadence",
+        "cadence_ticks",
+        "quality_threshold",
+        "review_chain",
+        "max_revision_rounds",
+        "schedule_tier",
+        "budget_class",
+        "completion_claim"
+      ],
+      "properties": {
+        "id": { "$ref": "#/$defs/id" },
+        "version": { "type": "integer", "minimum": 1 },
+        "template_id": { "$ref": "#/$defs/template_id" },
+        "source_policy": { "$ref": "#/$defs/source_policy" },
+        "evidence_policy": { "$ref": "#/$defs/evidence_policy" },
+        "cadence": { "$ref": "#/$defs/cadence" },
+        "cadence_ticks": { "type": "integer", "minimum": 1 },
+        "quality_threshold": {
+          "type": "integer",
+          "minimum": 0,
+          "maximum": 100
+        },
+        "review_chain": {
+          "type": "array",
+          "minItems": 1,
+          "uniqueItems": true,
+          "items": { "$ref": "#/$defs/review_role" }
+        },
+        "max_revision_rounds": {
+          "type": "integer",
+          "minimum": 0,
+          "maximum": 10
+        },
+        "schedule_tier": { "$ref": "#/$defs/schedule_tier" },
+        "budget_class": { "$ref": "#/$defs/budget_class" },
+        "completion_claim": { "$ref": "#/$defs/completion_claim" }
+      }
+    },
+    "book": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "book_id",
+        "title",
+        "question",
+        "role",
+        "template_id",
+        "policy_id",
+        "schedule_tier",
+        "cadence_ticks",
+        "tags",
+        "source_policy",
+        "status"
+      ],
+      "properties": {
+        "book_id": { "$ref": "#/$defs/id" },
+        "title": { "type": "string", "minLength": 1 },
+        "question": { "type": "string", "minLength": 1 },
+        "role": { "$ref": "#/$defs/book_role" },
+        "template_id": { "$ref": "#/$defs/template_id" },
+        "policy_id": { "$ref": "#/$defs/id" },
+        "schedule_tier": { "$ref": "#/$defs/schedule_tier" },
+        "cadence_ticks": { "type": "integer", "minimum": 1 },
+        "tags": {
+          "type": "array",
+          "minItems": 1,
+          "uniqueItems": true,
+          "items": { "$ref": "#/$defs/id" }
+        },
+        "source_policy": { "$ref": "#/$defs/source_policy" },
+        "status": { "$ref": "#/$defs/book_status" }
+      }
+    },
+    "domain": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "domain_id",
+        "title",
+        "icon",
+        "building_id",
+        "kind",
+        "primary_book_id",
+        "policy_id",
+        "communication_scenario_ids",
+        "summary",
+        "books"
+      ],
+      "properties": {
+        "domain_id": { "$ref": "#/$defs/id" },
+        "title": { "type": "string", "minLength": 1 },
+        "icon": { "type": "string", "minLength": 1 },
+        "building_id": { "$ref": "#/$defs/id" },
+        "kind": { "$ref": "#/$defs/domain_kind" },
+        "primary_book_id": { "$ref": "#/$defs/id" },
+        "policy_id": { "$ref": "#/$defs/id" },
+        "communication_scenario_ids": {
+          "type": "array",
+          "uniqueItems": true,
+          "items": { "$ref": "#/$defs/id" }
+        },
+        "summary": { "type": "string", "minLength": 1 },
+        "books": {
+          "type": "array",
+          "minItems": 1,
+          "items": { "$ref": "#/$defs/book" }
+        }
+      }
+    }
+  }
+}

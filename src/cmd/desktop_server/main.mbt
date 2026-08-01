@@ -124,6 +124,29 @@ fn request_header(request : @http.Request, name : String) -> String {
 }
 
 ///|
+fn moondesk_transport_id(request : @http.Request) -> String {
+  let value = request_header(request, "x-moondesk-transport-id")
+  if value.is_empty() {
+    "moondesk-owner-service"
+  } else {
+    value
+  }
+}
+
+///|
+fn runtime_handoff_kind(body : String) -> String {
+  let parsed = @json.parse(body) catch { _ => Json::null() }
+  match parsed {
+    Object(fields) =>
+      match fields.get("kind") {
+        Some(String(value)) => value.trim().to_owned().to_lower()
+        _ => ""
+      }
+    _ => ""
+  }
+}
+
+///|
 fn local_service_host(host : String) -> Bool {
   host == "127.0.0.1:17842" || host == "localhost:17842"
 }
@@ -395,12 +418,131 @@ async fn handle_request(
     send_json(conn, 200, @town_contract.desktop_contract())
     return
   }
+  let supervisor = @supervisor_setup.default_supervisor_setup_application()
+  if path == @town_contract.miniapp_runtime_outbox_path() {
+    if !(request.meth is Get) {
+      send_json(conn, 405, { "ok": false, "error": "GET required" })
+      return
+    }
+    send_json(conn, 200, supervisor.runtime_handoffs())
+    return
+  }
+  if path == @town_contract.miniapp_runtime_observation_reconcile_path() {
+    if reject_unsafe_operator_write(request, conn) {
+      return
+    }
+    let result = supervisor.reconcile_runtime_observation(
+      moondesk_transport_id(request),
+      body.read_all().text(),
+      now_ms=@env.now(),
+    ) catch {
+      error => {
+        send_json(conn, 409, { "ok": false, "error": "\{error}" })
+        return
+      }
+    }
+    send_json(conn, 200, result)
+    return
+  }
+  if path == @town_contract.miniapp_runtime_outbox_claim_path() ||
+    path == @town_contract.miniapp_runtime_outbox_release_path() ||
+    path == @town_contract.miniapp_runtime_outbox_reconcile_path() {
+    if reject_unsafe_operator_write(request, conn) {
+      return
+    }
+    let request_body = body.read_all().text()
+    let kind = runtime_handoff_kind(request_body)
+    let transport_id = moondesk_transport_id(request)
+    let result = try {
+      if path == @town_contract.miniapp_runtime_outbox_release_path() {
+        supervisor.release_runtime_handoff(transport_id, request_body)
+      } else if path == @town_contract.miniapp_runtime_outbox_claim_path() {
+        if kind == "activation" {
+          supervisor.claim_activation_handoff(transport_id, request_body)
+        } else if kind == "execution" {
+          supervisor.claim_execution_handoff(transport_id, request_body)
+        } else {
+          fail("runtime handoff kind must be activation or execution")
+        }
+      } else if kind == "activation" {
+        supervisor.reconcile_activation_handoff(transport_id, request_body)
+      } else if kind == "execution" {
+        supervisor.reconcile_execution_handoff(transport_id, request_body)
+      } else {
+        fail("runtime handoff kind must be activation or execution")
+      }
+    } catch {
+      error => {
+        send_json(conn, 409, { "ok": false, "error": "\{error}" })
+        return
+      }
+    }
+    send_json(conn, 200, result)
+    return
+  }
+  if path == @town_contract.miniapp_bookkeeper_outbox_path() {
+    if !(request.meth is Get) {
+      send_json(conn, 405, { "ok": false, "error": "GET required" })
+      return
+    }
+    send_json(conn, 200, supervisor.bookkeeper_outbox())
+    return
+  }
+  if path == @town_contract.miniapp_bookkeeper_outbox_claim_path() ||
+    path == @town_contract.miniapp_bookkeeper_outbox_release_path() ||
+    path == @town_contract.miniapp_bookkeeper_outbox_reconcile_path() {
+    if reject_unsafe_operator_write(request, conn) {
+      return
+    }
+    let request_body = body.read_all().text()
+    let transport_id = moondesk_transport_id(request)
+    let result = try {
+      if path == @town_contract.miniapp_bookkeeper_outbox_release_path() {
+        supervisor.release_bookkeeper_review(transport_id, request_body)
+      } else if path == @town_contract.miniapp_bookkeeper_outbox_claim_path() {
+        supervisor.claim_bookkeeper_review(transport_id, request_body)
+      } else {
+        supervisor.reconcile_bookkeeper_review(transport_id, request_body)
+      }
+    } catch {
+      error => {
+        send_json(conn, 409, { "ok": false, "error": "\{error}" })
+        return
+      }
+    }
+    send_json(conn, 200, result)
+    return
+  }
   if path == "/energy-valley-runtime.json" {
     if !(request.meth is Get) {
       send_json(conn, 405, { "ok": false, "error": "GET required" })
       return
     }
     send_json(conn, 200, energy_valley_runtime_projection())
+    return
+  }
+  if path == "/knowledge-domain-catalog.json" {
+    if !(request.meth is Get) {
+      send_json(conn, 405, { "ok": false, "error": "GET required" })
+      return
+    }
+    match resolved_knowledge_domain_catalog_response() {
+      Some((body, _)) =>
+        send_text(conn, 200, "OK", body, kind="application/json; charset=utf-8")
+      None =>
+        send_json(conn, 503, {
+          "ok": false,
+          "error": "no valid knowledge-domain catalog is available",
+        })
+    }
+    return
+  }
+  if path == "/module-projections.json" {
+    if !(request.meth is Get) {
+      send_json(conn, 405, { "ok": false, "error": "GET required" })
+      return
+    }
+    send_json(conn, 200, module_projections_json())
     return
   }
   if path == @town_contract.desktop_standing_watch_path() {
@@ -423,9 +565,9 @@ async fn handle_request(
     send_json(conn, 200, result)
     return
   }
-  if request.meth is Get &&
-    path == @town_contract.desktop_standing_goals_path() {
-    let goals = match read_optional_json(state_root() + "/standing-goals.json") {
+  if request.meth is Get && path == @town_contract.desktop_standing_goals_path() {
+    let goals = match
+      read_optional_json(state_root() + "/standing-goals.json") {
       Some(value) => value
       None => ([] : Array[Json]).to_json()
     }

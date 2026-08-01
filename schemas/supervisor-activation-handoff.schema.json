@@ -1,0 +1,30 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "moontown/supervisor-activation-handoff@1.0.0",
+  "type": "object",
+  "required": ["schema", "handoff_id", "target_runtime", "payload", "request_digest", "status", "revision"],
+  "properties": {
+    "schema": {"const": "moontown.supervisor-activation-handoff.v1"},
+    "handoff_id": {"type": "string", "minLength": 1},
+    "target_runtime": {"const": "moonclaw"},
+    "payload": {
+      "type": "object",
+      "required": ["contract_id", "runtime_binding", "activated_at"],
+      "properties": {
+        "contract_id": {"const": "moonsuite.supervisor-profile-activation.v1"},
+        "runtime_binding": {
+          "type": "object",
+          "required": ["workspace_id", "building_id", "book_ids", "model", "max_active_workers"],
+          "properties": {
+            "model": {"const": "gpt-5.6-sol"},
+            "max_active_workers": {"type": "integer", "minimum": 1}
+          }
+        },
+        "activated_at": {"type": "string", "pattern": "^[0-9]+$"}
+      }
+    },
+    "request_digest": {"type": "string", "pattern": "^sha256:[0-9a-f]{64}$"},
+    "status": {"type": "string"},
+    "revision": {"type": "integer", "minimum": 1}
+  }
+}

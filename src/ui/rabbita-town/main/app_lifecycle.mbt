@@ -86,6 +86,10 @@ fn update_non_form_message(
       persist_energy_valley_model(next)
       model_only_update(next)
     }
+    OpenEnergyBuilding(building_id) =>
+      model_only_update(
+        energy_valley_open_registered_building_model(model, building_id),
+      )
     CloseEnergyInspector =>
       model_only_update({ ..model, energy_selected_building: None })
     SetDashboardSection(section) =>

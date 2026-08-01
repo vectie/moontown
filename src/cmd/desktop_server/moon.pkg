@@ -8,12 +8,15 @@ import {
   "moonbitlang/core/encoding/utf8",
   "moonbitlang/core/json",
   "moonbitlang/core/string",
+  "moonbitlang/x/crypto",
   "moonbitlang/x/time",
   "vectie/moontown/storage",
   "vectie/moontown/support",
+  "vectie/moontown/supervisor_setup",
   "vectie/moontown/town_application",
   "vectie/moontown/town_contract",
   "vectie/moontown/flow_adapter",
+  "vectie/moontown/domain_catalog",
   "vectie/moontown/adapters/moonbook",
 }
 

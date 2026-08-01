@@ -25,6 +25,11 @@
       "id": "moontown.civic-templates",
       "version": "1.0.0",
       "path": "assets/templates/catalog.v1.json"
+    },
+    {
+      "id": "moontown.knowledge-domains",
+      "version": "1.0.0",
+      "path": "assets/templates/domains/catalog.v1.json"
     }
   ],
   "schemas": [
@@ -37,6 +42,31 @@
       "id": "civic-synthesis-result",
       "version": "1.0.0",
       "path": "schemas/civic-synthesis-result.schema.json"
+    },
+    {
+      "id": "knowledge-domain-catalog",
+      "version": "1.0.0",
+      "path": "schemas/knowledge-domain-catalog.schema.json"
+    },
+    {
+      "id": "supervisor-profile",
+      "version": "1.0.0",
+      "path": "schemas/supervisor-profile.schema.json"
+    },
+    {
+      "id": "supervisor-activation-handoff",
+      "version": "1.0.0",
+      "path": "schemas/supervisor-activation-handoff.schema.json"
+    },
+    {
+      "id": "supervisor-execution-handoff",
+      "version": "2.0.0",
+      "path": "schemas/supervisor-execution-handoff.schema.json"
+    },
+    {
+      "id": "supervisor-bookkeeper-review-request",
+      "version": "1.0.0",
+      "path": "schemas/supervisor-bookkeeper-review-request.schema.json"
     }
   ],
   "tools": [
@@ -53,6 +83,26 @@
         "books/*/wiki/reviews"
       ],
       "review_required": true
+    },
+    {
+      "id": "supervisor.profile.save",
+      "owner_product": "moontown",
+      "input_schema_id": "supervisor-profile",
+      "output_schema_id": "supervisor-profile",
+      "authority": "WorkspaceMutation",
+      "idempotent": true,
+      "evidence_outputs": ["supervisor-setup/state.json"],
+      "review_required": false
+    },
+    {
+      "id": "supervisor.activation.enqueue",
+      "owner_product": "moontown",
+      "input_schema_id": "supervisor-profile",
+      "output_schema_id": "supervisor-activation-handoff",
+      "authority": "WorkspaceMutation",
+      "idempotent": true,
+      "evidence_outputs": ["supervisor-setup/state.json"],
+      "review_required": false
     }
   ],
   "workflows": [

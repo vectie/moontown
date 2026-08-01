@@ -36,6 +36,22 @@ priv struct ProjectionLinkSnapshot {
 } derive(FromJson)
 
 ///|
+/// Read-only proof that MoonBook's durable bookkeeper accepted one exact
+/// candidate. This field is absent when no explicit decision exists.
+priv struct ProjectionAcceptanceReceipt {
+  contract_version : String
+  decision : String
+  decision_id : String
+  candidate_version : String
+  reviewer : String
+  evidence_count : Int
+  issue_count : Int
+  requires_human_review : Bool
+  source_contract : String
+  source_projection : String
+} derive(FromJson)
+
+///|
 priv struct BookProjectionFragment {
   book_id : String
   title : String
@@ -47,6 +63,7 @@ priv struct BookProjectionFragment {
   page_families : Array[ProjectionItemSnapshot]
   journey : Array[ProjectionJourneySnapshot]
   links : Array[ProjectionLinkSnapshot]
+  acceptance_receipt : ProjectionAcceptanceReceipt?
 } derive(FromJson)
 
 ///|

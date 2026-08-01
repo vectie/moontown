@@ -7,6 +7,7 @@ import {
   "moonbit-community/rabbita/js",
   "vectie/moonlib/moonsuite",
   "vectie/moontown/core",
+  "vectie/moontown/domain_catalog",
   "vectie/moontown/health",
   "vectie/moontown/ui",
 }

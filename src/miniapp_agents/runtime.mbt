@@ -379,9 +379,9 @@ pub fn miniapp_accept_run_for_review(
     snapshot,
     viewer,
     draft,
-    @miniapp_contracts.RunDone,
-    "review.accepted",
-    "run accepted into book memory",
+    @miniapp_contracts.RunWaitingReview,
+    "bookkeeper.review.requested",
+    "run remains pending until exact Bookkeeper receipt replay",
     now_ms~,
   )
 }

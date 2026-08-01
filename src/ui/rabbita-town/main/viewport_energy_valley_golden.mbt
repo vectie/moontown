@@ -172,14 +172,7 @@ fn render_energy_valley_speed_button(
 
 ///|
 fn energy_valley_environment_agent_count(model : Model) -> Int {
-  let real_agents = energy_valley_runtime_active_agents(
-    model.energy_valley_runtime,
-  ).length()
-  if real_agents > 0 {
-    real_agents
-  } else {
-    20
-  }
+  energy_valley_runtime_active_agents(model.energy_valley_runtime).length()
 }
 
 ///|
@@ -413,21 +406,47 @@ fn energy_valley_runtime_phase_copy(
         },
         "bg-emerald-400",
       )
-    Loading => ("连接中", "正在读取 MoonTown 运行时", "bg-sky-400")
+    Loading =>
+      (
+        "Knowledge flow preview", "Connecting · preview is illustrative, never real work",
+        "bg-sky-400",
+      )
     Stale =>
       (
-        "数据已过期", "保留最后一次真实快照，不推测新工作",
+        "Knowledge flow preview", "Runtime stale · last evidence retained separately",
         "bg-amber-400",
       )
     Error =>
       (
-        "连接错误", "地图可浏览；Agent 不会冒充执行任务", "bg-rose-400",
+        "Knowledge flow preview", "Connection error · movement is illustrative only",
+        "bg-rose-400",
       )
     Unavailable =>
       (
-        "演示模式", "运行时未连接；移动仅为环境动画", "bg-slate-400",
+        "Knowledge flow preview", "Disconnected · deterministic explanation, not execution",
+        "bg-slate-400",
       )
   }
+}
+
+///|
+fn render_knowledge_flow_preview_legend(model : Model) -> @rabbita.Html {
+  if !energy_valley_knowledge_preview_visible(model) {
+    return @html.nothing
+  }
+  div(class="knowledge-flow-preview-legend", [
+    span(class="knowledge-flow-preview-title", "Illustrated state cycle"),
+    div(class="knowledge-flow-preview-states", [
+      span("⌕ Researching"),
+      span("↔ Discussing"),
+      span("✓ Reviewing"),
+      span("↺ Revising"),
+      span("⇠ Returning"),
+    ]),
+    p(
+      "Preview residents are capped at 12 and excluded from agents, tasks, and completed-work totals.",
+    ),
+  ])
 }
 
 ///|
@@ -462,6 +481,7 @@ fn render_energy_valley_runtime_summary(
         ],
       ),
       div(class="border-t border-white/10 px-3 pb-3 pt-2", [
+        render_knowledge_flow_preview_legend(model),
         p(
           class="rounded-lg bg-white/[0.04] px-2 py-2 text-[10px] leading-relaxed text-slate-400",
           if energy_valley_runtime_work_count(model) == 0 {
@@ -487,6 +507,25 @@ fn render_energy_valley_event_feed(model : Model) -> @rabbita.Html {
     None => false
   }
   let events : Array[@rabbita.Html] = []
+  if energy_valley_knowledge_preview_visible(model) {
+    events.push(
+      div(
+        class="knowledge-flow-preview-event flex items-center gap-2 rounded-xl bg-slate-950/70 px-3 py-1.5 backdrop-blur-sm border border-violet-300/20 text-[11px] text-violet-100",
+        [
+          span("◇"),
+          span(class="font-semibold", "Knowledge flow preview"),
+          span(
+            class="text-violet-200/70",
+            if has_real_projection {
+              "illustrative · no live worker on the road"
+            } else {
+              "illustrative · 0 live jobs"
+            },
+          ),
+        ],
+      ),
+    )
+  }
   if !has_real_projection {
     let (weather_icon, weather_copy) = match model.energy_weather {
       Sunny => ("☀️", "天气晴朗")
@@ -561,6 +600,17 @@ fn render_energy_valley_inspector(
   model : Model,
 ) -> @rabbita.Html {
   match model.energy_selected_building {
+    Some(building) =>
+      match find_knowledge_domain_for_building(model, building) {
+        Some(domain) =>
+          return render_knowledge_domain_inspector_shell(
+            dispatch, model, building, domain,
+          )
+        None => ()
+      }
+    None => ()
+  }
+  match model.energy_selected_building {
     None => @html.nothing
     Some(building) => {
       let building_tasks = golden_valley_runtime_tasks_for_building(
@@ -571,16 +621,7 @@ fn render_energy_valley_inspector(
         model.energy_valley_runtime,
         building,
       )
-      let civic_id = golden_valley_building_civic_id(building)
-      let interior_link = if civic_id.is_empty() {
-        @html.nothing
-      } else {
-        a(
-          href=legacy_viewport_module_href(civic_id),
-          class="mt-3 grid min-h-11 place-items-center rounded-xl bg-amber-300 px-3 text-center text-[12px] font-black text-slate-950 no-underline shadow-lg shadow-amber-950/20 hover:bg-amber-200 focus:outline-none focus:ring-2 focus:ring-amber-100",
-          "进入建筑 · 查看真实工作",
-        )
-      }
+      let interior_link = @html.nothing
       div(
         class="pointer-events-auto w-64 rounded-2xl bg-slate-950/70 p-4 backdrop-blur-md border border-white/10 shadow-2xl",
         [
@@ -680,7 +721,10 @@ fn render_energy_valley_inspector(
 }
 
 ///|
-fn render_energy_valley_dashboard_work_list(model : Model) -> @rabbita.Html {
+fn render_energy_valley_dashboard_work_list(
+  dispatch : Dispatch[Msg],
+  model : Model,
+) -> @rabbita.Html {
   match model.energy_valley_runtime.projection {
     None =>
       div(
@@ -708,9 +752,12 @@ fn render_energy_valley_dashboard_work_list(model : Model) -> @rabbita.Html {
           task.id,
         )
         cards.push(
-          a(
-            href=legacy_viewport_module_href(civic_id),
-            class="block rounded-lg border border-white/10 bg-white/[0.04] px-2.5 py-2 no-underline hover:border-amber-200/30 hover:bg-white/[0.08] focus:outline-none focus:ring-2 focus:ring-amber-200/50",
+          button(
+            class="block w-full rounded-lg border border-white/10 bg-white/[0.04] px-2.5 py-2 text-left hover:border-amber-200/30 hover:bg-white/[0.08] focus:outline-none focus:ring-2 focus:ring-amber-200/50",
+            on_click=dispatch(OpenEnergyBuilding(civic_id)),
+            attrs=@html.Attrs::build().aria_label(
+              "Open \{task.title} building library on the town canvas",
+            ),
             [
               div(class="flex items-start justify-between gap-3", [
                 span(
@@ -807,7 +854,7 @@ fn render_energy_valley_dashboard(
           "运行活动 · 4",
         ),
       ]),
-      render_energy_valley_dashboard_work_list(model),
+      render_energy_valley_dashboard_work_list(dispatch, model),
       div(
         class="flex items-center justify-between border-t border-white/10 pt-2 text-[10px] text-slate-500",
         [

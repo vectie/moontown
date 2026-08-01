@@ -108,6 +108,7 @@ Wenyu Valley product readiness is tracked in:
 - [docs/WENYU_UI_MODULE_SYSTEM.md](/Users/kq/Workspace/moontown/docs/WENYU_UI_MODULE_SYSTEM.md)
 - [docs/WENYU_BUILDING_PROTOCOL_PLAN.md](/Users/kq/Workspace/moontown/docs/WENYU_BUILDING_PROTOCOL_PLAN.md)
 - [docs/WENYU_TOWN_STATUS.md](/Users/kq/Workspace/moontown/docs/WENYU_TOWN_STATUS.md)
+- [docs/KNOWLEDGE_TOWN_ARCHITECTURE.md](/Users/kq/Workspace/moontown/docs/KNOWLEDGE_TOWN_ARCHITECTURE.md)
 - [docs/CIVIC_COMMUNICATION_PATTERNS.md](/Users/kq/Workspace/moontown/docs/CIVIC_COMMUNICATION_PATTERNS.md)
 - [docs/FINAL_INTEGRATION.md](/Users/kq/Workspace/moontown/docs/FINAL_INTEGRATION.md)
 - [docs/COOKBOOK.md](/Users/kq/Workspace/moontown/docs/COOKBOOK.md)

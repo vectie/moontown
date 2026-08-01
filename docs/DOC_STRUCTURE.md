@@ -81,6 +81,12 @@ once.
    - operator UI and Rabbita viewport guidance
 8. [docs/WENYU_VALLEY_PRD.md](/Users/kq/Workspace/moontown/docs/WENYU_VALLEY_PRD.md)
    - Wenyu product specification
+9. [docs/KNOWLEDGE_TOWN_ARCHITECTURE.md](/Users/kq/Workspace/moontown/docs/KNOWLEDGE_TOWN_ARCHITECTURE.md)
+   - building-to-domain libraries, generation policies, truthful activity, and
+     the operator flow for provisioning many MoonBooks
+10. [docs/MARKETPLACE_DISCOVERY.md](/Users/kq/Workspace/moontown/docs/MARKETPLACE_DISCOVERY.md)
+    - safe publication, discovery lanes, communication ACLs, sharing policy,
+      and the Bunnia/MoonFind/MoonClaw integration boundary
 
 ## Doc Families
 
@@ -105,6 +111,8 @@ once.
 - [docs/WENYU_BUILDING_PROTOCOL_PLAN.md](/Users/kq/Workspace/moontown/docs/WENYU_BUILDING_PROTOCOL_PLAN.md)
 - [docs/WENYU_BUILDING_STYLE_SHEET.md](/Users/kq/Workspace/moontown/docs/WENYU_BUILDING_STYLE_SHEET.md)
 - [docs/WENYU_TOWN_STATUS.md](/Users/kq/Workspace/moontown/docs/WENYU_TOWN_STATUS.md)
+- [docs/KNOWLEDGE_TOWN_ARCHITECTURE.md](/Users/kq/Workspace/moontown/docs/KNOWLEDGE_TOWN_ARCHITECTURE.md)
+- [docs/MARKETPLACE_DISCOVERY.md](/Users/kq/Workspace/moontown/docs/MARKETPLACE_DISCOVERY.md)
 
 ### Civic Protocols
 

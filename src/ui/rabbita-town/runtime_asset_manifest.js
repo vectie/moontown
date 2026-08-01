@@ -40,6 +40,15 @@ const RUNTIME_ASSET_DIRECTORIES = [
 
 const MODULE_CONFIG_PATH = 'tilemap/modules/wenyu-town-modules.json'
 
+// The knowledge catalog is authored by MoonTown's domain-template layer rather
+// than the tile asset tree. The production assembler copies this canonical
+// source to a stable browser URL so the Rabbita UI never needs repository-path
+// knowledge at runtime.
+export const KNOWLEDGE_DOMAIN_CATALOG_SOURCE =
+  '../../../assets/templates/domains/catalog.v1.json'
+export const KNOWLEDGE_DOMAIN_CATALOG_TARGET =
+  'knowledge-domain-catalog.json'
+
 function safeRuntimePath(relativePath) {
   const normalized = path.posix.normalize(String(relativePath || ''))
   if (

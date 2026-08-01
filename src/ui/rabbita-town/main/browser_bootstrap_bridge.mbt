@@ -128,3 +128,15 @@ extern "js" fn load_bootstrap_wenyu_modules_json() -> String =
 ///|
 extern "js" fn wenyu_modules_version() -> Int =
   #| () => globalThis.__wenyuTownModulesVersion || 0
+
+///|
+extern "js" fn load_bootstrap_knowledge_domain_catalog_json() -> String =
+  #| () => globalThis.__moontownKnowledgeDomainCatalogJson || ""
+
+///|
+extern "js" fn knowledge_domain_catalog_version() -> Int =
+  #| () => globalThis.__moontownKnowledgeDomainCatalogVersion || 0
+
+///|
+extern "js" fn knowledge_domain_catalog_digest() -> String =
+  #| () => globalThis.__moontownKnowledgeDomainCatalogDigest || ""

@@ -102,11 +102,15 @@ fn public_placement(value : Json, index : Int) -> Json? {
 }
 
 ///|
-fn public_agent(value : Json) -> Json? {
+fn public_agent(value : Json, visual : Json?) -> Json? {
   guard value is Object(fields) else { return None }
   let id = string_field(fields, "id")
   if id.is_empty() {
     return None
+  }
+  let visual_fields = match visual {
+    Some(Object(projected)) => projected
+    _ => Map([])
   }
   Some({
     "id": id,
@@ -115,7 +119,43 @@ fn public_agent(value : Json) -> Json? {
     "status": string_field(fields, "status"),
     "buildingId": string_field(fields, "book_id"),
     "capabilities": Json::array(safe_string_array(fields, "capabilities")),
+    "kind": "bounded-worker",
+    "durability": "run-scoped",
+    "workStatusSource": "town-worker-snapshot",
+    "movementSource": if visual_fields.length() > 0 {
+      "visual-projection"
+    } else {
+      "not-observed"
+    },
+    "movement": if visual_fields.length() > 0 {
+      {
+        "phase": string_field(visual_fields, "phase"),
+        "location": string_field(visual_fields, "location"),
+        "destination": string_field(visual_fields, "destination"),
+        "behavior": string_field(visual_fields, "behavior"),
+        "gridX": visual_fields.get("grid_x").unwrap_or(Json::null()),
+        "gridY": visual_fields.get("grid_y").unwrap_or(Json::null()),
+        "runId": visual_fields.get("run_id").unwrap_or(Json::null()),
+        "taskId": visual_fields.get("task_id").unwrap_or(Json::null()),
+      }
+    } else {
+      Json::null()
+    },
   })
+}
+
+///|
+fn visual_agents_by_worker(value : Json?) -> Map[String, Json] {
+  let result : Map[String, Json] = Map([])
+  guard value is Some(Object(root)) else { return result }
+  for agent in array_field(root, "agents") {
+    guard agent is Object(fields) else { continue }
+    let worker_id = string_field(fields, "worker_id")
+    if !worker_id.is_empty() {
+      result[worker_id] = agent
+    }
+  }
+  result
 }
 
 ///|
@@ -192,6 +232,8 @@ fn public_run(task : Json, execution : Json?) -> Json? {
       _ => false
     },
     "resultDecision": string_field(execution_fields, "result_decision"),
+    "runKind": "bounded-worker",
+    "durability": "run-scoped",
   })
 }
 
@@ -262,11 +304,29 @@ pub async fn TownProjection::miniapp_snapshot(self : TownProjection) -> Json {
     }
   }
   let agents : Array[Json] = []
+  let visual_agents = visual_agents_by_worker(
+    @support.read_optional_json_file(
+      self.state_root + "/visual-projection.json",
+    ),
+  )
   for value in array_field(town, "workers") {
-    match public_agent(value) {
+    let worker_id = match value {
+      Object(fields) => string_field(fields, "id")
+      _ => ""
+    }
+    match public_agent(value, visual_agents.get(worker_id)) {
       Some(agent) => agents.push(agent)
       None => ()
     }
+  }
+  let supervisor_app = @supervisor_setup.supervisor_setup_application(
+    self.state_root,
+  )
+  for supervisor in supervisor_app.supervisor_agents_projection() {
+    agents.push(supervisor)
+  }
+  for worker in supervisor_app.supervisor_worker_agents_projection() {
+    agents.push(worker)
   }
   let executions = execution_by_task(array_field(town, "executions"))
   let runs : Array[Json] = []

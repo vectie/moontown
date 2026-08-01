@@ -917,6 +917,36 @@ The demo town persists runtime bootstrap files under:
 
 ## 2.1 Manage Book Types And Quality
 
+### Inspect and seed the Wenyu knowledge district
+
+The canonical knowledge-domain catalog binds the sixteen registered town
+buildings to governed MoonBook portfolios. Inspecting it is read-only:
+
+```bash
+moon run src/cmd/main -- knowledge catalog
+moon run src/cmd/main -- knowledge status
+```
+
+Queue the active catalog books through the existing durable template-request
+inbox:
+
+```bash
+moon run src/cmd/main -- knowledge seed
+moon run src/cmd/main -- books template requests status
+moon run src/cmd/main -- books template requests process
+```
+
+`knowledge status` is read-only and reports provisioning, source configuration,
+and research readiness separately. `knowledge seed` is opt-in and idempotent:
+it creates only missing empty config scaffolds, preserves existing user config,
+and queues an active book only after its approved source references are
+configured. Edit the reported config paths, then run `knowledge seed` again.
+Incubating books remain declared in the catalog. Neither a pending request nor
+`workspace_installed` proves that research ran or that MoonBook accepted any
+knowledge. See
+[KNOWLEDGE_TOWN_ARCHITECTURE.md](/Users/kq/Workspace/moontown/docs/KNOWLEDGE_TOWN_ARCHITECTURE.md)
+for the ownership and visible-activity contract.
+
 List available book templates:
 
 ```bash

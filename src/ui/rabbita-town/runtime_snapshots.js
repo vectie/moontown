@@ -4,6 +4,7 @@ import {
   WENYU_REFERENCE_LABELS_SNAPSHOT,
   WENYU_REFERENCE_ROADS_SNAPSHOT,
   WENYU_TOWN_MODULES_SNAPSHOT,
+  KNOWLEDGE_DOMAIN_CATALOG_SNAPSHOT,
 } from './runtime_snapshot_manifest.js'
 import {
   loadJsonGlobal,
@@ -97,6 +98,20 @@ export async function loadWenyuReferenceRoads() {
 
 export async function loadWenyuTownModules() {
   await refreshTextSnapshot(WENYU_TOWN_MODULES_SNAPSHOT)
+}
+
+export async function loadKnowledgeDomainCatalog() {
+  await refreshTextSnapshot(KNOWLEDGE_DOMAIN_CATALOG_SNAPSHOT)
+  const text = globalThis.__moontownKnowledgeDomainCatalogJson || ''
+  if (!text) {
+    globalThis.__moontownKnowledgeDomainCatalogDigest = ''
+    return
+  }
+  const bytes = new TextEncoder().encode(text)
+  const digest = await globalThis.crypto.subtle.digest('SHA-256', bytes)
+  const hex = Array.from(new Uint8Array(digest), byte =>
+    byte.toString(16).padStart(2, '0')).join('')
+  globalThis.__moontownKnowledgeDomainCatalogDigest = `sha256:${hex}`
 }
 
 globalThis.__moontownRefreshRuntimeSnapshots = refreshRuntimeSnapshots

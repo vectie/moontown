@@ -15,6 +15,163 @@ async fn read_optional_json(path : String) -> Json? {
 }
 
 ///|
+let moonbook_bookkeeper_contract = "moonbook.bookkeeper.v1"
+
+///|
+let moonbook_bookkeeper_ui_projection = "moonbook.bookkeeper.ui.v1"
+
+///|
+let moontown_acceptance_receipt_projection = "moontown.moonbook.acceptance-receipt-projection.v1"
+
+///|
+/// Project only the latest explicit, evidence-bearing MoonBook bookkeeper
+/// acceptance decision. Display text and earlier superseded decisions are not
+/// acceptance evidence.
+fn moonbook_acceptance_receipt_projection(value : Json?) -> Json? {
+  guard value is Some(Object(state)) else { return None }
+  guard json_string_field(state, "contract_version") ==
+    moonbook_bookkeeper_contract &&
+    json_string_field(state, "projection_version") ==
+    moonbook_bookkeeper_ui_projection &&
+    state.get("loaded") is Some(True) else {
+    return None
+  }
+  let decisions = array_field(state, "deliverable_acceptance")
+  if decisions.is_empty() {
+    return None
+  }
+  guard decisions[decisions.length() - 1] is Object(decision) else {
+    return None
+  }
+  let decision_id = json_string_field(decision, "record_id")
+  let candidate_version = json_string_field(decision, "record_version")
+  let reviewer = json_string_field(decision, "owner_route")
+  let evidence_count = json_int_field(
+    decision, "evidence_count", -1, -1, 2147483647,
+  )
+  let issue_count = json_int_field(decision, "issue_count", -1, -1, 2147483647)
+  guard json_string_field(decision, "stage") == "deliverable_acceptance" &&
+    json_string_field(decision, "status") == "accepted" &&
+    decision.get("requires_human_review") is Some(False) &&
+    !decision_id.is_empty() &&
+    !candidate_version.is_empty() &&
+    !reviewer.is_empty() &&
+    evidence_count > 0 &&
+    issue_count == 0 else {
+    return None
+  }
+  Some({
+    "contract_version": moontown_acceptance_receipt_projection,
+    "decision": "accepted",
+    "decision_id": decision_id,
+    "candidate_version": candidate_version,
+    "reviewer": reviewer,
+    "evidence_count": evidence_count,
+    "issue_count": issue_count,
+    "requires_human_review": false,
+    "source_contract": moonbook_bookkeeper_contract,
+    "source_projection": moonbook_bookkeeper_ui_projection,
+  })
+}
+
+///|
+fn ensure_projection_array(fields : Map[String, Json], key : String) -> Unit {
+  match fields.get(key) {
+    Some(Array(_)) => ()
+    _ => fields[key] = Json::array([])
+  }
+}
+
+///|
+async fn module_projection_links(
+  book_id : String,
+  root : String,
+) -> Array[Json] {
+  let links : Array[Json] = []
+  let candidates : Array[(String, String, String)] = [
+    ("Open book", "book/site/generated/index.html", "site"),
+    ("Open book index", "book/index.html", "site"),
+    ("Open book home", "book/Home.html", "site"),
+    ("Review queue", "book/reviews/pending.html", "review"),
+    ("Evidence", "book/synthesis/evidence.html", "evidence"),
+  ]
+  let mut has_site = false
+  for candidate in candidates {
+    let (label, relative, kind) = candidate
+    if kind == "site" && has_site {
+      continue
+    }
+    if @fs.exists(root + "/" + relative) &&
+      @fs.kind(root + "/" + relative) is Regular {
+      links.push({
+        "label": label,
+        "kind": kind,
+        "url": "/book-output/" + book_id + "/" + relative,
+      })
+      if kind == "site" {
+        has_site = true
+      }
+    }
+  }
+  links
+}
+
+///|
+async fn module_projections_json() -> Json {
+  let projections : Array[Json] = []
+  let root = books_root()
+  if @fs.exists(root) && @fs.kind(root) is Directory {
+    let dir = @fs.opendir(root)
+    defer dir.close()
+    let names = dir.read_all()
+    names.sort()
+    for name in names {
+      if safe_slug(name) != name {
+        continue
+      }
+      let book_root = root + "/" + name
+      let path = book_root + "/book/moonbook-ui-state.json"
+      guard @fs.exists(path) && @fs.kind(path) is Regular else { continue }
+      guard read_optional_json(path) is Some(Object(source)) else { continue }
+      let fields : Map[String, Json] = Map([])
+      for key, value in source {
+        fields[key] = value
+      }
+      // A presentation document cannot self-assert acceptance. Re-project this
+      // field only from MoonBook's durable bookkeeper state below.
+      fields.remove("acceptance_receipt")
+      fields["book_id"] = name.to_json()
+      if json_string_field(fields, "title").is_empty() {
+        fields["title"] = name.replace(old="-", new=" ").to_json()
+      }
+      if json_string_field(fields, "summary").is_empty() {
+        fields["summary"] = "MoonBook projection is available.".to_json()
+      }
+      for
+        key in [
+          "status_chips", "metrics", "readiness", "review_queue", "page_families",
+          "journey",
+        ] {
+        ensure_projection_array(fields, key)
+      }
+      fields["links"] = Json::array(module_projection_links(name, book_root))
+      match
+        moonbook_acceptance_receipt_projection(
+          read_optional_json(book_root + "/.moonbook/bookkeeper/ui-state.json"),
+        ) {
+        Some(receipt) => fields["acceptance_receipt"] = receipt
+        None => ()
+      }
+      projections.push(Json::object(fields))
+    }
+  }
+  {
+    "generated_at": iso_timestamp(@env.now()),
+    "projections": Json::array(projections),
+  }
+}
+
+///|
 fn object_fields(value : Json?) -> Map[String, Json] {
   match value {
     Some(Object(fields)) => fields
@@ -81,43 +238,138 @@ fn durable_observed_at(runtime : Json?) -> String {
 }
 
 ///|
-fn building_module_key(book_id : String) -> String {
+fn building_module_key(
+  book_id : String,
+  bindings? : Map[String, String] = Map([]),
+) -> String {
   if book_id.is_empty() {
     "unlocated"
-  } else if book_id.has_prefix("research-") {
-    match book_id {
-      "research-embodied-robotics" => "research-embodied-robotics"
-      "research-ai-agents" => "research-ai-agents"
-      "research-opc" => "research-opc"
-      "research-how-llms-are-trained-in-very-detail" => "research-llm-training"
-      "research-ai-hardware" => "research-ai-hardware"
-      id if id.contains("robot") => "research-embodied-robotics"
-      id if id.contains("opc") => "research-opc"
-      id if id.contains("hardware") => "research-ai-hardware"
-      id if id.contains("llm") || id.contains("training") =>
-        "research-llm-training"
-      _ => "research-ai-agents"
-    }
   } else {
-    match book_id {
-      "coding" | "wenyu-ai-garden" => "ai-garden"
-      "finance" | "wenyu-valley-market" => "valley-market"
-      "wenyu-town-shell" => "town-shell"
-      "wenyu-resident-twins" => "resident-twins"
-      "wenyu-policy-hall" => "policy-hall"
-      "wenyu-contest-express" => "contest-express"
-      "wenyu-social-square" => "social-square"
-      "wenyu-talent-avenue" => "talent-avenue"
-      "wenyu-vitality-dashboard" => "vitality-tower"
-      "wenyu-broadcast-tower" => "story-radar"
-      // The current Energy Valley layout has no standalone bridge building.
-      // Keep bridge work visible at the civic hub instead of leaving it
-      // unlocated.
-      "wenyu-physical-bridge" => "town-shell"
-      "vitality-dashboard" => "vitality-tower"
-      "broadcast-tower" => "story-radar"
-      _ => book_id
+    match bindings.get(book_id) {
+      Some(building_id) => runtime_building_module_key(building_id)
+      None =>
+        match book_id {
+          "research-embodied-robotics" => "research-embodied-robotics"
+          "research-ai-agents" | "research-agent-work-projection" =>
+            "research-ai-agents"
+          "research-opc" => "research-opc"
+          "research-how-llms-are-trained-in-very-detail" =>
+            "research-llm-training"
+          "research-ai-hardware" => "research-ai-hardware"
+          "coding" | "wenyu-ai-garden" => "ai-garden"
+          "finance" | "wenyu-valley-market" => "valley-market"
+          "wenyu-town-shell" => "town-shell"
+          "wenyu-resident-twins" => "resident-twins"
+          "wenyu-policy-hall" => "policy-hall"
+          "wenyu-contest-express" => "contest-express"
+          "wenyu-social-square" => "social-square"
+          "wenyu-talent-avenue" => "talent-avenue"
+          "wenyu-vitality-dashboard" => "vitality-tower"
+          "wenyu-broadcast-tower" => "story-radar"
+          // The current Energy Valley layout has no standalone bridge building.
+          // Keep bridge work visible at the civic hub instead of leaving it
+          // unlocated.
+          "wenyu-physical-bridge" => "town-shell"
+          "vitality-dashboard" => "vitality-tower"
+          "broadcast-tower" => "story-radar"
+          _ => "unlocated"
+        }
     }
+  }
+}
+
+///|
+fn runtime_building_module_key(building_id : String) -> String {
+  match building_id {
+    "vitality-dashboard" => "vitality-tower"
+    "broadcast-tower" => "story-radar"
+    id => id
+  }
+}
+
+///|
+async fn knowledge_domain_book_bindings() -> Map[String, String] {
+  let bindings : Map[String, String] = Map([])
+  guard resolved_knowledge_domain_catalog() is Some(catalog) else {
+    return bindings
+  }
+  for domain in catalog.domains {
+    for book in domain.books {
+      bindings[book.book_id] = domain.building_id
+    }
+  }
+  bindings
+}
+
+///|
+fn knowledge_domain_catalog_paths(
+  configured : String?,
+  browser_static_root : String,
+  application_resource_root : String,
+) -> Array[String] {
+  match configured {
+    Some(path) => [path]
+    None =>
+      [
+        browser_static_root + "/knowledge-domain-catalog.json",
+        application_resource_root + "/domains/catalog.v1.json",
+        "assets/templates/domains/catalog.v1.json",
+      ]
+  }
+}
+
+///|
+/// Resolve one catalog for every desktop consumer. An explicit environment
+/// override is exclusive and fails closed instead of being mixed with a
+/// different bundled browser catalog.
+async fn resolved_knowledge_domain_catalog() -> @domain_catalog.KnowledgeDomainCatalog? {
+  let paths = knowledge_domain_catalog_paths(
+    env_value("MOONTOWN_KNOWLEDGE_DOMAIN_CATALOG"),
+    static_root(),
+    resource_root(),
+  )
+  for path in paths {
+    if !@fs.exists(path) {
+      continue
+    }
+    if !(@fs.kind(path) is Regular) {
+      continue
+    }
+    let text = @support.read_text_or_empty(path)
+    let catalog = @domain_catalog.parse_knowledge_domain_catalog(text) catch {
+      _ => continue
+    }
+    return Some(catalog)
+  }
+  None
+}
+
+///|
+fn knowledge_domain_catalog_body(
+  catalog : @domain_catalog.KnowledgeDomainCatalog,
+) -> String {
+  catalog.to_json().stringify(indent=2)
+}
+
+///|
+fn knowledge_domain_catalog_digest(
+  catalog : @domain_catalog.KnowledgeDomainCatalog,
+) -> String {
+  let bytes = @utf8.encode(knowledge_domain_catalog_body(catalog))
+  "sha256:\{@crypto.bytes_to_hex_string(@crypto.sha256(bytes))}"
+}
+
+///|
+async fn resolved_knowledge_domain_catalog_response() -> (String, String)? {
+  match resolved_knowledge_domain_catalog() {
+    Some(catalog) =>
+      Some(
+        (
+          knowledge_domain_catalog_body(catalog),
+          knowledge_domain_catalog_digest(catalog),
+        ),
+      )
+    None => None
   }
 }
 
@@ -349,6 +601,7 @@ fn town_work_item(
   workers : Map[String, Json],
   watcher_value : Json?,
   request_value : Json?,
+  book_bindings : Map[String, String],
 ) -> Json? {
   guard task_value is Object(task) else { return None }
   let execution = object_fields(execution_value)
@@ -391,7 +644,7 @@ fn town_work_item(
     "status": watcher_task_status(watcher).unwrap_or(
       town_task_status(task, execution),
     ),
-    "buildingModuleKey": building_module_key(book_id),
+    "buildingModuleKey": building_module_key(book_id, bindings=book_bindings),
     "artifacts": Json::array(
       if !watcher_run_id.is_empty() && watcher_run_id != execution_run_id {
         []
@@ -540,7 +793,10 @@ fn town_work_item(
 }
 
 ///|
-fn operator_work_item(value : Json) -> Json? {
+fn operator_work_item(
+  value : Json,
+  book_bindings : Map[String, String],
+) -> Json? {
   guard value is Object(request) else { return None }
   let id = json_string_field(request, "id")
   if id.is_empty() {
@@ -565,7 +821,7 @@ fn operator_work_item(value : Json) -> Json? {
     "id": id,
     "title": title,
     "status": status,
-    "buildingModuleKey": building_module_key(book_id),
+    "buildingModuleKey": building_module_key(book_id, bindings=book_bindings),
     "requestId": id,
     "correlationId": id,
     "artifacts": Json::array([]),
@@ -592,6 +848,59 @@ fn active_status(status : String) -> Bool {
   status == "running" ||
   status == "waiting_review" ||
   status == "blocked"
+}
+
+///|
+fn projected_task_activity(fields : Map[String, Json]) -> (String, String) {
+  let status = json_string_field(fields, "status")
+  let collaboration_count = match fields.get("collaboration") {
+    Some(Object(collaboration)) =>
+      array_field(collaboration, "participants").length()
+    _ => 0
+  }
+  let progress = match fields.get("progress") {
+    Some(Object(progress)) => progress
+    _ => Map([])
+  }
+  let accepted = json_int_field(progress, "acceptedFacts", 0, 0, 2147483647)
+  let changed = json_int_field(progress, "pagesChanged", 0, 0, 2147483647)
+  match status {
+    "queued" => ("idle", "等待调度")
+    "assigned" => ("walking", "前往研究建筑")
+    "waiting_review" => ("reviewing", "独立审阅")
+    "blocked" | "failed" => ("recovering", "恢复与修订")
+    // Durable completion is not evidence that a worker is still in transit.
+    // A live return animation needs a recent, timestamped return receipt.
+    "completed" => ("idle", "工作已完成")
+    "running" if collaboration_count >= 2 => ("discussing", "跨书讨论")
+    "running" if accepted > 0 || changed > 0 => ("synthesizing", "综合证据")
+    "running" => ("researching", "研究资料")
+    _ => ("idle", "等待工作")
+  }
+}
+
+///|
+fn annotate_projected_task_activities(
+  tasks : Array[Json],
+  book_bindings : Map[String, String],
+) -> Unit {
+  for task in tasks {
+    guard task is Object(fields) else { continue }
+    let (kind, label) = projected_task_activity(fields)
+    let home = building_module_key(
+      json_string_field(fields, "bookId"),
+      bindings=book_bindings,
+    )
+    let destination = match kind {
+      "discussing" => "social-square"
+      "recovering" => "town-shell"
+      _ => json_string_field(fields, "buildingModuleKey")
+    }
+    fields["activityKind"] = kind.to_json()
+    fields["activityLabel"] = label.to_json()
+    optional_item_field(fields, "originBuildingModuleKey", home)
+    optional_item_field(fields, "destinationBuildingModuleKey", destination)
+  }
 }
 
 ///|
@@ -787,7 +1096,16 @@ fn projected_collaboration_agents(tasks : Array[Json]) -> Array[Json] {
         "name": family.replace(old="_", new=" "),
         "role": "worker",
         "status": collaborator_agent_status(json_string_field(fields, "status")),
-        "buildingModuleKey": json_string_field(task_fields, "buildingModuleKey"),
+        "buildingModuleKey": json_string_field(
+          task_fields, "destinationBuildingModuleKey",
+        ),
+        "bookId": json_string_field(task_fields, "bookId"),
+        "activityKind": "discussing",
+        "activityLabel": "跨书讨论",
+        "originBuildingModuleKey": json_string_field(
+          task_fields, "originBuildingModuleKey",
+        ),
+        "destinationBuildingModuleKey": "social-square",
         "workItemId": json_string_field(task_fields, "id"),
         "runId": run_id,
       })
@@ -800,6 +1118,7 @@ fn projected_collaboration_agents(tasks : Array[Json]) -> Array[Json] {
 fn projected_agents(
   worker_values : Array[Json],
   tasks : Array[Json],
+  book_bindings : Map[String, String],
 ) -> Array[Json] {
   let active_by_agent : Map[String, Json] = Map([])
   for task in tasks {
@@ -834,6 +1153,8 @@ fn projected_agents(
       "name": name,
       "role": worker_role(json_string_field(worker, "role")),
       "status": status,
+      "kind": "bounded-worker",
+      "durability": "run-scoped",
     }
     if work.length() > 0 {
       optional_item_field(
@@ -843,12 +1164,40 @@ fn projected_agents(
       )
       optional_item_field(fields, "workItemId", json_string_field(work, "id"))
       optional_item_field(fields, "runId", json_string_field(work, "runId"))
+      optional_item_field(fields, "bookId", json_string_field(work, "bookId"))
+      optional_item_field(
+        fields,
+        "activityKind",
+        json_string_field(work, "activityKind"),
+      )
+      optional_item_field(
+        fields,
+        "activityLabel",
+        json_string_field(work, "activityLabel"),
+      )
+      optional_item_field(
+        fields,
+        "originBuildingModuleKey",
+        json_string_field(work, "originBuildingModuleKey"),
+      )
+      optional_item_field(
+        fields,
+        "destinationBuildingModuleKey",
+        json_string_field(work, "destinationBuildingModuleKey"),
+      )
+      fields["movementSource"] = "runtime-task-projection".to_json()
+      fields["workStatusSource"] = "runtime-execution-ledger".to_json()
     } else {
       optional_item_field(
         fields,
         "buildingModuleKey",
-        building_module_key(json_string_field(worker, "book_id")),
+        building_module_key(
+          json_string_field(worker, "book_id"),
+          bindings=book_bindings,
+        ),
       )
+      fields["movementSource"] = "not-observed".to_json()
+      fields["workStatusSource"] = "worker-snapshot".to_json()
     }
     agents.push(Json::object(fields))
   }
@@ -860,10 +1209,16 @@ fn projected_agents(
 
 ///|
 async fn energy_valley_runtime_projection() -> Json {
+  let book_bindings = knowledge_domain_book_bindings()
+  let catalog_digest = match resolved_knowledge_domain_catalog() {
+    Some(catalog) => knowledge_domain_catalog_digest(catalog)
+    None => ""
+  }
   let town_path = state_root() + "/town.json"
   let daemon_path = state_root() + "/daemon.json"
   let daemon_runtime_path = state_root() + "/daemon-runtime.json"
   let request_path = state_root() + "/operator-requests/requests.jsonl"
+  let supervisor_path = state_root() + "/supervisor-setup/state.json"
   let town_root = read_optional_json(town_path)
   let town = match town_root {
     Some(Object(root)) => object_fields(root.get("town"))
@@ -917,6 +1272,7 @@ async fn energy_valley_runtime_projection() -> Json {
       workers_by_id,
       watcher,
       request,
+      book_bindings,
     )
     match item {
       Some(value) => {
@@ -972,6 +1328,7 @@ async fn energy_valley_runtime_projection() -> Json {
         workers_by_id,
         Some(watcher),
         request,
+        book_bindings,
       ) {
       Some(value) => {
         let fields = object_fields(Some(value))
@@ -997,7 +1354,7 @@ async fn energy_valley_runtime_projection() -> Json {
           (!goal_id.is_empty() && represented_goals.contains(goal_id)) {
           continue
         }
-        match operator_work_item(item) {
+        match operator_work_item(item, book_bindings) {
           Some(value) => tasks.push(value)
           None => ()
         }
@@ -1005,13 +1362,15 @@ async fn energy_valley_runtime_projection() -> Json {
     _ => ()
   }
   attach_collaboration(tasks)
+  annotate_projected_task_activities(tasks, book_bindings)
   attach_result_links(tasks)
   let daemon_runtime = read_optional_json(daemon_runtime_path)
   let observed_at = durable_observed_at(daemon_runtime)
   let source_found = @fs.exists(town_path) ||
     @fs.exists(daemon_path) ||
     @fs.exists(daemon_runtime_path) ||
-    @fs.exists(request_path)
+    @fs.exists(request_path) ||
+    @fs.exists(supervisor_path)
   if !source_found {
     return {
       "schema": energy_valley_runtime_schema,
@@ -1027,8 +1386,45 @@ async fn energy_valley_runtime_projection() -> Json {
     "mode": "live",
     "observedAt": observed_at,
     "tasks": Json::array(tasks),
-    "agents": Json::array(projected_agents(workers, tasks)),
+    "agents": Json::array(
+      {
+        let agents = projected_agents(workers, tasks, book_bindings)
+        let supervisor_app = @supervisor_setup.default_supervisor_setup_application()
+        let lineage = supervisor_app.execution_lineage_projection()
+        for agent in agents {
+          guard agent is Object(agent_fields) else { continue }
+          let run_id = json_string_field(agent_fields, "runId")
+          if run_id.is_empty() {
+            continue
+          }
+          for edge in lineage {
+            guard edge is Object(edge_fields) else { continue }
+            if json_string_field(edge_fields, "runId") == run_id {
+              optional_item_field(
+                agent_fields,
+                "supervisorProfileId",
+                json_string_field(edge_fields, "supervisorProfileId"),
+              )
+              optional_item_field(
+                agent_fields,
+                "lineageStatus",
+                json_string_field(edge_fields, "status"),
+              )
+              agent_fields["lineageSource"] = "supervisor-execution-handoff".to_json()
+            }
+          }
+        }
+        for supervisor in supervisor_app.supervisor_agents_projection() {
+          agents.push(supervisor)
+        }
+        for worker in supervisor_app.supervisor_worker_agents_projection() {
+          agents.push(worker)
+        }
+        agents
+      },
+    ),
   }
+  optional_item_field(fields, "knowledgeCatalogDigest", catalog_digest)
   match read_optional_json(daemon_path) {
     Some(Object(daemon)) =>
       match daemon.get("tick_sequence") {

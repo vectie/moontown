@@ -440,7 +440,7 @@ pub fn miniapp_local_backend_accept_run(
         now_ms~,
       )
       miniapp_local_backend_agent_response(
-        state, session_id, "accept-run", change,
+        state, session_id, "request-bookkeeper-review", change,
       )
     }
     None =>

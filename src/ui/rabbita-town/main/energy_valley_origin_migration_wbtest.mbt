@@ -176,9 +176,7 @@ test "building inspector only claims real work assigned to that building" {
   assert_true(policy_html.contains("Policy Hall · 协议制定与治理"))
   assert_true(policy_html.contains("running · run-parent"))
   assert_true(policy_html.contains("在内 Agent"))
-  assert_true(policy_html.contains("进入建筑 · 查看真实工作"))
-  assert_true(policy_html.contains("module=policy-hall"))
-  assert_true(policy_html.contains("seed=20260727"))
+  assert_false(policy_html.contains("module=policy-hall"))
 }
 
 ///|
@@ -203,8 +201,12 @@ test "runtime dashboard reveals recorded assignments instead of inert tabs" {
   assert_true(html.contains("policy-hall"))
   assert_true(html.contains("1 agent · run-parent"))
   assert_true(html.contains("进入对应建筑查看 Agent"))
-  assert_true(html.contains("module=policy-hall"))
-  assert_true(html.contains("seed=20260727"))
+  assert_true(
+    html.contains(
+      "Open Collaborated research building library on the town canvas",
+    ),
+  )
+  assert_false(html.contains("module=policy-hall"))
 }
 
 ///|

@@ -3,6 +3,7 @@ import {
   "moonbitlang/core/json",
   "vectie/moontown/storage",
   "vectie/moontown/support",
+  "vectie/moontown/supervisor_setup",
 }
 
 import {
