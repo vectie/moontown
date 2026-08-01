@@ -338,7 +338,8 @@ fn marketplace_state_for_runtime_status(
 
 ///| Trusted local reconciliation from the existing supervisor/MoonClaw
 
-///| receipt chain. This function is not exposed as a public HTTP operation.
+///|
+/// receipt chain. This function is not exposed as a public HTTP operation.
 pub fn marketplace_reconcile_action_request_runtime(
   state : MarketplaceState,
   draft : ActionRequestRuntimeDraft,
@@ -373,7 +374,9 @@ pub fn marketplace_reconcile_action_request_runtime(
     current.result_summary
   } else {
     validate_public_text(
-      "marketplace runtime result summary", draft.result_summary, 2000,
+      "marketplace runtime result summary",
+      draft.result_summary,
+      2000,
     )
   }
   let evidence = normalized_terms(draft.result_evidence_refs)
@@ -407,7 +410,11 @@ pub fn marketplace_reconcile_action_request_runtime(
     replace_marketplace_action_request(state, reconciled),
     reconciled,
     title,
-    if result_summary.is_empty() { draft.runtime_status } else { result_summary },
+    if result_summary.is_empty() {
+      draft.runtime_status
+    } else {
+      result_summary
+    },
     now_ms~,
   )
 }

@@ -52,6 +52,14 @@ test "marketplace routing keeps caller session separate from fixed bootstrap" {
   )
   assert_true(
     marketplace_operation(
+      @town_contract.miniapp_marketplace_review_queue_path(),
+      true,
+      false,
+    ) ==
+    Some("review-queue"),
+  )
+  assert_true(
+    marketplace_operation(
       @town_contract.miniapp_marketplace_shared_listings_path(),
       true,
       false,
@@ -125,9 +133,9 @@ test "marketplace bridge derives the existing bounded supervisor delegate payloa
     "instruction": "Prepare a reviewable robotics reading plan.",
     "execution_bounds": {
       "claim_ceiling": "reviewable",
-      "max_cost_micro_usd": 2000000,
-      "max_runtime_ms": 300000,
-      "max_tokens": 12000,
+      "max_cost_micro_usd": "2000000",
+      "max_runtime_ms": "300000",
+      "max_tokens": "12000",
       "max_artifacts": 3,
       "web_search": false,
       "expires_at": "2026-08-01T00:05:00Z",
@@ -147,14 +155,41 @@ test "marketplace bridge derives the existing bounded supervisor delegate payloa
       },
     },
   }
-  let payload = marketplace_delegate_payload(
-    bridge_object(request), snapshot,
-  ).stringify()
-  assert_true(payload.contains("marketplace-action:agent.robot-guide:reader-a:7"))
+  let payload = marketplace_delegate_payload(bridge_object(request), snapshot).stringify()
+  assert_true(
+    payload.contains("marketplace-action:agent.robot-guide:reader-a:7"),
+  )
   assert_true(payload.contains("\"model\":\"gpt-5.6-sol\""))
   assert_true(payload.contains("\"webSearch\":false"))
+  assert_true(payload.contains("\"maxCostMicroUsd\":\"2000000\""))
+  assert_true(payload.contains("\"maxRuntimeMs\":\"300000\""))
+  assert_true(payload.contains("\"maxTokens\":\"12000\""))
   assert_true(payload.contains("books/robotics-book/artifacts"))
   assert_true(payload.contains("marketplace_request_id"))
   assert_false(payload.contains("/Users/"))
   assert_false(payload.contains("authority"))
+}
+
+///|
+test "marketplace pending handoff preserves the accepted decision for retry" {
+  let result = marketplace_pending_handoff_result(
+    "decide-action-request",
+    {
+      "ok": true,
+      "payload": {
+        "action_request": {
+          "request_id": "action:agent.robot-guide:reader-a:7",
+          "state": "accepted_pending_handoff",
+          "version": 2,
+          "can_decide": false,
+          "can_retry_handoff": true,
+        },
+      },
+    },
+  ).stringify()
+  assert_true(result.contains("\"ok\":true"))
+  assert_true(result.contains("accepted_pending_handoff"))
+  assert_true(result.contains("supervisor_activation_required"))
+  assert_true(result.contains("\"can_retry_handoff\":true"))
+  assert_false(result.contains("marketplace_handoff_not_ready"))
 }

@@ -72,6 +72,8 @@ pub fn miniapp_marketplace_public_index_path() -> String
 
 pub fn miniapp_marketplace_recommendations_path() -> String
 
+pub fn miniapp_marketplace_review_queue_path() -> String
+
 pub fn miniapp_marketplace_search_path() -> String
 
 pub fn miniapp_marketplace_share_grants_path() -> String

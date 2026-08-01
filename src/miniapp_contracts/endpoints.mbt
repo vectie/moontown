@@ -304,6 +304,12 @@ pub fn miniapp_contract_endpoints() -> Array[MiniappEndpoint] {
       summary="Export exact sanitized moonsuite.public-listing.v1 cards for MoonFind.",
     ),
     miniapp_endpoint(
+      id="marketplace-review-queue",
+      http_method="GET",
+      path="/miniapp/marketplace/review-queue",
+      summary="Return same-tenant submitted public cards to an independent publisher or moderator reviewer.",
+    ),
+    miniapp_endpoint(
       id="marketplace-agent-draft",
       http_method="POST",
       path="/miniapp/marketplace/listings/agent",

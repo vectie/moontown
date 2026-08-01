@@ -35,6 +35,8 @@ pub fn marketplace_discovery_feed(MarketplaceState, MarketplacePrincipal, String
 
 pub fn marketplace_emit_publication_notifications(MarketplaceState, ListingKind, String, now_ms~ : UInt64) -> MarketplaceState
 
+pub fn marketplace_listing_review_queue(MarketplaceState, MarketplacePrincipal) -> Json raise
+
 pub fn marketplace_mark_notification_read(MarketplaceState, MarketplacePrincipal, String, now_ms~ : UInt64) -> MarketplaceState raise
 
 pub fn marketplace_notifications_for(MarketplaceState, MarketplacePrincipal) -> Json

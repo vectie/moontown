@@ -120,9 +120,11 @@ async test "pack and host declaration publish the same capability truth" {
   )
   assert_eq(json_string_field(pack, "id"), "moontown")
   assert_eq(json_string_field(pack, "version"), pack_version())
-  guard pack["tools"] is Array([Object(tool)]) else {
-    fail("expected one MoonTown pack tool")
+  guard pack["tools"] is Array(tools) else {
+    fail("expected MoonTown pack tools")
   }
+  assert_true(tools.length() >= 1)
+  let tool = json_object(tools[0], "civic synthesis pack tool")
   assert_eq(json_string_field(tool, "id"), operation_id())
   assert_eq(json_string_field(tool, "owner_product"), "moontown")
   guard tool["review_required"] is True else {

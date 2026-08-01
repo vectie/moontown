@@ -47,9 +47,7 @@ fn supervisor_worker_task_wire_json(task : SupervisorWorkerTask) -> Json {
 }
 
 ///|
-fn supervisor_worker_task_wire_or_null(
-  task : SupervisorWorkerTask?,
-) -> Json {
+fn supervisor_worker_task_wire_or_null(task : SupervisorWorkerTask?) -> Json {
   match task {
     Some(item) => supervisor_worker_task_wire_json(item)
     None => Json::null()
@@ -57,9 +55,7 @@ fn supervisor_worker_task_wire_or_null(
 }
 
 ///|
-fn supervisor_worker_budget_wire_json(
-  budget : SupervisorWorkerBudget,
-) -> Json {
+fn supervisor_worker_budget_wire_json(budget : SupervisorWorkerBudget) -> Json {
   {
     "max_cost_micro_usd": budget.max_cost_micro_usd,
     "max_runtime_ms": budget.max_runtime_ms,
@@ -69,9 +65,7 @@ fn supervisor_worker_budget_wire_json(
 }
 
 ///|
-fn supervisor_worker_bounds_wire_json(
-  bounds : SupervisorWorkerBounds,
-) -> Json {
+fn supervisor_worker_bounds_wire_json(bounds : SupervisorWorkerBounds) -> Json {
   {
     "claim_ceiling": bounds.claim_ceiling,
     "budget": supervisor_worker_budget_wire_json(bounds.budget),

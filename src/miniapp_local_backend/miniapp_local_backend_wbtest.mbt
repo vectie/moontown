@@ -114,9 +114,7 @@ test "local backend can create agent chat and update run lifecycle" {
     now_ms=6500UL,
   )
   assert_eq(accepted.ok, true)
-  assert_true(
-    accepted.body.contains("kind=request-bookkeeper-review ok=true"),
-  )
+  assert_true(accepted.body.contains("kind=request-bookkeeper-review ok=true"))
   assert_eq(
     accepted.state.snapshot.runs.length(),
     login.state.snapshot.runs.length() + 1,

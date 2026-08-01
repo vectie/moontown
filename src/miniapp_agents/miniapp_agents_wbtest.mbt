@@ -147,17 +147,15 @@ test "run status controls cover cancel retry and review acceptance" {
   let pending_bookkeeper = miniapp_accept_run_for_review(
     retried.snapshot,
     viewer,
-    {
-      run_id: "run-policy-hall-1",
-      summary: "Request exact Bookkeeper review.",
-    },
+    { run_id: "run-policy-hall-1", summary: "Request exact Bookkeeper review." },
     now_ms=4600UL,
   )
   assert_true(
     miniapp_agent_test_run_status(
       pending_bookkeeper.snapshot,
       "run-policy-hall-1",
-    ) == @miniapp_contracts.RunWaitingReview,
+    ) ==
+    @miniapp_contracts.RunWaitingReview,
   )
   assert_true(
     miniapp_agent_test_has_audit(

@@ -14,16 +14,16 @@ async test "profile GET emits optional identity and consent as scalar or null" {
     profile.get("consent") is Some(Object(consent)) else {
     fail("profile GET must expose identity and consent objects")
   }
-  assert_eq(
-    identity.get("avatarUrl"),
-    Some("avatar://otter-steward".to_json()),
-  )
+  assert_eq(identity.get("avatarUrl"), Some("avatar://otter-steward".to_json()))
   assert_eq(consent.get("confirmedAtMs"), Some(1234UL.to_json()))
 
   let absent = {
     ..application.load_store().profiles[0],
     identity: { display_name: "Aster", avatar_url: None },
-    consent: { ..application.load_store().profiles[0].consent, confirmed_at_ms: None },
+    consent: {
+      ..application.load_store().profiles[0].consent,
+      confirmed_at_ms: None,
+    },
   }
   guard supervisor_profile_projection(absent) is Object(absent_profile) &&
     absent_profile.get("identity") is Some(Object(absent_identity)) &&
@@ -61,7 +61,8 @@ async test "activation execution lifecycle and review wires never wrap option va
   ).unwrap()
   let pending_outbox = application.runtime_handoffs()
   guard pending_outbox is Object(pending_fields) &&
-    json_array(pending_fields, "activationHandoffs").get(0) is Some(Object(pending)) else {
+    json_array(pending_fields, "activationHandoffs").get(0)
+    is Some(Object(pending)) else {
     fail("activation outbox must contain the queued handoff")
   }
   assert_eq(pending.get("expected_cursor"), Some((9 : Int).to_json()))
@@ -85,13 +86,12 @@ async test "activation execution lifecycle and review wires never wrap option va
       "handoffId": queued_activation.handoff_id,
       "expectedCursor": 2,
       "evaluatedAt": "2026-08-01T00:00:01Z",
-      "authority": supervisor_test_authority(
-        queued_activation.request_digest,
-      ),
+      "authority": supervisor_test_authority(queued_activation.request_digest),
     }),
   )
   guard activation_claim is Object(activation_claim_fields) &&
-    activation_claim_fields.get("moonclawCommand") is Some(Object(activation_command)) else {
+    activation_claim_fields.get("moonclawCommand")
+    is Some(Object(activation_command)) else {
     fail("activation claim must expose the exact MoonClaw command")
   }
   assert_eq(
@@ -134,13 +134,11 @@ async test "activation execution lifecycle and review wires never wrap option va
   })
   let lifecycle_outbox = application.runtime_handoffs()
   guard lifecycle_outbox is Object(lifecycle_fields) &&
-    json_array(lifecycle_fields, "executionHandoffs").get(0) is Some(Object(lifecycle)) else {
+    json_array(lifecycle_fields, "executionHandoffs").get(0)
+    is Some(Object(lifecycle)) else {
     fail("execution outbox must contain the lifecycle handoff")
   }
-  assert_eq(
-    lifecycle.get("target_run_id"),
-    Some("worker-run-1".to_json()),
-  )
+  assert_eq(lifecycle.get("target_run_id"), Some("worker-run-1".to_json()))
   assert_eq(lifecycle.get("expected_cursor"), Some((12 : Int).to_json()))
   assert_eq(lifecycle.get("worker_task"), Some(Json::null()))
   assert_eq(lifecycle.get("worker_bounds"), Some(Json::null()))
@@ -162,14 +160,13 @@ async test "activation execution lifecycle and review wires never wrap option va
       "transportEndpoint": "worker-stop",
       "transportRequest": transport_request,
       "runtimeCommand": supervisor_test_runtime_command(
-        execution,
-        transport_request,
-        transport_digest,
+        execution, transport_request, transport_digest,
       ),
     }),
   )
   guard execution_claim is Object(execution_claim_fields) &&
-    execution_claim_fields.get("executionHandoff") is Some(Object(claimed_execution)) else {
+    execution_claim_fields.get("executionHandoff")
+    is Some(Object(claimed_execution)) else {
     fail("execution claim must expose the canonical lifecycle handoff")
   }
   assert_eq(
@@ -211,7 +208,8 @@ async test "activation execution lifecycle and review wires never wrap option va
   })
   let review_outbox = application.bookkeeper_outbox()
   guard review_outbox is Object(review_fields) &&
-    json_array(review_fields, "requests").get(0) is Some(Object(projected_review)) else {
+    json_array(review_fields, "requests").get(0)
+    is Some(Object(projected_review)) else {
     fail("Bookkeeper outbox must contain the pending exact review")
   }
   assert_eq(projected_review.get("claimed_by"), Some(Json::null()))

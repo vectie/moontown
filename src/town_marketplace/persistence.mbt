@@ -156,6 +156,11 @@ pub async fn MarketplaceApplication::execute(
       )
     "public-index" =>
       application_ok(operation, public_listing_index_export(state))
+    "review-queue" =>
+      application_ok(
+        operation,
+        marketplace_listing_review_queue(state, principal),
+      )
     "list-channels" =>
       application_ok(operation, {
         "contract_id": "moontown.channels.v1",

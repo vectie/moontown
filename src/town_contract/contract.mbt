@@ -219,6 +219,11 @@ pub fn miniapp_marketplace_public_index_path() -> String {
 }
 
 ///|
+pub fn miniapp_marketplace_review_queue_path() -> String {
+  "/miniapp/marketplace/review-queue"
+}
+
+///|
 pub fn miniapp_marketplace_agent_listing_path() -> String {
   "/miniapp/marketplace/listings/agent"
 }

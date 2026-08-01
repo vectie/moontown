@@ -7,7 +7,7 @@ async test "miniapp routes command exposes local backend catalog" {
   assert_true(output.contains("route=publish-building"))
   assert_true(output.contains("route=archive-building"))
   assert_true(output.contains("route=chat-send"))
-  assert_true(output.contains("route=accept-run"))
+  assert_true(output.contains("route=request-bookkeeper-review"))
 }
 
 ///|
@@ -47,7 +47,10 @@ async test "miniapp agent chat and run commands render local backend responses" 
   let accept = render_cli_command([
     "miniapp", "reviews", "accept", "user-a", "run-policy-hall-1",
   ])
-  assert_true(accept.contains("kind=accept-run ok=true"))
+  assert_true(accept.contains("kind=request-bookkeeper-review ok=true"))
+  assert_true(
+    accept.contains("remains pending until exact Bookkeeper receipt replay"),
+  )
 }
 
 ///|

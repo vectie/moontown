@@ -322,6 +322,9 @@ fn marketplace_operation(
   } else if path == @town_contract.miniapp_marketplace_public_index_path() &&
     is_get {
     Some("public-index")
+  } else if path == @town_contract.miniapp_marketplace_review_queue_path() &&
+    is_get {
+    Some("review-queue")
   } else if path == @town_contract.miniapp_marketplace_agent_listing_path() &&
     is_post {
     Some("upsert-agent")
@@ -424,7 +427,10 @@ async fn handle_marketplace_request(
     query,
     now_ms=@env.now(),
   ) catch {
-    _ => {
+    error => {
+      println(
+        "marketplace request denied: operation=\{operation} reason=\{error}",
+      )
       send_json(conn, 403, {
         "ok": false,
         "error": "marketplace_request_denied",
@@ -444,12 +450,11 @@ async fn handle_marketplace_request(
       now_ms=@env.now(),
     ) catch {
       _ => {
-        send_json(conn, 409, {
-          "ok": false,
-          "error": "marketplace_handoff_not_ready",
-          "operation": operation,
-          "message": "The decision is saved, but the publisher must activate a delegation-enabled supervisor before retrying the handoff.",
-        })
+        send_json(
+          conn,
+          202,
+          marketplace_pending_handoff_result(operation, initial_result),
+        )
         return true
       }
     }

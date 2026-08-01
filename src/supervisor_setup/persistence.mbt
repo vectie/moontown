@@ -40,10 +40,11 @@ fn migrate_supervisor_store_json(value : Json) -> Json {
         if handoff_fields.get("worker_bounds_source") is None {
           handoff_fields["worker_bounds_source"] = "legacy_unbounded".to_json()
         }
-        for optional_field in [
-          "worker_task", "worker_bounds", "transport_request_digest",
-          "transport_endpoint", "transport_request", "runtime_command",
-        ] {
+        for
+          optional_field in [
+            "worker_task", "worker_bounds", "transport_request_digest", "transport_endpoint",
+            "transport_request", "runtime_command",
+          ] {
           if handoff_fields.get(optional_field) is Some(Null) {
             handoff_fields.remove(optional_field)
           }

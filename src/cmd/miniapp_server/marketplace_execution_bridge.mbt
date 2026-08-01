@@ -32,6 +32,7 @@ fn bridge_int(fields : Map[String, Json], key : String) -> Int {
 fn bridge_int64(fields : Map[String, Json], key : String) -> Int64 {
   match fields.get(key) {
     Some(Number(value, ..)) => value.to_int64()
+    Some(String(value)) => @string.parse_int64(value) catch { _ => 0L }
     _ => 0L
   }
 }
@@ -60,6 +61,30 @@ fn bridge_action_request(result : Json) -> Map[String, Json] raise {
   let root = bridge_object(result)
   let payload = bridge_object(root.get("payload").unwrap_or(Json::null()))
   bridge_object(payload.get("action_request").unwrap_or(Json::null()))
+}
+
+///| Preserve a durable marketplace decision when the optional MoonClaw handoff
+///| cannot start yet. Supervisor activation is a recoverable next step, not a
+///| failed decision, so clients receive the accepted request and can offer the
+///| existing retry action without displaying a false save error.
+fn marketplace_pending_handoff_result(
+  operation : String,
+  marketplace_result : Json,
+) -> Json raise {
+  let root = bridge_object(marketplace_result)
+  let payload = bridge_object(root.get("payload").unwrap_or(Json::null()))
+  {
+    "ok": true,
+    "operation": operation,
+    "payload": {
+      "action_request": payload
+      .get("action_request")
+      .unwrap_or(Json::null()),
+      "execution_handoff": Json::null(),
+      "handoff_status": "supervisor_activation_required",
+      "message": "The decision is saved. Activate a delegation-enabled supervisor, then retry the MoonClaw handoff.",
+    },
+  }
 }
 
 ///|

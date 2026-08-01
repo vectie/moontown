@@ -38,6 +38,13 @@ test "miniapp endpoint catalog covers identity building search and runs" {
   assert_true(miniapp_endpoint_by_id("building-create").unwrap().writes)
   assert_true(miniapp_endpoint_by_id("building-publish").unwrap().writes)
   assert_eq(
+    miniapp_endpoint_by_id("marketplace-review-queue").unwrap().path,
+    "/miniapp/marketplace/review-queue",
+  )
+  assert_false(
+    miniapp_endpoint_by_id("marketplace-review-queue").unwrap().writes,
+  )
+  assert_eq(
     miniapp_endpoint_by_id("building-place").unwrap().path,
     "/buildings/:id/place",
   )
