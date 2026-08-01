@@ -815,7 +815,11 @@ async fn handle_request(
       }
     }
     ignore(
-      sync_marketplace_action_lineage(supervisor, now_ms=@env.now()) catch {
+      @marketplace_runtime_bridge.sync_action_lineage(
+        @storage.moontown_product_state_dir() + "/marketplace/state.json",
+        supervisor,
+        now_ms=@env.now(),
+      ) catch {
         _ => Json::null()
       },
     )
@@ -858,7 +862,8 @@ async fn handle_request(
     if path == @town_contract.miniapp_runtime_outbox_reconcile_path() &&
       kind == "execution" {
       ignore(
-        sync_marketplace_execution_receipt(
+        @marketplace_runtime_bridge.sync_execution_receipt(
+          @storage.moontown_product_state_dir() + "/marketplace/state.json",
           request_body,
           result,
           now_ms=@env.now(),

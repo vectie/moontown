@@ -10,6 +10,7 @@ import {
   "moonbitlang/core/string",
   "vectie/moontown/storage",
   "vectie/moontown/supervisor_setup",
+  "vectie/moontown/marketplace_runtime_bridge",
   "vectie/moontown/town_application",
   "vectie/moontown/town_contract",
   "vectie/moontown/town_projection",

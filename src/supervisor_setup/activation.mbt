@@ -235,16 +235,20 @@ pub async fn SupervisorSetupApplication::claim_activation_handoff(
   if current.status != "pending_transport" && current.status != "runtime_failed" {
     fail("activation handoff is not pending transport")
   }
-  let command : Json = {
+  let command_fields : Map[String, Json] = {
     "contract_id": "moonclaw.supervisor-command.v1",
     "command_id": current.command_id,
     "request_digest": current.request_digest,
     "issued_at": current.created_at_ms.to_string(),
-    "expected_cursor": wire_int_or_null(current.expected_cursor),
     "authority": authority,
     "evaluated_at": evaluated_at,
     "profile": supervisor_activation_payload_wire_json(current.payload),
   }
+  match current.expected_cursor {
+    Some(cursor) => command_fields["expected_cursor"] = cursor.to_json()
+    None => ()
+  }
+  let command = Json::object(command_fields)
   guard authority is Object(authority_fields) else {
     fail("MoonClaw authority must be an object")
   }

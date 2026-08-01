@@ -1,0 +1,31 @@
+town-api.example.com {
+  encode zstd gzip
+
+  log {
+    output file /var/log/moonsuite/moontown-access.log
+    format filter {
+      wrap json
+      fields {
+        request>headers>X-Miniapp-Session delete
+        request>headers>Authorization delete
+      }
+    }
+  }
+
+  @writes method POST PUT PATCH DELETE
+  request_body @writes {
+    max_size 128KB
+  }
+
+  reverse_proxy 127.0.0.1:18191 {
+    header_up Host {host}
+    header_up X-Forwarded-Proto https
+  }
+
+  header {
+    Strict-Transport-Security "max-age=31536000; includeSubDomains"
+    X-Content-Type-Options nosniff
+    Referrer-Policy no-referrer
+    -Server
+  }
+}

@@ -13,6 +13,7 @@ import {
   "vectie/moontown/storage",
   "vectie/moontown/support",
   "vectie/moontown/supervisor_setup",
+  "vectie/moontown/marketplace_runtime_bridge",
   "vectie/moontown/town_application",
   "vectie/moontown/town_contract",
   "vectie/moontown/flow_adapter",

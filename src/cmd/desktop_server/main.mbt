@@ -441,6 +441,15 @@ async fn handle_request(
         return
       }
     }
+    ignore(
+      @marketplace_runtime_bridge.sync_action_lineage(
+        state_root() + "/marketplace/state.json",
+        supervisor,
+        now_ms=@env.now(),
+      ) catch {
+        _ => Json::null()
+      },
+    )
     send_json(conn, 200, result)
     return
   }
@@ -476,6 +485,19 @@ async fn handle_request(
         send_json(conn, 409, { "ok": false, "error": "\{error}" })
         return
       }
+    }
+    if path == @town_contract.miniapp_runtime_outbox_reconcile_path() &&
+      kind == "execution" {
+      ignore(
+        @marketplace_runtime_bridge.sync_execution_receipt(
+          state_root() + "/marketplace/state.json",
+          request_body,
+          result,
+          now_ms=@env.now(),
+        ) catch {
+          _ => Json::null()
+        },
+      )
     }
     send_json(conn, 200, result)
     return

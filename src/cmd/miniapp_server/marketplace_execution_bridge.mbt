@@ -64,9 +64,13 @@ fn bridge_action_request(result : Json) -> Map[String, Json] raise {
 }
 
 ///| Preserve a durable marketplace decision when the optional MoonClaw handoff
+
 ///| cannot start yet. Supervisor activation is a recoverable next step, not a
+
 ///| failed decision, so clients receive the accepted request and can offer the
-///| existing retry action without displaying a false save error.
+
+///|
+/// existing retry action without displaying a false save error.
 fn marketplace_pending_handoff_result(
   operation : String,
   marketplace_result : Json,
@@ -77,9 +81,7 @@ fn marketplace_pending_handoff_result(
     "ok": true,
     "operation": operation,
     "payload": {
-      "action_request": payload
-      .get("action_request")
-      .unwrap_or(Json::null()),
+      "action_request": payload.get("action_request").unwrap_or(Json::null()),
       "execution_handoff": Json::null(),
       "handoff_status": "supervisor_activation_required",
       "message": "The decision is saved. Activate a delegation-enabled supervisor, then retry the MoonClaw handoff.",
@@ -284,80 +286,4 @@ async fn complete_marketplace_action_operation(
       "execution_handoff": supervisor_result,
     },
   }
-}
-
-///|
-async fn sync_marketplace_execution_receipt(
-  request_body : String,
-  supervisor_result : Json,
-  now_ms~ : UInt64,
-) -> Json {
-  let request = bridge_object(@json.parse(request_body))
-  let result = bridge_object(supervisor_result)
-  let receipt = match request.get("receipt") {
-    Some(Object(fields)) => fields
-    _ => Map([])
-  }
-  let worker = match receipt.get("worker") {
-    Some(Object(fields)) => fields
-    _ => Map([])
-  }
-  let worker_status = bridge_string(worker, "execution_status")
-  marketplace_application().reconcile_runtime_handoff(
-    {
-      handoff_id: bridge_string(result, "handoffId"),
-      runtime_status: if worker_status.is_empty() {
-        bridge_string(result, "status")
-      } else {
-        worker_status
-      },
-      worker_run_id: bridge_string(worker, "worker_run_id"),
-      result_summary: bridge_string(worker, "summary"),
-      result_evidence_refs: bridge_strings(worker, "artifact_refs"),
-    },
-    now_ms~,
-  )
-}
-
-///|
-async fn sync_marketplace_action_lineage(
-  supervisor : @supervisor_setup.SupervisorSetupApplication,
-  now_ms~ : UInt64,
-) -> Json {
-  let mut synced = 0
-  for lineage in supervisor.execution_lineage_projection() {
-    guard lineage is Object(fields) else { continue }
-    let status = {
-      let runtime = bridge_string(fields, "runtimeExecutionStatus")
-      if runtime.is_empty() {
-        bridge_string(fields, "status")
-      } else {
-        runtime
-      }
-    }
-    let summary = match fields.get("summary") {
-      Some(String(value)) => value
-      _ =>
-        match fields.get("error") {
-          Some(String(value)) => value
-          _ => ""
-        }
-    }
-    let reconciled = marketplace_application().reconcile_runtime_handoff(
-      {
-        handoff_id: bridge_string(fields, "handoffId"),
-        runtime_status: status,
-        worker_run_id: bridge_string(fields, "runId"),
-        result_summary: summary,
-        result_evidence_refs: bridge_strings(fields, "artifactRefs"),
-      },
-      now_ms~,
-    ) catch {
-      _ => Json::null()
-    }
-    if reconciled != Json::null() {
-      synced += 1
-    }
-  }
-  { "ok": true, "synced": synced }
 }

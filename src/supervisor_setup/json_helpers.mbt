@@ -52,9 +52,11 @@ fn json_int64_alias(
 ) -> Int64 {
   match fields.get(camel) {
     Some(Number(value, ..)) => value.to_int64()
+    Some(String(value)) => @string.parse_int64(value) catch { _ => -1L }
     _ =>
       match fields.get(snake) {
         Some(Number(value, ..)) => value.to_int64()
+        Some(String(value)) => @string.parse_int64(value) catch { _ => -1L }
         _ => -1L
       }
   }

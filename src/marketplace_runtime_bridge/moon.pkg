@@ -1,0 +1,7 @@
+import {
+  "moonbitlang/core/json",
+  "vectie/moontown/supervisor_setup",
+  "vectie/moontown/town_marketplace",
+}
+
+supported_targets = "native"
