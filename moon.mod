@@ -22,3 +22,15 @@ description = ""
 preferred_target = "native"
 
 source = "src"
+
+// Runtime art and generated Rabbita output ship with the application release,
+// not the reusable MoonBit source package published to Mooncakes.
+
+options(
+  exclude: [
+    "src/ui/assets",
+    "src/ui/rabbita-town/_build",
+    "src/ui/rabbita-town/dist",
+    "src/ui/rabbita-town/node_modules",
+  ],
+)

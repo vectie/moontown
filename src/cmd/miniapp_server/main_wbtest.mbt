@@ -172,21 +172,18 @@ test "marketplace bridge derives the existing bounded supervisor delegate payloa
 
 ///|
 test "marketplace pending handoff preserves the accepted decision for retry" {
-  let result = marketplace_pending_handoff_result(
-    "decide-action-request",
-    {
-      "ok": true,
-      "payload": {
-        "action_request": {
-          "request_id": "action:agent.robot-guide:reader-a:7",
-          "state": "accepted_pending_handoff",
-          "version": 2,
-          "can_decide": false,
-          "can_retry_handoff": true,
-        },
+  let result = marketplace_pending_handoff_result("decide-action-request", {
+    "ok": true,
+    "payload": {
+      "action_request": {
+        "request_id": "action:agent.robot-guide:reader-a:7",
+        "state": "accepted_pending_handoff",
+        "version": 2,
+        "can_decide": false,
+        "can_retry_handoff": true,
       },
     },
-  ).stringify()
+  }).stringify()
   assert_true(result.contains("\"ok\":true"))
   assert_true(result.contains("accepted_pending_handoff"))
   assert_true(result.contains("supervisor_activation_required"))
