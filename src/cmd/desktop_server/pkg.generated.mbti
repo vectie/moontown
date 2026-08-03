@@ -19,3 +19,4 @@ type ResearchHandoffInspectionRequest derive(@json.FromJson)
 // Type aliases
 
 // Traits
+

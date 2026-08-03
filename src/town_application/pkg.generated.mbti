@@ -20,3 +20,4 @@ pub async fn RequestApplication::submit_standing_watch(Self, String) -> Json
 // Type aliases
 
 // Traits
+

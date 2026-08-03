@@ -72,23 +72,26 @@ fn render_energy_valley_agent_avatar(
 }
 
 ///| Runtime profiles may carry only Town's symbolic avatar allowlist. Those
+
 ///| symbols map to bundled sprite strips; worker children use a separate,
-///| stable worker strip and no remote asset URL is ever evaluated.
+
+///|
+/// stable worker strip and no remote asset URL is ever evaluated.
 fn energy_valley_runtime_agent_sprite_asset(
   agent : EnergyValleyRuntimeAgent,
   index : Int,
 ) -> String {
   match agent.avatarRef {
     Some("avatar://otter-steward") => "tilemap/actors/keeper_walk_strip.png"
-    Some("avatar://moon-lantern") =>
-      "tilemap/actors/researcher_walk_strip.png"
-    _ => if agent.role == "worker" {
-      "tilemap/actors/worker_walk_strip.png"
-    } else if agent.role == "keeper" {
-      "tilemap/actors/keeper_walk_strip.png"
-    } else {
-      worker_roster_asset(index)
-    }
+    Some("avatar://moon-lantern") => "tilemap/actors/researcher_walk_strip.png"
+    _ =>
+      if agent.role == "worker" {
+        "tilemap/actors/worker_walk_strip.png"
+      } else if agent.role == "keeper" {
+        "tilemap/actors/keeper_walk_strip.png"
+      } else {
+        worker_roster_asset(index)
+      }
   }
 }
 

@@ -29,3 +29,4 @@ pub async fn seed_knowledge_domain_catalog(catalog_path? : String, snapshot_path
 // Type aliases
 
 // Traits
+

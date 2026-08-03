@@ -517,3 +517,4 @@ pub(all) struct TownNotification {
 // Type aliases
 
 // Traits
+

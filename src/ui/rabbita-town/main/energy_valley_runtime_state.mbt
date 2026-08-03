@@ -277,9 +277,11 @@ fn energy_valley_runtime_agent_is_valid(
     )
   !agent.id.trim().is_empty() &&
   !agent.name.trim().is_empty() &&
-  (agent.avatarRef is None ||
+  (
+    agent.avatarRef is None ||
     agent.avatarRef == Some("avatar://otter-steward") ||
-    agent.avatarRef == Some("avatar://moon-lantern")) &&
+    agent.avatarRef == Some("avatar://moon-lantern")
+  ) &&
   energy_valley_runtime_role_is_valid(agent.role) &&
   energy_valley_runtime_agent_status_is_valid(agent.status) &&
   activity_is_valid &&
