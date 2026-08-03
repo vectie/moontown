@@ -1,0 +1,431 @@
+{
+  "schema_version": "raw.bootstrap.packet.v1",
+  "job": {
+    "job_id": "job.proposal.20260417-201907-act-as-the-wiki-gather-usersk",
+    "run_id": "run-20260417-201924-usersk",
+    "step_id": "step_3_consolidate_lane_evidence",
+    "status": "best_effort"
+  },
+  "source_summaries": [
+    {
+      "lane": "docs",
+      "status": "observed",
+      "inspection_mode": "direct_inspection",
+      "sources": [
+        {"path": "README.mbt.md:41", "note": "Current status and runtime flow"},
+        {"path": "docs/USAGE.md:18", "note": "Usable surfaces, persistence, and current limits"},
+        {"path": "docs/ARCHITECTURE.md:13", "note": "Layer responsibilities and packet lifecycle ownership"},
+        {"path": "docs/PACKAGES.md:24", "note": "Package purposes and persisted files"},
+        {"path": "docs/DEVELOPMENT.md:72", "note": "Runtime artifact paths and docs maintenance guidance"}
+      ],
+      "summary": "Visible documentation consistently describes Moontown as a control-plane-first prototype with persisted bootstrap state in `.moontown/`, a MoonBook-backed harness boundary, a MoonClaw proposal import boundary, and wiki-oriented ingest/synthesis targets for research bootstrap work."
+    },
+    {
+      "lane": "implementation",
+      "status": "observed",
+      "inspection_mode": "direct_inspection",
+      "sources": [
+        {"path": "core/types.mbt:328", "note": "`BookProvider` trait and static provider"},
+        {"path": "adapters/moonbook/client.mbt:72", "note": "Default catalog, workspace roots, and persisted catalog path"},
+        {"path": "adapters/moonclaw/client.mbt:120", "note": "`ExternalProposalPacket`, `ProposalImportReceipt`, packet metadata, and packet directory"},
+        {"path": "roles/mayor.mbt:93", "note": "Keeper packet preparation and MoonClaw profile selection"},
+        {"path": "goal_run.mbt:406", "note": "Research bootstrap ingest task and target wiki pages"},
+        {"path": "moontown.mbt:192", "note": "Default task target pages across review/planning/analysis flows"}
+      ],
+      "summary": "Visible implementation confirms packet preparation, persisted bootstrap/catalog paths, provider abstraction, and explicit candidate wiki target pages for ingest, planning, review, and analysis tasks."
+    },
+    {
+      "lane": "architecture",
+      "status": "observed",
+      "inspection_mode": "direct_inspection",
+      "sources": [
+        {"path": "docs/ARCHITECTURE.md:3", "note": "Three-layer system and ownership split"},
+        {"path": "README.mbt.md:112", "note": "Embedded role model and town/book/execution split"},
+        {"path": "goal_run.mbt:419", "note": "Bootstrap ingest target pages expected for maintained research coverage"}
+      ],
+      "summary": "The visible architecture lane aligns docs and implementation around Moontown owning town-wide orchestration/persistence, MoonBook owning durable domain memory/context hydration, and MoonClaw owning execution/runtime packaging."
+    },
+    {
+      "lane": "prior_artifacts",
+      "status": "unverified",
+      "inspection_mode": "carried_forward_evidence",
+      "sources": [
+        {"path": "step_1_inventory_gather_outputs", "note": "Reported gather-lane artifacts and prior packet files were missing from this step"},
+        {"path": "step_2_normalize_packet_schema", "note": "Schema was reported written to `raw/bootstrap/packet-schema.md`, but file is not visible in this worktree"}
+      ],
+      "summary": "Prior workflow outputs indicate missing gather artifacts and mention a schema file that is inaccessible from the current step worktree, so those artifacts cannot be directly inspected here."
+    }
+  ],
+  "evidence_bullets": [
+    {
+      "id": "docs-control-plane-prototype",
+      "status": "observed",
+      "inspection_mode": "direct_inspection",
+      "claim": "Visible docs describe the repo as a control-plane-first prototype rather than a fully live autonomous runtime.",
+      "support": [
+        "README.mbt.md:62",
+        "docs/USAGE.md:34"
+      ]
+    },
+    {
+      "id": "persisted-bootstrap-paths",
+      "status": "observed",
+      "inspection_mode": "direct_inspection",
+      "claim": "The documented and implemented persisted bootstrap/runtime artifact paths are `.moontown/moonbooks.json`, `.moontown/town.json`, and optional `.moontown/packets/` exports.",
+      "support": [
+        "docs/USAGE.md:66",
+        "docs/ARCHITECTURE.md:197",
+        "docs/DEVELOPMENT.md:72",
+        "adapters/moonbook/client.mbt:101",
+        "storage/store.mbt:36",
+        "adapters/moonclaw/client.mbt:199"
+      ]
+    },
+    {
+      "id": "provider-abstraction-visible",
+      "status": "observed",
+      "inspection_mode": "direct_inspection",
+      "claim": "The visible provider surface is a `BookProvider` trait plus concrete provider implementations such as `MoonbookCatalogProvider` and `StaticBookProvider`.",
+      "support": [
+        "core/types.mbt:328",
+        "adapters/moonbook/client.mbt:46",
+        "adapters/moonbook/client.mbt:65",
+        "core/types.mbt:333"
+      ]
+    },
+    {
+      "id": "provider-registry-surface-unresolved",
+      "status": "partially_supported",
+      "inspection_mode": "direct_inspection",
+      "claim": "A broader provider-registry surface remains unresolved in the visible checkout: code exposes a provider abstraction and the mayor runtime lists a visible tool named `town-registry`, but no explicit provider registry type or API was confirmed here.",
+      "support": [
+        "core/types.mbt:328",
+        "adapters/moonclaw/client.mbt:579"
+      ]
+    },
+    {
+      "id": "packet-shape-visible",
+      "status": "observed",
+      "inspection_mode": "direct_inspection",
+      "claim": "The implementation defines ingestable proposal packet and receipt structures through `ExternalProposalPacket` and `ProposalImportReceipt`, including packet metadata carrying `disable_waiting_for_input` and `best_effort_on_missing_input` flags.",
+      "support": [
+        "adapters/moonclaw/client.mbt:120",
+        "adapters/moonclaw/client.mbt:135",
+        "adapters/moonclaw/client.mbt:209"
+      ]
+    },
+    {
+      "id": "research-bootstrap-targets-visible",
+      "status": "observed",
+      "inspection_mode": "direct_inspection",
+      "claim": "Research bootstrap logic creates an ingest task titled `Bootstrap maintained research coverage` and targets `wiki/log.md`, `wiki/synthesis/maintenance-plan.md`, `wiki/synthesis/evidence.md`, and `raw/README.md`.",
+      "support": [
+        "goal_run.mbt:406",
+        "goal_run.mbt:419"
+      ]
+    },
+    {
+      "id": "candidate-pages-from-default-book-tasks",
+      "status": "observed",
+      "inspection_mode": "direct_inspection",
+      "claim": "Default book tasks add additional target pages across review, planning, and analysis flows, including `wiki/reviews/pending.md`, `wiki/reviews/approved.md`, `wiki/synthesis/map.md`, `wiki/index.md`, `wiki/log.md`, and `keeper/INSIGHTS.md`.",
+      "support": [
+        "moontown.mbt:196",
+        "moontown.mbt:204",
+        "moontown.mbt:215",
+        "moontown.mbt:242",
+        "moontown.mbt:256"
+      ]
+    },
+    {
+      "id": "bootstrap-trigger-conditions-visible",
+      "status": "observed",
+      "inspection_mode": "direct_inspection",
+      "claim": "Bootstrap ingest is triggered for research goals when the visible MoonBook summary indicates missing substantive tree coverage, missing entity/concept coverage, zero durable sources, or zero durable evidence.",
+      "support": [
+        "goal_run.mbt:386",
+        "goal_run.mbt:394",
+        "goal_run.mbt:437"
+      ]
+    },
+    {
+      "id": "architecture-ownership-split",
+      "status": "observed",
+      "inspection_mode": "direct_inspection",
+      "claim": "Docs and code agree on the ownership split: Moontown owns town-wide orchestration and persistence, MoonBook owns durable domain memory and context hydration, and MoonClaw owns execution/session packaging and runtime behavior.",
+      "support": [
+        "docs/ARCHITECTURE.md:15",
+        "docs/ARCHITECTURE.md:35",
+        "docs/ARCHITECTURE.md:52",
+        "README.mbt.md:127"
+      ]
+    },
+    {
+      "id": "inaccessible-prior-packets",
+      "status": "unverified",
+      "inspection_mode": "carried_forward_evidence",
+      "claim": "Previously written gather/output packet files and the schema file referenced by prior steps are inaccessible from the current worktree, so they cannot be merged by direct inspection in this step.",
+      "support": [
+        "step_1_inventory_gather_outputs",
+        "step_2_normalize_packet_schema"
+      ]
+    }
+  ],
+  "candidate_wiki_updates": {
+    "sources": [
+      {
+        "path": "wiki/sources/moontown-bootstrap-and-persistence.md",
+        "reason": "Docs and implementation both expose persisted bootstrap/catalog/packet paths and ownership boundaries around bootstrap artifacts.",
+        "support": [
+          "docs/USAGE.md:66",
+          "docs/ARCHITECTURE.md:197",
+          "docs/DEVELOPMENT.md:72",
+          "adapters/moonbook/client.mbt:101",
+          "storage/store.mbt:36",
+          "adapters/moonclaw/client.mbt:199"
+        ]
+      },
+      {
+        "path": "wiki/sources/moontown-research-bootstrap-ingest.md",
+        "reason": "`goal_run.mbt` contains explicit bootstrap ingest rules and maintained research target pages.",
+        "support": [
+          "goal_run.mbt:386",
+          "goal_run.mbt:406",
+          "goal_run.mbt:419"
+        ]
+      },
+      {
+        "path": "wiki/sources/moontown-packet-lifecycle.md",
+        "reason": "Packet/receipt structures and lifecycle ownership are visible across architecture docs, mayor code, and MoonClaw adapter types.",
+        "support": [
+          "docs/ARCHITECTURE.md:167",
+          "roles/mayor.mbt:93",
+          "adapters/moonclaw/client.mbt:120",
+          "adapters/moonclaw/client.mbt:135"
+        ]
+      }
+    ],
+    "entities": [
+      {
+        "path": "wiki/entities/moontown.md",
+        "reason": "Visible docs strongly define Moontown as the town-wide control plane and persistence owner.",
+        "support": [
+          "README.mbt.md:7",
+          "docs/ARCHITECTURE.md:13"
+        ]
+      },
+      {
+        "path": "wiki/entities/moonbook.md",
+        "reason": "Architecture docs assign durable domain memory, context hydration, and local planning to MoonBook.",
+        "support": [
+          "docs/ARCHITECTURE.md:33",
+          "README.mbt.md:136"
+        ]
+      },
+      {
+        "path": "wiki/entities/moonclaw.md",
+        "reason": "Architecture docs and adapter code define MoonClaw as the execution/runtime substrate and proposal import boundary.",
+        "support": [
+          "docs/ARCHITECTURE.md:48",
+          "README.mbt.md:74",
+          "adapters/moonclaw/client.mbt:312"
+        ]
+      },
+      {
+        "path": "wiki/entities/mayor.md",
+        "reason": "Mayor is the visible strategic role adapter that routes, patrols, and prepares keeper packets.",
+        "support": [
+          "docs/ARCHITECTURE.md:70",
+          "roles/mayor.mbt:24",
+          "roles/mayor.mbt:93"
+        ]
+      },
+      {
+        "path": "wiki/entities/keeper.md",
+        "reason": "Keeper is the domain-scoped runtime target for prepared packets, though implementation ownership is still on the MoonBook side.",
+        "support": [
+          "docs/ARCHITECTURE.md:96",
+          "roles/mayor.mbt:76"
+        ]
+      }
+    ],
+    "concepts": [
+      {
+        "path": "wiki/concepts/book-provider.md",
+        "reason": "The visible provider concept is concrete and inspectable in code.",
+        "support": [
+          "core/types.mbt:328",
+          "adapters/moonbook/client.mbt:65"
+        ]
+      },
+      {
+        "path": "wiki/concepts/provider-registry-surface.md",
+        "reason": "The repo shows a provider abstraction and a `town-registry` tool name, but no explicit provider registry API was confirmed; this should be captured as scoped uncertainty.",
+        "support": [
+          "core/types.mbt:328",
+          "adapters/moonclaw/client.mbt:579"
+        ]
+      },
+      {
+        "path": "wiki/concepts/external-proposal-packet.md",
+        "reason": "The packet shape is directly inspectable and central to ingest/bootstrap handoff.",
+        "support": [
+          "adapters/moonclaw/client.mbt:120",
+          "adapters/moonclaw/client.mbt:209"
+        ]
+      },
+      {
+        "path": "wiki/concepts/proposal-import-receipt.md",
+        "reason": "Receipt structure is directly inspectable and is part of the lifecycle surfaces docs reference.",
+        "support": [
+          "adapters/moonclaw/client.mbt:135",
+          "docs/ARCHITECTURE.md:179"
+        ]
+      },
+      {
+        "path": "wiki/concepts/research-bootstrap-ingest.md",
+        "reason": "Bootstrap gating rules and target pages are explicit in `goal_run.mbt`.",
+        "support": [
+          "goal_run.mbt:386",
+          "goal_run.mbt:406",
+          "goal_run.mbt:419"
+        ]
+      }
+    ],
+    "synthesis": [
+      {
+        "path": "wiki/log.md",
+        "reason": "Explicit bootstrap ingest target and general task target page.",
+        "support": [
+          "goal_run.mbt:419",
+          "moontown.mbt:242",
+          "moontown.mbt:256"
+        ]
+      },
+      {
+        "path": "wiki/synthesis/maintenance-plan.md",
+        "reason": "Explicit bootstrap ingest and planning target page.",
+        "support": [
+          "goal_run.mbt:419",
+          "moontown.mbt:215"
+        ]
+      },
+      {
+        "path": "wiki/synthesis/evidence.md",
+        "reason": "Explicit bootstrap ingest target page for maintained research coverage.",
+        "support": [
+          "goal_run.mbt:419"
+        ]
+      },
+      {
+        "path": "wiki/synthesis/map.md",
+        "reason": "Planning flow target in default coding book tasks.",
+        "support": [
+          "moontown.mbt:215"
+        ]
+      },
+      {
+        "path": "wiki/index.md",
+        "reason": "Default analysis tasks route maintained results back to book-local entry surfaces.",
+        "support": [
+          "moontown.mbt:242",
+          "moontown.mbt:256"
+        ]
+      },
+      {
+        "path": "wiki/reviews/pending.md",
+        "reason": "Default review flow target page.",
+        "support": [
+          "moontown.mbt:204",
+          "moontown.mbt:231"
+        ]
+      },
+      {
+        "path": "wiki/reviews/approved.md",
+        "reason": "Default review flow target page.",
+        "support": [
+          "moontown.mbt:204",
+          "moontown.mbt:231"
+        ]
+      },
+      {
+        "path": "keeper/INSIGHTS.md",
+        "reason": "Finance analysis flow targets keeper-local insight storage.",
+        "support": [
+          "moontown.mbt:242"
+        ]
+      },
+      {
+        "path": "raw/README.md",
+        "reason": "Explicit bootstrap ingest target for raw research coverage.",
+        "support": [
+          "goal_run.mbt:421"
+        ]
+      }
+    ]
+  },
+  "cross_project_linkage_notes": [
+    {
+      "status": "observed",
+      "inspection_mode": "direct_inspection",
+      "note": "Docs and architecture surfaces explicitly model `moontown -> moonbook -> moonclaw` as the system stack and assign durable memory to MoonBook rather than Moontown.",
+      "support": [
+        "docs/ARCHITECTURE.md:3",
+        "docs/ARCHITECTURE.md:35",
+        "README.mbt.md:136"
+      ]
+    },
+    {
+      "status": "observed",
+      "inspection_mode": "direct_inspection",
+      "note": "Mayor prepares keeper-facing packets using MoonBook worker-context hydration and MoonClaw proposal packet shapes, linking all three layers in one visible handoff path.",
+      "support": [
+        "roles/mayor.mbt:99",
+        "roles/mayor.mbt:102",
+        "adapters/moonclaw/client.mbt:209"
+      ]
+    },
+    {
+      "status": "partially_supported",
+      "inspection_mode": "direct_inspection",
+      "note": "The visible repo references runtime surfaces like `town-registry`, but this step could not confirm whether a dedicated provider registry exists in another checkout or external dependency.",
+      "support": [
+        "adapters/moonclaw/client.mbt:579"
+      ]
+    }
+  ],
+  "uncertainty": [
+    {
+      "scope": "provider_registry_surface",
+      "status": "open",
+      "details": "No explicit provider registry type, module, or wiki page was found in the visible checkout. Only the concrete `BookProvider` abstraction and a runtime-visible tool string `town-registry` were directly observed.",
+      "evidence": [
+        "core/types.mbt:328",
+        "adapters/moonclaw/client.mbt:579"
+      ]
+    },
+    {
+      "scope": "previously_written_packet_files",
+      "status": "open",
+      "details": "Step metadata and prior outputs indicate earlier gather/output packet artifacts may exist outside the current worktree. None were accessible here, so no direct merge with prior raw/bootstrap packet content was possible.",
+      "evidence": [
+        "step_1_inventory_gather_outputs",
+        "step_2_normalize_packet_schema"
+      ]
+    },
+    {
+      "scope": "step_2_schema_visibility",
+      "status": "open",
+      "details": "The prior step reported a schema file at `raw/bootstrap/packet-schema.md`, but the file is not present in this step worktree, so schema compatibility is carried forward from step output text rather than direct file inspection.",
+      "evidence": [
+        "step_2_normalize_packet_schema"
+      ]
+    }
+  ],
+  "blockers": [
+    {
+      "status": "best_effort_missing_input",
+      "details": "Parent workflow gather-lane artifacts and any previously materialized packet files were not exposed to this step, limiting consolidation to evidence directly inspectable in the current worktree plus carried-forward prior-step messages."
+    }
+  ]
+}
