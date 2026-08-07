@@ -10,7 +10,7 @@ fn render_default_dashboard_test_html(model : Model) -> String {
       render_dashboard_page(
         dashboard_test_dispatch(),
         model,
-        render_scene_context(model),
+        build_operations_context(model),
       ),
     ),
   )

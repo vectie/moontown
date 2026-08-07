@@ -458,7 +458,8 @@ Acceptance:
 
 - the viewport has no direct civic business logic beyond projection mapping
 - module interiors render protocol state from `civic-status.json`
-- frontend smoke checks validate view, editor, and output modes
+- frontend smoke checks validate the canonical Energy Valley, historical URL
+  aliasing, and the separate OperationsConsole
 
 ## Non-Goals
 

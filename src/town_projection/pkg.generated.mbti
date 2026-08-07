@@ -17,4 +17,3 @@ pub async fn TownProjection::miniapp_snapshot(Self) -> Json
 // Type aliases
 
 // Traits
-

@@ -1,6 +1,11 @@
 ///|
-fn build_dashboard_sections(town : @core.TownState) -> Array[DashboardSection] {
+fn build_dashboard_sections(
+  town : @core.TownState,
+  report : @health.HealthReport,
+) -> Array[DashboardSection] {
   [
+    dashboard_overview_section(town, report),
+    dashboard_book_activity_section(town),
     dashboard_books_section(town),
     dashboard_workers_section(town),
     dashboard_tasks_section(town),

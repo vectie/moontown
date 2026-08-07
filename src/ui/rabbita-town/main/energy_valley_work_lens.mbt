@@ -144,9 +144,7 @@ fn energy_valley_runtime_active_agents(
   match state.projection {
     Some(projection) =>
       projection.agents.filter(agent => {
-        agent.status != "idle" &&
-        agent.status != "offline" &&
-        agent.buildingModuleKey is Some(_)
+        energy_valley_runtime_active_task_for_agent(state, agent) is Some(_)
       })
     None => []
   }

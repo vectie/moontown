@@ -40,16 +40,6 @@ extern "js" fn replace_browser_query_param(
   #| }
 
 ///|
-extern "js" fn current_viewport_mode_param() -> String =
-  #| () => {
-  #|   try {
-  #|     return new URL(globalThis.location?.href || "http://local/").searchParams.get("mode") || "";
-  #|   } catch (_) {
-  #|     return "";
-  #|   }
-  #| }
-
-///|
 extern "js" fn current_viewport_module_param() -> String =
   #| () => {
   #|   try {

@@ -9,7 +9,9 @@ fn daemon_process_args(command : String, tail : Array[String]) -> Array[String] 
   let args : Array[String] = []
   if daemon_command_uses_moon_runner(command) {
     args.push("run")
-    args.push("cmd/main")
+    // The MoonTown module declares `source: "src"`; `moon run` receives a
+    // filesystem package path, not the logical package name.
+    args.push("src/cmd/main")
     args.push("--")
   }
   for item in tail {

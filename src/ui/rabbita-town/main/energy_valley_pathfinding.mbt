@@ -1,10 +1,53 @@
 ///|
-fn golden_valley_walkable(model : Model, seed : Int, x : Int, y : Int) -> Bool {
-  if x < 0 || x >= golden_valley_cols() || y < 0 || y >= golden_valley_rows() {
-    return false
+fn golden_valley_semantic_road_node_at(
+  world : @energy_valley_contract.CompiledTownWorld,
+  x : Int,
+  y : Int,
+) -> @energy_valley_contract.RoadNode? {
+  for node in world.road_network.nodes {
+    // Pedestrian spur nodes may share a threshold coordinate with a road
+    // cell. Only source road nodes represent the public carriageway raster.
+    if node.id.scope() == "road-node" &&
+      node.grid.column == x &&
+      node.grid.row == y {
+      return Some(node)
+    }
   }
-  let terrain = golden_valley_terrain(model, seed, x, y)
-  terrain == "road" || terrain == "bridge"
+  None
+}
+
+///|
+/// Public walkability is no longer reconstructed from a rendered terrain
+/// string. The exact node set accepted into `CompiledTownWorld` is the only
+/// road occupancy truth used by placement, player movement and Agents.
+fn golden_valley_walkable(model : Model, seed : Int, x : Int, y : Int) -> Bool {
+  golden_valley_semantic_road_node_at(
+    ecosystem_contract_world_for_model(model, seed),
+    x,
+    y,
+  )
+  is Some(_)
+}
+
+///|
+fn golden_valley_semantic_node_for_building(
+  model : Model,
+  seed : Int,
+  building : GoldenValleyBuilding,
+) -> @energy_valley_contract.RoadNode? {
+  let world = ecosystem_contract_world_for_model(model, seed)
+  match town_world_place_for_visual_building(world, building) {
+    None => None
+    Some(place) =>
+      match place.primary_entrance() {
+        Some(portal) =>
+          match portal.road_node_id {
+            Some(node_id) => world.road_network.find_node(node_id)
+            None => None
+          }
+        None => None
+      }
+  }
 }
 
 ///|
@@ -13,28 +56,9 @@ fn golden_valley_nearest_road(
   seed : Int,
   building : GoldenValleyBuilding,
 ) -> (Int, Int)? {
-  match (building.entrance_x, building.entrance_y) {
-    (Some(x), Some(y)) =>
-      if golden_valley_walkable(model, seed, x, y) {
-        return Some((x, y))
-      }
-    _ => ()
-  }
-  let candidates : Array[(Int, Int)] = []
-  for x in (building.x - 1)..<=(building.x + building.width) {
-    candidates.push((x, building.y - 1))
-    candidates.push((x, building.y + building.depth))
-  }
-  for y in (building.y - 1)..<=(building.y + building.depth) {
-    candidates.push((building.x - 1, y))
-    candidates.push((building.x + building.width, y))
-  }
-  for candidate in candidates {
-    if golden_valley_walkable(model, seed, candidate.0, candidate.1) {
-      return Some(candidate)
-    }
-  }
-  None
+  golden_valley_semantic_node_for_building(model, seed, building).map(node => {
+    (node.grid.column, node.grid.row)
+  })
 }
 
 ///|
@@ -44,72 +68,28 @@ fn golden_valley_road_path(
   start : (Int, Int),
   destination : (Int, Int),
 ) -> Array[(Double, Double)]? {
-  if start == destination {
-    return Some([(start.0.to_double() + 0.5, start.1.to_double() + 0.5)])
+  let world = ecosystem_contract_world_for_model(model, seed)
+  match
+    (
+      golden_valley_semantic_road_node_at(world, start.0, start.1),
+      golden_valley_semantic_road_node_at(world, destination.0, destination.1),
+    ) {
+    (Some(origin), Some(target)) =>
+      world.road_network
+      .shortest_path(
+        origin.id,
+        target.id,
+        mode=@energy_valley_contract.Pedestrian,
+      )
+      .map(nodes => {
+        let result : Array[(Double, Double)] = []
+        for node in nodes {
+          result.push((node.position.x, node.position.y))
+        }
+        result
+      })
+    _ => None
   }
-  let columns = golden_valley_cols()
-  let queue : Array[Int] = [start.1 * columns + start.0]
-  let seen : Map[String, Bool] = {}
-  seen[golden_valley_tile_key(start.0, start.1)] = true
-  let previous : Map[String, Int] = {}
-  // The reference graph comes from down-sampled map imagery, so curves often
-  // advance diagonally between neighboring semantic cells.
-  let directions = [
-    (0, -1),
-    (1, -1),
-    (1, 0),
-    (1, 1),
-    (0, 1),
-    (-1, 1),
-    (-1, 0),
-    (-1, -1),
-  ]
-  let mut head = 0
-  let mut reached = -1
-  while head < queue.length() {
-    let current = queue[head]
-    head = head + 1
-    let current_x = current % columns
-    let current_y = current / columns
-    if current_x == destination.0 && current_y == destination.1 {
-      reached = current
-      break
-    }
-    for direction in directions {
-      let next_x = current_x + direction.0
-      let next_y = current_y + direction.1
-      let key = golden_valley_tile_key(next_x, next_y)
-      if !seen.contains(key) &&
-        golden_valley_walkable(model, seed, next_x, next_y) {
-        seen[key] = true
-        previous[key] = current
-        queue.push(next_y * columns + next_x)
-      }
-    }
-  }
-  if reached < 0 {
-    return None
-  }
-  let reversed : Array[Int] = []
-  let mut cursor = reached
-  while cursor >= 0 {
-    reversed.push(cursor)
-    let cursor_x = cursor % columns
-    let cursor_y = cursor / columns
-    cursor = previous
-      .get(golden_valley_tile_key(cursor_x, cursor_y))
-      .unwrap_or(-1)
-  }
-  let path : Array[(Double, Double)] = []
-  let mut index = reversed.length() - 1
-  while index >= 0 {
-    let tile = reversed[index]
-    path.push(
-      ((tile % columns).to_double() + 0.5, (tile / columns).to_double() + 0.5),
-    )
-    index = index - 1
-  }
-  Some(path)
 }
 
 ///|

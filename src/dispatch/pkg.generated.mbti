@@ -47,4 +47,3 @@ pub fn RouteRequest::new(task~ : @core.TownTask) -> Self
 // Type aliases
 
 // Traits
-

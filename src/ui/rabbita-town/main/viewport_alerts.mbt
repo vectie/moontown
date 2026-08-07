@@ -1,11 +1,11 @@
 ///|
-fn all_alerts(scene : @ui.SceneRenderModel, model : Model) -> Array[String] {
+fn all_alerts(runtime_alerts : Array[String], model : Model) -> Array[String] {
   let alerts : Array[String] = []
   if mayor_recovery_active(model) {
     alerts.push(town_recovery_alert_text)
     return alerts
   }
-  for alert in scene.alerts {
+  for alert in runtime_alerts {
     alerts.push(alert)
   }
   if model.pressure > 72 {

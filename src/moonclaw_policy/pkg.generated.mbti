@@ -37,4 +37,3 @@ pub fn step_metadata_fields(preferred_skills~ : Array[String], enable_tools~ : B
 // Type aliases
 
 // Traits
-

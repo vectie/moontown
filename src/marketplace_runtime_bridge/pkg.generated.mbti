@@ -17,4 +17,3 @@ pub async fn sync_execution_receipt(String, String, Json, now_ms~ : UInt64) -> J
 // Type aliases
 
 // Traits
-

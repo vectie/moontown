@@ -40,3 +40,17 @@ fn inspect_book_house_activity(
   }
   { worker_count, task_count, execution_count, active_stage }
 }
+
+///|
+fn dashboard_book_activity_section(town : @core.TownState) -> DashboardSection {
+  let lines : Array[String] = []
+  for book in town.books {
+    if !is_mayor_book(book) {
+      let activity = inspect_book_house_activity(town, book.id)
+      lines.push(
+        "\{book.name}: workers: \{activity.worker_count} / tasks: \{activity.task_count} / executions: \{activity.execution_count} / active stage: \{activity.active_stage}",
+      )
+    }
+  }
+  { title: "Book Activity", lines }
+}

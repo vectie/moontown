@@ -11,15 +11,15 @@ test "modeled state seeds books workers tasks and dispatch events" {
 }
 
 ///|
-test "dashboard renders town square and dispatch log" {
+test "dashboard renders non-spatial operations summary and dispatch log" {
   let dashboard = @moontown.modeled_dashboard()
   assert_true(dashboard.contains("Dashboard / MoonTown / Moonrise"))
-  assert_true(dashboard.contains("## Town Map"))
-  assert_true(dashboard.contains("scene: 1280x720"))
-  assert_true(dashboard.contains("City Hall"))
-  assert_true(dashboard.contains("frame: 610,100 280x180"))
-  assert_true(dashboard.contains("tilemap/buildings/city_hall_base.png"))
-  assert_true(dashboard.contains("Anomaly Corner"))
+  assert_true(dashboard.contains("## Overview"))
+  assert_true(dashboard.contains("## Book Activity"))
+  assert_false(dashboard.contains("## Town Map"))
+  assert_false(dashboard.contains("scene: 1280x720"))
+  assert_false(dashboard.contains("frame:"))
+  assert_false(dashboard.contains("tilemap/"))
   assert_true(dashboard.contains("## Books"))
   assert_true(dashboard.contains("## Workers"))
   assert_true(dashboard.contains("## Pipeline"))

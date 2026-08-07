@@ -11,4 +11,3 @@ pub fn transient_external_dependency_error(String) -> Bool
 // Type aliases
 
 // Traits
-

@@ -124,19 +124,8 @@ fn golden_valley_runtime_agent_work_status(
   state : EnergyValleyRuntimeState,
   agent : EnergyValleyRuntimeAgent,
 ) -> String {
-  match agent.workItemId {
-    Some(work_item_id) =>
-      match state.projection {
-        Some(projection) => {
-          for task in projection.tasks {
-            if task.id == work_item_id {
-              return task.status
-            }
-          }
-          agent.status
-        }
-        None => agent.status
-      }
+  match energy_valley_runtime_task_for_agent(state, agent) {
+    Some(task) => task.status
     None => agent.status
   }
 }

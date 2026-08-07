@@ -265,18 +265,18 @@ Package tests currently cover:
 
 - core state and package surfaces
 - standing goal due windows
-- scene layout/render contracts
+- non-spatial dashboard summaries and compiled-world contracts
 - mayor role behavior
 - scheduler standing-goal planning
 - proposal/import/run lifecycle tracking
 - root demo path
 
-If a change affects dashboard output or scene contracts, update the relevant
+If a change affects dashboard output or compiled-world contracts, update the relevant
 tests in:
 
 - `moontown_test.mbt`
-- `src/ui/scene_layout_test.mbt`
-- `src/ui/scene_render_test.mbt`
+- `src/ui/dashboard_test.mbt`
+- `src/ui/dashboard_wbtest.mbt`
 - `roles/mayor_test.mbt`
 - `runtime_status_wbtest.mbt`
 - `scheduler/daemon_wbtest.mbt`

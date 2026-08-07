@@ -111,4 +111,3 @@ pub impl Show for MayorSupervisionPacket
 // Type aliases
 
 // Traits
-

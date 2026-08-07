@@ -1,11 +1,12 @@
-# MoonTown Scene Assets
+# MoonTown Energy Valley Assets
 
-This folder is the visual home for the town scene rendered by `moontown/ui`.
+This folder is the visual home for the compiled Energy Valley world rendered by
+the Rabbita frontend.
 
-The structure follows the semantic-scene lesson from `sou`:
+The structure supports the semantic compiled-world renderer:
 
-- one world background
-- named places with stable coordinates
+- terrain and public-realm tiles
+- named places with compiler-owned footprints and portals
 - role-specific actors
 - props and effects that make status readable at a glance
 
@@ -24,9 +25,8 @@ The structure follows the semantic-scene lesson from `sou`:
 - `tilemap/`
   - generated 2.5D isometric tilesets, sliced PNG sprites, map JSON, prompts, and tile manifests
 
-## Current Baseline Assets
+## Archived concept assets
 
-- `backgrounds/town-square.svg`
 - `buildings/city-hall.svg`
 - `buildings/book-house-coding.svg`
 - `buildings/book-house-finance.svg`
@@ -36,6 +36,10 @@ The structure follows the semantic-scene lesson from `sou`:
 - `props/worker-yard.svg`
 - `props/gate-sign.svg`
 - `effects/anomaly-signal.svg`
+
+These SVGs are retained only as early visual references. The production
+Rabbita map loads the typed tilemap/semantic assets below; it does not ship a
+baked scene background.
 - `tilemap/tiles/*.png`
 - `tilemap/objects/*.png`
 - `tilemap/actors/*.png`
@@ -52,11 +56,12 @@ The structure follows the semantic-scene lesson from `sou`:
 - Follow the tiled-map procedure in
   [docs/TILED_MAP_PIPELINE.md](/Users/kq/Workspace/moontown/docs/TILED_MAP_PIPELINE.md)
   when generating and assembling isometric tiles.
-- Prefer complete building sprites for the current DOM renderer. Add clean
+- Prefer complete building sprites for the Canvas renderer. Add clean
   base/roof splits only when the renderer supports actor depth sorting behind
   canopy pixels.
 - Do not bake labels or UI text into art assets. Labels belong to Rabbita UI.
 
-## Layout Source
+## World Source
 
-The matching scene spec lives in `ui/scene_layout.mbt`.
+Placement and navigation truth comes from `CompiledTownWorld` and
+`TownSnapshot`, not from an asset-local layout specification.

@@ -77,4 +77,3 @@ pub(all) struct TownRuntimeStatus {
 // Type aliases
 
 // Traits
-

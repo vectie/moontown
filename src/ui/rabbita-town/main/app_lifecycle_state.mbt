@@ -9,15 +9,6 @@ fn toggle_pause_model(model : Model) -> Model {
 }
 
 ///|
-fn set_viewport_mode_model(
-  model : Model,
-  viewport_mode : ViewportMode,
-) -> Model {
-  replace_browser_query_param("mode", viewport_mode_slug(viewport_mode))
-  { ..model, viewport_mode, selection: Selection::Overview }
-}
-
-///|
 fn set_dashboard_section_model(
   model : Model,
   dashboard_section : DashboardSection,

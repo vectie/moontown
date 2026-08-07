@@ -27,8 +27,85 @@ test "detached import receipt parser skips moonclaw json startup logs" {
 }
 
 ///|
+test "detached import command publishes stdout only after the child exits" {
+  let command = build_detached_shell_command_with_output(
+    "/opt/moonclaw",
+    ["proposal", "import", "/tmp/packet.json", "--json"],
+    "/tmp/packet.import.json",
+    "/tmp/packet.import.json.err",
+  )
+  assert_true(command.contains("receipt_tmp="))
+  assert_true(command.contains("/tmp/packet.import.json.partial."))
+  assert_true(command.contains("stderr_tmp="))
+  assert_true(command.contains("/tmp/packet.import.json.err.partial."))
+  assert_true(command.contains("mv -f \"$stderr_tmp\""))
+  assert_true(command.contains("mv -f \"$receipt_tmp\""))
+  assert_true(command.contains("moontown_child_status=$?"))
+  assert_true(command.contains("else exit 74"))
+  assert_true(!command.contains(" >'/tmp/packet.import.json' 2>"))
+}
+
+///|
+async test "detached relaunch clears published output but preserves live partials" {
+  let root = @fs.tmpdir(prefix="moontown-clear-receipt-test-")
+  let receipt_path = root + "/packet.json.import.json"
+  let stderr_path = receipt_path + ".err"
+  let partial_path = receipt_path + ".partial.123"
+  moonclaw_write_text_file(receipt_path, "stale receipt")
+  moonclaw_write_text_file(stderr_path, "stale stderr")
+  moonclaw_write_text_file(partial_path, "live child output")
+  clear_detached_import_output(receipt_path, stderr_path)
+  assert_true(!@fs.exists(receipt_path))
+  assert_true(!@fs.exists(stderr_path))
+  assert_true(@fs.exists(partial_path))
+}
+
+///|
+async fn wait_for_detached_test_file(path : String) -> Bool {
+  for _ in 0..<500 {
+    if @fs.exists(path) {
+      return true
+    }
+    @async.sleep(10)
+  }
+  false
+}
+
+///|
+async test "large detached output is invisible until atomic publication" {
+  let root = @fs.tmpdir(prefix="moontown-atomic-receipt-test-")
+  let packet_path = "\{root}/packet.json"
+  let receipt_path = detached_import_receipt_path(packet_path)
+  let ready_path = root + "/child-ready"
+  let release_path = root + "/release-child"
+  ensure_parent_directory(receipt_path)
+  let child_script = "yes x | head -c 65536; : > \{ready_path}; while [ ! -e \{release_path} ]; do sleep 0.01; done; printf \"\\n%s\\n\" \"{\\\"proposal_id\\\":\\\"proposal-1\\\",\\\"run_id\\\":\\\"run-1\\\",\\\"status\\\":\\\"Pending\\\"}\""
+  let command = build_detached_shell_command_with_output(
+    "/bin/zsh",
+    ["-lc", child_script],
+    receipt_path,
+    receipt_path + ".err",
+  )
+  ignore(@integration.run_checked("/bin/zsh", ["-lc", command]))
+  let child_ready = wait_for_detached_test_file(ready_path)
+  let final_visible_while_running = @fs.exists(receipt_path)
+  let early_receipt = detached_import_receipt("packet", packet_path)
+  moonclaw_write_text_file(release_path, "release")
+  let final_published = wait_for_detached_test_file(receipt_path)
+  assert_true(child_ready)
+  assert_true(!final_visible_while_running)
+  assert_eq(early_receipt, None)
+  assert_true(final_published)
+  guard detached_import_receipt("packet", packet_path) is Some(receipt) else {
+    fail("published receipt should become visible")
+  }
+  assert_eq(receipt.status, RunConfirmed)
+  assert_eq(receipt.run_id, Some("run-1"))
+}
+
+///|
 async test "detached import oversized receipt is failed without parsing" {
-  let root = "/tmp/moontown-oversized-receipt-test"
+  let root = @fs.tmpdir(prefix="moontown-oversized-receipt-test-")
   let packet_path = "\{root}/packet.json"
   let receipt_path = detached_import_receipt_path(packet_path)
   let builder = StringBuilder::new()
@@ -46,7 +123,7 @@ async test "detached import oversized receipt is failed without parsing" {
 
 ///|
 async test "detached import surfaces compiler failure written only to stderr" {
-  let root = "/tmp/moontown-detached-stderr-test"
+  let root = @fs.tmpdir(prefix="moontown-detached-stderr-test-")
   let packet_path = "\{root}/packet.json"
   let receipt_path = detached_import_receipt_path(packet_path)
   moonclaw_write_text_file(receipt_path, "")
@@ -63,7 +140,7 @@ async test "detached import surfaces compiler failure written only to stderr" {
 
 ///|
 async test "detached import reports failed run receipts as failures" {
-  let root = "/tmp/moontown-detached-failed-run-test"
+  let root = @fs.tmpdir(prefix="moontown-detached-failed-run-test-")
   let packet_path = "\{root}/packet.json"
   moonclaw_write_text_file(
     detached_import_receipt_path(packet_path),

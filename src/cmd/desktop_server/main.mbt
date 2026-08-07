@@ -12,6 +12,23 @@ fn resource_root() -> String {
 }
 
 ///|
+fn resolved_operator_policy_path(
+  configured_path : String?,
+  packaged_resource_root : String?,
+) -> String {
+  match configured_path {
+    Some(path) => path
+    None =>
+      match packaged_resource_root {
+        Some(root) => root + "/operator-policy.json"
+        // `moon run` starts in the module root; the bundled launcher sets
+        // `LEPUSA_RESOURCE_DIR` and copies this file as `operator-policy.json`.
+        None => "assets/templates/operator-request-policy.json"
+      }
+  }
+}
+
+///|
 fn static_root() -> String {
   env_value("MOONTOWN_DESKTOP_STATIC_ROOT").unwrap_or(resource_root() + "/ui")
 }
@@ -28,8 +45,9 @@ fn books_root() -> String {
 
 ///|
 fn operator_policy_path() -> String {
-  env_value("MOONTOWN_OPERATOR_POLICY_PATH").unwrap_or(
-    resource_root() + "/operator-policy.json",
+  resolved_operator_policy_path(
+    env_value("MOONTOWN_OPERATOR_POLICY_PATH"),
+    env_value("LEPUSA_RESOURCE_DIR"),
   )
 }
 

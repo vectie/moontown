@@ -97,4 +97,3 @@ pub using @daemon_runtime_policy {type DaemonRuntimeHealth}
 pub using @daemon_runtime_policy {type DaemonRuntimeState}
 
 // Traits
-

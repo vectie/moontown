@@ -27,13 +27,6 @@ fn clamp_metric(value : Int) -> Int {
 }
 
 ///|
-fn town_scene(model : Model) -> @ui.SceneRenderModel {
-  let state = state_for_model(model)
-  let report = @health.inspect_town(state)
-  @ui.build_scene_render(@ui.build_dashboard(state, report))
-}
-
-///|
 fn state_for_model(model : Model) -> @core.TownState {
   match model.state_source {
     StateSourceKind::DemoSimulation => simulation_state(model)

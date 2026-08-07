@@ -47,4 +47,3 @@ pub async fn supervise_saved_town(snapshot_path? : String, book_catalog_path? : 
 // Type aliases
 
 // Traits
-

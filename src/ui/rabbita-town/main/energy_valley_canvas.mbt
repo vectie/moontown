@@ -1,18 +1,4 @@
 ///|
-priv struct GoldenValleyBuilding {
-  module_key : String?
-  name : String
-  style : String
-  x : Int
-  y : Int
-  width : Int
-  depth : Int
-  entrance_x : Int?
-  entrance_y : Int?
-  floors : Int
-} derive(ToJson, FromJson)
-
-///|
 priv struct GoldenValleyCanvasAgent {
   x : Double
   y : Double
@@ -23,21 +9,24 @@ priv struct GoldenValleyCanvasAgent {
   activity_glyph : String
   activity_label : String
   preview : Bool
+  selected : Bool
 }
 
 ///|
-let golden_valley_world_cache : Map[Int, ExactEnergyValleyWorld] = Map([])
-
-///|
-fn golden_valley_world(seed : Int) -> ExactEnergyValleyWorld {
-  match golden_valley_world_cache.get(seed) {
-    Some(world) => world
-    None => {
-      let world = exact_energy_valley_generate_int(seed)
-      golden_valley_world_cache[seed] = world
-      world
-    }
-  }
+/// Renderer-only state paired with one immutable semantic snapshot. No world
+/// generation, persistence ledger, or application Model crosses the Canvas
+/// boundary.
+priv struct TownCanvasViewState {
+  tick : Int
+  weather : EnergyWeather
+  hour : Double
+  metro_visible : Bool
+  selected_place_id : @energy_valley_contract.StableId?
+  selected_actor_id : @energy_valley_contract.StableId?
+  runtime_agent_interaction_enabled : Bool
+  follow_enabled : Bool
+  player_idle_position : (Double, Double)?
+  player_motion : PlayerMotion?
 }
 
 ///|
@@ -139,6 +128,64 @@ extern "js" fn install_golden_valley_canvas_input(
   #|   if (!globalThis.__moontownGoldenValleyKeys) {
   #|     globalThis.__moontownGoldenValleyKeys = true;
   #|     globalThis.addEventListener("keydown", event => {
+  #|       const modal = globalThis.document?.querySelector(
+  #|         '[role="dialog"][aria-modal="true"],[role="alertdialog"][aria-modal="true"]',
+  #|       );
+  #|       if (event.key === "Tab" && modal) {
+  #|         const focusable = [...modal.querySelectorAll(
+  #|           'button:not([disabled]),a[href],input:not([disabled]),textarea:not([disabled]),select:not([disabled]),[tabindex]:not([tabindex="-1"])',
+  #|         )].filter(element => !element.hidden &&
+  #|           element.getAttribute("aria-hidden") !== "true");
+  #|         if (focusable.length > 0) {
+  #|           const first = focusable[0];
+  #|           const last = focusable[focusable.length - 1];
+  #|           const active = globalThis.document?.activeElement;
+  #|           if (!modal.contains(active)) {
+  #|             event.preventDefault();
+  #|             (event.shiftKey ? last : first).focus();
+  #|           } else if (event.shiftKey && active === first) {
+  #|             event.preventDefault();
+  #|             last.focus();
+  #|           } else if (!event.shiftKey && active === last) {
+  #|             event.preventDefault();
+  #|             first.focus();
+  #|           }
+  #|         }
+  #|         return;
+  #|       }
+  #|       // A modal owns the keyboard while it is open. Tab stays inside the
+  #|       // dialog above and Escape may close it below; every other town-wide
+  #|       // shortcut (tools 1–8, Space, and future map keys) is suspended.
+  #|       if (modal && event.key !== "Escape") return;
+  #|       if (event.key === "Escape") {
+  #|         const restoreLabel = globalThis.document?.querySelector(
+  #|           "#town-chronicle-panel",
+  #|         ) ? "小镇今日" : globalThis.document?.querySelector(
+  #|           "#resident-explorer-panel,#resident-profile-panel",
+  #|         ) ? "居民名册" : null;
+  #|         globalThis.document?.querySelector(
+  #|           'button[aria-label^="视察"]',
+  #|         )?.click();
+  #|         for (const label of [
+  #|           "关闭指南",
+  #|           "关闭能源谷运行看板",
+  #|           "关闭建筑详情",
+  #|           "关闭真实工作请求",
+  #|           "关闭居民列表",
+  #|           "关闭居民资料",
+  #|           "关闭小镇今日",
+  #|         ]) {
+  #|           globalThis.document?.querySelector(
+  #|             `button[aria-label="${label}"]`,
+  #|           )?.click();
+  #|         }
+  #|         if (restoreLabel) globalThis.requestAnimationFrame(() => {
+  #|           globalThis.document?.querySelector(
+  #|             `button[aria-label="${restoreLabel}"]`,
+  #|           )?.focus();
+  #|         });
+  #|         return;
+  #|       }
   #|       const target = event.target;
   #|       if (target?.matches?.("input, textarea, select") ||
   #|           target?.isContentEditable) return;
@@ -151,20 +198,6 @@ extern "js" fn install_golden_valley_canvas_input(
   #|         globalThis.document?.querySelector(
   #|           'button[aria-label="暂停模拟"],button[aria-label="继续模拟"]',
   #|         )?.click();
-  #|       } else if (event.key === "Escape") {
-  #|         globalThis.document?.querySelector(
-  #|           'button[aria-label^="视察"]',
-  #|         )?.click();
-  #|         for (const label of [
-  #|           "关闭指南",
-  #|           "关闭能源谷运行看板",
-  #|           "关闭建筑详情",
-  #|           "关闭真实工作请求",
-  #|         ]) {
-  #|           globalThis.document?.querySelector(
-  #|             `button[aria-label="${label}"]`,
-  #|           )?.click();
-  #|         }
   #|       }
   #|     });
   #|   }
@@ -400,23 +433,27 @@ extern "js" fn golden_draw_road_detail(
   #|   context.save();
   #|   context.lineCap = "round";
   #|   context.lineJoin = "round";
-  #|   context.strokeStyle = "rgba(224,216,192,0.82)";
+  #|   // Arterials retain a wider pale kerb and stronger asphalt body while
+  #|   // local streets recede. The hierarchy survives the whole-map zoom.
+  #|   context.strokeStyle = major
+  #|     ? "rgba(238,230,207,0.82)"
+  #|     : "rgba(224,220,207,0.48)";
   #|   context.lineWidth = Math.max(
-  #|     major ? 4.2 : 3.6,
-  #|     (major ? 23 : 18) * zoom,
+  #|     major ? 5.1 : 3.0,
+  #|     (major ? 24 : 13) * zoom,
   #|   );
   #|   context.setLineDash([]);
   #|   traceRoad();
   #|   context.stroke();
-  #|   context.strokeStyle = major ? "#3b424a" : "#48515a";
+  #|   context.strokeStyle = major ? "#363d45" : "#525960";
   #|   context.lineWidth = Math.max(
-  #|     major ? 3.2 : 2.7,
-  #|     (major ? 18 : 14) * zoom,
+  #|     major ? 3.9 : 2.25,
+  #|     (major ? 18 : 9.5) * zoom,
   #|   );
   #|   traceRoad();
   #|   context.stroke();
-  #|   context.strokeStyle = major ? "#f2c94c" : "rgba(248,250,252,0.88)";
-  #|   context.lineWidth = Math.max(0.8, (major ? 1.45 : 1.15) * zoom);
+  #|   context.strokeStyle = major ? "#f4cf54" : "rgba(248,250,252,0.82)";
+  #|   context.lineWidth = Math.max(0.72, (major ? 1.55 : 1.05) * zoom);
   #|   context.setLineDash(zoom >= 0.45 ? [
   #|     Math.max(2.5, 5 * zoom),
   #|     Math.max(2, 4 * zoom),
@@ -501,7 +538,17 @@ extern "js" fn golden_draw_ground_detail(
   #|     context.closePath();
   #|   };
   #|   if (terrain === "grass") {
-  #|     context.fillStyle = shade("#5da25f", 1 + variation * 0.09);
+  #|     // Two-tone diagonal gradient: light from the upper-left so the lawn
+  #|     // reads as softly lit ground instead of a flat green carpet.
+  #|     const grassBase = shade("#5da25f", 1 + variation * 0.09);
+  #|     const gradient = context.createLinearGradient(
+  #|       sx, sy - 16 * zoom,
+  #|       sx, sy + 16 * zoom,
+  #|     );
+  #|     gradient.addColorStop(0, shade("#6db36b", 1 + variation * 0.1));
+  #|     gradient.addColorStop(0.55, grassBase);
+  #|     gradient.addColorStop(1, shade("#4f8f52", 1 + variation * 0.08));
+  #|     context.fillStyle = gradient;
   #|     context.fill();
   #|     return;
   #|   }
@@ -588,6 +635,22 @@ extern "js" fn golden_draw_ground_detail(
   #|     context.strokeStyle = "rgba(0,0,0,0.08)";
   #|     context.lineWidth = 1;
   #|     context.stroke();
+  #|     if (zoom >= 0.2) {
+  #|       // Fine paving joins adjacent campus tiles without replacing their
+  #|       // authored footprint. It appears only at neighborhood zoom.
+  #|       context.save();
+  #|       diamond();
+  #|       context.clip();
+  #|       context.strokeStyle = "rgba(255,250,235,0.22)";
+  #|       context.lineWidth = Math.max(0.6, zoom);
+  #|       for (let offset = -24; offset <= 24; offset += 8) {
+  #|         context.beginPath();
+  #|         context.moveTo(sx - 34 * zoom, sy + offset * zoom);
+  #|         context.lineTo(sx + 34 * zoom, sy + offset * zoom);
+  #|         context.stroke();
+  #|       }
+  #|       context.restore();
+  #|     }
   #|   }
   #| }
 
@@ -605,11 +668,13 @@ extern "js" fn golden_draw_background(
   #|     : Math.sin(progress * Math.PI);
   #|   const gradient = context.createLinearGradient(0, 0, 0, height);
   #|   if (daylight > 0.5) {
-  #|     gradient.addColorStop(0, "#9fc8e8");
-  #|     gradient.addColorStop(1, "#cfe4d8");
+  #|     // Warmer midday palette: friendlier "town" feel vs the old cold
+  #|     // control-room blue, while keeping the day/dusk/night cycle legible.
+  #|     gradient.addColorStop(0, "#a9d3ec");
+  #|     gradient.addColorStop(1, "#e9e3c4");
   #|   } else if (daylight > 0.15) {
-  #|     gradient.addColorStop(0, "#7d90c0");
-  #|     gradient.addColorStop(1, "#c9b49a");
+  #|     gradient.addColorStop(0, "#8d97c5");
+  #|     gradient.addColorStop(1, "#d9bd9a");
   #|   } else {
   #|     gradient.addColorStop(0, "#0b1026");
   #|     gradient.addColorStop(1, "#182238");
@@ -718,11 +783,18 @@ extern "js" fn golden_draw_iso_windows(
   #|           at(f0, g0), at(f1, g0), at(f1, g1), at(f0, g1),
   #|         ];
   #|         const value = hash(`${salt}-${row}-${column}`);
-  #|         context.fillStyle = value < litFraction
-  #|           ? "rgba(255,205,110,0.95)"
-  #|           : value > 0.82
-  #|             ? "rgba(15,25,40,0.55)"
-  #|             : "rgba(200,220,235,0.4)";
+  #|         const lit = value < litFraction;
+  #|         // Day-time windows read as recessed glass: a darker pane with a
+  #|         // brighter sky reflection band so the grid is clearly visible.
+  #|         context.fillStyle = lit
+  #|           ? value < litFraction * 0.48
+  #|             ? "rgba(255,218,132,0.98)"
+  #|             : value < litFraction * 0.82
+  #|               ? "rgba(255,186,91,0.96)"
+  #|               : "rgba(255,231,178,0.94)"
+  #|           : value > 0.8
+  #|             ? "rgba(20,32,48,0.72)"
+  #|             : "rgba(74,108,138,0.62)";
   #|         context.beginPath();
   #|         context.moveTo(points[0].x, points[0].y);
   #|         for (let index = 1; index < points.length; index += 1) {
@@ -730,6 +802,23 @@ extern "js" fn golden_draw_iso_windows(
   #|         }
   #|         context.closePath();
   #|         context.fill();
+  #|         if (!lit) {
+  #|           // Glass reflection: a bright sliver along the top edge.
+  #|           context.fillStyle = "rgba(210,230,245,0.5)";
+  #|           context.beginPath();
+  #|           context.moveTo(points[0].x, points[0].y);
+  #|           context.lineTo(points[1].x, points[1].y);
+  #|           context.lineTo(
+  #|             points[1].x + (points[2].x - points[1].x) * 0.3,
+  #|             points[1].y + (points[2].y - points[1].y) * 0.3,
+  #|           );
+  #|           context.lineTo(
+  #|             points[0].x + (points[3].x - points[0].x) * 0.3,
+  #|             points[0].y + (points[3].y - points[0].y) * 0.3,
+  #|           );
+  #|           context.closePath();
+  #|           context.fill();
+  #|         }
   #|       }
   #|     }
   #|   };
@@ -763,11 +852,29 @@ extern "js" fn golden_draw_reference_building_shadow(
   zoom : Double,
 ) -> Unit =
   #| (context, sx, sy, width, depth, zoom) => {
-  #|   context.fillStyle = "rgba(0,0,0,0.15)";
+  #|   // Soft directional cast: light comes from the upper-left, so the shadow
+  #|   // falls toward the lower-right. A tight contact shadow anchors the base
+  #|   // and a blurred offset shadow gives it a soft, grounded look.
+  #|   const rx = width * 32 * zoom * 0.82;
+  #|   const ry = depth * 16 * zoom * 0.82;
+  #|   context.save();
+  #|   // Directional soft shadow, offset away from the light.
+  #|   context.fillStyle = "rgba(0,0,0,0.18)";
+  #|   context.filter = `blur(${Math.max(2, 6 * zoom)}px)`;
   #|   context.beginPath();
   #|   context.ellipse(
-  #|     sx + 4 * zoom, sy + 2 * zoom,
-  #|     width * 32 * zoom * 0.8, depth * 16 * zoom * 0.8,
+  #|     sx + 12 * zoom, sy + 9 * zoom,
+  #|     rx, ry,
+  #|     0, 0, Math.PI * 2,
+  #|   );
+  #|   context.fill();
+  #|   context.restore();
+  #|   // Tight contact shadow right under the footprint.
+  #|   context.fillStyle = "rgba(0,0,0,0.24)";
+  #|   context.beginPath();
+  #|   context.ellipse(
+  #|     sx + 3 * zoom, sy + 2 * zoom,
+  #|     rx * 0.92, ry * 0.92,
   #|     0, 0, Math.PI * 2,
   #|   );
   #|   context.fill();
@@ -1109,28 +1216,6 @@ fn golden_valley_agent_sprite_path(role : String, index : Int) -> String {
 }
 
 ///|
-fn golden_valley_agent_faces_left(
-  path : Array[(Double, Double)],
-  elapsed_seconds : Double,
-  speed : Double,
-  phase_offset : Double,
-  dwell_seconds : Double,
-  point : (Double, Double),
-) -> Bool {
-  match
-    golden_valley_commute_point(
-      path,
-      elapsed_seconds + 0.12,
-      speed,
-      phase_offset,
-      dwell_seconds,
-    ) {
-    Some(next) => next.0 - next.1 < point.0 - point.1
-    None => false
-  }
-}
-
-///|
 extern "js" fn golden_draw_sprite_agent(
   context : @dom.CanvasRenderingContext2D,
   sx : Double,
@@ -1143,10 +1228,11 @@ extern "js" fn golden_draw_sprite_agent(
   activity_glyph : String,
   activity_label : String,
   preview : Bool,
+  selected : Bool,
 ) -> Unit =
   #| (
   #|   context, sx, sy, zoom, spritePath, facingLeft, bob, workColor,
-  #|   activityGlyph, activityLabel, preview,
+  #|   activityGlyph, activityLabel, preview, selected,
   #| ) => {
   #|   globalThis.__moontownGoldenAgentSprites ||= new Map();
   #|   const cache = globalThis.__moontownGoldenAgentSprites;
@@ -1176,6 +1262,37 @@ extern "js" fn golden_draw_sprite_agent(
   #|     0, 0, Math.PI * 2,
   #|   );
   #|   context.fill();
+  #|   if (selected) {
+  #|     context.fillStyle = "rgba(251,191,36,0.14)";
+  #|     context.strokeStyle = "rgba(253,230,138,0.96)";
+  #|     context.lineWidth = Math.max(2, zoom * 2.2);
+  #|     context.beginPath();
+  #|     context.ellipse(
+  #|       sx, sy + Math.max(1, zoom * 2),
+  #|       Math.max(18, height * 0.38), Math.max(7, height * 0.13),
+  #|       0, 0, Math.PI * 2,
+  #|     );
+  #|     context.fill();
+  #|     context.stroke();
+  #|   }
+  #|   // PREVIEW is a shape as well as a color. Keep this dashed diamond
+  #|   // visible at whole-map zoom, while the activity bubble below remains a
+  #|   // progressive-detail affordance for closer zoom levels.
+  #|   if (preview) {
+  #|     const markerRadius = Math.max(7, height * 0.22);
+  #|     const markerY = sy - height - Math.max(4, height * 0.08);
+  #|     context.strokeStyle = "rgba(221,214,254,0.96)";
+  #|     context.lineWidth = Math.max(1.25, zoom * 1.35);
+  #|     context.setLineDash([3, 2]);
+  #|     context.beginPath();
+  #|     context.moveTo(sx, markerY - markerRadius);
+  #|     context.lineTo(sx + markerRadius, markerY);
+  #|     context.lineTo(sx, markerY + markerRadius);
+  #|     context.lineTo(sx - markerRadius, markerY);
+  #|     context.closePath();
+  #|     context.stroke();
+  #|     context.setLineDash([]);
+  #|   }
   #|   if (activityGlyph && zoom >= 0.38) {
   #|     const text = zoom >= 0.9 && activityLabel
   #|       ? activityLabel
@@ -1240,79 +1357,6 @@ extern "js" fn golden_draw_sprite_agent(
   #| }
 
 ///|
-fn golden_valley_cols() -> Int {
-  exact_energy_valley_cols()
-}
-
-///|
-fn golden_valley_rows() -> Int {
-  exact_energy_valley_rows()
-}
-
-///|
-fn golden_valley_terrain(model : Model, seed : Int, x : Int, y : Int) -> String {
-  if x < 0 || x >= golden_valley_cols() || y < 0 || y >= golden_valley_rows() {
-    return "void"
-  }
-  let key = golden_valley_tile_key(x, y)
-  let generated = golden_valley_world(seed).tiles[y][x].terrain
-  if golden_valley_custom_building_at_model(model, x, y) is Some(_) {
-    // Player buildings clear their accepted footprint to a reversible plaza
-    // overlay. This keeps forests and field textures from drawing through the
-    // building without mutating the authored Wenyu terrain evidence.
-    "plaza"
-  } else if model.energy_roads.contains(key) {
-    if generated == "water" || generated == "bridge" {
-      "bridge"
-    } else {
-      "road"
-    }
-  } else if model.energy_parks.contains(key) {
-    "forest"
-  } else {
-    generated
-  }
-}
-
-///|
-fn golden_valley_road_mask(model : Model, seed : Int, x : Int, y : Int) -> Int {
-  let mut mask = 0
-  let neighbors = [(x, y - 1), (x + 1, y), (x, y + 1), (x - 1, y)]
-  for index in 0..<neighbors.length() {
-    let terrain = golden_valley_terrain(
-      model,
-      seed,
-      neighbors[index].0,
-      neighbors[index].1,
-    )
-    if terrain == "road" || terrain == "bridge" {
-      mask = mask | (1 << index)
-    }
-  }
-  mask
-}
-
-///|
-fn golden_valley_buildings(seed : Int) -> Array[GoldenValleyBuilding] {
-  golden_valley_world(seed).buildings.map(building => {
-    module_key: Some(building.module_key),
-    name: building.name,
-    style: if building.style == "plaza-bld" {
-      "plaza"
-    } else {
-      building.style
-    },
-    x: building.x,
-    y: building.y,
-    width: building.width,
-    depth: building.depth,
-    entrance_x: Some(building.entrance_x),
-    entrance_y: Some(building.entrance_y),
-    floors: building.floors,
-  })
-}
-
-///|
 fn golden_screen_x(
   world_x : Double,
   world_y : Double,
@@ -1351,29 +1395,10 @@ fn golden_diamond(
 }
 
 ///|
-fn golden_fill_polygon(
-  context : @dom.CanvasRenderingContext2D,
-  points : Array[(Double, Double)],
-  color : String,
-) -> Unit {
-  if points.is_empty() {
-    return
-  }
-  context.begin_path()
-  context.move_to(points[0].0, points[0].1)
-  for index in 1..<points.length() {
-    context.line_to(points[index].0, points[index].1)
-  }
-  context.close_path()
-  golden_ctx_fill_style(context, color)
-  context.fill()
-}
-
-///|
 fn golden_draw_tile(
   context : @dom.CanvasRenderingContext2D,
-  model : Model,
-  seed : Int,
+  snapshot : @energy_valley_contract.TownSnapshot,
+  roads : Map[String, TownCanvasRoadCell],
   x : Int,
   y : Int,
   viewport_width : Int,
@@ -1395,7 +1420,9 @@ fn golden_draw_tile(
     sy > viewport_height.to_double() + 80.0 {
     return
   }
-  let terrain = golden_valley_terrain(model, seed, x, y)
+  let road = roads.get(town_canvas_road_key(x, y))
+  let terrain = town_snapshot_canvas_terrain(snapshot, road, x, y)
+  let variation = town_snapshot_canvas_variation(snapshot, x, y)
   golden_diamond(context, sx, sy)
   if terrain == "water" || terrain == "bridge" {
     golden_draw_water_detail(
@@ -1407,22 +1434,17 @@ fn golden_draw_tile(
       golden_animation_seconds(),
     )
   } else if terrain == "road" {
-    let world = golden_valley_world(seed)
-    let underlay = exact_energy_valley_canvas_terrain(
-      energy_valley_road_fill_kind(world.tiles, x, y),
-    )
     golden_draw_ground_detail(
       context,
-      underlay,
+      "urban",
       sx,
       sy,
       golden_valley_camera_zoom(),
-      world.tiles[y][x].variation,
+      variation,
       x + y,
-      world.tiles[y][x].district == "civic-core",
+      false,
     )
   } else {
-    let variation = golden_valley_world(seed).tiles[y][x].variation
     golden_draw_ground_detail(
       context,
       terrain,
@@ -1431,7 +1453,7 @@ fn golden_draw_tile(
       golden_valley_camera_zoom(),
       variation,
       x + y,
-      golden_valley_world(seed).tiles[y][x].district == "civic-core",
+      false,
     )
   }
   if terrain == "bridge" {
@@ -1442,15 +1464,15 @@ fn golden_draw_tile(
 ///|
 fn golden_draw_road_overlay_tile(
   context : @dom.CanvasRenderingContext2D,
-  model : Model,
-  seed : Int,
+  road : TownCanvasRoadCell?,
   x : Int,
   y : Int,
   viewport_width : Int,
   viewport_height : Int,
 ) -> Unit {
-  if golden_valley_terrain(model, seed, x, y) != "road" {
-    return
+  let semantic_road = match road {
+    Some(value) if !value.bridge => value
+    _ => return
   }
   let sx = golden_screen_x(
     x.to_double() + 0.5,
@@ -1473,13 +1495,13 @@ fn golden_draw_road_overlay_tile(
     sx,
     sy,
     golden_valley_camera_zoom(),
-    golden_valley_road_mask(model, seed, x, y),
-    golden_valley_world(seed).tiles[y][x].base_terrain == "road-major",
+    semantic_road.mask,
+    semantic_road.road_class is @energy_valley_contract.Arterial,
   )
 }
 
 ///|
-fn golden_draw_iso_box(
+extern "js" fn golden_draw_iso_box(
   context : @dom.CanvasRenderingContext2D,
   sx : Double,
   sy : Double,
@@ -1489,50 +1511,112 @@ fn golden_draw_iso_box(
   roof : String,
   left : String,
   right : String,
-) -> Unit {
-  let zoom = golden_valley_camera_zoom()
-  let scaled_height = height * zoom / 0.95
-  let half_width = 16.0 * zoom
-  let half_height = 8.0 * zoom
-  let top_y = sy - scaled_height
-  let north = (
-    sx + (depth - width) * half_width,
-    top_y - (width + depth) * half_height,
-  )
-  let east = (
-    sx + (width + depth) * half_width,
-    top_y + (width - depth) * half_height,
-  )
-  let south = (
-    sx + (width - depth) * half_width,
-    top_y + (width + depth) * half_height,
-  )
-  let west = (
-    sx - (width + depth) * half_width,
-    top_y + (depth - width) * half_height,
-  )
-  golden_fill_polygon(
-    context,
-    [
-      west,
-      south,
-      (south.0, south.1 + scaled_height),
-      (west.0, west.1 + scaled_height),
-    ],
-    left,
-  )
-  golden_fill_polygon(
-    context,
-    [
-      south,
-      east,
-      (east.0, east.1 + scaled_height),
-      (south.0, south.1 + scaled_height),
-    ],
-    right,
-  )
-  golden_fill_polygon(context, [north, east, south, west], roof)
-}
+) -> Unit =
+  #| (context, sx, sy, width, depth, height, roof, left, right) => {
+  #|   const camera = globalThis.__moontownGoldenValleyCamera || { z: 0.1 };
+  #|   const zoom = camera.z;
+  #|   const scaledHeight = height * zoom / 0.95;
+  #|   const halfWidth = 16 * zoom;
+  #|   const halfHeight = 8 * zoom;
+  #|   const topY = sy - scaledHeight;
+  #|   const north = [
+  #|     sx + (depth - width) * halfWidth,
+  #|     topY - (width + depth) * halfHeight,
+  #|   ];
+  #|   const east = [
+  #|     sx + (width + depth) * halfWidth,
+  #|     topY + (width - depth) * halfHeight,
+  #|   ];
+  #|   const south = [
+  #|     sx + (width - depth) * halfWidth,
+  #|     topY + (width + depth) * halfHeight,
+  #|   ];
+  #|   const west = [
+  #|     sx - (width + depth) * halfWidth,
+  #|     topY + (depth - width) * halfHeight,
+  #|   ];
+  #|   const parse = hex => {
+  #|     const value = hex.replace("#", "");
+  #|     const full = value.length === 3
+  #|       ? value.split("").map(ch => ch + ch).join("")
+  #|       : value;
+  #|     return [
+  #|       parseInt(full.slice(0, 2), 16),
+  #|       parseInt(full.slice(2, 4), 16),
+  #|       parseInt(full.slice(4, 6), 16),
+  #|     ];
+  #|   };
+  #|   const clamp = value => Math.max(0, Math.min(255, Math.round(value)));
+  #|   const shade = (hex, amount) => {
+  #|     const [r, g, b] = parse(hex);
+  #|     const lift = amount >= 0
+  #|       ? channel => channel + (255 - channel) * amount
+  #|       : channel => channel * (1 + amount);
+  #|     return `rgb(${clamp(lift(r))},${clamp(lift(g))},${clamp(lift(b))})`;
+  #|   };
+  #|   const fillPoly = points => {
+  #|     context.beginPath();
+  #|     context.moveTo(points[0][0], points[0][1]);
+  #|     for (let index = 1; index < points.length; index += 1) {
+  #|       context.lineTo(points[index][0], points[index][1]);
+  #|     }
+  #|     context.closePath();
+  #|   };
+  #|   // Left face: vertical gradient, lighter near the roof, darker at base.
+  #|   const leftTop = topY + Math.min(west[1], south[1]) + halfHeight * 0.4;
+  #|   const leftGradient = context.createLinearGradient(
+  #|     0, leftTop, 0, leftTop + scaledHeight,
+  #|   );
+  #|   leftGradient.addColorStop(0, shade(left, 0.10));
+  #|   leftGradient.addColorStop(1, shade(left, -0.22));
+  #|   fillPoly([
+  #|     west,
+  #|     south,
+  #|     [south[0], south[1] + scaledHeight],
+  #|     [west[0], west[1] + scaledHeight],
+  #|   ]);
+  #|   context.fillStyle = leftGradient;
+  #|   context.fill();
+  #|   // Right face: vertical gradient, slightly darker overall than the left.
+  #|   const rightTop = topY + Math.min(south[1], east[1]) + halfHeight * 0.4;
+  #|   const rightGradient = context.createLinearGradient(
+  #|     0, rightTop, 0, rightTop + scaledHeight,
+  #|   );
+  #|   rightGradient.addColorStop(0, shade(right, 0.04));
+  #|   rightGradient.addColorStop(1, shade(right, -0.26));
+  #|   fillPoly([
+  #|     south,
+  #|     east,
+  #|     [east[0], east[1] + scaledHeight],
+  #|     [south[0], south[1] + scaledHeight],
+  #|   ]);
+  #|   context.fillStyle = rightGradient;
+  #|   context.fill();
+  #|   // Roof: soft diagonal sheen from the sun-facing corner.
+  #|   const roofGradient = context.createLinearGradient(
+  #|     north[0], north[1], south[0], south[1],
+  #|   );
+  #|   roofGradient.addColorStop(0, shade(roof, 0.18));
+  #|   roofGradient.addColorStop(0.5, roof);
+  #|   roofGradient.addColorStop(1, shade(roof, -0.10));
+  #|   fillPoly([north, east, south, west]);
+  #|   context.fillStyle = roofGradient;
+  #|   context.fill();
+  #|   // Roof rim highlight + outer edge definition so the box reads crisply.
+  #|   context.lineJoin = "round";
+  #|   context.lineWidth = Math.max(1, zoom * 1.1);
+  #|   context.strokeStyle = shade(roof, -0.28);
+  #|   fillPoly([north, east, south, west]);
+  #|   context.stroke();
+  #|   // Bright top edges (north-west / north-east) catch the light.
+  #|   context.beginPath();
+  #|   context.moveTo(west[0], west[1]);
+  #|   context.lineTo(north[0], north[1]);
+  #|   context.lineTo(east[0], east[1]);
+  #|   context.strokeStyle = shade(roof, 0.32);
+  #|   context.lineWidth = Math.max(1, zoom * 1.2);
+  #|   context.stroke();
+  #| }
 
 ///|
 fn golden_building_colors(style : String) -> (String, String, String) {
@@ -1552,10 +1636,43 @@ fn golden_building_colors(style : String) -> (String, String, String) {
 }
 
 ///|
+fn town_snapshot_place_work_status(
+  snapshot : @energy_valley_contract.TownSnapshot,
+  place_id : @energy_valley_contract.StableId,
+) -> String {
+  let mut rank = 0
+  let mut status = ""
+  for presence in snapshot.presences_at(place_id) {
+    match snapshot.find_actor_profile(presence.actor_id) {
+      Some(profile) if profile.source_kind
+        is @energy_valley_contract.RuntimeEvidence => {
+        let (candidate_rank, candidate_status) = match profile.state {
+          @energy_valley_contract.ActorStateFailed => (7, "failed")
+          @energy_valley_contract.ActorStateBlocked => (6, "blocked")
+          @energy_valley_contract.ActorStateWaitingReview =>
+            (5, "waiting_review")
+          @energy_valley_contract.ActorStateActive => (4, "running")
+          @energy_valley_contract.ActorStateAssigned => (3, "assigned")
+          @energy_valley_contract.ActorStateCompleted => (2, "completed")
+          @energy_valley_contract.ActorStateIdle => (1, "idle")
+        }
+        if candidate_rank > rank {
+          rank = candidate_rank
+          status = candidate_status
+        }
+      }
+      _ => ()
+    }
+  }
+  status
+}
+
+///|
 fn golden_draw_building(
   context : @dom.CanvasRenderingContext2D,
-  model : Model,
-  building : GoldenValleyBuilding,
+  building : TownCanvasBuilding,
+  selected : Bool,
+  work_status : String,
   viewport_width : Int,
   viewport_height : Int,
   hour : Double,
@@ -1698,7 +1815,7 @@ fn golden_draw_building(
     building.style != "plaza" &&
     building.style != "market" {
     let columns = if building.width * 2 < 2 { 2 } else { building.width * 2 }
-    let lit_fraction = if hour < 6.0 || hour >= 19.0 { 0.45 } else { 0.0 }
+    let lit_fraction = if hour < 6.0 || hour >= 19.0 { 0.62 } else { 0.0 }
     golden_draw_iso_windows(
       context,
       sx,
@@ -1745,13 +1862,6 @@ fn golden_draw_building(
       "#999988",
       "#887777",
     )
-  }
-  let selected = match model.energy_selected_building {
-    Some(candidate) =>
-      candidate.x == building.x &&
-      candidate.y == building.y &&
-      candidate.name == building.name
-    None => false
   }
   golden_draw_reference_building_details(
     context,
@@ -1833,12 +1943,6 @@ fn golden_draw_building(
     golden_ctx_fill_style(context, "#ffe9b8")
     context.fill_text(building.name, label_x, label_y)
   }
-  let work_status = golden_valley_primary_building_status(
-    golden_valley_runtime_tasks_for_building(
-      model.energy_valley_runtime,
-      building,
-    ),
-  )
   if !work_status.is_empty() {
     let color = golden_valley_work_status_color(work_status)
     let pulse = (golden_math_sin(golden_animation_seconds() * 4.5) + 1.0) / 2.0
@@ -1859,271 +1963,6 @@ fn golden_draw_building(
       golden_ctx_global_alpha(context, 1.0)
     }
   }
-}
-
-///|
-fn golden_draw_ambient(
-  context : @dom.CanvasRenderingContext2D,
-  model : Model,
-  seed : Int,
-  x : Int,
-  y : Int,
-  viewport_width : Int,
-  viewport_height : Int,
-  hour : Double,
-) -> Unit {
-  let terrain = golden_valley_terrain(model, seed, x, y)
-  if terrain != "urban" && terrain != "plaza" {
-    return
-  }
-  let (structure, floors, footprint_width, footprint_depth) = match
-    golden_valley_world(seed).structure_footprint_at(x, y) {
-    None => return
-    Some(value) => value
-  }
-  let width_ratio = if structure == "row" || structure == "industrial" {
-    0.90
-  } else if structure == "block" || structure == "civic" {
-    0.86
-  } else {
-    0.80
-  }
-  let depth_ratio = if structure == "row" || structure == "industrial" {
-    0.72
-  } else if structure == "block" || structure == "civic" {
-    0.86
-  } else {
-    0.80
-  }
-  let box_width = footprint_width.to_double() * width_ratio
-  let box_depth = footprint_depth.to_double() * depth_ratio
-  let center_x = x.to_double() + footprint_width.to_double() / 2.0
-  let center_y = y.to_double() + footprint_depth.to_double() / 2.0
-  let sx = golden_screen_x(center_x, center_y, viewport_width)
-  let sy = golden_screen_y(center_x, center_y, viewport_height)
-  if sx < -60.0 ||
-    sx > viewport_width.to_double() + 60.0 ||
-    sy < -80.0 ||
-    sy > viewport_height.to_double() + 80.0 {
-    return
-  }
-  golden_draw_reference_building_shadow(
-    context,
-    sx,
-    sy,
-    box_width,
-    box_depth,
-    golden_valley_camera_zoom(),
-  )
-  golden_draw_architecture_plan(
-    context,
-    golden_architecture_plan(
-      structure, x, y, footprint_width, footprint_depth, floors,
-    ),
-    x.to_double(),
-    y.to_double(),
-    viewport_width,
-    viewport_height,
-    hour,
-  )
-}
-
-///|
-fn golden_draw_tree(
-  context : @dom.CanvasRenderingContext2D,
-  model : Model,
-  seed : Int,
-  x : Int,
-  y : Int,
-  viewport_width : Int,
-  viewport_height : Int,
-) -> Unit {
-  if golden_valley_terrain(model, seed, x, y) != "forest" {
-    return
-  }
-  let sx = golden_screen_x(
-    x.to_double() + 0.5,
-    y.to_double() + 0.5,
-    viewport_width,
-  )
-  let sy = golden_screen_y(
-    x.to_double() + 0.5,
-    y.to_double() + 0.5,
-    viewport_height,
-  )
-  golden_draw_reference_tree(
-    context,
-    sx,
-    sy,
-    golden_valley_camera_zoom(),
-    golden_reference_hash("tree-\{seed}-\{x}-\{y}"),
-    golden_animation_seconds(),
-  )
-}
-
-///|
-fn golden_valley_canvas_agents(
-  model : Model,
-  seed : Int,
-) -> Array[GoldenValleyCanvasAgent] {
-  let result : Array[GoldenValleyCanvasAgent] = []
-  let buildings = golden_valley_buildings(seed)
-  for building in model.energy_custom_buildings {
-    buildings.push(building)
-  }
-  if energy_valley_knowledge_preview_visible(model) && buildings.length() >= 2 {
-    // Preview residents are deterministic explanatory scenery. They are kept
-    // separate from runtime agents and never contribute to real-work counts.
-    let research_homes = buildings.filter(building => {
-      golden_valley_building_module_key(building).has_prefix("research-")
-    })
-    let social_square = golden_valley_building_for_identity(
-      buildings, "social-square",
-    )
-    for index in 0..<12 {
-      let role = if index == 0 {
-        "mayor"
-      } else if index < 4 {
-        "keeper"
-      } else if index < 9 {
-        "researcher"
-      } else {
-        "resident"
-      }
-      let random_from_index = energy_valley_variation(
-        seed,
-        index,
-        17,
-        601,
-        buildings.length(),
-      )
-      let random_destination_index = (
-          random_from_index +
-          1 +
-          energy_valley_variation(seed, index, 19, 607, buildings.length() - 1)
-        ) %
-        buildings.length()
-      let from = if role == "researcher" && !research_homes.is_empty() {
-        research_homes[index % research_homes.length()]
-      } else {
-        buildings[random_from_index]
-      }
-      let destination = match social_square {
-        Some(salon) if role == "researcher" => salon
-        _ => buildings[random_destination_index]
-      }
-      match golden_valley_building_road_path(model, seed, from, destination) {
-        None => ()
-        Some(path) => {
-          let elapsed_seconds = if model.paused ||
-            golden_prefers_reduced_motion() {
-            0.0
-          } else {
-            golden_animation_seconds()
-          }
-          let speed = if role == "researcher" { 2.0 } else { 1.55 }
-          let phase_offset = energy_valley_variation(seed, index, 23, 613, 72).to_double()
-          let dwell_seconds = 11.0 + (index % 4).to_double()
-          match
-            golden_valley_preview_motion(
-              path, elapsed_seconds, speed, phase_offset, dwell_seconds, index,
-            ) {
-            None => ()
-            Some(motion) =>
-              result.push({
-                x: motion.x,
-                y: motion.y,
-                sprite_path: golden_valley_agent_sprite_path(role, index),
-                facing_left: motion.facing_left,
-                bob: if golden_prefers_reduced_motion() {
-                  0.0
-                } else {
-                  golden_animation_seconds() * 9.0 + index.to_double()
-                },
-                work_color: motion.activity_color,
-                activity_glyph: motion.activity_glyph,
-                activity_label: motion.activity_label,
-                preview: true,
-              })
-          }
-        }
-      }
-    }
-  }
-  let runtime_agents = energy_valley_runtime_active_agents(
-    model.energy_valley_runtime,
-  )
-  for index, agent in runtime_agents {
-    if index >= 24 {
-      continue
-    }
-    match
-      golden_valley_runtime_agent_destination(
-        model.energy_valley_runtime,
-        buildings,
-        agent,
-      ) {
-      None => ()
-      Some(destination) => {
-        let origin = golden_valley_runtime_agent_origin(
-          model.energy_valley_runtime,
-          buildings,
-          agent,
-        )
-        match
-          golden_valley_building_road_path(model, seed, origin, destination) {
-          None => ()
-          Some(path) => {
-            let speed = if agent.role == "worker" {
-              2.6
-            } else if agent.role == "mayor" {
-              2.0
-            } else {
-              1.7
-            }
-            let elapsed_seconds = golden_valley_runtime_agent_motion_seconds(
-              model.energy_valley_runtime,
-              agent,
-            )
-            match golden_valley_assignment_point(path, elapsed_seconds, speed) {
-              None => ()
-              Some(point) => {
-                let status = golden_valley_runtime_agent_work_status(
-                  model.energy_valley_runtime,
-                  agent,
-                )
-                let activity = golden_valley_runtime_agent_activity(
-                  model.energy_valley_runtime,
-                  agent,
-                )
-                result.push({
-                  x: point.0,
-                  y: point.1,
-                  sprite_path: golden_valley_agent_sprite_path(
-                    agent.role,
-                    index,
-                  ),
-                  facing_left: golden_valley_assignment_faces_left(
-                    path, elapsed_seconds, speed, point,
-                  ),
-                  bob: if golden_prefers_reduced_motion() {
-                    0.0
-                  } else {
-                    golden_animation_seconds() * 9.0 + index.to_double()
-                  },
-                  work_color: golden_valley_work_status_color(status),
-                  activity_glyph: activity.0,
-                  activity_label: activity.1,
-                  preview: false,
-                })
-              }
-            }
-          }
-        }
-      }
-    }
-  }
-  result
 }
 
 ///|
@@ -2162,6 +2001,7 @@ fn golden_draw_agents_at_depth(
       agent.activity_glyph,
       agent.activity_label,
       agent.preview,
+      agent.selected,
     )
   }
 }
@@ -2169,11 +2009,12 @@ fn golden_draw_agents_at_depth(
 ///|
 fn golden_draw_weather(
   context : @dom.CanvasRenderingContext2D,
-  model : Model,
+  weather : EnergyWeather,
+  tick : Int,
   viewport_width : Int,
   viewport_height : Int,
 ) -> Unit {
-  match model.energy_weather {
+  match weather {
     Sunny => ()
     Cloudy => {
       golden_ctx_fill_style(context, "rgba(91,107,125,.13)")
@@ -2191,14 +2032,14 @@ fn golden_draw_weather(
         let x = energy_valley_variation(
           active_energy_valley_seed(),
           index,
-          model.tick,
+          tick,
           281,
           viewport_width,
         )
         let y = energy_valley_variation(
           active_energy_valley_seed(),
           index,
-          model.tick,
+          tick,
           283,
           viewport_height,
         )
@@ -2214,14 +2055,14 @@ fn golden_draw_weather(
         let x = energy_valley_variation(
           active_energy_valley_seed(),
           index,
-          model.tick / 2,
+          tick / 2,
           293,
           viewport_width,
         )
         let y = energy_valley_variation(
           active_energy_valley_seed(),
           index,
-          model.tick,
+          tick,
           307,
           viewport_height,
         )
@@ -2243,8 +2084,38 @@ fn golden_draw_weather(
 }
 
 ///|
-fn draw_golden_valley_canvas(model : Model) -> Unit {
+fn town_canvas_follow_position(view : TownCanvasViewState) -> (Double, Double)? {
+  if !view.follow_enabled {
+    return None
+  }
+  match view.player_motion {
+    Some(motion) => {
+      let elapsed = golden_animation_seconds() - motion.started_seconds
+      if elapsed < 0.0 {
+        return Some((motion.from_x, motion.from_y))
+      }
+      let walked = elapsed * player_walk_speed
+      let total = player_path_length(motion.path)
+      if walked >= total {
+        Some(player_point_along(motion.path, total))
+      } else {
+        Some(player_point_along(motion.path, walked))
+      }
+    }
+    None => view.player_idle_position
+  }
+}
+
+///|
+fn draw_golden_valley_canvas(
+  snapshot : @energy_valley_contract.TownSnapshot,
+  view : TownCanvasViewState,
+) -> Unit {
   let canvas_id = "energy-valley-canvas"
+  match town_canvas_follow_position(view) {
+    Some((x, y)) => golden_follow_camera(x, y)
+    None => ()
+  }
   prepare_golden_valley_canvas(canvas_id)
   let width = golden_valley_canvas_width(canvas_id)
   let height = golden_valley_canvas_height(canvas_id)
@@ -2252,53 +2123,117 @@ fn draw_golden_valley_canvas(model : Model) -> Unit {
     None => ()
     Some(context) => {
       context.clear_rect(0.0, 0.0, width.to_double(), height.to_double())
-      let hour = (energy_valley_sim_minutes(model) % (24 * 60)).to_double() /
-        60.0
+      let hour = view.hour
       golden_draw_background(context, width, height, hour)
-      let seed = active_energy_valley_seed()
-      for y in 0..<golden_valley_rows() {
-        for x in 0..<golden_valley_cols() {
-          golden_draw_tile(context, model, seed, x, y, width, height)
-        }
-      }
-      for y in 0..<golden_valley_rows() {
-        for x in 0..<golden_valley_cols() {
-          golden_draw_road_overlay_tile(
-            context, model, seed, x, y, width, height,
+      // Every spatial fact below is projected from the immutable snapshot
+      // prepared by page orchestration. Canvas never runs world compilation.
+      let ecosystem_town_snapshot = snapshot
+      let canvas_roads = town_snapshot_canvas_roads(ecosystem_town_snapshot)
+      let canvas_road_lookup = town_snapshot_canvas_road_lookup(canvas_roads)
+      let canvas_cols = town_snapshot_canvas_cols(ecosystem_town_snapshot)
+      let canvas_rows = town_snapshot_canvas_rows(ecosystem_town_snapshot)
+      let canvas_installations = town_snapshot_installations_by_depth(
+        ecosystem_town_snapshot,
+      )
+      for y in 0..<canvas_rows {
+        for x in 0..<canvas_cols {
+          golden_draw_tile(
+            context, ecosystem_town_snapshot, canvas_road_lookup, x, y, width, height,
           )
         }
       }
-      let agents = golden_valley_canvas_agents(model, seed)
-      for depth in 0..<(golden_valley_cols() + golden_valley_rows()) {
-        for y in 0..<golden_valley_rows() {
-          let x = depth - y
-          if x < 0 || x >= golden_valley_cols() {
-            continue
-          }
-          golden_draw_tree(context, model, seed, x, y, width, height)
+      for y in 0..<canvas_rows {
+        for x in 0..<canvas_cols {
+          golden_draw_road_overlay_tile(
+            context,
+            canvas_road_lookup.get(town_canvas_road_key(x, y)),
+            x,
+            y,
+            width,
+            height,
+          )
+        }
+      }
+      golden_draw_town_snapshot_metro_underlay(
+        context,
+        ecosystem_town_snapshot,
+        view.metro_visible,
+        width,
+        height,
+      )
+      // Runtime and public-life overlays consume the same semantic frame.
+      golden_draw_ecosystem_pedestrian_spurs(
+        context, ecosystem_town_snapshot, width, height,
+      )
+      let canvas_buildings = town_snapshot_canvas_buildings(
+        ecosystem_town_snapshot,
+      )
+      golden_draw_selected_town_snapshot_relations(
+        context,
+        ecosystem_town_snapshot,
+        view.selected_place_id,
+        width,
+        height,
+      )
+      golden_draw_active_ecosystem_exchanges(
+        context, ecosystem_town_snapshot, width, height,
+      )
+      let agents = town_snapshot_canvas_agents(
+        ecosystem_town_snapshot,
+        golden_animation_seconds(),
+        golden_prefers_reduced_motion(),
+        view.selected_actor_id,
+      )
+      for depth in 0..<(canvas_cols + canvas_rows) {
+        match canvas_installations.get(depth) {
+          Some(installations) =>
+            golden_draw_town_snapshot_installations(
+              context, installations, width, height, hour,
+            )
+          None => ()
         }
         golden_draw_agents_at_depth(context, agents, depth, width, height)
-        for y in 0..<golden_valley_rows() {
-          let x = depth - y
-          if x < 0 || x >= golden_valley_cols() {
-            continue
-          }
-          golden_draw_ambient(context, model, seed, x, y, width, height, hour)
-        }
-        for building in golden_valley_buildings(seed) {
-          if building.x + building.y + building.depth == depth {
-            golden_draw_building(context, model, building, width, height, hour)
-          }
-        }
-        for building in model.energy_custom_buildings {
-          if building.x + building.y + building.depth == depth {
-            golden_draw_building(context, model, building, width, height, hour)
+        for semantic_building in canvas_buildings {
+          if semantic_building.x + semantic_building.y + semantic_building.depth ==
+            depth {
+            let selected = view.selected_place_id ==
+              Some(semantic_building.place_id)
+            golden_draw_building(
+              context,
+              semantic_building,
+              selected,
+              town_snapshot_place_work_status(
+                ecosystem_town_snapshot,
+                semantic_building.place_id,
+              ),
+              width,
+              height,
+              hour,
+            )
+            golden_draw_ecosystem_place_layer(
+              context, ecosystem_town_snapshot, semantic_building, selected, width,
+              height,
+            )
           }
         }
       }
-      golden_draw_weather(context, model, width, height)
+      golden_draw_town_snapshot_metro_landmarks(
+        context,
+        ecosystem_town_snapshot,
+        view.metro_visible,
+        width,
+        height,
+      )
+      golden_draw_weather(context, view.weather, view.tick, width, height)
       golden_draw_day_night(context, width, height, hour)
       golden_ctx_global_alpha(context, 1.0)
+      // Publish pointer truth only after this exact semantic frame completed a
+      // real draw. A queued-but-not-painted Model must never replace the frame
+      // that remains visible to the user.
+      golden_valley_accept_canvas_frame_with_runtime_eligibility(
+        snapshot,
+        view.runtime_agent_interaction_enabled,
+      )
     }
   }
 }
@@ -2306,11 +2241,15 @@ fn draw_golden_valley_canvas(model : Model) -> Unit {
 ///|
 fn render_golden_valley_canvas(
   dispatch : Dispatch[Msg],
-  model : Model,
+  snapshot : @energy_valley_contract.TownSnapshot,
+  view : TownCanvasViewState,
 ) -> @rabbita.Html {
-  schedule_golden_valley_canvas(() => draw_golden_valley_canvas(model))
+  schedule_golden_valley_canvas(() => draw_golden_valley_canvas(snapshot, view))
   schedule_golden_valley_canvas(() => {
-    install_golden_valley_canvas_input(() => draw_golden_valley_canvas(model))
+    install_golden_valley_canvas_input(() => {
+      draw_golden_valley_canvas(snapshot, view)
+    })
+    install_player_walk_keys()
   })
   canvas(
     id="energy-valley-canvas",

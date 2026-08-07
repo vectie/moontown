@@ -199,4 +199,3 @@ pub fn TaskResultResponse::new(task_id~ : String, status~ : @core.TownTaskStatus
 // Type aliases
 
 // Traits
-

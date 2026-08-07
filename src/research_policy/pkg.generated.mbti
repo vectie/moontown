@@ -283,4 +283,3 @@ pub fn workspace_artifact_path(String, String) -> String
 // Type aliases
 
 // Traits
-

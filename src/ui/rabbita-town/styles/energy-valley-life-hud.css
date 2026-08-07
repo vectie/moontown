@@ -1,0 +1,611 @@
+/* Energy Valley map HUD hierarchy.
+   The map stays primary; controls form three quiet edges and onboarding
+   reveals one action at a time. */
+
+.energy-valley-golden {
+  --town-safe-top: env(safe-area-inset-top, 0px);
+  --town-safe-right: env(safe-area-inset-right, 0px);
+  --town-safe-bottom: env(safe-area-inset-bottom, 0px);
+  --town-safe-left: env(safe-area-inset-left, 0px);
+  --town-ink: #17231d;
+  --town-panel: rgba(24, 32, 27, 0.84);
+  --town-panel-strong: rgba(20, 28, 24, 0.94);
+  --town-cream: #fff8e8;
+  --town-sand: #ead9b7;
+  --town-leaf: #83b66b;
+  --town-gold: #f2c94c;
+  --town-line: rgba(255, 248, 232, 0.16);
+  width: 100%;
+  height: 100vh;
+  height: 100dvh;
+}
+
+.town-topbar {
+  top: calc(12px + var(--town-safe-top));
+  padding-right: calc(12px + var(--town-safe-right));
+  padding-left: calc(12px + var(--town-safe-left));
+  z-index: 24;
+}
+
+.town-topbar-inner {
+  width: min(
+    1120px,
+    calc(
+      100vw - 32px - var(--town-safe-left) - var(--town-safe-right)
+    )
+  );
+  min-height: 54px;
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 7px 10px;
+  border: 1px solid var(--town-line);
+  border-radius: 18px;
+  color: var(--town-cream);
+  background: linear-gradient(135deg, rgba(31, 42, 34, 0.9), rgba(22, 30, 27, 0.82));
+  box-shadow: 0 10px 28px rgba(27, 34, 27, 0.18);
+  backdrop-filter: blur(16px) saturate(1.08);
+}
+
+.town-topbar-identity,
+.town-topbar-clock,
+.town-topbar-weather,
+.town-topbar-sim,
+.town-topbar-metrics,
+.town-topbar-actions {
+  display: flex;
+  align-items: center;
+}
+
+.town-topbar-identity {
+  min-width: 188px;
+  gap: 9px;
+}
+
+.town-topbar-logo {
+  width: 34px;
+  height: 34px;
+  flex: 0 0 34px;
+  border-radius: 11px;
+  object-fit: contain;
+  box-shadow: 0 5px 14px rgba(0, 0, 0, 0.18);
+}
+
+.town-topbar-name {
+  min-width: 0;
+}
+
+.town-topbar-title {
+  overflow: hidden;
+  color: #fffaf0;
+  font-size: 13px;
+  font-weight: 800;
+  line-height: 1.2;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.town-topbar-sub,
+.town-topbar-day {
+  margin-top: 2px;
+  color: rgba(255, 248, 232, 0.62);
+  font-size: 9px;
+  font-weight: 650;
+  letter-spacing: 0.08em;
+  white-space: nowrap;
+}
+
+.town-topbar-sep {
+  width: 1px;
+  height: 28px;
+  flex: 0 0 1px;
+  background: var(--town-line);
+}
+
+.town-topbar-clock {
+  min-width: 65px;
+  flex-direction: column;
+  align-items: flex-start;
+}
+
+.town-topbar-time {
+  color: #fff8dc;
+  font-family: ui-monospace, SFMono-Regular, Menlo, monospace;
+  font-size: 13px;
+  font-weight: 750;
+  font-variant-numeric: tabular-nums;
+}
+
+.town-topbar-weather,
+.town-topbar-sim,
+.town-topbar-actions {
+  gap: 4px;
+}
+
+.town-topbar-weather button,
+.town-topbar-sim button,
+.town-topbar-chip {
+  min-width: 34px;
+  min-height: 34px;
+  border-radius: 10px;
+}
+
+.town-topbar-auto,
+.town-topbar-chip {
+  padding: 6px 9px;
+  color: rgba(255, 248, 232, 0.72);
+  font-size: 10px;
+  font-weight: 700;
+  background: rgba(255, 255, 255, 0.06);
+}
+
+.town-topbar-auto-on,
+.town-topbar-chip-on {
+  color: #ffeaa3;
+  background: rgba(242, 201, 76, 0.17);
+  box-shadow: inset 0 0 0 1px rgba(242, 201, 76, 0.28);
+}
+
+.town-topbar-metrics {
+  gap: 10px;
+  margin-left: auto;
+}
+
+.town-topbar-metrics > div {
+  gap: 4px;
+  min-width: 44px;
+  justify-content: center;
+  font-size: 11px;
+}
+
+.town-topbar-actions {
+  margin-left: auto;
+}
+
+.town-topbar button:focus-visible,
+.town-action:focus-visible,
+.quest-tracker-action:focus-visible,
+.chip-button:focus-visible {
+  outline: 2px solid #fff3bf;
+  outline-offset: 2px;
+}
+
+.town-status {
+  width: min(340px, calc(100vw - 32px));
+  overflow: hidden;
+  pointer-events: auto;
+  border: 1px solid var(--town-line);
+  border-radius: 15px;
+  color: var(--town-cream);
+  background: var(--town-panel);
+  box-shadow: 0 10px 26px rgba(25, 33, 27, 0.2);
+  backdrop-filter: blur(14px);
+}
+
+.town-status-summary {
+  width: 100%;
+  min-height: 46px;
+  display: grid;
+  grid-template-columns: auto minmax(0, 1fr) auto auto;
+  align-items: center;
+  gap: 8px;
+  padding: 8px 11px;
+  text-align: left;
+}
+
+.town-status-dot {
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+}
+
+.town-status-text {
+  min-width: 0;
+  display: flex;
+  flex-direction: column;
+}
+
+.town-status-label {
+  color: #fffaf0;
+  font-size: 11px;
+  font-weight: 800;
+}
+
+.town-status-detail {
+  overflow: hidden;
+  color: rgba(255, 248, 232, 0.58);
+  font-size: 9.5px;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.town-status-count,
+.town-status-chevron {
+  color: rgba(255, 248, 232, 0.68);
+  font-size: 10px;
+}
+
+.town-status-body {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  padding: 0 10px 10px;
+}
+
+.town-status-open .town-status-body {
+  max-height: 62vh;
+  max-height: min(
+    62dvh,
+    calc(
+      100dvh - 112px - var(--town-safe-top) - var(--town-safe-bottom)
+    )
+  );
+  overflow-y: auto;
+  overscroll-behavior: contain;
+  scrollbar-width: thin;
+}
+
+.town-generic-inspector {
+  max-height: calc(
+    100vh - 128px - var(--town-safe-top) - var(--town-safe-bottom)
+  );
+  max-height: min(
+    46rem,
+    calc(
+      100dvh - 128px - var(--town-safe-top) - var(--town-safe-bottom)
+    )
+  );
+  overflow-y: auto;
+  overscroll-behavior: contain;
+  scrollbar-width: thin;
+}
+
+.town-status-note {
+  color: rgba(255, 248, 232, 0.62);
+  font-size: 10px;
+  line-height: 1.55;
+}
+
+.town-status-cta {
+  min-height: 44px;
+  border-radius: 11px;
+  color: #203022;
+  background: #d9e8b8;
+  font-size: 11px;
+  font-weight: 800;
+}
+
+.town-tool-dock {
+  color: var(--town-cream);
+  background: var(--town-panel-strong) !important;
+  border-color: var(--town-line) !important;
+}
+
+.town-dock-button {
+  min-width: 58px;
+  min-height: 58px;
+}
+
+.town-dock-cost {
+  color: rgba(255, 248, 232, 0.56);
+  font-size: 8.5px;
+  line-height: 1;
+}
+
+.town-actions {
+  right: calc(16px + var(--town-safe-right));
+  bottom: calc(16px + var(--town-safe-bottom));
+  z-index: 22;
+}
+
+.town-status-wrap,
+.town-agent-detail-wrap {
+  bottom: calc(16px + var(--town-safe-bottom));
+  left: calc(16px + var(--town-safe-left));
+}
+
+.town-inspector-wrap,
+.town-metric-wrap {
+  top: calc(96px + var(--town-safe-top));
+  right: calc(16px + var(--town-safe-right));
+}
+
+.town-tool-wrap {
+  bottom: calc(16px + var(--town-safe-bottom));
+}
+
+.town-action {
+  min-height: 44px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  border-color: rgba(255, 248, 232, 0.18);
+  color: rgba(255, 248, 232, 0.78);
+  background: var(--town-panel);
+  box-shadow: 0 8px 22px rgba(28, 36, 29, 0.16);
+}
+
+.town-action-icon {
+  width: 44px;
+  padding-inline: 0;
+  font-size: 15px;
+  font-weight: 850;
+}
+
+.town-player-wrap,
+.town-quest-wrap,
+.phone-fab,
+.metro-legend {
+  z-index: 23;
+}
+
+.quest-tracker-action {
+  width: 100%;
+  min-height: 38px;
+  margin-top: 9px;
+  border-radius: 11px;
+  color: #203022;
+  background: linear-gradient(135deg, #f5d86f, #c9e29b);
+  font-size: 11px;
+  font-weight: 850;
+  box-shadow: 0 6px 16px rgba(20, 32, 22, 0.18);
+}
+
+.quest-tracker-action:hover {
+  filter: brightness(1.05);
+}
+
+.town-onboarding .town-topbar-weather,
+.town-onboarding .town-topbar-sim,
+.town-onboarding .town-topbar-metrics,
+.town-onboarding .town-topbar-actions,
+.town-onboarding .town-topbar-sep-wide,
+.town-onboarding .metro-legend {
+  display: none;
+}
+
+.town-onboarding .town-topbar-inner {
+  width: auto;
+  margin-right: auto;
+}
+
+.town-onboarding-stage-1 .phone-fab,
+.town-onboarding-stage-2 .phone-fab {
+  display: none;
+}
+
+@media (max-width: 900px) {
+  .town-metric-wrap {
+    top: calc(88px + var(--town-safe-top));
+    right: calc(16px + var(--town-safe-right));
+    left: calc(16px + var(--town-safe-left));
+  }
+
+  .town-inspector-wrap {
+    top: calc(168px + var(--town-safe-top));
+    right: calc(16px + var(--town-safe-right));
+  }
+
+  .town-topbar-inner {
+    width: calc(
+      100vw - 16px - var(--town-safe-left) - var(--town-safe-right)
+    );
+    gap: 7px;
+    border-radius: 14px;
+    padding: 6px 8px;
+  }
+
+  .town-topbar-identity {
+    min-width: 0;
+    flex: 1;
+  }
+
+  .town-topbar-sub,
+  .town-topbar-sep-wide,
+  .town-topbar-weather,
+  .town-topbar-sim {
+    display: none;
+  }
+
+  .town-topbar-metrics {
+    gap: 4px;
+  }
+
+  .town-topbar-metrics > div:nth-child(-n + 2) {
+    display: none;
+  }
+}
+
+@media (max-width: 680px) {
+  .town-metric-wrap {
+    top: calc(76px + var(--town-safe-top));
+    right: calc(8px + var(--town-safe-right));
+    left: calc(8px + var(--town-safe-left));
+  }
+
+  .town-inspector-wrap {
+    top: auto;
+    right: calc(8px + var(--town-safe-right));
+    bottom: calc(118.4px + var(--town-safe-bottom));
+  }
+
+  .town-tool-wrap {
+    right: calc(8px + var(--town-safe-right));
+    left: calc(8px + var(--town-safe-left));
+  }
+
+  .town-topbar-inner {
+    min-height: 50px;
+  }
+
+  .town-topbar-logo {
+    width: 30px;
+    height: 30px;
+    flex-basis: 30px;
+  }
+
+  .town-topbar-title {
+    font-size: 12px;
+  }
+
+  .town-topbar-clock,
+  .town-topbar-metrics,
+  .town-topbar-actions,
+  .town-topbar-sep {
+    display: none;
+  }
+
+  .town-quest-wrap {
+    right: calc(8px + var(--town-safe-right));
+    bottom: calc(148px + var(--town-safe-bottom));
+    left: calc(8px + var(--town-safe-left));
+  }
+
+  .quest-tracker {
+    width: 100%;
+  }
+
+  .town-onboarding .town-player-wrap {
+    bottom: calc(78px + var(--town-safe-bottom));
+  }
+
+  .town-onboarding .town-actions {
+    right: calc(8px + var(--town-safe-right));
+    bottom: calc(16px + var(--town-safe-bottom));
+    left: auto;
+    flex-direction: row;
+  }
+
+  /* A finished town exposes every utility at once. Keep the four mobile
+     edge layers in separate lanes: utility rail, quest, resident, tools.
+     The phone shares the resident lane, but the resident chip reserves its
+     width so neither control can cover the other. */
+  .town-graduated .town-actions {
+    top: calc(160px + var(--town-safe-top));
+    right: calc(8px + var(--town-safe-right));
+    bottom: auto;
+  }
+
+  /* Runtime truth is a primary control, so keep it out of the horizontally
+     scrolling build dock's tap lane. The narrow right gutter is reserved for
+     the utility rail below, while an expanded status panel grows over map
+     space instead of over another control. */
+  .town-graduated .town-status-wrap {
+    top: calc(76px + var(--town-safe-top));
+    right: calc(76px + var(--town-safe-right));
+    bottom: auto;
+    left: calc(8px + var(--town-safe-left));
+    z-index: 25;
+  }
+
+  .town-graduated .town-status {
+    width: 100%;
+  }
+
+  .town-graduated .town-status-open .town-status-body {
+    max-height: calc(
+      100dvh - 212px - var(--town-safe-top) - var(--town-safe-bottom)
+    );
+  }
+
+  .town-generic-inspector {
+    max-height: calc(
+      100dvh - 208px - var(--town-safe-top) - var(--town-safe-bottom)
+    );
+  }
+
+  .town-graduated .town-quest-wrap {
+    bottom: calc(158px + var(--town-safe-bottom));
+  }
+
+  .town-graduated .town-player-wrap {
+    right: calc(68px + var(--town-safe-right));
+    bottom: calc(82px + var(--town-safe-bottom));
+  }
+
+  .town-graduated .phone-fab {
+    right: calc(8px + var(--town-safe-right));
+    bottom: calc(87px + var(--town-safe-bottom));
+  }
+
+  .town-graduated .town-tool-wrap {
+    bottom: calc(8px + var(--town-safe-bottom));
+  }
+}
+
+/* A width-only phone layout fails on landscape devices: five 42px controls
+   cannot fit below y=160 in a 375px-tall viewport. Put utilities in one
+   horizontal lane, drop the already-completed quest receipt, and hide the
+   redundant map legend while vertical space is scarce. */
+@media (max-width: 680px) and (max-height: 430px) {
+  .town-graduated .metro-legend,
+  .town-graduated .town-quest-wrap {
+    display: none;
+  }
+
+  .town-graduated .town-actions {
+    top: calc(70px + var(--town-safe-top));
+    right: calc(8px + var(--town-safe-right));
+    left: calc(8px + var(--town-safe-left));
+    flex-direction: row;
+    align-items: stretch;
+    justify-content: flex-end;
+    overflow-x: auto;
+    scrollbar-width: none;
+  }
+
+  .town-graduated .town-actions::-webkit-scrollbar {
+    display: none;
+  }
+
+  .town-graduated .town-action {
+    min-height: 44px;
+    flex: 0 0 auto;
+  }
+
+  .town-graduated .town-action-icon {
+    width: 44px;
+  }
+
+  .town-toast-stack {
+    top: calc(70px + var(--town-safe-top));
+  }
+
+  .energy-valley-golden:has(.town-toast-stack) .town-actions {
+    visibility: hidden;
+    pointer-events: none;
+  }
+}
+
+/* Short landscape phones often exceed 680px in width, so height must own
+   this constraint. Both detail surfaces retain their own scroll completion
+   instead of escaping below the tool dock. */
+@media (orientation: landscape) and (max-height: 430px) {
+  .town-graduated .town-status-wrap {
+    top: calc(70px + var(--town-safe-top));
+    bottom: auto;
+  }
+
+  .town-graduated .town-status-open .town-status-body {
+    max-height: calc(
+      100dvh - 204px - var(--town-safe-top) - var(--town-safe-bottom)
+    );
+  }
+
+  .town-inspector-wrap {
+    top: calc(70px + var(--town-safe-top));
+    bottom: auto;
+  }
+
+  .town-generic-inspector {
+    max-height: calc(
+      100dvh - 158px - var(--town-safe-top) - var(--town-safe-bottom)
+    );
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .quest-tracker-action {
+    transition: none;
+  }
+}

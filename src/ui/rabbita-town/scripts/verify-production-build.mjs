@@ -121,6 +121,13 @@ assert.match(html, /id="app"/)
 assert.match(html, /src="\.\/bootstrap\.js"/)
 assert.match(html, /href="\.\/styles\.css"/)
 
+const viewportAlias = await readFile(path.join(distRoot, 'viewport.html'), 'utf8')
+assert.match(viewportAlias, /MoonTown · 能源谷/)
+assert.match(viewportAlias, /rel="canonical" href="\.\/index\.html"/)
+assert.doesNotMatch(viewportAlias, /standalone|legacy-viewport/i)
+assert.match(viewportAlias, /id="app"/)
+assert.match(viewportAlias, /src="\.\/bootstrap\.js"/)
+
 const bootstrap = await readFile(path.join(distRoot, 'bootstrap.js'), 'utf8')
 assert.match(bootstrap, /import\('\.\/main\.js'\)/)
 assert.doesNotMatch(bootstrap, /vite|react|typescript|\.tsx/i)

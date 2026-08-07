@@ -683,24 +683,25 @@ Important public types:
 
 Key files:
 
-- [src/ui/scene_layout.mbt](/Users/kq/Workspace/moontown/src/ui/scene_layout.mbt)
 - [src/ui/dashboard.mbt](/Users/kq/Workspace/moontown/src/ui/dashboard.mbt)
-- [src/ui/scene_render.mbt](/Users/kq/Workspace/moontown/src/ui/scene_render.mbt)
+- [src/ui/dashboard_render.mbt](/Users/kq/Workspace/moontown/src/ui/dashboard_render.mbt)
+- [src/ui/execution_view_stage.mbt](/Users/kq/Workspace/moontown/src/ui/execution_view_stage.mbt)
+- [src/ui/runtime_task_priority.mbt](/Users/kq/Workspace/moontown/src/ui/runtime_task_priority.mbt)
 
 Purpose:
 
-- semantic town scene layout
-- dashboard state projection
-- renderer-facing scene model
+- non-spatial operations summary projection
+- text rendering for CLI and diagnostics
 - reusable UI view-policy helpers such as execution-status stage grouping
 - reusable runtime visual priority helpers for choosing which task/execution a
   civic module should surface first
-- HTML bridge
 
 Boundary:
 
-- `src/ui` owns product-agnostic dashboard, scene layout, and view-policy
-  helpers that can be consumed by multiple frontends.
+- `src/ui` owns product-agnostic non-spatial dashboard and view-policy helpers.
+- Interactive map geometry belongs to `energy_valley_contract` and is projected
+  through `CompiledTownWorld` and `TownSnapshot`; `src/ui` must not define a
+  second coordinate or background contract.
 - UI applications should consume shared helpers such as
   `execution_view_stage_for_status(...)` and
   `runtime_task_priority_for_id(...)` instead of duplicating town execution

@@ -16,7 +16,7 @@ test "daemon detached shell line launches through nohup and captures pid" {
   )
   assert_true(line.contains("cd '/tmp/moontown cwd'"))
   assert_true(line.contains("&& { nohup '/Users/kq/.moon/bin/moon'"))
-  assert_true(line.contains("'run' 'cmd/main' '--'"))
+  assert_true(line.contains("'run' 'src/cmd/main' '--'"))
   assert_true(line.contains("'daemon' 'supervise' '--worker'"))
   assert_true(line.contains("echo $! > '/tmp/moontown.pid'"))
 }

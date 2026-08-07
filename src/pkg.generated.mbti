@@ -55,4 +55,3 @@ pub using @spatial_assets {type SpatialAssetIssue}
 pub using @spatial_assets {type TownPresentationAsset}
 
 // Traits
-

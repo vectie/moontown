@@ -53,4 +53,3 @@ pub fn wenyu_course_ui_state_json(@moonbook.BookCatalogEntry) -> String
 // Type aliases
 
 // Traits
-

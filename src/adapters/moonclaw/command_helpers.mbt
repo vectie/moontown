@@ -81,17 +81,29 @@ fn build_detached_shell_command_with_output(
   stderr_path : String,
 ) -> String {
   let builder = StringBuilder::new()
-  builder.write_string("nohup ")
+  // PID-qualified adjacent files avoid collisions. Only the final stdout
+  // rename is a receipt-readiness signal; abandoned partials are ignored.
+  builder.write_string("receipt_tmp=")
+  builder.write_string(shell_quote(stdout_path + ".partial."))
+  builder.write_string("$$; stderr_tmp=")
+  builder.write_string(shell_quote(stderr_path + ".partial."))
+  builder.write_string("$$; { ")
   builder.write_string(shell_quote(command))
   for arg in args {
     builder.write_char(' ')
     builder.write_string(shell_quote(arg))
   }
-  builder.write_string(" >")
-  builder.write_string(shell_quote(stdout_path))
-  builder.write_string(" 2>")
+  builder.write_string(
+    " >\"$receipt_tmp\" 2>\"$stderr_tmp\"; moontown_child_status=$?; if mv -f \"$stderr_tmp\" ",
+  )
   builder.write_string(shell_quote(stderr_path))
-  builder.write_string(" &")
+  builder.write_string(" && mv -f \"$receipt_tmp\" ")
+  builder.write_string(shell_quote(stdout_path))
+  // `&!` is zsh's background-and-disown operator. The group also detaches all
+  // standard descriptors, so the launcher can return while MoonClaw runs.
+  builder.write_string(
+    "; then exit \"$moontown_child_status\"; else exit 74; fi; } </dev/null >/dev/null 2>&1 &!",
+  )
   builder.to_string()
 }
 

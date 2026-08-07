@@ -17,8 +17,8 @@ async function fetchSnapshot(url) {
   }
 }
 
-export function setSnapshotFallback(snapshot) {
-  setSnapshotValue(snapshot, snapshot.fallback)
+export function setSnapshotFallback(snapshot, options = {}) {
+  return setSnapshotValue(snapshot, snapshot.fallback, options)
 }
 
 export function bumpSnapshotVersion(snapshot) {
@@ -26,24 +26,26 @@ export function bumpSnapshotVersion(snapshot) {
     (globalThis[snapshot.versionGlobal] || 0) + 1
 }
 
-function setSnapshotValue(snapshot, value, options = {}) {
+export function setSnapshotValue(snapshot, value, options = {}) {
+  const changed = !Object.is(globalThis[snapshot.jsonGlobal], value)
   globalThis[snapshot.jsonGlobal] = value
-  if (options.bumpVersion && snapshot.versionGlobal) {
+  if (changed && options.bumpVersion && snapshot.versionGlobal) {
     bumpSnapshotVersion(snapshot)
   }
+  return changed
 }
 
 async function loadSnapshotValue(snapshot, readValue, options = {}) {
   try {
     const response = await fetchSnapshot(snapshot.url)
     if (!response.ok) {
-      setSnapshotFallback(snapshot)
+      setSnapshotFallback(snapshot, options)
       return
     }
 
     setSnapshotValue(snapshot, await readValue(response), options)
   } catch {
-    setSnapshotFallback(snapshot)
+    setSnapshotFallback(snapshot, options)
   }
 }
 

@@ -105,7 +105,7 @@ evidence or civic progress.
 ## UI Contract
 
 The operator console should show the five standing watches as a portfolio, not
-as one hardcoded OPC panel. It should link to the standalone Wenyu viewport
+as one hardcoded OPC panel. It links to the canonical Energy Valley canvas
 instead of embedding a second, divergent map.
 
 Canonical viewport URLs:
@@ -113,10 +113,10 @@ Canonical viewport URLs:
 - `index.html?seed=20260727`
 - `index.html?seed=20260727&handoff_contract=<contract>&handoff_id=<id>&handoff_url=<url>`
 - `viewport.html` (compatibility alias to the canonical canvas)
-- `viewport.html?surface=legacy-viewport&mode=output` (explicit legacy-only
-  inspection surface; not a qualification target)
+- `operations.html` (the separate operations console)
 
 Building interiors are URL-addressable by `module=<module-id>`. The Back To
-Town control returns to the canonical map URL. Output mode is the retrieval
-surface for generated MoonBook reports, projections, review queues, and bridge
-records.
+Town control returns to the canonical map URL. Generated MoonBook reports,
+projections, review queues, and bridge records are reached from canonical
+building inspectors or the separate operations console; the retired raster
+output mode is no longer routed or built.

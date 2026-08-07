@@ -2,7 +2,6 @@
 priv enum TownSurfaceRoute {
   CanonicalEnergyValley
   OperationsConsole
-  LegacyStandaloneViewport
 }
 
 ///|
@@ -13,8 +12,6 @@ fn town_surface_route(
 ) -> TownSurfaceRoute {
   if handoff_requested {
     CanonicalEnergyValley
-  } else if surface == "legacy-viewport" {
-    LegacyStandaloneViewport
   } else if pathname.has_suffix("/operations.html") || surface == "operations" {
     OperationsConsole
   } else {
@@ -53,16 +50,11 @@ fn canonical_energy_valley_dashboard_href() -> String {
 }
 
 ///|
-fn legacy_viewport_editor_href() -> String {
-  "./viewport.html?surface=legacy-viewport&mode=editor&seed=\{active_energy_valley_seed()}"
+fn canonical_energy_valley_module_href(module_id : String) -> String {
+  canonical_energy_valley_href() + "&module=\{module_id}"
 }
 
 ///|
-fn legacy_viewport_module_href(module_id : String) -> String {
-  "./viewport.html?surface=legacy-viewport&mode=view&module=\{module_id}&seed=\{active_energy_valley_seed()}"
-}
-
-///|
-fn energy_valley_dashboard_requested(panel : String, mode : String) -> Bool {
-  panel == "dashboard" || mode == "output" || mode == "final"
+fn energy_valley_dashboard_requested(panel : String) -> Bool {
+  panel == "dashboard"
 }

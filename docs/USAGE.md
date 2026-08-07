@@ -242,9 +242,8 @@ authoring tools, building/runtime inspection, dashboard access, and typed
 interproduct handoffs.
 
 `/viewport.html` is a compatibility alias for the same canonical canvas. The
-retired raster editor/output shell is available only when an operator
-explicitly requests `surface=legacy-viewport`; it is not a product entrypoint
-or test target.
+retired `surface=legacy-viewport` and raster view/editor/output parameters have
+no routing effect; they also resolve to the canonical canvas.
 
 ## 1.5 Run A Building Communication Pattern Template
 
@@ -1380,49 +1379,42 @@ Do not model every worker as a persistent resident. Do not let temporary workers
 own durable memory. For memory promotion, wiki upkeep, review queues, and
 generated-site quality, route through the target MoonBook bookkeeper.
 
-## 6. Use The Scene Dashboard Model
+## 6. Use The Operations Summary And Compiled World
 
-The renderer-agnostic town scene lives in:
+The shared non-spatial operations summary lives in:
 
-- [src/ui/scene_layout.mbt](/Users/kq/Workspace/moontown/src/ui/scene_layout.mbt)
 - [ui/dashboard.mbt](/Users/kq/Workspace/moontown/src/ui/dashboard.mbt)
-- [src/ui/scene_render.mbt](/Users/kq/Workspace/moontown/src/ui/scene_render.mbt)
+- [src/ui/dashboard_render.mbt](/Users/kq/Workspace/moontown/src/ui/dashboard_render.mbt)
 
-Current flow:
+The interactive town uses a separate renderer-neutral contract:
 
 ```text
-TownState -> DashboardModel -> SceneRenderModel -> HTML / Rabbita
+Wenyu evidence + WorldDelta -> CompiledTownWorld -> TownSnapshot -> Rabbita Canvas
 ```
 
-Current semantic places:
+Use `src/ui` when you want to:
 
-- Town Gate
-- City Hall
-- Moonbook / Coding
-- Moonbook / Finance
-- Worker Yard
-- Anomaly Corner
+- change CLI/Operations status sections
+- change execution-stage display policy
+- change runtime visual priority policy
 
-Use this layer when you want to:
+Use `energy_valley_contract` and the Rabbita compiler bridge when you want to:
 
-- change the town layout
-- add new scene areas
-- change asset slots
-- add more dashboard-projected state
+- change roads, parcels, places, terrain, portals, or actors
+- add semantic public-realm objects
+- change map compilation or renderer-neutral snapshot fields
 
-## 7. Use The Scene Assets
+## 7. Use The Semantic Map Assets
 
-Current example assets live under:
+Archived concept assets live under (they are not production scene layers):
 
-- [src/ui/assets/backgrounds](/Users/kq/Workspace/moontown/src/ui/assets/backgrounds)
 - [src/ui/assets/buildings](/Users/kq/Workspace/moontown/src/ui/assets/buildings)
 - [src/ui/assets/actors](/Users/kq/Workspace/moontown/src/ui/assets/actors)
 - [src/ui/assets/props](/Users/kq/Workspace/moontown/src/ui/assets/props)
 - [src/ui/assets/effects](/Users/kq/Workspace/moontown/src/ui/assets/effects)
 
-Current starter assets:
+Archived starter references:
 
-- `backgrounds/town-square.svg`
 - `buildings/city-hall.svg`
 - `buildings/book-house-coding.svg`
 - `buildings/book-house-finance.svg`
@@ -1615,13 +1607,13 @@ Current dashboard surfaces:
   due tick, and latest watcher decision
 - request composer that submits new standing goals through the local MoonBit
   desktop-service endpoint
-- a compact Rabbita Town Launchpad linking to the standalone Wenyu map page
+- a compact Rabbita Town Launchpad linking to the canonical Energy Valley map
 - inspector sidebar
 - activity feed
 
 Current visual behaviors:
 
-- moving worker avatars in the standalone Wenyu viewport
+- moving runtime Agents in the canonical Energy Valley canvas
 - activity feed
 - anomaly surfacing
 - scene selection/inspector
@@ -1724,7 +1716,7 @@ Real now:
 - mayor-level research synthesis, integrated narrative, and quality gating
 - strategic mayor role model
 - dispatch and health model
-- scene dashboard model
+- non-spatial operations dashboard model
 - Rabbita simulation frontend
 
 Stubbed now:
@@ -1757,8 +1749,8 @@ If you want to:
   - start in [roles/mayor.mbt](/Users/kq/Workspace/moontown/src/roles/mayor.mbt)
 - change persisted books
   - start in [adapters/moonbook/client.mbt](/Users/kq/Workspace/moontown/src/adapters/moonbook/client.mbt)
-- change scene layout or assets
-  - start in [src/ui/scene_layout.mbt](/Users/kq/Workspace/moontown/src/ui/scene_layout.mbt)
+- change town world compilation or map semantics
+  - start in [src/energy_valley_contract](/Users/kq/Workspace/moontown/src/energy_valley_contract)
 - change browser UI behavior
   - start in [src/ui/rabbita-town/main/main.mbt](/Users/kq/Workspace/moontown/src/ui/rabbita-town/main/main.mbt)
 - change browser styling

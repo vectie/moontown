@@ -323,11 +323,11 @@ pub fn cookbook_core_features_markdown() -> String {
       "Visual And UI Projection",
       "Converts runtime and civic status into visible agents, buildings, effects, and messages for the town viewport.",
       [
-        "visual_projection_buildings.mbt", "visual_projection_agents.mbt", "ui/dashboard_town_map_places.mbt",
+        "visual_projection_buildings.mbt", "visual_projection_agents.mbt", "ui/rabbita-town/main/town_snapshot_canvas_projection.mbt",
       ],
       [
         "Count execution phases by book and worker.", "Derive building effects and module status.",
-        "Resolve assets and map places from scene layout.", "Emit projection messages and UI-safe records.",
+        "Resolve assets and map places from the accepted TownSnapshot.", "Emit projection messages and UI-safe records.",
       ],
       "AI may write summaries that become projection text after review, but browser-local UI state is never authoritative town state.",
       [

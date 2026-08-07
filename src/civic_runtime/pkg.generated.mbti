@@ -190,4 +190,3 @@ pub using @civic {type CivicCommunicationScenario}
 pub using @civic {type CivicCommunicationSchedule}
 
 // Traits
-

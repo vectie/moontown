@@ -340,6 +340,7 @@ fn render_knowledge_domain_inspector_shell(
   model : Model,
   building : GoldenValleyBuilding,
   domain : KnowledgeDomain,
+  snapshot : @energy_valley_contract.TownSnapshot,
 ) -> @rabbita.Html {
   div(
     class="knowledge-library-inspector pointer-events-auto rounded-2xl bg-slate-950/85 p-4 backdrop-blur-md border border-white/10 shadow-2xl",
@@ -357,6 +358,7 @@ fn render_knowledge_domain_inspector_shell(
           "✕",
         ),
       ]),
+      render_ecosystem_place_story(model, building, snapshot),
       render_knowledge_domain_library(model, domain),
       render_knowledge_domain_runtime_strip(model, building),
     ],

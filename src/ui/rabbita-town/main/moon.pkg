@@ -1,6 +1,8 @@
 import {
   "moonbitlang/core/json",
+  "moonbitlang/core/string",
   "moonbit-community/rabbita",
+  "moonbit-community/rabbita/cmd",
   "moonbit-community/rabbita/html",
   "moonbit-community/rabbita/html/canvas",
   "moonbit-community/rabbita/dom",
@@ -8,6 +10,7 @@ import {
   "vectie/moonlib/moonsuite",
   "vectie/moontown/core",
   "vectie/moontown/domain_catalog",
+  "vectie/moontown/energy_valley_contract",
   "vectie/moontown/health",
   "vectie/moontown/ui",
 }

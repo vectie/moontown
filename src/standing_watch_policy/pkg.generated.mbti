@@ -115,4 +115,3 @@ pub fn watcher_record_prefer_candidate(@core.WatcherRunRecord, @core.WatcherRunR
 // Type aliases
 
 // Traits
-

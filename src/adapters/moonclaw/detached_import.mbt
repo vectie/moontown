@@ -15,6 +15,7 @@ pub async fn import_packet_detached(
   let stderr_path = receipt_path + ".err"
   save_packet_file(resolved_packet_path, packet)
   ensure_parent_directory(receipt_path)
+  clear_detached_import_output(receipt_path, stderr_path)
   let cli_args = proposal_import_cli_args(
     resolved_packet_path, resolved_cwd, resolved_home, confirm, run_inline,
   )
@@ -34,6 +35,20 @@ pub async fn import_packet_detached(
     status: ProposalImported,
     command: "\{command} > \{receipt_path} 2> \{stderr_path}",
     summary: "Launched detached MoonClaw import for \{packet.packet_id}; waiting for receipt \{receipt_path}.",
+  }
+}
+
+///|
+async fn clear_detached_import_output(
+  receipt_path : String,
+  stderr_path : String,
+) -> Unit {
+  // Never remove PID-qualified partials here: one can belong to a live child.
+  // They are not receipt paths and therefore cannot be reconciled as output.
+  for path in [receipt_path, stderr_path] {
+    if @fs.exists(path) {
+      @fs.remove(path)
+    }
   }
 }
 

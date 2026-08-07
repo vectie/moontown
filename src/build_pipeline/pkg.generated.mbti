@@ -46,4 +46,3 @@ pub fn wenyu_module_name(@moonbook.BookCatalogEntry) -> String
 // Type aliases
 
 // Traits
-

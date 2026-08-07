@@ -414,6 +414,26 @@ fn execution_outcome_status(fields : Map[String, Json]) -> String? {
 }
 
 ///|
+/// A completed town task can retain a terminal MoonClaw handoff whose only
+/// outcome was explicitly triaged transient infrastructure contention. That
+/// row is useful recovery history, but it is not current blocked work. Keep
+/// the predicate deliberately narrow so ordinary blocked/failed executions
+/// remain actionable in the live task collection.
+fn terminal_transient_handoff_is_history(
+  task : Map[String, Json],
+  execution : Map[String, Json],
+) -> Bool {
+  let task_status = enum_key(json_string_field(task, "status"))
+  let execution_status = enum_key(json_string_field(execution, "status"))
+  let decision = enum_key(json_string_field(execution, "result_decision"))
+  let summary = json_string_field(execution, "summary").to_lower()
+  (task_status == "done" || task_status == "completed") &&
+  execution_status == "completed" &&
+  decision == "deferredtransientinfrastructure" &&
+  summary.contains("keeper_auto_triage: transient_infrastructure_contention")
+}
+
+///|
 fn town_task_status(
   task : Map[String, Json],
   execution : Map[String, Json],
@@ -457,6 +477,25 @@ fn watcher_task_status(watcher : Map[String, Json]) -> String? {
     // when its current decision is missing or unrecognized.
     _ => Some("blocked")
   }
+}
+
+///|
+/// A detached standing watch records `Deferred` while its external import is
+/// still producing a receipt. During that window the durable execution row is
+/// the stronger observation: `ProposalImported` means assigned and `Running`
+/// means the worker is still active. Once supervision marks the execution
+/// stale or failed, the watcher decision becomes authoritative again.
+fn projected_work_item_status(
+  task : Map[String, Json],
+  execution : Map[String, Json],
+  watcher : Map[String, Json],
+) -> String {
+  let execution_status = town_task_status(task, execution)
+  if enum_key(json_string_field(watcher, "decision")) == "deferred" &&
+    (execution_status == "assigned" || execution_status == "running") {
+    return execution_status
+  }
+  watcher_task_status(watcher).unwrap_or(execution_status)
 }
 
 ///|
@@ -641,9 +680,7 @@ fn town_work_item(
   let fields : Map[String, Json] = {
     "id": id,
     "title": title,
-    "status": watcher_task_status(watcher).unwrap_or(
-      town_task_status(task, execution),
-    ),
+    "status": projected_work_item_status(task, execution, watcher),
     "buildingModuleKey": building_module_key(book_id, bindings=book_bindings),
     "artifacts": Json::array(
       if !watcher_run_id.is_empty() && watcher_run_id != execution_run_id {
@@ -657,6 +694,10 @@ fn town_work_item(
     } else {
       "town-runtime"
     },
+  }
+  if watcher.length() == 0 &&
+    terminal_transient_handoff_is_history(task, execution) {
+    fields["recordScope"] = "history".to_json()
   }
   optional_item_field(fields, "bookId", book_id)
   optional_item_field(fields, "agentId", agent_id)
@@ -793,6 +834,23 @@ fn town_work_item(
 }
 
 ///|
+/// Route terminal recovery history away from the live task list. The marker
+/// is projection-internal and is removed before either collection is emitted.
+fn route_projected_work_item(
+  value : Json,
+  tasks : Array[Json],
+  history : Array[Json],
+) -> Unit {
+  guard value is Object(fields) else { return }
+  if json_string_field(fields, "recordScope") == "history" {
+    fields.remove("recordScope")
+    history.push(value)
+  } else {
+    tasks.push(value)
+  }
+}
+
+///|
 fn operator_work_item(
   value : Json,
   book_bindings : Map[String, String],
@@ -904,11 +962,19 @@ fn annotate_projected_task_activities(
 }
 
 ///|
+/// A book may contain evidence produced by a later run. Never attach those
+/// current-book pages to a terminal task that has no Run ID of its own.
+fn projected_task_can_link_results(fields : Map[String, Json]) -> Bool {
+  let status = json_string_field(fields, "status")
+  (status == "completed" || status == "waiting_review") &&
+  !json_string_field(fields, "runId").is_empty()
+}
+
+///|
 async fn attach_result_links(tasks : Array[Json]) -> Unit {
   for task in tasks {
     guard task is Object(fields) else { continue }
-    let status = json_string_field(fields, "status")
-    if status != "completed" && status != "waiting_review" {
+    if !projected_task_can_link_results(fields) {
       continue
     }
     let book_id = json_string_field(fields, "bookId")
@@ -1249,6 +1315,7 @@ async fn energy_valley_runtime_projection() -> Json {
     _ => ()
   }
   let tasks : Array[Json] = []
+  let history : Array[Json] = []
   let represented_requests : Map[String, Bool] = Map([])
   let represented_goals : Map[String, Bool] = Map([])
   let represented_watcher_tasks : Map[String, Bool] = Map([])
@@ -1285,7 +1352,7 @@ async fn energy_valley_runtime_projection() -> Json {
         if !standing_goal_id.is_empty() {
           represented_goals[standing_goal_id] = true
         }
-        tasks.push(value)
+        route_projected_work_item(value, tasks, history)
       }
       _ => ()
     }
@@ -1339,7 +1406,7 @@ async fn energy_valley_runtime_projection() -> Json {
         if !goal_id.is_empty() {
           represented_goals[goal_id] = true
         }
-        tasks.push(value)
+        route_projected_work_item(value, tasks, history)
       }
       None => ()
     }
@@ -1355,7 +1422,7 @@ async fn energy_valley_runtime_projection() -> Json {
           continue
         }
         match operator_work_item(item, book_bindings) {
-          Some(value) => tasks.push(value)
+          Some(value) => route_projected_work_item(value, tasks, history)
           None => ()
         }
       }
@@ -1386,6 +1453,7 @@ async fn energy_valley_runtime_projection() -> Json {
     "mode": "live",
     "observedAt": observed_at,
     "tasks": Json::array(tasks),
+    "history": Json::array(history),
     "agents": Json::array(
       {
         let agents = projected_agents(workers, tasks, book_bindings)

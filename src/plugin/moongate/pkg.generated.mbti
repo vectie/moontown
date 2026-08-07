@@ -59,4 +59,3 @@ pub fn MoonGateUsageSummary::from_json(Json) -> Result[Self, String]
 // Type aliases
 
 // Traits
-

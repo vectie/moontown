@@ -3,7 +3,7 @@ fn render_town_launchpad(
   model : Model,
   workers : Array[WorkerSim],
   executions : Array[@core.TaskExecutionRecord],
-  scene : @ui.SceneRenderModel,
+  town_title : String,
   alerts : Array[String],
 ) -> @rabbita.Html {
   let workers_summary = worker_count_summary(workers)
@@ -14,7 +14,7 @@ fn render_town_launchpad(
       div(class="town-launchpad-head", [
         div(class="town-launchpad-copy", [
           p(class="eyebrow", "MoonTown"),
-          h1(scene.title),
+          h1(town_title),
         ]),
         div(class="town-launchpad-actions", [
           render_town_launchpad_alert_chip(alerts, model),

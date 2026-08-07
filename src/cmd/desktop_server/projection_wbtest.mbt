@@ -158,6 +158,142 @@ test "desktop projection treats uncertain watcher outcomes conservatively" {
 }
 
 ///|
+test "desktop projection keeps a deferred detached import visibly active" {
+  assert_eq(
+    projected_work_item_status(
+      { "status": "Running" },
+      { "status": "ProposalImported" },
+      { "decision": "Deferred" },
+    ),
+    "assigned",
+  )
+  assert_eq(
+    projected_work_item_status(
+      { "status": "Running" },
+      { "status": "Running" },
+      { "decision": "Deferred" },
+    ),
+    "running",
+  )
+  assert_eq(
+    projected_work_item_status({ "status": "Running" }, { "status": "Stale" }, {
+      "decision": "Deferred",
+    }),
+    "blocked",
+  )
+  assert_eq(
+    projected_work_item_status(
+      { "status": "Running" },
+      { "status": "Running" },
+      { "decision": "NeedsReview" },
+    ),
+    "waiting_review",
+  )
+}
+
+///|
+test "desktop projection separates terminal transient triage from live blockers" {
+  let task : Map[String, Json] = {
+    "id": "legacy-review",
+    "title": "Review pending book updates",
+    "book_id": "coding",
+    "status": "Done",
+  }
+  let execution : Map[String, Json] = {
+    "task_id": "legacy-review",
+    "status": "Completed",
+    "result_decision": "deferred-transient-infrastructure",
+    "summary": "handoff failed\nkeeper_auto_triage: transient_infrastructure_contention",
+  }
+  assert_true(terminal_transient_handoff_is_history(task, execution))
+  let running_task = task.copy()
+  running_task["status"] = "Running"
+  assert_false(terminal_transient_handoff_is_history(running_task, execution))
+  let running_execution = execution.copy()
+  running_execution["status"] = "Running"
+  assert_false(terminal_transient_handoff_is_history(task, running_execution))
+  let failed_execution = execution.copy()
+  failed_execution["result_decision"] = "failed"
+  failed_execution["summary"] = "keeper_auto_triage: transient_infrastructure_contention"
+  assert_false(terminal_transient_handoff_is_history(task, failed_execution))
+  let untriaged_execution = execution.copy()
+  untriaged_execution["summary"] = "handoff failed and needs recovery"
+  assert_false(terminal_transient_handoff_is_history(task, untriaged_execution))
+
+  let projected = town_work_item(
+    task.to_json(),
+    Some(execution.to_json()),
+    Map([]),
+    None,
+    None,
+    Map([]),
+  ).unwrap()
+  guard projected is Object(projected_fields) else {
+    fail("terminal handoff did not produce a projected work item")
+  }
+  assert_eq(json_string_field(projected_fields, "status"), "blocked")
+  assert_eq(json_string_field(projected_fields, "recordScope"), "history")
+  let current : Array[Json] = []
+  let history : Array[Json] = []
+  route_projected_work_item(projected, current, history)
+  assert_eq(current.length(), 0)
+  assert_eq(history.length(), 1)
+  guard history[0] is Object(history_fields) else {
+    fail("historical work item was not preserved")
+  }
+  assert_false(history_fields.contains("recordScope"))
+  assert_eq(json_string_field(history_fields, "id"), "legacy-review")
+}
+
+///|
+test "desktop projection keeps genuine failures in the live task collection" {
+  let current : Array[Json] = []
+  let history : Array[Json] = []
+  let failed : Json = {
+    "id": "current-failure",
+    "title": "Current failure",
+    "status": "failed",
+    "buildingModuleKey": "policy-hall",
+    "artifacts": [],
+    "source": "town-runtime",
+  }
+  route_projected_work_item(failed, current, history)
+  assert_eq(current.length(), 1)
+  assert_eq(history.length(), 0)
+}
+
+///|
+test "desktop projection never lends current book evidence to a no-run task" {
+  assert_false(
+    projected_task_can_link_results({
+      "status": "completed",
+      "bookId": "research-agent-work-projection",
+    }),
+  )
+  assert_false(
+    projected_task_can_link_results({ "status": "waiting_review", "runId": "" }),
+  )
+  assert_true(
+    projected_task_can_link_results({
+      "status": "completed",
+      "runId": "run-20260807-003050-usersk",
+    }),
+  )
+  assert_true(
+    projected_task_can_link_results({
+      "status": "waiting_review",
+      "runId": "run-20260728-124233-usersk",
+    }),
+  )
+  assert_false(
+    projected_task_can_link_results({
+      "status": "running",
+      "runId": "run-still-running",
+    }),
+  )
+}
+
+///|
 test "desktop projection reads detailed watcher progress markers" {
   let watcher : Map[String, Json] = {
     "new_source_count": 8,

@@ -10,6 +10,7 @@ fn refresh_tick_state(model : Model) -> TickRefreshState {
     versions.energy_valley_runtime,
     model.energy_valley_runtime,
     browser_now_ms(),
+    town_tick=model.tick,
   )
   let visual_projection = refresh_visual_projection(
     versions.visual_projection,

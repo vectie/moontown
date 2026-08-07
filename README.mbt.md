@@ -4,7 +4,7 @@
 > [product contract](docs/PRODUCT_CONTRACT.md) for civic ownership, runtime
 > boundaries, capability status and release gates.
 
-> MoonBit-native town control plane + embedded strategic roles + scene dashboard + Rabbita operator UI
+> MoonBit-native town control plane + embedded strategic roles + compiled Energy Valley + Rabbita operator UI
 
 `MoonBit` `Town Orchestration` `MoonBook Extension API` `MoonClaw Proposal Packets` `Mayor` `Keeper` `Routing` `Health` `Storage` `Scene UI` `Rabbita`
 
@@ -66,11 +66,11 @@ Implemented today:
 - standing-goal due planning and dispatch into explicit MoonBook keeper lanes
 - strategic `Mayor` role adapter over embedded moonclaw runtime metadata
 - routing, isolation, scheduler, health, and storage packages
-- renderer-agnostic scene dashboard model
+- renderer-agnostic non-spatial operations dashboard model
 - Rabbita live simulation frontend
 - original example SVG scene assets
-- Wenyu Valley standalone tile viewport with configurable civic module
-  buildings and clickable interiors
+- canonical Wenyu Energy Valley canvas with compiled semantic roads, parcels,
+  buildings, Agents, and clickable procedural interiors
 - Wenyu civic service registry and `civic bootstrap` command that creates
   module-mode-aware support workspaces, schemas, review queues, generated
   projections, and dedicated MoonClaw skill contracts for enabled civic modules
@@ -151,7 +151,7 @@ deployment, backups, auth, and multi-day recovery evidence.
 - `src/roles` strategic `Mayor` role adapter
 - `src/adapters/moonbook` persisted book catalog plus real MoonBook CLI-backed harness requests
 - `src/adapters/moonclaw` embedded runtime profiles plus real MoonClaw proposal import, run, and polling boundary
-- `src/ui` scene layout, dashboard projection, and HTML render bridge
+- `src/ui` non-spatial operations projection and reusable view-policy helpers
 - `src/ui/rabbita-town` live browser dashboard with:
   - tick loop
   - pause/resume/step controls
@@ -619,7 +619,7 @@ activity and judgement, not pretend that the book improved.
 - `adapters/moonclaw`
   embedded runtime profiles plus real MoonClaw proposal import, run, and polling boundary
 - `ui`
-  scene contract, dashboard model, and render model
+  non-spatial operations dashboard and reusable view policies
 - `src/ui/rabbita-town`
   browser simulation dashboard
 
@@ -811,33 +811,36 @@ Current standing-goal path:
   -> standing goal next_due_tick advanced
 ```
 
-Current UI path:
+Current UI paths:
 
 ```text
 TownState
   -> DashboardModel
-  -> SceneRenderModel
-  -> Rabbita simulation dashboard
+  -> non-spatial operations summary
+
+Wenyu reference evidence + WorldDelta
+  -> CompiledTownWorld
+  -> TownSnapshot
+  -> Rabbita Energy Valley canvas
 ```
 
-## Town Scene
+## UI Projections
 
-The semantic town scene lives in:
+The shared non-spatial operations projection lives in:
 
-- `src/ui/scene_layout.mbt`
-- `ui/dashboard.mbt`
-- `src/ui/scene_render.mbt`
+- `src/ui/dashboard.mbt`
+- `src/ui/dashboard_render.mbt`
+- `src/ui/execution_view_stage.mbt`
+- `src/ui/runtime_task_priority.mbt`
 
-Current scene places:
+The interactive town world lives in:
 
-- Town Gate
-- City Hall
-- Moonbook / Coding
-- Moonbook / Finance
-- Worker Yard
-- Anomaly Corner
+- `src/energy_valley_contract/`
+- `src/ui/rabbita-town/main/ecosystem_world_bridge.mbt`
+- `src/ui/rabbita-town/main/town_snapshot_canvas_projection.mbt`
+- `src/ui/rabbita-town/main/energy_valley_canvas.mbt`
 
-Current asset folders:
+Current art folders:
 
 - `src/ui/assets/backgrounds/`
 - `src/ui/assets/buildings/`
@@ -845,8 +848,8 @@ Current asset folders:
 - `src/ui/assets/props/`
 - `src/ui/assets/effects/`
 
-The current assets are original `moontown` starter SVGs, not copied `sou`
-assets.
+These assets belong to the canonical compiled-world renderer; the operations
+summary does not own map geometry or a baked background.
 
 ## Rabbita Frontend
 

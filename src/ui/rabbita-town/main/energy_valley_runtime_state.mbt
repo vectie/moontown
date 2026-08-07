@@ -15,7 +15,8 @@ fn energy_valley_runtime_loading_state() -> EnergyValleyRuntimeState {
     projection: None,
     version: 0,
     fresh_at_ms: -1.0,
-    motion_started_at_ms: -1.0,
+    presence_started_at_tick: 0,
+    presence_clocks: [],
     error: "",
   }
 }
@@ -30,7 +31,8 @@ fn energy_valley_runtime_error_state(
     projection: None,
     version,
     fresh_at_ms: -1.0,
-    motion_started_at_ms: -1.0,
+    presence_started_at_tick: 0,
+    presence_clocks: [],
     error: message,
   }
 }
@@ -310,6 +312,11 @@ fn energy_valley_runtime_projection_validation_error(
   if !projection.tasks.all(energy_valley_runtime_work_item_is_valid) {
     return "Runtime projection contains an invalid work item."
   }
+  match projection.history {
+    Some(history) if !history.all(energy_valley_runtime_work_item_is_valid) =>
+      return "Runtime projection contains an invalid historical work item."
+    _ => ()
+  }
   if !projection.agents.all(energy_valley_runtime_agent_is_valid) {
     return "Runtime projection contains an invalid agent."
   }
@@ -334,10 +341,85 @@ fn energy_valley_runtime_state_at(
 }
 
 ///|
+fn energy_valley_runtime_journey_key(
+  projection : EnergyValleyRuntimeProjection,
+  agent : EnergyValleyRuntimeAgent,
+) -> String {
+  let task = energy_valley_runtime_task_for_agent_in_projection(
+    projection, agent,
+  )
+  let task_id = task.map(value => value.id).unwrap_or("")
+  let task_building = task.map(value => value.buildingModuleKey).unwrap_or("")
+  let current = agent.buildingModuleKey.unwrap_or(task_building)
+  let task_origin = match task {
+    Some(value) => value.originBuildingModuleKey
+    None => None
+  }
+  let task_destination = match task {
+    Some(value) => value.destinationBuildingModuleKey
+    None => None
+  }
+  let origin = agent.originBuildingModuleKey.unwrap_or(
+    task_origin.unwrap_or(current),
+  )
+  let destination = agent.destinationBuildingModuleKey.unwrap_or(
+    task_destination.unwrap_or(current),
+  )
+  let work_item = agent.workItemId.unwrap_or(task_id)
+  "\{agent.id}|\{work_item}|\{origin}|\{destination}"
+}
+
+///|
+/// Reconcile projection journeys against their previous clocks. Content-only
+/// changes preserve both clock domains; only a new journey key starts now.
+fn energy_valley_runtime_presence_clocks(
+  projection : EnergyValleyRuntimeProjection,
+  previous : Array[EnergyValleyRuntimePresenceClock],
+  town_tick : Int,
+  now_ms : Double,
+) -> Array[EnergyValleyRuntimePresenceClock] {
+  let result : Array[EnergyValleyRuntimePresenceClock] = []
+  for agent in projection.agents {
+    let journey_key = energy_valley_runtime_journey_key(projection, agent)
+    let mut started_at_tick = town_tick.max(0)
+    let mut started_at_ms = now_ms.max(0.0)
+    for clock in previous {
+      if clock.journey_key == journey_key {
+        started_at_tick = clock.started_at_tick
+        started_at_ms = clock.started_at_ms
+        break
+      }
+    }
+    result.push({ journey_key, started_at_tick, started_at_ms })
+  }
+  result
+}
+
+///|
+fn energy_valley_runtime_presence_clock_for_agent(
+  state : EnergyValleyRuntimeState,
+  agent : EnergyValleyRuntimeAgent,
+) -> EnergyValleyRuntimePresenceClock? {
+  match state.projection {
+    None => None
+    Some(projection) => {
+      let journey_key = energy_valley_runtime_journey_key(projection, agent)
+      for clock in state.presence_clocks {
+        if clock.journey_key == journey_key {
+          return Some(clock)
+        }
+      }
+      None
+    }
+  }
+}
+
+///|
 fn energy_valley_runtime_state_from_text(
   text : String,
   version : Int,
   now_ms : Double,
+  town_tick? : Int = 0,
 ) -> EnergyValleyRuntimeState {
   if text.trim().is_empty() {
     if version == 0 {
@@ -377,7 +459,13 @@ fn energy_valley_runtime_state_from_text(
       projection: Some(projection),
       version,
       fresh_at_ms: -1.0,
-      motion_started_at_ms: -1.0,
+      presence_started_at_tick: town_tick.max(0),
+      presence_clocks: energy_valley_runtime_presence_clocks(
+        projection,
+        [],
+        town_tick,
+        now_ms,
+      ),
       error: "",
     }
   }
@@ -393,7 +481,13 @@ fn energy_valley_runtime_state_from_text(
       projection: Some(projection),
       version,
       fresh_at_ms,
-      motion_started_at_ms: now_ms,
+      presence_started_at_tick: town_tick.max(0),
+      presence_clocks: energy_valley_runtime_presence_clocks(
+        projection,
+        [],
+        town_tick,
+        now_ms,
+      ),
       error: "",
     },
     now_ms,
@@ -414,6 +508,7 @@ fn refresh_energy_valley_runtime_state(
   version : Int,
   previous : EnergyValleyRuntimeState,
   now_ms : Double,
+  town_tick? : Int = 0,
 ) -> EnergyValleyRuntimeState {
   if version == previous.version {
     return energy_valley_runtime_state_at(previous, now_ms)
@@ -422,9 +517,22 @@ fn refresh_energy_valley_runtime_state(
     load_bootstrap_energy_valley_runtime_json(),
     version,
     now_ms,
+    town_tick~,
   )
   if next.phase != Error {
-    return next
+    return match next.projection {
+      Some(projection) =>
+        {
+          ..next,
+          presence_clocks: energy_valley_runtime_presence_clocks(
+            projection,
+            previous.presence_clocks,
+            town_tick,
+            now_ms,
+          ),
+        }
+      None => next
+    }
   }
   match previous.projection {
     Some(projection) =>
@@ -434,7 +542,8 @@ fn refresh_energy_valley_runtime_state(
           projection: Some(projection),
           version,
           fresh_at_ms: previous.fresh_at_ms,
-          motion_started_at_ms: previous.motion_started_at_ms,
+          presence_started_at_tick: previous.presence_started_at_tick,
+          presence_clocks: previous.presence_clocks,
           error: next.error,
         },
         now_ms,

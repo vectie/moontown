@@ -54,8 +54,13 @@ test "runtime v1 FromJson keeps task collaboration and result evidence" {
     ),
     3,
     110000.0,
+    town_tick=17,
   )
   assert_true(state.phase == Live)
+  assert_eq(state.presence_started_at_tick, 17)
+  assert_eq(state.presence_clocks.length(), 1)
+  assert_eq(state.presence_clocks[0].started_at_tick, 17)
+  assert_eq(state.presence_clocks[0].started_at_ms, 110000.0)
   let projection = state.projection.unwrap()
   assert_eq(projection.tick, Some(42))
   assert_eq(projection.tasks[0].id, "research-task")
@@ -68,6 +73,126 @@ test "runtime v1 FromJson keeps task collaboration and result evidence" {
   assert_eq(
     projection.tasks[0].resultLinks.unwrap()[0].url,
     "/book-output/policy-hall/report.html",
+  )
+}
+
+///|
+test "runtime journey clocks preserve motion and reset only changed journeys" {
+  let state = energy_valley_runtime_state_from_text(
+    energy_valley_runtime_test_projection_text(
+      "1970-01-01T00:01:40.000Z", "live",
+    ),
+    3,
+    110000.0,
+    town_tick=17,
+  )
+  let projection = state.projection.unwrap()
+  let second_task = {
+    ..projection.tasks[0],
+    id: "research-task-2",
+    agentId: Some("agent-2"),
+    agentName: Some("Builder"),
+    runId: Some("run-second"),
+    buildingModuleKey: "social-square",
+    originBuildingModuleKey: Some("policy-hall"),
+    destinationBuildingModuleKey: Some("social-square"),
+  }
+  let second_agent = {
+    ..projection.agents[0],
+    id: "agent-2",
+    name: "Builder",
+    buildingModuleKey: Some("social-square"),
+    workItemId: Some("research-task-2"),
+    runId: Some("run-second"),
+    originBuildingModuleKey: Some("policy-hall"),
+    destinationBuildingModuleKey: Some("social-square"),
+  }
+  let two_agent_projection = {
+    ..projection,
+    tasks: [projection.tasks[0], second_task],
+    agents: [projection.agents[0], second_agent],
+  }
+  let initial_clocks = energy_valley_runtime_presence_clocks(
+    two_agent_projection,
+    [],
+    17,
+    110000.0,
+  )
+  let content_refresh = {
+    ..two_agent_projection,
+    observedAt: "1970-01-01T00:02:25.000Z",
+    tasks: [
+      {
+        ..projection.tasks[0],
+        summary: Some("Progress changed"),
+        updatedAt: Some("1970-01-01T00:02:25.000Z"),
+      },
+      second_task,
+    ],
+  }
+  let stable_clocks = energy_valley_runtime_presence_clocks(
+    content_refresh, initial_clocks, 91, 145000.0,
+  )
+  assert_eq(stable_clocks[0].started_at_tick, 17)
+  assert_eq(stable_clocks[0].started_at_ms, 110000.0)
+  assert_eq(stable_clocks[1].started_at_tick, 17)
+  assert_eq(stable_clocks[1].started_at_ms, 110000.0)
+  let refreshed_state = {
+    ..state,
+    projection: Some(content_refresh),
+    presence_clocks: stable_clocks,
+  }
+  assert_eq(
+    golden_valley_runtime_agent_motion_seconds_at(
+      refreshed_state,
+      content_refresh.agents[0],
+      145000.0,
+    ),
+    35.0,
+  )
+  assert_eq(
+    golden_valley_runtime_agent_motion_seconds_at(
+      refreshed_state,
+      content_refresh.agents[1],
+      145000.0,
+    ),
+    35.0,
+  )
+  let changed_second_agent = {
+    ..content_refresh.agents[1],
+    destinationBuildingModuleKey: Some("town-shell"),
+  }
+  let changed_projection = {
+    ..content_refresh,
+    agents: [content_refresh.agents[0], changed_second_agent],
+  }
+  let changed_clocks = energy_valley_runtime_presence_clocks(
+    changed_projection, stable_clocks, 91, 150000.0,
+  )
+  assert_eq(changed_clocks[0].started_at_tick, 17)
+  assert_eq(changed_clocks[0].started_at_ms, 110000.0)
+  assert_eq(changed_clocks[1].started_at_tick, 91)
+  assert_eq(changed_clocks[1].started_at_ms, 150000.0)
+  let changed_state = {
+    ..refreshed_state,
+    projection: Some(changed_projection),
+    presence_clocks: changed_clocks,
+  }
+  assert_eq(
+    golden_valley_runtime_agent_motion_seconds_at(
+      changed_state,
+      changed_projection.agents[0],
+      160000.0,
+    ),
+    50.0,
+  )
+  assert_eq(
+    golden_valley_runtime_agent_motion_seconds_at(
+      changed_state,
+      changed_projection.agents[1],
+      160000.0,
+    ),
+    10.0,
   )
 }
 

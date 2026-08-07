@@ -41,4 +41,3 @@ pub fn wiki_course_skill_path() -> String
 // Type aliases
 
 // Traits
-

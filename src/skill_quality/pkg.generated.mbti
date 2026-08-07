@@ -13,4 +13,3 @@ pub fn exploration_quality_contract_section() -> String
 // Type aliases
 
 // Traits
-

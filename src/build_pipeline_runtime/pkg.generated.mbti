@@ -22,4 +22,3 @@ pub async fn wenyu_book_ready_for_build(@moonbook.BookCatalogEntry) -> Bool
 // Type aliases
 
 // Traits
-

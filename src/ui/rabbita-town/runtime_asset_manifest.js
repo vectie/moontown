@@ -5,7 +5,6 @@ import path from 'node:path'
 const FIXED_RUNTIME_ASSETS = [
   'moontown.svg',
   'moonsuite-i18n.js',
-  'backgrounds/town-square.svg',
   'effects/anomaly-signal.svg',
   'props/gate-sign.svg',
   'tilemap/actors/keeper_walk_1.png',

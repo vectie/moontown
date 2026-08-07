@@ -31,4 +31,3 @@ pub fn watcher_status_summary(Array[@core.WatcherRunRecord], Array[@core.Standin
 pub using @runtime_status_policy {type TownRuntimeStatus}
 
 // Traits
-

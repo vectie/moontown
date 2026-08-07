@@ -21,4 +21,3 @@ pub async fn render_app_tool_book_status(book_id? : String, workspace_root? : St
 // Type aliases
 
 // Traits
-

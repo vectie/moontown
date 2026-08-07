@@ -44,9 +44,8 @@ http://127.0.0.1:17842/index.html?seed=20260727
 
 Use `/index.html?seed=20260727` in every qualification record. The bare
 `/viewport.html` path is only a compatibility alias to the same canvas;
-`v=wenyu` and `v=wenyu-modules` are retired labels with no routing effect. The
-old raster shell is available only through `surface=legacy-viewport` and is not
-a qualification target.
+`v=wenyu`, `v=wenyu-modules`, and `surface=legacy-viewport` are retired labels
+with no routing effect. There is no second raster product surface.
 
 ## MT-01 — operate the Energy Valley canvas
 
@@ -149,9 +148,10 @@ Expected visible result:
   run.
 - MoonClaw remains active: inspect the existing MoonClaw run and reconcile; do
   not switch to a template/fixture reducer in a production qualification.
-- Old standalone viewport remains visible: remove
-  `surface=legacy-viewport`, open `/index.html?seed=20260727`, rebuild the
-  Rabbita bundle, restart the service, and reload the tab.
+- A stale standalone viewport remains visible: open
+  `/index.html?seed=20260727`, rebuild the Rabbita bundle, restart the service,
+  and reload without cached assets. Current builds cannot select that retired
+  renderer through a query parameter.
 
 ## Qualification record
 

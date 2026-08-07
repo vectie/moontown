@@ -7,6 +7,9 @@ _build/
 .moonagent/
 .moontown/
 .moonclaw/
+.shots/
+.kimi-audit/
+before-screenshot.png
 /books/
 /raw/
 ui/rabbita-town/dist/

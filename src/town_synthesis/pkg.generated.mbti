@@ -36,4 +36,3 @@ pub(all) struct TownSynthesisLaneReport {
 // Type aliases
 
 // Traits
-

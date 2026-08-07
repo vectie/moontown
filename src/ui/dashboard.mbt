@@ -29,35 +29,9 @@ pub impl Show for DashboardSection with fn output(
 }
 
 ///|
-pub struct TownMapPlace {
-  key : String
-  title : String
-  kind : SceneAreaKind
-  subtitle : String
-  x : Int
-  y : Int
-  width : Int
-  height : Int
-  asset_paths : Array[String]
-  lines : Array[String]
-} derive(Debug, Eq)
-
-///|
-pub impl Show for TownMapPlace with fn output(
-  self : TownMapPlace,
-  logger : &Logger,
-) -> Unit {
-  logger.write_string(
-    "TownMapPlace(key=\{self.key}, title=\{self.title}, kind=\{self.kind.to_string()}, x=\{self.x}, y=\{self.y}, width=\{self.width}, height=\{self.height}, assets=\{self.asset_paths.length()}, lines=\{self.lines.length()})",
-  )
-}
-
-///|
 pub struct DashboardModel {
   title : String
   alerts : Array[AlertBanner]
-  scene_layout : TownSceneLayout
-  town_map : Array[TownMapPlace]
   sections : Array[DashboardSection]
 } derive(Debug, Eq)
 
@@ -67,7 +41,7 @@ pub impl Show for DashboardModel with fn output(
   logger : &Logger,
 ) -> Unit {
   logger.write_string(
-    "DashboardModel(title=\{self.title}, alerts=\{self.alerts.length()}, town_map=\{self.town_map.length()}, sections=\{self.sections.length()})",
+    "DashboardModel(title=\{self.title}, alerts=\{self.alerts.length()}, sections=\{self.sections.length()})",
   )
 }
 
@@ -80,8 +54,6 @@ pub fn build_dashboard(
   for anomaly in report.anomalies {
     alerts.push({ level: "warning", text: anomaly.detail })
   }
-  let scene_layout = default_town_scene_layout()
-  let town_map = build_town_map(scene_layout, town, report)
-  let sections = build_dashboard_sections(town)
-  { title: town.config.name, alerts, scene_layout, town_map, sections }
+  let sections = build_dashboard_sections(town, report)
+  { title: town.config.name, alerts, sections }
 }

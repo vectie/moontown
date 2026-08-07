@@ -13,4 +13,3 @@ pub async fn render_wenyu_game_design_course_status(workspace_root? : String) ->
 // Type aliases
 
 // Traits
-

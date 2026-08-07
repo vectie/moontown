@@ -143,6 +143,8 @@ test "energy valley module placement is deterministic and seed-sensitive" {
 ///|
 test "energy valley module placement preserves spatial invariants" {
   for seed in [20260727, 20260728, 17, 99173, 812381] {
+    let road_network = energy_valley_authoritative_road_network(seed)
+    let road_nodes = ecosystem_road_network_node_lookup(road_network)
     let modules = procedural_energy_valley_modules(
       energy_valley_test_modules(),
       seed,
@@ -161,12 +163,13 @@ test "energy valley module placement preserves spatial invariants" {
       assert_true(
         energy_valley_footprint_is_buildable(
           seed,
+          road_nodes,
           civic,
           civic.grid_x,
           civic.grid_y,
         ),
       )
-      assert_true(energy_valley_module_has_road_entrance(seed, civic))
+      assert_true(energy_valley_module_has_road_entrance(road_network, civic))
     }
   }
 }

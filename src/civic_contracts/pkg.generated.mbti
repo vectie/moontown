@@ -49,4 +49,3 @@ pub fn wenyu_vision_path() -> String
 // Type aliases
 
 // Traits
-

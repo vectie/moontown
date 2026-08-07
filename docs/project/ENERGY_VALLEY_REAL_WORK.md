@@ -73,6 +73,27 @@ The runtime projection does not create arrival events or increase building
 vitality. Building and agent inspectors expose the real task and run IDs so an
 operator can distinguish evidence from animation.
 
+## Resident-to-result workflow
+
+The browser exposes the runtime contract through three connected surfaces:
+
+- **Residents** lists only Agents present in the runtime projection. Search,
+  map selection, phone context, and the profile use one canonical resolver:
+  exact work-item identity, exact Run ID, collaboration Run ID, then a stable
+  newest/status-ranked legacy Agent fallback.
+- **Resident profile** shows the resolved workplace and keeps the task receipt
+  collapsed until requested. Local artifact paths and command output are never
+  copied into narrative UI; only allowlisted result pages are clickable.
+- **Town Today** narrates the durable task ledger and labels browser-local town
+  activity separately. A stale snapshot is history, never current work.
+
+The resident request action pre-fills the resolved Agent, Work item, Run ID,
+MoonBook, and building as context for a durable standing-watch request. It is
+not a targeted assignment: Mayor scheduling chooses the final executing Agent.
+After submission, the new work must re-enter the same runtime projection before
+the UI calls it active, and a Run ID plus allowlisted result page is required
+before the UI presents completion evidence.
+
 ## Packaging boundary
 
 The Lepusa package bundles a narrow native MoonBit desktop service. Lepusa

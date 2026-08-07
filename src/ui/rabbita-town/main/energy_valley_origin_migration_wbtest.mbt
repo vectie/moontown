@@ -16,21 +16,27 @@ test "default valley is generated from the authored JSON migration process" {
 }
 
 ///|
-test "road placement uses the reference bridge price and park rejects water" {
+test "connected road placement uses the reference bridge price and park rejects water" {
   let base = { ..init_model(), energy_weather: Sunny }
   let seed = 20260727
-  let world = exact_energy_valley_generate_int(seed)
-  let mut water_x = 0
-  let mut water_y = 0
-  for y in 60..<85 {
-    for x in 105..<150 {
-      if world.terrain_at(x, y) == Some("water") {
-        water_x = x
-        water_y = y
+  let world = ecosystem_contract_world_for_model(base, seed)
+  let mut water = None
+  for y in 1..<(golden_valley_rows() - 1) {
+    for x in 1..<(golden_valley_cols() - 1) {
+      if ecosystem_contract_terrain_kind_at(world, x, y)
+        is Some(@energy_valley_contract.Water) &&
+        golden_valley_contract_road_node_at(world, x, y) is None &&
+        golden_valley_contract_place_at(world, x, y) is None &&
+        golden_valley_contract_road_candidate_connected(world, x, y) {
+        water = Some((x, y))
+        break
       }
     }
+    if water is Some(_) {
+      break
+    }
   }
-  assert_true(water_x > 0)
+  let (water_x, water_y) = water.unwrap()
   let screen_x = golden_screen_x(
       water_x.to_double() + 0.5,
       water_y.to_double() + 0.5,
@@ -50,21 +56,22 @@ test "road placement uses the reference bridge price and park rejects water" {
     screen_x,
     screen_y,
   )
-  assert_eq(bridge.energy_build_budget, 2280)
+  assert_eq(energy_valley_model_budget(bridge), 2280)
   assert_eq(bridge.energy_toast, "新桥贯通温榆河（-120）")
-  assert_eq(bridge.energy_roads.length(), 1)
+  assert_eq(energy_valley_model_roads(bridge).length(), 1)
   let park = energy_valley_canvas_click_model(
     { ..base, energy_tool: ParkTool },
     screen_x,
     screen_y,
   )
-  assert_eq(park.energy_build_budget, 2400)
+  assert_eq(energy_valley_model_budget(park), 2400)
   assert_eq(park.energy_toast, "仅可改造草地、草甸或农田")
 }
 
 ///|
 test "custom buildings use the reference half-price demolition refund" {
   let building = {
+    authored_id: None,
     module_key: None,
     name: "创新工坊 1",
     style: "custom-hall",
@@ -107,7 +114,7 @@ test "demo clock and weather begin from the reference simulation state" {
   assert_eq(energy_valley_sim_clock(model), "09:12")
   assert_eq(energy_valley_sim_day(model), 1)
   assert_true(model.energy_weather == Sunny)
-  assert_eq(model.energy_build_budget, 2400)
+  assert_eq(energy_valley_model_budget(model), 2400)
 }
 
 ///|
@@ -122,7 +129,7 @@ test "real work dialog exposes the existing live request composers" {
       render_energy_valley_request_dialog(dashboard_test_dispatch(), model),
     ),
   )
-  assert_true(html.contains("派遣真实协作工作"))
+  assert_true(html.contains("创建真实工作请求"))
   assert_true(html.contains("Ask the town to keep watching"))
   assert_true(html.contains("Save Watch"))
 }
@@ -149,13 +156,18 @@ test "building inspector only claims real work assigned to that building" {
     110000.0,
   )
   let buildings = golden_valley_buildings(20260727)
+  let town_hall_model = {
+    ..init_model(),
+    energy_valley_runtime: runtime,
+    energy_selected_building: Some(buildings[0]),
+  }
   let town_hall_html = @rabbita.render_to_string(
     @rabbita.static_cell(
-      render_energy_valley_inspector(dashboard_test_dispatch(), {
-        ..init_model(),
-        energy_valley_runtime: runtime,
-        energy_selected_building: Some(buildings[0]),
-      }),
+      render_energy_valley_inspector(
+        dashboard_test_dispatch(),
+        town_hall_model,
+        ecosystem_contract_town_snapshot(town_hall_model, 20260727),
+      ),
     ),
   )
   assert_true(town_hall_html.contains("真实工作"))
@@ -163,19 +175,24 @@ test "building inspector only claims real work assigned to that building" {
     town_hall_html.contains("这座建筑当前没有真实运行时任务。"),
   )
   assert_false(town_hall_html.contains("Collaborated research"))
+  let policy_model = {
+    ..init_model(),
+    energy_valley_runtime: runtime,
+    energy_selected_building: Some(buildings[1]),
+  }
   let policy_html = @rabbita.render_to_string(
     @rabbita.static_cell(
-      render_energy_valley_inspector(dashboard_test_dispatch(), {
-        ..init_model(),
-        energy_valley_runtime: runtime,
-        energy_selected_building: Some(buildings[1]),
-      }),
+      render_energy_valley_inspector(
+        dashboard_test_dispatch(),
+        policy_model,
+        ecosystem_contract_town_snapshot(policy_model, 20260727),
+      ),
     ),
   )
   assert_true(policy_html.contains("Collaborated research"))
   assert_true(policy_html.contains("Policy Hall · 协议制定与治理"))
   assert_true(policy_html.contains("running · run-parent"))
-  assert_true(policy_html.contains("在内 Agent"))
+  assert_true(policy_html.contains("此刻在这里"))
   assert_false(policy_html.contains("module=policy-hall"))
 }
 

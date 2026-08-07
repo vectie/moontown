@@ -21,14 +21,17 @@ JavaScript in this directory is browser, local-server, and build verification
 glue. Product state, rendering, town generation, work projection, and
 interaction behavior remain in MoonBit source.
 
-It consumes the renderer-agnostic scene contracts from the root module:
+The separate OperationsConsole consumes only non-spatial summary and view-policy
+contracts from the root module:
 
-- `vectie/moontown/ui/scene_layout`
 - `vectie/moontown/ui/dashboard`
-- `vectie/moontown/ui/scene_render`
+- `vectie/moontown/ui/execution_view_stage`
+- `vectie/moontown/ui/runtime_task_priority`
 
-The intent is to keep town orchestration and scene modeling in the main module
-while this package provides a browser shell that can be built for JS.
+The canonical Energy Valley consumes `CompiledTownWorld` and `TownSnapshot`
+from `vectie/moontown/energy_valley_contract`. `/index.html` is the product
+surface, `/operations.html` is the separate operations console, and historical
+`/viewport.html` is an alias to the canonical product—not a second renderer.
 
 ## Current UI Model
 
@@ -44,6 +47,12 @@ It currently includes:
 - request desk with standing-watch and PDF evidence-book creation paths
 - attention workbench with priority guidance and activity ledger
 - generated Wenyu Valley map with animated real-agent overlay
+- a searchable runtime-resident directory with evidence-backed profiles,
+  workplace focus, and context-prefilled durable work requests
+- a "Town Today" chronicle derived from durable work items, Run IDs,
+  collaboration records, and allowlisted result links
+- direct map selection for walking runtime Agents using the same route and
+  camera math as the renderer
 - deterministic procedural building interiors with runtime work stations
 - stronger keyboard focus visibility
 
@@ -73,6 +82,14 @@ document contract when turning a user request into a durable Mayor queue item.
 The packaged entry opens the Wenyu Valley workspace directly. Districts,
 residents, standing watches, active work, procedural interiors, and evidence
 handoffs are inspected in place.
+
+Runtime truth remains explicit across these social surfaces: stale snapshots
+are presented as history, decorative residents never enter the real roster or
+chronicle, and movement is never treated as completion evidence.
+Opening a request from a resident copies the exact Work item, Run ID, MoonBook,
+and building context when present. It does not promise a targeted assignment:
+the Mayor scheduler still chooses the executing Agent, and only the subsequent
+runtime ledger and result links prove that work happened.
 
 This package owns the MoonTown operator dashboard only. It does not own the
 generated MoonBook site that appears under live workspace directories such as

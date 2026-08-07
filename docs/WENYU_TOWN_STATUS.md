@@ -68,7 +68,7 @@ module.
 | Knowledge domain catalog | Medium-near | A typed 16-domain catalog binds 101 book specifications and 12 governed generation policies to exact registered buildings; only 32 are active priorities, catalog declaration is visibly separated from real projection/acceptance, and active books still need providers, sources, installed workspaces, and accepted revision histories |
 | Runtime architecture | Medium-near | Civic protocol behavior now has a documented refactor path, the communication-pattern scheduler is split away from generic daemon code, daemon scheduled jobs use a dispatcher, and protocol registry/store/status/fixtures are separated; package-level civic runtime splits and stronger contract validation are still pending |
 | Self-patching evidence | Not yet proven | PlanBook can route bounded repairs to MoonClaw/Codex ACP, but route wiring is not enough. Accepted source repairs now require `planbook.repair.patch_receipt.v1`; without that receipt, ACP runs remain diagnostics or blockers, not proof that the town patched its own source. |
-| Designer/operator tooling | Medium | JSON config works, the standalone viewport has view/editor/output modes, editor mode shows town-level MoonDesk handoff lanes, and detailed single-agent/workspace editing remains in MoonDesk |
+| Designer/operator tooling | Medium | JSON config works, canonical Map Lab exposes compiler evidence and rejection diagnostics, the separate operations console shows runtime work, and detailed single-agent/workspace editing remains in MoonDesk |
 | Cookbook/control book | Medium-far | `cookbook bootstrap` creates a MoonBook-backed stable-state cookbook, generated wiki pages, generated site, and `.moonsuite/products/moontown/cookbook/stable-state.json`; needs MoonDesk-native browsing/editing, drift review UI, import/export, and MoonBook-native templates upstream |
 | Production deployment | Far | Auth, backups, permissions, packaged supervisor, and recovery playbooks are not complete |
 
@@ -101,19 +101,19 @@ A fully functioning Wenyu town means:
 | Area | Current State | Completion | Main Gap |
 |---|---|---:|---|
 | Wenyu terrain map | 256 x 144 tiled visual surface with river, lakes, farms, roads, bridges, drag, and zoom | 70% | Needs richer depth, seasonal overlays, fog/cloud layers, and perf budgets for lower-end browsers |
-| Civic module registry | `wenyu-town-modules.json` can add, remove, move, size, style, and configure feature buildings; runtime validation now catches missing bindings, bad footprints, and bad placement | 70% | Needs standalone schema checks, asset checks, write-back editor, and designer preview |
+| Civic module registry | `wenyu-town-modules.json` can add, remove, move, size, style, and configure feature buildings; runtime validation now catches missing bindings, bad footprints, and bad placement | 70% | Needs stronger asset checks, governed write-back, and richer Map Lab previews |
 | Building protocol registry | Protocol definitions exist for every Wenyu civic building; Social Square has durable inbox/contribution/reduction/outbox/review/home-return proof slices plus effectiveness metrics; the UI can show protocol review pressure | 48% | Need real scenario packets, AI reducers, MoonBook accept/reject persistence, and UI protocol history for every building |
 | Module buildings | 16 configurable white-tech pavilion buildings render above terrain, including 11 civic modules and 5 research-domain homes; entrances bind to the existing map road/urban fabric | 62% | Needs base/roof/shadow/glow split layers and more precise collision/occlusion |
 | Canonical building inspector | Click opens an in-canvas domain library with policy, cadence, primary/supporting books, real projection joins, and live runtime strip; custom/unregistered buildings retain a compact fallback inspector | 72% | Needs deeper accepted-change history, domain-level provisioning controls, and repeated live service evidence |
 | Water effects | Runtime overlay adds depth, reflection, and bridge shadow | 35% | Needs richer segmented river logic and seasonal/weather response |
 | Agents on map | Evidence-derived live activities route from home to destination; disconnected mode has an explicitly labeled, capped knowledge-flow preview for research, discussion, review, revision, and return | 68% | Needs durable journey timestamps/checkpoints for exact restart replay and broader live task coverage |
-| Operator dashboard | Shows daemon/watch progress, a multi-topic watch portfolio, request composer, portal to canonical viewport, output mode, and MoonDesk bridge visibility | 68% | Needs approval queues and richer per-book progress panels |
+| Operator dashboard | Shows daemon/watch progress, a multi-topic watch portfolio, request composer, portal to the canonical canvas, and MoonDesk bridge visibility | 68% | Needs approval queues and richer per-book progress panels |
 | Mayor daemon | Local run/start/doctor/stop, heartbeat, stale detection, standing-goal dispatch, supervisor/worker runtime health, and nonblocking MoonClaw supervision | 68% | Needs multi-day soak evidence, deployment hardening, and recovery playbooks |
 | Standing watchers | Data-driven standing goals and watcher ledgers exist; the final portfolio installs OPC, LLM training, Robotics, Agents, and Hardware watches, and live books are now merged into book-quality auditing | 70% | Need stronger accepted-change views, repeated accepted deltas, and longer evidence that no-change cycles do not inflate progress |
 | MoonBook memory binding | Research books and generated projections work for research lanes; live research books from the town snapshot are included in quality audits; Wenyu civic protocol support workspaces can be bootstrapped with canonical schemas, wiki pages when needed, ledgers, review queues, and `moonbook-ui-state.json` fragments | 64% | MoonBook should eventually own native civic templates upstream instead of relying on MoonTown-generated seeds |
 | MoonClaw execution binding | Proposal/run boundary and worker execution path exist; every Wenyu civic module now has a role-specific skill pack path and output contract injected into worker context | 56% | Need repeated successful module-specific service executions and stricter result parsing per contract |
 | Real civic services | MoonTown can create civic lanes, install recurring protocol schedules, and run building communication patterns | 40% | Policy, contest, social, talent, bridge, market, story, and education modules still need service-specific accepted output histories |
-| Designer workflow | Manual JSON config plus standalone editor mode and handoff/bridge visibility | 48% | Needs write-back import/export, asset manifest checks, richer collision preview, and automatic MoonDesk artifact ingestion |
+| Designer workflow | Manual JSON config plus canonical Map Lab diagnostics and operations-side handoff/bridge visibility | 48% | Needs governed write-back import/export, asset manifest checks, richer collision preview, and automatic MoonDesk artifact ingestion |
 | Stable-state cookbook | MoonBook cookbook workspace, stable-state manifest, ownership pages, generated site, and CLI status are in place | 38% | Needs MoonDesk management UI, drift comparison, review workflow, and integration into operator dashboard |
 | Production readiness | Local development works; build/check pass | 25% | Needs packaged daemon, auth, permissions, backups, observability, and deployment model |
 
@@ -126,23 +126,22 @@ Implemented and validated:
 - `src/ui/assets/tilemap/modules/wenyu-town-modules.json` defines 16 enabled Wenyu
   modules: 11 civic buildings and 5 long-horizon research-domain homes.
 - The Rabbita bootstrap loads the module registry at runtime.
-- MoonBit parses enabled modules and renders them as a separate layer above the
-  terrain.
+- MoonBit joins enabled modules into compiler-owned `Place`, parcel, portal,
+  and interaction-slot records rendered by the canonical canvas.
 - Building labels stay hidden until hover/focus.
 - Clicking a registered module opens the domain MoonBook library and policy in
   the canonical canvas; it no longer sends the operator to the legacy viewport.
-- The HUD reports total modules, cleanly validated modules, loaded MoonBook
-  fragments, and module-config load version.
+- Map Lab reports compiled places, parcels/programs, provenance, diagnostics,
+  and rejected placements.
 - Module placement validation reports missing bindings, missing assets, invalid
   footprints, and bad water/road placement.
 - Module buildings now declare `style_family`, `asset_base`, `footprint_w`,
   `footprint_h`, `display_w`, `display_h`, `protocol_pattern`, `use_case`, and
   `agent_flow`, so placement, behavior, and art are config-driven.
-- The viewport now treats the reference terrain as the only visible road
-  system. Module entrances are still configured for routing, but synthetic
-  overlay roads are hidden to avoid two competing map systems.
-- Module interiors show runtime source, status counters, current detail,
-  validation state, and active worker roster slots.
+- One authoritative `RoadNetwork` now drives visible roads, entrances,
+  placement access, and navigation, avoiding competing map systems.
+- Canonical procedural interiors show runtime source, current work, interaction
+  slots, and active Agent presence.
 - The MoonBit desktop service exposes `module-projections.json` dynamically by
   scanning `books/*/book/moonbook-ui-state.json`, attaching exact book IDs and
   safe output links.
@@ -173,14 +172,12 @@ Implemented and validated:
 - The operator dashboard aggregates all watcher ledgers through
   `watchers/index.json` and shows a standing-watch portfolio instead of only a
   single focused watcher card.
-- The operator dashboard links to the standalone Wenyu viewport instead of
+- The operator dashboard links to the canonical Energy Valley instead of
   duplicating a second map.
-- The standalone viewport supports explicit `view`, `editor`, and `output`
-  modes.
-- Editor mode shows configured modules, grid/entrance placement, runtime state,
-  validation issues, and whether a MoonBook output fragment is connected.
-- Final output mode lists generated MoonBook projection fragments and links to
-  the book HTML/report outputs copied by the browser bridge.
+- Canonical Map Lab shows configured places, parcels, entrances, runtime
+  activity, validation issues, provenance, and rejected placements.
+- Building inspectors and the operations console expose generated MoonBook
+  projection fragments and governed result links without a second map shell.
 - The editor boundary is documented: MoonTown edits town/module/multi-agent
   composition, while `../moondesk` should own detailed file/workspace,
   single-book, and single-agent authoring.
@@ -191,8 +188,8 @@ Implemented and validated:
   `.moonsuite/products/moontown/moondesk-dispatches`,
   `.moonsuite/products/moontown/moondesk-requests`, and
   `.moonsuite/products/moontown/book-results` files.
-- Editor mode and final output mode both show MoonDesk handoff lanes and recent
-  bridge records.
+- The separate operations console shows editor-pipeline state, MoonDesk handoff
+  lanes, and recent bridge records.
 - `moon run src/cmd/main -- civic bootstrap` bootstraps 11 Wenyu civic support
   workspaces and updates `.moonsuite/products/moontown/moonbooks.json`.
 - `moon run src/cmd/main -- civic status` reports module operability, latest civic
@@ -339,17 +336,17 @@ The following items are visible but not fully real yet:
   workspaces, not yet mature books with long accepted service histories.
 - Agent movement is only as complete as the current visual projection; Wenyu
   civic protocol support workspaces still need module-specific task/run fragments.
-- The module registry is manually edited JSON; editor mode validates, inspects,
-  and displays import contracts but does not yet write config changes back or
-  automatically merge MoonDesk module packs.
+- The module registry is manually edited JSON; Map Lab validates and inspects
+  compiled output but does not yet write config changes back or automatically
+  merge MoonDesk module packs.
 - The 24/7 loop is a local supervised seam, not a fully packaged service.
 - Civic service flows have schemas, review queues, skill contracts, and seeded
   projections. They are not yet proven reliable end-to-end services until each
   lane has repeated MoonClaw execution, MoonBook persistence, review, and UI
   projection updates.
-- Output retrieval exists in viewport output mode, but the full
-  desktop/file-manager experience belongs in MoonDesk and still needs a clean
-  write-back/import handoff back into MoonTown.
+- Output retrieval exists through canonical building inspectors and the
+  operations console, but the full desktop/file-manager experience belongs in
+  MoonDesk and still needs a clean write-back/import handoff back into MoonTown.
 - Production safety boundaries, auth, operator approvals, and backups are not
   complete.
 
@@ -380,9 +377,9 @@ Implemented:
 - the browser bridge now merges MoonBook UI fragments by `book_id`
 - interiors now expose module-specific output links, review gaps, metrics, and
   recent MoonBook journey entries when the bound book has generated state
-- the viewport was validated with 16 modules, 16 clean placements, 0 issue
-  badges, working view/editor/output modes, zoom controls, and direct module
-  interior links
+- the canonical canvas was validated with typed module places, compiler
+  diagnostics, zoom controls, and direct module interior links; historical
+  viewport URLs resolve to this same product
 
 Remaining:
 
@@ -544,12 +541,12 @@ Acceptance:
    Vitality Tower, and Town Shell should each have at least one accepted or
    reviewed service result in its MoonBook.
 3. Add accepted-change summaries to the MoonBook UI-state contract and surface
-   them in module interiors and output mode.
+   them in canonical module interiors and the operations console.
 4. Add daily digest generation for watcher and civic-pattern cycles.
 5. Split the current single-layer building PNGs into optional base, roof,
    shadow, and glow layers for stronger 2.5D depth.
-6. Add a standalone module config, placement, and asset validator with editor
-   write-back.
+6. Extend Map Lab with governed module-config, placement, and asset validation
+   plus reviewed write-back.
 7. Move reusable civic workspace templates into MoonBook so MoonTown only
    requests service creation rather than generating all initial files itself.
 8. Add MoonDesk-style output browsing for produced wiki pages, reports, assets,

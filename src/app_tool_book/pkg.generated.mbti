@@ -167,4 +167,3 @@ pub(all) struct AppToolManifest {
 // Type aliases
 
 // Traits
-

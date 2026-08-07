@@ -145,4 +145,3 @@ pub fn StopRule::new(metric~ : String, threshold~ : Double, direction? : String)
 // Type aliases
 
 // Traits
-

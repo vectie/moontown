@@ -1,0 +1,108 @@
+.semantic-interior {
+  margin-top: .75rem;
+  padding-top: .75rem;
+  border-top: 1px solid rgba(255,255,255,.1);
+}
+
+.semantic-interior-header {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: .5rem;
+}
+
+.semantic-interior-header h3 {
+  margin: .1rem 0 0;
+  color: #fff1c9;
+  font-size: .78rem;
+}
+
+.semantic-interior-count {
+  border: 1px solid rgba(251,191,36,.22);
+  border-radius: 999px;
+  padding: .2rem .42rem;
+  color: #fcd58a;
+  font-size: .58rem;
+  white-space: nowrap;
+}
+
+.semantic-interior-floor {
+  position: relative;
+  min-height: 8.5rem;
+  margin-top: .55rem;
+  overflow: hidden;
+  border: 1px solid rgba(255,226,166,.14);
+  border-radius: .8rem;
+  background:
+    linear-gradient(90deg, rgba(255,255,255,.035) 1px, transparent 1px),
+    linear-gradient(rgba(255,255,255,.035) 1px, transparent 1px),
+    linear-gradient(145deg, rgba(63,82,69,.76), rgba(22,31,32,.9));
+  background-size: 18px 18px, 18px 18px, auto;
+}
+
+.semantic-interior-corridor {
+  position: absolute;
+  inset: 42% 7% auto;
+  height: 18%;
+  border: 1px solid rgba(255,224,169,.11);
+  border-radius: 999px;
+  background: rgba(240,204,139,.08);
+}
+
+.semantic-interior-slot {
+  position: absolute;
+  display: grid;
+  justify-items: center;
+  gap: .15rem;
+  transform: translate(-50%, -50%);
+}
+
+.semantic-interior-slot-dot {
+  display: grid;
+  width: 1.15rem;
+  height: 1.15rem;
+  place-items: center;
+  border: 1px solid rgba(255,232,187,.26);
+  border-radius: .35rem;
+  background: rgba(23,31,31,.9);
+  color: #d9caa9;
+  font-size: .55rem;
+}
+
+.semantic-interior-slot-dot.is-occupied {
+  border-color: rgba(52,211,153,.7);
+  background: rgba(16,185,129,.2);
+  box-shadow: 0 0 14px rgba(52,211,153,.25);
+  color: #d1fae5;
+}
+
+.semantic-interior-slot-label {
+  max-width: 4.5rem;
+  overflow: hidden;
+  color: rgba(241,245,249,.7);
+  font-size: .5rem;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.semantic-interior-presences {
+  display: grid;
+  gap: .3rem;
+  margin-top: .5rem;
+}
+
+.semantic-interior-presence {
+  display: flex;
+  align-items: center;
+  gap: .42rem;
+  padding: .35rem .45rem;
+  border-radius: .55rem;
+  background: rgba(255,255,255,.04);
+}
+
+.semantic-interior-presence div { display: grid; min-width: 0; }
+.semantic-interior-presence-name { overflow: hidden; color: #e9f7ef; font-size: .58rem; font-weight: 700; text-overflow: ellipsis; white-space: nowrap; }
+.semantic-interior-presence span:last-child { overflow: hidden; color: #8fa29c; font-size: .52rem; text-overflow: ellipsis; white-space: nowrap; }
+.semantic-interior-presence-mark { flex: 0 0 auto; width: .48rem; height: .48rem; border-radius: 999px; background: #d29a62; }
+.semantic-interior-presence-mark.is-live { background: #34d399; box-shadow: 0 0 9px rgba(52,211,153,.55); }
+.semantic-interior-empty { margin: .45rem 0 0; color: #718079; font-size: .56rem; line-height: 1.45; }

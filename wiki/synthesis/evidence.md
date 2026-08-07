@@ -20,7 +20,8 @@ in the worktree and the copied durable source pages under `wiki/sources/`.
 - `roles/mayor.mbt`
 - `adapters/moonbook/client.mbt`
 - `adapters/moonclaw/client.mbt`
-- `ui/scene_layout_test.mbt`
+- `ui/dashboard_test.mbt`
+- `energy_valley_contract` package tests
 
 ### Durable wiki sources
 

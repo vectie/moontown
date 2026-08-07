@@ -82,6 +82,7 @@ priv struct EnergyValleyRuntimeProjection {
   knowledgeCatalogDigest : String?
   tick : Int?
   tasks : Array[EnergyValleyRuntimeWorkItem]
+  history : Array[EnergyValleyRuntimeWorkItem]?
   agents : Array[EnergyValleyRuntimeAgent]
   message : String?
 } derive(FromJson)
@@ -96,11 +97,22 @@ priv enum EnergyValleyRuntimePhase {
 } derive(Eq)
 
 ///|
+/// One immutable start point for a specific Agent + work + route journey.
+/// Runtime refreshes may replace projection content without restarting this
+/// clock; a changed journey key receives a new tick and wall-clock origin.
+priv struct EnergyValleyRuntimePresenceClock {
+  journey_key : String
+  started_at_tick : Int
+  started_at_ms : Double
+} derive(Debug, Eq)
+
+///|
 priv struct EnergyValleyRuntimeState {
   phase : EnergyValleyRuntimePhase
   projection : EnergyValleyRuntimeProjection?
   version : Int
   fresh_at_ms : Double
-  motion_started_at_ms : Double
+  presence_started_at_tick : Int
+  presence_clocks : Array[EnergyValleyRuntimePresenceClock]
   error : String
 }

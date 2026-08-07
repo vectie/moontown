@@ -12,10 +12,14 @@ test "canonical canvas owns default and historical frontend entry paths" {
 }
 
 ///|
-test "legacy viewport requires the explicit legacy surface" {
+test "historical viewport and legacy surface resolve the canonical town" {
   assert_true(
     town_surface_route("/viewport.html", "legacy-viewport", false)
-    is LegacyStandaloneViewport,
+    is CanonicalEnergyValley,
+  )
+  assert_true(
+    town_surface_route("/index.html", "legacy-viewport", false)
+    is CanonicalEnergyValley,
   )
 }
 
@@ -42,6 +46,10 @@ test "operations remains an explicit separate surface" {
   assert_true(
     town_surface_route("/index.html", "operations", false) is OperationsConsole,
   )
+  assert_true(
+    town_surface_route("/operations.html", "legacy-viewport", false)
+    is OperationsConsole,
+  )
 }
 
 ///|
@@ -56,28 +64,23 @@ test "canonical canvas seed is stable unless explicitly varied" {
 }
 
 ///|
-test "maintained navigation targets canonical and explicit legacy surfaces" {
+test "maintained navigation targets only the canonical town" {
   assert_eq(canonical_energy_valley_href(), "./index.html?seed=20260727")
   assert_eq(
     canonical_energy_valley_dashboard_href(),
     "./index.html?seed=20260727&panel=dashboard",
   )
   assert_eq(
-    legacy_viewport_editor_href(),
-    "./viewport.html?surface=legacy-viewport&mode=editor&seed=20260727",
-  )
-  assert_eq(
-    legacy_viewport_module_href("policy-hall"),
-    "./viewport.html?surface=legacy-viewport&mode=view&module=policy-hall&seed=20260727",
+    canonical_energy_valley_module_href("policy-hall"),
+    "./index.html?seed=20260727&module=policy-hall",
   )
 }
 
 ///|
 test "dashboard panel query opens the canonical runtime board" {
-  assert_true(energy_valley_dashboard_requested("dashboard", ""))
-  assert_true(energy_valley_dashboard_requested("", "output"))
-  assert_true(energy_valley_dashboard_requested("", "final"))
-  assert_true(!energy_valley_dashboard_requested("", "view"))
+  assert_true(energy_valley_dashboard_requested("dashboard"))
+  assert_false(energy_valley_dashboard_requested(""))
+  assert_false(energy_valley_dashboard_requested("output"))
 }
 
 ///|

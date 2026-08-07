@@ -408,30 +408,34 @@ fn exact_energy_valley_building_name(
 ///|
 fn exact_energy_valley_buildings(
   seed : Int,
+  road_network : @energy_valley_contract.RoadNetwork,
 ) -> Array[ExactEnergyValleyBuilding] {
-  procedural_energy_valley_modules(exact_energy_valley_module_templates(), seed).map(civic => {
-      id: "civic-\{civic.id}",
-      archetype: civic.building_kind,
-      module_key: match civic.id {
-        "vitality-dashboard" => "vitality-tower"
-        "broadcast-tower" => "story-radar"
-        other => other
-      },
-      name: exact_energy_valley_building_name(civic.id, civic.title),
-      glyph: "",
-      style: exact_energy_valley_building_style(civic.id),
-      x: civic.grid_x,
-      y: civic.grid_y,
-      width: civic.footprint_w,
-      depth: civic.footprint_h,
-      entrance_x: civic.entrance_x,
-      entrance_y: civic.entrance_y,
-      floors: exact_energy_valley_building_floors(civic.id),
-      vitality: 0.78 +
-      energy_valley_variation(seed, civic.grid_x, civic.grid_y, 409, 20).to_double() /
-      100.0,
+  procedural_energy_valley_modules_with_road_network(
+    exact_energy_valley_module_templates(),
+    seed,
+    road_network,
+  ).map(civic => {
+    id: "civic-\{civic.id}",
+    archetype: civic.building_kind,
+    module_key: match civic.id {
+      "vitality-dashboard" => "vitality-tower"
+      "broadcast-tower" => "story-radar"
+      other => other
     },
-  )
+    name: exact_energy_valley_building_name(civic.id, civic.title),
+    glyph: "",
+    style: exact_energy_valley_building_style(civic.id),
+    x: civic.grid_x,
+    y: civic.grid_y,
+    width: civic.footprint_w,
+    depth: civic.footprint_h,
+    entrance_x: civic.entrance_x,
+    entrance_y: civic.entrance_y,
+    floors: exact_energy_valley_building_floors(civic.id),
+    vitality: 0.78 +
+    energy_valley_variation(seed, civic.grid_x, civic.grid_y, 409, 20).to_double() /
+    100.0,
+  })
 }
 
 ///|
@@ -551,8 +555,9 @@ pub fn exact_energy_valley_generate(seed : UInt) -> ExactEnergyValleyWorld {
     tiles.push(row)
   }
   energy_valley_compile_reference_road_network(tiles, normalized_seed)
+  let road_network = energy_valley_authoritative_road_network_from_tiles(tiles)
   energy_valley_prepare_semantic_ground(tiles)
-  let buildings = exact_energy_valley_buildings(normalized_seed)
+  let buildings = exact_energy_valley_buildings(normalized_seed, road_network)
   for building in buildings {
     exact_energy_valley_reserve_civic_parcel(tiles, building)
   }

@@ -19,4 +19,3 @@ pub async fn render_moontown_cookbook_status(workspace_root? : String, manifest_
 // Type aliases
 
 // Traits
-

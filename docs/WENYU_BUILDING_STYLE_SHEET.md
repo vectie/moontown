@@ -60,9 +60,9 @@ Assets:
 The pack is now registered in
 `src/ui/assets/tilemap/modules/wenyu-town-modules.json`. Each building entry
 declares its visual asset, footprint, display size, entrance tile, protocol
-pattern, use case, and agent flow. The viewport uses that data to place the
-building on the map, expose protocol details in the interior view, and show the
-same metadata in editor mode.
+pattern, use case, and agent flow. The compiler uses that data to create the
+building `Place`, expose protocol details in the canonical interior, and show
+the same spatial evidence in Map Lab.
 
 This makes the building layer an editable town plan rather than a hardcoded
 sprite list:

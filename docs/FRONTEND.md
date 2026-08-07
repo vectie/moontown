@@ -1,9 +1,9 @@
 # Frontend Guide
 
-`moontown` has two UI layers:
+`moontown` has two UI projections:
 
-- renderer-agnostic scene modeling in the root module
-- Rabbita browser rendering in `src/ui/rabbita-town`
+- a non-spatial operations summary in `src/ui`
+- a compiled interactive world rendered by Rabbita in `src/ui/rabbita-town`
 
 It also supports two frontend delivery surfaces over one application core:
 Rabbita/Lepusa desktop and the Bunnia/WeChat mini-app. Their adapter boundary,
@@ -12,46 +12,40 @@ trust model, and shared-state rules are documented in
 
 ## UI Stack
 
-The current UI flow is:
+The current UI flows are:
 
 ```text
 TownState
   -> DashboardModel
-  -> SceneRenderModel
-  -> Rabbita view
-  -> browser bundle
+  -> text operations summary
+
+Wenyu reference evidence + WorldDelta
+  -> CompiledTownWorld
+  -> TownSnapshot
+  -> Rabbita Canvas view
 ```
 
 Files by layer:
 
-- scene contract
-  - [src/ui/scene_layout.mbt](/Users/kq/Workspace/moontown/src/ui/scene_layout.mbt)
-- town-to-scene projection
+- non-spatial operations projection
   - [ui/dashboard.mbt](/Users/kq/Workspace/moontown/src/ui/dashboard.mbt)
-- renderer bridge
-  - [src/ui/scene_render.mbt](/Users/kq/Workspace/moontown/src/ui/scene_render.mbt)
+- interactive-world contract
+  - [src/energy_valley_contract](/Users/kq/Workspace/moontown/src/energy_valley_contract)
 - Rabbita frontend
   - [src/ui/rabbita-town/main/main.mbt](/Users/kq/Workspace/moontown/src/ui/rabbita-town/main/main.mbt)
 
-## Semantic Scene Model
+## Compiled World Model
 
-The frontend is intentionally not a graph viewer. It follows the `sou` lesson:
+The canonical frontend consumes one renderer-neutral town snapshot:
 
-- places first
-- state mapped into places
-- actors and props as meaning carriers
-- anomalies shown as a visible area
+- road and terrain networks are authoritative for navigation and rendering
+- parcels and places are authoritative for placement and entrances
+- actors, installations, and public-realm objects retain semantic identity
+- reference provenance and rejected placements remain inspectable in Map Lab
 
-Current default places:
-
-- Town Gate
-- City Hall
-- Moonbook / Coding
-- Moonbook / Finance
-- Worker Yard
-- Anomaly Corner
-
-This gives the UI a “town scene” instead of a “nodes and edges” look.
+The old fixed-coordinate scene/background projection has been removed. The
+Operations console keeps only its non-spatial title, alerts, and status
+sections; it does not build a second map.
 
 ## Current Rabbita Dashboard
 
@@ -239,29 +233,18 @@ The default `/`, `/index.html`, and compatibility `/viewport.html` paths all
 select this canvas. Interproduct handoffs append their typed query parameters
 to `index.html?seed=20260727`; they must not switch to another UI.
 
-The earlier three-mode raster viewport is retained only for compatibility and
-specialist inspection. It is never a default or qualification target and must
-be requested explicitly:
-
-- `viewport.html?surface=legacy-viewport&mode=view`
-- `viewport.html?surface=legacy-viewport&mode=view&module=town-shell`
-- `viewport.html?surface=legacy-viewport&mode=editor`
-- `viewport.html?surface=legacy-viewport&mode=output`
-
-The legacy editor can inspect module bindings and the legacy output mode can
-inspect generated projections while those capabilities are absorbed into the
-canonical canvas. New product features and UI-to-UI tests belong on
-`index.html`, not on this compatibility shell.
-
-The mode switch uses the same runtime data in all cases. It does not invent
-book content or duplicate the Wenyu map.
+The earlier three-mode raster viewport has been retired. Historical
+`viewport.html` and `surface=legacy-viewport` requests resolve to the canonical
+canvas, and no view/editor/output mode switch or baked-raster renderer remains
+in the product. Specialist runtime work stays on `operations.html`; map,
+building, authoring, and interior interactions stay on `index.html`.
 
 Decorator/runtime boundary:
 
 - Wenyu building placement and style live in
   `src/ui/assets/tilemap/modules/wenyu-town-modules.json`.
-- The Rabbita viewport renders the module registry directly for building
-  sprites, labels, interiors, and editor metadata.
+- The compiler joins the module registry to `CompiledTownWorld`; the canonical
+  canvas and interiors consume renderer-neutral `TownSnapshot` projections.
 - The persisted runtime projection also reads the same registry through a
   generic visual decorator placement contract, so active agents route toward
   configured building entrances instead of hardcoded Wenyu coordinates.
@@ -272,13 +255,13 @@ Decorator/runtime boundary:
 Latest validated UI behavior:
 
 - main console shows the five-domain standing-watch portfolio
-- viewport loads 11 civic building links
-- clicking a building opens a module interior by URL
-- Back To Town returns to the map view without leaving a stale interior shell
-- output mode lists generated MoonBook outputs and MoonDesk bridge context
+- the canonical compiler loads civic buildings as typed `Place` records
+- clicking a building opens its in-canvas inspector and procedural interior
+- closing an interior returns to the same map state and camera
+- the operations console lists editor-pipeline and MoonDesk bridge context
 - browser console validation reported no runtime errors for the checked paths
 
-Editor-mode boundary:
+Authoring/operations boundary:
 
 - MoonTown editor manages modules, books, worker lanes, runtime bindings,
   placement, and output availability.
@@ -303,12 +286,11 @@ Implemented handoff surfaces:
     `.moonsuite/products/moontown/moondesk-dispatches`,
     `.moonsuite/products/moontown/moondesk-requests`, and
     `.moonsuite/products/moontown/book-results` records
-- editor mode
-  - shows the boundary panel, handoff manifest, and bridge ledger beside module
-    validation
-- final output mode
-  - shows MoonBook outputs plus the same MoonDesk artifact lanes and recent
-    bridge records as retrieval context
+- `operations.html`
+  - shows editor-pipeline state, the boundary panel, handoff manifest, and
+    bridge ledger without embedding a second map
+- canonical building inspectors
+  - show governed MoonBook outputs and result links in their spatial context
 
 ## Wenyu Module UI
 
@@ -319,7 +301,8 @@ Current readiness is tracked in
 
 The short version:
 
-- the base terrain stays clean and mostly rasterized for drag/zoom performance
+- the Wenyu evidence compiles into semantic terrain regions, roads, parcels,
+  places, portals, and installations for Canvas rendering
 - each civic feature is a configurable building on the map
 - buildings are loaded from `src/ui/assets/tilemap/modules/wenyu-town-modules.json`
 - each building binds to a MoonBook through `book_id`
@@ -344,17 +327,17 @@ The short version:
 - generated MoonBook HTML outputs are served and copied under
   `book-output/<book-id>/...` for module interior links
 - hover/focus reveals module details without cluttering the first screen
-- water depth and reflection are rendered as cheap overlay layers, not baked
-  into the base map
+- water, roads, parcels, places, portals, and public-realm installations are
+  semantic objects rendered by the canonical canvas
 
 This keeps MoonTown in charge of the visual control plane while allowing
 MoonBook and MoonClaw to provide the state and work behind each building.
 
 Current frontend maturity:
 
-- the standalone viewport and modular building shell are real
-- hover labels, clickable interiors, water overlays, and module config loading
-  are real
+- the canonical semantic canvas and modular building inspectors are real
+- clickable interiors, terrain/road layers, and module config compilation are
+  real
 - module lights now use visual projection data first, direct execution records
   second, and config fallback last
 - `visual-projection.json` now carries first-class `modules[]` runtime status
@@ -378,9 +361,8 @@ Current frontend maturity:
 
 ## Assets
 
-Original example assets live under:
+Archived concept assets live under (they are not production scene layers):
 
-- [src/ui/assets/backgrounds](/Users/kq/Workspace/moontown/src/ui/assets/backgrounds)
 - [src/ui/assets/buildings](/Users/kq/Workspace/moontown/src/ui/assets/buildings)
 - [src/ui/assets/actors](/Users/kq/Workspace/moontown/src/ui/assets/actors)
 - [src/ui/assets/props](/Users/kq/Workspace/moontown/src/ui/assets/props)
@@ -453,7 +435,7 @@ moon -C .mooncakes/vectie/lepusa run cmd/main --target native -- \
 
 This repo owns:
 
-- town scene layout
+- compiled town-world semantics
 - dashboard projection
 - Rabbita interaction and styling
 

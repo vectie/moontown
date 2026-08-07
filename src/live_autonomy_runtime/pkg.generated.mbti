@@ -29,4 +29,3 @@ pub async fn write_live_autonomy_spine(@core.TownState, snapshot_path? : String,
 pub using @live_autonomy_policy {type LiveAutonomySpine}
 
 // Traits
-

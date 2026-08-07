@@ -298,4 +298,3 @@ pub impl Show for WorkerStatus
 pub(open) trait BookProvider {
   fn books(Self) -> Array[BookRef]
 }
-

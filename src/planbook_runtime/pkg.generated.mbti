@@ -60,4 +60,3 @@ pub using @planbook_policy {type PlanbookCriterionStatus}
 pub using @planbook_policy {type PlanbookRepairTask}
 
 // Traits
-

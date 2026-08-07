@@ -9,7 +9,7 @@ fn schedule_tick_if_running(dispatch : Dispatch[Msg], model : Model) -> Cmd {
 
 ///|
 fn tick_update(dispatch : Dispatch[Msg], model : Model) -> (Cmd, Model) {
-  let next = advance_model(model)
+  let next = town_life_tick(advance_model(model))
   (schedule_tick_if_running(dispatch, next), next)
 }
 

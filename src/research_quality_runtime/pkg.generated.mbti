@@ -29,4 +29,3 @@ pub async fn write_research_quality_review_trigger(@moonbook.BookCatalogEntry, A
 // Type aliases
 
 // Traits
-

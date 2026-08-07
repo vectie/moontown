@@ -596,11 +596,23 @@
 }
 
 .knowledge-flow-preview-states span {
+  border: 1px solid transparent;
   border-radius: 999px;
   padding: 3px 6px;
   color: #c4b5fd;
   background: rgb(139 92 246 / 11%);
   font-size: 8px;
+}
+
+.knowledge-flow-preview-states .is-real {
+  border-color: rgb(110 231 183 / 24%);
+  color: #a7f3d0;
+  background: rgb(16 185 129 / 8%);
+}
+
+.knowledge-flow-preview-states .is-preview {
+  border-color: rgb(196 181 253 / 32%);
+  border-style: dashed;
 }
 
 .knowledge-flow-preview-legend p {

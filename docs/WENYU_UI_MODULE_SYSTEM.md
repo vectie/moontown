@@ -444,15 +444,15 @@ Current status:
 - viewport runtime validation catches missing `book_id`, missing assets, invalid
   footprints, building anchors on blocked terrain, and entrances on water
 - bridge/river/harbor modules can opt into water or bridge placement
-- editor mode now shows the town/MoonDesk boundary, the handoff manifest, and
-  recent bridge records next to module validation
+- the operations console shows the town/MoonDesk boundary, handoff manifest,
+  and recent bridge records while canonical Map Lab owns spatial validation
 - `tilemap/modules/moondesk-handoff.json` defines the portable artifact lanes
   that can be imported without changing viewport code
 - `moondesk-bridge.json` scans real `.moonsuite/products/moontown/moondesk-*`
   and `.moonsuite/products/moontown/book-results` files for recent portable
   records
-- standalone write-back editing, schema validation, and richer designer preview
-  tooling are still pending
+- governed write-back editing, stronger schema validation, and richer Map Lab
+  designer previews are still pending
 
 ### Stage 7: Civic Runtime Integration
 

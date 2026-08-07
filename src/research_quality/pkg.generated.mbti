@@ -88,4 +88,3 @@ pub fn ResearchReadiness::summary_line(Self) -> String
 // Type aliases
 
 // Traits
-

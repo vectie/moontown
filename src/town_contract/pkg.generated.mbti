@@ -137,4 +137,3 @@ pub fn schema_version() -> String
 // Type aliases
 
 // Traits
-

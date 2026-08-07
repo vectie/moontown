@@ -13,20 +13,20 @@ The target style is a Stardew-like isometric valley:
 
 ## Current State
 
-The current viewport now uses a first-generation isometric tile layer:
+The current viewport uses the compiled Energy Valley world:
 
 ```text
-TownState
-  -> DashboardModel
-  -> SceneRenderModel
-  -> Rabbita DOM/CSS isometric tile layer
+Wenyu reference evidence + procedural grammar + WorldDelta
+  -> CompiledTownWorld
+  -> TownSnapshot
+  -> Rabbita Canvas layers
   -> generated PNG ground/object/building assets
 ```
 
 The grass, river, trees, flowers, paths, plaza, and bridge use generated PNG
-assets under `src/ui/assets/tilemap/`. Rabbita currently assembles an overscanned
-procedural map directly in `src/ui/rabbita-town/main/main.mbt`, with a smaller
-reference map JSON under `src/ui/assets/tilemap/maps/wenyu-valley.json`.
+assets under `src/ui/assets/tilemap/`. The reference evidence is compiled with
+the procedural grammar before the renderer receives a snapshot; the renderer
+does not own an independent fixed-coordinate scene.
 
 The next scalable target is:
 
@@ -237,7 +237,7 @@ hud
 Layer ownership:
 
 - `ground`, `river`, `path`: map editor or procedural generator
-- `building_base`, `building_roof`: semantic scene placement
+- `building_base`, `building_roof`: semantic compiled-world placement
 - `actors`: live runtime projection from workers/mayor/keeper
 - `effects`: alerts, anomalies, health, recovery, queue pressure
 - `hud`: Rabbita UI chrome
@@ -364,7 +364,8 @@ Add a renderer that reads:
 - `manifest.json`
 - `maps/wenyu-valley.json`
 
-It should output the same `SceneRenderModel` semantic nodes plus a tile layer.
+It should compile the same semantic road, parcel, place, terrain, and actor
+contracts into a `TownSnapshot`; it must not introduce a parallel coordinate model.
 
 ### Phase 3: Add Dynamic Actors
 

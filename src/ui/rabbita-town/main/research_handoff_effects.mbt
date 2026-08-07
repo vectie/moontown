@@ -36,7 +36,10 @@ fn execute_research_handoff_cmd(
 
 ///|
 fn initial_app_cmd(dispatch : Dispatch[Msg], model : Model) -> Cmd {
-  let commands : Array[Cmd] = [schedule_tick(dispatch)]
+  let commands : Array[Cmd] = [
+    schedule_tick(dispatch),
+    install_town_life_storage_bridge(dispatch),
+  ]
   match model.research_handoff {
     LoadingResearchHandoff(request) =>
       commands.push(load_research_handoff_cmd(dispatch, request))

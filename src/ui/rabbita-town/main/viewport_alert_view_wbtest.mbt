@@ -18,8 +18,7 @@ test "all alerts emits calm fallback when no conditions are active" {
     budget: 70,
     energy: 70,
   }
-  let scene = town_scene(model)
-  let alerts = all_alerts(scene, model)
+  let alerts = all_alerts([], model)
   assert_eq(alerts.length(), 1)
   assert_eq(alerts[0], no_active_alert_text)
 }
@@ -33,8 +32,7 @@ test "all alerts prioritizes mayor recovery over lower-priority alerts" {
     budget: 10,
     energy: 10,
   }
-  let scene = town_scene(model)
-  let alerts = all_alerts(scene, model)
+  let alerts = all_alerts([], model)
   assert_eq(alerts.length(), 1)
   assert_eq(alerts[0], town_recovery_alert_text)
 }

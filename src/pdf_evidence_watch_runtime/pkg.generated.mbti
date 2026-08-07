@@ -21,4 +21,3 @@ pub async fn render_pdf_evidence_watch_book_status(book_id? : String, workspace_
 // Type aliases
 
 // Traits
-

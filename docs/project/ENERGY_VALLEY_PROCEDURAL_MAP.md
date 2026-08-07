@@ -92,9 +92,9 @@ The MoonBit implementation is split by responsibility:
   visual language, depth order, and building interactions.
 - `main/tilemap_reference*.mbt` keeps the extracted Energy Valley geometry
   available as guardrails for the grammar.
-- `main/tilemap_reference.mbt`, `main/tilemap_roads.mbt`, and
-  `main/wenyu_modules.mbt` connect the generated result to the existing
-  MoonBit/Rabbita view layer.
+- `main/tilemap_reference.mbt`, `main/energy_valley_road_network.mbt`, and
+  `main/wenyu_modules.mbt` connect the generated result to the semantic
+  compiler and MoonBit/Rabbita view layer.
 
 Generation runs in these stages:
 

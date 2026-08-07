@@ -10,15 +10,9 @@ import {
 // Values
 pub fn build_dashboard(@core.TownState, @health.HealthReport) -> DashboardModel
 
-pub fn build_scene_render(DashboardModel) -> SceneRenderModel
-
-pub fn default_town_scene_layout() -> TownSceneLayout
-
 pub fn execution_view_stage_for_status(@core.TaskExecutionStatus) -> ExecutionViewStage
 
 pub fn render_dashboard(DashboardModel) -> String
-
-pub fn render_scene_html(SceneRenderModel) -> String
 
 pub fn runtime_task_priority_for_id(String) -> Int
 
@@ -34,8 +28,6 @@ pub impl Show for AlertBanner
 pub struct DashboardModel {
   title : String
   alerts : Array[AlertBanner]
-  scene_layout : TownSceneLayout
-  town_map : Array[TownMapPlace]
   sections : Array[DashboardSection]
 } derive(Eq, @debug.Debug)
 pub impl Show for DashboardModel
@@ -55,81 +47,6 @@ pub(all) enum ExecutionViewStage {
   Recovery
 } derive(Eq, @debug.Debug)
 
-pub struct SceneArea {
-  key : String
-  title : String
-  kind : SceneAreaKind
-  x : Int
-  y : Int
-  width : Int
-  height : Int
-  asset_keys : Array[String]
-} derive(Eq, @debug.Debug)
-pub impl Show for SceneArea
-
-pub enum SceneAreaKind {
-  CityHall
-  BookHouse
-  WorkerYard
-  AnomalyCorner
-  Gate
-} derive(Eq, @debug.Debug)
-pub impl Show for SceneAreaKind
-
-pub struct SceneAsset {
-  key : String
-  path : String
-  purpose : String
-} derive(Eq, @debug.Debug)
-pub impl Show for SceneAsset
-
-pub struct SceneRenderModel {
-  title : String
-  width : Int
-  height : Int
-  background_path : String
-  alerts : Array[String]
-  nodes : Array[SceneRenderNode]
-} derive(Eq, @debug.Debug)
-pub impl Show for SceneRenderModel
-
-pub struct SceneRenderNode {
-  key : String
-  title : String
-  class_name : String
-  x : Int
-  y : Int
-  width : Int
-  height : Int
-  asset_paths : Array[String]
-  lines : Array[String]
-} derive(Eq, @debug.Debug)
-pub impl Show for SceneRenderNode
-
-pub struct TownMapPlace {
-  key : String
-  title : String
-  kind : SceneAreaKind
-  subtitle : String
-  x : Int
-  y : Int
-  width : Int
-  height : Int
-  asset_paths : Array[String]
-  lines : Array[String]
-} derive(Eq, @debug.Debug)
-pub impl Show for TownMapPlace
-
-pub struct TownSceneLayout {
-  width : Int
-  height : Int
-  background : SceneAsset
-  areas : Array[SceneArea]
-  assets : Array[SceneAsset]
-} derive(Eq, @debug.Debug)
-pub impl Show for TownSceneLayout
-
 // Type aliases
 
 // Traits
-

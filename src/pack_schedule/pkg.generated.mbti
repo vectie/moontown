@@ -38,4 +38,3 @@ pub(all) struct ScheduleRegistry {
 // Type aliases
 
 // Traits
-

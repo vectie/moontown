@@ -426,3 +426,66 @@ fn energy_valley_compile_reference_road_network(
     }
   }
 }
+
+///|
+/// Project the already-compiled road layer into the same typed cell contract
+/// consumed by the ecosystem compiler. Civic placement receives the
+/// RoadNetwork built from these cells; it never reclassifies terrain as road.
+fn energy_valley_authoritative_road_cells(
+  tiles : Array[Array[ExactEnergyValleyTile]],
+) -> Array[EcosystemRoadCell] {
+  let roads : Array[EcosystemRoadCell] = []
+  for y in 0..<exact_energy_valley_rows() {
+    for x in 0..<exact_energy_valley_cols() {
+      let tile = tiles[y][x]
+      if tile.terrain == "road" || tile.terrain == "bridge" {
+        roads.push({
+          id: ecosystem_road_cell_id(x, y),
+          x,
+          y,
+          road_class: if tile.terrain == "bridge" {
+            "bridge"
+          } else if tile.base_terrain == "road-major" {
+            "major"
+          } else {
+            "local"
+          },
+          road_mask: exact_energy_valley_road_mask(tiles, x, y),
+          bridge: tile.terrain == "bridge",
+          custom: false,
+          streetlight: false,
+          street_tree: false,
+          boardwalk_mask: 0,
+        })
+      }
+    }
+  }
+  roads
+}
+
+///|
+fn energy_valley_authoritative_road_network_from_tiles(
+  tiles : Array[Array[ExactEnergyValleyTile]],
+) -> @energy_valley_contract.RoadNetwork {
+  ecosystem_contract_base_road_network(
+    energy_valley_authoritative_road_cells(tiles),
+  )
+}
+
+///|
+/// Compatibility entry points that need procedural module placement outside
+/// full world generation still compile the exact same road pipeline first.
+fn energy_valley_authoritative_road_network(
+  seed : Int,
+) -> @energy_valley_contract.RoadNetwork {
+  let tiles : Array[Array[ExactEnergyValleyTile]] = []
+  for y in 0..<exact_energy_valley_rows() {
+    let row : Array[ExactEnergyValleyTile] = []
+    for x in 0..<exact_energy_valley_cols() {
+      row.push(exact_energy_valley_tile(seed, x, y))
+    }
+    tiles.push(row)
+  }
+  energy_valley_compile_reference_road_network(tiles, seed)
+  energy_valley_authoritative_road_network_from_tiles(tiles)
+}
