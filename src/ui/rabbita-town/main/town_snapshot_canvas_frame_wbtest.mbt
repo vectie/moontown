@@ -182,11 +182,16 @@ extern "js" fn canvas_frame_test_install_harness(with_canvas : Bool) -> Unit =
   #|     "HTMLCanvasElement",
   #|     "CanvasRenderingContext2D",
   #|     "requestAnimationFrame",
+  #|     "cancelAnimationFrame",
   #|     "addEventListener",
+  #|     "removeEventListener",
+  #|     "matchMedia",
   #|     "__moontownGoldenValleyCamera",
   #|     "__moontownGoldenValleyCameraArtVersion",
   #|     "__moontownGoldenValleyCanvasSchedule",
+  #|     "__moontownGoldenValleyCanvasLifecycle",
   #|     "__moontownGoldenValleyRender",
+  #|     "__moontownStopGoldenValleyCanvas",
   #|     "__moontownGoldenValleyKeys",
   #|     "__moontownGoldenValleyAnimation",
   #|     "__moontownPlayerWalkKeys",
@@ -194,7 +199,12 @@ extern "js" fn canvas_frame_test_install_harness(with_canvas : Bool) -> Unit =
   #|   const descriptors = new Map(
   #|     names.map(name => [name, Object.getOwnPropertyDescriptor(globalThis, name)]),
   #|   );
-  #|   const callbacks = [];
+  #|   const callbacks = new Map();
+  #|   const globalListeners = new Map();
+  #|   const bucket = (table, name) => {
+  #|     if (!table.has(name)) table.set(name, new Set());
+  #|     return table.get(name);
+  #|   };
   #|   const gradient = { addColorStop() {} };
   #|   class TestContext {
   #|     createLinearGradient() { return gradient; }
@@ -215,11 +225,48 @@ extern "js" fn canvas_frame_test_install_harness(with_canvas : Bool) -> Unit =
   #|       this.width = 96;
   #|       this.height = 64;
   #|       this.dataset = {};
+  #|       this.isConnected = true;
+  #|       this.contextAvailable = true;
+  #|       this.listeners = new Map();
   #|     }
-  #|     getContext(kind) { return kind === "2d" ? context : null; }
-  #|     addEventListener() {}
+  #|     getContext(kind) {
+  #|       return kind === "2d" && this.contextAvailable ? context : null;
+  #|     }
+  #|     getBoundingClientRect() {
+  #|       return { left: 0, top: 0, width: 96, height: 64 };
+  #|     }
+  #|     addEventListener(name, callback) {
+  #|       bucket(this.listeners, name).add(callback);
+  #|     }
+  #|     removeEventListener(name, callback) {
+  #|       bucket(this.listeners, name).delete(callback);
+  #|     }
+  #|     dispatchEvent() {}
   #|   }
-  #|   const canvas = withCanvas ? new TestCanvas() : null;
+  #|   const motion = {
+  #|     matches: false,
+  #|     listeners: new Set(),
+  #|     addEventListener(name, callback) {
+  #|       if (name === "change") this.listeners.add(callback);
+  #|     },
+  #|     removeEventListener(name, callback) {
+  #|       if (name === "change") this.listeners.delete(callback);
+  #|     },
+  #|   };
+  #|   const harness = {
+  #|     descriptors,
+  #|     callbacks,
+  #|     globalListeners,
+  #|     motion,
+  #|     TestCanvas,
+  #|     nextRaf: 0,
+  #|     canvas: null,
+  #|     lastCanvas: null,
+  #|   };
+  #|   if (withCanvas) {
+  #|     harness.canvas = new TestCanvas();
+  #|     harness.lastCanvas = harness.canvas;
+  #|   }
   #|   Object.defineProperty(globalThis, "HTMLCanvasElement", {
   #|     configurable: true,
   #|     writable: true,
@@ -234,8 +281,9 @@ extern "js" fn canvas_frame_test_install_harness(with_canvas : Bool) -> Unit =
   #|     configurable: true,
   #|     writable: true,
   #|     value: {
+  #|       hidden: false,
   #|       getElementById(id) {
-  #|         return id === "energy-valley-canvas" ? canvas : null;
+  #|         return id === "energy-valley-canvas" ? harness.canvas : null;
   #|       },
   #|       querySelector() { return null; },
   #|       addEventListener() {},
@@ -244,12 +292,31 @@ extern "js" fn canvas_frame_test_install_harness(with_canvas : Bool) -> Unit =
   #|   Object.defineProperty(globalThis, "requestAnimationFrame", {
   #|     configurable: true,
   #|     writable: true,
-  #|     value(callback) { callbacks.push(callback); return callbacks.length; },
+  #|     value(callback) {
+  #|       const id = ++harness.nextRaf;
+  #|       callbacks.set(id, callback);
+  #|       return id;
+  #|     },
+  #|   });
+  #|   Object.defineProperty(globalThis, "cancelAnimationFrame", {
+  #|     configurable: true,
+  #|     writable: true,
+  #|     value(id) { callbacks.delete(id); },
   #|   });
   #|   Object.defineProperty(globalThis, "addEventListener", {
   #|     configurable: true,
   #|     writable: true,
-  #|     value() {},
+  #|     value(name, callback) { bucket(globalListeners, name).add(callback); },
+  #|   });
+  #|   Object.defineProperty(globalThis, "removeEventListener", {
+  #|     configurable: true,
+  #|     writable: true,
+  #|     value(name, callback) { bucket(globalListeners, name).delete(callback); },
+  #|   });
+  #|   Object.defineProperty(globalThis, "matchMedia", {
+  #|     configurable: true,
+  #|     writable: true,
+  #|     value() { return motion; },
   #|   });
   #|   Object.defineProperty(globalThis, "__moontownGoldenValleyCamera", {
   #|     configurable: true,
@@ -262,31 +329,99 @@ extern "js" fn canvas_frame_test_install_harness(with_canvas : Bool) -> Unit =
   #|     { configurable: true, writable: true, value: 3 },
   #|   );
   #|   delete globalThis.__moontownGoldenValleyCanvasSchedule;
+  #|   delete globalThis.__moontownGoldenValleyCanvasLifecycle;
   #|   delete globalThis.__moontownGoldenValleyRender;
+  #|   delete globalThis.__moontownStopGoldenValleyCanvas;
   #|   delete globalThis.__moontownGoldenValleyKeys;
   #|   delete globalThis.__moontownGoldenValleyAnimation;
   #|   delete globalThis.__moontownPlayerWalkKeys;
-  #|   globalThis.__moontownCanvasFrameTimingTest = { descriptors, callbacks };
+  #|   globalThis.__moontownCanvasFrameTimingTest = harness;
   #| }
 
 ///|
 extern "js" fn canvas_frame_test_flush_next_animation_frame() -> Bool =
   #| () => {
-  #|   const callback = globalThis.__moontownCanvasFrameTimingTest?.callbacks.shift();
-  #|   if (!callback) return false;
-  #|   callback(0);
+  #|   const callbacks = globalThis.__moontownCanvasFrameTimingTest?.callbacks;
+  #|   const next = callbacks?.entries().next().value;
+  #|   if (!next) return false;
+  #|   callbacks.delete(next[0]);
+  #|   next[1](0);
   #|   return true;
   #| }
 
 ///|
 extern "js" fn canvas_frame_test_pending_animation_frames() -> Int =
-  #| () => globalThis.__moontownCanvasFrameTimingTest?.callbacks.length ?? 0
+  #| () => globalThis.__moontownCanvasFrameTimingTest?.callbacks.size ?? 0
+
+///|
+extern "js" fn canvas_frame_test_set_canvas_present(present : Bool) -> Unit =
+  #| present => {
+  #|   const harness = globalThis.__moontownCanvasFrameTimingTest;
+  #|   if (!harness) return;
+  #|   if (!present) {
+  #|     if (harness.canvas) {
+  #|       harness.canvas.isConnected = false;
+  #|       harness.lastCanvas = harness.canvas;
+  #|       harness.canvas = null;
+  #|     }
+  #|     return;
+  #|   }
+  #|   if (!harness.canvas) {
+  #|     harness.canvas = new harness.TestCanvas();
+  #|     harness.lastCanvas = harness.canvas;
+  #|   }
+  #| }
+
+///|
+extern "js" fn canvas_frame_test_set_context_available(
+  available : Bool,
+) -> Unit =
+  #| available => {
+  #|   const canvas = globalThis.__moontownCanvasFrameTimingTest?.canvas;
+  #|   if (canvas) canvas.contextAvailable = available;
+  #| }
+
+///|
+extern "js" fn canvas_frame_test_retains_render_closure() -> Bool =
+  #| () => {
+  #|   const lifecycle = globalThis.__moontownGoldenValleyCanvasLifecycle;
+  #|   const schedule = globalThis.__moontownGoldenValleyCanvasSchedule;
+  #|   return typeof globalThis.__moontownGoldenValleyRender === "function" ||
+  #|     typeof lifecycle?.render === "function" ||
+  #|     typeof schedule?.pending === "function";
+  #| }
+
+///|
+extern "js" fn canvas_frame_test_has_canvas_lifecycle() -> Bool =
+  #| () => Boolean(globalThis.__moontownGoldenValleyCanvasLifecycle)
+
+///|
+extern "js" fn canvas_frame_test_released_backing_pixels() -> Int =
+  #| () => {
+  #|   const canvas = globalThis.__moontownCanvasFrameTimingTest?.lastCanvas;
+  #|   return (canvas?.width ?? 0) * (canvas?.height ?? 0);
+  #| }
+
+///|
+extern "js" fn canvas_frame_test_owned_canvas_listener_count() -> Int =
+  #| () => {
+  #|   const canvas = globalThis.__moontownCanvasFrameTimingTest?.lastCanvas;
+  #|   if (!canvas) return 0;
+  #|   let count = 0;
+  #|   for (const listeners of canvas.listeners.values()) count += listeners.size;
+  #|   return count;
+  #| }
+
+///|
+extern "js" fn canvas_frame_test_motion_listener_count() -> Int =
+  #| () => globalThis.__moontownCanvasFrameTimingTest?.motion.listeners.size ?? 0
 
 ///|
 extern "js" fn canvas_frame_test_remove_harness() -> Unit =
   #| () => {
   #|   const harness = globalThis.__moontownCanvasFrameTimingTest;
   #|   if (!harness) return;
+  #|   globalThis.__moontownStopGoldenValleyCanvas?.(true);
   #|   for (const [name, descriptor] of harness.descriptors) {
   #|     if (descriptor) {
   #|       Object.defineProperty(globalThis, name, descriptor);
@@ -353,9 +488,10 @@ test "Canvas accepts a semantic frame only after its scheduled draw succeeds" {
   )
   assert_eq(golden_valley_canvas_frame().unwrap().tick, visible.tick)
   assert_true(canvas_frame_test_flush_next_animation_frame())
-  assert_eq(golden_valley_canvas_frame().unwrap().tick, visible.tick)
+  assert_true(golden_valley_canvas_frame() is None)
   canvas_frame_test_remove_harness()
 
+  golden_valley_accept_canvas_frame(visible)
   canvas_frame_test_install_harness(true)
   ignore(
     render_golden_valley_canvas(
@@ -370,6 +506,32 @@ test "Canvas accepts a semantic frame only after its scheduled draw succeeds" {
   assert_eq(golden_valley_canvas_frame().unwrap().tick, pending.tick)
   canvas_frame_test_remove_harness()
   golden_valley_accept_canvas_frame(visible)
+}
+
+///|
+test "Canvas without a 2D context cannot retain or animate a snapshot" {
+  let dispatch : Dispatch[Msg] = Emit(fn(_message) { @rabbita.none })
+  let visible = canvas_frame_test_snapshot(3)
+  let failed = canvas_frame_test_snapshot(4)
+  golden_valley_accept_canvas_frame(visible)
+  canvas_frame_test_install_harness(true)
+  canvas_frame_test_set_context_available(false)
+  ignore(
+    render_golden_valley_canvas(
+      dispatch,
+      failed,
+      canvas_frame_test_view(failed.tick),
+    ),
+  )
+  assert_eq(canvas_frame_test_pending_animation_frames(), 1)
+  assert_eq(golden_valley_canvas_frame().unwrap().tick, visible.tick)
+  assert_true(canvas_frame_test_flush_next_animation_frame())
+  assert_eq(canvas_frame_test_pending_animation_frames(), 0)
+  assert_true(golden_valley_canvas_frame() is None)
+  assert_false(canvas_frame_test_has_canvas_lifecycle())
+  assert_false(canvas_frame_test_retains_render_closure())
+  assert_eq(canvas_frame_test_released_backing_pixels(), 0)
+  canvas_frame_test_remove_harness()
 }
 
 ///|
@@ -400,6 +562,61 @@ test "Canvas scheduling retains only the latest semantic frame before paint" {
   assert_eq(golden_valley_canvas_frame().unwrap().tick, latest.tick)
   canvas_frame_test_remove_harness()
   golden_valley_accept_canvas_frame(visible)
+}
+
+///|
+test "primary Canvas self-stops on unmount and restarts once on reopen" {
+  let dispatch : Dispatch[Msg] = Emit(fn(_message) { @rabbita.none })
+  let mounted = canvas_frame_test_snapshot(20)
+  let reopened = canvas_frame_test_snapshot(21)
+  canvas_frame_test_install_harness(true)
+  ignore(
+    render_golden_valley_canvas(
+      dispatch,
+      mounted,
+      canvas_frame_test_view(mounted.tick),
+    ),
+  )
+  assert_eq(canvas_frame_test_pending_animation_frames(), 1)
+  assert_true(canvas_frame_test_flush_next_animation_frame())
+  assert_eq(golden_valley_canvas_frame().unwrap().tick, mounted.tick)
+  assert_true(canvas_frame_test_has_canvas_lifecycle())
+  assert_true(canvas_frame_test_retains_render_closure())
+  assert_eq(canvas_frame_test_pending_animation_frames(), 1)
+  assert_true(canvas_frame_test_owned_canvas_listener_count() > 0)
+  assert_eq(canvas_frame_test_motion_listener_count(), 1)
+
+  canvas_frame_test_set_canvas_present(false)
+  assert_true(canvas_frame_test_flush_next_animation_frame())
+  assert_eq(canvas_frame_test_pending_animation_frames(), 0)
+  assert_false(canvas_frame_test_has_canvas_lifecycle())
+  assert_false(canvas_frame_test_retains_render_closure())
+  assert_eq(canvas_frame_test_released_backing_pixels(), 0)
+  assert_eq(canvas_frame_test_owned_canvas_listener_count(), 0)
+  assert_eq(canvas_frame_test_motion_listener_count(), 0)
+  assert_true(golden_valley_canvas_frame() is None)
+  stop_golden_valley_canvas()
+  stop_golden_valley_canvas()
+  assert_eq(canvas_frame_test_pending_animation_frames(), 0)
+  assert_false(canvas_frame_test_retains_render_closure())
+
+  canvas_frame_test_set_canvas_present(true)
+  ignore(
+    render_golden_valley_canvas(
+      dispatch,
+      reopened,
+      canvas_frame_test_view(reopened.tick),
+    ),
+  )
+  assert_eq(canvas_frame_test_pending_animation_frames(), 1)
+  assert_true(golden_valley_canvas_frame() is None)
+  assert_true(canvas_frame_test_flush_next_animation_frame())
+  assert_eq(golden_valley_canvas_frame().unwrap().tick, reopened.tick)
+  assert_true(canvas_frame_test_has_canvas_lifecycle())
+  assert_true(canvas_frame_test_retains_render_closure())
+  assert_eq(canvas_frame_test_pending_animation_frames(), 1)
+  canvas_frame_test_remove_harness()
+  assert_true(golden_valley_canvas_frame() is None)
 }
 
 ///|

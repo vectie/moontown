@@ -104,6 +104,18 @@ extern "js" fn town_life_transport_test_delayed_lock_broadcasts() -> Int =
   #| () => globalThis.__moontownTownLifeDelayedLockTest?.broadcasts ?? 0
 
 ///|
+extern "js" fn town_life_transport_test_disable_locks() -> Unit =
+  #| () => {
+  #|   Object.defineProperty(globalThis, "navigator", {
+  #|     value: {}, configurable: true, writable: true,
+  #|   });
+  #| }
+
+///|
+extern "js" fn town_life_transport_test_delayed_lock_row_count() -> Int =
+  #| () => globalThis.__moontownTownLifeDelayedLockTest?.rows.size ?? 0
+
+///|
 extern "js" fn town_life_transport_test_delayed_lock_pending_callbacks() -> Int =
   #| () => globalThis.__moontownTownLifeDelayedLockTest?.lockCallbacks.length ?? 0
 
@@ -458,9 +470,7 @@ test "V3 reads keep only each writer's highest valid cumulative envelope" {
     },
     {
       key: mismatched_key,
-      raw: town_life_transport_test_envelope(
-        "writer-a", 99, mismatched_text,
-      ),
+      raw: town_life_transport_test_envelope("writer-a", 99, mismatched_text),
     },
   ])
   assert_eq(readable.texts.length(), 3)
@@ -636,6 +646,74 @@ test "rapid V3 commits queue one compaction with the latest manifest" {
 }
 
 ///|
+test "lockless V3 exact compaction preserves concurrent replacement DAG" {
+  let save_a = { ..town_life_default_save(), analytics: ["state-a"] }
+  let save_b = { ..town_life_default_save(), analytics: ["state-b"] }
+  let cumulative_d = town_life_reconcile_save(save_a, save_b)
+  let text_a = ToJson::to_json(save_a).stringify()
+  let text_b = ToJson::to_json(save_b).stringify()
+  let text_d = ToJson::to_json(cumulative_d).stringify()
+  let key_a = town_life_v3_shard_key("writer-a", 1)
+  let key_b = town_life_v3_shard_key("writer-b", 1)
+  let key_c = town_life_v3_shard_key("delayed-lock-writer", 1)
+  let key_d = town_life_v3_shard_key("delayed-lock-writer", 2)
+  let corrupt_key = town_life_v3_shard_key("future-writer", 1)
+  town_life_transport_test_install_delayed_lock("ok")
+  town_life_transport_test_disable_locks()
+  town_life_transport_test_delayed_lock_seed(
+    key_a,
+    town_life_transport_test_envelope("writer-a", 1, text_a),
+  )
+  town_life_transport_test_delayed_lock_observe_shards()
+  // B and the future/corrupt shard arrive after A's observation. C may replace
+  // A only; the unobserved branch must survive for the next cumulative join.
+  town_life_transport_test_delayed_lock_seed(
+    key_b,
+    town_life_transport_test_envelope("writer-b", 1, text_b),
+  )
+  town_life_transport_test_delayed_lock_seed(
+    corrupt_key, "future-or-corrupt-envelope",
+  )
+  assert_true(browser_write_town_life_v3_writer_shard(text_a, 1))
+  let a_after_c = town_life_transport_test_delayed_lock_raw(key_a)
+  let b_after_c = town_life_transport_test_delayed_lock_raw(key_b)
+  let c_after_c = town_life_transport_test_delayed_lock_raw(key_c)
+  let corrupt_after_c = town_life_transport_test_delayed_lock_raw(corrupt_key)
+  let observation_after_c = town_life_transport_test_delayed_lock_observation_id()
+
+  // The next read validates B and C but excludes the corrupt/future shard from
+  // the exact deletion manifest. D then replaces both valid DAG parents.
+  town_life_transport_test_delayed_lock_observe_shards()
+  browser_restrict_town_life_v3_observed_shards([key_b, key_c])
+  assert_true(browser_write_town_life_v3_writer_shard(text_d, 2))
+  let b_after_d = town_life_transport_test_delayed_lock_raw(key_b)
+  let c_after_d = town_life_transport_test_delayed_lock_raw(key_c)
+  let d_after_d = town_life_transport_test_delayed_lock_raw(key_d)
+  let corrupt_after_d = town_life_transport_test_delayed_lock_raw(corrupt_key)
+  let observation_after_d = town_life_transport_test_delayed_lock_observation_id()
+  let lock_requests = town_life_transport_test_delayed_lock_requests()
+  let broadcasts = town_life_transport_test_delayed_lock_broadcasts()
+  let row_count = town_life_transport_test_delayed_lock_row_count()
+  town_life_transport_test_remove_delayed_lock()
+  assert_true(a_after_c.is_empty())
+  assert_true(!b_after_c.is_empty())
+  assert_true(!c_after_c.is_empty())
+  assert_eq(corrupt_after_c, "future-or-corrupt-envelope")
+  assert_eq(observation_after_c, 0)
+  assert_true(b_after_d.is_empty())
+  assert_true(c_after_d.is_empty())
+  assert_eq(town_life_transport_payload(d_after_d), text_d)
+  assert_eq(corrupt_after_d, "future-or-corrupt-envelope")
+  assert_eq(observation_after_d, 0)
+  assert_eq(lock_requests, 0)
+  assert_eq(broadcasts, 2)
+  assert_eq(row_count, 2)
+  let decoded_d = town_life_decode_save(town_life_transport_payload(d_after_d)).unwrap()
+  assert_true(decoded_d.analytics.contains("state-a"))
+  assert_true(decoded_d.analytics.contains("state-b"))
+}
+
+///|
 test "V3 compaction releases only its exact observed manifest" {
   town_life_transport_test_install_delayed_lock("ok")
   town_life_transport_test_delayed_lock_seed(
@@ -670,12 +748,19 @@ test "V3 compaction releases only its exact observed manifest" {
 ///|
 test "quota and readback mismatch reject reset shard before effects" {
   for mode in ["quota", "mismatch"] {
+    let prior_key = town_life_v3_shard_key("prior-writer", 1)
+    let prior_raw = "prior-must-survive-{mode}"
     town_life_transport_test_install_delayed_lock(mode)
+    town_life_transport_test_disable_locks()
+    town_life_transport_test_delayed_lock_seed(prior_key, prior_raw)
+    town_life_transport_test_delayed_lock_observe_shards()
     let written = browser_write_town_life_v3_writer_shard("reset-save", 1)
+    let surviving = town_life_transport_test_delayed_lock_raw(prior_key)
     let lock_requests = town_life_transport_test_delayed_lock_requests()
     let broadcasts = town_life_transport_test_delayed_lock_broadcasts()
     town_life_transport_test_remove_delayed_lock()
     assert_false(written)
+    assert_eq(surviving, prior_raw)
     assert_eq(lock_requests, 0)
     assert_eq(broadcasts, 0)
   }

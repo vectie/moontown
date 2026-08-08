@@ -130,10 +130,8 @@ fn town_life_transport_latest_valid_v3_saves(
     }
     match town_life_transport_decode_envelope(entry.raw) {
       Some(envelope) if entry.key.starts_with(town_life_v3_shard_prefix) &&
-        entry.key == town_life_v3_shard_key(
-          envelope.writer_id,
-          envelope.sequence,
-        ) => {
+        entry.key ==
+        town_life_v3_shard_key(envelope.writer_id, envelope.sequence) => {
         accepted_shard_keys.push(entry.key)
         let next : TownLifeTransportSelectedSave = {
           key: entry.key,
@@ -552,8 +550,9 @@ fn browser_town_life_v3_next_writer_sequence() -> Int {
 /// scheduled. Navigation may then cancel compaction without losing the new
 /// state. Under Web Locks, exact captured older shard keys are removed. A
 /// concurrent writer creates an unobserved key and is therefore retained.
-/// Without Web Locks, on quota/write failure, or with a stale observation
-/// manifest, deletion is disabled.
+/// Without Web Locks, the same byte-exact captured deletion runs synchronously
+/// after verification; mutable lease cleanup remains lock-only. On quota/write
+/// failure or with a stale observation manifest, deletion is disabled.
 extern "js" fn browser_write_town_life_v3_writer_shard(
   text : String,
   sequence : Int,
@@ -614,11 +613,38 @@ extern "js" fn browser_write_town_life_v3_writer_shard(
   #|   if (!writeAndVerify()) return false;
   #|   broadcastDurableShard();
   #|   const locks = globalThis.navigator?.locks;
-  #|   // Without a cross-tab exclusion primitive every verified cumulative
-  #|   // shard remains append-only. Exact byte comparison protects a key, but
-  #|   // cannot make a multi-key destructive pass atomic with another tab's
-  #|   // observation, so durability and convergence take priority over bounds.
-  #|   if (typeof locks?.request !== "function") return true;
+  #|   if (typeof locks?.request !== "function") {
+  #|     // Immutable keys plus byte-for-byte compare-before-remove make this
+  #|     // optimistic pass safe without Web Locks: an unobserved concurrent
+  #|     // shard is outside the manifest, and a changed candidate no longer
+  #|     // matches. Mutable cross-writer lease cleanup remains lock-only.
+  #|     try {
+  #|       if (observationFresh && storage.getItem(key) === raw) {
+  #|         const captured = new Map(
+  #|           capturedEntries.map(entry => [entry.key, entry.raw]),
+  #|         );
+  #|         for (const [candidateKey, expectedRaw] of captured) {
+  #|           if (candidateKey === key ||
+  #|               !candidateKey.startsWith(shardPrefix)) continue;
+  #|           if (storage.getItem(candidateKey) === expectedRaw) {
+  #|             storage.removeItem(candidateKey);
+  #|           }
+  #|         }
+  #|       }
+  #|     } catch (_) {
+  #|       // The new cumulative shard is already durable; partial optimistic
+  #|       // cleanup is safe and the remaining immutable shards stay readable.
+  #|     } finally {
+  #|       if (globalThis.__moontownTownLifeV3Observed === observedState) {
+  #|         delete globalThis.__moontownTownLifeV3Observed;
+  #|       }
+  #|       capturedEntries = null;
+  #|       observedState = null;
+  #|       raw = "";
+  #|       text = "";
+  #|     }
+  #|     return true;
+  #|   }
   #|   let compaction = globalThis.__moontownTownLifeV3Compaction;
   #|   if (!compaction) {
   #|     compaction = { pending: false, latest: null, ticket: null };

@@ -50,13 +50,148 @@ extern "js" fn schedule_golden_valley_canvas(callback : () -> Unit) -> Unit =
   #| }
 
 ///|
+extern "js" fn browser_stop_golden_valley_canvas() -> Unit =
+  #| () => {
+  #|   const lifecycle = globalThis.__moontownGoldenValleyCanvasLifecycle;
+  #|   if (typeof lifecycle?.stop === "function") {
+  #|     lifecycle.stop(true);
+  #|     return;
+  #|   }
+  #|   const schedule = globalThis.__moontownGoldenValleyCanvasSchedule;
+  #|   if (schedule?.raf) {
+  #|     globalThis.cancelAnimationFrame?.(schedule.raf);
+  #|   }
+  #|   if (schedule) {
+  #|     schedule.raf = 0;
+  #|     schedule.pending = null;
+  #|   }
+  #|   const canvas = globalThis.document?.getElementById(
+  #|     "energy-valley-canvas",
+  #|   );
+  #|   if (canvas) {
+  #|     delete canvas.dataset.goldenInput;
+  #|     canvas.width = 0;
+  #|     canvas.height = 0;
+  #|   }
+  #|   delete globalThis.__moontownGoldenValleyCanvasSchedule;
+  #|   delete globalThis.__moontownGoldenValleyRender;
+  #|   delete globalThis.__moontownStopGoldenValleyCanvas;
+  #| }
+
+///|
+fn stop_golden_valley_canvas() -> Unit {
+  browser_stop_golden_valley_canvas()
+  golden_valley_clear_canvas_frame()
+}
+
+///|
 extern "js" fn install_golden_valley_canvas_input(
   render_callback : () -> Unit,
+  release_frame_callback : () -> Unit,
 ) -> Unit =
-  #| (renderCallback) => {
-  #|   globalThis.__moontownGoldenValleyRender = renderCallback;
+  #| (renderCallback, releaseFrameCallback) => {
   #|   const canvas = globalThis.document?.getElementById("energy-valley-canvas");
-  #|   if (!canvas || canvas.dataset.goldenInput === "1") return;
+  #|   if (!canvas) {
+  #|     const lifecycle = globalThis.__moontownGoldenValleyCanvasLifecycle;
+  #|     if (typeof lifecycle?.stop === "function") lifecycle.stop(true);
+  #|     else {
+  #|       const schedule = globalThis.__moontownGoldenValleyCanvasSchedule;
+  #|       if (schedule?.raf) globalThis.cancelAnimationFrame?.(schedule.raf);
+  #|       if (schedule) {
+  #|         schedule.raf = 0;
+  #|         schedule.pending = null;
+  #|       }
+  #|       delete globalThis.__moontownGoldenValleyCanvasSchedule;
+  #|       delete globalThis.__moontownGoldenValleyRender;
+  #|       releaseFrameCallback();
+  #|     }
+  #|     return;
+  #|   }
+  #|   let lifecycle = globalThis.__moontownGoldenValleyCanvasLifecycle;
+  #|   if (lifecycle && (!lifecycle.running || lifecycle.canvas !== canvas)) {
+  #|     // Drawing has already accepted the replacement Canvas frame, so stop
+  #|     // the detached owner without clearing that newly accepted authority.
+  #|     lifecycle.stop(false);
+  #|     lifecycle = null;
+  #|   }
+  #|   if (lifecycle) {
+  #|     lifecycle.render = renderCallback;
+  #|     lifecycle.releaseFrame = releaseFrameCallback;
+  #|     return;
+  #|   }
+  #|   lifecycle = {
+  #|     canvas,
+  #|     render: renderCallback,
+  #|     releaseFrame: releaseFrameCallback,
+  #|     running: true,
+  #|     animationRaf: 0,
+  #|     transientRafs: new Set(),
+  #|     cleanups: [],
+  #|     lastPaint: 0,
+  #|     stop: null,
+  #|     invoke: null,
+  #|   };
+  #|   globalThis.__moontownGoldenValleyCanvasLifecycle = lifecycle;
+  #|   const invoke = () => {
+  #|     if (globalThis.__moontownGoldenValleyCanvasLifecycle === lifecycle &&
+  #|         lifecycle.running) lifecycle.render?.();
+  #|   };
+  #|   lifecycle.invoke = invoke;
+  #|   globalThis.__moontownGoldenValleyRender = invoke;
+  #|   const stopLifecycle = (
+  #|     clearAcceptedFrame = true,
+  #|     preservePendingPaint = false,
+  #|   ) => {
+  #|     if (!lifecycle.running) return;
+  #|     lifecycle.running = false;
+  #|     const schedule = globalThis.__moontownGoldenValleyCanvasSchedule;
+  #|     if (!preservePendingPaint) {
+  #|       if (schedule?.raf) globalThis.cancelAnimationFrame?.(schedule.raf);
+  #|       if (schedule) {
+  #|         schedule.raf = 0;
+  #|         schedule.pending = null;
+  #|       }
+  #|     }
+  #|     if (lifecycle.animationRaf) {
+  #|       globalThis.cancelAnimationFrame?.(lifecycle.animationRaf);
+  #|       lifecycle.animationRaf = 0;
+  #|     }
+  #|     for (const raf of lifecycle.transientRafs) {
+  #|       globalThis.cancelAnimationFrame?.(raf);
+  #|     }
+  #|     lifecycle.transientRafs.clear();
+  #|     for (const cleanup of lifecycle.cleanups.splice(0).reverse()) {
+  #|       try { cleanup(); } catch (_) {}
+  #|     }
+  #|     const ownedCanvas = lifecycle.canvas;
+  #|     if (ownedCanvas) {
+  #|       delete ownedCanvas.dataset.goldenInput;
+  #|       ownedCanvas.width = 0;
+  #|       ownedCanvas.height = 0;
+  #|     }
+  #|     const releaseFrame = lifecycle.releaseFrame;
+  #|     lifecycle.canvas = null;
+  #|     lifecycle.render = null;
+  #|     lifecycle.releaseFrame = null;
+  #|     lifecycle.invoke = null;
+  #|     if (globalThis.__moontownGoldenValleyCanvasLifecycle === lifecycle) {
+  #|       delete globalThis.__moontownGoldenValleyCanvasLifecycle;
+  #|       if (!preservePendingPaint) {
+  #|         delete globalThis.__moontownGoldenValleyCanvasSchedule;
+  #|       }
+  #|       if (globalThis.__moontownGoldenValleyRender === invoke) {
+  #|         delete globalThis.__moontownGoldenValleyRender;
+  #|       }
+  #|       if (globalThis.__moontownStopGoldenValleyCanvas === stopLifecycle) {
+  #|         delete globalThis.__moontownStopGoldenValleyCanvas;
+  #|       }
+  #|       delete globalThis.__moontownGoldenValleyKeys;
+  #|       delete globalThis.__moontownGoldenValleyAnimation;
+  #|     }
+  #|     if (clearAcceptedFrame) releaseFrame?.();
+  #|   };
+  #|   lifecycle.stop = stopLifecycle;
+  #|   globalThis.__moontownStopGoldenValleyCanvas = stopLifecycle;
   #|   canvas.dataset.goldenInput = "1";
   #|   const viewportWidth = canvas.clientWidth || globalThis.innerWidth || 1280;
   #|   const viewportHeight = canvas.clientHeight || globalThis.innerHeight || 720;
@@ -81,8 +216,16 @@ extern "js" fn install_golden_valley_canvas_input(
   #|   let cameraDragging = false;
   #|   let painting = false;
   #|   let moved = false;
+  #|   let activePointerId = null;
   #|   let lastX = 0;
   #|   let lastY = 0;
+  #|   const listen = (target, name, handler, options) => {
+  #|     if (typeof target?.addEventListener !== "function") return;
+  #|     target.addEventListener(name, handler, options);
+  #|     lifecycle.cleanups.push(() => {
+  #|       target.removeEventListener?.(name, handler, options);
+  #|     });
+  #|   };
   #|   const inspectSelected = () =>
   #|     Boolean(globalThis.document?.querySelector(
   #|       'button[aria-label^="视察"][aria-pressed="true"]',
@@ -99,7 +242,7 @@ extern "js" fn install_golden_valley_canvas_input(
   #|     globalThis.__moontownGoldenValleyActionX = x;
   #|     globalThis.__moontownGoldenValleyActionY = y;
   #|   };
-  #|   canvas.addEventListener("pointerdown", event => {
+  #|   const onPointerDown = event => {
   #|     if (event.button === 0) rememberAction(event);
   #|     if (event.button === 1 || event.button === 2 ||
   #|         (event.button === 0 && inspectSelected())) {
@@ -107,13 +250,17 @@ extern "js" fn install_golden_valley_canvas_input(
   #|       moved = false;
   #|       lastX = event.clientX;
   #|       lastY = event.clientY;
+  #|       activePointerId = event.pointerId;
   #|       canvas.setPointerCapture?.(event.pointerId);
   #|     } else if (event.button === 0) {
   #|       painting = paintSelected();
-  #|       if (painting) canvas.setPointerCapture?.(event.pointerId);
+  #|       if (painting) {
+  #|         activePointerId = event.pointerId;
+  #|         canvas.setPointerCapture?.(event.pointerId);
+  #|       }
   #|     }
-  #|   });
-  #|   canvas.addEventListener("pointermove", event => {
+  #|   };
+  #|   const onPointerMove = event => {
   #|     if (cameraDragging) {
   #|       if (Math.abs(event.clientX - lastX) > 2 ||
   #|           Math.abs(event.clientY - lastY) > 2) moved = true;
@@ -131,22 +278,20 @@ extern "js" fn install_golden_valley_canvas_input(
   #|         clientY: event.clientY,
   #|       }));
   #|     }
-  #|   });
-  #|   const stop = event => {
+  #|   };
+  #|   const stopPointer = event => {
   #|     cameraDragging = false;
   #|     painting = false;
   #|     canvas.releasePointerCapture?.(event.pointerId);
+  #|     activePointerId = null;
   #|   };
-  #|   canvas.addEventListener("pointerup", event => {
-  #|     stop(event);
-  #|   });
-  #|   canvas.addEventListener("pointercancel", stop);
-  #|   canvas.addEventListener("click", event => {
+  #|   const onPointerUp = event => stopPointer(event);
+  #|   const onClick = event => {
   #|     if (moved) event.stopImmediatePropagation();
   #|     moved = false;
-  #|   }, true);
-  #|   canvas.addEventListener("contextmenu", event => event.preventDefault());
-  #|   canvas.addEventListener("wheel", event => {
+  #|   };
+  #|   const onContextMenu = event => event.preventDefault();
+  #|   const onWheel = event => {
   #|     event.preventDefault();
   #|     const rect = canvas.getBoundingClientRect();
   #|     const mx = event.clientX - rect.left - rect.width / 2;
@@ -158,10 +303,24 @@ extern "js" fn install_golden_valley_canvas_input(
   #|     camera.x += mx / previous - mx / camera.z;
   #|     camera.y += my / previous - my / camera.z;
   #|     globalThis.__moontownGoldenValleyRender?.();
-  #|   }, { passive: false });
-  #|   if (!globalThis.__moontownGoldenValleyKeys) {
-  #|     globalThis.__moontownGoldenValleyKeys = true;
-  #|     globalThis.addEventListener("keydown", event => {
+  #|   };
+  #|   listen(canvas, "pointerdown", onPointerDown);
+  #|   listen(canvas, "pointermove", onPointerMove);
+  #|   listen(canvas, "pointerup", onPointerUp);
+  #|   listen(canvas, "pointercancel", stopPointer);
+  #|   listen(canvas, "click", onClick, true);
+  #|   listen(canvas, "contextmenu", onContextMenu);
+  #|   listen(canvas, "wheel", onWheel, { passive: false });
+  #|   lifecycle.cleanups.push(() => {
+  #|     cameraDragging = false;
+  #|     painting = false;
+  #|     if (activePointerId !== null) {
+  #|       canvas.releasePointerCapture?.(activePointerId);
+  #|       activePointerId = null;
+  #|     }
+  #|   });
+  #|   globalThis.__moontownGoldenValleyKeys = true;
+  #|   const onKeyDown = event => {
   #|       const modal = globalThis.document?.querySelector(
   #|         '[role="dialog"][aria-modal="true"],[role="alertdialog"][aria-modal="true"]',
   #|       );
@@ -213,11 +372,18 @@ extern "js" fn install_golden_valley_canvas_input(
   #|             `button[aria-label="${label}"]`,
   #|           )?.click();
   #|         }
-  #|         if (restoreLabel) globalThis.requestAnimationFrame(() => {
-  #|           globalThis.document?.querySelector(
-  #|             `button[aria-label="${restoreLabel}"]`,
-  #|           )?.focus();
-  #|         });
+  #|         if (restoreLabel &&
+  #|             typeof globalThis.requestAnimationFrame === "function") {
+  #|           let focusRaf = 0;
+  #|           focusRaf = globalThis.requestAnimationFrame(() => {
+  #|             lifecycle.transientRafs.delete(focusRaf);
+  #|             if (!lifecycle.running) return;
+  #|             globalThis.document?.querySelector(
+  #|               `button[aria-label="${restoreLabel}"]`,
+  #|             )?.focus();
+  #|           });
+  #|           lifecycle.transientRafs.add(focusRaf);
+  #|         }
   #|         return;
   #|       }
   #|       const target = event.target;
@@ -233,29 +399,44 @@ extern "js" fn install_golden_valley_canvas_input(
   #|           'button[aria-label="暂停模拟"],button[aria-label="继续模拟"]',
   #|         )?.click();
   #|       }
-  #|     });
-  #|   }
-  #|   if (!globalThis.__moontownGoldenValleyAnimation) {
-  #|     globalThis.__moontownGoldenValleyAnimation = true;
-  #|     const motion = globalThis.matchMedia?.(
-  #|       "(prefers-reduced-motion: reduce)",
+  #|   };
+  #|   listen(globalThis, "keydown", onKeyDown);
+  #|   globalThis.__moontownGoldenValleyAnimation = true;
+  #|   const motion = globalThis.matchMedia?.(
+  #|     "(prefers-reduced-motion: reduce)",
+  #|   );
+  #|   const onMotionChange = () => invoke();
+  #|   listen(motion, "change", onMotionChange);
+  #|   const frame = timestamp => {
+  #|     lifecycle.animationRaf = 0;
+  #|     if (!lifecycle.running ||
+  #|         globalThis.__moontownGoldenValleyCanvasLifecycle !== lifecycle) {
+  #|       return;
+  #|     }
+  #|     const mounted = globalThis.document?.getElementById(
+  #|       "energy-valley-canvas",
   #|     );
-  #|     let lastPaint = 0;
-  #|     const frame = timestamp => {
-  #|       // The map remains interactive under reduced motion, but continuous
-  #|       // canvas animation is suppressed. Normal motion is capped at 30fps.
-  #|       if (!motion?.matches && !globalThis.document?.hidden &&
-  #|           timestamp - lastPaint >= 33) {
-  #|         lastPaint = timestamp;
-  #|         globalThis.__moontownGoldenValleyRender?.();
-  #|       }
-  #|       globalThis.requestAnimationFrame(frame);
-  #|     };
-  #|     motion?.addEventListener?.("change", () => {
-  #|       globalThis.__moontownGoldenValleyRender?.();
-  #|     });
-  #|     globalThis.requestAnimationFrame(frame);
-  #|   }
+  #|     if (mounted !== lifecycle.canvas ||
+  #|         lifecycle.canvas?.isConnected === false) {
+  #|       const replacementMounted = Boolean(
+  #|         mounted && mounted !== lifecycle.canvas &&
+  #|         mounted.isConnected !== false,
+  #|       );
+  #|       lifecycle.stop(true, replacementMounted);
+  #|       return;
+  #|     }
+  #|     // The map remains interactive under reduced motion, but continuous
+  #|     // canvas animation is suppressed. Normal motion is capped at 30fps.
+  #|     if (!motion?.matches && !globalThis.document?.hidden &&
+  #|         timestamp - lifecycle.lastPaint >= 33) {
+  #|       lifecycle.lastPaint = timestamp;
+  #|       invoke();
+  #|     }
+  #|     if (lifecycle.running) {
+  #|       lifecycle.animationRaf = globalThis.requestAnimationFrame(frame);
+  #|     }
+  #|   };
+  #|   lifecycle.animationRaf = globalThis.requestAnimationFrame(frame);
   #| }
 
 ///|
@@ -2108,7 +2289,7 @@ fn town_canvas_follow_position(view : TownCanvasViewState) -> (Double, Double)? 
 fn draw_golden_valley_canvas(
   snapshot : @energy_valley_contract.TownSnapshot,
   view : TownCanvasViewState,
-) -> Unit {
+) -> Bool {
   let canvas_id = "energy-valley-canvas"
   match town_canvas_follow_position(view) {
     Some((x, y)) => golden_follow_camera(x, y)
@@ -2118,7 +2299,7 @@ fn draw_golden_valley_canvas(
   let width = golden_valley_canvas_width(canvas_id)
   let height = golden_valley_canvas_height(canvas_id)
   match @canvas.get_context2d(canvas_id) {
-    None => ()
+    None => false
     Some(context) => {
       context.clear_rect(0.0, 0.0, width.to_double(), height.to_double())
       let hour = view.hour
@@ -2232,6 +2413,7 @@ fn draw_golden_valley_canvas(
         snapshot,
         view.runtime_agent_interaction_enabled,
       )
+      true
     }
   }
 }
@@ -2245,11 +2427,19 @@ fn render_golden_valley_canvas(
   schedule_golden_valley_canvas(() => {
     // Drawing first preserves the accepted-frame contract: input and the
     // continuous animator only adopt this snapshot after a successful paint.
-    draw_golden_valley_canvas(snapshot, view)
-    install_golden_valley_canvas_input(() => {
-      draw_golden_valley_canvas(snapshot, view)
-    })
-    install_player_walk_keys()
+    if draw_golden_valley_canvas(snapshot, view) {
+      install_golden_valley_canvas_input(
+        () => {
+          if !draw_golden_valley_canvas(snapshot, view) {
+            stop_golden_valley_canvas()
+          }
+        },
+        () => golden_valley_clear_canvas_frame(),
+      )
+      install_player_walk_keys()
+    } else {
+      stop_golden_valley_canvas()
+    }
   })
   canvas(
     id="energy-valley-canvas",
