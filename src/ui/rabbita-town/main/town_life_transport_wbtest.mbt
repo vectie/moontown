@@ -167,6 +167,191 @@ extern "js" fn town_life_transport_test_remove_delayed_lock() -> Unit =
   #| }
 
 ///|
+/// Browser harness for repeated writer-realm shutdown and adversarial writer
+/// ownership interleavings.
+extern "js" fn town_life_transport_test_install_writer_lease_churn() -> Unit =
+  #| () => {
+  #|   const names = [
+  #|     "localStorage", "sessionStorage", "crypto", "addEventListener",
+  #|     "setInterval", "clearInterval", "__moontownTownLifeV3WriterState",
+  #|   ];
+  #|   const saved = new Map(names.map(name => [
+  #|     name, Object.getOwnPropertyDescriptor(globalThis, name),
+  #|   ]));
+  #|   const rows = new Map();
+  #|   const sessionRows = new Map();
+  #|   const listeners = new Map();
+  #|   const bucket = name => {
+  #|     if (!listeners.has(name)) listeners.set(name, new Set());
+  #|     return listeners.get(name);
+  #|   };
+  #|   const harness = {
+  #|     saved, rows, sessionRows, listeners, uuid: 0, interval: 0,
+  #|     contendOnReadKey: "", contenderId: "", contenderSawActive: false,
+  #|   };
+  #|   globalThis.__moontownTownLifeWriterLeaseChurnTest = harness;
+  #|   const install = (name, value) => Object.defineProperty(globalThis, name, {
+  #|     value, configurable: true, writable: true,
+  #|   });
+  #|   install("localStorage", {
+  #|     get length() { return rows.size; },
+  #|     key(index) { return [...rows.keys()][index] ?? null; },
+  #|     getItem(key) {
+  #|       const normalized = String(key);
+  #|       const current = rows.get(normalized) ?? null;
+  #|       if (normalized === harness.contendOnReadKey) {
+  #|         harness.contendOnReadKey = "";
+  #|         try {
+  #|           const lease = JSON.parse(current || "null");
+  #|           harness.contenderSawActive = lease?.released === false;
+  #|           if (harness.contenderSawActive) {
+  #|             const prefix = "moontown-town-life-v3-lease:";
+  #|             const writerId = normalized.slice(prefix.length);
+  #|             harness.contenderId = `${writerId}-contender`;
+  #|             rows.set(`${prefix}${harness.contenderId}`, JSON.stringify({
+  #|               owner_token: "conforming-contender-owner",
+  #|               released: false,
+  #|               updated_at_ms: Date.now(),
+  #|               last_sequence: 0,
+  #|             }));
+  #|           }
+  #|         } catch (_) {}
+  #|       }
+  #|       return current;
+  #|     },
+  #|     setItem(key, value) { rows.set(String(key), String(value)); },
+  #|     removeItem(key) { rows.delete(String(key)); },
+  #|   });
+  #|   install("sessionStorage", {
+  #|     getItem(key) { return sessionRows.get(String(key)) ?? null; },
+  #|     setItem(key, value) { sessionRows.set(String(key), String(value)); },
+  #|     removeItem(key) { sessionRows.delete(String(key)); },
+  #|     clear() { sessionRows.clear(); },
+  #|   });
+  #|   install("crypto", {
+  #|     randomUUID() {
+  #|       harness.uuid += 1;
+  #|       return `lease-churn-${String(harness.uuid).padStart(8, "0")}`;
+  #|     },
+  #|   });
+  #|   install("addEventListener", (name, callback) => {
+  #|     bucket(name).add(callback);
+  #|   });
+  #|   install("setInterval", () => ++harness.interval);
+  #|   install("clearInterval", () => {});
+  #|   delete globalThis.__moontownTownLifeV3WriterState;
+  #| }
+
+///|
+extern "js" fn town_life_transport_test_writer_lease_new_lifetime() -> Unit =
+  #| () => {
+  #|   const harness = globalThis.__moontownTownLifeWriterLeaseChurnTest;
+  #|   harness?.sessionRows.clear();
+  #|   delete globalThis.__moontownTownLifeV3WriterState;
+  #| }
+
+///|
+extern "js" fn town_life_transport_test_writer_lease_select_session(
+  writer_id : String,
+) -> Unit =
+  #| writerId => {
+  #|   const harness = globalThis.__moontownTownLifeWriterLeaseChurnTest;
+  #|   harness?.sessionRows.set("moontown-town-life-v3-writer-id", writerId);
+  #|   delete globalThis.__moontownTownLifeV3WriterState;
+  #| }
+
+///|
+extern "js" fn town_life_transport_test_writer_lease_contend_on_read(
+  writer_id : String,
+) -> Unit =
+  #| writerId => {
+  #|   const harness = globalThis.__moontownTownLifeWriterLeaseChurnTest;
+  #|   if (harness) {
+  #|     harness.contendOnReadKey =
+  #|       `moontown-town-life-v3-lease:${writerId}`;
+  #|   }
+  #| }
+
+///|
+extern "js" fn town_life_transport_test_writer_lease_contender_id() -> String =
+  #| () => globalThis.__moontownTownLifeWriterLeaseChurnTest?.contenderId ?? ""
+
+///|
+extern "js" fn town_life_transport_test_writer_lease_contender_saw_active() -> Bool =
+  #| () => Boolean(
+  #|   globalThis.__moontownTownLifeWriterLeaseChurnTest?.contenderSawActive,
+  #| )
+
+///|
+extern "js" fn town_life_transport_test_writer_lease_fire(
+  event_name : String,
+  persisted : Bool,
+) -> Unit =
+  #| (eventName, persisted) => {
+  #|   const harness = globalThis.__moontownTownLifeWriterLeaseChurnTest;
+  #|   for (const callback of harness?.listeners.get(eventName) ?? []) {
+  #|     callback({ persisted });
+  #|   }
+  #| }
+
+///|
+extern "js" fn town_life_transport_test_writer_lease_fire_at(
+  event_name : String,
+  listener_index : Int,
+  persisted : Bool,
+) -> Unit =
+  #| (eventName, listenerIndex, persisted) => {
+  #|   const harness = globalThis.__moontownTownLifeWriterLeaseChurnTest;
+  #|   const callback = [
+  #|     ...(harness?.listeners.get(eventName) ?? []),
+  #|   ][listenerIndex];
+  #|   callback?.({ persisted });
+  #| }
+
+///|
+extern "js" fn town_life_transport_test_writer_lease_count() -> Int =
+  #| () => {
+  #|   const harness = globalThis.__moontownTownLifeWriterLeaseChurnTest;
+  #|   const prefix = "moontown-town-life-v3-lease:";
+  #|   return [...(harness?.rows.keys() ?? [])]
+  #|     .filter(key => key.startsWith(prefix)).length;
+  #| }
+
+///|
+extern "js" fn town_life_transport_test_writer_lease_has(
+  writer_id : String,
+) -> Bool =
+  #| writerId => {
+  #|   const harness = globalThis.__moontownTownLifeWriterLeaseChurnTest;
+  #|   return harness?.rows.has(
+  #|     `moontown-town-life-v3-lease:${writerId}`,
+  #|   ) ?? false;
+  #| }
+
+///|
+extern "js" fn town_life_transport_test_writer_lease_raw(
+  writer_id : String,
+) -> String =
+  #| writerId => {
+  #|   const harness = globalThis.__moontownTownLifeWriterLeaseChurnTest;
+  #|   return harness?.rows.get(
+  #|     `moontown-town-life-v3-lease:${writerId}`,
+  #|   ) ?? "";
+  #| }
+
+///|
+extern "js" fn town_life_transport_test_remove_writer_lease_churn() -> Unit =
+  #| () => {
+  #|   const harness = globalThis.__moontownTownLifeWriterLeaseChurnTest;
+  #|   if (!harness) return;
+  #|   for (const [name, descriptor] of harness.saved) {
+  #|     if (descriptor) Object.defineProperty(globalThis, name, descriptor);
+  #|     else delete globalThis[name];
+  #|   }
+  #|   delete globalThis.__moontownTownLifeWriterLeaseChurnTest;
+  #| }
+
+///|
 /// A deterministic browser-event harness for the live TownLife V3 bridge. It
 /// uses queued timers so the test can prove installation never dispatches into
 /// Rabbita synchronously during `with_init`.
@@ -756,14 +941,77 @@ test "quota and readback mismatch reject reset shard before effects" {
     town_life_transport_test_delayed_lock_observe_shards()
     let written = browser_write_town_life_v3_writer_shard("reset-save", 1)
     let surviving = town_life_transport_test_delayed_lock_raw(prior_key)
+    let observation_id = town_life_transport_test_delayed_lock_observation_id()
     let lock_requests = town_life_transport_test_delayed_lock_requests()
     let broadcasts = town_life_transport_test_delayed_lock_broadcasts()
     town_life_transport_test_remove_delayed_lock()
     assert_false(written)
     assert_eq(surviving, prior_raw)
+    assert_eq(observation_id, 0)
     assert_eq(lock_requests, 0)
     assert_eq(broadcasts, 0)
   }
+}
+
+///|
+test "writer lease churn removes its active owner lease on shutdown" {
+  town_life_transport_test_install_writer_lease_churn()
+  let mut max_lease_rows = 0
+  for _ in 0..<24 {
+    town_life_transport_test_writer_lease_new_lifetime()
+    let writer_id = browser_town_life_v3_writer_id()
+    assert_true(writer_id != "writer-unavailable")
+    let active = town_life_transport_test_writer_lease_count()
+    max_lease_rows = max_lease_rows.max(active)
+    assert_eq(active, 1)
+    town_life_transport_test_writer_lease_fire("pagehide", true)
+    assert_eq(town_life_transport_test_writer_lease_count(), 1)
+    town_life_transport_test_writer_lease_fire("pagehide", false)
+    assert_eq(town_life_transport_test_writer_lease_count(), 0)
+  }
+  town_life_transport_test_remove_writer_lease_churn()
+  assert_eq(max_lease_rows, 1)
+}
+
+///|
+test "writer shutdown preserves contenders and a later same-key owner" {
+  town_life_transport_test_install_writer_lease_churn()
+  let owner_id = browser_town_life_v3_writer_id()
+
+  // A conforming realm that observes O's still-active lease must take a
+  // suffixed identity. The storage read seam runs that contender during O's
+  // final ownership read, before O removes its own key.
+  town_life_transport_test_writer_lease_contend_on_read(owner_id)
+  town_life_transport_test_writer_lease_fire_at("pagehide", 0, false)
+  let contender_id = town_life_transport_test_writer_lease_contender_id()
+  let contender_saw_active = town_life_transport_test_writer_lease_contender_saw_active()
+  let owner_removed = !town_life_transport_test_writer_lease_has(owner_id)
+  let contender_survived = town_life_transport_test_writer_lease_has(
+    contender_id,
+  )
+  let count_after_release = town_life_transport_test_writer_lease_count()
+
+  // Once O has removed its key, a later realm may claim that exact identity.
+  // O's subsequent unload callback must observe the new owner token and leave
+  // the replacement untouched.
+  town_life_transport_test_writer_lease_select_session(owner_id)
+  let replacement_id = browser_town_life_v3_writer_id()
+  let replacement_before = town_life_transport_test_writer_lease_raw(owner_id)
+  town_life_transport_test_writer_lease_fire_at("unload", 0, false)
+  let replacement_after = town_life_transport_test_writer_lease_raw(owner_id)
+  let contender_after = town_life_transport_test_writer_lease_has(contender_id)
+  let final_count = town_life_transport_test_writer_lease_count()
+  town_life_transport_test_remove_writer_lease_churn()
+  assert_true(contender_saw_active)
+  assert_true(contender_id != owner_id)
+  assert_true(owner_removed)
+  assert_true(contender_survived)
+  assert_eq(count_after_release, 1)
+  assert_eq(replacement_id, owner_id)
+  assert_true(!replacement_before.is_empty())
+  assert_eq(replacement_after, replacement_before)
+  assert_true(contender_after)
+  assert_eq(final_count, 2)
 }
 
 ///|

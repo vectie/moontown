@@ -482,21 +482,22 @@ extern "js" fn browser_town_life_v3_writer_stamp_json(
   #|           }));
   #|         } catch (_) {}
   #|       }, 30000);
-  #|       globalThis.addEventListener("pagehide", event => {
-  #|         if (event.persisted) return;
+  #|       const releaseLease = event => {
+  #|         if (event?.persisted) return;
   #|         globalThis.clearInterval(state.heartbeat);
   #|         try {
   #|           const key = `${leasePrefix}${state.writerId}`;
   #|           const lease = JSON.parse(storage?.getItem(key) || "null");
   #|           if (lease?.owner_token !== state.ownerToken) return;
-  #|           storage.setItem(key, JSON.stringify({
-  #|             owner_token: state.ownerToken,
-  #|             released: true,
-  #|             updated_at_ms: Date.now(),
-  #|             last_sequence: state.sequence,
-  #|           }));
+  #|           // Keep this owner's lease active through the final read. A
+  #|           // conforming contender must therefore choose a suffixed writer
+  #|           // identity. Once removed, this realm performs no more lease
+  #|           // writes; a later realm may safely claim this exact key.
+  #|           storage.removeItem(key);
   #|         } catch (_) {}
-  #|       });
+  #|       };
+  #|       globalThis.addEventListener("pagehide", releaseLease);
+  #|       globalThis.addEventListener("unload", releaseLease);
   #|     }
   #|   }
   #|   if (reserveSequence) {
@@ -610,7 +611,16 @@ extern "js" fn browser_write_town_life_v3_writer_shard(
   #|   // This append is intentionally synchronous. Reset/demolition callers
   #|   // may navigate immediately after this function returns, so the queued
   #|   // lock is allowed to disappear but the cumulative shard is not.
-  #|   if (!writeAndVerify()) return false;
+  #|   if (!writeAndVerify()) {
+  #|     if (globalThis.__moontownTownLifeV3Observed === observedState) {
+  #|       delete globalThis.__moontownTownLifeV3Observed;
+  #|     }
+  #|     capturedEntries = null;
+  #|     observedState = null;
+  #|     raw = "";
+  #|     text = "";
+  #|     return false;
+  #|   }
   #|   broadcastDurableShard();
   #|   const locks = globalThis.navigator?.locks;
   #|   if (typeof locks?.request !== "function") {
