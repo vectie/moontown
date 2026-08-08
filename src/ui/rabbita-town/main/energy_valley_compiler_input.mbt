@@ -28,6 +28,9 @@ fn golden_valley_world(seed : Int) -> ExactEnergyValleyWorld {
     Some(world) => world
     None => {
       let world = exact_energy_valley_generate_int(seed)
+      // The active seed is one compiler authority. Keeping every previously
+      // previewed seed retains a complete generated map graph indefinitely.
+      golden_valley_world_cache.clear()
       golden_valley_world_cache[seed] = world
       world
     }

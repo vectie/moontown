@@ -1055,9 +1055,24 @@ fn ecosystem_contract_copy_issues(
 }
 
 ///|
+fn ecosystem_contract_world_is_cached_authority(
+  world : @energy_valley_contract.CompiledTownWorld,
+) -> Bool {
+  let identity = ecosystem_contract_world_validation_identity(world)
+  for _, cached in ecosystem_contract_world_cache {
+    if ecosystem_contract_world_validation_identity(cached) == identity {
+      return true
+    }
+  }
+  false
+}
+
+///|
 /// Production worlds always hit this cache because adoption records the exact
 /// `validate_world(candidate)` result. Synthetic white-box worlds fall back to
-/// one validation and are cached by immutable world identity thereafter.
+/// validation without displacing diagnostics owned by the currently published
+/// world. With no published authority, the synthetic fallback remains a
+/// single-slot cache by immutable world identity.
 fn ecosystem_contract_world_validation_issues(
   world : @energy_valley_contract.CompiledTownWorld,
 ) -> Array[@energy_valley_contract.ContractIssue] {
@@ -1068,7 +1083,11 @@ fn ecosystem_contract_world_validation_issues(
       let issues = ecosystem_contract_copy_issues(
         @energy_valley_contract.validate_world(world),
       )
-      ecosystem_contract_world_validation_issues_cache[identity] = issues
+      if ecosystem_contract_world_cache.length() == 0 ||
+        ecosystem_contract_world_is_cached_authority(world) {
+        ecosystem_contract_world_validation_issues_cache.clear()
+        ecosystem_contract_world_validation_issues_cache[identity] = issues
+      }
       issues
     }
   }
@@ -1089,6 +1108,29 @@ fn ecosystem_contract_issue_summary(
     }
   }
   messages.join("；")
+}
+
+///|
+/// Publish one accepted compiler authority and its exact validation evidence.
+/// All companion caches share the world's single-slot lifetime, so failed
+/// edits, summaries, and issue arrays cannot accumulate behind newer worlds.
+fn ecosystem_contract_publish_world_cache(
+  key : String,
+  world : @energy_valley_contract.CompiledTownWorld,
+  invalid : Bool,
+  summary : String,
+  issues : ArrayView[@energy_valley_contract.ContractIssue],
+) -> Unit {
+  ecosystem_contract_world_cache.clear()
+  ecosystem_contract_world_validation_failed_cache.clear()
+  ecosystem_contract_world_validation_summary_cache.clear()
+  ecosystem_contract_world_validation_issues_cache.clear()
+  ecosystem_contract_world_cache[key] = world
+  ecosystem_contract_world_validation_failed_cache[key] = invalid
+  ecosystem_contract_world_validation_summary_cache[key] = summary
+  ecosystem_contract_world_validation_issues_cache[ecosystem_contract_world_validation_identity(
+    world,
+  )] = ecosystem_contract_copy_issues(issues)
 }
 
 ///|
@@ -1169,10 +1211,6 @@ fn ecosystem_contract_world_for_model(
       let candidate = ecosystem_contract_world_from_snapshot(snapshot, seed)
       let issues = @energy_valley_contract.validate_world(candidate)
       let invalid = @energy_valley_contract.has_errors(issues)
-      ecosystem_contract_world_validation_failed_cache[key] = invalid
-      ecosystem_contract_world_validation_summary_cache[key] = ecosystem_contract_issue_summary(
-        issues,
-      )
       let accepted_world = if invalid {
         // Fail closed. Returning a previous world would mix its semantic routes
         // with the compatibility renderer's current geometry; returning the
@@ -1234,16 +1272,13 @@ fn ecosystem_contract_world_for_model(
       for issue in adopted_issues {
         reported_issues.push(issue)
       }
-      ecosystem_contract_world_validation_failed_cache[key] = invalid ||
-        adoption_invalid
-      ecosystem_contract_world_validation_summary_cache[key] = ecosystem_contract_issue_summary(
+      ecosystem_contract_publish_world_cache(
+        key,
+        published_world,
+        invalid || adoption_invalid,
+        ecosystem_contract_issue_summary(reported_issues),
         reported_issues,
       )
-      ecosystem_contract_world_validation_issues_cache[ecosystem_contract_world_validation_identity(
-        published_world,
-      )] = reported_issues
-      ecosystem_contract_world_cache.clear()
-      ecosystem_contract_world_cache[key] = published_world
       published_world
     }
   }
@@ -1382,16 +1417,27 @@ let ecosystem_contract_snapshot_validation_summary_cache : Map[String, String] =
 )
 
 ///|
+fn ecosystem_contract_record_snapshot_validation(
+  cache_key : String,
+  invalid : Bool,
+  issues : ArrayView[@energy_valley_contract.ContractIssue],
+) -> Unit {
+  ecosystem_contract_snapshot_validation_failed_cache.clear()
+  ecosystem_contract_snapshot_validation_summary_cache.clear()
+  ecosystem_contract_snapshot_validation_failed_cache[cache_key] = invalid
+  ecosystem_contract_snapshot_validation_summary_cache[cache_key] = ecosystem_contract_issue_summary(
+    issues,
+  )
+}
+
+///|
 fn ecosystem_contract_validated_snapshot(
   candidate : @energy_valley_contract.TownSnapshot,
   cache_key : String,
 ) -> (@energy_valley_contract.TownSnapshot, Bool) {
   let issues = @energy_valley_contract.validate_snapshot_ledger(candidate)
   let invalid = @energy_valley_contract.has_errors(issues)
-  ecosystem_contract_snapshot_validation_summary_cache.clear()
-  ecosystem_contract_snapshot_validation_summary_cache[cache_key] = ecosystem_contract_issue_summary(
-    issues,
-  )
+  ecosystem_contract_record_snapshot_validation(cache_key, invalid, issues)
   if invalid {
     // Dynamic ledgers are an authority boundary too. If any presence, slot,
     // signal or exchange is inconsistent, keep the validated world but publish
@@ -1664,8 +1710,7 @@ fn ecosystem_contract_town_snapshot(
   let (snapshot, invalid) = ecosystem_contract_validated_snapshot(
     candidate, key,
   )
-  ecosystem_contract_snapshot_validation_failed_cache.clear()
-  ecosystem_contract_snapshot_validation_failed_cache[key] = invalid
+  ignore(invalid)
   snapshot
 }
 

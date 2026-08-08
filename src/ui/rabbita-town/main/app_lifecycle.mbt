@@ -1,6 +1,51 @@
 ///|
+/// Browser-owned timer state makes the simulation clock a singleton across
+/// pause/resume transitions and development remounts. Updating the callback is
+/// safe while a timeout is pending; the timeout always delivers into the
+/// newest Rabbita scheduler.
+extern "js" fn browser_schedule_simulation_tick(callback : () -> Unit) -> Unit =
+  #| callback => {
+  #|   let lifecycle = globalThis.__moontownSimulationTickLifecycle;
+  #|   if (!lifecycle) {
+  #|     lifecycle = { timer: null, callback: null, generation: 0 };
+  #|     globalThis.__moontownSimulationTickLifecycle = lifecycle;
+  #|   }
+  #|   lifecycle.callback = callback;
+  #|   if (lifecycle.timer !== null) return;
+  #|   const generation = ++lifecycle.generation;
+  #|   lifecycle.timer = globalThis.setTimeout(() => {
+  #|     if (globalThis.__moontownSimulationTickLifecycle !== lifecycle ||
+  #|         lifecycle.generation !== generation) return;
+  #|     lifecycle.timer = null;
+  #|     const deliver = lifecycle.callback;
+  #|     lifecycle.callback = null;
+  #|     if (typeof deliver === "function") deliver();
+  #|   }, 1200);
+  #| }
+
+///|
+extern "js" fn browser_cancel_simulation_tick() -> Unit =
+  #| () => {
+  #|   const lifecycle = globalThis.__moontownSimulationTickLifecycle;
+  #|   if (!lifecycle) return;
+  #|   lifecycle.generation += 1;
+  #|   if (lifecycle.timer !== null) {
+  #|     globalThis.clearTimeout?.(lifecycle.timer);
+  #|   }
+  #|   lifecycle.timer = null;
+  #|   lifecycle.callback = null;
+  #| }
+
+///|
 fn schedule_tick(dispatch : Dispatch[Msg]) -> Cmd {
-  @rabbita.delay(dispatch(Tick), 1200)
+  @cmd.custom_cmd(scheduler => {
+    browser_schedule_simulation_tick(fn() { scheduler.add(dispatch(Tick)) })
+  })
+}
+
+///|
+fn cancel_scheduled_tick() -> Cmd {
+  @cmd.custom_cmd(_scheduler => browser_cancel_simulation_tick())
 }
 
 ///|

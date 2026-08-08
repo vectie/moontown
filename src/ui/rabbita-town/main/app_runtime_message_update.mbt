@@ -1,7 +1,7 @@
 ///|
 fn schedule_tick_if_running(dispatch : Dispatch[Msg], model : Model) -> Cmd {
   if model.paused {
-    @rabbita.none
+    cancel_scheduled_tick()
   } else {
     schedule_tick(dispatch)
   }
@@ -9,8 +9,12 @@ fn schedule_tick_if_running(dispatch : Dispatch[Msg], model : Model) -> Cmd {
 
 ///|
 fn tick_update(dispatch : Dispatch[Msg], model : Model) -> (Cmd, Model) {
-  let next = town_life_tick(advance_model(model))
-  (schedule_tick_if_running(dispatch, next), next)
+  if model.paused {
+    (cancel_scheduled_tick(), model)
+  } else {
+    let next = town_life_tick(advance_model(model))
+    (schedule_tick_if_running(dispatch, next), next)
+  }
 }
 
 ///|

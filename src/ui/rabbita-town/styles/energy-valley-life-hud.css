@@ -609,3 +609,974 @@
     transition: none;
   }
 }
+
+/* Contemporary civic HUD
+   ----------------------
+   The visual world now uses a bright, matte civic-campus language. These
+   overrides make the interface feel like part of that same system: warm
+   white planes, deep blue-grey type, flat cyan/green state, and restrained
+   yellow emphasis. Fixed controls are assigned explicit lanes so the map
+   remains the primary surface at every supported viewport. */
+
+.energy-valley-golden {
+  --town-ink: #274557;
+  --town-ink-strong: #18394d;
+  --town-ink-soft: #617784;
+  --town-panel: rgba(245, 242, 233, 0.96);
+  --town-panel-strong: rgba(250, 248, 241, 0.98);
+  --town-cream: #f5f2e9;
+  --town-sand: #ede5d4;
+  --town-leaf: #6fa653;
+  --town-green-deep: #47764b;
+  --town-cyan: #20a9d0;
+  --town-cyan-soft: #d9eff4;
+  --town-water: #2798c2;
+  --town-gold: #e5b840;
+  --town-line: rgba(39, 69, 87, 0.16);
+  --town-line-strong: rgba(39, 69, 87, 0.26);
+  --town-shadow: 0 12px 30px rgba(24, 57, 77, 0.14);
+  color: var(--town-ink);
+  background: #dceff3 !important;
+}
+
+.town-topbar {
+  top: calc(12px + var(--town-safe-top));
+  right: 0;
+  left: 0;
+  display: flex;
+  justify-content: center;
+  padding-right: calc(16px + var(--town-safe-right));
+  padding-left: calc(16px + var(--town-safe-left));
+}
+
+.town-topbar-inner {
+  width: min(
+    1320px,
+    calc(
+      100vw - 32px - var(--town-safe-left) - var(--town-safe-right)
+    )
+  );
+  min-height: 62px;
+  display: grid;
+  grid-template-columns: minmax(270px, auto) minmax(320px, 1fr) minmax(410px, auto);
+  align-items: center;
+  gap: 14px;
+  padding: 8px 10px;
+  border: 1px solid rgba(255, 255, 255, 0.82);
+  border-radius: 17px;
+  color: var(--town-ink);
+  background: var(--town-panel-strong);
+  box-shadow: var(--town-shadow);
+  backdrop-filter: none;
+}
+
+.town-topbar-leading,
+.town-topbar-controls,
+.town-topbar-trailing {
+  min-width: 0;
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.town-topbar-leading {
+  justify-content: flex-start;
+}
+
+.town-topbar-controls {
+  justify-content: center;
+}
+
+.town-topbar-trailing {
+  justify-content: flex-end;
+}
+
+.town-topbar-identity {
+  min-width: 0;
+  gap: 10px;
+}
+
+.town-topbar-logo {
+  width: 36px;
+  height: 36px;
+  flex-basis: 36px;
+  border: 1px solid rgba(39, 69, 87, 0.1);
+  border-radius: 10px;
+  background: #fff;
+  box-shadow: none;
+}
+
+.town-topbar-title {
+  color: var(--town-ink-strong);
+  font-size: 13.5px;
+  font-weight: 850;
+  letter-spacing: -0.01em;
+}
+
+.town-topbar-sub,
+.town-topbar-day {
+  color: var(--town-ink-soft);
+  font-weight: 700;
+}
+
+.town-topbar-sep {
+  height: 32px;
+  background: var(--town-line);
+}
+
+.town-topbar-clock {
+  min-width: 68px;
+}
+
+.town-topbar-time {
+  color: var(--town-ink-strong);
+  font-size: 13px;
+  font-weight: 850;
+}
+
+.town-topbar-weather,
+.town-topbar-sim,
+.town-topbar-actions {
+  gap: 3px;
+}
+
+.town-topbar-weather button,
+.town-topbar-sim button,
+.town-topbar-chip {
+  min-width: 44px;
+  min-height: 44px;
+  border: 1px solid transparent;
+  border-radius: 11px;
+  color: var(--town-ink-soft) !important;
+  background: transparent !important;
+  box-shadow: none !important;
+  opacity: 1 !important;
+  touch-action: manipulation;
+}
+
+.town-topbar-weather button:hover,
+.town-topbar-sim button:hover,
+.town-topbar-chip:hover {
+  border-color: var(--town-line);
+  color: var(--town-ink-strong) !important;
+  background: rgba(39, 69, 87, 0.06) !important;
+}
+
+.town-topbar-weather button[aria-pressed="true"],
+.town-topbar-sim button[aria-pressed="true"],
+.town-topbar-auto-on,
+.town-topbar-chip-on {
+  border-color: rgba(32, 169, 208, 0.34) !important;
+  color: #17647c !important;
+  background: var(--town-cyan-soft) !important;
+  box-shadow: inset 0 0 0 1px rgba(255, 255, 255, 0.56) !important;
+}
+
+.town-topbar-weather-button {
+  padding-inline: 0 !important;
+  font-size: 11px !important;
+  font-weight: 850;
+}
+
+.town-topbar-pause,
+.town-topbar-speed-button {
+  font-size: 11px !important;
+  font-weight: 800;
+}
+
+.town-topbar-auto,
+.town-topbar-chip {
+  padding: 6px 10px;
+  font-size: 10.5px;
+  font-weight: 800;
+}
+
+.town-topbar-metrics {
+  gap: 3px;
+  margin-left: 0;
+}
+
+.town-topbar-metrics > div,
+.town-topbar-metric {
+  min-width: 52px;
+  display: grid;
+  justify-items: center;
+  gap: 1px;
+  padding: 4px 6px;
+}
+
+.town-topbar-metric-label {
+  color: var(--town-ink-soft);
+  font-size: 8px;
+  font-weight: 750;
+  letter-spacing: 0.05em;
+  line-height: 1;
+}
+
+.town-topbar-metric-value {
+  color: var(--town-ink-strong);
+  font-family: ui-monospace, SFMono-Regular, Menlo, monospace;
+  font-size: 12px;
+  font-weight: 850;
+  font-variant-numeric: tabular-nums;
+}
+
+.town-topbar-actions {
+  margin-left: 0;
+}
+
+.town-topbar button:focus-visible,
+.town-action:focus-visible,
+.town-dock-button:focus-visible,
+.quest-tracker-action:focus-visible,
+.chip-button:focus-visible,
+.phone-fab:focus-visible {
+  outline: 3px solid rgba(32, 169, 208, 0.78);
+  outline-offset: 2px;
+}
+
+.town-status,
+.quest-tracker,
+.player-chip,
+.metro-legend,
+.town-generic-inspector,
+.town-dashboard {
+  border: 1px solid rgba(255, 255, 255, 0.8) !important;
+  color: var(--town-ink) !important;
+  background: var(--town-panel) !important;
+  box-shadow: var(--town-shadow) !important;
+  backdrop-filter: none !important;
+}
+
+.town-status {
+  border-radius: 15px;
+}
+
+.town-status-summary {
+  min-height: 48px;
+}
+
+.town-status-label,
+.quest-tracker-title,
+.player-chip-name,
+.metro-legend-title,
+.town-generic-inspector .text-amber-100,
+.town-dashboard .text-amber-100 {
+  color: var(--town-ink-strong) !important;
+}
+
+.town-status-detail,
+.town-status-note,
+.town-status-count,
+.town-status-chevron,
+.quest-tracker-hint,
+.player-chip-title,
+.metro-legend-sub,
+.town-generic-inspector .text-slate-400,
+.town-generic-inspector .text-slate-500,
+.town-dashboard .text-slate-400,
+.town-dashboard .text-slate-500 {
+  color: var(--town-ink-soft) !important;
+}
+
+.town-status-cta {
+  color: var(--town-ink-strong);
+  background: #bfe6ef;
+}
+
+.quest-tracker {
+  width: 320px;
+  border-color: rgba(32, 169, 208, 0.22) !important;
+  border-radius: 15px;
+  padding: 13px 14px;
+}
+
+.quest-tracker-done {
+  border-color: rgba(229, 184, 64, 0.34) !important;
+}
+
+.quest-tracker-badge {
+  color: #17647c;
+  background: var(--town-cyan-soft);
+}
+
+.quest-tracker-done .quest-tracker-badge {
+  color: #6f5812;
+  background: #f6e8b8;
+}
+
+.quest-tracker-bar {
+  background: rgba(39, 69, 87, 0.1);
+}
+
+.quest-tracker-fill {
+  background: var(--town-cyan);
+}
+
+.quest-tracker-action {
+  min-height: 44px;
+  border: 1px solid rgba(111, 88, 18, 0.16);
+  border-radius: 11px;
+  color: #3e3417;
+  background: var(--town-gold);
+  box-shadow: none;
+  touch-action: manipulation;
+}
+
+.quest-tracker-action:hover {
+  filter: brightness(1.03);
+}
+
+.quest-tracker-action-civic {
+  border-color: rgba(32, 169, 208, 0.24);
+  color: #174e60;
+  background: #cbeaf1;
+}
+
+.player-chip {
+  border-radius: 15px;
+  padding: 8px 10px;
+}
+
+.player-chip-dot {
+  border: 2px solid rgba(255, 255, 255, 0.86);
+  color: var(--town-ink-strong);
+  box-shadow: 0 0 0 1px var(--town-line);
+}
+
+.chip-button {
+  min-height: 44px;
+  display: inline-flex;
+  align-items: center;
+  border: 1px solid transparent;
+  border-radius: 10px;
+  color: var(--town-ink-soft);
+  background: rgba(39, 69, 87, 0.055);
+  touch-action: manipulation;
+}
+
+.chip-button:hover {
+  border-color: var(--town-line);
+  color: var(--town-ink-strong);
+  background: rgba(39, 69, 87, 0.08);
+}
+
+.chip-button-active {
+  border-color: rgba(32, 169, 208, 0.3);
+  color: #17647c;
+  background: var(--town-cyan-soft);
+  box-shadow: none;
+}
+
+.chip-button-checkin {
+  color: var(--town-green-deep);
+  background: rgba(111, 166, 83, 0.14);
+}
+
+.phone-fab {
+  width: 52px;
+  height: 52px;
+  border: 1px solid rgba(91, 70, 13, 0.18);
+  border-radius: 15px;
+  color: #3e3417;
+  background: var(--town-gold);
+  box-shadow: 0 10px 24px rgba(74, 62, 26, 0.18);
+}
+
+.phone-fab:hover {
+  transform: translateY(-1px);
+}
+
+.phone-fab-icon {
+  font-size: 0;
+}
+
+.phone-fab-icon::before {
+  content: "联";
+  font-size: 15px;
+  font-weight: 900;
+}
+
+.phone-fab-badge {
+  background: #b96f52;
+  box-shadow: none;
+}
+
+.metro-legend {
+  top: calc(88px + var(--town-safe-top));
+  border-color: rgba(39, 152, 194, 0.28) !important;
+  border-radius: 13px;
+  padding: 7px 11px;
+}
+
+.metro-legend-badge {
+  color: #fff;
+  background: var(--town-water);
+}
+
+.town-tool-wrap {
+  bottom: calc(16px + var(--town-safe-bottom));
+  z-index: 24;
+}
+
+.town-tool-dock {
+  width: min(
+    330px,
+    calc(
+      100vw - 32px - var(--town-safe-left) - var(--town-safe-right)
+    )
+  );
+  max-width: calc(
+    100vw - 32px - var(--town-safe-left) - var(--town-safe-right)
+  );
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  overflow-x: auto;
+  padding: 6px;
+  border: 1px solid rgba(255, 255, 255, 0.84) !important;
+  border-radius: 16px;
+  color: var(--town-ink) !important;
+  background:
+    linear-gradient(
+      90deg,
+      transparent 0,
+      transparent calc(100% - 28px),
+      rgba(39, 69, 87, 0.11) 100%
+    ),
+    var(--town-panel-strong) !important;
+  box-shadow: var(--town-shadow);
+  scroll-snap-type: x proximity;
+  scrollbar-width: thin;
+  scrollbar-color: rgba(32, 169, 208, 0.5) transparent;
+  backdrop-filter: none;
+}
+
+.town-tool-dock::-webkit-scrollbar {
+  display: block;
+  height: 4px;
+}
+
+.town-tool-dock::-webkit-scrollbar-track {
+  background: transparent;
+}
+
+.town-tool-dock::-webkit-scrollbar-thumb {
+  border-radius: 999px;
+  background: rgba(32, 169, 208, 0.5);
+}
+
+.town-dock-button {
+  min-width: 60px;
+  min-height: 60px;
+  flex: 0 0 auto;
+  scroll-snap-align: start;
+  border: 1px solid transparent;
+  border-radius: 11px;
+  color: var(--town-ink-soft);
+  background: transparent !important;
+  box-shadow: none !important;
+  touch-action: manipulation;
+}
+
+.town-dock-button:hover {
+  border-color: var(--town-line);
+  background: rgba(39, 69, 87, 0.055) !important;
+}
+
+.town-dock-button[aria-pressed="true"] {
+  border-color: rgba(32, 169, 208, 0.34);
+  color: #17647c;
+  background: var(--town-cyan-soft) !important;
+  box-shadow: inset 0 -2px var(--town-cyan) !important;
+}
+
+.town-dock-icon {
+  width: 28px;
+  height: 28px;
+  display: grid;
+  place-items: center;
+  border: 1px solid rgba(39, 69, 87, 0.12);
+  border-radius: 8px;
+  color: var(--town-ink-strong);
+  background: var(--town-sand);
+  font-size: 12px !important;
+  font-weight: 900;
+}
+
+.town-dock-icon-building {
+  color: #fff !important;
+  background: #3d7892 !important;
+  box-shadow: none !important;
+}
+
+.town-dock-label {
+  color: var(--town-ink-strong) !important;
+  font-weight: 750;
+}
+
+.town-dock-cost {
+  color: var(--town-ink-soft);
+}
+
+.town-dock-hotkey {
+  color: var(--town-ink-soft) !important;
+  background: #fff !important;
+}
+
+.town-dock-divider {
+  display: none;
+}
+
+.town-onboarding .town-tool-dock {
+  width: max-content;
+}
+
+.town-actions {
+  right: calc(16px + var(--town-safe-right));
+  bottom: calc(164px + var(--town-safe-bottom));
+  display: flex;
+  align-items: center;
+  gap: 2px;
+  padding: 4px;
+  border: 1px solid rgba(255, 255, 255, 0.82);
+  border-radius: 14px;
+  background: var(--town-panel-strong);
+  box-shadow: var(--town-shadow);
+}
+
+.town-action {
+  min-height: 44px;
+  border: 1px solid transparent;
+  border-radius: 10px;
+  padding: 7px 11px;
+  color: var(--town-ink-soft);
+  background: transparent;
+  box-shadow: none;
+  touch-action: manipulation;
+}
+
+.town-action:hover {
+  border-color: var(--town-line);
+  color: var(--town-ink-strong);
+  background: rgba(39, 69, 87, 0.055);
+}
+
+.town-action-secondary {
+  color: rgba(39, 69, 87, 0.66);
+}
+
+.town-action-secondary:hover,
+.town-action-secondary:focus-visible {
+  color: var(--town-ink-strong);
+}
+
+.town-action-primary:not(.town-action-active) {
+  border-color: rgba(32, 169, 208, 0.22);
+  color: #17647c;
+  background: rgba(217, 239, 244, 0.7);
+}
+
+.town-action-active {
+  border-color: rgba(229, 184, 64, 0.34) !important;
+  color: #6f5812 !important;
+  background: #f6e8b8 !important;
+}
+
+.town-action-icon {
+  width: 44px;
+  padding-inline: 0;
+}
+
+.town-generic-inspector,
+.town-dashboard {
+  border-color: var(--town-line-strong) !important;
+}
+
+.town-generic-inspector .bg-white\/\[0\.04\],
+.town-dashboard .bg-white\/5,
+.town-dashboard .bg-white\/\[0\.03\] {
+  background: rgba(39, 69, 87, 0.055) !important;
+}
+
+.town-generic-inspector .text-slate-200,
+.town-dashboard .text-slate-200,
+.town-dashboard .text-emerald-300 {
+  color: var(--town-ink-strong) !important;
+}
+
+.town-dashboard {
+  width: min(38rem, calc(100vw - 32px)) !important;
+}
+
+.energy-valley-golden .map-lab-launcher {
+  right: calc(18px + var(--town-safe-right));
+  bottom: calc(18px + var(--town-safe-bottom));
+  width: 44px;
+  min-width: 44px;
+  min-height: 44px;
+  justify-content: center;
+  padding: 6px;
+  border-color: rgba(39, 69, 87, 0.18);
+  color: var(--town-ink-soft);
+  background: rgba(245, 242, 233, 0.88);
+  box-shadow: 0 7px 18px rgba(24, 57, 77, 0.1);
+  opacity: 0.78;
+  backdrop-filter: none;
+}
+
+.energy-valley-golden .map-lab-launcher:hover,
+.energy-valley-golden .map-lab-launcher:focus-visible,
+.energy-valley-golden .map-lab-launcher.is-open {
+  border-color: rgba(32, 169, 208, 0.38);
+  color: #17647c;
+  background: var(--town-panel-strong);
+  opacity: 1;
+}
+
+.energy-valley-golden .map-lab-launcher > span:last-child {
+  display: none;
+}
+
+.energy-valley-golden .map-lab-launcher-mark {
+  width: 24px;
+  height: 24px;
+  border-color: rgba(39, 69, 87, 0.18);
+  color: var(--town-ink-soft);
+}
+
+.town-onboarding .town-topbar {
+  justify-content: flex-start;
+}
+
+.town-onboarding .town-topbar-inner {
+  width: auto;
+  grid-template-columns: auto;
+  margin-right: 0;
+}
+
+.town-onboarding .town-topbar-controls,
+.town-onboarding .town-topbar-trailing {
+  display: none;
+}
+
+@media (max-width: 1180px) {
+  .town-topbar-inner {
+    grid-template-columns: minmax(250px, 1fr) auto;
+  }
+
+  .town-topbar-controls {
+    display: none;
+  }
+
+  .town-topbar-trailing {
+    justify-content: flex-end;
+  }
+
+  .town-actions {
+    max-width: calc(100vw - 32px);
+    overflow-x: auto;
+    scrollbar-width: none;
+  }
+
+  .town-actions::-webkit-scrollbar {
+    display: none;
+  }
+}
+
+@media (max-width: 900px) {
+  .town-topbar-inner {
+    width: calc(
+      100vw - 24px - var(--town-safe-left) - var(--town-safe-right)
+    );
+    grid-template-columns: minmax(220px, 1fr) auto;
+    gap: 8px;
+  }
+
+  .town-topbar-actions,
+  .town-topbar-trailing > .town-topbar-sep,
+  .town-topbar-metric:first-child,
+  .town-topbar-metric:last-child {
+    display: none;
+  }
+
+  .town-topbar-metrics {
+    display: flex;
+  }
+
+  .town-inspector-wrap,
+  .town-metric-wrap {
+    right: calc(12px + var(--town-safe-right));
+  }
+
+  .energy-valley-golden .map-lab-launcher {
+    display: none;
+  }
+}
+
+@media (max-width: 680px) {
+  .town-topbar {
+    top: calc(8px + var(--town-safe-top));
+    padding-right: calc(8px + var(--town-safe-right));
+    padding-left: calc(8px + var(--town-safe-left));
+  }
+
+  .town-topbar-inner {
+    width: calc(
+      100vw - 16px - var(--town-safe-left) - var(--town-safe-right)
+    );
+    min-height: 54px;
+    grid-template-columns: minmax(0, 1fr) auto;
+    padding: 6px 8px;
+    border-radius: 14px;
+  }
+
+  .town-topbar-leading {
+    min-width: 0;
+  }
+
+  .town-topbar-clock,
+  .town-topbar-leading > .town-topbar-sep,
+  .town-topbar-metric:not(:nth-child(2)) {
+    display: none;
+  }
+
+  .town-topbar-logo {
+    width: 32px;
+    height: 32px;
+    flex-basis: 32px;
+  }
+
+  .town-topbar-title {
+    font-size: 12px;
+  }
+
+  .town-topbar-sub {
+    max-width: 48vw;
+    overflow: hidden;
+    text-overflow: ellipsis;
+  }
+
+  .town-topbar-metric {
+    min-width: 48px;
+    padding-inline: 4px;
+  }
+
+  .town-quest-wrap {
+    top: calc(72px + var(--town-safe-top));
+    right: calc(8px + var(--town-safe-right));
+    bottom: auto;
+    left: calc(8px + var(--town-safe-left));
+  }
+
+  .quest-tracker {
+    width: 100%;
+  }
+
+  .town-graduated .town-quest-wrap {
+    top: calc(128px + var(--town-safe-top));
+    display: flex;
+  }
+
+  .town-graduated .quest-tracker-done {
+    display: grid;
+    grid-template-columns: minmax(0, 1fr) auto;
+    align-items: center;
+    gap: 8px;
+    padding: 8px 10px;
+  }
+
+  .town-graduated .quest-tracker-done .quest-tracker-head {
+    min-width: 0;
+  }
+
+  .town-graduated .quest-tracker-done .quest-tracker-title {
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+  }
+
+  .town-graduated .quest-tracker-done .quest-tracker-hint {
+    display: none;
+  }
+
+  .town-graduated .quest-tracker-done .quest-tracker-action {
+    width: auto;
+    min-width: 104px;
+    margin-top: 0;
+    padding-inline: 12px;
+  }
+
+  .town-graduated .town-status-wrap {
+    top: calc(72px + var(--town-safe-top));
+    right: calc(68px + var(--town-safe-right));
+    bottom: auto;
+    left: calc(8px + var(--town-safe-left));
+  }
+
+  .town-graduated .town-status {
+    width: 100%;
+  }
+
+  .town-graduated .town-actions {
+    top: calc(188px + var(--town-safe-top));
+    right: calc(8px + var(--town-safe-right));
+    bottom: auto;
+    left: calc(8px + var(--town-safe-left));
+    max-width: none;
+    flex-direction: row;
+    overflow-x: auto;
+  }
+
+  .energy-valley-golden.town-graduated:has(.town-status-open) .town-actions {
+    visibility: hidden;
+    pointer-events: none;
+  }
+
+  .town-onboarding .town-actions {
+    top: auto;
+    right: calc(8px + var(--town-safe-right));
+    bottom: calc(16px + var(--town-safe-bottom));
+    left: auto;
+  }
+
+  .town-action {
+    min-width: 44px;
+    flex: 0 0 auto;
+    padding: 7px 10px;
+    text-align: center;
+  }
+
+  .town-tool-wrap {
+    right: calc(8px + var(--town-safe-right));
+    bottom: calc(8px + var(--town-safe-bottom));
+    left: calc(8px + var(--town-safe-left));
+    overflow-x: auto;
+    transform: none;
+    scrollbar-width: none;
+  }
+
+  .town-tool-wrap::-webkit-scrollbar {
+    display: none;
+  }
+
+  .town-tool-dock {
+    width: max-content;
+    max-width: none;
+    min-width: max-content;
+    background: var(--town-panel-strong) !important;
+    scrollbar-width: none;
+  }
+
+  .town-tool-dock::-webkit-scrollbar {
+    display: none;
+  }
+
+  .town-dock-button {
+    min-width: 56px;
+    min-height: 58px;
+  }
+
+  .town-dock-hotkey {
+    display: none;
+  }
+
+  .town-graduated .town-player-wrap {
+    right: calc(68px + var(--town-safe-right));
+    bottom: calc(82px + var(--town-safe-bottom));
+    left: calc(8px + var(--town-safe-left));
+  }
+
+  .town-graduated .phone-fab {
+    right: calc(8px + var(--town-safe-right));
+    bottom: calc(86px + var(--town-safe-bottom));
+  }
+
+  .town-player-wrap .player-chip {
+    width: 100%;
+    overflow-x: auto;
+  }
+
+  .town-graduated .metro-legend {
+    display: none;
+  }
+
+  .town-inspector-wrap {
+    top: calc(72px + var(--town-safe-top));
+    right: calc(8px + var(--town-safe-right));
+    bottom: calc(82px + var(--town-safe-bottom));
+    left: calc(8px + var(--town-safe-left));
+  }
+
+  .town-generic-inspector {
+    width: 100% !important;
+    max-height: 100%;
+  }
+
+  .energy-valley-golden:has(.town-generic-inspector) .town-status-wrap,
+  .energy-valley-golden:has(.town-generic-inspector) .town-actions,
+  .energy-valley-golden:has(.town-generic-inspector) .town-player-wrap,
+  .energy-valley-golden:has(.town-generic-inspector) .phone-fab {
+    display: none;
+  }
+}
+
+@media (orientation: landscape) and (max-height: 430px) {
+  .town-graduated .metro-legend {
+    display: none;
+  }
+
+  .town-graduated .town-status-wrap {
+    display: none;
+  }
+
+  .town-graduated .town-quest-wrap {
+    top: calc(70px + var(--town-safe-top));
+    right: auto;
+    bottom: auto;
+    left: calc(8px + var(--town-safe-left));
+    width: min(340px, 50vw);
+    display: flex;
+  }
+
+  .town-graduated .quest-tracker-done {
+    width: 100%;
+    display: grid;
+    grid-template-columns: minmax(0, 1fr) auto;
+    align-items: center;
+    gap: 6px;
+    padding: 6px 8px;
+  }
+
+  .town-graduated .quest-tracker-done .quest-tracker-badge,
+  .town-graduated .quest-tracker-done .quest-tracker-hint {
+    display: none;
+  }
+
+  .town-graduated .quest-tracker-done .quest-tracker-title {
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+  }
+
+  .town-graduated .quest-tracker-done .quest-tracker-action {
+    width: auto;
+    min-width: 96px;
+    min-height: 44px;
+    margin-top: 0;
+    padding-inline: 10px;
+  }
+
+  .town-graduated .town-actions {
+    top: calc(70px + var(--town-safe-top));
+    right: calc(8px + var(--town-safe-right));
+    bottom: auto;
+    left: calc(min(340px, 50vw) + 16px + var(--town-safe-left));
+    flex-direction: row;
+    overflow-x: auto;
+  }
+
+  .energy-valley-golden .map-lab-launcher {
+    display: none;
+  }
+}

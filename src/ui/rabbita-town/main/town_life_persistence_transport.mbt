@@ -35,6 +35,24 @@ priv struct TownLifeTransportLease {
 } derive(Debug, Eq)
 
 ///|
+/// One domain-valid payload selected for reconciliation. V3 envelopes with
+/// the same writer are cumulative, so only the greatest valid sequence is
+/// needed; checkpoints and legacy direct saves use an empty writer identity
+/// and remain independent inputs.
+priv struct TownLifeTransportSelectedSave {
+  key : String
+  writer_id : String
+  sequence : Int
+  payload : String
+}
+
+///|
+priv struct TownLifeTransportReadableSaves {
+  texts : Array[String]
+  accepted_shard_keys : Array[String]
+}
+
+///|
 let town_life_transport_version = 3
 
 ///|
@@ -91,6 +109,65 @@ fn town_life_transport_save_texts(
   }
   entries.sort_by((left, right) => left.key.compare(right.key))
   entries.map(entry => town_life_transport_payload(entry.raw))
+}
+
+///|
+/// Select the bounded V3 read authority while retaining every domain-valid
+/// shard in the exact-observation manifest. `persist_town_life_model_result`
+/// reads and reconciles all durable authority immediately before every V3
+/// write, making a greater sequence from one writer a cumulative superset of
+/// its lower sequences. We still decode every candidate: an invalid newest
+/// payload is retained on disk and the greatest older valid payload wins.
+fn town_life_transport_latest_valid_v3_saves(
+  entries : ArrayView[TownLifeTransportEntry],
+) -> TownLifeTransportReadableSaves {
+  let selected : Array[TownLifeTransportSelectedSave] = []
+  let accepted_shard_keys : Array[String] = []
+  for entry in entries {
+    let payload = town_life_transport_payload(entry.raw)
+    if town_life_decode_save(payload) is None {
+      continue
+    }
+    match town_life_transport_decode_envelope(entry.raw) {
+      Some(envelope) if entry.key.starts_with(town_life_v3_shard_prefix) &&
+        entry.key == town_life_v3_shard_key(
+          envelope.writer_id,
+          envelope.sequence,
+        ) => {
+        accepted_shard_keys.push(entry.key)
+        let next : TownLifeTransportSelectedSave = {
+          key: entry.key,
+          writer_id: envelope.writer_id,
+          sequence: envelope.sequence,
+          payload,
+        }
+        let mut found = -1
+        for index, current in selected {
+          if current.writer_id == envelope.writer_id {
+            found = index
+            break
+          }
+        }
+        if found < 0 {
+          selected.push(next)
+        } else {
+          let current = selected[found]
+          if envelope.sequence > current.sequence ||
+            (
+              envelope.sequence == current.sequence &&
+              entry.key.compare(current.key) > 0
+            ) {
+            selected[found] = next
+          }
+        }
+      }
+      _ =>
+        selected.push({ key: entry.key, writer_id: "", sequence: 0, payload })
+    }
+  }
+  selected.sort_by((left, right) => left.key.compare(right.key))
+  accepted_shard_keys.sort_by((left, right) => left.compare(right))
+  { texts: selected.map(candidate => candidate.payload), accepted_shard_keys }
 }
 
 ///|
@@ -323,23 +400,9 @@ fn browser_town_life_v3_save_texts() -> Array[String] {
     }
   }
   entries.sort_by((left, right) => left.key.compare(right.key))
-  let texts : Array[String] = []
-  let accepted_shard_keys : Array[String] = []
-  for entry in entries {
-    let payload = town_life_transport_payload(entry.raw)
-    match town_life_decode_save(payload) {
-      Some(_) => {
-        texts.push(payload)
-        if entry.key.starts_with(town_life_v3_shard_prefix) &&
-          town_life_transport_decode_envelope(entry.raw) is Some(_) {
-          accepted_shard_keys.push(entry.key)
-        }
-      }
-      None => ()
-    }
-  }
-  browser_restrict_town_life_v3_observed_shards(accepted_shard_keys)
-  texts
+  let readable = town_life_transport_latest_valid_v3_saves(entries)
+  browser_restrict_town_life_v3_observed_shards(readable.accepted_shard_keys)
+  readable.texts
 }
 
 ///|
@@ -508,7 +571,7 @@ extern "js" fn browser_write_town_life_v3_writer_shard(
   #|   const targetSequence = Math.max(1, Number(sequence) || 0);
   #|   const sequenceText = String(targetSequence).padStart(16, "0");
   #|   const key = `${shardPrefix}${state.writerId}:${sequenceText}`;
-  #|   const raw = JSON.stringify({
+  #|   let raw = JSON.stringify({
   #|     transport_version: 3,
   #|     writer_id: state.writerId,
   #|     sequence: targetSequence,
@@ -518,10 +581,10 @@ extern "js" fn browser_write_town_life_v3_writer_shard(
   #|   // Freeze the manifest synchronously beside the cumulative payload.
   #|   // A later storage/focus read may replace the global observation while
   #|   // this writer is queued for the asynchronous Web Lock.
-  #|   const observedState = globalThis.__moontownTownLifeV3Observed;
+  #|   let observedState = globalThis.__moontownTownLifeV3Observed;
   #|   const observationFresh = observedState &&
   #|     Date.now() - Number(observedState.capturedAtMs) <= 5000;
-  #|   const capturedEntries = observationFresh
+  #|   let capturedEntries = observationFresh
   #|     ? observedState.entries.map(entry => ({ key: entry.key, raw: entry.raw }))
   #|     : [];
   #|   const writeAndVerify = () => {
@@ -551,45 +614,123 @@ extern "js" fn browser_write_town_life_v3_writer_shard(
   #|   if (!writeAndVerify()) return false;
   #|   broadcastDurableShard();
   #|   const locks = globalThis.navigator?.locks;
+  #|   // Without a cross-tab exclusion primitive every verified cumulative
+  #|   // shard remains append-only. Exact byte comparison protects a key, but
+  #|   // cannot make a multi-key destructive pass atomic with another tab's
+  #|   // observation, so durability and convergence take priority over bounds.
   #|   if (typeof locks?.request !== "function") return true;
-  #|   void locks.request(lockName, { mode: "exclusive" }, () => {
-  #|     const captured = new Map(
-  #|       capturedEntries.map(entry => [entry.key, entry.raw]),
-  #|     );
-  #|     if (storage.getItem(key) !== raw || !observationFresh) return;
-  #|     for (const [candidateKey, expectedRaw] of captured) {
-  #|       if (candidateKey === key || !candidateKey.startsWith(shardPrefix)) continue;
-  #|       if (storage.getItem(candidateKey) === expectedRaw) {
-  #|         storage.removeItem(candidateKey);
-  #|       }
+  #|   let compaction = globalThis.__moontownTownLifeV3Compaction;
+  #|   if (!compaction) {
+  #|     compaction = { pending: false, latest: null, ticket: null };
+  #|     globalThis.__moontownTownLifeV3Compaction = compaction;
+  #|   }
+  #|   // Replacing this job releases the previous captured manifest while the
+  #|   // single Web-Lock callback is still queued. Every persist reads storage
+  #|   // immediately before this write, so the latest manifest is cumulative.
+  #|   let job = {
+  #|     storage,
+  #|     key,
+  #|     raw,
+  #|     observationFresh: Boolean(observationFresh),
+  #|     observation: observedState,
+  #|     capturedEntries,
+  #|     writerId: state.writerId,
+  #|   };
+  #|   if (compaction.latest) compaction.latest.observation = null;
+  #|   compaction.latest = job;
+  #|   // A queued callback reaches the manifest only through `compaction`.
+  #|   // Clear call-local aliases so the first queued closure cannot pin its
+  #|   // original payload after a newer cumulative job replaces it.
+  #|   job = null;
+  #|   capturedEntries = null;
+  #|   observedState = null;
+  #|   raw = "";
+  #|   text = "";
+  #|   if (compaction.pending) return true;
+  #|   compaction.pending = true;
+  #|   const ticket = {};
+  #|   compaction.ticket = ticket;
+  #|   const releaseObservation = task => {
+  #|     const observation = task?.observation;
+  #|     if (observation &&
+  #|         globalThis.__moontownTownLifeV3Observed === observation) {
+  #|       delete globalThis.__moontownTownLifeV3Observed;
   #|     }
-  #|     const activeWriters = new Set();
-  #|     const leaseEntries = [];
-  #|     for (let index = 0; index < storage.length; index += 1) {
-  #|       const candidateKey = storage.key(index) ?? "";
-  #|       if (candidateKey.startsWith(shardPrefix)) {
-  #|         try {
-  #|           const value = JSON.parse(storage.getItem(candidateKey) || "null");
-  #|           if (value?.transport_version === 3 && value.writer_id) {
-  #|             activeWriters.add(value.writer_id);
-  #|           }
-  #|         } catch (_) {}
-  #|       } else if (candidateKey.startsWith(leasePrefix)) {
-  #|         leaseEntries.push(candidateKey);
-  #|       }
-  #|     }
-  #|     const now = Date.now();
-  #|     for (const leaseKey of leaseEntries) {
-  #|       const writerId = leaseKey.slice(leasePrefix.length);
-  #|       if (writerId === state.writerId || activeWriters.has(writerId)) continue;
+  #|     if (task) task.observation = null;
+  #|   };
+  #|   const settleFailure = () => {
+  #|     if (compaction.ticket !== ticket) return;
+  #|     const task = compaction.latest;
+  #|     compaction.pending = false;
+  #|     compaction.latest = null;
+  #|     compaction.ticket = null;
+  #|     releaseObservation(task);
+  #|   };
+  #|   try {
+  #|     const request = locks.request(lockName, { mode: "exclusive" }, () => {
+  #|       if (compaction.ticket !== ticket) return;
+  #|       const task = compaction.latest;
+  #|       compaction.latest = null;
   #|       try {
-  #|         const lease = JSON.parse(storage.getItem(leaseKey) || "null");
-  #|         const abandoned = now - Number(lease?.updated_at_ms || 0) >=
-  #|           abandonedLeaseMs;
-  #|         if (lease?.released === true || abandoned) storage.removeItem(leaseKey);
-  #|       } catch (_) {}
-  #|     }
-  #|   }).catch(() => {});
+  #|         if (!task || !task.observationFresh ||
+  #|             task.storage.getItem(task.key) !== task.raw) return;
+  #|         const captured = new Map(
+  #|           task.capturedEntries.map(entry => [entry.key, entry.raw]),
+  #|         );
+  #|         for (const [candidateKey, expectedRaw] of captured) {
+  #|           if (candidateKey === task.key ||
+  #|               !candidateKey.startsWith(shardPrefix)) continue;
+  #|           if (task.storage.getItem(candidateKey) === expectedRaw) {
+  #|             task.storage.removeItem(candidateKey);
+  #|           }
+  #|         }
+  #|         const activeWriters = new Set();
+  #|         const leaseEntries = [];
+  #|         for (let index = 0; index < task.storage.length; index += 1) {
+  #|           const candidateKey = task.storage.key(index) ?? "";
+  #|           if (candidateKey.startsWith(shardPrefix)) {
+  #|             try {
+  #|               const value = JSON.parse(
+  #|                 task.storage.getItem(candidateKey) || "null",
+  #|               );
+  #|               if (value?.transport_version === 3 && value.writer_id) {
+  #|                 activeWriters.add(value.writer_id);
+  #|               }
+  #|             } catch (_) {}
+  #|           } else if (candidateKey.startsWith(leasePrefix)) {
+  #|             leaseEntries.push(candidateKey);
+  #|           }
+  #|         }
+  #|         const now = Date.now();
+  #|         for (const leaseKey of leaseEntries) {
+  #|           const writerId = leaseKey.slice(leasePrefix.length);
+  #|           if (writerId === task.writerId || activeWriters.has(writerId)) continue;
+  #|           try {
+  #|             const lease = JSON.parse(
+  #|               task.storage.getItem(leaseKey) || "null",
+  #|             );
+  #|             const abandoned = now - Number(lease?.updated_at_ms || 0) >=
+  #|               abandonedLeaseMs;
+  #|             if (lease?.released === true || abandoned) {
+  #|               task.storage.removeItem(leaseKey);
+  #|             }
+  #|           } catch (_) {}
+  #|         }
+  #|       } catch (_) {
+  #|         // The cumulative shard is already durable. A failed destructive
+  #|         // pass is intentionally abandoned rather than retried blindly.
+  #|       } finally {
+  #|         releaseObservation(task);
+  #|         if (compaction.ticket === ticket) {
+  #|           compaction.pending = false;
+  #|           compaction.ticket = null;
+  #|         }
+  #|       }
+  #|     });
+  #|     void Promise.resolve(request).catch(settleFailure);
+  #|   } catch (_) {
+  #|     settleFailure();
+  #|   }
   #|   return true;
   #| }
 

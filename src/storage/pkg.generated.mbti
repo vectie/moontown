@@ -62,6 +62,8 @@ pub fn moontown_product_tmp_dir() -> String
 
 pub fn moontown_workspace_root_is_suite_book(String) -> Bool
 
+pub fn project_town_snapshot(TownSnapshot, limits? : @core.TownStateProjectionLimits) -> TownSnapshotProjection
+
 pub async fn save_snapshot_file(String, TownSnapshot) -> Unit
 
 pub async fn save_standing_goals_file(String, Array[@core.StandingGoal]) -> Unit
@@ -92,6 +94,12 @@ pub impl Show for EventCursor
 pub struct TownSnapshot {
   town : @core.TownState
   event_count : Int
+} derive(Eq, ToJson, @debug.Debug, @json.FromJson)
+
+pub struct TownSnapshotProjection {
+  town : @core.TownState
+  event_count : Int
+  retention : @core.TownStateProjectionEvidence
 } derive(Eq, ToJson, @debug.Debug, @json.FromJson)
 
 // Type aliases

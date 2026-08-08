@@ -283,6 +283,9 @@ fn energy_valley_base_contract_world_for_seed(
     ecosystem_world_snapshot(golden_valley_world(seed), [], [], []),
     seed,
   )
+  // This derived authority follows the same single active seed as the typed
+  // world compiler. A future request can deterministically rebuild it.
+  energy_valley_base_contract_world_cache.clear()
   energy_valley_base_contract_world_cache[seed] = world
   world
 }

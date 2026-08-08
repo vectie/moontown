@@ -169,6 +169,148 @@ fn town_life_world_prefer_event(
 }
 
 ///|
+fn town_life_world_event_incarnation_key(event : TownLifeWorldEvent) -> String {
+  "\{town_life_world_kind_key(event.kind)}\u{1f}\{event.entity_id}\u{1f}\{event.incarnation_id}"
+}
+
+///|
+/// Semantic pruning is limited to the immutable transition shape emitted by
+/// `town_life_next_event`. The persistence transport is append-only for one
+/// writer/dot; accepting two different canonical payloads for that dot would
+/// violate this trusted-writer boundary. Anything outside that shape remains
+/// explicit causal evidence and is never semantically pruned.
+fn town_life_world_event_compaction_eligible(
+  event : TownLifeWorldEvent,
+) -> Bool {
+  if !town_life_world_event_payload_valid(event) ||
+    event.epoch_id.is_empty() ||
+    event.entity_id.is_empty() ||
+    event.incarnation_id.is_empty() ||
+    event.stamp.writer_id != event.dot.writer_id ||
+    event.stamp.lamport < event.dot.sequence {
+    return false
+  }
+  let expected_id = match event.action {
+    WorldMove(_) => "\{event.dot.writer_id}:\{event.dot.sequence}:world-move"
+    WorldDelete => "\{event.dot.writer_id}:\{event.dot.sequence}:world-delete"
+    WorldAdd(_) => return false
+  }
+  if event.id != expected_id {
+    return false
+  }
+  match event.action {
+    WorldMove(WorldBuildingPayload(building)) =>
+      building.authored_id.unwrap_or("") == event.entity_id
+    WorldMove(WorldParkPayload(park)) => park.id == event.entity_id
+    WorldMove(WorldRoadCellPayload(_)) | WorldAdd(_) => false
+    WorldDelete => true
+  }
+}
+
+///|
+/// Keep only transitions that can still affect canonical replay. The CRDT's
+/// total order makes intermediate post-Add Moves and later post-Add Deletes
+/// semantically dominated: replay selects the newest Move and the earliest
+/// Delete for an incarnation. When an Add is not present yet, one newest Move
+/// remains, while every Delete remains because a late Add can fall between two
+/// Deletes. Malformed and noncanonical by-dot winners also remain: without a
+/// covered-dot frontier, dropping one could let a lower conflicting payload
+/// for the same dot become authoritative on stale replay. Known pre-Add
+/// transitions from the trusted append-only writer path are inert and can be
+/// dropped consistently. One state-wide maximum revision witness remains.
+///
+/// This is deliberately not an age/count slice. Rejoining a stale shard simply
+/// re-runs the same min/max selection, so normalization is idempotent and merge
+/// continues to be commutative without turning maintenance into a reset epoch.
+fn town_life_world_compact_semantic_events(
+  source : ArrayView[TownLifeWorldEvent],
+) -> Array[TownLifeWorldEvent] {
+  let adds : Map[String, TownLifeWorldEvent] = Map([])
+  let mut revision_witness : TownLifeWorldEvent? = None
+  for event in source {
+    match revision_witness {
+      Some(current) if town_life_world_event_compare(event, current) <= 0 => ()
+      _ => revision_witness = Some(event)
+    }
+    if event.action is WorldAdd(_) && town_life_world_event_payload_valid(event) {
+      let key = town_life_world_event_incarnation_key(event)
+      match adds.get(key) {
+        Some(current) if town_life_world_event_compare(event, current) <= 0 =>
+          ()
+        _ => adds[key] = event
+      }
+    }
+  }
+  let moves : Map[String, TownLifeWorldEvent] = Map([])
+  let deletions : Map[String, TownLifeWorldEvent] = Map([])
+  for event in source {
+    let key = town_life_world_event_incarnation_key(event)
+    match (event.action, adds.get(key)) {
+      (WorldMove(_), Some(add)) if town_life_world_event_payload_valid(event) &&
+        town_life_world_event_compare(event, add) > 0 =>
+        match moves.get(key) {
+          Some(current) if town_life_world_event_compare(event, current) <= 0 =>
+            ()
+          _ => moves[key] = event
+        }
+      (WorldMove(_), None) if town_life_world_event_payload_valid(event) =>
+        match moves.get(key) {
+          Some(current) if town_life_world_event_compare(event, current) <= 0 =>
+            ()
+          _ => moves[key] = event
+        }
+      (WorldDelete, Some(add)) if town_life_world_event_compare(event, add) > 0 =>
+        match deletions.get(key) {
+          Some(current) if town_life_world_event_compare(event, current) >= 0 =>
+            ()
+          _ => deletions[key] = event
+        }
+      (WorldDelete, None) => ()
+      _ => ()
+    }
+  }
+  let retained : Map[String, Bool] = Map([])
+  for _, event in adds {
+    retained[town_life_world_event_identity(event)] = true
+  }
+  for _, event in moves {
+    retained[town_life_world_event_identity(event)] = true
+  }
+  for _, event in deletions {
+    retained[town_life_world_event_identity(event)] = true
+  }
+  for event in source {
+    let key = town_life_world_event_incarnation_key(event)
+    let must_preserve = if !town_life_world_event_payload_valid(event) {
+      true
+    } else if !(event.action is WorldAdd(_)) &&
+      !town_life_world_event_compaction_eligible(event) {
+      true
+    } else {
+      match (event.action, adds.get(key)) {
+        (WorldDelete, None) => true
+        _ => false
+      }
+    }
+    if must_preserve {
+      retained[town_life_world_event_identity(event)] = true
+    }
+  }
+  match revision_witness {
+    Some(event) => retained[town_life_world_event_identity(event)] = true
+    None => ()
+  }
+  let events : Array[TownLifeWorldEvent] = []
+  for event in source {
+    if retained.contains(town_life_world_event_identity(event)) {
+      events.push(event)
+    }
+  }
+  events.sort_by(town_life_world_event_compare)
+  events
+}
+
+///|
 fn town_life_world_normalize_state(
   state : TownLifeWorldState,
 ) -> TownLifeWorldState {
@@ -186,7 +328,9 @@ fn town_life_world_normalize_state(
         by_dot[key] = town_life_world_prefer_event(current, event)
     }
   }
-  let events = by_dot.values().to_array()
+  let events = town_life_world_compact_semantic_events(
+    by_dot.values().to_array(),
+  )
   events.sort_by(town_life_world_event_compare)
   { ..state, events, }
 }
@@ -868,6 +1012,9 @@ fn town_life_world_base_road_cells(
       None => ()
     }
   }
+  // The road index is a derived companion of the active compiled blueprint;
+  // retaining one full cell map per historical digest duplicates world data.
+  town_life_world_base_road_cells_cache.clear()
   town_life_world_base_road_cells_cache[world.blueprint_digest] = cells
   cells
 }

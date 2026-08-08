@@ -1,4 +1,7 @@
-import { parseWatcherRecords } from './runtime_snapshot_parser.js'
+import {
+  parseOperatorRequests,
+  parseWatcherRecords,
+} from './runtime_snapshot_parser.js'
 
 export const RUNTIME_TEXT_SNAPSHOTS = [
   {
@@ -80,6 +83,7 @@ export const RUNTIME_TEXT_SNAPSHOTS = [
     jsonGlobal: '__moontownOperatorRequestsJson',
     versionGlobal: '__moontownOperatorRequestsVersion',
     fallback: '[]',
+    transform: text => JSON.stringify(parseOperatorRequests(text)),
   },
   {
     url: './book-template-requests.json',

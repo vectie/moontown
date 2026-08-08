@@ -253,11 +253,17 @@ let ecosystem_contract_terrain_walkable_lookup_cache : Map[
 fn ecosystem_contract_prepare_terrain_lookup(
   world : @energy_valley_contract.CompiledTownWorld,
 ) -> Unit {
-  if ecosystem_contract_terrain_kind_lookup_cache.contains(
-      world.blueprint_digest,
-    ) {
+  let identity = world.blueprint_digest
+  if ecosystem_contract_terrain_kind_lookup_cache.contains(identity) &&
+    ecosystem_contract_terrain_walkable_lookup_cache.contains(identity) {
     return
   }
+  // Both maps are one coherent compiler artifact. Clear them together before
+  // rebuilding so an edited world never retains a full raster lookup for
+  // every historical blueprint, and a partially cleared cache cannot pair
+  // fresh terrain kinds with stale walkability.
+  ecosystem_contract_terrain_kind_lookup_cache.clear()
+  ecosystem_contract_terrain_walkable_lookup_cache.clear()
   let kinds : Map[String, @energy_valley_contract.TerrainKind] = Map([])
   let walkable : Map[String, Bool] = Map([])
   for region in world.terrain_regions {
@@ -273,8 +279,8 @@ fn ecosystem_contract_prepare_terrain_lookup(
       }
     }
   }
-  ecosystem_contract_terrain_kind_lookup_cache[world.blueprint_digest] = kinds
-  ecosystem_contract_terrain_walkable_lookup_cache[world.blueprint_digest] = walkable
+  ecosystem_contract_terrain_kind_lookup_cache[identity] = kinds
+  ecosystem_contract_terrain_walkable_lookup_cache[identity] = walkable
 }
 
 ///|

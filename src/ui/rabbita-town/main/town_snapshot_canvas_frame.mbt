@@ -45,6 +45,14 @@ fn golden_valley_accept_canvas_frame(
 }
 
 ///|
+/// Once the primary Canvas is confirmed absent there is no displayed pointer
+/// authority. Releasing the accepted frame avoids retaining its full semantic
+/// world until a later mount successfully paints and accepts a fresh frame.
+fn golden_valley_clear_canvas_frame() -> Unit {
+  golden_valley_canvas_frame_cache.clear()
+}
+
+///|
 fn golden_valley_canvas_frame() -> @energy_valley_contract.TownSnapshot? {
   golden_valley_canvas_frame_cache.get("accepted").map(frame => frame.snapshot)
 }

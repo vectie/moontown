@@ -4,6 +4,11 @@ import http from "node:http";
 import os from "node:os";
 import path from "node:path";
 import { URL } from "node:url";
+import {
+  MAX_MINIAPP_SESSIONS,
+  authorizeMiniappRequest,
+  pruneMiniappSessions,
+} from "./miniapp-session-retention.mjs";
 
 const defaultPort = 18191;
 const durableKeys = ["users", "buildings", "placements", "agents", "threads", "messages", "runs", "auditEvents"];
@@ -165,20 +170,32 @@ function routeRequest(state, method, url, body, headers) {
 }
 
 function devLogin(state, body) {
+  pruneMiniappSessions(state.sessions, now(), MAX_MINIAPP_SESSIONS);
   const userId = body.userId || body.loginId || body.login_id || "user-a";
   const user = state.users.find((item) => item.id === userId);
   if (!user) return json(404, { ok: false, kind: "dev-login", reason: "user-not-found", userId });
   const sessionId = `dev-session-${userId}-${now()}`;
   state.sessions.set(sessionId, { id: sessionId, userId, expiresAtMs: now() + 3600000 });
+  pruneMiniappSessions(state.sessions, now(), MAX_MINIAPP_SESSIONS);
   return ok({ ok: true, kind: "dev-login", user, session: { id: sessionId, userId, tokenLabel: `dev:${userId}` } });
 }
 
 function requireSession(state, url, body, headers) {
   const sessionId = body.sessionId || url.searchParams.get("sessionId") || headerValue(headers, "x-miniapp-session");
-  if (sessionId && state.sessions.has(sessionId)) return { ok: true, userId: state.sessions.get(sessionId).userId, sessionId };
   const userId = body.userId || url.searchParams.get("userId") || "user-a";
-  if (state.users.some((item) => item.id === userId)) return { ok: true, userId, sessionId: "" };
-  return json(401, { ok: false, kind: "auth", reason: "session-invalid" });
+  const authorization = authorizeMiniappRequest({
+    sessions: state.sessions,
+    users: state.users,
+    sessionId,
+    userId,
+    nowMs: now(),
+  });
+  if (authorization.ok) return authorization;
+  return json(authorization.status, {
+    ok: false,
+    kind: "auth",
+    reason: authorization.reason,
+  });
 }
 
 function headerValue(headers, name) {

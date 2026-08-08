@@ -182,7 +182,14 @@ extern "js" fn canvas_frame_test_install_harness(with_canvas : Bool) -> Unit =
   #|     "HTMLCanvasElement",
   #|     "CanvasRenderingContext2D",
   #|     "requestAnimationFrame",
+  #|     "addEventListener",
   #|     "__moontownGoldenValleyCamera",
+  #|     "__moontownGoldenValleyCameraArtVersion",
+  #|     "__moontownGoldenValleyCanvasSchedule",
+  #|     "__moontownGoldenValleyRender",
+  #|     "__moontownGoldenValleyKeys",
+  #|     "__moontownGoldenValleyAnimation",
+  #|     "__moontownPlayerWalkKeys",
   #|   ];
   #|   const descriptors = new Map(
   #|     names.map(name => [name, Object.getOwnPropertyDescriptor(globalThis, name)]),
@@ -239,6 +246,26 @@ extern "js" fn canvas_frame_test_install_harness(with_canvas : Bool) -> Unit =
   #|     writable: true,
   #|     value(callback) { callbacks.push(callback); return callbacks.length; },
   #|   });
+  #|   Object.defineProperty(globalThis, "addEventListener", {
+  #|     configurable: true,
+  #|     writable: true,
+  #|     value() {},
+  #|   });
+  #|   Object.defineProperty(globalThis, "__moontownGoldenValleyCamera", {
+  #|     configurable: true,
+  #|     writable: true,
+  #|     value: { x: 1792, y: 3200, z: 0.5 },
+  #|   });
+  #|   Object.defineProperty(
+  #|     globalThis,
+  #|     "__moontownGoldenValleyCameraArtVersion",
+  #|     { configurable: true, writable: true, value: 3 },
+  #|   );
+  #|   delete globalThis.__moontownGoldenValleyCanvasSchedule;
+  #|   delete globalThis.__moontownGoldenValleyRender;
+  #|   delete globalThis.__moontownGoldenValleyKeys;
+  #|   delete globalThis.__moontownGoldenValleyAnimation;
+  #|   delete globalThis.__moontownPlayerWalkKeys;
   #|   globalThis.__moontownCanvasFrameTimingTest = { descriptors, callbacks };
   #| }
 
@@ -250,6 +277,10 @@ extern "js" fn canvas_frame_test_flush_next_animation_frame() -> Bool =
   #|   callback(0);
   #|   return true;
   #| }
+
+///|
+extern "js" fn canvas_frame_test_pending_animation_frames() -> Int =
+  #| () => globalThis.__moontownCanvasFrameTimingTest?.callbacks.length ?? 0
 
 ///|
 extern "js" fn canvas_frame_test_remove_harness() -> Unit =
@@ -337,6 +368,36 @@ test "Canvas accepts a semantic frame only after its scheduled draw succeeds" {
   assert_eq(golden_valley_canvas_frame().unwrap().tick, visible.tick)
   assert_true(canvas_frame_test_flush_next_animation_frame())
   assert_eq(golden_valley_canvas_frame().unwrap().tick, pending.tick)
+  canvas_frame_test_remove_harness()
+  golden_valley_accept_canvas_frame(visible)
+}
+
+///|
+test "Canvas scheduling retains only the latest semantic frame before paint" {
+  let dispatch : Dispatch[Msg] = Emit(fn(_message) { @rabbita.none })
+  let visible = canvas_frame_test_snapshot(10)
+  let superseded = canvas_frame_test_snapshot(11)
+  let latest = canvas_frame_test_snapshot(12)
+  golden_valley_accept_canvas_frame(visible)
+  canvas_frame_test_install_harness(true)
+  ignore(
+    render_golden_valley_canvas(
+      dispatch,
+      superseded,
+      canvas_frame_test_view(superseded.tick),
+    ),
+  )
+  ignore(
+    render_golden_valley_canvas(
+      dispatch,
+      latest,
+      canvas_frame_test_view(latest.tick),
+    ),
+  )
+  assert_eq(canvas_frame_test_pending_animation_frames(), 1)
+  assert_eq(golden_valley_canvas_frame().unwrap().tick, visible.tick)
+  assert_true(canvas_frame_test_flush_next_animation_frame())
+  assert_eq(golden_valley_canvas_frame().unwrap().tick, latest.tick)
   canvas_frame_test_remove_harness()
   golden_valley_accept_canvas_frame(visible)
 }

@@ -20,9 +20,24 @@ extern "js" fn map_lab_canvas_line_dash(
 ///|
 extern "js" fn schedule_map_lab_canvas(callback : () -> Unit) -> Unit =
   #| callback => {
-  #|   if (typeof globalThis.requestAnimationFrame === "function") {
-  #|     globalThis.requestAnimationFrame(() => callback());
+  #|   if (typeof globalThis.requestAnimationFrame !== "function") return;
+  #|   let lifecycle = globalThis.__moontownMapLabCanvasLifecycle;
+  #|   if (!lifecycle) {
+  #|     lifecycle = {
+  #|       paintRaf: 0, observerRaf: 0, pending: null, render: null,
+  #|       signature: "",
+  #|     };
+  #|     globalThis.__moontownMapLabCanvasLifecycle = lifecycle;
   #|   }
+  #|   lifecycle.pending = callback;
+  #|   if (lifecycle.paintRaf) return;
+  #|   lifecycle.paintRaf = globalThis.requestAnimationFrame(() => {
+  #|     if (globalThis.__moontownMapLabCanvasLifecycle !== lifecycle) return;
+  #|     lifecycle.paintRaf = 0;
+  #|     const paint = lifecycle.pending;
+  #|     lifecycle.pending = null;
+  #|     if (typeof paint === "function") paint();
+  #|   });
   #| }
 
 ///|
@@ -32,27 +47,64 @@ extern "js" fn schedule_map_lab_canvas(callback : () -> Unit) -> Unit =
 /// no continuous diagnostic animation.
 extern "js" fn install_map_lab_canvas_renderer(callback : () -> Unit) -> Unit =
   #| callback => {
-  #|   globalThis.__moontownMapLabRender = callback;
   #|   if (typeof globalThis.requestAnimationFrame !== "function") return;
-  #|   if (globalThis.__moontownMapLabObserver) return;
-  #|   globalThis.__moontownMapLabObserver = true;
-  #|   let signature = "";
+  #|   let lifecycle = globalThis.__moontownMapLabCanvasLifecycle;
+  #|   if (!lifecycle) {
+  #|     lifecycle = {
+  #|       paintRaf: 0, observerRaf: 0, pending: null, render: null,
+  #|       signature: "",
+  #|     };
+  #|     globalThis.__moontownMapLabCanvasLifecycle = lifecycle;
+  #|   }
+  #|   lifecycle.render = callback;
+  #|   globalThis.__moontownMapLabRender = callback;
+  #|   if (lifecycle.observerRaf) return;
   #|   const frame = () => {
+  #|     if (globalThis.__moontownMapLabCanvasLifecycle !== lifecycle) return;
   #|     const canvas = globalThis.document?.getElementById("map-lab-canvas");
   #|     const camera = globalThis.__moontownGoldenValleyCamera;
   #|     if (canvas && camera) {
   #|       const next = [camera.x, camera.y, camera.z,
   #|         canvas.clientWidth, canvas.clientHeight].join(":");
-  #|       if (next !== signature) {
-  #|         signature = next;
-  #|         globalThis.__moontownMapLabRender?.();
+  #|       if (next !== lifecycle.signature) {
+  #|         lifecycle.signature = next;
+  #|         lifecycle.render?.();
   #|       }
   #|     } else {
-  #|       signature = "";
+  #|       lifecycle.signature = "";
   #|     }
-  #|     globalThis.requestAnimationFrame(frame);
+  #|     lifecycle.observerRaf = globalThis.requestAnimationFrame(frame);
   #|   };
-  #|   globalThis.requestAnimationFrame(frame);
+  #|   lifecycle.observerRaf = globalThis.requestAnimationFrame(frame);
+  #| }
+
+///|
+/// Closing the diagnostic surface releases both queued MoonBit closures and
+/// the browser's pixel backing store. The next open creates a fresh lifecycle.
+extern "js" fn stop_map_lab_canvas_renderer() -> Unit =
+  #| () => {
+  #|   const lifecycle = globalThis.__moontownMapLabCanvasLifecycle;
+  #|   if (lifecycle) {
+  #|     if (lifecycle.paintRaf) {
+  #|       globalThis.cancelAnimationFrame?.(lifecycle.paintRaf);
+  #|     }
+  #|     if (lifecycle.observerRaf) {
+  #|       globalThis.cancelAnimationFrame?.(lifecycle.observerRaf);
+  #|     }
+  #|     lifecycle.paintRaf = 0;
+  #|     lifecycle.observerRaf = 0;
+  #|     lifecycle.pending = null;
+  #|     lifecycle.render = null;
+  #|     lifecycle.signature = "";
+  #|   }
+  #|   const canvas = globalThis.document?.getElementById("map-lab-canvas");
+  #|   if (canvas) {
+  #|     canvas.width = 0;
+  #|     canvas.height = 0;
+  #|   }
+  #|   delete globalThis.__moontownMapLabRender;
+  #|   delete globalThis.__moontownMapLabObserver;
+  #|   delete globalThis.__moontownMapLabCanvasLifecycle;
   #| }
 
 ///|
@@ -1004,10 +1056,11 @@ fn render_map_lab_canvas(
   view : MapLabCanvasViewState,
 ) -> @rabbita.Html {
   if !view.open {
+    stop_map_lab_canvas_renderer()
     return @html.nothing
   }
-  schedule_map_lab_canvas(() => draw_map_lab_canvas(snapshot, view))
   schedule_map_lab_canvas(() => {
+    draw_map_lab_canvas(snapshot, view)
     install_map_lab_canvas_renderer(() => draw_map_lab_canvas(snapshot, view))
   })
   canvas(

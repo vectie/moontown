@@ -31,6 +31,7 @@ extern "js" fn town_life_transport_test_install_delayed_lock(
   #|     "__moontownTownLifeV3WriterState",
   #|     "__moontownTownLifeV3Observed",
   #|     "__moontownTownLifeV3Channel",
+  #|     "__moontownTownLifeV3Compaction",
   #|   ];
   #|   const saved = new Map(
   #|     names.map(name => [name, Object.getOwnPropertyDescriptor(globalThis, name)]),
@@ -39,7 +40,9 @@ extern "js" fn town_life_transport_test_install_delayed_lock(
   #|     saved,
   #|     rows: new Map(),
   #|     lockRequests: 0,
+  #|     lockCallbacks: [],
   #|     broadcasts: 0,
+  #|     observationSequence: 0,
   #|     writeMode,
   #|   };
   #|   globalThis.__moontownTownLifeDelayedLockTest = harness;
@@ -64,8 +67,9 @@ extern "js" fn town_life_transport_test_install_delayed_lock(
   #|   });
   #|   install("navigator", {
   #|     locks: {
-  #|       request() {
+  #|       request(_name, _options, callback) {
   #|         harness.lockRequests += 1;
+  #|         harness.lockCallbacks.push(callback);
   #|         return new Promise(() => {});
   #|       },
   #|     },
@@ -82,6 +86,7 @@ extern "js" fn town_life_transport_test_install_delayed_lock(
   #|   install("__moontownTownLifeV3Channel", {
   #|     postMessage() { harness.broadcasts += 1; },
   #|   });
+  #|   delete globalThis.__moontownTownLifeV3Compaction;
   #| }
 
 ///|
@@ -97,6 +102,45 @@ extern "js" fn town_life_transport_test_delayed_lock_requests() -> Int =
 ///|
 extern "js" fn town_life_transport_test_delayed_lock_broadcasts() -> Int =
   #| () => globalThis.__moontownTownLifeDelayedLockTest?.broadcasts ?? 0
+
+///|
+extern "js" fn town_life_transport_test_delayed_lock_pending_callbacks() -> Int =
+  #| () => globalThis.__moontownTownLifeDelayedLockTest?.lockCallbacks.length ?? 0
+
+///|
+extern "js" fn town_life_transport_test_delayed_lock_seed(
+  key : String,
+  raw : String,
+) -> Unit =
+  #| (key, raw) => {
+  #|   globalThis.__moontownTownLifeDelayedLockTest?.rows.set(key, raw);
+  #| }
+
+///|
+extern "js" fn town_life_transport_test_delayed_lock_observe_shards() -> Unit =
+  #| () => {
+  #|   const harness = globalThis.__moontownTownLifeDelayedLockTest;
+  #|   if (!harness) return;
+  #|   const prefix = "moontown-town-life-v3-shard:";
+  #|   globalThis.__moontownTownLifeV3Observed = {
+  #|     testId: ++harness.observationSequence,
+  #|     capturedAtMs: Date.now(),
+  #|     entries: [...harness.rows]
+  #|       .filter(([key]) => key.startsWith(prefix))
+  #|       .map(([key, raw]) => ({ key, raw })),
+  #|   };
+  #| }
+
+///|
+extern "js" fn town_life_transport_test_delayed_lock_observation_id() -> Int =
+  #| () => globalThis.__moontownTownLifeV3Observed?.testId ?? 0
+
+///|
+extern "js" fn town_life_transport_test_delayed_lock_fire() -> Unit =
+  #| () => {
+  #|   const harness = globalThis.__moontownTownLifeDelayedLockTest;
+  #|   harness?.lockCallbacks.shift()?.();
+  #| }
 
 ///|
 extern "js" fn town_life_transport_test_remove_delayed_lock() -> Unit =
@@ -373,6 +417,70 @@ test "V3 transport unwraps immutable envelopes in deterministic key order" {
 }
 
 ///|
+test "V3 reads keep only each writer's highest valid cumulative envelope" {
+  let older = { ..town_life_default_save(), analytics: ["older-only"] }
+  let latest = town_life_cumulative_save(
+    { ..init_model(), analytics: ["latest-local"] },
+    [ToJson::to_json(older).stringify()],
+  )
+  let remote = { ..town_life_default_save(), analytics: ["remote-only"] }
+  let mismatched = {
+    ..town_life_default_save(),
+    analytics: ["mismatched-independent"],
+  }
+  let older_text = ToJson::to_json(older).stringify()
+  let latest_text = ToJson::to_json(latest).stringify()
+  let remote_text = ToJson::to_json(remote).stringify()
+  let mismatched_text = ToJson::to_json(mismatched).stringify()
+  let older_key = town_life_v3_shard_key("writer-a", 1)
+  let latest_key = town_life_v3_shard_key("writer-a", 2)
+  let corrupt_key = town_life_v3_shard_key("writer-a", 3)
+  let remote_key = town_life_v3_shard_key("writer-b", 1)
+  let mismatched_key = town_life_v3_shard_key("different-key-writer", 99)
+  let readable = town_life_transport_latest_valid_v3_saves([
+    {
+      key: corrupt_key,
+      raw: town_life_transport_test_envelope(
+        "writer-a", 3, "not-a-town-life-save",
+      ),
+    },
+    {
+      key: remote_key,
+      raw: town_life_transport_test_envelope("writer-b", 1, remote_text),
+    },
+    {
+      key: older_key,
+      raw: town_life_transport_test_envelope("writer-a", 1, older_text),
+    },
+    {
+      key: latest_key,
+      raw: town_life_transport_test_envelope("writer-a", 2, latest_text),
+    },
+    {
+      key: mismatched_key,
+      raw: town_life_transport_test_envelope(
+        "writer-a", 99, mismatched_text,
+      ),
+    },
+  ])
+  assert_eq(readable.texts.length(), 3)
+  assert_false(readable.texts.contains(older_text))
+  assert_true(readable.texts.contains(latest_text))
+  assert_true(readable.texts.contains(remote_text))
+  assert_true(readable.texts.contains(mismatched_text))
+  assert_true(readable.accepted_shard_keys.contains(older_key))
+  assert_true(readable.accepted_shard_keys.contains(latest_key))
+  assert_true(readable.accepted_shard_keys.contains(remote_key))
+  assert_false(readable.accepted_shard_keys.contains(corrupt_key))
+  assert_false(readable.accepted_shard_keys.contains(mismatched_key))
+  let aggregate = town_life_aggregate_v3_saves(readable.texts).unwrap()
+  assert_true(aggregate.analytics.contains("older-only"))
+  assert_true(aggregate.analytics.contains("latest-local"))
+  assert_true(aggregate.analytics.contains("remote-only"))
+  assert_true(aggregate.analytics.contains("mismatched-independent"))
+}
+
+///|
 test "V3 compaction cannot delete before durable write or after raw changes" {
   let new_key = town_life_v3_shard_key("writer-c", 9)
   let old_a : TownLifeTransportEntry = {
@@ -485,6 +593,78 @@ test "browser V3 shard is durable before delayed Web Lock callback" {
   assert_eq(broadcasts, 1)
   assert_true(!raw.is_empty())
   assert_eq(town_life_transport_payload(raw), "reset-save")
+}
+
+///|
+test "rapid V3 commits queue one compaction with the latest manifest" {
+  town_life_transport_test_install_delayed_lock("ok")
+  let captured_key = town_life_v3_shard_key("captured-writer", 1)
+  let first_key = town_life_v3_shard_key("delayed-lock-writer", 1)
+  let latest_key = town_life_v3_shard_key("delayed-lock-writer", 2)
+  let concurrent_key = town_life_v3_shard_key("concurrent-writer", 1)
+  town_life_transport_test_delayed_lock_seed(
+    captured_key, "captured-before-first-commit",
+  )
+  town_life_transport_test_delayed_lock_observe_shards()
+  let first_written = browser_write_town_life_v3_writer_shard("save-one", 1)
+  // A real persist rereads all durable shards before constructing the next
+  // cumulative payload. Mirror that boundary so the latest queued manifest
+  // includes the superseded first shard.
+  town_life_transport_test_delayed_lock_observe_shards()
+  let latest_written = browser_write_town_life_v3_writer_shard("save-two", 2)
+  town_life_transport_test_delayed_lock_seed(
+    concurrent_key, "unobserved-concurrent-shard",
+  )
+  let lock_requests = town_life_transport_test_delayed_lock_requests()
+  let pending_callbacks = town_life_transport_test_delayed_lock_pending_callbacks()
+  let broadcasts = town_life_transport_test_delayed_lock_broadcasts()
+  town_life_transport_test_delayed_lock_fire()
+  let captured_raw = town_life_transport_test_delayed_lock_raw(captured_key)
+  let first_raw = town_life_transport_test_delayed_lock_raw(first_key)
+  let latest_raw = town_life_transport_test_delayed_lock_raw(latest_key)
+  let concurrent_raw = town_life_transport_test_delayed_lock_raw(concurrent_key)
+  town_life_transport_test_remove_delayed_lock()
+  assert_true(first_written)
+  assert_true(latest_written)
+  assert_eq(lock_requests, 1)
+  assert_eq(pending_callbacks, 1)
+  assert_eq(broadcasts, 2)
+  assert_true(captured_raw.is_empty())
+  assert_true(first_raw.is_empty())
+  assert_eq(town_life_transport_payload(latest_raw), "save-two")
+  assert_eq(concurrent_raw, "unobserved-concurrent-shard")
+}
+
+///|
+test "V3 compaction releases only its exact observed manifest" {
+  town_life_transport_test_install_delayed_lock("ok")
+  town_life_transport_test_delayed_lock_seed(
+    town_life_v3_shard_key("captured-writer", 1),
+    "captured-observation",
+  )
+  town_life_transport_test_delayed_lock_observe_shards()
+  let captured_id = town_life_transport_test_delayed_lock_observation_id()
+  ignore(browser_write_town_life_v3_writer_shard("first-save", 1))
+
+  // A read while the Web Lock is pending replaces the global observation.
+  // Completing the older job must not erase this newer manifest.
+  town_life_transport_test_delayed_lock_observe_shards()
+  let newer_id = town_life_transport_test_delayed_lock_observation_id()
+  town_life_transport_test_delayed_lock_fire()
+  let surviving_id = town_life_transport_test_delayed_lock_observation_id()
+
+  // The next job captures that exact newer object. With no intervening read,
+  // its completion must release the now-obsolete raw-payload manifest.
+  ignore(browser_write_town_life_v3_writer_shard("second-save", 2))
+  let exact_id = town_life_transport_test_delayed_lock_observation_id()
+  town_life_transport_test_delayed_lock_fire()
+  let released_id = town_life_transport_test_delayed_lock_observation_id()
+  town_life_transport_test_remove_delayed_lock()
+  assert_true(captured_id > 0)
+  assert_true(newer_id > captured_id)
+  assert_eq(surviving_id, newer_id)
+  assert_eq(exact_id, newer_id)
+  assert_eq(released_id, 0)
 }
 
 ///|

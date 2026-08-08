@@ -13,7 +13,14 @@ let player_avatar_colors = [
 ///|
 extern "js" fn golden_follow_camera(world_x : Double, world_y : Double) -> Unit =
   #| (worldX, worldY) => {
-  #|   globalThis.__moontownGoldenValleyCamera ||= { x: 1792, y: 3200, z: 0.1 };
+  #|   const civicZoom = globalThis.innerWidth < 640
+  #|     ? 0.34
+  #|     : globalThis.innerWidth < 1100 || globalThis.innerHeight < 800
+  #|       ? 0.42
+  #|       : 0.5;
+  #|   globalThis.__moontownGoldenValleyCamera ||= {
+  #|     x: 1792, y: 3200, z: civicZoom,
+  #|   };
   #|   const camera = globalThis.__moontownGoldenValleyCamera;
   #|   camera.x = (worldX - worldY) * 32;
   #|   camera.y = (worldX + worldY) * 16;

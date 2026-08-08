@@ -170,7 +170,7 @@ fn render_energy_valley_page_with_snapshot(
             button(
               class="square-action mt-1",
               on_click=dispatch(AvatarOpenEditor),
-              "✨ 立即创建",
+              "立即创建",
             ),
           ]),
         ])
@@ -262,9 +262,9 @@ fn render_town_action_rail(
     actions.push(
       button(
         class=if model.resident_explorer_open {
-          "town-action town-action-active"
+          "town-action town-action-secondary town-action-active"
         } else {
-          "town-action"
+          "town-action town-action-secondary"
         },
         title="寻找真实运行时居民与工作证据",
         on_click=dispatch(ToggleResidentExplorer),
@@ -284,9 +284,9 @@ fn render_town_action_rail(
     actions.push(
       button(
         class=if model.town_chronicle_open {
-          "town-action town-action-active"
+          "town-action town-action-secondary town-action-active"
         } else {
-          "town-action"
+          "town-action town-action-secondary"
         },
         title="查看由真实任务账本生成的小镇今日",
         on_click=dispatch(ToggleTownChronicle),
@@ -306,16 +306,16 @@ fn render_town_action_rail(
     actions.push(
       button(
         class=if model.metro_visible {
-          "town-action town-action-active"
+          "town-action town-action-secondary town-action-active"
         } else {
-          "town-action"
+          "town-action town-action-secondary"
         },
         title="显示 / 隐藏地铁 17 号线",
         on_click=dispatch(ToggleMetro),
         attrs=@html.Attrs::build()
           .aria_label("地铁 17 号线图层")
           .aria_pressed(if model.metro_visible { "true" } else { "false" }),
-        "🚇 17号线",
+        "17号线",
       ),
     )
   }
@@ -323,14 +323,14 @@ fn render_town_action_rail(
     actions.push(
       button(
         class=if model.square_open {
-          "town-action town-action-active"
+          "town-action town-action-primary town-action-active"
         } else {
-          "town-action"
+          "town-action town-action-primary"
         },
         title="发布与收藏知识大楼",
         on_click=dispatch(ToggleSquare),
         attrs=@html.Attrs::build().aria_label("小镇知识广场"),
-        "🏛️ 广场",
+        "知识广场",
       ),
     )
   }
@@ -338,14 +338,14 @@ fn render_town_action_rail(
     actions.push(
       button(
         class=if model.ops_open {
-          "town-action town-action-active"
+          "town-action town-action-secondary town-action-active"
         } else {
-          "town-action"
+          "town-action town-action-secondary"
         },
         title="镇长运营看板",
         on_click=dispatch(ToggleOps),
         attrs=@html.Attrs::build().aria_label("能源谷运营中心"),
-        "🏙️ 运营",
+        "运营",
       ),
     )
   }

@@ -10,21 +10,48 @@ const ZOOM_IN_SELECTOR = '.viewport-zoom-in'
 const ZOOM_OUT_SELECTOR = '.viewport-zoom-out'
 const ZOOM_TRANSITION_MS = 140
 const DRAG_THRESHOLD_PX = 4
+const VIEWPORT_CONTROLLER_KEY = '__moontownViewportDragPanController'
 const ZOOM_LIMITS = {
   min: 0.55,
   max: 1.9,
   step: 0.25,
 }
 
-export function installViewportDragPan() {
-  if (!viewportPathEnabled(globalThis.location)) {
-    return
+export function installViewportDragPan(
+  documentRef = document,
+  windowRef = globalThis,
+) {
+  if (!viewportPathEnabled(windowRef.location)) {
+    teardownViewportDragPan(windowRef)
+    return null
   }
 
-  createViewportDragPanController(document, globalThis).install()
+  const installed = windowRef[VIEWPORT_CONTROLLER_KEY]
+  if (installed?.isInstalled?.()) {
+    return installed
+  }
+  installed?.destroy?.()
+
+  const controller = createViewportDragPanController(documentRef, windowRef)
+  controller.install()
+  windowRef[VIEWPORT_CONTROLLER_KEY] = controller
+  return controller
+}
+
+export function teardownViewportDragPan(windowRef = globalThis) {
+  const controller = windowRef[VIEWPORT_CONTROLLER_KEY]
+  controller?.destroy?.()
+  if (windowRef[VIEWPORT_CONTROLLER_KEY] === controller) {
+    delete windowRef[VIEWPORT_CONTROLLER_KEY]
+  }
 }
 
 globalThis.__moontownInstallViewportDragPan = installViewportDragPan
+globalThis.__moontownTeardownViewportDragPan = teardownViewportDragPan
+
+if (import.meta.hot?.dispose) {
+  import.meta.hot.dispose(() => teardownViewportDragPan())
+}
 
 function viewportPathEnabled(location) {
   try {
@@ -34,7 +61,7 @@ function viewportPathEnabled(location) {
   }
 }
 
-function createViewportDragPanController(documentRef, windowRef) {
+export function createViewportDragPanController(documentRef, windowRef) {
   const state = {
     frame: null,
     dragging: false,
@@ -48,12 +75,21 @@ function createViewportDragPanController(documentRef, windowRef) {
     pendingScrollTop: 0,
     panFrame: 0,
     findFrameRaf: 0,
+    centerFrameRaf: 0,
+    zoomFrameRaf: 0,
+    navigationFrameRaf: 0,
     zoomResetTimer: 0,
+    observer: null,
+    installed: false,
     initialPanDone: false,
     zoom: 1,
   }
 
   function install() {
+    if (state.installed) {
+      return
+    }
+    state.installed = true
     documentRef.addEventListener('pointerdown', onPointerDown)
     documentRef.addEventListener('pointermove', onPointerMove, { passive: false })
     documentRef.addEventListener('pointerup', stopDrag)
@@ -65,7 +101,52 @@ function createViewportDragPanController(documentRef, windowRef) {
     findFrame()
   }
 
+  function destroy() {
+    if (state.installed) {
+      documentRef.removeEventListener('pointerdown', onPointerDown)
+      documentRef.removeEventListener('pointermove', onPointerMove)
+      documentRef.removeEventListener('pointerup', stopDrag)
+      documentRef.removeEventListener('pointercancel', stopDrag)
+      documentRef.removeEventListener('click', onViewportNavigationClick, true)
+      documentRef.removeEventListener('click', onZoomClick, true)
+      documentRef.removeEventListener('click', suppressClickAfterDrag, true)
+    }
+    state.installed = false
+    state.observer?.disconnect?.()
+    state.observer = null
+    cancelFrame('panFrame')
+    cancelFrame('findFrameRaf')
+    cancelFrame('centerFrameRaf')
+    cancelFrame('zoomFrameRaf')
+    cancelFrame('navigationFrameRaf')
+    if (state.zoomResetTimer) {
+      windowRef.clearTimeout(state.zoomResetTimer)
+      state.zoomResetTimer = 0
+    }
+    if (state.frame) {
+      state.frame.classList.remove('is-drag-panning', 'is-zooming')
+      if (state.pointerId !== null) {
+        state.frame.releasePointerCapture?.(state.pointerId)
+      }
+    }
+    state.frame = null
+    state.dragging = false
+    state.moved = false
+    state.pointerId = null
+  }
+
+  function cancelFrame(key) {
+    if (!state[key]) {
+      return
+    }
+    windowRef.cancelAnimationFrame(state[key])
+    state[key] = 0
+  }
+
   function findFrame() {
+    if (!state.installed) {
+      return null
+    }
     state.frame = documentRef.querySelector(VIEWPORT_FRAME_SELECTOR)
     if (state.frame) {
       if (!state.initialPanDone) {
@@ -83,18 +164,24 @@ function createViewportDragPanController(documentRef, windowRef) {
     }
 
     const focus = findInitialFocus(documentRef)
-    windowRef.requestAnimationFrame(() => {
-      const maxLeft = Math.max(0, state.frame.scrollWidth - state.frame.clientWidth)
-      const maxTop = Math.max(0, state.frame.scrollHeight - state.frame.clientHeight)
+    const activeFrame = state.frame
+    cancelFrame('centerFrameRaf')
+    state.centerFrameRaf = windowRef.requestAnimationFrame(() => {
+      state.centerFrameRaf = 0
+      if (!state.installed || state.frame !== activeFrame) {
+        return
+      }
+      const maxLeft = Math.max(0, activeFrame.scrollWidth - activeFrame.clientWidth)
+      const maxTop = Math.max(0, activeFrame.scrollHeight - activeFrame.clientHeight)
       const targetLeft = focus
-        ? focus.offsetLeft - state.frame.clientWidth * 0.35
-        : state.frame.scrollWidth * 0.5 - state.frame.clientWidth * 0.5
+        ? focus.offsetLeft - activeFrame.clientWidth * 0.35
+        : activeFrame.scrollWidth * 0.5 - activeFrame.clientWidth * 0.5
       const targetTop = focus
-        ? focus.offsetTop - state.frame.clientHeight * 0.44
-        : state.frame.scrollHeight * 0.5 - state.frame.clientHeight * 0.5
+        ? focus.offsetTop - activeFrame.clientHeight * 0.44
+        : activeFrame.scrollHeight * 0.5 - activeFrame.clientHeight * 0.5
 
-      state.frame.scrollLeft = clampScroll(targetLeft, maxLeft)
-      state.frame.scrollTop = clampScroll(targetTop, maxTop)
+      activeFrame.scrollLeft = clampScroll(targetLeft, maxLeft)
+      activeFrame.scrollTop = clampScroll(targetTop, maxTop)
       state.initialPanDone = true
     })
   }
@@ -124,7 +211,12 @@ function createViewportDragPanController(documentRef, windowRef) {
       return
     }
 
-    windowRef.requestAnimationFrame(() => {
+    cancelFrame('zoomFrameRaf')
+    state.zoomFrameRaf = windowRef.requestAnimationFrame(() => {
+      state.zoomFrameRaf = 0
+      if (!state.installed || state.frame !== activeFrame) {
+        return
+      }
       const ratio = state.zoom / previousZoom
       activeFrame.scrollLeft = centerX * ratio - activeFrame.clientWidth / 2
       activeFrame.scrollTop = centerY * ratio - activeFrame.clientHeight / 2
@@ -166,7 +258,12 @@ function createViewportDragPanController(documentRef, windowRef) {
     event.stopPropagation()
     event.stopImmediatePropagation?.()
     windowRef.location.href = href
-    windowRef.requestAnimationFrame(() => {
+    cancelFrame('navigationFrameRaf')
+    state.navigationFrameRaf = windowRef.requestAnimationFrame(() => {
+      state.navigationFrameRaf = 0
+      if (!state.installed) {
+        return
+      }
       windowRef.location.reload()
     })
   }
@@ -210,7 +307,7 @@ function createViewportDragPanController(documentRef, windowRef) {
 
   function flushPan() {
     state.panFrame = 0
-    if (!state.dragging || !state.frame) {
+    if (!state.installed || !state.dragging || !state.frame) {
       return
     }
     state.frame.scrollLeft = state.pendingScrollLeft
@@ -244,7 +341,13 @@ function createViewportDragPanController(documentRef, windowRef) {
   }
 
   function observeFrameChanges() {
-    const observer = new windowRef.MutationObserver(() => {
+    if (typeof windowRef.MutationObserver !== 'function') {
+      return
+    }
+    state.observer = new windowRef.MutationObserver(() => {
+      if (!state.installed) {
+        return
+      }
       if (state.findFrameRaf) {
         return
       }
@@ -253,14 +356,18 @@ function createViewportDragPanController(documentRef, windowRef) {
         findFrame()
       })
     })
-    observer.observe(documentRef.body, { childList: true, subtree: true })
+    state.observer.observe(documentRef.body, { childList: true, subtree: true })
   }
 
   function shouldIgnoreDragStart(target) {
     return target?.closest?.(DRAG_IGNORE_SELECTOR)
   }
 
-  return { install }
+  return {
+    install,
+    destroy,
+    isInstalled: () => state.installed,
+  }
 }
 
 function findInitialFocus(documentRef) {

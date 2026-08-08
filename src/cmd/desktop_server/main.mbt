@@ -295,6 +295,51 @@ async fn serve_book_output(
 }
 
 ///|
+let operator_request_projection_limit = 256
+
+///|
+let watcher_record_projection_limit = 256
+
+///|
+fn push_json_projection_tail(
+  rows : Array[Json],
+  value : Json,
+  capacity : Int,
+) -> Unit {
+  rows.push(value)
+  while rows.length() > capacity.max(1) {
+    ignore(rows.remove(0))
+  }
+}
+
+///|
+fn watcher_record_projection_compare(left : Json, right : Json) -> Int {
+  let left_tick = match left {
+    Object(fields) => json_int_field(fields, "tick", 0, 0, 2147483647)
+    _ => 0
+  }
+  let right_tick = match right {
+    Object(fields) => json_int_field(fields, "tick", 0, 0, 2147483647)
+    _ => 0
+  }
+  let by_tick = left_tick.compare(right_tick)
+  if by_tick != 0 {
+    by_tick
+  } else {
+    left.stringify().compare(right.stringify())
+  }
+}
+
+///|
+fn push_watcher_record_projection(rows : Array[Json], value : Json) -> Unit {
+  rows.push(value)
+  rows.sort_by(watcher_record_projection_compare)
+  while rows.length() > watcher_record_projection_limit {
+    ignore(rows.remove(0))
+  }
+}
+
+///|
 async fn operator_requests_json() -> Json {
   let path = state_root() + "/operator-requests/requests.jsonl"
   let rows : Array[Json] = []
@@ -305,7 +350,7 @@ async fn operator_requests_json() -> Json {
       continue
     }
     let value = @json.parse(trimmed) catch { _ => continue }
-    rows.push(value)
+    push_json_projection_tail(rows, value, operator_request_projection_limit)
   }
   rows.to_json()
 }
@@ -330,7 +375,7 @@ async fn watcher_records_json() -> Json {
         continue
       }
       let value = @json.parse(line) catch { _ => continue }
-      rows.push(value)
+      push_watcher_record_projection(rows, value)
     }
   }
   rows.to_json()
@@ -370,11 +415,42 @@ async fn serve_runtime_snapshot(
   guard runtime_snapshot_source(path) is Some((source, fallback)) else {
     return false
   }
+  if path == "/town.json" && !source.is_empty() {
+    let text = @support.read_text_or_empty(source)
+    match bounded_town_snapshot_text(text) {
+      Some(projected) => {
+        send_text(
+          conn,
+          200,
+          "OK",
+          projected,
+          kind="application/json; charset=utf-8",
+        )
+        return true
+      }
+      None => ()
+    }
+  }
   if !source.is_empty() && serve_file(conn, source) {
     return true
   }
   send_text(conn, 200, "OK", fallback, kind="application/json; charset=utf-8")
   true
+}
+
+///|
+/// Converts the durable full snapshot into the bounded browser/read shape.
+/// Parse failures deliberately return `None` so the existing raw-file/fallback
+/// behavior remains available to the caller.
+fn bounded_town_snapshot_text(text : String) -> String? {
+  if text.trim().is_empty() {
+    return None
+  }
+  let parsed = @json.parse(text) catch { _ => return None }
+  let snapshot : @storage.TownSnapshot = @json.from_json(parsed) catch {
+    _ => return None
+  }
+  Some(@storage.project_town_snapshot(snapshot).to_json().stringify())
 }
 
 ///|

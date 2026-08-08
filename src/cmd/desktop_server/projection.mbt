@@ -851,6 +851,40 @@ fn route_projected_work_item(
 }
 
 ///|
+let energy_valley_runtime_history_projection_limit = 128
+
+///|
+fn projected_history_compare(left : Json, right : Json) -> Int {
+  let left_fields = object_fields(Some(left))
+  let right_fields = object_fields(Some(right))
+  let by_time = json_string_field(left_fields, "updatedAt").compare(
+    json_string_field(right_fields, "updatedAt"),
+  )
+  if by_time != 0 {
+    by_time
+  } else {
+    let by_id = json_string_field(left_fields, "id").compare(
+      json_string_field(right_fields, "id"),
+    )
+    if by_id != 0 {
+      by_id
+    } else {
+      left.stringify().compare(right.stringify())
+    }
+  }
+}
+
+///|
+fn bounded_projected_history(source : ArrayView[Json]) -> Array[Json] {
+  let history = source.to_owned()
+  history.sort_by(projected_history_compare)
+  while history.length() > energy_valley_runtime_history_projection_limit {
+    ignore(history.remove(0))
+  }
+  history
+}
+
+///|
 fn operator_work_item(
   value : Json,
   book_bindings : Map[String, String],
@@ -1453,7 +1487,7 @@ async fn energy_valley_runtime_projection() -> Json {
     "mode": "live",
     "observedAt": observed_at,
     "tasks": Json::array(tasks),
-    "history": Json::array(history),
+    "history": Json::array(bounded_projected_history(history)),
     "agents": Json::array(
       {
         let agents = projected_agents(workers, tasks, book_bindings)

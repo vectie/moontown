@@ -217,9 +217,9 @@ fn render_avatar_wizard(
       class="wizard-button-primary",
       on_click=dispatch(AvatarCreate),
       if model.player is Some(_) {
-        "✨ 保存形象"
+        "保存形象"
       } else {
-        "✨ 正式入住"
+        "正式入住"
       },
     )
   }
@@ -263,7 +263,7 @@ fn render_player_chip(dispatch : Dispatch[Msg], model : Model) -> @rabbita.Html 
           div(class="player-chip-name", player.name),
           div(
             class="player-chip-title",
-            "\{avatar_persona_label(player.persona)} · \{player.title} · ✨\{model.spark}",
+            "\{avatar_persona_label(player.persona)} · \{player.title} · 谷光 \{model.spark}",
           ),
         ]),
         if !onboarding || progress == 1 {
@@ -274,7 +274,7 @@ fn render_player_chip(dispatch : Dispatch[Msg], model : Model) -> @rabbita.Html 
             attrs=@html.Attrs::build()
               .aria_label("点地行走模式")
               .aria_pressed(if model.walk_mode { "true" } else { "false" }),
-            "🚶 行走",
+            "行走",
           )
         } else {
           @html.nothing
@@ -287,7 +287,7 @@ fn render_player_chip(dispatch : Dispatch[Msg], model : Model) -> @rabbita.Html 
             attrs=@html.Attrs::build()
               .aria_label("跟随角色")
               .aria_pressed(if model.player_follow { "true" } else { "false" }),
-            "🎥 跟随",
+            "跟随",
           )
         } else {
           @html.nothing
@@ -300,7 +300,7 @@ fn render_player_chip(dispatch : Dispatch[Msg], model : Model) -> @rabbita.Html 
               class="chip-button chip-button-checkin",
               title="每日签到领取谷光值",
               on_click=dispatch(DailyCheckin),
-              "🌅 签到",
+              "签到",
             )
           }
         } else {
@@ -312,7 +312,7 @@ fn render_player_chip(dispatch : Dispatch[Msg], model : Model) -> @rabbita.Html 
             title="重新编辑名字与形象",
             on_click=dispatch(AvatarOpenEditor),
             attrs=@html.Attrs::build().aria_label("编辑角色"),
-            "✏️",
+            "编辑",
           )
         } else {
           @html.nothing
@@ -389,12 +389,18 @@ fn render_quest_tracker(
     None =>
       div(class="quest-tracker pointer-events-auto quest-tracker-done", [
         div(class="quest-tracker-head", [
-          span(class="quest-tracker-badge", "🎓 毕业"),
-          span(class="quest-tracker-title", "新手任务全部完成！"),
+          span(class="quest-tracker-badge", "已完成"),
+          span(class="quest-tracker-title", "下一步：分享或收藏知识"),
         ]),
         div(
           class="quest-tracker-hint",
           "去广场为知识大楼生成分享链接，或者收藏可核验成果一起共建吧。",
+        ),
+        button(
+          class="quest-tracker-action quest-tracker-action-civic",
+          on_click=dispatch(ToggleSquare),
+          attrs=@html.Attrs::build().aria_label("打开小镇知识广场"),
+          "打开知识广场",
         ),
       ])
   }

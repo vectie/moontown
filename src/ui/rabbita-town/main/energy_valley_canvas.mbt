@@ -31,7 +31,23 @@ priv struct TownCanvasViewState {
 
 ///|
 extern "js" fn schedule_golden_valley_canvas(callback : () -> Unit) -> Unit =
-  #| (callback) => globalThis.requestAnimationFrame(() => callback())
+  #| callback => {
+  #|   if (typeof globalThis.requestAnimationFrame !== "function") return;
+  #|   let schedule = globalThis.__moontownGoldenValleyCanvasSchedule;
+  #|   if (!schedule) {
+  #|     schedule = { raf: 0, pending: null };
+  #|     globalThis.__moontownGoldenValleyCanvasSchedule = schedule;
+  #|   }
+  #|   schedule.pending = callback;
+  #|   if (schedule.raf) return;
+  #|   schedule.raf = globalThis.requestAnimationFrame(() => {
+  #|     if (globalThis.__moontownGoldenValleyCanvasSchedule !== schedule) return;
+  #|     schedule.raf = 0;
+  #|     const render = schedule.pending;
+  #|     schedule.pending = null;
+  #|     if (typeof render === "function") render();
+  #|   });
+  #| }
 
 ///|
 extern "js" fn install_golden_valley_canvas_input(
@@ -42,8 +58,26 @@ extern "js" fn install_golden_valley_canvas_input(
   #|   const canvas = globalThis.document?.getElementById("energy-valley-canvas");
   #|   if (!canvas || canvas.dataset.goldenInput === "1") return;
   #|   canvas.dataset.goldenInput = "1";
-  #|   globalThis.__moontownGoldenValleyCamera ||= { x: 1792, y: 3200, z: 0.1 };
+  #|   const viewportWidth = canvas.clientWidth || globalThis.innerWidth || 1280;
+  #|   const viewportHeight = canvas.clientHeight || globalThis.innerHeight || 720;
+  #|   const civicZoom = viewportWidth < 640
+  #|     ? 0.34
+  #|     : viewportWidth < 1100 || viewportHeight < 800 ? 0.42 : 0.5;
+  #|   globalThis.__moontownGoldenValleyCamera ||= {
+  #|     x: 1792, y: 3200, z: civicZoom,
+  #|   };
   #|   const camera = globalThis.__moontownGoldenValleyCamera;
+  #|   // Migrate only untouched historical overview presets. Deliberate pans
+  #|   // and zooms stay intact while new sessions open on seven civic heroes.
+  #|   const artVersion = globalThis.__moontownGoldenValleyCameraArtVersion ?? 0;
+  #|   const legacyOverview = camera.z <= 0.101 ||
+  #|     (artVersion === 2 && Math.abs(camera.z - 0.25) < 0.001);
+  #|   if (artVersion < 3 && legacyOverview &&
+  #|       Math.abs(camera.x - 1792) < 0.01 &&
+  #|       Math.abs(camera.y - 3200) < 0.01) {
+  #|     camera.z = civicZoom;
+  #|   }
+  #|   globalThis.__moontownGoldenValleyCameraArtVersion = 3;
   #|   let cameraDragging = false;
   #|   let painting = false;
   #|   let moved = false;
@@ -242,7 +276,13 @@ extern "js" fn golden_valley_camera_y() -> Double =
 
 ///|
 extern "js" fn golden_valley_camera_zoom() -> Double =
-  #| () => globalThis.__moontownGoldenValleyCamera?.z ?? 0.1
+  #| () => globalThis.__moontownGoldenValleyCamera?.z ?? (
+  #|   globalThis.innerWidth < 640
+  #|     ? 0.34
+  #|     : globalThis.innerWidth < 1100 || globalThis.innerHeight < 800
+  #|       ? 0.42
+  #|       : 0.5
+  #| )
 
 ///|
 extern "js" fn golden_focus_building_camera(
@@ -250,7 +290,14 @@ extern "js" fn golden_focus_building_camera(
   world_y : Double,
 ) -> Unit =
   #| (worldX, worldY) => {
-  #|   globalThis.__moontownGoldenValleyCamera ||= { x: 1792, y: 3200, z: 0.1 };
+  #|   const civicZoom = globalThis.innerWidth < 640
+  #|     ? 0.34
+  #|     : globalThis.innerWidth < 1100 || globalThis.innerHeight < 800
+  #|       ? 0.42
+  #|       : 0.5;
+  #|   globalThis.__moontownGoldenValleyCamera ||= {
+  #|     x: 1792, y: 3200, z: civicZoom,
+  #|   };
   #|   const camera = globalThis.__moontownGoldenValleyCamera;
   #|   camera.x = (worldX - worldY) * 32;
   #|   camera.y = (worldX + worldY) * 16;
@@ -352,41 +399,26 @@ extern "js" fn golden_draw_water_detail(
   #|   const gradient = context.createLinearGradient(
   #|     sx, sy - 16 * zoom, sx, sy + 16 * zoom,
   #|   );
-  #|   gradient.addColorStop(0, "#2e7f9e");
-  #|   gradient.addColorStop(1, "#1f5f7e");
+  #|   // Clear civic blue: two calm values keep the waterfront legible
+  #|   // without turning every water tile into a textured effect.
+  #|   gradient.addColorStop(0, "#35a8ce");
+  #|   gradient.addColorStop(1, "#238caf");
   #|   context.fillStyle = gradient;
   #|   context.fill();
+  #|   if (zoom < 0.24) return;
   #|   context.save();
   #|   context.clip();
-  #|   for (let index = 0; index < 2; index += 1) {
-  #|     const progress = (
-  #|       time * 0.35 + phase * 0.13 + index * 0.5
-  #|     ) % 1;
-  #|     const offset = (progress - 0.5) * 64 * zoom;
-  #|     context.strokeStyle = `rgba(180,230,245,${0.35 - index * 0.12})`;
-  #|     context.lineWidth = 2 * zoom;
-  #|     context.beginPath();
-  #|     context.moveTo(
-  #|       sx - 32 * zoom * 0.6 + offset * 0.3,
-  #|       sy + offset * 0.55,
-  #|     );
-  #|     context.quadraticCurveTo(
-  #|       sx + Math.sin(time * 2 + phase) * 4 * zoom,
-  #|       sy + offset * 0.55 + 3 * zoom,
-  #|       sx + 32 * zoom * 0.6 + offset * 0.3,
-  #|       sy + offset * 0.55,
-  #|     );
-  #|     context.stroke();
-  #|   }
-  #|   const sparkle = (Math.sin(time * 3 + phase * 5) + 1) / 2;
-  #|   context.fillStyle = `rgba(255,255,255,${0.12 + sparkle * 0.25})`;
+  #|   const progress = (time * 0.16 + phase * 0.11) % 1;
+  #|   const offset = (progress - 0.5) * 42 * zoom;
+  #|   context.strokeStyle = "rgba(226,248,252,0.46)";
+  #|   context.lineWidth = Math.max(0.8, 1.25 * zoom);
   #|   context.beginPath();
-  #|   context.ellipse(
-  #|     sx + Math.sin(phase * 9) * 10 * zoom,
-  #|     sy + Math.cos(phase * 7) * 5 * zoom,
-  #|     2.2 * zoom, 1.1 * zoom, 0, 0, Math.PI * 2,
+  #|   context.moveTo(sx - 17 * zoom + offset * 0.2, sy + offset * 0.32);
+  #|   context.quadraticCurveTo(
+  #|     sx, sy + offset * 0.32 + 1.5 * zoom,
+  #|     sx + 17 * zoom + offset * 0.2, sy + offset * 0.32,
   #|   );
-  #|   context.fill();
+  #|   context.stroke();
   #|   context.restore();
   #| }
 
@@ -433,33 +465,34 @@ extern "js" fn golden_draw_road_detail(
   #|   context.save();
   #|   context.lineCap = "round";
   #|   context.lineJoin = "round";
-  #|   // Arterials retain a wider pale kerb and stronger asphalt body while
-  #|   // local streets recede. The hierarchy survives the whole-map zoom.
-  #|   context.strokeStyle = major
-  #|     ? "rgba(238,230,207,0.82)"
-  #|     : "rgba(224,220,207,0.48)";
+  #|   // Warm-white kerbs and blue-grey asphalt form a quiet hierarchy.
+  #|   // Markings appear progressively so the overview remains a composition,
+  #|   // not a mesh of tiny lines.
+  #|   context.strokeStyle = major ? "#f5f2e9" : "#e7e5dd";
   #|   context.lineWidth = Math.max(
-  #|     major ? 5.1 : 3.0,
-  #|     (major ? 24 : 13) * zoom,
+  #|     major ? 4.8 : 2.8,
+  #|     (major ? 21 : 11.5) * zoom,
   #|   );
   #|   context.setLineDash([]);
   #|   traceRoad();
   #|   context.stroke();
-  #|   context.strokeStyle = major ? "#363d45" : "#525960";
+  #|   context.strokeStyle = major ? "#62717d" : "#7a858d";
   #|   context.lineWidth = Math.max(
-  #|     major ? 3.9 : 2.25,
-  #|     (major ? 18 : 9.5) * zoom,
+  #|     major ? 3.6 : 2.0,
+  #|     (major ? 16.5 : 8.2) * zoom,
   #|   );
   #|   traceRoad();
   #|   context.stroke();
-  #|   context.strokeStyle = major ? "#f4cf54" : "rgba(248,250,252,0.82)";
-  #|   context.lineWidth = Math.max(0.72, (major ? 1.55 : 1.05) * zoom);
-  #|   context.setLineDash(zoom >= 0.45 ? [
-  #|     Math.max(2.5, 5 * zoom),
-  #|     Math.max(2, 4 * zoom),
-  #|   ] : []);
-  #|   traceRoad();
-  #|   context.stroke();
+  #|   if ((major && zoom >= 0.28) || (!major && zoom >= 0.62)) {
+  #|     context.strokeStyle = "rgba(245,242,233,0.9)";
+  #|     context.lineWidth = Math.max(0.7, (major ? 1.35 : 0.9) * zoom);
+  #|     context.setLineDash([
+  #|       Math.max(3, 6 * zoom),
+  #|       Math.max(2.5, 5 * zoom),
+  #|     ]);
+  #|     traceRoad();
+  #|     context.stroke();
+  #|   }
   #|   context.restore();
   #| }
 
@@ -478,29 +511,21 @@ extern "js" fn golden_draw_bridge_detail(
   #|   context.lineTo(sx, sy - 3 * zoom + 16 * zoom * 0.86);
   #|   context.lineTo(sx - 32 * zoom * 0.86, sy - 3 * zoom);
   #|   context.closePath();
-  #|   const gradient = context.createLinearGradient(
-  #|     sx, sy - 16 * zoom, sx, sy + 16 * zoom,
-  #|   );
-  #|   gradient.addColorStop(0, "#b08954");
-  #|   gradient.addColorStop(1, "#8a6a40");
-  #|   context.fillStyle = gradient;
+  #|   context.fillStyle = "#d4d3cc";
   #|   context.fill();
-  #|   context.strokeStyle = "rgba(60,40,20,0.5)";
-  #|   context.lineWidth = 1;
+  #|   context.strokeStyle = "#405866";
+  #|   context.lineWidth = Math.max(0.8, 1.15 * zoom);
   #|   context.stroke();
-  #|   context.strokeStyle = "rgba(60,40,20,0.35)";
-  #|   for (let index = -1; index <= 1; index += 1) {
+  #|   if (zoom >= 0.48) {
+  #|     context.strokeStyle = "rgba(245,242,233,0.8)";
+  #|     context.lineWidth = Math.max(0.7, zoom);
   #|     context.beginPath();
-  #|     context.moveTo(
-  #|       sx - 32 * zoom * 0.7, sy - 3 * zoom + index * 5 * zoom,
-  #|     );
-  #|     context.lineTo(
-  #|       sx + 32 * zoom * 0.7, sy - 3 * zoom + index * 5 * zoom,
-  #|     );
+  #|     context.moveTo(sx - 18 * zoom, sy - 3 * zoom);
+  #|     context.lineTo(sx + 18 * zoom, sy - 3 * zoom);
   #|     context.stroke();
   #|   }
-  #|   context.strokeStyle = "#5e4630";
-  #|   context.lineWidth = 2 * zoom;
+  #|   context.strokeStyle = "#20a9d0";
+  #|   context.lineWidth = Math.max(0.9, 1.65 * zoom);
   #|   context.beginPath();
   #|   context.moveTo(sx - 32 * zoom * 0.8, sy - 9.72 * zoom);
   #|   context.lineTo(sx + 32 * zoom * 0.8, sy - 9.72 * zoom);
@@ -538,65 +563,52 @@ extern "js" fn golden_draw_ground_detail(
   #|     context.closePath();
   #|   };
   #|   if (terrain === "grass") {
-  #|     // Two-tone diagonal gradient: light from the upper-left so the lawn
-  #|     // reads as softly lit ground instead of a flat green carpet.
-  #|     const grassBase = shade("#5da25f", 1 + variation * 0.09);
-  #|     const gradient = context.createLinearGradient(
-  #|       sx, sy - 16 * zoom,
-  #|       sx, sy + 16 * zoom,
-  #|     );
-  #|     gradient.addColorStop(0, shade("#6db36b", 1 + variation * 0.1));
-  #|     gradient.addColorStop(0.55, grassBase);
-  #|     gradient.addColorStop(1, shade("#4f8f52", 1 + variation * 0.08));
-  #|     context.fillStyle = gradient;
+  #|     // Broad matte color fields make the green spine read at a glance.
+  #|     context.fillStyle = shade("#91c467", 0.96 + variation * 0.06);
   #|     context.fill();
   #|     return;
   #|   }
   #|   if (terrain === "meadow") {
-  #|     context.fillStyle = shade("#78b85c", 0.96 + variation * 0.12);
+  #|     context.fillStyle = shade("#9dcc76", 0.96 + variation * 0.05);
   #|     context.fill();
-  #|     context.fillStyle = variation > 0.55
-  #|       ? "rgba(255,220,105,0.52)"
-  #|       : "rgba(255,164,190,0.48)";
-  #|     for (let index = 0; index < 2; index += 1) {
-  #|       const px = sx + (
-  #|         (variation * 19 + index * 13) % (32 * zoom * 0.8)
-  #|       ) - 32 * zoom * 0.4;
-  #|       const py = sy + (
-  #|         (variation * 31 + index * 9) % (16 * zoom * 0.9)
-  #|       ) - 16 * zoom * 0.45;
+  #|     if (zoom >= 0.55 && phase % 7 === 0) {
+  #|       context.fillStyle = variation > 0.55 ? "#e5b840" : "#efb6bf";
+  #|       for (let index = 0; index < 3; index += 1) {
+  #|         const px = sx + (index - 1) * 3.2 * zoom;
+  #|         const py = sy + ((index % 2) * 2 - 1) * 1.5 * zoom;
   #|       context.beginPath();
-  #|       context.arc(px, py, Math.max(0.8, 1.2 * zoom), 0, Math.PI * 2);
+  #|         context.arc(px, py, Math.max(0.65, 1.0 * zoom), 0, Math.PI * 2);
   #|       context.fill();
+  #|       }
   #|     }
   #|     return;
   #|   }
   #|   if (terrain === "field") {
-  #|     context.fillStyle = shade("#a8bd48", 0.92 + variation * 0.12);
+  #|     context.fillStyle = shade("#b5ca68", 0.95 + variation * 0.05);
   #|     context.fill();
-  #|     context.save();
-  #|     diamond();
-  #|     context.clip();
-  #|     context.strokeStyle = phase % 2 === 0
-  #|       ? "rgba(236,219,91,0.45)"
-  #|       : "rgba(100,128,42,0.38)";
-  #|     context.lineWidth = Math.max(1, 1.4 * zoom);
-  #|     for (let row = -2; row <= 2; row += 1) {
-  #|       context.beginPath();
-  #|       context.moveTo(sx - 32 * zoom, sy + row * 5 * zoom);
-  #|       context.lineTo(sx + 32 * zoom, sy + row * 5 * zoom);
-  #|       context.stroke();
+  #|     if (zoom >= 0.45) {
+  #|       context.save();
+  #|       diamond();
+  #|       context.clip();
+  #|       context.strokeStyle = "rgba(71,118,75,0.34)";
+  #|       context.lineWidth = Math.max(0.8, 1.1 * zoom);
+  #|       for (let row = -1; row <= 1; row += 1) {
+  #|         context.beginPath();
+  #|         context.moveTo(sx - 32 * zoom, sy + row * 6 * zoom);
+  #|         context.lineTo(sx + 32 * zoom, sy + row * 6 * zoom);
+  #|         context.stroke();
+  #|       }
+  #|       context.restore();
   #|     }
-  #|     context.restore();
   #|     return;
   #|   }
   #|   if (terrain === "wetland") {
-  #|     context.fillStyle = shade("#70a957", 0.9 + variation * 0.12);
+  #|     context.fillStyle = shade("#79b768", 0.95 + variation * 0.05);
   #|     context.fill();
   #|     context.save();
   #|     diamond();
   #|     context.clip();
-  #|     context.fillStyle = "rgba(37,126,133,0.36)";
+  #|     context.fillStyle = "rgba(39,152,194,0.48)";
   #|     context.beginPath();
   #|     context.ellipse(
   #|       sx + (variation - 0.5) * 16 * zoom,
@@ -604,46 +616,42 @@ extern "js" fn golden_draw_ground_detail(
   #|       12 * zoom, 3.2 * zoom, 0, 0, Math.PI * 2,
   #|     );
   #|     context.fill();
-  #|     context.strokeStyle = "rgba(48,94,44,0.5)";
-  #|     context.lineWidth = Math.max(1, zoom);
-  #|     for (let reed = -1; reed <= 1; reed += 1) {
-  #|       const rx = sx + (reed * 8 + variation * 4) * zoom;
-  #|       context.beginPath();
-  #|       context.moveTo(rx, sy + 4 * zoom);
-  #|       context.lineTo(rx + 1.5 * zoom, sy - 3 * zoom);
-  #|       context.stroke();
+  #|     if (zoom >= 0.55) {
+  #|       context.strokeStyle = "rgba(71,118,75,0.72)";
+  #|       context.lineWidth = Math.max(0.8, zoom);
+  #|       for (let reed = -1; reed <= 1; reed += 1) {
+  #|         const rx = sx + (reed * 6 + variation * 3) * zoom;
+  #|         context.beginPath();
+  #|         context.moveTo(rx, sy + 3 * zoom);
+  #|         context.lineTo(rx + 1.2 * zoom, sy - 2.5 * zoom);
+  #|         context.stroke();
+  #|       }
   #|     }
   #|     context.restore();
   #|     return;
   #|   }
   #|   if (terrain === "forest") {
-  #|     context.fillStyle = shade("#3f7f48", 0.98 + variation * 0.08);
+  #|     context.fillStyle = shade("#47764b", 0.97 + variation * 0.05);
   #|     context.fill();
   #|     return;
   #|   }
   #|   if (terrain === "urban") {
-  #|     context.fillStyle = civicUrban ? "#aeb6ad" : "#a9b19f";
+  #|     context.fillStyle = civicUrban ? "#e1ded4" : "#d4d3cc";
   #|     context.fill();
-  #|     context.strokeStyle = "rgba(255,255,255,0.12)";
-  #|     context.lineWidth = 1;
-  #|     context.stroke();
   #|     return;
   #|   }
   #|   if (terrain === "plaza") {
-  #|     context.fillStyle = "#c9c2b2";
+  #|     context.fillStyle = "#ede5d4";
   #|     context.fill();
-  #|     context.strokeStyle = "rgba(0,0,0,0.08)";
-  #|     context.lineWidth = 1;
-  #|     context.stroke();
-  #|     if (zoom >= 0.2) {
+  #|     if (zoom >= 0.62) {
   #|       // Fine paving joins adjacent campus tiles without replacing their
   #|       // authored footprint. It appears only at neighborhood zoom.
   #|       context.save();
   #|       diamond();
   #|       context.clip();
-  #|       context.strokeStyle = "rgba(255,250,235,0.22)";
+  #|       context.strokeStyle = "rgba(91,111,120,0.16)";
   #|       context.lineWidth = Math.max(0.6, zoom);
-  #|       for (let offset = -24; offset <= 24; offset += 8) {
+  #|       for (let offset = -16; offset <= 16; offset += 16) {
   #|         context.beginPath();
   #|         context.moveTo(sx - 34 * zoom, sy + offset * zoom);
   #|         context.lineTo(sx + 34 * zoom, sy + offset * zoom);
@@ -668,13 +676,12 @@ extern "js" fn golden_draw_background(
   #|     : Math.sin(progress * Math.PI);
   #|   const gradient = context.createLinearGradient(0, 0, 0, height);
   #|   if (daylight > 0.5) {
-  #|     // Warmer midday palette: friendlier "town" feel vs the old cold
-  #|     // control-room blue, while keeping the day/dusk/night cycle legible.
-  #|     gradient.addColorStop(0, "#a9d3ec");
-  #|     gradient.addColorStop(1, "#e9e3c4");
+  #|     // Clear late-morning spring light; the map colors carry the scene.
+  #|     gradient.addColorStop(0, "#8fd4eb");
+  #|     gradient.addColorStop(1, "#d9eef0");
   #|   } else if (daylight > 0.15) {
-  #|     gradient.addColorStop(0, "#8d97c5");
-  #|     gradient.addColorStop(1, "#d9bd9a");
+  #|     gradient.addColorStop(0, "#91b9d2");
+  #|     gradient.addColorStop(1, "#d9d9cf");
   #|   } else {
   #|     gradient.addColorStop(0, "#0b1026");
   #|     gradient.addColorStop(1, "#182238");
@@ -696,13 +703,13 @@ extern "js" fn golden_draw_day_night(
   #|     ? 0
   #|     : Math.sin(progress * Math.PI);
   #|   if (daylight > 0 && daylight < 0.45) {
-  #|     context.fillStyle = `rgba(255,140,60,${0.14 * (
+  #|     context.fillStyle = `rgba(229,184,64,${0.08 * (
   #|       1 - daylight / 0.45
   #|     )})`;
   #|     context.fillRect(0, 0, width, height);
   #|   }
   #|   if (daylight < 0.5) {
-  #|     context.fillStyle = `rgba(8,14,40,${0.42 * (
+  #|     context.fillStyle = `rgba(13,31,46,${0.3 * (
   #|       1 - daylight / 0.5
   #|     )})`;
   #|     context.fillRect(0, 0, width, height);
@@ -714,7 +721,7 @@ extern "js" fn golden_draw_day_night(
   #|     width / 2, height / 2, edge,
   #|   );
   #|   vignette.addColorStop(0, "rgba(0,0,0,0)");
-  #|   vignette.addColorStop(1, "rgba(0,0,0,0.28)");
+  #|   vignette.addColorStop(1, "rgba(24,48,59,0.12)");
   #|   context.fillStyle = vignette;
   #|   context.fillRect(0, 0, width, height);
   #| }
@@ -737,6 +744,7 @@ extern "js" fn golden_draw_iso_windows(
   #|   columns, rows, litFraction,
   #| ) => {
   #|   const scaledHeight = height * zoom / 0.95;
+  #|   if (zoom < 0.34) return;
   #|   const halfWidth = 16 * zoom;
   #|   const halfHeight = 8 * zoom;
   #|   const topY = sy - scaledHeight;
@@ -784,17 +792,14 @@ extern "js" fn golden_draw_iso_windows(
   #|         ];
   #|         const value = hash(`${salt}-${row}-${column}`);
   #|         const lit = value < litFraction;
-  #|         // Day-time windows read as recessed glass: a darker pane with a
-  #|         // brighter sky reflection band so the grid is clearly visible.
+  #|         // A small, repeated glass rhythm replaces dense facade grids.
   #|         context.fillStyle = lit
-  #|           ? value < litFraction * 0.48
-  #|             ? "rgba(255,218,132,0.98)"
-  #|             : value < litFraction * 0.82
-  #|               ? "rgba(255,186,91,0.96)"
-  #|               : "rgba(255,231,178,0.94)"
-  #|           : value > 0.8
-  #|             ? "rgba(20,32,48,0.72)"
-  #|             : "rgba(74,108,138,0.62)";
+  #|           ? value < litFraction * 0.7
+  #|             ? "#e5b840"
+  #|             : "#f2d88a"
+  #|           : value > 0.84
+  #|             ? "#6aa6ba"
+  #|             : "#83bed0";
   #|         context.beginPath();
   #|         context.moveTo(points[0].x, points[0].y);
   #|         for (let index = 1; index < points.length; index += 1) {
@@ -802,22 +807,16 @@ extern "js" fn golden_draw_iso_windows(
   #|         }
   #|         context.closePath();
   #|         context.fill();
+  #|         context.strokeStyle = "rgba(50,78,91,0.46)";
+  #|         context.lineWidth = Math.max(0.55, 0.7 * zoom);
+  #|         context.stroke();
   #|         if (!lit) {
-  #|           // Glass reflection: a bright sliver along the top edge.
-  #|           context.fillStyle = "rgba(210,230,245,0.5)";
+  #|           context.strokeStyle = "rgba(230,248,250,0.58)";
+  #|           context.lineWidth = Math.max(0.45, 0.55 * zoom);
   #|           context.beginPath();
   #|           context.moveTo(points[0].x, points[0].y);
   #|           context.lineTo(points[1].x, points[1].y);
-  #|           context.lineTo(
-  #|             points[1].x + (points[2].x - points[1].x) * 0.3,
-  #|             points[1].y + (points[2].y - points[1].y) * 0.3,
-  #|           );
-  #|           context.lineTo(
-  #|             points[0].x + (points[3].x - points[0].x) * 0.3,
-  #|             points[0].y + (points[3].y - points[0].y) * 0.3,
-  #|           );
-  #|           context.closePath();
-  #|           context.fill();
+  #|           context.stroke();
   #|         }
   #|       }
   #|     }
@@ -852,25 +851,24 @@ extern "js" fn golden_draw_reference_building_shadow(
   zoom : Double,
 ) -> Unit =
   #| (context, sx, sy, width, depth, zoom) => {
-  #|   // Soft directional cast: light comes from the upper-left, so the shadow
-  #|   // falls toward the lower-right. A tight contact shadow anchors the base
-  #|   // and a blurred offset shadow gives it a soft, grounded look.
+  #|   // Late-morning light comes from the upper-left. Keep one restrained
+  #|   // directional cast plus a crisp contact shadow.
   #|   const rx = width * 32 * zoom * 0.82;
   #|   const ry = depth * 16 * zoom * 0.82;
   #|   context.save();
   #|   // Directional soft shadow, offset away from the light.
-  #|   context.fillStyle = "rgba(0,0,0,0.18)";
-  #|   context.filter = `blur(${Math.max(2, 6 * zoom)}px)`;
+  #|   context.fillStyle = "rgba(45,70,78,0.14)";
+  #|   context.filter = `blur(${Math.max(1.5, 3.5 * zoom)}px)`;
   #|   context.beginPath();
   #|   context.ellipse(
-  #|     sx + 12 * zoom, sy + 9 * zoom,
+  #|     sx + 10 * zoom, sy + 7 * zoom,
   #|     rx, ry,
   #|     0, 0, Math.PI * 2,
   #|   );
   #|   context.fill();
   #|   context.restore();
   #|   // Tight contact shadow right under the footprint.
-  #|   context.fillStyle = "rgba(0,0,0,0.24)";
+  #|   context.fillStyle = "rgba(39,61,70,0.18)";
   #|   context.beginPath();
   #|   context.ellipse(
   #|     sx + 3 * zoom, sy + 2 * zoom,
@@ -884,6 +882,7 @@ extern "js" fn golden_draw_reference_building_shadow(
 extern "js" fn golden_draw_reference_building_details(
   context : @dom.CanvasRenderingContext2D,
   style : String,
+  name : String,
   world_x : Double,
   world_y : Double,
   width : Double,
@@ -894,9 +893,17 @@ extern "js" fn golden_draw_reference_building_details(
   time : Double,
   selected : Bool,
 ) -> Unit =
-  #| (context, style, tx, ty, width, depth, height0, vw, vh, time, selected) => {
+  #| (
+  #|   context, style, name, tx, ty, width, depth, height0,
+  #|   vw, vh, time, selected,
+  #| ) => {
+  #|   const civicZoom = globalThis.innerWidth < 640
+  #|     ? 0.34
+  #|     : globalThis.innerWidth < 1100 || globalThis.innerHeight < 800
+  #|       ? 0.42
+  #|       : 0.5;
   #|   const camera = globalThis.__moontownGoldenValleyCamera ??
-  #|     { x: -64, y: 832, z: 0.95 };
+  #|     { x: 1792, y: 3200, z: civicZoom };
   #|   const z = camera.z;
   #|   const height = height0 * z / 0.95;
   #|   const toScreen = (x, y) => ({
@@ -932,23 +939,21 @@ extern "js" fn golden_draw_reference_building_details(
   #|     context.closePath();
   #|     context.fill();
   #|   };
-  #|   const flag = (x, y, color) => {
-  #|     context.strokeStyle = "#e8e8e8";
-  #|     context.lineWidth = 1.5 * z;
+  #|   const outline = (points, color = "#405866") => {
+  #|     context.strokeStyle = color;
+  #|     context.lineWidth = Math.max(0.7, 1.15 * z);
+  #|     context.lineJoin = "round";
   #|     context.beginPath();
-  #|     context.moveTo(x, y);
-  #|     context.lineTo(x, y - 14 * z);
+  #|     context.moveTo(points[0].x, points[0].y);
+  #|     for (let i = 1; i < points.length; i += 1) {
+  #|       context.lineTo(points[i].x, points[i].y);
+  #|     }
+  #|     context.closePath();
   #|     context.stroke();
-  #|     const wave = Math.sin(time * 5) * 2 * z;
-  #|     polygon([
-  #|       { x, y: y - 14 * z },
-  #|       { x: x + 10 * z, y: y - 12 * z + wave },
-  #|       { x, y: y - 8 * z },
-  #|     ], color);
   #|   };
   #|   const center = toScreen(tx + width / 2, ty + depth / 2);
   #|   if (style === "market") {
-  #|     const colors = ["#d4553a", "#e8a83a", "#3a8ad4", "#50b06a"];
+  #|     const colors = ["#f5f2e9", "#91c467", "#ede5d4", "#b8895b"];
   #|     let index = 0;
   #|     for (let column = 0; column < 2; column += 1) {
   #|       for (let row = 0; row < 2; row += 1) {
@@ -959,13 +964,12 @@ extern "js" fn golden_draw_reference_building_details(
   #|           ty + row * depth / 2 + 0.08,
   #|           stallWidth, stallDepth, 6.65,
   #|         );
-  #|         context.globalAlpha = 0.85;
   #|         polygon([roof.N, roof.E, roof.S, roof.W], colors[index]);
-  #|         context.globalAlpha = 1;
+  #|         outline([roof.N, roof.E, roof.S, roof.W]);
   #|         const start = lerp(roof.N, roof.W, 0.5);
   #|         const end = lerp(roof.E, roof.S, 0.5);
-  #|         context.strokeStyle = "rgba(255,255,255,0.5)";
-  #|         context.lineWidth = 1.5 * z;
+  #|         context.strokeStyle = "rgba(64,88,102,0.46)";
+  #|         context.lineWidth = Math.max(0.6, z);
   #|         context.beginPath();
   #|         context.moveTo(start.x, start.y);
   #|         context.lineTo(end.x, end.y);
@@ -974,149 +978,133 @@ extern "js" fn golden_draw_reference_building_details(
   #|       }
   #|     }
   #|   }
-  #|   if (style === "hall") {
-  #|     const roof = top(tx, ty, width, depth, height0);
-  #|     const peak = {
-  #|       x: roof.center.x,
-  #|       y: roof.center.y - 10 * z,
-  #|     };
-  #|     polygon([roof.W, roof.S, peak], "#8a4f3a");
-  #|     context.strokeStyle = "rgba(250,246,235,0.9)";
-  #|     context.lineWidth = 2.2 * z;
-  #|     for (let i = 1; i <= 3; i += 1) {
-  #|       const base = lerp(roof.W, roof.S, i / 4);
+  #|   if (style === "hall" || style === "custom-hall") {
+  #|     const landmark = name.includes("市政") || name.includes("知识") ||
+  #|       name.toLowerCase().includes("moonbook");
+  #|     const roof = top(tx, ty, width, depth, height0 + (landmark ? 3.2 : 1));
+  #|     if (landmark) {
+  #|       // Two lifted page planes and one recessed spine make the civic
+  #|       // landmark read as an open MoonBook from the isometric camera.
+  #|       const spineN = { x: roof.N.x, y: roof.N.y + 2.2 * z };
+  #|       const spineS = { x: roof.S.x, y: roof.S.y + 2.2 * z };
+  #|       const outerW = { x: roof.W.x, y: roof.W.y - 4.2 * z };
+  #|       const outerE = { x: roof.E.x, y: roof.E.y - 4.2 * z };
+  #|       const leftPage = [spineN, outerW, spineS];
+  #|       const rightPage = [spineN, outerE, spineS];
+  #|       polygon(leftPage, "#f5f2e9");
+  #|       polygon(rightPage, "#ede5d4");
+  #|       outline(leftPage);
+  #|       outline(rightPage);
+  #|       context.strokeStyle = "#20a9d0";
+  #|       context.lineWidth = Math.max(0.8, 1.7 * z);
   #|       context.beginPath();
-  #|       context.moveTo(base.x, base.y);
-  #|       context.lineTo(base.x, base.y + 8 * z);
+  #|       context.moveTo(spineN.x, spineN.y);
+  #|       context.lineTo(spineS.x, spineS.y);
   #|       context.stroke();
+  #|     } else {
+  #|       const inset = [roof.N, roof.E, roof.S, roof.W].map(point =>
+  #|         lerp(point, roof.center, 0.28));
+  #|       const maker = name.includes("众创") || name.includes("工坊") ||
+  #|         name.toLowerCase().includes("maker");
+  #|       const accent = maker
+  #|         ? "#b8895b"
+  #|         : name.includes("政策") ? "#b96f52" : "#83bed0";
+  #|       polygon(inset, accent);
+  #|       outline(inset);
   #|     }
-  #|     flag(peak.x, peak.y, "#d4553a");
   #|   } else if (style === "home" || style === "custom-home") {
   #|     const first = top(tx, ty, width / 2, depth, height0 * 0.85);
   #|     const second = top(
   #|       tx + width / 2, ty + 0.3, width / 2, depth - 0.3, height0,
   #|     );
   #|     for (const roof of [first, second]) {
-  #|       polygon([roof.N, roof.W, {
-  #|         x: roof.S.x, y: roof.S.y - 6 * z,
-  #|       }], "#7a5240");
-  #|       polygon([roof.N, roof.E, {
-  #|         x: roof.S.x, y: roof.S.y - 6 * z,
-  #|       }], "#8a6248");
+  #|       const terrace = [roof.N, roof.E, roof.S, roof.W].map(point =>
+  #|         lerp(point, roof.center, 0.3));
+  #|       polygon(terrace, "#6fa653");
+  #|       outline(terrace, "#47764b");
+  #|       context.strokeStyle = "#b8895b";
+  #|       context.lineWidth = Math.max(0.8, 1.5 * z);
+  #|       context.beginPath();
+  #|       context.moveTo(roof.W.x, roof.W.y);
+  #|       context.lineTo(roof.S.x, roof.S.y);
+  #|       context.stroke();
   #|     }
   #|   } else if (style === "garden") {
-  #|     const domeHeight = 20 * z;
-  #|     const gradient = context.createLinearGradient(
-  #|       center.x, center.y - domeHeight, center.x, center.y,
-  #|     );
-  #|     gradient.addColorStop(0, "rgba(210,240,250,0.85)");
-  #|     gradient.addColorStop(1, "rgba(150,200,220,0.45)");
-  #|     context.fillStyle = gradient;
-  #|     context.beginPath();
-  #|     context.ellipse(
-  #|       center.x, center.y - 5 * z, 16 * z, domeHeight * 0.8,
-  #|       0, Math.PI, 0,
-  #|     );
-  #|     context.fill();
-  #|     context.strokeStyle = "rgba(255,255,255,0.6)";
-  #|     context.lineWidth = z;
-  #|     for (let i = -2; i <= 2; i += 1) {
-  #|       context.beginPath();
-  #|       context.ellipse(
-  #|         center.x + i * 6 * z, center.y - 5 * z,
-  #|         3 * z, domeHeight * 0.75, 0, Math.PI, 0,
-  #|       );
-  #|       context.stroke();
+  #|     const canopy = top(tx + 0.35, ty + 0.35, width - 0.7, depth - 0.7, 13);
+  #|     const canopyPoints = [canopy.N, canopy.E, canopy.S, canopy.W];
+  #|     context.globalAlpha = 0.82;
+  #|     polygon(canopyPoints, "#b9e2e5");
+  #|     context.globalAlpha = 1;
+  #|     outline(canopyPoints);
+  #|     const planter = canopyPoints.map(point =>
+  #|       lerp(point, canopy.center, 0.38));
+  #|     polygon(planter, "#6fa653");
+  #|     outline(planter, "#47764b");
+  #|     if (z >= 0.5) {
+  #|       context.strokeStyle = "rgba(64,88,102,0.58)";
+  #|       context.lineWidth = Math.max(0.55, 0.8 * z);
+  #|       for (const fraction of [0.33, 0.66]) {
+  #|         const a = lerp(canopy.N, canopy.W, fraction);
+  #|         const b = lerp(canopy.E, canopy.S, fraction);
+  #|         context.beginPath();
+  #|         context.moveTo(a.x, a.y);
+  #|         context.lineTo(b.x, b.y);
+  #|         context.stroke();
+  #|       }
   #|     }
   #|   } else if (style === "plaza") {
-  #|     context.strokeStyle = "rgba(250,246,235,0.95)";
-  #|     context.lineWidth = 2 * z;
-  #|     const corners = [
-  #|       toScreen(tx + 0.3, ty + 0.3),
-  #|       toScreen(tx + width - 0.3, ty + 0.3),
-  #|       toScreen(tx + width - 0.3, ty + depth - 0.3),
-  #|       toScreen(tx + 0.3, ty + depth - 0.3),
-  #|     ];
-  #|     for (const point of corners) {
-  #|       context.beginPath();
-  #|       context.moveTo(point.x, point.y - 4 * z);
-  #|       context.lineTo(point.x, point.y - 14 * z);
-  #|       context.stroke();
-  #|     }
   #|     const fx = center.x;
   #|     const fy = center.y - 4 * z;
-  #|     context.fillStyle = "#b8b0a0";
+  #|     context.fillStyle = "#d4d3cc";
   #|     context.beginPath();
   #|     context.ellipse(fx, fy, 11 * z, 5.5 * z, 0, 0, Math.PI * 2);
   #|     context.fill();
-  #|     context.fillStyle = "#3f8ab8";
+  #|     context.strokeStyle = "#405866";
+  #|     context.lineWidth = Math.max(0.7, z);
+  #|     context.stroke();
+  #|     context.fillStyle = "#2798c2";
   #|     context.beginPath();
   #|     context.ellipse(fx, fy - z, 8.5 * z, 4 * z, 0, 0, Math.PI * 2);
   #|     context.fill();
-  #|     const jet = 6 * z + Math.sin(time * 3) * 2 * z;
-  #|     context.strokeStyle = "rgba(200,235,250,0.9)";
-  #|     context.lineWidth = 1.6 * z;
-  #|     for (let i = -1; i <= 1; i += 1) {
+  #|     if (z >= 0.42) {
+  #|       const jet = 5 * z + Math.sin(time * 2) * z;
+  #|       context.strokeStyle = "rgba(226,248,252,0.9)";
+  #|       context.lineWidth = Math.max(0.7, 1.2 * z);
   #|       context.beginPath();
-  #|       context.moveTo(fx + i * 2.5 * z, fy - z);
+  #|       context.moveTo(fx, fy - z);
   #|       context.quadraticCurveTo(
-  #|         fx + i * 5 * z, fy - jet - 3 * z,
-  #|         fx + i * 6.5 * z, fy - z,
+  #|         fx + 3 * z, fy - jet,
+  #|         fx + 5 * z, fy - z,
   #|       );
   #|       context.stroke();
   #|     }
-  #|     flag(center.x, center.y - 14 * z, "#3a8ad4");
   #|   } else if (style === "radar") {
   #|     const roof = top(tx, ty, width, depth, height0 * 0.6);
-  #|     context.strokeStyle = "#cfd8e0";
-  #|     context.lineWidth = 2 * z;
+  #|     const canopy = [roof.N, roof.E, roof.S, roof.W].map(point =>
+  #|       lerp(point, roof.center, 0.22));
+  #|     polygon(canopy, "#83bed0");
+  #|     outline(canopy);
+  #|     context.fillStyle = "#20a9d0";
   #|     context.beginPath();
-  #|     context.moveTo(roof.center.x, roof.center.y);
-  #|     context.lineTo(roof.center.x, roof.center.y - 22 * z);
-  #|     context.stroke();
-  #|     const angle = time * 1.4;
-  #|     context.strokeStyle = "#5ec8e8";
-  #|     context.lineWidth = 3 * z;
-  #|     context.beginPath();
-  #|     context.moveTo(
-  #|       roof.center.x - Math.cos(angle) * 12 * z,
-  #|       roof.center.y - 22 * z - Math.sin(angle) * 4 * z,
-  #|     );
-  #|     context.lineTo(
-  #|       roof.center.x + Math.cos(angle) * 12 * z,
-  #|       roof.center.y - 22 * z + Math.sin(angle) * 4 * z,
-  #|     );
-  #|     context.stroke();
-  #|     const wave = (time * 0.7 + 0.37) % 1;
-  #|     context.strokeStyle = `rgba(94,200,232,${0.5 * (1 - wave)})`;
-  #|     context.lineWidth = 1.5 * z;
-  #|     context.beginPath();
-  #|     context.ellipse(
-  #|       roof.center.x, roof.center.y - 22 * z,
-  #|       (10 + wave * 22) * z, (10 + wave * 22) * 0.35 * z,
-  #|       0, 0, Math.PI * 2,
-  #|     );
+  #|     context.arc(roof.center.x, roof.center.y, 4.2 * z, 0, Math.PI * 2);
+  #|     context.fill();
+  #|     context.strokeStyle = "#f5f2e9";
+  #|     context.lineWidth = Math.max(0.7, z);
   #|     context.stroke();
   #|   } else if (style === "tower" || style === "custom-tower") {
   #|     const roof = top(
   #|       tx + 0.3, ty, width - 0.3, 0.6, height0 + 7.6,
   #|     );
-  #|     context.fillStyle = "rgba(255,255,255,0.12)";
-  #|     polygon([roof.N, roof.E, roof.S, roof.W], context.fillStyle);
-  #|     context.strokeStyle = "#dfe8f0";
-  #|     context.lineWidth = 1.6 * z;
+  #|     const roofPoints = [roof.N, roof.E, roof.S, roof.W];
+  #|     polygon(roofPoints, "#6fa653");
+  #|     outline(roofPoints, "#47764b");
+  #|     context.strokeStyle = "#20a9d0";
+  #|     context.lineWidth = Math.max(0.8, 1.6 * z);
   #|     context.beginPath();
-  #|     context.moveTo(roof.center.x, roof.center.y);
-  #|     context.lineTo(roof.center.x, roof.center.y - 12 * z);
+  #|     context.moveTo(roof.W.x, roof.W.y);
+  #|     context.lineTo(roof.N.x, roof.N.y);
+  #|     context.lineTo(roof.E.x, roof.E.y);
   #|     context.stroke();
-  #|     const blink = (Math.sin(time * 2.5 + 3.7) + 1) / 2;
-  #|     context.fillStyle = `rgba(255,80,80,${0.4 + blink * 0.6})`;
-  #|     context.beginPath();
-  #|     context.arc(
-  #|       roof.center.x, roof.center.y - 12 * z, 2 * z,
-  #|       0, Math.PI * 2,
-  #|     );
-  #|     context.fill();
   #|   }
   #|   if (selected) {
   #|     const pulse = (Math.sin(time * 4) + 1) / 2;
@@ -1124,7 +1112,7 @@ extern "js" fn golden_draw_reference_building_details(
   #|     const E = toScreen(tx + width, ty);
   #|     const S = toScreen(tx + width, ty + depth);
   #|     const W = toScreen(tx, ty + depth);
-  #|     context.strokeStyle = `rgba(255,210,90,${0.6 + pulse * 0.4})`;
+  #|     context.strokeStyle = `rgba(229,184,64,${0.72 + pulse * 0.2})`;
   #|     context.lineWidth = 2.5 * z;
   #|     context.beginPath();
   #|     context.moveTo(N.x, N.y);
@@ -1133,15 +1121,10 @@ extern "js" fn golden_draw_reference_building_details(
   #|     context.lineTo(W.x, W.y);
   #|     context.closePath();
   #|     context.stroke();
-  #|     const gradient = context.createLinearGradient(
-  #|       center.x, center.y - 90 * z, center.x, center.y,
-  #|     );
-  #|     gradient.addColorStop(0, "rgba(255,210,90,0)");
-  #|     gradient.addColorStop(1, `rgba(255,210,90,${0.25 + pulse * 0.2})`);
-  #|     context.fillStyle = gradient;
-  #|     context.fillRect(
-  #|       center.x - 14 * z, center.y - 90 * z, 28 * z, 90 * z,
-  #|     );
+  #|     context.fillStyle = "#20a9d0";
+  #|     context.beginPath();
+  #|     context.arc(center.x, center.y - 9 * z, 3.2 * z, 0, Math.PI * 2);
+  #|     context.fill();
   #|   }
   #| }
 
@@ -1173,35 +1156,39 @@ extern "js" fn golden_draw_reference_tree(
   #|     const b = Math.min(255, Math.max(0, (n & 255) * factor));
   #|     return `rgb(${r | 0},${g | 0},${b | 0})`;
   #|   };
-  #|   const sway = Math.sin(time * 1.2 + seed * 20) * 1.5 * zoom;
+  #|   const sway = Math.sin(time * 0.7 + seed * 20) * 0.35 * zoom;
   #|   const height = (14 + seed * 10) * zoom;
-  #|   context.fillStyle = "rgba(0,0,0,0.18)";
+  #|   context.fillStyle = "rgba(45,70,78,0.14)";
   #|   context.beginPath();
   #|   context.ellipse(
   #|     sx + 3 * zoom, sy + zoom, 8 * zoom, 3.5 * zoom,
   #|     0, 0, Math.PI * 2,
   #|   );
   #|   context.fill();
-  #|   context.strokeStyle = "#6b4a2e";
-  #|   context.lineWidth = 2.4 * zoom;
+  #|   context.strokeStyle = "#8a6848";
+  #|   context.lineWidth = Math.max(0.9, 2.2 * zoom);
   #|   context.beginPath();
   #|   context.moveTo(sx, sy);
   #|   context.lineTo(sx + sway * 0.3, sy - height * 0.45);
   #|   context.stroke();
-  #|   context.fillStyle = shade("#3e7d46", 0.9 + seed * 0.25);
-  #|   context.beginPath();
-  #|   context.ellipse(
-  #|     sx + sway * 0.5, sy - height * 0.62,
-  #|     9 * zoom, 6.5 * zoom, 0, 0, Math.PI * 2,
-  #|   );
-  #|   context.fill();
-  #|   context.fillStyle = shade("#4d9a52", 0.9 + seed * 0.25);
-  #|   context.beginPath();
-  #|   context.ellipse(
-  #|     sx + sway * 0.8 - 2 * zoom, sy - height * 0.85,
-  #|     6.5 * zoom, 5 * zoom, 0, 0, Math.PI * 2,
-  #|   );
-  #|   context.fill();
+  #|   const lobes = [
+  #|     { x: -5.5, y: -0.6, rx: 7.2, ry: 5.8, color: "#47764b" },
+  #|     { x: 5.2, y: -1.4, rx: 7.5, ry: 6, color: "#6fa653" },
+  #|     { x: 0, y: -6.8, rx: 8.2, ry: 6.4, color: "#91c467" },
+  #|   ];
+  #|   for (const lobe of lobes) {
+  #|     context.fillStyle = shade(lobe.color, 0.96 + seed * 0.07);
+  #|     context.beginPath();
+  #|     context.ellipse(
+  #|       sx + sway + lobe.x * zoom,
+  #|       sy - height * 0.58 + lobe.y * zoom,
+  #|       lobe.rx * zoom, lobe.ry * zoom, 0, 0, Math.PI * 2,
+  #|     );
+  #|     context.fill();
+  #|     context.strokeStyle = "rgba(47,83,53,0.7)";
+  #|     context.lineWidth = Math.max(0.55, 0.8 * zoom);
+  #|     context.stroke();
+  #|   }
   #| }
 
 ///|
@@ -1513,7 +1500,12 @@ extern "js" fn golden_draw_iso_box(
   right : String,
 ) -> Unit =
   #| (context, sx, sy, width, depth, height, roof, left, right) => {
-  #|   const camera = globalThis.__moontownGoldenValleyCamera || { z: 0.1 };
+  #|   const civicZoom = globalThis.innerWidth < 640
+  #|     ? 0.34
+  #|     : globalThis.innerWidth < 1100 || globalThis.innerHeight < 800
+  #|       ? 0.42
+  #|       : 0.5;
+  #|   const camera = globalThis.__moontownGoldenValleyCamera || { z: civicZoom };
   #|   const zoom = camera.z;
   #|   const scaledHeight = height * zoom / 0.95;
   #|   const halfWidth = 16 * zoom;
@@ -1562,76 +1554,62 @@ extern "js" fn golden_draw_iso_box(
   #|     }
   #|     context.closePath();
   #|   };
-  #|   // Left face: vertical gradient, lighter near the roof, darker at base.
-  #|   const leftTop = topY + Math.min(west[1], south[1]) + halfHeight * 0.4;
-  #|   const leftGradient = context.createLinearGradient(
-  #|     0, leftTop, 0, leftTop + scaledHeight,
-  #|   );
-  #|   leftGradient.addColorStop(0, shade(left, 0.10));
-  #|   leftGradient.addColorStop(1, shade(left, -0.22));
-  #|   fillPoly([
+  #|   // Matte two-value faces with one precise outline. Distinct planes,
+  #|   // rather than material gradients, carry the 2.5D massing.
+  #|   const leftFace = [
   #|     west,
   #|     south,
   #|     [south[0], south[1] + scaledHeight],
   #|     [west[0], west[1] + scaledHeight],
-  #|   ]);
-  #|   context.fillStyle = leftGradient;
+  #|   ];
+  #|   fillPoly(leftFace);
+  #|   context.fillStyle = left;
   #|   context.fill();
-  #|   // Right face: vertical gradient, slightly darker overall than the left.
-  #|   const rightTop = topY + Math.min(south[1], east[1]) + halfHeight * 0.4;
-  #|   const rightGradient = context.createLinearGradient(
-  #|     0, rightTop, 0, rightTop + scaledHeight,
-  #|   );
-  #|   rightGradient.addColorStop(0, shade(right, 0.04));
-  #|   rightGradient.addColorStop(1, shade(right, -0.26));
-  #|   fillPoly([
+  #|   const rightFace = [
   #|     south,
   #|     east,
   #|     [east[0], east[1] + scaledHeight],
   #|     [south[0], south[1] + scaledHeight],
-  #|   ]);
-  #|   context.fillStyle = rightGradient;
+  #|   ];
+  #|   fillPoly(rightFace);
+  #|   context.fillStyle = right;
   #|   context.fill();
-  #|   // Roof: soft diagonal sheen from the sun-facing corner.
-  #|   const roofGradient = context.createLinearGradient(
-  #|     north[0], north[1], south[0], south[1],
-  #|   );
-  #|   roofGradient.addColorStop(0, shade(roof, 0.18));
-  #|   roofGradient.addColorStop(0.5, roof);
-  #|   roofGradient.addColorStop(1, shade(roof, -0.10));
-  #|   fillPoly([north, east, south, west]);
-  #|   context.fillStyle = roofGradient;
+  #|   const roofFace = [north, east, south, west];
+  #|   fillPoly(roofFace);
+  #|   context.fillStyle = roof;
   #|   context.fill();
-  #|   // Roof rim highlight + outer edge definition so the box reads crisply.
   #|   context.lineJoin = "round";
-  #|   context.lineWidth = Math.max(1, zoom * 1.1);
-  #|   context.strokeStyle = shade(roof, -0.28);
-  #|   fillPoly([north, east, south, west]);
-  #|   context.stroke();
-  #|   // Bright top edges (north-west / north-east) catch the light.
+  #|   context.lineWidth = Math.max(0.75, zoom * 1.25);
+  #|   context.strokeStyle = "rgba(53,76,88,0.72)";
+  #|   for (const face of [leftFace, rightFace, roofFace]) {
+  #|     fillPoly(face);
+  #|     context.stroke();
+  #|   }
+  #|   // A single warm-white sun edge establishes the light direction.
   #|   context.beginPath();
   #|   context.moveTo(west[0], west[1]);
   #|   context.lineTo(north[0], north[1]);
   #|   context.lineTo(east[0], east[1]);
-  #|   context.strokeStyle = shade(roof, 0.32);
-  #|   context.lineWidth = Math.max(1, zoom * 1.2);
+  #|   context.strokeStyle = shade(roof, 0.24);
+  #|   context.lineWidth = Math.max(0.65, zoom);
   #|   context.stroke();
   #| }
 
 ///|
 fn golden_building_colors(style : String) -> (String, String, String) {
   match style {
-    "tower" => ("#bcd8e8", "#6f9cbd", "#54799a")
-    "custom-tower" => ("#d8c8e8", "#9a7fbd", "#7a619a")
-    "lab" => ("#d5e8dd", "#8fb8a0", "#729a84")
-    "custom-lab" => ("#e8ddd0", "#b8a08f", "#9a8472")
-    "garden" => ("#69b56a", "#4d8a52", "#3f7345")
-    "home" => ("#f0d8c8", "#c89880", "#a87a64")
-    "custom-home" => ("#e0e8f0", "#98a8b8", "#7c8c9c")
-    "radar" => ("#d0d8e0", "#98a4b0", "#7e8a96")
-    "market" => ("#e8a83a", "#b98242", "#966735")
-    "plaza" => ("#ddd6c4", "#b5ad99", "#98917d")
-    _ => ("#e8e0cf", "#b8ad97", "#9a9080")
+    "tower" => ("#f5f2e9", "#83bed0", "#5f98ad")
+    "custom-tower" => ("#e9f0ef", "#87b5bd", "#668f9b")
+    "lab" => ("#f5f2e9", "#d4d3cc", "#83bed0")
+    "custom-lab" => ("#ede5d4", "#c7b79f", "#75aabb")
+    "hall" | "custom-hall" => ("#f5f2e9", "#d4d3cc", "#b9c7c7")
+    "garden" => ("#91c467", "#6fa653", "#47764b")
+    "home" => ("#f5f2e9", "#d7c9b4", "#b8895b")
+    "custom-home" => ("#f1f0ea", "#bdced0", "#8caab0")
+    "radar" => ("#f5f2e9", "#d4d3cc", "#83bed0")
+    "market" => ("#ede5d4", "#b8895b", "#956a47")
+    "plaza" => ("#f5f2e9", "#d4d3cc", "#b8b9b3")
+    _ => ("#f5f2e9", "#d4d3cc", "#b7b8b2")
   }
 }
 
@@ -1665,6 +1643,25 @@ fn town_snapshot_place_work_status(
     }
   }
   status
+}
+
+///|
+fn golden_civic_hero_label(module_key : String?) -> Bool {
+  match module_key {
+    Some(value) =>
+      match value {
+        "town-shell"
+        | "contest-express"
+        | "resident-twins"
+        | "ai-garden"
+        | "social-square"
+        | "research-ai-agents"
+        | "physical-bridge" => true
+        other if other.contains("transit") || other.contains("mobility") => true
+        _ => false
+      }
+    None => false
+  }
 }
 
 ///|
@@ -1746,17 +1743,17 @@ fn golden_draw_building(
       if building.style == "custom-home" {
         roof
       } else {
-        "#e8e0d0"
+        "#f5f2e9"
       },
       if building.style == "custom-home" {
         left
       } else {
-        "#b0a894"
+        "#d7c9b4"
       },
       if building.style == "custom-home" {
         right
       } else {
-        "#948c78"
+        "#b8895b"
       },
     )
   } else if building.style == "tower" || building.style == "custom-tower" {
@@ -1814,7 +1811,14 @@ fn golden_draw_building(
   if building.style != "garden" &&
     building.style != "plaza" &&
     building.style != "market" {
-    let columns = if building.width * 2 < 2 { 2 } else { building.width * 2 }
+    let columns = if building.width <= 3 {
+      2
+    } else if building.width <= 6 {
+      3
+    } else {
+      4
+    }
+    let rows = if building.floors > 3 { 3 } else { building.floors }
     let lit_fraction = if hour < 6.0 || hour >= 19.0 { 0.62 } else { 0.0 }
     golden_draw_iso_windows(
       context,
@@ -1829,43 +1833,30 @@ fn golden_draw_building(
       },
       golden_valley_camera_zoom(),
       columns,
-      building.floors,
+      rows,
       lit_fraction,
     )
   }
   if building.style == "lab" || building.style == "custom-lab" {
-    let first_center_x = building.x.to_double() + 0.6
+    let first_center_x = building.x.to_double() +
+      building.width.to_double() / 2.0
     let first_center_y = building.y.to_double() + 0.6
     golden_draw_iso_box(
       context,
       golden_screen_x(first_center_x, first_center_y, viewport_width),
       golden_screen_y(first_center_x, first_center_y, viewport_height),
-      0.6,
-      0.6,
-      height + 4.75,
-      "#aabbcc",
-      "#888899",
-      "#777788",
-    )
-    let second_center_x = building.x.to_double() +
-      building.width.to_double() -
-      0.65
-    let second_center_y = building.y.to_double() + 0.65
-    golden_draw_iso_box(
-      context,
-      golden_screen_x(second_center_x, second_center_y, viewport_width),
-      golden_screen_y(second_center_x, second_center_y, viewport_height),
-      0.5,
-      0.5,
-      height + 3.325,
-      "#bbbbaa",
-      "#999988",
-      "#887777",
+      1.4,
+      0.55,
+      height + 2.2,
+      "#83bed0",
+      "#6897a6",
+      "#507887",
     )
   }
   golden_draw_reference_building_details(
     context,
     building.style,
+    building.name,
     building.x.to_double(),
     building.y.to_double(),
     building.width.to_double(),
@@ -1928,9 +1919,13 @@ fn golden_draw_building(
   golden_ctx_text_align(context, "center")
   golden_ctx_text_baseline(context, "middle")
   let label_y = top_center_y - 14.0 * zoom
-  if zoom > 0.75 {
+  let show_label = selected ||
+    !work_status.is_empty() ||
+    zoom >= 0.72 ||
+    (zoom >= 0.42 && golden_civic_hero_label(building.module_key))
+  if show_label {
     let label_width = golden_ctx_measure_text(context, building.name)
-    golden_ctx_fill_style(context, "rgba(12,20,36,.72)")
+    golden_ctx_fill_style(context, "rgba(245,242,233,.94)")
     context.begin_path()
     context.round_rect(
       label_x - label_width / 2.0 - 6.0,
@@ -1940,7 +1935,10 @@ fn golden_draw_building(
       8.0,
     )
     context.fill()
-    golden_ctx_fill_style(context, "#ffe9b8")
+    golden_ctx_stroke_style(context, "rgba(64,88,102,.42)")
+    golden_ctx_line_width(context, 0.8)
+    context.stroke()
+    golden_ctx_fill_style(context, "#334b57")
     context.fill_text(building.name, label_x, label_y)
   }
   if !work_status.is_empty() {
@@ -2017,7 +2015,7 @@ fn golden_draw_weather(
   match weather {
     Sunny => ()
     Cloudy => {
-      golden_ctx_fill_style(context, "rgba(91,107,125,.13)")
+      golden_ctx_fill_style(context, "rgba(91,107,125,.08)")
       context.fill_rect(
         0.0,
         0.0,
@@ -2026,9 +2024,9 @@ fn golden_draw_weather(
       )
     }
     Rain => {
-      golden_ctx_stroke_style(context, "rgba(166,211,235,.42)")
-      golden_ctx_line_width(context, 1.0)
-      for index in 0..<130 {
+      golden_ctx_stroke_style(context, "rgba(196,229,240,.38)")
+      golden_ctx_line_width(context, 0.9)
+      for index in 0..<80 {
         let x = energy_valley_variation(
           active_energy_valley_seed(),
           index,
@@ -2050,8 +2048,8 @@ fn golden_draw_weather(
       }
     }
     Snow => {
-      golden_ctx_fill_style(context, "rgba(240,248,255,.66)")
-      for index in 0..<95 {
+      golden_ctx_fill_style(context, "rgba(240,248,255,.58)")
+      for index in 0..<58 {
         let x = energy_valley_variation(
           active_energy_valley_seed(),
           index,
@@ -2244,8 +2242,10 @@ fn render_golden_valley_canvas(
   snapshot : @energy_valley_contract.TownSnapshot,
   view : TownCanvasViewState,
 ) -> @rabbita.Html {
-  schedule_golden_valley_canvas(() => draw_golden_valley_canvas(snapshot, view))
   schedule_golden_valley_canvas(() => {
+    // Drawing first preserves the accepted-frame contract: input and the
+    // continuous animator only adopt this snapshot after a successful paint.
+    draw_golden_valley_canvas(snapshot, view)
     install_golden_valley_canvas_input(() => {
       draw_golden_valley_canvas(snapshot, view)
     })

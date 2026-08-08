@@ -193,6 +193,7 @@ pub struct TownState {
   executions : Array[TaskExecutionRecord]
   events : Array[TownEvent]
 } derive(Eq, ToJson, @debug.Debug, @json.FromJson)
+pub fn TownState::bounded_read_projection(Self, TownStateProjectionLimits) -> TownStateProjection
 pub fn TownState::enqueue_task(Self, TownTask) -> Unit
 pub fn TownState::record_event(Self, TownEvent) -> Unit
 pub fn TownState::register_book(Self, BookRef) -> Unit
@@ -202,6 +203,36 @@ pub fn TownState::replace_execution(Self, TaskExecutionRecord) -> Unit
 pub fn TownState::replace_task(Self, TownTask) -> Unit
 pub fn TownState::set_worker_status(Self, String, WorkerStatus) -> Unit
 pub impl Show for TownState
+
+pub struct TownStateProjection {
+  state : TownState
+  evidence : TownStateProjectionEvidence
+} derive(Eq, @debug.Debug)
+
+pub struct TownStateProjectionEvidence {
+  total_events : Int
+  retained_events : Int
+  omitted_events : Int
+  total_tasks : Int
+  retained_tasks : Int
+  omitted_tasks : Int
+  omitted_live_tasks : Int
+  omitted_terminal_tasks : Int
+  total_executions : Int
+  retained_executions : Int
+  omitted_executions : Int
+  omitted_live_executions : Int
+  omitted_terminal_executions : Int
+} derive(Eq, ToJson, @debug.Debug, @json.FromJson)
+
+pub struct TownStateProjectionLimits {
+  recent_events : Int
+  live_tasks : Int
+  terminal_tasks : Int
+  live_executions : Int
+  terminal_executions : Int
+} derive(Eq, @debug.Debug)
+pub fn TownStateProjectionLimits::new(recent_events? : Int, live_tasks? : Int, terminal_tasks? : Int, live_executions? : Int, terminal_executions? : Int) -> Self
 
 pub struct TownTask {
   id : String
