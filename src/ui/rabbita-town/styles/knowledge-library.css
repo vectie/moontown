@@ -8,6 +8,65 @@
   color: #e2e8f0;
 }
 
+.energy-valley-golden:has(.knowledge-library-inspector) .town-quest-wrap {
+  display: none;
+}
+
+.policy-hall-map-entry {
+  position: absolute;
+  z-index: 33;
+  top: calc(76px + var(--town-safe-top, 0px));
+  left: 50%;
+  display: grid;
+  min-height: 44px;
+  grid-template-columns: auto minmax(0, 1fr) auto;
+  align-items: center;
+  gap: 8px;
+  transform: translateX(-50%);
+  border: 1px solid rgb(13 148 136 / 78%);
+  border-radius: 999px;
+  padding: 6px 11px;
+  color: #134e4a;
+  background: rgb(240 253 250 / 96%);
+  box-shadow: 0 8px 22px rgb(7 40 43 / 18%);
+  text-align: left;
+}
+
+.policy-hall-map-entry:hover {
+  background: #ccfbf1;
+}
+
+.policy-hall-map-entry:focus-visible {
+  outline: 3px solid #fef3c7;
+  outline-offset: 2px;
+}
+
+.policy-hall-map-entry-dot {
+  color: #0d9488;
+  font-size: 9px;
+}
+
+.policy-hall-map-entry-copy {
+  display: grid;
+  line-height: 1.05;
+}
+
+.policy-hall-map-entry-title {
+  font-size: 11px;
+  font-weight: 850;
+}
+
+.policy-hall-map-entry-hint {
+  margin-top: 3px;
+  color: #47736f;
+  font-size: 8px;
+}
+
+.policy-hall-map-entry-arrow {
+  font-size: 14px;
+  font-weight: 800;
+}
+
 .knowledge-inspector-toolbar,
 .knowledge-library-heading,
 .knowledge-library-identity,
@@ -51,6 +110,68 @@
 
 .knowledge-inspector-close {
   flex: 0 0 auto;
+}
+
+.policy-hall-question-action {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) auto;
+  align-items: center;
+  gap: 12px;
+  border: 1px solid rgb(52 211 153 / 28%);
+  border-radius: 14px;
+  padding: 11px 12px;
+  background:
+    linear-gradient(135deg, rgb(16 185 129 / 15%), rgb(14 165 233 / 7%));
+  box-shadow: inset 0 1px rgb(255 255 255 / 6%);
+}
+
+.policy-hall-question-copy {
+  min-width: 0;
+}
+
+.policy-hall-question-eyebrow {
+  display: block;
+  color: #6ee7b7;
+  font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace;
+  font-size: 8px;
+  font-weight: 750;
+  letter-spacing: .09em;
+}
+
+.policy-hall-question-title {
+  margin: 3px 0 0;
+  color: #f8fafc;
+  font-size: 14px;
+  font-weight: 800;
+}
+
+.policy-hall-question-description {
+  margin: 4px 0 0;
+  color: #a7b4c7;
+  font-size: 9px;
+  line-height: 1.5;
+}
+
+.policy-hall-question-button {
+  min-width: 104px;
+  min-height: 44px;
+  border: 1px solid rgb(110 231 183 / 36%);
+  border-radius: 11px;
+  padding: 0 12px;
+  color: #052e2b;
+  background: #6ee7b7;
+  font-size: 10.5px;
+  font-weight: 850;
+  white-space: nowrap;
+}
+
+.policy-hall-question-button:hover {
+  background: #a7f3d0;
+}
+
+.policy-hall-question-button:focus-visible {
+  outline: 2px solid #fff3bf;
+  outline-offset: 2px;
 }
 
 .knowledge-library {
@@ -645,6 +766,11 @@
 }
 
 @media (max-width: 680px) {
+  .policy-hall-map-entry {
+    top: calc(70px + var(--town-safe-top, 0px));
+    max-width: calc(100vw - 24px);
+  }
+
   .town-inspector-wrap > .knowledge-library-inspector {
     width: min(430px, calc(100vw - 1rem));
     max-height: calc(100vh - 8.2rem);
@@ -652,6 +778,14 @@
 
   .knowledge-library-books {
     max-height: 34vh;
+  }
+
+  .policy-hall-question-action {
+    grid-template-columns: 1fr;
+  }
+
+  .policy-hall-question-button {
+    width: 100%;
   }
 }
 

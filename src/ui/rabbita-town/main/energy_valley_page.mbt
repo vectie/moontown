@@ -74,6 +74,11 @@ fn render_energy_valley_page_with_snapshot(
       class="town-topbar pointer-events-none absolute inset-x-0 top-3 flex justify-center px-3",
       render_energy_valley_topbar(dispatch, model),
     ),
+    if model.energy_intro_open {
+      @html.nothing
+    } else {
+      render_policy_hall_map_entry(dispatch, model)
+    },
     match model.selection {
       Agent(_) => @html.nothing
       _ if onboarding => @html.nothing

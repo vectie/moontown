@@ -10,6 +10,8 @@ pub fn desktop_contract_path() -> String
 
 pub fn desktop_evidence_book_path() -> String
 
+pub fn desktop_moonclaw_guide_path() -> String
+
 pub fn desktop_moonflow_research_reconcile_path() -> String
 
 pub fn desktop_moonflow_research_start_path() -> String

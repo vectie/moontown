@@ -706,6 +706,14 @@ async fn handle_request(
     send_json(conn, 200, result)
     return
   }
+  if path == @town_contract.desktop_moonclaw_guide_path() {
+    if reject_unsafe_operator_write(request, conn) {
+      return
+    }
+    let (code, result) = moonclaw_guide_chat(body.read_all().text())
+    send_json(conn, code, result)
+    return
+  }
   if path == @town_contract.desktop_book_registration_path() {
     if request.meth is Get {
       send_json(

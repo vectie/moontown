@@ -345,6 +345,8 @@ priv struct Model {
   town_life_phone_events : Array[TownLifePhoneEvent]
   town_life_phone_prune_watermarks : Array[TownLifePruneWatermark]
   phone_unread : Int
+  moonclaw_guide_pending : Bool
+  moonclaw_guide_error : String
   town_life_writer_id : String
   town_life_writer_counters : Array[TownLifeWriterCounter]
   spark : Int
@@ -454,9 +456,12 @@ priv enum Msg {
   PlayerStepDirection(Int, Int)
   PlayerStepTo(Int, Int)
   TogglePhone
+  OpenMoonclawGuide
   PhoneSelectContact(String)
   PhoneDraft(String)
   PhoneSend
+  MoonclawGuideAsk(String)
+  MoonclawGuideReplied(String)
   ToggleSquare
   OpenKnowledgeDialog(String)
   CloseKnowledgeDialog

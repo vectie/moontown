@@ -24,7 +24,7 @@ fn wenyu_policy_hall_service() -> CivicServiceDefinition {
     ],
     wiki_pages=[
       "wiki/civic/policy-hall.md", "wiki/sources/policies.md", "wiki/concepts/eligibility.md",
-      "wiki/queries/policy-questions.md",
+      "wiki/queries/policy-questions.md", "wiki/policies/changping-youth-entrepreneurship.md",
     ],
     review_queues=["wiki/reviews/policy-citations.md"],
     skill_pack="civic-policy-researcher",

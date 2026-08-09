@@ -1,6 +1,8 @@
 ///|
 fn policy_hall_book_ids() -> Array[String] {
-  ["wenyu-policy-hall", "policy-hall"]
+  [
+    "wenyu-policy-hall", "policy-hall", "changping-youth-entrepreneurship-policy",
+  ]
 }
 
 ///|

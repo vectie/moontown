@@ -157,6 +157,24 @@ fn phone_toggle_update(model : Model) -> (Cmd, Model) {
 }
 
 ///|
+fn moonclaw_guide_open_update(model : Model) -> (Cmd, Model) {
+  let next = {
+    ..model,
+    phone_open: true,
+    phone_contact: moonclaw_guide_contact_id,
+    phone_unread: 0,
+    moonclaw_guide_error: "",
+    square_open: false,
+    ops_open: false,
+    energy_request_open: false,
+    energy_intro_open: false,
+    resident_explorer_open: false,
+    town_chronicle_open: false,
+  }
+  town_life_commit(track_event(next, "phone_open", moonclaw_guide_contact_id))
+}
+
+///|
 fn square_toggle_update(model : Model) -> (Cmd, Model) {
   if model.square_open {
     town_life_commit({ ..model, square_open: false })

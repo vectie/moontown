@@ -166,6 +166,8 @@ fn init_model() -> Model {
     town_life_phone_prune_watermarks: town_life.phone_prune_watermarks.unwrap_or([],
     ),
     phone_unread: 0,
+    moonclaw_guide_pending: false,
+    moonclaw_guide_error: "",
     town_life_writer_id: browser_town_life_v3_writer_id(),
     town_life_writer_counters: town_life.writer_counters.unwrap_or([]),
     spark: town_life_effective_spark(town_life),

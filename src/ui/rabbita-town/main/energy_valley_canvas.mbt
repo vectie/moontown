@@ -2122,6 +2122,21 @@ fn golden_draw_building(
     golden_ctx_fill_style(context, "#334b57")
     context.fill_text(building.name, label_x, label_y)
   }
+  if golden_policy_hall_publication_highlight(building.module_key) {
+    golden_draw_policy_hall_publication_highlight(
+      context,
+      sx,
+      sy,
+      top_center_y,
+      building.width.to_double(),
+      building.depth.to_double(),
+      zoom,
+      golden_policy_hall_publication_badge(),
+      selected,
+      golden_prefers_reduced_motion(),
+      golden_animation_seconds(),
+    )
+  }
   if !work_status.is_empty() {
     let color = golden_valley_work_status_color(work_status)
     let pulse = (golden_math_sin(golden_animation_seconds() * 4.5) + 1.0) / 2.0

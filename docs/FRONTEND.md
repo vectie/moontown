@@ -255,6 +255,9 @@ Decorator/runtime boundary:
 Latest validated UI behavior:
 
 - main console shows the five-domain standing-watch portfolio
+- a persistent corner mascot opens Moonclaw Guide as the first contact in the
+  existing town phone, with responsive quick questions, truthful loading/error
+  states, and a same-origin desktop-service chat bridge
 - the canonical compiler loads civic buildings as typed `Place` records
 - clicking a building opens its in-canvas inspector and procedural interior
 - closing an interior returns to the same map state and camera

@@ -1,4 +1,23 @@
 ///|
+let moonclaw_guide_contact_id = "moonclaw-guide"
+
+///|
+fn phone_contact_is_moonclaw_guide(id : String) -> Bool {
+  id == moonclaw_guide_contact_id
+}
+
+///|
+fn moonclaw_guide_contact() -> PhoneContact {
+  {
+    id: moonclaw_guide_contact_id,
+    name: "小爪",
+    role: "Moonclaw Guide · 本地 Agent",
+    avatar_glyph: "爪",
+    greeting: "忘记下一步也没关系。我是住在谷光手机里的 Moonclaw Guide，可以解释 MoonTown 的界面、MoonBook、大楼、居民和真实工作入口。先选一个常见问题，或者直接问我。",
+  }
+}
+
+///|
 /// The offline phone directory. These are clearly presented as fictional,
 /// deterministic residents; they keep the phone useful without claiming that
 /// a runtime Agent or an LLM produced their replies.
@@ -153,7 +172,9 @@ fn phone_runtime_contacts(model : Model) -> Array[PhoneContact] {
 
 ///|
 fn phone_contacts(model : Model) -> Array[PhoneContact] {
-  let contacts = phone_runtime_contacts(model) + offline_phone_contacts()
+  let contacts = [moonclaw_guide_contact()] +
+    phone_runtime_contacts(model) +
+    offline_phone_contacts()
   if phone_contact_is_runtime(model.phone_contact) &&
     !contacts.any(contact => contact.id == model.phone_contact) {
     [phone_disconnected_runtime_contact(model.phone_contact)] + contacts
@@ -390,6 +411,9 @@ fn phone_send_model(model : Model) -> Model {
     return model
   }
   let contact = model.phone_contact
+  if phone_contact_is_moonclaw_guide(contact) {
+    return model
+  }
   if phone_contact_is_runtime(contact) {
     return {
       ..model,
@@ -419,22 +443,180 @@ fn phone_send_model(model : Model) -> Model {
 }
 
 ///|
-/// Floating phone entry with unread badge, bottom-right above the guide
-/// buttons. Always reachable in one click from anywhere.
-fn render_phone_fab(dispatch : Dispatch[Msg], model : Model) -> @rabbita.Html {
-  if model.player is None {
-    return @html.nothing
+fn moonclaw_guide_context(model : Model) -> String {
+  if policy_hall_question_selected(model) {
+    policy_hall_question_context_key
+  } else if model.player is None {
+    "before-avatar"
+  } else if current_quest(model) is Some(_) {
+    "onboarding"
+  } else {
+    "town"
   }
+}
+
+///|
+fn moonclaw_guide_send_cmd(
+  dispatch : Dispatch[Msg],
+  message : String,
+  context : String,
+) -> Cmd {
+  @rabbita.perform(fn(raw) { dispatch(MoonclawGuideReplied(raw)) }, async fn() noraise {
+    wait_request_response_json(
+      submit_moonclaw_guide_json(
+        message,
+        context,
+        browser_moonclaw_guide_session_id(),
+      ),
+    )
+  })
+}
+
+///|
+fn moonclaw_guide_send_update(
+  dispatch : Dispatch[Msg],
+  model : Model,
+  input : String,
+) -> (Cmd, Model) {
+  let message = input.trim().to_owned()
+  if message.is_empty() || model.moonclaw_guide_pending {
+    return model_only_update(model)
+  }
+  let sent = town_life_append_phone_message(model, {
+    contact: moonclaw_guide_contact_id,
+    from_me: true,
+    text: message,
+    tick: model.tick,
+  })
+  let next = track_event(
+    {
+      ..sent,
+      phone_open: true,
+      phone_contact: moonclaw_guide_contact_id,
+      phone_draft: "",
+      moonclaw_guide_pending: true,
+      moonclaw_guide_error: "",
+    },
+    "phone_send",
+    moonclaw_guide_contact_id,
+  )
+  let (persist_cmd, persisted) = town_life_commit(next)
+  (
+    @rabbita.batch([
+      persist_cmd,
+      moonclaw_guide_send_cmd(dispatch, message, moonclaw_guide_context(model)),
+    ]),
+    persisted,
+  )
+}
+
+///|
+fn moonclaw_guide_reply_result(raw : String) -> Result[String, String] {
+  let parsed = @json.parse(raw) catch {
+    _ =>
+      return Err("Moonclaw 返回了无法识别的响应，请稍后再试。")
+  }
+  guard parsed is Object(fields) else {
+    return Err("Moonclaw 返回了无法识别的响应，请稍后再试。")
+  }
+  if fields.get("ok") is Some(True) {
+    match fields.get("reply") {
+      Some(String(reply)) if !reply.trim().is_empty() =>
+        Ok(reply.trim().to_owned())
+      _ => Err("Moonclaw 已完成请求，但没有返回文字回复。")
+    }
+  } else {
+    match fields.get("error") {
+      Some(String(error)) if !error.trim().is_empty() =>
+        Err(moonclaw_guide_safe_error(error))
+      _ =>
+        Err(
+          "Moonclaw 目前无法连接，请确认本地网关正在运行。",
+        )
+    }
+  }
+}
+
+///|
+fn moonclaw_guide_safe_error(value : String) -> String {
+  let error = value.trim().to_owned()
+  let lower = error.to_lower()
+  if error.length() > 240 ||
+    error.contains("\n") ||
+    lower.contains("<!doctype") ||
+    lower.contains("<html") ||
+    lower.contains("</") {
+    "Moonclaw 目前无法连接，请确认本地网关正在运行。"
+  } else {
+    error
+  }
+}
+
+///|
+fn moonclaw_guide_reply_update(raw : String, model : Model) -> (Cmd, Model) {
+  match moonclaw_guide_reply_result(raw) {
+    Ok(reply) => {
+      let received = town_life_append_phone_message(model, {
+        contact: moonclaw_guide_contact_id,
+        from_me: false,
+        text: reply,
+        tick: model.tick,
+      })
+      let next = complete_quest(
+        track_event(
+          {
+            ..received,
+            moonclaw_guide_pending: false,
+            moonclaw_guide_error: "",
+          },
+          "phone_receive",
+          moonclaw_guide_contact_id,
+        ),
+        "first-chat",
+      )
+      town_life_commit(next)
+    }
+    Err(error) =>
+      model_only_update({
+        ..model,
+        moonclaw_guide_pending: false,
+        moonclaw_guide_error: error,
+      })
+  }
+}
+
+///|
+/// The existing phone entry becomes the Moonclaw pet. It remains the single
+/// gateway to all phone contacts and opens the live guide in one click.
+fn render_phone_fab(dispatch : Dispatch[Msg], model : Model) -> @rabbita.Html {
   button(
-    class="phone-fab pointer-events-auto",
-    on_click=dispatch(TogglePhone),
+    class="moonclaw-pet pointer-events-auto",
+    on_click=dispatch(OpenMoonclawGuide),
     attrs=@html.Attrs::build()
-      .aria_label("打开虚拟手机")
+      .aria_label("打开谷光手机，询问 Moonclaw Guide")
+      .aria_controls("town-phone-panel")
       .aria_expanded(if model.phone_open { "true" } else { "false" }),
     [
-      span(class="phone-fab-icon", "📱"),
+      span(
+        class="moonclaw-pet-art",
+        attrs=@html.Attrs::build().aria_hidden("true"),
+        [
+          span(class="moonclaw-pet-ear moonclaw-pet-ear-left", no_children()),
+          span(class="moonclaw-pet-ear moonclaw-pet-ear-right", no_children()),
+          span(class="moonclaw-pet-face", [
+            span(class="moonclaw-pet-eye moonclaw-pet-eye-left", no_children()),
+            span(class="moonclaw-pet-eye moonclaw-pet-eye-right", no_children()),
+            span(class="moonclaw-pet-smile", no_children()),
+          ]),
+          span(class="moonclaw-pet-moon", "☾"),
+        ],
+      ),
+      span(class="moonclaw-pet-label", [
+        span(class="moonclaw-pet-name", "小爪"),
+        span(class="moonclaw-pet-hint", "忘了？问我"),
+      ]),
       if model.phone_unread > 0 {
-        span(class="phone-fab-badge", model.phone_unread.to_string())
+        span(class="moonclaw-pet-badge", model.phone_unread.to_string())
       } else {
         @html.nothing
       },
@@ -472,10 +654,17 @@ fn render_phone_contact_row(
 }
 
 ///|
-fn render_phone_thread(model : Model) -> @rabbita.Html {
+fn render_phone_thread(
+  dispatch : Dispatch[Msg],
+  model : Model,
+) -> @rabbita.Html {
   let contact = phone_contact_by_id(model, model.phone_contact)
   let thread = phone_thread(model, contact.id)
-  let sender_label = if phone_contact_is_runtime(contact.id) {
+  let guide_contact = phone_contact_is_moonclaw_guide(contact.id)
+  let policy_context = guide_contact && policy_hall_question_selected(model)
+  let sender_label = if guide_contact {
+    "\{contact.name} · Moonclaw Agent"
+  } else if phone_contact_is_runtime(contact.id) {
     "\{contact.name} · Runtime 工作动态"
   } else {
     "\{contact.name} · 本地剧本"
@@ -485,9 +674,48 @@ fn render_phone_thread(model : Model) -> @rabbita.Html {
     bubbles.push(
       div(class="phone-bubble phone-bubble-them", [
         span(class="phone-bubble-name", sender_label),
-        span(contact.greeting),
+        span(
+          if policy_context {
+            policy_hall_question_greeting()
+          } else {
+            contact.greeting
+          },
+        ),
       ]),
     )
+    if guide_contact {
+      let prompts = if policy_context {
+        policy_hall_question_prompts()
+      } else {
+        [
+          "我现在应该先做什么？", "MoonTown 里的大楼、MoonBook 和 Agent 是什么关系？",
+          "我在哪里查看真实工作和结果？",
+        ]
+      }
+      bubbles.push(
+        div(
+          class="phone-guide-prompts",
+          [
+            span(
+              class="phone-guide-prompts-label",
+              if policy_context {
+                "可以从资格、材料或复核开始："
+              } else {
+                "可以先问："
+              },
+            ),
+          ] +
+          prompts.map(prompt => {
+            button(
+              class="phone-guide-prompt",
+              on_click=dispatch(MoonclawGuideAsk(prompt)),
+              attrs=@html.Attrs::build().disabled(model.moonclaw_guide_pending),
+              prompt,
+            )
+          }),
+        ),
+      )
+    }
   }
   for message in thread {
     bubbles.push(
@@ -501,6 +729,34 @@ fn render_phone_thread(model : Model) -> @rabbita.Html {
       },
     )
   }
+  if guide_contact && model.moonclaw_guide_pending {
+    bubbles.push(
+      div(
+        class="phone-bubble phone-bubble-them phone-guide-thinking",
+        attrs=@html.Attrs::build().aria_live("polite"),
+        [
+          span(class="phone-bubble-name", sender_label),
+          span(class="phone-guide-thinking-dots", [
+            span(no_children()),
+            span(no_children()),
+            span(no_children()),
+          ]),
+          span("Moonclaw 正在查看你的问题…"),
+        ],
+      ),
+    )
+  }
+  if guide_contact && !model.moonclaw_guide_error.is_empty() {
+    bubbles.push(
+      div(class="phone-guide-error", attrs=@html.Attrs::build().role("alert"), [
+        span(class="phone-guide-error-title", "暂时没连上 Moonclaw"),
+        span(model.moonclaw_guide_error),
+        span(
+          "确认本地 Moonclaw gateway 已启动后，可以直接重试。",
+        ),
+      ]),
+    )
+  }
   div(class="phone-thread", bubbles)
 }
 
@@ -511,16 +767,25 @@ fn render_phone_panel(dispatch : Dispatch[Msg], model : Model) -> @rabbita.Html 
   }
   let contact = phone_contact_by_id(model, model.phone_contact)
   let runtime_contact = phone_contact_is_runtime(contact.id)
+  let guide_contact = phone_contact_is_moonclaw_guide(contact.id)
+  let policy_context = guide_contact && policy_hall_question_selected(model)
   section(
+    id="town-phone-panel",
     class="phone-panel pointer-events-auto",
-    attrs=@html.Attrs::build().role("dialog").aria_label("虚拟手机"),
+    attrs=@html.Attrs::build().role("dialog").aria_label("谷光手机"),
     [
       div(class="phone-panel-head", [
         span(class="phone-panel-heading", [
-          span(class="phone-panel-title", "📱 谷光手机"),
+          span(class="phone-panel-title", "谷光手机"),
           span(
             class="phone-panel-mode",
-            if runtime_contact {
+            if guide_contact {
+              if policy_context {
+                "Policy Hall · 昌平青创政策问答"
+              } else {
+                "Moonclaw Guide · 真实本地 Agent"
+              }
+            } else if runtime_contact {
               "真实 Runtime Agent · 只读工作动态"
             } else {
               "离线居民 · 本地剧本（非 AI）"
@@ -541,55 +806,149 @@ fn render_phone_panel(dispatch : Dispatch[Msg], model : Model) -> @rabbita.Html 
             render_phone_contact_row(dispatch, model, c)
           }),
         ),
-        div(class="phone-chat", [
-          div(class="phone-chat-head", [
-            span(class="phone-contact-avatar", contact.avatar_glyph),
-            span(class="phone-chat-title", [
-              span(class="phone-contact-name", contact.name),
-              span(class="phone-contact-role", contact.role),
+        div(
+          class="phone-chat",
+          attrs=@html.Attrs::build().aria_busy(
+            if guide_contact && model.moonclaw_guide_pending {
+              "true"
+            } else {
+              "false"
+            },
+          ),
+          [
+            div(class="phone-chat-head", [
+              span(class="phone-contact-avatar", contact.avatar_glyph),
+              span(class="phone-chat-title", [
+                span(class="phone-contact-name", contact.name),
+                span(class="phone-contact-role", contact.role),
+              ]),
+              if guide_contact {
+                span(
+                  class=if model.moonclaw_guide_pending {
+                    "phone-guide-state phone-guide-state-busy"
+                  } else if !model.moonclaw_guide_error.is_empty() {
+                    "phone-guide-state phone-guide-state-error"
+                  } else {
+                    "phone-guide-state"
+                  },
+                  if model.moonclaw_guide_pending {
+                    "思考中"
+                  } else if !model.moonclaw_guide_error.is_empty() {
+                    "未连接"
+                  } else {
+                    "可提问"
+                  },
+                )
+              } else {
+                @html.nothing
+              },
             ]),
-          ]),
-          render_phone_thread(model),
-          if runtime_contact {
-            div(class="phone-composer", [
-              input(
-                id="phone-draft-input",
-                class="phone-input",
-                placeholder="真实消息写入接口尚未连接",
-                value="",
-                attrs=@html.Attrs::build()
-                  .disabled(true)
-                  .aria_label("Runtime Agent 工作动态为只读"),
-              ),
-              button(
-                class="phone-send",
-                on_click=dispatch(OpenEnergyRequestForAgent(contact.id)),
-                attrs=@html.Attrs::build().aria_label(
-                  "打开真实工作请求表单",
+            if policy_context {
+              aside(
+                class="phone-policy-context",
+                attrs=@html.Attrs::build().role("note"),
+                [
+                  span(class="phone-policy-context-title", "答复边界"),
+                  span(
+                    "依据昌平青创政策 MoonBook；区分官网确认、现场 OCR 与待复核项。信息导航不等于审批意见。",
+                  ),
+                ],
+              )
+            } else {
+              @html.nothing
+            },
+            render_phone_thread(dispatch, model),
+            if guide_contact {
+              div(class="phone-guide-composer", [
+                span(
+                  id="moonclaw-guide-composer-label",
+                  class="phone-composer-label",
+                  if policy_context {
+                    "描述你的情况，询问昌平青创政策"
+                  } else {
+                    "问小爪关于 MoonTown 的问题"
+                  },
                 ),
-                "创建真实工作请求",
-              ),
-            ])
-          } else {
-            div(class="phone-composer", [
-              input(
-                id="phone-draft-input",
-                class="phone-input",
-                placeholder="发送本地剧本消息给 \{contact.name}…",
-                value=model.phone_draft,
-                on_input=value => dispatch(PhoneDraft(value)),
-              ),
-              button(
-                class="phone-send",
-                on_click=dispatch(PhoneSend),
-                attrs=@html.Attrs::build().aria_label(
-                  "发送本地剧本消息",
+                div(class="phone-composer", [
+                  input(
+                    id="phone-draft-input",
+                    class="phone-input",
+                    placeholder=if policy_context {
+                      "例如：我 29 岁，硕士，在昌注册公司 8 个月…"
+                    } else {
+                      "例如：我接下来该做什么？"
+                    },
+                    value=model.phone_draft,
+                    on_input=value => dispatch(PhoneDraft(value)),
+                    attrs=@html.Attrs::build()
+                      .disabled(model.moonclaw_guide_pending)
+                      .aria_labelledby("moonclaw-guide-composer-label"),
+                  ),
+                  button(
+                    class=if model.moonclaw_guide_pending {
+                      "phone-send phone-send-disabled"
+                    } else {
+                      "phone-send"
+                    },
+                    on_click=dispatch(PhoneSend),
+                    attrs=@html.Attrs::build()
+                      .disabled(model.moonclaw_guide_pending)
+                      .aria_label(
+                        if policy_context {
+                          "发送昌平青年创新创业政策问题"
+                        } else {
+                          "发送问题给 Moonclaw Guide"
+                        },
+                      ),
+                    if model.moonclaw_guide_pending {
+                      "请稍候"
+                    } else {
+                      "发送"
+                    },
+                  ),
+                ]),
+              ])
+            } else if runtime_contact {
+              div(class="phone-composer", [
+                input(
+                  id="phone-draft-input",
+                  class="phone-input",
+                  placeholder="真实消息写入接口尚未连接",
+                  value="",
+                  attrs=@html.Attrs::build()
+                    .disabled(true)
+                    .aria_label("Runtime Agent 工作动态为只读"),
                 ),
-                "发送",
-              ),
-            ])
-          },
-        ]),
+                button(
+                  class="phone-send",
+                  on_click=dispatch(OpenEnergyRequestForAgent(contact.id)),
+                  attrs=@html.Attrs::build().aria_label(
+                    "打开真实工作请求表单",
+                  ),
+                  "创建真实工作请求",
+                ),
+              ])
+            } else {
+              div(class="phone-composer", [
+                input(
+                  id="phone-draft-input",
+                  class="phone-input",
+                  placeholder="发送本地剧本消息给 \{contact.name}…",
+                  value=model.phone_draft,
+                  on_input=value => dispatch(PhoneDraft(value)),
+                ),
+                button(
+                  class="phone-send",
+                  on_click=dispatch(PhoneSend),
+                  attrs=@html.Attrs::build().aria_label(
+                    "发送本地剧本消息",
+                  ),
+                  "发送",
+                ),
+              ])
+            },
+          ],
+        ),
       ]),
     ],
   )

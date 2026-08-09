@@ -418,10 +418,23 @@ fn update_non_form_message(
     PlayerStepDirection(dx, dy) => player_step_direction_update(model, dx, dy)
     PlayerStepTo(tx, ty) => player_step_to_update(model, tx, ty)
     TogglePhone => phone_toggle_update(model)
+    OpenMoonclawGuide => moonclaw_guide_open_update(model)
     PhoneSelectContact(contact) =>
-      model_only_update({ ..model, phone_contact: contact })
+      model_only_update({
+        ..model,
+        phone_contact: contact,
+        moonclaw_guide_error: "",
+      })
     PhoneDraft(value) => model_only_update({ ..model, phone_draft: value })
-    PhoneSend => town_life_commit(phone_send_model(model))
+    PhoneSend =>
+      if phone_contact_is_moonclaw_guide(model.phone_contact) {
+        moonclaw_guide_send_update(dispatch, model, model.phone_draft)
+      } else {
+        town_life_commit(phone_send_model(model))
+      }
+    MoonclawGuideAsk(question) =>
+      moonclaw_guide_send_update(dispatch, model, question)
+    MoonclawGuideReplied(raw) => moonclaw_guide_reply_update(raw, model)
     ToggleSquare => square_toggle_update(model)
     OpenKnowledgeDialog(post_id) =>
       model_only_update(knowledge_open_dialog_model(model, post_id))

@@ -48,6 +48,24 @@ Both adapters use the same MoonTown runtime state. The mini-app server defaults
 to `127.0.0.1:18191`; a non-loopback bind requires
 `MOONTOWN_MINIAPP_SESSION_TOKEN`.
 
+### Moonclaw front-page guide
+
+The Rabbita front page exposes Moonclaw Guide through the existing town phone.
+The desktop service proxies `POST /api/agent/chat` to a loopback Moonclaw
+gateway, so browser code never receives the gateway token. Start the default
+gateway from the MoonTown workspace with:
+
+```bash
+moonclaw gateway start --cwd "$PWD" --port 18123
+```
+
+The proxy defaults to `http://127.0.0.1:18123`. A different loopback port and
+an optional bearer token can be supplied with
+`MOONTOWN_MOONCLAW_GATEWAY_URL` and `MOONTOWN_MOONCLAW_GATEWAY_TOKEN`. The URL
+validator intentionally rejects non-loopback hosts. If the gateway is not
+running, the phone keeps the user's message and shows an explicit unavailable
+state instead of inventing a reply.
+
 Check source layout boundaries:
 
 ```bash

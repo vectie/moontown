@@ -24,6 +24,11 @@ pub fn desktop_evidence_book_path() -> String {
 }
 
 ///|
+pub fn desktop_moonclaw_guide_path() -> String {
+  "/api/agent/chat"
+}
+
+///|
 pub fn desktop_book_registration_path() -> String {
   "/api/book-registrations"
 }
@@ -355,6 +360,12 @@ pub fn desktop_contract() -> Json {
         "POST",
         desktop_evidence_book_path(),
         "research.evidence-book.queue",
+      ),
+      endpoint(
+        "chat-with-moontown-guide",
+        "POST",
+        desktop_moonclaw_guide_path(),
+        "moonclaw.guide.chat",
       ),
       endpoint(
         "query-supervisor-profile",

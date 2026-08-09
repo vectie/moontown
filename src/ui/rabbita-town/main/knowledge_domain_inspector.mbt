@@ -359,6 +359,7 @@ fn render_knowledge_domain_inspector_shell(
         ),
       ]),
       render_ecosystem_place_story(model, building, snapshot),
+      render_policy_hall_question_action(dispatch, building),
       render_knowledge_domain_library(model, domain),
       render_knowledge_domain_runtime_strip(model, building),
     ],
