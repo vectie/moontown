@@ -3,6 +3,10 @@ extern "js" fn load_bootstrap_town_snapshot_json() -> String =
   #| () => globalThis.__moontownTownSnapshotJson || ""
 
 ///|
+extern "js" fn load_bootstrap_account_context_json() -> String =
+  #| () => globalThis.__moontownAccountContextJson || ""
+
+///|
 extern "js" fn town_snapshot_version() -> Int =
   #| () => globalThis.__moontownTownSnapshotVersion || 0
 

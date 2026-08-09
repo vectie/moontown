@@ -1,27 +1,48 @@
 ///|
-test "miniapp dev mode is allowed only on loopback" {
-  assert_true(session_authorized("127.0.0.1:18191", "", ""))
-  assert_true(session_authorized("localhost:18191", "", "anything"))
-  assert_true(!session_authorized("0.0.0.0:18191", "", "anything"))
-}
-
-///|
-test "configured miniapp session token must match" {
-  assert_true(session_authorized("0.0.0.0:18191", "secret", "secret"))
-  assert_true(!session_authorized("0.0.0.0:18191", "secret", "wrong"))
-  assert_true(!session_authorized("127.0.0.1:18191", "secret", ""))
-}
-
-///|
 test "miniapp contract advertises the shared snapshot and write routes" {
   let contract = @town_contract.miniapp_contract().stringify()
   assert_true(contract.contains(@town_contract.miniapp_snapshot_path()))
   assert_true(contract.contains(@town_contract.miniapp_standing_watch_path()))
   assert_true(contract.contains(@town_contract.miniapp_evidence_book_path()))
+  assert_true(contract.contains(@town_contract.miniapp_visitor_session_path()))
+  assert_true(contract.contains(@town_contract.miniapp_account_context_path()))
+  assert_true(
+    contract.contains(@town_contract.miniapp_account_tenant_switch_path()),
+  )
+  assert_true(
+    contract.contains(@town_contract.miniapp_enterprise_management_path()),
+  )
+  assert_true(contract.contains(@town_contract.miniapp_admin_management_path()))
   let desktop = @town_contract.desktop_contract().stringify()
   assert_true(desktop.contains(@town_contract.miniapp_supervisor_wake_path()))
   assert_true(desktop.contains(@town_contract.miniapp_supervisor_stop_path()))
   assert_true(desktop.contains(@town_contract.miniapp_supervisor_resume_path()))
+}
+
+///|
+test "account tenant selection accepts only string or null" {
+  assert_eq(
+    tenant_switch_target("{\"tenant_id\":\"energy-labs\"}"),
+    Some("energy-labs"),
+  )
+  assert_eq(tenant_switch_target("{\"tenant_id\":null}"), None)
+  try tenant_switch_target("{\"tenant_id\":42}") catch {
+    error => assert_true("\{error}".contains("string or null"))
+  } noraise {
+    _ => fail("numeric tenant selector must be rejected")
+  }
+}
+
+///|
+test "enterprise configuration keeps organization powers tenant scoped" {
+  assert_eq(
+    personal_plan_for_account_plan(@account_system.EnterprisePlan),
+    @account_system.PaidPlan,
+  )
+  assert_eq(
+    personal_plan_for_account_plan(@account_system.VisitorPlan),
+    @account_system.VisitorPlan,
+  )
 }
 
 ///|

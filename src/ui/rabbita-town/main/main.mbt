@@ -44,7 +44,12 @@ fn render_town_surface(
   dispatch : Dispatch[Msg],
   model : Model,
 ) -> @rabbita.Html {
-  render_town_surface_for_route(current_town_surface_route(), dispatch, model)
+  render_account_surface_for_route(
+    current_town_surface_route(),
+    dispatch,
+    model,
+    parse_bootstrap_account_experience(),
+  )
 }
 
 ///|

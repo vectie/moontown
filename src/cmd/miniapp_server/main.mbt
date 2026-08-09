@@ -17,6 +17,108 @@ fn session_token() -> String {
 }
 
 ///|
+let visitor_session_rng : @random.Rand = @random.Rand::chacha8()
+
+///|
+fn configured_account_plan() -> @account_system.AccountPlan {
+  match env_value("MOONTOWN_ACCOUNT_PLAN").unwrap_or("enterprise").to_lower() {
+    "visitor" => @account_system.VisitorPlan
+    "paid" => @account_system.PaidPlan
+    _ => @account_system.EnterprisePlan
+  }
+}
+
+///|
+fn configured_personal_plan() -> @account_system.AccountPlan {
+  personal_plan_for_account_plan(configured_account_plan())
+}
+
+///|
+fn personal_plan_for_account_plan(
+  configured : @account_system.AccountPlan,
+) -> @account_system.AccountPlan {
+  match configured {
+    @account_system.EnterprisePlan => @account_system.PaidPlan
+    plan => plan
+  }
+}
+
+///|
+fn configured_platform_roles() -> Array[@account_system.AccountRole] {
+  let roles : Array[@account_system.AccountRole] = []
+  for
+    raw in env_value("MOONTOWN_ACCOUNT_PLATFORM_ROLES")
+    .unwrap_or("platform-admin")
+    .split(",") {
+    match raw.trim().to_lower() {
+      "platform-admin" => roles.push(@account_system.PlatformAdmin)
+      "publisher" => roles.push(@account_system.AccountPublisher)
+      "editor" => roles.push(@account_system.AccountEditor)
+      _ => ()
+    }
+  }
+  roles
+}
+
+///|
+fn configured_tenant_access() -> Array[@account_system.AccountTenantAccess] {
+  if configured_account_plan() != @account_system.EnterprisePlan {
+    return []
+  }
+  [
+    {
+      tenant_id: env_value("MOONTOWN_MINIAPP_TENANT_ID")
+      .unwrap_or("local-town")
+      .to_lower(),
+      tenant_name: env_value("MOONTOWN_MINIAPP_TENANT_NAME").unwrap_or(
+        "Local town",
+      ),
+      plan: @account_system.EnterprisePlan,
+      roles: [
+        @account_system.AccountMember,
+        @account_system.AccountEditor,
+        @account_system.AccountPublisher,
+        @account_system.OrganizationAdmin,
+      ],
+      active: true,
+      version: 1,
+    },
+  ]
+}
+
+///|
+fn account_application() -> @account_system.AccountApplication raise {
+  let user_id = env_value("MOONTOWN_MINIAPP_PRINCIPAL_ID")
+    .unwrap_or("local-operator")
+    .to_lower()
+  @account_system.account_application(
+    @storage.moontown_product_state_dir() + "/accounts/state.json",
+    {
+      user_id,
+      display_name: env_value("MOONTOWN_MINIAPP_PRINCIPAL_NAME").unwrap_or(
+        "Local operator",
+      ),
+      // Enterprise is tenant-scoped; outside an active tenant this principal
+      // retains only its paid personal workspace.
+      personal_plan: configured_personal_plan(),
+      platform_roles: configured_platform_roles(),
+      tenant_access: configured_tenant_access(),
+      active: true,
+      version: 1,
+    },
+    "bootstrap:\{user_id}",
+    marketplace_bootstrap_opaque_session(),
+  )
+}
+
+///|
+fn visitor_session_identity(now_ms : UInt64) -> (String, String) {
+  let nonce = visitor_session_rng.uint64().to_string(radix=16)
+  let visitor_id = "visitor-\{now_ms}-\{nonce}"
+  (visitor_id, "visit:\{visitor_id}:\{visitor_session_rng.uint64()}")
+}
+
+///|
 fn operator_policy_path() -> String {
   env_value("MOONTOWN_OPERATOR_POLICY_PATH").unwrap_or(
     "assets/templates/operator-request-policy.json",
@@ -28,19 +130,6 @@ fn loopback_bind(bind : String) -> Bool {
   bind.has_prefix("127.0.0.1:") ||
   bind.has_prefix("localhost:") ||
   bind.has_prefix("[::1]:")
-}
-
-///|
-fn session_authorized(
-  bind : String,
-  configured_token : String,
-  supplied_token : String,
-) -> Bool {
-  if configured_token.is_empty() {
-    loopback_bind(bind)
-  } else {
-    supplied_token == configured_token
-  }
 }
 
 ///|
@@ -92,18 +181,38 @@ async fn send_json(
 }
 
 ///|
-async fn require_session(
+async fn require_account_context(
   request : @http.Request,
   conn : @http.ServerConnection,
+) -> @account_system.AccountContext? {
+  let supplied = request_header(request, "x-miniapp-session")
+  match account_application().resolve(supplied, now_ms=@env.now()) {
+    Some(context) => Some(context)
+    None => {
+      send_json(conn, 401, {
+        "ok": false,
+        "error": "missing_expired_or_invalid_account_session",
+      })
+      None
+    }
+  }
+}
+
+///|
+async fn require_account_entitlement(
+  context : @account_system.AccountContext,
+  entitlement : @account_system.AccountEntitlement,
+  conn : @http.ServerConnection,
 ) -> Bool {
-  if session_authorized(
-      miniapp_bind(),
-      session_token(),
-      request_header(request, "x-miniapp-session"),
-    ) {
+  if context.has_entitlement(entitlement) {
     return true
   }
-  send_json(conn, 401, { "ok": false, "error": "missing_or_invalid_session" })
+  send_json(conn, 403, {
+    "ok": false,
+    "error": "account_entitlement_required",
+    "required": @account_system.account_entitlement_name(entitlement),
+    "plan": @account_system.account_plan_name(context.plan),
+  })
   false
 }
 
@@ -164,12 +273,15 @@ async fn require_bounded_json_body(
 }
 
 ///|
-fn miniapp_actor_user_id(request : @http.Request) -> String {
-  let supplied = request_header(request, "x-miniapp-user-id")
-  if supplied.is_empty() {
-    "local-operator"
-  } else {
-    supplied
+fn tenant_switch_target(body : String) -> String? raise {
+  guard @json.parse(body) is Object(fields) else {
+    fail("tenant switch body must be a JSON object")
+  }
+  match fields.get("tenant_id") {
+    Some(String(value)) if !value.trim().is_empty() =>
+      Some(value.trim().to_owned().to_lower())
+    Some(Null) | None => None
+    _ => fail("tenant_id must be a string or null")
   }
 }
 
@@ -604,13 +716,128 @@ async fn handle_request(
     send_json(conn, 200, @town_contract.miniapp_contract())
     return
   }
+  if path == @town_contract.miniapp_visitor_session_path() {
+    if !require_json_write(request, conn) {
+      return
+    }
+    let now_ms = @env.now()
+    let (visitor_id, opaque_token) = visitor_session_identity(now_ms)
+    let result = account_application().create_visitor_session(
+      opaque_token,
+      visitor_id,
+      now_ms~,
+    ) catch {
+      error => {
+        send_json(conn, 409, {
+          "ok": false,
+          "error": "visitor_session_failed",
+          "message": "\{error}",
+        })
+        return
+      }
+    }
+    send_json(conn, 201, {
+      "ok": true,
+      "session_token": result.opaque_token,
+      "expires_in_ms": 86400000,
+      "account": @account_system.account_context_projection(result.context),
+    })
+    return
+  }
   let marketplace_handled = handle_marketplace_request(
     request, body, conn, path,
   )
   if marketplace_handled {
     return
   }
-  if !require_session(request, conn) {
+  guard require_account_context(request, conn) is Some(account_context) else {
+    return
+  }
+  if path == @town_contract.miniapp_account_context_path() {
+    if !(request.meth is @http.Get) {
+      send_json(conn, 405, { "ok": false, "error": "GET required" })
+      return
+    }
+    send_json(conn, 200, {
+      "ok": true,
+      "account": @account_system.account_context_projection(account_context),
+    })
+    return
+  }
+  if path == @town_contract.miniapp_account_tenant_switch_path() {
+    if !require_json_write(request, conn) {
+      return
+    }
+    let switched = account_application().switch_tenant(
+      request_header(request, "x-miniapp-session"),
+      tenant_switch_target(body.read_all().text()),
+      now_ms=@env.now(),
+    ) catch {
+      error => {
+        send_json(conn, 403, {
+          "ok": false,
+          "error": "tenant_switch_denied",
+          "message": "\{error}",
+        })
+        return
+      }
+    }
+    send_json(conn, 200, {
+      "ok": true,
+      "account": @account_system.account_context_projection(switched),
+    })
+    return
+  }
+  if path == @town_contract.miniapp_enterprise_management_path() {
+    if !(request.meth is @http.Get) {
+      send_json(conn, 405, { "ok": false, "error": "GET required" })
+      return
+    }
+    if !require_account_entitlement(
+        account_context,
+        @account_system.UseTeamWorkspaces,
+        conn,
+      ) {
+      return
+    }
+    send_json(conn, 200, {
+      "ok": true,
+      "contract_id": "moontown.enterprise-management.v1",
+      "tenant_id": account_context.active_tenant_id.to_json(),
+      "sections": [
+        "team-workspaces", "shared-agents", "member-directory", "organization-usage",
+        "compliance", "organization-billing",
+      ],
+      "can_manage_members": account_context.has_entitlement(
+        @account_system.ManageOrganizationMembers,
+      ),
+      "can_manage_billing": account_context.has_entitlement(
+        @account_system.ManageOrganizationBilling,
+      ),
+    })
+    return
+  }
+  if path == @town_contract.miniapp_admin_management_path() {
+    if !(request.meth is @http.Get) {
+      send_json(conn, 405, { "ok": false, "error": "GET required" })
+      return
+    }
+    if !require_account_entitlement(
+        account_context,
+        @account_system.AccessAdminConsole,
+        conn,
+      ) {
+      return
+    }
+    send_json(conn, 200, {
+      "ok": true,
+      "contract_id": "moontown.admin-management.v1",
+      "sections": [
+        "users", "tenants", "moderation", "publishing", "analytics", "audit-log",
+        "system-health",
+      ],
+      "impersonation": "disabled",
+    })
     return
   }
   if path == @town_contract.miniapp_snapshot_path() {
@@ -638,11 +865,18 @@ async fn handle_request(
     return
   }
   let supervisor = @supervisor_setup.default_supervisor_setup_application()
-  let actor_user_id = miniapp_actor_user_id(request)
+  let actor_user_id = account_context.user_id
   if path == @town_contract.miniapp_supervisor_path() ||
     path == @town_contract.miniapp_supervisor_readiness_path() {
     if !(request.meth is @http.Get) {
       send_json(conn, 405, { "ok": false, "error": "GET required" })
+      return
+    }
+    if !require_account_entitlement(
+        account_context,
+        @account_system.UsePersonalAgent,
+        conn,
+      ) {
       return
     }
     send_json(conn, 200, supervisor.query_profile(actor_user_id))
@@ -650,6 +884,13 @@ async fn handle_request(
   }
   if path == @town_contract.miniapp_supervisor_draft_path() {
     if !require_json_put(request, conn) {
+      return
+    }
+    if !require_account_entitlement(
+        account_context,
+        @account_system.UsePersonalAgent,
+        conn,
+      ) {
       return
     }
     let result = supervisor.save_profile_draft(
@@ -670,6 +911,13 @@ async fn handle_request(
   }
   if path == @town_contract.miniapp_supervisor_activation_path() {
     if !require_json_write(request, conn) {
+      return
+    }
+    if !require_account_entitlement(
+        account_context,
+        @account_system.UsePersonalAgent,
+        conn,
+      ) {
       return
     }
     if !profile_binding_is_installed(
@@ -707,6 +955,13 @@ async fn handle_request(
     path == @town_contract.miniapp_run_cancel_path() ||
     path == @town_contract.miniapp_run_retry_path() {
     if !require_json_write(request, conn) {
+      return
+    }
+    if !require_account_entitlement(
+        account_context,
+        @account_system.UsePersonalAgent,
+        conn,
+      ) {
       return
     }
     let request_body = body.read_all().text()
@@ -779,6 +1034,13 @@ async fn handle_request(
     if !require_json_write(request, conn) {
       return
     }
+    if !require_account_entitlement(
+        account_context,
+        @account_system.PublishTownContent,
+        conn,
+      ) {
+      return
+    }
     let result = supervisor.request_bookkeeper_review(
       actor_user_id,
       body.read_all().text(),
@@ -797,11 +1059,25 @@ async fn handle_request(
       send_json(conn, 405, { "ok": false, "error": "GET required" })
       return
     }
+    if !require_account_entitlement(
+        account_context,
+        @account_system.ManageSystemHealth,
+        conn,
+      ) {
+      return
+    }
     send_json(conn, 200, supervisor.runtime_handoffs())
     return
   }
   if path == @town_contract.miniapp_runtime_observation_reconcile_path() {
     if !require_json_write(request, conn) {
+      return
+    }
+    if !require_account_entitlement(
+        account_context,
+        @account_system.ManageSystemHealth,
+        conn,
+      ) {
       return
     }
     let result = supervisor.reconcile_runtime_observation(
@@ -830,6 +1106,13 @@ async fn handle_request(
     path == @town_contract.miniapp_runtime_outbox_reconcile_path() ||
     path == @town_contract.miniapp_runtime_outbox_release_path() {
     if !require_json_write(request, conn) {
+      return
+    }
+    if !require_account_entitlement(
+        account_context,
+        @account_system.ManageSystemHealth,
+        conn,
+      ) {
       return
     }
     let request_body = body.read_all().text()
@@ -880,6 +1163,13 @@ async fn handle_request(
       send_json(conn, 405, { "ok": false, "error": "GET required" })
       return
     }
+    if !require_account_entitlement(
+        account_context,
+        @account_system.ManageSystemHealth,
+        conn,
+      ) {
+      return
+    }
     send_json(conn, 200, supervisor.bookkeeper_outbox())
     return
   }
@@ -887,6 +1177,13 @@ async fn handle_request(
     path == @town_contract.miniapp_bookkeeper_outbox_reconcile_path() ||
     path == @town_contract.miniapp_bookkeeper_outbox_release_path() {
     if !require_json_write(request, conn) {
+      return
+    }
+    if !require_account_entitlement(
+        account_context,
+        @account_system.ManageSystemHealth,
+        conn,
+      ) {
       return
     }
     let request_body = body.read_all().text()
@@ -912,6 +1209,13 @@ async fn handle_request(
     if !require_json_write(request, conn) {
       return
     }
+    if !require_account_entitlement(
+        account_context,
+        @account_system.ManagePersonalWorkspace,
+        conn,
+      ) {
+      return
+    }
     let application = @town_application.default_request_application(
       operator_policy_path(),
     )
@@ -926,6 +1230,13 @@ async fn handle_request(
   }
   if path == @town_contract.miniapp_evidence_book_path() {
     if !require_json_write(request, conn) {
+      return
+    }
+    if !require_account_entitlement(
+        account_context,
+        @account_system.ManagePersonalWorkspace,
+        conn,
+      ) {
       return
     }
     let application = @town_application.default_request_application(

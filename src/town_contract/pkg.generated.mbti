@@ -26,6 +26,12 @@ pub fn desktop_standing_goals_path() -> String
 
 pub fn desktop_standing_watch_path() -> String
 
+pub fn miniapp_account_context_path() -> String
+
+pub fn miniapp_account_tenant_switch_path() -> String
+
+pub fn miniapp_admin_management_path() -> String
+
 pub fn miniapp_book_registration_path() -> String
 
 pub fn miniapp_bookkeeper_outbox_claim_path() -> String
@@ -41,6 +47,8 @@ pub fn miniapp_child_run_steer_path() -> String
 pub fn miniapp_contract() -> Json
 
 pub fn miniapp_contract_path() -> String
+
+pub fn miniapp_enterprise_management_path() -> String
 
 pub fn miniapp_evidence_book_path() -> String
 
@@ -129,6 +137,8 @@ pub fn miniapp_supervisor_resume_path() -> String
 pub fn miniapp_supervisor_stop_path() -> String
 
 pub fn miniapp_supervisor_wake_path() -> String
+
+pub fn miniapp_visitor_session_path() -> String
 
 pub fn schema_version() -> String
 

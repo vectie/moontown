@@ -1,0 +1,287 @@
+.account-experience {
+  --account-accent: #6f8f72;
+  --account-accent-strong: #31583d;
+  --account-nav-bg: rgba(250, 249, 243, 0.96);
+  --account-nav-border: rgba(49, 88, 61, 0.2);
+  min-height: 100dvh;
+  background: #111a16;
+  color: #17241b;
+}
+
+.account-experience-paid {
+  --account-accent: #ad8141;
+  --account-accent-strong: #76501f;
+  --account-nav-border: rgba(118, 80, 31, 0.22);
+}
+
+.account-experience-enterprise {
+  --account-accent: #527d8a;
+  --account-accent-strong: #24515f;
+  --account-nav-border: rgba(36, 81, 95, 0.23);
+}
+
+.account-experience-admin {
+  --account-accent: #9aa8ba;
+  --account-accent-strong: #d6deea;
+  --account-nav-bg: #111827;
+  --account-nav-border: rgba(214, 222, 234, 0.18);
+  color: #eef2f7;
+}
+
+.account-global-nav {
+  position: relative;
+  z-index: 1200;
+  min-height: 64px;
+  display: grid;
+  grid-template-columns: minmax(210px, auto) minmax(0, 1fr) minmax(150px, auto);
+  align-items: center;
+  gap: 18px;
+  padding: 8px max(16px, env(safe-area-inset-left));
+  padding-right: max(16px, env(safe-area-inset-right));
+  border-bottom: 1px solid var(--account-nav-border);
+  background: var(--account-nav-bg);
+  box-shadow: 0 8px 28px rgba(9, 20, 13, 0.12);
+  backdrop-filter: blur(18px);
+}
+
+.account-global-identity,
+.account-global-user,
+.account-global-links {
+  display: flex;
+  align-items: center;
+}
+
+.account-global-identity {
+  min-width: 0;
+  gap: 9px;
+}
+
+.account-global-brand {
+  font-size: 15px;
+  font-weight: 800;
+  letter-spacing: -0.02em;
+}
+
+.account-global-plan,
+.account-global-tenant {
+  white-space: nowrap;
+  border-radius: 999px;
+  padding: 5px 9px;
+  font-size: 11px;
+  font-weight: 700;
+  line-height: 1;
+}
+
+.account-global-plan {
+  color: #fff;
+  background: var(--account-accent-strong);
+}
+
+.account-global-tenant {
+  max-width: 150px;
+  overflow: hidden;
+  color: var(--account-accent-strong);
+  background: color-mix(in srgb, var(--account-accent) 16%, transparent);
+  text-overflow: ellipsis;
+}
+
+.account-experience-admin .account-global-brand,
+.account-experience-admin .account-global-user,
+.account-experience-admin .account-global-link {
+  color: #eef2f7;
+}
+
+.account-experience-admin .account-global-tenant {
+  color: #d6deea;
+  background: rgba(214, 222, 234, 0.1);
+}
+
+.account-global-links {
+  min-width: 0;
+  justify-content: center;
+  gap: 3px;
+  overflow-x: auto;
+  scrollbar-width: none;
+}
+
+.account-global-links::-webkit-scrollbar {
+  display: none;
+}
+
+.account-global-link {
+  min-height: 44px;
+  display: inline-flex;
+  flex: 0 0 auto;
+  align-items: center;
+  border-radius: 11px;
+  padding: 0 11px;
+  color: #35443a;
+  font-size: 12px;
+  font-weight: 680;
+  text-decoration: none;
+}
+
+.account-global-link:hover,
+.account-global-link:focus-visible {
+  color: var(--account-accent-strong);
+  background: color-mix(in srgb, var(--account-accent) 14%, transparent);
+  outline: none;
+}
+
+.account-global-link.is-primary {
+  color: var(--account-accent-strong);
+  background: color-mix(in srgb, var(--account-accent) 18%, transparent);
+}
+
+.account-global-user {
+  min-width: 0;
+  justify-content: flex-end;
+  gap: 8px;
+  color: #35443a;
+}
+
+.account-global-avatar {
+  width: 34px;
+  height: 34px;
+  display: grid;
+  flex: 0 0 auto;
+  place-items: center;
+  border: 1px solid color-mix(in srgb, var(--account-accent) 35%, transparent);
+  border-radius: 50%;
+  color: #fff;
+  background: var(--account-accent-strong);
+  font-size: 13px;
+  font-weight: 800;
+}
+
+.account-global-user-name {
+  max-width: 130px;
+  overflow: hidden;
+  font-size: 12px;
+  font-weight: 700;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.account-product-surface {
+  position: relative;
+  height: calc(100dvh - 64px);
+  overflow: hidden;
+}
+
+.account-product-surface > .energy-valley-golden {
+  width: 100%;
+  height: 100%;
+}
+
+.account-experience-admin .account-product-surface {
+  overflow: auto;
+  color: #17241b;
+  background: #eef1f4;
+}
+
+.account-access-denied {
+  min-height: 100%;
+  display: grid;
+  place-items: center;
+  padding: 32px 18px;
+  background:
+    radial-gradient(circle at 20% 10%, rgba(111, 143, 114, 0.18), transparent 34%),
+    #eef2ec;
+}
+
+.account-access-denied-panel {
+  width: min(560px, 100%);
+  padding: clamp(26px, 6vw, 52px);
+  border: 1px solid rgba(49, 88, 61, 0.18);
+  border-radius: 24px;
+  background: rgba(255, 255, 255, 0.9);
+  box-shadow: 0 26px 80px rgba(22, 42, 27, 0.13);
+}
+
+.account-access-kicker {
+  color: #52715a;
+  font-size: 11px;
+  font-weight: 800;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+}
+
+.account-access-denied h1 {
+  margin: 14px 0 10px;
+  color: #17241b;
+  font-size: clamp(28px, 6vw, 44px);
+  letter-spacing: -0.04em;
+}
+
+.account-access-denied p {
+  margin: 0;
+  color: #55645a;
+  line-height: 1.65;
+}
+
+.account-access-return {
+  min-height: 44px;
+  display: inline-flex;
+  align-items: center;
+  margin-top: 24px;
+  border-radius: 12px;
+  padding: 0 16px;
+  color: #fff;
+  background: #31583d;
+  font-weight: 750;
+  text-decoration: none;
+}
+
+.account-access-return:focus-visible {
+  outline: 3px solid rgba(49, 88, 61, 0.28);
+  outline-offset: 3px;
+}
+
+@media (max-width: 900px) {
+  .account-global-nav {
+    grid-template-columns: minmax(0, 1fr) auto;
+    gap: 5px 12px;
+    min-height: 108px;
+    padding-top: max(8px, env(safe-area-inset-top));
+  }
+
+  .account-global-links {
+    grid-column: 1 / -1;
+    grid-row: 2;
+    justify-content: flex-start;
+  }
+
+  .account-global-tenant,
+  .account-global-user-name {
+    display: none;
+  }
+
+  .account-product-surface {
+    height: calc(100dvh - 108px);
+  }
+}
+
+@media (max-width: 520px) {
+  .account-global-nav {
+    min-height: 102px;
+    padding-inline: max(10px, env(safe-area-inset-left));
+  }
+
+  .account-global-brand {
+    font-size: 14px;
+  }
+
+  .account-global-plan {
+    padding-inline: 7px;
+  }
+
+  .account-global-link {
+    min-height: 44px;
+    padding-inline: 10px;
+  }
+
+  .account-product-surface {
+    height: calc(100dvh - 102px);
+  }
+}

@@ -1,0 +1,154 @@
+// Generated using `moon info`, DON'T EDIT IT
+package "vectie/moontown/account_system"
+
+import {
+  "moonbitlang/core/debug",
+  "moonbitlang/core/json",
+}
+
+// Values
+pub fn account_application(String, AccountPrincipal, String, String) -> AccountApplication raise
+
+pub fn account_context_for(AccountPrincipal, String?) -> AccountContext
+
+pub fn account_context_for_session(AccountState, String, now_ms~ : UInt64) -> AccountContext?
+
+pub fn account_context_projection(AccountContext) -> Json
+
+pub fn account_entitlement_name(AccountEntitlement) -> String
+
+pub fn account_entitlements_for(AccountPlan, Array[AccountRole]) -> Array[AccountEntitlement]
+
+pub fn account_home_surface_name(AccountHomeSurface) -> String
+
+pub fn account_plan_name(AccountPlan) -> String
+
+pub fn account_register_session(AccountState, AccountPrincipal, String, String, active_tenant_id? : String, expires_at_ms~ : UInt64) -> AccountState raise
+
+pub fn account_role_name(AccountRole) -> String
+
+pub fn account_state_schema() -> String
+
+pub fn account_switch_session_tenant(AccountState, String, String?, now_ms~ : UInt64) -> AccountState raise
+
+pub fn account_token_digest(String) -> String
+
+pub fn empty_account_state() -> AccountState
+
+// Errors
+
+// Types and methods
+pub(all) struct AccountApplication {
+  state_path : String
+  bootstrap_principal : AccountPrincipal
+  bootstrap_session_id : String
+  bootstrap_token_digest : String
+} derive(Eq, @debug.Debug)
+pub async fn AccountApplication::create_visitor_session(Self, String, String, now_ms~ : UInt64, ttl_ms? : UInt64) -> VisitorSessionResult
+pub async fn AccountApplication::resolve(Self, String, now_ms~ : UInt64) -> AccountContext?
+pub async fn AccountApplication::switch_tenant(Self, String, String?, now_ms~ : UInt64) -> AccountContext
+
+pub(all) struct AccountContext {
+  user_id : String
+  display_name : String
+  plan : AccountPlan
+  roles : Array[AccountRole]
+  entitlements : Array[AccountEntitlement]
+  active_tenant_id : String?
+  active_tenant_name : String?
+  tenant_choices : Array[AccountTenantAccess]
+  home_surface : AccountHomeSurface
+  visitor : Bool
+} derive(Eq, ToJson, @debug.Debug, @json.FromJson)
+pub fn AccountContext::has_entitlement(Self, AccountEntitlement) -> Bool
+
+pub(all) enum AccountEntitlement {
+  ExplorePublicTown
+  DiscoverPublicServices
+  UsePersonalAgent
+  ManagePersonalWorkspace
+  UseMarketplaceActions
+  ManagePersonalBilling
+  UseTeamWorkspaces
+  UseSharedAgents
+  ViewMemberDirectory
+  ViewOrganizationUsage
+  ViewComplianceControls
+  PublishTownContent
+  ManageOrganization
+  ManageOrganizationMembers
+  ManageOrganizationBilling
+  AccessAdminConsole
+  ManagePlatformUsers
+  ManagePlatformTenants
+  ModerateTownContent
+  ViewPlatformAnalytics
+  ViewAuditLog
+  ManageSystemHealth
+} derive(Eq, ToJson, @debug.Debug, @json.FromJson)
+
+pub(all) enum AccountHomeSurface {
+  PublicTownHome
+  PersonalTownHome
+  EnterpriseTownHome
+  AdminConsoleHome
+} derive(Eq, ToJson, @debug.Debug, @json.FromJson)
+
+pub(all) enum AccountPlan {
+  VisitorPlan
+  PaidPlan
+  EnterprisePlan
+} derive(Eq, ToJson, @debug.Debug, @json.FromJson)
+
+pub(all) struct AccountPrincipal {
+  user_id : String
+  display_name : String
+  personal_plan : AccountPlan
+  platform_roles : Array[AccountRole]
+  tenant_access : Array[AccountTenantAccess]
+  active : Bool
+  version : Int
+} derive(Eq, ToJson, @debug.Debug, @json.FromJson)
+
+pub(all) enum AccountRole {
+  AccountMember
+  AccountEditor
+  AccountPublisher
+  OrganizationAdmin
+  PlatformAdmin
+} derive(Eq, ToJson, @debug.Debug, @json.FromJson)
+
+pub(all) struct AccountSession {
+  session_id : String
+  token_digest : String
+  principal_id : String
+  active_tenant_id : String?
+  expires_at_ms : UInt64
+  revoked : Bool
+  version : Int
+} derive(Eq, ToJson, @debug.Debug, @json.FromJson)
+
+pub(all) struct AccountState {
+  schema : String
+  principals : Array[AccountPrincipal]
+  sessions : Array[AccountSession]
+  version : Int
+} derive(Eq, ToJson, @debug.Debug, @json.FromJson)
+
+pub(all) struct AccountTenantAccess {
+  tenant_id : String
+  tenant_name : String
+  plan : AccountPlan
+  roles : Array[AccountRole]
+  active : Bool
+  version : Int
+} derive(Eq, ToJson, @debug.Debug, @json.FromJson)
+
+pub(all) struct VisitorSessionResult {
+  opaque_token : String
+  context : AccountContext
+} derive(Eq, ToJson, @debug.Debug)
+
+// Type aliases
+
+// Traits

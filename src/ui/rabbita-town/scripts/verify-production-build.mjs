@@ -118,7 +118,7 @@ assert.match(html, /MoonTown · 能源谷/)
 assert.doesNotMatch(html, /operations\.html|viewport\.html/)
 assert.doesNotMatch(html, /\.tsx|react|typescript/i)
 assert.match(html, /id="app"/)
-assert.match(html, /src="\.\/bootstrap\.js"/)
+assert.match(html, /src="\.\/bootstrap\.js(?:\?[^"\s]+)?"/)
 assert.match(html, /href="\.\/styles\.css"/)
 
 const viewportAlias = await readFile(path.join(distRoot, 'viewport.html'), 'utf8')
@@ -126,10 +126,10 @@ assert.match(viewportAlias, /MoonTown · 能源谷/)
 assert.match(viewportAlias, /rel="canonical" href="\.\/index\.html"/)
 assert.doesNotMatch(viewportAlias, /standalone|legacy-viewport/i)
 assert.match(viewportAlias, /id="app"/)
-assert.match(viewportAlias, /src="\.\/bootstrap\.js"/)
+assert.match(viewportAlias, /src="\.\/bootstrap\.js(?:\?[^"\s]+)?"/)
 
 const bootstrap = await readFile(path.join(distRoot, 'bootstrap.js'), 'utf8')
-assert.match(bootstrap, /import\('\.\/main\.js'\)/)
+assert.match(bootstrap, /import\('\.\/main\.js(?:\?[^'\s]+)?'\)/)
 assert.doesNotMatch(bootstrap, /vite|react|typescript|\.tsx/i)
 assert.doesNotMatch(
   bootstrap,

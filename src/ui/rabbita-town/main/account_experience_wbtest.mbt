@@ -1,0 +1,115 @@
+///|
+fn account_experience_test_value(
+  plan : String,
+  roles? : Array[String] = ["member"],
+  active_tenant_name? : String,
+  home_surface? : String = "personal-town",
+) -> AccountExperience {
+  {
+    contract_id: "moontown.account-context.v1",
+    user_id: "test-user",
+    display_name: "Test User",
+    plan,
+    roles,
+    entitlements: [],
+    active_tenant_id: active_tenant_name.map(_ => "test-tenant"),
+    active_tenant_name,
+    tenant_choices: [],
+    home_surface,
+    visitor: plan == "visitor",
+  }
+}
+
+///|
+test "bootstrap projection accepts server tenant choices" {
+  let parsed : AccountExperience = @json.from_json(
+    @json.parse(
+      (
+        #|{"contract_id":"moontown.account-context.v1","user_id":"enterprise-user","display_name":"Enterprise User","plan":"enterprise","roles":["organization-admin"],"entitlements":["organization.manage"],"active_tenant_id":"energy-labs","active_tenant_name":"Energy Labs","tenant_choices":[{"tenant_id":"energy-labs","tenant_name":"Energy Labs","plan":"enterprise","roles":["organization-admin"]}],"home_surface":"enterprise-town","visitor":false}
+      ),
+    ),
+  )
+  assert_eq(parsed.kind(), EnterpriseExperience)
+  assert_eq(parsed.tenant_choices.length(), 1)
+}
+
+///|
+test "bootstrap projection accepts normalized paid tenant" {
+  let text =
+    #|{"contract_id":"moontown.account-context.v1","user_id":"paid-preview","display_name":"MoonTown Member","plan":"paid","roles":["member"],"entitlements":["town.public.explore","agent.personal.use"],"tenant_choices":[],"home_surface":"personal-town","visitor":false}
+  let parsed : AccountExperience = @json.from_json(@json.parse(text))
+  assert_eq(parsed.kind(), PaidExperience)
+}
+
+///|
+test "four account experiences keep distinct navigation" {
+  let visitor = account_experience_test_value(
+    "visitor",
+    home_surface="public-town",
+  )
+  let paid = account_experience_test_value("paid")
+  let enterprise = account_experience_test_value(
+    "enterprise",
+    active_tenant_name="Energy Labs",
+    home_surface="enterprise-town",
+  )
+  let admin = account_experience_test_value(
+    "enterprise",
+    roles=["platform-admin"],
+    home_surface="admin-console",
+  )
+  assert_eq(visitor.kind(), VisitorExperience)
+  assert_eq(paid.kind(), PaidExperience)
+  assert_eq(enterprise.kind(), EnterpriseExperience)
+  assert_eq(admin.kind(), AdminExperience)
+  assert_true(
+    account_navigation_items(VisitorExperience).any(item => {
+      item.label == "Join MoonTown"
+    }),
+  )
+  assert_true(
+    account_navigation_items(PaidExperience).any(item => {
+      item.label == "My Agent"
+    }),
+  )
+  assert_true(
+    account_navigation_items(EnterpriseExperience).any(item => {
+      item.label == "Members"
+    }),
+  )
+  assert_true(
+    account_navigation_items(AdminExperience).any(item => {
+      item.label == "Moderation"
+    }),
+  )
+}
+
+///|
+test "account navigation exposes plan tenant and accessible label" {
+  let html = @rabbita.render_to_string(
+    @rabbita.static_cell(
+      render_account_navigation(
+        account_experience_test_value(
+          "enterprise",
+          active_tenant_name="Energy Labs",
+          home_surface="enterprise-town",
+        ),
+      ),
+    ),
+  )
+  assert_true(html.contains("aria-label=\"Account navigation\""))
+  assert_true(html.contains("Enterprise"))
+  assert_true(html.contains("Energy Labs"))
+  assert_true(html.contains("Shared Agents"))
+  assert_true(html.contains("account-global-avatar"))
+}
+
+///|
+test "non-admin operations denial provides a recovery action" {
+  let html = @rabbita.render_to_string(
+    @rabbita.static_cell(render_account_operations_denied()),
+  )
+  assert_true(html.contains("Operations access is restricted"))
+  assert_true(html.contains("Return to the town"))
+  assert_true(html.contains("href=\"./index.html\""))
+}

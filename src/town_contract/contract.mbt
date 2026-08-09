@@ -69,6 +69,31 @@ pub fn miniapp_health_path() -> String {
 }
 
 ///|
+pub fn miniapp_visitor_session_path() -> String {
+  "/miniapp/auth/visitor"
+}
+
+///|
+pub fn miniapp_account_context_path() -> String {
+  "/miniapp/me"
+}
+
+///|
+pub fn miniapp_account_tenant_switch_path() -> String {
+  "/miniapp/account/tenant"
+}
+
+///|
+pub fn miniapp_enterprise_management_path() -> String {
+  "/miniapp/account/enterprise"
+}
+
+///|
+pub fn miniapp_admin_management_path() -> String {
+  "/miniapp/account/admin"
+}
+
+///|
 pub fn miniapp_snapshot_path() -> String {
   "/miniapp/town/snapshot"
 }
@@ -615,6 +640,36 @@ pub fn miniapp_contract() -> Json {
     "endpoints": [
       endpoint("health", "GET", miniapp_health_path(), "health.read"),
       endpoint("contract", "GET", miniapp_contract_path(), "contract.read"),
+      endpoint(
+        "create-visitor-session",
+        "POST",
+        miniapp_visitor_session_path(),
+        "account.visitor.create",
+      ),
+      endpoint(
+        "account-context",
+        "GET",
+        miniapp_account_context_path(),
+        "account.context.read",
+      ),
+      endpoint(
+        "switch-account-tenant",
+        "POST",
+        miniapp_account_tenant_switch_path(),
+        "account.tenant.switch",
+      ),
+      endpoint(
+        "enterprise-management",
+        "GET",
+        miniapp_enterprise_management_path(),
+        "account.enterprise.manage",
+      ),
+      endpoint(
+        "admin-management",
+        "GET",
+        miniapp_admin_management_path(),
+        "account.platform.manage",
+      ),
       endpoint(
         "load-town-snapshot",
         "GET",
