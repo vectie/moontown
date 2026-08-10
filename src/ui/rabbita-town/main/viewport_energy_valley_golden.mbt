@@ -95,8 +95,8 @@ fn render_energy_valley_topbar(
   } else {
     ""
   }
-  div(class="town-topbar-inner pointer-events-auto", [
-    div(class="town-topbar-leading", [
+  div(class="town-topbar-inner", [
+    div(class="town-topbar-leading pointer-events-auto", [
       div(class="town-topbar-identity", [
         img(src="moontown.svg", alt="", class="town-topbar-logo"),
         div(class="town-topbar-name", [
@@ -113,95 +113,100 @@ fn render_energy_valley_topbar(
         span(class="town-topbar-day", "第 \{energy_valley_sim_day(model)} 天"),
       ]),
     ]),
-    div(class="town-topbar-controls", [
-      div(class="town-topbar-weather", [
-        render_energy_valley_weather_button(dispatch, model, Sunny),
-        render_energy_valley_weather_button(dispatch, model, Cloudy),
-        render_energy_valley_weather_button(dispatch, model, Rain),
-        render_energy_valley_weather_button(dispatch, model, Snow),
-        button(
-          class="town-topbar-auto" + auto_class,
-          on_click=dispatch(ToggleEnergyWeatherAuto),
-          attrs=@html.Attrs::build()
-            .aria_label("自动天气")
-            .aria_pressed(
-              if model.energy_weather_auto {
-                "true"
-              } else {
-                "false"
-              },
-            ),
-          "自动",
-        ),
-      ]),
-      div(class="town-topbar-sep town-topbar-sep-wide", no_children()),
-      div(class="town-topbar-sim", [
-        button(
-          class="town-topbar-pause",
-          title="空格键",
-          on_click=dispatch(TogglePause),
-          attrs=@html.Attrs::build()
-            .aria_label(
-              if model.paused {
-                "继续模拟"
-              } else {
-                "暂停模拟"
-              },
-            )
-            .aria_pressed(if model.paused { "true" } else { "false" }),
-          if model.paused {
-            "▶"
-          } else {
-            "Ⅱ"
-          },
-        ),
-        render_energy_valley_speed_button(dispatch, model, 30, "1×"),
-        render_energy_valley_speed_button(dispatch, model, 60, "2×"),
-        render_energy_valley_speed_button(dispatch, model, 240, "8×"),
-      ]),
-    ]),
-    div(class="town-topbar-trailing", [
-      div(class="town-topbar-metrics", [
-        render_energy_valley_metric(
-          "居民",
-          energy_valley_known_resident_count(model).to_string(),
-        ),
-        render_energy_valley_metric("能源", model.energy.to_string()),
-        render_energy_valley_metric(
-          "预算",
-          energy_valley_model_budget(model).to_string(),
-        ),
-        render_energy_valley_metric(
-          "Agent",
-          energy_valley_environment_agent_count(model).to_string(),
-        ),
-      ]),
-      div(class="town-topbar-sep town-topbar-sep-wide", no_children()),
-      div(class="town-topbar-actions", [
-        button(
-          class="town-topbar-chip" + board_class,
-          on_click=dispatch(ToggleEnergyBoard),
-          attrs=@html.Attrs::build().aria_expanded(
-            if model.energy_board_open {
-              "true"
-            } else {
-              "false"
-            },
-          ),
-          "看板",
-        ),
-        button(
-          class="town-topbar-chip",
-          on_click=dispatch(OpenEnergyGuide),
-          "指南",
-        ),
-        button(
-          class="town-topbar-chip",
-          title="重置小镇",
-          on_click=dispatch(OpenEnergyReset),
-          "重置",
-        ),
-      ]),
+    div(class="town-topbar-trailing pointer-events-auto", [
+      @html.details(
+        class="town-topbar-disclosure",
+        attrs=@html.Attrs::build().name("moontown-hud-disclosure"),
+        [
+          @html.summary(class="town-topbar-disclosure-toggle", "镇况"),
+          div(class="town-topbar-menu", [
+            div(class="town-topbar-town-state", [
+              span(class="town-topbar-menu-title", "MoonTown 镇况"),
+              div(class="town-topbar-metrics", [
+                render_energy_valley_metric(
+                  "居民",
+                  energy_valley_known_resident_count(model).to_string(),
+                ),
+                render_energy_valley_metric("能源", model.energy.to_string()),
+                render_energy_valley_metric(
+                  "预算",
+                  energy_valley_model_budget(model).to_string(),
+                ),
+                render_energy_valley_metric(
+                  "Agent",
+                  energy_valley_environment_agent_count(model).to_string(),
+                ),
+              ]),
+            ]),
+            div(class="town-topbar-controls", [
+              div(class="town-topbar-control-group", [
+                span(class="town-topbar-control-label", "天气"),
+                div(class="town-topbar-weather", [
+                  render_energy_valley_weather_button(dispatch, model, Sunny),
+                  render_energy_valley_weather_button(dispatch, model, Cloudy),
+                  render_energy_valley_weather_button(dispatch, model, Rain),
+                  render_energy_valley_weather_button(dispatch, model, Snow),
+                  button(
+                    class="town-topbar-auto" + auto_class,
+                    on_click=dispatch(ToggleEnergyWeatherAuto),
+                    attrs=@html.Attrs::build()
+                      .aria_label("自动天气")
+                      .aria_pressed(
+                        if model.energy_weather_auto {
+                          "true"
+                        } else {
+                          "false"
+                        },
+                      ),
+                    "自动",
+                  ),
+                ]),
+              ]),
+              div(class="town-topbar-control-group", [
+                span(class="town-topbar-control-label", "模拟时间"),
+                div(class="town-topbar-sim", [
+                  button(
+                    class="town-topbar-pause",
+                    title="空格键",
+                    on_click=dispatch(TogglePause),
+                    attrs=@html.Attrs::build()
+                      .aria_label(
+                        if model.paused {
+                          "继续模拟"
+                        } else {
+                          "暂停模拟"
+                        },
+                      )
+                      .aria_pressed(if model.paused { "true" } else { "false" }),
+                    if model.paused {
+                      "继续"
+                    } else {
+                      "暂停"
+                    },
+                  ),
+                  render_energy_valley_speed_button(dispatch, model, 30, "1×"),
+                  render_energy_valley_speed_button(dispatch, model, 60, "2×"),
+                  render_energy_valley_speed_button(dispatch, model, 240, "8×"),
+                ]),
+              ]),
+            ]),
+            div(class="town-topbar-actions", [
+              button(
+                class="town-topbar-chip" + board_class,
+                on_click=dispatch(ToggleEnergyBoard),
+                attrs=@html.Attrs::build().aria_expanded(
+                  if model.energy_board_open {
+                    "true"
+                  } else {
+                    "false"
+                  },
+                ),
+                "运行看板",
+              ),
+            ]),
+          ]),
+        ],
+      ),
     ]),
   ])
 }
@@ -224,7 +229,7 @@ fn render_energy_valley_status_panel(
   } else {
     ""
   }
-  div(class="town-status" + open_class, [
+  div(id="town-runtime-status", class="town-status" + open_class, [
     button(
       class="town-status-summary",
       on_click=dispatch(ToggleEnergyStatus),
@@ -348,10 +353,13 @@ fn render_energy_valley_dock_button(
   cost : String,
   hotkey : String,
   building? : Bool = false,
+  primary? : Bool = false,
 ) -> @rabbita.Html {
+  let primary_class = if primary { " town-dock-primary" } else { "" }
   button(
     class="group town-dock-button relative flex flex-col items-center gap-0.5 rounded-xl px-2.5 py-1.5 transition" +
-      energy_valley_tool_active(model, tool),
+      energy_valley_tool_active(model, tool) +
+      primary_class,
     title=if cost.is_empty() { label } else { "\{label} · 花费 \{cost}" },
     on_click=dispatch(SetEnergyTool(tool)),
     attrs=@html.Attrs::build()
@@ -393,116 +401,138 @@ fn render_energy_valley_tool_dock(
 ) -> @rabbita.Html {
   let progress = quest_progress_count(model)
   let onboarding = current_quest(model) is Some(_)
-  // During onboarding expose only the control required by the current step.
-  // The full construction palette returns after graduation.
-  if onboarding && progress != 2 && progress != 4 {
+  // Onboarding gets only its required tool. Graduated residents get four
+  // everyday actions and one disclosure slot; all specialist tools remain
+  // keyboard-accessible without turning the map edge into a long palette.
+  if onboarding {
+    if progress == 2 {
+      return div(class="town-tool-dock pointer-events-auto", [
+        render_energy_valley_dock_button(
+          dispatch,
+          model,
+          InspectTool,
+          "巡",
+          "视察",
+          "",
+          "1",
+          primary=true,
+        ),
+      ])
+    }
+    if progress == 4 {
+      return div(class="town-tool-dock pointer-events-auto", [
+        render_energy_valley_dock_button(
+          dispatch,
+          model,
+          WorkshopTool,
+          "坊",
+          "创新工坊",
+          "400",
+          "7",
+          building=true,
+          primary=true,
+        ),
+      ])
+    }
     return @html.nothing
   }
-  let tools : Array[@rabbita.Html] = []
-  if !onboarding || progress == 2 {
-    tools.push(
-      render_energy_valley_dock_button(
-        dispatch,
-        model,
-        InspectTool,
-        "巡",
-        "视察",
-        "",
-        "1",
-      ),
-    )
-  }
-  if !onboarding {
-    tools.push(
-      render_energy_valley_dock_button(
-        dispatch,
-        model,
-        RoadTool,
-        "路",
-        "铺路",
-        "30 · 桥120",
-        "2",
-      ),
-    )
-    tools.push(
-      render_energy_valley_dock_button(
-        dispatch,
-        model,
-        ParkTool,
-        "绿",
-        "造林",
-        "20",
-        "3",
-      ),
-    )
-    tools.push(
-      render_energy_valley_dock_button(
-        dispatch,
-        model,
-        DemolishTool,
-        "拆",
-        "拆除",
-        "",
-        "4",
-      ),
-    )
-  }
-  if !onboarding {
-    tools.push(div(class="town-dock-divider", no_children()))
-  }
-  if !onboarding || progress == 4 {
-    tools.push(
-      render_energy_valley_dock_button(
-        dispatch,
-        model,
-        ResearchTowerTool,
-        "研",
-        "研发塔楼",
-        "800",
-        "5",
-        building=true,
-      ),
-    )
-    tools.push(
-      render_energy_valley_dock_button(
-        dispatch,
-        model,
-        LaboratoryTool,
-        "实",
-        "实验室",
-        "500",
-        "6",
-        building=true,
-      ),
-    )
-    tools.push(
-      render_energy_valley_dock_button(
-        dispatch,
-        model,
-        WorkshopTool,
-        "坊",
-        "创新工坊",
-        "400",
-        "7",
-        building=true,
-      ),
-    )
-  }
-  if !onboarding {
-    tools.push(
-      render_energy_valley_dock_button(
-        dispatch,
-        model,
-        TalentHomeTool,
-        "寓",
-        "人才公寓",
-        "350",
-        "8",
-        building=true,
-      ),
-    )
-  }
-  div(class="town-tool-dock pointer-events-auto", tools)
+  div(class="town-tool-dock pointer-events-auto", [
+    render_energy_valley_dock_button(
+      dispatch,
+      model,
+      InspectTool,
+      "巡",
+      "视察",
+      "",
+      "1",
+      primary=true,
+    ),
+    render_energy_valley_dock_button(
+      dispatch,
+      model,
+      RoadTool,
+      "路",
+      "铺路",
+      "30 · 桥120",
+      "2",
+      primary=true,
+    ),
+    render_energy_valley_dock_button(
+      dispatch,
+      model,
+      ParkTool,
+      "绿",
+      "造林",
+      "20",
+      "3",
+      primary=true,
+    ),
+    render_energy_valley_dock_button(
+      dispatch,
+      model,
+      WorkshopTool,
+      "坊",
+      "创新工坊",
+      "400",
+      "7",
+      building=true,
+      primary=true,
+    ),
+    @html.details(
+      class="town-dock-more",
+      attrs=@html.Attrs::build().name("moontown-hud-disclosure"),
+      [
+        @html.summary(
+          class="town-dock-button town-dock-primary town-dock-more-toggle",
+          [
+            span(class="town-dock-icon", "筑"),
+            span(class="town-dock-label", "扩建"),
+          ],
+        ),
+        div(class="town-dock-more-menu", [
+          render_energy_valley_dock_button(
+            dispatch,
+            model,
+            ResearchTowerTool,
+            "研",
+            "研发塔楼",
+            "800",
+            "5",
+            building=true,
+          ),
+          render_energy_valley_dock_button(
+            dispatch,
+            model,
+            LaboratoryTool,
+            "实",
+            "实验室",
+            "500",
+            "6",
+            building=true,
+          ),
+          render_energy_valley_dock_button(
+            dispatch,
+            model,
+            TalentHomeTool,
+            "寓",
+            "人才公寓",
+            "350",
+            "8",
+            building=true,
+          ),
+          render_energy_valley_dock_button(
+            dispatch,
+            model,
+            DemolishTool,
+            "拆",
+            "拆除",
+            "",
+            "4",
+          ),
+        ]),
+      ],
+    ),
+  ])
 }
 
 ///|

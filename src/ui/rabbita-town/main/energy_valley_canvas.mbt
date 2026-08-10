@@ -24,6 +24,7 @@ priv struct TownCanvasViewState {
   selected_place_id : @energy_valley_contract.StableId?
   selected_actor_id : @energy_valley_contract.StableId?
   runtime_agent_interaction_enabled : Bool
+  intersection_preview : Bool
   follow_enabled : Bool
   player_idle_position : (Double, Double)?
   player_motion : PlayerMotion?
@@ -52,6 +53,9 @@ extern "js" fn schedule_golden_valley_canvas(callback : () -> Unit) -> Unit =
 ///|
 extern "js" fn browser_stop_golden_valley_canvas() -> Unit =
   #| () => {
+  #|   delete globalThis.__moontownIntersectionStaticCanvas;
+  #|   delete globalThis.__moontownIntersectionFrameBenchmark;
+  #|   delete globalThis.__moontownIntersectionWalkerEdges;
   #|   const lifecycle = globalThis.__moontownGoldenValleyCanvasLifecycle;
   #|   if (typeof lifecycle?.stop === "function") {
   #|     lifecycle.stop(true);
@@ -81,6 +85,7 @@ extern "js" fn browser_stop_golden_valley_canvas() -> Unit =
 ///|
 fn stop_golden_valley_canvas() -> Unit {
   browser_stop_golden_valley_canvas()
+  golden_release_spring_civic_building_assets()
   golden_valley_clear_canvas_frame()
 }
 
@@ -88,8 +93,9 @@ fn stop_golden_valley_canvas() -> Unit {
 extern "js" fn install_golden_valley_canvas_input(
   render_callback : () -> Unit,
   release_frame_callback : () -> Unit,
+  camera_only : Bool,
 ) -> Unit =
-  #| (renderCallback, releaseFrameCallback) => {
+  #| (renderCallback, releaseFrameCallback, cameraOnly) => {
   #|   const canvas = globalThis.document?.getElementById("energy-valley-canvas");
   #|   if (!canvas) {
   #|     const lifecycle = globalThis.__moontownGoldenValleyCanvasLifecycle;
@@ -117,12 +123,14 @@ extern "js" fn install_golden_valley_canvas_input(
   #|   if (lifecycle) {
   #|     lifecycle.render = renderCallback;
   #|     lifecycle.releaseFrame = releaseFrameCallback;
+  #|     lifecycle.cameraOnly = Boolean(cameraOnly);
   #|     return;
   #|   }
   #|   lifecycle = {
   #|     canvas,
   #|     render: renderCallback,
   #|     releaseFrame: releaseFrameCallback,
+  #|     cameraOnly: Boolean(cameraOnly),
   #|     running: true,
   #|     animationRaf: 0,
   #|     transientRafs: new Set(),
@@ -242,10 +250,38 @@ extern "js" fn install_golden_valley_canvas_input(
   #|     globalThis.__moontownGoldenValleyActionX = x;
   #|     globalThis.__moontownGoldenValleyActionY = y;
   #|   };
+  #|   const updateCoordinateReadout = event => {
+  #|     const rect = canvas.getBoundingClientRect();
+  #|     const localX = event.clientX - rect.left;
+  #|     const localY = event.clientY - rect.top;
+  #|     const projectedDifference =
+  #|       (localX - rect.width / 2) / camera.z + camera.x;
+  #|     const projectedSum =
+  #|       (localY - rect.height / 2) / camera.z + camera.y;
+  #|     const worldX = (projectedDifference / 32 + projectedSum / 16) / 2;
+  #|     const worldY = (projectedSum / 16 - projectedDifference / 32) / 2;
+  #|     const inside = worldX >= 0 && worldX <= 256 &&
+  #|       worldY >= 0 && worldY <= 144;
+  #|     const xText = inside ? worldX.toFixed(1) : "—";
+  #|     const yText = inside ? worldY.toFixed(1) : "—";
+  #|     canvas.dataset.worldX = xText;
+  #|     canvas.dataset.worldY = yText;
+  #|     const root = canvas.closest?.(".energy-valley-golden");
+  #|     if (root) {
+  #|       root.dataset.energyValleyCoordinateX = xText;
+  #|       root.dataset.energyValleyCoordinateY = yText;
+  #|     }
+  #|     const readout = globalThis.document?.getElementById(
+  #|       "energy-valley-coordinate-readout",
+  #|     );
+  #|     if (readout) readout.textContent = `X ${xText} · Y ${yText}`;
+  #|   };
   #|   const onPointerDown = event => {
-  #|     if (event.button === 0) rememberAction(event);
+  #|     updateCoordinateReadout(event);
+  #|     if (event.button === 0 && !lifecycle.cameraOnly) rememberAction(event);
   #|     if (event.button === 1 || event.button === 2 ||
-  #|         (event.button === 0 && inspectSelected())) {
+  #|         (event.button === 0 &&
+  #|           (lifecycle.cameraOnly || inspectSelected()))) {
   #|       cameraDragging = true;
   #|       moved = false;
   #|       lastX = event.clientX;
@@ -253,7 +289,7 @@ extern "js" fn install_golden_valley_canvas_input(
   #|       activePointerId = event.pointerId;
   #|       canvas.setPointerCapture?.(event.pointerId);
   #|     } else if (event.button === 0) {
-  #|       painting = paintSelected();
+  #|       painting = !lifecycle.cameraOnly && paintSelected();
   #|       if (painting) {
   #|         activePointerId = event.pointerId;
   #|         canvas.setPointerCapture?.(event.pointerId);
@@ -261,6 +297,7 @@ extern "js" fn install_golden_valley_canvas_input(
   #|     }
   #|   };
   #|   const onPointerMove = event => {
+  #|     updateCoordinateReadout(event);
   #|     if (cameraDragging) {
   #|       if (Math.abs(event.clientX - lastX) > 2 ||
   #|           Math.abs(event.clientY - lastY) > 2) moved = true;
@@ -287,7 +324,7 @@ extern "js" fn install_golden_valley_canvas_input(
   #|   };
   #|   const onPointerUp = event => stopPointer(event);
   #|   const onClick = event => {
-  #|     if (moved) event.stopImmediatePropagation();
+  #|     if (lifecycle.cameraOnly || moved) event.stopImmediatePropagation();
   #|     moved = false;
   #|   };
   #|   const onContextMenu = event => event.preventDefault();
@@ -664,7 +701,7 @@ extern "js" fn golden_draw_road_detail(
   #|   );
   #|   traceRoad();
   #|   context.stroke();
-  #|   if ((major && zoom >= 0.28) || (!major && zoom >= 0.62)) {
+  #|   if (zoom >= 0.65) {
   #|     context.strokeStyle = "rgba(245,242,233,0.9)";
   #|     context.lineWidth = Math.max(0.7, (major ? 1.35 : 0.9) * zoom);
   #|     context.setLineDash([
@@ -683,35 +720,47 @@ extern "js" fn golden_draw_bridge_detail(
   sx : Double,
   sy : Double,
   zoom : Double,
+  mask : Int,
 ) -> Unit =
-  #| (context, sx, sy, zoom) => {
+  #| (context, sx, sy, zoom, mask) => {
+  #|   const northSouth = Number(Boolean(mask & 1)) + Number(Boolean(mask & 4));
+  #|   const eastWest = Number(Boolean(mask & 2)) + Number(Boolean(mask & 8));
+  #|   const alongNorthSouth = northSouth >= eastWest;
+  #|   const dx = 32 * zoom;
+  #|   const dy = (alongNorthSouth ? -16 : 16) * zoom;
+  #|   const from = [sx - dx, sy - dy - 3 * zoom];
+  #|   const to = [sx + dx, sy + dy - 3 * zoom];
+  #|   const length = Math.hypot(to[0] - from[0], to[1] - from[1]) || 1;
+  #|   const nx = -(to[1] - from[1]) / length;
+  #|   const ny = (to[0] - from[0]) / length;
+  #|   const trace = offset => {
+  #|     context.beginPath();
+  #|     context.moveTo(from[0] + nx * offset, from[1] + ny * offset);
+  #|     context.lineTo(to[0] + nx * offset, to[1] + ny * offset);
+  #|   };
   #|   context.save();
-  #|   context.beginPath();
-  #|   context.moveTo(sx, sy - 3 * zoom - 16 * zoom * 0.86);
-  #|   context.lineTo(sx + 32 * zoom * 0.86, sy - 3 * zoom);
-  #|   context.lineTo(sx, sy - 3 * zoom + 16 * zoom * 0.86);
-  #|   context.lineTo(sx - 32 * zoom * 0.86, sy - 3 * zoom);
-  #|   context.closePath();
-  #|   context.fillStyle = "#d4d3cc";
-  #|   context.fill();
+  #|   context.lineCap = "butt";
   #|   context.strokeStyle = "#405866";
-  #|   context.lineWidth = Math.max(0.8, 1.15 * zoom);
+  #|   context.lineWidth = Math.max(4.8, 22 * zoom);
+  #|   trace(0);
   #|   context.stroke();
-  #|   if (zoom >= 0.48) {
+  #|   context.strokeStyle = "#d4d3cc";
+  #|   context.lineWidth = Math.max(3.8, 18 * zoom);
+  #|   trace(0);
+  #|   context.stroke();
+  #|   if (zoom >= 0.65) {
   #|     context.strokeStyle = "rgba(245,242,233,0.8)";
   #|     context.lineWidth = Math.max(0.7, zoom);
-  #|     context.beginPath();
-  #|     context.moveTo(sx - 18 * zoom, sy - 3 * zoom);
-  #|     context.lineTo(sx + 18 * zoom, sy - 3 * zoom);
+  #|     context.setLineDash([Math.max(3, 6 * zoom), Math.max(2.5, 5 * zoom)]);
+  #|     trace(0);
   #|     context.stroke();
   #|   }
+  #|   context.setLineDash([]);
   #|   context.strokeStyle = "#20a9d0";
   #|   context.lineWidth = Math.max(0.9, 1.65 * zoom);
-  #|   context.beginPath();
-  #|   context.moveTo(sx - 32 * zoom * 0.8, sy - 9.72 * zoom);
-  #|   context.lineTo(sx + 32 * zoom * 0.8, sy - 9.72 * zoom);
-  #|   context.moveTo(sx - 32 * zoom * 0.8, sy + 3.72 * zoom);
-  #|   context.lineTo(sx + 32 * zoom * 0.8, sy + 3.72 * zoom);
+  #|   trace(Math.max(3.2, 9 * zoom));
+  #|   context.stroke();
+  #|   trace(-Math.max(3.2, 9 * zoom));
   #|   context.stroke();
   #|   context.restore();
   #| }
@@ -1563,34 +1612,134 @@ fn golden_diamond(
 }
 
 ///|
-fn golden_draw_tile(
-  context : @dom.CanvasRenderingContext2D,
+/// The rank grid is presentation-only: an unavailable or invalid grid falls
+/// back to the complete semantic graph, while UserDelta roads always remain
+/// visible at every zoom. The complete native mesh stays semantic-only when a
+/// curated grid is valid; revealing it at close zoom recreates the serpentine
+/// extraction artifacts that the schematic is meant to replace.
+fn golden_native_road_rank_visible(
+  rank_code : String,
+  custom : Bool,
+  presentation_ready : Bool,
+  zoom : Double,
+) -> Bool {
+  if custom || !presentation_ready {
+    return true
+  }
+  match rank_code {
+    "P" => true
+    "S" => zoom >= 0.34
+    "A" => zoom >= 0.58
+    _ => false
+  }
+}
+
+///|
+fn golden_native_road_visible(
+  road : TownCanvasRoadCell,
+  presentation_ready : Bool,
+  zoom : Double,
+) -> Bool {
+  golden_native_road_rank_visible(
+    reference_road_presentation_code_at(road.x, road.y),
+    road.custom,
+    presentation_ready,
+    zoom,
+  )
+}
+
+///|
+/// Filter the semantic connection mask through the same LOD predicate as the
+/// neighboring cells. This prevents visible corridors from sprouting stubs
+/// toward local streets that are intentionally hidden at overview zoom.
+fn golden_native_road_visible_mask(
+  roads : Map[String, TownCanvasRoadCell],
+  road : TownCanvasRoadCell,
+  presentation_ready : Bool,
+  zoom : Double,
+) -> Int {
+  let directions = [(0, -1), (1, 0), (0, 1), (-1, 0)]
+  let mut visible_mask = 0
+  for index in 0..<directions.length() {
+    let bit = 1 << index
+    if (road.mask & bit) == 0 {
+      continue
+    }
+    let (delta_x, delta_y) = directions[index]
+    match roads.get(town_canvas_road_key(road.x + delta_x, road.y + delta_y)) {
+      Some(neighbor) if golden_native_road_visible(
+          neighbor, presentation_ready, zoom,
+        ) => visible_mask = visible_mask | bit
+      _ => ()
+    }
+  }
+  visible_mask
+}
+
+///|
+fn golden_native_road_major(
+  road : TownCanvasRoadCell,
+  presentation_ready : Bool,
+) -> Bool {
+  if !presentation_ready || road.custom {
+    return road.road_class is @energy_valley_contract.Arterial
+  }
+  reference_road_presentation_code_at(road.x, road.y) == "P"
+}
+
+///|
+/// The old-map base chooses terrain before any road detail, bridge deck,
+/// building, label, or semantic hit area is overlaid. Preview mode shares this
+/// exact decision so hiding those overlays cannot rewrite grass or parcels.
+fn golden_canonical_old_map_road_visible(
+  road : TownCanvasRoadCell?,
+  authoritative_transport : Bool,
+  presentation_ready : Bool,
+) -> Bool {
+  match road {
+    Some(value) =>
+      if authoritative_transport {
+        value.custom
+      } else {
+        golden_native_road_visible(
+          value,
+          presentation_ready,
+          golden_valley_camera_zoom(),
+        )
+      }
+    None => true
+  }
+}
+
+///|
+fn golden_canonical_old_map_terrain(
   snapshot : @energy_valley_contract.TownSnapshot,
   roads : Map[String, TownCanvasRoadCell],
+  road : TownCanvasRoadCell?,
+  road_visible : Bool,
+  authoritative_transport : Bool,
   x : Int,
   y : Int,
-  viewport_width : Int,
-  viewport_height : Int,
-) -> Unit {
-  let sx = golden_screen_x(
-    x.to_double() + 0.5,
-    y.to_double() + 0.5,
-    viewport_width,
-  )
-  let sy = golden_screen_y(
-    x.to_double() + 0.5,
-    y.to_double() + 0.5,
-    viewport_height,
-  )
-  if sx < -80.0 ||
-    sx > viewport_width.to_double() + 80.0 ||
-    sy < -80.0 ||
-    sy > viewport_height.to_double() + 80.0 {
-    return
+) -> String {
+  if authoritative_transport || !road_visible {
+    town_snapshot_canvas_transport_terrain(snapshot, roads, road, x, y)
+  } else {
+    town_snapshot_canvas_terrain(snapshot, road, x, y)
   }
-  let road = roads.get(town_canvas_road_key(x, y))
-  let terrain = town_snapshot_canvas_terrain(snapshot, road, x, y)
-  let variation = town_snapshot_canvas_variation(snapshot, x, y)
+}
+
+///|
+/// Paint only the canonical old-map terrain/pattern. Road detail and bridge
+/// decks remain separate passes, allowing the authoring preview to omit them.
+fn golden_draw_canonical_old_map_terrain(
+  context : @dom.CanvasRenderingContext2D,
+  terrain : String,
+  sx : Double,
+  sy : Double,
+  variation : Double,
+  x : Int,
+  y : Int,
+) -> Unit {
   golden_diamond(context, sx, sy)
   if terrain == "water" || terrain == "bridge" {
     golden_draw_water_detail(
@@ -1624,22 +1773,91 @@ fn golden_draw_tile(
       false,
     )
   }
-  if terrain == "bridge" {
-    golden_draw_bridge_detail(context, sx, sy, golden_valley_camera_zoom())
+}
+
+///|
+fn golden_draw_tile(
+  context : @dom.CanvasRenderingContext2D,
+  snapshot : @energy_valley_contract.TownSnapshot,
+  roads : Map[String, TownCanvasRoadCell],
+  authoritative_transport : Bool,
+  presentation_ready : Bool,
+  bridge_graphics_visible : Bool,
+  terrain_override : String?,
+  x : Int,
+  y : Int,
+  viewport_width : Int,
+  viewport_height : Int,
+) -> Unit {
+  let sx = golden_screen_x(
+    x.to_double() + 0.5,
+    y.to_double() + 0.5,
+    viewport_width,
+  )
+  let sy = golden_screen_y(
+    x.to_double() + 0.5,
+    y.to_double() + 0.5,
+    viewport_height,
+  )
+  if sx < -80.0 ||
+    sx > viewport_width.to_double() + 80.0 ||
+    sy < -80.0 ||
+    sy > viewport_height.to_double() + 80.0 {
+    return
+  }
+  let road = roads.get(town_canvas_road_key(x, y))
+  let road_visible = golden_canonical_old_map_road_visible(
+    road, authoritative_transport, presentation_ready,
+  )
+  // Hidden native roads retain their semantic identity for pathfinding and
+  // placement, but recover neutral underlying terrain at this presentation LOD.
+  let terrain = terrain_override.unwrap_or(
+    golden_canonical_old_map_terrain(
+      snapshot, roads, road, road_visible, authoritative_transport, x, y,
+    ),
+  )
+  let variation = town_snapshot_canvas_variation(snapshot, x, y)
+  golden_draw_canonical_old_map_terrain(
+    context, terrain, sx, sy, variation, x, y,
+  )
+  match road {
+    Some(value) if bridge_graphics_visible &&
+      terrain == "bridge" &&
+      road_visible =>
+      golden_draw_bridge_detail(
+        context,
+        sx,
+        sy,
+        golden_valley_camera_zoom(),
+        golden_native_road_visible_mask(
+          roads,
+          value,
+          presentation_ready,
+          golden_valley_camera_zoom(),
+        ),
+      )
+    _ => ()
   }
 }
 
 ///|
 fn golden_draw_road_overlay_tile(
   context : @dom.CanvasRenderingContext2D,
+  roads : Map[String, TownCanvasRoadCell],
   road : TownCanvasRoadCell?,
+  presentation_ready : Bool,
   x : Int,
   y : Int,
   viewport_width : Int,
   viewport_height : Int,
 ) -> Unit {
   let semantic_road = match road {
-    Some(value) if !value.bridge => value
+    Some(value) if !value.bridge &&
+      golden_native_road_visible(
+        value,
+        presentation_ready,
+        golden_valley_camera_zoom(),
+      ) => value
     _ => return
   }
   let sx = golden_screen_x(
@@ -1663,8 +1881,13 @@ fn golden_draw_road_overlay_tile(
     sx,
     sy,
     golden_valley_camera_zoom(),
-    semantic_road.mask,
-    semantic_road.road_class is @energy_valley_contract.Arterial,
+    golden_native_road_visible_mask(
+      roads,
+      semantic_road,
+      presentation_ready,
+      golden_valley_camera_zoom(),
+    ),
+    golden_native_road_major(semantic_road, presentation_ready),
   )
 }
 
@@ -1861,6 +2084,7 @@ fn golden_draw_building(
   let sy = golden_screen_y(center_x, center_y, viewport_height)
   let height = building.floors.to_double() * 24.7
   let (roof, left, right) = golden_building_colors(building.style)
+  let zoom = golden_valley_camera_zoom()
   golden_draw_reference_building_shadow(
     context,
     sx,
@@ -1869,199 +2093,234 @@ fn golden_draw_building(
     building.depth.to_double(),
     golden_valley_camera_zoom(),
   )
-  if building.style == "market" {
-    for column in 0..<2 {
-      for row in 0..<2 {
-        let stall_x = building.x.to_double() +
-          column.to_double() * building.width.to_double() / 2.0 +
-          0.08
-        let stall_y = building.y.to_double() +
-          row.to_double() * building.depth.to_double() / 2.0 +
-          0.08
-        let stall_width = building.width.to_double() / 2.0 - 0.15
-        let stall_depth = building.depth.to_double() / 2.0 - 0.15
-        let stall_center_x = stall_x + stall_width / 2.0
-        let stall_center_y = stall_y + stall_depth / 2.0
-        golden_draw_iso_box(
-          context,
-          golden_screen_x(stall_center_x, stall_center_y, viewport_width),
-          golden_screen_y(stall_center_x, stall_center_y, viewport_height),
-          stall_width,
-          stall_depth,
-          6.65,
-          "#f0ead8",
-          "#c8bfa8",
-          "#aaa28c",
-        )
-      }
-    }
-  } else if building.style == "home" || building.style == "custom-home" {
-    let half_width = building.width.to_double() / 2.0
-    let first_center_x = building.x.to_double() + half_width / 2.0
-    let first_center_y = building.y.to_double() +
-      building.depth.to_double() / 2.0
-    golden_draw_iso_box(
-      context,
-      golden_screen_x(first_center_x, first_center_y, viewport_width),
-      golden_screen_y(first_center_x, first_center_y, viewport_height),
-      half_width,
-      building.depth.to_double(),
-      height * 0.85,
-      roof,
-      left,
-      right,
-    )
-    let second_depth = building.depth.to_double() - 0.3
-    let second_center_x = building.x.to_double() + half_width + half_width / 2.0
-    let second_center_y = building.y.to_double() + 0.3 + second_depth / 2.0
-    golden_draw_iso_box(
-      context,
-      golden_screen_x(second_center_x, second_center_y, viewport_width),
-      golden_screen_y(second_center_x, second_center_y, viewport_height),
-      half_width,
-      second_depth,
-      height,
-      if building.style == "custom-home" {
-        roof
-      } else {
-        "#f5f2e9"
-      },
-      if building.style == "custom-home" {
-        left
-      } else {
-        "#d7c9b4"
-      },
-      if building.style == "custom-home" {
-        right
-      } else {
-        "#b8895b"
-      },
-    )
-  } else if building.style == "tower" || building.style == "custom-tower" {
-    let rear_depth = building.depth.to_double() - 0.6
-    let rear_center_x = building.x.to_double() +
-      building.width.to_double() / 2.0
-    let rear_center_y = building.y.to_double() + 0.6 + rear_depth / 2.0
-    golden_draw_iso_box(
-      context,
-      golden_screen_x(rear_center_x, rear_center_y, viewport_width),
-      golden_screen_y(rear_center_x, rear_center_y, viewport_height),
+  // Landmark ownership wins even while its image is loading or unavailable;
+  // an ambient skin must never flash underneath a canonical module. Only a
+  // building with no landmark candidate may enter the bounded ambient pack.
+  let authored_asset_path = if golden_spring_building_asset_visible(
+      sx,
+      sy,
       building.width.to_double(),
-      rear_depth,
-      height,
-      roof,
-      left,
-      right,
-    )
-    let front_width = building.width.to_double() - 0.3
-    let front_center_x = building.x.to_double() + 0.3 + front_width / 2.0
-    let front_center_y = building.y.to_double() + 0.3
-    golden_draw_iso_box(
-      context,
-      golden_screen_x(front_center_x, front_center_y, viewport_width),
-      golden_screen_y(front_center_x, front_center_y, viewport_height),
-      front_width,
-      0.6,
-      height + 7.6,
-      roof,
-      left,
-      right,
-    )
+      building.depth.to_double(),
+      zoom,
+      viewport_width,
+      viewport_height,
+    ) {
+    golden_spring_building_asset_path(building, zoom)
   } else {
-    let body_height = if building.style == "garden" {
-      4.75
-    } else if building.style == "plaza" {
-      3.8
-    } else if building.style == "radar" {
-      height * 0.6
-    } else {
-      height
-    }
-    golden_draw_iso_box(
-      context,
-      sx,
-      sy,
-      building.width.to_double(),
-      building.depth.to_double(),
-      body_height,
-      roof,
-      left,
-      right,
-    )
+    None
   }
-  if building.style != "garden" &&
-    building.style != "plaza" &&
-    building.style != "market" {
-    let columns = if building.width <= 3 {
-      2
-    } else if building.width <= 6 {
-      3
+  let authored_skin_drawn = match authored_asset_path {
+    Some(asset_path) =>
+      golden_draw_spring_civic_building_asset(
+        context,
+        asset_path,
+        sx,
+        sy,
+        building.width.to_double(),
+        building.depth.to_double(),
+        zoom,
+        selected,
+      )
+    None => false
+  }
+  if !authored_skin_drawn {
+    if building.style == "market" {
+      for column in 0..<2 {
+        for row in 0..<2 {
+          let stall_x = building.x.to_double() +
+            column.to_double() * building.width.to_double() / 2.0 +
+            0.08
+          let stall_y = building.y.to_double() +
+            row.to_double() * building.depth.to_double() / 2.0 +
+            0.08
+          let stall_width = building.width.to_double() / 2.0 - 0.15
+          let stall_depth = building.depth.to_double() / 2.0 - 0.15
+          let stall_center_x = stall_x + stall_width / 2.0
+          let stall_center_y = stall_y + stall_depth / 2.0
+          golden_draw_iso_box(
+            context,
+            golden_screen_x(stall_center_x, stall_center_y, viewport_width),
+            golden_screen_y(stall_center_x, stall_center_y, viewport_height),
+            stall_width,
+            stall_depth,
+            6.65,
+            "#f0ead8",
+            "#c8bfa8",
+            "#aaa28c",
+          )
+        }
+      }
+    } else if building.style == "home" || building.style == "custom-home" {
+      let half_width = building.width.to_double() / 2.0
+      let first_center_x = building.x.to_double() + half_width / 2.0
+      let first_center_y = building.y.to_double() +
+        building.depth.to_double() / 2.0
+      golden_draw_iso_box(
+        context,
+        golden_screen_x(first_center_x, first_center_y, viewport_width),
+        golden_screen_y(first_center_x, first_center_y, viewport_height),
+        half_width,
+        building.depth.to_double(),
+        height * 0.85,
+        roof,
+        left,
+        right,
+      )
+      let second_depth = building.depth.to_double() - 0.3
+      let second_center_x = building.x.to_double() +
+        half_width +
+        half_width / 2.0
+      let second_center_y = building.y.to_double() + 0.3 + second_depth / 2.0
+      golden_draw_iso_box(
+        context,
+        golden_screen_x(second_center_x, second_center_y, viewport_width),
+        golden_screen_y(second_center_x, second_center_y, viewport_height),
+        half_width,
+        second_depth,
+        height,
+        if building.style == "custom-home" {
+          roof
+        } else {
+          "#f5f2e9"
+        },
+        if building.style == "custom-home" {
+          left
+        } else {
+          "#d7c9b4"
+        },
+        if building.style == "custom-home" {
+          right
+        } else {
+          "#b8895b"
+        },
+      )
+    } else if building.style == "tower" || building.style == "custom-tower" {
+      let rear_depth = building.depth.to_double() - 0.6
+      let rear_center_x = building.x.to_double() +
+        building.width.to_double() / 2.0
+      let rear_center_y = building.y.to_double() + 0.6 + rear_depth / 2.0
+      golden_draw_iso_box(
+        context,
+        golden_screen_x(rear_center_x, rear_center_y, viewport_width),
+        golden_screen_y(rear_center_x, rear_center_y, viewport_height),
+        building.width.to_double(),
+        rear_depth,
+        height,
+        roof,
+        left,
+        right,
+      )
+      let front_width = building.width.to_double() - 0.3
+      let front_center_x = building.x.to_double() + 0.3 + front_width / 2.0
+      let front_center_y = building.y.to_double() + 0.3
+      golden_draw_iso_box(
+        context,
+        golden_screen_x(front_center_x, front_center_y, viewport_width),
+        golden_screen_y(front_center_x, front_center_y, viewport_height),
+        front_width,
+        0.6,
+        height + 7.6,
+        roof,
+        left,
+        right,
+      )
     } else {
-      4
-    }
-    let rows = if building.floors > 3 { 3 } else { building.floors }
-    let lit_fraction = if hour < 6.0 || hour >= 19.0 { 0.62 } else { 0.0 }
-    golden_draw_iso_windows(
-      context,
-      sx,
-      sy,
-      building.width.to_double(),
-      building.depth.to_double(),
-      if building.style == "radar" {
+      let body_height = if building.style == "garden" {
+        4.75
+      } else if building.style == "plaza" {
+        3.8
+      } else if building.style == "radar" {
         height * 0.6
       } else {
         height
-      },
-      golden_valley_camera_zoom(),
-      columns,
-      rows,
-      lit_fraction,
-    )
-  }
-  if building.style == "lab" || building.style == "custom-lab" {
-    let first_center_x = building.x.to_double() +
-      building.width.to_double() / 2.0
-    let first_center_y = building.y.to_double() + 0.6
-    golden_draw_iso_box(
+      }
+      golden_draw_iso_box(
+        context,
+        sx,
+        sy,
+        building.width.to_double(),
+        building.depth.to_double(),
+        body_height,
+        roof,
+        left,
+        right,
+      )
+    }
+    if building.style != "garden" &&
+      building.style != "plaza" &&
+      building.style != "market" {
+      let columns = if building.width <= 3 {
+        2
+      } else if building.width <= 6 {
+        3
+      } else {
+        4
+      }
+      let rows = if building.floors > 3 { 3 } else { building.floors }
+      let lit_fraction = if hour < 6.0 || hour >= 19.0 { 0.62 } else { 0.0 }
+      golden_draw_iso_windows(
+        context,
+        sx,
+        sy,
+        building.width.to_double(),
+        building.depth.to_double(),
+        if building.style == "radar" {
+          height * 0.6
+        } else {
+          height
+        },
+        golden_valley_camera_zoom(),
+        columns,
+        rows,
+        lit_fraction,
+      )
+    }
+    if building.style == "lab" || building.style == "custom-lab" {
+      let first_center_x = building.x.to_double() +
+        building.width.to_double() / 2.0
+      let first_center_y = building.y.to_double() + 0.6
+      golden_draw_iso_box(
+        context,
+        golden_screen_x(first_center_x, first_center_y, viewport_width),
+        golden_screen_y(first_center_x, first_center_y, viewport_height),
+        1.4,
+        0.55,
+        height + 2.2,
+        "#83bed0",
+        "#6897a6",
+        "#507887",
+      )
+    }
+    golden_draw_reference_building_details(
       context,
-      golden_screen_x(first_center_x, first_center_y, viewport_width),
-      golden_screen_y(first_center_x, first_center_y, viewport_height),
-      1.4,
-      0.55,
-      height + 2.2,
-      "#83bed0",
-      "#6897a6",
-      "#507887",
-    )
-  }
-  golden_draw_reference_building_details(
-    context,
-    building.style,
-    building.name,
-    building.x.to_double(),
-    building.y.to_double(),
-    building.width.to_double(),
-    building.depth.to_double(),
-    height,
-    viewport_width,
-    viewport_height,
-    golden_animation_seconds(),
-    selected,
-  )
-  if building.style == "garden" {
-    let tree_x = building.x.to_double() + 0.5
-    let tree_y = building.y.to_double() + building.depth.to_double() - 0.5
-    golden_draw_reference_tree(
-      context,
-      golden_screen_x(tree_x, tree_y, viewport_width),
-      golden_screen_y(tree_x, tree_y, viewport_height),
-      golden_valley_camera_zoom() * 0.8,
-      golden_reference_hash("civic-ai-garden-\{building.x}-\{building.y}"),
+      building.style,
+      building.name,
+      building.x.to_double(),
+      building.y.to_double(),
+      building.width.to_double(),
+      building.depth.to_double(),
+      height,
+      viewport_width,
+      viewport_height,
       golden_animation_seconds(),
+      selected,
     )
+    if building.style == "garden" {
+      let tree_x = building.x.to_double() + 0.5
+      let tree_y = building.y.to_double() + building.depth.to_double() - 0.5
+      golden_draw_reference_tree(
+        context,
+        golden_screen_x(tree_x, tree_y, viewport_width),
+        golden_screen_y(tree_x, tree_y, viewport_height),
+        golden_valley_camera_zoom() * 0.8,
+        golden_reference_hash("civic-ai-garden-\{building.x}-\{building.y}"),
+        golden_animation_seconds(),
+      )
+    }
   }
-  let zoom = golden_valley_camera_zoom()
-  let label_x = if building.style == "tower" || building.style == "custom-tower" {
+  let label_x = if authored_skin_drawn {
+    sx
+  } else if building.style == "tower" || building.style == "custom-tower" {
     let front_width = building.width.to_double() - 0.3
     golden_screen_x(
       building.x.to_double() + 0.3 + front_width / 2.0,
@@ -2079,7 +2338,14 @@ fn golden_draw_building(
   } else {
     sx
   }
-  let top_center_y = if building.style == "garden" {
+  let top_center_y = if authored_skin_drawn {
+    golden_spring_civic_building_top_y(
+      sy,
+      building.width.to_double(),
+      building.depth.to_double(),
+      zoom,
+    )
+  } else if building.style == "garden" {
     sy - 18.0 * zoom
   } else if building.style == "plaza" {
     sy - 14.0 * zoom
@@ -2316,6 +2582,12 @@ fn draw_golden_valley_canvas(
   match @canvas.get_context2d(canvas_id) {
     None => false
     Some(context) => {
+      if view.intersection_preview &&
+        reference_intersection_preview_graph_ready() {
+        return draw_intersection_road_preview_frame(
+          context, snapshot, view, width, height,
+        )
+      }
       context.clear_rect(0.0, 0.0, width.to_double(), height.to_double())
       let hour = view.hour
       golden_draw_background(context, width, height, hour)
@@ -2329,23 +2601,65 @@ fn draw_golden_valley_canvas(
       let canvas_installations = town_snapshot_installations_by_depth(
         ecosystem_town_snapshot,
       )
+      let canvas_buildings = town_snapshot_canvas_buildings(
+        ecosystem_town_snapshot,
+      )
+      let authoritative_transport = authoritative_energy_valley_transport_ready()
+      let presentation_ready = !authoritative_transport &&
+        reference_road_presentation_snapshot_ready()
       for y in 0..<canvas_rows {
         for x in 0..<canvas_cols {
           golden_draw_tile(
-            context, ecosystem_town_snapshot, canvas_road_lookup, x, y, width, height,
-          )
-        }
-      }
-      for y in 0..<canvas_rows {
-        for x in 0..<canvas_cols {
-          golden_draw_road_overlay_tile(
             context,
-            canvas_road_lookup.get(town_canvas_road_key(x, y)),
+            ecosystem_town_snapshot,
+            canvas_road_lookup,
+            authoritative_transport,
+            presentation_ready,
+            true,
+            None,
             x,
             y,
             width,
             height,
           )
+        }
+      }
+      if authoritative_transport {
+        golden_draw_authoritative_energy_valley_transport_overlay(
+          context, canvas_buildings, width, height,
+        )
+        // The OSM layer replaces only the immutable base presentation. Local
+        // RoadTool deltas remain visible on top of it and keep their semantic
+        // masks, paving, and pathfinding identity.
+        for y in 0..<canvas_rows {
+          for x in 0..<canvas_cols {
+            let road = canvas_road_lookup.get(town_canvas_road_key(x, y))
+            match road {
+              Some(value) if town_canvas_road_overlay_visible_with_transport(
+                  value, true,
+                ) =>
+                golden_draw_road_overlay_tile(
+                  context, canvas_road_lookup, road, presentation_ready, x, y, width,
+                  height,
+                )
+              _ => ()
+            }
+          }
+        }
+      } else {
+        for y in 0..<canvas_rows {
+          for x in 0..<canvas_cols {
+            golden_draw_road_overlay_tile(
+              context,
+              canvas_road_lookup,
+              canvas_road_lookup.get(town_canvas_road_key(x, y)),
+              presentation_ready,
+              x,
+              y,
+              width,
+              height,
+            )
+          }
         }
       }
       golden_draw_town_snapshot_metro_underlay(
@@ -2359,8 +2673,24 @@ fn draw_golden_valley_canvas(
       golden_draw_ecosystem_pedestrian_spurs(
         context, ecosystem_town_snapshot, width, height,
       )
-      let canvas_buildings = town_snapshot_canvas_buildings(
-        ecosystem_town_snapshot,
+      let canvas_building_work_statuses : Array[String] = []
+      let canvas_building_status_tie_breaks : Array[String] = []
+      for semantic_building in canvas_buildings {
+        canvas_building_work_statuses.push(
+          town_snapshot_place_work_status(
+            ecosystem_town_snapshot,
+            semantic_building.place_id,
+          ),
+        )
+        canvas_building_status_tie_breaks.push(
+          golden_status_pin_tie_break(
+            semantic_building.module_key,
+            semantic_building.place_id,
+          ),
+        )
+      }
+      let canvas_status_pin_indices = golden_status_pin_indices(
+        canvas_building_work_statuses, canvas_building_status_tie_breaks,
       )
       golden_draw_selected_town_snapshot_relations(
         context,
@@ -2378,31 +2708,33 @@ fn draw_golden_valley_canvas(
         golden_prefers_reduced_motion(),
         view.selected_actor_id,
       )
-      for depth in 0..<(canvas_cols + canvas_rows) {
+      golden_begin_spring_civic_building_asset_frame()
+      for depth in 0..<(canvas_cols + canvas_rows + 32) {
         match canvas_installations.get(depth) {
           Some(installations) =>
             golden_draw_town_snapshot_installations(
-              context, installations, width, height, hour,
+              context, installations, authoritative_transport, width, height, hour,
             )
           None => ()
         }
         golden_draw_agents_at_depth(context, agents, depth, width, height)
-        for semantic_building in canvas_buildings {
-          if semantic_building.x + semantic_building.y + semantic_building.depth ==
+        for building_index, semantic_building in canvas_buildings {
+          if semantic_building.x +
+            semantic_building.y +
+            semantic_building.width +
+            semantic_building.depth ==
             depth {
             let selected = view.selected_place_id ==
               Some(semantic_building.place_id)
+            let work_status = if canvas_status_pin_indices.contains(
+                building_index,
+              ) {
+              canvas_building_work_statuses[building_index]
+            } else {
+              ""
+            }
             golden_draw_building(
-              context,
-              semantic_building,
-              selected,
-              town_snapshot_place_work_status(
-                ecosystem_town_snapshot,
-                semantic_building.place_id,
-              ),
-              width,
-              height,
-              hour,
+              context, semantic_building, selected, work_status, width, height, hour,
             )
             golden_draw_ecosystem_place_layer(
               context, ecosystem_town_snapshot, semantic_building, selected, width,
@@ -2411,6 +2743,7 @@ fn draw_golden_valley_canvas(
           }
         }
       }
+      golden_end_spring_civic_building_asset_frame()
       golden_draw_town_snapshot_metro_landmarks(
         context,
         ecosystem_town_snapshot,
@@ -2421,6 +2754,11 @@ fn draw_golden_valley_canvas(
       golden_draw_weather(context, view.weather, view.tick, width, height)
       golden_draw_day_night(context, width, height, hour)
       golden_ctx_global_alpha(context, 1.0)
+      // Intersection calibration is an authoring overlay on the accepted
+      // MoonTown frame. It never replaces or mutates the map beneath it.
+      if energy_valley_intersection_reference_requested() {
+        intersection_reference_draw_points(context, width, height)
+      }
       // Publish pointer truth only after this exact semantic frame completed a
       // real draw. A queued-but-not-painted Model must never replace the frame
       // that remains visible to the user.
@@ -2449,23 +2787,34 @@ fn render_golden_valley_canvas(
             stop_golden_valley_canvas()
           }
         },
-        () => golden_valley_clear_canvas_frame(),
+        () => {
+          golden_release_spring_civic_building_assets()
+          golden_valley_clear_canvas_frame()
+        },
+        view.intersection_preview,
       )
-      install_player_walk_keys()
+      if !view.intersection_preview {
+        install_player_walk_keys()
+      }
     } else {
       stop_golden_valley_canvas()
     }
   })
+  let canvas_attrs = if view.intersection_preview {
+    @html.Attrs::build().aria_label("能源谷路网地图")
+  } else {
+    @html.Attrs::build()
+    .aria_label("能源谷可交互等距地图")
+    .on_click(_ => {
+      dispatch(
+        EnergyCanvasClick(golden_valley_action_x(), golden_valley_action_y()),
+      )
+    })
+  }
   canvas(
     id="energy-valley-canvas",
     class="absolute inset-0 h-full w-full cursor-grab active:cursor-grabbing",
-    attrs=@html.Attrs::build()
-      .aria_label("能源谷可交互等距地图")
-      .on_click(_ => {
-        dispatch(
-          EnergyCanvasClick(golden_valley_action_x(), golden_valley_action_y()),
-        )
-      }),
+    attrs=canvas_attrs,
     no_children(),
   )
 }

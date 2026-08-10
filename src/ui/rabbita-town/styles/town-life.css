@@ -1786,3 +1786,47 @@
 .energy-valley-golden:has(.square-panel) .town-metric-wrap {
   display: none;
 }
+.energy-valley-osm-attribution {
+  position: absolute;
+  right: calc(16px + var(--town-safe-right, 0px));
+  bottom: calc(78px + var(--town-safe-bottom, 0px));
+  z-index: 18;
+  padding: 0.18rem 0.38rem;
+  border: 1px solid rgb(255 255 255 / 14%);
+  border-radius: 0.35rem;
+  background: rgb(11 28 34 / 68%);
+  font-size: 0.625rem;
+  line-height: 1.15;
+  pointer-events: auto;
+  backdrop-filter: blur(4px);
+}
+
+.energy-valley-osm-attribution a {
+  color: rgb(225 244 242 / 82%);
+  text-decoration: none;
+}
+
+.energy-valley-osm-attribution a:hover,
+.energy-valley-osm-attribution a:focus-visible {
+  color: #fff;
+  text-decoration: underline;
+}
+
+@media (max-width: 680px) {
+  .energy-valley-osm-attribution {
+    right: auto;
+    bottom: calc(164px + var(--town-safe-bottom, 0px));
+    left: 50%;
+    white-space: nowrap;
+    transform: translateX(-50%);
+  }
+}
+
+@media (orientation: landscape) and (max-height: 430px) {
+  .energy-valley-osm-attribution {
+    right: calc(8px + var(--town-safe-right, 0px));
+    bottom: calc(64px + var(--town-safe-bottom, 0px));
+    left: auto;
+    transform: none;
+  }
+}

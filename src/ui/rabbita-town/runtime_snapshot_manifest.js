@@ -111,6 +111,28 @@ export const WENYU_REFERENCE_ROADS_SNAPSHOT = {
   fallback: null,
 }
 
+export const WENYU_REFERENCE_INTERSECTIONS_SNAPSHOT = {
+  url: './tilemap/wenyu_reference_intersections.json',
+  jsonGlobal: '__wenyuReferenceIntersections',
+  fallback: null,
+}
+
+export const ENERGY_VALLEY_OSM_BLOCK_GRAPH_SNAPSHOT = {
+  url: './tilemap/energy-valley-osm-block-graph-v1.json',
+  jsonGlobal: '__moontownEnergyValleyOsmBlockGraph',
+  fallback: null,
+}
+
+// Authoring/validation descriptor only. Runtime bootstrap does not import the
+// transport loader and production packaging excludes both the loader and JSON
+// until the Wenyu georeference report is independently accepted.
+export const ENERGY_VALLEY_TRANSPORT_SNAPSHOT = {
+  url: './tilemap/energy-valley-transport-v1.json',
+  jsonGlobal: '__moontownEnergyValleyTransport',
+  fallback: null,
+  authoringOnly: true,
+}
+
 export const WENYU_TOWN_MODULES_SNAPSHOT = {
   url: './tilemap/modules/wenyu-town-modules.json',
   jsonGlobal: '__wenyuTownModulesJson',

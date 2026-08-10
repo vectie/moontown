@@ -7,14 +7,20 @@
   --town-safe-right: env(safe-area-inset-right, 0px);
   --town-safe-bottom: env(safe-area-inset-bottom, 0px);
   --town-safe-left: env(safe-area-inset-left, 0px);
-  --town-ink: #17231d;
-  --town-panel: rgba(24, 32, 27, 0.84);
-  --town-panel-strong: rgba(20, 28, 24, 0.94);
+  --town-ink: #fff8e8;
+  --town-ink-strong: #fffaf0;
+  --town-ink-soft: #b7c4b4;
+  --town-panel: #27362d;
+  --town-panel-strong: #1d2922;
   --town-cream: #fff8e8;
   --town-sand: #ead9b7;
   --town-leaf: #83b66b;
   --town-gold: #f2c94c;
   --town-line: rgba(255, 248, 232, 0.16);
+  --town-line-strong: rgba(255, 248, 232, 0.26);
+  --town-leaf-soft: rgba(131, 182, 107, 0.18);
+  --town-gold-soft: rgba(242, 201, 76, 0.18);
+  --town-shadow: 0 10px 24px rgba(10, 17, 12, 0.3);
   width: 100%;
   height: 100vh;
   height: 100dvh;
@@ -339,6 +345,77 @@
   z-index: 23;
 }
 
+/* Authoring-only junction calibration stays on top of the canonical map
+   without reflowing or replacing any normal MoonTown HUD surface. */
+.intersection-reference-legend {
+  position: absolute;
+  z-index: 22;
+  top: calc(72px + var(--town-safe-top));
+  right: calc(12px + var(--town-safe-right));
+  max-width: calc(100vw - 32px);
+  min-height: 30px;
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 5px 8px;
+  border: 1px solid rgba(79, 124, 255, 0.45);
+  border-radius: 999px;
+  color: #f8fafc;
+  background: rgba(20, 28, 42, 0.84);
+  box-shadow: 0 8px 22px rgba(15, 23, 42, 0.22);
+  backdrop-filter: blur(10px);
+  white-space: nowrap;
+  font-size: 10px;
+  font-weight: 800;
+  line-height: 1;
+}
+
+.intersection-reference-badge {
+  width: 18px;
+  height: 18px;
+  flex: 0 0 18px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: 999px;
+  color: #101827;
+  background: #4f7cff;
+  font-size: 11px;
+}
+
+.intersection-reference-detail {
+  color: #dbeafe;
+}
+
+.intersection-reference-cue {
+  padding: 3px 5px;
+  border-radius: 999px;
+  color: #312e81;
+  background: #e0e7ff;
+  font-size: 9px;
+}
+
+.intersection-reference-coordinate {
+  min-width: 88px;
+  padding: 3px 6px;
+  border: 1px solid rgba(255, 255, 255, 0.12);
+  border-radius: 999px;
+  color: #f8fafc;
+  background: rgba(2, 6, 23, 0.5);
+  font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace;
+  font-size: 9px;
+  font-variant-numeric: tabular-nums;
+  letter-spacing: 0.02em;
+  text-align: center;
+}
+
+@media (max-width: 680px) {
+  .intersection-reference-badge,
+  .intersection-reference-detail {
+    display: none;
+  }
+}
+
 .quest-tracker-action {
   width: 100%;
   min-height: 38px;
@@ -610,199 +687,164 @@
   }
 }
 
-/* Contemporary civic HUD
-   ----------------------
-   The visual world now uses a bright, matte civic-campus language. These
-   overrides make the interface feel like part of that same system: warm
-   white planes, deep blue-grey type, flat cyan/green state, and restrained
-   yellow emphasis. Fixed controls are assigned explicit lanes so the map
-   remains the primary surface at every supported viewport. */
-
-.energy-valley-golden {
-  --town-ink: #274557;
-  --town-ink-strong: #18394d;
-  --town-ink-soft: #617784;
-  --town-panel: rgba(245, 242, 233, 0.96);
-  --town-panel-strong: rgba(250, 248, 241, 0.98);
-  --town-cream: #f5f2e9;
-  --town-sand: #ede5d4;
-  --town-leaf: #6fa653;
-  --town-green-deep: #47764b;
-  --town-cyan: #20a9d0;
-  --town-cyan-soft: #d9eff4;
-  --town-water: #2798c2;
-  --town-gold: #e5b840;
-  --town-line: rgba(39, 69, 87, 0.16);
-  --town-line-strong: rgba(39, 69, 87, 0.26);
-  --town-shadow: 0 12px 30px rgba(24, 57, 77, 0.14);
-  color: var(--town-ink);
-  background: #dceff3 !important;
-}
-
-.town-topbar {
-  top: calc(12px + var(--town-safe-top));
-  right: 0;
-  left: 0;
-  display: flex;
-  justify-content: center;
-  padding-right: calc(16px + var(--town-safe-right));
-  padding-left: calc(16px + var(--town-safe-left));
-}
+/* MoonTown progressive disclosure
+   -------------------------------
+   Default HUD chrome stays below roughly twelve percent of the 1440x900
+   town view. MoonTown identity, the current quest, resident identity, and a
+   five-slot town-building dock stay visible; runtime and operator surfaces
+   remain accessible through native details/summary disclosures. */
 
 .town-topbar-inner {
-  width: min(
-    1320px,
-    calc(
-      100vw - 32px - var(--town-safe-left) - var(--town-safe-right)
-    )
+  width: calc(
+    100vw - 32px - var(--town-safe-left) - var(--town-safe-right)
   );
-  min-height: 62px;
-  display: grid;
-  grid-template-columns: minmax(270px, auto) minmax(320px, 1fr) minmax(410px, auto);
-  align-items: center;
-  gap: 14px;
-  padding: 8px 10px;
-  border: 1px solid rgba(255, 255, 255, 0.82);
-  border-radius: 17px;
-  color: var(--town-ink);
-  background: var(--town-panel-strong);
-  box-shadow: var(--town-shadow);
+  min-height: 0;
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 12px;
+  padding: 0;
+  border: 0;
+  border-radius: 0;
+  background: transparent !important;
+  box-shadow: none;
   backdrop-filter: none;
+  pointer-events: none;
 }
 
 .town-topbar-leading,
-.town-topbar-controls,
 .town-topbar-trailing {
-  min-width: 0;
+  min-height: 54px;
   display: flex;
   align-items: center;
-  gap: 10px;
+  gap: 8px;
+  padding: 5px 7px;
+  border: 1px solid var(--town-line);
+  border-radius: 12px;
+  color: var(--town-cream);
+  background: var(--town-panel-strong);
+  box-shadow: var(--town-shadow);
+  pointer-events: auto;
 }
 
 .town-topbar-leading {
-  justify-content: flex-start;
-}
-
-.town-topbar-controls {
-  justify-content: center;
+  flex: 0 1 auto;
 }
 
 .town-topbar-trailing {
-  justify-content: flex-end;
+  flex: 0 0 auto;
+  gap: 5px;
 }
 
-.town-topbar-identity {
-  min-width: 0;
-  gap: 10px;
+.town-onboarding .town-topbar-trailing {
+  display: none;
 }
 
 .town-topbar-logo {
-  width: 36px;
-  height: 36px;
-  flex-basis: 36px;
-  border: 1px solid rgba(39, 69, 87, 0.1);
-  border-radius: 10px;
-  background: #fff;
-  box-shadow: none;
-}
-
-.town-topbar-title {
-  color: var(--town-ink-strong);
-  font-size: 13.5px;
-  font-weight: 850;
-  letter-spacing: -0.01em;
-}
-
-.town-topbar-sub,
-.town-topbar-day {
-  color: var(--town-ink-soft);
-  font-weight: 700;
-}
-
-.town-topbar-sep {
+  width: 32px;
   height: 32px;
-  background: var(--town-line);
+  flex-basis: 32px;
 }
 
-.town-topbar-clock {
-  min-width: 68px;
+.town-topbar-identity {
+  min-width: 178px;
 }
 
-.town-topbar-time {
-  color: var(--town-ink-strong);
-  font-size: 13px;
-  font-weight: 850;
+.town-topbar-disclosure,
+.town-dock-more,
+.player-chip-disclosure,
+.town-utility-disclosure {
+  position: relative;
 }
 
-.town-topbar-weather,
-.town-topbar-sim,
-.town-topbar-actions {
-  gap: 3px;
-}
-
-.town-topbar-weather button,
-.town-topbar-sim button,
-.town-topbar-chip {
-  min-width: 44px;
-  min-height: 44px;
-  border: 1px solid transparent;
-  border-radius: 11px;
-  color: var(--town-ink-soft) !important;
-  background: transparent !important;
-  box-shadow: none !important;
-  opacity: 1 !important;
+.town-topbar-disclosure > summary,
+.town-dock-more > summary,
+.player-chip-disclosure > summary,
+.town-utility-disclosure > summary {
+  list-style: none;
+  cursor: pointer;
+  user-select: none;
   touch-action: manipulation;
 }
 
-.town-topbar-weather button:hover,
-.town-topbar-sim button:hover,
-.town-topbar-chip:hover {
-  border-color: var(--town-line);
-  color: var(--town-ink-strong) !important;
-  background: rgba(39, 69, 87, 0.06) !important;
+.town-topbar-disclosure > summary::-webkit-details-marker,
+.town-dock-more > summary::-webkit-details-marker,
+.player-chip-disclosure > summary::-webkit-details-marker,
+.town-utility-disclosure > summary::-webkit-details-marker {
+  display: none;
 }
 
-.town-topbar-weather button[aria-pressed="true"],
-.town-topbar-sim button[aria-pressed="true"],
-.town-topbar-auto-on,
-.town-topbar-chip-on {
-  border-color: rgba(32, 169, 208, 0.34) !important;
-  color: #17647c !important;
-  background: var(--town-cyan-soft) !important;
-  box-shadow: inset 0 0 0 1px rgba(255, 255, 255, 0.56) !important;
-}
-
-.town-topbar-weather-button {
-  padding-inline: 0 !important;
-  font-size: 11px !important;
+.town-topbar-disclosure-toggle {
+  min-width: 52px;
+  min-height: 44px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  border: 1px solid var(--town-line);
+  border-radius: 9px;
+  color: var(--town-sand);
+  background: rgba(255, 255, 255, 0.06);
+  font-size: 11px;
   font-weight: 850;
 }
 
-.town-topbar-pause,
-.town-topbar-speed-button {
-  font-size: 11px !important;
-  font-weight: 800;
+.town-topbar-disclosure[open] .town-topbar-disclosure-toggle {
+  border-color: rgba(242, 201, 76, 0.46);
+  color: #ffeaa3;
+  background: var(--town-gold-soft);
 }
 
-.town-topbar-auto,
-.town-topbar-chip {
-  padding: 6px 10px;
-  font-size: 10.5px;
-  font-weight: 800;
+.town-topbar-menu {
+  position: absolute;
+  top: calc(100% + 8px);
+  right: 0;
+  z-index: 4;
+  width: min(360px, calc(100vw - 16px));
+  max-height: calc(
+    100dvh - 82px - var(--town-safe-top) - var(--town-safe-bottom)
+  );
+  display: grid;
+  gap: 10px;
+  overflow-y: auto;
+  padding: 10px;
+  border: 1px solid var(--town-line-strong);
+  border-radius: 12px;
+  color: var(--town-cream);
+  background: var(--town-panel-strong);
+  box-shadow: var(--town-shadow);
+  overscroll-behavior: contain;
 }
 
-.town-topbar-metrics {
-  gap: 3px;
-  margin-left: 0;
+.town-topbar-town-state {
+  display: grid;
+  gap: 7px;
+  padding-bottom: 9px;
+  border-bottom: 1px solid var(--town-line);
 }
 
-.town-topbar-metrics > div,
+.town-topbar-menu-title {
+  color: var(--town-sand);
+  font-size: 10px;
+  font-weight: 850;
+  letter-spacing: 0.08em;
+}
+
+.town-topbar-town-state .town-topbar-metrics {
+  margin: 0;
+  display: grid;
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+  gap: 4px;
+}
+
 .town-topbar-metric {
-  min-width: 52px;
+  min-width: 0;
   display: grid;
   justify-items: center;
-  gap: 1px;
-  padding: 4px 6px;
+  gap: 2px;
+  padding: 5px 4px;
+  border: 1px solid rgba(255, 248, 232, 0.09);
+  border-radius: 8px;
+  background: rgba(255, 255, 255, 0.035);
 }
 
 .town-topbar-metric-label {
@@ -810,285 +852,219 @@
   font-size: 8px;
   font-weight: 750;
   letter-spacing: 0.05em;
-  line-height: 1;
 }
 
 .town-topbar-metric-value {
-  color: var(--town-ink-strong);
+  color: var(--town-cream);
   font-family: ui-monospace, SFMono-Regular, Menlo, monospace;
   font-size: 12px;
   font-weight: 850;
   font-variant-numeric: tabular-nums;
 }
 
-.town-topbar-actions {
-  margin-left: 0;
+.town-topbar-menu .town-topbar-controls {
+  display: flex !important;
+  flex-direction: column;
+  align-items: stretch;
+  gap: 8px;
 }
 
-.town-topbar button:focus-visible,
-.town-action:focus-visible,
-.town-dock-button:focus-visible,
-.quest-tracker-action:focus-visible,
-.chip-button:focus-visible,
-.phone-fab:focus-visible {
-  outline: 3px solid rgba(32, 169, 208, 0.78);
+.town-topbar-control-group {
+  display: grid;
+  grid-template-columns: 64px minmax(0, 1fr);
+  align-items: center;
+  gap: 8px;
+}
+
+.town-topbar-control-label {
+  color: var(--town-ink-soft);
+  font-size: 10px;
+  font-weight: 800;
+}
+
+.town-topbar-menu .town-topbar-weather,
+.town-topbar-menu .town-topbar-sim {
+  display: flex !important;
+  justify-content: flex-end;
+  gap: 4px;
+}
+
+.town-topbar-menu .town-topbar-weather button,
+.town-topbar-menu .town-topbar-sim button,
+.town-topbar-menu .town-topbar-chip {
+  min-width: 44px;
+  min-height: 44px;
+}
+
+.town-topbar-menu .town-topbar-actions {
+  display: flex !important;
+  justify-content: flex-end;
+  margin: 0;
+  padding-top: 8px;
+  border-top: 1px solid var(--town-line);
+}
+
+.town-topbar-menu .town-topbar-chip {
+  min-width: 96px;
+}
+
+.town-topbar-disclosure-toggle:focus-visible,
+.town-dock-more-toggle:focus-visible,
+.player-chip-menu-toggle:focus-visible,
+.town-action-menu-toggle:focus-visible {
+  outline: 3px solid rgba(242, 201, 76, 0.82);
   outline-offset: 2px;
 }
 
+/* MoonTown's social HUD is moss, cream, leaf, and 谷光 gold. Keep these
+   surfaces solid and quiet instead of borrowing the reference's white civic
+   cards, cyan resource strip, or glass treatment. */
 .town-status,
 .quest-tracker,
-.player-chip,
-.metro-legend,
-.town-generic-inspector,
-.town-dashboard {
-  border: 1px solid rgba(255, 255, 255, 0.8) !important;
-  color: var(--town-ink) !important;
+.player-chip {
+  border: 1px solid var(--town-line-strong) !important;
+  color: var(--town-cream) !important;
   background: var(--town-panel) !important;
   box-shadow: var(--town-shadow) !important;
   backdrop-filter: none !important;
 }
 
-.town-status {
-  border-radius: 15px;
-}
-
-.town-status-summary {
-  min-height: 48px;
-}
-
 .town-status-label,
 .quest-tracker-title,
-.player-chip-name,
-.metro-legend-title,
-.town-generic-inspector .text-amber-100,
-.town-dashboard .text-amber-100 {
-  color: var(--town-ink-strong) !important;
+.player-chip-name {
+  color: var(--town-cream) !important;
 }
 
 .town-status-detail,
 .town-status-note,
 .town-status-count,
 .town-status-chevron,
-.quest-tracker-hint,
-.player-chip-title,
-.metro-legend-sub,
-.town-generic-inspector .text-slate-400,
-.town-generic-inspector .text-slate-500,
-.town-dashboard .text-slate-400,
-.town-dashboard .text-slate-500 {
+.quest-tracker-hint {
   color: var(--town-ink-soft) !important;
 }
 
-.town-status-cta {
-  color: var(--town-ink-strong);
-  background: #bfe6ef;
-}
-
-.quest-tracker {
-  width: 320px;
-  border-color: rgba(32, 169, 208, 0.22) !important;
-  border-radius: 15px;
-  padding: 13px 14px;
-}
-
-.quest-tracker-done {
-  border-color: rgba(229, 184, 64, 0.34) !important;
-}
-
 .quest-tracker-badge {
-  color: #17647c;
-  background: var(--town-cyan-soft);
+  color: #d7f4c9;
+  background: var(--town-leaf-soft);
 }
 
 .quest-tracker-done .quest-tracker-badge {
-  color: #6f5812;
-  background: #f6e8b8;
-}
-
-.quest-tracker-bar {
-  background: rgba(39, 69, 87, 0.1);
-}
-
-.quest-tracker-fill {
-  background: var(--town-cyan);
+  color: #ffeaa3;
+  background: var(--town-gold-soft);
 }
 
 .quest-tracker-action {
   min-height: 44px;
-  border: 1px solid rgba(111, 88, 18, 0.16);
-  border-radius: 11px;
-  color: #3e3417;
+  border: 1px solid rgba(242, 201, 76, 0.42);
+  color: #252217;
   background: var(--town-gold);
   box-shadow: none;
-  touch-action: manipulation;
-}
-
-.quest-tracker-action:hover {
-  filter: brightness(1.03);
 }
 
 .quest-tracker-action-civic {
-  border-color: rgba(32, 169, 208, 0.24);
-  color: #174e60;
-  background: #cbeaf1;
+  border-color: rgba(131, 182, 107, 0.52);
+  color: #f1f8ec;
+  background: #4f744b;
 }
 
-.player-chip {
-  border-radius: 15px;
-  padding: 8px 10px;
-}
-
-.player-chip-dot {
-  border: 2px solid rgba(255, 255, 255, 0.86);
-  color: var(--town-ink-strong);
-  box-shadow: 0 0 0 1px var(--town-line);
+.player-chip-title {
+  color: #f7d978;
 }
 
 .chip-button {
   min-height: 44px;
   display: inline-flex;
   align-items: center;
-  border: 1px solid transparent;
-  border-radius: 10px;
-  color: var(--town-ink-soft);
-  background: rgba(39, 69, 87, 0.055);
-  touch-action: manipulation;
-}
-
-.chip-button:hover {
-  border-color: var(--town-line);
-  color: var(--town-ink-strong);
-  background: rgba(39, 69, 87, 0.08);
+  color: var(--town-sand);
+  background: rgba(255, 255, 255, 0.06);
 }
 
 .chip-button-active {
-  border-color: rgba(32, 169, 208, 0.3);
-  color: #17647c;
-  background: var(--town-cyan-soft);
-  box-shadow: none;
+  color: #ffeaa3;
+  background: var(--town-gold-soft);
+  box-shadow: inset 0 0 0 1px rgba(242, 201, 76, 0.38);
 }
 
-.chip-button-checkin {
-  color: var(--town-green-deep);
-  background: rgba(111, 166, 83, 0.14);
+/* Three optional map pins remain: quest, resident identity, and runtime.
+   Runtime is invisible until explicitly opened; transit and Map Lab retain
+   their functionality through the utility disclosure. */
+.town-graduated .metro-legend,
+.town-graduated .phone-fab,
+.town-graduated .moonclaw-pet,
+.energy-valley-golden .map-lab-launcher,
+.town-graduated .town-status:not(.town-status-open) {
+  display: none !important;
 }
 
-.phone-fab {
-  width: 52px;
-  height: 52px;
-  border: 1px solid rgba(91, 70, 13, 0.18);
-  border-radius: 15px;
-  color: #3e3417;
-  background: var(--town-gold);
-  box-shadow: 0 10px 24px rgba(74, 62, 26, 0.18);
+.town-graduated .quest-tracker-done {
+  width: 310px;
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) auto;
+  align-items: center;
+  gap: 8px;
+  padding: 8px 10px;
 }
 
-.phone-fab:hover {
-  transform: translateY(-1px);
+.town-graduated .quest-tracker-done .quest-tracker-head {
+  min-width: 0;
 }
 
-.phone-fab-icon {
-  font-size: 0;
+.town-graduated .quest-tracker-done .quest-tracker-title {
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
 }
 
-.phone-fab-icon::before {
-  content: "联";
-  font-size: 15px;
-  font-weight: 900;
+.town-graduated .quest-tracker-done .quest-tracker-hint {
+  display: none;
 }
 
-.phone-fab-badge {
-  background: #b96f52;
-  box-shadow: none;
+.town-graduated .quest-tracker-done .quest-tracker-action {
+  width: auto;
+  min-width: 112px;
+  margin-top: 0;
+  padding-inline: 12px;
 }
 
-.metro-legend {
-  top: calc(88px + var(--town-safe-top));
-  border-color: rgba(39, 152, 194, 0.28) !important;
-  border-radius: 13px;
-  padding: 7px 11px;
-}
-
-.metro-legend-badge {
-  color: #fff;
-  background: var(--town-water);
-}
-
+/* Five MoonTown slots: inspect, road, park, workshop, and expansion. */
 .town-tool-wrap {
-  bottom: calc(16px + var(--town-safe-bottom));
-  z-index: 24;
+  z-index: 25;
 }
 
 .town-tool-dock {
-  width: min(
-    330px,
-    calc(
-      100vw - 32px - var(--town-safe-left) - var(--town-safe-right)
-    )
-  );
+  width: max-content;
   max-width: calc(
     100vw - 32px - var(--town-safe-left) - var(--town-safe-right)
   );
   display: flex;
   align-items: center;
-  gap: 4px;
-  overflow-x: auto;
-  padding: 6px;
-  border: 1px solid rgba(255, 255, 255, 0.84) !important;
-  border-radius: 16px;
-  color: var(--town-ink) !important;
-  background:
-    linear-gradient(
-      90deg,
-      transparent 0,
-      transparent calc(100% - 28px),
-      rgba(39, 69, 87, 0.11) 100%
-    ),
-    var(--town-panel-strong) !important;
+  gap: 3px;
+  overflow: visible;
+  padding: 5px;
+  border: 1px solid var(--town-line-strong) !important;
+  border-radius: 13px;
+  color: var(--town-cream) !important;
+  background: var(--town-panel-strong) !important;
   box-shadow: var(--town-shadow);
-  scroll-snap-type: x proximity;
-  scrollbar-width: thin;
-  scrollbar-color: rgba(32, 169, 208, 0.5) transparent;
-  backdrop-filter: none;
-}
-
-.town-tool-dock::-webkit-scrollbar {
-  display: block;
-  height: 4px;
-}
-
-.town-tool-dock::-webkit-scrollbar-track {
-  background: transparent;
-}
-
-.town-tool-dock::-webkit-scrollbar-thumb {
-  border-radius: 999px;
-  background: rgba(32, 169, 208, 0.5);
+  scrollbar-width: none;
 }
 
 .town-dock-button {
-  min-width: 60px;
-  min-height: 60px;
-  flex: 0 0 auto;
-  scroll-snap-align: start;
   border: 1px solid transparent;
-  border-radius: 11px;
-  color: var(--town-ink-soft);
+  border-radius: 10px;
+  color: var(--town-sand);
   background: transparent !important;
-  box-shadow: none !important;
   touch-action: manipulation;
 }
 
 .town-dock-button:hover {
-  border-color: var(--town-line);
-  background: rgba(39, 69, 87, 0.055) !important;
+  background: rgba(255, 255, 255, 0.07) !important;
 }
 
 .town-dock-button[aria-pressed="true"] {
-  border-color: rgba(32, 169, 208, 0.34);
-  color: #17647c;
-  background: var(--town-cyan-soft) !important;
-  box-shadow: inset 0 -2px var(--town-cyan) !important;
+  color: #ffeaa3;
+  background: var(--town-gold-soft) !important;
+  box-shadow: inset 0 -2px var(--town-gold) !important;
 }
 
 .town-dock-icon {
@@ -1096,22 +1072,21 @@
   height: 28px;
   display: grid;
   place-items: center;
-  border: 1px solid rgba(39, 69, 87, 0.12);
+  border: 1px solid rgba(255, 248, 232, 0.12);
   border-radius: 8px;
-  color: var(--town-ink-strong);
+  color: #2a2c20;
   background: var(--town-sand);
   font-size: 12px !important;
   font-weight: 900;
 }
 
 .town-dock-icon-building {
-  color: #fff !important;
-  background: #3d7892 !important;
-  box-shadow: none !important;
+  color: #eef7e8 !important;
+  background: #587852 !important;
 }
 
 .town-dock-label {
-  color: var(--town-ink-strong) !important;
+  color: var(--town-cream) !important;
   font-weight: 750;
 }
 
@@ -1119,169 +1094,167 @@
   color: var(--town-ink-soft);
 }
 
-.town-dock-hotkey {
-  color: var(--town-ink-soft) !important;
-  background: #fff !important;
-}
-
-.town-dock-divider {
+.town-tool-dock::-webkit-scrollbar {
   display: none;
 }
 
-.town-onboarding .town-tool-dock {
-  width: max-content;
+.town-dock-primary {
+  min-width: 58px;
+  min-height: 58px;
+  padding-inline: 5px;
 }
 
-.town-actions {
-  right: calc(16px + var(--town-safe-right));
-  bottom: calc(164px + var(--town-safe-bottom));
+.town-dock-more-toggle {
   display: flex;
+  flex-direction: column;
   align-items: center;
+  justify-content: center;
   gap: 2px;
-  padding: 4px;
-  border: 1px solid rgba(255, 255, 255, 0.82);
-  border-radius: 14px;
+  padding: 6px 10px;
+}
+
+.town-dock-more[open] .town-dock-more-toggle {
+  border-color: rgba(242, 201, 76, 0.46);
+  color: #ffeaa3;
+  background: var(--town-gold-soft) !important;
+}
+
+.town-dock-more-menu {
+  position: absolute;
+  right: 0;
+  bottom: calc(100% + 10px);
+  z-index: 2;
+  display: grid;
+  grid-template-columns: repeat(4, minmax(60px, 1fr));
+  gap: 4px;
+  padding: 6px;
+  border: 1px solid var(--town-line-strong);
+  border-radius: 12px;
+  color: var(--town-cream);
   background: var(--town-panel-strong);
   box-shadow: var(--town-shadow);
 }
 
-.town-action {
-  min-height: 44px;
-  border: 1px solid transparent;
-  border-radius: 10px;
-  padding: 7px 11px;
-  color: var(--town-ink-soft);
-  background: transparent;
-  box-shadow: none;
-  touch-action: manipulation;
+.town-dock-more-menu .town-dock-button {
+  min-width: 60px;
+  min-height: 60px;
 }
 
-.town-action:hover {
-  border-color: var(--town-line);
-  color: var(--town-ink-strong);
-  background: rgba(39, 69, 87, 0.055);
+.town-dock-label,
+.town-dock-cost {
+  white-space: nowrap;
 }
 
-.town-action-secondary {
-  color: rgba(39, 69, 87, 0.66);
+/* Resident actions retain 44px targets without remaining permanently open. */
+.player-chip {
+  position: relative;
+  min-height: 54px;
+  overflow: visible;
+  padding: 6px 8px;
 }
 
-.town-action-secondary:hover,
-.town-action-secondary:focus-visible {
-  color: var(--town-ink-strong);
+.player-chip-id {
+  max-width: 170px;
 }
 
-.town-action-primary:not(.town-action-active) {
-  border-color: rgba(32, 169, 208, 0.22);
-  color: #17647c;
-  background: rgba(217, 239, 244, 0.7);
-}
-
-.town-action-active {
-  border-color: rgba(229, 184, 64, 0.34) !important;
-  color: #6f5812 !important;
-  background: #f6e8b8 !important;
-}
-
-.town-action-icon {
-  width: 44px;
-  padding-inline: 0;
-}
-
-.town-generic-inspector,
-.town-dashboard {
-  border-color: var(--town-line-strong) !important;
-}
-
-.town-generic-inspector .bg-white\/\[0\.04\],
-.town-dashboard .bg-white\/5,
-.town-dashboard .bg-white\/\[0\.03\] {
-  background: rgba(39, 69, 87, 0.055) !important;
-}
-
-.town-generic-inspector .text-slate-200,
-.town-dashboard .text-slate-200,
-.town-dashboard .text-emerald-300 {
-  color: var(--town-ink-strong) !important;
-}
-
-.town-dashboard {
-  width: min(38rem, calc(100vw - 32px)) !important;
-}
-
-.energy-valley-golden .map-lab-launcher {
-  right: calc(18px + var(--town-safe-right));
-  bottom: calc(18px + var(--town-safe-bottom));
-  width: 44px;
-  min-width: 44px;
+.player-chip-menu-toggle {
+  min-width: 52px;
   min-height: 44px;
   justify-content: center;
+  padding-inline: 9px;
+}
+
+.player-chip-disclosure[open] .player-chip-menu-toggle {
+  border-color: rgba(242, 201, 76, 0.42);
+  color: #ffeaa3;
+  background: var(--town-gold-soft);
+}
+
+.player-chip-menu {
+  position: absolute;
+  bottom: calc(100% + 10px);
+  left: 0;
+  z-index: 2;
+  width: 220px;
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 5px;
   padding: 6px;
-  border-color: rgba(39, 69, 87, 0.18);
-  color: var(--town-ink-soft);
-  background: rgba(245, 242, 233, 0.88);
-  box-shadow: 0 7px 18px rgba(24, 57, 77, 0.1);
-  opacity: 0.78;
-  backdrop-filter: none;
-}
-
-.energy-valley-golden .map-lab-launcher:hover,
-.energy-valley-golden .map-lab-launcher:focus-visible,
-.energy-valley-golden .map-lab-launcher.is-open {
-  border-color: rgba(32, 169, 208, 0.38);
-  color: #17647c;
+  border: 1px solid var(--town-line-strong);
+  border-radius: 13px;
   background: var(--town-panel-strong);
-  opacity: 1;
+  box-shadow: var(--town-shadow);
 }
 
-.energy-valley-golden .map-lab-launcher > span:last-child {
-  display: none;
+.player-chip-menu .chip-button {
+  min-width: 0;
+  justify-content: center;
 }
 
-.energy-valley-golden .map-lab-launcher-mark {
-  width: 24px;
-  height: 24px;
-  border-color: rgba(39, 69, 87, 0.18);
-  color: var(--town-ink-soft);
+/* One quiet menu pin replaces the former full resident/knowledge/ops rail. */
+.town-actions.town-utility-disclosure {
+  right: calc(16px + var(--town-safe-right));
+  bottom: calc(16px + var(--town-safe-bottom));
+  display: block;
+  max-width: none;
+  overflow: visible;
+  padding: 0;
+  border: 0;
+  border-radius: 0;
+  background: transparent;
+  box-shadow: none;
 }
 
-.town-onboarding .town-topbar {
-  justify-content: flex-start;
+.town-action-menu-toggle {
+  min-width: 52px;
+  min-height: 52px;
+  padding: 8px;
+  border-color: var(--town-line-strong);
+  color: var(--town-sand);
+  background: var(--town-panel-strong);
+  box-shadow: var(--town-shadow);
 }
 
-.town-onboarding .town-topbar-inner {
-  width: auto;
-  grid-template-columns: auto;
-  margin-right: 0;
+.town-utility-disclosure[open] .town-action-menu-toggle {
+  border-color: rgba(242, 201, 76, 0.46);
+  color: #ffeaa3;
+  background: var(--town-gold-soft);
 }
 
-.town-onboarding .town-topbar-controls,
-.town-onboarding .town-topbar-trailing {
-  display: none;
+.town-utility-panel {
+  position: absolute;
+  right: 0;
+  bottom: calc(100% + 10px);
+  z-index: 2;
+  width: min(330px, calc(100vw - 16px));
+  max-height: calc(
+    100dvh - 96px - var(--town-safe-top) - var(--town-safe-bottom)
+  );
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 5px;
+  overflow-y: auto;
+  padding: 7px;
+  border: 1px solid var(--town-line-strong);
+  border-radius: 12px;
+  color: var(--town-cream);
+  background: var(--town-panel-strong);
+  box-shadow: var(--town-shadow);
+  overscroll-behavior: contain;
 }
 
-@media (max-width: 1180px) {
-  .town-topbar-inner {
-    grid-template-columns: minmax(250px, 1fr) auto;
-  }
+.town-utility-panel .town-action {
+  min-width: 0;
+  min-height: 44px;
+  justify-content: center;
+  padding: 7px 6px;
+  text-align: center;
+}
 
-  .town-topbar-controls {
-    display: none;
-  }
-
-  .town-topbar-trailing {
-    justify-content: flex-end;
-  }
-
-  .town-actions {
-    max-width: calc(100vw - 32px);
-    overflow-x: auto;
-    scrollbar-width: none;
-  }
-
-  .town-actions::-webkit-scrollbar {
-    display: none;
-  }
+.energy-valley-golden:has(.town-status-open) .town-player-wrap,
+.energy-valley-golden:has(.town-status-open) .town-utility-disclosure {
+  visibility: hidden;
+  pointer-events: none;
 }
 
 @media (max-width: 900px) {
@@ -1289,294 +1262,605 @@
     width: calc(
       100vw - 24px - var(--town-safe-left) - var(--town-safe-right)
     );
-    grid-template-columns: minmax(220px, 1fr) auto;
-    gap: 8px;
-  }
-
-  .town-topbar-actions,
-  .town-topbar-trailing > .town-topbar-sep,
-  .town-topbar-metric:first-child,
-  .town-topbar-metric:last-child {
-    display: none;
-  }
-
-  .town-topbar-metrics {
     display: flex;
   }
 
-  .town-inspector-wrap,
-  .town-metric-wrap {
+  .town-actions.town-utility-disclosure {
     right: calc(12px + var(--town-safe-right));
-  }
-
-  .energy-valley-golden .map-lab-launcher {
-    display: none;
+    bottom: calc(12px + var(--town-safe-bottom));
   }
 }
 
 @media (max-width: 680px) {
-  .town-topbar {
-    top: calc(8px + var(--town-safe-top));
-    padding-right: calc(8px + var(--town-safe-right));
-    padding-left: calc(8px + var(--town-safe-left));
+  .town-graduated .quest-tracker-done {
+    display: none;
   }
 
   .town-topbar-inner {
     width: calc(
       100vw - 16px - var(--town-safe-left) - var(--town-safe-right)
     );
-    min-height: 54px;
-    grid-template-columns: minmax(0, 1fr) auto;
-    padding: 6px 8px;
-    border-radius: 14px;
+    gap: 6px;
+  }
+
+  .town-topbar-leading,
+  .town-topbar-trailing {
+    min-height: 50px;
+    padding: 3px 5px;
+    border-radius: 13px;
   }
 
   .town-topbar-leading {
     min-width: 0;
+    flex: 1 1 auto;
+  }
+
+  .town-topbar-identity {
+    min-width: 0;
+    gap: 7px;
   }
 
   .town-topbar-clock,
   .town-topbar-leading > .town-topbar-sep,
-  .town-topbar-metric:not(:nth-child(2)) {
+  .town-topbar-sub {
     display: none;
   }
 
-  .town-topbar-logo {
-    width: 32px;
-    height: 32px;
-    flex-basis: 32px;
-  }
-
   .town-topbar-title {
-    font-size: 12px;
-  }
-
-  .town-topbar-sub {
-    max-width: 48vw;
-    overflow: hidden;
-    text-overflow: ellipsis;
+    max-width: 44vw;
   }
 
   .town-topbar-metric {
-    min-width: 48px;
-    padding-inline: 4px;
+    min-width: 46px;
+    padding-inline: 3px;
   }
 
-  .town-quest-wrap {
-    top: calc(72px + var(--town-safe-top));
-    right: calc(8px + var(--town-safe-right));
-    bottom: auto;
+  .town-topbar-disclosure-toggle {
+    min-width: 48px;
+  }
+
+  .town-topbar-menu {
+    right: -4px;
+    width: min(340px, calc(100vw - 16px));
+  }
+
+  .town-graduated .town-player-wrap {
+    right: auto;
+    bottom: calc(100px + var(--town-safe-bottom));
     left: calc(8px + var(--town-safe-left));
   }
 
-  .quest-tracker {
-    width: 100%;
+  .town-player-wrap .player-chip {
+    width: auto;
+    max-width: calc(100vw - 84px);
+    overflow: visible;
   }
 
-  .town-graduated .town-quest-wrap {
-    top: calc(128px + var(--town-safe-top));
-    display: flex;
+  .player-chip-title {
+    display: none;
   }
 
-  .town-graduated .quest-tracker-done {
-    display: grid;
-    grid-template-columns: minmax(0, 1fr) auto;
-    align-items: center;
-    gap: 8px;
-    padding: 8px 10px;
+  .player-chip-id {
+    max-width: 32vw;
   }
 
-  .town-graduated .quest-tracker-done .quest-tracker-head {
-    min-width: 0;
-  }
-
-  .town-graduated .quest-tracker-done .quest-tracker-title {
+  .player-chip-name {
     overflow: hidden;
     text-overflow: ellipsis;
     white-space: nowrap;
   }
 
-  .town-graduated .quest-tracker-done .quest-tracker-hint {
-    display: none;
-  }
-
-  .town-graduated .quest-tracker-done .quest-tracker-action {
-    width: auto;
-    min-width: 104px;
-    margin-top: 0;
-    padding-inline: 12px;
-  }
-
-  .town-graduated .town-status-wrap {
-    top: calc(72px + var(--town-safe-top));
-    right: calc(68px + var(--town-safe-right));
-    bottom: auto;
-    left: calc(8px + var(--town-safe-left));
-  }
-
-  .town-graduated .town-status {
-    width: 100%;
-  }
-
-  .town-graduated .town-actions {
-    top: calc(188px + var(--town-safe-top));
-    right: calc(8px + var(--town-safe-right));
-    bottom: auto;
-    left: calc(8px + var(--town-safe-left));
-    max-width: none;
-    flex-direction: row;
-    overflow-x: auto;
-  }
-
-  .energy-valley-golden.town-graduated:has(.town-status-open) .town-actions {
-    visibility: hidden;
-    pointer-events: none;
-  }
-
-  .town-onboarding .town-actions {
+  .town-actions.town-utility-disclosure {
+    position: absolute;
     top: auto;
     right: calc(8px + var(--town-safe-right));
-    bottom: calc(16px + var(--town-safe-bottom));
+    bottom: calc(100px + var(--town-safe-bottom));
     left: auto;
+    display: block;
+    overflow: visible;
   }
 
-  .town-action {
-    min-width: 44px;
-    flex: 0 0 auto;
-    padding: 7px 10px;
-    text-align: center;
+  .town-action-menu-toggle {
+    min-width: 52px;
+    min-height: 52px;
   }
 
   .town-tool-wrap {
-    right: calc(8px + var(--town-safe-right));
+    right: auto;
     bottom: calc(8px + var(--town-safe-bottom));
-    left: calc(8px + var(--town-safe-left));
-    overflow-x: auto;
-    transform: none;
-    scrollbar-width: none;
-  }
-
-  .town-tool-wrap::-webkit-scrollbar {
-    display: none;
+    left: 50%;
+    overflow: visible;
+    transform: translateX(-50%);
   }
 
   .town-tool-dock {
     width: max-content;
-    max-width: none;
-    min-width: max-content;
-    background: var(--town-panel-strong) !important;
-    scrollbar-width: none;
+    min-width: 0;
+    max-width: calc(
+      100vw - 16px - var(--town-safe-left) - var(--town-safe-right)
+    );
+    overflow: visible;
   }
 
-  .town-tool-dock::-webkit-scrollbar {
-    display: none;
+  .town-dock-primary {
+    min-width: 57px;
   }
 
-  .town-dock-button {
-    min-width: 56px;
-    min-height: 58px;
+  .town-dock-more-menu {
+    right: 0;
   }
 
-  .town-dock-hotkey {
-    display: none;
-  }
-
-  .town-graduated .town-player-wrap {
-    right: calc(68px + var(--town-safe-right));
-    bottom: calc(82px + var(--town-safe-bottom));
+  .town-graduated .town-status-wrap {
+    top: calc(70px + var(--town-safe-top));
+    right: calc(8px + var(--town-safe-right));
+    bottom: auto;
     left: calc(8px + var(--town-safe-left));
   }
 
-  .town-graduated .phone-fab {
-    right: calc(8px + var(--town-safe-right));
-    bottom: calc(86px + var(--town-safe-bottom));
-  }
-
-  .town-player-wrap .player-chip {
+  .town-graduated .town-status-open {
     width: 100%;
-    overflow-x: auto;
   }
 
-  .town-graduated .metro-legend {
-    display: none;
+  .energy-valley-golden:has(.town-status-open) .town-tool-wrap,
+  .energy-valley-golden:has(.town-status-open) .town-quest-wrap {
+    visibility: hidden;
+    pointer-events: none;
   }
 
-  .town-inspector-wrap {
-    top: calc(72px + var(--town-safe-top));
-    right: calc(8px + var(--town-safe-right));
-    bottom: calc(82px + var(--town-safe-bottom));
-    left: calc(8px + var(--town-safe-left));
-  }
-
-  .town-generic-inspector {
-    width: 100% !important;
-    max-height: 100%;
-  }
-
-  .energy-valley-golden:has(.town-generic-inspector) .town-status-wrap,
-  .energy-valley-golden:has(.town-generic-inspector) .town-actions,
-  .energy-valley-golden:has(.town-generic-inspector) .town-player-wrap,
-  .energy-valley-golden:has(.town-generic-inspector) .phone-fab {
-    display: none;
+  .energy-valley-golden:has(.town-dock-more[open]) .town-player-wrap,
+  .energy-valley-golden:has(.town-dock-more[open]) .town-utility-disclosure {
+    visibility: hidden;
+    pointer-events: none;
   }
 }
 
 @media (orientation: landscape) and (max-height: 430px) {
-  .town-graduated .metro-legend {
+  .town-topbar {
+    top: calc(6px + var(--town-safe-top));
+  }
+
+  .town-topbar-inner {
+    width: calc(
+      100vw - 16px - var(--town-safe-left) - var(--town-safe-right)
+    );
+  }
+
+  .town-topbar-leading,
+  .town-topbar-trailing {
+    min-height: 46px;
+    padding: 1px 4px;
+  }
+
+  .town-topbar-logo,
+  .town-topbar-clock,
+  .town-topbar-leading > .town-topbar-sep,
+  .town-topbar-sub {
     display: none;
+  }
+
+  .town-topbar-identity {
+    min-width: 0;
+  }
+
+  .town-topbar-title {
+    max-width: 190px;
+  }
+
+  .town-topbar-disclosure-toggle {
+    min-width: 48px;
+    min-height: 44px;
+  }
+
+  .town-graduated .town-status-wrap,
+  .town-graduated .town-quest-wrap {
+    display: none;
+  }
+
+  .town-graduated .town-status-wrap:has(.town-status-open) {
+    top: calc(60px + var(--town-safe-top));
+    right: calc(8px + var(--town-safe-right));
+    bottom: auto;
+    left: calc(8px + var(--town-safe-left));
+    display: block;
+  }
+
+  .town-graduated .town-status-open {
+    width: min(340px, calc(100vw - 16px));
+  }
+
+  .town-graduated .town-player-wrap {
+    right: auto;
+    bottom: calc(8px + var(--town-safe-bottom));
+    left: calc(8px + var(--town-safe-left));
+  }
+
+  .town-graduated .player-chip {
+    min-height: 44px;
+    padding: 0;
+    border: 0 !important;
+    background: transparent !important;
+    box-shadow: none !important;
+  }
+
+  .town-graduated .player-chip-dot,
+  .town-graduated .player-chip-id {
+    display: none;
+  }
+
+  .player-chip-menu-toggle {
+    min-width: 48px;
+    min-height: 48px;
+    background: var(--town-panel-strong);
+    box-shadow: var(--town-shadow);
+  }
+
+  .town-actions.town-utility-disclosure {
+    position: absolute;
+    top: auto;
+    right: calc(8px + var(--town-safe-right));
+    bottom: calc(8px + var(--town-safe-bottom));
+    left: auto;
+  }
+
+  .town-action-menu-toggle {
+    min-width: 48px;
+    min-height: 48px;
+  }
+
+  .town-tool-wrap {
+    bottom: calc(8px + var(--town-safe-bottom));
+  }
+
+  .town-tool-dock {
+    padding: 3px;
+  }
+
+  .town-dock-primary {
+    min-width: 48px;
+    min-height: 48px;
+    padding: 3px 6px;
+  }
+
+  .town-dock-primary .town-dock-icon {
+    width: 22px;
+    height: 22px;
+  }
+
+  .town-dock-primary .town-dock-cost,
+  .town-dock-primary .town-dock-hotkey {
+    display: none;
+  }
+
+  .town-dock-more-menu,
+  .town-utility-panel,
+  .player-chip-menu,
+  .town-topbar-menu {
+    max-height: calc(
+      100dvh - 68px - var(--town-safe-top) - var(--town-safe-bottom)
+    );
+    overflow-y: auto;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .town-topbar-disclosure-toggle,
+  .town-dock-more-toggle,
+  .player-chip-menu-toggle,
+  .town-action-menu-toggle {
+    transition: none;
+  }
+}
+
+/* Final MoonTown responsive authority
+   -----------------------------------
+   Keep the compact town lanes authoritative at the two smallest release
+   viewports: 390x844 portrait and 844x390 landscape. */
+@media (max-width: 680px) {
+  .town-topbar-inner {
+    width: calc(
+      100vw - 16px - var(--town-safe-left) - var(--town-safe-right)
+    );
+    min-height: 0;
+    display: flex;
+    gap: 6px;
+    padding: 0;
+    border-radius: 0;
+  }
+
+  .town-topbar-leading,
+  .town-topbar-trailing {
+    min-height: 50px;
+    padding: 3px 5px;
+    border-radius: 13px;
+  }
+
+  .town-topbar-leading {
+    min-width: 0;
+    flex: 1 1 auto;
+  }
+
+  .town-topbar-identity {
+    min-width: 0;
+    gap: 7px;
+  }
+
+  .town-topbar-clock,
+  .town-topbar-leading > .town-topbar-sep,
+  .town-topbar-sub {
+    display: none;
+  }
+
+  .town-topbar-title {
+    max-width: 44vw;
+  }
+
+  .town-topbar-metric {
+    min-width: 46px;
+    padding-inline: 3px;
+  }
+
+  .town-topbar-disclosure-toggle {
+    min-width: 48px;
+  }
+
+  .town-topbar-menu {
+    right: -4px;
+    width: min(340px, calc(100vw - 16px));
+  }
+
+  .town-graduated .town-quest-wrap,
+  .town-graduated .quest-tracker-done {
+    display: none !important;
+  }
+
+  .town-graduated .town-player-wrap {
+    right: auto;
+    bottom: calc(100px + var(--town-safe-bottom));
+    left: calc(8px + var(--town-safe-left));
+  }
+
+  .town-player-wrap .player-chip {
+    width: auto;
+    max-width: calc(100vw - 84px);
+    overflow: visible;
+  }
+
+  .player-chip-title {
+    display: none;
+  }
+
+  .player-chip-id {
+    max-width: 32vw;
+  }
+
+  .player-chip-name {
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+  }
+
+  .town-actions.town-utility-disclosure {
+    position: absolute;
+    top: auto;
+    right: calc(8px + var(--town-safe-right));
+    bottom: calc(100px + var(--town-safe-bottom));
+    left: auto;
+    display: block;
+    max-width: none;
+    flex-direction: initial;
+    overflow: visible;
+  }
+
+  .town-action-menu-toggle {
+    min-width: 52px;
+    min-height: 52px;
+  }
+
+  .town-tool-wrap {
+    right: auto;
+    bottom: calc(8px + var(--town-safe-bottom));
+    left: 50%;
+    overflow: visible;
+    transform: translateX(-50%);
+  }
+
+  .town-tool-dock {
+    width: max-content;
+    min-width: 0;
+    max-width: calc(
+      100vw - 16px - var(--town-safe-left) - var(--town-safe-right)
+    );
+    overflow: visible;
+  }
+
+  .town-dock-primary {
+    min-width: 57px;
+    min-height: 58px;
+  }
+
+  .town-dock-more-menu {
+    right: 0;
+  }
+
+  .town-graduated .town-status-wrap {
+    top: calc(70px + var(--town-safe-top));
+    right: calc(8px + var(--town-safe-right));
+    bottom: auto;
+    left: calc(8px + var(--town-safe-left));
+  }
+
+  .town-graduated .town-status-open {
+    width: 100%;
+  }
+
+  .energy-valley-golden:has(.town-status-open) .town-tool-wrap,
+  .energy-valley-golden:has(.town-status-open) .town-quest-wrap {
+    visibility: hidden;
+    pointer-events: none;
+  }
+
+  .energy-valley-golden:has(.town-dock-more[open]) .town-player-wrap,
+  .energy-valley-golden:has(.town-dock-more[open]) .town-utility-disclosure {
+    visibility: hidden;
+    pointer-events: none;
+  }
+}
+
+@media (orientation: landscape) and (max-height: 430px) {
+  .town-topbar {
+    top: calc(6px + var(--town-safe-top));
+  }
+
+  .town-topbar-inner {
+    width: calc(
+      100vw - 16px - var(--town-safe-left) - var(--town-safe-right)
+    );
+    min-height: 0;
+    display: flex;
+    gap: 6px;
+    padding: 0;
+  }
+
+  .town-topbar-leading,
+  .town-topbar-trailing {
+    min-height: 46px;
+    padding: 1px 4px;
+  }
+
+  .town-topbar-logo,
+  .town-topbar-clock,
+  .town-topbar-leading > .town-topbar-sep,
+  .town-topbar-sub {
+    display: none;
+  }
+
+  .town-topbar-identity {
+    min-width: 0;
+  }
+
+  .town-topbar-title {
+    max-width: 190px;
+  }
+
+  .town-topbar-disclosure-toggle {
+    min-width: 48px;
+    min-height: 44px;
+  }
+
+  .town-graduated .town-quest-wrap,
+  .town-graduated .quest-tracker-done {
+    display: none !important;
   }
 
   .town-graduated .town-status-wrap {
     display: none;
   }
 
-  .town-graduated .town-quest-wrap {
-    top: calc(70px + var(--town-safe-top));
-    right: auto;
-    bottom: auto;
-    left: calc(8px + var(--town-safe-left));
-    width: min(340px, 50vw);
-    display: flex;
-  }
-
-  .town-graduated .quest-tracker-done {
-    width: 100%;
-    display: grid;
-    grid-template-columns: minmax(0, 1fr) auto;
-    align-items: center;
-    gap: 6px;
-    padding: 6px 8px;
-  }
-
-  .town-graduated .quest-tracker-done .quest-tracker-badge,
-  .town-graduated .quest-tracker-done .quest-tracker-hint {
-    display: none;
-  }
-
-  .town-graduated .quest-tracker-done .quest-tracker-title {
-    overflow: hidden;
-    text-overflow: ellipsis;
-    white-space: nowrap;
-  }
-
-  .town-graduated .quest-tracker-done .quest-tracker-action {
-    width: auto;
-    min-width: 96px;
-    min-height: 44px;
-    margin-top: 0;
-    padding-inline: 10px;
-  }
-
-  .town-graduated .town-actions {
-    top: calc(70px + var(--town-safe-top));
+  .town-graduated .town-status-wrap:has(.town-status-open) {
+    top: calc(60px + var(--town-safe-top));
     right: calc(8px + var(--town-safe-right));
     bottom: auto;
-    left: calc(min(340px, 50vw) + 16px + var(--town-safe-left));
-    flex-direction: row;
-    overflow-x: auto;
+    left: calc(8px + var(--town-safe-left));
+    display: block;
   }
 
-  .energy-valley-golden .map-lab-launcher {
+  .town-graduated .town-status-open {
+    width: min(340px, calc(100vw - 16px));
+  }
+
+  .town-graduated .town-player-wrap {
+    right: auto;
+    bottom: calc(8px + var(--town-safe-bottom));
+    left: calc(8px + var(--town-safe-left));
+  }
+
+  .town-graduated .player-chip {
+    width: auto;
+    min-height: 44px;
+    padding: 0;
+    border: 0 !important;
+    background: transparent !important;
+    box-shadow: none !important;
+  }
+
+  .town-graduated .player-chip-dot,
+  .town-graduated .player-chip-id {
     display: none;
+  }
+
+  .player-chip-menu-toggle {
+    min-width: 48px;
+    min-height: 48px;
+    background: var(--town-panel-strong);
+    box-shadow: var(--town-shadow);
+  }
+
+  .town-actions.town-utility-disclosure {
+    position: absolute;
+    top: auto;
+    right: calc(8px + var(--town-safe-right));
+    bottom: calc(8px + var(--town-safe-bottom));
+    left: auto;
+    display: block;
+    max-width: none;
+    flex-direction: initial;
+    overflow: visible;
+  }
+
+  .town-action-menu-toggle {
+    min-width: 48px;
+    min-height: 48px;
+  }
+
+  .town-tool-wrap {
+    right: auto;
+    bottom: calc(8px + var(--town-safe-bottom));
+    left: 50%;
+    overflow: visible;
+    transform: translateX(-50%);
+  }
+
+  .town-tool-dock {
+    width: max-content;
+    min-width: 0;
+    max-width: calc(
+      100vw - 128px - var(--town-safe-left) - var(--town-safe-right)
+    );
+    overflow: visible;
+    padding: 3px;
+  }
+
+  .town-dock-primary {
+    min-width: 48px;
+    min-height: 48px;
+    padding: 3px 6px;
+  }
+
+  .town-dock-primary .town-dock-icon {
+    width: 22px;
+    height: 22px;
+  }
+
+  .town-dock-primary .town-dock-cost,
+  .town-dock-primary .town-dock-hotkey {
+    display: none;
+  }
+
+  .town-dock-more-menu,
+  .town-utility-panel,
+  .player-chip-menu,
+  .town-topbar-menu {
+    max-height: calc(
+      100dvh - 68px - var(--town-safe-top) - var(--town-safe-bottom)
+    );
+    overflow-y: auto;
+  }
+
+  .energy-valley-golden:has(.town-status-open) .town-tool-wrap,
+  .energy-valley-golden:has(.town-status-open) .town-quest-wrap,
+  .energy-valley-golden:has(.town-status-open) .town-player-wrap,
+  .energy-valley-golden:has(.town-status-open) .town-utility-disclosure {
+    visibility: hidden;
+    pointer-events: none;
   }
 }

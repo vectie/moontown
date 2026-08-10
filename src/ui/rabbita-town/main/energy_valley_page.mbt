@@ -23,6 +23,7 @@ fn render_energy_valley_page_with_snapshot(
   model : Model,
   snapshot : @energy_valley_contract.TownSnapshot,
 ) -> @rabbita.Html {
+  let intersection_preview = energy_valley_intersection_road_preview_active()
   let selected_place_id = match model.energy_selected_building {
     Some(building) =>
       town_snapshot_place_for_visual_building(snapshot, building).map(place => {
@@ -40,7 +41,8 @@ fn render_energy_valley_page_with_snapshot(
     runtime_agent_interaction_enabled: energy_valley_runtime_can_claim_active_work(
       model.energy_valley_runtime,
     ),
-    follow_enabled: model.player_follow,
+    intersection_preview,
+    follow_enabled: model.player_follow && !intersection_preview,
     player_idle_position: player_idle_position(model),
     player_motion: model.player_motion,
   }
@@ -69,12 +71,35 @@ fn render_energy_valley_page_with_snapshot(
   }
   let children : Array[@rabbita.Html] = [
     render_golden_valley_canvas(dispatch, snapshot, town_canvas_view),
-    render_map_lab_canvas(snapshot, map_lab_canvas_view),
+    if energy_valley_intersection_reference_requested() {
+      render_intersection_reference_legend()
+    } else {
+      @html.nothing
+    },
+    if reference_osm_block_graph_ready() ||
+      (!intersection_preview && authoritative_energy_valley_transport_ready()) {
+      div(class="energy-valley-osm-attribution", [
+        a(
+          href="https://www.openstreetmap.org/copyright",
+          attrs=@html.Attrs::build().aria_label(
+            "OpenStreetMap contributors and copyright",
+          ),
+          "© OpenStreetMap contributors",
+        ),
+      ])
+    } else {
+      @html.nothing
+    },
+    if intersection_preview {
+      @html.nothing
+    } else {
+      render_map_lab_canvas(snapshot, map_lab_canvas_view)
+    },
     div(
       class="town-topbar pointer-events-none absolute inset-x-0 top-3 flex justify-center px-3",
       render_energy_valley_topbar(dispatch, model),
     ),
-    if model.energy_intro_open {
+    if model.energy_intro_open || intersection_preview {
       @html.nothing
     } else {
       render_policy_hall_map_entry(dispatch, model)
@@ -131,6 +156,7 @@ fn render_energy_valley_page_with_snapshot(
               "先随便逛逛，稍后再创建角色"
             },
           ),
+          render_phone_fab(dispatch, model),
         ],
       )
     } else {
@@ -186,9 +212,21 @@ fn render_energy_valley_page_with_snapshot(
     div(class="town-player-wrap pointer-events-none", [
       render_player_chip(dispatch, model),
     ]),
-    render_player_walk_buttons(dispatch, model),
-    render_metro_legend(dispatch, model),
-    render_phone_fab(dispatch, model),
+    if intersection_preview {
+      @html.nothing
+    } else {
+      render_player_walk_buttons(dispatch, model)
+    },
+    if intersection_preview {
+      @html.nothing
+    } else {
+      render_metro_legend(dispatch, model)
+    },
+    if model.energy_intro_open {
+      @html.nothing
+    } else {
+      render_phone_fab(dispatch, model)
+    },
     render_phone_panel(dispatch, model),
     render_square_panel(dispatch, model),
     render_resident_explorer(dispatch, model),
@@ -198,7 +236,7 @@ fn render_energy_valley_page_with_snapshot(
     render_knowledge_dialog(dispatch, model),
     render_ops_center(dispatch, model),
     render_energy_valley_toast_stack(dispatch, model),
-    if onboarding {
+    if onboarding || intersection_preview {
       @html.nothing
     } else {
       render_map_lab(dispatch, map_lab_view, snapshot)
@@ -253,9 +291,9 @@ fn render_energy_valley_toast_stack(
 }
 
 ///|
-/// Progressive action rail: onboarding exposes only the visible entrance for
-/// the current task. The complete utility rail appears once the resident has
-/// learned the core loop.
+/// MoonTown town-services menu: onboarding exposes only the visible entrance
+/// for the current task. Once graduated, secondary surfaces share one native
+/// disclosure instead of competing with the map as permanent edge buttons.
 fn render_town_action_rail(
   dispatch : Dispatch[Msg],
   model : Model,
@@ -264,6 +302,22 @@ fn render_town_action_rail(
 ) -> @rabbita.Html {
   let actions : Array[@rabbita.Html] = []
   if !onboarding {
+    actions.push(
+      button(
+        class=if model.phone_open {
+          "town-action town-action-primary town-action-active"
+        } else {
+          "town-action town-action-primary"
+        },
+        title="联系居民与 MoonClaw",
+        on_click=dispatch(TogglePhone),
+        attrs=@html.Attrs::build()
+          .aria_label("打开谷光联络台")
+          .aria_controls("town-phone-panel")
+          .aria_expanded(if model.phone_open { "true" } else { "false" }),
+        "联络",
+      ),
+    )
     actions.push(
       button(
         class=if model.resident_explorer_open {
@@ -323,6 +377,28 @@ fn render_town_action_rail(
         "17号线",
       ),
     )
+    actions.push(
+      button(
+        class=if model.energy_status_open {
+          "town-action town-action-secondary town-action-active"
+        } else {
+          "town-action town-action-secondary"
+        },
+        title="查看真实运行时任务与证据",
+        on_click=dispatch(ToggleEnergyStatus),
+        attrs=@html.Attrs::build()
+          .aria_label("运行状态与证据")
+          .aria_controls("town-runtime-status")
+          .aria_expanded(
+            if model.energy_status_open {
+              "true"
+            } else {
+              "false"
+            },
+          ),
+        "运行状态",
+      ),
+    )
   }
   if !onboarding || stage == 5 || stage == 6 {
     actions.push(
@@ -353,27 +429,54 @@ fn render_town_action_rail(
         "运营",
       ),
     )
+    actions.push(
+      button(
+        class=if model.map_lab_open {
+          "town-action town-action-secondary town-action-active"
+        } else {
+          "town-action town-action-secondary"
+        },
+        title="高级地图诊断 · Shift+M",
+        on_click=dispatch(ToggleMapLab),
+        attrs=@html.Attrs::build()
+          .aria_label("打开地图诊断")
+          .aria_controls("map-lab-panel")
+          .aria_expanded(if model.map_lab_open { "true" } else { "false" }),
+        "地图诊断",
+      ),
+    )
   }
   actions.push(
     button(
-      class="town-action town-action-icon",
+      class="town-action town-action-secondary",
       on_click=dispatch(OpenEnergyGuide),
       attrs=@html.Attrs::build().aria_label("打开能源谷指南"),
-      "?",
+      "指南",
     ),
   )
   if !onboarding {
     actions.push(
       button(
-        class="town-action town-action-icon",
+        class="town-action town-action-secondary",
         title="重置小镇",
         on_click=dispatch(OpenEnergyReset),
         attrs=@html.Attrs::build().aria_label("重置小镇"),
-        "↺",
+        "重置",
       ),
     )
   }
-  div(class="town-actions", actions)
+  if onboarding {
+    div(class="town-actions town-actions-onboarding", actions)
+  } else {
+    @html.details(
+      class="town-actions town-utility-disclosure pointer-events-auto",
+      attrs=@html.Attrs::build().name("moontown-hud-disclosure"),
+      [
+        @html.summary(class="town-action town-action-menu-toggle", "镇务"),
+        div(class="town-utility-panel", actions),
+      ],
+    )
+  }
 }
 
 ///|

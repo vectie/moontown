@@ -21,6 +21,30 @@ priv struct MetroStation {
 
 ///|
 fn metro_line17_path() -> Array[(Double, Double)] {
+  if authoritative_energy_valley_transport_ready() {
+    let result : Array[(Double, Double)] = []
+    for index in 0..<authoritative_energy_valley_metro_path_count() {
+      result.push(
+        (
+          authoritative_energy_valley_metro_path_x(index).to_double() / 1000.0,
+          authoritative_energy_valley_metro_path_y(index).to_double() / 1000.0,
+        ),
+      )
+    }
+    return result
+  }
+  if reference_line17_snapshot_ready() {
+    let result : Array[(Double, Double)] = []
+    for index in 0..<reference_line17_path_count() {
+      result.push(
+        (
+          reference_line17_path_x_millis(index).to_double() / 1000.0,
+          reference_line17_path_y_millis(index).to_double() / 1000.0,
+        ),
+      )
+    }
+    return result
+  }
   [
     (139.5, 143.5),
     (136.0, 128.0),
@@ -41,6 +65,63 @@ fn metro_line17_path() -> Array[(Double, Double)] {
 
 ///|
 fn metro_line17_stations() -> Array[MetroStation] {
+  if authoritative_energy_valley_transport_ready() {
+    let result : Array[MetroStation] = []
+    for station_index in 0..<authoritative_energy_valley_metro_station_count() {
+      let exits : Array[MetroExit] = []
+      for
+        exit_index in 0..<authoritative_energy_valley_metro_exit_count(
+          station_index,
+        ) {
+        exits.push({
+          label: authoritative_energy_valley_metro_exit_label(
+            station_index, exit_index,
+          ),
+          destination: authoritative_energy_valley_metro_exit_destination(
+            station_index, exit_index,
+          ),
+          x: authoritative_energy_valley_metro_exit_x(station_index, exit_index).to_double() /
+          1000.0,
+          y: authoritative_energy_valley_metro_exit_y(station_index, exit_index).to_double() /
+          1000.0,
+        })
+      }
+      result.push({
+        name: authoritative_energy_valley_metro_station_name(station_index),
+        x: authoritative_energy_valley_metro_station_x(station_index).to_double() /
+        1000.0,
+        y: authoritative_energy_valley_metro_station_y(station_index).to_double() /
+        1000.0,
+        exits,
+      })
+    }
+    return result
+  }
+  if reference_line17_snapshot_ready() {
+    let result : Array[MetroStation] = []
+    for station_index in 0..<reference_line17_station_count() {
+      let exits : Array[MetroExit] = []
+      for exit_index in 0..<reference_line17_exit_count(station_index) {
+        exits.push({
+          label: reference_line17_exit_label(station_index, exit_index),
+          destination: reference_line17_exit_destination(
+            station_index, exit_index,
+          ),
+          x: reference_line17_exit_x_millis(station_index, exit_index).to_double() /
+          1000.0,
+          y: reference_line17_exit_y_millis(station_index, exit_index).to_double() /
+          1000.0,
+        })
+      }
+      result.push({
+        name: reference_line17_station_name(station_index),
+        x: reference_line17_station_x_millis(station_index).to_double() / 1000.0,
+        y: reference_line17_station_y_millis(station_index).to_double() / 1000.0,
+        exits,
+      })
+    }
+    return result
+  }
   [
     {
       name: "未来科学城站",
@@ -71,12 +152,37 @@ fn metro_line17_station_exit_count() -> Int {
 }
 
 ///|
+/// Resolve the exact display/installation point independently from the
+/// integer portal threshold used by the legacy pathfinding seam.
+fn metro_line17_station_exit_position(
+  station_name : String,
+  exit_label : String,
+) -> (Double, Double)? {
+  for station in metro_line17_stations() {
+    if station.name != station_name {
+      continue
+    }
+    for exit in station.exits {
+      if exit.label == exit_label {
+        return Some((exit.x, exit.y))
+      }
+    }
+  }
+  None
+}
+
+///|
 fn metro_station_exit_summary(station : MetroStation) -> String {
   if station.exits.is_empty() {
     return ""
   }
   let labels = station.exits.map(exit => exit.label).join(" / ")
   "\{labels} 口 · \{station.exits[0].destination}"
+}
+
+///|
+fn metro_line17_close_detail_visible(zoom : Double) -> Bool {
+  zoom >= 0.72
 }
 
 ///|
@@ -149,7 +255,7 @@ extern "js" fn golden_draw_metro_station(
   #|     const padding = fontSize * 0.45;
   #|     const width = context.measureText(name).width + padding * 2;
   #|     const lx = sx + radius + Math.max(4, 8 * zoom);
-  #|     const showExit = zoom >= 0.3 && exitSummary;
+  #|     const showExit = zoom >= 0.72 && exitSummary;
   #|     const ly = sy - fontSize * 0.75;
   #|     const labelHeight = showExit ? fontSize * 2.45 : fontSize * 1.5;
   #|     context.fillStyle = "rgba(8,25,32,0.72)";
@@ -183,7 +289,7 @@ extern "js" fn golden_draw_metro_station_exit(
   label : String,
 ) -> Unit =
   #| (context, sx, sy, zoom, label) => {
-  #|   if (zoom < 0.16) return;
+  #|   if (zoom < 0.72) return;
   #|   const width = Math.max(5, 12 * zoom);
   #|   const height = Math.max(4, 10 * zoom);
   #|   context.save();

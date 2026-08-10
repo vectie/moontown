@@ -1,5 +1,7 @@
 import {
+  loadEnergyValleyOsmBlockGraph,
   loadWenyuReferenceBuildings,
+  loadWenyuReferenceIntersections,
   loadWenyuReferenceLabels,
   loadWenyuReferenceRoads,
   loadWenyuTownModules,
@@ -234,7 +236,9 @@ async function prepareRuntimeBridge() {
   await Promise.allSettled([
     prepareAccountContext(),
     refreshRuntimeSnapshots(),
+    loadEnergyValleyOsmBlockGraph(),
     loadWenyuReferenceBuildings(),
+    loadWenyuReferenceIntersections(),
     loadWenyuReferenceLabels(),
     loadWenyuReferenceRoads(),
     loadWenyuTownModules(),

@@ -7,6 +7,7 @@ extern "js" fn world_migration_test_install_storage(mode : String) -> Unit =
   #|     "__wenyuReferenceRoadGraph",
   #|     "__wenyuReferenceBuildings",
   #|     "__wenyuReferenceBuildingComponentRows",
+  #|     "__moontownEnergyValleyTransport",
   #|     "__moontownTownLifeV3Observed",
   #|   ];
   #|   const descriptors = new Map(
@@ -94,6 +95,8 @@ extern "js" fn world_migration_test_install_reference_assets() -> Unit =
   #|   globalThis.__wenyuReferenceLabels = read("wenyu_reference_labels.json");
   #|   globalThis.__wenyuReferenceRoadGraph = read("wenyu_reference_roads.json");
   #|   globalThis.__wenyuReferenceBuildings = read("wenyu_reference_buildings.json");
+  #|   globalThis.__moontownEnergyValleyTransport =
+  #|     read("energy-valley-transport-v1.json");
   #| }
 
 ///|
@@ -103,6 +106,7 @@ extern "js" fn world_migration_test_clear_reference_assets() -> Unit =
   #|   delete globalThis.__wenyuReferenceRoadGraph;
   #|   delete globalThis.__wenyuReferenceBuildings;
   #|   delete globalThis.__wenyuReferenceBuildingComponentRows;
+  #|   delete globalThis.__moontownEnergyValleyTransport;
   #| }
 
 ///|
@@ -234,7 +238,7 @@ test "migration loser adopts and fences an observed V3 winner" {
 }
 
 ///|
-test "fallback geography defers migration until all Wenyu inputs are ready" {
+test "fallback geography defers migration until reference and transport inputs are ready" {
   world_migration_test_install_storage("normal")
   let seed = world_migration_test_install_ready_world()
   let ledger = energy_valley_empty_world_delta_for_seed(seed)

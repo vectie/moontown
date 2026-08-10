@@ -208,3 +208,149 @@ test "semantic metro alignment stays inside the compiled Wenyu world" {
     }),
   )
 }
+
+///|
+test "native road ranks expose the intended zoom hierarchy" {
+  assert_true(golden_native_road_rank_visible("P", false, true, 0.20))
+  assert_false(golden_native_road_rank_visible("S", false, true, 0.339))
+  assert_true(golden_native_road_rank_visible("S", false, true, 0.34))
+  assert_false(golden_native_road_rank_visible("A", false, true, 0.579))
+  assert_true(golden_native_road_rank_visible("A", false, true, 0.58))
+  assert_false(golden_native_road_rank_visible(".", false, true, 0.719))
+  assert_false(golden_native_road_rank_visible(".", false, true, 1.80))
+  assert_true(golden_native_road_rank_visible(".", true, true, 0.20))
+  assert_true(golden_native_road_rank_visible(".", false, false, 0.20))
+}
+
+///|
+test "Line 17 exit detail starts only at close zoom" {
+  assert_false(metro_line17_close_detail_visible(0.719))
+  assert_true(metro_line17_close_detail_visible(0.72))
+}
+
+///|
+extern "js" fn native_schematic_test_install_asset() -> Unit =
+  #| () => {
+  #|   const names = [
+  #|     "__wenyuReferenceRoadGraph",
+  #|     "__moontownEnergyValleyTransport",
+  #|   ];
+  #|   globalThis.__moontownNativeSchematicTestDescriptors = new Map(
+  #|     names.map(name => [name, Object.getOwnPropertyDescriptor(globalThis, name)]),
+  #|   );
+  #|   const semanticRow = ".".repeat(256);
+  #|   const presentationRows = Array(144).fill(semanticRow);
+  #|   presentationRows[7] =
+  #|     semanticRow.slice(0, 4) + "PSA" + semanticRow.slice(7);
+  #|   globalThis.__wenyuReferenceRoadGraph = {
+  #|     schema: "moontown.wenyu_road_graph.v1",
+  #|     rows: Array(144).fill(semanticRow),
+  #|     presentationRows,
+  #|     line17: {
+  #|       path: [[203000, 57000], [192000, 76000], [181000, 97000]],
+  #|       stations: [
+  #|         {
+  #|           name: "未来科学城北站",
+  #|           xMillis: 203000,
+  #|           yMillis: 57000,
+  #|           exits: [{
+  #|             label: "A",
+  #|             destination: "英才北一街",
+  #|             xMillis: 202200,
+  #|             yMillis: 56700,
+  #|           }],
+  #|         },
+  #|         {
+  #|           name: "未来科学城站",
+  #|           xMillis: 181000,
+  #|           yMillis: 97000,
+  #|           exits: [{
+  #|             label: "B",
+  #|             destination: "能源谷核心区",
+  #|             xMillis: 181800,
+  #|             yMillis: 97400,
+  #|           }],
+  #|         },
+  #|       ],
+  #|     },
+  #|   };
+  #|   delete globalThis.__moontownEnergyValleyTransport;
+  #| }
+
+///|
+extern "js" fn native_schematic_test_invalidate_presentation_rows() -> Unit =
+  #| () => { globalThis.__wenyuReferenceRoadGraph.presentationRows[0] = "."; }
+
+///|
+extern "js" fn native_schematic_test_restore_asset() -> Unit =
+  #| () => {
+  #|   const saved = globalThis.__moontownNativeSchematicTestDescriptors;
+  #|   if (!saved) return;
+  #|   for (const [name, descriptor] of saved) {
+  #|     if (descriptor) Object.defineProperty(globalThis, name, descriptor);
+  #|     else delete globalThis[name];
+  #|   }
+  #|   delete globalThis.__moontownNativeSchematicTestDescriptors;
+  #| }
+
+///|
+test "native schematic bridge accepts ranked roads and two Line 17 stations" {
+  native_schematic_test_install_asset()
+  assert_true(reference_road_presentation_snapshot_ready())
+  assert_eq(reference_road_presentation_code_at(4, 7), "P")
+  assert_eq(reference_road_presentation_code_at(5, 7), "S")
+  assert_eq(reference_road_presentation_code_at(6, 7), "A")
+  assert_true(reference_line17_snapshot_ready())
+  assert_eq(reference_line17_path_count(), 3)
+  assert_eq(reference_line17_station_count(), 2)
+  let path = metro_line17_path()
+  assert_eq(path[0], (203.0, 57.0))
+  let stations = metro_line17_stations()
+  assert_eq(stations.length(), 2)
+  assert_eq(stations[0].name, "未来科学城北站")
+  assert_eq(stations[0].exits[0].label, "A")
+  let center : TownCanvasRoadCell = {
+    node_id: ecosystem_contract_id("road-node/native-center"),
+    x: 4,
+    y: 7,
+    mask: 10,
+    road_class: @energy_valley_contract.Arterial,
+    bridge: false,
+    custom: false,
+  }
+  let west : TownCanvasRoadCell = {
+    node_id: ecosystem_contract_id("road-node/native-west"),
+    x: 3,
+    y: 7,
+    mask: 2,
+    road_class: @energy_valley_contract.Local,
+    bridge: false,
+    custom: false,
+  }
+  let east : TownCanvasRoadCell = {
+    node_id: ecosystem_contract_id("road-node/native-east"),
+    x: 5,
+    y: 7,
+    mask: 8,
+    road_class: @energy_valley_contract.Collector,
+    bridge: false,
+    custom: false,
+  }
+  let roads : Map[String, TownCanvasRoadCell] = Map([])
+  roads[town_canvas_road_key(center.x, center.y)] = center
+  roads[town_canvas_road_key(west.x, west.y)] = west
+  roads[town_canvas_road_key(east.x, east.y)] = east
+  // The far overview hides both secondary and local stubs. District zoom
+  // restores the curated secondary; UserDelta restores its local connection
+  // independently at every zoom.
+  assert_eq(golden_native_road_visible_mask(roads, center, true, 0.20), 0)
+  assert_eq(golden_native_road_visible_mask(roads, center, true, 0.34), 2)
+  roads[town_canvas_road_key(west.x, west.y)] = { ..west, custom: true }
+  assert_eq(golden_native_road_visible_mask(roads, center, true, 0.20), 8)
+  assert_eq(golden_native_road_visible_mask(roads, center, true, 0.34), 10)
+  native_schematic_test_invalidate_presentation_rows()
+  assert_false(reference_road_presentation_snapshot_ready())
+  // Road-rank failure does not discard independently valid Line 17 geometry.
+  assert_true(reference_line17_snapshot_ready())
+  native_schematic_test_restore_asset()
+}

@@ -235,8 +235,9 @@ fn render_avatar_wizard(
 }
 
 ///|
-/// Bottom-left resident chip: identity, spark balance, and the two movement
-/// affordances (walk-to-click mode, camera follow).
+/// Bottom-left resident chip. The resident identity stays visible, while
+/// everyday account and camera actions live in a native disclosure. During
+/// onboarding the one action needed by the current quest remains direct.
 fn render_player_chip(dispatch : Dispatch[Msg], model : Model) -> @rabbita.Html {
   match model.player {
     None => @html.nothing
@@ -253,6 +254,43 @@ fn render_player_chip(dispatch : Dispatch[Msg], model : Model) -> @rabbita.Html 
       } else {
         "chip-button"
       }
+      let resident_actions : Array[@rabbita.Html] = [
+        button(
+          class=walk_class,
+          title="开启后点击道路即可沿路走过去",
+          on_click=dispatch(ToggleWalkMode),
+          attrs=@html.Attrs::build()
+            .aria_label("点地行走模式")
+            .aria_pressed(if model.walk_mode { "true" } else { "false" }),
+          "行走",
+        ),
+        button(
+          class=follow_class,
+          title="相机跟随你的角色",
+          on_click=dispatch(TogglePlayerFollow),
+          attrs=@html.Attrs::build()
+            .aria_label("跟随角色")
+            .aria_pressed(if model.player_follow { "true" } else { "false" }),
+          "跟随",
+        ),
+        if model.checkin_day == energy_valley_sim_day(model) {
+          span(class="chip-button chip-button-muted", "已签到")
+        } else {
+          button(
+            class="chip-button chip-button-checkin",
+            title="每日签到领取谷光值",
+            on_click=dispatch(DailyCheckin),
+            "签到",
+          )
+        },
+        button(
+          class="chip-button",
+          title="重新编辑名字与形象",
+          on_click=dispatch(AvatarOpenEditor),
+          attrs=@html.Attrs::build().aria_label("编辑角色"),
+          "编辑",
+        ),
+      ]
       div(class="player-chip pointer-events-auto", [
         span(
           class="player-chip-dot",
@@ -266,7 +304,7 @@ fn render_player_chip(dispatch : Dispatch[Msg], model : Model) -> @rabbita.Html 
             "\{avatar_persona_label(player.persona)} · \{player.title} · 谷光 \{model.spark}",
           ),
         ]),
-        if !onboarding || progress == 1 {
+        if onboarding && progress == 1 {
           button(
             class=walk_class,
             title="开启后点击道路即可沿路走过去",
@@ -280,39 +318,16 @@ fn render_player_chip(dispatch : Dispatch[Msg], model : Model) -> @rabbita.Html 
           @html.nothing
         },
         if !onboarding {
-          button(
-            class=follow_class,
-            title="相机跟随你的角色",
-            on_click=dispatch(TogglePlayerFollow),
-            attrs=@html.Attrs::build()
-              .aria_label("跟随角色")
-              .aria_pressed(if model.player_follow { "true" } else { "false" }),
-            "跟随",
-          )
-        } else {
-          @html.nothing
-        },
-        if !onboarding {
-          if model.checkin_day == energy_valley_sim_day(model) {
-            span(class="chip-button chip-button-muted", "已签到 ✓")
-          } else {
-            button(
-              class="chip-button chip-button-checkin",
-              title="每日签到领取谷光值",
-              on_click=dispatch(DailyCheckin),
-              "签到",
-            )
-          }
-        } else {
-          @html.nothing
-        },
-        if !onboarding {
-          button(
-            class="chip-button",
-            title="重新编辑名字与形象",
-            on_click=dispatch(AvatarOpenEditor),
-            attrs=@html.Attrs::build().aria_label("编辑角色"),
-            "编辑",
+          @html.details(
+            class="player-chip-disclosure",
+            attrs=@html.Attrs::build().name("moontown-hud-disclosure"),
+            [
+              @html.summary(
+                class="chip-button player-chip-menu-toggle",
+                "居民",
+              ),
+              div(class="player-chip-menu", resident_actions),
+            ],
           )
         } else {
           @html.nothing
@@ -372,7 +387,7 @@ fn render_quest_tracker(
       let total = town_quest_chain().length()
       div(class="quest-tracker pointer-events-auto", [
         div(class="quest-tracker-head", [
-          span(class="quest-tracker-badge", "进度 \{done_count}/\{total}"),
+          span(class="quest-tracker-badge", "镇务 \{done_count + 1}/\{total}"),
           span(class="quest-tracker-title", quest.title),
         ]),
         div(class="quest-tracker-hint", quest.hint),
@@ -389,8 +404,11 @@ fn render_quest_tracker(
     None =>
       div(class="quest-tracker pointer-events-auto quest-tracker-done", [
         div(class="quest-tracker-head", [
-          span(class="quest-tracker-badge", "已完成"),
-          span(class="quest-tracker-title", "下一步：分享或收藏知识"),
+          span(class="quest-tracker-badge", "常住居民"),
+          span(
+            class="quest-tracker-title",
+            "继续共建：分享或收藏知识",
+          ),
         ]),
         div(
           class="quest-tracker-hint",
@@ -400,7 +418,7 @@ fn render_quest_tracker(
           class="quest-tracker-action quest-tracker-action-civic",
           on_click=dispatch(ToggleSquare),
           attrs=@html.Attrs::build().aria_label("打开小镇知识广场"),
-          "打开知识广场",
+          "前往知识广场",
         ),
       ])
   }

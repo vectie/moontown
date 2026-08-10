@@ -195,6 +195,9 @@ extern "js" fn canvas_frame_test_install_harness(with_canvas : Bool) -> Unit =
   #|     "__moontownGoldenValleyKeys",
   #|     "__moontownGoldenValleyAnimation",
   #|     "__moontownPlayerWalkKeys",
+  #|     "__wenyuReferenceIntersections",
+  #|     "__wenyuReferenceIntersectionsValidated",
+  #|     "__wenyuReferenceIntersectionPreviewGraphValidated",
   #|   ];
   #|   const descriptors = new Map(
   #|     names.map(name => [name, Object.getOwnPropertyDescriptor(globalThis, name)]),
@@ -396,6 +399,50 @@ extern "js" fn canvas_frame_test_has_canvas_lifecycle() -> Bool =
   #| () => Boolean(globalThis.__moontownGoldenValleyCanvasLifecycle)
 
 ///|
+extern "js" fn canvas_frame_test_install_intersection_preview() -> Unit =
+  #| () => {
+  #|   globalThis.__wenyuReferenceIntersectionsValidated = false;
+  #|   globalThis.__wenyuReferenceIntersectionPreviewGraphValidated = true;
+  #|   globalThis.__wenyuReferenceIntersections = {
+  #|     schema: "moontown.wenyu_reference_intersections.v2",
+  #|     runtimeEligible: false,
+  #|     previewGraph: {
+  #|       method: "exact-seed 8-neighbor source-skeleton geodesics, unique-segment union, degree-not-two routing-node compression",
+  #|       metrics: {
+  #|         nodes: 145,
+  #|         routingNodes: 38,
+  #|         totalGraphNodes: 183,
+  #|         edges: 216,
+  #|         components: 1,
+  #|         cycleRank: 34,
+  #|         terminalsOmitted: 160,
+  #|         unrepresentedVerifiedArms: 193,
+  #|         bridges: 5,
+  #|         bridgeEvidenceVertices: 66,
+  #|         bridgeSpanVertices: 68,
+  #|         sourceSegments: 14141,
+  #|         enclosedBlocks: 34,
+  #|         waterConflicts: 0,
+  #|       },
+  #|       routingNodes: Array.from({ length: 38 }, (_, index) => ({ index })),
+  #|       edges: Array.from({ length: 216 }, (_, index) => ({
+  #|         pathMillis: [[0, index], [100, index]],
+  #|         confidence: "high",
+  #|         bridgeSpans: [],
+  #|       })),
+  #|     },
+  #|   };
+  #| }
+
+///|
+extern "js" fn canvas_frame_test_input_is_camera_only() -> Bool =
+  #| () => globalThis.__moontownGoldenValleyCanvasLifecycle?.cameraOnly === true
+
+///|
+extern "js" fn canvas_frame_test_player_walk_keys_installed() -> Bool =
+  #| () => globalThis.__moontownPlayerWalkKeys === true
+
+///|
 extern "js" fn canvas_frame_test_released_backing_pixels() -> Int =
   #| () => {
   #|   const canvas = globalThis.__moontownCanvasFrameTimingTest?.lastCanvas;
@@ -465,6 +512,7 @@ fn canvas_frame_test_view(tick : Int) -> TownCanvasViewState {
     selected_place_id: None,
     selected_actor_id: None,
     runtime_agent_interaction_enabled: false,
+    intersection_preview: false,
     follow_enabled: false,
     player_idle_position: None,
     player_motion: None,
@@ -506,6 +554,22 @@ test "Canvas accepts a semantic frame only after its scheduled draw succeeds" {
   assert_eq(golden_valley_canvas_frame().unwrap().tick, pending.tick)
   canvas_frame_test_remove_harness()
   golden_valley_accept_canvas_frame(visible)
+}
+
+///|
+test "intersection road preview clears pointer authority and installs camera-only input" {
+  let dispatch : Dispatch[Msg] = Emit(fn(_message) { @rabbita.none })
+  let visible = canvas_frame_test_snapshot(1)
+  golden_valley_accept_canvas_frame(visible)
+  canvas_frame_test_install_harness(true)
+  canvas_frame_test_install_intersection_preview()
+  let preview = { ..canvas_frame_test_view(2), intersection_preview: true }
+  ignore(render_golden_valley_canvas(dispatch, visible, preview))
+  assert_true(canvas_frame_test_flush_next_animation_frame())
+  assert_true(golden_valley_canvas_frame() is None)
+  assert_true(canvas_frame_test_input_is_camera_only())
+  assert_false(canvas_frame_test_player_walk_keys_installed())
+  canvas_frame_test_remove_harness()
 }
 
 ///|

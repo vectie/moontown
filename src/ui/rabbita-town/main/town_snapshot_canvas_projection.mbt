@@ -10,6 +10,7 @@ priv struct TownCanvasRoadCell {
   mask : Int
   road_class : @energy_valley_contract.RoadClass
   bridge : Bool
+  custom : Bool
 } derive(Debug, Eq)
 
 ///|
@@ -136,6 +137,7 @@ fn town_snapshot_canvas_roads(
       mask: masks.get(node.id).unwrap_or(0),
       road_class,
       bridge: road_class is @energy_valley_contract.Bridge,
+      custom: node.provenance.kind is @energy_valley_contract.UserDelta,
     })
   }
   result
@@ -167,6 +169,14 @@ fn town_snapshot_canvas_road_lookup(
 }
 
 ///|
+fn town_canvas_road_overlay_visible_with_transport(
+  road : TownCanvasRoadCell,
+  authoritative_transport : Bool,
+) -> Bool {
+  !authoritative_transport || road.custom
+}
+
+///|
 fn town_snapshot_canvas_terrain(
   snapshot : @energy_valley_contract.TownSnapshot,
   road : TownCanvasRoadCell?,
@@ -186,6 +196,101 @@ fn town_snapshot_canvas_terrain(
         Some(@energy_valley_contract.Custom(label)) => label
         None => "void"
       }
+  }
+}
+
+///|
+/// Convert a reference-map terrain label into a Canvas ground class. Road
+/// labels intentionally have no ground representation here: the accepted OSM
+/// transport owns their visible alignment.
+fn town_canvas_transport_neutral_terrain_kind(kind : String) -> String? {
+  match kind {
+    "road-major" | "road" | "bridge" => None
+    "river" | "lake" | "water" => Some("water")
+    "grass-light" => Some("grass")
+    "grass-flower-pink" | "grass-flower-yellow" => Some("meadow")
+    "farm" | "field" => Some("field")
+    "urban" | "urban-dense" => Some("urban")
+    "campus" => Some("plaza")
+    "grass" | "meadow" | "forest" | "wetland" | "plaza" => Some(kind)
+    _ => None
+  }
+}
+
+///|
+/// Recover presentation-only ground below a legacy semantic road. The world
+/// contract keeps its original Paving cells for placement and pathfinding, so
+/// asking it for the center terrain would leave the old blocky graph visible.
+/// Instead, sample the nearest deterministic non-road reference/terrain cell.
+/// Legacy bridge cells recover water directly. UserDelta roads never call this
+/// helper and retain their authored road paving.
+fn town_snapshot_canvas_transport_base_terrain(
+  snapshot : @energy_valley_contract.TownSnapshot,
+  roads : Map[String, TownCanvasRoadCell],
+  road : TownCanvasRoadCell,
+  x : Int,
+  y : Int,
+) -> String {
+  if road.bridge ||
+    (
+      reference_tile_snapshot_ready() &&
+      reference_tile_kind_at(x, y) == Some("bridge")
+    ) {
+    return "water"
+  }
+  for radius in 1..<=4 {
+    for candidate_y in (y - radius)..<=(y + radius) {
+      for candidate_x in (x - radius)..<=(x + radius) {
+        if abs_int(candidate_x - x).max(abs_int(candidate_y - y)) != radius ||
+          candidate_x < 0 ||
+          candidate_y < 0 ||
+          candidate_x >= town_snapshot_canvas_cols(snapshot) ||
+          candidate_y >= town_snapshot_canvas_rows(snapshot) ||
+          roads.contains(town_canvas_road_key(candidate_x, candidate_y)) {
+          continue
+        }
+        if reference_tile_snapshot_ready() {
+          match reference_tile_kind_at(candidate_x, candidate_y) {
+            Some(reference_kind) =>
+              match town_canvas_transport_neutral_terrain_kind(reference_kind) {
+                Some(kind) => return kind
+                None => ()
+              }
+            None => ()
+          }
+        }
+        let candidate = town_snapshot_canvas_terrain(
+          snapshot,
+          None,
+          candidate_x,
+          candidate_y,
+        )
+        // Paving cannot distinguish a real plaza from a compiled legacy road
+        // in the typed snapshot. Prefer an unambiguous natural neighbor here;
+        // the reference branch above preserves genuine urban/campus ground.
+        if candidate != "void" && candidate != "plaza" {
+          return candidate
+        }
+      }
+    }
+  }
+  "grass"
+}
+
+///|
+fn town_snapshot_canvas_transport_terrain(
+  snapshot : @energy_valley_contract.TownSnapshot,
+  roads : Map[String, TownCanvasRoadCell],
+  road : TownCanvasRoadCell?,
+  x : Int,
+  y : Int,
+) -> String {
+  match road {
+    Some(value) if value.custom =>
+      town_snapshot_canvas_terrain(snapshot, road, x, y)
+    Some(value) =>
+      town_snapshot_canvas_transport_base_terrain(snapshot, roads, value, x, y)
+    None => town_snapshot_canvas_terrain(snapshot, None, x, y)
   }
 }
 

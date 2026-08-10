@@ -75,6 +75,83 @@ test "canvas road masks require an authoritative segment not coordinate adjacenc
 }
 
 ///|
+test "canvas road projection preserves UserDelta presentation provenance" {
+  let snapshot = ecosystem_contract_town_snapshot(init_model(), 20260727)
+  let source = snapshot.world.road_network.nodes[0]
+  let custom_node = {
+    ..source,
+    provenance: ecosystem_contract_provenance(true),
+  }
+  let custom_snapshot = {
+    ..snapshot,
+    world: {
+      ..snapshot.world,
+      road_network: @energy_valley_contract.road_network([custom_node], [], []),
+    },
+  }
+  let projected = town_snapshot_canvas_roads(custom_snapshot)
+  assert_eq(projected.length(), 1)
+  assert_true(projected[0].custom)
+  assert_true(
+    town_canvas_road_overlay_visible_with_transport(projected[0], true),
+  )
+  assert_true(
+    town_canvas_road_overlay_visible_with_transport(projected[0], false),
+  )
+  let base_projected = town_snapshot_canvas_roads(snapshot)
+  guard base_projected.search_by(road => !road.custom) is Some(index) else {
+    fail("expected a fixed Wenyu road")
+  }
+  assert_false(
+    town_canvas_road_overlay_visible_with_transport(base_projected[index], true),
+  )
+}
+
+///|
+test "transport terrain hides legacy paving and restores bridge water" {
+  let snapshot = ecosystem_contract_town_snapshot(init_model(), 20260727)
+  let roads = town_snapshot_canvas_roads(snapshot)
+  let lookup = town_snapshot_canvas_road_lookup(roads)
+  let mut recovered_regular_ground = false
+  let mut recovered_bridge_water = false
+  for road in roads {
+    if road.custom {
+      continue
+    }
+    let compiled = town_snapshot_canvas_terrain(snapshot, None, road.x, road.y)
+    let recovered = town_snapshot_canvas_transport_terrain(
+      snapshot,
+      lookup,
+      Some(road),
+      road.x,
+      road.y,
+    )
+    if road.bridge && compiled == "plaza" && recovered == "water" {
+      recovered_bridge_water = true
+    }
+    if !road.bridge && compiled == "plaza" && recovered != "plaza" {
+      recovered_regular_ground = true
+    }
+  }
+  assert_true(recovered_regular_ground)
+  assert_true(recovered_bridge_water)
+  guard roads.search_by(road => !road.bridge && !road.custom) is Some(index) else {
+    fail("expected a fixed non-bridge road")
+  }
+  let custom = { ..roads[index], custom: true }
+  assert_eq(
+    town_snapshot_canvas_transport_terrain(
+      snapshot,
+      lookup,
+      Some(custom),
+      custom.x,
+      custom.y,
+    ),
+    "road",
+  )
+}
+
+///|
 test "canvas building projection comes only from semantic places" {
   let model = init_model()
   let snapshot = ecosystem_contract_town_snapshot(model, 20260727)
