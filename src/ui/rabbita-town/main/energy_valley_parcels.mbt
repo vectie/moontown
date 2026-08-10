@@ -256,7 +256,7 @@ fn energy_valley_mark_structure_footprint(
 }
 
 ///|
-fn energy_valley_grow_parcel_structures(
+fn energy_valley_grow_legacy_parcel_structures(
   tiles : Array[Array[ExactEnergyValleyTile]],
   seed : Int,
 ) -> Unit {
@@ -316,5 +316,452 @@ fn energy_valley_grow_parcel_structures(
         None => ()
       }
     }
+  }
+}
+
+///|
+/// Exact source-building evidence after the final road graph, civic footprints,
+/// and water have carved it into one legal block and dry region.
+priv struct EnergyValleyReferenceFragment {
+  block_ordinal : Int
+  region_ordinal : Int
+  code : String
+  area : Int
+  sum_x : Int
+  sum_y : Int
+  min_x : Int
+  min_y : Int
+  max_x : Int
+  max_y : Int
+}
+
+///|
+fn energy_valley_shifted_reference_building_code_at(
+  seed : Int,
+  x : Int,
+  y : Int,
+) -> String {
+  reference_building_code_at(
+    x - energy_valley_road_pattern_shift_x(seed),
+    y - energy_valley_road_pattern_shift_y(seed),
+  )
+}
+
+///|
+fn energy_valley_reference_fragment_cell(
+  tiles : Array[Array[ExactEnergyValleyTile]],
+  layout : EnergyValleyRoadBlockLayout,
+  seed : Int,
+  x : Int,
+  y : Int,
+) -> ((Int, Int), String)? {
+  if !energy_valley_layout_cell_in_bounds(x, y) {
+    return None
+  }
+  let code = energy_valley_shifted_reference_building_code_at(seed, x, y)
+  if wenyu_reference_building_kind_from_code(code) is None {
+    return None
+  }
+  let tile = tiles[y][x]
+  if energy_valley_structure_cell_blocked(tile) ||
+    tile.base_terrain == "wetland" ||
+    !energy_valley_parcel_buildable_kind(tile.base_terrain) {
+    return None
+  }
+  match energy_valley_road_block_layout_at(layout, x, y) {
+    Some(identity) => Some((identity, code))
+    None => None
+  }
+}
+
+///|
+fn energy_valley_reference_fragments(
+  tiles : Array[Array[ExactEnergyValleyTile]],
+  layout : EnergyValleyRoadBlockLayout,
+  seed : Int,
+) -> Array[EnergyValleyReferenceFragment] {
+  let visited = energy_valley_bool_grid(false)
+  let fragments : Array[EnergyValleyReferenceFragment] = []
+  let cols = exact_energy_valley_cols()
+  for start_y in 0..<exact_energy_valley_rows() {
+    for start_x in 0..<cols {
+      if visited[start_y][start_x] {
+        continue
+      }
+      let source = match
+        energy_valley_reference_fragment_cell(
+          tiles, layout, seed, start_x, start_y,
+        ) {
+        Some(value) => value
+        None => {
+          visited[start_y][start_x] = true
+          continue
+        }
+      }
+      let identity = source.0
+      let code = source.1
+      let queue : Array[Int] = [start_y * cols + start_x]
+      visited[start_y][start_x] = true
+      let mut head = 0
+      let mut area = 0
+      let mut sum_x = 0
+      let mut sum_y = 0
+      let mut min_x = start_x
+      let mut min_y = start_y
+      let mut max_x = start_x
+      let mut max_y = start_y
+      while head < queue.length() {
+        let encoded = queue[head]
+        head += 1
+        let x = encoded % cols
+        let y = encoded / cols
+        area += 1
+        sum_x += x
+        sum_y += y
+        min_x = min_x.min(x)
+        min_y = min_y.min(y)
+        max_x = max_x.max(x)
+        max_y = max_y.max(y)
+        for delta in [(0, -1), (1, 0), (0, 1), (-1, 0)] {
+          let next_x = x + delta.0
+          let next_y = y + delta.1
+          if !energy_valley_layout_cell_in_bounds(next_x, next_y) ||
+            visited[next_y][next_x] {
+            continue
+          }
+          match
+            energy_valley_reference_fragment_cell(
+              tiles, layout, seed, next_x, next_y,
+            ) {
+            Some((next_identity, next_code)) =>
+              if next_identity == identity && next_code == code {
+                visited[next_y][next_x] = true
+                queue.push(next_y * cols + next_x)
+              }
+            None => ()
+          }
+        }
+      }
+      fragments.push({
+        block_ordinal: identity.0,
+        region_ordinal: identity.1,
+        code,
+        area,
+        sum_x,
+        sum_y,
+        min_x,
+        min_y,
+        max_x,
+        max_y,
+      })
+    }
+  }
+  fragments
+}
+
+///|
+fn energy_valley_largest_reference_fragment_per_block(
+  fragments : Array[EnergyValleyReferenceFragment],
+  block_count : Int,
+) -> Array[EnergyValleyReferenceFragment] {
+  let best_by_block : Array[EnergyValleyReferenceFragment?] = Array::make(
+    block_count + 1,
+    None,
+  )
+  for fragment in fragments {
+    let replace = match best_by_block[fragment.block_ordinal] {
+      None => true
+      Some(current) =>
+        fragment.area > current.area ||
+        (
+          fragment.area == current.area &&
+          (
+            fragment.min_y < current.min_y ||
+            (fragment.min_y == current.min_y && fragment.min_x < current.min_x)
+          )
+        )
+    }
+    if replace {
+      best_by_block[fragment.block_ordinal] = Some(fragment)
+    }
+  }
+  let result : Array[EnergyValleyReferenceFragment] = []
+  for ordinal in 1..<=block_count {
+    match best_by_block[ordinal] {
+      Some(fragment) => result.push(fragment)
+      None => ()
+    }
+  }
+  result
+}
+
+///|
+fn energy_valley_block_structure_candidate_score(
+  tiles : Array[Array[ExactEnergyValleyTile]],
+  layout : EnergyValleyRoadBlockLayout,
+  seed : Int,
+  fragment : EnergyValleyReferenceFragment,
+  x : Int,
+  y : Int,
+  width : Int,
+  depth : Int,
+) -> Int? {
+  let identity = (fragment.block_ordinal, fragment.region_ordinal)
+  if energy_valley_road_block_layout_for_footprint(layout, x, y, width, depth) !=
+    Some(identity) {
+    return None
+  }
+  let clearance = 2
+  for yy in (y - clearance)..<(y + depth + clearance) {
+    for xx in (x - clearance)..<(x + width + clearance) {
+      if energy_valley_layout_cell_in_bounds(xx, yy) &&
+        tiles[yy][xx].building_id is Some(_) {
+        return None
+      }
+    }
+  }
+  let mut buildable = 0
+  let mut source_match = 0
+  for yy in y..<(y + depth) {
+    for xx in x..<(x + width) {
+      let tile = tiles[yy][xx]
+      if energy_valley_structure_cell_blocked(tile) ||
+        tile.base_terrain == "wetland" {
+        return None
+      }
+      if energy_valley_parcel_buildable_kind(tile.base_terrain) {
+        buildable += 1
+      }
+      if energy_valley_shifted_reference_building_code_at(seed, xx, yy) ==
+        fragment.code {
+        source_match += 1
+      }
+    }
+  }
+  if buildable * 2 < width * depth {
+    return None
+  }
+  let mut road_frontage = 0
+  for xx in (x - 1)..<=(x + width) {
+    for yy in [y - 1, y + depth] {
+      if !energy_valley_layout_cell_in_bounds(xx, yy) {
+        return None
+      }
+      let tile = tiles[yy][xx]
+      if tile.terrain == "road" || tile.terrain == "bridge" {
+        road_frontage += 1
+      } else if tile.terrain == "water" ||
+        tile.base_terrain == "wetland" ||
+        tile.building_id is Some(_) ||
+        energy_valley_road_block_layout_at(layout, xx, yy) != Some(identity) {
+        return None
+      }
+    }
+  }
+  for yy in y..<(y + depth) {
+    for xx in [x - 1, x + width] {
+      if !energy_valley_layout_cell_in_bounds(xx, yy) {
+        return None
+      }
+      let tile = tiles[yy][xx]
+      if tile.terrain == "road" || tile.terrain == "bridge" {
+        road_frontage += 1
+      } else if tile.terrain == "water" ||
+        tile.base_terrain == "wetland" ||
+        tile.building_id is Some(_) ||
+        energy_valley_road_block_layout_at(layout, xx, yy) != Some(identity) {
+        return None
+      }
+    }
+  }
+  if road_frontage == 0 {
+    return None
+  }
+  let fragment_center_x2 = (fragment.sum_x * 2 + fragment.area) / fragment.area
+  let fragment_center_y2 = (fragment.sum_y * 2 + fragment.area) / fragment.area
+  let candidate_center_x2 = x * 2 + width
+  let candidate_center_y2 = y * 2 + depth
+  let distance = abs_int(candidate_center_x2 - fragment_center_x2) +
+    abs_int(candidate_center_y2 - fragment_center_y2)
+  Some(road_frontage * 40 + source_match * 16 + buildable * 3 - distance * 5)
+}
+
+///|
+fn energy_valley_best_block_structure_placement(
+  tiles : Array[Array[ExactEnergyValleyTile]],
+  layout : EnergyValleyRoadBlockLayout,
+  seed : Int,
+  fragment : EnergyValleyReferenceFragment,
+) -> EnergyValleyParcelPlacement? {
+  let sizes = [(5, 4), (4, 5), (3, 3)]
+  let anchor_x = fragment.sum_x / fragment.area
+  let anchor_y = fragment.sum_y / fragment.area
+  let search_radius = 14
+  for size in sizes {
+    let width = size.0
+    let depth = size.1
+    let mut best : EnergyValleyParcelPlacement? = None
+    let start_x = (anchor_x - search_radius).max(1)
+    let start_y = (anchor_y - search_radius).max(1)
+    let end_x = (anchor_x + search_radius).min(
+      exact_energy_valley_cols() - width - 2,
+    )
+    let end_y = (anchor_y + search_radius).min(
+      exact_energy_valley_rows() - depth - 2,
+    )
+    for y in start_y..<=end_y {
+      for x in start_x..<=end_x {
+        match
+          energy_valley_block_structure_candidate_score(
+            tiles, layout, seed, fragment, x, y, width, depth,
+          ) {
+          None => ()
+          Some(score) =>
+            match best {
+              Some(current) =>
+                if score > current.score {
+                  best = Some({ x, y, width, depth, score })
+                }
+              None => best = Some({ x, y, width, depth, score })
+            }
+        }
+      }
+    }
+    if best is Some(_) {
+      return best
+    }
+  }
+  None
+}
+
+///|
+fn energy_valley_mark_block_structure_ground(
+  tiles : Array[Array[ExactEnergyValleyTile]],
+  layout : EnergyValleyRoadBlockLayout,
+  placement : EnergyValleyParcelPlacement,
+  fragment : EnergyValleyReferenceFragment,
+  kind : String,
+) -> Unit {
+  let terrain = if kind == "campus" || kind == "civic" || kind == "industrial" {
+    "plaza"
+  } else {
+    "urban"
+  }
+  let identity = (fragment.block_ordinal, fragment.region_ordinal)
+  for y in (placement.y - 1)..<=(placement.y + placement.depth) {
+    for x in (placement.x - 1)..<=(placement.x + placement.width) {
+      if energy_valley_road_block_layout_at(layout, x, y) == Some(identity) {
+        let tile = tiles[y][x]
+        if !exact_energy_valley_is_transport_or_water(tile.terrain) &&
+          tile.base_terrain != "wetland" &&
+          tile.building_id is None {
+          tile.terrain = terrain
+          tile.generated_terrain = if terrain == "plaza" {
+            "campus"
+          } else {
+            "urban"
+          }
+        }
+      }
+    }
+  }
+}
+
+///|
+fn energy_valley_mark_block_structure_footprint(
+  tiles : Array[Array[ExactEnergyValleyTile]],
+  placement : EnergyValleyParcelPlacement,
+  fragment : EnergyValleyReferenceFragment,
+  kind : String,
+  floors : Int,
+) -> Unit {
+  let id = "ambient-wenyu-\{fragment.block_ordinal}-\{kind}"
+  let terrain = if kind == "campus" || kind == "civic" || kind == "industrial" {
+    "plaza"
+  } else {
+    "urban"
+  }
+  for y in placement.y..<(placement.y + placement.depth) {
+    for x in placement.x..<(placement.x + placement.width) {
+      let tile = tiles[y][x]
+      tile.terrain = terrain
+      tile.generated_terrain = if terrain == "plaza" {
+        "campus"
+      } else {
+        "urban"
+      }
+      tile.building_id = Some(id)
+      tile.structure = None
+      tile.structure_floors = None
+      tile.structure_width = None
+      tile.structure_depth = None
+    }
+  }
+  let anchor = tiles[placement.y][placement.x]
+  anchor.structure = Some(kind)
+  anchor.structure_floors = Some(floors)
+  anchor.structure_width = Some(placement.width)
+  anchor.structure_depth = Some(placement.depth)
+}
+
+///|
+fn energy_valley_grow_block_structures(
+  tiles : Array[Array[ExactEnergyValleyTile]],
+  seed : Int,
+  layout : EnergyValleyRoadBlockLayout,
+) -> Unit {
+  let fragments = energy_valley_largest_reference_fragment_per_block(
+    energy_valley_reference_fragments(tiles, layout, seed),
+    layout.blocks.length(),
+  )
+  for fragment in fragments {
+    let source_kind = match
+      wenyu_reference_building_kind_from_code(fragment.code) {
+      Some(value) => value
+      None => continue
+    }
+    let target = source_kind.new_system_kind()
+    let kind = target.runtime_name()
+    let (base_floors, floor_variants) = target.floor_profile()
+    let floors = base_floors +
+      energy_valley_variation(
+        seed,
+        fragment.min_x,
+        fragment.min_y,
+        659 + fragment.block_ordinal,
+        floor_variants,
+      )
+    match
+      energy_valley_best_block_structure_placement(
+        tiles, layout, seed, fragment,
+      ) {
+      Some(placement) => {
+        energy_valley_mark_block_structure_ground(
+          tiles, layout, placement, fragment, kind,
+        )
+        energy_valley_mark_block_structure_footprint(
+          tiles, placement, fragment, kind, floors,
+        )
+      }
+      None => ()
+    }
+  }
+}
+
+///|
+fn energy_valley_grow_parcel_structures(
+  tiles : Array[Array[ExactEnergyValleyTile]],
+  seed : Int,
+  layout : EnergyValleyRoadBlockLayout,
+) -> Unit {
+  if reference_building_snapshot_ready() &&
+    reference_road_graph_snapshot_ready() {
+    energy_valley_grow_block_structures(tiles, seed, layout)
+  } else {
+    // The production bootstrap installs the Wenyu building snapshot before
+    // world generation. Keep the prior deterministic fallback for isolated
+    // tests and degraded/offline startup where that authoring evidence is
+    // intentionally unavailable.
+    energy_valley_grow_legacy_parcel_structures(tiles, seed)
   }
 }

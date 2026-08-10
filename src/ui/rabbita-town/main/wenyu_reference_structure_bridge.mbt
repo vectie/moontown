@@ -1,5 +1,5 @@
 ///|
-/// Typed building categories authored by the Wenyu reference JSON.
+/// Presentation categories attached to Wenyu footprint or roof-anchor evidence.
 priv enum WenyuReferenceBuildingKind {
   WenyuLowrise
   WenyuRow
@@ -34,7 +34,7 @@ priv struct WenyuReferenceBuildingCell {
 
 ///|
 extern "js" fn reference_building_snapshot_ready() -> Bool =
-  #| () => globalThis.__wenyuReferenceBuildings?.schema === "moontown.wenyu_reference_buildings.v4" && globalThis.__wenyuReferenceBuildings?.tileGrid?.width === 256 && globalThis.__wenyuReferenceBuildings?.tileGrid?.height === 144
+  #| () => ["moontown.wenyu_reference_buildings.v4", "moontown.wenyu_reference_building_anchors.v1"].includes(globalThis.__wenyuReferenceBuildings?.schema) && globalThis.__wenyuReferenceBuildings?.tileGrid?.width === 256 && globalThis.__wenyuReferenceBuildings?.tileGrid?.height === 144
 
 ///|
 extern "js" fn reference_building_code_at(grid_x : Int, grid_y : Int) -> String =

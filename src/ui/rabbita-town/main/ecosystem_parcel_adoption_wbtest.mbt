@@ -487,19 +487,20 @@ test "water derives nested land-region topology without renumbering 75 road bloc
   // The preliminary 87-region analysis came from an approximate water mask and
   // is intentionally not an architecture invariant. Authored JSON open water
   // produces 78 / 20,160; adding wetlands produces 80 / 20,083. The compiler
-  // accepts 4 authored hydrology cells at repaired crossings,
+  // accepts 3 authored hydrology cells at repaired crossings after civic
+  // entrances are constrained to legal road-block frontages,
   // expands the hydrology barrier by 125 cells, and removes 2 more accepted
-  // road cells: 20,083 + 4 - 125 - 2 = 19,960. That land is split into 83
+  // road cells: 20,083 + 3 - 125 - 2 = 19,959. That land is split into 83
   // semantic regions, all nested under the 75 legal road blocks.
   assert_eq(open_water_metrics, (78, 20160))
   assert_eq(authored_hydrology_metrics, (80, 20083))
   assert_eq(authored_hydrology_land_cell_count, 20083)
-  assert_eq(accepted_from_authored_hydrology_cell_count, 4)
+  assert_eq(accepted_from_authored_hydrology_cell_count, 3)
   assert_eq(accepted_road_removed_cell_count, 2)
   assert_eq(generated_hydrology_removed_cell_count, 125)
   assert_eq(unexplained_removed_cell_count, 0)
   assert_eq(land_region_count, 83)
-  assert_eq(land_region_cell_count, 19960)
+  assert_eq(land_region_cell_count, 19959)
   assert_true(split_block_count > 0)
   assert_eq(empty_block_count, 1)
   assert_eq(fragment_seen.length(), land_region_cell_count)

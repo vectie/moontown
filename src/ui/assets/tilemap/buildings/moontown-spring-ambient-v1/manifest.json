@@ -1,0 +1,763 @@
+{
+  "id": "moontown-spring-ambient-v1",
+  "style_family": "moontown-procedural-spring-civic",
+  "generated_at": "2026-08-08",
+  "prompt_doc": "tilemap/prompts/moontown-spring-ambient-v1.md",
+  "use_case": "stylized-concept",
+  "source_workflow": "imagegen-chroma-key-alpha",
+  "format": {
+    "media_type": "image/webp",
+    "extension": "webp",
+    "width": 512,
+    "height": 512,
+    "color_mode": "RGBA",
+    "alpha_required": true
+  },
+  "camera": {
+    "projection": "orthographic-isometric",
+    "azimuth_degrees": 45,
+    "elevation_degrees": 32
+  },
+  "alignment": {
+    "anchor": {
+      "x": 0.5,
+      "y": 0.8,
+      "meaning": "runtime ground-center placement"
+    },
+    "front_vertex": {
+      "x": 0.5,
+      "y": 0.96
+    },
+    "normalized_footprint_width": 0.64
+  },
+  "composition": {
+    "scene_plate": false,
+    "baked_ground": false,
+    "baked_shadow": false,
+    "labels": false,
+    "people": false,
+    "vehicles": false,
+    "ui": false
+  },
+  "p0_generation_gates": {
+    "applies_to_variants": [4, 5, 6, 7, 8, 9],
+    "macro_massing": [
+      "match the archetype's exact macro silhouette and explicit counts at thumbnail scale",
+      "variants 4 and 5 remain clearly distinct from variants 0 through 3 of the same style",
+      "variants 6 and 7 remain clearly distinct from variants 0 through 5 of the same style",
+      "variants 8 and 9 remain clearly distinct from variants 0 through 7 of the same style"
+    ],
+    "single_isolated_cutout": true,
+    "camera_contract": "orthographic isometric at 45-degree azimuth and approximately 32-degree elevation",
+    "chroma_source": {
+      "key": "#ff00ff",
+      "uniform_background_required": true,
+      "key_color_in_subject": false
+    },
+    "final_export": "512-by-512 RGBA WebP with alpha",
+    "alignment_contract": "anchor (0.50, 0.80), front vertex y=0.96, normalized footprint width 0.64",
+    "per_asset_opaque_bbox_contract": "when opaque_bbox_px is present, the final non-transparent silhouette must fit both inclusive width and height ranges",
+    "per_asset_floor_contract": "when floor_gate is present, the authored massing must show exactly that floor distribution",
+    "style_contract": "warm-white, natural timber, pale-cyan glass, spring-green planting, crisp semi-flat cel shading balanced between flat vector illustration and restrained stylized 3D",
+    "role_specific_cues_range": [2, 3],
+    "facade_and_foliage_density": "sparse windows and simplified graphic foliage",
+    "prohibited_scene_content": [
+      "scene plate",
+      "ground",
+      "road",
+      "shadow",
+      "person",
+      "vehicle",
+      "prop",
+      "text",
+      "logo",
+      "UI"
+    ],
+    "strict_avoid_list_required": true,
+    "finished_sprite_mirroring_or_rotation": false,
+    "generation_strategy": "one separate built-in ImageGen stylized-concept call per file",
+    "runtime_fallback": "render the complete procedural building until the selected asset is ready"
+  },
+  "runtime_gate": {
+    "selector": "golden_spring_ambient_building_asset_candidate(building, zoom)",
+    "path_resolver": "golden_spring_ambient_building_asset_path(building, zoom)",
+    "variant_resolver": "golden_spring_ambient_asset_path_for_variant(style, variant)",
+    "eligible_if": {
+      "module_key": null,
+      "authored_id": null,
+      "style_allowlist": [
+        "block",
+        "campus",
+        "civic",
+        "courtyard",
+        "industrial",
+        "lowrise",
+        "row",
+        "tower"
+      ],
+      "minimum_zoom_inclusive": 0.18
+    },
+    "variant_selection": {
+      "count_per_style": 10,
+      "variant_range_inclusive": [0, 9],
+      "method": "promotion-preserving-stable-hash",
+      "salt": "moontown-spring-ambient-v1",
+      "inputs": ["style", "place_id", "interior_seed"],
+      "selection_rule": "r = mod(hash, 10); variants 8 and 9 use r directly; residues 0 through 7 retain mod(hash, 8)",
+      "promoted_residues": [8, 9],
+      "legacy_variant_modulo": 8,
+      "preserved_existing_fraction": 0.8,
+      "animation_time_is_input": false
+    },
+    "draw_only_when": "asset state is ready and natural dimensions are non-zero",
+    "fallback": "render the complete procedural building for loading, error, missing, or ineligible assets"
+  },
+  "style_semantics": [
+    {
+      "style": "block",
+      "footprints_cells": ["5x5", "7x7"],
+      "runtime_floors": [2, 4],
+      "authored_floor_read": 2
+    },
+    {
+      "style": "campus",
+      "footprints_cells": ["5x5"],
+      "runtime_floors": [2],
+      "authored_floor_read": 2
+    },
+    {
+      "style": "civic",
+      "footprints_cells": ["5x5", "7x7"],
+      "runtime_floors": [3],
+      "authored_floor_read": 3
+    },
+    {
+      "style": "courtyard",
+      "footprints_cells": ["5x5", "7x7"],
+      "runtime_floors": [3],
+      "authored_floor_read": 3
+    },
+    {
+      "style": "industrial",
+      "footprints_cells": ["7x7"],
+      "runtime_floors": [2],
+      "authored_floor_read": 2
+    },
+    {
+      "style": "lowrise",
+      "footprints_cells": ["5x5"],
+      "runtime_floors": [1, 2],
+      "authored_floor_read": 2
+    },
+    {
+      "style": "row",
+      "footprints_cells": ["5x5", "7x7"],
+      "runtime_floors": [3],
+      "authored_floor_read": 3
+    },
+    {
+      "style": "tower",
+      "footprints_cells": ["5x5"],
+      "runtime_floors": [8],
+      "authored_floor_read": 8
+    }
+  ],
+  "assets": [
+    {
+      "style": "block",
+      "variant": 0,
+      "file": "block-0.webp",
+      "archetype": "Two-storey compact mixed-use block with stepped warm-white volumes, a central stack of planted terraces, vertical timber fins, cyan corner glazing, and one recessed timber entry."
+    },
+    {
+      "style": "block",
+      "variant": 1,
+      "file": "block-1.webp",
+      "archetype": "Two-storey paired neighborhood block with a rounded glazed corner wing, a rectilinear companion wing, a sheltered central passage, a small coral canopy, and a restrained roof-edge planter."
+    },
+    {
+      "style": "block",
+      "variant": 2,
+      "file": "block-2.webp",
+      "archetype": "Two-storey stepped neighborhood market block with three staggered warm-white volumes, a recessed cyan-glazed corner shop, one continuous timber market awning, and a compact rooftop herb planter."
+    },
+    {
+      "style": "block",
+      "variant": 3,
+      "file": "block-3.webp",
+      "archetype": "Two-storey split garden mixed-use block formed by two offset wings around a narrow planted breezeway, with a short glazed link, quiet timber work bays, and two shallow planted roof edges."
+    },
+    {
+      "style": "block",
+      "variant": 4,
+      "file": "block-4.webp",
+      "archetype": "Two-storey checkerboard neighborhood block whose alternating square bays create deep open corner notches, with quiet cyan glazing, restrained timber faces, and one compact planted roof patch."
+    },
+    {
+      "style": "block",
+      "variant": 5,
+      "file": "block-5.webp",
+      "archetype": "Two-storey gateway bridge block with two solid side piers and exactly one upper bar spanning a broad full-height ground portal, finished with a slim planted roof edge and no courtyard ring."
+    },
+    {
+      "style": "block",
+      "variant": 6,
+      "file": "block-6.webp",
+      "archetype": "Two-storey bow-tie neighborhood block where exactly two trapezoidal wings meet at one narrow cyan-glazed waist to create four splayed outer corners; include no bridge, courtyard, or notched checkerboard."
+    },
+    {
+      "style": "block",
+      "variant": 7,
+      "file": "block-7.webp",
+      "archetype": "Single solid two-storey triangular-wedge block with three unequal façades, one clipped entry tip, and one small triangular roof garden; include no inner court or paired wing."
+    },
+    {
+      "style": "block",
+      "variant": 8,
+      "file": "block-8.webp",
+      "floor_gate": "2 storeys throughout",
+      "opaque_bbox_px": {
+        "width_inclusive": [420, 432],
+        "height_inclusive": [310, 370]
+      },
+      "archetype": "Continuous two-storey pentagonal shield-plan neighborhood block with exactly five outer sides and exactly one square bite removed from the rear-right corner.",
+      "p0_reject": "Reject Block-7 triangular massing: retain exactly five outer sides. Reject Block-4 checkerboard massing: allow only one bite. Reject Civic-5/7 polygon symmetry and any enclosed ring."
+    },
+    {
+      "style": "block",
+      "variant": 9,
+      "file": "block-9.webp",
+      "floor_gate": "2 storeys throughout",
+      "opaque_bbox_px": {
+        "width_inclusive": [420, 432],
+        "height_inclusive": [310, 370]
+      },
+      "archetype": "Continuous two-storey M-plan neighborhood block formed by one rear spine, exactly three fused forward bays, and exactly two open front notches.",
+      "p0_reject": "Reject Campus-4 comb, row façades, Block-4 checkerboard, and courtyard massing. All three forward bays must remain fused to the rear spine; no detached bays."
+    },
+    {
+      "style": "campus",
+      "variant": 0,
+      "file": "campus-0.webp",
+      "archetype": "Two-storey learning campus of two distinct wings joined by a cyan-glazed skybridge around a small green court, with one tree, a linear roof garden, timber panels, and a broad entry canopy."
+    },
+    {
+      "style": "campus",
+      "variant": 1,
+      "file": "campus-1.webp",
+      "archetype": "Two-storey angular learning pavilion with an offset satellite wing, a long timber bridge-canopy, a triangular skylight, generous cyan glazing, and one compact planted roof court."
+    },
+    {
+      "style": "campus",
+      "variant": 2,
+      "file": "campus-2.webp",
+      "archetype": "Two-storey greenhouse research campus with two calm laboratory wings joined by a modest pitched cyan-glass growing house, a sheltered garden court, timber sun screens, and one restrained solar strip."
+    },
+    {
+      "style": "campus",
+      "variant": 3,
+      "file": "campus-3.webp",
+      "archetype": "Two-storey maker learning campus pairing a compact classroom wing with a higher workshop bay, connected by a covered timber arcade around a small project court, with one sawtooth clerestory and one soft-yellow workshop door."
+    },
+    {
+      "style": "campus",
+      "variant": 4,
+      "file": "campus-4.webp",
+      "archetype": "Comb-plan learning campus with one two-storey academic spine, exactly three short single-storey studio fingers, and one linear roof garden; include no bridge, greenhouse, or court ring."
+    },
+    {
+      "style": "campus",
+      "variant": 5,
+      "file": "campus-5.webp",
+      "archetype": "Low two-storey cruciform campus with four shallow learning wings centered on one square cyan-glazed commons hub, plus restrained timber canopies and one compact roof garden."
+    },
+    {
+      "style": "campus",
+      "variant": 6,
+      "file": "campus-6.webp",
+      "archetype": "Exactly three detached two-storey pavilion cubes stepping diagonally and joined by exactly two low cyan-glazed links, with a roof garden on the middle cube only."
+    },
+    {
+      "style": "campus",
+      "variant": 7,
+      "file": "campus-7.webp",
+      "archetype": "One continuous two-storey rectilinear S-ribbon framing exactly two opposite open garden pockets; include no detached nodes, bridge, comb, cross, or closed ring."
+    },
+    {
+      "style": "campus",
+      "variant": 8,
+      "file": "campus-8.webp",
+      "floor_gate": "three equal 2-storey wings plus one low 1-storey hub",
+      "opaque_bbox_px": {
+        "width_inclusive": [420, 432],
+        "height_inclusive": [270, 330]
+      },
+      "archetype": "Y-plan campus with exactly three equal two-storey wings fused to one low triangular cyan-glazed central hub.",
+      "p0_reject": "Reject Campus-5 four-arm cross, Campus-1 boomerang, Block-7 solid triangle, and Civic-8 trefoil. Include no courts, bridges, or detached nodes."
+    },
+    {
+      "style": "campus",
+      "variant": 9,
+      "file": "campus-9.webp",
+      "floor_gate": "two equal 2-storey bars plus one low 1-storey ground link",
+      "opaque_bbox_px": {
+        "width_inclusive": [420, 432],
+        "height_inclusive": [270, 330]
+      },
+      "archetype": "Continuous N-plan campus with exactly two parallel equal two-storey bars, exactly one low diagonal ground-connected link, and exactly two opposite open triangular garden pockets.",
+      "p0_reject": "Reject Campus-0 skybridge, Campus-6 chain, Campus-7 S-plan, and Industrial-5 Z-plan. The diagonal link must remain ground-connected, never elevated or detached."
+    },
+    {
+      "style": "civic",
+      "variant": 0,
+      "file": "civic-0.webp",
+      "archetype": "Three-storey public-service building combining a rounded low chamber and a taller administration volume, divided by a full-height cyan atrium, with a yellow entry canopy and one curved roof planter."
+    },
+    {
+      "style": "civic",
+      "variant": 1,
+      "file": "civic-1.webp",
+      "archetype": "Three-storey stepped civic library with a broad semicircular public hall, a quiet rectangular upper volume, a planted roof promenade that follows the curve, and a centered timber-framed entrance."
+    },
+    {
+      "style": "civic",
+      "variant": 2,
+      "file": "civic-2.webp",
+      "archetype": "Low two-storey neighborhood assembly and forum pavilion formed by two splayed trapezoidal wings beneath one folded unifying roof, with a central cyan-glazed foyer and a recessed timber forum entrance."
+    },
+    {
+      "style": "civic",
+      "variant": 3,
+      "file": "civic-3.webp",
+      "archetype": "Low two-storey crescent wellness and community center wrapping a planted inner court, with continuous pale-cyan glazing, a compact rectilinear side wing, and one broad sheltered entrance."
+    },
+    {
+      "style": "civic",
+      "variant": 4,
+      "file": "civic-4.webp",
+      "archetype": "Compact three-storey terraced council house whose three offset rectilinear tiers create broad civic terraces, with one centered cyan chamber bay and a restrained timber entrance canopy."
+    },
+    {
+      "style": "civic",
+      "variant": 5,
+      "file": "civic-5.webp",
+      "archetype": "Low two-storey hexagonal neighborhood forum with six clean faceted sides beneath one broad unifying roof, a recessed cyan-glazed public chamber, and one clear timber-framed entrance."
+    },
+    {
+      "style": "civic",
+      "variant": 6,
+      "file": "civic-6.webp",
+      "opaque_bbox_px": {
+        "width_inclusive": [400, 432],
+        "height_inclusive": [350, 410]
+      },
+      "archetype": "Solid three-storey racetrack-plan civic hall with one continuous oval mass and no inner court, marked by one straight timber entry blade and one small offset square roof lantern or planted patch; include no crescent opening or ring."
+    },
+    {
+      "style": "civic",
+      "variant": 7,
+      "file": "civic-7.webp",
+      "opaque_bbox_px": {
+        "width_inclusive": [400, 432],
+        "height_inclusive": [370, 430]
+      },
+      "archetype": "Solid three-storey diamond-plan civic forum with four clipped corners, one diagonal full-height opaque-cyan atrium slash, and one small off-center flat-roof court or lantern; include no gables, parallel halls, church, cottage, or old-kingdom styling."
+    },
+    {
+      "style": "civic",
+      "variant": 8,
+      "file": "civic-8.webp",
+      "floor_gate": "3 storeys throughout below one flat roof lantern",
+      "opaque_bbox_px": {
+        "width_inclusive": [410, 432],
+        "height_inclusive": [360, 420]
+      },
+      "archetype": "Solid three-storey trefoil civic hall made from exactly three equal fused architectural lobes with straight clipped joins, one triangular foyer, and one small flat roof lantern; contain no internal void.",
+      "p0_reject": "Reject Courtyard-7 figure-eight, every enclosed ring, Civic-0/1/3 curved compositions, and Civic-6 oval. Reject clover, flower, logo, petal-outline, dome, spire, religious, and old-kingdom readings."
+    },
+    {
+      "style": "civic",
+      "variant": 9,
+      "file": "civic-9.webp",
+      "floor_gate": "one circular 3-storey chamber plus one straight 1-storey foyer stem",
+      "opaque_bbox_px": {
+        "width_inclusive": [400, 432],
+        "height_inclusive": [350, 410]
+      },
+      "archetype": "Solid keyhole-plan civic hall formed by exactly one circular three-storey chamber and one broad straight one-storey foyer stem measuring 25–30% of total building length, topped by one raised square cyan lantern.",
+      "p0_reject": "Reject Civic-6 continuous racetrack, Civic-5 polygon, courtyard rings, tower or campus scale, and every dome. Preserve one solid circular chamber plus one short broad stem."
+    },
+    {
+      "style": "courtyard",
+      "variant": 0,
+      "file": "courtyard-0.webp",
+      "archetype": "Three-storey U-shaped community housing block with two parallel wings around a rectangular planted court, a glazed rear bridge, sparse timber accents, and a simple front portal."
+    },
+    {
+      "style": "courtyard",
+      "variant": 1,
+      "file": "courtyard-1.webp",
+      "archetype": "Three-storey stepped C-shaped community block framing a green courtyard and single small tree, with staggered terraces, a tall cyan common-room bay, balcony planters, and a timber entrance canopy."
+    },
+    {
+      "style": "courtyard",
+      "variant": 2,
+      "file": "courtyard-2.webp",
+      "archetype": "Three-storey four-wing garden cooperative ring enclosing a generous square planted court, with stepped corner volumes, restrained timber balcony bands, one light glazed link, and a clearly open front portal."
+    },
+    {
+      "style": "courtyard",
+      "variant": 3,
+      "file": "courtyard-3.webp",
+      "archetype": "Three-wing pinwheel learning court with bent teaching wings radiating around a compact planted center, linked by one short cyan-glazed bridge and grounded by a slim timber entrance canopy."
+    },
+    {
+      "style": "courtyard",
+      "variant": 4,
+      "file": "courtyard-4.webp",
+      "archetype": "Three-storey H-plan garden cooperative with two parallel residential bars joined by one centered crossbar, framing exactly two open rectangular planted courts."
+    },
+    {
+      "style": "courtyard",
+      "variant": 5,
+      "file": "courtyard-5.webp",
+      "archetype": "Three-storey triangular residential ring formed by three straight wings around one triangular planted court, with one clear ground-level portal and no fourth wing or circular court."
+    },
+    {
+      "style": "courtyard",
+      "variant": 6,
+      "file": "courtyard-6.webp",
+      "archetype": "Three-storey octagonal residential ring with eight clean faceted sides, one octagonal garden court, and exactly two opposite ground-level portals."
+    },
+    {
+      "style": "courtyard",
+      "variant": 7,
+      "file": "courtyard-7.webp",
+      "archetype": "One continuous three-storey figure-eight residential ribbon enclosing exactly two equal round garden courts joined at one narrow shared waist."
+    },
+    {
+      "style": "courtyard",
+      "variant": 8,
+      "file": "courtyard-8.webp",
+      "floor_gate": "3 storeys throughout the continuous ring",
+      "opaque_bbox_px": {
+        "width_inclusive": [410, 432],
+        "height_inclusive": [350, 410]
+      },
+      "archetype": "Continuous three-storey teardrop residential ring with one matching teardrop garden court, one rounded head tapering to one point, and exactly one ground-level portal at the tip.",
+      "p0_reject": "Reject Courtyard-5 triangle, Courtyard-6 octagon, Courtyard-7 twin loops, and civic solid massing. Reject heart, map-pin, icon, or top-cleft silhouettes."
+    },
+    {
+      "style": "courtyard",
+      "variant": 9,
+      "file": "courtyard-9.webp",
+      "floor_gate": "3 storeys throughout the continuous spiral ribbon",
+      "opaque_bbox_px": {
+        "width_inclusive": [420, 432],
+        "height_inclusive": [350, 410]
+      },
+      "archetype": "Continuous three-storey square-spiral G-plan residential ribbon wrapping exactly 1.5 turns around one off-center square garden court, with one front opening and an inner tail at least 40% of opaque bounding-box width.",
+      "p0_reject": "Reject Courtyard-1 simple C, Courtyard-2 closed square, Campus-7 S-plan, and Courtyard-4 twin courts. Include no detached bar."
+    },
+    {
+      "style": "industrial",
+      "variant": 0,
+      "file": "industrial-0.webp",
+      "archetype": "Low two-storey maker shed with three restrained sawtooth roof bays, cyan clerestory glazing, slim roof-edge planting, and a continuous pale-cyan front work canopy."
+    },
+    {
+      "style": "industrial",
+      "variant": 1,
+      "file": "industrial-1.webp",
+      "archetype": "Two-storey fabrication hall with stepped monitor roofs, continuous clerestory windows, one small solar array, a large cyan loading door, and a modest timber side-entry canopy."
+    },
+    {
+      "style": "industrial",
+      "variant": 2,
+      "file": "industrial-2.webp",
+      "archetype": "Two-storey neighborhood mobility depot with two broad cyan service bays beneath a planted butterfly roof, a compact center dispatch bay, and one slender side canopy; show no vehicles or road markings."
+    },
+    {
+      "style": "industrial",
+      "variant": 3,
+      "file": "industrial-3.webp",
+      "archetype": "Two offset repair halls with a square cyan clerestory lantern centered over the taller rear volume, one broad service door, quiet timber work-bay screens, and a modest timber entrance canopy."
+    },
+    {
+      "style": "industrial",
+      "variant": 4,
+      "file": "industrial-4.webp",
+      "archetype": "Long mono-pitch wedge hall with one full-length cyan clerestory beneath the raised roof edge and exactly three broad service bays; show no vehicles, road markings, or extra roof machinery."
+    },
+    {
+      "style": "industrial",
+      "variant": 5,
+      "file": "industrial-5.webp",
+      "archetype": "Z-plan industrial workshop made from two offset flat-roof bars, with one solar canopy spanning their overlap and one deep open corner recess; include no sawtooth, butterfly, or barrel roof."
+    },
+    {
+      "style": "industrial",
+      "variant": 6,
+      "file": "industrial-6.webp",
+      "archetype": "One long shallow barrel-vault processing hall with a full-height cyan end bay and exactly two low rectangular side lean-tos; it must not read as a greenhouse or transit shed."
+    },
+    {
+      "style": "industrial",
+      "variant": 7,
+      "file": "industrial-7.webp",
+      "opaque_bbox_px": {
+        "width_inclusive": [420, 432],
+        "height_inclusive": [270, 335]
+      },
+      "archetype": "T-plan industrial depot with one tall stem intersecting one low crossbar beneath two mono-pitch roof planes that slope in the same screen direction, and exactly two broad service doors; do not mirror either roof plane or add a third door."
+    },
+    {
+      "style": "industrial",
+      "variant": 8,
+      "file": "industrial-8.webp",
+      "floor_gate": "2 storeys; shorter perpendicular leg visibly taller than long low workshop leg",
+      "opaque_bbox_px": {
+        "width_inclusive": [420, 432],
+        "height_inclusive": [280, 340]
+      },
+      "archetype": "Continuous L-plan repair plant with exactly one long low workshop leg and one shorter taller perpendicular leg fused at the outer elbow beneath flat roofs, exactly one raised square cyan clerestory cube at the elbow, and exactly two broad service bays on the long leg.",
+      "p0_reject": "Reject Industrial-7 T-plan: include no centered stem or crossbar. Reject Industrial-3 offset pair or lantern, lowrise or campus proportions, detached tower or silo, and a third service bay."
+    },
+    {
+      "style": "industrial",
+      "variant": 9,
+      "file": "industrial-9.webp",
+      "floor_gate": "2 storeys with flat roofs at exactly 2 heights",
+      "opaque_bbox_px": {
+        "width_inclusive": [420, 432],
+        "height_inclusive": [270, 335]
+      },
+      "archetype": "Continuous F-plan depot with one long low spine, exactly two unequal perpendicular fingers on the same side, exactly two open service courts, flat roofs at exactly two heights, and exactly two broad cyan service doors at the finger ends.",
+      "p0_reject": "Reject Campus-4 comb: retain two fingers, not three. Reject Industrial-7 T-plan, Industrial-5 Z-plan, courtyard or ground-plate massing, and detached bars."
+    },
+    {
+      "style": "lowrise",
+      "variant": 0,
+      "file": "lowrise-0.webp",
+      "archetype": "Paired two-storey garden homes formed from offset compact volumes, with cyan box-bay windows, two timber doors, a shared recessed passage, and one sheltered balcony planter."
+    },
+    {
+      "style": "lowrise",
+      "variant": 1,
+      "file": "lowrise-1.webp",
+      "archetype": "Two-storey garden residence pairing a softly curved glazed corner wing with a rectilinear timber-screened wing and a compact planted roof terrace."
+    },
+    {
+      "style": "lowrise",
+      "variant": 2,
+      "file": "lowrise-2.webp",
+      "archetype": "Rectilinear two-storey L-shaped garden house with a planted roof court nested inside the L, broad pale-cyan windows, a centered timber entry bay, and restrained perimeter planters."
+    },
+    {
+      "style": "lowrise",
+      "variant": 3,
+      "file": "lowrise-3.webp",
+      "archetype": "Narrow split-level live-work atelier pairing a tall studio volume and a short side wing, with one double-height cyan work window, a timber-framed entrance, and a compact upper garden terrace."
+    },
+    {
+      "style": "lowrise",
+      "variant": 4,
+      "file": "lowrise-4.webp",
+      "archetype": "Single-storey T-plan patio bungalow with a broad garden room across the top of the T, a short entry stem, one sheltered side patio, and one offset cyan clerestory."
+    },
+    {
+      "style": "lowrise",
+      "variant": 5,
+      "file": "lowrise-5.webp",
+      "archetype": "Paired two-storey garden homes with opposing mono-pitch roofs rising away from one narrow planted center seam, two simple cyan end bays, and clearly separate timber entrances."
+    },
+    {
+      "style": "lowrise",
+      "variant": 6,
+      "file": "lowrise-6.webp",
+      "opaque_bbox_px": {
+        "width_inclusive": [390, 425],
+        "height_inclusive": [320, 380]
+      },
+      "archetype": "Compact two-storey top-heavy cantilever house with one shifted upper volume projecting over a smaller ground volume to create one large sheltered corner void, plus one flat roof planter and one unmistakably domestic timber front door; include no courtyard ring, service bay, or commercial canopy."
+    },
+    {
+      "style": "lowrise",
+      "variant": 7,
+      "file": "lowrise-7.webp",
+      "opaque_bbox_px": {
+        "width_inclusive": [400, 432],
+        "height_inclusive": [300, 360]
+      },
+      "archetype": "Compact domestic two-storey vertical wedge loft with one mono-pitch main volume, one full-height cyan home-studio window, and one lower perpendicular flat-roof annex with a planted edge and clearly residential timber door; include no loading door, service bay, depot proportions, office scale, campus scale, paired house, or courtyard block."
+    },
+    {
+      "style": "lowrise",
+      "variant": 8,
+      "file": "lowrise-8.webp",
+      "floor_gate": "2 storeys throughout the compact domestic mass",
+      "opaque_bbox_px": {
+        "width_inclusive": [390, 420],
+        "height_inclusive": [320, 380]
+      },
+      "archetype": "Compact square two-storey domestic house with exactly one large quarter-circle full-height bite removed from the front-left corner to form one curved sheltered terrace, plus one flat roof garden patch and one timber front door.",
+      "p0_reject": "Reject Lowrise-1 convex rounded wing, Lowrise-6 rectangular cantilever void, civic curves, and every commercial or service cue. The quarter-circle must be a concave bite, not a projecting lobe."
+    },
+    {
+      "style": "lowrise",
+      "variant": 9,
+      "file": "lowrise-9.webp",
+      "floor_gate": "2 storeys: one ground volume crossed by one narrower upper volume",
+      "opaque_bbox_px": {
+        "width_inclusive": [390, 425],
+        "height_inclusive": [320, 380]
+      },
+      "archetype": "Compact rotated-stack house with exactly one horizontal rectangular ground volume crossed centrally by exactly one narrower upper volume rotated 90 degrees, creating exactly two opposite sheltered terraces, plus one small roof planter and one domestic front door.",
+      "p0_reject": "Reject Lowrise-6 same-axis cantilever, Lowrise-0 paired boxes, Campus-5 ground cross, Industrial-7 T-plan or depot scale, every bridge, and every paired prong."
+    },
+    {
+      "style": "row",
+      "variant": 0,
+      "file": "row-0.webp",
+      "archetype": "Three joined three-storey shop-house bays with a clear repeated rhythm, dark restrained storefront awnings, cyan glazing, alternating timber fins, and only two tiny roof planters."
+    },
+    {
+      "style": "row",
+      "variant": 1,
+      "file": "row-1.webp",
+      "archetype": "Three joined three-storey townhouses with staggered narrow bays, warm timber balcony planters, open roof terraces, one pale-yellow center shop canopy, and a small angled corner bay."
+    },
+    {
+      "style": "row",
+      "variant": 2,
+      "file": "row-2.webp",
+      "archetype": "Three-storey continuous straight-lintel gallery bar with one long rectangular mass, a deeply shaded ground-floor gallery, evenly repeated cyan window bays, sparse timber screens, and one shallow gray roof."
+    },
+    {
+      "style": "row",
+      "variant": 3,
+      "file": "row-3.webp",
+      "archetype": "Four-bay descending terrace row whose linked homes step down one bay at a time, with flat timber roof terraces, tall cyan windows, four clearly separated entrances, and restrained front planters."
+    },
+    {
+      "style": "row",
+      "variant": 4,
+      "file": "row-4.webp",
+      "archetype": "Four-bay terrace arranged as one shallow chevron V-plan, unified by one continuous roof line and one continuous timber shade canopy, with restrained repeated cyan bays."
+    },
+    {
+      "style": "row",
+      "variant": 5,
+      "file": "row-5.webp",
+      "archetype": "Five-bay terrace with an exact high-low-high-low-high roof rhythm and one full-height central passage through the middle high bay, with five clear entrances and no continuous arcade."
+    },
+    {
+      "style": "row",
+      "variant": 6,
+      "file": "row-6.webp",
+      "archetype": "Five equal three-storey bays arrayed along one shallow concave arc with one continuous curved roof line; include no chevron, height stepping, or central passage."
+    },
+    {
+      "style": "row",
+      "variant": 7,
+      "file": "row-7.webp",
+      "archetype": "Four equal three-storey maisonette cubes separated by exactly three full-height planted slots and joined only by one slim upper timber gallery."
+    },
+    {
+      "style": "row",
+      "variant": 8,
+      "file": "row-8.webp",
+      "floor_gate": "3 storeys across exactly 6 equal attached bays",
+      "opaque_bbox_px": {
+        "width_inclusive": [420, 432],
+        "height_inclusive": [390, 450]
+      },
+      "archetype": "Exactly six equal attached three-storey bays arranged on one shallow convex arc with a symmetric three-level parapet crown: the outer pair low, the next pair medium, and the center pair high; include exactly six doors.",
+      "p0_reject": "Reject Row-6 concave five-bay arc, Row-3 one-way descent, Row-5 alternating straight row, and civic-scale curves. Include no gables."
+    },
+    {
+      "style": "row",
+      "variant": 9,
+      "file": "row-9.webp",
+      "floor_gate": "3 storeys across exactly 5 equal attached bays",
+      "opaque_bbox_px": {
+        "width_inclusive": [420, 432],
+        "height_inclusive": [390, 450]
+      },
+      "archetype": "Exactly five equal attached three-storey bays forming one crisp 90-degree L-corner row, with three bays on the long leg, two on the short leg, one level flat roof, exactly five doors, and an open inner corner.",
+      "p0_reject": "Reject straight Rows 0/2/5/7, Row-4 chevron, Rows 6/8 arcs, courtyard U or C massing, and detached corner buildings."
+    },
+    {
+      "style": "tower",
+      "variant": 0,
+      "file": "tower-0.webp",
+      "archetype": "Slender eight-storey planted midrise with a full-height cyan glass bay, asymmetric stepped terraces, one rooftop garden, sparse vertical windows, and a small coral entry canopy."
+    },
+    {
+      "style": "tower",
+      "variant": 1,
+      "file": "tower-1.webp",
+      "archetype": "Slender eight-storey split-volume midrise with a narrow cyan central glass spine, alternating planted ledges, a tiered roof garden, timber accent panels, and a calm framed entrance."
+    },
+    {
+      "style": "tower",
+      "variant": 2,
+      "file": "tower-2.webp",
+      "archetype": "Slender eight-storey wellness shaft punctured by exactly three large recessed sky terraces, each with a pale-cyan back wall, warm timber lining, and concentrated planting, plus one compact roof garden."
+    },
+    {
+      "style": "tower",
+      "variant": 3,
+      "file": "tower-3.webp",
+      "archetype": "Slender energy-observatory shaft capped by an offset two-floor cyan-glazed top lantern and a small solar pergola over its planted roof, with quiet horizontal window bands and no glowing or science-fiction elements."
+    },
+    {
+      "style": "tower",
+      "variant": 4,
+      "file": "tower-4.webp",
+      "archetype": "Compact eight-storey paired-prong midrise with two vertical shafts separated by one full-height open slot and joined by exactly one planted mid-level bridge; never close the slot or add a second bridge."
+    },
+    {
+      "style": "tower",
+      "variant": 5,
+      "file": "tower-5.webp",
+      "archetype": "Single eight-storey rounded capsule shaft wrapped by exactly two broad horizontal green belts, with sparse cyan window bands, a quiet timber entry, and no stepped terraces, prongs, or top lantern."
+    },
+    {
+      "style": "tower",
+      "variant": 6,
+      "file": "tower-6.webp",
+      "archetype": "Single eight-storey triangular-plan midrise with three chamfered faces, one vertical cyan atrium seam, sparse timber fins, and one roof garden; include no terraces, prongs, or top lantern."
+    },
+    {
+      "style": "tower",
+      "variant": 7,
+      "file": "tower-7.webp",
+      "archetype": "Single eight-storey tapered-wedge midrise whose flush floor plates narrow monotonically upward to one small roof garden, with one broad cyan face and no balconies, steps, bridge, or green belts."
+    },
+    {
+      "style": "tower",
+      "variant": 8,
+      "file": "tower-8.webp",
+      "floor_gate": "8 storeys with exactly 7 sparse window bands above the entry",
+      "opaque_bbox_px": {
+        "width_inclusive": [210, 250],
+        "height_inclusive": [450, 472]
+      },
+      "archetype": "Single constant-width regular-hexagonal tower shaft with exactly six equal sides, one recessed full-height cyan groove on one face, one flat hexagonal roof garden, and exactly seven sparse window bands above the entry.",
+      "p0_reject": "Reject Tower-5 capsule or green belts, Tower-6 triangle, Tower-7 taper, Civic-5 low hexagon, and every terrace, prong, or top lantern."
+    },
+    {
+      "style": "tower",
+      "variant": 9,
+      "file": "tower-9.webp",
+      "floor_gate": "8 storeys with exactly 7 sparse window bands above the entry",
+      "opaque_bbox_px": {
+        "width_inclusive": [180, 225],
+        "height_inclusive": [450, 472]
+      },
+      "archetype": "Single constant-width narrow rectangular blade tower whose visible depth is at most 40% of façade width, capped by one diagonal mono-pitch crown rising left-to-right, with one solid pale-cyan end face and exactly seven sparse window bands above the entry.",
+      "p0_reject": "Reject Tower-7 taper: keep both vertical sides parallel. Reject Tower-3 lantern or cantilever, Tower-4 prongs, Industrial-4 low wedge, and every balcony, terrace, or green belt."
+    }
+  ]
+}

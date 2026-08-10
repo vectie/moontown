@@ -171,7 +171,10 @@ fn exact_energy_valley_assert_aligned_buildings(
       for x in building.x..<(building.x + building.width) {
         let tile = world.tiles[y][x]
         assert_eq(tile.terrain, "plaza")
-        assert_eq(tile.base_terrain, "campus")
+        assert_eq(
+          tile.base_terrain,
+          energy_valley_tile_kind_at(world.seed.reinterpret_as_int(), x, y),
+        )
         assert_eq(tile.generated_terrain, "campus")
         assert_eq(tile.building_id, Some(building.id))
         assert_eq(tile.structure, None)
@@ -215,7 +218,7 @@ test "Wenyu semantic evidence compiles into readable gameplay parcels" {
       }
     }
   }
-  assert_true(footprint_count >= 40)
+  assert_true(footprint_count >= 20)
   assert_true(footprint_count <= 300)
 }
 

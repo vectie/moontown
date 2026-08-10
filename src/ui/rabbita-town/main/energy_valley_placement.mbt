@@ -91,6 +91,7 @@ fn energy_valley_footprint_is_buildable(
   grid_x : Int,
   grid_y : Int,
 ) -> Bool {
+  let mut buildable = 0
   for y in grid_y..<(grid_y + civic.footprint_h) {
     for x in grid_x..<(grid_x + civic.footprint_w) {
       if energy_valley_water_at(seed, x, y) ||
@@ -98,9 +99,14 @@ fn energy_valley_footprint_is_buildable(
         ecosystem_road_network_node_at(road_nodes, x, y) is Some(_) {
         return false
       }
+      if energy_valley_parcel_buildable_kind(
+          energy_valley_tile_kind_at(seed, x, y),
+        ) {
+        buildable += 1
+      }
     }
   }
-  true
+  buildable * 2 >= civic.footprint_w * civic.footprint_h
 }
 
 ///|
@@ -164,6 +170,7 @@ fn energy_valley_perimeter_road_entrance(
 fn energy_valley_candidate_placement(
   seed : Int,
   road_nodes : Map[String, @energy_valley_contract.RoadNode],
+  layout : EnergyValleyRoadBlockLayout,
   civic : WenyuTownModule,
   placed : Array[EnergyValleyFootprint],
   grid_x : Int,
@@ -171,6 +178,20 @@ fn energy_valley_candidate_placement(
   entrance : EnergyValleyPoint,
   require_district : Bool,
 ) -> EnergyValleyPlacement? {
+  let layout_identity = if reference_road_graph_snapshot_ready() {
+    energy_valley_road_block_layout_for_footprint(
+      layout,
+      grid_x,
+      grid_y,
+      civic.footprint_w,
+      civic.footprint_h,
+    )
+  } else {
+    // Preserve the pre-existing procedural fallback contract when the Wenyu
+    // road authority is absent. The browser production path always takes the
+    // block-validated branch above.
+    Some((0, 0))
+  }
   if !energy_valley_footprint_in_bounds(
       grid_x,
       grid_y,
@@ -178,6 +199,7 @@ fn energy_valley_candidate_placement(
       civic.footprint_h,
     ) ||
     energy_valley_placement_overlaps(placed, civic, grid_x, grid_y) ||
+    layout_identity is None ||
     !energy_valley_footprint_is_buildable(
       seed, road_nodes, civic, grid_x, grid_y,
     ) ||
@@ -224,6 +246,7 @@ fn energy_valley_placements_for_road(
 fn find_energy_valley_fallback_placement_near_anchor(
   seed : Int,
   road_nodes : Map[String, @energy_valley_contract.RoadNode],
+  layout : EnergyValleyRoadBlockLayout,
   civic : WenyuTownModule,
   placed : Array[EnergyValleyFootprint],
   anchor_x : Int,
@@ -251,7 +274,8 @@ fn find_energy_valley_fallback_placement_near_anchor(
           Some(entrance) =>
             match
               energy_valley_candidate_placement(
-                seed, road_nodes, civic, placed, grid_x, grid_y, entrance, require_district,
+                seed, road_nodes, layout, civic, placed, grid_x, grid_y, entrance,
+                require_district,
               ) {
               Some(placement) => return Some(placement)
               None => ()
@@ -268,6 +292,7 @@ fn find_energy_valley_fallback_placement_near_anchor(
 fn find_energy_valley_placement_near_anchor(
   seed : Int,
   road_nodes : Map[String, @energy_valley_contract.RoadNode],
+  layout : EnergyValleyRoadBlockLayout,
   civic : WenyuTownModule,
   placed : Array[EnergyValleyFootprint],
   index : Int,
@@ -283,8 +308,8 @@ fn find_energy_valley_placement_near_anchor(
   let phase = hash % 11
   if !reference_tile_snapshot_ready() {
     return find_energy_valley_fallback_placement_near_anchor(
-      seed, road_nodes, civic, placed, anchor_x, anchor_y, phase, flip_x, flip_y,
-      require_district,
+      seed, road_nodes, layout, civic, placed, anchor_x, anchor_y, phase, flip_x,
+      flip_y, require_district,
     )
   }
   // Search the reference graph first, then fit the building to a side of the
@@ -312,6 +337,7 @@ fn find_energy_valley_placement_near_anchor(
               energy_valley_candidate_placement(
                 seed,
                 road_nodes,
+                layout,
                 civic,
                 placed,
                 candidate.0,
@@ -331,22 +357,62 @@ fn find_energy_valley_placement_near_anchor(
 }
 
 ///|
+fn find_energy_valley_global_placement(
+  seed : Int,
+  road_nodes : Map[String, @energy_valley_contract.RoadNode],
+  layout : EnergyValleyRoadBlockLayout,
+  civic : WenyuTownModule,
+  placed : Array[EnergyValleyFootprint],
+  index : Int,
+) -> EnergyValleyPlacement? {
+  let phase = energy_valley_module_anchor_hash(seed, civic, index) % 11
+  for grid_y in 3..<(tilemap_grid_height() - civic.footprint_h - 3) {
+    for grid_x in 3..<(tilemap_grid_width() - civic.footprint_w - 3) {
+      match
+        energy_valley_perimeter_road_entrance(
+          road_nodes, civic, grid_x, grid_y, phase,
+        ) {
+        None => ()
+        Some(entrance) =>
+          match
+            energy_valley_candidate_placement(
+              seed, road_nodes, layout, civic, placed, grid_x, grid_y, entrance,
+              false,
+            ) {
+            Some(placement) => return Some(placement)
+            None => ()
+          }
+      }
+    }
+  }
+  None
+}
+
+///|
 fn find_energy_valley_placement(
   seed : Int,
   road_nodes : Map[String, @energy_valley_contract.RoadNode],
+  layout : EnergyValleyRoadBlockLayout,
   civic : WenyuTownModule,
   placed : Array[EnergyValleyFootprint],
   index : Int,
 ) -> EnergyValleyPlacement? {
   match
     find_energy_valley_placement_near_anchor(
-      seed, road_nodes, civic, placed, index, true,
+      seed, road_nodes, layout, civic, placed, index, true,
     ) {
     Some(placement) => Some(placement)
     None =>
-      find_energy_valley_placement_near_anchor(
-        seed, road_nodes, civic, placed, index, false,
-      )
+      match
+        find_energy_valley_placement_near_anchor(
+          seed, road_nodes, layout, civic, placed, index, false,
+        ) {
+        Some(placement) => Some(placement)
+        None =>
+          find_energy_valley_global_placement(
+            seed, road_nodes, layout, civic, placed, index,
+          )
+      }
   }
 }
 
@@ -358,12 +424,15 @@ fn procedural_energy_valley_modules_with_road_network(
 ) -> Array[WenyuTownModule] {
   let normalized = normalized_energy_valley_seed(seed)
   let road_nodes = ecosystem_road_network_node_lookup(road_network)
+  let layout = energy_valley_road_block_layout(normalized, road_network)
   let result : Array[WenyuTownModule] = []
   let placed : Array[EnergyValleyFootprint] = []
   for index in 0..<templates.length() {
     let civic = templates[index]
     match
-      find_energy_valley_placement(normalized, road_nodes, civic, placed, index) {
+      find_energy_valley_placement(
+        normalized, road_nodes, layout, civic, placed, index,
+      ) {
       Some(placement) => {
         let generated = {
           ..civic,
@@ -380,7 +449,18 @@ fn procedural_energy_valley_modules_with_road_network(
           height: civic.footprint_h,
         })
       }
-      None => result.push(civic)
+      None =>
+        if reference_road_graph_snapshot_ready() {
+          abort(
+            "Energy Valley civic placement has no legal road-block lot: \{civic.id}",
+          )
+        } else {
+          // Degraded/offline startup has only the procedural road fallback and
+          // cannot promise the authored 75-block topology. Preserve the prior
+          // deterministic civic coordinates only in that explicit fallback;
+          // the production Wenyu path always fails closed above.
+          result.push(civic)
+        }
     }
   }
   result

@@ -349,8 +349,9 @@ fn exact_energy_valley_procedural_structure(
 fn exact_energy_valley_grow_urban_fabric(
   tiles : Array[Array[ExactEnergyValleyTile]],
   seed : Int,
+  layout : EnergyValleyRoadBlockLayout,
 ) -> Unit {
-  energy_valley_grow_parcel_structures(tiles, seed)
+  energy_valley_grow_parcel_structures(tiles, seed, layout)
 }
 
 ///|
@@ -499,7 +500,15 @@ fn exact_energy_valley_is_transport_or_water(terrain : String) -> Bool {
 fn exact_energy_valley_reserve_civic_parcel(
   tiles : Array[Array[ExactEnergyValleyTile]],
   building : ExactEnergyValleyBuilding,
+  layout : EnergyValleyRoadBlockLayout,
 ) -> Unit {
+  let identity = energy_valley_road_block_layout_for_footprint(
+    layout,
+    building.x,
+    building.y,
+    building.width,
+    building.depth,
+  )
   for y in (building.y - 1)..<=(building.y + building.depth) {
     for x in (building.x - 1)..<=(building.x + building.width) {
       if x < 0 ||
@@ -515,18 +524,25 @@ fn exact_energy_valley_reserve_civic_parcel(
       let tile = tiles[y][x]
       if footprint {
         tile.terrain = "plaza"
-        tile.base_terrain = "campus"
         tile.generated_terrain = "campus"
         tile.building_id = Some(building.id)
         tile.structure = None
         tile.structure_floors = None
         tile.structure_width = None
         tile.structure_depth = None
-      } else if !exact_energy_valley_is_transport_or_water(tile.terrain) {
+      } else if (match identity {
+          Some(value) =>
+            energy_valley_road_block_layout_at(layout, x, y) == Some(value)
+          None => !reference_road_graph_snapshot_ready()
+        }) &&
+        !exact_energy_valley_is_transport_or_water(tile.terrain) &&
+        tile.base_terrain != "wetland" &&
+        tile.building_id is None {
         // The one-tile campus apron visually joins each procedural civic
-        // footprint to its ground without erasing an adjacent access road.
+        // footprint to its ground without erasing an adjacent access road or
+        // leaking into a neighboring block. Base terrain remains immutable
+        // authoring evidence for the downstream parcel compiler.
         tile.terrain = "plaza"
-        tile.base_terrain = "campus"
         tile.generated_terrain = "campus"
         tile.structure = None
         tile.structure_floors = None
@@ -556,12 +572,15 @@ pub fn exact_energy_valley_generate(seed : UInt) -> ExactEnergyValleyWorld {
   }
   energy_valley_compile_reference_road_network(tiles, normalized_seed)
   let road_network = energy_valley_authoritative_road_network_from_tiles(tiles)
+  let block_layout = energy_valley_road_block_layout(
+    normalized_seed, road_network,
+  )
   energy_valley_prepare_semantic_ground(tiles)
   let buildings = exact_energy_valley_buildings(normalized_seed, road_network)
   for building in buildings {
-    exact_energy_valley_reserve_civic_parcel(tiles, building)
+    exact_energy_valley_reserve_civic_parcel(tiles, building, block_layout)
   }
-  exact_energy_valley_grow_urban_fabric(tiles, normalized_seed)
+  exact_energy_valley_grow_urban_fabric(tiles, normalized_seed, block_layout)
   energy_valley_compile_building_access(tiles, buildings)
   for y in 0..<exact_energy_valley_rows() {
     for x in 0..<exact_energy_valley_cols() {

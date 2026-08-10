@@ -1,0 +1,50 @@
+{
+  "id": "moontown-spring-civic-v1",
+  "style_family": "moontown-procedural-spring-civic",
+  "generated_at": "2026-08-08",
+  "prompt_doc": "tilemap/prompts/moontown-spring-civic-v1.md",
+  "camera": {
+    "projection": "orthographic-isometric",
+    "azimuth_degrees": 45,
+    "elevation_degrees": 32
+  },
+  "anchor": {
+    "x": 0.5,
+    "y": 0.8
+  },
+  "assets": [
+    { "module_key": "resident-twins", "file": "resident-twins.png" },
+    { "module_key": "contest-express", "file": "contest-express.png" },
+    { "module_key": "research-ai-agents", "file": "research-ai-agents.png" },
+    { "module_key": "social-square", "file": "social-square.png" },
+    { "module_key": "ai-garden", "file": "ai-garden.png" },
+    { "module_key": "physical-bridge", "file": "physical-bridge.png" },
+    { "module_key": "town-shell", "file": "town-shell.png" },
+    { "module_key": "policy-hall", "file": "policy-hall.png" },
+    {
+      "module_key": "vitality-tower",
+      "runtime_aliases": ["vitality-dashboard"],
+      "file": "vitality-tower.png"
+    },
+    {
+      "module_key": "story-radar",
+      "runtime_aliases": ["broadcast-tower"],
+      "file": "story-radar.png"
+    },
+    { "module_key": "talent-avenue", "file": "talent-avenue.png" },
+    { "module_key": "valley-market", "file": "valley-market.png" },
+    {
+      "module_key": "research-embodied-robotics",
+      "file": "research-embodied-robotics.png"
+    },
+    { "module_key": "research-opc", "file": "research-opc.png" },
+    {
+      "module_key": "research-llm-training",
+      "file": "research-llm-training.png"
+    },
+    {
+      "module_key": "research-ai-hardware",
+      "file": "research-ai-hardware.png"
+    }
+  ]
+}

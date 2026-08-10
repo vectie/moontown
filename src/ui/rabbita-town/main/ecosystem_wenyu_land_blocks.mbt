@@ -518,6 +518,75 @@ fn ecosystem_wenyu_planning_fragments(
     }
   })
   let result : Array[EcosystemPlanningFragment] = []
+  // Base civic and ambient footprints are already proven by the shared Wenyu
+  // layout to fit one dry road block. Reserve each complete rectangle as one
+  // planning fragment before decomposing the remaining land. This keeps the
+  // parcel compiler lossless while ensuring a rendered building never spans
+  // two finer land-use fragments merely because their source labels differ.
+  let base_buildings : Array[EcosystemPlace] = []
+  for place in snapshot.places {
+    if place.kind is EcosystemCivicBuilding ||
+      place.kind is EcosystemAmbientBuilding {
+      base_buildings.push(place)
+    }
+  }
+  base_buildings.sort_by((left, right) => {
+    let by_y = left.footprint.y.compare(right.footprint.y)
+    if by_y != 0 {
+      by_y
+    } else {
+      let by_x = left.footprint.x.compare(right.footprint.x)
+      if by_x != 0 {
+        by_x
+      } else {
+        left.source_id.compare(right.source_id)
+      }
+    }
+  })
+  for place in base_buildings {
+    let footprint = place.footprint
+    let mut owning_region = -1
+    let mut valid = footprint.width > 0 && footprint.depth > 0
+    for y in footprint.y..<(footprint.y + footprint.depth) {
+      for x in footprint.x..<(footprint.x + footprint.width) {
+        let key = golden_valley_tile_key(x, y)
+        if local_delta.contains(key) {
+          valid = false
+        }
+        match (eligible.get(key), region_ordinals.get(key)) {
+          (Some(_), Some(region)) =>
+            if owning_region < 0 {
+              owning_region = region
+            } else if owning_region != region {
+              valid = false
+            }
+          _ => valid = false
+        }
+      }
+    }
+    if !valid || owning_region < 0 {
+      continue
+    }
+    let origin_key = golden_valley_tile_key(footprint.x, footprint.y)
+    let tile_class = match eligible.get(origin_key) {
+      Some(value) => value
+      None => continue
+    }
+    for y in footprint.y..<(footprint.y + footprint.depth) {
+      for x in footprint.x..<(footprint.x + footprint.width) {
+        covered[golden_valley_tile_key(x, y)] = true
+      }
+    }
+    result.push({
+      id_key: "building-\{ecosystem_id_fragment(place.source_id)}-\{footprint.x}-\{footprint.y}-\{footprint.width}-\{footprint.depth}",
+      x: footprint.x,
+      y: footprint.y,
+      width: footprint.width,
+      depth: footprint.depth,
+      land_use: tile_class.land_use,
+      custom: false,
+    })
+  }
   for cell in sorted_cells {
     let origin_key = golden_valley_tile_key(cell.x, cell.y)
     if covered.contains(origin_key) {
