@@ -23,9 +23,9 @@
     },
     "buildings": {
       "path": "wenyu_reference_buildings.json",
-      "source": "wenyu_reference_buildings_source.png",
+      "source": "wenyu_topdown_semantic.png",
       "preview": "wenyu_reference_buildings_preview.png",
-      "method": "Shape-first extraction from reference.png: label exact footprint cells, preserve road/grid seams, classify connected components, and bake those outlines into the viewport raster."
+      "method": "Single-frame roof-provenance anchors: extract reviewed roof-core evidence from the same raster as terrain and roads, reject road/water/wetland cells, and fit runtime buildings legally inside the owning road block."
     },
     "standaloneRaster": {
       "path": "wenyu_reference_tilemap_iso.png",
@@ -194,7 +194,7 @@
       "civic": "buildings/wenyu_shape/cell_civic.png",
       "industrial": "buildings/wenyu_shape/cell_industrial.png",
       "placementLayer": "wenyu_reference_buildings.json",
-      "rendering": "Each sprite is a per-cell material. Building shape and orientation come from wenyu_reference_buildings.json labelRows/components, not from random icon placement."
+      "rendering": "The JSON stores reviewed singleton roof anchors and presentation-only style hints. Runtime shape, clearance, frontage, and parcel ownership are fitted inside the anchor's authoritative Wenyu road block."
     }
   }
 }

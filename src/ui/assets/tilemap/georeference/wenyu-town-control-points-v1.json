@@ -1,0 +1,236 @@
+{
+  "schema": "moontown.wenyu_georeference_controls.v1",
+  "datasetId": "wenyu-town-grid-georeference-v1",
+  "revision": 3,
+  "grid": {
+    "width": 256,
+    "height": 144,
+    "axis": {
+      "x": "east/right",
+      "y": "south/down",
+      "origin": "northwest outer edge"
+    },
+    "previewPath": "src/ui/assets/tilemap/wenyu_reference_labels_preview.png",
+    "sourceAssets": [
+      {
+        "path": "src/ui/assets/tilemap/wenyu_topdown_semantic.png",
+        "sha256": "sha256:10d09f3fb45da0e6dbcfb89dee19051df23d8be4b6b5e28aafbd51817c64d93b"
+      },
+      {
+        "path": "src/ui/assets/tilemap/wenyu_reference_labels.json",
+        "sha256": "sha256:9b93cc1b9c55aa26ec5e2e21b177aea4cba97940e2a78fea06d36d04d84f6d89"
+      },
+      {
+        "path": "src/ui/assets/tilemap/wenyu_reference_roads.json",
+        "sha256": "sha256:0c305284bdb166fd64bf71a164eb788bb70fb04da0d4cd261b2e1ea42856bc19"
+      }
+    ]
+  },
+  "acceptancePolicy": {
+    "minimumFitControls": 6,
+    "minimumAffineFitControls": 6,
+    "minimumIndependentNonStationGroups": 4,
+    "maximumStationControls": 2,
+    "minimumSourceQuadrants": 3,
+    "minimumHoldoutControls": 2,
+    "minimumSourceHullCoverage": 0.3,
+    "maximumRmsTiles": 0.6,
+    "maximumP95Tiles": 1.0,
+    "maximumMaxTiles": 1.5,
+    "maximumHoldoutTiles": 1.0,
+    "maximumLeaveOneOutTiles": 1.0,
+    "maximumScaleRatio": 1.35,
+    "maximumAxisNonOrthogonalityCosine": 0.2,
+    "minimumAffineRmsImprovement": 0.2
+  },
+  "controls": [
+    {
+      "id": "gcp-qinbei-river-crossing",
+      "featureType": "road-water-crossing",
+      "independentGroup": "wenyu-central-bridge-chain",
+      "role": "fit",
+      "reviewStatus": "confirmed",
+      "weight": 0.8,
+      "grid": {
+        "x": 184.0,
+        "y": 63.5,
+        "uncertaintyTiles": 2.0,
+        "evidence": "Qinbei Road crossing identified by its upstream position in the ordered Wenyu bridge chain on the published Energy Valley plan."
+      },
+      "wgs84": {
+        "lon": 116.456935,
+        "lat": 40.125626,
+        "evidence": "Beijing Water Authority 2017 table, row 161: Qinbei Road river crossing."
+      },
+      "reviewNote": "Confirmed as the upstream control in the official Qinbei/Future Science City/Future Science City East/Jingcheng sequence; the illustrated grid pick remains approximate."
+    },
+    {
+      "id": "gcp-future-science-city-road-bridge",
+      "featureType": "road-water-crossing",
+      "independentGroup": "wenyu-central-bridge-chain",
+      "role": "fit",
+      "reviewStatus": "confirmed",
+      "weight": 1.0,
+      "grid": {
+        "x": 190.4375,
+        "y": 78.4375,
+        "uncertaintyTiles": 2.5,
+        "evidence": "Future Science City Road bridge center identified on the same public Energy Valley plan and local semantic raster."
+      },
+      "wgs84": {
+        "lon": 116.462627,
+        "lat": 40.121959,
+        "evidence": "Beijing Water Authority 2017 table, row 159: Future Science City Road bridge."
+      },
+      "baiduReference": {
+        "name": "未来科学城路桥",
+        "uid": "d02560f4963d1f271ee999d0",
+        "coordinateSystem": "BD09MC",
+        "x": 12966072.815,
+        "y": 4856843.48,
+        "url": "https://map.baidu.com/poi/%E6%9C%AA%E6%9D%A5%E7%A7%91%E5%AD%A6%E5%9F%8E%E8%B7%AF%E6%A1%A5/@12966072.815,4856843.48,19z?uid=d02560f4963d1f271ee999d0"
+      },
+      "reviewNote": "Name and location independently verified in Baidu Map; the official WGS84 coordinate remains the metric fit target."
+    },
+    {
+      "id": "gcp-future-science-city-east-road-bridge",
+      "featureType": "road-water-crossing",
+      "independentGroup": "wenyu-central-bridge-chain",
+      "role": "fit",
+      "reviewStatus": "confirmed",
+      "weight": 1.0,
+      "grid": {
+        "x": 205.233333,
+        "y": 85.966667,
+        "uncertaintyTiles": 2.5,
+        "evidence": "Future Science City East Road bridge center identified on the public plan and local semantic raster."
+      },
+      "wgs84": {
+        "lon": 116.469955,
+        "lat": 40.121399,
+        "evidence": "Beijing Water Authority 2017 table, row 157: Science East Road river crossing."
+      },
+      "baiduReference": {
+        "name": "未来科学城东路桥",
+        "uid": "01e9370548045569f23cbad3",
+        "coordinateSystem": "BD09MC",
+        "x": 12966780.953053571,
+        "y": 4856888.745660714,
+        "url": "https://map.baidu.com/poi/%E6%9C%AA%E6%9D%A5%E7%A7%91%E5%AD%A6%E5%9F%8E%E4%B8%9C%E8%B7%AF%E6%A1%A5/@12966780.953053571,4856888.745660714,16z?uid=01e9370548045569f23cbad3"
+      },
+      "reviewNote": "Name and location independently verified in Baidu Map; the official WGS84 coordinate remains the metric fit target."
+    },
+    {
+      "id": "gcp-jingcheng-wenyu-crossing",
+      "featureType": "road-water-crossing",
+      "independentGroup": "wenyu-central-bridge-chain",
+      "role": "fit",
+      "reviewStatus": "confirmed",
+      "weight": 0.9,
+      "grid": {
+        "x": 222.078947,
+        "y": 97.078947,
+        "uncertaintyTiles": 3.0,
+        "evidence": "Broad Jingcheng Expressway crossing identified by its position immediately downstream of the two science-city road bridges."
+      },
+      "wgs84": {
+        "lon": 116.478485,
+        "lat": 40.120253,
+        "evidence": "Beijing Water Authority 2017 table, row 156: Wenyu River bridge (Jingcheng Expressway)."
+      },
+      "reviewNote": "Confirmed by the official named bridge order and the labeled Energy Valley plate; the broad illustrated interchange has the largest pick uncertainty."
+    },
+    {
+      "id": "holdout-shunyu-river-crossing",
+      "featureType": "road-water-crossing",
+      "independentGroup": "shunyu-wenyu-crossing",
+      "role": "holdout",
+      "reviewStatus": "candidate",
+      "weight": 0.6,
+      "grid": {
+        "x": 176.5,
+        "y": 45.0,
+        "uncertaintyTiles": 3.0,
+        "evidence": "Upstream illustrated crossing is sequence-compatible with Shunyu Road, but the source plate does not label it directly."
+      },
+      "wgs84": {
+        "lon": 116.449423,
+        "lat": 40.138615,
+        "evidence": "Beijing Water Authority 2017 table, row 166: Shunyu Road river crossing."
+      },
+      "reviewNote": "Hold out of the fit until the upstream bridge identity is independently labeled."
+    },
+    {
+      "id": "holdout-airport-north-line-crossing",
+      "featureType": "road-water-crossing",
+      "independentGroup": "airport-north-line-wenyu-crossing",
+      "role": "holdout",
+      "reviewStatus": "candidate",
+      "weight": 0.7,
+      "grid": {
+        "x": 235.685185,
+        "y": 116.314815,
+        "uncertaintyTiles": 3.0,
+        "evidence": "Large downstream illustrated crossing is compatible with the Airport North Line, but remains an extrapolation beyond the local four-bridge fit."
+      },
+      "wgs84": {
+        "lon": 116.485774,
+        "lat": 40.113497,
+        "evidence": "Beijing Water Authority 2017 table, row 153: Airport North Line expressway river crossing."
+      },
+      "reviewNote": "Retained as a candidate holdout because the perspective-derived town raster is measurably less rigid outside the central crossing chain."
+    }
+  ],
+  "provenance": {
+    "townSource": {
+      "kind": "illustrated Energy Valley planning masterplan",
+      "publicArticleUrl": "https://www.kechuangfuwu.com/vue/news?id=7133&menu=parkService&subcat=%E8%B5%84%E8%AE%AF%E5%88%97%E8%A1%A8",
+      "exactPublicImageUrl": "https://www.kechuangfuwu.com/ueditor/fileupload/file/20210309/1615259457179003479.jpg",
+      "labeledArticleUrl": "https://kechuangfuwu.com/vue/news?id=7126&menu=%E8%B5%B0%E8%BF%9B%E5%9B%AD%E5%8C%BA",
+      "labeledImageUrl": "https://www.kechuangfuwu.com/ueditor/fileupload/file/20210304/1614839499074030180.jpg",
+      "identityEvidence": "The public image and the local birdseye source are the same Energy Valley plate; the local top-down semantic asset is a derived presentation raster, not surveyed GIS.",
+      "limitation": "The oblique planning illustration has perspective and local warping. A central similarity fit does not justify a whole-map road overlay."
+    },
+    "officialSpatialEvidence": {
+      "bridgeOrderPdf": "https://swj.beijing.gov.cn/zwgk/ghjhzj/202408/P020240806622968501559.pdf",
+      "bridgeCoordinatePdf": "https://swj.beijing.gov.cn/zwgk/ztb/zbjg/201912/P020191219459038488736.pdf",
+      "coordinateCrsAssumption": "The published longitude/latitude pairs are treated as WGS84 for the local metric fit; relative crossing order, scale, and rotation—not absolute cadastral position—are the acceptance evidence.",
+      "confirmedOrder": [
+        "秦北路跨河桥",
+        "未来科学城路桥",
+        "科学东路跨河桥",
+        "温榆河大桥（京承高速）",
+        "机场北线高速跨河桥"
+      ]
+    },
+    "baiduMap": {
+      "provider": "Baidu Map",
+      "referenceOnly": true,
+      "observedAt": "2026-08-09",
+      "coordinateSystem": "BD09MC",
+      "mapUrl": "https://map.baidu.com/",
+      "note": "Baidu names and POI positions are retained only as authoring evidence; no Baidu tiles or road geometry are distributed.",
+      "line17Stations": [
+        {
+          "name": "未来科学城北",
+          "uid": "6395f941b88eab334e2fdf4b",
+          "x": 12966143.515,
+          "y": 4857953.51
+        },
+        {
+          "name": "未来科学城",
+          "uid": "8821b4b4e591e30bc5effbe2",
+          "x": 12965916.17525,
+          "y": 4855964.635
+        }
+      ],
+      "stationPolicy": "The two station POIs validate route order and relative spacing only; they are not fit controls because the planning plate does not identify exact station pixels."
+    },
+    "calibrationScope": {
+      "kind": "local-transport-registration",
+      "supportedUse": "Author a schematic major-road and Line 17 layer snapped to the existing town graph around the confirmed Wenyu crossing chain.",
+      "unsupportedUse": "Do not transform the whole OSM/Baidu road network, terrain, water, buildings, or parcels into the town canvas."
+    },
+    "reviewRule": "Only visibly named or ordered features may become confirmed controls. Candidate holdouts remain excluded from acceptance until independently identified."
+  }
+}

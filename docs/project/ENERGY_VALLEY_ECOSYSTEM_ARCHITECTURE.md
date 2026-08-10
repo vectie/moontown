@@ -364,6 +364,34 @@ live runtime projection; `PREVIEW · 环境日程` means deterministic ambient l
 A stale runtime snapshot is shown as historical evidence and never relabelled
 as current execution.
 
+## Procedural spring art layer
+
+Canvas always renders the full interactive `TownSnapshot`; there is no scene
+plate, parallel hotspot map or second composition. Sixteen canonical module IDs
+may optionally use spring civic landmark cutouts. Anonymous compiled fabric can
+use one of ten deterministic spring variants for each of the eight contract
+styles (`block`, `courtyard`, `civic`, `lowrise`, `industrial`, `row`, `campus`
+and `tower`). User-authored buildings and every missing/loading asset keep the
+complete cel-shaded procedural renderer.
+
+Cutouts inherit the real building's semantic footprint, depth order, selection
+and accepted-frame hit authority. Ambient choice hashes stable place identity,
+style and interior seed; it never samples time, camera or collection order. A
+promotion map assigns variants 8 and 9 to two stable hash residues while
+preserving the prior modulo-8 choice for the other eight residues, so extending
+the terminal 80-sprite pack does not visually reroll most existing buildings.
+The 96 possible landmark-and-ambient paths share a 48-entry least-recently-used
+image cache owned and released by the Canvas lifecycle. Only cutouts whose
+normalized sprite bounds intersect the viewport enter that cache. Records used
+by the active Canvas frame and records still loading are not eviction
+candidates; when every slot is protected, the extra building uses procedural
+massing without mutating the cache. Ready/error callbacks coalesce into one
+animation-frame repaint, which a normal Canvas paint may absorb. These rules
+prevent full-world traversal from cycling every slot through `loading` while
+still allowing a later camera frame to replace off-screen art. Art readiness
+cannot change town state or interaction geometry. Overview zoom avoids ambient
+decoding and uses procedural massing.
+
 ## Attention and progressive disclosure
 
 Attention is a camera and interaction concern, not another permanent map

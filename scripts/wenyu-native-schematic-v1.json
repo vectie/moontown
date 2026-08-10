@@ -1,0 +1,231 @@
+{
+  "schema": "moontown.wenyu_native_schematic_authoring.v2",
+  "revision": 2,
+  "expectedSemanticRowsSha256": "sha256:3ebc130c49b61969a7ee8620c792d9b6e51b48f565868af1ccdde85e0a3ba2b8",
+  "expectedPresentationCounts": {
+    "primaryTiles": 131,
+    "secondaryTiles": 135,
+    "accessTiles": 0
+  },
+  "provenance": {
+    "basis": "central native schematic curated on the immutable Wenyu cardinal road graph",
+    "bridgeChainActivated": false,
+    "cameraBasis": "default native camera centered at (128,72)",
+    "wholeMapTransformEligible": false,
+    "semanticCloseReveal": false,
+    "line17SouthStationCorrection": "未来科学城站 snapped to visible native major-road cell (116,87); post-station tail stays monotonically west",
+    "reviewDecision": "GO",
+    "reviewPayloadSha256": "sha256:18abcf38ac26c66a9ecff4739c8905b4b65ed2d7cbd84e67d650cf70f8cb64a1"
+  },
+  "corridors": [
+    {
+      "id": "future-science-city-road",
+      "name": "未来科学城路",
+      "rank": "P",
+      "vertices": [
+        [125, 49],
+        [125, 64]
+      ]
+    },
+    {
+      "id": "future-science-city-east-road",
+      "name": "未来科学城东路",
+      "rank": "P",
+      "vertices": [
+        [125, 59],
+        [139, 59],
+        [139, 60],
+        [141, 60],
+        [141, 62],
+        [143, 62],
+        [143, 70],
+        [141, 70],
+        [141, 76],
+        [139, 76],
+        [139, 77],
+        [149, 77],
+        [149, 81],
+        [157, 81],
+        [157, 82],
+        [159, 82],
+        [159, 89]
+      ]
+    },
+    {
+      "id": "qinbei-road",
+      "name": "秦北路",
+      "rank": "P",
+      "vertices": [
+        [102, 69],
+        [102, 59],
+        [104, 59],
+        [104, 49],
+        [125, 49]
+      ]
+    },
+    {
+      "id": "yingcai-north-1-street",
+      "name": "英才北一街",
+      "rank": "S",
+      "vertices": [
+        [102, 69],
+        [110, 69],
+        [110, 71],
+        [119, 71],
+        [119, 72],
+        [120, 72]
+      ]
+    },
+    {
+      "id": "yingcai-north-2-street",
+      "name": "英才北二街",
+      "rank": "S",
+      "vertices": [
+        [120, 72],
+        [122, 72],
+        [122, 74],
+        [138, 74],
+        [138, 76],
+        [139, 76]
+      ]
+    },
+    {
+      "id": "yingcai-south-1-street",
+      "name": "英才南一街",
+      "rank": "S",
+      "vertices": [
+        [120, 72],
+        [120, 80],
+        [116, 80],
+        [116, 87]
+      ]
+    },
+    {
+      "id": "yingcai-south-2-street",
+      "name": "英才南二街",
+      "rank": "S",
+      "vertices": [
+        [116, 87],
+        [111, 87],
+        [111, 95],
+        [108, 95],
+        [108, 102]
+      ]
+    },
+    {
+      "id": "central-lake-south-edge",
+      "name": "",
+      "rank": "S",
+      "vertices": [
+        [108, 102],
+        [103, 102],
+        [103, 101],
+        [96, 101],
+        [96, 97],
+        [98, 97],
+        [98, 89],
+        [100, 89]
+      ]
+    },
+    {
+      "id": "central-lake-west-edge",
+      "name": "",
+      "rank": "S",
+      "vertices": [
+        [100, 89],
+        [100, 76],
+        [102, 76],
+        [102, 69]
+      ]
+    }
+  ],
+  "line17": {
+    "path": [
+      [125000, 52000],
+      [123480, 55258],
+      [121751, 58759],
+      [121221, 60626],
+      [121010, 62746],
+      [119400, 72889],
+      [116000, 87000],
+      [115600, 93272],
+      [115300, 96841],
+      [115000, 100824],
+      [114800, 103438],
+      [114500, 121152],
+      [114200, 135037],
+      [114000, 140434],
+      [113857, 143000]
+    ],
+    "stations": [
+      {
+        "name": "未来科学城北站",
+        "xMillis": 125000,
+        "yMillis": 52000,
+        "exits": [
+          {
+            "label": "B",
+            "destination": "英才北一街",
+            "xMillis": 125000,
+            "yMillis": 51000,
+            "minZoomMillis": 720
+          },
+          {
+            "label": "C",
+            "destination": "英才北一街",
+            "xMillis": 125000,
+            "yMillis": 53000,
+            "minZoomMillis": 720
+          },
+          {
+            "label": "D",
+            "destination": "英才北一街",
+            "xMillis": 124000,
+            "yMillis": 49000,
+            "minZoomMillis": 720
+          }
+        ]
+      },
+      {
+        "name": "未来科学城站",
+        "xMillis": 116000,
+        "yMillis": 87000,
+        "exits": [
+          {
+            "label": "A",
+            "destination": "能源谷核心区",
+            "xMillis": 116000,
+            "yMillis": 87000,
+            "minZoomMillis": 720
+          },
+          {
+            "label": "B",
+            "destination": "能源谷核心区",
+            "xMillis": 116000,
+            "yMillis": 86000,
+            "minZoomMillis": 720
+          },
+          {
+            "label": "C",
+            "destination": "能源谷核心区",
+            "xMillis": 115000,
+            "yMillis": 87000,
+            "minZoomMillis": 720
+          },
+          {
+            "label": "D",
+            "destination": "能源谷核心区",
+            "xMillis": 120000,
+            "yMillis": 80000,
+            "minZoomMillis": 720
+          }
+        ]
+      }
+    ],
+    "lod": {
+      "pathMinZoomMillis": 0,
+      "stationMinZoomMillis": 160,
+      "exitMinZoomMillis": 720
+    }
+  }
+}

@@ -16,7 +16,9 @@ no georeferencing transform.
 from __future__ import annotations
 
 import argparse
+import hashlib
 import json
+from collections import Counter
 from collections import deque
 from pathlib import Path
 
@@ -32,6 +34,12 @@ ROAD_VALUE_MAX = 240
 MAJOR_HALF_WIDTH_MIN = 3
 RECTILINEAR_CORRIDOR_STRIDE = 10
 RECTILINEAR_MAX_DEVIATION = 3
+
+NATIVE_SCHEMATIC_SCHEMA = "moontown.wenyu_native_schematic_authoring.v2"
+PRESENTATION_CODES = frozenset(".PSA")
+PRESENTATION_RANKS = frozenset("PSA")
+PRESENTATION_PRIORITY = {".": 0, "A": 1, "S": 2, "P": 3}
+SEMANTIC_ROAD_CODES = frozenset("MRb")
 
 FOUR_NEIGHBORS = ((1, 0), (-1, 0), (0, 1), (0, -1))
 EIGHT_NEIGHBORS = FOUR_NEIGHBORS + (
@@ -525,7 +533,414 @@ def enclosed_block_sizes(roads: np.ndarray) -> list[int]:
     return sorted(enclosed, reverse=True)
 
 
-def generate(source_path: Path, semantic_path: Path) -> dict:
+def semantic_rows_sha256(rows: list[str]) -> str:
+    """Return the stable digest used to pin the immutable semantic graph."""
+    payload = ("\n".join(rows) + "\n").encode("utf-8")
+    return f"sha256:{hashlib.sha256(payload).hexdigest()}"
+
+
+def require_safe_int(value: object, name: str) -> int:
+    if isinstance(value, bool) or not isinstance(value, int):
+        raise RuntimeError(f"{name} must be an integer")
+    if abs(value) > 9_007_199_254_740_991:
+        raise RuntimeError(f"{name} is not JSON-safe")
+    return value
+
+
+def require_grid_point(value: object, name: str) -> tuple[int, int]:
+    if not isinstance(value, list) or len(value) != 2:
+        raise RuntimeError(f"{name} must be an [x, y] pair")
+    x = require_safe_int(value[0], f"{name}[0]")
+    y = require_safe_int(value[1], f"{name}[1]")
+    if not (0 <= x < GRID_WIDTH and 0 <= y < GRID_HEIGHT):
+        raise RuntimeError(f"{name} is outside the native grid")
+    return x, y
+
+
+def require_millis_point(
+    x_value: object, y_value: object, name: str
+) -> tuple[int, int]:
+    x = require_safe_int(x_value, f"{name}.xMillis")
+    y = require_safe_int(y_value, f"{name}.yMillis")
+    if not (0 <= x < GRID_WIDTH * 1000 and 0 <= y < GRID_HEIGHT * 1000):
+        raise RuntimeError(f"{name} is outside the native grid")
+    return x, y
+
+
+def expand_cardinal_vertices(
+    vertices: object, corridor_name: str
+) -> list[tuple[int, int]]:
+    """Expand exact turn vertices into one cardinal native-grid path."""
+    if not isinstance(vertices, list) or len(vertices) < 2:
+        raise RuntimeError(f"{corridor_name}.vertices must contain two points")
+    parsed = [
+        require_grid_point(value, f"{corridor_name}.vertices[{index}]")
+        for index, value in enumerate(vertices)
+    ]
+    path = [parsed[0]]
+    for index in range(1, len(parsed)):
+        start_x, start_y = parsed[index - 1]
+        end_x, end_y = parsed[index]
+        if start_x == end_x and start_y == end_y:
+            raise RuntimeError(
+                f"{corridor_name}.vertices contains a duplicate neighbor"
+            )
+        if start_x != end_x and start_y != end_y:
+            raise RuntimeError(
+                f"{corridor_name}.vertices contains a diagonal segment"
+            )
+        delta_x = 0 if start_x == end_x else (1 if end_x > start_x else -1)
+        delta_y = 0 if start_y == end_y else (1 if end_y > start_y else -1)
+        x, y = start_x, start_y
+        while (x, y) != (end_x, end_y):
+            x += delta_x
+            y += delta_y
+            path.append((x, y))
+    if len(set(path)) != len(path):
+        raise RuntimeError(f"{corridor_name}.vertices does not form a simple path")
+    return path
+
+
+def normalize_line17(
+    line17: object,
+    semantic_rows: list[str],
+    presentation_rows: list[str],
+) -> dict:
+    """Validate and copy the integer-millis native Line 17 schematic."""
+    if not isinstance(line17, dict):
+        raise RuntimeError("line17 must be an object")
+    raw_path = line17.get("path")
+    if not isinstance(raw_path, list) or len(raw_path) < 2:
+        raise RuntimeError("line17.path must contain at least two points")
+    path: list[list[int]] = []
+    for index, value in enumerate(raw_path):
+        if not isinstance(value, list) or len(value) != 2:
+            raise RuntimeError(f"line17.path[{index}] must be a millis pair")
+        x, y = require_millis_point(
+            value[0], value[1], f"line17.path[{index}]"
+        )
+        if path and path[-1] == [x, y]:
+            raise RuntimeError("line17.path contains a duplicate neighbor")
+        path.append([x, y])
+
+    raw_lod = line17.get("lod")
+    if not isinstance(raw_lod, dict):
+        raise RuntimeError("line17.lod must be an object")
+    lod = {
+        "pathMinZoomMillis": require_safe_int(
+            raw_lod.get("pathMinZoomMillis"), "line17.lod.pathMinZoomMillis"
+        ),
+        "stationMinZoomMillis": require_safe_int(
+            raw_lod.get("stationMinZoomMillis"),
+            "line17.lod.stationMinZoomMillis",
+        ),
+        "exitMinZoomMillis": require_safe_int(
+            raw_lod.get("exitMinZoomMillis"), "line17.lod.exitMinZoomMillis"
+        ),
+    }
+    if lod != {
+        "pathMinZoomMillis": 0,
+        "stationMinZoomMillis": 160,
+        "exitMinZoomMillis": 720,
+    }:
+        raise RuntimeError("line17.lod must use the accepted 0/160/720 thresholds")
+
+    raw_stations = line17.get("stations")
+    if not isinstance(raw_stations, list) or len(raw_stations) != 2:
+        raise RuntimeError("line17.stations must contain exactly two stations")
+    stations: list[dict] = []
+    station_names: set[str] = set()
+    for station_index, raw_station in enumerate(raw_stations):
+        name = f"line17.stations[{station_index}]"
+        if not isinstance(raw_station, dict):
+            raise RuntimeError(f"{name} must be an object")
+        station_name = raw_station.get("name")
+        if not isinstance(station_name, str) or not station_name:
+            raise RuntimeError(f"{name}.name must be non-empty")
+        if station_name in station_names:
+            raise RuntimeError("line17 station names must be unique")
+        station_names.add(station_name)
+        x, y = require_millis_point(
+            raw_station.get("xMillis"), raw_station.get("yMillis"), name
+        )
+        if [x, y] not in path:
+            raise RuntimeError(f"{name} must lie exactly on line17.path")
+        station_grid_x = x // 1000
+        station_grid_y = y // 1000
+        if semantic_rows[station_grid_y][station_grid_x] not in SEMANTIC_ROAD_CODES:
+            raise RuntimeError(
+                f"{name} must use a snapped native road cell"
+            )
+        if presentation_rows[station_grid_y][station_grid_x] == ".":
+            raise RuntimeError(
+                f"{name} must use the curated display graph"
+            )
+        raw_exits = raw_station.get("exits")
+        if not isinstance(raw_exits, list) or not raw_exits:
+            raise RuntimeError(f"{name}.exits must be non-empty")
+        exits: list[dict] = []
+        exit_labels: set[str] = set()
+        exit_points: set[tuple[int, int]] = set()
+        for exit_index, raw_exit in enumerate(raw_exits):
+            exit_name = f"{name}.exits[{exit_index}]"
+            if not isinstance(raw_exit, dict):
+                raise RuntimeError(f"{exit_name} must be an object")
+            label = raw_exit.get("label")
+            destination = raw_exit.get("destination")
+            if not isinstance(label, str) or not label:
+                raise RuntimeError(f"{exit_name}.label must be non-empty")
+            if not isinstance(destination, str) or not destination:
+                raise RuntimeError(
+                    f"{exit_name}.destination must be non-empty"
+                )
+            if label in exit_labels:
+                raise RuntimeError(f"{name} exit labels must be unique")
+            exit_labels.add(label)
+            exit_x, exit_y = require_millis_point(
+                raw_exit.get("xMillis"), raw_exit.get("yMillis"), exit_name
+            )
+            if (exit_x, exit_y) in exit_points:
+                raise RuntimeError(f"{name} exit points must be distinct")
+            exit_points.add((exit_x, exit_y))
+            exit_grid_x = exit_x // 1000
+            exit_grid_y = exit_y // 1000
+            if semantic_rows[exit_grid_y][exit_grid_x] not in SEMANTIC_ROAD_CODES:
+                raise RuntimeError(
+                    f"{exit_name} must use a snapped native road cell"
+                )
+            if presentation_rows[exit_grid_y][exit_grid_x] == ".":
+                raise RuntimeError(
+                    f"{exit_name} must use the curated display graph"
+                )
+            minimum_zoom = require_safe_int(
+                raw_exit.get("minZoomMillis"), f"{exit_name}.minZoomMillis"
+            )
+            if minimum_zoom != lod["exitMinZoomMillis"]:
+                raise RuntimeError(
+                    f"{exit_name}.minZoomMillis must match line17.lod"
+                )
+            exits.append(
+                {
+                    "label": label,
+                    "destination": destination,
+                    "xMillis": exit_x,
+                    "yMillis": exit_y,
+                    "minZoomMillis": minimum_zoom,
+                }
+            )
+        station = {
+            "name": station_name,
+            "xMillis": x,
+            "yMillis": y,
+            "exits": exits,
+        }
+        for offset_key in ("labelOffsetXMillis", "labelOffsetYMillis"):
+            if offset_key in raw_station:
+                offset = require_safe_int(
+                    raw_station[offset_key], f"{name}.{offset_key}"
+                )
+                if not -128_000 <= offset <= 128_000:
+                    raise RuntimeError(f"{name}.{offset_key} is out of bounds")
+                station[offset_key] = offset
+        stations.append(station)
+
+    expected_names = {"未来科学城北站", "未来科学城站"}
+    if station_names != expected_names:
+        raise RuntimeError("line17 must contain the two Energy Valley stations")
+    return {
+        "path": path,
+        "stations": stations,
+        "lod": lod,
+    }
+
+
+def build_native_schematic(
+    semantic_rows: list[str], schematic_path: Path
+) -> tuple[list[str], dict, dict, dict]:
+    """Build presentation rows and Line 17 from compact curated metadata."""
+    metadata = json.loads(schematic_path.read_text())
+    if metadata.get("schema") != NATIVE_SCHEMATIC_SCHEMA:
+        raise RuntimeError(
+            f"Native schematic must use {NATIVE_SCHEMATIC_SCHEMA}"
+        )
+    semantic_digest = semantic_rows_sha256(semantic_rows)
+    if metadata.get("expectedSemanticRowsSha256") != semantic_digest:
+        raise RuntimeError(
+            "Native schematic semantic digest does not match generated rows"
+        )
+
+    presentation = [["." for _ in row] for row in semantic_rows]
+    raw_corridors = metadata.get("corridors")
+    if not isinstance(raw_corridors, list) or not raw_corridors:
+        raise RuntimeError("Native schematic corridors must be non-empty")
+    corridor_ids: set[str] = set()
+    corridor_names: set[str] = set()
+    corridor_counts = Counter()
+    corridor_tiles: set[tuple[int, int]] = set()
+    for corridor_index, corridor in enumerate(raw_corridors):
+        prefix = f"corridors[{corridor_index}]"
+        if not isinstance(corridor, dict):
+            raise RuntimeError(f"{prefix} must be an object")
+        corridor_id = corridor.get("id")
+        corridor_name = corridor.get("name")
+        rank = corridor.get("rank")
+        if not isinstance(corridor_id, str) or not corridor_id:
+            raise RuntimeError(f"{prefix}.id must be non-empty")
+        if not isinstance(corridor_name, str):
+            raise RuntimeError(f"{prefix}.name must be a string")
+        if corridor_id in corridor_ids or (
+            corridor_name and corridor_name in corridor_names
+        ):
+            raise RuntimeError("Native schematic corridor identities must be unique")
+        if rank not in PRESENTATION_RANKS:
+            raise RuntimeError(f"{prefix}.rank must be P, S, or A")
+        corridor_ids.add(corridor_id)
+        if corridor_name:
+            corridor_names.add(corridor_name)
+        corridor_counts[rank] += 1
+        path = expand_cardinal_vertices(corridor.get("vertices"), prefix)
+        for x, y in path:
+            if semantic_rows[y][x] not in SEMANTIC_ROAD_CODES:
+                raise RuntimeError(
+                    f"{prefix} leaves the native road graph at [{x}, {y}]"
+                )
+            corridor_tiles.add((x, y))
+            current = presentation[y][x]
+            if PRESENTATION_PRIORITY[rank] > PRESENTATION_PRIORITY[current]:
+                presentation[y][x] = rank
+
+    presentation_rows = ["".join(row) for row in presentation]
+    if any(
+        len(row) != GRID_WIDTH or set(row) - PRESENTATION_CODES
+        for row in presentation_rows
+    ):
+        raise RuntimeError("Generated presentation rows are invalid")
+    counts = Counter("".join(presentation_rows))
+    semantic_road_tiles = sum(
+        code in SEMANTIC_ROAD_CODES for row in semantic_rows for code in row
+    )
+    if any(
+        presentation_rows[y][x] != "."
+        and semantic_rows[y][x] not in SEMANTIC_ROAD_CODES
+        for y in range(GRID_HEIGHT)
+        for x in range(GRID_WIDTH)
+    ):
+        raise RuntimeError("Presentation rows leave the semantic road graph")
+
+    line17 = normalize_line17(
+        metadata.get("line17"), semantic_rows, presentation_rows
+    )
+    expected_counts = metadata.get("expectedPresentationCounts")
+    actual_counts = {
+        "primaryTiles": counts["P"],
+        "secondaryTiles": counts["S"],
+        "accessTiles": counts["A"],
+    }
+    if expected_counts != actual_counts:
+        raise RuntimeError(
+            f"Presentation counts changed: {actual_counts} != {expected_counts}"
+        )
+
+    bridge_counts = Counter()
+    for y in range(GRID_HEIGHT):
+        for x in range(GRID_WIDTH):
+            if semantic_rows[y][x] == "b":
+                bridge_counts[presentation_rows[y][x]] += 1
+    presentation_roads = np.asarray(
+        [[code != "." for code in row] for row in presentation_rows],
+        dtype=bool,
+    )
+    components = component_sizes(presentation_roads, FOUR_NEIGHBORS)
+    presentation_road_tiles = counts["P"] + counts["S"] + counts["A"]
+    display_edges = 0
+    for y in range(GRID_HEIGHT):
+        for x in range(GRID_WIDTH):
+            if not presentation_roads[y, x]:
+                continue
+            if x + 1 < GRID_WIDTH and presentation_roads[y, x + 1]:
+                display_edges += 1
+            if y + 1 < GRID_HEIGHT and presentation_roads[y + 1, x]:
+                display_edges += 1
+    display_y, display_x = np.nonzero(presentation_roads)
+    display_bounds = [
+        int(display_x.min()),
+        int(display_y.min()),
+        int(display_x.max()),
+        int(display_y.max()),
+    ]
+    display_blocks = enclosed_block_sizes(presentation_roads)
+    metrics = {
+        **actual_counts,
+        "presentationRoadTiles": presentation_road_tiles,
+        "hiddenSemanticRoadTiles": semantic_road_tiles - presentation_road_tiles,
+        "connectedComponents4": len(components),
+        "largestComponent4": components[0],
+        "primaryCorridors": corridor_counts["P"],
+        "secondaryCorridors": corridor_counts["S"],
+        "accessCorridors": corridor_counts["A"],
+        "namedCorridors": len(corridor_names),
+        "displayBounds": display_bounds,
+        "displayCycleRank": display_edges - presentation_road_tiles + len(components),
+        "enclosedDisplayBlocks": len(display_blocks),
+        "largestEnclosedDisplayBlocks": display_blocks[:4],
+        "bridgeTilesByRank": {
+            "primary": bridge_counts["P"],
+            "secondary": bridge_counts["S"],
+            "access": bridge_counts["A"],
+        },
+        "line17PathPoints": len(line17["path"]),
+        "line17Stations": len(line17["stations"]),
+        "line17Exits": sum(
+            len(station["exits"]) for station in line17["stations"]
+        ),
+        "lod": {
+            "overview": {
+                "maxZoomMillis": 339,
+                "visibleCodes": ["P"],
+                "visibleRoadTiles": counts["P"],
+                "semanticFallback": False,
+            },
+            "district": {
+                "minZoomMillis": 340,
+                "maxZoomMillis": 579,
+                "visibleCodes": ["P", "S"],
+                "visibleRoadTiles": counts["P"] + counts["S"],
+                "semanticFallback": False,
+            },
+            "access": {
+                "minZoomMillis": 580,
+                "maxZoomMillis": 719,
+                "visibleCodes": ["P", "S", "A"],
+                "visibleRoadTiles": presentation_road_tiles,
+                "semanticFallback": False,
+            },
+            "close": {
+                "minZoomMillis": 720,
+                "visibleCodes": ["P", "S", "A"],
+                "visibleRoadTiles": presentation_road_tiles,
+                "showStationExits": True,
+                "semanticFallback": False,
+            },
+        },
+    }
+    provenance = dict(metadata.get("provenance", {}))
+    provenance.update(
+        {
+            "authoringSchema": NATIVE_SCHEMATIC_SCHEMA,
+            "authoringInput": f"repo://scripts/{schematic_path.name}",
+            "semanticRowsSha256": semantic_digest,
+            "semanticRowsUnchanged": True,
+            "runtimeScope": "native presentation only",
+            "osmRuntimeActivated": False,
+            "semanticCloseReveal": False,
+        }
+    )
+    return presentation_rows, line17, provenance, metrics
+
+
+def generate(
+    source_path: Path, semantic_path: Path, schematic_path: Path
+) -> dict:
     rgb = np.asarray(Image.open(source_path).convert("RGB"))
     semantic_rows, semantic_payload = parse_semantic_rows(semantic_path)
     candidates = road_surface_candidates(rgb)
@@ -550,6 +965,12 @@ def generate(source_path: Path, semantic_path: Path) -> dict:
         dtype=bool,
     )
     raw_components4 = component_sizes(raw_roads, FOUR_NEIGHBORS)
+    (
+        presentation_rows,
+        line17,
+        presentation_provenance,
+        presentation_metrics,
+    ) = build_native_schematic(rows, schematic_path)
 
     return {
         "schema": "moontown.wenyu_road_graph.v1",
@@ -570,6 +991,12 @@ def generate(source_path: Path, semantic_path: Path) -> dict:
             "M": {"kind": "road-major"},
             "R": {"kind": "road"},
             "b": {"kind": "bridge"},
+        },
+        "presentationLegend": {
+            ".": {"kind": "not-curated", "neverVisible": True},
+            "P": {"kind": "road-primary", "minZoomMillis": 0},
+            "S": {"kind": "road-secondary", "minZoomMillis": 340},
+            "A": {"kind": "road-access", "minZoomMillis": 580},
         },
         "extraction": {
             "neutralRgbSpreadMax": NEUTRAL_SPREAD_MAX,
@@ -596,6 +1023,8 @@ def generate(source_path: Path, semantic_path: Path) -> dict:
             "rawSemanticConnectedComponents4": len(raw_components4),
             "rawSemanticLargestComponent4": raw_components4[0],
         },
+        "presentationProvenance": presentation_provenance,
+        "presentationMetrics": presentation_metrics,
         "openMapReview": {
             "provider": "OpenStreetMap",
             "role": (
@@ -606,6 +1035,8 @@ def generate(source_path: Path, semantic_path: Path) -> dict:
             "url": "https://www.openstreetmap.org/#map=15/40.1120/116.4515",
         },
         "rows": rows,
+        "presentationRows": presentation_rows,
+        "line17": line17,
     }
 
 
@@ -625,13 +1056,20 @@ def main() -> None:
         / "src/ui/assets/tilemap/wenyu_reference_labels.json",
     )
     parser.add_argument(
+        "--schematic",
+        type=Path,
+        default=repository / "scripts/wenyu-native-schematic-v1.json",
+    )
+    parser.add_argument(
         "--output",
         type=Path,
         default=repository
         / "src/ui/assets/tilemap/wenyu_reference_roads.json",
     )
     arguments = parser.parse_args()
-    payload = generate(arguments.source, arguments.semantic)
+    payload = generate(
+        arguments.source, arguments.semantic, arguments.schematic
+    )
     arguments.output.parent.mkdir(parents=True, exist_ok=True)
     arguments.output.write_text(
         json.dumps(payload, ensure_ascii=False, indent=2) + "\n"
