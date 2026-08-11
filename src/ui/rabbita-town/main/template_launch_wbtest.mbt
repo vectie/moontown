@@ -24,6 +24,7 @@ test "template launch requires catalog and source pins before selecting a civic 
   )
   assert_true(accepted.state is TemplateLaunchAccepted)
   assert_eq(accepted.building_id, "policy-hall")
+  assert_true(accepted.message.contains("without creating an instance"))
   let stale_catalog = resolve_template_launch(
     "wenyu-policy-hall-triage",
     "1.0.0",

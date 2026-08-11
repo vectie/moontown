@@ -9,6 +9,15 @@ fn account_experience_test_value(
     contract_id: "moontown.account-context.v1",
     user_id: "test-user",
     display_name: "Test User",
+    account_kind: if roles.contains("platform-admin") {
+      "admin"
+    } else if plan == "enterprise" {
+      "enterprise"
+    } else if plan == "paid" {
+      "paid-user"
+    } else {
+      "visitor"
+    },
     plan,
     roles,
     entitlements: [],
@@ -25,7 +34,7 @@ test "bootstrap projection accepts server tenant choices" {
   let parsed : AccountExperience = @json.from_json(
     @json.parse(
       (
-        #|{"contract_id":"moontown.account-context.v1","user_id":"enterprise-user","display_name":"Enterprise User","plan":"enterprise","roles":["organization-admin"],"entitlements":["organization.manage"],"active_tenant_id":"energy-labs","active_tenant_name":"Energy Labs","tenant_choices":[{"tenant_id":"energy-labs","tenant_name":"Energy Labs","plan":"enterprise","roles":["organization-admin"]}],"home_surface":"enterprise-town","visitor":false}
+        #|{"contract_id":"moontown.account-context.v1","user_id":"enterprise-user","display_name":"Enterprise User","account_kind":"enterprise","plan":"enterprise","roles":["organization-admin"],"entitlements":["organization.manage"],"active_tenant_id":"energy-labs","active_tenant_name":"Energy Labs","tenant_choices":[{"tenant_id":"energy-labs","tenant_name":"Energy Labs","plan":"enterprise","roles":["organization-admin"]}],"home_surface":"enterprise-town","visitor":false}
       ),
     ),
   )
@@ -36,7 +45,7 @@ test "bootstrap projection accepts server tenant choices" {
 ///|
 test "bootstrap projection accepts normalized paid tenant" {
   let text =
-    #|{"contract_id":"moontown.account-context.v1","user_id":"paid-preview","display_name":"MoonTown Member","plan":"paid","roles":["member"],"entitlements":["town.public.explore","agent.personal.use"],"tenant_choices":[],"home_surface":"personal-town","visitor":false}
+    #|{"contract_id":"moontown.account-context.v1","user_id":"paid-preview","display_name":"MoonTown Member","account_kind":"paid-user","plan":"paid","roles":["member"],"entitlements":["town.public.explore","agent.personal.use"],"tenant_choices":[],"home_surface":"personal-town","visitor":false}
   let parsed : AccountExperience = @json.from_json(@json.parse(text))
   assert_eq(parsed.kind(), PaidExperience)
 }
@@ -78,6 +87,9 @@ test "four account experiences keep distinct navigation" {
     }),
   )
   assert_true(
+    account_navigation_items(AdminExperience).any(item => item.label == "Users"),
+  )
+  assert_false(
     account_navigation_items(AdminExperience).any(item => {
       item.label == "Moderation"
     }),
@@ -112,4 +124,14 @@ test "non-admin operations denial provides a recovery action" {
   assert_true(html.contains("Operations access is restricted"))
   assert_true(html.contains("Return to the town"))
   assert_true(html.contains("href=\"./index.html\""))
+}
+
+///|
+test "management surfaces render a live status region" {
+  let html = @rabbita.render_to_string(
+    @rabbita.static_cell(render_account_management_surface("billing")),
+  )
+  assert_true(html.contains("Personal billing"))
+  assert_true(html.contains("id=\"account-management-root\""))
+  assert_true(html.contains("aria-live=\"polite\""))
 }

@@ -172,9 +172,12 @@ fn phone_runtime_contacts(model : Model) -> Array[PhoneContact] {
 
 ///|
 fn phone_contacts(model : Model) -> Array[PhoneContact] {
-  let contacts = [moonclaw_guide_contact()] +
-    phone_runtime_contacts(model) +
-    offline_phone_contacts()
+  let runtime_contacts = phone_runtime_contacts(model)
+  let contacts = if runtime_contacts.is_empty() {
+    [moonclaw_guide_contact()] + offline_phone_contacts()
+  } else {
+    runtime_contacts + [moonclaw_guide_contact()] + offline_phone_contacts()
+  }
   if phone_contact_is_runtime(model.phone_contact) &&
     !contacts.any(contact => contact.id == model.phone_contact) {
     [phone_disconnected_runtime_contact(model.phone_contact)] + contacts
@@ -909,15 +912,10 @@ fn render_phone_panel(dispatch : Dispatch[Msg], model : Model) -> @rabbita.Html 
                 ]),
               ])
             } else if runtime_contact {
-              div(class="phone-composer", [
-                input(
-                  id="phone-draft-input",
-                  class="phone-input",
-                  placeholder="真实消息写入接口尚未连接",
-                  value="",
-                  attrs=@html.Attrs::build()
-                    .disabled(true)
-                    .aria_label("Runtime Agent 工作动态为只读"),
+              div(class="phone-runtime-contact-actions", [
+                p(
+                  class="phone-policy-context-copy",
+                  "真实 Runtime Agent 动态为只读。需要协作时，创建可追踪、可审核的工作请求。",
                 ),
                 button(
                   class="phone-send",

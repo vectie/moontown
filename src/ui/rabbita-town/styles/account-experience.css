@@ -238,6 +238,284 @@
   outline-offset: 3px;
 }
 
+.account-tenant-switcher {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+
+.account-tenant-select,
+.account-logout-button {
+  min-height: 44px;
+  border: 1px solid var(--account-nav-border);
+  border-radius: 10px;
+  color: inherit;
+  background: color-mix(in srgb, var(--account-nav-bg) 88%, transparent);
+  font: inherit;
+}
+
+.account-tenant-select {
+  max-width: 160px;
+  padding: 0 30px 0 10px;
+}
+
+.account-logout-button {
+  padding: 0 10px;
+  cursor: pointer;
+}
+
+.account-management {
+  min-height: 100%;
+  overflow: auto;
+  padding: clamp(20px, 4vw, 52px);
+  color: #17241b;
+  background:
+    linear-gradient(135deg, rgba(255, 255, 255, 0.86), rgba(238, 242, 236, 0.94)),
+    #eef2ec;
+}
+
+.account-management-shell {
+  width: min(1120px, 100%);
+  margin: 0 auto;
+}
+
+.account-management-header {
+  max-width: 720px;
+  margin-bottom: 24px;
+}
+
+.account-management-header h1 {
+  margin: 10px 0 8px;
+  color: #17241b;
+  font-size: clamp(30px, 5vw, 48px);
+  letter-spacing: -0.045em;
+  line-height: 1.04;
+}
+
+.account-management-header p,
+.account-management-result p,
+.account-management-note {
+  color: #58675d;
+  line-height: 1.6;
+}
+
+.account-management-workspace {
+  display: grid;
+  gap: 18px;
+}
+
+.account-management-status {
+  margin: 0;
+  border-left: 4px solid #527d8a;
+  border-radius: 8px;
+  padding: 10px 13px;
+  color: #29414a;
+  background: rgba(82, 125, 138, 0.1);
+}
+
+.account-management-status.is-success {
+  border-color: #42734e;
+  color: #285232;
+  background: rgba(66, 115, 78, 0.1);
+}
+
+.account-management-status.is-error {
+  border-color: #b4534b;
+  color: #762f2a;
+  background: rgba(180, 83, 75, 0.1);
+}
+
+.account-management-summary {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 1px;
+  overflow: hidden;
+  border: 1px solid rgba(49, 88, 61, 0.16);
+  border-radius: 18px;
+  background: rgba(49, 88, 61, 0.12);
+  box-shadow: 0 18px 50px rgba(22, 42, 27, 0.08);
+}
+
+.account-management-metric {
+  min-height: 112px;
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+  gap: 12px;
+  padding: 20px;
+  background: rgba(255, 255, 255, 0.94);
+}
+
+.account-management-metric-label {
+  color: #66746b;
+  font-size: 12px;
+  font-weight: 750;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+}
+
+.account-management-metric-value {
+  overflow-wrap: anywhere;
+  font-size: clamp(20px, 3vw, 30px);
+  line-height: 1.1;
+}
+
+.account-management-form,
+.account-management-list,
+.account-management-result,
+.account-management-actions {
+  border: 1px solid rgba(49, 88, 61, 0.15);
+  border-radius: 18px;
+  padding: clamp(18px, 3vw, 26px);
+  background: rgba(255, 255, 255, 0.94);
+  box-shadow: 0 16px 44px rgba(22, 42, 27, 0.07);
+}
+
+.account-management-form {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 16px;
+}
+
+.account-management-field {
+  display: grid;
+  gap: 7px;
+}
+
+.account-management-field-label {
+  color: #415047;
+  font-size: 12px;
+  font-weight: 750;
+}
+
+.account-management-input {
+  width: 100%;
+  min-height: 46px;
+  border: 1px solid rgba(49, 88, 61, 0.28);
+  border-radius: 10px;
+  padding: 0 12px;
+  color: #17241b;
+  background: #fff;
+  font: inherit;
+}
+
+.account-management-input:focus-visible,
+.account-management-button:focus-visible,
+.account-tenant-select:focus-visible,
+.account-logout-button:focus-visible {
+  outline: 3px solid color-mix(in srgb, var(--account-accent) 36%, transparent);
+  outline-offset: 2px;
+}
+
+.account-management-button {
+  min-height: 46px;
+  align-self: end;
+  border: 1px solid transparent;
+  border-radius: 11px;
+  padding: 0 15px;
+  color: #fff;
+  background: var(--account-accent-strong);
+  font: inherit;
+  font-weight: 760;
+  cursor: pointer;
+}
+
+.account-management-button.is-secondary {
+  border-color: rgba(49, 88, 61, 0.24);
+  color: #31583d;
+  background: #f4f7f3;
+}
+
+.account-management-button:disabled {
+  cursor: wait;
+  opacity: 0.6;
+}
+
+.account-management-actions {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 12px;
+}
+
+.account-management-list {
+  display: grid;
+  gap: 1px;
+  padding: 0;
+  overflow: hidden;
+}
+
+.account-management-list h2,
+.account-management-empty {
+  margin: 0;
+  padding: 20px;
+}
+
+.account-management-row {
+  min-height: 68px;
+  display: grid;
+  grid-template-columns: minmax(180px, 1fr) auto auto auto;
+  align-items: center;
+  gap: 12px;
+  padding: 12px 18px;
+  border-top: 1px solid rgba(49, 88, 61, 0.1);
+}
+
+.account-management-row-main {
+  min-width: 0;
+  display: grid;
+  gap: 3px;
+}
+
+.account-management-row-main span {
+  overflow: hidden;
+  color: #68766d;
+  font-size: 12px;
+  text-overflow: ellipsis;
+}
+
+.account-management-badge {
+  max-width: 260px;
+  overflow: hidden;
+  border-radius: 999px;
+  padding: 6px 9px;
+  color: #3e5546;
+  background: #edf3ed;
+  font-size: 11px;
+  font-weight: 750;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.account-management-badge.is-good {
+  color: #285232;
+  background: #e5f1e7;
+}
+
+.account-management-badge.is-bad {
+  color: #762f2a;
+  background: #f7e7e5;
+}
+
+.account-management-token {
+  display: block;
+  margin-top: 12px;
+  overflow-wrap: anywhere;
+  border-radius: 9px;
+  padding: 12px;
+  color: #173522;
+  background: #edf3ed;
+  user-select: all;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .account-management *,
+  .account-global-nav * {
+    scroll-behavior: auto !important;
+    transition: none !important;
+  }
+}
+
 @media (max-width: 900px) {
   .account-global-nav {
     grid-template-columns: minmax(0, 1fr) auto;
@@ -253,12 +531,22 @@
   }
 
   .account-global-tenant,
-  .account-global-user-name {
+  .account-global-user-name,
+  .account-tenant-select {
     display: none;
   }
 
   .account-product-surface {
     height: calc(100dvh - 108px);
+  }
+
+  .account-management-summary,
+  .account-management-form {
+    grid-template-columns: 1fr;
+  }
+
+  .account-management-row {
+    grid-template-columns: minmax(0, 1fr) auto;
   }
 }
 
@@ -284,4 +572,18 @@
   .account-product-surface {
     height: calc(100dvh - 102px);
   }
+
+  .account-management {
+    padding: 18px 12px 84px;
+  }
+
+  .account-management-row {
+    grid-template-columns: 1fr;
+    align-items: stretch;
+  }
+
+  .account-management-row .account-management-button {
+    width: 100%;
+  }
+
 }

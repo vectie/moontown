@@ -31,6 +31,7 @@ const BROWSER_FILES = [
   'viewport.html',
   'operations.html',
   'bootstrap.js',
+  'account_management.js',
   'runtime_snapshot_fetch.js',
   'runtime_snapshot_manifest.js',
   'runtime_snapshot_parser.js',

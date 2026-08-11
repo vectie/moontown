@@ -111,7 +111,7 @@ fn resolve_template_launch(
       template_id: requested,
       building_id: template_building_id(requested),
       dashboard_section: template_dashboard_section(requested),
-      message: "Template identity verified. This is a preview: review the highlighted civic system and its human gate. Instance creation is not implemented yet.",
+      message: "Template preview verified. MoonTown opened the installed civic reference without creating an instance. Use the highlighted system only for review.",
     }
   } else {
     {

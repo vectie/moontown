@@ -10,6 +10,7 @@ import {
   startRuntimeSnapshotRefresh,
 } from './runtime_snapshots.js'
 import './viewport_drag_pan.js'
+import { installAccountManagement } from './account_management.js'
 
 const app = document.getElementById('app')
 const ACCOUNT_SESSION_KEY = 'moontown.account-session.v1'
@@ -19,6 +20,7 @@ const ACCOUNT_DEMO_FIXTURES = {
     contract_id: 'moontown.account-context.v1',
     user_id: 'visitor-preview',
     display_name: 'Visitor',
+    account_kind: 'visitor',
     plan: 'visitor',
     roles: ['member'],
     entitlements: ['town.public.explore', 'town.public.discover'],
@@ -32,6 +34,7 @@ const ACCOUNT_DEMO_FIXTURES = {
     contract_id: 'moontown.account-context.v1',
     user_id: 'paid-preview',
     display_name: 'MoonTown Member',
+    account_kind: 'paid-user',
     plan: 'paid',
     roles: ['member'],
     entitlements: [
@@ -52,6 +55,7 @@ const ACCOUNT_DEMO_FIXTURES = {
     contract_id: 'moontown.account-context.v1',
     user_id: 'enterprise-preview',
     display_name: 'Enterprise Member',
+    account_kind: 'enterprise',
     plan: 'enterprise',
     roles: ['member', 'organization-admin'],
     entitlements: [
@@ -76,6 +80,7 @@ const ACCOUNT_DEMO_FIXTURES = {
     contract_id: 'moontown.account-context.v1',
     user_id: 'admin-preview',
     display_name: 'District Operator',
+    account_kind: 'admin',
     plan: 'enterprise',
     roles: ['platform-admin'],
     entitlements: [
@@ -250,6 +255,7 @@ async function startMoontown() {
   startRuntimeSnapshotRefresh()
   await prepareRuntimeBridge()
   await import('./main.js?account-system-v2')
+  installAccountManagement()
 }
 
 void startMoontown().catch(error => {

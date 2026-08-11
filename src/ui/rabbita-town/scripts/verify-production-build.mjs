@@ -16,6 +16,7 @@ const REQUIRED_BROWSER_FILES = [
   'index.html',
   'viewport.html',
   'operations.html',
+  'account_management.js',
   'bootstrap.js',
   'main.js',
   'runtime_snapshot_fetch.js',
@@ -130,6 +131,7 @@ assert.match(viewportAlias, /src="\.\/bootstrap\.js(?:\?[^"\s]+)?"/)
 
 const bootstrap = await readFile(path.join(distRoot, 'bootstrap.js'), 'utf8')
 assert.match(bootstrap, /import\('\.\/main\.js(?:\?[^'\s]+)?'\)/)
+assert.match(bootstrap, /from '\.\/account_management\.js'/)
 assert.doesNotMatch(bootstrap, /vite|react|typescript|\.tsx/i)
 assert.doesNotMatch(
   bootstrap,

@@ -130,9 +130,10 @@ test "phone lists real runtime Agents without fabricating chat" {
     @rabbita.static_cell(render_phone_panel(dispatch, model)),
   )
   assert_true(html.contains("真实 Runtime Agent · 只读工作动态"))
-  assert_true(html.contains("真实消息写入接口尚未连接"))
+  assert_true(html.contains("创建可追踪、可审核的工作请求"))
+  assert_false(html.contains("真实消息写入接口尚未连接"))
   assert_true(html.contains("创建真实工作请求"))
-  assert_true(html.contains("disabled"))
+  assert_false(html.contains("id=\"phone-draft-input\""))
 }
 
 ///|

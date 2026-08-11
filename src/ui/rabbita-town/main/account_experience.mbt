@@ -11,6 +11,7 @@ priv struct AccountExperience {
   contract_id : String
   user_id : String
   display_name : String
+  account_kind : String
   plan : String
   roles : Array[String]
   entitlements : Array[String]
@@ -49,6 +50,7 @@ fn visitor_account_experience() -> AccountExperience {
     contract_id: "moontown.account-context.v1",
     user_id: "visitor-fallback",
     display_name: "Visitor",
+    account_kind: "visitor",
     plan: "visitor",
     roles: ["member"],
     entitlements: ["town.public.explore", "town.public.discover"],
@@ -81,16 +83,47 @@ fn parse_bootstrap_account_experience() -> AccountExperience {
 
 ///|
 fn AccountExperience::kind(self : AccountExperience) -> AccountExperienceKind {
-  if self.roles.contains("platform-admin") ||
+  if self.account_kind == "admin" ||
+    self.roles.contains("platform-admin") ||
     self.home_surface == "admin-console" {
     AdminExperience
   } else {
-    match self.plan {
-      "paid" => PaidExperience
+    match self.account_kind {
+      "paid-user" => PaidExperience
       "enterprise" => EnterpriseExperience
-      _ => VisitorExperience
+      _ =>
+        match self.plan {
+          "paid" => PaidExperience
+          "enterprise" => EnterpriseExperience
+          _ => VisitorExperience
+        }
     }
   }
+}
+
+///|
+fn account_experience_query_name(kind : AccountExperienceKind) -> String {
+  match kind {
+    VisitorExperience => "visitor"
+    PaidExperience => "paid"
+    EnterpriseExperience => "enterprise"
+    AdminExperience => "admin"
+  }
+}
+
+///| Preserve an explicitly requested local preview while normal sessions remain
+
+///|
+/// entirely token-derived.
+fn account_navigation_href(
+  href : String,
+  kind : AccountExperienceKind,
+) -> String {
+  if current_browser_query_param("demo") != "1" {
+    return href
+  }
+  let separator = if href.contains("?") { "&" } else { "?" }
+  href + separator + "demo=1&account=" + account_experience_query_name(kind)
 }
 
 ///|
@@ -126,7 +159,7 @@ fn account_navigation_items(
         { label: "Events", href: "./index.html?area=districts", primary: false },
         {
           label: "Join MoonTown",
-          href: "./index.html?account=join",
+          href: "./index.html?panel=join",
           primary: true,
         },
       ]
@@ -155,7 +188,7 @@ fn account_navigation_items(
           href: "./index.html?area=residents",
           primary: false,
         },
-        { label: "Members", href: "./index.html?area=social", primary: false },
+        { label: "Members", href: "./index.html?panel=members", primary: false },
         { label: "Usage", href: "./index.html?panel=usage", primary: false },
         {
           label: "Compliance",
@@ -174,11 +207,6 @@ fn account_navigation_items(
         {
           label: "Organizations",
           href: "./operations.html?admin=tenants",
-          primary: false,
-        },
-        {
-          label: "Moderation",
-          href: "./operations.html?admin=moderation",
           primary: false,
         },
         {
@@ -253,12 +281,13 @@ fn render_account_navigation(account : AccountExperience) -> @rabbita.Html {
             } else {
               "account-global-link"
             },
-            href=item.href,
+            href=account_navigation_href(item.href, kind),
             item.label,
           )
         }),
       ),
       div(class="account-global-user", [
+        div(id="account-tenant-switcher", class="account-tenant-switcher", ""),
         span(
           class="account-global-avatar",
           account_avatar_label(account.display_name),
@@ -267,6 +296,96 @@ fn render_account_navigation(account : AccountExperience) -> @rabbita.Html {
       ]),
     ],
   )
+}
+
+///|
+fn requested_account_management_surface(
+  route : TownSurfaceRoute,
+  kind : AccountExperienceKind,
+) -> String? {
+  let panel = current_browser_query_param("panel")
+  match kind {
+    VisitorExperience if panel == "join" => Some("join")
+    PaidExperience if panel == "billing" => Some("billing")
+    EnterpriseExperience if panel == "members" => Some("members")
+    EnterpriseExperience if panel == "usage" => Some("usage")
+    EnterpriseExperience if panel == "compliance" => Some("compliance")
+    AdminExperience =>
+      match route {
+        OperationsConsole => {
+          let section = current_browser_query_param("admin")
+          Some(if section.is_empty() { "overview" } else { section })
+        }
+        CanonicalEnergyValley => None
+      }
+    _ => None
+  }
+}
+
+///|
+fn account_management_heading(surface : String) -> (String, String) {
+  match surface {
+    "join" =>
+      (
+        "Join MoonTown", "Activate a paid personal workspace and keep this account session.",
+      )
+    "billing" =>
+      (
+        "Personal billing", "Review the persisted subscription state or change the personal plan.",
+      )
+    "members" =>
+      (
+        "Organization members", "Invite members, assign organization administration, or remove access.",
+      )
+    "usage" =>
+      (
+        "Organization usage", "Review active membership and session usage for the selected tenant.",
+      )
+    "compliance" =>
+      (
+        "Compliance controls", "Inspect session, audit, and impersonation controls reported by the server.",
+      )
+    "users" =>
+      (
+        "Platform users", "Provision one of the four account kinds and control account activation.",
+      )
+    "tenants" =>
+      (
+        "Organizations", "Review tenants derived from durable enterprise membership records.",
+      )
+    "analytics" =>
+      (
+        "Platform analytics", "Review authoritative user, tenant, and active-session counts.",
+      )
+    "audit" =>
+      ("Audit log", "Review bounded account lifecycle and membership events.")
+    _ =>
+      (
+        "Account operations", "Review the authoritative platform account state without impersonation.",
+      )
+  }
+}
+
+///|
+fn render_account_management_surface(surface : String) -> @rabbita.Html {
+  let (title, description) = account_management_heading(surface)
+  @html.main_(class="account-management", [
+    section(class="account-management-shell", [
+      header(class="account-management-header", [
+        span(class="account-access-kicker", "MoonTown account system"),
+        h1(title),
+        p(description),
+      ]),
+      div(id="account-management-root", class="account-management-workspace", [
+        p(
+          id="account-management-status",
+          class="account-management-status",
+          attrs=@html.Attrs::build().role("status").aria_live("polite"),
+          "Loading authoritative account data…",
+        ),
+      ]),
+    ]),
+  ])
 }
 
 ///|
@@ -300,14 +419,22 @@ fn render_account_surface_for_route(
     account,
     current_browser_query_param("view") == "town",
   )
+  let management_surface = requested_account_management_surface(
+    route,
+    account.kind(),
+  )
   div(class="account-experience " + account_experience_class(account.kind()), [
     render_account_navigation(account),
     div(class="account-product-surface", [
-      match plan {
-        AccountTownProduct => render_energy_valley_page(dispatch, model)
-        AccountOperationsProduct(context) =>
-          render_dashboard_page(dispatch, model, context)
-        AccountOperationsDenied => render_account_operations_denied()
+      match management_surface {
+        Some(surface) => render_account_management_surface(surface)
+        None =>
+          match plan {
+            AccountTownProduct => render_energy_valley_page(dispatch, model)
+            AccountOperationsProduct(context) =>
+              render_dashboard_page(dispatch, model, context)
+            AccountOperationsDenied => render_account_operations_denied()
+          }
       },
     ]),
   ])
