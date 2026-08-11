@@ -129,9 +129,19 @@ pub fn account_context_for(
       EnterprisePlan => EnterpriseTownHome
     }
   }
+  let account_kind = if roles.contains(PlatformAdmin) {
+    AdminAccount
+  } else if active_tenant is Some(_) && plan == EnterprisePlan {
+    EnterpriseAccount
+  } else if plan == PaidPlan {
+    PaidUserAccount
+  } else {
+    VisitorAccount
+  }
   {
     user_id: principal.user_id,
     display_name: principal.display_name,
+    account_kind,
     plan,
     roles,
     entitlements: account_entitlements_for(plan, roles),

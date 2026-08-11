@@ -1118,6 +1118,40 @@ async test "application persists drafts across restart" {
 }
 
 ///|
+async test "account-authorized marketplace mirrors are short lived" {
+  let path = "/tmp/moontown-marketplace-account-session-wbtest/state.json"
+  if @fs.exists(path) {
+    @fs.remove(path)
+  }
+  let owner = test_principal("publisher-a", ["publisher"])
+  let reader = test_principal("reader-account", [])
+  let app = marketplace_application(
+    path, owner, "session-bootstrap", "opaque-bootstrap-token",
+  )
+  app.synchronize_account_session(
+    reader,
+    "account-session-token",
+    now_ms=100UL,
+    expires_at_ms=200UL,
+  )
+  let response = app.execute(
+    "account-session-token",
+    "search",
+    "",
+    "robotics",
+    now_ms=150UL,
+  )
+  assert_true(response.stringify().contains("result_count"))
+  try
+    app.execute("account-session-token", "search", "", "robotics", now_ms=201UL)
+  catch {
+    error => assert_true("\{error}".contains("expired"))
+  } noraise {
+    _ => fail("expired account mirrors must not authorize marketplace access")
+  }
+}
+
+///|
 test "publisher decision binds one bounded MoonClaw handoff and returns status" {
   let (published, owner, _, reader) = test_published_state()
   let requested = marketplace_request_listing_action(

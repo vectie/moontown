@@ -41,22 +41,45 @@ fn MarketplaceApplication::ensure_bootstrap(
   self : MarketplaceApplication,
   state : MarketplaceState,
 ) -> MarketplaceState {
-  let principals = state.principals.filter(principal => {
-    principal.principal_id != self.bootstrap_principal.principal_id
-  })
-  principals.push(self.bootstrap_principal)
+  let principals = state.principals.copy()
+  let mut principal_exists = false
+  for principal in principals {
+    if principal.principal_id == self.bootstrap_principal.principal_id {
+      principal_exists = true
+    }
+  }
+  if !principal_exists {
+    principals.push(self.bootstrap_principal)
+  }
+  let mut session_exists = false
+  for session in state.sessions {
+    if session.session_id == self.bootstrap_session_id {
+      session_exists = true
+    }
+  }
   let sessions = state.sessions.filter(session => {
     session.session_id != self.bootstrap_session_id &&
     session.token_digest != self.bootstrap_token_digest
   })
-  sessions.push({
-    session_id: self.bootstrap_session_id,
-    token_digest: self.bootstrap_token_digest,
-    principal_id: self.bootstrap_principal.principal_id,
-    expires_at_ms: 18446744073709551615UL,
-    revoked: false,
-    version: 1,
-  })
+  if session_exists || !principal_exists {
+    let mut persisted : MarketplaceSession? = None
+    for session in state.sessions {
+      if session.session_id == self.bootstrap_session_id &&
+        session.token_digest == self.bootstrap_token_digest {
+        persisted = Some(session)
+      }
+    }
+    sessions.push(
+      persisted.unwrap_or({
+        session_id: self.bootstrap_session_id,
+        token_digest: self.bootstrap_token_digest,
+        principal_id: self.bootstrap_principal.principal_id,
+        expires_at_ms: 18446744073709551615UL,
+        revoked: false,
+        version: 1,
+      }),
+    )
+  }
   { ..state, principals, sessions }
 }
 
@@ -113,6 +136,38 @@ fn require_session_principal(
 ///|
 fn application_ok(operation : String, payload : Json) -> Json {
   { "ok": true, "operation": operation, "payload": payload }
+}
+
+///| Mirror a short-lived account-authorized session into the marketplace
+
+///| execution store. The account service remains authoritative: the HTTP
+
+///|
+/// boundary resolves it before every call, and this mirror expires quickly.
+pub async fn MarketplaceApplication::synchronize_account_session(
+  self : MarketplaceApplication,
+  principal : MarketplacePrincipal,
+  opaque_token : String,
+  now_ms~ : UInt64,
+  expires_at_ms~ : UInt64,
+) -> Unit {
+  marketplace_store_mutex.acquire()
+  defer marketplace_store_mutex.release()
+  let loaded = self.load_state()
+  let state = {
+    ..loaded,
+    sessions: loaded.sessions.filter(session => {
+      !session.revoked && session.expires_at_ms > now_ms
+    }),
+  }
+  let next = marketplace_register_session(
+    state,
+    principal,
+    "account:\{principal.principal_id}",
+    opaque_token,
+    expires_at_ms,
+  )
+  self.save_state(next)
 }
 
 ///| Single durable feature boundary used by the HTTP adapter. Identity always

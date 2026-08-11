@@ -8,6 +8,16 @@ pub fn account_plan_name(plan : AccountPlan) -> String {
 }
 
 ///|
+pub fn account_kind_name(kind : AccountKind) -> String {
+  match kind {
+    VisitorAccount => "visitor"
+    PaidUserAccount => "paid-user"
+    EnterpriseAccount => "enterprise"
+    AdminAccount => "admin"
+  }
+}
+
+///|
 pub fn account_role_name(role : AccountRole) -> String {
   match role {
     AccountMember => "member"

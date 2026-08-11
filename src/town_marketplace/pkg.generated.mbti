@@ -334,6 +334,7 @@ pub(all) struct MarketplaceApplication {
 } derive(Eq, @debug.Debug)
 pub async fn MarketplaceApplication::execute(Self, String, String, String, String, now_ms~ : UInt64) -> Json
 pub async fn MarketplaceApplication::reconcile_runtime_handoff(Self, ActionRequestRuntimeDraft, now_ms~ : UInt64) -> Json
+pub async fn MarketplaceApplication::synchronize_account_session(Self, MarketplacePrincipal, String, now_ms~ : UInt64, expires_at_ms~ : UInt64) -> Unit
 
 pub(all) struct MarketplaceExecutionBounds {
   claim_ceiling : String

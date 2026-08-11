@@ -36,15 +36,30 @@ fn AccountApplication::ensure_bootstrap(
   self : AccountApplication,
   state : AccountState,
 ) -> AccountState {
-  let principals = state.principals.filter(principal => {
-    principal.user_id != self.bootstrap_principal.user_id
-  })
-  principals.push(self.bootstrap_principal)
+  let principals = state.principals.copy()
+  let mut principal_was_present = true
+  let principal = match
+    account_principal_record_by_id(state, self.bootstrap_principal.user_id) {
+    Some(persisted) => persisted
+    None => {
+      principal_was_present = false
+      principals.push(self.bootstrap_principal)
+      self.bootstrap_principal
+    }
+  }
+  let mut bootstrap_session_exists = false
+  for session in state.sessions {
+    if session.session_id == self.bootstrap_session_id {
+      bootstrap_session_exists = true
+    }
+  }
   let sessions = state.sessions.filter(session => {
     session.session_id != self.bootstrap_session_id &&
     session.token_digest != self.bootstrap_token_digest
   })
-  sessions.push(self.bootstrap_session(state))
+  if bootstrap_session_exists || !principal_was_present {
+    sessions.push(self.bootstrap_session(state, principal))
+  }
   { ..state, principals, sessions }
 }
 
@@ -52,32 +67,30 @@ fn AccountApplication::ensure_bootstrap(
 fn AccountApplication::bootstrap_session(
   self : AccountApplication,
   state : AccountState,
+  principal : AccountPrincipal,
 ) -> AccountSession {
   for session in state.sessions {
     if session.session_id == self.bootstrap_session_id &&
       session.token_digest == self.bootstrap_token_digest {
       let active_tenant_id = match session.active_tenant_id {
-        Some(tenant_id) if principal_has_tenant(
-            self.bootstrap_principal,
-            tenant_id,
-          ) => Some(tenant_id)
-        Some(_) => first_active_tenant_id(self.bootstrap_principal)
+        Some(tenant_id) if principal_has_tenant(principal, tenant_id) =>
+          Some(tenant_id)
+        Some(_) => first_active_tenant_id(principal)
         None => None
       }
       return {
         ..session,
-        principal_id: self.bootstrap_principal.user_id,
+        principal_id: principal.user_id,
         active_tenant_id,
         expires_at_ms: 18446744073709551615UL,
-        revoked: false,
       }
     }
   }
   {
     session_id: self.bootstrap_session_id,
     token_digest: self.bootstrap_token_digest,
-    principal_id: self.bootstrap_principal.user_id,
-    active_tenant_id: first_active_tenant_id(self.bootstrap_principal),
+    principal_id: principal.user_id,
+    active_tenant_id: first_active_tenant_id(principal),
     expires_at_ms: 18446744073709551615UL,
     revoked: false,
     version: 1,
@@ -90,7 +103,9 @@ async fn AccountApplication::load_state(
 ) -> AccountState {
   let state = match @support.read_optional_json_file(self.state_path) {
     Some(value) => {
-      let decoded : AccountState = @json.from_json(value) catch {
+      let decoded : AccountState = @json.from_json(
+        migrate_account_state_json(value),
+      ) catch {
         error => fail("account state is invalid: \{error}")
       }
       if decoded.schema != account_state_schema() {
@@ -120,6 +135,31 @@ async fn AccountApplication::save_state(
   @fs.rename(temp, self.state_path, replace=true)
 }
 
+///| Bound active sessions and discard anonymous principals after their last
+
+///| usable session. The configured bootstrap principal is retained as a
+
+///|
+/// revocation tombstone so signing out cannot recreate its fixed token.
+fn AccountApplication::prune_state(
+  self : AccountApplication,
+  state : AccountState,
+  now_ms : UInt64,
+) -> AccountState {
+  let pruned = account_prune_sessions(state, now_ms~)
+  let principals = pruned.principals.filter(principal => {
+    principal.user_id == self.bootstrap_principal.user_id ||
+    principal.personal_plan != VisitorPlan ||
+    principal.tenant_access.any(access => access.active) ||
+    pruned.sessions.any(session => session.principal_id == principal.user_id)
+  })
+  if principals.length() == pruned.principals.length() {
+    pruned
+  } else {
+    { ..pruned, principals, version: pruned.version + 1 }
+  }
+}
+
 ///|
 pub async fn AccountApplication::resolve(
   self : AccountApplication,
@@ -128,7 +168,12 @@ pub async fn AccountApplication::resolve(
 ) -> AccountContext? {
   account_store_mutex.acquire()
   defer account_store_mutex.release()
-  account_context_for_session(self.load_state(), opaque_token, now_ms~)
+  let state = self.load_state()
+  let pruned = self.prune_state(state, now_ms)
+  if pruned != state {
+    self.save_state(pruned)
+  }
+  account_context_for_session(pruned, opaque_token, now_ms~)
 }
 
 ///|
@@ -141,7 +186,7 @@ pub async fn AccountApplication::create_visitor_session(
 ) -> VisitorSessionResult {
   account_store_mutex.acquire()
   defer account_store_mutex.release()
-  let state = self.load_state()
+  let state = self.prune_state(self.load_state(), now_ms)
   let principal : AccountPrincipal = {
     user_id: visitor_id,
     display_name: "Visitor",
@@ -181,4 +226,16 @@ pub async fn AccountApplication::switch_tenant(
   account_context_for_session(next, opaque_token, now_ms~).unwrap_or_else(() => {
     fail("account session disappeared during tenant switch")
   })
+}
+
+///|
+pub async fn AccountApplication::logout(
+  self : AccountApplication,
+  opaque_token : String,
+  now_ms~ : UInt64,
+) -> Unit {
+  account_store_mutex.acquire()
+  defer account_store_mutex.release()
+  let revoked = account_revoke_session(self.load_state(), opaque_token, now_ms~)
+  self.save_state(revoked)
 }

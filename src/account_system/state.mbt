@@ -1,11 +1,36 @@
 ///|
 pub fn account_state_schema() -> String {
-  "moontown.account-store.v1"
+  "moontown.account-store.v2"
 }
 
 ///|
 pub fn empty_account_state() -> AccountState {
-  { schema: account_state_schema(), principals: [], sessions: [], version: 1 }
+  {
+    schema: account_state_schema(),
+    principals: [],
+    sessions: [],
+    subscriptions: [],
+    audit_events: [],
+    version: 1,
+  }
+}
+
+///|
+/// Upgrade the original account store without discarding installed sessions.
+fn migrate_account_state_json(value : Json) -> Json {
+  guard value is Object(fields) else { return value }
+  match fields.get("schema") {
+    Some(String("moontown.account-store.v1")) =>
+      fields["schema"] = account_state_schema().to_json()
+    _ => ()
+  }
+  if fields.get("subscriptions") is None {
+    fields["subscriptions"] = Json::array([])
+  }
+  if fields.get("audit_events") is None {
+    fields["audit_events"] = Json::array([])
+  }
+  Json::object(fields)
 }
 
 ///|
@@ -28,6 +53,7 @@ pub fn account_context_projection(context : AccountContext) -> Json {
     "contract_id": "moontown.account-context.v1",
     "user_id": context.user_id,
     "display_name": context.display_name,
+    "account_kind": account_kind_name(context.account_kind),
     "plan": account_plan_name(context.plan),
     "roles": context.roles.map(account_role_name).to_json(),
     "entitlements": context.entitlements.map(account_entitlement_name).to_json(),

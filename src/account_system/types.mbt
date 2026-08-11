@@ -5,6 +5,21 @@ pub(all) enum AccountPlan {
   EnterprisePlan
 } derive(Debug, Eq, ToJson, FromJson)
 
+///| The product-facing account kind. Billing remains represented by
+
+///| `AccountPlan`; administrator authority remains represented by roles.
+
+///| This explicit projection prevents either concern from masquerading as the
+
+///|
+/// other while still providing four independently routed experiences.
+pub(all) enum AccountKind {
+  VisitorAccount
+  PaidUserAccount
+  EnterpriseAccount
+  AdminAccount
+} derive(Debug, Eq, ToJson, FromJson)
+
 ///|
 pub(all) enum AccountRole {
   AccountMember
@@ -81,10 +96,32 @@ pub(all) struct AccountSession {
 } derive(Debug, Eq, ToJson, FromJson)
 
 ///|
+pub(all) struct AccountSubscription {
+  principal_id : String
+  plan : AccountPlan
+  status : String
+  changed_at_ms : UInt64
+  version : Int
+} derive(Debug, Eq, ToJson, FromJson)
+
+///|
+pub(all) struct AccountAuditEvent {
+  event_id : String
+  actor_id : String
+  action : String
+  target_id : String
+  detail : String
+  occurred_at_ms : UInt64
+  version : Int
+} derive(Debug, Eq, ToJson, FromJson)
+
+///|
 pub(all) struct AccountState {
   schema : String
   principals : Array[AccountPrincipal]
   sessions : Array[AccountSession]
+  subscriptions : Array[AccountSubscription]
+  audit_events : Array[AccountAuditEvent]
   version : Int
 } derive(Debug, Eq, ToJson, FromJson)
 
@@ -92,6 +129,7 @@ pub(all) struct AccountState {
 pub(all) struct AccountContext {
   user_id : String
   display_name : String
+  account_kind : AccountKind
   plan : AccountPlan
   roles : Array[AccountRole]
   entitlements : Array[AccountEntitlement]

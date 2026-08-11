@@ -21,9 +21,15 @@ pub fn account_entitlements_for(AccountPlan, Array[AccountRole]) -> Array[Accoun
 
 pub fn account_home_surface_name(AccountHomeSurface) -> String
 
+pub fn account_kind_name(AccountKind) -> String
+
 pub fn account_plan_name(AccountPlan) -> String
 
+pub fn account_prune_sessions(AccountState, now_ms~ : UInt64) -> AccountState
+
 pub fn account_register_session(AccountState, AccountPrincipal, String, String, active_tenant_id? : String, expires_at_ms~ : UInt64) -> AccountState raise
+
+pub fn account_revoke_session(AccountState, String, now_ms~ : UInt64) -> AccountState raise
 
 pub fn account_role_name(AccountRole) -> String
 
@@ -44,13 +50,33 @@ pub(all) struct AccountApplication {
   bootstrap_session_id : String
   bootstrap_token_digest : String
 } derive(Eq, @debug.Debug)
+pub async fn AccountApplication::admin_create_account(Self, String, String, String, String, String, String, String, String, now_ms~ : UInt64, ttl_ms? : UInt64) -> VisitorSessionResult
+pub async fn AccountApplication::admin_set_account_active(Self, String, String, Bool, now_ms~ : UInt64) -> Json
+pub async fn AccountApplication::admin_snapshot(Self, String, now_ms~ : UInt64) -> Json
+pub async fn AccountApplication::billing_snapshot(Self, String, now_ms~ : UInt64) -> Json
 pub async fn AccountApplication::create_visitor_session(Self, String, String, now_ms~ : UInt64, ttl_ms? : UInt64) -> VisitorSessionResult
+pub async fn AccountApplication::enterprise_remove_member(Self, String, String, now_ms~ : UInt64) -> Json
+pub async fn AccountApplication::enterprise_snapshot(Self, String, now_ms~ : UInt64) -> Json
+pub async fn AccountApplication::enterprise_upsert_member(Self, String, String, String, Bool, String, String, now_ms~ : UInt64, ttl_ms? : UInt64) -> VisitorSessionResult
+pub async fn AccountApplication::logout(Self, String, now_ms~ : UInt64) -> Unit
 pub async fn AccountApplication::resolve(Self, String, now_ms~ : UInt64) -> AccountContext?
+pub async fn AccountApplication::set_paid_subscription(Self, String, Bool, now_ms~ : UInt64) -> AccountContext
 pub async fn AccountApplication::switch_tenant(Self, String, String?, now_ms~ : UInt64) -> AccountContext
+
+pub(all) struct AccountAuditEvent {
+  event_id : String
+  actor_id : String
+  action : String
+  target_id : String
+  detail : String
+  occurred_at_ms : UInt64
+  version : Int
+} derive(Eq, ToJson, @debug.Debug, @json.FromJson)
 
 pub(all) struct AccountContext {
   user_id : String
   display_name : String
+  account_kind : AccountKind
   plan : AccountPlan
   roles : Array[AccountRole]
   entitlements : Array[AccountEntitlement]
@@ -94,6 +120,13 @@ pub(all) enum AccountHomeSurface {
   AdminConsoleHome
 } derive(Eq, ToJson, @debug.Debug, @json.FromJson)
 
+pub(all) enum AccountKind {
+  VisitorAccount
+  PaidUserAccount
+  EnterpriseAccount
+  AdminAccount
+} derive(Eq, ToJson, @debug.Debug, @json.FromJson)
+
 pub(all) enum AccountPlan {
   VisitorPlan
   PaidPlan
@@ -132,6 +165,16 @@ pub(all) struct AccountState {
   schema : String
   principals : Array[AccountPrincipal]
   sessions : Array[AccountSession]
+  subscriptions : Array[AccountSubscription]
+  audit_events : Array[AccountAuditEvent]
+  version : Int
+} derive(Eq, ToJson, @debug.Debug, @json.FromJson)
+
+pub(all) struct AccountSubscription {
+  principal_id : String
+  plan : AccountPlan
+  status : String
+  changed_at_ms : UInt64
   version : Int
 } derive(Eq, ToJson, @debug.Debug, @json.FromJson)
 

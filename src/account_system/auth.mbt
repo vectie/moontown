@@ -37,6 +37,19 @@ fn account_principal_by_id(
 }
 
 ///|
+fn account_principal_record_by_id(
+  state : AccountState,
+  principal_id : String,
+) -> AccountPrincipal? {
+  for principal in state.principals {
+    if principal.user_id == principal_id {
+      return Some(principal)
+    }
+  }
+  None
+}
+
+///|
 fn principal_has_tenant(
   principal : AccountPrincipal,
   tenant_id : String,
@@ -139,4 +152,56 @@ pub fn account_switch_session_tenant(
     fail("missing, expired, or revoked account session")
   }
   { ..state, sessions, version: state.version + 1 }
+}
+
+///|
+pub fn account_revoke_session(
+  state : AccountState,
+  opaque_token : String,
+  now_ms~ : UInt64,
+) -> AccountState raise {
+  let digest = account_token_digest(opaque_token)
+  let sessions = state.sessions.copy()
+  let mut found = false
+  for index, session in sessions {
+    if session.token_digest == digest &&
+      !session.revoked &&
+      session.expires_at_ms > now_ms {
+      sessions[index] = {
+        ..session,
+        revoked: true,
+        version: session.version + 1,
+      }
+      found = true
+    }
+  }
+  if !found {
+    fail("missing, expired, or revoked account session")
+  }
+  { ..state, sessions, version: state.version + 1 }
+}
+
+///| Remove sessions that cannot resolve to an active principal. Revocation is
+
+///|
+/// retained only in the bounded audit log, not indefinitely in session state.
+pub fn account_prune_sessions(
+  state : AccountState,
+  now_ms~ : UInt64,
+) -> AccountState {
+  let active_sessions = state.sessions.filter(session => {
+    !session.revoked &&
+    session.expires_at_ms > now_ms &&
+    account_principal_by_id(state, session.principal_id) is Some(_)
+  })
+  let sessions = if active_sessions.length() > 1000 {
+    active_sessions[active_sessions.length() - 1000:].to_owned()
+  } else {
+    active_sessions
+  }
+  if sessions.length() == state.sessions.length() {
+    state
+  } else {
+    { ..state, sessions, version: state.version + 1 }
+  }
 }
