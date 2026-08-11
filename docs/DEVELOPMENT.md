@@ -46,7 +46,11 @@ moon run src/cmd/miniapp_server
 
 Both adapters use the same MoonTown runtime state. The mini-app server defaults
 to `127.0.0.1:18191`; a non-loopback bind requires
-`MOONTOWN_MINIAPP_SESSION_TOKEN`.
+`MOONTOWN_MINIAPP_SESSION_TOKEN`. Its bootstrap account defaults to a visitor
+with no platform roles. Set `MOONTOWN_ACCOUNT_PLAN` to `paid` or `enterprise`
+and set `MOONTOWN_ACCOUNT_PLATFORM_ROLES` explicitly only when local testing
+requires those powers. Unknown plans or roles stop startup instead of gaining
+authority.
 
 ### Moonclaw front-page guide
 

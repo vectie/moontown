@@ -94,10 +94,13 @@ Mini-app, non-loopback deployment:
 ```bash
 export MOONTOWN_MINIAPP_BIND=0.0.0.0:18191
 export MOONTOWN_MINIAPP_SESSION_TOKEN='replace-with-a-secret'
+export MOONTOWN_ACCOUNT_PLAN=enterprise
+export MOONTOWN_ACCOUNT_PLATFORM_ROLES=platform-admin
 moon run src/cmd/miniapp_server
 ```
 
 The process refuses a non-loopback bind without
 `MOONTOWN_MINIAPP_SESSION_TOKEN`. TLS should terminate at a reverse proxy or
 platform gateway; the adapter contract describes HTTPS as the production
-transport.
+transport. Account plans and platform roles fail closed and are independent:
+an enterprise subscription does not grant platform administration.

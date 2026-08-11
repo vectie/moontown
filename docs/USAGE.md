@@ -1667,8 +1667,15 @@ For a non-loopback bind, configure an explicit session token:
 ```bash
 export MOONTOWN_MINIAPP_BIND=0.0.0.0:18191
 export MOONTOWN_MINIAPP_SESSION_TOKEN='replace-with-a-secret'
+export MOONTOWN_ACCOUNT_PLAN=enterprise
+export MOONTOWN_ACCOUNT_PLATFORM_ROLES=platform-admin
 moon run src/cmd/miniapp_server
 ```
+
+The account bootstrap otherwise defaults to visitor access with no platform
+roles. Invalid `MOONTOWN_ACCOUNT_PLAN` or role values stop startup. Paid,
+enterprise, and administrator access must be granted explicitly; administrator
+authority is never inferred from an enterprise plan.
 
 The legacy JavaScript local backend remains a UI fixture for Bunnia's unfinished
 social routes:
