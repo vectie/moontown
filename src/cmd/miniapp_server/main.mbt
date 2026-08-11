@@ -20,16 +20,26 @@ fn session_token() -> String {
 let visitor_session_rng : @random.Rand = @random.Rand::chacha8()
 
 ///|
-fn configured_account_plan() -> @account_system.AccountPlan {
-  match env_value("MOONTOWN_ACCOUNT_PLAN").unwrap_or("enterprise").to_lower() {
+fn parse_configured_account_plan(
+  value : String,
+) -> @account_system.AccountPlan raise {
+  match value.trim().to_lower() {
     "visitor" => @account_system.VisitorPlan
     "paid" => @account_system.PaidPlan
-    _ => @account_system.EnterprisePlan
+    "enterprise" => @account_system.EnterprisePlan
+    _ => fail("MOONTOWN_ACCOUNT_PLAN must be visitor, paid, or enterprise")
   }
 }
 
 ///|
-fn configured_personal_plan() -> @account_system.AccountPlan {
+fn configured_account_plan() -> @account_system.AccountPlan raise {
+  parse_configured_account_plan(
+    env_value("MOONTOWN_ACCOUNT_PLAN").unwrap_or("visitor"),
+  )
+}
+
+///|
+fn configured_personal_plan() -> @account_system.AccountPlan raise {
   personal_plan_for_account_plan(configured_account_plan())
 }
 
@@ -44,24 +54,25 @@ fn personal_plan_for_account_plan(
 }
 
 ///|
-fn configured_platform_roles() -> Array[@account_system.AccountRole] {
+fn configured_platform_roles() -> Array[@account_system.AccountRole] raise {
   let roles : Array[@account_system.AccountRole] = []
   for
-    raw in env_value("MOONTOWN_ACCOUNT_PLATFORM_ROLES")
-    .unwrap_or("platform-admin")
-    .split(",") {
+    raw in env_value("MOONTOWN_ACCOUNT_PLATFORM_ROLES").unwrap_or("").split(",") {
     match raw.trim().to_lower() {
       "platform-admin" => roles.push(@account_system.PlatformAdmin)
       "publisher" => roles.push(@account_system.AccountPublisher)
       "editor" => roles.push(@account_system.AccountEditor)
-      _ => ()
+      "member" => roles.push(@account_system.AccountMember)
+      "" | "none" => ()
+      value =>
+        fail("unsupported MOONTOWN_ACCOUNT_PLATFORM_ROLES value: \{value}")
     }
   }
   roles
 }
 
 ///|
-fn configured_tenant_access() -> Array[@account_system.AccountTenantAccess] {
+fn configured_tenant_access() -> Array[@account_system.AccountTenantAccess] raise {
   if configured_account_plan() != @account_system.EnterprisePlan {
     return []
   }
@@ -112,10 +123,18 @@ fn account_application() -> @account_system.AccountApplication raise {
 }
 
 ///|
-fn visitor_session_identity(now_ms : UInt64) -> (String, String) {
+fn generated_session_identity(
+  session_kind : String,
+  now_ms : UInt64,
+) -> (String, String) {
   let nonce = visitor_session_rng.uint64().to_string(radix=16)
-  let visitor_id = "visitor-\{now_ms}-\{nonce}"
-  (visitor_id, "visit:\{visitor_id}:\{visitor_session_rng.uint64()}")
+  let session_id = "\{session_kind}-\{now_ms}-\{nonce}"
+  (session_id, "session:\{session_id}:\{visitor_session_rng.uint64()}")
+}
+
+///|
+fn visitor_session_identity(now_ms : UInt64) -> (String, String) {
+  generated_session_identity("visitor", now_ms)
 }
 
 ///|
@@ -130,6 +149,14 @@ fn loopback_bind(bind : String) -> Bool {
   bind.has_prefix("127.0.0.1:") ||
   bind.has_prefix("localhost:") ||
   bind.has_prefix("[::1]:")
+}
+
+///|
+fn privileged_bootstrap_configured(
+  plan : @account_system.AccountPlan,
+  roles : Array[@account_system.AccountRole],
+) -> Bool {
+  plan != @account_system.VisitorPlan || !roles.is_empty()
 }
 
 ///|
@@ -286,6 +313,37 @@ fn tenant_switch_target(body : String) -> String? raise {
 }
 
 ///|
+fn account_management_fields(body : String) -> Map[String, Json] raise {
+  guard @json.parse(body) is Object(fields) else {
+    fail("account management body must be a JSON object")
+  }
+  fields
+}
+
+///|
+fn account_management_string(
+  fields : Map[String, Json],
+  key : String,
+) -> String {
+  match fields.get(key) {
+    Some(String(value)) => value.trim().to_owned()
+    _ => ""
+  }
+}
+
+///|
+fn account_management_bool(
+  fields : Map[String, Json],
+  key : String,
+) -> Bool raise {
+  match fields.get(key) {
+    Some(True) => true
+    Some(False) => false
+    _ => fail("\{key} must be a boolean")
+  }
+}
+
+///|
 fn miniapp_transport_id(request : @http.Request) -> String {
   let supplied = request_header(request, "x-moondesk-transport-id")
   if supplied.is_empty() {
@@ -311,13 +369,9 @@ fn marketplace_bootstrap_opaque_session() -> String {
 ///|
 fn select_marketplace_opaque_session(
   supplied : String,
-  bootstrap : String,
+  _bootstrap : String,
 ) -> String {
-  if supplied.is_empty() {
-    bootstrap
-  } else {
-    supplied
-  }
+  supplied
 }
 
 ///| Marketplace identity comes only from an opaque pre-provisioned session.
@@ -329,6 +383,33 @@ fn marketplace_opaque_session(request : @http.Request) -> String {
     request_header(request, "x-miniapp-session"),
     marketplace_bootstrap_opaque_session(),
   )
+}
+
+///|
+fn marketplace_principal_for_account(
+  context : @account_system.AccountContext,
+) -> @town_marketplace.MarketplacePrincipal {
+  let roles : Array[String] = []
+  if context.has_entitlement(@account_system.PublishTownContent) {
+    roles.push("publisher")
+  }
+  if context.has_entitlement(@account_system.ModerateTownContent) {
+    roles.push("moderator")
+  }
+  if context.has_entitlement(@account_system.ManageOrganizationBilling) ||
+    context.has_entitlement(@account_system.ManagePlatformTenants) {
+    roles.push("advertiser")
+  }
+  {
+    principal_id: context.user_id,
+    tenant_id: context.active_tenant_id.unwrap_or("personal:\{context.user_id}"),
+    display_name: context.display_name,
+    workspace_ids: [],
+    roles,
+    interest_tags: [],
+    active: true,
+    version: 1,
+  }
 }
 
 ///|
@@ -510,6 +591,7 @@ async fn handle_marketplace_request(
   body : &@io.Reader,
   conn : @http.ServerConnection,
   path : String,
+  account_context : @account_system.AccountContext,
 ) -> Bool {
   guard marketplace_operation(
       path,
@@ -520,6 +602,13 @@ async fn handle_marketplace_request(
     return false
   }
   let writes = http_method_is_post(request.meth)
+  if !require_account_entitlement(
+      account_context,
+      @account_system.UseMarketplaceActions,
+      conn,
+    ) {
+    return true
+  }
   if writes {
     if !require_json_write(request, conn) {
       return true
@@ -532,7 +621,24 @@ async fn handle_marketplace_request(
   }
   let payload = if writes { body.read_all().text() } else { "" }
   let opaque_session = marketplace_opaque_session(request)
-  let initial_result = marketplace_application().execute(
+  let marketplace = marketplace_application()
+  let marketplace_now_ms = @env.now()
+  marketplace.synchronize_account_session(
+    marketplace_principal_for_account(account_context),
+    opaque_session,
+    now_ms=marketplace_now_ms,
+    expires_at_ms=marketplace_now_ms + 300000UL,
+  ) catch {
+    error => {
+      println("marketplace account synchronization denied: \{error}")
+      send_json(conn, 403, {
+        "ok": false,
+        "error": "marketplace_account_synchronization_denied",
+      })
+      return true
+    }
+  }
+  let initial_result = marketplace.execute(
     opaque_session,
     operation,
     payload,
@@ -744,13 +850,33 @@ async fn handle_request(
     })
     return
   }
+  guard require_account_context(request, conn) is Some(account_context) else {
+    return
+  }
   let marketplace_handled = handle_marketplace_request(
-    request, body, conn, path,
+    request, body, conn, path, account_context,
   )
   if marketplace_handled {
     return
   }
-  guard require_account_context(request, conn) is Some(account_context) else {
+  if path == @town_contract.miniapp_account_logout_path() {
+    if !require_json_write(request, conn) {
+      return
+    }
+    account_application().logout(
+      request_header(request, "x-miniapp-session"),
+      now_ms=@env.now(),
+    ) catch {
+      error => {
+        send_json(conn, 409, {
+          "ok": false,
+          "error": "account_logout_failed",
+          "message": "\{error}",
+        })
+        return
+      }
+    }
+    send_json(conn, 200, { "ok": true, "session_revoked": true })
     return
   }
   if path == @town_contract.miniapp_account_context_path() {
@@ -761,6 +887,70 @@ async fn handle_request(
     send_json(conn, 200, {
       "ok": true,
       "account": @account_system.account_context_projection(account_context),
+    })
+    return
+  }
+  if path == @town_contract.miniapp_account_billing_path() {
+    let token = request_header(request, "x-miniapp-session")
+    if request.meth is @http.Get {
+      let snapshot = account_application().billing_snapshot(
+        token,
+        now_ms=@env.now(),
+      ) catch {
+        error => {
+          send_json(conn, 403, {
+            "ok": false,
+            "error": "account_billing_denied",
+            "message": "\{error}",
+          })
+          return
+        }
+      }
+      send_json(conn, 200, { "ok": true, "billing": snapshot })
+      return
+    }
+    if !require_json_write(request, conn) {
+      return
+    }
+    let fields = account_management_fields(body.read_all().text()) catch {
+      error => {
+        send_json(conn, 400, {
+          "ok": false,
+          "error": "invalid_account_billing_request",
+          "message": "\{error}",
+        })
+        return
+      }
+    }
+    let operation = account_management_string(fields, "action")
+    let active = match operation {
+      "activate" => true
+      "cancel" => false
+      _ => {
+        send_json(conn, 400, {
+          "ok": false,
+          "error": "billing action must be activate or cancel",
+        })
+        return
+      }
+    }
+    let updated = account_application().set_paid_subscription(
+      token,
+      active,
+      now_ms=@env.now(),
+    ) catch {
+      error => {
+        send_json(conn, 403, {
+          "ok": false,
+          "error": "account_billing_denied",
+          "message": "\{error}",
+        })
+        return
+      }
+    }
+    send_json(conn, 200, {
+      "ok": true,
+      "account": @account_system.account_context_projection(updated),
     })
     return
   }
@@ -789,54 +979,203 @@ async fn handle_request(
     return
   }
   if path == @town_contract.miniapp_enterprise_management_path() {
-    if !(request.meth is @http.Get) {
-      send_json(conn, 405, { "ok": false, "error": "GET required" })
+    let token = request_header(request, "x-miniapp-session")
+    if request.meth is @http.Get {
+      let snapshot = account_application().enterprise_snapshot(
+        token,
+        now_ms=@env.now(),
+      ) catch {
+        error => {
+          send_json(conn, 403, {
+            "ok": false,
+            "error": "enterprise_management_denied",
+            "message": "\{error}",
+          })
+          return
+        }
+      }
+      send_json(conn, 200, { "ok": true, "enterprise": snapshot })
       return
     }
-    if !require_account_entitlement(
-        account_context,
-        @account_system.UseTeamWorkspaces,
-        conn,
-      ) {
+    if !require_json_write(request, conn) {
       return
     }
-    send_json(conn, 200, {
+    let fields = account_management_fields(body.read_all().text()) catch {
+      error => {
+        send_json(conn, 400, {
+          "ok": false,
+          "error": "invalid_enterprise_management_request",
+          "message": "\{error}",
+        })
+        return
+      }
+    }
+    let operation = account_management_string(fields, "action")
+    let user_id = account_management_string(fields, "user_id").to_lower()
+    if operation == "remove-member" {
+      let updated = account_application().enterprise_remove_member(
+        token,
+        user_id,
+        now_ms=@env.now(),
+      ) catch {
+        error => {
+          send_json(conn, 403, {
+            "ok": false,
+            "error": "enterprise_member_removal_denied",
+            "message": "\{error}",
+          })
+          return
+        }
+      }
+      send_json(conn, 200, { "ok": true, "member": updated })
+      return
+    }
+    if operation != "upsert-member" {
+      send_json(conn, 400, {
+        "ok": false,
+        "error": "enterprise action must be upsert-member or remove-member",
+      })
+      return
+    }
+    let organization_admin = account_management_bool(
+      fields, "organization_admin",
+    ) catch {
+      error => {
+        send_json(conn, 400, {
+          "ok": false,
+          "error": "invalid_enterprise_member_role",
+          "message": "\{error}",
+        })
+        return
+      }
+    }
+    let now_ms = @env.now()
+    let (generated_session_id, generated_token) = generated_session_identity(
+      "enterprise", now_ms,
+    )
+    let result = account_application().enterprise_upsert_member(
+      token,
+      user_id,
+      account_management_string(fields, "display_name"),
+      organization_admin,
+      generated_session_id,
+      generated_token,
+      now_ms~,
+    ) catch {
+      error => {
+        send_json(conn, 403, {
+          "ok": false,
+          "error": "enterprise_member_upsert_denied",
+          "message": "\{error}",
+        })
+        return
+      }
+    }
+    send_json(conn, 201, {
       "ok": true,
-      "contract_id": "moontown.enterprise-management.v1",
-      "tenant_id": account_context.active_tenant_id.to_json(),
-      "sections": [
-        "team-workspaces", "shared-agents", "member-directory", "organization-usage",
-        "compliance", "organization-billing",
-      ],
-      "can_manage_members": account_context.has_entitlement(
-        @account_system.ManageOrganizationMembers,
-      ),
-      "can_manage_billing": account_context.has_entitlement(
-        @account_system.ManageOrganizationBilling,
-      ),
+      "session_token": result.opaque_token,
+      "account": @account_system.account_context_projection(result.context),
     })
     return
   }
   if path == @town_contract.miniapp_admin_management_path() {
-    if !(request.meth is @http.Get) {
-      send_json(conn, 405, { "ok": false, "error": "GET required" })
+    let token = request_header(request, "x-miniapp-session")
+    if request.meth is @http.Get {
+      let snapshot = account_application().admin_snapshot(
+        token,
+        now_ms=@env.now(),
+      ) catch {
+        error => {
+          send_json(conn, 403, {
+            "ok": false,
+            "error": "admin_management_denied",
+            "message": "\{error}",
+          })
+          return
+        }
+      }
+      send_json(conn, 200, { "ok": true, "admin": snapshot })
       return
     }
-    if !require_account_entitlement(
-        account_context,
-        @account_system.AccessAdminConsole,
-        conn,
-      ) {
+    if !require_json_write(request, conn) {
       return
     }
-    send_json(conn, 200, {
+    let fields = account_management_fields(body.read_all().text()) catch {
+      error => {
+        send_json(conn, 400, {
+          "ok": false,
+          "error": "invalid_admin_management_request",
+          "message": "\{error}",
+        })
+        return
+      }
+    }
+    let operation = account_management_string(fields, "action")
+    let user_id = account_management_string(fields, "user_id").to_lower()
+    if operation == "set-active" {
+      let active = account_management_bool(fields, "active") catch {
+        error => {
+          send_json(conn, 400, {
+            "ok": false,
+            "error": "invalid_account_active_state",
+            "message": "\{error}",
+          })
+          return
+        }
+      }
+      let updated = account_application().admin_set_account_active(
+        token,
+        user_id,
+        active,
+        now_ms=@env.now(),
+      ) catch {
+        error => {
+          send_json(conn, 403, {
+            "ok": false,
+            "error": "admin_account_lifecycle_denied",
+            "message": "\{error}",
+          })
+          return
+        }
+      }
+      send_json(conn, 200, { "ok": true, "account": updated })
+      return
+    }
+    if operation != "create-account" {
+      send_json(conn, 400, {
+        "ok": false,
+        "error": "admin action must be create-account or set-active",
+      })
+      return
+    }
+    let now_ms = @env.now()
+    let (generated_session_id, generated_token) = generated_session_identity(
+      "managed", now_ms,
+    )
+    let result = account_application().admin_create_account(
+      token,
+      user_id,
+      account_management_string(fields, "display_name"),
+      account_management_string(fields, "account_kind"),
+      account_management_string(fields, "tenant_id").to_lower(),
+      account_management_string(fields, "tenant_name"),
+      generated_session_id,
+      generated_token,
+      now_ms~,
+    ) catch {
+      error => {
+        send_json(conn, 409, {
+          "ok": false,
+          "error": "admin_account_creation_failed",
+          "message": "\{error}",
+        })
+        return
+      }
+    }
+    send_json(conn, 201, {
       "ok": true,
-      "contract_id": "moontown.admin-management.v1",
-      "sections": [
-        "users", "tenants", "moderation", "publishing", "analytics", "audit-log",
-        "system-health",
-      ],
-      "impersonation": "disabled",
+      "session_token": result.opaque_token,
+      "account": @account_system.account_context_projection(result.context),
     })
     return
   }
@@ -1257,9 +1596,12 @@ async fn handle_request(
 ///|
 async fn main {
   let bind = miniapp_bind()
-  if !loopback_bind(bind) && session_token().is_empty() {
+  let plan = configured_account_plan()
+  let roles = configured_platform_roles()
+  if session_token().is_empty() &&
+    (!loopback_bind(bind) || privileged_bootstrap_configured(plan, roles)) {
     fail(
-      "MOONTOWN_MINIAPP_SESSION_TOKEN is required when binding beyond localhost",
+      "MOONTOWN_MINIAPP_SESSION_TOKEN is required for non-loopback or privileged bootstrap access",
     )
   }
   let server = @http.Server(@socket.Addr::parse(bind), reuse_addr=true)

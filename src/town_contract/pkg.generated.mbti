@@ -26,7 +26,11 @@ pub fn desktop_standing_goals_path() -> String
 
 pub fn desktop_standing_watch_path() -> String
 
+pub fn miniapp_account_billing_path() -> String
+
 pub fn miniapp_account_context_path() -> String
+
+pub fn miniapp_account_logout_path() -> String
 
 pub fn miniapp_account_tenant_switch_path() -> String
 

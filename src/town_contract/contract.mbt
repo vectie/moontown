@@ -74,6 +74,11 @@ pub fn miniapp_visitor_session_path() -> String {
 }
 
 ///|
+pub fn miniapp_account_logout_path() -> String {
+  "/miniapp/auth/logout"
+}
+
+///|
 pub fn miniapp_account_context_path() -> String {
   "/miniapp/me"
 }
@@ -81,6 +86,11 @@ pub fn miniapp_account_context_path() -> String {
 ///|
 pub fn miniapp_account_tenant_switch_path() -> String {
   "/miniapp/account/tenant"
+}
+
+///|
+pub fn miniapp_account_billing_path() -> String {
+  "/miniapp/account/billing"
 }
 
 ///|
@@ -647,6 +657,12 @@ pub fn miniapp_contract() -> Json {
         "account.visitor.create",
       ),
       endpoint(
+        "logout-account-session",
+        "POST",
+        miniapp_account_logout_path(),
+        "account.session.revoke",
+      ),
+      endpoint(
         "account-context",
         "GET",
         miniapp_account_context_path(),
@@ -659,16 +675,40 @@ pub fn miniapp_contract() -> Json {
         "account.tenant.switch",
       ),
       endpoint(
+        "account-billing-read",
+        "GET",
+        miniapp_account_billing_path(),
+        "account.billing.read",
+      ),
+      endpoint(
+        "account-billing-change",
+        "POST",
+        miniapp_account_billing_path(),
+        "account.billing.change",
+      ),
+      endpoint(
         "enterprise-management",
         "GET",
         miniapp_enterprise_management_path(),
         "account.enterprise.manage",
       ),
       endpoint(
+        "enterprise-management-change",
+        "POST",
+        miniapp_enterprise_management_path(),
+        "account.enterprise.members.manage",
+      ),
+      endpoint(
         "admin-management",
         "GET",
         miniapp_admin_management_path(),
         "account.platform.manage",
+      ),
+      endpoint(
+        "admin-management-change",
+        "POST",
+        miniapp_admin_management_path(),
+        "account.platform.users.manage",
       ),
       endpoint(
         "load-town-snapshot",

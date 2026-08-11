@@ -5,10 +5,12 @@ test "miniapp contract advertises the shared snapshot and write routes" {
   assert_true(contract.contains(@town_contract.miniapp_standing_watch_path()))
   assert_true(contract.contains(@town_contract.miniapp_evidence_book_path()))
   assert_true(contract.contains(@town_contract.miniapp_visitor_session_path()))
+  assert_true(contract.contains(@town_contract.miniapp_account_logout_path()))
   assert_true(contract.contains(@town_contract.miniapp_account_context_path()))
   assert_true(
     contract.contains(@town_contract.miniapp_account_tenant_switch_path()),
   )
+  assert_true(contract.contains(@town_contract.miniapp_account_billing_path()))
   assert_true(
     contract.contains(@town_contract.miniapp_enterprise_management_path()),
   )
@@ -46,15 +48,41 @@ test "enterprise configuration keeps organization powers tenant scoped" {
 }
 
 ///|
+test "account plan configuration fails closed" {
+  assert_eq(
+    parse_configured_account_plan("visitor"),
+    @account_system.VisitorPlan,
+  )
+  assert_eq(
+    parse_configured_account_plan("enterprise"),
+    @account_system.EnterprisePlan,
+  )
+  try parse_configured_account_plan("typo-plan") catch {
+    error =>
+      assert_true("\{error}".contains("must be visitor, paid, or enterprise"))
+  } noraise {
+    _ => fail("unknown plans must not gain enterprise authority")
+  }
+}
+
+///|
+test "privileged bootstrap always requires an explicit secret" {
+  assert_false(privileged_bootstrap_configured(@account_system.VisitorPlan, []))
+  assert_true(privileged_bootstrap_configured(@account_system.PaidPlan, []))
+  assert_true(
+    privileged_bootstrap_configured(@account_system.VisitorPlan, [
+      @account_system.PlatformAdmin,
+    ]),
+  )
+}
+
+///|
 test "marketplace routing keeps caller session separate from fixed bootstrap" {
   assert_eq(
     select_marketplace_opaque_session("user-session-token", "bootstrap-token"),
     "user-session-token",
   )
-  assert_eq(
-    select_marketplace_opaque_session("", "bootstrap-token"),
-    "bootstrap-token",
-  )
+  assert_eq(select_marketplace_opaque_session("", "bootstrap-token"), "")
   assert_true(
     marketplace_operation(
       @town_contract.miniapp_marketplace_search_path(),

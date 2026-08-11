@@ -20,13 +20,14 @@ test "miniapp contract ids preserve product vocabulary" {
 test "miniapp endpoint catalog covers identity building search and runs" {
   let endpoints = miniapp_contract_endpoints()
   assert_true(endpoints.length() >= 20)
+  assert_true(miniapp_endpoint_by_id("auth-wechat-login") is None)
+  assert_true(miniapp_endpoint_by_id("auth-dev-login") is None)
   assert_eq(
-    miniapp_endpoint_by_id("auth-wechat-login").unwrap().path,
-    "/auth/wechat/login",
+    miniapp_endpoint_by_id("auth-logout").unwrap().path,
+    "/miniapp/auth/logout",
   )
-  assert_true(
-    !miniapp_endpoint_by_id("auth-wechat-login").unwrap().auth_required,
-  )
+  assert_true(miniapp_endpoint_by_id("auth-logout").unwrap().auth_required)
+  assert_true(miniapp_endpoint_by_id("account-billing-change").unwrap().writes)
   assert_eq(
     miniapp_endpoint_by_id("town-snapshot").unwrap().path,
     "/town/snapshot",

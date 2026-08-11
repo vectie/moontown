@@ -24,27 +24,11 @@ pub fn miniapp_endpoint(
 pub fn miniapp_contract_endpoints() -> Array[MiniappEndpoint] {
   [
     miniapp_endpoint(
-      id="auth-wechat-login",
-      http_method="POST",
-      path="/auth/wechat/login",
-      writes=true,
-      auth_required=false,
-      summary="Exchange a WeChat login code for a product session.",
-    ),
-    miniapp_endpoint(
-      id="auth-dev-login",
-      http_method="POST",
-      path="/auth/dev/login",
-      writes=true,
-      auth_required=false,
-      summary="Create a local development session for a fixture user.",
-    ),
-    miniapp_endpoint(
       id="auth-logout",
       http_method="POST",
-      path="/auth/logout",
+      path="/miniapp/auth/logout",
       writes=true,
-      summary="Expire the current product session.",
+      summary="Revoke the current product session in the authoritative account store.",
     ),
     miniapp_endpoint(
       id="auth-visitor",
@@ -68,16 +52,43 @@ pub fn miniapp_contract_endpoints() -> Array[MiniappEndpoint] {
       summary="Switch only to an active tenant already assigned to the session principal.",
     ),
     miniapp_endpoint(
+      id="account-billing-read",
+      http_method="GET",
+      path="/miniapp/account/billing",
+      summary="Return the persisted personal subscription state.",
+    ),
+    miniapp_endpoint(
+      id="account-billing-change",
+      http_method="POST",
+      path="/miniapp/account/billing",
+      writes=true,
+      summary="Activate or cancel a personal paid subscription.",
+    ),
+    miniapp_endpoint(
       id="account-enterprise-management",
       http_method="GET",
       path="/miniapp/account/enterprise",
       summary="Return the active enterprise workspace management surface when entitled.",
     ),
     miniapp_endpoint(
+      id="account-enterprise-management-change",
+      http_method="POST",
+      path="/miniapp/account/enterprise",
+      writes=true,
+      summary="Add, update, or remove an enterprise tenant member.",
+    ),
+    miniapp_endpoint(
       id="account-admin-management",
       http_method="GET",
       path="/miniapp/account/admin",
       summary="Return the platform operations management surface for platform administrators.",
+    ),
+    miniapp_endpoint(
+      id="account-admin-management-change",
+      http_method="POST",
+      path="/miniapp/account/admin",
+      writes=true,
+      summary="Provision, activate, or deactivate a platform account.",
     ),
     miniapp_endpoint(
       id="me",
