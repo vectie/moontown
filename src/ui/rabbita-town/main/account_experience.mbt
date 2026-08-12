@@ -63,6 +63,75 @@ fn visitor_account_experience() -> AccountExperience {
 }
 
 ///|
+fn account_has_entitlements(
+  account : AccountExperience,
+  required : Array[String],
+) -> Bool {
+  required.all(entitlement => account.entitlements.contains(entitlement))
+}
+
+///|
+/// Reject contradictory wire projections before they can select privileged
+/// navigation or management surfaces.
+fn account_experience_valid(account : AccountExperience) -> Bool {
+  if account.user_id.trim().is_empty() ||
+    account.display_name.trim().is_empty() ||
+    !account_has_entitlements(account, [
+      "town.public.explore", "town.public.discover",
+    ]) {
+    return false
+  }
+  let tenant_pair_valid = match
+    (account.active_tenant_id, account.active_tenant_name) {
+    (None, None) => true
+    (Some(tenant_id), Some(tenant_name)) =>
+      !tenant_id.trim().is_empty() &&
+      !tenant_name.trim().is_empty() &&
+      account.tenant_choices.any(choice => {
+        choice.tenant_id == tenant_id &&
+        choice.tenant_name == tenant_name &&
+        choice.plan == "enterprise"
+      })
+    _ => false
+  }
+  if !tenant_pair_valid {
+    return false
+  }
+  match account.account_kind {
+    "visitor" =>
+      account.plan == "visitor" &&
+      account.home_surface == "public-town" &&
+      account.visitor &&
+      account.active_tenant_id is None
+    "paid-user" =>
+      account.plan == "paid" &&
+      account.home_surface == "personal-town" &&
+      !account.visitor &&
+      account.active_tenant_id is None &&
+      account_has_entitlements(account, [
+        "agent.personal.use", "workspace.personal.manage", "marketplace.action.use",
+        "billing.personal.manage",
+      ])
+    "enterprise" =>
+      account.plan == "enterprise" &&
+      account.home_surface == "enterprise-town" &&
+      !account.visitor &&
+      account.active_tenant_id is Some(_) &&
+      account_has_entitlements(account, [
+        "workspace.team.use", "agent.shared.use", "organization.members.view",
+      ])
+    "admin" =>
+      account.roles.contains("platform-admin") &&
+      account.home_surface == "admin-console" &&
+      !account.visitor &&
+      account_has_entitlements(account, [
+        "platform.admin.access", "platform.users.manage", "platform.health.manage",
+      ])
+    _ => false
+  }
+}
+
+///|
 fn parse_bootstrap_account_experience() -> AccountExperience {
   let text = load_bootstrap_account_context_json()
   if text.is_empty() {
@@ -74,7 +143,8 @@ fn parse_bootstrap_account_experience() -> AccountExperience {
   let account : AccountExperience = @json.from_json(parsed) catch {
     _ => return visitor_account_experience()
   }
-  if account.contract_id != "moontown.account-context.v1" {
+  if account.contract_id != "moontown.account-context.v1" ||
+    !account_experience_valid(account) {
     visitor_account_experience()
   } else {
     account
@@ -275,10 +345,10 @@ fn render_account_navigation(account : AccountExperience) -> @rabbita.Html {
   let kind = account.kind()
   let admin_surface = current_browser_query_param("admin")
   let tenant_label = account.active_tenant_name.unwrap_or_else(() => {
-    if kind == PaidExperience {
-      "Personal workspace"
-    } else {
-      "Public town"
+    match kind {
+      PaidExperience => "Personal workspace"
+      AdminExperience => "Platform administration"
+      _ => "Public town"
     }
   })
   @html.nav(

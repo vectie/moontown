@@ -11,94 +11,10 @@ import {
 } from './runtime_snapshots.js'
 import './viewport_drag_pan.js'
 import { installAccountManagement } from './account_management.js'
+import { ACCOUNT_DEMO_FIXTURES } from './account_demo_fixtures.js'
 
 const app = document.getElementById('app')
 const ACCOUNT_SESSION_KEY = 'moontown.account-session.v1'
-
-const ACCOUNT_DEMO_FIXTURES = {
-  visitor: {
-    contract_id: 'moontown.account-context.v1',
-    user_id: 'visitor-preview',
-    display_name: 'Visitor',
-    account_kind: 'visitor',
-    plan: 'visitor',
-    roles: ['member'],
-    entitlements: ['town.public.explore', 'town.public.discover'],
-    active_tenant_id: null,
-    active_tenant_name: null,
-    tenant_choices: [],
-    home_surface: 'public-town',
-    visitor: true,
-  },
-  paid: {
-    contract_id: 'moontown.account-context.v1',
-    user_id: 'paid-preview',
-    display_name: 'MoonTown Member',
-    account_kind: 'paid-user',
-    plan: 'paid',
-    roles: ['member'],
-    entitlements: [
-      'town.public.explore',
-      'town.public.discover',
-      'agent.personal.use',
-      'workspace.personal.manage',
-      'marketplace.action.use',
-      'billing.personal.manage',
-    ],
-    active_tenant_id: null,
-    active_tenant_name: null,
-    tenant_choices: [],
-    home_surface: 'personal-town',
-    visitor: false,
-  },
-  enterprise: {
-    contract_id: 'moontown.account-context.v1',
-    user_id: 'enterprise-preview',
-    display_name: 'Enterprise Member',
-    account_kind: 'enterprise',
-    plan: 'enterprise',
-    roles: ['member', 'organization-admin'],
-    entitlements: [
-      'town.public.explore',
-      'agent.personal.use',
-      'workspace.team.use',
-      'agent.shared.use',
-      'organization.members.view',
-      'organization.usage.view',
-      'organization.compliance.view',
-      'organization.manage',
-      'organization.members.manage',
-      'organization.billing.manage',
-    ],
-    active_tenant_id: 'energy-labs',
-    active_tenant_name: 'Energy Labs',
-    tenant_choices: [],
-    home_surface: 'enterprise-town',
-    visitor: false,
-  },
-  admin: {
-    contract_id: 'moontown.account-context.v1',
-    user_id: 'admin-preview',
-    display_name: 'District Operator',
-    account_kind: 'admin',
-    plan: 'enterprise',
-    roles: ['platform-admin'],
-    entitlements: [
-      'platform.admin.access',
-      'platform.users.manage',
-      'platform.tenants.manage',
-      'platform.content.moderate',
-      'platform.analytics.view',
-      'platform.audit.view',
-      'platform.health.manage',
-    ],
-    active_tenant_id: 'local-town',
-    active_tenant_name: 'Local town',
-    tenant_choices: [],
-    home_surface: 'admin-console',
-    visitor: false,
-  },
-}
 
 function accountDemoFixture() {
   const params = new URLSearchParams(globalThis.location?.search || '')
@@ -252,8 +168,8 @@ async function prepareRuntimeBridge() {
 }
 
 async function startMoontown() {
-  startRuntimeSnapshotRefresh()
   await prepareRuntimeBridge()
+  startRuntimeSnapshotRefresh()
   await import('./main.js?account-system-v2')
   installAccountManagement()
 }

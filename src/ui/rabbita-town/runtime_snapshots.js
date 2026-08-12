@@ -12,7 +12,7 @@ import {
   loadJsonGlobal,
   refreshTextSnapshot,
 } from './runtime_snapshot_fetch.js'
-function runtimeRefreshIntervalMs() {
+export function runtimeRefreshIntervalMs() {
   try {
     const snapshot = JSON.parse(globalThis.__moontownSystemSettingsJson || '{}')
     const value = snapshot?.settings?.frontend_snapshot_refresh_interval_ms

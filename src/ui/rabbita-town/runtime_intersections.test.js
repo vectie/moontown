@@ -375,7 +375,10 @@ test('the single map view replaces stale presentation after graph validation', a
     canvas,
     /if !view\.intersection_preview \{\s+install_player_walk_keys\(\)/,
   )
-  assert.match(canvas, /let canvas_attrs = if view\.intersection_preview/)
+  assert.match(
+    canvas,
+    /let canvas_attrs = @html\.Attrs::build\(\)\s+\.aria_label\(\s+if view\.intersection_preview/,
+  )
   assert.match(canvas, /EnergyCanvasClick/)
   assert.match(canvas, /delete globalThis\.__moontownIntersectionStaticCanvas/)
   assert.match(canvas, /delete globalThis\.__moontownIntersectionWalkerEdges/)
@@ -440,15 +443,21 @@ test('the single map view replaces stale presentation after graph validation', a
   assert.doesNotMatch(preview, /golden_draw_reference_building_shadow/)
   assert.match(preview, /town_snapshot_canvas_buildings/)
   assert.match(preview, /golden_draw_building\(/)
+  assert.match(preview, /Some\(road\) if road\.custom/)
+  assert.match(preview, /golden_draw_road_overlay_tile\(/)
+  assert.match(preview, /golden_draw_ecosystem_place_layer\(/)
   assert.match(preview, /golden_draw_weather/)
   assert.match(preview, /golden_draw_day_night/)
   assert.match(preview, /golden_draw_energy_valley_coordinate_grid/)
   assert.match(preview, /golden_valley_clear_canvas_frame\(\)/)
   assert.doesNotMatch(
     preview,
-    /golden_draw_(?:road_overlay_tile|bridge_detail|town_snapshot_metro|selected_town_snapshot_relations|active_ecosystem_exchanges|ecosystem_pedestrian_spurs|ecosystem_place_layer)/,
+    /golden_draw_(?:bridge_detail|town_snapshot_metro|selected_town_snapshot_relations|active_ecosystem_exchanges|ecosystem_pedestrian_spurs)/,
   )
-  assert.doesNotMatch(preview, /golden_valley_accept_canvas_frame/)
+  assert.match(
+    preview,
+    /golden_valley_accept_canvas_frame_with_runtime_eligibility\(snapshot, false\)/,
+  )
   assert.match(hudCss, /\.intersection-reference-legend \{/)
   assert.match(hudCss, /\.intersection-reference-coordinate \{/)
   assert.match(hudCss, /right: calc\(12px \+ var\(--town-safe-right\)\);/)

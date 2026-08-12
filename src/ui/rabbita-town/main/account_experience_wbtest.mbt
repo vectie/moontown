@@ -51,6 +51,14 @@ test "bootstrap projection accepts normalized paid tenant" {
 }
 
 ///|
+test "contradictory privileged account projections are invalid" {
+  let text =
+    #|{"contract_id":"moontown.account-context.v1","user_id":"impossible-admin","display_name":"Impossible Admin","account_kind":"admin","plan":"enterprise","roles":["platform-admin"],"entitlements":["town.public.explore","town.public.discover","platform.admin.access","platform.users.manage","platform.health.manage"],"active_tenant_id":"missing-tenant","active_tenant_name":"Missing Tenant","tenant_choices":[],"home_surface":"admin-console","visitor":true}
+  let parsed : AccountExperience = @json.from_json(@json.parse(text))
+  assert_false(account_experience_valid(parsed))
+}
+
+///|
 test "four account experiences keep distinct navigation" {
   let visitor = account_experience_test_value(
     "visitor",
