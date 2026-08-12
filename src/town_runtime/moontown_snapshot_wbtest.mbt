@@ -25,9 +25,18 @@ fn snapshot_test_execution(
 ///|
 test "snapshot refresh detects duplicate execution task ids" {
   let state = snapshot_test_state()
-  state.register_execution(snapshot_test_execution("task", "first"))
-  state.register_execution(snapshot_test_execution("task", "second"))
+  state.executions.push(snapshot_test_execution("task", "first"))
+  state.executions.push(snapshot_test_execution("task", "second"))
   assert_eq(snapshot_requires_refresh(@storage.snapshot_of(state)), true)
+}
+
+///|
+test "snapshot refresh detects broken execution task references" {
+  let state = snapshot_test_state()
+  state.executions.push(snapshot_test_execution("missing-task", "orphan"))
+  assert_true(
+    snapshot_has_broken_execution_references(@storage.snapshot_of(state)),
+  )
 }
 
 ///|
@@ -55,6 +64,15 @@ test "snapshot refresh keeps current modeled bootstrap lifecycle snapshots" {
       name="Book",
       purpose="test",
       workspace_root="/tmp/moontown/books/book",
+    ),
+  )
+  state.enqueue_task(
+    @core.TownTask::new(
+      id="task",
+      book_id="book",
+      title="Task",
+      prompt="Test task",
+      domain=Research,
     ),
   )
   state.register_execution(

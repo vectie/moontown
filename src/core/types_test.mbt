@@ -67,10 +67,35 @@ test "core state replaces all duplicate execution records for same task" {
       output_contract="test",
     ),
   )
-  assert_eq(state.executions.length(), 2)
+  assert_eq(state.executions.length(), 1)
   assert_true(
     state.executions.all(fn(execution) { execution.status == ReviewQueued }),
   )
+}
+
+///|
+test "core state upserts duplicate task identities" {
+  let state = empty_state(TownConfig::new(id="town", name="MoonTown"))
+  state.enqueue_task(
+    TownTask::new(
+      id="task-1",
+      book_id="coding",
+      title="Initial",
+      prompt="Initial prompt",
+      domain=Coding,
+    ),
+  )
+  state.enqueue_task(
+    TownTask::new(
+      id="task-1",
+      book_id="coding",
+      title="Updated",
+      prompt="Updated prompt",
+      domain=Coding,
+    ),
+  )
+  assert_eq(state.tasks.length(), 1)
+  assert_eq(state.tasks[0].title, "Updated")
 }
 
 ///|

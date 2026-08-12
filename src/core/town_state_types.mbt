@@ -75,7 +75,7 @@ pub fn TownState::register_worker(self : TownState, worker : WorkerRef) -> Unit 
 
 ///|
 pub fn TownState::enqueue_task(self : TownState, task : TownTask) -> Unit {
-  self.tasks.push(task)
+  self.replace_task(task)
 }
 
 ///|
@@ -91,15 +91,22 @@ pub fn TownState::replace_execution(
   self : TownState,
   execution : TaskExecutionRecord,
 ) -> Unit {
-  let mut replaced = false
-  for index in 0..<self.executions.length() {
-    if self.executions[index].task_id == execution.task_id {
-      self.executions[index] = execution
-      replaced = true
+  let mut replacement_index = -1
+  let mut index = 0
+  while index < self.executions.length() {
+    if self.executions[index].task_id != execution.task_id {
+      index += 1
+    } else if replacement_index < 0 {
+      replacement_index = index
+      index += 1
+    } else {
+      ignore(self.executions.remove(index))
     }
   }
-  if !replaced {
+  if replacement_index < 0 {
     self.executions.push(execution)
+  } else {
+    self.executions[replacement_index] = execution
   }
 }
 
