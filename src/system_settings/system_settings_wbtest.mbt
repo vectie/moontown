@@ -10,6 +10,21 @@ test "defaults validate and expose every value through the catalog" {
     .join("\n")
     .contains("max_live_external_executions"),
   )
+  guard settings.to_json() is Object(value_fields) else {
+    fail("system settings must serialize as an object")
+  }
+  let catalog_keys : Array[String] = []
+  for item in catalog {
+    guard item is Object(fields) && fields.get("key") is Some(String(key)) else {
+      fail("every catalog entry must expose a string key")
+    }
+    assert_false(catalog_keys.contains(key))
+    catalog_keys.push(key)
+  }
+  assert_eq(catalog_keys.length(), value_fields.length())
+  for key, _ in value_fields {
+    assert_true(catalog_keys.contains(key))
+  }
 }
 
 ///|

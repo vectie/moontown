@@ -7,13 +7,35 @@ pub fn default_system_settings_path() -> String {
 }
 
 ///|
+/// Fill newly introduced v1 setting fields from authoritative defaults while
+/// preserving every stored value, revision, and audit event. This makes
+/// additive settings releases forward-compatible with existing state files.
+fn migrate_system_settings_state_json(value : Json) -> Json {
+  guard value is Object(fields) &&
+    fields.get("schema") ==
+    Some(@system_settings.system_settings_schema().to_json()) &&
+    fields.get("settings") is Some(Object(setting_fields)) &&
+    @system_settings.default_system_settings().to_json()
+    is Object(default_fields) else {
+    return value
+  }
+  for key, default_value in default_fields {
+    if setting_fields.get(key) is None {
+      setting_fields[key] = default_value
+    }
+  }
+  fields["settings"] = Json::object(setting_fields)
+  Json::object(fields)
+}
+
+///|
 async fn load_system_settings_state_unlocked(
   path : String,
 ) -> @system_settings.SystemSettingsState {
   let state : @system_settings.SystemSettingsState = match
     @support.read_optional_json_file(path) {
     Some(value) =>
-      @json.from_json(value) catch {
+      @json.from_json(migrate_system_settings_state_json(value)) catch {
         error => fail("system settings state is invalid: \{error}")
       }
     None => @system_settings.empty_system_settings_state()

@@ -54,3 +54,33 @@ async test "settings update rejects a stale revision" {
     _ => ()
   }
 }
+
+///|
+async test "settings load fills additive fields without losing stored values" {
+  let path = "/tmp/moontown-system-settings-additive-migration-test.json"
+  @fs.remove(path) catch {
+    _ => ()
+  }
+  let state = @system_settings.empty_system_settings_state()
+  guard state.to_json() is Object(fields) &&
+    fields.get("settings") is Some(Object(values)) else {
+    fail("settings fixture must use the durable object shape")
+  }
+  values.remove("map_lab_entity_result_limit")
+  values["max_concurrent_tasks"] = (20 : Int).to_json()
+  fields["settings"] = Json::object(values)
+  @fs.write_file(
+    path,
+    Json::object(fields).stringify(indent=2),
+    create_mode=CreateOrTruncate,
+  )
+  let loaded = load_and_install_system_settings(path~)
+  assert_eq(loaded.max_concurrent_tasks, 20)
+  assert_eq(
+    loaded.map_lab_entity_result_limit,
+    @system_settings.default_system_settings().map_lab_entity_result_limit,
+  )
+  @fs.remove(path) catch {
+    _ => ()
+  }
+}
