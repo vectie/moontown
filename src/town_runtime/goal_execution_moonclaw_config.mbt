@@ -20,8 +20,13 @@ fn moontown_moonclaw_supervision_seconds() -> Int {
 ///|
 fn moontown_moonclaw_import_timeout_ms() -> Int {
   match optional_env_text("MOONTOWN_MOONCLAW_IMPORT_TIMEOUT_MS") {
-    Some(value) => parse_non_negative_seconds(value, fallback=20_000)
-    None => 20_000
+    Some(value) =>
+      parse_non_negative_seconds(
+        value,
+        fallback=@system_settings.current_system_settings().moonclaw_import_timeout_ms,
+      )
+    None =>
+      @system_settings.current_system_settings().moonclaw_import_timeout_ms
   }
 }
 

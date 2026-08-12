@@ -104,6 +104,11 @@ pub fn miniapp_admin_management_path() -> String {
 }
 
 ///|
+pub fn miniapp_system_settings_path() -> String {
+  "/miniapp/system/settings"
+}
+
+///|
 pub fn miniapp_snapshot_path() -> String {
   "/miniapp/town/snapshot"
 }
@@ -709,6 +714,18 @@ pub fn miniapp_contract() -> Json {
         "POST",
         miniapp_admin_management_path(),
         "account.platform.users.manage",
+      ),
+      endpoint(
+        "system-settings",
+        "GET",
+        miniapp_system_settings_path(),
+        "platform.health.manage",
+      ),
+      endpoint(
+        "system-settings-change",
+        "POST",
+        miniapp_system_settings_path(),
+        "platform.health.manage",
       ),
       endpoint(
         "load-town-snapshot",

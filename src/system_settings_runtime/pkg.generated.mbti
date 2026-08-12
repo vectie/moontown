@@ -1,0 +1,25 @@
+// Generated using `moon info`, DON'T EDIT IT
+package "vectie/moontown/system_settings_runtime"
+
+import {
+  "vectie/moontown/system_settings",
+}
+
+// Values
+pub fn default_system_settings_path() -> String
+
+pub async fn load_and_install_system_settings(path? : String) -> @system_settings.SystemSettings
+
+pub async fn public_system_settings_snapshot(path? : String) -> Json
+
+pub async fn system_settings_management_snapshot(path? : String) -> Json
+
+pub async fn update_system_settings(String, actor_id~ : String, now_ms~ : UInt64, path? : String) -> Json
+
+// Errors
+
+// Types and methods
+
+// Type aliases
+
+// Traits

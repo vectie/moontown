@@ -202,6 +202,7 @@ pub fn TownState::register_worker(Self, WorkerRef) -> Unit
 pub fn TownState::replace_execution(Self, TaskExecutionRecord) -> Unit
 pub fn TownState::replace_task(Self, TownTask) -> Unit
 pub fn TownState::set_worker_status(Self, String, WorkerStatus) -> Unit
+pub fn TownState::with_current_system_settings(Self) -> Self
 pub impl Show for TownState
 
 pub struct TownStateProjection {

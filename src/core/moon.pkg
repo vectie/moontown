@@ -1,6 +1,7 @@
 import {
   "moonbitlang/core/json",
   "moonbitlang/x/path",
+  "vectie/moontown/system_settings",
 }
 
 import {

@@ -142,6 +142,8 @@ pub fn miniapp_supervisor_stop_path() -> String
 
 pub fn miniapp_supervisor_wake_path() -> String
 
+pub fn miniapp_system_settings_path() -> String
+
 pub fn miniapp_visitor_session_path() -> String
 
 pub fn schema_version() -> String

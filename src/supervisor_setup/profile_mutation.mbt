@@ -89,9 +89,10 @@ pub async fn SupervisorSetupApplication::save_profile_draft(
   if !supervisor_avatar_allowed(draft.avatar_url) ||
     !supervisor_capabilities_allowed(draft.capabilities) ||
     draft.max_active_workers <= 0 ||
-    draft.max_active_workers > 3 {
+    draft.max_active_workers >
+    @system_settings.current_system_settings().supervisor_max_active_workers {
     fail(
-      "supervisor profile requires an allowlisted avatar, 1-3 unique capabilities, and a worker ceiling from 1 through 3",
+      "supervisor profile requires an allowlisted avatar, 1-3 unique capabilities, and a worker ceiling from 1 through \{@system_settings.current_system_settings().supervisor_max_active_workers}",
     )
   }
   supervisor_store_mutex.acquire()

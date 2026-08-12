@@ -12,6 +12,8 @@ import {
   "moonbitlang/x/time",
   "vectie/moontown/storage",
   "vectie/moontown/support",
+  "vectie/moontown/system_settings",
+  "vectie/moontown/system_settings_runtime",
   "vectie/moontown/supervisor_setup",
   "vectie/moontown/marketplace_runtime_bridge",
   "vectie/moontown/town_application",

@@ -182,8 +182,13 @@ pub async fn AccountApplication::create_visitor_session(
   opaque_token : String,
   visitor_id : String,
   now_ms~ : UInt64,
-  ttl_ms? : UInt64 = 86400000UL,
+  ttl_ms? : UInt64 = 0UL,
 ) -> VisitorSessionResult {
+  let ttl_ms = if ttl_ms == 0UL {
+    @system_settings.current_system_settings().visitor_session_ttl_ms.to_uint64()
+  } else {
+    ttl_ms
+  }
   account_store_mutex.acquire()
   defer account_store_mutex.release()
   let state = self.prune_state(self.load_state(), now_ms)

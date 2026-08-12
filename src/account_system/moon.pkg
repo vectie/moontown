@@ -5,6 +5,7 @@ import {
   "moonbitlang/core/json",
   "moonbitlang/x/crypto",
   "vectie/moontown/support",
+  "vectie/moontown/system_settings",
 }
 
 supported_targets = "native"

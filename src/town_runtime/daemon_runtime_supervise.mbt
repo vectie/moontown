@@ -6,6 +6,17 @@ pub async fn daemon_supervise_saved_town(
   sleep_ms? : Int = 30_000,
   stale_after_ms? : UInt64 = 900_000UL,
 ) -> String {
+  let settings = @system_settings_runtime.load_and_install_system_settings()
+  let sleep_ms = if sleep_ms == 30_000 {
+    settings.daemon_poll_interval_ms
+  } else {
+    sleep_ms
+  }
+  let stale_after_ms = if stale_after_ms == 900_000UL {
+    settings.daemon_stale_after_ms.to_uint64()
+  } else {
+    stale_after_ms
+  }
   let command = @daemon_runtime.daemon_command_or_current(command)
   let run_id = @daemon_runtime.daemon_run_id("supervisor")
   let supervisor_pid = @daemon_runtime.daemon_current_process_pid(snapshot_path)

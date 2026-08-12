@@ -28,6 +28,8 @@ import {
   "vectie/moontown/roles",
   "vectie/moontown/scheduler",
   "vectie/moontown/storage",
+  "vectie/moontown/system_settings",
+  "vectie/moontown/system_settings_runtime",
   "vectie/moontown/ui",
   "moonbitlang/async",
   "moonbitlang/async/fs",

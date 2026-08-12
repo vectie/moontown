@@ -183,6 +183,11 @@ fn http_method_is_post(request_method : @http.RequestMethod) -> Bool {
 }
 
 ///|
+fn system_settings_update_is_revision_conflict(detail : String) -> Bool {
+  detail.contains("system settings changed since this page loaded")
+}
+
+///|
 async fn send_text(
   conn : @http.ServerConnection,
   code : Int,
@@ -783,7 +788,8 @@ fn bind_miniapp_supervisor_draft(
 ) -> @supervisor_setup.SupervisorProfileDraft raise {
   if draft.book_ids.length() != 1 ||
     !catalog_contains_book(catalog, draft.book_ids[0]) ||
-    draft.max_active_workers != 3 {
+    draft.max_active_workers !=
+    @system_settings.current_system_settings().supervisor_max_active_workers {
     fail("supervisor binding must select one currently installed MoonBook")
   }
   let book_id = draft.book_ids[0]
@@ -822,6 +828,16 @@ async fn handle_request(
     send_json(conn, 200, @town_contract.miniapp_contract())
     return
   }
+  ignore(@system_settings_runtime.load_and_install_system_settings()) catch {
+    error => {
+      send_json(conn, 500, {
+        "ok": false,
+        "error": "system_settings_invalid",
+        "message": "\{error}",
+      })
+      return
+    }
+  }
   if path == @town_contract.miniapp_visitor_session_path() {
     if !require_json_write(request, conn) {
       return
@@ -845,12 +861,55 @@ async fn handle_request(
     send_json(conn, 201, {
       "ok": true,
       "session_token": result.opaque_token,
-      "expires_in_ms": 86400000,
+      "expires_in_ms": @system_settings.current_system_settings().visitor_session_ttl_ms,
       "account": @account_system.account_context_projection(result.context),
     })
     return
   }
   guard require_account_context(request, conn) is Some(account_context) else {
+    return
+  }
+  if path == @town_contract.miniapp_system_settings_path() {
+    if !require_account_entitlement(
+        account_context,
+        @account_system.ManageSystemHealth,
+        conn,
+      ) {
+      return
+    }
+    if request.meth is @http.Get {
+      let snapshot = @system_settings_runtime.system_settings_management_snapshot()
+      send_json(conn, 200, { "ok": true, "system_settings": snapshot })
+      return
+    }
+    if !require_json_write(request, conn) {
+      return
+    }
+    let updated = @system_settings_runtime.update_system_settings(
+      body.read_all().text(),
+      actor_id=account_context.user_id,
+      now_ms=@env.now(),
+    ) catch {
+      error => {
+        let detail = "\{error}"
+        let stale_revision = system_settings_update_is_revision_conflict(detail)
+        send_json(conn, if stale_revision { 409 } else { 400 }, {
+          "ok": false,
+          "error": if stale_revision {
+            "system_settings_revision_conflict"
+          } else {
+            "system_settings_validation_failed"
+          },
+          "message": if stale_revision {
+            "System settings changed since this page loaded. Refresh and retry."
+          } else {
+            "The proposed settings are invalid. Review the allowed ranges and related values."
+          },
+        })
+        return
+      }
+    }
+    send_json(conn, 200, { "ok": true, "system_settings": updated })
     return
   }
   let marketplace_handled = handle_marketplace_request(
@@ -1595,6 +1654,7 @@ async fn handle_request(
 
 ///|
 async fn main {
+  let settings = @system_settings_runtime.load_and_install_system_settings()
   let bind = miniapp_bind()
   let plan = configured_account_plan()
   let roles = configured_platform_roles()
@@ -1608,5 +1668,8 @@ async fn main {
   println(
     "MoonTown mini-app adapter listening at http://\{bind}; suite=\{@storage.moontown_active_workspace_root()}",
   )
-  server.run_forever(handle_request, max_connections=32)
+  server.run_forever(
+    handle_request,
+    max_connections=settings.http_max_connections,
+  )
 }

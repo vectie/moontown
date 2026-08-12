@@ -134,6 +134,20 @@ test "marketplace HTTP method classification keeps reads and writes separate" {
 }
 
 ///|
+test "settings update errors reserve conflict for stale revisions" {
+  assert_true(
+    system_settings_update_is_revision_conflict(
+      "system settings changed since this page loaded; refresh and retry",
+    ),
+  )
+  assert_false(
+    system_settings_update_is_revision_conflict(
+      "max_live_external_executions cannot exceed max_concurrent_tasks",
+    ),
+  )
+}
+
+///|
 test "marketplace query decoder preserves UTF-8 search terms" {
   assert_eq(
     request_query_parameter(

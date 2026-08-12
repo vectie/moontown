@@ -40,5 +40,5 @@ async fn research_bootstrap_plan(
 
 ///|
 fn research_bootstrap_task_limit() -> Int {
-  1
+  @system_settings.current_system_settings().research_bootstrap_task_limit
 }

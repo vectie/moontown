@@ -64,7 +64,8 @@ fn append_account_audit(
     occurred_at_ms: now_ms,
     version: state.version + 1,
   })
-  while audit_events.length() > 500 {
+  while audit_events.length() >
+        @system_settings.current_system_settings().account_audit_capacity {
     ignore(audit_events.remove(0))
   }
   { ..state, audit_events, version: state.version + 1 }
@@ -322,8 +323,13 @@ pub async fn AccountApplication::admin_create_account(
   session_id : String,
   opaque_token : String,
   now_ms~ : UInt64,
-  ttl_ms? : UInt64 = 604800000UL,
+  ttl_ms? : UInt64 = 0UL,
 ) -> VisitorSessionResult {
+  let ttl_ms = if ttl_ms == 0UL {
+    @system_settings.current_system_settings().managed_session_ttl_ms.to_uint64()
+  } else {
+    ttl_ms
+  }
   account_store_mutex.acquire()
   defer account_store_mutex.release()
   let state = self.prune_state(self.load_state(), now_ms)
@@ -486,8 +492,13 @@ pub async fn AccountApplication::enterprise_upsert_member(
   session_id : String,
   opaque_token : String,
   now_ms~ : UInt64,
-  ttl_ms? : UInt64 = 604800000UL,
+  ttl_ms? : UInt64 = 0UL,
 ) -> VisitorSessionResult {
+  let ttl_ms = if ttl_ms == 0UL {
+    @system_settings.current_system_settings().managed_session_ttl_ms.to_uint64()
+  } else {
+    ttl_ms
+  }
   account_store_mutex.acquire()
   defer account_store_mutex.release()
   let state = self.prune_state(self.load_state(), now_ms)

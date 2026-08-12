@@ -851,7 +851,9 @@ fn route_projected_work_item(
 }
 
 ///|
-let energy_valley_runtime_history_projection_limit = 128
+fn energy_valley_runtime_history_projection_limit() -> Int {
+  @system_settings.current_system_settings().runtime_history_projection_limit
+}
 
 ///|
 fn projected_history_compare(left : Json, right : Json) -> Int {
@@ -878,7 +880,7 @@ fn projected_history_compare(left : Json, right : Json) -> Int {
 fn bounded_projected_history(source : ArrayView[Json]) -> Array[Json] {
   let history = source.to_owned()
   history.sort_by(projected_history_compare)
-  while history.length() > energy_valley_runtime_history_projection_limit {
+  while history.length() > energy_valley_runtime_history_projection_limit() {
     ignore(history.remove(0))
   }
   history

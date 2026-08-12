@@ -3,6 +3,7 @@ import {
   "vectie/moontown/book_quality",
   "vectie/moontown/runtime_error_policy",
   "vectie/moontown/standing_watch_contracts",
+  "vectie/moontown/system_settings",
 }
 
 supported_targets = "native"

@@ -101,7 +101,7 @@ fn standing_goal_dispatch_index(
 
 ///|
 fn max_standing_goal_dispatches_per_tick() -> Int {
-  3
+  @system_settings.current_system_settings().standing_goal_dispatches_per_tick
 }
 
 ///|

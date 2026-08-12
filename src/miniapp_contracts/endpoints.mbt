@@ -91,6 +91,19 @@ pub fn miniapp_contract_endpoints() -> Array[MiniappEndpoint] {
       summary="Provision, activate, or deactivate a platform account.",
     ),
     miniapp_endpoint(
+      id="system-settings",
+      http_method="GET",
+      path="/miniapp/system/settings",
+      summary="Return grouped operational settings for platform administrators.",
+    ),
+    miniapp_endpoint(
+      id="system-settings-change",
+      http_method="POST",
+      path="/miniapp/system/settings",
+      writes=true,
+      summary="Validate and persist grouped operational settings.",
+    ),
+    miniapp_endpoint(
       id="me",
       http_method="GET",
       path="/me",

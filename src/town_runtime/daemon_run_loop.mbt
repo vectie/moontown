@@ -7,6 +7,12 @@ pub async fn daemon_run_saved_town(
   preserve_supervisor? : Bool = false,
   inline_under_supervisor? : Bool = false,
 ) -> String {
+  let settings = @system_settings_runtime.load_and_install_system_settings()
+  let sleep_ms = if sleep_ms == 30_000 {
+    settings.daemon_poll_interval_ms
+  } else {
+    sleep_ms
+  }
   let log_path = @daemon_runtime.default_daemon_log_path(snapshot_path~)
   let observed_worker_pid = @daemon_runtime.daemon_current_process_pid(
     snapshot_path,
@@ -147,7 +153,9 @@ async fn run_daemon_tick_with_heartbeat(
     let mut done = false
     let heartbeat = group.spawn(() => {
       while !done {
-        @async.sleep(10_000)
+        @async.sleep(
+          @system_settings.current_system_settings().daemon_heartbeat_interval_ms,
+        )
         if !done {
           @daemon_runtime.touch_daemon_heartbeat(
             snapshot_path,

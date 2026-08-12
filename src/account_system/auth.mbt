@@ -194,8 +194,9 @@ pub fn account_prune_sessions(
     session.expires_at_ms > now_ms &&
     account_principal_by_id(state, session.principal_id) is Some(_)
   })
-  let sessions = if active_sessions.length() > 1000 {
-    active_sessions[active_sessions.length() - 1000:].to_owned()
+  let limit = @system_settings.current_system_settings().account_max_active_sessions
+  let sessions = if active_sessions.length() > limit {
+    active_sessions[active_sessions.length() - limit:].to_owned()
   } else {
     active_sessions
   }

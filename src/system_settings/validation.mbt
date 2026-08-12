@@ -1,0 +1,207 @@
+///|
+fn require_setting_range(
+  key : String,
+  value : Int,
+  minimum : Int,
+  maximum : Int,
+) -> Unit raise {
+  if value < minimum || value > maximum {
+    fail("`\{key}` must be between \{minimum} and \{maximum}")
+  }
+}
+
+///|
+pub fn validate_system_settings(settings : SystemSettings) -> Unit raise {
+  require_setting_range(
+    "town_heartbeat_seconds",
+    settings.town_heartbeat_seconds,
+    5,
+    300,
+  )
+  require_setting_range(
+    "max_concurrent_tasks",
+    settings.max_concurrent_tasks,
+    1,
+    256,
+  )
+  require_setting_range(
+    "max_live_external_executions",
+    settings.max_live_external_executions,
+    1,
+    64,
+  )
+  require_setting_range(
+    "external_execution_stale_window_ticks",
+    settings.external_execution_stale_window_ticks,
+    5,
+    10_000,
+  )
+  require_setting_range(
+    "polled_execution_stale_window_ticks",
+    settings.polled_execution_stale_window_ticks,
+    5,
+    10_000,
+  )
+  require_setting_range(
+    "detached_execution_stale_window_ticks",
+    settings.detached_execution_stale_window_ticks,
+    5,
+    10_000,
+  )
+  require_setting_range(
+    "standing_watch_stale_window_ticks",
+    settings.standing_watch_stale_window_ticks,
+    5,
+    100_000,
+  )
+  require_setting_range(
+    "standing_goal_dispatches_per_tick",
+    settings.standing_goal_dispatches_per_tick,
+    1,
+    64,
+  )
+  require_setting_range(
+    "research_bootstrap_task_limit",
+    settings.research_bootstrap_task_limit,
+    1,
+    32,
+  )
+  require_setting_range(
+    "daemon_poll_interval_ms",
+    settings.daemon_poll_interval_ms,
+    1_000,
+    300_000,
+  )
+  require_setting_range(
+    "daemon_stale_after_ms",
+    settings.daemon_stale_after_ms,
+    30_000,
+    86_400_000,
+  )
+  require_setting_range(
+    "daemon_heartbeat_interval_ms",
+    settings.daemon_heartbeat_interval_ms,
+    1_000,
+    300_000,
+  )
+  require_setting_range(
+    "moonclaw_import_timeout_ms",
+    settings.moonclaw_import_timeout_ms,
+    1_000,
+    600_000,
+  )
+  require_setting_range(
+    "supervisor_max_active_workers",
+    settings.supervisor_max_active_workers,
+    1,
+    32,
+  )
+  require_setting_range(
+    "account_max_active_sessions",
+    settings.account_max_active_sessions,
+    1,
+    100_000,
+  )
+  require_setting_range(
+    "account_audit_capacity",
+    settings.account_audit_capacity,
+    50,
+    100_000,
+  )
+  require_setting_range(
+    "visitor_session_ttl_ms",
+    settings.visitor_session_ttl_ms,
+    60_000,
+    2_000_000_000,
+  )
+  require_setting_range(
+    "managed_session_ttl_ms",
+    settings.managed_session_ttl_ms,
+    60_000,
+    2_000_000_000,
+  )
+  require_setting_range(
+    "frontend_snapshot_refresh_interval_ms",
+    settings.frontend_snapshot_refresh_interval_ms,
+    1_000,
+    60_000,
+  )
+  require_setting_range(
+    "frontend_runtime_stale_after_ms",
+    settings.frontend_runtime_stale_after_ms,
+    5_000,
+    3_600_000,
+  )
+  require_setting_range(
+    "runtime_history_projection_limit",
+    settings.runtime_history_projection_limit,
+    16,
+    4_096,
+  )
+  require_setting_range(
+    "operator_request_projection_limit",
+    settings.operator_request_projection_limit,
+    16,
+    10_000,
+  )
+  require_setting_range(
+    "watcher_record_projection_limit",
+    settings.watcher_record_projection_limit,
+    16,
+    10_000,
+  )
+  require_setting_range(
+    "analytics_ring_capacity",
+    settings.analytics_ring_capacity,
+    20,
+    10_000,
+  )
+  require_setting_range(
+    "town_life_phone_capacity",
+    settings.town_life_phone_capacity,
+    10,
+    2_000,
+  )
+  require_setting_range(
+    "town_life_report_capacity",
+    settings.town_life_report_capacity,
+    10,
+    2_000,
+  )
+  require_setting_range(
+    "recent_event_feed_limit",
+    settings.recent_event_feed_limit,
+    1,
+    100,
+  )
+  require_setting_range(
+    "town_chronicle_runtime_limit",
+    settings.town_chronicle_runtime_limit,
+    1,
+    100,
+  )
+  require_setting_range(
+    "map_lab_entity_result_limit",
+    settings.map_lab_entity_result_limit,
+    5,
+    1_000,
+  )
+  require_setting_range(
+    "http_max_connections",
+    settings.http_max_connections,
+    4,
+    1_024,
+  )
+  if settings.max_live_external_executions > settings.max_concurrent_tasks {
+    fail("max_live_external_executions cannot exceed max_concurrent_tasks")
+  }
+  if settings.daemon_stale_after_ms < settings.daemon_poll_interval_ms * 2 {
+    fail("daemon_stale_after_ms must be at least twice daemon_poll_interval_ms")
+  }
+  if settings.frontend_runtime_stale_after_ms <
+    settings.frontend_snapshot_refresh_interval_ms * 2 {
+    fail(
+      "frontend_runtime_stale_after_ms must be at least twice frontend_snapshot_refresh_interval_ms",
+    )
+  }
+}

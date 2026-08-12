@@ -89,15 +89,16 @@ pub fn pollable_execution_status(status : TaskExecutionStatus) -> Bool {
 pub fn polled_execution_stale_window_ticks(
   execution : TaskExecutionRecord,
 ) -> Int {
+  let settings = @system_settings.current_system_settings()
   match execution.run_id {
-    Some(_) => 120
-    None => 15
+    Some(_) => settings.polled_execution_stale_window_ticks
+    None => settings.detached_execution_stale_window_ticks
   }
 }
 
 ///|
 pub fn external_execution_stale_window_ticks() -> Int {
-  30
+  @system_settings.current_system_settings().external_execution_stale_window_ticks
 }
 
 ///|
@@ -133,7 +134,7 @@ pub fn live_external_execution_count(state : TownState) -> Int {
 
 ///|
 pub fn max_live_external_executions() -> Int {
-  8
+  @system_settings.current_system_settings().max_live_external_executions
 }
 
 ///|

@@ -45,6 +45,24 @@ pub fn empty_state(config : TownConfig) -> TownState {
   { config, books: [], workers: [], tasks: [], executions: [], events: [] }
 }
 
+///| Apply the authoritative process settings to the persisted town metadata.
+
+///| This keeps the dashboard's configured capacity aligned with the limits the
+
+///|
+/// scheduler actually enforces.
+pub fn TownState::with_current_system_settings(self : TownState) -> TownState {
+  let settings = @system_settings.current_system_settings()
+  {
+    ..self,
+    config: {
+      ..self.config,
+      heartbeat_seconds: settings.town_heartbeat_seconds,
+      max_concurrent_tasks: settings.max_concurrent_tasks,
+    },
+  }
+}
+
 ///|
 pub fn TownState::register_book(self : TownState, book : BookRef) -> Unit {
   self.books.push(book)

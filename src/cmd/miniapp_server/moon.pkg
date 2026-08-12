@@ -12,6 +12,8 @@ import {
   "vectie/moontown/account_system",
   "vectie/moontown/storage",
   "vectie/moontown/supervisor_setup",
+  "vectie/moontown/system_settings",
+  "vectie/moontown/system_settings_runtime",
   "vectie/moontown/marketplace_runtime_bridge",
   "vectie/moontown/town_application",
   "vectie/moontown/town_contract",

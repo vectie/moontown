@@ -28,7 +28,7 @@ async fn prepare_daemon_tick_context(
   let watcher_records_for_floor = load_watcher_records_for_goals(
     snapshot_path, standing_goals,
   )
-  let state = load_or_create_saved_state(path=snapshot_path, book_catalog_path~)
+  let state = load_or_create_saved_state(path=snapshot_path, book_catalog_path~).with_current_system_settings()
   let loaded_daemon = @daemon_runtime.load_daemon_state(paths.daemon_path)
   let tick_floor = @runtime_status.daemon_tick_floor(
     snapshot_path,

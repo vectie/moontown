@@ -295,10 +295,14 @@ async fn serve_book_output(
 }
 
 ///|
-let operator_request_projection_limit = 256
+fn operator_request_projection_limit() -> Int {
+  @system_settings.current_system_settings().operator_request_projection_limit
+}
 
 ///|
-let watcher_record_projection_limit = 256
+fn watcher_record_projection_limit() -> Int {
+  @system_settings.current_system_settings().watcher_record_projection_limit
+}
 
 ///|
 fn push_json_projection_tail(
@@ -334,7 +338,7 @@ fn watcher_record_projection_compare(left : Json, right : Json) -> Int {
 fn push_watcher_record_projection(rows : Array[Json], value : Json) -> Unit {
   rows.push(value)
   rows.sort_by(watcher_record_projection_compare)
-  while rows.length() > watcher_record_projection_limit {
+  while rows.length() > watcher_record_projection_limit() {
     ignore(rows.remove(0))
   }
 }
@@ -350,7 +354,7 @@ async fn operator_requests_json() -> Json {
       continue
     }
     let value = @json.parse(trimmed) catch { _ => continue }
-    push_json_projection_tail(rows, value, operator_request_projection_limit)
+    push_json_projection_tail(rows, value, operator_request_projection_limit())
   }
   rows.to_json()
 }
@@ -403,6 +407,7 @@ fn runtime_snapshot_source(path : String) -> (String, String)? {
     "/standing-goals.json" => Some((root + "/standing-goals.json", "[]"))
     "/book-template-requests.json" =>
       Some((root + "/book-template-requests.json", "{\"requests\":[]}"))
+    "/system-settings.json" => Some(("", ""))
     _ => None
   }
 }
@@ -414,6 +419,14 @@ async fn serve_runtime_snapshot(
 ) -> Bool {
   guard runtime_snapshot_source(path) is Some((source, fallback)) else {
     return false
+  }
+  if path == "/system-settings.json" {
+    send_json(
+      conn,
+      200,
+      @system_settings_runtime.public_system_settings_snapshot(),
+    )
+    return true
   }
   if path == "/town.json" && !source.is_empty() {
     let text = @support.read_text_or_empty(source)
@@ -814,6 +827,7 @@ async fn handle_request(
 
 ///|
 async fn main {
+  let settings = @system_settings_runtime.load_and_install_system_settings()
   let server = @http.Server(
     @socket.Addr::parse("127.0.0.1:17842"),
     reuse_addr=true,
@@ -824,5 +838,8 @@ async fn main {
   // Browsers fetch the entry, MoonBit bundle, styles, sprites, and runtime
   // snapshots concurrently. A single connection stalls bootstrap behind the
   // first keep-alive request, so allow a small bounded local connection pool.
-  server.run_forever(handle_request, max_connections=32)
+  server.run_forever(
+    handle_request,
+    max_connections=settings.http_max_connections,
+  )
 }
