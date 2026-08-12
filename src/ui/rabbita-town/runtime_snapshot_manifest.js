@@ -5,6 +5,12 @@ import {
 
 export const RUNTIME_TEXT_SNAPSHOTS = [
   {
+    url: './system-settings.json',
+    jsonGlobal: '__moontownSystemSettingsJson',
+    versionGlobal: '__moontownSystemSettingsVersion',
+    fallback: '{"schema":"moontown.system-settings.v1","revision":1,"settings":{}}',
+  },
+  {
     url: './energy-valley-runtime.json',
     jsonGlobal: '__moontownEnergyValleyRuntimeJson',
     versionGlobal: '__moontownEnergyValleyRuntimeVersion',

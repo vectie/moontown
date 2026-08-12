@@ -12,7 +12,15 @@ import {
   loadJsonGlobal,
   refreshTextSnapshot,
 } from './runtime_snapshot_fetch.js'
-const RUNTIME_REFRESH_INTERVAL_MS = 5000
+function runtimeRefreshIntervalMs() {
+  try {
+    const snapshot = JSON.parse(globalThis.__moontownSystemSettingsJson || '{}')
+    const value = snapshot?.settings?.frontend_snapshot_refresh_interval_ms
+    return Number.isSafeInteger(value) && value >= 1000 ? value : 5000
+  } catch {
+    return 5000
+  }
+}
 
 export async function refreshRuntimeSnapshots() {
   await Promise.all(RUNTIME_TEXT_SNAPSHOTS.map(refreshTextSnapshot))
@@ -24,7 +32,7 @@ export function startRuntimeSnapshotRefresh() {
   }
   globalThis.__moontownTownSnapshotRefreshTimer = setInterval(
     refreshRuntimeSnapshots,
-    RUNTIME_REFRESH_INTERVAL_MS,
+    runtimeRefreshIntervalMs(),
   )
 }
 

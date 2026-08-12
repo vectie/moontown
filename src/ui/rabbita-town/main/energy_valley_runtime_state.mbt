@@ -5,7 +5,7 @@ fn energy_valley_runtime_schema() -> String {
 
 ///|
 fn energy_valley_runtime_stale_after_ms() -> Double {
-  75000.0
+  frontend_setting_int("frontend_runtime_stale_after_ms", 75_000).to_double()
 }
 
 ///|

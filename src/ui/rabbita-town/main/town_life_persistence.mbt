@@ -1,8 +1,12 @@
 ///|
-let town_life_phone_capacity = 80
+let town_life_phone_capacity : Int = frontend_setting_int(
+  "town_life_phone_capacity", 80,
+)
 
 ///|
-let town_life_report_capacity = 30
+let town_life_report_capacity : Int = frontend_setting_int(
+  "town_life_report_capacity", 30,
+)
 
 ///|
 fn town_life_default_save() -> TownLifeSave {

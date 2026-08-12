@@ -393,6 +393,246 @@ function userRow(user, refresh) {
   return row
 }
 
+export function systemSettingsShape(snapshot) {
+  return {
+    revision: Number(snapshot?.revision || 1),
+    values: { ...(snapshot?.values || snapshot?.settings || {}) },
+    descriptors: Array.isArray(snapshot?.settings)
+      ? snapshot.settings
+      : Array.isArray(snapshot?.catalog)
+        ? snapshot.catalog
+        : [],
+    auditEvents: Array.isArray(snapshot?.audit_events) ? snapshot.audit_events : [],
+  }
+}
+
+export function validateSystemSettingRelationships(values) {
+  const errors = new Map()
+  if (values.max_live_external_executions > values.max_concurrent_tasks) {
+    errors.set(
+      'max_live_external_executions',
+      'Live external executions cannot exceed concurrent town tasks.',
+    )
+  }
+  if (values.daemon_stale_after_ms < values.daemon_poll_interval_ms * 2) {
+    errors.set(
+      'daemon_stale_after_ms',
+      'The daemon stale threshold must be at least twice the poll interval.',
+    )
+  }
+  if (
+    values.frontend_runtime_stale_after_ms <
+    values.frontend_snapshot_refresh_interval_ms * 2
+  ) {
+    errors.set(
+      'frontend_runtime_stale_after_ms',
+      'The runtime stale threshold must be at least twice the refresh interval.',
+    )
+  }
+  return errors
+}
+
+function settingModeLabel(mode) {
+  return {
+    immediate: 'Immediate',
+    'next-tick': 'Next tick',
+    'reload-required': 'Reload',
+    'restart-required': 'Restart',
+  }[mode] || mode
+}
+
+function renderSystemSettings(root, snapshot, refresh, readOnly = false) {
+  const model = systemSettingsShape(snapshot)
+  if (!model.descriptors.length) {
+    root.append(resultPanel('Settings catalog unavailable', 'The service returned no configurable operational settings.'))
+    return
+  }
+  const form = node('form', 'system-settings-form')
+  const controls = new Map()
+  const originalValues = { ...model.values }
+  const groups = new Map()
+  for (const descriptor of model.descriptors) {
+    if (!groups.has(descriptor.group)) groups.set(descriptor.group, [])
+    groups.get(descriptor.group).push(descriptor)
+  }
+
+  const intro = append(
+    node('section', 'system-settings-intro'),
+    append(
+      node('div', 'system-settings-intro-copy'),
+      node('h2', '', 'Operational configuration'),
+      node(
+        'p',
+        '',
+        'Change runtime policy from one authoritative registry. Every value is range-checked, revision-protected, and audited.',
+      ),
+    ),
+    metric('Revision', model.revision),
+    metric('Managed settings', model.descriptors.length),
+    metric('Groups', groups.size),
+  )
+  form.append(intro)
+
+  const updateFormState = () => {
+    const values = { ...model.values }
+    for (const [key, control] of controls) values[key] = Number(control.value)
+    const relationshipErrors = validateSystemSettingRelationships(values)
+    let valid = true
+    let changed = 0
+    for (const [key, control] of controls) {
+      const descriptor = model.descriptors.find(item => item.key === key)
+      const value = Number(control.value)
+      let message = relationshipErrors.get(key) || ''
+      if (!Number.isSafeInteger(value)) message = 'Enter a whole number.'
+      else if (value < descriptor.minimum || value > descriptor.maximum) {
+        message = `Use a value from ${descriptor.minimum} to ${descriptor.maximum}.`
+      }
+      control.setCustomValidity(message)
+      control.closest('.system-setting-row')?.classList.toggle('has-error', Boolean(message))
+      const error = document.getElementById(`setting-error-${key}`)
+      if (error) error.textContent = message
+      valid &&= !message
+      if (value !== originalValues[key]) changed += 1
+    }
+    const save = form.querySelector('[data-settings-save]')
+    const dirty = form.querySelector('[data-settings-dirty]')
+    if (save) save.disabled = readOnly || !valid || changed === 0
+    if (dirty) dirty.textContent = changed ? `${changed} unsaved change${changed === 1 ? '' : 's'}` : 'No unsaved changes'
+    return { valid, changed, values }
+  }
+
+  let groupIndex = 0
+  for (const [groupName, descriptors] of groups) {
+    const details = node('details', 'system-settings-group')
+    details.open = groupIndex < 2
+    const summary = append(
+      node('summary', 'system-settings-group-summary'),
+      append(
+        node('span', 'system-settings-group-title'),
+        node('strong', '', groupName),
+        node('span', '', `${descriptors.length} settings`),
+      ),
+      node('span', 'account-management-badge', groupIndex < 2 ? 'Open' : 'Review'),
+    )
+    const list = node('div', 'system-settings-list')
+    for (const descriptor of descriptors) {
+      const input = document.createElement('input')
+      input.type = 'number'
+      input.id = `setting-${descriptor.key}`
+      input.name = descriptor.key
+      input.value = String(model.values[descriptor.key] ?? descriptor.value)
+      input.min = String(descriptor.minimum)
+      input.max = String(descriptor.maximum)
+      input.step = '1'
+      input.inputMode = 'numeric'
+      input.disabled = readOnly || descriptor.editable === false
+      input.className = 'system-setting-input'
+      input.setAttribute('aria-describedby', `setting-help-${descriptor.key} setting-error-${descriptor.key}`)
+      input.addEventListener('input', updateFormState)
+      input.addEventListener('blur', updateFormState)
+      controls.set(descriptor.key, input)
+      const row = append(
+        node('div', 'system-setting-row'),
+        append(
+          node('div', 'system-setting-copy'),
+          node('label', 'system-setting-label', descriptor.label),
+          node('p', 'system-setting-description', descriptor.description),
+          append(
+            node('div', 'system-setting-meta'),
+            node('code', '', descriptor.key),
+            node('span', 'account-management-badge', settingModeLabel(descriptor.apply_mode)),
+          ),
+          node('span', 'system-setting-error', '',),
+        ),
+        append(
+          node('div', 'system-setting-control'),
+          input,
+          node('span', 'system-setting-unit', descriptor.unit),
+        ),
+      )
+      row.querySelector('.system-setting-description').id = `setting-help-${descriptor.key}`
+      row.querySelector('.system-setting-label').htmlFor = input.id
+      const error = row.querySelector('.system-setting-error')
+      error.id = `setting-error-${descriptor.key}`
+      error.setAttribute('aria-live', 'polite')
+      list.append(row)
+    }
+    details.append(summary, list)
+    form.append(details)
+    groupIndex += 1
+  }
+
+  const saveBar = append(
+    node('div', 'system-settings-savebar'),
+    append(
+      node('div', 'system-settings-save-state'),
+      node('strong', '', readOnly ? 'Preview mode' : 'Ready to configure'),
+      node('span', '', readOnly ? 'Sign in as a platform administrator to save.' : 'No unsaved changes'),
+    ),
+  )
+  saveBar.querySelector('.system-settings-save-state span').dataset.settingsDirty = ''
+  const discard = button('Discard changes', () => {
+    for (const [key, control] of controls) control.value = String(originalValues[key])
+    updateFormState()
+    setStatus('Unsaved settings were discarded.')
+  }, true)
+  discard.disabled = readOnly
+  const save = node('button', 'account-management-button', 'Save settings')
+  save.type = 'submit'
+  save.dataset.settingsSave = ''
+  save.disabled = true
+  saveBar.append(discard, save)
+  form.append(saveBar)
+
+  if (model.auditEvents.length) {
+    const audit = node('details', 'system-settings-audit')
+    audit.append(node('summary', '', `Recent settings changes (${model.auditEvents.length})`))
+    const events = node('div', 'account-management-list')
+    for (const event of model.auditEvents.slice(0, 12)) {
+      events.append(
+        append(
+          node('div', 'account-management-row'),
+          append(
+            node('div', 'account-management-row-main'),
+            node('strong', '', `Revision ${event.revision}`),
+            node('span', '', event.actor_id),
+          ),
+          node('span', 'account-management-badge', `${event.changed_keys.length} changes`),
+        ),
+      )
+    }
+    audit.append(events)
+    form.append(audit)
+  }
+
+  form.addEventListener('submit', async event => {
+    event.preventDefault()
+    const state = updateFormState()
+    if (!state.valid || !state.changed || !form.reportValidity()) return
+    save.disabled = true
+    setStatus(`Saving ${state.changed} system setting${state.changed === 1 ? '' : 's'}…`)
+    try {
+      const result = await request('/miniapp/system/settings', {
+        method: 'POST',
+        body: JSON.stringify({ expected_revision: model.revision, values: state.values }),
+      })
+      globalThis.__moontownSystemSettingsJson = JSON.stringify({
+        schema: result.system_settings.schema,
+        revision: result.system_settings.revision,
+        settings: result.system_settings.values,
+      })
+      setStatus('System settings saved. Reload or restart badges identify deferred changes.', 'success')
+      await refresh()
+    } catch (error) {
+      setStatus(error.message, 'error')
+      save.disabled = false
+    }
+  })
+
+  root.append(form)
+  updateFormState()
+}
+
 function renderAdmin(root, admin, surface, refresh) {
   root.append(
     append(
@@ -444,6 +684,13 @@ function renderAdmin(root, admin, surface, refresh) {
       )
     }
     root.append(list)
+  } else if (surface === 'analytics') {
+    root.append(
+      resultPanel(
+        'Authoritative platform totals',
+        'These counts come from durable account records. Product engagement analytics remain separate from account administration.',
+      ),
+    )
   }
 }
 
@@ -460,6 +707,19 @@ async function hydrateManagement() {
   const surface = requestedSurface(context)
   const demo = new URLSearchParams(globalThis.location?.search || '').get('demo') === '1'
   if (demo) {
+    if (context.account_kind === 'admin' && surface === 'settings') {
+      setStatus('Loading the read-only settings catalog…')
+      try {
+        const response = await fetch('./system-settings.json', { cache: 'no-store' })
+        const snapshot = await response.json()
+        renderSystemSettings(root, snapshot, hydrateManagement, true)
+        setStatus('Preview mode shows effective defaults but cannot save changes.')
+      } catch (error) {
+        root.append(resultPanel('Settings preview unavailable', error.message))
+        setStatus(error.message, 'error')
+      }
+      return
+    }
     root.append(
       resultPanel(
         'Preview only',
@@ -481,8 +741,13 @@ async function hydrateManagement() {
       renderEnterprise(root, result.enterprise, surface, refresh)
     } else if (context.account_kind === 'admin') {
       const refresh = hydrateManagement
-      const result = await request('/miniapp/account/admin')
-      renderAdmin(root, result.admin, surface, refresh)
+      if (surface === 'settings') {
+        const result = await request('/miniapp/system/settings')
+        renderSystemSettings(root, result.system_settings, refresh)
+      } else {
+        const result = await request('/miniapp/account/admin')
+        renderAdmin(root, result.admin, surface, refresh)
+      }
     } else {
       throw new Error('The server returned an unsupported account kind.')
     }

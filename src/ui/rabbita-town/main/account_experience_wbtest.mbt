@@ -135,3 +135,30 @@ test "management surfaces render a live status region" {
   assert_true(html.contains("id=\"account-management-root\""))
   assert_true(html.contains("aria-live=\"polite\""))
 }
+
+///|
+test "administrator navigation and heading expose system settings" {
+  let navigation = @rabbita.render_to_string(
+    @rabbita.static_cell(
+      render_account_navigation(
+        account_experience_test_value(
+          "admin",
+          roles=["platform-admin"],
+          home_surface="admin-console",
+        ),
+      ),
+    ),
+  )
+  assert_true(navigation.contains("admin=settings"))
+  let surface = @rabbita.render_to_string(
+    @rabbita.static_cell(render_account_management_surface("settings")),
+  )
+  assert_true(surface.contains("System settings"))
+}
+
+///|
+test "administrator navigation highlights the selected management surface" {
+  assert_true(admin_navigation_item_active("Settings", "settings"))
+  assert_false(admin_navigation_item_active("Overview", "settings"))
+  assert_true(admin_navigation_item_active("Overview", ""))
+}

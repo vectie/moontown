@@ -89,7 +89,9 @@ fn analytics_event_label(event : String) -> String {
 }
 
 ///|
-let analytics_ring_capacity = 160
+let analytics_ring_capacity : Int = frontend_setting_int(
+  "analytics_ring_capacity", 160,
+)
 
 ///|
 /// Append one validated local activity record. Unknown names are rejected so

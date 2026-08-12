@@ -301,7 +301,9 @@ fn town_chronicle_entry_for_task(
 }
 
 ///|
-let town_chronicle_runtime_limit = 6
+let town_chronicle_runtime_limit : Int = frontend_setting_int(
+  "town_chronicle_runtime_limit", 6,
+)
 
 ///|
 fn town_chronicle_runtime_entries(

@@ -915,7 +915,9 @@ fn map_lab_candidate_matches(
 }
 
 ///|
-let map_lab_entity_result_limit = 40
+let map_lab_entity_result_limit : Int = frontend_setting_int(
+  "map_lab_entity_result_limit", 40,
+)
 
 ///|
 fn map_lab_add_candidate_row(

@@ -215,6 +215,11 @@ fn account_navigation_items(
           primary: false,
         },
         {
+          label: "Settings",
+          href: "./operations.html?admin=settings",
+          primary: false,
+        },
+        {
           label: "Audit",
           href: "./operations.html?admin=audit",
           primary: false,
@@ -254,8 +259,21 @@ fn account_avatar_label(display_name : String) -> String {
 }
 
 ///|
+fn admin_navigation_item_active(label : String, surface : String) -> Bool {
+  match surface {
+    "users" => label == "Users"
+    "tenants" => label == "Organizations"
+    "analytics" => label == "Analytics"
+    "settings" => label == "Settings"
+    "audit" => label == "Audit"
+    _ => label == "Overview"
+  }
+}
+
+///|
 fn render_account_navigation(account : AccountExperience) -> @rabbita.Html {
   let kind = account.kind()
+  let admin_surface = current_browser_query_param("admin")
   let tenant_label = account.active_tenant_name.unwrap_or_else(() => {
     if kind == PaidExperience {
       "Personal workspace"
@@ -275,8 +293,13 @@ fn render_account_navigation(account : AccountExperience) -> @rabbita.Html {
       div(
         class="account-global-links",
         account_navigation_items(kind).map(item => {
+          let highlighted = if kind == AdminExperience {
+            admin_navigation_item_active(item.label, admin_surface)
+          } else {
+            item.primary
+          }
           a(
-            class=if item.primary {
+            class=if highlighted {
               "account-global-link is-primary"
             } else {
               "account-global-link"
@@ -356,6 +379,10 @@ fn account_management_heading(surface : String) -> (String, String) {
     "analytics" =>
       (
         "Platform analytics", "Review authoritative user, tenant, and active-session counts.",
+      )
+    "settings" =>
+      (
+        "System settings", "Manage grouped operational policy, capacity, retention, freshness, and service limits.",
       )
     "audit" =>
       ("Audit log", "Review bounded account lifecycle and membership events.")

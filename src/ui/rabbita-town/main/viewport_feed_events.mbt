@@ -121,7 +121,9 @@ fn feed_item_for_event(event : @core.TownEvent) -> FeedItem? {
 }
 
 ///|
-let recent_event_feed_limit = 6
+let recent_event_feed_limit : Int = frontend_setting_int(
+  "recent_event_feed_limit", 6,
+)
 
 ///|
 fn recent_event_limit_reached(pushed : Int) -> Bool {
