@@ -53,6 +53,13 @@ extern "js" fn schedule_golden_valley_canvas(callback : () -> Unit) -> Unit =
 ///|
 extern "js" fn browser_stop_golden_valley_canvas() -> Unit =
   #| () => {
+  #|   const staticCache = globalThis.__moontownIntersectionStaticCanvas;
+  #|   if (staticCache?.canvas) {
+  #|     staticCache.canvas.width = 0;
+  #|     staticCache.canvas.height = 0;
+  #|     staticCache.canvas = null;
+  #|     staticCache.context = null;
+  #|   }
   #|   delete globalThis.__moontownIntersectionStaticCanvas;
   #|   delete globalThis.__moontownIntersectionFrameBenchmark;
   #|   delete globalThis.__moontownIntersectionWalkerEdges;
@@ -97,6 +104,31 @@ extern "js" fn install_golden_valley_canvas_input(
 ) -> Unit =
   #| (renderCallback, releaseFrameCallback, cameraOnly) => {
   #|   const canvas = globalThis.document?.getElementById("energy-valley-canvas");
+  #|   const releaseDragCache = (owner, destroy = false) => {
+  #|     const cache = owner?.dragCache;
+  #|     const pool = owner?.dragTilePool;
+  #|     if (cache?.tiles) {
+  #|       for (const entry of cache.tiles) {
+  #|         if (!entry?.tile) continue;
+  #|         if (destroy) {
+  #|           entry.tile.width = 0;
+  #|           entry.tile.height = 0;
+  #|         } else {
+  #|           pool?.push(entry.tile);
+  #|         }
+  #|         entry.tile = null;
+  #|       }
+  #|       cache.tiles.length = 0;
+  #|     }
+  #|     if (destroy && pool) {
+  #|       for (const tile of pool) {
+  #|         tile.width = 0;
+  #|         tile.height = 0;
+  #|       }
+  #|       pool.length = 0;
+  #|     }
+  #|     if (owner) owner.dragCache = null;
+  #|   };
   #|   if (!canvas) {
   #|     const lifecycle = globalThis.__moontownGoldenValleyCanvasLifecycle;
   #|     if (typeof lifecycle?.stop === "function") lifecycle.stop(true);
@@ -124,6 +156,10 @@ extern "js" fn install_golden_valley_canvas_input(
   #|     lifecycle.render = renderCallback;
   #|     lifecycle.releaseFrame = releaseFrameCallback;
   #|     lifecycle.cameraOnly = Boolean(cameraOnly);
+  #|     // A semantic repaint (road/tree/building/model change) invalidates the
+  #|     // short-lived presentation cache. The next drag frame captures the
+  #|     // newly accepted world instead of replaying stale pixels.
+  #|     releaseDragCache(lifecycle);
   #|     return;
   #|   }
   #|   lifecycle = {
@@ -136,13 +172,43 @@ extern "js" fn install_golden_valley_canvas_input(
   #|     transientRafs: new Set(),
   #|     cleanups: [],
   #|     lastPaint: 0,
+  #|     interactionRaf: 0,
+  #|     pendingCoordinate: null,
+  #|     needsFullPaint: false,
+  #|     cameraDragging: false,
+  #|     dragCache: null,
+  #|     dragTilePool: [],
   #|     stop: null,
   #|     invoke: null,
   #|   };
   #|   globalThis.__moontownGoldenValleyCanvasLifecycle = lifecycle;
-  #|   const invoke = () => {
+  #|   const invoke = (reason = "external") => {
   #|     if (globalThis.__moontownGoldenValleyCanvasLifecycle === lifecycle &&
-  #|         lifecycle.running) lifecycle.render?.();
+  #|         lifecycle.running) {
+  #|       const started = globalThis.performance?.now?.() ?? Date.now();
+  #|       lifecycle.render?.();
+  #|       const finished = globalThis.performance?.now?.() ?? Date.now();
+  #|       lifecycle.lastPaint = finished;
+  #|       const metrics = globalThis.__moontownGoldenValleyRenderBenchmark;
+  #|       if (metrics) {
+  #|         metrics.invokedFullPaints = (metrics.invokedFullPaints ?? 0) + 1;
+  #|         metrics.invokedFullPaintTotalMs =
+  #|           (metrics.invokedFullPaintTotalMs ?? 0) + finished - started;
+  #|         metrics.invokedFullPaintLastMs = finished - started;
+  #|         metrics.invokedFullPaintAverageMs =
+  #|           metrics.invokedFullPaintTotalMs / metrics.invokedFullPaints;
+  #|         const reasonCount = `${reason}FullPaints`;
+  #|         const reasonTotal = `${reason}FullPaintTotalMs`;
+  #|         const reasonAverage = `${reason}FullPaintAverageMs`;
+  #|         metrics[reasonCount] = (metrics[reasonCount] ?? 0) + 1;
+  #|         metrics[reasonTotal] =
+  #|           (metrics[reasonTotal] ?? 0) + finished - started;
+  #|         metrics[reasonAverage] = metrics[reasonTotal] / metrics[reasonCount];
+  #|         if (lifecycle.canvas) {
+  #|           lifecycle.canvas.dataset.renderBenchmark = JSON.stringify(metrics);
+  #|         }
+  #|       }
+  #|     }
   #|   };
   #|   lifecycle.invoke = invoke;
   #|   globalThis.__moontownGoldenValleyRender = invoke;
@@ -164,6 +230,11 @@ extern "js" fn install_golden_valley_canvas_input(
   #|       globalThis.cancelAnimationFrame?.(lifecycle.animationRaf);
   #|       lifecycle.animationRaf = 0;
   #|     }
+  #|     if (lifecycle.interactionRaf) {
+  #|       globalThis.cancelAnimationFrame?.(lifecycle.interactionRaf);
+  #|       lifecycle.interactionRaf = 0;
+  #|     }
+  #|     releaseDragCache(lifecycle, true);
   #|     for (const raf of lifecycle.transientRafs) {
   #|       globalThis.cancelAnimationFrame?.(raf);
   #|     }
@@ -210,6 +281,10 @@ extern "js" fn install_golden_valley_canvas_input(
   #|     x: 1792, y: 3200, z: civicZoom,
   #|   };
   #|   const camera = globalThis.__moontownGoldenValleyCamera;
+  #|   const dragMegaTileMinPx = 256;
+  #|   const dragMegaTileBudget = 64;
+  #|   const dragSemanticRefreshPx = 96;
+  #|   const animationFrameIntervalMs = 33;
   #|   // Migrate only untouched historical overview presets. Deliberate pans
   #|   // and zooms stay intact while new sessions open on seven civic heroes.
   #|   const artVersion = globalThis.__moontownGoldenValleyCameraArtVersion ?? 0;
@@ -227,6 +302,31 @@ extern "js" fn install_golden_valley_canvas_input(
   #|   let activePointerId = null;
   #|   let lastX = 0;
   #|   let lastY = 0;
+  #|   const benchmark = () =>
+  #|     globalThis.__moontownGoldenValleyRenderBenchmark ||= {
+  #|       fullPaints: 0,
+  #|       fullPaintTotalMs: 0,
+  #|       fullPaintMaxMs: 0,
+  #|       dragCompositeFrames: 0,
+  #|       dragCompositeTotalMs: 0,
+  #|       dragCacheCaptures: 0,
+  #|       dragCacheRefreshes: 0,
+  #|       pointerMoves: 0,
+  #|       coordinateUpdates: 0,
+  #|     };
+  #|   const publishBenchmark = () => {
+  #|     const metrics = benchmark();
+  #|     metrics.fullPaintAverageMs = metrics.fullPaints > 0
+  #|       ? metrics.fullPaintTotalMs / metrics.fullPaints
+  #|       : 0;
+  #|     metrics.dragCompositeAverageMs = metrics.dragCompositeFrames > 0
+  #|       ? metrics.dragCompositeTotalMs / metrics.dragCompositeFrames
+  #|       : 0;
+  #|     metrics.invokedFullPaintAverageMs = metrics.invokedFullPaints > 0
+  #|       ? metrics.invokedFullPaintTotalMs / metrics.invokedFullPaints
+  #|       : 0;
+  #|     canvas.dataset.renderBenchmark = JSON.stringify(metrics);
+  #|   };
   #|   const listen = (target, name, handler, options) => {
   #|     if (typeof target?.addEventListener !== "function") return;
   #|     target.addEventListener(name, handler, options);
@@ -275,6 +375,132 @@ extern "js" fn install_golden_valley_canvas_input(
   #|       "energy-valley-coordinate-readout",
   #|     );
   #|     if (readout) readout.textContent = `X ${xText} · Y ${yText}`;
+  #|     benchmark().coordinateUpdates += 1;
+  #|   };
+  #|   const captureDragCache = () => {
+  #|     releaseDragCache(lifecycle);
+  #|     const width = canvas.clientWidth || 1;
+  #|     const height = canvas.clientHeight || 1;
+  #|     const scaleX = canvas.width / width;
+  #|     const scaleY = canvas.height / height;
+  #|     // 256 CSS-pixel mega tiles keep cache composition bounded (normally
+  #|     // 15 tiles at 1280 × 656) without changing semantic world cells.
+  #|     const tileSize = Math.max(
+  #|       dragMegaTileMinPx,
+  #|       Math.ceil(
+  #|         Math.sqrt(width * height / dragMegaTileBudget) / 64,
+  #|       ) * 64,
+  #|     );
+  #|     const tiles = [];
+  #|     for (let y = 0; y < height; y += tileSize) {
+  #|       for (let x = 0; x < width; x += tileSize) {
+  #|         const cssWidth = Math.min(tileSize, width - x);
+  #|         const cssHeight = Math.min(tileSize, height - y);
+  #|         const sourceX = Math.round(x * scaleX);
+  #|         const sourceY = Math.round(y * scaleY);
+  #|         const sourceWidth = Math.round(cssWidth * scaleX);
+  #|         const sourceHeight = Math.round(cssHeight * scaleY);
+  #|         const tile = lifecycle.dragTilePool.pop() ??
+  #|           globalThis.document.createElement("canvas");
+  #|         if (tile.width !== sourceWidth) tile.width = sourceWidth;
+  #|         if (tile.height !== sourceHeight) tile.height = sourceHeight;
+  #|         tile.getContext("2d")?.drawImage(
+  #|           canvas,
+  #|           sourceX,
+  #|           sourceY,
+  #|           sourceWidth,
+  #|           sourceHeight,
+  #|           0,
+  #|           0,
+  #|           sourceWidth,
+  #|           sourceHeight,
+  #|         );
+  #|         tiles.push({ tile, x, y, cssWidth, cssHeight });
+  #|       }
+  #|     }
+  #|     lifecycle.dragCache = {
+  #|       tiles,
+  #|       cameraX: camera.x,
+  #|       cameraY: camera.y,
+  #|       zoom: camera.z,
+  #|       width,
+  #|       height,
+  #|     };
+  #|     benchmark().dragCacheCaptures += 1;
+  #|     publishBenchmark();
+  #|   };
+  #|   const compositeDragCache = () => {
+  #|     const cache = lifecycle.dragCache;
+  #|     if (!cache || cache.zoom !== camera.z ||
+  #|         cache.width !== canvas.clientWidth ||
+  #|         cache.height !== canvas.clientHeight) return false;
+  #|     const shiftX = (cache.cameraX - camera.x) * camera.z;
+  #|     const shiftY = (cache.cameraY - camera.y) * camera.z;
+  #|     // A periodic semantic refresh fills newly exposed edges while still
+  #|     // replacing dozens of pointer-triggered full paints with composites.
+  #|     if (Math.abs(shiftX) > dragSemanticRefreshPx ||
+  #|         Math.abs(shiftY) > dragSemanticRefreshPx) return false;
+  #|     const started = globalThis.performance?.now?.() ?? Date.now();
+  #|     const context = canvas.getContext("2d");
+  #|     if (!context) return false;
+  #|     const dpr = canvas.width / Math.max(1, canvas.clientWidth);
+  #|     context.setTransform(dpr, 0, 0, dpr, 0, 0);
+  #|     context.clearRect(0, 0, cache.width, cache.height);
+  #|     context.fillStyle = "#d8e6d5";
+  #|     context.fillRect(0, 0, cache.width, cache.height);
+  #|     for (const entry of cache.tiles) {
+  #|       context.drawImage(
+  #|         entry.tile,
+  #|         0,
+  #|         0,
+  #|         entry.tile.width,
+  #|         entry.tile.height,
+  #|         entry.x + shiftX,
+  #|         entry.y + shiftY,
+  #|         entry.cssWidth,
+  #|         entry.cssHeight,
+  #|       );
+  #|     }
+  #|     const duration =
+  #|       (globalThis.performance?.now?.() ?? Date.now()) - started;
+  #|     const metrics = benchmark();
+  #|     metrics.dragCompositeFrames += 1;
+  #|     metrics.dragCompositeTotalMs += duration;
+  #|     metrics.dragCompositeLastMs = duration;
+  #|     publishBenchmark();
+  #|     return true;
+  #|   };
+  #|   const flushInteractionFrame = () => {
+  #|     lifecycle.interactionRaf = 0;
+  #|     if (!lifecycle.running) return;
+  #|     if (lifecycle.pendingCoordinate) {
+  #|       updateCoordinateReadout(lifecycle.pendingCoordinate);
+  #|       lifecycle.pendingCoordinate = null;
+  #|     }
+  #|     if (lifecycle.cameraDragging) {
+  #|       if (!compositeDragCache()) {
+  #|         invoke("interaction");
+  #|         captureDragCache();
+  #|         benchmark().dragCacheRefreshes += 1;
+  #|         publishBenchmark();
+  #|       }
+  #|     } else if (lifecycle.needsFullPaint) {
+  #|       lifecycle.needsFullPaint = false;
+  #|       invoke("interaction");
+  #|     }
+  #|   };
+  #|   const scheduleInteractionFrame = () => {
+  #|     if (lifecycle.interactionRaf || !lifecycle.running) return;
+  #|     lifecycle.interactionRaf = globalThis.requestAnimationFrame(
+  #|       flushInteractionFrame,
+  #|     );
+  #|   };
+  #|   const queueCoordinateReadout = event => {
+  #|     lifecycle.pendingCoordinate = {
+  #|       clientX: event.clientX,
+  #|       clientY: event.clientY,
+  #|     };
+  #|     scheduleInteractionFrame();
   #|   };
   #|   const onPointerDown = event => {
   #|     updateCoordinateReadout(event);
@@ -283,11 +509,13 @@ extern "js" fn install_golden_valley_canvas_input(
   #|         (event.button === 0 &&
   #|           (lifecycle.cameraOnly || inspectSelected()))) {
   #|       cameraDragging = true;
+  #|       lifecycle.cameraDragging = true;
   #|       moved = false;
   #|       lastX = event.clientX;
   #|       lastY = event.clientY;
   #|       activePointerId = event.pointerId;
   #|       canvas.setPointerCapture?.(event.pointerId);
+  #|       captureDragCache();
   #|     } else if (event.button === 0) {
   #|       painting = !lifecycle.cameraOnly && paintSelected();
   #|       if (painting) {
@@ -297,7 +525,8 @@ extern "js" fn install_golden_valley_canvas_input(
   #|     }
   #|   };
   #|   const onPointerMove = event => {
-  #|     updateCoordinateReadout(event);
+  #|     benchmark().pointerMoves += 1;
+  #|     queueCoordinateReadout(event);
   #|     if (cameraDragging) {
   #|       if (Math.abs(event.clientX - lastX) > 2 ||
   #|           Math.abs(event.clientY - lastY) > 2) moved = true;
@@ -305,7 +534,7 @@ extern "js" fn install_golden_valley_canvas_input(
   #|       camera.y -= (event.clientY - lastY) / camera.z;
   #|       lastX = event.clientX;
   #|       lastY = event.clientY;
-  #|       globalThis.__moontownGoldenValleyRender?.();
+  #|       scheduleInteractionFrame();
   #|     } else if (painting) {
   #|       rememberAction(event);
   #|       canvas.dispatchEvent(new MouseEvent("click", {
@@ -317,10 +546,17 @@ extern "js" fn install_golden_valley_canvas_input(
   #|     }
   #|   };
   #|   const stopPointer = event => {
+  #|     const wasDragging = cameraDragging;
   #|     cameraDragging = false;
+  #|     lifecycle.cameraDragging = false;
   #|     painting = false;
   #|     canvas.releasePointerCapture?.(event.pointerId);
   #|     activePointerId = null;
+  #|     releaseDragCache(lifecycle);
+  #|     if (wasDragging) {
+  #|       lifecycle.needsFullPaint = true;
+  #|       scheduleInteractionFrame();
+  #|     }
   #|   };
   #|   const onPointerUp = event => stopPointer(event);
   #|   const onClick = event => {
@@ -339,7 +575,10 @@ extern "js" fn install_golden_valley_canvas_input(
   #|     )));
   #|     camera.x += mx / previous - mx / camera.z;
   #|     camera.y += my / previous - my / camera.z;
-  #|     globalThis.__moontownGoldenValleyRender?.();
+  #|     releaseDragCache(lifecycle);
+  #|     lifecycle.needsFullPaint = true;
+  #|     queueCoordinateReadout(event);
+  #|     scheduleInteractionFrame();
   #|   };
   #|   listen(canvas, "pointerdown", onPointerDown);
   #|   listen(canvas, "pointermove", onPointerMove);
@@ -350,6 +589,7 @@ extern "js" fn install_golden_valley_canvas_input(
   #|   listen(canvas, "wheel", onWheel, { passive: false });
   #|   lifecycle.cleanups.push(() => {
   #|     cameraDragging = false;
+  #|     lifecycle.cameraDragging = false;
   #|     painting = false;
   #|     if (activePointerId !== null) {
   #|       canvas.releasePointerCapture?.(activePointerId);
@@ -442,7 +682,7 @@ extern "js" fn install_golden_valley_canvas_input(
   #|   const motion = globalThis.matchMedia?.(
   #|     "(prefers-reduced-motion: reduce)",
   #|   );
-  #|   const onMotionChange = () => invoke();
+  #|   const onMotionChange = () => invoke("motion");
   #|   listen(motion, "change", onMotionChange);
   #|   const frame = timestamp => {
   #|     lifecycle.animationRaf = 0;
@@ -465,9 +705,9 @@ extern "js" fn install_golden_valley_canvas_input(
   #|     // The map remains interactive under reduced motion, but continuous
   #|     // canvas animation is suppressed. Normal motion is capped at 30fps.
   #|     if (!motion?.matches && !globalThis.document?.hidden &&
-  #|         timestamp - lifecycle.lastPaint >= 33) {
-  #|       lifecycle.lastPaint = timestamp;
-  #|       invoke();
+  #|         !lifecycle.cameraDragging && !lifecycle.interactionRaf &&
+  #|         timestamp - lifecycle.lastPaint >= animationFrameIntervalMs) {
+  #|       invoke("animation");
   #|     }
   #|     if (lifecycle.running) {
   #|       lifecycle.animationRaf = globalThis.requestAnimationFrame(frame);
@@ -538,6 +778,45 @@ extern "js" fn prepare_golden_valley_canvas(id : String) -> Unit =
   #|   }
   #|   const context = canvas.getContext("2d");
   #|   context?.setTransform(dpr, 0, 0, dpr, 0, 0);
+  #| }
+
+///|
+extern "js" fn golden_canvas_benchmark_now() -> Double =
+  #| () => globalThis.performance?.now?.() ?? Date.now()
+
+///|
+extern "js" fn golden_canvas_record_full_paint(
+  duration_ms : Double,
+  chunk_count : Int,
+  visible_tile_visits : Int,
+  legacy_tile_visits : Int,
+) -> Unit =
+  #| (durationMs, chunkCount, visibleTileVisits, legacyTileVisits) => {
+  #|   const metrics = globalThis.__moontownGoldenValleyRenderBenchmark ||= {
+  #|     fullPaints: 0,
+  #|     fullPaintTotalMs: 0,
+  #|     fullPaintMaxMs: 0,
+  #|     dragCompositeFrames: 0,
+  #|     dragCompositeTotalMs: 0,
+  #|     dragCacheCaptures: 0,
+  #|     dragCacheRefreshes: 0,
+  #|     pointerMoves: 0,
+  #|     coordinateUpdates: 0,
+  #|   };
+  #|   metrics.fullPaints += 1;
+  #|   metrics.fullPaintTotalMs += durationMs;
+  #|   metrics.fullPaintLastMs = durationMs;
+  #|   metrics.fullPaintMaxMs = Math.max(metrics.fullPaintMaxMs, durationMs);
+  #|   metrics.chunkCount = chunkCount;
+  #|   metrics.visibleTileVisits = visibleTileVisits;
+  #|   metrics.legacyTileVisits = legacyTileVisits;
+  #|   metrics.tileVisitReduction = legacyTileVisits > 0
+  #|     ? 1 - visibleTileVisits / legacyTileVisits
+  #|     : 0;
+  #|   const canvas = globalThis.document?.getElementById(
+  #|     "energy-valley-canvas",
+  #|   );
+  #|   if (canvas) canvas.dataset.renderBenchmark = JSON.stringify(metrics);
   #| }
 
 ///|
@@ -2588,6 +2867,7 @@ fn draw_golden_valley_canvas(
           context, snapshot, view, width, height,
         )
       }
+      let benchmark_started = golden_canvas_benchmark_now()
       context.clear_rect(0.0, 0.0, width.to_double(), height.to_double())
       let hour = view.hour
       golden_draw_background(context, width, height, hour)
@@ -2607,21 +2887,35 @@ fn draw_golden_valley_canvas(
       let authoritative_transport = authoritative_energy_valley_transport_ready()
       let presentation_ready = !authoritative_transport &&
         reference_road_presentation_snapshot_ready()
-      for y in 0..<canvas_rows {
-        for x in 0..<canvas_cols {
-          golden_draw_tile(
-            context,
-            ecosystem_town_snapshot,
-            canvas_road_lookup,
-            authoritative_transport,
-            presentation_ready,
-            true,
-            None,
-            x,
-            y,
-            width,
-            height,
-          )
+      // Chunk traversal is presentation-only: each nested iteration still
+      // resolves and draws one semantic tile. Culling whole off-screen chunks
+      // avoids paying for the invisible majority of the 256 × 144 world.
+      let visible_chunks = golden_canvas_visible_tile_chunks(
+        canvas_cols,
+        canvas_rows,
+        width,
+        height,
+        golden_valley_camera_x(),
+        golden_valley_camera_y(),
+        golden_valley_camera_zoom(),
+      )
+      for chunk in visible_chunks {
+        for y in chunk.min_y..<chunk.max_y {
+          for x in chunk.min_x..<chunk.max_x {
+            golden_draw_tile(
+              context,
+              ecosystem_town_snapshot,
+              canvas_road_lookup,
+              authoritative_transport,
+              presentation_ready,
+              true,
+              None,
+              x,
+              y,
+              width,
+              height,
+            )
+          }
         }
       }
       if authoritative_transport {
@@ -2631,34 +2925,38 @@ fn draw_golden_valley_canvas(
         // The OSM layer replaces only the immutable base presentation. Local
         // RoadTool deltas remain visible on top of it and keep their semantic
         // masks, paving, and pathfinding identity.
-        for y in 0..<canvas_rows {
-          for x in 0..<canvas_cols {
-            let road = canvas_road_lookup.get(town_canvas_road_key(x, y))
-            match road {
-              Some(value) if town_canvas_road_overlay_visible_with_transport(
-                  value, true,
-                ) =>
-                golden_draw_road_overlay_tile(
-                  context, canvas_road_lookup, road, presentation_ready, x, y, width,
-                  height,
-                )
-              _ => ()
+        for chunk in visible_chunks {
+          for y in chunk.min_y..<chunk.max_y {
+            for x in chunk.min_x..<chunk.max_x {
+              let road = canvas_road_lookup.get(town_canvas_road_key(x, y))
+              match road {
+                Some(value) if town_canvas_road_overlay_visible_with_transport(
+                    value, true,
+                  ) =>
+                  golden_draw_road_overlay_tile(
+                    context, canvas_road_lookup, road, presentation_ready, x, y,
+                    width, height,
+                  )
+                _ => ()
+              }
             }
           }
         }
       } else {
-        for y in 0..<canvas_rows {
-          for x in 0..<canvas_cols {
-            golden_draw_road_overlay_tile(
-              context,
-              canvas_road_lookup,
-              canvas_road_lookup.get(town_canvas_road_key(x, y)),
-              presentation_ready,
-              x,
-              y,
-              width,
-              height,
-            )
+        for chunk in visible_chunks {
+          for y in chunk.min_y..<chunk.max_y {
+            for x in chunk.min_x..<chunk.max_x {
+              golden_draw_road_overlay_tile(
+                context,
+                canvas_road_lookup,
+                canvas_road_lookup.get(town_canvas_road_key(x, y)),
+                presentation_ready,
+                x,
+                y,
+                width,
+                height,
+              )
+            }
           }
         }
       }
@@ -2759,6 +3057,14 @@ fn draw_golden_valley_canvas(
       if energy_valley_intersection_reference_requested() {
         intersection_reference_draw_points(context, width, height)
       }
+      let visible_tile_visits = golden_canvas_chunk_tile_count(visible_chunks) *
+        2
+      golden_canvas_record_full_paint(
+        golden_canvas_benchmark_now() - benchmark_started,
+        visible_chunks.length(),
+        visible_tile_visits,
+        canvas_cols * canvas_rows * 2,
+      )
       // Publish pointer truth only after this exact semantic frame completed a
       // real draw. A queued-but-not-painted Model must never replace the frame
       // that remains visible to the user.
@@ -2791,7 +3097,7 @@ fn render_golden_valley_canvas(
           golden_release_spring_civic_building_assets()
           golden_valley_clear_canvas_frame()
         },
-        view.intersection_preview,
+        false,
       )
       if !view.intersection_preview {
         install_player_walk_keys()
@@ -2800,17 +3106,19 @@ fn render_golden_valley_canvas(
       stop_golden_valley_canvas()
     }
   })
-  let canvas_attrs = if view.intersection_preview {
-    @html.Attrs::build().aria_label("能源谷路网地图")
-  } else {
-    @html.Attrs::build()
-    .aria_label("能源谷可交互等距地图")
+  let canvas_attrs = @html.Attrs::build()
+    .aria_label(
+      if view.intersection_preview {
+        "能源谷可交互路网地图"
+      } else {
+        "能源谷可交互等距地图"
+      },
+    )
     .on_click(_ => {
       dispatch(
         EnergyCanvasClick(golden_valley_action_x(), golden_valley_action_y()),
       )
     })
-  }
   canvas(
     id="energy-valley-canvas",
     class="absolute inset-0 h-full w-full cursor-grab active:cursor-grabbing",

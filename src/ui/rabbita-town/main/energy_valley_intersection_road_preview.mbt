@@ -67,6 +67,47 @@ let intersection_road_preview_water_cache : Map[
   Array[(Int, Int, String)],
 ] = Map([])
 
+///| Keep a derived-frame cache strictly bounded to its active key. Camera
+
+///| movement and semantic edits create high-cardinality keys, so retaining old
+
+///|
+/// entries turns ordinary dragging into unbounded reachable heap.
+fn[K : Hash + Eq, V] intersection_road_preview_retain_cache_key(
+  cache : Map[K, V],
+  cache_key : K,
+) -> Unit {
+  match cache.get(cache_key) {
+    Some(current) if cache.length() != 1 => {
+      cache.clear()
+      cache[cache_key] = current
+    }
+    Some(_) => ()
+    None => cache.clear()
+  }
+}
+
+///|
+fn intersection_road_preview_retain_semantic_cache_key(
+  cache_key : String,
+) -> Unit {
+  intersection_road_preview_retain_cache_key(
+    intersection_road_preview_procedural_cache, cache_key,
+  )
+  intersection_road_preview_retain_cache_key(
+    intersection_road_preview_depth_cache, cache_key,
+  )
+  intersection_road_preview_retain_cache_key(
+    intersection_road_preview_land_cache, cache_key,
+  )
+  intersection_road_preview_retain_cache_key(
+    intersection_road_preview_stale_ground_cache, cache_key,
+  )
+  intersection_road_preview_retain_cache_key(
+    intersection_road_preview_installation_cache, cache_key,
+  )
+}
+
 ///|
 fn intersection_road_preview_graph_identity() -> String {
   if reference_osm_block_graph_ready() &&
@@ -181,6 +222,9 @@ fn intersection_road_preview_curated_buildings() -> Array[
   IntersectionRoadPreviewBuilding,
 ] {
   let cache_key = intersection_road_preview_graph_identity()
+  intersection_road_preview_retain_cache_key(
+    intersection_road_preview_fixed_cache, cache_key,
+  )
   match intersection_road_preview_fixed_cache.get(cache_key) {
     Some(cached) => return cached
     None => ()
@@ -485,6 +529,7 @@ fn intersection_road_preview_procedural_buildings(
   fixed : Array[IntersectionRoadPreviewBuilding],
 ) -> Array[IntersectionRoadPreviewBuilding] {
   let cache_key = intersection_road_preview_cache_key(snapshot)
+  intersection_road_preview_retain_semantic_cache_key(cache_key)
   match intersection_road_preview_procedural_cache.get(cache_key) {
     Some(cached) => cached
     None => {
@@ -657,6 +702,7 @@ fn intersection_road_preview_buildings_by_depth(
   snapshot : @energy_valley_contract.TownSnapshot,
 ) -> Map[Int, Array[IntersectionRoadPreviewBuilding]] {
   let cache_key = intersection_road_preview_cache_key(snapshot)
+  intersection_road_preview_retain_semantic_cache_key(cache_key)
   match intersection_road_preview_depth_cache.get(cache_key) {
     Some(cached) => return cached
     None => ()
@@ -690,6 +736,21 @@ fn intersection_road_preview_buildings_by_depth(
     invalid_lots, overlapping_pairs,
   )
   intersection_road_preview_depth_cache[cache_key] = result
+  result
+}
+
+///|
+fn intersection_road_preview_user_buildings(
+  snapshot : @energy_valley_contract.TownSnapshot,
+) -> Array[TownCanvasBuilding] {
+  let result : Array[TownCanvasBuilding] = []
+  for building in town_snapshot_canvas_buildings(snapshot) {
+    match snapshot.world.find_place(building.place_id) {
+      Some(place) if place.provenance.kind is @energy_valley_contract.UserDelta =>
+        result.push(building)
+      _ => ()
+    }
+  }
   result
 }
 
@@ -999,6 +1060,11 @@ fn golden_draw_intersection_road_preview_building(
 fn intersection_road_preview_installation_visible(
   installation : @energy_valley_contract.Installation,
 ) -> Bool {
+  // User-authored parks and fixtures are semantic deltas, not legacy road
+  // furniture. They must remain visible on the reviewed road presentation.
+  if installation.provenance.kind is @energy_valley_contract.UserDelta {
+    return true
+  }
   match installation.kind {
     @energy_valley_contract.MetroAlignment
     | @energy_valley_contract.TransitEntrance
@@ -1016,6 +1082,7 @@ fn intersection_road_preview_installations_by_depth(
   snapshot : @energy_valley_contract.TownSnapshot,
 ) -> Map[Int, Array[@energy_valley_contract.Installation]] {
   let cache_key = intersection_road_preview_cache_key(snapshot)
+  intersection_road_preview_retain_semantic_cache_key(cache_key)
   match intersection_road_preview_installation_cache.get(cache_key) {
     Some(cached) => return cached
     None => ()
@@ -1323,6 +1390,7 @@ fn intersection_road_view_stale_ground_cells(
   snapshot : @energy_valley_contract.TownSnapshot,
 ) -> Map[String, Bool] {
   let cache_key = intersection_road_preview_cache_key(snapshot)
+  intersection_road_preview_retain_semantic_cache_key(cache_key)
   match intersection_road_preview_stale_ground_cache.get(cache_key) {
     Some(cached) => return cached
     None => ()
@@ -1377,7 +1445,7 @@ extern "js" fn intersection_road_view_static_cache_key(
 ) -> String =
   #| (baseKey, width, height, hour) => {
   #|   const camera = globalThis.__moontownGoldenValleyCamera ?? {
-  #|     x: 1792, y: 3200, zoom: 0.42,
+  #|     x: 1792, y: 3200, z: 0.42,
   #|   };
   #|   const canvas = globalThis.document?.getElementById("energy-valley-canvas");
   #|   const progress = (hour - 6) / 13;
@@ -1388,7 +1456,7 @@ extern "js" fn intersection_road_view_static_cache_key(
   #|   return [
   #|     baseKey, width, height, canvas?.width ?? 0, canvas?.height ?? 0,
   #|     Number(camera.x).toFixed(4), Number(camera.y).toFixed(4),
-  #|     Number(camera.zoom).toFixed(6), light,
+  #|     Number(camera.z).toFixed(6), light,
   #|   ].join(":");
   #| }
 
@@ -1420,10 +1488,18 @@ extern "js" fn intersection_road_view_prepare_static_cache(
   #|   if (typeof globalThis.document?.createElement !== "function") {
   #|     return context;
   #|   }
-  #|   const canvas = globalThis.document.createElement("canvas");
-  #|   canvas.width = context.canvas.width;
-  #|   canvas.height = context.canvas.height;
+  #|   const previous = globalThis.__moontownIntersectionStaticCanvas;
+  #|   const canvas = previous?.canvas ??
+  #|     globalThis.document.createElement("canvas");
+  #|   if (canvas.width !== context.canvas.width) {
+  #|     canvas.width = context.canvas.width;
+  #|   }
+  #|   if (canvas.height !== context.canvas.height) {
+  #|     canvas.height = context.canvas.height;
+  #|   }
   #|   const staticContext = canvas.getContext("2d");
+  #|   staticContext.setTransform(1, 0, 0, 1, 0, 0);
+  #|   staticContext.clearRect(0, 0, canvas.width, canvas.height);
   #|   staticContext.setTransform(context.getTransform());
   #|   globalThis.__moontownIntersectionStaticCanvas = {
   #|     key: cacheKey, canvas, context: staticContext, ready: false,
@@ -1529,6 +1605,7 @@ fn intersection_road_preview_building_land_cells(
   buildings : Map[Int, Array[IntersectionRoadPreviewBuilding]],
   cache_key : String,
 ) -> Map[String, String] {
+  intersection_road_preview_retain_semantic_cache_key(cache_key)
   match intersection_road_preview_land_cache.get(cache_key) {
     Some(cached) => return cached
     None => ()
@@ -1597,6 +1674,15 @@ fn draw_intersection_road_preview_frame(
   let building_land_cells = intersection_road_preview_building_land_cells(
     preview_buildings, preview_cache_key,
   )
+  let visible_chunks = golden_canvas_visible_tile_chunks(
+    canvas_cols,
+    canvas_rows,
+    viewport_width,
+    viewport_height,
+    golden_valley_camera_x(),
+    golden_valley_camera_y(),
+    golden_valley_camera_zoom(),
+  )
   let benchmark_prepared = intersection_road_view_benchmark_now()
   let static_cache_key = intersection_road_view_static_cache_key(
     preview_cache_key,
@@ -1605,6 +1691,13 @@ fn draw_intersection_road_preview_frame(
     view.hour,
   )
   let static_cache_supported = intersection_road_view_static_cache_supported()
+  if static_cache_supported {
+    intersection_road_preview_retain_cache_key(
+      intersection_road_preview_water_cache, static_cache_key,
+    )
+  } else {
+    intersection_road_preview_water_cache.clear()
+  }
   if !intersection_road_view_draw_static_cache(context, static_cache_key) {
     let static_context = intersection_road_view_prepare_static_cache(
       context, static_cache_key,
@@ -1616,45 +1709,47 @@ fn draw_intersection_road_preview_frame(
       view.hour,
     )
     let animated_water : Array[(Int, Int, String)] = []
-    for y in 0..<canvas_rows {
-      for x in 0..<canvas_cols {
-        // Reuse the old map's complete tile painter. Only its separate bridge
-        // glyph is disabled; this keeps every terrain value and pattern exact.
-        let road = road_lookup.get(town_canvas_road_key(x, y))
-        let key = town_canvas_road_key(x, y)
-        // A reviewed lot owns the full 7×7 land envelope. Check it before the
-        // hidden legacy road lookup so one stale semantic road cell cannot
-        // punch a differently colored tile through an otherwise uniform lot.
-        let terrain_override = match building_land_cells.get(key) {
-          Some(land_type) => Some(land_type)
-          None if road is Some(_) =>
-            // Old semantic roads remain in the snapshot for compatibility, but
-            // their paving must not leak into this single presentation. The
-            // reviewed graph owns every visible road pixel.
-            Some(intersection_road_view_stale_ground_terrain(x, y))
-          None if stale_ground_cells.contains(key) =>
-            Some(intersection_road_view_stale_ground_terrain(x, y))
-          _ => None
+    for chunk in visible_chunks {
+      for y in chunk.min_y..<chunk.max_y {
+        for x in chunk.min_x..<chunk.max_x {
+          // Reuse the old map's complete tile painter. Only its separate bridge
+          // glyph is disabled; this keeps every terrain value and pattern exact.
+          let road = road_lookup.get(town_canvas_road_key(x, y))
+          let key = town_canvas_road_key(x, y)
+          // A reviewed lot owns the full 7×7 land envelope. Check it before the
+          // hidden legacy road lookup so one stale semantic road cell cannot
+          // punch a differently colored tile through an otherwise uniform lot.
+          let terrain_override = match building_land_cells.get(key) {
+            Some(land_type) => Some(land_type)
+            None if road is Some(_) =>
+              // Old semantic roads remain in the snapshot for compatibility, but
+              // their paving must not leak into this single presentation. The
+              // reviewed graph owns every visible road pixel.
+              Some(intersection_road_view_stale_ground_terrain(x, y))
+            None if stale_ground_cells.contains(key) =>
+              Some(intersection_road_view_stale_ground_terrain(x, y))
+            _ => None
+          }
+          let road_visible = golden_canonical_old_map_road_visible(
+            road, authoritative_transport, presentation_ready,
+          )
+          let terrain = terrain_override.unwrap_or(
+            golden_canonical_old_map_terrain(
+              snapshot, road_lookup, road, road_visible, authoritative_transport,
+              x, y,
+            ),
+          )
+          if (terrain == "water" || terrain == "bridge") &&
+            intersection_road_view_tile_on_screen(
+              x, y, viewport_width, viewport_height,
+            ) {
+            animated_water.push((x, y, terrain))
+          }
+          golden_draw_tile(
+            static_context, snapshot, road_lookup, authoritative_transport, presentation_ready,
+            false, terrain_override, x, y, viewport_width, viewport_height,
+          )
         }
-        let road_visible = golden_canonical_old_map_road_visible(
-          road, authoritative_transport, presentation_ready,
-        )
-        let terrain = terrain_override.unwrap_or(
-          golden_canonical_old_map_terrain(
-            snapshot, road_lookup, road, road_visible, authoritative_transport, x,
-            y,
-          ),
-        )
-        if (terrain == "water" || terrain == "bridge") &&
-          intersection_road_view_tile_on_screen(
-            x, y, viewport_width, viewport_height,
-          ) {
-          animated_water.push((x, y, terrain))
-        }
-        golden_draw_tile(
-          static_context, snapshot, road_lookup, authoritative_transport, presentation_ready,
-          false, terrain_override, x, y, viewport_width, viewport_height,
-        )
       }
     }
     for _, buildings in preview_buildings {
@@ -1713,6 +1808,28 @@ fn draw_intersection_road_preview_frame(
     viewport_width,
     viewport_height,
   )
+  // The reviewed graph owns the immutable base road presentation. Local road
+  // edits remain semantic cells and are drawn above it with their normal masks.
+  for chunk in visible_chunks {
+    for y in chunk.min_y..<chunk.max_y {
+      for x in chunk.min_x..<chunk.max_x {
+        match road_lookup.get(town_canvas_road_key(x, y)) {
+          Some(road) if road.custom =>
+            golden_draw_road_overlay_tile(
+              context,
+              road_lookup,
+              Some(road),
+              presentation_ready,
+              x,
+              y,
+              viewport_width,
+              viewport_height,
+            )
+          _ => ()
+        }
+      }
+    }
+  }
   let benchmark_graph = intersection_road_view_benchmark_now()
   let installations = intersection_road_preview_installations_by_depth(snapshot)
   // Do not reuse semantic agents here: their route positions belong to the
@@ -1722,6 +1839,7 @@ fn draw_intersection_road_preview_frame(
     golden_animation_seconds(),
     golden_prefers_reduced_motion(),
   )
+  let user_buildings = intersection_road_preview_user_buildings(snapshot)
   golden_begin_spring_civic_building_asset_frame()
   for depth in 0..<(canvas_cols + canvas_rows + 32) {
     match installations.get(depth) {
@@ -1749,6 +1867,23 @@ fn draw_intersection_road_preview_frame(
           )
         }
       None => ()
+    }
+    for building in user_buildings {
+      if building.x + building.y + building.width + building.depth == depth {
+        let selected = view.selected_place_id == Some(building.place_id)
+        golden_draw_building(
+          context,
+          building,
+          selected,
+          "",
+          viewport_width,
+          viewport_height,
+          view.hour,
+        )
+        golden_draw_ecosystem_place_layer(
+          context, snapshot, building, selected, viewport_width, viewport_height,
+        )
+      }
     }
   }
   golden_end_spring_civic_building_asset_frame()
@@ -1781,5 +1916,9 @@ fn draw_intersection_road_preview_frame(
     benchmark_finish - benchmark_objects,
     benchmark_finish - benchmark_start,
   )
+  // Accept the exact semantic frame behind the reviewed presentation only
+  // after every layer succeeds. Runtime walkers stay presentation-only, while
+  // inspection and every construction tool resolve against this snapshot.
+  golden_valley_accept_canvas_frame_with_runtime_eligibility(snapshot, false)
   true
 }

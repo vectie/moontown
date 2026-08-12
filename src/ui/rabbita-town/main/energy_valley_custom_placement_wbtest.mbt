@@ -345,6 +345,11 @@ test "building tool resolves a nearby lot and clears its rendered footprint" {
         next,
         active_energy_valley_seed(),
       )
+      let presentation_buildings = intersection_road_preview_user_buildings(
+        ecosystem_contract_town_snapshot(next, active_energy_valley_seed()),
+      )
+      assert_eq(presentation_buildings.length(), 1)
+      assert_eq(presentation_buildings[0].authored_id, building.authored_id)
       match
         world.find_place(
           ecosystem_contract_id(ecosystem_custom_place_id(building)),

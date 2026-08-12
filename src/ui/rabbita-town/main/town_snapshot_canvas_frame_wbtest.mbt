@@ -557,7 +557,7 @@ test "Canvas accepts a semantic frame only after its scheduled draw succeeds" {
 }
 
 ///|
-test "intersection road preview clears pointer authority and installs camera-only input" {
+test "intersection road presentation accepts pointer truth and construction input" {
   let dispatch : Dispatch[Msg] = Emit(fn(_message) { @rabbita.none })
   let visible = canvas_frame_test_snapshot(1)
   golden_valley_accept_canvas_frame(visible)
@@ -566,8 +566,8 @@ test "intersection road preview clears pointer authority and installs camera-onl
   let preview = { ..canvas_frame_test_view(2), intersection_preview: true }
   ignore(render_golden_valley_canvas(dispatch, visible, preview))
   assert_true(canvas_frame_test_flush_next_animation_frame())
-  assert_true(golden_valley_canvas_frame() is None)
-  assert_true(canvas_frame_test_input_is_camera_only())
+  assert_eq(golden_valley_canvas_frame().unwrap().tick, visible.tick)
+  assert_false(canvas_frame_test_input_is_camera_only())
   assert_false(canvas_frame_test_player_walk_keys_installed())
   canvas_frame_test_remove_harness()
 }

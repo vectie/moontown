@@ -37,6 +37,24 @@ fn intersection_preview_test_building(
 }
 
 ///|
+test "intersection road preview derived caches retain only the active key" {
+  let active = intersection_preview_test_building(40, 50, 5, 5, 100)
+  let cache : Map[String, Array[IntersectionRoadPreviewBuilding]] = {
+    "stale-camera-a": [],
+    "active-camera": [active],
+    "stale-camera-b": [],
+  }
+  intersection_road_preview_retain_cache_key(cache, "active-camera")
+  assert_eq(cache.length(), 1)
+  assert_eq(cache.get("active-camera").map(items => items.length()), Some(1))
+  assert_true(cache.get("stale-camera-a") is None)
+  assert_true(cache.get("stale-camera-b") is None)
+
+  intersection_road_preview_retain_cache_key(cache, "new-camera")
+  assert_eq(cache.length(), 0)
+}
+
+///|
 test "intersection road preview buildings use only fixed ambient assets" {
   assert_eq(
     intersection_road_preview_building_asset_path("campus", 3),
@@ -277,4 +295,14 @@ test "intersection road preview keeps scenery and suppresses transport ghosts" {
     ] {
     assert_false(intersection_road_preview_installation_visible(installation))
   }
+}
+
+///|
+test "intersection road presentation keeps user planted road fixtures" {
+  let fixture = intersection_preview_test_installation(
+    @energy_valley_contract.Tree,
+    ["road-mask:2"],
+  )
+  let fixture = { ..fixture, provenance: ecosystem_contract_provenance(true) }
+  assert_true(intersection_road_preview_installation_visible(fixture))
 }
