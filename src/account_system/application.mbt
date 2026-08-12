@@ -23,6 +23,7 @@ pub fn account_application(
     !valid_account_id(bootstrap_session_id) {
     fail("account bootstrap requires a strong session and symbolic identity")
   }
+  validate_account_principal(bootstrap_principal)
   {
     state_path,
     bootstrap_principal,
@@ -108,14 +109,14 @@ async fn AccountApplication::load_state(
       ) catch {
         error => fail("account state is invalid: \{error}")
       }
-      if decoded.schema != account_state_schema() {
-        fail("unsupported account state schema")
-      }
-      decoded
+      normalize_account_state(decoded)
     }
     None => empty_account_state()
   }
-  self.ensure_bootstrap(state)
+  validate_account_state(state)
+  let bootstrapped = self.ensure_bootstrap(state)
+  validate_account_state(bootstrapped)
+  bootstrapped
 }
 
 ///|
@@ -123,6 +124,7 @@ async fn AccountApplication::save_state(
   self : AccountApplication,
   state : AccountState,
 ) -> Unit {
+  validate_account_state(state)
   let temp = self.state_path + ".next"
   @support.ensure_parent_directory(self.state_path)
   @fs.write_file(
@@ -135,11 +137,9 @@ async fn AccountApplication::save_state(
   @fs.rename(temp, self.state_path, replace=true)
 }
 
-///| Bound active sessions and discard anonymous principals after their last
-
-///| usable session. The configured bootstrap principal is retained as a
-
 ///|
+/// Bound active sessions and discard anonymous principals after their last
+/// usable session. The configured bootstrap principal is retained as a
 /// revocation tombstone so signing out cannot recreate its fixed token.
 fn AccountApplication::prune_state(
   self : AccountApplication,
@@ -153,10 +153,14 @@ fn AccountApplication::prune_state(
     principal.tenant_access.any(access => access.active) ||
     pruned.sessions.any(session => session.principal_id == principal.user_id)
   })
-  if principals.length() == pruned.principals.length() {
+  let subscriptions = pruned.subscriptions.filter(subscription => {
+    principals.any(principal => principal.user_id == subscription.principal_id)
+  })
+  if principals.length() == pruned.principals.length() &&
+    subscriptions.length() == pruned.subscriptions.length() {
     pruned
   } else {
-    { ..pruned, principals, version: pruned.version + 1 }
+    { ..pruned, principals, subscriptions, version: pruned.version + 1 }
   }
 }
 

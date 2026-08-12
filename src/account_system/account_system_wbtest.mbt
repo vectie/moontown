@@ -58,6 +58,69 @@ test "plans and roles produce four distinct account experiences" {
 }
 
 ///|
+test "administrator authority never projects a visitor account flag" {
+  let admin = account_context_for(
+    test_principal(VisitorPlan, platform_roles=[PlatformAdmin]),
+    None,
+  )
+  assert_eq(admin.account_kind, AdminAccount)
+  assert_false(admin.visitor)
+}
+
+///|
+test "v1 enterprise personal plans normalize to paid tenant-scoped accounts" {
+  let legacy = {
+    ..empty_account_state(),
+    schema: "moontown.account-store.v1",
+    principals: [
+      test_principal(EnterprisePlan, tenant_access=[enterprise_access()]),
+    ],
+  }
+  guard legacy.to_json() is Object(legacy_fields) else {
+    fail("legacy account fixture must serialize as an object")
+  }
+  legacy_fields.remove("subscriptions")
+  legacy_fields.remove("audit_events")
+  let decoded : AccountState = @json.from_json(
+    migrate_account_state_json(Json::object(legacy_fields)),
+  ) catch {
+    error => fail("legacy account state did not decode: \{error}")
+  }
+  let migrated = normalize_account_state(decoded)
+  validate_account_state(migrated)
+  assert_eq(migrated.principals[0].personal_plan, PaidPlan)
+  assert_eq(
+    account_context_for(migrated.principals[0], None).account_kind,
+    PaidUserAccount,
+  )
+  assert_eq(
+    account_context_for(migrated.principals[0], Some("energy-labs")).account_kind,
+    EnterpriseAccount,
+  )
+}
+
+///|
+test "persisted account state rejects duplicate session identities" {
+  let principal = test_principal(PaidPlan)
+  let registered = account_register_session(
+    empty_account_state(),
+    principal,
+    "session-a",
+    "opaque-token-a",
+    expires_at_ms=1000UL,
+  )
+  let invalid = {
+    ..registered,
+    sessions: [registered.sessions[0], registered.sessions[0]],
+  }
+  try validate_account_state(invalid) catch {
+    error => assert_true("\{error}".contains("duplicate sessions"))
+  } noraise {
+    _ => fail("duplicate persisted sessions must be rejected")
+  }
+}
+
+///|
 test "enterprise payment never grants organization administration" {
   let enterprise_member = account_context_for(
     test_principal(PaidPlan, tenant_access=[enterprise_access()]),

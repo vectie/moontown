@@ -149,7 +149,6 @@ pub fn account_context_for(
     active_tenant_name: active_tenant.map(access => access.tenant_name),
     tenant_choices: principal.tenant_access.filter(access => access.active),
     home_surface,
-    visitor: principal.personal_plan == VisitorPlan &&
-    principal.tenant_access.all(access => !access.active),
+    visitor: account_kind == VisitorAccount,
   }
 }

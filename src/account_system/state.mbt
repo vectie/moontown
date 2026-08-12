@@ -34,6 +34,34 @@ fn migrate_account_state_json(value : Json) -> Json {
 }
 
 ///|
+/// v1 allowed an enterprise plan to leak into the personal billing field.
+/// Enterprise authority is tenant-scoped in v2, so retain the paid personal
+/// workspace while preserving all tenant access during migration.
+fn normalize_account_state(state : AccountState) -> AccountState {
+  let principals = state.principals.map(principal => {
+    if principal.personal_plan == EnterprisePlan {
+      { ..principal, personal_plan: PaidPlan }
+    } else {
+      principal
+    }
+  })
+  let subscriptions = state.subscriptions.map(subscription => {
+    let mut plan = if subscription.plan == EnterprisePlan {
+      PaidPlan
+    } else {
+      subscription.plan
+    }
+    for principal in principals {
+      if principal.user_id == subscription.principal_id {
+        plan = principal.personal_plan
+      }
+    }
+    { ..subscription, plan, }
+  })
+  { ..state, principals, subscriptions }
+}
+
+///|
 fn optional_account_string_projection(value : String?) -> Json {
   match value {
     Some(text) => text.to_json()
