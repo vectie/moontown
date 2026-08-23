@@ -109,6 +109,7 @@ fn candidate_next_status(status : String, event : String) -> String? {
   match (status, event) {
     ("submitted", "route") => Some("routed")
     ("routed", "request-review") => Some("review-pending")
+    ("review-pending", "receive") => Some("review-pending")
     ("routed", "accept") | ("review-pending", "accept") => Some("accepted")
     ("routed", "reject") | ("review-pending", "reject") => Some("rejected")
     ("submitted", "withdraw")

@@ -119,3 +119,18 @@ pub(all) struct PackCandidateReceipt {
   evidence_refs : Array[String]
   issue : String?
 } derive(Debug, Eq, ToJson, FromJson)
+
+///|
+/// Pack-owned evidence that settles a candidate previously delivered through
+/// the workspace mailbox. MoonTown validates the bound pack, operation, and
+/// candidate identity before applying the decision.
+pub(all) struct PackCandidateAcknowledgement {
+  contract_id : String
+  candidate_ref : String
+  pack_id : String
+  operation_id : String
+  decision : String
+  occurred_at : String
+  evidence_refs : Array[String]
+  issue : String?
+} derive(Debug, Eq, ToJson, FromJson)

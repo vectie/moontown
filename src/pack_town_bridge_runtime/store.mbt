@@ -260,6 +260,17 @@ pub async fn discover_active_packs(
         manifest_ref,
       ),
     )
+    reconcile_pack_mailbox(
+      workspace, state, activation, manifest_ref, occurred_at,
+    ) catch {
+      error =>
+        record_mailbox_failure(
+          state,
+          activation,
+          occurred_at,
+          "pack mailbox verification failed: \{error}",
+        )
+    }
   }
   for index, lifecycle in state.lifecycles {
     if !active_ids.contains(lifecycle.pack_id) &&
@@ -386,6 +397,11 @@ pub async fn submit_candidate(
     }
     None => ()
   }
+  let inbox_ref = deliver_candidate_to_pack(
+    workspace,
+    activation.product_id,
+    candidate,
+  )
   let submitted = @pack_town_bridge.submitted_candidate_receipt(
     candidate, occurred_at,
   )
@@ -393,7 +409,7 @@ pub async fn submit_candidate(
     submitted,
     "route",
     occurred_at,
-    [],
+    [inbox_ref],
   ).unwrap()
   let receipt = if route.review_required {
     @pack_town_bridge.transition_candidate_receipt(

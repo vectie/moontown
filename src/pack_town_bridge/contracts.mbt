@@ -39,6 +39,11 @@ pub fn candidate_receipt_contract_id() -> String {
 }
 
 ///|
+pub fn candidate_acknowledgement_contract_id() -> String {
+  "moontown.pack-candidate-acknowledgement.v1"
+}
+
+///|
 pub fn pack_lifecycle_stages() -> Array[String] {
   [
     "draft", "validated", "installed", "active", "projecting", "degraded", "inactive",

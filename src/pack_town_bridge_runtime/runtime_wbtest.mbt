@@ -150,10 +150,117 @@ async test "runtime discovers projects and routes a reviewed bottom-up candidate
   let submitted = submit_candidate(workspace, state_path, candidate, "t3")
   assert_true(submitted.accepted)
   assert_eq(submitted.receipt.status, "review-pending")
+  let inbox_ref = candidate_inbox_ref(
+    "bridge-fixture", "town/candidates/fixture-one",
+  )
+  assert_true(@fs.exists(workspace + "/" + inbox_ref))
+  assert_eq(
+    @json.parse(@fs.read_file(workspace + "/" + inbox_ref).text()),
+    candidate,
+  )
+  let acknowledgement_ref = candidate_acknowledgement_ref(
+    "bridge-fixture", "town/candidates/fixture-one",
+  )
+  ensure_parent_directory(workspace + "/" + acknowledgement_ref)
+  let acknowledgement : Json = {
+    "contract_id": "moontown.pack-candidate-acknowledgement.v1",
+    "candidate_ref": "town/candidates/fixture-one",
+    "pack_id": "bridge-fixture",
+    "operation_id": "fixture.candidate.intake",
+    "decision": "received",
+    "occurred_at": "t4",
+    "evidence_refs": ["records/fixture-one.json"],
+  }
+  @fs.write_file(
+    workspace + "/" + acknowledgement_ref,
+    @encoding/utf8.encode(acknowledgement.stringify()),
+    create_mode=CreateOrTruncate,
+    permission=0o644,
+  )
+  let reconciled = discover_active_packs(workspace, state_path, "t4")
+  assert_eq(reconciled.candidates[0].status, "review-pending")
+  assert_true(
+    reconciled.candidates[0].evidence_refs.contains(acknowledgement_ref),
+  )
+  let replayed = discover_active_packs(workspace, state_path, "t5")
+  assert_eq(replayed.candidates[0].sequence, reconciled.candidates[0].sequence)
   let reloaded = load_runtime_state(state_path)
   assert_eq(reloaded.projections.projections.length(), 1)
   assert_eq(reloaded.candidates.length(), 1)
   assert_eq(reloaded.candidate_envelopes.length(), 1)
+  @fs.rmdir(source, recursive=true)
+  @fs.rmdir(workspace, recursive=true)
+}
+
+///|
+async test "runtime automatically reconciles a pack-published projection" {
+  let source = @fs.tmpdir(prefix="moontown-pack-bridge-outbox-source")
+  let workspace = @fs.tmpdir(prefix="moontown-pack-bridge-outbox-workspace")
+  let state_path = workspace + "/bridge/state.json"
+  write_bridge_fixture(source)
+  let profile : @installer.HostProfile = {
+    contract: "moonsuite.pack-host-profile.v1",
+    runtime_extensions: [],
+    granted_authorities: [Observe, WorkspaceMutation],
+  }
+  @installer.install_authorized(source, workspace, profile) |> ignore
+  let projection : Json = {
+    "contract_id": "moontown.pack-projection.v1",
+    "pack_id": "bridge-fixture",
+    "product_id": "bridge-fixture",
+    "version": "1.0.0",
+    "generated_at": "t2",
+    "subjects": [],
+  }
+  let outbox_ref = projection_outbox_ref("bridge-fixture")
+  ensure_parent_directory(workspace + "/" + outbox_ref)
+  @fs.write_file(
+    workspace + "/" + outbox_ref,
+    @encoding/utf8.encode(projection.stringify()),
+    create_mode=CreateOrTruncate,
+    permission=0o644,
+  )
+  let discovered = discover_active_packs(workspace, state_path, "t2")
+  assert_eq(discovered.projections.projections.length(), 1)
+  assert_eq(discovered.lifecycles[0].stage, "projecting")
+  let sequence = discovered.lifecycles[0].sequence
+  let replayed = discover_active_packs(workspace, state_path, "t3")
+  assert_eq(replayed.lifecycles[0].sequence, sequence)
+  @fs.rmdir(source, recursive=true)
+  @fs.rmdir(workspace, recursive=true)
+}
+
+///|
+async test "invalid pack outbox degrades lifecycle without breaking discovery" {
+  let source = @fs.tmpdir(prefix="moontown-pack-bridge-bad-outbox-source")
+  let workspace = @fs.tmpdir(prefix="moontown-pack-bridge-bad-outbox-workspace")
+  let state_path = workspace + "/bridge/state.json"
+  write_bridge_fixture(source)
+  let profile : @installer.HostProfile = {
+    contract: "moonsuite.pack-host-profile.v1",
+    runtime_extensions: [],
+    granted_authorities: [Observe, WorkspaceMutation],
+  }
+  @installer.install_authorized(source, workspace, profile) |> ignore
+  let outbox_ref = projection_outbox_ref("bridge-fixture")
+  ensure_parent_directory(workspace + "/" + outbox_ref)
+  @fs.write_file(
+    workspace + "/" + outbox_ref,
+    @encoding/utf8.encode("not-json"),
+    create_mode=CreateOrTruncate,
+    permission=0o644,
+  )
+  let discovered = discover_active_packs(workspace, state_path, "t2")
+  assert_eq(discovered.capabilities.length(), 1)
+  assert_eq(discovered.lifecycles[0].stage, "degraded")
+  assert_true(
+    discovered.lifecycles[0].issue
+    .unwrap_or("")
+    .contains("mailbox verification failed"),
+  )
+  let sequence = discovered.lifecycles[0].sequence
+  let replayed = discover_active_packs(workspace, state_path, "t3")
+  assert_eq(replayed.lifecycles[0].sequence, sequence)
   @fs.rmdir(source, recursive=true)
   @fs.rmdir(workspace, recursive=true)
 }
@@ -195,9 +302,7 @@ async test "rejected projection version preserves active lifecycle identity and 
   let discovered = discover_active_packs(workspace, state_path, "t4")
   assert_eq(discovered.lifecycles[0].version, "1.0.0")
   assert_eq(discovered.lifecycles[0].stage, "degraded")
-  assert_eq(discovered.projections.projections, [
-    @json.from_json(valid),
-  ])
+  assert_eq(discovered.projections.projections, [@json.from_json(valid)])
   @fs.rmdir(source, recursive=true)
   @fs.rmdir(workspace, recursive=true)
 }
