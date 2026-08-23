@@ -12,6 +12,7 @@ import {
 import './viewport_drag_pan.js'
 import { installAccountManagement } from './account_management.js'
 import { ACCOUNT_DEMO_FIXTURES } from './account_demo_fixtures.js'
+import { installPackBridgePanel } from './pack_bridge_panel.js'
 
 const app = document.getElementById('app')
 const ACCOUNT_SESSION_KEY = 'moontown.account-session.v1'
@@ -172,6 +173,7 @@ async function startMoontown() {
   startRuntimeSnapshotRefresh()
   await import('./main.js?spatial-props-v7')
   installAccountManagement()
+  installPackBridgePanel()
 }
 
 void startMoontown().catch(error => {
