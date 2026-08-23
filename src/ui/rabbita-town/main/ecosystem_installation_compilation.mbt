@@ -107,6 +107,11 @@ fn ecosystem_contract_installations(
           .search_by(source => ecosystem_contract_id(source.id) == portal.id)
           .map(source_index => snapshot.entrances[source_index].label)
           .unwrap_or((index + 1).to_string())
+        let position = match
+          metro_line17_station_exit_position(place.name, exit_label) {
+          Some((x, y)) => @energy_valley_contract.world_point(x, y)
+          None => portal.position
+        }
         result.push(
           @energy_valley_contract.installation(
             ecosystem_contract_scoped_id(
@@ -115,7 +120,7 @@ fn ecosystem_contract_installations(
             ),
             "\{place.name} \{exit_label} 口",
             @energy_valley_contract.TransitEntrance,
-            @energy_valley_contract.installation_point(portal.position),
+            @energy_valley_contract.installation_point(position),
             reference,
             owner_place_id=Some(place.id),
             interactive=true,

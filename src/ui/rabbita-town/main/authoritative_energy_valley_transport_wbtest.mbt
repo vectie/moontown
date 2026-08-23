@@ -188,7 +188,10 @@ test "transport changes presentation and Line 17 without replacing MoonTown" {
   let seed = 20260727
   let fallback = exact_energy_valley_generate_int(seed)
   let fallback_metro = metro_line17_path()
-  assert_eq(fallback_metro[0], (139.5, 143.5))
+  // The reference road graph is deliberately installed above, so the
+  // transport-free baseline is the authored reference Line 17 geometry, not
+  // the last-resort hard-coded polyline used when no reference data exists.
+  assert_eq(fallback_metro[0], (125.0, 52.0))
   assert_false(authoritative_energy_valley_transport_ready())
 
   assert_true(authoritative_transport_test_install())
@@ -262,12 +265,30 @@ test "transport changes presentation and Line 17 without replacing MoonTown" {
   assert_eq(exact_exit_count, 7)
   assert_eq(distinct_exit_positions.length(), 7)
   assert_true(all_exact_entrances_visible)
-  assert_false(
-    town_snapshot_transit_entrance_visible(
-      snapshot,
-      @energy_valley_contract.world_point(137.555, 84.529),
-    ),
-  )
+  let mut occupied_reference_cell = None
+  for y in 0..<golden_valley_rows() {
+    for x in 0..<golden_valley_cols() {
+      if wenyu_reference_building_kind_from_code(
+          reference_building_code_at(x, y),
+        )
+        is Some(_) {
+        occupied_reference_cell = Some(
+          @energy_valley_contract.world_point(
+            x.to_double() + 0.5,
+            y.to_double() + 0.5,
+          ),
+        )
+        break
+      }
+    }
+    if occupied_reference_cell is Some(_) {
+      break
+    }
+  }
+  guard occupied_reference_cell is Some(occupied_point) else {
+    fail("expected an occupied authored reference cell")
+  }
+  assert_false(town_snapshot_transit_entrance_visible(snapshot, occupied_point))
 
   let mut hidden_fixed_road_furniture = false
   let mut visible_woodland_tree = false
