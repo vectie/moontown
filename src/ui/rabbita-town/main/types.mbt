@@ -262,6 +262,8 @@ priv struct Model {
   snapshot_version : Int
   energy_valley_runtime : EnergyValleyRuntimeState
   energy_first_agent_open : Bool
+  secret_compute_room_open : Bool
+  secret_compute_room_selected_id : String
   visual_projection : VisualProjectionSnapshot?
   visual_projection_version : Int
   module_projections : Array[BookProjectionFragment]
@@ -396,6 +398,9 @@ priv enum Msg {
   SelectAgent(String)
   SelectNode(String)
   SelectOverview
+  OpenSecretComputeRoom
+  CloseSecretComputeRoom
+  SelectSecretComputeEndpoint(String)
   SetEnergyWeather(EnergyWeather)
   ToggleEnergyWeatherAuto
   SetEnergyTimeScale(Int)

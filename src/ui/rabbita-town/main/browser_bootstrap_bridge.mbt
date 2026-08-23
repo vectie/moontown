@@ -19,6 +19,10 @@ extern "js" fn energy_valley_runtime_version() -> Int =
   #| () => globalThis.__moontownEnergyValleyRuntimeVersion || 0
 
 ///|
+extern "js" fn load_bootstrap_secret_compute_room_json() -> String =
+  #| () => globalThis.__moontownSecretComputeRoomJson || ""
+
+///|
 extern "js" fn browser_now_ms() -> Double =
   #| () => Date.now()
 

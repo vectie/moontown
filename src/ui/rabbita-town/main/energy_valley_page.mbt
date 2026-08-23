@@ -5,6 +5,9 @@ fn render_energy_valley_page(
   dispatch : Dispatch[Msg],
   model : Model,
 ) -> @rabbita.Html {
+  if model.secret_compute_room_open {
+    return render_secret_compute_room(dispatch, model)
+  }
   // Page orchestration compiles one immutable semantic frame. Both canvases,
   // the inspector, and pointer routing share this exact accepted snapshot.
   let snapshot = ecosystem_contract_town_snapshot(
@@ -302,6 +305,15 @@ fn render_town_action_rail(
 ) -> @rabbita.Html {
   let actions : Array[@rabbita.Html] = []
   if !onboarding {
+    actions.push(
+      button(
+        class="town-action town-action-secondary compute-room-lift-action",
+        title="进入只读、脱敏的算力基础设施层",
+        on_click=dispatch(OpenSecretComputeRoom),
+        attrs=@html.Attrs::build().aria_label("进入秘密算力室"),
+        "算力室",
+      ),
+    )
     actions.push(
       button(
         class=if model.phone_open {

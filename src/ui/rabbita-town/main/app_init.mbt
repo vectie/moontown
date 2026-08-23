@@ -80,6 +80,8 @@ fn init_model() -> Model {
     snapshot_version: town_snapshot_version(),
     energy_valley_runtime,
     energy_first_agent_open: false,
+    secret_compute_room_open: current_browser_query_param("layer") == "compute",
+    secret_compute_room_selected_id: "moongate",
     visual_projection,
     visual_projection_version: visual_projection_version(),
     module_projections,

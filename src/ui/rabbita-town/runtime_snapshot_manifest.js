@@ -18,6 +18,13 @@ export const RUNTIME_TEXT_SNAPSHOTS = [
       '{"schema":"moontown.energy-valley.runtime.v1","mode":"error","observedAt":"","tasks":[],"agents":[],"message":"Unable to read the MoonTown runtime."}',
   },
   {
+    url: './secret-compute-room.json',
+    jsonGlobal: '__moontownSecretComputeRoomJson',
+    versionGlobal: '__moontownSecretComputeRoomVersion',
+    fallback:
+      '{"schema":"moontown.secret-compute-room.v1","mode":"unavailable","observed_at":"","authority":{"agent_boundary":"MoonGate","local_control_plane":"LunaNexa","claim":"read-only redacted projection"},"gateway":{"state":"unreachable","active_targets":[],"model_count":0},"local_cluster":{"configured":false,"state":"not-configured","machines":[]},"remote_routes":[{"id":"codex","label":"Codex / OpenAI","state":"not-observed","evidence":"MoonGate is not reachable from this MoonTown service."},{"id":"deepseek","label":"DeepSeek","state":"not-observed","evidence":"MoonGate is not reachable from this MoonTown service."},{"id":"glm","label":"GLM","state":"not-observed","evidence":"MoonGate is not reachable from this MoonTown service."},{"id":"kimi","label":"Kimi","state":"not-observed","evidence":"MoonGate is not reachable from this MoonTown service."}]}',
+  },
+  {
     url: './town.json',
     jsonGlobal: '__moontownTownSnapshotJson',
     versionGlobal: '__moontownTownSnapshotVersion',

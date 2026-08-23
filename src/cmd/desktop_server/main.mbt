@@ -650,6 +650,14 @@ async fn handle_request(
     send_json(conn, 200, energy_valley_runtime_projection())
     return
   }
+  if path == "/secret-compute-room.json" {
+    if !(request.meth is Get) {
+      send_json(conn, 405, { "ok": false, "error": "GET required" })
+      return
+    }
+    send_json(conn, 200, secret_compute_room_projection())
+    return
+  }
   if path == "/knowledge-domain-catalog.json" {
     if !(request.meth is Get) {
       send_json(conn, 405, { "ok": false, "error": "GET required" })

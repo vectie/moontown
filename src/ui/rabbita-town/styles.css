@@ -17,6 +17,7 @@
 @import url("./styles/energy-valley-ecosystem.css");
 @import url("./styles/map-lab.css");
 @import url("./styles/semantic-interior.css");
+@import url("./styles/secret-compute-room.css");
 
 @media (max-width: 1220px) {
   .runtime-grid,

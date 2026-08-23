@@ -17,5 +17,6 @@ fn close_town_transient_surfaces(model : Model) -> Model {
     square_open: false,
     ops_open: false,
     knowledge_dialog_open: false,
+    secret_compute_room_open: false,
   }
 }

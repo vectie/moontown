@@ -73,6 +73,19 @@ fn update_non_form_message(
     SelectNode(node_key) =>
       model_only_update({ ..model, selection: Node(node_key) })
     SelectOverview => model_only_update({ ..model, selection: Overview })
+    OpenSecretComputeRoom =>
+      model_only_update({
+        ..close_town_transient_surfaces(model),
+        secret_compute_room_open: true,
+        secret_compute_room_selected_id: "moongate",
+      })
+    CloseSecretComputeRoom =>
+      model_only_update({ ..model, secret_compute_room_open: false })
+    SelectSecretComputeEndpoint(endpoint_id) =>
+      model_only_update({
+        ..model,
+        secret_compute_room_selected_id: endpoint_id,
+      })
     SetEnergyWeather(weather) =>
       model_only_update({
         ..model,
