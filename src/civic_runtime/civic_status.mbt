@@ -95,10 +95,17 @@ pub async fn render_wenyu_civic_status(
 pub async fn write_wenyu_civic_status(
   book_catalog_path? : String = @moonbook.default_catalog_path(),
   status_path? : String = default_wenyu_civic_status_path(),
+  protocol_status_path? : String = default_wenyu_protocol_status_path(),
+  protocol_registry_path? : String = default_wenyu_protocol_registry_path(),
 ) -> String {
   let portfolio = inspect_wenyu_civic_services(book_catalog_path~, status_path~)
   @support.write_text_file(status_path, portfolio.to_json().stringify(indent=2))
-  ignore(write_wenyu_building_protocol_status())
+  ignore(
+    write_wenyu_building_protocol_status(
+      status_path=protocol_status_path,
+      registry_path=protocol_registry_path,
+    ),
+  )
   @support.write_text_file(
     portfolio.markdown_path,
     render_wenyu_civic_portfolio(portfolio),

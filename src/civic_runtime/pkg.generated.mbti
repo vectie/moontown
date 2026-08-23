@@ -97,7 +97,7 @@ pub async fn write_protocol_jsonl_records(String, String, Array[Json], ledger_ba
 
 pub async fn write_wenyu_building_protocol_status(status_path? : String, registry_path? : String) -> String
 
-pub async fn write_wenyu_civic_status(book_catalog_path? : String, status_path? : String) -> String
+pub async fn write_wenyu_civic_status(book_catalog_path? : String, status_path? : String, protocol_status_path? : String, protocol_registry_path? : String) -> String
 
 pub async fn write_wenyu_civic_workspace_seed(@moonbook.BookCatalogEntry, String) -> Unit
 

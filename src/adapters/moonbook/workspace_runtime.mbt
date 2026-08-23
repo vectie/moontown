@@ -58,9 +58,10 @@ async fn moonbook_runtime_invocation(
 }
 
 ///|
-fn result_temp_path(task_id : String) -> String {
+fn result_temp_path(workspace_root : String, task_id : String) -> String {
   resolved_root_path(
-    @storage.moontown_product_artifact(
+    @storage.moontown_product_artifact_for_workspace_root(
+      workspace_root,
       "book-results/\{safe_result_temp_name(task_id)}.json",
     ),
   )

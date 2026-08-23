@@ -84,8 +84,21 @@ async fn materialize_civic_communication_scenario(
     )
   }
   let protocol = civic_communication_protocol_for_scenario(scenario)
+  let product_root = if workspace_base.trim().is_empty() {
+    @storage.moontown_product_state_dir()
+  } else {
+    @storage.moontown_product_state_dir_for_workspace_root(workspace_base)
+  }
+  let protocol_status_path = product_root + "/civic/protocol-status.json"
+  let protocol_registry_path = product_root + "/civic/protocols.json"
   seed_civic_communication_protocol_slice(
-    scenario, protocol, participants, ideas, round_id, round_number,
+    scenario,
+    protocol,
+    participants,
+    ideas,
+    round_id,
+    round_number,
+    ledger_base_dir=product_root + "/civic/protocols",
   )
   write_civic_communication_building_pages(
     scenario,
@@ -96,9 +109,16 @@ async fn materialize_civic_communication_scenario(
     round_id,
     round_number,
     civic_communication_workspace_root(protocol.book_id, workspace_base),
+    ledger_base_dir=product_root + "/civic/protocols",
   )
-  ignore(write_wenyu_building_protocol_status())
-  ignore(write_wenyu_civic_status())
+  ignore(
+    write_wenyu_civic_status(
+      book_catalog_path~,
+      status_path=product_root + "/civic/status.json",
+      protocol_status_path~,
+      protocol_registry_path~,
+    ),
+  )
   civic_communication_seeded_summary(
     scenario, round_id, participants, ideas, metrics, reducer_summary,
   )

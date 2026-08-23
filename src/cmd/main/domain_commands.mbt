@@ -64,6 +64,8 @@ async fn render_civic_protocols_command(args : Array[String]) -> String {
       @civic_runtime.run_due_civic_communication_patterns()
     ["schedules", "status"] =>
       @civic_runtime.render_civic_communication_schedule_status()
+    ["schedules", "status", snapshot_path] =>
+      @civic_runtime.render_civic_communication_schedule_status(snapshot_path~)
     _ => @moontown.load_or_create_saved_dashboard()
   }
 }

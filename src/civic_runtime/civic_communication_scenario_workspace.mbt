@@ -92,6 +92,7 @@ async fn write_civic_communication_building_pages(
   round_id : String,
   round_number : Int,
   root : String,
+  ledger_base_dir? : String = default_protocol_ledger_base_dir(),
 ) -> Unit {
   @support.write_text_file(
     "\{root}/\{scenario.synthesis_path}",
@@ -118,7 +119,7 @@ async fn write_civic_communication_building_pages(
     metrics.to_json().stringify(indent=2),
   )
   @support.write_text_file(
-    "\{protocol_ledger_dir(protocol.building_id)}/metrics.json",
+    "\{protocol_ledger_dir(protocol.building_id, ledger_base_dir~)}/metrics.json",
     metrics.to_json().stringify(indent=2),
   )
   let html = civic_communication_building_html(

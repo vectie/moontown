@@ -82,7 +82,7 @@ pub async fn persist_result_payload(
         "MoonBook persist payload must be a BookResult or mooncode-book-result envelope",
       )
   }
-  let path = result_temp_path(result.result_id)
+  let path = result_temp_path(entry.workspace_root, result.result_id)
   save_result_payload_file(path, payload)
   let json = run_book_json_command(
     entry,

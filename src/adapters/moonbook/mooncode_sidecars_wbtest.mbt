@@ -56,7 +56,8 @@ test "mooncode sidecar processed ledger uses moontown product home" {
   )
   assert_eq(
     mooncode_book_results_processed_ledger(entry),
-    @storage.moontown_product_artifact(
+    @storage.moontown_product_artifact_for_workspace_root(
+      entry.workspace_root,
       "mooncode-book-results/book-with-spaces/processed.jsonl",
     ),
   )
@@ -92,10 +93,6 @@ async test "mooncode sidecar reconciler imports through moonbook cli and dedupes
   let suite_root = "/tmp/moontown-mooncode-sidecar-e2e-suite"
   let root = "\{suite_root}/books/sidecar-e2e"
   @support.ignore_checked_command("rm", ["-rf", suite_root])
-  @support.ignore_checked_command("rm", [
-    "-rf",
-    @storage.moontown_product_artifact("mooncode-book-results/sidecar-e2e"),
-  ])
   let entry = BookCatalogEntry::new(
     id="sidecar-e2e",
     name="Sidecar E2E",

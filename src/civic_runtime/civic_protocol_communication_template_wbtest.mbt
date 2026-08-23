@@ -38,6 +38,20 @@ async test "civic communication scenario template can seed a non-hardcoded domai
     participant_projection.contains("\"projection_scope\": \"internal\""),
   )
   assert_true(participant_projection.contains("\"participant-workspace\""))
+  assert_true(
+    @fs.exists(
+      root + "/.moonsuite/products/moontown/civic/protocol-status.json",
+    ),
+  )
+  assert_true(
+    @fs.exists(root + "/.moonsuite/products/moontown/civic/status.json"),
+  )
+  assert_true(
+    @fs.exists(
+      root +
+      "/.moonsuite/products/moontown/civic/protocols/social-square/outbox.jsonl",
+    ),
+  )
   let snapshot_path = "\{root}/town.json"
   assert_true(
     @fs.exists(civic_communication_scenario_path(scenario.id, snapshot_path~)),

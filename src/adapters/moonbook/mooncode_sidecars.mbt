@@ -22,7 +22,8 @@ fn mooncode_book_results_sessions_root(book_root : String) -> String {
 
 ///|
 fn mooncode_book_results_processed_ledger(entry : BookCatalogEntry) -> String {
-  @storage.moontown_product_artifact(
+  @storage.moontown_product_artifact_for_workspace_root(
+    entry.workspace_root,
     "mooncode-book-results/\{safe_mooncode_book_result_id(entry.id)}/processed.jsonl",
   )
 }

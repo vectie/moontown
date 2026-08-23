@@ -30,3 +30,7 @@ import {
 supported_targets = "native"
 
 pkgtype(kind: "executable")
+
+import {
+  "moonbitlang/async/fs",
+} for "wbtest"
