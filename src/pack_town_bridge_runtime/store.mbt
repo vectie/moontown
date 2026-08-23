@@ -303,7 +303,7 @@ pub async fn ingest_projection(
   let lifecycle = activated_lifecycle(
     Some(state.lifecycles[index]),
     projection.pack_id,
-    projection.version,
+    activation.version,
     occurred_at,
     manifest_ref,
   )

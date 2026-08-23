@@ -159,6 +159,50 @@ async test "runtime discovers projects and routes a reviewed bottom-up candidate
 }
 
 ///|
+async test "rejected projection version preserves active lifecycle identity and last good projection" {
+  let source = @fs.tmpdir(prefix="moontown-pack-bridge-version-source")
+  let workspace = @fs.tmpdir(prefix="moontown-pack-bridge-version-workspace")
+  let state_path = workspace + "/bridge/state.json"
+  write_bridge_fixture(source)
+  let profile : @installer.HostProfile = {
+    contract: "moonsuite.pack-host-profile.v1",
+    runtime_extensions: [],
+    granted_authorities: [Observe, WorkspaceMutation],
+  }
+  @installer.install_authorized(source, workspace, profile) |> ignore
+  let valid : Json = {
+    "contract_id": "moontown.pack-projection.v1",
+    "pack_id": "bridge-fixture",
+    "product_id": "bridge-fixture",
+    "version": "1.0.0",
+    "generated_at": "t2",
+    "subjects": [],
+  }
+  let accepted = ingest_projection(workspace, state_path, valid, "t2")
+  assert_true(accepted.accepted)
+  let mismatched : Json = {
+    "contract_id": "moontown.pack-projection.v1",
+    "pack_id": "bridge-fixture",
+    "product_id": "bridge-fixture",
+    "version": "99.0.0",
+    "generated_at": "t3",
+    "subjects": [],
+  }
+  let rejected = ingest_projection(workspace, state_path, mismatched, "t3")
+  assert_false(rejected.accepted)
+  assert_eq(rejected.lifecycle.version, "1.0.0")
+  assert_eq(rejected.lifecycle.stage, "degraded")
+  let discovered = discover_active_packs(workspace, state_path, "t4")
+  assert_eq(discovered.lifecycles[0].version, "1.0.0")
+  assert_eq(discovered.lifecycles[0].stage, "degraded")
+  assert_eq(discovered.projections.projections, [
+    @json.from_json(valid),
+  ])
+  @fs.rmdir(source, recursive=true)
+  @fs.rmdir(workspace, recursive=true)
+}
+
+///|
 async test "runtime state migrates additive lifecycle fields" {
   let workspace = @fs.tmpdir(prefix="moontown-pack-bridge-migration")
   let state_path = workspace + "/state.json"
