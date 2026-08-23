@@ -474,6 +474,10 @@ fn render_secret_compute_room(
   model : Model,
 ) -> @rabbita.Html {
   let projection = parse_bootstrap_secret_compute_room_projection()
+  let return_label = match model.town_spatial_layer {
+    Underground(Some(building)) => "↑ 返回 \{building.name}"
+    _ => "↑ 返回小镇"
+  }
   @html.main_(class="secret-compute-room", [
     div(class="compute-room-ambient ambient-a", ""),
     div(class="compute-room-ambient ambient-b", ""),
@@ -490,8 +494,8 @@ fn render_secret_compute_room(
         button(
           class="compute-room-exit",
           on_click=dispatch(CloseSecretComputeRoom),
-          attrs=@html.Attrs::build().aria_label("返回能源谷地面层"),
-          "↑ 返回小镇",
+          attrs=@html.Attrs::build().aria_label(return_label),
+          return_label,
         ),
       ]),
     ]),
@@ -501,47 +505,7 @@ fn render_secret_compute_room(
         "这是受控本地环境中的脱敏投影；它不提供远程 Shell、凭据查看或直接调度。",
       ),
     ]),
-    section(
-      class="compute-room-scene",
-      attrs=@html.Attrs::build().aria_label(
-        "Agent 到算力控制面的连接图",
-      ),
-      [
-        div(
-          class="compute-room-route-lines",
-          attrs=@html.Attrs::build().aria_hidden("true"),
-          [
-            span(class="route-line line-agent", ""),
-            span(class="route-line line-local", ""),
-            span(class="route-line line-remote", ""),
-          ],
-        ),
-        render_secret_compute_agents(model),
-        div(class="compute-gateway-zone", [
-          p(class="compute-gateway-overline", "GOVERNED ROUTER"),
-          render_secret_compute_gateway(
-            dispatch,
-            projection,
-            model.secret_compute_room_selected_id,
-          ),
-          div(class="compute-receipt-legend", [
-            span("① provider selected"),
-            span("② binding verified"),
-            span("③ execution receipt"),
-          ]),
-        ]),
-        render_secret_compute_local_cluster(
-          dispatch,
-          projection,
-          model.secret_compute_room_selected_id,
-        ),
-        render_secret_compute_remote_routes(
-          dispatch,
-          projection,
-          model.secret_compute_room_selected_id,
-        ),
-      ],
-    ),
+    render_secret_compute_graphical_scene(dispatch, model, projection),
     render_secret_compute_evidence(
       projection,
       model.secret_compute_room_selected_id,

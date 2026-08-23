@@ -11,13 +11,14 @@ import {
 const frontendRoot = path.resolve(import.meta.dirname, '..')
 const assetRoot = path.resolve(frontendRoot, '../assets')
 const distRoot = path.join(frontendRoot, 'dist')
-// The governed compute-room layer adds one MoonBit-rendered spatial scene and
-// remains within a narrowly raised, explicit release ceiling.
-const MAX_DIST_BYTES = 65 * 1024 * 1024
+// The governed spatial layers include two transparent authored prop atlases.
+// Keep their release cost inside a narrow, explicit ceiling.
+const MAX_DIST_BYTES = 69 * 1024 * 1024
 const REQUIRED_BROWSER_FILES = [
   'index.html',
   'viewport.html',
   'operations.html',
+  'account_demo_fixtures.js',
   'account_management.js',
   'bootstrap.js',
   'main.js',
@@ -181,7 +182,7 @@ for (const file of manifest.files) {
 
 assert.ok(
   totalBytes < MAX_DIST_BYTES,
-  `production artifact is ${(totalBytes / 1024 / 1024).toFixed(1)} MiB; budget is 65 MiB`,
+  `production artifact is ${(totalBytes / 1024 / 1024).toFixed(1)} MiB; budget is 69 MiB`,
 )
 
 console.log(

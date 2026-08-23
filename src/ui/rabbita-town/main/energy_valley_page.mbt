@@ -5,8 +5,9 @@ fn render_energy_valley_page(
   dispatch : Dispatch[Msg],
   model : Model,
 ) -> @rabbita.Html {
-  if model.secret_compute_room_open {
-    return render_secret_compute_room(dispatch, model)
+  match model.town_spatial_layer {
+    Underground(_) => return render_secret_compute_room(dispatch, model)
+    _ => ()
   }
   // Page orchestration compiles one immutable semantic frame. Both canvases,
   // the inspector, and pointer routing share this exact accepted snapshot.
@@ -14,6 +15,13 @@ fn render_energy_valley_page(
     model,
     active_energy_valley_seed(),
   )
+  match model.town_spatial_layer {
+    Indoor(building) =>
+      return render_energy_valley_building_interior(
+        dispatch, model, snapshot, building,
+      )
+    _ => ()
+  }
   render_energy_valley_page_with_snapshot(dispatch, model, snapshot)
 }
 

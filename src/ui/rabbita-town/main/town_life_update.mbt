@@ -344,3 +344,27 @@ fn open_building_update(model : Model, building_id : String) -> (Cmd, Model) {
     None => model_only_update(opened)
   }
 }
+
+///|
+fn enter_building_interior_update(
+  model : Model,
+  building_id : String,
+) -> (Cmd, Model) {
+  let opened = energy_valley_open_registered_building_model(model, building_id)
+  match opened.energy_selected_building {
+    Some(building) => {
+      guard golden_valley_building_for_identity([building], building_id)
+        is Some(_) else {
+        return model_only_update(opened)
+      }
+      let closed = close_town_transient_surfaces(opened)
+      let next = set_town_spatial_layer_model(
+        { ..closed, energy_selected_building: None, selection: Overview },
+        TownSpatialLayer::Indoor(building),
+      )
+      let next = track_event(next, "building_enter", building_id)
+      town_life_commit(complete_quest(next, "visit-building"))
+    }
+    None => model_only_update(opened)
+  }
+}

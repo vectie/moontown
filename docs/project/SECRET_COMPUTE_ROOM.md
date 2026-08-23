@@ -152,6 +152,97 @@ keyboard-focusable row with a text state. Status never relies on color alone.
 The mobile layout becomes a vertical evidence list, and motion is removed under
 `prefers-reduced-motion`.
 
+The visual language is inherited from the outdoor town rather than introduced
+as a separate operations-dashboard theme. Indoor and underground use the same
+late-morning spring palette, warm civic whites, blue-grey outlines, matte
+two-value isometric faces, soft directional shadows, and outdoor resident
+sprite family. Underground lowers the brightness through masonry and earth
+tones, but it does not become neon, glossy, or cyberpunk.
+
+The underground background establishes a physical room before the semantic
+equipment is placed: an excavated rock canopy, structural ceiling beam, warm
+work lights, supply and return pipes, ventilation, masonry wall panels,
+supporting columns, an isometric service floor, and a cable trench. These are
+renderer-owned architectural context. They explain why this is below the town
+and make the racks, MoonGate plinth, remote wall, and Agent consoles read as
+objects sharing one place rather than cards floating in a panel.
+
+## Semantic scene mapping
+
+Indoor and underground are graphical world scenes, not dashboard metaphors.
+Every meaningful visible object is projected from an authoritative entity:
+
+- the indoor room shell is the compiled `Place` and retains its stable ID;
+- doors are `EntrancePortal` records, including the contract's primary flag;
+- furnished work, meeting, exchange, exhibit, service, stage, bench, and gate
+  zones are `InteractionSlot` records. Furniture shape is selected from
+  `InteractionKind`. Position starts from the slot's `WorldPoint`; when civic
+  map slots intentionally share a point, the renderer blends that point with a
+  deterministic kind-specific furnishing bay so real objects remain separately
+  visible rather than painting over one another;
+- visible indoor Agents are `ActorPresence` records joined to `ActorProfile`;
+  they only appear at the slot named by `interaction_slot_id`;
+- underground Agent consoles are active `EnergyValleyRuntimeAgent` records;
+- rack units are reported `SecretComputeMachine` records from LunaNexa;
+- remote wall ports are `SecretComputeRemoteRoute` records from MoonGate;
+- the central governed plinth is the fixed MoonGate authority boundary.
+
+Walls, excavated rock, structural columns, pipes, ventilation, floor grids,
+lighting, service trenches, cable trays, and vacant rack frames are
+renderer-owned structure. Authored furniture form is selected by a real
+`InteractionSlot`, so it has no independent identity beyond that slot. A vacant
+rack means physical capacity only; a `SecretComputeMachine` replaces that frame
+with an occupied rack and is the sole authority for installed server units.
+These distinctions are explicitly identified in the UI, and structural objects
+must never be counted, selected, or reported as system entities. Empty scenes
+remain operationally empty instead of being filled with decorative Agents or
+servers.
+
+## Three spatial layers
+
+MoonTown treats location as an explicit three-plane state instead of a
+collection of overlapping panels:
+
+1. **Outdoor** is the town map, building entrances, streets, and cross-building
+   Agent movement.
+2. **Indoor** is a complete building floor with contract-backed interaction
+   slots, actual inside presences, current building work, and cross-building
+   handoff summaries.
+3. **Underground** is the secret compute room and its governed infrastructure
+   projection.
+
+Selecting a building still opens the quick inspector. `Enter indoor` then
+changes the spatial layer. A secured lift inside the building opens the compute
+room through MoonGate; closing it returns to the same building rather than
+losing the user's location. The URL mirrors durable location with
+`?layer=indoor&building=<civic-id>` or `?layer=compute`.
+
+## UI verification status
+
+The three-plane journey has focused MoonBit coverage for entering a building,
+showing real inside presences and building work, opening the secured lift, and
+returning from underground to the same building. The compiled MoonBit browser
+product was exercised through the real desktop service at 1440×900 and 400×900.
+
+The live policy-hall check rendered all five contract-backed furnishing slots
+as separate authored objects and joined current `ActorPresence` records to
+their assigned slots. The live underground projection rendered MoonGate, all
+four remote route families, and four visibly vacant physical rack bays. It
+correctly rendered no occupied LunaNexa racks or runtime Agent consoles because
+the checked projection reported none; fixture-backed MoonBit tests cover the
+populated machine and Agent variants without weakening that claim ceiling.
+Both mobile world canvases retain the same scene rather than turning into a
+card diagram. The account navigation is horizontally scrollable at the narrow
+breakpoint, and the underground title, status, exit action, room, roster, and
+evidence remain in a stable reading order.
+
+The release assembler and verifier require both structural room plates and all
+three prop assets. The assembled product contains 273 deterministic files and
+is 68.0 MiB under the narrowly raised 69 MiB ceiling. The older empty-`#app`
+bootstrap stall did not reproduce
+in this pass: direct indoor and compute URLs both mounted the compiled MoonBit
+UI and refreshed their projections.
+
 ## Non-goals
 
 The room does not:

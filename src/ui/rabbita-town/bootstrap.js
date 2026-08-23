@@ -170,7 +170,7 @@ async function prepareRuntimeBridge() {
 async function startMoontown() {
   await prepareRuntimeBridge()
   startRuntimeSnapshotRefresh()
-  await import('./main.js?account-system-v2')
+  await import('./main.js?spatial-props-v7')
   installAccountManagement()
 }
 

@@ -12,6 +12,10 @@ Root policy:
   [`ENERGY_VALLEY_PROCEDURAL_MAP.md`](ENERGY_VALLEY_PROCEDURAL_MAP.md).
 - Keep the Energy Valley runtime-work boundary in
   [`ENERGY_VALLEY_REAL_WORK.md`](ENERGY_VALLEY_REAL_WORK.md).
+- Keep the three-layer art and semantic rendering contract in
+  [`SPATIAL_WORLD_ART_PIPELINE.md`](SPATIAL_WORLD_ART_PIPELINE.md).
+- Keep the governed infrastructure boundary in
+  [`SECRET_COMPUTE_ROOM.md`](SECRET_COMPUTE_ROOM.md).
 - Keep the cross-product publication, discovery, sharing, and communication
   contract in [`../MARKETPLACE_DISCOVERY.md`](../MARKETPLACE_DISCOVERY.md).
 - Keep release-specific installation and verification evidence in the

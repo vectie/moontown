@@ -34,6 +34,27 @@ fn initial_request_composer() -> RequestComposerFocus {
 }
 
 ///|
+fn initial_town_spatial_layer() -> TownSpatialLayer {
+  match current_browser_query_param("layer") {
+    "compute" => TownSpatialLayer::Underground(None)
+    "indoor" => {
+      let building_id = current_browser_query_param("building")
+        .trim()
+        .to_owned()
+      match
+        golden_valley_building_for_identity(
+          golden_valley_buildings(active_energy_valley_seed()),
+          building_id,
+        ) {
+        Some(building) => TownSpatialLayer::Indoor(building)
+        None => TownSpatialLayer::Outdoor
+      }
+    }
+    _ => TownSpatialLayer::Outdoor
+  }
+}
+
+///|
 fn init_model() -> Model {
   let projection_snapshot = parse_bootstrap_town_snapshot()
   let energy_valley_runtime = initial_energy_valley_runtime_state()
@@ -80,7 +101,7 @@ fn init_model() -> Model {
     snapshot_version: town_snapshot_version(),
     energy_valley_runtime,
     energy_first_agent_open: false,
-    secret_compute_room_open: current_browser_query_param("layer") == "compute",
+    town_spatial_layer: initial_town_spatial_layer(),
     secret_compute_room_selected_id: "moongate",
     visual_projection,
     visual_projection_version: visual_projection_version(),

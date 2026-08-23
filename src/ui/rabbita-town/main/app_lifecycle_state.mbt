@@ -4,6 +4,29 @@ fn model_only_update(model : Model) -> (Cmd, Model) {
 }
 
 ///|
+fn set_town_spatial_layer_model(
+  model : Model,
+  layer : TownSpatialLayer,
+) -> Model {
+  replace_browser_query_param(
+    "layer",
+    match layer {
+      Outdoor => ""
+      Indoor(_) => "indoor"
+      Underground(_) => "compute"
+    },
+  )
+  replace_browser_query_param(
+    "building",
+    match layer {
+      Indoor(building) => golden_valley_building_civic_id(building)
+      _ => ""
+    },
+  )
+  { ..model, town_spatial_layer: layer }
+}
+
+///|
 fn toggle_pause_model(model : Model) -> Model {
   { ..model, paused: !model.paused }
 }

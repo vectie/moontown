@@ -73,19 +73,43 @@ fn update_non_form_message(
     SelectNode(node_key) =>
       model_only_update({ ..model, selection: Node(node_key) })
     SelectOverview => model_only_update({ ..model, selection: Overview })
-    OpenSecretComputeRoom =>
-      model_only_update({
-        ..close_town_transient_surfaces(model),
-        secret_compute_room_open: true,
-        secret_compute_room_selected_id: "moongate",
-      })
-    CloseSecretComputeRoom =>
-      model_only_update({ ..model, secret_compute_room_open: false })
+    OpenSecretComputeRoom => {
+      let return_building = match model.town_spatial_layer {
+        Indoor(building) => Some(building)
+        _ => None
+      }
+      let closed = close_town_transient_surfaces(model)
+      model_only_update(
+        set_town_spatial_layer_model(
+          { ..closed, secret_compute_room_selected_id: "moongate" },
+          TownSpatialLayer::Underground(return_building),
+        ),
+      )
+    }
+    CloseSecretComputeRoom => {
+      let destination = match model.town_spatial_layer {
+        Underground(Some(building)) => TownSpatialLayer::Indoor(building)
+        _ => TownSpatialLayer::Outdoor
+      }
+      model_only_update(set_town_spatial_layer_model(model, destination))
+    }
     SelectSecretComputeEndpoint(endpoint_id) =>
       model_only_update({
         ..model,
         secret_compute_room_selected_id: endpoint_id,
       })
+    EnterEnergyBuilding(building_id) =>
+      enter_building_interior_update(model, building_id)
+    ExitEnergyBuilding => {
+      let returned = match model.town_spatial_layer {
+        Indoor(building) =>
+          { ..model, energy_selected_building: Some(building) }
+        _ => model
+      }
+      model_only_update(
+        set_town_spatial_layer_model(returned, TownSpatialLayer::Outdoor),
+      )
+    }
     SetEnergyWeather(weather) =>
       model_only_update({
         ..model,

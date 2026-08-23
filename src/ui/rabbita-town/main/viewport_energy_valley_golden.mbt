@@ -723,7 +723,16 @@ fn render_energy_valley_inspector(
       let claims_live_work = energy_valley_runtime_can_claim_active_work(
         model.energy_valley_runtime,
       )
-      let interior_link = @html.nothing
+      let interior_link = button(
+        class="town-enter-interior",
+        on_click=dispatch(
+          EnterEnergyBuilding(golden_valley_building_civic_id(building)),
+        ),
+        attrs=@html.Attrs::build().aria_label(
+          "进入 \{building.name} 室内层",
+        ),
+        "进入室内层 →",
+      )
       div(
         class="town-generic-inspector pointer-events-auto w-64 rounded-2xl bg-slate-950/70 p-4 backdrop-blur-md border border-white/10 shadow-2xl",
         [

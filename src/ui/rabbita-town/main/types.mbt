@@ -7,6 +7,15 @@ priv enum Selection {
 }
 
 ///|
+/// MoonTown's three spatial planes. An underground visit remembers the
+/// building it came from so the secured lift can return to the same interior.
+priv enum TownSpatialLayer {
+  Outdoor
+  Indoor(GoldenValleyBuilding)
+  Underground(GoldenValleyBuilding?)
+}
+
+///|
 priv enum StateSourceKind {
   DemoSimulation
   SnapshotFile
@@ -262,7 +271,7 @@ priv struct Model {
   snapshot_version : Int
   energy_valley_runtime : EnergyValleyRuntimeState
   energy_first_agent_open : Bool
-  secret_compute_room_open : Bool
+  town_spatial_layer : TownSpatialLayer
   secret_compute_room_selected_id : String
   visual_projection : VisualProjectionSnapshot?
   visual_projection_version : Int
@@ -401,6 +410,8 @@ priv enum Msg {
   OpenSecretComputeRoom
   CloseSecretComputeRoom
   SelectSecretComputeEndpoint(String)
+  EnterEnergyBuilding(String)
+  ExitEnergyBuilding
   SetEnergyWeather(EnergyWeather)
   ToggleEnergyWeatherAuto
   SetEnergyTimeScale(Int)
