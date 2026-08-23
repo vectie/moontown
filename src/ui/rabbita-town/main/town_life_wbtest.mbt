@@ -834,7 +834,7 @@ test "quest tracker reports only the contiguous ordered progress" {
   let html = @rabbita.render_to_string(
     @rabbita.static_cell(render_quest_tracker(dispatch, model)),
   )
-  assert_true(html.contains("进度 1/7"))
+  assert_true(html.contains("镇务 2/7"))
   assert_true(html.contains("在镇上走一段路"))
   assert_true(!html.contains("任务 6/7"))
 }

@@ -41,6 +41,15 @@ function projectionFor(state, packId) {
   return state.projections.find(item => item.pack_id === packId) || null
 }
 
+function packOperationHref(packId, subjectRef, operationId) {
+  const query = new URLSearchParams({
+    subject: subjectRef,
+    operation: operationId,
+    source: 'moontown-pack-bridge',
+  })
+  return `/pack-apps/${encodeURIComponent(packId)}/?${query.toString()}`
+}
+
 function packFilter(capability, selected, onChange) {
   const label = element('label', 'pack-layer-filter')
   const input = document.createElement('input')
@@ -79,12 +88,17 @@ function subjectCard(pack, subject, status) {
   if (Array.isArray(subject.operation_ids) && subject.operation_ids.length) {
     const actions = element('div', 'pack-layer-actions')
     subject.operation_ids.forEach(operationId => {
-      const button = element('button', 'pack-layer-action', operationId)
-      button.type = 'button'
-      button.addEventListener('click', () => {
-        status.textContent = `${operationId} selected. Authority stays in ${pack.display_name || pack.pack_id}; open its reviewed workflow to execute.`
+      const action = element('a', 'pack-layer-action', operationId)
+      action.href = packOperationHref(
+        pack.pack_id,
+        subject.subject_ref,
+        operationId,
+      )
+      action.dataset.packOperation = operationId
+      action.addEventListener('click', () => {
+        status.textContent = `Opening ${operationId} in ${pack.display_name || pack.pack_id}. The pack’s reviewed workflow retains authority.`
       })
-      actions.append(button)
+      actions.append(action)
     })
     card.append(actions)
   }

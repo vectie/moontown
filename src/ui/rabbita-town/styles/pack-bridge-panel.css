@@ -146,9 +146,12 @@
 }
 
 .pack-layer-action {
+  display: inline-flex;
+  align-items: center;
   min-height: 30px;
   font-family: ui-monospace, SFMono-Regular, Menlo, monospace;
   font-size: 10px;
+  text-decoration: none;
 }
 
 .pack-candidates-heading { margin: 18px 0 8px; }
