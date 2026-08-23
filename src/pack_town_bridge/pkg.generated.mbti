@@ -11,6 +11,8 @@ import {
 // Values
 pub fn all_projected_subjects(PackProjectionRegistry) -> Array[(String, PackTownSubject)]
 
+pub fn candidate_acknowledgement_contract_id() -> String
+
 pub fn candidate_conformance_issues(@host.HostActivationProjection, TownPackCandidate) -> Array[PackTownBridgeIssue]
 
 pub fn candidate_contract_id() -> String
@@ -71,6 +73,17 @@ pub(all) struct CandidateRoute {
   operation_id : String
   authority : @pack.AuthorityClass
   review_required : Bool
+} derive(Eq, ToJson, @debug.Debug, @json.FromJson)
+
+pub(all) struct PackCandidateAcknowledgement {
+  contract_id : String
+  candidate_ref : String
+  pack_id : String
+  operation_id : String
+  decision : String
+  occurred_at : String
+  evidence_refs : Array[String]
+  issue : String?
 } derive(Eq, ToJson, @debug.Debug, @json.FromJson)
 
 pub(all) struct PackCandidateReceipt {

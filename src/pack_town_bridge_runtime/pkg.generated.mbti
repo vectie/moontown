@@ -8,6 +8,10 @@ import {
 }
 
 // Values
+pub fn candidate_acknowledgement_ref(String, String) -> String
+
+pub fn candidate_inbox_ref(String, String) -> String
+
 pub async fn discover_active_packs(String, String, String) -> PackBridgeRuntimeState
 
 pub fn empty_runtime_state() -> PackBridgeRuntimeState
@@ -15,6 +19,8 @@ pub fn empty_runtime_state() -> PackBridgeRuntimeState
 pub async fn ingest_projection(String, String, Json, String) -> ProjectionIngestResult
 
 pub async fn load_runtime_state(String) -> PackBridgeRuntimeState
+
+pub fn projection_outbox_ref(String) -> String
 
 pub async fn save_runtime_state(String, PackBridgeRuntimeState) -> Unit
 
