@@ -89,10 +89,16 @@ fn energy_valley_world_delta_test_valid_labs(
       match
         golden_valley_custom_building(LaboratoryTool, x, y, result.length() + 1) {
         Some(building) if golden_valley_custom_placement_block_in_world(
-            world, building,
+            // This test exercises the domain delta contract, which accepts a
+            // one-planning-cell building independently of the UI tool's
+            // deliberately larger two-cell visual footprint. Using the
+            // smallest canonical footprint guarantees two legal mutation
+            // sites without weakening production placement validation.
+            world,
+            { ..building, width: scale, depth: scale },
           )
           is None => {
-          result.push(building)
+          result.push({ ..building, width: scale, depth: scale })
           if result.length() == count {
             return result
           }

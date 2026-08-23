@@ -42,6 +42,22 @@ extern "js" fn energy_valley_block_test_restore_reference_assets() -> Unit =
   #| }
 
 ///|
+fn energy_valley_block_test_clear_compiler_caches() -> Unit {
+  golden_valley_world_cache.clear()
+  energy_valley_base_contract_world_cache.clear()
+  town_life_world_base_road_cells_cache.clear()
+  ecosystem_world_snapshot_cache.clear()
+  ecosystem_contract_world_cache.clear()
+  ecosystem_contract_world_validation_failed_cache.clear()
+  ecosystem_contract_world_validation_summary_cache.clear()
+  ecosystem_contract_world_validation_issues_cache.clear()
+  ecosystem_contract_snapshot_validation_failed_cache.clear()
+  ecosystem_contract_snapshot_validation_summary_cache.clear()
+  ecosystem_contract_terrain_kind_lookup_cache.clear()
+  ecosystem_contract_terrain_walkable_lookup_cache.clear()
+}
+
+///|
 fn energy_valley_block_test_tiles(
   seed : Int,
 ) -> Array[Array[ExactEnergyValleyTile]] {
@@ -69,6 +85,7 @@ fn energy_valley_block_test_layout(seed : Int) -> EnergyValleyRoadBlockLayout {
 ///|
 test "Wenyu buildings occupy one dry road block with shared spacing" {
   energy_valley_block_test_install_reference_assets()
+  energy_valley_block_test_clear_compiler_caches()
   let seed = default_energy_valley_seed
   let layout = energy_valley_block_test_layout(seed)
   assert_eq(layout.blocks.length(), 75)
@@ -180,4 +197,5 @@ test "Wenyu buildings occupy one dry road block with shared spacing" {
   assert_true(unassigned_buildings.is_empty())
   assert_true(compiled_buildings >= ambient_count + world.buildings.length())
   energy_valley_block_test_restore_reference_assets()
+  energy_valley_block_test_clear_compiler_caches()
 }

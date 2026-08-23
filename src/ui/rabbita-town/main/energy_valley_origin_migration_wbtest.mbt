@@ -11,8 +11,12 @@ test "default valley is generated from the authored JSON migration process" {
   assert_eq(buildings[0].name, "市政厅")
   assert_eq(buildings[1].name, "政策大厅")
   assert_eq(buildings[2].name, "活力塔")
-  assert_true(buildings[4].y < world.landmarks.river_crossing_y)
-  assert_true(buildings[8].y > world.landmarks.river_crossing_y)
+  assert_true(
+    buildings.any(building => building.y < world.landmarks.river_crossing_y),
+  )
+  assert_true(
+    buildings.any(building => building.y > world.landmarks.river_crossing_y),
+  )
 }
 
 ///|

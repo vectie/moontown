@@ -57,8 +57,8 @@ test "onboarding tool dock reveals only the current task control" {
   let build_html = @rabbita.render_to_string(
     @rabbita.static_cell(render_energy_valley_tool_dock(dispatch, build_model)),
   )
-  assert_true(build_html.contains("研发塔楼"))
-  assert_true(build_html.contains("实验室"))
+  assert_true(!build_html.contains("研发塔楼"))
+  assert_true(!build_html.contains("实验室"))
   assert_true(build_html.contains("创新工坊"))
   assert_true(!build_html.contains("拆除"))
 }
