@@ -1,0 +1,163 @@
+// Generated using `moon info`, DON'T EDIT IT
+package "vectie/moontown/pack_town_bridge"
+
+import {
+  "moonbitlang/core/debug",
+  "moonbitlang/core/json",
+  "vectie/moonlib/pack",
+  "vectie/moonlib/pack/host",
+}
+
+// Values
+pub fn all_projected_subjects(PackProjectionRegistry) -> Array[(String, PackTownSubject)]
+
+pub fn candidate_conformance_issues(@host.HostActivationProjection, TownPackCandidate) -> Array[PackTownBridgeIssue]
+
+pub fn candidate_contract_id() -> String
+
+pub fn candidate_input_schema_id() -> String
+
+pub fn candidate_receipt_contract_id() -> String
+
+pub fn candidate_receipt_statuses() -> Array[String]
+
+pub fn candidate_schema_path() -> String
+
+pub fn draft_pack_lifecycle(String, String, String) -> PackLifecycleRecord
+
+pub fn empty_registry() -> PackProjectionRegistry
+
+pub fn pack_lifecycle_contract_id() -> String
+
+pub fn pack_lifecycle_event_contract_id() -> String
+
+pub fn pack_lifecycle_event_kinds() -> Array[String]
+
+pub fn pack_lifecycle_stages() -> Array[String]
+
+pub fn projection_conformance_issues(@host.HostActivationProjection, PackTownProjection) -> Array[PackTownBridgeIssue]
+
+pub fn projection_contract_id() -> String
+
+pub fn projection_for_pack(PackProjectionRegistry, String) -> PackTownProjection?
+
+pub fn projection_provider_port_id() -> String
+
+pub fn projection_provider_port_version() -> String
+
+pub fn projection_schema_path() -> String
+
+pub fn reconcile_projection(PackProjectionRegistry, @host.HostActivationProjection, PackTownProjection) -> Result[PackProjectionRegistry, Array[PackTownBridgeIssue]]
+
+pub fn reduce_pack_lifecycle(PackLifecycleRecord, PackLifecycleEvent) -> Result[PackLifecycleRecord, String]
+
+pub fn remove_pack_projection(PackProjectionRegistry, String) -> PackProjectionRegistry
+
+pub fn resolve_candidate_route(@host.HostActivationProjection, TownPackCandidate) -> Result[CandidateRoute, Array[PackTownBridgeIssue]]
+
+pub fn subject_for_pack(PackProjectionRegistry, String, String) -> PackTownSubject?
+
+pub fn submitted_candidate_receipt(TownPackCandidate, String) -> PackCandidateReceipt
+
+pub fn transition_candidate_receipt(PackCandidateReceipt, String, String, Array[String], issue? : String?) -> Result[PackCandidateReceipt, String]
+
+// Errors
+
+// Types and methods
+pub(all) struct CandidateRoute {
+  pack_id : String
+  product_id : String
+  version : String
+  operation_id : String
+  authority : @pack.AuthorityClass
+  review_required : Bool
+} derive(Eq, ToJson, @debug.Debug, @json.FromJson)
+
+pub(all) struct PackCandidateReceipt {
+  contract_id : String
+  candidate_ref : String
+  pack_id : String
+  operation_id : String
+  status : String
+  sequence : Int
+  updated_at : String
+  evidence_refs : Array[String]
+  issue : String?
+} derive(Eq, ToJson, @debug.Debug, @json.FromJson)
+
+pub(all) struct PackLifecycleEvent {
+  contract_id : String
+  event_id : String
+  pack_id : String
+  version : String
+  kind : String
+  occurred_at : String
+  evidence_refs : Array[String]
+  issue : String?
+} derive(Eq, ToJson, @debug.Debug, @json.FromJson)
+
+pub(all) struct PackLifecycleRecord {
+  contract_id : String
+  pack_id : String
+  version : String
+  stage : String
+  sequence : Int
+  updated_at : String
+  last_projection_at : String?
+  issue : String?
+  evidence_refs : Array[String]
+  applied_event_ids : Array[String]
+} derive(Eq, ToJson, @debug.Debug, @json.FromJson)
+
+pub(all) struct PackProjectionRegistry {
+  projections : Array[PackTownProjection]
+} derive(Eq, ToJson, @debug.Debug, @json.FromJson)
+
+pub(all) struct PackTownBridgeIssue {
+  path : String
+  message : String
+} derive(Eq, ToJson, @debug.Debug, @json.FromJson)
+
+pub(all) struct PackTownProjection {
+  contract_id : String
+  pack_id : String
+  product_id : String
+  version : String
+  generated_at : String
+  subjects : Array[PackTownSubject]
+} derive(Eq, ToJson, @debug.Debug, @json.FromJson)
+
+pub(all) struct PackTownSubject {
+  subject_ref : String
+  schema_id : String
+  title : String
+  summary : String
+  lifecycle_state : String
+  attention : String
+  place_refs : Array[String]
+  related_refs : Array[String]
+  workflow_refs : Array[String]
+  run_refs : Array[String]
+  evidence_refs : Array[String]
+  operation_ids : Array[String]
+  domain_payload : Json
+} derive(Eq, ToJson, @debug.Debug, @json.FromJson)
+
+pub(all) struct TownPackCandidate {
+  contract_id : String
+  candidate_ref : String
+  origin_ref : String
+  target_pack_id : String
+  intake_operation_id : String
+  submitted_by : String
+  submitted_at : String
+  title : String
+  rationale : String
+  claim_ceiling : String
+  evidence_refs : Array[String]
+  domain_payload : Json
+} derive(Eq, ToJson, @debug.Debug, @json.FromJson)
+
+// Type aliases
+
+// Traits

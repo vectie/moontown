@@ -16,6 +16,12 @@ pub fn desktop_moonflow_research_reconcile_path() -> String
 
 pub fn desktop_moonflow_research_start_path() -> String
 
+pub fn desktop_pack_bridge_path() -> String
+
+pub fn desktop_pack_candidate_path() -> String
+
+pub fn desktop_pack_projection_path() -> String
+
 pub fn desktop_research_handoff_path() -> String
 
 pub fn desktop_research_handoff_reconcile_path() -> String

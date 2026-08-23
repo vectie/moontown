@@ -16,6 +16,12 @@ test "desktop and miniapp contracts share capabilities without sharing trust" {
   assert_true(desktop.contains("/api/research-handoffs/reconcile"))
   assert_true(desktop.contains("/api/research-handoffs/moonflow/start"))
   assert_true(desktop.contains("/api/research-handoffs/moonflow/reconcile"))
+  assert_true(desktop.contains("/api/pack-bridge"))
+  assert_true(desktop.contains("/api/pack-bridge/projections"))
+  assert_true(desktop.contains("/api/pack-bridge/candidates"))
+  assert_true(desktop.contains("\"capability\":\"pack.bridge.read\""))
+  assert_true(desktop.contains("\"capability\":\"pack.projection.ingest\""))
+  assert_true(desktop.contains("\"capability\":\"pack.candidate.submit\""))
   assert_true(
     desktop.contains("\"capability\":\"civic.communication.handoff.execute\""),
   )

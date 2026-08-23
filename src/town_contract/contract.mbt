@@ -59,6 +59,21 @@ pub fn desktop_moonflow_research_reconcile_path() -> String {
 }
 
 ///|
+pub fn desktop_pack_bridge_path() -> String {
+  "/api/pack-bridge"
+}
+
+///|
+pub fn desktop_pack_projection_path() -> String {
+  "/api/pack-bridge/projections"
+}
+
+///|
+pub fn desktop_pack_candidate_path() -> String {
+  "/api/pack-bridge/candidates"
+}
+
+///|
 pub fn miniapp_contract_path() -> String {
   "/miniapp/contract"
 }
@@ -586,6 +601,24 @@ pub fn desktop_contract() -> Json {
         "POST",
         desktop_moonflow_research_reconcile_path(),
         "civic.communication.moonflow.reconcile",
+      ),
+      endpoint(
+        "inspect-pack-bridge",
+        "GET",
+        desktop_pack_bridge_path(),
+        "pack.bridge.read",
+      ),
+      endpoint(
+        "ingest-pack-projection",
+        "POST",
+        desktop_pack_projection_path(),
+        "pack.projection.ingest",
+      ),
+      endpoint(
+        "submit-pack-candidate",
+        "POST",
+        desktop_pack_candidate_path(),
+        "pack.candidate.submit",
       ),
       endpoint(
         "runtime-outbox",

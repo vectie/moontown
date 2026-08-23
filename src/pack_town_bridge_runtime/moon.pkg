@@ -1,0 +1,16 @@
+import {
+  "moonbitlang/async/fs",
+  "moonbitlang/core/encoding/utf8" @encoding/utf8,
+  "moonbitlang/core/json",
+  "moonbitlang/x/path",
+  "vectie/moonlib/pack/host",
+  "vectie/moonlib/pack/installer",
+  "vectie/moontown/pack_town_bridge",
+}
+
+supported_targets = "native"
+
+import {
+  "moonbitlang/async",
+  "vectie/moonlib/pack",
+} for "wbtest"

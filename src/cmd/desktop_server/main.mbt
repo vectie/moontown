@@ -810,6 +810,46 @@ async fn handle_request(
     )
     return
   }
+  if path == @town_contract.desktop_pack_bridge_path() {
+    if !(request.meth is Get) {
+      send_json(conn, 405, { "ok": false, "error": "GET required" })
+      return
+    }
+    let snapshot = pack_bridge_snapshot() catch {
+      error => {
+        send_json(conn, 409, { "ok": false, "error": "\{error}" })
+        return
+      }
+    }
+    send_json(conn, 200, snapshot)
+    return
+  }
+  if path == @town_contract.desktop_pack_projection_path() {
+    if reject_unsafe_operator_write(request, conn) {
+      return
+    }
+    let result = ingest_pack_bridge_projection(body.read_all().text()) catch {
+      error => {
+        send_json(conn, 409, { "ok": false, "error": "\{error}" })
+        return
+      }
+    }
+    send_json(conn, 200, result)
+    return
+  }
+  if path == @town_contract.desktop_pack_candidate_path() {
+    if reject_unsafe_operator_write(request, conn) {
+      return
+    }
+    let result = submit_pack_bridge_candidate(body.read_all().text()) catch {
+      error => {
+        send_json(conn, 409, { "ok": false, "error": "\{error}" })
+        return
+      }
+    }
+    send_json(conn, 200, result)
+    return
+  }
   if request.meth is Get && path == "/operator-requests.json" {
     send_json(conn, 200, operator_requests_json())
     return

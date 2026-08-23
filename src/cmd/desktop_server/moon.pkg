@@ -19,6 +19,7 @@ import {
   "vectie/moontown/town_application",
   "vectie/moontown/town_contract",
   "vectie/moontown/flow_adapter",
+  "vectie/moontown/pack_town_bridge_runtime",
   "vectie/moontown/domain_catalog",
   "vectie/moontown/adapters/moonbook",
   "vectie/moontown/plugin/moongate",

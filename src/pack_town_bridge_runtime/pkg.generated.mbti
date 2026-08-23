@@ -1,0 +1,59 @@
+// Generated using `moon info`, DON'T EDIT IT
+package "vectie/moontown/pack_town_bridge_runtime"
+
+import {
+  "moonbitlang/core/debug",
+  "moonbitlang/core/json",
+  "vectie/moontown/pack_town_bridge",
+}
+
+// Values
+pub async fn discover_active_packs(String, String, String) -> PackBridgeRuntimeState
+
+pub fn empty_runtime_state() -> PackBridgeRuntimeState
+
+pub async fn ingest_projection(String, String, Json, String) -> ProjectionIngestResult
+
+pub async fn load_runtime_state(String) -> PackBridgeRuntimeState
+
+pub async fn save_runtime_state(String, PackBridgeRuntimeState) -> Unit
+
+pub async fn submit_candidate(String, String, Json, String) -> CandidateSubmissionResult
+
+// Errors
+
+// Types and methods
+pub(all) struct CandidateSubmissionResult {
+  accepted : Bool
+  route : @pack_town_bridge.CandidateRoute
+  receipt : @pack_town_bridge.PackCandidateReceipt
+} derive(Eq, ToJson, @debug.Debug, @json.FromJson)
+
+pub(all) struct PackBridgeCapability {
+  pack_id : String
+  product_id : String
+  version : String
+  display_name : String
+  intake_operation_ids : Array[String]
+  operation_ids : Array[String]
+} derive(Eq, ToJson, @debug.Debug, @json.FromJson)
+
+pub(all) struct PackBridgeRuntimeState {
+  contract_id : String
+  mut projections : @pack_town_bridge.PackProjectionRegistry
+  mut capabilities : Array[PackBridgeCapability]
+  lifecycles : Array[@pack_town_bridge.PackLifecycleRecord]
+  candidates : Array[@pack_town_bridge.PackCandidateReceipt]
+  candidate_envelopes : Array[@pack_town_bridge.TownPackCandidate]
+} derive(Eq, ToJson, @debug.Debug, @json.FromJson)
+
+pub(all) struct ProjectionIngestResult {
+  accepted : Bool
+  lifecycle : @pack_town_bridge.PackLifecycleRecord
+  projection : @pack_town_bridge.PackTownProjection?
+  issues : Array[@pack_town_bridge.PackTownBridgeIssue]
+} derive(Eq, ToJson, @debug.Debug, @json.FromJson)
+
+// Type aliases
+
+// Traits

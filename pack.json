@@ -49,6 +49,16 @@
       "path": "schemas/knowledge-domain-catalog.schema.json"
     },
     {
+      "id": "pack-town-projection",
+      "version": "1.0.0",
+      "path": "schemas/pack-town-projection.schema.json"
+    },
+    {
+      "id": "town-pack-candidate",
+      "version": "1.0.0",
+      "path": "schemas/town-pack-candidate.schema.json"
+    },
+    {
       "id": "supervisor-profile",
       "version": "1.0.0",
       "path": "schemas/supervisor-profile.schema.json"
