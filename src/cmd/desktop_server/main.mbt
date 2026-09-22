@@ -166,7 +166,9 @@ fn runtime_handoff_kind(body : String) -> String {
 
 ///|
 fn local_service_host(host : String) -> Bool {
-  host == "127.0.0.1:17842" || host == "localhost:17842"
+  host == "127.0.0.1:17842" ||
+  host == "localhost:17842" ||
+  public_service_host(host)
 }
 
 ///|
@@ -519,6 +521,9 @@ async fn handle_request(
   let path = request_path(request)
   if request.meth is Get && path == "/health" {
     send_json(conn, 200, { "ok": true, "service": "moontown-desktop" })
+    return
+  }
+  if public_access_gate(request, body, conn) {
     return
   }
   if request.meth is Get && path == @town_contract.desktop_contract_path() {
@@ -875,13 +880,19 @@ async fn handle_request(
 
 ///|
 async fn main {
+  let bind = env_value("MOONTOWN_DESKTOP_BIND").unwrap_or("127.0.0.1:17842")
+  if !bind.has_prefix("127.0.0.1:") &&
+    (
+      env_value("MOONTOWN_PUBLIC_HOST") is None ||
+      env_value("MOONTOWN_IDENTITY_ENDPOINT") is None ||
+      env_value("MOONTOWN_IDENTITY_HOST") is None
+    ) {
+    raise Failure("non-loopback MoonTown requires the configured identity gate")
+  }
   let settings = @system_settings_runtime.load_and_install_system_settings()
-  let server = @http.Server(
-    @socket.Addr::parse("127.0.0.1:17842"),
-    reuse_addr=true,
-  )
+  let server = @http.Server(@socket.Addr::parse(bind), reuse_addr=true)
   println(
-    "MoonTown desktop service listening at http://127.0.0.1:17842; suite=\{@storage.moontown_active_workspace_root()}",
+    "MoonTown desktop service ready; suite=\{@storage.moontown_active_workspace_root()}",
   )
   // Browsers fetch the entry, MoonBit bundle, styles, sprites, and runtime
   // snapshots concurrently. A single connection stalls bootstrap behind the

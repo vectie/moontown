@@ -4,7 +4,7 @@ version = "0.1.8"
 
 import {
   "moonbitlang/async@0.16.6",
-  "moonbitlang/x@0.4.40",
+  "moonbitlang/x@0.4.50",
   "vectie/lepusa@0.1.4",
   "vectie/moonlib@0.1.19",
 }

@@ -45,7 +45,7 @@ fn json_int_field(
   let value : Int = match fields.get(key) {
     Some(Number(value, ..)) => value.trunc().to_int()
     Some(String(value)) =>
-      @strconv.from_str(value.trim()) catch {
+      @string.parse_int(value.trim()) catch {
         _ => fallback
       }
     _ => fallback

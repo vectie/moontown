@@ -3,7 +3,7 @@ name = "vectie/moontown-rabbita"
 version = "0.1.0"
 
 import {
-  "moonbit-community/rabbita@0.12.4",
+  "moonbit-community/rabbita@0.14.0",
   "vectie/moonlib@0.1.19",
   "vectie/moontown@0.1.0",
 }

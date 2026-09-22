@@ -1,0 +1,19 @@
+[Unit]
+Description=MoonTown shared operator workspace
+After=network-online.target
+Wants=network-online.target
+
+[Service]
+Type=simple
+WorkingDirectory=%h/moonsuite
+EnvironmentFile=%h/.config/moontown/service.env
+ExecStart=%h/moon-public/releases/moontown-current/moontown
+Restart=on-failure
+RestartSec=3
+NoNewPrivileges=true
+PrivateTmp=true
+UMask=0077
+LimitNOFILE=4096
+
+[Install]
+WantedBy=default.target
