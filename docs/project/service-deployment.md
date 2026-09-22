@@ -118,3 +118,32 @@ generic onboarding question, not workspace files or private content.
   authority/renderer acceptance tests; do not revoke that shared smoke account
   until those tests finish. The operator-only service does not depend on the
   continued existence of the smoke account.
+
+### Corrected inference diagnosis (2026-09-22, read-only inspection)
+
+The timeout must **not** be attributed specifically to MoonGate. A minimal
+eight-token request sent directly to `192.168.2.178:8888` also timed out after
+45 seconds with zero response bytes. That endpoint's `/health` and `/v1/models`
+returned 200; those checks prove HTTP liveness/catalog access, not successful
+inference. Zero running/waiting counters likewise do not prove that the
+distributed engine can execute a request.
+
+The serving process is a two-node, tensor-parallel-size-2 vLLM deployment:
+
+- Head: `192.168.2.178`, fabric address `10.0.22.1`.
+- Worker: `192.168.2.179`, fabric address `10.0.22.2`; fabric SSH hostname and
+  worker logs independently identify rank 1 with NCCL world size 2.
+- Worker logs show shutdown at 17:45:49 and exit at 17:46:00, exit code 0,
+  `OOMKilled=false`. The head subsequently logged a shared-memory broadcast
+  block unavailable for 60 seconds, repeatedly.
+- A **separate benchmark** container, `lunaflux-spark-vllm-ncu`, ran from
+  18:10:29 to 18:44:31 and exited 137 with `OOMKilled=true`; kernel logs show
+  global OOM. The fourth node later recovered to Kubernetes Ready, but the
+  GLM worker remained exited. Do not conflate the later benchmark OOM with
+  the earlier clean exit of the serving rank.
+
+The missing serving rank makes this two-node model unavailable even though
+the head's health endpoint responds. Fixing a MoonTown or MoonGate queue alone
+cannot restore the absent worker. Further inference retries are paused until
+the benchmark owner coordinates restoration of both serving ranks. No GPU,
+benchmark, or model-serving configuration was changed during this inspection.
