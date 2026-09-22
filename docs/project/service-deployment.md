@@ -41,7 +41,7 @@ browser UI before calling a release live. A build alone is not acceptance.
 
 ## 2026-09-22 acceptance
 
-- Management release: `moon-public/releases/moontown-20260922-r1`, supervised
+- Management release: `moon-public/releases/moontown-20260922-r3`, supervised
   by `moontown.service`; public URL `http://106.39.18.146:5007/`.
 - The user opened the outer TCP 5007 mapping. Identity on 5006 was untouched.
 - Public health 200; anonymous UI/API and forged cookie 401; incorrect Host
@@ -58,8 +58,8 @@ browser UI before calling a release live. A build alone is not acceptance.
 - The outer gate authenticates platform operators. The inner town's visitor
   and resident/avatar creation model is separate; account/role federation into
   that model is not part of this deployment claim.
-- Model execution, live agent success, and multi-day soak are not proven by
-  this UI deployment. Persistent product data stays under
+- Live guide inference and multi-day soak are not proven by
+  this deployment; see the reproducible timeout below. Persistent product data stays under
   `/home/HwHiAiUser/moonsuite`, outside the release directory.
 
 The service environment selects the installed MoonClaw binary and MoonBook
@@ -99,3 +99,22 @@ authenticated public MoonTown UI. Neither 18123 nor 5883 needs a public port.
 is the opt-in live regression check: it requires a real operator cookie and
 fails on HTTP errors or an empty agent completion. It sends only a short
 generic onboarding question, not workspace files or private content.
+
+### Live Guide result (2026-09-22, 18:42 CST)
+
+- The final private gateway runs the HTTP-bearer, standalone-argument and
+  queued-user-input fixes. Loopback health returns 200; anonymous API calls
+  return 401; the authenticated gateway CLI health succeeds. The existing
+  MoonClaw daemon on 8090 and MoonGate on 5883 remain active and unchanged.
+- The authenticated route probe identifies `GLM-5.3-Flash-EXL3`. One direct
+  non-streaming `/openclaw/v1/chat/completions` request with `max_tokens: 32`
+  timed out after 60 seconds with zero response bytes.
+- One real public-browser Guide question, submitted at 18:41:22, reached
+  the gateway and selected that configured model, but produced no answer
+  before the 55-second bound. The UI showed a truthful unavailable/timeout
+  state and re-enabled the input. This is **not** a successful inference
+  acceptance; no GPU or model-serving configuration was changed to mask it.
+- Temporary identity cleanup is coordinated with the concurrent platform
+  authority/renderer acceptance tests; do not revoke that shared smoke account
+  until those tests finish. The operator-only service does not depend on the
+  continued existence of the smoke account.
