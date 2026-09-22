@@ -1,0 +1,55 @@
+///|
+import {
+  "moonbitlang/async",
+  "moonbitlang/async/shell",
+  "moonbitlang/core/env",
+  "moonbitlang/core/json",
+}
+
+///|
+async fn main {
+  guard @env.args()[1:] is [base, cookie_jar] else {
+    fail("usage: smoke-guide.mbtx PUBLIC_BASE OPERATOR_COOKIE_JAR")
+  }
+  guard base == "http://106.39.18.146:5007" else {
+    fail("this deployment acceptance targets only the approved public endpoint")
+  }
+  let payload : Json = {
+    "message": "请用一句话告诉我如何开始使用MoonTown。",
+    "session_id": "deployment-guide-acceptance",
+    "context": "before-avatar",
+  }
+  let output = @shell.Cmd(
+    "curl",
+    [
+      "--fail",
+      "--silent",
+      "--show-error",
+      "--max-time",
+      "60",
+      "--cookie",
+      cookie_jar,
+      "--header",
+      "Origin: " + base,
+      "--header",
+      "Content-Type: application/json",
+      "--data-binary",
+      "@-",
+      base + "/api/agent/chat",
+    ],
+    stdin=Text(payload.stringify()),
+  ).output(timeout_ms=65000, max_output_bytes=65536)
+  guard output.exit_code() == 0 else {
+    fail("Guide HTTP request failed; no acceptance claimed")
+  }
+  let response = @json.parse(output.stdout())
+  guard response
+    is { "ok": true, "reply": String(reply), "agent": "moonclaw", .. } &&
+    !reply.trim().is_empty() else {
+    fail("Guide failed or returned an empty completion")
+  }
+  println(
+    "Public authenticated MoonTown → MoonClaw gateway → MoonGate guide: PASS",
+  )
+  println(reply)
+}

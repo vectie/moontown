@@ -179,17 +179,19 @@ async fn moonclaw_guide_post_json(
   url : String,
   value : Json,
 ) -> Result[(Int, String), String] noraise {
-  try {
+  @async.with_timeout(55000, () => {
     let payload = @utf8.encode(value.stringify())
     let headers = moonclaw_guide_headers(payload)
     let client = @http.post_stream(url, headers~)
     defer client.close()
     client.write(payload)
     let response = client.end_request()
-    let text = client.read_all().text()
+    guard bounded_identity_text(client, 65536) is Some(text) else {
+      return Err("Moonclaw returned an oversized guide response.")
+    }
     Ok((response.code, text))
-  } catch {
-    _ => Err("Moonclaw is not reachable at the configured local gateway.")
+  }) catch {
+    _ => Err("Moonclaw is unavailable or the guide request timed out.")
   }
 }
 
@@ -316,8 +318,9 @@ async fn moonclaw_guide_chat(raw : String) -> (Int, Json) noraise {
     Err(error) => return (502, { "ok": false, "error": error })
   }
   let waited = moonclaw_guide_post_json(gateway + "/v1/rpc", {
+    "type": "req",
     "id": "wait-" + accepted_run_id,
-    "rpc_method": "agent.wait",
+    "method": "agent.wait",
     "params": { "run_id": accepted_run_id, "timeout_ms": 45000 },
   })
   let waited_text = match waited {

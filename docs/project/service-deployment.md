@@ -61,3 +61,41 @@ browser UI before calling a release live. A build alone is not acceptance.
 - Model execution, live agent success, and multi-day soak are not proven by
   this UI deployment. Persistent product data stays under
   `/home/HwHiAiUser/moonsuite`, outside the release directory.
+
+The service environment selects the installed MoonClaw binary and MoonBook
+launcher explicitly; it does not rely on an interactive shell PATH or source
+checkout fallback. The town guide is a separate integration: it calls the
+MoonClaw **gateway** `/v1/agent` and `/v1/rpc` on loopback 18123, not the
+daemon's port 8090.
+
+## Private Guide gateway
+
+Build MoonClaw's `cmd/gateway` native release with the HTTP API bearer fix
+(`4162d766`) and standalone/input fixes (`63cac1e3` or newer). Install it as `moonclaw-gateway` next to the MoonTown
+executable. The existing 8090 daemon remains unchanged. Install
+`deploy/moontown-guide.service` in the same user service manager.
+
+Run `scripts/bootstrap-guide-gateway.mbtx PRIVATE_CONTROL GATEWAY_HOME TOWN_ENV`
+with MoonBit on the management node. `PRIVATE_CONTROL` is the existing paired
+MoonClaw control file, `GATEWAY_HOME` is a new dedicated directory such as
+`/home/HwHiAiUser/.local/share/moontown-guide`, and `TOWN_ENV` is the private
+MoonTown service environment. The script checks the instance-bound 8090 route,
+requires ready MoonGate on loopback 5883, and creates an independent random
+gateway bearer token in mode-0600 files. It never returns that credential to
+the browser. Existing gateway configuration is not overwritten or rotated.
+
+The gateway's local `default` model alias is mapped to the live route's exact
+model ID at bootstrap, with `/openclaw/v1` as the provider endpoint. This is
+separate from MoonGate's Codex-facing `/v1/models` catalog and does not change
+the MoonGate service or its upstream credentials. Reconfigure this private
+alias explicitly if the operator changes the underlying model route.
+
+Enable the guide unit and restart MoonTown after configuration. Verify that
+18123 binds only 127.0.0.1, `/health` works, and unauthenticated `/v1/agent`,
+`/v1/rpc`, and `/v1/runs` return 401. Then verify a real question through the
+authenticated public MoonTown UI. Neither 18123 nor 5883 needs a public port.
+
+`moon run scripts/smoke-guide.mbtx http://106.39.18.146:5007 COOKIE_JAR`
+is the opt-in live regression check: it requires a real operator cookie and
+fails on HTTP errors or an empty agent completion. It sends only a short
+generic onboarding question, not workspace files or private content.

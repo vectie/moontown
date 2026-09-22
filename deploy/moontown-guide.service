@@ -1,0 +1,20 @@
+[Unit]
+Description=MoonTown private MoonClaw Guide gateway
+After=network-online.target
+Wants=network-online.target
+
+[Service]
+Type=simple
+WorkingDirectory=%h/moonsuite
+Environment=PATH=%h/moon-public/bin:%h/moon-public/toolchains/moon-linux-amd64/bin:/usr/local/bin:/usr/bin:/bin
+Environment=MOON_HOME=%h/moon-public/toolchains/moon-linux-amd64
+ExecStart=%h/moon-public/releases/moontown-current/moonclaw-gateway start --port 18123 --cwd %h/moonsuite --home %h/.local/share/moontown-guide
+Restart=on-failure
+RestartSec=3
+NoNewPrivileges=true
+PrivateTmp=true
+UMask=0077
+LimitNOFILE=4096
+
+[Install]
+WantedBy=default.target

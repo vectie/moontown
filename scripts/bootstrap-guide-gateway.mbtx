@@ -1,0 +1,102 @@
+///|
+import {
+  "moonbitlang/async",
+  "moonbitlang/async/fs",
+  "moonbitlang/async/http",
+  "moonbitlang/core/env",
+  "moonbitlang/core/json",
+  "moonbitlang/x/crypto",
+}
+
+///|
+fn field(value : Json, key : String) -> String raise {
+  guard value is Object(fields) && fields.get(key) is Some(String(text)) else {
+    fail("invalid private configuration field: " + key)
+  }
+  text
+}
+
+///|
+async fn main {
+  guard @env.args()[1:] is [private_control, gateway_home, town_env] else {
+    fail(
+      "usage: bootstrap-guide-gateway.mbtx PRIVATE_CONTROL GATEWAY_HOME TOWN_ENV",
+    )
+  }
+  guard gateway_home.has_prefix("/") && town_env.has_prefix("/") else {
+    fail("absolute deployment paths required")
+  }
+  let existing = @fs.read_file(town_env).text()
+  guard !existing.contains("MOONTOWN_MOONCLAW_GATEWAY_TOKEN=") else {
+    fail("Town gateway token already configured")
+  }
+  let control = @json.parse(@fs.read_file(private_control).text())
+  let (response, body) = @http.get("http://127.0.0.1:8090/v1/moongate-route", headers={
+    "X-MoonClaw-Execution-Token": field(control, "auth_token"),
+    "X-MoonClaw-Instance-ID": field(control, "instance_id"),
+  })
+  guard response.code == 200 &&
+    response.headers.get("x-moonclaw-instance-id") ==
+    Some(field(control, "instance_id")) else {
+    fail("trusted route probe failed")
+  }
+  let route = @json.parse(body.text())
+  guard route is { "ready": true, .. } else { fail("model route is not ready") }
+  let base = field(route, "base_url")
+  guard base == "http://127.0.0.1:5883" else {
+    fail("unexpected MoonGate endpoint")
+  }
+  guard field(route, "default_model").strip_prefix("moongate/") is Some(model) else {
+    fail("not a MoonGate model")
+  }
+  let product = gateway_home + "/.moonsuite/products/moonclaw"
+  @fs.mkdir(product + "/models", recursive=true, permission=0o700)
+  let config_path = product + "/moonclaw.json"
+  guard !@fs.exists(config_path) else {
+    fail("gateway config already exists; refusing token rotation")
+  }
+  guard @env.rand(32) is Some(entropy) else {
+    fail("secure entropy unavailable")
+  }
+  let token = @crypto.bytes_to_hex_string(entropy)
+  let config : Json = {
+    "gateway": { "port": 18123, "auth": { "token": token } },
+  }
+  @fs.write_file(
+    config_path,
+    config.stringify(),
+    create_mode=CreateNew,
+    permission=0o600,
+  )
+  // Direct gateway agent requests use the selector "default". Bind that local
+  // alias to the authenticated live route, not the public Codex model catalog.
+  let models : Json = [
+    {
+      "name": "default",
+      "model_name": model.to_owned(),
+      "model_type": "saas/openai",
+      "base_url": base + "/openclaw/v1",
+      "api_key": "",
+      "safe_zone_tokens": 32768,
+    },
+  ]
+  @fs.write_file(
+    product + "/models/models.json",
+    models.stringify(),
+    create_mode=CreateNew,
+    permission=0o600,
+  )
+  @fs.write_file(
+    town_env,
+    existing +
+    "\nMOONTOWN_MOONCLAW_GATEWAY_URL=http://127.0.0.1:18123\nMOONTOWN_MOONCLAW_GATEWAY_TOKEN=" +
+    token +
+    "\n",
+    permission=0o600,
+  )
+  println(
+    "Private Guide gateway initialized; live route=" +
+    model.to_owned() +
+    "; credentials not printed",
+  )
+}
