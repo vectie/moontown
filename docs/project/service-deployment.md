@@ -58,8 +58,9 @@ browser UI before calling a release live. A build alone is not acceptance.
 - The outer gate authenticates platform operators. The inner town's visitor
   and resident/avatar creation model is separate; account/role federation into
   that model is not part of this deployment claim.
-- Live guide inference and multi-day soak are not proven by
-  this deployment; see the reproducible timeout below. Persistent product data stays under
+- A real Guide answer passed after restoring the missing distributed model
+  rank; see the initial failure and successful retest below. Multi-day soak
+  remains unproven. Persistent product data stays under
   `/home/HwHiAiUser/moonsuite`, outside the release directory.
 
 The service environment selects the installed MoonClaw binary and MoonBook
@@ -144,6 +145,35 @@ The serving process is a two-node, tensor-parallel-size-2 vLLM deployment:
 
 The missing serving rank makes this two-node model unavailable even though
 the head's health endpoint responds. Fixing a MoonTown or MoonGate queue alone
-cannot restore the absent worker. Further inference retries are paused until
-the benchmark owner coordinates restoration of both serving ranks. No GPU,
+cannot restore the absent worker. At this checkpoint, further inference retries
+were paused until the benchmark owner coordinated restoration of both serving ranks. No GPU,
 benchmark, or model-serving configuration was changed during this inspection.
+
+### Successful real-browser retest (2026-09-22, 19:04 CST)
+
+After the benchmark owner released the resources, the recovery operator
+restarted the existing GLM head/worker containers without changing their image
+or inference stack. Independent probes then returned real `hello` output:
+direct model endpoint HTTP 200 in 0.490 seconds and MoonGate HTTP 200 in
+1.088 seconds. These probe timings are not the full Guide response latency.
+
+The dedicated 18123 gateway still held one old pending request from the outage.
+Only `moontown-guide.service` was restarted; the existing 8090 daemon, MoonGate,
+and GPU services were not changed by this MoonTown retest.
+
+A fresh Safari tab opened the public `http://106.39.18.146:5007/` page,
+completed the actual platform password login using the temporary operator,
+loaded the town, opened 小爪, and submitted:
+
+> 请用一句话告诉我如何开始使用 MoonTown。
+
+The real Guide answered visibly in the page:
+
+> 点击屏幕上可见的「创建角色」按钮建立你的专属头像，之后就可以通过地图、底部工具栏和仪表盘开始探索并建设你的 MoonTown 小镇啦。
+
+The input returned to its ready state, and the authenticated gateway health
+reported zero pending requests. Screenshot evidence is saved locally as
+`.shots/moontown-guide-success-20260922.png`. This verifies one actual
+browser → Town → private MoonClaw gateway → MoonGate → GLM response, not
+scripted resident dialogue or a health-only probe. It is not a claim of
+exhaustive model-answer accuracy, full user-role federation, or long-term HA.
