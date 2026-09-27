@@ -73,6 +73,13 @@ async fn run_daemon_scheduled_job(
         tick~,
       ),
     )
+  } else if @scheduler.scheduled_job_is_code_schedule(job) {
+    Some(
+      @code_schedules.run_due_code_schedules(
+        (@env.now() / 1000UL).reinterpret_as_int64(),
+        book_catalog_path,
+      ),
+    )
   } else {
     None
   }

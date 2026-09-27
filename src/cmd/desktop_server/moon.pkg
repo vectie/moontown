@@ -11,6 +11,7 @@ import {
   "moonbitlang/x/crypto",
   "moonbitlang/x/time",
   "vectie/moontown/storage",
+  "vectie/moontown/code_schedules",
   "vectie/moontown/support",
   "vectie/moontown/system_settings",
   "vectie/moontown/system_settings_runtime",

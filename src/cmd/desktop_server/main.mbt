@@ -764,6 +764,30 @@ async fn handle_request(
     send_json(conn, 200, result)
     return
   }
+  if path == @town_contract.desktop_code_schedules_path() {
+    if request.meth is Get {
+      let state = @code_schedules.load_code_schedule_state() catch {
+        error => {
+          send_json(conn, 409, { "ok": false, "error": "\{error}" })
+          return
+        }
+      }
+      send_json(conn, 200, state.to_json())
+      return
+    }
+    if reject_unsafe_operator_write(request, conn) {
+      return
+    }
+    let result = code_schedule_api_action(body.read_all().text()) catch {
+      error => {
+        let (code, message) = code_schedule_api_error_response("\{error}")
+        send_json(conn, code, { "ok": false, "error": message })
+        return
+      }
+    }
+    send_json(conn, 200, result)
+    return
+  }
   if path == @town_contract.desktop_research_handoff_path() {
     if reject_unsafe_operator_write(request, conn) {
       return

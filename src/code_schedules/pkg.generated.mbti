@@ -1,0 +1,83 @@
+// Generated using `moon info`, DON'T EDIT IT
+package "vectie/moontown/code_schedules"
+
+import {
+  "moonbitlang/core/debug",
+  "moonbitlang/core/json",
+}
+
+// Values
+pub fn code_schedule_schema() -> String
+
+pub async fn create_code_schedule(CodeSchedule, path? : String) -> CodeScheduleState
+
+pub fn default_code_schedule_path() -> String
+
+pub async fn load_code_schedule_state(path? : String) -> CodeScheduleState
+
+pub async fn pending_code_schedule_intents(limit? : Int, path? : String) -> Array[CodeDispatchIntent]
+
+pub async fn record_code_schedule_acceptance(String, String, path? : String) -> Bool
+
+pub async fn record_code_schedule_attempt(String, String, Int64, path? : String) -> Bool
+
+pub async fn record_code_schedule_terminal(String, String, String, Int64, path? : String) -> Bool
+
+pub async fn record_code_schedule_uncertain(String, String, path? : String) -> Bool
+
+pub async fn record_code_schedule_waiting(String, String, String, path? : String) -> Bool
+
+pub async fn reserve_due_code_schedule(Int64, path? : String) -> CodeDispatchIntent?
+
+pub async fn run_due_code_schedules(Int64, String, path? : String) -> String
+
+pub async fn set_code_schedule_enabled(String, Bool, Int64, path? : String) -> Bool
+
+// Errors
+
+// Types and methods
+pub struct CodeDispatchIntent {
+  schedule_id : String
+  command_id : String
+  book_id : String
+  book_root : String
+  session_id : String
+  prompt : String
+  model : String
+  due_at : Int64
+} derive(ToJson, @debug.Debug, @json.FromJson)
+
+pub struct CodeSchedule {
+  id : String
+  book_id : String
+  book_root : String
+  session_id : String
+  prompt : String
+  model : String
+  interval_seconds : Int
+  enabled : Bool
+  next_due_at : Int64
+  pending_command_id : String
+  last_command_id : String
+  last_status : String
+  last_finished_at : Int64
+  last_attempt_at : Int64?
+} derive(ToJson, @debug.Debug, @json.FromJson)
+pub fn CodeSchedule::mark_accepted(Self, String) -> Self?
+pub fn CodeSchedule::mark_terminal(Self, String, String, Int64) -> Self?
+pub fn CodeSchedule::mark_uncertain(Self, String) -> Self?
+pub fn CodeSchedule::mark_waiting(Self, String, String) -> Self?
+pub fn CodeSchedule::new(id~ : String, book_id~ : String, book_root~ : String, session_id~ : String, prompt~ : String, model~ : String, interval_seconds~ : Int, now~ : Int64) -> Result[Self, String]
+pub fn CodeSchedule::pause(Self) -> Self
+pub fn CodeSchedule::prepare_due(Self, Int64) -> (Self, CodeDispatchIntent)?
+pub fn CodeSchedule::reactivate(Self, Int64) -> Self
+
+pub struct CodeScheduleState {
+  schema : String
+  revision : Int
+  schedules : Array[CodeSchedule]
+} derive(ToJson, @debug.Debug, @json.FromJson)
+
+// Type aliases
+
+// Traits
