@@ -34,8 +34,8 @@ test "Town commission promotes the strongest qualified evidence-backed candidate
     commission_id: "commission-1",
     question: "Which design should proceed?",
     criteria: [
-      { criterion_id: "safety", weight: 2.0, minimum_score: 7.0 },
-      { criterion_id: "utility", weight: 1.0, minimum_score: 5.0 },
+      { criterion_id: "safety", weight: 2.0, minimum_score: 7.0, },
+      { criterion_id: "utility", weight: 1.0, minimum_score: 5.0, },
     ],
     candidates: [candidate("a", 8.0, 6.0), candidate("b", 9.0, 8.0)],
   })
@@ -52,8 +52,8 @@ test "Town commission does not promote candidates below explicit gates" {
     commission_id: "commission-2",
     question: "Which design should proceed?",
     criteria: [
-      { criterion_id: "safety", weight: 1.0, minimum_score: 9.0 },
-      { criterion_id: "utility", weight: 1.0, minimum_score: 9.0 },
+      { criterion_id: "safety", weight: 1.0, minimum_score: 9.0, },
+      { criterion_id: "utility", weight: 1.0, minimum_score: 9.0, },
     ],
     candidates: [candidate("a", 8.0, 6.0), candidate("b", 7.0, 8.0)],
   })

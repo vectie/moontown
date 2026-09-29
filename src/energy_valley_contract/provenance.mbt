@@ -33,7 +33,7 @@ pub fn provenance(
   preservation : PreservationLevel,
   confidence_per_mille? : Int = 1000,
 ) -> Provenance {
-  { source_id, source_version, kind, preservation, confidence_per_mille }
+  { source_id, source_version, kind, preservation, confidence_per_mille, }
 }
 
 ///|

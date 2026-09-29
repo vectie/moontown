@@ -1,0 +1,30 @@
+{
+  "schema": "moontown.visual_perspective_picks.v1",
+  "direction": "original-design-pixels-to-generated-design-pixels",
+  "previousPicks": "docs/project/wenyu-three-point-trial.json",
+  "fitIds": ["A", "B", "C", "E"],
+  "checkIds": ["D", "F", "G"],
+  "method": "Provisional manual road-centre picks. Frozen before the perspective fit; no surveyed OSM identity implied. A-D retained verbatim from the preceding trial.",
+  "originalPickRadiusPixels": 12,
+  "generatedPickRadiusPixels": 6,
+  "additionalPicks": [
+    {
+      "id": "E",
+      "feature": "Road crossing the river beside the eastern edge of the large northern field",
+      "original": {"x": 1470, "y": 417},
+      "generated": {"x": 1144, "y": 295}
+    },
+    {
+      "id": "F",
+      "feature": "Narrow upper river crossing immediately east of A",
+      "original": {"x": 1203, "y": 160},
+      "generated": {"x": 852, "y": 37}
+    },
+    {
+      "id": "G",
+      "feature": "Diagonal river crossing south of the oval riverside park",
+      "original": {"x": 1509, "y": 690},
+      "generated": {"x": 1250, "y": 515}
+    }
+  ]
+}

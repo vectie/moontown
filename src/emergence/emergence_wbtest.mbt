@@ -155,7 +155,7 @@ test "autonomous round promotes an unseeded idea and preserves dissent" {
 
 ///|
 test "autonomous round requires explicit comparison criteria" {
-  let missing = { ..qualified_round(), comparison_criteria: [] }
+  let missing = { ..qualified_round(), comparison_criteria: [], }
   assert_true(
     evaluate_autonomous_civic_round(missing) ==
     Err("round requires explicit comparison criteria"),
@@ -164,7 +164,7 @@ test "autonomous round requires explicit comparison criteria" {
 
 ///|
 test "autonomous round requires explicit unresolved assumptions" {
-  let missing = { ..qualified_round(), unresolved_assumptions: [] }
+  let missing = { ..qualified_round(), unresolved_assumptions: [], }
   assert_true(
     evaluate_autonomous_civic_round(missing) ==
     Err("round requires explicit unresolved assumptions"),
@@ -173,7 +173,7 @@ test "autonomous round requires explicit unresolved assumptions" {
 
 ///|
 test "autonomous round requires criterion-by-concept assessments" {
-  let missing = { ..qualified_round(), comparison_assessments: [] }
+  let missing = { ..qualified_round(), comparison_assessments: [], }
   let result = evaluate_autonomous_civic_round(missing)
   assert_true(
     result ==
@@ -183,7 +183,10 @@ test "autonomous round requires criterion-by-concept assessments" {
 
 ///|
 test "Mayor cannot promote external authority or physical claims" {
-  let physical = { ..qualified_round(), requested_authority: "physical-effect" }
+  let physical = {
+    ..qualified_round(),
+    requested_authority: "physical-effect",
+  }
   assert_true(
     evaluate_autonomous_civic_round(physical) ==
     Err("Mayor cannot schedule external or physical authority"),

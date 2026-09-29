@@ -1,0 +1,244 @@
+import {
+  "moonbitlang/x@0.4.40/fs",
+  "moonbitlang/core/json",
+  "moonbitlang/core/env",
+  "moonbitlang/core/encoding/base64",
+}
+
+///|
+struct Point {
+  x : Double
+  y : Double
+} derive(ToJson)
+
+///|
+struct Pick {
+  id : String
+  original : Point
+  generated : Point
+} derive(ToJson)
+
+///|
+fn field(j : Json, key : String) -> Json {
+  match j { Object(m) => m.get(key).unwrap(); _ => abort("expected object") }
+}
+
+///|
+fn num(j : Json) -> Double {
+  match j { Number(n, ..) => n; _ => abort("expected number") }
+}
+
+///|
+fn arr(j : Json) -> Array[Json] {
+  match j { Array(a) => a; _ => abort("expected array") }
+}
+
+///|
+fn str(j : Json) -> String {
+  match j { String(s) => s; _ => abort("expected string") }
+}
+
+///|
+fn point(j : Json) -> Point {
+  { x: num(field(j, "x")), y: num(field(j, "y")) }
+}
+
+///|
+fn pick(j : Json) -> Pick {
+  { id: str(field(j, "id")), original: point(field(j, "original")), generated: point(field(j, "generated")) }
+}
+
+///|
+fn normalize(p : Point, original : Bool) -> Point {
+  if original { { x: (p.x - 1137.0) / 1137.0, y: (p.y - 640.0) / 1137.0 } }
+  else { { x: (p.x - 836.0) / 836.0, y: (p.y - 470.5) / 836.0 } }
+}
+
+///|
+// Normalized least-squares equations; partial pivoting rejects singular systems.
+fn solve(rows : Array[Array[Double]], rhs : Array[Double], n : Int) -> Array[Double]? {
+  let a = Array::makei(n, _ => Array::make(n + 1, 0.0))
+  for k, row in rows {
+    for i in 0..<n {
+      for j in 0..<n { a[i][j] += row[i] * row[j] }
+      a[i][n] += row[i] * rhs[k]
+    }
+  }
+  for i in 0..<n {
+    let mut pivot = i
+    for k in (i + 1)..<n { if a[k][i].abs() > a[pivot][i].abs() { pivot = k } }
+    if a[pivot][i].abs() < 0.000000000001 { return None }
+    let swap = a[i]; a[i] = a[pivot]; a[pivot] = swap
+    let div = a[i][i]
+    for j in i..<=n { a[i][j] /= div }
+    for k in 0..<n {
+      if k == i { continue }
+      let factor = a[k][i]
+      for j in i..<=n { a[k][j] -= factor * a[i][j] }
+    }
+  }
+  Some(Array::makei(n, i => a[i][n]))
+}
+
+///|
+fn fit(picks : Array[Pick], perspective : Bool) -> Array[Double]? {
+  let rows : Array[Array[Double]] = []
+  let rhs : Array[Double] = []
+  for c in picks {
+    let a = normalize(c.original, true); let b = normalize(c.generated, false)
+    let x = [a.x, a.y, 1.0, 0.0, 0.0, 0.0]
+    let y = [0.0, 0.0, 0.0, a.x, a.y, 1.0]
+    if perspective { x.push(-b.x * a.x); x.push(-b.x * a.y); y.push(-b.y * a.x); y.push(-b.y * a.y) }
+    rows.push(x); rows.push(y); rhs.push(b.x); rhs.push(b.y)
+  }
+  match solve(rows, rhs, if perspective { 8 } else { 6 }) {
+    Some(h) => { if !perspective { h.push(0.0); h.push(0.0) }; Some(h) }
+    None => None
+  }
+}
+
+///|
+fn denominator(h : Array[Double], p : Point) -> Double {
+  let p = normalize(p, true)
+  h[6] * p.x + h[7] * p.y + 1.0
+}
+
+///|
+fn project(h : Array[Double], p : Point) -> Point? {
+  let d = denominator(h, p)
+  if d.abs() < 0.000000001 { return None }
+  let p = normalize(p, true)
+  Some({ x: (h[0] * p.x + h[1] * p.y + h[2]) / d * 836.0 + 836.0,
+    y: (h[3] * p.x + h[4] * p.y + h[5]) / d * 836.0 + 470.5 })
+}
+
+///|
+fn error(a : Point, b : Point) -> Double {
+  ((a.x - b.x) * (a.x - b.x) + (a.y - b.y) * (a.y - b.y)).sqrt()
+}
+
+///|
+fn rms(h : Array[Double], picks : Array[Pick]) -> Double {
+  (picks.fold(init=0.0, (total, c) => {
+    let e = error(project(h, c.original).unwrap(), c.generated)
+    total + e * e
+  }) / picks.length().to_double()).sqrt()
+}
+
+///|
+fn pole(h : Array[Double]) -> Bool {
+  let ds = [Point::{ x: 0, y: 0 }, { x: 2274, y: 0 }, { x: 2274, y: 1280 }, { x: 0, y: 1280 }].map(p => denominator(h, p))
+  ds.any(d => d <= 0.0) && ds.any(d => d >= 0.0)
+}
+
+///|
+fn self_test() -> Unit raise {
+  let known = [1.02, 0.15, 0.03, -0.08, 0.91, -0.02, 0.12, -0.07]
+  let picks = [Point::{ x: 150, y: 100 }, { x: 2100, y: 130 }, { x: 2050, y: 1100 }, { x: 180, y: 1150 }].map(p => Pick::{ id: "synthetic", original: p, generated: project(known, p).unwrap() })
+  let h = fit(picks, true).unwrap()
+  assert_true(rms(h, picks) < 0.000001)
+  let unused = { x: 1000, y: 600 }
+  assert_true(error(project(h, unused).unwrap(), project(known, unused).unwrap()) < 0.000001)
+  assert_true(fit([picks[0], picks[0], picks[2], picks[3]], true) is None)
+  assert_true(!pole(h))
+  assert_true(pole([1, 0, 0, 0, 1, 0, 2, 0]))
+  assert_true(project([1, 0, 0, 0, 1, 0, 2, 0], { x: 568.5, y: 640 }) is None)
+}
+
+///|
+fn marker(svg : StringBuilder, p : Point, label : String, color : String) -> Unit {
+  svg.write_string("<circle cx='\{p.x}' cy='\{p.y}' r='12' fill='none' stroke='\{color}' stroke-width='5'/><text x='\{p.x + 17}' y='\{p.y - 12}' class='pin'>\{label}</text>")
+}
+
+///|
+fn main raise {
+  self_test()
+  let config = @json.parse(@fs.read_file_to_string("docs/project/wenyu-perspective-picks.json"))
+  let previous = @json.parse(@fs.read_file_to_string(str(field(config, "previousPicks"))))
+  let old = arr(field(previous, "fitPicks")).map(pick)
+  let picks = [..old, pick(field(previous, "heldOutPick")), ..arr(field(config, "additionalPicks")).map(pick)]
+  let fit_ids = arr(field(config, "fitIds")).map(str)
+  let check_ids = arr(field(config, "checkIds")).map(str)
+  let fitting = picks.filter(c => fit_ids.contains(c.id))
+  let checks = picks.filter(c => check_ids.contains(c.id))
+  let original_radius = num(field(config, "originalPickRadiusPixels"))
+  let generated_radius = num(field(config, "generatedPickRadiusPixels"))
+  assert_true(original_radius > 0.0 && generated_radius > 0.0)
+  assert_eq(fitting.length(), 4); assert_eq(checks.length(), 3)
+  assert_true(fit_ids.all(id => !check_ids.contains(id)))
+  let models = [("Affine ABC (previous)", fit(old, false).unwrap()), ("Affine ABCE (same inputs)", fit(fitting, false).unwrap()), ("Perspective ABCE", fit(fitting, true).unwrap())]
+  let h = models[2].1
+  assert_true(rms(h, fitting) < 0.000001)
+  // Deterministic one-coordinate-at-a-time pick perturbations, NOT confidence intervals.
+  let movement = Array::make(checks.length(), 0.0)
+  let mut perturbation_poles = 0
+  let mut perturbation_singular = 0
+  for index in 0..<4 {
+    for coordinate in 0..<4 {
+      for sign in [-1.0, 1.0] {
+        let perturbed = fitting.map(c => c)
+        let c = fitting[index]
+        perturbed[index] = { ..c,
+          original: { x: c.original.x + (if coordinate == 0 { original_radius * sign } else { 0.0 }), y: c.original.y + (if coordinate == 1 { original_radius * sign } else { 0.0 }) },
+          generated: { x: c.generated.x + (if coordinate == 2 { generated_radius * sign } else { 0.0 }), y: c.generated.y + (if coordinate == 3 { generated_radius * sign } else { 0.0 }) } }
+        match fit(perturbed, true) {
+          None => perturbation_singular += 1
+          Some(trial) => {
+            if pole(trial) { perturbation_poles += 1 }
+            for j, c in checks {
+              movement[j] = movement[j].max(error(project(h, c.original).unwrap(), project(trial, c.original).unwrap()))
+            }
+          }
+        }
+      }
+    }
+  }
+  let results = models.map(entry => {
+    let (name, matrix) = entry
+    let result : Json = { "name": name, "normalizedMatrix": matrix.to_json(), "fitRmsPixels": rms(matrix, if name == "Affine ABC (previous)" { old } else { fitting }), "checkRmsPixels": rms(matrix, checks), "poleInOriginalImage": pole(matrix), "checks": checks.map(c => {
+      let predicted = project(matrix, c.original).unwrap()
+      let j : Json = { "id": c.id, "prediction": predicted.to_json(), "observed": c.generated.to_json(), "errorPixels": error(predicted, c.generated), "errorApproxTiles": error(predicted, c.generated) * 256.0 / 1672.0 }
+      j
+    }).to_json() }
+    result
+  })
+  let report : Json = {
+    "schema": "moontown.original_to_generated_perspective_trial.v1", "direction": str(field(config, "direction")), "originalSha256": field(previous, "originalSha256"), "originalSize": field(previous, "originalSize"), "generatedSize": field(previous, "generatedSize"), "pickMethod": field(config, "method"), "picks": picks.to_json(), "fitIds": fit_ids.to_json(), "checkIds": check_ids.to_json(), "models": results.to_json(),
+    "normalization": "Original ((x-1137)/1137,(y-640)/1137); generated ((x-836)/836,(y-470.5)/836); row-major h with h22=1.",
+    "singleCoordinateSensitivity": { "variants": 32, "maximumCheckPredictionMovementPixels": movement.to_json(), "checkOrder": check_ids.to_json(), "poles": perturbation_poles, "singular": perturbation_singular, "notAConfidenceInterval": true },
+    "osmFit": false, "runtimeEligible": false,
+  }
+  println(report.stringify(indent=2))
+  @fs.write_string_to_file("docs/project/wenyu-perspective-trial.json", report.stringify(indent=2))
+  let jpg = @base64.encode(@fs.read_file_to_bytes(@env.get_env_var("WENYU_REFERENCE_IMAGE").unwrap()))
+  let png = @base64.encode(@fs.read_file_to_bytes("src/ui/assets/tilemap/wenyu_topdown_semantic.png"))
+  let svg = StringBuilder()
+  svg.write_string("<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 1600 1170'><rect width='1600' height='1170' fill='#182a29'/><style>text{font-family:system-ui,sans-serif;fill:white}.title{font-size:26px;font-weight:650}.note{font-size:19px}.pin{font-size:26px;font-weight:800;paint-order:stroke;stroke:#182a29;stroke-width:4px}</style><text x='32' y='44' class='title'>Wenyu Valley · perspective verification</text><text x='32' y='80' class='note'>Fit A/B/C/E. Checks D/F/G never enter the fit. Approximate visual matches, not OSM calibration.</text><text x='32' y='120' class='note'>Original design · same A-D as the previous trial</text><text x='812' y='120' class='note'>Generated reference · check residuals after perspective</text><g transform='translate(32 140) scale(0.3298)'><image href='data:image/jpeg;base64,\{jpg}' width='2274' height='1280'/>")
+  for c in picks { marker(svg, c.original, c.id, if fit_ids.contains(c.id) { "#f8d66b" } else { "#fff" }) }
+  svg.write_string("</g><g transform='translate(812 140) scale(0.4486)'><image href='data:image/png;base64,\{png}' width='1672' height='941'/>")
+  for c in picks { marker(svg, c.generated, c.id, if fit_ids.contains(c.id) { "#f8d66b" } else { "#fff" }) }
+  for c in checks {
+    let p = project(h, c.original).unwrap()
+    svg.write_string("<path d='M\{c.generated.x},\{c.generated.y} L\{p.x},\{p.y}' stroke='#ff5176' stroke-width='5'/>")
+    marker(svg, p, "\{c.id}'", "#ff5176")
+  }
+  svg.write_string("</g><text x='32' y='610' class='title'>Same three excluded checks · lower error is better</text><text x='32' y='650' class='note'>Model</text><text x='530' y='650' class='note'>Fit RMS</text><text x='750' y='650' class='note'>Check RMS</text><text x='1000' y='650' class='note'>Pole inside original?</text>")
+  for i, entry in models {
+    let (name, matrix) = entry
+    let y = 693 + i * 42
+    svg.write_string("<text x='32' y='\{y}' class='note'>\{name}</text><text x='530' y='\{y}' class='note'>\{rms(matrix, if i == 0 { old } else { fitting }).to_int()} px</text><text x='750' y='\{y}' class='note'>\{rms(matrix, checks).to_int()} px</text><text x='1000' y='\{y}' class='note'>\{pole(matrix)}</text>")
+  }
+  for i, c in checks {
+    let e = error(project(h, c.original).unwrap(), c.generated)
+    svg.write_string("<text x='32' y='\{847 + i * 36}' class='note'>Check \{c.id}: \{e.to_int()} px (~\{(e * 256.0 / 1672.0).to_int()} tiles); pick-perturbation prediction movement up to \{movement[i].to_int()} px.</text>")
+  }
+  svg.write_string("<text x='32' y='980' class='note'>Yellow rings = fit. White rings = observed checks. Pink rings / lines = perspective predictions and residuals.</text><text x='32' y='1020' class='note'>Sensitivity: 32 single-coordinate perturbations (original ±12 px, generated ±6 px), not a confidence interval.</text><text x='32' y='1060' class='note'>Exact fitted anchors do not prove the whole image is calibrated. No terrain, OSM roads or runtime registration changed.</text><text x='32' y='1100' class='note'>Residuals may combine perspective-model limitations, image-generation deformation and imperfect visual correspondence.</text></svg>")
+  @fs.write_string_to_file("docs/project/wenyu-perspective-trial.svg", svg.to_string())
+  let detail = StringBuilder()
+  detail.write_string("<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 1600 850'><rect width='1600' height='850' fill='#182a29'/><style>text{font-family:system-ui,sans-serif;fill:white}.pin{font-size:20px;font-weight:800;paint-order:stroke;stroke:#182a29;stroke-width:3px}</style><text x='30' y='40' font-size='26'>Crossing review · original and generated detail (unwarped)</text><svg x='30' y='80' width='740' height='650' viewBox='1280 520 570 470'><image href='data:image/jpeg;base64,\{jpg}' width='2274' height='1280'/>")
+  for c in picks.filter(c => c.id == "G" || c.id == "C") { marker(detail, c.original, c.id, "#f8d66b") }
+  detail.write_string("</svg><svg x='815' y='80' width='740' height='650' viewBox='1080 375 450 370'><image href='data:image/png;base64,\{png}' width='1672' height='941'/>")
+  for c in picks.filter(c => c.id == "G" || c.id == "C") { marker(detail, c.generated, c.id, "#f8d66b") }
+  detail.write_string("</svg><text x='30' y='790' font-size='22'>Review actual road / water centres before adjusting a control. No image or terrain edits.</text></svg>")
+  @fs.write_string_to_file("docs/project/wenyu-crossing-detail.svg", detail.to_string())
+}

@@ -105,5 +105,5 @@ pub fn review_run_ledger_to_text(ledger : BookQualityReviewRunLedger) -> String 
 
 ///|
 pub fn empty_review_run_ledger() -> BookQualityReviewRunLedger {
-  { runs: [] }
+  { runs: [], }
 }

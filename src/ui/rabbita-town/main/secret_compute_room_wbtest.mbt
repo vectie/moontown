@@ -56,7 +56,7 @@ test "compute room renders spatial and textual route evidence" {
   assert_true(html.contains("Kimi"))
   assert_true(html.contains("read-only redacted projection"))
   assert_true(html.contains("空机架 = 物理容量，不代表观测机器"))
-  assert_true(html.contains("不会用装饰性服务器冒充真实机器"))
+  assert_true(html.contains("可用不等于已执行"))
 }
 
 ///|
@@ -71,7 +71,7 @@ test "graphical compute room maps reported nodes and routes to physical assets" 
     @rabbita.static_cell(
       render_secret_compute_graphical_scene(
         dispatch,
-        { ..init_model(), secret_compute_room_selected_id: "local-node-1" },
+        { ..init_model(), secret_compute_room_selected_id: "local-node-1", },
         projection,
       ),
     ),
@@ -85,7 +85,7 @@ test "graphical compute room maps reported nodes and routes to physical assets" 
   assert_true(html.contains("Local node 1"))
   assert_true(html.contains("ROUTE · kimi"))
   assert_true(html.contains("MoonGate"))
-  assert_true(html.contains("机房结构与线缆仅为渲染结构"))
+  assert_true(html.contains("不代表机器分配"))
 }
 
 ///|

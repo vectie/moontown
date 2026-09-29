@@ -3,7 +3,7 @@ pub fn next_tick(
   sequence : Int,
   actions : Array[SchedulerAction],
 ) -> SchedulerTick {
-  { sequence, summary: "\{actions.length()} town actions planned" }
+  { sequence, summary: "\{actions.length()} town actions planned", }
 }
 
 ///|

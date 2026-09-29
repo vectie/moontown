@@ -56,7 +56,7 @@ fn town_life_persistence_test_save(
       sprite_index: 3,
       title: player_title_for(spark),
     }),
-    player_position: Some({ x: 81.5, y: 63.5 }),
+    player_position: Some({ x: 81.5, y: 63.5, }),
     player_stamp: None,
     player_position_stamp: None,
     writer_counters: Some([]),
@@ -94,12 +94,12 @@ fn town_life_test_text_event(
   sequence : Int,
   value : String,
 ) -> TownLifeTextEvent {
-  let dot : TownLifeDot = { writer_id, sequence }
+  let dot : TownLifeDot = { writer_id, sequence, }
   {
     id,
     dot,
     observed_dots: Some([dot]),
-    stamp: { writer_id, lamport: sequence },
+    stamp: { writer_id, lamport: sequence, },
     value,
   }
 }
@@ -116,7 +116,7 @@ fn town_life_test_map_post(
     id,
     building_id: Some(building_id),
     incarnation_id: Some(incarnation_id),
-    created_stamp: Some({ writer_id: "origin", lamport: 1 }),
+    created_stamp: Some({ writer_id: "origin", lamport: 1, }),
     updated_stamp: Some(updated),
     reset_epoch,
     building_name: "同名实验室",
@@ -135,14 +135,14 @@ test "town life reconciliation rejects an avatar-only stale writer" {
   let completed = town_life_persistence_test_save(
     310,
     completed_quests,
-    [{ contact: "mayor", from_me: true, text: "验收完成", tick: 60 }],
+    [{ contact: "mayor", from_me: true, text: "验收完成", tick: 60, }],
     [
       town_life_persistence_test_post(
         "mine-验收实验室", "多智能体协作验收", true, false,
       ),
     ],
     ["1|knowledge_publish|验收实验室"],
-    [{ cooldown_key: "place:lab", last_shown_tick: 60, show_count: 2 }],
+    [{ cooldown_key: "place:lab", last_shown_tick: 60, show_count: 2, }],
     ["第1天 · 完成验收"],
     4,
   )
@@ -159,7 +159,7 @@ test "town life reconciliation rejects an avatar-only stale writer" {
     ],
     [town_life_persistence_test_post("mine-验收实验室", "", false, false)],
     ["1|phone_receive|mayor"],
-    [{ cooldown_key: "place:metro", last_shown_tick: 720, show_count: 1 }],
+    [{ cooldown_key: "place:metro", last_shown_tick: 720, show_count: 1, }],
     ["第2天 · 自动运营快照"],
     4,
   )
@@ -215,8 +215,8 @@ test "migration fence permanently rejects later v1 state" {
 
 ///|
 test "exact incarnation tombstones converge for concurrent disjoint deletes" {
-  let reset : TownLifeCausalStamp = { writer_id: "root", lamport: 7 }
-  let created : TownLifeCausalStamp = { writer_id: "root", lamport: 8 }
+  let reset : TownLifeCausalStamp = { writer_id: "root", lamport: 7, }
+  let created : TownLifeCausalStamp = { writer_id: "root", lamport: 8, }
   let first = {
     ..town_life_persistence_test_post("mine-first", "第一主题", true, false),
     building_id: Some("site-first"),
@@ -256,8 +256,8 @@ test "exact incarnation tombstones converge for concurrent disjoint deletes" {
         post_id: first.id,
         incarnation_id: "inc-first",
         reset_epoch: Some(reset),
-        dot: { writer_id: "a", sequence: 9 },
-        stamp: { writer_id: "a", lamport: 9 },
+        dot: { writer_id: "a", sequence: 9, },
+        stamp: { writer_id: "a", lamport: 9, },
       },
     ]),
   }
@@ -269,8 +269,8 @@ test "exact incarnation tombstones converge for concurrent disjoint deletes" {
         post_id: second.id,
         incarnation_id: "inc-second",
         reset_epoch: Some(reset),
-        dot: { writer_id: "b", sequence: 9 },
-        stamp: { writer_id: "b", lamport: 9 },
+        dot: { writer_id: "b", sequence: 9, },
+        stamp: { writer_id: "b", lamport: 9, },
       },
     ]),
   }
@@ -300,14 +300,14 @@ test "spark awards merge distinct events and deduplicate one quest" {
     ..base,
     spark: 80,
     spark_floor: Some(50),
-    spark_awards: Some([{ id: "quest:first-walk", amount: 30 }]),
+    spark_awards: Some([{ id: "quest:first-walk", amount: 30, }]),
     quest_done: ["create-avatar", "first-walk"],
   }
   let checkin = {
     ..base,
     spark: 70,
     spark_floor: Some(50),
-    spark_awards: Some([{ id: "checkin:20260727:1", amount: 20 }]),
+    spark_awards: Some([{ id: "checkin:20260727:1", amount: 20, }]),
     analytics: ["1|checkin|"],
   }
   let distinct = town_life_reconcile_save(quest, checkin)
@@ -324,9 +324,9 @@ test "town life join is commutative associative and replay idempotent" {
   let a_event = town_life_test_text_event("a:1", "a", 1, "A")
   let b_event = town_life_test_text_event("b:1", "b", 1, "B")
   let c_event = town_life_test_text_event("c:1", "c", 1, "C")
-  let a = { ..base, analytics: ["A"], analytics_events: Some([a_event]) }
-  let b = { ..base, analytics: ["B"], analytics_events: Some([b_event]) }
-  let c = { ..base, analytics: ["C"], analytics_events: Some([c_event]) }
+  let a = { ..base, analytics: ["A"], analytics_events: Some([a_event]), }
+  let b = { ..base, analytics: ["B"], analytics_events: Some([b_event]), }
+  let c = { ..base, analytics: ["C"], analytics_events: Some([c_event]), }
   let left = town_life_reconcile_save(town_life_reconcile_save(a, b), c)
   let right = town_life_reconcile_save(a, town_life_reconcile_save(c, b))
   let reverse = town_life_reconcile_save(c, town_life_reconcile_save(b, a))
@@ -393,23 +393,23 @@ test "attention uses per-writer maxima and newest causal cooldown tick" {
     cooldown_key: "place:lab",
     count: 2,
     last_shown_tick: 900,
-    dot: { writer_id: "a", sequence: 5 },
-    stamp: { writer_id: "a", lamport: 5 },
+    dot: { writer_id: "a", sequence: 5, },
+    stamp: { writer_id: "a", lamport: 5, },
   }
   let new_a = {
     ..old_a,
     count: 3,
     last_shown_tick: 10,
-    dot: { writer_id: "a", sequence: 6 },
-    stamp: { writer_id: "a", lamport: 6 },
+    dot: { writer_id: "a", sequence: 6, },
+    stamp: { writer_id: "a", lamport: 6, },
   }
   let b : TownLifeAttentionCounter = {
     writer_id: "b",
     cooldown_key: "place:lab",
     count: 4,
     last_shown_tick: 20,
-    dot: { writer_id: "b", sequence: 7 },
-    stamp: { writer_id: "b", lamport: 7 },
+    dot: { writer_id: "b", sequence: 7, },
+    stamp: { writer_id: "b", lamport: 7, },
   }
   let counters = town_life_merge_attention_counters([old_a], [new_a, b])
   assert_eq(counters.length(), 2)
@@ -424,7 +424,7 @@ test "attention uses per-writer maxima and newest causal cooldown tick" {
 
 ///|
 test "post mutable payload is wholly LWW including unpublished edits" {
-  let reset : TownLifeCausalStamp = { writer_id: "root", lamport: 1 }
+  let reset : TownLifeCausalStamp = { writer_id: "root", lamport: 1, }
   let published = {
     ..town_life_test_map_post("mine-site-a", "site-a", "inc-a", Some(reset), {
       writer_id: "a",
@@ -439,7 +439,7 @@ test "post mutable payload is wholly LWW including unpublished edits" {
     topic: "第二版",
     spark: 12,
     published: false,
-    updated_stamp: Some({ writer_id: "b", lamport: 6 }),
+    updated_stamp: Some({ writer_id: "b", lamport: 6, }),
   }
   let left = town_life_merge_post(published, edited)
   let right = town_life_merge_post(edited, published)
@@ -479,7 +479,7 @@ test "new reset rejects stale no-epoch map posts but keeps references" {
   )
   let reset = {
     ..town_life_persistence_test_save(50, [], [], [reference], [], [], [], 0),
-    post_reset_stamp: Some({ writer_id: "reset", lamport: 10 }),
+    post_reset_stamp: Some({ writer_id: "reset", lamport: 10, }),
   }
   let left = town_life_reconcile_save(stale, reset)
   let right = town_life_reconcile_save(reset, stale)
@@ -493,34 +493,34 @@ test "new reset rejects stale no-epoch map posts but keeps references" {
 
 ///|
 test "exact delete keeps tombstone while a new recollection incarnation lives" {
-  let reset : TownLifeCausalStamp = { writer_id: "reset", lamport: 10 }
+  let reset : TownLifeCausalStamp = { writer_id: "reset", lamport: 10, }
   let old = town_life_test_map_post(
     "community-a",
     "site-old",
     "inc-old",
     Some(reset),
-    { writer_id: "a", lamport: 11 },
+    { writer_id: "a", lamport: 11, },
   )
   let fresh = {
     ..old,
     building_id: Some("site-new"),
     incarnation_id: Some("inc-new"),
-    created_stamp: Some({ writer_id: "b", lamport: 13 }),
-    updated_stamp: Some({ writer_id: "b", lamport: 13 }),
+    created_stamp: Some({ writer_id: "b", lamport: 13, }),
+    updated_stamp: Some({ writer_id: "b", lamport: 13, }),
   }
   let tombstone : TownLifePostTombstone = {
     post_id: old.id,
     incarnation_id: "inc-old",
     reset_epoch: Some(reset),
-    dot: { writer_id: "a", sequence: 12 },
-    stamp: { writer_id: "a", lamport: 12 },
+    dot: { writer_id: "a", sequence: 12, },
+    stamp: { writer_id: "a", lamport: 12, },
   }
   let deleted = {
     ..town_life_persistence_test_save(50, [], [], [], [], [], [], 0),
     post_reset_stamp: Some(reset),
     post_tombstones: Some([tombstone]),
   }
-  let recollected = { ..deleted, posts: [fresh] }
+  let recollected = { ..deleted, posts: [fresh], }
   let merged = town_life_reconcile_save(deleted, recollected)
   assert_eq(merged.posts.length(), 1)
   assert_eq(merged.posts[0].incarnation_id, Some("inc-new"))
@@ -536,15 +536,15 @@ test "legacy wildcard deletion is a cutoff not a permanent logical-id ban" {
     post_id: legacy.id,
     incarnation_id: "legacy-any:\{legacy.id}",
     reset_epoch: None,
-    dot: { writer_id: "migration", sequence: 5 },
-    stamp: { writer_id: "migration", lamport: 5 },
+    dot: { writer_id: "migration", sequence: 5, },
+    stamp: { writer_id: "migration", lamport: 5, },
   }
   let fresh = {
     ..legacy,
     building_id: Some("site-new"),
     incarnation_id: Some("inc-new"),
-    created_stamp: Some({ writer_id: "live", lamport: 6 }),
-    updated_stamp: Some({ writer_id: "live", lamport: 6 }),
+    created_stamp: Some({ writer_id: "live", lamport: 6, }),
+    updated_stamp: Some({ writer_id: "live", lamport: 6, }),
   }
   let stale = {
     ..town_life_persistence_test_save(50, [], [], [legacy], [], [], [], 0),
@@ -575,9 +575,9 @@ test "avatar and position use deterministic causal LWW" {
       sprite_index: 1,
       title: "新居民",
     }),
-    player_position: Some({ x: 10.0, y: 10.0 }),
-    player_stamp: Some({ writer_id: "a", lamport: 5 }),
-    player_position_stamp: Some({ writer_id: "a", lamport: 5 }),
+    player_position: Some({ x: 10.0, y: 10.0, }),
+    player_stamp: Some({ writer_id: "a", lamport: 5, }),
+    player_position_stamp: Some({ writer_id: "a", lamport: 5, }),
   }
   let newer = {
     ..older,
@@ -588,9 +588,9 @@ test "avatar and position use deterministic causal LWW" {
       sprite_index: 2,
       title: "新居民",
     }),
-    player_position: Some({ x: 20.0, y: 20.0 }),
-    player_stamp: Some({ writer_id: "b", lamport: 6 }),
-    player_position_stamp: Some({ writer_id: "b", lamport: 6 }),
+    player_position: Some({ x: 20.0, y: 20.0, }),
+    player_stamp: Some({ writer_id: "b", lamport: 6, }),
+    player_position_stamp: Some({ writer_id: "b", lamport: 6, }),
   }
   let left = town_life_reconcile_save(older, newer)
   let right = town_life_reconcile_save(newer, older)
@@ -608,15 +608,18 @@ test "event allocator advances above every observed writer" {
     ..init_model(),
     town_life_writer_id: "local",
     town_life_writer_counters: [
-      { writer_id: "a", sequence: 5 },
-      { writer_id: "b", sequence: 9 },
+      { writer_id: "a", sequence: 5, },
+      { writer_id: "b", sequence: 9, },
     ],
   }
   let (dot, stamp, _, next) = town_life_next_event(model, "test")
-  assert_eq(dot, { writer_id: "local", sequence: 10 })
-  assert_eq(stamp, { writer_id: "local", lamport: 10 })
+  assert_eq(dot, { writer_id: "local", sequence: 10, })
+  assert_eq(stamp, { writer_id: "local", lamport: 10, })
   assert_true(
-    next.town_life_writer_counters.contains({ writer_id: "local", sequence: 10 }),
+    next.town_life_writer_counters.contains({
+      writer_id: "local",
+      sequence: 10,
+    }),
   )
 }
 
@@ -677,7 +680,7 @@ test "migration loser returns the V3 checkpoint authority" {
 
 ///|
 test "player spawn snaps to the migrated Wenyu road graph" {
-  let model = { ..init_model(), player: Some(test_player_avatar()) }
+  let model = { ..init_model(), player: Some(test_player_avatar()), }
   let seed = 20260727
   let (x, y) = player_home_position(model)
   assert_true(
@@ -690,7 +693,7 @@ test "idle player uses the persisted road endpoint after reload" {
   let model = {
     ..init_model(),
     player: Some(test_player_avatar()),
-    player_position: Some({ x: 81.5, y: 63.5 }),
+    player_position: Some({ x: 81.5, y: 63.5, }),
     player_motion: None,
   }
   assert_eq(player_current_position(model), Some((81.5, 63.5)))
@@ -698,7 +701,7 @@ test "idle player uses the persisted road endpoint after reload" {
 
 ///|
 test "every direction control can start a walk from the player spawn" {
-  let model = { ..init_model(), player: Some(test_player_avatar()) }
+  let model = { ..init_model(), player: Some(test_player_avatar()), }
   let directions = [(-1, -1), (1, 1), (-1, 1), (1, -1)]
   for direction in directions {
     let next = player_step_direction_model(model, direction.0, direction.1)
@@ -845,8 +848,8 @@ test "publishing a knowledge building creates a shareable town link" {
     id: "mine-test-lab",
     building_id: Some("site-test-lab"),
     incarnation_id: Some("inc-test-lab"),
-    created_stamp: Some({ writer_id: "test", lamport: 1 }),
-    updated_stamp: Some({ writer_id: "test", lamport: 1 }),
+    created_stamp: Some({ writer_id: "test", lamport: 1, }),
+    updated_stamp: Some({ writer_id: "test", lamport: 1, }),
     reset_epoch: None,
     building_name: "测试实验室",
     topic: "MoonBit 协作研究",
@@ -888,12 +891,12 @@ test "town life surfaces open with competing overlays closed" {
   assert_true(
     !phone.square_open && !phone.ops_open && !phone.energy_request_open,
   )
-  let (_, square) = square_toggle_update({ ..base, square_open: false })
+  let (_, square) = square_toggle_update({ ..base, square_open: false, })
   assert_true(square.square_open)
   assert_true(
     !square.phone_open && !square.ops_open && !square.energy_request_open,
   )
-  let (_, ops) = ops_toggle_update({ ..base, ops_open: false })
+  let (_, ops) = ops_toggle_update({ ..base, ops_open: false, })
   assert_true(ops.ops_open)
   assert_true(!ops.phone_open && !ops.square_open && !ops.energy_request_open)
 }

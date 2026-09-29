@@ -71,16 +71,19 @@ test "daemon runtime policy owns supervisor worker spawn decisions" {
   }
   assert_false(daemon_runtime_should_spawn_worker(running_worker))
   assert_true(
-    daemon_runtime_should_spawn_worker({ ..running_worker, worker_alive: false }),
+    daemon_runtime_should_spawn_worker({
+      ..running_worker,
+      worker_alive: false,
+    }),
   )
   assert_true(
-    daemon_runtime_should_spawn_worker({ ..running_worker, stale: true }),
+    daemon_runtime_should_spawn_worker({ ..running_worker, stale: true, }),
   )
   assert_true(
-    daemon_runtime_should_spawn_worker({ ..running_worker, status: "missing" }),
+    daemon_runtime_should_spawn_worker({ ..running_worker, status: "missing", }),
   )
   assert_true(
-    daemon_runtime_should_spawn_worker({ ..running_worker, status: "stopped" }),
+    daemon_runtime_should_spawn_worker({ ..running_worker, status: "stopped", }),
   )
   assert_false(
     daemon_runtime_should_spawn_worker({

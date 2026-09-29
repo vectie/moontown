@@ -33,12 +33,12 @@ pub struct TownSnapshot {
 
 ///|
 pub fn snapshot_of(town : @core.TownState) -> TownSnapshot {
-  { town, event_count: town.events.length() }
+  { town, event_count: town.events.length(), }
 }
 
 ///|
 pub fn empty_checkpoint(run_id : String) -> Checkpoint {
-  { run_id, summary: "not started", event_count: 0 }
+  { run_id, summary: "not started", event_count: 0, }
 }
 
 ///|

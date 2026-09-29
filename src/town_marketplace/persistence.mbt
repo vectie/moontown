@@ -80,7 +80,7 @@ fn MarketplaceApplication::ensure_bootstrap(
       }),
     )
   }
-  { ..state, principals, sessions }
+  { ..state, principals, sessions, }
 }
 
 ///|

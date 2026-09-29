@@ -534,7 +534,7 @@ fn ecosystem_contract_portals(
       0
     }
     for index in 0..<result.length() {
-      result[index] = { ..result[index], primary: index == primary_index }
+      result[index] = { ..result[index], primary: index == primary_index, }
     }
   }
   result

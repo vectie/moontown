@@ -84,7 +84,7 @@ pub fn miniapp_update_building(
   }
   if updated {
     miniapp_building_accept(
-      { ..snapshot, buildings, version: snapshot.version + 1 },
+      { ..snapshot, buildings, version: snapshot.version + 1, },
       building_id,
       "building updated",
     )

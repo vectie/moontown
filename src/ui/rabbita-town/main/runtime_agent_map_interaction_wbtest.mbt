@@ -94,19 +94,19 @@ test "runtime agent route speeds stay aligned with role choreography" {
   }
   assert_eq(golden_valley_runtime_agent_route_speed(base), 1.7)
   assert_eq(
-    golden_valley_runtime_agent_route_speed({ ..base, role: "mayor" }),
+    golden_valley_runtime_agent_route_speed({ ..base, role: "mayor", }),
     2.0,
   )
   assert_eq(
-    golden_valley_runtime_agent_route_speed({ ..base, role: "worker" }),
+    golden_valley_runtime_agent_route_speed({ ..base, role: "worker", }),
     2.6,
   )
 }
 
 ///|
 test "stale runtime residents cannot receive map clicks" {
-  let stale = { ..energy_valley_runtime_loading_state(), phase: Stale }
-  let model = { ..init_model(), energy_valley_runtime: stale }
+  let stale = { ..energy_valley_runtime_loading_state(), phase: Stale, }
+  let model = { ..init_model(), energy_valley_runtime: stale, }
   assert_true(runtime_agent_test_map_positions(model, 1280, 720).is_empty())
   assert_eq(runtime_agent_test_hit(model, 1280, 720, 640, 360), None)
 }
@@ -394,7 +394,7 @@ test "unresolved runtime destination stays explicitly unreachable" {
     ..base,
     energy_valley_runtime: {
       ..base.energy_valley_runtime,
-      projection: Some({ ..projection, tasks: [task], agents: [agent] }),
+      projection: Some({ ..projection, tasks: [task], agents: [agent], }),
     },
   }
   let journey = golden_valley_runtime_agent_journey_at(
@@ -416,7 +416,7 @@ test "runtime presence evidence tick is stable across animation ticks" {
   assert_eq(golden_valley_runtime_agent_presence_since_tick(base, agent), 41)
   assert_eq(
     golden_valley_runtime_agent_presence_since_tick(
-      { ..base, tick: base.tick + 200 },
+      { ..base, tick: base.tick + 200, },
       agent,
     ),
     41,
@@ -426,7 +426,7 @@ test "runtime presence evidence tick is stable across animation ticks" {
     ..base,
     energy_valley_runtime: {
       ..base.energy_valley_runtime,
-      projection: Some({ ..projection, tick: None }),
+      projection: Some({ ..projection, tick: None, }),
       version: 7,
       presence_started_at_tick: 7,
     },
@@ -437,7 +437,7 @@ test "runtime presence evidence tick is stable across animation ticks" {
   )
   assert_eq(
     golden_valley_runtime_agent_presence_since_tick(
-      { ..without_source_tick, tick: without_source_tick.tick + 200 },
+      { ..without_source_tick, tick: without_source_tick.tick + 200, },
       agent,
     ),
     7,
@@ -601,7 +601,7 @@ test "canvas walk mode has priority over a live runtime agent hit" {
     sprite_index: 0,
     title: "New resident",
   }
-  let model = { ..base, walk_mode: true, player: Some(player) }
+  let model = { ..base, walk_mode: true, player: Some(player), }
   let (_, next) = energy_canvas_click_routed(model, pointer_x, pointer_y)
   assert_false(next.selection is Agent(_))
   assert_true(next.walk_mode)
@@ -615,7 +615,7 @@ test "stale runtime agent falls through to the building under the pointer" {
   let (live, pointer_x, pointer_y) = runtime_map_routing_agent_click_fixture()
   let model = {
     ..live,
-    energy_valley_runtime: { ..live.energy_valley_runtime, phase: Stale },
+    energy_valley_runtime: { ..live.energy_valley_runtime, phase: Stale, },
   }
   assert_eq(
     runtime_agent_test_hit(model, 1280, 720, pointer_x, pointer_y),
@@ -661,7 +661,7 @@ test "selected runtime resident is visibly marked in the shared sprite record" {
   ).filter(agent => !agent.preview)
   assert_eq(unselected.length(), 1)
   assert_false(unselected[0].selected)
-  let selected_model = { ..base, selection: Agent("routing-agent") }
+  let selected_model = { ..base, selection: Agent("routing-agent"), }
   let selected_snapshot = ecosystem_contract_town_snapshot(
     selected_model,
     active_energy_valley_seed(),

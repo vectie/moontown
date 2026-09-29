@@ -11,7 +11,7 @@ fn protocol_history_entry_from_line(
       let status = protocol_history_status(step, map)
       let detail = protocol_history_detail(step, map)
       let entry_title = protocol_history_title(title, map)
-      Some({ step, status, title: entry_title, detail, evidence_ref })
+      Some({ step, status, title: entry_title, detail, evidence_ref, })
     }
     _ => None
   }

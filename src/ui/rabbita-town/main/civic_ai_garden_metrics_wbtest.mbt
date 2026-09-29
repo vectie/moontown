@@ -43,7 +43,7 @@ test "ai garden signal uses shared execution phrase groups" {
   )
   assert_eq(
     ai_garden_signal(
-      { ..model, state_source: StateSourceKind::SnapshotFile },
+      { ..model, state_source: StateSourceKind::SnapshotFile, },
       Some(civic_metric_test_execution(Completed)),
     ),
     "Projection bridge",
@@ -103,7 +103,7 @@ test "ai garden tool trial label uses shared execution phrase groups" {
   )
   assert_eq(
     ai_garden_tool_trial_label(
-      { ..model, state_source: StateSourceKind::SnapshotFile },
+      { ..model, state_source: StateSourceKind::SnapshotFile, },
       None,
     ),
     "Projection lesson pending",
@@ -129,7 +129,7 @@ test "ai garden comparison label uses shared execution phrase groups" {
   )
   assert_eq(
     ai_garden_comparison_label(
-      { ..model, state_source: StateSourceKind::SnapshotFile },
+      { ..model, state_source: StateSourceKind::SnapshotFile, },
       None,
     ),
     "Projection proof pending",

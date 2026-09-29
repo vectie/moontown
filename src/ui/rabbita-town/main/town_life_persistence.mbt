@@ -146,7 +146,7 @@ fn town_life_stable_hash(text : String) -> Int {
 
 ///|
 fn town_life_legacy_dot(stream : String, sequence : Int) -> TownLifeDot {
-  { writer_id: "legacy-\{stream}", sequence: sequence.max(0) }
+  { writer_id: "legacy-\{stream}", sequence: sequence.max(0), }
 }
 
 ///|
@@ -154,7 +154,7 @@ fn town_life_legacy_stamp(
   stream : String,
   lamport : Int,
 ) -> TownLifeCausalStamp {
-  { writer_id: "legacy-\{stream}", lamport: lamport.max(0) }
+  { writer_id: "legacy-\{stream}", lamport: lamport.max(0), }
 }
 
 ///|
@@ -195,7 +195,7 @@ fn town_life_advance_watermark(
       return
     }
   }
-  watermarks.push({ writer_id: dot.writer_id, through_sequence: dot.sequence })
+  watermarks.push({ writer_id: dot.writer_id, through_sequence: dot.sequence, })
 }
 
 ///|
@@ -227,7 +227,7 @@ fn town_life_merge_writer_counters(
 ) -> Array[TownLifeWriterCounter] {
   let merged : Array[TownLifeWriterCounter] = []
   for counter in left {
-    merged.push({ ..counter, sequence: counter.sequence.max(0) })
+    merged.push({ ..counter, sequence: counter.sequence.max(0), })
   }
   for counter in right {
     let mut found = -1
@@ -237,9 +237,9 @@ fn town_life_merge_writer_counters(
       }
     }
     if found < 0 {
-      merged.push({ ..counter, sequence: counter.sequence.max(0) })
+      merged.push({ ..counter, sequence: counter.sequence.max(0), })
     } else if counter.sequence > merged[found].sequence {
-      merged[found] = { ..counter, sequence: counter.sequence.max(0) }
+      merged[found] = { ..counter, sequence: counter.sequence.max(0), }
     }
   }
   merged.sort_by((a, b) => a.writer_id.compare(b.writer_id))
@@ -262,7 +262,7 @@ fn town_life_observe_dot(
       return
     }
   }
-  counters.push({ writer_id: dot.writer_id, sequence: dot.sequence })
+  counters.push({ writer_id: dot.writer_id, sequence: dot.sequence, })
 }
 
 ///|
@@ -347,15 +347,15 @@ fn town_life_next_event(
     ) +
     1
   let lamport = town_life_max_observed_lamport(model).max(sequence - 1) + 1
-  let dot : TownLifeDot = { writer_id, sequence }
-  let stamp : TownLifeCausalStamp = { writer_id, lamport }
+  let dot : TownLifeDot = { writer_id, sequence, }
+  let stamp : TownLifeCausalStamp = { writer_id, lamport, }
   let counters = model.town_life_writer_counters.copy()
   town_life_observe_dot(counters, dot)
   (
     dot,
     stamp,
     "\{writer_id}:\{sequence}:\{kind}",
-    { ..model, town_life_writer_counters: counters },
+    { ..model, town_life_writer_counters: counters, },
   )
 }
 
@@ -375,7 +375,7 @@ fn town_life_seed_text_events(
       id: "legacy:\{stream}:\{payload_hash}:\{occurrence}",
       dot,
       observed_dots: Some([dot]),
-      stamp: { writer_id: dot.writer_id, lamport: index + 1 },
+      stamp: { writer_id: dot.writer_id, lamport: index + 1, },
       value,
     })
   }
@@ -397,7 +397,7 @@ fn town_life_seed_phone_events(
     events.push({
       id: "legacy:phone:\{payload_hash}:\{occurrence}",
       dot,
-      stamp: { writer_id: dot.writer_id, lamport: index + 1 },
+      stamp: { writer_id: dot.writer_id, lamport: index + 1, },
       value,
     })
   }
@@ -426,7 +426,7 @@ fn town_life_prefer_text_event(
   } else {
     right
   }
-  { ..winner, observed_dots: Some(town_life_merge_event_dots(left, right)) }
+  { ..winner, observed_dots: Some(town_life_merge_event_dots(left, right)), }
 }
 
 ///|
@@ -603,7 +603,7 @@ fn town_life_append_text_event(
   let (events, next_watermarks) = town_life_merge_text_event_state(
     existing,
     watermarks,
-    [{ id: event_id, dot, observed_dots: Some([dot]), stamp, value }],
+    [{ id: event_id, dot, observed_dots: Some([dot]), stamp, value, }],
     [],
     capacity,
   )
@@ -622,7 +622,7 @@ fn town_life_append_phone_message(model : Model, value : PhoneMessage) -> Model 
   let (events, watermarks) = town_life_merge_phone_event_state(
     existing,
     model.town_life_phone_prune_watermarks,
-    [{ id, dot, stamp, value }],
+    [{ id, dot, stamp, value, }],
     [],
   )
   {
@@ -901,12 +901,12 @@ fn town_life_merge_spark_awards(
     for index, current in merged {
       if current.id == award.id {
         if award.amount > current.amount {
-          merged[index] = { ..award, amount: award.amount.max(0) }
+          merged[index] = { ..award, amount: award.amount.max(0), }
         }
         return
       }
     }
-    merged.push({ ..award, amount: award.amount.max(0) })
+    merged.push({ ..award, amount: award.amount.max(0), })
   }
   for award in left {
     add(award)
@@ -924,14 +924,14 @@ fn town_life_add_spark_award(model : Model, id : String, amount : Int) -> Model 
     return model
   }
   let awards = model.town_life_spark_awards.copy()
-  awards.push({ id, amount: amount.max(0) })
+  awards.push({ id, amount: amount.max(0), })
   awards.sort_by((a, b) => a.id.compare(b.id))
   let spark = model.town_life_spark_floor + town_life_awards_total(awards)
   let player = model.player.map(value => {
     ..value,
     title: player_title_for(spark),
   })
-  { ..model, spark, player, town_life_spark_awards: awards }
+  { ..model, spark, player, town_life_spark_awards: awards, }
 }
 
 ///|
@@ -970,7 +970,7 @@ fn town_life_legacy_reset_stamp(generation : Int) -> TownLifeCausalStamp? {
   if generation <= 0 {
     None
   } else {
-    Some({ writer_id: "legacy-post-reset", lamport: generation })
+    Some({ writer_id: "legacy-post-reset", lamport: generation, })
   }
 }
 
@@ -1004,7 +1004,7 @@ fn town_life_normalize_post(
     None =>
       match reset_epoch {
         Some(epoch) =>
-          { writer_id: "legacy-post-state", lamport: epoch.lamport + 1 }
+          { writer_id: "legacy-post-state", lamport: epoch.lamport + 1, }
         None => town_life_legacy_stamp("post-state", 0)
       }
   }
@@ -1602,7 +1602,7 @@ fn town_life_reconcile_save(
     right.spark_awards.unwrap_or([]),
   )
   let spark = spark_floor + town_life_awards_total(awards)
-  let player = player.map(value => { ..value, title: player_title_for(spark) })
+  let player = player.map(value => { ..value, title: player_title_for(spark), })
   town_life_normalize_save({
     player,
     player_position,
@@ -1774,7 +1774,7 @@ fn town_life_model_with_save(model : Model, raw : TownLifeSave) -> Model {
 ///|
 fn town_life_set_player(model : Model, player : PlayerAvatar?) -> Model {
   let (_, stamp, _, stamped) = town_life_next_event(model, "player")
-  { ..stamped, player, town_life_player_stamp: Some(stamp) }
+  { ..stamped, player, town_life_player_stamp: Some(stamp), }
 }
 
 ///|
@@ -1840,7 +1840,7 @@ fn town_life_touch_post(model : Model, incarnation_id : String) -> Model {
     ..stamped,
     posts: stamped.posts.map(post => {
       if post.incarnation_id.unwrap_or("") == incarnation_id {
-        { ..post, updated_stamp: Some(stamp) }
+        { ..post, updated_stamp: Some(stamp), }
       } else {
         post
       }
@@ -1854,7 +1854,7 @@ fn town_life_with_post_deletions(
   before : ArrayView[KnowledgePost],
   after : Array[KnowledgePost],
 ) -> Model {
-  let mut next = { ..model, posts: after }
+  let mut next = { ..model, posts: after, }
   let tombstones = model.town_life_post_tombstones.copy()
   for raw in before {
     let post = town_life_normalize_post(raw, model.town_life_post_reset_stamp)

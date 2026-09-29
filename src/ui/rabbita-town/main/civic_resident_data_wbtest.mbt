@@ -10,6 +10,6 @@ test "resident data keeps the expected demo roster shape" {
 ///|
 test "resident data marks the first resident focused under pressure" {
   let model = init_model()
-  assert_eq(resident_sims({ ..model, pressure: 34 })[0].mood, "Curious")
-  assert_eq(resident_sims({ ..model, pressure: 80 })[0].mood, "Focused")
+  assert_eq(resident_sims({ ..model, pressure: 34, })[0].mood, "Curious")
+  assert_eq(resident_sims({ ..model, pressure: 80, })[0].mood, "Focused")
 }

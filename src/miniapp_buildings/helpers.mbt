@@ -4,7 +4,7 @@ fn miniapp_building_accept(
   building_id : String,
   message : String,
 ) -> MiniappBuildingChange {
-  { ok: true, snapshot, message, building_id, placement_id: None }
+  { ok: true, snapshot, message, building_id, placement_id: None, }
 }
 
 ///|
@@ -14,7 +14,13 @@ fn miniapp_building_accept_with_placement(
   placement_id : String,
   message : String,
 ) -> MiniappBuildingChange {
-  { ok: true, snapshot, message, building_id, placement_id: Some(placement_id) }
+  {
+    ok: true,
+    snapshot,
+    message,
+    building_id,
+    placement_id: Some(placement_id),
+  }
 }
 
 ///|
@@ -23,7 +29,7 @@ fn miniapp_building_reject(
   building_id : String,
   message : String,
 ) -> MiniappBuildingChange {
-  { ok: false, snapshot, message, building_id, placement_id: None }
+  { ok: false, snapshot, message, building_id, placement_id: None, }
 }
 
 ///|
@@ -75,7 +81,7 @@ fn miniapp_replace_placement(
 ) -> Array[@miniapp_contracts.MiniappBuildingPlacement] {
   let replaced = placements.map(placement => {
     if placement.id == next.id {
-      { ..next, version: placement.version + 1 }
+      { ..next, version: placement.version + 1, }
     } else {
       placement
     }

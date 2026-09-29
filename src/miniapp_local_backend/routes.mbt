@@ -85,5 +85,5 @@ fn miniapp_local_backend_route(
   name : String,
   auth_required : Bool,
 ) -> MiniappLocalBackendRoute {
-  { http_method, path, name, auth_required }
+  { http_method, path, name, auth_required, }
 }

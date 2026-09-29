@@ -167,8 +167,8 @@ test "offline resident pings are infrequent and bounded" {
     phone_open: false,
     phone_log: [],
   }
-  assert_true(phone_maybe_receive({ ..base, tick: 22 }).phone_log.is_empty())
-  let pinged = phone_maybe_receive({ ..base, tick: 720 })
+  assert_true(phone_maybe_receive({ ..base, tick: 22, }).phone_log.is_empty())
+  let pinged = phone_maybe_receive({ ..base, tick: 720, })
   assert_eq(pinged.phone_log.length(), 1)
   assert_eq(pinged.phone_unread, 1)
   assert_true(pinged.life_toast.contains("离线剧本居民"))
@@ -185,8 +185,13 @@ test "phone renders only the newest contact history" {
       tick: index,
     })
   }
-  log.push({ contact: "keeper", from_me: false, text: "别的会话", tick: 99 })
-  let model = { ..init_model(), phone_log: log }
+  log.push({
+    contact: "keeper",
+    from_me: false,
+    text: "别的会话",
+    tick: 99,
+  })
+  let model = { ..init_model(), phone_log: log, }
   let thread = phone_thread(model, "mayor")
   assert_eq(thread.length(), 36)
   assert_eq(thread[0].text, "消息 16")
@@ -197,7 +202,7 @@ test "phone renders only the newest contact history" {
 ///|
 test "phone marks stale Agents and preserves a vanished runtime identity" {
   let runtime = social_knowledge_runtime_state()
-  let stale = { ..runtime, phase: Stale }
+  let stale = { ..runtime, phase: Stale, }
   let stale_model = {
     ..init_model(),
     player: Some(social_knowledge_player()),
@@ -209,8 +214,8 @@ test "phone marks stale Agents and preserves a vanished runtime identity" {
   assert_true(stale_contact.role.contains("快照已过期"))
   assert_true(!stale_contact.role.contains("工作中"))
   let projection = runtime.projection.unwrap()
-  let vanished = { ..runtime, projection: Some({ ..projection, agents: [] }) }
-  let vanished_model = { ..stale_model, energy_valley_runtime: vanished }
+  let vanished = { ..runtime, projection: Some({ ..projection, agents: [], }), }
+  let vanished_model = { ..stale_model, energy_valley_runtime: vanished, }
   let disconnected = phone_contact_by_id(vanished_model, "runtime:agent-live")
   assert_eq(disconnected.id, "runtime:agent-live")
   assert_true(disconnected.name.contains("已断开"))
@@ -271,8 +276,8 @@ test "publishing creates an ordinary browser URL and complete share card" {
     id: "mine-share",
     building_id: Some("site-share"),
     incarnation_id: Some("inc-share"),
-    created_stamp: Some({ writer_id: "test", lamport: 1 }),
-    updated_stamp: Some({ writer_id: "test", lamport: 1 }),
+    created_stamp: Some({ writer_id: "test", lamport: 1, }),
+    updated_stamp: Some({ writer_id: "test", lamport: 1, }),
     reset_epoch: None,
     building_name: "协作实验室",
     topic: "MoonBit 多 Agent 研究",
@@ -282,7 +287,7 @@ test "publishing creates an ordinary browser URL and complete share card" {
     collected: false,
     mine: true,
   }
-  let model = { ..init_model(), posts: [post] }
+  let model = { ..init_model(), posts: [post], }
   let link = knowledge_share_link(model, post)
   assert_true(link.has_prefix("http://") || link.has_prefix("https://"))
   assert_true(link.contains("share=knowledge-building"))
@@ -361,7 +366,11 @@ test "unfinished knowledge building is durable and recoverable from square" {
   assert_true(prompted.posts[0].topic.is_empty())
   assert_eq(prompted.posts[0].building_id, identified.authored_id)
   assert_eq(knowledge_pending_buildings(prompted).length(), 1)
-  let deferred = { ..prompted, knowledge_dialog_open: false, square_open: true }
+  let deferred = {
+    ..prompted,
+    knowledge_dialog_open: false,
+    square_open: true,
+  }
   let dispatch : Dispatch[Msg] = Emit(fn(_msg) { @rabbita.none })
   let square_html = @rabbita.render_to_string(
     @rabbita.static_cell(render_square_panel(dispatch, deferred)),
@@ -390,8 +399,8 @@ test "demolition removes the local knowledge post instead of orphaning it" {
     id: "mine-实验室 1",
     building_id: Some("site-lab-1"),
     incarnation_id: Some("inc-lab-1"),
-    created_stamp: Some({ writer_id: "test", lamport: 1 }),
-    updated_stamp: Some({ writer_id: "test", lamport: 1 }),
+    created_stamp: Some({ writer_id: "test", lamport: 1, }),
+    updated_stamp: Some({ writer_id: "test", lamport: 1, }),
     reset_epoch: None,
     building_name: "实验室 1",
     topic: "已分享主题",
@@ -448,13 +457,17 @@ test "same-name buildings use authored identity and legacy ambiguity is untouche
     entrance_y: None,
     floors: 2,
   }
-  let second_building = { ..first_building, authored_id: Some("site-b"), x: 64 }
+  let second_building = {
+    ..first_building,
+    authored_id: Some("site-b"),
+    x: 64,
+  }
   let first : KnowledgePost = {
     id: "mine-site-a",
     building_id: Some("site-a"),
     incarnation_id: Some("inc-a"),
-    created_stamp: Some({ writer_id: "test", lamport: 1 }),
-    updated_stamp: Some({ writer_id: "test", lamport: 1 }),
+    created_stamp: Some({ writer_id: "test", lamport: 1, }),
+    updated_stamp: Some({ writer_id: "test", lamport: 1, }),
     reset_epoch: None,
     building_name: "同名实验室",
     topic: "A",
@@ -486,13 +499,13 @@ test "same-name buildings use authored identity and legacy ambiguity is untouche
     created_stamp: None,
     updated_stamp: None,
   }
-  let legacy_second = { ..legacy_first, id: "legacy-b", topic: "B" }
+  let legacy_second = { ..legacy_first, id: "legacy-b", topic: "B", }
   let ambiguous = knowledge_posts_after_demolition(
     [legacy_first, legacy_second],
-    [{ ..first_building, authored_id: None }],
+    [{ ..first_building, authored_id: None, }],
     [
-      { ..first_building, authored_id: None },
-      { ..second_building, authored_id: None },
+      { ..first_building, authored_id: None, },
+      { ..second_building, authored_id: None, },
     ],
   )
   assert_eq(ambiguous.length(), 2)
@@ -504,8 +517,8 @@ test "map reset removes authored and collected physical post state" {
     id: "mine-reset",
     building_id: Some("site-reset"),
     incarnation_id: Some("inc-reset"),
-    created_stamp: Some({ writer_id: "test", lamport: 1 }),
-    updated_stamp: Some({ writer_id: "test", lamport: 1 }),
+    created_stamp: Some({ writer_id: "test", lamport: 1, }),
+    updated_stamp: Some({ writer_id: "test", lamport: 1, }),
     reset_epoch: None,
     building_name: "研发塔楼 1",
     topic: "本机主题",
@@ -515,7 +528,7 @@ test "map reset removes authored and collected physical post state" {
     collected: false,
     mine: true,
   }
-  let collected = { ..community_square_posts()[0], collected: true }
+  let collected = { ..community_square_posts()[0], collected: true, }
   let example = community_square_posts()[1]
   let remaining = knowledge_posts_after_map_reset([
     mine_post, collected, example,

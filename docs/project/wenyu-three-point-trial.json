@@ -1,0 +1,85 @@
+{
+  "schema": "moontown.original_to_generated_three_point_trial.v1",
+  "direction": "original-design-pixels-to-generated-design-pixels",
+  "originalImage": "wenyuvalley.jpg",
+  "originalSize": [
+    2274,
+    1280
+  ],
+  "originalSha256": "8363abfdeda33d759a185c8a54c3ef8f971711a4dbf149028ee9447e38f90e62",
+  "generatedImage": "wenyu_topdown_semantic.png",
+  "generatedSize": [
+    1672,
+    941
+  ],
+  "fitPicks": [
+    {
+      "id": "A",
+      "original": {
+        "x": 1080,
+        "y": 144
+      },
+      "generated": {
+        "x": 728,
+        "y": 35
+      }
+    },
+    {
+      "id": "B",
+      "original": {
+        "x": 168,
+        "y": 693
+      },
+      "generated": {
+        "x": 406,
+        "y": 757
+      }
+    },
+    {
+      "id": "C",
+      "original": {
+        "x": 1790,
+        "y": 838
+      },
+      "generated": {
+        "x": 1450,
+        "y": 637
+      }
+    }
+  ],
+  "heldOutPick": {
+    "id": "D",
+    "original": {
+      "x": 627,
+      "y": 397
+    },
+    "generated": {
+      "x": 548,
+      "y": 439
+    }
+  },
+  "heldOutPrediction": {
+    "x": 559.7818734000966,
+    "y": 373.18133835524554
+  },
+  "heldOutErrorPixels": 66.86485445675162,
+  "heldOutErrorApproxTiles": 10.237681065148573,
+  "matrix": [
+    [
+      0.6060771395437428,
+      0.4202957217923995
+    ],
+    [
+      -0.16678106770393697,
+      1.0380613228671791
+    ]
+  ],
+  "translation": {
+    "x": 12.914105354555204,
+    "y": 65.64272262735182
+  },
+  "pickMethod": "Manual visual centres; provisional correspondence, not survey. Allow about 12 original pixels and 6 generated pixels per pick.",
+  "osmFit": false,
+  "runtimeEligible": false,
+  "conclusion": "An exact three-point affine fit does not reproduce the excluded junction. This alone does not distinguish perspective from non-projective image-generation deformation."
+}

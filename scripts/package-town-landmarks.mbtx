@@ -1,0 +1,70 @@
+import {
+  "moonbitlang/x@0.4.40/fs",
+  "moonbitlang/core/json",
+}
+
+///|
+fn field(j : Json, k : String) -> Json {
+  match j { Object(m) => m.get(k).unwrap_or(Json::null()); _ => Json::null() }
+}
+///|
+fn num(j : Json) -> Double { match j { Number(n, ..) => n; _ => abort("number required") } }
+///|
+fn str(j : Json) -> String { match j { String(s) => s; _ => "" } }
+///|
+fn arr(j : Json) -> Array[Json] { match j { Array(a) => a; _ => abort("array required") } }
+///|
+fn copy_tree(source : String, target : String) -> Unit raise {
+  if !@fs.path_exists(target) { @fs.create_dir(target) }
+  for name in @fs.read_dir(source) {
+    // The original floor-plan photograph is private review material. Never
+    // publish it through the town's static asset tree.
+    if name == "interior-reference.jpg" { continue }
+    let from = source + "/" + name
+    let to = target + "/" + name
+    if @fs.is_dir(from) { copy_tree(from, to) } else {
+      @fs.write_bytes_to_file(to, @fs.read_file_to_bytes(from))
+    }
+  }
+}
+///|
+fn main raise {
+  // Original studies remain untouched. Product copies are generated inputs to
+  // the existing hashed/verified static asset assembly, not new source models.
+  let target = "src/ui/assets/landmark-studio"
+  let stale_private_reference = target + "/interior-reference.jpg"
+  if @fs.path_exists(stale_private_reference) {
+    @fs.remove_file(stale_private_reference)
+  }
+  copy_tree("src/ui/landmark-studio/web", target)
+  let source = @json.parse(@fs.read_file_to_string("docs/project/wenyu-lower-perspective.json"))
+  let nodes : Map[String, Json] = Map([])
+  let edges : Array[Json] = []
+  for way in arr(field(source, "ways")) {
+    let tags = field(way, "tags")
+    let kind = str(field(tags, "highway"))
+    if !["secondary", "tertiary", "residential", "unclassified", "service", "footway", "path", "pedestrian", "steps", "cycleway"].contains(kind) ||
+      ["no", "private"].contains(str(field(tags, "access"))) ||
+      str(field(tags, "foot")) == "no" || str(field(tags, "tunnel")) == "yes" { continue }
+    let geo = arr(field(way, "geometryWgs84"))
+    if !geo.all(p => num(field(p,"lon")) > 116.457 && num(field(p,"lon")) < 116.483 && num(field(p,"lat")) > 40.108 && num(field(p,"lat")) < 40.135) { continue }
+    let path = arr(field(way, "pathGrid"))
+    let ids = arr(field(way, "nodes"))
+    assert_eq(path.length(), ids.length())
+    for i, p in path {
+      let x = num(field(p,"x")); let y = num(field(p,"y"))
+      let w = 1.0 + 0.01 * ((x - 256.0) / 256.0 - y / 144.0)
+      let id = ids[i].stringify()
+      nodes[id] = { "id": id, "x": 256.0 + (x - 256.0) / w, "y": y / w }
+      if i > 0 {
+        edges.push({"a": ids[i-1].stringify(), "b": id, "way": field(way,"osmWayId"), "bridge": str(field(tags,"bridge")) == "yes"})
+      }
+    }
+  }
+  let ns : Array[Json] = []
+  for _, n in nodes { ns.push(n) }
+  ns.sort_by((a,b) => str(field(a,"id")).compare(str(field(b,"id"))))
+  let graph : Json = {"schema":"moontown.landmark-navigation.v1", "authority":"local navigation simulation; not live runtime assignment", "attribution":"© OpenStreetMap contributors, ODbL", "source":"wenyu-lower-perspective.json + unshifted gentle 0.01", "nodes":ns, "edges":edges}
+  @fs.write_string_to_file(target + "/navigation.json", graph.stringify())
+  println("Preserved studio copied; \{ns.length()} shared-node route vertices, \{edges.length()} edges")
+}

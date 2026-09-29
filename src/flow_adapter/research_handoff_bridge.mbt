@@ -108,7 +108,7 @@ async fn ensure_research_handoff_flow_plan(
     request.input_digest else {
     fail("MoonTown research handoff evidence changed after preparation")
   }
-  { root, handoff, request, request_ref, result_ref, package_ref }
+  { root, handoff, request, request_ref, result_ref, package_ref, }
 }
 
 ///|

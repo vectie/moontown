@@ -31,7 +31,7 @@ pub fn marketplace_set_subscription(
     created_at_ms: now_ms,
     version: next_version,
   })
-  { ..state, subscriptions, version: state.version + 1 }
+  { ..state, subscriptions, version: state.version + 1, }
 }
 
 ///|
@@ -77,7 +77,7 @@ pub fn marketplace_emit_publication_notifications(
       })
     }
   }
-  { ..state, notifications, version: state.version + 1 }
+  { ..state, notifications, version: state.version + 1, }
 }
 
 ///|
@@ -139,7 +139,7 @@ pub fn marketplace_mark_notification_read(
   if !found {
     fail("notification not found for session principal")
   }
-  { ..state, notifications, version: state.version + 1 }
+  { ..state, notifications, version: state.version + 1, }
 }
 
 ///|
@@ -184,7 +184,7 @@ pub fn marketplace_upsert_sponsored_placement(
     interest_tags: normalized_terms(placement.interest_tags),
     version: next_version,
   })
-  { ..state, sponsored_placements: placements, version: state.version + 1 }
+  { ..state, sponsored_placements: placements, version: state.version + 1, }
 }
 
 ///|

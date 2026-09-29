@@ -953,7 +953,7 @@ fn map_lab_entity_page_result(
   rows : Array[MapLabEntityRow],
   scanned : Int,
 ) -> MapLabEntityPage {
-  { rows, scanned, detail_materializations: 0 }
+  { rows, scanned, detail_materializations: 0, }
 }
 
 ///|
@@ -1724,7 +1724,7 @@ fn render_map_lab_panel(
       render_map_lab_selected(selected),
       render_map_lab_entity_browser(
         dispatch,
-        { ..view, selected_id: selected_key },
+        { ..view, selected_id: selected_key, },
         page,
       ),
       div(class="map-lab-foot", [

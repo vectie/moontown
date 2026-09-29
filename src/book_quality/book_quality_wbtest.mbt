@@ -855,9 +855,9 @@ test "book quality package owns review run identity for view replacement" {
     summary: "summary",
     generated_at_ms: 3UL,
   }
-  let moved_packet = { ..first, packet_path: "packet-moved.json" }
-  let changed_summary = { ..first, summary: "changed" }
-  let changed_generation = { ..first, generated_at_ms: 4UL }
+  let moved_packet = { ..first, packet_path: "packet-moved.json", }
+  let changed_summary = { ..first, summary: "changed", }
+  let changed_generation = { ..first, generated_at_ms: 4UL, }
   let packet_only_view = book_quality_review_ledger_view({
     runs: [first, moved_packet],
   })
@@ -907,7 +907,7 @@ test "book quality package owns review ledger view history accounting" {
     summary: "current a",
     generated_at_ms: 3UL,
   }
-  let ledger = { runs: [old_a, current_b, current_a] }
+  let ledger = { runs: [old_a, current_b, current_a], }
   let view = book_quality_review_ledger_view(ledger)
   assert_eq(view.current_runs.length(), 2)
   assert_eq(view.current_runs[0].book_id, "book-a")
@@ -983,7 +983,7 @@ test "book quality package owns review ledger text parsing" {
     generated_at_ms: 1UL,
   }
   let parsed = review_run_ledger_from_text(
-    review_run_ledger_to_text({ runs: [run] }),
+    review_run_ledger_to_text({ runs: [run], }),
   )
   assert_eq(parsed.runs.length(), 1)
   assert_eq(parsed.runs[0].book_id, "book-a")
@@ -1002,7 +1002,7 @@ test "book quality package owns review ledger serializer roundtrip" {
     summary: "roundtrip summary",
     generated_at_ms: 7UL,
   }
-  let text = review_run_ledger_to_text({ runs: [run] })
+  let text = review_run_ledger_to_text({ runs: [run], })
   assert_true(text.contains("\"runs\""))
   assert_true(text.contains("\"book_id\": \"book-roundtrip\""))
   let parsed = review_run_ledger_from_text(text)
@@ -1287,9 +1287,9 @@ async test "book quality package counts active review runs" {
     status: review_run_written_status(),
   }
   let observations = [
-    { run: recent, has_result: false, process_alive: false },
-    { run: stale, has_result: false, process_alive: false },
-    { run: written, has_result: true, process_alive: false },
+    { run: recent, has_result: false, process_alive: false, },
+    { run: stale, has_result: false, process_alive: false, },
+    { run: written, has_result: true, process_alive: false, },
   ]
   assert_eq(active_review_count_for_observations(observations, 200UL), 2)
   assert_eq(
@@ -1501,8 +1501,8 @@ test "book quality package owns review markdown row formatting" {
     ),
     "|book-row|queued|pending|`run-row`|row \\| summary next|",
   )
-  let ledger = { runs: [run] }
-  let view = { current_runs: [run], historical_runs: [run] }
+  let ledger = { runs: [run], }
+  let view = { current_runs: [run], historical_runs: [run], }
   let summary = review_status_summary_lines(
     "/tmp/runs.json", "/tmp/results", 1, ledger, view,
   ).join("\n")

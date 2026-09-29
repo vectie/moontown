@@ -77,7 +77,7 @@ test "town shell signal uses shared execution signal groups" {
   )
   assert_eq(
     town_shell_signal(
-      { ..model, state_source: StateSourceKind::SnapshotFile },
+      { ..model, state_source: StateSourceKind::SnapshotFile, },
       Some(civic_metric_test_execution(PacketReady)),
     ),
     "Projection bridge",

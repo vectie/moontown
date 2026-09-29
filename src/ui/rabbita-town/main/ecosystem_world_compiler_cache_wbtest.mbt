@@ -9,17 +9,17 @@ fn ecosystem_cache_rejected_park_model(
   let event_id = "\{writer}:2:add"
   let event : TownLifeWorldEvent = {
     id: event_id,
-    dot: { writer_id: writer, sequence: 2 },
-    stamp: { writer_id: writer, lamport: 2 },
+    dot: { writer_id: writer, sequence: 2, },
+    stamp: { writer_id: writer, lamport: 2, },
     epoch_id: state.epoch.id,
     kind: WorldPark,
     entity_id,
     incarnation_id: event_id,
-    action: WorldAdd(WorldParkPayload({ id: entity_id, x: -1, y: -1 })),
+    action: WorldAdd(WorldParkPayload({ id: entity_id, x: -1, y: -1, })),
     budget_delta: 0,
   }
   let next = town_life_world_reproject_model(
-    { ..model, town_life_world_states: [{ ..state, events: [event] }] },
+    { ..model, town_life_world_states: [{ ..state, events: [event], }], },
     seed,
   )
   (next, event_id)

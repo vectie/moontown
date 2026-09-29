@@ -475,7 +475,7 @@ fn golden_architecture_plan(
       roof_feature = if variant == 2 { "solar" } else { "ridge" }
     }
   }
-  { masses, feature_index, roof_feature, accent, variant }
+  { masses, feature_index, roof_feature, accent, variant, }
 }
 
 ///|

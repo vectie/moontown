@@ -46,7 +46,7 @@ test "physical bridge signal uses shared execution phrase groups" {
   )
   assert_eq(
     physical_bridge_signal(
-      { ..model, state_source: StateSourceKind::SnapshotFile },
+      { ..model, state_source: StateSourceKind::SnapshotFile, },
       Some(civic_metric_test_execution(Completed)),
     ),
     "Projection bridge",
@@ -87,7 +87,7 @@ test "physical bridge stage uses shared execution phrase groups" {
   )
   assert_eq(
     physical_bridge_stage(
-      { ..model, state_source: StateSourceKind::SnapshotFile },
+      { ..model, state_source: StateSourceKind::SnapshotFile, },
       Some(civic_metric_test_execution(Completed)),
     ),
     "Projection bridge pending",
@@ -113,7 +113,7 @@ test "physical bridge handoff label uses shared execution phrase groups" {
   )
   assert_eq(
     physical_bridge_handoff_label(
-      { ..model, state_source: StateSourceKind::SnapshotFile },
+      { ..model, state_source: StateSourceKind::SnapshotFile, },
       Some(civic_metric_test_execution(Failed)),
     ),
     "Projection-safe room and robot feed",

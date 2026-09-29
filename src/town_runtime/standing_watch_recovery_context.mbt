@@ -29,7 +29,7 @@ fn standing_watch_recovery_context(
     Some(entry) => entry
     None => return None
   }
-  Some({ goal, entry })
+  Some({ goal, entry, })
 }
 
 ///|

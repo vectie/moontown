@@ -82,7 +82,7 @@ fn civic_signal_phrases(
   completed~ : String,
   recovery? : String = "Needs recovery",
 ) -> CivicExecutionSignalPhrases {
-  { packet, running, persisting, review, completed, recovery }
+  { packet, running, persisting, review, completed, recovery, }
 }
 
 ///|

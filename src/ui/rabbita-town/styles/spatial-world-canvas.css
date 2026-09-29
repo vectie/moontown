@@ -17,8 +17,8 @@
   height: auto;
   background: #d9eef0;
 }
-.indoor-world-stage .spatial-world-canvas { aspect-ratio: 2 / 1; }
-.compute-world-stage .spatial-world-canvas { aspect-ratio: 16 / 9; }
+.indoor-world-stage .spatial-world-canvas { aspect-ratio: 4 / 3; }
+.compute-world-stage .spatial-world-canvas { aspect-ratio: 4 / 3; }
 .spatial-world-hotspots { position: absolute; z-index: 3; inset: 0; pointer-events: none; }
 .spatial-world-hotspot {
   position: absolute;
@@ -133,9 +133,47 @@
   }
   .building-interior-floor-shell:has(.indoor-world-scene) { padding: .6rem; }
   .spatial-world-header { display: grid; }
-  .spatial-world-hotspot { min-width: 2.4rem; min-height: 2.4rem; }
+  .spatial-world-hotspot { min-width: 2.75rem; min-height: 2.75rem; }
   .spatial-world-legend { display: grid; grid-template-columns: 1fr; gap: .25rem; }
   .compute-world-roster-entry { min-width: 8rem; }
+}
+
+/* Art scales with the room; the roster preserves accessible targets on phones. */
+.indoor-slot-roster { display: flex; flex-wrap: wrap; gap: .4rem; }
+.indoor-slot-roster button,
+.spatial-work-journey button,
+.indoor-slot-inspector button,
+.building-interior-work-row button {
+  min-height: 44px; padding: .6rem .85rem; border: 1px solid #536a75;
+  border-radius: .5rem; background: #fff8df; color: #334b57; cursor: pointer;
+  font: inherit; text-align: left;
+}
+.indoor-slot-roster .is-selected { background: #f2d88a; }
+.indoor-slot-inspector { display: grid; gap: .75rem; }
+.spatial-work-journey { width: min(1540px, 100%); margin: 1.5rem auto; color: #334b57; background: #f5f2e9; }
+.spatial-work-journey p, .indoor-slot-inspector p { line-height: 1.6; font-size: .9rem; }
+.spatial-work-journey details { margin-block: .8rem; overflow-wrap: anywhere; }
+.spatial-work-journey summary, .indoor-slot-inspector summary { min-height: 44px; padding-block: .65rem; cursor: pointer; }
+.spatial-work-warning { color: #85392e; }
+.spatial-work-reviewed { color: #315c32; }
+.building-interior-layer .semantic-interior-presence-name { color: #334b57; }
+.building-interior-layer .policy-hall-question-action { background: #fff8df; border-color: #b8895b; }
+.building-interior-layer .policy-hall-question-title { color: #334b57; }
+.building-interior-layer .policy-hall-question-description { color: #536a75; }
+.building-interior-layer .policy-hall-question-eyebrow { color: #315c32; }
+.building-interior-work-list { max-height: 24rem; overflow-y: auto; }
+.town-area-route { position: fixed; inset: 5rem 1rem 1rem; z-index: 55; overflow: auto; padding: 1.25rem; border-radius: .8rem; background: #f5f2e9; color: #334b57; box-shadow: 0 .5rem 2rem #334b5744; }
+.town-area-route > header { display: flex; justify-content: space-between; gap: 1rem; align-items: center; }
+.town-area-route button { min-height: 44px; padding: .5rem 1rem; }
+.building-interior-layer, .secret-compute-room { padding-bottom: max(6rem, env(safe-area-inset-bottom)); }
+.building-interior-header h1, .compute-room-title h1 { font-size: clamp(1.5rem, 3vw, 2.5rem); }
+.account-experience:has(.building-interior-layer) .pack-bridge-launch,
+.account-experience:has(.secret-compute-room) .pack-bridge-launch { min-height: 44px; }
+.building-interior-location { display: none; }
+@media (max-width: 760px) {
+  .spatial-work-journey { padding: 1rem; }
+  .indoor-slot-roster button { flex: 1 1 7rem; }
+  .town-area-route { inset-inline: .5rem; top: 7rem; }
 }
 
 @media (prefers-reduced-motion: reduce) {

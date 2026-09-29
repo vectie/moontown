@@ -1,0 +1,118 @@
+{
+  "schema": "moontown.wenyu_terrain_corner_controls.v1",
+  "runtimeEligible": false,
+  "controlsSource": "docs/project/wenyu-four-corner-controls.json",
+  "terrainSource": "src/ui/assets/tilemap/wenyu_reference_labels.json",
+  "mapping": "gridX=pixelX*256/1672; gridY=pixelY*144/941; groundX=32*(gridX-gridY); groundY=16*(gridX+gridY). Camera translation and zoom are display-only.",
+  "caution": "These are the same four controls propagated through terrain generation, not four new independent checks. Segmentation may classify a landmark cell differently; no snapping to current OSM roads.",
+  "controls": [
+    {
+      "id": "NW",
+      "name": "立汤路 × 温榆河",
+      "wgs84": {
+        "lon": 116.40502227236075,
+        "lat": 40.15066261584157
+      },
+      "generatedPixel": {
+        "x": 728,
+        "y": 37
+      },
+      "terrainGrid": {
+        "x": 111.46411483253588,
+        "y": 5.662061636556855
+      },
+      "containingTile": {
+        "x": 111,
+        "y": 5,
+        "label": "g",
+        "kind": "grass-light"
+      },
+      "isometricGroundAtZoom1": {
+        "x": 3385.665702271329,
+        "y": 1874.0188235054839
+      },
+      "status": "Derived from provisional raster landmark; not an independent geographic observation"
+    },
+    {
+      "id": "NE",
+      "name": "京承高速 × 顺于路",
+      "wgs84": {
+        "lon": 116.47713305309628,
+        "lat": 40.136206827991515
+      },
+      "generatedPixel": {
+        "x": 1503,
+        "y": 416
+      },
+      "terrainGrid": {
+        "x": 230.1244019138756,
+        "y": 63.65993623804464
+      },
+      "containingTile": {
+        "x": 230,
+        "y": 63,
+        "label": "c",
+        "kind": "campus"
+      },
+      "isometricGroundAtZoom1": {
+        "x": 5326.862901626591,
+        "y": 4700.549410430724
+      },
+      "status": "Derived from provisional raster landmark; not an independent geographic observation"
+    },
+    {
+      "id": "SE",
+      "name": "京承高速 × 机场北线",
+      "wgs84": {
+        "lon": 116.47850167375822,
+        "lat": 40.114804859695624
+      },
+      "generatedPixel": {
+        "x": 1430,
+        "y": 722
+      },
+      "terrainGrid": {
+        "x": 218.94736842105263,
+        "y": 110.48671625929862
+      },
+      "containingTile": {
+        "x": 219,
+        "y": 110,
+        "label": "c",
+        "kind": "campus"
+      },
+      "isometricGroundAtZoom1": {
+        "x": 3470.7408691761284,
+        "y": 5270.94535488562
+      },
+      "status": "Derived from provisional raster landmark; not an independent geographic observation"
+    },
+    {
+      "id": "SW",
+      "name": "立汤路 × 定泗路",
+      "wgs84": {
+        "lon": 116.405675675,
+        "lat": 40.11513705
+      },
+      "generatedPixel": {
+        "x": 548,
+        "y": 439
+      },
+      "terrainGrid": {
+        "x": 83.90430622009569,
+        "y": 67.17959617428268
+      },
+      "containingTile": {
+        "x": 84,
+        "y": 67,
+        "label": "c",
+        "kind": "campus"
+      },
+      "isometricGroundAtZoom1": {
+        "x": 535.1907214660164,
+        "y": 2417.3424383100537
+      },
+      "status": "Derived from provisional raster landmark; not an independent geographic observation"
+    }
+  ]
+}

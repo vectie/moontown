@@ -1,0 +1,138 @@
+{
+  "schema": "moontown.wenyu_road_corner_controls.v1",
+  "runtimeEligible": false,
+  "coordinateStage": "Stored OSM road graph before live local registration warp",
+  "source": "src/ui/assets/tilemap/energy-valley-osm-block-graph-v1.json",
+  "georeference": "src/ui/assets/tilemap/georeference/wenyu-town-georef-v1.json",
+  "mapping": "WGS84 anchor → UTM 50N → inverse of the graph storage similarity. No new fit and no terrain coordinates reused as road coordinates.",
+  "coverageFinding": "NW anchor is outside stored crop. SE anchor is inside crop but 8.42 tiles from the nearest retained segment; do not claim either is an existing stored routing junction.",
+  "contextSource": "docs/project/wenyu-corner-osm-reference.json; named-way context only, separately dashed, not added to stored graph",
+  "edgeCount": 775,
+  "vertexCount": 3980,
+  "controls": [
+    {
+      "id": "NW",
+      "name": "立汤路 × 温榆河",
+      "wgs84": {
+        "lon": 116.40502227236075,
+        "lat": 40.15066261584157
+      },
+      "roadGrid": {
+        "x": 105.16859840498704,
+        "y": -50.24637670133683
+      },
+      "terrainGrid": {
+        "x": 111.46411483253588,
+        "y": 5.662061636556855
+      },
+      "offsetTiles": 56.26177214122923,
+      "deltaTerrainMinusRoad": {
+        "x": 6.295516427548847,
+        "y": 55.908438337893685
+      },
+      "insideStoredFrame": false,
+      "nearestStoredEdge": {
+        "id": "edge-0025",
+        "point": {
+          "x": 120.895,
+          "y": 0
+        },
+        "distanceTiles": 52.64995801271137,
+        "meaning": "Proximity only, not a road-identity match or snapping instruction"
+      }
+    },
+    {
+      "id": "NE",
+      "name": "京承高速 × 顺于路",
+      "wgs84": {
+        "lon": 116.47713305309628,
+        "lat": 40.136206827991515
+      },
+      "roadGrid": {
+        "x": 237.44005335623055,
+        "y": 52.813496518772986
+      },
+      "terrainGrid": {
+        "x": 230.1244019138756,
+        "y": 63.65993623804464
+      },
+      "offsetTiles": 13.082966430050323,
+      "deltaTerrainMinusRoad": {
+        "x": -7.315651442354948,
+        "y": 10.84643971927165
+      },
+      "insideStoredFrame": true,
+      "nearestStoredEdge": {
+        "id": "edge-0321",
+        "point": {
+          "x": 237.44010539173772,
+          "y": 52.81335469120348
+        },
+        "distanceTiles": 0.00015107201421340116,
+        "meaning": "Proximity only, not a road-identity match or snapping instruction"
+      }
+    },
+    {
+      "id": "SE",
+      "name": "京承高速 × 机场北线",
+      "wgs84": {
+        "lon": 116.47850167375822,
+        "lat": 40.114804859695624
+      },
+      "roadGrid": {
+        "x": 215.49172956998652,
+        "y": 111.67164457968332
+      },
+      "terrainGrid": {
+        "x": 218.94736842105263,
+        "y": 110.48671625929862
+      },
+      "offsetTiles": 3.6531486410283422,
+      "deltaTerrainMinusRoad": {
+        "x": 3.4556388510661122,
+        "y": -1.1849283203846994
+      },
+      "insideStoredFrame": true,
+      "nearestStoredEdge": {
+        "id": "edge-0532",
+        "point": {
+          "x": 221.955,
+          "y": 106.279
+        },
+        "distanceTiles": 8.417510333481909,
+        "meaning": "Proximity only, not a road-identity match or snapping instruction"
+      }
+    },
+    {
+      "id": "SW",
+      "name": "立汤路 × 定泗路",
+      "wgs84": {
+        "lon": 116.405675675,
+        "lat": 40.11513705
+      },
+      "roadGrid": {
+        "x": 65.31104272204627,
+        "y": 45.983393985661095
+      },
+      "terrainGrid": {
+        "x": 83.90430622009569,
+        "y": 67.17959617428268
+      },
+      "offsetTiles": 28.19553927004808,
+      "deltaTerrainMinusRoad": {
+        "x": 18.593263498049424,
+        "y": 21.196202188621584
+      },
+      "insideStoredFrame": true,
+      "nearestStoredEdge": {
+        "id": "edge-0273",
+        "point": {
+          "x": 65.303440938591,
+          "y": 46.00333199665342
+        },
+        "distanceTiles": 0.021338026947939345,
+        "meaning": "Proximity only, not a road-identity match or snapping instruction"
+      }
+    }
+  ]
+}

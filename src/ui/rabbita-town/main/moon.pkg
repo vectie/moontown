@@ -1,4 +1,7 @@
 import {
+  "moonbitlang/core/math",
+  "vectie/moontown-rabbita/landmark_routes",
+  "vectie/moontown-rabbita/design_registration",
   "moonbitlang/core/json",
   "moonbitlang/core/string",
   "moonbit-community/rabbita",

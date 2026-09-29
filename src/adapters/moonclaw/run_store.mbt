@@ -30,7 +30,7 @@ async fn load_run(run_id : String, home : String) -> StoredRun? {
   let indexed = match moonclaw_read_optional_json_file(path) {
     Some(parsed) => {
       let index : RunsIndexFile = @json.from_json(parsed) catch {
-        _ => { runs: [] }
+        _ => { runs: [], }
       }
       index.runs.iter().find_first(fn(run) { run.id == run_id })
     }

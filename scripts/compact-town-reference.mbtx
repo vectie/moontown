@@ -1,0 +1,18 @@
+import {
+  "moonbitlang/x@0.4.40/fs",
+  "moonbitlang/core/json",
+}
+
+///|
+/// Whitespace-only compaction of the shipped reference. Preserve every parsed
+/// value and coordinate; make room for bearing code without raising the budget.
+fn main raise {
+  let path = "src/ui/assets/tilemap/wenyu_reference_intersections.json"
+  let before = @fs.read_file_to_string(path)
+  let parsed = @json.parse(before)
+  let compact = parsed.stringify()
+  assert_eq(@json.parse(compact), parsed)
+  @fs.write_string_to_file(path,compact)
+  assert_eq(@json.parse(@fs.read_file_to_string(path)),parsed)
+  println("Reference compacted: \{before.length()} -> \{compact.length()} code units; all JSON values unchanged")
+}

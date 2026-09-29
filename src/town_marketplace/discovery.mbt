@@ -140,7 +140,7 @@ fn recommendation_for_card(
   } else {
     "Recommended because your interests include \{matches.join(", ")}"
   }
-  { listing: card, score, reason }
+  { listing: card, score, reason, }
 }
 
 ///|

@@ -1,0 +1,436 @@
+import {
+  "moonbitlang/x@0.4.40/fs",
+  "moonbitlang/core/json",
+  "moonbitlang/core/math",
+  "moonbitlang/core/env",
+  "moonbitlang/core/encoding/base64",
+}
+
+///|
+struct P { x : Double; y : Double } derive(Debug, ToJson)
+
+///|
+// Row-major homogeneous affine: [a b tx; c d ty; 0 0 1].
+struct Affine { a : Double; b : Double; tx : Double; c : Double; d : Double; ty : Double } derive(Debug, ToJson)
+
+///|
+struct Pick { id : String; original : P; generated : P; osm : P; weight : Double; fit : Bool } derive(ToJson)
+
+///|
+struct Fit { matrix : Affine; source_center : P; osm_center : P; source_covariance_condition : Double } derive(ToJson)
+
+///|
+fn field(j : Json, key : String) -> Json {
+  match j { Object(m) => m.get(key).unwrap(); _ => abort("Expected object: " + key) }
+}
+
+///|
+fn arr(j : Json) -> Array[Json] { match j { Array(a) => a; _ => abort("Expected array") } }
+
+///|
+fn num(j : Json) -> Double { match j { Number(n, ..) => n; _ => abort("Expected number") } }
+
+///|
+fn str(j : Json) -> String { match j { String(s) => s; _ => abort("Expected string") } }
+
+///|
+fn point(j : Json) -> P { {x: num(field(j, "x")), y: num(field(j, "y"))} }
+
+///|
+fn distance(p : P, q : P) -> Double { ((p.x-q.x)*(p.x-q.x)+(p.y-q.y)*(p.y-q.y)).sqrt() }
+
+///|
+// WGS84 UTM zone 50N, same ellipsoid/series as the retained georeference.
+fn utm(lon : Double, lat : Double) -> P {
+  let e = (1.0 / 298.257223563) * (2.0 - 1.0 / 298.257223563)
+  let ep = e / (1.0 - e)
+  let phi = lat * @math.PI / 180.0
+  let cp = @math.cos(phi)
+  let sp = @math.sin(phi)
+  let tangent = @math.tan(phi)
+  let n = 6378137.0 / (1.0 - e * sp * sp).sqrt()
+  let t = tangent * tangent
+  let c = ep * cp * cp
+  let a = cp * (lon - 117.0) * @math.PI / 180.0
+  let a2 = a*a
+  let a4 = a2*a2
+  let e4 = e*e
+  let e6 = e4*e
+  let m = 6378137.0 * ((1.0-e/4.0-3.0*e4/64.0-5.0*e6/256.0)*phi -
+    (3.0*e/8.0+3.0*e4/32.0+45.0*e6/1024.0)*@math.sin(2.0*phi) +
+    (15.0*e4/256.0+45.0*e6/1024.0)*@math.sin(4.0*phi)-35.0*e6/3072.0*@math.sin(6.0*phi))
+  {x: 500000.0+0.9996*n*(a+(1.0-t+c)*a*a2/6.0+(5.0-18.0*t+t*t+72.0*c-58.0*ep)*a*a4/120.0),
+   y: 0.9996*(m+n*tangent*(a2/2.0+(5.0-t+9.0*c+4.0*c*c)*a4/24.0+(61.0-58.0*t+t*t+600.0*c-330.0*ep)*a4*a2/720.0))}
+}
+
+///|
+fn Affine::at(h : Affine, p : P) -> P {
+  {x: h.a*p.x+h.b*p.y+h.tx, y: h.c*p.x+h.d*p.y+h.ty}
+}
+
+///|
+fn Affine::determinant(h : Affine) -> Double { h.a*h.d-h.b*h.c }
+
+///|
+fn Affine::inverse(h : Affine) -> Affine? {
+  let det = h.a*h.d-h.b*h.c
+  let scale = h.a*h.a+h.b*h.b+h.c*h.c+h.d*h.d
+  if det.abs() <= scale*0.000000000001 { return None }
+  let a = h.d/det
+  let b = -h.b/det
+  let c = -h.c/det
+  let d = h.a/det
+  Some({a,b,c,d,tx: -a*h.tx-b*h.ty,ty: -c*h.tx-d*h.ty})
+}
+
+///|
+// outer(inner(p)); multiplication order is explicit at each call site.
+fn compose(outer : Affine, inner : Affine) -> Affine {
+  let t = outer.at({x:inner.tx,y:inner.ty})
+  {a:outer.a*inner.a+outer.b*inner.c,b:outer.a*inner.b+outer.b*inner.d,
+   c:outer.c*inner.a+outer.d*inner.c,d:outer.c*inner.b+outer.d*inner.d,tx:t.x,ty:t.y}
+}
+
+///|
+fn fit_affine(source : Array[P], target : Array[P], weights : Array[Double]) -> Fit? {
+  if source.length() < 3 || source.length() != target.length() || weights.length() != source.length() { return None }
+  let mut sw = 0.0
+  let mut sx = 0.0
+  let mut sy = 0.0
+  let mut tx = 0.0
+  let mut ty = 0.0
+  for i, p in source {
+    let w = weights[i]
+    if w <= 0.0 { return None }
+    sw += w; sx += w*p.x; sy += w*p.y; tx += w*target[i].x; ty += w*target[i].y
+  }
+  let cs : P = {x:sx/sw,y:sy/sw}
+  let ct : P = {x:tx/sw,y:ty/sw}
+  let mut xx = 0.0
+  let mut xy = 0.0
+  let mut yy = 0.0
+  let mut ex = 0.0
+  let mut ey = 0.0
+  let mut nx = 0.0
+  let mut ny = 0.0
+  for i, p in source {
+    let x = p.x-cs.x
+    let y = p.y-cs.y
+    let e = target[i].x-ct.x
+    let n = target[i].y-ct.y
+    let w = weights[i]
+    xx += w*x*x; xy += w*x*y; yy += w*y*y
+    ex += w*e*x; ey += w*e*y; nx += w*n*x; ny += w*n*y
+  }
+  let det = xx*yy-xy*xy
+  let trace = xx+yy
+  if det <= trace*trace*0.000000000001 { return None }
+  let a = (ex*yy-ey*xy)/det
+  let b = (ey*xx-ex*xy)/det
+  let c = (nx*yy-ny*xy)/det
+  let d = (ny*xx-nx*xy)/det
+  let lambda = (trace+((xx-yy)*(xx-yy)+4.0*xy*xy).sqrt())/2.0
+  Some({matrix:{a,b,c,d,tx:ct.x-a*cs.x-b*cs.y,ty:ct.y-c*cs.x-d*cs.y},source_center:cs,osm_center:ct,source_covariance_condition:lambda*lambda/det})
+}
+
+///|
+fn self_test() -> Unit raise {
+  let a : Affine = {a:2.0,b:0.3,c:-0.4,d:-3.0,tx:450000.0,ty:4440000.0}
+  let b : Affine = {a:0.5,b:-0.2,c:0.1,d:0.8,tx:17.0,ty:-26.0}
+  let ps : Array[P] = [{x:20.0,y:30.0},{x:920.0,y:70.0},{x:150.0,y:700.0},{x:800.0,y:600.0}]
+  let f = fit_affine(ps,ps.map(p=>a.at(p)),[1.0,2.0,3.0,1.0]).unwrap()
+  for p in [..ps, {x:-500.0,y:1800.0}] {
+    assert_true(distance(f.matrix.at(p),a.at(p)) < 0.0000001)
+    assert_true(distance(a.inverse().unwrap().at(a.at(p)),p) < 0.0000001)
+    assert_true(distance(compose(a,b).at(p),a.at(b.at(p))) < 0.0000001)
+  }
+  assert_true(distance(f.matrix.at(f.source_center),f.osm_center) < 0.0000001)
+  let line : Array[P] = [{x:0.0,y:0.0},{x:1.0,y:1.0},{x:2.0,y:2.0}]
+  assert_true(fit_affine(line,line,[1.0,1.0,1.0]) is None)
+  assert_true(({a:1.0,b:2.0,c:2.0,d:4.0,tx:0.0,ty:0.0} : Affine).inverse() is None)
+  assert_true(distance(utm(117.0,0.0),{x:500000.0,y:0.0}) < 0.0000001)
+}
+
+///|
+fn svg_matrix(h : Affine) -> String { "matrix(\{h.a} \{h.c} \{h.b} \{h.d} \{h.tx} \{h.ty})" }
+
+///|
+fn rms(picks : Array[Pick], h : Affine, original : Bool, fitting : Bool) -> Double {
+  let mut sum = 0.0
+  let mut weight = 0.0
+  for p in picks {
+    if p.fit == fitting {
+      let e = distance(h.at(if original {p.original} else {p.generated}),p.osm)
+      sum += p.weight*e*e; weight += p.weight
+    }
+  }
+  (sum/weight).sqrt()
+}
+
+///|
+fn main raise {
+  if @env.get_env_var("WENYU_FOUR_CORNER_FIT") is Some("1") {
+    self_test()
+    let config = @json.parse(@fs.read_file_to_string("docs/project/wenyu-terrain-four-corners.json"))
+    let controls = arr(field(config,"controls"))
+    let source = controls.map(c=>{let p=field(c,"wgs84");utm(num(field(p,"lon")),num(field(p,"lat")))})
+    let targets = controls.map(c=>point(field(c,"terrainGrid")))
+    let fit = fit_affine(source,targets,[1.0,1.0,1.0,1.0]).unwrap()
+    let old = @json.parse(@fs.read_file_to_string("docs/project/wenyu-osm-chain-controls.json"))
+    let checks = arr(field(old,"controls")).filter(c=>str(field(c,"id"))!="A-Litang-Wenyu")
+    let holdouts : Array[Json] = checks.map(c=>{
+      let geo=field(c,"wgs84");let pixel=point(field(c,"generated"))
+      let observed : P = {x:pixel.x*256.0/1672.0,y:pixel.y*144.0/941.0}
+      let predicted=fit.matrix.at(utm(num(field(geo,"lon")),num(field(geo,"lat"))))
+      {"id":field(c,"id"),"observed":observed.to_json(),"predicted":predicted.to_json(),"errorTiles":distance(observed,predicted)}
+    })
+    let residuals : Array[Json] = controls.mapi((i,c)=>{"id":field(c,"id"),"observed":targets[i].to_json(),"predicted":fit.matrix.at(source[i]).to_json(),"errorTiles":distance(targets[i],fit.matrix.at(source[i]))})
+    let report : Json = {"matrix":fit.matrix.to_json(),"sourceCenter":fit.source_center.to_json(),"targetCenter":fit.osm_center.to_json(),"condition":fit.source_covariance_condition,"determinant":fit.matrix.determinant(),"fit":residuals,"holdouts":holdouts,"runtimeEligible":false}
+    @fs.write_string_to_file("docs/project/wenyu-four-corner-affine.json",report.stringify(indent=2))
+    println(report.stringify(indent=2))
+    if @env.get_env_var("WENYU_FULL_OSM") is Some(path) {
+      rebuild_corner_roads(path,fit.matrix,report)
+    }
+    return
+  }
+  self_test()
+  let controls = @json.parse(@fs.read_file_to_string("docs/project/wenyu-osm-chain-controls.json"))
+  let picks : Array[Pick] = arr(field(controls,"controls")).map(j => {
+    let geo = field(j,"wgs84")
+    {id:str(field(j,"id")),original:point(field(j,"original")),generated:point(field(j,"generated")),
+     osm:utm(num(field(geo,"lon")),num(field(geo,"lat"))),weight:num(field(j,"weight")),fit:str(field(j,"role"))=="fit"}
+  })
+  let fitting = picks.filter(p=>p.fit)
+  let targets = fitting.map(p=>p.osm)
+  let weights = fitting.map(p=>p.weight)
+  let original = fit_affine(fitting.map(p=>p.original),targets,weights).unwrap()
+  let generated = fit_affine(fitting.map(p=>p.generated),targets,weights).unwrap()
+  let osm_to_design = generated.matrix.inverse().unwrap()
+  let original_to_design = compose(osm_to_design,original.matrix)
+  let inverse_original = original.matrix.inverse().unwrap()
+  let orientation_consistent = original.matrix.determinant()*generated.matrix.determinant() > 0.0
+  assert_true(distance(original.osm_center,generated.osm_center) < 0.00000001)
+  for p in picks {
+    assert_true(distance(osm_to_design.at(generated.matrix.at(p.generated)),p.generated) < 0.000001)
+    assert_true(distance(inverse_original.at(original.matrix.at(p.original)),p.original) < 0.000001)
+    assert_true(distance(original_to_design.at(p.original),osm_to_design.at(original.matrix.at(p.original))) < 0.000001)
+  }
+  // Undo ONLY the retained graph's storage similarity. Neither image fit uses this old grid.
+  let georef = @json.parse(@fs.read_file_to_string("src/ui/assets/tilemap/georeference/wenyu-town-georef-v1.json"))
+  let forward = field(field(georef,"selectedModel"),"forward")
+  let m = arr(field(forward,"matrix")).map(arr)
+  let t = arr(field(forward,"translation"))
+  let storage_to_osm : Affine = {a:num(m[0][0]),b:num(m[0][1]),c:num(m[1][0]),d:num(m[1][1]),tx:num(t[0]),ty:num(t[1])}
+  let graph = @json.parse(@fs.read_file_to_string("src/ui/assets/tilemap/energy-valley-osm-block-graph-v1.json"))
+  let edges = arr(field(field(graph,"graph"),"edges"))
+  let paths = edges.map(e=>arr(field(e,"pathMillis")).map(j=>{
+    let xy = arr(j)
+    storage_to_osm.at({x:num(xy[0])/1000.0,y:num(xy[1])/1000.0})
+  }))
+  let mut vertices = 0
+  for path in paths { vertices += path.length() }
+  assert_eq(edges.length(),775)
+  assert_eq(vertices,3980)
+  let residuals = picks.map(p=>{
+    let j : Json = {"id":p.id,"fit":p.fit,"originalMetres":distance(original.matrix.at(p.original),p.osm),
+      "generatedMetres":distance(generated.matrix.at(p.generated),p.osm),"relativeGeneratedPixels":distance(original_to_design.at(p.original),p.generated)}
+    j
+  })
+  let report : Json = {
+    "schema":"moontown.wenyu_common_osm_affines.v1","runtimeEligible":false,
+    "crs":"EPSG:32650, easting/northing metres; source images native pixels x right/y down",
+    "formula":"osm = osmCenter + L * (imagePixel - imageCenter); matrices encode the same centered fit as [a b tx; c d ty; 0 0 1]",
+    "controlSource":"docs/project/wenyu-osm-chain-controls.json; unchanged A/Q/X/C fit, G excluded",
+    "quality":"Provisional image picks and geographic coordinates. OSM feature identity checks do not make pixel picks surveyed controls.",
+    "originalToOsm":original.to_json(),"generatedToOsm":generated.to_json(),"osmToGenerated":osm_to_design.to_json(),
+    "originalToGeneratedViaOsm":original_to_design.to_json(),"composition":"inverse(generatedToOsm) * originalToOsm",
+    "originalDeterminant":original.matrix.determinant(),"generatedDeterminant":generated.matrix.determinant(),
+    "relativeOrientationPreserved":orientation_consistent,
+    "acceptance":"Rejected for live use: opposite fitted orientations, poorly spread image controls and large excluded-point residual. Need independent off-river geographic correspondences, not additional points on the same bridge chain.",
+    "originalFitRmsMetres":rms(picks,original.matrix,true,true),"generatedFitRmsMetres":rms(picks,generated.matrix,false,true),
+    "originalHoldoutRmsMetres":rms(picks,original.matrix,true,false),"generatedHoldoutRmsMetres":rms(picks,generated.matrix,false,false),
+    "residuals":residuals,"controlsMetric":picks.to_json(),"edgesPreserved":edges.length(),"verticesPreserved":vertices,
+    "osmReferenceProvenance":field(graph,"provenance"),"osmStorageToMetric":storage_to_osm.to_json(),
+    "osmApiIdentityCheck":"https://api.openstreetmap.org/api/0.6/way/991390168/full.json; retrieved 2026-09-05/06, name 未来科学城东路桥",
+    "display":"Both panels use identical north-up metric camera centered at shared OSM control centroid, width 12000m, height 8302.702702702703m. Display crop only; all road paths retained.",
+  }
+  @fs.write_string_to_file("docs/project/wenyu-common-osm-affines.json",report.stringify(indent=2))
+  println(report.stringify(indent=2))
+  let path = @env.get_env_var("WENYU_REFERENCE_IMAGE").unwrap_or("")
+  if path == "" { fail("set WENYU_REFERENCE_IMAGE to the private planning image") }
+  let images = [@base64.encode(@fs.read_file_to_bytes(path)),@base64.encode(@fs.read_file_to_bytes("src/ui/assets/tilemap/wenyu_topdown_semantic.png"))]
+  let svg = StringBuilder()
+  svg.write_string("<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 1600 1050' role='img' aria-label='Two independent image to OSM affine fits'><rect width='1600' height='1050' fill='#122522'/><style>text{font-family:system-ui,sans-serif;fill:#f5f1e6}.title{font-size:28px;font-weight:650}.note{font-size:19px}.small{font-size:16px}.pin{font-size:17px;font-weight:750;paint-order:stroke;stroke:#122522;stroke-width:4px}</style><text x='32' y='45' class='title'>Wenyu · two maps, one OSM reference</text><text x='32' y='81' class='note'>Independent centered affine fits. Same north-up camera, geographic center and metric scale.</text>")
+  let scale = 740.0/12000.0
+  for i in 0..<2 {
+    let left = 32+i*796
+    let f = if i==0 {original} else {generated}
+    let camera : Affine = {a:scale,b:0.0,c:0.0,d:-scale,tx:370.0-scale*f.osm_center.x,ty:256.0+scale*f.osm_center.y}
+    let h = compose(camera,f.matrix)
+    let title = if i==0 {"1  Original planning image → OSM"} else {"2  Generated terrain → OSM"}
+    let mime = if i==0 {"jpeg"} else {"png"}
+    let width = if i==0 {2274} else {1672}
+    let height = if i==0 {1280} else {941}
+    svg.write_string("<text x='\{left}' y='128' class='note'>\{title}</text><svg x='\{left}' y='150' width='740' height='512' viewBox='0 0 740 512'><rect width='740' height='512' fill='#34443e'/><image href='data:image/\{mime};base64,\{images[i]}' width='\{width}' height='\{height}' transform='\{svg_matrix(h)}' opacity='0.85'/><g fill='none' stroke='#ffad4d' stroke-width='1.1' opacity='0.9'>")
+    for path in paths {
+      let d = StringBuilder()
+      for k,p in path {
+        let q = camera.at(p)
+        d.write_string("\{if k==0 {"M"} else {"L"}}\{q.x},\{q.y} ")
+      }
+      svg.write_string("<path d='\{d.to_string()}'/>")
+    }
+    svg.write_string("</g>")
+    for p in picks {
+      let actual = camera.at(p.osm)
+      let predicted = h.at(if i==0 {p.original} else {p.generated})
+      let id = p.id.split("-").to_array()[0].to_owned()
+      svg.write_string("<path d='M\{actual.x},\{actual.y}L\{predicted.x},\{predicted.y}' stroke='#ff4c94' stroke-width='2'/><circle cx='\{actual.x}' cy='\{actual.y}' r='5' fill='#122522' stroke='#fff' stroke-width='2'/><path d='M\{predicted.x-4},\{predicted.y-4}l8,8m-8,0l8,-8' stroke='#ff4c94' stroke-width='2'/><text x='\{actual.x+8}' y='\{actual.y-9}' class='pin'>\{id}</text>")
+    }
+    svg.write_string("<path d='M24,477h\{scale*1000.0}' stroke='white' stroke-width='3'/><text x='24' y='464' class='small'>1 km</text><text x='700' y='30' class='note'>N ↑</text></svg><text x='\{left}' y='700' class='note'>Fit RMS: \{(rms(picks,f.matrix,i==0,true)+0.5).to_int()} m · excluded G: \{(rms(picks,f.matrix,i==0,false)+0.5).to_int()} m</text><text x='\{left}' y='731' class='small'>Image center: (\{f.source_center.x}, \{f.source_center.y}) px</text><text x='\{left}' y='758' class='small'>\{if i==0 {"Orientation: expected · provisional fit"} else {"WARNING: reversed orientation · unstable near-collinear controls"}}</text>")
+  }
+  svg.write_string("<text x='32' y='786' class='note'>Orange: all 775 retained OSM edges · white circles: geographic controls · pink ×: transformed image picks</text><text x='32' y='824' class='note'>A/Q/X/C fit both matrices independently; G is excluded from both. Raster geometry is affine, not perspective.</text><text x='32' y='882' class='title'>Relative map = inverse(generated → OSM) × (original → OSM)</text><text x='32' y='923' class='note'>The designed image remains the destination. No live terrain, road topology or camera has been changed.</text><text x='32' y='962' class='small'>Provisional landmarks; neither fit is survey-validated. Same display crop in both panels; stored OSM extent is limited.</text><text x='32' y='1005' class='small'>© OpenStreetMap contributors · ODbL 1.0 · retained network snapshot 2026-08-10 · full coefficients in companion JSON</text></svg>")
+  @fs.write_string_to_file("docs/project/wenyu-common-osm-affines.svg",svg.to_string())
+  @fs.write_string_to_file("src/ui/rabbita-town/dist/wenyu-common-osm-affines.svg",svg.to_string())
+}
+
+///|
+fn optional_field(j : Json, key : String) -> Json {
+  match j { Object(m) => m.get(key).unwrap_or(Json::null()); _ => Json::null() }
+}
+
+///|
+fn optional_string(j : Json) -> String {
+  match j { String(s) => s; _ => "" }
+}
+
+///|
+fn review_number(n : Double) -> String {
+  let hundredths = (n*100.0+0.5).to_int()
+  "\{hundredths/100}.\{if hundredths%100<10 {"0"} else {""}}\{hundredths%100}"
+}
+
+///|
+// Rebuild from uncropped geographic geometry. Do not route through the old
+// clipped graph or a runtime rubber-sheet field. Clipping is presentation-only.
+fn rebuild_corner_roads(path : String, matrix : Affine, fit_report : Json) -> Unit raise {
+  let raw_text = @fs.read_file_to_string(path)
+  let raw = @json.parse(raw_text)
+  assert_true(optional_field(raw,"remark") is Null)
+  let elements = arr(field(raw,"elements"))
+  let ways : Array[Json] = []
+  let rivers : Array[Json] = []
+  let mut vertices = 0
+  let mut outside_vertices = 0
+  let mut bridges = 0
+  let junction_ids : Map[String, Int] = Map([])
+  let ids : Map[String, Bool] = Map([])
+  for w in elements {
+    let tags = field(w,"tags")
+    let highway = optional_string(optional_field(tags,"highway"))
+    if optional_string(optional_field(tags,"waterway"))=="river" {
+      let geo=arr(field(w,"geometry"))
+      let pixels=geo.map(g=>matrix.at(utm(num(field(g,"lon")),num(field(g,"lat")))))
+      rivers.push({"osmWayId":field(w,"id"),"tags":tags,"geometryWgs84":geo,"pathGrid":pixels.to_json()})
+    }
+    if highway=="" {continue}
+    let id = "osm-way-\{num(field(w,"id")).to_int64()}"
+    assert_true(!ids.contains(id)); ids[id]=true
+    let geo = arr(field(w,"geometry"))
+    let nodes = arr(field(w,"nodes"))
+    assert_eq(geo.length(),nodes.length())
+    assert_true(geo.length()>=2)
+    let pixels = geo.map(g=>matrix.at(utm(num(field(g,"lon")),num(field(g,"lat")))))
+    for p in pixels {
+      assert_true(p.x.abs()<100000.0 && p.y.abs()<100000.0)
+      if p.x<0.0 || p.x>256.0 || p.y<0.0 || p.y>144.0 {outside_vertices+=1}
+    }
+    for node in nodes {
+      let key = "\{num(node).to_int64()}"
+      junction_ids[key]=junction_ids.get(key).unwrap_or(0)+1
+    }
+    let bridge = optional_string(optional_field(tags,"bridge"))
+    if bridge!="" && bridge!="no" {bridges+=1}
+    vertices+=geo.length()
+    let feature : Json = {"id":id,"osmWayId":field(w,"id"),"nodes":nodes,"tags":tags,"geometryWgs84":geo,"pathGrid":pixels.to_json()}
+    ways.push(feature)
+  }
+  // Source OSM main carriageways at all four corners must survive ingestion.
+  for id in [106616524,106616542,158054660,158054718,126860126,158054613,1250750580,1250776519,1257119855,1257123252] {
+    assert_true(ids.contains("osm-way-\{id}"))
+  }
+  // Out-of-frame vertices remain in the candidate, rather than being clamped
+  // or removed before the final SVG viewport clipping operation.
+  assert_true(outside_vertices>0)
+  let controls = arr(field(fit_report,"fit"))
+  let holdouts = arr(field(fit_report,"holdouts"))
+  let fit_max = controls.fold(init=0.0,(m,p)=>m.max(num(field(p,"errorTiles"))))
+  let holdout_max = holdouts.fold(init=0.0,(m,p)=>m.max(num(field(p,"errorTiles"))))
+  let fit_rms = (controls.fold(init=0.0,(s,p)=>{let e=num(field(p,"errorTiles"));s+e*e})/controls.length().to_double()).sqrt()
+  let holdout_rms = (holdouts.fold(init=0.0,(s,p)=>{let e=num(field(p,"errorTiles"));s+e*e})/holdouts.length().to_double()).sqrt()
+  let inverse = matrix.inverse().unwrap()
+  for p in [{x:0.0,y:0.0},{x:256.0,y:0.0},{x:256.0,y:144.0},{x:0.0,y:144.0}] {
+    assert_true(distance(matrix.at(inverse.at(p)),p)<0.000001)
+  }
+  // Numerical review tolerances only, not geographic survey certification.
+  let gates : Json = {"maximumFitErrorTiles":4,"maximumHoldoutErrorTiles":3,"fitPass":fit_max<=4.0,"holdoutsPass":holdout_max<=3.0,"manualCorrespondencesAccepted":false}
+  let candidate : Json = {"schema":"moontown.wenyu_geographic_road_candidate.v1","runtimeEligible":false,
+    "stage":"uncropped OSM geography → single global affine → fixed terrain grid → viewport clip only",
+    "sourceSnapshot":"docs/project/wenyu-full-osm-reference.json","sourceOsmBase":field(field(raw,"osm3s"),"timestamp_osm_base"),
+    "license":"ODbL-1.0","attribution":"© OpenStreetMap contributors",
+    "sourceQuery":"[out:json][timeout:45];(way[highway](40.07,116.34,40.19,116.53);way[waterway=river](40.07,116.34,40.19,116.53););out geom;",
+    "sourceExtentCaveat":"Finite geographic query, not worldwide coverage. Full returned way geometry is retained without the old tile-frame crop.",
+    "matrix":matrix.to_json(),"tileGrid":{"width":256,"height":144},
+    "topologyPolicy":"Original way IDs, ordered node IDs, all source vertices, tags, layers, bridge/tunnel and one-way evidence retained. No intersection clustering or connections inferred from crossings. This is not a routing authority.",
+    "cropPolicy":"No source-geometry crop; render clips only after projection. Stored old graph is unchanged.",
+    "metrics":{"ways":ways.length(),"vertices":vertices,"verticesOutsideTerrain":outside_vertices,"bridgeWays":bridges,"riverWays":rivers.length(),"fitRmsTiles":fit_rms,"holdoutRmsTiles":holdout_rms},
+    "holdoutCaveat":"Legacy bridge correspondences excluded from this fit, not newly surveyed independent observations. Residuals combine correspondence uncertainty and model error.",
+    "gates":gates,"controls":controls,"holdouts":holdouts,"ways":ways,"riverContext":rivers}
+  @fs.write_string_to_file("docs/project/wenyu-full-osm-reference.json",raw_text)
+  @fs.write_string_to_file("docs/project/wenyu-rebuilt-road-candidate.json",candidate.stringify())
+  let preview = @base64.encode(@fs.read_file_to_bytes("src/ui/assets/tilemap/wenyu_topdown_semantic.png"))
+  let old = @json.parse(@fs.read_file_to_string("src/ui/assets/tilemap/energy-valley-osm-block-graph-v1.json"))
+  let svg = StringBuilder()
+  svg.write_string("<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 1800 1280'><rect width='1800' height='1280' fill='#182a29'/><style>text{font-family:system-ui,sans-serif;fill:#f6f3e9}.title{font-size:28px;font-weight:650}.note{font-size:20px}.small{font-size:17px}.pin{font-size:19px;font-weight:750;paint-order:stroke;stroke:#182a29;stroke-width:4px}</style><defs><clipPath id='mapClip'><rect width='256' height='144'/></clipPath></defs><text x='30' y='43' class='title'>Road registration rebuilt from uncropped OSM</text><text x='30' y='82' class='note'>Terrain fixed · one global affine · full geographic source retained · crop only after projection · no local warp</text>")
+  for panel in 0..<2 {
+    let left = 30.0+900.0*panel.to_double()
+    svg.write_string("<text x='\{left}' y='127' class='note'>\{if panel==0 {"Before · old stored graph (775 edges)"} else {"After · global candidate (\{ways.length()} source ways)"}}</text><g transform='translate(\{left} 150) scale(3.28125)' clip-path='url(#mapClip)'><image href='data:image/png;base64,\{preview}' width='256' height='144' opacity='0.78'/>")
+    if panel==0 {
+      for e in arr(field(field(old,"graph"),"edges")) {
+        let d = arr(field(e,"pathMillis")).mapi((i,j)=>{let p=arr(j);"\{if i==0 {"M"} else {"L"}}\{num(p[0])/1000.0},\{num(p[1])/1000.0}"}).join(" ")
+        svg.write_string("<path d='\{d}' fill='none' stroke='#f3ab57' stroke-width='0.3'/>")
+      }
+    } else {
+      for w in ways {
+        let highway = optional_string(optional_field(field(w,"tags"),"highway"))
+        let major = ["motorway","motorway_link","trunk","trunk_link","primary","primary_link"].contains(highway)
+        let minor = ["footway","path","steps","cycleway","track","pedestrian"].contains(highway)
+        let d = arr(field(w,"pathGrid")).mapi((i,j)=>{let p=point(j);"\{if i==0 {"M"} else {"L"}}\{p.x},\{p.y}"}).join(" ")
+        svg.write_string("<path d='\{d}' fill='none' stroke='\{if major {"#ffc46d"} else {"#f3ab57"}}' stroke-width='\{if major {0.45} else if minor {0.09} else {0.22}}' opacity='\{if minor {0.4} else {0.95}}'/>")
+      }
+      for w in rivers {
+        let d=arr(field(w,"pathGrid")).mapi((i,j)=>{let p=point(j);"\{if i==0 {"M"} else {"L"}}\{p.x},\{p.y}"}).join(" ")
+        svg.write_string("<path d='\{d}' fill='none' stroke='#72efff' stroke-width='0.45' stroke-dasharray='1.6 0.8'/>")
+      }
+    }
+    svg.write_string("</g>")
+    if panel==1 {
+      for c in [..controls,..holdouts] {
+        let p=point(field(c,"observed"));let q=point(field(c,"predicted"))
+        let x=left+p.x*3.28125;let y=150.0+p.y*3.28125
+        let qx=left+q.x*3.28125;let qy=150.0+q.y*3.28125
+        let id=str(field(c,"id")).split("-").to_array()[0].to_owned()
+        svg.write_string("<path d='M\{x},\{y}L\{qx},\{qy}' stroke='#ff5980' stroke-width='2'/><circle cx='\{x}' cy='\{y}' r='6' fill='none' stroke='#63f2c2' stroke-width='2'/><circle cx='\{qx}' cy='\{qy}' r='5' fill='none' stroke='#ff5980' stroke-width='2'/><text x='\{x+10}' y='\{y-10}' class='pin'>\{id}</text>")
+      }
+    }
+  }
+  svg.write_string("<text x='30' y='670' class='title'>Coverage repaired; alignment still needs review</text><text x='30' y='710' class='note'>NW / SE main carriageways are present. Cyan dashed lines = current OSM rivers under the same affine.</text><text x='30' y='751' class='note'>Corner fit RMS: \{review_number(fit_rms)} tiles · four held-out bridge checks RMS: \{review_number(holdout_rms)} tiles</text><text x='30' y='792' class='note'>Green circles = observed terrain landmarks · pink circles = global-affine predictions · connecting lines = residuals</text>")
+  for i,c in holdouts {
+    let y = 850+i*58
+    svg.write_string("<text x='30' y='\{y}' class='note'>Held out: \{str(field(c,"id"))}</text><text x='780' y='\{y}' class='note'>\{review_number(num(field(c,"errorTiles")))} tiles</text>")
+  }
+  svg.write_string("<text x='30' y='1110' class='note'>NOT promoted: held-out checks exceed 3 tiles. Their correspondence and the global model need further review.</text><text x='30' y='1150' class='small'>This rebuild is separate from the live map. It preserves geographic geometry and tags; it does not add navigable connections.</text><text x='30' y='1190' class='small'>Source ways: \{ways.length()} · vertices: \{vertices} · bridge-tagged ways: \{bridges} · original source and terrain assets unchanged</text><text x='30' y='1230' class='small'>© OpenStreetMap contributors · ODbL 1.0 · geographic source snapshot \{str(field(field(raw,"osm3s"),"timestamp_osm_base"))}</text></svg>")
+  @fs.write_string_to_file("docs/project/wenyu-rebuilt-roads.svg",svg.to_string())
+  @fs.write_string_to_file("src/ui/rabbita-town/dist/wenyu-rebuilt-roads.svg",svg.to_string())
+  println("Rebuilt \{ways.length()} source ways / \{vertices} vertices; fit RMS \{fit_rms}, holdout RMS \{holdout_rms}; runtime promotion disabled")
+}

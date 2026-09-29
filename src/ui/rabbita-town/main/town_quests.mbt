@@ -151,7 +151,7 @@ fn complete_quest_with_note(model : Model, id : String, note : String) -> Model 
   if note.is_empty() {
     next
   } else if quest_completed(model, id) {
-    { ..next, life_toast: next.life_toast + " · " + note }
+    { ..next, life_toast: next.life_toast + " · " + note, }
   } else {
     next
   }

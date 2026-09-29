@@ -79,7 +79,7 @@ fn test_live_autonomy_snapshot(
 
 ///|
 test "live autonomy operator view exposes disconnected fallback" {
-  let model = { ..init_model(), live_autonomy: None, standing_goals: [] }
+  let model = { ..init_model(), live_autonomy: None, standing_goals: [], }
   let view = live_autonomy_operator_view(model, fallback_active_workers=7)
   assert_eq(view.template_request_count, 0)
 }
@@ -91,7 +91,11 @@ test "live autonomy operator view exposes connected request counts" {
     enabled_goals=3,
     disabled_goals=1,
   )
-  let model = { ..init_model(), live_autonomy: Some(spine), standing_goals: [] }
+  let model = {
+    ..init_model(),
+    live_autonomy: Some(spine),
+    standing_goals: [],
+  }
   let view = live_autonomy_operator_view(model, fallback_active_workers=0)
   assert_eq(view.template_request_count, 2)
   assert_eq(view.pending_template_request_count, 2)

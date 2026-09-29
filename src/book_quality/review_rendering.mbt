@@ -114,7 +114,7 @@ fn review_run_display_row(
   run : BookQualityReviewRun,
   result_state : String,
 ) -> BookQualityReviewRunDisplayRow {
-  { run, result_state }
+  { run, result_state, }
 }
 
 ///|

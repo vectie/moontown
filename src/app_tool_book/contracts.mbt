@@ -159,25 +159,25 @@ pub fn manifest(
 ///|
 fn path_specs() -> Array[AppToolBookPathSpec] {
   [
-    { path: "book.json", copy_from_template: false },
-    { path: "tool-manifest.json", copy_from_template: false },
+    { path: "book.json", copy_from_template: false, },
+    { path: "tool-manifest.json", copy_from_template: false, },
     {
       path: "raw/bootstrap/APP_TOOL_BOOK_CONTRACT.md",
       copy_from_template: true,
     },
-    { path: "wiki/index.md", copy_from_template: true },
-    { path: "wiki/methods/analysis-method.md", copy_from_template: true },
-    { path: "wiki/tools/tool-spec.md", copy_from_template: true },
-    { path: "wiki/reports/latest-analysis.md", copy_from_template: true },
-    { path: "wiki/reviews/tool-review.md", copy_from_template: true },
-    { path: "skills/tool-watch/SKILL.md", copy_from_template: true },
-    { path: "skills/tool-build/SKILL.md", copy_from_template: true },
-    { path: "schemas/tool-manifest.schema.md", copy_from_template: true },
-    { path: "app/index.html", copy_from_template: false },
-    { path: "app/tool.js", copy_from_template: true },
-    { path: "app/styles.css", copy_from_template: true },
-    { path: generated_site_path(), copy_from_template: false },
-    { path: generated_tool_path(), copy_from_template: false },
+    { path: "wiki/index.md", copy_from_template: true, },
+    { path: "wiki/methods/analysis-method.md", copy_from_template: true, },
+    { path: "wiki/tools/tool-spec.md", copy_from_template: true, },
+    { path: "wiki/reports/latest-analysis.md", copy_from_template: true, },
+    { path: "wiki/reviews/tool-review.md", copy_from_template: true, },
+    { path: "skills/tool-watch/SKILL.md", copy_from_template: true, },
+    { path: "skills/tool-build/SKILL.md", copy_from_template: true, },
+    { path: "schemas/tool-manifest.schema.md", copy_from_template: true, },
+    { path: "app/index.html", copy_from_template: false, },
+    { path: "app/tool.js", copy_from_template: true, },
+    { path: "app/styles.css", copy_from_template: true, },
+    { path: generated_site_path(), copy_from_template: false, },
+    { path: generated_tool_path(), copy_from_template: false, },
   ]
 }
 

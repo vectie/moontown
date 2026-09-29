@@ -57,11 +57,11 @@ fn standing_watch_marker_decision_rules() -> Array[
   StandingWatchMarkerDecisionRule,
 ] {
   [
-    { marker: "failed", decision: Failed },
-    { marker: "deferred", decision: Deferred },
-    { marker: "no_change", decision: NoChange },
-    { marker: "needs_review", decision: NeedsReview },
-    { marker: "update", decision: Update },
+    { marker: "failed", decision: Failed, },
+    { marker: "deferred", decision: Deferred, },
+    { marker: "no_change", decision: NoChange, },
+    { marker: "needs_review", decision: NeedsReview, },
+    { marker: "update", decision: Update, },
   ]
 }
 

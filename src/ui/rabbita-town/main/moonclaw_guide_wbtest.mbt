@@ -70,7 +70,7 @@ test "guide phone renders quick questions and announced async states" {
   assert_true(ready_html.contains("aria-busy=\"false\""))
   let busy_html = @rabbita.render_to_string(
     @rabbita.static_cell(
-      render_phone_panel(dispatch, { ..ready, moonclaw_guide_pending: true }),
+      render_phone_panel(dispatch, { ..ready, moonclaw_guide_pending: true, }),
     ),
   )
   assert_true(busy_html.contains("Moonclaw 正在查看你的问题"))

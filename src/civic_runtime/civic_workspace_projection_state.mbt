@@ -6,10 +6,10 @@ fn civic_projection_state(
     title: "Wenyu Valley / \{service.title}",
     summary: service.projection_summary,
     status_chips: [
-      { label: "Civic workspace", tone: "healthy" },
-      { label: service.service_kind, tone: "info" },
-      { label: service.module_mode, tone: "info" },
-      { label: "Review gated", tone: "review" },
+      { label: "Civic workspace", tone: "healthy", },
+      { label: service.service_kind, tone: "info", },
+      { label: service.module_mode, tone: "info", },
+      { label: "Review gated", tone: "review", },
     ],
     metrics: civic_projection_metrics(service),
     readiness: projection_items(
@@ -94,7 +94,7 @@ fn projection_items(
 ) -> Array[CivicProjectionItem] {
   let items : Array[CivicProjectionItem] = []
   for path in paths {
-    items.push({ title: schema_title(path), detail: path, meta })
+    items.push({ title: schema_title(path), detail: path, meta, })
   }
   items
 }

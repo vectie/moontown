@@ -1,0 +1,240 @@
+import {
+  "moonbitlang/x@0.4.40/fs",
+  "moonbitlang/core/json",
+  "moonbitlang/core/encoding/base64",
+  "moonbitlang/core/env",
+}
+
+///|
+struct P { x : Double; y : Double } derive(ToJson)
+///|
+struct H { u : Double; v : Double; w : Double }
+///|
+fn field(j : Json,k : String) -> Json {match j {Object(m)=>m.get(k).unwrap();_=>abort("Expected object")}}
+///|
+fn arr(j : Json) -> Array[Json] {match j {Array(a)=>a;_=>abort("Expected array")}}
+///|
+fn num(j : Json) -> Double {match j {Number(n,..)=>n;_=>abort("Expected number")}}
+///|
+fn str(j : Json) -> String {match j {String(s)=>s;_=>abort("Expected string")}}
+///|
+fn p(j : Json) -> P {{x:num(field(j,"x")),y:num(field(j,"y"))}}
+///|
+fn distance(a : P,b : P) -> Double {((a.x-b.x)*(a.x-b.x)+(a.y-b.y)*(a.y-b.y)).sqrt()}
+///|
+// A single additional homography. Top-right stays fixed; decreasing denominator
+// increases distance from that pivot progressively toward bottom-left.
+fn homogeneous(p : P,k : Double, bottom? : Double = k) -> H {
+  let w=1.0+k*(p.x-256.0)/256.0-bottom*p.y/144.0
+  {u:256.0*w+p.x-256.0,v:p.y,w}
+}
+///|
+fn at(p : P,k : Double, bottom? : Double = k) -> P {
+  let h=homogeneous(p,k,bottom~)
+  {x:h.u/h.w,y:h.v/h.w}
+}
+///|
+// Clip against the destination viewport in homogeneous coordinates BEFORE
+// dividing by W, so distant source segments cannot draw across infinity.
+// This clips presentation only; the original source geometry is unchanged.
+fn clip(a : H,b : H) -> (P,P)? {
+  let fa=[a.w-0.000001,a.u,256.0*a.w-a.u,a.v,144.0*a.w-a.v]
+  let fb=[b.w-0.000001,b.u,256.0*b.w-b.u,b.v,144.0*b.w-b.v]
+  let mut lo=0.0;let mut hi=1.0
+  for i in 0..<5 {
+    if fa[i]<0.0 && fb[i]<0.0 {return None}
+    if (fa[i]<0.0)!=(fb[i]<0.0) {
+      let t=fa[i]/(fa[i]-fb[i])
+      if fa[i]<0.0 {lo=lo.max(t)} else {hi=hi.min(t)}
+    }
+  }
+  if lo>hi {return None}
+  fn divide(t : Double) -> P {let w=a.w+t*(b.w-a.w);{x:(a.u+t*(b.u-a.u))/w,y:(a.v+t*(b.v-a.v))/w}}
+  Some((divide(lo),divide(hi)))
+}
+///|
+fn number(n : Double) -> String {let v=(n*100.0+0.5).to_int();"\{v/100}.\{if v%100<10 {"0"} else {""}}\{v%100}"}
+///|
+fn parameter(n : Double) -> String {
+  let v=(n.abs()*1000000.0+0.5).to_int()
+  let digits="\{v%1000000}"
+  "\{if n<0.0 {"-"} else {""}}\{v/1000000}.\{String::make(6-digits.length(),'0')}\{digits}"
+}
+///|
+struct Sample { before : P; target : P; held : Bool }
+///|
+// The six withheld observations never contribute to parameter selection.
+fn objective(samples : Array[Sample], k : P) -> Double {
+  let mut sum=0.0
+  for s in samples {
+    if !s.held {
+      let e=distance(at(s.before,k.x,bottom=k.y),s.target)
+      sum+=e*e
+    }
+  }
+  sum
+}
+///|
+// Deterministic bounded grid followed by a shrinking eight-direction search.
+// "Best" means best found in this family, not a recovered physical camera.
+fn optimize(samples : Array[Sample], tied : Bool) -> P {
+  let mut best : P={x:0,y:0}
+  let mut score=objective(samples,best)
+  for ix in -80..=80 {
+    for iy in (if tied {ix} else {-80})..=(if tied {ix} else {80}) {
+      let k : P={x:ix.to_double()/1000.0,y:iy.to_double()/1000.0}
+      let candidate=objective(samples,k)
+      if candidate<score {best=k;score=candidate}
+    }
+  }
+  let mut step=0.001
+  for _ in 0..<18 {
+    for _ in 0..<100 {
+      let previous=score
+      let center=best
+      for dx in -1..=1 {
+        for dy in (if tied {dx} else {-1})..=(if tied {dx} else {1}) {
+          let k : P={x:center.x+dx.to_double()*step,y:center.y+dy.to_double()*step}
+          if k.x.abs()<=0.08 && k.y.abs()<=0.08 {
+            let candidate=objective(samples,k)
+            if candidate<score {best=k;score=candidate}
+          }
+        }
+      }
+      if score==previous {break}
+    }
+    step/=2.0
+  }
+  best
+}
+///|
+fn self_test() -> Unit raise {
+  let pivot : P={x:256,y:0};let corner : P={x:0,y:144}
+  for k in [0.0,0.01,0.02] {
+    assert_true(distance(at(pivot,k),pivot)<0.000001)
+    assert_true((distance(at(corner,k),pivot)/distance(corner,pivot)-1.0/(1.0-2.0*k)).abs()<0.000001)
+  }
+  assert_true(at(corner,0.02).x<corner.x && at(corner,0.02).y>corner.y)
+  let (a,b)=clip({u:-10,v:50,w:1},{u:300,v:50,w:1}).unwrap()
+  assert_true(distance(a,{x:0,y:50})<0.000001 && distance(b,{x:256,y:50})<0.000001)
+  assert_true(clip({u:-10,v:-10,w:1},{u:-2,v:-2,w:1}) is None)
+  if clip({u:10,v:10,w:1},{u:10,v:10,w:-1}) is Some((a,b)) {
+    for p in [a,b] {assert_true(p.x>=0.0 && p.x<=256.000001 && p.y>=0.0 && p.y<=144.000001)}
+  }
+  let known : P={x:0.0234,y:-0.0087}
+  let samples=[{x:10,y:30},{x:55,y:130},{x:220,y:125},{x:200,y:15}].map(before=>Sample::{before,target:at(before,known.x,bottom=known.y),held:false})
+  let recovered=optimize(samples,false)
+  assert_true(distance(recovered,known)<0.000001)
+  samples.push({before:{x:30,y:60},target:{x:9000,y:-9000},held:true})
+  let excluded=optimize(samples,false)
+  assert_true(distance(excluded,recovered)<0.000000001)
+  assert_true(distance(at(pivot,known.x,bottom=known.y),pivot)<0.000001)
+  let tied_known=0.00765
+  let tied_samples=samples.filter(s=>!s.held).map(s=>Sample::{before:s.before,target:at(s.before,tied_known),held:false})
+  let tied_recovered=optimize(tied_samples,true)
+  assert_true((tied_recovered.x-tied_known).abs()<0.000001)
+  assert_eq(tied_recovered.x,tied_recovered.y)
+}
+///|
+fn main raise {
+  self_test()
+  let source=@json.parse(@fs.read_file_to_string("docs/project/wenyu-lower-perspective.json"))
+  let ways=arr(field(source,"ways"));assert_eq(ways.length(),6420)
+  let controls=arr(field(source,"controls"))
+  let predictions=arr(field(arr(field(source,"models"))[2],"errors"))
+  assert_eq(controls.length(),predictions.length())
+  let optimized=@env.get_env_var("WENYU_OPTIMIZE_STRETCH")==Some("1")
+  let samples : Array[Sample]=[]
+  for i,c in controls {
+    assert_eq(field(c,"id"),field(predictions[i],"id"))
+    samples.push({before:p(field(predictions[i],"predicted")),target:p(field(c,"target")),held:field(c,"holdout")==Json::boolean(true)})
+  }
+  assert_eq(samples.filter(s=>!s.held).length(),15)
+  assert_eq(samples.filter(s=>s.held).length(),6)
+  let tied=optimize(samples,true);let split=optimize(samples,false)
+  let fits : Json={"tied":tied.to_json(),"split":split.to_json(),"tiedFitRms":(objective(samples,tied)/15.0).sqrt(),"splitFitRms":(objective(samples,split)/15.0).sqrt()}
+  println(fits.stringify(indent=2))
+  let png=@base64.encode(@fs.read_file_to_bytes("src/ui/assets/tilemap/wenyu_topdown_semantic.png"))
+  let reports : Array[Json]=[];let drawings : Array[String]=[]
+  let strengths : Array[P]=if optimized {[{x:0.01,y:0.01},tied,split]} else {[{x:0,y:0},{x:0.01,y:0.01},{x:0.02,y:0.02}]}
+  let names=if optimized {["Previous gentle stretch","Optimized equal strengths","Optimized separate strengths"]} else {["Current 21-point preview","Gentle · 2.04% farther at bottom-left","Stronger · 4.17% farther at bottom-left"]}
+  for strength in strengths {
+    let k=strength.x;let bottom=strength.y
+    let errors : Array[Json]=[]
+    let mut fit_sum=0.0;let mut check_sum=0.0;let mut fit_n=0;let mut check_n=0
+    for i,c in controls {
+      let observed=p(field(c,"target"));let before=p(field(predictions[i],"predicted"));let after=at(before,k,bottom~)
+      assert_true(homogeneous(before,k,bottom~).w>0.0)
+      let e=distance(observed,after);let held=field(c,"holdout")==Json::boolean(true)
+      if held {check_sum+=e*e;check_n+=1} else {fit_sum+=e*e;fit_n+=1}
+      let gentle_error=distance(observed,at(before,0.01))
+      errors.push({"id":field(c,"id"),"heldOut":held,"before":before.to_json(),"after":after.to_json(),"observed":observed.to_json(),"errorTiles":e,"gentleErrorTiles":gentle_error,"changeFromGentleTiles":e-gentle_error})
+    }
+    let draw=StringBuilder();let mut negative=0;let mut vertices=0;let mut minimum_w=1000000.0
+    for way in ways {
+      let points=arr(field(way,"pathGrid")).map(j=>homogeneous(p(j),k,bottom~))
+      vertices+=points.length();negative+=points.filter(p=>p.w<=0.0).length()
+      for q in points {minimum_w=minimum_w.min(q.w)}
+      let d=StringBuilder()
+      for i in 1..<points.length() {
+        if clip(points[i-1],points[i]) is Some((a,b)) {
+          for p in [a,b] {assert_true(p.x>=-0.000001 && p.x<=256.000001 && p.y>=-0.000001 && p.y<=144.000001)}
+          d.write_string("M\{a.x},\{a.y}L\{b.x},\{b.y} ")
+        }
+      }
+      let kind=str(field(field(way,"tags"),"highway"))
+      let minor=["footway","path","steps","cycleway","track","pedestrian"].contains(kind)
+      draw.write_string("<path d='\{d.to_string()}' fill='none' stroke='#ffc46d' stroke-width='\{if minor {0.09} else {0.24}}' opacity='\{if minor {0.35} else {0.95}}'/>")
+    }
+    assert_eq(vertices,44343)
+    assert_eq(negative,0)
+    reports.push({"strength":k,"bottomStrength":bottom,"bottomLeftRadialGain":1.0/(1.0-k-bottom),"fitRmsTiles":(fit_sum/fit_n.to_double()).sqrt(),"heldOutRmsTiles":(check_sum/check_n.to_double()).sqrt(),"sourceVertices":vertices,"minimumTrialDenominator":minimum_w,"verticesBehindTrialHorizon":negative,"errors":errors})
+    drawings.push(draw.to_string())
+  }
+  let report : Json={"schema":"moontown.wenyu_directional_stretch_trial.v1","runtimeEligible":false,"source":"docs/project/wenyu-lower-perspective.json","pivot":{"x":256,"y":0},"formula":"w=1+k*((x-256)/256-y/144); x'=256+(x-256)/w; y'=y/w","selection":"Manual sensitivity trial, not a fitted or accepted physical camera","clipping":"Destination homogeneous half-space clipping on W,U,256W-U,V,144W-V before perspective division. Full source unchanged; points behind the trial horizon are reported, not silently labeled pole-safe.","variants":reports}
+  let report : Json=if optimized {{"schema":"moontown.wenyu_optimized_stretch.v1","runtimeEligible":false,"source":"docs/project/wenyu-lower-perspective.json","pivot":{"x":256,"y":0},"formula":"w=1+kLeft*(x-256)/256-kBottom*y/144; x'=256+(x-256)/w; y'=y/w","search":{"boundsEach":[-0.08,0.08],"gridStep":0.001,"refinementHalvings":18,"maximumSweepsPerScale":100,"objective":"Unweighted sum of squared Euclidean errors on 15 fitting landmarks only","limitations":"Best found within this fixed-pivot family and bounds. Six withheld points have been inspected in prior trials and are not fresh independent validation. BL1/BL2 are uncertain correspondences. No physical pose recovery."},"decision":"No automatic replacement: lower fitting error worsens aggregate withheld error versus the gentle trial. The simpler tied optimum is the conservative fit-only candidate; the split optimum is diagnostic, not an overall winner.","clipping":"Display-only homogeneous half-space clipping. Source ways, node IDs and geography remain unchanged in the referenced source. Minimum denominator checked across every source vertex for every rendered finalist.","fittedParameters":fits,"variants":reports}} else {report}
+  let stem=if optimized {"wenyu-optimized-stretch"} else {"wenyu-directional-stretch"}
+  @fs.write_string_to_file("docs/project/\{stem}.json",report.stringify(indent=2))
+  if !optimized && @env.get_env_var("WENYU_PROJECT_TERRAIN")==Some("1") {
+    // Already calibrated design-grid coordinates. Do not apply another fit,
+    // legacy mesh warp, centering offset, or perspective at runtime.
+    assert_eq(strengths[1].x,0.01);assert_eq(strengths[1].y,0.01)
+    let overlay="<svg xmlns='http://www.w3.org/2000/svg' width='2048' height='1152' viewBox='0 0 256 144'><title>Wenyu gentle road projection, display-only</title>\{drawings[1]}</svg>"
+    @fs.write_string_to_file("src/ui/assets/tilemap/wenyu-gentle-road-overlay.svg",overlay)
+    @fs.write_string_to_file("src/ui/rabbita-town/dist/tilemap/wenyu-gentle-road-overlay.svg",overlay)
+    let manifest : Json={"schema":"moontown.wenyu_gentle_ground_trial.v1","runtimeEligible":false,"routingAuthority":false,"terrainChanged":false,"source":"docs/project/wenyu-lower-perspective.json","calibration":reports[1],"asset":"tilemap/wenyu-gentle-road-overlay.svg","mapping":"Calibrated grid -> ground (32*(x-y),16*(x+y)) -> shared camera pan/zoom. No second calibration or legacy local warp.","sourceWays":6420,"sourceVertices":44343}
+    @fs.write_string_to_file("docs/project/wenyu-gentle-ground-trial.json",manifest.stringify(indent=2))
+  }
+  let svg=StringBuilder()
+  let height=if optimized {1530} else {1170}
+  let title=if optimized {"Perspective parameter search · lower fitting error is not an overall win"} else {"A small perspective stretch toward bottom-left"}
+  let subtitle=if optimized {"15 fitting landmarks select parameters · 6 withheld checks stay out of the objective · identical terrain and road data"} else {"Top-right pivot fixed · terrain and landmark picks unchanged · percentages mean distance from pivot at the bottom-left corner"}
+  svg.write_string("<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 1800 \{height}'><rect width='1800' height='\{height}' fill='#182a29'/><style>text{fill:#f6f3e9;font:19px system-ui}.title{font-size:28px;font-weight:650}.small{font-size:16px}.pin{font:3.4px system-ui;paint-order:stroke;stroke:#182a29;stroke-width:0.8px}</style><text x='30' y='43' class='title'>\{title}</text><text x='30' y='83'>\{subtitle}</text>")
+  for i,r in reports {
+    let left=30+i*600
+    svg.write_string("<text x='\{left}' y='130'>\{names[i]}</text><svg x='\{left}' y='150' width='550' height='310' viewBox='0 0 256 144'><image href='data:image/png;base64,\{png}' width='256' height='144' opacity='0.83'/>\{drawings[i]}<path d='M252,0h4v4' fill='none' stroke='white' stroke-width='1'/></svg>")
+    svg.write_string("<text x='\{left}' y='501'>Fit RMS \{number(num(field(r,"fitRmsTiles")))} · checks \{number(num(field(r,"heldOutRmsTiles")))} tiles</text><text x='\{left}' y='553'>Bottom-left detail</text><svg x='\{left}' y='570' width='550' height='340' viewBox='0 75 112 69'><image href='data:image/png;base64,\{png}' width='256' height='144' opacity='0.83'/>\{drawings[i]}")
+    for e in arr(field(r,"errors")) {
+      let id=str(field(e,"id"));let q=p(field(e,"after"));let p=p(field(e,"observed"))
+      svg.write_string("<path d='M\{p.x},\{p.y}L\{q.x},\{q.y}' stroke='#ff6c90' stroke-width='0.4'/><circle cx='\{p.x}' cy='\{p.y}' r='0.9' fill='none' stroke='#63f2c2' stroke-width='0.3'/><text x='\{p.x+1.2}' y='\{p.y-1.0}' class='pin'>\{id}</text>")
+    }
+    svg.write_string("</svg>")
+    if optimized {
+      svg.write_string("<text x='\{left}' y='527' class='small'>Left \{parameter(strengths[i].x)} · bottom \{parameter(strengths[i].y)}</text><text x='\{left}' y='950'>Bottom-right detail</text><svg x='\{left}' y='965' width='550' height='290' viewBox='158 85 98 52'><image href='data:image/png;base64,\{png}' width='256' height='144' opacity='0.83'/>\{drawings[i]}")
+      for e in arr(field(r,"errors")) {
+        let id=str(field(e,"id"));let q=p(field(e,"after"));let observed=p(field(e,"observed"))
+        svg.write_string("<path d='M\{observed.x},\{observed.y}L\{q.x},\{q.y}' stroke='#ff6c90' stroke-width='0.4'/><circle cx='\{observed.x}' cy='\{observed.y}' r='0.9' fill='none' stroke='#63f2c2' stroke-width='0.3'/><text x='\{observed.x+1.2}' y='\{observed.y-1}' class='pin'>\{id}</text>")
+      }
+      svg.write_string("</svg>")
+    }
+  }
+  if optimized {
+    svg.write_string("<text x='30' y='1310'>Best equal strength: k = \{parameter(tied.x)}. Separate strengths save only 0.025 fitting tiles and worsen the withheld score further.</text><text x='30' y='1350'>Green circles = fixed observations · pink segments = remaining errors. BL1 / BL2 remain uncertain, not survey control.</text><text x='30' y='1390'>No automatic promotion: the previous gentle trial still has the lowest withheld RMS of these three candidates.</text><text x='30' y='1430'>Some designed streets may not share current OSM geometry. More parameter precision does not resolve ambiguous correspondences.</text><text x='30' y='1485' class='small'>© OpenStreetMap contributors · ODbL 1.0 · all 6,420 ways / 44,343 vertices retained · terrain and live town unchanged</text></svg>")
+    @fs.write_string_to_file("docs/project/\{stem}.svg",svg.to_string())
+    @fs.write_string_to_file("src/ui/rabbita-town/dist/\{stem}.svg",svg.to_string())
+    return
+  }
+  svg.write_string("<text x='30' y='965'>Green = fixed image observations · pink lines = remaining errors. BL1 / BL2 still have uncertain correspondence.</text><text x='30' y='1008'>These are controlled visual trials, not a new automatic fit. Judge street continuity as well as landmark scores.</text><text x='30' y='1051'>The terrain is not stretched. No landmark was moved and no live road source was replaced.</text><text x='30' y='1110' class='small'>© OpenStreetMap contributors · ODbL 1.0 · all 6,420 ways / 44,343 source vertices retained; clipping is display-only</text></svg>")
+  @fs.write_string_to_file("docs/project/wenyu-directional-stretch.svg",svg.to_string())
+  @fs.write_string_to_file("src/ui/rabbita-town/dist/wenyu-directional-stretch.svg",svg.to_string())
+}

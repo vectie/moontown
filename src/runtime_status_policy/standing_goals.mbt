@@ -13,5 +13,5 @@ pub fn runtime_status_standing_goal_counts(
       due += 1
     }
   }
-  { total: goals.length(), enabled, disabled: goals.length() - enabled, due }
+  { total: goals.length(), enabled, disabled: goals.length() - enabled, due, }
 }

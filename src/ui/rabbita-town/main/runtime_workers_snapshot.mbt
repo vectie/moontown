@@ -35,11 +35,11 @@ fn snapshot_worker_profile(
   status : @core.WorkerStatus,
 ) -> SnapshotWorkerProfile {
   match status {
-    Running => { load: 74, energy: 64 }
-    Waiting => { load: 28, energy: 79 }
-    Idle => { load: 16, energy: 88 }
-    Blocked => { load: 91, energy: 38 }
-    Offline => { load: 0, energy: 0 }
+    Running => { load: 74, energy: 64, }
+    Waiting => { load: 28, energy: 79, }
+    Idle => { load: 16, energy: 88, }
+    Blocked => { load: 91, energy: 38, }
+    Offline => { load: 0, energy: 0, }
   }
 }
 

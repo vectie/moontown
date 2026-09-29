@@ -23,7 +23,9 @@ extern "js" fn schedule_spatial_world_canvas(
   #|       scene.pending = null;
   #|       if (typeof paint === "function") paint();
   #|       const canvas = globalThis.document?.getElementById(canvasId);
-  #|       if (canvas && !scene.observer && typeof ResizeObserver === "function") {
+  #|       if (canvas && scene.canvas !== canvas && typeof ResizeObserver === "function") {
+  #|         scene.observer?.disconnect();
+  #|         scene.canvas = canvas;
   #|         scene.observer = new ResizeObserver(() => {
   #|           if (scene.raf) return;
   #|           scene.raf = globalThis.requestAnimationFrame(() => {
@@ -45,8 +47,13 @@ extern "js" fn spatial_world_canvas_draw_plate(
   width : Int,
   height : Int,
   fallback_color : String,
+  xx : Double,
+  yx : Double,
+  yy : Double,
+  tx : Double,
+  ty : Double,
 ) -> Bool =
-  #| (context, canvasId, assetPath, width, height, fallbackColor) => {
+  #| (context, canvasId, assetPath, width, height, fallbackColor, xx, yx, yy, tx, ty) => {
   #|   context.fillStyle = fallbackColor;
   #|   context.fillRect(0, 0, width, height);
   #|   const cache = globalThis.__moontownSpatialWorldPlates ||= new Map();
@@ -65,7 +72,10 @@ extern "js" fn spatial_world_canvas_draw_plate(
   #|   }
   #|   if (!record.ready || !record.image.naturalWidth) return false;
   #|   context.imageSmoothingEnabled = true;
+  #|   context.save();
+  #|   context.transform(xx, yx * height / width, 0, yy, tx * width, ty * height);
   #|   context.drawImage(record.image, 0, 0, width, height);
+  #|   context.restore();
   #|   return true;
   #| }
 
@@ -111,7 +121,7 @@ extern "js" fn spatial_world_canvas_draw_atlas_prop(
   #|   const safeIndex = Math.max(0, Math.min(assetIndex, safeColumns * safeRows - 1));
   #|   const column = safeIndex % safeColumns;
   #|   const row = Math.floor(safeIndex / safeColumns);
-  #|   const size = targetSize * Math.max(.48, scale);
+  #|   const size = targetSize * scale;
   #|   const drawHeight = size;
   #|   const drawWidth = size * cellWidth / cellHeight;
   #|   const baseline = Math.max(.5, Math.min(.98, baselineRatio));
@@ -122,7 +132,7 @@ extern "js" fn spatial_world_canvas_draw_atlas_prop(
   #|   context.save();
   #|   if (selected) {
   #|     context.strokeStyle = "#f2d88a";
-  #|     context.lineWidth = 3 * Math.max(.48, scale);
+  #|     context.lineWidth = 3 * scale;
   #|     context.beginPath();
   #|     context.ellipse(x, y + drawHeight * .015, drawWidth * .31, drawHeight * .095, 0, 0, Math.PI * 2);
   #|     context.stroke();
@@ -142,7 +152,7 @@ extern "js" fn spatial_world_canvas_draw_atlas_prop(
   #|   if (tone) {
   #|     context.fillStyle = tone;
   #|     context.strokeStyle = "#fff8df";
-  #|     context.lineWidth = 1.5 * Math.max(.48, scale);
+  #|     context.lineWidth = 1.5 * scale;
   #|     context.beginPath();
   #|     context.arc(x + drawWidth * .27, y - drawHeight * .54, drawHeight * .026, 0, Math.PI * 2);
   #|     context.fill();
@@ -189,7 +199,7 @@ extern "js" fn spatial_world_canvas_draw_indoor_prop(
   occupied : Bool,
 ) -> Unit =
   #| (context, kind, x, y, scale, accent, occupied) => {
-  #|   const s = Math.max(.48, scale);
+  #|   const s = scale;
   #|   const poly = (points, fill, stroke = "#405866", line = 1.25) => {
   #|     context.beginPath();
   #|     context.moveTo(points[0][0], points[0][1]);
@@ -298,7 +308,7 @@ extern "js" fn spatial_world_canvas_draw_agent(
   #|     image.onerror = () => { record.failed = true; };
   #|     image.src = spritePath;
   #|   }
-  #|   const s = Math.max(.48, scale);
+  #|   const s = scale;
   #|   const h = 68*s;
   #|   context.save();
   #|   context.fillStyle = "rgba(45,70,78,.25)";
@@ -327,7 +337,7 @@ extern "js" fn spatial_world_canvas_draw_compute_entity(
   selected : Bool,
 ) -> Unit =
   #| (context, kind, x, y, scale, state, selected) => {
-  #|   const s = Math.max(.48, scale);
+  #|   const s = scale;
   #|   const normalized = String(state).toLowerCase();
   #|   const tone = /offline|unavailable|unreachable|unhealthy|retired/.test(normalized) ? "#b85f58"
   #|     : /not-observed|not-configured/.test(normalized) ? "#b8895b"
@@ -381,7 +391,7 @@ extern "js" fn spatial_world_canvas_draw_compute_entity(
 
 ///|
 fn spatial_scene_scale(width : Int) -> Double {
-  (width.to_double() / 1400.0).clamp(min=0.48, max=1.18)
+  width.max(1).to_double() / 1400.0
 }
 
 ///|
@@ -392,12 +402,13 @@ fn spatial_scene_anchor(
   normalized_y : Double,
   underground : Bool,
 ) -> (Double, Double) {
-  let north_x = if underground { 0.47 } else { 0.46 }
-  let north_y = if underground { 0.31 } else { 0.29 }
-  let east_x = if underground { 0.94 } else { 0.95 }
-  let east_y = if underground { 0.60 } else { 0.53 }
-  let west_x = if underground { 0.07 } else { 0.05 }
-  let west_y = if underground { 0.64 } else { 0.65 }
+  let camera = spatial_scene_camera(underground)
+  let north_x = 0.5
+  let north_y = 0.30
+  let east_x = north_x + (camera.east_x - camera.north_x) * 0.90
+  let east_y = north_y + (east_x - north_x) * 2.0 / 3.0
+  let west_x = north_x + (camera.west_x - camera.north_x) * 0.90
+  let west_y = north_y + (north_x - west_x) * 2.0 / 3.0
   (
     (
       north_x +
@@ -422,19 +433,13 @@ fn spatial_scene_hotspot_style(
   width_percent : Double,
   height_percent : Double,
 ) -> Array[String] {
-  let north_x = if underground { 47.0 } else { 46.0 }
-  let north_y = if underground { 31.0 } else { 29.0 }
-  let east_x = if underground { 94.0 } else { 95.0 }
-  let east_y = if underground { 60.0 } else { 53.0 }
-  let west_x = if underground { 7.0 } else { 5.0 }
-  let west_y = if underground { 64.0 } else { 65.0 }
-  let left = north_x +
-    normalized_x * (east_x - north_x) +
-    normalized_y * (west_x - north_x)
-  let top = north_y +
-    normalized_x * (east_y - north_y) +
-    normalized_y * (west_y - north_y)
+  let (left, top) = spatial_scene_anchor(
+    100, 100, normalized_x, normalized_y, underground,
+  )
   [
-    "left: {left}%", "top: {top}%", "width: {width_percent}%", "height: {height_percent}%",
+    "left: \{left}%",
+    "top: \{top}%",
+    "width: \{width_percent}%",
+    "height: \{height_percent}%",
   ]
 }

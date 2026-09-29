@@ -41,7 +41,7 @@ test "social square signal uses shared execution phrase groups" {
   )
   assert_eq(
     social_square_signal(
-      { ..model, state_source: StateSourceKind::SnapshotFile },
+      { ..model, state_source: StateSourceKind::SnapshotFile, },
       Some(civic_metric_test_execution(Completed)),
     ),
     "Projection bridge",
@@ -82,7 +82,7 @@ test "social square stage uses shared execution phrase groups" {
   )
   assert_eq(
     social_square_stage(
-      { ..model, state_source: StateSourceKind::SnapshotFile },
+      { ..model, state_source: StateSourceKind::SnapshotFile, },
       Some(civic_metric_test_execution(Completed)),
     ),
     "Projection bridge pending",

@@ -3,7 +3,7 @@ pub fn required_path(
   relative : String,
   points : Int,
 ) -> BookQualityRequiredPath {
-  { relative, points }
+  { relative, points, }
 }
 
 ///|
@@ -17,7 +17,7 @@ fn required_path_profile(
   book_type : String,
   paths : Array[BookQualityRequiredPath],
 ) -> BookQualityRequiredPathProfile {
-  { book_type, paths }
+  { book_type, paths, }
 }
 
 ///|
@@ -83,7 +83,7 @@ pub fn path_set_assessment(
   points : Int,
 ) -> BookQualityPathSetAssessment {
   if relatives.is_empty() {
-    return { score: points, strength: None, gap: None }
+    return { score: points, strength: None, gap: None, }
   }
   if missing.is_empty() {
     {
@@ -109,9 +109,9 @@ pub fn path_presence_assessment(
   exists : Bool,
 ) -> BookQualityPathAssessment {
   if exists {
-    { score: points, strength: Some("has `\{relative}`"), gap: None }
+    { score: points, strength: Some("has `\{relative}`"), gap: None, }
   } else {
-    { score: 0, strength: None, gap: Some("missing `\{relative}`") }
+    { score: 0, strength: None, gap: Some("missing `\{relative}`"), }
   }
 }
 
@@ -142,7 +142,7 @@ pub fn base_workspace_assessment(
   } else {
     gaps.push("missing \{projection_state_path()}")
   }
-  { score, strengths, gaps }
+  { score, strengths, gaps, }
 }
 
 ///|
@@ -164,7 +164,7 @@ pub fn research_deep_report_word_assessment(
   } else {
     gaps.push("deep report is missing or shallow")
   }
-  { score, strengths, gaps }
+  { score, strengths, gaps, }
 }
 
 ///|
@@ -184,7 +184,7 @@ pub fn course_identity_assessment(
     score += 8
     strengths.push("course identity is explicit")
   }
-  { score, strengths, gaps }
+  { score, strengths, gaps, }
 }
 
 ///|
@@ -192,7 +192,7 @@ pub fn civic_latest_result_assessment(
   exists : Bool,
 ) -> BookQualitySignalAssessment {
   if exists {
-    { score: 10, strengths: ["latest civic service result exists"], gaps: [] }
+    { score: 10, strengths: ["latest civic service result exists"], gaps: [], }
   } else {
     {
       score: 0,

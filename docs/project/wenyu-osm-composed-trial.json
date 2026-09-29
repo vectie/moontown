@@ -1,0 +1,210 @@
+{
+  "schema": "moontown.global_calibration_audit.v1",
+  "direction": "osm-to-fixed-design",
+  "source": "energy-valley-osm-block-graph-v1.json",
+  "controlSource": "docs/project/wenyu-osm-chain-controls.json",
+  "sourceHullCoverage": null,
+  "sourceEdgesPreserved": 775,
+  "sourcePathVerticesPreserved": 3980,
+  "models": [
+    {
+      "model": "Original geographic placement",
+      "normalizedMatrix": [
+        1,
+        0,
+        0,
+        0,
+        1,
+        0,
+        0,
+        0
+      ],
+      "fitRmsTiles": 27.98887914492223,
+      "excludedCheckRmsTiles": 0.6764834106262978,
+      "unconfirmedHoldoutRmsTiles": null,
+      "poleInMap": false,
+      "geometryMetricsValid": true,
+      "waterConflictEdges": 96,
+      "outOfBoundsEdges": 38,
+      "outOfBoundsSampleFraction": 0.0038182689483528885,
+      "maximumCornerMovementTiles": 0,
+      "runtimeEligible": false
+    },
+    {
+      "model": "OSM - original affine - design",
+      "normalizedMatrix": [
+        2.4564112954076585,
+        -1.0425041445060867,
+        -0.6719711265955568,
+        0.5619918928577456,
+        0.20174604977560584,
+        -0.18977031003918737,
+        0.33042981889472045,
+        0.017399697242659978
+      ],
+      "fitRmsTiles": 7.429545928479686,
+      "excludedCheckRmsTiles": 10.736525940669573,
+      "unconfirmedHoldoutRmsTiles": null,
+      "poleInMap": false,
+      "geometryMetricsValid": true,
+      "waterConflictEdges": 112,
+      "outOfBoundsEdges": 400,
+      "outOfBoundsSampleFraction": 0.4819521093230688,
+      "maximumCornerMovementTiles": 603.3672937036151,
+      "runtimeEligible": false
+    },
+    {
+      "model": "OSM - original perspective - design",
+      "normalizedMatrix": [
+        -0.19430573739913493,
+        0.7529486995302308,
+        0.4830530060869567,
+        -1.050882790047803,
+        1.6531864500246423,
+        0.5793120120874508,
+        -0.3206158627648783,
+        -0.5181351981221659
+      ],
+      "fitRmsTiles": 7.240452078993931,
+      "excludedCheckRmsTiles": 16.021378651490828,
+      "unconfirmedHoldoutRmsTiles": null,
+      "poleInMap": false,
+      "geometryMetricsValid": true,
+      "waterConflictEdges": 105,
+      "outOfBoundsEdges": 441,
+      "outOfBoundsSampleFraction": 0.5504336131336085,
+      "maximumCornerMovementTiles": 361.8011007100296,
+      "runtimeEligible": false
+    }
+  ],
+  "composedTrial": true,
+  "compositionDetails": [
+    {
+      "model": "OSM - original affine - design",
+      "firstLegNormalizedMatrix": [
+        17.328094292019447,
+        -8.889410752246015,
+        2.0819664074058615,
+        6.431619285942847,
+        -0.29343086266330776,
+        1.4291529608969813,
+        0,
+        0
+      ],
+      "firstLegFitRmsOriginalPixels": 22.803066373342432,
+      "firstLegExcludedCheckRmsOriginalPixels": 85.78839008848475,
+      "firstLegPoleInSourceGrid": false,
+      "secondLegNormalizedMatrix": [
+        0.8768723150608503,
+        0.5526333912188872,
+        0.18239878147009855,
+        -0.21440985177107355,
+        1.2449532065923723,
+        0.11846226154259215,
+        -0.03060546007916387,
+        0.47458958210208313
+      ]
+    },
+    {
+      "model": "OSM - original perspective - design",
+      "firstLegNormalizedMatrix": [
+        3.6513866924148637,
+        -9.824061584035514,
+        9.24592235597901,
+        -8.449831213151551,
+        9.543146994191266,
+        8.937539925389947,
+        0.08586808463143325,
+        -1.4985864188338691
+      ],
+      "firstLegFitRmsOriginalPixels": 4.181284827943247e-11,
+      "firstLegExcludedCheckRmsOriginalPixels": 77.26685569511073,
+      "firstLegPoleInSourceGrid": false,
+      "secondLegNormalizedMatrix": [
+        0.8768723150608503,
+        0.5526333912188872,
+        0.18239878147009855,
+        -0.21440985177107355,
+        1.2449532065923723,
+        0.11846226154259215,
+        -0.03060546007916387,
+        0.47458958210208313
+      ]
+    }
+  ],
+  "controlPairs": [
+    {
+      "id": "A-Litang-Wenyu",
+      "sourceGrid": [
+        104.78136768622062,
+        -50.21333188416611
+      ],
+      "designGrid": [
+        111.46411483253588,
+        5.3560042507970245
+      ],
+      "confirmedFit": true,
+      "outsideStoredGrid": true,
+      "nearestStoredRoadVertexTiles": 52.735451503263796
+    },
+    {
+      "id": "Q-Qinbei-Wenyu",
+      "sourceGrid": [
+        183.43265586646885,
+        63.35489015247731
+      ],
+      "designGrid": [
+        184.03827751196172,
+        63.506907545164715
+      ],
+      "confirmedFit": true,
+      "outsideStoredGrid": false,
+      "nearestStoredRoadVertexTiles": 0.2746388746543685
+    },
+    {
+      "id": "X-ScienceCityEast-Wenyu",
+      "sourceGrid": [
+        205.4548553006607,
+        86.31472783965
+      ],
+      "designGrid": [
+        205.7799043062201,
+        86.00212539851222
+      ],
+      "confirmedFit": true,
+      "outsideStoredGrid": false,
+      "nearestStoredRoadVertexTiles": 2.2133564407607107
+    },
+    {
+      "id": "C-Jingcheng-Wenyu",
+      "sourceGrid": [
+        221.76465598290088,
+        96.98334523642552
+      ],
+      "designGrid": [
+        222.00956937799043,
+        97.47927736450585
+      ],
+      "confirmedFit": true,
+      "outsideStoredGrid": false,
+      "nearestStoredRoadVertexTiles": 4.283920491829439
+    },
+    {
+      "id": "G-ScienceCityRoad-Wenyu",
+      "sourceGrid": [
+        190.95271493105247,
+        78.29156863434764
+      ],
+      "designGrid": [
+        191.38755980861245,
+        78.80977683315622
+      ],
+      "confirmedFit": false,
+      "outsideStoredGrid": false,
+      "nearestStoredRoadVertexTiles": 1.153036852819552
+    }
+  ],
+  "matrixConvention": "Normalize both grids with ((x-128)/128,(y-72)/128); h=[h00,h01,h02,h10,h11,h12,h20,h21], h22=1. These are plane transforms, not uniquely recoverable camera Euler angles.",
+  "selfTests": "synthetic perspective recovery, singular solve rejection, camera roundtrip at three zooms, composed matrix equals sequential evaluation at three excluded synthetic points, 775 source edges preserved",
+  "runtimeEligible": false
+}

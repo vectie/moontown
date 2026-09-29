@@ -45,7 +45,7 @@ fn dashboard_tasks_section(town : @core.TownState) -> DashboardSection {
 
 ///|
 fn dashboard_pipeline_section(town : @core.TownState) -> DashboardSection {
-  { title: "Pipeline", lines: build_pipeline_lines(town) }
+  { title: "Pipeline", lines: build_pipeline_lines(town), }
 }
 
 ///|

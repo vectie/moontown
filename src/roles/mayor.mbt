@@ -12,7 +12,7 @@ pub impl Show for Mayor with fn output(self : Mayor, logger : &Logger) -> Unit {
 
 ///|
 pub fn Mayor::new() -> Mayor {
-  { runtime: @moonclaw.mayor_runtime() }
+  { runtime: @moonclaw.mayor_runtime(), }
 }
 
 ///|

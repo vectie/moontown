@@ -198,7 +198,7 @@ test "Live to Stale without a version bump cannot leak live place presentation" 
   let live = runtime_map_routing_live_model()
   let stale = {
     ..live,
-    energy_valley_runtime: { ..live.energy_valley_runtime, phase: Stale },
+    energy_valley_runtime: { ..live.energy_valley_runtime, phase: Stale, },
   }
   assert_eq(
     live.energy_valley_runtime.version,

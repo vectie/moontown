@@ -108,7 +108,7 @@ pub fn AssignTaskRequest::new(
   context_summary~ : String,
   skills? : Array[String] = [],
 ) -> AssignTaskRequest {
-  { assignment, workspace_root, context_summary, skills }
+  { assignment, workspace_root, context_summary, skills, }
 }
 
 ///|
@@ -124,7 +124,7 @@ pub fn PollWorkerResponse::new(
   status~ : @core.WorkerStatus,
   detail~ : String,
 ) -> PollWorkerResponse {
-  { worker_id, status, detail }
+  { worker_id, status, detail, }
 }
 
 ///|
@@ -142,5 +142,5 @@ pub fn TaskResultResponse::new(
   summary~ : String,
   memory_candidates? : Array[String] = [],
 ) -> TaskResultResponse {
-  { task_id, status, summary, memory_candidates }
+  { task_id, status, summary, memory_candidates, }
 }

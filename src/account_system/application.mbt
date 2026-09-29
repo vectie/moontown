@@ -61,7 +61,7 @@ fn AccountApplication::ensure_bootstrap(
   if bootstrap_session_exists || !principal_was_present {
     sessions.push(self.bootstrap_session(state, principal))
   }
-  { ..state, principals, sessions }
+  { ..state, principals, sessions, }
 }
 
 ///|
@@ -160,7 +160,7 @@ fn AccountApplication::prune_state(
     subscriptions.length() == pruned.subscriptions.length() {
     pruned
   } else {
-    { ..pruned, principals, subscriptions, version: pruned.version + 1 }
+    { ..pruned, principals, subscriptions, version: pruned.version + 1, }
   }
 }
 
@@ -213,7 +213,7 @@ pub async fn AccountApplication::create_visitor_session(
     expires_at_ms=now_ms + ttl_ms,
   )
   self.save_state(next)
-  { opaque_token, context: account_context_for(principal, None) }
+  { opaque_token, context: account_context_for(principal, None), }
 }
 
 ///|

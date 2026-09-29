@@ -1,7 +1,7 @@
 ///|
 test "ecosystem attention digest stays bounded and labels preview provenance" {
   let dispatch : Dispatch[Msg] = Emit(fn(_message) { @rabbita.none })
-  let model = { ..init_model(), tick: 18 }
+  let model = { ..init_model(), tick: 18, }
   let snapshot = ecosystem_contract_town_snapshot(model, 20260727)
   let html = @rabbita.render_to_string(
     @rabbita.static_cell(
@@ -18,7 +18,7 @@ test "ecosystem attention digest stays bounded and labels preview provenance" {
 
 ///|
 test "ecosystem place story joins personality to semantic access and truth" {
-  let model = { ..init_model(), tick: 18 }
+  let model = { ..init_model(), tick: 18, }
   let semantic_snapshot = ecosystem_contract_town_snapshot(model, 20260727)
   let bridge = ecosystem_cached_world_snapshot(model, 20260727)
   let occupied_buildings = golden_valley_buildings(20260727).filter(building => {
@@ -104,7 +104,10 @@ test "inspector access and actions follow the accepted semantic place" {
     .map(affordance => ecosystem_contract_id(affordance.id))
   let sealed_place = {
     ..accepted,
-    entrances: accepted.entrances.map(portal => { ..portal, road_node_id: None }),
+    entrances: accepted.entrances.map(portal => {
+      ..portal,
+      road_node_id: None,
+    }),
     traits: accepted.traits.filter(place_trait => {
       !(place_trait is @energy_valley_contract.Accessible)
     }),

@@ -357,7 +357,7 @@ pub async fn ingest_projection(
       ).unwrap()
       replace_lifecycle(state, degraded)
       save_runtime_state(state_path, state)
-      { accepted: false, lifecycle: degraded, projection: None, issues }
+      { accepted: false, lifecycle: degraded, projection: None, issues, }
     }
   }
 }
@@ -393,7 +393,7 @@ pub async fn submit_candidate(
           fail("candidate identity is already bound to another payload")
         _ => ()
       }
-      return { accepted: true, route, receipt }
+      return { accepted: true, route, receipt, }
     }
     None => ()
   }
@@ -424,5 +424,5 @@ pub async fn submit_candidate(
   replace_candidate(state, receipt)
   state.candidate_envelopes.push(candidate)
   save_runtime_state(state_path, state)
-  { accepted: true, route, receipt }
+  { accepted: true, route, receipt, }
 }

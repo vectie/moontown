@@ -1,0 +1,18 @@
+{
+  "schema": "moontown.wenyu_dense_image_picks.v1",
+  "status": "Manual topological candidates, not survey-validated; frozen before fitting",
+  "image": "src/ui/assets/tilemap/wenyu_topdown_semantic.png",
+  "imageSize": [1672, 941],
+  "method": "Inspect the pure reference at magnified scale with pixel-coordinate ticks; identify bridge decks and street corridor order. Never use fitted predictions as target coordinates.",
+  "points": [
+    {"id":"R5","pixel":{"x":1143,"y":292},"radiusPixels":8,"holdout":false,"evidence":"Shunyu corridor from NE westward to its Wenyu crossing, north of the oval river park."},
+    {"id":"R6","pixel":{"x":1177,"y":451},"radiusPixels":10,"holdout":false,"evidence":"Qinbei crossing on the northeast edge of the oval park; center of the first diagonal bridge downstream from Shunyu. Earlier (1202,415) was off this deck; retained only in legacy report."},
+    {"id":"R7","pixel":{"x":1242,"y":516},"radiusPixels":8,"holdout":true,"evidence":"Next downstream bridge, continuing south to the S6 junction."},
+    {"id":"R8","pixel":{"x":1344,"y":562},"radiusPixels":8,"holdout":false,"evidence":"Next downstream oblique bridge between R7 and Jingcheng, continuing southwest to S7. Legacy image pick retained."},
+    {"id":"R9","pixel":{"x":1450,"y":637},"radiusPixels":12,"holdout":true,"evidence":"Broad Jingcheng river crossing immediately north of SE interchange. Legacy image pick retained."},
+    {"id":"S1","pixel":{"x":481,"y":600},"radiusPixels":16,"holdout":true,"evidence":"Provisional Litang–Beiqing corridor intersection between SW and the lower large crossroad S4. Small junction geometry is ambiguous in designed terrain; retained as a low-confidence check, not a fitting control."},
+    {"id":"S4","pixel":{"x":410,"y":760},"radiusPixels":12,"holdout":false,"evidence":"Large southern Litang crossroad below the central wetland, one major junction south of S1. This is not the corrected SW/Dingsi junction."},
+    {"id":"S6","pixel":{"x":1217,"y":578},"radiusPixels":10,"holdout":false,"evidence":"Science City Road continuation south from R7, meeting the Dingsi corridor before the southeast interchange."},
+    {"id":"S7","pixel":{"x":1287,"y":615},"radiusPixels":10,"holdout":false,"evidence":"Science City East Road continuation southwest from R8, meeting the same Dingsi corridor east of S6."}
+  ]
+}

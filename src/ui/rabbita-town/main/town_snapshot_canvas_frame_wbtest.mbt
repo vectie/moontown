@@ -53,7 +53,7 @@ test "accepted Canvas frame keeps building identity until a new frame is accepte
   let newer = {
     ..rendered,
     tick: rendered.tick + 1,
-    world: { ..rendered.world, places: [] },
+    world: { ..rendered.world, places: [], },
   }
   assert_true(
     town_snapshot_canvas_building_at_tile(newer, visible.x, visible.y) is None,
@@ -112,7 +112,7 @@ test "accepted Canvas frame keeps actor records from the displayed snapshot" {
   golden_valley_accept_canvas_frame(live)
   let stale_model = {
     ..live_model,
-    energy_valley_runtime: { ..live_model.energy_valley_runtime, phase: Stale },
+    energy_valley_runtime: { ..live_model.energy_valley_runtime, phase: Stale, },
   }
   // Eligibility belongs to the frame that completed drawing. A newer stale
   // application Model must not disable a still-visible live Agent.
@@ -513,6 +513,7 @@ fn canvas_frame_test_view(tick : Int) -> TownCanvasViewState {
     selected_actor_id: None,
     runtime_agent_interaction_enabled: false,
     intersection_preview: false,
+    authoring_overlay: false,
     follow_enabled: false,
     player_idle_position: None,
     player_motion: None,
@@ -563,7 +564,7 @@ test "intersection road presentation accepts pointer truth and construction inpu
   golden_valley_accept_canvas_frame(visible)
   canvas_frame_test_install_harness(true)
   canvas_frame_test_install_intersection_preview()
-  let preview = { ..canvas_frame_test_view(2), intersection_preview: true }
+  let preview = { ..canvas_frame_test_view(2), intersection_preview: true, }
   ignore(render_golden_valley_canvas(dispatch, visible, preview))
   assert_true(canvas_frame_test_flush_next_animation_frame())
   assert_eq(golden_valley_canvas_frame().unwrap().tick, visible.tick)
@@ -715,7 +716,7 @@ test "one page render threads the exact same TownSnapshot through its surfaces" 
     }
   })
   assert_true(!occupied.is_empty())
-  let model = { ..base, energy_selected_building: Some(occupied[0]) }
+  let model = { ..base, energy_selected_building: Some(occupied[0]), }
   let supplied = @energy_valley_contract.town_snapshot(
     compiled.world,
     compiled.tick,

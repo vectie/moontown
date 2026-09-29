@@ -166,5 +166,5 @@ fn miniapp_moderation_reject(
   message : String,
   validation : MiniappPublicationValidation,
 ) -> MiniappModerationChange {
-  { ok: false, snapshot, building_id, message, validation }
+  { ok: false, snapshot, building_id, message, validation, }
 }

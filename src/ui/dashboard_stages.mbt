@@ -76,7 +76,7 @@ fn dashboard_stage_rules() -> Array[DashboardStageRule] {
         "standing-watch", "standing watch", "standing_goal_decision", "watcher",
       ],
     },
-    { label: "Bootstrap", priority: 0, tokens: ["bootstrap"] },
+    { label: "Bootstrap", priority: 0, tokens: ["bootstrap"], },
     {
       label: "Source Population",
       priority: 1,

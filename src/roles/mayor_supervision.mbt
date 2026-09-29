@@ -8,7 +8,13 @@ pub fn Mayor::patrol(
   let recovery = @health.recovery_actions(report)
   let actions = @scheduler.plan_tick(state, report)
   let tick = @scheduler.next_tick(1, actions)
-  { output_contract: "mayor.patrol.packet.v1", report, actions, tick, recovery }
+  {
+    output_contract: "mayor.patrol.packet.v1",
+    report,
+    actions,
+    tick,
+    recovery,
+  }
 }
 
 ///|

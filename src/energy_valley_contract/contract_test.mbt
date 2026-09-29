@@ -201,13 +201,17 @@ test "sealed authored building is preserved without fabricating road access" {
     traits: [KnowledgeWork],
     interaction_slots: [],
   }
-  let sealed_world = { ..source, places: [sealed_place], attention_targets: [] }
+  let sealed_world = {
+    ..source,
+    places: [sealed_place],
+    attention_targets: [],
+  }
   assert_false(has_errors(validate_world(sealed_world)))
   let falsely_accessible = {
     ..sealed_place,
     traits: [KnowledgeWork, Accessible],
   }
-  let invalid_world = { ..sealed_world, places: [falsely_accessible] }
+  let invalid_world = { ..sealed_world, places: [falsely_accessible], }
   let issues = validate_world(invalid_world)
   assert_true(issues.any(issue => issue.code == MissingPrimaryEntrance))
   assert_true(has_errors(issues))

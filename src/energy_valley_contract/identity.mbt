@@ -54,7 +54,7 @@ pub fn stable_id(
   if canonical_scope.is_empty() || canonical_key.is_empty() {
     Err(InvalidStableId(scope~, key~))
   } else {
-    Ok({ value: "\{canonical_scope}/\{canonical_key}" })
+    Ok({ value: "\{canonical_scope}/\{canonical_key}", })
   }
 }
 

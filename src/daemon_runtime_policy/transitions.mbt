@@ -94,7 +94,7 @@ pub fn daemon_runtime_heartbeat_state(
   now : UInt64,
   log_path : String,
 ) -> DaemonRuntimeState {
-  { ..previous, status, last_heartbeat_ms: now, log_path }
+  { ..previous, status, last_heartbeat_ms: now, log_path, }
 }
 
 ///|

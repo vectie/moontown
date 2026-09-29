@@ -345,7 +345,7 @@ test "native schematic bridge accepts ranked roads and two Line 17 stations" {
   // independently at every zoom.
   assert_eq(golden_native_road_visible_mask(roads, center, true, 0.20), 0)
   assert_eq(golden_native_road_visible_mask(roads, center, true, 0.34), 2)
-  roads[town_canvas_road_key(west.x, west.y)] = { ..west, custom: true }
+  roads[town_canvas_road_key(west.x, west.y)] = { ..west, custom: true, }
   assert_eq(golden_native_road_visible_mask(roads, center, true, 0.20), 8)
   assert_eq(golden_native_road_visible_mask(roads, center, true, 0.34), 10)
   native_schematic_test_invalidate_presentation_rows()

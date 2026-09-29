@@ -1,6 +1,6 @@
 ///|
 test "vitality dashboard points flow label uses aggregate counters" {
-  let model = { ..init_model(), tick: 5 }
+  let model = { ..init_model(), tick: 5, }
   let label = vitality_dashboard_points_flow_label(model)
   assert_true(label.contains("issued"))
   assert_true(label.contains("redeemed"))

@@ -1,0 +1,27 @@
+<!doctype html>
+<html lang="zh-CN">
+<head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>G座三层 · Interior Atelier</title>
+<link rel="stylesheet" href="interior.css"><script type="importmap">{"imports":{"three":"./vendor/three.module.js"}}</script></head>
+<body>
+<header><a class="brand" href="index.html#center"><b>M</b><span>MOONTOWN<small>INTERIOR ATELIER</small></span></a><div class="heading">未来中心 <strong>G座 · 三层</strong></div><span class="badge">独立设计研究 · 未接入城镇</span></header>
+<main>
+<aside>
+<div class="kicker">01 / REBUILD FROM THE PLAN</div><h1>空间，重新组织。</h1><p class="intro">以你提供的三层功能分区图为依据。先确认房间与动线，再确认陈设。</p>
+<p class="intro">原始参考图仅保留在本地研究资料中，不随公开版本分发。</p>
+<div class="section-title">房间与功能 <span>选择定位 / 双击房间进入近景</span></div>
+<nav id="zones" aria-label="房间选择"></nav>
+<section id="room-info" aria-live="polite"><div class="kicker" id="room-id">全层总览</div><h2 id="room-title">图纸与设计，分开说明</h2><p id="room-area">标注面积来自照片，不是模型计算值。</p><h3>图纸依据</h3><p id="evidence">中央挑空、双服务核心及周边功能区。</p><h3>本次设计提案</h3><p id="proposal">家具、材料、照明及未标注用途的空间均为提案。</p><button id="focus-room" disabled>查看此空间 →</button></section>
+<p class="disclaimer">照片未经测绘标定。墙高、尺寸、门宽与消防疏散均未验证；不作为施工或安全依据。</p>
+</aside>
+<section id="viewport" aria-label="三层交互式3D室内模型">
+<canvas id="scene" tabindex="0" aria-label="拖拽旋转，滚轮缩放，右键平移；方向键旋转，加减号缩放，Home恢复总览"></canvas>
+<div class="toolbar"><div role="group" aria-label="视角"><button data-view="overview" aria-pressed="true">3D 总览</button><button data-view="plan" aria-pressed="false">平面图</button><button data-view="reverse" aria-pressed="false">背面</button></div><button id="reset" title="恢复全层视角">重置 ↺</button></div>
+<div class="layers"><label><input id="cutaway" type="checkbox" checked>剖切墙体</label><label><input id="furniture" type="checkbox" checked>家具提案</label><label><input id="labels" type="checkbox" checked>房间编号</label><label><input id="ceiling" type="checkbox">顶棚</label><button id="light" aria-pressed="false">日光 / 暖光</button></div>
+<div id="room-labels"></div><div id="loading" role="status">正在建立三层空间…</div>
+<div class="legend"><span><i class="known"></i>图纸布局</span><span><i class="proposed"></i>陈设提案</span><span>中央区域为挑空 · 非办公楼面</span></div>
+<div id="status" aria-live="polite">拖拽旋转 · 滚轮缩放 · 点击房间选区</div>
+</section>
+</main>
+<footer><span>MoonBit geometry × Three.js rendering</span><span>G / 03 <i>·</i> REFERENCE-LED, NOT AS-BUILT</span></footer>
+<script type="module" src="interior.js"></script>
+</body></html>

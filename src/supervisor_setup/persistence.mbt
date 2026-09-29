@@ -176,6 +176,6 @@ fn append_idempotency(
   {
     ..store,
     idempotency: store.idempotency +
-    [{ command_id, actor_user_id, operation, request_digest, response }],
+    [{ command_id, actor_user_id, operation, request_digest, response, }],
   }
 }

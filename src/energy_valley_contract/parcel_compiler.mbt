@@ -24,7 +24,7 @@ pub fn parcel_grammar(
   variation? : PreservationLevel = Bounded,
   minimum_area_sqm? : Double = 1.0,
 ) -> ParcelGrammar {
-  { target_count, split_axis, variation, minimum_area_sqm }
+  { target_count, split_axis, variation, minimum_area_sqm, }
 }
 
 ///|
@@ -220,7 +220,7 @@ fn polygon_bounds(value : Polygon) -> PolygonBounds {
     minimum_y = minimum_y.min(point.y)
     maximum_y = maximum_y.max(point.y)
   }
-  { minimum_x, maximum_x, minimum_y, maximum_y }
+  { minimum_x, maximum_x, minimum_y, maximum_y, }
 }
 
 ///|

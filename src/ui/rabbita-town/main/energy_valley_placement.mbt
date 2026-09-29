@@ -146,21 +146,21 @@ fn energy_valley_perimeter_road_entrance(
   for offset in 0..<civic.footprint_w {
     let x = grid_x + energy_valley_mod(offset + phase, civic.footprint_w)
     if ecosystem_road_network_node_at(road_nodes, x, grid_y - 1) is Some(_) {
-      return Some({ x, y: grid_y - 1 })
+      return Some({ x, y: grid_y - 1, })
     }
     if ecosystem_road_network_node_at(road_nodes, x, grid_y + civic.footprint_h)
       is Some(_) {
-      return Some({ x, y: grid_y + civic.footprint_h })
+      return Some({ x, y: grid_y + civic.footprint_h, })
     }
   }
   for offset in 0..<civic.footprint_h {
     let y = grid_y + energy_valley_mod(offset + phase, civic.footprint_h)
     if ecosystem_road_network_node_at(road_nodes, grid_x - 1, y) is Some(_) {
-      return Some({ x: grid_x - 1, y })
+      return Some({ x: grid_x - 1, y, })
     }
     if ecosystem_road_network_node_at(road_nodes, grid_x + civic.footprint_w, y)
       is Some(_) {
-      return Some({ x: grid_x + civic.footprint_w, y })
+      return Some({ x: grid_x + civic.footprint_w, y, })
     }
   }
   None
@@ -214,7 +214,7 @@ fn energy_valley_candidate_placement(
     ) {
     return None
   }
-  Some({ grid_x, grid_y, entrance_x: entrance.x, entrance_y: entrance.y })
+  Some({ grid_x, grid_y, entrance_x: entrance.x, entrance_y: entrance.y, })
 }
 
 ///|
@@ -227,17 +227,17 @@ fn energy_valley_placements_for_road(
   let width_offset = energy_valley_mod(phase, civic.footprint_w)
   let height_offset = energy_valley_mod(phase, civic.footprint_h)
   [
-    (road_x - width_offset, road_y + 1, { x: road_x, y: road_y }),
+    (road_x - width_offset, road_y + 1, { x: road_x, y: road_y, }),
     (
       road_x - width_offset,
       road_y - civic.footprint_h,
-      { x: road_x, y: road_y },
+      { x: road_x, y: road_y, },
     ),
-    (road_x + 1, road_y - height_offset, { x: road_x, y: road_y }),
+    (road_x + 1, road_y - height_offset, { x: road_x, y: road_y, }),
     (
       road_x - civic.footprint_w,
       road_y - height_offset,
-      { x: road_x, y: road_y },
+      { x: road_x, y: road_y, },
     ),
   ]
 }

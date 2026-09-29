@@ -59,7 +59,7 @@ test "contest express signal uses shared execution signal groups" {
   )
   assert_eq(
     contest_express_signal(
-      { ..model, state_source: StateSourceKind::SnapshotFile },
+      { ..model, state_source: StateSourceKind::SnapshotFile, },
       Some(civic_metric_test_execution(Completed)),
     ),
     "Projection bridge",
@@ -92,7 +92,7 @@ test "contest express champion label uses shared execution phrase groups" {
   )
   assert_eq(
     contest_express_champion_label(
-      { ..model, state_source: StateSourceKind::SnapshotFile },
+      { ..model, state_source: StateSourceKind::SnapshotFile, },
       None,
     ),
     "Projection pending",
@@ -118,7 +118,7 @@ test "contest express readiness label uses shared execution score policy" {
   )
   assert_eq(
     contest_express_readiness_label(
-      { ..model, state_source: StateSourceKind::SnapshotFile },
+      { ..model, state_source: StateSourceKind::SnapshotFile, },
       None,
     ),
     "46% ready",

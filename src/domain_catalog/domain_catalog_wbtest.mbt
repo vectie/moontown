@@ -136,7 +136,7 @@ test "catalog identifiers reject path traversal and punctuation" {
   assert_false(valid_catalog_identifier("Research Agents"))
   assert_false(valid_catalog_identifier("research--agents"))
   let catalog = valid_catalog_fixture()
-  let invalid = { ..catalog, catalog_id: "../fixture" }
+  let invalid = { ..catalog, catalog_id: "../fixture", }
   assert_true(
     validate_knowledge_domain_catalog(invalid).any(error => {
       error.contains("path-safe identifier")

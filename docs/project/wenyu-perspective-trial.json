@@ -1,0 +1,296 @@
+{
+  "schema": "moontown.original_to_generated_perspective_trial.v1",
+  "direction": "original-design-pixels-to-generated-design-pixels",
+  "originalSha256": "8363abfdeda33d759a185c8a54c3ef8f971711a4dbf149028ee9447e38f90e62",
+  "originalSize": [
+    2274,
+    1280
+  ],
+  "generatedSize": [
+    1672,
+    941
+  ],
+  "pickMethod": "Provisional manual road-centre picks. Frozen before the perspective fit; no surveyed OSM identity implied. A-D retained verbatim from the preceding trial.",
+  "picks": [
+    {
+      "id": "A",
+      "original": {
+        "x": 1080,
+        "y": 144
+      },
+      "generated": {
+        "x": 728,
+        "y": 35
+      }
+    },
+    {
+      "id": "B",
+      "original": {
+        "x": 168,
+        "y": 693
+      },
+      "generated": {
+        "x": 406,
+        "y": 757
+      }
+    },
+    {
+      "id": "C",
+      "original": {
+        "x": 1790,
+        "y": 838
+      },
+      "generated": {
+        "x": 1450,
+        "y": 637
+      }
+    },
+    {
+      "id": "D",
+      "original": {
+        "x": 627,
+        "y": 397
+      },
+      "generated": {
+        "x": 548,
+        "y": 439
+      }
+    },
+    {
+      "id": "E",
+      "original": {
+        "x": 1470,
+        "y": 417
+      },
+      "generated": {
+        "x": 1144,
+        "y": 295
+      }
+    },
+    {
+      "id": "F",
+      "original": {
+        "x": 1203,
+        "y": 160
+      },
+      "generated": {
+        "x": 852,
+        "y": 37
+      }
+    },
+    {
+      "id": "G",
+      "original": {
+        "x": 1509,
+        "y": 690
+      },
+      "generated": {
+        "x": 1250,
+        "y": 515
+      }
+    }
+  ],
+  "fitIds": [
+    "A",
+    "B",
+    "C",
+    "E"
+  ],
+  "checkIds": [
+    "D",
+    "F",
+    "G"
+  ],
+  "models": [
+    {
+      "name": "Affine ABC (previous)",
+      "normalizedMatrix": [
+        0.8242939086858246,
+        0.5716222914807061,
+        0.16149889349640048,
+        -0.2268302320327003,
+        1.411813067105142,
+        0.08357882210880584,
+        0,
+        0
+      ],
+      "fitRmsPixels": 7.338453819646734e-14,
+      "checkRmsPixels": 50.39994089589737,
+      "poleInOriginalImage": false,
+      "checks": [
+        {
+          "id": "D",
+          "prediction": {
+            "x": 559.7818734000966,
+            "y": 373.1813383552455
+          },
+          "observed": {
+            "x": 548,
+            "y": 439
+          },
+          "errorPixels": 66.86485445675167,
+          "errorApproxTiles": 10.237681065148582
+        },
+        {
+          "id": "F",
+          "prediction": {
+            "x": 809.2722197125698,
+            "y": 31.09490983829346
+          },
+          "observed": {
+            "x": 852,
+            "y": 37
+          },
+          "errorPixels": 43.13389963948065,
+          "errorApproxTiles": 6.604233437623832
+        },
+        {
+          "id": "G",
+          "prediction": {
+            "x": 1217.4885569629164,
+            "y": 530.2324042404651
+          },
+          "observed": {
+            "x": 1250,
+            "y": 515
+          },
+          "errorPixels": 35.902925609182226,
+          "errorApproxTiles": 5.497098657865221
+        }
+      ]
+    },
+    {
+      "name": "Affine ABCE (same inputs)",
+      "normalizedMatrix": [
+        0.8454062754204404,
+        0.5365324757148395,
+        0.1774784131172173,
+        -0.21327771306692306,
+        1.389288098699169,
+        0.09383644719875145,
+        0,
+        0
+      ],
+      "fitRmsPixels": 30.4991022242226,
+      "checkRmsPixels": 41.873429515511376,
+      "poleInOriginalImage": false,
+      "checks": [
+        {
+          "id": "D",
+          "prediction": {
+            "x": 571.4933966687402,
+            "y": 380.69923737677937
+          },
+          "observed": {
+            "x": 548,
+            "y": 439
+          },
+          "errorPixels": 62.856333089704584,
+          "errorApproxTiles": 9.623936166844722
+        },
+        {
+          "id": "F",
+          "prediction": {
+            "x": 836.0398379726316,
+            "y": 48.27766621507516
+          },
+          "observed": {
+            "x": 852,
+            "y": 37
+          },
+          "errorPixels": 19.54258240864034,
+          "errorApproxTiles": 2.9921657276387124
+        },
+        {
+          "id": "G",
+          "prediction": {
+            "x": 1235.3320640875713,
+            "y": 541.6865662376783
+          },
+          "observed": {
+            "x": 1250,
+            "y": 515
+          },
+          "errorPixels": 30.45194840218123,
+          "errorApproxTiles": 4.662499276888992
+        }
+      ]
+    },
+    {
+      "name": "Perspective ABCE",
+      "normalizedMatrix": [
+        0.8768723150608503,
+        0.5526333912188872,
+        0.18239878147009855,
+        -0.21440985177107355,
+        1.2449532065923723,
+        0.11846226154259215,
+        -0.03060546007916387,
+        0.47458958210208313
+      ],
+      "fitRmsPixels": 1.752031836010979e-13,
+      "checkRmsPixels": 28.36112678512288,
+      "poleInOriginalImage": false,
+      "checks": [
+        {
+          "id": "D",
+          "prediction": {
+            "x": 534.4876699774086,
+            "y": 423.36553920888304
+          },
+          "observed": {
+            "x": 548,
+            "y": 439
+          },
+          "errorPixels": 20.664448380452814,
+          "errorApproxTiles": 3.163934680260718
+        },
+        {
+          "id": "F",
+          "prediction": {
+            "x": 835.9971980946726,
+            "y": 30.891287862783656
+          },
+          "observed": {
+            "x": 852,
+            "y": 37
+          },
+          "errorPixels": 17.129099007143477,
+          "errorApproxTiles": 2.622637168557853
+        },
+        {
+          "id": "G",
+          "prediction": {
+            "x": 1244.2121001964515,
+            "y": 555.7324845027234
+          },
+          "observed": {
+            "x": 1250,
+            "y": 515
+          },
+          "errorPixels": 41.141646514213804,
+          "errorApproxTiles": 6.299199466291109
+        }
+      ]
+    }
+  ],
+  "normalization": "Original ((x-1137)/1137,(y-640)/1137); generated ((x-836)/836,(y-470.5)/836); row-major h with h22=1.",
+  "singleCoordinateSensitivity": {
+    "variants": 32,
+    "maximumCheckPredictionMovementPixels": [
+      22.098395194955444,
+      12.75575173628669,
+      15.7234352709384
+    ],
+    "checkOrder": [
+      "D",
+      "F",
+      "G"
+    ],
+    "poles": 0,
+    "singular": 0,
+    "notAConfidenceInterval": true
+  },
+  "osmFit": false,
+  "runtimeEligible": false
+}

@@ -381,7 +381,7 @@ fn golden_status_pin_indices(
       } else {
         "z:\{index}"
       }
-      candidates.push({ index, status, tie_break })
+      candidates.push({ index, status, tie_break, })
     }
   }
   candidates.sort_by((left, right) => {

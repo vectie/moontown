@@ -1376,7 +1376,7 @@ fn ecosystem_rank_attention(
   for signal in signals {
     let score = ecosystem_attention_score(signal, history, now_tick)
     if score > 0 {
-      ranked.push({ signal, score })
+      ranked.push({ signal, score, })
     }
   }
   ranked.sort_by((left, right) => {

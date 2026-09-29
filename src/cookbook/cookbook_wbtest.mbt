@@ -164,5 +164,5 @@ fn test_cookbook_artifact(
   required~ : Bool,
   exists~ : Bool,
 ) -> CookbookArtifact {
-  { path, kind, owner: "test", stable_role: "test artifact", required, exists }
+  { path, kind, owner: "test", stable_role: "test artifact", required, exists, }
 }

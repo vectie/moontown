@@ -6,7 +6,7 @@ fn knowledge_projection_fixture(
     book_id: "research-fixture",
     title: "Fixture",
     summary: "Fixture projection",
-    status_chips: [{ label: "completed and delivered", tone: "healthy" }],
+    status_chips: [{ label: "completed and delivered", tone: "healthy", }],
     metrics: [],
     readiness: [],
     review_queue: [],
@@ -73,13 +73,13 @@ test "explicit MoonBook acceptance receipt validates fail closed" {
   )
   assert_false(
     knowledge_projection_is_explicitly_accepted(
-      knowledge_projection_fixture(Some({ ..receipt, evidence_count: 0 })),
+      knowledge_projection_fixture(Some({ ..receipt, evidence_count: 0, })),
     ),
   )
   assert_false(
     knowledge_projection_is_explicitly_accepted(
       knowledge_projection_fixture(
-        Some({ ..receipt, requires_human_review: true }),
+        Some({ ..receipt, requires_human_review: true, }),
       ),
     ),
   )

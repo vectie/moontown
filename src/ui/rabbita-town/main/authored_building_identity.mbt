@@ -93,7 +93,7 @@ fn golden_valley_assign_authored_building_id(
         Some(sequence) => next_sequence.max(sequence + 1)
         None => next_sequence.max(1)
       }
-      ({ ..building, authored_id: Some(authored_id) }, following)
+      ({ ..building, authored_id: Some(authored_id), }, following)
     }
     _ => {
       let sequence = golden_valley_next_free_authored_sequence(
@@ -139,7 +139,7 @@ fn golden_valley_migrate_authored_buildings(
   for building in buildings {
     match golden_valley_nonempty_authored_id(building) {
       Some(authored_id) if !preserved_ids.contains(authored_id) => {
-        migrated.push({ ..building, authored_id: Some(authored_id) })
+        migrated.push({ ..building, authored_id: Some(authored_id), })
         preserved_ids.push(authored_id)
       }
       _ => {
@@ -165,5 +165,5 @@ fn golden_valley_migrate_energy_save(
     save.buildings,
     save.next_authored_building_sequence,
   )
-  { ..save, buildings, next_authored_building_sequence: Some(next_sequence) }
+  { ..save, buildings, next_authored_building_sequence: Some(next_sequence), }
 }

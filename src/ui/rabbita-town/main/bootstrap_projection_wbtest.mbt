@@ -1,6 +1,6 @@
 ///|
 fn projection_test_ready_snapshot(model : Model) -> ProjectionSnapshot {
-  { town: simulation_state(model), event_count: 0 }
+  { town: simulation_state(model), event_count: 0, }
 }
 
 ///|
@@ -19,7 +19,7 @@ test "browser bootstrap uses live state unless demo is explicit" {
 ///|
 test "model projection snapshot predicates distinguish demo and waiting states" {
   let model = init_model()
-  let demo_model = { ..model, state_source: StateSourceKind::DemoSimulation }
+  let demo_model = { ..model, state_source: StateSourceKind::DemoSimulation, }
   assert_eq(model_projection_snapshot_ready(demo_model), false)
   assert_eq(model_projection_snapshot_waiting(demo_model), false)
   let waiting_model = {
@@ -47,7 +47,7 @@ test "model projection snapshot predicates detect a ready snapshot source" {
 ///|
 test "empty snapshots do not unlock operational area details" {
   let model = init_model()
-  let sparse_snapshot = { town: snapshot_placeholder_state(), event_count: 0 }
+  let sparse_snapshot = { town: snapshot_placeholder_state(), event_count: 0, }
   let sparse_model = {
     ..model,
     state_source: StateSourceKind::SnapshotFile,
@@ -68,6 +68,6 @@ test "snapshot mode never falls back to demo work" {
   assert_true(executions_for_model(model).is_empty())
   assert_true(workers_for_model(model).is_empty())
   assert_true(
-    runtime_availability({ ..model, snapshot_version: 1 }) is OfflineRuntime,
+    runtime_availability({ ..model, snapshot_version: 1, }) is OfflineRuntime,
   )
 }

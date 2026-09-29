@@ -19,7 +19,7 @@ pub fn BookCatalogEntry::new(
   tags? : Array[String] = [],
   skills? : Array[String] = [],
 ) -> BookCatalogEntry {
-  { id, name, purpose, workspace_root, memory_scope, tags, skills }
+  { id, name, purpose, workspace_root, memory_scope, tags, skills, }
 }
 
 ///|

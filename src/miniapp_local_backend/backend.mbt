@@ -530,7 +530,7 @@ fn miniapp_local_backend_transfer_building_to_team(
       buildings.push(building)
     }
   }
-  { ..snapshot, buildings, version: snapshot.version + 1 }
+  { ..snapshot, buildings, version: snapshot.version + 1, }
 }
 
 ///|

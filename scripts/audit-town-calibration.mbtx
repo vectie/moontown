@@ -1,0 +1,449 @@
+import {
+  "moonbitlang/x@0.4.40/fs",
+  "moonbitlang/core/json",
+  "moonbitlang/core/math",
+  "moonbitlang/core/env",
+}
+
+///|
+// Offline diagnostic only. Run from the repository root. Never rewrites map
+// inputs or promotes a fit into the game. Both directions share one plane map.
+struct Point {
+  x : Double
+  y : Double
+} derive(Debug)
+
+///|
+struct Control {
+  id : String
+  source : Point
+  target : Point
+  weight : Double
+  confirmed : Bool
+}
+
+///|
+fn field(value : Json, key : String) -> Json {
+  match value { Object(fields) => fields.get(key).unwrap_or(Json::null()); _ => Json::null() }
+}
+
+///|
+fn array(value : Json) -> Array[Json] {
+  match value { Array(values) => values; _ => [] }
+}
+
+///|
+fn number(value : Json) -> Double {
+  match value { Number(n, ..) => n; _ => 0.0 }
+}
+
+///|
+fn string(value : Json) -> String {
+  match value { String(s) => s; _ => "" }
+}
+
+///|
+fn distance(a : Point, b : Point) -> Double {
+  ((a.x - b.x) * (a.x - b.x) + (a.y - b.y) * (a.y - b.y)).sqrt()
+}
+
+///|
+// Same WGS84 -> UTM50N series as the existing georeference authoring tool.
+fn utm(lon : Double, lat : Double) -> Point {
+  let e = (1.0 / 298.257223563) * (2.0 - 1.0 / 298.257223563)
+  let ep = e / (1.0 - e)
+  let phi = lat * @math.PI / 180.0
+  let cphi = @math.cos(phi)
+  let sphi = @math.sin(phi)
+  let tangent = @math.tan(phi)
+  let n = 6378137.0 / (1.0 - e * sphi * sphi).sqrt()
+  let t = tangent * tangent
+  let c = ep * cphi * cphi
+  let a = cphi * (lon - 117.0) * @math.PI / 180.0
+  let a2 = a * a
+  let a4 = a2 * a2
+  let e4 = e * e
+  let e6 = e4 * e
+  let m = 6378137.0 * ((1.0 - e / 4.0 - 3.0 * e4 / 64.0 - 5.0 * e6 / 256.0) * phi -
+    (3.0 * e / 8.0 + 3.0 * e4 / 32.0 + 45.0 * e6 / 1024.0) * @math.sin(2.0 * phi) +
+    (15.0 * e4 / 256.0 + 45.0 * e6 / 1024.0) * @math.sin(4.0 * phi) -
+    35.0 * e6 / 3072.0 * @math.sin(6.0 * phi))
+  {
+    x: 500000.0 + 0.9996 * n * (a + (1.0 - t + c) * a * a2 / 6.0 +
+      (5.0 - 18.0 * t + t * t + 72.0 * c - 58.0 * ep) * a * a4 / 120.0),
+    y: 0.9996 * (m + n * tangent * (a2 / 2.0 +
+      (5.0 - t + 9.0 * c + 4.0 * c * c) * a4 / 24.0 +
+      (61.0 - 58.0 * t + t * t + 600.0 * c - 330.0 * ep) * a4 * a2 / 720.0)),
+  }
+}
+
+///|
+fn metric_to_source(report : Json, p : Point) -> Point {
+  let inverse = field(field(report, "selectedModel"), "inverse")
+  let matrix = array(field(inverse, "matrix")).map(array)
+  let translation = array(field(inverse, "translation"))
+  {
+    x: number(matrix[0][0]) * p.x + number(matrix[0][1]) * p.y + number(translation[0]),
+    y: number(matrix[1][0]) * p.x + number(matrix[1][1]) * p.y + number(translation[1]),
+  }
+}
+
+///|
+fn normalize(p : Point) -> Point {
+  { x: (p.x - 128.0) / 128.0, y: (p.y - 72.0) / 128.0 }
+}
+
+///|
+fn denominator(h : Array[Double], p : Point) -> Double {
+  let p = normalize(p)
+  h[6] * p.x + h[7] * p.y + 1.0
+}
+
+///|
+fn project(h : Array[Double], p : Point) -> Point {
+  let q = normalize(p)
+  let d = denominator(h, p)
+  {
+    x: (h[0] * q.x + h[1] * q.y + h[2]) / d * 128.0 + 128.0,
+    y: (h[3] * q.x + h[4] * q.y + h[5]) / d * 128.0 + 72.0,
+  }
+}
+
+///|
+// Normalized, small least-squares system with partial pivoting. Singular fits
+// return None; there is deliberately no fallback that silently accepts them.
+fn solve(rows : Array[Array[Double]], targets : Array[Double], n : Int) -> Array[Double]? {
+  let a = Array::makei(n, _ => Array::make(n + 1, 0.0))
+  for k, row in rows {
+    for i in 0..<n {
+      for j in 0..<n { a[i][j] += row[i] * row[j] }
+      a[i][n] += row[i] * targets[k]
+    }
+  }
+  for i in 0..<n {
+    let mut pivot = i
+    for j in (i + 1)..<n {
+      if a[j][i].abs() > a[pivot][i].abs() { pivot = j }
+    }
+    if a[pivot][i].abs() < 0.000000000001 { return None }
+    let swap = a[i]
+    a[i] = a[pivot]
+    a[pivot] = swap
+    let scale = a[i][i]
+    for j in i..<=n { a[i][j] /= scale }
+    for k in 0..<n {
+      if k == i { continue }
+      let factor = a[k][i]
+      for j in i..<=n { a[k][j] -= factor * a[i][j] }
+    }
+  }
+  Some(Array::makei(n, i => a[i][n]))
+}
+
+///|
+fn fit(controls : Array[Control], perspective : Bool) -> Array[Double]? {
+  let rows : Array[Array[Double]] = []
+  let targets : Array[Double] = []
+  for control in controls {
+    let a = normalize(control.source)
+    let b = normalize(control.target)
+    let weight = control.weight.sqrt()
+    let x = [a.x, a.y, 1.0, 0.0, 0.0, 0.0]
+    let y = [0.0, 0.0, 0.0, a.x, a.y, 1.0]
+    if perspective {
+      x.push(-b.x * a.x); x.push(-b.x * a.y)
+      y.push(-b.y * a.x); y.push(-b.y * a.y)
+    }
+    rows.push(x.map(v => v * weight))
+    rows.push(y.map(v => v * weight))
+    targets.push(b.x * weight); targets.push(b.y * weight)
+  }
+  match solve(rows, targets, if perspective { 8 } else { 6 }) {
+    Some(h) => { if !perspective { h.push(0.0); h.push(0.0) }; Some(h) }
+    None => None
+  }
+}
+
+///|
+fn rms(h : Array[Double], controls : Array[Control]) -> Double {
+  (controls.fold(init=0.0, (sum, control) => {
+    let d = distance(project(h, control.source), control.target)
+    sum + d * d
+  }) / controls.length().to_double()).sqrt()
+}
+
+///|
+fn control_center(controls : Array[Control], target : Bool) -> Point {
+  let sum = controls.fold(init=0.0, (n, c) => n + c.weight)
+  {
+    x: controls.fold(init=0.0, (n, c) => n + c.weight * (if target { c.target.x } else { c.source.x })) / sum,
+    y: controls.fold(init=0.0, (n, c) => n + c.weight * (if target { c.target.y } else { c.source.y })) / sum,
+  }
+}
+
+///|
+// First move to the correspondence centre, then apply the linear part, then
+// move to the matching destination centre: q = ct + L * (p - cs).
+fn centred_matrix(cs : Point, ct : Point, linear : Array[Double]) -> Array[Double] {
+  let a = linear[0]; let b = linear[1]; let c = linear[2]; let d = linear[3]
+  [a, b, (ct.x - 128.0 + a * (128.0 - cs.x) + b * (72.0 - cs.y)) / 128.0,
+    c, d, (ct.y - 72.0 + c * (128.0 - cs.x) + d * (72.0 - cs.y)) / 128.0, 0.0, 0.0]
+}
+
+///|
+fn fit_centred(controls : Array[Control]) -> Array[Double]? {
+  let cs = control_center(controls, false)
+  let ct = control_center(controls, true)
+  let rows : Array[Array[Double]] = []
+  let rhs : Array[Double] = []
+  for p in controls {
+    let w = p.weight.sqrt() / 128.0
+    let x = (p.source.x - cs.x) * w
+    let y = (p.source.y - cs.y) * w
+    rows.push([x, y, 0.0, 0.0]); rhs.push((p.target.x - ct.x) * w)
+    rows.push([0.0, 0.0, x, y]); rhs.push((p.target.y - ct.y) * w)
+  }
+  solve(rows, rhs, 4).map(linear => centred_matrix(cs, ct, linear))
+}
+
+///|
+// Compose through the original image, explicitly converting each normalization.
+// Recover the equivalent grid homography from four corners, then check interior
+// points to ensure this is an exact composition, not a new heuristic warp.
+fn compose_original_design(first : Array[Double], second : Array[Double]) -> Array[Double] raise {
+  let chain = fn(p : Point) {
+    let original = project(first, p)
+    let x = (original.x - 1137.0) / 1137.0
+    let y = (original.y - 640.0) / 1137.0
+    let d = second[6] * x + second[7] * y + 1.0
+    Point::{
+      x: ((second[0] * x + second[1] * y + second[2]) / d * 836.0 + 836.0) * 256.0 / 1672.0,
+      y: ((second[3] * x + second[4] * y + second[5]) / d * 836.0 + 470.5) * 144.0 / 941.0,
+    }
+  }
+  let pairs = [Point::{x: 0, y: 0}, {x: 256, y: 0}, {x: 256, y: 144}, {x: 0, y: 144}].map(p => Control::{id: "composition", source: p, target: chain(p), weight: 1, confirmed: true})
+  let combined = fit(pairs, true).unwrap()
+  for p in [Point::{x: 128, y: 72}, {x: 40, y: 115}, {x: 210, y: 22}] {
+    assert_true(distance(project(combined, p), chain(p)) < 0.000001)
+  }
+  combined
+}
+
+///|
+fn self_test() -> Unit raise {
+  let known = [1.03, -0.12, 0.04, 0.07, 0.91, -0.02, 0.1, -0.05]
+  let controls : Array[Control] = []
+  for point in [Point::{x: 15.0, y: 12.0}, {x: 240.0, y: 15.0}, {x: 225.0, y: 133.0}, {x: 30.0, y: 120.0}, {x: 130.0, y: 80.0}] {
+    controls.push({id: "synthetic", source: point, target: project(known, point), weight: 1.0, confirmed: true})
+  }
+  let solved = fit(controls, true).unwrap()
+  assert_true(rms(solved, controls) < 0.00000001)
+  assert_true(distance(project(solved, {x: 100.0, y: 35.0}), project(known, {x: 100.0, y: 35.0})) < 0.00000001)
+  assert_true(solve([[1.0, 1.0], [2.0, 2.0]], [1.0, 2.0], 2) is None)
+  let cs = {x: 170.0, y: 40.0}
+  let ct = {x: 173.0, y: 38.0}
+  let pivoted = centred_matrix(cs, ct, [1.01, -0.02, 0.015, 0.99])
+  assert_true(distance(project(pivoted, cs), ct) < 0.00000001)
+  let affine_controls = controls.map(c => Control::{ ..c, target: project(pivoted, c.source) })
+  let recovered = fit_centred(affine_controls).unwrap()
+  for p in [Point::{x: 0,y: 0}, {x: 256,y: 144}, cs] {
+    assert_true(distance(project(recovered, p), project(pivoted, p)) < 0.00000001)
+  }
+  // Recentring an unrestricted affine fit must not change the fitted map.
+  let unrestricted = fit(affine_controls, false).unwrap()
+  assert_true(distance(project(unrestricted, cs), project(recovered, cs)) < 0.00000001)
+  // A common invertible camera cannot remove a map-coordinate disagreement.
+  for zoom in [0.1, 0.7, 1.8] {
+    let p = {x: 123.0, y: 67.0}
+    let sx = ((p.x - p.y) * 32.0 - 1792.0) * zoom
+    let sy = ((p.x + p.y) * 16.0 - 3200.0) * zoom
+    let inverse = {
+      x: ((sx / zoom + 1792.0) / 32.0 + (sy / zoom + 3200.0) / 16.0) / 2.0,
+      y: ((sy / zoom + 3200.0) / 16.0 - (sx / zoom + 1792.0) / 32.0) / 2.0,
+    }
+    assert_true(distance(p, inverse) < 0.000000001)
+  }
+}
+
+///|
+fn main raise {
+  self_test()
+  let base = "src/ui/assets/tilemap/"
+  let report = @json.parse(@fs.read_file_to_string(base + "georeference/wenyu-town-georef-v1.json"))
+  let source = @json.parse(@fs.read_file_to_string(base + "energy-valley-osm-block-graph-v1.json"))
+  let labels = @json.parse(@fs.read_file_to_string(base + "wenyu_reference_labels.json"))
+  let composed_mode = @env.get_env_var("WENYU_COMPOSED_TRIAL") == Some("1")
+  let centered_mode = @env.get_env_var("WENYU_CENTERED_TRIAL") == Some("1")
+  assert_true(!(centered_mode && composed_mode))
+  let config = if composed_mode { @json.parse(@fs.read_file_to_string("docs/project/wenyu-osm-chain-controls.json")) } else { report }
+  let raw_controls = array(field(config, "controls"))
+  let controls = raw_controls.map(control => {
+    let geo = field(control, "wgs84")
+    let grid = field(control, "grid")
+    Control::{
+      id: string(field(control, "id")),
+      source: metric_to_source(report, utm(number(field(geo, "lon")), number(field(geo, "lat")))),
+      target: if composed_mode { let pixel = field(control, "generated"); {x: number(field(pixel, "x")) * 256.0 / 1672.0, y: number(field(pixel, "y")) * 144.0 / 941.0} } else { {x: number(field(grid, "x")), y: number(field(grid, "y"))} },
+      weight: number(field(control, "weight")),
+      confirmed: (composed_mode || string(field(control, "reviewStatus")) == "confirmed") && string(field(control, "role")) == "fit",
+    }
+  })
+  let confirmed = controls.filter(c => c.confirmed)
+  let holdouts = controls.filter(c => !c.confirmed)
+  assert_eq(confirmed.length(), 4)
+  let identity = [1.0, 0.0, 0.0, 0.0, 1.0, 0.0, 0.0, 0.0]
+  if !composed_mode { assert_true((rms(identity, confirmed) - 0.476397).abs() < 0.00001) }
+  let chain_details : Array[Json] = []
+  let models = if centered_mode {
+    let cs = control_center(confirmed, false)
+    let ct = control_center(confirmed, true)
+    let recentered = centred_matrix(cs, ct, [1.0, 0.0, 0.0, 1.0])
+    let full = fit_centred(confirmed).unwrap()
+    let old = fit(confirmed, false).unwrap()
+    let corners = [Point::{x: 0,y: 0}, {x: 256,y: 0}, {x: 256,y: 144}, {x: 0,y: 144}]
+    let delta = corners.fold(init=0.0, (n, p) => n.max(distance(project(full, p), project(old, p))))
+    assert_true(delta < 0.00000001)
+    // Bound total movement everywhere on the rectangle: affine displacement
+    // norm is convex, so its maximum occurs at a corner. Blend only the linear
+    // adjustment, keeping the two correspondence centres explicit.
+    let centre_shift = distance(cs, ct)
+    assert_true(centre_shift <= 2.0)
+    let linear_movement = corners.fold(init=0.0, (n, p) => n.max(distance(project(full, p), project(recentered, p))))
+    let alpha = if linear_movement <= 0.000000001 { 1.0 } else { ((2.0 - centre_shift) / linear_movement).min(1.0) }
+    let small = centred_matrix(cs, ct, [1.0 + alpha * (full[0] - 1.0), alpha * full[1], alpha * full[3], 1.0 + alpha * (full[4] - 1.0)])
+    assert_true(corners.all(p => distance(project(small, p), p) <= 2.00000001))
+    let details : Json = { "sourceCentre": [cs.x, cs.y], "targetCentre": [ct.x, ct.y], "centreTranslationTiles": [ct.x - cs.x, ct.y - cs.y], "centreShiftTiles": centre_shift, "unrestrictedCentredMatrix": full.to_json(), "unrestrictedVsPreviousMaximumCornerDifferenceTiles": delta, "linearAdjustmentFraction": alpha, "maximumAllowedMovementTiles": 2.0, "formula": "targetCentre + linear * (point - sourceCentre)", "controlChoice": "Existing four central geographic controls; not whole-image bounding-box centres or the later upstream hypothesis." }
+    chain_details.push(details)
+    [("Current source placement", identity), ("1. Move source centre to target centre", recentered), ("2. Small affine around the matched centre", small)]
+  } else if composed_mode {
+    let original_controls = controls.mapi((i, c) => { let p = field(raw_controls[i], "original"); Control::{ ..c, target: {x: number(field(p, "x")), y: number(field(p, "y"))} } })
+    let fitting = original_controls.filter(c => c.confirmed)
+    let checking = original_controls.filter(c => !c.confirmed)
+    let second_report = @json.parse(@fs.read_file_to_string(string(field(config, "secondLeg"))))
+    let second = array(field(array(field(second_report, "models"))[2], "normalizedMatrix")).map(number)
+    let result = [("Original geographic placement", identity)]
+    for perspective in [false, true] {
+      let first = fit(fitting, perspective).unwrap()
+      let combined = compose_original_design(first, second)
+      let name = if perspective { "OSM - original perspective - design" } else { "OSM - original affine - design" }
+      result.push((name, combined))
+      let ds = [Point::{x: 0,y: 0}, {x: 256,y: 0}, {x: 256,y: 144}, {x: 0,y: 144}].map(p => denominator(first, p))
+      let detail : Json = { "model": name, "firstLegNormalizedMatrix": first.to_json(), "firstLegFitRmsOriginalPixels": rms(first, fitting), "firstLegExcludedCheckRmsOriginalPixels": rms(first, checking), "firstLegPoleInSourceGrid": ds.any(d => d <= 0.0) && ds.any(d => d >= 0.0), "secondLegNormalizedMatrix": second.to_json() }
+      chain_details.push(detail)
+    }
+    result
+  } else { [("Original geographic placement", identity), ("Global affine candidate", fit(confirmed, false).unwrap()), ("Global perspective candidate", fit(confirmed, true).unwrap())] }
+  let rows = array(field(labels, "rows")).map(string)
+  let edges = array(field(field(source, "graph"), "edges"))
+  if composed_mode { assert_eq(edges.length(), 775) }
+  let results : Array[Json] = []
+  let svg = StringBuilder()
+  svg.write_string("<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 1600 1200'><rect width='1600' height='1200' fill='#f6f5ee'/><style>text{font-family:system-ui,sans-serif;fill:#293b39}.title{font-size:26px;font-weight:650}.detail{font-size:16px}</style><text x='32' y='42' class='title'>MoonTown · ground-plane calibration audit</text><text x='32' y='72' class='detail'>Design fixed. Full OSM network. No local warp. Same top-down camera in all three panels.</text>")
+  for index, entry in models {
+    let (name, h) = entry
+    let corners = [Point::{x: 0.0, y: 0.0}, {x: 256.0, y: 0.0}, {x: 256.0, y: 144.0}, {x: 0.0, y: 144.0}]
+    let ds = corners.map(p => denominator(h, p))
+    let pole = ds.any(d => d <= 0.0) && ds.any(d => d >= 0.0)
+    let y0 = 110 + index * 340
+    svg.write_string("<text x='32' y='\{y0}' class='title'>\{index + 1}. \{name}</text><defs><clipPath id='panel\{index}'><rect x='-.5' y='-.5' width='256' height='144'/></clipPath></defs><g transform='translate(32 \{y0 + 18}) scale(1.9)'><g clip-path='url(#panel\{index})'><rect x='-.5' y='-.5' width='256' height='144' fill='#e0e9cd'/>")
+    for y, row in rows {
+      // Run-length cells preserve the exact mask, not a smoothed substitute.
+      for x = 0; x < row.length(); {
+        let code = row[x]
+        let mut finish = x + 1
+        while finish < row.length() && row[finish] == code { finish += 1 }
+        let color = if code == 'r' || code == 'l' || code == 'b' { "#8bc6d2" } else if code == 'M' || code == 'R' { "#faf8ee" } else { "" }
+        if color != "" { svg.write_string("<rect x='\{x.to_double() - 0.5}' y='\{y.to_double() - 0.5}' width='\{finish - x}' height='1' fill='\{color}'/>") }
+        continue finish
+      }
+    }
+    let mut conflicts = 0
+    let mut outside_edges = 0
+    let mut outside_samples = 0
+    let mut total_samples = 0
+    for edge in edges {
+      let path = array(field(edge, "pathMillis")).map(p => {
+        let xy = array(p)
+        Point::{x: number(xy[0]) / 1000.0, y: number(xy[1]) / 1000.0}
+      })
+      let spans = array(field(edge, "bridgeSpans"))
+      let mut wet = false
+      let mut outside = false
+      let d = StringBuilder()
+      for i, p in path {
+        let q = project(h, p)
+        d.write_string("\{if i == 0 { "M" } else { "L" }}\{q.x},\{q.y} ")
+      }
+      for i in 1..<path.length() {
+        let a = path[i - 1]; let b = path[i]
+        let bridge = spans.any(s => number(field(s, "fromIndex")).to_int() <= i - 1 && number(field(s, "toIndex")).to_int() >= i)
+        let steps = ((b.x - a.x).abs().max((b.y - a.y).abs()) * 10.0).to_int() + 1
+        for k in 0..<steps {
+          let t = (k.to_double() + 0.5) / steps.to_double()
+          let q = project(h, {x: a.x + (b.x - a.x) * t, y: a.y + (b.y - a.y) * t})
+          total_samples += 1
+          if q.x < -0.5 || q.y < -0.5 || q.x >= 255.5 || q.y >= 143.5 {
+            outside = true; outside_samples += 1; continue
+          }
+          let code = rows[(q.y + 0.5).to_int()][(q.x + 0.5).to_int()]
+          if !bridge && (code == 'r' || code == 'l' || code == 'b') { wet = true }
+        }
+      }
+      if wet { conflicts += 1 }
+      if outside { outside_edges += 1 }
+      if !pole { svg.write_string("<path d='\{d.to_string()}' fill='none' stroke='\{if wet { "#b92d58" } else { "#bb721f" }}' stroke-width='.32'/>") }
+    }
+    for c in controls {
+      svg.write_string("<circle cx='\{c.target.x}' cy='\{c.target.y}' r='2' fill='none' stroke='\{if c.confirmed { "#202a47" } else { "#a164be" }}' stroke-width='.8'/>")
+    }
+    svg.write_string("</g></g>")
+    let metrics : Json = {
+      "model": name,
+      "normalizedMatrix": h.to_json(),
+      "fitRmsTiles": rms(h, confirmed),
+      "excludedCheckRmsTiles": rms(h, holdouts),
+      "unconfirmedHoldoutRmsTiles": if composed_mode { Json::null() } else { rms(h, holdouts).to_json() },
+      "poleInMap": pole,
+      "geometryMetricsValid": !pole,
+      "waterConflictEdges": conflicts,
+      "outOfBoundsEdges": outside_edges,
+      "outOfBoundsSampleFraction": outside_samples.to_double() / total_samples.to_double(),
+      "maximumCornerMovementTiles": corners.fold(init=0.0, (maximum, p) => maximum.max(distance(project(h, p), p))),
+      "runtimeEligible": false,
+    }
+    results.push(metrics)
+    println(metrics.stringify(indent=2))
+    svg.write_string("<text x='560' y='\{y0 + 45}' class='detail'>Fit RMS: \{rms(h, confirmed)} tiles</text><text x='560' y='\{y0 + 75}' class='detail'>Excluded check RMS: \{rms(h, holdouts)} tiles (\{if composed_mode { "G: name checked; pixel centre approximate" } else { "unconfirmed candidate identities" }})</text><text x='560' y='\{y0 + 105}' class='detail'>Water-conflicting edges: \{conflicts} / \{edges.length()}</text><text x='560' y='\{y0 + 135}' class='detail'>Edges leaving design bounds: \{outside_edges} (do not count clipping as improvement)</text><text x='560' y='\{y0 + 165}' class='detail'>Projective pole inside map: \{pole}</text><text x='560' y='\{y0 + 205}' class='detail'>\{if pole { "REJECT: cannot project this map through a singularity." } else { "NOT ACCEPTED: controls do not support a whole-map calibration." }}</text>")
+  }
+  svg.write_string("<text x='32' y='1150' class='detail'>Blue: water · ivory: design roads · orange: OSM · rose: water conflict · circles: \{confirmed.length()} fit / \{holdouts.length()} excluded checks</text><text x='32' y='1180' class='detail'>\{if composed_mode { "A: source grid (104.78, -50.21), outside stored 256 x 144 extent. No live map changes; both composed candidates rejected." } else { "Camera: X=(32,16), Y=(-32,16). Orthographic equivalent: 30° elevation, 45° plan rotation, 0° roll." }}</text></svg>")
+  let output : Json = {
+    "schema": "moontown.global_calibration_audit.v1",
+    "direction": "osm-to-fixed-design",
+    "source": "energy-valley-osm-block-graph-v1.json",
+    "controlSource": if composed_mode { "docs/project/wenyu-osm-chain-controls.json" } else { "georeference/wenyu-town-georef-v1.json" },
+    "sourceHullCoverage": if composed_mode { Json::null() } else { field(field(report, "qa"), "sourceHullCoverage") },
+    "sourceEdgesPreserved": edges.length(),
+    "sourcePathVerticesPreserved": edges.fold(init=0, (n, e) => n + array(field(e, "pathMillis")).length()),
+    "models": results.to_json(),
+    "composedTrial": composed_mode,
+    "centredTrial": centered_mode,
+    "compositionDetails": chain_details.to_json(),
+    "controlPairs": controls.map(c => {
+      let pair : Json = {
+        "id": c.id,
+        "sourceGrid": [c.source.x, c.source.y],
+        "designGrid": [c.target.x, c.target.y],
+        "confirmedFit": c.confirmed,
+        "outsideStoredGrid": c.source.x < -0.5 || c.source.x >= 255.5 || c.source.y < -0.5 || c.source.y >= 143.5,
+        "nearestStoredRoadVertexTiles": edges.fold(init=1.0e9, (nearest, edge) => array(field(edge, "pathMillis")).fold(init=nearest, (n, vertex) => { let xy = array(vertex); n.min(distance(c.source, {x: number(xy[0]) / 1000.0, y: number(xy[1]) / 1000.0})) })),
+      }
+      pair
+    }).to_json(),
+    "matrixConvention": "Normalize both grids with ((x-128)/128,(y-72)/128); h=[h00,h01,h02,h10,h11,h12,h20,h21], h22=1. These are plane transforms, not uniquely recoverable camera Euler angles.",
+    "selfTests": if composed_mode { "synthetic perspective recovery, singular solve rejection, camera roundtrip at three zooms, composed matrix equals sequential evaluation at three excluded synthetic points, 775 source edges preserved" } else { "synthetic perspective recovery, singular solve rejection, camera roundtrip at three zooms, existing geographic RMS reproduced" },
+    "runtimeEligible": false,
+  }
+  let stem = if centered_mode { "docs/project/wenyu-centered-trial" } else if composed_mode { "docs/project/wenyu-osm-composed-trial" } else { "docs/project/town-calibration-audit" }
+  @fs.write_string_to_file(stem + ".json", output.stringify(indent=2))
+  @fs.write_string_to_file(stem + ".svg", svg.to_string())
+}

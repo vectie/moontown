@@ -142,7 +142,7 @@ test "Map Lab stays behind one accessible advanced control" {
   assert_true(closed_html.contains("aria-expanded=\"false\""))
   assert_false(closed_html.contains("id=\"map-lab-panel\""))
 
-  let open_model = { ..init_model(), map_lab_open: true }
+  let open_model = { ..init_model(), map_lab_open: true, }
   let open_html = @rabbita.render_to_string(
     @rabbita.static_cell(
       render_map_lab(
@@ -204,7 +204,7 @@ test "Map Lab installation search caps results without eager detail materializat
 ///|
 test "Map Lab searches and selects every dynamic attention ledger category" {
   let snapshot = ecosystem_contract_town_snapshot(
-    { ..init_model(), tick: 18 },
+    { ..init_model(), tick: 18, },
     20260727,
   )
   assert_true(!snapshot.actor_profiles.is_empty())
@@ -251,7 +251,7 @@ test "Map Lab searches and selects every dynamic attention ledger category" {
 ///|
 test "Map Lab validates dynamic contents without a tick-length stale cache" {
   let snapshot = ecosystem_contract_town_snapshot(
-    { ..init_model(), tick: 18 },
+    { ..init_model(), tick: 18, },
     20260727,
   )
   let _ = map_lab_validation_issues(snapshot)
@@ -259,7 +259,7 @@ test "Map Lab validates dynamic contents without a tick-length stale cache" {
   for profile in snapshot.actor_profiles {
     profiles.push(profile)
   }
-  profiles[0] = { ..profiles[0], display_name: "" }
+  profiles[0] = { ..profiles[0], display_name: "", }
   let malformed = @energy_valley_contract.town_snapshot(
     snapshot.world,
     snapshot.tick,
@@ -309,7 +309,7 @@ test "Map Lab exposes rejected placements as searchable diagnostics" {
   )
   let rejected_snapshot = {
     ..snapshot,
-    world: { ..snapshot.world, rejected_placements: [rejection] },
+    world: { ..snapshot.world, rejected_placements: [rejection], },
   }
   let rejected = map_lab_visible_entities(rejected_snapshot, "intersects-road")
   assert_eq(rejected.rows.length(), 1)
@@ -336,7 +336,7 @@ test "Map Lab canvas exists only while diagnostics are open" {
     ),
   )
   assert_false(closed_html.contains("map-lab-canvas"))
-  let open_model = { ..init_model(), map_lab_open: true }
+  let open_model = { ..init_model(), map_lab_open: true, }
   let open_html = @rabbita.render_to_string(
     @rabbita.static_cell(
       render_map_lab_canvas(

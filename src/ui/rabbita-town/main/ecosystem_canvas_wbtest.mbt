@@ -1,7 +1,7 @@
 ///|
 test "canvas exchanges mirror the authoritative active exchange ledger" {
   let snapshot = ecosystem_contract_town_snapshot(
-    { ..init_model(), tick: 18 },
+    { ..init_model(), tick: 18, },
     20260727,
   )
   let exchanges = snapshot.active_exchanges()
@@ -17,7 +17,7 @@ test "canvas exchanges mirror the authoritative active exchange ledger" {
 ///|
 test "canvas exchange endpoints use semantic slots or entrances" {
   let snapshot = ecosystem_contract_town_snapshot(
-    { ..init_model(), tick: 18 },
+    { ..init_model(), tick: 18, },
     20260727,
   )
   let exchanges = snapshot.active_exchanges()
@@ -49,7 +49,7 @@ test "canvas exchange endpoints use semantic slots or entrances" {
 ///|
 test "canvas exchange packet phase follows ledger lifetime" {
   let snapshot = ecosystem_contract_town_snapshot(
-    { ..init_model(), tick: 18 },
+    { ..init_model(), tick: 18, },
     20260727,
   )
   for exchange in snapshot.active_exchanges() {

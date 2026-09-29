@@ -9,7 +9,7 @@ fn policy_spec(
   profile : @policy.PolicyProfile,
   repair_action : String,
 ) -> PolicySpec {
-  { profile, repair_action }
+  { profile, repair_action, }
 }
 
 ///|

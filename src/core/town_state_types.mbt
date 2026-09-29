@@ -42,7 +42,7 @@ pub struct TownState {
 
 ///|
 pub fn empty_state(config : TownConfig) -> TownState {
-  { config, books: [], workers: [], tasks: [], executions: [], events: [] }
+  { config, books: [], workers: [], tasks: [], executions: [], events: [], }
 }
 
 ///| Apply the authoritative process settings to the persisted town metadata.

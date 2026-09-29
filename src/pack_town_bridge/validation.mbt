@@ -4,7 +4,7 @@ fn add_issue(
   path : String,
   message : String,
 ) -> Unit {
-  issues.push({ path, message })
+  issues.push({ path, message, })
 }
 
 ///|

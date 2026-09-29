@@ -155,7 +155,7 @@ fn energy_valley_saved_road_components(
       Some((x, y)) => {
         let key = golden_valley_tile_key(x, y)
         if !cells.contains(key) {
-          let point : SavedWorldDeltaGridPoint = { x, y }
+          let point : SavedWorldDeltaGridPoint = { x, y, }
           cells[key] = point
           ordered.push(point)
         }
@@ -179,7 +179,7 @@ fn energy_valley_saved_road_components(
     }
     let path : Array[SavedWorldDeltaGridPoint] = []
     energy_valley_append_saved_road_walk(point, cells, visited, path)
-    result.push({ id: energy_valley_saved_road_id(point), path })
+    result.push({ id: energy_valley_saved_road_id(point), path, })
   }
   result
 }
@@ -195,7 +195,7 @@ fn energy_valley_world_delta_from_projection(
     let id = golden_valley_nonempty_authored_id(building).unwrap_or(
       "unmigrated-building-\{building.x}-\{building.y}",
     )
-    operations.push(AddBuilding({ id, building }))
+    operations.push(AddBuilding({ id, building, }))
   }
   for road in energy_valley_saved_road_components(save.roads) {
     operations.push(AddRoad(road))
@@ -204,7 +204,7 @@ fn energy_valley_world_delta_from_projection(
     match energy_valley_parse_saved_tile(encoded) {
       Some((x, y)) =>
         operations.push(
-          AddPark({ id: energy_valley_saved_park_id(x, y), x, y }),
+          AddPark({ id: energy_valley_saved_park_id(x, y), x, y, }),
         )
       None => ()
     }
@@ -688,7 +688,7 @@ fn energy_valley_project_contract_world_delta(
       None => ()
     }
   }
-  { buildings, roads, parks }
+  { buildings, roads, parks, }
 }
 
 ///|
@@ -975,7 +975,7 @@ fn energy_valley_model_replace_roads_delta(
         // Normal interaction adds one cell. If a compatibility caller adds a
         // batch, its total debit stays attached to the first immutable cell
         // event and the canonical budget remains exact.
-        next = town_life_world_add_road_cell(next, { x, y }, remaining_delta)
+        next = town_life_world_add_road_cell(next, { x, y, }, remaining_delta)
         remaining_delta = 0
       }
       None => ()
@@ -1010,7 +1010,7 @@ fn energy_valley_validated_world_delta_projection(
     base_world=Some(base),
   )
   if @energy_valley_contract.has_errors(issues) {
-    { buildings: [], roads: [], parks: [] }
+    { buildings: [], roads: [], parks: [], }
   } else {
     energy_valley_project_contract_world_delta(delta)
   }

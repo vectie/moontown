@@ -273,6 +273,9 @@ priv struct Model {
   energy_first_agent_open : Bool
   town_spatial_layer : TownSpatialLayer
   secret_compute_room_selected_id : String
+  indoor_selected_slot_id : String
+  spatial_selected_work_id : String
+  spatial_request_id : String
   visual_projection : VisualProjectionSnapshot?
   visual_projection_version : Int
   module_projections : Array[BookProjectionFragment]
@@ -410,6 +413,10 @@ priv enum Msg {
   OpenSecretComputeRoom
   CloseSecretComputeRoom
   SelectSecretComputeEndpoint(String)
+  SelectIndoorSlot(String)
+  SelectSpatialWork(String)
+  StartIndoorWork
+  ReviewSpatialWork
   EnterEnergyBuilding(String)
   ExitEnergyBuilding
   SetEnergyWeather(EnergyWeather)

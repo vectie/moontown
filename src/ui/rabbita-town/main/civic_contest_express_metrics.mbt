@@ -63,7 +63,7 @@ fn contest_express_health(
 
 ///|
 fn contest_express_worker_health_policy() -> CivicWorkerEnergyHealthPolicy {
-  { fallback: 46, load_divisor: 4, energy_bonus: 4 }
+  { fallback: 46, load_divisor: 4, energy_bonus: 4, }
 }
 
 ///|

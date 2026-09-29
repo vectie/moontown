@@ -69,7 +69,7 @@ pub fn TownConfig::new(
   heartbeat_seconds? : Int = 30,
   max_concurrent_tasks? : Int = 12,
 ) -> TownConfig {
-  { id, name, heartbeat_seconds, max_concurrent_tasks }
+  { id, name, heartbeat_seconds, max_concurrent_tasks, }
 }
 
 ///|
@@ -91,7 +91,7 @@ pub fn BookRef::new(
   memory_scope? : MemoryScope = BookPrivate,
   tags? : Array[String] = [],
 ) -> BookRef {
-  { id, name, purpose, workspace_root, memory_scope, tags }
+  { id, name, purpose, workspace_root, memory_scope, tags, }
 }
 
 ///|
@@ -113,7 +113,7 @@ pub fn WorkerRef::new(
   capabilities? : Array[String] = [],
   status? : WorkerStatus = Idle,
 ) -> WorkerRef {
-  { id, name, book_id, role, capabilities, status }
+  { id, name, book_id, role, capabilities, status, }
 }
 
 ///|

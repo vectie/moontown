@@ -119,7 +119,7 @@ const FIXED_RUNTIME_ASSETS = [
   'tilemap/buildings/moontown-spring-ambient-v1/tower-9.webp',
   'tilemap/buildings/worker_yard_base.png',
   'tilemap/buildings/worker_yard_roof.png',
-  'tilemap/rooms/moontown-spatial-v2/indoor-empty-room.jpg',
+  'tilemap/rooms/moontown-spatial-v3/indoor-room.jpg',
   'tilemap/rooms/moontown-spatial-v1/underground-empty-room.jpg',
   'tilemap/props/moontown-spatial-v2/compute-props-atlas.png',
   'tilemap/props/moontown-spatial-v2/indoor-furniture-atlas.png',
@@ -130,11 +130,15 @@ const FIXED_RUNTIME_ASSETS = [
   'tilemap/wenyu_reference_intersections.json',
   'tilemap/energy-valley-osm-block-graph-v1.json',
   'tilemap/wenyu_reference_labels.json',
+  'tilemap/wenyu-unshifted-road-overlay.svg',
+  'tilemap/wenyu-unshifted-scene.json',
   'tilemap/wenyu_reference_roads.json',
   'tilemap/wenyu_reference_tilemap_iso.png',
 ]
 
 const RUNTIME_ASSET_DIRECTORIES = [
+  'landmark-studio',
+  'landmark-studio/vendor',
   'tilemap/districts',
   'tilemap/objects',
   'tilemap/tiles',

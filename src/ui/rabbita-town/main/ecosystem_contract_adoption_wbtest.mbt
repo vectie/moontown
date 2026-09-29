@@ -89,8 +89,8 @@ test "blueprint digest changes when spatial facts move without count changes" {
     assignments: world.parcel_program_assignments,
   }
   let moved_roads = snapshot.roads.copy()
-  moved_roads[0] = { ..moved_roads[0], x: moved_roads[0].x + 1 }
-  let moved = { ..snapshot, roads: moved_roads }
+  moved_roads[0] = { ..moved_roads[0], x: moved_roads[0].x + 1, }
+  let moved = { ..snapshot, roads: moved_roads, }
   assert_eq(moved.roads.length(), snapshot.roads.length())
   assert_eq(moved.places.length(), snapshot.places.length())
   assert_true(
@@ -176,7 +176,7 @@ test "contract portals reach roads through typed pedestrian spurs without telepo
 
 ///|
 test "contract town snapshot carries named resident focus and attention" {
-  let model = { ..init_model(), tick: 18 }
+  let model = { ..init_model(), tick: 18, }
   let snapshot = ecosystem_contract_town_snapshot(model, 20260727)
   assert_true(snapshot.attention_signals.length() > 0)
   assert_eq(snapshot.attention_focuses.length(), 12)
@@ -201,14 +201,14 @@ test "contract town snapshot carries named resident focus and attention" {
 
 ///|
 test "ambient semantic ledger remains valid at the opening transition" {
-  let model = { ..init_model(), tick: 8 }
+  let model = { ..init_model(), tick: 8, }
   let _ = ecosystem_contract_town_snapshot(model, 20260727)
   assert_false(ecosystem_contract_snapshot_validation_failed(model, 20260727))
 }
 
 ///|
 test "invalid dynamic ledger fails closed without discarding its world" {
-  let model = { ..init_model(), tick: 18 }
+  let model = { ..init_model(), tick: 18, }
   let valid = ecosystem_contract_town_snapshot(model, 20260727)
   let presence = valid.actor_presences[0]
   let malformed = @energy_valley_contract.town_snapshot(
@@ -254,7 +254,7 @@ test "live runtime work joins the same semantic presence ledger" {
   assert_eq(runtime_presence.phase, @energy_valley_contract.Approaching)
   assert_eq(runtime_presence.interaction_slot_id, None)
   assert_eq(runtime_presence.since_tick, 41)
-  let later = ecosystem_contract_town_snapshot({ ..model, tick: 81 }, 20260727)
+  let later = ecosystem_contract_town_snapshot({ ..model, tick: 81, }, 20260727)
   let later_runtime_presence = later.actor_presences.filter(presence => {
       presence.provenance.kind == @energy_valley_contract.RuntimeProjection
     })[0]
@@ -316,11 +316,11 @@ fn ecosystem_contract_access_test_place() -> EcosystemPlace {
     kind: EcosystemAmbientBuilding,
     district: "test",
     style: "block",
-    footprint: { x: 10, y: 10, width: 3, depth: 3 },
+    footprint: { x: 10, y: 10, width: 3, depth: 3, },
     anchor: ecosystem_point(11, 11),
     traits: [],
-    attention: { visual: 0, social: 0, activity: 0, urgency: 0, novelty: 0 },
-    runtime: { runtime_key: None },
+    attention: { visual: 0, social: 0, activity: 0, urgency: 0, novelty: 0, },
+    runtime: { runtime_key: None, },
   }
 }
 

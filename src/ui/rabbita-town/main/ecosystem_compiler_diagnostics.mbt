@@ -80,7 +80,7 @@ fn ecosystem_compiler_rejected_placements(
       result,
       "compiler",
       "wenyu-road-enclosures",
-      { x: 0, y: 0, width: snapshot.cols, depth: snapshot.rows },
+      { x: 0, y: 0, width: snapshot.cols, depth: snapshot.rows, },
       "road-block-count-mismatch",
       "Authoritative Wenyu road rows did not compile to exactly 75 enclosed blocks.",
       "wenyu-reference",

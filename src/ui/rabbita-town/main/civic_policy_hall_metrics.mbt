@@ -64,7 +64,7 @@ fn policy_hall_health(
 
 ///|
 fn policy_hall_worker_health_policy() -> CivicWorkerEnergyHealthPolicy {
-  { fallback: 42, load_divisor: 3, energy_bonus: 0 }
+  { fallback: 42, load_divisor: 3, energy_bonus: 0, }
 }
 
 ///|

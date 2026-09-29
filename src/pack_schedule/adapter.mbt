@@ -17,7 +17,7 @@ pub(all) struct ScheduleRegistry {
 
 ///|
 pub fn empty_registry() -> ScheduleRegistry {
-  { schedules: [] }
+  { schedules: [], }
 }
 
 ///|
@@ -65,7 +65,7 @@ pub fn reconcile(
   let retained = registry.schedules.filter(binding => {
     binding.pack_id != projection.pack_id || !ids.contains(binding.schedule_id)
   })
-  { schedules: retained + incoming }
+  { schedules: retained + incoming, }
 }
 
 ///|

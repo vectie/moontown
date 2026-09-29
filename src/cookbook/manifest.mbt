@@ -173,7 +173,7 @@ fn cookbook_artifact(
   stable_role : String,
   required : Bool,
 ) -> CookbookArtifact {
-  { path, kind, owner, stable_role, required, exists: false }
+  { path, kind, owner, stable_role, required, exists: false, }
 }
 
 ///|

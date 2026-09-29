@@ -29,7 +29,7 @@ pub fn miniapp_validate_publication(
       miniapp_validate_book_projection(issues, snapshot, building, policy)
       miniapp_validate_assets(issues, request.asset_refs, policy)
       miniapp_validate_duplicate_signals(issues, warnings, snapshot, building)
-      { ok: issues.length() == 0, building_id: building.id, issues, warnings }
+      { ok: issues.length() == 0, building_id: building.id, issues, warnings, }
     }
   }
 }

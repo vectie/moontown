@@ -18,7 +18,7 @@ test "analytics v1 dictionary is exact and authoritative" {
 
 ///|
 test "analytics ingestion rejects unknown names and preserves its wire format" {
-  let base = { ..init_model(), analytics: [], tick: 0 }
+  let base = { ..init_model(), analytics: [], tick: 0, }
   let unknown = track_event(base, "invented_event", "ignored")
   assert_eq(unknown.analytics.length(), 0)
   let next = track_event(base, "phone_send", "mayor|hello\nagain")
@@ -30,7 +30,7 @@ test "analytics ingestion rejects unknown names and preserves its wire format" {
 
 ///|
 test "analytics ring keeps only the configured local activity window" {
-  let mut model = { ..init_model(), analytics: [], tick: 0 }
+  let mut model = { ..init_model(), analytics: [], tick: 0, }
   for index in 0..<(analytics_ring_capacity + 2) {
     model = track_event(model, "walk_step", "step-\{index}")
   }
@@ -225,7 +225,7 @@ test "scheduled ops report is emitted once per simulated day" {
   }
   assert_eq(energy_valley_sim_day(day_one), 1)
   assert_eq(ops_maybe_scheduled_report(day_one).ops_reports.length(), 0)
-  let day_two = { ..day_one, tick: 888 }
+  let day_two = { ..day_one, tick: 888, }
   assert_eq(energy_valley_sim_day(day_two), 2)
   let reported = ops_maybe_scheduled_report(day_two)
   assert_eq(reported.ops_reports.length(), 1)

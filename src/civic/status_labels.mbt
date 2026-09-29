@@ -47,15 +47,15 @@ pub fn civic_service_status_bucket(status : String) -> String {
 ///|
 fn civic_service_status_rules() -> Array[CivicServiceStatusRule] {
   [
-    { bucket: "seeded", statuses: ["seeded"] },
+    { bucket: "seeded", statuses: ["seeded"], },
     {
       bucket: "missing-or-incomplete",
       statuses: ["missing-workspace", "incomplete", "misconfigured"],
     },
-    { bucket: "review", statuses: ["needs-review"] },
-    { bucket: "blocked", statuses: ["blocked"] },
-    { bucket: "changed", statuses: ["changed"] },
-    { bucket: "no-change", statuses: ["no-change"] },
+    { bucket: "review", statuses: ["needs-review"], },
+    { bucket: "blocked", statuses: ["blocked"], },
+    { bucket: "changed", statuses: ["changed"], },
+    { bucket: "no-change", statuses: ["no-change"], },
   ]
 }
 

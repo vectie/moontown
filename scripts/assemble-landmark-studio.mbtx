@@ -1,0 +1,15 @@
+import {
+  "moonbitlang/x@0.4.40/fs",
+}
+
+///|
+// Run after `moon -C src/ui/landmark-studio build --target js --release`.
+// No changes to the town production bundle; copy only the compiled study model.
+fn main raise {
+  let root = "src/ui/landmark-studio"
+  @fs.write_string_to_file(
+    root + "/web/models.js",
+    @fs.read_file_to_string(root + "/_build/js/release/build/main/main.js"),
+  )
+  println("Built standalone viewer: src/ui/landmark-studio/web/index.html")
+}

@@ -25,7 +25,7 @@ pub fn CookbookArtifactSummary::from_artifacts(
       required_missing_paths.push(artifact.path)
     }
   }
-  { docs_count, definition_count, runtime_state_count, required_missing_paths }
+  { docs_count, definition_count, runtime_state_count, required_missing_paths, }
 }
 
 ///|

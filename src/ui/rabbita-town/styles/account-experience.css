@@ -51,6 +51,15 @@
   align-items: center;
 }
 
+.account-global-links {
+  min-width: 0;
+  overflow-x: auto;
+  scrollbar-width: none;
+}
+
+.account-global-links::-webkit-scrollbar { display: none; }
+.account-global-link { flex: 0 0 auto; }
+
 .account-global-identity {
   min-width: 0;
   gap: 9px;

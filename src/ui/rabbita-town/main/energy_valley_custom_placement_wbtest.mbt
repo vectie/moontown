@@ -1,6 +1,6 @@
 ///|
 fn custom_placement_test_model() -> Model {
-  { ..init_model(), energy_tool: ResearchTowerTool }
+  { ..init_model(), energy_tool: ResearchTowerTool, }
 }
 
 ///|

@@ -284,7 +284,7 @@ fn ecosystem_wenyu_append_boundary_edge(
   to_x : Int,
   to_y : Int,
 ) -> Unit {
-  result.push({ from_x, from_y, to_x, to_y, used: false })
+  result.push({ from_x, from_y, to_x, to_y, used: false, })
 }
 
 ///|

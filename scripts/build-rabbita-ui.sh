@@ -18,6 +18,10 @@ echo "[rabbita] compiling MoonBit browser entry"
 moon -C "$ui_dir" build --target js --release
 
 echo "[rabbita] assembling deterministic static product"
+moon -C "$repo_root/src/ui/landmark-studio" build --target js --release
+cd "$repo_root"
+moon run scripts/assemble-landmark-studio.mbtx
+moon run scripts/package-town-landmarks.mbtx
 node "$ui_dir/scripts/assemble-production-build.mjs"
 
 echo "[rabbita] verifying static product"

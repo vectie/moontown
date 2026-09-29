@@ -155,7 +155,12 @@ pub async fn update_system_settings(
   }
   let revision = state.revision + 1
   let audit_events = state.audit_events.copy()
-  audit_events.push({ revision, actor_id, changed_keys, occurred_at_ms: now_ms })
+  audit_events.push({
+    revision,
+    actor_id,
+    changed_keys,
+    occurred_at_ms: now_ms,
+  })
   while audit_events.length() > proposed.account_audit_capacity {
     ignore(audit_events.remove(0))
   }

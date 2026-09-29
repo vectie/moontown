@@ -145,7 +145,7 @@ fn ops_runtime_metrics(model : Model) -> OpsRuntimeMetrics {
     Error => "读取错误"
   }
   match model.energy_valley_runtime.projection {
-    None => { phase, agents: 0, tasks: 0, active: 0, completed: 0, blocked: 0 }
+    None => { phase, agents: 0, tasks: 0, active: 0, completed: 0, blocked: 0, }
     Some(projection) => {
       let mut active = 0
       let mut completed = 0
@@ -235,7 +235,7 @@ fn ops_maybe_scheduled_report(model : Model) -> Model {
       ops_report_line_for_day(model, ended_day),
     )
   }
-  { ..next, last_report_tick: model.tick }
+  { ..next, last_report_tick: model.tick, }
 }
 
 ///|

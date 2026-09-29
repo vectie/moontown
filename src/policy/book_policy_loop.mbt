@@ -24,7 +24,7 @@ fn loop_step(
   subject : String,
   summary : String,
 ) -> BookLoopStep {
-  { order, phase, lane, subject, summary }
+  { order, phase, lane, subject, summary, }
 }
 
 ///|

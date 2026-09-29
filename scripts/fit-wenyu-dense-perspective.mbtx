@@ -1,0 +1,367 @@
+import {
+  "moonbitlang/x@0.4.40/fs",
+  "moonbitlang/core/json",
+  "moonbitlang/core/env",
+  "moonbitlang/core/encoding/base64",
+}
+
+///|
+struct P { x : Double; y : Double } derive(ToJson, Debug)
+///|
+struct Control { id : String; name : String; source : P; target : P; holdout : Bool; evidence : Json } derive(ToJson)
+///|
+fn field(j : Json, k : String) -> Json { match j { Object(m)=>m.get(k).unwrap_or(Json::null()); _=>Json::null() } }
+///|
+fn arr(j : Json) -> Array[Json] { match j { Array(a)=>a; _=>[] } }
+///|
+fn num(j : Json) -> Double { match j { Number(n,..)=>n; _=>abort("Expected number") } }
+///|
+fn str(j : Json) -> String { match j { String(s)=>s; _=>"" } }
+///|
+fn point(j : Json) -> P { {x:num(field(j,"x")),y:num(field(j,"y"))} }
+///|
+fn dist(a : P,b : P) -> Double { ((a.x-b.x)*(a.x-b.x)+(a.y-b.y)*(a.y-b.y)).sqrt() }
+///|
+fn crossing(a : P,b : P,c : P,d : P) -> P? {
+  let ux=b.x-a.x;let uy=b.y-a.y;let vx=d.x-c.x;let vy=d.y-c.y
+  let det=ux*vy-uy*vx
+  if det.abs()<0.000000000001 {return None}
+  let dx=c.x-a.x;let dy=c.y-a.y
+  let t=(dx*vy-dy*vx)/det;let s=(dx*uy-dy*ux)/det
+  if t<0.0 || t>1.0 || s<0.0 || s>1.0 {return None}
+  Some({x:a.x+t*ux,y:a.y+t*uy})
+}
+///|
+fn path(points : Array[Json]) -> String {
+  points.mapi((i,j)=>{let p=point(j);"\{if i==0 {"M"} else {"L"}}\{p.x},\{p.y}"}).join(" ")
+}
+///|
+fn main raise {
+  let lower=@env.get_env_var("WENYU_LOWER_POINTS") is Some("1")
+  let candidate=@json.parse(@fs.read_file_to_string("docs/project/wenyu-rebuilt-road-candidate.json"))
+  let ways=arr(field(candidate,"ways"));let rivers=arr(field(candidate,"riverContext"))
+  let all=[..ways,..rivers]
+  let pairs=[
+    ("R1","秦上路","温榆河"),("R2","秦上路","北沙河"),
+    ("R3","鲁疃路","温榆河"),("R4","鲁疃东路","温榆河"),
+    ("R5","顺于路","温榆河"),("R6","秦北路","温榆河"),
+    ("R7","未来科学城路","温榆河"),("R8","未来科学城东路","温榆河"),
+    ("R9","京承高速","温榆河"),
+    ("S1","立汤路","北清路"),("S2","立汤路","平西府路"),
+    ("S3","立汤路","北七家路"),("S4","立汤路","回南路"),
+    ("S5","定泗路","鲁疃路"),("S6","定泗路","未来科学城路"),
+    ("S7","定泗路","未来科学城东路"),("S8","定泗路","秦上路"),
+    ("S9","顺于路","鲁疃路"),("S10","顺于路","鲁疃东路"),
+    ("S11","顺于路","秦北路"),("S12","秦北路","未来科学城路"),
+  ]
+  if lower {
+    for p in [
+      ("BL1","回南路","奥北公园西路"),("BL2","回南北路","奥北公园西路"),
+      ("BL3","立汤路","回南北路"),("BL4","立汤路","太平庄北街"),
+      ("BL5","回南路","平西府东路"),("BL6","回南路","平西府路"),
+      ("BL7","回南北路","平西府东路"),("BL8","回南路","平西府西路"),
+      ("BL9","回南路","枢纽西侧路"),("BL10","回南路","枢纽东侧路"),
+      ("BR1","未来科学城路","英才南三街"),("BR2","未来科学城东路","英才南三街"),
+      ("BR3","鲁疃路","英才南三街"),("BR4","鲁疃东路","英才南三街"),
+      ("BR5","英泽路","七北南路"),("BR6","英泽路","英才南三街"),
+      ("BR7","未来科学城路","七北南路"),("BR8","未来科学城东路","七北南路"),
+      ("BR9","京承高速","定泗路"),("BR10","鲁疃路","七北南路"),
+      ("BR11","未来科学城路","英才南二街"),("BR12","未来科学城东路","英才南二街"),
+    ] {pairs.push(p)}
+  }
+  let found : Array[Json]=[]
+  for pair in pairs {
+    let (id,one,two)=pair
+    let ps : Array[P]=[];let evidence : Array[Json]=[]
+    for a in all.filter(w=>str(field(field(w,"tags"),"name"))==one) {
+      for b in all.filter(w=>str(field(field(w,"tags"),"name"))==two) {
+        let ap=arr(field(a,"pathGrid")).map(point);let bp=arr(field(b,"pathGrid")).map(point)
+        for i in 1..<ap.length() { for j in 1..<bp.length() {
+          if crossing(ap[i-1],ap[i],bp[j-1],bp[j]) is Some(p) {
+            if ps.any(q=>dist(p,q)<0.00001) {continue}
+            ps.push(p);evidence.push({"wayA":field(a,"osmWayId"),"wayB":field(b,"osmWayId"),"sourceGrid":p.to_json()})
+          }
+        }}
+      }
+    }
+    if ps.is_empty() {continue}
+    let center : P={x:ps.fold(init=0.0,(s,p)=>s+p.x)/ps.length().to_double(),y:ps.fold(init=0.0,(s,p)=>s+p.y)/ps.length().to_double()}
+    let spread=ps.fold(init=0.0,(m,p)=>m.max(dist(p,center)))
+    let item : Json={"id":id,"name":one+" × "+two,"source":center.to_json(),"crossingSpreadTiles":spread,"evidence":evidence}
+    found.push(item)
+  }
+  @fs.write_string_to_file("docs/project/wenyu-\{if lower {"lower"} else {"dense"}}-source-landmarks.json",found.to_json().stringify(indent=2))
+  println(found.to_json().stringify(indent=2))
+  let png=@base64.encode(@fs.read_file_to_bytes("src/ui/assets/tilemap/wenyu_topdown_semantic.png"))
+  let svg=StringBuilder()
+  svg.write_string("<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 1800 1500'><rect width='1800' height='1500' fill='#182a29'/><style>text{fill:white;font:20px system-ui}.pin{font-size:4px;paint-order:stroke;stroke:#182a29;stroke-width:1px}</style><text x='30' y='40'>Landmark identification atlas — source identities first, independent image picks second</text>")
+  for panel in 0..<2 {
+    let x=30+panel*900
+    svg.write_string("<svg x='\{x}' y='80' width='840' height='473' viewBox='0 0 256 144'><rect width='256' height='144' fill='#293b36'/>")
+    if panel==1 {svg.write_string("<image href='data:image/png;base64,\{png}' width='256' height='144'/>")}
+    else {
+      for w in ways {svg.write_string("<path d='\{path(arr(field(w,"pathGrid")))}' fill='none' stroke='#dfb572' stroke-width='0.17'/>")}
+      for w in rivers {svg.write_string("<path d='\{path(arr(field(w,"pathGrid")))}' fill='none' stroke='#72efff' stroke-width='0.6'/>")}
+      for f in found {let p=point(field(f,"source"));svg.write_string("<circle cx='\{p.x}' cy='\{p.y}' r='1' fill='#ff6c90'/><text x='\{p.x+1.4}' y='\{p.y-1.3}' class='pin'>\{str(field(f,"id"))}</text>")}
+    }
+    for i in 1..<17 {let gx=i.to_double()*100.0*256.0/1672.0;svg.write_string("<path d='M\{gx},0V144' stroke='white' stroke-opacity='0.18' stroke-width='0.15'/><text x='\{gx}' y='143' class='pin'>\{i*100}</text>")}
+    for i in 1..<10 {let gy=i.to_double()*100.0*144.0/941.0;svg.write_string("<path d='M0,\{gy}H256' stroke='white' stroke-opacity='0.18' stroke-width='0.15'/><text x='1' y='\{gy}' class='pin'>\{i*100}</text>")}
+    svg.write_string("</svg>")
+  }
+  for i,f in found {svg.write_string("<text x='\{30+(i%2)*900}' y='\{600+(i/2)*60}'>\{str(field(f,"id"))} · \{str(field(f,"name"))}</text>")}
+  svg.write_string("</svg>")
+  @fs.write_string_to_file("src/ui/rabbita-town/dist/wenyu-\{if lower {"lower"} else {"dense"}}-atlas.svg",svg.to_string())
+  if lower {lower_detail(ways,found,png)}
+  let detail=StringBuilder()
+  detail.write_string("<svg xmlns='http://www.w3.org/2000/svg' viewBox='350 250 1200 650'><image href='data:image/png;base64,\{png}' width='1672' height='941'/><style>text{font:11px system-ui;fill:white;paint-order:stroke;stroke:#182a29;stroke-width:2px}</style>")
+  for x in 7..<32 {for y in 5..<19 {detail.write_string("<path d='M\{x*50-3},\{y*50}h6m-3,-3v6' stroke='white' stroke-opacity='0.7' stroke-width='1'/><text x='\{x*50+4}' y='\{y*50-4}'>\{x*50},\{y*50}</text>")}}
+  detail.write_string("</svg>")
+  @fs.write_string_to_file("src/ui/rabbita-town/dist/wenyu-dense-detail.svg",detail.to_string())
+  if @env.get_env_var("WENYU_DENSE_FIT") is Some("1") {fit_dense(candidate,found,png)}
+}
+
+///|
+fn lower_detail(ways : Array[Json],found : Array[Json],png : String) -> Unit raise {
+  let picks=arr(field(@json.parse(@fs.read_file_to_string("docs/project/wenyu-lower-image-picks.json")),"points"))
+  let selected=found.filter(f=>picks.any(p=>str(field(p,"id"))==str(field(f,"id"))))
+  let old=@json.parse(@fs.read_file_to_string("docs/project/wenyu-dense-perspective.json"))
+  let h=arr(field(arr(field(old,"models"))[2],"matrixNormalized")).map(num)
+  let svg=StringBuilder()
+  svg.write_string("<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 1800 1450'><rect width='1800' height='1450' fill='#182a29'/><style>text{fill:white;font:20px system-ui}.pin{font-size:2.6px;paint-order:stroke;stroke:#182a29;stroke-width:0.65px}</style><text x='30' y='40'>Lower-area identification · left: OSM identities under prior perspective · right: fixed design</text>")
+  for row in 0..<2 {
+    let px=if row==0 {0.0} else {1050.0};let py=if row==0 {520.0} else {620.0}
+    let pw=if row==0 {650.0} else {570.0};let ph=if row==0 {421.0} else {321.0}
+    let gx=px*256.0/1672.0;let gy=py*144.0/941.0;let gw=pw*256.0/1672.0;let gh=ph*144.0/941.0
+    for panel in 0..<2 {
+      let left=30+panel*900;let top=80+row*530
+      svg.write_string("<svg x='\{left}' y='\{top}' width='840' height='480' viewBox='\{gx} \{gy} \{gw} \{gh}'><rect x='\{gx}' y='\{gy}' width='\{gw}' height='\{gh}' fill='#293b36'/>")
+      if panel==1 {svg.write_string("<image href='data:image/png;base64,\{png}' width='256' height='144'/>")}
+      else {
+        for w in ways {let ps=arr(field(w,"pathGrid")).map(j=>project(h,point(j)).unwrap().to_json());svg.write_string("<path d='\{path(ps)}' fill='none' stroke='#dfb572' stroke-width='0.15'/>")}
+        for f in selected {let p=project(h,point(field(f,"source"))).unwrap();svg.write_string("<circle cx='\{p.x}' cy='\{p.y}' r='0.6' fill='#ff6c90'/><text x='\{p.x+0.8}' y='\{p.y-0.8}' class='pin'>\{str(field(f,"id"))}</text>")}
+      }
+      for i in 0..<34 {let x=i.to_double()*50.0*256.0/1672.0;svg.write_string("<path d='M\{x},\{gy}v\{gh}' stroke='white' stroke-opacity='0.15' stroke-width='0.1'/><text x='\{x+0.3}' y='\{gy+gh-1.0}' class='pin'>\{i*50}</text>")}
+      for i in 11..<19 {let y=i.to_double()*50.0*144.0/941.0;svg.write_string("<path d='M\{gx},\{y}h\{gw}' stroke='white' stroke-opacity='0.15' stroke-width='0.1'/><text x='\{gx+0.3}' y='\{y-0.5}' class='pin'>\{i*50}</text>")}
+      if panel==1 {for pick in picks {
+        let pixel=point(field(pick,"pixel"));let x=pixel.x*256.0/1672.0;let y=pixel.y*144.0/941.0
+        let check=field(pick,"holdout")==Json::boolean(true)
+        svg.write_string("<circle cx='\{x}' cy='\{y}' r='0.9' fill='none' stroke='\{if check {"white"} else {"#63f2c2"}}' stroke-width='0.35'/><text x='\{x+1.2}' y='\{y-1.0}' class='pin'>\{str(field(pick,"id"))}\{if check {"*"} else {""}}</text>")
+      }}
+      svg.write_string("</svg>")
+    }
+  }
+  let lower=selected
+  for i,f in lower {svg.write_string("<text x='\{30+(i%3)*600}' y='\{1150+(i/3)*45}'>\{str(field(f,"id"))} · \{str(field(f,"name"))}</text>")}
+  svg.write_string("<text x='30' y='1340'>* = validation-only. BL1 / BL2 have uncertain layout correspondence and do not influence the fit.</text><text x='30' y='1385'>Eight added candidates: three bottom-left, five bottom-right. BR9 omitted: no unambiguous design counterpart.</text></svg>")
+  @fs.write_string_to_file("src/ui/rabbita-town/dist/wenyu-lower-detail.svg",svg.to_string())
+  @fs.write_string_to_file("docs/project/wenyu-lower-detail.svg",svg.to_string())
+  let zoom=StringBuilder()
+  zoom.write_string("<svg xmlns='http://www.w3.org/2000/svg' width='1080' height='820' viewBox='1050 680 330 250' style='overflow:hidden'><image href='data:image/png;base64,\{png}' width='1672' height='941'/><style>text{font:3.5px system-ui;fill:white;paint-order:stroke;stroke:#182a29;stroke-width:0.6px}</style>")
+  for i in 106..<139 {let x=i*10;zoom.write_string("<path d='M\{x},680v250' stroke='white' stroke-opacity='0.15' stroke-width='0.25'/><text x='\{x+1}' y='927'>\{x}</text>")}
+  for i in 69..<94 {let y=i*10;zoom.write_string("<path d='M1050,\{y}h330' stroke='white' stroke-opacity='0.15' stroke-width='0.25'/><text x='1051' y='\{y-1}'>\{y}</text>")}
+  zoom.write_string("</svg>")
+  @fs.write_string_to_file("src/ui/rabbita-town/dist/wenyu-lower-pick-detail.svg",zoom.to_string())
+}
+
+///|
+fn normalized(p : P) -> P { {x:(p.x-128.0)/100.0,y:(p.y-72.0)/100.0} }
+///|
+fn denominator(h : Array[Double],p : P) -> Double {let q=normalized(p);h[6]*q.x+h[7]*q.y+1.0}
+///|
+fn project(h : Array[Double],p : P) -> P? {
+  let d=denominator(h,p)
+  if d.abs()<0.000000001 {return None}
+  let q=normalized(p)
+  Some({x:100.0*(h[0]*q.x+h[1]*q.y+h[2])/d+128.0,y:100.0*(h[3]*q.x+h[4]*q.y+h[5])/d+72.0})
+}
+///|
+// Normalized least squares, with partial pivoting and singular rejection.
+fn solve(rows : Array[Array[Double]],rhs : Array[Double],n : Int) -> Array[Double]? {
+  let a=Array::makei(n,_=>Array::make(n+1,0.0))
+  for k,row in rows {for i in 0..<n {for j in 0..<n {a[i][j]+=row[i]*row[j]};a[i][n]+=row[i]*rhs[k]}}
+  for i in 0..<n {
+    let mut pivot=i
+    for j in (i+1)..<n {if a[j][i].abs()>a[pivot][i].abs(){pivot=j}}
+    if a[pivot][i].abs()<0.000000000001 {return None}
+    let swap=a[i];a[i]=a[pivot];a[pivot]=swap
+    let div=a[i][i]
+    for j in i..<=n {a[i][j]/=div}
+    for k in 0..<n {if k==i {continue};let factor=a[k][i];for j in i..<=n {a[k][j]-=factor*a[i][j]}}
+  }
+  Some(Array::makei(n,i=>a[i][n]))
+}
+///|
+fn squared_error(h : Array[Double],cs : Array[Control]) -> Double {
+  cs.fold(init=0.0,(s,c)=>match project(h,c.source) {Some(p)=>{let d=dist(p,c.target);s+d*d};None=>s+1000000000000.0})
+}
+///|
+fn fit(cs : Array[Control],perspective : Bool,domain? : Array[P]=[],seed? : Array[Double]) -> Array[Double]? {
+  if cs.length() < (if perspective {4} else {3}) {return None}
+  let rows : Array[Array[Double]]=[];let rhs : Array[Double]=[]
+  for c in cs {
+    let a=normalized(c.source);let b=normalized(c.target)
+    let x=[a.x,a.y,1.0,0.0,0.0,0.0];let y=[0.0,0.0,0.0,a.x,a.y,1.0]
+    if perspective {x.push(-b.x*a.x);x.push(-b.x*a.y);y.push(-b.y*a.x);y.push(-b.y*a.y)}
+    rows.push(x);rows.push(y);rhs.push(b.x);rhs.push(b.y)
+  }
+  let n=if perspective {8} else {6}
+  guard solve(rows,rhs,n) is Some(initial) else {return None}
+  if !perspective {initial.push(0.0);initial.push(0.0);return Some(initial)}
+  // Minimize geometric reprojection error after the linear initialization.
+  // Every fitting control remains in the objective; no residual-driven deletion.
+  let mut h=seed.unwrap_or(initial)
+  if !domain.all(p=>denominator(h,p)>0.05) {return None}
+  for _ in 0..<30 {
+    let jac : Array[Array[Double]]=[];let residual : Array[Double]=[]
+    for c in cs {
+      let p=normalized(c.source);let target=normalized(c.target)
+      let d=denominator(h,c.source)
+      if d.abs()<0.000001 {return None}
+      let u=(h[0]*p.x+h[1]*p.y+h[2])/d;let v=(h[3]*p.x+h[4]*p.y+h[5])/d
+      jac.push([p.x/d,p.y/d,1.0/d,0.0,0.0,0.0,-u*p.x/d,-u*p.y/d])
+      jac.push([0.0,0.0,0.0,p.x/d,p.y/d,1.0/d,-v*p.x/d,-v*p.y/d])
+      residual.push(target.x-u);residual.push(target.y-v)
+    }
+    guard solve(jac,residual,8) is Some(step) else {break}
+    let before=squared_error(h,cs)
+    let mut factor=1.0;let mut accepted=false
+    for _ in 0..<16 {
+      let next=Array::makei(8,i=>h[i]+factor*step[i])
+      if determinant(next)>0.0 && domain.all(p=>denominator(next,p)>0.05) && squared_error(next,cs)<before {h=next;accepted=true;break}
+      factor*=0.5
+    }
+    if !accepted {break}
+  }
+  Some(h)
+}
+///|
+fn metric(h : Array[Double],cs : Array[Control]) -> Json {
+  {"rmsTiles":(squared_error(h,cs)/cs.length().to_double()).sqrt(),"maximumTiles":cs.fold(init=0.0,(m,c)=>m.max(dist(project(h,c.source).unwrap(),c.target)))}
+}
+///|
+fn rounded(n : Double) -> String {let v=(n*100.0+0.5).to_int();"\{v/100}.\{if v%100<10 {"0"} else {""}}\{v%100}"}
+///|
+fn determinant(h : Array[Double]) -> Double {
+  h[0]*(h[4]-h[5]*h[7])-h[1]*(h[3]-h[5]*h[6])+h[2]*(h[3]*h[7]-h[4]*h[6])
+}
+///|
+fn self_test() -> Unit raise {
+  let known=[1.05,0.03,0.01,-0.02,0.98,-0.03,0.12,-0.08]
+  let ps : Array[P]=[{x:0,y:0},{x:256,y:0},{x:256,y:144},{x:0,y:144},{x:80,y:100},{x:190,y:30}]
+  let cs=ps.map(p=>Control::{id:"test",name:"synthetic",source:p,target:project(known,p).unwrap(),holdout:false,evidence:Json::null()})
+  let h=fit(cs,true).unwrap()
+  assert_true(determinant(h)>0.0)
+  assert_true(squared_error(h,cs)<0.000000001)
+  assert_true(dist(project(h,{x:130,y:55}).unwrap(),project(known,{x:130,y:55}).unwrap())<0.000001)
+  assert_true(fit([cs[0],cs[0],cs[0],cs[0]],true) is None)
+  assert_true(project([1,0,0,0,1,0,1,0],{x:28,y:72}) is None)
+  let affine=[0.95,0.1,0.01,-0.05,1.08,0.03,0.0,0.0]
+  let ac=ps.map(p=>Control::{id:"test",name:"affine",source:p,target:project(affine,p).unwrap(),holdout:false,evidence:Json::null()})
+  assert_true(squared_error(fit(ac,false).unwrap(),ac)<0.000000001)
+  assert_true(crossing({x:0,y:0},{x:2,y:2},{x:0,y:2},{x:2,y:0}) is Some({x:1,y:1}))
+  let domain : Array[P]=[{x:-900,y:900},..ps]
+  let identity=[1.0,0.0,0.0,0.0,1.0,0.0,0.0,0.0]
+  let constrained=fit(cs,true,domain~,seed=identity).unwrap()
+  assert_true(domain.all(p=>denominator(constrained,p)>0.05))
+  assert_true(squared_error(constrained,cs)<squared_error(identity,cs))
+}
+///|
+fn fit_dense(candidate : Json,found : Array[Json],png : String) -> Unit raise {
+  self_test()
+  let lower=@env.get_env_var("WENYU_LOWER_POINTS") is Some("1")
+  let corners=arr(field(@json.parse(@fs.read_file_to_string("docs/project/wenyu-four-corner-affine.json")),"fit"))
+  let cs : Array[Control]=corners.map(c=>{id:str(field(c,"id")),name:"perimeter",source:point(field(c,"predicted")),target:point(field(c,"observed")),holdout:false,evidence:c})
+  let picks=@json.parse(@fs.read_file_to_string("docs/project/wenyu-dense-image-picks.json"))
+  let image_picks=arr(field(picks,"points"))
+  if lower {for p in arr(field(@json.parse(@fs.read_file_to_string("docs/project/wenyu-lower-image-picks.json")),"points")) {image_picks.push(p)}}
+  for p in image_picks {
+    let id=str(field(p,"id"));let matches=found.filter(f=>str(field(f,"id"))==id)
+    assert_eq(matches.length(),1)
+    let f=matches[0]
+    assert_true(num(field(f,"crossingSpreadTiles"))<1.5)
+    let pixel=point(field(p,"pixel"))
+    cs.push({id,name:str(field(f,"name")),source:point(field(f,"source")),target:{x:pixel.x*256.0/1672.0,y:pixel.y*144.0/941.0},holdout:field(p,"holdout")==Json::boolean(true),evidence:{"source":f,"image":p}})
+  }
+  let training=cs.filter(c=>!c.holdout);let holdouts=cs.filter(c=>c.holdout)
+  assert_eq(cs.length(),if lower {21} else {13});assert_eq(holdouts.length(),if lower {6} else {3})
+  let identity=if lower {arr(field(arr(field(@json.parse(@fs.read_file_to_string("docs/project/wenyu-dense-perspective.json")),"models"))[2],"matrixNormalized")).map(num)} else {[1.0,0.0,0.0,0.0,1.0,0.0,0.0,0.0]}
+  let ways=arr(field(candidate,"ways"));let rivers=arr(field(candidate,"riverContext"))
+  let domain : Array[P]=[]
+  for w in [..ways,..rivers] {for j in arr(field(w,"pathGrid")) {domain.push(point(j))}}
+  let affine=fit(training,false).unwrap();let unconstrained=fit(training,true).unwrap()
+  let unconstrained_min=domain.fold(init=1000000.0,(d,p)=>d.min(denominator(unconstrained,p)))
+  let perspective=if lower {fit(training,true,domain~,seed=identity).unwrap()} else {unconstrained}
+  assert_true(determinant(perspective)>0.0)
+  let models=[identity,affine,perspective];let names=[if lower {"Previous 13-landmark perspective"} else {"Previous four-corner affine"},"\{training.length()}-point affine","\{training.length()}-point perspective"]
+  let reports : Array[Json]=[]
+  for i,h in models {
+    let errors : Array[Json]=cs.map(c=>{"id":c.id,"holdout":c.holdout,"observed":c.target.to_json(),"predicted":project(h,c.source).unwrap().to_json(),"errorTiles":dist(project(h,c.source).unwrap(),c.target)})
+    let loo : Array[Json]=[]
+    if i>0 {for c in training {
+      let retained=training.filter(p=>p.id!=c.id)
+      let leave_one=if lower && i==2 {fit(retained,true,domain~,seed=identity).unwrap()} else {fit(retained,i==2).unwrap()}
+      loo.push({"id":c.id,"errorTiles":dist(project(leave_one,c.source).unwrap(),c.target)})
+    }}
+    reports.push({"name":names[i],"matrixNormalized":h,"fit":metric(h,training),"holdouts":metric(h,holdouts),"errors":errors,"leaveOneTrainingPointOut":loo})
+  }
+  let mut minimum_d=1000000.0;let mut maximum_d=0.0
+  for w in [..ways,..rivers] {for j in arr(field(w,"pathGrid")) {let d=denominator(perspective,point(j));minimum_d=minimum_d.min(d);maximum_d=maximum_d.max(d)}}
+  let safe=minimum_d>0.05
+  let local_scale : Array[Json]=cs.map(c=>{
+    let d=denominator(perspective,c.source)
+    {"id":c.id,"areaEquivalentLinearScaleVsPriorAffine":(determinant(perspective)/(d*d*d)).sqrt()}
+  })
+  let gates : Json={"maximumFitErrorTiles":4,"maximumHoldoutErrorTiles":3,"fitPass":num(field(metric(perspective,training),"maximumTiles"))<=4.0,"holdoutPass":num(field(metric(perspective,holdouts),"maximumTiles"))<=3.0,"fullSourcePoleSafe":safe,"manualAcceptance":false}
+  // A global denominator cannot cross zero inside any straight source segment
+  // if it is positive at every source vertex.
+  let mut candidate_ways : Array[Json]=[]
+  if safe {
+    candidate_ways=ways.map(w=>{"osmWayId":field(w,"osmWayId"),"nodes":field(w,"nodes"),"tags":field(w,"tags"),"geometryWgs84":field(w,"geometryWgs84"),"pathGrid":arr(field(w,"pathGrid")).map(j=>project(perspective,point(j)).unwrap()).to_json()})
+    assert_eq(candidate_ways.length(),6420)
+    assert_eq(candidate_ways.fold(init=0,(n,w)=>n+arr(field(w,"pathGrid")).length()),44343)
+  }
+  let report : Json={"schema":"moontown.wenyu_dense_perspective_review.v1","runtimeEligible":false,"source":"docs/project/wenyu-rebuilt-road-candidate.json","license":"ODbL-1.0","attribution":"© OpenStreetMap contributors","sourceOsmBase":field(candidate,"sourceOsmBase"),"sourceFrame":"Prior four-corner affine used only as invertible numerical coordinate frame; uncropped geographic geometry retained.","normalization":"Both input and output: ((x-128)/100,(y-72)/100). h33=1. Projective denominator h31*x+h32*y+1.","controls":cs.to_json(),"trainingCount":training.length(),"holdoutCount":holdouts.length(),"models":reports,"sourceDenominatorRange":[minimum_d,maximum_d],"poleSafeOverFullSource":safe,"localScale":local_scale,"gates":gates,"manualAcceptance":false,"terrainChanged":false,"ways":candidate_ways}
+  if report is Object(fields) {
+    fields["unconstrainedCandidate"]={"minimumSourceDenominator":unconstrained_min,"fit":metric(unconstrained,training),"matrixNormalized":unconstrained,"rejectedForPoleSafety":unconstrained_min<=0.05}
+    fields["solver"] = Json::string(if lower {"Geometric-error refinement initialized at prior accepted-for-preview matrix; backtracking accepts only positive-determinant steps with denominator >0.05 at every source vertex. Holdouts never enter objective."} else {"Normalized linear initialization followed by geometric-error refinement."})
+  }
+  let stem=if lower {"wenyu-lower-perspective"} else {"wenyu-dense-perspective"}
+  @fs.write_string_to_file("docs/project/\{stem}.json",report.stringify())
+  println(reports.to_json().stringify(indent=2));println("Source denominator range: \{minimum_d} to \{maximum_d}")
+  let svg=StringBuilder()
+  svg.write_string("<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 1800 1470'><rect width='1800' height='1470' fill='#182a29'/><style>text{fill:#f6f3e9;font:20px system-ui}.title{font-size:28px;font-weight:650}.small{font-size:17px}.pin{font-size:4px;font-weight:700;paint-order:stroke;stroke:#182a29;stroke-width:1px}</style><text x='30' y='44' class='title'>\{cs.length()}-landmark calibration · \{if lower {"more controls in both lower areas"} else {"perspective compared with affine"}}</text><text x='30' y='83'>\{training.length()} fitting controls + \{holdouts.length()} held-out checks · terrain fixed · no rubber-sheet warp · all source road vertices retained</text>")
+  for panel in 0..<2 {
+    let index=panel*2;let h=models[index];let left=30+900*panel
+    svg.write_string("<text x='\{left}' y='125'>\{names[index]}</text><svg x='\{left}' y='145' width='840' height='473' viewBox='0 0 256 144'><image href='data:image/png;base64,\{png}' width='256' height='144' opacity='0.8'/>")
+    if panel==0 || safe {
+      for w in ways {
+        let kind=str(field(field(w,"tags"),"highway"));let minor=["footway","path","steps","cycleway","track","pedestrian"].contains(kind)
+        let ps=arr(field(w,"pathGrid")).map(j=>project(h,point(j)).unwrap().to_json())
+        svg.write_string("<path d='\{path(ps)}' fill='none' stroke='#ffc46d' stroke-width='\{if minor {0.09} else {0.24}}' opacity='\{if minor {0.35} else {0.95}}'/>")
+      }
+      for w in rivers {let ps=arr(field(w,"pathGrid")).map(j=>project(h,point(j)).unwrap().to_json());svg.write_string("<path d='\{path(ps)}' fill='none' stroke='#72efff' stroke-width='0.35' stroke-dasharray='1.3 0.8'/>")}
+    }
+    for c in cs {
+      let p=c.target;let q=project(h,c.source).unwrap()
+      svg.write_string("<path d='M\{p.x},\{p.y}L\{q.x},\{q.y}' stroke='#ff6087' stroke-width='0.4'/><circle cx='\{p.x}' cy='\{p.y}' r='1.2' fill='none' stroke='\{if c.holdout {"#ffffff"} else {"#63f2c2"}}' stroke-width='0.4'/><path d='M\{q.x-0.6},\{q.y-0.6}l1.2,1.2m-1.2,0l1.2,-1.2' stroke='#ff6087' stroke-width='0.3'/><text x='\{p.x+1.5}' y='\{p.y-1.8}' class='pin'>\{c.id}\{if c.holdout {"*"} else {""}}</text>")
+    }
+    svg.write_string("</svg>")
+  }
+  svg.write_string("<text x='30' y='659'>Green circles = fitting landmarks · white circles / * = held out · pink × = model predictions · cyan = OSM rivers</text><text x='30' y='708' class='title'>Same points, same test split — no point removed to improve the score</text>")
+  for i,r in reports {let y=756+i*45;svg.write_string("<text x='30' y='\{y}'>\{names[i]}</text><text x='580' y='\{y}'>Fit RMS \{rounded(num(field(field(r,"fit"),"rmsTiles")))} tiles</text><text x='1080' y='\{y}'>Held-out RMS \{rounded(num(field(field(r,"holdouts"),"rmsTiles")))} tiles</text>")}
+  for i,c in holdouts {let x=30+(i%2)*900;let y=925+(i/2)*60;svg.write_string("<text x='\{x}' y='\{y}'>\{c.id}* · \{c.name}</text><text x='\{x}' y='\{y+26}' class='small'>Perspective error \{rounded(dist(project(perspective,c.source).unwrap(),c.target))} tiles</text>")}
+  if lower {
+    svg.write_string("<text x='30' y='1120' class='title'>Eight added lower-area candidates — correspondence review still needed</text>")
+    svg.write_string("<text x='30' y='1163'>Three bottom-left + five bottom-right. BL1 / BL2 are uncertain layout matches and excluded from the fit.</text>")
+    svg.write_string("<text x='30' y='1204'>Unconstrained refit rejected: a projective pole crossed the wider source. Shown refit keeps every source vertex safe.</text>")
+    svg.write_string("<text x='30' y='1245'>Fit gate: \{field(gates,"fitPass").stringify()} · held-out gate: \{field(gates,"holdoutPass").stringify()} · full-source pole safety: \{safe}. Live map unchanged.</text>")
+    svg.write_string("<text x='30' y='1300' class='small'>BL1 crosses a designed green block under the prior mapping; this may be a layout difference or an incorrect correspondence.</text>")
+    svg.write_string("<text x='30' y='1340' class='small'>Do not hide that discrepancy by forcing a low-confidence point into the fit. BR9 has no unambiguous counterpart and is omitted.</text>")
+    svg.write_string("<text x='30' y='1380' class='small'>Previous 13-point artifact preserved. All 6,420 source ways / 44,343 road vertices retained; terrain unchanged.</text>")
+    svg.write_string("<text x='30' y='1425' class='small'>© OpenStreetMap contributors · ODbL 1.0 · source snapshot 2026-09-06T00:37:05Z</text></svg>")
+  } else {
+    svg.write_string("<text x='30' y='1120' class='title'>Perspective candidate — not a calibrated physical camera</text><text x='30' y='1163'>A homography allows scale to change across the plane. Image picks remain provisional; S1 is a low-confidence check.</text><text x='30' y='1204'>Local scale versus prior affine: NW \{rounded(num(field(local_scale[0],"areaEquivalentLinearScaleVsPriorAffine")))}× · SE \{rounded(num(field(local_scale[2],"areaEquivalentLinearScaleVsPriorAffine")))}×. All 6,420 ways retained; pole safety: \{safe}.</text><text x='30' y='1245'>Still fails the 3-tile held-out gate at S1. Live map unchanged; current and designed street layouts may differ.</text><text x='30' y='1300' class='small'>New geographic bridge centers come from named road–river intersections. Legacy map-click centers are not reused.</text><text x='30' y='1340' class='small'>Qinbei image pick revised from (1202,415) to (1177,451) on the bridge deck. Old report preserved for comparison.</text><text x='30' y='1380' class='small'>Reproducible MoonBit fit, geometric-error refinement, singular/pole tests. Source geometry and terrain assets unchanged.</text><text x='30' y='1425' class='small'>© OpenStreetMap contributors · ODbL 1.0 · source snapshot 2026-09-06T00:37:05Z</text></svg>")
+  }
+  @fs.write_string_to_file("docs/project/\{stem}.svg",svg.to_string())
+  @fs.write_string_to_file("src/ui/rabbita-town/dist/\{stem}.svg",svg.to_string())
+}

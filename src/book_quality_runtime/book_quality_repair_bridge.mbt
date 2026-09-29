@@ -51,7 +51,7 @@ async fn load_book_quality_repair_bridge_context(
   let current_tick = book_quality_current_daemon_tick(snapshot_path)
   let goals_path = book_quality_standing_goal_path(snapshot_path)
   let goals = @storage.load_or_create_standing_goals(path=goals_path)
-  { repairable_book_ids, audit, current_tick, goals_path, goals }
+  { repairable_book_ids, audit, current_tick, goals_path, goals, }
 }
 
 ///|
@@ -63,7 +63,7 @@ async fn persist_book_quality_repair_bridge(
   @storage.save_standing_goals_file(context.goals_path, context.goals)
   @support.write_text_file(
     bridge_path,
-    @book_quality.BookQualityRepairBridgeLedger::{ items: repaired }
+    @book_quality.BookQualityRepairBridgeLedger::{ items: repaired, }
     .to_json()
     .stringify(indent=2),
   )
@@ -130,7 +130,7 @@ async fn book_quality_repair_bridge_candidate(
       result_text,
       generated_at_ms=@env.now(),
     ) {
-    Some(item) => Some({ item, result_text })
+    Some(item) => Some({ item, result_text, })
     _ => None
   }
 }

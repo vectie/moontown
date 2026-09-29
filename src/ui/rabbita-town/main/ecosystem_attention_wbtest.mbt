@@ -311,10 +311,10 @@ test "runtime adapters keep live work separate from stale records" {
     projection: Some({
       ..projected,
       tasks: [],
-      agents: [{ ..projected.agents[0], status: "idle", workItemId: None }],
+      agents: [{ ..projected.agents[0], status: "idle", workItemId: None, }],
     }),
   }
-  let unbound_model = { ..live_model, energy_valley_runtime: unbound_state }
+  let unbound_model = { ..live_model, energy_valley_runtime: unbound_state, }
   assert_true(ecosystem_runtime_attention_signals(unbound_model, "").is_empty())
   let completed_model = {
     ..live_model,
@@ -345,8 +345,8 @@ test "attention feed diversifies repeated runtime records with town life" {
         ..projection,
         tasks: projection.tasks +
         [
-          { ..projection.tasks[0], id: "task-attention-2" },
-          { ..projection.tasks[0], id: "task-attention-3" },
+          { ..projection.tasks[0], id: "task-attention-2", },
+          { ..projection.tasks[0], id: "task-attention-3", },
         ],
         agents: projection.agents +
         [

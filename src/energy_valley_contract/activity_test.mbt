@@ -138,7 +138,7 @@ test "presence rendering resolves portals outside and slots inside" {
     Some(4),
     source,
   )
-  let inside = { ..at_entrance, phase: Inside }
+  let inside = { ..at_entrance, phase: Inside, }
   assert_eq(
     at_entrance.render_position(world),
     Some(

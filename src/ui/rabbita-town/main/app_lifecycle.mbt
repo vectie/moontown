@@ -69,10 +69,10 @@ fn update_non_form_message(
     TogglePause => toggle_pause_update(dispatch, model)
     Step => step_update(model)
     SelectWorker(worker_id) =>
-      model_only_update({ ..model, selection: Worker(worker_id) })
+      model_only_update({ ..model, selection: Worker(worker_id), })
     SelectNode(node_key) =>
-      model_only_update({ ..model, selection: Node(node_key) })
-    SelectOverview => model_only_update({ ..model, selection: Overview })
+      model_only_update({ ..model, selection: Node(node_key), })
+    SelectOverview => model_only_update({ ..model, selection: Overview, })
     OpenSecretComputeRoom => {
       let return_building = match model.town_spatial_layer {
         Indoor(building) => Some(building)
@@ -81,7 +81,7 @@ fn update_non_form_message(
       let closed = close_town_transient_surfaces(model)
       model_only_update(
         set_town_spatial_layer_model(
-          { ..closed, secret_compute_room_selected_id: "moongate" },
+          { ..closed, secret_compute_room_selected_id: "moongate", },
           TownSpatialLayer::Underground(return_building),
         ),
       )
@@ -93,6 +93,14 @@ fn update_non_form_message(
       }
       model_only_update(set_town_spatial_layer_model(model, destination))
     }
+    SelectIndoorSlot(slot_id) =>
+      model_only_update({ ..model, indoor_selected_slot_id: slot_id, })
+    SelectSpatialWork(work_id) => {
+      replace_browser_query_param("work", work_id)
+      model_only_update({ ..model, spatial_selected_work_id: work_id, })
+    }
+    StartIndoorWork => model_only_update(spatial_start_work_model(model))
+    ReviewSpatialWork => town_life_commit(spatial_review_work_model(model))
     SelectSecretComputeEndpoint(endpoint_id) =>
       model_only_update({
         ..model,
@@ -103,7 +111,7 @@ fn update_non_form_message(
     ExitEnergyBuilding => {
       let returned = match model.town_spatial_layer {
         Indoor(building) =>
-          { ..model, energy_selected_building: Some(building) }
+          { ..model, energy_selected_building: Some(building), }
         _ => model
       }
       model_only_update(
@@ -122,11 +130,11 @@ fn update_non_form_message(
         energy_weather_auto: !model.energy_weather_auto,
       })
     SetEnergyTimeScale(scale) =>
-      model_only_update({ ..model, energy_time_scale: scale })
+      model_only_update({ ..model, energy_time_scale: scale, })
     SetEnergyTool(tool) =>
       // Picking a build/demolish tool means the next click should build, not
       // walk — drop walk mode so the two never fight over the same tap.
-      model_only_update({ ..model, energy_tool: tool, walk_mode: false })
+      model_only_update({ ..model, energy_tool: tool, walk_mode: false, })
     ToggleEnergyBoard => {
       let opening = !model.energy_board_open
       let next = if opening {
@@ -140,7 +148,7 @@ fn update_non_form_message(
           town_chronicle_open: false,
         }
       } else {
-        { ..model, energy_board_open: false }
+        { ..model, energy_board_open: false, }
       }
       if opening {
         town_life_commit(track_event(next, "board_open", ""))
@@ -168,7 +176,8 @@ fn update_non_form_message(
           "",
         ),
       )
-    CloseEnergyGuide => model_only_update({ ..model, energy_guide_open: false })
+    CloseEnergyGuide =>
+      model_only_update({ ..model, energy_guide_open: false, })
     OpenEnergyReset =>
       model_only_update({
         ..model,
@@ -177,10 +186,11 @@ fn update_non_form_message(
         resident_explorer_open: false,
         town_chronicle_open: false,
       })
-    CloseEnergyReset => model_only_update({ ..model, energy_reset_open: false })
+    CloseEnergyReset =>
+      model_only_update({ ..model, energy_reset_open: false, })
     CloseEnergyIntro => {
       browser_mark_energy_valley_intro_seen()
-      model_only_update({ ..model, energy_intro_open: false })
+      model_only_update({ ..model, energy_intro_open: false, })
     }
     OpenEnergyRequest =>
       model_only_update({
@@ -221,7 +231,7 @@ fn update_non_form_message(
       }
     }
     CloseEnergyRequest =>
-      model_only_update({ ..model, energy_request_open: false })
+      model_only_update({ ..model, energy_request_open: false, })
     ToggleResidentExplorer => {
       let opening = !model.resident_explorer_open
       if opening {
@@ -231,11 +241,11 @@ fn update_non_form_message(
           selection: Overview,
         })
       } else {
-        model_only_update({ ..model, resident_explorer_open: false })
+        model_only_update({ ..model, resident_explorer_open: false, })
       }
     }
     ResidentSearch(query) =>
-      model_only_update({ ..model, resident_query: query })
+      model_only_update({ ..model, resident_query: query, })
     ToggleTownChronicle => {
       let opening = !model.town_chronicle_open
       if opening {
@@ -245,7 +255,7 @@ fn update_non_form_message(
           selection: Overview,
         })
       } else {
-        model_only_update({ ..model, town_chronicle_open: false })
+        model_only_update({ ..model, town_chronicle_open: false, })
       }
     }
     EnergyResetCurrent => {
@@ -286,7 +296,7 @@ fn update_non_form_message(
     OpenEcosystemAttention(cooldown_key, interaction_target) =>
       ecosystem_open_attention_update(model, cooldown_key, interaction_target)
     CloseEnergyInspector =>
-      model_only_update({ ..model, energy_selected_building: None })
+      model_only_update({ ..model, energy_selected_building: None, })
     SetDashboardSection(section) =>
       model_only_update(set_dashboard_section_model(model, section))
     SetRequestComposer(focus) =>
@@ -411,11 +421,11 @@ fn update_non_form_message(
         _ => model_only_update(model)
       }
     AvatarDraftName(value) =>
-      model_only_update({ ..model, avatar_draft_name: value })
+      model_only_update({ ..model, avatar_draft_name: value, })
     AvatarDraftPersona(value) =>
-      model_only_update({ ..model, avatar_draft_persona: value })
+      model_only_update({ ..model, avatar_draft_persona: value, })
     AvatarDraftColor(index) =>
-      model_only_update({ ..model, avatar_draft_color: index })
+      model_only_update({ ..model, avatar_draft_color: index, })
     AvatarWizardNext =>
       if model.avatar_wizard_step < 2 {
         model_only_update({
@@ -437,7 +447,7 @@ fn update_non_form_message(
     AvatarCreate => avatar_create_update(model)
     AvatarOpenEditor => avatar_open_editor_update(model)
     ToggleWalkMode => {
-      let next = { ..model, walk_mode: !model.walk_mode }
+      let next = { ..model, walk_mode: !model.walk_mode, }
       town_life_commit(
         track_event(
           next,
@@ -451,7 +461,7 @@ fn update_non_form_message(
       )
     }
     TogglePlayerFollow =>
-      model_only_update({ ..model, player_follow: !model.player_follow })
+      model_only_update({ ..model, player_follow: !model.player_follow, })
     PlayerStepDirection(dx, dy) => player_step_direction_update(model, dx, dy)
     PlayerStepTo(tx, ty) => player_step_to_update(model, tx, ty)
     TogglePhone => phone_toggle_update(model)
@@ -462,7 +472,7 @@ fn update_non_form_message(
         phone_contact: contact,
         moonclaw_guide_error: "",
       })
-    PhoneDraft(value) => model_only_update({ ..model, phone_draft: value })
+    PhoneDraft(value) => model_only_update({ ..model, phone_draft: value, })
     PhoneSend =>
       if phone_contact_is_moonclaw_guide(model.phone_contact) {
         moonclaw_guide_send_update(dispatch, model, model.phone_draft)
@@ -476,9 +486,9 @@ fn update_non_form_message(
     OpenKnowledgeDialog(post_id) =>
       model_only_update(knowledge_open_dialog_model(model, post_id))
     CloseKnowledgeDialog =>
-      model_only_update({ ..model, knowledge_dialog_open: false })
+      model_only_update({ ..model, knowledge_dialog_open: false, })
     KnowledgeDraftTopic(value) =>
-      model_only_update({ ..model, knowledge_draft_topic: value })
+      model_only_update({ ..model, knowledge_draft_topic: value, })
     ConfirmKnowledgeTopic =>
       town_life_commit(knowledge_confirm_topic_model(model))
     PublishBuilding(post_id) =>
@@ -491,30 +501,30 @@ fn update_non_form_message(
         ),
       )
     ToggleOps => ops_toggle_update(model)
-    SetOpsTab(index) => model_only_update({ ..model, ops_tab: index })
+    SetOpsTab(index) => model_only_update({ ..model, ops_tab: index, })
     OpsGenerateReport => ops_generate_report_update(model)
     ToggleMetro =>
       town_life_commit(
         track_event(
-          { ..model, metro_visible: !model.metro_visible },
+          { ..model, metro_visible: !model.metro_visible, },
           "metro_toggle",
           "",
         ),
       )
     DailyCheckin => daily_checkin_update(model)
-    CloseLifeToast => model_only_update({ ..model, life_toast: "" })
+    CloseLifeToast => model_only_update({ ..model, life_toast: "", })
     ToggleMapLab =>
-      model_only_update({ ..model, map_lab_open: !model.map_lab_open })
-    CloseMapLab => model_only_update({ ..model, map_lab_open: false })
+      model_only_update({ ..model, map_lab_open: !model.map_lab_open, })
+    CloseMapLab => model_only_update({ ..model, map_lab_open: false, })
     ToggleMapLabLayer(layer) =>
       model_only_update({
         ..model,
         map_lab_layers: map_lab_toggle_layer(model.map_lab_layers, layer),
       })
     SelectMapLabEntity(entity_id) =>
-      model_only_update({ ..model, map_lab_selected_id: entity_id })
+      model_only_update({ ..model, map_lab_selected_id: entity_id, })
     SetMapLabQuery(query) =>
-      model_only_update({ ..model, map_lab_query: query })
+      model_only_update({ ..model, map_lab_query: query, })
     _ => model_only_update(model)
   }
 }

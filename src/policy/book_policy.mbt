@@ -54,12 +54,12 @@ pub fn skill(
   cadence : String,
   purpose : String,
 ) -> SkillSpec {
-  { id, lane, cadence, purpose }
+  { id, lane, cadence, purpose, }
 }
 
 ///|
 pub fn file(path : String, required : Bool, purpose : String) -> FileSpec {
-  { path, required, purpose }
+  { path, required, purpose, }
 }
 
 ///|
@@ -83,7 +83,7 @@ pub fn output(
   contract : String,
   projection_path : String,
 ) -> OutputSpec {
-  { surface, contract, projection_path }
+  { surface, contract, projection_path, }
 }
 
 ///|
@@ -93,7 +93,7 @@ pub fn new(
   quality_criteria : QualityCriteria,
   output : OutputSpec,
 ) -> BookPolicy {
-  { skills, required_files, quality_criteria, output }
+  { skills, required_files, quality_criteria, output, }
 }
 
 ///|
@@ -141,12 +141,12 @@ fn upsert_file(files : Array[FileSpec], next : FileSpec) -> Array[FileSpec] {
 
 ///|
 pub fn with_skill(policy : BookPolicy, next : SkillSpec) -> BookPolicy {
-  { ..policy, skills: upsert_skill(policy.skills, next) }
+  { ..policy, skills: upsert_skill(policy.skills, next), }
 }
 
 ///|
 pub fn with_file(policy : BookPolicy, next : FileSpec) -> BookPolicy {
-  { ..policy, required_files: upsert_file(policy.required_files, next) }
+  { ..policy, required_files: upsert_file(policy.required_files, next), }
 }
 
 ///|

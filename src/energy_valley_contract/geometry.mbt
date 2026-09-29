@@ -6,7 +6,7 @@ pub(all) struct GridPosition {
 
 ///|
 pub fn grid_position(column : Int, row : Int) -> GridPosition {
-  { column, row }
+  { column, row, }
 }
 
 ///|
@@ -18,7 +18,7 @@ pub(all) struct WorldPoint {
 
 ///|
 pub fn world_point(x : Double, y : Double, z? : Double = 0.0) -> WorldPoint {
-  { x, y, z }
+  { x, y, z, }
 }
 
 ///|
@@ -29,7 +29,7 @@ pub(all) struct WorldBounds {
 
 ///|
 pub fn world_bounds(minimum : WorldPoint, maximum : WorldPoint) -> WorldBounds {
-  { minimum, maximum }
+  { minimum, maximum, }
 }
 
 ///|

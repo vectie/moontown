@@ -26,7 +26,7 @@ fn book_quality_review_ledger_view(
       historical_runs.push(run)
     }
   }
-  { current_runs, historical_runs }
+  { current_runs, historical_runs, }
 }
 
 ///|

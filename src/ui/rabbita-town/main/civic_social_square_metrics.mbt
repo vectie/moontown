@@ -123,5 +123,5 @@ fn social_square_base_health(worker : WorkerSim?) -> Int {
 
 ///|
 fn social_square_worker_health_policy() -> CivicWorkerEnergyHealthPolicy {
-  { fallback: 54, load_divisor: 5, energy_bonus: 22 }
+  { fallback: 54, load_divisor: 5, energy_bonus: 22, }
 }

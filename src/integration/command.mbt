@@ -68,7 +68,7 @@ pub async fn run(
       stdout=stdout.1,
       stderr=stderr.1,
     )
-    { command, args, status, stdout: stdout.0.wait(), stderr: stderr.0.wait() }
+    { command, args, status, stdout: stdout.0.wait(), stderr: stderr.0.wait(), }
   })
 }
 

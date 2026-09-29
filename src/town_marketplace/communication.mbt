@@ -180,7 +180,7 @@ pub fn marketplace_create_channel(
     updated_at_ms: now_ms,
     version: 1,
   }
-  { ..state, channels: state.channels + [next], version: state.version + 1 }
+  { ..state, channels: state.channels + [next], version: state.version + 1, }
 }
 
 ///|
@@ -745,7 +745,7 @@ pub fn marketplace_create_share_grant(
     version: next_version,
   })
   mark_listing_shared_for_grant(
-    { ..state, share_grants: grants, version: state.version + 1 },
+    { ..state, share_grants: grants, version: state.version + 1, },
     grant,
     now_ms,
   )
@@ -931,7 +931,7 @@ pub fn marketplace_revoke_share_grant(
   }
   let revoked_grant = revoked.unwrap_or_else(() => fail("share grant not found"))
   restore_listing_draft_after_last_grant(
-    { ..state, share_grants: grants, version: state.version + 1 },
+    { ..state, share_grants: grants, version: state.version + 1, },
     revoked_grant,
     now_ms,
   )

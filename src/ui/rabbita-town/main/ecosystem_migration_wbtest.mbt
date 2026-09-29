@@ -53,7 +53,7 @@ test "ecosystem snapshot cache invalidates on local map deltas" {
 
 ///|
 test "attention actions persist cooldown and open their semantic place" {
-  let model = { ..init_model(), tick: 12, energy_status_open: true }
+  let model = { ..init_model(), tick: 12, energy_status_open: true, }
   let signals = ecosystem_attention_candidates(model, 20260727, "")
   guard signals.search_by(signal => signal.provenance is AmbientPreview)
     is Some(index) else {
@@ -76,7 +76,7 @@ test "attention actions persist cooldown and open their semantic place" {
 
 ///|
 test "preview canvas residents expose named scheduled intentions" {
-  let model = { ..init_model(), tick: 18 }
+  let model = { ..init_model(), tick: 18, }
   let intention = ecosystem_preview_canvas_intention(model, 7)
   let profile = ecosystem_preview_resident_profile(7)
   assert_eq(intention.resident_name, profile.name)

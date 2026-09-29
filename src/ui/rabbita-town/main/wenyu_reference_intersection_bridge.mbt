@@ -92,9 +92,9 @@ extern "js" fn reference_intersection_count() -> Int =
 extern "js" fn reference_intersection_x_millis(index : Int) -> Int =
   #| index => {
   #|   if (globalThis.__moontownEnergyValleyOsmBlockGraphValidated === true) {
-  #|     return globalThis.__moontownEnergyValleyCartoonRoadGraph
+  #|     return Math.round(globalThis.__moontownEnergyValleyCartoonRoadGraph
   #|       ?.junctions?.[index]
-  #|       ?.xMillis ?? 0;
+  #|       ?.xMillis ?? 0);
   #|   }
   #|   const value = globalThis.__wenyuReferenceIntersections;
   #|   const verified = value?.points?.length ?? 0;
@@ -110,9 +110,9 @@ extern "js" fn reference_intersection_x_millis(index : Int) -> Int =
 extern "js" fn reference_intersection_y_millis(index : Int) -> Int =
   #| index => {
   #|   if (globalThis.__moontownEnergyValleyOsmBlockGraphValidated === true) {
-  #|     return globalThis.__moontownEnergyValleyCartoonRoadGraph
+  #|     return Math.round(globalThis.__moontownEnergyValleyCartoonRoadGraph
   #|       ?.junctions?.[index]
-  #|       ?.yMillis ?? 0;
+  #|       ?.yMillis ?? 0);
   #|   }
   #|   const value = globalThis.__wenyuReferenceIntersections;
   #|   const verified = value?.points?.length ?? 0;

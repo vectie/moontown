@@ -58,14 +58,14 @@ test "vitality dashboard signal uses shared phrases with recovery override" {
   )
   assert_eq(
     vitality_dashboard_signal(
-      { ..model, state_source: StateSourceKind::SnapshotFile },
+      { ..model, state_source: StateSourceKind::SnapshotFile, },
       Some(civic_metric_test_execution(Completed)),
     ),
     "Projection bridge",
   )
   assert_eq(
     vitality_dashboard_signal(
-      { ..model, pressure: 90 },
+      { ..model, pressure: 90, },
       Some(civic_metric_test_execution(Completed)),
     ),
     "Recovery loop",

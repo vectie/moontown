@@ -19,3 +19,5 @@ src/ui/rabbita-town/dist/
 src/ui/rabbita-town/node_modules/
 src/ui/rabbita-town/.mooncakes/
 src/ui/rabbita-town/_build/
+src/ui/assets/landmark-studio/
+/docs/project/*.svg

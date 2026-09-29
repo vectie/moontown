@@ -115,13 +115,13 @@ fn corrected_terminal_review_run(
   run : BookQualityReviewRun,
 ) -> BookQualityReviewRun {
   match review_terminal_marker(run.summary) {
-    OrphanedReview => { ..run, status: review_run_orphaned_status() }
-    BlockedReview => { ..run, status: review_run_blocked_status() }
+    OrphanedReview => { ..run, status: review_run_orphaned_status(), }
+    BlockedReview => { ..run, status: review_run_blocked_status(), }
     NoTerminalMarker =>
       if review_run_terminal_status(run.status) {
         run
       } else if review_run_in_progress_status(run.status) {
-        { ..run, status: review_run_written_status() }
+        { ..run, status: review_run_written_status(), }
       } else {
         run
       }

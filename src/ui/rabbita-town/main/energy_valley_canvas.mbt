@@ -25,6 +25,7 @@ priv struct TownCanvasViewState {
   selected_actor_id : @energy_valley_contract.StableId?
   runtime_agent_interaction_enabled : Bool
   intersection_preview : Bool
+  authoring_overlay : Bool
   follow_enabled : Bool
   player_idle_position : (Double, Double)?
   player_motion : PlayerMotion?
@@ -893,21 +894,15 @@ extern "js" fn golden_draw_water_detail(
   time : Double,
 ) -> Unit =
   #| (context, sx, sy, zoom, phase, time) => {
-  #|   const gradient = context.createLinearGradient(
-  #|     sx, sy - 16 * zoom, sx, sy + 16 * zoom,
-  #|   );
-  #|   // Clear civic blue: two calm values keep the waterfront legible
-  #|   // without turning every water tile into a textured effect.
-  #|   gradient.addColorStop(0, "#35a8ce");
-  #|   gradient.addColorStop(1, "#238caf");
-  #|   context.fillStyle = gradient;
+  #|   // A continuous matte water value; highlights are sparse, not per-tile.
+  #|   context.fillStyle = "#72b9bd";
   #|   context.fill();
-  #|   if (zoom < 0.24) return;
+  #|   if (zoom < 0.55 || Math.sin(phase * 17) < 0.70) return;
   #|   context.save();
   #|   context.clip();
   #|   const progress = (time * 0.16 + phase * 0.11) % 1;
   #|   const offset = (progress - 0.5) * 42 * zoom;
-  #|   context.strokeStyle = "rgba(226,248,252,0.46)";
+  #|   context.strokeStyle = "rgba(235,252,244,0.22)";
   #|   context.lineWidth = Math.max(0.8, 1.25 * zoom);
   #|   context.beginPath();
   #|   context.moveTo(sx - 17 * zoom + offset * 0.2, sy + offset * 0.32);
@@ -1073,12 +1068,12 @@ extern "js" fn golden_draw_ground_detail(
   #|   };
   #|   if (terrain === "grass") {
   #|     // Broad matte color fields make the green spine read at a glance.
-  #|     context.fillStyle = shade("#91c467", 0.96 + variation * 0.06);
+  #|     context.fillStyle = shade("#acc68e", 0.98 + variation * 0.025);
   #|     context.fill();
   #|     return;
   #|   }
   #|   if (terrain === "meadow") {
-  #|     context.fillStyle = shade("#9dcc76", 0.96 + variation * 0.05);
+  #|     context.fillStyle = shade("#b2ca95", 0.98 + variation * 0.025);
   #|     context.fill();
   #|     if (zoom >= 0.55 && phase % 7 === 0) {
   #|       context.fillStyle = variation > 0.55 ? "#e5b840" : "#efb6bf";
@@ -1140,7 +1135,8 @@ extern "js" fn golden_draw_ground_detail(
   #|     return;
   #|   }
   #|   if (terrain === "forest") {
-  #|     context.fillStyle = shade("#47764b", 0.97 + variation * 0.05);
+  #|     // Woodland is grass beneath canopies, not a dark square under each tree.
+  #|     context.fillStyle = shade("#a4bf86", 0.98 + variation * 0.025);
   #|     context.fill();
   #|     return;
   #|   }
@@ -1666,7 +1662,10 @@ extern "js" fn golden_draw_reference_tree(
   #|     return `rgb(${r | 0},${g | 0},${b | 0})`;
   #|   };
   #|   const sway = Math.sin(time * 0.7 + seed * 20) * 0.35 * zoom;
-  #|   const height = (14 + seed * 10) * zoom;
+  #|   // Match the building kit's relative scale: crowns read above a person,
+  #|   // below a two-storey roof. All trunks stay vertical in screen space.
+  #|   zoom *= 2.5;
+  #|   const height = (18 + seed * 7) * zoom;
   #|   context.fillStyle = "rgba(45,70,78,0.14)";
   #|   context.beginPath();
   #|   context.ellipse(
@@ -2095,7 +2094,7 @@ fn golden_draw_tile(
       snapshot, roads, road, road_visible, authoritative_transport, x, y,
     ),
   )
-  let variation = town_snapshot_canvas_variation(snapshot, x, y)
+  let variation = town_scene_ground_variation(x, y)
   golden_draw_canonical_old_map_terrain(
     context, terrain, sx, sy, variation, x, y,
   )
@@ -2861,6 +2860,11 @@ fn draw_golden_valley_canvas(
   match @canvas.get_context2d(canvas_id) {
     None => false
     Some(context) => {
+      if wenyu_scene_default_requested() ||
+        wenyu_gentle_ground_trial_requested() {
+        draw_wenyu_gentle_ground_trial(context, snapshot, view, width, height)
+        return true
+      }
       if view.intersection_preview &&
         reference_intersection_preview_graph_ready() {
         return draw_intersection_road_preview_frame(
@@ -3054,7 +3058,8 @@ fn draw_golden_valley_canvas(
       golden_ctx_global_alpha(context, 1.0)
       // Intersection calibration is an authoring overlay on the accepted
       // MoonTown frame. It never replaces or mutates the map beneath it.
-      if energy_valley_intersection_reference_requested() {
+      if view.authoring_overlay &&
+        energy_valley_intersection_reference_requested() {
         intersection_reference_draw_points(context, width, height)
       }
       let visible_tile_visits = golden_canvas_chunk_tile_count(visible_chunks) *
@@ -3097,7 +3102,7 @@ fn render_golden_valley_canvas(
           golden_release_spring_civic_building_assets()
           golden_valley_clear_canvas_frame()
         },
-        false,
+        wenyu_gentle_ground_trial_requested(),
       )
       if !view.intersection_preview {
         install_player_walk_keys()

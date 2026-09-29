@@ -28,7 +28,7 @@ fn issue(
   code : String,
   message : String,
 ) -> Result[TownPresentationAsset, SpatialAssetIssue] {
-  Err({ code, message })
+  Err({ code, message, })
 }
 
 ///|

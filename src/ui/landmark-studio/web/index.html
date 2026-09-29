@@ -1,0 +1,64 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width,initial-scale=1">
+  <meta name="color-scheme" content="light">
+  <title>Wenyu · Landmark Atelier</title>
+  <link rel="stylesheet" href="studio.css">
+  <script type="importmap">{"imports":{"three":"./vendor/three.module.js","three/addons/":"./vendor/"}}</script>
+</head>
+<body>
+  <header class="masthead">
+    <a class="brand" href="#center" aria-label="Wenyu Landmark Atelier home"><span class="brand-mark">M</span><span>MOONTOWN <small>LANDMARK ATELIER</small></span></a>
+    <div class="project-label">温榆河 · 未来科学城 <span>/</span> Architectural studies</div>
+    <span class="stage"><i></i> INDEPENDENT STUDY</span>
+  </header>
+  <main>
+    <aside class="inspector">
+      <div class="eyebrow">FIELD NOTES <span id="ordinal">01 / 04</span></div>
+      <h1 id="title">未来中心</h1>
+      <p id="subtitle" class="subtitle">FUTURE CENTER</p>
+      <p id="description" class="description"></p>
+      <div class="divider"></div>
+      <div class="control-heading">LIGHT & MATERIAL</div>
+      <div class="segments" role="group" aria-label="Lighting">
+        <button data-light="day" aria-pressed="true">Daylight</button><button data-light="golden" aria-pressed="false">Golden</button><button data-light="blue" aria-pressed="false">Blue hour</button>
+      </div>
+      <div class="toggle-row"><label for="context">Surroundings</label><input id="context" type="checkbox" checked></div>
+      <div class="toggle-row"><label for="clay">Clay model</label><input id="clay" type="checkbox"></div>
+      <div class="toggle-row"><label for="rotate">Slow orbit</label><input id="rotate" type="checkbox"></div>
+      <div class="divider"></div>
+      <button id="references" class="reference-button"><span>Reference photographs</span><span aria-hidden="true">↗</span></button>
+      <p class="reference-caption" id="reference-count"></p>
+      <a id="interior-link" href="interior.html" class="reference-button">G座三层 · 室内研究 →</a>
+      <a href="datacenter.html" class="reference-button">数据中心 · 多尺度 3D 研究 →</a>
+      <p class="accuracy"><span>MODEL STATUS</span><br><span id="note"></span><br><br>Surroundings are illustrative, not surveyed. Not integrated into the town map.</p>
+      <div class="signature">MoonBit geometry <span>×</span> Three.js rendering</div>
+    </aside>
+    <section id="viewport" aria-label="Interactive architectural model">
+      <canvas id="scene" tabindex="0" aria-label="3D landmark. Drag to orbit, scroll to zoom, right-drag to pan. Arrow keys orbit, plus and minus zoom, Home resets."></canvas>
+      <div class="view-tools" role="group" aria-label="Camera presets">
+        <button data-view="hero" class="selected">Perspective</button><button data-view="detail" title="Inspect facade and structural details">Detail</button><button data-view="top">Top</button><button data-view="front">Front</button><button data-view="side">Side</button><button data-view="reverse">Rear</button><button id="projection" aria-pressed="false">Ortho</button>
+      </div>
+      <div class="canvas-label"><span class="label-rule"></span><span>WENYU VALLEY<br><strong>Built form, in landscape.</strong></span></div>
+      <div class="compass" aria-label="Local study axes, not a surveyed geographic bearing"><span id="north-arrow">↑</span><b>N*</b><small>LOCAL AXIS</small></div>
+      <div id="loading" class="loading" role="status"><span class="spinner"></span>Preparing the architectural study…</div>
+      <div class="interaction-help"><span>Drag to orbit</span><span>Scroll to zoom</span><span>Right-drag to pan</span><button id="reset" aria-label="Reset camera">Reset view ↺</button></div>
+      <div class="view-status" id="view-status" aria-live="polite"></div>
+    </section>
+  </main>
+  <nav class="landmarks" aria-label="Choose a landmark">
+    <button data-study="center" aria-pressed="true"><span class="number">01</span><span><strong>未来中心</strong><small>Courtyards & skyline</small></span><span class="mini-icon">▥▥</span></button>
+    <button data-study="vision" aria-pressed="false"><span class="number">02</span><span><strong>未来视界</strong><small>Glass & garden</small></span><span class="mini-icon">▥</span></button>
+    <button data-study="east-bridge" aria-pressed="false"><span class="number">03</span><span><strong>未来科学城东路桥</strong><small>The wave lattice</small></span><span class="mini-icon wave">∿</span></button>
+    <button data-study="arch-bridge" aria-pressed="false"><span class="number">04</span><span><strong>未来科学城路桥</strong><small>The sculpted arch</small></span><span class="mini-icon">⌒</span></button>
+  </nav>
+  <dialog id="reference-dialog" aria-labelledby="reference-title">
+    <div class="dialog-head"><div><div class="eyebrow">SOURCE LIBRARY</div><h2 id="reference-title">Reference photographs</h2></div><button id="close-references" aria-label="Close references">Close ×</button></div>
+    <p class="dialog-intro">Photographs and design diagrams used for this interpretive model. Select an image to inspect the original. Images remain with their original publishers; they are not model textures.</p>
+    <div id="reference-grid"></div>
+  </dialog>
+  <script type="module" src="studio.js"></script>
+</body>
+</html>

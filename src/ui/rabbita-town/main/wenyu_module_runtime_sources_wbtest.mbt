@@ -27,7 +27,7 @@ test "civic health runtime counts map seeded health to waiting" {
 
 ///|
 test "civic health runtime counts use status kind for waiting policy" {
-  let health = { ..civic_health_snapshot_fixture(), status: "seeded" }
+  let health = { ..civic_health_snapshot_fixture(), status: "seeded", }
   let waiting = civic_health_runtime_counts(health, Waiting)
   let projected = civic_health_runtime_counts(health, Projected)
   assert_eq(waiting.waiting, 1)
@@ -37,9 +37,9 @@ test "civic health runtime counts use status kind for waiting policy" {
 ///|
 test "civic health runtime counts map review blocked and completed evidence" {
   let seeded = civic_health_snapshot_fixture()
-  let review = { ..seeded, status: "needs-review", latest_review_items: 3 }
-  let blocked = { ..seeded, status: "blocked" }
-  let completed = { ..seeded, status: "changed", proven_by_result: true }
+  let review = { ..seeded, status: "needs-review", latest_review_items: 3, }
+  let blocked = { ..seeded, status: "blocked", }
+  let completed = { ..seeded, status: "changed", proven_by_result: true, }
   let review_counts = civic_health_runtime_counts(
     review,
     civic_health_status_kind(review.status),

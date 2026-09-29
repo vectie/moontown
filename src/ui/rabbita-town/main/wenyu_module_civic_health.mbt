@@ -152,7 +152,7 @@ fn civic_protocol_summary_counts(
     }
     review_count += service.protocol_review_count
   }
-  { ready_count, review_count }
+  { ready_count, review_count, }
 }
 
 ///|

@@ -5,7 +5,7 @@
 fn town_life_tick(model : Model) -> Model {
   let mut next = model
   if !next.life_toast.is_empty() && next.tick - next.life_toast_tick >= 5 {
-    next = { ..next, life_toast: "" }
+    next = { ..next, life_toast: "", }
   }
   let phone_before = next.phone_log.length()
   let reports_before = next.ops_reports.length()
@@ -99,7 +99,7 @@ fn avatar_open_editor_update(model : Model) -> (Cmd, Model) {
       }
     None => model
   }
-  model_only_update({ ..next, avatar_wizard_step: 0, energy_intro_open: true })
+  model_only_update({ ..next, avatar_wizard_step: 0, energy_intro_open: true, })
 }
 
 ///|
@@ -140,7 +140,7 @@ fn player_step_direction_update(
 ///|
 fn phone_toggle_update(model : Model) -> (Cmd, Model) {
   if model.phone_open {
-    town_life_commit({ ..model, phone_open: false })
+    town_life_commit({ ..model, phone_open: false, })
   } else {
     let next = {
       ..model,
@@ -177,7 +177,7 @@ fn moonclaw_guide_open_update(model : Model) -> (Cmd, Model) {
 ///|
 fn square_toggle_update(model : Model) -> (Cmd, Model) {
   if model.square_open {
-    town_life_commit({ ..model, square_open: false })
+    town_life_commit({ ..model, square_open: false, })
   } else {
     town_life_commit(
       track_event(
@@ -200,7 +200,7 @@ fn square_toggle_update(model : Model) -> (Cmd, Model) {
 ///|
 fn ops_toggle_update(model : Model) -> (Cmd, Model) {
   if model.ops_open {
-    model_only_update({ ..model, ops_open: false })
+    model_only_update({ ..model, ops_open: false, })
   } else {
     town_life_commit(
       track_event(
@@ -359,7 +359,12 @@ fn enter_building_interior_update(
       }
       let closed = close_town_transient_surfaces(opened)
       let next = set_town_spatial_layer_model(
-        { ..closed, energy_selected_building: None, selection: Overview },
+        {
+          ..closed,
+          energy_selected_building: None,
+          selection: Overview,
+          indoor_selected_slot_id: "",
+        },
         TownSpatialLayer::Indoor(building),
       )
       let next = track_event(next, "building_enter", building_id)

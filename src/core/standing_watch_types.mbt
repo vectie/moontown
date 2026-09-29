@@ -36,7 +36,7 @@ pub fn StandingGoal::mark_dispatched(
   tick : Int,
 ) -> StandingGoal {
   let cadence = if self.cadence_ticks < 1 { 1 } else { self.cadence_ticks }
-  { ..self, last_run_tick: Some(tick), next_due_tick: tick + cadence }
+  { ..self, last_run_tick: Some(tick), next_due_tick: tick + cadence, }
 }
 
 ///|

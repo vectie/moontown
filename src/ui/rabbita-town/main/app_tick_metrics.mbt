@@ -88,5 +88,5 @@ fn tick_metric_state(model : Model) -> TickMetricState {
     periodic_bonus(model.tick, 5, 1) +
     recovery_boost(recovery_active, 12),
   )
-  { budget, energy, pressure, stability }
+  { budget, energy, pressure, stability, }
 }

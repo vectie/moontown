@@ -72,7 +72,10 @@ test "town today redacts path-bearing summaries, activity, titles, and errors" {
   let activity_detail = town_chronicle_task_detail(state, activity_task)
   assert_true(activity_detail.contains("已隐藏"))
   assert_false(activity_detail.contains("/home/"))
-  let title_task = { ..base_task, title: "审阅 /private/example/runtime.log" }
+  let title_task = {
+    ..base_task,
+    title: "审阅 /private/example/runtime.log",
+  }
   let title = town_chronicle_task_title(state, title_task)
   assert_true(title.contains("任务标题包含本地路径"))
   assert_false(title.contains("/private/"))
@@ -93,7 +96,7 @@ test "town today only offers resident navigation for projected Agents" {
   let projection = state.projection.unwrap()
   let missing_agent_state = {
     ..state,
-    projection: Some({ ..projection, agents: [] }),
+    projection: Some({ ..projection, agents: [], }),
   }
   let entries = town_chronicle_runtime_entries(missing_agent_state)
   assert_eq(entries.length(), 1)
@@ -124,7 +127,7 @@ test "town today header counts evidence across the full ledger" {
       updatedAt: Some("1970-01-01T00:01:\{40 + index}.000Z"),
     })
   }
-  let expanded = { ..state, projection: Some({ ..projection, tasks, }) }
+  let expanded = { ..state, projection: Some({ ..projection, tasks, }), }
   assert_eq(
     town_chronicle_runtime_entries(expanded).length(),
     town_chronicle_runtime_limit,

@@ -168,9 +168,9 @@ fn energy_valley_best_structure_placement(
             match best {
               Some(current) =>
                 if score > current.score {
-                  best = Some({ x, y, width, depth, score })
+                  best = Some({ x, y, width, depth, score, })
                 }
-              None => best = Some({ x, y, width, depth, score })
+              None => best = Some({ x, y, width, depth, score, })
             }
         }
       }
@@ -620,9 +620,9 @@ fn energy_valley_best_block_structure_placement(
             match best {
               Some(current) =>
                 if score > current.score {
-                  best = Some({ x, y, width, depth, score })
+                  best = Some({ x, y, width, depth, score, })
                 }
-              None => best = Some({ x, y, width, depth, score })
+              None => best = Some({ x, y, width, depth, score, })
             }
         }
       }

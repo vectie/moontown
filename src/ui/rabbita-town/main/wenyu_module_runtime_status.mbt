@@ -131,7 +131,7 @@ fn module_runtime_counts(
   blocked? : Int = 0,
   completed? : Int = 0,
 ) -> ModuleRuntimeCounts {
-  { running, waiting, review, blocked, completed }
+  { running, waiting, review, blocked, completed, }
 }
 
 ///|

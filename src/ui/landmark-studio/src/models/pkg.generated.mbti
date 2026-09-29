@@ -1,0 +1,21 @@
+// Generated using `moon info`, DON'T EDIT IT
+package "vectie/wenyu-landmark-studio/models"
+
+// Values
+pub fn data_center_observation(String) -> Json
+
+pub fn data_center_report(Int) -> Json
+
+pub fn data_center_study() -> Json
+
+pub fn interior_study() -> Json
+
+pub fn studies() -> Json
+
+// Errors
+
+// Types and methods
+
+// Type aliases
+
+// Traits

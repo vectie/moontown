@@ -17,12 +17,12 @@ priv struct AnalyticsEventDef {
 /// and tests agree on the same contract.
 fn analytics_event_dictionary() -> Array[AnalyticsEventDef] {
   [
-    { name: "avatar_create", label: "创建角色", category: "onboarding" },
-    { name: "avatar_edit", label: "编辑角色", category: "onboarding" },
-    { name: "walk_step", label: "角色移动", category: "explore" },
-    { name: "walk_mode", label: "切换行走模式", category: "explore" },
-    { name: "building_visit", label: "视察大楼", category: "explore" },
-    { name: "phone_open", label: "打开虚拟手机", category: "social" },
+    { name: "avatar_create", label: "创建角色", category: "onboarding", },
+    { name: "avatar_edit", label: "编辑角色", category: "onboarding", },
+    { name: "walk_step", label: "角色移动", category: "explore", },
+    { name: "walk_mode", label: "切换行走模式", category: "explore", },
+    { name: "building_visit", label: "视察大楼", category: "explore", },
+    { name: "phone_open", label: "打开虚拟手机", category: "social", },
     {
       name: "phone_send",
       label: "发送本地剧本消息",
@@ -33,7 +33,7 @@ fn analytics_event_dictionary() -> Array[AnalyticsEventDef] {
       label: "收到本地剧本回复",
       category: "social",
     },
-    { name: "build_place", label: "放置楼宇", category: "build" },
+    { name: "build_place", label: "放置楼宇", category: "build", },
     {
       name: "knowledge_topic",
       label: "设置知识主题",
@@ -49,9 +49,9 @@ fn analytics_event_dictionary() -> Array[AnalyticsEventDef] {
       label: "收藏本地广场条目",
       category: "knowledge",
     },
-    { name: "quest_complete", label: "完成任务", category: "onboarding" },
-    { name: "checkin", label: "本地签到", category: "onboarding" },
-    { name: "ops_open", label: "打开运营中心", category: "system" },
+    { name: "quest_complete", label: "完成任务", category: "onboarding", },
+    { name: "checkin", label: "本地签到", category: "onboarding", },
+    { name: "ops_open", label: "打开运营中心", category: "system", },
     {
       name: "ops_report",
       label: "生成本页运营快照",
@@ -62,9 +62,9 @@ fn analytics_event_dictionary() -> Array[AnalyticsEventDef] {
       label: "切换 17 号线图层",
       category: "explore",
     },
-    { name: "square_open", label: "打开本地广场", category: "social" },
-    { name: "board_open", label: "打开运行看板", category: "system" },
-    { name: "guide_open", label: "打开指南", category: "system" },
+    { name: "square_open", label: "打开本地广场", category: "social", },
+    { name: "board_open", label: "打开运行看板", category: "system", },
+    { name: "guide_open", label: "打开指南", category: "system", },
   ]
 }
 

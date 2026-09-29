@@ -1,0 +1,170 @@
+import {
+  "moonbitlang/x@0.4.40/fs",
+  "moonbitlang/core/json",
+  "moonbitlang/core/math",
+  "moonbitlang/core/encoding/base64",
+}
+
+///|
+struct P { x : Double; y : Double } derive(ToJson, Debug)
+
+///|
+fn field(j : Json, key : String) -> Json {
+  match j { Object(m) => m.get(key).unwrap(); _ => abort("Expected object") }
+}
+
+///|
+fn arr(j : Json) -> Array[Json] { match j { Array(a) => a; _ => abort("Expected array") } }
+
+///|
+fn num(j : Json) -> Double { match j { Number(n, ..) => n; _ => abort("Expected number") } }
+
+///|
+fn str(j : Json) -> String { match j { String(s) => s; _ => abort("Expected string") } }
+
+///|
+fn point(j : Json) -> P { {x:num(field(j,"x")),y:num(field(j,"y"))} }
+
+///|
+fn distance(p : P,q : P) -> Double { ((p.x-q.x)*(p.x-q.x)+(p.y-q.y)*(p.y-q.y)).sqrt() }
+
+///|
+// WGS84 UTM 50N; same series used by the retained graph's georeference.
+fn utm(lon : Double, lat : Double) -> P {
+  let e = (1.0/298.257223563)*(2.0-1.0/298.257223563)
+  let ep = e/(1.0-e)
+  let phi = lat*@math.PI/180.0
+  let cp = @math.cos(phi); let sp = @math.sin(phi)
+  let tangent = @math.tan(phi)
+  let n = 6378137.0/(1.0-e*sp*sp).sqrt()
+  let t = tangent*tangent; let c = ep*cp*cp
+  let a = cp*(lon-117.0)*@math.PI/180.0
+  let a2 = a*a; let a4 = a2*a2; let e4 = e*e; let e6 = e4*e
+  let m = 6378137.0*((1.0-e/4.0-3.0*e4/64.0-5.0*e6/256.0)*phi-
+    (3.0*e/8.0+3.0*e4/32.0+45.0*e6/1024.0)*@math.sin(2.0*phi)+
+    (15.0*e4/256.0+45.0*e6/1024.0)*@math.sin(4.0*phi)-35.0*e6/3072.0*@math.sin(6.0*phi))
+  {x:500000.0+0.9996*n*(a+(1.0-t+c)*a*a2/6.0+(5.0-18.0*t+t*t+72.0*c-58.0*ep)*a*a4/120.0),
+   y:0.9996*(m+n*tangent*(a2/2.0+(5.0-t+9.0*c+4.0*c*c)*a4/24.0+(61.0-58.0*t+t*t+600.0*c-330.0*ep)*a4*a2/720.0))}
+}
+
+///|
+fn nearest_on_segment(p : P,a : P,b : P) -> P {
+  let dx = b.x-a.x; let dy = b.y-a.y
+  let length2 = dx*dx+dy*dy
+  let t = if length2==0.0 {0.0} else {((p.x-a.x)*dx+(p.y-a.y)*dy)/length2}
+  let t = if t<0.0 {0.0} else if t>1.0 {1.0} else {t}
+  {x:a.x+t*dx,y:a.y+t*dy}
+}
+
+///|
+fn short(n : Double) -> Double { (n*100.0).to_int().to_double()/100.0 }
+
+///|
+fn main raise {
+  assert_true(distance(utm(117.0,0.0),{x:500000.0,y:0.0})<0.000001)
+  assert_eq(nearest_on_segment({x:1.0,y:2.0},{x:0.0,y:0.0},{x:2.0,y:0.0}).x,1.0)
+  let terrain = @json.parse(@fs.read_file_to_string("docs/project/wenyu-terrain-four-corners.json"))
+  let georef = @json.parse(@fs.read_file_to_string("src/ui/assets/tilemap/georeference/wenyu-town-georef-v1.json"))
+  let forward = field(field(georef,"selectedModel"),"forward")
+  let m = arr(field(forward,"matrix")).map(arr)
+  let translation = arr(field(forward,"translation"))
+  let a = num(m[0][0]); let b = num(m[0][1]); let c = num(m[1][0]); let d = num(m[1][1])
+  let tx = num(translation[0]); let ty = num(translation[1])
+  let det = a*d-b*c
+  assert_true(det.abs()>1.0)
+  let to_grid = (p : P) => {x:(d*(p.x-tx)-b*(p.y-ty))/det,y:(a*(p.y-ty)-c*(p.x-tx))/det}
+  let graph = @json.parse(@fs.read_file_to_string("src/ui/assets/tilemap/energy-valley-osm-block-graph-v1.json"))
+  let edges = arr(field(field(graph,"graph"),"edges"))
+  let paths : Array[Array[P]] = edges.map(e=>arr(field(e,"pathMillis")).map(j=>{
+    let xy = arr(j)
+    {x:num(xy[0])/1000.0,y:num(xy[1])/1000.0}
+  }))
+  assert_eq(paths.length(),775)
+  assert_eq(paths.fold(init=0,(n,p)=>n+p.length()),3980)
+  let controls : Array[Json] = []
+  for entry in arr(field(terrain,"controls")) {
+    let geo = field(entry,"wgs84")
+    let metric = utm(num(field(geo,"lon")),num(field(geo,"lat")))
+    let p = to_grid(metric)
+    assert_true(distance({x:a*p.x+b*p.y+tx,y:c*p.x+d*p.y+ty},metric)<0.000001)
+    let target = point(field(entry,"terrainGrid"))
+    let mut closest = 1000000.0
+    let mut edge_id = ""
+    let mut nearest : P = {x:0.0,y:0.0}
+    for i,path in paths {
+      for k in 1..<path.length() {
+        let q = nearest_on_segment(p,path[k-1],path[k])
+        let gap = distance(p,q)
+        if gap<closest {closest=gap;edge_id=str(field(edges[i],"id"));nearest=q}
+      }
+    }
+    controls.push({"id":field(entry,"id"),"name":field(entry,"name"),"wgs84":geo,"roadGrid":p.to_json(),"terrainGrid":target.to_json(),
+      "offsetTiles":distance(p,target),"deltaTerrainMinusRoad":{"x":target.x-p.x,"y":target.y-p.y},
+      "insideStoredFrame":p.x>=0.0 && p.x<256.0 && p.y>=0.0 && p.y<144.0,
+      "nearestStoredEdge":{"id":edge_id,"point":nearest.to_json(),"distanceTiles":closest,"meaning":"Proximity only, not a road-identity match or snapping instruction"}})
+  }
+  assert_true(num(field(field(controls[0],"roadGrid"),"y"))<0.0)
+  assert_true(num(field(field(controls[1],"nearestStoredEdge"),"distanceTiles"))<0.001)
+  assert_true(num(field(field(controls[2],"nearestStoredEdge"),"distanceTiles"))>8.0)
+  assert_true(num(field(field(controls[3],"nearestStoredEdge"),"distanceTiles"))<0.1)
+  let report : Json = {"schema":"moontown.wenyu_road_corner_controls.v1","runtimeEligible":false,"coordinateStage":"Stored OSM road graph before live local registration warp",
+    "source":"src/ui/assets/tilemap/energy-valley-osm-block-graph-v1.json","georeference":"src/ui/assets/tilemap/georeference/wenyu-town-georef-v1.json",
+    "mapping":"WGS84 anchor → UTM 50N → inverse of the graph storage similarity. No new fit and no terrain coordinates reused as road coordinates.",
+    "coverageFinding":"NW anchor is outside stored crop. SE anchor is inside crop but 8.42 tiles from the nearest retained segment; do not claim either is an existing stored routing junction.",
+    "contextSource":"docs/project/wenyu-corner-osm-reference.json; named-way context only, separately dashed, not added to stored graph",
+    "edgeCount":775,"vertexCount":3980,"controls":controls}
+  @fs.write_string_to_file("docs/project/wenyu-road-four-corners.json",report.stringify(indent=2))
+  println(report.stringify(indent=2))
+  let svg = StringBuilder()
+  let preview = @base64.encode(@fs.read_file_to_bytes("src/ui/assets/tilemap/wenyu_reference_labels_preview.png"))
+  let context = @json.parse(@fs.read_file_to_string("docs/project/wenyu-corner-osm-reference.json"))
+  let context_paths : Array[Array[P]] = arr(field(context,"elements")).map(w=>arr(field(w,"geometry")).map(j=>to_grid(utm(num(field(j,"lon")),num(field(j,"lat"))))))
+  // Expand beyond the stored frame if a geographic landmark was clipped out.
+  let minx = controls.fold(init=0.0,(n,j)=>n.min(num(field(field(j,"roadGrid"),"x"))))-10.0
+  let miny = controls.fold(init=0.0,(n,j)=>n.min(num(field(field(j,"roadGrid"),"y"))))-10.0
+  let maxx = controls.fold(init=256.0,(n,j)=>n.max(num(field(field(j,"roadGrid"),"x"))))+10.0
+  let maxy = controls.fold(init=144.0,(n,j)=>n.max(num(field(field(j,"roadGrid"),"y"))))+10.0
+  let scale = (830.0/(maxx-minx)).min(550.0/(maxy-miny))
+  svg.write_string("<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 1800 1160'><rect width='1800' height='1160' fill='#182a29'/><style>text{font-family:system-ui,sans-serif;fill:#f6f3e9}.title{font-size:28px;font-weight:650}.note{font-size:20px}.small{font-size:17px}.pin{font-size:21px;font-weight:750;paint-order:stroke;stroke:#182a29;stroke-width:5px}</style><defs><clipPath id='contextClip'><rect x='\{minx}' y='\{miny}' width='\{maxx-minx}' height='\{maxy-miny}'/></clipPath></defs><text x='30' y='45' class='title'>Four landmarks on the road map</text><text x='30' y='82' class='note'>Stored OSM network before live local warp · gold = 775 retained edges · grey dashed = separate named OSM context</text>")
+  for panel in 0..<2 {
+    let left = 30.0+900.0*panel.to_double()
+    svg.write_string("<text x='\{left}' y='130' class='note'>\{if panel==0 {"Road map · geographic anchors shown as pink circles"} else {"Roads + terrain · green crosses are terrain targets"}}</text><g transform='translate(\{left} 160) scale(\{scale}) translate(\{-minx} \{-miny})'><rect x='0' y='0' width='256' height='144' fill='#2c403b' stroke='#71827a' stroke-width='0.4' stroke-dasharray='2 2'/>")
+    if panel==1 {svg.write_string("<image href='data:image/png;base64,\{preview}' width='256' height='144' opacity='0.6' style='image-rendering:pixelated'/>")}
+    svg.write_string("<g clip-path='url(#contextClip)' opacity='0.55'>")
+    for path in context_paths {
+      let d = path.mapi((i,p)=>"\{if i==0 {"M"} else {"L"}}\{p.x},\{p.y}").join(" ")
+      svg.write_string("<path d='\{d}' fill='none' stroke='#b6c1bc' stroke-width='0.35' stroke-dasharray='1.8 1.2'/>")
+    }
+    svg.write_string("</g>")
+    for path in paths {
+      let d = path.mapi((i,p)=>"\{if i==0 {"M"} else {"L"}}\{p.x},\{p.y}").join(" ")
+      svg.write_string("<path d='\{d}' fill='none' stroke='#e2b670' stroke-width='0.28'/>")
+    }
+    if panel==1 {
+      for j in controls {
+        let p = point(field(j,"roadGrid")); let q = point(field(j,"terrainGrid"))
+        svg.write_string("<path d='M\{p.x},\{p.y}L\{q.x},\{q.y}' stroke='#63f2c2' stroke-width='0.65' stroke-dasharray='2 1'/>")
+      }
+    }
+    svg.write_string("</g>")
+    for j in controls {
+      let p = point(field(j,"roadGrid"))
+      let x = left+(p.x-minx)*scale; let y = 160.0+(p.y-miny)*scale
+      let id = str(field(j,"id"))
+      svg.write_string("<circle cx='\{x}' cy='\{y}' r='8' fill='#182a29' stroke='#ff5a83' stroke-width='3'/><text x='\{x+13}' y='\{y-10}' class='pin'>\{id}</text>")
+      if panel==1 {
+        let q = point(field(j,"terrainGrid"))
+        let x = left+(q.x-minx)*scale; let y = 160.0+(q.y-miny)*scale
+        svg.write_string("<path d='M\{x-8},\{y-8}l16,16m-16,0l16,-16' stroke='#63f2c2' stroke-width='3'/><text x='\{x+13}' y='\{y+20}' class='pin'>\{id} terrain</text>")
+      }
+    }
+  }
+  for i,j in controls {
+    let p = point(field(j,"roadGrid")); let q = point(field(j,"terrainGrid"))
+    let y = 772+i*66
+    svg.write_string("<text x='30' y='\{y}' class='note'>\{str(field(j,"id"))} · \{str(field(j,"name"))}</text><text x='440' y='\{y}' class='note'>Road (\{short(p.x)}, \{short(p.y)})</text><text x='820' y='\{y}' class='note'>Terrain (\{short(q.x)}, \{short(q.y)})</text><text x='1240' y='\{y}' class='note'>Offset \{short(num(field(j,"offsetTiles")))} tiles</text>")
+  }
+  svg.write_string("<text x='30' y='1035' class='note'>Coverage warning: NW is outside the stored crop. SE is in a gap, 8.42 tiles from the nearest retained segment.</text><text x='30' y='1075' class='small'>Pink circles retain geographic identity, even where stored roads are absent. Green crosses retain terrain identity. Neither is snapped.</text><text x='30' y='1120' class='small'>© OpenStreetMap contributors · ODbL 1.0 · stored network 2026-08-10 / anchor reference 2026-09-05 · diagnostic only, no map edits</text></svg>")
+  @fs.write_string_to_file("docs/project/wenyu-road-four-corners.svg",svg.to_string())
+  @fs.write_string_to_file("src/ui/rabbita-town/dist/wenyu-road-four-corners.svg",svg.to_string())
+}

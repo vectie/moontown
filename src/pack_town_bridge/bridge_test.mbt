@@ -214,7 +214,7 @@ test "projection can expose only activated pack operations" {
 
 ///|
 test "projection requires explicit host discovery port" {
-  let undiscoverable = { ..moonpoly_activation(), provider_ports: [] }
+  let undiscoverable = { ..moonpoly_activation(), provider_ports: [], }
   let issues = projection_conformance_issues(
     undiscoverable,
     moonpoly_projection(),

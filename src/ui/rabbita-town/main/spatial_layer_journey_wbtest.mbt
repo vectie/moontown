@@ -22,7 +22,7 @@ test "three-layer journey returns underground agents to the same interior" {
 ///|
 test "building interior is a complete layer with Agent work and compute lift" {
   let dispatch : Dispatch[Msg] = Emit(fn(_message) { @rabbita.none })
-  let model = { ..init_model(), energy_intro_open: false }
+  let model = { ..init_model(), energy_intro_open: false, }
   let snapshot = ecosystem_contract_town_snapshot(
     model,
     active_energy_valley_seed(),
@@ -39,8 +39,8 @@ test "building interior is a complete layer with Agent work and compute lift" {
   assert_true(html.contains("indoor-graphical-scene"))
   assert_true(html.contains("indoor-world-canvas"))
   assert_true(html.contains("indoor-world-hotspot"))
-  assert_true(html.contains("InteractionSlot 家具"))
-  assert_true(html.contains("ActorPresence Agent"))
+  assert_true(html.contains("家具可点选"))
+  assert_true(html.contains("预览居民不代表执行"))
   assert_true(html.contains("MOONTOWN · LAYER 0 · INDOOR"))
   assert_true(html.contains(building.name))
   assert_true(html.contains("正在室内的 Agent"))
@@ -51,11 +51,9 @@ test "building interior is a complete layer with Agent work and compute lift" {
   assert_true(html.contains("返回地面"))
   match town_snapshot_place_for_building_view(model, snapshot, building) {
     Some(place) => {
-      assert_true(html.contains("PLACE · \{place.id.local_key()}"))
+      assert_true(html.contains(place.name))
       if !place.interaction_slots.is_empty() {
-        assert_true(
-          html.contains("SLOT · \{place.interaction_slots[0].id.local_key()}"),
-        )
+        assert_true(html.contains(place.interaction_slots[0].label))
       }
     }
     None => fail("building should compile to a semantic Place")
@@ -65,7 +63,7 @@ test "building interior is a complete layer with Agent work and compute lift" {
 ///|
 test "outdoor indoor and underground render as mutually exclusive planes" {
   let dispatch : Dispatch[Msg] = Emit(fn(_message) { @rabbita.none })
-  let base = { ..init_model(), energy_intro_open: false }
+  let base = { ..init_model(), energy_intro_open: false, }
   let building = golden_valley_buildings(active_energy_valley_seed())[0]
   let indoor_html = @rabbita.render_to_string(
     @rabbita.static_cell(

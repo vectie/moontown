@@ -5,8 +5,12 @@ fn operator_request_success_model(
   request_id : String,
   status : String,
 ) -> Model {
+  replace_browser_query_param("work-request", request_id)
+  replace_browser_query_param("work", "")
   {
     ..model,
+    spatial_request_id: request_id,
+    spatial_selected_work_id: "",
     request_submitting: false,
     request_status: operator_request_success_status(goal_id, request_id, status),
     standing_goals: parse_bootstrap_standing_goals(),

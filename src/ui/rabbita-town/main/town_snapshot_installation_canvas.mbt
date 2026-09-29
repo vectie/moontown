@@ -163,13 +163,20 @@ fn golden_draw_town_snapshot_installations(
           Some(point) =>
             if town_snapshot_installation_tag(installation, "kind:") ==
               Some("woodland") {
-              golden_draw_reference_tree(
+              let seed = golden_reference_hash(installation.id.to_string())
+              town_botanical_draw_tree(
                 context,
                 golden_screen_x(point.x, point.y, viewport_width),
                 golden_screen_y(point.x, point.y, viewport_height),
                 golden_valley_camera_zoom(),
-                golden_reference_hash(installation.id.to_string()),
-                golden_animation_seconds(),
+                town_botanical_tree_kind(
+                  point.x.to_int(),
+                  point.y.to_int(),
+                  seed,
+                  town_botanical_waterside(point.x.to_int(), point.y.to_int()),
+                ),
+                town_botanical_tree_scale(seed),
+                seed,
               )
             } else {
               golden_draw_public_street_tree(

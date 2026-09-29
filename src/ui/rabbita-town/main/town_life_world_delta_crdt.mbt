@@ -400,8 +400,8 @@ fn town_life_world_genesis_epoch(
   let writer = "world-genesis-\{ecosystem_stable_hash(blueprint_digest)}"
   {
     id: "\{writer}:epoch",
-    dot: { writer_id: writer, sequence: 1 },
-    stamp: { writer_id: writer, lamport: 1 },
+    dot: { writer_id: writer, sequence: 1, },
+    stamp: { writer_id: writer, lamport: 1, },
     base_budget: 2400,
     base_next_authored_sequence: 1,
   }
@@ -439,10 +439,10 @@ fn town_life_world_import_legacy_ledger(
   let writer = "0-world-import-\{ecosystem_stable_hash(digest)}"
   let epoch : TownLifeWorldEpoch = {
     id: "\{writer}:epoch",
-    dot: { writer_id: writer, sequence: 1 },
+    dot: { writer_id: writer, sequence: 1, },
     // Strictly below the genesis epoch: if a real V3 edit races the one-time
     // import, the real authority wins and import events are discarded.
-    stamp: { writer_id: writer, lamport: 0 },
+    stamp: { writer_id: writer, lamport: 0, },
     base_budget: ledger.budget.max(0),
     base_next_authored_sequence: ledger.next_authored_building_sequence.max(1),
   }
@@ -457,8 +457,8 @@ fn town_life_world_import_legacy_ledger(
     let id = "\{writer}:\{sequence}:world-import"
     events.push({
       id,
-      dot: { writer_id: writer, sequence },
-      stamp: { writer_id: writer, lamport: sequence },
+      dot: { writer_id: writer, sequence, },
+      stamp: { writer_id: writer, lamport: sequence, },
       epoch_id: epoch.id,
       kind,
       entity_id,
@@ -477,7 +477,7 @@ fn town_life_world_import_legacy_ledger(
     append(
       WorldBuilding,
       entity_id,
-      WorldBuildingPayload({ ..building, authored_id: Some(entity_id) }),
+      WorldBuildingPayload({ ..building, authored_id: Some(entity_id), }),
     )
   }
   for encoded in projected.roads {
@@ -486,7 +486,7 @@ fn town_life_world_import_legacy_ledger(
         append(
           WorldRoadCell,
           "road-cell-\{x}-\{y}",
-          WorldRoadCellPayload({ x, y }),
+          WorldRoadCellPayload({ x, y, }),
         )
       None => ()
     }
@@ -495,7 +495,7 @@ fn town_life_world_import_legacy_ledger(
     match energy_valley_parse_saved_tile(encoded) {
       Some((x, y)) => {
         let entity_id = energy_valley_saved_park_id(x, y)
-        append(WorldPark, entity_id, WorldParkPayload({ id: entity_id, x, y }))
+        append(WorldPark, entity_id, WorldParkPayload({ id: entity_id, x, y, }))
       }
       None => ()
     }
@@ -678,7 +678,7 @@ fn town_life_world_resolve_incarnations(
             }
           Some(current) =>
             if town_life_world_event_compare(event, current.add) > 0 {
-              resolved[key] = { ..current, add: event }
+              resolved[key] = { ..current, add: event, }
             }
         }
       WorldAdd(_) | WorldMove(_) | WorldDelete => ()
@@ -692,10 +692,10 @@ fn town_life_world_resolve_incarnations(
         ) &&
         town_life_world_event_compare(event, current.add) > 0 =>
         match current.movement {
-          None => resolved[key] = { ..current, movement: Some(event) }
+          None => resolved[key] = { ..current, movement: Some(event), }
           Some(previous) =>
             if town_life_world_event_compare(event, previous) > 0 {
-              resolved[key] = { ..current, movement: Some(event) }
+              resolved[key] = { ..current, movement: Some(event), }
             }
         }
       (WorldDelete, Some(current)) if town_life_world_event_compare(
@@ -704,10 +704,10 @@ fn town_life_world_resolve_incarnations(
         ) >
         0 =>
         match current.deletion {
-          None => resolved[key] = { ..current, deletion: Some(event) }
+          None => resolved[key] = { ..current, deletion: Some(event), }
           Some(previous) =>
             if town_life_world_event_compare(event, previous) < 0 {
-              resolved[key] = { ..current, deletion: Some(event) }
+              resolved[key] = { ..current, deletion: Some(event), }
             }
         }
       _ => ()
@@ -869,8 +869,8 @@ fn town_life_world_operations_for_active(
   for incarnation in active {
     match (incarnation.kind, town_life_world_effective_payload(incarnation)) {
       (WorldBuilding, WorldBuildingPayload(raw)) => {
-        let building = { ..raw, authored_id: Some(incarnation.entity_id) }
-        operations.push(AddBuilding({ id: incarnation.entity_id, building }))
+        let building = { ..raw, authored_id: Some(incarnation.entity_id), }
+        operations.push(AddBuilding({ id: incarnation.entity_id, building, }))
       }
       (WorldRoadCell, WorldRoadCellPayload(point)) => {
         let key = golden_valley_tile_key(point.x, point.y)
@@ -879,7 +879,7 @@ fn town_life_world_operations_for_active(
         }
       }
       (WorldPark, WorldParkPayload(park)) =>
-        operations.push(AddPark({ ..park, id: incarnation.entity_id }))
+        operations.push(AddPark({ ..park, id: incarnation.entity_id, }))
       _ => ()
     }
   }
@@ -1060,7 +1060,7 @@ fn town_life_world_reachable_custom_road_subset(
     match energy_valley_parse_saved_tile(encoded) {
       Some((x, y)) =>
         if town_life_world_road_point_allowed(world, base_roads, x, y) {
-          points[golden_valley_tile_key(x, y)] = { x, y }
+          points[golden_valley_tile_key(x, y)] = { x, y, }
         }
       None => ()
     }
@@ -1109,7 +1109,7 @@ fn town_life_world_custom_road_distances(
     match energy_valley_parse_saved_tile(encoded) {
       Some((x, y)) if town_life_world_road_point_allowed(
           world, base_roads, x, y,
-        ) => points[golden_valley_tile_key(x, y)] = { x, y }
+        ) => points[golden_valley_tile_key(x, y)] = { x, y, }
       _ => ()
     }
   }
@@ -1297,7 +1297,7 @@ fn town_life_world_filter_base_truth(
   let accepted : Array[TownLifeWorldResolvedIncarnation] = []
   let rejected : Array[TownLifeWorldRejectedEvent] = []
   for incarnation in candidates {
-    let original = { ..incarnation, movement: None }
+    let original = { ..incarnation, movement: None, }
     let add_valid = town_life_world_payload_base_valid(
       world,
       base_roads,
@@ -1507,7 +1507,7 @@ fn town_life_world_restore_required_road_deletions(
             WorldRoadCellPayload(point) => active_points[key] = point
             _ => ()
           }
-          active.push({ ..incarnation, deletion: None })
+          active.push({ ..incarnation, deletion: None, })
           match incarnation.deletion {
             Some(delete_event) =>
               rejections.push({
@@ -1700,7 +1700,7 @@ fn town_life_world_filter_geometry(
     if incarnation.kind == WorldRoadCell {
       continue
     }
-    let original = { ..incarnation, movement: None }
+    let original = { ..incarnation, movement: None, }
     let owner = town_life_world_incarnation_key(original)
     let cells = town_life_world_incarnation_cells(original)
     if cells.any(cell => occupied.contains(cell)) {
@@ -1794,13 +1794,13 @@ fn town_life_world_filter_budget(
     if accepted_adds.get(key) != Some(true) || !eligible_keys.contains(key) {
       continue
     }
-    transitions.push({ incarnation, event: incarnation.add })
+    transitions.push({ incarnation, event: incarnation.add, })
     // A dependency-rejected delete leaves the incarnation active and has no
     // economic effect. Only a canonically absent incarnation receives its one
     // accepted delete transition/refund.
     if !active_keys.contains(key) {
       match incarnation.deletion {
-        Some(event) => transitions.push({ incarnation, event })
+        Some(event) => transitions.push({ incarnation, event, })
         None => ()
       }
     }
@@ -1854,13 +1854,13 @@ fn town_life_world_projection_core(
   let (histories, history_rejections) = town_life_world_logical_histories(state)
   let transitions : Array[TownLifeWorldTransition] = []
   for incarnation in histories {
-    transitions.push({ incarnation, event: incarnation.add })
+    transitions.push({ incarnation, event: incarnation.add, })
     match incarnation.movement {
-      Some(event) => transitions.push({ incarnation, event })
+      Some(event) => transitions.push({ incarnation, event, })
       None => ()
     }
     match incarnation.deletion {
-      Some(event) => transitions.push({ incarnation, event })
+      Some(event) => transitions.push({ incarnation, event, })
       None => ()
     }
   }
@@ -1906,7 +1906,7 @@ fn town_life_world_projection_core(
               reason: "Move targets an incarnation that is not active.",
             })
           Some(current) => {
-            let moved = { ..current, movement: Some(transition.event) }
+            let moved = { ..current, movement: Some(transition.event), }
             active_by_key[key] = moved
           }
         }
@@ -2117,7 +2117,7 @@ fn town_life_world_projection_core(
       } else {
         match incarnation.movement {
           Some(move_event) => {
-            let original = { ..incarnation, movement: None }
+            let original = { ..incarnation, movement: None, }
             validation_passes += 1
             if town_life_world_ledger_valid(
                 town_life_world_ledger(state, prefix + [original], budget),
@@ -2207,7 +2207,7 @@ fn town_life_world_projection(
           .to_array()
           .any(entry => historically_accepted.get(entry.0) != Some(true)) {
           let before_delete = town_life_world_projection_core(
-            { ..state, events: prefix.copy() },
+            { ..state, events: prefix.copy(), },
             seed,
             historically_accepted,
           )
@@ -2274,7 +2274,7 @@ fn town_life_world_apply_projection(
       }
     }
   })
-  { ..model, energy_world_delta: projected.ledger, posts }
+  { ..model, energy_world_delta: projected.ledger, posts, }
 }
 
 ///|
@@ -2316,7 +2316,7 @@ fn town_life_world_store_event(
     events: state.events + [event],
   })
   town_life_world_reproject_model(
-    { ..model, town_life_world_states: states },
+    { ..model, town_life_world_states: states, },
     seed,
   )
 }
@@ -2345,7 +2345,7 @@ fn town_life_world_add_building(
     current, "world-building-add",
   )
   let entity_id = town_life_world_building_id(dot)
-  let building = { ..raw, authored_id: Some(entity_id) }
+  let building = { ..raw, authored_id: Some(entity_id), }
   let event : TownLifeWorldEvent = {
     id: event_id,
     dot,
@@ -2426,7 +2426,7 @@ fn town_life_world_add_park(
       kind: WorldPark,
       entity_id,
       incarnation_id: event_id,
-      action: WorldAdd(WorldParkPayload({ id: entity_id, x, y })),
+      action: WorldAdd(WorldParkPayload({ id: entity_id, x, y, })),
       budget_delta: budget_delta.min(0),
     },
     seed,
@@ -2568,7 +2568,7 @@ fn town_life_world_reset(model : Model) -> Model {
     events: [],
   })
   town_life_world_reproject_model(
-    { ..stamped, town_life_world_states: states },
+    { ..stamped, town_life_world_states: states, },
     seed,
   )
 }

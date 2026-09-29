@@ -42,7 +42,7 @@ fn replace_account_principal(
     principal.user_id != replacement.user_id
   })
   principals.push(replacement)
-  { ..state, principals, version: state.version + 1 }
+  { ..state, principals, version: state.version + 1, }
 }
 
 ///|
@@ -68,7 +68,7 @@ fn append_account_audit(
         @system_settings.current_system_settings().account_audit_capacity {
     ignore(audit_events.remove(0))
   }
-  { ..state, audit_events, version: state.version + 1 }
+  { ..state, audit_events, version: state.version + 1, }
 }
 
 ///|
@@ -89,7 +89,7 @@ fn update_account_subscription(
     changed_at_ms: now_ms,
     version: state.version + 1,
   })
-  { ..state, subscriptions, version: state.version + 1 }
+  { ..state, subscriptions, version: state.version + 1, }
 }
 
 ///|
@@ -374,7 +374,7 @@ pub async fn AccountApplication::admin_create_account(
     now_ms,
   )
   self.save_state(next)
-  { opaque_token, context: account_context_for(principal, initial_tenant) }
+  { opaque_token, context: account_context_for(principal, initial_tenant), }
 }
 
 ///|
@@ -398,14 +398,14 @@ pub async fn AccountApplication::admin_set_account_active(
     fail("administrators cannot deactivate their current account")
   }
   let principal = account_principal_or_fail(state, user_id)
-  let updated = { ..principal, active, version: principal.version + 1 }
+  let updated = { ..principal, active, version: principal.version + 1, }
   let replaced = replace_account_principal(state, updated)
   let sessions = if active {
     replaced.sessions
   } else {
     replaced.sessions.map(session => {
       if session.principal_id == user_id {
-        { ..session, revoked: true, version: session.version + 1 }
+        { ..session, revoked: true, version: session.version + 1, }
       } else {
         session
       }
@@ -561,7 +561,7 @@ pub async fn AccountApplication::enterprise_upsert_member(
     now_ms,
   )
   self.save_state(next)
-  { opaque_token, context: account_context_for(updated, Some(tenant_id)) }
+  { opaque_token, context: account_context_for(updated, Some(tenant_id)), }
 }
 
 ///|
@@ -591,7 +591,7 @@ pub async fn AccountApplication::enterprise_remove_member(
   let tenant_access = principal.tenant_access.map(access => {
     if access.tenant_id == tenant_id && access.active {
       found = true
-      { ..access, active: false, version: access.version + 1 }
+      { ..access, active: false, version: access.version + 1, }
     } else {
       access
     }
@@ -599,12 +599,12 @@ pub async fn AccountApplication::enterprise_remove_member(
   if !found {
     fail("organization member does not exist")
   }
-  let updated = { ..principal, tenant_access, version: principal.version + 1 }
+  let updated = { ..principal, tenant_access, version: principal.version + 1, }
   let replaced = replace_account_principal(state, updated)
   let sessions = replaced.sessions.map(session => {
     if session.principal_id == user_id &&
       session.active_tenant_id == Some(tenant_id) {
-      { ..session, active_tenant_id: None, version: session.version + 1 }
+      { ..session, active_tenant_id: None, version: session.version + 1, }
     } else {
       session
     }

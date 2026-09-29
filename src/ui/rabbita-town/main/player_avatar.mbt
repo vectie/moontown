@@ -284,7 +284,7 @@ fn player_begin_walk(model : Model, tx : Int, ty : Int) -> Model? {
   let target = path[path.length() - 1]
   let positioned = town_life_set_player_position(
     model,
-    Some({ x: target.0, y: target.1 }),
+    Some({ x: target.0, y: target.1, }),
   )
   Some({
     ..positioned,

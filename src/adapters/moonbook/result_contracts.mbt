@@ -32,7 +32,7 @@ pub fn MemoryCandidate::new(
   durable? : Bool = false,
   target_page? : String? = None,
 ) -> MemoryCandidate {
-  { kind, title, detail, durable, target_page }
+  { kind, title, detail, durable, target_page, }
 }
 
 ///|

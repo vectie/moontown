@@ -1,0 +1,5540 @@
+{
+  "result": {
+    "schema": "moontown.wenyu_bank_clearance.v1",
+    "runtimeEligible": false,
+    "routingAuthority": false,
+    "terrainChanged": false,
+    "source": "docs/project/wenyu-lower-perspective.json",
+    "base": "gentle 0.01 / 0.01",
+    "maximumMovementTiles": 0.9706337572597564,
+    "sourceWays": 6420,
+    "sourceVertices": 44343,
+    "bridgeWaysUnchanged": 338,
+    "sharedSourceNodesVerified": 33756,
+    "waterSamplesBefore": 4444,
+    "waterSamplesAfter": 4261,
+    "method": "Continuous signed-distance riverbank clearance, 0.35-tile target, 1.5-tile cap. Fixed tagged bridges/tunnels/fords and 0.2-tile buffer; smooth taper to 1.2 tiles. Deep water beyond 2 tiles unchanged. Same position field preserves shared-node coordinates. Display densified at <=0.2 tile before adjustment; no source roads deleted.",
+    "limitations": "Raster-mask paired centerline sample counts, not surveyed water clearance or a routing certification. Residual deep/ambiguous crossings retained. Source and bridge metadata unchanged.",
+    "changedWays": [
+      {
+        "osmWayId": 26427880,
+        "name": "六环路",
+        "maximumMovementTiles": 0.001130285710711813,
+        "movedDisplaySamples": 34,
+        "waterSamplesBefore": 4,
+        "waterSamplesAfter": 4
+      },
+      {
+        "osmWayId": 26427882,
+        "name": "六环路",
+        "maximumMovementTiles": 0.0007281210205286227,
+        "movedDisplaySamples": 13,
+        "waterSamplesBefore": 0,
+        "waterSamplesAfter": 0
+      },
+      {
+        "osmWayId": 26427884,
+        "name": "六环路",
+        "maximumMovementTiles": 0.0002987265611201703,
+        "movedDisplaySamples": 47,
+        "waterSamplesBefore": 0,
+        "waterSamplesAfter": 0
+      },
+      {
+        "osmWayId": 26428087,
+        "name": "六环路",
+        "maximumMovementTiles": 0.0010196025035250505,
+        "movedDisplaySamples": 21,
+        "waterSamplesBefore": 4,
+        "waterSamplesAfter": 4
+      },
+      {
+        "osmWayId": 26428090,
+        "name": "六环路",
+        "maximumMovementTiles": 0.0006678810540389634,
+        "movedDisplaySamples": 13,
+        "waterSamplesBefore": 0,
+        "waterSamplesAfter": 0
+      },
+      {
+        "osmWayId": 26428091,
+        "name": "六环路",
+        "maximumMovementTiles": 0.00014296449394813737,
+        "movedDisplaySamples": 46,
+        "waterSamplesBefore": 0,
+        "waterSamplesAfter": 0
+      },
+      {
+        "osmWayId": 26428094,
+        "name": "六环路",
+        "maximumMovementTiles": 0.00018362836624799756,
+        "movedDisplaySamples": 28,
+        "waterSamplesBefore": 0,
+        "waterSamplesAfter": 0
+      },
+      {
+        "osmWayId": 26428097,
+        "name": "六环路",
+        "maximumMovementTiles": 0.0005659047424174177,
+        "movedDisplaySamples": 36,
+        "waterSamplesBefore": 0,
+        "waterSamplesAfter": 0
+      },
+      {
+        "osmWayId": 33505957,
+        "name": "土沟路",
+        "maximumMovementTiles": 0.011646728830420935,
+        "movedDisplaySamples": 24,
+        "waterSamplesBefore": 0,
+        "waterSamplesAfter": 0
+      },
+      {
+        "osmWayId": 42782263,
+        "name": "京承高速",
+        "maximumMovementTiles": 0.0015831758723535974,
+        "movedDisplaySamples": 39,
+        "waterSamplesBefore": 0,
+        "waterSamplesAfter": 0
+      },
+      {
+        "osmWayId": 47518656,
+        "name": "秦北路",
+        "maximumMovementTiles": 0.02781285649518825,
+        "movedDisplaySamples": 51,
+        "waterSamplesBefore": 7,
+        "waterSamplesAfter": 7
+      },
+      {
+        "osmWayId": 47518787,
+        "name": "秦北路",
+        "maximumMovementTiles": 0.08276457385918784,
+        "movedDisplaySamples": 23,
+        "waterSamplesBefore": 9,
+        "waterSamplesAfter": 9
+      },
+      {
+        "osmWayId": 47518902,
+        "name": "温榆河左堤路",
+        "maximumMovementTiles": 0.9277197072475172,
+        "movedDisplaySamples": 466,
+        "waterSamplesBefore": 542,
+        "waterSamplesAfter": 511
+      },
+      {
+        "osmWayId": 47518911,
+        "name": "温榆河左堤路",
+        "maximumMovementTiles": 0.74725316447284,
+        "movedDisplaySamples": 230,
+        "waterSamplesBefore": 230,
+        "waterSamplesAfter": 190
+      },
+      {
+        "osmWayId": 55787998,
+        "name": "东沙路",
+        "maximumMovementTiles": 0.015333107094437987,
+        "movedDisplaySamples": 98,
+        "waterSamplesBefore": 11,
+        "waterSamplesAfter": 11
+      },
+      {
+        "osmWayId": 106615256,
+        "name": "立汤路",
+        "maximumMovementTiles": 0.0942101870939292,
+        "movedDisplaySamples": 122,
+        "waterSamplesBefore": 6,
+        "waterSamplesAfter": 6
+      },
+      {
+        "osmWayId": 106616547,
+        "name": "立汤路",
+        "maximumMovementTiles": 0.013017519328728435,
+        "movedDisplaySamples": 23,
+        "waterSamplesBefore": 2,
+        "waterSamplesAfter": 2
+      },
+      {
+        "osmWayId": 126860126,
+        "name": "京承高速",
+        "maximumMovementTiles": 0.07177584686028038,
+        "movedDisplaySamples": 28,
+        "waterSamplesBefore": 0,
+        "waterSamplesAfter": 0
+      },
+      {
+        "osmWayId": 126860130,
+        "name": "京承高速",
+        "maximumMovementTiles": 0.05685042098582529,
+        "movedDisplaySamples": 13,
+        "waterSamplesBefore": 0,
+        "waterSamplesAfter": 0
+      },
+      {
+        "osmWayId": 126860131,
+        "name": "京承高速",
+        "maximumMovementTiles": 0.0005409197474823897,
+        "movedDisplaySamples": 23,
+        "waterSamplesBefore": 0,
+        "waterSamplesAfter": 0
+      },
+      {
+        "osmWayId": 126860134,
+        "name": "京承高速",
+        "maximumMovementTiles": 0.0006004180461390791,
+        "movedDisplaySamples": 16,
+        "waterSamplesBefore": 0,
+        "waterSamplesAfter": 0
+      },
+      {
+        "osmWayId": 126860135,
+        "name": "京承高速",
+        "maximumMovementTiles": 0.05707920356650923,
+        "movedDisplaySamples": 12,
+        "waterSamplesBefore": 0,
+        "waterSamplesAfter": 0
+      },
+      {
+        "osmWayId": 126860150,
+        "name": null,
+        "maximumMovementTiles": 0.05728271362277507,
+        "movedDisplaySamples": 32,
+        "waterSamplesBefore": 0,
+        "waterSamplesAfter": 0
+      },
+      {
+        "osmWayId": 126860152,
+        "name": null,
+        "maximumMovementTiles": 0.003747349899407113,
+        "movedDisplaySamples": 41,
+        "waterSamplesBefore": 0,
+        "waterSamplesAfter": 0
+      },
+      {
+        "osmWayId": 126860158,
+        "name": null,
+        "maximumMovementTiles": 0.030280456266083576,
+        "movedDisplaySamples": 20,
+        "waterSamplesBefore": 0,
+        "waterSamplesAfter": 0
+      },
+      {
+        "osmWayId": 126860181,
+        "name": null,
+        "maximumMovementTiles": 0.18791728588760412,
+        "movedDisplaySamples": 31,
+        "waterSamplesBefore": 0,
+        "waterSamplesAfter": 0
+      },
+      {
+        "osmWayId": 126860182,
+        "name": null,
+        "maximumMovementTiles": 0.17932432221914793,
+        "movedDisplaySamples": 40,
+        "waterSamplesBefore": 0,
+        "waterSamplesAfter": 0
+      },
+      {
+        "osmWayId": 126860183,
+        "name": null,
+        "maximumMovementTiles": 0.000013936352105531176,
+        "movedDisplaySamples": 9,
+        "waterSamplesBefore": 0,
+        "waterSamplesAfter": 0
+      },
+      {
+        "osmWayId": 126860189,
+        "name": "首都机场北线高速公路",
+        "maximumMovementTiles": 0.0048905526390226025,
+        "movedDisplaySamples": 19,
+        "waterSamplesBefore": 0,
+        "waterSamplesAfter": 0
+      },
+      {
+        "osmWayId": 126860190,
+        "name": "首都机场北线高速公路",
+        "maximumMovementTiles": 0.005202555833121274,
+        "movedDisplaySamples": 19,
+        "waterSamplesBefore": 0,
+        "waterSamplesAfter": 0
+      },
+      {
+        "osmWayId": 130218349,
+        "name": null,
+        "maximumMovementTiles": 0.14645182664216194,
+        "movedDisplaySamples": 42,
+        "waterSamplesBefore": 19,
+        "waterSamplesAfter": 19
+      },
+      {
+        "osmWayId": 152445128,
+        "name": "立汤路",
+        "maximumMovementTiles": 0.011928902458586209,
+        "movedDisplaySamples": 27,
+        "waterSamplesBefore": 2,
+        "waterSamplesAfter": 2
+      },
+      {
+        "osmWayId": 152475742,
+        "name": "立汤路",
+        "maximumMovementTiles": 0.06500075532416179,
+        "movedDisplaySamples": 121,
+        "waterSamplesBefore": 0,
+        "waterSamplesAfter": 0
+      },
+      {
+        "osmWayId": 158054586,
+        "name": "京承高速",
+        "maximumMovementTiles": 0.0008516111937761825,
+        "movedDisplaySamples": 26,
+        "waterSamplesBefore": 0,
+        "waterSamplesAfter": 0
+      },
+      {
+        "osmWayId": 158054587,
+        "name": "京承高速",
+        "maximumMovementTiles": 0.0048462314556078955,
+        "movedDisplaySamples": 89,
+        "waterSamplesBefore": 0,
+        "waterSamplesAfter": 0
+      },
+      {
+        "osmWayId": 158054593,
+        "name": "京承高速",
+        "maximumMovementTiles": 0.00045425599587110697,
+        "movedDisplaySamples": 35,
+        "waterSamplesBefore": 0,
+        "waterSamplesAfter": 0
+      },
+      {
+        "osmWayId": 158054598,
+        "name": "京承高速",
+        "maximumMovementTiles": 0.0019179631379561697,
+        "movedDisplaySamples": 34,
+        "waterSamplesBefore": 0,
+        "waterSamplesAfter": 0
+      },
+      {
+        "osmWayId": 158054603,
+        "name": "京承高速",
+        "maximumMovementTiles": 0.0008896514456617516,
+        "movedDisplaySamples": 34,
+        "waterSamplesBefore": 0,
+        "waterSamplesAfter": 0
+      },
+      {
+        "osmWayId": 158054613,
+        "name": "京承高速",
+        "maximumMovementTiles": 0.11102836809383357,
+        "movedDisplaySamples": 34,
+        "waterSamplesBefore": 0,
+        "waterSamplesAfter": 0
+      },
+      {
+        "osmWayId": 158054629,
+        "name": "未来科学城滨河大道",
+        "maximumMovementTiles": 0.058490193077318016,
+        "movedDisplaySamples": 190,
+        "waterSamplesBefore": 0,
+        "waterSamplesAfter": 0
+      },
+      {
+        "osmWayId": 158054631,
+        "name": null,
+        "maximumMovementTiles": 0.0002359946827582717,
+        "movedDisplaySamples": 48,
+        "waterSamplesBefore": 0,
+        "waterSamplesAfter": 0
+      },
+      {
+        "osmWayId": 158054640,
+        "name": null,
+        "maximumMovementTiles": 0.0006030314843256452,
+        "movedDisplaySamples": 13,
+        "waterSamplesBefore": 0,
+        "waterSamplesAfter": 0
+      },
+      {
+        "osmWayId": 158054645,
+        "name": "未来科学城滨河大道",
+        "maximumMovementTiles": 0.08406744652472546,
+        "movedDisplaySamples": 191,
+        "waterSamplesBefore": 0,
+        "waterSamplesAfter": 0
+      },
+      {
+        "osmWayId": 158054725,
+        "name": null,
+        "maximumMovementTiles": 0.019276783027689093,
+        "movedDisplaySamples": 89,
+        "waterSamplesBefore": 0,
+        "waterSamplesAfter": 0
+      },
+      {
+        "osmWayId": 158054728,
+        "name": null,
+        "maximumMovementTiles": 0.10934808516794306,
+        "movedDisplaySamples": 77,
+        "waterSamplesBefore": 0,
+        "waterSamplesAfter": 0
+      },
+      {
+        "osmWayId": 158054729,
+        "name": null,
+        "maximumMovementTiles": 0.09448967072266923,
+        "movedDisplaySamples": 73,
+        "waterSamplesBefore": 0,
+        "waterSamplesAfter": 0
+      },
+      {
+        "osmWayId": 158054739,
+        "name": "府前街路",
+        "maximumMovementTiles": 0.04533512130815963,
+        "movedDisplaySamples": 83,
+        "waterSamplesBefore": 17,
+        "waterSamplesAfter": 16
+      },
+      {
+        "osmWayId": 158054748,
+        "name": "顺于路",
+        "maximumMovementTiles": 0.06941351415729786,
+        "movedDisplaySamples": 52,
+        "waterSamplesBefore": 0,
+        "waterSamplesAfter": 0
+      },
+      {
+        "osmWayId": 158054763,
+        "name": "顺于路",
+        "maximumMovementTiles": 0.08939285376493543,
+        "movedDisplaySamples": 50,
+        "waterSamplesBefore": 0,
+        "waterSamplesAfter": 0
+      },
+      {
+        "osmWayId": 158054767,
+        "name": "于庄街",
+        "maximumMovementTiles": 0.00015651757642415706,
+        "movedDisplaySamples": 14,
+        "waterSamplesBefore": 2,
+        "waterSamplesAfter": 2
+      },
+      {
+        "osmWayId": 183456801,
+        "name": "京承高速",
+        "maximumMovementTiles": 0.0024690508769050607,
+        "movedDisplaySamples": 82,
+        "waterSamplesBefore": 0,
+        "waterSamplesAfter": 0
+      },
+      {
+        "osmWayId": 183456802,
+        "name": "京承高速",
+        "maximumMovementTiles": 0.0004203789037102876,
+        "movedDisplaySamples": 27,
+        "waterSamplesBefore": 0,
+        "waterSamplesAfter": 0
+      },
+      {
+        "osmWayId": 183456807,
+        "name": null,
+        "maximumMovementTiles": 0.00015724185094256882,
+        "movedDisplaySamples": 5,
+        "waterSamplesBefore": 0,
+        "waterSamplesAfter": 0
+      },
+      {
+        "osmWayId": 203298089,
+        "name": "七北路",
+        "maximumMovementTiles": 0.024594398821314662,
+        "movedDisplaySamples": 97,
+        "waterSamplesBefore": 0,
+        "waterSamplesAfter": 0
+      },
+      {
+        "osmWayId": 203298100,
+        "name": null,
+        "maximumMovementTiles": 0.03375919600108315,
+        "movedDisplaySamples": 20,
+        "waterSamplesBefore": 0,
+        "waterSamplesAfter": 0
+      },
+      {
+        "osmWayId": 210697479,
+        "name": "八曹路",
+        "maximumMovementTiles": 0.003018592703565863,
+        "movedDisplaySamples": 38,
+        "waterSamplesBefore": 0,
+        "waterSamplesAfter": 0
+      },
+      {
+        "osmWayId": 220207021,
+        "name": null,
+        "maximumMovementTiles": 0.047629805396093704,
+        "movedDisplaySamples": 34,
+        "waterSamplesBefore": 0,
+        "waterSamplesAfter": 0
+      },
+      {
+        "osmWayId": 220207025,
+        "name": null,
+        "maximumMovementTiles": 0.07202485331461293,
+        "movedDisplaySamples": 36,
+        "waterSamplesBefore": 0,
+        "waterSamplesAfter": 0
+      },
+      {
+        "osmWayId": 220207026,
+        "name": null,
+        "maximumMovementTiles": 0.050858240145190185,
+        "movedDisplaySamples": 59,
+        "waterSamplesBefore": 13,
+        "waterSamplesAfter": 13
+      },
+      {
+        "osmWayId": 220207027,
+        "name": "苍龙街",
+        "maximumMovementTiles": 0.017154413185917268,
+        "movedDisplaySamples": 22,
+        "waterSamplesBefore": 9,
+        "waterSamplesAfter": 9
+      },
+      {
+        "osmWayId": 232399625,
+        "name": null,
+        "maximumMovementTiles": 0.021469230830953843,
+        "movedDisplaySamples": 54,
+        "waterSamplesBefore": 14,
+        "waterSamplesAfter": 14
+      },
+      {
+        "osmWayId": 232400183,
+        "name": null,
+        "maximumMovementTiles": 0.00005987624068046162,
+        "movedDisplaySamples": 1,
+        "waterSamplesBefore": 0,
+        "waterSamplesAfter": 0
+      },
+      {
+        "osmWayId": 232400539,
+        "name": null,
+        "maximumMovementTiles": 0.07023738776823744,
+        "movedDisplaySamples": 225,
+        "waterSamplesBefore": 0,
+        "waterSamplesAfter": 0
+      },
+      {
+        "osmWayId": 260842920,
+        "name": "温榆河右堤路",
+        "maximumMovementTiles": 0.6932387124106405,
+        "movedDisplaySamples": 649,
+        "waterSamplesBefore": 22,
+        "waterSamplesAfter": 14
+      },
+      {
+        "osmWayId": 276208167,
+        "name": "温榆河左堤路",
+        "maximumMovementTiles": 0.13302173361434136,
+        "movedDisplaySamples": 636,
+        "waterSamplesBefore": 142,
+        "waterSamplesAfter": 139
+      },
+      {
+        "osmWayId": 276208169,
+        "name": "秦上路",
+        "maximumMovementTiles": 0.05902884829706883,
+        "movedDisplaySamples": 221,
+        "waterSamplesBefore": 0,
+        "waterSamplesAfter": 0
+      },
+      {
+        "osmWayId": 276208170,
+        "name": null,
+        "maximumMovementTiles": 0.00173684438069807,
+        "movedDisplaySamples": 30,
+        "waterSamplesBefore": 13,
+        "waterSamplesAfter": 13
+      },
+      {
+        "osmWayId": 276208171,
+        "name": null,
+        "maximumMovementTiles": 0.14496584311927785,
+        "movedDisplaySamples": 125,
+        "waterSamplesBefore": 1,
+        "waterSamplesAfter": 1
+      },
+      {
+        "osmWayId": 276208172,
+        "name": null,
+        "maximumMovementTiles": 0.021120597837194777,
+        "movedDisplaySamples": 72,
+        "waterSamplesBefore": 8,
+        "waterSamplesAfter": 8
+      },
+      {
+        "osmWayId": 276208174,
+        "name": null,
+        "maximumMovementTiles": 0.05902995854598782,
+        "movedDisplaySamples": 66,
+        "waterSamplesBefore": 11,
+        "waterSamplesAfter": 11
+      },
+      {
+        "osmWayId": 276208175,
+        "name": null,
+        "maximumMovementTiles": 0.04155857006716492,
+        "movedDisplaySamples": 26,
+        "waterSamplesBefore": 0,
+        "waterSamplesAfter": 0
+      },
+      {
+        "osmWayId": 276208176,
+        "name": null,
+        "maximumMovementTiles": 0.060223640849782906,
+        "movedDisplaySamples": 33,
+        "waterSamplesBefore": 0,
+        "waterSamplesAfter": 0
+      },
+      {
+        "osmWayId": 276208177,
+        "name": null,
+        "maximumMovementTiles": 0.0745333216806228,
+        "movedDisplaySamples": 30,
+        "waterSamplesBefore": 0,
+        "waterSamplesAfter": 0
+      },
+      {
+        "osmWayId": 276208178,
+        "name": null,
+        "maximumMovementTiles": 0.0006583380383744475,
+        "movedDisplaySamples": 21,
+        "waterSamplesBefore": 0,
+        "waterSamplesAfter": 0
+      },
+      {
+        "osmWayId": 276208179,
+        "name": null,
+        "maximumMovementTiles": 0.05407202747759588,
+        "movedDisplaySamples": 43,
+        "waterSamplesBefore": 0,
+        "waterSamplesAfter": 0
+      },
+      {
+        "osmWayId": 276208181,
+        "name": null,
+        "maximumMovementTiles": 0.021563086497801604,
+        "movedDisplaySamples": 37,
+        "waterSamplesBefore": 0,
+        "waterSamplesAfter": 0
+      },
+      {
+        "osmWayId": 276433266,
+        "name": null,
+        "maximumMovementTiles": 0.08823418282835249,
+        "movedDisplaySamples": 99,
+        "waterSamplesBefore": 0,
+        "waterSamplesAfter": 0
+      },
+      {
+        "osmWayId": 276433268,
+        "name": null,
+        "maximumMovementTiles": 0.019987487828843735,
+        "movedDisplaySamples": 11,
+        "waterSamplesBefore": 8,
+        "waterSamplesAfter": 8
+      },
+      {
+        "osmWayId": 298728749,
+        "name": null,
+        "maximumMovementTiles": 0.00013209842932329974,
+        "movedDisplaySamples": 6,
+        "waterSamplesBefore": 0,
+        "waterSamplesAfter": 0
+      },
+      {
+        "osmWayId": 328209625,
+        "name": "北七家东路",
+        "maximumMovementTiles": 0.04261832848042181,
+        "movedDisplaySamples": 39,
+        "waterSamplesBefore": 0,
+        "waterSamplesAfter": 0
+      },
+      {
+        "osmWayId": 328287318,
+        "name": "英才北三街",
+        "maximumMovementTiles": 0.00201995338397695,
+        "movedDisplaySamples": 18,
+        "waterSamplesBefore": 0,
+        "waterSamplesAfter": 0
+      },
+      {
+        "osmWayId": 328287325,
+        "name": "蓬莱苑南街",
+        "maximumMovementTiles": 0.18364933083201918,
+        "movedDisplaySamples": 28,
+        "waterSamplesBefore": 0,
+        "waterSamplesAfter": 0
+      },
+      {
+        "osmWayId": 328292551,
+        "name": "高白路",
+        "maximumMovementTiles": 0.032710427871381544,
+        "movedDisplaySamples": 40,
+        "waterSamplesBefore": 0,
+        "waterSamplesAfter": 0
+      },
+      {
+        "osmWayId": 328292555,
+        "name": null,
+        "maximumMovementTiles": 0.013844434360385368,
+        "movedDisplaySamples": 15,
+        "waterSamplesBefore": 0,
+        "waterSamplesAfter": 0
+      },
+      {
+        "osmWayId": 328292559,
+        "name": null,
+        "maximumMovementTiles": 0.01152781782940663,
+        "movedDisplaySamples": 16,
+        "waterSamplesBefore": 0,
+        "waterSamplesAfter": 0
+      },
+      {
+        "osmWayId": 328292561,
+        "name": null,
+        "maximumMovementTiles": 0.001051825139205037,
+        "movedDisplaySamples": 13,
+        "waterSamplesBefore": 0,
+        "waterSamplesAfter": 0
+      },
+      {
+        "osmWayId": 328292564,
+        "name": null,
+        "maximumMovementTiles": 0.016176633863994296,
+        "movedDisplaySamples": 28,
+        "waterSamplesBefore": 0,
+        "waterSamplesAfter": 0
+      },
+      {
+        "osmWayId": 328292565,
+        "name": null,
+        "maximumMovementTiles": 0.5356164786151656,
+        "movedDisplaySamples": 34,
+        "waterSamplesBefore": 0,
+        "waterSamplesAfter": 0
+      },
+      {
+        "osmWayId": 328292566,
+        "name": "酸枣岭路",
+        "maximumMovementTiles": 0.0003794673359020079,
+        "movedDisplaySamples": 7,
+        "waterSamplesBefore": 0,
+        "waterSamplesAfter": 0
+      },
+      {
+        "osmWayId": 328292568,
+        "name": "北唐路",
+        "maximumMovementTiles": 0.0005472568745755641,
+        "movedDisplaySamples": 35,
+        "waterSamplesBefore": 0,
+        "waterSamplesAfter": 0
+      },
+      {
+        "osmWayId": 328596897,
+        "name": "北清路",
+        "maximumMovementTiles": 0.002725186170623765,
+        "movedDisplaySamples": 20,
+        "waterSamplesBefore": 0,
+        "waterSamplesAfter": 0
+      },
+      {
+        "osmWayId": 328596900,
+        "name": "北清路",
+        "maximumMovementTiles": 0.004051609044910359,
+        "movedDisplaySamples": 19,
+        "waterSamplesBefore": 0,
+        "waterSamplesAfter": 0
+      },
+      {
+        "osmWayId": 328596910,
+        "name": "岭上北街",
+        "maximumMovementTiles": 0.03286830925879956,
+        "movedDisplaySamples": 39,
+        "waterSamplesBefore": 0,
+        "waterSamplesAfter": 0
+      },
+      {
+        "osmWayId": 328596919,
+        "name": "未来科学城路",
+        "maximumMovementTiles": 0.005185782024474079,
+        "movedDisplaySamples": 41,
+        "waterSamplesBefore": 1,
+        "waterSamplesAfter": 1
+      },
+      {
+        "osmWayId": 328596945,
+        "name": "酸枣岭路",
+        "maximumMovementTiles": 0.03865273730976186,
+        "movedDisplaySamples": 28,
+        "waterSamplesBefore": 0,
+        "waterSamplesAfter": 0
+      },
+      {
+        "osmWayId": 395308293,
+        "name": "温榆河绿道昌平段",
+        "maximumMovementTiles": 0.1261967219724088,
+        "movedDisplaySamples": 490,
+        "waterSamplesBefore": 170,
+        "waterSamplesAfter": 162
+      },
+      {
+        "osmWayId": 395308294,
+        "name": "温榆河绿道昌平段",
+        "maximumMovementTiles": 0.10029154653993734,
+        "movedDisplaySamples": 167,
+        "waterSamplesBefore": 6,
+        "waterSamplesAfter": 6
+      },
+      {
+        "osmWayId": 395525259,
+        "name": null,
+        "maximumMovementTiles": 0.15724602921940947,
+        "movedDisplaySamples": 24,
+        "waterSamplesBefore": 0,
+        "waterSamplesAfter": 0
+      },
+      {
+        "osmWayId": 395531623,
+        "name": null,
+        "maximumMovementTiles": 0.16681238180089264,
+        "movedDisplaySamples": 70,
+        "waterSamplesBefore": 42,
+        "waterSamplesAfter": 41
+      },
+      {
+        "osmWayId": 395531624,
+        "name": null,
+        "maximumMovementTiles": 0.13335890519339008,
+        "movedDisplaySamples": 17,
+        "waterSamplesBefore": 0,
+        "waterSamplesAfter": 0
+      },
+      {
+        "osmWayId": 395531625,
+        "name": null,
+        "maximumMovementTiles": 0.20647777505692455,
+        "movedDisplaySamples": 54,
+        "waterSamplesBefore": 0,
+        "waterSamplesAfter": 0
+      },
+      {
+        "osmWayId": 395531626,
+        "name": null,
+        "maximumMovementTiles": 0.1834459680492262,
+        "movedDisplaySamples": 43,
+        "waterSamplesBefore": 0,
+        "waterSamplesAfter": 0
+      },
+      {
+        "osmWayId": 395531627,
+        "name": null,
+        "maximumMovementTiles": 0.2044328245667916,
+        "movedDisplaySamples": 61,
+        "waterSamplesBefore": 14,
+        "waterSamplesAfter": 14
+      },
+      {
+        "osmWayId": 395533856,
+        "name": null,
+        "maximumMovementTiles": 0.14268987362581048,
+        "movedDisplaySamples": 87,
+        "waterSamplesBefore": 0,
+        "waterSamplesAfter": 0
+      },
+      {
+        "osmWayId": 395699977,
+        "name": "顺于路",
+        "maximumMovementTiles": 0.0017737684087678523,
+        "movedDisplaySamples": 12,
+        "waterSamplesBefore": 0,
+        "waterSamplesAfter": 0
+      },
+      {
+        "osmWayId": 395702463,
+        "name": "北七家西路",
+        "maximumMovementTiles": 0.18364933083201918,
+        "movedDisplaySamples": 38,
+        "waterSamplesBefore": 0,
+        "waterSamplesAfter": 0
+      },
+      {
+        "osmWayId": 417225058,
+        "name": null,
+        "maximumMovementTiles": 0.04422373706152918,
+        "movedDisplaySamples": 84,
+        "waterSamplesBefore": 0,
+        "waterSamplesAfter": 0
+      },
+      {
+        "osmWayId": 417225059,
+        "name": null,
+        "maximumMovementTiles": 0.008093066818782968,
+        "movedDisplaySamples": 23,
+        "waterSamplesBefore": 0,
+        "waterSamplesAfter": 0
+      },
+      {
+        "osmWayId": 417225060,
+        "name": null,
+        "maximumMovementTiles": 0.22465620458182758,
+        "movedDisplaySamples": 17,
+        "waterSamplesBefore": 0,
+        "waterSamplesAfter": 0
+      },
+      {
+        "osmWayId": 417225061,
+        "name": "温榆河绿道昌平段",
+        "maximumMovementTiles": 0.9247447532489451,
+        "movedDisplaySamples": 75,
+        "waterSamplesBefore": 43,
+        "waterSamplesAfter": 35
+      },
+      {
+        "osmWayId": 417225066,
+        "name": null,
+        "maximumMovementTiles": 0.06446644432193227,
+        "movedDisplaySamples": 22,
+        "waterSamplesBefore": 3,
+        "waterSamplesAfter": 3
+      },
+      {
+        "osmWayId": 417225069,
+        "name": null,
+        "maximumMovementTiles": 0.15220934034770078,
+        "movedDisplaySamples": 197,
+        "waterSamplesBefore": 19,
+        "waterSamplesAfter": 19
+      },
+      {
+        "osmWayId": 417225070,
+        "name": null,
+        "maximumMovementTiles": 0.013645535713501659,
+        "movedDisplaySamples": 30,
+        "waterSamplesBefore": 0,
+        "waterSamplesAfter": 0
+      },
+      {
+        "osmWayId": 417225071,
+        "name": null,
+        "maximumMovementTiles": 0.0002679889909359513,
+        "movedDisplaySamples": 13,
+        "waterSamplesBefore": 0,
+        "waterSamplesAfter": 0
+      },
+      {
+        "osmWayId": 417227244,
+        "name": null,
+        "maximumMovementTiles": 0.037471642410907266,
+        "movedDisplaySamples": 103,
+        "waterSamplesBefore": 0,
+        "waterSamplesAfter": 0
+      },
+      {
+        "osmWayId": 417227249,
+        "name": null,
+        "maximumMovementTiles": 0.0069031708936217314,
+        "movedDisplaySamples": 48,
+        "waterSamplesBefore": 0,
+        "waterSamplesAfter": 0
+      },
+      {
+        "osmWayId": 417227254,
+        "name": null,
+        "maximumMovementTiles": 0.0010450243892583218,
+        "movedDisplaySamples": 17,
+        "waterSamplesBefore": 0,
+        "waterSamplesAfter": 0
+      },
+      {
+        "osmWayId": 419670265,
+        "name": null,
+        "maximumMovementTiles": 0.23794399194534593,
+        "movedDisplaySamples": 21,
+        "waterSamplesBefore": 3,
+        "waterSamplesAfter": 2
+      },
+      {
+        "osmWayId": 419670266,
+        "name": null,
+        "maximumMovementTiles": 0.037730164938440974,
+        "movedDisplaySamples": 14,
+        "waterSamplesBefore": 17,
+        "waterSamplesAfter": 17
+      },
+      {
+        "osmWayId": 419670267,
+        "name": null,
+        "maximumMovementTiles": 0.25426701053151873,
+        "movedDisplaySamples": 69,
+        "waterSamplesBefore": 20,
+        "waterSamplesAfter": 20
+      },
+      {
+        "osmWayId": 419670268,
+        "name": null,
+        "maximumMovementTiles": 0.35816373727996903,
+        "movedDisplaySamples": 31,
+        "waterSamplesBefore": 49,
+        "waterSamplesAfter": 46
+      },
+      {
+        "osmWayId": 419670269,
+        "name": null,
+        "maximumMovementTiles": 0.23385014158443565,
+        "movedDisplaySamples": 12,
+        "waterSamplesBefore": 0,
+        "waterSamplesAfter": 0
+      },
+      {
+        "osmWayId": 419670271,
+        "name": null,
+        "maximumMovementTiles": 0.35500101263998324,
+        "movedDisplaySamples": 173,
+        "waterSamplesBefore": 9,
+        "waterSamplesAfter": 6
+      },
+      {
+        "osmWayId": 419670272,
+        "name": null,
+        "maximumMovementTiles": 0.2650187987540012,
+        "movedDisplaySamples": 53,
+        "waterSamplesBefore": 13,
+        "waterSamplesAfter": 12
+      },
+      {
+        "osmWayId": 419671811,
+        "name": null,
+        "maximumMovementTiles": 0.3879422680972525,
+        "movedDisplaySamples": 111,
+        "waterSamplesBefore": 37,
+        "waterSamplesAfter": 33
+      },
+      {
+        "osmWayId": 419671812,
+        "name": null,
+        "maximumMovementTiles": 0.15429964824339257,
+        "movedDisplaySamples": 9,
+        "waterSamplesBefore": 19,
+        "waterSamplesAfter": 19
+      },
+      {
+        "osmWayId": 419671813,
+        "name": null,
+        "maximumMovementTiles": 0.3818579807284195,
+        "movedDisplaySamples": 37,
+        "waterSamplesBefore": 37,
+        "waterSamplesAfter": 24
+      },
+      {
+        "osmWayId": 419671814,
+        "name": null,
+        "maximumMovementTiles": 0.34132784038570846,
+        "movedDisplaySamples": 18,
+        "waterSamplesBefore": 10,
+        "waterSamplesAfter": 10
+      },
+      {
+        "osmWayId": 420509951,
+        "name": null,
+        "maximumMovementTiles": 0.07681692076839865,
+        "movedDisplaySamples": 15,
+        "waterSamplesBefore": 5,
+        "waterSamplesAfter": 5
+      },
+      {
+        "osmWayId": 420509953,
+        "name": null,
+        "maximumMovementTiles": 0.28771607202277966,
+        "movedDisplaySamples": 61,
+        "waterSamplesBefore": 0,
+        "waterSamplesAfter": 0
+      },
+      {
+        "osmWayId": 420509954,
+        "name": null,
+        "maximumMovementTiles": 0.08677380434014792,
+        "movedDisplaySamples": 7,
+        "waterSamplesBefore": 0,
+        "waterSamplesAfter": 0
+      },
+      {
+        "osmWayId": 420509955,
+        "name": null,
+        "maximumMovementTiles": 0.056896232583431704,
+        "movedDisplaySamples": 26,
+        "waterSamplesBefore": 0,
+        "waterSamplesAfter": 0
+      },
+      {
+        "osmWayId": 420509956,
+        "name": null,
+        "maximumMovementTiles": 0.07114402943998761,
+        "movedDisplaySamples": 17,
+        "waterSamplesBefore": 8,
+        "waterSamplesAfter": 8
+      },
+      {
+        "osmWayId": 420509957,
+        "name": null,
+        "maximumMovementTiles": 0.06431828054157418,
+        "movedDisplaySamples": 64,
+        "waterSamplesBefore": 0,
+        "waterSamplesAfter": 0
+      },
+      {
+        "osmWayId": 420509958,
+        "name": null,
+        "maximumMovementTiles": 0.029837886106194658,
+        "movedDisplaySamples": 4,
+        "waterSamplesBefore": 6,
+        "waterSamplesAfter": 6
+      },
+      {
+        "osmWayId": 420509959,
+        "name": null,
+        "maximumMovementTiles": 0.0040621990108960305,
+        "movedDisplaySamples": 2,
+        "waterSamplesBefore": 8,
+        "waterSamplesAfter": 8
+      },
+      {
+        "osmWayId": 420509960,
+        "name": null,
+        "maximumMovementTiles": 0.13348225413239762,
+        "movedDisplaySamples": 20,
+        "waterSamplesBefore": 0,
+        "waterSamplesAfter": 0
+      },
+      {
+        "osmWayId": 420509961,
+        "name": null,
+        "maximumMovementTiles": 0.09511873135182007,
+        "movedDisplaySamples": 16,
+        "waterSamplesBefore": 0,
+        "waterSamplesAfter": 0
+      },
+      {
+        "osmWayId": 420509962,
+        "name": null,
+        "maximumMovementTiles": 0.0000048509112713924925,
+        "movedDisplaySamples": 2,
+        "waterSamplesBefore": 16,
+        "waterSamplesAfter": 16
+      },
+      {
+        "osmWayId": 420509964,
+        "name": null,
+        "maximumMovementTiles": 0.08206245198529835,
+        "movedDisplaySamples": 43,
+        "waterSamplesBefore": 7,
+        "waterSamplesAfter": 7
+      },
+      {
+        "osmWayId": 420509965,
+        "name": null,
+        "maximumMovementTiles": 0.08258530320636034,
+        "movedDisplaySamples": 30,
+        "waterSamplesBefore": 11,
+        "waterSamplesAfter": 11
+      },
+      {
+        "osmWayId": 420510854,
+        "name": null,
+        "maximumMovementTiles": 0.16259059385269206,
+        "movedDisplaySamples": 6,
+        "waterSamplesBefore": 0,
+        "waterSamplesAfter": 0
+      },
+      {
+        "osmWayId": 420545488,
+        "name": null,
+        "maximumMovementTiles": 0.26689367049154994,
+        "movedDisplaySamples": 26,
+        "waterSamplesBefore": 0,
+        "waterSamplesAfter": 0
+      },
+      {
+        "osmWayId": 420546973,
+        "name": null,
+        "maximumMovementTiles": 0.09295955145903562,
+        "movedDisplaySamples": 8,
+        "waterSamplesBefore": 0,
+        "waterSamplesAfter": 0
+      },
+      {
+        "osmWayId": 420549935,
+        "name": null,
+        "maximumMovementTiles": 0.0689684676684519,
+        "movedDisplaySamples": 13,
+        "waterSamplesBefore": 0,
+        "waterSamplesAfter": 0
+      },
+      {
+        "osmWayId": 420549937,
+        "name": null,
+        "maximumMovementTiles": 0.029938622411921547,
+        "movedDisplaySamples": 7,
+        "waterSamplesBefore": 1,
+        "waterSamplesAfter": 1
+      },
+      {
+        "osmWayId": 420549939,
+        "name": null,
+        "maximumMovementTiles": 0.042746368044765524,
+        "movedDisplaySamples": 32,
+        "waterSamplesBefore": 12,
+        "waterSamplesAfter": 12
+      },
+      {
+        "osmWayId": 420549940,
+        "name": null,
+        "maximumMovementTiles": 0.03715916539232574,
+        "movedDisplaySamples": 12,
+        "waterSamplesBefore": 0,
+        "waterSamplesAfter": 0
+      },
+      {
+        "osmWayId": 420682607,
+        "name": null,
+        "maximumMovementTiles": 0.44080646946796437,
+        "movedDisplaySamples": 23,
+        "waterSamplesBefore": 0,
+        "waterSamplesAfter": 0
+      },
+      {
+        "osmWayId": 420684969,
+        "name": null,
+        "maximumMovementTiles": 0.009178462276007753,
+        "movedDisplaySamples": 24,
+        "waterSamplesBefore": 0,
+        "waterSamplesAfter": 0
+      },
+      {
+        "osmWayId": 420684970,
+        "name": null,
+        "maximumMovementTiles": 0.02728507705499069,
+        "movedDisplaySamples": 66,
+        "waterSamplesBefore": 0,
+        "waterSamplesAfter": 0
+      },
+      {
+        "osmWayId": 420684972,
+        "name": null,
+        "maximumMovementTiles": 0.01643015476752641,
+        "movedDisplaySamples": 17,
+        "waterSamplesBefore": 0,
+        "waterSamplesAfter": 0
+      },
+      {
+        "osmWayId": 429424672,
+        "name": "沟流路",
+        "maximumMovementTiles": 0.00012376620926473822,
+        "movedDisplaySamples": 9,
+        "waterSamplesBefore": 0,
+        "waterSamplesAfter": 0
+      },
+      {
+        "osmWayId": 446941117,
+        "name": null,
+        "maximumMovementTiles": 0.06043251749699089,
+        "movedDisplaySamples": 92,
+        "waterSamplesBefore": 0,
+        "waterSamplesAfter": 0
+      },
+      {
+        "osmWayId": 446941118,
+        "name": null,
+        "maximumMovementTiles": 0.025911909484361187,
+        "movedDisplaySamples": 19,
+        "waterSamplesBefore": 4,
+        "waterSamplesAfter": 4
+      },
+      {
+        "osmWayId": 491892342,
+        "name": null,
+        "maximumMovementTiles": 0.016194033600257396,
+        "movedDisplaySamples": 52,
+        "waterSamplesBefore": 0,
+        "waterSamplesAfter": 0
+      },
+      {
+        "osmWayId": 491892344,
+        "name": null,
+        "maximumMovementTiles": 0.0004216429699358067,
+        "movedDisplaySamples": 15,
+        "waterSamplesBefore": 0,
+        "waterSamplesAfter": 0
+      },
+      {
+        "osmWayId": 491892345,
+        "name": null,
+        "maximumMovementTiles": 0.00846955386900274,
+        "movedDisplaySamples": 33,
+        "waterSamplesBefore": 0,
+        "waterSamplesAfter": 0
+      },
+      {
+        "osmWayId": 491893345,
+        "name": null,
+        "maximumMovementTiles": 0.0173665644195201,
+        "movedDisplaySamples": 15,
+        "waterSamplesBefore": 0,
+        "waterSamplesAfter": 0
+      },
+      {
+        "osmWayId": 491893346,
+        "name": null,
+        "maximumMovementTiles": 0.013770775389166327,
+        "movedDisplaySamples": 14,
+        "waterSamplesBefore": 0,
+        "waterSamplesAfter": 0
+      },
+      {
+        "osmWayId": 491893347,
+        "name": null,
+        "maximumMovementTiles": 0.026213081473700134,
+        "movedDisplaySamples": 27,
+        "waterSamplesBefore": 0,
+        "waterSamplesAfter": 0
+      },
+      {
+        "osmWayId": 491893348,
+        "name": null,
+        "maximumMovementTiles": 0.005734988656416351,
+        "movedDisplaySamples": 29,
+        "waterSamplesBefore": 0,
+        "waterSamplesAfter": 0
+      },
+      {
+        "osmWayId": 530469340,
+        "name": null,
+        "maximumMovementTiles": 0.003460766726904749,
+        "movedDisplaySamples": 58,
+        "waterSamplesBefore": 0,
+        "waterSamplesAfter": 0
+      },
+      {
+        "osmWayId": 530469341,
+        "name": null,
+        "maximumMovementTiles": 0.023723621105773498,
+        "movedDisplaySamples": 21,
+        "waterSamplesBefore": 0,
+        "waterSamplesAfter": 0
+      },
+      {
+        "osmWayId": 530469344,
+        "name": null,
+        "maximumMovementTiles": 0.0005166906953461177,
+        "movedDisplaySamples": 11,
+        "waterSamplesBefore": 0,
+        "waterSamplesAfter": 0
+      },
+      {
+        "osmWayId": 530469345,
+        "name": null,
+        "maximumMovementTiles": 0.0001294913064544886,
+        "movedDisplaySamples": 9,
+        "waterSamplesBefore": 0,
+        "waterSamplesAfter": 0
+      },
+      {
+        "osmWayId": 530469346,
+        "name": null,
+        "maximumMovementTiles": 0.10592037032817518,
+        "movedDisplaySamples": 33,
+        "waterSamplesBefore": 0,
+        "waterSamplesAfter": 0
+      },
+      {
+        "osmWayId": 530469347,
+        "name": null,
+        "maximumMovementTiles": 0.0005048361936884518,
+        "movedDisplaySamples": 61,
+        "waterSamplesBefore": 0,
+        "waterSamplesAfter": 0
+      },
+      {
+        "osmWayId": 530469348,
+        "name": null,
+        "maximumMovementTiles": 0.001558846467866734,
+        "movedDisplaySamples": 37,
+        "waterSamplesBefore": 0,
+        "waterSamplesAfter": 0
+      },
+      {
+        "osmWayId": 530469349,
+        "name": null,
+        "maximumMovementTiles": 0.0692688727412622,
+        "movedDisplaySamples": 21,
+        "waterSamplesBefore": 0,
+        "waterSamplesAfter": 0
+      },
+      {
+        "osmWayId": 530469352,
+        "name": null,
+        "maximumMovementTiles": 0.09434146172805373,
+        "movedDisplaySamples": 108,
+        "waterSamplesBefore": 0,
+        "waterSamplesAfter": 0
+      },
+      {
+        "osmWayId": 530469353,
+        "name": null,
+        "maximumMovementTiles": 0.028639685529407464,
+        "movedDisplaySamples": 27,
+        "waterSamplesBefore": 0,
+        "waterSamplesAfter": 0
+      },
+      {
+        "osmWayId": 530469354,
+        "name": null,
+        "maximumMovementTiles": 0.05512904530979259,
+        "movedDisplaySamples": 5,
+        "waterSamplesBefore": 0,
+        "waterSamplesAfter": 0
+      },
+      {
+        "osmWayId": 530469355,
+        "name": null,
+        "maximumMovementTiles": 0.04353303175223013,
+        "movedDisplaySamples": 13,
+        "waterSamplesBefore": 0,
+        "waterSamplesAfter": 0
+      },
+      {
+        "osmWayId": 530470016,
+        "name": null,
+        "maximumMovementTiles": 0.017179735414084657,
+        "movedDisplaySamples": 5,
+        "waterSamplesBefore": 0,
+        "waterSamplesAfter": 0
+      },
+      {
+        "osmWayId": 530770811,
+        "name": null,
+        "maximumMovementTiles": 0.02964308959233669,
+        "movedDisplaySamples": 14,
+        "waterSamplesBefore": 0,
+        "waterSamplesAfter": 0
+      },
+      {
+        "osmWayId": 530770818,
+        "name": null,
+        "maximumMovementTiles": 0.027794738346426956,
+        "movedDisplaySamples": 37,
+        "waterSamplesBefore": 0,
+        "waterSamplesAfter": 0
+      },
+      {
+        "osmWayId": 554057369,
+        "name": null,
+        "maximumMovementTiles": 0.002369539184659556,
+        "movedDisplaySamples": 14,
+        "waterSamplesBefore": 0,
+        "waterSamplesAfter": 0
+      },
+      {
+        "osmWayId": 591295112,
+        "name": null,
+        "maximumMovementTiles": 0.02661526626034682,
+        "movedDisplaySamples": 63,
+        "waterSamplesBefore": 0,
+        "waterSamplesAfter": 0
+      },
+      {
+        "osmWayId": 622367776,
+        "name": null,
+        "maximumMovementTiles": 0.08844058069189942,
+        "movedDisplaySamples": 128,
+        "waterSamplesBefore": 20,
+        "waterSamplesAfter": 20
+      },
+      {
+        "osmWayId": 622367777,
+        "name": null,
+        "maximumMovementTiles": 0.11283678917251423,
+        "movedDisplaySamples": 25,
+        "waterSamplesBefore": 0,
+        "waterSamplesAfter": 0
+      },
+      {
+        "osmWayId": 622367780,
+        "name": null,
+        "maximumMovementTiles": 0.05477338513740282,
+        "movedDisplaySamples": 82,
+        "waterSamplesBefore": 0,
+        "waterSamplesAfter": 0
+      },
+      {
+        "osmWayId": 622367781,
+        "name": null,
+        "maximumMovementTiles": 0.015758009901253978,
+        "movedDisplaySamples": 56,
+        "waterSamplesBefore": 26,
+        "waterSamplesAfter": 26
+      },
+      {
+        "osmWayId": 622609708,
+        "name": null,
+        "maximumMovementTiles": 0.03393564954168838,
+        "movedDisplaySamples": 18,
+        "waterSamplesBefore": 17,
+        "waterSamplesAfter": 17
+      },
+      {
+        "osmWayId": 622609709,
+        "name": null,
+        "maximumMovementTiles": 0.028663733817498708,
+        "movedDisplaySamples": 83,
+        "waterSamplesBefore": 33,
+        "waterSamplesAfter": 33
+      },
+      {
+        "osmWayId": 622609710,
+        "name": null,
+        "maximumMovementTiles": 0.010913277306571894,
+        "movedDisplaySamples": 4,
+        "waterSamplesBefore": 0,
+        "waterSamplesAfter": 0
+      },
+      {
+        "osmWayId": 622609711,
+        "name": null,
+        "maximumMovementTiles": 0.034773224839729895,
+        "movedDisplaySamples": 13,
+        "waterSamplesBefore": 22,
+        "waterSamplesAfter": 22
+      },
+      {
+        "osmWayId": 622609712,
+        "name": null,
+        "maximumMovementTiles": 0.02235218501653229,
+        "movedDisplaySamples": 21,
+        "waterSamplesBefore": 0,
+        "waterSamplesAfter": 0
+      },
+      {
+        "osmWayId": 622609713,
+        "name": null,
+        "maximumMovementTiles": 0.017276154406304,
+        "movedDisplaySamples": 22,
+        "waterSamplesBefore": 0,
+        "waterSamplesAfter": 0
+      },
+      {
+        "osmWayId": 622609714,
+        "name": null,
+        "maximumMovementTiles": 0.061673169509672304,
+        "movedDisplaySamples": 56,
+        "waterSamplesBefore": 0,
+        "waterSamplesAfter": 0
+      },
+      {
+        "osmWayId": 622609715,
+        "name": null,
+        "maximumMovementTiles": 0.038381247148431816,
+        "movedDisplaySamples": 4,
+        "waterSamplesBefore": 0,
+        "waterSamplesAfter": 0
+      },
+      {
+        "osmWayId": 622609716,
+        "name": null,
+        "maximumMovementTiles": 0.04441233437947565,
+        "movedDisplaySamples": 10,
+        "waterSamplesBefore": 0,
+        "waterSamplesAfter": 0
+      },
+      {
+        "osmWayId": 622609717,
+        "name": null,
+        "maximumMovementTiles": 0.0494718720681829,
+        "movedDisplaySamples": 3,
+        "waterSamplesBefore": 0,
+        "waterSamplesAfter": 0
+      },
+      {
+        "osmWayId": 622609718,
+        "name": null,
+        "maximumMovementTiles": 0.0714955713869321,
+        "movedDisplaySamples": 98,
+        "waterSamplesBefore": 37,
+        "waterSamplesAfter": 29
+      },
+      {
+        "osmWayId": 622609719,
+        "name": null,
+        "maximumMovementTiles": 0.00012599750553363498,
+        "movedDisplaySamples": 1,
+        "waterSamplesBefore": 14,
+        "waterSamplesAfter": 14
+      },
+      {
+        "osmWayId": 622609720,
+        "name": null,
+        "maximumMovementTiles": 0.0024640107333872415,
+        "movedDisplaySamples": 18,
+        "waterSamplesBefore": 54,
+        "waterSamplesAfter": 54
+      },
+      {
+        "osmWayId": 622609721,
+        "name": null,
+        "maximumMovementTiles": 0.00912579193137093,
+        "movedDisplaySamples": 18,
+        "waterSamplesBefore": 32,
+        "waterSamplesAfter": 32
+      },
+      {
+        "osmWayId": 622609724,
+        "name": null,
+        "maximumMovementTiles": 0.006973670140719667,
+        "movedDisplaySamples": 32,
+        "waterSamplesBefore": 6,
+        "waterSamplesAfter": 6
+      },
+      {
+        "osmWayId": 622609726,
+        "name": null,
+        "maximumMovementTiles": 0.027017927226841158,
+        "movedDisplaySamples": 60,
+        "waterSamplesBefore": 25,
+        "waterSamplesAfter": 25
+      },
+      {
+        "osmWayId": 622609729,
+        "name": null,
+        "maximumMovementTiles": 0.016015702246555092,
+        "movedDisplaySamples": 21,
+        "waterSamplesBefore": 3,
+        "waterSamplesAfter": 3
+      },
+      {
+        "osmWayId": 622609731,
+        "name": null,
+        "maximumMovementTiles": 0.03990708580519105,
+        "movedDisplaySamples": 56,
+        "waterSamplesBefore": 0,
+        "waterSamplesAfter": 0
+      },
+      {
+        "osmWayId": 622609733,
+        "name": null,
+        "maximumMovementTiles": 0.03211364282827246,
+        "movedDisplaySamples": 16,
+        "waterSamplesBefore": 0,
+        "waterSamplesAfter": 0
+      },
+      {
+        "osmWayId": 622609734,
+        "name": null,
+        "maximumMovementTiles": 0.028061571421936025,
+        "movedDisplaySamples": 21,
+        "waterSamplesBefore": 5,
+        "waterSamplesAfter": 4
+      },
+      {
+        "osmWayId": 622609736,
+        "name": null,
+        "maximumMovementTiles": 0.013314733629953853,
+        "movedDisplaySamples": 74,
+        "waterSamplesBefore": 0,
+        "waterSamplesAfter": 0
+      },
+      {
+        "osmWayId": 622609737,
+        "name": null,
+        "maximumMovementTiles": 0.027372905270037,
+        "movedDisplaySamples": 21,
+        "waterSamplesBefore": 0,
+        "waterSamplesAfter": 0
+      },
+      {
+        "osmWayId": 622609739,
+        "name": null,
+        "maximumMovementTiles": 0.005795422275061353,
+        "movedDisplaySamples": 11,
+        "waterSamplesBefore": 0,
+        "waterSamplesAfter": 0
+      },
+      {
+        "osmWayId": 622609741,
+        "name": null,
+        "maximumMovementTiles": 0.010678398346904249,
+        "movedDisplaySamples": 15,
+        "waterSamplesBefore": 54,
+        "waterSamplesAfter": 54
+      },
+      {
+        "osmWayId": 622609744,
+        "name": null,
+        "maximumMovementTiles": 0.0015498511217166455,
+        "movedDisplaySamples": 6,
+        "waterSamplesBefore": 17,
+        "waterSamplesAfter": 17
+      },
+      {
+        "osmWayId": 622609746,
+        "name": null,
+        "maximumMovementTiles": 0.010266278100301137,
+        "movedDisplaySamples": 70,
+        "waterSamplesBefore": 62,
+        "waterSamplesAfter": 62
+      },
+      {
+        "osmWayId": 622609748,
+        "name": null,
+        "maximumMovementTiles": 0.01747500505297905,
+        "movedDisplaySamples": 8,
+        "waterSamplesBefore": 0,
+        "waterSamplesAfter": 0
+      },
+      {
+        "osmWayId": 622609750,
+        "name": null,
+        "maximumMovementTiles": 0.0063647813320352655,
+        "movedDisplaySamples": 7,
+        "waterSamplesBefore": 4,
+        "waterSamplesAfter": 4
+      },
+      {
+        "osmWayId": 622609751,
+        "name": null,
+        "maximumMovementTiles": 0.00997239993757188,
+        "movedDisplaySamples": 8,
+        "waterSamplesBefore": 0,
+        "waterSamplesAfter": 0
+      },
+      {
+        "osmWayId": 622609754,
+        "name": null,
+        "maximumMovementTiles": 0.006784288347115195,
+        "movedDisplaySamples": 9,
+        "waterSamplesBefore": 5,
+        "waterSamplesAfter": 5
+      },
+      {
+        "osmWayId": 622609755,
+        "name": null,
+        "maximumMovementTiles": 0.010557670222720595,
+        "movedDisplaySamples": 20,
+        "waterSamplesBefore": 0,
+        "waterSamplesAfter": 0
+      },
+      {
+        "osmWayId": 622609757,
+        "name": null,
+        "maximumMovementTiles": 0.007721132051835264,
+        "movedDisplaySamples": 47,
+        "waterSamplesBefore": 0,
+        "waterSamplesAfter": 0
+      },
+      {
+        "osmWayId": 622609761,
+        "name": null,
+        "maximumMovementTiles": 0.00004092217357399775,
+        "movedDisplaySamples": 16,
+        "waterSamplesBefore": 0,
+        "waterSamplesAfter": 0
+      },
+      {
+        "osmWayId": 622609765,
+        "name": null,
+        "maximumMovementTiles": 0.000012297791381863205,
+        "movedDisplaySamples": 7,
+        "waterSamplesBefore": 0,
+        "waterSamplesAfter": 0
+      },
+      {
+        "osmWayId": 669449216,
+        "name": "沟自头街",
+        "maximumMovementTiles": 0.0034134000460901816,
+        "movedDisplaySamples": 21,
+        "waterSamplesBefore": 0,
+        "waterSamplesAfter": 0
+      },
+      {
+        "osmWayId": 669449217,
+        "name": null,
+        "maximumMovementTiles": 0.000010556195942067273,
+        "movedDisplaySamples": 22,
+        "waterSamplesBefore": 0,
+        "waterSamplesAfter": 0
+      },
+      {
+        "osmWayId": 669449218,
+        "name": "岭上南街",
+        "maximumMovementTiles": 0.02314072594154817,
+        "movedDisplaySamples": 28,
+        "waterSamplesBefore": 0,
+        "waterSamplesAfter": 0
+      },
+      {
+        "osmWayId": 779733510,
+        "name": null,
+        "maximumMovementTiles": 0.1825246889157464,
+        "movedDisplaySamples": 239,
+        "waterSamplesBefore": 118,
+        "waterSamplesAfter": 113
+      },
+      {
+        "osmWayId": 817849295,
+        "name": "定泗路",
+        "maximumMovementTiles": 0.09167188945855177,
+        "movedDisplaySamples": 56,
+        "waterSamplesBefore": 1,
+        "waterSamplesAfter": 1
+      },
+      {
+        "osmWayId": 833445445,
+        "name": "常后路",
+        "maximumMovementTiles": 0.06517120975191333,
+        "movedDisplaySamples": 37,
+        "waterSamplesBefore": 0,
+        "waterSamplesAfter": 0
+      },
+      {
+        "osmWayId": 833832480,
+        "name": null,
+        "maximumMovementTiles": 0.015134768481635369,
+        "movedDisplaySamples": 29,
+        "waterSamplesBefore": 3,
+        "waterSamplesAfter": 3
+      },
+      {
+        "osmWayId": 835197480,
+        "name": "顺于路",
+        "maximumMovementTiles": 0.0002915563578509746,
+        "movedDisplaySamples": 2,
+        "waterSamplesBefore": 0,
+        "waterSamplesAfter": 0
+      },
+      {
+        "osmWayId": 838501175,
+        "name": null,
+        "maximumMovementTiles": 0.0002539098890354351,
+        "movedDisplaySamples": 1,
+        "waterSamplesBefore": 0,
+        "waterSamplesAfter": 0
+      },
+      {
+        "osmWayId": 839530328,
+        "name": null,
+        "maximumMovementTiles": 0.022915114825902316,
+        "movedDisplaySamples": 19,
+        "waterSamplesBefore": 2,
+        "waterSamplesAfter": 2
+      },
+      {
+        "osmWayId": 839901797,
+        "name": null,
+        "maximumMovementTiles": 0.005162167558504702,
+        "movedDisplaySamples": 26,
+        "waterSamplesBefore": 0,
+        "waterSamplesAfter": 0
+      },
+      {
+        "osmWayId": 839901798,
+        "name": null,
+        "maximumMovementTiles": 0.011529338861843945,
+        "movedDisplaySamples": 32,
+        "waterSamplesBefore": 0,
+        "waterSamplesAfter": 0
+      },
+      {
+        "osmWayId": 839901799,
+        "name": "温榆河右堤路",
+        "maximumMovementTiles": 0.005435598761336598,
+        "movedDisplaySamples": 10,
+        "waterSamplesBefore": 0,
+        "waterSamplesAfter": 0
+      },
+      {
+        "osmWayId": 839901800,
+        "name": "温榆河右堤路",
+        "maximumMovementTiles": 0.005435598761336598,
+        "movedDisplaySamples": 7,
+        "waterSamplesBefore": 0,
+        "waterSamplesAfter": 0
+      },
+      {
+        "osmWayId": 839901801,
+        "name": null,
+        "maximumMovementTiles": 0.0009263236337431197,
+        "movedDisplaySamples": 2,
+        "waterSamplesBefore": 0,
+        "waterSamplesAfter": 0
+      },
+      {
+        "osmWayId": 839901803,
+        "name": "立汤路",
+        "maximumMovementTiles": 0.08948877935503657,
+        "movedDisplaySamples": 154,
+        "waterSamplesBefore": 89,
+        "waterSamplesAfter": 87
+      },
+      {
+        "osmWayId": 839901804,
+        "name": null,
+        "maximumMovementTiles": 0.008384574402071214,
+        "movedDisplaySamples": 29,
+        "waterSamplesBefore": 0,
+        "waterSamplesAfter": 0
+      },
+      {
+        "osmWayId": 839901805,
+        "name": "温榆河右堤路",
+        "maximumMovementTiles": 0.15921710509734624,
+        "movedDisplaySamples": 473,
+        "waterSamplesBefore": 189,
+        "waterSamplesAfter": 187
+      },
+      {
+        "osmWayId": 862967910,
+        "name": null,
+        "maximumMovementTiles": 0.0002114533661849028,
+        "movedDisplaySamples": 19,
+        "waterSamplesBefore": 0,
+        "waterSamplesAfter": 0
+      },
+      {
+        "osmWayId": 888003390,
+        "name": null,
+        "maximumMovementTiles": 0.007078031698318153,
+        "movedDisplaySamples": 34,
+        "waterSamplesBefore": 0,
+        "waterSamplesAfter": 0
+      },
+      {
+        "osmWayId": 906806930,
+        "name": "未来科学城东路",
+        "maximumMovementTiles": 0.05278762579503101,
+        "movedDisplaySamples": 14,
+        "waterSamplesBefore": 0,
+        "waterSamplesAfter": 0
+      },
+      {
+        "osmWayId": 906806931,
+        "name": "未来科学城滨河大道",
+        "maximumMovementTiles": 0.05888242776712306,
+        "movedDisplaySamples": 59,
+        "waterSamplesBefore": 0,
+        "waterSamplesAfter": 0
+      },
+      {
+        "osmWayId": 906806932,
+        "name": "未来科学城滨河大道",
+        "maximumMovementTiles": 0.07335195582901068,
+        "movedDisplaySamples": 61,
+        "waterSamplesBefore": 0,
+        "waterSamplesAfter": 0
+      },
+      {
+        "osmWayId": 906806934,
+        "name": null,
+        "maximumMovementTiles": 0.05888242776712306,
+        "movedDisplaySamples": 24,
+        "waterSamplesBefore": 0,
+        "waterSamplesAfter": 0
+      },
+      {
+        "osmWayId": 906806935,
+        "name": "高唐路",
+        "maximumMovementTiles": 0.09034239143169914,
+        "movedDisplaySamples": 117,
+        "waterSamplesBefore": 3,
+        "waterSamplesAfter": 3
+      },
+      {
+        "osmWayId": 906806943,
+        "name": "于庄街",
+        "maximumMovementTiles": 0.005134503647340711,
+        "movedDisplaySamples": 21,
+        "waterSamplesBefore": 0,
+        "waterSamplesAfter": 0
+      },
+      {
+        "osmWayId": 930883211,
+        "name": null,
+        "maximumMovementTiles": 0.21742927618934402,
+        "movedDisplaySamples": 40,
+        "waterSamplesBefore": 6,
+        "waterSamplesAfter": 6
+      },
+      {
+        "osmWayId": 930883212,
+        "name": null,
+        "maximumMovementTiles": 0.11821121029928987,
+        "movedDisplaySamples": 30,
+        "waterSamplesBefore": 0,
+        "waterSamplesAfter": 0
+      },
+      {
+        "osmWayId": 930883214,
+        "name": null,
+        "maximumMovementTiles": 0.08535867668362936,
+        "movedDisplaySamples": 55,
+        "waterSamplesBefore": 0,
+        "waterSamplesAfter": 0
+      },
+      {
+        "osmWayId": 930887683,
+        "name": null,
+        "maximumMovementTiles": 0.07424321214618147,
+        "movedDisplaySamples": 30,
+        "waterSamplesBefore": 7,
+        "waterSamplesAfter": 7
+      },
+      {
+        "osmWayId": 930887685,
+        "name": null,
+        "maximumMovementTiles": 0.004468517794552614,
+        "movedDisplaySamples": 3,
+        "waterSamplesBefore": 0,
+        "waterSamplesAfter": 0
+      },
+      {
+        "osmWayId": 930887686,
+        "name": null,
+        "maximumMovementTiles": 0.020803340228956295,
+        "movedDisplaySamples": 17,
+        "waterSamplesBefore": 0,
+        "waterSamplesAfter": 0
+      },
+      {
+        "osmWayId": 930887687,
+        "name": null,
+        "maximumMovementTiles": 0.005189318665656758,
+        "movedDisplaySamples": 26,
+        "waterSamplesBefore": 0,
+        "waterSamplesAfter": 0
+      },
+      {
+        "osmWayId": 930887688,
+        "name": null,
+        "maximumMovementTiles": 0.0015548071537152023,
+        "movedDisplaySamples": 11,
+        "waterSamplesBefore": 0,
+        "waterSamplesAfter": 0
+      },
+      {
+        "osmWayId": 943810864,
+        "name": "未来科学城路",
+        "maximumMovementTiles": 0.004621494803759893,
+        "movedDisplaySamples": 32,
+        "waterSamplesBefore": 4,
+        "waterSamplesAfter": 4
+      },
+      {
+        "osmWayId": 945673554,
+        "name": "机场北线南路",
+        "maximumMovementTiles": 0.038139350088470865,
+        "movedDisplaySamples": 24,
+        "waterSamplesBefore": 3,
+        "waterSamplesAfter": 3
+      },
+      {
+        "osmWayId": 969649954,
+        "name": "高白路",
+        "maximumMovementTiles": 0.06106606570104304,
+        "movedDisplaySamples": 58,
+        "waterSamplesBefore": 77,
+        "waterSamplesAfter": 77
+      },
+      {
+        "osmWayId": 969649956,
+        "name": "高白路",
+        "maximumMovementTiles": 0.22924105441154513,
+        "movedDisplaySamples": 41,
+        "waterSamplesBefore": 26,
+        "waterSamplesAfter": 26
+      },
+      {
+        "osmWayId": 981465905,
+        "name": null,
+        "maximumMovementTiles": 0.001956614151691082,
+        "movedDisplaySamples": 11,
+        "waterSamplesBefore": 0,
+        "waterSamplesAfter": 0
+      },
+      {
+        "osmWayId": 981465906,
+        "name": null,
+        "maximumMovementTiles": 0.02747271768393101,
+        "movedDisplaySamples": 85,
+        "waterSamplesBefore": 0,
+        "waterSamplesAfter": 0
+      },
+      {
+        "osmWayId": 981465908,
+        "name": null,
+        "maximumMovementTiles": 0.1261722622463739,
+        "movedDisplaySamples": 79,
+        "waterSamplesBefore": 13,
+        "waterSamplesAfter": 13
+      },
+      {
+        "osmWayId": 991390148,
+        "name": "高白路",
+        "maximumMovementTiles": 0.7841349832865872,
+        "movedDisplaySamples": 21,
+        "waterSamplesBefore": 34,
+        "waterSamplesAfter": 24
+      },
+      {
+        "osmWayId": 991390157,
+        "name": "于庄南街",
+        "maximumMovementTiles": 0.00148632513060856,
+        "movedDisplaySamples": 23,
+        "waterSamplesBefore": 8,
+        "waterSamplesAfter": 8
+      },
+      {
+        "osmWayId": 991390159,
+        "name": "高白路",
+        "maximumMovementTiles": 0.024058396966951716,
+        "movedDisplaySamples": 40,
+        "waterSamplesBefore": 0,
+        "waterSamplesAfter": 0
+      },
+      {
+        "osmWayId": 992367908,
+        "name": null,
+        "maximumMovementTiles": 0.12334133402504245,
+        "movedDisplaySamples": 25,
+        "waterSamplesBefore": 0,
+        "waterSamplesAfter": 0
+      },
+      {
+        "osmWayId": 992367910,
+        "name": null,
+        "maximumMovementTiles": 0.0064891378228365045,
+        "movedDisplaySamples": 27,
+        "waterSamplesBefore": 0,
+        "waterSamplesAfter": 0
+      },
+      {
+        "osmWayId": 992367911,
+        "name": null,
+        "maximumMovementTiles": 0.04417648511660255,
+        "movedDisplaySamples": 28,
+        "waterSamplesBefore": 0,
+        "waterSamplesAfter": 0
+      },
+      {
+        "osmWayId": 992367912,
+        "name": null,
+        "maximumMovementTiles": 0.001626772221698513,
+        "movedDisplaySamples": 16,
+        "waterSamplesBefore": 0,
+        "waterSamplesAfter": 0
+      },
+      {
+        "osmWayId": 992367915,
+        "name": null,
+        "maximumMovementTiles": 0.00007238411861083451,
+        "movedDisplaySamples": 4,
+        "waterSamplesBefore": 0,
+        "waterSamplesAfter": 0
+      },
+      {
+        "osmWayId": 992367918,
+        "name": null,
+        "maximumMovementTiles": 0.014253785945795839,
+        "movedDisplaySamples": 40,
+        "waterSamplesBefore": 0,
+        "waterSamplesAfter": 0
+      },
+      {
+        "osmWayId": 992367919,
+        "name": null,
+        "maximumMovementTiles": 0.3512751980733155,
+        "movedDisplaySamples": 48,
+        "waterSamplesBefore": 34,
+        "waterSamplesAfter": 33
+      },
+      {
+        "osmWayId": 992368681,
+        "name": null,
+        "maximumMovementTiles": 0.006537326881218743,
+        "movedDisplaySamples": 61,
+        "waterSamplesBefore": 0,
+        "waterSamplesAfter": 0
+      },
+      {
+        "osmWayId": 992368682,
+        "name": null,
+        "maximumMovementTiles": 0.1035578215679088,
+        "movedDisplaySamples": 22,
+        "waterSamplesBefore": 0,
+        "waterSamplesAfter": 0
+      },
+      {
+        "osmWayId": 992368689,
+        "name": null,
+        "maximumMovementTiles": 0.044211427437194584,
+        "movedDisplaySamples": 92,
+        "waterSamplesBefore": 0,
+        "waterSamplesAfter": 0
+      },
+      {
+        "osmWayId": 992368690,
+        "name": null,
+        "maximumMovementTiles": 0.012118200220754003,
+        "movedDisplaySamples": 35,
+        "waterSamplesBefore": 0,
+        "waterSamplesAfter": 0
+      },
+      {
+        "osmWayId": 992369471,
+        "name": null,
+        "maximumMovementTiles": 0.0001827071111013675,
+        "movedDisplaySamples": 8,
+        "waterSamplesBefore": 0,
+        "waterSamplesAfter": 0
+      },
+      {
+        "osmWayId": 992369485,
+        "name": null,
+        "maximumMovementTiles": 0.04983863827732912,
+        "movedDisplaySamples": 22,
+        "waterSamplesBefore": 0,
+        "waterSamplesAfter": 0
+      },
+      {
+        "osmWayId": 992369499,
+        "name": null,
+        "maximumMovementTiles": 0.0005599149782917485,
+        "movedDisplaySamples": 32,
+        "waterSamplesBefore": 0,
+        "waterSamplesAfter": 0
+      },
+      {
+        "osmWayId": 992373574,
+        "name": null,
+        "maximumMovementTiles": 0.0029498976690671475,
+        "movedDisplaySamples": 21,
+        "waterSamplesBefore": 0,
+        "waterSamplesAfter": 0
+      },
+      {
+        "osmWayId": 992373575,
+        "name": null,
+        "maximumMovementTiles": 0.0009995307419034807,
+        "movedDisplaySamples": 11,
+        "waterSamplesBefore": 0,
+        "waterSamplesAfter": 0
+      },
+      {
+        "osmWayId": 992373576,
+        "name": null,
+        "maximumMovementTiles": 0.019362315649904312,
+        "movedDisplaySamples": 49,
+        "waterSamplesBefore": 0,
+        "waterSamplesAfter": 0
+      },
+      {
+        "osmWayId": 995972460,
+        "name": null,
+        "maximumMovementTiles": 0.07554430102868923,
+        "movedDisplaySamples": 35,
+        "waterSamplesBefore": 16,
+        "waterSamplesAfter": 16
+      },
+      {
+        "osmWayId": 1054234155,
+        "name": "七北路",
+        "maximumMovementTiles": 0.01867768622177754,
+        "movedDisplaySamples": 87,
+        "waterSamplesBefore": 0,
+        "waterSamplesAfter": 0
+      },
+      {
+        "osmWayId": 1054234156,
+        "name": null,
+        "maximumMovementTiles": 0.0014367460425718645,
+        "movedDisplaySamples": 15,
+        "waterSamplesBefore": 0,
+        "waterSamplesAfter": 0
+      },
+      {
+        "osmWayId": 1055563185,
+        "name": null,
+        "maximumMovementTiles": 0.18731615440642044,
+        "movedDisplaySamples": 22,
+        "waterSamplesBefore": 0,
+        "waterSamplesAfter": 0
+      },
+      {
+        "osmWayId": 1055563195,
+        "name": null,
+        "maximumMovementTiles": 0.00006389644807968687,
+        "movedDisplaySamples": 18,
+        "waterSamplesBefore": 0,
+        "waterSamplesAfter": 0
+      },
+      {
+        "osmWayId": 1055563197,
+        "name": null,
+        "maximumMovementTiles": 0.0002291118055903448,
+        "movedDisplaySamples": 22,
+        "waterSamplesBefore": 0,
+        "waterSamplesAfter": 0
+      },
+      {
+        "osmWayId": 1055563205,
+        "name": null,
+        "maximumMovementTiles": 0.000141839610788384,
+        "movedDisplaySamples": 10,
+        "waterSamplesBefore": 0,
+        "waterSamplesAfter": 0
+      },
+      {
+        "osmWayId": 1055626980,
+        "name": null,
+        "maximumMovementTiles": 0.08870012985990616,
+        "movedDisplaySamples": 23,
+        "waterSamplesBefore": 0,
+        "waterSamplesAfter": 0
+      },
+      {
+        "osmWayId": 1055626981,
+        "name": null,
+        "maximumMovementTiles": 0.08301987539562818,
+        "movedDisplaySamples": 47,
+        "waterSamplesBefore": 29,
+        "waterSamplesAfter": 29
+      },
+      {
+        "osmWayId": 1055626983,
+        "name": null,
+        "maximumMovementTiles": 0.06437933084231567,
+        "movedDisplaySamples": 28,
+        "waterSamplesBefore": 0,
+        "waterSamplesAfter": 0
+      },
+      {
+        "osmWayId": 1055626990,
+        "name": null,
+        "maximumMovementTiles": 0.017595453493749393,
+        "movedDisplaySamples": 31,
+        "waterSamplesBefore": 0,
+        "waterSamplesAfter": 0
+      },
+      {
+        "osmWayId": 1055626991,
+        "name": null,
+        "maximumMovementTiles": 0.0017124463375533482,
+        "movedDisplaySamples": 9,
+        "waterSamplesBefore": 0,
+        "waterSamplesAfter": 0
+      },
+      {
+        "osmWayId": 1059215622,
+        "name": "温榆河绿道昌平段",
+        "maximumMovementTiles": 0.08791785091538541,
+        "movedDisplaySamples": 243,
+        "waterSamplesBefore": 9,
+        "waterSamplesAfter": 9
+      },
+      {
+        "osmWayId": 1059215623,
+        "name": "温榆河绿道昌平段",
+        "maximumMovementTiles": 0.002067403021658871,
+        "movedDisplaySamples": 46,
+        "waterSamplesBefore": 34,
+        "waterSamplesAfter": 34
+      },
+      {
+        "osmWayId": 1059215624,
+        "name": "温榆河绿道昌平段",
+        "maximumMovementTiles": 0.6617960122977499,
+        "movedDisplaySamples": 137,
+        "waterSamplesBefore": 125,
+        "waterSamplesAfter": 117
+      },
+      {
+        "osmWayId": 1059215626,
+        "name": "温榆河绿道昌平段",
+        "maximumMovementTiles": 0.09192454183947299,
+        "movedDisplaySamples": 26,
+        "waterSamplesBefore": 7,
+        "waterSamplesAfter": 7
+      },
+      {
+        "osmWayId": 1059215627,
+        "name": null,
+        "maximumMovementTiles": 0.1929394743779777,
+        "movedDisplaySamples": 11,
+        "waterSamplesBefore": 28,
+        "waterSamplesAfter": 28
+      },
+      {
+        "osmWayId": 1059803756,
+        "name": "海䴖落新村湖滨路",
+        "maximumMovementTiles": 0.08199092175488472,
+        "movedDisplaySamples": 40,
+        "waterSamplesBefore": 0,
+        "waterSamplesAfter": 0
+      },
+      {
+        "osmWayId": 1083100638,
+        "name": null,
+        "maximumMovementTiles": 0.001839537169673783,
+        "movedDisplaySamples": 46,
+        "waterSamplesBefore": 0,
+        "waterSamplesAfter": 0
+      },
+      {
+        "osmWayId": 1093379797,
+        "name": null,
+        "maximumMovementTiles": 0.000011522364279547076,
+        "movedDisplaySamples": 7,
+        "waterSamplesBefore": 75,
+        "waterSamplesAfter": 75
+      },
+      {
+        "osmWayId": 1099292069,
+        "name": null,
+        "maximumMovementTiles": 0.03304550562415922,
+        "movedDisplaySamples": 107,
+        "waterSamplesBefore": 0,
+        "waterSamplesAfter": 0
+      },
+      {
+        "osmWayId": 1099292070,
+        "name": null,
+        "maximumMovementTiles": 0.0066774497200727,
+        "movedDisplaySamples": 9,
+        "waterSamplesBefore": 0,
+        "waterSamplesAfter": 0
+      },
+      {
+        "osmWayId": 1099292071,
+        "name": null,
+        "maximumMovementTiles": 0.004930285564568611,
+        "movedDisplaySamples": 31,
+        "waterSamplesBefore": 0,
+        "waterSamplesAfter": 0
+      },
+      {
+        "osmWayId": 1099292072,
+        "name": null,
+        "maximumMovementTiles": 0.0050163109141366,
+        "movedDisplaySamples": 30,
+        "waterSamplesBefore": 0,
+        "waterSamplesAfter": 0
+      },
+      {
+        "osmWayId": 1099292073,
+        "name": null,
+        "maximumMovementTiles": 0.0038401358452646263,
+        "movedDisplaySamples": 10,
+        "waterSamplesBefore": 0,
+        "waterSamplesAfter": 0
+      },
+      {
+        "osmWayId": 1120928507,
+        "name": null,
+        "maximumMovementTiles": 0.0000810346350768043,
+        "movedDisplaySamples": 4,
+        "waterSamplesBefore": 0,
+        "waterSamplesAfter": 0
+      },
+      {
+        "osmWayId": 1120928508,
+        "name": "京承高速",
+        "maximumMovementTiles": 0.0000810346350768043,
+        "movedDisplaySamples": 4,
+        "waterSamplesBefore": 0,
+        "waterSamplesAfter": 0
+      },
+      {
+        "osmWayId": 1137137137,
+        "name": null,
+        "maximumMovementTiles": 0.023026286898469587,
+        "movedDisplaySamples": 5,
+        "waterSamplesBefore": 0,
+        "waterSamplesAfter": 0
+      },
+      {
+        "osmWayId": 1137139853,
+        "name": "温榆河右堤路",
+        "maximumMovementTiles": 0.36338009876496713,
+        "movedDisplaySamples": 198,
+        "waterSamplesBefore": 10,
+        "waterSamplesAfter": 10
+      },
+      {
+        "osmWayId": 1137492131,
+        "name": null,
+        "maximumMovementTiles": 0.0005262105850691062,
+        "movedDisplaySamples": 16,
+        "waterSamplesBefore": 0,
+        "waterSamplesAfter": 0
+      },
+      {
+        "osmWayId": 1147316741,
+        "name": null,
+        "maximumMovementTiles": 0.025265957525020054,
+        "movedDisplaySamples": 57,
+        "waterSamplesBefore": 0,
+        "waterSamplesAfter": 0
+      },
+      {
+        "osmWayId": 1158301832,
+        "name": null,
+        "maximumMovementTiles": 0.012198428202707282,
+        "movedDisplaySamples": 37,
+        "waterSamplesBefore": 10,
+        "waterSamplesAfter": 10
+      },
+      {
+        "osmWayId": 1158810439,
+        "name": null,
+        "maximumMovementTiles": 0.045421256869342265,
+        "movedDisplaySamples": 41,
+        "waterSamplesBefore": 0,
+        "waterSamplesAfter": 0
+      },
+      {
+        "osmWayId": 1158810440,
+        "name": null,
+        "maximumMovementTiles": 0.009618641608223235,
+        "movedDisplaySamples": 16,
+        "waterSamplesBefore": 21,
+        "waterSamplesAfter": 21
+      },
+      {
+        "osmWayId": 1158810441,
+        "name": null,
+        "maximumMovementTiles": 0.019250581337096395,
+        "movedDisplaySamples": 64,
+        "waterSamplesBefore": 0,
+        "waterSamplesAfter": 0
+      },
+      {
+        "osmWayId": 1235731015,
+        "name": "未来科学城路",
+        "maximumMovementTiles": 0.00002226132637228204,
+        "movedDisplaySamples": 7,
+        "waterSamplesBefore": 0,
+        "waterSamplesAfter": 0
+      },
+      {
+        "osmWayId": 1235731016,
+        "name": "未来科学城路",
+        "maximumMovementTiles": 0.00003259530675372276,
+        "movedDisplaySamples": 7,
+        "waterSamplesBefore": 0,
+        "waterSamplesAfter": 0
+      },
+      {
+        "osmWayId": 1235731030,
+        "name": "七星路",
+        "maximumMovementTiles": 0.00000214188773166355,
+        "movedDisplaySamples": 13,
+        "waterSamplesBefore": 0,
+        "waterSamplesAfter": 0
+      },
+      {
+        "osmWayId": 1239039189,
+        "name": null,
+        "maximumMovementTiles": 0.0246786705060189,
+        "movedDisplaySamples": 4,
+        "waterSamplesBefore": 24,
+        "waterSamplesAfter": 24
+      },
+      {
+        "osmWayId": 1239039190,
+        "name": null,
+        "maximumMovementTiles": 0.0006686958077338067,
+        "movedDisplaySamples": 4,
+        "waterSamplesBefore": 0,
+        "waterSamplesAfter": 0
+      },
+      {
+        "osmWayId": 1239039191,
+        "name": null,
+        "maximumMovementTiles": 0.0007620495790892708,
+        "movedDisplaySamples": 3,
+        "waterSamplesBefore": 0,
+        "waterSamplesAfter": 0
+      },
+      {
+        "osmWayId": 1239039192,
+        "name": null,
+        "maximumMovementTiles": 0.00005267527114644184,
+        "movedDisplaySamples": 10,
+        "waterSamplesBefore": 0,
+        "waterSamplesAfter": 0
+      },
+      {
+        "osmWayId": 1239039195,
+        "name": null,
+        "maximumMovementTiles": 0.001903931707702958,
+        "movedDisplaySamples": 9,
+        "waterSamplesBefore": 3,
+        "waterSamplesAfter": 3
+      },
+      {
+        "osmWayId": 1239039197,
+        "name": null,
+        "maximumMovementTiles": 0.000011249088930147607,
+        "movedDisplaySamples": 6,
+        "waterSamplesBefore": 0,
+        "waterSamplesAfter": 0
+      },
+      {
+        "osmWayId": 1239039198,
+        "name": null,
+        "maximumMovementTiles": 0.017423757073818526,
+        "movedDisplaySamples": 11,
+        "waterSamplesBefore": 0,
+        "waterSamplesAfter": 0
+      },
+      {
+        "osmWayId": 1239039206,
+        "name": null,
+        "maximumMovementTiles": 0.011358449618623761,
+        "movedDisplaySamples": 83,
+        "waterSamplesBefore": 0,
+        "waterSamplesAfter": 0
+      },
+      {
+        "osmWayId": 1241792859,
+        "name": null,
+        "maximumMovementTiles": 0.0001727238618315853,
+        "movedDisplaySamples": 13,
+        "waterSamplesBefore": 0,
+        "waterSamplesAfter": 0
+      },
+      {
+        "osmWayId": 1241792860,
+        "name": null,
+        "maximumMovementTiles": 0.01577000523616645,
+        "movedDisplaySamples": 29,
+        "waterSamplesBefore": 0,
+        "waterSamplesAfter": 0
+      },
+      {
+        "osmWayId": 1241792862,
+        "name": null,
+        "maximumMovementTiles": 0.0017521430823144407,
+        "movedDisplaySamples": 22,
+        "waterSamplesBefore": 0,
+        "waterSamplesAfter": 0
+      },
+      {
+        "osmWayId": 1241792863,
+        "name": null,
+        "maximumMovementTiles": 0.036489592304220976,
+        "movedDisplaySamples": 30,
+        "waterSamplesBefore": 0,
+        "waterSamplesAfter": 0
+      },
+      {
+        "osmWayId": 1241792864,
+        "name": null,
+        "maximumMovementTiles": 0.0004155723745172822,
+        "movedDisplaySamples": 47,
+        "waterSamplesBefore": 0,
+        "waterSamplesAfter": 0
+      },
+      {
+        "osmWayId": 1241792865,
+        "name": null,
+        "maximumMovementTiles": 0.0033727264925345122,
+        "movedDisplaySamples": 22,
+        "waterSamplesBefore": 0,
+        "waterSamplesAfter": 0
+      },
+      {
+        "osmWayId": 1241792866,
+        "name": null,
+        "maximumMovementTiles": 0.00032786832126663156,
+        "movedDisplaySamples": 9,
+        "waterSamplesBefore": 0,
+        "waterSamplesAfter": 0
+      },
+      {
+        "osmWayId": 1250666145,
+        "name": null,
+        "maximumMovementTiles": 0.0001766744289634051,
+        "movedDisplaySamples": 2,
+        "waterSamplesBefore": 26,
+        "waterSamplesAfter": 26
+      },
+      {
+        "osmWayId": 1250666148,
+        "name": null,
+        "maximumMovementTiles": 0.01097006391503286,
+        "movedDisplaySamples": 10,
+        "waterSamplesBefore": 21,
+        "waterSamplesAfter": 21
+      },
+      {
+        "osmWayId": 1250750586,
+        "name": "东二旗北路",
+        "maximumMovementTiles": 0.00915127339393018,
+        "movedDisplaySamples": 15,
+        "waterSamplesBefore": 0,
+        "waterSamplesAfter": 0
+      },
+      {
+        "osmWayId": 1250750588,
+        "name": null,
+        "maximumMovementTiles": 0.3949771143723693,
+        "movedDisplaySamples": 30,
+        "waterSamplesBefore": 0,
+        "waterSamplesAfter": 0
+      },
+      {
+        "osmWayId": 1250750589,
+        "name": null,
+        "maximumMovementTiles": 0.003160081377497432,
+        "movedDisplaySamples": 14,
+        "waterSamplesBefore": 0,
+        "waterSamplesAfter": 0
+      },
+      {
+        "osmWayId": 1250750591,
+        "name": null,
+        "maximumMovementTiles": 0.009769520193010313,
+        "movedDisplaySamples": 3,
+        "waterSamplesBefore": 0,
+        "waterSamplesAfter": 0
+      },
+      {
+        "osmWayId": 1250750592,
+        "name": null,
+        "maximumMovementTiles": 0.15715773030323865,
+        "movedDisplaySamples": 31,
+        "waterSamplesBefore": 0,
+        "waterSamplesAfter": 0
+      },
+      {
+        "osmWayId": 1250750593,
+        "name": null,
+        "maximumMovementTiles": 0.1250746084130861,
+        "movedDisplaySamples": 12,
+        "waterSamplesBefore": 0,
+        "waterSamplesAfter": 0
+      },
+      {
+        "osmWayId": 1250750594,
+        "name": "八曹路",
+        "maximumMovementTiles": 0.019406671541834817,
+        "movedDisplaySamples": 33,
+        "waterSamplesBefore": 0,
+        "waterSamplesAfter": 0
+      },
+      {
+        "osmWayId": 1250750595,
+        "name": null,
+        "maximumMovementTiles": 0.003327865592589833,
+        "movedDisplaySamples": 2,
+        "waterSamplesBefore": 0,
+        "waterSamplesAfter": 0
+      },
+      {
+        "osmWayId": 1257094062,
+        "name": "立汤路",
+        "maximumMovementTiles": 0.005952744839937946,
+        "movedDisplaySamples": 27,
+        "waterSamplesBefore": 0,
+        "waterSamplesAfter": 0
+      },
+      {
+        "osmWayId": 1257094063,
+        "name": "立汤路",
+        "maximumMovementTiles": 0.0067135914034620265,
+        "movedDisplaySamples": 26,
+        "waterSamplesBefore": 0,
+        "waterSamplesAfter": 0
+      },
+      {
+        "osmWayId": 1257119851,
+        "name": null,
+        "maximumMovementTiles": 0.019486129209092998,
+        "movedDisplaySamples": 11,
+        "waterSamplesBefore": 0,
+        "waterSamplesAfter": 0
+      },
+      {
+        "osmWayId": 1257119852,
+        "name": null,
+        "maximumMovementTiles": 0.019486129209092998,
+        "movedDisplaySamples": 10,
+        "waterSamplesBefore": 0,
+        "waterSamplesAfter": 0
+      },
+      {
+        "osmWayId": 1257119853,
+        "name": null,
+        "maximumMovementTiles": 0.019724758499370908,
+        "movedDisplaySamples": 25,
+        "waterSamplesBefore": 0,
+        "waterSamplesAfter": 0
+      },
+      {
+        "osmWayId": 1257119855,
+        "name": "立汤路",
+        "maximumMovementTiles": 0.0054347579199508994,
+        "movedDisplaySamples": 40,
+        "waterSamplesBefore": 0,
+        "waterSamplesAfter": 0
+      },
+      {
+        "osmWayId": 1257119856,
+        "name": "立汤路",
+        "maximumMovementTiles": 0.004940237902407961,
+        "movedDisplaySamples": 4,
+        "waterSamplesBefore": 0,
+        "waterSamplesAfter": 0
+      },
+      {
+        "osmWayId": 1257123249,
+        "name": null,
+        "maximumMovementTiles": 0.040551445663781556,
+        "movedDisplaySamples": 14,
+        "waterSamplesBefore": 0,
+        "waterSamplesAfter": 0
+      },
+      {
+        "osmWayId": 1257123250,
+        "name": null,
+        "maximumMovementTiles": 0.030999239816720096,
+        "movedDisplaySamples": 16,
+        "waterSamplesBefore": 0,
+        "waterSamplesAfter": 0
+      },
+      {
+        "osmWayId": 1257123251,
+        "name": "立汤路",
+        "maximumMovementTiles": 0.07268729355442678,
+        "movedDisplaySamples": 33,
+        "waterSamplesBefore": 0,
+        "waterSamplesAfter": 0
+      },
+      {
+        "osmWayId": 1257123252,
+        "name": "立汤路",
+        "maximumMovementTiles": 0.057381270135650274,
+        "movedDisplaySamples": 25,
+        "waterSamplesBefore": 5,
+        "waterSamplesAfter": 5
+      },
+      {
+        "osmWayId": 1263505726,
+        "name": null,
+        "maximumMovementTiles": 0.011644973864787694,
+        "movedDisplaySamples": 6,
+        "waterSamplesBefore": 0,
+        "waterSamplesAfter": 0
+      },
+      {
+        "osmWayId": 1263505727,
+        "name": null,
+        "maximumMovementTiles": 0.00874813707372106,
+        "movedDisplaySamples": 4,
+        "waterSamplesBefore": 0,
+        "waterSamplesAfter": 0
+      },
+      {
+        "osmWayId": 1263505728,
+        "name": "普庆寺南街",
+        "maximumMovementTiles": 0.00002820328035209632,
+        "movedDisplaySamples": 10,
+        "waterSamplesBefore": 0,
+        "waterSamplesAfter": 0
+      },
+      {
+        "osmWayId": 1263505729,
+        "name": "普庆寺路",
+        "maximumMovementTiles": 0.00311937158076791,
+        "movedDisplaySamples": 14,
+        "waterSamplesBefore": 0,
+        "waterSamplesAfter": 0
+      },
+      {
+        "osmWayId": 1263505732,
+        "name": "未来科学城东路",
+        "maximumMovementTiles": 0.030743100462725347,
+        "movedDisplaySamples": 22,
+        "waterSamplesBefore": 0,
+        "waterSamplesAfter": 0
+      },
+      {
+        "osmWayId": 1263505743,
+        "name": "岭上北街",
+        "maximumMovementTiles": 0.03516272734614178,
+        "movedDisplaySamples": 39,
+        "waterSamplesBefore": 0,
+        "waterSamplesAfter": 0
+      },
+      {
+        "osmWayId": 1263505744,
+        "name": "北七家东路",
+        "maximumMovementTiles": 0.050607676108891074,
+        "movedDisplaySamples": 39,
+        "waterSamplesBefore": 0,
+        "waterSamplesAfter": 0
+      },
+      {
+        "osmWayId": 1263505745,
+        "name": "北七家东路",
+        "maximumMovementTiles": 0.026054919181187606,
+        "movedDisplaySamples": 33,
+        "waterSamplesBefore": 10,
+        "waterSamplesAfter": 10
+      },
+      {
+        "osmWayId": 1264216486,
+        "name": "未来科学城东路",
+        "maximumMovementTiles": 0.043103163875034656,
+        "movedDisplaySamples": 37,
+        "waterSamplesBefore": 0,
+        "waterSamplesAfter": 0
+      },
+      {
+        "osmWayId": 1264216489,
+        "name": "英才北三街",
+        "maximumMovementTiles": 0.001546410574570845,
+        "movedDisplaySamples": 18,
+        "waterSamplesBefore": 0,
+        "waterSamplesAfter": 0
+      },
+      {
+        "osmWayId": 1272460753,
+        "name": "温榆河右堤路",
+        "maximumMovementTiles": 0.46227616910497743,
+        "movedDisplaySamples": 52,
+        "waterSamplesBefore": 54,
+        "waterSamplesAfter": 54
+      },
+      {
+        "osmWayId": 1272463990,
+        "name": "机场北线南路",
+        "maximumMovementTiles": 0.03861933144943909,
+        "movedDisplaySamples": 25,
+        "waterSamplesBefore": 8,
+        "waterSamplesAfter": 8
+      },
+      {
+        "osmWayId": 1272463992,
+        "name": "高白路",
+        "maximumMovementTiles": 0.18518456004225786,
+        "movedDisplaySamples": 48,
+        "waterSamplesBefore": 20,
+        "waterSamplesAfter": 15
+      },
+      {
+        "osmWayId": 1273254560,
+        "name": null,
+        "maximumMovementTiles": 0.03685702877864687,
+        "movedDisplaySamples": 5,
+        "waterSamplesBefore": 20,
+        "waterSamplesAfter": 20
+      },
+      {
+        "osmWayId": 1280498644,
+        "name": "温榆河右堤路",
+        "maximumMovementTiles": 0.9706337572597564,
+        "movedDisplaySamples": 82,
+        "waterSamplesBefore": 106,
+        "waterSamplesAfter": 106
+      },
+      {
+        "osmWayId": 1280498646,
+        "name": "温榆河右堤路",
+        "maximumMovementTiles": 0.8030021420313352,
+        "movedDisplaySamples": 43,
+        "waterSamplesBefore": 59,
+        "waterSamplesAfter": 57
+      },
+      {
+        "osmWayId": 1280498648,
+        "name": "温榆河绿道昌平段",
+        "maximumMovementTiles": 0.05376663166900411,
+        "movedDisplaySamples": 69,
+        "waterSamplesBefore": 0,
+        "waterSamplesAfter": 0
+      },
+      {
+        "osmWayId": 1280740322,
+        "name": "温榆河右堤路",
+        "maximumMovementTiles": 0.30598468492839187,
+        "movedDisplaySamples": 309,
+        "waterSamplesBefore": 220,
+        "waterSamplesAfter": 220
+      },
+      {
+        "osmWayId": 1281900274,
+        "name": "温榆河绿道昌平段",
+        "maximumMovementTiles": 0.2724309186213079,
+        "movedDisplaySamples": 46,
+        "waterSamplesBefore": 53,
+        "waterSamplesAfter": 45
+      },
+      {
+        "osmWayId": 1282700850,
+        "name": "温榆河左堤路",
+        "maximumMovementTiles": 0.0066043161985305165,
+        "movedDisplaySamples": 19,
+        "waterSamplesBefore": 79,
+        "waterSamplesAfter": 79
+      },
+      {
+        "osmWayId": 1308819308,
+        "name": null,
+        "maximumMovementTiles": 0.00007687241882160373,
+        "movedDisplaySamples": 15,
+        "waterSamplesBefore": 34,
+        "waterSamplesAfter": 34
+      },
+      {
+        "osmWayId": 1308819319,
+        "name": "英才北二街",
+        "maximumMovementTiles": 0.0018209576239317184,
+        "movedDisplaySamples": 10,
+        "waterSamplesBefore": 0,
+        "waterSamplesAfter": 0
+      },
+      {
+        "osmWayId": 1308819322,
+        "name": null,
+        "maximumMovementTiles": 0.0013600673620975982,
+        "movedDisplaySamples": 21,
+        "waterSamplesBefore": 0,
+        "waterSamplesAfter": 0
+      },
+      {
+        "osmWayId": 1308819326,
+        "name": "土沟路",
+        "maximumMovementTiles": 0.011646728830420935,
+        "movedDisplaySamples": 24,
+        "waterSamplesBefore": 0,
+        "waterSamplesAfter": 0
+      },
+      {
+        "osmWayId": 1318042339,
+        "name": "京承高速",
+        "maximumMovementTiles": 0.03728409964078592,
+        "movedDisplaySamples": 6,
+        "waterSamplesBefore": 0,
+        "waterSamplesAfter": 0
+      },
+      {
+        "osmWayId": 1325596371,
+        "name": "高白路",
+        "maximumMovementTiles": 0.45192747139979095,
+        "movedDisplaySamples": 11,
+        "waterSamplesBefore": 13,
+        "waterSamplesAfter": 12
+      },
+      {
+        "osmWayId": 1325596381,
+        "name": "高白路",
+        "maximumMovementTiles": 0.45192747139979095,
+        "movedDisplaySamples": 12,
+        "waterSamplesBefore": 17,
+        "waterSamplesAfter": 13
+      },
+      {
+        "osmWayId": 1339156832,
+        "name": "立汤路",
+        "maximumMovementTiles": 0.019452862525715067,
+        "movedDisplaySamples": 6,
+        "waterSamplesBefore": 0,
+        "waterSamplesAfter": 0
+      },
+      {
+        "osmWayId": 1339156833,
+        "name": "东沙路",
+        "maximumMovementTiles": 0.03177629135819904,
+        "movedDisplaySamples": 6,
+        "waterSamplesBefore": 0,
+        "waterSamplesAfter": 0
+      },
+      {
+        "osmWayId": 1339156834,
+        "name": "东二旗北路",
+        "maximumMovementTiles": 0.02383114605126539,
+        "movedDisplaySamples": 5,
+        "waterSamplesBefore": 0,
+        "waterSamplesAfter": 0
+      },
+      {
+        "osmWayId": 1339156835,
+        "name": "东二旗北路",
+        "maximumMovementTiles": 0.03211637423596787,
+        "movedDisplaySamples": 9,
+        "waterSamplesBefore": 0,
+        "waterSamplesAfter": 0
+      },
+      {
+        "osmWayId": 1339156836,
+        "name": "立汤路",
+        "maximumMovementTiles": 0.040551445663781556,
+        "movedDisplaySamples": 6,
+        "waterSamplesBefore": 0,
+        "waterSamplesAfter": 0
+      },
+      {
+        "osmWayId": 1339156837,
+        "name": null,
+        "maximumMovementTiles": 0.015927774425156797,
+        "movedDisplaySamples": 7,
+        "waterSamplesBefore": 0,
+        "waterSamplesAfter": 0
+      },
+      {
+        "osmWayId": 1339156838,
+        "name": null,
+        "maximumMovementTiles": 0.010532498646383377,
+        "movedDisplaySamples": 3,
+        "waterSamplesBefore": 0,
+        "waterSamplesAfter": 0
+      },
+      {
+        "osmWayId": 1370776663,
+        "name": "顺于路",
+        "maximumMovementTiles": 0.0002915563578509746,
+        "movedDisplaySamples": 2,
+        "waterSamplesBefore": 0,
+        "waterSamplesAfter": 0
+      },
+      {
+        "osmWayId": 1375072362,
+        "name": null,
+        "maximumMovementTiles": 0.00004876813746871408,
+        "movedDisplaySamples": 12,
+        "waterSamplesBefore": 0,
+        "waterSamplesAfter": 0
+      },
+      {
+        "osmWayId": 1387759526,
+        "name": "温榆河右堤路",
+        "maximumMovementTiles": 0.4211358264545292,
+        "movedDisplaySamples": 9,
+        "waterSamplesBefore": 11,
+        "waterSamplesAfter": 11
+      },
+      {
+        "osmWayId": 1393172748,
+        "name": null,
+        "maximumMovementTiles": 0.042915178778528795,
+        "movedDisplaySamples": 42,
+        "waterSamplesBefore": 0,
+        "waterSamplesAfter": 0
+      },
+      {
+        "osmWayId": 1393172749,
+        "name": null,
+        "maximumMovementTiles": 0.056685682908039076,
+        "movedDisplaySamples": 34,
+        "waterSamplesBefore": 0,
+        "waterSamplesAfter": 0
+      },
+      {
+        "osmWayId": 1393172751,
+        "name": null,
+        "maximumMovementTiles": 0.037414443723828995,
+        "movedDisplaySamples": 9,
+        "waterSamplesBefore": 0,
+        "waterSamplesAfter": 0
+      },
+      {
+        "osmWayId": 1393172752,
+        "name": null,
+        "maximumMovementTiles": 0.019095042276807424,
+        "movedDisplaySamples": 9,
+        "waterSamplesBefore": 0,
+        "waterSamplesAfter": 0
+      },
+      {
+        "osmWayId": 1393172753,
+        "name": null,
+        "maximumMovementTiles": 0.006981775027484079,
+        "movedDisplaySamples": 9,
+        "waterSamplesBefore": 0,
+        "waterSamplesAfter": 0
+      },
+      {
+        "osmWayId": 1393172754,
+        "name": null,
+        "maximumMovementTiles": 0.0014897785499973862,
+        "movedDisplaySamples": 9,
+        "waterSamplesBefore": 0,
+        "waterSamplesAfter": 0
+      },
+      {
+        "osmWayId": 1393172755,
+        "name": null,
+        "maximumMovementTiles": 0.00016498421780539564,
+        "movedDisplaySamples": 9,
+        "waterSamplesBefore": 0,
+        "waterSamplesAfter": 0
+      },
+      {
+        "osmWayId": 1393172756,
+        "name": null,
+        "maximumMovementTiles": 0.0000036246343901266416,
+        "movedDisplaySamples": 2,
+        "waterSamplesBefore": 0,
+        "waterSamplesAfter": 0
+      },
+      {
+        "osmWayId": 1393172761,
+        "name": null,
+        "maximumMovementTiles": 0.057580008975175505,
+        "movedDisplaySamples": 20,
+        "waterSamplesBefore": 8,
+        "waterSamplesAfter": 8
+      },
+      {
+        "osmWayId": 1393172762,
+        "name": null,
+        "maximumMovementTiles": 0.03164694076674126,
+        "movedDisplaySamples": 56,
+        "waterSamplesBefore": 3,
+        "waterSamplesAfter": 3
+      },
+      {
+        "osmWayId": 1393172763,
+        "name": null,
+        "maximumMovementTiles": 0.038670248993043194,
+        "movedDisplaySamples": 9,
+        "waterSamplesBefore": 0,
+        "waterSamplesAfter": 0
+      },
+      {
+        "osmWayId": 1393172764,
+        "name": null,
+        "maximumMovementTiles": 0.05552220849705359,
+        "movedDisplaySamples": 15,
+        "waterSamplesBefore": 0,
+        "waterSamplesAfter": 0
+      },
+      {
+        "osmWayId": 1393172765,
+        "name": null,
+        "maximumMovementTiles": 0.0441772617127975,
+        "movedDisplaySamples": 8,
+        "waterSamplesBefore": 0,
+        "waterSamplesAfter": 0
+      },
+      {
+        "osmWayId": 1393172766,
+        "name": null,
+        "maximumMovementTiles": 0.03962670314614859,
+        "movedDisplaySamples": 7,
+        "waterSamplesBefore": 0,
+        "waterSamplesAfter": 0
+      },
+      {
+        "osmWayId": 1393172767,
+        "name": null,
+        "maximumMovementTiles": 0.0552023430312849,
+        "movedDisplaySamples": 9,
+        "waterSamplesBefore": 0,
+        "waterSamplesAfter": 0
+      },
+      {
+        "osmWayId": 1393172768,
+        "name": null,
+        "maximumMovementTiles": 0.040251756941888255,
+        "movedDisplaySamples": 16,
+        "waterSamplesBefore": 0,
+        "waterSamplesAfter": 0
+      },
+      {
+        "osmWayId": 1393172769,
+        "name": null,
+        "maximumMovementTiles": 0.03174359668084994,
+        "movedDisplaySamples": 5,
+        "waterSamplesBefore": 0,
+        "waterSamplesAfter": 0
+      },
+      {
+        "osmWayId": 1393172770,
+        "name": null,
+        "maximumMovementTiles": 0.02999290537833008,
+        "movedDisplaySamples": 11,
+        "waterSamplesBefore": 0,
+        "waterSamplesAfter": 0
+      },
+      {
+        "osmWayId": 1393172771,
+        "name": null,
+        "maximumMovementTiles": 0.03101265924486127,
+        "movedDisplaySamples": 2,
+        "waterSamplesBefore": 0,
+        "waterSamplesAfter": 0
+      },
+      {
+        "osmWayId": 1393172772,
+        "name": null,
+        "maximumMovementTiles": 0.025976287562218484,
+        "movedDisplaySamples": 12,
+        "waterSamplesBefore": 0,
+        "waterSamplesAfter": 0
+      },
+      {
+        "osmWayId": 1393172773,
+        "name": null,
+        "maximumMovementTiles": 0.01167108801620031,
+        "movedDisplaySamples": 12,
+        "waterSamplesBefore": 0,
+        "waterSamplesAfter": 0
+      },
+      {
+        "osmWayId": 1393172774,
+        "name": null,
+        "maximumMovementTiles": 0.0023453005534666382,
+        "movedDisplaySamples": 11,
+        "waterSamplesBefore": 0,
+        "waterSamplesAfter": 0
+      },
+      {
+        "osmWayId": 1393172775,
+        "name": null,
+        "maximumMovementTiles": 0.01599103564221365,
+        "movedDisplaySamples": 8,
+        "waterSamplesBefore": 0,
+        "waterSamplesAfter": 0
+      },
+      {
+        "osmWayId": 1393172776,
+        "name": null,
+        "maximumMovementTiles": 0.007064351223805663,
+        "movedDisplaySamples": 8,
+        "waterSamplesBefore": 0,
+        "waterSamplesAfter": 0
+      },
+      {
+        "osmWayId": 1393172777,
+        "name": null,
+        "maximumMovementTiles": 0.0014314149762411094,
+        "movedDisplaySamples": 8,
+        "waterSamplesBefore": 0,
+        "waterSamplesAfter": 0
+      },
+      {
+        "osmWayId": 1393172778,
+        "name": null,
+        "maximumMovementTiles": 0.00009573200380876613,
+        "movedDisplaySamples": 8,
+        "waterSamplesBefore": 0,
+        "waterSamplesAfter": 0
+      },
+      {
+        "osmWayId": 1393172779,
+        "name": null,
+        "maximumMovementTiles": 0.000026027192394178253,
+        "movedDisplaySamples": 23,
+        "waterSamplesBefore": 0,
+        "waterSamplesAfter": 0
+      },
+      {
+        "osmWayId": 1393172780,
+        "name": null,
+        "maximumMovementTiles": 0.02540707236284229,
+        "movedDisplaySamples": 44,
+        "waterSamplesBefore": 0,
+        "waterSamplesAfter": 0
+      },
+      {
+        "osmWayId": 1393172781,
+        "name": null,
+        "maximumMovementTiles": 0.00006122127374393757,
+        "movedDisplaySamples": 12,
+        "waterSamplesBefore": 0,
+        "waterSamplesAfter": 0
+      },
+      {
+        "osmWayId": 1393172782,
+        "name": null,
+        "maximumMovementTiles": 0.0005707217750833949,
+        "movedDisplaySamples": 13,
+        "waterSamplesBefore": 0,
+        "waterSamplesAfter": 0
+      },
+      {
+        "osmWayId": 1393172783,
+        "name": null,
+        "maximumMovementTiles": 0.0011620325678715342,
+        "movedDisplaySamples": 13,
+        "waterSamplesBefore": 0,
+        "waterSamplesAfter": 0
+      },
+      {
+        "osmWayId": 1393172784,
+        "name": null,
+        "maximumMovementTiles": 0.008543182874866388,
+        "movedDisplaySamples": 14,
+        "waterSamplesBefore": 0,
+        "waterSamplesAfter": 0
+      },
+      {
+        "osmWayId": 1393172785,
+        "name": null,
+        "maximumMovementTiles": 0.005272254345111564,
+        "movedDisplaySamples": 13,
+        "waterSamplesBefore": 0,
+        "waterSamplesAfter": 0
+      },
+      {
+        "osmWayId": 1393172786,
+        "name": null,
+        "maximumMovementTiles": 0.02723950716657571,
+        "movedDisplaySamples": 16,
+        "waterSamplesBefore": 0,
+        "waterSamplesAfter": 0
+      },
+      {
+        "osmWayId": 1393172787,
+        "name": null,
+        "maximumMovementTiles": 0.022766730027366136,
+        "movedDisplaySamples": 8,
+        "waterSamplesBefore": 0,
+        "waterSamplesAfter": 0
+      },
+      {
+        "osmWayId": 1393172788,
+        "name": null,
+        "maximumMovementTiles": 0.019605426565181824,
+        "movedDisplaySamples": 9,
+        "waterSamplesBefore": 0,
+        "waterSamplesAfter": 0
+      },
+      {
+        "osmWayId": 1393172789,
+        "name": null,
+        "maximumMovementTiles": 0.03572654273054789,
+        "movedDisplaySamples": 3,
+        "waterSamplesBefore": 0,
+        "waterSamplesAfter": 0
+      },
+      {
+        "osmWayId": 1393172790,
+        "name": null,
+        "maximumMovementTiles": 0.032181929744462864,
+        "movedDisplaySamples": 16,
+        "waterSamplesBefore": 0,
+        "waterSamplesAfter": 0
+      },
+      {
+        "osmWayId": 1393172791,
+        "name": null,
+        "maximumMovementTiles": 0.042201522968807505,
+        "movedDisplaySamples": 14,
+        "waterSamplesBefore": 0,
+        "waterSamplesAfter": 0
+      },
+      {
+        "osmWayId": 1393172792,
+        "name": null,
+        "maximumMovementTiles": 0.000867375455197756,
+        "movedDisplaySamples": 10,
+        "waterSamplesBefore": 13,
+        "waterSamplesAfter": 13
+      },
+      {
+        "osmWayId": 1393172793,
+        "name": null,
+        "maximumMovementTiles": 0.04335043469462768,
+        "movedDisplaySamples": 29,
+        "waterSamplesBefore": 0,
+        "waterSamplesAfter": 0
+      },
+      {
+        "osmWayId": 1393172801,
+        "name": null,
+        "maximumMovementTiles": 0.000407673118588795,
+        "movedDisplaySamples": 11,
+        "waterSamplesBefore": 0,
+        "waterSamplesAfter": 0
+      },
+      {
+        "osmWayId": 1393172803,
+        "name": null,
+        "maximumMovementTiles": 0.024474821718583988,
+        "movedDisplaySamples": 10,
+        "waterSamplesBefore": 0,
+        "waterSamplesAfter": 0
+      },
+      {
+        "osmWayId": 1393175413,
+        "name": null,
+        "maximumMovementTiles": 0.00003340941974155796,
+        "movedDisplaySamples": 6,
+        "waterSamplesBefore": 0,
+        "waterSamplesAfter": 0
+      },
+      {
+        "osmWayId": 1393175426,
+        "name": null,
+        "maximumMovementTiles": 0.000050059920766734386,
+        "movedDisplaySamples": 10,
+        "waterSamplesBefore": 0,
+        "waterSamplesAfter": 0
+      },
+      {
+        "osmWayId": 1393175427,
+        "name": null,
+        "maximumMovementTiles": 0.00016073093826135832,
+        "movedDisplaySamples": 16,
+        "waterSamplesBefore": 0,
+        "waterSamplesAfter": 0
+      },
+      {
+        "osmWayId": 1393175428,
+        "name": null,
+        "maximumMovementTiles": 0.0000022139288514058413,
+        "movedDisplaySamples": 2,
+        "waterSamplesBefore": 0,
+        "waterSamplesAfter": 0
+      },
+      {
+        "osmWayId": 1393175430,
+        "name": null,
+        "maximumMovementTiles": 0.00327701619759293,
+        "movedDisplaySamples": 24,
+        "waterSamplesBefore": 0,
+        "waterSamplesAfter": 0
+      },
+      {
+        "osmWayId": 1393175431,
+        "name": null,
+        "maximumMovementTiles": 0.00004462881713725589,
+        "movedDisplaySamples": 9,
+        "waterSamplesBefore": 0,
+        "waterSamplesAfter": 0
+      },
+      {
+        "osmWayId": 1393175432,
+        "name": null,
+        "maximumMovementTiles": 0.000011173401327567156,
+        "movedDisplaySamples": 6,
+        "waterSamplesBefore": 0,
+        "waterSamplesAfter": 0
+      },
+      {
+        "osmWayId": 1393175433,
+        "name": null,
+        "maximumMovementTiles": 0.00009324245369930642,
+        "movedDisplaySamples": 6,
+        "waterSamplesBefore": 0,
+        "waterSamplesAfter": 0
+      },
+      {
+        "osmWayId": 1393175434,
+        "name": null,
+        "maximumMovementTiles": 0.00019448205100630226,
+        "movedDisplaySamples": 9,
+        "waterSamplesBefore": 0,
+        "waterSamplesAfter": 0
+      },
+      {
+        "osmWayId": 1393175435,
+        "name": null,
+        "maximumMovementTiles": 0.0003496896696244562,
+        "movedDisplaySamples": 9,
+        "waterSamplesBefore": 0,
+        "waterSamplesAfter": 0
+      },
+      {
+        "osmWayId": 1393175436,
+        "name": null,
+        "maximumMovementTiles": 0.000533510759522162,
+        "movedDisplaySamples": 18,
+        "waterSamplesBefore": 0,
+        "waterSamplesAfter": 0
+      },
+      {
+        "osmWayId": 1393175437,
+        "name": null,
+        "maximumMovementTiles": 0.06555846418556265,
+        "movedDisplaySamples": 64,
+        "waterSamplesBefore": 0,
+        "waterSamplesAfter": 0
+      },
+      {
+        "osmWayId": 1393175438,
+        "name": null,
+        "maximumMovementTiles": 0.06168755757074079,
+        "movedDisplaySamples": 14,
+        "waterSamplesBefore": 0,
+        "waterSamplesAfter": 0
+      },
+      {
+        "osmWayId": 1393176541,
+        "name": null,
+        "maximumMovementTiles": 0.051071243414426655,
+        "movedDisplaySamples": 11,
+        "waterSamplesBefore": 0,
+        "waterSamplesAfter": 0
+      },
+      {
+        "osmWayId": 1393176542,
+        "name": null,
+        "maximumMovementTiles": 0.03679430372330102,
+        "movedDisplaySamples": 14,
+        "waterSamplesBefore": 0,
+        "waterSamplesAfter": 0
+      },
+      {
+        "osmWayId": 1393176543,
+        "name": null,
+        "maximumMovementTiles": 0.00327701619759293,
+        "movedDisplaySamples": 12,
+        "waterSamplesBefore": 0,
+        "waterSamplesAfter": 0
+      },
+      {
+        "osmWayId": 1393176544,
+        "name": null,
+        "maximumMovementTiles": 0.04329956066681533,
+        "movedDisplaySamples": 23,
+        "waterSamplesBefore": 0,
+        "waterSamplesAfter": 0
+      },
+      {
+        "osmWayId": 1393176545,
+        "name": null,
+        "maximumMovementTiles": 0.005270323021891321,
+        "movedDisplaySamples": 3,
+        "waterSamplesBefore": 0,
+        "waterSamplesAfter": 0
+      },
+      {
+        "osmWayId": 1393176546,
+        "name": null,
+        "maximumMovementTiles": 0.022010675675159023,
+        "movedDisplaySamples": 24,
+        "waterSamplesBefore": 0,
+        "waterSamplesAfter": 0
+      },
+      {
+        "osmWayId": 1393176547,
+        "name": null,
+        "maximumMovementTiles": 0.0399924307092413,
+        "movedDisplaySamples": 14,
+        "waterSamplesBefore": 0,
+        "waterSamplesAfter": 0
+      },
+      {
+        "osmWayId": 1393176548,
+        "name": null,
+        "maximumMovementTiles": 0.033631814431768256,
+        "movedDisplaySamples": 14,
+        "waterSamplesBefore": 0,
+        "waterSamplesAfter": 0
+      },
+      {
+        "osmWayId": 1393176549,
+        "name": null,
+        "maximumMovementTiles": 0.018236159779187314,
+        "movedDisplaySamples": 14,
+        "waterSamplesBefore": 0,
+        "waterSamplesAfter": 0
+      },
+      {
+        "osmWayId": 1393176551,
+        "name": null,
+        "maximumMovementTiles": 0.006118653616174751,
+        "movedDisplaySamples": 11,
+        "waterSamplesBefore": 0,
+        "waterSamplesAfter": 0
+      },
+      {
+        "osmWayId": 1393176552,
+        "name": null,
+        "maximumMovementTiles": 0.020477499820128198,
+        "movedDisplaySamples": 32,
+        "waterSamplesBefore": 0,
+        "waterSamplesAfter": 0
+      },
+      {
+        "osmWayId": 1393176553,
+        "name": null,
+        "maximumMovementTiles": 0.001010525340759939,
+        "movedDisplaySamples": 10,
+        "waterSamplesBefore": 0,
+        "waterSamplesAfter": 0
+      },
+      {
+        "osmWayId": 1393176554,
+        "name": null,
+        "maximumMovementTiles": 0.0007943739578529425,
+        "movedDisplaySamples": 5,
+        "waterSamplesBefore": 0,
+        "waterSamplesAfter": 0
+      },
+      {
+        "osmWayId": 1393176555,
+        "name": null,
+        "maximumMovementTiles": 0.003125992070601462,
+        "movedDisplaySamples": 5,
+        "waterSamplesBefore": 0,
+        "waterSamplesAfter": 0
+      },
+      {
+        "osmWayId": 1393176556,
+        "name": null,
+        "maximumMovementTiles": 0.01022905122255098,
+        "movedDisplaySamples": 5,
+        "waterSamplesBefore": 0,
+        "waterSamplesAfter": 0
+      },
+      {
+        "osmWayId": 1393176557,
+        "name": null,
+        "maximumMovementTiles": 0.006848830626366353,
+        "movedDisplaySamples": 5,
+        "waterSamplesBefore": 0,
+        "waterSamplesAfter": 0
+      },
+      {
+        "osmWayId": 1393176558,
+        "name": null,
+        "maximumMovementTiles": 0.0014873464335188283,
+        "movedDisplaySamples": 11,
+        "waterSamplesBefore": 0,
+        "waterSamplesAfter": 0
+      },
+      {
+        "osmWayId": 1393176559,
+        "name": null,
+        "maximumMovementTiles": 0.0008737901879892885,
+        "movedDisplaySamples": 8,
+        "waterSamplesBefore": 0,
+        "waterSamplesAfter": 0
+      },
+      {
+        "osmWayId": 1393176561,
+        "name": null,
+        "maximumMovementTiles": 0.00010554820095515298,
+        "movedDisplaySamples": 26,
+        "waterSamplesBefore": 0,
+        "waterSamplesAfter": 0
+      },
+      {
+        "osmWayId": 1393176562,
+        "name": null,
+        "maximumMovementTiles": 0.000010492270845667651,
+        "movedDisplaySamples": 6,
+        "waterSamplesBefore": 0,
+        "waterSamplesAfter": 0
+      },
+      {
+        "osmWayId": 1393176563,
+        "name": null,
+        "maximumMovementTiles": 0.0000039123674724534665,
+        "movedDisplaySamples": 4,
+        "waterSamplesBefore": 0,
+        "waterSamplesAfter": 0
+      },
+      {
+        "osmWayId": 1393176566,
+        "name": null,
+        "maximumMovementTiles": 0.000049373751304514285,
+        "movedDisplaySamples": 7,
+        "waterSamplesBefore": 0,
+        "waterSamplesAfter": 0
+      },
+      {
+        "osmWayId": 1393176567,
+        "name": null,
+        "maximumMovementTiles": 0.00002868024824224438,
+        "movedDisplaySamples": 7,
+        "waterSamplesBefore": 0,
+        "waterSamplesAfter": 0
+      },
+      {
+        "osmWayId": 1393176568,
+        "name": null,
+        "maximumMovementTiles": 0.000007197298148402337,
+        "movedDisplaySamples": 7,
+        "waterSamplesBefore": 0,
+        "waterSamplesAfter": 0
+      },
+      {
+        "osmWayId": 1393176569,
+        "name": null,
+        "maximumMovementTiles": 0.00017803891759483518,
+        "movedDisplaySamples": 31,
+        "waterSamplesBefore": 0,
+        "waterSamplesAfter": 0
+      },
+      {
+        "osmWayId": 1393176570,
+        "name": null,
+        "maximumMovementTiles": 0.00020360626901364562,
+        "movedDisplaySamples": 3,
+        "waterSamplesBefore": 0,
+        "waterSamplesAfter": 0
+      },
+      {
+        "osmWayId": 1393176571,
+        "name": null,
+        "maximumMovementTiles": 0.0003564473868647893,
+        "movedDisplaySamples": 7,
+        "waterSamplesBefore": 0,
+        "waterSamplesAfter": 0
+      },
+      {
+        "osmWayId": 1442882869,
+        "name": null,
+        "maximumMovementTiles": 0.0022942815766528956,
+        "movedDisplaySamples": 11,
+        "waterSamplesBefore": 0,
+        "waterSamplesAfter": 0
+      },
+      {
+        "osmWayId": 1442882870,
+        "name": null,
+        "maximumMovementTiles": 0.025606082802537813,
+        "movedDisplaySamples": 25,
+        "waterSamplesBefore": 0,
+        "waterSamplesAfter": 0
+      },
+      {
+        "osmWayId": 1442882873,
+        "name": null,
+        "maximumMovementTiles": 0.00017368613349237977,
+        "movedDisplaySamples": 9,
+        "waterSamplesBefore": 2,
+        "waterSamplesAfter": 2
+      },
+      {
+        "osmWayId": 1487068994,
+        "name": null,
+        "maximumMovementTiles": 0.016672262721698045,
+        "movedDisplaySamples": 4,
+        "waterSamplesBefore": 0,
+        "waterSamplesAfter": 0
+      },
+      {
+        "osmWayId": 1487068995,
+        "name": null,
+        "maximumMovementTiles": 0.019638788162783014,
+        "movedDisplaySamples": 4,
+        "waterSamplesBefore": 0,
+        "waterSamplesAfter": 0
+      },
+      {
+        "osmWayId": 1487068997,
+        "name": null,
+        "maximumMovementTiles": 0.0014782950483106492,
+        "movedDisplaySamples": 3,
+        "waterSamplesBefore": 0,
+        "waterSamplesAfter": 0
+      },
+      {
+        "osmWayId": 1487068998,
+        "name": null,
+        "maximumMovementTiles": 0.004677676403700148,
+        "movedDisplaySamples": 4,
+        "waterSamplesBefore": 0,
+        "waterSamplesAfter": 0
+      },
+      {
+        "osmWayId": 1506178845,
+        "name": null,
+        "maximumMovementTiles": 0.002059353342636815,
+        "movedDisplaySamples": 19,
+        "waterSamplesBefore": 0,
+        "waterSamplesAfter": 0
+      },
+      {
+        "osmWayId": 1507396099,
+        "name": "定泗路",
+        "maximumMovementTiles": 0.00031846247304444974,
+        "movedDisplaySamples": 23,
+        "waterSamplesBefore": 0,
+        "waterSamplesAfter": 0
+      },
+      {
+        "osmWayId": 1528838194,
+        "name": null,
+        "maximumMovementTiles": 0.0035569102361422533,
+        "movedDisplaySamples": 34,
+        "waterSamplesBefore": 1,
+        "waterSamplesAfter": 1
+      },
+      {
+        "osmWayId": 1528838196,
+        "name": "黄平西路辅路",
+        "maximumMovementTiles": 0.0015483209199954997,
+        "movedDisplaySamples": 33,
+        "waterSamplesBefore": 0,
+        "waterSamplesAfter": 0
+      },
+      {
+        "osmWayId": 1528838198,
+        "name": "黄平西路",
+        "maximumMovementTiles": 0.00003034967997438818,
+        "movedDisplaySamples": 12,
+        "waterSamplesBefore": 5,
+        "waterSamplesAfter": 5
+      },
+      {
+        "osmWayId": 1528838200,
+        "name": "黄平西路",
+        "maximumMovementTiles": 0.000023941137702312636,
+        "movedDisplaySamples": 11,
+        "waterSamplesBefore": 8,
+        "waterSamplesAfter": 8
+      },
+      {
+        "osmWayId": 1528838201,
+        "name": "黄平西路辅路",
+        "maximumMovementTiles": 0.00002203937063307417,
+        "movedDisplaySamples": 11,
+        "waterSamplesBefore": 5,
+        "waterSamplesAfter": 5
+      },
+      {
+        "osmWayId": 1528838202,
+        "name": null,
+        "maximumMovementTiles": 0.00013458045609381072,
+        "movedDisplaySamples": 21,
+        "waterSamplesBefore": 6,
+        "waterSamplesAfter": 6
+      },
+      {
+        "osmWayId": 1528854642,
+        "name": null,
+        "maximumMovementTiles": 0.0000022320184818329557,
+        "movedDisplaySamples": 4,
+        "waterSamplesBefore": 0,
+        "waterSamplesAfter": 0
+      },
+      {
+        "osmWayId": 1528854643,
+        "name": null,
+        "maximumMovementTiles": 0.000005430022081092135,
+        "movedDisplaySamples": 5,
+        "waterSamplesBefore": 0,
+        "waterSamplesAfter": 0
+      },
+      {
+        "osmWayId": 1528854644,
+        "name": null,
+        "maximumMovementTiles": 0.0000022215343165044033,
+        "movedDisplaySamples": 2,
+        "waterSamplesBefore": 0,
+        "waterSamplesAfter": 0
+      },
+      {
+        "osmWayId": 1528854645,
+        "name": null,
+        "maximumMovementTiles": 0.0000022370575629924238,
+        "movedDisplaySamples": 2,
+        "waterSamplesBefore": 0,
+        "waterSamplesAfter": 0
+      },
+      {
+        "osmWayId": 1529695684,
+        "name": null,
+        "maximumMovementTiles": 0.000029596738307912497,
+        "movedDisplaySamples": 2,
+        "waterSamplesBefore": 0,
+        "waterSamplesAfter": 0
+      },
+      {
+        "osmWayId": 1529695689,
+        "name": null,
+        "maximumMovementTiles": 0.05355365099853404,
+        "movedDisplaySamples": 4,
+        "waterSamplesBefore": 0,
+        "waterSamplesAfter": 0
+      },
+      {
+        "osmWayId": 1529695694,
+        "name": null,
+        "maximumMovementTiles": 0.06369840686113853,
+        "movedDisplaySamples": 56,
+        "waterSamplesBefore": 0,
+        "waterSamplesAfter": 0
+      },
+      {
+        "osmWayId": 1529695695,
+        "name": null,
+        "maximumMovementTiles": 0.029395790463975013,
+        "movedDisplaySamples": 5,
+        "waterSamplesBefore": 0,
+        "waterSamplesAfter": 0
+      },
+      {
+        "osmWayId": 1529695696,
+        "name": null,
+        "maximumMovementTiles": 0.028900351188605157,
+        "movedDisplaySamples": 4,
+        "waterSamplesBefore": 0,
+        "waterSamplesAfter": 0
+      },
+      {
+        "osmWayId": 1529695714,
+        "name": null,
+        "maximumMovementTiles": 0.00005119045431772012,
+        "movedDisplaySamples": 3,
+        "waterSamplesBefore": 0,
+        "waterSamplesAfter": 0
+      },
+      {
+        "osmWayId": 1529695715,
+        "name": null,
+        "maximumMovementTiles": 0.00007191775809608261,
+        "movedDisplaySamples": 4,
+        "waterSamplesBefore": 0,
+        "waterSamplesAfter": 0
+      },
+      {
+        "osmWayId": 1529695716,
+        "name": null,
+        "maximumMovementTiles": 0.05662777938125174,
+        "movedDisplaySamples": 4,
+        "waterSamplesBefore": 0,
+        "waterSamplesAfter": 0
+      },
+      {
+        "osmWayId": 1529695717,
+        "name": null,
+        "maximumMovementTiles": 0.00009438023482415424,
+        "movedDisplaySamples": 4,
+        "waterSamplesBefore": 0,
+        "waterSamplesAfter": 0
+      },
+      {
+        "osmWayId": 1529695718,
+        "name": null,
+        "maximumMovementTiles": 0.0006509479283675693,
+        "movedDisplaySamples": 5,
+        "waterSamplesBefore": 0,
+        "waterSamplesAfter": 0
+      },
+      {
+        "osmWayId": 1529695719,
+        "name": null,
+        "maximumMovementTiles": 0.0008608691974208212,
+        "movedDisplaySamples": 4,
+        "waterSamplesBefore": 0,
+        "waterSamplesAfter": 0
+      },
+      {
+        "osmWayId": 1529695720,
+        "name": null,
+        "maximumMovementTiles": 0.0004305468755414709,
+        "movedDisplaySamples": 4,
+        "waterSamplesBefore": 0,
+        "waterSamplesAfter": 0
+      },
+      {
+        "osmWayId": 1529695721,
+        "name": null,
+        "maximumMovementTiles": 0.0005489299279728504,
+        "movedDisplaySamples": 4,
+        "waterSamplesBefore": 0,
+        "waterSamplesAfter": 0
+      },
+      {
+        "osmWayId": 1529695722,
+        "name": null,
+        "maximumMovementTiles": 0.004055500061584938,
+        "movedDisplaySamples": 5,
+        "waterSamplesBefore": 0,
+        "waterSamplesAfter": 0
+      },
+      {
+        "osmWayId": 1529695723,
+        "name": null,
+        "maximumMovementTiles": 0.004883139291013143,
+        "movedDisplaySamples": 4,
+        "waterSamplesBefore": 0,
+        "waterSamplesAfter": 0
+      },
+      {
+        "osmWayId": 1529695724,
+        "name": null,
+        "maximumMovementTiles": 0.005054738134359978,
+        "movedDisplaySamples": 6,
+        "waterSamplesBefore": 0,
+        "waterSamplesAfter": 0
+      },
+      {
+        "osmWayId": 1529695725,
+        "name": null,
+        "maximumMovementTiles": 0.0061609932132272414,
+        "movedDisplaySamples": 4,
+        "waterSamplesBefore": 0,
+        "waterSamplesAfter": 0
+      },
+      {
+        "osmWayId": 1529695726,
+        "name": null,
+        "maximumMovementTiles": 0.013888056988390053,
+        "movedDisplaySamples": 5,
+        "waterSamplesBefore": 0,
+        "waterSamplesAfter": 0
+      },
+      {
+        "osmWayId": 1529695727,
+        "name": null,
+        "maximumMovementTiles": 0.016421869394974697,
+        "movedDisplaySamples": 4,
+        "waterSamplesBefore": 0,
+        "waterSamplesAfter": 0
+      },
+      {
+        "osmWayId": 1529695728,
+        "name": null,
+        "maximumMovementTiles": 0.016027159165149817,
+        "movedDisplaySamples": 5,
+        "waterSamplesBefore": 0,
+        "waterSamplesAfter": 0
+      },
+      {
+        "osmWayId": 1529695729,
+        "name": null,
+        "maximumMovementTiles": 0.01872608833621075,
+        "movedDisplaySamples": 4,
+        "waterSamplesBefore": 0,
+        "waterSamplesAfter": 0
+      },
+      {
+        "osmWayId": 1529695730,
+        "name": null,
+        "maximumMovementTiles": 0.035030462733661435,
+        "movedDisplaySamples": 5,
+        "waterSamplesBefore": 0,
+        "waterSamplesAfter": 0
+      },
+      {
+        "osmWayId": 1529695731,
+        "name": null,
+        "maximumMovementTiles": 0.03914547798175626,
+        "movedDisplaySamples": 4,
+        "waterSamplesBefore": 0,
+        "waterSamplesAfter": 0
+      },
+      {
+        "osmWayId": 1529695732,
+        "name": null,
+        "maximumMovementTiles": 0.03084427091540019,
+        "movedDisplaySamples": 4,
+        "waterSamplesBefore": 0,
+        "waterSamplesAfter": 0
+      },
+      {
+        "osmWayId": 1529695733,
+        "name": null,
+        "maximumMovementTiles": 0.03996856038658012,
+        "movedDisplaySamples": 4,
+        "waterSamplesBefore": 0,
+        "waterSamplesAfter": 0
+      },
+      {
+        "osmWayId": 1529695734,
+        "name": null,
+        "maximumMovementTiles": 0.0376871021601825,
+        "movedDisplaySamples": 2,
+        "waterSamplesBefore": 0,
+        "waterSamplesAfter": 0
+      },
+      {
+        "osmWayId": 1529695735,
+        "name": null,
+        "maximumMovementTiles": 0.03364374371153398,
+        "movedDisplaySamples": 4,
+        "waterSamplesBefore": 0,
+        "waterSamplesAfter": 0
+      },
+      {
+        "osmWayId": 1529695736,
+        "name": null,
+        "maximumMovementTiles": 0.05218217705482653,
+        "movedDisplaySamples": 5,
+        "waterSamplesBefore": 0,
+        "waterSamplesAfter": 0
+      },
+      {
+        "osmWayId": 1529695737,
+        "name": null,
+        "maximumMovementTiles": 0.05306920415822129,
+        "movedDisplaySamples": 4,
+        "waterSamplesBefore": 0,
+        "waterSamplesAfter": 0
+      },
+      {
+        "osmWayId": 1529695738,
+        "name": null,
+        "maximumMovementTiles": 0.04956668808814306,
+        "movedDisplaySamples": 4,
+        "waterSamplesBefore": 0,
+        "waterSamplesAfter": 0
+      },
+      {
+        "osmWayId": 1529695739,
+        "name": null,
+        "maximumMovementTiles": 0.051264023845479706,
+        "movedDisplaySamples": 4,
+        "waterSamplesBefore": 0,
+        "waterSamplesAfter": 0
+      },
+      {
+        "osmWayId": 1529695740,
+        "name": null,
+        "maximumMovementTiles": 0.05092359829747874,
+        "movedDisplaySamples": 3,
+        "waterSamplesBefore": 0,
+        "waterSamplesAfter": 0
+      },
+      {
+        "osmWayId": 1529695741,
+        "name": null,
+        "maximumMovementTiles": 0.0514763364378806,
+        "movedDisplaySamples": 4,
+        "waterSamplesBefore": 0,
+        "waterSamplesAfter": 0
+      },
+      {
+        "osmWayId": 1529695742,
+        "name": null,
+        "maximumMovementTiles": 0.05246721437046703,
+        "movedDisplaySamples": 2,
+        "waterSamplesBefore": 0,
+        "waterSamplesAfter": 0
+      },
+      {
+        "osmWayId": 1529695743,
+        "name": null,
+        "maximumMovementTiles": 0.0529263030799345,
+        "movedDisplaySamples": 4,
+        "waterSamplesBefore": 0,
+        "waterSamplesAfter": 0
+      },
+      {
+        "osmWayId": 1529695744,
+        "name": null,
+        "maximumMovementTiles": 0.06911549363709081,
+        "movedDisplaySamples": 5,
+        "waterSamplesBefore": 0,
+        "waterSamplesAfter": 0
+      },
+      {
+        "osmWayId": 1529695745,
+        "name": null,
+        "maximumMovementTiles": 0.058221649894851464,
+        "movedDisplaySamples": 6,
+        "waterSamplesBefore": 0,
+        "waterSamplesAfter": 0
+      },
+      {
+        "osmWayId": 1529695746,
+        "name": null,
+        "maximumMovementTiles": 0.05494066920731811,
+        "movedDisplaySamples": 3,
+        "waterSamplesBefore": 0,
+        "waterSamplesAfter": 0
+      },
+      {
+        "osmWayId": 1529695747,
+        "name": null,
+        "maximumMovementTiles": 0.05096019438750132,
+        "movedDisplaySamples": 4,
+        "waterSamplesBefore": 0,
+        "waterSamplesAfter": 0
+      },
+      {
+        "osmWayId": 1529695750,
+        "name": null,
+        "maximumMovementTiles": 0.0046276000972103005,
+        "movedDisplaySamples": 4,
+        "waterSamplesBefore": 0,
+        "waterSamplesAfter": 0
+      },
+      {
+        "osmWayId": 1529695763,
+        "name": null,
+        "maximumMovementTiles": 0.000014669784288960583,
+        "movedDisplaySamples": 3,
+        "waterSamplesBefore": 0,
+        "waterSamplesAfter": 0
+      },
+      {
+        "osmWayId": 1529695764,
+        "name": null,
+        "maximumMovementTiles": 0.00002103362068025641,
+        "movedDisplaySamples": 4,
+        "waterSamplesBefore": 0,
+        "waterSamplesAfter": 0
+      },
+      {
+        "osmWayId": 1529695765,
+        "name": null,
+        "maximumMovementTiles": 0.000015598981610148277,
+        "movedDisplaySamples": 3,
+        "waterSamplesBefore": 0,
+        "waterSamplesAfter": 0
+      },
+      {
+        "osmWayId": 1529695766,
+        "name": null,
+        "maximumMovementTiles": 0.000022102261189185998,
+        "movedDisplaySamples": 4,
+        "waterSamplesBefore": 0,
+        "waterSamplesAfter": 0
+      },
+      {
+        "osmWayId": 1529695767,
+        "name": null,
+        "maximumMovementTiles": 0.000048331402661736035,
+        "movedDisplaySamples": 3,
+        "waterSamplesBefore": 0,
+        "waterSamplesAfter": 0
+      },
+      {
+        "osmWayId": 1529695768,
+        "name": null,
+        "maximumMovementTiles": 0.00006748280242802474,
+        "movedDisplaySamples": 4,
+        "waterSamplesBefore": 0,
+        "waterSamplesAfter": 0
+      },
+      {
+        "osmWayId": 1529695769,
+        "name": null,
+        "maximumMovementTiles": 0.00025506719336038835,
+        "movedDisplaySamples": 6,
+        "waterSamplesBefore": 0,
+        "waterSamplesAfter": 0
+      },
+      {
+        "osmWayId": 1529695770,
+        "name": null,
+        "maximumMovementTiles": 0.0003441246809475349,
+        "movedDisplaySamples": 4,
+        "waterSamplesBefore": 0,
+        "waterSamplesAfter": 0
+      },
+      {
+        "osmWayId": 1529695771,
+        "name": null,
+        "maximumMovementTiles": 0.00045427580417523993,
+        "movedDisplaySamples": 7,
+        "waterSamplesBefore": 0,
+        "waterSamplesAfter": 0
+      },
+      {
+        "osmWayId": 1529695772,
+        "name": null,
+        "maximumMovementTiles": 0.0006159275961026366,
+        "movedDisplaySamples": 4,
+        "waterSamplesBefore": 0,
+        "waterSamplesAfter": 0
+      },
+      {
+        "osmWayId": 1529695773,
+        "name": null,
+        "maximumMovementTiles": 0.0009909552345991489,
+        "movedDisplaySamples": 2,
+        "waterSamplesBefore": 0,
+        "waterSamplesAfter": 0
+      },
+      {
+        "osmWayId": 1529695774,
+        "name": null,
+        "maximumMovementTiles": 0.0012131910900396515,
+        "movedDisplaySamples": 4,
+        "waterSamplesBefore": 0,
+        "waterSamplesAfter": 0
+      },
+      {
+        "osmWayId": 1529695775,
+        "name": null,
+        "maximumMovementTiles": 0.0015787634841883046,
+        "movedDisplaySamples": 6,
+        "waterSamplesBefore": 0,
+        "waterSamplesAfter": 0
+      },
+      {
+        "osmWayId": 1529695776,
+        "name": null,
+        "maximumMovementTiles": 0.0019260366069619634,
+        "movedDisplaySamples": 4,
+        "waterSamplesBefore": 0,
+        "waterSamplesAfter": 0
+      },
+      {
+        "osmWayId": 1529695777,
+        "name": null,
+        "maximumMovementTiles": 0.004630288351028296,
+        "movedDisplaySamples": 5,
+        "waterSamplesBefore": 0,
+        "waterSamplesAfter": 0
+      },
+      {
+        "osmWayId": 1529695778,
+        "name": null,
+        "maximumMovementTiles": 0.005649870125368427,
+        "movedDisplaySamples": 4,
+        "waterSamplesBefore": 0,
+        "waterSamplesAfter": 0
+      },
+      {
+        "osmWayId": 1529695779,
+        "name": null,
+        "maximumMovementTiles": 0.007679669416674419,
+        "movedDisplaySamples": 2,
+        "waterSamplesBefore": 0,
+        "waterSamplesAfter": 0
+      },
+      {
+        "osmWayId": 1529695780,
+        "name": null,
+        "maximumMovementTiles": 0.00881018574813239,
+        "movedDisplaySamples": 4,
+        "waterSamplesBefore": 0,
+        "waterSamplesAfter": 0
+      },
+      {
+        "osmWayId": 1529695781,
+        "name": null,
+        "maximumMovementTiles": 0.00747146278433751,
+        "movedDisplaySamples": 5,
+        "waterSamplesBefore": 0,
+        "waterSamplesAfter": 0
+      },
+      {
+        "osmWayId": 1529695782,
+        "name": null,
+        "maximumMovementTiles": 0.00864180321155192,
+        "movedDisplaySamples": 4,
+        "waterSamplesBefore": 0,
+        "waterSamplesAfter": 0
+      },
+      {
+        "osmWayId": 1529695783,
+        "name": null,
+        "maximumMovementTiles": 0.01631903109629921,
+        "movedDisplaySamples": 4,
+        "waterSamplesBefore": 0,
+        "waterSamplesAfter": 0
+      },
+      {
+        "osmWayId": 1529695784,
+        "name": null,
+        "maximumMovementTiles": 0.01779684147199472,
+        "movedDisplaySamples": 4,
+        "waterSamplesBefore": 0,
+        "waterSamplesAfter": 0
+      },
+      {
+        "osmWayId": 1529695785,
+        "name": null,
+        "maximumMovementTiles": 0.01855848958761984,
+        "movedDisplaySamples": 5,
+        "waterSamplesBefore": 0,
+        "waterSamplesAfter": 0
+      },
+      {
+        "osmWayId": 1529695786,
+        "name": null,
+        "maximumMovementTiles": 0.019585748680760292,
+        "movedDisplaySamples": 4,
+        "waterSamplesBefore": 0,
+        "waterSamplesAfter": 0
+      },
+      {
+        "osmWayId": 1529695787,
+        "name": null,
+        "maximumMovementTiles": 0.02090880761169024,
+        "movedDisplaySamples": 2,
+        "waterSamplesBefore": 0,
+        "waterSamplesAfter": 0
+      },
+      {
+        "osmWayId": 1529695788,
+        "name": null,
+        "maximumMovementTiles": 0.02124461143338227,
+        "movedDisplaySamples": 4,
+        "waterSamplesBefore": 0,
+        "waterSamplesAfter": 0
+      },
+      {
+        "osmWayId": 1529695789,
+        "name": null,
+        "maximumMovementTiles": 0.02180247869737347,
+        "movedDisplaySamples": 4,
+        "waterSamplesBefore": 0,
+        "waterSamplesAfter": 0
+      },
+      {
+        "osmWayId": 1529695790,
+        "name": null,
+        "maximumMovementTiles": 0.02180247869737347,
+        "movedDisplaySamples": 4,
+        "waterSamplesBefore": 0,
+        "waterSamplesAfter": 0
+      },
+      {
+        "osmWayId": 1529695791,
+        "name": null,
+        "maximumMovementTiles": 0.021556512832791117,
+        "movedDisplaySamples": 5,
+        "waterSamplesBefore": 0,
+        "waterSamplesAfter": 0
+      },
+      {
+        "osmWayId": 1529695792,
+        "name": null,
+        "maximumMovementTiles": 0.011330703693527629,
+        "movedDisplaySamples": 4,
+        "waterSamplesBefore": 0,
+        "waterSamplesAfter": 0
+      },
+      {
+        "osmWayId": 1529695793,
+        "name": null,
+        "maximumMovementTiles": 0.02141018610808255,
+        "movedDisplaySamples": 6,
+        "waterSamplesBefore": 0,
+        "waterSamplesAfter": 0
+      },
+      {
+        "osmWayId": 1529695794,
+        "name": null,
+        "maximumMovementTiles": 0.010782669713510013,
+        "movedDisplaySamples": 4,
+        "waterSamplesBefore": 0,
+        "waterSamplesAfter": 0
+      },
+      {
+        "osmWayId": 1529695795,
+        "name": null,
+        "maximumMovementTiles": 0.008333166621663456,
+        "movedDisplaySamples": 2,
+        "waterSamplesBefore": 0,
+        "waterSamplesAfter": 0
+      },
+      {
+        "osmWayId": 1529695796,
+        "name": null,
+        "maximumMovementTiles": 0.006773319300191781,
+        "movedDisplaySamples": 4,
+        "waterSamplesBefore": 0,
+        "waterSamplesAfter": 0
+      },
+      {
+        "osmWayId": 1529695797,
+        "name": null,
+        "maximumMovementTiles": 0.008873646028651148,
+        "movedDisplaySamples": 4,
+        "waterSamplesBefore": 0,
+        "waterSamplesAfter": 0
+      },
+      {
+        "osmWayId": 1529925007,
+        "name": null,
+        "maximumMovementTiles": 0.002527401604477052,
+        "movedDisplaySamples": 6,
+        "waterSamplesBefore": 0,
+        "waterSamplesAfter": 0
+      },
+      {
+        "osmWayId": 1529925008,
+        "name": null,
+        "maximumMovementTiles": 0.000474255531966265,
+        "movedDisplaySamples": 4,
+        "waterSamplesBefore": 0,
+        "waterSamplesAfter": 0
+      },
+      {
+        "osmWayId": 1529925009,
+        "name": null,
+        "maximumMovementTiles": 0.001178901884848082,
+        "movedDisplaySamples": 5,
+        "waterSamplesBefore": 0,
+        "waterSamplesAfter": 0
+      },
+      {
+        "osmWayId": 1529925010,
+        "name": null,
+        "maximumMovementTiles": 0.0003156426900638013,
+        "movedDisplaySamples": 4,
+        "waterSamplesBefore": 0,
+        "waterSamplesAfter": 0
+      },
+      {
+        "osmWayId": 1529925011,
+        "name": null,
+        "maximumMovementTiles": 0.00026297736224037465,
+        "movedDisplaySamples": 3,
+        "waterSamplesBefore": 0,
+        "waterSamplesAfter": 0
+      },
+      {
+        "osmWayId": 1529925012,
+        "name": null,
+        "maximumMovementTiles": 0.00015799129966090662,
+        "movedDisplaySamples": 4,
+        "waterSamplesBefore": 0,
+        "waterSamplesAfter": 0
+      },
+      {
+        "osmWayId": 1529925013,
+        "name": null,
+        "maximumMovementTiles": 0.0003964917364606483,
+        "movedDisplaySamples": 4,
+        "waterSamplesBefore": 0,
+        "waterSamplesAfter": 0
+      },
+      {
+        "osmWayId": 1529925014,
+        "name": null,
+        "maximumMovementTiles": 0.000160940854297763,
+        "movedDisplaySamples": 4,
+        "waterSamplesBefore": 0,
+        "waterSamplesAfter": 0
+      },
+      {
+        "osmWayId": 1529925015,
+        "name": null,
+        "maximumMovementTiles": 0.00013640686880092838,
+        "movedDisplaySamples": 4,
+        "waterSamplesBefore": 0,
+        "waterSamplesAfter": 0
+      },
+      {
+        "osmWayId": 1529925016,
+        "name": null,
+        "maximumMovementTiles": 0.00004399792910256798,
+        "movedDisplaySamples": 4,
+        "waterSamplesBefore": 0,
+        "waterSamplesAfter": 0
+      },
+      {
+        "osmWayId": 1529925017,
+        "name": null,
+        "maximumMovementTiles": 0.00003450634081940319,
+        "movedDisplaySamples": 2,
+        "waterSamplesBefore": 0,
+        "waterSamplesAfter": 0
+      },
+      {
+        "osmWayId": 1529925018,
+        "name": null,
+        "maximumMovementTiles": 0.000025502249375967797,
+        "movedDisplaySamples": 4,
+        "waterSamplesBefore": 0,
+        "waterSamplesAfter": 0
+      },
+      {
+        "osmWayId": 1529925019,
+        "name": null,
+        "maximumMovementTiles": 0.00012595053057369376,
+        "movedDisplaySamples": 3,
+        "waterSamplesBefore": 0,
+        "waterSamplesAfter": 0
+      },
+      {
+        "osmWayId": 1529925020,
+        "name": null,
+        "maximumMovementTiles": 0.00005590479711229152,
+        "movedDisplaySamples": 4,
+        "waterSamplesBefore": 0,
+        "waterSamplesAfter": 0
+      },
+      {
+        "osmWayId": 1529925021,
+        "name": null,
+        "maximumMovementTiles": 0.000044448980065927325,
+        "movedDisplaySamples": 2,
+        "waterSamplesBefore": 0,
+        "waterSamplesAfter": 0
+      },
+      {
+        "osmWayId": 1529925022,
+        "name": null,
+        "maximumMovementTiles": 0.00003037255231111983,
+        "movedDisplaySamples": 4,
+        "waterSamplesBefore": 0,
+        "waterSamplesAfter": 0
+      },
+      {
+        "osmWayId": 1529925023,
+        "name": null,
+        "maximumMovementTiles": 0.00001986408577618988,
+        "movedDisplaySamples": 3,
+        "waterSamplesBefore": 0,
+        "waterSamplesAfter": 0
+      },
+      {
+        "osmWayId": 1529925024,
+        "name": null,
+        "maximumMovementTiles": 0.000009484507436588977,
+        "movedDisplaySamples": 4,
+        "waterSamplesBefore": 0,
+        "waterSamplesAfter": 0
+      },
+      {
+        "osmWayId": 1529925025,
+        "name": null,
+        "maximumMovementTiles": 0.000023681208268363925,
+        "movedDisplaySamples": 3,
+        "waterSamplesBefore": 0,
+        "waterSamplesAfter": 0
+      },
+      {
+        "osmWayId": 1529925026,
+        "name": null,
+        "maximumMovementTiles": 0.000006636363967492304,
+        "movedDisplaySamples": 2,
+        "waterSamplesBefore": 0,
+        "waterSamplesAfter": 0
+      },
+      {
+        "osmWayId": 1529925027,
+        "name": null,
+        "maximumMovementTiles": 0.00000399008530003097,
+        "movedDisplaySamples": 4,
+        "waterSamplesBefore": 0,
+        "waterSamplesAfter": 0
+      },
+      {
+        "osmWayId": 1529925028,
+        "name": null,
+        "maximumMovementTiles": 0.000006401715656328233,
+        "movedDisplaySamples": 4,
+        "waterSamplesBefore": 0,
+        "waterSamplesAfter": 0
+      },
+      {
+        "osmWayId": 1529925029,
+        "name": null,
+        "maximumMovementTiles": 0.0000038763853651891645,
+        "movedDisplaySamples": 1,
+        "waterSamplesBefore": 0,
+        "waterSamplesAfter": 0
+      },
+      {
+        "osmWayId": 1529925035,
+        "name": null,
+        "maximumMovementTiles": 0.000002336331379779763,
+        "movedDisplaySamples": 1,
+        "waterSamplesBefore": 0,
+        "waterSamplesAfter": 0
+      },
+      {
+        "osmWayId": 1531014526,
+        "name": null,
+        "maximumMovementTiles": 0.000772538510065951,
+        "movedDisplaySamples": 18,
+        "waterSamplesBefore": 0,
+        "waterSamplesAfter": 0
+      },
+      {
+        "osmWayId": 1531014527,
+        "name": null,
+        "maximumMovementTiles": 0.0008296582340597286,
+        "movedDisplaySamples": 22,
+        "waterSamplesBefore": 4,
+        "waterSamplesAfter": 4
+      },
+      {
+        "osmWayId": 1531014545,
+        "name": null,
+        "maximumMovementTiles": 0.000121880522641673,
+        "movedDisplaySamples": 2,
+        "waterSamplesBefore": 0,
+        "waterSamplesAfter": 0
+      },
+      {
+        "osmWayId": 1531014546,
+        "name": null,
+        "maximumMovementTiles": 0.000175753113482999,
+        "movedDisplaySamples": 16,
+        "waterSamplesBefore": 1,
+        "waterSamplesAfter": 1
+      },
+      {
+        "osmWayId": 1531014547,
+        "name": null,
+        "maximumMovementTiles": 0.00012391507881381455,
+        "movedDisplaySamples": 4,
+        "waterSamplesBefore": 0,
+        "waterSamplesAfter": 0
+      },
+      {
+        "osmWayId": 1531014548,
+        "name": null,
+        "maximumMovementTiles": 0.0003466339293686801,
+        "movedDisplaySamples": 4,
+        "waterSamplesBefore": 0,
+        "waterSamplesAfter": 0
+      },
+      {
+        "osmWayId": 1531021263,
+        "name": null,
+        "maximumMovementTiles": 0.000002053094384696309,
+        "movedDisplaySamples": 7,
+        "waterSamplesBefore": 5,
+        "waterSamplesAfter": 5
+      },
+      {
+        "osmWayId": 1531021264,
+        "name": null,
+        "maximumMovementTiles": 0.0000018950736551227127,
+        "movedDisplaySamples": 6,
+        "waterSamplesBefore": 14,
+        "waterSamplesAfter": 14
+      },
+      {
+        "osmWayId": 1531021271,
+        "name": "白各庄新村路",
+        "maximumMovementTiles": 0.0007814941367599084,
+        "movedDisplaySamples": 21,
+        "waterSamplesBefore": 6,
+        "waterSamplesAfter": 6
+      },
+      {
+        "osmWayId": 1535850856,
+        "name": "定泗路",
+        "maximumMovementTiles": 0.043330422010742914,
+        "movedDisplaySamples": 33,
+        "waterSamplesBefore": 77,
+        "waterSamplesAfter": 77
+      },
+      {
+        "osmWayId": 1535850857,
+        "name": null,
+        "maximumMovementTiles": 0.04600321824776004,
+        "movedDisplaySamples": 22,
+        "waterSamplesBefore": 71,
+        "waterSamplesAfter": 71
+      },
+      {
+        "osmWayId": 1535850858,
+        "name": "定泗路",
+        "maximumMovementTiles": 0.10489845961892726,
+        "movedDisplaySamples": 132,
+        "waterSamplesBefore": 102,
+        "waterSamplesAfter": 102
+      },
+      {
+        "osmWayId": 1535866905,
+        "name": "定泗路",
+        "maximumMovementTiles": 0.1172168106258941,
+        "movedDisplaySamples": 70,
+        "waterSamplesBefore": 28,
+        "waterSamplesAfter": 27
+      },
+      {
+        "osmWayId": 1543206035,
+        "name": "宏福大道",
+        "maximumMovementTiles": 0.0003564473868647893,
+        "movedDisplaySamples": 24,
+        "waterSamplesBefore": 0,
+        "waterSamplesAfter": 0
+      },
+      {
+        "osmWayId": 1543206038,
+        "name": "宏福大道",
+        "maximumMovementTiles": 0.0013445812069103069,
+        "movedDisplaySamples": 5,
+        "waterSamplesBefore": 0,
+        "waterSamplesAfter": 0
+      },
+      {
+        "osmWayId": 1550525175,
+        "name": "苍龙街",
+        "maximumMovementTiles": 0.00031846247304444974,
+        "movedDisplaySamples": 6,
+        "waterSamplesBefore": 0,
+        "waterSamplesAfter": 0
+      },
+      {
+        "osmWayId": 1553006337,
+        "name": "未来科学城滨河大道",
+        "maximumMovementTiles": 0.024349128921066894,
+        "movedDisplaySamples": 270,
+        "waterSamplesBefore": 0,
+        "waterSamplesAfter": 0
+      }
+    ],
+    "residualWays": [
+      {
+        "osmWayId": 26427880,
+        "waterSamples": 4
+      },
+      {
+        "osmWayId": 26428087,
+        "waterSamples": 4
+      },
+      {
+        "osmWayId": 47518656,
+        "waterSamples": 7
+      },
+      {
+        "osmWayId": 47518787,
+        "waterSamples": 9
+      },
+      {
+        "osmWayId": 47518902,
+        "waterSamples": 511
+      },
+      {
+        "osmWayId": 47518911,
+        "waterSamples": 190
+      },
+      {
+        "osmWayId": 55787998,
+        "waterSamples": 11
+      },
+      {
+        "osmWayId": 106615256,
+        "waterSamples": 6
+      },
+      {
+        "osmWayId": 106616547,
+        "waterSamples": 2
+      },
+      {
+        "osmWayId": 130218349,
+        "waterSamples": 19
+      },
+      {
+        "osmWayId": 152445128,
+        "waterSamples": 2
+      },
+      {
+        "osmWayId": 158054739,
+        "waterSamples": 16
+      },
+      {
+        "osmWayId": 158054767,
+        "waterSamples": 2
+      },
+      {
+        "osmWayId": 220207026,
+        "waterSamples": 13
+      },
+      {
+        "osmWayId": 220207027,
+        "waterSamples": 9
+      },
+      {
+        "osmWayId": 232399625,
+        "waterSamples": 14
+      },
+      {
+        "osmWayId": 260842920,
+        "waterSamples": 14
+      },
+      {
+        "osmWayId": 276208167,
+        "waterSamples": 139
+      },
+      {
+        "osmWayId": 276208170,
+        "waterSamples": 13
+      },
+      {
+        "osmWayId": 276208171,
+        "waterSamples": 1
+      },
+      {
+        "osmWayId": 276208172,
+        "waterSamples": 8
+      },
+      {
+        "osmWayId": 276208173,
+        "waterSamples": 8
+      },
+      {
+        "osmWayId": 276208174,
+        "waterSamples": 11
+      },
+      {
+        "osmWayId": 276433268,
+        "waterSamples": 8
+      },
+      {
+        "osmWayId": 328596919,
+        "waterSamples": 1
+      },
+      {
+        "osmWayId": 395214343,
+        "waterSamples": 19
+      },
+      {
+        "osmWayId": 395308293,
+        "waterSamples": 162
+      },
+      {
+        "osmWayId": 395308294,
+        "waterSamples": 6
+      },
+      {
+        "osmWayId": 395531623,
+        "waterSamples": 41
+      },
+      {
+        "osmWayId": 395531627,
+        "waterSamples": 14
+      },
+      {
+        "osmWayId": 417225061,
+        "waterSamples": 35
+      },
+      {
+        "osmWayId": 417225065,
+        "waterSamples": 11
+      },
+      {
+        "osmWayId": 417225066,
+        "waterSamples": 3
+      },
+      {
+        "osmWayId": 417225069,
+        "waterSamples": 19
+      },
+      {
+        "osmWayId": 419670265,
+        "waterSamples": 2
+      },
+      {
+        "osmWayId": 419670266,
+        "waterSamples": 17
+      },
+      {
+        "osmWayId": 419670267,
+        "waterSamples": 20
+      },
+      {
+        "osmWayId": 419670268,
+        "waterSamples": 46
+      },
+      {
+        "osmWayId": 419670271,
+        "waterSamples": 6
+      },
+      {
+        "osmWayId": 419670272,
+        "waterSamples": 12
+      },
+      {
+        "osmWayId": 419671811,
+        "waterSamples": 33
+      },
+      {
+        "osmWayId": 419671812,
+        "waterSamples": 19
+      },
+      {
+        "osmWayId": 419671813,
+        "waterSamples": 24
+      },
+      {
+        "osmWayId": 419671814,
+        "waterSamples": 10
+      },
+      {
+        "osmWayId": 420509951,
+        "waterSamples": 5
+      },
+      {
+        "osmWayId": 420509952,
+        "waterSamples": 15
+      },
+      {
+        "osmWayId": 420509956,
+        "waterSamples": 8
+      },
+      {
+        "osmWayId": 420509958,
+        "waterSamples": 6
+      },
+      {
+        "osmWayId": 420509959,
+        "waterSamples": 8
+      },
+      {
+        "osmWayId": 420509962,
+        "waterSamples": 16
+      },
+      {
+        "osmWayId": 420509964,
+        "waterSamples": 7
+      },
+      {
+        "osmWayId": 420509965,
+        "waterSamples": 11
+      },
+      {
+        "osmWayId": 420549937,
+        "waterSamples": 1
+      },
+      {
+        "osmWayId": 420549939,
+        "waterSamples": 12
+      },
+      {
+        "osmWayId": 446941118,
+        "waterSamples": 4
+      },
+      {
+        "osmWayId": 622367776,
+        "waterSamples": 20
+      },
+      {
+        "osmWayId": 622367781,
+        "waterSamples": 26
+      },
+      {
+        "osmWayId": 622609708,
+        "waterSamples": 17
+      },
+      {
+        "osmWayId": 622609709,
+        "waterSamples": 33
+      },
+      {
+        "osmWayId": 622609711,
+        "waterSamples": 22
+      },
+      {
+        "osmWayId": 622609718,
+        "waterSamples": 29
+      },
+      {
+        "osmWayId": 622609719,
+        "waterSamples": 14
+      },
+      {
+        "osmWayId": 622609720,
+        "waterSamples": 54
+      },
+      {
+        "osmWayId": 622609721,
+        "waterSamples": 32
+      },
+      {
+        "osmWayId": 622609723,
+        "waterSamples": 2
+      },
+      {
+        "osmWayId": 622609724,
+        "waterSamples": 6
+      },
+      {
+        "osmWayId": 622609726,
+        "waterSamples": 25
+      },
+      {
+        "osmWayId": 622609729,
+        "waterSamples": 3
+      },
+      {
+        "osmWayId": 622609734,
+        "waterSamples": 4
+      },
+      {
+        "osmWayId": 622609741,
+        "waterSamples": 54
+      },
+      {
+        "osmWayId": 622609743,
+        "waterSamples": 16
+      },
+      {
+        "osmWayId": 622609744,
+        "waterSamples": 17
+      },
+      {
+        "osmWayId": 622609746,
+        "waterSamples": 62
+      },
+      {
+        "osmWayId": 622609750,
+        "waterSamples": 4
+      },
+      {
+        "osmWayId": 622609754,
+        "waterSamples": 5
+      },
+      {
+        "osmWayId": 779733510,
+        "waterSamples": 113
+      },
+      {
+        "osmWayId": 817849295,
+        "waterSamples": 1
+      },
+      {
+        "osmWayId": 833832480,
+        "waterSamples": 3
+      },
+      {
+        "osmWayId": 839530328,
+        "waterSamples": 2
+      },
+      {
+        "osmWayId": 839901802,
+        "waterSamples": 3
+      },
+      {
+        "osmWayId": 839901803,
+        "waterSamples": 87
+      },
+      {
+        "osmWayId": 839901805,
+        "waterSamples": 187
+      },
+      {
+        "osmWayId": 906806935,
+        "waterSamples": 3
+      },
+      {
+        "osmWayId": 930883211,
+        "waterSamples": 6
+      },
+      {
+        "osmWayId": 930887683,
+        "waterSamples": 7
+      },
+      {
+        "osmWayId": 943810864,
+        "waterSamples": 4
+      },
+      {
+        "osmWayId": 945673554,
+        "waterSamples": 3
+      },
+      {
+        "osmWayId": 969649954,
+        "waterSamples": 77
+      },
+      {
+        "osmWayId": 969649956,
+        "waterSamples": 26
+      },
+      {
+        "osmWayId": 981465908,
+        "waterSamples": 13
+      },
+      {
+        "osmWayId": 991390148,
+        "waterSamples": 24
+      },
+      {
+        "osmWayId": 991390157,
+        "waterSamples": 8
+      },
+      {
+        "osmWayId": 992367919,
+        "waterSamples": 33
+      },
+      {
+        "osmWayId": 992367921,
+        "waterSamples": 17
+      },
+      {
+        "osmWayId": 995972460,
+        "waterSamples": 16
+      },
+      {
+        "osmWayId": 1055626981,
+        "waterSamples": 29
+      },
+      {
+        "osmWayId": 1059215622,
+        "waterSamples": 9
+      },
+      {
+        "osmWayId": 1059215623,
+        "waterSamples": 34
+      },
+      {
+        "osmWayId": 1059215624,
+        "waterSamples": 117
+      },
+      {
+        "osmWayId": 1059215626,
+        "waterSamples": 7
+      },
+      {
+        "osmWayId": 1059215627,
+        "waterSamples": 28
+      },
+      {
+        "osmWayId": 1093379797,
+        "waterSamples": 75
+      },
+      {
+        "osmWayId": 1137139853,
+        "waterSamples": 10
+      },
+      {
+        "osmWayId": 1158301832,
+        "waterSamples": 10
+      },
+      {
+        "osmWayId": 1158810440,
+        "waterSamples": 21
+      },
+      {
+        "osmWayId": 1239039187,
+        "waterSamples": 5
+      },
+      {
+        "osmWayId": 1239039188,
+        "waterSamples": 7
+      },
+      {
+        "osmWayId": 1239039189,
+        "waterSamples": 24
+      },
+      {
+        "osmWayId": 1239039195,
+        "waterSamples": 3
+      },
+      {
+        "osmWayId": 1250666145,
+        "waterSamples": 26
+      },
+      {
+        "osmWayId": 1250666147,
+        "waterSamples": 4
+      },
+      {
+        "osmWayId": 1250666148,
+        "waterSamples": 21
+      },
+      {
+        "osmWayId": 1250666149,
+        "waterSamples": 4
+      },
+      {
+        "osmWayId": 1250666150,
+        "waterSamples": 6
+      },
+      {
+        "osmWayId": 1257123252,
+        "waterSamples": 5
+      },
+      {
+        "osmWayId": 1263505745,
+        "waterSamples": 10
+      },
+      {
+        "osmWayId": 1272460753,
+        "waterSamples": 54
+      },
+      {
+        "osmWayId": 1272463990,
+        "waterSamples": 8
+      },
+      {
+        "osmWayId": 1272463992,
+        "waterSamples": 15
+      },
+      {
+        "osmWayId": 1273254560,
+        "waterSamples": 20
+      },
+      {
+        "osmWayId": 1273254562,
+        "waterSamples": 20
+      },
+      {
+        "osmWayId": 1273254563,
+        "waterSamples": 2
+      },
+      {
+        "osmWayId": 1280498644,
+        "waterSamples": 106
+      },
+      {
+        "osmWayId": 1280498646,
+        "waterSamples": 57
+      },
+      {
+        "osmWayId": 1280740322,
+        "waterSamples": 220
+      },
+      {
+        "osmWayId": 1281900274,
+        "waterSamples": 45
+      },
+      {
+        "osmWayId": 1282700850,
+        "waterSamples": 79
+      },
+      {
+        "osmWayId": 1308819308,
+        "waterSamples": 34
+      },
+      {
+        "osmWayId": 1325596371,
+        "waterSamples": 12
+      },
+      {
+        "osmWayId": 1325596373,
+        "waterSamples": 3
+      },
+      {
+        "osmWayId": 1325596380,
+        "waterSamples": 3
+      },
+      {
+        "osmWayId": 1325596381,
+        "waterSamples": 13
+      },
+      {
+        "osmWayId": 1325596382,
+        "waterSamples": 3
+      },
+      {
+        "osmWayId": 1382209682,
+        "waterSamples": 9
+      },
+      {
+        "osmWayId": 1382209683,
+        "waterSamples": 2
+      },
+      {
+        "osmWayId": 1382209684,
+        "waterSamples": 3
+      },
+      {
+        "osmWayId": 1387759526,
+        "waterSamples": 11
+      },
+      {
+        "osmWayId": 1393172761,
+        "waterSamples": 8
+      },
+      {
+        "osmWayId": 1393172762,
+        "waterSamples": 3
+      },
+      {
+        "osmWayId": 1393172792,
+        "waterSamples": 13
+      },
+      {
+        "osmWayId": 1442882873,
+        "waterSamples": 2
+      },
+      {
+        "osmWayId": 1528838194,
+        "waterSamples": 1
+      },
+      {
+        "osmWayId": 1528838198,
+        "waterSamples": 5
+      },
+      {
+        "osmWayId": 1528838200,
+        "waterSamples": 8
+      },
+      {
+        "osmWayId": 1528838201,
+        "waterSamples": 5
+      },
+      {
+        "osmWayId": 1528838202,
+        "waterSamples": 6
+      },
+      {
+        "osmWayId": 1528854656,
+        "waterSamples": 7
+      },
+      {
+        "osmWayId": 1528854657,
+        "waterSamples": 6
+      },
+      {
+        "osmWayId": 1529695685,
+        "waterSamples": 3
+      },
+      {
+        "osmWayId": 1529695799,
+        "waterSamples": 4
+      },
+      {
+        "osmWayId": 1529695800,
+        "waterSamples": 3
+      },
+      {
+        "osmWayId": 1529695801,
+        "waterSamples": 2
+      },
+      {
+        "osmWayId": 1529695802,
+        "waterSamples": 2
+      },
+      {
+        "osmWayId": 1531014527,
+        "waterSamples": 4
+      },
+      {
+        "osmWayId": 1531014543,
+        "waterSamples": 4
+      },
+      {
+        "osmWayId": 1531014546,
+        "waterSamples": 1
+      },
+      {
+        "osmWayId": 1531021263,
+        "waterSamples": 5
+      },
+      {
+        "osmWayId": 1531021264,
+        "waterSamples": 14
+      },
+      {
+        "osmWayId": 1531021271,
+        "waterSamples": 6
+      },
+      {
+        "osmWayId": 1535850856,
+        "waterSamples": 77
+      },
+      {
+        "osmWayId": 1535850857,
+        "waterSamples": 71
+      },
+      {
+        "osmWayId": 1535850858,
+        "waterSamples": 102
+      },
+      {
+        "osmWayId": 1535866905,
+        "waterSamples": 27
+      },
+      {
+        "osmWayId": 1535866906,
+        "waterSamples": 6
+      }
+    ]
+  },
+  "supersedes": "Tile-following v1 rejected visually by user: excessive road waviness",
+  "smoothing": "Two separable [1,4,6,4,1]/16 blur passes on displacement vectors, followed by convex cubic B-spline interpolation. Gain 2; four-tile smooth bridge approach fade. No smoothing of source roads, bridge paths, or terrain.",
+  "dryRegressionGuardSamples": 2,
+  "transverseSegmentsGuardedNotAssumedBridges": 361,
+  "newDryToWaterSamples": 0
+}

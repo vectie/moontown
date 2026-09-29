@@ -1,0 +1,43 @@
+// Generated using `moon info`, DON'T EDIT IT
+package "vectie/moontown-rabbita/landmark_routes"
+
+import {
+  "moonbitlang/core/debug",
+  "moonbitlang/core/json",
+}
+
+// Values
+pub fn distance(Point, Point) -> Double
+
+pub fn nearest(Graph, Point, Double) -> String?
+
+pub fn route(Graph, String, String) -> Array[Point]?
+
+// Errors
+
+// Types and methods
+pub(all) struct Edge {
+  a : String
+  b : String
+  bridge : Bool
+} derive(@json.FromJson)
+
+pub(all) struct Graph {
+  nodes : Array[Node]
+  edges : Array[Edge]
+} derive(@json.FromJson)
+
+pub(all) struct Node {
+  id : String
+  x : Double
+  y : Double
+} derive(@json.FromJson)
+
+pub(all) struct Point {
+  x : Double
+  y : Double
+} derive(ToJson, @debug.Debug, @json.FromJson)
+
+// Type aliases
+
+// Traits

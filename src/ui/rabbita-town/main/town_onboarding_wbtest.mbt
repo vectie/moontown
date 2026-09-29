@@ -1,6 +1,6 @@
 ///|
 test "player movement remains on the connected Wenyu road graph" {
-  let model = { ..init_model(), player: Some(test_player_avatar()) }
+  let model = { ..init_model(), player: Some(test_player_avatar()), }
   let next = player_step_direction_model(model, -1, -1)
   guard next.player_motion is Some(motion) else {
     fail("expected a connected road route from the player spawn")

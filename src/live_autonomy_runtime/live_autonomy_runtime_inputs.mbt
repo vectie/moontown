@@ -59,5 +59,5 @@ async fn load_live_autonomy_watch_inputs(
   let watcher_records = load_live_autonomy_watcher_records(
     snapshot_path, standing_goals,
   )
-  { standing_goals, watcher_records }
+  { standing_goals, watcher_records, }
 }

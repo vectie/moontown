@@ -33,7 +33,7 @@ fn miniapp_local_backend_reject(
   status : Int,
   body : String,
 ) -> MiniappLocalBackendResponse {
-  { ok: false, status, body, state, session_id: state.active_session_id }
+  { ok: false, status, body, state, session_id: state.active_session_id, }
 }
 
 ///|
@@ -50,5 +50,5 @@ fn miniapp_local_backend_with_snapshot(
   state : MiniappLocalBackendState,
   snapshot : @miniapp_contracts.MiniappTownSnapshot,
 ) -> MiniappLocalBackendState {
-  { ..state, snapshot, version: state.version + 1 }
+  { ..state, snapshot, version: state.version + 1, }
 }

@@ -334,7 +334,7 @@ fn energy_valley_runtime_state_at(
   if can_become_stale &&
     state.fresh_at_ms >= 0.0 &&
     now_ms - state.fresh_at_ms >= energy_valley_runtime_stale_after_ms() {
-    { ..state, phase: Stale }
+    { ..state, phase: Stale, }
   } else {
     state
   }
@@ -390,7 +390,7 @@ fn energy_valley_runtime_presence_clocks(
         break
       }
     }
-    result.push({ journey_key, started_at_tick, started_at_ms })
+    result.push({ journey_key, started_at_tick, started_at_ms, })
   }
   result
 }

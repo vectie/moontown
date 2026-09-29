@@ -159,7 +159,7 @@ test "resident activity fallbacks never expose local paths" {
   assert_false(agent_activity.contains("/Users/"))
   let task_fallback = resident_activity_copy(
     Live,
-    { ..base_agent, activityLabel: None },
+    { ..base_agent, activityLabel: None, },
     Some({
       ..base_task,
       activityLabel: None,
@@ -180,7 +180,7 @@ test "resident rendering exposes actions and safe evidence without path leaks" {
   assert_true(directory_html.contains("月灯"))
   assert_true(directory_html.contains("AI智能体实验室"))
   assert_false(directory_html.contains("{agent.name}"))
-  let selected = { ..base, selection: Agent("agent-moon") }
+  let selected = { ..base, selection: Agent("agent-moon"), }
   let profile_html = @rabbita.render_to_string(
     @rabbita.static_cell(render_selected_resident_profile(dispatch, selected)),
   )
@@ -211,7 +211,7 @@ test "resident work receipt redacts a path-bearing task title" {
     selection: Agent("agent-moon"),
     energy_valley_runtime: {
       ..base.energy_valley_runtime,
-      projection: Some({ ..projection, tasks: [unsafe_task] }),
+      projection: Some({ ..projection, tasks: [unsafe_task], }),
     },
   }
   let html = @rabbita.render_to_string(

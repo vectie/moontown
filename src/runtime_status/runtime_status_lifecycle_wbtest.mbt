@@ -31,10 +31,10 @@ test "runtime status summary composes stable metric groups" {
   let state = runtime_status_test_state()
   let summary = @runtime_status_policy.runtime_status_summary(
     state,
-    { running: 1, review: 2, failed: 3, stale: 4, completed: 5 },
-    { total: 6, enabled: 5, disabled: 1, due: 2 },
+    { running: 1, review: 2, failed: 3, stale: 4, completed: 5, },
+    { total: 6, enabled: 5, disabled: 1, due: 2, },
     7,
-    { total: 8, pending: 9, failed: 10 },
+    { total: 8, pending: 9, failed: 10, },
     11,
   )
   assert_true(summary.contains("books=\{state.books.length()}"))

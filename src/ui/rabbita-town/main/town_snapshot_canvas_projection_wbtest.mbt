@@ -138,7 +138,7 @@ test "transport terrain hides legacy paving and restores bridge water" {
   guard roads.search_by(road => !road.bridge && !road.custom) is Some(index) else {
     fail("expected a fixed non-bridge road")
   }
-  let custom = { ..roads[index], custom: true }
+  let custom = { ..roads[index], custom: true, }
   assert_eq(
     town_snapshot_canvas_transport_terrain(
       snapshot,

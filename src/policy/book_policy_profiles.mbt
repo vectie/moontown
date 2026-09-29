@@ -11,7 +11,7 @@ fn profile(
   source_policy : String,
   policy : BookPolicy,
 ) -> PolicyProfile {
-  { book_type, source_policy, policy }
+  { book_type, source_policy, policy, }
 }
 
 ///|

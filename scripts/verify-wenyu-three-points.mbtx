@@ -1,0 +1,114 @@
+import {
+  "moonbitlang/x@0.4.40/fs",
+  "moonbitlang/core/json",
+  "moonbitlang/core/env",
+  "moonbitlang/core/encoding/base64",
+}
+
+///|
+// Visual correspondence experiment, NOT geographic control-point certification.
+struct Pixel {
+  x : Double
+  y : Double
+} derive(ToJson)
+
+///|
+struct Pick {
+  id : String
+  original : Pixel
+  generated : Pixel
+} derive(ToJson)
+
+///|
+fn cross(a : Pixel, b : Pixel) -> Double {
+  a.x * b.y - a.y * b.x
+}
+
+///|
+fn sub(a : Pixel, b : Pixel) -> Pixel {
+  { x: a.x - b.x, y: a.y - b.y }
+}
+
+///|
+fn affine(picks : Array[Pick], p : Pixel) -> Pixel? {
+  let a = picks[0]
+  let u = sub(picks[1].original, a.original)
+  let v = sub(picks[2].original, a.original)
+  let det = cross(u, v)
+  if det.abs() < 0.000001 { return None }
+  let d = sub(p, a.original)
+  let b = cross(d, v) / det
+  let c = cross(u, d) / det
+  Some({
+    x: a.generated.x + b * (picks[1].generated.x - a.generated.x) + c * (picks[2].generated.x - a.generated.x),
+    y: a.generated.y + b * (picks[1].generated.y - a.generated.y) + c * (picks[2].generated.y - a.generated.y),
+  })
+}
+
+///|
+fn error(a : Pixel, b : Pixel) -> Double {
+  let d = sub(a, b)
+  (d.x * d.x + d.y * d.y).sqrt()
+}
+
+///|
+fn main raise {
+  let original_path = @env.get_env_var("WENYU_REFERENCE_IMAGE").unwrap()
+  let picks : Array[Pick] = [
+    { id: "A", original: { x: 1080, y: 144 }, generated: { x: 728, y: 35 } },
+    { id: "B", original: { x: 168, y: 693 }, generated: { x: 406, y: 757 } },
+    { id: "C", original: { x: 1790, y: 838 }, generated: { x: 1450, y: 637 } },
+  ]
+  // D is deliberately excluded from fitting: the large west-central junction.
+  let check : Pick = { id: "D", original: { x: 627, y: 397 }, generated: { x: 548, y: 439 } }
+  for pick in picks {
+    assert_true(error(affine(picks, pick.original).unwrap(), pick.generated) < 0.000001)
+  }
+  let synthetic : Array[Pick] = [
+    { id: "1", original: { x: 0, y: 0 }, generated: { x: 5, y: 7 } },
+    { id: "2", original: { x: 1, y: 0 }, generated: { x: 7, y: 6 } },
+    { id: "3", original: { x: 0, y: 1 }, generated: { x: 8, y: 11 } },
+  ]
+  assert_true(error(affine(synthetic, { x: 2, y: 3 }).unwrap(), { x: 18, y: 17 }) < 0.000001)
+  assert_true(affine([synthetic[0], synthetic[0], synthetic[2]], { x: 2, y: 3 }) is None)
+  let predicted = affine(picks, check.original).unwrap()
+  let residual = error(predicted, check.generated)
+  let origin = affine(picks, { x: 0, y: 0 }).unwrap()
+  let x_axis = sub(affine(picks, { x: 1, y: 0 }).unwrap(), origin)
+  let y_axis = sub(affine(picks, { x: 0, y: 1 }).unwrap(), origin)
+  let report : Json = {
+    "schema": "moontown.original_to_generated_three_point_trial.v1",
+    "direction": "original-design-pixels-to-generated-design-pixels",
+    "originalImage": "wenyuvalley.jpg",
+    "originalSize": [2274, 1280],
+    "originalSha256": "8363abfdeda33d759a185c8a54c3ef8f971711a4dbf149028ee9447e38f90e62",
+    "generatedImage": "wenyu_topdown_semantic.png",
+    "generatedSize": [1672, 941],
+    "fitPicks": picks.to_json(),
+    "heldOutPick": check.to_json(),
+    "heldOutPrediction": predicted.to_json(),
+    "heldOutErrorPixels": residual,
+    "heldOutErrorApproxTiles": residual * 256.0 / 1672.0,
+    "matrix": [[x_axis.x, y_axis.x], [x_axis.y, y_axis.y]],
+    "translation": origin.to_json(),
+    "pickMethod": "Manual visual centres; provisional correspondence, not survey. Allow about 12 original pixels and 6 generated pixels per pick.",
+    "osmFit": false,
+    "runtimeEligible": false,
+    "conclusion": "An exact three-point affine fit does not reproduce the excluded junction. This alone does not distinguish perspective from non-projective image-generation deformation.",
+  }
+  println(report.stringify(indent=2))
+  @fs.write_string_to_file("docs/project/wenyu-three-point-trial.json", report.stringify(indent=2))
+  let jpg = @base64.encode(@fs.read_file_to_bytes(original_path))
+  let png = @base64.encode(@fs.read_file_to_bytes("src/ui/assets/tilemap/wenyu_topdown_semantic.png"))
+  let svg = StringBuilder()
+  svg.write_string("<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 1600 1120'><rect width='1600' height='1120' fill='#182a29'/><style>text{font-family:system-ui,sans-serif;fill:#fff}.title{font-size:26px;font-weight:650}.note{font-size:18px}.pin{font-size:30px;font-weight:800;paint-order:stroke;stroke:#182a29;stroke-width:5px}</style><text x='32' y='42' class='title'>Wenyu Valley · three-point verification</text><text x='32' y='76' class='note'>A/B/C fit exactly. D is excluded from fitting. Visual correspondences, not surveyed OSM controls.</text><text x='32' y='115' class='note'>Original · Downloads/wenyuvalley.jpg · 2274 × 1280</text><text x='812' y='115' class='note'>Generated terrain reference · 1672 × 941</text><g transform='translate(32 135) scale(0.3298)'><image href='data:image/jpeg;base64,\{jpg}' width='2274' height='1280'/>")
+  for pick in [..picks, check] {
+    svg.write_string("<circle cx='\{pick.original.x}' cy='\{pick.original.y}' r='17' fill='none' stroke='\{if pick.id == "D" { "#fff" } else { "#f8d66b" }}' stroke-width='7'/><text x='\{pick.original.x + 23}' y='\{pick.original.y - 15}' class='pin'>\{pick.id}</text>")
+  }
+  svg.write_string("</g><g transform='translate(812 135) scale(0.4486)'><image href='data:image/png;base64,\{png}' width='1672' height='941'/>")
+  for pick in [..picks, check] {
+    svg.write_string("<circle cx='\{pick.generated.x}' cy='\{pick.generated.y}' r='12' fill='none' stroke='\{if pick.id == "D" { "#fff" } else { "#f8d66b" }}' stroke-width='5'/><text x='\{pick.generated.x + 17}' y='\{pick.generated.y - 12}' class='pin'>\{pick.id}</text>")
+  }
+  svg.write_string("<path d='M\{check.generated.x},\{check.generated.y} L\{predicted.x},\{predicted.y}' stroke='#ff5176' stroke-width='5'/><circle cx='\{predicted.x}' cy='\{predicted.y}' r='12' fill='none' stroke='#ff5176' stroke-width='5'/><text x='\{predicted.x + 18}' y='\{predicted.y - 12}' class='pin'>D predicted</text></g><text x='32' y='612' class='title'>Result: the three fitted points alone are not verification.</text><text x='32' y='652' class='note'>The excluded junction misses by \{residual.to_int()} generated pixels (~\{(residual * 256.0 / 1672.0).to_int()} terrain tiles).</text><text x='32' y='690' class='note'>A: upper road / river crossing. B: southwest arterial junction. C: southeast highway / river crossing.</text><text x='32' y='728' class='note'>D: large west-central junction, checked only after the fit. White = observed; pink = predicted.</text><text x='32' y='780' class='title'>What this establishes</text><text x='32' y='820' class='note'>Three non-collinear pairs determine translation, rotation, unequal scale and shear on one plane.</text><text x='32' y='858' class='note'>They do not uniquely recover physical pitch / roll / yaw / lens parameters from this illustration.</text><text x='32' y='896' class='note'>The original-to-generated step needs verification before fitting OSM to the fixed designed terrain.</text><text x='32' y='948' class='title'>Scope</text><text x='32' y='988' class='note'>Offline first-pass diagnostic. Approximate manual picks. No OSM roads removed; no runtime assets changed.</text><text x='32' y='1026' class='note'>Next model test: four spread matches for perspective, with a fifth independent visual check.</text><text x='32' y='1064' class='note'>A failed affine check is not, by itself, proof of non-projective AI deformation.</text></svg>")
+  @fs.write_string_to_file("docs/project/wenyu-three-point-trial.svg", svg.to_string())
+}

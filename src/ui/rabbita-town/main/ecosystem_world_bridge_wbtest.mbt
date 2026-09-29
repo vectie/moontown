@@ -301,7 +301,7 @@ test "runtime projection never mutates compatibility place facts" {
   }
   let stale = {
     ..live,
-    energy_valley_runtime: { ..live.energy_valley_runtime, phase: Stale },
+    energy_valley_runtime: { ..live.energy_valley_runtime, phase: Stale, },
   }
   let live_snapshot = ecosystem_world_snapshot_for_model(live, 20260727)
   let stale_snapshot = ecosystem_world_snapshot_for_model(stale, 20260727)

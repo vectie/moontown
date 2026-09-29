@@ -1,0 +1,251 @@
+import {
+  "moonbitlang/x@0.4.40/fs",
+  "moonbitlang/core/json",
+  "moonbitlang/core/encoding/base64",
+}
+
+///|
+struct P { x : Double; y : Double } derive(ToJson)
+///|
+fn field(j : Json,k : String) -> Json {match j {Object(m)=>m.get(k).unwrap_or(Json::null());_=>Json::null()}}
+///|
+fn arr(j : Json) -> Array[Json] {match j {Array(a)=>a;_=>abort("Expected array")}}
+///|
+fn num(j : Json) -> Double {match j {Number(n,..)=>n;_=>abort("Expected number")}}
+///|
+fn str(j : Json) -> String {match j {String(s)=>s;_=>""}}
+///|
+fn point(j : Json) -> P {{x:num(field(j,"x")),y:num(field(j,"y"))}}
+///|
+fn add(p : P,d : P) -> P {{x:p.x+d.x,y:p.y+d.y}}
+///|
+fn distance(a : P,b : P) -> Double {((a.x-b.x)*(a.x-b.x)+(a.y-b.y)*(a.y-b.y)).sqrt()}
+///|
+fn mix(a : P,b : P,t : Double) -> P {{x:a.x+t*(b.x-a.x),y:a.y+t*(b.y-a.y)}}
+///|
+// Display-only serialization precision: <=0.00005 tile (<0.004 px at zoom 1).
+fn pixel_number(n : Double) -> Double {(n*10000.0).round()/10000.0}
+///|
+fn gentle(p : P) -> P {
+  let w=1.0+0.01*((p.x-256.0)/256.0-p.y/144.0)
+  guard w>0.0 else {abort("Unsafe horizon")}
+  {x:256.0+(p.x-256.0)/w,y:p.y/w}
+}
+///|
+fn tagged(way : Json,key : String) -> Bool {
+  let value=str(field(field(way,"tags"),key))
+  value!="" && value!="no" && value!="0" && value!="false"
+}
+///|
+fn exempt(way : Json) -> Bool {tagged(way,"bridge") || tagged(way,"tunnel") || tagged(way,"ford")}
+///|
+fn water(rows : Array[String],x : Int,y : Int) -> Bool {
+  x>=0 && x<256 && y>=0 && y<144 && "rlb".contains(rows[y].get_char(x).unwrap().to_string())
+}
+///|
+fn wet(rows : Array[String],p : P) -> Bool {water(rows,p.x.floor().to_int(),p.y.floor().to_int())}
+///|
+fn shore_field(rows : Array[String]) -> Array[Double] {
+  let result : Array[Double]=[]
+  for y in 0..<144 {for x in 0..<256 {
+    let inside=water(rows,x,y);let mut nearest=5.0
+    for dy in -5..=5 {for dx in -5..=5 {
+      let xx=x+dx;let yy=y+dy
+      if xx>=0 && xx<256 && yy>=0 && yy<144 && water(rows,xx,yy)!=inside {
+        nearest=nearest.min((dx*dx+dy*dy).to_double().sqrt()-0.5)
+      }
+    }}
+    result.push(if inside {-nearest} else {nearest})
+  }}
+  result
+}
+///|
+fn clearance(grid : Array[Double],p : P) -> Double {
+  let x=(p.x-0.5).max(0.0).min(254.999999);let y=(p.y-0.5).max(0.0).min(142.999999)
+  let ix=x.floor().to_int();let iy=y.floor().to_int();let tx=x-ix.to_double();let ty=y-iy.to_double()
+  (grid[iy*256+ix]*(1.0-tx)+grid[iy*256+ix+1]*tx)*(1.0-ty)+
+    (grid[(iy+1)*256+ix]*(1.0-tx)+grid[(iy+1)*256+ix+1]*tx)*ty
+}
+///|
+// Whole-road objective: one dx/dy for every non-bridge way with this name.
+// Nothing here can change a bend, segment direction, or segment length.
+fn score(samples : Array[P],grid : Array[Double],d : P) -> Double {
+  let mut sum=0.0
+  for p in samples {
+    let deficit=(0.35-clearance(grid,add(p,d))).max(0.0)
+    sum+=deficit*deficit
+  }
+  sum/samples.length().to_double()+0.03*(d.x*d.x+d.y*d.y)
+}
+///|
+fn fit(samples : Array[P],grid : Array[Double]) -> P {
+  let mut best : P={x:0,y:0};let mut value=score(samples,grid,best)
+  for x in -15..=15 {for y in -15..=15 {
+    let d : P={x:x.to_double()/10.0,y:y.to_double()/10.0}
+    if distance(d,{x:0,y:0})>1.5 {continue}
+    let next=score(samples,grid,d)
+    if next<value {best=d;value=next}
+  }}
+  best
+}
+///|
+fn main raise {
+  // User rollback: retain the scene restoration, remove ONLY riverside offsets.
+  let apply_shore_shifts=false
+  let source=@json.parse(@fs.read_file_to_string("docs/project/wenyu-lower-perspective.json"))
+  let ways=arr(field(source,"ways"));assert_eq(ways.length(),6420)
+  let labels=@json.parse(@fs.read_file_to_string("src/ui/assets/tilemap/wenyu_reference_labels.json"))
+  let rows=arr(field(labels,"rows")).map(str);let grid=shore_field(rows)
+  let names=["温榆河左堤路","温榆河右堤路","温榆河绿道昌平段"]
+  let shifts : Map[String,P]=Map([]);let summaries : Array[Json]=[]
+  for name in names {
+    let samples : Array[P]=[];let ids : Array[Json]=[]
+    for way in ways {
+      if str(field(field(way,"tags"),"name"))!=name || exempt(way) {continue}
+      ids.push(field(way,"osmWayId"))
+      let path=arr(field(way,"pathGrid")).map(p=>gentle(point(p)))
+      for i in 1..<path.length() {
+        let n=(distance(path[i-1],path[i])/0.25).ceil().to_int().max(1)
+        for j in 0..<n {
+          let p=mix(path[i-1],path[i],(j.to_double()+0.5)/n.to_double())
+          if p.x>2.0 && p.x<254.0 && p.y>2.0 && p.y<142.0 {samples.push(p)}
+        }
+      }
+    }
+    assert_true(!samples.is_empty())
+    let d=if apply_shore_shifts {fit(samples,grid)} else {{x:0,y:0}};shifts[name]=d
+    let b=samples.filter(p=>wet(rows,p)).length()
+    let a=samples.filter(p=>wet(rows,add(p,d))).length()
+    summaries.push({"name":name,"osmWayIds":ids,"translationTiles":d.to_json(),"waterSamplesBefore":b,"waterSamplesAfter":a,"sampleCount":samples.length(),"objectiveBefore":score(samples,grid,{x:0,y:0}),"objectiveAfter":score(samples,grid,d)})
+  }
+  let original=StringBuilder();let shifted=StringBuilder();let green_spine=StringBuilder()
+  let compact_minor=StringBuilder();let compact_major=StringBuilder()
+  let scene_paths : Array[Json]=[]
+  let road_cells=Array::make(256*144,false)
+  let positions : Map[String,Array[P]]=Map([])
+  let mut vertices=0;let mut bridges=0
+  for way in ways {
+    let path=arr(field(way,"pathGrid")).map(p=>gentle(point(p)))
+    let nodes=arr(field(way,"nodes"));assert_eq(path.length(),nodes.length());vertices+=path.length()
+    let name=str(field(field(way,"tags"),"name"))
+    let d=if exempt(way) {{x:0,y:0}} else {shifts.get(name).unwrap_or({x:0,y:0})}
+    if tagged(way,"bridge") {bridges+=1;assert_eq(d.x,0.0);assert_eq(d.y,0.0)}
+    let before=StringBuilder();let after=StringBuilder()
+    for i,p in path {
+      let q=add(p,d)
+      if i>0 {
+        let prev=add(path[i-1],d)
+        assert_true((distance(p,path[i-1])-distance(q,prev)).abs()<0.00000001)
+        assert_true(((q.x-prev.x)-(p.x-path[i-1].x)).abs()<0.00000001)
+        assert_true(((q.y-prev.y)-(p.y-path[i-1].y)).abs()<0.00000001)
+      }
+      let command=if i==0 {"M"} else {"L"}
+      before.write_string("\{command}\{p.x},\{p.y}");after.write_string("\{command}\{q.x},\{q.y}")
+      let key=nodes[i].stringify()
+      match positions.get(key) {
+        Some(existing)=>{if !existing.any(v=>distance(v,q)<0.00000001) {existing.push(q)}}
+        None=>positions[key]=[q]
+      }
+    }
+    if exempt(way) || !apply_shore_shifts {assert_eq(before.to_string(),after.to_string())}
+    let kind=str(field(field(way,"tags"),"highway"))
+    let minor=["footway","path","steps","cycleway","track","pedestrian"].contains(kind)
+    let display=path.map(p=>add(p,d))
+    // Do not ship invisible off-map ways as SVG markup; source/audit remain complete.
+    let on_map=display.any(p=>p.x>=0 && p.x<=256 && p.y>=0 && p.y<=144) ||
+      (display.any(p=>p.x<256) && display.any(p=>p.x>0) && display.any(p=>p.y<144) && display.any(p=>p.y>0))
+    if on_map {
+      let compact=StringBuilder()
+      for i,p in display {compact.write_string("\{if i==0 {"M"} else {"L"}}\{pixel_number(p.x)},\{pixel_number(p.y)}")}
+      (if minor {compact_minor} else {compact_major}).write_string("<path d='\{compact.to_string()}'/>")
+    }
+    for i in 1..<display.length() {
+      let a=display[i-1];let b=display[i]
+      let steps=(distance(a,b)/0.2).ceil().to_int().max(1)
+      for j in 0..=steps {
+        let p=mix(a,b,j.to_double()/steps.to_double())
+        if p.x < -1 || p.x > 257 || p.y < -1 || p.y > 145 {continue}
+        // Conservative whole-cell occupancy, including the stroke and sample gap.
+        for y in (p.y-0.4).floor().to_int()..=(p.y+0.4).floor().to_int() {
+          for x in (p.x-0.4).floor().to_int()..=(p.x+0.4).floor().to_int() {
+            if x>=0 && x<256 && y>=0 && y<144 {road_cells[y*256+x]=true}
+          }
+        }
+      }
+    }
+    if display.all(p=>p.x>1 && p.x<255 && p.y>1 && p.y<143) &&
+      (minor || kind=="residential" || kind=="unclassified") && !tagged(way,"tunnel") {
+      scene_paths.push({"id":field(way,"osmWayId"),"greenway":name=="温榆河绿道昌平段","points":display.map(p=>[pixel_number(p.x),pixel_number(p.y)]).to_json()})
+    }
+    let style="fill='none' stroke='#ffc46d' stroke-width='\{if minor {0.09} else {0.24}}' opacity='\{if minor {0.35} else {0.95}}' stroke-linejoin='round'"
+    if name=="温榆河绿道昌平段" && !exempt(way) {
+      green_spine.write_string("<path d='\{after.to_string()}' fill='none' stroke='#86ab70' stroke-width='1.5' opacity='0.48' stroke-linecap='round' stroke-linejoin='round'/>")
+    }
+    original.write_string("<path d='\{before.to_string()}' \{style}/>")
+    shifted.write_string("<path d='\{after.to_string()}' \{style}/>")
+  }
+  assert_eq(vertices,44343);assert_eq(bridges,338)
+  // Explicit short display approaches only at actual shared OSM node IDs.
+  // The shifted corridor remains rigid; original bridge decks remain exact.
+  let approaches : Array[Json]=[]
+  for node,ps in positions {
+    if ps.length()<2 {continue}
+    for i in 1..<ps.length() {
+      let a=ps[0];let b=ps[i]
+      if a.x<0 || a.x>256 || a.y<0 || a.y>144 {continue}
+      approaches.push({"sourceNodeId":node,"from":a.to_json(),"to":b.to_json(),"displayOnly":true})
+      let n=(distance(a,b)/0.2).ceil().to_int().max(1)
+      for j in 0..=n {
+        let p=mix(a,b,j.to_double()/n.to_double())
+        for y in (p.y-0.4).floor().to_int()..=(p.y+0.4).floor().to_int() {
+          for x in (p.x-0.4).floor().to_int()..=(p.x+0.4).floor().to_int() {
+            if x>=0 && x<256 && y>=0 && y<144 {road_cells[y*256+x]=true}
+          }
+        }
+      }
+      shifted.write_string("<path d='M\{a.x},\{a.y}L\{b.x},\{b.y}' fill='none' stroke='#ffc46d' stroke-width='0.18'/>")
+    }
+  }
+  let report : Json={"schema":"moontown.wenyu_rigid_corridors.v1","runtimeEligible":false,"terrainChanged":false,"source":"docs/project/wenyu-lower-perspective.json","base":"gentle 0.01 / 0.01","method":"One constant translation per named riverside corridor, shared across all of its non-exempt OSM ways. Search 0.1-tile grid within radius 1.5; equal-distance samples; squared bank-clearance deficit plus 0.03 squared-translation penalty. No vertex nudges, curve smoothing, rubber-sheet warp, or per-way fitting.","corridors":summaries,"bridgeWaysUnchanged":bridges,"sourceWays":ways.length(),"sourceVertices":vertices,"approachConnectors":approaches,"limitations":"Rigid placement trial, not a geographic calibration or routing graph. Explicit short display approach connectors bridge shifted/unshifted positions only at existing shared OSM nodes. Residual water overlap remains; no source node or bridge metadata changes."}
+  if !apply_shore_shifts {assert_eq(approaches.length(),0);assert_eq(original.to_string(),shifted.to_string())}
+  let rollback : Json={"riversideShiftsApplied":apply_shore_shifts,"rollback":"All road paths are exactly the original gentle projection. Buildings, pads, green spine and characters retained. The nested audit describes the now-disabled fit method.","audit":report}
+  @fs.write_string_to_file("docs/project/wenyu-unshifted-corridors.json",rollback.stringify(indent=2))
+  println(Json::array(summaries).stringify(indent=2));println("\{approaches.length()} explicit display approach connectors; \{bridges} bridge ways unchanged")
+  let start="<svg xmlns='http://www.w3.org/2000/svg' width='2048' height='1152' viewBox='0 0 256 144'><defs><clipPath id='ground'><rect width='256' height='144'/></clipPath></defs><g clip-path='url(#ground)'>"
+  // The spine follows the same translated greenway, clipped to authored dry land.
+  let dry=StringBuilder()
+  for y in 0..<144 {
+    let mut x=0
+    while x<256 {
+      if water(rows,x,y) {x+=1;continue}
+      let first=x
+      while x<256 && !water(rows,x,y) {x+=1}
+      dry.write_string("<rect x='\{first}' y='\{y}' width='\{x-first}' height='1'/>")
+    }
+  }
+  let compact_roads="<g fill='none' stroke='#ffc46d' stroke-linejoin='round'><g stroke-width='0.09' stroke-opacity='0.35'>"+compact_minor.to_string()+"</g><g stroke-width='0.24' stroke-opacity='0.95'>"+compact_major.to_string()+"</g></g>"
+  let overlay=start+"<defs><clipPath id='dry'>"+dry.to_string()+"</clipPath></defs><g clip-path='url(#dry)'>"+green_spine.to_string()+"</g>"+compact_roads+"</g></svg>"
+  @fs.write_string_to_file("src/ui/assets/tilemap/wenyu-unshifted-road-overlay.svg",overlay)
+  @fs.write_string_to_file("src/ui/rabbita-town/dist/tilemap/wenyu-unshifted-road-overlay.svg",overlay)
+  let occupancy : Array[String]=[]
+  for y in 0..<144 {
+    let row=StringBuilder()
+    for x in 0..<256 {row.write_string(if road_cells[y*256+x] {"R"} else {"."})}
+    occupancy.push(row.to_string())
+  }
+  let scene : Json={"schema":"moontown.wenyu_rigid_scene.v1","riversideShiftsApplied":false,"runtimeEligible":false,"roadCells":occupancy.to_json(),"paths":scene_paths}
+  @fs.write_string_to_file("src/ui/assets/tilemap/wenyu-unshifted-scene.json",scene.stringify())
+  @fs.write_string_to_file("src/ui/rabbita-town/dist/tilemap/wenyu-unshifted-scene.json",scene.stringify())
+  // Historical shifted comparison is retained on disk, not regenerated after undo.
+  if !apply_shore_shifts {return}
+  let png=@base64.encode(@fs.read_file_to_bytes("src/ui/assets/tilemap/wenyu_reference_labels_preview.png"))
+  let svg=StringBuilder()
+  svg.write_string("<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 1800 1080'><rect width='1800' height='1080' fill='#182a29'/><style>text{font:22px system-ui;fill:#f6f3e9}</style><text x='30' y='45'>Move the whole riverside road · no change to its curves · bridges fixed</text>")
+  for i in 0..<2 {
+    let x=30+i*900;let drawing=if i==0 {original.to_string()} else {shifted.to_string()}
+    svg.write_string("<text x='\{x}' y='90'>\{if i==0 {"Original gentle fit"} else {"Rigid corridor placement"}}</text><svg x='\{x}' y='110' width='840' height='473' viewBox='0 0 256 144'><image href='data:image/png;base64,\{png}' width='256' height='144'/>\{drawing}</svg><text x='\{x}' y='630'>River bend · identical scale</text><svg x='\{x}' y='655' width='840' height='350' viewBox='175 55 80 34'><image href='data:image/png;base64,\{png}' width='256' height='144'/>\{drawing}</svg>")
+  }
+  svg.write_string("<text x='30' y='1050'>© OpenStreetMap contributors · fixed terrain · display-only approaches at existing junctions · residual overlaps remain</text></svg>")
+  @fs.write_string_to_file("docs/project/wenyu-rigid-corridors.svg",svg.to_string())
+  @fs.write_string_to_file("src/ui/rabbita-town/dist/wenyu-rigid-corridors.svg",svg.to_string())
+}

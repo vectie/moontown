@@ -2,9 +2,12 @@
 test "town launchpad health labels separate healthy paused and recovery states" {
   let model = init_model()
   assert_eq(professional_town_health_label(model), "Healthy")
-  assert_eq(professional_town_health_label({ ..model, paused: true }), "Paused")
   assert_eq(
-    professional_town_health_label({ ..model, pressure: 90 }),
+    professional_town_health_label({ ..model, paused: true, }),
+    "Paused",
+  )
+  assert_eq(
+    professional_town_health_label({ ..model, pressure: 90, }),
     "Needs attention",
   )
 }
@@ -12,22 +15,22 @@ test "town launchpad health labels separate healthy paused and recovery states" 
 ///|
 test "town launchpad attention summary prioritizes failed and review work" {
   assert_eq(
-    professional_attention_label({ review_count: 0, failed_count: 0 }),
+    professional_attention_label({ review_count: 0, failed_count: 0, }),
     "Clear",
   )
   assert_eq(
-    professional_attention_label({ review_count: 2, failed_count: 0 }),
+    professional_attention_label({ review_count: 2, failed_count: 0, }),
     "Review",
   )
   assert_eq(
-    professional_attention_label({ review_count: 2, failed_count: 1 }),
+    professional_attention_label({ review_count: 2, failed_count: 1, }),
     "Failed",
   )
 }
 
 ///|
 test "town launchpad attention summary includes execution review state" {
-  let model = { ..init_model(), watcher_records: [] }
+  let model = { ..init_model(), watcher_records: [], }
   let summary = professional_attention_summary(model, [
     @core.TaskExecutionRecord::new(
       task_id="task-review",
@@ -50,9 +53,9 @@ test "town launchpad book queue counts only pending work" {
   let model = {
     ..init_model(),
     book_template_requests: [
-      { status: "pending" },
-      { status: "retry" },
-      { status: "installed" },
+      { status: "pending", },
+      { status: "retry", },
+      { status: "installed", },
     ],
   }
   assert_eq(professional_book_queue_count(model), 2)

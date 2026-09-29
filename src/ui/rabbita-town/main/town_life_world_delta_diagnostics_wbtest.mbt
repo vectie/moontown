@@ -8,17 +8,17 @@ test "Map Lab exposes rejected TownLife world events as contract diagnostics" {
   let id = "diagnostic-writer:2:world-road-add"
   let event : TownLifeWorldEvent = {
     id,
-    dot: { writer_id: "diagnostic-writer", sequence: 2 },
-    stamp: { writer_id: "diagnostic-writer", lamport: 2 },
+    dot: { writer_id: "diagnostic-writer", sequence: 2, },
+    stamp: { writer_id: "diagnostic-writer", lamport: 2, },
     epoch_id: state.epoch.id,
     kind: WorldRoadCell,
     entity_id: "road-cell-\{x}-\{y}",
     incarnation_id: id,
-    action: WorldAdd(WorldRoadCellPayload({ x, y })),
+    action: WorldAdd(WorldRoadCellPayload({ x, y, })),
     budget_delta: -3000,
   }
   let model = town_life_world_reproject_model(
-    { ..init_model(), town_life_world_states: [{ ..state, events: [event] }] },
+    { ..init_model(), town_life_world_states: [{ ..state, events: [event], }], },
     seed,
   )
   let snapshot = ecosystem_contract_town_snapshot(model, seed)
@@ -44,30 +44,30 @@ test "duplicate external event ids still produce unique valid diagnostics" {
   let shared_id = "duplicated-external-event-id"
   let first : TownLifeWorldEvent = {
     id: shared_id,
-    dot: { writer_id: "duplicate-a", sequence: 2 },
-    stamp: { writer_id: "duplicate-a", lamport: 2 },
+    dot: { writer_id: "duplicate-a", sequence: 2, },
+    stamp: { writer_id: "duplicate-a", lamport: 2, },
     epoch_id: state.epoch.id,
     kind: WorldRoadCell,
     entity_id: "road-cell-4-4",
     incarnation_id: shared_id,
-    action: WorldAdd(WorldRoadCellPayload({ x: 4, y: 5 })),
+    action: WorldAdd(WorldRoadCellPayload({ x: 4, y: 5, })),
     budget_delta: 0,
   }
   let second : TownLifeWorldEvent = {
     id: shared_id,
-    dot: { writer_id: "duplicate-b", sequence: 2 },
-    stamp: { writer_id: "duplicate-b", lamport: 2 },
+    dot: { writer_id: "duplicate-b", sequence: 2, },
+    stamp: { writer_id: "duplicate-b", lamport: 2, },
     epoch_id: state.epoch.id,
     kind: WorldRoadCell,
     entity_id: "road-cell-7-7",
     incarnation_id: shared_id,
-    action: WorldAdd(WorldRoadCellPayload({ x: 7, y: 8 })),
+    action: WorldAdd(WorldRoadCellPayload({ x: 7, y: 8, })),
     budget_delta: 0,
   }
   let model = town_life_world_reproject_model(
     {
       ..init_model(),
-      town_life_world_states: [{ ..state, events: [first, second] }],
+      town_life_world_states: [{ ..state, events: [first, second], }],
     },
     seed,
   )

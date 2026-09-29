@@ -20,7 +20,7 @@ async test "book quality review candidate selection favors the weakest pending s
     ),
     structural_score: 88,
   }
-  let equal = { ..stronger, book_id: "equal-book" }
+  let equal = { ..stronger, book_id: "equal-book", }
   let audit = @book_quality.audit_from_scores("/tmp/catalog.json", [
     stronger, weaker, equal,
   ])

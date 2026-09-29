@@ -13,8 +13,8 @@ fn adversarial_world_event(
 ) -> TownLifeWorldEvent {
   {
     id: "\{writer}:\{sequence}:\{label}",
-    dot: { writer_id: writer, sequence },
-    stamp: { writer_id: writer, lamport },
+    dot: { writer_id: writer, sequence, },
+    stamp: { writer_id: writer, lamport, },
     epoch_id: epoch.id,
     kind,
     entity_id,
@@ -64,7 +64,7 @@ fn adversarial_world_reachable_road_points(
         mode=@energy_valley_contract.ServiceVehicle,
       ) {
       seen[key] = true
-      result.push({ x: node.grid.column, y: node.grid.row })
+      result.push({ x: node.grid.column, y: node.grid.row, })
       if result.length() >= count {
         return result
       }
@@ -89,7 +89,7 @@ fn adversarial_world_custom_road_stroke(
       let key = golden_valley_tile_key(x, y)
       if !base_roads.contains(key) &&
         town_life_world_road_point_allowed(world, base_roads, x, y) {
-        candidates[key] = { x, y }
+        candidates[key] = { x, y, }
       }
     }
   }
@@ -236,7 +236,7 @@ fn adversarial_world_diagonal_frontage_fixture(
         entrance_y: Some(59),
         floors: 1,
       },
-      { x: 101, y: 58 },
+      { x: 101, y: 58, },
     ),
   )
 }
@@ -285,11 +285,11 @@ test "world CRDT merge and projection are commutative associative idempotent" {
     "zz-conflict",
     points[2],
   )
-  let left = { ..base, events: [a] }
-  let right = { ..base, events: [b] }
+  let left = { ..base, events: [a], }
+  let right = { ..base, events: [b], }
   let conflict = {
     ..base,
-    epoch: { ..base.epoch, base_budget: base.epoch.base_budget - 1 },
+    epoch: { ..base.epoch, base_budget: base.epoch.base_budget - 1, },
     events: [conflicting_a],
   }
   assert_eq(
@@ -377,7 +377,7 @@ test "pre-Add move and delete cannot suppress or charge the later Add" {
     999,
   )
   let projection = town_life_world_projection(
-    { ..base, events: [add, deletion, movement] },
+    { ..base, events: [add, deletion, movement], },
     seed,
   )
   assert_eq(projection.active.length(), 1)
@@ -472,7 +472,7 @@ test "delete wins once, paid Add refunds half, free Add cannot mint, and reset c
           value.reason_code == "historical-add-rejected"
         }),
       )
-      let stale = { ..base, events: [add_one] }
+      let stale = { ..base, events: [add_one], }
       let stale_replay = town_life_world_projection(
         town_life_world_merge_state(stale, complete),
         seed,
@@ -483,12 +483,12 @@ test "delete wins once, paid Add refunds half, free Add cannot mint, and reset c
       )
       let reset_epoch : TownLifeWorldEpoch = {
         id: "reset-writer:100:world-reset",
-        dot: { writer_id: "reset-writer", sequence: 100 },
-        stamp: { writer_id: "reset-writer", lamport: 100 },
+        dot: { writer_id: "reset-writer", sequence: 100, },
+        stamp: { writer_id: "reset-writer", lamport: 100, },
         base_budget: 2400,
         base_next_authored_sequence: 1,
       }
-      let reset = { ..base, epoch: reset_epoch, events: [] }
+      let reset = { ..base, epoch: reset_epoch, events: [], }
       let after_reset = town_life_world_merge_state(complete, reset)
       let after_stale_replay = town_life_world_merge_state(after_reset, stale)
       assert_eq(
@@ -550,8 +550,8 @@ test "legacy import preserves identity budget and sequence while real V3 state w
         authored_id: Some("legacy-stable-building"),
       }
       let operations : Array[SavedWorldDeltaOperation] = [
-        AddBuilding({ id: "legacy-stable-building", building }),
-        AddRoad({ id: "legacy-road-component", path: [points[0], points[1]] }),
+        AddBuilding({ id: "legacy-stable-building", building, }),
+        AddRoad({ id: "legacy-road-component", path: [points[0], points[1]], }),
       ]
       let ledger : EnergyValleyWorldDeltaLedger = {
         ..energy_valley_empty_world_delta_for_seed(seed),
@@ -581,7 +581,7 @@ test "legacy import preserves identity budget and sequence while real V3 state w
         "real-edit",
         points[2],
       )
-      let real = { ..real_base, events: [real_event] }
+      let real = { ..real_base, events: [real_event], }
       let merged = town_life_world_merge_state(imported, real)
       let reverse = town_life_world_merge_state(real, imported)
       assert_eq(
@@ -619,8 +619,8 @@ fn adversarial_collected_post(
     id,
     building_id: Some(building_id),
     incarnation_id: Some("\{writer}:post-incarnation"),
-    created_stamp: Some({ writer_id: writer, lamport: 3 }),
-    updated_stamp: Some({ writer_id: writer, lamport: 3 }),
+    created_stamp: Some({ writer_id: writer, lamport: 3, }),
+    updated_stamp: Some({ writer_id: writer, lamport: 3, }),
     reset_epoch: None,
     building_name: "Concurrent collected building",
     topic: "Atomic physical and knowledge convergence",
@@ -668,12 +668,12 @@ test "projected collected posts never outlive a spatially rejected building" {
       let left : TownLifeSave = {
         ..town_life_default_save(),
         posts: [adversarial_collected_post("post-a", first_id, "collector-a")],
-        world_states: Some([{ ..base, events: [first_event] }]),
+        world_states: Some([{ ..base, events: [first_event], }]),
       }
       let right : TownLifeSave = {
         ..town_life_default_save(),
         posts: [adversarial_collected_post("post-b", second_id, "collector-b")],
-        world_states: Some([{ ..base, events: [second_event] }]),
+        world_states: Some([{ ..base, events: [second_event], }]),
       }
       let merged = town_life_reconcile_save(left, right)
       let projected = town_life_model_with_save(init_model(), merged)
@@ -726,11 +726,11 @@ test "invalid Move is rejected without discarding its valid Add" {
         WorldBuilding,
         "move-preserves-add",
         add.id,
-        WorldMove(WorldBuildingPayload({ ..building, x: -100, y: -100 })),
+        WorldMove(WorldBuildingPayload({ ..building, x: -100, y: -100, })),
         0,
       )
       let projection = town_life_world_projection(
-        { ..base, events: [movement, add] },
+        { ..base, events: [movement, add], },
         seed,
       )
       let buildings = energy_valley_world_delta_projection(projection.ledger).buildings
@@ -791,7 +791,7 @@ test "later duplicate Add cannot resurrect a deleted incarnation" {
         WorldAdd(WorldBuildingPayload(building)),
         -600,
       )
-      let complete = { ..base, events: [add, deletion, malformed_late_add] }
+      let complete = { ..base, events: [add, deletion, malformed_late_add], }
       let projection = town_life_world_projection(complete, seed)
       assert_true(projection.active.is_empty())
       assert_eq(projection.ledger.budget, 2100)
@@ -802,7 +802,7 @@ test "later duplicate Add cannot resurrect a deleted incarnation" {
         }),
       )
       let replay = town_life_world_projection(
-        town_life_world_merge_state(complete, { ..base, events: [add] }),
+        town_life_world_merge_state(complete, { ..base, events: [add], }),
         seed,
       )
       assert_true(replay.active.is_empty())
@@ -845,8 +845,8 @@ test "road-cell delete removes only its cell and stale replay cannot restore it"
     WorldDelete,
     0,
   )
-  let stale = { ..base, events: [first, second] }
-  let complete = { ..base, events: [first, second, deletion] }
+  let stale = { ..base, events: [first, second], }
+  let complete = { ..base, events: [first, second, deletion], }
   let merged = town_life_world_merge_state(stale, complete)
   let projection = town_life_world_projection(merged, seed)
   assert_eq(projection.active.length(), 1)
@@ -934,8 +934,8 @@ test "canonical budget order accepts one concurrent spender independent of merge
         WorldAdd(WorldBuildingPayload(building)),
         -1600,
       )
-      let left = { ..base, events: [first] }
-      let right = { ..base, events: [second] }
+      let left = { ..base, events: [first], }
+      let right = { ..base, events: [second], }
       let forward = town_life_world_projection(
         town_life_world_merge_state(left, right),
         seed,
@@ -967,7 +967,7 @@ test "invalid deleted Add has no debit and cannot manufacture a refund" {
     None => fail("expected one compiler-approved building fixture")
     Some(valid) => {
       let base = town_life_world_empty_state_for_seed(seed)
-      let invalid = { ..valid, x: -100, y: -100 }
+      let invalid = { ..valid, x: -100, y: -100, }
       let add = adversarial_world_event(
         base.epoch,
         "mint-attack",
@@ -993,7 +993,7 @@ test "invalid deleted Add has no debit and cannot manufacture a refund" {
         999,
       )
       let projection = town_life_world_projection(
-        { ..base, events: [add, deletion] },
+        { ..base, events: [add, deletion], },
         seed,
       )
       assert_true(projection.active.is_empty())
@@ -1050,7 +1050,7 @@ test "diagonal-only custom road contact does not provide building frontage" {
         0,
       )
       let projection = town_life_world_projection(
-        { ..base, events: [road, add] },
+        { ..base, events: [road, add], },
         seed,
       )
       assert_true(projection.active.any(value => value.add.id == road.id))
@@ -1069,7 +1069,7 @@ test "budget retry rechecks topology and keeps the affordable connector" {
   let seed = active_energy_valley_seed()
   let world = energy_valley_base_contract_world_for_seed(seed)
   let base = town_life_world_empty_state_for_seed(seed)
-  let epoch = { ..base.epoch, base_budget: 30 }
+  let epoch = { ..base.epoch, base_budget: 30, }
   let (connector, far) = world_projection_isolation_dependent_chain(world).unwrap()
   let far_add = adversarial_world_event(
     epoch,
@@ -1096,7 +1096,7 @@ test "budget retry rechecks topology and keeps the affordable connector" {
     -30,
   )
   let projection = town_life_world_projection(
-    { ..base, epoch, events: [far_add, connector_add] },
+    { ..base, epoch, events: [far_add, connector_add], },
     seed,
   )
   assert_false(projection.active.any(value => value.add.id == far_add.id))
@@ -1112,7 +1112,7 @@ test "budget topology retry keeps the maximal affordable anchored road prefix" {
   let seed = active_energy_valley_seed()
   let world = energy_valley_base_contract_world_for_seed(seed)
   let base = town_life_world_empty_state_for_seed(seed)
-  let epoch = { ..base.epoch, base_budget: 60 }
+  let epoch = { ..base.epoch, base_budget: 60, }
   let (connector, middle, far) = adversarial_world_three_cell_dependent_chain(
     world,
   ).unwrap()
@@ -1153,7 +1153,7 @@ test "budget topology retry keeps the maximal affordable anchored road prefix" {
     -30,
   )
   let projection = town_life_world_projection(
-    { ..base, epoch, events: [far_add, middle_add, connector_add] },
+    { ..base, epoch, events: [far_add, middle_add, connector_add], },
     seed,
   )
   assert_false(projection.active.any(value => value.add.id == far_add.id))
@@ -1221,8 +1221,8 @@ test "paid connector and dependent road remain charged after both are deleted" {
     WorldDelete,
     0,
   )
-  let left = { ..base, events: [connector_add, dependent_delete] }
-  let right = { ..base, events: [dependent_add, connector_delete] }
+  let left = { ..base, events: [connector_add, dependent_delete], }
+  let right = { ..base, events: [dependent_add, connector_delete], }
   let forward = town_life_world_projection(
     town_life_world_merge_state(left, right),
     seed,
@@ -1322,7 +1322,7 @@ test "historical replay preserves topology-aware budget rejection" {
   let seed = active_energy_valley_seed()
   let world = energy_valley_base_contract_world_for_seed(seed)
   let base = town_life_world_empty_state_for_seed(seed)
-  let epoch = { ..base.epoch, base_budget: 30 }
+  let epoch = { ..base.epoch, base_budget: 30, }
   let (connector, dependent) = world_projection_isolation_dependent_chain(world).unwrap()
   let dependent_add = adversarial_world_event(
     epoch,
@@ -1349,7 +1349,7 @@ test "historical replay preserves topology-aware budget rejection" {
     -20,
   )
   let live = town_life_world_projection(
-    { ..base, epoch, events: [dependent_add, connector_add] },
+    { ..base, epoch, events: [dependent_add, connector_add], },
     seed,
   )
   assert_false(live.active.any(value => value.add.id == dependent_add.id))
@@ -1429,14 +1429,14 @@ test "detached deleted paid road is economically inert under merge order" {
     0,
   )
   let forward = town_life_world_projection(
-    town_life_world_merge_state({ ..base, events: [add] }, {
+    town_life_world_merge_state({ ..base, events: [add], }, {
       ..base,
       events: [deletion],
     }),
     seed,
   )
   let reverse = town_life_world_projection(
-    town_life_world_merge_state({ ..base, events: [deletion] }, {
+    town_life_world_merge_state({ ..base, events: [deletion], }, {
       ..base,
       events: [add],
     }),

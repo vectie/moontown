@@ -96,21 +96,21 @@ test "local backend can create agent chat and update run lifecycle" {
   let cancelled = miniapp_local_backend_cancel_run(
     chat.state,
     session,
-    { run_id: "run-local-chat", summary: "Cancelled locally." },
+    { run_id: "run-local-chat", summary: "Cancelled locally.", },
     now_ms=6300UL,
   )
   assert_eq(cancelled.ok, true)
   let retried = miniapp_local_backend_retry_run(
     cancelled.state,
     session,
-    { run_id: "run-local-chat", summary: "Retried locally." },
+    { run_id: "run-local-chat", summary: "Retried locally.", },
     now_ms=6400UL,
   )
   assert_eq(retried.ok, true)
   let accepted = miniapp_local_backend_accept_run(
     retried.state,
     session,
-    { run_id: "run-local-chat", summary: "Accepted locally." },
+    { run_id: "run-local-chat", summary: "Accepted locally.", },
     now_ms=6500UL,
   )
   assert_eq(accepted.ok, true)

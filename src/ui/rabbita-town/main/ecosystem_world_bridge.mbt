@@ -207,7 +207,7 @@ fn ecosystem_clamp_attention(value : Int) -> Int {
 
 ///|
 fn ecosystem_point(x : Int, y : Int) -> EcosystemGridPoint {
-  { x, y }
+  { x, y, }
 }
 
 ///|
@@ -391,7 +391,7 @@ fn ecosystem_threshold_for_road(
   } else {
     road.y
   }
-  { x: threshold_x, y: threshold_y }
+  { x: threshold_x, y: threshold_y, }
 }
 
 ///|
@@ -916,30 +916,30 @@ fn ecosystem_place_traits(
   access : Array[EcosystemRoadFrontage],
 ) -> Array[EcosystemTrait] {
   let traits : Array[EcosystemTrait] = [
-    { key: "district", value: district, salience: 35 },
+    { key: "district", value: district, salience: 35, },
     {
       key: "program",
       value: ecosystem_program_trait(style, runtime_key),
       salience: 75,
     },
-    { key: "style", value: style, salience: 45 },
-    { key: "source", value: source, salience: 20 },
-    { key: "floors", value: floors.to_string(), salience: 30 },
+    { key: "style", value: style, salience: 45, },
+    { key: "source", value: source, salience: 20, },
+    { key: "floors", value: floors.to_string(), salience: 30, },
   ]
   if access.is_empty() {
-    traits.push({ key: "road-access", value: "unresolved", salience: 90 })
+    traits.push({ key: "road-access", value: "unresolved", salience: 90, })
   } else if access.any(item => item.direct) {
-    traits.push({ key: "road-access", value: "direct", salience: 65 })
+    traits.push({ key: "road-access", value: "direct", salience: 65, })
   } else {
-    traits.push({ key: "road-access", value: "linked", salience: 70 })
+    traits.push({ key: "road-access", value: "linked", salience: 70, })
   }
   if ecosystem_footprint_near_terrain(
       world, custom_buildings, custom_roads, custom_parks, footprint, "water", 3,
     ) {
-    traits.push({ key: "setting", value: "waterfront", salience: 82 })
+    traits.push({ key: "setting", value: "waterfront", salience: 82, })
   }
   if ecosystem_footprint_near_metro(footprint) {
-    traits.push({ key: "mobility", value: "metro-adjacent", salience: 80 })
+    traits.push({ key: "mobility", value: "metro-adjacent", salience: 80, })
   }
   traits
 }
@@ -1405,7 +1405,7 @@ fn ecosystem_append_landmark_places(
   for landmark in landmarks {
     let x = landmark.4.max(0).min(world.cols - 1)
     let y = landmark.5.max(0).min(world.rows - 1)
-    let footprint : EcosystemFootprint = { x, y, width: 1, depth: 1 }
+    let footprint : EcosystemFootprint = { x, y, width: 1, depth: 1, }
     places.push(
       ecosystem_make_place(
         world,
@@ -1450,7 +1450,7 @@ fn ecosystem_public_realm_place(
     EcosystemPublicRealm,
     world.tiles[y][x].district,
     feature,
-    { x, y, width: 1, depth: 1 },
+    { x, y, width: 1, depth: 1, },
     0,
     None,
     [],
@@ -1661,7 +1661,7 @@ fn ecosystem_world_snapshot(
             EcosystemAmbientBuilding,
             world.tiles[y][x].district,
             style,
-            { x, y, width, depth },
+            { x, y, width, depth, },
             floors,
             None,
             None,

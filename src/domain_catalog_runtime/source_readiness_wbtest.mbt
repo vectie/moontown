@@ -285,7 +285,7 @@ async test "status is read-only and seed defers books until sources are configur
   let ledger = @book_templates_runtime.load_request_ledger(request_path)
   assert_eq(ledger.requests.length(), 1)
   @book_templates_runtime.save_request_ledger(request_path, {
-    requests: [{ ..ledger.requests[0], status: "installed" }],
+    requests: [{ ..ledger.requests[0], status: "installed", }],
   })
   let installed_status = render_knowledge_domain_catalog_status(
     catalog_path~,

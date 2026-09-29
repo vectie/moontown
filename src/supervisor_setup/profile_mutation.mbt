@@ -147,7 +147,10 @@ pub async fn SupervisorSetupApplication::save_profile_draft(
     schema: supervisor_profile_schema(),
     profile_id,
     owner_user_id: actor_user_id,
-    identity: { display_name: draft.display_name, avatar_url: draft.avatar_url },
+    identity: {
+      display_name: draft.display_name,
+      avatar_url: draft.avatar_url,
+    },
     role: draft.role,
     mission: draft.mission,
     tone: draft.tone,

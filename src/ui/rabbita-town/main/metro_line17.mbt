@@ -128,8 +128,8 @@ fn metro_line17_stations() -> Array[MetroStation] {
       x: 126.5,
       y: 88.0,
       exits: [
-        { label: "A", destination: "能源谷核心区", x: 124.8, y: 87.0 },
-        { label: "B", destination: "能源谷核心区", x: 128.2, y: 89.0 },
+        { label: "A", destination: "能源谷核心区", x: 124.8, y: 87.0, },
+        { label: "B", destination: "能源谷核心区", x: 128.2, y: 89.0, },
       ],
     },
     {
@@ -137,8 +137,8 @@ fn metro_line17_stations() -> Array[MetroStation] {
       x: 125.0,
       y: 52.0,
       exits: [
-        { label: "C", destination: "英才北一街", x: 123.4, y: 51.0 },
-        { label: "D", destination: "英才北一街", x: 126.7, y: 53.0 },
+        { label: "C", destination: "英才北一街", x: 123.4, y: 51.0, },
+        { label: "D", destination: "英才北一街", x: 126.7, y: 53.0, },
       ],
     },
   ]

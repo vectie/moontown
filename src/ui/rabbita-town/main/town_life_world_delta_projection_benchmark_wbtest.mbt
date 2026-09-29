@@ -14,7 +14,7 @@ fn world_projection_benchmark_points(
       let key = golden_valley_tile_key(x, y)
       if !base_roads.contains(key) &&
         town_life_world_road_point_allowed(world, base_roads, x, y) {
-        candidates[key] = { x, y }
+        candidates[key] = { x, y, }
       }
     }
   }
@@ -76,8 +76,8 @@ fn world_projection_benchmark_state(
     let id = "projection-benchmark:\{sequence}:road-add"
     events.push({
       id,
-      dot: { writer_id: "projection-benchmark", sequence },
-      stamp: { writer_id: "projection-benchmark", lamport: sequence },
+      dot: { writer_id: "projection-benchmark", sequence, },
+      stamp: { writer_id: "projection-benchmark", lamport: sequence, },
       epoch_id: base.epoch.id,
       kind: WorldRoadCell,
       entity_id: "road-cell-\{point.x}-\{point.y}",
@@ -103,8 +103,8 @@ fn world_projection_paid_deleted_chain_state(
     let id = "paid-deleted-road:\{sequence}:add"
     let event : TownLifeWorldEvent = {
       id,
-      dot: { writer_id: "paid-deleted-road", sequence },
-      stamp: { writer_id: "paid-deleted-road", lamport: sequence },
+      dot: { writer_id: "paid-deleted-road", sequence, },
+      stamp: { writer_id: "paid-deleted-road", lamport: sequence, },
       epoch_id: base.epoch.id,
       kind: WorldRoadCell,
       entity_id: "road-cell-\{point.x}-\{point.y}",
@@ -119,8 +119,8 @@ fn world_projection_paid_deleted_chain_state(
     let sequence = count + index + 2
     events.push({
       id: "paid-deleted-road:\{sequence}:delete",
-      dot: { writer_id: "paid-deleted-road", sequence },
-      stamp: { writer_id: "paid-deleted-road", lamport: sequence },
+      dot: { writer_id: "paid-deleted-road", sequence, },
+      stamp: { writer_id: "paid-deleted-road", lamport: sequence, },
       epoch_id: base.epoch.id,
       kind: WorldRoadCell,
       entity_id: added.entity_id,
@@ -170,7 +170,7 @@ fn world_mutation_benchmark_park_point(
           x,
           y,
         }) {
-        return Some({ x, y })
+        return Some({ x, y, })
       }
     }
   }
@@ -288,7 +288,7 @@ test "benchmark: 192 paid deleted road cells replay without recursive blowup" {
 ///|
 test "benchmark: road click uses canonical membership without candidate compile" {
   let seed = active_energy_valley_seed()
-  let model = { ..init_model(), energy_tool: RoadTool }
+  let model = { ..init_model(), energy_tool: RoadTool, }
   let current_snapshot_key = ecosystem_snapshot_cache_key(model, seed)
   let current_contract_key = ecosystem_contract_world_cache_key(model, seed)
   let world = ecosystem_contract_world_for_model(model, seed)
@@ -321,7 +321,7 @@ test "benchmark: road click uses canonical membership without candidate compile"
 ///|
 test "benchmark: park click uses canonical membership without candidate compile" {
   let seed = active_energy_valley_seed()
-  let model = { ..init_model(), energy_tool: ParkTool }
+  let model = { ..init_model(), energy_tool: ParkTool, }
   let current_snapshot_key = ecosystem_snapshot_cache_key(model, seed)
   let current_contract_key = ecosystem_contract_world_cache_key(model, seed)
   let world = ecosystem_contract_world_for_model(model, seed)
@@ -354,7 +354,7 @@ test "benchmark: park click uses canonical membership without candidate compile"
 ///|
 test "benchmark: building click uses canonical membership without candidate compile" {
   let seed = active_energy_valley_seed()
-  let model = { ..init_model(), energy_tool: WorkshopTool }
+  let model = { ..init_model(), energy_tool: WorkshopTool, }
   let current_snapshot_key = ecosystem_snapshot_cache_key(model, seed)
   let current_contract_key = ecosystem_contract_world_cache_key(model, seed)
   let world = ecosystem_contract_world_for_model(model, seed)

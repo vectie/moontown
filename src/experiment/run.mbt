@@ -25,7 +25,7 @@ pub fn Cohort::new(
   name~ : String,
   participants? : Array[String] = [],
 ) -> Cohort {
-  { id, name, participants }
+  { id, name, participants, }
 }
 
 ///|
@@ -43,7 +43,7 @@ pub fn Intervention::new(
   detail~ : String,
   target_book_ids? : Array[String] = [],
 ) -> Intervention {
-  { id, title, detail, target_book_ids }
+  { id, title, detail, target_book_ids, }
 }
 
 ///|
@@ -59,7 +59,7 @@ pub fn Measurement::new(
   value~ : Double,
   note? : String = "",
 ) -> Measurement {
-  { metric, value, note }
+  { metric, value, note, }
 }
 
 ///|
@@ -75,7 +75,7 @@ pub fn StopRule::new(
   threshold~ : Double,
   direction? : String = "gte",
 ) -> StopRule {
-  { metric, threshold, direction }
+  { metric, threshold, direction, }
 }
 
 ///|
@@ -97,7 +97,7 @@ pub fn ExperimentDefinition::new(
   interventions? : Array[Intervention] = [],
   stop_rules? : Array[StopRule] = [],
 ) -> ExperimentDefinition {
-  { id, title, hypothesis, target_book_ids, interventions, stop_rules }
+  { id, title, hypothesis, target_book_ids, interventions, stop_rules, }
 }
 
 ///|
@@ -139,7 +139,7 @@ pub fn ExperimentRun::record_measurement(
 ) -> ExperimentRun {
   let next = self.measurements.copy()
   next.push(measurement)
-  { ..self, measurements: next }
+  { ..self, measurements: next, }
 }
 
 ///|
@@ -157,7 +157,7 @@ pub fn evaluate_run(
   } else {
     "run \{run.id} remains active"
   }
-  { run_id: run.id, summary, should_stop }
+  { run_id: run.id, summary, should_stop, }
 }
 
 ///|

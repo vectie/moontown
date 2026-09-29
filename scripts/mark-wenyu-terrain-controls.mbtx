@@ -1,0 +1,114 @@
+import {
+  "moonbitlang/x@0.4.40/fs",
+  "moonbitlang/core/json",
+  "moonbitlang/core/encoding/base64",
+}
+
+///|
+fn field(j : Json, key : String) -> Json {
+  match j { Object(m) => m.get(key).unwrap_or(Json::null()); _ => Json::null() }
+}
+
+///|
+fn num(j : Json) -> Double {
+  match j { Number(n, ..) => n; _ => abort("Expected coordinate") }
+}
+
+///|
+fn str(j : Json) -> String {
+  match j { String(s) => s; _ => abort("Expected string") }
+}
+
+///|
+fn array(j : Json) -> Array[Json] {
+  match j { Array(a) => a; _ => abort("Expected array") }
+}
+
+///|
+fn containing_tile(pixel : Double, size : Double, count : Double) -> Int {
+  for t in 0..<count.to_int() {
+    let lo = (t.to_double()*size/count).to_int().to_double()
+    let hi = ((t+1).to_double()*size/count).to_int().to_double()
+    if pixel>=lo && pixel<hi { return t }
+  }
+  abort("Pixel outside terrain source bounds")
+}
+
+///|
+fn main raise {
+  assert_eq(containing_tile(0.0,1672.0,256.0),0)
+  assert_eq(containing_tile(1671.0,1672.0,256.0),255)
+  assert_eq(containing_tile(1430.0,1672.0,256.0),219)
+  let controls = @json.parse(@fs.read_file_to_string("docs/project/wenyu-four-corner-controls.json"))
+  let labels = @json.parse(@fs.read_file_to_string("src/ui/assets/tilemap/wenyu_reference_labels.json"))
+  let source = field(labels,"source")
+  let grid = field(labels,"tileGrid")
+  let width = num(field(source,"width"))
+  let height = num(field(source,"height"))
+  let cols = num(field(grid,"width"))
+  let rows = num(field(grid,"height"))
+  assert_eq(width,1672.0); assert_eq(height,941.0)
+  assert_eq(cols,256.0); assert_eq(rows,144.0)
+  let entries = array(field(controls,"controls"))
+  assert_eq(entries.length(),4)
+  let mapped : Array[Json] = []
+  for c in entries {
+    let pixel = field(c,"generated")
+    let px = num(field(pixel,"x")); let py = num(field(pixel,"y"))
+    let x = px*cols/width; let y = py*rows/height
+    assert_true(x>=0.0 && x<cols && y>=0.0 && y<rows)
+    assert_true((x*width/cols-px).abs()<0.00000001)
+    assert_true((y*height/rows-py).abs()<0.00000001)
+    let iso_x = 32.0*(x-y); let iso_y = 16.0*(x+y)
+    assert_true(((iso_x/32.0+iso_y/16.0)/2.0-x).abs()<0.00000001)
+    assert_true(((iso_y/16.0-iso_x/32.0)/2.0-y).abs()<0.00000001)
+    // Invert the segmentation's documented floored source-pixel bounds.
+    let tx = containing_tile(px,width,cols)
+    let ty = containing_tile(py,height,rows)
+    let label = str(array(field(labels,"rows"))[ty]).get_char(tx).unwrap().to_string()
+    mapped.push({"id":field(c,"id"),"name":field(c,"name"),"wgs84":field(c,"wgs84"),"generatedPixel":pixel,
+      "terrainGrid":{"x":x,"y":y},"containingTile":{"x":tx,"y":ty,"label":label,"kind":field(field(field(labels,"legend"),label),"kind")},
+      "isometricGroundAtZoom1":{"x":32.0*(x-y),"y":16.0*(x+y)},
+      "status":"Derived from provisional raster landmark; not an independent geographic observation"})
+  }
+  let report : Json = {"schema":"moontown.wenyu_terrain_corner_controls.v1","runtimeEligible":false,
+    "controlsSource":"docs/project/wenyu-four-corner-controls.json","terrainSource":"src/ui/assets/tilemap/wenyu_reference_labels.json",
+    "mapping":"gridX=pixelX*256/1672; gridY=pixelY*144/941; groundX=32*(gridX-gridY); groundY=16*(gridX+gridY). Camera translation and zoom are display-only.",
+    "caution":"These are the same four controls propagated through terrain generation, not four new independent checks. Segmentation may classify a landmark cell differently; no snapping to current OSM roads.","controls":mapped}
+  @fs.write_string_to_file("docs/project/wenyu-terrain-four-corners.json",report.stringify(indent=2))
+  println(report.stringify(indent=2))
+  let generated = @base64.encode(@fs.read_file_to_bytes("src/ui/assets/tilemap/wenyu_topdown_semantic.png"))
+  let terrain = @base64.encode(@fs.read_file_to_bytes("src/ui/assets/tilemap/wenyu_reference_labels_preview.png"))
+  let svg = StringBuilder()
+  svg.write_string("<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 1800 1370'><rect width='1800' height='1370' fill='#182a29'/><style>text{font-family:system-ui,sans-serif;fill:#f6f3e9}.title{font-size:28px;font-weight:650}.note{font-size:21px}.small{font-size:18px}.pin{font-size:24px;font-weight:750;paint-order:stroke;stroke:#182a29;stroke-width:5px}</style><defs><image id='terrain' href='data:image/png;base64,\{terrain}' width='256' height='144' style='image-rendering:pixelated'/></defs><text x='30' y='43' class='title'>Four landmarks on the actual terrain grid</text><text x='30' y='80' class='note'>Same NW / NE / SE / corrected SW · source pixels → 256 × 144 terrain tiles → isometric ground</text>")
+  for i in 0..<2 {
+    let left = 30.0+i.to_double()*900.0
+    svg.write_string("<text x='\{left}' y='127' class='note'>\{if i==0 {"Generated design reference"} else {"Terrain label map · used by the town"}}</text><svg x='\{left}' y='145' width='840' height='473' viewBox='0 0 256 144'>")
+    if i==0 {svg.write_string("<image href='data:image/png;base64,\{generated}' width='256' height='144'/>")} else {svg.write_string("<use href='#terrain'/>")}
+    svg.write_string("</svg>")
+    for c in mapped {
+      let p = field(c,"terrainGrid")
+      let x = left+num(field(p,"x"))*840.0/256.0
+      let y = 145.0+num(field(p,"y"))*472.5/144.0
+      let id = str(field(c,"id")); let color = if id=="SW" {"#63f2c2"} else {"#ff5a83"}
+      svg.write_string("<circle cx='\{x}' cy='\{y}' r='9' fill='none' stroke='\{color}' stroke-width='3'/><path d='M\{x-14},\{y}h28M\{x},\{y-14}v28' stroke='\{color}' stroke-width='2'/><text x='\{x+16}' y='\{y+20}' class='pin'>\{id}</text>")
+    }
+  }
+  svg.write_string("<text x='30' y='674' class='note'>Isometric terrain-only projection · same ground axes as the town, not a live screenshot</text><g transform='matrix(2.65 1.325 -2.65 1.325 420 720)'><use href='#terrain'/></g>")
+  for i,c in mapped {
+    let p = field(c,"terrainGrid")
+    let gx = num(field(p,"x")); let gy = num(field(p,"y"))
+    let x = 420.0+2.65*(gx-gy); let y = 720.0+1.325*(gx+gy)
+    let id = str(field(c,"id")); let color = if id=="SW" {"#63f2c2"} else {"#ff5a83"}
+    svg.write_string("<circle cx='\{x}' cy='\{y}' r='9' fill='none' stroke='\{color}' stroke-width='3'/><path d='M\{x},\{y-14}v28M\{x-14},\{y}h28' stroke='\{color}' stroke-width='2'/><text x='\{x+17}' y='\{y+22}' class='pin'>\{id}</text>")
+    let ty = 755+i*114
+    let tile = field(c,"containingTile")
+    // Hundredths are display truncations only; JSON retains full precision.
+    let dx = (gx*100.0).to_int().to_double()/100.0
+    let dy = (gy*100.0).to_int().to_double()/100.0
+    svg.write_string("<text x='1140' y='\{ty}' class='note'>\{id} · \{str(field(c,"name"))}</text><text x='1140' y='\{ty+33}' class='small'>Terrain coordinate (\{dx}, \{dy})</text><text x='1140' y='\{ty+64}' class='small'>Tile [\{num(field(tile,"x"))}, \{num(field(tile,"y"))}] · \{str(field(tile,"kind"))}</text>")
+  }
+  svg.write_string("<text x='30' y='1295' class='note'>Pins follow the terrain’s source mapping; they are not snapped to the currently misaligned OSM overlay.</text><text x='30' y='1334' class='small'>Provisional geographic correspondence inherited from the reviewed controls. No terrain, camera or road-network changes.</text></svg>")
+  @fs.write_string_to_file("docs/project/wenyu-terrain-four-corners.svg",svg.to_string())
+  @fs.write_string_to_file("src/ui/rabbita-town/dist/wenyu-terrain-four-corners.svg",svg.to_string())
+}

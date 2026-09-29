@@ -22,7 +22,7 @@ async fn research_bootstrap_plan(
     quality_gaps~,
   )
   if !bootstrap_active {
-    return { tasks: ordered, task_limit, bootstrap_active: false }
+    return { tasks: ordered, task_limit, bootstrap_active: false, }
   }
   if !quality_gaps.is_empty() {
     @research_quality_runtime.write_research_quality_review_trigger(
@@ -35,7 +35,7 @@ async fn research_bootstrap_plan(
     ..ordered.filter(fn(task) { task.id != bootstrap_task.id }),
   ]
   let effective_limit = research_bootstrap_task_limit()
-  { tasks: planned, task_limit: effective_limit, bootstrap_active: true }
+  { tasks: planned, task_limit: effective_limit, bootstrap_active: true, }
 }
 
 ///|

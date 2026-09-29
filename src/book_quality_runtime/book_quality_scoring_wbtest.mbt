@@ -159,64 +159,64 @@ async test "book quality runtime scorer observes research report word count" {
 ///|
 test "research book required paths expose scoring contract as data" {
   assert_required_path_contract(@book_quality.research_required_paths(), 11, [
-    { relative: "raw/bootstrap/deep-report.md", points: 12 },
-    { relative: "wiki/synthesis/overview.md", points: 5 },
-    { relative: "wiki/sources/", points: 5 },
-    { relative: @book_quality.generated_site_path(), points: 6 },
+    { relative: "raw/bootstrap/deep-report.md", points: 12, },
+    { relative: "wiki/synthesis/overview.md", points: 5, },
+    { relative: "wiki/sources/", points: 5, },
+    { relative: @book_quality.generated_site_path(), points: 6, },
   ])
 }
 
 ///|
 test "course book required paths expose scoring contract as data" {
   assert_required_path_contract(@book_quality.course_required_paths(), 10, [
-    { relative: "raw/bootstrap/COURSE_CONTRACT.md", points: 12 },
-    { relative: "wiki/course/outline.md", points: 5 },
-    { relative: "wiki/course/lessons.md", points: 5 },
-    { relative: "wiki/course/beginner-course.md", points: 16 },
-    { relative: "skills/course-builder/SKILL.md", points: 12 },
+    { relative: "raw/bootstrap/COURSE_CONTRACT.md", points: 12, },
+    { relative: "wiki/course/outline.md", points: 5, },
+    { relative: "wiki/course/lessons.md", points: 5, },
+    { relative: "wiki/course/beginner-course.md", points: 16, },
+    { relative: "skills/course-builder/SKILL.md", points: 12, },
   ])
 }
 
 ///|
 test "planbook required paths expose scoring contract as data" {
   assert_required_path_contract(@book_quality.planbook_required_paths(), 14, [
-    { relative: "raw/bootstrap/PLANBOOK_CONTRACT.md", points: 14 },
-    { relative: "plans/2026-05-29-book-quality-upgrade/plan.md", points: 16 },
-    { relative: "wiki/planning/index.md", points: 5 },
-    { relative: "wiki/planning/role-model.md", points: 5 },
-    { relative: "skills/code-plan/SKILL.md", points: 12 },
+    { relative: "raw/bootstrap/PLANBOOK_CONTRACT.md", points: 14, },
+    { relative: "plans/2026-05-29-book-quality-upgrade/plan.md", points: 16, },
+    { relative: "wiki/planning/index.md", points: 5, },
+    { relative: "wiki/planning/role-model.md", points: 5, },
+    { relative: "skills/code-plan/SKILL.md", points: 12, },
   ])
 }
 
 ///|
 test "cookbook required paths expose scoring contract as data" {
   assert_required_path_contract(@book_quality.cookbook_required_paths(), 13, [
-    { relative: "raw/bootstrap/COOKBOOK_CONTRACT.md", points: 14 },
-    { relative: "wiki/cookbook/index.md", points: 5 },
-    { relative: "wiki/cookbook/definitions.md", points: 5 },
-    { relative: "wiki/cookbook/runtime-state.md", points: 5 },
-    { relative: "wiki/definitions/stable-state.md", points: 16 },
-    { relative: "schemas/stable-state-manifest.schema.md", points: 8 },
+    { relative: "raw/bootstrap/COOKBOOK_CONTRACT.md", points: 14, },
+    { relative: "wiki/cookbook/index.md", points: 5, },
+    { relative: "wiki/cookbook/definitions.md", points: 5, },
+    { relative: "wiki/cookbook/runtime-state.md", points: 5, },
+    { relative: "wiki/definitions/stable-state.md", points: 16, },
+    { relative: "schemas/stable-state-manifest.schema.md", points: 8, },
   ])
 }
 
 ///|
 test "operational book required paths expose scoring contract as data" {
   assert_required_path_contract(@book_quality.operational_required_paths(), 5, [
-    { relative: "raw/bootstrap/OPERATIONAL_BOOK_CONTRACT.md", points: 18 },
-    { relative: "wiki/operations/review-policy.md", points: 16 },
-    { relative: "skills/operational-keeper/SKILL.md", points: 16 },
+    { relative: "raw/bootstrap/OPERATIONAL_BOOK_CONTRACT.md", points: 18, },
+    { relative: "wiki/operations/review-policy.md", points: 16, },
+    { relative: "skills/operational-keeper/SKILL.md", points: 16, },
   ])
 }
 
 ///|
 test "civic book base required paths expose scoring contract as data" {
   assert_required_path_contract(@book_quality.civic_base_required_paths(), 7, [
-    { relative: "raw/bootstrap/CIVIC_SERVICE_CONTRACT.md", points: 12 },
-    { relative: "raw/bootstrap/BUILDING_PROTOCOL_CONTRACT.md", points: 12 },
-    { relative: "wiki/ledgers/exchange-ledger.md", points: 5 },
-    { relative: "wiki/reviews/pending.md", points: 5 },
-    { relative: "moonclaw.jobs.json", points: 10 },
+    { relative: "raw/bootstrap/CIVIC_SERVICE_CONTRACT.md", points: 12, },
+    { relative: "raw/bootstrap/BUILDING_PROTOCOL_CONTRACT.md", points: 12, },
+    { relative: "wiki/ledgers/exchange-ledger.md", points: 5, },
+    { relative: "wiki/reviews/pending.md", points: 5, },
+    { relative: "moonclaw.jobs.json", points: 10, },
   ])
 }
 

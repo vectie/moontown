@@ -12,7 +12,7 @@ test "idle and offline Agents never become authoritative presences or sprites" {
           // The task remains active on purpose: Agent state must still veto
           // both presentation and semantic presence claims.
           ,
-          tasks: [{ ..projection.tasks[0], status: "running" }],
+          tasks: [{ ..projection.tasks[0], status: "running", }],
           agents: [{ ..projection.agents[0], status, }],
         }),
       },

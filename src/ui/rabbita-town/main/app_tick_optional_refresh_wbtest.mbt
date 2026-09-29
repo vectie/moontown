@@ -41,7 +41,7 @@ test "array refresh accepts parsed array when version changes" {
 
 ///|
 test "refreshed state source keeps explicit snapshot mode" {
-  let model = { ..init_model(), state_source: StateSourceKind::SnapshotFile }
+  let model = { ..init_model(), state_source: StateSourceKind::SnapshotFile, }
   assert_true(
     refreshed_state_source(model, model.projection_snapshot) ==
     StateSourceKind::SnapshotFile,

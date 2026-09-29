@@ -14,7 +14,7 @@ fn context_spec(
     ..pages,
     policy_type_output_path(book_type),
   ]
-  { book_type, pages: include_policy_context_pages(book_type, context_pages) }
+  { book_type, pages: include_policy_context_pages(book_type, context_pages), }
 }
 
 ///|

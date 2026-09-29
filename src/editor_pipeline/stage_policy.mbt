@@ -172,5 +172,5 @@ fn pipeline_stage(
   summary : String,
   evidence : String,
 ) -> EditorPipelineStage {
-  { id, title, status, summary, evidence }
+  { id, title, status, summary, evidence, }
 }

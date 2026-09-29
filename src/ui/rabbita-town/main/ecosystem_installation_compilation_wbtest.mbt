@@ -7,11 +7,11 @@ test "accepted custom Place outside every parcel remains a visible rejection" {
     kind: EcosystemCustomBuilding,
     district: "test",
     style: "custom-lab",
-    footprint: { x: 20, y: 20, width: 2, depth: 2 },
+    footprint: { x: 20, y: 20, width: 2, depth: 2, },
     anchor: ecosystem_point(21, 21),
     traits: [],
-    attention: { visual: 1, social: 1, activity: 1, urgency: 1, novelty: 1 },
-    runtime: { runtime_key: None },
+    attention: { visual: 1, social: 1, activity: 1, urgency: 1, novelty: 1, },
+    runtime: { runtime_key: None, },
   }
   let snapshot : EcosystemWorldSnapshot = {
     schema: ecosystem_world_schema(),

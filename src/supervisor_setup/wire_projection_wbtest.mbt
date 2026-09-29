@@ -19,7 +19,7 @@ async test "profile GET emits optional identity and consent as scalar or null" {
 
   let absent = {
     ..application.load_store().profiles[0],
-    identity: { display_name: "Aster", avatar_url: None },
+    identity: { display_name: "Aster", avatar_url: None, },
     consent: {
       ..application.load_store().profiles[0].consent,
       confirmed_at_ms: None,

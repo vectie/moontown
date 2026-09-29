@@ -69,8 +69,8 @@ fn secret_compute_room_fallback() -> SecretComputeRoomProjection {
       local_control_plane: "LunaNexa",
       claim: "read-only redacted projection",
     },
-    gateway: { state: "unreachable", active_targets: [], model_count: 0 },
-    local_cluster: { configured: false, state: "not-configured", machines: [] },
+    gateway: { state: "unreachable", active_targets: [], model_count: 0, },
+    local_cluster: { configured: false, state: "not-configured", machines: [], },
     remote_routes: [
       {
         id: "codex",
@@ -506,9 +506,11 @@ fn render_secret_compute_room(
       ),
     ]),
     render_secret_compute_graphical_scene(dispatch, model, projection),
+    render_spatial_work_journey(dispatch, model),
     render_secret_compute_evidence(
       projection,
       model.secret_compute_room_selected_id,
     ),
+    render_spatial_overlays(dispatch, model),
   ])
 }

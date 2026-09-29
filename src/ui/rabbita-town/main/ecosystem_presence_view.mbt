@@ -126,7 +126,11 @@ fn ecosystem_presence_provenance_groups(
     })
   }
   if local_count > 0 {
-    groups.push({ label: "LOCAL · USER", tone: "is-local", count: local_count })
+    groups.push({
+      label: "LOCAL · USER",
+      tone: "is-local",
+      count: local_count,
+    })
   }
   if wenyu_count > 0 {
     groups.push({

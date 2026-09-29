@@ -152,7 +152,7 @@ pub fn marketplace_upsert_agent_draft(
     updated_at_ms: now_ms,
     version,
   })
-  { ..state, agent_listings: listings, version: state.version + 1 }
+  { ..state, agent_listings: listings, version: state.version + 1, }
 }
 
 ///|
@@ -237,7 +237,7 @@ pub fn marketplace_upsert_building_draft(
     updated_at_ms: now_ms,
     version,
   })
-  { ..state, building_listings: listings, version: state.version + 1 }
+  { ..state, building_listings: listings, version: state.version + 1, }
 }
 
 ///|
@@ -275,9 +275,9 @@ fn transition_lifecycle(
         review_summary,
       }
     PublicationShared =>
-      { ..current, state: target, shared_at_ms: Some(now_ms) }
+      { ..current, state: target, shared_at_ms: Some(now_ms), }
     PublicationSubmitted =>
-      { ..current, state: target, submitted_at_ms: Some(now_ms) }
+      { ..current, state: target, submitted_at_ms: Some(now_ms), }
     PublicationPublished =>
       {
         ..current,
@@ -287,7 +287,7 @@ fn transition_lifecycle(
         review_summary,
       }
     PublicationArchived =>
-      { ..current, state: target, archived_at_ms: Some(now_ms) }
+      { ..current, state: target, archived_at_ms: Some(now_ms), }
   }
 }
 
@@ -357,7 +357,7 @@ pub fn marketplace_transition_listing(
       if !found {
         fail("agent listing not found")
       }
-      { ..state, agent_listings: listings, version: state.version + 1 }
+      { ..state, agent_listings: listings, version: state.version + 1, }
     }
     BuildingListing => {
       let listings : Array[BuildingListingRecord] = []
@@ -403,7 +403,7 @@ pub fn marketplace_transition_listing(
       if !found {
         fail("building listing not found")
       }
-      { ..state, building_listings: listings, version: state.version + 1 }
+      { ..state, building_listings: listings, version: state.version + 1, }
     }
   }
 }

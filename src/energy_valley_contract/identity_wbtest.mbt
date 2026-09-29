@@ -8,8 +8,8 @@ test "private ID normalization is idempotent and Unicode-safe" {
 ///|
 test "attention signal expiry uses a half-open tick interval" {
   let signal = AttentionSignal::{
-    id: { value: "attention-signal/test" },
-    target_id: { value: "attention-target/test" },
+    id: { value: "attention-signal/test", },
+    target_id: { value: "attention-target/test", },
     source_id: None,
     kind: Ambient,
     intensity_per_mille: 1,

@@ -204,7 +204,7 @@ fn energy_valley_road_block_layout(
       })
     }
   }
-  { blocks, regions, block_by_tile, region_by_tile }
+  { blocks, regions, block_by_tile, region_by_tile, }
 }
 
 ///|

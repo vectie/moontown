@@ -13,7 +13,8 @@ const assetRoot = path.resolve(frontendRoot, '../assets')
 const distRoot = path.join(frontendRoot, 'dist')
 // The governed spatial layers include two transparent authored prop atlases.
 // Keep their release cost inside a narrow, explicit ceiling.
-const MAX_DIST_BYTES = 69 * 1024 * 1024
+// Add the preserved offline Three.js studio and its pinned vendor modules.
+const MAX_DIST_BYTES = 72 * 1024 * 1024
 const REQUIRED_BROWSER_FILES = [
   'index.html',
   'viewport.html',
@@ -44,6 +45,7 @@ const FORBIDDEN_RELEASE_FILES = new Set([
   'editor-pipeline.json',
   'live-autonomy.json',
   'live-digest.md',
+  'landmark-studio/interior-reference.jpg',
   'module-projections.json',
   'moondesk-bridge.json',
   'operator-requests.json',
@@ -119,6 +121,11 @@ for (const relativePath of distPathSet) {
     assert.equal(searchable.includes(segment), false, relativePath)
   }
 }
+
+const interiorHtml = await readFile(
+  path.join(distRoot, 'landmark-studio/interior.html'), 'utf8',
+)
+assert.doesNotMatch(interiorHtml, /interior-reference\.jpg/)
 
 const html = await readFile(path.join(distRoot, 'index.html'), 'utf8')
 assert.match(html, /MoonTown · 能源谷/)

@@ -116,7 +116,7 @@ test "Wenyu buildings occupy one dry road block with shared spacing" {
           }
           assert_false(ambient_blocks.contains(identity.0))
           ambient_blocks[identity.0] = true
-          placed_footprints.push({ x, y, width, height: depth })
+          placed_footprints.push({ x, y, width, height: depth, })
           let building_id = world.tiles[y][x].building_id
           assert_true(
             building_id.unwrap_or("").has_prefix("ambient-wenyu-\{identity.0}-"),

@@ -793,7 +793,7 @@ fn bind_miniapp_supervisor_draft(
     fail("supervisor binding must select one currently installed MoonBook")
   }
   let book_id = draft.book_ids[0]
-  { ..draft, workspace_id: book_id, building_id: book_id }
+  { ..draft, workspace_id: book_id, building_id: book_id, }
 }
 
 ///|

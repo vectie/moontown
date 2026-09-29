@@ -2,7 +2,7 @@
 async test "book template request inbox reports empty ledger through shared summary" {
   let base = "/tmp/moontown-book-template-empty-request-wbtest"
   let request_path = "\{base}/book-template-requests.json"
-  save_request_ledger(request_path, { requests: [] })
+  save_request_ledger(request_path, { requests: [], })
   assert_eq(
     process_book_template_requests(request_path~),
     "Processed 0 book template request(s); reconciled_events=0 pending=0 installed=0 failed=0.",

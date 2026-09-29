@@ -439,7 +439,7 @@ fn phone_send_model(model : Model) -> Model {
     text: reply,
     tick: model.tick,
   })
-  let next = { ..replied, phone_draft: "" }
+  let next = { ..replied, phone_draft: "", }
   let next = track_event(next, "phone_send", contact)
   let next = track_event(next, "phone_receive", contact)
   complete_quest(next, "first-chat")
@@ -784,7 +784,7 @@ fn render_phone_panel(dispatch : Dispatch[Msg], model : Model) -> @rabbita.Html 
             class="phone-panel-mode",
             if guide_contact {
               if policy_context {
-                "Policy Hall · 昌平青创政策问答"
+                "Policy Hall · 昌平政策问答"
               } else {
                 "Moonclaw Guide · 真实本地 Agent"
               }
@@ -853,7 +853,7 @@ fn render_phone_panel(dispatch : Dispatch[Msg], model : Model) -> @rabbita.Html 
                 [
                   span(class="phone-policy-context-title", "答复边界"),
                   span(
-                    "依据昌平青创政策 MoonBook；区分官网确认、现场 OCR 与待复核项。信息导航不等于审批意见。",
+                    "现有专题资料以青年创业为主，其他领域需补充来源；区分官网确认、现场 OCR 与待复核项。信息导航不等于审批意见。",
                   ),
                 ],
               )
@@ -867,7 +867,7 @@ fn render_phone_panel(dispatch : Dispatch[Msg], model : Model) -> @rabbita.Html 
                   id="moonclaw-guide-composer-label",
                   class="phone-composer-label",
                   if policy_context {
-                    "描述你的情况，询问昌平青创政策"
+                    "描述你的本地议题，询问昌平政策"
                   } else {
                     "问小爪关于 MoonTown 的问题"
                   },
@@ -877,7 +877,7 @@ fn render_phone_panel(dispatch : Dispatch[Msg], model : Model) -> @rabbita.Html 
                     id="phone-draft-input",
                     class="phone-input",
                     placeholder=if policy_context {
-                      "例如：我 29 岁，硕士，在昌注册公司 8 个月…"
+                      "例如：社区养老服务不足，应先收集哪些证据？"
                     } else {
                       "例如：我接下来该做什么？"
                     },
@@ -898,7 +898,7 @@ fn render_phone_panel(dispatch : Dispatch[Msg], model : Model) -> @rabbita.Html 
                       .disabled(model.moonclaw_guide_pending)
                       .aria_label(
                         if policy_context {
-                          "发送昌平青年创新创业政策问题"
+                          "发送昌平政策问题"
                         } else {
                           "发送问题给 Moonclaw Guide"
                         },

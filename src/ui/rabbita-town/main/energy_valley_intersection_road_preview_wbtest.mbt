@@ -153,17 +153,17 @@ test "intersection road preview building geometry owns its anchor and depth" {
     }),
   )
   assert_false(
-    intersection_road_preview_building_geometry_valid({ ..building, x: 252 }),
+    intersection_road_preview_building_geometry_valid({ ..building, x: 252, }),
   )
   assert_false(
-    intersection_road_preview_building_geometry_valid({ ..building, width: 0 }),
+    intersection_road_preview_building_geometry_valid({ ..building, width: 0, }),
   )
   assert_false(
-    intersection_road_preview_building_geometry_valid({ ..building, width: 4 }),
+    intersection_road_preview_building_geometry_valid({ ..building, width: 4, }),
   )
   let equal_depth = [
-    { ..building, id: "preview-building-z" },
-    { ..building, id: "preview-building-a" },
+    { ..building, id: "preview-building-z", },
+    { ..building, id: "preview-building-a", },
   ]
   intersection_road_preview_sort_equal_depth(equal_depth)
   assert_eq(equal_depth[0].id, "preview-building-a")
@@ -303,6 +303,6 @@ test "intersection road presentation keeps user planted road fixtures" {
     @energy_valley_contract.Tree,
     ["road-mask:2"],
   )
-  let fixture = { ..fixture, provenance: ecosystem_contract_provenance(true) }
+  let fixture = { ..fixture, provenance: ecosystem_contract_provenance(true), }
   assert_true(intersection_road_preview_installation_visible(fixture))
 }

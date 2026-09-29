@@ -1,0 +1,17 @@
+{
+  "schema":"moontown.wenyu_lower_image_picks.v1",
+  "status":"Provisional visual/topological matches, frozen before refit; not surveyed",
+  "image":"src/ui/assets/tilemap/wenyu_topdown_semantic.png",
+  "imageSize":[1672,941],
+  "points":[
+    {"id":"BL1","pixel":{"x":72,"y":735},"radiusPixels":25,"holdout":true,"region":"bottom-left","confidence":"low","evidence":"Candidate west junction of the cross-town corridor leading east to S4; the design shifts the corridor around the lower edge of a large green block, unlike current OSM. Diagnostic only: do not force the fit through this uncertain layout correspondence."},
+    {"id":"BL2","pixel":{"x":103,"y":633},"radiusPixels":20,"holdout":true,"region":"bottom-left","confidence":"low","evidence":"Candidate northern west-side T junction above BL1. The two current parallel road crossings have a very different separation in the design; exact identity is unresolved. Excluded from fitting."},
+    {"id":"BL4","pixel":{"x":335,"y":918},"radiusPixels":18,"holdout":false,"region":"bottom-left","confidence":"provisional","evidence":"Southern Litang corridor junction below S4, near the lower image edge. Manual center of the continuing main road and the lower transverse street; not an exact surveyed center."},
+    {"id":"BR1","pixel":{"x":1184,"y":727},"previousPixel":{"x":1165,"y":727},"radiusPixels":8,"holdout":false,"region":"bottom-right","confidence":"provisional","evidence":"Science City Road traced south from R7/S6 to the lower east-west campus corridor. The pure-image 3x crop places the actual broad junction at (1184,727); the initial overview pick was west of the road."},
+    {"id":"BR4","pixel":{"x":1361,"y":785},"previousPixel":{"x":1322,"y":784},"radiusPixels":8,"holdout":false,"region":"bottom-right","confidence":"provisional","evidence":"Eastern end of the same campus corridor at its curved north-south perimeter road. The pure-image 3x crop places the road junction at (1361,785), not inside the building block at the initial overview pick."},
+    {"id":"BR7","pixel":{"x":1135,"y":866},"previousPixel":{"x":1115,"y":859},"radiusPixels":8,"holdout":false,"region":"bottom-right","confidence":"provisional","evidence":"Southern continuation of Science City Road meeting the lower perimeter corridor. Broad junction centered from the pure-image 3x crop, independently of predicted coordinates."},
+    {"id":"BR8","pixel":{"x":1204,"y":888},"previousPixel":{"x":1190,"y":880},"radiusPixels":10,"holdout":true,"region":"bottom-right","confidence":"provisional","evidence":"Science City East Road meeting the lower campus perimeter between BR7 and BR10; first narrower T junction east of BR7. Pixel refined from pure-image 3x crop. Remains validation-only, never used to fit."},
+    {"id":"BR10","pixel":{"x":1258,"y":902},"previousPixel":{"x":1265,"y":901},"radiusPixels":10,"holdout":false,"region":"bottom-right","confidence":"provisional","evidence":"Next lower-perimeter T junction east of BR8, where Luduan Road terminates. Center refined from pure-image 3x crop rather than model prediction."}
+  ],
+  "notSelected":[{"id":"BR9","reason":"Current Jingcheng–Dingsi crossing has no unambiguous matching junction in the simplified design highway/ramp layout; do not invent a terrain anchor."}]
+}

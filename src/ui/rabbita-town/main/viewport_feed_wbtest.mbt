@@ -3,7 +3,7 @@ fn test_visual_projection_snapshot(
   tick? : Int = 7,
   messages? : Array[String] = [],
 ) -> VisualProjectionSnapshot {
-  { tick, agents: [], buildings: [], modules: None, messages }
+  { tick, agents: [], buildings: [], modules: None, messages, }
 }
 
 ///|
@@ -20,7 +20,7 @@ test "optional feed item push reports whether it changed the feed" {
   assert_true(
     push_optional_feed_item(
       feed,
-      Some({ title: "Town event", detail: "Worker arrived", tone: "calm" }),
+      Some({ title: "Town event", detail: "Worker arrived", tone: "calm", }),
     ),
   )
   assert_eq(feed.length(), 1)
@@ -32,11 +32,11 @@ test "optional feed item push reports whether it changed the feed" {
 ///|
 test "feed item appender returns number of appended items" {
   let feed : Array[FeedItem] = [
-    { title: "Existing", detail: "base", tone: "calm" },
+    { title: "Existing", detail: "base", tone: "calm", },
   ]
   let appended = push_feed_items(feed, [
-    { title: "First", detail: "one", tone: "neutral" },
-    { title: "Second", detail: "two", tone: "hot" },
+    { title: "First", detail: "one", tone: "neutral", },
+    { title: "Second", detail: "two", tone: "hot", },
   ])
   assert_eq(appended, 2)
   assert_eq(feed.length(), 3)

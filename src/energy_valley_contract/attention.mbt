@@ -117,5 +117,5 @@ pub fn attention_focus(
   strength_per_mille : Int,
   since_tick : Int,
 ) -> AttentionFocus {
-  { actor_id, target_id, strength_per_mille, since_tick }
+  { actor_id, target_id, strength_per_mille, since_tick, }
 }

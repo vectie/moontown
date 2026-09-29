@@ -1,0 +1,213 @@
+{
+  "schema": "moontown.wenyu_common_osm_affines.v1",
+  "runtimeEligible": false,
+  "crs": "EPSG:32650, easting/northing metres; source images native pixels x right/y down",
+  "formula": "osm = osmCenter + L * (imagePixel - imageCenter); matrices encode the same centered fit as [a b tx; c d ty; 0 0 1]",
+  "controlSource": "docs/project/wenyu-osm-chain-controls.json; unchanged A/Q/X/C fit, G excluded",
+  "quality": "Provisional image picks and geographic coordinates. OSM feature identity checks do not make pixel picks surveyed controls.",
+  "originalToOsm": {
+    "matrix": {
+      "a": -1.485125983129528,
+      "b": 10.297558322053312,
+      "tx": 449493.6680688394,
+      "c": 3.855946127906126,
+      "d": -8.698110359166433,
+      "ty": 4441688.338773373
+    },
+    "source_center": {
+      "x": 1479.25,
+      "y": 588.75
+    },
+    "osm_center": {
+      "x": 453359.48292040394,
+      "y": 4442271.234609119
+    },
+    "source_covariance_condition": 98.86228546355935
+  },
+  "generatedToOsm": {
+    "matrix": {
+      "a": 13.456584100248987,
+      "b": -5.56681183918316,
+      "tx": 439762.1752787131,
+      "c": -12.643147898534984,
+      "d": 9.152334981206323,
+      "ty": 4453429.742181286
+    },
+    "source_center": {
+      "x": 1181,
+      "y": 412.25
+    },
+    "osm_center": {
+      "x": 453359.48292040394,
+      "y": 4442271.234609119
+    },
+    "source_covariance_condition": 2224.5938723857216
+  },
+  "osmToGenerated": {
+    "a": 0.17341475844091925,
+    "b": 0.10547770949821123,
+    "tx": -545998.8200139026,
+    "c": 0.23955727617699987,
+    "d": 0.25496993783295907,
+    "ty": -1240838.9333828546
+  },
+  "originalToGeneratedViaOsm": {
+    "a": 0.14917360190129492,
+    "b": 0.8682918313026142,
+    "tx": 449.12813370814547,
+    "c": 0.6273776092212653,
+    "d": 0.2490983653640062,
+    "ty": -662.4549910486676
+  },
+  "composition": "inverse(generatedToOsm) * originalToOsm",
+  "originalDeterminant": -26.789040440282793,
+  "generatedDeterminant": 52.777139982145385,
+  "relativeOrientationPreserved": false,
+  "acceptance": "Rejected for live use: opposite fitted orientations, poorly spread image controls and large excluded-point residual. Need independent off-river geographic correspondences, not additional points on the same bridge chain.",
+  "originalFitRmsMetres": 230.96639716886588,
+  "generatedFitRmsMetres": 244.99639853196783,
+  "originalHoldoutRmsMetres": 163.65205264152988,
+  "generatedHoldoutRmsMetres": 1033.8061219795093,
+  "residuals": [
+    {
+      "id": "A-Litang-Wenyu",
+      "fit": true,
+      "originalMetres": 74.16853740877158,
+      "generatedMetres": 109.68098078553388,
+      "relativeGeneratedPixels": 17.558581729185793
+    },
+    {
+      "id": "Q-Qinbei-Wenyu",
+      "fit": true,
+      "originalMetres": 288.81368975618255,
+      "generatedMetres": 214.869755950547,
+      "relativeGeneratedPixels": 46.84123740562331
+    },
+    {
+      "id": "X-ScienceCityEast-Wenyu",
+      "fit": true,
+      "originalMetres": 332.52394877136817,
+      "generatedMetres": 244.35819482405972,
+      "relativeGeneratedPixels": 26.808788277736973
+    },
+    {
+      "id": "C-Jingcheng-Wenyu",
+      "fit": true,
+      "originalMetres": 117.87879642338089,
+      "generatedMetres": 349.54696998907286,
+      "relativeGeneratedPixels": 32.88936849074647
+    },
+    {
+      "id": "G-ScienceCityRoad-Wenyu",
+      "fit": false,
+      "originalMetres": 163.65205264152988,
+      "generatedMetres": 1033.8061219795093,
+      "relativeGeneratedPixels": 63.32727772217939
+    }
+  ],
+  "controlsMetric": [
+    {
+      "id": "A-Litang-Wenyu",
+      "original": {
+        "x": 1080,
+        "y": 144
+      },
+      "generated": {
+        "x": 728,
+        "y": 35
+      },
+      "osm": {
+        "x": 449311.5031368104,
+        "y": 4444642.310475382
+      },
+      "weight": 1,
+      "fit": true
+    },
+    {
+      "id": "Q-Qinbei-Wenyu",
+      "original": {
+        "x": 1420,
+        "y": 593
+      },
+      "generated": {
+        "x": 1202,
+        "y": 415
+      },
+      "osm": {
+        "x": 453729.0772988775,
+        "y": 4441841.951176721
+      },
+      "weight": 1,
+      "fit": true
+    },
+    {
+      "id": "X-ScienceCityEast-Wenyu",
+      "original": {
+        "x": 1627,
+        "y": 780
+      },
+      "generated": {
+        "x": 1344,
+        "y": 562
+      },
+      "osm": {
+        "x": 454835.6324536791,
+        "y": 4441366.086686204
+      },
+      "weight": 1,
+      "fit": true
+    },
+    {
+      "id": "C-Jingcheng-Wenyu",
+      "original": {
+        "x": 1790,
+        "y": 838
+      },
+      "generated": {
+        "x": 1450,
+        "y": 637
+      },
+      "osm": {
+        "x": 455561.71879224863,
+        "y": 4441234.590098168
+      },
+      "weight": 1,
+      "fit": true
+    },
+    {
+      "id": "G-ScienceCityRoad-Wenyu",
+      "original": {
+        "x": 1509,
+        "y": 690
+      },
+      "generated": {
+        "x": 1250,
+        "y": 515
+      },
+      "osm": {
+        "x": 454211.59673092415,
+        "y": 4441431.991225561
+      },
+      "weight": 1,
+      "fit": false
+    }
+  ],
+  "edgesPreserved": 775,
+  "verticesPreserved": 3980,
+  "osmReferenceProvenance": {
+    "source": "OpenStreetMap",
+    "sourceUrl": "https://www.openstreetmap.org/#map=13/40.1154/116.4358",
+    "license": "ODbL-1.0",
+    "timestampOsmBase": "2026-08-10T09:55:05Z"
+  },
+  "osmStorageToMetric": {
+    "a": 34.87150903554578,
+    "b": 14.747831969155497,
+    "tx": 446398.1565081175,
+    "c": 14.747831969155497,
+    "d": -34.87150903554578,
+    "ty": 4441345.997814704
+  },
+  "osmApiIdentityCheck": "https://api.openstreetmap.org/api/0.6/way/991390168/full.json; retrieved 2026-09-05/06, name 未来科学城东路桥",
+  "display": "Both panels use identical north-up metric camera centered at shared OSM control centroid, width 12000m, height 8302.702702702703m. Display crop only; all road paths retained."
+}

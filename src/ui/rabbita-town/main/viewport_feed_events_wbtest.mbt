@@ -186,7 +186,7 @@ test "recent event feed items keeps newest visible events and dedupes daemon" {
 ///|
 test "push recent event messages delegates to event feed projection" {
   let feed : Array[FeedItem] = [
-    { title: "Existing", detail: "base", tone: "calm" },
+    { title: "Existing", detail: "base", tone: "calm", },
   ]
   push_recent_event_messages(feed, recent_event_projection_test_events())
   assert_eq(feed.length(), 7)

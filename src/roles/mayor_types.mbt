@@ -11,7 +11,7 @@ pub fn MayorGoalLane::new(
   objective~ : String,
   rationale~ : String,
 ) -> MayorGoalLane {
-  { entry, objective, rationale }
+  { entry, objective, rationale, }
 }
 
 ///|
@@ -41,7 +41,7 @@ pub fn MayorGoalPlan::new(
   summary~ : String,
   lanes~ : Array[MayorGoalLane],
 ) -> MayorGoalPlan {
-  { output_contract, prompt, parallelizable, summary, lanes }
+  { output_contract, prompt, parallelizable, summary, lanes, }
 }
 
 ///|

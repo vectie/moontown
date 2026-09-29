@@ -21,7 +21,7 @@ test "default valley is generated from the authored JSON migration process" {
 
 ///|
 test "connected road placement uses the reference bridge price and park rejects water" {
-  let base = { ..init_model(), energy_weather: Sunny }
+  let base = { ..init_model(), energy_weather: Sunny, }
   let seed = 20260727
   let world = ecosystem_contract_world_for_model(base, seed)
   let mut water = None
@@ -56,7 +56,7 @@ test "connected road placement uses the reference bridge price and park rejects 
     .floor()
     .to_int()
   let bridge = energy_valley_canvas_click_model(
-    { ..base, energy_tool: RoadTool },
+    { ..base, energy_tool: RoadTool, },
     screen_x,
     screen_y,
   )
@@ -64,7 +64,7 @@ test "connected road placement uses the reference bridge price and park rejects 
   assert_eq(bridge.energy_toast, "新桥贯通温榆河（-120）")
   assert_eq(energy_valley_model_roads(bridge).length(), 1)
   let park = energy_valley_canvas_click_model(
-    { ..base, energy_tool: ParkTool },
+    { ..base, energy_tool: ParkTool, },
     screen_x,
     screen_y,
   )

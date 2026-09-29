@@ -116,7 +116,7 @@ pub fn account_register_session(
     revoked: false,
     version: state.version + 1,
   })
-  { ..state, principals, sessions, version: state.version + 1 }
+  { ..state, principals, sessions, version: state.version + 1, }
 }
 
 ///|
@@ -151,7 +151,7 @@ pub fn account_switch_session_tenant(
   if !found {
     fail("missing, expired, or revoked account session")
   }
-  { ..state, sessions, version: state.version + 1 }
+  { ..state, sessions, version: state.version + 1, }
 }
 
 ///|
@@ -178,7 +178,7 @@ pub fn account_revoke_session(
   if !found {
     fail("missing, expired, or revoked account session")
   }
-  { ..state, sessions, version: state.version + 1 }
+  { ..state, sessions, version: state.version + 1, }
 }
 
 ///| Remove sessions that cannot resolve to an active principal. Revocation is
@@ -203,6 +203,6 @@ pub fn account_prune_sessions(
   if sessions.length() == state.sessions.length() {
     state
   } else {
-    { ..state, sessions, version: state.version + 1 }
+    { ..state, sessions, version: state.version + 1, }
   }
 }

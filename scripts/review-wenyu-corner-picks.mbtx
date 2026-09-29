@@ -1,0 +1,28 @@
+import {
+  "moonbitlang/x@0.4.40/fs",
+  "moonbitlang/core/encoding/base64",
+  "moonbitlang/core/env",
+}
+
+///|
+fn main raise {
+  let source = @env.get_env_var("WENYU_REFERENCE_IMAGE").unwrap_or("")
+  if source == "" { fail("set WENYU_REFERENCE_IMAGE to the private planning image") }
+  let original = @base64.encode(@fs.read_file_to_bytes(source))
+  let generated = @base64.encode(@fs.read_file_to_bytes("src/ui/assets/tilemap/wenyu_topdown_semantic.png"))
+  let svg = StringBuilder()
+  svg.write_string("<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 1800 1450'><rect width='1800' height='1450' fill='#182a29'/><style>text{font:20px system-ui;fill:white;paint-order:stroke;stroke:#182a29;stroke-width:3px}</style><defs><image id='original' href='data:image/jpeg;base64,\{original}' width='2274' height='1280'/><image id='generated' href='data:image/png;base64,\{generated}' width='1672' height='941'/></defs>")
+  let views = [("Original west-to-east road context", "original", "400 200 1500 900", 0, 0), ("Generated west-to-east road context", "generated", "350 260 1200 650", 900, 0), ("Original corrected SW candidate", "original", "470 280 320 250", 0, 750), ("Generated corrected SW candidate", "generated", "420 330 270 220", 900, 750)]
+  for entry in views {
+    let (title,id,view,x,y) = entry
+    svg.write_string("<text x='\{x+20}' y='\{y+35}'>\{title} · native pixel coordinates</text><svg x='\{x+20}' y='\{y+50}' width='860' height='640' viewBox='\{view}'><use href='#\{id}'/>")
+    for xx in 0..<23 {
+      for yy in 0..<13 {
+        svg.write_string("<circle cx='\{xx*100}' cy='\{yy*100}' r='1' fill='red'/><text style='font-size:7px;stroke-width:1px' x='\{xx*100+3}' y='\{yy*100}'>\{xx*100},\{yy*100}</text>")
+      }
+    }
+    svg.write_string("</svg>")
+  }
+  svg.write_string("</svg>")
+  @fs.write_string_to_file("src/ui/rabbita-town/dist/wenyu-corner-detail.svg",svg.to_string())
+}

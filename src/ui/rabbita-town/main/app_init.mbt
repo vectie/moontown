@@ -35,21 +35,34 @@ fn initial_request_composer() -> RequestComposerFocus {
 
 ///|
 fn initial_town_spatial_layer() -> TownSpatialLayer {
-  match current_browser_query_param("layer") {
-    "compute" => TownSpatialLayer::Underground(None)
-    "indoor" => {
-      let building_id = current_browser_query_param("building")
-        .trim()
-        .to_owned()
-      match
+  town_spatial_layer_for_route(
+    current_browser_query_param("layer"),
+    current_browser_query_param("building"),
+  )
+}
+
+///|
+fn town_spatial_layer_for_route(
+  layer : String,
+  building_id : String,
+) -> TownSpatialLayer {
+  match layer {
+    "compute" =>
+      TownSpatialLayer::Underground(
         golden_valley_building_for_identity(
           golden_valley_buildings(active_energy_valley_seed()),
           building_id,
+        ),
+      )
+    "indoor" =>
+      match
+        golden_valley_building_for_identity(
+          golden_valley_buildings(active_energy_valley_seed()),
+          building_id.trim().to_owned(),
         ) {
         Some(building) => TownSpatialLayer::Indoor(building)
         None => TownSpatialLayer::Outdoor
       }
-    }
     _ => TownSpatialLayer::Outdoor
   }
 }
@@ -103,6 +116,9 @@ fn init_model() -> Model {
     energy_first_agent_open: false,
     town_spatial_layer: initial_town_spatial_layer(),
     secret_compute_room_selected_id: "moongate",
+    indoor_selected_slot_id: "",
+    spatial_selected_work_id: current_browser_query_param("work"),
+    spatial_request_id: current_browser_query_param("work-request"),
     visual_projection,
     visual_projection_version: visual_projection_version(),
     module_projections,
@@ -162,7 +178,9 @@ fn init_model() -> Model {
     energy_reset_open: false,
     energy_status_open: false,
     energy_intro_open: town_life.player is None &&
-    !browser_energy_valley_intro_seen(),
+    !browser_energy_valley_intro_seen() &&
+    current_browser_query_param("area").is_empty() &&
+    current_browser_query_param("layer").is_empty(),
     energy_request_open: false,
     resident_explorer_open: false,
     resident_query: "",

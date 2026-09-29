@@ -128,5 +128,5 @@ fn town_shell_base_health(worker : WorkerSim?) -> Int {
 
 ///|
 fn town_shell_worker_health_policy() -> CivicWorkerEnergyHealthPolicy {
-  { fallback: 48, load_divisor: 4, energy_bonus: 18 }
+  { fallback: 48, load_divisor: 4, energy_bonus: 18, }
 }

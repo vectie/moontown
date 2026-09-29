@@ -520,7 +520,7 @@ fn golden_valley_reposition_custom_building(
   x : Int,
   y : Int,
 ) -> GoldenValleyBuilding {
-  { ..building, x, y }
+  { ..building, x, y, }
 }
 
 ///|
@@ -632,7 +632,7 @@ fn golden_valley_place_custom_building_model(
     Some(requested) => {
       let cost = golden_valley_tool_cost(model.energy_tool)
       if energy_valley_model_budget(model) < cost {
-        { ..model, energy_toast: "预算不足" }
+        { ..model, energy_toast: "预算不足", }
       } else {
         match golden_valley_tile_placement_block(model, x, y) {
           Some(block) =>
@@ -697,13 +697,13 @@ fn golden_valley_place_road_model(model : Model, x : Int, y : Int) -> Model {
   )
   let footprint = golden_valley_contract_tile_footprint(x, y)
   if !golden_valley_contract_polygon_in_bounds(world, footprint) {
-    return { ..model, energy_toast: "这里不在能源谷范围内" }
+    return { ..model, energy_toast: "这里不在能源谷范围内", }
   }
   if golden_valley_contract_road_node_at(world, x, y) is Some(_) {
-    return { ..model, energy_toast: "已是道路" }
+    return { ..model, energy_toast: "已是道路", }
   }
   if golden_valley_contract_place_at(world, x, y) is Some(_) {
-    return { ..model, energy_toast: "先拆除建筑或设施" }
+    return { ..model, energy_toast: "先拆除建筑或设施", }
   }
   let terrain = ecosystem_contract_terrain_kind_at(world, x, y)
   let cost = match terrain {
@@ -724,12 +724,12 @@ fn golden_valley_place_road_model(model : Model, x : Int, y : Int) -> Model {
         energy_toast: "道路仅可铺在自然地表或河面",
       }
     Some(@energy_valley_contract.Wetland) =>
-      return { ..model, energy_toast: "湿地保护区不可铺路" }
+      return { ..model, energy_toast: "湿地保护区不可铺路", }
     Some(@energy_valley_contract.Restricted) | None =>
-      return { ..model, energy_toast: "这里不在可铺路区域内" }
+      return { ..model, energy_toast: "这里不在可铺路区域内", }
   }
   if energy_valley_model_budget(model) < cost {
-    return { ..model, energy_toast: "预算不足" }
+    return { ..model, energy_toast: "预算不足", }
   }
   let key = golden_valley_tile_key(x, y)
   let current_roads = energy_valley_model_roads(model)
@@ -773,7 +773,7 @@ fn golden_valley_place_park_model(model : Model, x : Int, y : Int) -> Model {
   )
   let footprint = golden_valley_contract_tile_footprint(x, y)
   if !golden_valley_contract_polygon_in_bounds(world, footprint) {
-    return { ..model, energy_toast: "这里不在能源谷范围内" }
+    return { ..model, energy_toast: "这里不在能源谷范围内", }
   }
   if golden_valley_contract_user_park_at(world, x, y) {
     return model
@@ -782,7 +782,7 @@ fn golden_valley_place_park_model(model : Model, x : Int, y : Int) -> Model {
     golden_valley_contract_place_at(world, x, y) is Some(_) ||
     ecosystem_contract_terrain_kind_at(world, x, y) !=
     Some(@energy_valley_contract.Meadow) {
-    return { ..model, energy_toast: "仅可改造草地、草甸或农田" }
+    return { ..model, energy_toast: "仅可改造草地、草甸或农田", }
   }
   if golden_valley_contract_buildable_parcel_for(world, footprint) is None {
     return {
@@ -791,7 +791,7 @@ fn golden_valley_place_park_model(model : Model, x : Int, y : Int) -> Model {
     }
   }
   if energy_valley_model_budget(model) < 20 {
-    return { ..model, energy_toast: "预算不足" }
+    return { ..model, energy_toast: "预算不足", }
   }
   let with_park = energy_valley_model_add_park_delta(
     model,
@@ -799,7 +799,7 @@ fn golden_valley_place_park_model(model : Model, x : Int, y : Int) -> Model {
     y,
     energy_valley_model_budget(model) - 20,
   )
-  let candidate = { ..with_park, energy_toast: "造林已完成（-20）" }
+  let candidate = { ..with_park, energy_toast: "造林已完成（-20）", }
   if golden_valley_canonical_park_active(candidate, x, y) {
     candidate
   } else {
@@ -856,7 +856,7 @@ fn golden_valley_demolish_at_model(model : Model, x : Int, y : Int) -> Model {
   let removable_park = golden_valley_contract_user_park_at(world, x, y) &&
     energy_valley_model_parks(model).contains(key)
   if removed is None && !removable_road && !removable_park {
-    return { ..model, energy_toast: "这里没有可拆除的内容" }
+    return { ..model, energy_toast: "这里没有可拆除的内容", }
   }
   let after_building = match removed {
     Some(building) =>
@@ -921,13 +921,13 @@ fn energy_valley_canvas_click_model(
     InspectTool =>
       match golden_valley_canvas_frame() {
         None =>
-          { ..model, energy_toast: "地图帧尚未就绪，请稍后再试" }
+          { ..model, energy_toast: "地图帧尚未就绪，请稍后再试", }
         Some(snapshot) => {
           if !golden_valley_contract_polygon_in_bounds(
               snapshot.world,
               golden_valley_contract_tile_footprint(x, y),
             ) {
-            return { ..model, energy_toast: "这里不在能源谷范围内" }
+            return { ..model, energy_toast: "这里不在能源谷范围内", }
           }
           match town_snapshot_canvas_building_at_tile(snapshot, x, y) {
             None =>
@@ -970,7 +970,7 @@ fn energy_valley_canvas_click_model(
           world,
           golden_valley_contract_tile_footprint(x, y),
         ) {
-        return { ..model, energy_toast: "这里不在能源谷范围内" }
+        return { ..model, energy_toast: "这里不在能源谷范围内", }
       }
       match model.energy_tool {
         RoadTool => golden_valley_place_road_model(model, x, y)

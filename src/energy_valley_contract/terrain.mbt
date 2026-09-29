@@ -26,5 +26,5 @@ pub fn terrain_region(
   walkable : Bool,
   provenance : Provenance,
 ) -> TerrainRegion {
-  { id, kind, boundary, walkable, provenance }
+  { id, kind, boundary, walkable, provenance, }
 }

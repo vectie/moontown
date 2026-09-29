@@ -89,6 +89,16 @@ pub fn book_template_request_job_kind() -> String {
 }
 
 ///|
+pub fn code_schedule_job_id() -> String {
+  "dispatch-code-schedules"
+}
+
+///|
+pub fn code_schedule_job_kind() -> String {
+  "code-schedule"
+}
+
+///|
 pub fn default_daemon_jobs() -> Array[ScheduledJob] {
   [
     {
@@ -121,7 +131,7 @@ pub fn default_daemon_jobs() -> Array[ScheduledJob] {
       kind: book_quality_review_job_kind(),
       interval_seconds: 1800,
     },
-    { id: health_job_id(), kind: health_job_kind(), interval_seconds: 60 },
+    { id: health_job_id(), kind: health_job_kind(), interval_seconds: 60, },
     {
       id: projection_job_id(),
       kind: projection_job_kind(),
@@ -131,6 +141,11 @@ pub fn default_daemon_jobs() -> Array[ScheduledJob] {
       id: book_template_request_job_id(),
       kind: book_template_request_job_kind(),
       interval_seconds: 30,
+    },
+    {
+      id: code_schedule_job_id(),
+      kind: code_schedule_job_kind(),
+      interval_seconds: 60,
     },
   ]
 }
@@ -196,6 +211,11 @@ pub fn scheduled_job_is_projection(job : ScheduledJob) -> Bool {
 ///|
 pub fn scheduled_job_is_book_template_request(job : ScheduledJob) -> Bool {
   job.kind == book_template_request_job_kind()
+}
+
+///|
+pub fn scheduled_job_is_code_schedule(job : ScheduledJob) -> Bool {
+  job.kind == code_schedule_job_kind()
 }
 
 ///|

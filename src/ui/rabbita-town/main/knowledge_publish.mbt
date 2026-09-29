@@ -672,7 +672,7 @@ fn knowledge_posts_with_draft(
     draft,
     stable_id.unwrap_or(""),
   )
-  { ..stamped, posts: stamped.posts + [draft] }
+  { ..stamped, posts: stamped.posts + [draft], }
 }
 
 ///|
@@ -812,7 +812,7 @@ fn knowledge_confirm_topic_model(model : Model) -> Model {
       draft,
       model.knowledge_target_site_id,
     )
-    { ..stamped, posts: stamped.posts + [draft] }
+    { ..stamped, posts: stamped.posts + [draft], }
   }
   let next = {
     ..updated,

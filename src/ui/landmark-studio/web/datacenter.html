@@ -1,0 +1,91 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+  <meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>MoonTown · 数据中心 3D</title>
+  <link rel="stylesheet" href="./datacenter.css">
+  <script type="importmap">{"imports":{"three":"./vendor/three.module.js"}}</script>
+</head>
+<body>
+  <header class="app-header">
+    <a class="brand" href="./index.html"><span class="brand-mark" aria-hidden="true">M</span><span>MoonTown <small>空间研究 / INFRASTRUCTURE</small></span></a>
+    <nav id="levels" aria-label="模型层级">
+      <button data-view="site">01 <span>园区</span></button><i aria-hidden="true">/</i>
+      <button data-view="hall">02 <span>机房</span></button><i aria-hidden="true">/</i>
+      <button data-view="rack">03 <span>机柜</span></button><i aria-hidden="true">/</i>
+      <button data-view="server">04 <span>服务器</span></button><i aria-hidden="true">/</i>
+      <button data-view="board">05 <span>主板</span></button>
+    </nav>
+    <button id="open-stats" aria-expanded="false" aria-controls="stats">统计与报告 ↗</button>
+  </header>
+  <main>
+    <aside class="inspector" aria-label="场景设备检查器">
+      <p class="eyebrow" id="chapter">DATA CENTER / 01</p>
+      <h1 id="title">一座可读的数据中心</h1>
+      <p class="intro">从一座建筑，到一块芯片。看清计算背后的空间与流动。</p>
+      <span class="mode-badge">设计研究 · 非实测设施</span>
+      <div class="section-head"><h2>当前空间</h2><span id="entity-count"></span></div>
+      <div id="entities" class="entity-list"></div>
+      <section class="selection" aria-live="polite">
+        <p class="eyebrow" id="entity-kind">EXPLORE</p><h2 id="entity-name">选择一个设备</h2>
+        <p id="entity-detail">点击模型或设备列表。拖拽环视，滚轮缩放；可从任意层级开始。</p>
+        <div class="selection-actions"><button id="focus" disabled>聚焦设备</button><button id="enter" disabled>进入下一层 →</button></div>
+      </section>
+      <div class="scope-note"><strong>实体边界</strong><p>模型机位 ≠ 真实机器位置。LunaNexa 负责机器；MoonGate 负责路由。远端 API 不虚构为本地机架。</p></div>
+      <a class="quiet-link" href="./interior.html">查看办公室研究 ↗</a>
+    </aside>
+    <section id="viewport" aria-label="交互式数据中心模型">
+      <canvas id="scene" tabindex="0" aria-label="三维模型：拖拽旋转，滚轮缩放，方向键环视，加减缩放，Home 复位，单击选择设备"></canvas>
+      <div id="loading" role="status">正在构建数据中心…</div>
+      <div class="viewport-top">
+        <div class="location"><span id="location">园区概览</span><small id="model-note">CONCEPT / NOT AS-BUILT</small></div>
+        <div class="camera-tools"><button id="reset" title="复位相机 (Home)">复位</button><button id="reverse">背面</button><button id="top">俯视</button></div>
+      </div>
+      <div id="labels" aria-label="空间标注"></div>
+      <div class="view-options">
+        <label><input id="cutaway" type="checkbox">剖开外壳</label>
+        <label><input id="show-labels" type="checkbox" checked>标注</label>
+        <label id="containment-option" hidden><input id="containment" type="checkbox" checked>通道顶罩</label>
+        <label id="explode-option" hidden title="拆解只移动散热器；流动路径对应装配位置。">拆解 <input id="explode" type="range" min="0" max="100" value="0" aria-label="散热器拆解程度"></label>
+      </div>
+      <section class="flow-dock" aria-label="系统流动">
+        <div class="flow-toolbar" role="group" aria-label="流动类型">
+          <button data-family="none" aria-pressed="true">建筑</button>
+          <button data-family="data" aria-pressed="false"><i class="dot data"></i>信号与网络</button>
+          <button data-family="power" aria-pressed="false"><i class="dot power"></i>电力</button>
+          <button data-family="cooling" aria-pressed="false"><i class="dot cooling"></i>冷却与热</button>
+          <button id="play" disabled aria-pressed="false">播放流动</button>
+        </div>
+        <div id="flow-story" hidden><div id="flow-steps"></div><p id="flow-detail"></p><small>教学路径 · 非抓包 / 电路 / CFD 仿真 <span id="flow-legend"></span></small></div>
+      </section>
+      <div class="canvas-footer"><span id="status" role="status">拖拽环视 · 滚轮缩放 · 点击设备</span><span>MoonBit geometry / Three.js</span></div>
+    </section>
+    <aside id="stats" hidden aria-label="统计与报告">
+      <header><div><p class="eyebrow">EVIDENCE & CAPACITY</p><h2>统计与报告</h2></div><button id="close-stats" aria-label="关闭统计与报告">×</button></header>
+      <div class="report-tabs" role="group" aria-label="数据模式"><button data-panel="planning" aria-pressed="true">设计容量</button><button data-panel="observed" aria-pressed="false">基础设施观测</button></div>
+      <section id="planning-panel">
+        <p class="data-note">示例设计参数，不是运行遥测。</p>
+        <div id="metrics" class="metrics"></div>
+        <label class="load-control">规划负载 <output id="load-label">60%</output><input id="load" type="range" min="0" max="100" value="60"></label>
+        <div class="capacity-bar"><span id="capacity-fill"></span></div><p id="capacity-note"></p>
+        <h3>机柜容量清单</h3><div id="rack-table"></div>
+        <h3>计算依据</h3><ul id="assumptions"></ul>
+        <p class="data-note">实际功耗、温度、吞吐与 PUE：未采集。没有历史数据时不绘制虚构趋势。</p>
+      </section>
+      <section id="observed-panel" hidden>
+        <p class="data-note">只读接入现有 MoonTown 脱敏契约。机架几何仍为设计模型。</p>
+        <div class="source-actions"><button id="refresh">读取同源服务</button><label class="file-button">导入快照<input id="snapshot" type="file" accept="application/json,.json"></label></div>
+        <p id="source-status" role="status">未连接。静态预览不提供实时服务。</p>
+        <div id="observations"></div>
+        <h3>未接入的测量</h3><p>机柜位置 / CPU 利用率 / 功率 / 进风温度 / 网络计数器 / 冷却水温 / 设施能耗。</p>
+        <p class="data-note">GET /secret-compute-room.json。导入只在本机内存解析，不上传、不读取凭据、不执行机器命令。</p>
+      </section>
+      <footer class="report-actions"><button id="export-json">导出 JSON 报告</button><button id="export-csv">导出 CSV</button><button id="print">打印报告</button></footer>
+      <details class="references"><summary>依据与限制</summary><p>通用架构研究，不是竣工模型、安全操作指南或冗余等级认证。</p><a href="https://www.energy.gov/cmei/femp/articles/best-practices-guide-energy-efficient-data-center-design" target="_blank" rel="noreferrer">DOE · 数据中心能源设计</a><a href="https://www.dell.com/support/manuals/en-us/poweredge-r760/per760_ism_pub/inside-the-system?guid=guid-043d9f52-a16e-4494-a65a-128c47fd4ea4&amp;lang=en-us" target="_blank" rel="noreferrer">Dell · 服务器内部部件</a><a href="https://www.cisco.com/c/en/us/products/collateral/switches/nexus-9000-series-switches/white-paper-c11-743245.html" target="_blank" rel="noreferrer">Cisco · Leaf / Spine</a></details>
+    </aside>
+  </main>
+  <section id="print-report" aria-label="打印报告"></section>
+  <dialog id="export-dialog" aria-labelledby="export-title"><header><div><p class="eyebrow">PORTABLE REPORT</p><h2 id="export-title">报告已生成</h2></div><button id="close-export" aria-label="关闭导出报告">×</button></header><p>先检查内容，再保存。若应用内浏览器不支持下载，可以复制报告。</p><textarea id="export-text" readonly aria-label="报告内容" spellcheck="false"></textarea><footer><a id="save-report" download>下载文件</a><button id="copy-report">复制报告</button><span id="export-status" role="status"></span></footer></dialog>
+  <script type="module" src="./datacenter.js"></script>
+</body>
+</html>

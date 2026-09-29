@@ -52,8 +52,8 @@ pub fn build_dashboard(
 ) -> DashboardModel {
   let alerts : Array[AlertBanner] = []
   for anomaly in report.anomalies {
-    alerts.push({ level: "warning", text: anomaly.detail })
+    alerts.push({ level: "warning", text: anomaly.detail, })
   }
   let sections = build_dashboard_sections(town, report)
-  { title: town.config.name, alerts, sections }
+  { title: town.config.name, alerts, sections, }
 }

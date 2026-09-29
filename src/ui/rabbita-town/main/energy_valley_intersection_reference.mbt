@@ -106,9 +106,16 @@ fn render_intersection_reference_legend() -> @rabbita.Html {
         ),
         span(
           class="intersection-reference-detail",
-          "· 保留原始线路 · \{reference_osm_cartoon_road_cycle_count()} 个环路",
+          "· 保留路网连接 · \{reference_osm_cartoon_road_cycle_count()} 个环路",
         ),
-        span(class="intersection-reference-cue", "338 点坐标校对"),
+        span(
+          class="intersection-reference-cue",
+          town_design_registration_summary(),
+        ),
+        span(
+          class="intersection-reference-detail",
+          "橙虚线：原始 OSM · 玫红：水域冲突",
+        ),
         span(
           id="energy-valley-coordinate-readout",
           class="intersection-reference-coordinate",

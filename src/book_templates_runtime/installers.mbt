@@ -5,7 +5,7 @@ priv struct BookTemplateInstaller {
 
 ///|
 fn book_template_installers() -> Array[BookTemplateInstaller] {
-  [{ template_id: "pdf-evidence-watch" }, { template_id: "app-tool-book" }]
+  [{ template_id: "pdf-evidence-watch", }, { template_id: "app-tool-book", }]
 }
 
 ///|

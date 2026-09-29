@@ -303,7 +303,7 @@ test "selected feature readiness requires matching evidence" {
   assert_true(terrain_label_ready(lifecycle, [layer], [reason]))
   assert_true(
     placement_diff_ready(
-      { ..lifecycle, selected_feature: "placement-diff-preview" },
+      { ..lifecycle, selected_feature: "placement-diff-preview", },
       [
         {
           module_id: "policy-hall",
@@ -321,7 +321,7 @@ test "selected feature readiness requires matching evidence" {
   )
   assert_false(
     movement_loop_ready(
-      { ..lifecycle, selected_feature: "movement-loop-evidence" },
+      { ..lifecycle, selected_feature: "movement-loop-evidence", },
       [],
     ),
   )
@@ -344,7 +344,7 @@ test "module policy builds movement placement and terrain records" {
     entrance_y: 24,
     style_family: "white-tech-pavilion",
   }
-  let moved : EditorPipelineModulePlacement = { ..current, grid_x: 12 }
+  let moved : EditorPipelineModulePlacement = { ..current, grid_x: 12, }
   let loops = movement_loop_records([current])
   assert_eq(loops.length(), 1)
   assert_eq(loops[0].status, "ready")

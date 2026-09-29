@@ -10,8 +10,8 @@ fn world_projection_isolation_add(
   let id = "\{writer}:\{sequence}:add"
   {
     id,
-    dot: { writer_id: writer, sequence },
-    stamp: { writer_id: writer, lamport: sequence },
+    dot: { writer_id: writer, sequence, },
+    stamp: { writer_id: writer, lamport: sequence, },
     epoch_id: epoch.id,
     kind,
     entity_id,
@@ -30,8 +30,8 @@ fn world_projection_isolation_delete_road(
 ) -> TownLifeWorldEvent {
   {
     id: "\{writer}:\{sequence}:delete",
-    dot: { writer_id: writer, sequence },
-    stamp: { writer_id: writer, lamport: sequence },
+    dot: { writer_id: writer, sequence, },
+    stamp: { writer_id: writer, lamport: sequence, },
     epoch_id: epoch.id,
     kind: WorldRoadCell,
     entity_id: added.entity_id,
@@ -52,14 +52,14 @@ fn world_projection_isolation_move_park(
   let id = "\{writer}:\{sequence}:move"
   {
     id,
-    dot: { writer_id: writer, sequence },
-    stamp: { writer_id: writer, lamport: sequence },
+    dot: { writer_id: writer, sequence, },
+    stamp: { writer_id: writer, lamport: sequence, },
     epoch_id: epoch.id,
     kind: WorldPark,
     entity_id: added.entity_id,
     incarnation_id: added.incarnation_id,
     action: WorldMove(
-      WorldParkPayload({ id: added.entity_id, x: target.x, y: target.y }),
+      WorldParkPayload({ id: added.entity_id, x: target.x, y: target.y, }),
     ),
     budget_delta: 0,
   }
@@ -186,7 +186,7 @@ fn world_projection_isolation_detached_park_cell(
         golden_valley_tile_placement_block_in_world(world, x, y) is None &&
         town_life_world_road_point_allowed(world, base_roads, x, y) &&
         town_life_world_reachable_custom_roads(world, [key]) is None {
-        return Some({ x, y })
+        return Some({ x, y, })
       }
     }
   }
@@ -257,10 +257,10 @@ test "invalid detached road cannot suppress a valid colliding park" {
     3,
     WorldPark,
     park_id,
-    WorldParkPayload({ id: park_id, x: point.x, y: point.y }),
+    WorldParkPayload({ id: park_id, x: point.x, y: point.y, }),
   )
   let projection = town_life_world_projection(
-    { ..base, events: [road, park] },
+    { ..base, events: [road, park], },
     seed,
   )
   assert_false(
@@ -298,7 +298,7 @@ test "detached road component cannot suppress an unrelated connected extension" 
     WorldRoadCellPayload(detached),
   )
   let projection = town_life_world_projection(
-    { ..base, events: [connected_event, detached_event] },
+    { ..base, events: [connected_event, detached_event], },
     seed,
   )
   assert_true(
@@ -343,10 +343,10 @@ test "malformed building cannot reserve a valid park cell" {
     3,
     WorldPark,
     park_id,
-    WorldParkPayload({ id: park_id, x: point.x, y: point.y }),
+    WorldParkPayload({ id: park_id, x: point.x, y: point.y, }),
   )
   let projection = town_life_world_projection(
-    { ..base, events: [malformed, park] },
+    { ..base, events: [malformed, park], },
     seed,
   )
   assert_false(
@@ -474,7 +474,7 @@ test "colliding move is rejected while both original park sites survive" {
     2,
     WorldPark,
     first_id,
-    WorldParkPayload({ id: first_id, x: first.x, y: first.y }),
+    WorldParkPayload({ id: first_id, x: first.x, y: first.y, }),
   )
   let second_add = world_projection_isolation_add(
     base.epoch,
@@ -482,7 +482,7 @@ test "colliding move is rejected while both original park sites survive" {
     3,
     WorldPark,
     second_id,
-    WorldParkPayload({ id: second_id, x: second.x, y: second.y }),
+    WorldParkPayload({ id: second_id, x: second.x, y: second.y, }),
   )
   let movement = world_projection_isolation_move_park(
     base.epoch,
@@ -492,7 +492,7 @@ test "colliding move is rejected while both original park sites survive" {
     second,
   )
   let projection = town_life_world_projection(
-    { ..base, events: [first_add, second_add, movement] },
+    { ..base, events: [first_add, second_add, movement], },
     seed,
   )
   assert_true(
@@ -544,7 +544,7 @@ test "later downstream Add cannot resurrect an already deleted connector" {
     WorldRoadCellPayload(downstream),
   )
   let projection = town_life_world_projection(
-    { ..base, events: [connector_add, connector_delete, downstream_add] },
+    { ..base, events: [connector_add, connector_delete, downstream_add], },
     seed,
   )
   assert_false(
@@ -592,7 +592,7 @@ test "valid Move cannot launder an invalid Add into spatial authority" {
       2,
       WorldPark,
       entity_id,
-      WorldParkPayload({ id: entity_id, x: -1, y: -1 }),
+      WorldParkPayload({ id: entity_id, x: -1, y: -1, }),
     ),
     budget_delta: -20,
   }
@@ -604,7 +604,7 @@ test "valid Move cannot launder an invalid Add into spatial authority" {
     target,
   )
   let projection = town_life_world_projection(
-    { ..base, events: [invalid_add, movement] },
+    { ..base, events: [invalid_add, movement], },
     seed,
   )
   assert_false(
@@ -653,12 +653,12 @@ test "spatially invalid Add cannot starve a later valid full-budget Add" {
       3,
       WorldBuilding,
       valid_id,
-      WorldBuildingPayload({ ..valid_building, authored_id: Some(valid_id) }),
+      WorldBuildingPayload({ ..valid_building, authored_id: Some(valid_id), }),
     ),
     budget_delta: -base.epoch.base_budget,
   }
   let projection = town_life_world_projection(
-    { ..base, events: [invalid_add, valid_add] },
+    { ..base, events: [invalid_add, valid_add], },
     seed,
   )
   assert_false(

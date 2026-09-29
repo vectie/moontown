@@ -9,16 +9,18 @@ test "resident state metrics count private scopes and review records" {
 test "resident twin resident plan rotates with the active resident" {
   let model = init_model()
   assert_true(
-    resident_twins_resident_plan({ ..model, tick: 0 }).contains("policy quest"),
+    resident_twins_resident_plan({ ..model, tick: 0, }).contains("policy quest"),
   )
   assert_true(
-    resident_twins_resident_plan({ ..model, tick: 1 }).contains("Talent Avenue"),
+    resident_twins_resident_plan({ ..model, tick: 1, }).contains(
+      "Talent Avenue",
+    ),
   )
   assert_eq(
     resident_twins_resident_plan({
       ..model,
       tick: resident_sims(model).length(),
     }),
-    resident_twins_resident_plan({ ..model, tick: 0 }),
+    resident_twins_resident_plan({ ..model, tick: 0, }),
   )
 }

@@ -55,7 +55,7 @@ fn replace_marketplace_action_request(
     request.request_id != replacement.request_id
   })
   requests.push(replacement)
-  { ..state, action_requests: requests, version: state.version + 1 }
+  { ..state, action_requests: requests, version: state.version + 1, }
 }
 
 ///|

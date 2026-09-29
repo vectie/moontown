@@ -25,7 +25,7 @@ test "agent runtime creates and attaches user scoped agents" {
   let attached = miniapp_attach_agent_to_building(
     created.snapshot,
     viewer,
-    { agent_id: "agent-private-builder", building_id: "private-lab" },
+    { agent_id: "agent-private-builder", building_id: "private-lab", },
     now_ms=4100UL,
   )
   assert_eq(attached.ok, true)
@@ -137,7 +137,7 @@ test "run status controls cover cancel retry and review acceptance" {
   let retried = miniapp_retry_run(
     cancelled.snapshot,
     viewer,
-    { run_id: "run-policy-hall-1", summary: "User retried the query." },
+    { run_id: "run-policy-hall-1", summary: "User retried the query.", },
     now_ms=4500UL,
   )
   assert_true(
@@ -147,7 +147,10 @@ test "run status controls cover cancel retry and review acceptance" {
   let pending_bookkeeper = miniapp_accept_run_for_review(
     retried.snapshot,
     viewer,
-    { run_id: "run-policy-hall-1", summary: "Request exact Bookkeeper review." },
+    {
+      run_id: "run-policy-hall-1",
+      summary: "Request exact Bookkeeper review.",
+    },
     now_ms=4600UL,
   )
   assert_true(

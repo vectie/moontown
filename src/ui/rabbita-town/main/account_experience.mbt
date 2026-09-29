@@ -223,10 +223,18 @@ fn account_navigation_items(
   match kind {
     VisitorExperience =>
       [
-        { label: "Explore town", href: "./index.html", primary: true },
-        { label: "Policies", href: "./index.html?area=quests", primary: false },
-        { label: "Talent", href: "./index.html?area=social", primary: false },
-        { label: "Events", href: "./index.html?area=districts", primary: false },
+        { label: "Explore town", href: "./index.html", primary: true, },
+        {
+          label: "Policies",
+          href: "./index.html?layer=indoor&building=policy-hall",
+          primary: false,
+        },
+        { label: "Talent", href: "./index.html?area=social", primary: false, },
+        {
+          label: "Districts",
+          href: "./index.html?area=districts",
+          primary: false,
+        },
         {
           label: "Join MoonTown",
           href: "./index.html?panel=join",
@@ -235,19 +243,27 @@ fn account_navigation_items(
       ]
     PaidExperience =>
       [
-        { label: "My town", href: "./index.html", primary: true },
-        { label: "My Agent", href: "./index.html?panel=agent", primary: false },
-        { label: "Workspace", href: "./index.html?area=quests", primary: false },
+        { label: "My town", href: "./index.html", primary: true, },
+        { label: "My Agent", href: "./index.html?panel=agent", primary: false, },
+        {
+          label: "Workspace",
+          href: "./index.html?area=quests",
+          primary: false,
+        },
         {
           label: "Marketplace",
           href: "./index.html?area=social",
           primary: false,
         },
-        { label: "Billing", href: "./index.html?panel=billing", primary: false },
+        {
+          label: "Billing",
+          href: "./index.html?panel=billing",
+          primary: false,
+        },
       ]
     EnterpriseExperience =>
       [
-        { label: "Organization", href: "./index.html", primary: true },
+        { label: "Organization", href: "./index.html", primary: true, },
         {
           label: "Team spaces",
           href: "./index.html?area=districts",
@@ -258,8 +274,12 @@ fn account_navigation_items(
           href: "./index.html?area=residents",
           primary: false,
         },
-        { label: "Members", href: "./index.html?panel=members", primary: false },
-        { label: "Usage", href: "./index.html?panel=usage", primary: false },
+        {
+          label: "Members",
+          href: "./index.html?panel=members",
+          primary: false,
+        },
+        { label: "Usage", href: "./index.html?panel=usage", primary: false, },
         {
           label: "Compliance",
           href: "./index.html?panel=compliance",
@@ -268,7 +288,7 @@ fn account_navigation_items(
       ]
     AdminExperience =>
       [
-        { label: "Overview", href: "./operations.html", primary: true },
+        { label: "Overview", href: "./operations.html", primary: true, },
         {
           label: "Users",
           href: "./operations.html?admin=users",
@@ -294,7 +314,7 @@ fn account_navigation_items(
           href: "./operations.html?admin=audit",
           primary: false,
         },
-        { label: "View town", href: "./index.html?view=town", primary: false },
+        { label: "View town", href: "./index.html?view=town", primary: false, },
       ]
   }
 }

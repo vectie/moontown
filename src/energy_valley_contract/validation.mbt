@@ -76,7 +76,7 @@ fn report(
   entity_id : StableId?,
   message : String,
 ) -> Unit {
-  issues.push({ severity, code, entity_id, message })
+  issues.push({ severity, code, entity_id, message, })
 }
 
 ///|

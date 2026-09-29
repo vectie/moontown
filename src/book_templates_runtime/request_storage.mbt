@@ -11,14 +11,14 @@ pub async fn load_request_ledger(
   request_path : String,
 ) -> @book_templates.BookTemplateRequestLedger {
   if !@fs.exists(request_path) {
-    return { requests: [] }
+    return { requests: [], }
   }
   let text = @fs.read_file(request_path).text() catch {
-    _ => return { requests: [] }
+    _ => return { requests: [], }
   }
-  let parsed = @json.parse(text) catch { _ => return { requests: [] } }
+  let parsed = @json.parse(text) catch { _ => return { requests: [], } }
   @json.from_json(parsed) catch {
-    _ => { requests: [] }
+    _ => { requests: [], }
   }
 }
 

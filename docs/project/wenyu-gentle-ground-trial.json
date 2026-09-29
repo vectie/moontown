@@ -1,0 +1,422 @@
+{
+  "schema": "moontown.wenyu_gentle_ground_trial.v1",
+  "runtimeEligible": false,
+  "routingAuthority": false,
+  "terrainChanged": false,
+  "source": "docs/project/wenyu-lower-perspective.json",
+  "calibration": {
+    "strength": 0.01,
+    "bottomStrength": 0.01,
+    "bottomLeftRadialGain": 1.0204081632653061,
+    "fitRmsTiles": 2.9307225379926325,
+    "heldOutRmsTiles": 5.702341637000205,
+    "sourceVertices": 44343,
+    "minimumTrialDenominator": 0.9779320561860639,
+    "verticesBehindTrialHorizon": 0,
+    "errors": [
+      {
+        "id": "NW",
+        "heldOut": false,
+        "before": {
+          "x": 110.48220814177566,
+          "y": 6.8146241280497435
+        },
+        "after": {
+          "x": 109.58062696765732,
+          "y": 6.856845335120617
+        },
+        "observed": {
+          "x": 111.46411483253588,
+          "y": 5.662061636556855
+        },
+        "errorTiles": 2.2304785637836786,
+        "gentleErrorTiles": 2.2304785637836786,
+        "changeFromGentleTiles": 0
+      },
+      {
+        "id": "NE",
+        "heldOut": false,
+        "before": {
+          "x": 229.62562012813828,
+          "y": 61.063052371280904
+        },
+        "after": {
+          "x": 229.4858710757805,
+          "y": 61.3866051427363
+        },
+        "observed": {
+          "x": 230.1244019138756,
+          "y": 63.65993623804464
+        },
+        "errorTiles": 2.3613038559436266,
+        "gentleErrorTiles": 2.3613038559436266,
+        "changeFromGentleTiles": 0
+      },
+      {
+        "id": "SE",
+        "heldOut": false,
+        "before": {
+          "x": 220.2366369260717,
+          "y": 107.99073180006712
+        },
+        "after": {
+          "x": 219.9156171669566,
+          "y": 108.9600801982437
+        },
+        "observed": {
+          "x": 218.94736842105263,
+          "y": 110.48671625929862
+        },
+        "errorTiles": 1.8077951479240855,
+        "gentleErrorTiles": 1.8077951479240855,
+        "changeFromGentleTiles": 0
+      },
+      {
+        "id": "SW",
+        "heldOut": false,
+        "before": {
+          "x": 84.52395457540942,
+          "y": 64.48055677610874
+        },
+        "after": {
+          "x": 82.5858609079001,
+          "y": 65.20934287830636
+        },
+        "observed": {
+          "x": 83.90430622009569,
+          "y": 67.17959617428268
+        },
+        "errorTiles": 2.370695275980464,
+        "gentleErrorTiles": 2.370695275980464,
+        "changeFromGentleTiles": 0
+      },
+      {
+        "id": "R5",
+        "heldOut": false,
+        "before": {
+          "x": 176.38094365131295,
+          "y": 44.097857289074796
+        },
+        "after": {
+          "x": 175.88644508982964,
+          "y": 44.37174055262977
+        },
+        "observed": {
+          "x": 175.00478468899522,
+          "y": 44.684378320935174
+        },
+        "errorTiles": 0.9354503923621474,
+        "gentleErrorTiles": 0.9354503923621474,
+        "changeFromGentleTiles": 0
+      },
+      {
+        "id": "R6",
+        "heldOut": false,
+        "before": {
+          "x": 181.83378799334173,
+          "y": 70.42948261453607
+        },
+        "after": {
+          "x": 181.25164376234994,
+          "y": 70.9822965696577
+        },
+        "observed": {
+          "x": 180.21052631578948,
+          "y": 69.01594048884166
+        },
+        "errorTiles": 2.224967814170533,
+        "gentleErrorTiles": 2.224967814170533,
+        "changeFromGentleTiles": 0
+      },
+      {
+        "id": "R7",
+        "heldOut": true,
+        "before": {
+          "x": 190.17949950060927,
+          "y": 80.04858954747279
+        },
+        "after": {
+          "x": 189.63998975518223,
+          "y": 80.70472242159076
+        },
+        "observed": {
+          "x": 190.16267942583733,
+          "y": 78.96280552603614
+        },
+        "errorTiles": 1.818647564215836,
+        "gentleErrorTiles": 1.818647564215836,
+        "changeFromGentleTiles": 0
+      },
+      {
+        "id": "R8",
+        "heldOut": false,
+        "before": {
+          "x": 203.94860562729855,
+          "y": 87.84786078268746
+        },
+        "after": {
+          "x": 203.5217579192182,
+          "y": 88.56825758447843
+        },
+        "observed": {
+          "x": 205.7799043062201,
+          "y": 86.00212539851222
+        },
+        "errorTiles": 3.4182246124240283,
+        "gentleErrorTiles": 3.4182246124240283,
+        "changeFromGentleTiles": 0
+      },
+      {
+        "id": "R9",
+        "heldOut": true,
+        "before": {
+          "x": 222.52139185973567,
+          "y": 96.57949282782901
+        },
+        "after": {
+          "x": 222.25090408243676,
+          "y": 97.35979923239057
+        },
+        "observed": {
+          "x": 222.00956937799043,
+          "y": 97.47927736450585
+        },
+        "errorTiles": 0.2692906675396553,
+        "gentleErrorTiles": 0.2692906675396553,
+        "changeFromGentleTiles": 0
+      },
+      {
+        "id": "S1",
+        "heldOut": true,
+        "before": {
+          "x": 74.59988202741349,
+          "y": 86.53726257063082
+        },
+        "after": {
+          "x": 72.19284010143994,
+          "y": 87.68554638375362
+        },
+        "observed": {
+          "x": 73.64593301435407,
+          "y": 91.81721572794899
+        },
+        "errorTiles": 4.379745492985306,
+        "gentleErrorTiles": 4.379745492985306,
+        "changeFromGentleTiles": 0
+      },
+      {
+        "id": "S4",
+        "heldOut": false,
+        "before": {
+          "x": 62.48989660763718,
+          "y": 116.60697600390733
+        },
+        "after": {
+          "x": 59.41197788892576,
+          "y": 118.46169463555954
+        },
+        "observed": {
+          "x": 62.77511961722488,
+          "y": 116.30180658873539
+        },
+        "errorTiles": 3.996978691391866,
+        "gentleErrorTiles": 3.996978691391866,
+        "changeFromGentleTiles": 0
+      },
+      {
+        "id": "S6",
+        "heldOut": false,
+        "before": {
+          "x": 185.213718221192,
+          "y": 91.52738546994813
+        },
+        "after": {
+          "x": 184.5621220804069,
+          "y": 92.36990593648048
+        },
+        "observed": {
+          "x": 186.33492822966508,
+          "y": 88.45058448459086
+        },
+        "errorTiles": 4.301618565852825,
+        "gentleErrorTiles": 4.301618565852825,
+        "changeFromGentleTiles": 0
+      },
+      {
+        "id": "S7",
+        "heldOut": false,
+        "before": {
+          "x": 197.06967522764586,
+          "y": 95.1956061912158
+        },
+        "after": {
+          "x": 196.5397193149188,
+          "y": 96.05169301173734
+        },
+        "observed": {
+          "x": 197.05263157894737,
+          "y": 94.11264612114772
+        },
+        "errorTiles": 2.0057372296729663,
+        "gentleErrorTiles": 2.0057372296729663,
+        "changeFromGentleTiles": 0
+      },
+      {
+        "id": "BL1",
+        "heldOut": true,
+        "before": {
+          "x": 16.30325187089015,
+          "y": 98.48611435107594
+        },
+        "after": {
+          "x": 12.355611531473286,
+          "y": 100.10811281755207
+        },
+        "observed": {
+          "x": 11.023923444976077,
+          "y": 112.47608926673752
+        },
+        "errorTiles": 12.43946279416135,
+        "gentleErrorTiles": 12.43946279416135,
+        "changeFromGentleTiles": 0
+      },
+      {
+        "id": "BL2",
+        "heldOut": true,
+        "before": {
+          "x": 18.005398861778943,
+          "y": 94.55986470253364
+        },
+        "after": {
+          "x": 14.169158504023118,
+          "y": 96.08407730005014
+        },
+        "observed": {
+          "x": 15.770334928229666,
+          "y": 96.86716259298619
+        },
+        "errorTiles": 1.7824108722310932,
+        "gentleErrorTiles": 1.7824108722310932,
+        "changeFromGentleTiles": 0
+      },
+      {
+        "id": "BL4",
+        "heldOut": false,
+        "before": {
+          "x": 54.224542766619734,
+          "y": 137.18609210745535
+        },
+        "after": {
+          "x": 50.64966746586402,
+          "y": 139.61663137623717
+        },
+        "observed": {
+          "x": 51.291866028708135,
+          "y": 140.48034006376196
+        },
+        "errorTiles": 1.0762953549211502,
+        "gentleErrorTiles": 1.0762953549211502,
+        "changeFromGentleTiles": 0
+      },
+      {
+        "id": "BR1",
+        "heldOut": false,
+        "before": {
+          "x": 179.21590272284743,
+          "y": 108.86206444958859
+        },
+        "after": {
+          "x": 178.39646806386537,
+          "y": 110.0238329904929
+        },
+        "observed": {
+          "x": 181.2822966507177,
+          "y": 111.25185972369819
+        },
+        "errorTiles": 3.1362487608863265,
+        "gentleErrorTiles": 3.1362487608863265,
+        "changeFromGentleTiles": 0
+      },
+      {
+        "id": "BR4",
+        "heldOut": false,
+        "before": {
+          "x": 205.94192899677722,
+          "y": 117.95916786138031
+        },
+        "after": {
+          "x": 205.42878274004804,
+          "y": 119.16836957894265
+        },
+        "observed": {
+          "x": 208.38277511961724,
+          "y": 120.12752391073326
+        },
+        "errorTiles": 3.105808753085999,
+        "gentleErrorTiles": 3.105808753085999,
+        "changeFromGentleTiles": 0
+      },
+      {
+        "id": "BR7",
+        "heldOut": false,
+        "before": {
+          "x": 171.6228962178048,
+          "y": 128.11572960587057
+        },
+        "after": {
+          "x": 170.58139517429194,
+          "y": 129.69711436659142
+        },
+        "observed": {
+          "x": 173.7799043062201,
+          "y": 132.5228480340064
+        },
+        "errorTiles": 4.267930578886,
+        "gentleErrorTiles": 4.267930578886,
+        "changeFromGentleTiles": 0
+      },
+      {
+        "id": "BR8",
+        "heldOut": true,
+        "before": {
+          "x": 182.4214116772995,
+          "y": 131.70291487165267
+        },
+        "after": {
+          "x": 181.5262220187736,
+          "y": 133.30527080261638
+        },
+        "observed": {
+          "x": 184.3444976076555,
+          "y": 135.8894792773645
+        },
+        "errorTiles": 3.8237168744361374,
+        "gentleErrorTiles": 3.8237168744361374,
+        "changeFromGentleTiles": 0
+      },
+      {
+        "id": "BR10",
+        "heldOut": false,
+        "before": {
+          "x": 190.24391827719106,
+          "y": 134.28387765594445
+        },
+        "after": {
+          "x": 189.45241014593992,
+          "y": 135.9002571340992
+        },
+        "observed": {
+          "x": 192.61244019138755,
+          "y": 138.03188097768333
+        },
+        "errorTiles": 3.8117725664929276,
+        "gentleErrorTiles": 3.8117725664929276,
+        "changeFromGentleTiles": 0
+      }
+    ]
+  },
+  "asset": "tilemap/wenyu-gentle-road-overlay.svg",
+  "mapping": "Calibrated grid -> ground (32*(x-y),16*(x+y)) -> shared camera pan/zoom. No second calibration or legacy local warp.",
+  "sourceWays": 6420,
+  "sourceVertices": 44343
+}

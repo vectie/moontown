@@ -39,7 +39,7 @@ test "talent avenue signal uses shared execution phrase groups" {
   )
   assert_eq(
     talent_avenue_signal(
-      { ..model, state_source: StateSourceKind::SnapshotFile },
+      { ..model, state_source: StateSourceKind::SnapshotFile, },
       Some(civic_metric_test_execution(Completed)),
     ),
     "Projection bridge",

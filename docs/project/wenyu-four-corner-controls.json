@@ -1,0 +1,319 @@
+{
+  "schema": "moontown.wenyu_four_corner_controls.v1",
+  "runtimeEligible": false,
+  "fourCornerSetReady": true,
+  "status": "Four provisional controls available for diagnostic fitting; SW image correspondence corrected, not survey-validated or runtime-approved",
+  "swCorrection": {
+    "osmAnchorChanged": false,
+    "rejectedOriginal": {
+      "x": 175,
+      "y": 694
+    },
+    "rejectedGenerated": {
+      "x": 410,
+      "y": 760
+    },
+    "correctedOriginal": {
+      "x": 630,
+      "y": 403
+    },
+    "correctedGenerated": {
+      "x": 548,
+      "y": 439
+    },
+    "reason": "Keep Litang–Dingsi OSM junction fixed. Move both raster picks to the northern large Litang crossroad whose eastbound corridor runs north of the central wetland toward the southeast airport interchange. The old picks were a different junction farther south.",
+    "confidence": "Topological/manual candidate, not a surveyed correspondence; published road labels establish Litang and Jingcheng but do not directly label this raster junction as Dingsi."
+  },
+  "cornerMeaning": "Corners of the shared Litang–Jingcheng site footprint, not the literal image canvas corners; north/east labels are geographic.",
+  "coordinateSource": "Fresh OSM named-way geometry, not the previous authority-table or map-click coordinates.",
+  "osmSnapshot": "docs/project/wenyu-corner-osm-reference.json",
+  "osmBase": "2026-09-05T16:18:13Z",
+  "sourceEndpoint": "https://overpass-api.de/api/interpreter",
+  "sourceBounds": [
+    116.375,
+    40.075,
+    116.51,
+    40.175
+  ],
+  "sourceQuery": "[out:json][timeout:35];(way[highway][name~\"立汤|定泗|北清|京承|机场北|顺于|北六环\"](40.075,116.375,40.175,116.51);way[waterway=river](40.075,116.375,40.175,116.51););out geom;",
+  "labelEvidence": "https://www.kechuangfuwu.com/ueditor/fileupload/file/20210304/1614839499074030180.jpg",
+  "imageMatchingEvidence": "Trace the labeled Litang west boundary from the river bridge to the large crossroad north of the central wetland, not the lower crossroad below that wetland. Its eastbound corridor passes north of the wetland toward the southeast airport interchange, matching the OSM Dingsi corridor ordering. Trace Jingcheng to the crossroad above the east-bank campus and the large interchange below its river crossing. Picks are independent visual candidates, not fitted predictions.",
+  "caution": "The 2021 design and AI-generated terrain can simplify or change junction geometry. Exact OSM vector intersections do not eliminate manual raster uncertainty; the southeast interchange has the widest pick radius.",
+  "coverageMeaning": "Current provisional control hull as a fraction of image canvas; coverage is reported, not maximized by choosing a different junction.",
+  "coverage": [
+    {
+      "image": "original",
+      "controlHullFraction": 0.15264092733069481
+    },
+    {
+      "image": "generated",
+      "controlHullFraction": 0.21302321413135777
+    }
+  ],
+  "controls": [
+    {
+      "id": "NW",
+      "name": "立汤路 × 温榆河",
+      "role": "fit",
+      "weight": 1,
+      "reviewStatus": "visually-reviewed-not-surveyed",
+      "wgs84": {
+        "lon": 116.40502227236075,
+        "lat": 40.15066261584157
+      },
+      "original": {
+        "x": 1060,
+        "y": 147
+      },
+      "generated": {
+        "x": 728,
+        "y": 37
+      },
+      "originalPickRadiusPixels": 8,
+      "generatedPickRadiusPixels": 4,
+      "osmPointDefinition": "Mean of unique crossings of the selected main carriageway centerlines; grade separation does not imply a connected routing junction.",
+      "evidenceCrossings": [
+        {
+          "roads": [
+            "立汤路",
+            "温榆河"
+          ],
+          "ways": [
+            106616524,
+            226214870
+          ],
+          "coordinate": {
+            "lon": 116.40510021597953,
+            "lat": 40.15068631833197
+          }
+        },
+        {
+          "roads": [
+            "立汤路",
+            "温榆河"
+          ],
+          "ways": [
+            106616542,
+            226214870
+          ],
+          "coordinate": {
+            "lon": 116.40494432874199,
+            "lat": 40.15063891335116
+          }
+        }
+      ]
+    },
+    {
+      "id": "NE",
+      "name": "京承高速 × 顺于路",
+      "role": "fit",
+      "weight": 1,
+      "reviewStatus": "visually-reviewed-not-surveyed",
+      "wgs84": {
+        "lon": 116.47713305309628,
+        "lat": 40.136206827991515
+      },
+      "original": {
+        "x": 1882,
+        "y": 614
+      },
+      "generated": {
+        "x": 1503,
+        "y": 416
+      },
+      "originalPickRadiusPixels": 8,
+      "generatedPickRadiusPixels": 5,
+      "osmPointDefinition": "Mean of unique crossings of the selected main carriageway centerlines; grade separation does not imply a connected routing junction.",
+      "evidenceCrossings": [
+        {
+          "roads": [
+            "京承高速",
+            "顺于路"
+          ],
+          "ways": [
+            158054660,
+            395699977
+          ],
+          "coordinate": {
+            "lon": 116.47723185890754,
+            "lat": 40.136210961699504
+          }
+        },
+        {
+          "roads": [
+            "京承高速",
+            "顺于路"
+          ],
+          "ways": [
+            158054718,
+            395699977
+          ],
+          "coordinate": {
+            "lon": 116.477034247285,
+            "lat": 40.136202694283526
+          }
+        }
+      ]
+    },
+    {
+      "id": "SE",
+      "name": "京承高速 × 机场北线",
+      "role": "fit",
+      "weight": 1,
+      "reviewStatus": "visually-reviewed-not-surveyed",
+      "wgs84": {
+        "lon": 116.47850167375822,
+        "lat": 40.114804859695624
+      },
+      "original": {
+        "x": 1738,
+        "y": 971
+      },
+      "generated": {
+        "x": 1430,
+        "y": 722
+      },
+      "originalPickRadiusPixels": 18,
+      "generatedPickRadiusPixels": 12,
+      "osmPointDefinition": "Mean of unique crossings of the selected main carriageway centerlines; grade separation does not imply a connected routing junction.",
+      "evidenceCrossings": [
+        {
+          "roads": [
+            "京承高速",
+            "机场北线"
+          ],
+          "ways": [
+            126860126,
+            126860147
+          ],
+          "coordinate": {
+            "lon": 116.4784007824361,
+            "lat": 40.11490263276873
+          }
+        },
+        {
+          "roads": [
+            "京承高速",
+            "机场北线"
+          ],
+          "ways": [
+            126860126,
+            126860186
+          ],
+          "coordinate": {
+            "lon": 116.47840980531706,
+            "lat": 40.11475642106384
+          }
+        },
+        {
+          "roads": [
+            "京承高速",
+            "机场北线"
+          ],
+          "ways": [
+            158054613,
+            126860147
+          ],
+          "coordinate": {
+            "lon": 116.47859393639521,
+            "lat": 40.11485300386465
+          }
+        },
+        {
+          "roads": [
+            "京承高速",
+            "机场北线"
+          ],
+          "ways": [
+            158054613,
+            126860186
+          ],
+          "coordinate": {
+            "lon": 116.47860217088451,
+            "lat": 40.114707381085275
+          }
+        }
+      ]
+    },
+    {
+      "id": "SW",
+      "name": "立汤路 × 定泗路",
+      "role": "fit",
+      "weight": 1,
+      "reviewStatus": "corrected-candidate-topology-reviewed-not-surveyed",
+      "wgs84": {
+        "lon": 116.405675675,
+        "lat": 40.11513705
+      },
+      "original": {
+        "x": 630,
+        "y": 403
+      },
+      "generated": {
+        "x": 548,
+        "y": 439
+      },
+      "originalPickRadiusPixels": 12,
+      "generatedPickRadiusPixels": 8,
+      "osmPointDefinition": "Mean of unique crossings of the selected main carriageway centerlines; grade separation does not imply a connected routing junction.",
+      "evidenceCrossings": [
+        {
+          "roads": [
+            "立汤路",
+            "定泗路"
+          ],
+          "ways": [
+            1250750580,
+            1235731027
+          ],
+          "coordinate": {
+            "lon": 116.4059142,
+            "lat": 40.1151039
+          }
+        },
+        {
+          "roads": [
+            "立汤路",
+            "定泗路"
+          ],
+          "ways": [
+            1250776519,
+            1537700201
+          ],
+          "coordinate": {
+            "lon": 116.4054468,
+            "lat": 40.1150958
+          }
+        },
+        {
+          "roads": [
+            "立汤路",
+            "定泗路"
+          ],
+          "ways": [
+            1257119855,
+            1235731026
+          ],
+          "coordinate": {
+            "lon": 116.405907,
+            "lat": 40.1151787
+          }
+        },
+        {
+          "roads": [
+            "立汤路",
+            "定泗路"
+          ],
+          "ways": [
+            1257123252,
+            1537700204
+          ],
+          "coordinate": {
+            "lon": 116.4054347,
+            "lat": 40.1151698
+          }
+        }
+      ]
+    }
+  ]
+}

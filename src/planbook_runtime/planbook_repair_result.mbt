@@ -42,7 +42,7 @@ async fn refresh_planbook_repair_task_from_run(
   } else {
     "\{task.summary} Latest run status reconciled to `\{status}` from MoonClaw index status `\{status_label}`."
   }
-  { ..task, status, summary }
+  { ..task, status, summary, }
 }
 
 ///|

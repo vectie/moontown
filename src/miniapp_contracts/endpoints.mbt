@@ -17,7 +17,7 @@ pub fn miniapp_endpoint(
   auth_required? : Bool = true,
   summary~ : String,
 ) -> MiniappEndpoint {
-  { id, http_method, path, writes, auth_required, summary }
+  { id, http_method, path, writes, auth_required, summary, }
 }
 
 ///|

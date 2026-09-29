@@ -30,7 +30,7 @@ test "registry policy expands descriptor filesystem check paths" {
   assert_eq(base_paths.length(), 2)
   assert_eq(base_paths[0], "assets/templates/books/pdf-evidence-watch")
   assert_eq(base_paths[1], "assets/templates/books/pdf-evidence-watch/SKILL.md")
-  let with_example = { ..base, install_example: "examples/pdf-watch.json" }
+  let with_example = { ..base, install_example: "examples/pdf-watch.json", }
   let example_paths = descriptor_check_paths(with_example)
   assert_eq(example_paths.length(), 3)
   assert_eq(example_paths[0], "assets/templates/books/pdf-evidence-watch")

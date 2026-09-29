@@ -20,7 +20,7 @@ fn advance_model(model : Model) -> Model {
   } else {
     model.energy_weather
   }
-  let ticked = { ..model, tick: next_tick, energy_weather: weather }
+  let ticked = { ..model, tick: next_tick, energy_weather: weather, }
   let refreshed = apply_tick_refresh_state(ticked, refresh)
   apply_tick_metric_state(refreshed, metrics)
 }

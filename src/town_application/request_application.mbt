@@ -9,7 +9,7 @@ pub fn request_application(
   state_root : String,
   operator_policy_path : String,
 ) -> RequestApplication {
-  { state_root, operator_policy_path }
+  { state_root, operator_policy_path, }
 }
 
 ///|

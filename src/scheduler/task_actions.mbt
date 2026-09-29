@@ -45,7 +45,7 @@ pub fn plan_tick(
     }
   }
   for recovery in @health.recovery_actions(report) {
-    actions.push({ kind: recovery.kind, detail: recovery.detail })
+    actions.push({ kind: recovery.kind, detail: recovery.detail, })
   }
   actions
 }

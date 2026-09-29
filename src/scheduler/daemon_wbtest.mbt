@@ -57,7 +57,7 @@ test "daemon tick migrates persisted job list to current defaults" {
       kind: standing_goal_job_kind(),
       interval_seconds: 30,
     },
-    { id: health_job_id(), kind: health_job_kind(), interval_seconds: 60 },
+    { id: health_job_id(), kind: health_job_kind(), interval_seconds: 60, },
     {
       id: projection_job_id(),
       kind: projection_job_kind(),
@@ -84,8 +84,8 @@ test "daemon tick preserves configured jobs and adds missing defaults" {
   )
   let report = @health.inspect_town(town)
   let configured_jobs = [
-    { id: "custom-maintenance", kind: "custom", interval_seconds: 30 },
-    { id: health_job_id(), kind: health_job_kind(), interval_seconds: 60 },
+    { id: "custom-maintenance", kind: "custom", interval_seconds: 30, },
+    { id: health_job_id(), kind: health_job_kind(), interval_seconds: 60, },
   ]
   let configured_daemon = DaemonState::new(jobs=configured_jobs)
   let (daemon, _, _) = plan_daemon_tick(configured_daemon, town, report)

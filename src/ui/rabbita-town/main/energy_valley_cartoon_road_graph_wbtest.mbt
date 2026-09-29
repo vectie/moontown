@@ -48,11 +48,11 @@ test "cartoon graph preserves every reviewed intersection and routed edge" {
 }
 
 ///|
-test "cartoon road hierarchy uses progressive disclosure" {
+test "cartoon road hierarchy retains the complete network at every zoom" {
   assert_eq(energy_valley_cartoon_road_rank_visible("primary", 0.20), true)
-  assert_eq(energy_valley_cartoon_road_rank_visible("secondary", 0.33), false)
+  assert_eq(energy_valley_cartoon_road_rank_visible("secondary", 0.20), true)
   assert_eq(energy_valley_cartoon_road_rank_visible("secondary", 0.34), true)
-  assert_eq(energy_valley_cartoon_road_rank_visible("local", 0.33), false)
+  assert_eq(energy_valley_cartoon_road_rank_visible("local", 0.20), true)
   assert_eq(energy_valley_cartoon_road_rank_visible("local", 0.34), true)
   assert_eq(energy_valley_cartoon_road_rank_visible("unknown", 1.00), false)
 }

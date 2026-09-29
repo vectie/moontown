@@ -13,7 +13,10 @@ fn world_compaction_fixture_add(
     "compact-building",
     "compact-writer:1:world-building-add",
     WorldAdd(
-      WorldBuildingPayload({ ..building, authored_id: Some("compact-building") }),
+      WorldBuildingPayload({
+        ..building,
+        authored_id: Some("compact-building"),
+      }),
     ),
     -120,
   )
@@ -36,7 +39,7 @@ fn world_compaction_fixture_move(
     add.entity_id,
     add.incarnation_id,
     WorldMove(
-      WorldBuildingPayload({ ..building, authored_id: Some(add.entity_id) }),
+      WorldBuildingPayload({ ..building, authored_id: Some(add.entity_id), }),
     ),
     0,
   )
@@ -68,9 +71,9 @@ test "world normalization compacts dominated moves and stale replay is harmless"
     ToJson::to_json(replayed).stringify(),
     ToJson::to_json(town_life_world_merge_state(replayed, compacted)).stringify(),
   )
-  let a = { ..state, events: [add, first] }
-  let b = { ..state, events: [second] }
-  let c = { ..state, events: [latest] }
+  let a = { ..state, events: [add, first], }
+  let b = { ..state, events: [second], }
+  let c = { ..state, events: [latest], }
   assert_eq(
     ToJson::to_json(town_life_world_merge_state(a, b)).stringify(),
     ToJson::to_json(town_life_world_merge_state(b, a)).stringify(),
@@ -173,7 +176,10 @@ test "orphan transition compaction remains safe when Add arrives late" {
   assert_true(orphan.events.any(event => event.id == latest_move.id))
   assert_true(orphan.events.any(event => event.id == first_delete.id))
   assert_true(orphan.events.any(event => event.id == later_delete.id))
-  let completed = town_life_world_merge_state(orphan, { ..state, events: [add] })
+  let completed = town_life_world_merge_state(orphan, {
+    ..state,
+    events: [add],
+  })
   let direct = town_life_world_normalize_state({
     ..state,
     events: [add, first_move, first_delete, later_delete, latest_move],
@@ -203,7 +209,7 @@ test "noncanonical valid transitions stay outside semantic compaction" {
     add.entity_id,
     add.incarnation_id,
     WorldMove(
-      WorldBuildingPayload({ ..building, authored_id: Some(add.entity_id) }),
+      WorldBuildingPayload({ ..building, authored_id: Some(add.entity_id), }),
     ),
     0,
   )
@@ -232,7 +238,7 @@ test "malformed by-dot winner fences lower valid stale replay" {
     "same-dot-site",
     "same-dot-writer:2:event",
     WorldAdd(
-      WorldBuildingPayload({ ..building, authored_id: Some("same-dot-site") }),
+      WorldBuildingPayload({ ..building, authored_id: Some("same-dot-site"), }),
     ),
     -120,
   )
@@ -246,7 +252,7 @@ test "malformed by-dot winner fences lower valid stale replay" {
     "same-dot-site",
     "zzzz-invalid-incarnation",
     WorldAdd(
-      WorldBuildingPayload({ ..building, authored_id: Some("same-dot-site") }),
+      WorldBuildingPayload({ ..building, authored_id: Some("same-dot-site"), }),
     ),
     -120,
   )
@@ -290,7 +296,7 @@ test "late Add between orphan Deletes cannot resurrect an incarnation" {
     "late-add-site",
     "late-add-writer:3:world-building-add",
     WorldAdd(
-      WorldBuildingPayload({ ..building, authored_id: Some("late-add-site") }),
+      WorldBuildingPayload({ ..building, authored_id: Some("late-add-site"), }),
     ),
     -120,
   )
@@ -323,7 +329,10 @@ test "late Add between orphan Deletes cannot resurrect an incarnation" {
     events: [after, before],
   })
   assert_eq(orphan.events.length(), 2)
-  let completed = town_life_world_merge_state(orphan, { ..state, events: [add] })
+  let completed = town_life_world_merge_state(orphan, {
+    ..state,
+    events: [add],
+  })
   let direct = town_life_world_normalize_state({
     ..state,
     events: [before, add, after],

@@ -12,7 +12,7 @@ pub(all) struct VisualDecoratorConfig {
 
 ///|
 pub fn VisualDecoratorConfig::empty() -> VisualDecoratorConfig {
-  { placements: [] }
+  { placements: [], }
 }
 
 ///|

@@ -17,7 +17,7 @@ test "Canvas relations are the selected snapshot relation ledger exactly" {
   // Canvas edge, proving the renderer does not retain that old lookup table.
   let without_relations = {
     ..snapshot,
-    world: { ..snapshot.world, place_relations: [] },
+    world: { ..snapshot.world, place_relations: [], },
   }
   assert_true(
     town_snapshot_canvas_relations_from(without_relations, source_id).is_empty(),
@@ -41,7 +41,7 @@ test "Canvas relation geometry and styling derive from semantic endpoints" {
   )
   let isolated = {
     ..snapshot,
-    world: { ..snapshot.world, place_relations: [relation] },
+    world: { ..snapshot.world, place_relations: [relation], },
   }
   let projected = town_snapshot_canvas_relations_from(isolated, source.id)
   assert_eq(projected.length(), 1)

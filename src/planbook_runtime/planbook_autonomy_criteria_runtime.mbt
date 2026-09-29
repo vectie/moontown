@@ -182,6 +182,6 @@ async fn planbook_unresolved_runtime_failures(
         },
       }
     }
-    None => { count: 0, sample: "no saved snapshot" }
+    None => { count: 0, sample: "no saved snapshot", }
   }
 }

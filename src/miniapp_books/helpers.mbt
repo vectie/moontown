@@ -6,7 +6,7 @@ fn miniapp_book_accept(
   run_id : String?,
   message : String,
 ) -> MiniappBookChange {
-  { ok: true, snapshot, message, building_id, book_id, run_id }
+  { ok: true, snapshot, message, building_id, book_id, run_id, }
 }
 
 ///|
@@ -17,7 +17,7 @@ fn miniapp_book_reject(
   run_id : String?,
   message : String,
 ) -> MiniappBookChange {
-  { ok: false, snapshot, message, building_id, book_id, run_id }
+  { ok: false, snapshot, message, building_id, book_id, run_id, }
 }
 
 ///|

@@ -5,7 +5,7 @@ pub(all) struct Polygon {
 
 ///|
 pub fn polygon(vertices : ArrayView[WorldPoint]) -> Polygon {
-  { vertices: freeze(vertices) }
+  { vertices: freeze(vertices), }
 }
 
 ///|
@@ -44,7 +44,7 @@ pub fn buildable_region(
   land_use : LandUse,
   provenance : Provenance,
 ) -> BuildableRegion {
-  { id, boundary, land_use, provenance }
+  { id, boundary, land_use, provenance, }
 }
 
 ///|

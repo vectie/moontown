@@ -58,7 +58,7 @@ test "UI deltas target and validate against the exact base blueprint" {
     4,
     energy_valley_base_blueprint_digest_for_seed(seed),
   )
-  let model = { ..init_model(), energy_world_delta: ledger }
+  let model = { ..init_model(), energy_world_delta: ledger, }
   let base = ecosystem_contract_world_from_snapshot(
     ecosystem_world_snapshot(golden_valley_world(seed), [], [], []),
     seed,
@@ -95,10 +95,10 @@ fn energy_valley_world_delta_test_valid_labs(
             // smallest canonical footprint guarantees two legal mutation
             // sites without weakening production placement validation.
             world,
-            { ..building, width: scale, depth: scale },
+            { ..building, width: scale, depth: scale, },
           )
           is None => {
-          result.push({ ..building, width: scale, depth: scale })
+          result.push({ ..building, width: scale, depth: scale, })
           if result.length() == count {
             return result
           }
@@ -207,10 +207,10 @@ test "TownLife Add Move Delete stays canonical after compiler caches warm" {
 test "mismatched blueprint delta is rejected instead of rebound" {
   let seed = 20260727
   let valid = energy_valley_empty_world_delta_for_seed(seed)
-  let stale = { ..valid, base_blueprint_digest: "sha256:stale-blueprint" }
+  let stale = { ..valid, base_blueprint_digest: "sha256:stale-blueprint", }
   assert_false(energy_valley_world_delta_targets_seed(stale, seed))
   assert_false(energy_valley_world_delta_valid_for_seed(stale, seed))
-  let model = { ..init_model(), energy_world_delta: stale }
+  let model = { ..init_model(), energy_world_delta: stale, }
   let projected = energy_valley_validated_world_delta_projection(model, seed)
   assert_true(projected.buildings.is_empty())
   assert_true(projected.roads.is_empty())
@@ -279,7 +279,7 @@ test "all nine saved operations convert and project exhaustively" {
     floors: 2,
   }
   let operations : Array[SavedWorldDeltaOperation] = [
-    AddBuilding({ id: "authored-building-70", building }),
+    AddBuilding({ id: "authored-building-70", building, }),
     MoveBuilding({
       id: "authored-building-70",
       x: 24,
@@ -289,19 +289,19 @@ test "all nine saved operations convert and project exhaustively" {
       entrance_x: Some(25),
       entrance_y: Some(24),
     }),
-    DeleteBuilding({ id: "authored-building-70" }),
+    DeleteBuilding({ id: "authored-building-70", }),
     AddRoad({
       id: "authored-road-component-20-20",
-      path: [{ x: 20, y: 20 }, { x: 21, y: 20 }],
+      path: [{ x: 20, y: 20, }, { x: 21, y: 20, }],
     }),
     MoveRoad({
       id: "authored-road-component-20-20",
-      path: [{ x: 20, y: 20 }, { x: 21, y: 20 }, { x: 22, y: 20 }],
+      path: [{ x: 20, y: 20, }, { x: 21, y: 20, }, { x: 22, y: 20, }],
     }),
-    DeleteRoad({ id: "authored-road-component-20-20" }),
-    AddPark({ id: "authored-park-30-30", x: 30, y: 30 }),
-    MovePark({ id: "authored-park-30-30", x: 31, y: 32 }),
-    DeletePark({ id: "authored-park-30-30" }),
+    DeleteRoad({ id: "authored-road-component-20-20", }),
+    AddPark({ id: "authored-park-30-30", x: 30, y: 30, }),
+    MovePark({ id: "authored-park-30-30", x: 31, y: 32, }),
+    DeletePark({ id: "authored-park-30-30", }),
   ]
   let ledger : EnergyValleyWorldDeltaLedger = {
     ..base,

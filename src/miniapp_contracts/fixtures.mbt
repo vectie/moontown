@@ -20,7 +20,7 @@ pub fn miniapp_fixture_publication(
 
 ///|
 pub fn miniapp_fixture_user(id? : String = "user-a") -> MiniappUser {
-  { id, display_name: "User A", avatar_url: None, version: 1 }
+  { id, display_name: "User A", avatar_url: None, version: 1, }
 }
 
 ///|
@@ -208,7 +208,7 @@ pub fn miniapp_fixture_snapshot() -> MiniappTownSnapshot {
     messages: [miniapp_fixture_message(thread_id=thread.id)],
     runs: [miniapp_fixture_run()],
     permissions: [
-      { subject_kind: "user", subject_id: user.id, role: OwnerRole },
+      { subject_kind: "user", subject_id: user.id, role: OwnerRole, },
     ],
     audit_events: [miniapp_fixture_audit_event()],
     generated_at_ms: 3000UL,

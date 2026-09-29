@@ -26,5 +26,5 @@ pub fn inspect_town(town : @core.TownState) -> HealthReport {
     })
   }
   let anomalies = detect_anomalies(worker_health, town.executions)
-  { worker_health, book_health, anomalies }
+  { worker_health, book_health, anomalies, }
 }

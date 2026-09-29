@@ -1,6 +1,6 @@
 ///|
 pub fn empty_registry() -> PackProjectionRegistry {
-  { projections: [] }
+  { projections: [], }
 }
 
 ///|
@@ -18,7 +18,7 @@ pub fn reconcile_projection(
   let retained = registry.projections.filter(existing => {
     existing.pack_id != projection.pack_id
   })
-  Ok({ projections: retained + [projection] })
+  Ok({ projections: retained + [projection], })
 }
 
 ///|

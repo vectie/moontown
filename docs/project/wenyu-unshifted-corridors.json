@@ -1,0 +1,85 @@
+{
+  "riversideShiftsApplied": false,
+  "rollback": "All road paths are exactly the original gentle projection. Buildings, pads, green spine and characters retained. The nested audit describes the now-disabled fit method.",
+  "audit": {
+    "schema": "moontown.wenyu_rigid_corridors.v1",
+    "runtimeEligible": false,
+    "terrainChanged": false,
+    "source": "docs/project/wenyu-lower-perspective.json",
+    "base": "gentle 0.01 / 0.01",
+    "method": "One constant translation per named riverside corridor, shared across all of its non-exempt OSM ways. Search 0.1-tile grid within radius 1.5; equal-distance samples; squared bank-clearance deficit plus 0.03 squared-translation penalty. No vertex nudges, curve smoothing, rubber-sheet warp, or per-way fitting.",
+    "corridors": [
+      {
+        "name": "温榆河左堤路",
+        "osmWayIds": [
+          47518902,
+          47518911,
+          276208167,
+          1282700850
+        ],
+        "translationTiles": {
+          "x": 0,
+          "y": 0
+        },
+        "waterSamplesBefore": 733,
+        "waterSamplesAfter": 733,
+        "sampleCount": 1327,
+        "objectiveBefore": 0.8272201804170096,
+        "objectiveAfter": 0.8272201804170096
+      },
+      {
+        "name": "温榆河右堤路",
+        "osmWayIds": [
+          260842920,
+          839901799,
+          839901800,
+          839901805,
+          1137139853,
+          1272460753,
+          1280498644,
+          1280498646,
+          1280740322,
+          1387759526,
+          1387759527
+        ],
+        "translationTiles": {
+          "x": 0,
+          "y": 0
+        },
+        "waterSamplesBefore": 427,
+        "waterSamplesAfter": 427,
+        "sampleCount": 1498,
+        "objectiveBefore": 0.9098925074060926,
+        "objectiveAfter": 0.9098925074060926
+      },
+      {
+        "name": "温榆河绿道昌平段",
+        "osmWayIds": [
+          395308293,
+          395308294,
+          417225061,
+          1059215622,
+          1059215623,
+          1059215624,
+          1059215626,
+          1280498648,
+          1281900274
+        ],
+        "translationTiles": {
+          "x": 0,
+          "y": 0
+        },
+        "waterSamplesBefore": 275,
+        "waterSamplesAfter": 275,
+        "sampleCount": 958,
+        "objectiveBefore": 0.3845725799924992,
+        "objectiveAfter": 0.3845725799924992
+      }
+    ],
+    "bridgeWaysUnchanged": 338,
+    "sourceWays": 6420,
+    "sourceVertices": 44343,
+    "approachConnectors": [],
+    "limitations": "Rigid placement trial, not a geographic calibration or routing graph. Explicit short display approach connectors bridge shifted/unshifted positions only at existing shared OSM nodes. Residual water overlap remains; no source node or bridge metadata changes."
+  }
+}

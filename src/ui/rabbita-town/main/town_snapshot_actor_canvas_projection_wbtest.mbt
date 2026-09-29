@@ -111,7 +111,7 @@ test "runtime and local player appearance survive the snapshot boundary" {
   )
 
   let player = snapshot_actor_test_player()
-  let player_model = { ..init_model(), player: Some(player) }
+  let player_model = { ..init_model(), player: Some(player), }
   let player_snapshot = ecosystem_contract_town_snapshot(player_model, seed)
   let player_id = ecosystem_contract_scoped_id("player", "local")
   let player_profile = player_snapshot.find_actor_profile(player_id).unwrap()
@@ -134,7 +134,7 @@ test "runtime and local player appearance survive the snapshot boundary" {
 
 ///|
 test "reduced motion is a projection input, not a second movement truth" {
-  let model = { ..init_model(), tick: 1 }
+  let model = { ..init_model(), tick: 1, }
   let snapshot = ecosystem_contract_town_snapshot(model, 20260727)
   let still = town_snapshot_canvas_agents(snapshot, 99.0, true, None)
   assert_true(still.all(agent => agent.bob == 0.0))

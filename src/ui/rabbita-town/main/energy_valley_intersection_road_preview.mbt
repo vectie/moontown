@@ -110,9 +110,12 @@ fn intersection_road_preview_retain_semantic_cache_key(
 
 ///|
 fn intersection_road_preview_graph_identity() -> String {
+  if wenyu_rigid_scene_active() {
+    return "wenyu-unshifted-scene-v2:\{wenyu_scene_prefix.length()}"
+  }
   if reference_osm_block_graph_ready() &&
     reference_osm_cartoon_road_graph_prepare() {
-    "osm-cartoon-road:v1:{reference_osm_cartoon_road_node_count()}:{reference_osm_cartoon_road_edge_count()}"
+    "osm-cartoon-road:design-corridor-fit-v1:\{town_design_registration_revision()}:\{reference_osm_cartoon_road_node_count()}:\{reference_osm_cartoon_road_edge_count()}"
   } else if reference_intersection_preview_graph_ready() {
     "wenyu-source-graph:145:216"
   } else {
@@ -124,7 +127,13 @@ fn intersection_road_preview_graph_identity() -> String {
 fn intersection_road_preview_cache_key(
   snapshot : @energy_valley_contract.TownSnapshot,
 ) -> String {
-  "{snapshot.world.blueprint_digest}:{snapshot.world.places.length()}:{snapshot.world.installations.length()}:{intersection_road_preview_graph_identity()}"
+  let bearing = if wenyu_rigid_scene_active() &&
+    town_bearing_buildings_requested() {
+    ":bearing-streetfront-v2"
+  } else {
+    ""
+  }
+  "\{snapshot.world.blueprint_digest}:\{snapshot.world.places.length()}:\{snapshot.world.installations.length()}:\{intersection_road_preview_graph_identity()}\{bearing}"
 }
 
 ///|
@@ -156,13 +165,19 @@ fn intersection_road_preview_building_geometry_valid(
     intersection_road_preview_vector_style_supported(building.style)
   building.x >= 0 &&
   building.y >= 0 &&
-  // All preview skins share one authored lot contract: a 5×5 footprint plus
-  // one tile on every side, i.e. a 7×7 reserved ground envelope.
-  building.width == 5 &&
-  building.depth == 5 &&
-  building.apron == 1 &&
-  building.width + building.apron * 2 == 7 &&
-  building.depth + building.apron * 2 == 7 &&
+  // Streetfront homes keep the setback INSIDE a three-tile plot, instead of
+  // shrinking architecture to pay for an additional external lawn apron.
+  (building.width == 3 || building.width == 4 || building.width == 5) &&
+  building.depth == building.width &&
+  (
+    building.apron == 1 ||
+    (
+      building.apron == 0 &&
+      building.width == 3 &&
+      building.id.has_prefix("procedural-grid-density-") &&
+      (building.style == "row" || building.style == "lowrise")
+    )
+  ) &&
   building.x - building.apron >= 0 &&
   building.y - building.apron >= 0 &&
   building.x + building.width + building.apron <= 256 &&
@@ -337,6 +352,9 @@ fn intersection_road_preview_apron_valid(
   if !intersection_road_preview_building_geometry_valid(building) {
     return false
   }
+  if wenyu_rigid_scene_active() {
+    return wenyu_scene_lot_valid(building)
+  }
   let graph_ready = energy_valley_intersection_road_preview_active()
   let osm_ready = graph_ready && reference_osm_block_graph_ready()
   let mut frontage = false
@@ -382,7 +400,7 @@ fn intersection_road_preview_apron_valid(
 
 ///|
 /// Procedural and curated buildings share the exact same lot contract. This
-/// keeps the displayed road, the 5×5 footprint, and the complete one-tile
+/// keeps the displayed road, the scaled footprint, and the complete one-tile
 /// apron as a single source of truth.
 fn intersection_road_preview_procedural_lot_valid(
   building : IntersectionRoadPreviewBuilding,
@@ -395,6 +413,17 @@ fn intersection_road_preview_buildings_overlap(
   left : IntersectionRoadPreviewBuilding,
   right : IntersectionRoadPreviewBuilding,
 ) -> Bool {
+  // Compact infill shares landscaped strips, not building footprints. Keep
+  // at least one full tile between masses: new walls cannot enter even an
+  // existing building's apron. Planting margins may coincide; each building
+  // still passes the unchanged road/terrain clearance with its full apron.
+  if left.id.has_prefix("procedural-grid-density-") ||
+    right.id.has_prefix("procedural-grid-density-") {
+    return !(left.x + left.width + 1 <= right.x ||
+      right.x + right.width + 1 <= left.x ||
+      left.y + left.depth + 1 <= right.y ||
+      right.y + right.depth + 1 <= left.y)
+  }
   !(left.x + left.width + left.apron <= right.x - right.apron ||
   right.x + right.width + right.apron <= left.x - left.apron ||
   left.y + left.depth + left.apron <= right.y - right.apron ||
@@ -486,7 +515,12 @@ fn intersection_road_preview_relocate_procedural_buildings(
               ..building,
               x: building.x + dx,
               y: building.y + dy,
-              depth_key: building.x + dx + building.y + dy + 10,
+              depth_key: building.x +
+              dx +
+              building.y +
+              dy +
+              building.width +
+              building.depth,
             }
             let mut conflict = false
             for existing in occupied {
@@ -523,7 +557,7 @@ fn intersection_road_preview_relocate_procedural_buildings(
 ///|
 /// Restore a dense, deterministic procedural layer between the fixed lots.
 /// The semantic profile supplies style and stable variant seed; every accepted
-/// candidate is relocated through the same 5×5 + one-tile-apron contract.
+/// candidate is relocated through the same footprint + one-tile-apron contract.
 fn intersection_road_preview_procedural_buildings(
   snapshot : @energy_valley_contract.TownSnapshot,
   fixed : Array[IntersectionRoadPreviewBuilding],
@@ -553,90 +587,50 @@ fn intersection_road_preview_procedural_buildings(
           source.place_id,
           source.interior_seed,
         )
+        let span = town_scene_building_span(source.style)
         match
           intersection_road_preview_building_asset_path(source.style, variant) {
           None => continue
           Some(asset_path) =>
             raw.push({
-              id: "procedural-source-{raw.length()}",
+              id: "procedural-source-\{source.place_id.to_string()}",
               style: source.style,
               asset_path,
               x: source.x,
               y: source.y,
-              width: 5,
-              depth: 5,
+              width: span,
+              depth: span,
               apron: 1,
-              depth_key: source.x + source.y + 10,
+              depth_key: source.x + source.y + span * 2,
             })
         }
       }
-      // Reserve the original MoonTown vector forms before the image-backed
-      // density pass. If images fill the pool first, every vector candidate
-      // is correctly rejected as overlapping and the procedural layer becomes
-      // visually empty even though its draw path is live.
-      let vector_styles = ["home", "market", "garden", "lab", "plaza", "radar"]
-      let mut vector_count = 0
-      for phase_y in 0..<2 {
-        for phase_x in 0..<2 {
-          for row in 0..<18 {
-            for col in 0..<32 {
-              if vector_count < 24 {
-                let x = 6 + col * 8 + phase_x
-                let y = 6 + row * 8 + phase_y
-                if x + 6 < 256 && y + 6 < 144 {
-                  let style = vector_styles[vector_count %
-                    vector_styles.length()]
-                  let candidate : IntersectionRoadPreviewBuilding = {
-                    id: "procedural-vector-{vector_count}-{x}-{y}",
-                    style,
-                    asset_path: "",
-                    x,
-                    y,
-                    width: 5,
-                    depth: 5,
-                    apron: 1,
-                    depth_key: x + y + 10,
-                  }
-                  let mut overlaps_raw = false
-                  for existing in raw {
-                    if intersection_road_preview_buildings_overlap(
-                        candidate, existing,
-                      ) {
-                      overlaps_raw = true
-                    }
-                  }
-                  if !overlaps_raw &&
-                    intersection_road_preview_procedural_lot_valid(candidate) {
-                    raw.push(candidate)
-                    vector_count += 1
-                  }
-                }
-              }
-            }
-          }
-        }
-      }
+      // Reject/relocate legacy candidates BEFORE counting the density budget.
+      // Otherwise 64 impossible sites can starve the entire infill pass.
+      let accepted = intersection_road_preview_relocate_procedural_buildings(
+        raw, fixed,
+      )
       // The old snapshot can be sparse after a migration. Fill the remaining
       // density from a deterministic, phase-shifted native grid, admitting a
-      // slot only when its 7×7 apron fronts the reviewed graph. This is still
+      // slot only when its reserved apron fronts the reviewed graph. This is still
       // a MoonBit presentation calculation; no Python/runtime asset is used.
-      if reference_intersection_preview_graph_ready() {
-        let styles = [
-          "lowrise", "industrial", "tower", "courtyard", "campus", "row", "civic",
-        ]
-        for phase_y in 0..<2 {
-          for phase_x in 0..<2 {
+      if wenyu_rigid_scene_active() ||
+        energy_valley_intersection_road_preview_active() {
+        for phase_y in 0..<4 {
+          for phase_x in 0..<4 {
             for row in 0..<18 {
               for col in 0..<32 {
-                if raw.length() < 96 {
-                  let x = 2 + col * 8 + phase_x
-                  let y = 2 + row * 8 + phase_y
+                if accepted.length() < 96 {
+                  let (x, y) = town_scene_infill_site(
+                    row * 32 + col,
+                    phase_x,
+                    phase_y,
+                  )
                   if x + 6 < 256 && y + 6 < 144 {
-                    // Rotate through the authored pack so every reference
-                    // silhouette is represented instead of letting a hash
-                    // starve one of the seven requested styles.
-                    let style = styles[raw.length() % styles.length()]
-                    let source_id = "grid-{x}-{y}"
+                    // Neighborhood identity is independent of admission order.
+                    let style = town_scene_neighborhood_style(x, y)
+                    let span = town_scene_building_span(style)
+                    let source_id = "grid-\{x}-\{y}"
                     let stable_source_id = @energy_valley_contract.stable_id(
                       "preview-grid", source_id,
                     ).unwrap()
@@ -652,18 +646,25 @@ fn intersection_road_preview_procedural_buildings(
                       None => ()
                       Some(asset_path) => {
                         let candidate : IntersectionRoadPreviewBuilding = {
-                          id: "procedural-grid-{x}-{y}",
+                          id: "procedural-grid-\{x}-\{y}",
                           style,
                           asset_path,
                           x,
                           y,
-                          width: 5,
-                          depth: 5,
+                          width: span,
+                          depth: span,
                           apron: 1,
-                          depth_key: x + y + 10,
+                          depth_key: x + y + span * 2,
                         }
                         let mut overlaps_raw = false
-                        for existing in raw {
+                        for existing in accepted {
+                          if intersection_road_preview_buildings_overlap(
+                              candidate, existing,
+                            ) {
+                            overlaps_raw = true
+                          }
+                        }
+                        for existing in fixed {
                           if intersection_road_preview_buildings_overlap(
                               candidate, existing,
                             ) {
@@ -677,7 +678,7 @@ fn intersection_road_preview_procedural_buildings(
                             candidate,
                           ) &&
                           !overlaps_raw {
-                          raw.push(candidate)
+                          accepted.push(candidate)
                         }
                       }
                     }
@@ -688,11 +689,8 @@ fn intersection_road_preview_procedural_buildings(
           }
         }
       }
-      let placed = intersection_road_preview_relocate_procedural_buildings(
-        raw, fixed,
-      )
-      intersection_road_preview_procedural_cache[cache_key] = placed
-      placed
+      intersection_road_preview_procedural_cache[cache_key] = accepted
+      accepted
     }
   }
 }
@@ -725,6 +723,10 @@ fn intersection_road_preview_buildings_by_depth(
         None => result[building.depth_key] = [building]
       }
     }
+  }
+  if wenyu_rigid_scene_active() && town_bearing_buildings_requested() {
+    town_bearing_complete_mix(result)
+    town_bearing_fill_density(result, town_bearing_density_target)
   }
   for _, buildings in result {
     intersection_road_preview_sort_equal_depth(buildings)
@@ -762,7 +764,8 @@ fn intersection_road_preview_building_counts(
   let mut vector_count = 0
   for _, items in buildings {
     for building in items {
-      if building.asset_path.is_empty() {
+      if building.asset_path.is_empty() ||
+        (wenyu_rigid_scene_active() && town_bearing_buildings_requested()) {
         vector_count += 1
       } else {
         image_count += 1
@@ -895,9 +898,9 @@ extern "js" fn intersection_road_preview_building_asset_ready(
   #| }
 
 ///|
-/// Make the 7×7 lot contract visible on the map. The outer diamond is the
-/// footprint-plus-apron envelope; the inner diamond is the 5×5 building
-/// footprint. This is a low-alpha guide painted below the graph and sprites,
+/// Landscape each scaled footprint-plus-apron envelope. The inner stone
+/// plinth and outer planted border share the building's ground anchor.
+/// This is ground art painted below the graph and sprites,
 /// so it cannot hide a road or change the building silhouette.
 extern "js" fn golden_draw_intersection_road_preview_building_lot(
   context : @dom.CanvasRenderingContext2D,
@@ -905,12 +908,13 @@ extern "js" fn golden_draw_intersection_road_preview_building_lot(
   sy : Double,
   zoom : Double,
   land_type : String,
+  span : Double,
 ) -> Unit =
-  #| (context, sx, sy, zoom, landType) => {
+  #| (context, sx, sy, zoom, landType, span) => {
   #|   // A square world lot projects to an isometric diamond: x spans
   #|   // (w+d)*16px and y spans (w+d)*8px at zoom 1. For a square of side
   #|   // `size`, that is size*32px by size*16px. Keeping the two half-axes
-  #|   // distinct is what makes the visible 7x7 contract read as a rectangle
+  #|   // distinct is what makes the lot read as a ground-plane rectangle
   #|   // instead of a pinched diamond.
   #|   const diamond = size => {
   #|     const halfX = size * 32 * zoom;
@@ -937,23 +941,21 @@ extern "js" fn golden_draw_intersection_road_preview_building_lot(
   #|   };
   #|   context.save();
   #|   context.lineJoin = "round";
-  #|   // Keep the apron boundary visually separate from the building art.
-  #|   // The dashed outer edge is the reserved one-tile ring; the solid inner
-  #|   // edge is the exact 5x5 footprint.
-  #|   context.setLineDash([4, 3]);
+  #|   // A planted perimeter and warm stone plinth, never a debug bounding box.
+  #|   context.setLineDash([]);
   #|   const plaza = landType === "plaza";
   #|   paint(
-  #|     diamond(7),
-  #|     plaza ? "rgba(244,235,202,0.26)" : "rgba(74,111,78,0.18)",
-  #|     plaza ? "rgba(151,122,69,0.82)" : "rgba(52,87,70,0.78)",
-  #|     Math.max(2.0, 2.35 * zoom),
+  #|     diamond(span + 2),
+  #|     "#b6c99b",
+  #|     "rgba(106,130,89,0.25)",
+  #|     0.8 * zoom,
   #|   );
   #|   context.setLineDash([]);
   #|   paint(
-  #|     diamond(5),
-  #|     "rgba(255,255,255,0.07)",
-  #|     "rgba(255,255,255,0.86)",
-  #|     Math.max(1.25, 1.45 * zoom),
+  #|     diamond(span + 0.7),
+  #|     plaza ? "#e9e1ce" : "#dcded2",
+  #|     "rgba(255,253,240,0.72)",
+  #|     1.2 * zoom,
   #|   );
   #|   context.restore();
   #| }
@@ -1020,6 +1022,12 @@ fn golden_draw_intersection_road_preview_building(
       viewport_width,
       viewport_height,
     ) {
+    if wenyu_rigid_scene_active() && town_bearing_buildings_requested() {
+      town_bearing_draw_building(
+        context, building, viewport_width, viewport_height,
+      )
+      return
+    }
     if !building.asset_path.is_empty() &&
       intersection_road_preview_building_asset_ready(building.asset_path) {
       golden_draw_intersection_road_preview_building_shadow(
@@ -1090,7 +1098,38 @@ fn intersection_road_preview_installations_by_depth(
   let result : Map[Int, Array[@energy_valley_contract.Installation]] = Map([])
   for depth, items in town_snapshot_installations_by_depth(snapshot) {
     for installation in items {
-      if intersection_road_preview_installation_visible(installation) {
+      let position = town_snapshot_installation_position(installation)
+      let reserved_lot = match
+        (position, intersection_road_preview_land_cache.get(cache_key)) {
+        (Some(point), Some(cells)) =>
+          cells.contains(
+            town_canvas_road_key(point.x.to_int(), point.y.to_int()),
+          )
+        _ => false
+      }
+      let landscape_visible = match position {
+        Some(point) if installation.kind is @energy_valley_contract.Tree &&
+          !(installation.provenance.kind is @energy_valley_contract.UserDelta) =>
+          town_scene_background_tree_visible(point.x.to_int(), point.y.to_int()) &&
+          !reserved_lot &&
+          (if wenyu_rigid_scene_active() {
+            wenyu_scene_region_clear(
+              wenyu_scene_road_prefix,
+              point.x.to_int(),
+              point.y.to_int(),
+              1,
+              1,
+            )
+          } else {
+            !reference_osm_cartoon_road_corridor_cell_at(
+              point.x.to_int(),
+              point.y.to_int(),
+            )
+          })
+        _ => true
+      }
+      if landscape_visible &&
+        intersection_road_preview_installation_visible(installation) {
         match result.get(depth) {
           Some(visible) => visible.push(installation)
           None => result[depth] = [installation]
@@ -1104,9 +1143,8 @@ fn intersection_road_preview_installations_by_depth(
 
 ///|
 /// Draw the selected road structure in the established MoonTown cartoon style.
-/// The OSM payload supplies reference topology only; its dense raw linework is
-/// never painted. Parallel carriageways and junction complexes have already
-/// been contracted by `reference_osm_cartoon_road_graph_prepare`.
+/// The OSM payload supplies immutable topology. Every reviewed path is kept;
+/// world-space widths and restrained detail provide the visual hierarchy.
 extern "js" fn golden_draw_intersection_road_preview_graph(
   context : @dom.CanvasRenderingContext2D,
   camera_x : Double,
@@ -1114,8 +1152,12 @@ extern "js" fn golden_draw_intersection_road_preview_graph(
   zoom : Double,
   viewport_width : Int,
   viewport_height : Int,
+  primary_width : Double,
+  secondary_width : Double,
+  local_width : Double,
+  authoring : Bool,
 ) -> Unit =
-  #| (context, cameraX, cameraY, zoom, viewportWidth, viewportHeight) => {
+  #| (context, cameraX, cameraY, zoom, viewportWidth, viewportHeight, primaryWidth, secondaryWidth, localWidth, authoring) => {
   #|   const osmReady =
   #|     globalThis.__moontownEnergyValleyOsmBlockGraphValidated === true;
   #|   const snapshot = osmReady
@@ -1154,26 +1196,27 @@ extern "js" fn golden_draw_intersection_road_preview_graph(
   #|     return maximumX >= -margin && minimumX <= viewportWidth + margin &&
   #|       maximumY >= -margin && minimumY <= viewportHeight + margin;
   #|   };
-  #|   const trace = (path, smooth = osmReady) => {
+  #|   const trace = (path, smooth = false) => {
   #|     if (!Array.isArray(path) || path.length < 2) return false;
-  #|     const first = toScreen(path[0]);
+  #|     const ground = point => [point[0] / 1000, point[1] / 1000];
+  #|     const first = ground(path[0]);
   #|     context.beginPath();
   #|     context.moveTo(first[0], first[1]);
   #|     if (smooth && path.length > 2) {
   #|       for (let index = 1; index < path.length - 1; index += 1) {
-  #|         const point = toScreen(path[index]);
-  #|         const next = toScreen(path[index + 1]);
+  #|         const point = ground(path[index]);
+  #|         const next = ground(path[index + 1]);
   #|         context.quadraticCurveTo(
   #|           point[0], point[1],
   #|           (point[0] + next[0]) / 2,
   #|           (point[1] + next[1]) / 2,
   #|         );
   #|       }
-  #|       const last = toScreen(path[path.length - 1]);
+  #|       const last = ground(path[path.length - 1]);
   #|       context.lineTo(last[0], last[1]);
   #|     } else {
   #|       for (let index = 1; index < path.length; index += 1) {
-  #|         const point = toScreen(path[index]);
+  #|         const point = ground(path[index]);
   #|         context.lineTo(point[0], point[1]);
   #|       }
   #|     }
@@ -1182,10 +1225,19 @@ extern "js" fn golden_draw_intersection_road_preview_graph(
   #|   const edges = edgesSource.filter(edge =>
   #|     Array.isArray(edge?.pathMillis) && visible(edge.pathMillis) &&
   #|       (!osmReady || edge.rank === "primary" ||
-  #|         (edge.rank === "secondary" && zoom >= 0.34) ||
-  #|         (edge.rank === "local" && zoom >= 0.34))
+  #|         edge.rank === "secondary" || edge.rank === "local")
   #|   );
   #|   context.save();
+  #|   // Project the complete road surface, not just its centerline. A circular
+  #|   // world-space stroke becomes an ellipse under the same 2:1 ground camera
+  #|   // as lots and buildings; no zoom-dependent minimum pixel width.
+  #|   context.transform(32 * zoom, 16 * zoom, -32 * zoom, 16 * zoom,
+  #|     viewportWidth / 2 - cameraX * zoom, viewportHeight / 2 - cameraY * zoom);
+  #|   // Bound road surfaces at the finite terrain edge, without moving paths.
+  #|   context.beginPath();
+  #|   context.rect(0, 0, 256, 144);
+  #|   context.clip();
+  #|   const widths = { primary: primaryWidth, secondary: secondaryWidth, local: localWidth };
   #|   context.lineCap = "round";
   #|   context.lineJoin = "round";
   #|   context.setLineDash([]);
@@ -1193,13 +1245,9 @@ extern "js" fn golden_draw_intersection_road_preview_graph(
   #|     // Soft ground contact, warm curb, and slate asphalt echo the original
   #|     // isometric road tiles without bringing back their stair-step shape.
   #|     context.save();
-  #|     context.translate(0, Math.max(1.4, 2.7 * zoom));
-  #|     context.strokeStyle = "rgba(48,72,54,0.24)";
+  #|     context.strokeStyle = "rgba(79,104,77,0.18)";
   #|     for (const rank of ["local", "secondary", "primary"]) {
-  #|       context.lineWidth = rank === "primary"
-  #|         ? Math.max(11.0, 17.5 * zoom)
-  #|         : rank === "secondary" ? Math.max(9.0, 14.0 * zoom)
-  #|           : Math.max(7.0, 10.5 * zoom);
+  #|       context.lineWidth = widths[rank] + 0.10;
   #|       for (const edge of edges) {
   #|         if (edge.rank === rank && trace(edge.pathMillis)) context.stroke();
   #|       }
@@ -1207,29 +1255,23 @@ extern "js" fn golden_draw_intersection_road_preview_graph(
   #|     context.restore();
   #|     context.strokeStyle = "#f4eee2";
   #|     for (const rank of ["local", "secondary", "primary"]) {
-  #|       context.lineWidth = rank === "primary"
-  #|         ? Math.max(9.5, 15.0 * zoom)
-  #|         : rank === "secondary" ? Math.max(7.5, 11.8 * zoom)
-  #|           : Math.max(6.0, 8.8 * zoom);
+  #|       context.lineWidth = widths[rank];
   #|       for (const edge of edges) {
   #|         if (edge.rank === rank && trace(edge.pathMillis)) context.stroke();
   #|       }
   #|     }
   #|     for (const rank of ["local", "secondary", "primary"]) {
-  #|       context.strokeStyle = rank === "primary" ? "#5f707a" :
-  #|         rank === "secondary" ? "#7b878c" : "#929a99";
-  #|       context.lineWidth = rank === "primary"
-  #|         ? Math.max(5.8, 9.2 * zoom)
-  #|         : rank === "secondary" ? Math.max(4.5, 7.0 * zoom)
-  #|           : Math.max(3.4, 5.2 * zoom);
+  #|       context.strokeStyle = rank === "primary" ? "#738084" :
+  #|         rank === "secondary" ? "#88908c" : "#a5aaa0";
+  #|       context.lineWidth = widths[rank] * 0.66;
   #|       for (const edge of edges) {
   #|         if (edge.rank === rank && trace(edge.pathMillis)) context.stroke();
   #|       }
   #|     }
   #|     if (zoom >= 0.62) {
-  #|       context.setLineDash([Math.max(5, 10 * zoom), Math.max(4, 8 * zoom)]);
+  #|       context.setLineDash([0.40, 0.48]);
   #|       context.strokeStyle = "rgba(247,241,222,0.88)";
-  #|       context.lineWidth = Math.max(1.0, 1.45 * zoom);
+  #|       context.lineWidth = 0.035;
   #|       for (const edge of edges) {
   #|         if (edge.rank === "primary" && trace(edge.pathMillis)) {
   #|           context.stroke();
@@ -1239,12 +1281,12 @@ extern "js" fn golden_draw_intersection_road_preview_graph(
   #|     }
   #|   } else {
   #|     context.strokeStyle = "rgba(247,244,235,0.97)";
-  #|     context.lineWidth = Math.max(4.4, 8.0 * zoom);
+  #|     context.lineWidth = secondaryWidth;
   #|     for (const edge of edges) if (trace(edge.pathMillis, false)) {
   #|       context.stroke();
   #|     }
   #|     context.strokeStyle = "#405866";
-  #|     context.lineWidth = Math.max(2.4, 5.0 * zoom);
+  #|     context.lineWidth = secondaryWidth * 0.66;
   #|     for (const edge of edges) if (trace(edge.pathMillis, false)) {
   #|       context.stroke();
   #|     }
@@ -1257,13 +1299,25 @@ extern "js" fn golden_draw_intersection_road_preview_graph(
   #|     for (const path of bridgePaths) {
   #|       context.setLineDash([]);
   #|       context.strokeStyle = "rgba(250,248,239,0.99)";
-  #|       context.lineWidth = Math.max(6.0, 10.0 * zoom);
+  #|       context.lineWidth = widths[edge.rank] || secondaryWidth;
   #|       if (trace(path)) context.stroke();
   #|       context.strokeStyle = "#a98c66";
-  #|       context.lineWidth = Math.max(4.0, 7.5 * zoom);
+  #|       context.lineWidth = (widths[edge.rank] || secondaryWidth) * 0.82;
   #|       if (trace(path)) context.stroke();
   #|       context.strokeStyle = "#5f707a";
-  #|       context.lineWidth = Math.max(2.8, 5.5 * zoom);
+  #|       context.lineWidth = (widths[edge.rank] || secondaryWidth) * 0.66;
+  #|       if (trace(path)) context.stroke();
+  #|     }
+  #|   }
+  #|   if (authoring && snapshot.designRegistration) {
+  #|     context.setLineDash([0.3, 0.18]);
+  #|     context.strokeStyle = '#d67b24';
+  #|     context.lineWidth = 0.10;
+  #|     for (const edge of edges) if (trace(edge.sourcePathMillis)) context.stroke();
+  #|     context.setLineDash([]);
+  #|     context.strokeStyle = '#bb245b';
+  #|     context.lineWidth = 0.32;
+  #|     for (const edge of edges) for (const path of edge.designConflicts || []) {
   #|       if (trace(path)) context.stroke();
   #|     }
   #|   }
@@ -1359,6 +1413,9 @@ fn intersection_road_preview_graph_walkers(
     let y = reference_intersection_preview_graph_walker_coordinate(
       index, elapsed_seconds, 1, reduced_motion,
     )
+    if x < 0.0 || x >= 256.0 || y < 0.0 || y >= 144.0 {
+      continue
+    }
     result.push({
       x,
       y,
@@ -1616,13 +1673,22 @@ fn intersection_road_preview_building_land_cells(
       let land_type = intersection_road_preview_building_land_type(
         building.style,
       )
-      for y in (building.y - building.apron)..<=(building.y + building.depth) {
-        for x in (building.x - building.apron)..<=(building.x + building.width) {
+      for
+        y in (building.y - building.apron)..<(building.y +
+        building.depth +
+        building.apron) {
+        for
+          x in (building.x - building.apron)..<(building.x +
+          building.width +
+          building.apron) {
           if x >= 0 &&
             y >= 0 &&
             x < 256 &&
             y < 144 &&
-            !reference_intersection_preview_graph_cell_at(x, y) {
+            (
+              wenyu_rigid_scene_active() ||
+              !reference_intersection_preview_graph_cell_at(x, y)
+            ) {
             result[town_canvas_road_key(x, y)] = land_type
           }
         }
@@ -1642,6 +1708,12 @@ fn draw_intersection_road_preview_frame(
   viewport_height : Int,
 ) -> Bool {
   let benchmark_start = intersection_road_view_benchmark_now()
+  if wenyu_gentle_ground_trial_requested() || wenyu_scene_default_requested() {
+    draw_wenyu_gentle_ground_trial(
+      context, snapshot, view, viewport_width, viewport_height,
+    )
+    return true
+  }
   if reference_osm_block_graph_ready() &&
     !reference_osm_cartoon_road_graph_prepare() {
     return false
@@ -1716,7 +1788,7 @@ fn draw_intersection_road_preview_frame(
           // glyph is disabled; this keeps every terrain value and pattern exact.
           let road = road_lookup.get(town_canvas_road_key(x, y))
           let key = town_canvas_road_key(x, y)
-          // A reviewed lot owns the full 7×7 land envelope. Check it before the
+          // A reviewed lot owns its full reserved envelope. Check it before the
           // hidden legacy road lookup so one stale semantic road cell cannot
           // punch a differently colored tile through an otherwise uniform lot.
           let terrain_override = match building_land_cells.get(key) {
@@ -1757,12 +1829,34 @@ fn draw_intersection_road_preview_frame(
         let (center_x, center_y) = intersection_road_preview_building_center(
           building,
         )
+        if !golden_spring_building_asset_visible(
+            golden_screen_x(center_x, center_y, viewport_width),
+            golden_screen_y(center_x, center_y, viewport_height),
+            building.width.to_double(),
+            building.depth.to_double(),
+            golden_valley_camera_zoom(),
+            viewport_width,
+            viewport_height,
+          ) {
+          continue
+        }
         golden_draw_intersection_road_preview_building_lot(
           static_context,
           golden_screen_x(center_x, center_y, viewport_width),
           golden_screen_y(center_x, center_y, viewport_height),
           golden_valley_camera_zoom(),
           intersection_road_preview_building_land_type(building.style),
+          building.width.to_double(),
+        )
+        town_scene_draw_lot_access(
+          static_context,
+          center_x,
+          center_y,
+          golden_valley_camera_x(),
+          golden_valley_camera_y(),
+          golden_valley_camera_zoom(),
+          viewport_width,
+          viewport_height,
         )
       }
     }
@@ -1807,6 +1901,10 @@ fn draw_intersection_road_preview_frame(
     golden_valley_camera_zoom(),
     viewport_width,
     viewport_height,
+    town_scene_road_width("primary"),
+    town_scene_road_width("secondary"),
+    town_scene_road_width("local"),
+    view.authoring_overlay,
   )
   // The reviewed graph owns the immutable base road presentation. Local road
   // edits remain semantic cells and are drawn above it with their normal masks.
@@ -1897,16 +1995,18 @@ fn draw_intersection_road_preview_frame(
   )
   golden_draw_day_night(context, viewport_width, viewport_height, view.hour)
   golden_ctx_global_alpha(context, 1.0)
-  golden_draw_energy_valley_coordinate_grid(
-    context,
-    golden_valley_camera_x(),
-    golden_valley_camera_y(),
-    golden_valley_camera_zoom(),
-    viewport_width,
-    viewport_height,
-    energy_valley_coordinate_grid_spacing(golden_valley_camera_zoom()),
-  )
-  intersection_reference_draw_points(context, viewport_width, viewport_height)
+  if view.authoring_overlay {
+    golden_draw_energy_valley_coordinate_grid(
+      context,
+      golden_valley_camera_x(),
+      golden_valley_camera_y(),
+      golden_valley_camera_zoom(),
+      viewport_width,
+      viewport_height,
+      energy_valley_coordinate_grid_spacing(golden_valley_camera_zoom()),
+    )
+    intersection_reference_draw_points(context, viewport_width, viewport_height)
+  }
   let benchmark_finish = intersection_road_view_benchmark_now()
   intersection_road_view_record_benchmark(
     benchmark_prepared - benchmark_start,

@@ -64,7 +64,7 @@ test "spring ambient variant is stable style-sensitive and promotion preserving"
     ),
     2,
   )
-  let restyled = { ..building, style: "row" }
+  let restyled = { ..building, style: "row", }
   let restyled_first = golden_spring_ambient_building_asset_candidate(
     restyled, 0.42,
   ).unwrap()
@@ -78,7 +78,7 @@ test "spring ambient variant is stable style-sensitive and promotion preserving"
     golden_spring_ambient_building_asset_path(building, 0.42),
     Some(first.asset_path),
   )
-  let moved = { ..building, x: 91, y: 12, name: "Moved fixture" }
+  let moved = { ..building, x: 91, y: 12, name: "Moved fixture", }
   assert_eq(
     golden_spring_ambient_building_asset_candidate(moved, 1.2),
     Some(first),
@@ -122,21 +122,21 @@ test "spring ambient eligibility rejects semantic owners and unsupported views" 
   let ambient = spring_ambient_test_building("lowrise", "ambient", 9)
   assert_eq(
     golden_spring_ambient_building_asset_candidate(
-      { ..ambient, module_key: Some("town-shell") },
+      { ..ambient, module_key: Some("town-shell"), },
       0.5,
     ),
     None,
   )
   assert_eq(
     golden_spring_ambient_building_asset_candidate(
-      { ..ambient, authored_id: Some("authored-building-1") },
+      { ..ambient, authored_id: Some("authored-building-1"), },
       0.5,
     ),
     None,
   )
   assert_eq(
     golden_spring_ambient_building_asset_candidate(
-      { ..ambient, style: "custom-home" },
+      { ..ambient, style: "custom-home", },
       0.5,
     ),
     None,
@@ -150,7 +150,7 @@ test "spring ambient eligibility rejects semantic owners and unsupported views" 
 ///|
 test "spring skin precedence never substitutes ambient art for a landmark" {
   let ambient = spring_ambient_test_building("lowrise", "precedence", 21)
-  let landmark = { ..ambient, module_key: Some("town-shell") }
+  let landmark = { ..ambient, module_key: Some("town-shell"), }
   assert_eq(
     golden_spring_building_asset_path(landmark, 0.5),
     Some("/tilemap/buildings/moontown-spring-civic-v1/town-shell.png"),
@@ -161,7 +161,7 @@ test "spring skin precedence never substitutes ambient art for a landmark" {
   )
   assert_eq(
     golden_spring_building_asset_path(
-      { ..ambient, module_key: Some("unknown-module") },
+      { ..ambient, module_key: Some("unknown-module"), },
       0.5,
     ),
     None,

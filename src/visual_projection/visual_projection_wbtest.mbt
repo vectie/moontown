@@ -201,7 +201,7 @@ test "visual projection strips wenyu prefix for module ids" {
 test "visual projection uses decorator placement instead of embedded Wenyu coordinates" {
   let state = visual_projection_test_state()
   let projection = build_visual_projection_with_decorator(state, {
-    placements: [{ book_id: "research-opc", grid_x: 31, grid_y: 47 }],
+    placements: [{ book_id: "research-opc", grid_x: 31, grid_y: 47, }],
   })
   let agent = projection.agents[0]
   assert_true(agent.grid_x >= 28 && agent.grid_x <= 34)

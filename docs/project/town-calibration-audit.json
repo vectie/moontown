@@ -1,0 +1,152 @@
+{
+  "schema": "moontown.global_calibration_audit.v1",
+  "direction": "osm-to-fixed-design",
+  "source": "energy-valley-osm-block-graph-v1.json",
+  "controlSource": "georeference/wenyu-town-georef-v1.json",
+  "sourceHullCoverage": 0.004782983,
+  "models": [
+    {
+      "model": "Original geographic placement",
+      "normalizedMatrix": [
+        1,
+        0,
+        0,
+        0,
+        1,
+        0,
+        0,
+        0
+      ],
+      "fitRmsTiles": 0.47639679910146077,
+      "unconfirmedHoldoutRmsTiles": 18.13479278494448,
+      "poleInMap": false,
+      "geometryMetricsValid": true,
+      "waterConflictEdges": 96,
+      "outOfBoundsEdges": 38,
+      "outOfBoundsSampleFraction": 0.0038182689483528885,
+      "maximumCornerMovementTiles": 0,
+      "runtimeEligible": false
+    },
+    {
+      "model": "Global affine candidate",
+      "normalizedMatrix": [
+        1.104045570124108,
+        -0.12788482972289644,
+        -0.0493597110416252,
+        0.002437247421350817,
+        0.9914579823800832,
+        -0.0007325929349044207,
+        0,
+        0
+      ],
+      "fitRmsTiles": 0.2119429955805959,
+      "unconfirmedHoldoutRmsTiles": 19.697325906942883,
+      "poleInMap": false,
+      "geometryMetricsValid": true,
+      "waterConflictEdges": 85,
+      "outOfBoundsEdges": 91,
+      "outOfBoundsSampleFraction": 0.060473960024115384,
+      "maximumCornerMovementTiles": 28.86164034135588,
+      "runtimeEligible": false
+    },
+    {
+      "model": "Global perspective candidate",
+      "normalizedMatrix": [
+        -3.62247031500144,
+        3.617867256551251,
+        1.0571005637750135,
+        0.19830443186018884,
+        -1.566225915447126,
+        -0.07690828205725414,
+        -5.088140921721721,
+        7.766472507164771
+      ],
+      "fitRmsTiles": 5.514988122922693e-11,
+      "unconfirmedHoldoutRmsTiles": 23929.690112398464,
+      "poleInMap": true,
+      "geometryMetricsValid": false,
+      "waterConflictEdges": 57,
+      "outOfBoundsEdges": 281,
+      "outOfBoundsSampleFraction": 0.29346565876733294,
+      "maximumCornerMovementTiles": 558.7043378865158,
+      "runtimeEligible": false
+    }
+  ],
+  "controlPairs": [
+    {
+      "id": "gcp-qinbei-river-crossing",
+      "sourceGrid": [
+        183.43265586646885,
+        63.35489015247731
+      ],
+      "designGrid": [
+        184,
+        63.5
+      ],
+      "confirmedFit": true
+    },
+    {
+      "id": "gcp-future-science-city-road-bridge",
+      "sourceGrid": [
+        190.95271493105247,
+        78.29156863434764
+      ],
+      "designGrid": [
+        190.4375,
+        78.4375
+      ],
+      "confirmedFit": true
+    },
+    {
+      "id": "gcp-future-science-city-east-road-bridge",
+      "sourceGrid": [
+        205.4548553006607,
+        86.31472783965
+      ],
+      "designGrid": [
+        205.233333,
+        85.966667
+      ],
+      "confirmedFit": true
+    },
+    {
+      "id": "gcp-jingcheng-wenyu-crossing",
+      "sourceGrid": [
+        221.76465598290088,
+        96.98334523642552
+      ],
+      "designGrid": [
+        222.078947,
+        97.078947
+      ],
+      "confirmedFit": true
+    },
+    {
+      "id": "holdout-shunyu-river-crossing",
+      "sourceGrid": [
+        182.9525969525348,
+        21.695866320107598
+      ],
+      "designGrid": [
+        176.5,
+        45
+      ],
+      "confirmedFit": false
+    },
+    {
+      "id": "holdout-airport-north-line-crossing",
+      "sourceGrid": [
+        229.01610465480917,
+        121.65767304162728
+      ],
+      "designGrid": [
+        235.685185,
+        116.314815
+      ],
+      "confirmedFit": false
+    }
+  ],
+  "matrixConvention": "Normalize both grids with ((x-128)/128,(y-72)/128); h=[h00,h01,h02,h10,h11,h12,h20,h21], h22=1. These are plane transforms, not uniquely recoverable camera Euler angles.",
+  "selfTests": "synthetic perspective recovery, singular solve rejection, camera roundtrip at three zooms, existing geographic RMS reproduced",
+  "runtimeEligible": false
+}

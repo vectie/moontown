@@ -38,28 +38,38 @@ fn indoor_task_route_label(
 
 ///|
 fn render_indoor_work(
+  dispatch : Dispatch[Msg],
   model : Model,
   building : GoldenValleyBuilding,
 ) -> @rabbita.Html {
-  let tasks = golden_valley_runtime_tasks_for_building(
-    model.energy_valley_runtime,
-    building,
-  )
+  let tasks = indoor_work_items(model, building)
   let rows : Array[@rabbita.Html] = []
-  let count = tasks.length().min(6)
+  let count = tasks.length()
   for index in 0..<count {
     let task = tasks[index]
     let agent = task.agentName.unwrap_or("未绑定 Agent")
     rows.push(
       article(class="building-interior-work-row", [
         div(class="building-interior-work-head", [
-          @html.strong(task.title),
+          button(
+            on_click=dispatch(SelectSpatialWork(task.id)),
+            town_chronicle_safe_task_title(task),
+          ),
           span(
             class="building-interior-work-state",
             town_chronicle_status_label(task.status),
           ),
         ]),
         p("\{agent} · \{indoor_task_route_label(model, building, task)}"),
+        match task.destinationBuildingModuleKey {
+          Some(destination) if destination !=
+            golden_valley_building_module_key(building) =>
+            button(
+              on_click=dispatch(EnterEnergyBuilding(destination)),
+              "前往协作建筑 →",
+            )
+          _ => @html.nothing
+        },
       ]),
     )
   }
@@ -96,7 +106,26 @@ fn render_indoor_presence_summary(
   let rows : Array[@rabbita.Html] = []
   for presence in snapshot.presences_at(place.id) {
     if presence.phase is @energy_valley_contract.Inside {
-      rows.push(render_town_snapshot_inside_presence(presence))
+      let name = snapshot
+        .find_actor_profile(presence.actor_id)
+        .map(profile => profile.display_name)
+        .unwrap_or("居民")
+      let origin = if presence.provenance.kind
+        is @energy_valley_contract.RuntimeProjection {
+        "运行时记录"
+      } else {
+        "预览居民 · 非真实执行"
+      }
+      rows.push(
+        div(class="semantic-interior-presence", [
+          div([
+            span(class="semantic-interior-presence-name", name),
+            p(
+              "\{origin} · \{town_snapshot_presence_phase_label(presence.phase)}",
+            ),
+          ]),
+        ]),
+      )
     }
   }
   section(class="building-interior-panel building-interior-agents", [
@@ -105,7 +134,7 @@ fn render_indoor_presence_summary(
         p(class="building-interior-eyebrow", "INDOOR PRESENCE"),
         h2("正在室内的 Agent"),
       ]),
-      span("\{rows.length()} 位"),
+      span("\{rows.length()} 位 · 含预览"),
     ]),
     if rows.is_empty() {
       p(
@@ -196,7 +225,9 @@ fn render_energy_valley_building_interior(
       section(class="building-interior-floor-shell", [
         match place {
           Some(value) =>
-            render_town_snapshot_graphical_interior_scene(snapshot, value)
+            render_town_snapshot_graphical_interior_scene(
+              dispatch, model, snapshot, value,
+            )
           None =>
             div(class="building-interior-unavailable", [
               h2("室内结构尚不可用"),
@@ -207,13 +238,21 @@ fn render_energy_valley_building_interior(
         },
       ]),
       div(class="building-interior-side", [
+        render_policy_hall_question_action(dispatch, building),
+        match place {
+          Some(value) =>
+            render_indoor_slot_inspector(dispatch, model, snapshot, value)
+          None => @html.nothing
+        },
         match place {
           Some(value) => render_indoor_presence_summary(snapshot, value)
           None => @html.nothing
         },
-        render_indoor_work(model, building),
+        render_indoor_work(dispatch, model, building),
       ]),
     ]),
+    render_spatial_work_journey(dispatch, model),
     render_indoor_compute_lift(dispatch),
+    render_spatial_overlays(dispatch, model),
   ])
 }

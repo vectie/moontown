@@ -21,7 +21,7 @@ fn standing_goal_summary(model : Model) -> StandingGoalSummary {
       disabled_count += 1
     }
   }
-  { enabled_count, disabled_count, active_goal }
+  { enabled_count, disabled_count, active_goal, }
 }
 
 ///|
@@ -35,7 +35,7 @@ fn standing_goal_next_check_view(model : Model) -> StandingGoalNextCheckView {
   match active_goal {
     Some(goal) => {
       let remaining = ticks_until_next_goal_check(model, goal)
-      { idle_detail: standing_goal_idle_wait_detail(goal, remaining) }
+      { idle_detail: standing_goal_idle_wait_detail(goal, remaining), }
     }
     None =>
       {

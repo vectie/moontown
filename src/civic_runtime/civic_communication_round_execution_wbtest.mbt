@@ -110,7 +110,7 @@ async test "persisted civic reducer prefers scenario-specific output over shared
   @support.write_text_file(
     "\{raw_root}/civic-communication-results.json",
     Json::object({
-      "ideas": [{ ..scenario.ideas[0], participating_books: ["other-book"] }].to_json(),
+      "ideas": [{ ..scenario.ideas[0], participating_books: ["other-book"], }].to_json(),
     }).stringify(indent=2),
   )
   @support.write_text_file(

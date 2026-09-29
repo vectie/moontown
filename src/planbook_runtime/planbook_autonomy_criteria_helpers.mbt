@@ -8,7 +8,7 @@ fn planbook_criterion(
   evidence : String,
   next_action : String,
 ) -> PlanbookCriterionStatus {
-  { id, plan_id, title, owner, satisfied, evidence, next_action }
+  { id, plan_id, title, owner, satisfied, evidence, next_action, }
 }
 
 ///|

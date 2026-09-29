@@ -34,7 +34,7 @@ fn watcher_decision_summary_for_goal(
       }
     }
   }
-  { review_count, failed_count }
+  { review_count, failed_count, }
 }
 
 ///|

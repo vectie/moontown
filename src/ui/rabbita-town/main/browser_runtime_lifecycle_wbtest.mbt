@@ -101,7 +101,7 @@ fn lifecycle_test_dispatch() -> Dispatch[Msg] {
 
 ///|
 test "a queued Tick cannot advance a paused model" {
-  let model = { ..init_model(), paused: true, tick: 41 }
+  let model = { ..init_model(), paused: true, tick: 41, }
   let (_, next) = tick_update(lifecycle_test_dispatch(), model)
   assert_eq(next.tick, 41)
   assert_true(next.paused)

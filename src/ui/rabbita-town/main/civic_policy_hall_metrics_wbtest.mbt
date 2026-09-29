@@ -130,7 +130,7 @@ test "policy hall confidence uses shared execution score policy" {
   )
   assert_eq(
     policy_hall_confidence(
-      { ..model, state_source: StateSourceKind::SnapshotFile },
+      { ..model, state_source: StateSourceKind::SnapshotFile, },
       None,
     ),
     41,

@@ -50,12 +50,13 @@ fn energy_valley_runtime_counts_for_module(
   let mut counts = module_runtime_counts()
   for task in energy_valley_runtime_tasks_for_module(state, civic) {
     match task.status {
-      "running" => counts = { ..counts, running: counts.running + 1 }
+      "running" => counts = { ..counts, running: counts.running + 1, }
       "queued" | "assigned" =>
-        counts = { ..counts, waiting: counts.waiting + 1 }
-      "waiting_review" => counts = { ..counts, review: counts.review + 1 }
-      "blocked" | "failed" => counts = { ..counts, blocked: counts.blocked + 1 }
-      "completed" => counts = { ..counts, completed: counts.completed + 1 }
+        counts = { ..counts, waiting: counts.waiting + 1, }
+      "waiting_review" => counts = { ..counts, review: counts.review + 1, }
+      "blocked" | "failed" =>
+        counts = { ..counts, blocked: counts.blocked + 1, }
+      "completed" => counts = { ..counts, completed: counts.completed + 1, }
       _ => ()
     }
   }
@@ -196,9 +197,9 @@ priv struct ModuleConfigRuntimeStatus {
 ///|
 fn module_config_runtime_status(issue_count : Int) -> ModuleConfigRuntimeStatus {
   if issue_count > 0 {
-    { class: "module-status-unbound", label: "Needs config" }
+    { class: "module-status-unbound", label: "Needs config", }
   } else {
-    { class: "module-status-calm", label: "Configured" }
+    { class: "module-status-calm", label: "Configured", }
   }
 }
 

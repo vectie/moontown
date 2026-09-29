@@ -60,7 +60,7 @@ test "request status message helpers keep operator and book paths distinct" {
 
 ///|
 test "operator request result model clears submit flag and refreshes ledgers" {
-  let model = { ..init_model(), request_submitting: true }
+  let model = { ..init_model(), request_submitting: true, }
   let next = operator_request_success_model(
     model, "goal-opc", "request-1", "accepted",
   )
@@ -73,7 +73,7 @@ test "operator request result model clears submit flag and refreshes ledgers" {
 
 ///|
 test "book template result model clears submit flag and refreshes request state" {
-  let model = { ..init_model(), book_request_submitting: true }
+  let model = { ..init_model(), book_request_submitting: true, }
   let next = book_template_request_success_model(
     model, "book-request-1", "pending",
   )

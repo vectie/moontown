@@ -177,7 +177,7 @@ fn ecosystem_terrain_rectangles(
           covered[covered_y][covered_x] = true
         }
       }
-      result.push({ x, y, width, depth, cell_class })
+      result.push({ x, y, width, depth, cell_class, })
     }
   }
   result

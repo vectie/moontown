@@ -1,0 +1,16 @@
+{
+  "schema": "moontown.osm_original_design_trial_controls.v1",
+  "direction": "osm-grid-to-original-plan-to-fixed-design",
+  "status": "provisional-visual-landmark-review",
+  "secondLeg": "docs/project/wenyu-perspective-trial.json",
+  "notes": "Geographic identities checked against named OSM ways and published planning plate. Original pixel centres are approximate. The Litang bridge adds an upstream group; this is not survey certification. G stays excluded and unchanged. Western junction B remains unconfirmed and is not used.",
+  "controls": [
+    {"id":"A-Litang-Wenyu","role":"fit","reviewStatus":"confirmed","weight":1,"wgs84":{"lon":116.40487,"lat":40.15060},"original":{"x":1080,"y":144},"generated":{"x":728,"y":35},"osmWays":[106616524,106616542],"evidence":"Litang label on the original plate, traced to its river crossing. OSM query verified previously at 40.15060,116.40487; coordinate is approximate map click."},
+    {"id":"Q-Qinbei-Wenyu","role":"fit","reviewStatus":"confirmed","weight":1,"wgs84":{"lon":116.456935,"lat":40.125626},"original":{"x":1420,"y":593},"generated":{"x":1202,"y":415},"osmWays":[47518657],"evidence":"Current OSM query confirms Qinbei Road bridge; original centre selected on the upstream side of the oval riverside park, retaining published crossing order."},
+    {"id":"X-ScienceCityEast-Wenyu","role":"fit","reviewStatus":"confirmed","weight":1,"wgs84":{"lon":116.469955,"lat":40.121399},"original":{"x":1627,"y":780},"generated":{"x":1344,"y":562},"osmWays":[395533857,991390168],"evidence":"Current OSM query confirms Future Science City East Road bridge; original centre on the crossing between G and Jingcheng, inspected in magnified detail."},
+    {"id":"C-Jingcheng-Wenyu","role":"fit","reviewStatus":"confirmed","weight":1,"wgs84":{"lon":116.478485,"lat":40.120253},"original":{"x":1790,"y":838},"generated":{"x":1450,"y":637},"evidence":"Jingcheng label in the original plate and existing official crossing control. Same pixel pick as earlier trials; broad crossing has approximate centre."},
+    {"id":"G-ScienceCityRoad-Wenyu","role":"holdout","reviewStatus":"confirmed","weight":1,"wgs84":{"lon":116.462627,"lat":40.121959},"original":{"x":1509,"y":690},"generated":{"x":1250,"y":515},"osmWays":[991390169],"evidence":"Current OSM query confirms Future Science City Road bridge. Magnified original/generated pair shows the same road crossing; keep G unchanged rather than moving it toward a prediction."}
+  ],
+  "coordinateCrsAssumption":"Existing Beijing Water Authority longitudes/latitudes remain treated as WGS84, not newly surveyed coordinates.",
+  "runtimeEligible":false
+}

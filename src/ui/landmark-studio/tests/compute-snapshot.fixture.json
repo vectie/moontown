@@ -1,0 +1,13 @@
+{
+  "schema": "moontown.secret-compute-room.v1",
+  "mode": "observed",
+  "observed_at": "2026-01-01T00:00:00Z",
+  "authority": {"agent_boundary": "MoonGate", "local_control_plane": "LunaNexa"},
+  "gateway": {"state": "reachable", "model_count": 2},
+  "local_cluster": {
+    "state": "observed",
+    "machines": [{"id": "fixture-node", "label": "TEST FIXTURE — NOT A REAL MACHINE", "state": "active", "architecture": "synthetic-test", "accelerator_count": 1, "memory_total_mib": 8192, "memory_free_mib": 4096, "healthy": true, "running_workloads": 2, "observed_at_unix_ms": "1767225600000"}]
+  },
+  "remote_routes": [{"id": "fixture-provider", "label": "TEST ROUTE — NOT LIVE", "state": "not-observed", "evidence": "Synthetic UI test fixture"}],
+  "unapproved_extra": "THIS FIELD MUST NOT APPEAR IN REPORTS"
+}

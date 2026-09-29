@@ -66,7 +66,7 @@ pub fn building_movement(
   provenance : Provenance,
   entrance_grid? : GridPosition? = None,
 ) -> BuildingMovement {
-  { id, grid_anchor, entrance_grid, footprint, provenance }
+  { id, grid_anchor, entrance_grid, footprint, provenance, }
 }
 
 ///|
@@ -80,7 +80,7 @@ pub fn building_deletion(
   id : StableId,
   provenance : Provenance,
 ) -> BuildingDeletion {
-  { id, provenance }
+  { id, provenance, }
 }
 
 ///|
@@ -127,7 +127,7 @@ pub fn road_movement(
   grid_path : ArrayView[GridPosition],
   provenance : Provenance,
 ) -> RoadMovement {
-  { id, grid_path: freeze(grid_path), provenance }
+  { id, grid_path: freeze(grid_path), provenance, }
 }
 
 ///|
@@ -138,7 +138,7 @@ pub(all) struct RoadDeletion {
 
 ///|
 pub fn road_deletion(id : StableId, provenance : Provenance) -> RoadDeletion {
-  { id, provenance }
+  { id, provenance, }
 }
 
 ///|
@@ -160,7 +160,7 @@ pub fn park_addition(
   provenance : Provenance,
   parcel_id? : StableId? = None,
 ) -> ParkAddition {
-  { id, label, parcel_id, grid_anchor, boundary, provenance }
+  { id, label, parcel_id, grid_anchor, boundary, provenance, }
 }
 
 ///|
@@ -178,7 +178,7 @@ pub fn park_movement(
   boundary : Polygon,
   provenance : Provenance,
 ) -> ParkMovement {
-  { id, grid_anchor, boundary, provenance }
+  { id, grid_anchor, boundary, provenance, }
 }
 
 ///|
@@ -189,7 +189,7 @@ pub(all) struct ParkDeletion {
 
 ///|
 pub fn park_deletion(id : StableId, provenance : Provenance) -> ParkDeletion {
-  { id, provenance }
+  { id, provenance, }
 }
 
 ///|
@@ -353,16 +353,19 @@ fn normalize_delta_operation(
         footprint: normalize_polygon(movement.footprint),
       })
     AddRoad(addition) =>
-      AddRoad({ ..addition, grid_path: normalize_grid_path(addition.grid_path) })
+      AddRoad({
+        ..addition,
+        grid_path: normalize_grid_path(addition.grid_path),
+      })
     MoveRoad(movement) =>
       MoveRoad({
         ..movement,
         grid_path: normalize_grid_path(movement.grid_path),
       })
     AddPark(addition) =>
-      AddPark({ ..addition, boundary: normalize_polygon(addition.boundary) })
+      AddPark({ ..addition, boundary: normalize_polygon(addition.boundary), })
     MovePark(movement) =>
-      MovePark({ ..movement, boundary: normalize_polygon(movement.boundary) })
+      MovePark({ ..movement, boundary: normalize_polygon(movement.boundary), })
     DeleteBuilding(_) | DeleteRoad(_) | DeletePark(_) => value
   }
 }
@@ -379,5 +382,5 @@ pub fn WorldDelta::normalized(self : WorldDelta) -> WorldDelta {
       operations.push(normalized)
     }
   }
-  { ..self, operations: freeze(operations) }
+  { ..self, operations: freeze(operations), }
 }

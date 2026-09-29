@@ -42,7 +42,7 @@ test "resident twins signal uses shared execution phrase groups" {
   )
   assert_eq(
     resident_twins_signal(
-      { ..model, state_source: StateSourceKind::SnapshotFile },
+      { ..model, state_source: StateSourceKind::SnapshotFile, },
       Some(civic_metric_test_execution(Completed)),
     ),
     "Projection bridge",

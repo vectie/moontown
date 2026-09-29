@@ -126,20 +126,33 @@ fn indoor_scene_slot_normalized_position(
 ///|
 /// A building contract may intentionally give several slots one civic map
 /// point. Inside the room those objects still need separate, stable footprints.
-/// Blend the contract point with a kind-specific furnishing bay so every
-/// semantic slot remains visible without inventing another entity.
+/// Civic coordinates are not room-local furniture positions. Use furnishing
+/// bays with enough separation for the matching pointer targets.
 fn indoor_scene_slot_visual_position(
   place : @energy_valley_contract.Place,
   slot : @energy_valley_contract.InteractionSlot,
   index : Int,
 ) -> (Double, Double) {
-  let (world_x, world_y) = indoor_scene_slot_normalized_position(place, slot)
+  let repeated_kind = place.interaction_slots
+    .iter()
+    .filter(other => other.kind == slot.kind)
+    .count() >
+    1
+  if repeated_kind {
+    let column = index % 3
+    let row = index / 3
+    let row_count = (place.interaction_slots.length() + 2) / 3
+    return (
+      0.15 + column.to_double() * 0.32,
+      0.20 + row.to_double() * 0.65 / (row_count - 1).max(1).to_double(),
+    )
+  }
   let (bay_x, bay_y) = match slot.kind {
-    @energy_valley_contract.ServicePoint => (0.16, 0.28)
-    @energy_valley_contract.TransitGate => (0.82, 0.12)
-    @energy_valley_contract.Workstation => (0.24, 0.72)
-    @energy_valley_contract.ExchangeDesk => (0.72, 0.68)
-    @energy_valley_contract.MeetingPoint => (0.52, 0.47)
+    @energy_valley_contract.ServicePoint => (0.25, 0.15)
+    @energy_valley_contract.TransitGate => (0.88, 0.16)
+    @energy_valley_contract.Workstation => (0.12, 0.68)
+    @energy_valley_contract.ExchangeDesk => (0.86, 0.70)
+    @energy_valley_contract.MeetingPoint => (0.50, 0.65)
     @energy_valley_contract.Exhibit => (0.77, 0.32)
     @energy_valley_contract.Bench => (0.45, 0.77)
     @energy_valley_contract.Stage => (0.52, 0.30)
@@ -151,10 +164,7 @@ fn indoor_scene_slot_visual_position(
         _ => (0.69, 0.62)
       }
   }
-  (
-    (bay_x * 0.82 + world_x * 0.18).clamp(min=0.10, max=0.90),
-    (bay_y * 0.82 + world_y * 0.18).clamp(min=0.10, max=0.90),
-  )
+  (bay_x, bay_y)
 }
 
 ///|
@@ -191,6 +201,7 @@ fn indoor_scene_slots_in_draw_order(
 fn draw_town_snapshot_indoor_world_canvas(
   snapshot : @energy_valley_contract.TownSnapshot,
   place : @energy_valley_contract.Place,
+  selected_id : String,
 ) -> Unit {
   let canvas_id = "indoor-world-canvas"
   prepare_golden_valley_canvas(canvas_id)
@@ -200,10 +211,11 @@ fn draw_town_snapshot_indoor_world_canvas(
     None => ()
     Some(context) => {
       context.clear_rect(0.0, 0.0, width.to_double(), height.to_double())
+      let (xx, yx, yy, tx, ty) = spatial_scene_plate_registration(false)
       ignore(
         spatial_world_canvas_draw_plate(
-          context, canvas_id, "/tilemap/rooms/moontown-spatial-v2/indoor-empty-room.jpg?scene-kit-v1",
-          width, height, "#d9eef0",
+          context, canvas_id, "/tilemap/rooms/moontown-spatial-v3/indoor-room.jpg",
+          width, height, "#f5f2e9", xx, yx, yy, tx, ty,
         ),
       )
       let scale = spatial_scene_scale(width)
@@ -232,7 +244,7 @@ fn draw_town_snapshot_indoor_world_canvas(
           scale,
           indoor_scene_kind_asset_size(slot.kind),
           indoor_scene_kind_asset_baseline(slot.kind),
-          !occupants.is_empty(),
+          selected_id == slot.id.local_key(),
           "",
         )
         if !authored {
@@ -271,6 +283,8 @@ fn draw_town_snapshot_indoor_world_canvas(
 
 ///|
 fn render_indoor_world_hotspots(
+  dispatch : Dispatch[Msg],
+  model : Model,
   snapshot : @energy_valley_contract.TownSnapshot,
   place : @energy_valley_contract.Place,
 ) -> @rabbita.Html {
@@ -282,22 +296,40 @@ fn render_indoor_world_hotspots(
     )
     hotspots.push(
       button(
-        class="spatial-world-hotspot indoor-world-hotspot",
+        class="spatial-world-hotspot indoor-world-hotspot" +
+          (if model.indoor_selected_slot_id == slot.id.local_key() {
+            " is-selected"
+          } else {
+            ""
+          }),
+        on_click=dispatch(SelectIndoorSlot(slot.id.local_key())),
         style=spatial_scene_hotspot_style(
           normalized_x, normalized_y, false, 11.0, 14.0,
         ),
         attrs=@html.Attrs::build().aria_label(
-          "SLOT · \{slot.id.local_key()}，\{slot.label}，\{town_snapshot_interior_kind_label(slot.kind)}，容量 \{slot.capacity}，当前 \{occupants.length()} 位 Agent",
+          "\{slot.label}，\{town_snapshot_interior_kind_label(slot.kind)}，容量 \{slot.capacity}，当前 \{occupants.length()} 位居民",
         ),
         span(class="sr-only", slot.label),
       ),
     )
   }
-  for portal in place.entrances {
+  for index, portal in place.entrances {
+    if index != 0 {
+      continue
+    }
+    let (xx, yx, yy, tx, ty) = spatial_scene_plate_registration(false)
+    let door_left = (0.708 * xx + tx) * 100.0
+    let door_top = (0.708 * yx + 0.385 * yy + ty) * 100.0
     hotspots.push(
       button(
         class="spatial-world-hotspot indoor-world-portal-hotspot",
-        style=["left: 66%", "top: 25%", "width: 9%", "height: 20%"],
+        style=[
+          "left: \{door_left}%",
+          "top: \{door_top}%",
+          "width: 9%",
+          "height: 17%",
+        ],
+        on_click=dispatch(ExitEnergyBuilding),
         attrs=@html.Attrs::build().aria_label(
           if portal.primary {
             "主入口 \{portal.id.local_key()}"
@@ -314,6 +346,8 @@ fn render_indoor_world_hotspots(
 
 ///|
 fn render_town_snapshot_graphical_interior_scene(
+  dispatch : Dispatch[Msg],
+  model : Model,
   snapshot : @energy_valley_contract.TownSnapshot,
   place : @energy_valley_contract.Place,
 ) -> @rabbita.Html {
@@ -328,7 +362,11 @@ fn render_town_snapshot_graphical_interior_scene(
       }
     })
   schedule_spatial_world_canvas("indoor-world-canvas", () => {
-    draw_town_snapshot_indoor_world_canvas(snapshot, place)
+    draw_town_snapshot_indoor_world_canvas(
+      snapshot,
+      place,
+      model.indoor_selected_slot_id,
+    )
   })
   section(
     class="indoor-graphical-scene indoor-world-scene",
@@ -338,14 +376,10 @@ fn render_town_snapshot_graphical_interior_scene(
     [
       header(class="indoor-scene-header spatial-world-header", [
         div([
-          p(
-            class="building-interior-eyebrow",
-            "SEMANTIC PLACE · ISOMETRIC WORLD",
-          ),
+          p(class="building-interior-eyebrow", "房间 · 点击家具开始"),
           h2(place.name),
         ]),
         div(class="indoor-scene-place-facts", [
-          span("PLACE · \{place.id.local_key()}"),
           span("\{building_profile.floors} 层"),
           span("\{inside_count} Agent"),
         ]),
@@ -359,12 +393,11 @@ fn render_town_snapshot_graphical_interior_scene(
           ),
           no_children(),
         ),
-        render_indoor_world_hotspots(snapshot, place),
+        render_indoor_world_hotspots(dispatch, model, snapshot, place),
       ]),
       div(class="spatial-world-legend", [
-        span("InteractionSlot 家具"),
-        span("ActorPresence Agent"),
-        span("建筑外壳 = renderer structure"),
+        span("家具可点选 · 门返回小镇"),
+        span("实线居民：运行时记录 · 预览居民不代表执行"),
       ]),
     ],
   )

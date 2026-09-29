@@ -5,7 +5,7 @@ async test "invalid civic scenario blocks instead of crashing protocol seeding" 
   let snapshot_path = "\{root}/town.json"
   let book_catalog_path = "\{root}/books/catalog.json"
   let schedule = daemon_civic_communication_schedule()
-  let scenario = { ..daemon_civic_communication_scenario(), participants: [] }
+  let scenario = { ..daemon_civic_communication_scenario(), participants: [], }
   save_civic_communication_schedules(
     default_civic_communication_schedule_path(snapshot_path~),
     [schedule],
@@ -47,7 +47,7 @@ async test "invalid civic idea participant reference is reviewable blocker" {
     ..base.ideas[0],
     participating_books: ["future-energy-storage", "missing-book"],
   }
-  let scenario = { ..base, ideas: [bad_idea] }
+  let scenario = { ..base, ideas: [bad_idea], }
   save_civic_communication_schedules(
     default_civic_communication_schedule_path(snapshot_path~),
     [schedule],

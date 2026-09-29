@@ -22,7 +22,29 @@ fn render_energy_valley_page(
       )
     _ => ()
   }
-  render_energy_valley_page_with_snapshot(dispatch, model, snapshot)
+  match model.dashboard_section {
+    Some(selected) =>
+      @html.main_(class="town-area-route", [
+        header([
+          h1(
+            if selected == SocialCapitalSection {
+              "Talent"
+            } else {
+              dashboard_section_label(selected)
+            },
+          ),
+          button(
+            on_click=dispatch(SetDashboardSection(selected)),
+            "返回小镇",
+          ),
+        ]),
+        p(
+          "展示资料与街区投影，不代表当前已核验或实时执行；请从来源和工作结果中复核。",
+        ),
+        render_dashboard_ecosystem_detail(model),
+      ])
+    None => render_energy_valley_page_with_snapshot(dispatch, model, snapshot)
+  }
 }
 
 ///|
@@ -34,7 +56,8 @@ fn render_energy_valley_page_with_snapshot(
   model : Model,
   snapshot : @energy_valley_contract.TownSnapshot,
 ) -> @rabbita.Html {
-  let intersection_preview = energy_valley_intersection_road_preview_active()
+  let intersection_preview = wenyu_scene_default_requested() ||
+    energy_valley_intersection_road_preview_active()
   let selected_place_id = match model.energy_selected_building {
     Some(building) =>
       town_snapshot_place_for_visual_building(snapshot, building).map(place => {
@@ -53,6 +76,8 @@ fn render_energy_valley_page_with_snapshot(
       model.energy_valley_runtime,
     ),
     intersection_preview,
+    authoring_overlay: model.map_lab_open ||
+    town_design_registration_review_requested(),
     follow_enabled: model.player_follow && !intersection_preview,
     player_idle_position: player_idle_position(model),
     player_motion: model.player_motion,
@@ -61,6 +86,43 @@ fn render_energy_valley_page_with_snapshot(
     open: model.map_lab_open,
     layers: model.map_lab_layers.copy(),
     selected_id: model.map_lab_selected_id,
+  }
+  if wenyu_gentle_ground_trial_requested() {
+    return div(
+      class="energy-valley-golden relative h-screen w-screen overflow-hidden bg-slate-950 select-none",
+      [
+        render_golden_valley_canvas(dispatch, snapshot, town_canvas_view),
+        div(
+          class="absolute top-4 left-4 z-50 rounded-xl bg-slate-900 p-4 text-white",
+          [
+            p(
+              if wenyu_gentle_bank_requested() {
+                "河岸道路 · 地块 / 绿脊 / 建筑 / 角色"
+              } else {
+                "道路 → 固定地形 · gentle 0.01 / 0.01"
+              },
+            ),
+            p(
+              "场景预览 · 拖动平移，滚轮缩放 · 角色为展示动画",
+            ),
+            a(href="index.html", class="underline", "返回正常小镇"),
+            p([
+              a(
+                href="index.html?road-trial=gentle",
+                class="underline",
+                "原投影",
+              ),
+              span(" · "),
+              a(
+                href="index.html?road-trial=gentle&shore=1",
+                class="underline",
+                "完整场景（无河岸平移）",
+              ),
+            ]),
+          ],
+        ),
+      ],
+    )
   }
   let map_lab_view : MapLabViewState = {
     open: model.map_lab_open,
@@ -82,7 +144,8 @@ fn render_energy_valley_page_with_snapshot(
   }
   let children : Array[@rabbita.Html] = [
     render_golden_valley_canvas(dispatch, snapshot, town_canvas_view),
-    if energy_valley_intersection_reference_requested() {
+    if (model.map_lab_open || town_design_registration_review_requested()) &&
+      energy_valley_intersection_reference_requested() {
       render_intersection_reference_legend()
     } else {
       @html.nothing
@@ -110,7 +173,7 @@ fn render_energy_valley_page_with_snapshot(
       class="town-topbar pointer-events-none absolute inset-x-0 top-3 flex justify-center px-3",
       render_energy_valley_topbar(dispatch, model),
     ),
-    if model.energy_intro_open || intersection_preview {
+    if model.energy_intro_open {
       @html.nothing
     } else {
       render_policy_hall_map_entry(dispatch, model)

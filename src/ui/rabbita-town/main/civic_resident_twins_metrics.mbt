@@ -122,5 +122,5 @@ fn resident_twins_base_health(worker : WorkerSim?) -> Int {
 
 ///|
 fn resident_twins_worker_health_policy() -> CivicWorkerEnergyHealthPolicy {
-  { fallback: 54, load_divisor: 4, energy_bonus: 22 }
+  { fallback: 54, load_divisor: 4, energy_bonus: 22, }
 }

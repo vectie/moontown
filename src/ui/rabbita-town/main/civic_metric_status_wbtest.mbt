@@ -65,14 +65,14 @@ test "civic worker energy health base centralizes common health math" {
   assert_eq(
     civic_worker_energy_health_base(
       Some(civic_metric_test_worker(energy=98, load=0)),
-      { fallback: 42, load_divisor: 4, energy_bonus: 20 },
+      { fallback: 42, load_divisor: 4, energy_bonus: 20, },
     ),
     100,
   )
   assert_eq(
     civic_worker_energy_health_base(
       Some(civic_metric_test_worker(energy=70, load=20)),
-      { fallback: 42, load_divisor: 0, energy_bonus: 5 },
+      { fallback: 42, load_divisor: 0, energy_bonus: 5, },
     ),
     55,
   )
@@ -152,7 +152,7 @@ test "civic module signal class separates snapshot wrapper from status mapping" 
   let model = init_model()
   assert_eq(
     civic_module_signal_class(
-      { ..model, state_source: StateSourceKind::SnapshotFile },
+      { ..model, state_source: StateSourceKind::SnapshotFile, },
       Some(civic_metric_test_execution(Completed)),
       running_is_live=true,
     ),

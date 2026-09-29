@@ -1,6 +1,6 @@
 ///|
 test "dashboard section helper changes only the ecosystem focus" {
-  let model = { ..init_model(), selection: Selection::Node("policy-hall") }
+  let model = { ..init_model(), selection: Selection::Node("policy-hall"), }
   let next = set_dashboard_section_model(
     model,
     DashboardSection::SocialCapitalSection,
@@ -24,7 +24,7 @@ test "dashboard section helper closes an active ecosystem focus" {
 
 ///|
 test "request composer helper changes only the request focus" {
-  let model = { ..init_model(), selection: Selection::Worker("worker-1") }
+  let model = { ..init_model(), selection: Selection::Worker("worker-1"), }
   let next = set_request_composer_model(
     model,
     RequestComposerFocus::EvidenceBookComposer,
@@ -39,7 +39,7 @@ test "request composer helper changes only the request focus" {
 test "reset navigation requires a verified durable shard" {
   let navigations : Array[Bool] = []
   let navigate = fn(regenerate : Bool) { navigations.push(regenerate) }
-  let model = { ..init_model(), tick: 37, energy_toast: "" }
+  let model = { ..init_model(), tick: 37, energy_toast: "", }
   let (_, failed_reset) = energy_reset_after_persistence(
     model, false, false, navigate,
   )

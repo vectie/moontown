@@ -17,7 +17,7 @@ pub fn request_status_counts(
       retry += 1
     }
   }
-  { total: ledger.requests.length(), pending, installed, failed, retry }
+  { total: ledger.requests.length(), pending, installed, failed, retry, }
 }
 
 ///|
@@ -90,7 +90,7 @@ pub fn request_process_result(
   processed~ : Bool,
   reconciled_event~ : Bool,
 ) -> BookTemplateRequestProcessResult {
-  { request, processed, reconciled_event }
+  { request, processed, reconciled_event, }
 }
 
 ///|
@@ -109,7 +109,7 @@ pub fn request_processing_outcome(
     }
     updated.push(result.request)
   }
-  { ledger: { requests: updated }, processed, reconciled_events }
+  { ledger: { requests: updated, }, processed, reconciled_events, }
 }
 
 ///|
@@ -152,7 +152,7 @@ pub fn empty_request_status(
   request_status_from_counts(
     request_path~,
     event_path~,
-    counts={ total: 0, pending: 0, installed: 0, failed: 0, retry: 0 },
+    counts={ total: 0, pending: 0, installed: 0, failed: 0, retry: 0, },
     latest_event_summary="none",
   )
 }

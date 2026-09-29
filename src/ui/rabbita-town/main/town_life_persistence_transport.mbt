@@ -160,12 +160,12 @@ fn town_life_transport_latest_valid_v3_saves(
         }
       }
       _ =>
-        selected.push({ key: entry.key, writer_id: "", sequence: 0, payload })
+        selected.push({ key: entry.key, writer_id: "", sequence: 0, payload, })
     }
   }
   selected.sort_by((left, right) => left.key.compare(right.key))
   accepted_shard_keys.sort_by((left, right) => left.compare(right))
-  { texts: selected.map(candidate => candidate.payload), accepted_shard_keys }
+  { texts: selected.map(candidate => candidate.payload), accepted_shard_keys, }
 }
 
 ///|
@@ -528,10 +528,10 @@ fn town_life_transport_writer_stamp(
 ) -> TownLifeTransportWriterStamp {
   let text = browser_town_life_v3_writer_stamp_json(reserve_sequence)
   let parsed = @json.parse(text) catch {
-    _ => return { writer_id: "writer-unavailable", sequence: 0 }
+    _ => return { writer_id: "writer-unavailable", sequence: 0, }
   }
   @json.from_json(parsed) catch {
-    _ => { writer_id: "writer-unavailable", sequence: 0 }
+    _ => { writer_id: "writer-unavailable", sequence: 0, }
   }
 }
 

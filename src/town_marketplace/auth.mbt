@@ -58,7 +58,7 @@ pub fn marketplace_register_session(
   let principals = state.principals.filter(current => {
     current.principal_id != principal.principal_id
   })
-  principals.push({ ..principal, version: principal.version.max(1) })
+  principals.push({ ..principal, version: principal.version.max(1), })
   let sessions = state.sessions.filter(current => {
     current.session_id != session_id &&
     current.token_digest != marketplace_token_digest(opaque_token)
@@ -71,5 +71,5 @@ pub fn marketplace_register_session(
     revoked: false,
     version: state.version + 1,
   })
-  { ..state, principals, sessions, version: state.version + 1 }
+  { ..state, principals, sessions, version: state.version + 1, }
 }

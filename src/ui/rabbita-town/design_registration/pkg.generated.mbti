@@ -1,0 +1,35 @@
+// Generated using `moon info`, DON'T EDIT IT
+package "vectie/moontown-rabbita/design_registration"
+
+import {
+  "moonbitlang/core/debug",
+}
+
+// Values
+pub fn fit(Json, Json, Json) -> Field
+
+pub fn identity() -> Field
+
+// Errors
+
+// Types and methods
+pub struct Field {
+  offsets : Array[Point]
+  before_rms : Double
+  after_rms : Double
+  iterations : Int
+}
+pub fn Field::maximum_displacement(Self) -> Double
+pub fn Field::minimum_area(Self) -> Double
+pub fn Field::project(Self, Point) -> Point
+pub fn Field::segment(Self, Point, Point) -> Array[Point]
+pub fn Field::water_conflict_edges(Self, Json, Json) -> Int
+
+pub(all) struct Point {
+  x : Double
+  y : Double
+} derive(Eq, @debug.Debug)
+
+// Type aliases
+
+// Traits

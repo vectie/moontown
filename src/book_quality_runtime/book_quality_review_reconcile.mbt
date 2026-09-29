@@ -96,7 +96,7 @@ async fn observe_book_quality_review_run(
     }
     None => ()
   }
-  { result_exists, result_content, process_alive, poll_summary }
+  { result_exists, result_content, process_alive, poll_summary, }
 }
 
 ///|

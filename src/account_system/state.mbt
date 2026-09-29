@@ -40,7 +40,7 @@ fn migrate_account_state_json(value : Json) -> Json {
 fn normalize_account_state(state : AccountState) -> AccountState {
   let principals = state.principals.map(principal => {
     if principal.personal_plan == EnterprisePlan {
-      { ..principal, personal_plan: PaidPlan }
+      { ..principal, personal_plan: PaidPlan, }
     } else {
       principal
     }
@@ -58,7 +58,7 @@ fn normalize_account_state(state : AccountState) -> AccountState {
     }
     { ..subscription, plan, }
   })
-  { ..state, principals, subscriptions }
+  { ..state, principals, subscriptions, }
 }
 
 ///|

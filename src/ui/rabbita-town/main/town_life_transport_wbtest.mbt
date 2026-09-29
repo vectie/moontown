@@ -1,6 +1,6 @@
 ///|
 fn town_life_transport_test_entry(key : String, raw : String) -> String {
-  ToJson::to_json(TownLifeTransportEntry::{ key, raw }).stringify()
+  ToJson::to_json(TownLifeTransportEntry::{ key, raw, }).stringify()
 }
 
 ///|
@@ -544,8 +544,8 @@ test "storage bridge defers then enqueues relevant cross-tab signals" {
   let remote_save : TownLifeSave = {
     ..town_life_default_save(),
     player: Some(remote),
-    player_stamp: Some({ lamport: 12, writer_id: "remote-tab" }),
-    writer_counters: Some([{ writer_id: "remote-tab", sequence: 12 }]),
+    player_stamp: Some({ lamport: 12, writer_id: "remote-tab", }),
+    writer_counters: Some([{ writer_id: "remote-tab", sequence: 12, }]),
   }
   let remote_key = town_life_v3_checkpoint_prefix + "remote-tab"
   town_life_transport_test_storage_bridge_set(
@@ -615,12 +615,12 @@ test "V3 transport unwraps immutable envelopes in deterministic key order" {
 
 ///|
 test "V3 reads keep only each writer's highest valid cumulative envelope" {
-  let older = { ..town_life_default_save(), analytics: ["older-only"] }
+  let older = { ..town_life_default_save(), analytics: ["older-only"], }
   let latest = town_life_cumulative_save(
-    { ..init_model(), analytics: ["latest-local"] },
+    { ..init_model(), analytics: ["latest-local"], },
     [ToJson::to_json(older).stringify()],
   )
-  let remote = { ..town_life_default_save(), analytics: ["remote-only"] }
+  let remote = { ..town_life_default_save(), analytics: ["remote-only"], }
   let mismatched = {
     ..town_life_default_save(),
     analytics: ["mismatched-independent"],
@@ -692,8 +692,8 @@ test "V3 compaction cannot delete before durable write or after raw changes" {
   }
   let current = [
     old_a,
-    { ..old_b, raw: "changed-after-capture" },
-    { key: town_life_v3_shard_key("writer-d", 1), raw: "unobserved" },
+    { ..old_b, raw: "changed-after-capture", },
+    { key: town_life_v3_shard_key("writer-d", 1), raw: "unobserved", },
   ]
   assert_true(
     town_life_transport_exact_delete_keys(
@@ -769,7 +769,7 @@ test "synchronous V3 append survives cancelled queued compaction" {
   assert_true(
     town_life_transport_delete_keys_after_durable_append(reset, [previous], [
       previous,
-      { ..reset, raw: "torn-or-colliding-value" },
+      { ..reset, raw: "torn-or-colliding-value", },
     ]).is_empty(),
   )
 }
@@ -832,8 +832,8 @@ test "rapid V3 commits queue one compaction with the latest manifest" {
 
 ///|
 test "lockless V3 exact compaction preserves concurrent replacement DAG" {
-  let save_a = { ..town_life_default_save(), analytics: ["state-a"] }
-  let save_b = { ..town_life_default_save(), analytics: ["state-b"] }
+  let save_a = { ..town_life_default_save(), analytics: ["state-a"], }
+  let save_b = { ..town_life_default_save(), analytics: ["state-b"], }
   let cumulative_d = town_life_reconcile_save(save_a, save_b)
   let text_a = ToJson::to_json(save_a).stringify()
   let text_b = ToJson::to_json(save_b).stringify()

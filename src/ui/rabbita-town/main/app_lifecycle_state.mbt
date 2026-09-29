@@ -20,15 +20,16 @@ fn set_town_spatial_layer_model(
     "building",
     match layer {
       Indoor(building) => golden_valley_building_civic_id(building)
+      Underground(Some(building)) => golden_valley_building_civic_id(building)
       _ => ""
     },
   )
-  { ..model, town_spatial_layer: layer }
+  { ..model, town_spatial_layer: layer, }
 }
 
 ///|
 fn toggle_pause_model(model : Model) -> Model {
-  { ..model, paused: !model.paused }
+  { ..model, paused: !model.paused, }
 }
 
 ///|
@@ -52,7 +53,7 @@ fn set_dashboard_section_model(
       None => ""
     },
   )
-  { ..model, dashboard_section: next }
+  { ..model, dashboard_section: next, }
 }
 
 ///|

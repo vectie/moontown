@@ -2,11 +2,11 @@
 test "resident twins active twin rotates by tick" {
   let model = init_model()
   assert_eq(
-    resident_twins_active_twin_label({ ..model, tick: 0 }),
+    resident_twins_active_twin_label({ ..model, tick: 0, }),
     "Li / Edge AI OPC / Policy Hall",
   )
   assert_eq(
-    resident_twins_active_twin_label({ ..model, tick: 1 }),
+    resident_twins_active_twin_label({ ..model, tick: 1, }),
     "Chen / Design Automation OPC / Social Square",
   )
   assert_eq(

@@ -38,7 +38,7 @@ fn inspect_book_house_activity(
       )
     }
   }
-  { worker_count, task_count, execution_count, active_stage }
+  { worker_count, task_count, execution_count, active_stage, }
 }
 
 ///|
@@ -52,5 +52,5 @@ fn dashboard_book_activity_section(town : @core.TownState) -> DashboardSection {
       )
     }
   }
-  { title: "Book Activity", lines }
+  { title: "Book Activity", lines, }
 }

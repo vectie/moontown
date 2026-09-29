@@ -312,7 +312,7 @@ test "public listing actions use the governed shared vocabulary" {
     marketplace_upsert_agent_draft(
       state,
       owner,
-      { ..test_agent_draft(), action_ids: ["follow", "run-shell"] },
+      { ..test_agent_draft(), action_ids: ["follow", "run-shell"], },
       now_ms=100UL,
     )
   catch {
@@ -446,7 +446,7 @@ test "sponsored placement requires publisher consent and safe copy" {
     active: true,
     version: 1,
   }
-  let advertiser = { ..reader, roles: ["advertiser"] }
+  let advertiser = { ..reader, roles: ["advertiser"], }
   try
     marketplace_upsert_sponsored_placement(state, advertiser, unauthorized)
   catch {
@@ -874,7 +874,7 @@ test "workspace and listing channels require real membership and binding authori
     principal_id: "reader-b",
     workspace_ids: ["workspace-b"],
   }
-  let with_outsider = { ..state, principals: state.principals + [outsider] }
+  let with_outsider = { ..state, principals: state.principals + [outsider], }
   try
     marketplace_create_channel(
       with_outsider,

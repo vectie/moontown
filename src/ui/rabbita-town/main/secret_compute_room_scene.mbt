@@ -25,7 +25,7 @@ fn compute_scene_route_screen_position(
   } else {
     index.to_double() / (visible - 1).to_double()
   }
-  ((0.28 + spread * 0.47) * width.to_double(), 0.31 * height.to_double())
+  spatial_scene_anchor(width, height, 0.13, 0.12 + spread * 0.70, true)
 }
 
 ///|
@@ -41,10 +41,11 @@ fn draw_secret_compute_world_canvas(
     None => ()
     Some(context) => {
       context.clear_rect(0.0, 0.0, width.to_double(), height.to_double())
+      let (xx, yx, yy, tx, ty) = spatial_scene_plate_registration(true)
       ignore(
         spatial_world_canvas_draw_plate(
           context, canvas_id, "/tilemap/rooms/moontown-spatial-v1/underground-empty-room.jpg",
-          width, height, "#334b57",
+          width, height, "#334b57", xx, yx, yy, tx, ty,
         ),
       )
       let scale = spatial_scene_scale(width)
@@ -52,46 +53,21 @@ fn draw_secret_compute_world_canvas(
         width, height, 0.50, 0.64, true,
       )
       let route_visible = projection.remote_routes.length().min(6)
-      for index in 0..<route_visible {
-        let (route_x, route_y) = compute_scene_route_screen_position(
-          index, route_visible, width, height,
-        )
-        spatial_world_canvas_draw_connection(
-          context,
-          gateway_x,
-          gateway_y,
-          route_x,
-          route_y + 22.0 * scale,
-          "rgba(131,190,208,.48)",
-        )
-      }
       let machine_visible = projection.local_cluster.machines.length().min(8)
-      for index in 0..<machine_visible {
-        let (normalized_x, normalized_y) = compute_scene_machine_normalized_position(
-          index,
-        )
-        let (machine_x, machine_y) = spatial_scene_anchor(
-          width, height, normalized_x, normalized_y, true,
-        )
-        spatial_world_canvas_draw_connection(
-          context, gateway_x, gateway_y, machine_x, machine_y, "rgba(229,184,64,.38)",
-        )
-      }
+      // Infrastructure availability is not a run-to-endpoint binding. Do not
+      // draw execution cables without an observed, correlated receipt.
       let agents = energy_valley_runtime_active_agents(
         model.energy_valley_runtime,
-      )
+      ).filter(agent => {
+        match spatial_selected_work(model) {
+          Some(task) =>
+            task.agentId == Some(agent.id) &&
+            task.runId is Some(_) &&
+            task.runId == agent.runId
+          None => false
+        }
+      })
       let agent_visible = agents.length().min(6)
-      for index in 0..<agent_visible {
-        let (normalized_x, normalized_y) = compute_scene_agent_normalized_position(
-          index,
-        )
-        let (agent_x, agent_y) = spatial_scene_anchor(
-          width, height, normalized_x, normalized_y, true,
-        )
-        spatial_world_canvas_draw_connection(
-          context, agent_x, agent_y, gateway_x, gateway_y, "rgba(111,166,83,.40)",
-        )
-      }
       for index in 0..<route_visible {
         let route = projection.remote_routes[index]
         let (route_x, route_y) = compute_scene_route_screen_position(
@@ -293,21 +269,14 @@ fn render_compute_world_hotspots(
   let route_visible = projection.remote_routes.length().min(6)
   for index in 0..<route_visible {
     let route = projection.remote_routes[index]
-    let spread = if route_visible <= 1 {
-      0.5
-    } else {
-      index.to_double() / (route_visible - 1).to_double()
-    }
+    let (left, top) = compute_scene_route_screen_position(
+      index, route_visible, 100, 100,
+    )
     hotspots.push(
       button(
         class="spatial-world-hotspot compute-world-route-hotspot" +
           (if selected == route.id { " is-selected" } else { "" }),
-        style=[
-          "left: \{28.0 + spread * 47.0}%",
-          "top: 31%",
-          "width: 7%",
-          "height: 13%",
-        ],
+        style=["left: \{left}%", "top: \{top}%", "width: 7%", "height: 13%"],
         on_click=dispatch(SelectSecretComputeEndpoint(route.id)),
         attrs=@html.Attrs::build()
           .aria_label(
@@ -384,7 +353,7 @@ fn render_secret_compute_graphical_scene(
   section(
     class="compute-physical-room compute-world-scene",
     attrs=@html.Attrs::build().aria_label(
-      "地下算力室等距世界：运行时 Agent 经 MoonGate 连接 LunaNexa 机器和远程路由",
+      "地下算力室：观测机器与远程路由，不代表所选工作的实际执行资源",
     ),
     [
       div(class="spatial-world-stage compute-world-stage", [
@@ -408,12 +377,15 @@ fn render_secret_compute_graphical_scene(
         model.secret_compute_room_selected_id,
       ),
       div(class="spatial-world-legend compute-world-legend", [
-        span("Actor = 活跃运行时 Agent"),
-        span("Node = LunaNexa 观测机器"),
+        span(
+          "居民：所选工作中已关联的负责人，不代表机器分配",
+        ),
+        span("机架：LunaNexa 观测机器"),
         span("空机架 = 物理容量，不代表观测机器"),
-        span("Route = MoonGate 远程上行"),
-        span("机房结构与线缆仅为渲染结构"),
-        span("不会用装饰性服务器冒充真实机器"),
+        span("终端：MoonGate 远程路由 · 可用不等于已执行"),
+        span(
+          "场景最多显示 8 台机器、6 条路由；下方列表包含全部观测实体",
+        ),
       ]),
     ],
   )

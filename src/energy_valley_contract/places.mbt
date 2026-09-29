@@ -20,7 +20,7 @@ pub fn runtime_binding(
   resource_id : String,
   capability : String,
 ) -> RuntimeBinding {
-  { system, resource_id, capability }
+  { system, resource_id, capability, }
 }
 
 ///|
@@ -77,7 +77,7 @@ pub fn building_profile(
   roof : RoofKind,
   interior_seed : Int,
 ) -> BuildingProfile {
-  { archetype, floors, height_meters, roof, interior_seed }
+  { archetype, floors, height_meters, roof, interior_seed, }
 }
 
 ///|
@@ -110,7 +110,7 @@ pub fn entrance_portal(
   mobility : ArrayView[MobilityMode],
   primary? : Bool = false,
 ) -> EntrancePortal {
-  { id, position, road_node_id, mobility: freeze(mobility), primary }
+  { id, position, road_node_id, mobility: freeze(mobility), primary, }
 }
 
 ///|
@@ -134,7 +134,7 @@ pub fn interaction_slot(
   attention_target_id : StableId?,
   runtime_binding : RuntimeBinding?,
 ) -> InteractionSlot {
-  { id, kind, label, position, capacity, attention_target_id, runtime_binding }
+  { id, kind, label, position, capacity, attention_target_id, runtime_binding, }
 }
 
 ///|
@@ -236,5 +236,5 @@ pub fn place_relation(
   label : String,
   provenance : Provenance,
 ) -> PlaceRelation {
-  { id, source_place_id, target_place_id, kind, label, provenance }
+  { id, source_place_id, target_place_id, kind, label, provenance, }
 }

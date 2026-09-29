@@ -37,7 +37,7 @@ test "versioned world delta normalizes losslessly and stays blueprint-bound" {
   assert_true(
     validate_world_delta(normalized, base_world=Some(world)).is_empty(),
   )
-  let stale = { ..normalized, base_blueprint_digest: "sha256:stale" }
+  let stale = { ..normalized, base_blueprint_digest: "sha256:stale", }
   assert_true(
     validate_world_delta(stale, base_world=Some(world)).any(issue => {
       issue.code == WorldDeltaBlueprintMismatch
@@ -319,7 +319,7 @@ test "snapshot route position is the sole outdoor actor location" {
     road_segment_id: Some(test_id("road-segment", "missing")),
     progress_per_mille: 1001,
   }
-  let broken_presence = { ..presence, route_position: Some(broken_route) }
+  let broken_presence = { ..presence, route_position: Some(broken_route), }
   let issues = validate_snapshot(
     town_snapshot(world, 14, [], [], actor_presences=[broken_presence]),
   )

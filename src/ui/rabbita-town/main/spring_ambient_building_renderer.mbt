@@ -97,7 +97,7 @@ fn golden_spring_ambient_building_asset_candidate(
     building.interior_seed,
   )
   match golden_spring_ambient_asset_path_for_variant(building.style, variant) {
-    Some(asset_path) => Some({ asset_path, variant })
+    Some(asset_path) => Some({ asset_path, variant, })
     None => None
   }
 }

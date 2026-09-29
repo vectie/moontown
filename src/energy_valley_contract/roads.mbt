@@ -31,7 +31,7 @@ pub fn road_node(
   position : WorldPoint,
   provenance : Provenance,
 ) -> RoadNode {
-  { id, grid, position, provenance }
+  { id, grid, position, provenance, }
 }
 
 ///|
