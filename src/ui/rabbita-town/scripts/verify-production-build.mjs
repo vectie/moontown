@@ -21,6 +21,8 @@ const REQUIRED_BROWSER_FILES = [
   'account_demo_fixtures.js',
   'account_management.js',
   'bootstrap.js',
+  'platform-base.js',
+  'platform-scope.js',
   'pack_bridge_panel.js',
   'main.js',
   'runtime_snapshot_fetch.js',

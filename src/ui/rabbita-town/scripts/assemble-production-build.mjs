@@ -31,6 +31,8 @@ const BROWSER_FILES = [
   'viewport.html',
   'operations.html',
   'bootstrap.js',
+  'platform-base.js',
+  'platform-scope.js',
   'pack_bridge_panel.js',
   'account_demo_fixtures.js',
   'account_management.js',

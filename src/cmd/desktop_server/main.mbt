@@ -166,8 +166,18 @@ fn runtime_handoff_kind(body : String) -> String {
 
 ///|
 fn local_service_host(host : String) -> Bool {
-  host == "127.0.0.1:17842" ||
-  host == "localhost:17842" ||
+  let bind = env_value("MOONTOWN_DESKTOP_BIND").unwrap_or("127.0.0.1:17842")
+  let hosted_gateway = env_value("MOONTOWN_HOSTED_WEBIDE") == Some("true") &&
+    env_value("MOONTOWN_HOSTED_SERVICE_HOST") is Some(expected) &&
+    host == expected
+  (
+    bind.has_prefix("127.0.0.1:") &&
+    (
+      host == bind ||
+      host == "localhost:" + bind["127.0.0.1:".length():].to_owned()
+    )
+  ) ||
+  hosted_gateway ||
   public_service_host(host)
 }
 
@@ -764,6 +774,30 @@ async fn handle_request(
     send_json(conn, 200, result)
     return
   }
+  if path == @town_contract.desktop_code_schedules_path() {
+    if request.meth is Get {
+      let state = @code_schedules.load_code_schedule_state() catch {
+        error => {
+          send_json(conn, 409, { "ok": false, "error": "\{error}" })
+          return
+        }
+      }
+      send_json(conn, 200, state.to_json())
+      return
+    }
+    if reject_unsafe_operator_write(request, conn) {
+      return
+    }
+    let result = code_schedule_api_action(body.read_all().text()) catch {
+      error => {
+        let (code, message) = code_schedule_api_error_response("\{error}")
+        send_json(conn, code, { "ok": false, "error": message })
+        return
+      }
+    }
+    send_json(conn, 200, result)
+    return
+  }
   if path == @town_contract.desktop_research_handoff_path() {
     if reject_unsafe_operator_write(request, conn) {
       return
@@ -881,7 +915,16 @@ async fn handle_request(
 ///|
 async fn main {
   let bind = env_value("MOONTOWN_DESKTOP_BIND").unwrap_or("127.0.0.1:17842")
+  let hosted_webide = env_value("MOONTOWN_HOSTED_WEBIDE") == Some("true")
+  if hosted_webide &&
+    (
+      env_value("MOONTOWN_PUBLIC_HOST") is Some(_) ||
+      env_value("MOONSUITE_ROOT") != Some("/workspace")
+    ) {
+    raise Failure("hosted MoonTown requires a private per-user workspace")
+  }
   if !bind.has_prefix("127.0.0.1:") &&
+    !hosted_webide &&
     (
       env_value("MOONTOWN_PUBLIC_HOST") is None ||
       env_value("MOONTOWN_IDENTITY_ENDPOINT") is None ||

@@ -1,5 +1,8 @@
 # Managed MoonTown service
 
+The historical site identifiers in this acceptance note are anonymized.
+Use the live deployment inventory, not these example addresses, for operations.
+
 MoonTown uses the same management-node user-service lifecycle as MoonDesk,
 but owns port 5007. Port 5006 remains the identity service. The public instance
 shares the configured MoonSuite workspace and is currently **PlatformOperator
@@ -42,7 +45,7 @@ browser UI before calling a release live. A build alone is not acceptance.
 ## 2026-09-22 acceptance
 
 - Management release: `moon-public/releases/moontown-20260922-r3`, supervised
-  by `moontown.service`; public URL `http://106.39.18.146:5007/`.
+  by `moontown.service`; public URL `http://198.51.100.7:5007/`.
 - The user opened the outer TCP 5007 mapping. Identity on 5006 was untouched.
 - Public health 200; anonymous UI/API and forged cookie 401; incorrect Host
   and cross-origin login 403. An actual EnterpriseUser login was denied 403.
@@ -61,7 +64,7 @@ browser UI before calling a release live. A build alone is not acceptance.
 - A real Guide answer passed after restoring the missing distributed model
   rank; see the initial failure and successful retest below. Multi-day soak
   remains unproven. Persistent product data stays under
-  `/home/HwHiAiUser/moonsuite`, outside the release directory.
+  a dedicated data directory outside the release directory.
 
 The service environment selects the installed MoonClaw binary and MoonBook
 launcher explicitly; it does not rely on an interactive shell PATH or source
@@ -79,7 +82,7 @@ executable. The existing 8090 daemon remains unchanged. Install
 Run `scripts/bootstrap-guide-gateway.mbtx PRIVATE_CONTROL GATEWAY_HOME TOWN_ENV`
 with MoonBit on the management node. `PRIVATE_CONTROL` is the existing paired
 MoonClaw control file, `GATEWAY_HOME` is a new dedicated directory such as
-`/home/HwHiAiUser/.local/share/moontown-guide`, and `TOWN_ENV` is the private
+`/srv/moontown-guide`, and `TOWN_ENV` is the private
 MoonTown service environment. The script checks the instance-bound 8090 route,
 requires ready MoonGate on loopback 5883, and creates an independent random
 gateway bearer token in mode-0600 files. It never returns that credential to
@@ -96,7 +99,7 @@ Enable the guide unit and restart MoonTown after configuration. Verify that
 `/v1/rpc`, and `/v1/runs` return 401. Then verify a real question through the
 authenticated public MoonTown UI. Neither 18123 nor 5883 needs a public port.
 
-`moon run scripts/smoke-guide.mbtx http://106.39.18.146:5007 COOKIE_JAR`
+`moon run scripts/smoke-guide.mbtx https://platform.example COOKIE_JAR`
 is the opt-in live regression check: it requires a real operator cookie and
 fails on HTTP errors or an empty agent completion. It sends only a short
 generic onboarding question, not workspace files or private content.
@@ -123,7 +126,7 @@ generic onboarding question, not workspace files or private content.
 ### Corrected inference diagnosis (2026-09-22, read-only inspection)
 
 The timeout must **not** be attributed specifically to MoonGate. A minimal
-eight-token request sent directly to `192.168.2.178:8888` also timed out after
+eight-token request sent directly to `192.0.2.18:8888` also timed out after
 45 seconds with zero response bytes. That endpoint's `/health` and `/v1/models`
 returned 200; those checks prove HTTP liveness/catalog access, not successful
 inference. Zero running/waiting counters likewise do not prove that the
@@ -131,8 +134,8 @@ distributed engine can execute a request.
 
 The serving process is a two-node, tensor-parallel-size-2 vLLM deployment:
 
-- Head: `192.168.2.178`, fabric address `10.0.22.1`.
-- Worker: `192.168.2.179`, fabric address `10.0.22.2`; fabric SSH hostname and
+- Head: `192.0.2.18`, fabric address `198.51.100.1`.
+- Worker: `192.0.2.19`, fabric address `198.51.100.2`; fabric SSH hostname and
   worker logs independently identify rank 1 with NCCL world size 2.
 - Worker logs show shutdown at 17:45:49 and exit at 17:46:00, exit code 0,
   `OOMKilled=false`. The head subsequently logged a shared-memory broadcast
@@ -161,7 +164,7 @@ The dedicated 18123 gateway still held one old pending request from the outage.
 Only `moontown-guide.service` was restarted; the existing 8090 daemon, MoonGate,
 and GPU services were not changed by this MoonTown retest.
 
-A fresh Safari tab opened the public `http://106.39.18.146:5007/` page,
+A fresh Safari tab opened the public `http://198.51.100.7:5007/` page,
 completed the actual platform password login using the temporary operator,
 loaded the town, opened 小爪, and submitted:
 

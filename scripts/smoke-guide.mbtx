@@ -11,8 +11,8 @@ async fn main {
   guard @env.args()[1:] is [base, cookie_jar] else {
     fail("usage: smoke-guide.mbtx PUBLIC_BASE OPERATOR_COOKIE_JAR")
   }
-  guard base == "http://106.39.18.146:5007" else {
-    fail("this deployment acceptance targets only the approved public endpoint")
+  guard base.has_prefix("https://") || base.has_prefix("http://") else {
+    fail("pass the approved deployment's explicit HTTP(S) origin")
   }
   let payload : Json = {
     "message": "请用一句话告诉我如何开始使用MoonTown。",

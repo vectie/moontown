@@ -36,6 +36,7 @@ test "desktop and miniapp contracts share capabilities without sharing trust" {
   assert_true(!miniapp.contains("/api/operator-requests"))
   assert_true(desktop.contains("/api/standing-goals"))
   assert_true(desktop.contains("/api/book-registrations"))
+  assert_true(desktop.contains("/api/code-schedules"))
   assert_true(desktop.contains("/api/agent/chat"))
   assert_true(desktop.contains("\"capability\":\"moonclaw.guide.chat\""))
   assert_true(!miniapp.contains("/api/agent/chat"))

@@ -15,6 +15,11 @@ import { ACCOUNT_DEMO_FIXTURES } from './account_demo_fixtures.js'
 import { installPackBridgePanel } from './pack_bridge_panel.js'
 
 const app = document.getElementById('app')
+if (globalThis.location?.pathname?.startsWith('/moontown/') &&
+    globalThis.__MOONTOWN_SCOPE_READY !== true) {
+  app.textContent = 'MoonTown 工作空间身份未就绪，请从企业门户重新打开。'
+  throw new Error('Hosted MoonTown workspace scope is unavailable')
+}
 const ACCOUNT_SESSION_KEY = 'moontown.account-session.v1'
 
 function accountDemoFixture() {

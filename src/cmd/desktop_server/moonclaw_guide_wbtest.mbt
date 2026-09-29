@@ -116,3 +116,28 @@ test "Moonclaw guide parses accepted and completed gateway responses" {
     is Err("offline"),
   )
 }
+
+///|
+test "MoonTown guide routes to the granted model through MoonGate" {
+  let payload = moonclaw_guide_agent_payload(
+    "answer a question", "personal-session", "run-1", "/workspace", "glm-5.3.flash",
+  )
+  assert_true(
+    payload
+    is {
+      "model": String("moongate/glm-5.3.flash"),
+      "session_key": String("moontown-guide:personal-session"),
+      "cwd": String("/workspace"),
+      ..
+    },
+  )
+}
+
+///|
+test "standalone MoonTown keeps the gateway default model" {
+  let payload = moonclaw_guide_agent_payload(
+    "answer a question", "local-session", "run-2", "/tmp/work", "",
+  )
+  guard payload is Object(fields) else { fail("expected agent payload") }
+  assert_eq(fields.get("model"), None)
+}

@@ -34,6 +34,11 @@ pub fn desktop_book_registration_path() -> String {
 }
 
 ///|
+pub fn desktop_code_schedules_path() -> String {
+  "/api/code-schedules"
+}
+
+///|
 pub fn desktop_research_handoff_path() -> String {
   "/api/research-handoffs/inspect"
 }
@@ -571,6 +576,18 @@ pub fn desktop_contract() -> Json {
         "POST",
         desktop_book_registration_path(),
         "book.catalog.register",
+      ),
+      endpoint(
+        "list-code-schedules",
+        "GET",
+        desktop_code_schedules_path(),
+        "code.schedule.read",
+      ),
+      endpoint(
+        "manage-code-schedule",
+        "POST",
+        desktop_code_schedules_path(),
+        "code.schedule.manage",
       ),
       endpoint(
         "inspect-research-handoff",
