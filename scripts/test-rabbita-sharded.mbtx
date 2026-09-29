@@ -1,0 +1,91 @@
+///|
+import {
+  "moonbitlang/async",
+  "moonbitlang/async/shell",
+  "moonbitlang/core/env",
+  "moonbitlang/core/string",
+}
+
+///|
+async fn main {
+  let workers = match @env.args() {
+    [_, count] => @string.parse_int(count)
+    [_] => 4
+    _ => fail("Usage: moon run scripts/test-rabbita-sharded.mbtx [SHARDS]")
+  }
+  guard workers >= 1 && workers <= 8 else {
+    fail("SHARDS must be between 1 and 8")
+  }
+  let listing = @shell.Cmd("rg", [
+    "--files", "src/ui/rabbita-town/main", "-g", "*_test.mbt", "-g", "*_wbtest.mbt",
+  ]).output()
+  listing.check()
+  let files : Array[String] = []
+  for line in listing.stdout().split("\n") {
+    if !line.is_empty() {
+      guard line.to_owned().strip_prefix("src/ui/rabbita-town/") is Some(path) else {
+        fail("Unexpected Rabbita test path")
+      }
+      files.push(path.to_owned())
+    }
+  }
+  guard !files.is_empty() else { fail("No Rabbita tests found") }
+  files.sort()
+  let batches : Array[Array[String]] = []
+  for index, file in files {
+    if index % 4 == 0 {
+      batches.push([])
+    }
+    batches[batches.length() - 1].push(file)
+  }
+  let build = @shell.Cmd("moon", [
+    "-C", "src/ui/rabbita-town", "test", "main", "--target", "js", "--release", "--build-only",
+    "--jobs", "8", "--frozen", "--diagnostic-limit", "0", "-q",
+  ]).output(timeout_ms=300000, max_output_bytes=1048576)
+  if build.exit_code() != 0 {
+    println(build.stdout())
+    println(build.stderr())
+    fail("Rabbita test build failed")
+  }
+  println(
+    "Built Rabbita JS tests; running \{files.length()} files in \{batches.length()} batches on \{workers} workers",
+  )
+  let next_batch = [0]
+  @async.with_task_group(group => {
+    for worker in 0..<workers {
+      let worker_number = worker + 1
+      group.spawn_bg(() => {
+        for ;; {
+          if next_batch[0] >= batches.length() {
+            break
+          }
+          let index = next_batch[0]
+          next_batch[0] = index + 1
+          let args : Array[String] = [
+            "-C", "src/ui/rabbita-town", "test", "--target", "js", "--release", "--frozen",
+            "--diagnostic-limit", "0", "-q",
+          ]
+          for file in batches[index] {
+            args.push(file)
+          }
+          println(
+            "Batch \{index + 1}/\{batches.length()} running: \{batches[index].join(", ")}",
+          )
+          let result = @shell.Cmd("moon", args).output(
+            timeout_ms=600000,
+            max_output_bytes=2097152,
+          )
+          if result.exit_code() != 0 {
+            println("Batch \{index + 1} failed:")
+            println(result.stdout())
+            println(result.stderr())
+            fail("Rabbita batch \{index + 1} failed")
+          }
+          println(
+            "Batch \{index + 1}/\{batches.length()} passed (\{batches[index].length()} files; worker \{worker_number})",
+          )
+        }
+      })
+    }
+  })
+}
