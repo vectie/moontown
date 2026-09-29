@@ -140,7 +140,7 @@ The serving process is a two-node, tensor-parallel-size-2 vLLM deployment:
 - Worker logs show shutdown at 17:45:49 and exit at 17:46:00, exit code 0,
   `OOMKilled=false`. The head subsequently logged a shared-memory broadcast
   block unavailable for 60 seconds, repeatedly.
-- A **separate benchmark** container, `lunaflux-spark-vllm-ncu`, ran from
+- A **separate benchmark** container ran from
   18:10:29 to 18:44:31 and exited 137 with `OOMKilled=true`; kernel logs show
   global OOM. The fourth node later recovered to Kubernetes Ready, but the
   GLM worker remained exited. Do not conflate the later benchmark OOM with
