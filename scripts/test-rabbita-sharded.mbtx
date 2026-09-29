@@ -8,13 +8,17 @@ import {
 
 ///|
 async fn main {
-  let workers = match @env.args() {
-    [_, count] => @string.parse_int(count)
-    [_] => 4
-    _ => fail("Usage: moon run scripts/test-rabbita-sharded.mbtx [SHARDS]")
+  let (workers, batch_size) = match @env.args() {
+    [_, count, size] => (@string.parse_int(count), @string.parse_int(size))
+    [_, count] => (@string.parse_int(count), 4)
+    [_] => (4, 4)
+    _ => fail("Usage: moon run scripts/test-rabbita-sharded.mbtx [SHARDS] [FILES_PER_BATCH]")
   }
   guard workers >= 1 && workers <= 8 else {
     fail("SHARDS must be between 1 and 8")
+  }
+  guard batch_size >= 1 && batch_size <= 16 else {
+    fail("FILES_PER_BATCH must be between 1 and 16")
   }
   let listing = @shell.Cmd("rg", [
     "--files", "src/ui/rabbita-town/main", "-g", "*_test.mbt", "-g", "*_wbtest.mbt",
@@ -33,7 +37,7 @@ async fn main {
   files.sort()
   let batches : Array[Array[String]] = []
   for index, file in files {
-    if index % 4 == 0 {
+    if index % batch_size == 0 {
       batches.push([])
     }
     batches[batches.length() - 1].push(file)

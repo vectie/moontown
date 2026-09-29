@@ -245,30 +245,9 @@ pub fn RoadNetwork::is_reachable(
   destination : StableId,
   mode? : MobilityMode = Pedestrian,
 ) -> Bool {
-  if self.find_node(origin) is None || self.find_node(destination) is None {
-    return false
-  }
-  if origin == destination {
-    return true
-  }
-  let visited : Map[StableId, Bool] = Map([])
-  visited[origin] = true
-  let queue : Array[StableId] = [origin]
-  let mut cursor = 0
-  while cursor < queue.length() {
-    let current = queue[cursor]
-    cursor += 1
-    for next in self.neighbors(current, mode~) {
-      if next == destination {
-        return true
-      }
-      if !visited.contains(next) {
-        visited[next] = true
-        queue.push(next)
-      }
-    }
-  }
-  false
+  // shortest_path builds adjacency once instead of rescanning every segment
+  // for each BFS node on a large compiled town graph.
+  self.shortest_path(origin, destination, mode~) is Some(_)
 }
 
 ///|
