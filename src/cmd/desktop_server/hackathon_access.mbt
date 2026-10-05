@@ -260,7 +260,7 @@ async fn public_hackathon_request(
     @env.now(),
   ) catch {
     error => {
-      send_json(conn, 400, { "error": "\{error}" })
+      send_json(conn, 400, { "error": hackathon_error_message("\{error}") })
       return
     }
   }

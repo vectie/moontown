@@ -540,7 +540,10 @@ async fn handle_request(
     if request.meth is Get {
       let state = @hackathon.load_hackathons() catch {
         error => {
-          send_json(conn, 503, { "ok": false, "error": "\{error}" })
+          send_json(conn, 503, {
+            "ok": false,
+            "error": hackathon_error_message("\{error}"),
+          })
           return
         }
       }
@@ -565,7 +568,10 @@ async fn handle_request(
     }
     let state = @hackathon.apply_hackathon_action(action, payload, @env.now()) catch {
       error => {
-        send_json(conn, 400, { "ok": false, "error": "\{error}" })
+        send_json(conn, 400, {
+          "ok": false,
+          "error": hackathon_error_message("\{error}"),
+        })
         return
       }
     }
