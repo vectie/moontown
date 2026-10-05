@@ -188,6 +188,38 @@ test "marketplace action request routes keep read decision and recovery separate
 }
 
 ///|
+test "orderlist routes require the intended HTTP methods" {
+  let orders = @town_contract.miniapp_marketplace_orders_path()
+  assert_eq(marketplace_operation(orders, true, false), Some("orders"))
+  assert_eq(marketplace_operation(orders, false, true), Some("publish-order"))
+  assert_eq(marketplace_operation(orders, false, false), None)
+  assert_eq(
+    marketplace_operation(
+      @town_contract.miniapp_marketplace_order_fulfillment_path(),
+      false,
+      true,
+    ),
+    Some("fulfill-order"),
+  )
+  assert_eq(
+    marketplace_operation(
+      @town_contract.miniapp_marketplace_order_decision_path(),
+      false,
+      true,
+    ),
+    Some("decide-order"),
+  )
+  assert_eq(
+    marketplace_operation(
+      @town_contract.miniapp_marketplace_order_cancel_path(),
+      false,
+      true,
+    ),
+    Some("cancel-order"),
+  )
+}
+
+///|
 test "marketplace bridge derives the existing bounded supervisor delegate payload" {
   let request : Json = {
     "request_id": "action:agent.robot-guide:reader-a:7",

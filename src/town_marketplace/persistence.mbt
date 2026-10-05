@@ -5,11 +5,15 @@ let marketplace_store_mutex : @async.Mutex = Mutex()
 fn migrate_marketplace_state_json(value : Json) -> Json {
   guard value is Object(fields) else { return value }
   let schema = api_string(fields, "schema")
-  if schema == "moontown.marketplace-store.v1" {
+  if schema == "moontown.marketplace-store.v1" ||
+    schema == "moontown.marketplace-store.v2" {
     fields["schema"] = marketplace_schema().to_json()
   }
   if fields.get("action_requests") is None {
     fields["action_requests"] = Json::array([])
+  }
+  if fields.get("orders") is None {
+    fields["orders"] = Json::array([])
   }
   Json::object(fields)
 }
@@ -234,6 +238,52 @@ pub async fn MarketplaceApplication::execute(
         operation,
         marketplace_visible_action_requests(state, principal),
       )
+    "orders" =>
+      application_ok(operation, visible_orders(state, principal, query))
+    "publish-order" => {
+      let draft : OrderDraft = @json.from_json(payload)
+      let next = publish_order(state, principal, draft, now_ms~)
+      self.save_state(next)
+      application_ok(operation, {
+        "order": order_card(
+          order_by_id(next, draft.order_id).unwrap(),
+          principal,
+        ),
+      })
+    }
+    "fulfill-order" => {
+      let draft : OrderFulfillmentDraft = @json.from_json(payload)
+      let next = submit_order_fulfillment(state, principal, draft, now_ms~)
+      self.save_state(next)
+      application_ok(operation, {
+        "order": order_card(
+          order_by_id(next, draft.order_id).unwrap(),
+          principal,
+        ),
+      })
+    }
+    "decide-order" => {
+      let draft : OrderDecisionDraft = @json.from_json(payload)
+      let next = decide_order_fulfillment(state, principal, draft, now_ms~)
+      self.save_state(next)
+      application_ok(operation, {
+        "order": order_card(
+          order_by_id(next, draft.order_id).unwrap(),
+          principal,
+        ),
+      })
+    }
+    "cancel-order" => {
+      let draft : OrderCancelDraft = @json.from_json(payload)
+      let next = cancel_order(state, principal, draft, now_ms~)
+      self.save_state(next)
+      application_ok(operation, {
+        "order": order_card(
+          order_by_id(next, draft.order_id).unwrap(),
+          principal,
+        ),
+      })
+    }
     "prepare-action-handoff" => {
       let draft : ActionRequestResumeDraft = @json.from_json(payload)
       application_ok(operation, {

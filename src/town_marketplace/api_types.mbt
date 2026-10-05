@@ -53,6 +53,38 @@ pub(all) struct ActionRequestRuntimeDraft {
 } derive(Debug, Eq, ToJson, FromJson)
 
 ///|
+pub(all) struct OrderDraft {
+  order_id : String
+  title : String
+  description : String
+  deliverable : String
+  acceptance_criteria : String
+  tags : Array[String]
+} derive(Debug, Eq, ToJson, FromJson)
+
+///|
+pub(all) struct OrderFulfillmentDraft {
+  order_id : String
+  expected_version : Int
+  summary : String
+  evidence_refs : Array[String]
+} derive(Debug, Eq, ToJson, FromJson)
+
+///|
+pub(all) struct OrderDecisionDraft {
+  order_id : String
+  expected_version : Int
+  decision : String
+  decision_summary : String
+} derive(Debug, Eq, ToJson, FromJson)
+
+///|
+pub(all) struct OrderCancelDraft {
+  order_id : String
+  expected_version : Int
+} derive(Debug, Eq, ToJson, FromJson)
+
+///|
 pub(all) struct ChannelDraft {
   channel_id : String
   title : String

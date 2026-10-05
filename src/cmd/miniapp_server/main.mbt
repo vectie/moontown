@@ -544,6 +544,23 @@ fn marketplace_operation(
   } else if path == @town_contract.miniapp_marketplace_action_retry_path() &&
     is_post {
     Some("prepare-action-handoff")
+  } else if path == @town_contract.miniapp_marketplace_orders_path() {
+    if is_get {
+      Some("orders")
+    } else if is_post {
+      Some("publish-order")
+    } else {
+      None
+    }
+  } else if path == @town_contract.miniapp_marketplace_order_fulfillment_path() &&
+    is_post {
+    Some("fulfill-order")
+  } else if path == @town_contract.miniapp_marketplace_order_decision_path() &&
+    is_post {
+    Some("decide-order")
+  } else if path == @town_contract.miniapp_marketplace_order_cancel_path() &&
+    is_post {
+    Some("cancel-order")
   } else if path == @town_contract.miniapp_marketplace_channels_path() {
     if is_get {
       Some("list-channels")
