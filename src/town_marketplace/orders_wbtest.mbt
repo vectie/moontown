@@ -299,3 +299,29 @@ async test "order API persists a cross-account fulfillment and decision" {
   )
   assert_true(listed.stringify().contains("order.api-flow"))
 }
+
+///|
+async test "account session using bootstrap token survives marketplace reload" {
+  let path = "/tmp/moontown-orderlist-bootstrap-session-wbtest/state.json"
+  if @fs.exists(path) {
+    @fs.remove(path)
+  }
+  let requester = test_principal("order-bootstrap-owner", [])
+  let token = "opaque-order-bootstrap-token"
+  let app = marketplace_application(
+    path, requester, "bootstrap:order-bootstrap-owner", token,
+  )
+  app.synchronize_account_session(
+    requester,
+    token,
+    now_ms=100UL,
+    expires_at_ms=200UL,
+  )
+  let response = app.execute(token, "orders", "", "", now_ms=150UL)
+  assert_true(response.stringify().contains("orders"))
+  try app.execute(token, "orders", "", "", now_ms=201UL) catch {
+    error => assert_true("\{error}".contains("expired"))
+  } noraise {
+    _ => fail("expired account session must not authorize marketplace access")
+  }
+}

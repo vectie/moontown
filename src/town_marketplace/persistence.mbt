@@ -62,8 +62,7 @@ fn MarketplaceApplication::ensure_bootstrap(
     }
   }
   let sessions = state.sessions.filter(session => {
-    session.session_id != self.bootstrap_session_id &&
-    session.token_digest != self.bootstrap_token_digest
+    session.session_id != self.bootstrap_session_id
   })
   if session_exists || !principal_exists {
     let mut persisted : MarketplaceSession? = None
