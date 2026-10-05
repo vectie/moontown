@@ -536,6 +536,42 @@ async fn handle_request(
   if public_access_gate(request, body, conn) {
     return
   }
+  if path == "/api/contest-express/hackathons" {
+    if request.meth is Get {
+      let state = @hackathon.load_hackathons() catch {
+        error => {
+          send_json(conn, 503, { "ok": false, "error": "\{error}" })
+          return
+        }
+      }
+      send_json(conn, 200, state.to_json())
+      return
+    }
+    if reject_unsafe_operator_write(request, conn) {
+      return
+    }
+    let input = @json.parse(body.read_all().text()) catch {
+      _ => {
+        send_json(conn, 400, { "ok": false, "error": "invalid JSON" })
+        return
+      }
+    }
+    guard input is { "action": String(action), "payload": payload, .. } else {
+      send_json(conn, 400, {
+        "ok": false,
+        "error": "action and payload required",
+      })
+      return
+    }
+    let state = @hackathon.apply_hackathon_action(action, payload, @env.now()) catch {
+      error => {
+        send_json(conn, 400, { "ok": false, "error": "\{error}" })
+        return
+      }
+    }
+    send_json(conn, 200, state.to_json())
+    return
+  }
   if request.meth is Get && path == @town_contract.desktop_contract_path() {
     send_json(conn, 200, @town_contract.desktop_contract())
     return

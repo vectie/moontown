@@ -47,21 +47,26 @@ fn wenyu_contest_express_service() -> CivicServiceDefinition {
     module_mode="agent-workspace",
     book_role="coaching-workspace",
     skill_mode="contest-coaching",
-    purpose="Contest calendars, readiness scoring, submission checklists, team preparation, mock judge feedback, and champion-wall stories.",
+    purpose="Mayor-published hackathons and contest calendars with team preparation, online submissions, evidence-backed evaluation, live leaderboards, and reviewed champion-wall stories.",
     workflow=[
-      "discover relevant contests and deadlines", "score readiness against explicit criteria",
-      "produce a revision plan and mock-judge review packet",
+      "publish a Mayor challenge brief with benchmark materials and rubric", "register teams and record versioned online submissions",
+      "review criterion evidence and project the current-version leaderboard",
     ],
     agent_work=[
       "track contest deadlines and requirements", "score team readiness", "produce mock-judge feedback and revision plans",
+      "prepare reproducible benchmark and evaluation packets",
     ],
     place_work=[
-      "show contest calendar", "collect team submissions", "display reviewed champion-wall stories",
+      "show challenge information pages and contest calendar", "collect team submissions",
+      "display receipt-backed leaderboards and reviewed champion-wall stories",
     ],
-    schema_pages=["wiki/schemas/contest.md", "wiki/schemas/readiness-score.md"],
+    schema_pages=[
+      "wiki/schemas/contest.md", "wiki/schemas/readiness-score.md", "wiki/schemas/hackathon-challenge.md",
+      "wiki/schemas/hackathon-evaluation.md",
+    ],
     wiki_pages=[
       "wiki/civic/contest-express.md", "wiki/sources/contests.md", "wiki/entities/teams.md",
-      "wiki/queries/contest-readiness.md",
+      "wiki/queries/contest-readiness.md", "wiki/civic/hackathons.md",
     ],
     review_queues=["wiki/reviews/contest-submissions.md"],
     skill_pack="civic-contest-coach",
@@ -69,9 +74,10 @@ fn wenyu_contest_express_service() -> CivicServiceDefinition {
     worker_role=Planner,
     acceptance=[
       "tracks deadline and submission state", "produces actionable readiness gaps",
+      "scores the published rubric against versioned evaluation materials", "projects only current-benchmark results into the leaderboard",
       "does not submit externally without operator confirmation",
     ],
-    projection_summary="Competition service lane for calendars, readiness, mock review, and next preparation actions.",
+    projection_summary="Competition service lane for Mayor challenges, teams, submissions, official review, and live standings.",
   )
 }
 

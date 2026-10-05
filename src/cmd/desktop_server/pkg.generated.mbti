@@ -12,6 +12,8 @@ import {
 // Types and methods
 type MoonFlowResearchExecutionRequest derive(@json.FromJson)
 
+type PublicIdentity
+
 type ResearchHandoffExecutionRequest derive(@json.FromJson)
 
 type ResearchHandoffInspectionRequest derive(@json.FromJson)
