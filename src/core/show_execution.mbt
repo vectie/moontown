@@ -26,6 +26,7 @@ pub impl Show for TaskExecutionStatus with fn output(
       Running => "Running"
       AwaitingPersistence => "AwaitingPersistence"
       ReviewQueued => "ReviewQueued"
+      AwaitingAcceptance => "AwaitingAcceptance"
       Completed => "Completed"
       Stale => "Stale"
       Failed => "Failed"

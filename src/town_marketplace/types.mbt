@@ -333,6 +333,7 @@ pub(all) struct MarketplaceState {
   sponsored_placements : Array[SponsoredPlacement]
   action_requests : Array[MarketplaceActionRequest]
   orders : Array[OrderRecord]
+  portable_bindings : Array[PortableListingBinding]
   version : Int
 } derive(Debug, Eq, ToJson, FromJson)
 

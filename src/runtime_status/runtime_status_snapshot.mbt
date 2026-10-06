@@ -74,6 +74,7 @@ pub fn runtime_status_from_state(
     failed_count: execution_counts.failed,
     stale_count: execution_counts.stale,
     completed_count: execution_counts.completed,
+    awaiting_acceptance_count: Some(execution_counts.awaiting_acceptance),
     standing_goal_count: standing_goal_counts.total,
     enabled_standing_goal_count: standing_goal_counts.enabled,
     disabled_standing_goal_count: standing_goal_counts.disabled,

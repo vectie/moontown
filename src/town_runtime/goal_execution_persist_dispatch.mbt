@@ -14,10 +14,15 @@ async fn book_persist_summary(
 }
 
 ///|
-fn book_persist_artifacts(
+async fn book_persist_artifacts(
   entry : @moonbook.BookCatalogEntry,
   execution : @core.TaskExecutionRecord,
 ) -> Array[String] {
+  if execution.output_contract == "wenyu.build.local-result.v1" {
+    return @build_pipeline_runtime.local_wenyu_result_artifacts(
+      entry, execution,
+    )
+  }
   match @civic.wenyu_civic_service_for_book_id(entry.id) {
     Some(service) =>
       if @civic_runtime.is_civic_service_execution(execution) {

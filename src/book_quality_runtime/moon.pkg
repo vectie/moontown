@@ -7,6 +7,8 @@ import {
   "vectie/moontown/adapters/moonbook",
   "vectie/moontown/adapters/moonclaw",
   "vectie/moontown/book_quality",
+  "vectie/moontown/native_work",
+  "vectie/moontown/native_code_control",
   "vectie/moontown/civic",
   "vectie/moontown/civic_runtime",
   "vectie/moontown/cookbook_runtime",

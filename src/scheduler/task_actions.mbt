@@ -10,17 +10,18 @@ pub fn collect_due_tasks(town : @core.TownState) -> Array[@core.TownTask] {
 }
 
 ///|
-fn execution_action_kind(execution : @core.TaskExecutionRecord) -> String {
+fn execution_action_kind(execution : @core.TaskExecutionRecord) -> String? {
   match execution.status {
-    PacketReady => proposal_import_action_kind()
-    ProposalImported => run_confirm_action_kind()
-    RunConfirmed => run_start_action_kind()
-    Running => poll_run_action_kind()
-    AwaitingPersistence => persist_result_action_kind()
-    ReviewQueued => review_sync_action_kind()
-    Completed => archive_action_kind()
-    Stale => recover_stale_action_kind()
-    Failed => recovery_action_kind()
+    PacketReady => Some(proposal_import_action_kind())
+    ProposalImported => Some(run_confirm_action_kind())
+    RunConfirmed => Some(run_start_action_kind())
+    Running => Some(poll_run_action_kind())
+    AwaitingPersistence => Some(persist_result_action_kind())
+    ReviewQueued => Some(review_sync_action_kind())
+    AwaitingAcceptance => None
+    Completed => Some(archive_action_kind())
+    Stale => Some(recover_stale_action_kind())
+    Failed => Some(recovery_action_kind())
   }
 }
 
@@ -33,10 +34,14 @@ pub fn plan_tick(
   for task in collect_due_tasks(town) {
     match @core.find_execution(town, task.id) {
       Some(execution) =>
-        actions.push({
-          kind: execution_action_kind(execution),
-          detail: "\{task.id} / \{execution.status.to_string()}",
-        })
+        match execution_action_kind(execution) {
+          Some(kind) =>
+            actions.push({
+              kind,
+              detail: "\{task.id} / \{execution.status.to_string()}",
+            })
+          None => ()
+        }
       None =>
         actions.push({
           kind: prepare_packet_action_kind(),

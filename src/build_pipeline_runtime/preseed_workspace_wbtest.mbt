@@ -1,9 +1,7 @@
 ///|
 async test "Wenyu preseed materializes build workspace inputs in build pipeline" {
-  let root = "/tmp/moontown-wenyu-preseed-workspace"
-  let repo = "/tmp/moontown-wenyu-preseed-repo"
-  @support.ignore_checked_command("rm", ["-rf", root])
-  @support.ignore_checked_command("rm", ["-rf", repo])
+  let root = @fs.tmpdir(prefix="moontown-wenyu-preseed-workspace-")
+  let repo = @fs.tmpdir(prefix="moontown-wenyu-preseed-repo-")
   @support.write_text_file(
     "\{repo}/docs/WENYU_VALLEY_PRD.md",
     "# Wenyu Valley PRD\n\nBuild the AI innovation town.",
@@ -29,7 +27,7 @@ async test "Wenyu preseed materializes build workspace inputs in build pipeline"
     "pub fn goal_run() -> String { \"run\" }",
   )
   let entry = @moonbook.BookCatalogEntry::new(
-    id="wenyu-town-shell",
+    id="wenyu-native-build",
     name="Wenyu Valley / Town Shell",
     purpose="Build Wenyu town shell.",
     workspace_root=root,
@@ -48,6 +46,17 @@ async test "Wenyu preseed materializes build workspace inputs in build pipeline"
     copied.contains("source: \{repo}/src/ui/rabbita-town/main/main.mbt"),
   )
   assert_true(@fs.exists("\{root}/skills/wenyu-build/SKILL.md"))
+  assert_false(
+    @fs.exists(
+      @moonsuite.product_artifact_for_workspace_root(
+        root, "moonclaw", "moonclaw.json",
+      ),
+    ),
+  )
+  assert_false(@fs.exists(root + "/moonclaw.jobs.json"))
+  assert_false(@fs.exists("\{root}/moonclaw.json"))
+  preseed_wenyu_goal_inputs(entry, "Build Wenyu Valley", repo, execution="acp")
+  assert_true(@fs.exists(root + "/moonclaw.jobs.json"))
   assert_true(
     @fs.exists(
       @moonsuite.product_artifact_for_workspace_root(
@@ -55,7 +64,29 @@ async test "Wenyu preseed materializes build workspace inputs in build pipeline"
       ),
     ),
   )
-  assert_false(@fs.exists("\{root}/moonclaw.json"))
-  @support.ignore_checked_command("rm", ["-rf", root])
-  @support.ignore_checked_command("rm", ["-rf", repo])
+}
+
+///|
+async test "wenyu explicit legacy preseed preserves customized profile and target bytes" {
+  let root = @fs.tmpdir(prefix="moontown-wenyu-custom-legacy-")
+  let repo = @fs.tmpdir(prefix="moontown-wenyu-custom-source-")
+  let entry = @moonbook.BookCatalogEntry::new(
+    id="wenyu-build",
+    name="Wenyu Build",
+    purpose="Fixture",
+    workspace_root=root,
+  )
+  let profile = "{ \"jobs\": { \"profiles\": { \"wenyu_build_controller\": { \"custom\": true } } } }\n"
+  let target = "{ \"acp\": { \"targets\": { \"wenyu-codex-moontown\": { \"custom\": true } } }, \"agents\": { \"defaults\": { \"workspace\": \"unchanged\" } } }\n"
+  let target_path = @moonsuite.product_artifact_for_workspace_root(
+    root, "moonclaw", "moonclaw.json",
+  )
+  @support.write_text_file(root + "/moonclaw.jobs.json", profile)
+  @support.write_text_file(target_path, target)
+  preseed_wenyu_goal_inputs(entry, "goal", repo)
+  assert_eq(@fs.read_file(root + "/moonclaw.jobs.json").text(), profile)
+  assert_eq(@fs.read_file(target_path).text(), target)
+  preseed_wenyu_goal_inputs(entry, "goal", repo, execution="acp")
+  assert_eq(@fs.read_file(root + "/moonclaw.jobs.json").text(), profile)
+  assert_eq(@fs.read_file(target_path).text(), target)
 }

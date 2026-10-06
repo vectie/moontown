@@ -1,0 +1,15 @@
+// Generated using `moon info`, DON'T EDIT IT
+package "vectie/moontown/goal_run_arguments"
+
+// Values
+pub fn parse(Array[String]) -> (String?, String, String, String) raise
+
+pub fn parse_options(Array[String]) -> (String?, String, String, String, Bool) raise
+
+// Errors
+
+// Types and methods
+
+// Type aliases
+
+// Traits

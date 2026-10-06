@@ -1,0 +1,17 @@
+// Generated using `moon info`, DON'T EDIT IT
+package "vectie/moontown/cmd/portable_transfer"
+
+import {
+  "moonbitlang/core/debug",
+}
+
+// Values
+
+// Errors
+
+// Types and methods
+type Command derive(Eq, @debug.Debug)
+
+// Type aliases
+
+// Traits

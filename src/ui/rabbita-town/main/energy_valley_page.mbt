@@ -305,6 +305,7 @@ fn render_energy_valley_page_with_snapshot(
     render_square_panel(dispatch, model),
     render_resident_explorer(dispatch, model),
     render_town_chronicle(dispatch, model),
+    render_imported_outputs_drawer(dispatch, model.imported_outputs),
     render_town_action_rail(dispatch, model, onboarding, stage),
     render_energy_valley_handoff_layer(dispatch, model),
     render_knowledge_dialog(dispatch, model),
@@ -443,6 +444,36 @@ fn render_town_action_rail(
             },
           ),
         "今日",
+      ),
+    )
+    actions.push(
+      button(
+        class=if model.imported_outputs.open {
+          "town-action town-action-secondary town-action-active"
+        } else {
+          "town-action town-action-secondary"
+        },
+        title="Read verified imported Book output files",
+        on_click=dispatch(
+          ImportedOutputsEvent(
+            if model.imported_outputs.open {
+              CloseImportedOutputs
+            } else {
+              OpenImportedOutputs
+            },
+          ),
+        ),
+        attrs=@html.Attrs::build()
+          .aria_label("Imported outputs")
+          .aria_controls("imported-outputs-panel")
+          .aria_expanded(
+            if model.imported_outputs.open {
+              "true"
+            } else {
+              "false"
+            },
+          ),
+        "Imported outputs",
       ),
     )
     actions.push(

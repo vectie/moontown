@@ -8,6 +8,9 @@ fn spatial_origin_building(model : Model) -> GoldenValleyBuilding? {
 
 ///|
 fn spatial_start_work_model(model : Model) -> Model {
+  if model.request_submitting {
+    return reopen_pending_operator_request_model(model)
+  }
   let building = spatial_origin_building(model)
   let name = building.map(value => value.name).unwrap_or("小镇")
   let module_key = building.map(golden_valley_building_module_key).unwrap_or("")

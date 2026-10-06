@@ -44,7 +44,16 @@ pub async fn dispatch_next_book_quality_ai_review(
   result_dir? : String = @book_quality.default_review_result_dir(),
   run_path? : String = @book_quality.default_review_run_path(),
   run_inline? : Bool = moontown_moonclaw_inline_enabled(),
+  execution? : String = "native",
 ) -> String {
+  if execution == "native" {
+    return dispatch_next_native_book_quality_review(
+      book_catalog_path, snapshot_path, review_dir, result_dir, run_path,
+    )
+  }
+  if execution != "acp" {
+    return "Unsupported book review execution selection: " + execution
+  }
   dispatch_next_book_quality_ai_review_run(
     book_catalog_path, snapshot_path, review_dir, result_dir, run_path, run_inline,
   )

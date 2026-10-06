@@ -2,6 +2,7 @@
 priv enum ModuleRuntimeStatusKind {
   Alert
   Review
+  Acceptance
   Running
   Waiting
   Complete
@@ -13,6 +14,7 @@ fn module_runtime_status_class(kind : ModuleRuntimeStatusKind) -> String {
   match kind {
     Alert => "module-status-alert"
     Review => "module-status-review"
+    Acceptance => "module-status-waiting"
     Running => "module-status-running"
     Waiting => "module-status-waiting"
     Complete => "module-status-complete"
@@ -25,6 +27,7 @@ fn module_runtime_status_label(kind : ModuleRuntimeStatusKind) -> String {
   match kind {
     Alert => "Recovery"
     Review => "Review"
+    Acceptance => "Acceptance pending"
     Running => "Running"
     Waiting => "Waiting"
     Complete => "Quiet"
@@ -40,6 +43,7 @@ fn module_runtime_status_count(
   match (kind, expected) {
     (Alert, Alert)
     | (Review, Review)
+    | (Acceptance, Acceptance)
     | (Running, Running)
     | (Waiting, Waiting)
     | (Complete, Complete)
@@ -54,7 +58,8 @@ fn module_runtime_counts_from_status_kind(
 ) -> ModuleRuntimeCounts {
   module_runtime_counts(
     running=module_runtime_status_count(kind, Running),
-    waiting=module_runtime_status_count(kind, Waiting),
+    waiting=module_runtime_status_count(kind, Waiting) +
+      module_runtime_status_count(kind, Acceptance),
     review=module_runtime_status_count(kind, Review),
     blocked=module_runtime_status_count(kind, Alert),
     completed=module_runtime_status_count(kind, Complete),
@@ -68,6 +73,7 @@ fn module_projection_explicit_status_kind(
   match status {
     "alert" => Some(Alert)
     "review" => Some(Review)
+    "acceptance-pending" => Some(Acceptance)
     "running" => Some(Running)
     "waiting" => Some(Waiting)
     "complete" => Some(Complete)
@@ -217,6 +223,8 @@ fn module_execution_status_kind(
     Review
   } else if execution_status_needs_attention(status) {
     Alert
+  } else if status == AwaitingAcceptance {
+    Acceptance
   } else if status == Completed {
     Complete
   } else {

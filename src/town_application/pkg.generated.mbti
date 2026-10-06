@@ -4,7 +4,7 @@ package "vectie/moontown/town_application"
 // Values
 pub fn default_request_application(String) -> RequestApplication
 
-pub fn request_application(String, String) -> RequestApplication
+pub fn request_application(String, String, catalog_path? : String) -> RequestApplication
 
 // Errors
 
@@ -12,6 +12,7 @@ pub fn request_application(String, String) -> RequestApplication
 pub struct RequestApplication {
   state_root : String
   operator_policy_path : String
+  catalog_path : String
 }
 pub async fn RequestApplication::queue_evidence_book(Self, String) -> Json
 pub async fn RequestApplication::register_existing_book(Self, String) -> Json

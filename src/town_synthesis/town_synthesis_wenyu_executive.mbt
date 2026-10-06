@@ -12,6 +12,14 @@ fn render_wenyu_executive_summary(
   builder.write_string(
     wenyu_lane_status_summary(complete_count, running_count, failed_count),
   )
+  let acceptance_count = count_lanes_by_status(
+    state, plan, "acceptance pending",
+  )
+  if acceptance_count > 0 {
+    builder.write_string(
+      " \{acceptance_count} lanes are acceptance pending; Book review approval has not evaluated the original goal acceptance.",
+    )
+  }
   builder.write_string("\n\n")
   builder.write_string(wenyu_product_build_map_summary())
   builder.to_string()

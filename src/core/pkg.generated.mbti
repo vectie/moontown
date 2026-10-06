@@ -57,6 +57,10 @@ pub fn tick_from_task_id(String) -> Int
 
 pub fn town_task_status_for_execution(TaskExecutionStatus) -> TownTaskStatus
 
+pub fn unconfirmed_standing_watch_decision() -> String
+
+pub fn unconfirmed_standing_watch_dispatch(TaskExecutionRecord) -> Bool
+
 pub fn upsert_moonclaw_job_profile_json(Json, String, Json) -> Json
 
 pub fn upsert_nested_object_entry_json(Json, section_key~ : String, collection_key~ : String, entry_key~ : String, entry~ : Json) -> Json
@@ -161,6 +165,7 @@ pub(all) enum TaskExecutionStatus {
   Completed
   Stale
   Failed
+  AwaitingAcceptance
 } derive(Eq, ToJson, @debug.Debug, @json.FromJson)
 pub impl Show for TaskExecutionStatus
 

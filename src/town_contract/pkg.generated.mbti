@@ -12,11 +12,17 @@ pub fn desktop_contract_path() -> String
 
 pub fn desktop_evidence_book_path() -> String
 
+pub fn desktop_imported_output_content_path() -> String
+
+pub fn desktop_imported_outputs_path() -> String
+
 pub fn desktop_moonclaw_guide_path() -> String
 
 pub fn desktop_moonflow_research_reconcile_path() -> String
 
 pub fn desktop_moonflow_research_start_path() -> String
+
+pub fn desktop_native_work_path() -> String
 
 pub fn desktop_pack_bridge_path() -> String
 
@@ -161,6 +167,22 @@ pub fn miniapp_supervisor_wake_path() -> String
 pub fn miniapp_system_settings_path() -> String
 
 pub fn miniapp_visitor_session_path() -> String
+
+pub fn native_work_status_schema() -> String
+
+pub fn portable_package_content_path() -> String
+
+pub fn portable_package_grants_path() -> String
+
+pub fn portable_package_preview_path() -> String
+
+pub fn portable_package_revoke_path() -> String
+
+pub fn portable_package_withdraw_path() -> String
+
+pub fn portable_packages_path() -> String
+
+pub fn portable_transfer_contract() -> Json
 
 pub fn schema_version() -> String
 

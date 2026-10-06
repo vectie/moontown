@@ -14,7 +14,7 @@ pub fn book_quality_catalog_entry_from_runtime_book(@core.BookRef) -> @moonbook.
 
 pub async fn bootstrap_registered_book_workspaces(book_catalog_path? : String) -> String
 
-pub async fn dispatch_next_book_quality_ai_review(book_catalog_path? : String, snapshot_path? : String, review_dir? : String, result_dir? : String, run_path? : String, run_inline? : Bool) -> String
+pub async fn dispatch_next_book_quality_ai_review(book_catalog_path? : String, snapshot_path? : String, review_dir? : String, result_dir? : String, run_path? : String, run_inline? : Bool, execution? : String) -> String
 
 pub async fn first_pending_review_score(@book_quality.BookQualityAudit, String) -> @book_quality.BookQualityScore?
 

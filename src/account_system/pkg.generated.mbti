@@ -59,7 +59,9 @@ pub async fn AccountApplication::enterprise_remove_member(Self, String, String, 
 pub async fn AccountApplication::enterprise_snapshot(Self, String, now_ms~ : UInt64) -> Json
 pub async fn AccountApplication::enterprise_upsert_member(Self, String, String, String, Bool, String, String, now_ms~ : UInt64, ttl_ms? : UInt64) -> VisitorSessionResult
 pub async fn AccountApplication::logout(Self, String, now_ms~ : UInt64) -> Unit
+pub async fn AccountApplication::portable_transfer_recipient_active(Self, AccountContext, String) -> Bool
 pub async fn AccountApplication::resolve(Self, String, now_ms~ : UInt64) -> AccountContext?
+pub async fn AccountApplication::resolve_portable_transfer(Self, String, now_ms~ : UInt64) -> AccountContext?
 pub async fn AccountApplication::set_paid_subscription(Self, String, Bool, now_ms~ : UInt64) -> AccountContext
 pub async fn AccountApplication::switch_tenant(Self, String, String?, now_ms~ : UInt64) -> AccountContext
 

@@ -3,13 +3,18 @@ fn activation_request_json(
   actor_user_id : String,
   draft : SupervisorActivationDraft,
 ) -> Json {
-  {
+  let fields : Map[String, Json] = {
     "actorUserId": actor_user_id,
     "commandId": draft.command_id,
     "expectedVersion": draft.expected_version,
     "expectedCursor": draft.expected_cursor,
     "runtimeExpectedCursor": wire_int_or_null(draft.runtime_expected_cursor),
   }
+  match draft.requested_model {
+    Some(model) => fields["model"] = model.to_json()
+    None => ()
+  }
+  Json::object(fields)
 }
 
 ///|
@@ -48,6 +53,12 @@ pub async fn SupervisorSetupApplication::activate_profile(
   if !current.ready() {
     fail("supervisor profile is not ready or consent is incomplete")
   }
+  let requested_model = draft.requested_model.unwrap_or("")
+  if requested_model != "" && !supervisor_worker_model_valid(requested_model) {
+    fail(
+      "activation requires an exact moongate/<catalog-id> selector or the explicitly selected legacy gpt-5.6-sol model",
+    )
+  }
   let activation : SupervisorProfileActivationPayload = {
     contract_id: "moonsuite.supervisor-profile-activation.v1",
     supervisor_id: current.profile_id,
@@ -60,7 +71,17 @@ pub async fn SupervisorSetupApplication::activate_profile(
       "workspace_id": current.bindings.workspace_id,
       "building_id": current.bindings.building_id,
       "book_ids": current.bindings.book_ids.to_json(),
-      "model": "gpt-5.6-sol",
+      "model": if requested_model == "gpt-5.6-sol" {
+        requested_model
+      } else {
+        ""
+      },
+      "requested_model": requested_model,
+      "model_resolution": if requested_model == "gpt-5.6-sol" {
+        "explicit_legacy"
+      } else {
+        "pending_route"
+      },
       "max_active_workers": current.bindings.max_active_workers,
       "source_request_digest": request_digest,
     },
@@ -117,6 +138,16 @@ pub async fn SupervisorSetupApplication::activate_profile(
       "status": handoff.status,
       "targetRuntime": handoff.target_runtime,
       "requestDigest": handoff.request_digest,
+      "requestedModel": requested_model,
+      "model": supervisor_activation_model(activation),
+      "modelResolution": supervisor_activation_binding_string(
+        activation, "model_resolution",
+      ),
+      "modelRouteStatus": if requested_model == "gpt-5.6-sol" {
+        "resolved"
+      } else {
+        "model_route_required"
+      },
     },
     "bookkeeperState": "not_requested",
   }
@@ -234,6 +265,19 @@ pub async fn SupervisorSetupApplication::claim_activation_handoff(
   }
   if current.status != "pending_transport" && current.status != "runtime_failed" {
     fail("activation handoff is not pending transport")
+  }
+  // Resolve before constructing/authorizing the command, then commit the exact
+  // payload and grant together. A retry never reselects an already bound model.
+  let payload = resolve_supervisor_activation_model(
+    current.payload,
+    fields.get("modelRoute").unwrap_or(Json::null()),
+  )
+  let current = {
+    ..current,
+    payload,
+    request_digest: sha256_json(
+      supervisor_activation_payload_wire_json(payload),
+    ),
   }
   let command_fields : Map[String, Json] = {
     "contract_id": "moonclaw.supervisor-command.v1",

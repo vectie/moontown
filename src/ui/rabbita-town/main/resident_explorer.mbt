@@ -46,6 +46,7 @@ fn resident_status_copy(
     "assigned" => "已分派"
     "waiting" | "queued" => "等待中"
     "waiting_review" => "等待审阅"
+    "awaiting_acceptance" => "Awaiting acceptance"
     "reviewing" => "审阅中"
     "blocked" => "受阻"
     "failed" => "失败"
@@ -58,7 +59,8 @@ fn resident_status_copy(
     Live => {
       let tone = match status {
         "running" | "assigned" | "reviewing" => "is-active"
-        "waiting" | "queued" | "waiting_review" => "is-waiting"
+        "waiting" | "queued" | "waiting_review" | "awaiting_acceptance" =>
+          "is-waiting"
         "blocked" | "failed" => "is-alert"
         "completed" => "is-complete"
         _ => "is-idle"

@@ -13,6 +13,8 @@ fn visual_agent_message(
     "persisting" =>
       "\{worker.name} is carrying results back to MoonBook memory."
     "review" => "\{worker.name} is inside the book review room."
+    "acceptance-pending" =>
+      "Book review approved for \{work}; goal acceptance remains unevaluated."
     "failed" => "\{worker.name} needs mayor recovery for \{work}."
     "stale" => "\{worker.name} is stale and should be recovered."
     "blocked" => "\{worker.name} is blocked and visible in anomaly triage."

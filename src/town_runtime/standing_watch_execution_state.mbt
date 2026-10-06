@@ -99,12 +99,24 @@ async fn publish_running_standing_watch_snapshot(
   worker_id : String?,
   tick : Int,
   snapshot_path : String,
+  material_change? : MaterialWatchChange? = None,
 ) -> Unit {
   match (decision, worker_id) {
     (Assigned(_), Some(worker_id)) => {
       let live_execution = running_standing_watch_execution(
         entry, task, worker_id, tick,
       )
+      let live_execution = match material_change {
+        Some(change) => {
+          let bound = bind_material_watch_execution(live_execution, change)
+          remember_material_watch_execution(
+            material_watch_directory(snapshot_path, change.input.goal.id),
+            bound,
+          )
+          bound
+        }
+        None => live_execution
+      }
       state.replace_task(to_town_task(entry, task, live_execution.status))
       state.replace_execution(live_execution)
       sync_worker_from_execution(state, live_execution)

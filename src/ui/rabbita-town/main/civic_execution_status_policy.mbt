@@ -53,6 +53,7 @@ fn civic_execution_stage_label_for_status(
     @ui.Running => phrases.running
     @ui.Persisting => phrases.persisting
     @ui.Review => phrases.review
+    @ui.Acceptance => "Acceptance pending"
     @ui.Completed => phrases.completed
     @ui.Recovery => phrases.recovery
   }
@@ -169,6 +170,7 @@ fn civic_execution_score_for_status(
     @ui.Running => policy.running
     @ui.Persisting => policy.persisting
     @ui.Review => policy.review
+    @ui.Acceptance => policy.review
     @ui.Completed => policy.completed
     @ui.Recovery => policy.recovery
   }

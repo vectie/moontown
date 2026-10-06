@@ -22,7 +22,20 @@ pub async fn write_moontown_planbook_repair_task(
   book_catalog_path? : String = @moonbook.default_catalog_path(),
   dispatch? : Bool = false,
   run_inline? : Bool = planbook_repair_run_inline_enabled(),
+  execution? : String = "native",
 ) -> String {
+  if execution != "native" && execution != "acp" {
+    return "Unsupported PlanBook repair execution selection: " + execution
+  }
+  if pending_native_planbook_repair(
+      snapshot_path,
+      workspace_root,
+      dispatch && execution == "native",
+    )
+    is Some(task) {
+    write_planbook_repair_status(task, workspace_root, snapshot_path)
+    return "PlanBook repair task `\{task.id}` is \{task.status}: \{task.summary}"
+  }
   let status = inspect_moontown_planbook_autonomy(
     snapshot_path~,
     workspace_root~,
@@ -42,10 +55,16 @@ pub async fn write_moontown_planbook_repair_task(
             ) {
             Some(task) => task
             None =>
-              materialize_planbook_repair_task(
-                criterion, snapshot_path, workspace_root, book_catalog_path, dispatch,
-                run_inline,
-              )
+              if execution == "acp" {
+                materialize_planbook_repair_task(
+                  criterion, snapshot_path, workspace_root, book_catalog_path, dispatch,
+                  run_inline,
+                )
+              } else {
+                materialize_native_planbook_repair(
+                  criterion, snapshot_path, workspace_root, book_catalog_path, dispatch,
+                )
+              }
           }
       }
       write_planbook_repair_status(task, workspace_root, snapshot_path)
@@ -96,6 +115,28 @@ pub async fn render_moontown_planbook_repair_status(
   let task : PlanbookRepairTask = @json.from_json(parsed) catch {
     _ =>
       return "PlanBook repair task exists at \{path}, but it does not match the contract."
+  }
+  if task.id.has_prefix("town-work-") {
+    let state = @native_work.load(
+      path=@native_work.path_for_snapshot(snapshot_path),
+    )
+    match state.work.iter().find_first(work => work.id == task.id) {
+      Some(work) =>
+        return render_planbook_repair_markdown(
+          {
+            ..task,
+            status: @native_work.owner_status(work),
+            summary: @native_work.summary(work),
+          },
+          result_text=if @native_work.owner_status(work) == "completed" {
+            @support.read_text_or_empty(work.request.result_path)
+          } else {
+            ""
+          },
+        )
+      None =>
+        return "Native PlanBook repair request is unavailable; no legacy redispatch was attempted."
+    }
   }
   let status = inspect_moontown_planbook_autonomy(snapshot_path~)
   if planbook_repair_task_satisfied_by_status(task, status) {

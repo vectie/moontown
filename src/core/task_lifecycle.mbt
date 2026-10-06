@@ -9,6 +9,7 @@ pub fn town_task_status_for_execution(
     Running => Running
     AwaitingPersistence => Running
     ReviewQueued => Blocked
+    AwaitingAcceptance => Blocked
     Completed => Done
     Stale => Blocked
     Failed => Failed
@@ -76,7 +77,7 @@ pub fn execution_status_rank(status : TaskExecutionStatus) -> Int {
     PacketReady => 1
     ProposalImported => 2
     RunConfirmed | Running | AwaitingPersistence => 3
-    ReviewQueued | Completed | Stale | Failed => 4
+    ReviewQueued | AwaitingAcceptance | Completed | Stale | Failed => 4
   }
 }
 
@@ -106,6 +107,9 @@ pub fn no_run_id_live_execution_stale(
   execution : TaskExecutionRecord,
   tick : Int,
 ) -> Bool {
+  if execution.output_contract == "wenyu.build.native-result.v1" {
+    return false
+  }
   if !live_execution_status(execution.status) {
     return false
   }
@@ -123,7 +127,11 @@ pub fn live_external_execution_count(state : TownState) -> Int {
   for execution in state.executions {
     match execution.status {
       ProposalImported | RunConfirmed | Running =>
-        if execution.run_id is Some(_) {
+        if execution.run_id is Some(_) ||
+          (
+            execution.output_contract == "wenyu.build.native-result.v1" &&
+            execution.result_decision != "native-pending"
+          ) {
           count += 1
         }
       _ => ()

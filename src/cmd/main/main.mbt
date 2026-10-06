@@ -20,6 +20,31 @@ async fn render_cli_command(args : Array[String]) -> String {
       render_editor_pipeline_command(rest.to_owned())
     ["course", .. rest] => render_course_command(rest.to_owned())
     ["books", .. rest] => render_books_command(rest.to_owned())
+    ["native-work", "list"] => @native_work.render_status()
+    ["native-work", "show", id] => {
+      let state = @native_work.load()
+      match state.work.iter().find_first(work => work.id == id) {
+        Some(work) => @native_work.status(work).to_json().stringify(indent=2)
+        None => "Native work not found: " + id
+      }
+    }
+    ["native-work", "sync", id] => {
+      let work = @native_work.sync(id, @env.now(), force=true)
+      @build_pipeline_runtime.apply_wenyu_native_work_result(work)
+      @native_work.summary(work)
+    }
+    ["native-work", "refresh", id] => {
+      let state = @native_work.load()
+      @native_work.summary(@native_work.refresh(id, state.revision, @env.now()))
+    }
+    ["native-work", "cancel", id] => {
+      let state = @native_work.load()
+      @native_work.summary(@native_work.cancel(id, state.revision, @env.now()))
+    }
+    ["native-work", "supersede", id] => {
+      let state = @native_work.load()
+      @native_work.summary(@native_work.supersede(id, state.revision))
+    }
     ["knowledge", .. rest] => render_knowledge_command(rest.to_owned())
     ["moonclaw", .. rest] => render_moonclaw_command(rest.to_owned())
     ["civic", .. rest] => render_civic_command(rest.to_owned())

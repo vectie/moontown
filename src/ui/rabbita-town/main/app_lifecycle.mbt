@@ -62,7 +62,27 @@ fn update_non_form_message(
   msg : Msg,
   model : Model,
 ) -> (Cmd, Model) {
+  let (command, next) = update_non_form_message_before_imported_surface_fence(
+    dispatch,
+    msg,
+    imported_outputs_reconcile_primary_surface(model),
+  )
+  (command, imported_outputs_reconcile_primary_surface(next))
+}
+
+///|
+fn update_non_form_message_before_imported_surface_fence(
+  dispatch : Dispatch[Msg],
+  msg : Msg,
+  model : Model,
+) -> (Cmd, Model) {
   match msg {
+    ImportedOutputsEvent(event) =>
+      imported_outputs_update(dispatch, model, event)
+    ImportedDownloadReceived(generation, download_generation, selection, result) =>
+      imported_outputs_download_update(
+        model, generation, download_generation, selection, result,
+      )
     ViewportControlNoop => model_only_update(model)
     TownLifeStorageChanged => town_life_storage_changed_update(model)
     Tick => tick_update(dispatch, model)
@@ -97,7 +117,11 @@ fn update_non_form_message(
       model_only_update({ ..model, indoor_selected_slot_id: slot_id, })
     SelectSpatialWork(work_id) => {
       replace_browser_query_param("work", work_id)
-      model_only_update({ ..model, spatial_selected_work_id: work_id, })
+      model_only_update({
+        ..model,
+        spatial_selected_work_id: work_id,
+        request_follow_result: false,
+      })
     }
     StartIndoorWork => model_only_update(spatial_start_work_model(model))
     ReviewSpatialWork => town_life_commit(spatial_review_work_model(model))
@@ -201,6 +225,9 @@ fn update_non_form_message(
         request_composer: StandingWatchComposer,
       })
     OpenEnergyRequestForAgent(contact_id) => {
+      if model.request_submitting {
+        return model_only_update(reopen_pending_operator_request_model(model))
+      }
       let contact = phone_contact_by_id(model, contact_id)
       match resident_runtime_agent_by_id(model, contact_id) {
         Some(agent) => {
@@ -231,7 +258,11 @@ fn update_non_form_message(
       }
     }
     CloseEnergyRequest =>
-      model_only_update({ ..model, energy_request_open: false, })
+      model_only_update({
+        ..model,
+        energy_request_open: false,
+        request_follow_result: false,
+      })
     ToggleResidentExplorer => {
       let opening = !model.resident_explorer_open
       if opening {
@@ -309,7 +340,8 @@ fn update_non_form_message(
     SubmitOperatorRequest => submit_operator_request_update(dispatch, model)
     SubmitBookTemplateRequest =>
       submit_book_template_request_update(dispatch, model)
-    OperatorRequestSubmitted(raw) => operator_request_result_update(raw, model)
+    OperatorRequestSubmitted(submission_id, raw) =>
+      operator_request_result_update(submission_id, raw, model)
     BookTemplateRequestSubmitted(raw) =>
       book_template_request_result_update(raw, model)
     ResearchHandoffInspected(raw) =>

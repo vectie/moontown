@@ -1,0 +1,193 @@
+// Generated using `moon info`, DON'T EDIT IT
+package "vectie/moontown/native_work"
+
+import {
+  "moonbitlang/core/debug",
+  "moonbitlang/core/json",
+  "vectie/moontown/native_code_control",
+}
+
+// Values
+pub async fn accepted_repair(String, String, path? : String) -> Bool
+
+pub async fn cancel(String, Int, UInt64, path? : String, client? : @native_code_control.Client) -> Work
+
+pub fn default_path() -> String
+
+pub fn digest(String) -> String
+
+pub async fn editor_applied_feature(String) -> String?
+
+pub async fn editor_applied_feature_artifacts(String) -> EditorAppliedFeature?
+
+pub fn editor_owner_enabled(String) -> Bool
+
+pub async fn editor_owner_file(String, String) -> String
+
+pub async fn editor_owner_fingerprint(String, String) -> String
+
+pub fn editor_owner_pending(Work) -> Bool
+
+pub fn editor_owner_plan_relative() -> String
+
+pub async fn enqueue(Request, path? : String) -> Work
+
+pub fn is_workspace_change(String) -> Bool
+
+pub async fn load(path? : String) -> State
+
+pub fn owner_status(Work) -> String
+
+pub fn path_for_snapshot(String) -> String
+
+pub async fn read_saved(path? : String) -> State
+
+pub async fn refresh(String, Int, UInt64, path? : String, client? : @native_code_control.Client) -> Work
+
+pub async fn render_status(path? : String) -> String
+
+pub async fn source_binding(String?) -> Result[Json, String]
+
+pub fn source_root(Json) -> String
+
+pub async fn source_still_bound(Json, strict_digest? : Bool) -> Bool
+
+pub fn status(Work) -> Status
+
+pub fn summary(Work) -> String
+
+pub async fn supersede(String, Int, path? : String) -> Work
+
+pub async fn sync(String, UInt64, path? : String, client? : @native_code_control.Client, force? : Bool, expected_revision? : Int) -> Work
+
+pub fn terminal(String) -> Bool
+
+pub fn wenyu_completion_policy(Array[String]) -> Json
+
+pub fn wenyu_mutation_receipt_satisfies_contract(Work) -> Bool
+
+pub fn wenyu_no_change_receipt_satisfies_contract(Work) -> Bool
+
+pub fn wenyu_result_satisfies_contract(Work, String, no_change? : Bool) -> Bool
+
+// Errors
+
+// Types and methods
+pub(all) struct CancelControl {
+  command_id : String
+  target_command_id : String
+  request_body : String
+  body_digest : String
+  status : String
+  last_attempt_at_ms : UInt64
+  evidence : Json
+} derive(ToJson, @json.FromJson)
+
+pub(all) struct EditorAppliedFeature {
+  selected_feature : String
+  selection_content : String
+  implementation_content : String
+} derive(Eq, @debug.Debug)
+
+pub(all) struct EditorCapturedInput {
+  book_id : String
+  root : String
+  relative : String
+  content : String
+  content_digest : String
+} derive(ToJson, @json.FromJson)
+
+type EditorOutputPackage derive(ToJson, @json.FromJson)
+
+pub(all) struct EditorOwnerSpec {
+  contract : String
+  criterion_id : String
+  plan_id : String
+  selection_content : String
+  selection_digest : String
+  selected_feature : String
+  title : String
+  implementation_hint : String
+  acceptance : Array[String]
+  captured_inputs : Array[EditorCapturedInput]
+  output_before : Map[String, String]
+  missing_plan_template : String
+} derive(ToJson, @json.FromJson)
+
+pub(all) struct Request {
+  kind : String
+  work_key : String
+  generation : Int
+  owner_workspace : String
+  book_id : String
+  book_root : String
+  book_type : String
+  catalog_path : String
+  execution_root : String
+  source_binding : Json
+  criterion_id : String
+  model_request : String
+  prompt : String
+  input_blocker : String
+  input_digest : String
+  output_contract : String
+  result_path : String
+  acceptance_policy : Json
+  created_at_ms : UInt64
+} derive(ToJson, @json.FromJson)
+
+pub(all) struct Reservation {
+  session_id : String
+  command_id : String
+  model : String
+  model_workspace : String
+  execution_root : String
+  config_path : String
+  request_body : String
+  body_digest : String
+  reserved_at_ms : UInt64
+} derive(ToJson, @json.FromJson)
+
+pub(all) struct State {
+  schema : String
+  revision : Int
+  work : Array[Work]
+} derive(ToJson, @json.FromJson)
+
+pub(all) struct Status {
+  id : String
+  kind : String
+  book_id : String
+  criterion_id : String
+  generation : Int
+  state : String
+  control_state : String
+  blocked_reason : String
+  blocker_help : String
+  observed_at_ms : UInt64
+  retry_after_ms : UInt64
+  session_id : String
+  command_id : String
+  engineering_status : String
+  output : String
+} derive(ToJson)
+
+pub(all) struct Work {
+  id : String
+  request : Request
+  request_digest : String
+  state : String
+  blocked_reason : String
+  reservation : Reservation?
+  control : CancelControl?
+  baseline : Json
+  observed_instances : Array[String]
+  last_attempt_at_ms : UInt64
+  retry_after_ms : UInt64
+  output : String
+  receipt : Json
+} derive(ToJson, @json.FromJson)
+
+// Type aliases
+
+// Traits

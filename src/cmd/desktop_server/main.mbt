@@ -578,8 +578,18 @@ async fn handle_request(
     send_json(conn, 200, state.to_json())
     return
   }
+  if path == @town_contract.desktop_imported_outputs_path() ||
+    path.has_prefix(@town_contract.desktop_imported_outputs_path() + "/") {
+    handle_imported_output_api(request, conn)
+    return
+  }
   if request.meth is Get && path == @town_contract.desktop_contract_path() {
     send_json(conn, 200, @town_contract.desktop_contract())
+    return
+  }
+  if path == @town_contract.desktop_native_work_path() ||
+    path.has_prefix(@town_contract.desktop_native_work_path() + "/") {
+    handle_native_work_api(request, body, conn, path)
     return
   }
   let supervisor = @supervisor_setup.default_supervisor_setup_application()

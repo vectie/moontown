@@ -9,7 +9,7 @@ fn visual_execution_is_live(status : @core.TaskExecutionStatus) -> Bool {
     | ReviewQueued
     | Stale
     | Failed => true
-    Completed => false
+    AwaitingAcceptance | Completed => false
   }
 }
 
@@ -40,6 +40,7 @@ fn visual_phase_for_execution(status : @core.TaskExecutionStatus) -> String {
     Running => "running"
     AwaitingPersistence => "persisting"
     ReviewQueued => "review"
+    AwaitingAcceptance => "acceptance-pending"
     Completed => "completed"
     Stale => "stale"
     Failed => "failed"

@@ -46,6 +46,22 @@ pub async fn RequestApplication::submit_standing_watch(
     Object(fields) => fields
     _ => fail("request body must be a JSON object")
   }
+  let lock_path = self.state_root + "/operator-requests/submission.lock"
+  @support.ensure_parent_directory(lock_path)
+  let lock = @fs.open(lock_path, mode=ReadWrite, create_mode=OpenOrCreate)
+  defer lock.close()
+  lock.lock(Exclusive)
+  let watch_mode = match fields.get("watch_mode") {
+    None => ""
+    Some(String(mode)) => mode.trim().to_owned()
+    _ => fail("watch_mode must be cadence or local-material")
+  }
+  if watch_mode == "local-material" {
+    return self.submit_material_watch(fields)
+  }
+  if watch_mode != "" && watch_mode != "cadence" {
+    fail("Unsupported watch mode")
+  }
   let title = json_string_field(fields, "title")
   let prompt = json_string_field(fields, "prompt")
   if title.is_empty() || prompt.is_empty() {

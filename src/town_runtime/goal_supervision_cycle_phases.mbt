@@ -6,6 +6,8 @@ async fn run_supervision_reconciliation_passes(
   standing_goals : Array[@core.StandingGoal],
   tick? : Int = supervision_tick(state),
 ) -> Unit {
+  restore_material_watch_executions(state, snapshot_path, standing_goals)
+  recover_saved_wenyu_native_launches(state, catalog, snapshot_path, tick)
   reconcile_live_executions(
     state,
     catalog,

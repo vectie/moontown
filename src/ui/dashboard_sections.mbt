@@ -38,7 +38,11 @@ fn dashboard_tasks_section(town : @core.TownState) -> DashboardSection {
     title: "Tasks",
     lines: town.tasks.map(task => {
       let stage = task_stage_label(task)
-      "\{task.id}: \{task.status.to_string()} / stage=\{stage}"
+      let acceptance = match find_execution_for_task(town, task.id) {
+        Some({ status: AwaitingAcceptance, .. }) => " / Awaiting acceptance"
+        _ => ""
+      }
+      "\{task.id}: \{task.status.to_string()}\{acceptance} / stage=\{stage}"
     }),
   }
 }

@@ -6,6 +6,8 @@ async fn execute_goal_book_task(
   assigned_worker_id? : String? = None,
   tick? : Int = 0,
   run_inline? : Bool = moontown_moonclaw_inline_enabled(),
+  native_path? : String = @native_work.default_path(),
+  saved_legacy? : Bool = false,
 ) -> @core.TaskExecutionRecord {
   if @build_pipeline.is_wenyu_book(entry) &&
     @build_pipeline.is_local_wenyu_build_fallback_task(task.kind) {
@@ -15,6 +17,68 @@ async fn execute_goal_book_task(
       assigned_worker_id~,
       tick~,
     )
+  }
+  if !saved_legacy &&
+    @build_pipeline.is_wenyu_book(entry) &&
+    @build_pipeline_runtime.wenyu_native_task_kind(task.kind) {
+    let path = @build_pipeline_runtime.wenyu_launch_path(native_path, task.id)
+    let exists = @fs.exists(path) catch {
+      error =>
+        return @build_pipeline_runtime.wenyu_native_attention_record(
+          entry,
+          task,
+          path,
+          error.to_string(),
+          tick,
+          assigned_worker_id~,
+        )
+    }
+    if !exists {
+      return @core.TaskExecutionRecord::new(
+        task_id=task.id,
+        book_id=entry.id,
+        packet_id="wenyu-launch-missing",
+        packet_path=path,
+        status=Failed,
+        summary="Wenyu native launch is missing its accepted-goal manifest; prepare the goal before starting new native work. No compatibility execution was substituted.",
+        output_contract="wenyu.build.native-result.v1",
+        context_pages=task.target_pages,
+        assigned_worker_id~,
+        heartbeat_tick=tick,
+        stale_after_tick=tick + 30,
+        result_decision="native-launch-missing",
+        requires_review=true,
+        notify_town=true,
+      )
+    }
+    let launch = @build_pipeline_runtime.load_wenyu_launch(path) catch {
+      error =>
+        return @build_pipeline_runtime.wenyu_native_attention_record(
+          entry,
+          task,
+          path,
+          error.to_string(),
+          tick,
+          assigned_worker_id~,
+        )
+    }
+    if launch.execution == "native" {
+      return @build_pipeline_runtime.execute_wenyu_native(
+        launch,
+        tick,
+        assigned_worker_id~,
+      ) catch {
+        error =>
+          @build_pipeline_runtime.wenyu_native_attention_record(
+            entry,
+            task,
+            path,
+            error.to_string(),
+            tick,
+            assigned_worker_id~,
+          )
+      }
+    }
   }
   let prepared = mayor.prepare_keeper_packet(entry, task)
   let workspace_root = @moonbook.workspace_root(entry)

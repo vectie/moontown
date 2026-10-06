@@ -7,6 +7,9 @@ async fn reconcile_transient_dependency_failures(
 ) -> Unit {
   let snapshot = state.executions.copy()
   for execution in snapshot {
+    if @build_pipeline_runtime.is_wenyu_native_execution(execution) {
+      continue
+    }
     if !transient_dependency_reconcilable_status(execution.status) ||
       !@runtime_error_policy.transient_external_dependency_error(
         execution.summary,
@@ -70,6 +73,9 @@ fn reopen_retriable_deferred_standing_watch_executions(
 ) -> Unit {
   let snapshot = state.executions.copy()
   for execution in snapshot {
+    if @build_pipeline_runtime.is_wenyu_native_execution(execution) {
+      continue
+    }
     if execution.status != Completed ||
       execution.attempt >= 5 ||
       (
@@ -119,6 +125,9 @@ async fn reconcile_repaired_context_import_failures(
 ) -> Unit {
   let snapshot = state.executions.copy()
   for execution in snapshot {
+    if @build_pipeline_runtime.is_wenyu_native_execution(execution) {
+      continue
+    }
     if execution.status != Failed ||
       !execution.summary.contains("context_pages must not be empty") {
       continue

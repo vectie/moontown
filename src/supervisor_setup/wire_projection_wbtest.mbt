@@ -51,6 +51,7 @@ async test "activation execution lifecycle and review wires never wrap option va
         expected_version: 1,
         expected_cursor: 1,
         runtime_expected_cursor: Some(9),
+        requested_model: Some("gpt-5.6-sol"),
       },
       now_ms=2000UL,
     ),

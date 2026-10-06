@@ -13,6 +13,7 @@ pub fn empty_runtime_status(snapshot_path : String) -> TownRuntimeStatus {
     failed_count: 0,
     stale_count: 0,
     completed_count: 0,
+    awaiting_acceptance_count: Some(0),
     standing_goal_count: 0,
     enabled_standing_goal_count: 0,
     disabled_standing_goal_count: 0,

@@ -216,6 +216,11 @@ pub fn parse_supervisor_activation_draft(
         Some(value)
       }
     },
+    requested_model: match fields.get("model") {
+      Some(String(value)) => Some(value)
+      None | Some(Null) => None
+      _ => fail("activation model must be an exact selector string")
+    },
   }
   if draft.command_id.is_empty() ||
     draft.expected_version < 1 ||

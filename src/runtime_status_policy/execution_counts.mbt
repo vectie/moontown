@@ -86,6 +86,11 @@ pub fn runtime_status_execution_counts(
     completed: count_runtime_executions_in_indexes(state, effective_indexes, [
       Completed,
     ]),
+    awaiting_acceptance: count_runtime_executions_in_indexes(
+      state,
+      effective_indexes,
+      [AwaitingAcceptance],
+    ),
   }
 }
 

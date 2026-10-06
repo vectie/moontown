@@ -51,6 +51,38 @@ fn visual_projection_test_state(
 }
 
 ///|
+test "visual projection shows acceptance pending as inactive waiting without review or completion" {
+  let projection = build_visual_projection(
+    visual_projection_test_state(
+      worker_status=Idle,
+      execution_status=AwaitingAcceptance,
+    ),
+  )
+  let agent = projection.agents[0]
+  assert_eq(agent.phase, "acceptance-pending")
+  assert_eq(agent.behavior, "awaiting-acceptance")
+  assert_eq(agent.effect, "none")
+  assert_false(agent.visible_on_overworld)
+  assert_true(agent.message.contains("goal acceptance remains unevaluated"))
+  assert_false(visual_execution_is_live(AwaitingAcceptance))
+  assert_false(visual_phase_is_completed_or_idle(agent.phase))
+  assert_false(visual_phase_is_keeper_bound(agent.phase))
+  let building = projection.buildings[0]
+  assert_eq(building.waiting_count, 1)
+  assert_eq(building.running_count, 0)
+  assert_eq(building.review_count, 0)
+  assert_eq(building.completed_count, 0)
+  assert_eq(building.blocked_count, 0)
+  assert_eq(building.effect, "none")
+  assert_true(building.message.contains("Awaiting acceptance"))
+  let module_status = projection.modules[0]
+  assert_eq(module_status.status, "acceptance-pending")
+  assert_eq(module_status.active_agent_count, 0)
+  assert_eq(module_status.review_count, 0)
+  assert_eq(module_status.completed_count, 0)
+}
+
+///|
 test "visual projection path uses storage snapshot base" {
   assert_eq(
     default_visual_projection_path("town.json"),
@@ -162,6 +194,7 @@ test "visual building activity owns effect status and message priority" {
   let activity : VisualBuildingActivity = {
     running_count: 2,
     waiting_count: 1,
+    acceptance_pending_count: 0,
     review_count: 1,
     blocked_count: 1,
     completed_count: 3,

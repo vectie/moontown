@@ -1,5 +1,8 @@
 ///|
 async fn reconcile_planbook_repair_result(task : PlanbookRepairTask) -> String {
+  if task.id.has_prefix("town-work-") {
+    return ""
+  }
   let existing = planbook_repair_result_text_for_task(task)
   if existing != "" {
     return existing

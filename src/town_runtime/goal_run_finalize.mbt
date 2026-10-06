@@ -1,12 +1,30 @@
 ///|
+fn local_wenyu_result_ready_for_projection(
+  execution : @core.TaskExecutionRecord,
+) -> Bool {
+  // Reporting an already materialized local projection does not complete
+  // image generation or bypass the pending Book review.
+  execution.output_contract == "wenyu.build.local-result.v1" &&
+  execution.status is ReviewQueued
+}
+
+///|
 async fn finalize_goal_book_entry(
   state : @core.TownState,
   entry : @moonbook.BookCatalogEntry,
   pending_review_baseline : Int,
   task_ids : Array[String],
 ) -> Unit {
+  let local_outputs = !task_ids.is_empty() &&
+    task_ids.all(fn(id) {
+      match @core.find_execution(state, id) {
+        Some(execution) =>
+          execution.output_contract == "wenyu.build.local-result.v1"
+        None => false
+      }
+    })
   let generated_index = match
-    build_goal_book_workspace_or_record_error(state, entry) {
+    build_goal_book_workspace_or_record_error(state, entry, local_outputs~) {
     Some(index) => index
     None => return
   }
@@ -19,7 +37,12 @@ async fn finalize_goal_book_entry(
     state, entry, summary, pending_review_baseline, task_ids, quality_gaps,
   )
   record_goal_book_projection_events(
-    state, entry, generated_index, summary, quality_gaps,
+    state,
+    entry,
+    generated_index,
+    summary,
+    quality_gaps,
+    local_outputs~,
   )
 }
 
@@ -27,7 +50,17 @@ async fn finalize_goal_book_entry(
 async fn build_goal_book_workspace_or_record_error(
   state : @core.TownState,
   entry : @moonbook.BookCatalogEntry,
+  local_outputs? : Bool = false,
 ) -> String? {
+  if local_outputs {
+    // The materializer already attempted the projection before persistence.
+    // Do not create new outputs here after the Book artifact list was saved.
+    let index = @moonbook.generated_site_index_path(entry)
+    let valid = try (@fs.kind(index, follow_symlink=false) is Regular) catch {
+      _ => false
+    }
+    return if valid { Some(index) } else { None }
+  }
   let generated_index = @moonbook.build_workspace(entry) catch {
     error => {
       record_goal_book_error_event(
@@ -120,8 +153,11 @@ fn record_goal_book_projection_events(
   generated_index : String,
   summary : @moonbook.BookStateSummary,
   quality_gaps : Array[String],
+  local_outputs? : Bool = false,
 ) -> Unit {
-  state.record_event(goal_book_projection_event(entry, generated_index))
+  state.record_event(
+    goal_book_projection_event(entry, generated_index, local_outputs~),
+  )
   state.record_event(goal_book_summary_event(entry, summary, quality_gaps))
 }
 
@@ -129,11 +165,16 @@ fn record_goal_book_projection_events(
 fn goal_book_projection_event(
   entry : @moonbook.BookCatalogEntry,
   generated_index : String,
+  local_outputs? : Bool = false,
 ) -> @core.TownEvent {
   @core.TownEvent::new(
     id="event-build-\{entry.id}",
     kind="projection",
-    detail="Generated site for \{entry.id}: \{generated_index}",
+    detail=if local_outputs {
+      "Local Book projection available for \{entry.id}: \{generated_index}; existing files were preserved and are not claimed as newly generated."
+    } else {
+      "Generated site for \{entry.id}: \{generated_index}"
+    },
     related_book_id=Some(entry.id),
   )
 }

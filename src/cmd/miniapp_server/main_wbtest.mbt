@@ -243,6 +243,7 @@ test "marketplace bridge derives the existing bounded supervisor delegate payloa
       "revision": 2,
       "activeRunId": "supervisor-run-1",
       "runtimeCursor": 18,
+      "runtimeModel": "moongate/catalog-explicit-model",
       "bindings": {
         "workspaceId": "robotics-book",
         "buildingId": "robotics-book",
@@ -254,7 +255,8 @@ test "marketplace bridge derives the existing bounded supervisor delegate payloa
   assert_true(
     payload.contains("marketplace-action:agent.robot-guide:reader-a:7"),
   )
-  assert_true(payload.contains("\"model\":\"gpt-5.6-sol\""))
+  assert_true(payload.contains("\"model\":\"moongate/catalog-explicit-model\""))
+  assert_false(payload.contains("gpt-5.6-sol"))
   assert_true(payload.contains("\"webSearch\":false"))
   assert_true(payload.contains("\"maxCostMicroUsd\":\"2000000\""))
   assert_true(payload.contains("\"maxRuntimeMs\":\"300000\""))
@@ -284,4 +286,31 @@ test "marketplace pending handoff preserves the accepted decision for retry" {
   assert_true(result.contains("supervisor_activation_required"))
   assert_true(result.contains("\"can_retry_handoff\":true"))
   assert_false(result.contains("marketplace_handoff_not_ready"))
+}
+
+///|
+test "marketplace retry reuses its persisted exact selector and command identity" {
+  let handoff : Json = {
+    "handoff_id": "supervisor-execution-marketplace-request-1",
+    "command_id": "marketplace-request-1",
+    "owner_user_id": "publisher-1",
+    "action": "delegate",
+    "status": "runtime_failed",
+    "worker_task": { "model": "moongate/previously-selected" },
+  }
+  let outbox : Json = { "executionHandoffs": [handoff] }
+  assert_eq(
+    existing_marketplace_handoff(outbox, "marketplace-request-1", "publisher-1"),
+    Some(handoff),
+  )
+  assert_eq(
+    existing_marketplace_handoff(
+      outbox, "marketplace-request-1", "other-publisher",
+    ),
+    None,
+  )
+  assert_eq(
+    existing_marketplace_handoff(outbox, "other-command", "publisher-1"),
+    None,
+  )
 }

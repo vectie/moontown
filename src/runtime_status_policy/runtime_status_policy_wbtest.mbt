@@ -17,6 +17,24 @@ test "runtime status policy owns active and review execution sets" {
   assert_false(runtime_status_active_execution_status(ReviewQueued))
   assert_true(runtime_status_review_execution_status(ReviewQueued))
   assert_false(runtime_status_review_execution_status(Completed))
+  assert_false(runtime_status_active_execution_status(AwaitingAcceptance))
+  assert_false(runtime_status_review_execution_status(AwaitingAcceptance))
+}
+
+///|
+test "runtime status counts exclude acceptance pending from review and completion" {
+  let state = runtime_status_policy_test_state()
+  state.register_execution(
+    runtime_status_policy_test_execution("approved", AwaitingAcceptance),
+  )
+  let counts = runtime_status_execution_counts(
+    state,
+    @health.inspect_town(state),
+  )
+  assert_eq(counts.running, 0)
+  assert_eq(counts.review, 0)
+  assert_eq(counts.completed, 0)
+  assert_eq(counts.awaiting_acceptance, 1)
 }
 
 ///|
@@ -96,7 +114,14 @@ test "runtime status policy summarizes metric groups" {
   )
   let summary = runtime_status_summary(
     state,
-    { running: 1, review: 2, failed: 3, stale: 4, completed: 5, },
+    {
+      running: 1,
+      review: 2,
+      failed: 3,
+      stale: 4,
+      completed: 5,
+      awaiting_acceptance: 6,
+    },
     { total: 6, enabled: 5, disabled: 1, due: 2, },
     7,
     { total: 8, pending: 9, failed: 10, },
@@ -104,6 +129,7 @@ test "runtime status policy summarizes metric groups" {
   )
   assert_true(summary.contains("books=0 workers=0 tasks=0 executions=0"))
   assert_true(summary.contains("running=1 review=2 failed=3 stale=4"))
+  assert_true(summary.contains("awaiting_acceptance=6"))
   assert_true(
     summary.contains(
       "standing_goals=6 enabled_standing_goals=5 disabled_standing_goals=1 due_goals=2",

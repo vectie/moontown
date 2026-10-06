@@ -18,7 +18,7 @@ fn operator_request_last_summary_from_snapshot(
   let parts = [
     "Last accepted watch: \{request.title}",
     "for \{request.target_book_id} at \{request.created_at}.",
-    "Status \{request.status}; check frequency \{request.cadence_ticks};",
+    "Status \{request.status}; check interval \{request.cadence_ticks} ticks;",
     "quality \{request.quality_threshold}%.",
     "Request: \{one_line(request.prompt)}",
   ]

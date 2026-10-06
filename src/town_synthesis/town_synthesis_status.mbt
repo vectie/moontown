@@ -5,6 +5,8 @@ fn town_synthesis_execution_status(
 ) -> @core.TaskExecutionStatus {
   if town_synthesis_ready(state, plan) {
     Completed
+  } else if count_lanes_by_status(state, plan, "acceptance pending") > 0 {
+    AwaitingAcceptance
   } else {
     ReviewQueued
   }
@@ -62,6 +64,9 @@ fn town_synthesis_decision(
   if count_lanes_by_status(state, plan, "review queued") > 0 {
     return "The mayor should keep the goal in review because one or more lanes have quality-gate or pending-review blockers.\n"
   }
+  if count_lanes_by_status(state, plan, "acceptance pending") > 0 {
+    return "Book review is approved, but the original goal acceptance remains unevaluated; the town synthesis is acceptance pending.\n"
+  }
   "The mayor can treat the town goal as complete and use this artifact as the cross-lane synthesis entry point.\n"
 }
 
@@ -87,6 +92,7 @@ pub fn lane_research_status(
 ) -> String {
   let mut saw_running = false
   let mut saw_review = false
+  let mut saw_acceptance = false
   let mut saw_failed = false
   let mut saw_completed = false
   for execution in state.executions {
@@ -96,6 +102,7 @@ pub fn lane_research_status(
     match execution.status {
       Completed => saw_completed = true
       ReviewQueued => saw_review = true
+      AwaitingAcceptance => saw_acceptance = true
       Failed | Stale => saw_failed = true
       _ =>
         if @core.active_work_execution_status(execution.status) {
@@ -109,6 +116,8 @@ pub fn lane_research_status(
     "failed"
   } else if saw_review {
     "review queued"
+  } else if saw_acceptance {
+    "acceptance pending"
   } else if saw_completed {
     "complete"
   } else {

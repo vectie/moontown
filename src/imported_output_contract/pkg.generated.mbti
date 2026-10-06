@@ -1,0 +1,97 @@
+// Generated using `moon info`, DON'T EDIT IT
+package "vectie/moontown/imported_output_contract"
+
+import {
+  "moonbitlang/core/debug",
+  "moonbitlang/core/json",
+}
+
+// Values
+pub fn catalog_wire_limit() -> Int
+
+pub fn content_path(Selection, mode~ : String) -> String
+
+pub fn digest_valid(String) -> Bool
+
+pub fn parse_catalog(String) -> Catalog?
+
+pub fn parse_text_reply(String) -> TextReply?
+
+pub fn query_encode(String) -> String
+
+pub fn relative_path_valid(String) -> Bool
+
+pub fn selection_bytes_match(Selection, Bytes) -> Bool
+
+pub fn selection_valid(Selection) -> Bool
+
+pub fn text_preview_limit() -> Int
+
+pub fn text_wire_limit() -> Int
+
+// Errors
+
+// Types and methods
+pub(all) struct Book {
+  handle : String
+  book_id : String
+  name : String
+  state : String
+  message : String
+  source : Source?
+  outputs : Array[Output]
+} derive(Eq, ToJson, @debug.Debug, @json.FromJson)
+
+pub(all) struct Catalog {
+  contract : String
+  state : String
+  message : String
+  books : Array[Book]
+} derive(Eq, ToJson, @debug.Debug, @json.FromJson)
+
+pub(all) struct Output {
+  artifact_id : String
+  label : String
+  mime_type : String
+  included : Bool
+  reference : String?
+  declared_digest : String?
+  files : Array[OutputFile]
+  preview_path : String?
+  app_entrypoint : String?
+} derive(Eq, ToJson, @debug.Debug, @json.FromJson)
+
+pub(all) struct OutputFile {
+  path : String
+  size_bytes : Int
+  digest : String
+} derive(Eq, ToJson, @debug.Debug, @json.FromJson)
+
+pub(all) struct Selection {
+  book_handle : String
+  package_sha256 : String
+  manifest_sha256 : String
+  artifact_id : String
+  path : String
+  digest : String
+  size_bytes : Int
+} derive(Eq, ToJson, @debug.Debug, @json.FromJson)
+
+pub(all) struct Source {
+  agent_id : String
+  agent_version : String
+  package_sha256 : String
+  outputs_manifest_digest : String?
+} derive(Eq, ToJson, @debug.Debug, @json.FromJson)
+
+pub(all) struct TextReply {
+  contract : String
+  state : String
+  message : String
+  selection : Selection
+  content : String?
+} derive(Eq, ToJson, @debug.Debug, @json.FromJson)
+
+// Type aliases
+
+// Traits

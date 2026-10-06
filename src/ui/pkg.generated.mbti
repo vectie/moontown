@@ -43,6 +43,7 @@ pub(all) enum ExecutionViewStage {
   Running
   Persisting
   Review
+  Acceptance
   Completed
   Recovery
 } derive(Eq, @debug.Debug)

@@ -302,6 +302,7 @@ priv struct Model {
   operator_requests_version : Int
   book_template_requests : Array[BookTemplateRequestSnapshot]
   book_template_requests_version : Int
+  imported_outputs : ImportedOutputsState
   research_handoff : ResearchHandoffState
   moonflow_receiver : MoonFlowReceiverState
   request_title : String
@@ -309,7 +310,14 @@ priv struct Model {
   request_book_id : String
   request_cadence : String
   request_quality_threshold : String
+  request_watch_mode : WatchRequestMode
+  request_material_sources : String
+  request_material_acceptance : String
+  request_material_next_action : String
+  request_material_receipt : (String, String, String, MaterialWatchSnapshot)?
   request_submitting : Bool
+  request_submission_id : Int
+  request_follow_result : Bool
   request_status : String
   book_request_title : String
   book_request_book_id : String
@@ -402,6 +410,13 @@ priv struct Model {
 
 ///|
 priv enum Msg {
+  ImportedOutputsEvent(ImportedOutputsMsg)
+  ImportedDownloadReceived(
+    Int,
+    Int,
+    @imported_output_contract.Selection,
+    ImportedOutputDownload
+  )
   Tick
   ViewportControlNoop
   TogglePause
@@ -449,8 +464,12 @@ priv enum Msg {
   SetRequestBookId(String)
   SetRequestCadence(String)
   SetRequestQualityThreshold(String)
+  SetRequestWatchMode(WatchRequestMode)
+  SetRequestMaterialSources(String)
+  SetRequestMaterialAcceptance(String)
+  SetRequestMaterialNextAction(String)
   SubmitOperatorRequest
-  OperatorRequestSubmitted(String)
+  OperatorRequestSubmitted(Int, String)
   SetBookRequestTitle(String)
   SetBookRequestBookId(String)
   SetBookRequestPurpose(String)

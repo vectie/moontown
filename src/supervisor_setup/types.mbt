@@ -92,6 +92,7 @@ pub(all) struct SupervisorActivationDraft {
   expected_version : Int
   expected_cursor : Int
   runtime_expected_cursor : Int?
+  requested_model : String?
 } derive(Debug, Eq)
 
 ///|

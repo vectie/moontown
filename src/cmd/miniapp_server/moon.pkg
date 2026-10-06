@@ -19,6 +19,8 @@ import {
   "vectie/moontown/town_contract",
   "vectie/moontown/town_projection",
   "vectie/moontown/town_marketplace",
+  "vectie/moontown/town_portable_http",
+  "vectie/moontown/town_portable_transfer",
   "vectie/moontown/adapters/moonbook",
 }
 

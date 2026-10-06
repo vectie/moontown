@@ -19,6 +19,7 @@ pub fn empty_marketplace_state() -> MarketplaceState {
     sponsored_placements: [],
     action_requests: [],
     orders: [],
+    portable_bindings: [],
     version: 1,
   }
 }

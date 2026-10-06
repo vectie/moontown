@@ -1,148 +1,12 @@
 ///|
-/// MoonTown may schedule Code work, but MoonClaw owns the turn and execution.
-/// The private control credential is read only by the daemon and never enters
-/// a schedule record or desktop response.
-priv struct CodeControlConfig {
-  protocol_version : Int
-  instance_id : String
-  auth_token : String
-  workspace_id : String
-  workspace_root : String
-} derive(FromJson)
-
-///|
-fn code_control_hex(value : String, length : Int) -> Bool {
-  value.length() == length &&
-  value.all(ch => ch.is_ascii_digit() || (ch >= 'a' && ch <= 'f'))
-}
-
-///|
-async fn load_code_control_config() -> CodeControlConfig? {
-  guard @env.get_env_var("HOME") is Some(home) && home != "" else {
-    return None
-  }
-  let root = @pathx.normalize(
-    @pathx.join(
-      home, "Library/Application Support/app.vectie.moondesk/control/execution-sandbox",
-    ),
-  )
-  let expected = @pathx.join(root, "moonclaw.json")
-  let configured = match @env.get_env_var("MOONTOWN_MOONCODE_CONTROL_CONFIG") {
-    Some(value) => value
-    None =>
-      @env.get_env_var("MOONDESK_EXECUTION_SANDBOX_CONFIG").unwrap_or(expected)
-  }
-  let path = @pathx.normalize(configured)
-  guard path == expected &&
-    @fs.kind(root, follow_symlink=false) is Directory &&
-    @fs.realpath(root) == root &&
-    @fs.kind(path, follow_symlink=false) is Regular &&
-    @fs.realpath(path) == path else {
-    return None
-  }
-  let file = @fs.open(path, mode=ReadOnly)
-  defer file.close()
-  guard file.size() >= 0L && file.size() <= 65536L else { return None }
-  let value : CodeControlConfig = @json.from_json(
-    @json.parse(file.read_all().text()),
-  ) catch {
-    _ => return None
-  }
-  guard value.protocol_version == 1 &&
-    code_control_hex(value.instance_id, 32) &&
-    code_control_hex(value.auth_token, 64) &&
-    value.workspace_id != "" &&
-    value.workspace_root == @storage.moontown_active_workspace_root() &&
-    @fs.kind(value.workspace_root, follow_symlink=false) is Directory &&
-    @fs.realpath(value.workspace_root) == value.workspace_root else {
-    return None
-  }
-  Some(value)
-}
-
-///|
-async fn code_control_port(config : CodeControlConfig) -> Int? {
-  let path = @moonsuite.product_artifact_for_workspace_root(
-    config.workspace_root,
-    "moonclaw",
-    "daemon.json",
-  )
-  guard @fs.kind(path, follow_symlink=false) is Regular else { return None }
-  let info = @json.parse(@fs.read_file(path).text()) catch { _ => return None }
-  guard info is Object(fields) && fields.get("port") is Some(Number(port, ..)) else {
-    return None
-  }
-  let value = port.to_int()
-  if value > 0 && value <= 65535 {
-    Some(value)
-  } else {
-    None
-  }
-}
-
-///|
 fn code_url_component(value : String) -> String {
-  let result : Array[String] = []
-  let digits = "0123456789ABCDEF"
-  for byte in @utf8.encode(value) {
-    if (byte >= b'a' && byte <= b'z') ||
-      (byte >= b'A' && byte <= b'Z') ||
-      (byte >= b'0' && byte <= b'9') ||
-      byte == b'-' ||
-      byte == b'_' ||
-      byte == b'.' ||
-      byte == b'~' {
-      result.push(byte.to_char().to_string())
-    } else {
-      let number = byte.to_int()
-      result.push(
-        "%" +
-        digits[number / 16:number / 16 + 1].to_owned() +
-        digits[number % 16:number % 16 + 1].to_owned(),
-      )
-    }
-  }
-  result.join("")
-}
-
-///|
-fn code_control_headers(config : CodeControlConfig) -> Map[String, String] {
-  {
-    "X-MoonClaw-Execution-Token": config.auth_token,
-    "X-MoonClaw-Instance-ID": config.instance_id,
-  }
-}
-
-///|
-async fn code_control_get(
-  port : Int,
-  path : String,
-  config : CodeControlConfig,
-) -> Json? {
-  let (response, data) = @async.with_timeout(10000, () => {
-    @http.get(
-      "http://127.0.0.1:\{port}\{path}",
-      headers=code_control_headers(config),
-    )
-  }) catch {
-    _ => return None
-  }
-  guard response.code == 200 &&
-    response.headers.get("x-moonclaw-instance-id") == Some(config.instance_id) else {
-    return None
-  }
-  let text = data.text() catch { _ => return None }
-  guard text.length() <= 2_000_000 && !text.contains(config.auth_token) else {
-    return None
-  }
-  Some(@json.parse(text) catch { _ => return None })
+  @native_code_control.url_component(value)
 }
 
 ///|
 async fn code_control_submit(
-  port : Int,
   intent : CodeDispatchIntent,
-  config : CodeControlConfig,
+  config : @native_code_control.Client,
 ) -> Bool {
   let body : Json = {
     "protocol": "mooncode.v1",
@@ -153,35 +17,24 @@ async fn code_control_submit(
     "text": intent.prompt,
     "packet": { "command_id": intent.command_id },
   }
-  let headers = code_control_headers(config)
-  headers["Content-Type"] = "application/json"
-  let (response, data) = @async.with_timeout(10000, () => {
-    @http.post(
-      "http://127.0.0.1:\{port}/v1/code/sessions/\{code_url_component(intent.session_id)}/turns",
-      body,
-      headers~,
-    )
-  }) catch {
-    _ => return false
+  match
+    config.request(
+      "POST",
+      "/v1/code/sessions/" + code_url_component(intent.session_id) + "/turns",
+      body.stringify(),
+    ) {
+    Ok(reply) =>
+      reply
+      is {
+        "accepted": true,
+        "session_id": String(session_id),
+        "command_id": String(command_id),
+        ..
+      } &&
+      session_id == intent.session_id &&
+      command_id == intent.command_id
+    Err(_) => false
   }
-  guard response.code == 202 &&
-    response.headers.get("x-moonclaw-instance-id") == Some(config.instance_id) else {
-    return false
-  }
-  let text = data.text() catch { _ => return false }
-  guard text.length() <= 2_000_000 && !text.contains(config.auth_token) else {
-    return false
-  }
-  let reply = @json.parse(text) catch { _ => return false }
-  reply
-  is {
-    "accepted": true,
-    "session_id": String(session_id),
-    "command_id": String(command_id),
-    ..
-  } &&
-  session_id == intent.session_id &&
-  command_id == intent.command_id
 }
 
 ///|
@@ -212,13 +65,12 @@ fn code_receipt_status(claim : Json, command_id : String) -> String? {
 
 ///|
 async fn code_schedule_terminal_receipt(
-  port : Int,
   intent : CodeDispatchIntent,
-  config : CodeControlConfig,
+  config : @native_code_control.Client,
 ) -> String? {
   let claim_path = "/v1/code/sessions/\{code_url_component(intent.session_id)}/runtime-claim?book_root=\{code_url_component(intent.book_root)}"
-  match code_control_get(port, claim_path, config) {
-    Some(claim) if claim
+  match config.request("GET", claim_path, "") {
+    Ok(claim) if claim
       is {
         "owner": "moonclaw",
         "session_id": String(session_id),
@@ -281,8 +133,8 @@ pub async fn run_due_code_schedules(
       ),
     )
   }
-  let config = load_code_control_config() catch { _ => None }
-  guard config is Some(config) && code_control_port(config) is Some(port) else {
+  let config = @native_code_control.load()
+  guard config is Ok(config) else {
     for intent in intents {
       ignore(
         record_code_schedule_waiting(
@@ -311,7 +163,7 @@ pub async fn run_due_code_schedules(
       awaiting += 1
       continue
     }
-    if code_schedule_terminal_receipt(port, intent, config) is Some(status) {
+    if code_schedule_terminal_receipt(intent, config) is Some(status) {
       ignore(
         record_code_schedule_terminal(
           intent.schedule_id,
@@ -324,7 +176,7 @@ pub async fn run_due_code_schedules(
       completed += 1
       continue
     }
-    if code_control_submit(port, intent, config) {
+    if code_control_submit(intent, config) {
       ignore(
         record_code_schedule_acceptance(
           intent.schedule_id,
@@ -344,7 +196,7 @@ pub async fn run_due_code_schedules(
       awaiting += 1
       continue
     }
-    if code_schedule_terminal_receipt(port, intent, config) is Some(status) {
+    if code_schedule_terminal_receipt(intent, config) is Some(status) {
       ignore(
         record_code_schedule_terminal(
           intent.schedule_id,

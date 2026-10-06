@@ -8,6 +8,45 @@ async fn reconcile_live_executions(
 ) -> Unit {
   let snapshot = state.executions.copy()
   for execution in snapshot {
+    if @build_pipeline_runtime.is_wenyu_native_execution(execution) {
+      if execution.result_decision == "native-book-review-rejected" {
+        // A rejected deliverable needs an explicit operator decision. Never
+        // redispatch or reinterpret it through automatic review reconciliation.
+        continue
+      }
+      if execution.status == ReviewQueued ||
+        execution.status == AwaitingAcceptance ||
+        execution.result_decision == "native-blocked-review" ||
+        execution.result_decision == "native-book-review-approved" {
+        match @moonbook.entry_for_book_id(catalog, execution.book_id) {
+          Some(entry) =>
+            reconcile_native_wenyu_review(state, entry, execution.task_id, tick)
+          None => ()
+        }
+        continue
+      }
+      if execution.status != ReviewQueued &&
+        execution.result_decision != "native-blocked-review" {
+        match @moonbook.entry_for_book_id(catalog, execution.book_id) {
+          Some(entry) => {
+            let updated = @build_pipeline_runtime.sync_wenyu_native_execution(
+              entry, execution, tick,
+            ) catch {
+              error =>
+                copy_execution_with(
+                  execution,
+                  summary="Saved Wenyu native work needs attention: \{error}",
+                  heartbeat_tick=tick,
+                  next_retry_tick=None,
+                )
+            }
+            replace_execution_task_and_worker(state, updated)
+          }
+          None => ()
+        }
+      }
+      continue
+    }
     if !@core.pollable_execution_status(execution.status) {
       continue
     }
@@ -117,6 +156,31 @@ async fn reconcile_no_run_id_live_execution(
   launch_confirmed_run? : Bool = true,
   launch_command_override? : String? = None,
 ) -> Unit {
+  if @build_pipeline_runtime.is_wenyu_native_execution(execution) {
+    return
+  }
+  if @core.unconfirmed_standing_watch_dispatch(execution) {
+    if reconcile_detached_import_receipt_if_available(
+        state,
+        execution,
+        tick,
+        launch_confirmed_run~,
+        launch_command_override~,
+      ) {
+      return
+    }
+    if @core.no_run_id_live_execution_stale(execution, tick) {
+      let waiting = copy_execution_with(
+        execution,
+        status=Stale,
+        summary="Source-bound watch dispatch is unconfirmed; reconcile the original packet receipt before any retry.",
+        heartbeat_tick=tick,
+        next_retry_tick=None,
+      )
+      replace_execution_task_and_worker(state, waiting)
+    }
+    return
+  }
   if execution.status == ProposalImported {
     if reconcile_detached_import_receipt_if_available(
         state,

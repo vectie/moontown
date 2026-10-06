@@ -4,15 +4,41 @@ fn operator_request_success_model(
   goal_id : String,
   request_id : String,
   status : String,
+  material_watch? : MaterialWatchSnapshot? = None,
 ) -> Model {
-  replace_browser_query_param("work-request", request_id)
-  replace_browser_query_param("work", "")
+  // A background save must not replace the work the user navigated to.
+  let follow_saved_watch = model.request_follow_result &&
+    model.energy_request_open &&
+    model.request_composer == StandingWatchComposer
+  if follow_saved_watch {
+    replace_browser_query_param("work-request", request_id)
+    replace_browser_query_param("work", "")
+  }
   {
     ..model,
-    spatial_request_id: request_id,
-    spatial_selected_work_id: "",
+    spatial_request_id: if follow_saved_watch {
+      request_id
+    } else {
+      model.spatial_request_id
+    },
+    spatial_selected_work_id: if follow_saved_watch {
+      ""
+    } else {
+      model.spatial_selected_work_id
+    },
     request_submitting: false,
-    request_status: operator_request_success_status(goal_id, request_id, status),
+    request_material_receipt: match material_watch {
+      Some(saved) =>
+        Some(
+          (request_id, goal_id, model.request_book_id.trim().to_owned(), saved),
+        )
+      None => model.request_material_receipt
+    },
+    request_status: if material_watch is Some(_) {
+      "Local material watch saved. Its first due check will establish the baseline; later changes enter Book review."
+    } else {
+      operator_request_success_status(goal_id, request_id, status)
+    },
     standing_goals: parse_bootstrap_standing_goals(),
     standing_goals_version: standing_goals_version(),
     operator_requests: parse_bootstrap_operator_requests(),

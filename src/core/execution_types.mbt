@@ -9,6 +9,8 @@ pub(all) enum TaskExecutionStatus {
   Completed
   Stale
   Failed
+  // Book review is approved; the original goal acceptance is still unevaluated.
+  AwaitingAcceptance
 } derive(Debug, Eq, ToJson, FromJson)
 
 ///|

@@ -40,7 +40,7 @@ pub async fn run_planbook_daemon_phase(String, String, dispatch_repair? : Bool) 
 
 pub async fn write_moontown_planbook_autonomy(snapshot_path? : String, workspace_root? : String, book_catalog_path? : String) -> String
 
-pub async fn write_moontown_planbook_repair_task(snapshot_path? : String, workspace_root? : String, book_catalog_path? : String, dispatch? : Bool, run_inline? : Bool) -> String
+pub async fn write_moontown_planbook_repair_task(snapshot_path? : String, workspace_root? : String, book_catalog_path? : String, dispatch? : Bool, run_inline? : Bool, execution? : String) -> String
 
 pub async fn write_moontown_planbook_validation_evidence(snapshot_path? : String, note? : String) -> String
 

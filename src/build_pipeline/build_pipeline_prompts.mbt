@@ -26,7 +26,7 @@ pub fn wenyu_implementation_backlog_prompt(
     "Quality bar:",
     "- Every backlog item must cite at least one evidence row, PRD section, or local source path.",
     "- Include concrete code areas, not generic product text.",
-    "- Mark work as `codex-ready` only if the file paths, expected behavior, and tests are clear.",
+    "- Mark work as `implementation-ready` only if the file paths, expected behavior, and tests are clear.",
     "",
     "Town objective: \{objective}",
   ].join("\n")
@@ -80,7 +80,7 @@ pub fn wenyu_asset_pack_prompt(
   [
     "Create the visual/projection asset pack for Wenyu Valley `\{module_name}`.",
     "",
-    "Use image generation through Codex image tools when available, but keep the task useful if image generation is unavailable by writing production-ready prompts and a manifest.",
+    "Prepare production-ready image prompts and a manifest. Actual image generation is a separate authorized step; do not claim images or a generated projection exist from prompt text alone.",
     "",
     "Read first:",
     "- `raw/bootstrap/deep-report.md`",

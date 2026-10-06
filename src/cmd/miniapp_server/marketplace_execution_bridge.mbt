@@ -92,18 +92,20 @@ fn marketplace_pending_handoff_result(
 ///|
 fn bridge_profile_context(
   snapshot : Json,
-) -> (Int, Int, Int, String, String, String, String) raise {
+) -> (Int, Int, Int, String, String, String, String, String) raise {
   let root = bridge_object(snapshot)
   let profile = bridge_object(root.get("profile").unwrap_or(Json::null()))
   let bindings = bridge_object(profile.get("bindings").unwrap_or(Json::null()))
   let readiness = bridge_object(root.get("readiness").unwrap_or(Json::null()))
   let book_ids = bridge_strings(bindings, "bookIds")
   let active_run_id = bridge_string(profile, "activeRunId")
+  let model = bridge_string(profile, "runtimeModel")
   let town_cursor = bridge_int(root, "cursor")
   let runtime_cursor = bridge_int(profile, "runtimeCursor")
   let profile_version = bridge_int(profile, "revision")
   if !bridge_bool(readiness, "ready") ||
     active_run_id.is_empty() ||
+    model.is_empty() ||
     town_cursor <= 0 ||
     runtime_cursor < 0 ||
     profile_version <= 0 ||
@@ -118,6 +120,7 @@ fn bridge_profile_context(
     bridge_string(bindings, "workspaceId"),
     bridge_string(bindings, "buildingId"),
     book_ids[0],
+    model,
   )
 }
 
@@ -158,6 +161,7 @@ fn marketplace_delegate_payload(
     workspace_id,
     building_id,
     book_id,
+    model,
   ) = bridge_profile_context(snapshot)
   let bounds = bridge_object(
     request.get("execution_bounds").unwrap_or(Json::null()),
@@ -181,7 +185,7 @@ fn marketplace_delegate_payload(
       "conversationId": active_run_id,
       "title": "Marketplace \{action_id}: \{listing_id}",
       "cwd": "",
-      "model": "gpt-5.6-sol",
+      "model": model,
       "webSearch": bridge_bool(bounds, "web_search"),
       "metadata": {
         "workspace_id": workspace_id,

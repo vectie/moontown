@@ -2,6 +2,7 @@
 struct VisualBuildingActivity {
   running_count : Int
   waiting_count : Int
+  acceptance_pending_count : Int
   review_count : Int
   blocked_count : Int
   completed_count : Int
@@ -17,7 +18,14 @@ fn VisualBuildingActivity::for_book(
       visual_phase_is_working(phase) || phase == "persisting"
     }),
     waiting_count: visual_count_book_phases(state, book_id, fn(phase) {
-      visual_phase_is_handoff(phase) || phase == "waiting"
+      visual_phase_is_handoff(phase) ||
+      phase == "waiting" ||
+      phase == "acceptance-pending"
+    }),
+    acceptance_pending_count: visual_count_book_phases(state, book_id, fn(
+      phase,
+    ) {
+      phase == "acceptance-pending"
     }),
     review_count: visual_count_book_phases(state, book_id, fn(phase) {
       phase == "review"
@@ -39,7 +47,7 @@ fn VisualBuildingActivity::effect(self : VisualBuildingActivity) -> String {
     "review-glow"
   } else if self.running_count > 0 {
     "work-particles"
-  } else if self.waiting_count > 0 {
+  } else if self.waiting_count > self.acceptance_pending_count {
     "packet-pulse"
   } else {
     "none"
@@ -56,6 +64,8 @@ fn VisualBuildingActivity::module_status(
     "review"
   } else if self.running_count > 0 {
     "running"
+  } else if self.acceptance_pending_count > 0 {
+    "acceptance-pending"
   } else if self.waiting_count > 0 {
     "waiting"
   } else if self.completed_count > 0 {
@@ -76,6 +86,8 @@ fn VisualBuildingActivity::message(
     "\{book.name} has \{self.review_count} worker(s) in review."
   } else if self.running_count > 0 {
     "\{book.name} has \{self.running_count} active worker(s)."
+  } else if self.acceptance_pending_count > 0 {
+    "\{book.name}: Awaiting acceptance for \{self.acceptance_pending_count} worker result(s). Book review approved; goal acceptance remains unevaluated."
   } else if self.waiting_count > 0 {
     "\{book.name} has \{self.waiting_count} worker(s) waiting for handoff."
   } else {

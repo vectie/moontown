@@ -8,6 +8,7 @@ import {
   "vectie/moontown/course_book",
   "vectie/moontown/editor_pipeline",
   "vectie/moontown/moonclaw_runtime",
+  "vectie/moontown/native_work",
   "vectie/moontown/planbook",
   "vectie/moontown/planbook_policy",
   "vectie/moontown/storage",
@@ -19,4 +20,5 @@ supported_targets = "native"
 
 import {
   "moonbitlang/async",
+  "vectie/moonlib/fsx",
 } for "wbtest"

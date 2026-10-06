@@ -852,6 +852,9 @@ async fn handle_request(
         "error": "system_settings_invalid",
         "message": "\{error}",
       })
+      if @town_portable_http.is_transfer_path(request.path) {
+        conn.close()
+      }
       return
     }
   }
@@ -881,6 +884,11 @@ async fn handle_request(
       "expires_in_ms": @system_settings.current_system_settings().visitor_session_ttl_ms,
       "account": @account_system.account_context_projection(result.context),
     })
+    return
+  }
+  // This core owns the same authoritative account boundary, plus the fresh
+  // account/source checks needed around long exact-byte transfers.
+  if handle_portable_transfer_request(request, body, conn) {
     return
   }
   guard require_account_context(request, conn) is Some(account_context) else {

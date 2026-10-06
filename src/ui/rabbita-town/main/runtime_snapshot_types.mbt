@@ -163,6 +163,7 @@ priv struct OperatorRequestSnapshot {
   source_policy : String
   quality_threshold : Int
   standing_goal_id : String
+  material_watch : MaterialWatchSnapshot?
 } derive(FromJson)
 
 ///|
@@ -182,4 +183,5 @@ priv struct RequestSubmitResult {
   standing_goal_id : String?
   status : String?
   error : String?
+  material_watch : MaterialWatchSnapshot?
 } derive(FromJson)

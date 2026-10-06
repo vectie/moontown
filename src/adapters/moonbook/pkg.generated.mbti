@@ -27,6 +27,8 @@ pub fn default_moonbook_root() -> String
 
 pub fn default_workspace_root(String) -> String
 
+pub async fn ensure_local_projection(BookCatalogEntry, moonbook_root? : String) -> LocalProjectionOutcome
+
 pub fn entry_for_book_id(Array[BookCatalogEntry], String) -> BookCatalogEntry?
 
 pub fn entry_for_explicit_research_book(Array[BookCatalogEntry], String, String) -> BookCatalogEntry?
@@ -45,11 +47,15 @@ pub async fn load_or_create_provider(path? : String) -> MoonbookCatalogProvider
 
 pub fn parallel_research_entry(String) -> BookCatalogEntry
 
+pub async fn persist_native_wenyu_result(BookCatalogEntry, BookResult, String, String, moonbook_root? : String) -> PersistResultOutcome
+
 pub async fn persist_result(BookCatalogEntry, BookResult, moonbook_root? : String) -> PersistResultOutcome
 
 pub async fn persist_result_payload(BookCatalogEntry, Json, moonbook_root? : String) -> PersistResultOutcome
 
 pub async fn produce_task_batch(BookCatalogEntry, String, goal_id? : String?) -> BookTaskBatch
+
+pub async fn read_native_wenyu_review(BookCatalogEntry, String, String, String, String, moonbook_root? : String) -> NativeWenyuReviewResolution
 
 pub async fn reconcile_mooncode_book_result_sidecars(BookCatalogEntry, moonbook_root? : String) -> Array[MoonCodeBookResultImport]
 
@@ -62,6 +68,8 @@ pub async fn save_catalog_file(String, Array[BookCatalogEntry]) -> Unit
 pub fn should_parallelize_goal(String) -> Bool
 
 pub async fn summarize_state(BookCatalogEntry) -> BookStateSummary
+
+pub fn validate_native_wenyu_review_resolution(NativeWenyuReviewResolution, BookCatalogEntry, String, String, String, String) -> Unit raise
 
 pub fn workspace_root(BookCatalogEntry) -> String
 
@@ -231,6 +239,13 @@ pub struct KnowledgePageRecord {
   outbound_links : Array[String]
 } derive(Eq, ToJson, @debug.Debug, @json.FromJson)
 
+pub(all) struct LocalProjectionOutcome {
+  contract : String
+  generated_artifacts : Array[String]
+  preserved_artifacts : Array[String]
+  missing_artifacts : Array[String]
+} derive(ToJson, @debug.Debug, @json.FromJson)
+
 pub struct MemoryCandidate {
   kind : String
   title : String
@@ -262,6 +277,21 @@ pub struct MoonbookCatalogProvider {
 pub fn MoonbookCatalogProvider::book_refs(Self) -> Array[@core.BookRef]
 pub fn MoonbookCatalogProvider::new(Array[BookCatalogEntry]) -> Self
 pub impl @core.BookProvider for MoonbookCatalogProvider
+
+pub struct NativeWenyuReviewResolution {
+  contract : String
+  status : String
+  root : String
+  work_id : String
+  request_digest : String
+  payload_digest : String
+  result_id : String
+  review_id : String
+  evidence_id : String
+  resolution_timestamp : String?
+  original_task_acceptance : String
+  reason : String
+} derive(Eq, ToJson, @debug.Debug, @json.FromJson)
 
 pub struct PersistResultOutcome {
   log_path : String

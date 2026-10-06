@@ -20,6 +20,14 @@ pub async fn ensure_wenyu_build_moonclaw_profile(root : String) -> Unit {
       return
     }
   }
+  if parsed is { "jobs": { "profiles": Object(profiles), .. }, .. } &&
+    profiles.contains("wenyu_build_controller") {
+    return
+  }
+  if parsed is { "profiles": Object(profiles), .. } &&
+    profiles.contains("wenyu_build_controller") {
+    return
+  }
   @support.write_text_file(
     path,
     @support.upsert_moonclaw_job_profile_json(

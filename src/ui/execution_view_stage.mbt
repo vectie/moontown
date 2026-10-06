@@ -4,6 +4,7 @@ pub(all) enum ExecutionViewStage {
   Running
   Persisting
   Review
+  Acceptance
   Completed
   Recovery
 } derive(Debug, Eq)
@@ -17,6 +18,7 @@ pub fn execution_view_stage_for_status(
     RunConfirmed | Running => Running
     AwaitingPersistence => Persisting
     ReviewQueued => Review
+    AwaitingAcceptance => Acceptance
     Completed => Completed
     Failed | Stale => Recovery
   }

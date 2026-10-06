@@ -36,6 +36,7 @@ pub(all) struct RuntimeStatusExecutionCounts {
   failed : Int
   stale : Int
   completed : Int
+  awaiting_acceptance : Int
 }
 
 pub(all) struct RuntimeStatusStandingGoalCounts {
@@ -58,6 +59,7 @@ pub(all) struct TownRuntimeStatus {
   failed_count : Int
   stale_count : Int
   completed_count : Int
+  awaiting_acceptance_count : Int?
   standing_goal_count : Int
   enabled_standing_goal_count : Int
   disabled_standing_goal_count : Int

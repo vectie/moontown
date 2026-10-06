@@ -6,10 +6,28 @@ async fn apply_supervision_directive(
   directive : @roles.MayorSupervisionDirective,
   snapshot_path : String,
   standing_goals : Array[@core.StandingGoal],
+  retry? : async (
+    @core.TownState,
+    @roles.Mayor,
+    Array[@moonbook.BookCatalogEntry],
+    @core.TaskExecutionRecord,
+    @roles.MayorSupervisionDirective,
+    String,
+    Array[@core.StandingGoal],
+  ) -> Unit = retry_execution,
 ) -> Unit {
   let execution = match @core.find_execution(state, directive.task_id) {
     Some(execution) => execution
     None => return
+  }
+  // Native commands keep their exact identity through approval, uncertainty and
+  // long waits. Generic stale/retry directives must not replace them.
+  if @build_pipeline_runtime.is_wenyu_native_execution(execution) {
+    return
+  }
+  if @roles.supervision_directive_retries_execution(directive.kind) &&
+    @core.unconfirmed_standing_watch_dispatch(execution) {
+    return
   }
   match directive.kind {
     kind if kind == @scheduler.persist_result_action_kind() =>
@@ -44,7 +62,7 @@ async fn apply_supervision_directive(
       sync_worker_from_execution(state, updated)
     }
     kind if @roles.supervision_directive_retries_execution(kind) =>
-      retry_execution(
+      retry(
         state, mayor, catalog, execution, directive, snapshot_path, standing_goals,
       )
     kind if kind == @scheduler.review_sync_action_kind() => {
@@ -69,6 +87,11 @@ async fn retry_execution(
   snapshot_path : String,
   standing_goals : Array[@core.StandingGoal],
 ) -> Unit {
+  // A directive may have been computed before restart reconciliation. Recheck
+  // the current execution at the existing dispatch boundary as well as Mayor.
+  if @core.unconfirmed_standing_watch_dispatch(execution) {
+    return
+  }
   let entry = match @moonbook.entry_for_book_id(catalog, execution.book_id) {
     Some(entry) => entry
     None => return
@@ -86,6 +109,7 @@ async fn retry_execution(
     priority=80,
     requires_review=execution.requires_review,
     required_role=task.required_role,
+    target_pages=execution.context_pages,
   )
   let rerun = execute_goal_book_task(
     mayor,
@@ -94,6 +118,8 @@ async fn retry_execution(
     assigned_worker_id=execution.assigned_worker_id,
     tick=supervision_tick(state),
     run_inline=false,
+    native_path=@native_work.path_for_snapshot(snapshot_path),
+    saved_legacy=execution.attempt > 0,
   ) catch {
     error =>
       failed_execution_record(

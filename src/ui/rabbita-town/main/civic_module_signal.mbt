@@ -44,6 +44,7 @@ fn civic_module_signal_class_for_status(
   match status {
     ReviewQueued | Failed | Stale => "module-signal-alert"
     AwaitingPersistence => "module-signal-review"
+    AwaitingAcceptance => "module-signal-neutral"
     Completed => "module-signal-live"
     Running | RunConfirmed =>
       civic_module_active_run_signal_class(running_is_live)

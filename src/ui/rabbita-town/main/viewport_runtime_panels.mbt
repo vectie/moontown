@@ -3,7 +3,7 @@ fn execution_stage_cards(
   executions : Array[@core.TaskExecutionRecord],
 ) -> Array[@rabbita.Html] {
   let summary = execution_count_summary(executions)
-  [
+  let cards = [
     runtime_stat_chip("Packets", summary.packet_ready, "runtime-packets"),
     runtime_stat_chip("Imported", summary.proposal_imported, "runtime-imported"),
     runtime_stat_chip("Running", summary.active_run_flow(), "runtime-running"),
@@ -16,4 +16,14 @@ fn execution_stage_cards(
     runtime_stat_chip("Done", summary.completed, "runtime-completed"),
     runtime_stat_chip("Issues", summary.issue_count(), "runtime-blocked"),
   ]
+  if summary.awaiting_acceptance > 0 {
+    cards.push(
+      runtime_stat_chip(
+        "Acceptance pending",
+        summary.awaiting_acceptance,
+        "runtime-imported",
+      ),
+    )
+  }
+  cards
 }

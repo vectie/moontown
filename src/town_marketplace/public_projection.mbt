@@ -169,21 +169,25 @@ fn safe_private_listing_share_projection(
     AgentListing =>
       for listing in state.agent_listings {
         if listing.listing_id == listing_id {
-          return Some({
-            "contract_id": "moontown.private-listing-share-preview.v1",
-            "listing_id": listing.listing_id,
-            "listing_kind": "agent",
-            "publisher_id": listing.publisher_id,
-            "title": listing.title,
-            "summary": listing.summary,
-            "capabilities": listing.capabilities.to_json(),
-            "tags": listing.tags.to_json(),
-            "action_ids": listing.action_ids.to_json(),
-            "image_ref": listing.image_ref,
-            "pricing_summary": listing.pricing_summary,
-            "publication_state": publication_state_name(listing.lifecycle.state),
-            "version": listing.version_label,
-          })
+          return Some(
+            attach_private_portable_binding(state, listing_id, {
+              "contract_id": "moontown.private-listing-share-preview.v1",
+              "listing_id": listing.listing_id,
+              "listing_kind": "agent",
+              "publisher_id": listing.publisher_id,
+              "title": listing.title,
+              "summary": listing.summary,
+              "capabilities": listing.capabilities.to_json(),
+              "tags": listing.tags.to_json(),
+              "action_ids": listing.action_ids.to_json(),
+              "image_ref": listing.image_ref,
+              "pricing_summary": listing.pricing_summary,
+              "publication_state": publication_state_name(
+                listing.lifecycle.state,
+              ),
+              "version": listing.version_label,
+            }),
+          )
         }
       }
     BuildingListing =>

@@ -47,6 +47,8 @@ pub fn movement_loop_record_for_module(EditorPipelineModulePlacement) -> EditorP
 
 pub fn movement_loop_records(Array[EditorPipelineModulePlacement], limit? : Int) -> Array[EditorPipelineMovementLoopRecord]
 
+pub fn parse_native_selection(String) -> NativeSelection?
+
 pub fn pipeline_stages(EditorPipelineStageInputs) -> Array[EditorPipelineStage]
 
 pub fn pipeline_status(EditorPipelineStageInputs) -> String
@@ -236,6 +238,13 @@ pub(all) struct EditorPipelineTerrainReasonRecord {
   placement_ref : String
   reason : String
 } derive(Eq, ToJson, @debug.Debug, @json.FromJson)
+
+pub(all) struct NativeSelection {
+  selected_feature : String
+  title : String
+  implementation_hint : String
+  acceptance : Array[String]
+} derive(Eq, @debug.Debug)
 
 // Type aliases
 

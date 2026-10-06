@@ -5,6 +5,9 @@ pub async fn run_goal(
   task_limit_per_book? : Int = 1,
   snapshot_path? : String = @storage.default_snapshot_path(),
   book_catalog_path? : String = @moonbook.default_catalog_path(),
+  wenyu_execution? : String = "native",
+  wenyu_model? : String = "",
+  wenyu_allow_no_change? : Bool = false,
 ) -> @core.TownState {
   let state = @core.empty_state(
     @core.TownConfig::new(id="moonrise", name="MoonTown / Moonrise"),
@@ -16,6 +19,9 @@ pub async fn run_goal(
     task_limit_per_book~,
     snapshot_path~,
     book_catalog_path~,
+    wenyu_execution~,
+    wenyu_model~,
+    wenyu_allow_no_change~,
   )
 }
 
@@ -27,7 +33,19 @@ async fn run_goal_into_state(
   task_limit_per_book? : Int = 1,
   snapshot_path? : String = @storage.default_snapshot_path(),
   book_catalog_path? : String = @moonbook.default_catalog_path(),
+  wenyu_execution? : String = "native",
+  wenyu_model? : String = "",
+  wenyu_allow_no_change? : Bool = false,
 ) -> @core.TownState {
+  guard ["native", "acp"].contains(wenyu_execution) else {
+    fail("wenyu_execution_invalid")
+  }
+  guard wenyu_execution != "acp" || wenyu_model == "" else {
+    fail("wenyu_model_requires_native")
+  }
+  guard !wenyu_allow_no_change || wenyu_execution == "native" else {
+    fail("wenyu_no_change_requires_native")
+  }
   let catalog = @moonbook.load_or_create_catalog(path=book_catalog_path)
   let mayor = default_mayor()
   let plan = mayor.plan_goal(catalog, goal, explicit_book_id=book_id)
@@ -56,13 +74,29 @@ async fn run_goal_into_state(
   let limit = if task_limit_per_book < 1 { 1 } else { task_limit_per_book }
   let launches : Array[GoalBookLaunch] = []
   for lane in plan.lanes {
-    match prepare_goal_book_launch(state, lane.entry, lane.objective, limit) {
+    match
+      prepare_goal_book_launch(
+        state,
+        lane.entry,
+        lane.objective,
+        limit,
+        wenyu_execution~,
+        wenyu_model~,
+        wenyu_allow_no_change~,
+        snapshot_path~,
+        book_catalog_path~,
+      ) {
       Some(launch) => launches.push(launch)
       None => ()
     }
   }
   for launch in launches {
-    launch_goal_book(state, mayor, launch)
+    launch_goal_book(
+      state,
+      mayor,
+      launch,
+      native_path=@native_work.path_for_snapshot(snapshot_path),
+    )
     persist_town_checkpoint(state, snapshot_path)
   }
   wait_for_goal_settle(state, mayor, catalog, snapshot_path)
@@ -81,6 +115,9 @@ pub async fn render_goal_run(
   task_limit_per_book? : Int = 1,
   snapshot_path? : String = @storage.default_snapshot_path(),
   book_catalog_path? : String = @moonbook.default_catalog_path(),
+  wenyu_execution? : String = "native",
+  wenyu_model? : String = "",
+  wenyu_allow_no_change? : Bool = false,
 ) -> String {
   let state = run_goal(
     goal,
@@ -88,6 +125,9 @@ pub async fn render_goal_run(
     task_limit_per_book~,
     snapshot_path~,
     book_catalog_path~,
+    wenyu_execution~,
+    wenyu_model~,
+    wenyu_allow_no_change~,
   )
   render_state_dashboard(state)
 }
@@ -103,7 +143,7 @@ pub async fn supervise_saved_town(
   match snapshot {
     Some(saved) => {
       let state = saved.town
-      run_supervision_cycle(state, mayor, catalog)
+      run_supervision_cycle(state, mayor, catalog, snapshot_path~)
       persist_town_checkpoint(state, snapshot_path)
       render_state_dashboard(state)
     }

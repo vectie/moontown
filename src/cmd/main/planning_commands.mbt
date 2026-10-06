@@ -20,6 +20,11 @@ async fn render_planbook_command(args : Array[String]) -> String {
     ["repair"] => @planbook_runtime.write_moontown_planbook_repair_task()
     ["repair", "--dispatch"] =>
       @planbook_runtime.write_moontown_planbook_repair_task(dispatch=true)
+    ["repair", "--dispatch", "--execution=acp"] =>
+      @planbook_runtime.write_moontown_planbook_repair_task(
+        dispatch=true,
+        execution="acp",
+      )
     ["repair", "status"] =>
       @planbook_runtime.render_moontown_planbook_repair_status()
     _ => @moontown.load_or_create_saved_dashboard()

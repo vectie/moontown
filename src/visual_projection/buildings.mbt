@@ -26,6 +26,11 @@ fn visual_module_projection(
   let activity : VisualBuildingActivity = {
     running_count: building.running_count,
     waiting_count: building.waiting_count,
+    acceptance_pending_count: agents
+    .filter(fn(agent) {
+      agent.book_id == building.book_id && agent.phase == "acceptance-pending"
+    })
+    .length(),
     review_count: building.review_count,
     blocked_count: building.blocked_count,
     completed_count: building.completed_count,
