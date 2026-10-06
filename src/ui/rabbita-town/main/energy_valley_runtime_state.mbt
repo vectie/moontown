@@ -43,6 +43,7 @@ fn energy_valley_runtime_work_status_is_valid(status : String) -> Bool {
   status == "assigned" ||
   status == "running" ||
   status == "waiting_review" ||
+  status == "awaiting_acceptance" ||
   status == "completed" ||
   status == "failed" ||
   status == "blocked"

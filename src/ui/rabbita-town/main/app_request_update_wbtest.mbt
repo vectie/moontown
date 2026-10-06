@@ -46,7 +46,7 @@ test "request status message helpers keep operator and book paths distinct" {
   )
   assert_eq(
     operator_request_failure_status("network error"),
-    "Could not save the watch: network error",
+    "Could not confirm the save. The watch may already be saved. Check accepted watches before trying again. Details: network error",
   )
   assert_eq(
     book_template_request_success_status("book-request-1", "pending"),

@@ -37,11 +37,11 @@ pub fn[Provider : @core.BookProvider] modeled_state_with_provider(Provider) -> @
 
 pub fn moonflow_adapter_capability_json() -> Json
 
-pub async fn render_goal_run(String, book_id? : String?, task_limit_per_book? : Int, snapshot_path? : String, book_catalog_path? : String) -> String
+pub async fn render_goal_run(String, book_id? : String?, task_limit_per_book? : Int, snapshot_path? : String, book_catalog_path? : String, wenyu_execution? : String, wenyu_model? : String, wenyu_allow_no_change? : Bool) -> String
 
 pub fn render_state_dashboard(@core.TownState) -> String
 
-pub async fn run_goal(String, book_id? : String?, task_limit_per_book? : Int, snapshot_path? : String, book_catalog_path? : String) -> @core.TownState
+pub async fn run_goal(String, book_id? : String?, task_limit_per_book? : Int, snapshot_path? : String, book_catalog_path? : String, wenyu_execution? : String, wenyu_model? : String, wenyu_allow_no_change? : Bool) -> @core.TownState
 
 pub async fn supervise_saved_town(snapshot_path? : String, book_catalog_path? : String) -> String
 

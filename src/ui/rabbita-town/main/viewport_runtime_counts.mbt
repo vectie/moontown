@@ -40,6 +40,7 @@ priv struct ExecutionCountSummary {
   running : Int
   awaiting_persistence : Int
   review_queued : Int
+  awaiting_acceptance : Int
   completed : Int
   stale : Int
   failed : Int
@@ -59,6 +60,7 @@ fn execution_count_summary(
       AwaitingPersistence,
     ),
     review_queued: count_execution_status(executions, ReviewQueued),
+    awaiting_acceptance: count_execution_status(executions, AwaitingAcceptance),
     completed: count_execution_status(executions, Completed),
     stale: count_execution_status(executions, Stale),
     failed: count_execution_status(executions, Failed),
@@ -78,6 +80,7 @@ fn ExecutionCountSummary::active_or_unresolved(
   self.running +
   self.awaiting_persistence +
   self.review_queued +
+  self.awaiting_acceptance +
   self.stale
 }
 

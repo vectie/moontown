@@ -3,7 +3,11 @@ pub async fn preseed_wenyu_goal_inputs(
   entry : @moonbook.BookCatalogEntry,
   objective : String,
   repo_root : String,
+  execution? : String = "native",
 ) -> Unit {
+  guard ["native", "acp"].contains(execution) else {
+    fail("wenyu_execution_invalid")
+  }
   let root = @moonbook.workspace_root(entry)
   let prd_path = "\{repo_root}/docs/WENYU_VALLEY_PRD.md"
   let vision_path = "\{repo_root}/docs/project/wenyu.md"
@@ -18,8 +22,10 @@ pub async fn preseed_wenyu_goal_inputs(
   preseed_wenyu_source_bundle(root, repo_root)
   write_wenyu_build_skills(root, entry)
   @civic_runtime.write_wenyu_civic_workspace_seed(entry, objective)
-  ensure_wenyu_build_moonclaw_profile(root)
-  ensure_wenyu_codex_acp_target(root)
+  if execution == "acp" {
+    ensure_wenyu_build_moonclaw_profile(root)
+    ensure_wenyu_codex_acp_target(root)
+  }
   write_wenyu_research_request(root, entry, objective)
   write_wenyu_source_hints(root, prd_path, vision_path, repo_root)
 }

@@ -1,4 +1,14 @@
 ///|
+async fn write_wenyu_local_artifact(path : String, content : String) -> Unit {
+  // Do not replace a human/provider artifact with deterministic fallback text.
+  if @fs.exists(path) {
+    return
+  }
+  @support.ensure_parent_directory(path)
+  @fs.write_file(path, content, create_mode=CreateNew)
+}
+
+///|
 pub async fn wenyu_book_ready_for_build(
   entry : @moonbook.BookCatalogEntry,
 ) -> Bool {
@@ -18,6 +28,7 @@ fn copy_execution_with(
   execution : @core.TaskExecutionRecord,
   status? : @core.TaskExecutionStatus = execution.status,
   summary? : String = execution.summary,
+  output_contract? : String = execution.output_contract,
   attempt? : Int = execution.attempt,
   heartbeat_tick? : Int = execution.heartbeat_tick,
   stale_after_tick? : Int = execution.stale_after_tick,
@@ -41,7 +52,7 @@ fn copy_execution_with(
     run_id~,
     status~,
     summary~,
-    output_contract=execution.output_contract,
+    output_contract~,
     context_pages~,
     skill_paths~,
     last_command=execution.last_command,

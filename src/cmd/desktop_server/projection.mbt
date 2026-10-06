@@ -446,6 +446,7 @@ fn town_task_status(
     "packetready" | "proposalimported" | "runconfirmed" => return "assigned"
     "running" | "awaitingpersistence" => return "running"
     "reviewqueued" => return "waiting_review"
+    "awaitingacceptance" => return "awaiting_acceptance"
     "completed" => return "completed"
     "stale" => return "blocked"
     "failed" => return "failed"
@@ -962,6 +963,7 @@ fn projected_task_activity(fields : Map[String, Json]) -> (String, String) {
     "queued" => ("idle", "等待调度")
     "assigned" => ("walking", "前往研究建筑")
     "waiting_review" => ("reviewing", "独立审阅")
+    "awaiting_acceptance" => ("idle", "Awaiting acceptance")
     "blocked" | "failed" => ("recovering", "恢复与修订")
     // Durable completion is not evidence that a worker is still in transit.
     // A live return animation needs a recent, timestamped return receipt.
@@ -1002,7 +1004,11 @@ fn annotate_projected_task_activities(
 /// current-book pages to a terminal task that has no Run ID of its own.
 fn projected_task_can_link_results(fields : Map[String, Json]) -> Bool {
   let status = json_string_field(fields, "status")
-  (status == "completed" || status == "waiting_review") &&
+  (
+    status == "completed" ||
+    status == "waiting_review" ||
+    status == "awaiting_acceptance"
+  ) &&
   !json_string_field(fields, "runId").is_empty()
 }
 

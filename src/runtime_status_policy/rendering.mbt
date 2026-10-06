@@ -14,6 +14,9 @@ pub fn render_runtime_status_report(
   )
   builder.write_string("\{runtime_health_summary}\n")
   builder.write_string(
+    "awaiting_acceptance=\{status.awaiting_acceptance_count.unwrap_or(0)}\n",
+  )
+  builder.write_string(
     "standing_goals=\{status.standing_goal_count} enabled=\{status.enabled_standing_goal_count} disabled=\{status.disabled_standing_goal_count} due_next_tick=\{status.due_standing_goal_count}\n",
   )
   builder.write_string(

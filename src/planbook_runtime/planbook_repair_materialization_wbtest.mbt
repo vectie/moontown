@@ -16,6 +16,7 @@ async test "planbook repair queues bounded packet without marking it active befo
     snapshot_path~,
     workspace_root~,
     book_catalog_path=workspace.catalog_path,
+    execution="acp",
   )
   assert_true(message.contains("PlanBook repair task"))
   let task_text = @support.read_text_or_empty(

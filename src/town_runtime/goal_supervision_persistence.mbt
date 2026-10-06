@@ -5,6 +5,9 @@ async fn reconcile_persisted_non_review_outputs(
 ) -> Unit {
   let snapshot = state.executions.copy()
   for execution in snapshot {
+    if @build_pipeline_runtime.is_wenyu_native_execution(execution) {
+      continue
+    }
     if execution.status != ReviewQueued {
       continue
     }
@@ -43,6 +46,9 @@ async fn reconcile_persisted_terminal_outputs(
 ) -> Unit {
   let snapshot = state.executions.copy()
   for execution in snapshot {
+    if @build_pipeline_runtime.is_wenyu_native_execution(execution) {
+      continue
+    }
     if execution.status != Failed &&
       execution.status != Stale &&
       execution.status != AwaitingPersistence {

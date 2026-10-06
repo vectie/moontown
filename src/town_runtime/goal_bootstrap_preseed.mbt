@@ -2,6 +2,7 @@
 async fn preseed_goal_bootstrap_inputs(
   entry : @moonbook.BookCatalogEntry,
   objective : String,
+  wenyu_execution? : String = "native",
 ) -> Unit {
   if town_runtime_entry_is_research(entry) {
     preseed_reference_style_inputs(entry, objective)
@@ -20,6 +21,7 @@ async fn preseed_goal_bootstrap_inputs(
     entry,
     objective,
     current_repo_root(),
+    execution=wenyu_execution,
   )
 }
 

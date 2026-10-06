@@ -336,6 +336,20 @@ fn marketplace_state_for_runtime_status(
   }
 }
 
+///|
+fn normalized_result_evidence_refs(values : Array[String]) -> Array[String] {
+  let refs : Array[String] = []
+  for raw in values {
+    // Artifact paths and URL paths/queries retain their case-sensitive identity.
+    let value = normalized_string(raw)
+    if !value.is_empty() && !refs.contains(value) {
+      refs.push(value)
+    }
+  }
+  refs.sort()
+  refs
+}
+
 ///| Trusted local reconciliation from the existing supervisor/MoonClaw
 
 ///|
@@ -373,13 +387,12 @@ pub fn marketplace_reconcile_action_request_runtime(
   let result_summary = if draft.result_summary.is_empty() {
     current.result_summary
   } else {
-    validate_public_text(
-      "marketplace runtime result summary",
+    marketplace_runtime_result_summary(
       draft.result_summary,
-      2000,
+      draft.runtime_status,
     )
   }
-  let evidence = normalized_terms(draft.result_evidence_refs)
+  let evidence = normalized_result_evidence_refs(draft.result_evidence_refs)
   let reconciled = {
     ..current,
     state: next_state,

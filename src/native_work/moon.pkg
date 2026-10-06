@@ -1,0 +1,30 @@
+import {
+  "moonbitlang/async/fs",
+  "moonbitlang/core/env",
+  "moonbitlang/core/json",
+  "moonbitlang/core/string",
+  "moonbitlang/core/encoding/utf8",
+  "moonbitlang/core/encoding/base64",
+  "moonbitlang/core/encoding/hex",
+  "moonbitlang/x/crypto",
+  "vectie/moontown/native_code_control",
+  "vectie/moontown/editor_pipeline",
+  "vectie/moontown/adapters/moonbook",
+  "vectie/moontown/book_quality",
+  "vectie/moontown/storage",
+  "vectie/moontown/support",
+  "vectie/moontown/integration",
+  "vectie/moonlib/pathx",
+}
+
+supported_targets = "native"
+
+import {
+  "moonbitlang/async",
+  "vectie/moonlib/fsx",
+  "vectie/moonlib/moonsuite",
+} for "wbtest"
+
+import {
+  "moonbitlang/async",
+} for "test"

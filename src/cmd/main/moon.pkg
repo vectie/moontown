@@ -1,4 +1,7 @@
 import {
+  "vectie/moontown/native_work",
+  "vectie/moontown/build_pipeline_runtime",
+  "vectie/moontown/goal_run_arguments",
   "moonbitlang/async",
   "moonbitlang/core/env",
   "vectie/moontown",

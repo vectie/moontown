@@ -15,6 +15,9 @@ async fn finalize_standing_watch_supervision_record(
     None => return execution
   }
   let observed = standing_watch_execution_with_book_decision(entry, execution)
+  let observed = retain_material_watch_observation(
+    goal, snapshot_path, observed,
+  )
   collapse_standing_watch_book_history(entry, observed)
   let decision = @standing_watch_policy.standing_watch_decision_from_execution(
     observed,

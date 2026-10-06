@@ -6,6 +6,7 @@ fn visual_behavior_for_phase(phase : String) -> String {
     "running" => "working"
     "persisting" => "carrying-memory"
     "review" => "reviewing"
+    "acceptance-pending" => "awaiting-acceptance"
     "failed" => "recovering"
     "stale" => "recovering"
     "blocked" => "recovering"

@@ -5,6 +5,10 @@ priv enum OperatorRequestFormField {
   OperatorRequestBookId(String)
   OperatorRequestCadence(String)
   OperatorRequestQualityThreshold(String)
+  OperatorRequestWatchMode(WatchRequestMode)
+  OperatorRequestMaterialSources(String)
+  OperatorRequestMaterialAcceptance(String)
+  OperatorRequestMaterialNextAction(String)
 }
 
 ///|
@@ -22,6 +26,9 @@ fn update_operator_request_form(
   model : Model,
   field : OperatorRequestFormField,
 ) -> Model {
+  if model.request_submitting {
+    return model
+  }
   match field {
     OperatorRequestTitle(value) => { ..model, request_title: value, }
     OperatorRequestPrompt(value) => { ..model, request_prompt: value, }
@@ -29,6 +36,13 @@ fn update_operator_request_form(
     OperatorRequestCadence(value) => { ..model, request_cadence: value, }
     OperatorRequestQualityThreshold(value) =>
       { ..model, request_quality_threshold: value, }
+    OperatorRequestWatchMode(value) => { ..model, request_watch_mode: value, }
+    OperatorRequestMaterialSources(value) =>
+      { ..model, request_material_sources: value, }
+    OperatorRequestMaterialAcceptance(value) =>
+      { ..model, request_material_acceptance: value, }
+    OperatorRequestMaterialNextAction(value) =>
+      { ..model, request_material_next_action: value, }
   }
 }
 

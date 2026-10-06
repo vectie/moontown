@@ -75,12 +75,23 @@ fn render_town_status_and_trajectory(
   let complete_count = count_lanes_by_status(state, plan, "complete")
   let review_count = count_lanes_by_status(state, plan, "review queued")
   let failed_count = count_lanes_by_status(state, plan, "failed")
+  let acceptance_count = count_lanes_by_status(
+    state, plan, "acceptance pending",
+  )
   builder.write_string(
     town_report_status_counts_sentence(
       complete_count, running_count, review_count, failed_count,
     ),
   )
-  if review_count == 0 && failed_count == 0 && running_count == 0 {
+  if acceptance_count > 0 {
+    builder.write_string(
+      "\{acceptance_count} lanes are acceptance pending: Book review is approved, but goal acceptance remains unevaluated. ",
+    )
+  }
+  if review_count == 0 &&
+    failed_count == 0 &&
+    running_count == 0 &&
+    acceptance_count == 0 {
     builder.write_string(town_report_final_status_verdict())
   } else {
     builder.write_string(town_report_interim_status_verdict())

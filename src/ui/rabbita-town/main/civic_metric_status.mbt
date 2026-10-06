@@ -34,7 +34,7 @@ fn civic_health_after_execution_stage(
     @ui.Review => clamp_metric(base + policy.review_delta)
     @ui.Recovery => clamp_metric(base + policy.failed_delta)
     @ui.Completed => clamp_metric(base + policy.completed_delta)
-    @ui.Packet | @ui.Running => base
+    @ui.Packet | @ui.Running | @ui.Acceptance => base
   }
 }
 

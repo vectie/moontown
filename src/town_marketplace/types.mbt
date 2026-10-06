@@ -296,6 +296,7 @@ pub(all) struct MarketplaceState {
   notifications : Array[TownNotification]
   sponsored_placements : Array[SponsoredPlacement]
   action_requests : Array[MarketplaceActionRequest]
+  portable_bindings : Array[PortableListingBinding]
   version : Int
 } derive(Debug, Eq, ToJson, FromJson)
 

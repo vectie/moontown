@@ -1,4 +1,8 @@
 import {
+  "vectie/moontown/core",
+  "vectie/moontown/material_watch_plan",
+  "moonbitlang/core/encoding/utf8",
+  "moonbitlang/x/crypto",
   "moonbitlang/async/fs",
   "moonbitlang/core/env",
   "moonbitlang/core/json",

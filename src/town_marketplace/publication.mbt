@@ -64,8 +64,19 @@ pub fn marketplace_upsert_agent_draft(
   state : MarketplaceState,
   principal : MarketplacePrincipal,
   draft : AgentListingDraft,
+  portable_source? : PortableSource,
   now_ms~ : UInt64,
 ) -> MarketplaceState raise {
+  // Portable identity must use the exact stored listing key before ownership
+  // checks; do not permit a whitespace alias to create a second record.
+  if draft.listing_id != draft.listing_id.trim().to_owned() &&
+    (
+      portable_source is Some(_) ||
+      portable_binding_by_listing(state, draft.listing_id.trim().to_owned())
+      is Some(_)
+    ) {
+    fail("portable listing_id must be canonical")
+  }
   if state.building_listings.any(listing => {
       listing.listing_id == draft.listing_id
     }) {
@@ -129,6 +140,12 @@ pub fn marketplace_upsert_agent_draft(
     action_ids: normalized_terms(draft.action_ids),
     required_permissions: normalized_terms(draft.required_permissions),
   }
+  let portable_bindings = bind_portable_source(
+    state,
+    principal,
+    normalized_draft.listing_id,
+    portable_source,
+  )
   listings.push({
     listing_id: normalized_draft.listing_id,
     publisher_id: principal.principal_id,
@@ -152,7 +169,12 @@ pub fn marketplace_upsert_agent_draft(
     updated_at_ms: now_ms,
     version,
   })
-  { ..state, agent_listings: listings, version: state.version + 1, }
+  {
+    ..state,
+    agent_listings: listings,
+    portable_bindings,
+    version: state.version + 1,
+  }
 }
 
 ///|

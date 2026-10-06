@@ -1,11 +1,15 @@
 ///|
 async fn render_run_command(args : Array[String]) -> String {
-  match args {
-    ["--book", book_id, goal] =>
-      @moontown.render_goal_run(goal, book_id=Some(book_id))
-    [goal] => @moontown.render_goal_run(goal)
-    [.. rest] => @moontown.render_goal_run(rest.to_owned().join(" "))
-  }
+  let (book, execution, model, goal, allow_no_change) = @goal_run_arguments.parse_options(
+    args,
+  )
+  @moontown.render_goal_run(
+    goal,
+    book_id=book,
+    wenyu_execution=execution,
+    wenyu_model=model,
+    wenyu_allow_no_change=allow_no_change,
+  )
 }
 
 ///|

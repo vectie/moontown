@@ -1,0 +1,15 @@
+import {
+  "moonbitlang/async",
+  "moonbitlang/async/fs",
+  "moonbitlang/async/http",
+  "moonbitlang/async/io",
+  "moonbitlang/core/encoding/utf8",
+  "moonbitlang/core/json",
+  "moonbitlang/core/random",
+  "moonbitlang/core/string",
+  "moonbitlang/x/crypto",
+  "vectie/moontown/town_marketplace" @marketplace,
+  "vectie/moontown/town_portable_transfer" @transfer,
+}
+
+supported_targets = "native"

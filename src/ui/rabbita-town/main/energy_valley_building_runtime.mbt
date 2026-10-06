@@ -96,6 +96,7 @@ fn golden_valley_work_status_color(status : String) -> String {
   match status {
     "running" => "#6ee7b7"
     "waiting_review" => "#fcd34d"
+    "awaiting_acceptance" => "#94a3b8"
     "blocked" => "#fdba74"
     "failed" => "#fda4af"
     "completed" => "#86efac"
@@ -110,7 +111,8 @@ fn golden_valley_primary_building_status(
 ) -> String {
   for
     status in [
-      "running", "waiting_review", "blocked", "assigned", "queued", "failed", "completed",
+      "running", "waiting_review", "blocked", "assigned", "queued", "failed", "awaiting_acceptance",
+      "completed",
     ] {
     if tasks.any(task => task.status == status) {
       return status

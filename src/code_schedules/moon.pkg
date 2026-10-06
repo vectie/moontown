@@ -1,18 +1,14 @@
 import {
   "moonbitlang/core/json",
   "moonbitlang/async/fs",
-  "moonbitlang/async/http",
-  "moonbitlang/async",
-  "moonbitlang/core/encoding/utf8",
-  "moonbitlang/core/env",
-  "vectie/moonlib/moonsuite",
-  "vectie/moonlib/pathx",
+  "vectie/moontown/native_code_control",
   "vectie/moontown/adapters/moonbook",
   "vectie/moontown/storage",
   "vectie/moontown/support",
 }
 
 import {
+  "moonbitlang/async",
   "vectie/moonlib/fsx",
 } for "wbtest"
 

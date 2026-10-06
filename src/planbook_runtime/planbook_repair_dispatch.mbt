@@ -126,6 +126,17 @@ async fn write_planbook_repair_status(
   workspace_root : String,
   snapshot_path : String,
 ) -> Unit {
+  if task.id.has_prefix("town-work-") {
+    let prior = @support.read_text_or_empty(
+      default_planbook_repair_path(snapshot_path~),
+    )
+    let same = try @json.parse(prior) == task.to_json() catch {
+      _ => false
+    }
+    if same {
+      return
+    }
+  }
   @support.write_text_file(
     default_planbook_repair_path(snapshot_path~),
     task.to_json().stringify(indent=2),

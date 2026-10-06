@@ -4,12 +4,28 @@ async fn persist_execution_into_book(
   entry : @moonbook.BookCatalogEntry,
   execution : @core.TaskExecutionRecord,
 ) -> @moonbook.PersistResultOutcome? {
+  if @core.unconfirmed_standing_watch_dispatch(execution) {
+    return None
+  }
+  if @build_pipeline_runtime.is_wenyu_native_execution(execution) {
+    // Native owner import carries its verified artifacts and idempotent Book receipt.
+    return None
+  }
   if execution.summary.trim().is_blank() ||
     @core.live_execution_status(execution.status) {
     return None
   }
   let result_summary = book_persist_summary(entry, execution)
   let result_artifacts = book_persist_artifacts(entry, execution)
+  let result_artifacts = match
+    @standing_watch_policy.standing_watch_marker_value(
+      execution.summary,
+      "material_watch_input",
+    ) {
+    Some(path) if execution.context_pages.contains(path) &&
+      !result_artifacts.contains(path) => [..result_artifacts, path]
+    _ => result_artifacts
+  }
   let memory_candidates = book_persist_memory_candidates(entry, execution)
   let result = @moonbook.BookResult::new(
     result_id=execution.task_id,
@@ -35,6 +51,7 @@ async fn persist_execution_into_book(
       return None
     }
   }
+  retain_material_watch_book_receipt(execution, outcome)
   state.record_event(
     @core.TownEvent::new(
       id="event-persist-\{entry.id}-\{execution.task_id}",
@@ -63,6 +80,20 @@ fn execution_after_successful_book_persist(
   outcome : @moonbook.PersistResultOutcome,
   tick : Int,
 ) -> @core.TaskExecutionRecord {
+  let execution = if execution.summary.contains("material_watch_input:") &&
+    outcome.executable_event.book_id == execution.book_id &&
+    outcome.executable_event.result_id == execution.task_id {
+    if execution.summary.contains("material_watch_book_persisted: true") {
+      execution
+    } else {
+      copy_execution_with(
+        execution,
+        summary=execution.summary + "\nmaterial_watch_book_persisted: true",
+      )
+    }
+  } else {
+    execution
+  }
   let status : @core.TaskExecutionStatus = match execution.status {
     Failed | Stale | AwaitingPersistence =>
       if outcome.review_queued {

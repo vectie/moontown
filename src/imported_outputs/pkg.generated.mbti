@@ -1,0 +1,25 @@
+// Generated using `moon info`, DON'T EDIT IT
+package "vectie/moontown/imported_outputs"
+
+import {
+  "moonbitlang/core/debug",
+  "vectie/moontown/imported_output_contract",
+}
+
+// Values
+pub async fn discover(String, String) -> @imported_output_contract.Catalog
+
+pub async fn respond(String, String, String, String) -> Response
+
+// Errors
+
+// Types and methods
+pub(all) struct Response {
+  status : Int
+  headers : Map[String, String]
+  body : Bytes
+} derive(Eq, @debug.Debug)
+
+// Type aliases
+
+// Traits

@@ -11,6 +11,9 @@ fn migrate_marketplace_state_json(value : Json) -> Json {
   if fields.get("action_requests") is None {
     fields["action_requests"] = Json::array([])
   }
+  if fields.get("portable_bindings") is None {
+    fields["portable_bindings"] = Json::array([])
+  }
   Json::object(fields)
 }
 
@@ -97,6 +100,7 @@ async fn MarketplaceApplication::load_state(
       if decoded.schema != marketplace_schema() {
         fail("unsupported marketplace state schema")
       }
+      validate_persisted_portable_bindings(decoded)
       decoded
     }
     None => empty_marketplace_state()
@@ -262,16 +266,19 @@ pub async fn MarketplaceApplication::execute(
     }
     "upsert-agent" => {
       let draft : AgentListingDraft = @json.from_json(payload)
+      let portable_source = parse_portable_source_intake(payload)
       let next = marketplace_upsert_agent_draft(
         state,
         principal,
         draft,
+        portable_source?,
         now_ms~,
       )
       self.save_state(next)
       application_ok(operation, {
         "listing_id": draft.listing_id,
         "publication_state": "draft",
+        "portable_binding": portable_binding_wire(next, draft.listing_id),
       })
     }
     "upsert-building" => {

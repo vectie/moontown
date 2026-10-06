@@ -10,7 +10,7 @@ pub async fn render_book_quality_ai_review_status(
     book_catalog_path, snapshot_path,
   )
   let ledger = load_review_run_ledger_file(run_path)
-  @book_quality.review_status_markdown_from_observations(
+  let historical = @book_quality.review_status_markdown_from_observations(
     run_path,
     result_dir,
     active_book_ids~,
@@ -18,6 +18,9 @@ pub async fn render_book_quality_ai_review_status(
     book_quality_review_run_observations(ledger.runs, result_dir),
     @env.now(),
   )
+  historical +
+  "\n\n" +
+  @native_work.render_status(path=@native_work.path_for_snapshot(snapshot_path))
 }
 
 ///|

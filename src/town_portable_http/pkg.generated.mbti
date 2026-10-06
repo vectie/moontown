@@ -1,0 +1,41 @@
+// Generated using `moon info`, DON'T EDIT IT
+package "vectie/moontown/town_portable_http"
+
+import {
+  "moonbitlang/async/http",
+  "moonbitlang/async/io",
+  "vectie/moontown/account_system",
+  "vectie/moontown/town_marketplace",
+  "vectie/moontown/town_portable_transfer",
+}
+
+// Values
+pub fn is_transfer_path(String) -> Bool
+
+pub fn response_sink(async (Int, Map[String, String]) -> Unit, async (Bytes) -> Unit, async () -> Unit, () -> Unit) -> ResponseSink
+
+// Errors
+
+// Types and methods
+pub struct ResponseSink {
+  start_response : async (Int, Map[String, String]) -> Unit
+  write_bytes : async (Bytes) -> Unit
+  end_response : async () -> Unit
+  close_connection : () -> Unit
+  mut started : Bool
+  mut idle_timeout_ms : Int
+}
+pub impl @io.Writer for ResponseSink
+
+pub(all) struct TransferService {
+  accounts : @account_system.AccountApplication
+  marketplace : @town_marketplace.MarketplaceApplication
+  store : @town_portable_transfer.PortableStore
+  limits : @town_portable_transfer.TransferLimits
+  now : () -> UInt64
+}
+pub async fn TransferService::handle(Self, @http.Request, &@io.Reader, ResponseSink) -> Bool
+
+// Type aliases
+
+// Traits

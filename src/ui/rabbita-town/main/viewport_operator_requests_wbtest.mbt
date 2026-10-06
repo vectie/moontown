@@ -1,7 +1,7 @@
 ///|
 test "operator request submit labels reflect pending state" {
   assert_eq(operator_request_submit_label(false), "Save Watch")
-  assert_eq(operator_request_submit_label(true), "Submitting...")
+  assert_eq(operator_request_submit_label(true), "Saving watch...")
 }
 
 ///|
@@ -37,12 +37,13 @@ test "operator request summary includes accepted request details" {
     source_policy: "web-first",
     quality_threshold: 85,
     standing_goal_id: "watch-opc",
+    material_watch: None,
   }
   let summary = operator_request_last_summary_from_snapshot(request)
   assert_true(summary.contains("Last accepted watch: Track OPC news"))
   assert_true(summary.contains("for research-opc"))
   assert_true(summary.contains("Status accepted"))
-  assert_true(summary.contains("check frequency 60"))
+  assert_true(summary.contains("check interval 60 ticks"))
   assert_true(summary.contains("quality 85%"))
   assert_true(summary.contains("Request: Watch official sources."))
   assert_true(!summary.contains("request-1"))

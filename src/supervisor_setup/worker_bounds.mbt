@@ -57,12 +57,7 @@ fn parse_supervisor_worker_assignment(
   )
   let title = json_string(task_fields, "title")
   let requested_cwd = json_string(task_fields, "cwd")
-  let requested_model = json_string(task_fields, "model")
-  let model = if requested_model.is_empty() {
-    "gpt-5.6-sol"
-  } else {
-    requested_model
-  }
+  let model = json_string(task_fields, "model")
   let web_search_explicit = task_fields.get("webSearch") is Some(True | False) ||
     task_fields.get("web_search") is Some(True | False)
   let metadata = task_fields.get("metadata").unwrap_or(Json::null())
@@ -136,12 +131,12 @@ fn parse_supervisor_worker_assignment(
     task.conversation_id.is_empty() ||
     task.title.is_empty() ||
     workspace_id.is_empty() ||
-    task.model != "gpt-5.6-sol" ||
+    !supervisor_worker_model_valid(task.model) ||
     !web_search_explicit ||
     !canonical_book_segment(book_id) ||
     (!requested_cwd.is_empty() && requested_cwd != cwd) {
     fail(
-      "delegate task requires explicit taskId, conversationId, title, gpt-5.6-sol model, webSearch, and symbolic metadata.workspaceId/bookId; client absolute cwd is forbidden",
+      "delegate task requires explicit taskId, conversationId, title, bound model selector, webSearch, and symbolic metadata.workspaceId/bookId; client absolute cwd is forbidden",
     )
   }
   if !(bounds.claim_ceiling == "evidence-only" ||
@@ -164,8 +159,9 @@ fn parse_supervisor_worker_assignment(
       )
     }
   }
-  let source = if requested_model.is_empty() ||
-    !json_alias_present(budget_fields, "maxCostMicroUsd", "max_cost_micro_usd") ||
+  let source = if !json_alias_present(
+      budget_fields, "maxCostMicroUsd", "max_cost_micro_usd",
+    ) ||
     !json_alias_present(budget_fields, "maxRuntimeMs", "max_runtime_ms") ||
     !json_alias_present(budget_fields, "maxTokens", "max_tokens") ||
     !json_alias_present(budget_fields, "maxArtifacts", "max_artifacts") {

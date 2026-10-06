@@ -119,7 +119,13 @@ async fn planbook_result_contract_criterion() -> PlanbookCriterionStatus {
 ///|
 async fn planbook_source_patch_loop_criterion(
   workspace_root : String,
+  native_state_path? : String = @native_work.default_path(),
 ) -> PlanbookCriterionStatus {
+  let native_ready = @native_work.accepted_repair(
+    workspace_root,
+    "planbook-source-patch-loop",
+    path=native_state_path,
+  )
   let repair_workspace_file = "src/planbook_runtime/planbook_repair_workspace.mbt"
   let profile_file = "src/planbook_runtime/planbook_repair_profile.mbt"
   let acp_file = "src/planbook_runtime/planbook_repair_acp.mbt"
@@ -143,17 +149,19 @@ async fn planbook_source_patch_loop_criterion(
   planbook_criterion(
     "planbook-source-patch-loop",
     "2026-05-31-editor-mode-real-pipeline",
-    "PlanBook repair can patch repository source through Codex ACP",
-    "moontown+moonclaw+codex-acp",
-    acp_ready && skill_ready && receipt_ready,
-    if acp_ready && skill_ready && receipt_ready {
-      "PlanBook repair has accepted `\{@planbook_policy.repair_patch_receipt_contract()}` evidence from a Codex ACP source-root patch run"
+    "PlanBook repair can patch explicitly bound repository source",
+    "moontown+moonclaw",
+    native_ready || (acp_ready && skill_ready && receipt_ready),
+    if native_ready {
+      "PlanBook repair has accepted planbook.repair.native_patch_receipt.v1 evidence: applied and validated; uncommitted, with frozen source/model binding and unchanged unrelated work"
+    } else if acp_ready && skill_ready && receipt_ready {
+      "PlanBook repair retains historical accepted `\{@planbook_policy.repair_patch_receipt_contract()}` evidence from an explicit legacy Codex ACP source-root patch run"
     } else if acp_ready && skill_ready {
-      "PlanBook repair ACP wiring exists, but no accepted `\{@planbook_policy.repair_patch_receipt_contract()}` source patch receipt has been consumed yet"
+      "Native PlanBook repair is the default; no accepted planbook.repair.native_patch_receipt.v1 source receipt is present. Historical ACP wiring is retained only for explicit compatibility selection"
     } else {
-      "PlanBook repair still cannot prove a source-patching ACP route; it may only plan or validate without editing repository code"
+      "PlanBook repair still needs an explicit source binding, available native model/runtime and accepted planbook.repair.native_patch_receipt.v1 patch/validation evidence"
     },
-    "route PlanBook repair packets through Codex ACP with source-root cwd/workspace, then require repair-result evidence after validation",
+    "set MOONTOWN_WORKSPACE_ROOT to the intended MoonTown checkout, then dispatch native repair and reconcile its task-specific patch and validation receipt",
   )
 }
 

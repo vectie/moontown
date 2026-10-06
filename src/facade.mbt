@@ -78,6 +78,9 @@ pub async fn run_goal(
   task_limit_per_book? : Int = 3,
   snapshot_path? : String = @storage.default_snapshot_path(),
   book_catalog_path? : String = @moonbook.default_catalog_path(),
+  wenyu_execution? : String = "native",
+  wenyu_model? : String = "",
+  wenyu_allow_no_change? : Bool = false,
 ) -> @core.TownState {
   @town_runtime.run_goal(
     goal,
@@ -85,6 +88,9 @@ pub async fn run_goal(
     task_limit_per_book~,
     snapshot_path~,
     book_catalog_path~,
+    wenyu_execution~,
+    wenyu_model~,
+    wenyu_allow_no_change~,
   )
 }
 
@@ -95,6 +101,9 @@ pub async fn render_goal_run(
   task_limit_per_book? : Int = 3,
   snapshot_path? : String = @storage.default_snapshot_path(),
   book_catalog_path? : String = @moonbook.default_catalog_path(),
+  wenyu_execution? : String = "native",
+  wenyu_model? : String = "",
+  wenyu_allow_no_change? : Bool = false,
 ) -> String {
   @town_runtime.render_goal_run(
     goal,
@@ -102,6 +111,9 @@ pub async fn render_goal_run(
     task_limit_per_book~,
     snapshot_path~,
     book_catalog_path~,
+    wenyu_execution~,
+    wenyu_model~,
+    wenyu_allow_no_change~,
   )
 }
 

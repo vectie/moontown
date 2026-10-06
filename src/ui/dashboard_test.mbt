@@ -14,6 +14,33 @@ fn sample_dashboard_model() -> @ui.DashboardModel {
 }
 
 ///|
+test "dashboard explains blocked task awaiting acceptance without an active run" {
+  let state = dashboard_test_state()
+  state.enqueue_task(
+    @core.TownTask::new(
+      id="task-acceptance",
+      book_id="coding",
+      title="Original task",
+      prompt="Original goal",
+      domain=Coding,
+      status=Blocked,
+    ),
+  )
+  dashboard_test_register_execution(
+    state,
+    task_id="task-acceptance",
+    packet_id="packet-acceptance",
+    status=AwaitingAcceptance,
+    summary="Book review approved; goal acceptance remains unevaluated",
+    output_contract="wenyu.build.native-result.v1",
+  )
+  let text = @ui.render_dashboard(dashboard_test_model(state))
+  assert_true(text.contains("task-acceptance: Blocked / Awaiting acceptance"))
+  assert_true(text.contains("acceptance: 1 pending"))
+  assert_true(text.contains("runs: 0 active lifecycle records"))
+}
+
+///|
 test "dashboard text is a non-spatial operations summary" {
   let text = @ui.render_dashboard(sample_dashboard_model())
   assert_true(text.contains("Dashboard / MoonTown / Moonrise"))

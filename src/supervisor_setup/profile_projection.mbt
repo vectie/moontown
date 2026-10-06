@@ -43,6 +43,7 @@ pub fn supervisor_profile_projection(profile : SupervisorProfile) -> Json {
   fields["activeRunId"] = Json::null()
   fields["runtimeCursor"] = Json::null()
   fields["runtimeEvidenceSource"] = Json::null()
+  fields["runtimeModel"] = Json::null()
   fields["readiness"] = {
     "ready": profile.ready(),
     "state": profile.lifecycle.id(),
@@ -59,6 +60,7 @@ fn apply_activation_runtime_projection(
   fields["activeRunId"] = Json::null()
   fields["runtimeCursor"] = Json::null()
   fields["runtimeEvidenceSource"] = Json::null()
+  fields["runtimeModel"] = Json::null()
   guard activation is Some(item) && activation_acknowledged_status(item.status) else {
     return
   }
@@ -82,6 +84,7 @@ fn apply_activation_runtime_projection(
   fields["activeRunId"] = active_run_id.to_json()
   fields["runtimeCursor"] = receipt_cursor.to_json()
   fields["runtimeEvidenceSource"] = "moonclaw.supervisor-command-receipt.v1".to_json()
+  fields["runtimeModel"] = supervisor_activation_model(item.payload).to_json()
 }
 
 ///|
@@ -120,9 +123,25 @@ fn latest_activation_for_profile(
   profile_id : String,
 ) -> SupervisorActivationHandoff? {
   let mut latest : SupervisorActivationHandoff? = None
+  let seen : Array[String] = []
   for handoff in store.activation_handoffs {
-    if handoff.payload.profile_id == profile_id &&
-      latest.map(item => item.revision < handoff.revision).unwrap_or(true) {
+    if handoff.payload.profile_id != profile_id {
+      continue
+    }
+    if seen.contains(handoff.handoff_id) {
+      if latest is Some(item) &&
+        item.handoff_id == handoff.handoff_id &&
+        item.revision < handoff.revision {
+        latest = Some(handoff)
+      }
+      continue
+    }
+    seen.push(handoff.handoff_id)
+    // Revisions of an older activation must not become a newer activation.
+    // First appearance is the durable tie-breaker when timestamps are equal.
+    if latest
+      .map(item => item.created_at_ms <= handoff.created_at_ms)
+      .unwrap_or(true) {
       latest = Some(handoff)
     }
   }
@@ -207,6 +226,26 @@ fn profile_response(
               "handoffId": item.handoff_id,
               "status": item.status,
               "revision": item.revision,
+              "modelRouteStatus": if supervisor_activation_model(item.payload) ==
+                "" {
+                "model_route_required"
+              } else {
+                "resolved"
+              },
+              "model": supervisor_activation_model(item.payload),
+              "requestedModel": supervisor_activation_binding_string(
+                item.payload,
+                "requested_model",
+              ),
+              "modelResolution": supervisor_activation_binding_string(
+                item.payload,
+                "model_resolution",
+              ),
+              "message": if supervisor_activation_model(item.payload) == "" {
+                "Start or configure MoonGate, then retry the saved activation through MoonDesk."
+              } else {
+                ""
+              },
             }
           None => Json::null()
         },

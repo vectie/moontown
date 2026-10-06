@@ -27,11 +27,62 @@ test "runtime status summarizes execution lifecycle counts" {
 }
 
 ///|
+test "runtime status API exposes deduped acceptance debt without claiming review or completion" {
+  let state = runtime_status_test_state()
+  state.register_execution(
+    runtime_status_test_execution(
+      "task-approved",
+      "book",
+      "packet-review",
+      ReviewQueued,
+      "Review queued",
+    ),
+  )
+  state.register_execution(
+    runtime_status_test_execution(
+      "task-approved",
+      "book",
+      "packet-approved",
+      AwaitingAcceptance,
+      "Book review approved; goal acceptance remains unevaluated",
+    ),
+  )
+  state.register_execution(
+    runtime_status_test_execution(
+      "task-approved",
+      "book",
+      "packet-old-running",
+      Running,
+      "Old snapshot",
+    ),
+  )
+  let status = runtime_status_from_state(state, "/tmp/town.json")
+  assert_eq(status.awaiting_acceptance_count, Some(1))
+  assert_eq(status.execution_count, 3)
+  assert_eq(status.running_count, 0)
+  assert_eq(status.review_count, 0)
+  assert_eq(status.completed_count, 0)
+  assert_eq(status.daemon_actions.length(), 0)
+  assert_true(status.summary.contains("awaiting_acceptance=1"))
+  guard status.to_json() is Object(fields) else {
+    fail("expected status object")
+  }
+  assert_eq(fields.get("awaiting_acceptance_count"), Some((1 : Int).to_json()))
+}
+
+///|
 test "runtime status summary composes stable metric groups" {
   let state = runtime_status_test_state()
   let summary = @runtime_status_policy.runtime_status_summary(
     state,
-    { running: 1, review: 2, failed: 3, stale: 4, completed: 5, },
+    {
+      running: 1,
+      review: 2,
+      failed: 3,
+      stale: 4,
+      completed: 5,
+      awaiting_acceptance: 6,
+    },
     { total: 6, enabled: 5, disabled: 1, due: 2, },
     7,
     { total: 8, pending: 9, failed: 10, },
@@ -39,6 +90,7 @@ test "runtime status summary composes stable metric groups" {
   )
   assert_true(summary.contains("books=\{state.books.length()}"))
   assert_true(summary.contains("running=1 review=2 failed=3 stale=4"))
+  assert_true(summary.contains("awaiting_acceptance=6"))
   assert_true(
     summary.contains(
       "standing_goals=6 enabled_standing_goals=5 disabled_standing_goals=1 due_goals=2",

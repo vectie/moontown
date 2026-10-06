@@ -32,6 +32,7 @@ fn worker_status_for_execution(
     Running => Running
     AwaitingPersistence => Waiting
     ReviewQueued => Idle
+    AwaitingAcceptance => Idle
     Completed => Idle
     Stale => Blocked
     Failed => Idle

@@ -8,6 +8,7 @@ fn parse_request_submit_result(text : String) -> RequestSubmitResult {
         standing_goal_id: None,
         status: None,
         error: Some("Request endpoint returned invalid JSON."),
+        material_watch: None,
       }
   }
   @json.from_json(parsed) catch {
@@ -20,23 +21,21 @@ fn parse_request_submit_result(text : String) -> RequestSubmitResult {
         error: Some(
           "Request endpoint response did not match the expected contract.",
         ),
+        material_watch: None,
       }
   }
 }
 
 ///|
 fn submit_operator_request_cmd(dispatch : Dispatch[Msg], model : Model) -> Cmd {
-  @rabbita.perform(fn(raw) { dispatch(OperatorRequestSubmitted(raw)) }, async fn() noraise {
-    wait_request_response_json(
-      submit_operator_request_json(
-        model.request_title,
-        model.request_prompt,
-        model.request_book_id,
-        model.request_cadence,
-        model.request_quality_threshold,
-      ),
-    )
-  })
+  @rabbita.perform(
+    fn(raw) {
+      dispatch(OperatorRequestSubmitted(model.request_submission_id, raw))
+    },
+    async fn() noraise {
+      wait_request_response_json(submit_operator_request_model_json(model))
+    },
+  )
 }
 
 ///|

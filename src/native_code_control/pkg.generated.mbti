@@ -1,0 +1,27 @@
+// Generated using `moon info`, DON'T EDIT IT
+package "vectie/moontown/native_code_control"
+
+// Values
+pub fn configured_path() -> String
+
+pub async fn load(path? : String, owner_workspace? : String, exchange? : async (String, String, String, Map[String, String]) -> (Int, String, String)) -> Result[Client, String]
+
+pub fn select_model(Json, String) -> Result[String, String]
+
+pub fn url_component(String) -> String
+
+// Errors
+
+// Types and methods
+pub struct Client {
+  owner_workspace : String
+  instance_id : String
+  config_path : String
+  request : async (String, String, String) -> Result[Json, String]
+}
+pub fn Client::new(owner_workspace~ : String, instance_id~ : String, config_path~ : String, request~ : async (String, String, String) -> Result[Json, String]) -> Self
+pub async fn Client::request(Self, String, String, String) -> Result[Json, String]
+
+// Type aliases
+
+// Traits

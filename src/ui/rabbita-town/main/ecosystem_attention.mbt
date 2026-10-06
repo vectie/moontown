@@ -1565,6 +1565,7 @@ fn ecosystem_runtime_status_urgency(status : String) -> Int {
 ///|
 fn ecosystem_runtime_behavior(status : String) -> EcosystemBehavior {
   match status.to_lower() {
+    "awaiting_acceptance" => Rest
     "waiting_review" | "reviewing" => Review
     "completed" => Deliver
     "blocked" | "failed" => Observe

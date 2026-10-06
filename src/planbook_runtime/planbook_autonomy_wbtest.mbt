@@ -184,9 +184,7 @@ async test "self-patching criteria stay open without accepted patch receipt evid
   assert_true(!source_patch.satisfied)
   assert_true(!engineering.satisfied)
   assert_true(
-    source_patch.evidence.contains(
-      @planbook_policy.repair_patch_receipt_contract(),
-    ),
+    source_patch.evidence.contains("planbook.repair.native_patch_receipt.v1"),
   )
   assert_true(engineering.evidence.contains("accepted ACP patch evidence"))
 }

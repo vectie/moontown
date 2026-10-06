@@ -12,6 +12,7 @@ import {
   "moonbit-community/rabbita/js",
   "vectie/moonlib/moonsuite",
   "vectie/moontown/core",
+  "vectie/moontown/imported_output_contract",
   "vectie/moontown/domain_catalog",
   "vectie/moontown/energy_valley_contract",
   "vectie/moontown/health",
@@ -21,3 +22,7 @@ import {
 supported_targets = "js"
 
 pkgtype(kind: "executable")
+
+import {
+  "moonbitlang/core/encoding/utf8",
+} for "wbtest"

@@ -36,6 +36,7 @@ fn runtime_status_execution_summary(
     runtime_status_metric("review", counts.review),
     runtime_status_metric("failed", counts.failed),
     runtime_status_metric("stale", counts.stale),
+    runtime_status_metric("awaiting_acceptance", counts.awaiting_acceptance),
   ].join(" ")
 }
 

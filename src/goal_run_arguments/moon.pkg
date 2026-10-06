@@ -1,0 +1,2 @@
+// Pure parsing is separate from the executable so route selection can be tested
+// without starting or linking unrelated runtime integrations.

@@ -71,7 +71,7 @@ pub fn marketplace_token_digest(String) -> String
 
 pub fn marketplace_transition_listing(MarketplaceState, MarketplacePrincipal, ListingKind, String, PublicationState, review_summary~ : String, now_ms~ : UInt64) -> MarketplaceState raise
 
-pub fn marketplace_upsert_agent_draft(MarketplaceState, MarketplacePrincipal, AgentListingDraft, now_ms~ : UInt64) -> MarketplaceState raise
+pub fn marketplace_upsert_agent_draft(MarketplaceState, MarketplacePrincipal, AgentListingDraft, portable_source? : PortableSource, now_ms~ : UInt64) -> MarketplaceState raise
 
 pub fn marketplace_upsert_building_draft(MarketplaceState, MarketplacePrincipal, BuildingListingDraft, now_ms~ : UInt64) -> MarketplaceState raise
 
@@ -92,6 +92,8 @@ pub fn public_listing_cards(MarketplaceState) -> Array[Json]
 pub fn public_listing_index_export(MarketplaceState) -> Json
 
 pub fn publication_state_name(PublicationState) -> String
+
+pub fn validate_portable_listing_binding(PortableListingBinding) -> Unit raise
 
 // Errors
 
@@ -333,6 +335,7 @@ pub(all) struct MarketplaceApplication {
   bootstrap_token_digest : String
 } derive(Eq, @debug.Debug)
 pub async fn MarketplaceApplication::execute(Self, String, String, String, String, now_ms~ : UInt64) -> Json
+pub async fn MarketplaceApplication::portable_transfer_binding(Self, String) -> PortableListingBinding?
 pub async fn MarketplaceApplication::reconcile_runtime_handoff(Self, ActionRequestRuntimeDraft, now_ms~ : UInt64) -> Json
 pub async fn MarketplaceApplication::synchronize_account_session(Self, MarketplacePrincipal, String, now_ms~ : UInt64, expires_at_ms~ : UInt64) -> Unit
 
@@ -379,6 +382,7 @@ pub(all) struct MarketplaceState {
   notifications : Array[TownNotification]
   sponsored_placements : Array[SponsoredPlacement]
   action_requests : Array[MarketplaceActionRequest]
+  portable_bindings : Array[PortableListingBinding]
   version : Int
 } derive(Eq, ToJson, @debug.Debug, @json.FromJson)
 
@@ -402,6 +406,39 @@ pub(all) struct MessageDraft {
 pub(all) struct NotificationReadDraft {
   notification_id : String
 } derive(Eq, ToJson, @debug.Debug, @json.FromJson)
+
+pub(all) struct PortableListingBinding {
+  contract : String
+  listing_id : String
+  publisher_principal_id : String
+  tenant_id : String
+  binding_revision : Int
+  source : PortableSource
+  reuse_mode : String
+  verification_scope : String
+  binding_digest : String
+} derive(Eq, ToJson, @debug.Debug, @json.FromJson)
+
+pub(all) struct PortableSource {
+  contract : String
+  bundle_contract : String
+  agent_id : String
+  agent_version : String
+  book_revision : String
+  bundle_digest : String
+  package_filename : String
+  package_size_bytes : Int
+  package_sha256 : String
+  file_count : Int
+  total_decoded_bytes : Int
+  outputs_manifest_path : String?
+  outputs_manifest_digest : String?
+  included_output_count : Int
+  reference_only_count : Int
+  transport : String
+} derive(Eq, @debug.Debug)
+pub impl ToJson for PortableSource
+pub impl @json.FromJson for PortableSource
 
 pub(all) struct PublicationLifecycle {
   state : PublicationState

@@ -16,7 +16,10 @@ async fn planbook_autonomy_criteria(
     ),
     planbook_editor_feature_selection_criterion(workspace_root),
     planbook_editor_selected_feature_implementation_criterion(workspace_root),
-    planbook_source_patch_loop_criterion(workspace_root),
+    planbook_source_patch_loop_criterion(
+      workspace_root,
+      native_state_path=@native_work.path_for_snapshot(snapshot_path),
+    ),
     planbook_engineering_loop_criterion(workspace_root),
     planbook_implementation_backlog_criterion(workspace_root),
     planbook_validation_criterion(snapshot_path),

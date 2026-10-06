@@ -55,6 +55,7 @@ fn town_chronicle_status_label(status : String) -> String {
     "assigned" => "已分派"
     "running" => "执行中"
     "waiting_review" => "等待评审"
+    "awaiting_acceptance" => "Awaiting acceptance"
     "completed" => "已完成"
     "failed" => "未完成"
     "blocked" => "受阻"
@@ -179,6 +180,8 @@ fn town_chronicle_live_title(
       }
     "waiting_review" =>
       "\{agent.unwrap_or(town_chronicle_task_building_label(task))}已把「\{task_title}」交给评审"
+    "awaiting_acceptance" =>
+      "Awaiting acceptance · \{task_title} · Book review approved; goal acceptance remains unevaluated"
     "running" =>
       "\{agent.unwrap_or(town_chronicle_task_building_label(task))}正在推进「\{task_title}」"
     "assigned" =>

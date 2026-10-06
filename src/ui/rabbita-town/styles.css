@@ -158,3 +158,16 @@
     transition: none !important;
   }
 }
+
+/* Imported Book outputs: a read-only native Town drawer. */
+.imported-outputs-drawer { width: min(720px, calc(100vw - 24px)); max-height: calc(100dvh - 110px); }
+.imported-outputs-body { overflow: auto; padding: 0 16px 16px; min-height: 0; user-select: text; }
+.imported-outputs-actions { padding: 0 16px 12px; }
+.imported-outputs-choices { display: flex; flex-wrap: wrap; gap: 8px; margin: 10px 0 16px; }
+.imported-outputs-choices button[aria-pressed="true"] { outline: 2px solid #4bd8be; outline-offset: 2px; }
+.imported-outputs-drawer h3 { margin: 16px 0 8px; font-weight: 700; }
+.imported-outputs-provenance, .imported-outputs-reference { font-size: 12px; overflow-wrap: anywhere; }
+.imported-outputs-status { margin: 12px 0; line-height: 1.5; }
+.imported-outputs-text { white-space: pre-wrap; overflow-wrap: anywhere; user-select: text; font: 13px/1.55 ui-monospace, monospace; padding: 12px; margin-top: 16px; border: 1px solid #36534d; border-radius: 10px; background: #10221e; color: #edf7f1; }
+.imported-outputs-download { display: inline-block; margin-top: 8px; }
+.imported-outputs-drawer button:focus-visible, .imported-outputs-drawer a:focus-visible { outline: 2px solid #4bd8be; outline-offset: 3px; }

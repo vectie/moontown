@@ -26,7 +26,10 @@ fn late_detached_import_receipt_candidate(
   let packet_path_matches = !packet_path.trim().is_empty()
   execution.run_id is None &&
   !@core.live_execution_status(execution.status) &&
-  execution.result_decision == "deferred-transient-infrastructure" &&
+  (
+    execution.result_decision == "deferred-transient-infrastructure" ||
+    @core.unconfirmed_standing_watch_dispatch(execution)
+  ) &&
   (command_matches || packet_path_matches)
 }
 

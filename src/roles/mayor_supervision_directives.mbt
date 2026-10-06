@@ -5,6 +5,9 @@ fn supervision_directive_for(
   tick : Int,
 ) -> MayorSupervisionDirective? {
   ignore(state)
+  if @core.unconfirmed_standing_watch_dispatch(execution) {
+    return None
+  }
   match stale_supervision_directive(execution, tick) {
     Some(directive) => return Some(directive)
     None => ()

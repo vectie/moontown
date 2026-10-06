@@ -229,6 +229,13 @@ async fn SupervisorSetupApplication::request_run_action(
   if active_parent_run_id != Some(parent_run_id) {
     fail("parentRunId must be the exact receipt-backed active supervisor run")
   }
+  if worker_task is Some(task) &&
+    activation.map(item => supervisor_activation_model(item.payload)) !=
+    Some(task.model) {
+    fail(
+      "delegate model must match the exact receipt-backed supervisor model binding",
+    )
+  }
   let command_kind = execution_command_kind(action)
   let handoff : SupervisorExecutionHandoff = {
     schema: "moontown.supervisor-execution-handoff.v2",

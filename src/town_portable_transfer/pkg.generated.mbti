@@ -1,0 +1,110 @@
+// Generated using `moon info`, DON'T EDIT IT
+package "vectie/moontown/town_portable_transfer"
+
+import {
+  "moonbitlang/async/io",
+  "moonbitlang/core/debug",
+  "moonbitlang/core/json",
+  "vectie/moontown/account_system",
+  "vectie/moontown/town_marketplace",
+}
+
+// Values
+pub fn actor_for_account(@account_system.AccountContext) -> TransferActor raise
+
+pub fn default_limits() -> TransferLimits
+
+pub fn package_id(String) -> String
+
+pub fn portable_store(String, limits? : TransferLimits) -> PortableStore
+
+// Errors
+pub(all) suberror TransferError {
+  TransferError(Int, String)
+} derive(@debug.Debug)
+
+// Types and methods
+pub(all) struct GrantDraft {
+  grant_id : String
+  package_id : String
+  binding_digest : String
+  grantee_principal_id : String
+  expires_at_ms : UInt64
+} derive(Eq, ToJson, @debug.Debug, @json.FromJson)
+
+pub(all) struct PackageByteReceipt {
+  contract : String
+  package_id : String
+  listing_id : String
+  publisher_principal_id : String
+  tenant_id : String
+  binding_digest : String
+  package_sha256 : String
+  package_size_bytes : Int
+  stored_at_ms : UInt64
+  byte_verification_scope : String
+  delivery_transport : String
+} derive(Eq, ToJson, @debug.Debug, @json.FromJson)
+
+pub struct PackageDownload {
+  view : PackageView
+  // private fields
+}
+pub fn PackageDownload::close(Self) -> Unit
+pub async fn PackageDownload::stream(Self, &@io.Writer) -> Unit
+
+pub(all) struct PackageView {
+  package_id : String
+  binding : @town_marketplace.PortableListingBinding
+  receipt : PackageByteReceipt?
+  status : String
+  access_basis : String
+  cleanup_pending : Bool
+  grants : Array[PortablePackageGrant]
+} derive(Eq, ToJson, @debug.Debug, @json.FromJson)
+
+pub(all) struct PortablePackageGrant {
+  grant_id : String
+  package_id : String
+  binding_digest : String
+  package_sha256 : String
+  grantor_principal_id : String
+  grantee_principal_id : String
+  tenant_id : String
+  permission : String
+  created_at_ms : UInt64
+  expires_at_ms : UInt64
+  revoked_at_ms : UInt64?
+  version : Int
+} derive(Eq, ToJson, @debug.Debug, @json.FromJson)
+
+pub struct PortableStore {
+  // private fields
+}
+pub async fn PortableStore::download(Self, TransferActor, String, String, UInt64) -> PackageDownload
+pub async fn PortableStore::get(Self, TransferActor, String, String, UInt64) -> PackageView
+pub async fn PortableStore::grant(Self, TransferActor, GrantDraft, UInt64) -> PortablePackageGrant
+pub async fn PortableStore::list(Self, TransferActor, UInt64) -> Array[PackageView]
+pub async fn PortableStore::recover(Self, UInt64) -> Unit
+pub async fn PortableStore::revoke(Self, TransferActor, String, UInt64) -> PortablePackageGrant
+pub async fn PortableStore::upload(Self, TransferActor, @town_marketplace.PortableListingBinding, &@io.Reader, async () -> Unit, () -> UInt64) -> PackageView
+pub async fn PortableStore::withdraw(Self, TransferActor, String, String, UInt64) -> PackageView
+
+pub struct TransferActor {
+  principal_id : String
+  tenant_id : String
+  publisher : Bool
+} derive(Eq, @debug.Debug)
+
+pub(all) struct TransferLimits {
+  max_package_bytes : Int
+  chunk_bytes : Int
+  max_retained_bytes : Int
+  idle_timeout_ms : Int
+  total_timeout_ms : Int
+  lease_ms : UInt64
+} derive(Eq, ToJson, @debug.Debug, @json.FromJson)
+
+// Type aliases
+
+// Traits

@@ -1,6 +1,29 @@
 ///|
 fn operator_request_form_model_for_msg(model : Model, msg : Msg) -> Model? {
   match msg {
+    SetRequestWatchMode(value) =>
+      Some(update_operator_request_form(model, OperatorRequestWatchMode(value)))
+    SetRequestMaterialSources(value) =>
+      Some(
+        update_operator_request_form(
+          model,
+          OperatorRequestMaterialSources(value),
+        ),
+      )
+    SetRequestMaterialAcceptance(value) =>
+      Some(
+        update_operator_request_form(
+          model,
+          OperatorRequestMaterialAcceptance(value),
+        ),
+      )
+    SetRequestMaterialNextAction(value) =>
+      Some(
+        update_operator_request_form(
+          model,
+          OperatorRequestMaterialNextAction(value),
+        ),
+      )
     SetRequestTitle(value) =>
       Some(update_operator_request_form(model, OperatorRequestTitle(value)))
     SetRequestPrompt(value) =>

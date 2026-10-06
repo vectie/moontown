@@ -4,6 +4,9 @@ pub async fn complete_wenyu_build_artifacts_if_needed(
   task : @moonbook.BookTask,
   execution : @core.TaskExecutionRecord,
 ) -> @core.TaskExecutionRecord {
+  if execution.output_contract == "wenyu.build.native-result.v1" {
+    return execution
+  }
   if !@build_pipeline.is_wenyu_book(entry) {
     return execution
   }
@@ -13,7 +16,8 @@ pub async fn complete_wenyu_build_artifacts_if_needed(
       copy_execution_with(
         execution,
         status=Completed,
-        summary="MoonTown materialized implementation backlog and acceptance tests for \{entry.id} after the Wenyu build controller returned no writable artifacts.",
+        output_contract="wenyu.build.local-result.v1",
+        summary="MoonTown locally materialized implementation backlog and acceptance tests for \{entry.id}; implementation still requires execution and review.",
       )
     }
     "code-patch" => {
@@ -28,11 +32,12 @@ pub async fn complete_wenyu_build_artifacts_if_needed(
       )
     }
     "image-asset" => {
-      write_wenyu_asset_pack_record(entry, task)
+      let summary = write_wenyu_asset_pack_record(entry, task)
       copy_execution_with(
         execution,
-        status=Completed,
-        summary="MoonTown materialized module-specific asset prompts and an asset manifest for \{entry.id} after the Wenyu build controller returned no writable artifacts.",
+        status=ReviewQueued,
+        output_contract="wenyu.build.local-result.v1",
+        summary~,
       )
     }
     _ => execution

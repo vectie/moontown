@@ -88,6 +88,8 @@ fn execution_summary(
     AwaitingPersistence =>
       "MoonBook persistence is waiting to absorb the result."
     ReviewQueued => "Keeper review queued after persistence."
+    AwaitingAcceptance =>
+      "Book review approved; goal acceptance remains unevaluated."
     Completed => "Packet, run, and review loop completed."
     Stale => "Mayor marked the execution stale and queued a recovery decision."
     Failed => "Execution failed and the town should recover or retry."

@@ -39,6 +39,26 @@ pub fn desktop_code_schedules_path() -> String {
 }
 
 ///|
+pub fn desktop_native_work_path() -> String {
+  "/api/native-work"
+}
+
+///|
+pub fn desktop_imported_outputs_path() -> String {
+  "/api/imported-outputs"
+}
+
+///|
+pub fn desktop_imported_output_content_path() -> String {
+  "/api/imported-outputs/content"
+}
+
+///|
+pub fn native_work_status_schema() -> String {
+  "moontown.native-work.status.v1"
+}
+
+///|
 pub fn desktop_research_handoff_path() -> String {
   "/api/research-handoffs/inspect"
 }
@@ -390,6 +410,7 @@ pub fn desktop_contract() -> Json {
     "audience": "trusted-local-operator",
     "transport": "localhost",
     "transportEndpointsOnOwnerService": true,
+    "nativeWorkStatusSchema": native_work_status_schema(),
     "miniappAdapter": {
       "contractPath": miniapp_contract_path(),
       "defaultLocalUrl": "http://127.0.0.1:18191",
@@ -397,6 +418,60 @@ pub fn desktop_contract() -> Json {
     },
     "endpoints": [
       endpoint("contract", "GET", desktop_contract_path(), "contract.read"),
+      endpoint(
+        "list-imported-outputs",
+        "GET",
+        desktop_imported_outputs_path(),
+        "book.imported-outputs.read",
+      ),
+      endpoint(
+        "head-imported-outputs",
+        "HEAD",
+        desktop_imported_outputs_path(),
+        "book.imported-outputs.read",
+      ),
+      endpoint(
+        "read-imported-output",
+        "GET",
+        desktop_imported_output_content_path(),
+        "book.imported-outputs.read",
+      ),
+      endpoint(
+        "head-imported-output",
+        "HEAD",
+        desktop_imported_output_content_path(),
+        "book.imported-outputs.read",
+      ),
+      endpoint(
+        "list-native-work",
+        "GET",
+        desktop_native_work_path(),
+        "native-work.saved.read",
+      ),
+      endpoint(
+        "show-native-work",
+        "GET",
+        desktop_native_work_path() + "/{id}",
+        "native-work.saved.read",
+      ),
+      endpoint(
+        "refresh-native-work",
+        "POST",
+        desktop_native_work_path() + "/{id}/refresh",
+        "native-work.observe",
+      ),
+      endpoint(
+        "cancel-native-work",
+        "POST",
+        desktop_native_work_path() + "/{id}/cancel",
+        "native-work.cancel",
+      ),
+      endpoint(
+        "sync-native-work",
+        "POST",
+        desktop_native_work_path() + "/{id}/sync",
+        "native-work.sync",
+      ),
       endpoint(
         "list-standing-watches",
         "GET",
@@ -702,6 +777,7 @@ pub fn miniapp_contract() -> Json {
     "audience": "authenticated-miniapp-user",
     "transport": "https-or-local-dev",
     "sessionHeader": "x-miniapp-session",
+    "portablePackageTransfer": portable_transfer_contract(),
     "endpoints": [
       endpoint("health", "GET", miniapp_health_path(), "health.read"),
       endpoint("contract", "GET", miniapp_contract_path(), "contract.read"),

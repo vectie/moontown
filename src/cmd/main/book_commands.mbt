@@ -21,6 +21,10 @@ async fn render_books_command(args : Array[String]) -> String {
       @book_quality_runtime.write_book_quality_review_packets()
     ["ai-review", "--dispatch"] =>
       @book_quality_runtime.dispatch_next_book_quality_ai_review()
+    ["ai-review", "--dispatch", "--execution=acp"] =>
+      @book_quality_runtime.dispatch_next_book_quality_ai_review(
+        execution="acp",
+      )
     ["ai-review", "bridge"] =>
       @book_quality_runtime.reconcile_book_quality_repair_bridge()
     ["ai-review", "status"] =>

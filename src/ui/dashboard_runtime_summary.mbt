@@ -17,6 +17,7 @@ fn dashboard_overview_section(
       "packets: \{count_execution_status(town, PacketReady)} ready",
       "imports: \{count_execution_status(town, ProposalImported)} imported",
       "runs: \{running_like_count(town)} active lifecycle records",
+      "acceptance: \{count_execution_status(town, AwaitingAcceptance)} pending",
     ],
   }
 }

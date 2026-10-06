@@ -1,6 +1,7 @@
 import {
   "moonbitlang/async/fs",
   "moonbitlang/core/json",
+  "moonbitlang/core/env",
   "vectie/moontown/adapters/codex",
   "vectie/moontown/adapters/moonbook",
   "vectie/moontown/book_templates",
@@ -8,6 +9,8 @@ import {
   "vectie/moontown/civic_runtime",
   "vectie/moontown/core",
   "vectie/moontown/moonclaw_runtime",
+  "vectie/moontown/native_work",
+  "vectie/moontown/storage",
   "vectie/moontown/support",
   "vectie/moonlib/moonsuite",
 }
@@ -16,4 +19,6 @@ supported_targets = "native"
 
 import {
   "moonbitlang/async",
+  "vectie/moontown/integration",
+  "vectie/moontown/native_code_control",
 } for "wbtest"

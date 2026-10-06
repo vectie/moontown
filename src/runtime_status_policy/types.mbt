@@ -12,6 +12,8 @@ pub(all) struct TownRuntimeStatus {
   failed_count : Int
   stale_count : Int
   completed_count : Int
+  // Legacy saved status objects omit this field; a missing value means zero.
+  awaiting_acceptance_count : Int?
   standing_goal_count : Int
   enabled_standing_goal_count : Int
   disabled_standing_goal_count : Int
@@ -35,6 +37,7 @@ pub(all) struct RuntimeStatusExecutionCounts {
   failed : Int
   stale : Int
   completed : Int
+  awaiting_acceptance : Int
 }
 
 ///|

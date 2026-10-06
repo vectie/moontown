@@ -29,13 +29,10 @@ async fn inspect_editor_pipeline_lifecycle(
   let repair_text = @support.read_text_or_empty(repair_path)
   let implementation_text = @support.read_text_or_empty(implementation_path)
   let change_id = "editor-pipeline-\{selected_feature.selected_feature}"
-  let accepted_proof = implementation_text.contains(
-      "contract: \{@editor_pipeline.selected_feature_implementation_contract()}",
-    ) &&
-    implementation_text.contains(
-      "selected_feature: \{selected_feature.selected_feature}",
-    ) &&
-    implementation_text.contains("implementation_status: accepted")
+  let accepted_proof = editor_accepted_feature_from_proof(
+      workspace_root, implementation_text,
+    ) ==
+    Some(selected_feature.selected_feature)
   let lifecycle_status = if accepted_proof {
     "ready-to-export"
   } else if planbook_repair_result_mentions_criterion(
@@ -54,6 +51,8 @@ async fn inspect_editor_pipeline_lifecycle(
       "PlanBook repair is running for the selected change. Wait for a validated repair result before treating the output as exportable."
     "accepted" =>
       "PlanBook repair accepted the change, but export readiness still depends on the durable selected-feature proof record."
+    "no_change" =>
+      "No net source change; required engineering checks passed. Original-task acceptance remains unevaluated, and export readiness still requires the selected-feature proof record."
     "blocked" =>
       "The selected change is blocked or owned externally. Output mode should show the blocker instead of implying completion."
     "ready-to-export" =>
@@ -79,6 +78,15 @@ async fn editor_pipeline_lifecycle_status_from_repair_result(
   repair_text : String,
   snapshot_path : String,
 ) -> String {
+  if planbook_repair_result_has_no_change_decision(repair_text) &&
+    repair_text
+    .split("\n")
+    .any(line => {
+      line.trim() ==
+      "native_receipt_contract: planbook.repair.native_no_change_receipt.v1"
+    }) {
+    return "no_change"
+  }
   if planbook_repair_result_has_accepted_decision(repair_text) ||
     planbook_repair_result_has_no_change_decision(repair_text) {
     return "accepted"
@@ -111,9 +119,37 @@ async fn current_editor_pipeline_repair_status(
 
 ///|
 async fn editor_pipeline_feature_history_ready(workspace_root : String) -> Bool {
-  let proof_ready = @support.read_text_or_empty(
+  let proof = @support.read_text_or_empty(
     editor_selected_feature_implementation_path(workspace_root),
   )
+  let native_feature = if editor_proof_has_native_provenance(proof) {
+    editor_accepted_feature_from_proof(workspace_root, proof)
+  } else {
+    None
+  }
+  editor_pipeline_history_evidence_ready(
+    proof,
+    native_feature,
+    editor_pipeline_history_source_ready(),
+  )
+}
+
+///|
+fn editor_pipeline_history_evidence_ready(
+  proof : String,
+  native_feature : String?,
+  source_ready : Bool,
+) -> Bool {
+  let proof_ready = if editor_proof_has_native_provenance(proof) {
+    native_feature == Some("building-protocol-history")
+  } else {
+    proof.contains("selected_feature: building-protocol-history")
+  }
+  proof_ready || source_ready
+}
+
+///|
+async fn editor_pipeline_history_source_ready() -> Bool {
   let civic_status_ready = text_file_contains(
     "src/civic_runtime/civic_status.mbt", "protocol_history",
   )
@@ -123,6 +159,5 @@ async fn editor_pipeline_feature_history_ready(workspace_root : String) -> Bool 
     text_file_contains(
       "src/ui/rabbita-town/main/main.mbt", "No protocol events yet.",
     )
-  proof_ready.contains("selected_feature: building-protocol-history") ||
-  (civic_status_ready && ui_ready)
+  civic_status_ready && ui_ready
 }

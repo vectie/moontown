@@ -21,7 +21,9 @@ extern "js" fn submit_operator_request_json(
   #|     });
   #|     const text = await response.text();
   #|     if (globalThis.__moontownRefreshRuntimeSnapshots) {
-  #|       await globalThis.__moontownRefreshRuntimeSnapshots();
+  #|       // Refresh is secondary: neither rejection nor a stalled refresh may
+  #|       // delay the already received save response or encourage a retry.
+  #|       Promise.resolve().then(() => globalThis.__moontownRefreshRuntimeSnapshots()).catch(() => {});
   #|     }
   #|     if (!response.ok) {
   #|       try {

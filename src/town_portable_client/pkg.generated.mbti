@@ -1,0 +1,51 @@
+// Generated using `moon info`, DON'T EDIT IT
+package "vectie/moontown/town_portable_client"
+
+import {
+  "moonbitlang/async/http",
+  "moonbitlang/async/io",
+  "moonbitlang/core/debug",
+  "vectie/moontown/town_marketplace",
+  "vectie/moontown/town_portable_transfer",
+}
+
+// Values
+pub fn native_exchange(String) -> (async (@http.Request, async (&@io.Writer) -> Unit, async (@http.Response, &@io.Reader) -> Unit) -> Unit) raise
+
+pub async fn read_binding_file(String) -> @town_marketplace.PortableListingBinding
+
+pub async fn read_session(&@io.Reader) -> String
+
+pub async fn receive_download(@town_portable_transfer.PackageView, @http.Response, &@io.Reader, String, limits? : @town_portable_transfer.TransferLimits) -> DownloadedPackage
+
+// Errors
+pub(all) suberror ClientError {
+  ClientError(String)
+} derive(Eq, @debug.Debug)
+
+// Types and methods
+pub(all) struct DownloadedPackage {
+  package_path : String
+  binding_path : String
+  receipt_path : String
+  package_id : String
+  package_sha256 : String
+  package_size_bytes : Int
+} derive(Eq, ToJson, @debug.Debug)
+
+pub struct PortableClient {
+  // private fields
+}
+pub async fn PortableClient::download(Self, String, @town_marketplace.PortableListingBinding, String) -> DownloadedPackage
+pub async fn PortableClient::list(Self) -> Array[@town_portable_transfer.PackageView]
+pub fn PortableClient::new(async () -> String, async (@http.Request, async (&@io.Writer) -> Unit, async (@http.Response, &@io.Reader) -> Unit) -> Unit, limits? : @town_portable_transfer.TransferLimits) -> Self raise
+pub async fn PortableClient::preview_share(Self, @town_portable_transfer.GrantDraft) -> Json
+pub async fn PortableClient::revoke(Self, String) -> @town_portable_transfer.PortablePackageGrant
+pub async fn PortableClient::share(Self, @town_portable_transfer.GrantDraft) -> @town_portable_transfer.PortablePackageGrant
+pub async fn PortableClient::upload(Self, String, String, @town_marketplace.PortableListingBinding) -> @town_portable_transfer.PackageView
+pub async fn PortableClient::withdraw(Self, String, @town_marketplace.PortableListingBinding) -> @town_portable_transfer.PackageView
+
+// Type aliases
+pub type Exchange = async (@http.Request, async (&@io.Writer) -> Unit, async (@http.Response, &@io.Reader) -> Unit) -> Unit
+
+// Traits

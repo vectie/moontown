@@ -1,5 +1,7 @@
 town-api.example.com {
-  encode zstd gzip
+  # Exact package responses must retain their original serialization.
+  @transformable not path /miniapp/marketplace/portable-packages/content
+  encode @transformable zstd gzip
 
   log {
     output file /var/log/moonsuite/moontown-access.log
@@ -12,7 +14,22 @@ town-api.example.com {
     }
   }
 
-  @writes method POST PUT PATCH DELETE
+  # One disjoint raw-upload exception. Every other write retains 128KB.
+  @packageUpload {
+    method PUT
+    path /miniapp/marketplace/portable-packages/content
+  }
+  request_body @packageUpload {
+    # Exact raw-byte limit: 64 MiB (avoid decimal MB ambiguity).
+    max_size 67108864
+  }
+  @writes {
+    method POST PUT PATCH DELETE
+    not {
+      method PUT
+      path /miniapp/marketplace/portable-packages/content
+    }
+  }
   request_body @writes {
     max_size 128KB
   }

@@ -3,11 +3,14 @@ async fn launch_goal_book(
   state : @core.TownState,
   mayor : @roles.Mayor,
   launch : GoalBookLaunch,
+  native_path? : String = @native_work.default_path(),
 ) -> Unit {
   for task in launch.tasks {
     let tick = supervision_tick(state)
     let planned_task = to_town_task(launch.entry, task, PacketReady)
-    if @core.live_external_execution_count(state) >=
+    if !(@build_pipeline.is_wenyu_book(launch.entry) &&
+      @build_pipeline.is_local_wenyu_build_fallback_task(task.kind)) &&
+      @core.live_external_execution_count(state) >=
       @core.max_live_external_executions() {
       queue_goal_book_task(state, launch.entry, task, planned_task, tick)
       continue
@@ -20,6 +23,7 @@ async fn launch_goal_book(
       planned_task,
       tick,
       launch.pending_review_baseline,
+      native_path~,
     )
   }
 }
@@ -33,6 +37,7 @@ async fn launch_goal_book_task(
   planned_task : @core.TownTask,
   tick : Int,
   pending_review_baseline : Int,
+  native_path? : String = @native_work.default_path(),
 ) -> Unit {
   let decision = mayor.decide_dispatch(state, planned_task)
   state.record_event(route_event(decision.decision, state.events.length()))
@@ -43,6 +48,7 @@ async fn launch_goal_book_task(
     task,
     assigned_worker_id=worker_id,
     tick~,
+    native_path~,
   ) catch {
     error =>
       failed_execution_record(
@@ -67,7 +73,8 @@ async fn launch_goal_book_task(
   if reconciled_execution != completed_execution {
     record_goal_execution(state, entry, task, reconciled_execution)
   }
-  if @core.terminal_execution_status(completed_execution.status) {
+  if @core.terminal_execution_status(completed_execution.status) ||
+    local_wenyu_result_ready_for_projection(completed_execution) {
     finalize_goal_book_entry(state, entry, pending_review_baseline, [
       reconciled_execution.task_id,
     ])

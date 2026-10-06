@@ -11,6 +11,11 @@ async fn prepare_goal_book_launch(
   entry : @moonbook.BookCatalogEntry,
   objective : String,
   task_limit : Int,
+  wenyu_execution? : String = "native",
+  wenyu_model? : String = "",
+  wenyu_allow_no_change? : Bool = false,
+  snapshot_path? : String = @storage.default_snapshot_path(),
+  book_catalog_path? : String = @moonbook.default_catalog_path(),
 ) -> GoalBookLaunch? {
   let acceptance = @moonbook.accept_goal(entry, objective) catch {
     error => {
@@ -25,6 +30,17 @@ async fn prepare_goal_book_launch(
       return None
     }
   }
+  if !acceptance.accepted {
+    state.record_event(
+      @core.TownEvent::new(
+        id="event-reject-\{entry.id}",
+        kind="planning",
+        detail="MoonBook declined planning for \{entry.id}: \{acceptance.reason}",
+        related_book_id=Some(entry.id),
+      ),
+    )
+    return None
+  }
   state.record_event(
     @core.TownEvent::new(
       id="event-accept-\{entry.id}",
@@ -33,7 +49,7 @@ async fn prepare_goal_book_launch(
       related_book_id=Some(entry.id),
     ),
   )
-  preseed_goal_bootstrap_inputs(entry, objective) catch {
+  preseed_goal_bootstrap_inputs(entry, objective, wenyu_execution~) catch {
     error =>
       state.record_event(
         @core.TownEvent::new(
@@ -88,9 +104,54 @@ async fn prepare_goal_book_launch(
       ),
     )
   }
+  let tasks = select_goal_book_tasks(plan.tasks, plan.task_limit)
+  let selected : Array[@moonbook.BookTask] = []
+  for task in tasks {
+    if @build_pipeline.is_wenyu_book(entry) &&
+      [
+        "implementation-backlog", "code-patch", "image-asset", "projection-schema",
+        "test-fix",
+      ].contains(task.kind) {
+      let scoped = @build_pipeline_runtime.wenyu_task_after_explicit_supersession(
+        @build_pipeline_runtime.wenyu_objective_task(task, objective),
+        @native_work.path_for_snapshot(snapshot_path),
+      )
+      if @build_pipeline_runtime.wenyu_native_task_kind(scoped.kind) {
+        ignore(
+          @build_pipeline_runtime.freeze_wenyu_launch(
+            entry,
+            scoped,
+            acceptance.goal_id,
+            objective,
+            execution=wenyu_execution,
+            model=wenyu_model,
+            allow_no_change=wenyu_allow_no_change,
+            native_path=@native_work.path_for_snapshot(snapshot_path),
+            catalog_path=book_catalog_path,
+          ) catch {
+            error => {
+              state.record_event(
+                @core.TownEvent::new(
+                  id="event-wenyu-prepare-\{entry.id}",
+                  kind="error",
+                  detail="Wenyu launch preparation needs attention for \{entry.id}: \{error}",
+                  related_book_id=Some(entry.id),
+                  related_task_id=Some(scoped.id),
+                ),
+              )
+              return None
+            }
+          },
+        )
+      }
+      selected.push(scoped)
+    } else {
+      selected.push(task)
+    }
+  }
   Some({
     entry,
-    tasks: select_goal_book_tasks(plan.tasks, plan.task_limit),
+    tasks: selected,
     pending_review_baseline: initial_summary.pending_review_count,
   })
 }
@@ -163,7 +224,9 @@ fn goal_book_wenyu_build_plan(
     tasks: @build_pipeline.wenyu_build_tasks(
       entry,
       objective,
-      current_repo_root(),
+      @env.get_env_var("MOONTOWN_WORKSPACE_ROOT").unwrap_or(
+        "<MOONTOWN_WORKSPACE_ROOT required>",
+      ),
     ),
     task_limit: @build_pipeline.wenyu_build_task_limit(task_limit),
     bootstrap_active: false,

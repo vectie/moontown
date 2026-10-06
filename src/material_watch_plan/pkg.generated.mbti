@@ -1,0 +1,40 @@
+// Generated using `moon info`, DON'T EDIT IT
+package "vectie/moontown/material_watch_plan"
+
+import {
+  "moonbitlang/core/json",
+  "vectie/moontown/adapters/moonbook",
+  "vectie/moontown/core",
+}
+
+// Values
+pub async fn read_plan(@moonbook.BookCatalogEntry, @core.StandingGoal, String) -> Plan
+
+pub async fn read_sources(@moonbook.BookCatalogEntry, Plan) -> Array[Source]
+
+pub fn relative_path(String) -> Bool
+
+pub fn validate(Plan, @moonbook.BookCatalogEntry, @core.StandingGoal) -> Plan raise
+
+// Errors
+
+// Types and methods
+pub(all) struct Plan {
+  contract : String
+  goal_id : String
+  book_id : String
+  intent : String
+  acceptance : String
+  next_action : String
+  sources : Array[String]
+} derive(Eq, ToJson, @json.FromJson)
+
+pub(all) struct Source {
+  path : String
+  sha256 : String
+  content : String
+} derive(Eq, ToJson, @json.FromJson)
+
+// Type aliases
+
+// Traits

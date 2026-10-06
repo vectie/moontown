@@ -2,22 +2,65 @@
 package "vectie/moontown/build_pipeline_runtime"
 
 import {
+  "moonbitlang/core/json",
   "vectie/moontown/adapters/moonbook",
   "vectie/moontown/core",
+  "vectie/moontown/native_work",
 }
 
 // Values
+pub async fn apply_wenyu_native_work_result(@native_work.Work, native_path? : String) -> Unit
+
 pub async fn complete_wenyu_build_artifacts_if_needed(@moonbook.BookCatalogEntry, @moonbook.BookTask, @core.TaskExecutionRecord) -> @core.TaskExecutionRecord
 
 pub async fn ensure_wenyu_build_moonclaw_profile(String) -> Unit
 
-pub async fn preseed_wenyu_goal_inputs(@moonbook.BookCatalogEntry, String, String) -> Unit
+pub async fn execute_wenyu_native(WenyuLaunch, Int, assigned_worker_id? : String?) -> @core.TaskExecutionRecord
+
+pub async fn freeze_wenyu_launch(@moonbook.BookCatalogEntry, @moonbook.BookTask, String, String, execution? : String, model? : String, allow_no_change? : Bool, native_path? : String, catalog_path? : String) -> WenyuLaunch
+
+pub async fn import_wenyu_native_result(WenyuLaunch, @native_work.Work, persist? : async (@moonbook.BookResult) -> @moonbook.PersistResultOutcome, after_page? : async (String) -> Unit) -> @moonbook.PersistResultOutcome
+
+pub fn is_wenyu_native_execution(@core.TaskExecutionRecord) -> Bool
+
+pub async fn load_wenyu_launch(String) -> WenyuLaunch
+
+pub async fn local_wenyu_result_artifacts(@moonbook.BookCatalogEntry, @core.TaskExecutionRecord) -> Array[String]
+
+pub async fn preseed_wenyu_goal_inputs(@moonbook.BookCatalogEntry, String, String, execution? : String) -> Unit
+
+pub async fn reconcile_wenyu_native_review(@moonbook.BookCatalogEntry, @core.TaskExecutionRecord, Int) -> @core.TaskExecutionRecord
+
+pub async fn sync_wenyu_native_execution(@moonbook.BookCatalogEntry, @core.TaskExecutionRecord, Int) -> @core.TaskExecutionRecord
 
 pub async fn wenyu_book_ready_for_build(@moonbook.BookCatalogEntry) -> Bool
+
+pub fn wenyu_launch_path(String, String) -> String
+
+pub fn wenyu_native_attention_record(@moonbook.BookCatalogEntry, @moonbook.BookTask, String, String, Int, assigned_worker_id? : String?) -> @core.TaskExecutionRecord
+
+pub fn wenyu_native_execution_record(WenyuLaunch, @native_work.Work, Int, assigned_worker_id? : String?, imported? : Bool, import_blocker? : String) -> @core.TaskExecutionRecord
+
+pub fn wenyu_native_task_kind(String) -> Bool
+
+pub fn wenyu_objective_task(@moonbook.BookTask, String) -> @moonbook.BookTask
+
+pub async fn wenyu_task_after_explicit_supersession(@moonbook.BookTask, String) -> @moonbook.BookTask
 
 // Errors
 
 // Types and methods
+pub(all) struct WenyuLaunch {
+  schema : String
+  execution : String
+  native_path : String
+  entry : @moonbook.BookCatalogEntry
+  task : @moonbook.BookTask
+  request : @native_work.Request
+  output_before : Map[String, String]
+} derive(ToJson, @json.FromJson)
+
+type WenyuOutputPackage derive(ToJson, @json.FromJson)
 
 // Type aliases
 

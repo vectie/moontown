@@ -39,7 +39,7 @@ fn copy_execution_with(
     proposal_id~,
     run_id~,
     status~,
-    summary~,
+    summary=preserve_material_watch_summary(execution.summary, summary),
     output_contract=execution.output_contract,
     context_pages~,
     skill_paths~,

@@ -2,6 +2,7 @@
 async fn planbook_latest_repair_patch_receipt_ready(
   workspace_root : String,
 ) -> Bool {
+  @native_work.accepted_repair(workspace_root, "planbook-source-patch-loop") ||
   planbook_repair_source_patch_receipt_text_ready(
     @support.read_text_or_empty(
       planbook_repair_result_path_for_workspace(workspace_root),
