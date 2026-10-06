@@ -90,6 +90,14 @@ pub fn miniapp_marketplace_notifications_path() -> String
 
 pub fn miniapp_marketplace_notifications_read_path() -> String
 
+pub fn miniapp_marketplace_order_cancel_path() -> String
+
+pub fn miniapp_marketplace_order_decision_path() -> String
+
+pub fn miniapp_marketplace_order_fulfillment_path() -> String
+
+pub fn miniapp_marketplace_orders_path() -> String
+
 pub fn miniapp_marketplace_public_index_path() -> String
 
 pub fn miniapp_marketplace_recommendations_path() -> String

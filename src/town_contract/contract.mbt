@@ -324,6 +324,26 @@ pub fn miniapp_marketplace_action_retry_path() -> String {
 }
 
 ///|
+pub fn miniapp_marketplace_orders_path() -> String {
+  "/miniapp/marketplace/orders"
+}
+
+///|
+pub fn miniapp_marketplace_order_fulfillment_path() -> String {
+  "/miniapp/marketplace/orders/fulfillment"
+}
+
+///|
+pub fn miniapp_marketplace_order_decision_path() -> String {
+  "/miniapp/marketplace/orders/decision"
+}
+
+///|
+pub fn miniapp_marketplace_order_cancel_path() -> String {
+  "/miniapp/marketplace/orders/cancel"
+}
+
+///|
 pub fn miniapp_marketplace_channels_path() -> String {
   "/miniapp/marketplace/channels"
 }
@@ -866,6 +886,36 @@ pub fn miniapp_contract() -> Json {
         "POST",
         miniapp_marketplace_action_retry_path(),
         "marketplace.action-request.retry-handoff",
+      ),
+      endpoint(
+        "marketplace-orders-read",
+        "GET",
+        miniapp_marketplace_orders_path(),
+        "marketplace.order.read",
+      ),
+      endpoint(
+        "marketplace-orders-publish",
+        "POST",
+        miniapp_marketplace_orders_path(),
+        "marketplace.order.publish",
+      ),
+      endpoint(
+        "marketplace-order-fulfillment",
+        "POST",
+        miniapp_marketplace_order_fulfillment_path(),
+        "marketplace.order.fulfill",
+      ),
+      endpoint(
+        "marketplace-order-decision",
+        "POST",
+        miniapp_marketplace_order_decision_path(),
+        "marketplace.order.decide",
+      ),
+      endpoint(
+        "marketplace-order-cancel",
+        "POST",
+        miniapp_marketplace_order_cancel_path(),
+        "marketplace.order.cancel",
       ),
       endpoint(
         "marketplace-channels-read",

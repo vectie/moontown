@@ -4,6 +4,15 @@ MoonTown lets people publish safe descriptions of agents and buildings, find
 other people's published work, understand why something was recommended, and
 contact the owner without exposing the private material behind that work.
 
+Orderlist uses the same account-backed marketplace store for requests from one
+person that another person can fulfill. An order is a structured request with
+a title, description, deliverable, acceptance criteria, and tags. A separate
+account submits a fulfillment with
+a summary and symbolic evidence references; the requester accepts it or rejects
+it with a reason. Rejection reopens the order and preserves the review trail.
+Acceptance closes it as fulfilled. An open order can be cancelled by its owner.
+No order submission itself starts an agent runtime or transfers payment.
+
 This is one connected product loop, but it is not one undifferentiated feed:
 
 ```text
@@ -183,6 +192,11 @@ host. Request bodies cannot select or impersonate the acting principal.
 | GET | `/miniapp/marketplace/action-requests` | Read the session principal's requester/publisher work queue |
 | POST | `/miniapp/marketplace/action-requests/decision` | Publisher accepts or rejects; acceptance queues bounded supervisor delegation |
 | POST | `/miniapp/marketplace/action-requests/retry-handoff` | Recover only an approved request whose runtime handoff was not bound |
+| GET | `/miniapp/marketplace/orders?q=...` | Browse open orders and the caller's own closed or pending orders |
+| POST | `/miniapp/marketplace/orders` | Publish a structured order |
+| POST | `/miniapp/marketplace/orders/fulfillment` | Submit a fulfillment for an open order |
+| POST | `/miniapp/marketplace/orders/decision` | Requester accepts or rejects a pending fulfillment |
+| POST | `/miniapp/marketplace/orders/cancel` | Requester cancels an open order |
 | GET | `/miniapp/marketplace/channels` | List authorized channels |
 | POST | `/miniapp/marketplace/channels` | Create one ACL-bound channel |
 | GET | `/miniapp/marketplace/messages?channel_id=...` | Read one authorized channel |
@@ -195,6 +209,24 @@ host. Request bodies cannot select or impersonate the acting principal.
 | GET | `/miniapp/marketplace/shared-listings` | Read sanitized private/shared cards allowed by active grants |
 | POST | `/miniapp/marketplace/shares/preview` | Inspect the exact safe projection before sharing |
 | POST | `/miniapp/marketplace/sponsored` | Create a separately labeled placement |
+
+### Orderlist contract
+
+`POST /orders` takes `order_id`, `title`, `description`, `deliverable`,
+`acceptance_criteria`, and `tags`. The server derives the requester from the
+session. IDs and evidence references are symbolic, and text is validated as
+public material. Orders are published to marketplace accounts across tenants;
+they do not enter the agent/building review or MoonFind index.
+
+`POST /orders/fulfillment` takes `order_id`, `expected_version`, `summary`, and
+`evidence_refs`. `POST /orders/decision` takes `order_id`, `expected_version`,
+`decision` (`accept` or `reject`), and a nonempty `decision_summary`.
+`POST /orders/cancel` takes `order_id` and `expected_version`. Each transition
+returns the updated order, increments its version, and rejects stale versions.
+The order states are `open`, `pending_review`, `fulfilled`, and `cancelled`.
+Fulfillment submissions and decisions notify the relevant participant. The
+requester sees the full fulfillment history; other users see only their own
+submissions. Open orders can be found by title, description, or tags.
 
 Responses use `{ "ok", "operation", "payload" }`. Clients must allowlist
 fields from `payload`; they must not render arbitrary provider or host objects.

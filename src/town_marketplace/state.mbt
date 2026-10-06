@@ -1,6 +1,6 @@
 ///|
 pub fn marketplace_schema() -> String {
-  "moontown.marketplace-store.v2"
+  "moontown.marketplace-store.v3"
 }
 
 ///|
@@ -18,6 +18,7 @@ pub fn empty_marketplace_state() -> MarketplaceState {
     notifications: [],
     sponsored_placements: [],
     action_requests: [],
+    orders: [],
     version: 1,
   }
 }
