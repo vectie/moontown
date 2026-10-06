@@ -125,7 +125,8 @@ pub struct KnowledgeBundle {
   contract : String
   book_id : String
   root : String
-  generated_at : Int
+  // Numeric epoch milliseconds on the MoonBook JSON wire.
+  generated_at : Double
   summary : BookStateSummary
   health : BookHealthReport
   pages : Array[KnowledgePageRecord]
@@ -148,7 +149,8 @@ pub struct BookStateSnapshot {
   contract : String
   book_id : String
   root : String
-  generated_at : Int
+  // Keep older numeric snapshot values readable.
+  generated_at : Double
   catalog : BookCatalogRecord
   summary : BookStateSummary
   health : BookHealthReport
@@ -156,3 +158,13 @@ pub struct BookStateSnapshot {
   latest_event : @moonbook_contracts.ExecutableBookEvent?
   paths : BookStatePaths
 } derive(Debug, Eq, ToJson, FromJson)
+
+///|
+fn valid_generated_at_millis(value : Double) -> Bool {
+  !value.is_nan() &&
+  value != @double.infinity &&
+  value != @double.neg_infinity &&
+  value >= -9007199254740991.0 &&
+  value <= 9007199254740991.0 &&
+  value.trunc() == value
+}
