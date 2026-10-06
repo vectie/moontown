@@ -22,6 +22,7 @@ async test "precommit stage failures clean only files owned by this download" {
         )
       catch {
         ClientError("synthetic_stage_failure") => ()
+        _ => fail("unexpected error")
       } noraise {
         _ => fail("expected stage failure")
       }
@@ -55,6 +56,7 @@ async test "racing destinations at sidecar and package commit stay unchanged" {
         )
       catch {
         ClientError("download_failed") => ()
+        _ => fail("unexpected error")
       } noraise {
         _ => fail("expected rename conflict")
       }
@@ -96,6 +98,7 @@ async test "cancellation before commit removes partials but cancellation after c
         cancel.val = () => task.cancel()
         try task.wait() catch {
           _ => ()
+          _ => fail("unexpected error")
         } noraise {
           _ => ()
         }

@@ -65,6 +65,7 @@ async test "upload preflight rejects size digest symlink or wrong binding before
       @fs.write_file(file, bytes, create_mode=CreateOrTruncate)
       try client.upload(file, "listing-v1", binding) catch {
         ClientError(_) => ()
+        _ => fail("unexpected error")
       } noraise {
         _ => fail("expected local rejection")
       }
@@ -73,11 +74,13 @@ async test "upload preflight rejects size digest symlink or wrong binding before
     @fs.symlink(target=root + "/bad", root + "/link")
     try client.upload(root + "/link", "listing-v1", binding) catch {
       ClientError("local_package_not_regular") => ()
+      _ => fail("unexpected error")
     } noraise {
       _ => fail("expected symlink rejection")
     }
     try client.upload(root + "/bad", "wrong", binding) catch {
       ClientError("listing_identity_mismatch") => ()
+      _ => fail("unexpected error")
     } noraise {
       _ => fail("expected listing rejection")
     }
@@ -103,6 +106,7 @@ async test "upload detects source mutation after preflight using same descriptor
     )
     try client.upload(file, "listing-v1", fixture_binding()) catch {
       ClientError("local_package_digest_mismatch") => ()
+      _ => fail("unexpected error")
     } noraise {
       _ => fail("expected changed original rejection")
     }
@@ -185,6 +189,7 @@ async test "download denies absent duplicate mismatched and unreceipted list wit
       )
       try client.download(view.package_id, view.binding, root + "/file") catch {
         ClientError(_) => ()
+        _ => fail("unexpected error")
       } noraise {
         _ => fail("expected exact selection denial")
       }
@@ -288,6 +293,7 @@ test "native origin seam accepts origins without connecting and rejects credenti
     ] {
     try native_exchange(base) catch {
       ClientError("invalid_base_url") => ()
+      _ => fail("unexpected error")
     } noraise {
       _ => fail("expected invalid origin")
     }
@@ -298,6 +304,7 @@ test "native origin seam accepts origins without connecting and rejects credenti
     ] {
     try decimal_length(raw, 1024) catch {
       ClientError(_) => ()
+      _ => fail("unexpected error")
     } noraise {
       _ => fail("expected invalid length")
     }
@@ -305,6 +312,7 @@ test "native origin seam accepts origins without connecting and rejects credenti
   assert_eq(decimal_length("1024", 1024), 1024)
   try decimal_length("1025", 1024) catch {
     ClientError(_) => ()
+    _ => fail("unexpected error")
   } noraise {
     _ => fail("expected limit rejection")
   }
@@ -319,6 +327,7 @@ async test "explicit stdin session is bounded and errors cannot reflect secrets"
   for bytes in [b"", b"two tokens", b"line1\nline2", b"bad\x00token"] {
     try read_session(observed_reader(bytes)) catch {
       ClientError("invalid_session") => ()
+      _ => fail("unexpected error")
     } noraise {
       _ => fail("expected invalid session")
     }
@@ -329,6 +338,7 @@ async test "explicit stdin session is bounded and errors cannot reflect secrets"
   })
   try client.list() catch {
     ClientError("invalid_session") => ()
+    _ => fail("unexpected error")
   } noraise {
     _ => fail("expected invalid header token")
   }

@@ -65,6 +65,7 @@ async test "metadata response rejects declared and actual 8MiB plus one without 
   let untouched = observed_reader(b"")
   try read_payload(response, untouched, 30000) catch {
     ClientError("invalid_content_length") => ()
+    _ => fail("unexpected error")
   } noraise {
     _ => fail("expected declared response cap")
   }
@@ -79,6 +80,7 @@ async test "metadata response rejects declared and actual 8MiB plus one without 
   }
   try read_payload(small_header, reader, 30000) catch {
     ClientError("metadata_too_large") => ()
+    _ => fail("unexpected error")
   } noraise {
     _ => fail("expected counted response cap")
   }

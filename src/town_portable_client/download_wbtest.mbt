@@ -54,6 +54,7 @@ async test "truncated overlong wrong digest interrupted and slow streams leave n
         receive_download(view, fixture_response(view), reader, output, limits~)
       catch {
         ClientError(_) => ()
+        _ => fail("unexpected error")
       } noraise {
         _ => fail("expected rejected download")
       }
@@ -95,6 +96,7 @@ async test "bad headers redirects partial response encoding and metadata are rej
         )
       catch {
         ClientError(_) => ()
+        _ => fail("unexpected error")
       } noraise {
         _ => fail("expected header rejection")
       }
@@ -112,6 +114,7 @@ async test "bad headers redirects partial response encoding and metadata are rej
         )
       catch {
         ClientError(_) => ()
+        _ => fail("unexpected error")
       } noraise {
         _ => fail("expected status rejection")
       }
@@ -140,6 +143,7 @@ async test "bad headers redirects partial response encoding and metadata are rej
         )
       catch {
         ClientError(_) => ()
+        _ => fail("unexpected error")
       } noraise {
         _ => fail("expected metadata rejection")
       }
@@ -167,6 +171,7 @@ async test "existing package sidecar and dangling symlink are never overwritten"
         )
       catch {
         ClientError("output_already_exists") => ()
+        _ => fail("unexpected error")
       } noraise {
         _ => fail("expected no overwrite")
       }
@@ -185,6 +190,7 @@ async test "existing package sidecar and dangling symlink are never overwritten"
       )
     catch {
       ClientError("output_already_exists") => ()
+      _ => fail("unexpected error")
     } noraise {
       _ => fail("expected symlink rejection")
     }
