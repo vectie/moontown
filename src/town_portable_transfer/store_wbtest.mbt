@@ -102,7 +102,7 @@ fn test_draft(view : PackageView, id : String) -> GrantDraft {
 
 ///|
 async test "exact raw stream receipt immutable retry and same descriptor download" {
-  let root = @fs.tmpdir(prefix="town-store-exact-")
+  let root = @fs.realpath(@fs.tmpdir(prefix="town-store-exact-"))
   defer (@fs.rmdir(root, recursive=true) catch { _ => () })
   let store = portable_store(root, limits=test_limits())
   let bytes = Bytes::makei(65, i => i.to_byte())
@@ -149,7 +149,7 @@ async test "exact raw stream receipt immutable retry and same descriptor downloa
 
 ///|
 async test "one active reservation quota and recovery never age deletes active upload" {
-  let root = @fs.tmpdir(prefix="town-store-concurrent-")
+  let root = @fs.realpath(@fs.tmpdir(prefix="town-store-concurrent-"))
   defer (@fs.rmdir(root, recursive=true) catch { _ => () })
   let limits = {
     ..test_limits(),
@@ -193,7 +193,7 @@ async test "one active reservation quota and recovery never age deletes active u
 
 ///|
 async test "abandoned reservation partial file and rename before commit recover only expired unlocked bytes" {
-  let root = @fs.tmpdir(prefix="town-store-restart-")
+  let root = @fs.realpath(@fs.tmpdir(prefix="town-store-restart-"))
   defer (@fs.rmdir(root, recursive=true) catch { _ => () })
   let store = portable_store(root, limits=test_limits())
   let bytes = b"restart exact bytes"
@@ -237,7 +237,7 @@ async test "actual lifecycle fault checkpoints deny availability and release res
       "part_create", "part_write", "part_sync", "object_rename", "after_object_rename",
       "index_write", "index_rename",
     ] {
-    let root = @fs.tmpdir(prefix="town-store-fault-")
+    let root = @fs.realpath(@fs.tmpdir(prefix="town-store-fault-"))
     defer (@fs.rmdir(root, recursive=true) catch { _ => () })
     let fail_once = Ref(true)
     let store : PortableStore = {
@@ -265,7 +265,7 @@ async test "actual lifecycle fault checkpoints deny availability and release res
 
 ///|
 async test "failed repair retains original receipts and grants then exact repair restores bytes" {
-  let root = @fs.tmpdir(prefix="town-store-repair-")
+  let root = @fs.realpath(@fs.tmpdir(prefix="town-store-repair-"))
   defer (@fs.rmdir(root, recursive=true) catch { _ => () })
   let clean = portable_store(root, limits=test_limits())
   let bytes = b"old immutable bytes"
@@ -307,7 +307,7 @@ async test "failed repair retains original receipts and grants then exact repair
 
 ///|
 async test "cleanup failures stay durable charged and withdrawal never revives" {
-  let root = @fs.tmpdir(prefix="town-store-cleanup-")
+  let root = @fs.realpath(@fs.tmpdir(prefix="town-store-cleanup-"))
   defer (@fs.rmdir(root, recursive=true) catch { _ => () })
   let limits = {
     ..test_limits(),
@@ -373,7 +373,7 @@ async test "cleanup failures stay durable charged and withdrawal never revives" 
 
 ///|
 async test "slow read total deadline cancellation truncation and mismatches expose no available record" {
-  let root = @fs.tmpdir(prefix="town-store-abort-")
+  let root = @fs.realpath(@fs.tmpdir(prefix="town-store-abort-"))
   defer (@fs.rmdir(root, recursive=true) catch { _ => () })
   let limits = { ..test_limits(), idle_timeout_ms: 10, total_timeout_ms: 30, }
   let store = portable_store(root, limits~)

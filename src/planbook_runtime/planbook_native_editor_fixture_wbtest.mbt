@@ -31,7 +31,7 @@ async fn native_editor_fixture(
   omit_course_page? : String = "",
   existing_plan? : String,
 ) -> NativeEditorFixture {
-  let root = @fsx.mkdtemp("/tmp/town-planbook-editor-producer-XXXXXX")
+  let root = @fs.realpath(@fsx.mkdtemp("/tmp/town-planbook-editor-producer-XXXXXX"))
   let source_root = root + "/source"
   let course_root = root + "/course"
   let book_root = root + "/planbook"

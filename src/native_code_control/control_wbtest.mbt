@@ -1,6 +1,6 @@
 ///|
 async test "configured private control binds owner daemon and authenticated exact-byte transport without Desk" {
-  let root = @fsx.mkdtemp("/tmp/town-native-control-XXXXXX")
+  let root = @fs.realpath(@fsx.mkdtemp("/tmp/town-native-control-XXXXXX"))
   let owner = root + "/owner"
   @fs.mkdir(owner)
   let path = root + "/app-data/control/execution-sandbox/moonclaw.json"

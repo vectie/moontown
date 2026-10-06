@@ -1,7 +1,7 @@
 ///|
 async test "scheduled native semantic producer never seeds ACP and keeps one pending review" {
   let root = cleaned_book_quality_test_root(
-    "/tmp/moontown-native-semantic-producer-wbtest",
+    @fs.realpath("/tmp") + "/moontown-native-semantic-producer-wbtest",
   )
   let book_root = root + "/imported"
   @support.write_text_file(book_root + "/wiki/index.md", "Fixture Book\n")
@@ -16,9 +16,9 @@ async test "scheduled native semantic producer never seeds ACP and keeps one pen
     ),
   ])
   let snapshot = root + "/snapshot.json"
-  let review_dir = root + "/book-quality/review"
-  let result_dir = root + "/book-quality/results"
-  let run_path = root + "/book-quality/runs.json"
+  let review_dir = root + "/book-quality/ai-review-packets"
+  let result_dir = root + "/book-quality/ai-review-results"
+  let run_path = root + "/book-quality/ai-review-runs.json"
   let calls : Array[String] = []
   let client = @native_code_control.Client::new(
     owner_workspace=@storage.moontown_active_workspace_root(),

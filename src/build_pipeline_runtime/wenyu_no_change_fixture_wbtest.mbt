@@ -37,7 +37,7 @@ async fn wenyu_launch_fixture(
   execution? : String = "native",
   kind? : String = "code-patch",
 ) -> WenyuLaunch {
-  let root = @fs.tmpdir(prefix="wenyu-no-change-launch-")
+  let root = @fs.realpath(@fs.tmpdir(prefix="wenyu-no-change-launch-"))
   let source = root + "/source"
   let book = root + "/suite/books/wenyu"
   @fs.mkdir(source)

@@ -139,7 +139,7 @@ struct Fixture {
 async fn fixture(
   limits? : @town_portable_transfer.TransferLimits = @town_portable_transfer.default_limits(),
 ) -> Fixture {
-  let root = @fs.tmpdir(prefix="moontown-package-http-")
+  let root = @fs.realpath(@fs.tmpdir(prefix="moontown-package-http-"))
   let clock = Ref(500UL)
   let mut state = @account_system.empty_account_state()
   for

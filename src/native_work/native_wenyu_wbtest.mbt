@@ -377,7 +377,7 @@ test "wenyu rejects absent failed stale or unattributed evidence and all no chan
 
 ///|
 async test "wenyu queue deduplicates exact key and preserves separate goals tasks and generations" {
-  let root = @fsx.mkdtemp("/tmp/town-wenyu-queue-XXXXXX")
+  let root = @fs.realpath(@fsx.mkdtemp("/tmp/town-wenyu-queue-XXXXXX"))
   let request = wenyu_fixture_request(root~)
   let path = root + "/state.json"
   let first = enqueue(request, path~)
@@ -409,7 +409,7 @@ async test "wenyu queue deduplicates exact key and preserves separate goals task
 
 ///|
 async test "wenyu unreserved cancellation records no native execution and never imports a Book" {
-  let root = @fsx.mkdtemp("/tmp/town-wenyu-cancel-XXXXXX")
+  let root = @fs.realpath(@fsx.mkdtemp("/tmp/town-wenyu-cancel-XXXXXX"))
   let request = wenyu_fixture_request(root~)
   let path = root + "/state.json"
   let queued = enqueue(request, path~)
@@ -507,7 +507,7 @@ test "wenyu failure receipt preserves partial source and raw failed evidence wit
 
 ///|
 async test "wenyu completed result cannot write a PlanBook owner result" {
-  let root = @fsx.mkdtemp("/tmp/town-wenyu-owner-result-XXXXXX")
+  let root = @fs.realpath(@fsx.mkdtemp("/tmp/town-wenyu-owner-result-XXXXXX"))
   let work = wenyu_fixture_reserved(wenyu_fixture_request(root~))
   let completed = reconcile_repair_evidence(
     work,

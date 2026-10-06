@@ -7,7 +7,7 @@ async fn editor_owner_fixture(
   no_change? : Bool = false,
   real_pipeline? : Bool = false,
 ) -> (Work, String) {
-  let root = @fsx.mkdtemp("/tmp/town-editor-owner-XXXXXX")
+  let root = @fs.realpath(@fsx.mkdtemp("/tmp/town-editor-owner-XXXXXX"))
   let base = wenyu_fixture_request(root~)
   @fs.mkdir(base.owner_workspace)
   @fs.mkdir(base.book_root)

@@ -1,6 +1,6 @@
 ///|
 async fn fixture_request() -> Request {
-  let root = @fsx.mkdtemp("/tmp/town-native-work-XXXXXX")
+  let root = @fs.realpath(@fsx.mkdtemp("/tmp/town-native-work-XXXXXX"))
   let owner = root + "/owner"
   let book = root + "/imported-book"
   let source = root + "/repository"

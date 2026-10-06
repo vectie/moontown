@@ -66,7 +66,7 @@ async fn wenyu_copy_retained_fixture(
 /// Git's bounded whitespace check, focused diff, and owner reconciliation are
 /// real; this test does not claim compiler or live-provider execution.
 async test "wenyu actual source mutation and bounded Git check reconcile through injected native sync" {
-  let root = @fsx.mkdtemp("/tmp/town-wenyu-real-source-XXXXXX")
+  let root = @fs.realpath(@fsx.mkdtemp("/tmp/town-wenyu-real-source-XXXXXX"))
   let retained = root + "/retained-baseline"
   wenyu_materialize_retained_fixture(retained)
   let request = wenyu_fixture_request(root~)

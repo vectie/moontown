@@ -1,6 +1,6 @@
 ///|
 async test "strict index corruption fails closed without replacing durable metadata" {
-  let root = @fs.tmpdir(prefix="town-store-index-")
+  let root = @fs.realpath(@fs.tmpdir(prefix="town-store-index-"))
   defer (@fs.rmdir(root, recursive=true) catch { _ => () })
   let store = portable_store(root, limits=test_limits())
   let bytes = b"durable exact bytes"
@@ -75,7 +75,7 @@ async test "strict index corruption fails closed without replacing durable metad
 
 ///|
 async test "managed namespace rejects symlinks directories and unsafe object names" {
-  let root = @fs.tmpdir(prefix="town-store-paths-")
+  let root = @fs.realpath(@fs.tmpdir(prefix="town-store-paths-"))
   defer (@fs.rmdir(root, recursive=true) catch { _ => () })
   let store = portable_store(root + "/private", limits=test_limits())
   let bytes = b"safe exact bytes"
@@ -145,7 +145,7 @@ async test "managed namespace rejects symlinks directories and unsafe object nam
 async test "commit index failures survive restart with no authorized orphan and preserve old repair receipt" {
   for repair in [false, true] {
     for failure in ["index_write", "index_rename"] {
-      let root = @fs.tmpdir(prefix="town-store-commit-")
+      let root = @fs.realpath(@fs.tmpdir(prefix="town-store-commit-"))
       defer (@fs.rmdir(root, recursive=true) catch { _ => () })
       let clean = portable_store(root, limits=test_limits())
       let bytes = b"commit durable bytes"
@@ -212,7 +212,7 @@ async test "commit index failures survive restart with no authorized orphan and 
 
 ///|
 async test "withdraw during active upload marks cleanup pending and cannot commit" {
-  let root = @fs.tmpdir(prefix="town-store-withdraw-active-")
+  let root = @fs.realpath(@fs.tmpdir(prefix="town-store-withdraw-active-"))
   defer (@fs.rmdir(root, recursive=true) catch { _ => () })
   let store = portable_store(root, limits=test_limits())
   let bytes = b"active withdrawn bytes"
@@ -266,7 +266,7 @@ async test "withdraw during active upload marks cleanup pending and cannot commi
 ///|
 async test "cancellation immediately after durable reservation releases accounting before retry" {
   for stop_at in ["index_committed", "part_create"] {
-    let root = @fs.tmpdir(prefix="town-store-cancel-reserve-")
+    let root = @fs.realpath(@fs.tmpdir(prefix="town-store-cancel-reserve-"))
     defer (@fs.rmdir(root, recursive=true) catch { _ => () })
     let bytes = b"reservation cancelled"
     let binding = test_binding(bytes, "listing-reserve-cancel")
