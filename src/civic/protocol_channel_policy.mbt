@@ -7,7 +7,11 @@ fn input_channels_for_service(
       ["resident_request", "profile_projection", "event_signal"]
     "policy-hall" =>
       ["resident_question", "official_source", "eligibility_context"]
-    "contest-express" => ["contest_call", "team_profile", "submission_draft"]
+    "contest-express" =>
+      [
+        "contest_call", "mayor_challenge", "team_profile", "submission_draft", "benchmark_material",
+        "evaluation_material",
+      ]
     "vitality-dashboard" =>
       ["daemon_event", "watcher_record", "worker_status", "projection_signal"]
     "physical-bridge" =>
@@ -28,7 +32,10 @@ fn output_channels_for_service(
     "policy-hall" =>
       ["cited_checklist", "eligibility_answer", "uncertainty_review"]
     "contest-express" =>
-      ["readiness_plan", "mock_judge_feedback", "revision_queue"]
+      [
+        "readiness_plan", "mock_judge_feedback", "revision_queue", "submission_receipt",
+        "evaluation_receipt", "leaderboard_projection",
+      ]
     "vitality-dashboard" =>
       ["health_digest", "recovery_item", "false_progress_note"]
     "physical-bridge" => ["handoff_packet", "confirmation_request", "blocker"]

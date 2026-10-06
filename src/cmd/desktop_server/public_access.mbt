@@ -25,11 +25,19 @@ async fn bounded_identity_text(reader : &@io.Reader, limit : Int) -> String? {
 
 ///|
 async fn public_operator_authorized(cookie : String) -> Bool {
+  match public_identity(cookie) {
+    Some(identity) => identity.is_operator
+    None => false
+  }
+}
+
+///|
+async fn public_identity(cookie : String) -> PublicIdentity? {
   guard !cookie.is_empty() &&
     cookie.length() <= 16384 &&
     env_value("MOONTOWN_IDENTITY_ENDPOINT") is Some(endpoint) &&
     env_value("MOONTOWN_IDENTITY_HOST") is Some(host) else {
-    return false
+    return None
   }
   let client = @http.Client(endpoint, headers={
     "Host": host,
@@ -41,23 +49,23 @@ async fn public_operator_authorized(cookie : String) -> Bool {
   })
   defer client.close()
   let response = client.get("/auth/session")
-  guard response.code == 200 else { return false }
+  guard response.code == 200 else { return None }
   guard bounded_identity_text(client, 16384) is Some(session_text) else {
-    return false
+    return None
   }
   let session = @json.parse(session_text)
   guard session is { "session_token": String(bearer), .. } &&
     bearer.has_prefix("lnxs_") else {
-    return false
+    return None
   }
   let account_response = client.get("/v1/auth/self", extra_headers={
     "Authorization": "Bearer " + bearer,
   })
-  guard account_response.code == 200 else { return false }
+  guard account_response.code == 200 else { return None }
   guard bounded_identity_text(client, 65536) is Some(account_text) else {
-    return false
+    return None
   }
-  active_platform_operator(@json.parse(account_text))
+  parse_public_identity(@json.parse(account_text))
 }
 
 ///|
@@ -65,6 +73,7 @@ async fn public_password_login(
   request : @http.Request,
   body : &@io.Reader,
   conn : @http.ServerConnection,
+  audience? : String = "operator",
 ) -> Unit {
   if reject_unsafe_operator_write(request, conn) {
     return
@@ -93,7 +102,7 @@ async fn public_password_login(
   let payload : Json = {
     "username": username,
     "password": password,
-    "audience": "operator",
+    "audience": audience,
   }
   let response = client.post(
     "/auth/password",
@@ -109,8 +118,16 @@ async fn public_password_login(
     })
   }
   let cookie = response.cookies.map(c => c.name + "=" + c.value).join("; ")
-  guard public_operator_authorized(cookie) else {
-    return send_json(conn, 403, { "error": "active PlatformOperator required" })
+  let identity = public_identity(cookie)
+  guard identity is Some(principal) &&
+    (if audience == "operator" {
+      principal.is_operator
+    } else {
+      principal.is_operator || principal.is_enterprise_user
+    }) else {
+    return send_json(conn, 403, {
+      "error": "active account with required role needed",
+    })
   }
   conn.send_response(200, "OK", cookies=response.cookies, extra_headers={
     "Content-Type": "application/json",
@@ -137,9 +154,25 @@ async fn public_access_gate(
     send_json(conn, 403, { "error": "same-origin request required" })
     return true
   }
-  if request_path(request) == "/auth/password" {
-    @async.with_timeout(15000, () => public_password_login(request, body, conn)) catch {
+  if request_path(request) == "/auth/password" ||
+    request_path(request) == "/auth/hackathon-password" {
+    let audience = if request_path(request) == "/auth/password" {
+      "operator"
+    } else {
+      "enterprise"
+    }
+    @async.with_timeout(15000, () => {
+      public_password_login(request, body, conn, audience~)
+    }) catch {
       _ => send_json(conn, 503, { "error": "identity unavailable" })
+    }
+    return true
+  }
+  if hackathon_public_path(request_path(request)) {
+    @async.with_timeout(10000, () => {
+      public_hackathon_request(request, body, conn)
+    }) catch {
+      _ => send_json(conn, 503, { "error": "hackathon unavailable" })
     }
     return true
   }

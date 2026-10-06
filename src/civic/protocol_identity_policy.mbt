@@ -19,7 +19,7 @@ fn social_responsibility_for_service(
     "policy-hall" =>
       "Source-backed policy help that separates cited facts from interpretation."
     "contest-express" =>
-      "Competition readiness coaching, submission review, and team preparation."
+      "Mayor challenges, team preparation, submission review, evidence-backed evaluation, and receipt-derived standings."
     "vitality-dashboard" =>
       "Town vitality accounting that separates real progress from operational noise."
     "physical-bridge" => "Confirmation-gated virtual-to-real service handoff."

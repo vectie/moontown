@@ -79,6 +79,15 @@ fn render_quest_card(quest : CivicQuestSim) -> @rabbita.Html {
     p("Reward: \{quest.reward}"),
     p(class="quest-detail", quest.detail),
     p(class="quest-next", "Next: \{quest.next_action}"),
+    if quest.area == "Contest Express" {
+      a(
+        href="./hackathon.html",
+        class="quest-next",
+        "Open hackathon workbench ↗",
+      )
+    } else {
+      span("")
+    },
     span(class="module-signal \{quest.status_class}", quest.status),
   ])
 }

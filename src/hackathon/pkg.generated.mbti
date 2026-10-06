@@ -1,0 +1,113 @@
+// Generated using `moon info`, DON'T EDIT IT
+package "vectie/moontown/hackathon"
+
+import {
+  "moonbitlang/core/debug",
+  "moonbitlang/core/json",
+}
+
+// Values
+pub async fn apply_hackathon_action(String, Json, UInt64, path? : String) -> HackathonState
+
+pub fn default_hackathon_path() -> String
+
+pub fn empty_hackathon_state() -> HackathonState
+
+pub fn join_team(HackathonState, String, String) -> HackathonState raise
+
+pub fn leaderboard(HackathonState, String) -> Array[LeaderboardEntry]
+
+pub async fn load_hackathons(path? : String) -> HackathonState
+
+pub fn publish_challenge(HackathonState, Challenge) -> HackathonState raise
+
+pub fn record_evaluation(HackathonState, Evaluation) -> HackathonState raise
+
+pub fn register_team(HackathonState, Team) -> HackathonState raise
+
+pub fn revise_benchmark(HackathonState, String, Array[String], Array[String], Array[RubricCriterion]) -> HackathonState raise
+
+pub fn submit_solution(HackathonState, Submission) -> HackathonState raise
+
+// Errors
+
+// Types and methods
+type BenchmarkRevision derive(@json.FromJson)
+
+pub struct Challenge {
+  id : String
+  name : String
+  topic : String
+  scope : String
+  possibility_wiki : String
+  first_person_solution : String
+  deadline_ms : UInt64
+  benchmark_version : Int
+  benchmark_materials : Array[String]
+  evaluation_materials : Array[String]
+  rubric : Array[RubricCriterion]
+  published : Bool
+} derive(ToJson, @debug.Debug, @json.FromJson)
+
+pub struct CriterionScore {
+  criterion_id : String
+  points : Int
+  evidence : String
+} derive(ToJson, @debug.Debug, @json.FromJson)
+
+pub struct Evaluation {
+  submission_id : String
+  benchmark_version : Int
+  reviewer : String
+  scores : Array[CriterionScore]
+  total : Int
+  evaluated_ms : UInt64
+} derive(ToJson, @debug.Debug, @json.FromJson)
+
+pub struct HackathonState {
+  schema : String
+  revision : Int
+  challenges : Array[Challenge]
+  challenge_history : Array[Challenge]
+  teams : Array[Team]
+  submissions : Array[Submission]
+  evaluations : Array[Evaluation]
+} derive(ToJson, @debug.Debug, @json.FromJson)
+
+type JoinTeamRequest derive(@json.FromJson)
+
+pub struct LeaderboardEntry {
+  rank : Int
+  team_id : String
+  team_name : String
+  submission_id : String
+  total : Int
+  evaluated_ms : UInt64
+} derive(ToJson, @debug.Debug, @json.FromJson)
+
+pub struct RubricCriterion {
+  id : String
+  label : String
+  max_points : Int
+} derive(ToJson, @debug.Debug, @json.FromJson)
+
+pub struct Submission {
+  id : String
+  challenge_id : String
+  team_id : String
+  version : Int
+  artifact_url : String
+  first_person_solution : String
+  submitted_ms : UInt64
+} derive(ToJson, @debug.Debug, @json.FromJson)
+
+pub struct Team {
+  id : String
+  challenge_id : String
+  name : String
+  members : Array[String]
+} derive(ToJson, @debug.Debug, @json.FromJson)
+
+// Type aliases
+
+// Traits

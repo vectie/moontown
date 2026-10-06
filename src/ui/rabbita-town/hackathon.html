@@ -1,0 +1,148 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+  <meta name="description" content="Contest Express challenges, teams, submissions, reviews, and the live Champion Wall in MoonTown.">
+  <title>Contest Express · MoonTown</title>
+  <link rel="stylesheet" href="/hackathon.css">
+  <script type="module" src="/hackathon.js"></script>
+</head>
+<body>
+  <a class="skip-link" href="#main">Skip to Contest Express</a>
+  <header class="site-header">
+    <a class="town-link" href="/index.html">← MoonTown · Energy Valley</a>
+    <span class="site-wordmark">Contest Express <span aria-hidden="true">✦</span></span>
+    <nav aria-label="Contest Express areas">
+      <a href="#challenge">Challenge</a>
+      <a href="#teams">Teams</a>
+      <a href="#reviews">Review</a>
+      <a href="#mayor">Mayor desk</a>
+    </nav>
+  </header>
+
+  <main id="main" class="page-shell">
+    <section class="hero" aria-labelledby="page-title">
+      <div>
+        <p class="eyebrow">Energy Valley / Contest Express</p>
+        <h1 id="page-title">Build together.<br><em>Show your work.</em></h1>
+        <p class="hero-copy">The Mayor publishes a question. Teams build a first person solution, submit an artifact, and learn from a shared benchmark. The Champion Wall follows each completed review.</p>
+        <div class="hero-actions">
+          <a class="button button-primary" href="#teams">Join a team</a>
+          <a class="button button-light" href="#leaderboard">See Champion Wall</a>
+        </div>
+      </div>
+      <div class="hero-mark" aria-hidden="true"><span>CE</span><small>OPEN<br>CHALLENGE</small></div>
+    </section>
+
+    <div class="live-strip" role="status" aria-live="polite">
+      <span class="live-dot" aria-hidden="true"></span>
+      <span id="sync-status">Connecting to Contest Express…</span>
+      <button id="refresh-button" class="text-button" type="button">Refresh now</button>
+    </div>
+
+    <section id="challenge" class="workspace-section" aria-labelledby="challenge-title">
+      <div class="section-heading">
+        <div><p class="eyebrow">01 / The brief</p><h2 id="challenge-title">Open challenge</h2></div>
+        <label class="picker-label" for="challenge-select">Choose challenge <select id="challenge-select"></select></label>
+      </div>
+      <div id="challenge-detail" class="card empty-state">The Mayor has not published a challenge yet.</div>
+    </section>
+
+    <section id="leaderboard" class="workspace-section" aria-labelledby="leaderboard-title">
+      <div class="section-heading"><div><p class="eyebrow">02 / Champion Wall</p><h2 id="leaderboard-title">Live leaderboard</h2></div><span id="leaderboard-version" class="version-tag"></span></div>
+      <p class="section-intro">A team appears after its submission receives a complete review. The strongest current benchmark score leads; equal scores favor the earlier review.</p>
+      <div id="leaderboard-content" class="card empty-state">No scored submissions yet.</div>
+    </section>
+
+    <section id="teams" class="workspace-section" aria-labelledby="teams-title">
+      <div class="section-heading"><div><p class="eyebrow">03 / Build in public</p><h2 id="teams-title">Team workbench</h2></div></div>
+      <div class="two-column">
+        <article class="card form-card">
+          <h3>Gather a team</h3><p class="card-intro">Give your crew a stable ID and list the people building together.</p>
+          <form id="team-form">
+            <label>Team ID <small>Lowercase letters, numbers, hyphens</small><input name="id" required pattern="[a-z0-9-]+" maxlength="64" placeholder="harbor-builders"></label>
+            <label>Team name<input name="name" required maxlength="120" placeholder="Harbor Builders"></label>
+            <label>Members <small>One name per line</small><textarea name="members" required rows="4" placeholder="Ari\nMei"></textarea></label>
+            <button class="button button-primary" type="submit">Register team</button>
+          </form>
+          <p id="team-feedback" class="form-feedback" role="status" aria-live="polite"></p>
+        </article>
+        <article class="card form-card">
+          <h3>Submit a solution</h3><p class="card-intro">Share a public artifact and explain what your team actually built in your own voice.</p>
+          <form id="submission-form">
+            <label>Registered team<select name="team_id" id="submission-team" required></select></label>
+            <label>Artifact URL<input name="artifact_url" required type="url" placeholder="https://example.org/demo"></label>
+            <label>First person solution<textarea name="first_person_solution" required rows="5" placeholder="We tested… We learned… Our next step is…"></textarea></label>
+            <button class="button button-primary" type="submit">Submit solution</button>
+          </form>
+          <p id="submission-feedback" class="form-feedback" role="status" aria-live="polite"></p>
+        </article>
+      </div>
+      <article class="card form-card join-card">
+        <h3>Join an existing team</h3>
+        <p class="card-intro">Add yourself to a crew already building for this challenge.</p>
+        <form id="join-form">
+          <label>Team<select name="team_id" id="join-team" required></select></label>
+          <label>Member ID <small>Your account ID</small><input name="member_id" required placeholder="your-account-id"></label>
+          <button class="button button-light" type="submit">Join team</button>
+        </form>
+        <p id="join-feedback" class="form-feedback" role="status" aria-live="polite"></p>
+      </article>
+      <div id="team-list" class="team-list" aria-live="polite"></div>
+    </section>
+
+    <section id="reviews" class="workspace-section" aria-labelledby="reviews-title" hidden>
+      <div class="section-heading"><div><p class="eyebrow">04 / Evidence into feedback</p><h2 id="reviews-title">Review desk</h2></div></div>
+      <div class="two-column review-layout">
+        <article class="card form-card">
+          <h3>Evaluate a submission</h3><p class="card-intro">Score each criterion against the Mayor’s current benchmark. Cite evidence for every score.</p>
+          <form id="evaluation-form">
+            <label>Submission<select name="submission_id" id="evaluation-submission" required></select></label>
+            <label>Reviewer name<input name="reviewer" required placeholder="Your name"></label>
+            <div id="score-fields" class="score-fields"></div>
+            <button class="button button-primary" type="submit">Record evaluation</button>
+          </form>
+          <p id="evaluation-feedback" class="form-feedback" role="status" aria-live="polite"></p>
+        </article>
+        <aside class="card review-context"><h3>Evaluation materials</h3><div id="review-materials" class="empty-state">Select a challenge to see its materials and scoring guide.</div></aside>
+      </div>
+    </section>
+
+    <section id="mayor" class="workspace-section" aria-labelledby="mayor-title" hidden>
+      <div class="section-heading"><div><p class="eyebrow">05 / Mayor desk</p><h2 id="mayor-title">Set the challenge</h2></div></div>
+      <p class="section-intro">Publish the public brief before teams join. Revising benchmark materials starts a new score version; earlier reviews remain in the record, while the Champion Wall waits for current reviews.</p>
+      <div class="two-column">
+        <article class="card form-card">
+          <h3>Publish a challenge</h3>
+          <form id="publish-form">
+            <label>Challenge ID <small>Lowercase letters, numbers, hyphens</small><input name="id" required pattern="[a-z0-9-]+" maxlength="64" placeholder="clean-harbor-2026"></label>
+            <label>Name<input name="name" required placeholder="Clean Harbor Sprint"></label>
+            <label>Topic<input name="topic" required placeholder="How might we…"></label>
+            <label>Scope<textarea name="scope" required rows="3" placeholder="What is in scope, and what is out?"></textarea></label>
+            <label>Possibility wiki<textarea name="possibility_wiki" required rows="3" placeholder="Background, references, and promising possibilities"></textarea></label>
+            <label>First person solution prompt<textarea name="first_person_solution" required rows="3" placeholder="I will… We believe…"></textarea></label>
+            <label>Submission deadline<input name="deadline" required type="datetime-local"></label>
+            <label>Benchmark materials <small>One link or item per line</small><textarea name="benchmark_materials" required rows="3"></textarea></label>
+            <label>Evaluation materials <small>One link or item per line</small><textarea name="evaluation_materials" required rows="3"></textarea></label>
+            <label>Scoring rubric <small>One criterion per line: id | Label | Max points</small><textarea name="rubric" required rows="4" placeholder="impact | Community impact | 40&#10;proof | Evidence quality | 30&#10;craft | Prototype quality | 30"></textarea></label>
+            <button class="button button-primary" type="submit">Publish challenge</button>
+          </form>
+          <p id="publish-feedback" class="form-feedback" role="status" aria-live="polite"></p>
+        </article>
+        <article class="card form-card">
+          <h3>Revise the benchmark</h3><p class="card-intro">Applies to the selected challenge. Include the full current set of materials and criteria.</p>
+          <form id="benchmark-form">
+            <label>Benchmark materials <small>One link or item per line</small><textarea name="benchmark_materials" required rows="4"></textarea></label>
+            <label>Evaluation materials <small>One link or item per line</small><textarea name="evaluation_materials" required rows="4"></textarea></label>
+            <label>Scoring rubric <small>One criterion per line: id | Label | Max points</small><textarea name="rubric" required rows="5"></textarea></label>
+            <button class="button button-light" type="submit">Publish benchmark revision</button>
+          </form>
+          <p id="benchmark-feedback" class="form-feedback" role="status" aria-live="polite"></p>
+        </article>
+      </div>
+    </section>
+  </main>
+  <footer class="site-footer"><span>MoonTown · Contest Express</span><a href="/index.html">Return to Energy Valley ↗</a></footer>
+</body>
+</html>
