@@ -108,7 +108,17 @@ pub async fn book_state_snapshot(
     ["state", entry.workspace_root],
     moonbook_root~,
   )
-  @json.from_json(json)
+  decode_book_state_snapshot(json)
+}
+
+///|
+fn decode_book_state_snapshot(json : Json) -> BookStateSnapshot raise {
+  let snapshot : BookStateSnapshot = @json.from_json(json)
+  if !valid_generated_at_millis(snapshot.generated_at) ||
+    !valid_generated_at_millis(snapshot.knowledge.generated_at) {
+    fail("MoonBook generated_at must be an exact numeric epoch millisecond")
+  }
+  snapshot
 }
 
 ///|
