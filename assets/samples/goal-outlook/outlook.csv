@@ -1,0 +1,5 @@
+"source_position","goal_id_json","title_json","target_book_id_json","state","cadence_ticks","effective_cadence_ticks","next_due_tick","occurrence_count","occurrence_ticks_json","start_tick","end_tick_exclusive","source_digest"
+"1","""watch-customer""","""=Customer launch, 中文""","""research-customer""","due_now","60","60","240","6","[240,300,360,420,480,540]","240","600","sha256:07f75ce0daabb161edf2d3247f6efab1e03bac0ee8b25ba6e2eaed55e990a1b7"
+"2","""watch-paused""","""Paused market review""","null","paused","120","120","360","0","[]","240","600","sha256:07f75ce0daabb161edf2d3247f6efab1e03bac0ee8b25ba6e2eaed55e990a1b7"
+"3","""watch-unassigned""","""Literal empty Book ID""","""""","paused","60","60","0","0","[]","240","600","sha256:07f75ce0daabb161edf2d3247f6efab1e03bac0ee8b25ba6e2eaed55e990a1b7"
+"4","""watch-market""","""=Market, \""中文\""\nsecond line""","""research-customer""","due_now","90","90","240","4","[240,330,420,510]","240","600","sha256:07f75ce0daabb161edf2d3247f6efab1e03bac0ee8b25ba6e2eaed55e990a1b7"

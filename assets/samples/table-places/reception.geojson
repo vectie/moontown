@@ -1,0 +1,77 @@
+{
+  "type": "FeatureCollection",
+  "features": [
+    {
+      "type": "Feature",
+      "id": "table-row-1",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          116.41,
+          40.11
+        ]
+      },
+      "properties": {
+        "name": "Welcome Pavilion",
+        "category": "reception",
+        "source_table": {
+          "data_row": 1,
+          "headers": [
+            "Place",
+            "North",
+            "East",
+            "Type",
+            "Contact",
+            "Note",
+            "Note"
+          ],
+          "cells": [
+            "Welcome Pavilion",
+            "40.110",
+            "116.410",
+            "reception",
+            "001",
+            "Meet, outside",
+            "wheelchair entrance"
+          ]
+        }
+      }
+    },
+    {
+      "type": "Feature",
+      "id": "table-row-3",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          116.405,
+          40.108
+        ]
+      },
+      "properties": {
+        "name": "West Gate",
+        "category": "reception",
+        "source_table": {
+          "data_row": 3,
+          "headers": [
+            "Place",
+            "North",
+            "East",
+            "Type",
+            "Contact",
+            "Note",
+            "Note"
+          ],
+          "cells": [
+            "West Gate",
+            "40.108",
+            "116.405",
+            "reception",
+            "003",
+            "Line one\nLine two",
+            "=KEEP_AS_TEXT"
+          ]
+        }
+      }
+    }
+  ]
+}

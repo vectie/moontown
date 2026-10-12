@@ -326,3 +326,15 @@ Also update UI-local docs when relevant:
 
 - [src/ui/rabbita-town/README.md](/Users/kq/Workspace/moontown/src/ui/rabbita-town/README.md)
 - [src/ui/assets/README.md](/Users/kq/Workspace/moontown/src/ui/assets/README.md)
+
+## Node mini-app development fixture recovery
+
+The dependency-free `scripts/miniapp-local-backend.mjs` development fixture now
+supports finding and restoring archived buildings without editing saved JSON.
+See [the exact HTTP workflow and local-only limits](MINIAPP_ARCHIVE_RECOVERY.md).
+It remains separate from the native adapters described above and does not prove
+canonical MoonTown/MoonBook execution or acceptance.
+
+## Node mini-app building review packets
+
+The existing local service exposes source-bound read-only packet downloads, discoverable in snapshot/archive responses. See [the user workflow and route contract](MINIAPP_REVIEW_PACKETS.md). Run `node --test scripts/miniapp-review-packet.test.mjs scripts/miniapp-archive-recovery.test.mjs scripts/miniapp-session-retention.test.mjs` for the focused dependency-free lane. This does not qualify the native adapter or a Bunnia client.

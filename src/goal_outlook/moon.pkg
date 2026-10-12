@@ -1,0 +1,7 @@
+import {
+  "vectie/moontown/core",
+  "vectie/moontown/goal_table",
+  "moonbitlang/core/json",
+  "moonbitlang/core/encoding/utf8",
+  "moonbitlang/x/crypto",
+}

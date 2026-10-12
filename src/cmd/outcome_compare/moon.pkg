@@ -1,0 +1,15 @@
+import {
+  "moonbitlang/async",
+  "moonbitlang/async/fs",
+  "moonbitlang/async/stdio",
+  "moonbitlang/core/env",
+  "moonbitlang/core/json",
+  "moonbitlang/core/encoding/utf8",
+  "moonbitlang/x/sys",
+  "vectie/moontown/collaboration_authoring" @authoring,
+  "vectie/moontown/collaboration_contract" @contract,
+}
+
+supported_targets = "native"
+
+pkgtype(kind: "executable")

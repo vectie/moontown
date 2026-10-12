@@ -1,0 +1,10 @@
+name,latitude,longitude,category,note,note
+Welcome Pavilion,1,1,reception,001,"Meet, outside"
+West Gate,5,0,reception,002,On exterior edge
+Courtyard,5,5,rest,003,Inside excluded hole
+Shared Gallery,1,9,culture,004,"line one
+line two"
+Outside Hall,20,20,venue,005,Unassigned
+Hole Edge,5,3,venue,006,Excluded hole edge
+Corner,10,10,venue,007,Two district boundaries
+=South Gate,-1,-2,@venue,008,Negative coordinates

@@ -1,0 +1,6 @@
+﻿goal_id	period_start	period_end	outcome	manual_period_start	manual_period_end	manual_minutes	review_minutes	supervision_minutes	followup_minutes	note
+watch-customer	2026-10-01	2026-10-08	Review five launch sources	2026-09-01	2026-09-08	60	10	5	5	Manually timed comparable source set
+watch-market	2026-10-01	2026-10-08	Review market assumption				5	5	5	Manual baseline was not measured
+watch-customer	2026-10-08	2026-10-15	Review five launch sources	2026-09-08	2026-09-15	10	10	5	5	"Second comparison
+Includes handoff time"
+watch-heavy	2026-10-01	2026-10-08	Review two procurement changes	2026-09-01	2026-09-08	5	10	5	2	Town effort was higher

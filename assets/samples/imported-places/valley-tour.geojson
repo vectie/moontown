@@ -1,0 +1,9 @@
+{
+  "type": "FeatureCollection",
+  "features": [
+    {"type":"Feature","id":"welcome","properties":{"name":"Welcome Pavilion","category":"reception","note":"Synthetic visitor meeting point"},"geometry":{"type":"Point","coordinates":[116.4500,40.0800]}},
+    {"type":"Feature","id":"cafe","properties":{"name":"River Cafe / 河畔咖啡","category":"social","access":"Step-free entrance"},"geometry":{"type":"Point","coordinates":[116.4520,40.0810]}},
+    {"type":"Feature","id":"gallery","properties":{"name":"Talent Gallery","category":"reception","note":"Prototype exhibit and demo stop"},"geometry":{"type":"Point","coordinates":[116.4540,40.0820,12]}},
+    {"type":"Feature","id":"tour","properties":{"name":"Reception walking route","category":"reception","note":"Supplied sketch; verify on site. Not navigation."},"geometry":{"type":"LineString","coordinates":[[116.4500,40.0800],[116.4520,40.0810],[116.4540,40.0820]]}}
+  ]
+}

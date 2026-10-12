@@ -1,0 +1,13 @@
+{
+  "type": "FeatureCollection",
+  "name": "Synthetic reception district, not a real boundary",
+  "features": [
+    {"type":"Feature","id":"north-zone","properties":{"name":"North reception zone","category":"district","source_note":"Synthetic operator-supplied boundary"},"geometry":{"type":"Polygon","coordinates":[[[116,40],[117,40],[117,41],[116,41],[116,40]],[[116.4,40.4],[116.6,40.4],[116.6,40.6],[116.4,40.6],[116.4,40.4]]]}},
+    {"type":"Feature","id":"welcome","properties":{"name":"Welcome Pavilion","category":"reception"},"geometry":{"type":"Point","coordinates":[116.2,40.2,18]}},
+    {"type":"Feature","id":"gate","properties":{"name":"West Gate","category":"reception"},"geometry":{"type":"Point","coordinates":[116,40.5]}},
+    {"type":"Feature","id":"courtyard","properties":{"name":"Private Courtyard","category":"reception"},"geometry":{"type":"Point","coordinates":[116.5,40.5]}},
+    {"type":"Feature","id":"outside","properties":{"name":"South Annex","category":"reception"},"geometry":{"type":"Point","coordinates":[116.2,39.8]}},
+    {"type":"Feature","id":"gallery","properties":{"name":"Talent Gallery","category":"culture"},"geometry":{"type":"Point","coordinates":[116.8,40.8]}},
+    {"type":"Feature","id":"walk","properties":{"name":"Reception Walk","category":"reception"},"geometry":{"type":"LineString","coordinates":[[116.2,40.2],[116.8,40.8]]}}
+  ]
+}

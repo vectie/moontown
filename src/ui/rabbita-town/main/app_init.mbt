@@ -29,6 +29,7 @@ fn initial_request_composer() -> RequestComposerFocus {
   match current_browser_query_param("request") {
     "watch" => RequestComposerFocus::StandingWatchComposer
     "book" => RequestComposerFocus::EvidenceBookComposer
+    "collaboration" => RequestComposerFocus::CollaborationComposer
     _ => RequestComposerFocus::RequestShortcuts
   }
 }
@@ -110,6 +111,7 @@ fn init_model() -> Model {
     state_source: initial_state_source(),
     dashboard_section: initial_dashboard_section(),
     request_composer: initial_request_composer(),
+    collaboration: @collaboration.Client::new(),
     projection_snapshot,
     snapshot_version: town_snapshot_version(),
     energy_valley_runtime,

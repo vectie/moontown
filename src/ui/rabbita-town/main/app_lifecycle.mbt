@@ -67,7 +67,23 @@ fn update_non_form_message(
     msg,
     imported_outputs_reconcile_primary_surface(model),
   )
-  (command, imported_outputs_reconcile_primary_surface(next))
+  let next = imported_outputs_reconcile_primary_surface(next)
+  // A newer primary surface invalidates stale collaboration callbacks and
+  // browser download completion, without deleting an already saved draft.
+  if model.collaboration.busy() &&
+    (
+      next.request_composer != CollaborationComposer ||
+      (model.energy_request_open && !next.energy_request_open)
+    ) &&
+    next.collaboration.generation == model.collaboration.generation {
+    let (cancel, fenced) = collaboration_replace(
+      next,
+      next.collaboration.dismiss(),
+    )
+    (@rabbita.batch([command, cancel]), fenced)
+  } else {
+    (command, next)
+  }
 }
 
 ///|
@@ -77,6 +93,60 @@ fn update_non_form_message_before_imported_surface_fence(
   model : Model,
 ) -> (Cmd, Model) {
   match msg {
+    CollaborationEdit(field, value) =>
+      collaboration_replace(model, model.collaboration.edit(field, value))
+    CollaborationParticipantEdit(id, field, value) =>
+      collaboration_replace(
+        model,
+        model.collaboration.edit_participant(id, field, value),
+      )
+    CollaborationToggleBook(id) =>
+      collaboration_replace(model, model.collaboration.toggle_book(id))
+    CollaborationBrowseSources(id) =>
+      collaboration_action(
+        dispatch,
+        { ..model, collaboration: model.collaboration.select_source_book(id), },
+        "source-list",
+        id,
+        "",
+      )
+    CollaborationToggleSource(path) =>
+      collaboration_replace(model, model.collaboration.toggle_source(path))
+    CollaborationReset =>
+      collaboration_replace(model, model.collaboration.reset())
+    CollaborationAction(action) =>
+      collaboration_action(
+        dispatch,
+        model,
+        action,
+        model.collaboration.draft.draft_id,
+        model.collaboration.revision,
+      )
+    CollaborationOpen(id, revision) =>
+      collaboration_action(dispatch, model, "load", id, revision)
+    CollaborationReply(generation, action, raw) =>
+      collaboration_replace(
+        model,
+        model.collaboration.settle(generation, action, raw),
+      )
+    CollaborationDownload(path) => collaboration_download(dispatch, model, path)
+    CollaborationOutcomeOpen(key) =>
+      collaboration_action(
+        dispatch,
+        { ..model, collaboration: model.collaboration.select_outcome(key), },
+        "outcome-inspect",
+        key.draft_id,
+        key.revision,
+      )
+    CollaborationOutcomeDownload =>
+      collaboration_outcome_download(dispatch, model)
+    CollaborationCancel =>
+      collaboration_replace(model, model.collaboration.dismiss())
+    CollaborationDownloaded(generation, message) =>
+      collaboration_replace(
+        model,
+        model.collaboration.download_settled(generation, message),
+      )
     ImportedOutputsEvent(event) =>
       imported_outputs_update(dispatch, model, event)
     ImportedDownloadReceived(generation, download_generation, selection, result) =>
@@ -258,11 +328,10 @@ fn update_non_form_message_before_imported_surface_fence(
       }
     }
     CloseEnergyRequest =>
-      model_only_update({
-        ..model,
-        energy_request_open: false,
-        request_follow_result: false,
-      })
+      collaboration_replace(
+        { ..model, energy_request_open: false, request_follow_result: false, },
+        model.collaboration.dismiss(),
+      )
     ToggleResidentExplorer => {
       let opening = !model.resident_explorer_open
       if opening {
@@ -330,8 +399,24 @@ fn update_non_form_message_before_imported_surface_fence(
       model_only_update({ ..model, energy_selected_building: None, })
     SetDashboardSection(section) =>
       model_only_update(set_dashboard_section_model(model, section))
-    SetRequestComposer(focus) =>
-      model_only_update(set_request_composer_model(model, focus))
+    SetRequestComposer(focus) => {
+      let next = set_request_composer_model(model, focus)
+      if focus == CollaborationComposer {
+        if model.collaboration.busy() {
+          model_only_update(next)
+        } else {
+          collaboration_action(
+            dispatch,
+            next,
+            "list",
+            model.collaboration.draft.draft_id,
+            model.collaboration.revision,
+          )
+        }
+      } else {
+        collaboration_replace(next, model.collaboration.dismiss())
+      }
+    }
     SelectAgent(agent_id) =>
       model_only_update({
         ..close_town_transient_surfaces(model),

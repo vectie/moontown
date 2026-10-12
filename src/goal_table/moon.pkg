@@ -1,0 +1,7 @@
+import {
+  "vectie/moontown/core",
+  "vectie/moontown/imported_output_contract" @table,
+  "moonbitlang/core/json",
+  "moonbitlang/core/string",
+  "moonbitlang/core/encoding/utf8",
+}

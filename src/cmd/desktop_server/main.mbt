@@ -536,6 +536,10 @@ async fn handle_request(
   if public_access_gate(request, body, conn) {
     return
   }
+  if path == @town_contract.desktop_collaboration_path() {
+    handle_collaboration_api(request, body, conn)
+    return
+  }
   if path == "/api/contest-express/hackathons" {
     if request.meth is Get {
       let state = @hackathon.load_hackathons() catch {

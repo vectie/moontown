@@ -1,0 +1,2 @@
+// Shipped paired-source integration: see docs/COLLABORATION_COMPOSER.md.
+members = [ ".", "../moonchat" ]

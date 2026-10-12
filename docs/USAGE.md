@@ -1762,3 +1762,7 @@ If you want to:
   - start in [src/ui/rabbita-town/main/main.mbt](/Users/kq/Workspace/moontown/src/ui/rabbita-town/main/main.mbt)
 - change browser styling
   - start in [src/ui/rabbita-town/styles.css](/Users/kq/Workspace/moontown/src/ui/rabbita-town/styles.css)
+
+## Source-backed cross-book claim comparison
+
+Import explicit claim CSV/TSV and local source quotes into a readable Markdown or JSON comparison brief with `src/cmd/claim_compare`. [Workflow, example and limits](CLAIM_COMPARISON.md).

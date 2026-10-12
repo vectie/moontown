@@ -56,6 +56,13 @@ fn render_request_shortcuts(
         "Evidence book",
         "Queue",
       ),
+      render_request_action_button(
+        dispatch,
+        model,
+        RequestComposerFocus::CollaborationComposer,
+        "Collaboration",
+        "Compose",
+      ),
     ],
   )
 }
@@ -79,6 +86,10 @@ fn render_request_desk_workspace(
     EvidenceBookComposer =>
       div(id="request-composer-panel", class="request-desk-stack", [
         render_book_template_composer(dispatch, model),
+      ])
+    CollaborationComposer =>
+      div(id="request-composer-panel", class="request-desk-stack", [
+        render_collaboration_composer(dispatch, model.collaboration),
       ])
   }
 }

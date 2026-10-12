@@ -38,6 +38,10 @@ fn imported_outputs_cmd(
 ) -> Cmd {
   match request {
     None => @rabbita.none
+    Some(SaveFilteredTable(content, filename)) =>
+      @cmd.custom_cmd(_ => {
+        save_imported_output_download(@utf8.encode(content), filename)
+      })
     Some(FetchImportedCatalog(generation)) =>
       @rabbita.perform(
         raw => {

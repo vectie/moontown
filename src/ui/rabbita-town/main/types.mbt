@@ -70,6 +70,7 @@ priv enum RequestComposerFocus {
   RequestShortcuts
   StandingWatchComposer
   EvidenceBookComposer
+  CollaborationComposer
 } derive(Eq)
 
 ///|
@@ -267,6 +268,7 @@ priv struct Model {
   state_source : StateSourceKind
   dashboard_section : DashboardSection?
   request_composer : RequestComposerFocus
+  collaboration : @collaboration.Client
   projection_snapshot : ProjectionSnapshot?
   snapshot_version : Int
   energy_valley_runtime : EnergyValleyRuntimeState
@@ -459,6 +461,20 @@ priv enum Msg {
   CloseEnergyInspector
   SetDashboardSection(DashboardSection)
   SetRequestComposer(RequestComposerFocus)
+  CollaborationEdit(String, String)
+  CollaborationParticipantEdit(String, String, String)
+  CollaborationToggleBook(String)
+  CollaborationBrowseSources(String)
+  CollaborationToggleSource(String)
+  CollaborationReset
+  CollaborationAction(String)
+  CollaborationOpen(String, String)
+  CollaborationReply(Int, String, String)
+  CollaborationDownload(String)
+  CollaborationOutcomeOpen(@collaboration.OutcomeKey)
+  CollaborationOutcomeDownload
+  CollaborationCancel
+  CollaborationDownloaded(Int, String)
   SetRequestTitle(String)
   SetRequestPrompt(String)
   SetRequestBookId(String)

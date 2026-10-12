@@ -26,6 +26,14 @@ priv struct ImportedOutputsState {
   download_generation : Int
   download : ImportedOutputsDownloadState
   text : ImportedOutputsTextState
+  table : Result[@imported_output_contract.DataTable, String]?
+  table_query : String
+  table_page : Int
+  table_show : Bool
+  table_view : TableViewState
+  agenda : AgendaState
+  geo : GeoState
+  places : PlacesState
 } derive(Debug, Eq)
 
 ///|
@@ -37,6 +45,14 @@ priv enum ImportedOutputsMsg {
   ChooseImportedOutput(String)
   ChooseImportedFile(String)
   DownloadImportedFile
+  SearchImportedTable(String)
+  PageImportedTable(Int)
+  ShowImportedTable(Bool)
+  DownloadFilteredTable
+  TableViewEvent(TableViewMsg)
+  AgendaEvent(AgendaMsg)
+  GeoEvent(GeoMsg)
+  PlacesEvent(PlacesMsg)
   ImportedDownloadStatus(
     Int,
     Int,
@@ -53,6 +69,7 @@ priv enum ImportedOutputsRequest {
   FetchImportedCatalog(Int)
   FetchImportedDownload(Int, Int, @imported_output_contract.Selection)
   FetchImportedText(Int, @imported_output_contract.Selection)
+  SaveFilteredTable(String, String)
 } derive(Debug, Eq)
 
 ///|

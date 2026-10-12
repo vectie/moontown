@@ -1,0 +1,6 @@
+claim_id,book_id,topic,context,value,source_path,quote
+sales-launch,sales,launch month,October 2026 plan,November,sales.txt,Launch: November
+engineering-launch,engineering,launch month,October 2026 plan,December,engineering.txt,Launch: December
+sales-previous,sales,launch month,September 2026 plan,November,sales.txt,Prior September launch: November
+sales-region,sales,region,October 2026 plan,水,sales.txt,Region: 水
+engineering-region,engineering,region,October 2026 plan,水,engineering.txt,Region: 水

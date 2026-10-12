@@ -135,6 +135,10 @@ deployment, backups, auth, and multi-day recovery evidence.
 
 ## Current Capabilities
 
+- imported CSV/TSV output exploration with quoted/multiline cells, row search,
+  25-row paging and all-matching-row CSV export; exact source downloads remain
+  available. See [Imported data tables](docs/IMPORTED_DATA_TABLES.md).
+
 - source packages live under `src/`; root stays limited to metadata, docs,
   scripts, templates, and runtime state
 - `src/` root is a facade only; implementation files must live in named
@@ -885,3 +889,22 @@ Detailed docs:
 - [docs/PACKAGES.md](/Users/kq/Workspace/moontown/docs/PACKAGES.md)
 - [docs/FRONTEND.md](/Users/kq/Workspace/moontown/docs/FRONTEND.md)
 - [docs/DEVELOPMENT.md](/Users/kq/Workspace/moontown/docs/DEVELOPMENT.md)
+
+## Edit saved standing goals as CSV/TSV
+
+The local [`goal_table` workflow](docs/GOAL_TABLE.md) exports all current StandingGoal fields to an editable table and reimports a separate canonical JSON snapshot, preserving identities, due/run ticks and disabled state. It never installs a candidate or starts a daemon.
+
+## Source-backed cross-book claim comparison
+
+Import explicit claim CSV/TSV and local source quotes into a readable Markdown or JSON comparison brief with `src/cmd/claim_compare`. [Workflow, example and limits](docs/CLAIM_COMPARISON.md).
+
+## Explore and compare standing-goal schedules
+
+Use `src/cmd/goal_outlook` to inspect a bounded tick horizon and compare an edited `goal_table` candidate against its baseline. JSON shows chronological clustering; CSV preserves a row for every goal, including paused goals. This is an explicit cadence-only projection, never a daemon execution or wall-clock forecast. [Workflow and example](docs/GOAL_OUTLOOK.md).
+
+### Reviewed mini-app building profiles
+
+The existing local Node mini-app service supports [previewed profile corrections](docs/MINIAPP_BUILDING_PROFILE.md).
+Update a retained building's title, summary or search tags at its inspected
+version, then rediscover the same identity with its conversation intact. This
+fixture workflow does not qualify the native app or production identity service.

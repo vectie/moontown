@@ -14,6 +14,7 @@ import {
   "vectie/moontown/code_schedules",
   "vectie/moontown/native_work",
   "vectie/moontown/imported_outputs",
+  "vectie/moontown/collaboration_authoring",
   "vectie/moontown/build_pipeline_runtime",
   "vectie/moontown/support",
   "vectie/moontown/system_settings",

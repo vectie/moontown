@@ -1,0 +1,15 @@
+// Generated using `moon info`, DON'T EDIT IT
+package "vectie/moontown/claim_comparison"
+
+// Values
+pub fn report(Bytes, Char, Map[String, Bytes], format~ : String) -> Result[String, String]
+
+pub fn source_paths(Bytes, Char) -> Result[Array[String], String]
+
+// Errors
+
+// Types and methods
+
+// Type aliases
+
+// Traits

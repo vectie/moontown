@@ -1,0 +1,110 @@
+{
+  "type": "FeatureCollection",
+  "features": [
+    {
+      "type": "Feature",
+      "id": "reference",
+      "properties": null,
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          1,
+          1
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "id": "district",
+      "properties": {
+        "name": "=North",
+        "category": "district",
+        "original_note": "Synthetic zone with a hole"
+      },
+      "geometry": {
+        "type": "Polygon",
+        "coordinates": [
+          [
+            [
+              0,
+              0
+            ],
+            [
+              10,
+              0
+            ],
+            [
+              10,
+              10
+            ],
+            [
+              0,
+              10
+            ],
+            [
+              0,
+              0
+            ]
+          ],
+          [
+            [
+              3,
+              3
+            ],
+            [
+              7,
+              3
+            ],
+            [
+              7,
+              7
+            ],
+            [
+              3,
+              7
+            ],
+            [
+              3,
+              3
+            ]
+          ]
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "id": "district",
+      "properties": {
+        "name": "東区",
+        "category": "@district"
+      },
+      "geometry": {
+        "type": "Polygon",
+        "coordinates": [
+          [
+            [
+              8,
+              0
+            ],
+            [
+              12,
+              0
+            ],
+            [
+              12,
+              10
+            ],
+            [
+              8,
+              10
+            ],
+            [
+              8,
+              0
+            ]
+          ]
+        ]
+      }
+    }
+  ]
+}

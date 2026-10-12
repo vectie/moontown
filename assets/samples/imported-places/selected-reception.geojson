@@ -1,0 +1,65 @@
+{
+  "type": "FeatureCollection",
+  "features": [
+    {
+      "type": "Feature",
+      "id": "welcome",
+      "properties": {
+        "name": "Welcome Pavilion",
+        "category": "reception",
+        "note": "Synthetic visitor meeting point"
+      },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          116.45,
+          40.08
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "id": "gallery",
+      "properties": {
+        "name": "Talent Gallery",
+        "category": "reception",
+        "note": "Prototype exhibit and demo stop"
+      },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          116.454,
+          40.082,
+          12
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "id": "tour",
+      "properties": {
+        "name": "Reception walking route",
+        "category": "reception",
+        "note": "Supplied sketch; verify on site. Not navigation."
+      },
+      "geometry": {
+        "type": "LineString",
+        "coordinates": [
+          [
+            116.45,
+            40.08
+          ],
+          [
+            116.452,
+            40.081
+          ],
+          [
+            116.454,
+            40.082
+          ]
+        ]
+      }
+    }
+  ]
+}
+

@@ -3,18 +3,24 @@ import fs from "node:fs";
 import http from "node:http";
 import os from "node:os";
 import path from "node:path";
-import { URL } from "node:url";
+import { URL, pathToFileURL } from "node:url";
 import {
   MAX_MINIAPP_SESSIONS,
   authorizeMiniappRequest,
   pruneMiniappSessions,
 } from "./miniapp-session-retention.mjs";
 
+import { buildingReviewPacket, reviewPacketAction } from "./miniapp-review-packet.mjs";
+
+import { conversationSearch } from "./miniapp-conversation-search.mjs";
+import { runInbox, inspectRun } from "./miniapp-run-inbox.mjs";
+import { buildingProfile, profileEditAction } from "./miniapp-building-profile.mjs";
+
 const defaultPort = 18191;
 const durableKeys = ["users", "buildings", "placements", "agents", "threads", "messages", "runs", "auditEvents"];
 const now = () => Date.now();
 
-function initialState() {
+export function initialState() {
   return {
     sessions: new Map(),
     users: [
@@ -95,7 +101,7 @@ function parseArgs(argv) {
   return result;
 }
 
-function createServer(state = initialState(), persistState = null) {
+export function createServer(state = initialState(), persistState = null) {
   return http.createServer(async (req, res) => {
     const url = new URL(req.url || "/", "http://127.0.0.1");
     setCors(res);
@@ -108,6 +114,11 @@ function createServer(state = initialState(), persistState = null) {
       if (persistState && shouldPersist(req.method || "GET", url.pathname, response)) {
         persistState(state);
       }
+      if (response.headers) {
+        const isJson = typeof response.body !== "string" && !Buffer.isBuffer(response.body);
+        res.writeHead(response.status, { ...(isJson ? { "content-type": "application/json; charset=utf-8" } : {}), ...response.headers });
+        return res.end(isJson ? JSON.stringify(response.body) : response.body);
+      }
       return sendJson(res, response.status, response.body);
     } catch (error) {
       return sendJson(res, 500, { ok: false, kind: "server-error", error: String(error && error.message ? error.message : error) });
@@ -117,10 +128,12 @@ function createServer(state = initialState(), persistState = null) {
 
 function shouldPersist(method, pathName, response) {
   if (method !== "POST" || response.status < 200 || response.status >= 300) return false;
+  if (pathName === "/miniapp/buildings/profile/preview") return false;
+  if (pathName === "/miniapp/buildings/profile/apply" && response.body.changed === false) return false;
   return pathName !== "/miniapp/auth/dev-login";
 }
 
-function routeRequest(state, method, url, body, headers) {
+export function routeRequest(state, method, url, body, headers) {
   const path = url.pathname;
   if (method === "GET" && path === "/healthz") {
     return ok({ kind: "health", ok: true, service: "moontown-miniapp-local-backend" });
@@ -133,8 +146,32 @@ function routeRequest(state, method, url, body, headers) {
   if (method === "GET" && path === "/miniapp/town/snapshot") {
     return snapshot(state, session.userId);
   }
+  if (method === "GET" && path === "/miniapp/runs/inbox") {
+    return runInbox(state, session.userId, url.searchParams);
+  }
+  if (method === "GET" && path === "/miniapp/runs/inspect") {
+    return inspectRun(state, session.userId, url.searchParams);
+  }
+  if (method === "GET" && path === "/miniapp/conversations/search") {
+    return conversationSearch(state, session.userId, url.searchParams);
+  }
   if (method === "GET" && path === "/miniapp/buildings/search") {
     return searchBuildings(state, session.userId, url.searchParams.get("query") || body.query || "");
+  }
+  if (method === "GET" && path === "/miniapp/buildings/review-packet") {
+    return buildingReviewPacket(state, session.userId, url.searchParams);
+  }
+  if (method === "GET" && path === "/miniapp/buildings/archived") {
+    return archivedBuildings(state, session.userId, url.searchParams.get("query") || "");
+  }
+  if (method === "POST" && path === "/miniapp/buildings/profile/preview") {
+    return buildingProfile(state, session.userId, body);
+  }
+  if (method === "POST" && path === "/miniapp/buildings/profile/apply") {
+    return buildingProfile(state, session.userId, body, true);
+  }
+  if (method === "POST" && path === "/miniapp/buildings/restore") {
+    return restoreBuilding(state, session.userId, body);
   }
   if (method === "POST" && path === "/miniapp/buildings") {
     return createBuilding(state, session.userId, body);
@@ -214,8 +251,13 @@ function snapshot(state, userId) {
   return ok({
     ok: true,
     kind: "snapshot",
+    runInbox: { path: "/miniapp/runs/inbox", filters: ["status", "owner", "buildingId", "asOfMs", "minAgeMs"],
+      preview: runInbox(state, userId, new URLSearchParams({ limit: "5" })).body },
+    conversationSearch: { path: "/miniapp/conversations/search", queryRequired: true, filters: ["buildingId", "actorId", "case"] },
     userId,
     buildings,
+    reviewPackets: buildings.map((item) => reviewPacketAction(item, userId)).filter(Boolean),
+    profileEdits: buildings.map((item) => profileEditAction(item, userId)).filter(Boolean),
     placements: state.placements.filter((item) => buildingIds.has(item.buildingId)),
     agents: state.agents.filter((item) => !item.buildingId || buildingIds.has(item.buildingId)),
     threads,
@@ -295,6 +337,64 @@ function archiveBuilding(state, userId, body) {
   target.version += 1;
   audit(state, userId, "building", buildingId, "building.archived", "Building archived locally.");
   return ok({ ok: true, kind: "archive-building", building: target });
+}
+
+// Recovery is deliberately non-public, including for formerly published buildings.
+function restoreVisibility(target) {
+  return target.ownerId === "org-a" ? "shared_private" : "private_draft";
+}
+
+function archivedBuildings(state, userId, query) {
+  const normalized = query.trim().toLowerCase();
+  const results = state.buildings
+    .filter((item) => item.visibility === "archived" && canEdit(item, userId))
+    .filter((item) => !normalized || [item.id, item.title, ...item.tags]
+      .some((value) => value.toLowerCase().includes(normalized)))
+    .sort((left, right) => right.updatedAtMs - left.updatedAtMs ||
+      (left.id < right.id ? -1 : left.id > right.id ? 1 : 0))
+    .map((item) => {
+      const threadIds = new Set(state.threads
+        .filter((thread) => thread.buildingId === item.id).map((thread) => thread.id));
+      return {
+        building: item,
+        restoreVisibility: restoreVisibility(item),
+        reviewPacket: reviewPacketAction(item, userId),
+        profileEdit: profileEditAction(item, userId),
+        retained: {
+          placements: state.placements.filter((entry) => entry.buildingId === item.id).length,
+          agents: state.agents.filter((entry) => entry.buildingId === item.id).length,
+          threads: threadIds.size,
+          messages: state.messages.filter((entry) => threadIds.has(entry.threadId)).length,
+          runs: state.runs.filter((entry) => entry.buildingId === item.id).length,
+        },
+      };
+    });
+  return ok({ ok: true, kind: "archived-buildings", userId, query, results });
+}
+
+function restoreBuilding(state, userId, body) {
+  const buildingId = body.buildingId;
+  const expectedVersion = body.expectedVersion;
+  if (typeof buildingId !== "string" || !buildingId.trim() ||
+      !Number.isSafeInteger(expectedVersion) || expectedVersion < 1) {
+    return json(400, { ok: false, kind: "restore-building", reason: "building-id-and-version-required" });
+  }
+  const target = state.buildings.find((item) => item.id === buildingId);
+  if (!target || !canEdit(target, userId)) {
+    return json(404, { ok: false, kind: "restore-building", reason: "building-not-editable" });
+  }
+  if (target.visibility !== "archived") {
+    return json(409, { ok: false, kind: "restore-building", reason: "building-not-archived", buildingId });
+  }
+  if (target.version !== expectedVersion) {
+    return json(409, { ok: false, kind: "restore-building", reason: "building-version-changed", buildingId, currentVersion: target.version });
+  }
+  target.visibility = restoreVisibility(target);
+  target.updatedAtMs = now();
+  target.version += 1;
+  audit(state, userId, "building", buildingId, "building.restored",
+    `Archived building restored locally as ${target.visibility}; retained history preserved.`);
+  return ok({ ok: true, kind: "restore-building", building: target });
 }
 
 function createAgent(state, userId, body) {
@@ -394,7 +494,7 @@ function json(status, body) {
   return { status, body };
 }
 
-function loadState(statePath, resetState = false) {
+export function loadState(statePath, resetState = false) {
   const resolved = path.resolve(statePath);
   if (resetState && fs.existsSync(resolved)) {
     fs.unlinkSync(resolved);
@@ -408,7 +508,7 @@ function loadState(statePath, resetState = false) {
   return state;
 }
 
-function saveState(statePath, state) {
+export function saveState(statePath, state) {
   const resolved = path.resolve(statePath);
   fs.mkdirSync(path.dirname(resolved), { recursive: true });
   const tmpPath = `${resolved}.${process.pid}.tmp`;
@@ -503,15 +603,18 @@ async function post(url, body) {
   return response.json();
 }
 
-const args = parseArgs(process.argv.slice(2));
-if (args.smoke) {
-  await smoke(args.port, args.statePathExplicit ? args.statePath : "");
-} else {
-  const statePath = path.resolve(args.statePath);
-  const state = loadState(statePath, args.resetState);
-  createServer(state, (nextState) => saveState(statePath, nextState)).listen(args.port, "127.0.0.1", () => {
-    console.log(`moontown-miniapp-local-backend=http://127.0.0.1:${args.port}`);
-    console.log("wechat-devtools-backendBaseUrl=http://127.0.0.1:" + args.port);
-    console.log("moontown-miniapp-local-state=" + statePath);
-  });
+// Importing the service for focused tests does not bind a port or open state.
+if (process.argv[1] && import.meta.url === pathToFileURL(path.resolve(process.argv[1])).href) {
+  const args = parseArgs(process.argv.slice(2));
+  if (args.smoke) {
+    await smoke(args.port, args.statePathExplicit ? args.statePath : "");
+  } else {
+    const statePath = path.resolve(args.statePath);
+    const state = loadState(statePath, args.resetState);
+    createServer(state, (nextState) => saveState(statePath, nextState)).listen(args.port, "127.0.0.1", () => {
+      console.log(`moontown-miniapp-local-backend=http://127.0.0.1:${args.port}`);
+      console.log("wechat-devtools-backendBaseUrl=http://127.0.0.1:" + args.port);
+      console.log("moontown-miniapp-local-state=" + statePath);
+    });
+  }
 }

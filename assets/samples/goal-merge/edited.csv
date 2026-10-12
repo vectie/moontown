@@ -1,0 +1,4 @@
+id_json,title_json,prompt_json,target_book_id_json,cadence_ticks,next_due_tick,last_run_tick,enabled,source_policy_json,quality_threshold
+"""watch-customer""","""=客户 review, \""launch\""\n🌙""","""Review the launch assumption.\nCite the exact source.""","""research-customer""",120,240,180,false,"""local-material:plans/customer.json""",85
+"""watch-paused""","""Paused market review""","""Keep this intent for later""",null,120,360,null,false,"""""",80
+"""watch-unassigned""","""Literal empty Book ID""","""Retain an explicit empty target""","""""",60,0,0,false,"""""",80

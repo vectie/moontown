@@ -6,6 +6,8 @@ pub fn desktop_book_registration_path() -> String
 
 pub fn desktop_code_schedules_path() -> String
 
+pub fn desktop_collaboration_path() -> String
+
 pub fn desktop_contract() -> Json
 
 pub fn desktop_contract_path() -> String

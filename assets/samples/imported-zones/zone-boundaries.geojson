@@ -1,0 +1,64 @@
+{
+  "type": "FeatureCollection",
+  "features": [
+    {
+      "type": "Feature",
+      "id": "north-zone",
+      "properties": {
+        "name": "North reception zone",
+        "category": "district",
+        "source_note": "Synthetic operator-supplied boundary"
+      },
+      "geometry": {
+        "type": "Polygon",
+        "coordinates": [
+          [
+            [
+              116,
+              40
+            ],
+            [
+              117,
+              40
+            ],
+            [
+              117,
+              41
+            ],
+            [
+              116,
+              41
+            ],
+            [
+              116,
+              40
+            ]
+          ],
+          [
+            [
+              116.4,
+              40.4
+            ],
+            [
+              116.6,
+              40.4
+            ],
+            [
+              116.6,
+              40.6
+            ],
+            [
+              116.4,
+              40.6
+            ],
+            [
+              116.4,
+              40.4
+            ]
+          ]
+        ]
+      }
+    }
+  ]
+}
+

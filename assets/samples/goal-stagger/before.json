@@ -1,0 +1,46 @@
+[
+  {
+    "id": "customer-watch",
+    "title": "Customer signals 🌙",
+    "prompt": "Compare exact retained sources",
+    "cadence_ticks": 60,
+    "next_due_tick": 240,
+    "last_run_tick": 180,
+    "enabled": true,
+    "source_policy": "Explicit source files only",
+    "quality_threshold": 70
+  },
+  {
+    "id": "market-watch",
+    "title": "Market assumption",
+    "prompt": "Compare exact retained sources",
+    "cadence_ticks": 60,
+    "next_due_tick": 240,
+    "last_run_tick": 180,
+    "enabled": true,
+    "source_policy": "Explicit source files only",
+    "quality_threshold": 70
+  },
+  {
+    "id": "reference-watch",
+    "title": "Unselected",
+    "prompt": "Compare exact retained sources",
+    "cadence_ticks": 60,
+    "next_due_tick": 240,
+    "last_run_tick": 180,
+    "enabled": true,
+    "source_policy": "Explicit source files only",
+    "quality_threshold": 70
+  },
+  {
+    "id": "paused-watch",
+    "title": "Paused",
+    "prompt": "Compare exact retained sources",
+    "cadence_ticks": 60,
+    "next_due_tick": 240,
+    "last_run_tick": 180,
+    "enabled": false,
+    "source_policy": "Explicit source files only",
+    "quality_threshold": 70
+  }
+]

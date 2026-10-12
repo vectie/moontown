@@ -1,0 +1,21 @@
+// Generated using `moon info`, DON'T EDIT IT
+package "vectie/moontown/goal_table"
+
+import {
+  "vectie/moontown/core",
+}
+
+// Values
+pub fn decode_snapshot(Bytes) -> Result[Array[@core.StandingGoal], String]
+
+pub fn snapshot_to_table(Bytes, Char) -> Result[String, String]
+
+pub fn table_to_snapshot(Bytes, Char) -> Result[String, String]
+
+// Errors
+
+// Types and methods
+
+// Type aliases
+
+// Traits

@@ -7,13 +7,49 @@ import {
 }
 
 // Values
+pub fn calendar_csv(Array[CalendarEvent], Array[Int]) -> String
+
+pub fn calendar_file(String, String) -> Bool
+
+pub fn calendar_itinerary(Array[CalendarEvent], Array[Int]) -> String
+
+pub fn calendar_matches(Array[CalendarEvent], String, String, String, String) -> Array[Int]
+
+pub fn calendar_occurrence_csv(Array[CalendarEvent], Array[Int], String, String) -> String
+
+pub fn calendar_occurrence_itinerary(Array[CalendarEvent], Array[Int], String, String) -> String
+
+pub fn calendar_occurrences(String, String, String, Array[Int]) -> Result[Array[CalendarEvent], String]
+
+pub fn calendar_overlap_report(Array[CalendarEvent], Array[Int], String, String) -> Result[String, String]
+
+pub fn calendar_overlap_review(Array[CalendarEvent], Array[Int]) -> Result[CalendarOverlapReview, String]
+
 pub fn catalog_wire_limit() -> Int
 
 pub fn content_path(Selection, mode~ : String) -> String
 
 pub fn digest_valid(String) -> Bool
 
+pub fn geo_csv(Array[GeoFeature], Array[Int]) -> String
+
+pub fn geo_matches(Array[GeoFeature], String, String) -> Array[Int]
+
+pub fn geo_places_in_zone(Array[GeoFeature], Int) -> Array[Int]
+
+pub fn geo_rings(GeoFeature) -> Array[Array[GeoPoint]]
+
+pub fn geojson_file(String, String) -> Bool
+
+pub fn geojson_selection(Array[GeoFeature], Array[Int]) -> String
+
+pub fn parse_calendar(String) -> Result[Array[CalendarEvent], String]
+
 pub fn parse_catalog(String) -> Catalog?
+
+pub fn parse_data_table(String, Char) -> Result[DataTable, String]
+
+pub fn parse_geojson(String) -> Result[Array[GeoFeature], String]
 
 pub fn parse_text_reply(String) -> TextReply?
 
@@ -24,6 +60,10 @@ pub fn relative_path_valid(String) -> Bool
 pub fn selection_bytes_match(Selection, Bytes) -> Bool
 
 pub fn selection_valid(Selection) -> Bool
+
+pub fn table_delimiter(String, String) -> Char?
+
+pub fn table_zones_export(Bytes, Bytes, Char, latitude~ : Int, longitude~ : Int, name~ : Int, category~ : Int, format~ : String) -> Result[String, String]
 
 pub fn text_preview_limit() -> Int
 
@@ -42,12 +82,62 @@ pub(all) struct Book {
   outputs : Array[Output]
 } derive(Eq, ToJson, @debug.Debug, @json.FromJson)
 
+pub(all) struct CalendarEvent {
+  uid : String
+  summary : String
+  start : String
+  end : String
+  date : String
+  zone : String
+  location : String
+  description : String
+  url : String
+  recurrence : String
+} derive(Eq, @debug.Debug)
+
+pub(all) struct CalendarOverlap {
+  first : Int
+  second : Int
+  start : String
+  end : String
+} derive(Eq, @debug.Debug)
+
+pub(all) struct CalendarOverlapReview {
+  pairs : Array[CalendarOverlap]
+  unassessed : Array[Int]
+  assessed : Int
+} derive(Eq, @debug.Debug)
+
 pub(all) struct Catalog {
   contract : String
   state : String
   message : String
   books : Array[Book]
 } derive(Eq, ToJson, @debug.Debug, @json.FromJson)
+
+pub(all) struct DataTable {
+  headers : Array[String]
+  rows : Array[Array[String]]
+} derive(Eq, @debug.Debug)
+pub fn DataTable::filtered_csv(Self, String) -> String
+pub fn DataTable::matching_rows(Self, String) -> Array[Int]
+pub fn DataTable::places(Self, latitude~ : Int, longitude~ : Int, name~ : Int, category~ : Int) -> Result[Array[GeoFeature], String]
+pub fn DataTable::selection_csv(Self, Array[Int]) -> String
+pub fn DataTable::view_csv(Self, Array[Int], Array[Int]) -> Result[String, String]
+pub fn DataTable::view_rows(Self, String, column? : Int, exact? : Bool, sort_column? : Int, descending? : Bool) -> Result[Array[Int], String]
+
+pub(all) struct GeoFeature {
+  name : String
+  kind : String
+  category : String
+  points : Array[GeoPoint]
+  source : Json
+} derive(Eq, @debug.Debug)
+
+pub(all) struct GeoPoint {
+  longitude : Double
+  latitude : Double
+} derive(Eq, @debug.Debug)
 
 pub(all) struct Output {
   artifact_id : String

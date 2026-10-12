@@ -77,6 +77,7 @@ fn set_request_composer_model(
       RequestShortcuts => ""
       StandingWatchComposer => "watch"
       EvidenceBookComposer => "book"
+      CollaborationComposer => "collaboration"
     },
   )
   { ..model, request_composer, }

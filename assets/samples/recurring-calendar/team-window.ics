@@ -1,0 +1,36 @@
+BEGIN:VCALENDAR
+VERSION:2.0
+PRODID:-//MoonTown//Synthetic recurring itinerary//EN
+BEGIN:VEVENT
+UID:studio@example.invalid
+URL:https://example.invalid/studio
+DTSTART:20261007T150000Z
+DTEND:20261007T160000Z
+SUMMARY:Studio review
+LOCATION:North studio
+RRULE:FREQ=WEEKLY;COUNT=4
+DESCRIPTION:Review the shared notebook. Synthetic example only.
+END:VEVENT
+BEGIN:VEVENT
+UID:desk@example.invalid
+URL:https://example.invalid/desk
+DTSTART:20261009T230000Z
+DTEND:20261010T003000Z
+SUMMARY:Daily desk review
+LOCATION:Online
+RRULE:FREQ=DAILY;COUNT=6
+EXDATE:20261010T230000Z
+EXDATE:20261012T230000Z
+DESCRIPTION:Bring notes\, open questions and the current draft.
+STATUS:TENTATIVE
+END:VEVENT
+BEGIN:VEVENT
+UID:proposal@example.invalid
+URL:https://example.invalid/proposal
+DTSTART;VALUE=DATE:20261013
+DTEND;VALUE=DATE:20261014
+SUMMARY:Proposal deadline
+LOCATION:City Hall
+DESCRIPTION:All-day deadline. The end date is exclusive.
+END:VEVENT
+END:VCALENDAR

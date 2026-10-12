@@ -1,0 +1,13 @@
+// Generated using `moon info`, DON'T EDIT IT
+package "vectie/moontown/goal_effort"
+
+// Values
+pub fn report(Bytes, Bytes, Char, format~ : String) -> Result[String, String]
+
+// Errors
+
+// Types and methods
+
+// Type aliases
+
+// Traits

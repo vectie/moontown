@@ -7,6 +7,7 @@ import {
   "moonbitlang/x@0.4.50",
   "vectie/lepusa@0.1.4",
   "vectie/moonlib@0.1.19",
+  "vectie/moonchat@0.1.0",
 }
 
 readme = "README.mbt.md"

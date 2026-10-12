@@ -170,4 +170,12 @@
 .imported-outputs-status { margin: 12px 0; line-height: 1.5; }
 .imported-outputs-text { white-space: pre-wrap; overflow-wrap: anywhere; user-select: text; font: 13px/1.55 ui-monospace, monospace; padding: 12px; margin-top: 16px; border: 1px solid #36534d; border-radius: 10px; background: #10221e; color: #edf7f1; }
 .imported-outputs-download { display: inline-block; margin-top: 8px; }
+.imported-data-table { margin-top: 16px; font-size: 13px; }
+.imported-data-table > p { line-height: 1.5; margin: 10px 0; }
+.imported-data-table label { display: block; margin: 12px 0 6px; font-weight: 700; }
+.imported-data-table .imported-outputs-actions { display: flex; flex-wrap: wrap; gap: 8px; padding: 0; }
+.imported-data-table caption { text-align: left; padding: 10px 0; }
+.imported-data-table th { background: #18382f; color: #edf7f1; }
+.imported-data-table tbody tr:nth-child(even) { background: #102a23; }
+.imported-outputs-actions button[aria-pressed="true"] { outline: 2px solid #4bd8be; outline-offset: 2px; }
 .imported-outputs-drawer button:focus-visible, .imported-outputs-drawer a:focus-visible { outline: 2px solid #4bd8be; outline-offset: 3px; }

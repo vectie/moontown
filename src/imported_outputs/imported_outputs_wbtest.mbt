@@ -2,6 +2,8 @@
 async fn fixture(
   bytes : Bytes,
   name? : String = "recipient",
+  filename? : String = "content.txt",
+  mime? : String = "text/html",
 ) -> (String, String, @contract.Selection) {
   let home = @fs.realpath(@fs.tmpdir(prefix="town-imported-output-"))
   let root = home + "/" + name
@@ -14,7 +16,7 @@ async fn fixture(
     truncate=true,
   )
   @fs.write_file(
-    root + "/portable/outputs/result/content.txt",
+    root + "/portable/outputs/result/" + filename,
     bytes,
     create=0o600,
     truncate=true,
@@ -22,19 +24,19 @@ async fn fixture(
   let output : @contract.Output = {
     artifact_id: "result",
     label: "Inert result",
-    mime_type: "text/html",
+    mime_type: mime,
     included: true,
     reference: None,
     declared_digest: None,
     files: [
       {
-        path: "portable/outputs/result/content.txt",
+        path: "portable/outputs/result/" + filename,
         size_bytes: bytes.length(),
         digest: hash(bytes),
       },
     ],
-    preview_path: Some("portable/outputs/result/content.txt"),
-    app_entrypoint: Some("portable/outputs/result/content.txt"),
+    preview_path: Some("portable/outputs/result/" + filename),
+    app_entrypoint: Some("portable/outputs/result/" + filename),
   }
   let manifest : Json = {
     "contract": "moonbook.portable_outputs.v1",
@@ -93,7 +95,7 @@ async fn fixture(
       package_sha256: hash(b"original-package"),
       manifest_sha256: hash(manifest_bytes),
       artifact_id: "result",
-      path: "portable/outputs/result/content.txt",
+      path: "portable/outputs/result/" + filename,
       digest: hash(bytes),
       size_bytes: bytes.length(),
     },

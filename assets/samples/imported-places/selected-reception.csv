@@ -1,0 +1,7 @@
+name,geometry,category,vertex,longitude,latitude
+"Welcome Pavilion","Point","reception","1","116.45","40.08"
+"Talent Gallery","Point","reception","1","116.454","40.082"
+"Reception walking route","LineString","reception","1","116.45","40.08"
+"Reception walking route","LineString","reception","2","116.452","40.081"
+"Reception walking route","LineString","reception","3","116.454","40.082"
+

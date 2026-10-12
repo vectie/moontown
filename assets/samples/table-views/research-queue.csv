@@ -1,0 +1,8 @@
+id,topic,status,owner,score,note
+001,Zoning,open,Lea,2,"Review, pending"
+002,Alpha,closed,open,10,Unrelated owner match
+003,budget,OPEN,Chen,001,河流
+004,Budget,open,Mira,3,"two
+lines"
+005,Missing owner,, ,0,Unknown status
+006,Formula,open,Ada,9,=SUM(A1)

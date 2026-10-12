@@ -1,0 +1,37 @@
+{
+  "type": "FeatureCollection",
+  "features": [
+    {
+      "type": "Feature",
+      "id": "welcome",
+      "properties": {
+        "name": "Welcome Pavilion",
+        "category": "reception"
+      },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          116.2,
+          40.2,
+          18
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "id": "gate",
+      "properties": {
+        "name": "West Gate",
+        "category": "reception"
+      },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          116,
+          40.5
+        ]
+      }
+    }
+  ]
+}
+

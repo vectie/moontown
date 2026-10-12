@@ -37,6 +37,8 @@ pub fn keeper_profile_for_task(@moonbook.BookTask) -> String
 
 pub fn keeper_runtime(@core.BookRef) -> EmbeddedMoonclawRuntime
 
+pub async fn launch_oneoff(String, moonclaw_root~ : String, home~ : String, cwd~ : String, log_prefix~ : String, store_home~ : String) -> Int
+
 pub async fn load_packet_file(String) -> ExternalProposalPacket?
 
 pub fn mayor_runtime() -> EmbeddedMoonclawRuntime
@@ -56,6 +58,8 @@ pub async fn run_process_alive(String) -> Bool
 pub async fn run_workspace_dir(String, home? : String, cwd? : String) -> String?
 
 pub async fn save_packet_file(String, ExternalProposalPacket) -> Unit
+
+pub async fn start_oneoff(String, moonclaw_root~ : String, home~ : String, cwd~ : String, store_home~ : String) -> OneoffReceipt
 
 pub fn timed_out_poll_response(String, String, String) -> ProposalPollResponse
 
@@ -150,6 +154,14 @@ pub struct ExternalProposalPacket {
   metadata : Json
 } derive(Eq, ToJson, @debug.Debug, @json.FromJson)
 pub fn ExternalProposalPacket::new(packet_id~ : String, title~ : String, summary~ : String, request_text~ : String, profile~ : String, output_contract~ : String, context_pages? : Array[String], skill_paths? : Array[String], notes? : Array[String], tags? : Array[String], metadata? : Json) -> Self
+
+pub(all) struct OneoffReceipt {
+  packet_id : String
+  proposal_id : String
+  run_id : String
+  status : String
+  workspace_dir : String?
+} derive(Eq, ToJson, @debug.Debug, @json.FromJson)
 
 pub struct PollWorkerResponse {
   worker_id : String

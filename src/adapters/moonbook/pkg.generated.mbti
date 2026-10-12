@@ -45,6 +45,8 @@ pub async fn load_or_create_catalog(path? : String) -> Array[BookCatalogEntry]
 
 pub async fn load_or_create_provider(path? : String) -> MoonbookCatalogProvider
 
+pub fn oneoff_context(String, String, String, String, Array[String]) -> WorkerContextBundle
+
 pub fn parallel_research_entry(String) -> BookCatalogEntry
 
 pub async fn persist_native_wenyu_result(BookCatalogEntry, BookResult, String, String, moonbook_root? : String) -> PersistResultOutcome
@@ -54,6 +56,8 @@ pub async fn persist_result(BookCatalogEntry, BookResult, moonbook_root? : Strin
 pub async fn persist_result_payload(BookCatalogEntry, Json, moonbook_root? : String) -> PersistResultOutcome
 
 pub async fn produce_task_batch(BookCatalogEntry, String, goal_id? : String?) -> BookTaskBatch
+
+pub async fn product_outcome_operation(BookCatalogEntry, String, String) -> Json
 
 pub async fn read_native_wenyu_review(BookCatalogEntry, String, String, String, String, moonbook_root? : String) -> NativeWenyuReviewResolution
 

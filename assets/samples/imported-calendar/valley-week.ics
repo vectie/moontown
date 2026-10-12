@@ -1,0 +1,38 @@
+BEGIN:VCALENDAR
+VERSION:2.0
+PRODID:-//MoonTown//Synthetic agenda sample//EN
+BEGIN:VEVENT
+UID:river-walk@example.invalid
+DTSTART:20261009T090000Z
+DTEND:20261009T100000Z
+SUMMARY:River walk and field notes
+LOCATION:North gate\, Wenyu Valley
+DESCRIPTION:Bring notebook\; collect water observations.\nMeet beside the
+  bridge.
+URL:https://example.invalid/river-walk
+END:VEVENT
+BEGIN:VEVENT
+UID:proposal-deadline@example.invalid
+DTSTART;VALUE=DATE:20261010
+DTEND;VALUE=DATE:20261011
+SUMMARY:Community proposal deadline
+LOCATION:City Hall
+DESCRIPTION:Submit the draft before the end of the day.
+END:VEVENT
+BEGIN:VEVENT
+UID:studio-review@example.invalid
+DTSTART;TZID=Asia/Shanghai:20261009T150000
+DTEND;TZID=Asia/Shanghai:20261009T160000
+SUMMARY:Studio review
+LOCATION:South studio
+DESCRIPTION:Discuss the new map and signage.
+RRULE:FREQ=WEEKLY;COUNT=4
+END:VEVENT
+BEGIN:VEVENT
+UID:coffee@example.invalid
+DTSTART:20261011T103000
+SUMMARY:Coffee and project catch-up
+LOCATION:Valley cafe
+DESCRIPTION:Floating local time\, confirm the zone with the organizer.
+END:VEVENT
+END:VCALENDAR

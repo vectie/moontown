@@ -1,0 +1,12 @@
+name,geometry,category,vertex,longitude,latitude,ring,ring_vertex
+"North reception zone","Polygon","district","1","116","40","1","1"
+"North reception zone","Polygon","district","2","117","40","1","2"
+"North reception zone","Polygon","district","3","117","41","1","3"
+"North reception zone","Polygon","district","4","116","41","1","4"
+"North reception zone","Polygon","district","5","116","40","1","5"
+"North reception zone","Polygon","district","6","116.4","40.4","2","1"
+"North reception zone","Polygon","district","7","116.6","40.4","2","2"
+"North reception zone","Polygon","district","8","116.6","40.6","2","3"
+"North reception zone","Polygon","district","9","116.4","40.6","2","4"
+"North reception zone","Polygon","district","10","116.4","40.4","2","5"
+

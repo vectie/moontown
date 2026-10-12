@@ -34,6 +34,7 @@ state. MoonBook owns source and accepted knowledge.
 | Persistent town, residents, roles and supervision models | available locally |
 | Rabbita town and Wenyu operator views | available locally |
 | Generic civic communication synthesis | available through versioned pack adapter |
+| One-off source-bound collaboration composer | local draft/save/reopen/prepare/download; pending human review |
 | Cross-book research-salon fixture | available as one scenario configuration |
 | MoonClaw worker reduction | conditional on configured runtimes |
 | Accepted MoonBook outcome history | conditional on reviewed book workflows |
@@ -54,6 +55,12 @@ never reruns an unknown outcome automatically. See
 [MoonFlow civic adapter](MOONFLOW_CIVIC_ADAPTER.md).
 
 ## Persistence, authority and recovery
+
+The [collaboration composer](COLLABORATION_COMPOSER.md) captures exact selected
+source files and exports a one-off civic handoff, participant briefs and a
+MoonChat source-bound review bundle. This authoring path neither executes work
+nor installs a schedule, synthesizes ideas or changes participant Books. Its
+paired MoonChat source workspace is a build prerequisite.
 
 Town state, incident history and scenario evidence are durable. Actions that
 mutate workspaces, communicate externally or affect a robot retain their
@@ -80,3 +87,25 @@ recovery and accepted outputs in the participating books.
 - Exercise one real MoonFind handoff through MoonFlow with a configured
   MoonClaw provider and named-human settlement.
 - Complete authentication and packaged supervisor operation.
+
+## Local mini-app development fixture
+
+The existing Node mini-app fixture supports [archived building recovery](MINIAPP_ARCHIVE_RECOVERY.md):
+inspect an editable archived record and restore the same identity to a non-public
+state with its conversation and run history retained. This development-service
+workflow does not establish the canonical native adapter, production identity,
+reviewed publication, or accepted MoonBook knowledge.
+
+The same local development service offers [building review packets](MINIAPP_REVIEW_PACKETS.md): discover a per-building action in the town snapshot or archive, inspect its source digest and download a bound JSON/Markdown account of retained records. Read-only export does not establish native UI integration, accepted knowledge, successful execution or production security.
+
+The local fixture's [conversation search](MINIAPP_CONVERSATION_SEARCH.md) locates
+literal retained message text within currently visible buildings, with exact
+message/thread/run references and digest-bound pages. This is read-only record
+inspection; recorded run statuses do not establish live execution or acceptance.
+
+The local fixture also supports [reviewed building profile edits](MINIAPP_BUILDING_PROFILE.md).
+Owners preview and apply a version-bound title, summary or tag correction, then
+reopen the same building and retained history. This uses the existing fixture
+identity and persistence model; it grants no publication, runtime or Book authority.
+
+The existing local snapshot also embeds a [retained-run review inbox](MINIAPP_RUN_INBOX.md), with source-bound cross-building paging and linked conversation/audit inspection. Recorded update age and status remain explicitly fixture evidence; reading this backlog neither executes work nor accepts knowledge.

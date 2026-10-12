@@ -1,0 +1,1 @@
+{"schema":"moontown.goal-merge.v1","status":"conflict","conflict_count":1,"conflicts":[{"goal_id":"watch-customer","field":"title","kind":"different_edits","base_value":"=Customer launch, 中文","edited_value":"=客户 review, \"launch\"\n🌙","current_value":"Concurrent title"}],"merged_goals":null}

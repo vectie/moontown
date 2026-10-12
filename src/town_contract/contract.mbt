@@ -49,6 +49,11 @@ pub fn desktop_imported_outputs_path() -> String {
 }
 
 ///|
+pub fn desktop_collaboration_path() -> String {
+  "/api/collaboration"
+}
+
+///|
 pub fn desktop_imported_output_content_path() -> String {
   "/api/imported-outputs/content"
 }
@@ -438,6 +443,12 @@ pub fn desktop_contract() -> Json {
     },
     "endpoints": [
       endpoint("contract", "GET", desktop_contract_path(), "contract.read"),
+      endpoint(
+        "collaboration-authoring",
+        "POST",
+        desktop_collaboration_path(),
+        "collaboration.draft.local",
+      ),
       endpoint(
         "list-imported-outputs",
         "GET",

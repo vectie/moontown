@@ -1,4 +1,5 @@
 import {
+  "moonbitlang/core/encoding/utf8",
   "moonbitlang/core/math",
   "vectie/moontown-rabbita/landmark_routes",
   "vectie/moontown-rabbita/design_registration",
@@ -7,6 +8,7 @@ import {
   "moonbit-community/rabbita",
   "moonbit-community/rabbita/cmd",
   "moonbit-community/rabbita/html",
+  "moonbit-community/rabbita/svg",
   "moonbit-community/rabbita/html/canvas",
   "moonbit-community/rabbita/dom",
   "moonbit-community/rabbita/js",
@@ -17,6 +19,7 @@ import {
   "vectie/moontown/energy_valley_contract",
   "vectie/moontown/health",
   "vectie/moontown/ui",
+  "vectie/moontown/collaboration_contract" @collaboration,
 }
 
 supported_targets = "js"
@@ -24,5 +27,5 @@ supported_targets = "js"
 pkgtype(kind: "executable")
 
 import {
-  "moonbitlang/core/encoding/utf8",
+  "moonbitlang/async",
 } for "wbtest"

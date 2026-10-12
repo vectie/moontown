@@ -1,0 +1,48 @@
+[
+  {
+    "id": "watch-new-current",
+    "title": "New current goal",
+    "prompt": "Review the launch assumption.\nCite the exact source.",
+    "target_book_id": "research-customer",
+    "cadence_ticks": 60,
+    "next_due_tick": 240,
+    "last_run_tick": 180,
+    "enabled": true,
+    "source_policy": "local-material:plans/customer.json",
+    "quality_threshold": 85
+  },
+  {
+    "id": "watch-unassigned",
+    "title": "Literal empty Book ID",
+    "prompt": "Retain an explicit empty target",
+    "target_book_id": "",
+    "cadence_ticks": 60,
+    "next_due_tick": 0,
+    "last_run_tick": 0,
+    "enabled": false,
+    "source_policy": "",
+    "quality_threshold": 80
+  },
+  {
+    "id": "watch-customer",
+    "title": "Concurrent title",
+    "prompt": "Review the launch assumption.\nCite the exact source.",
+    "target_book_id": "research-customer",
+    "cadence_ticks": 60,
+    "next_due_tick": 300,
+    "last_run_tick": 240,
+    "enabled": true,
+    "source_policy": "local-material:plans/customer.json",
+    "quality_threshold": 85
+  },
+  {
+    "id": "watch-paused",
+    "title": "Paused market review",
+    "prompt": "Keep this intent for later",
+    "cadence_ticks": 120,
+    "next_due_tick": 360,
+    "enabled": false,
+    "source_policy": "",
+    "quality_threshold": 80
+  }
+]

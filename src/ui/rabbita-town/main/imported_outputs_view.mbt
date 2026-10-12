@@ -239,17 +239,7 @@ fn render_imported_output_text(
         imported_output_status("Verifying and loading full text…")
       TextUnavailable(message) => imported_output_status(message)
       TextReady(content) =>
-        if content.is_empty() {
-          imported_output_status("This is an empty text file (0 bytes).")
-        } else {
-          // Rabbita creates a text node. Never insert innerHTML, Markdown,
-          // iframe content or an active-document preview here.
-          @html.pre(
-            class="imported-outputs-text",
-            attrs=@html.Attrs::build().aria_label("Verified full text"),
-            content,
-          )
-        }
+        render_imported_data_content(dispatch, state, content)
     },
   ])
 }

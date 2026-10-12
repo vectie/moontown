@@ -10,6 +10,14 @@ fn initial_imported_outputs_state() -> ImportedOutputsState {
     download_generation: 0,
     download: DownloadIdle,
     text: TextIdle,
+    table: None,
+    table_query: "",
+    table_page: 0,
+    table_show: true,
+    table_view: initial_table_view(),
+    agenda: initial_agenda(),
+    geo: initial_geo(),
+    places: initial_places(),
   }
 }
 
@@ -137,6 +145,14 @@ fn imported_outputs_transition(
           download_generation: 0,
           download: DownloadIdle,
           text: TextIdle,
+          table: None,
+          table_query: "",
+          table_page: 0,
+          table_show: true,
+          table_view: initial_table_view(),
+          agenda: initial_agenda(),
+          geo: initial_geo(),
+          places: initial_places(),
         },
         None,
       )
@@ -161,6 +177,14 @@ fn imported_outputs_transition(
           download_generation: 0,
           download: DownloadIdle,
           text: TextIdle,
+          table: None,
+          table_query: "",
+          table_page: 0,
+          table_show: true,
+          table_view: initial_table_view(),
+          agenda: initial_agenda(),
+          geo: initial_geo(),
+          places: initial_places(),
         },
         None,
       )
@@ -180,9 +204,61 @@ fn imported_outputs_transition(
           selection: Some(selection),
           download: DownloadIdle,
           text: TextLoading,
+          table: None,
+          table_query: "",
+          table_page: 0,
+          table_show: true,
+          table_view: initial_table_view(),
+          agenda: initial_agenda(),
+          geo: initial_geo(),
+          places: initial_places(),
         },
         Some(FetchImportedText(generation, selection)),
       )
+    }
+    AgendaEvent(message) => agenda_transition(state, message)
+    GeoEvent(message) => geo_transition(state, message)
+    PlacesEvent(message) => places_transition(state, message)
+    TableViewEvent(message) => table_view_transition(state, message)
+    SearchImportedTable(query) => {
+      if !state.open || !(state.table is Some(Ok(_))) {
+        return (state, None)
+      }
+      ({ ..state, table_query: query, table_page: 0, }, None)
+    }
+    PageImportedTable(page) => {
+      guard state.open && state.table is Some(Ok(table)) else {
+        return (state, None)
+      }
+      let count = imported_table_view_rows(state, table).length()
+      if page < 0 || page >= (count + 24) / 25 {
+        return (state, None)
+      }
+      ({ ..state, table_page: page, }, None)
+    }
+    ShowImportedTable(show) => {
+      if !state.open || !(state.table is Some(Ok(_))) {
+        return (state, None)
+      }
+      (
+        { ..state, table_show: show, places: { ..state.places, show: false, }, },
+        None,
+      )
+    }
+    DownloadFilteredTable => {
+      guard state.open &&
+        state.table is Some(Ok(table)) &&
+        state.selection is Some(_) else {
+        return (state, None)
+      }
+      match
+        table.view_csv(
+          imported_table_view_rows(state, table),
+          imported_table_view_columns(state, table),
+        ) {
+        Ok(csv) => (state, Some(SaveFilteredTable(csv, "table-view.csv")))
+        Err(_) => (state, None)
+      }
     }
     DownloadImportedFile => {
       guard state.open && state.selection is Some(selection) else {
@@ -231,11 +307,32 @@ fn imported_outputs_transition(
         !(state.text is TextLoading) {
         return (state, None)
       }
+      let geo_file = match imported_outputs_output(state) {
+        Some(output) =>
+          @imported_output_contract.geojson_file(
+            expected.path,
+            output.mime_type,
+          )
+        None => false
+      }
       let text = match @imported_output_contract.parse_text_reply(raw) {
         Some(reply) if reply.selection == expected =>
           if reply.state == "ready" {
             match reply.content {
-              Some(content) => TextReady(content)
+              Some(content) =>
+                // The host verifies every read. GeoJSON additionally binds the
+                // derived feature model to the exact pinned UTF-8 bytes here.
+                if geo_file &&
+                  !@imported_output_contract.selection_bytes_match(
+                    expected,
+                    @utf8.encode(content),
+                  ) {
+                  TextUnavailable(
+                    "GeoJSON bytes do not match the selected file. Refresh imported outputs before reading again.",
+                  )
+                } else {
+                  TextReady(content)
+                }
               None =>
                 TextUnavailable(
                   "The host did not return verified text. Refresh to check this file again.",
@@ -249,7 +346,51 @@ fn imported_outputs_transition(
             "The file or response changed. Refresh the imported outputs before reading again.",
           )
       }
-      ({ ..state, text, }, None)
+      let table = match text {
+        TextReady(content) =>
+          match imported_outputs_output(state) {
+            Some(output) =>
+              match
+                @imported_output_contract.table_delimiter(
+                  expected.path,
+                  output.mime_type,
+                ) {
+                Some(delimiter) =>
+                  Some(
+                    @imported_output_contract.parse_data_table(
+                      content, delimiter,
+                    ),
+                  )
+                None => None
+              }
+            None => None
+          }
+        _ => None
+      }
+      let agenda = match text {
+        TextReady(content) =>
+          match imported_outputs_output(state) {
+            Some(output) if @imported_output_contract.calendar_file(
+                expected.path,
+                output.mime_type,
+              ) =>
+              {
+                ..initial_agenda(),
+                events: Some(@imported_output_contract.parse_calendar(content)),
+              }
+            _ => initial_agenda()
+          }
+        _ => initial_agenda()
+      }
+      let geo = match text {
+        TextReady(content) if geo_file =>
+          {
+            ..initial_geo(),
+            features: Some(@imported_output_contract.parse_geojson(content)),
+          }
+        _ => initial_geo()
+      }
+      ({ ..state, text, table, agenda, geo, }, None)
     }
   }
 }
