@@ -32,6 +32,7 @@ const BROWSER_FILES = [
   'operations.html',
   'hackathon.html',
   'hackathon.js',
+  'competition-ui.js',
   'hackathon.css',
   'bootstrap.js',
   'platform-base.js',

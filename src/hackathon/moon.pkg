@@ -1,10 +1,16 @@
 import {
   "moonbitlang/async",
   "moonbitlang/async/fs",
+  "moonbitlang/async/process",
+  "moonbitlang/async/io",
+  "moonbitlang/core/encoding/utf8",
+  "moonbitlang/x/crypto",
   "moonbitlang/core/env",
   "moonbitlang/core/json",
   "vectie/moontown/storage",
   "vectie/moontown/support",
+  "vectie/moontown/adapters/moonbook",
+  "vectie/moontown/moonbook_contracts",
 }
 
 supported_targets = "native"

@@ -50,6 +50,17 @@ pub fn register_team(
   state : HackathonState,
   team : Team,
 ) -> HackathonState raise {
+  guard !state.programs.any(p => p.challenge_id == team.challenge_id) else {
+    fail("use competition registration and invitations for this event")
+  }
+  register_team_unconfigured(state, team)
+}
+
+///|
+fn register_team_unconfigured(
+  state : HackathonState,
+  team : Team,
+) -> HackathonState raise {
   guard valid_id(team.id) &&
     !team.name.trim().is_empty() &&
     !team.members.is_empty() &&
@@ -83,6 +94,11 @@ pub fn join_team(
   team_id : String,
   member_id : String,
 ) -> HackathonState raise {
+  guard !state.teams.any(t => {
+    t.id == team_id && state.programs.any(p => p.challenge_id == t.challenge_id)
+  }) else {
+    fail("join this competition team by accepting an invitation")
+  }
   guard !member_id.trim().is_empty() &&
     !state.teams.any(t => {
       t.members.contains(member_id) &&
@@ -119,6 +135,11 @@ pub fn revise_benchmark(
   evaluation_materials : Array[String],
   rubric : Array[RubricCriterion],
 ) -> HackathonState raise {
+  guard !state.programs.any(p => {
+    p.challenge_id == challenge_id && p.state == "final"
+  }) else {
+    fail("final competition benchmark is frozen")
+  }
   guard !benchmark_materials.is_empty() &&
     !evaluation_materials.is_empty() &&
     !rubric.is_empty() else {
@@ -155,6 +176,17 @@ pub fn revise_benchmark(
 
 ///|
 pub fn submit_solution(
+  state : HackathonState,
+  submission : Submission,
+) -> HackathonState raise {
+  guard !state.programs.any(p => p.challenge_id == submission.challenge_id) else {
+    fail("use a submission package for this competition")
+  }
+  submit_solution_unconfigured(state, submission)
+}
+
+///|
+fn submit_solution_unconfigured(
   state : HackathonState,
   submission : Submission,
 ) -> HackathonState raise {
@@ -209,6 +241,23 @@ pub fn record_evaluation(
     is Some(challenge) else {
     fail("challenge was not found")
   }
+  if state.programs.iter().find_first(p => p.challenge_id == challenge.id)
+    is Some(program) {
+    guard program.state != "final" else {
+      fail("final competition reviews are frozen")
+    }
+    guard state.submission_packages
+      .iter()
+      .find_first(p => p.submission_id == submission.id)
+      is Some(bundle) &&
+      program.tracks.any(t => {
+        t.id == bundle.track_id && t.scoring_mode == "rubric"
+      }) else {
+      fail(
+        "review requires a rubric package; metric tracks require measured benchmark results",
+      )
+    }
+  }
   guard evaluation.benchmark_version == challenge.benchmark_version &&
     !evaluation.reviewer.trim().is_empty() &&
     evaluation.scores.length() == challenge.rubric.length() else {
@@ -252,6 +301,16 @@ pub fn leaderboard(
   for team in state.teams {
     if team.challenge_id != challenge_id {
       continue
+    }
+    if state.programs.iter().find_first(p => p.challenge_id == challenge_id)
+      is Some(program) {
+      guard state.team_profiles.iter().find_first(p => p.team_id == team.id)
+        is Some(profile) &&
+        program.tracks.any(t => {
+          t.id == profile.track_id && t.scoring_mode == "rubric"
+        }) else {
+        continue
+      }
     }
     let mut best : Evaluation? = None
     let mut best_submission : Submission? = None

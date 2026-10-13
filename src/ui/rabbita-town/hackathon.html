@@ -13,12 +13,7 @@
   <header class="site-header">
     <a class="town-link" href="/index.html">← MoonTown · Energy Valley</a>
     <span class="site-wordmark">Contest Express <span aria-hidden="true">✦</span></span>
-    <nav aria-label="Contest Express areas">
-      <a href="#challenge">Challenge</a>
-      <a href="#teams">Teams</a>
-      <a href="#reviews">Review</a>
-      <a href="#mayor">Mayor desk</a>
-    </nav>
+    <span id="viewer-status" class="muted-note">Public visitor</span>
   </header>
 
   <main id="main" class="page-shell">
@@ -40,29 +35,49 @@
       <span id="sync-status">Connecting to Contest Express…</span>
       <button id="refresh-button" class="text-button" type="button">Refresh now</button>
     </div>
+    <div class="event-picker"><label for="challenge-select">Competition <select id="challenge-select"></select></label><span id="event-state" class="version-tag"></span></div>
+    <nav class="competition-tabs" aria-label="Competition pages">
+      <button type="button" data-tab="challenge" aria-current="page">Overview</button>
+      <button type="button" data-tab="tracks">Tracks &amp; rules</button>
+      <button type="button" data-tab="leaderboard">Champion Wall</button>
+      <button type="button" data-tab="stories">Stories &amp; updates</button>
+      <button type="button" data-tab="faq">FAQ</button>
+      <button type="button" data-tab="teams">My team &amp; submissions</button>
+      <button type="button" data-tab="reviews" hidden>Review desk</button>
+      <button type="button" data-tab="mayor" hidden>Mayor desk</button>
+    </nav>
 
     <section id="challenge" class="workspace-section" aria-labelledby="challenge-title">
       <div class="section-heading">
         <div><p class="eyebrow">01 / The brief</p><h2 id="challenge-title">Open challenge</h2></div>
-        <label class="picker-label" for="challenge-select">Choose challenge <select id="challenge-select"></select></label>
       </div>
       <div id="challenge-detail" class="card empty-state">The Mayor has not published a challenge yet.</div>
+      <div id="event-calendar" class="milestone-strip"></div>
+      <div id="event-prizes" class="editorial-content"></div>
     </section>
+    <section id="tracks" class="workspace-section" hidden><div class="section-heading"><h2>Tracks &amp; rules</h2></div><div id="track-list"></div><div id="policy-detail" class="editorial-content"></div></section>
+    <section id="stories" class="workspace-section" hidden><div class="section-heading"><h2>Stories &amp; updates</h2></div><div id="story-list" class="editorial-content"></div></section>
+    <section id="faq" class="workspace-section" hidden><div class="section-heading"><h2>FAQ</h2></div><label class="search-label">Search questions<input id="faq-search" type="search" placeholder="Teams, materials, judging…"></label><div id="faq-list" class="editorial-content"></div></section>
 
     <section id="leaderboard" class="workspace-section" aria-labelledby="leaderboard-title">
       <div class="section-heading"><div><p class="eyebrow">02 / Champion Wall</p><h2 id="leaderboard-title">Live leaderboard</h2></div><span id="leaderboard-version" class="version-tag"></span></div>
       <p class="section-intro">A team appears after its submission receives a complete review. The strongest current benchmark score leads; equal scores favor the earlier review.</p>
+      <label class="picker-label">Track <select id="board-track"></select></label>
       <div id="leaderboard-content" class="card empty-state">No scored submissions yet.</div>
     </section>
 
     <section id="teams" class="workspace-section" aria-labelledby="teams-title">
       <div class="section-heading"><div><p class="eyebrow">03 / Build in public</p><h2 id="teams-title">Team workbench</h2></div></div>
+      <p id="participation-status" class="section-intro"></p>
+      <div id="invitation-list" class="editorial-content"></div>
       <div class="two-column">
         <article class="card form-card">
           <h3>Gather a team</h3><p class="card-intro">Give your crew a stable ID and list the people building together.</p>
           <form id="team-form">
             <label>Team ID <small>Lowercase letters, numbers, hyphens</small><input name="id" required pattern="[a-z0-9-]+" maxlength="64" placeholder="harbor-builders"></label>
             <label>Team name<input name="name" required maxlength="120" placeholder="Harbor Builders"></label>
+            <label class="program-field">Affiliation<input name="affiliation" placeholder="School, lab, community, or independent"></label>
+            <label class="program-field">Competition track<select name="track_id" id="registration-track"></select></label>
             <label>Members <small>One name per line</small><textarea name="members" required rows="4" placeholder="Ari\nMei"></textarea></label>
             <button class="button button-primary" type="submit">Register team</button>
           </form>
@@ -74,6 +89,7 @@
             <label>Registered team<select name="team_id" id="submission-team" required></select></label>
             <label>Artifact URL<input name="artifact_url" required type="url" placeholder="https://example.org/demo"></label>
             <label>First person solution<textarea name="first_person_solution" required rows="5" placeholder="We tested… We learned… Our next step is…"></textarea></label>
+            <fieldset class="program-field"><legend>Submission materials</legend><p class="card-intro">Include each material required by your track and its SHA-256 checksum. Compute the checksum from the exact file before uploading, using a file checksum tool or <code>shasum -a 256 path/to/file</code>, then paste all 64 hexadecimal characters.</p><div id="package-materials"></div><button id="add-material" type="button" class="button button-light">Add material</button></fieldset>
             <button class="button button-primary" type="submit">Submit solution</button>
           </form>
           <p id="submission-feedback" class="form-feedback" role="status" aria-live="polite"></p>
@@ -90,10 +106,12 @@
         <p id="join-feedback" class="form-feedback" role="status" aria-live="polite"></p>
       </article>
       <div id="team-list" class="team-list" aria-live="polite"></div>
+      <div id="own-submissions" class="editorial-content"></div>
     </section>
 
     <section id="reviews" class="workspace-section" aria-labelledby="reviews-title" hidden>
       <div class="section-heading"><div><p class="eyebrow">04 / Evidence into feedback</p><h2 id="reviews-title">Review desk</h2></div></div>
+      <p id="review-feedback" class="form-feedback" role="status"></p><div id="review-queue" class="editorial-content"></div>
       <div class="two-column review-layout">
         <article class="card form-card">
           <h3>Evaluate a submission</h3><p class="card-intro">Score each criterion against the Mayor’s current benchmark. Cite evidence for every score.</p>
@@ -112,6 +130,29 @@
     <section id="mayor" class="workspace-section" aria-labelledby="mayor-title" hidden>
       <div class="section-heading"><div><p class="eyebrow">05 / Mayor desk</p><h2 id="mayor-title">Set the challenge</h2></div></div>
       <p class="section-intro">Publish the public brief before teams join. Revising benchmark materials starts a new score version; earlier reviews remain in the record, while the Champion Wall waits for current reviews.</p>
+      <div id="program-controls" class="card form-card"></div>
+      <article class="card form-card setup-card"><div class="section-heading"><h3>Competition builder</h3><button id="load-program" type="button" class="button button-light">Edit selected competition</button></div><p class="card-intro">Save a draft, check the public preview, then open registration. Contest Express keeps the event record; MoonBook holds your shared brief and team receipts.</p>
+        <form id="program-form">
+          <fieldset><legend>1 · Mayor’s brief</legend><div class="two-column">
+          <label>Competition ID<input name="id" required pattern="[a-z0-9-]+" maxlength="64" placeholder="valley-sprint-2026"></label><label>Name<input name="name" required></label>
+          <label>Mayor’s topic<input name="topic" required></label><label>Organizer<input name="organizer" required placeholder="Energy Valley Mayor"></label>
+          <label>Scope<textarea name="scope" required rows="3"></textarea></label><label>Possibility wiki<textarea name="possibility_wiki" required rows="3"></textarea></label>
+          <label>First person solution prompt<textarea name="first_person_solution" required rows="3"></textarea></label><label>Contact URL<input name="contact_url" type="url" placeholder="https://…"></label>
+          </div></fieldset>
+          <fieldset><legend>2 · Calendar &amp; team policy</legend><p class="card-intro">Enter dates in your device’s time zone. The organizer time zone is displayed with the public calendar.</p><div class="two-column">
+          <label>Time zone<input name="timezone" required value="Asia/Shanghai"></label><label>Maximum team size<input name="max_team_size" type="number" min="1" max="100" required value="5"></label>
+          <label>Registration opens<input name="registration_open_ms" type="datetime-local" required></label><label>Registration closes<input name="registration_close_ms" type="datetime-local" required></label>
+          <label>Submissions open<input name="submission_open_ms" type="datetime-local" required></label><label>Submission deadline<input name="deadline_ms" type="datetime-local" required></label>
+          <label>Review closes<input name="review_close_ms" type="datetime-local" required></label><label>Daily submission limit per team <small>Resets at 00:00 UTC</small><input name="daily_submission_limit" type="number" min="1" max="1000" required value="5"></label>
+          <label>Evaluator accounts <small>One account ID per line. Include your own Mayor account if you will judge.</small><textarea name="evaluator_ids" rows="3"></textarea></label>
+          </div></fieldset>
+          <fieldset><legend>3 · Tracks, benchmarks &amp; scoring</legend><div class="two-column"><label>Benchmark materials <small>One link or description per line</small><textarea name="benchmark_materials" required rows="3"></textarea></label><label>Private evaluation guidance<textarea name="evaluation_materials" required rows="3"></textarea></label><label>Rubric <small>Required for human review tracks. id | Label | Max points, one criterion per line.</small><textarea name="rubric" rows="3" placeholder="quality | Solution quality | 100"></textarea></label></div><div id="track-editors"></div><button id="add-track" type="button" class="button button-light">Add track</button></fieldset>
+          <fieldset><legend>4 · Prizes, partners &amp; FAQ</legend><h4>Prizes</h4><div id="prize-editors"></div><button type="button" data-add-editor="prize" class="button button-light">Add prize</button><h4>Partners</h4><div id="partner-editors"></div><button type="button" data-add-editor="partner" class="button button-light">Add partner</button><h4>FAQ</h4><div id="faq-editors"></div><button type="button" data-add-editor="faq" class="button button-light">Add question</button></fieldset>
+          <div class="action-row"><button type="submit" class="button button-primary">Save draft / amendment</button><button id="preview-program" type="button" class="button button-light">Preview public page</button><button id="new-program" type="button" class="text-button">Start a new draft</button></div>
+        </form><p id="program-feedback" class="form-feedback" role="status"></p><div id="program-preview" class="preview-pane" hidden></div>
+      </article>
+      <article class="card form-card"><h3>Publish an update</h3><form id="announcement-form"><label>Title<input name="title" required></label><label>Story or announcement<textarea name="body" rows="4" required></textarea></label><button type="submit" class="button button-light">Publish update</button></form><p id="announcement-feedback" class="form-feedback" role="status"></p></article>
+      <details class="legacy-tools"><summary>Existing community challenge tools</summary>
       <div class="two-column">
         <article class="card form-card">
           <h3>Publish a challenge</h3>
@@ -141,6 +182,7 @@
           <p id="benchmark-feedback" class="form-feedback" role="status" aria-live="polite"></p>
         </article>
       </div>
+      </details>
     </section>
   </main>
   <footer class="site-footer"><span>MoonTown · Contest Express</span><a href="/index.html">Return to Energy Valley ↗</a></footer>

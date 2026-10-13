@@ -77,6 +77,13 @@ pub struct HackathonState {
   teams : Array[Team]
   submissions : Array[Submission]
   evaluations : Array[Evaluation]
+  programs : Array[CompetitionProgram]
+  team_profiles : Array[TeamProfile]
+  invitations : Array[TeamInvitation]
+  submission_packages : Array[SubmissionPackage]
+  benchmark_runs : Array[BenchmarkRun]
+  appeals : Array[CompetitionAppeal]
+  program_history : Array[CompetitionProgram]
 } derive(Debug, ToJson, FromJson)
 
 ///|
@@ -89,5 +96,12 @@ pub fn empty_hackathon_state() -> HackathonState {
     teams: [],
     submissions: [],
     evaluations: [],
+    programs: [],
+    team_profiles: [],
+    invitations: [],
+    submission_packages: [],
+    benchmark_runs: [],
+    appeals: [],
+    program_history: [],
   }
 }

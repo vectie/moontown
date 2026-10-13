@@ -40,7 +40,7 @@ test "hosted team actions bind membership to authenticated account" {
     is_operator: true,
     is_enterprise_user: false,
   }
-  let state : @hackathon.HackathonState = @json.from_json({
+  let state = @hackathon.decode_hackathon_state({
     "schema": "moontown.contest-express.hackathon.v1",
     "revision": 1,
     "challenges": [],
@@ -115,7 +115,7 @@ test "hosted projection redacts evaluator inputs and other team members" {
     is_operator: false,
     is_enterprise_user: true,
   }
-  let state : @hackathon.HackathonState = @json.from_json({
+  let state = @hackathon.decode_hackathon_state({
     "schema": "moontown.contest-express.hackathon.v1",
     "revision": 1,
     "challenges": [

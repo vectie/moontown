@@ -536,6 +536,10 @@ async fn handle_request(
   if public_access_gate(request, body, conn) {
     return
   }
+  if hackathon_public_path(path) && path != "/api/contest-express/hackathons" {
+    public_hackathon_request(request, body, conn)
+    return
+  }
   if path == @town_contract.desktop_collaboration_path() {
     handle_collaboration_api(request, body, conn)
     return
@@ -551,13 +555,20 @@ async fn handle_request(
           return
         }
       }
-      send_json(conn, 200, state.to_json())
+      send_json(conn, 200, local_hackathon_response(state))
       return
     }
     if reject_unsafe_operator_write(request, conn) {
       return
     }
-    let input = @json.parse(body.read_all().text()) catch {
+    guard bounded_identity_text(body, 131072) is Some(input_text) else {
+      send_json(conn, 413, {
+        "ok": false,
+        "error": "hackathon request too large",
+      })
+      return
+    }
+    let input = @json.parse(input_text) catch {
       _ => {
         send_json(conn, 400, { "ok": false, "error": "invalid JSON" })
         return
@@ -570,6 +581,13 @@ async fn handle_request(
       })
       return
     }
+    if action == "record-benchmark-result" || action == "start-benchmark" {
+      send_json(conn, 403, {
+        "ok": false,
+        "error": "benchmark results require a trusted worker",
+      })
+      return
+    }
     let state = @hackathon.apply_hackathon_action(action, payload, @env.now()) catch {
       error => {
         send_json(conn, 400, {
@@ -579,7 +597,7 @@ async fn handle_request(
         return
       }
     }
-    send_json(conn, 200, state.to_json())
+    send_json(conn, 200, local_hackathon_response(state))
     return
   }
   if path == @town_contract.desktop_imported_outputs_path() ||
@@ -996,8 +1014,20 @@ async fn main {
   // Browsers fetch the entry, MoonBit bundle, styles, sprites, and runtime
   // snapshots concurrently. A single connection stalls bootstrap behind the
   // first keep-alive request, so allow a small bounded local connection pool.
-  server.run_forever(
-    handle_request,
-    max_connections=settings.http_max_connections,
-  )
+  @async.with_task_group(group => {
+    group.spawn_bg(() => {
+      for ;; {
+        let processed = @hackathon.process_next_competition_benchmark() catch {
+          _ => false
+        }
+        if !processed {
+          @async.sleep(1000)
+        }
+      }
+    })
+    server.run_forever(
+      handle_request,
+      max_connections=settings.http_max_connections,
+    )
+  })
 }

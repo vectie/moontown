@@ -21,6 +21,7 @@ const REQUIRED_BROWSER_FILES = [
   'operations.html',
   'hackathon.html',
   'hackathon.js',
+  'competition-ui.js',
   'hackathon.css',
   'account_demo_fixtures.js',
   'account_management.js',

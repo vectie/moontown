@@ -1,0 +1,56 @@
+///|
+/// Loopback-only identity fixture for isolated browser acceptance tests.
+/// Fake accounts: mayor (operator), alice/bob (team), reviewer (evaluator).
+/// Every fixture account uses the non-secret password ui-test-only.
+import {
+  "moonbitlang/async",
+  "moonbitlang/async/http",
+  "moonbitlang/async/io",
+  "moonbitlang/async/socket",
+  "moonbitlang/core/json",
+}
+
+///|
+async fn respond(conn : @http.ServerConnection, code : Int, json : Json, cookies? : Array[@http.Cookie] = []) -> Unit {
+  conn.send_response(code, if code == 200 { "OK" } else { "Unauthorized" }, cookies~, extra_headers={ "Content-Type": "application/json", "Cache-Control": "no-store" })
+  conn.write_string(json.stringify())
+  conn.end_response()
+}
+
+///|
+async fn handle(request : @http.Request, reader : &@io.Reader, conn : @http.ServerConnection) -> Unit {
+  let accounts = ["mayor", "alice", "bob", "reviewer"]
+  if request.path == "/auth/password" && request.meth is Post {
+    let input = @json.parse(reader.read_all().text()) catch { _ => Json::null() }
+    guard input is { "username": String(username), "password": String("ui-test-only"), .. } && accounts.contains(username) else {
+      respond(conn, 401, { "error": "fixture account required" })
+      return
+    }
+    respond(conn, 200, { "ok": true }, cookies=[@http.Cookie("contest_ui_fixture", username, path="/", http_only=true, extensions=["SameSite=Lax"])])
+    return
+  }
+  if request.path == "/auth/session" {
+    let cookie = request.headers.get("cookie").unwrap_or("")
+    guard accounts.iter().find_first(account => cookie.contains("contest_ui_fixture=" + account)) is Some(account) else {
+      respond(conn, 401, { "error": "fixture session missing" }); return
+    }
+    respond(conn, 200, { "session_token": "lnxs_fixture_" + account })
+    return
+  }
+  if request.path == "/v1/auth/self" {
+    let bearer = request.headers.get("authorization").unwrap_or("")
+    guard bearer.strip_prefix("Bearer lnxs_fixture_") is Some(name) && accounts.contains(name.to_string()) else {
+      respond(conn, 401, { "error": "fixture account missing" }); return
+    }
+    respond(conn, 200, { "account_id": name.to_string(), "state": "Active", "roles": if name == "mayor" { ["PlatformOperator"] } else { ["EnterpriseUser"] } })
+    return
+  }
+  respond(conn, 401, { "error": "fixture route missing" })
+}
+
+///|
+async fn main {
+  let server = @http.Server(@socket.Addr::parse("127.0.0.1:17864"), reuse_addr=true)
+  println("Contest Express test identity fixture: loopback 17864; synthetic accounts only")
+  server.run_forever(handle, max_connections=16)
+}

@@ -1,3 +1,4 @@
+import { createCompetitionUI } from './competition-ui.js'
 const API_URL = '/api/contest-express/hackathons'
 const POLL_INTERVAL_MS = 5000
 
@@ -123,8 +124,12 @@ function init() {
   let renderedRubricKey = ''
   let benchmarkFormKey = ''
   let loading = false
+  let mutationBusy = false
   const byId = id => document.getElementById(id)
   const status = byId('sync-status')
+  const competitionUI = createCompetitionUI({ getState: () => state, getChallenge: selectedChallenge,
+    getChallengeId: () => challengeId, submit, showFeedback, setOptions, materialList, prettyTime,
+    node, append, selectChallenge: id => { challengeId = id; render() } })
 
   function selectedChallenge() {
     return state?.challenges.find(item => item.id === challengeId)
@@ -152,7 +157,7 @@ function init() {
     }
     target.className = 'card brief-card'
     const header = append(node('div', 'brief-header'),
-      append(node('div'), node('p', 'eyebrow', `Published · Benchmark v${challenge.benchmark_version}`),
+      append(node('div'), node('p', 'eyebrow', `${challenge.published === false ? 'Draft' : 'Published'} · Benchmark v${challenge.benchmark_version}`),
         node('h3', '', challenge.name)),
       node('span', 'deadline', `Deadline · ${prettyTime(challenge.deadline_ms)}`))
     const grid = append(node('div', 'brief-grid'),
@@ -226,7 +231,13 @@ function init() {
   }
 
   function renderReviews(challenge) {
-    const submissions = challenge ? state.submissions.filter(item => item.challenge_id === challenge.id) : []
+    const program = state.programs?.find(item => item.challenge_id === challenge?.id)
+    const submissions = challenge ? state.submissions.filter(item => {
+      if (item.challenge_id !== challenge.id) return false
+      if (!program) return true
+      const packageRecord = state.submission_packages?.find(record => record.submission_id === item.id)
+      return program.tracks.some(track => track.id === packageRecord?.track_id && track.scoring_mode === 'rubric')
+    }) : []
     setOptions(byId('evaluation-submission'), submissions.map(submission => {
       const team = state.teams.find(item => item.id === submission.team_id)
       return [submission.id, `${team?.name || submission.team_id} · version ${submission.version}`]
@@ -280,10 +291,6 @@ function init() {
       can_publish: true, can_register_team: true, can_join_team: true,
       can_submit: true, can_evaluate: true,
     }
-    byId('mayor').hidden = !viewer.can_publish
-    byId('reviews').hidden = !viewer.can_evaluate
-    document.querySelector('a[href="#mayor"]').hidden = !viewer.can_publish
-    document.querySelector('a[href="#reviews"]').hidden = !viewer.can_evaluate
     byId('team-form').parentElement.hidden = !viewer.can_register_team
     byId('join-form').parentElement.hidden = !viewer.can_join_team
     byId('submission-form').parentElement.hidden = !viewer.can_submit
@@ -293,7 +300,7 @@ function init() {
     const joinMemberField = byId('join-form').elements.member_id
     joinMemberField.closest('label').hidden = Boolean(state.viewer?.account_id)
     if (state.viewer?.account_id) joinMemberField.value = state.viewer.account_id
-    const challenges = state.challenges.filter(item => item.published !== false)
+    const challenges = state.challenges.filter(item => item.published !== false || viewer.can_publish)
     if (!challenges.some(item => item.id === challengeId)) challengeId = challenges[0]?.id || ''
     const picker = byId('challenge-select')
     setOptions(picker, challenges.map(item => [item.id, item.name]), 'No published challenges')
@@ -305,14 +312,15 @@ function init() {
     renderTeams(challenge)
     renderReviews(challenge)
     renderBenchmarkForm(challenge)
+    competitionUI.render()
   }
 
   async function refresh() {
-    if (loading) return
+    if (loading || mutationBusy) return
     loading = true
     try {
       const next = await apiGet()
-      if (!state || state.revision !== next.revision) {
+      if (!state || state.revision !== next.revision || JSON.stringify(state.viewer) !== JSON.stringify(next.viewer)) {
         state = next
         render()
       }
@@ -327,16 +335,32 @@ function init() {
   }
 
   async function submit(action, payload, feedbackId, success) {
+    if (mutationBusy) { showFeedback(feedbackId, 'A request is still running. Wait for its receipt before continuing.', true); return false }
+    mutationBusy = true
+    let succeeded = false
+    const buttons = [...document.querySelectorAll('.workspace-section button')].map(button => [button, button.disabled])
+    for (const [button] of buttons) button.disabled = true
+    const waitMessage = action === 'execute-benchmark' ? 'Scheduling the registered benchmark worker…' : 'Saving to Contest Express…'
+    showFeedback(feedbackId, waitMessage)
+    status.textContent = waitMessage
+    document.querySelector('main').setAttribute('aria-busy', 'true')
     try {
       state = await apiPost(action, payload)
       render()
       showFeedback(feedbackId, success)
       status.textContent = `Live · revision ${state.revision} · just updated`
       status.parentElement.classList.remove('is-offline')
+      succeeded = true
       return true
     } catch (error) {
       showFeedback(feedbackId, error.message, true)
+      status.textContent = `Request failed: ${error.message}`
       return false
+    } finally {
+      mutationBusy = false
+      for (const [button, disabled] of buttons) button.disabled = disabled
+      document.querySelector('main').removeAttribute('aria-busy')
+      if (state && succeeded) competitionUI.render()
     }
   }
 
@@ -379,7 +403,12 @@ function init() {
     if (!members.length) return showFeedback('team', 'List at least one team member.', true)
     const payload = { id: form.elements.id.value.trim(), challenge_id: challengeId,
       name: form.elements.name.value.trim(), members }
-    if (await submit('register-team', payload, 'team', 'Team registered. You can submit a solution now.')) {
+    const program = state.programs?.find(item => item.challenge_id === challengeId)
+    const action = program ? 'register-competition-team' : 'register-team'
+    const request = program ? { team: payload, profile: { team_id: payload.id,
+      captain_id: members[0], affiliation: form.elements.affiliation.value.trim(),
+      track_id: form.elements.track_id.value } } : payload
+    if (await submit(action, request, 'team', program ? 'Team registered. Invite your crew and prepare your materials.' : 'Team registered. You can submit a solution now.')) {
       form.reset()
       if (state.viewer?.account_id) form.elements.members.value = state.viewer.account_id
       byId('submission-team').value = payload.id
@@ -407,7 +436,11 @@ function init() {
       team_id: form.elements.team_id.value, version: 0,
       artifact_url: form.elements.artifact_url.value.trim(),
       first_person_solution: form.elements.first_person_solution.value.trim(), submitted_ms: '0' }
-    if (await submit('submit', payload, 'submission', 'Solution submitted. It is ready for review.')) form.reset()
+    const program = state.programs?.find(item => item.challenge_id === challengeId)
+    const request = program ? { submission: payload, package: competitionUI.submissionPackage(payload) } : payload
+    if (await submit(program ? 'submit-package' : 'submit', request, 'submission', 'Solution submitted. Your version receipt appears below.')) {
+      form.reset(); competitionUI.resetMaterials()
+    }
   })
 
   byId('evaluation-form').addEventListener('submit', async event => {

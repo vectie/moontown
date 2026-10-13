@@ -7,11 +7,35 @@ import {
 }
 
 // Values
-pub async fn apply_hackathon_action(String, Json, UInt64, path? : String) -> HackathonState
+pub fn apply_evaluation_action(HackathonState, String, Json, UInt64) -> HackathonState? raise
+
+pub async fn apply_hackathon_action(String, Json, UInt64, path? : String, actor_id? : String?, actor_is_operator? : Bool) -> HackathonState
+
+pub fn apply_participation_action(HackathonState, String, Json, UInt64) -> HackathonState? raise
+
+pub fn apply_program_action(HackathonState, String, Json, UInt64) -> HackathonState? raise
+
+pub fn competition_action_authorized(HackathonState, String, Json, String, Bool) -> Bool
+
+pub fn competition_finalization_ready(HackathonState, String) -> Bool
+
+pub fn competition_leaderboard(HackathonState, String, String) -> Array[CompetitionBoardEntry]
+
+pub fn competition_program(HackathonState, String) -> CompetitionProgram?
+
+pub fn competition_runner_registry_path() -> String
+
+pub async fn competition_workspace_sync_status(path? : String) -> Json noraise
+
+pub fn decode_hackathon_state(Json) -> HackathonState raise
 
 pub fn default_hackathon_path() -> String
 
 pub fn empty_hackathon_state() -> HackathonState
+
+pub async fn execute_configured_benchmark(HackathonState, String, registry_path? : String, receipt_root? : String) -> BenchmarkResult
+
+pub fn failed_benchmark_result(HackathonState, String, String) -> BenchmarkResult raise
 
 pub fn join_team(HackathonState, String, String) -> HackathonState raise
 
@@ -19,11 +43,21 @@ pub fn leaderboard(HackathonState, String) -> Array[LeaderboardEntry]
 
 pub async fn load_hackathons(path? : String) -> HackathonState
 
+pub async fn process_next_competition_benchmark(path? : String, registry_path? : String, receipt_root? : String) -> Bool
+
+pub fn program_readiness(HackathonState, String) -> Array[String]
+
 pub fn publish_challenge(HackathonState, Challenge) -> HackathonState raise
+
+pub async fn reconcile_competition_workspaces(HackathonState, path? : String) -> Json noraise
 
 pub fn record_evaluation(HackathonState, Evaluation) -> HackathonState raise
 
 pub fn register_team(HackathonState, Team) -> HackathonState raise
+
+pub fn require_competition_reviewer(HackathonState, String, String, UInt64) -> Unit raise
+
+pub fn require_unfrozen_program(HackathonState, String) -> Unit raise
 
 pub fn revise_benchmark(HackathonState, String, Array[String], Array[String], Array[RubricCriterion]) -> HackathonState raise
 
@@ -32,7 +66,40 @@ pub fn submit_solution(HackathonState, Submission) -> HackathonState raise
 // Errors
 
 // Types and methods
+type AnnouncementRequest derive(@json.FromJson)
+
+type AppealRequest derive(@json.FromJson)
+
+type ApproveBenchmarkRequest derive(@json.FromJson)
+
+pub struct BenchmarkResult {
+  run_id : String
+  worker_run_id : String
+  metrics : Array[MetricValue]
+  evidence : Array[String]
+  input_hash : String
+  output_hash : String
+  success : Bool
+  reason : String
+} derive(ToJson, @debug.Debug, @json.FromJson)
+
 type BenchmarkRevision derive(@json.FromJson)
+
+pub struct BenchmarkRun {
+  id : String
+  submission_id : String
+  reviewer_id : String
+  worker_run_id : String
+  state : String
+  reason : String
+  input_hash : String
+  output_hash : String
+  benchmark_version : Int
+  metrics : Array[MetricValue]
+  evidence : Array[String]
+  queued_ms : UInt64
+  finished_ms : UInt64
+} derive(ToJson, @debug.Debug, @json.FromJson)
 
 pub struct Challenge {
   id : String
@@ -47,6 +114,93 @@ pub struct Challenge {
   evaluation_materials : Array[String]
   rubric : Array[RubricCriterion]
   published : Bool
+} derive(ToJson, @debug.Debug, @json.FromJson)
+
+pub struct CompetitionAnnouncement {
+  id : String
+  title : String
+  body : String
+  published_ms : UInt64
+} derive(ToJson, @debug.Debug, @json.FromJson)
+
+pub struct CompetitionAppeal {
+  id : String
+  submission_id : String
+  member_id : String
+  reason : String
+  state : String
+  resolution : String
+  created_ms : UInt64
+  resolved_ms : UInt64
+} derive(ToJson, @debug.Debug, @json.FromJson)
+
+pub struct CompetitionBoardEntry {
+  rank : Int
+  team_id : String
+  team_name : String
+  submission_id : String
+  score : Double
+  metrics : Array[MetricValue]
+  reviewed_ms : UInt64
+  status : String
+} derive(ToJson, @debug.Debug, @json.FromJson)
+
+pub struct CompetitionFAQ {
+  category : String
+  question : String
+  answer : String
+} derive(ToJson, @debug.Debug, @json.FromJson)
+
+pub struct CompetitionPartner {
+  name : String
+  url : String
+} derive(ToJson, @debug.Debug, @json.FromJson)
+
+pub struct CompetitionPrize {
+  track_id : String
+  place : String
+  description : String
+} derive(ToJson, @debug.Debug, @json.FromJson)
+
+pub struct CompetitionProgram {
+  challenge_id : String
+  state : String
+  organizer : String
+  timezone : String
+  registration_open_ms : UInt64
+  registration_close_ms : UInt64
+  submission_open_ms : UInt64
+  review_close_ms : UInt64
+  max_team_size : Int
+  daily_submission_limit : Int
+  contact_url : String
+  tracks : Array[CompetitionTrack]
+  prizes : Array[CompetitionPrize]
+  partners : Array[CompetitionPartner]
+  faq : Array[CompetitionFAQ]
+  announcements : Array[CompetitionAnnouncement]
+  evaluator_ids : Array[String]
+} derive(ToJson, @debug.Debug, @json.FromJson)
+
+pub struct CompetitionRunner {
+  key : String
+  program : String
+  args : Array[String]
+  cwd : String
+  timeout_ms : Int
+} derive(ToJson, @debug.Debug, @json.FromJson)
+
+type CompetitionTeamRequest derive(@json.FromJson)
+
+pub struct CompetitionTrack {
+  id : String
+  name : String
+  description : String
+  scoring_mode : String
+  runner_key : String
+  required_materials : Array[String]
+  metrics : Array[MetricRule]
+  gates : Array[QualificationRule]
 } derive(ToJson, @debug.Debug, @json.FromJson)
 
 pub struct CriterionScore {
@@ -72,7 +226,18 @@ pub struct HackathonState {
   teams : Array[Team]
   submissions : Array[Submission]
   evaluations : Array[Evaluation]
+  programs : Array[CompetitionProgram]
+  team_profiles : Array[TeamProfile]
+  invitations : Array[TeamInvitation]
+  submission_packages : Array[SubmissionPackage]
+  benchmark_runs : Array[BenchmarkRun]
+  appeals : Array[CompetitionAppeal]
+  program_history : Array[CompetitionProgram]
 } derive(ToJson, @debug.Debug, @json.FromJson)
+
+type InvitationRequest derive(@json.FromJson)
+
+type InvitationResponse derive(@json.FromJson)
 
 type JoinTeamRequest derive(@json.FromJson)
 
@@ -85,11 +250,51 @@ pub struct LeaderboardEntry {
   evaluated_ms : UInt64
 } derive(ToJson, @debug.Debug, @json.FromJson)
 
+pub struct MetricRule {
+  id : String
+  label : String
+  unit : String
+  direction : String
+  baseline : Double
+  weight : Double
+} derive(ToJson, @debug.Debug, @json.FromJson)
+
+pub struct MetricValue {
+  metric_id : String
+  value : Double
+} derive(ToJson, @debug.Debug, @json.FromJson)
+
+type ProgramIdentityRequest derive(@json.FromJson)
+
+type ProgramTransitionRequest derive(@json.FromJson)
+
+pub struct QualificationRule {
+  id : String
+  label : String
+  metric_id : String
+  comparison : String
+  threshold : Double
+} derive(ToJson, @debug.Debug, @json.FromJson)
+
+type QueueBenchmarkRequest derive(@json.FromJson)
+
+type RecoverBenchmarkRequest derive(@json.FromJson)
+
+type RemoveMemberRequest derive(@json.FromJson)
+
+type ResolveAppealRequest derive(@json.FromJson)
+
 pub struct RubricCriterion {
   id : String
   label : String
   max_points : Int
 } derive(ToJson, @debug.Debug, @json.FromJson)
+
+type RunIdRequest derive(@json.FromJson)
+
+type RunnerOutput derive(@json.FromJson)
+
+type SaveProgramRequest derive(@json.FromJson)
 
 pub struct Submission {
   id : String
@@ -101,11 +306,42 @@ pub struct Submission {
   submitted_ms : UInt64
 } derive(ToJson, @debug.Debug, @json.FromJson)
 
+pub struct SubmissionMaterial {
+  kind : String
+  url : String
+  sha256 : String
+} derive(ToJson, @debug.Debug, @json.FromJson)
+
+pub struct SubmissionPackage {
+  submission_id : String
+  track_id : String
+  materials : Array[SubmissionMaterial]
+  benchmark_version : Int
+} derive(ToJson, @debug.Debug, @json.FromJson)
+
+type SubmissionPackageRequest derive(@json.FromJson)
+
 pub struct Team {
   id : String
   challenge_id : String
   name : String
   members : Array[String]
+} derive(ToJson, @debug.Debug, @json.FromJson)
+
+pub struct TeamInvitation {
+  id : String
+  team_id : String
+  inviter_id : String
+  invitee_id : String
+  state : String
+  created_ms : UInt64
+} derive(ToJson, @debug.Debug, @json.FromJson)
+
+pub struct TeamProfile {
+  team_id : String
+  captain_id : String
+  affiliation : String
+  track_id : String
 } derive(ToJson, @debug.Debug, @json.FromJson)
 
 // Type aliases
