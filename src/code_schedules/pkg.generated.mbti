@@ -4,6 +4,7 @@ package "vectie/moontown/code_schedules"
 import {
   "moonbitlang/core/debug",
   "moonbitlang/core/json",
+  "vectie/moontown/adapters/moonbook",
 }
 
 // Values
@@ -12,6 +13,12 @@ pub fn code_schedule_schema() -> String
 pub async fn create_code_schedule(CodeSchedule, path? : String) -> CodeScheduleState
 
 pub fn default_code_schedule_path() -> String
+
+pub async fn delete_code_schedule(String, path? : String) -> CodeScheduleState
+
+pub async fn edit_code_schedule(String, prompt~ : String, model~ : String, title~ : String, interval_seconds~ : Int, next_due_at~ : Int64, repeat~ : Bool, recurrence? : String, timezone? : String, path? : String) -> CodeScheduleState
+
+pub fn find_code_schedule_book(Array[@moonbook.BookCatalogEntry], String) -> @moonbook.BookCatalogEntry?
 
 pub async fn load_code_schedule_state(path? : String) -> CodeScheduleState
 
@@ -28,6 +35,8 @@ pub async fn record_code_schedule_uncertain(String, String, path? : String) -> B
 pub async fn record_code_schedule_waiting(String, String, String, path? : String) -> Bool
 
 pub async fn reserve_due_code_schedule(Int64, path? : String) -> CodeDispatchIntent?
+
+pub async fn run_code_schedule_now(String, Int64, path? : String) -> CodeScheduleState
 
 pub async fn run_due_code_schedules(Int64, String, path? : String) -> String
 
@@ -62,6 +71,11 @@ pub struct CodeSchedule {
   last_status : String
   last_finished_at : Int64
   last_attempt_at : Int64?
+  repeat : Bool?
+  title : String?
+  recurrence : String?
+  timezone : String?
+  calendar_anchor_at : Int64?
 } derive(ToJson, @debug.Debug, @json.FromJson)
 pub fn CodeSchedule::mark_accepted(Self, String) -> Self?
 pub fn CodeSchedule::mark_terminal(Self, String, String, Int64) -> Self?
@@ -71,6 +85,8 @@ pub fn CodeSchedule::new(id~ : String, book_id~ : String, book_root~ : String, s
 pub fn CodeSchedule::pause(Self) -> Self
 pub fn CodeSchedule::prepare_due(Self, Int64) -> (Self, CodeDispatchIntent)?
 pub fn CodeSchedule::reactivate(Self, Int64) -> Self
+pub fn CodeSchedule::reschedule(Self, prompt~ : String, model~ : String, title~ : String, interval_seconds~ : Int, next_due_at~ : Int64, repeat~ : Bool) -> Result[Self, String]
+pub async fn CodeSchedule::with_calendar(Self, String, String) -> Self
 
 pub struct CodeScheduleState {
   schema : String

@@ -1,5 +1,6 @@
 import {
   "moonbitlang/core/json",
+  "moonbitlang/x/time",
   "moonbitlang/async/fs",
   "vectie/moontown/native_code_control",
   "vectie/moontown/adapters/moonbook",

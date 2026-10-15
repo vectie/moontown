@@ -16,6 +16,11 @@ pub struct CodeSchedule {
   last_status : String
   last_finished_at : Int64
   last_attempt_at : Int64?
+  repeat : Bool?
+  title : String?
+  recurrence : String?
+  timezone : String?
+  calendar_anchor_at : Int64?
 } derive(Debug, ToJson, FromJson)
 
 ///|
@@ -77,6 +82,11 @@ pub fn CodeSchedule::new(
     last_status: "never-run",
     last_finished_at: 0L,
     last_attempt_at: Some(0L),
+    repeat: Some(true),
+    title: None,
+    recurrence: None,
+    timezone: None,
+    calendar_anchor_at: None,
   })
 }
 
@@ -163,6 +173,39 @@ pub fn CodeSchedule::mark_terminal(
     last_status: status,
     last_finished_at: now,
     next_due_at: now + self.interval_seconds.to_int64(),
+    enabled: self.enabled && self.repeat.unwrap_or(true),
+  })
+}
+
+///|
+pub fn CodeSchedule::reschedule(
+  self : CodeSchedule,
+  prompt~ : String,
+  model~ : String,
+  title~ : String,
+  interval_seconds~ : Int,
+  next_due_at~ : Int64,
+  repeat~ : Bool,
+) -> Result[CodeSchedule, String] {
+  if self.pending_command_id != "" {
+    return Err("Code schedule is running; edit after this run finishes")
+  }
+  if prompt.trim().is_empty() ||
+    prompt.length() > 4000 ||
+    model.trim().is_empty() ||
+    interval_seconds < 60 ||
+    interval_seconds > 30 * 24 * 60 * 60 ||
+    next_due_at < 0L {
+    return Err("invalid Code schedule")
+  }
+  Ok({
+    ..self,
+    prompt: prompt.trim().to_owned(),
+    model: model.trim().to_owned(),
+    title: Some(title.trim().to_owned()),
+    interval_seconds,
+    next_due_at,
+    repeat: Some(repeat),
   })
 }
 

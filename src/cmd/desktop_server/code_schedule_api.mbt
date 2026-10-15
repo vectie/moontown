@@ -10,6 +10,10 @@ fn code_schedule_api_string(fields : Map[String, Json], key : String) -> String 
 fn code_schedule_api_error_response(error : String) -> (Int, String) {
   if error.contains("identity already exists") {
     (409, "A Code schedule with this ID already exists.")
+  } else if error.contains("Code schedule is running") {
+    (
+      409, "This task is running. You can edit or remove its schedule after it finishes.",
+    )
   } else if error.contains("invalid Code schedule") ||
     error.contains("cadence is required") ||
     error.contains("invalid Code schedule request") {
@@ -40,7 +44,8 @@ async fn code_schedule_api_action(body : String) -> Json {
       let catalog = @moonbook.load_or_create_catalog(
         path=@moonbook.default_catalog_path(),
       )
-      guard @moonbook.find_catalog_entry(catalog, book_id) is Some(book) &&
+      guard @code_schedules.find_code_schedule_book(catalog, book_id)
+        is Some(book) &&
         @fs.kind(book.workspace_root, follow_symlink=false) is Directory &&
         @fs.realpath(book.workspace_root) == book.workspace_root else {
         fail("select a registered MoonBook with a canonical workspace")
@@ -62,8 +67,48 @@ async fn code_schedule_api_action(body : String) -> Json {
         Ok(value) => value
         Err(error) => fail(error)
       }
+      let schedule = if fields.contains("next_due_at") ||
+        fields.contains("repeat") ||
+        fields.contains("title") {
+        match
+          schedule.reschedule(
+            prompt=schedule.prompt,
+            model=schedule.model,
+            title=code_schedule_api_string(fields, "title"),
+            interval_seconds=schedule.interval_seconds,
+            next_due_at=code_schedule_api_due(fields, schedule.next_due_at),
+            repeat=code_schedule_api_repeat(fields),
+          ) {
+          Ok(value) => value
+          Err(error) => fail(error)
+        }
+      } else {
+        schedule
+      }
+      let schedule = schedule.with_calendar(
+        code_schedule_api_string(fields, "recurrence"),
+        code_schedule_api_string(fields, "timezone"),
+      )
       @code_schedules.create_code_schedule(schedule).to_json()
     }
+    "update" => {
+      guard fields.get("interval_seconds") is Some(Number(interval, ..)) else {
+        fail("Code schedule cadence is required")
+      }
+      @code_schedules.edit_code_schedule(
+        id,
+        prompt=code_schedule_api_string(fields, "prompt"),
+        model=code_schedule_api_string(fields, "model"),
+        title=code_schedule_api_string(fields, "title"),
+        interval_seconds=interval.to_int(),
+        next_due_at=code_schedule_api_due(fields, now + interval.to_int64()),
+        repeat=code_schedule_api_repeat(fields),
+        recurrence=code_schedule_api_string(fields, "recurrence"),
+        timezone=code_schedule_api_string(fields, "timezone"),
+      ).to_json()
+    }
+    "run-now" => @code_schedules.run_code_schedule_now(id, now).to_json()
+    "delete" => @code_schedules.delete_code_schedule(id).to_json()
     "pause" | "resume" => {
       let enabled = code_schedule_api_string(fields, "action") == "resume"
       guard @code_schedules.set_code_schedule_enabled(id, enabled, now) else {
@@ -72,5 +117,21 @@ async fn code_schedule_api_action(body : String) -> Json {
       @code_schedules.load_code_schedule_state().to_json()
     }
     _ => fail("unsupported Code schedule action")
+  }
+}
+
+///|
+fn code_schedule_api_due(fields : Map[String, Json], fallback : Int64) -> Int64 {
+  match fields.get("next_due_at") {
+    Some(Number(value, ..)) => value.to_int64()
+    _ => fallback
+  }
+}
+
+///|
+fn code_schedule_api_repeat(fields : Map[String, Json]) -> Bool {
+  match fields.get("repeat") {
+    Some(False) => false
+    _ => true
   }
 }

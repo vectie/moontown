@@ -1015,6 +1015,9 @@ async fn main {
   // snapshots concurrently. A single connection stalls bootstrap behind the
   // first keep-alive request, so allow a small bounded local connection pool.
   @async.with_task_group(group => {
+    if env_value("MOONTOWN_DESKTOP_SCHEDULES") == Some("1") {
+      group.spawn_bg(run_desktop_code_schedule_clock)
+    }
     group.spawn_bg(() => {
       for ;; {
         let processed = @hackathon.process_next_competition_benchmark() catch {

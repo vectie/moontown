@@ -2,7 +2,10 @@
 async fn wenyu_owner_fixture(
   label : String,
 ) -> (WenyuLaunch, @native_work.Work) {
-  let temporary = "/tmp/town-wenyu-owner-" + label + "-" + @env.now().to_string()
+  let temporary = "/tmp/town-wenyu-owner-" +
+    label +
+    "-" +
+    @env.now().to_string()
   @fs.mkdir(temporary)
   let root = @fs.realpath(temporary)
   let book = root + "/book"

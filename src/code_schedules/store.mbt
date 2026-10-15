@@ -323,7 +323,11 @@ pub async fn record_code_schedule_terminal(
       is Some(updated) else {
       return false
     }
-    schedules[index] = updated
+    schedules[index] = code_schedule_next_after_completion(
+      schedules[index],
+      updated,
+      now,
+    )
     save_code_schedule_state_unlocked(path, {
       ..state,
       revision: state.revision + 1,

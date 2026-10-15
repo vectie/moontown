@@ -90,7 +90,7 @@ async fn code_schedule_book_still_registered(
   catalog_path : String,
 ) -> Bool {
   let catalog = @moonbook.load_or_create_catalog(path=catalog_path)
-  match @moonbook.find_catalog_entry(catalog, intent.book_id) {
+  match find_code_schedule_book(catalog, intent.book_id) {
     Some(entry) =>
       entry.workspace_root == intent.book_root &&
       @fs.kind(entry.workspace_root, follow_symlink=false) is Directory &&
