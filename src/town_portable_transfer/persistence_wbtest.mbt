@@ -214,7 +214,7 @@ async test "commit index failures survive restart with no authorized orphan and 
 async test "withdraw during active upload marks cleanup pending and cannot commit" {
   let root = @fs.realpath(@fs.tmpdir(prefix="town-store-withdraw-active-"))
   defer (@fs.rmdir(root, recursive=true) catch { _ => () })
-  let store = portable_store(root, limits=test_limits())
+  let store = portable_store(root, limits=gated_upload_limits())
   let bytes = b"active withdrawn bytes"
   let binding = test_binding(bytes, "listing-active")
   let started = Ref(false)
@@ -246,7 +246,7 @@ async test "withdraw during active upload marks cleanup pending and cannot commi
       110UL,
     )
     assert_true(withdrawn.cleanup_pending)
-    store.recover(5000UL)
+    store.recover(store.limits.lease_ms + 1000UL)
     assert_eq(store.load_index().reservations.length(), 1)
     gate.release()
     task.wait()

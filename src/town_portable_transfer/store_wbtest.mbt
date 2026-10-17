@@ -16,6 +16,20 @@ fn test_limits() -> TransferLimits {
 }
 
 ///|
+fn gated_upload_limits() -> TransferLimits {
+  // These fixtures deliberately hold the transport open across durable index
+  // operations. Keep their transport budget separate from the short deadline
+  // fixtures. The lease must exceed that budget; recovery below still runs
+  // after its expiry, so the live file lock must protect the active attempt.
+  {
+    ..test_limits(),
+    idle_timeout_ms: 2000,
+    total_timeout_ms: 5000,
+    lease_ms: 10000UL,
+  }
+}
+
+///|
 fn owner_actor() -> TransferActor {
   { principal_id: "publisher", tenant_id: "team", publisher: true, }
 }
@@ -82,7 +96,7 @@ async fn test_upload(
 ///|
 async fn expect_code(code : Int, action : async () -> Unit) -> Unit {
   try action() catch {
-    TransferError(actual, _) => assert_eq(actual, code)
+    TransferError(actual, reason) => assert_eq(actual, code, msg=reason)
     error => fail("unexpected error: \{error}")
   } noraise {
     _ => fail("expected transfer error \{code}")
@@ -152,7 +166,7 @@ async test "one active reservation quota and recovery never age deletes active u
   let root = @fs.realpath(@fs.tmpdir(prefix="town-store-concurrent-"))
   defer (@fs.rmdir(root, recursive=true) catch { _ => () })
   let limits = {
-    ..test_limits(),
+    ..gated_upload_limits(),
     max_package_bytes: 64,
     max_retained_bytes: 128,
   }
@@ -180,12 +194,17 @@ async test "one active reservation quota and recovery never age deletes active u
       @async.sleep(1)
     }
     expect_code(409, () => ignore(test_upload(store, one, bytes)))
-    store.recover(2000UL)
+    store.recover(limits.lease_ms + 1000UL)
     assert_eq(store.load_index().reservations.length(), 1)
     ignore(test_upload(store, two, bytes))
     expect_code(413, () => ignore(test_upload(store, three, bytes)))
     gate.release()
-    assert_eq(active.wait().status, "available")
+    let completed = active.wait() catch {
+      TransferError(code, reason) =>
+        fail("active upload failed: \{code} \{reason}")
+      error => raise error
+    }
+    assert_eq(completed.status, "available")
   })
   assert_eq(store.load_index().reservations.length(), 0)
   assert_eq(store.list(owner_actor(), 100UL).length(), 2)
