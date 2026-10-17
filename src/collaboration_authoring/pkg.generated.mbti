@@ -54,6 +54,7 @@ pub async fn Store::compare_outcomes(Self, @collaboration_contract.OutcomeKey, @
 pub async fn Store::decide_oneoff(Self, String, String, String?, Json, String) -> @collaboration_contract.OneoffWork
 pub async fn Store::export_outcome(Self, @collaboration_contract.OutcomeKey) -> Bytes
 pub async fn Store::export_tar(Self, String, String) -> Bytes
+pub async fn Store::import_material(Self, String, Array[@collaboration_contract.MaterialSelection]) -> @collaboration_contract.MaterialNotebook
 pub async fn Store::inspect_outcome(Self, @collaboration_contract.OutcomeKey) -> @collaboration_contract.RetainedOutcome
 pub async fn Store::list(Self) -> Array[@collaboration_contract.SavedDraft]
 pub async fn Store::list_outcomes(Self) -> Array[@collaboration_contract.OutcomeEntry]
@@ -66,6 +67,9 @@ pub async fn Store::request(Self, Request, String) -> @collaboration_contract.Re
 pub async fn Store::request_oneoff(Self, Request, OneoffRuntime?, String?, String, Int) -> @collaboration_contract.Reply
 pub async fn Store::reuse(Self, String, String, String, String) -> @collaboration_contract.SavedDraft
 pub async fn Store::save(Self, @collaboration_contract.Draft, String, String) -> @collaboration_contract.SavedDraft
+pub async fn Store::save_claim_challenge(Self, @collaboration_contract.ClaimChallenge, String) -> @collaboration_contract.SavedDraft
+pub async fn Store::save_material_notebook(Self, @collaboration_contract.MaterialNotebook, String) -> @collaboration_contract.SavedDraft
+pub async fn Store::save_retained_inquiry(Self, @collaboration_contract.RetainedInquiry, String) -> @collaboration_contract.SavedDraft
 pub async fn Store::search_outcomes(Self, @collaboration_contract.OutcomeSearchQuery) -> @collaboration_contract.OutcomeSearch
 pub async fn Store::start_oneoff(Self, String, String, OneoffRuntime, background? : Bool) -> @collaboration_contract.OneoffWork
 pub async fn Store::submit_oneoff(Self, String, String, Json, Int) -> @collaboration_contract.OneoffWork

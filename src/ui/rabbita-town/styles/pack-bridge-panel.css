@@ -190,6 +190,43 @@
 .pack-candidate-form-status { min-height: 18px; margin: 0; color: #64748b; font-size: 12px; }
 .pack-candidate-submit { min-height: 42px; background: #1d4ed8; color: #fff; border-color: #1d4ed8; }
 
+.pack-material-discovery { display: grid; gap: 10px; margin: 16px 0 20px; }
+.pack-material-discovery h3 { margin: 0; }
+.pack-material-review-sources { display: grid; gap: 12px; }
+.pack-material-ref { overflow-wrap: anywhere; font-size: 12px; line-height: 1.5; }
+.pack-material-dialog .pack-layer-filter { border-radius: 8px; font-size: 12px; }
+.pack-material-dialog .pack-layer-filter input { flex: 0 0 auto; }
+.pack-material-dialog button[hidden] { display: none; }
+.pack-material-discovery button:disabled,
+.pack-material-dialog button:disabled { opacity: .6; cursor: not-allowed; }
+
+.pack-question-section, .pack-question-rows { display: grid; gap: 12px; }
+.pack-question-section { margin: 16px 0; padding-bottom: 16px; border-bottom: 1px solid #cbd5e1; }
+.pack-question-section h3 { margin: 0; }
+.pack-question-section input[type="file"] { max-width: 100%; }
+.pack-question-dialog { width: min(760px, calc(100vw - 28px)); }
+.pack-question-dialog .pack-candidate-field :is(input, textarea, select) { box-sizing: border-box; }
+.pack-question-dialog button:disabled { opacity: .6; cursor: not-allowed; }
+.pack-question-gap { padding: 10px; margin: 0; border-left: 3px solid #b45309; background: #fffbeb; color: #92400e; font-size: 12px; line-height: 1.5; }
+
+.pack-observation-section, .pack-observation-rows { display: grid; gap: 12px; }
+.pack-observation-section { margin: 16px 0; padding-bottom: 16px; border-bottom: 1px solid #cbd5e1; }
+.pack-observation-section h3, .pack-observation-section h4 { margin: 0; }
+.pack-observation-section .pack-candidate-field :is(input, select) { box-sizing: border-box; }
+.pack-observation-section input[type="checkbox"] { width: 18px; min-height: 18px; }
+.pack-observation-excerpt { border-left: 2px solid #cbd5e1; padding-left: 10px; overflow-wrap: anywhere; }
+.pack-observation-excerpt p { white-space: pre-wrap; font-size: 12px; line-height: 1.5; }
+.pack-observation-section button:disabled { opacity: .6; cursor: not-allowed; }
+
+.pack-vocabulary-section, .pack-vocabulary-rows { display: grid; gap: 12px; }
+.pack-vocabulary-section { margin: 16px 0; padding-bottom: 16px; border-bottom: 1px solid #cbd5e1; }
+.pack-vocabulary-section h3, .pack-vocabulary-section h4 { margin: 0; }
+.pack-vocabulary-section p { overflow-wrap: anywhere; white-space: pre-wrap; font-size: 12px; line-height: 1.5; }
+.pack-vocabulary-section .pack-candidate-field :is(input, select, textarea) { box-sizing: border-box; }
+.pack-vocabulary-section input[type="checkbox"] { width: 18px; min-height: 18px; }
+.pack-vocabulary-section input[type="file"] { max-width: 100%; }
+.pack-vocabulary-section button:disabled { opacity: .6; cursor: not-allowed; }
+
 @media (max-width: 560px) {
   .pack-bridge-panel {
     top: max(56px, calc(env(safe-area-inset-top) + 8px));

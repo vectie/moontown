@@ -1,0 +1,63 @@
+{
+  "contract_version": "moontown.material-notebook.v1",
+  "draft_id": "shade-question",
+  "title": "Does shade explain dry soil?",
+  "question": "Could shade and irrigation timing explain the south plot?",
+  "falsifier": "If equally irrigated shaded and exposed sensors stay equally dry, reject the shade hypothesis.",
+  "dissent": "The path observation may not describe the plot itself.",
+  "assumptions": "The observation dates and rainfall exposure are comparable.",
+  "reviewer_id": "alex",
+  "reviewer_name": "Alex Reviewer",
+  "objection_reviewer_id": "sam",
+  "objection_reviewer_name": "Sam Reviewer",
+  "pages": [
+    {
+      "book_id": "water",
+      "book_title": "water Book",
+      "source_path": "raw/observations.md",
+      "digest": "sha256:7880504be203879c4ab7b62e1113b1fafbd864438a899b42b7f294a3fdea7f94",
+      "size_bytes": 88,
+      "text": "# Water observations\nThe south plot stayed dry after rain.\nNo temperature was recorded.\n"
+    },
+    {
+      "book_id": "water",
+      "book_title": "water Book",
+      "source_path": "raw/unselected.md",
+      "digest": "sha256:ce5b9080a83cf61c891ddb6caf4c95c61a28b4ffaaf3e503320bd5b6b570699c",
+      "size_bytes": 31,
+      "text": "Not relevant to this question.\n"
+    },
+    {
+      "book_id": "mobility",
+      "book_title": "mobility Book",
+      "source_path": "raw/observations.md",
+      "digest": "sha256:8504c2710410721d7529fc0e11f045afc17de7ef720cbe03b31abeef3bd55db2",
+      "size_bytes": 84,
+      "text": "# Site observations\nThe south path has no shade at noon.\nThe north path was closed.\n"
+    },
+    {
+      "book_id": "mobility",
+      "book_title": "mobility Book",
+      "source_path": "raw/unselected.md",
+      "digest": "sha256:ce5b9080a83cf61c891ddb6caf4c95c61a28b4ffaaf3e503320bd5b6b570699c",
+      "size_bytes": 31,
+      "text": "Not relevant to this question.\n"
+    }
+  ],
+  "excerpts": [
+    {
+      "book_id": "water",
+      "source_path": "raw/observations.md",
+      "quote": "The south plot stayed dry after rain.",
+      "observation": "Dry soil after rain raises a possible exposure question.",
+      "challenge": "Check the actual rainfall and irrigation record."
+    },
+    {
+      "book_id": "mobility",
+      "source_path": "raw/observations.md",
+      "quote": "The south path has no shade at noon.",
+      "observation": "Nearby shade observations suggest a test, not a causal conclusion.",
+      "challenge": "Check whether the path and plot share the same exposure."
+    }
+  ]
+}

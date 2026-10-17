@@ -8,6 +8,8 @@ pub(all) struct Client {
   work : OneoffWork?
   previous_revision : String
   work_fields : Map[String, String]
+  claim_fields : Map[String, String]
+  inquiry_fields : Map[String, String]
   books : Array[CatalogBook]
   drafts : Array[SavedDraft]
   new_draft_id : String
@@ -36,6 +38,8 @@ pub fn Client::new() -> Client {
     work: None,
     previous_revision: "",
     work_fields: Map([]),
+    claim_fields: Map([]),
+    inquiry_fields: Map([]),
     books: [],
     drafts: [],
     new_draft_id: "",
@@ -91,12 +95,19 @@ pub fn Client::reset(self : Client) -> Client {
 
 ///|
 pub fn Client::edit(self : Client, field : String, value : String) -> Client {
+  if field.has_prefix("inquiry_") {
+    return self.edit_retained_inquiry(field, value)
+  }
+  if field.has_prefix("claim_") {
+    return self.edit_claim_challenge(field, value)
+  }
   if field == "source_filter" {
     return { ..self, source_filter: value, }
   }
   if field == "outcome_filter" || field == "review_filter" {
     return {
       ..self.dismiss(),
+      inquiry_fields: Map([]),
       outcome_filter: if field == "outcome_filter" {
         value
       } else {
@@ -114,6 +125,41 @@ pub fn Client::edit(self : Client, field : String, value : String) -> Client {
   }
   let d = self.draft
   if field.has_prefix("work_") {
+    if field == "work_collective_mode" {
+      if value == "compose" && self.work_fields.get(field) == Some("compose") {
+        return self
+      }
+      let fields = clear_collective_fields(self.work_fields)
+      if value == "compose" {
+        guard self.work is Some(work) && salon_ready(work) else {
+          return {
+            ..self,
+            notice: "Collect two completed contributions before composing an experiment",
+          }
+        }
+        fields[field] = value
+        fields["work_collective_result_digest"] = work.result_digest
+      }
+      return { ..self, work_fields: fields, }
+    }
+    if field == "work_salon_mode" {
+      if value == "compare" &&
+        self.work_fields.get("work_salon_mode") == Some("compare") {
+        return self
+      }
+      let fields = clear_salon_fields(self.work_fields)
+      if value == "compare" {
+        guard self.work is Some(work) && salon_ready(work) else {
+          return {
+            ..self,
+            notice: "Collect two completed contributions before comparing ideas",
+          }
+        }
+        fields["work_salon_mode"] = "compare"
+        fields["work_salon_result_digest"] = work.result_digest
+      }
+      return { ..self, work_fields: fields, }
+    }
     let fields = self.work_fields.copy()
     fields[field] = value
     return { ..self, work_fields: fields, }
@@ -144,6 +190,7 @@ pub fn Client::edit(self : Client, field : String, value : String) -> Client {
     sources: [],
     prepared: None,
     work: None,
+    work_fields: clear_collective_fields(clear_salon_fields(self.work_fields)),
     dirty: true,
     generation: self.generation + 1,
     notice: "Unsaved changes",
@@ -176,6 +223,7 @@ pub fn Client::toggle_book(self : Client, id : String) -> Client {
     sources: [],
     prepared: None,
     work: None,
+    work_fields: clear_collective_fields(clear_salon_fields(self.work_fields)),
     dirty: true,
     generation: self.generation + 1,
     notice: "Unsaved participant selection",
@@ -222,6 +270,7 @@ pub fn Client::edit_participant(
     sources: [],
     prepared: None,
     work: None,
+    work_fields: clear_collective_fields(clear_salon_fields(self.work_fields)),
     dirty: true,
     generation: self.generation + 1,
     notice: "Unsaved assignment changes",
@@ -232,6 +281,20 @@ pub fn Client::edit_participant(
 pub fn Client::begin(self : Client, action : String, id : String) -> Client {
   if self.busy() {
     return self
+  }
+  if action == "retained-inquiry" {
+    if self.retained_inquiry_preview() is Err(error) {
+      return { ..self, notice: error, }
+    }
+  }
+  if action == "claim-challenge" {
+    let validation = match self.claim_challenge_input() {
+      Ok(input) => claim_challenge_draft(input, self.books)
+      Err(error) => Err(error)
+    }
+    if validation is Err(error) {
+      return { ..self, notice: error, }
+    }
   }
   if (
       action == "prepare" ||
@@ -338,7 +401,17 @@ pub fn Client::settle(
         notice: "Work response belongs to another captured revision",
       }
     }
-    return { ..clean, work: Some(work), notice: work.detail, }
+    return {
+      ..clean,
+      work: Some(work),
+      work_fields: if self.work.map(previous => previous.result_digest) ==
+        Some(work.result_digest) {
+        self.work_fields
+      } else {
+        clear_collective_fields(clear_salon_fields(self.work_fields))
+      },
+      notice: work.detail,
+    }
   }
   if action == "list" {
     return {
@@ -353,14 +426,34 @@ pub fn Client::settle(
     }
   }
   if reply.saved is Some(saved) {
-    let expected_id = if action == "reuse" {
+    let expected_id = if action == "oneoff-followup" {
+      self.work_fields.get("work_collective_new_id").unwrap_or("")
+    } else if action == "reuse" {
       self.new_draft_id
     } else {
       self.pending_id
     }
+    let expected_id = if action == "retained-inquiry" {
+      self.inquiry_fields.get("inquiry_id").unwrap_or("")
+    } else if action == "claim-challenge" {
+      self.claim_fields.get("claim_id").unwrap_or("")
+    } else {
+      expected_id
+    }
+    let claim_matches = if action == "retained-inquiry" {
+      self.retained_inquiry_preview() == Ok(saved.draft)
+    } else if action == "claim-challenge" {
+      match self.claim_challenge_input() {
+        Ok(input) => claim_challenge_draft(input, self.books) == Ok(saved.draft)
+        Err(_) => false
+      }
+    } else {
+      true
+    }
     if saved.draft.draft_id != expected_id ||
       !safe_id(saved.revision) ||
-      (action == "save" && saved.draft != self.draft) {
+      (action == "save" && saved.draft != self.draft) ||
+      !claim_matches {
       return {
         ..clean,
         notice: "Saved draft identity did not match this request",
@@ -377,12 +470,25 @@ pub fn Client::settle(
       sources: saved.sources,
       prepared: None,
       work: None,
+      claim_fields: Map([]),
+      inquiry_fields: Map([]),
+      work_fields: if action == "oneoff-followup" {
+        Map([])
+      } else {
+        clear_collective_fields(clear_salon_fields(self.work_fields))
+      },
       previous_revision: saved.previous_revision,
       drafts,
       dirty: false,
       source_book: "",
       source_listing: None,
-      notice: "Saved source snapshots reopened. Prepare verifies every captured file.",
+      notice: if action == "retained-inquiry" {
+        "New research-salon inquiry saved with attributed historical excerpts and newly captured current sources. Edit assignments or sources, then Prepare. No work has run and no prior review was inherited."
+      } else if action == "oneoff-followup" {
+        "Peer-challenge draft saved with exact prior excerpts and newly captured current Book sources. No work has run. Inspect assignments, then prepare and explicitly run the new round."
+      } else {
+        "Saved source snapshots reopened. Prepare verifies every captured file."
+      },
     }
   }
   if reply.prepared is Some(prepared) {
@@ -426,6 +532,11 @@ pub fn Client::download_settled(
 pub fn Client::select_outcome(self : Client, key : OutcomeKey) -> Client {
   {
     ..self.dismiss(),
+    inquiry_fields: if self.outcome_key == Some(key) {
+      self.inquiry_fields
+    } else {
+      Map([])
+    },
     outcome_key: Some(key),
     outcome: None,
     notice: "Inspecting the selected retained result and review version",

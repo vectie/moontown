@@ -160,6 +160,20 @@ async fn Store::make_work_package(
       @utf8.encode(required_text(fields, "capability_summary")),
     ).to_json()
   }
+  let salon = match @contract.salon_selection(saved, work, fields) {
+    Ok(value) => value
+    Err(error) => raise CollaborationError(error)
+  }
+  let routed_summary = match salon {
+    Some(selection) => {
+      statement_fields["salon_selection"] = selection
+      "Idea salon selected " +
+      required_text(fields, "salon_selected_book") +
+      " for independent Book review. " +
+      summary
+    }
+    None => summary
+  }
   let statement = Json::object(statement_fields)
   let statement_text = statement.stringify(indent=2)
   let identity = digest(@utf8.encode(statement_text))
@@ -197,7 +211,7 @@ async fn Store::make_work_package(
     " participant(s) succeeded, " +
     work.participants.filter(p => p.status == "failed").length().to_string() +
     " failed. Exact inputs, outputs and failures are retained. Approval covers the account, not a claim of successful collaboration. Book makes its own independent decision.",
-    "outcome_summary": summary,
+    "outcome_summary": routed_summary,
     "owner_route": route,
     "evidence_refs": references.to_json(),
     "decision_evidence_id": evidence_ids[2],

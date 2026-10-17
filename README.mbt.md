@@ -908,3 +908,41 @@ The existing local Node mini-app service supports [previewed profile corrections
 Update a retained building's title, summary or search tags at its inspected
 version, then rediscover the same identity with its conversation intact. This
 fixture workflow does not qualify the native app or production identity service.
+
+## Source-linked bottom-up pack proposals
+
+In **Pack layers**, select actual domain subjects and choose **Propose from N
+source(s)** to preserve their observations and evidence in a review-pending
+candidate. Explain the connections and contrary evidence before explicit
+submission. See [Source-linked pack candidates](docs/SOURCE_LINKED_PACK_CANDIDATES.md)
+for freshness, retry and authority boundaries.
+
+To start from recurring local material, open **Shared-material groups** in the
+same panel. Review observations that cite one exact pack-relative evidence path,
+include the relevant ones, leave others excluded, and state a tentative pattern.
+**Continue to proposal** carries the inspected group into the existing reviewed
+intake. [Workflow, generation binding and limits](docs/SHARED_MATERIAL_GROUPS.md).
+
+To combine observations from distinct packs, choose **Compose cross-pack question**.
+Label supporting, challenging and contextual observations with their dates or
+conditions, state a scoped question and rejection test, and continue into the
+reviewed intake. Download/import preserves an unsent draft; missing or changed
+snapshots remain explicit gaps until reviewed.
+[Cross-pack question workflow and boundaries](docs/CROSS_PACK_QUESTIONS.md).
+
+To discover changes before you have a question, use **What changed since your
+last visit?** in Pack layers. Download a baseline of selected layers, import it
+on a later visit, and inspect exact before/after observations across that saved
+scope. Select new or changed observations and **Continue N change(s) to intake**
+to keep their history in an editable review-pending candidate. Missing packs are
+named gaps; no-longer-projected observations are not treated as deleted knowledge.
+[Observation baseline workflow and boundaries](docs/OBSERVATION_BASELINES.md).
+
+To discover a connection before selecting sources or a question, use **Discover
+words connecting different packs** in Pack layers. Ranked exact-word suggestions
+span distinct packs even when evidence paths differ. Edit an ANY/ALL keyword lens,
+read attributed current excerpts and named coverage gaps, and continue reviewed
+matches into editable candidate intake. Lenses can be downloaded, imported and
+edited; discovery exports retain every match. Shared words are navigation hints,
+not semantic agreement or accepted knowledge.
+[Vocabulary discovery workflow and limitations](docs/VOCABULARY_DISCOVERY.md).

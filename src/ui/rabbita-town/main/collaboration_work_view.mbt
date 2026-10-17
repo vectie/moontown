@@ -71,13 +71,20 @@ fn render_collaboration_work(
           ),
           p(participant.detail),
           p(participant.output_digest),
-          @html.pre(
-            class="collaboration-retained-output",
-            participant.output_text,
-          ),
+          if state.work_fields.get("work_salon_mode") == Some("compare") &&
+            participant.status == "completed" {
+            p("Compare this contribution in the idea salon below.")
+          } else {
+            @html.pre(
+              class="collaboration-retained-output",
+              participant.output_text,
+            )
+          },
         ])
       }),
     ),
+    render_idea_salon(dispatch, state, work),
+    render_collective_experiment(dispatch, state, work),
     if work.result_digest.is_empty() {
       span("")
     } else {
@@ -247,7 +254,11 @@ fn render_collaboration_work(
         button(
           attrs=@html.Attrs::build().disabled(disabled),
           on_click=dispatch(CollaborationAction("oneoff-book")),
-          "Send retained outcome to chosen Book",
+          if state.work_fields.get("work_salon_mode") == Some("compare") {
+            "Send selected salon outcome to chosen Book"
+          } else {
+            "Send retained outcome to chosen Book"
+          },
         ),
       ])
     },

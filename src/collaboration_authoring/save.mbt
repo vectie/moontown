@@ -73,9 +73,27 @@ pub async fn Store::save(
   expected_revision : String,
   recorded_at : String,
 ) -> @contract.SavedDraft {
+  self.save_internal(draft, expected_revision, recorded_at)
+}
+
+///|
+async fn Store::save_internal(
+  self : Store,
+  draft : @contract.Draft,
+  expected_revision : String,
+  recorded_at : String,
+  claim_challenge? : @contract.ClaimChallenge,
+  material_notebook? : @contract.MaterialNotebook,
+) -> @contract.SavedDraft {
   self.locked(() => {
     let current = self.current_revision(draft.draft_id)
     let captured = self.capture(draft)
+    if claim_challenge is Some(input) {
+      verify_claim_capture(input, captured)
+    }
+    if material_notebook is Some(input) {
+      verify_material_capture(input, captured)
+    }
     let sources = captured.map(pair => pair.0)
     if !current.is_empty() {
       let old = self.load_revision(draft.draft_id, current)

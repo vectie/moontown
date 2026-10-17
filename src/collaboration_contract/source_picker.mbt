@@ -68,6 +68,7 @@ pub fn Client::toggle_source(self : Client, path : String) -> Client {
     sources: [],
     prepared: None,
     work: None,
+    work_fields: clear_collective_fields(clear_salon_fields(self.work_fields)),
     dirty: true,
     generation: self.generation + 1,
     notice: "Selected paths only. Save draft and capture sources rechecks and captures current bytes.",

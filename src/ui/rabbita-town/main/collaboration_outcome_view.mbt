@@ -199,6 +199,7 @@ fn render_collaboration_outcomes(
           p(
             "Includes a readable summary, exact collected result, attributed contributions and failures, binary-safe captured sources, selected review history and a byte-checked manifest",
           ),
+          render_retained_inquiry(dispatch, state, outcome),
         ])
       }
     },
