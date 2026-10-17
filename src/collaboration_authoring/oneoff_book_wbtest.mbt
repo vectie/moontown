@@ -39,6 +39,16 @@ async test "oneoff completed production participant result crosses real Book int
     "result_digest": accepted.result_digest,
     "review_version": accepted.review_version,
     "book_id": "destination",
+    "salon_mode": "compare",
+    "salon_result_digest": accepted.result_digest,
+    "salon_selected_book": "water",
+    "salon_basis": "Which fixture contribution supplies a bounded comparison?",
+    "salon_assessment_water": "Water fixture returns its captured evidence.",
+    "salon_assessment_mobility": "Mobility fixture supplies the alternative perspective.",
+    "salon_rationale": "Choose water to rehearse the Book routing contract.",
+    "salon_alternatives": "Keep mobility as the alternative; no quality ranking is claimed.",
+    "salon_dissent": "The original observed-period objection remains in evidence.",
+    "salon_assumptions": "Real provider quality and human acceptance remain unqualified.",
     "outcome_summary": "Synthetic local one-off output demonstrates source retention and protocol crossing only. It does not establish real provider quality or human acceptance.",
     "information_severity": "0",
     "information_summary": "No information gap is claimed in this bounded transport-only fixture.",
@@ -81,6 +91,27 @@ async test "oneoff completed production participant result crosses real Book int
     fail("Expected actual retained evidence")
   }
   assert_eq(artifacts.length(), 4)
+  guard artifacts[3] is { "text": String(statement_text), .. } else {
+    fail("Expected interpretation")
+  }
+  assert_true(
+    @json.parse(statement_text)
+    is {
+      "salon_selection": {
+        "selected_book_id": "water",
+        "genuine_emergence_verified": False,
+        "comparisons": Array(comparisons),
+        ..
+      },
+      ..
+    } &&
+    comparisons.length() == 2,
+  )
+  assert_true(
+    @json.parse(payload)
+    is { "submission": { "outcome_summary": String(summary), .. }, .. } &&
+    summary.has_prefix("Idea salon selected water for independent Book review."),
+  )
   assert_true(payload.contains("bytes_hex"))
   assert_true(payload.contains("Deterministic local fixture output"))
   assert_true(

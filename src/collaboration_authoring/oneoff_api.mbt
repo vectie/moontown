@@ -23,6 +23,31 @@ pub async fn Store::request_oneoff(
     source_listing: None,
   }
   try {
+    if request.action == "oneoff-followup" {
+      let (saved, work) = self.read_locked(() => {
+        let saved = self.load_revision(request.draft_id, request.revision)
+        let retained = self.retained_work(saved)
+        let versions = self.retained_review_versions(saved)
+        let history = self.outcome_history(
+          saved,
+          retained,
+          versions[versions.length() - 1],
+        )
+        (saved, history.work)
+      })
+      let draft = match
+        @contract.collective_followup(
+          saved,
+          work,
+          request.payload.unwrap_or(Json::null()),
+        ) {
+        Ok(draft) => draft
+        Err(error) => raise CollaborationError(error)
+      }
+      // Same authored request plus exact current sources is retry-safe through
+      // save's existing optimistic fresh-ID guard. Never inherit work/reviews.
+      return { ..base, saved: Some(self.save(draft, "", timestamp)), }
+    }
     let work = match request.action {
       "oneoff-start" => {
         guard runtime is Some(config) else {

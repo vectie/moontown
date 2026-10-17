@@ -1,0 +1,125 @@
+{
+  "capabilities": [
+    {
+      "pack_id": "bridge-fixture",
+      "intake_operation_ids": [
+        "fixture.candidate.intake"
+      ]
+    },
+    {
+      "pack_id": "second-fixture",
+      "intake_operation_ids": [
+        "fixture.candidate.intake"
+      ]
+    }
+  ],
+  "lifecycles": [
+    {
+      "pack_id": "bridge-fixture",
+      "stage": "projecting"
+    },
+    {
+      "pack_id": "second-fixture",
+      "stage": "projecting"
+    }
+  ],
+  "candidates": [],
+  "projections": {
+    "projections": [
+      {
+        "contract_id": "moontown.pack-projection.v1",
+        "pack_id": "bridge-fixture",
+        "product_id": "bridge-fixture",
+        "version": "1.0.0",
+        "generated_at": "2026-10-13T08:00:00Z",
+        "subjects": [
+          {
+            "subject_ref": "observations/interviews.json",
+            "schema_id": "fixture-draft",
+            "title": "interviews signal",
+            "summary": "Customers request spreadsheet export for monthly reporting.",
+            "lifecycle_state": "draft",
+            "evidence_refs": [
+              "evidence/interviews.json"
+            ],
+            "operation_ids": [
+              "fixture.inspect"
+            ],
+            "attention": "review",
+            "place_refs": [],
+            "related_refs": [],
+            "workflow_refs": [],
+            "run_refs": [],
+            "domain_payload": {}
+          },
+          {
+            "subject_ref": "observations/cost.json",
+            "schema_id": "fixture-draft",
+            "title": "cost signal",
+            "summary": "Export pricing remains an open question.",
+            "lifecycle_state": "draft",
+            "evidence_refs": [
+              "evidence/cost.json"
+            ],
+            "operation_ids": [
+              "fixture.inspect"
+            ],
+            "attention": "review",
+            "place_refs": [],
+            "related_refs": [],
+            "workflow_refs": [],
+            "run_refs": [],
+            "domain_payload": {}
+          }
+        ]
+      },
+      {
+        "contract_id": "moontown.pack-projection.v1",
+        "pack_id": "second-fixture",
+        "product_id": "second-fixture",
+        "version": "1.0.0",
+        "generated_at": "2026-10-13T08:00:00Z",
+        "subjects": [
+          {
+            "subject_ref": "observations/field-notes.json",
+            "schema_id": "fixture-draft",
+            "title": "field-notes signal",
+            "summary": "Researchers manually export spreadsheet data after field visits.",
+            "lifecycle_state": "draft",
+            "evidence_refs": [
+              "evidence/field-notes.json"
+            ],
+            "operation_ids": [
+              "fixture.inspect"
+            ],
+            "attention": "review",
+            "place_refs": [],
+            "related_refs": [],
+            "workflow_refs": [],
+            "run_refs": [],
+            "domain_payload": {}
+          },
+          {
+            "subject_ref": "observations/shipping.json",
+            "schema_id": "fixture-draft",
+            "title": "shipping signal",
+            "summary": "Shipping is unrelated to this reporting question.",
+            "lifecycle_state": "draft",
+            "evidence_refs": [
+              "evidence/shipping.json"
+            ],
+            "operation_ids": [
+              "fixture.inspect"
+            ],
+            "attention": "review",
+            "place_refs": [],
+            "related_refs": [],
+            "workflow_refs": [],
+            "run_refs": [],
+            "domain_payload": {}
+          }
+        ]
+      }
+    ]
+  }
+}

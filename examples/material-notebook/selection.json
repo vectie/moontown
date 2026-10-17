@@ -1,0 +1,4 @@
+[
+  {"book_id":"water","source_paths":["raw/observations.md","raw/unselected.md"]},
+  {"book_id":"mobility","source_paths":["raw/observations.md","raw/unselected.md"]}
+]

@@ -90,6 +90,14 @@ Prepare. It contains the authored plan and captured inputs, not executed
 contributions. Reusing a question creates a new draft and recaptures current
 sources without inheriting an old result or review decisions.
 
+## Start a new inquiry from historical contributions
+
+The selected dossier can seed a [new editable research-salon inquiry](RETAINED_RESEARCH_INQUIRY.md).
+Choose at least two successful contributions, quote their retained passages and
+author independent challenges. Saving re-verifies the historical selection and
+captures current Book sources into a fresh ordinary draft, with no inherited
+review decisions or execution. Failed and unselected Books remain visible context.
+
 ## Compare two retained outcomes
 
 The read-only [retained outcome comparison command](RETAINED_OUTCOME_COMPARISON.md)

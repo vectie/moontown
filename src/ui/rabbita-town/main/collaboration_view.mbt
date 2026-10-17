@@ -176,6 +176,7 @@ fn render_collaboration_composer(
   div(class="request-composer", [
     h2("Compose a collaboration"),
     render_collaboration_outcomes(dispatch, state),
+    render_claim_challenge(dispatch, state),
     p(
       "Write a question, choose at least two existing Books, and assign source-bound contributions. Local preparation creates a pending review packet and participant briefs.",
     ),

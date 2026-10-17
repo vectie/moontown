@@ -84,7 +84,17 @@ fn collaboration_payload(
     "revision": revision,
     "new_draft_id": state.new_draft_id,
     "artifact_path": path,
-    "payload": if action == "source-list" {
+    "payload": if action == "retained-inquiry" {
+      match state.retained_inquiry_input() {
+        Ok(input) => input.to_json()
+        Err(_) => Json::null()
+      }
+    } else if action == "claim-challenge" {
+      match state.claim_challenge_input() {
+        Ok(input) => input.to_json()
+        Err(_) => Json::null()
+      }
+    } else if action == "source-list" {
       { "book_id": state.source_book }
     } else if action == "outcome-inspect" || action == "outcome-export" {
       match state.outcome_key {
@@ -174,6 +184,13 @@ fn collaboration_action(
   id : String,
   revision : String,
 ) -> (Cmd, Model) {
+  let (id, revision) = if action == "retained-inquiry" {
+    (model.collaboration.inquiry_fields.get("inquiry_id").unwrap_or(""), "")
+  } else if action == "claim-challenge" {
+    (model.collaboration.claim_fields.get("claim_id").unwrap_or(""), "")
+  } else {
+    (id, revision)
+  }
   let state = model.collaboration.begin(action, id)
   if model.collaboration.busy() || !state.busy() {
     return collaboration_replace(model, state)

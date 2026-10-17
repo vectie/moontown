@@ -35,6 +35,9 @@ state. MoonBook owns source and accepted knowledge.
 | Rabbita town and Wenyu operator views | available locally |
 | Generic civic communication synthesis | available through versioned pack adapter |
 | One-off source-bound collaboration composer | local draft/save/reopen/prepare/download; pending human review |
+| Shared-material discovery and reviewed domain candidate | bounded same-pack reference grouping, explicit source selection and hypothesis; pending pack review |
+| Cross-pack question composer | operator-labelled multi-pack observations, portable unsent draft, explicit snapshot gaps, reviewed candidate intake |
+| Observation baseline comparison | explicit local snapshot scope, before/after exploration and selected change history in pending pack intake; not a standing watch |
 | Cross-book research-salon fixture | available as one scenario configuration |
 | MoonClaw worker reduction | conditional on configured runtimes |
 | Accepted MoonBook outcome history | conditional on reviewed book workflows |
@@ -65,6 +68,41 @@ paired MoonChat source workspace is a build prerequisite.
 Town state, incident history and scenario evidence are durable. Actions that
 mutate workspaces, communicate externally or affect a robot retain their
 original authority class. Supervisor approval does not elevate an effect.
+
+[Shared-material groups](SHARED_MATERIAL_GROUPS.md) connects projected local
+observations to an operator-reviewed domain candidate. Exact pack-relative
+reference reuse suggests a group to inspect; it is not independent corroboration
+or accepted knowledge. Group membership, exclusions and the operator hypothesis
+remain bound to the submitted candidate, while owning packs retain review and
+execution authority. Unsent review drafts survive cancel and refresh in memory;
+only native candidate intake supplies durable submission state.
+
+[Cross-pack questions](CROSS_PACK_QUESTIONS.md) combine explicitly selected
+observations from distinct packs with scope, conditions and an observable rejection
+test. Download/import resumes unsent operator notes; current projection gaps remain
+visible and block candidate preparation. The native candidate mailbox preserves the
+exact cross-pack source context for owning-pack review. This does not infer agreement,
+contradiction, genuine autonomous emergence, or acceptance by a participating Book.
+
+[Observation baselines](OBSERVATION_BASELINES.md) let an operator discover exact
+projected-field changes before naming a hypothesis. Baselines are downloaded and
+explicitly imported as untrusted historical excerpts. Comparison preserves pack
+scope, names unavailable/ambiguous packs, and distinguishes newly projected,
+changed, unchanged and no-longer-projected observations. Selected current
+observations and their before/after history flow into the existing editable
+candidate intake, with its source preflight and 128 KiB complete-envelope bound.
+Import does not start a watch, alter knowledge, or grant authority. Local fixture
+intake is not live civic synthesis, owning-Book acceptance or release qualification.
+
+[Vocabulary discovery](VOCABULARY_DISCOVERY.md) finds exact words recurring across
+independent pack observations with different evidence paths. An editable portable
+ANY/ALL lens supplies explicit scope, current matching excerpts and named coverage
+gaps. The operator can select a tentative connection and continue into the existing
+review-pending candidate composer. Shared words are navigation hints, not inferred
+agreement, contradiction or autonomous emergence. Importing a lens does not import
+knowledge, restore an uncertain POST, dispatch a goal or authorize downstream work.
+The native fixture retains the exact UI candidate through mailbox/reload/replay;
+configured civic synthesis and owning-Book acceptance remain unqualified.
 
 ## Verification
 

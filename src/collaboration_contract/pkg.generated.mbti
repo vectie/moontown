@@ -7,9 +7,17 @@ import {
 }
 
 // Values
+pub fn claim_challenge_draft(ClaimChallenge, Array[CatalogBook]) -> Result[Draft, String]
+
+pub fn collective_followup(SavedDraft, OneoffWork, Json) -> Result[Draft, String]
+
 pub fn compare_outcomes(RetainedOutcome, RetainedOutcome) -> OutcomeComparison raise
 
+pub fn decode_claim_comparison(String) -> Result[ClaimComparison, String]
+
 pub fn empty_draft(String) -> Draft
+
+pub fn empty_material_notebook(String, Array[MaterialPage]) -> MaterialNotebook
 
 pub fn empty_outcome_search(OutcomeSearchQuery) -> OutcomeSearch raise
 
@@ -19,9 +27,17 @@ pub fn filter_outcomes(Array[OutcomeEntry], String, String) -> Array[OutcomeEntr
 
 pub fn preparation_issues(SavedDraft) -> Array[String]
 
+pub fn retained_inquiry_draft(RetainedInquiry, RetainedOutcome) -> Result[Draft, String]
+
 pub fn safe_id(String) -> Bool
 
 pub fn safe_source_path(String) -> Bool
+
+pub fn salon_candidates(OneoffWork) -> Array[ParticipantWork]
+
+pub fn salon_ready(OneoffWork) -> Bool
+
+pub fn salon_selection(SavedDraft, OneoffWork, Json) -> Result[Json?, String]
 
 pub fn search_outcome(RetainedOutcome, OutcomeSearchQuery) -> OutcomeSearchHit? raise
 
@@ -39,6 +55,38 @@ pub(all) struct CatalogBook {
   title : String
 } derive(Eq, ToJson, @debug.Debug, @json.FromJson)
 
+pub(all) struct ClaimChallenge {
+  comparison : String
+  group_index : Int
+  draft_id : String
+  title : String
+  question : String
+  falsifier : String
+  reviewer_id : String
+  reviewer_name : String
+  objection : String
+  objection_reviewer_id : String
+  objection_reviewer_name : String
+  mappings : Array[ClaimSourceMapping]
+} derive(Eq, ToJson, @debug.Debug, @json.FromJson)
+
+pub(all) struct ClaimComparison {
+  contract : String
+  state : String
+  policy : String
+  table_digest : String
+  table_size_bytes : Int
+  sources : Array[ComparedSource]
+  groups : Array[ComparedGroup]
+} derive(Eq, ToJson, @debug.Debug, @json.FromJson)
+
+pub(all) struct ClaimSourceMapping {
+  claim_id : String
+  book_id : String
+  source_path : String
+  challenge : String
+} derive(Eq, ToJson, @debug.Debug, @json.FromJson)
+
 pub(all) struct Client {
   draft : Draft
   revision : String
@@ -47,6 +95,8 @@ pub(all) struct Client {
   work : OneoffWork?
   previous_revision : String
   work_fields : Map[String, String]
+  claim_fields : Map[String, String]
+  inquiry_fields : Map[String, String]
   books : Array[CatalogBook]
   drafts : Array[SavedDraft]
   new_draft_id : String
@@ -66,12 +116,15 @@ pub(all) struct Client {
 } derive(@debug.Debug)
 pub fn Client::begin(Self, String, String) -> Self
 pub fn Client::busy(Self) -> Bool
+pub fn Client::claim_challenge_input(Self) -> Result[ClaimChallenge, String]
 pub fn Client::dismiss(Self) -> Self
 pub fn Client::download_settled(Self, Int, String) -> Self
 pub fn Client::edit(Self, String, String) -> Self
 pub fn Client::edit_participant(Self, String, String, String) -> Self
 pub fn Client::new() -> Self
 pub fn Client::reset(Self) -> Self
+pub fn Client::retained_inquiry_input(Self) -> Result[RetainedInquiry, String]
+pub fn Client::retained_inquiry_preview(Self) -> Result[Draft, String]
 pub fn Client::select_outcome(Self, OutcomeKey) -> Self
 pub fn Client::select_source_book(Self, String) -> Self
 pub fn Client::settle(Self, Int, String, String) -> Self
@@ -79,6 +132,30 @@ pub fn Client::toggle_book(Self, String) -> Self
 pub fn Client::toggle_source(Self, String) -> Self
 pub fn Client::visible_outcomes(Self) -> Array[OutcomeEntry]
 pub fn Client::visible_source_paths(Self) -> Array[String]
+
+pub(all) struct ComparedClaim {
+  claim_id : String
+  book_id : String
+  topic : String
+  context : String
+  value : String
+  source_path : String
+  quote : String
+} derive(Eq, ToJson, @debug.Debug, @json.FromJson)
+
+pub(all) struct ComparedGroup {
+  topic : String
+  context : String
+  state : String
+  books : Array[String]
+  claims : Array[ComparedClaim]
+} derive(Eq, ToJson, @debug.Debug, @json.FromJson)
+
+pub(all) struct ComparedSource {
+  path : String
+  digest : String
+  size_bytes : Int
+} derive(Eq, ToJson, @debug.Debug, @json.FromJson)
 
 pub(all) struct Draft {
   draft_id : String
@@ -91,6 +168,86 @@ pub(all) struct Draft {
   objection_reviewer_id : String
   objection_reviewer_name : String
   participants : Array[Participant]
+} derive(Eq, ToJson, @debug.Debug, @json.FromJson)
+
+pub(all) struct InquiryContribution {
+  book_id : String
+  quote : String
+  challenge : String
+} derive(Eq, ToJson, @debug.Debug, @json.FromJson)
+
+pub(all) struct MaterialContextMatch {
+  match_line : MaterialMatch
+  first_line : Int
+  last_line : Int
+  text : String
+} derive(Eq, ToJson, @debug.Debug, @json.FromJson)
+
+pub(all) struct MaterialContextSearch {
+  search : MaterialSearch
+  context_lines : Int
+  windows : Array[MaterialContextMatch]
+} derive(Eq, ToJson, @debug.Debug, @json.FromJson)
+
+pub(all) struct MaterialExcerpt {
+  book_id : String
+  source_path : String
+  quote : String
+  observation : String
+  challenge : String
+} derive(Eq, ToJson, @debug.Debug, @json.FromJson)
+
+pub(all) struct MaterialMatch {
+  book_id : String
+  source_path : String
+  digest : String
+  line_number : Int
+  text : String
+} derive(Eq, ToJson, @debug.Debug, @json.FromJson)
+
+pub(all) struct MaterialNotebook {
+  contract_version : String
+  draft_id : String
+  title : String
+  question : String
+  falsifier : String
+  dissent : String
+  assumptions : String
+  reviewer_id : String
+  reviewer_name : String
+  objection_reviewer_id : String
+  objection_reviewer_name : String
+  pages : Array[MaterialPage]
+  excerpts : Array[MaterialExcerpt]
+} derive(Eq, ToJson, @debug.Debug, @json.FromJson)
+pub fn MaterialNotebook::draft(Self) -> Draft raise
+pub fn MaterialNotebook::find(Self, String) -> MaterialSearch raise
+pub fn MaterialNotebook::find_context(Self, String, Int) -> MaterialContextSearch raise
+pub fn MaterialNotebook::remove_excerpt(Self, Int) -> Self raise
+pub fn MaterialNotebook::revise_excerpt(Self, Int, String, String) -> Self raise
+pub fn MaterialNotebook::select_lines(Self, String, String, Int, Int, String, String) -> Self raise
+pub fn MaterialNotebook::validate_pages(Self) -> Unit raise
+
+pub(all) struct MaterialPage {
+  book_id : String
+  book_title : String
+  source_path : String
+  digest : String
+  size_bytes : Int
+  text : String
+} derive(Eq, ToJson, @debug.Debug, @json.FromJson)
+
+pub(all) struct MaterialSearch {
+  query : String
+  case_sensitive : Bool
+  matched_lines : Int
+  truncated : Bool
+  matches : Array[MaterialMatch]
+} derive(Eq, ToJson, @debug.Debug, @json.FromJson)
+
+pub(all) struct MaterialSelection {
+  book_id : String
+  source_paths : Array[String]
 } derive(Eq, ToJson, @debug.Debug, @json.FromJson)
 
 pub(all) struct OneoffWork {
@@ -255,6 +412,21 @@ pub(all) struct Reply {
   outcomes : Array[OutcomeEntry]
   outcome : RetainedOutcome?
   source_listing : SourceListing?
+} derive(Eq, ToJson, @debug.Debug, @json.FromJson)
+
+pub(all) struct RetainedInquiry {
+  origin : OutcomeKey
+  draft_id : String
+  title : String
+  question : String
+  falsifier : String
+  dissent : String
+  assumptions : String
+  reviewer_id : String
+  reviewer_name : String
+  objection_reviewer_id : String
+  objection_reviewer_name : String
+  contributions : Array[InquiryContribution]
 } derive(Eq, ToJson, @debug.Debug, @json.FromJson)
 
 pub(all) struct RetainedOutcome {

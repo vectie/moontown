@@ -1,5 +1,16 @@
 # One-off collaboration composer
 
+To explore actual Book text before writing a question, use the
+[local material notebook](MATERIAL_NOTEBOOK.md). Import selected files, search
+their passages, author observations and independent challenges, and save a
+byte-checked new inquiry that opens in this ordinary composer.
+
+The **Challenge a source claim comparison** action accepts an existing claim
+comparison JSON report before any participant work has run. Explicitly map the
+selected group to registered Book files, author challenges and a falsifier, then
+save through the ordinary draft flow. See [Source claim challenges](CLAIM_CHALLENGE.md)
+for exact-byte checking, limits and interruption behavior.
+
 The request desk's **Collaboration** action authors a question for two or more
 existing Books. Choose the Books, browse/search and select observed source paths
 (or enter exact workspace-relative paths), describe each focus, perspective, contribution and next artifact, and

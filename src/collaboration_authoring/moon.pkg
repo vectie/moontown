@@ -17,4 +17,5 @@ supported_targets = "native"
 
 import {
   "moonbitlang/core/env",
+  "vectie/moontown/claim_comparison" @claims,
 } for "wbtest"

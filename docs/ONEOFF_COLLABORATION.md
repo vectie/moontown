@@ -11,6 +11,13 @@ The collaboration composer can now turn its existing prepared plan into actual p
 5. After every participant is terminal and every named-owner decision approves the accurate result account, choose a destination Book and author the outcome interpretation and three gap statements. A partially failed dossier is eligible learning evidence: success/failure counts and each failure remain explicit, and approving the account never labels the collaboration successful. Running/unknown/unreviewed/rejected/deferred results remain blocked. Severity 0 requires an explicit absence explanation; a present gap requires a proposed capability descriptor. Choose **Send retained outcome to chosen Book**. Book's existing receiver owns deliverable and Three-Gap review. A duplicate submission retries the same retained bytes, even if its first reply was interrupted.
 6. Use Book's existing review UI. Back in Town, **Read Book disposition and reopen exact outcome** invokes the existing read-only receiver and verifies the returned package against this exact collaboration's captured sources, produced outputs and retained Chat review. A receipt is an unsigned historical local observation, never activation authority. Earlier source revisions and dissent remain reopenable.
 
+## Compare and select an idea
+
+After collecting at least two completed contributions, the [idea salon worksheet](IDEA_SALON.md)
+lets the operator compare each output, preserve alternatives and dissent, and
+route one selected proposal through the same Book outcome action. This is a
+source-bound operator comparison, not a claim of autonomous emergence.
+
 ## Host setup
 
 The host owns all paths and runtime settings; a browser payload supplies none of them.
@@ -47,3 +54,13 @@ Set `MOONTOWN_BOOK_OUTCOME_BIN` to the existing MoonBook `cmd/outcome_lessons` e
 Town owns the immutable work intent, participant packets, retained results, source-bound Chat settlement and product outcome envelope. The lower MoonClaw adapter is used for execution/status; no call reaches `bootstrap_civic_communication_scenario_file`, its installer or its inner workspace materializer. MoonChat remains an embedded review contract. MoonBook's canonical product-outcome receiver is unchanged.
 
 `cmd/oneoff_fixture` in the Claw integration tree is a verification-only deterministic local AnalysisExecutor. It reads actual frozen inputs and exercises production proposal/workflow/artifact persistence. It has no external model, provider account or agent dispatch. Fixture reviewer IDs are synthetic test contexts, not authenticated real humans.
+
+## Cross-Book experiment and peer-challenge round
+
+After collecting two or more successful outputs, [compose a cross-Book
+experiment](CROSS_BOOK_EXPERIMENT.md) from exact cited passages, a combined
+hypothesis and an observable falsifier. Save it as a new, unrun collaboration
+with independent challenges for the source Books. This combines contributions
+into a new question rather than selecting one existing proposal. Historical
+output/source identities, failed Books, review decisions and dissent remain
+attributed; the new round captures current source files and inherits no approval.

@@ -72,6 +72,37 @@ pub async fn Store::request(
   }
   try {
     match request.action {
+      "retained-inquiry" => {
+        guard request.payload is Some(payload) else {
+          raise CollaborationError("Retained inquiry fields are missing")
+        }
+        let input : @contract.RetainedInquiry = @json.from_json(payload)
+        guard input.to_json() == payload &&
+          input.draft_id == request.draft_id &&
+          request.revision.is_empty() else {
+          raise CollaborationError(
+            "A retained inquiry requires a new draft identity and exact fields",
+          )
+        }
+        {
+          ..reply,
+          saved: Some(self.save_retained_inquiry(input, recorded_at)),
+        }
+      }
+      "claim-challenge" => {
+        guard request.payload is Some(payload) else {
+          raise CollaborationError("Claim challenge fields are missing")
+        }
+        let input : @contract.ClaimChallenge = @json.from_json(payload)
+        guard input.to_json() == payload &&
+          input.draft_id == request.draft_id &&
+          request.revision.is_empty() else {
+          raise CollaborationError(
+            "A source claim challenge requires a new draft identity",
+          )
+        }
+        { ..reply, saved: Some(self.save_claim_challenge(input, recorded_at)), }
+      }
       "source-list" => {
         guard request.payload is Some({ "book_id": String(book_id), .. }) else {
           raise CollaborationError("Choose a registered Book ID")

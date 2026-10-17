@@ -1,5 +1,8 @@
 # Compare source-backed claims across Books
 
+To turn a selected JSON comparison group into an ordinary source-verified,
+saved/reopenable collaboration question, see [Source claim challenges](CLAIM_CHALLENGE.md).
+
 Use `claim_compare` to bring a small, explicitly selected set of Book claims into
 one readable comparison brief. Import CSV/TSV labels and exact source quotations;
 the command checks each quote against the selected local UTF-8 file and emits

@@ -1,0 +1,125 @@
+{
+  "capabilities": [
+    {
+      "pack_id": "bridge-fixture",
+      "intake_operation_ids": [
+        "fixture.candidate.intake"
+      ]
+    },
+    {
+      "pack_id": "second-fixture",
+      "intake_operation_ids": [
+        "fixture.candidate.intake"
+      ]
+    }
+  ],
+  "lifecycles": [
+    {
+      "pack_id": "bridge-fixture",
+      "stage": "projecting"
+    },
+    {
+      "pack_id": "second-fixture",
+      "stage": "projecting"
+    }
+  ],
+  "candidates": [],
+  "projections": {
+    "projections": [
+      {
+        "contract_id": "moontown.pack-projection.v1",
+        "pack_id": "bridge-fixture",
+        "product_id": "bridge-fixture",
+        "version": "1.0.0",
+        "generated_at": "2026-10-13T08:00:00Z",
+        "subjects": [
+          {
+            "subject_ref": "observations/demand.json",
+            "schema_id": "fixture-draft",
+            "title": "demand signal",
+            "summary": "Three interviewees now request a shared export.",
+            "lifecycle_state": "draft",
+            "evidence_refs": [
+              "evidence/demand.json"
+            ],
+            "operation_ids": [
+              "fixture.inspect"
+            ],
+            "attention": "review",
+            "place_refs": [],
+            "related_refs": [],
+            "workflow_refs": [],
+            "run_refs": [],
+            "domain_payload": {}
+          }
+        ]
+      },
+      {
+        "contract_id": "moontown.pack-projection.v1",
+        "pack_id": "second-fixture",
+        "product_id": "second-fixture",
+        "version": "1.0.0",
+        "generated_at": "2026-10-13T08:00:00Z",
+        "subjects": [
+          {
+            "subject_ref": "observations/demand.json",
+            "schema_id": "fixture-draft",
+            "title": "demand signal",
+            "summary": "Earlier demand observation",
+            "lifecycle_state": "draft",
+            "evidence_refs": [
+              "evidence/demand.json"
+            ],
+            "operation_ids": [
+              "fixture.inspect"
+            ],
+            "attention": "review",
+            "place_refs": [],
+            "related_refs": [],
+            "workflow_refs": [],
+            "run_refs": [],
+            "domain_payload": {}
+          },
+          {
+            "subject_ref": "observations/retention.json",
+            "schema_id": "fixture-draft",
+            "title": "retention signal",
+            "summary": "Earlier retention observation",
+            "lifecycle_state": "draft",
+            "evidence_refs": [
+              "evidence/retention.json"
+            ],
+            "operation_ids": [
+              "fixture.inspect"
+            ],
+            "attention": "review",
+            "place_refs": [],
+            "related_refs": [],
+            "workflow_refs": [],
+            "run_refs": [],
+            "domain_payload": {}
+          },
+          {
+            "subject_ref": "observations/export.json",
+            "schema_id": "fixture-draft",
+            "title": "export signal",
+            "summary": "A second domain reports repeated copy/paste into spreadsheets.",
+            "lifecycle_state": "draft",
+            "evidence_refs": [
+              "evidence/export.json"
+            ],
+            "operation_ids": [
+              "fixture.inspect"
+            ],
+            "attention": "review",
+            "place_refs": [],
+            "related_refs": [],
+            "workflow_refs": [],
+            "run_refs": [],
+            "domain_payload": {}
+          }
+        ]
+      }
+    ]
+  }
+}
