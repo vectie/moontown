@@ -21,14 +21,21 @@ fn render_request_action_button(
   let selected = model.request_composer == target
   button(
     class=request_action_button_class(model.request_composer, target),
+    title=action,
     on_click=dispatch(SetRequestComposer(target)),
     attrs=@html.Attrs::build()
       .aria_pressed(if selected { "true" } else { "false" })
       .aria_expanded(if selected { "true" } else { "false" })
       .aria_controls("request-composer-panel"),
     [
-      span(class="request-action-label", label),
-      span(class="request-action-command", action),
+      town_ui_label(
+        match target {
+          StandingWatchComposer => "clock"
+          EvidenceBookComposer => "book"
+          _ => "people"
+        },
+        label,
+      ),
     ],
   )
 }
@@ -46,22 +53,22 @@ fn render_request_shortcuts(
         dispatch,
         model,
         RequestComposerFocus::StandingWatchComposer,
-        "Standing watch",
-        "Save",
+        "关注",
+        "持续关注变化",
       ),
       render_request_action_button(
         dispatch,
         model,
         RequestComposerFocus::EvidenceBookComposer,
-        "Evidence book",
-        "Queue",
+        "研究",
+        "创建资料研究",
       ),
       render_request_action_button(
         dispatch,
         model,
         RequestComposerFocus::CollaborationComposer,
-        "Collaboration",
-        "Compose",
+        "协作",
+        "组织协作任务",
       ),
     ],
   )

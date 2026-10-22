@@ -164,16 +164,16 @@ test "watch rendered save and fields disable while pending and cadence names tic
   let html = @rabbita.render_to_string(
     @rabbita.static_cell(render_request_composer(dispatch, pending)),
   )
-  assert_true(html.contains("Saving watch..."))
+  assert_true(html.contains("保存中…"))
   assert_eq(html.split(" disabled").to_array().length(), 7)
-  assert_true(html.contains("Check interval (ticks)"))
+  assert_true(html.contains("检查间隔（运行步数）"))
   assert_true(html.contains(operator_request_cadence_help()))
   assert_true(html.contains("for=\"request-check-frequency\""))
   let ready = @rabbita.render_to_string(
     @rabbita.static_cell(render_request_composer(dispatch, init_model())),
   )
   assert_false(ready.contains("disabled"))
-  assert_true(ready.contains("Save Watch"))
+  assert_true(ready.contains("保存关注"))
 }
 
 ///|

@@ -10,6 +10,16 @@ document.documentElement.dataset.landmarkModels='loading';
 const bridge = p => p.id.endsWith('bridge');
 const screen = (p,f,h=0) => [f.w/2+(32*(p[0]-p[1])-f.cx)*f.z, f.h/2+(16*(p[0]+p[1])-f.cy-h)*f.z];
 const render = () => globalThis.__moontownGoldenValleyRender?.('landmark-interaction');
+// Same 24px, 1.7px rounded outline language as the native town controls.
+const icon = name => `<svg class="town-ui-svg" aria-hidden="true" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><path d="${{
+  layers:'M12 2 2 7l10 5 10-5zM2 12l10 5 10-5M2 17l10 5 10-5',
+  cube:'M12 2 2 7v10l10 5 10-5V7zM2 7l10 5 10-5M12 12v10',
+  indoor:'M4 22V3h16v19M2 22h20M9 22V9h6v13M12 14h.01',
+  server:'M3 3h18v7H3zM3 14h18v7H3zM6 6h1M6 17h1M11 6h7M11 17h7',
+  fit:'M3 8V3h5M16 3h5v5M21 16v5h-5M8 21H3v-5',
+  sliders:'M4 3v6m0 6v6M12 3v12m0 4v2M20 3v2m0 6v10M1 9h6v6H1zM9 15h6v4H9zM17 5h6v6h-6z',
+  back:'M15 5l-7 7 7 7M8 12h13',
+}[name]}"></path></svg>`;
 
 function paint(ctx,p,t,f) {
   const [x,y]=screen([p.x,p.y],f);
@@ -40,13 +50,14 @@ function paintApproaches(ctx,p,f) {
 
 function focus(p) {
   selected=p;const c=globalThis.__moontownGoldenValleyCamera;
+  document.querySelector('[aria-label="关闭建筑详情"]')?.click();
+  inspector.querySelector('details').open=true;
   if(c){c.x=32*(p.x-p.y);c.y=16*(p.x+p.y)-35;c.z=.95;c.gentleTrialFramed=true;}
   inspector.querySelector('h2').textContent=p.title;
   inspector.querySelector('.landmark-note').textContent=p.note;
   inspector.querySelector('[data-action="cross"]').hidden=!bridge(p);
   inspector.querySelector('[data-action="indoor"]').hidden=p.id!=='center';
   inspector.querySelector('[data-action="compute"]').hidden=p.id!=='center';
-  inspector.querySelector('[data-action="study"]').textContent='打开原始 3D · 自由旋转';
   inspector.querySelectorAll('[data-place]').forEach(b=>b.setAttribute('aria-pressed',String(b.dataset.place===p.id)));
   render();
 }
@@ -57,7 +68,7 @@ function openStudy(kind) {
   viewer=document.createElement('dialog');viewer.className='town-studio-dialog';
   const header=document.createElement('header');
   const title=document.createElement('strong');title.textContent=kind==='indoor'?'未来中心 → G3 室内设计研究':kind==='compute'?'未来中心 → 地下算力设计研究':selected.title+' · 原始 3D';
-  const close=document.createElement('button');close.textContent='返回小镇 ×';close.onclick=()=>viewer.close();
+  const close=document.createElement('button');close.innerHTML=icon('back')+'<span>小镇</span>';close.title='返回小镇';close.setAttribute('aria-label','返回小镇');close.onclick=()=>viewer.close();
   header.append(title,close);
   const frame=document.createElement('iframe');frame.title=title.textContent;frame.src=new URL(url,import.meta.url).href;
   frame.addEventListener('load',()=>{
@@ -70,7 +81,8 @@ function openStudy(kind) {
 function walk(a,b) {
   const result=api.walk(a,b);
   paused=false;pauseButton.textContent='暂停';pauseButton.hidden=stopButton.hidden=!result.ok;
-  status.textContent=result.ok?'本地导航代理行走中 · 沿共享 OSM 节点':'路线不可达：未生成跨水直线';
+  status.hidden=false;
+  status.textContent=result.ok?'演示角色行走中':'没有可通行路线，请更换起点或终点。';
   progress.hidden=!result.ok;
   document.documentElement.dataset.landmarkRoute=result.ok?'walking':'disconnected';
   render();
@@ -78,10 +90,13 @@ function walk(a,b) {
 
 function setupUI() {
   inspector=document.createElement('section');inspector.className='town-landmark-inspector';inspector.setAttribute('aria-label','地标与三层空间');
-  inspector.innerHTML=`<details open><summary>地标 · 三层空间 <span>3D → MAP</span></summary><div class="landmark-body"><nav aria-label="地标选择"></nav><h2>未来中心</h2><p class="landmark-note"></p><div class="landmark-actions"><button data-action="study">打开原始 3D · 自由旋转</button><button data-action="indoor">进入室内 · G3</button><button data-action="compute">进入地下 · 数据中心</button><button data-action="cross" hidden>代理过桥</button></div><div class="landmark-journey"><label>从 <select aria-label="步行起点"></select></label><label>到 <select aria-label="步行终点"></select></label><button data-action="walk">代理步行</button></div><progress max="1" value="0" hidden aria-label="步行进度"></progress><p class="landmark-status" role="status">本地导航演示 · 不代表远程 Agent 任务执行</p><small>室内 / 算力为设计门户，不声称真实楼层或机器位置。</small><button data-action="fit">查看全镇</button></div></details>`;
+  inspector.innerHTML=`<details name="moontown-hud-disclosure"><summary title="地标与三层空间" aria-label="地标与三层空间">${icon('layers')}<b>地标</b></summary><div class="landmark-body"><nav aria-label="地标选择"></nav><div class="landmark-heading"><div><span class="landmark-design-badge">设计模型</span><h2>未来中心</h2></div><button data-action="fit" title="查看全镇" aria-label="查看全镇">${icon('fit')}</button></div><div class="landmark-actions"><button data-action="study" title="查看完整 3D 模型，自由旋转" aria-label="查看完整 3D 模型">${icon('cube')}<span>3D</span></button><button data-action="indoor" title="室内设计模型" aria-label="室内设计模型">${icon('indoor')}<span>室内</span></button><button data-action="compute" title="数据中心设计模型" aria-label="数据中心设计模型">${icon('server')}<span>地下</span></button></div><progress max="1" value="0" hidden aria-label="步行进度"></progress><p class="landmark-status" role="status" hidden></p><details class="landmark-advanced"><summary title="步行演示与模型说明" aria-label="Advanced · 步行演示与模型说明">${icon('sliders')}<span>高级</span></summary><div class="landmark-journey"><label>从 <select aria-label="步行起点"></select></label><label>到 <select aria-label="步行终点"></select></label><button data-action="walk">演示步行</button><button data-action="cross" hidden>演示过桥</button></div><p class="landmark-note"></p><small>本地步行演示，不执行远程任务。室内与数据中心为设计模型，不代表实际楼层或机器位置。</small></details></div></details>`;
+  inspector.querySelector('details').addEventListener('toggle',()=>{
+    if(inspector.querySelector('details').open)document.querySelector('[aria-label="关闭建筑详情"]')?.click();
+  });
   const nav=inspector.querySelector('nav');
   for(const p of api.places){
-    const b=document.createElement('button');b.dataset.place=p.id;b.textContent=p.title;b.onclick=()=>focus(p);nav.append(b);
+    const b=document.createElement('button');b.dataset.place=p.id;b.textContent=({center:'中心',vision:'视界','east-bridge':'东路桥','arch-bridge':'路桥'})[p.id]||p.title;b.title=p.title;b.setAttribute('aria-label',p.title);b.onclick=()=>focus(p);nav.append(b);
     for(const select of inspector.querySelectorAll('select')){const o=document.createElement('option');o.value=p.id;o.textContent=p.title;select.append(o);}
   }
   const [from,to]=inspector.querySelectorAll('select');to.value='vision';
@@ -108,6 +123,7 @@ function setupUI() {
   if(townRoot)new MutationObserver(()=>{
     const map=document.getElementById('energy-valley-canvas');
     inspector.hidden=pins.hidden=!map||map.offsetParent===null;
+    if(document.querySelector('.knowledge-library-inspector'))inspector.querySelector('details').open=false;
   }).observe(townRoot,{childList:true,subtree:true});
 }
 
@@ -158,7 +174,7 @@ globalThis.__townLandmarkPainter={ready:false,
     for(const p of api.places){const t=tiles.get(p.id);if(selectedBridge?.id===p.id){paint(ctx,p,t.front,f);}else if(p.x+p.y>position[0]+position[1]){paint(ctx,p,t,f);}}
     ctx.restore();
     progress.value=done;
-    const label=done>=1?'已到达 · 可打开对应空间门户':paused?'已暂停 · 路线位置保留':'本地导航代理行走中 · 沿共享 OSM 节点';
+    const label=done>=1?'演示已到达':paused?'演示已暂停':'演示角色行走中';
     if(status.textContent!==label)status.textContent=label;
     document.documentElement.dataset.landmarkRoute=done>=1?'arrived':paused?'paused':'walking';
   },

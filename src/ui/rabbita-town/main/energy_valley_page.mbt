@@ -173,10 +173,10 @@ fn render_energy_valley_page_with_snapshot(
       class="town-topbar pointer-events-none absolute inset-x-0 top-3 flex justify-center px-3",
       render_energy_valley_topbar(dispatch, model),
     ),
-    if model.energy_intro_open {
-      @html.nothing
-    } else {
+    if onboarding && !model.energy_intro_open {
       render_policy_hall_map_entry(dispatch, model)
+    } else {
+      @html.nothing
     },
     match model.selection {
       Agent(_) => @html.nothing
@@ -261,7 +261,11 @@ fn render_energy_valley_page_with_snapshot(
       @html.nothing
     },
     div(class="town-quest-wrap pointer-events-none", [
-      render_quest_tracker(dispatch, model),
+      if onboarding {
+        render_quest_tracker(dispatch, model)
+      } else {
+        @html.nothing
+      },
       if model.player is None && !model.energy_intro_open {
         div(class="quest-tracker pointer-events-auto", [
           div(class="quest-tracker-head", [
@@ -373,17 +377,37 @@ fn render_town_action_rail(
   dispatch : Dispatch[Msg],
   model : Model,
   onboarding : Bool,
-  stage : Int,
+  stage : Int32,
 ) -> @rabbita.Html {
   let actions : Array[@rabbita.Html] = []
+  let advanced : Array[@rabbita.Html] = []
   if !onboarding {
+    actions.push(
+      button(
+        class="town-action town-action-primary",
+        on_click=dispatch(OpenEnergyRequest),
+        attrs=@html.Attrs::build().aria_label("创建工作请求"),
+        town_ui_label("work", "发起工作"),
+      ),
+    )
+    actions.push(
+      button(
+        class="town-action town-action-secondary",
+        on_click=dispatch(EnterEnergyBuilding("policy-hall")),
+        title="进入政策大厅，查看并询问昌平政策",
+        attrs=@html.Attrs::build().aria_label(
+          "进入政策大厅，查看并询问昌平政策",
+        ),
+        town_ui_label("building", "政策"),
+      ),
+    )
     actions.push(
       button(
         class="town-action town-action-secondary compute-room-lift-action",
         title="进入只读、脱敏的算力基础设施层",
         on_click=dispatch(OpenSecretComputeRoom),
         attrs=@html.Attrs::build().aria_label("进入秘密算力室"),
-        "算力室",
+        town_ui_label("server", "算力"),
       ),
     )
     actions.push(
@@ -399,7 +423,7 @@ fn render_town_action_rail(
           .aria_label("打开谷光联络台")
           .aria_controls("town-phone-panel")
           .aria_expanded(if model.phone_open { "true" } else { "false" }),
-        "联络",
+        town_ui_label("chat", "联络"),
       ),
     )
     actions.push(
@@ -421,7 +445,7 @@ fn render_town_action_rail(
               "false"
             },
           ),
-        "居民",
+        town_ui_label("people", "居民"),
       ),
     )
     actions.push(
@@ -443,7 +467,7 @@ fn render_town_action_rail(
               "false"
             },
           ),
-        "今日",
+        town_ui_label("clock", "今日"),
       ),
     )
     actions.push(
@@ -453,7 +477,7 @@ fn render_town_action_rail(
         } else {
           "town-action town-action-secondary"
         },
-        title="Read verified imported Book output files",
+        title="查看已导入的研究成果",
         on_click=dispatch(
           ImportedOutputsEvent(
             if model.imported_outputs.open {
@@ -473,10 +497,10 @@ fn render_town_action_rail(
               "false"
             },
           ),
-        "Imported outputs",
+        town_ui_label("download", "成果"),
       ),
     )
-    actions.push(
+    advanced.push(
       button(
         class=if model.metro_visible {
           "town-action town-action-secondary town-action-active"
@@ -488,10 +512,10 @@ fn render_town_action_rail(
         attrs=@html.Attrs::build()
           .aria_label("地铁 17 号线图层")
           .aria_pressed(if model.metro_visible { "true" } else { "false" }),
-        "17号线",
+        town_ui_label("train", "地铁"),
       ),
     )
-    actions.push(
+    advanced.push(
       button(
         class=if model.energy_status_open {
           "town-action town-action-secondary town-action-active"
@@ -510,7 +534,7 @@ fn render_town_action_rail(
               "false"
             },
           ),
-        "运行状态",
+        town_ui_label("chart", "运行"),
       ),
     )
   }
@@ -525,12 +549,12 @@ fn render_town_action_rail(
         title="发布与收藏知识大楼",
         on_click=dispatch(ToggleSquare),
         attrs=@html.Attrs::build().aria_label("小镇知识广场"),
-        "知识广场",
+        town_ui_label("book", "知识"),
       ),
     )
   }
   if !onboarding {
-    actions.push(
+    advanced.push(
       button(
         class=if model.ops_open {
           "town-action town-action-secondary town-action-active"
@@ -540,10 +564,10 @@ fn render_town_action_rail(
         title="镇长运营看板",
         on_click=dispatch(ToggleOps),
         attrs=@html.Attrs::build().aria_label("能源谷运营中心"),
-        "运营",
+        town_ui_label("chart", "运营"),
       ),
     )
-    actions.push(
+    advanced.push(
       button(
         class=if model.map_lab_open {
           "town-action town-action-secondary town-action-active"
@@ -556,28 +580,40 @@ fn render_town_action_rail(
           .aria_label("打开地图诊断")
           .aria_controls("map-lab-panel")
           .aria_expanded(if model.map_lab_open { "true" } else { "false" }),
-        "地图诊断",
+        town_ui_label("pin", "地图诊断"),
       ),
     )
   }
-  actions.push(
-    button(
-      class="town-action town-action-secondary",
-      on_click=dispatch(OpenEnergyGuide),
-      attrs=@html.Attrs::build().aria_label("打开能源谷指南"),
-      "指南",
-    ),
+  let guidance = button(
+    class="town-action town-action-secondary",
+    on_click=dispatch(OpenEnergyGuide),
+    attrs=@html.Attrs::build().aria_label("打开能源谷指南"),
+    town_ui_label("help", "指南"),
   )
+  if onboarding {
+    actions.push(guidance)
+  } else {
+    advanced.push(guidance)
+  }
   if !onboarding {
-    actions.push(
+    advanced.push(
       button(
         class="town-action town-action-secondary",
         title="重置小镇",
         on_click=dispatch(OpenEnergyReset),
         attrs=@html.Attrs::build().aria_label("重置小镇"),
-        "重置",
+        town_ui_label("reset", "重置"),
       ),
     )
+    advanced.push(
+      button(
+        id="town-pack-tools-open",
+        class="town-action town-action-secondary",
+        on_click=@cmd.custom_cmd(_ => open_advanced_pack_tools()),
+        town_ui_label("plus", "扩展工具"),
+      ),
+    )
+    actions.push(render_advanced_details("工具与维护", advanced))
   }
   if onboarding {
     div(class="town-actions town-actions-onboarding", actions)
@@ -586,7 +622,11 @@ fn render_town_action_rail(
       class="town-actions town-utility-disclosure pointer-events-auto",
       attrs=@html.Attrs::build().name("moontown-hud-disclosure"),
       [
-        @html.summary(class="town-action town-action-menu-toggle", "镇务"),
+        @html.summary(
+          class="town-action town-action-menu-toggle",
+          title="镇务",
+          town_ui_label("menu", "镇务"),
+        ),
         div(class="town-utility-panel", actions),
       ],
     )

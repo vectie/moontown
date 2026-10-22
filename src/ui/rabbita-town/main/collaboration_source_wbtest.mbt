@@ -56,7 +56,7 @@ test "source picker compiled controls select paths without capture search and fe
   )
   for
     text in [
-      "Search observed paths", "Listing truncated and incomplete", "Save draft and capture sources",
+      "Search observed paths", "Listing truncated and incomplete", "保存草稿",
       "raw/nested/source.bin", "研究.txt",
     ] {
     assert_true(html.contains(text), msg=text)

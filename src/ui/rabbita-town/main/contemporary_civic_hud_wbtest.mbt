@@ -93,7 +93,7 @@ test "five-slot primary dock discloses every specialist tool" {
   assert_true(rail_html.contains(">镇务<"))
   for
     label in [
-      "联络", "居民", "今日", "17号线", "运行状态", "知识广场", "运营",
+      "联络", "居民", "今日", "地铁", "运行状态", "知识广场", "运营",
       "地图诊断",
     ] {
     assert_true(rail_html.contains(label))

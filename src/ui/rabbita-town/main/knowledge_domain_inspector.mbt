@@ -79,6 +79,7 @@ fn render_knowledge_book_card(
   model : Model,
   book : KnowledgeDomainBook,
   is_primary : Bool,
+  technical~ : Bool = false,
 ) -> @rabbita.Html {
   let state = knowledge_book_display_state(model, book)
   let projection = find_exact_book_projection(model, book.book_id)
@@ -88,17 +89,26 @@ fn render_knowledge_book_card(
         div(class="knowledge-book-card-title-line", [
           h3(class="knowledge-book-card-title", book.title),
           if is_primary {
-            span(class="knowledge-book-primary", "Primary synthesis")
+            span(class="knowledge-book-primary", "主专题")
           } else {
             @html.nothing
           },
         ]),
-        span(class="knowledge-book-id", book.book_id),
       ]),
       span(
         class=knowledge_book_state_class(state),
         title=state.explanation,
-        state.label,
+        if technical {
+          state.label
+        } else {
+          match state.key {
+            "review" => "待审阅"
+            "accepted" => "已验收"
+            "real" => "已有资料"
+            "planned" => "规划中"
+            _ => "待产出"
+          }
+        },
       ),
     ]),
     p(class="knowledge-book-question", book.question),
@@ -125,28 +135,25 @@ fn render_knowledge_book_card(
         None => ()
       }
     }
-    None =>
-      card_children.push(
-        p(
-          class="knowledge-book-declaration",
-          "Catalog declaration · \{book.status} · not a completed-work claim",
-        ),
-      )
+    None => ()
   }
-  card_children.push(render_knowledge_book_tags(book))
-  card_children.push(
-    div(class="knowledge-book-meta", [
-      span("Tier · \{book.schedule_tier}"),
-      span("Cadence · \{book.cadence_ticks} ticks"),
-      span("Role · \{book.role}"),
-    ]),
-  )
-  card_children.push(
-    p(
-      class="knowledge-book-source-policy",
-      "Source policy · \{book.source_policy}",
-    ),
-  )
+  if technical {
+    card_children.push(span(class="knowledge-book-id", book.book_id))
+    card_children.push(render_knowledge_book_tags(book))
+    card_children.push(
+      div(class="knowledge-book-meta", [
+        span("Tier · \{book.schedule_tier}"),
+        span("Cadence · \{book.cadence_ticks} ticks"),
+        span("Role · \{book.role}"),
+      ]),
+    )
+    card_children.push(
+      p(
+        class="knowledge-book-source-policy",
+        "Source policy · \{book.source_policy}",
+      ),
+    )
+  }
   let primary_class = if is_primary {
     " knowledge-book-card-primary"
   } else {
@@ -217,60 +224,66 @@ fn render_knowledge_domain_library(
   let review = knowledge_domain_review_book_count(model, domain)
   let accepted = knowledge_domain_accepted_book_count(model, domain)
   let cards : Array[@rabbita.Html] = []
+  let catalog : Array[@rabbita.Html] = []
   for book in domain.books {
-    cards.push(
+    catalog.push(
       render_knowledge_book_card(
         model,
         book,
         book.book_id == domain.primary_book_id,
+        technical=true,
       ),
     )
+    if find_exact_book_projection(model, book.book_id) is Some(_) {
+      cards.push(
+        render_knowledge_book_card(
+          model,
+          book,
+          book.book_id == domain.primary_book_id,
+        ),
+      )
+    }
   }
   section(class="knowledge-library", [
     div(class="knowledge-library-heading", [
       div(class="knowledge-library-identity", [
-        span(class="knowledge-library-icon", domain.icon),
-        div([
-          span(class="knowledge-library-eyebrow", "Domain MoonBook library"),
-          h2(class="knowledge-library-title", domain.title),
-        ]),
+        span(class="knowledge-library-icon", town_ui_icon("book")),
+        h2(class="knowledge-library-title", "研究成果"),
       ]),
-      span(class="knowledge-library-kind", domain.kind),
-    ]),
-    p(class="knowledge-library-summary", domain.summary),
-    div(class="knowledge-library-stats", [
-      render_knowledge_domain_stat("Books", total.to_string()),
-      render_knowledge_domain_stat("Real joins", real.to_string()),
-      render_knowledge_domain_stat("Review", review.to_string()),
-      render_knowledge_domain_stat("Accepted", accepted.to_string()),
-    ]),
-    div(class="knowledge-library-tier-row", [
-      span("Primary tier"),
-      span(
-        class="knowledge-library-tier",
-        knowledge_domain_primary_tier(domain),
-      ),
-      span(class="knowledge-library-policy-ref", domain.policy_id),
-    ]),
-    render_knowledge_domain_policy(model, domain),
-    div(class="knowledge-library-list-head", [
-      div([
-        span(class="knowledge-library-list-title", "Books in this building"),
-        span(
-          class="knowledge-library-list-note",
-          "Declared ≠ produced. Real states require a matching MoonBook projection.",
-        ),
-      ]),
-      span(class="knowledge-library-total", total.to_string()),
     ]),
     if cards.is_empty() {
       div(
         class="knowledge-library-empty",
-        "This domain is registered, but no books have been declared yet.",
+        "还没有可查看的研究结果。",
       )
     } else {
       div(class="knowledge-library-books", cards)
     },
+    render_advanced_details(
+      "专题目录与运行规则",
+      compact_label="目录",
+      [
+        h3(domain.title),
+        p(class="knowledge-library-summary", domain.summary),
+        div(class="knowledge-library-stats", [
+          render_knowledge_domain_stat("专题", total.to_string()),
+          render_knowledge_domain_stat("已有资料", real.to_string()),
+          render_knowledge_domain_stat("待审阅", review.to_string()),
+          render_knowledge_domain_stat("已验收", accepted.to_string()),
+        ]),
+        div(class="knowledge-library-tier-row", [
+          span(domain.kind),
+          span(knowledge_domain_primary_tier(domain)),
+          span(domain.policy_id),
+        ]),
+        render_knowledge_domain_policy(model, domain),
+        p(
+          class="knowledge-library-list-note",
+          "规划目录不代表已产出；有资料的专题才会出现在上方。",
+        ),
+        div(class="knowledge-library-books", catalog),
+      ],
+    ),
   ])
 }
 
@@ -287,6 +300,9 @@ fn render_knowledge_domain_runtime_strip(
     model.energy_valley_runtime,
     building,
   )
+  if tasks.is_empty() {
+    return @html.nothing
+  }
   let task_cards : Array[@rabbita.Html] = []
   let shown = if tasks.length() < 3 { tasks.length() } else { 3 }
   for index in 0..<shown {
@@ -296,7 +312,7 @@ fn render_knowledge_domain_runtime_strip(
         span(class="knowledge-runtime-task-title", task.title),
         span(
           class="knowledge-runtime-task-meta",
-          "\{task.status} · \{task.runId.unwrap_or("no run")}",
+          town_chronicle_status_label(task.status),
         ),
       ]),
     )
@@ -304,33 +320,22 @@ fn render_knowledge_domain_runtime_strip(
   section(class="knowledge-runtime-strip", [
     div(class="knowledge-runtime-head", [
       div([
-        span(class="knowledge-runtime-title", "Real runtime"),
+        span(class="knowledge-runtime-title", "当前工作"),
         span(
           class="knowledge-runtime-truth",
           if model.energy_valley_runtime.phase is Live {
-            "Live evidence"
+            "实时"
           } else {
-            "No live claim"
+            "最近记录 · 暂未更新"
           },
         ),
       ]),
       div(class="knowledge-runtime-counts", [
-        span("\{agents.length()} agents"),
-        span("\{tasks.length()} tasks"),
+        span("\{agents.length()} 位代理"),
+        span("\{tasks.length()} 项工作"),
       ]),
     ]),
-    if tasks.is_empty() {
-      p(
-        class="knowledge-runtime-empty",
-        if model.energy_valley_runtime.phase is Live {
-          "Connected, with no current runtime task assigned here."
-        } else {
-          "Preview movement is illustrative and is never counted as work."
-        },
-      )
-    } else {
-      div(class="knowledge-runtime-tasks", task_cards)
-    },
+    div(class="knowledge-runtime-tasks", task_cards),
   ])
 }
 
@@ -347,21 +352,28 @@ fn render_knowledge_domain_inspector_shell(
     [
       div(class="knowledge-inspector-toolbar", [
         div(class="knowledge-inspector-building", [
-          span(golden_valley_building_kind_label(building)),
-          span("·"),
+          town_ui_icon("building"),
           span(building.name),
         ]),
         button(
           class="knowledge-inspector-close min-h-11 min-w-11 rounded-lg text-slate-400 hover:bg-white/10",
+          title="关闭建筑详情",
           on_click=dispatch(CloseEnergyInspector),
           attrs=@html.Attrs::build().aria_label("关闭建筑详情"),
-          "✕",
+          town_ui_icon("close"),
         ),
       ]),
-      render_ecosystem_place_story(model, building, snapshot),
       render_policy_hall_question_action(dispatch, building),
-      render_knowledge_domain_library(model, domain),
+      button(
+        class="knowledge-book-open",
+        on_click=dispatch(StartIndoorWork),
+        town_ui_label("plus", "研究"),
+      ),
       render_knowledge_domain_runtime_strip(model, building),
+      render_knowledge_domain_library(model, domain),
+      render_advanced_details("场所与连接", compact_label="连接", [
+        render_ecosystem_place_story(model, building, snapshot),
+      ]),
     ],
   )
 }

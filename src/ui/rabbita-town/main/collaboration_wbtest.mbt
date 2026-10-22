@@ -29,10 +29,9 @@ test "collaboration composer renders authored question Books exact sources revie
   )
   for
     text in [
-      "Compose a collaboration", "Which observations should we compare?", "Water Book",
-      "Mobility Book", "Exact source paths in water", "Perspective for mobility",
-      "Alex Reviewer", "Sam Reviewer", "Save draft and capture sources", "Prepare one-off handoff",
-      "Reuse saved question as a fresh draft",
+      "协作研究", "Which observations should we compare?", "Water Book", "Mobility Book",
+      "Exact source paths in water", "Perspective for mobility", "Alex Reviewer",
+      "Sam Reviewer", "保存草稿", "准备交接", "Reuse saved question as a fresh draft",
     ] {
     assert_true(html.contains(text), msg=text)
   }
@@ -116,9 +115,9 @@ test "collaboration request desk routing uses the real third composer" {
   let html = @rabbita.render_to_string(
     @rabbita.static_cell(render_request_desk_workspace(dispatch, model)),
   )
-  assert_true(html.contains("Compose a collaboration"))
+  assert_true(html.contains("协作研究"))
   let buttons = @rabbita.render_to_string(
     @rabbita.static_cell(render_request_shortcuts(dispatch, model)),
   )
-  assert_true(buttons.contains("Collaboration"))
+  assert_true(buttons.contains("协作"))
 }

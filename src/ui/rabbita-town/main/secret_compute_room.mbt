@@ -15,7 +15,7 @@ priv struct SecretComputeActiveTarget {
 priv struct SecretComputeGateway {
   state : String
   active_targets : Array[SecretComputeActiveTarget]
-  model_count : Int
+  model_count : Int32
 } derive(Debug, Eq, FromJson)
 
 ///|
@@ -24,11 +24,11 @@ priv struct SecretComputeMachine {
   label : String
   state : String
   architecture : String
-  accelerator_count : Int
-  memory_total_mib : Int
-  memory_free_mib : Int
+  accelerator_count : Int32
+  memory_total_mib : Int32
+  memory_free_mib : Int32
   healthy : Bool
-  running_workloads : Int
+  running_workloads : Int32
   observed_at_unix_ms : String
 } derive(Debug, Eq, FromJson)
 
@@ -415,7 +415,7 @@ fn render_secret_compute_evidence(
     selected,
   )
   let title = if selected == "moongate" {
-    "MoonGate 治理边界"
+    "MoonGate 连接网关"
   } else {
     match selected_machine {
       Some(machine) => machine.label
@@ -423,7 +423,7 @@ fn render_secret_compute_evidence(
     }
   }
   let detail = if selected == "moongate" {
-    "所有 Agent 请求先进入 MoonGate。提供方被选择、绑定验证和执行授权是三项不同事实。"
+    "连接本地机器与远程模型。选择终端可查看其连接状态。"
   } else {
     match selected_machine {
       Some(machine) =>
@@ -443,25 +443,30 @@ fn render_secret_compute_evidence(
         h2(title),
         p(detail),
       ]),
-      @html.dl(class="compute-evidence-facts", [
-        div([
-          @html.dt("Agent boundary"),
-          @html.dd(projection.authority.agent_boundary),
-        ]),
-        div([
-          @html.dt("Local control"),
-          @html.dd(projection.authority.local_control_plane),
-        ]),
-        div([@html.dt("Claim ceiling"), @html.dd(projection.authority.claim)]),
-        div([
-          @html.dt("Observed"),
-          @html.dd(
-            if projection.observed_at.is_empty() {
-              "No fresh snapshot"
-            } else {
-              projection.observed_at
-            },
-          ),
+      render_advanced_details("连接与观测详情", [
+        p(
+          "提供方选择、绑定验证和执行授权分别记录；连接可用不代表工作已执行。",
+        ),
+        @html.dl(class="compute-evidence-facts", [
+          div([
+            @html.dt("Agent boundary"),
+            @html.dd(projection.authority.agent_boundary),
+          ]),
+          div([
+            @html.dt("Local control"),
+            @html.dd(projection.authority.local_control_plane),
+          ]),
+          div([@html.dt("Claim ceiling"), @html.dd(projection.authority.claim)]),
+          div([
+            @html.dt("Observed"),
+            @html.dd(
+              if projection.observed_at.is_empty() {
+                "No fresh snapshot"
+              } else {
+                projection.observed_at
+              },
+            ),
+          ]),
         ]),
       ]),
     ],
@@ -483,27 +488,20 @@ fn render_secret_compute_room(
     div(class="compute-room-ambient ambient-b", ""),
     header(class="compute-room-header", [
       div(class="compute-room-title", [
-        p(class="compute-kicker", "MOONTOWN · LAYER −1 · READ ONLY"),
+        p(class="compute-kicker", "地下 · 只读"),
         h1("秘密算力室"),
-        p(
-          "看见真实机器与远程上行，同时把凭据、调度权和执行权留在各自的控制面。",
-        ),
+        p("查看机器、远程模型和容量。此处仅供查看。"),
       ]),
       div(class="compute-room-header-actions", [
         render_secret_compute_status(projection.mode),
         button(
           class="compute-room-exit",
+          title=return_label,
           on_click=dispatch(CloseSecretComputeRoom),
           attrs=@html.Attrs::build().aria_label(return_label),
-          return_label,
+          town_ui_label("back", "返回"),
         ),
       ]),
-    ]),
-    div(class="compute-room-boundary-note", [
-      @html.strong("机密边界"),
-      span(
-        "这是受控本地环境中的脱敏投影；它不提供远程 Shell、凭据查看或直接调度。",
-      ),
     ]),
     render_secret_compute_graphical_scene(dispatch, model, projection),
     render_spatial_work_journey(dispatch, model),
@@ -511,6 +509,14 @@ fn render_secret_compute_room(
       projection,
       model.secret_compute_room_selected_id,
     ),
+    render_advanced_details("基础设施权限说明", [
+      div(class="compute-room-boundary-note", [
+        @html.strong("机密边界"),
+        span(
+          "这是受控本地环境中的脱敏投影；它不提供远程 Shell、凭据查看或直接调度。",
+        ),
+      ]),
+    ]),
     render_spatial_overlays(dispatch, model),
   ])
 }

@@ -1,13 +1,13 @@
 ///|
 test "operator request submit labels reflect pending state" {
-  assert_eq(operator_request_submit_label(false), "Save Watch")
-  assert_eq(operator_request_submit_label(true), "Saving watch...")
+  assert_eq(operator_request_submit_label(false), "保存关注")
+  assert_eq(operator_request_submit_label(true), "保存中…")
 }
 
 ///|
 test "book template request submit labels reflect pending state" {
-  assert_eq(book_template_request_submit_label(false), "Queue PDF Watch Book")
-  assert_eq(book_template_request_submit_label(true), "Queueing...")
+  assert_eq(book_template_request_submit_label(false), "创建研究")
+  assert_eq(book_template_request_submit_label(true), "提交中…")
 }
 
 ///|

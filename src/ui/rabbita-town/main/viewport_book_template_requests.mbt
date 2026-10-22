@@ -5,7 +5,6 @@ fn render_book_template_composer(
 ) -> @rabbita.Html {
   article(class="request-composer book-template-composer", [
     render_book_template_request_header(dispatch, model),
-    p(class="request-last", book_template_request_intro()),
     render_book_template_request_field_grid(dispatch, model),
     render_request_textarea_field(
       "Websites",
@@ -21,23 +20,49 @@ fn render_book_template_composer(
       value => dispatch(SetBookRequestPurpose(value)),
       compact=true,
     ),
-    render_request_textarea_field(
-      "Special analysis rules",
-      "Optional. Leave blank to use the template method, or describe the exact analysis rules.",
-      model.book_request_analysis_method,
-      value => dispatch(SetBookRequestAnalysisMethod(value)),
-      compact=true,
+    render_advanced_details(
+      "检查频率与分析规则",
+      needs_attention=advanced_integer_needs_attention(
+        model.book_request_cadence,
+        max=2147483647,
+      ),
+      [
+        render_request_input_field(
+          "Check frequency",
+          "60",
+          model.book_request_cadence,
+          value => dispatch(SetBookRequestCadence(value)),
+        ),
+        render_request_textarea_field(
+          "Special analysis rules",
+          "Optional. Leave blank to use the template method, or describe the exact analysis rules.",
+          model.book_request_analysis_method,
+          value => dispatch(SetBookRequestAnalysisMethod(value)),
+          compact=true,
+        ),
+      ],
     ),
     render_request_status_line(model.book_request_status),
+    div(class="request-submit-row", [
+      button(
+        class="control-button request-submit",
+        disabled=model.book_request_submitting,
+        on_click=dispatch(SubmitBookTemplateRequest),
+        town_ui_label(
+          "plus",
+          book_template_request_submit_label(model.book_request_submitting),
+        ),
+      ),
+    ]),
   ])
 }
 
 ///|
 fn book_template_request_submit_label(submitting : Bool) -> String {
   if submitting {
-    "Queueing..."
+    "提交中…"
   } else {
-    "Queue PDF Watch Book"
+    "创建研究"
   }
 }
 
@@ -53,20 +78,10 @@ fn book_template_request_target_label() -> String {
 
 ///|
 fn render_book_template_request_header(
-  dispatch : Dispatch[Msg],
-  model : Model,
+  _dispatch : Dispatch[Msg],
+  _model : Model,
 ) -> @rabbita.Html {
-  div(class="request-composer-head", [
-    div([p(class="eyebrow", "New MoonBook"), h3("Create a PDF evidence watch")]),
-    div(class="request-composer-actions-top", [
-      status_chip(book_template_request_target_label(), "chip-book"),
-      button(
-        class="control-button request-submit",
-        on_click=dispatch(SubmitBookTemplateRequest),
-        book_template_request_submit_label(model.book_request_submitting),
-      ),
-    ]),
-  ])
+  div(class="request-composer-head", [h3("研究什么？")])
 }
 
 ///|
@@ -87,12 +102,6 @@ fn render_book_template_request_field_grid(
       "research-opc-pdf-watch",
       model.book_request_book_id,
       value => dispatch(SetBookRequestBookId(value)),
-    ),
-    render_request_input_field(
-      "Check frequency",
-      "60",
-      model.book_request_cadence,
-      value => dispatch(SetBookRequestCadence(value)),
     ),
   ])
 }

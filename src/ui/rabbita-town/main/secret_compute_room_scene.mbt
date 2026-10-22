@@ -1,12 +1,12 @@
 ///|
-fn compute_scene_machine_normalized_position(index : Int) -> (Double, Double) {
+fn compute_scene_machine_normalized_position(index : Int32) -> (Double, Double) {
   let column = index % 4
   let row = index / 4
   (0.58 + column.to_double() * 0.095, 0.18 + row.to_double() * 0.22)
 }
 
 ///|
-fn compute_scene_agent_normalized_position(index : Int) -> (Double, Double) {
+fn compute_scene_agent_normalized_position(index : Int32) -> (Double, Double) {
   let column = index % 2
   let row = index / 2
   (0.10 + column.to_double() * 0.16, 0.45 + row.to_double() * 0.16)
@@ -14,10 +14,10 @@ fn compute_scene_agent_normalized_position(index : Int) -> (Double, Double) {
 
 ///|
 fn compute_scene_route_screen_position(
-  index : Int,
-  count : Int,
-  width : Int,
-  height : Int,
+  index : Int32,
+  count : Int32,
+  width : Int32,
+  height : Int32,
 ) -> (Double, Double) {
   let visible = count.min(6).max(1)
   let spread = if visible <= 1 {
@@ -376,16 +376,22 @@ fn render_secret_compute_graphical_scene(
         projection,
         model.secret_compute_room_selected_id,
       ),
-      div(class="spatial-world-legend compute-world-legend", [
-        span(
-          "居民：所选工作中已关联的负责人，不代表机器分配",
-        ),
-        span("机架：LunaNexa 观测机器"),
-        span("空机架 = 物理容量，不代表观测机器"),
-        span("终端：MoonGate 远程路由 · 可用不等于已执行"),
-        span(
-          "场景最多显示 8 台机器、6 条路由；下方列表包含全部观测实体",
-        ),
+      p(
+        class="spatial-world-legend",
+        "场景示意 · 选择机器或终端查看连接状态",
+      ),
+      render_advanced_details("场景图例", [
+        div(class="spatial-world-legend compute-world-legend", [
+          span(
+            "居民：所选工作中已关联的负责人，不代表机器分配",
+          ),
+          span("机架：LunaNexa 观测机器"),
+          span("空机架 = 物理容量，不代表观测机器"),
+          span("终端：MoonGate 远程路由 · 可用不等于已执行"),
+          span(
+            "场景最多显示 8 台机器、6 条路由；下方列表包含全部观测实体",
+          ),
+        ]),
       ]),
     ],
   )

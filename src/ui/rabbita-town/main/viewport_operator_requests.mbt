@@ -15,7 +15,19 @@ fn render_request_composer(
       disabled=model.request_submitting,
     ),
     render_material_watch_request_fields(dispatch, model),
+    render_operator_request_settings(dispatch, model),
     render_request_status_line(model.request_status),
+    div(class="request-submit-row", [
+      button(
+        class="control-button request-submit",
+        disabled=model.request_submitting,
+        on_click=dispatch(SubmitOperatorRequest),
+        town_ui_label(
+          "plus",
+          operator_request_submit_label(model.request_submitting),
+        ),
+      ),
+    ]),
     render_operator_request_last(model),
     render_material_watch_saved_requests(model),
   ])
@@ -24,29 +36,18 @@ fn render_request_composer(
 ///|
 fn operator_request_submit_label(submitting : Bool) -> String {
   if submitting {
-    "Saving watch..."
+    "保存中…"
   } else {
-    "Save Watch"
+    "保存关注"
   }
 }
 
 ///|
 fn render_operator_request_header(
-  dispatch : Dispatch[Msg],
-  model : Model,
+  _dispatch : Dispatch[Msg],
+  _model : Model,
 ) -> @rabbita.Html {
-  div(class="request-composer-head", [
-    div([p(class="eyebrow", "New Request"), h3("Ask the town to keep watching")]),
-    div(class="request-composer-actions-top", [
-      status_chip("Saves a durable watch", "chip-book"),
-      button(
-        class="control-button request-submit",
-        disabled=model.request_submitting,
-        on_click=dispatch(SubmitOperatorRequest),
-        operator_request_submit_label(model.request_submitting),
-      ),
-    ]),
-  ])
+  div(class="request-composer-head", [h3("关注什么？")])
 }
 
 ///|
@@ -70,29 +71,55 @@ fn render_operator_request_field_grid(
       value => dispatch(SetRequestBookId(value)),
       disabled=model.request_submitting,
     ),
-    div([
-      render_request_input_field(
-        "Check interval (ticks)",
-        "60",
-        model.request_cadence,
-        value => dispatch(SetRequestCadence(value)),
-        disabled=model.request_submitting,
-      ),
-      p(class="request-status", operator_request_cadence_help()),
-    ]),
-    render_request_input_field(
-      "Quality threshold",
-      "85",
-      model.request_quality_threshold,
-      value => dispatch(SetRequestQualityThreshold(value)),
-      disabled=model.request_submitting,
-    ),
   ])
 }
 
 ///|
+fn render_operator_request_settings(
+  dispatch : Dispatch[Msg],
+  model : Model,
+) -> @rabbita.Html {
+  render_advanced_details(
+    "检查频率与质量",
+    needs_attention=advanced_integer_needs_attention(
+        model.request_cadence,
+        max=2147483647,
+      ) ||
+      advanced_integer_needs_attention(model.request_quality_threshold, max=100),
+    [
+      div([
+        render_request_input_field(
+          "Check interval (ticks)",
+          "60",
+          model.request_cadence,
+          value => dispatch(SetRequestCadence(value)),
+          disabled=model.request_submitting,
+        ),
+        p(class="request-status", operator_request_cadence_help()),
+      ]),
+      render_request_input_field(
+        "Quality threshold",
+        "85",
+        model.request_quality_threshold,
+        value => dispatch(SetRequestQualityThreshold(value)),
+        disabled=model.request_submitting,
+      ),
+    ],
+  )
+}
+
+///|
 fn render_operator_request_last(model : Model) -> @rabbita.Html {
-  p(class="request-last", operator_request_last_summary(model))
+  match latest_operator_request(model) {
+    None => @html.nothing
+    Some(request) =>
+      div([
+        p(class="request-last", "已保存：\{request.title}"),
+        render_advanced_details("上次请求详情", [
+          p(class="request-last", operator_request_last_summary(model)),
+        ]),
+      ])
+  }
 }
 
 ///|

@@ -22,7 +22,7 @@ fn spatial_start_work_model(model : Model) -> Model {
     request_title: "\{name} · 本地议题调查",
     request_prompt: "请围绕以下本地议题建立可追踪、可审阅的工作。\n\n议题与受影响的人群：\n希望改善的现状：\n已有材料：\n需要人来决定的事项：\n\n建筑上下文：\{module_key}\n工作台上下文：\{model.indoor_selected_slot_id}\n请区分问题、证据、政策选项、实施约束和待核实事项；列出来源与版本，最后提供可打开的结果页。建筑和工作台仅为上下文，最终 Agent 与机器由授权调度选择；不要自动执行政策或提交申请。",
     request_submitting: false,
-    request_status: "补充议题后确认提交。接受请求不等于已执行。",
+    request_status: "补充议题后确认提交。",
   }
 }
 
@@ -77,19 +77,22 @@ fn render_spatial_work_journey(
   model : Model,
 ) -> @rabbita.Html {
   section(class="spatial-work-journey building-interior-panel", [
-    h2("从议题到可审阅的结果"),
+    h2("工作"),
     match spatial_selected_work(model) {
       None =>
         div([
           p(
             if model.spatial_request_id.is_empty() {
-              "选择工作台提出本地议题；从楼内工作中选择一项，跟随负责人、执行记录和结果。"
+              "提出议题，或选择一项楼内工作。"
             } else {
-              "请求已接受，等待运行时关联工作。尚未证明 Agent 已开始执行；请勿重复提交。"
+              "请求已提交，等待分配。无需重复提交。"
             },
           ),
-          p("议题 → 工作与负责人 → 执行证据 → 结果审阅"),
-          button(on_click=dispatch(StartIndoorWork), "提出本地议题"),
+          button(
+            on_click=dispatch(StartIndoorWork),
+            title="提出本地议题",
+            town_ui_label("work", "新工作"),
+          ),
         ])
       Some(task) => {
         let reviewed = model.town_life_spark_awards.any(award => {
@@ -114,8 +117,7 @@ fn render_spatial_work_journey(
             Some(summary) => p(resident_safe_task_summary(summary))
             None => @html.nothing
           },
-          @html.details([
-            @html.summary("工作与执行记录"),
+          render_advanced_details("工作与执行记录", [
             p("工作：\{task.id}"),
             p("Run：\{task.runId.unwrap_or("尚未观测到")}"),
             p("请求：\{task.requestId.unwrap_or("未提供关联")}"),
@@ -124,21 +126,18 @@ fn render_spatial_work_journey(
             ),
           ]),
           match model.town_spatial_layer {
-            Underground(_) =>
-              p(
-                "下方是基础设施观测；不会据此推断本项工作使用了哪台机器。",
-              )
+            Underground(_) => @html.nothing
             _ =>
               button(
                 on_click=dispatch(OpenSecretComputeRoom),
-                "查看算力与执行边界 ↓",
+                "查看算力 ↓",
               )
           },
           render_resident_evidence(task),
           if reviewed {
             p(
               class="spatial-work-reviewed",
-              "已记录你的结果审阅 · +10 星火。这不是政策批准或实施完成。",
+              "已记录你的阅读 · +10 星火",
             )
           } else if spatial_work_can_review(task) {
             button(
@@ -146,9 +145,7 @@ fn render_spatial_work_journey(
               "我已阅读结果，记录审阅 +10 星火",
             )
           } else {
-            p(
-              "等待完成且附有可打开的结果；失败或仅接受的请求不会获得完成奖励。",
-            )
+            p("结果就绪后，可在这里阅读并记录审阅。")
           },
         ])
       }

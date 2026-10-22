@@ -347,7 +347,10 @@ export function candidateDialog(state, onSubmitted, sources = [], { fetcher = fe
 
 export function installPackBridgePanel() {
   if (document.querySelector('[data-pack-bridge-panel]')) return
-  const launch = element('button', 'pack-bridge-launch', 'Pack layers')
+  const launch = element('button', 'pack-bridge-launch', '')
+  launch.title = '扩展工具（高级）'
+  launch.setAttribute('aria-label', '扩展工具（高级）')
+  launch.innerHTML = '<svg aria-hidden="true" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><path d="M4 3v6m0 6v6M12 3v12m0 4v2M20 3v2m0 6v10M1 9h6v6H1zM9 15h6v4H9zM17 5h6v6h-6z"/></svg>'
   launch.type = 'button'
   launch.dataset.packBridgePanel = 'launch'
   const panel = element('aside', 'pack-bridge-panel')
@@ -479,11 +482,14 @@ export function installPackBridgePanel() {
   launch.addEventListener('click', async () => {
     panel.hidden = false
     launch.hidden = true
+    close.focus?.()
     await refresh()
   })
   close.addEventListener('click', () => {
     panel.hidden = true
     launch.hidden = false
+    const origin = document.querySelector('#town-pack-tools-open') || launch
+    origin.focus?.()
   })
   propose.addEventListener('click', () => {
     openCandidate([...proposalSources.values()])

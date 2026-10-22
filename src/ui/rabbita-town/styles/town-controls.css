@@ -1,0 +1,134 @@
+/* Shared town chrome. Map sprites, terrain and full 3D models are untouched. */
+:root {
+  --town-ui-paper: #f7f4e9;
+  --town-ui-card: #fffdf5;
+  --town-ui-wash: #e9eddf;
+  --town-ui-ink: #293b30;
+  --town-ui-muted: #596859;
+  --town-ui-line: #c7cebc;
+  --town-ui-accent: #3f614a;
+  --town-ui-focus: #956b24;
+  --town-ui-radius: 16px;
+  --town-ui-shadow: 0 12px 32px rgb(32 47 35 / 18%);
+}
+.town-ui-icon, .town-ui-svg { display: inline-flex; width: 20px; height: 20px; flex: 0 0 20px; vertical-align: middle; }
+.town-ui-icon svg { display: block; }
+.town-ui-label { display: inline-flex; align-items: center; justify-content: center; gap: 8px; line-height: 1.4; }
+.town-ui-icon-button { display: inline-flex; align-items: center; justify-content: center; min-width: 44px; min-height: 44px; padding: 10px; border: 1px solid transparent; border-radius: 12px; background: transparent; color: var(--town-ui-muted); cursor: pointer; }
+.town-ui-icon-button:hover { background: var(--town-ui-wash); color: var(--town-ui-ink); }
+.town-advanced > summary { display: flex; align-items: center; width: fit-content; gap: 8px; list-style: none; font-size: 12px; }
+.town-advanced > summary::-webkit-details-marker { display: none; }
+.town-advanced > summary::after { content: ''; width: 6px; height: 6px; border-right: 1.5px solid currentColor; border-bottom: 1.5px solid currentColor; transform: rotate(45deg); margin: -3px 6px 0 4px; }
+.town-advanced[open] > summary::after { transform: rotate(225deg); margin-top: 3px; }
+.town-advanced-heading { margin: 0; font-size: 12px; font-weight: 650; }
+
+/* Stable homes: identity left, views right, build tools bottom-center,
+   resident bottom-left, services bottom-right. */
+.town-actions.town-utility-disclosure { z-index: 36; }
+.town-action-menu-toggle > .town-ui-label { flex-direction: column; gap: 3px; font-size: 11px; }
+.town-topbar-disclosure-toggle > .town-ui-label { flex-direction: column; gap: 3px; font-size: 11px; }
+.town-utility-disclosure[open] .town-action-menu-toggle { background: var(--town-ui-accent); color: var(--town-ui-paper); border-color: var(--town-ui-line); }
+.town-utility-panel { width: min(360px, calc(100vw - 32px)); padding: 12px; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: 8px; border: 1px solid var(--town-ui-line); border-radius: var(--town-ui-radius); background: var(--town-ui-paper); color: var(--town-ui-ink); box-shadow: var(--town-ui-shadow); }
+.town-utility-panel .town-action { min-height: 68px; padding: 10px 4px; border: 1px solid transparent; background: transparent; color: var(--town-ui-ink); box-shadow: none; font-size: 12px; }
+.town-utility-panel .town-action > .town-ui-label { flex-direction: column; gap: 7px; }
+.town-utility-panel .town-action:hover, .town-utility-panel .town-action-active { border-color: var(--town-ui-line); background: var(--town-ui-wash); color: var(--town-ui-ink); }
+.town-utility-panel .town-advanced { color: var(--town-ui-muted); border-color: var(--town-ui-line); }
+.town-utility-panel .town-advanced > summary:hover { color: var(--town-ui-ink); }
+.town-utility-panel .town-advanced-body { grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 8px; }
+.town-utility-panel .town-advanced-heading { grid-column: 1 / -1; }
+.town-utility-panel .town-advanced .town-action { min-height: 60px; }
+.town-utility-panel :is(button, summary):focus-visible { outline: 2px solid var(--town-ui-focus); outline-offset: -2px; }
+.town-dock-icon, .town-dock-icon-building { background: transparent; box-shadow: none; color: inherit; border: 0; }
+.town-dock-button .town-dock-icon-building { background: transparent; box-shadow: none; }
+.town-dock-button[aria-pressed=true] .town-dock-icon { color: var(--town-sand); background: transparent; }
+.town-dock-label { font-size: 11px; }
+.town-dock-button .town-dock-cost { font-size: 10px; }
+.player-chip-profile { grid-column: 1 / -1; margin: 0 0 4px; font-size: 12px; line-height: 1.5; }
+.player-chip-menu-toggle { padding: 10px; }
+.town-quest-wrap:empty { display: none; }
+
+/* One paper sheet instead of a dashboard nested inside a dark modal. */
+.town-ui-sheet.energy-request-dialog { width: min(620px, calc(100vw - 32px)); max-height: calc(100dvh - 32px); padding: 24px; border: 1px solid var(--town-ui-line); border-radius: 20px; background: var(--town-ui-paper); color: var(--town-ui-ink); box-shadow: var(--town-ui-shadow); }
+.account-product-surface .town-modal-backdrop { position: absolute; inset: 0; }
+.account-product-surface .town-ui-sheet.energy-request-dialog { max-height: 100%; }
+.town-ui-sheet-header { display: flex; justify-content: space-between; align-items: center; gap: 12px; margin-bottom: 16px; }
+.town-ui-sheet-header h2 { margin: 0; font-size: 20px; font-weight: 650; color: var(--town-ui-ink); }
+.energy-request-dialog .request-desk { padding: 0; border: 0; border-radius: 0; box-shadow: none; background: transparent; color: var(--town-ui-ink); gap: 20px; }
+.energy-request-dialog .request-desk-head { display: block; }
+.energy-request-dialog .request-desk-head .request-action-dock { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 4px; padding: 4px; border: 1px solid var(--town-ui-line); border-radius: 12px; background: var(--town-ui-wash); }
+.energy-request-dialog .request-action-button { display: flex; align-items: center; justify-content: center; min-height: 44px; padding: 8px 10px; border: 1px solid transparent; background: transparent; box-shadow: none; color: var(--town-ui-muted); font-size: 13px; font-weight: 550; transition: background 120ms, color 120ms; transform: none; }
+.energy-request-dialog .request-action-button:hover { background: var(--town-ui-card); }
+.energy-request-dialog .request-action-button.is-active { border-color: var(--town-ui-line); background: var(--town-ui-card); color: var(--town-ui-ink); }
+.energy-request-dialog .request-desk-head .request-action-button.is-active { background: var(--town-ui-accent); border-color: var(--town-ui-accent); color: var(--town-ui-paper); }
+.energy-request-dialog .request-composer { padding: 0; gap: 16px; border: 0; box-shadow: none; background: transparent; }
+.energy-request-dialog .request-composer h3 { font-size: 16px; font-weight: 600; color: var(--town-ui-ink); }
+.energy-request-dialog .request-mode-dock { width: fit-content; display: flex; flex-wrap: wrap; gap: 8px; }
+.energy-request-dialog .request-mode-dock .request-action-button { width: auto; min-height: 44px; border: 1px solid var(--town-ui-line); padding: 8px 14px; }
+.energy-request-dialog .request-field-grid { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 16px; }
+.energy-request-dialog .request-field-wide { grid-column: auto; }
+.energy-request-dialog .request-field { min-width: 0; gap: 7px; }
+.energy-request-dialog .request-label { color: var(--town-ui-muted); font-size: 12px; font-weight: 550; letter-spacing: 0; text-transform: none; }
+.energy-request-dialog .request-input, .energy-request-dialog .request-textarea { min-height: 44px; border: 1px solid var(--town-ui-line); border-radius: 10px; background: var(--town-ui-card); color: var(--town-ui-ink); box-shadow: none; font-size: 14px; line-height: 1.6; font-family: inherit; }
+.energy-request-dialog .request-textarea { min-height: 112px; }
+.energy-request-dialog .town-advanced { border-color: var(--town-ui-line); color: var(--town-ui-muted); }
+.energy-request-dialog .town-advanced > summary:hover { color: var(--town-ui-ink); }
+.energy-request-dialog .request-submit-row { display: flex; justify-content: flex-end; padding-top: 12px; border-top: 1px solid var(--town-ui-line); }
+.energy-request-dialog .request-submit { min-height: 44px; padding: 10px 18px; border: 1px solid var(--town-ui-accent); border-radius: 12px; background: var(--town-ui-accent); color: var(--town-ui-paper); font-size: 14px; box-shadow: none; }
+.energy-request-dialog .request-submit:hover { background: #304e39; }
+.energy-request-dialog .request-submit:disabled { opacity: .55; cursor: wait; }
+.energy-request-dialog .request-status { border-color: var(--town-ui-line); background: var(--town-ui-wash); color: var(--town-ui-muted); border-radius: 8px; }
+.energy-request-dialog .request-form-grid { display: grid; gap: 16px; }
+.energy-request-dialog .request-form-grid:has(#collaboration-title) { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+.energy-request-dialog .request-form-grid > .request-field:has(#collaboration-title, #collaboration-question, #collaboration-decision_prompt) { grid-column: 1 / -1; }
+.collaboration-book-picker { border: 1px solid var(--town-ui-line); background: var(--town-ui-card); border-radius: 12px; }
+.collaboration-book-picker > summary { min-height: 44px; padding: 10px 12px; cursor: pointer; font-size: 13px; }
+.collaboration-book-options { max-height: 240px; overflow: auto; padding: 10px; gap: 8px; }
+.collaboration-book-options button { overflow-wrap: anywhere; }
+.energy-request-dialog .request-actions button:not(.request-submit) { min-height: 44px; padding: 8px 12px; border: 1px solid var(--town-ui-line); border-radius: 10px; background: var(--town-ui-wash); color: var(--town-ui-ink); }
+.energy-request-dialog .request-composer > p { font-size: 13px; line-height: 1.6; color: var(--town-ui-muted); }
+.energy-request-dialog :is(button, input, textarea, summary):focus-visible { outline: 2px solid var(--town-ui-focus); outline-offset: 2px; }
+
+/* Building inspection uses the same palette as task sheets and landmarks. */
+.knowledge-library-inspector { padding: 20px; border: 1px solid var(--town-ui-line); border-radius: var(--town-ui-radius); background: var(--town-ui-paper); color: var(--town-ui-ink); box-shadow: var(--town-ui-shadow); }
+.knowledge-library-inspector :is(h2, h3, .knowledge-library-title, .knowledge-book-card-title, .knowledge-library-stat-value) { color: var(--town-ui-ink); }
+.knowledge-library-inspector :is(p, .knowledge-inspector-toolbar, .knowledge-library-eyebrow, .knowledge-book-card-question, .knowledge-library-summary, .knowledge-library-empty, .knowledge-library-subtitle, .town-advanced) { color: var(--town-ui-muted); }
+.knowledge-library-inspector :is(.knowledge-inspector-toolbar, .town-advanced, .knowledge-library-empty) { border-color: var(--town-ui-line); }
+.knowledge-library-inspector .knowledge-inspector-building { font-size: 13px; letter-spacing: 0; align-items: center; }
+.knowledge-library-inspector .knowledge-library-icon { background: var(--town-ui-wash); color: var(--town-ui-accent); border-color: var(--town-ui-line); }
+.knowledge-library-inspector .knowledge-book-card { background: var(--town-ui-card); border-color: var(--town-ui-line); }
+.knowledge-library-inspector .knowledge-inspector-close { color: var(--town-ui-muted); }
+.knowledge-library-inspector .knowledge-inspector-close:hover { background: var(--town-ui-wash); }
+.knowledge-library-inspector .knowledge-book-open { align-self: flex-start; min-height: 44px; border: 1px solid var(--town-ui-line); background: var(--town-ui-wash); color: var(--town-ui-ink); padding: 8px 14px; border-radius: 10px; }
+.knowledge-library-inspector .policy-hall-question-action { padding: 16px; background: var(--town-ui-wash); border-color: var(--town-ui-line); box-shadow: none; }
+.knowledge-library-inspector .policy-hall-question-eyebrow { color: var(--town-ui-accent); }
+.knowledge-library-inspector .policy-hall-question-button { background: var(--town-ui-accent); color: var(--town-ui-paper); border-color: var(--town-ui-accent); min-height: 44px; box-shadow: none; }
+.knowledge-library-inspector .town-advanced > summary:hover { color: var(--town-ui-ink); }
+.knowledge-library-inspector :is(button, a, summary):focus-visible { outline: 2px solid var(--town-ui-focus); outline-offset: 2px; }
+@media (max-width: 540px) {
+  .town-ui-sheet.energy-request-dialog { padding: 16px; width: calc(100vw - 24px); }
+  .energy-request-dialog .request-field-grid { grid-template-columns: minmax(0, 1fr); }
+  .energy-request-dialog .request-input, .energy-request-dialog .request-textarea { font-size: 16px; }
+  .energy-request-dialog .request-action-button .town-ui-label { gap: 5px; }
+  .town-utility-panel { width: min(344px, calc(100vw - 24px)); }
+}
+@media (prefers-reduced-motion: reduce) { .energy-request-dialog .request-action-button { transition: none; } }
+
+/* Keep the illustrated room stages intact; their surrounding controls use paper. */
+.secret-compute-room {
+  --compute-surface: var(--town-ui-paper);
+  --compute-surface-strong: var(--town-ui-card);
+  --compute-line: var(--town-ui-line);
+  --compute-text: var(--town-ui-ink);
+  --compute-muted: var(--town-ui-muted);
+  --compute-cyan: var(--town-ui-accent);
+}
+.secret-compute-room:has(.compute-world-scene) { background: var(--town-ui-paper); }
+.secret-compute-room::before, .building-interior-layer::before, .compute-room-ambient { display: none; }
+.compute-room-title h1, .building-interior-title h1 { font-size: clamp(24px, 3vw, 32px); line-height: 1.25; letter-spacing: 0; color: var(--town-ui-ink); }
+.compute-kicker, .building-interior-eyebrow { letter-spacing: .03em; }
+.compute-room-exit, .building-interior-exit, .building-lift-button { min-height: 44px; display: inline-flex; justify-content: center; align-items: center; padding: 10px 14px; border: 1px solid #829577; border-radius: 12px; background: #314b37; color: var(--town-ui-paper); }
+.compute-room-exit:hover, .building-interior-exit:hover, .building-lift-button:hover { background: #405f45; }
+.secret-compute-room .town-advanced { color: var(--town-ui-muted); border-color: var(--town-ui-line); }
+.secret-compute-room .town-advanced > summary:hover { color: var(--town-ui-ink); }
+.pack-bridge-launch { width: 44px; min-height: 44px; padding: 10px; display: flex; align-items: center; justify-content: center; border: 1px solid var(--town-ui-line); border-radius: 12px; background: var(--town-ui-paper); color: var(--town-ui-ink); box-shadow: var(--town-ui-shadow); }
+.pack-bridge-launch:focus-visible { outline: 2px solid var(--town-ui-focus); outline-offset: 2px; }

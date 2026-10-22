@@ -75,10 +75,7 @@ fn render_indoor_work(
   }
   section(class="building-interior-panel building-interior-work", [
     header(class="building-interior-panel-head", [
-      div([
-        p(class="building-interior-eyebrow", "BUILDING WORK"),
-        h2("楼内工作与跨楼交接"),
-      ]),
+      div([h2("楼内工作")]),
       span("\{tasks.length()} 项"),
     ]),
     if rows.is_empty() {
@@ -87,9 +84,9 @@ fn render_indoor_work(
         if energy_valley_runtime_can_claim_active_work(
             model.energy_valley_runtime,
           ) {
-          "运行时已连接，但这座建筑当前没有真实工作。"
+          "暂无进行中的工作。"
         } else {
-          "当前没有可声明为实时的楼内工作；不会用演示活动代替。"
+          "工作动态暂未连接。"
         },
       )
     } else {
@@ -114,7 +111,7 @@ fn render_indoor_presence_summary(
         is @energy_valley_contract.RuntimeProjection {
         "运行时记录"
       } else {
-        "预览居民 · 非真实执行"
+        "预览居民"
       }
       rows.push(
         div(class="semantic-interior-presence", [
@@ -130,17 +127,11 @@ fn render_indoor_presence_summary(
   }
   section(class="building-interior-panel building-interior-agents", [
     header(class="building-interior-panel-head", [
-      div([
-        p(class="building-interior-eyebrow", "INDOOR PRESENCE"),
-        h2("正在室内的 Agent"),
-      ]),
+      div([h2("室内居民")]),
       span("\{rows.length()} 位 · 含预览"),
     ]),
     if rows.is_empty() {
-      p(
-        class="building-interior-empty",
-        "当前没有 Agent 被真实分配到本楼交互位。",
-      )
+      p(class="building-interior-empty", "暂无代理入驻。")
     } else {
       div(class="building-interior-agent-list", rows)
     },
@@ -151,32 +142,35 @@ fn render_indoor_presence_summary(
 fn render_indoor_compute_lift(dispatch : Dispatch[Msg]) -> @rabbita.Html {
   section(class="building-interior-panel building-compute-lift", [
     div(class="building-lift-copy", [
-      p(class="building-interior-eyebrow", "SECURED LIFT · LAYER −1"),
-      h2("地下算力链路"),
+      p(class="building-interior-eyebrow", "地下层"),
+      h2("地下算力室"),
+      p("查看机器、容量和连接状态。"),
+    ]),
+    render_advanced_details("算力如何连接", [
       p(
-        "楼内 Agent 不直接连接机器。请求先穿过 MoonGate，再由受控路由选择 LunaNexa 本地算力或远程模型。",
+        "楼内 Agent 的请求经 MoonGate 路由至 LunaNexa 本地算力或远程模型。",
+      ),
+      div(
+        class="building-lift-route",
+        attrs=@html.Attrs::build().aria_label(
+          "楼内 Agent 经 MoonGate 连接地下算力",
+        ),
+        [
+          span("楼内 Agent"),
+          span(class="building-lift-arrow", "→"),
+          @html.strong("MoonGate"),
+          span(class="building-lift-arrow", "↓"),
+          span("LunaNexa / Remote"),
+        ],
       ),
     ]),
-    div(
-      class="building-lift-route",
-      attrs=@html.Attrs::build().aria_label(
-        "楼内 Agent 经 MoonGate 连接地下算力",
-      ),
-      [
-        span("楼内 Agent"),
-        span(class="building-lift-arrow", "→"),
-        @html.strong("MoonGate"),
-        span(class="building-lift-arrow", "↓"),
-        span("LunaNexa / Remote"),
-      ],
-    ),
     button(
       class="building-lift-button",
       on_click=dispatch(OpenSecretComputeRoom),
       attrs=@html.Attrs::build().aria_label(
         "乘安全电梯前往地下算力室",
       ),
-      "乘安全电梯前往地下 →",
+      town_ui_label("server", "地下"),
     ),
   ])
 }
@@ -203,15 +197,15 @@ fn render_energy_valley_building_interior(
             button(on_click=dispatch(OpenSecretComputeRoom), "地下算力"),
           ],
         ),
-        p(class="building-interior-eyebrow", "MOONTOWN · LAYER 0 · INDOOR"),
         h1(building.name),
         p(golden_valley_building_description(building)),
       ]),
       button(
         class="building-interior-exit",
+        title="返回地面小镇",
         on_click=dispatch(ExitEnergyBuilding),
         attrs=@html.Attrs::build().aria_label("返回地面小镇"),
-        "← 返回地面",
+        town_ui_label("back", "小镇"),
       ),
     ]),
     div(class="building-interior-location", [

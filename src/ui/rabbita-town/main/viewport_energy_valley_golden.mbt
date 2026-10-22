@@ -56,12 +56,12 @@ fn render_energy_valley_weather_button(
 }
 
 ///|
-fn energy_valley_sim_minutes(model : Model) -> Int {
+fn energy_valley_sim_minutes(model : Model) -> Int32 {
   552 + model.tick * model.energy_time_scale / 60
 }
 
 ///|
-fn energy_valley_two_digits(value : Int) -> String {
+fn energy_valley_two_digits(value : Int32) -> String {
   if value < 10 {
     "0\{value}"
   } else {
@@ -76,7 +76,7 @@ fn energy_valley_sim_clock(model : Model) -> String {
 }
 
 ///|
-fn energy_valley_sim_day(model : Model) -> Int {
+fn energy_valley_sim_day(model : Model) -> Int32 {
   1 + energy_valley_sim_minutes(model) / (24 * 60)
 }
 
@@ -118,7 +118,11 @@ fn render_energy_valley_topbar(
         class="town-topbar-disclosure",
         attrs=@html.Attrs::build().name("moontown-hud-disclosure"),
         [
-          @html.summary(class="town-topbar-disclosure-toggle", "镇况"),
+          @html.summary(
+            class="town-topbar-disclosure-toggle",
+            title="镇况",
+            town_ui_label("chart", "镇况"),
+          ),
           div(class="town-topbar-menu", [
             div(class="town-topbar-town-state", [
               span(class="town-topbar-menu-title", "MoonTown 镇况"),
@@ -307,7 +311,7 @@ fn render_energy_valley_metric(label : String, value : String) -> @rabbita.Html 
 fn render_energy_valley_speed_button(
   dispatch : Dispatch[Msg],
   model : Model,
-  scale : Int,
+  scale : Int32,
   label : String,
 ) -> @rabbita.Html {
   let selected = model.energy_time_scale == scale
@@ -328,14 +332,14 @@ fn render_energy_valley_speed_button(
 }
 
 ///|
-fn energy_valley_environment_agent_count(model : Model) -> Int {
+fn energy_valley_environment_agent_count(model : Model) -> Int32 {
   energy_valley_runtime_active_agents(model.energy_valley_runtime).length()
 }
 
 ///|
 /// Truthful resident count: the embodied player plus agents actually present
 /// in the latest runtime projection. Decorative preview walkers are excluded.
-fn energy_valley_known_resident_count(model : Model) -> Int {
+fn energy_valley_known_resident_count(model : Model) -> Int32 {
   let player_count = if model.player is Some(_) { 1 } else { 0 }
   match model.energy_valley_runtime.projection {
     Some(projection) => player_count + projection.agents.length()
@@ -352,8 +356,8 @@ fn render_energy_valley_dock_button(
   label : String,
   cost : String,
   hotkey : String,
-  building? : Bool = false,
-  primary? : Bool = false,
+  building~ : Bool = false,
+  primary~ : Bool = false,
 ) -> @rabbita.Html {
   let primary_class = if primary { " town-dock-primary" } else { "" }
   button(
@@ -378,7 +382,7 @@ fn render_energy_valley_dock_button(
         } else {
           "town-dock-icon text-lg"
         },
-        icon,
+        town_tool_icon(icon),
       ),
       span(class="town-dock-label text-[10px] text-slate-300", label),
       if cost.is_empty() {
@@ -485,7 +489,7 @@ fn render_energy_valley_tool_dock(
         @html.summary(
           class="town-dock-button town-dock-primary town-dock-more-toggle",
           [
-            span(class="town-dock-icon", "筑"),
+            span(class="town-dock-icon", town_ui_icon("plus")),
             span(class="town-dock-label", "扩建"),
           ],
         ),
@@ -536,7 +540,7 @@ fn render_energy_valley_tool_dock(
 }
 
 ///|
-fn energy_valley_runtime_work_count(model : Model) -> Int {
+fn energy_valley_runtime_work_count(model : Model) -> Int32 {
   match model.energy_valley_runtime.projection {
     Some(projection) => projection.tasks.length()
     None => 0
@@ -1219,33 +1223,24 @@ fn render_energy_valley_request_dialog(
   model : Model,
 ) -> @rabbita.Html {
   section(
-    class="energy-request-dialog pointer-events-auto max-h-[90vh] w-full max-w-4xl overflow-auto rounded-2xl border border-amber-200/20 bg-slate-950/95 p-5 text-slate-100 shadow-2xl backdrop-blur-md",
+    class="energy-request-dialog pointer-events-auto town-ui-sheet",
     attrs=@html.Attrs::build()
       .role("dialog")
       .aria_modal("true")
       .aria_labelledby("energy-request-title"),
     [
-      div(class="mb-4 flex items-start justify-between gap-4", [
-        div([
-          h2(
-            id="energy-request-title",
-            class="text-[17px] font-bold text-amber-100",
-            "创建真实工作请求",
-          ),
-          p(
-            class="mt-1 text-[12px] text-slate-400",
-            "提交后由 MoonTown 运行时保存持续观察请求，并由 Mayor 调度执行 Agent；进度和结果会通过运行时账本回投到能源谷。",
-          ),
-        ]),
+      div(class="town-ui-sheet-header", [
+        div([h2(id="energy-request-title", "发起工作")]),
         button(
-          class="energy-request-dialog-close rounded-lg px-2 py-1 text-slate-400 hover:bg-white/10",
+          class="energy-request-dialog-close town-ui-icon-button",
+          title="关闭",
           autofocus=true,
           on_click=dispatch(CloseEnergyRequest),
           attrs=@html.Attrs::build().aria_label("关闭真实工作请求"),
-          "✕",
+          town_ui_icon("close"),
         ),
       ]),
-      render_request_desk(dispatch, model),
+      render_request_desk(dispatch, model, compact=true),
     ],
   )
 }

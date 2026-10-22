@@ -230,7 +230,7 @@ fn phone_thread(model : Model, contact : String) -> Array[PhoneMessage] {
 fn offline_resident_reply(
   contact : String,
   input : String,
-  salt : Int,
+  salt : Int32,
 ) -> String {
   let lower = input.to_lower()
   let topic = if lower.contains("地铁") ||
@@ -847,16 +847,24 @@ fn render_phone_panel(dispatch : Dispatch[Msg], model : Model) -> @rabbita.Html 
               },
             ]),
             if policy_context {
-              aside(
-                class="phone-policy-context",
-                attrs=@html.Attrs::build().role("note"),
-                [
-                  span(class="phone-policy-context-title", "答复边界"),
-                  span(
-                    "现有专题资料以青年创业为主，其他领域需补充来源；区分官网确认、现场 OCR 与待复核项。信息导航不等于审批意见。",
+              div([
+                p(
+                  class="phone-policy-context",
+                  "政策参考 · 现有专题以青年创业为主，具体申请请向主管部门确认。",
+                ),
+                render_advanced_details("答复边界与来源", [
+                  aside(
+                    class="phone-policy-context",
+                    attrs=@html.Attrs::build().role("note"),
+                    [
+                      span(class="phone-policy-context-title", "答复边界"),
+                      span(
+                        "现有专题资料以青年创业为主，其他领域需补充来源；区分官网确认、现场 OCR 与待复核项。信息导航不等于审批意见。",
+                      ),
+                    ],
                   ),
-                ],
-              )
+                ]),
+              ])
             } else {
               @html.nothing
             },

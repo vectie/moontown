@@ -1198,6 +1198,10 @@
 
 /* One quiet menu pin replaces the former full resident/knowledge/ops rail. */
 .town-actions.town-utility-disclosure {
+  position: absolute;
+  top: auto;
+  left: auto;
+  width: max-content;
   right: calc(16px + var(--town-safe-right));
   bottom: calc(16px + var(--town-safe-bottom));
   display: block;

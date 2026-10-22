@@ -22,7 +22,7 @@ fn avatar_persona_label(persona : String) -> String {
 }
 
 ///|
-fn render_avatar_wizard_step_indicator(step : Int) -> @rabbita.Html {
+fn render_avatar_wizard_step_indicator(step : Int32) -> @rabbita.Html {
   let dots : Array[@rabbita.Html] = []
   for index in 0..<3 {
     dots.push(
@@ -301,7 +301,8 @@ fn render_player_chip(dispatch : Dispatch[Msg], model : Model) -> @rabbita.Html 
           div(class="player-chip-name", player.name),
           div(
             class="player-chip-title",
-            "\{avatar_persona_label(player.persona)} · \{player.title} · 谷光 \{model.spark}",
+            title="\{avatar_persona_label(player.persona)} · \{player.title}",
+            "谷光 \{model.spark}",
           ),
         ]),
         if onboarding && progress == 1 {
@@ -324,9 +325,20 @@ fn render_player_chip(dispatch : Dispatch[Msg], model : Model) -> @rabbita.Html 
             [
               @html.summary(
                 class="chip-button player-chip-menu-toggle",
-                "居民",
+                title="居民与角色设置",
+                attrs=@html.Attrs::build().aria_label("居民与角色设置"),
+                town_ui_icon("sliders"),
               ),
-              div(class="player-chip-menu", resident_actions),
+              div(
+                class="player-chip-menu",
+                [
+                  p(
+                    class="player-chip-profile",
+                    "\{avatar_persona_label(player.persona)} · \{player.title}",
+                  ),
+                  ..resident_actions,
+                ],
+              ),
             ],
           )
         } else {

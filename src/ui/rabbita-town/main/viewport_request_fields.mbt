@@ -4,8 +4,8 @@ fn render_request_input_field(
   placeholder : String,
   value : String,
   on_value : (String) -> Cmd,
-  wide? : Bool = false,
-  disabled? : Bool = false,
+  wide~ : Bool = false,
+  disabled~ : Bool = false,
 ) -> @rabbita.Html {
   let field_id = request_field_id(label)
   let field_class = if wide {
@@ -14,7 +14,11 @@ fn render_request_input_field(
     "request-field"
   }
   div(class=field_class, [
-    @html.label(class="request-label", for_=field_id, label),
+    @html.label(
+      class="request-label",
+      for_=field_id,
+      request_display_label(label),
+    ),
     input(
       id=field_id,
       class="request-input",
@@ -32,8 +36,8 @@ fn render_request_textarea_field(
   placeholder : String,
   value : String,
   on_value : (String) -> Cmd,
-  compact? : Bool = false,
-  disabled? : Bool = false,
+  compact~ : Bool = false,
+  disabled~ : Bool = false,
 ) -> @rabbita.Html {
   let field_id = request_field_id(label)
   let textarea_class = if compact {
@@ -42,7 +46,11 @@ fn render_request_textarea_field(
     "request-textarea"
   }
   div(class="request-field", [
-    @html.label(class="request-label", for_=field_id, label),
+    @html.label(
+      class="request-label",
+      for_=field_id,
+      request_display_label(label),
+    ),
     textarea(
       id=field_id,
       class=textarea_class,
@@ -57,6 +65,12 @@ fn render_request_textarea_field(
 
 ///|
 fn render_request_status_line(status : String) -> @rabbita.Html {
+  // Readiness is implicit in the enabled submit action; failures stay visible.
+  if status.is_empty() ||
+    status == "Ready to submit a standing watch request." ||
+    status == "Ready to queue a PDF Evidence Watch MoonBook request." {
+    return @html.nothing
+  }
   div(class="request-actions", [
     p(
       class="request-status tone-\{request_status_tone(status)}",
@@ -64,6 +78,26 @@ fn render_request_status_line(status : String) -> @rabbita.Html {
       status,
     ),
   ])
+}
+
+///|
+fn request_display_label(label : String) -> String {
+  match label {
+    "Title" | "Book title" => "名称"
+    "Target book" => "目标知识册"
+    "Book id" => "知识册标识"
+    "Request" => "关注目标"
+    "Purpose" => "研究目标"
+    "Websites" => "资料网站"
+    "Check frequency" | "Check interval (ticks)" =>
+      "检查间隔（运行步数）"
+    "Quality threshold" => "质量阈值"
+    "Special analysis rules" => "分析规则"
+    "Existing source paths" => "本地资料路径"
+    "Acceptance criteria" => "验收标准"
+    "Next owner action" => "下一步行动"
+    _ => label
+  }
 }
 
 ///|

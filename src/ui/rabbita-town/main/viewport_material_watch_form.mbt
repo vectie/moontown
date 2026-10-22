@@ -1,8 +1,8 @@
 ///|
 fn watch_request_mode_label(mode : WatchRequestMode) -> String {
   match mode {
-    CadenceWatch => "Cadence watch"
-    LocalMaterialWatch => "Local material changes"
+    CadenceWatch => "定期检查"
+    LocalMaterialWatch => "本地资料"
   }
 }
 
@@ -18,7 +18,7 @@ fn render_watch_request_mode(
     )
   }
   div(
-    class="request-action-dock",
+    class="request-action-dock request-mode-dock",
     attrs=@html.Attrs::build().role("group").aria_label("Watch mode"),
     [
       for mode in [CadenceWatch, LocalMaterialWatch] => {
@@ -55,7 +55,7 @@ fn render_material_watch_request_fields(
   div(class="request-desk-stack", [
     p(
       class="request-status",
-      "Opt in to exact local source comparison. Enter existing UTF-8 file paths relative to the target Book, one per line. The town validates the files when saving; no files are uploaded or discovered here.",
+      "每行填写一个已有资料路径（相对于目标知识册）。这里只比较文件，不上传资料。",
     ),
     render_request_textarea_field(
       "Existing source paths",
@@ -81,9 +81,11 @@ fn render_material_watch_request_fields(
       compact=true,
       disabled=model.request_submitting,
     ),
-    p(
-      class="request-status",
-      "The request above is the saved intent. The first due check establishes a baseline without dispatching work. Unchanged bytes stay quiet; changed sources or plan enter the existing Book review flow. A byte change is not automatically accepted knowledge.",
-    ),
+    render_advanced_details("How checks work", [
+      p(
+        class="request-status",
+        "The first check establishes a baseline. Unchanged sources stay quiet; changes enter review before being accepted.",
+      ),
+    ]),
   ])
 }

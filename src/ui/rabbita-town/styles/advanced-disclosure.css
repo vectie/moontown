@@ -1,0 +1,51 @@
+/* Technical details are opt-in. Native disclosure owns focus and open state. */
+.town-advanced {
+  min-width: 0;
+  border-top: 1px solid rgb(148 163 184 / 25%);
+  color: #cbd5e1;
+  font-size: 12px;
+}
+.town-advanced > summary {
+  min-height: 44px;
+  padding: 12px 4px;
+  box-sizing: border-box;
+  cursor: pointer;
+  line-height: 20px;
+}
+.town-advanced > summary:hover { color: #f8fafc; }
+.town-advanced > summary:focus-visible {
+  outline: 2px solid #6ee7b7;
+  outline-offset: -2px;
+  border-radius: 6px;
+}
+.town-advanced-body { display: grid; gap: 12px; padding: 4px 0 12px; overflow-wrap: anywhere; }
+.request-field-grid > .town-advanced, .town-utility-panel > .town-advanced { grid-column: 1 / -1; }
+.town-utility-panel .town-advanced-body { grid-template-columns: repeat(3, minmax(0, 1fr)); }
+.knowledge-library-inspector { overflow-y: auto; overscroll-behavior: contain; }
+.knowledge-library-inspector > *, .knowledge-library { flex-shrink: 0; }
+.knowledge-library-books { max-height: none; overflow: visible; }
+.knowledge-book-card-title { white-space: normal; font-size: 13px; line-height: 1.45; }
+.knowledge-book-card-title-line { flex-wrap: wrap; }
+.knowledge-library-title { white-space: normal; }
+.knowledge-library-empty, .knowledge-library-summary, .policy-hall-question-description { font-size: 12px; line-height: 1.6; }
+.policy-hall-question-action { grid-template-columns: minmax(0, 1fr); }
+.policy-hall-question-button { justify-self: start; }
+.phone-chat > .town-advanced, .phone-chat > div > .town-advanced { margin: 0 12px; }
+/* The native menu replaces the floating Pack launcher that covered town services.
+   Surfaces without that menu retain the fallback entry. */
+body:has(#town-pack-tools-open) > .pack-bridge-launch { display: none; }
+
+/* The light request workspace must not inherit the dark town modal's ink.
+   Compact mode has no title column; give its three task types the full row. */
+.request-desk { color: #243447; }
+.request-desk .request-composer h3, .request-desk .chip-book { color: #243447; }
+.request-desk .town-advanced { color: #475569; border-color: #cbd5e1; }
+.request-desk .town-advanced > summary:hover { color: #1e293b; }
+.request-desk .town-advanced > summary:focus-visible { outline-color: #047857; }
+.energy-request-dialog .request-desk-head { grid-template-columns: minmax(0, 1fr); }
+.energy-request-dialog .request-action-dock { grid-template-columns: repeat(3, minmax(0, 1fr)); }
+.energy-request-dialog .request-action-button { flex-wrap: wrap; gap: 4px 10px; }
+.energy-request-dialog .request-field-grid { grid-template-columns: minmax(0, 1fr); }
+@media (max-width: 540px) {
+  .energy-request-dialog .request-action-dock { grid-template-columns: minmax(0, 1fr); }
+}

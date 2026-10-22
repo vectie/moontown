@@ -61,14 +61,11 @@ fn render_policy_hall_question_action(
     attrs=@html.Attrs::build().aria_label("昌平政策问答"),
     [
       div(class="policy-hall-question-copy", [
-        span(
-          class="policy-hall-question-eyebrow",
-          "POLICY Q&A · 有来源边界",
-        ),
+        span(class="policy-hall-question-eyebrow", "昌平政策问答"),
         h2(class="policy-hall-question-title", "你的本地议题是什么？"),
         p(
           class="policy-hall-question-description",
-          "从现状、受影响人群和目标开始；一起梳理证据与政策选项。回答区分官网、OCR 与待复核项，未覆盖的领域会明确说明。",
+          "说说现状、受影响的人群和目标，一起梳理可行的政策选项。",
         ),
       ]),
       button(
@@ -77,7 +74,7 @@ fn render_policy_hall_question_action(
         attrs=@html.Attrs::build().aria_label(
           "打开 Moonclaw，询问昌平政策",
         ),
-        "询问政策 →",
+        town_ui_label("chat", "问政策"),
       ),
     ],
   )

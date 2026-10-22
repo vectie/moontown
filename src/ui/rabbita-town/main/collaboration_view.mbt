@@ -5,10 +5,14 @@ fn collaboration_field(
   value : String,
   disabled : Bool,
   on_input : (String) -> Cmd,
-  multiline? : Bool = false,
+  multiline~ : Bool = false,
 ) -> @rabbita.Html {
   div(class="request-field", [
-    @html.label(class="request-label", for_=id, label),
+    @html.label(
+      class="request-label",
+      for_=id,
+      collaboration_compact_label(label),
+    ),
     if multiline {
       textarea(
         id~,
@@ -31,13 +35,29 @@ fn collaboration_field(
 }
 
 ///|
+fn collaboration_compact_label(label : String) -> String {
+  match label {
+    "Collaboration title" => "名称"
+    "Question for the participant Books" => "研究问题"
+    "Human reviewer name" => "审阅人"
+    "Human reviewer ID" => "审阅人标识"
+    "Decision the reviewer must make" => "需要决定什么"
+    "Collaboration draft ID" => "草稿标识"
+    "Objection to retain (optional)" => "保留异议（选填）"
+    "Objection decision owner ID" => "异议处理人标识"
+    "Objection decision owner name" => "异议处理人"
+    _ => label
+  }
+}
+
+///|
 fn collaboration_form_field(
   dispatch : Dispatch[Msg],
   state : @collaboration.Client,
   field : String,
   label : String,
   value : String,
-  multiline? : Bool = false,
+  multiline~ : Bool = false,
 ) -> @rabbita.Html {
   collaboration_field(
     "collaboration-" + field,
@@ -174,23 +194,19 @@ fn render_collaboration_composer(
     ),
   ]
   div(class="request-composer", [
-    h2("Compose a collaboration"),
-    render_collaboration_outcomes(dispatch, state),
-    render_claim_challenge(dispatch, state),
-    p(
-      "Write a question, choose at least two existing Books, and assign source-bound contributions. Local preparation creates a pending review packet and participant briefs.",
-    ),
+    h3("协作研究"),
+    p("选择至少两个知识册，分配任务并指定审阅人。"),
     div(class="request-actions", [
       button(
-        class="request-submit",
+        class="control-button",
         attrs=@html.Attrs::build().disabled(disabled),
         on_click=dispatch(CollaborationAction("list")),
-        "Load Books and saved drafts",
+        town_ui_label("book", "载入知识册"),
       ),
       button(
-        class="request-submit",
+        class="control-button",
         on_click=dispatch(CollaborationReset),
-        "New draft / clear form",
+        town_ui_label("plus", "新草稿"),
       ),
     ]),
     div(
@@ -198,39 +214,57 @@ fn render_collaboration_composer(
       state.drafts.map(saved => {
         button(
           attrs=@html.Attrs::build().disabled(disabled),
+          title=saved.draft.draft_id,
           on_click=dispatch(
             CollaborationOpen(saved.draft.draft_id, saved.revision),
           ),
-          "Reopen " + saved.draft.title + " (" + saved.draft.draft_id + ")",
+          "打开：" + saved.draft.title,
         )
       }),
     ),
-    div(class="request-form-grid", fields),
-    h3("Participant Books"),
-    div(
-      class="request-actions",
-      state.books.map(book => {
-        let selected = state.draft.participants.any(p => {
-          p.book_id == book.book_id
-        })
-        button(
-          class=if selected {
-            "request-action-button is-active"
-          } else {
-            "request-action-button"
-          },
-          attrs=@html.Attrs::build()
-            .disabled(disabled)
-            .aria_pressed(if selected { "true" } else { "false" }),
-          on_click=dispatch(CollaborationToggleBook(book.book_id)),
-          (if selected { "Selected: " } else { "Add: " }) +
-          book.title +
-          " (" +
-          book.book_id +
-          ")",
-        )
-      }),
+    div(class="request-form-grid", [
+      fields[1],
+      fields[2],
+      fields[4],
+      fields[3],
+      fields[5],
+    ]),
+    render_advanced_details(
+      "草稿标识与可选异议",
+      compact_label="草稿选项",
+      needs_attention=!@collaboration.safe_id(state.draft.draft_id) ||
+        !state.draft.objection.is_empty(),
+      [fields[0], fields[6], fields[7], fields[8]],
     ),
+    @html.details(class="collaboration-book-picker", [
+      @html.summary(
+        town_ui_label(
+          "book",
+          "参与知识册 · 已选 \{state.draft.participants.length()}",
+        ),
+      ),
+      div(
+        class="request-actions collaboration-book-options",
+        state.books.map(book => {
+          let selected = state.draft.participants.any(p => {
+            p.book_id == book.book_id
+          })
+          button(
+            class=if selected {
+              "request-action-button is-active"
+            } else {
+              "request-action-button"
+            },
+            attrs=@html.Attrs::build()
+              .disabled(disabled)
+              .aria_pressed(if selected { "true" } else { "false" }),
+            on_click=dispatch(CollaborationToggleBook(book.book_id)),
+            title=book.book_id,
+            book.title,
+          )
+        }),
+      ),
+    ]),
     div(
       class="request-desk-stack",
       state.draft.participants.map(participant => {
@@ -240,9 +274,10 @@ fn render_collaboration_composer(
     div(class="request-actions", [
       button(
         class="request-submit",
+        title="保存草稿并记录当前来源",
         attrs=@html.Attrs::build().disabled(disabled),
         on_click=dispatch(CollaborationAction("save")),
-        "Save draft and capture sources",
+        "保存草稿",
       ),
       button(
         class="request-submit",
@@ -250,46 +285,52 @@ fn render_collaboration_composer(
           disabled || state.dirty || state.revision.is_empty(),
         ),
         on_click=dispatch(CollaborationAction("prepare")),
-        "Prepare one-off handoff",
+        "准备交接",
       ),
     ]),
-    if state.revision.is_empty() {
-      span("")
-    } else {
-      p("Saved revision: " + state.revision)
-    },
-    div(
-      state.sources.map(source => {
+    render_advanced_details(
+      "来源记录与草稿复用",
+      compact_label="来源记录",
+      [
+        if state.revision.is_empty() {
+          span("")
+        } else {
+          p("Saved revision: " + state.revision)
+        },
+        div(
+          state.sources.map(source => {
+            p(
+              source.book_id +
+              "/" +
+              source.source_path +
+              " · " +
+              source.size_bytes.to_string() +
+              " bytes · " +
+              source.digest,
+            )
+          }),
+        ),
+        collaboration_form_field(
+          dispatch,
+          state,
+          "new_draft_id",
+          "New ID for reuse",
+          state.new_draft_id,
+        ),
+        button(
+          attrs=@html.Attrs::build().disabled(
+            disabled ||
+            state.revision.is_empty() ||
+            state.dirty ||
+            !@collaboration.safe_id(state.new_draft_id),
+          ),
+          on_click=dispatch(CollaborationAction("reuse")),
+          "Reuse saved question as a fresh draft",
+        ),
         p(
-          source.book_id +
-          "/" +
-          source.source_path +
-          " · " +
-          source.size_bytes.to_string() +
-          " bytes · " +
-          source.digest,
-        )
-      }),
-    ),
-    collaboration_form_field(
-      dispatch,
-      state,
-      "new_draft_id",
-      "New ID for reuse",
-      state.new_draft_id,
-    ),
-    button(
-      attrs=@html.Attrs::build().disabled(
-        disabled ||
-        state.revision.is_empty() ||
-        state.dirty ||
-        !@collaboration.safe_id(state.new_draft_id),
-      ),
-      on_click=dispatch(CollaborationAction("reuse")),
-      "Reuse saved question as a fresh draft",
-    ),
-    p(
-      "Reuse copies this exact saved revision's assignments and recaptures the selected current files. Prior review decisions are not carried forward.",
+          "Reuse copies this exact saved revision's assignments and recaptures the selected current files. Prior review decisions are not carried forward.",
+        ),
+      ],
     ),
     match state.prepared {
       None => span("")
@@ -322,10 +363,27 @@ fn render_collaboration_composer(
           ),
         ])
     },
-    p(
-      attrs=@html.Attrs::build().role("status").aria_live("polite"),
-      state.notice,
+    if state.notice ==
+      "Choose existing Books and exact source paths. Save incomplete drafts; prepare when assignments and reviewers are ready." {
+      @html.nothing
+    } else {
+      p(
+        attrs=@html.Attrs::build().role("status").aria_live("polite"),
+        state.notice,
+      )
+    },
+    if state.prepared is Some(_) || state.work is Some(_) {
+      render_collaboration_work(dispatch, state)
+    } else {
+      @html.nothing
+    },
+    render_advanced_details(
+      "历史成果与声明复核",
+      compact_label="历史复核",
+      [
+        render_collaboration_outcomes(dispatch, state),
+        render_claim_challenge(dispatch, state),
+      ],
     ),
-    render_collaboration_work(dispatch, state),
   ])
 }
