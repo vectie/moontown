@@ -25,6 +25,7 @@
 @import url("./styles/pack-bridge-panel.css");
 @import url("./styles/advanced-disclosure.css");
 @import url("./styles/town-controls.css");
+@import url("./styles/spatial-controls.css");
 
 @media (max-width: 1220px) {
   .runtime-grid,

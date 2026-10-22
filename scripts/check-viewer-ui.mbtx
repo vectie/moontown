@@ -1,0 +1,38 @@
+///|
+import {
+  "moonbitlang/x@0.5.5/fs",
+}
+
+///|
+// Keep the existing renderer/report DOM contracts when reorganizing the UI.
+fn main raise {
+  let root = "src/ui/landmark-studio/web/"
+  for (page, scripts) in [
+    ("index", ["studio"]),
+    ("interior", ["interior"]),
+    ("datacenter", ["datacenter", "datacenter-reports"]),
+  ] {
+    let html = @fs.read_file_to_string(root + page + ".html")
+    let ids : Map[String, Bool] = Map([])
+    for index, part in html.split(" id=\"").to_array() {
+      if index == 0 { continue }
+      let id = part.split("\"").to_array()[0].to_string()
+      if ids.contains(id) { fail("duplicate id \{id} in \{page}") }
+      ids[id] = true
+    }
+    for script in scripts {
+      let source = @fs.read_file_to_string(root + script + ".js")
+      for index, part in source.split("$('").to_array() {
+        if index == 0 { continue }
+        let id = part.split("'").to_array()[0].to_string()
+        if !ids.contains(id) { fail("missing id \{id} in \{page} required by \{script}") }
+      }
+    }
+    assert_true(html.contains("viewer-ui.css"))
+    assert_true(html.contains("class=\"viewer-advanced\""))
+    assert_false(html.contains("class=\"viewer-advanced\" open"))
+    assert_true(html.contains("设计模型"))
+    assert_true(html.contains("id=\"scene\" tabindex=\"0\""))
+    println("\{page}: \{ids.length()} unique UI targets, renderer bindings preserved")
+  }
+}

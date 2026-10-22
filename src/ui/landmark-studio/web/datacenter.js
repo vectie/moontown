@@ -4,6 +4,8 @@ import {RoomEnvironment} from './vendor/RoomEnvironment.js';
 import {buildStudy,createMaterials} from './scene-adapter.js';
 import {buildFlows} from './datacenter-flows.js';
 import {initReports} from './datacenter-reports.js';
+import {initViewerUI,viewerIcon} from './viewer-ui.js';
+initViewerUI();
 
 const $=id=>document.getElementById(id),viewport=$('viewport'),reduced=matchMedia('(prefers-reduced-motion: reduce)');
 let renderer,scene,camera,controls,sun,views,current,model,flows,materials,highlight,selected;
@@ -49,7 +51,7 @@ function resetCamera(mode='overview'){
 function select(id,focus=false){
   const entity=current.entities.find(e=>e.id===id);if(!entity)return;selected=entity;viewport.dataset.selected=id;
   $('entity-kind').textContent=entity.kind;$('entity-name').textContent=entity.name;$('entity-detail').textContent=entity.detail;
-  $('focus').disabled=false;$('enter').disabled=!entity.visit;$('enter').textContent=entity.visit?`进入${names[entity.visit]} →`:'此层已到设备';
+  $('focus').disabled=false;$('enter').disabled=!entity.visit;$('enter').hidden=!entity.visit;$('enter').textContent=entity.visit?`进入${names[entity.visit]}`:'进入';
   document.querySelectorAll('[data-entity]').forEach(b=>b.setAttribute('aria-pressed',String(b.dataset.entity===id)));
   labelNodes.forEach((n,key)=>n.classList.toggle('selected',key===id));
   if(highlight){scene.remove(highlight);highlight.geometry.dispose();highlight.material.dispose();highlight=null;}
@@ -91,7 +93,7 @@ function showView(id){
   current=data;selected=null;delete viewport.dataset.selected;model=buildStudy(data.study,materials);flows=buildFlows(data.flows,data.study.span);scene.add(model.root,flows.root);
   $('title').textContent=data.study.title;$('chapter').textContent=data.study.subtitle;
   const context=id==='site'?names.site:`${names.hall}${['rack','server','board'].includes(id)?' / '+rackId:''}${['server','board'].includes(id)?' / '+slotId+'–'+(Number(slotId.slice(1))+1):''}${id==='board'?' / PCB':''}`;
-  $('location').textContent=context;$('model-note').textContent='CONCEPT / NOT AS-BUILT';
+  $('location').textContent=context;$('model-note').textContent='设计模型，非竣工模型。';
   $('entity-count').textContent=data.entities.length+' 项';$('entities').replaceChildren();$('labels').replaceChildren();labelNodes.clear();
   for(const [index,entity] of data.entities.entries()){
     const b=document.createElement('button'),n=document.createElement('span'),copy=document.createElement('span'),small=document.createElement('small');b.dataset.entity=entity.id;b.setAttribute('aria-pressed','false');
@@ -99,7 +101,7 @@ function showView(id){
     b.addEventListener('click',()=>select(entity.id));b.addEventListener('dblclick',()=>{select(entity.id);enter();});$('entities').append(b);
     const label=document.createElement('button');label.className='model-label';label.textContent=entity.name;label.addEventListener('click',()=>select(entity.id));label.addEventListener('dblclick',()=>{select(entity.id);enter();});$('labels').append(label);labelNodes.set(entity.id,label);
   }
-  $('entity-kind').textContent='EXPLORE';$('entity-name').textContent='选择一个设备';$('entity-detail').textContent='点击模型或左侧列表检查设备；进入下一层可查看内部结构。所有相机都支持拖拽环视。';$('focus').disabled=true;$('enter').disabled=true;$('enter').textContent='进入下一层 →';
+  $('entity-kind').textContent='';$('entity-name').textContent='选择一个设备';$('entity-detail').textContent='点击模型或展开设备列表。';$('focus').disabled=true;$('enter').disabled=true;$('enter').hidden=true;$('enter').textContent='进入';
   $('cutaway').checked=['hall','server','board'].includes(id);$('cutaway').disabled=['rack','board'].includes(id);$('containment-option').hidden=id!=='hall';$('explode-option').hidden=!['server','board'].includes(id);$('explode').value=0;
   const s=data.study.span;sun.position.set(-s*.45,s*.85,s*.6);sun.target.position.fromArray(data.study.focus);Object.assign(sun.shadow.camera,{left:-s*.65,right:s*.65,top:s*.65,bottom:-s*.65,near:s*.005,far:s*3});sun.shadow.camera.updateProjectionMatrix();sun.shadow.normalBias=s*.0002;sun.shadow.bias=-.00006;
   document.querySelectorAll('[data-view]').forEach(b=>b.setAttribute('aria-pressed',String(b.dataset.view===id)));
@@ -118,7 +120,8 @@ async function start(){
   camera=new THREE.PerspectiveCamera(38,1,.001,2000);controls=new OrbitControls(camera,$('scene'));controls.enableDamping=!reduced.matches;controls.dampingFactor=.15;controls.minPolarAngle=.015;controls.maxPolarAngle=Math.PI-.015;controls.addEventListener('change',invalidate);
   document.querySelectorAll('[data-view]').forEach(b=>b.addEventListener('click',()=>showView(b.dataset.view)));
   document.querySelectorAll('[data-family]').forEach(b=>b.addEventListener('click',()=>setFamily(b.dataset.family)));
-  $('play').addEventListener('click',()=>{playing=!playing;$('play').textContent=playing?'暂停流动':'播放流动';$('play').setAttribute('aria-pressed',String(playing));lastTime=0;invalidate();});
+  const updatePlay=()=>{$('play').replaceChildren(viewerIcon(playing?'pause':'play'));$('play').title=playing?'暂停流动':'播放流动';$('play').setAttribute('aria-label',$('play').title);$('play').setAttribute('aria-pressed',String(playing));};
+  $('play').addEventListener('click',()=>{playing=!playing;updatePlay();lastTime=0;invalidate();});
   $('reset').addEventListener('click',()=>resetCamera());$('reverse').addEventListener('click',()=>resetCamera('reverse'));$('top').addEventListener('click',()=>resetCamera('top'));
   $('focus').addEventListener('click',()=>selected&&select(selected.id,true));$('enter').addEventListener('click',enter);
   for(const id of ['cutaway','show-labels','containment'])$(id).addEventListener('change',layers);$('explode').addEventListener('input',layers);
@@ -143,7 +146,7 @@ async function start(){
   });
   document.addEventListener('keydown',e=>{if(e.key==='Escape'&&!$('export-dialog').open&&!$('stats').hidden)toggleStats(false);});
   new ResizeObserver(resize).observe(viewport);document.addEventListener('visibilitychange',()=>{lastTime=0;if(!document.hidden)invalidate();});
-  reduced.addEventListener('change',()=>{controls.enableDamping=!reduced.matches;if(reduced.matches){playing=false;$('play').textContent='播放流动';$('play').setAttribute('aria-pressed','false');}invalidate();});
+  reduced.addEventListener('change',()=>{controls.enableDamping=!reduced.matches;if(reduced.matches){playing=false;updatePlay();}invalidate();});
   $('scene').addEventListener('webglcontextlost',e=>{e.preventDefault();playing=false;$('loading').hidden=false;$('loading').textContent='图形上下文丢失，请刷新恢复模型。';});
   showView(views.some(v=>v.study.id===location.hash.slice(1))?location.hash.slice(1):'site');resize();$('loading').hidden=true;invalidate();
 }

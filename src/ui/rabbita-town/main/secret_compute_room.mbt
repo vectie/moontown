@@ -427,11 +427,13 @@ fn render_secret_compute_evidence(
   } else {
     match selected_machine {
       Some(machine) =>
-        "\{machine.architecture} · \{machine.accelerator_count} accelerator · \{machine.running_workloads} 个已上报工作负载。节点身份已脱敏。"
+        "\{machine.architecture} · \{machine.accelerator_count} 个加速器"
       None =>
-        selected_route
-        .map(route => route.evidence)
-        .unwrap_or("选择一个节点或上行，查看它的观测证据。")
+        if selected_route is Some(_) {
+          "远程模型路由"
+        } else {
+          "选择机器或终端查看状态。"
+        }
     }
   }
   aside(
@@ -439,26 +441,61 @@ fn render_secret_compute_evidence(
     attrs=@html.Attrs::build().aria_live("polite"),
     [
       div(class="compute-evidence-copy", [
-        p(class="compute-kicker", "SELECTED EVIDENCE"),
         h2(title),
+        render_secret_compute_status(
+          if selected == "moongate" {
+            projection.gateway.state
+          } else {
+            selected_machine
+            .map(machine => machine.state)
+            .unwrap_or(
+              selected_route.map(route => route.state).unwrap_or("not-observed"),
+            )
+          },
+        ),
         p(detail),
+        match selected_machine {
+          Some(machine) =>
+            div(class="compute-key-facts", [
+              p("显存：\{secret_compute_memory_label(machine)}"),
+              p("已上报工作负载：\{machine.running_workloads}"),
+              if !machine.healthy {
+                p(class="spatial-work-warning", "健康检查异常")
+              } else {
+                @html.nothing
+              },
+            ])
+          None => @html.nothing
+        },
+        p(
+          class="compute-observation-time",
+          if projection.observed_at.is_empty() {
+            "尚无观测快照"
+          } else {
+            "观测时间：\{projection.observed_at}"
+          },
+        ),
       ]),
       render_advanced_details("连接与观测详情", [
+        match selected_route {
+          Some(route) => p(route.evidence)
+          None => @html.nothing
+        },
         p(
           "提供方选择、绑定验证和执行授权分别记录；连接可用不代表工作已执行。",
         ),
         @html.dl(class="compute-evidence-facts", [
           div([
-            @html.dt("Agent boundary"),
+            @html.dt("代理网关"),
             @html.dd(projection.authority.agent_boundary),
           ]),
           div([
-            @html.dt("Local control"),
+            @html.dt("集群管理"),
             @html.dd(projection.authority.local_control_plane),
           ]),
-          div([@html.dt("Claim ceiling"), @html.dd(projection.authority.claim)]),
+          div([@html.dt("数据范围"), @html.dd(projection.authority.claim)]),
           div([
-            @html.dt("Observed"),
+            @html.dt("观测时间"),
             @html.dd(
               if projection.observed_at.is_empty() {
                 "No fresh snapshot"
@@ -490,7 +527,7 @@ fn render_secret_compute_room(
       div(class="compute-room-title", [
         p(class="compute-kicker", "地下 · 只读"),
         h1("秘密算力室"),
-        p("查看机器、远程模型和容量。此处仅供查看。"),
+        p("选择机器或终端，查看连接与容量。"),
       ]),
       div(class="compute-room-header-actions", [
         render_secret_compute_status(projection.mode),
@@ -503,17 +540,25 @@ fn render_secret_compute_room(
         ),
       ]),
     ]),
-    render_secret_compute_graphical_scene(dispatch, model, projection),
-    render_spatial_work_journey(dispatch, model),
-    render_secret_compute_evidence(
-      projection,
-      model.secret_compute_room_selected_id,
-    ),
-    render_advanced_details("基础设施权限说明", [
-      div(class="compute-room-boundary-note", [
-        @html.strong("机密边界"),
-        span(
-          "这是受控本地环境中的脱敏投影；它不提供远程 Shell、凭据查看或直接调度。",
+    div(class="compute-room-content", [
+      render_secret_compute_graphical_scene(dispatch, model, projection),
+      div(class="compute-room-sidebar", [
+        render_secret_compute_evidence(
+          projection,
+          model.secret_compute_room_selected_id,
+        ),
+        render_spatial_work_journey(dispatch, model),
+        render_advanced_details(
+          "基础设施权限说明",
+          compact_label="权限说明",
+          [
+            div(class="compute-room-boundary-note", [
+              @html.strong("机密边界"),
+              span(
+                "这是受控本地环境中的脱敏投影；它不提供远程 Shell、凭据查看或直接调度。",
+              ),
+            ]),
+          ],
         ),
       ]),
     ]),

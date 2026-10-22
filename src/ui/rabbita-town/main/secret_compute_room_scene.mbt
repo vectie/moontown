@@ -302,6 +302,13 @@ fn render_compute_world_roster(
       class="compute-world-roster-entry" +
         (if selected == "moongate" { " is-selected" } else { "" }),
       on_click=dispatch(SelectSecretComputeEndpoint("moongate")),
+      attrs=@html.Attrs::build().aria_pressed(
+        if selected == "moongate" {
+          "true"
+        } else {
+          "false"
+        },
+      ),
       [
         @html.strong("MoonGate"),
         span(secret_compute_state_label(projection.gateway.state)),
@@ -314,6 +321,13 @@ fn render_compute_world_roster(
         class="compute-world-roster-entry" +
           (if selected == machine.id { " is-selected" } else { "" }),
         on_click=dispatch(SelectSecretComputeEndpoint(machine.id)),
+        attrs=@html.Attrs::build().aria_pressed(
+          if selected == machine.id {
+            "true"
+          } else {
+            "false"
+          },
+        ),
         [
           @html.strong(machine.label),
           span(secret_compute_state_label(machine.state)),
@@ -327,6 +341,13 @@ fn render_compute_world_roster(
         class="compute-world-roster-entry" +
           (if selected == route.id { " is-selected" } else { "" }),
         on_click=dispatch(SelectSecretComputeEndpoint(route.id)),
+        attrs=@html.Attrs::build().aria_pressed(
+          if selected == route.id {
+            "true"
+          } else {
+            "false"
+          },
+        ),
         [
           @html.strong(route.label),
           span(secret_compute_state_label(route.state)),
@@ -380,7 +401,7 @@ fn render_secret_compute_graphical_scene(
         class="spatial-world-legend",
         "场景示意 · 选择机器或终端查看连接状态",
       ),
-      render_advanced_details("场景图例", [
+      render_advanced_details("场景图例", compact_label="图例", [
         div(class="spatial-world-legend compute-world-legend", [
           span(
             "居民：所选工作中已关联的负责人，不代表机器分配",

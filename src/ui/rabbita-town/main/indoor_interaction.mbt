@@ -12,7 +12,7 @@ fn render_indoor_slot_inspector(
     class="building-interior-panel indoor-slot-inspector",
     attrs=@html.Attrs::build().aria_live("polite"),
     [
-      h2(selected.map(slot => slot.label).unwrap_or("选择房间里的家具")),
+      h2(selected.map(slot => slot.label).unwrap_or("选择家具")),
       div(
         class="indoor-slot-roster",
         place.interaction_slots
@@ -39,39 +39,34 @@ fn render_indoor_slot_inspector(
       ),
       match selected {
         None =>
-          p(
-            "点击家具或上方名称，查看用途和居民；工作台可创建真实工作，门可返回小镇。",
-          )
+          p("点击家具或上方名称，查看用途并开始工作。")
         Some(slot) =>
           div([
             p(
               "\{town_snapshot_interior_kind_label(slot.kind)} · 容量 \{slot.capacity}",
             ),
             p(
-              "\{town_snapshot_slot_presences(snapshot, place.id, slot.id).length()} 位居民在此；预览居民不代表真实执行。",
+              "\{town_snapshot_slot_presences(snapshot, place.id, slot.id).length()} 位居民在此 · 含预览",
             ),
             match slot.kind {
               @energy_valley_contract.TransitGate =>
                 button(
                   on_click=dispatch(ExitEnergyBuilding),
-                  "从门口返回小镇",
+                  town_ui_label("back", "小镇"),
                 )
-              @energy_valley_contract.Bench =>
-                p(
-                  "休息与会面地点；选择楼内工作可查看真实协作，不会模拟新任务。",
-                )
+              @energy_valley_contract.Bench => p("休息与会面地点。")
               @energy_valley_contract.Exhibit | @energy_valley_contract.Stage =>
-                p(
-                  "在下方楼内工作中选择一项，打开它已发布的结果并记录审阅。没有证据时不展示虚构成果。",
-                )
+                p("选择楼内工作，阅读已发布的结果。")
               _ =>
                 button(
                   on_click=dispatch(StartIndoorWork),
-                  "在这里提出议题 / 创建工作",
+                  town_ui_label("work", "新工作"),
                 )
             },
-            @html.details([
-              @html.summary("语义实体信息"),
+            render_advanced_details("语义实体信息", [
+              p(
+                "预览居民不代表真实执行；楼内工作以运行时记录为准。",
+              ),
               p(
                 "Place：\{place.id.local_key()} · Slot：\{slot.id.local_key()}",
               ),

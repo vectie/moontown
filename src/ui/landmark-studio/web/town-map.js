@@ -67,14 +67,10 @@ function openStudy(kind) {
   const url = kind==='indoor' ? 'interior.html' : kind==='compute' ? 'datacenter.html' : `index.html#${selected.id}`;
   viewer=document.createElement('dialog');viewer.className='town-studio-dialog';
   const header=document.createElement('header');
-  const title=document.createElement('strong');title.textContent=kind==='indoor'?'未来中心 → G3 室内设计研究':kind==='compute'?'未来中心 → 地下算力设计研究':selected.title+' · 原始 3D';
+  const title=document.createElement('strong');title.textContent=kind==='indoor'?'未来中心 · 室内':kind==='compute'?'数据中心 · 3D':selected.title+' · 3D';
   const close=document.createElement('button');close.innerHTML=icon('back')+'<span>小镇</span>';close.title='返回小镇';close.setAttribute('aria-label','返回小镇');close.onclick=()=>viewer.close();
   header.append(title,close);
   const frame=document.createElement('iframe');frame.title=title.textContent;frame.src=new URL(url,import.meta.url).href;
-  frame.addEventListener('load',()=>{
-    // Context label only; the standalone studies and geometry remain unchanged.
-    try{const badge=frame.contentDocument?.querySelector('.stage');if(badge)badge.textContent='小镇空间门户 · 设计研究';}catch{/* External reference navigation has no parent access. */}
-  });
   viewer.append(header,frame);document.body.append(viewer);viewer.addEventListener('close',()=>{viewer.remove();viewer=null;globalThis.__moontownStudioOpen=false;inspector.querySelector('[data-action="study"]').focus();render();},{once:true});viewer.showModal();close.focus();
 }
 

@@ -2,6 +2,8 @@ import * as THREE from 'three';
 import {OrbitControls} from './vendor/OrbitControls.js';
 import {RoomEnvironment} from './vendor/RoomEnvironment.js';
 import {createMaterials,buildStudy} from './scene-adapter.js';
+import {initViewerUI} from './viewer-ui.js';
+initViewerUI();
 
 const $=id=>document.getElementById(id), viewport=$('viewport');
 const reduced=matchMedia('(prefers-reduced-motion: reduce)');
@@ -60,7 +62,7 @@ function selectZone(id,focus=false){
   selected=zones.find(z=>z.id===id);if(!selected)return;
   viewport.dataset.selected=id;
   $('room-id').textContent=id==='atrium'?'VOID / 非办公楼面':`SPACE / ${id}`;
-  $('room-title').textContent=selected.name;$('room-area').textContent=selected.area;
+  $('room-title').textContent=selected.name;$('room-area').textContent=`图纸标注：${selected.area}`;
   $('evidence').textContent=selected.evidence;$('proposal').textContent=selected.proposal;
   $('focus-room').disabled=false;
   document.querySelectorAll('#zones button').forEach(b=>b.setAttribute('aria-pressed',String(b.dataset.zone===id)));

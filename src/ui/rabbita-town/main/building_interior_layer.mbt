@@ -66,7 +66,7 @@ fn render_indoor_work(
             golden_valley_building_module_key(building) =>
             button(
               on_click=dispatch(EnterEnergyBuilding(destination)),
-              "前往协作建筑 →",
+              town_ui_label("building", "前往协作楼"),
             )
           _ => @html.nothing
         },
@@ -128,7 +128,7 @@ fn render_indoor_presence_summary(
   section(class="building-interior-panel building-interior-agents", [
     header(class="building-interior-panel-head", [
       div([h2("室内居民")]),
-      span("\{rows.length()} 位 · 含预览"),
+      span("\{rows.length()} 位"),
     ]),
     if rows.is_empty() {
       p(class="building-interior-empty", "暂无代理入驻。")
@@ -142,10 +142,17 @@ fn render_indoor_presence_summary(
 fn render_indoor_compute_lift(dispatch : Dispatch[Msg]) -> @rabbita.Html {
   section(class="building-interior-panel building-compute-lift", [
     div(class="building-lift-copy", [
-      p(class="building-interior-eyebrow", "地下层"),
       h2("地下算力室"),
       p("查看机器、容量和连接状态。"),
     ]),
+    button(
+      class="building-lift-button",
+      on_click=dispatch(OpenSecretComputeRoom),
+      attrs=@html.Attrs::build().aria_label(
+        "乘安全电梯前往地下算力室",
+      ),
+      town_ui_label("server", "地下"),
+    ),
     render_advanced_details("算力如何连接", [
       p(
         "楼内 Agent 的请求经 MoonGate 路由至 LunaNexa 本地算力或远程模型。",
@@ -164,14 +171,6 @@ fn render_indoor_compute_lift(dispatch : Dispatch[Msg]) -> @rabbita.Html {
         ],
       ),
     ]),
-    button(
-      class="building-lift-button",
-      on_click=dispatch(OpenSecretComputeRoom),
-      attrs=@html.Attrs::build().aria_label(
-        "乘安全电梯前往地下算力室",
-      ),
-      town_ui_label("server", "地下"),
-    ),
   ])
 }
 
@@ -189,16 +188,9 @@ fn render_energy_valley_building_interior(
         @html.nav(
           class="building-layer-breadcrumb",
           attrs=@html.Attrs::build().aria_label("MoonTown 空间层级"),
-          [
-            button(on_click=dispatch(ExitEnergyBuilding), "地面小镇"),
-            span("/"),
-            @html.strong("室内层"),
-            span("/"),
-            button(on_click=dispatch(OpenSecretComputeRoom), "地下算力"),
-          ],
+          [span("小镇"), span("/"), @html.strong("室内")],
         ),
         h1(building.name),
-        p(golden_valley_building_description(building)),
       ]),
       button(
         class="building-interior-exit",
@@ -207,13 +199,6 @@ fn render_energy_valley_building_interior(
         attrs=@html.Attrs::build().aria_label("返回地面小镇"),
         town_ui_label("back", "小镇"),
       ),
-    ]),
-    div(class="building-interior-location", [
-      span(class="is-complete", "地面"),
-      span(class="building-location-line", ""),
-      span(class="is-current", "室内"),
-      span(class="building-location-line", ""),
-      span("地下"),
     ]),
     div(class="building-interior-grid", [
       section(class="building-interior-floor-shell", [
@@ -238,15 +223,22 @@ fn render_energy_valley_building_interior(
             render_indoor_slot_inspector(dispatch, model, snapshot, value)
           None => @html.nothing
         },
-        match place {
-          Some(value) => render_indoor_presence_summary(snapshot, value)
-          None => @html.nothing
-        },
         render_indoor_work(dispatch, model, building),
+        render_spatial_work_journey(dispatch, model),
+        render_indoor_compute_lift(dispatch),
+        render_advanced_details(
+          "居民与建筑信息",
+          compact_label="居民与建筑",
+          [
+            p(golden_valley_building_description(building)),
+            match place {
+              Some(value) => render_indoor_presence_summary(snapshot, value)
+              None => @html.nothing
+            },
+          ],
+        ),
       ]),
     ]),
-    render_spatial_work_journey(dispatch, model),
-    render_indoor_compute_lift(dispatch),
     render_spatial_overlays(dispatch, model),
   ])
 }

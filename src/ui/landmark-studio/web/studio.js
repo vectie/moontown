@@ -3,6 +3,8 @@ import { OrbitControls } from './vendor/OrbitControls.js';
 import { RoomEnvironment } from './vendor/RoomEnvironment.js';
 import { createMaterials, buildStudy } from './scene-adapter.js';
 import { references } from './references.js';
+import { initViewerUI } from './viewer-ui.js';
+initViewerUI();
 
 const $ = id=>document.getElementById(id);
 const reducedMotion = matchMedia('(prefers-reduced-motion: reduce)');
@@ -10,7 +12,7 @@ let renderer, scene, camera, controls, current, data, model, sun, fill, hemi;
 let materials, clayMaterial, ground, environment, projection='perspective', lightMode='day';
 let raf=0, dirty=0, lastFrame=0, frameCount=0, lastAspect=0;
 
-function fail(error){$('loading').hidden=false;$('loading').replaceChildren();const title=document.createElement('span');title.textContent='The 3D viewer could not start. '+(error?.message||error)+' — Reload to retry.';$('loading').append(title);console.error(error);}
+function fail(error){$('loading').hidden=false;$('loading').replaceChildren();const title=document.createElement('span');title.textContent='模型未能加载，请刷新重试。';const detail=document.createElement('details'),summary=document.createElement('summary'),copy=document.createElement('p');summary.textContent='技术详情';copy.textContent=error?.message||String(error);detail.append(summary,copy);$('loading').append(title,detail);console.error(error);}
 
 function invalidate(){dirty=30;if(!raf)raf=requestAnimationFrame(render);}
 function render(time){
@@ -49,7 +51,7 @@ function bindControls(target){
   controls.minDistance=8;controls.maxDistance=1500;controls.minPolarAngle=.015;controls.maxPolarAngle=Math.PI-.015;
   controls.maxZoom=12;controls.minZoom=.2;controls.autoRotateSpeed=.45;
   controls.autoRotate=$('rotate').checked&&!reducedMotion.matches;
-  controls.addEventListener('change',invalidate);controls.addEventListener('start',()=>{$('view-status').textContent='Free orbit · full 360° inspection';});
+  controls.addEventListener('change',invalidate);controls.addEventListener('start',()=>{$('view-status').textContent='';});
 }
 
 function view(name){
@@ -70,8 +72,8 @@ function view(name){
   offset.multiplyScalar(scale*Math.max(1,fit));
   controls.target.copy(target);camera.position.copy(target).add(offset);camera.zoom=1;camera.updateProjectionMatrix();controls.update();
   if(camera.isOrthographicCamera&&name==='detail'){camera.zoom=3.2;camera.updateProjectionMatrix();}
-  document.querySelectorAll('[data-view]').forEach(b=>b.classList.toggle('selected',b.dataset.view===name));
-  $('view-status').textContent=name==='hero'?'Interpretive study · drag to explore every angle':`${name[0].toUpperCase()+name.slice(1)} view · drag to continue orbiting`;
+  document.querySelectorAll('[data-view]').forEach(b=>{b.classList.toggle('selected',b.dataset.view===name);b.setAttribute('aria-pressed',String(b.dataset.view===name));});
+  $('view-status').textContent=name==='hero'?'':({detail:'细节',top:'俯视',front:'正面',side:'侧面',reverse:'背面'}[name]||'');
   invalidate();
 }
 
@@ -114,7 +116,7 @@ function select(id){
   for(const key of ['title','subtitle','description','note'])$(key).textContent=current[key];
   $('ordinal').textContent=`0${data.indexOf(current)+1} / 04`;
   $('interior-link').style.display=current.id==='center'?'flex':'none';
-  $('reference-count').textContent=`${references[current.id].length} views · source photographs & diagrams`;
+  $('reference-count').textContent=`${references[current.id].length} 张参考照片与图纸`;
   document.querySelectorAll('[data-study]').forEach(b=>b.setAttribute('aria-pressed',String(b.dataset.study===current.id)));
   $('viewport').dataset.study=current.id;$('viewport').dataset.parts=String(current.parts.length);
   history.replaceState(null,'','#'+current.id);document.title=current.title+' · Wenyu Landmark Atelier';
@@ -122,7 +124,7 @@ function select(id){
 }
 
 function showReferences(){
-  $('reference-title').textContent=current.title+' · References';
+  $('reference-title').textContent=current.title+' · 参考图';
   $('reference-grid').replaceChildren();
   for(const [title,kind,url,source] of references[current.id]){
     const figure=document.createElement('figure'),link=document.createElement('a'),img=document.createElement('img'),caption=document.createElement('figcaption'),sourceLink=document.createElement('a');

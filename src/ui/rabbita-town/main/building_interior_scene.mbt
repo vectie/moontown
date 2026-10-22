@@ -40,7 +40,7 @@ fn indoor_scene_kind_key(
 ///|
 fn indoor_scene_kind_asset_index(
   kind : @energy_valley_contract.InteractionKind,
-) -> Int {
+) -> Int32 {
   match kind {
     @energy_valley_contract.Workstation | @energy_valley_contract.Custom(_) => 0
     @energy_valley_contract.MeetingPoint => 1
@@ -131,7 +131,7 @@ fn indoor_scene_slot_normalized_position(
 fn indoor_scene_slot_visual_position(
   place : @energy_valley_contract.Place,
   slot : @energy_valley_contract.InteractionSlot,
-  index : Int,
+  index : Int32,
 ) -> (Double, Double) {
   let repeated_kind = place.interaction_slots
     .iter()
@@ -170,8 +170,8 @@ fn indoor_scene_slot_visual_position(
 ///|
 fn indoor_scene_slots_in_draw_order(
   place : @energy_valley_contract.Place,
-) -> Array[(Int, @energy_valley_contract.InteractionSlot)] {
-  let ordered : Array[(Int, @energy_valley_contract.InteractionSlot)] = []
+) -> Array[(Int32, @energy_valley_contract.InteractionSlot)] {
+  let ordered : Array[(Int32, @energy_valley_contract.InteractionSlot)] = []
   for index, slot in place.interaction_slots {
     ordered.push((index, slot))
   }
@@ -375,13 +375,10 @@ fn render_town_snapshot_graphical_interior_scene(
     ),
     [
       header(class="indoor-scene-header spatial-world-header", [
-        div([
-          p(class="building-interior-eyebrow", "房间 · 点击家具开始"),
-          h2(place.name),
-        ]),
+        div([h2("房间")]),
         div(class="indoor-scene-place-facts", [
           span("\{building_profile.floors} 层"),
-          span("\{inside_count} Agent"),
+          span("\{inside_count} 位居民 · 含预览"),
         ]),
       ]),
       div(class="spatial-world-stage indoor-world-stage", [
@@ -397,7 +394,9 @@ fn render_town_snapshot_graphical_interior_scene(
       ]),
       div(class="spatial-world-legend", [
         span("家具可点选 · 门返回小镇"),
-        span("实线居民：运行时记录 · 预览居民不代表执行"),
+      ]),
+      render_advanced_details("场景图例", compact_label="图例", [
+        p("实线居民：运行时记录 · 预览居民不代表执行"),
       ]),
     ],
   )
